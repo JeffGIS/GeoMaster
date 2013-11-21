@@ -668,7 +668,7 @@ BOOL FAR PASCAL DIALOGSTYLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	LPCONTROLDEF	pControlDef;
 	short	i,ii;
 	char	str[256];
-//return FALSE;
+return FALSE;
  switch(Message)
    {
    	case WM_RBUTTONDOWN:
