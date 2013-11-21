@@ -1,0 +1,371 @@
+
+Mon Jul 24 18:01:37 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* lib/libipw/lqh/lqhinterp.c: Fixed bug in lininv computation.  The
+	  lininv values were being set to the first and second breakpoints
+	  without checking to see if it was reverse mapped.  This will change
+	  the output of some programs slightly.
+
+Mon Jul 24 16:52:06 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* lib/libipw/util/pow2:  Cahnged to ipow2, and changed calls in each
+	  program to call this.
+
+Mon Jul 17 17:20:00 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* lib/libipw/... Changes to use EXFUN and other declarations.
+
+Mon Jul 10 18:00:00 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* lib/libipw/{uio,pixio,fpio,bih,lqh}.  Added new uio control block
+	  information: I/O level, along with functions usetlevel and ugetlevel
+	  and modified close routines and control block init routines to use
+	  the level.
+
+Mon Jun 26 21:32:23 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* lib/make/Makerules: added the debug, plusdebug, and profile targets.
+	  Also added OPT=debug option for make.
+	* lib/make/Makestd: put back -s option in STRIP.  We have the new
+	  debug/plusdebug/profile options to make, so we want to strip the
+	  code that doesn't have symbols.
+	* lib/make/README: new file.
+	* lib/make/config/solaris2: added -msupersparc to optimization line.
+
+Mon Jun 26 15:34:10 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* lib/make/local: added PURIFY variable.
+	* lib/make/Makestd: only define pure objects if PURIFY is defined.
+
+Tue May 30 18:45:00 PDT 1995  James Domingo (jdomingo@heart.cor.epa.gov)
+
+	* src/lib/libipw/txtio/: new directory and programs.
+
+Tue May 25 15:50:00 PDT 1995  James Domingo (jdomingo@heart.cor.epa.gov)
+
+	* h/txtio.h: definitions for new txtio libraries.
+
+Fri May 21 19:15:00 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* h/macro.h: put ROUND definition inside #ifndef.
+
+Fri Apr 14 17:00:00 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* src/bin/window/cvt_wspec.c: initialize variables.
+	* src/bin/wedge/head2.c: initialize variables, and sanity check.
+	* src/bin/mux/mux.c: initialize variables.
+	* src/bin/hor1d/headers.c,horizon.c: initialize variables.
+	* src/bin/flip/fixorh.c: initialize variables.
+	* src/bin/gradient/main.c: initialize variables.
+	* src/bin/zoom/main.c: fix typo from last modification.
+
+Fri Apr 14 15:15:00 PDT 1995  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* h/ansi/extern.h: new settings for __NORETURNB and __NORETURNE for
+	  nonreturning functions.  Take out _flsbuf prototypes since each
+	  compiler changes it.  Use CC_NEED_VPRINT instead of CC_NO_VPRINT.
+	  Special definition of bsearch for Solaris.  Added CC_QSORT_VOID
+	  set if qsort returns void instead of int.  Special definition of
+	  srand for Solaris.
+	* h/extern.h: define NORETURNB and NORETURNE as empty.
+	* src/lib/libipw/error/_error.c: reads extern.h to get information
+	  about "noreturn" attribute.
+	* src/lib/libipw/lqh/lqhcheck.c: compar function slightly changed.
+
+Web Oct 19 00:00:00 PDT 1994  Rusty Dodson (dodson@heart.cor.epa.gov)
+
+	* src/etc/ipwman/ipwman.sh: added the exp/*/misc/* directories to the
+	  search path.
+
+Tue Aug 9 00:00:00 PDT 1994  Rusty Dodson (dodson@heart.cor.epa.gov)
+
+	* src/bin/zoom/: Added -f option to force geo headers to line up.
+
+Thu Feb 24 00:00:00 PDT 1994  ??
+
+	* src/lib/libipw/args/getargs.c: added a check for garbage on the
+	  input line.  Who?  What for?
+
+Web Oct 20 12:15:00 PDT 1993  Dana Jacobsen (jacobsd@heart.cor.epa.gov)
+
+	* h/getargs.h: removed LIB_COM_CHECK_* checks
+
+Thu Aug 19 10:45:54 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libunix/conf/hpux8.0:  Added random.c
+	* lib/make/Makerules:  Changed 'echo -n' to 'true' since SysV
+	  echo doesn't understand the -n option.
+
+Wed Aug 18 17:39:39 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/fpio/fpvwrite.c:  Fixes to the fixes.
+
+Tue Aug 17 18:33:40 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/fpio/fpvwrite.c:  Added binary search option for
+	  maps with more than 2 breakpoints.  This fixes the bug call.
+
+Mon Aug 16 11:08:27 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* h/macro.h:  Change test for over maxfiles to equal to or over
+	  maxfiles.
+
+Mon Aug 16 10:34:33 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/main/ipwexit.c:  Call maxfiles() once and save
+	  into a variable instead of calling once each loop.
+
+Fri Aug 13 19:11:07 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/exp/erlc/bin/Makefile:  Removed las2ipw and ipw2las.
+	* src/exp/erlc/bin/{las2ipw/,ipw2las/}:  These have been moved
+	  to src/exp/erlc/misc/las/.
+	* src/exp/erlc/grass/:  This has been moved to
+	  src/exp/erlc/misc/grass/.
+
+Fri Aug 13 18:13:03 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libunix/src/isinf.c:  Uses Solaris 2.x fpclass, or does
+	  a comparison against DBL_MAX.  This is more reliable than mucking
+	  with IEEE internals which may or may not be correct.  Alternatively
+	  we could use the finite function.
+	* src/lib/libunix/src/TEST/inf.c:  Tests correct operation of isinf.c.
+	* src/lib/libipw/fpio/_fpioinit.c:  dflt_init will return ERROR on
+	  failure instead of NULL.
+
+Wed Aug 11 18:55:45 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/util/ltou.c:  return type is unsigned.
+	* h/ansi/extern.h, h/extern.h: ltou returns unsigned int.
+
+Wed Aug 11 18:42:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/uio/{ugets.c,uread.c,urskip.c,uwrite.c}:  Initialize
+	  counter variable before entering loop.  This is both good practice
+	  and keeps picky compilers quiet.
+
+Fri Aug 6 10:36:05 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/args/cmdline.c:  fixed number of arguments to
+	  ecalloc.  Didn't change when converted from malloc.
+
+Wed Jul 28 16:38:34 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/args/cmdline.c:  replaced malloc call with ecalloc.
+
+Wed Jul 28 15:32:08 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* lib/make/Makerules:  removed '-' marks from front of some
+	  commands.  Make will now stop unless told to keep going.  This
+	  is documented in the INSTALL file.
+
+Wed Jul 28 10:23:05 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* README:  Rewrote completely.
+	* INSTALL:  Rewrote some sections.
+
+Mon Jul 19 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/etc/ipwman:  Determine revision date, author, and manual
+	  type, and print at bottom.
+
+Fri Jul 23 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/etc/imtoum:  New program to convert IPW manual pages to
+	  troff manual pages in the UNIX style.
+
+Sun May 16 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* h/config.h:  New definition: SORT_ALG which holds the default
+	  sort algorithm.  This should be set to qsort if it isn't a
+	  custom sort.  Sun's qsort in SunOS 4.x has poor worst case
+	  performance, so can be replaced with _quicksort.
+
+Tue May 11 12:15:27 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/util/allocnd.c:  Cast all addr_t pointers to
+	  (char *) before doing pointer arithmetic on them.
+
+Wed May  4 09:11:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* Tests completed for Base, UCSB, and V10 programs.
+
+Tue May  3 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/exp/ucsb/bin/*: Finished correcting manual pages.
+	* src/exp/v10/bin/*:  Finished correcting manual pages.
+
+Tue May  3 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/winh/winhwrite.c: Use dtoa instead of ftoa.
+	* src/lib/libipw/sunh/sunhwrite.c: Use dtoa instead of ftoa.
+	* src/lib/libipw/sunang/zonetime.c:  New function -- convert
+	  offset from GMT into time zone name.
+
+Fri Apr 30 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/args/opt_check.c: Converted to ANSI stdarg.h
+	  instead of varargs.h.
+	* src/lib/libipw/util/allocnd.c: Converted to ANSI C, changing
+	  some of the loop structures in the ANSI version.
+	* src/lib/libipw/uio/uread.c: Cast addr_t to (char *) before using
+	  pointer arithmetic.
+	* src/lib/libipw/uio/uwrite.c: Add an extra pointer to avoid changing
+	  the passed in pointer, which should not get changed.
+
+Thu Apr 29 10:06:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* configure:  Checks for nawk/gawk/mawk and replaces the string in
+	  lib/ipwenv to match the correct place.
+
+Thu Apr 29 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/sunh/*: Converted to ANSI prototypes.
+
+Thu Apr 27 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/bin/*:  Finished correcting manual pages.
+
+Thu Apr 27 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libunix/src/isacii.c:  New function.
+	* src/exp/erlc/lib/mat/apfit.c:  Put fitf function in this file so it
+	  can be inlined.
+
+Wed Apr 26 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/util/allocnd.c: Don't bzero memory that was allocated
+	  with calloc -- calloc already clears the space.
+	* src/lib/libipw/geoh/geohfree.c:  New function.  Frees a "geo" header.
+	* src/lib/libipw/orh/orhfree.c:  New function.  Frees an "or" header.
+	* src/lib/libipw/orh/orhread.c:  Changed to enhance readability.
+
+Thu Apr 22 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/exp/erlc/lib/qdips/*:  Changed to ANSI C prototypes.
+
+Wed Apr 21 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libunix/src/random.c: New function.
+	* src/lib/libipw/args/getargs.c:  malloc space for the description
+	  instead of using what was passed in.
+	* src/lib/libipw/error:  Use ANSI <stdarg.h> instead of K&R's
+	  non-standard <varargs.h> if ANSI C is being used.  This entailed
+	  making a new layer between _bug.c and _error.c, which is called
+	  __bug.c.   This lets _bug.c use prototypes, yet still call _error.c
+	  with the appropriate varargs list.
+	* src/lib/libipw/uio/*:  Changed some programs to ANSI C prototypes,
+	  changed some casts to reflect a more standard approach.
+	* src/lib/libipw/pixio/_pixio.h:  Added ANSI C extern prototype.
+	* src/lib/libipw/pixio/_pioinit.c:  Added ANSI C prototypes.  Added
+	  parenthesis to if statement to assure correct evaluation.
+	* src/lib/libipw/lqh/_lqh.h.c: Changed to ANSI C prototypes.
+	* src/lib/libipw/lqh/_lqharrays.c: Added "_lqh.h" to includes.
+	* src/lib/libipw/hdrio/_hdrio.h:  Added ANSI C extern prototypes.
+	* src/lib/libipw/hdrio/_hwrec.c:  Added ANSI C prototypes.
+
+Tue Apr 20 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/sunang/*:  Converted to ANSI prototypes.
+	* src/lib/libipw/args/cmdline.c: cast returned length.
+	* src/lib/libipw/util/*: Added "ipw.h" to include list.
+	* src/lib/libipw/strvec/addsv.c:  Changed cast on argument to realloc.
+	* src/lib/libipw/pixio/pxclose.c:  Added "pixio.h" to include list.
+	* src/lib/libipw/main/*:  Added ANSI C prototypes.
+	* src/lib/libipw/lqh/lqhcheck.c: Changed to ANSI C prototypes.
+	* src/lib/libipw/hdrio/*:  Added "gethdrs.h" to includes.
+	* src/lib/libipw/fpio/_fpio.h:  Added ANSI C extern prototypes.
+	* src/lib/libipw/bih/hostorder.c:  Added "bih.h" to includes.
+
+Mon Apr 19 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/fpio/_fpioinit.c:  Changed to ANSI C prototypes.
+	* src/lib/libipw/fpio/mnxfp.c:  Changed manual.  Added ANSI C
+	  prototypes.  Changed if tests to assert tests.
+
+Fri Apr 16 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libunix/src/strtod.c: New function.
+	* src/lib/libunix/src/hypot.c:  New function.
+	* src/exp/erlc/lib/proj/constants.h:  New file.  Holds static
+	  character array of projection names.
+	* src/exp/erlc/lib/proj/projname.c:  Includes constants.h.
+	* src/exp/erlc/lib/proj/nameproj.c:  New function -- given a
+	  projection name, it returns the projection ID.
+
+Thu Apr  8 00:00:00 PDT 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/lqh/lqhfree.c:  New function -- frees a "lqh" header.
+	* src/lib/libipw/lqh/lqhwrite.c: Fixed manual page.
+	* src/lib/libipw/lqh/bihfree.c:  New function -- frees a "bih" header.
+	* src/lib/libipw/lqh/bihwrite.c: Fixed manual page.
+
+Tue Mar 30 22:26:27 PST 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* h/typedef.h: typedef xsize_t to size_t if various defines are
+	  set that imply size_t is known.  Since different compilers on
+	  the same machine set size_t to different types, it is almost
+	  impossible to work things out by using one configured type.
+	* src/lib/libunix/src: added gnualloc.c, _quicksort.c, msort.c,
+	  hsort.c.
+
+Mon Mar 15 15:09:00 PST 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+ 
+	* src/exp/erlc/lib/mat/msolve.c:  Changed to ANSI C prototypes.
+
+Sun Mar 14 23:32:55 PST 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/exp/erlc/bin/requantize: Use an AWK for loop to calculate
+	  powers of 2 instead of the nonexistant pow2 program.
+
+Fri Jan 15 11:20:00 PST 1993  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/lib/libipw/horh/horhwrite.c:  Use hputrec like other header
+	  writing routines.  Use dtoa instead of ftoa.
+
+Fri Nov 13 11:18:45 PST 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* Added dg and dgux configuration files.
+
+Fri Oct 30 16:26:27 PPET 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* h/macro.h: OPEN_MAX is NOT the maximum number of files that can
+	  be opened.  It is the minimum number the OS will guarantee.
+	  Added macro ASSERT_OK_FD(fd) to check that fd is proper.
+	  Macro OK_FD was also changed.
+	* src/lib/libipw/util/maxfiles.c: new function returns the min
+	  of OPEN_LIMIT or getrlimit(RLIMIT_NOFILE).
+
+Mon Oct  7 22:22:12 PDT 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/bin/Makefile: added hdspic
+
+Fri Sep 18 16:25:50 PDT 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/exp/erlc/lib/gctp/xtra.c: Changed to allow IEEE_drem to be
+	  configurable (HP's don't have it)
+	* h/conf/sunos4:  IEEE_drem 1
+	* h/conf/hpux8.0: IEEE_drem 0
+
+Fri Sep 18 15:02:40 PDT 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/etc/mc.c: doesn't require IPW libraries or includes.
+
+Fri Sep 18 14:20:08 PDT 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* 22 scripts: changed "set -" to "set --" for SysV compatibility.
+
+	* configure: after linking, check for GNU make.
+
+	* h/typedef.h: Don't define off_t if _OFF_T is set (HP/UX)
+
+	* lib/make/conf/hppa-hpux8.0: ANSI_CC is cc -Aa, not $(CC) -Aa
+
+Thu Sep 17 16:01:18 PDT 1992  Dana Jacobsen (jacobsd@solar.cor2.epa.gov)
+
+	* src/exp/erlc/bin/addtime/main.c: Use mktime instead of timegm.
+
+	* src/lib/libunix/difftime.c: Added function.
+	* src/lib/libunix/conf/sunos4: Added src/difftime.c to SRCS.
+	* h/extern.h:      added "extern double difftime()"
+	* h/ansi/extern.h: added "extern double(/*time_t time1, time_t time0*/)"

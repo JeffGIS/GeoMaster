@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineViewer", "WPFViewer\PipelineViewer.csproj", "{8403FBB4-DF6A-45CC-B1A5-7F9BAE79A1A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_md|x86 = Debug_md|x86
+		Release_md|x86 = Release_md|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8403FBB4-DF6A-45CC-B1A5-7F9BAE79A1A6}.Debug_md|x86.ActiveCfg = Debug_md|x86
+		{8403FBB4-DF6A-45CC-B1A5-7F9BAE79A1A6}.Debug_md|x86.Build.0 = Debug_md|x86
+		{8403FBB4-DF6A-45CC-B1A5-7F9BAE79A1A6}.Release_md|x86.ActiveCfg = Release_md|x86
+		{8403FBB4-DF6A-45CC-B1A5-7F9BAE79A1A6}.Release_md|x86.Build.0 = Release_md|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

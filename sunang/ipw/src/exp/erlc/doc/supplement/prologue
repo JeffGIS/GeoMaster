@@ -1,0 +1,31 @@
+.1C
+.nr VS 14
+.nr PS 12
+.SH
+.ce
+PROLOGUE
+.PP
+The following software modifications, procedures, and programs were developed
+to support the U.S. Environmental Protection Agency's Global Climate Research
+Program (GCRP), as a part of the a project entitled Regional Energy, Water, and
+Biogeochemical Process Simulation.
+Software development was done by Kelly Longley, under the
+direction of Danny Marks.
+The Image Processing Workbench (IPW) is available by request from
+Jim Frew at the Center for Remote Sensing and Environmental Optics,
+via computer mail sent to the Internet address:
+.EQ
+ipw-list-request@crseo.ucsb.edu
+.EN
+This supplement to IPW is available from the authors upon request.
+However, no guarantee of performance is implied,
+and no support is intended or offered.
+.PP
+Development of the software described in this volume was
+done at the EPA Environmental Research Laboratory in Corvallis, Oregon, and was
+supported by the U.S. Environmental Protection Agency through
+contract xx-xx-xxxx with Oregon State University, and
+contract 68-C8-0006 with ManTech Environmental Technology Incorporated.
+It has not been subjected to agency review, and therefore does not necessarily
+reflect the views of the Agency and no official endorsement should be
+inferred.

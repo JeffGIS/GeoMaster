@@ -1,0 +1,5679 @@
+#include "graphint.h"   
+#include <string.h>
+#include <dos.h>
+#include <math.h>
+#include <conio.h>   
+#include "winexec.h"
+#include <time.h> 
+#include "c:\gssi\prog\geomastr\resource.h"
+#include "translat.h"  
+#include "address.h" 
+#include "dict.h"
+#include "pnet.h"    
+#include "extrndb.h"
+#include <float.h>   
+#include <dibapi.h>    
+
+extern	BOOL	IgnoreLock; 
+
+LPCOMBOFILE	CurrentComboFile=NULL;
+short	PolyInfoTheme;
+char	IncludeFileArg[32]="";
+long	ODBCRecNum;
+double	OrthScale=0;
+BOOL	GetCopySize=FALSE,DisplayAllRefs=FALSE,	WantOrthoResDisplay=FALSE, ShowBadSyms = FALSE,SnapPolygons=FALSE, AutoType=FALSE;
+DWORD	TotCopySize;
+BOOL	GetSegFromGlobals=FALSE,BleedThrough=FALSE,AlwaysUseSymDict=FALSE,PickDeletes=FALSE;
+DWORD	LastRecTime=ULONG_MAX;
+HANDLE	hMacArgs=0;
+COLORREF    WindowColor; 
+short	MaxTextLayer=99;
+double	GraphicsTextFactor=1,CurveChordDist=0.2, GraphicsPointFactor=1,LineSymbolFactor=1, InvisPointFactor=1;
+short	InclusionOpt=0, TextType=0;
+short	CurrentProcessedPickedItem=-1;  
+HANDLE	hDisplayedRefs=0;
+BOOL	PickAllPieces=FALSE, WantFunNames=TRUE,IgnorePrevLayers=TRUE, InExpand=FALSE;
+long	PickPieceRefno=0;
+short	HltFetchPos=BT_FIRST;
+BOOL	AltProjLocked=FALSE, AutoClearOffset=TRUE, MaskOffsetLine=FALSE,UseItemLen=TRUE;  
+BOOL	ShowLinkLines=FALSE, LoadCompiledTran=FALSE;
+COLORREF	TrackColor=RGB(0,0,0);
+short	TrackWidth=1;
+COLORREF	HighlightColor=RGB(255,0,0);
+short	HighlightWidth=2,InvertNetDir=1;
+HPPOINT	lpCurPoints;
+HPDPOINT	lpDCurPoints;
+BOOL	HiPrecis,PickPerim=FALSE, PickPoints=TRUE;
+long	nCurPoints;
+POINT	CurStartPoint, CurEndPoint;
+float	MaxPointSize=9999.0;
+LPSTR	OFTitle=0;
+short	ConvertMapVP=-1, ConvertMapFileNo=-1;
+short	LayerID=-1; 
+char	FontNames[MAXFONTS][32]={"Arial","","","","","","","","","","","","","","",""};
+HFONT	hSizingFont[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; 
+BOOL	TrackVideo=TRUE, MemMap=FALSE, FirstMemMap=FALSE,DisplayLinkedCursors=TRUE;
+short	CurrentType, CurrentTextBaseType, CurrentDesc;  
+BOOL	InGraphicsProcessor = FALSE;
+DPOINT	CLocPoint, CurBP, CurMP, CurEP;
+long	MinFileTime, MaxFileTime;
+BOOL	ExpandTextDataNotFound=FALSE;
+char	ImageExtension[6]=".gci";
+BOOL	FoundLiteral;
+BOOL	DoTime=FALSE;
+short	StretchMode=STRETCH_DELETESCANS;
+long	GRStartTime, GREndTime;
+DWORD	max_check_time=10000;   
+double	BaseUnitsPerOrthoPixel=1;   
+short	MaxOrthoRes=9;
+double	MaxSpeed=60, MinSpeed=30;
+short	OutDistUnits = 1, OutAreaUnits = 1;
+BOOL	WantStreets=TRUE, RedisplayOnly=FALSE, InReset=FALSE, DisplayHLTPattern=TRUE,DisplayOnlyNonHLT=FALSE,DisplayOnlyHLT=FALSE;  
+double	UserPickAP;
+DPOINT	CurrentPoint;
+double	CurrentDistance=DBL_MAX;
+HCURSOR	hLockedCursor, hPickAPCursor, hPickNearCursor,hDigCursor, hWaitCursor, CurPickCursor,DefaultCursor; 
+BOOL	CursorIsLocked = FALSE;
+BOOL	ShowFileBounds = FALSE;
+struct	tm	tmtime;
+HANDLE	hIntRefno=0, hPrefix=0, hUDI=0, hTEXT=0;
+BOOL	UseBinFileList=FALSE, Display16BitColor=TRUE,FastOrthos=TRUE;
+short	ProcessGCmdStrings=3; //0 = dont process, 1 = process at display 2= pick 3 = both
+long    HaveState=-1;
+BOOL	DisplayCoord[3]={TRUE,TRUE,TRUE};
+HANDLE	hUserCmd=0,hToolCmd;  
+LPHANDLE	phWhichCmdList;
+double  OrthoAdjustX=0, OrthoAdjustY=0, MapAdjustX=0, MapAdjustY=0; 
+short	OrthoAdjustVP =-1, OrthoAdjustFile=-1;
+BOOL	Printing=FALSE, PrintMerging=FALSE, DisplaySymbol=TRUE, SetRefno=FALSE;
+long	PrintReportID, PrintReportPage;
+BOOL	DoGraphics=TRUE,ProcessAllElements=FALSE;
+short	CurFont=1;
+BOOL	ShowScale=FALSE;
+BOOL	FillAreas=TRUE; 
+double	AddressTextSize=0.15,StreetTextSize=0.13;
+int		CurState=-1;  
+long	PenCOLOR[8]={-1,-1,-1,-1,-1,-1,-1,-1};
+long	AreaCOLOR[8]={-1,-1,-1,-1,-1,-1,-1,-1};
+int		PenWIDTH[8]={0,0,0,0,0,0,0,0};
+long	TextFreq=1;
+long	GlobalColors[10]={0,0,0,0,0,0,0,0,0,0};
+int		FileProjectionType=0;  
+BOOL	HaveStates[74], ByState=FALSE;       
+long	CurStreetNumbers[4],FromStreet, ToStreet, CurStreet=0;  
+long	PickTime, CloseTime, IntersectTime;  
+long	DistTime;    
+BOOL	DisplayMarkers=FALSE, ShowDeletedOpt=TRUE;
+HWND	VideoWnd;
+long	AddRefno=0; 
+long	AddressFrame; 
+long	MaxDisplayPoints=SHRT_MAX/2, MostPoints=0;
+short	CommandViewport=0;
+double	PickLimit=DBL_MAX;  
+double	CurrentAZ=HALFPI;
+
+
+BOOL	ComputeArea=TRUE;
+long	InternalRefno;
+int		MemMapWidth=800,MemMapHeight=600; 
+int		ReportXCOORD, ReportYCOORD;
+HBITMAP	hbmpOld=0, hMemBitmap=0;
+short	NumTAGDef=-1;  
+HANDLE	hTAGDef;  
+BOOL	ContinueProcessing=TRUE;
+HANDLE	FilePathHandle=0;
+BOOL	AllVarEqQuestionMark=FALSE;
+
+BOOL	TraceType[4]={FALSE,FALSE,FALSE,FALSE};
+BOOL	TraceType[4];  
+
+char	AreaUnitOpts[6][10]={"SQRFEET","SQRMETERS","SQRYARDS","SQRMILES","SQRKILOS","ACRES"};
+char	DistUnitOpts[5][12]={"FEET","METERS","YARDS","MILES","KILOMETERS"};
+
+extern	DPOINT	CurPointLocD,TXLoc;
+extern	long	MinCacheDriveFreeSpace, ShowRefno;
+extern	double	TXRot, CurLength, CurArea;
+extern	char	NewTAG[80];
+extern	double	ShowValSize;
+extern	BOOL	DisplayFiles,StandardSQL,ShortestRoute;
+extern	HANDLE	hDynamicSeg;
+extern	WORD	nDynamicCoord;
+extern	TAGBOX	TAGBox;
+extern	LPSTR	pMacroReturnValue;
+extern	double	LocationOffset, OffsetLineOffset, CurPointAZ;
+extern	LPTHEME	CurTheme; 
+extern	long	CurrentMacro;
+extern	short	ShowInvisiblePointsSymbol, TrackingStatus;
+extern	int		RealView;
+extern	short	MaxPick, FileNum, SubFile;  
+extern	int	PickAp;
+extern	int	DisplayFinOpt;
+extern	LPVIEWPORT	pViewports[MAX_VIEWPORTS];
+extern	int			NumViewports;
+extern	int		NumPicked;    
+extern	HANDLE	hNames1, hNames2,hScreenFile,hAreaOffFile;    
+extern	BOOL	Pick,UseRefOrTAGIndex, OutlineZoomArea,ConfigLoaded,SetPickGlobalsCalled;   
+extern	HDC		hdcMemMap;    
+extern	HCURSOR	hCursor;
+extern	BOOL	OverWritePrompt,AutoPan; 
+extern	DPOINT	sAddressPoint; 
+extern	long  PRJ_TYPE[4];
+extern	LPVISLIST	CurVis;
+extern	MNMXCORD	EditBounds; 
+extern	time_t	CurrentChangeDate;
+extern	double	SystemPickAp; 
+extern  long  PRJ_UNITS[4];
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	int		NumSavedPickList;
+extern	HANDLE	hSavedPickList,hHighlight,hHighlight2,LinkToVar;
+extern	HWND	hInst, hWndMain;
+extern	LPVIEWPORT	CurView;	
+extern	BOOL	Highways, DisableHalt,UseUserPickAp,OffsetFromLimits;	
+extern	LONG	CurrentRefno, TimeRangeBeg, TimeRangeEnd;  
+extern	BOOL	TraceOn, IgnoreBounds,DoPaint;          
+
+static	DWORD	VarTime=1;
+static	int	NumVars=0;
+static	HANDLE	VarHandles[MAXGLOBALS];
+static	char	shrtxt[256]; 
+static	HANDLE	hVarNameTable=0;
+
+
+
+  typedef struct {
+  			double r1, r2;
+  			int		i1;
+  		} Key; 
+  Key *lpKey;
+ 
+
+BOOL CreateStnameFilesUpdate (void);
+
+
+void Wait (long MicroSeconds)
+{   
+	MSG	msg; 
+	UINT	MS=(UINT)MicroSeconds;
+	
+	SetTimer (hWndMain,9999,MS,0);
+	msg.wParam = 0; 
+	while (msg.wParam != 9999)
+		GetMessage (&msg,hWndMain,WM_TIMER,WM_TIMER); 
+	KillTimer (hWndMain,9999);
+	return;
+}
+
+BOOL UpdateGlobalFile (LPSTR RptFile,LPSTR VName,LPSTR Value)
+{
+	char	str[1028];
+	HFILE	Fid; 
+	LPSTR	lpEq,lpDot;
+	HFILE	FidOut;
+	char	OldFile[128],NewFile[128],VarName[36];
+	OFSTRUCT	OFStruct; 
+	
+	Fid = GSSiOpenFile (RptFile,&OFStruct,OF_READ); 
+	if (Fid==HFILE_ERROR)
+		return FALSE;  
+	_fullpath(OldFile,RptFile,sizeof(OldFile));
+	_fstrcpy(NewFile,OldFile);
+	lpDot = _fstrrchr(NewFile,'.');
+	if (lpDot) *lpDot=0;
+	_fstrcat(NewFile,".ugf");
+	FidOut = GSSiOpenFile(NewFile,&OFStruct,OF_CREATE);  
+	
+	_fstrcpy(VarName,"[");
+	_fstrcat(VarName,VName);
+	_fstrcat(VarName,"]");
+	while (fgetstring (str,1024,Fid)) 
+	{
+		if (lpEq = _fstrchr(str,'='))
+		{
+			*lpEq=0;
+			if (!_fstricmp(VarName,str))
+			{   
+				*lpEq++ = '=';
+				_fstrcpy (lpEq,Value);
+			} 
+			else
+				*lpEq = '=';
+		}
+		fputstring (str,FidOut);
+	}                     
+Exit:
+	GSSiClose (Fid);
+	GSSiClose (FidOut);
+	GSSiRemove (OldFile);
+	GSSiRename (NewFile,OldFile);
+	
+	return TRUE;
+}
+ 
+void GetRunDate (LPSTR RunID, LPSTR Date)
+{
+	char	str[260];
+	HFILE	Fid;  
+	OFSTRUCT	OFStruct;
+	LPSTR	lpComma; 
+	
+	Fid = GSSiOpenFile ("rundate.txt",&OFStruct,OF_READ);   
+	*Date = 0;
+	if (Fid==HFILE_ERROR)
+		return;  
+	
+	while (fgetstring (str,256,Fid)) 
+	{
+		if (lpComma = _fstrchr(str,','))
+		{
+			*lpComma++=0;
+			if (!_fstricmp(RunID,str))
+			{
+				_fstrcpy(Date,lpComma);
+				goto Exit;
+			}
+		}
+	}                     
+Exit:
+	GSSiClose (Fid);
+	
+	return;
+}
+
+DWORD NextVarTime (void)
+{
+	if (VarTime < ULONG_MAX)
+		VarTime++;
+	else
+		VarTime = 0;
+		/* reset all times to 0 */
+	return VarTime;
+}
+                                         
+BOOL LoadGlobalInit (LPSTR File,BOOL First)
+{   
+	char	str[260], str2[260], mess[512];
+	HFILE	Fid;  
+	int		n=0; 
+	BOOL	noerr=TRUE; 
+	LPSTR	lpEq, lpEnd;  
+	OFSTRUCT	OFStruct; 
+	  
+	LayerID = 0;
+	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
+	if (Fid==HFILE_ERROR)
+		return TRUE; 
+	if (TraceOn)
+	{ 
+		sprintf (str,"Loading global init file %s",File);
+		GSSiTrace (str);
+	} 
+	while (fgetstring (str,256,Fid))
+	{
+		n++;
+		if (str[0] != '\0' && str[0] != '#')
+		{ 
+			lpEq = _fstrchr (str,'=');
+			if (!lpEq)
+			{   
+				sprintf (str2,"Error on line %i of %s",n,File);               
+				noerr = FALSE;
+				MessageBox( GetFocus(),str,str2,MB_ICONEXCLAMATION);
+			}
+			else
+			{
+				lpEq--;
+				if (str[0] != '[' && *lpEq != ']')
+				{
+					sprintf (str2,"Error on line %i of %s",n,File);               
+					noerr = FALSE;
+					MessageBox( GetFocus(),str,str2,MB_ICONEXCLAMATION);
+				}
+				else
+				{   
+					*lpEq = '\0';  
+					lpEq+=2;
+					lpEnd = _fstrchr(lpEq,0);
+					lpEnd--;
+					if (*lpEnd == ';') *lpEnd = 0;
+					_fstrcpy (str2,lpEq);
+					if (First || _fstricmp (&str[1],"%DATA_LOC"))
+						SetGlobalValue (&str[1],str2);  
+					if (TraceOn)
+					{ 
+						sprintf (mess,"%s: %s",&str[1],str2);
+						GSSiTrace (mess);
+					}
+					
+				}
+			}
+		}
+	}
+	GSSiClose (Fid);
+	if (TraceOn)
+	{ 
+		sprintf (str,"Close global init file %s",File);
+		GSSiTrace (str);
+	}  
+	
+	
+	return noerr;
+} 
+
+BOOL GetCurrentGraphicsDBName (LPSTR Name,short Type)
+{
+	short	NumFields=25, NumIndexFields=1; 
+	short	CurrentVersion=1002; 
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+	LPSTR	DefStr = GlobalLock (hStr); 
+	USHORT	StringID=IDS_GRAPHICSDEF;
+    
+    if (Type == 2)
+    {   
+    	NumFields = 6;
+    	CurrentVersion = 2001;
+    	StringID = IDS_GRAPHIC2DEF;
+    }
+   	sprintf (Name,"[%%DL]grt%i%i.gmd",Type,CurrentVersion); 
+   	if (!ExistFile (Name))
+   	{
+		if (!LoadString(hInst, StringID, DefStr, 256))
+			goto RtnFalse;  
+		if (StringID == IDS_GRAPHICSDEF)
+		{
+			if (!LoadString(hInst, IDS_GRAPHICSDEF2, _fstrchr (DefStr,0), 256))
+				goto RtnFalse;
+		}  
+		if (!CreateGWDDatabase (Name,CurrentVersion,NumFields,NumIndexFields,DefStr))
+			goto RtnFalse; 
+	} 
+	GSSiGlobUlFree (&hStr);
+	return TRUE;
+RtnFalse:
+	GSSiGlobUlFree (&hStr);
+	return FALSE;
+}
+
+short OpenDataFile (LPSTR InName,LPSTR SQL, short Access, HANDLE *hDB)
+
+{ 
+	short	i, NumFields,Type, l, nf; 
+	LPSTR	pTable=0;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPFIELDINFO	lpFieldInfoSave, lpFieldInfo;
+	HANDLE	FileHandle, handle, hFields;
+	LPGWDHEADER	lpGWDHead;
+	LPSTR	lpEq, lpDelim,lpFieldStart;
+	short	index, LocDelim;   
+	LPSTR	IDName;
+	LPSTR	str, cName;   
+   	LPSTR	drive,dir,fname,ext, driver, table;   
+   	LPSTR	Name;
+   	LPOFSTRUCT	pOFStruct;
+	HANDLE	hMem=0;
+	
+    if (*hDB) 
+    {
+		SQLPtr = (LPOPENSQLDATA) GlobalLock (*hDB);
+        FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+	    Type = FilePtr->Type;  
+	    GlobalUnlock (SQLPtr->OFHandle);
+	    GlobalUnlock (*hDB);
+	    return Type;
+	} 
+	hMem=GSSiGlobAlloc (GHND,2048);
+	str = GlobalLock (hMem);
+	IDName = str + 256;
+	cName = IDName + 256;
+	drive = cName + 256;
+	dir = drive + 8;
+	fname = dir + 128;
+	ext = fname + 64;
+	driver = ext + 8;   
+	table = driver + 128;
+	pOFStruct = (LPOFSTRUCT)(table + 256);
+	Name=cName;
+    _fstrcpy (Name,InName); 
+    if (_fstrstr (Name,"attribut\\graphics.gmd"))   
+    {
+    	LPSTR lpEQ = _fstrchr (Name,'=');
+    	
+    	if (lpEQ)
+    		lpEQ++;
+    	else
+    		lpEQ = Name;  
+    	GetCurrentGraphicsDBName (lpEQ,1);
+    }
+    if (_fstrstr (Name,"attribut\\graphic2.gmd"))   
+    {
+    	LPSTR lpEQ = _fstrchr (Name,'=');
+    	
+    	if (lpEQ)
+    		lpEQ++;
+    	else
+    		lpEQ = Name;  
+    	GetCurrentGraphicsDBName (lpEQ,2);
+    }
+    ExpandText (Name);    
+    
+    if (!_fstricmp (Name,"HLTLIST"))
+    {   
+    	HltFetchPos = BT_FIRST;
+    	goto RtnTrue;
+    }
+    
+	lpEq = MatchLev (Name,'=');
+	LocDelim = _fstrcspn (Name,",|(;");
+	if ((long)lpEq - (long)Name > LocDelim) 
+		lpEq = 0;
+	if (lpEq) 
+	{
+		*lpEq = 0;
+		_fstrcpy (IDName,Name);
+		*lpEq = '=';
+		Name = ++lpEq;
+	}
+	l = _fstrlen (Name);
+    if (_fstrncmp(Name,"ODBC|",5))
+    	_fstrupr (Name);
+    if (_fstrstr(Name,".GMD"))
+    	Type = UMIFS_DATAFILE;
+    else if (_fstrstr(Name,".GCF"))
+    	Type = COMBO_DATAFILE;
+    else if (_fstrstr(Name,".DBF"))
+    	Type = DBF_DATAFILE;
+    else if (!_fstrncmp (Name,"ODBC|",5))
+    	Type =ODBC_DATAFILE;
+    else if (_fstrstr(Name,".TXT"))
+    	Type =TEXT_DATAFILE;
+    else if (_fstrstr(Name,".DTM"))
+    	Type =DTM_DATAFILE;
+    else
+    	goto RtnFalse;
+    if ((FilePtr = InOpenFileList(Name)))
+    	goto ProcessSQL;
+	switch (Type)
+	{   
+		case 0:
+			FileHandle = NULL;
+			break;
+			
+		case UMIFS_DATAFILE:
+			FileHandle = OpenGWDatabase (Name,Access);
+			break;
+
+		case COMBO_DATAFILE:
+			FileHandle = OpenComboDatabase (Name,SQL);
+			break;
+
+		case FOXPRO_DATAFILE:
+	       	FileHandle = OpenExternalDatabase (Name); 
+	       	break;
+
+	    case MSACCESS_DATAFILE:
+	       	FileHandle = OpenExternalDatabase (Name);
+ 	    	break; 
+
+	    case DTM_DATAFILE:
+	       	FileHandle = DTMOpen (Name,DBL_MAX,BT_READ);
+ 	    	break; 
+
+        case ODBC_DATAFILE:
+	       	FileHandle = OpenExternalDatabase (Name); 
+            if(FileHandle)
+            {
+		       	pTable = (_fstrchr(Name,'|')) ;
+		       	if(pTable)
+		       	{ 
+		       	  pTable++;
+		       	  pTable = (_fstrchr(pTable,'|')) ;
+				  if(pTable)
+				  { 
+		       	    pTable++;
+		          	FileHandle =OpenDatabaseTable (FileHandle, pTable);
+		          }
+	            }  
+	        }
+ 	    	break;
+        case DBF_DATAFILE:
+        {   
+        	
+        	_splitpath (Name,drive,dir,fname,ext); 
+        	sprintf (driver,"DBF;DefaultDir=%s%s",drive,dir);
+	       	FileHandle = OpenExternalDatabase (driver); 
+            if(FileHandle && *fname != '*')
+            {   
+            	sprintf (table,"%s%s",fname,ext);
+	          	FileHandle =OpenDatabaseTable (FileHandle, table);
+	        } 
+	    }
+ 	    	break;
+        case TEXT_DATAFILE:
+        {   
+        	HFILE	Fid=GSSiOpenFile (Name,pOFStruct,OF_READ);
+        	
+        	if (Fid == HFILE_ERROR) 
+        	{
+				FileHandle = NULL;
+				GSSiMessageBox ("Unable to open TXT file",Name,MB_ICONEXCLAMATION);
+			}
+			else
+			{   
+				GSSiClose (Fid);
+		       	_splitpath (pOFStruct->szPathName,drive,dir,fname,ext); 
+	        	sprintf (driver,"TXT;DefaultDir=%s%s",drive,dir);
+		       	FileHandle = OpenExternalDatabase (driver); 
+	            if(FileHandle)
+	            {   
+	            	sprintf (table,"%s%s",fname,ext);
+		          	FileHandle =OpenDatabaseTable (FileHandle, table);
+		        }
+		    } 
+	    }
+ 	    	break;
+    }
+    if(!FileHandle)
+    	goto RtnFalse;
+    	            
+    NumFields = 0;  
+    hFields = GlobalAlloc (GMEM_MOVEABLE,MAXFIELDS*sizeof(FIELDINFO));
+    lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);  
+    index = 0;
+	lpFieldInfo = GetFieldInfo (FileHandle,TRUE,Type);
+	while (lpFieldInfo)
+	{   
+		lpFieldInfo->index = index++; 
+		lpFieldInfo->hCurVal = 0;
+		*lpFieldInfoSave++ = *lpFieldInfo;
+		NumFields++;
+		lpFieldInfo = GetFieldInfo (FileHandle,FALSE,Type);
+	}
+	GlobalUnlock(hFields);
+    if (!NumFields && pTable)
+    	goto RtnFalse;	
+AllocFilePtr: 
+	nf = max (NumFields,5);
+    handle = GlobalAlloc (GHND,sizeof(OPENFILEDATA)+nf*sizeof(FIELDINFO));
+    FilePtr = (LPOPENFILEDATA)GlobalLock (handle);
+    FilePtr->myhandle = handle;  
+    FilePtr->Type = Type;
+    FilePtr->MacroID = CurrentMacro; 
+	if (Type == UMIFS_DATAFILE || Type == DTM_DATAFILE)
+		_fullpath (FilePtr->fullpath,Name,_MAX_PATH);  
+	else
+		_fstrcpy (FilePtr->fullpath,Name);
+	FilePtr->Offset = -1;
+    FilePtr->FileHandle = FileHandle;
+    FilePtr->NumFields = NumFields;
+    lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);
+	lpFieldInfo = &FilePtr->FldInfo;
+	if (NumFields)
+		for (i=0;i<NumFields;i++,lpFieldInfoSave++,lpFieldInfo++)
+			*lpFieldInfo = *lpFieldInfoSave;
+	else
+	{
+		for (i=0;i<nf;i++,lpFieldInfoSave++,lpFieldInfo++) 
+		{   
+			if (!i)
+				_fstrcpy (lpFieldInfo->name,"RESULT");
+			else
+				sprintf (lpFieldInfo->name,"RESULT%i",i+1);  
+			lpFieldInfo->type = SQL_VARCHAR;
+			lpFieldInfo->length = 255;
+		}
+	    FilePtr->NumFields = nf;
+	}
+    GSSiGlobUlFree (&hFields);
+
+ProcessSQL: 
+    handle = GlobalAlloc(GHND,sizeof(OPENSQLDATA)+MAXFIELDINSQL*sizeof(SQLFIELD));
+    SQLPtr = (LPOPENSQLDATA)GlobalLock (handle); 
+    _fstrcpy (SQLPtr->IDName,IDName);
+    FilePtr->SQLHandles[FilePtr->NumSQLs++] = handle;
+    SQLPtr->myhandle = handle;
+    SQLPtr->OFHandle = FilePtr->myhandle;
+	ProcessFileSQL (SQLPtr,FilePtr,SQL);                                        
+    
+    GlobalUnlock (SQLPtr->myhandle);  
+    GlobalUnlock (FilePtr->myhandle);  
+    *hDB = handle;
+    AddToOpenFileList(handle); 
+RtnTrue:  
+	GSSiGlobUlFree (&hMem);
+	return TRUE;
+RtnFalse:
+	GSSiGlobUlFree (&hMem);
+	return FALSE;
+} 
+
+void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQL)
+{
+    short	NumFieldInSQL = 0; 
+    HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+    LPSTR	str=GlobalLock (hMem);
+    HANDLE	hFields = GlobalAlloc (GHND,MAXFIELDINSQL*sizeof(SQLFIELD));
+    LPSQLFIELD	SQLField = (LPSQLFIELD)GlobalLock(hFields);     
+	LPSQLFIELD	lpSQLField; 
+    LPSTR	lpFieldStart = str;  
+    LPSTR	lpEq; 
+    LPGWDHEADER	lpGWDHead;    
+	LPGWFLDINFO	lpGWFldInfo;
+    short	i;
+    
+    _fstrcpy (str,SQL); 
+    lpEq = _fstrchr (lpFieldStart,'=');
+    while (lpEq)
+    {   
+    	LPSTR	lpGlobal, lpEndGlobal, lpFieldEnd, lpString, lpStringEnd;  
+     
+     	lpFieldEnd = lpEq; 
+     	lpStringEnd = _fstrchr (lpEq,';');
+     	if (!lpStringEnd)
+        {
+        	lpStringEnd = _fstrchr (lpEq,0);
+        	*(lpStringEnd+1) = 0;
+        }
+        else
+     		*lpStringEnd = 0;  
+     	lpEq++; 
+     	while (*lpEq == ' ') lpEq++;
+     	_fstrcpy (SQLField->String,lpEq);
+NextGlobal:
+    	if ((lpGlobal = _fstrchr (lpEq,'['))) 
+	    {    
+	    	if ((lpEndGlobal = _fstrchr (lpGlobal,']')))
+	    	{    
+	    		*lpFieldEnd = '\0';
+	    		lpGlobal++;
+	    		*lpEndGlobal = '\0';
+		     	Truncate (lpFieldStart);
+		    	if (FilePtr->Type == UMIFS_DATAFILE)
+		    	{   
+		    		lpGWDHead =(LPGWDHEADER) GlobalLock (FilePtr->FileHandle);
+
+		        	for (i=0,lpGWFldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;i++,lpGWFldInfo++)
+		        	{	
+		        		if (!_fstricmp (lpGWFldInfo->Name,lpFieldStart))
+		        		{ 
+		        			SQLField->FieldNum = i; 
+		        			break;
+		        		}
+		        	}
+		        	GlobalUnlock (FilePtr->FileHandle);
+		    	}
+		    	else
+		    		SQLField->FieldNum = -1; 
+		    	SQLField->hGlobal = AllocateVar (lpGlobal);
+		    	NumFieldInSQL++;
+		    	SQLField++; 
+		    	lpEq = lpEndGlobal;  
+		    	lpEq++;
+		    	goto NextGlobal;
+		    }
+	    }
+       	lpFieldStart = lpStringEnd;
+       	lpFieldStart++;
+	    lpEq = _fstrchr (lpFieldStart,'=');
+    } 
+    GlobalUnlock(hFields);
+    
+    _fstrcpy (SQLPtr->SQL,SQL);  
+    SQLPtr->st = 2;
+    if (NumFieldInSQL)
+    	SQLPtr->NumGlobals = NumFieldInSQL; 
+    else
+    	SQLPtr->NumGlobals = -1; 
+    SQLField = (LPSQLFIELD)GlobalLock (hFields);
+    lpSQLField = &SQLPtr->SQLField;
+    for (i=0;i<NumFieldInSQL;i++,SQLField++,lpSQLField++)
+    	*lpSQLField = *SQLField;  
+	if (FilePtr->Type == UMIFS_DATAFILE)
+	    SQLPtr->IndexToUse =  SelectGWDIndex (FilePtr->FileHandle,SQLPtr);
+    GSSiGlobUlFree (&hFields);   
+    GSSiGlobUlFree (&hMem);
+	return;
+}
+
+int	SelectGWDIndex (HANDLE hFile,LPOPENSQLDATA	SQLPtr)
+{
+	LPGWDHEADER	lpGWDHead;
+	LPGWFLDINFO	lpGWFldInfo;  
+	LPSQLFIELD	lpSQLField;
+	short	index=-1, i,j,k, nif=0, maxf=-1;
+	
+	if (SQLPtr->NumGlobals == -1)
+		return 0;
+	lpGWDHead =(LPGWDHEADER) GlobalLock (hFile);
+	for (i=0;i<lpGWDHead->NumIndex;i++)
+	{	
+		nif=0;
+		for (k=0;k<lpGWDHead->NumIndexFields[i];k++)
+		{ 
+			for (j=0,lpSQLField=&SQLPtr->SQLField;j<SQLPtr->NumGlobals;j++,lpSQLField++)
+			{ 
+				if (lpGWDHead->IndexFields[i][k] == lpSQLField->FieldNum)
+					goto NextField;
+			} 
+			goto NextIndex;
+NextField:
+			nif++;
+		}
+NextIndex:
+		if (nif > maxf) 
+		{
+			index = i;
+			maxf = nif;
+		}
+	} 
+	GlobalUnlock (hFile);
+	return index;
+}
+
+
+HANDLE GetDBHandleFromSQL (HANDLE hSQL)
+{   HANDLE	DBHandle;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+	DBHandle = FilePtr->FileHandle;
+	GlobalUnlock (SQLPtr->OFHandle);
+	GlobalUnlock (hSQL);  
+	return DBHandle;
+}
+
+BOOL CloseDataFile (BOOL Final, HANDLE *hDB)
+{   
+	HANDLE	handle; 
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	int	i,j, NewNum; 
+	
+	if (!*hDB)
+		return(TRUE);
+	
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (*hDB); 
+	if (!SQLPtr) 
+	{
+		*hDB = 0;
+		return TRUE;
+	}
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+	GSSiGlobUlFree (&FilePtr->BufferHandle); 
+	NewNum = FilePtr->NumSQLs;
+	for (i=j=0;i<FilePtr->NumSQLs;i++)
+	{   
+		FilePtr->SQLHandles[j] = FilePtr->SQLHandles[i];
+		if (FilePtr->SQLHandles[i] != *hDB)
+			j++; 
+		else
+			NewNum--;
+	}
+	FilePtr->NumSQLs = NewNum;
+	if (FilePtr->NumSQLs)
+	{
+		GlobalUnlock (SQLPtr->OFHandle); 
+		goto DeallocSQL;
+	}
+	
+	switch (FilePtr->Type)
+	{
+		case UMIFS_DATAFILE:
+			CloseGWDatabase (FilePtr->FileHandle);
+ 			break;
+
+		case DTM_DATAFILE:
+			DTMClose (&FilePtr->FileHandle);
+ 			break;
+
+		case COMBO_DATAFILE:
+			CloseComboDatabase (FilePtr->FileHandle);
+ 			break;
+
+		case FOXPRO_DATAFILE:
+	       	if (Final)
+	       	{
+	          CloseExternalDatabase (FilePtr->FileHandle);
+              break;
+	       	}
+	    case ODBC_DATAFILE:  
+	    case DBF_DATAFILE:
+	    case TEXT_DATAFILE:
+	    case MSACCESS_DATAFILE:
+	        {
+			  ClearCurVals (FilePtr);
+			  if (SQLPtr->hstmt)
+			  {
+				SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
+				SQLPtr->hstmt = NULL;
+			  } 
+              CloseExternalDatabase (FilePtr->FileHandle);
+              break;
+	    	} 
+
+    }
+    handle = FilePtr->myhandle; 
+    FilePtr->myhandle = 0;
+    GSSiGlobUlFree (&handle);
+DeallocSQL:
+    RemoveFromOpenFileList(*hDB); 
+	GSSiGlobUlFree (hDB);
+    return (TRUE);
+}  
+
+void SetUDIValue (LPSTR Name, LPSTR Value)
+{   
+	int		i,j;
+	LPTAGDEF	pTAGDef;
+	
+	SetGlobalValue (Name,Value); 
+	LoadTAGDef();
+	if (NumTAGDef>0)
+	{
+		pTAGDef = (LPTAGDEF)GlobalLock (hTAGDef);
+		for (i=0;i<NumTAGDef;i++,pTAGDef++)
+		{ 
+			if (!_fstrcmp(pTAGDef->Prefix,Name))
+			{   
+				for (j=0;j<pTAGDef->NumVar;j++)
+				{
+					SetGlobalValueLen (pTAGDef->VarName[j],&Value[pTAGDef->VarStart[j]],pTAGDef->VarLen[j]);
+				}
+				goto GotTAG;
+			}
+		}
+	GotTAG:
+		GlobalUnlock (hTAGDef);
+	}
+	SetGlobalValue2 (hUDI,Value,0);
+		
+	return;  
+}  
+
+BOOL LoadTAGDef (void)
+{   
+	HFILE	TDFid; 
+	LPSTR	lpSpace;
+	OFSTRUCT	OFStruct;  
+	char	TDFile[128], Mess[256];
+	int		i,j, lineno=0;
+	LPTAGDEF	pTAGDef;
+	
+	
+	if (NumTAGDef<0)
+	{   
+		char	line[260];
+			
+		_fstrcpy (TDFile,"[%DATA_LOC]tagdef.txt");
+		TDFid = GSSiOpenFile(TDFile,&OFStruct,OF_READ);
+		NumTAGDef=0;
+		if (TDFid != HFILE_ERROR)
+		{   
+			hTAGDef=GSSiGlobAlloc (GHND,UINT_MAX);
+			pTAGDef = 0; 
+	NextLine: 
+			lineno++;
+			if (!fgetstring (line,256,TDFid))
+				goto EndFile;  
+			if (*line=='#' || !*line); 
+			else if (line[0]!=' ') 
+			{   
+				NumTAGDef++;
+				if (pTAGDef)
+					pTAGDef++;
+				else
+					pTAGDef = (LPTAGDEF)GlobalLock (hTAGDef); 
+				if (sscanf (line,"%s %i %i %i",
+					&pTAGDef->Prefix,&pTAGDef->Len,&pTAGDef->IncBeg,&pTAGDef->IncLen) != 4)
+				{
+					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
+					MessageBox (GetFocus(),Mess,NULL,MB_ICONEXCLAMATION);
+				}
+			}
+			else
+			{   
+				lpSpace = _fstrchr (&line[1],' ');
+				if (sscanf (&line[1],"%s %i %i %i",
+					&pTAGDef->VarName[pTAGDef->NumVar],&pTAGDef->VarStart[pTAGDef->NumVar],
+					&pTAGDef->VarLen[pTAGDef->NumVar]) != 3)
+				{
+					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
+					MessageBox (GetFocus(),Mess,NULL,MB_ICONEXCLAMATION);
+				}
+				pTAGDef->VarStart[pTAGDef->NumVar]-=1;
+				pTAGDef->NumVar++;
+			}  
+			goto NextLine;
+	EndFile: 
+			if (hTAGDef) 
+			{
+				GlobalUnlock (hTAGDef); 
+				hTAGDef = GlobalReAlloc (hTAGDef,(long)NumTAGDef*sizeof(TAGDEF),GMEM_MOVEABLE);
+			}
+			GSSiClose (TDFid);
+		}  
+	}
+	return TRUE; 
+}
+
+
+void SetUDIValueLen (LPSTR Name, LPSTR Value, short len)
+{
+	char	Value2[66];
+	
+	strncpy0(Value2,Value,len);
+	SetUDIValue (Name,Value2);
+	return;
+}
+
+void SetGlobalValue (LPSTR InName, LPSTR InValue)
+{   
+	VARPNT	VP;
+	HANDLE	handle, hVal; 
+	BOOL	BVal, FoundLit;
+	LPSTR	lpPar, lpEndPar=NULL, Value, Name;
+	short	Index=0; 
+	short	n;
+    
+    if (!ContinueProcessing)
+    	return; 
+    hVal = GSSiGlobAlloc (GMEM_MOVEABLE,2048+256);
+    Value = GlobalLock (hVal); 
+    Name = Value + 2048;
+   	_fstrcpy (Value,InValue);
+	ExpandText (Value);
+	FoundLit = FoundLiteral;	                  
+	_fstrcpy (Name,InName);
+	ExpandText (Name);
+	if ((lpPar=_fstrchr (Name,'.')))
+	{   
+		HANDLE	hSQLPtr; 
+
+		*lpPar++ = 0;
+			
+       	hSQLPtr = GetDBByIDName (Name);
+       	if (!hSQLPtr)
+       		goto Rtn; 
+	    SetGMDField (hSQLPtr,lpPar,Value);
+	    goto Rtn;
+    }
+	lpPar = _fstrrchr(Name,'(');
+	if (lpPar)
+	{
+		lpEndPar = _fstrchr(lpPar,')');
+		if (lpEndPar)
+		{   
+			*lpPar = 0;
+			if ((handle = FindVar (Name)))
+			{
+				VP = (VARPNT)GlobalLock (handle);
+				if (!VP->Type)
+					*lpPar = '(';
+				GlobalUnlock (handle);
+			}
+			else
+				*lpPar = '('; 
+			lpPar++;
+			Index = atoi(lpPar);
+		}
+	}
+	SetGlobalValue3 (Name,Value,Index,FoundLit);
+Rtn:    
+	GSSiGlobUlFree (&hVal);
+	return;
+}          
+void SetGlobalValue3 (LPSTR Name, LPSTR Value, short Index, BOOL FoundLit)
+{
+	VARPNT	VP;
+	HANDLE	handle;  
+	
+	if (!*Name)
+		return;
+	handle = AllocateVar (Name); 
+	VP = (VARPNT)GlobalLock (handle);
+	VP->ContainsGorF = FoundLit; 
+	GlobalUnlock (handle);  
+	SetGlobalValue2 (handle,Value,Index);
+	if (FoundLit)
+		LinkIncludedVars (handle,Value);
+	return;
+} 
+
+void SetLinkedVarTime (VARPNT VP)
+{   
+	VARPNT	VPLinked;  
+	UINT 	i;
+	
+	for (i=0;i<VP->NumLinkedVars;i++)
+	{
+		VPLinked = (VARPNT)GlobalLock (VP->LinkedVar[i]);
+		if (!VPLinked)
+		{ 
+			VP->NumLinkedVars = 0;
+			return;
+		}
+		VPLinked->changetime = VP->changetime;
+		GlobalUnlock (VP->LinkedVar[i]);	
+	}
+	return;
+} 
+
+void LinkIncludedVars (HANDLE hVar,LPSTR Value)
+{   
+	HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	LPSTR	pMem = GlobalLock (hMem);
+	
+	_fstrcpy (pMem,Value);
+	LinkToVar = hVar;
+	ExpandText (pMem);
+	GSSiGlobUlFree (&hMem);
+	LinkToVar = 0;
+	return;
+}
+
+void SetGlobalValue2 (HANDLE handle, LPSTR Value, short Index)
+{
+	VARPNT	VP;
+	BOOL	BVal; 
+	short	n, type, i,ii, ib, ie;    
+	long	Color;
+	char	nullval=0;
+    
+    if (!handle)
+    	return; 
+    if (!Value)
+    	Value = &nullval;
+	VP = (VARPNT)GlobalLock (handle);
+	type = VP->Type; 
+	if (type == 99 && AltProjLocked)
+		ii=1;
+	else 
+	{   
+		if (VP->ValueIsHandle)
+		{
+			HANDLE handle = atol (VP->Value);
+			GSSiGlobFree (&handle); 
+			VP->ValueIsHandle = 0;
+		}
+	
+		VP->Len = min (255,_fstrlen(Value));
+		if (type == 102) //%DL
+			_fullpath (VP->Value,Value,255); 
+		else 
+		{   
+			if (VP->Len == 255)
+				Value[255] = 0;
+			_fstrcpy (VP->Value,Value);
+		}
+		VP->changetime = NextVarTime();
+		SetLinkedVarTime (VP);
+		if (VP->Type == 99)
+			ConvertCoordClose (); 
+	} 
+	GlobalUnlock (handle);  
+	if (!type)
+		return;
+	switch (type)
+	{
+		case 2:
+			if (!_fstrcspn (Value," 1TtYy"))
+				FileProjectionType = 1;
+			else
+				FileProjectionType = 0;
+			break;  
+		case 3:
+			CurState = atoi (Value); 
+			if (CurState > 0 && CurState < 74)
+				HaveStates[CurState]=TRUE;
+			break;
+		case 4:
+			if (!_fstrcspn (Value," 1TtYy"))
+				ShowScale = TRUE;
+			else
+				ShowScale = FALSE;
+			break;     
+		case 5:
+			if (!_fstrcspn (Value," 1TtYy"))
+				BVal = TRUE;
+			else
+				BVal = 2;  
+			if (CurVis->FileIsVisible[Index])
+				CurVis->FileIsVisible[Index]=BVal;
+			break;     
+		case 6:
+			if (!_fstrcspn (Value," 1TtYy"))
+				DoGraphics = TRUE;
+			else
+				DoGraphics = FALSE;
+			break;     
+		case 7: 
+			SetTrace(atoi(Value));
+			break;     
+		case 8:
+			if (!_fstrcspn (Value," 1TtYy"))
+				FillAreas = TRUE;
+			else
+				FillAreas = FALSE;
+			break; 
+		case 9:  
+			InternalRefno = atol (Value);
+			break; 
+		case 10:
+			MaxPick = atoi (Value);
+			MaxPick = min (MaxPick,MAXPICKITEMS);
+			MaxPick = max (1,MaxPick);
+			break;
+		case 11:
+			if (Index >=0 && Index < 8)
+				PenCOLOR[Index] = atol (Value);
+			break;
+		case 12:
+			if (Index >=0 && Index < 8)
+				PenWIDTH[Index] = atoi (Value);
+			break;   
+		case 13:
+			if (Index >=0 && Index < 10)
+				GlobalColors[Index]=atol (Value);
+			break;
+		case 14:
+			TextFreq = atol (Value);
+			break;
+		case 15:
+			CurFont = atol (Value);
+			break;
+			   
+		case 16: 
+			if (CurView)
+			{
+				if (CurView->hWnd)
+					SetWindowText (CurView->hWnd,Value); 
+				break;
+			}                      
+			if (hWndMain)
+				SetWindowText (hWndMain,Value); 
+			break;
+			   
+		case 19:
+			if (!_fstrcspn (Value," 1TtYy"))
+				DisplayMarkers = 1;
+			else
+				DisplayMarkers = 0;
+			break;   
+			
+		case 20:
+			if (!_fstrcspn (Value," 1TtYy"))
+				DisplaySymbol = 1;
+			else
+				DisplaySymbol = 0;
+			break;   
+			
+		case 35:  
+			MaxDisplayPoints = IDNINT (atof (Value));
+			break;
+			
+		case 37:
+			if (!_fstrcspn (Value," 1TtYy"))
+				SetRefno = 1;
+			else
+				SetRefno = 0;
+			break;   
+			
+		case 38:
+			if (Index <1 || Index >3) break;
+			if (!_fstrcspn (Value," 1TtYy"))
+				DisplayCoord[Index-1] = 1;
+			else
+				DisplayCoord[Index-1] = 0;
+			break;
+			   
+		case 39:
+			if (!_fstrcspn (Value," 1TtYy"))
+				ByState = 1;
+			else
+				ByState = 0;
+			break; 
+			
+		case 44:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				UseBinFileList = 1;
+			else
+				UseBinFileList = 0;
+			break;
+			 
+		case 45:
+			if (Index >=0 && Index < 8)
+				AreaCOLOR[Index] = atol (Value);  
+				
+		case 46:
+			PickLimit = atof (Value);
+			break;
+				
+		case 47:  
+			ProcessGCmdStrings = atoi (Value);
+			break;
+			 
+		case 48:
+			HighlightColor = atol (Value);
+			break;
+				
+		case 49:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				Display16BitColor = 1;
+			else
+				Display16BitColor = 0;
+			break;
+			 
+		case 50:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				FastOrthos = 1;
+			else
+				FastOrthos = 0;
+			break;
+			
+		case 51:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				ShowFileBounds = 1;
+			else
+				ShowFileBounds = 0;
+			break;
+			 
+		case 52:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				CursorIsLocked = 1;
+			else
+				CursorIsLocked = 0;
+			break;
+			 
+		case 53:
+			UserPickAP = atof (Value);  
+			if (UserPickAP == 0)
+				CurPickCursor = hPickNearCursor;
+			else if (UserPickAP > 0)
+				CurPickCursor = hPickAPCursor;   
+			else
+				CurPickCursor = hPickAPCursor;
+			break;
+				
+		case 54:
+			AddressTextSize = atof (Value);
+			break;
+				
+		case 55:
+			StreetTextSize = atof (Value);
+			break;
+
+		case 56:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				WantStreets = 1;
+			else
+				WantStreets = 0;
+			break; 
+			
+		case 57:  
+			OrthoAdjustX = atof (Value);
+			break;
+			
+		case 58:  
+			OrthoAdjustY = atof (Value);
+			break;
+			
+		case 59:
+			for (i = 6;i;i--)
+				if (!_fstricmp (Value,AreaUnitOpts[i-1]))
+				{
+					OutAreaUnits = i;
+					SetGlobalValueLong ("%AREAUNITS",OutAreaUnits);
+					break; 
+				} 
+			
+			break;
+		case 62: 
+			n = _fstrlen (Value);
+			if (n)
+			for (i = 5;i;i--)
+				if (!_fstrnicmp (Value,DistUnitOpts[i-1],n))
+				{
+					OutDistUnits = i;
+					SetGlobalValueLong ("%DISTANCEUNITS",OutDistUnits); 
+					break;           
+				}
+			break;
+		case 63:
+			MinSpeed = atof (Value);
+			break;
+
+		case 64:
+			MaxSpeed = atof (Value);
+			break;
+
+		case 65:
+			if (!_fstrcspn (Value," 0FfNn"))
+			{   
+				ProcessErrorString ();
+				ContinueProcessing = FALSE; 
+			}
+					    
+   			break;
+        
+		case 78:
+			
+			Index = min (Index,32);
+			n = sscanf (Value,"%Flf %Flf",&UserPoints[Index].x,&UserPoints[Index].y);  
+			break;
+			
+		case 79: /*%BOUNDS*/ 
+			switch (Index)
+			{
+				default:
+				case 1:
+				case 2:
+					sscanf (Value,"%Flf %Flf",&UserBounds[Index-1].x,&UserBounds[Index-1].y);
+				break;
+				case 0:
+					sscanf (Value,"%Flf %Flf %Flf %Flf",&UserBounds[0].x,&UserBounds[0].y,&UserBounds[1].x,&UserBounds[1].y);
+				break;
+			}
+		break;
+		case 80: /*%VPBOUNDS*/ 
+			switch (Index)
+			{   
+				default:
+				case 0:
+					sscanf (Value,"%Flf %Flf %Flf %Flf",&CurView->WBounds.xmn, 
+												  		&CurView->WBounds.ymn,
+												  		&CurView->WBounds.xmx,
+												  		&CurView->WBounds.ymx);  
+				break;
+				case 1:
+					sscanf (Value,"%Flf %Flf",&CurView->WBounds.xmn,&CurView->WBounds.ymn);
+				break;
+				case 2:
+					sscanf (Value,"%Flf %Flf",&CurView->WBounds.xmx,&CurView->WBounds.ymx);
+				break; 
+			}
+		CurView->HaveBounds=TRUE;
+		CurView->NewBounds = CurView->WBounds;
+		break;
+		
+		case 81:  
+			if (!_fstrcspn (Value," 1TtYy"))
+				RedisplayOnly = 1;
+			else
+				RedisplayOnly = 0;
+			break;
+			
+		case 84:
+			BaseUnitsPerOrthoPixel=atof (Value);
+			if (!BaseUnitsPerOrthoPixel)
+				BaseUnitsPerOrthoPixel=1;
+			break;
+			
+		case 85:
+			StretchMode = atoi (Value);
+			if (StretchMode < 1 || StretchMode > 3)
+				StretchMode = STRETCH_DELETESCANS;
+			break;
+			
+		case 86:
+			if (!_fstrcspn (Value," 1TtYy"))
+				DoTime = 1;
+			else
+				DoTime = 0;
+			break;   
+			
+		case 89:
+			if (!_fstrcspn (Value," 0FfNn"))
+				TrackVideo = FALSE;
+			else
+				TrackVideo = TRUE;
+			break;
+        
+        case 90:
+        	Index = max (0,min(Index,15));
+        	_fstrcpy (FontNames[Index],Value); 
+        	if (hSizingFont[Index])
+        	{
+        		DeleteObject (hSizingFont[Index]);
+        		hSizingFont[Index]=0; 
+        	}
+        	break;
+        	
+		case 91:  
+			LayerID = atol (Value);
+			break;
+			
+		case 92:
+			ConvertMapVP = -1;
+			for (i=0;i<CurView->NumFiles;i++)
+			{  
+				if (!Expandicmp (Value,CurView->lpFiles[i]))
+				{
+					ConvertMapFileNo = i;
+					ConvertMapVP = CurView->ID;
+					break;
+				}
+			} 
+			break;
+			
+		case 93:
+			MaxPointSize = atof (Value);
+			break;
+
+		case 94:
+			if (!_fstrcspn (Value," 1TtYy"))
+				DisplayHLTPattern = TRUE;
+			else
+				DisplayHLTPattern = FALSE;
+			break;
+        
+		case 95:
+			if (!_fstrcspn (Value," 1TtYy"))
+				DisplayLinkedCursors = TRUE;
+			else
+				DisplayLinkedCursors = FALSE;
+			break;
+		case 96:
+			TrackColor=atol (Value);
+			break;
+        
+        case 97:
+        	_fstrcpy (ImageExtension,Value);
+        	break;
+        	
+		case 98:
+			if (!_fstrcspn (Value," 1TtYy"))
+				PickAllPieces = TRUE;
+			else
+				PickAllPieces = FALSE;
+			break;
+
+		case 100:
+			InclusionOpt=atol (Value);
+			break;
+        
+		case 101:
+			TrackWidth=atol (Value);
+			break;
+
+		case 102:
+			HighlightWidth = atol (Value);
+			break;
+		
+		case 103:
+			AutoClearOffset = atob (Value);
+			break;
+		
+		case 104:
+			MaskOffsetLine = atob (Value);
+			break;
+		
+		case 105:  
+			GraphicsTextFactor = atof (Value);
+			break;
+		
+		case 110:
+			UseItemLen = atob (Value);	
+			break;
+			
+		case 111:
+			WantFunNames = atob (Value);	
+			break;
+			
+		case 112:
+			ProcessAllElements = atob (Value);	
+			break;
+		
+		case 114:
+			ShowInvisiblePointsSymbol = atoi (Value);
+			break;	
+
+		case 115:
+			MaxTextLayer = atoi (Value);
+			break;	
+
+		case 116:
+			CurrentAZ = LTWOPI(atof (Value));
+			CreateDigCursor (CurView->hDC);
+			break;	
+        
+        case 118:
+			if (Index >=1 && Index < 5)
+        		TraceType[Index-1]=atob(Value);  
+        		
+        case 119:
+        	WindowColor = atol (Value);
+        	break;
+            
+        case 122:
+        	ShowLinkLines = atob (Value);	
+        	break;
+        case 123:
+        	if ((UseRefOrTAGIndex = atob (Value)))
+	        	IgnorePrevLayers = FALSE;
+	        else 	
+	        	IgnorePrevLayers = TRUE;
+        	break;
+        
+        case 124:
+        	if (CurTheme)
+        	{   
+        		Color = atol (Value);
+        		if (!Index)
+        		{
+        			ib=0;
+        			ie=MAX_THEME_CLASSES;
+        		}
+        		else if (Index > 0 && Index <= MAX_THEME_CLASSES)
+        		{
+        			ib = Index-1;
+        			ie = Index;
+        		}
+        		else
+        			break;
+        		for (i=ib;i<ie;i++)
+        			CurTheme->ClassColor[i] = Color;
+        	}
+        	break;
+        
+        case 125:
+        {		
+			LPCMDSTRING    pCmdStr;   
+	
+			if (CurView)
+			{   
+				if (CurView->FunStackHandle)
+				{
+					pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);
+					pCmdStr->Prompt = PRMT_USERPROMPT;
+					_fstrcpy (pCmdStr->PromptText,Value);
+					GlobalUnlock (CurView->FunStackHandle);
+					SetPrompt (PRMT_USERPROMPT,FALSE);
+				} 
+			}
+		}
+		break;
+		
+        case 126:
+        	PickPerim = atoi (Value);	
+        	break;
+        
+        case 127:
+        	CurveChordDist = atof (Value);
+        	break;	  
+        	
+		case 128:
+			AutoPan = atob (Value);
+			break;
+		
+		case 129:
+			GetSegFromGlobals = atob (Value);
+			break;
+		case 130:
+			if(atob (Value))
+				InvertNetDir=-1;
+			else
+				InvertNetDir=1;
+			break;
+		
+		case 131:  
+			GraphicsPointFactor = atof (Value);
+			break;
+		
+		case 132:
+			MaskOffsetLine = atob (Value);
+			break;
+		
+		case 133:
+			OutlineZoomArea = atob (Value);
+			break;
+		
+		case 134:
+			BleedThrough = atob (Value);
+			break;
+		
+		case 135:
+			OffsetLineOffset = atof (Value);
+			break;
+		
+		case 136:
+			LocationOffset = atof (Value);
+			break;
+		
+		case 138:
+			TimeRangeBeg = atol (Value); 
+			break;
+		
+		case 139:
+			TimeRangeEnd = atol (Value); 
+            break;
+        
+        case 140:
+        	if (*Value == 'T' || *Value == 't')
+        		FileProjectionType = 2;
+        	else
+        		FileProjectionType = 0;
+        	break;
+        	
+        case 142:
+        	if (*Value == 'T' || *Value == 't')
+        		OpenDisplayedRefs();
+        	else
+        		CloseDisplayedRefs();
+        	break;
+        	
+        case 143:
+       		AlwaysUseSymDict = atob (Value);
+        	break;
+        case 144:
+        	LoadCompiledTran = atob (Value);
+        	break;
+        	
+		case 148:  
+			LineSymbolFactor = atof (Value);
+			break;
+
+        case 151:
+       		GetCopySize = atob (Value);
+        	break;
+		
+        case 152:
+       		DisplayFiles = atob (Value);
+        	break;   
+        case 153:
+        	DisplayAllRefs = atob(Value);
+        	break;
+		case 154:  
+			InvisPointFactor = atof (Value);
+			break;
+		case 155:  
+			ShowValSize = atof (Value);
+			break;
+		case 156: 
+			if (_fstrchr(Value,':')) 
+				_fstrcpy (NewTAG,Value);
+			break;
+        case 157:
+        	WantOrthoResDisplay = atoi (Value);
+        	break;
+        case 158:
+        	ComputeArea = atob (Value);
+        	break;
+        case 159:
+        	ShowBadSyms = atob (Value);
+        	break;
+        case 160:
+        	PickDeletes = atob (Value);
+        	break;
+        case 162:
+        	StandardSQL = atob (Value);
+        	break;
+        case 163:
+        	MinCacheDriveFreeSpace = atol (Value) * 1024 * 1024;
+        	break;
+        case 165:
+        	ShortestRoute = atob (Value);
+        	break;
+		case 166:
+			SnapPolygons = atob (Value);
+			break;
+        case 168:
+       		AutoType = atob (Value);
+        	break;
+		case 169:
+			ShowRefno = atob (Value);
+			break;
+		default:
+			break;
+	}
+/*	if (TraceOn)
+	{
+		char	str[300];
+		extern	HWND hWndMain;
+		sprintf(str,"%s set to %s",Name,Value);
+		//GSSiTrace (str);
+		SetWindowText(hWndMain,str);
+	} */
+	return;
+}   
+short GetGlobalVal (HANDLE hGlobal,LPSTR OutStr,long Index)
+{   VARPNT	VarPnt, VarPnt2;
+	int	l; 
+	time_t	systime;     
+	DPOINT	DPoint;
+	
+	if (!hGlobal)
+	{
+		*OutStr = 0;
+		return 0;
+	}
+	VarPnt = (VARPNT)GlobalLock (hGlobal);  
+	*OutStr=0;
+	switch (VarPnt->Type)
+	{   
+		default:
+		case 99:
+		case 92:
+		case 0: 
+			if (VarPnt->ContainsGorF) 
+			{
+				HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+				LPSTR	pMem = GlobalLock (hMem);  
+				
+				_fstrcpy(pMem,VarPnt->Value); 
+				ExpandText (pMem);
+				l = _fstrlen (pMem);
+				_fstrcpy(OutStr,pMem);
+				GSSiGlobUlFree (&hMem);
+			}
+			else
+			{
+				_fstrcpy(OutStr,VarPnt->Value);
+				l = VarPnt->Len; 
+			}             
+			GlobalUnlock (hGlobal);
+			return l;
+		case 1:  
+			time (&systime);
+			ltoa ((long)systime,OutStr,10);
+           	break;
+		case 2:  
+			if (FileProjectionType == 1)
+				_fstrcpy (OutStr,"T");
+			else
+				_fstrcpy (OutStr,"F");
+           	break;
+		case 3:
+			sprintf (OutStr,"%2.2i",CurState);
+           	break;
+		case 4:  
+			if (ShowScale)
+				_fstrcpy (OutStr,"T");
+			else
+				_fstrcpy (OutStr,"F");
+           	break;
+		case 9:
+           	ltoa (InternalRefno,OutStr,10);
+           	break;
+		case 10:
+           	itoa (MaxPick,OutStr,10);
+           	break;
+		case 15:
+           	itoa (CurFont,OutStr,10);
+           	break;
+		case 17:
+           	ltoa (PrintReportID,OutStr,10);
+           	break;
+		case 18:
+           	ltoa (PrintReportPage,OutStr,10);
+           	break;
+		case 21:
+           	itoa (tmtime.tm_year+1900,OutStr,10);
+           	break;
+		case 22:
+           	itoa (tmtime.tm_year,OutStr,10);
+           	break;
+		case 23:
+           	itoa (tmtime.tm_mon+1,OutStr,10);
+           	break;
+		case 24:
+           	itoa (tmtime.tm_yday+1,OutStr,10);
+           	break;
+		case 25:
+           	itoa (tmtime.tm_mday,OutStr,10);
+           	break;
+		case 26:
+           	itoa (tmtime.tm_wday+1,OutStr,10);
+           	break;
+		case 27:
+           	itoa (tmtime.tm_hour,OutStr,10);
+           	break;
+		case 28:
+           	itoa (tmtime.tm_min,OutStr,10);
+			GlobalUnlock (hGlobal);
+			return (_fstrlen(OutStr)); 
+		case 29:
+           	itoa (tmtime.tm_sec,OutStr,10);
+           	break;
+		case 30:
+		{
+			char CMonth[12][10]={"January","February","March","April","May","June","July","August","September","October","November","December"};  
+			if (tmtime.tm_mon < 0 || tmtime.tm_mon > 11)  
+				*OutStr=0; 
+			else
+				_fstrcpy (OutStr,CMonth[tmtime.tm_mon]);
+           	break;
+		}	
+		case 31:
+		{
+			char CDay[7][10]={"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};  
+			if (tmtime.tm_wday < 0 || tmtime.tm_wday > 6)  
+				*OutStr=0; 
+			else
+				_fstrcpy (OutStr,CDay[tmtime.tm_wday]);
+           	break;
+		}	
+		case 32: 
+		{
+			short	year;
+			   
+			if (tmtime.tm_year < 100)
+				year = tmtime.tm_year;
+			else
+				year = tmtime.tm_year-100;
+           	sprintf (OutStr,"%i/%i/%2.2i",tmtime.tm_mon+1,tmtime.tm_mday,year);
+        }
+           	break;
+		case 33: 
+		{
+			char	AMPM[4];
+			
+			if (tmtime.tm_hour < 12)
+				_fstrcpy (AMPM,"AM");
+			else
+				_fstrcpy (AMPM,"PM");
+           	sprintf (OutStr,"%i:%i%s",(tmtime.tm_hour+11)%12+1,tmtime.tm_min,AMPM);
+		}
+           	break;
+		case 34: 
+           	sprintf (OutStr,"%2.2i:%i",tmtime.tm_hour,tmtime.tm_min);  
+           	break;
+		case 36: 
+           	ltoa ((long)MostPoints,OutStr,10);
+           	break; 
+           	
+		case 37:
+			if (SetRefno)
+				*OutStr++ = '1';
+			else
+				*OutStr++ = '0';
+			*OutStr--=0;
+			break;   
+			
+		case 40: 
+		case 41:
+		case 42:
+		case 43:
+		{
+			LPDOUBLE	pRVal;  
+			short	i;
+			
+			i=VarPnt->Type-40;
+			pRVal = &CurView->WBounds.xmn;
+			pRVal+=i;
+			sprintf (OutStr,"%.14lg",*pRVal);
+		}
+		break;  
+		case 47:  
+           	itoa (ProcessGCmdStrings,OutStr,10);
+           	break;
+		case 50:
+			if (FastOrthos)
+				*OutStr++ = '1';
+			else
+				*OutStr++ = '0';
+			*OutStr--=0;
+			break;   
+			
+		case 53:
+			sprintf (OutStr,"%.14lg",UserPickAP);
+		break;  
+		case 54:
+			sprintf (OutStr,"%.14lg",AddressTextSize);
+		break;  
+		case 55:
+			sprintf (OutStr,"%.14lg",StreetTextSize);
+		break;  
+		case 60:
+			sprintf (OutStr,"%.14lg",CurrentPoint.x);
+		break;  
+		case 61:
+			sprintf (OutStr,"%.14lg",CurrentPoint.y);
+		break;  
+		case 59:
+			_fstrcpy (OutStr,AreaUnitOpts[OutAreaUnits-1]);
+		break;
+		case 62:
+			_fstrcpy (OutStr,DistUnitOpts[OutDistUnits-1]);
+		break;
+		case 63:
+			sprintf (OutStr,"%.14lg",MinSpeed);
+		break;  
+		case 64:
+			sprintf (OutStr,"%.14lg",MaxSpeed);
+		break; 
+		case 65:  
+			if (ContinueProcessing)
+				*OutStr++ = '1';
+			else
+				*OutStr++ = '0';
+			*OutStr--=0;
+		break;
+		case 78: /*%POINTS*/ 
+			Index = min (Index,32);
+			sprintf (OutStr,"%.14lg %.14lg",UserPoints[Index].x,UserPoints[Index].y);
+		break;
+		case 79: /*%BOUNDS*/ 
+			switch (Index)
+			{
+				default:
+				case 1:
+				case 2:
+					sprintf (OutStr,"%.14lg %.14lg",UserBounds[Index-1].x,UserBounds[Index-1].y);
+				break;
+				case 0:
+					sprintf (OutStr,"%.14lg %.14lg %.14lg %.14lg",UserBounds[0].x,UserBounds[0].y,UserBounds[1].x,UserBounds[1].y);
+				break;
+			}
+		break;
+		case 80: /*%VPBOUNDS*/ 
+			switch (Index)
+			{   
+				default:
+				case 0:
+					sprintf (OutStr,"%.14lg %.14lg %.14lg %.14lg",CurView->WBounds.xmn, 
+												  CurView->WBounds.ymn,
+												  CurView->WBounds.xmx,
+												  CurView->WBounds.ymx);  
+				break;
+				case 1:
+					sprintf (OutStr,"%.14lg %.14lg",CurView->WBounds.xmn,CurView->WBounds.ymn);
+				break;
+				case 2:
+					sprintf (OutStr,"%.14lg %.14lg",CurView->WBounds.xmx,CurView->WBounds.ymx);
+				break; 
+			} 
+		
+		break;
+		
+		case 82:    // ESC
+			*OutStr++=0x1B;  
+			*OutStr--=0;
+		break;
+		case 83:   // CR
+			*OutStr++=0x0D;  
+			*OutStr--=0;
+		break; 
+		
+		case 87:
+           	ltoa (MinFileTime,OutStr,10);
+           	break;
+
+		case 88:
+           	ltoa (MaxFileTime,OutStr,10);
+           	break; 
+           	
+        case 90:
+        	Index = max (0,min(Index,15));
+        	_fstrcpy (OutStr,FontNames[Index]);
+        	break; 
+        	
+        case 91:
+           	itoa (LayerID,OutStr,10);
+		    break;  
+		    
+		case 93:
+			sprintf (OutStr,"%.14lg",MaxPointSize); 
+		break;
+		  
+		case 94:  
+			if (DisplayHLTPattern)
+				_fstrcpy (OutStr,"T");
+			else
+				_fstrcpy (OutStr,"F");
+           	break; 
+        
+        case 97:
+        	_fstrcpy (OutStr,ImageExtension);
+        	break; 
+
+		case 98:  
+			if (PickAllPieces)
+				_fstrcpy (OutStr,"T");
+			else
+				_fstrcpy (OutStr,"F");
+           	break; 
+        
+		case 100:
+           	ltoa (InclusionOpt,OutStr,10);
+           	break;
+           	 
+		case 101:
+           	ltoa ((long)TrackWidth,OutStr,10);
+           	break; 
+
+		case 102:
+           	ltoa ((long)HighlightWidth,OutStr,10);
+           	break; 
+           	
+		case 103:
+           	ltoa ((long)AutoClearOffset,OutStr,10);
+           	break;  
+		case 104:
+           	ltoa ((long)MaskOffsetLine,OutStr,10);
+           	break; 
+		case 105:
+			sprintf (OutStr,"%.14lg",GraphicsTextFactor);
+			break;  
+		case 106:
+				    ConvertCoordClose ();
+					ConvertCoordInit();
+			DPoint = CurrentPoint;
+			ConvertCoord (&DPoint,1,3);
+			sprintf (OutStr,"%.14lg",DPoint.x);  
+			break;
+		case 107:
+				    ConvertCoordClose ();
+					ConvertCoordInit();
+			DPoint = CurrentPoint;
+			ConvertCoord (&DPoint,1,3);
+			sprintf (OutStr,"%.14lg",DPoint.y);
+			break;  
+		case 108:
+				    ConvertCoordClose ();
+					ConvertCoordInit();
+			DPoint = CurrentPoint;
+			ConvertCoord (&DPoint,1,3);
+			sprintf (OutStr,"%.14lg %.14lg",DPoint.x,DPoint.y);
+			break;  
+		case 109:
+			DPoint = CurrentPoint;
+			sprintf (OutStr,"%.14lg %.14lg",DPoint.x,DPoint.y);
+			break;
+			
+		case 113:
+			VarPnt2 = (VARPNT)GlobalLock (hPrefix);
+			_fstrcpy (OutStr,VarPnt2->Value);
+			_fstrcat (OutStr,":");
+			GlobalUnlock (hPrefix);
+			VarPnt2 = (VARPNT)GlobalLock (hUDI);
+			_fstrcat (OutStr,VarPnt2->Value);
+			GlobalUnlock (hUDI);
+        	break;
+		case 116:
+			sprintf (OutStr,"%.14lg",CurrentAZ);
+			break;  
+		case 117:
+			sprintf (OutStr,"%.14lg",(double)PY);
+			break;  
+        case 120:
+        	if (!hMacArgs)
+        		break;
+			if (Index >=1 && Index <= 10)
+			{   
+				LPSTR	pArg;
+				
+				pArg = GlobalLock (hMacArgs);
+				pArg += (Index-1) * 4096;
+        		_fstrcpy (OutStr,pArg);
+        		GlobalUnlock (hMacArgs);
+        	}
+        	break;  
+		case 121:
+           	ultoa (LastRecTime,OutStr,10);
+           	break; 
+
+        case 125:
+        {		
+			LPCMDSTRING    pCmdStr;   
+	
+			if (CurView)
+			{   
+				if (CurView->FunStackHandle)
+				{
+					pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);
+					if (pCmdStr->Prompt == PRMT_USERPROMPT)
+						_fstrcpy (OutStr,pCmdStr->PromptText);
+					GlobalUnlock (CurView->FunStackHandle);
+				}
+			}
+		}
+		break;   
+		
+		case 127:
+			sprintf (OutStr,"%.14lg",CurveChordDist);
+		break; 
+		
+		case 128:  
+			if (AutoPan)
+				_fstrcpy (OutStr,"T");
+			else
+				_fstrcpy (OutStr,"F");
+           	break; 
+        
+		case 131:
+			sprintf (OutStr,"%.14lg",GraphicsPointFactor);
+			break;  
+
+		case 132:
+			if (MaskOffsetLine)
+				*OutStr++ = '1';
+			else
+				*OutStr++ = '0';
+			*OutStr--=0;
+			break;   
+			
+		case 133:
+			if (OutlineZoomArea)
+				*OutStr++ = '1';
+			else
+				*OutStr++ = '0';
+			*OutStr--=0;
+			break;   
+			
+		case 134:
+			if (BleedThrough)
+				*OutStr++ = '1';
+			else
+				*OutStr++ = '0';
+			*OutStr--=0;
+			break;   
+			
+		case 135:
+			sprintf (OutStr,"%.14lg",OffsetLineOffset);
+		break; 
+		
+		case 136:
+			sprintf (OutStr,"%.14lg",LocationOffset);
+		break; 
+		
+		case 137:
+			GetWindowsDirectory (OutStr,144);  
+		break; 
+			
+		case 138:
+			ltoa (TimeRangeBeg,OutStr,10);
+		break;
+			
+		case 139:
+			ltoa (TimeRangeEnd,OutStr,10);
+		break;
+			
+		case 141:
+			itoa (FileNum+1,OutStr,10);
+		break;
+		
+		case 145:
+			sprintf (OutStr,"%.14lg %.14lg %.14lg %.14lg",TAGBox.BlowUpBounds.xmn, 
+														  TAGBox.BlowUpBounds.ymn,
+														  TAGBox.BlowUpBounds.xmx,
+														  TAGBox.BlowUpBounds.ymx);  
+		    break;
+		    
+		case 146:
+			sprintf (OutStr,"%i %i %i %i",TAGBox.rect.left, 
+										  TAGBox.rect.bottom,
+										  TAGBox.rect.right,
+										  TAGBox.rect.top);  
+			break;	
+		case 147:
+			ltoa (TrackingStatus,OutStr,10);
+		break;  
+		
+		case 148:
+			sprintf (OutStr,"%.14lg",LineSymbolFactor);
+			break;    
+			
+		case 149:
+			itoa (TextType,OutStr,10);
+		break;  
+
+		case 150:
+           	ltoa ((long)TotCopySize,OutStr,10);
+           	break;  
+           	
+		case 155:
+			sprintf (OutStr,"%.14lg",ShowValSize);
+			break; 
+			   
+		case 161:
+           	ltoa (ODBCRecNum,OutStr,10);
+           	break; 
+           	
+        case 164:
+           	itoa (PolyInfoTheme,OutStr,10);
+           	break;
+		case 165:
+			itoa (ShortestRoute,OutStr,10);
+		break;  
+		case 167:
+			sprintf (OutStr,"%.14lg %.14lg",TXLoc.x,TXLoc.y);
+		break;  
+   	 
+			
+	}
+	GlobalUnlock (hGlobal);
+	return (_fstrlen(OutStr)); 
+}
+
+short Expandicmp (LPSTR String1, LPSTR String2)
+{
+	HANDLE	h1=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	HANDLE	h2=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	LPSTR	pString1=GlobalLock (h1);
+	LPSTR	pString2=GlobalLock (h2); 
+	short	rtn;
+	
+	_fstrcpy (pString1,String1);
+	ExpandText (pString1); 
+	_fstrcpy (pString2,String2);
+	ExpandText (pString2); 
+	rtn = _fstricmp (pString1,pString2);
+	GlobalUnlock (h1);
+	GlobalFree (h1);
+	GlobalUnlock (h2);
+	GlobalFree (h2);
+	return rtn;
+}
+
+void SetGlobalValueReal (LPSTR Name, double val)
+{   char	txt[32];  
+
+	sprintf (txt,"%.14lg",val);
+	SetGlobalValue (Name,txt);
+	return;
+} 
+
+void SetGlobalValueDPoint (LPSTR Name, DPOINT Point)
+{   char	txt[64];  
+
+	sprintf (txt,"%.14lg %.14lg",Point.x,Point.y);
+	SetGlobalValue (Name,txt);
+	return;
+} 
+
+void SetGlobalValueLong (LPSTR Name, long val)
+{   char	txt[16]; 
+
+	ltoa (val,txt,10);
+	SetGlobalValue (Name,txt);
+	return;
+}
+
+void SetGlobalValueBool (LPSTR Name, BOOL val)
+{   char	txt[32]; 
+    
+    if (val)
+		SetGlobalValue (Name,"T");  
+	else
+		SetGlobalValue (Name,"F");  
+	return;
+}
+
+void SetGlobalValueRect (LPSTR Name, RECT Rect)
+{   char	txt[32]; 
+
+	recttoa (txt,Rect);
+	SetGlobalValue (Name,txt);
+	return;
+}
+
+void SetGlobalValueLen (LPSTR Name, LPSTR Value, short len)
+{   
+	VARPNT	VP;
+	LPSTR	EndChar;
+	HANDLE	handle;
+	
+	handle = AllocateVar (Name);  
+	VP = (VARPNT)GlobalLock (handle);
+	if (VP->ValueIsHandle)
+	{
+		HANDLE handle = atol (VP->Value);
+		GSSiGlobFree (&handle); 
+		VP->ValueIsHandle = 0;
+	}
+	_fstrncpy (VP->Value,Value,len);
+	EndChar = VP->Value + len;
+	*EndChar = 0;
+	VP->Len = _fstrlen (VP->Value);
+	VP->changetime = NextVarTime();
+	SetLinkedVarTime (VP); 
+	GlobalUnlock (handle);
+	return;
+}     
+
+BOOL SetGlobalFromCheckBox (HWND hWndDlg,UINT Control,LPSTR VarName)
+{   
+	BOOL	rtn;
+	
+	rtn = SendDlgItemMessage (hWndDlg,Control,BM_GETCHECK,0,0);
+	SetGlobalValueBool (VarName,rtn);
+	return rtn;
+} 
+
+short ProcessDelimTextHeader(LPSTR INstr,LPHANDLE phDLT)
+{
+	LPSTR	BeginLoc, EndLoc, EqLoc, DashLoc; 
+	char	EndChar; 
+	BOOL	Done=FALSE;
+	LPSHORT	nDLTvar;
+	LPHANDLE	DLTVar; 
+	LPSHORT	DLTStart,DLTLen; 
+	short	lHead=_fstrlen (INstr); 
+	HANDLE	hHead = GSSiGlobAlloc (GMEM_MOVEABLE,lHead+1);
+	LPSTR	str = GlobalLock (hHead);
+	                                 
+	_fstrcpy (str,INstr);
+	nDLTvar = 0; 
+	*phDLT = GSSiGlobAlloc (GHND,2 + MAXDLTVAR * (2*sizeof(short)+sizeof(HANDLE)));
+	nDLTvar = (LPSHORT)GlobalLock (*phDLT);
+	DLTVar = (LPHANDLE)(nDLTvar + 1);
+	DLTStart = (LPSHORT)(DLTVar + MAXDLTVAR);
+	DLTLen = (LPSHORT)(DLTStart + MAXDLTVAR);
+	
+Next:if (*str == '"')
+	{
+		str++;
+		EndChar = '"';
+	}
+	else
+		EndChar = ',';
+	BeginLoc = str;
+	EndLoc = _fstrchr(str,EndChar); 
+	if (!EndLoc)
+	{
+		Done=TRUE;
+		EndLoc = _fstrchr (str,0); 
+	}
+	*EndLoc = '\0';
+	EqLoc = _fstrchr(str,'=');
+	if (EqLoc)
+	{
+		*EqLoc = '\0';
+		EqLoc++; 
+		DashLoc = _fstrchr(EqLoc,'-');
+		if (!DashLoc)
+			goto Exit;
+		*DashLoc = '\0';
+		DashLoc++;
+		DLTStart[*nDLTvar] = atoi (EqLoc)-1;
+		DLTLen[*nDLTvar] = atoi (DashLoc)-DLTStart[*nDLTvar];
+		if (DLTStart[*nDLTvar]<0 || DLTLen[*nDLTvar]<0) 
+			goto Exit;
+	}
+	else
+		DLTStart[*nDLTvar]=-1;	
+	DLTVar[(*nDLTvar)++] = AllocateVar(BeginLoc);  
+	if (Done)
+	{   
+		short	n=*nDLTvar;
+		
+		GlobalUnlock (*phDLT); 
+		GSSiGlobUlFree (&hHead);
+		return(n);
+	}
+	str = ++EndLoc;
+	if (!*str)
+	{   
+		short	n=*nDLTvar;
+		
+		GlobalUnlock (*phDLT);
+		GSSiGlobUlFree (&hHead);
+		return(n);
+	}
+	if (*str == ',') 
+		str++;
+	goto Next; 
+Exit:
+	GSSiGlobUlFree (phDLT);
+	GSSiGlobUlFree (&hHead);
+	return 0;	
+}  
+
+void CreateInternalGlobals (void)
+{
+	AllocateTypeVar("%SYS_CLOCK",1);
+	AllocateTypeVar("%LOCAL_CORRECTION",2); 
+	AllocateTypeVar("STATE",3);
+	AllocateTypeVar("%SHOW_SCALE",4);
+	AllocateTypeVar("%DISPLAY_AREAS",5);
+	AllocateTypeVar("%DISPLAY_GRAPHICS",6);
+	AllocateTypeVar("%TRACE",7);
+	AllocateTypeVar("%FILL_AREAS",8);
+	hIntRefno=AllocateTypeVar("%INT_REFNO",9);
+	hPrefix=AllocateVar("%PREFIX");
+	hUDI=AllocateVar("%UDI");
+	hTEXT=AllocateVar("%TEXT");
+	AllocateTypeVar("%MAXPICK",10);
+	AllocateTypeVar("%PEN_COLOR",11);
+	AllocateTypeVar("%PEN_WIDTH",12);
+	AllocateTypeVar("%SYM_COLOR",13);
+	AllocateTypeVar("%TEXT_FREQ",14);
+	AllocateTypeVar("%FONT",15);
+	AllocateTypeVar("%WT",16);
+	AllocateTypeVar("%ID",17);
+	AllocateTypeVar("%PAGE",18); 
+	AllocateTypeVar("%MARKERS",19);
+	AllocateTypeVar("%DISPLAY_SYMBOLS",20);   
+	AllocateTypeVar("%YEAR",21);
+	AllocateTypeVar("%YEAR1900",22);
+	AllocateTypeVar("%MONTH",23);  
+	AllocateTypeVar("%YDAY",24); 
+	AllocateTypeVar("%MDAY",25);
+	AllocateTypeVar("%WDAY",26);
+	AllocateTypeVar("%HOUR",27);
+	AllocateTypeVar("%MIN",28);
+	AllocateTypeVar("%SEC",29);
+	AllocateTypeVar("%CMONTH",30);
+	AllocateTypeVar("%CDAY",31);
+	AllocateTypeVar("%DATE",32);
+	AllocateTypeVar("%TIME",33);
+	AllocateTypeVar("%MTIME",34);			
+	AllocateTypeVar("%MAX_POINTS",35);			
+	AllocateTypeVar("%MOST_POINTS",36);			
+	AllocateTypeVar("%SET_REFNO",37);			
+	AllocateTypeVar("%DISPLAY_COORD",38);			
+	AllocateTypeVar("%BYSTATE",39);			
+	AllocateTypeVar("%XMN",40);			
+	AllocateTypeVar("%YMN",41);			
+	AllocateTypeVar("%XMX",42);			
+	AllocateTypeVar("%YMX",43);			
+    AllocateTypeVar("%USEBINFILELIST",44);
+	AllocateTypeVar("%AREA_COLOR",45);
+	AllocateTypeVar("%PICK_LIMIT",46);
+	AllocateTypeVar("%PROCESS_GCMD_STRINGS",47);
+	AllocateTypeVar("%HIGHLIGHT_COLOR",48);
+	AllocateTypeVar("%D16",49);
+	AllocateTypeVar("%FAST_ORTHOS",50);
+	AllocateTypeVar("%SHOW_FILE_BOUNDS",51);
+	AllocateTypeVar("%CURSOR_LOCKED",52);
+	AllocateTypeVar("%PICKAP",53);
+	AllocateTypeVar("%ADDRESS_TEXT_SIZE",54);
+	AllocateTypeVar("%STREET_TEXT_SIZE",55); 
+	AllocateTypeVar("%WANTSTREETS",56);  
+	AllocateTypeVar("%OAX",57);
+	AllocateTypeVar("%OAY",58);     
+	AllocateTypeVar("%AREA_UNITS",59);
+	AllocateTypeVar("%WX",60);
+	AllocateTypeVar("%WY",61);
+	AllocateTypeVar("%DIST_UNITS",62);
+	AllocateTypeVar("%MIN_SPEED",63);
+	AllocateTypeVar("%MAX_SPEED",64);
+	AllocateTypeVar("%C",65);
+	AllocateTypeVar("%POINTS",78); 
+	AllocateTypeVar("%BOUNDS",79); 
+	AllocateTypeVar("%VPBOUNDS",80); 
+	AllocateTypeVar("%REDISPLAY_ONLY",81); 
+	AllocateTypeVar("%ESC",82); 
+	AllocateTypeVar("%CR",83);  
+	AllocateTypeVar("%BASEUNITSPERORTHOPIXEL",84);
+	AllocateTypeVar("%BITMAPSTRETCHMODE",85);
+	AllocateTypeVar("%DOTIME",86);	
+	AllocateTypeVar("%MINFILETIME",87);	
+	AllocateTypeVar("%MAXFILETIME",88);	
+	AllocateTypeVar("%TRACKVIDEO",89);	
+	AllocateTypeVar("%FONTNAME",90);
+	AllocateTypeVar("%LAYERID",91);	
+	AllocateTypeVar("%MAPTOTRAN",92);	
+	AllocateTypeVar("%MAXPOINTSIZE",93);	
+	AllocateTypeVar("%DISPLAYHLTPATTERN",94);	
+	AllocateTypeVar("%LINKCURSORS",95);	
+	AllocateTypeVar("%TRACK_COLOR",96);
+	AllocateTypeVar("%IMAGE_EXTENSION",97);
+	AllocateTypeVar("%PICKALLPIECES",98);
+	AllocateTypeVar("%ALT_PROJECTION",99);
+	AllocateTypeVar("%INCLUSIONOPT",100);
+	AllocateTypeVar("%TRACK_WIDTH",101);
+	AllocateTypeVar("%HIGHLIGHT_WIDTH",102);  
+	AllocateTypeVar("%AutoClearOffset",103);  
+	AllocateTypeVar("%MaskOffsetLine",104);  
+	AllocateTypeVar("%TextFactor",105);  
+	AllocateTypeVar("%OUTX",106);  
+	AllocateTypeVar("%OUTY",107);  
+	AllocateTypeVar("%OUTPT",108);  
+	AllocateTypeVar("%CURPT",109);  
+	AllocateTypeVar("%USEITEMLENGTH",110);  
+	AllocateTypeVar("%WANTFUNNAMES",111);  
+	AllocateTypeVar("%PROCESSALLELEMENTS",112);  
+	AllocateTypeVar("%TAG",113);  
+	AllocateTypeVar("%INVISPOINTSYM",114);  
+	AllocateTypeVar("MAX_TEXT_LAYER",115);  
+	AllocateTypeVar("%AZ",116);  
+	AllocateTypeVar("%PI",117);  
+	AllocateTypeVar("%TRACETYPE",118);  
+	AllocateTypeVar("%WINDOWCOLOR",119);
+	AllocateTypeVar("%ARG",120);
+	AllocateTypeVar("%LASTRECTIME",121);
+	AllocateTypeVar("%SHOWLINKLINES",122);
+	AllocateTypeVar("%SHOWONLYFIRSTREF",123);
+	AllocateTypeVar("%CLASSCOLOR",124);
+	AllocateTypeVar("%P",125);
+	AllocateTypeVar("%PICKPERIM",126);
+	AllocateTypeVar("%CURVECHORDDIST",127);
+	AllocateTypeVar("%AUTOPAN",128);
+	AllocateTypeVar("%GETSEGDATAFROMGLOBALS",129);
+	AllocateTypeVar("%INVERTNETDIR",130);
+	AllocateTypeVar("%PointFactor",131);  
+	AllocateTypeVar("%MaskZoomArea",132);  
+	AllocateTypeVar("%OutlineZoomArea",133);  
+	AllocateTypeVar("%BleedThrough",134);  
+	AllocateTypeVar("%OffsetLineOffset",135);  
+	AllocateTypeVar("%LocationOffset",136);  
+	AllocateTypeVar("%WinDir",137);  
+	AllocateTypeVar("%TIMERANGEBEGIN",138);  
+	AllocateTypeVar("%TIMERANGEEND",139);  
+	AllocateTypeVar("%PROJECTION",140);  
+	AllocateTypeVar("%LAYERNUM",141);  
+	AllocateTypeVar("%DISPLAYONLYONCE",142);  
+	AllocateTypeVar("%USESYMDICT",143);  
+	AllocateTypeVar("%LoadCompiledTran",144);  
+	AllocateTypeVar("%IBFROMBOUNDS",145);  
+	AllocateTypeVar("%IBRECT",146);  
+	AllocateTypeVar("%TRACKINGSTATUS",147);  
+	AllocateTypeVar("%LINESYMBOLFACTOR",148);  
+	AllocateTypeVar("%TEXTTYPE",149);  //for oracle text transfer test report
+	AllocateTypeVar("%COPYSIZE",150);  
+	AllocateTypeVar("%GETCOPYSIZE",151);  
+	AllocateTypeVar("%DF",152);  
+	AllocateTypeVar("%SHOWALLREFS",153);  
+	AllocateTypeVar("%INVISPOINTFACTOR",154);  
+	AllocateTypeVar("%DISPLAYVALUESIZE",155);  
+	AllocateTypeVar("%NEWTAG",156);  
+	AllocateTypeVar("%DISPLAYORTHORES",157);  
+	AllocateTypeVar("%COMPUTEAREA",158);  
+	AllocateTypeVar("%SHOWBADSYMBOLS",159);  
+	AllocateTypeVar("%PICKDELETES",160);  
+	AllocateTypeVar("%RECNUM",161);  
+	AllocateTypeVar("%STANDARDSQL",162);  
+	AllocateTypeVar("%MINCACHEDRIVEFREESPACE",163);  
+	AllocateTypeVar("%POLYINFOTHEME",164); 
+	AllocateTypeVar("%SHORTESTROUTE",165); 
+	AllocateTypeVar("%SNAPPOLYGONS",166); 
+	AllocateTypeVar("%TEXTLOC",167); 
+	AllocateTypeVar("%AUTOTYPE",168); 
+	AllocateTypeVar("%SHOWREFNO",169); 
+	  
+	
+//	AllocateTypeVar("%DL",102);
+	
+	return;
+}
+
+BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
+{
+	LPSTR	BeginLoc, EndLoc;
+	char	EndChar; 
+	int		ivar=0, LineLen,l; 
+	VARPNT	VarPtr;
+	LPSHORT	nDLTvar;
+	LPHANDLE	DLTVar; 
+	LPSHORT	DLTStart,DLTLen;
+	
+	nDLTvar = (LPSHORT)GlobalLock (hDLT);
+	DLTVar = (LPHANDLE)(nDLTvar + 1);
+	DLTStart = (LPSHORT)(DLTVar + MAXDLTVAR);
+	DLTLen = (LPSHORT)(DLTStart + MAXDLTVAR);
+	 
+	for (ivar=0;ivar<*nDLTvar;ivar++)
+	{   
+		VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
+		VarPtr->Len = 0;
+		VarPtr->changetime = NextVarTime();
+		SetLinkedVarTime (VarPtr); 
+		GlobalUnlock (DLTVar[ivar]);
+	} 
+	ivar=0;
+	if (DLTStart[0]>=0)
+	{   
+		LineLen = _fstrlen(str);
+		for (ivar=*nDLTvar-1;ivar>=0;ivar--)
+		{   
+			VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
+			if (DLTStart[ivar]<LineLen)
+			{   
+				if (VarPtr->ValueIsHandle)
+				{
+					HANDLE handle = atol (VarPtr->Value);
+					GSSiGlobFree (&handle); 
+					VarPtr->ValueIsHandle = 0;
+				}
+				BeginLoc = str+DLTStart[ivar];
+				EndLoc = BeginLoc + DLTLen[ivar];
+				EndChar = *EndLoc;
+				*EndLoc = '\0';
+				_fstrcpy (VarPtr->Value,BeginLoc); 
+				l = _fstrlen(BeginLoc);
+				VarPtr->Len = min (l,DLTLen[ivar]);
+				*EndLoc = EndChar; 
+			}
+			GlobalUnlock (DLTVar[ivar]);
+		} 
+		goto RtnTrue;
+	}	 
+Next:if (*str == '"')
+	{
+		str++;
+		EndChar = '"';
+	}
+	else
+		EndChar = ',';
+	BeginLoc = str;
+	EndLoc = _fstrchr(str,EndChar);
+	if (EndLoc)
+		*EndLoc = '\0';  
+	VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
+	if (VarPtr->ValueIsHandle)
+	{
+		HANDLE handle = atol (VarPtr->Value);
+		GSSiGlobFree (&handle); 
+		VarPtr->ValueIsHandle = 0;
+	}
+	strncpy0 (VarPtr->Value,BeginLoc,255); 
+	VarPtr->Len = _fstrlen(BeginLoc); 
+	GlobalUnlock (DLTVar[ivar]);
+	if (!EndLoc) goto RtnTrue;
+	str = ++EndLoc; 
+	if (!*str) goto RtnTrue;
+	if (EndChar == '"')
+	{
+		if (*str != ',') goto RtnFalse;
+		str++; 
+	}
+	ivar++;
+	if (ivar >= *nDLTvar) goto RtnTrue;
+	goto Next;
+	
+RtnTrue:
+	GlobalUnlock (hDLT);  
+	return TRUE;
+RtnFalse:
+	GlobalUnlock (hDLT);  
+	return FALSE;
+}  
+
+HANDLE	GetDLTVarHandle (short ivar,HANDLE hDLT)
+{   
+	HANDLE	rtn=0;
+	
+	LPSHORT	nDLTvar;
+	LPHANDLE	DLTVar; 
+	LPSHORT	DLTStart,DLTLen;
+	
+	nDLTvar = (LPSHORT)GlobalLock (hDLT);
+	DLTVar = (LPHANDLE)(nDLTvar + 1);
+	DLTStart = (LPSHORT)(DLTVar + MAXDLTVAR);
+	DLTLen = (LPSHORT)(DLTStart + MAXDLTVAR);  
+	rtn = DLTVar[ivar];
+	GlobalUnlock (hDLT);
+	return rtn;
+}
+
+BOOL GetDLTVarName (short ivar,HANDLE hDLT, LPSTR Name)
+{
+	VARPNT	VarPtr;
+	LPSHORT	nDLTvar;
+	LPHANDLE	DLTVar; 
+	LPSHORT	DLTStart,DLTLen;
+	
+	nDLTvar = (LPSHORT)GlobalLock (hDLT);
+	DLTVar = (LPHANDLE)(nDLTvar + 1);
+	if (ivar > *nDLTvar)
+	{
+		GlobalUnlock (hDLT);
+		return FALSE;
+	}
+	ivar--;
+	VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
+	_fstrcpy (Name,VarPtr->Name); 
+	GlobalUnlock (DLTVar[ivar]);
+	GlobalUnlock (hDLT);
+	return TRUE;
+}
+
+void SetVarSaveStatus (LPSTR Name,BOOL Save)
+{   VARPNT  VarPnt;   
+	HANDLE	handle;
+
+	handle = AllocateVar (Name);
+	VarPnt = (VARPNT)GlobalLock(handle);  
+	VarPnt->Save = Save;
+	GlobalUnlock (handle);
+	return;
+} 
+
+void UpdateVarHandle (HANDLE OldHandle,HANDLE NewHandle)
+{   
+	UINT	i,l	;
+	VARPNT  VarPnt;
+	
+	for (i=0;i<NumVars;i++)
+	{   
+		if (VarHandles[i] == OldHandle)
+			VarHandles[i] = NewHandle;
+		else
+		{
+			VarPnt = (VARPNT)GlobalLock (VarHandles[i]);
+			l=VarPnt->NumLinkedVars;  
+			while (l--)
+			{
+				if (VarPnt->LinkedVar[l] == OldHandle)
+					VarPnt->LinkedVar[l] = NewHandle;
+			}
+			GlobalUnlock (VarHandles[i]); 
+		}
+	}
+	return;
+}
+
+BOOL GetVarSaveStatus (LPSTR Name)
+{   VARPNT  VarPnt;   
+	HANDLE	handle; 
+	BOOL	Save;
+	short	ii;
+
+	if (!(handle = FindVar(Name)))
+		return TRUE;
+	VarPnt = (VARPNT)GlobalLock(handle);  
+	Save = VarPnt->Save;
+	GlobalUnlock (handle);
+	if (!Save)
+		ii=1;
+	return Save;
+}
+
+HANDLE	AllocateVar (LPSTR Name)
+{   VARPNT  VarPnt;   
+	HANDLE	handle;
+
+	if (handle = FindVar(Name))
+		return (handle);
+	
+	AddToVarNameTable (Name);
+	handle = GSSiGlobAlloc(GHND,sizeof(VARINFO));
+	VarHandles[NumVars++]= handle;
+	VarPnt = (VARPNT)GlobalLock(handle);  
+	VarPnt->Handle = handle;
+	_fstrcpy(VarPnt->Name,Name);   
+	VarPnt->Save = TRUE;
+	GlobalUnlock (handle);
+	return (handle);
+
+}
+ 
+void SetIntRefno (long Ref)
+{
+	VARPNT  VarPnt;  
+	
+   	InternalRefno = Ref; 
+   	if (hIntRefno)
+   	{
+		VarPnt = (VARPNT)GlobalLock (hIntRefno);
+		VarPnt->changetime = NextVarTime();
+		SetLinkedVarTime (VarPnt); 
+        GlobalUnlock (hIntRefno);
+    }
+    return;
+}
+
+void AddToVarNameTable (LPSTR Name)
+{   
+	LPVARNAMEINDEXITEM	lpVN;  
+	UINT	i;
+	
+	if (NumVars >= MAXGLOBALS) 
+		BlowOut ("Maximum globals exceeded",NULL);
+	if (_fstrlen (Name) > 61)
+		MessageBox (GetFocus(),"Length of variable name exceeds 61 characters",Name,MB_ICONEXCLAMATION);
+	if (!hVarNameTable)
+		hVarNameTable = GSSiGlobAlloc (GMEM_MOVEABLE,(long)sizeof(VARNAMEINDEXITEM)*MAXGLOBALS);
+	lpVN = (LPVARNAMEINDEXITEM)GlobalLock (hVarNameTable); 
+	for (i=0;i<NumVars;i++,lpVN++)
+	{
+		if (_fstricmp (Name,lpVN->Name) < 0)
+		{   
+			_fmemmove ((LPVOID)(lpVN+1),(LPVOID)lpVN,((USHORT)NumVars-i)*sizeof(VARNAMEINDEXITEM));
+			goto Exit;
+		}
+	}
+Exit:
+	strncpy0 (lpVN->Name,Name,62);
+	lpVN->id = NumVars; 
+	GlobalUnlock (hVarNameTable);   
+	return;
+}
+
+void DestroyVarNameTable (void)
+{  
+	GSSiGlobFree (&hVarNameTable);
+	return;
+}        		
+
+HANDLE	AllocateTypeVar (LPSTR Name,short Type)
+{   VARPNT  VarPnt;   
+	HANDLE	handle;
+
+	if (handle = FindVar(Name))
+	{
+		VarPnt = (VARPNT)GlobalLock(handle);  
+		if (VarPnt->Type != Type)
+			VarPnt->Type = Type;
+		GlobalUnlock (handle);
+		return (handle);
+	}
+	AddToVarNameTable (Name);
+	
+	handle = GSSiGlobAlloc(GHND,sizeof(VARINFO));
+	VarHandles[NumVars++]= handle;
+	VarPnt = (VARPNT)GlobalLock(handle);  
+	VarPnt->Type = Type; 
+	VarPnt->Save = FALSE;
+	VarPnt->Handle = handle;
+	_fstrcpy(VarPnt->Name,Name);
+	GlobalUnlock (handle);
+	return (handle);
+
+}
+void NextPage (HDC hPr)
+{   
+	PrintReportPage++; 
+	if (Printing)
+	{
+		EndPage (hPr);
+		StartPage (hPr);  
+	}
+
+	return;
+}  
+
+void ProcessText (LPSTR InText)
+{
+	HANDLE	handle=GSSiGlobAlloc (GMEM_MOVEABLE,(long)4096);
+	LPSTR	Text=GlobalLock (handle);
+	
+	_fstrcpy (Text,InText);
+	ExpandText (Text);
+	GSSiGlobUlFree (&handle);
+	return;
+}
+
+void ProcessGlobal (LPSTR Global)
+{
+	HANDLE	handle=GSSiGlobAlloc (GMEM_MOVEABLE,(long)4096);
+	LPSTR	str=GlobalLock (handle);
+	
+	GetGlobalCVal (Global,str,NULL);
+	ExpandText (str);
+	GSSiGlobUlFree (&handle);
+	return;
+}
+
+LPSTR ExpandText (LPSTR InText)
+{
+	HANDLE	hMem=NULL, hMemTrace;
+	LPSTR	InLoc, OutLoc, NewText, BegBrack, EndBrack, loc, EqLoc, pLchr;
+	LPSTR	pEnd, pStr;
+	long	l,ii;
+	BOOL	FoundLit=FALSE, SaveIE=InExpand;
+	
+	InExpand = TRUE;
+	if (TraceType[0])
+	{   
+		hMem=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+		pStr = GlobalLock (hMem);
+		sprintf (pStr,"EXPIN:%s",InText);
+		GSSiTraceLev (pStr,1);
+		GSSiGlobUlFree (&hMem);
+	}
+	InLoc = InText;   
+	if (*InLoc == '{')
+	{
+//		pLchr = LastChr (InLoc);
+    	pEnd = MatchLev ((LPSTR)(InLoc+1),'}');
+    	if (pEnd)
+    	{
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,UINT_MAX);
+			NewText = OutLoc = GlobalLock(hMem);
+			l = pEnd - InLoc -1;
+			InLoc++;
+			if (l) _fmemmove(OutLoc,InLoc,(size_t) l);
+			OutLoc[l] = 0;
+	    	InLoc = OutLoc;
+	    }
+    }
+
+	while (*InLoc && ContinueProcessing)
+	{
+		if (*InLoc == '@') /* literal */
+		{
+			if (!hMem)
+			{
+				hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+				NewText = GlobalLock(hMem);
+				l = (InLoc - InText);
+				if (l>0) _fmemmove(NewText,InText,(size_t) l);
+				OutLoc = NewText + l;
+			}
+			InLoc++;
+			*OutLoc++ = *InLoc;
+			if (*InLoc != '@')
+				InLoc++;
+			FoundLit = TRUE;
+		}
+		else if (*InLoc == '[')
+		{   
+			if (!(EndBrack = MatchLev((LPSTR)(InLoc+1),']'))) goto OutChar; 
+			if (!hMem)
+			{
+				hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+				NewText = GlobalLock(hMem);
+				l = (InLoc - InText);
+				if (l>0) _fmemmove(NewText,InText,(size_t) l);
+				OutLoc = NewText + l;
+			}
+			EqLoc = EndBrack;
+			EqLoc++;
+			if (*EqLoc=='=')
+			{   HANDLE	hMemEq;
+				LPSTR	EqText, SemiCLoc, VName; 
+				BOOL	FoundSemiC=FALSE;
+			    
+			    VName = InLoc;
+			    VName++;
+			    *EndBrack = '\0';
+			    SemiCLoc = MatchLev (EqLoc,';');
+			    if (!SemiCLoc)
+			    	SemiCLoc = _fstrchr (EqLoc,'\0'); 
+			    else
+			    	FoundSemiC=TRUE;
+			    *SemiCLoc = '\0';
+				hMemEq = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+				EqText = GlobalLock(hMemEq);
+				l = (SemiCLoc - EqLoc);
+				if (l>0) _fmemmove(EqText,++EqLoc,(size_t) l);  
+				if (LinkToVar)
+					ExpandText (EqText);
+				else
+					SetGlobalValue (VName,EqText); 
+				GSSiGlobUlFree (&hMemEq);
+				InLoc = SemiCLoc;  
+				if (FoundSemiC)
+					InLoc++;
+			}
+			else
+			{
+				l = EndBrack - InLoc - 1; 
+				InLoc++;
+				_fmemmove(OutLoc,InLoc,(size_t) l);
+				InLoc = ++EndBrack;
+				loc = OutLoc + l;
+				*loc = '\0';
+				loc = ExpandText (OutLoc);
+			    l = GetVal(OutLoc,OutLoc);
+			    OutLoc+=l;
+			}
+		}
+		else if (!_fstrnicmp (InLoc,"WHILE(",6))
+		{
+			long	lWhile, lLoop, nLoops=-1;  
+			LPSTR	pWhile, pWhile2, pLoop;
+			HANDLE	hLoop, hWhile, hStr;
+				
+			InLoc += 6;
+			pEnd = MatchLev (InLoc,')');
+			if (!pEnd)
+				goto WhileError; 
+			pWhile = InLoc;
+			lWhile = pEnd++ - InLoc; 
+			if (*pEnd != '{')
+				goto WhileError;   
+			InLoc = pEnd;
+			InLoc++;
+			pEnd = MatchLev (InLoc,'}');
+			if (!pEnd)
+				goto WhileError; 
+			lLoop = pEnd++ - InLoc;
+			hLoop = GSSiGlobAlloc (GHND,lLoop+1);
+			pLoop = GlobalLock (hLoop);
+			_fstrncpy (pLoop,InLoc,(size_t)lLoop); 
+			GlobalUnlock (hLoop);
+			InLoc = pEnd;
+			hWhile = GSSiGlobAlloc (GHND,lWhile+1);
+			pWhile2 = GlobalLock (hWhile);
+			_fstrncpy (pWhile2,pWhile,(size_t)lWhile); 
+			GlobalUnlock (hWhile); 
+			hStr = GSSiGlobAlloc (GMEM_MOVEABLE,UINT_MAX);
+			pStr = GlobalLock (hStr); 
+			nLoops = 0;
+	NextWhileLoop: 
+			if (ContinueProcessing)
+			{
+				BOOL	Rtn;
+				short	rc;
+				
+				pWhile = GlobalLock (hWhile);
+				_fstrcpy (pStr,pWhile);
+				GlobalUnlock (hWhile);
+				Rtn = LogicP (pStr,&rc);
+//				ExpandText (pStr);
+//				if (!_fstrcspn (pStr," 1TtYy"))     
+				if (Rtn && !rc)
+				{
+					pLoop = GlobalLock (hLoop);
+					_fstrcpy (pStr,pLoop);
+					GlobalUnlock (hLoop);
+					ExpandText (pStr);
+					if (ContinueProcessing) 
+					{
+						nLoops++;
+						goto NextWhileLoop;    
+					}
+				}  
+			}
+			GSSiGlobUlFree (&hStr);
+			GlobalFree (hLoop);
+			GlobalFree (hWhile);
+	WhileError:
+			if (!hMem)
+			{
+				hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+				NewText = GlobalLock(hMem);
+				l = (InLoc - InText);
+				if (l>0) _fmemmove(NewText,InText,(size_t) l);
+				OutLoc = NewText + l;
+			}
+			ltoa (nLoops,OutLoc,10);
+			OutLoc = _fstrchr (OutLoc,0);
+		}
+		else if (!_fstrnicmp (InLoc,"IF(",3))
+		{
+			long	lIF, lTHEN;  
+			LPSTR	pEndIF, pStartIF=InLoc;
+			LPSTR	pIF, pIF2, pTHEN;
+			HANDLE	hTHEN, hIF, hStr;
+			BOOL	IfRtn, IfOK = FALSE;
+			short	rc;
+				
+			if (!(pEndIF = MatchLev (InLoc,';')))
+				pEndIF = _fstrchr (InLoc,0);
+			InLoc += 3;
+			pEnd = MatchLev (InLoc,')');
+			if (!pEnd)
+				goto IfError; 
+			pIF = InLoc;
+			lIF = pEnd++ - InLoc; 
+			if (!(pEnd = FirstNonBlank(pEnd)))
+				goto IfError;
+			if (!_fstrncmp (pEnd,"THEN",4))
+				pEnd+=4;
+			if (*pEnd != '{')
+				goto IfError;   
+			InLoc = pEnd;
+			InLoc++;
+			pTHEN = InLoc;
+			pEnd = MatchLev (InLoc,'}');
+			if (!pEnd)
+				goto IfError; 
+			lTHEN = pEnd++ - pTHEN;
+			InLoc = pEnd;
+			hIF = GSSiGlobAlloc (GHND,4096);
+			pIF2 = GlobalLock (hIF);
+			_fstrncpy (pIF2,pIF,(size_t)lIF); 
+			IfRtn = LogicP (pIF2,&rc); 
+			GSSiGlobUlFree (&hIF);
+			if (rc)
+				goto IfError; 
+			if (!hMem)
+			{
+				hMem = GSSiGlobAlloc(GMEM_MOVEABLE,UINT_MAX);
+				NewText = GlobalLock(hMem);
+				l = (pStartIF - InText);
+				if (l>0) _fmemmove(NewText,InText,(size_t) l);
+				OutLoc = NewText + l;
+			}  
+			if (IfRtn)
+			{   
+				if (*pEndIF == ';')
+					InLoc = pEndIF + 1;
+				else
+					InLoc = pEndIF;
+				_fstrncpy (OutLoc,pTHEN,(size_t)lTHEN);
+				OutLoc[lTHEN]=0;
+				ExpandText (OutLoc); 
+				OutLoc = _fstrchr (OutLoc,0);
+			}
+			else
+			{
+				InLoc = FirstNonBlank(InLoc);
+				if (!_fstrncmp (InLoc,"ELSE",4))
+				{
+					InLoc += 4;
+					l = pEndIF - InLoc;
+					if (l)
+					{
+						_fstrncpy (OutLoc,InLoc,(size_t)l);
+						OutLoc[l]=0;
+						ExpandText (OutLoc); 
+						OutLoc = _fstrchr (OutLoc,0);
+					}
+				}	
+				if (*pEndIF == ';')
+					InLoc = pEndIF + 1;
+				else
+					InLoc = pEndIF;
+			}
+			IfOK = TRUE;
+	IfError:
+			if (ContinueProcessing)
+				ContinueProcessing = IfOK;
+		}
+		else if (*InLoc == '$')
+		{   
+			int	FunID;
+			
+			if (!(BegBrack = _fstrchr(InLoc,'('))) goto OutChar;
+			if (!(EndBrack = MatchLev((LPSTR)(BegBrack+1),')'))) goto OutChar;  
+			if (!(FunID = GetFunctionID(InLoc,BegBrack))) goto OutChar;
+			if (!hMem)
+			{
+				hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+				NewText = GlobalLock(hMem);
+				l = (InLoc - InText);
+				if (l>0) _fmemmove(NewText,InText,(size_t) l);
+				OutLoc = NewText + l;
+			}
+			BegBrack++;
+			l = EndBrack - BegBrack; 
+			InLoc = BegBrack;
+			_fmemmove(OutLoc,InLoc,(size_t) l);
+			InLoc = ++EndBrack;
+			loc = OutLoc + l;
+			*loc = '\0';
+			if (ContinueProcessing)
+			{
+				if (FunID > 799 && FunID != 904)
+		    		l = GetFunctionValue2(FunID,OutLoc,OutLoc); 
+		    	else
+		    		l = GetFunctionValue(FunID,OutLoc,OutLoc);
+		    }
+		    else
+		    	l=0;
+		    OutLoc+=l;
+		}
+		else
+		{
+OutChar:	if (hMem)
+				*OutLoc++ = *InLoc++;
+			else
+				InLoc++;
+		}
+	}
+	FoundLiteral = FoundLit;
+	if (TraceType[0])
+	{
+		hMemTrace=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+		pStr = GlobalLock (hMemTrace); 
+		if (hMem)   
+		{
+			l = OutLoc - NewText;
+			NewText[l]=0;
+			sprintf (pStr,"EXPOUT:%s",NewText); 
+		}
+		else
+			sprintf (pStr,"EXPOUT:%s",InText); 
+		GSSiTraceLev (pStr,-1);
+		GSSiGlobUlFree (&hMemTrace);
+	}
+	InExpand = SaveIE;
+	if (hMem)
+	{
+		l = OutLoc - NewText;
+		if (*NewText == '"' && l > 1)
+		{ 
+			if (*(LPSTR)(NewText + l-1) == '"')
+			{
+				*(LPSTR)(NewText + l-1)	= 0;
+				NewText++;
+				l -= 2;
+			}
+		}
+		*OutLoc++ = '\0'; 
+		_fstrcpy(InText,NewText);
+		InText+=l;
+		GSSiGlobUlFree (&hMem);
+		return (InText);
+	}
+	if (*InText == '"') 
+	{
+		l = _fstrlen (InText);
+		if (l > 1 && *(LPSTR)(InText + l - 1) == '"') 
+		{
+			_fmemmove (InText,(InText+1),(size_t)l-2); 
+			*(LPSTR)(InText + l - 2) = 0;
+		}
+	}
+	return (InLoc);
+}
+
+double GetGlobalDVal (LPSTR Global)
+{   
+	double	rtn=0;
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);   
+	if (*str)
+		rtn = atof (str);
+	GSSiGlobUlFree (&hStr); 
+	return rtn;
+} 
+
+double GetGlobalDVal2 (LPSTR Global,double Default)
+{
+	double	rtn=Default;
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);   
+	if (*str)
+		rtn = atof (str);
+	GSSiGlobUlFree (&hStr); 
+	return rtn;
+} 
+
+BOOL GetGlobalValRaw (LPSTR VName,LPSTR Val)
+{   
+	VARPNT	VP;
+	HANDLE	handle;
+	
+	*Val = 0;
+	if ((handle = FindVar (VName)))
+	{
+		VP = (VARPNT)GlobalLock (handle);
+		_fstrcpy (Val,VP->Value);
+		GlobalUnlock (handle);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL GetGlobalCVal (LPSTR Global,LPSTR Val,LPSTR Default)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	
+	if (*Global != '[')
+	{
+		*str = '[';
+		_fstrcpy (&str[1],Global);
+		_fstrcat (str,"]");  
+	}
+	else
+		_fstrcpy (str,Global);
+	ExpandText (str);   
+	if (!*str)
+	{   
+		if (Default)
+			_fstrcpy (Val,Default);
+		else
+			*Val = 0; 
+		GSSiGlobUlFree (&hStr);
+		return FALSE;
+	}
+	_fstrcpy (Val,str);
+	GSSiGlobUlFree (&hStr);
+	return TRUE;
+} 
+
+RECT GetGlobalRectVal (LPSTR Global,LPRECT pDefault) 
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	RECT	Rect;
+	BOOL	Err;
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);   
+	if (!*str)
+	{   
+		if (pDefault)
+		{
+			GSSiGlobUlFree (&hStr);
+			return *pDefault;
+		}
+	}
+	Rect = atorect (str,&Err);
+	GSSiGlobUlFree (&hStr);
+	return Rect;
+} 
+
+
+long GetGlobalLVal (LPSTR Global)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	long	rtn=0;
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);  
+	if (*str)
+		rtn = atol (str);
+	GSSiGlobUlFree (&hStr);
+	return rtn;
+} 
+
+long GetGlobalLVal3 (LPSTR Global,long Default)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+    long	rtn;
+    
+	sprintf (str,"[%s]",Global);
+	rtn = GetGlobalLVal2 (str,Default);
+	GSSiGlobUlFree (&hStr);
+	return rtn;
+}
+
+long GetGlobalLVal2 (LPSTR Global,long Default)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+    long	rtn=Default;
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);  
+	if (*str)
+		rtn = atol (str);
+	GSSiGlobUlFree (&hStr);
+	return rtn;
+} 
+
+BOOL GetGlobalPVal (LPSTR Global,LPDPOINT Default,LPDPOINT pPoint)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	DPOINT	DPoint;
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);  
+	if (!*str)
+	{
+		if (Default)
+			DPoint = *Default;
+		else
+		{
+			GSSiGlobUlFree (&hStr);  
+			return FALSE;          
+		}
+	}
+	else
+	{
+		if (sscanf (str,"%Flf %Flf",&DPoint.x,&DPoint.y) != 2)
+		{
+			DPoint.x = 0;
+			DPoint.y = 0;
+		}
+	}  
+	GSSiGlobUlFree (&hStr);  
+	*pPoint = DPoint;
+	return TRUE;
+} 
+
+BOOL GetGlobalBVal (LPSTR Global)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	BOOL	rtn=FALSE;
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);
+	if (*str)
+	{
+		if (!_fstrcspn (str," 1TtYy"))
+			rtn = TRUE; 
+	}
+	GSSiGlobUlFree (&hStr);
+	return rtn;
+} 
+
+BOOL GetGlobalBVal2 (LPSTR Global,BOOL Default)
+{
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str=GlobalLock (hStr);
+	BOOL	rtn=Default;
+	
+	_fstrcpy (str,Global);
+	ExpandText (str);
+	if (*str)
+	{
+		if (!_fstrcspn (str," 1TtYy"))
+			rtn = TRUE;
+		else
+			rtn = FALSE; 
+	}
+	GSSiGlobUlFree (&hStr);
+	return rtn;
+} 
+
+int GetVal (LPSTR VarName, LPSTR OutStr)
+{   VARPNT	VarPnt, VP;
+	HANDLE	hGlobal=0;
+	int		l;
+	LPSTR	lpPar, lpEndPar=NULL;
+	long	Index=0;
+    
+    if (!ContinueProcessing)
+    	return 0;
+	if (AllVarEqQuestionMark)
+	{
+		*OutStr = '?';
+		return 1;
+	}
+	if (LinkToVar)
+	{
+		hGlobal = AllocateVar (VarName);
+		VP = (VARPNT)GlobalLock (hGlobal); 
+		l=VP->NumLinkedVars;  
+		while (l--)
+		{
+			if (VP->LinkedVar[l] == LinkToVar)
+			{
+				GlobalUnlock (hGlobal);
+				return 0;
+			}
+		}
+		l=VP->NumLinkedVars;
+		if (l)
+		{   
+			HANDLE	OldHandle=hGlobal, NewHandle;
+			
+			GlobalUnlock (hGlobal); 
+			NewHandle = GlobalReAlloc (hGlobal,(long)l*2+sizeof(VARINFO),GMEM_MOVEABLE); 
+			if (OldHandle != NewHandle) 
+				UpdateVarHandle (OldHandle,NewHandle);   
+			hGlobal = NewHandle;
+			VP = (VARPNT)GlobalLock (hGlobal); 
+		}
+		VP->LinkedVar[VP->NumLinkedVars] = LinkToVar; 
+		VP->NumLinkedVars++;
+		GlobalUnlock (hGlobal);
+		return 0; 
+	}
+	if ((l=GetValFromOpenFiles (VarName,OutStr))>=0)
+		return(l);
+	
+	lpPar = _fstrrchr(VarName,'(');
+	if (lpPar)
+	{
+		lpEndPar = _fstrchr(lpPar,')');
+		if (lpEndPar)
+		{   
+			Index = atol((LPSTR)(lpPar+1)); 
+			*lpPar = 0;
+			if ((hGlobal = FindVar (VarName)))
+			{
+				VP = (VARPNT)GlobalLock (hGlobal);
+				if (!VP->Type)
+				{
+					*lpPar = '(';
+					GlobalUnlock (hGlobal);    
+					hGlobal = 0;
+					Index = 0;
+				}               
+				else
+					GlobalUnlock (hGlobal);
+			}
+			else
+				*lpPar = '('; 
+		}
+	} 
+	if (!hGlobal)  
+		hGlobal = FindVar(VarName);	
+	if (hGlobal)
+	{   
+		return (GetGlobalVal (hGlobal,OutStr,Index));
+	}
+	else
+	{   
+		*OutStr = 0;
+		return 0; 
+		_fstrcpy(shrtxt,VarName);
+		_fstrcpy(OutStr,"[");
+		_fstrcat(OutStr,shrtxt);
+		_fstrcat(OutStr,"]");
+		return (_fstrlen(shrtxt)+2);
+	}
+} 
+   
+BOOL NeedRead (LPOPENSQLDATA SQLPtr)
+{  
+	LPSQLFIELD	lpSQLField; 
+	VARPNT		VarPtr;
+	DWORD		MaxVarTime=1; 
+	int			i;
+	
+	lpSQLField = &SQLPtr->SQLField;  
+	if (SQLPtr->NumGlobals < 0)
+	{
+		SQLPtr->NumGlobals = 0;
+		MaxVarTime = ULONG_MAX;                      
+	}
+	for (i=0;i<SQLPtr->NumGlobals;i++,lpSQLField++)
+	{                             
+		VarPtr = (VARPNT)GlobalLock (lpSQLField->hGlobal); 
+		if (CurrentComboFile && !_fstrnicmp (VarPtr->Name,"CF",2) && VarPtr->Name[3] == '.')
+		{
+			short FileNo = atoi (&VarPtr->Name[2]);
+			if (FileNo < CurrentComboFile->NumFiles)
+			{
+	             LPOPENSQLDATA SQLPtr2 = (LPOPENSQLDATA)GlobalLock(CurrentComboFile->hSQL[FileNo]);  
+	             
+	             if (SQLPtr2->lastreadtime > VarPtr->changetime || NeedRead (SQLPtr2))
+					MaxVarTime = ULONG_MAX;                      
+	             GlobalUnlock (CurrentComboFile->hSQL[FileNo]);
+		    }
+		}
+		
+		if (VarPtr->changetime > MaxVarTime)
+			MaxVarTime = VarPtr->changetime;
+		GlobalUnlock (lpSQLField->hGlobal);
+	} 
+	if (MaxVarTime > SQLPtr->lastreadtime)
+		return TRUE;
+	else
+		return FALSE;
+	
+}  
+
+BOOL ReadDBSequential (HANDLE hDB,short Index,LPINT First)
+{
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	int			loc;  
+	BOOL		rtn;
+	
+	if (*First)
+		loc = BT_FIRST;
+	else
+		loc = BT_NEXT;
+	*First = FALSE;
+	rtn = FALSE;
+	
+	SQLPtr = (LPOPENSQLDATA)GlobalLock(hDB);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+	
+	if (FilePtr->Type == UMIFS_DATAFILE)
+	{
+		lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
+		hBT = lpGWDHead->BTHandle[Index];
+	    if (!hBT) goto Exit;
+			    
+		SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[Index],loc,BT_ANY, (LPSTR)&SQLPtr->Offset);
+		if (SQLPtr->st)
+			SQLPtr->lastreadtime = 0; 
+		else
+		{
+			rtn = TRUE;
+	    	SQLPtr->lastreadtime = LONG_MAX; 
+	    }
+	}
+Exit:
+	GlobalUnlock (SQLPtr->OFHandle);
+	GlobalUnlock (hDB);  
+	return rtn;
+}  
+
+
+BOOL FetchDBRec (HANDLE hSQLPtr)
+{
+	LPOPENSQLDATA	SQLPtr;
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPSQLFIELD	lpSQLField;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle;
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	int			irc;  
+	BOOL		rtn;
+	short		cond=BT_ANY;
+	
+	if (!hSQLPtr)
+		return FALSE;
+	irc = 1;
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQLPtr);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+	lpFieldInfo = &FilePtr->FldInfo;
+    if (FilePtr->Type == COMBO_DATAFILE)
+    {   
+		LPCOMBOHEADER		pComboHeader;
+	    LPCOMBOFILE  		pComboFile; 
+    
+		pComboHeader = (LPCOMBOHEADER)GlobalLock (FilePtr->FileHandle); 
+		pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile);
+		rtn = FetchDBRec (pComboFile->hSQL[0]);
+		GlobalUnlock (pComboHeader->hComboFile);
+		GlobalUnlock (FilePtr->FileHandle); 
+		return rtn;
+    } 
+	else if (FilePtr->Type == UMIFS_DATAFILE)
+	{ 
+		if (SQLPtr->IndexToUse < 0)
+		{
+			irc = 0;
+			goto Exit;
+		}
+		lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
+		hBT = lpGWDHead->BTHandle[SQLPtr->IndexToUse];
+	    if (!hBT)
+	    {
+	    	GlobalUnlock (FilePtr->FileHandle);
+	    	goto Exit;
+		}				    
+	    if (NeedRead (SQLPtr))
+	    {   
+	    	int	i, j, n;  
+	    	BOOL	FieldSet[8]; 
+	    	HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	    	LPSTR	str=GlobalLock (hMem);
+	    	
+	    	if (SQLPtr->NumGlobals)
+	    	{	
+    			n = lpGWDHead->NumIndexFields[SQLPtr->IndexToUse]; 		    
+	    		if (SQLPtr->IndexToUse)
+	    			n--;
+	    		for (i=0;i<n;i++)
+	    			FieldSet[i]=FALSE;
+			    for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
+			    {   
+			    	_fstrcpy (str,lpSQLField->String);
+			    	ExpandText (str);
+			    	lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
+					SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE);
+					for (j=0;j<n;j++)
+						if (lpSQLField->FieldNum == lpGWDHead->IndexFields[SQLPtr->IndexToUse][j])
+							FieldSet[j] = TRUE;
+				}
+				cond = BT_EQ;
+	    		for (i=0;i<n;i++)
+	    		{
+	    			if (!FieldSet[i])
+	    			{
+	    				SetFieldToMinVal (lpGWDHead,lpGWDHead->IndexFields[SQLPtr->IndexToUse][i]);
+	    				cond = BT_GE;
+	    			}
+	    		}
+				GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0);
+				if (SQLPtr->IndexToUse) 
+					SetReadSecIndex(TRUE); 
+			}                
+			else
+				cond = BT_ANY;
+			SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,cond, (LPSTR)&SQLPtr->Offset);
+			SetReadSecIndex(FALSE);
+	        SQLPtr->lastreadtime = NextVarTime ();
+			GSSiGlobUlFree (&hMem);
+		} 
+		else
+			SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_NEXT,BT_ANY, (LPSTR)&SQLPtr->Offset);
+		while (WantGMDRecord (SQLPtr,lpGWDHead,cond) > 0)
+			SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_NEXT,BT_ANY, (LPSTR)&SQLPtr->Offset); 
+		GlobalUnlock (FilePtr->FileHandle);
+	}
+	else if (FilePtr->Type == ODBC_DATAFILE || FilePtr->Type == DBF_DATAFILE || FilePtr->Type == TEXT_DATAFILE)
+	{   
+	    if (NeedRead (SQLPtr))
+	    {     
+	    	if (SQLPtr->hstmt)
+	    	{
+	        	SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
+	        	SQLPtr->hstmt = NULL;
+			    ClearCurVals (FilePtr);
+	        } 
+	        SQLPtr->lastreadtime = NextVarTime ();
+	        SQLPtr->st = 0;    
+			GetExternalFieldData (FilePtr,SQLPtr->SQL,&SQLPtr->hstmt,
+            	                  lpFieldInfo, FALSE,0, &irc,
+                       		   	  FilePtr->NumFields,&FilePtr->FldInfo);
+        }
+        else    
+        {   
+        	int	rc;
+	                	
+		    rc = FetchODBCRecord (SQLPtr);  
+		    if(rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO)
+		    	irc = 0;  
+		    else
+		    {
+	        	SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
+	        	SQLPtr->hstmt = NULL;
+			    ClearCurVals (FilePtr);
+			}		    
+		}
+		if (irc)
+			SQLPtr->st = 31;
+	}
+	if (!SQLPtr->st)
+		irc = 1; 
+	else
+		irc = 0;
+Exit: 
+ 	GlobalUnlock (SQLPtr->OFHandle);
+	GlobalUnlock (hSQLPtr);
+ 	return irc;
+} 
+
+short WantGMDRecord (LPOPENSQLDATA SQLPtr,LPGWDHEADER lpGWDHead,short cond)
+{ 
+//returns 1 if this record not wanted but should continue search else 0 
+	short	n,i;
+	LPSQLFIELD	lpSQLField; 
+	LPSTR	str, pVal;
+	HANDLE	hStr;
+	
+	if (SQLPtr->st)
+		return 0;
+	if (cond == BT_EQ || cond == BT_ANY)
+		return 0; 
+	hStr = GSSiGlobAlloc (GMEM_MOVEABLE,2048);
+	str = GlobalLock (hStr);
+	pVal = str + 1028;
+	FillGWDData (lpGWDHead,SQLPtr->Offset);
+	n = lpGWDHead->NumIndexFields[SQLPtr->IndexToUse]; 		    
+	if (SQLPtr->IndexToUse)
+		n--;
+    for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
+    {   
+    	_fstrcpy (str,lpSQLField->String);
+    	ExpandText (str);
+		ConvertFieldValFromChar(lpGWDHead,lpSQLField->FieldNum,str,pVal);
+		if (TestFieldVal (lpGWDHead,lpSQLField->FieldNum,pVal,'=='))
+		{
+			GSSiGlobUlFree (&hStr);
+			SQLPtr->st = 1;
+			return 0; 
+		}
+	}
+	GSSiGlobUlFree (&hStr);
+	return 0;
+} 
+
+HANDLE GetDBByIDName (LPSTR IDName)
+{
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPSQLFIELD	lpSQLField;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle; 
+	HANDLE		hSQLPtr=0;
+	UINT		i;
+
+    if (!FilePathHandle)
+    	return 0;
+	FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);  
+	lpFileHandle = (LPHANDLE)&FilePathPtr->FileHandle;
+            
+	for (i=0;i<FilePathPtr->NumFiles;i++,lpFileHandle++)
+	{
+		if (*lpFileHandle)
+		{
+			SQLPtr = (LPOPENSQLDATA)GlobalLock (*lpFileHandle);
+			if (!_fstrcmp (SQLPtr->IDName,IDName))  
+			{
+				hSQLPtr = *lpFileHandle;
+				GlobalUnlock (*lpFileHandle);
+				GlobalUnlock (FilePathHandle);  
+				return hSQLPtr;
+			}
+			GlobalUnlock (*lpFileHandle);
+		} 
+	}
+	GlobalUnlock (FilePathHandle);
+    return 0;  
+}
+            
+BOOL SaveDBRec (HANDLE hSQLPtr)
+{
+	LPOPENSQLDATA	SQLPtr;
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPSQLFIELD	lpSQLField;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle;
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	int			irc;  
+	BOOL		rtn;
+	
+	irc = 1;
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQLPtr);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+	lpFieldInfo = &FilePtr->FldInfo;
+    if (FilePtr->Type == COMBO_DATAFILE)
+    {
+    	irc = 0;
+    	goto Exit;   
+    } 
+	else if (FilePtr->Type == UMIFS_DATAFILE)
+	{ 
+		lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
+		irc = GWDReplaceRecord (lpGWDHead,0,NULL,-1);
+		GlobalUnlock (FilePtr->FileHandle); 
+	}
+	else if (FilePtr->Type == ODBC_DATAFILE || FilePtr->Type == DBF_DATAFILE || FilePtr->Type == TEXT_DATAFILE)
+	{   
+    	irc = 0;
+    	goto Exit;   
+	}
+Exit: 
+ 	GlobalUnlock (SQLPtr->OFHandle);
+	GlobalUnlock (hSQLPtr);
+ 	return irc;
+}
+   
+BOOL SetGMDField (HANDLE hSQLPtr,LPSTR Name,LPSTR Value)
+{
+	LPOPENSQLDATA	SQLPtr;
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPSQLFIELD	lpSQLField;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle;
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	int			irc;  
+	BOOL		rtn;
+	
+	irc = 1;
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQLPtr);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+	lpFieldInfo = &FilePtr->FldInfo;
+    if (FilePtr->Type == COMBO_DATAFILE)
+    {
+    	irc = 0;
+    	goto Exit;   
+    } 
+	else if (FilePtr->Type == UMIFS_DATAFILE)
+	{ 
+		lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
+	    SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE);
+		GlobalUnlock (FilePtr->FileHandle); 
+	}
+	else if (FilePtr->Type == ODBC_DATAFILE || FilePtr->Type == DBF_DATAFILE || FilePtr->Type == TEXT_DATAFILE)
+	{   
+    	irc = 0;
+    	goto Exit;   
+	}
+Exit: 
+ 	GlobalUnlock (SQLPtr->OFHandle);
+	GlobalUnlock (hSQLPtr);
+ 	return irc;
+}
+   
+short GetValFromOpenFiles (LPSTR VarName,LPSTR Value)
+{   
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	long		Offset, IVal; 
+	short		st, i, j, k, len, isql, ifield, irc, rtn=-1; 
+	LPSTR		ep, ValC, lpDot;
+	LPFIELDINFO	lpFieldInfo,pFileField;
+	LPOPENFILEDATA	FilePtr, FilePtr2;
+	LPOPENSQLDATA	SQLPtr, SQLPtr2;
+	LPSQLFIELD	lpSQLField;
+	LPHANDLE	lpFileHandle; 
+    LPFILEPATH  FilePathPtr; 
+	LPLONG		pDebugLong;
+	char		IDName[34];  
+	HANDLE		hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR		str=GlobalLock (hStr); 
+	
+	if (!FilePathHandle)
+		goto GetOut; 
+/*	if (*VarName == '%')
+		goto GetOut;*/
+	FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+    
+    lpDot = _fstrchr (VarName,'.');
+    if (lpDot)
+    {    
+    	HANDLE	hGlobal;
+    	
+    	*lpDot = 0;
+    	_fstrcpy (IDName,VarName);  
+    	*lpDot ='.';
+    	VarName = lpDot + 1;  
+    	if (!*IDName)
+    	{
+    		hGlobal = FindVar(VarName);	
+			rtn = GetGlobalVal (hGlobal,Value,0);
+			goto GetOut;
+        }
+    }
+    else
+    	IDName[0]=0;
+    isql = FilePathPtr->NumFiles;	
+	while (isql--)
+	{
+		lpFileHandle = &FilePathPtr->FileHandle;  
+		lpFileHandle += isql;
+		if (*lpFileHandle)
+		{   
+			SQLPtr = (LPOPENSQLDATA)GlobalLock(*lpFileHandle);
+IgnoreLock=TRUE;			FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); IgnoreLock=FALSE;
+			if (*IDName && _fstrcmp (IDName,SQLPtr->IDName))
+				goto Exit;
+			lpFieldInfo = &FilePtr->FldInfo; 
+			for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
+			{
+				if (!_fstricmp (lpFieldInfo->name,VarName))
+					goto GetData;
+			}
+			if (*IDName && *VarName == '#')
+			{   
+				VarName++;
+				ifield = atoi (VarName) - 1;
+				lpFieldInfo = &FilePtr->FldInfo; 
+				lpFieldInfo	+= ifield;
+				goto GetData;
+			}
+			goto Exit;
+	GetData: 
+		    
+		    if (FilePtr->Type == COMBO_DATAFILE)
+		    {   
+				LPCOMBOHEADER		pComboHeader;
+			    LPCOMBOFILE  		pComboFile; 
+    			LPCOMBOFIELDINFO    pComboField;  
+			    LPWHEREINDEX        pWhereIndex;
+			    LPCFIELDINDEX       pCFieldIndex;  
+			    LPSTR       		pWhere, pCField, pStr;
+			    HANDLE				hStr;
+    			short	fromfile;
+		    
+				pComboHeader = (LPCOMBOHEADER)GlobalLock (FilePtr->FileHandle); 
+				pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile); 
+				CurrentComboFile = pComboFile;
+        		pComboField = (LPCOMBOFIELDINFO)GlobalLock (pComboHeader->hComboFields); 
+        		pComboField += ifield;
+        		fromfile = pComboField->fromfile;
+				if (fromfile < 0)
+				{   
+					hStr = GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+					pStr = GlobalLock (hStr);
+	                pCFieldIndex =(LPCFIELDINDEX) GlobalLock(pComboHeader->hComputedFields);
+	                pCField = (LPSTR)pCFieldIndex + (sizeof(CFIELDINDEX) +
+	                        	pCFieldIndex->offset[pComboField->fromfileindex]);
+	                _fstrcpy (pStr,pCField);
+	                GlobalUnlock (pComboHeader->hComputedFields); 
+	                ExpandText (pStr);
+	                _fstrcpy (Value,pStr);   
+	                GSSiGlobUlFree (&hStr);
+					GlobalUnlock (pComboHeader->hComboFields);
+					GlobalUnlock (pComboHeader->hComboFile);  
+					CurrentComboFile = NULL;
+					GlobalUnlock (FilePtr->FileHandle); 
+		        	goto GotData;
+                }
+                else
+                {
+	                SQLPtr2 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[fromfile]);
+	                FilePtr2 = (LPOPENFILEDATA)GlobalLock (SQLPtr2->OFHandle);
+	                pFileField = &FilePtr2->FldInfo+pComboField->fromfileindex; 
+					hStr = GSSiGlobAlloc (GMEM_MOVEABLE,512);
+					pStr = GlobalLock (hStr);
+					sprintf (pStr,"%s.%s",SQLPtr2->IDName,pFileField->name);
+					if (fromfile > 0)
+					{   
+						pWhere = GlobalLock(pComboHeader->hWhere);
+						pWhereIndex = (LPWHEREINDEX)pWhere;  
+						pWhere += sizeof(WHEREINDEX) + pWhereIndex->offset[pComboField->WhereID];
+						if (FilePtr2->Type == UMIFS_DATAFILE)
+						{  
+							ProcessFileSQL (SQLPtr2,FilePtr2,pWhere);
+							SQLPtr2->st = 0;
+						}
+						else
+						{                                       
+							_fstrcpy (SQLPtr2->SQL,pWhere); 
+							SQLPtr2->NumGlobals = -1;
+						}
+						GlobalUnlock (pComboHeader->hWhere);
+					}
+					GlobalUnlock (SQLPtr2->OFHandle);
+					GlobalUnlock(pComboFile->hSQL[fromfile]); 
+					st = GetValFromOpenFiles (pStr,Value);
+	                GSSiGlobUlFree (&hStr);
+					GlobalUnlock (pComboHeader->hComboFields);
+					GlobalUnlock (pComboHeader->hComboFile);
+					CurrentComboFile = NULL;
+					GlobalUnlock (FilePtr->FileHandle); 
+		        	goto GotData;
+                }
+				GlobalUnlock (pComboHeader->hComboFields);
+				GlobalUnlock (pComboHeader->hComboFile);
+				CurrentComboFile = NULL;
+				GlobalUnlock (FilePtr->FileHandle); 
+				if (!fromfile)
+					goto Exit; 
+		    } 
+			else if (FilePtr->Type == UMIFS_DATAFILE)
+			{    
+				short	FirstCond = BT_EQ;
+				
+				lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
+		        if (lpGWDHead->Version > 1000)
+		        {   
+		        	if (!LoadInternalGMD (lpGWDHead,InternalRefno))
+		        	{ 
+		        	    GlobalUnlock (FilePtr->FileHandle); 
+		        		goto NotFound;
+		        	}
+		            st = 0;  
+		           	goto Found;
+		        }
+				if (SQLPtr->IndexToUse < 0) goto NotFound;
+				hBT = lpGWDHead->BTHandle[SQLPtr->IndexToUse];
+			    if (!hBT) 
+	        	{ 
+	        	    GlobalUnlock (FilePtr->FileHandle); 
+	        		goto NotFound;
+	        	}
+			    
+			    if (NeedRead (SQLPtr))
+			    {   			    
+			        SQLPtr->lastreadtime = NextVarTime ();  
+			        GWDClearSetValues (lpGWDHead);
+				    for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
+				    {   
+				    	_fstrcpy (str,lpSQLField->String);
+				    	ExpandText (str);
+				    	lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
+						SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE);  
+					}
+					if (GWDInitUnsetKeyValues (lpGWDHead,SQLPtr->IndexToUse))
+						FirstCond = BT_GE;
+					GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0);
+					if (SQLPtr->IndexToUse) 
+						SetReadSecIndex(TRUE);
+					SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,FirstCond, (LPSTR)&SQLPtr->Offset);
+					SetReadSecIndex(FALSE);
+				}
+			    if (!SQLPtr->st)
+			    {   
+			    	if (FilePtr->Offset != SQLPtr->Offset)
+			    	{
+						FilePtr->Offset = SQLPtr->Offset;
+			        	FillGWDData (lpGWDHead,FilePtr->Offset);
+			       	}
+			    }
+			    else
+			    {
+	        	    GlobalUnlock (FilePtr->FileHandle); 
+			    	goto NotFound;
+			    }
+Found:			    
+				lpGWFldInfo=lpGWDHead->pFldInfo + ifield;
+				switch (lpGWFldInfo->Type)
+				{   
+					default:   
+					case BT_RIGHT_CHAR:
+					case BT_CHAR:
+			        	_fmemmove (Value,&lpGWDHead->GWDData[lpGWFldInfo->Beg],lpGWFldInfo->Len);
+			        	ep = &Value[lpGWFldInfo->Len];
+			        	*ep ='\0';
+		        	break;
+						        	
+		        	case BT_INTEGER:
+		        	    if (lpGWFldInfo->Len == 2)
+		        	    	IVal= *(LPINT) &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+		        	    else
+			     	    	IVal = *(LPLONG) &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+			     	    ltoa (IVal,Value,10);
+			     	break;
+					 			
+		 			case BT_REAL:
+		 			 	if (lpGWFldInfo->Len == 4)
+		 					sprintf(Value,"%f",*(LPFLOAT)&lpGWDHead->GWDData[lpGWFldInfo->Beg]);
+		 				else
+		 					sprintf(Value,"%.14lg",*(LPDOUBLE)&lpGWDHead->GWDData[lpGWFldInfo->Beg]);
+		 			break;
+	        	}
+	        	GlobalUnlock (FilePtr->FileHandle);  
+	        	goto GotData;
+			}
+			else if (FilePtr->Type == ODBC_DATAFILE || FilePtr->Type == DBF_DATAFILE || FilePtr->Type == TEXT_DATAFILE)
+			{   
+			    if (NeedRead (SQLPtr))
+			    {     
+			    	if (SQLPtr->hstmt)
+			    	{
+			        	SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
+			        	SQLPtr->hstmt = NULL;
+					    ClearCurVals (FilePtr);
+			        } 
+			        SQLPtr->lastreadtime = NextVarTime ();
+			        SQLPtr->st = 0;
+
+			    }
+                if (SQLPtr->st) goto NotFound;
+				ValC = (LPSTR) GetExternalFieldData (FilePtr,
+													 SQLPtr->SQL,&SQLPtr->hstmt,
+                                   		   			 lpFieldInfo, FALSE,0, &irc,FilePtr->NumFields,
+                                   		   			 &FilePtr->FldInfo);
+                if (irc) goto NotFound;
+			    _fstrcpy(Value,ValC);
+			    goto GotData;
+			
+			}
+NotFound:	SQLPtr->st = 31;
+			ExpandTextDataNotFound=TRUE;
+			*Value=0;
+Exit:		GlobalUnlock (SQLPtr->OFHandle);
+			GlobalUnlock (*lpFileHandle);
+		}
+	}
+	GlobalUnlock (FilePathHandle);
+GetOut:
+	GSSiGlobUlFree (&hStr);
+	return rtn;    
+	
+GotData:
+	GlobalUnlock (SQLPtr->OFHandle);
+	GlobalUnlock (*lpFileHandle);
+	GlobalUnlock (FilePathHandle);
+	GSSiGlobUlFree (&hStr);
+    return (_fstrlen(Value));
+} 
+
+BOOL GetDBFieldInfo (LPFIELDINFO pFieldInfo,HANDLE hDB)
+{
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr; 
+	BOOL	rtn=FALSE;
+	short	ifield;
+    
+    if (!hDB)
+    	return FALSE;
+	SQLPtr = (LPOPENSQLDATA)GlobalLock(hDB);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+	lpFieldInfo = &FilePtr->FldInfo;
+	for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
+	{
+		if (!_fstricmp (lpFieldInfo->name,pFieldInfo->name))
+		{
+			*pFieldInfo = *lpFieldInfo; 
+			rtn = TRUE;
+			goto Exit;
+		}
+	}
+Exit: 
+	GlobalUnlock (SQLPtr->OFHandle);  
+	GlobalUnlock (hDB);
+	return rtn;
+}
+	
+BOOL GetFieldDefFromOpenFiles (LPSTR VarName,LPFIELDINFO lpField)
+{   
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	long		Offset, IVal; 
+	BOOL		rtn;
+	char		str[256];
+	int			st, i, j, k, len, isql, ifield, irc; 
+	LPSTR		ep, ValC;
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPSQLFIELD	lpSQLField;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle;
+	 
+	rtn = FALSE; 
+	if (!FilePathHandle)
+		return (rtn); 
+	FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+	lpFileHandle = &FilePathPtr->FileHandle;
+
+	for (isql=0;isql<FilePathPtr->NumFiles;isql++,lpFileHandle++)
+	{
+		if (*lpFileHandle)
+		{   
+			SQLPtr = (LPOPENSQLDATA)GlobalLock(*lpFileHandle);
+			FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+			lpFieldInfo = &FilePtr->FldInfo;
+			for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
+			{
+				if (!_fstricmp (lpFieldInfo->name,VarName))
+					goto GetData;
+			}
+			goto Next;
+	GetData: 
+		    rtn = TRUE;  
+			*lpField = *lpFieldInfo;
+			
+Next:		GlobalUnlock (SQLPtr->OFHandle);
+			GlobalUnlock (*lpFileHandle); 
+			if (rtn) goto Exit;
+		}
+	}
+Exit:
+	GlobalUnlock (FilePathHandle);
+	return (rtn);    
+}   
+
+LPOPENFILEDATA InOpenFileList (LPSTR Name)
+{   
+ 	int i;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle,lpFileHandle2; 
+	LPOPENSQLDATA	SQLPtr;
+	LPSQLFIELD	lpSQLField;   
+	LPOPENFILEDATA	FilePtr;
+            
+    if (!FilePathHandle)  
+    	return NULL;
+    FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+    lpFileHandle = &FilePathPtr->FileHandle; 
+    for (i=0;i<FilePathPtr->NumFiles;i++,lpFileHandle++)
+    {
+		if (*lpFileHandle)
+		{
+			SQLPtr = (LPOPENSQLDATA)GlobalLock (*lpFileHandle);
+            FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+			GlobalUnlock (*lpFileHandle);
+			if (!_fstricmp (FilePtr->fullpath,Name))
+			{
+				GlobalUnlock (FilePathHandle);
+				return FilePtr; 
+			}
+			GlobalUnlock (SQLPtr->OFHandle);
+		} 
+    }
+	GlobalUnlock (FilePathHandle);
+	return NULL;
+}
+
+void CloseMacroFiles (long ThisMacro)
+{
+ 	int i;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle,lpFileHandle2; 
+
+Top:
+    if (!FilePathHandle)  
+    	return;
+    FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+    lpFileHandle = &FilePathPtr->FileHandle; 
+    for (i=0;i<FilePathPtr->NumFiles;i++,lpFileHandle++)
+    {   
+   		HANDLE			hSQL = *lpFileHandle;
+		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+		long			MacroID = FilePtr->MacroID;
+        
+        GlobalUnlock (SQLPtr->OFHandle);
+        GlobalUnlock (hSQL);
+    	if (MacroID == ThisMacro)
+    	{
+			GlobalUnlock (FilePathHandle); 
+			CloseDataFile (FALSE,&hSQL);
+			goto Top;
+		}
+    }
+	GlobalUnlock (FilePathHandle);
+	return;    
+}
+		
+BOOL AddToOpenFileList (HANDLE hSQL)
+{ 	int i;
+	LPFILEPATH	FilePathPtr; 
+	HANDLE	SaveHandle;
+	LPHANDLE	pHandle;
+
+    if (FilePathHandle)
+    {
+	    FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+	    pHandle = &FilePathPtr->FileHandle;
+	    pHandle += FilePathPtr->NumFiles++;
+	    *pHandle = hSQL;
+    }
+    else
+    {  
+	    SaveHandle = FilePathHandle;
+	    FilePathHandle = GlobalAlloc (GHND,sizeof(HANDLE)+2+MAXFILESINPATH*sizeof(HANDLE));
+	    FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+	    FilePathPtr->LastPathHandle = SaveHandle;
+	    FilePathPtr->FileHandle=hSQL;
+	    FilePathPtr->NumFiles=1; 
+	}
+    GlobalUnlock(FilePathHandle);
+	return(TRUE);
+}
+
+void RemoveFromOpenFileList (HANDLE hFile)
+{
+ 	int i;
+	LPFILEPATH	FilePathPtr;
+	LPHANDLE	lpFileHandle,lpFileHandle2; 
+
+    if (!FilePathHandle)  
+    	return;
+    FilePathPtr = (LPFILEPATH)GlobalLock (FilePathHandle);
+    lpFileHandle = &FilePathPtr->FileHandle; 
+    for (i=0;i<FilePathPtr->NumFiles;i++,lpFileHandle++)
+    {
+    	if (*lpFileHandle == hFile)
+    		goto Remove;
+    }
+	GlobalUnlock (FilePathHandle);
+	return;    
+
+Remove:	
+	if (FilePathPtr->NumFiles==1)
+	{   
+		HANDLE	LastHandle;
+				
+		LastHandle = FilePathPtr->LastPathHandle; 
+		GlobalUnlock (FilePathHandle);
+
+		GlobalFree (FilePathHandle);
+		FilePathHandle = LastHandle;  
+		if (!FilePathHandle)
+			ODBCTerminate (FALSE);
+	}
+	else if (i == (FilePathPtr->NumFiles-1)) 
+	{ 
+		FilePathPtr->NumFiles--;
+		GlobalUnlock (FilePathHandle);
+	}                  
+	else
+	{
+		for (i++,lpFileHandle2=lpFileHandle++;i<FilePathPtr->NumFiles;i++,lpFileHandle++,lpFileHandle2++)
+		{
+			*lpFileHandle2 = *lpFileHandle;
+		}
+		FilePathPtr->NumFiles--;
+		GlobalUnlock (FilePathHandle);
+	}
+	return;
+}
+
+void ListGlobals (HWND hWndDlg,WORD Control,BOOL Expand)
+{
+	unsigned short	i=NumVars; 
+	VARPNT	VarPtr;  
+	char	str[512]; 
+	
+	while (i--)
+	{   
+		VarPtr = (VARPNT)GlobalLock (VarHandles[i]); 
+		sprintf (str,"%s\t%s",VarPtr->Name,VarPtr->Value);   
+        SendDlgItemMessage (hWndDlg,Control,LB_ADDSTRING,0,(LPARAM)((LPSTR)str));
+		GlobalUnlock (VarHandles[i]);
+	} 
+	return;
+}
+
+void dumpvars (LPSTR Name)
+{   
+	unsigned short	i=NumVars; 
+	VARPNT	VarPtr;  
+	char	str[128]; 
+	OFSTRUCT	OFStruct;
+	HFILE	Fid;
+	
+	Fid = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
+
+	while (i--)
+	{   
+		VarPtr = (VARPNT)GlobalLock (VarHandles[i]); 
+		sprintf (str,"%ld %s:%s",(long)VarHandles[i],VarPtr->Name,VarPtr->Value);   
+		fputstring (str,Fid);
+		GlobalUnlock (VarHandles[i]);
+	} 
+	GSSiClose (Fid);
+	return;
+}
+
+HANDLE FindVar (LPSTR Name)
+{   
+	short	BegID,MidID,EndID;
+	short	i; 
+	VARPNT	VarPtr;
+	LPVARNAMEINDEXITEM	lpVN; 
+	HANDLE	rtn=NULL; 
+    
+	if (!hVarNameTable)
+		return (NULL);
+    if (!_fstrnicmp (Name,"G.",2))
+    	Name += 2;
+	lpVN = (LPVARNAMEINDEXITEM)GlobalLock (hVarNameTable); 
+	BegID = 0;
+	EndID = NumVars-1; 
+Start:
+	if (EndID < BegID)
+		goto Exit;
+	MidID = (BegID + EndID)/2;
+	i = _fstricmp (Name,lpVN[MidID].Name);
+	if (i < 0)
+	{ 
+		EndID = MidID - 1; 
+		goto Start;
+	}
+	if (i > 0)
+	{
+		BegID = MidID + 1; 
+		goto Start;
+	}
+	else
+		rtn = VarHandles[lpVN[MidID].id]; 
+Exit:
+	GlobalUnlock (hVarNameTable);
+	return rtn;
+}
+
+void CloseVars (void)
+{   int	i,ii;
+	VARPNT	VarPtr; 
+
+	for (i=0;i<NumVars;i++)
+	{   
+		if ((VarPtr = (VARPNT)GlobalLock (VarHandles[i])))
+		{
+			if (VarPtr->ValueIsHandle)
+			{
+				HANDLE handle = atol (VarPtr->Value);
+				GSSiGlobFree (&handle);
+			}
+			GSSiGlobUlFree (&VarHandles[i]);
+		}
+		else
+			VarHandles[i] = 0;
+	}
+	DestroyVarNameTable ();
+	return;
+}
+
+ 
+COLORREF SetColor (LPSTR pColor)
+{
+	return 0;
+}
+BOOL OpenGSStreetNames (int mode, int which)
+{   
+	char	str[128]="[STATE]\\";
+	if (hNames2)
+		return TRUE;
+	if (CurState >= 0)
+	{   
+		ExpandText (str);
+		SetGlobalValue("%GEOSPAN_LOC",str);
+		if (which >= 2)
+		{
+			hNames2 = BT_OPEN ("[STATE]\\stname2.btr", 0, mode, 0);
+			if (!hNames2 && mode == BT_WRITE) 
+			{
+				CreateStnameFilesUpdate ();
+				hNames2 = BT_OPEN ("[STATE]\\stname2.btr", 0, mode, 0);
+		    }
+		}
+		if (which%2)
+			hNames1 = BT_OPEN ("[STATE]\\stname1.btr", 0, mode, 0);
+		return TRUE; 
+	}
+	else
+	{
+		hNames2 = BT_OPEN ("stname2.btr", 0, mode, 0);
+		if (!hNames2) 
+		{
+			CreateStnameFilesUpdate ();
+			hNames2 = BT_OPEN ("stname2.btr", 0, mode, 0);
+	    }
+		hNames1 = BT_OPEN ("stname1.btr", 0, mode, 0);
+		return TRUE; 
+	}
+} 
+
+void CloseGSStreetNames(void)
+{
+	BT_CLOSE (hNames1); 
+	BT_CLOSE (hNames2);
+	hNames1 = 0;
+	hNames2 = 0;  
+	HaveState = -1;
+	return;
+} 
+
+long GetCmdID (LPSTR lpCmdID)
+{
+	HFILE	Fid; 
+	char	str[132];
+	long	ID;
+	LPSTR	lpSpace, lpParen; 
+	OFSTRUCT	OFStruct;
+	char CmdFName[64]="[%INDIR]cmdid";
+	
+	if (!lpCmdID)
+	{
+		return 0;
+	} 
+	Truncate (lpCmdID);
+	if (*lpCmdID == '"')
+	{   
+		LPLONG	pNumCmd, pCmdOffset;  
+		LPSTR	pCmd, pEndQuote;
+		long	NewOff;   
+		int		l;
+		
+		pEndQuote = lpCmdID;
+		pEndQuote++;
+		pEndQuote = MatchLev (pEndQuote,'"');
+		if (!pEndQuote)
+			return 0;
+		*pEndQuote = 0;
+		pNumCmd = (LPLONG)GlobalLock (*phWhichCmdList);
+		(*pNumCmd)++;
+		pCmdOffset = pNumCmd;
+		pCmdOffset += *pNumCmd;
+		if (*pNumCmd == 1)
+		{
+			*pCmdOffset = 1024*4 + 4;
+		}
+		else
+		{	
+			pCmdOffset--;
+			pCmd = pCmd;	
+			pCmd = (LPSTR)pNumCmd;
+			pCmd+=*pCmdOffset;
+			l = _fstrlen (pCmd);
+			NewOff = *pCmdOffset + l + 1;
+			pCmdOffset++;
+			*pCmdOffset = NewOff;
+		}
+		pCmd = (LPSTR)pNumCmd;
+		pCmd+=*pCmdOffset;
+		_fstrcpy (pCmd,++lpCmdID); 
+		REPLAC (pCmd,"[%ARG]",IncludeFileArg,_fstrlen(pCmd)+_fstrlen(IncludeFileArg));
+		GlobalUnlock (*phWhichCmdList);
+		if (phWhichCmdList == &hUserCmd)
+			return (58000+*pNumCmd);
+		else			
+			return (59500+*pNumCmd);
+	} 
+		
+	lpParen = _fstrchr (lpCmdID,'(');
+	if (lpParen)
+		*lpParen = 0;    
+	ID = ConvertCMDToNum (lpCmdID);
+	if (lpParen)
+		*lpParen = '(';
+	return ID;
+}
+
+BOOL ExecuteUserCmd (int CmdID)
+{ 
+	LPLONG	pNumCmd, pCmdOffset;  
+	LPSTR	pCmd, pEndQuote, pCommand;
+	long	NewOff, l;
+	HANDLE	handle;   
+	BOOL	rtn=TRUE;
+	
+	if (!*phWhichCmdList)
+		return FALSE;	
+	pNumCmd = (LPLONG)GlobalLock (*phWhichCmdList);    
+	if (!pNumCmd)
+		return FALSE;  
+	if (CmdID < 0 || CmdID > *pNumCmd)
+		return FALSE;
+	pCmdOffset = pNumCmd;
+	pCmdOffset += CmdID;
+	pCmd = (LPSTR)pNumCmd;
+	pCmd+=*pCmdOffset;
+	l = _fstrlen (pCmd);    
+	if (!l)
+	{
+		GlobalUnlock (*phWhichCmdList);
+		return FALSE;
+	}
+	handle = GSSiGlobAlloc (GMEM_MOVEABLE,l+10);
+	pCommand = GlobalLock (handle); 
+	_fstrcpy (pCommand,pCmd);
+	GlobalUnlock (*phWhichCmdList);    
+	
+	if (*pCommand == '|')
+		rtn = ExecuteCommandString (++pCommand);
+	else
+		AddGraphicsCmd (CurView->hWnd,pCommand,FALSE,0); 		
+	GlobalUnlock (handle);
+	GlobalFree (handle);   
+	return rtn;
+}
+	
+BOOL ExecuteCommandString (LPSTR pCmd)
+{
+	BOOL	MoreCommands; 
+	LPSTR	EndCommand, pCommand;
+	long	lc;  
+	HANDLE	hCmd; 
+	LPVIEWPORT	SaveVP =  CurView;
+	           
+	lc = _fstrlen (pCmd);
+	if (!lc)
+		return TRUE;
+	hCmd = GSSiGlobAlloc (GMEM_MOVEABLE,lc+1);
+	pCommand = GlobalLock (hCmd);  
+	_fstrcpy (pCommand,pCmd);
+//	CurView = pViewports[CommandViewport-1]; //tempdebu
+   	SetViewport(CommandViewport);
+	
+	MoreCommands =  TRUE;
+	while (MoreCommands)
+	{
+		EndCommand = MatchLev (pCommand,';');
+		if (!EndCommand)
+		{
+			MoreCommands = FALSE;
+			EndCommand = _fstrchr (pCommand,0);
+		} 
+		*EndCommand = 0;
+		DoUserCommand (pCommand);
+		pCommand = EndCommand;
+		pCommand++;
+	} 
+	GSSiGlobUlFree (&hCmd);
+	if (ConfigLoaded)
+		CurView = SaveVP;
+	return TRUE;
+} 
+
+BOOL DoUserCommand (LPSTR Cmd)
+{   
+	UINT	CmdID;
+	long	lCmdID; 
+	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	cmd=GlobalLock (hStr);
+	
+	lCmdID = GetCmdID (Cmd);
+	if (lCmdID < 0)
+	{   
+		CmdID = -lCmdID; 
+		AddGraphicsFunction (CurView->hWnd, CmdID,0);
+	}	
+    else if (lCmdID)
+    {
+    	CmdID = lCmdID; 
+		PostMessage(hWndMain, WM_COMMAND, CmdID, CurView->ID);
+	}
+    else  
+    {
+    	_fstrcpy (cmd,Cmd);
+		ExpandText (cmd);
+	}
+	GSSiGlobUlFree (&hStr);
+	return TRUE;
+} 
+
+double GetViewportScale (HDC hDC)
+{                
+	double scale, WDist, IDist, BaseScale;
+	int	iLogPixsX;   
+	DPOINT	p1,p2; 
+	long	OrthRes[4]={1,4,16,16};   
+	short	ires; 
+	char	str[32];
+	LPSTR	lpComma;
+
+	OrthScale=0;	
+	if (!hDC)
+		return 0;
+	iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
+	if (!iLogPixsX)
+		return 0;   
+	IDist = (double)(CurView->DrawRect.right - CurView->DrawRect.left)/(double)iLogPixsX;
+    if (!IDist)  
+    	return 0;
+	if (!PRJ_TYPE[1])
+	{   
+		p1.x = CurView->WBounds.xmn;
+		p2.x = CurView->WBounds.xmx;
+		p1.y = (CurView->WBounds.ymn + CurView->WBounds.ymx) / 2;
+		p2.y = p1.y;
+		WDist = ArcDistance(p1, p2);
+	}
+	else
+		WDist = CurView->WBounds.xmx - CurView->WBounds.xmn;
+    
+	scale = WDist/IDist; 
+	if (PRJ_TYPE[1] != 2)
+		scale *= MFT; 
+	scale /= 5280.0; 
+    
+    if (CurView->DesiredWidth) 
+    	BaseScale = WDist/(CurView->DesiredWidth * (1.0-2*(CurView->Margin+max(0,CurView->BorderPct))/100));
+    else
+    	BaseScale = 0;
+    SetGlobalValueReal ("%BASESCALE",BaseScale);
+    _fstrcpy (str,"[%ORTHOLEVS]");
+    ExpandText (str);
+    if (*str)
+    {   
+    	OrthRes[1]=OrthRes[2]=OrthRes[3]=999999999;
+    	OrthRes[0] = atol (str);
+    	if (!(lpComma = _fstrchr (str,',')))   
+    		goto GetScale;
+    	lpComma++;
+    	OrthRes[1] = atol (lpComma);
+    	if (!(lpComma = _fstrchr (lpComma,',')))   
+    		goto GetScale;
+    	lpComma++;
+    	OrthRes[2] = atol (lpComma);
+    	if (!(lpComma = _fstrchr (lpComma,',')))   
+    		goto GetScale;
+    	lpComma++;
+    	OrthRes[3] = atol (lpComma);
+    }    
+GetScale:
+    IDist = (double)(CurView->DrawRect.right - CurView->DrawRect.left);
+    if (IDist)
+		OrthScale = (WDist/BaseUnitsPerOrthoPixel)/IDist;
+	ires = 0;
+	if (OrthScale >= OrthRes[1])
+		ires = 1;
+	if (OrthScale >= OrthRes[2])
+		ires = 2;
+	if (OrthScale >= OrthRes[3])
+		ires = 3;
+	ires = min (MaxOrthoRes,max (ires,GetGlobalLVal ("[%MINORTHORES]")));
+	SetGlobalValueLong ("%ORTHORES",OrthRes[ires]);
+	
+	return scale;
+}
+
+long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,short Direction)
+{
+	 char	SaveProj[32], project[32];
+	 LPSTR	lpDot, lpEnd;
+	 short	SaveUnits;
+	 long	rtn=0;
+		 		 
+	 SaveUnits = PRJ_UNITS[3];
+	 _fstrcpy (SaveProj,"[%ALT_PROJECTION]");
+	 ExpandText (SaveProj);   
+	 _fstrcpy (project,CvtFile);
+     if ((lpDot=_fstrrchr(project,'.')))
+        *lpDot = 0;
+     SetGlobalValue("%ALT_PROJECTION",project);
+     ConvertCoordClose ();
+	 if ((rtn=ConvertCoordInit()))
+	 	goto Exit;
+/*     if (*str)
+     { 
+         if (!_fstrcmp(str,"Feet"))
+            PRJ_UNITS[3] = 1;
+         else if (!_fstrcmp(str,"Meters"))
+            PRJ_UNITS[3] = 2; 
+     } */ 
+     if (Direction==1)
+	 	rtn=ConvertCoord (Point,3,1);  
+	 else
+	 	rtn=ConvertCoord (Point,1,3); 
+Exit: 
+     PRJ_UNITS[3] = SaveUnits;
+	 SetGlobalValue ("%ALT_PROJECTION",SaveProj);
+     ConvertCoordClose ();
+     return rtn;
+}
+BOOL LoadInternalGMD (LPGWDHEADER lpGWDHead,long iref)
+{   
+	short	ii, Type;
+	char	SymName[34];
+	struct {
+			long	refno;
+			char	prefix[8], udi[64], hastext, Type, SymName[32];
+			short	symnum, Layer;
+			double	Length, Area, Perimeter, AZM, Elev;
+			long	MinTime, MaxTime;
+			double	BPX, BPY, MPX, MPY, EPX, EPY;
+			char	text[256];
+			char	FileName[256];
+			char	Globals[256];
+			long	NumPoints; } Type1;
+	struct {
+			long	refno;  
+			char	prefix[8], udi[64];
+			short	symnum, Type,Layer;  
+			/*DPOINT	BeginPoint, EndPoint, PickedPoint;
+			double	PCT, Length, OffDist;*/
+		   } Type2;
+	
+	switch (lpGWDHead->Version)
+	{
+		case 1001: 
+		case 1002:
+
+		if (InGraphicsProcessor)
+			ii=1;
+		else
+			if (!SetPickGlobalsCalled)
+				break;	
+       
+       SetPickGlobalsCalled = FALSE;
+		_fmemset (&Type1,0,sizeof(Type1));
+		  
+		Type1.refno = iref;
+		_fstrncpy (Type1.prefix,CurrentTAG,8); 
+		_fstrncpy (Type1.udi,CurrentUDI,64);
+		Type1.Layer = FileNum;
+		if (InGraphicsProcessor)
+			ScanItemForDBVals ();
+		GetGlobalVal (hTEXT,Type1.text,0);    
+		if (*Type1.text)
+			Type1.hastext = 'Y';
+		else
+			Type1.hastext = 'N';  
+		if (CurrentType == GF_TEXT)
+			Type = CurrentTextBaseType;
+		else
+			Type = CurrentType;
+		switch (Type)
+		{
+			case GF_POINT:
+				Type1.Type = 'P';  
+				Type1.AZM = CurPointAZ; 
+				Type1.BPX = Type1.MPX = Type1.EPX = CurPointLocD.x;
+				Type1.BPY = Type1.MPY = Type1.EPY = CurPointLocD.y; 
+				Type1.NumPoints = 1;
+				break;
+			case GF_LINE:
+			case GF_POLYLINE:
+			{   
+				HPPOINT	lpEndPoint;  
+				HPDPOINT	lpDEndPoint;
+				double	Dist;
+				
+				Type1.Type = 'L'; 
+				Type1.MPX = 0;
+				Type1.MPX = 0;
+GetPolylineEP:
+				if (InGraphicsProcessor)
+				{    
+					Type1.NumPoints = nCurPoints;  
+					Type1.Layer = FileNum;
+					if (HiPrecis)
+					{   
+						HPDPOINT	lpPoints=lpDCurPoints;
+						long		nPnts=nCurPoints;
+						
+						if (hDynamicSeg)
+						{
+							lpPoints=(HPDPOINT)GlobalLock (hDynamicSeg);
+							nPnts = nDynamicCoord;
+						}
+						lpDEndPoint = lpPoints + (nPnts-1); 
+						Type1.BPX = lpPoints->x;
+						Type1.BPY = lpPoints->y;  
+						Type1.EPX = lpDEndPoint->x;
+						Type1.EPY = lpDEndPoint->y;
+						Type1.AZM = getazd (lpPoints,lpDEndPoint);  
+						if (CurrentType == GF_CURVE)
+						{   
+							DPOINT	BP,RP; 
+							short	rc; 
+							double	Radius;
+								
+							Type1.MPX = lpPoints[1].x;
+							Type1.MPX = lpPoints[1].y;
+							rc = RCURVE(&Type1.BPX,&Type1.BPY,&Type1.MPX,&Type1.MPY,&Type1.EPX,&Type1.EPY,
+										&RP.x,&RP.y,&Dist); 
+							BP.x = Type1.BPX;
+							BP.y = Type1.BPY;
+							Radius = ldistp (BP,RP);
+							Type1.Length = Dist; 
+							SetGlobalValueReal ("%RADIUS",Radius);
+						}
+						else if (ComputeArea)
+							ComputeProjectedAreaAreaD (lpPoints,-nPnts,&Dist); 
+						if (hDynamicSeg)
+							GlobalUnlock (hDynamicSeg); 
+						CurLength = Dist;
+					}
+					else
+					{   
+						DPOINT	BPointW, EPointW;
+						
+						CurStartPoint = *lpCurPoints;
+						lpEndPoint = lpCurPoints + (nCurPoints-1);   
+						BPointW = FilePtToBasePt (CurStartPoint);
+						EPointW = FilePtToBasePt (*lpEndPoint);
+						Type1.BPX = BPointW.x;
+						Type1.BPY = BPointW.y;  
+						Type1.EPX = EPointW.x;
+						Type1.EPY = EPointW.y;
+						Type1.AZM = getaz (*lpCurPoints,*lpEndPoint);  
+						if (ComputeArea)
+						{
+							ComputeProjectedAreaArea (lpCurPoints,-nCurPoints,&Dist);  
+							CurLength = Dist;
+							Type1.Length = ConvertDist(Dist,OutDistUnits);
+						}
+					}
+				}  
+				else if (CurrentProcessedPickedItem >=0) 
+				{   
+					CurLength = PickList[CurrentProcessedPickedItem].Length;
+					Type1.Length = ConvertDist(PickList[CurrentProcessedPickedItem].Length,OutDistUnits); 
+				}
+			}
+				break;
+			case GF_CURVE:		 
+				Type1.Type = 'C'; 
+				Type1.NumPoints = 3;  
+				goto GetPolylineEP;
+				break;
+			case GF_AREA:
+			{
+				double	Dist, Area;
+							  
+				Type1.Type = 'A';  
+				if (InGraphicsProcessor)
+				{   
+					Type1.NumPoints = nCurPoints;
+					if (ComputeArea)
+					{
+						if (HiPrecis)
+							Area = ComputeProjectedAreaAreaD (lpDCurPoints,nCurPoints,&Dist);
+						else  
+							Area = ComputeProjectedAreaArea (lpCurPoints,nCurPoints,&Dist); 
+						CurLength = Dist;
+						CurArea = Area; 
+						Type1.Area = ConvertArea (Area,OutAreaUnits); 
+						Type1.Perimeter = ConvertDist(Dist,OutDistUnits);
+					}
+				}
+				else if (CurrentProcessedPickedItem >=0) 
+				{   
+					CurLength = PickList[CurrentProcessedPickedItem].Length;
+					CurArea = PickList[CurrentProcessedPickedItem].Area;
+					Type1.Area = ConvertArea (PickList[CurrentProcessedPickedItem].Area,OutAreaUnits); 
+					Type1.Perimeter = ConvertDist(PickList[CurrentProcessedPickedItem].Length,OutDistUnits); 
+				}
+			}
+				break;
+			case GF_TEXT:			 
+				Type1.Type = 'T';
+				Type1.AZM = TXRot;
+				break;
+		}
+		Type1.Elev = (double)iref/10;
+		Type1.MinTime = GRStartTime;
+		Type1.MaxTime = GREndTime; 
+		_fstrcpy (Type1.Globals,"[%GLOBALS]");
+		ExpandText (Type1.Globals);
+		Type1.symnum = CurrentDesc;
+		if (InGraphicsProcessor)  
+		{
+			if (!GetOpenFileSymName (CurrentDesc,SymName))
+				GetDictSymName (CurrentDesc,SymName);
+			_fstrcpy (Type1.FileName,PltName);
+			ExpandText (Type1.FileName);   
+		}
+		else
+		{   
+			double	Radius;
+			
+			Type1.BPX = CurBP.x;
+			Type1.BPY = CurBP.y;
+			Type1.MPX = 0;
+			Type1.MPX = 0;
+			Type1.EPX = CurEP.x;
+			Type1.EPY = CurEP.y;
+			GetSymbolName (CurrentDesc,SymName,NULL,0,NULL);
+			_fstrcpy (Type1.FileName,PickName);
+			ExpandText (Type1.FileName);   
+			if (CurrentType == GF_CURVE)
+			{   
+				DPOINT	BP,RP; 
+				short	rc; 
+				double	CLEN;
+								
+				Type1.MPX = CurMP.x;
+				Type1.MPY = CurMP.y;
+				rc = RCURVE(&Type1.BPX,&Type1.BPY,&Type1.MPX,&Type1.MPY,&Type1.EPX,&Type1.EPY,
+							&RP.x,&RP.y,&CLEN); 
+				BP.x = Type1.BPX;
+				BP.y = Type1.BPY;
+				Type1.Length = CLEN; 
+				CurLength = CLEN;
+				Radius = ldistp (BP,RP);
+			} 
+			else
+				Radius = 0;
+				SetGlobalValueReal ("%RADIUS",Radius);
+		}
+		_fstrncpy (Type1.SymName,SymName,32);
+		_fmemmove (&lpGWDHead->GWDData,&Type1,sizeof(Type1)); 
+		break;
+	
+		case 2001:
+		_fmemset (&Type2,0,sizeof(Type2));
+		Type2.refno = iref; 
+		_fstrncpy (Type2.prefix,CurrentTAG,8); 
+		_fstrncpy (Type2.udi,CurrentUDI,64);     
+		Type2.symnum = CurrentDesc;
+		if (CurrentType == GF_TEXT)
+			Type = CurrentTextBaseType;
+		else
+			Type = CurrentType; 
+		Type2.Type = Type;  
+		Type2.Layer = FileNum;
+/*		Type2.BeginPoint = PickList[NumPicked-1].BeginPoint;
+		Type2.EndPoint = PickList[NumPicked-1].EndPoint;
+		Type2.PickedPoint = PickList[NumPicked-1].PickedPoint;
+		Type2.PCT = PickList[NumPicked-1].PCT;
+		Type2.Length = PickList[NumPicked-1].Length;
+		Type2.OffDist = PickList[NumPicked-1].OffDist;*/
+		_fmemmove (&lpGWDHead->GWDData,&Type2,sizeof(Type2)); 
+		break;	
+	}
+	return TRUE;	
+}
+
+BOOL GetCurVal (LPSTR Val,short maxval, UINT StringID)
+{   
+	char	str[128]="[";
+	
+	*Val=0;
+	if (!StringID)
+		return FALSE; 
+	if (!LoadString(hInst, StringID, &str[1], 127))
+		return FALSE;
+	_fstrcat (str,"]");	
+	ExpandText (str); 
+	_fstrcpy (Val,str);
+	if (*Val)
+		return TRUE;
+	else
+		return FALSE;
+} 
+
+void SetCurVal (LPSTR Val,UINT StringID)
+{   
+	char	str[128];
+	
+	if (!StringID)
+		return;
+	if (!LoadString(hInst, StringID, str, 128))
+		return;
+	SetGlobalValue (str,Val);
+	return;
+}
+void SaveGlobalVals (HFILE Fid)
+{
+	unsigned short	i=NumVars; 
+	LPSTR	pstr;
+	VARPNT	VarPtr;
+    HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,UINT_MAX);
+    LPSTR	pMem = GlobalLock (hMem);
+    long	lMem=0; 
+    short	nVars=0,l;
+ 	short	Length, Version=1, id=OB_SAVEGLOBALS; 
+ 	HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+ 	LPSTR	str=GlobalLock (hStr);   
+
+ 	_lwrite (Fid,&id,2);  
+ 	_lwrite (Fid,&Version,2);
+ 	_lwrite (Fid,&Version,2);
+	while (i--)
+	{   
+		VarPtr = (VARPNT)GlobalLock (VarHandles[i]);
+		if (VarPtr)
+		{
+			if (VarPtr->Save)
+			{
+				nVars++;
+				_fstrcpy (pMem,VarPtr->Name);
+				l = _fstrlen (VarPtr->Name);
+				pMem += (l+1);
+				lMem += (l+2);  
+				*pMem = VarPtr->ContainsGorF;
+				pMem++;
+				_fstrcpy (str,VarPtr->Value);  
+				SubstituteDL (str);
+				pstr = str;
+				if (*str == '@')
+					pstr++;
+				_fstrcpy (pMem,pstr);  
+				l = _fstrlen (pMem);
+				pMem += (l+1);
+				lMem += (l+1);
+			}	
+			GlobalUnlock (VarHandles[i]);
+		}
+	} 
+	_lwrite (Fid,&nVars,2);
+	_lwrite (Fid,&lMem,4);
+	GlobalUnlock (hMem);
+	pMem = GlobalLock (hMem);
+	_lwrite (Fid,pMem,(size_t)lMem); 
+	GSSiGlobUlFree (&hMem);
+	GSSiGlobUlFree (&hStr);
+	return;
+} 
+
+void ExpandGlobalRaw (LPSTR Name,LPSTR Value, short maxlen)
+{
+	VARPNT	VP;
+	HANDLE	handle; 
+	
+	if ((handle = FindVar (Name)))
+	{
+		VP = (VARPNT)GlobalLock (handle); 
+		_fstrcpy (Value,VP->Value);
+		if (VP->ContainsGorF)
+		{
+			REPLAC (Value,"[","@[",maxlen);
+			REPLAC (Value,"$","@$",maxlen); 
+		}
+		GlobalUnlock (handle);
+	} 
+		else *Value=0;
+	return;
+} 
+
+
+long OutputToFile (LPSTR File, LPSTR DBName,LPSTR pSQL, HANDLE hFields,BOOL UseHLT,BOOL OutToScreen,BOOL GMHeader,HWND StatusWnd,HWND hWndDlg)
+{   
+    HANDLE      hSQL; 
+    LPINT       lpField, StartField;
+    short         NumFields;
+    long        rtn=0, TotRecs=0, AtRec=0;
+    char        str[260];
+    short         st,ifield,j; 
+    LPSTR       lpHead, lpRec, lpEnd;
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr=0;
+    LPFIELDINFO lpFieldInfo; 
+    HANDLE      SaveHandle, hRec, hHead;
+    HFILE       OutFid, IndexFid;     
+    long        iref, nRecs, Recloc,maxrowlen;
+    extern  HANDLE  hHighlight;    
+    
+typedef struct
+    {
+        short Show; 
+        long    Sequence; 
+        PICKDATA    PD; 
+    } HIGHLIGHTDATA;
+    HIGHLIGHTDATA   HighlightData;
+    
+    OFSTRUCT    OFStruct; 
+    char    IndexFile[144];
+    
+    hSQL=0;
+    if (!OpenDataFile (DBName,pSQL,BT_READ,&hSQL))
+        return FALSE;   
+    
+    if (UseHLT)
+    	TotRecs = BT_NUM_IN_INDEX (hHighlight); 
+/*    else if (StatusWnd)
+    	TotRecs = NumSQLRows (hSQL);   */
+    hHead = GSSiGlobAlloc(GHND,4096);
+    hRec  = GSSiGlobAlloc(GMEM_MOVEABLE,4096);   
+    lpRec = GlobalLock(hRec);
+    lpHead = GlobalLock(hHead);
+    OutFid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
+    if (OutFid == HFILE_ERROR)
+    {
+    	GSSiMessageBox (File,"Unable to create output file",MB_ICONEXCLAMATION);
+    	goto Exit;
+    }
+    if (OutToScreen)
+    { 
+        GetTempFileName (0,"idx",0,(LPSTR)IndexFile); 
+        IndexFid = GSSiOpenFile(IndexFile,&OFStruct,OF_CREATE);
+    }
+    else
+        IndexFid=0; 
+        
+    SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+    FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+    if (hFields)
+    {   
+	    lpField = (LPINT) GlobalLock(hFields);
+	    NumFields = *lpField++;
+	    StartField = lpField;   
+	}
+    lpFieldInfo = &FilePtr->FldInfo;   
+    for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
+    {   
+    	if (hFields)
+    	{
+            for (j=0,lpField=StartField;j<NumFields;j++,lpField++) 
+            {
+                if (ifield==*lpField) goto UseFld;
+            }
+            goto SkipFld;
+        }
+UseFld: 
+		if (*lpHead)
+			_fstrcat (lpHead,",");
+		if (GMHeader)
+		{   
+			CreateGMTextHeader (lpFieldInfo,lpHead);
+        }
+        else
+		{ 
+			if (lpFieldInfo->type == BT_RIGHT_CHAR || lpFieldInfo->type == BT_CHAR ||
+				lpFieldInfo->type == SQL_CHAR || lpFieldInfo->type == SQL_VARCHAR)
+	        	sprintf (_fstrchr(lpHead,0),"\"%s\"",lpFieldInfo->name);
+	        else
+	        	sprintf (_fstrchr(lpHead,0),"%s",lpFieldInfo->name);
+        }
+SkipFld:; 
+    }
+    fputstring (lpHead,OutFid);
+	nRecs=0;
+    maxrowlen=0;
+    if (UseHLT)
+	    st = BT_FIND (hHighlight,(LPSTR)&iref,BT_FIRST,BT_ANY,(LPSTR)&HighlightData); 
+	else
+		st = 0;
+    while (!st)
+    {   
+    	if (UseHLT)
+    	{
+	   		PickList[0]=HighlightData.PD;
+			ProcessPickedItem (0,FALSE);  
+	    } 
+		AtRec++;
+		if (TotRecs && StatusWnd)      		
+	        PctBox (StatusWnd,TotRecs,AtRec,-1);
+	    else 
+	    {
+	    	sprintf (str,"%ld records written",AtRec);
+	    	SetWindowText (hWndDlg,str);
+	    }
+        lpFieldInfo = &FilePtr->FldInfo;   
+        *lpRec = 0;
+        for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
+        {   
+        	if (hFields)
+        	{
+	            for (j=0,lpField=StartField;j<NumFields;j++,lpField++) 
+	            {
+	                if (ifield==*lpField) goto UseField;
+	            }
+	            goto SkipField;
+	        }
+    UseField:
+            if (GetValFromOpenFiles (lpFieldInfo->name,str) < 0)
+                goto NextHlt; 
+            Truncate (str);
+            if (*lpRec)
+            	_fstrcat (lpRec,",");
+			if (lpFieldInfo->type == BT_RIGHT_CHAR || lpFieldInfo->type == BT_CHAR ||
+				lpFieldInfo->type == SQL_CHAR || lpFieldInfo->type == SQL_VARCHAR)
+	        	sprintf (_fstrchr(lpRec,0),"\"%s\"",str);
+	        else
+	        	sprintf (_fstrchr(lpRec,0),"%s",str);
+     SkipField:;
+        }
+NextHlt: 
+		if (_fstrlen(lpRec)>1)
+		{
+	        
+	        Recloc = _llseek(OutFid,0,1);
+	        if (IndexFid)
+	            _lwrite (IndexFid,(char *)&Recloc,sizeof(Recloc)); 
+	        nRecs++;
+	        fputstring (lpRec,OutFid);
+	        maxrowlen = max(maxrowlen,(signed)_fstrlen(lpRec)); 
+	        rtn++;  
+	    }
+	    if (CheckForContinue ())
+	    {
+			if (UseHLT)
+	        	st = BT_FIND (hHighlight,(LPSTR)&iref,BT_NEXT,BT_ANY,(LPSTR)&HighlightData);
+	        else
+			{
+				if (FetchDBRec (hSQL))
+					st=0;
+				else
+					st=1;
+			}
+		}
+		else 
+		{
+	    	GSSiMessageBox ("Operation cancelled by user","",MB_ICONEXCLAMATION);
+	    	break;
+	    }
+			
+    }
+    if (IndexFid)
+    {   long rec;
+        _llseek (IndexFid,0,0);
+        for (rec=0;rec<nRecs;rec++)
+        {
+            _lread(IndexFid,&Recloc,sizeof(Recloc));
+            _lwrite(OutFid,(char *)&Recloc,sizeof(Recloc));
+        }
+        _lwrite(OutFid,(char *)&nRecs,sizeof(nRecs));
+        _lwrite(OutFid,(char *)&maxrowlen,sizeof(maxrowlen));
+        GSSiClose(IndexFid);
+        IndexFid = GSSiOpenFile(IndexFile,&OFStruct,OF_DELETE);
+    }      
+    GSSiClose (OutFid);
+Exit:
+    if (hFields)     
+    	GlobalUnlock(hFields);
+    GSSiGlobUlFree(&hRec);
+    GSSiGlobUlFree(&hHead);
+    if (SQLPtr)
+    {
+	    GlobalUnlock (SQLPtr->OFHandle);
+	    GlobalUnlock (hSQL);
+	}
+    CloseDataFile (TRUE, &hSQL);
+    return (rtn);
+}
+
+BOOL GetOriginalImageBounds (LPSTR IndexPath,LPSTR ImageName,LPMNMXCORD	lpBounds)
+{
+	LPFILEINDEX lpIndex;
+	HANDLE	handle; 
+	LPSTR	lpDot;
+	BOOL	SaveIgnoreBounds=IgnoreBounds; 
+		                 	
+	DBoundsInit (lpBounds);
+	IgnoreBounds=TRUE;
+	handle = OpenMapIndex (IndexPath);
+	if (!handle)
+	{
+		IgnoreBounds = SaveIgnoreBounds;
+		return FALSE;   
+	}
+	lpIndex = (LPFILEINDEX)GlobalLock (handle); 
+NextFile:
+	if (lpIndex->FileInIndex >= lpIndex->NumFiles-1)
+	{   
+	    if (!(lpIndex=GetNextIndexHeader(&handle)))
+		{
+			IgnoreBounds = SaveIgnoreBounds;
+	    	return TRUE;
+	    }
+	    goto NextFile;
+	}
+	GetNextIndexEntry(lpIndex); 
+	lpDot = _fstrrchr (lpIndex->CurrentEntry->Name,'.');
+	if (lpDot)
+		*lpDot = 0;
+	if (!_fstricmp (lpIndex->CurrentEntry->Name,ImageName))
+		AddMinMaxD (lpBounds,&lpIndex->CurrentEntry->Bounds);
+	if (lpDot)
+		*lpDot = '.';
+	goto NextFile;
+}
+void SetStartupGlobalValues (void)
+{   
+	char	str[256];
+	
+	
+	SetCurVal ("gpsfiles\\default.gps",IDS_FILEGPS);
+	SetCurVal ("formats\\",IDS_FILEFMT);
+	SetCurVal ("fundir\\",IDS_FUNDIR);
+	SetCurVal ("themes\\",IDS_FILETHM);
+	SetCurVal ("reports\\",IDS_FILERPT);
+	SetCurVal ("maplib\\",IDS_FILEPLT);
+	SetCurVal ("attribut\\",IDS_FILEGMD);
+	SetCurVal ("vislists\\",IDS_FILEVIS);
+	SetCurVal ("piklists\\",IDS_FILEPIK);
+	SetCurVal ("other.txt",IDS_FILEZML);
+	SetCurVal ("zoomtype.txt",IDS_FILEZMT);
+	SetCurVal ("vpoffset.txt",IDS_FILEVPOFF);
+	SetCurVal ("offline.txt",IDS_FILEOFFLINE);
+	SetCurVal ("daterang.txt",IDS_FILEDATERANGES);
+	SetGlobalValue("%START_DIR",CurDir);
+	SetGlobalValue("%DATA_LOC",""); 
+	SetCurVal ("@[%DL]",IDS_FILEVPEDIT);
+	SetGlobalValue("%SUBDL","Y");
+	SetGlobalValue("%PROMPTS","N");
+	SetGlobalValue("%IDM","Y");  
+	SetGlobalValue("%ALT_PROJECTION","");  
+	SetGlobalValue("%ORTHO_BUFFERS","1");
+	SetGlobalValue("%ORTHORES","");
+	SetGlobalValue("%BASE_UNITS","");    
+	SetGlobalValue("%TEXT_EDITOR","NOTEPAD.EXE"); 
+	SetGlobalValue("%NEW_POINT_SIZE","5P");
+	SetGlobalValue("%NEW_POINT_ROT","0D");
+	SetGlobalValue("%NEW_POINT_COLOR","-1");
+	SetGlobalValue("%NEW_LINE_COLOR","-1");
+	SetGlobalValue("%NEW_AREA_COLOR","-1");
+	SetGlobalValue("%NEW_LINE_WIDTH","1P");
+	SetGlobalValue("%NEW_LINE_SYM","");
+	SetGlobalValue("%NEW_AREA_SYM","");
+	SetGlobalValue("%NEW_POINT_SYM","");   
+	SetGlobalValue("%CLOSEODBC","Y"); 
+	SetGlobalValue("%ADDRANGEALL","N");  
+	SetGlobalValue("%ADDTOL","0");  
+	SetGlobalValue("%TRIGGER","3");  
+	SetGlobalValue("%CURRENTVIDEOFILE","");
+	SetGlobalValueLong ("%AUTO_ORTH_COLOR",RGB(255,0,0));     
+	SetGlobalValue("%TIGERFILE1EXT",".rt1");   
+	SetGlobalValue("%ConStatFile","constat");
+	SetGlobalValue("%PICKAP","4");   
+	
+
+	return;
+}
+
+BOOL GetNextHLTListItem (BOOL First)
+{ 
+    long	Sequence, Ref;
+	HIGHLIGHTDATA	HighlightData;
+	
+	if (First)
+		HltFetchPos = BT_FIRST;
+	if (BT_FIND (hHighlight2,(LPSTR)&Sequence,HltFetchPos,BT_ANY,(LPSTR)&Ref))
+		return FALSE;
+	HltFetchPos = BT_NEXT; 
+   	BT_FIND (hHighlight,(LPSTR)&Ref,BT_FIRST,BT_EQ,(LPSTR)&HighlightData);  
+	PickList[0]=HighlightData.PD;
+	ProcessPickedItem (0,FALSE);        		
+	return TRUE;
+}  
+
+LPVIEWPORT SetVPFromName (LPSTR Arg2,LPSHORT pErr)
+{   
+	short	iview;
+	
+	*pErr = FALSE;
+	if (!*Arg2)
+		return CurView;  
+	if (!_fstricmp (Arg2,"COMMAND"))
+	{
+		SetViewport(CommandViewport);
+		return CurView;
+	}
+	for (iview=0;iview<NumViewports;iview++)
+	{   
+		if (!_fstricmp (Arg2,pViewports[iview]->Name))
+    		return pViewports[iview];
+	}
+	*pErr = TRUE;
+	return CurView;
+} 
+
+BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs)
+{   
+	HANDLE	hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,4096+256+sizeof(OFSTRUCT));
+	LPSTR	str = GlobalLock (hSTR);
+    LPSTR	RtnValue=&str[4096];   
+   	LPOFSTRUCT	pOFStruct=(LPOFSTRUCT)(RtnValue+256);
+	HANDLE	hMacro = 0;
+	LPSTR	pMacro;
+	double	Off; 
+	long	Offset, lMacro=0;
+	BOOL	rtn=FALSE, AtEnd=FALSE;
+    extern	HANDLE	hPIDAddDB,hPIDPid;  
+    FIELDINFO Field; 
+    int		status;     
+    LPSTR	SaveRtnPointer, pEndCmd;
+   	LPSTR	pStr; 
+   	long	ThisMacro;
+    
+   ThisMacro = ++CurrentMacro;
+   if (RtnVal)
+    	*RtnVal = 0;
+    if (*Name)
+    {                                               
+    	HFILE		Fid;
+    	
+		hMacro = GSSiGlobAlloc (GMEM_MOVEABLE,UINT_MAX);
+    	pMacro = GlobalLock (hMacro);
+    	*pMacro = 0;
+	    if (!_fstricmp (Name,"INLINE"))
+	    {
+	    	if (phArgs)
+	    	{   
+	    		HANDLE hNewArgs;
+	    		LPSTR	pNewArgs;
+	    		long	l=GlobalSize (*phArgs);
+	    		
+	    		pStr = GlobalLock (*phArgs);
+	    		_fstrcpy (pMacro,pStr);
+	    		pStr += 4096; 
+	    		l -= 4096;
+	    		hNewArgs=GSSiGlobAlloc(GMEM_MOVEABLE,l);
+				pNewArgs = GlobalLock (hNewArgs);
+                _fmemmove (pNewArgs,pStr,(size_t)l);
+	    		GSSiGlobUlFree (phArgs);
+	    		GlobalUnlock (hNewArgs);
+	    		*phArgs = hNewArgs;
+	    	}
+	    }
+    	else
+    	{
+	    	Fid = GSSiOpenFile (Name,pOFStruct,OF_READ);
+	    	if (Fid == HFILE_ERROR)
+	    		goto Exit;
+	    	while (fgetstring (str,4090,Fid))
+	    		if (*str != '#')
+	    		{   
+	    			Truncate (str);
+	    			pStr = FirstNonBlank(str);
+	    			lMacro += _fstrlen (pStr);   
+	    			if (lMacro > UINT_MAX)
+	    			{
+	    				GSSiClose (Fid);  
+	    				GSSiMessageBox (Name,"Macro file exceeds maximum length",MB_ICONEXCLAMATION);
+	    				goto Exit;
+	    			}
+	    			_fstrcat (pMacro,pStr);   
+	    		}
+	    	GSSiClose (Fid); 
+	    }
+    	SaveRtnPointer = pMacroReturnValue;
+    	pMacroReturnValue = RtnValue;
+    	*pMacroReturnValue = 0;
+    	while (*pMacro)
+    	{   
+    		HANDLE	hCmd;
+    		LPSTR	pCmd;
+    		
+    		pEndCmd = MatchLev (pMacro,';');
+    		if (!pEndCmd)
+    		{
+    			AtEnd = TRUE;
+    			pEndCmd = _fstrchr (pMacro,0);
+    		}
+    		else
+    			*pEndCmd = 0;
+    		hCmd = GSSiGlobAlloc (GMEM_MOVEABLE,UINT_MAX);
+    		pCmd = GlobalLock (hCmd);
+    		_fstrcpy (pCmd,pMacro); 
+    		pMacro = pEndCmd;
+    		if (!AtEnd)
+    			pMacro++;
+    		AtEnd = FALSE;
+    		if (phArgs)
+    			hMacArgs = *phArgs;
+    		else
+    			hMacArgs = 0;
+	    	ExpandText (pCmd);
+    		hMacArgs = 0;
+	    	GSSiGlobUlFree (&hCmd); 
+	    	if (!ContinueProcessing)
+	    	{
+	    		if (pMacroReturnValue)
+	    		{  
+	    			if (RtnVal)       
+	    				_fstrcpy (RtnVal,pMacroReturnValue);
+	    			ContinueProcessing = TRUE;
+	    		}
+	    		*pMacro = 0;
+	    	}
+	    }
+    	pMacroReturnValue = SaveRtnPointer;
+		DoPaint = TRUE;
+    }
+	rtn = TRUE;
+Exit:
+    GSSiGlobUlFree (&hSTR);
+    GSSiGlobUlFree (&hMacro);  
+    CloseMacroFiles (ThisMacro);
+    return rtn;
+} 
+
+int	GetFunctionID (LPSTR str, LPSTR ParenLoc)
+{	
+	int		l; 
+	 
+	str++;
+	l = ParenLoc - str; 
+	switch (l)
+	{
+		case 1: 
+			return GetFunctionID1 (str);
+		case 2: 
+			return GetFunctionID2 (str);
+		case 3: 
+			return GetFunctionID3 (str);
+		case 4: 
+			return GetFunctionID4 (str);
+		case 5: 
+			return GetFunctionID5 (str);
+		case 6: 
+			return GetFunctionID6 (str);
+		case 7: 
+			return GetFunctionID7 (str);
+		case 8: 
+			return GetFunctionID8 (str);
+		case 9: 
+			return GetFunctionID9 (str);
+		case 10: 
+			return GetFunctionID10 (str);
+		case 11: 
+			return GetFunctionID11 (str);
+		case 12: 
+			return GetFunctionID12 (str);
+		case 13: 
+			return GetFunctionID13 (str);
+		case 14: 
+			return GetFunctionID14 (str);
+		case 15: 
+			return GetFunctionID15 (str);
+		case 16: 
+			return GetFunctionID16 (str);
+		case 18: 
+			return GetFunctionID18 (str);
+		default:
+			return 0;
+	}
+}
+
+
+
+           
+

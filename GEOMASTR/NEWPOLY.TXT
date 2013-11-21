@@ -1,0 +1,20 @@
+Creating new areas or polylines
+
+1) You must have a layer in your command viewport named 'Update'. This layer must
+	be a single map (not a map index file). All updates will be made to this map.
+	You may use the 'Create Null Map' utility to create an empty map to which the
+	updates may be made. To do this go into the Basic1 configuration and load an existing
+	map which covers the area in which new areas are to be created. Use the	'Create Null Map'
+	utility and assign a new name to the empty map. Then add this map to the file list for
+	the command viewport in the configuration file you are going to use for the digitizing
+	process and give the new layer the name 'Update'. Be sure to save the configuration file
+	so that this new layer is a permanent part of it.
+	
+2). Using the configuration file containing the 'Update' layer, set the visibility so that
+	the Update layer is visible (along with any other data you wish to see while digitizing).
+	Use the 'Create new area' or 'Create new polyline' graphics functions. In these functions
+	the left mouse button adds a new point to the area or polyline and the right button ends
+	the area or polyline. The 'Backspace' key may be used to remove the last digitized point
+	from the area or polyline. These functions are continuous. That is after creating one
+	area or polyline you may continue with the next without re-executing the function. Use
+	the 'Esc' key to exit the function.

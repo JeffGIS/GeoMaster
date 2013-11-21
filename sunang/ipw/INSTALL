@@ -1,0 +1,269 @@
+
+           IPW -- Image Processing Workbench -- ERL-C Version
+
+
+  This version of IPW is a merger of the original work done by Jim Frew at
+UCSB, his subsequent work, and the work done at the EPA Environmental
+Research Laboratory, Corvallis, Oregon.  
+
+  IPW is available via anonymous ftp at morpheus.cor.epa.gov in
+/pub/misc/ipw/ipw-dist.tar.gz.  Documentation and source are available
+to government sites from the WWW server at
+http://ice.cor.epa.gov/projects/ipw/.
+
+
+  The header files and some of the programs have been updated to handle
+ANSI C if it is available, which provides better error checking and
+better portability.  Some of the base scripts and programs have been
+changed in addition.
+
+  The biggest change from the original offering is the use of GNU Make
+instead of ipwmake.  While this requires porting GNU Make to each
+machine, I don't believe this represents a significant difficulty, and the
+benefits of using GNU Make extend beyond IPW.  The problem with ipwmake
+is it's assumption of a Release 7 Make -- one with limited functionality.
+
+  Why use GNU Make instead of assuming BSD Make?  By using GNU Make I
+can guarantee what features are available.  Some people's makes are just
+not the same as others.  Also, GNU Make has some features not available
+in most makes, such as conditionals, simple variables, parallel makes,
+functions for string substitutions, and more.
+
+  What if I can't get GNU Make working?  I have left the Makedefs files
+in directories where they existed.  At some point I will remove these,
+but for now they are left.  I have made no effort to modify them however.
+
+
+
+  Eventually, IPW will use an autoconfigure script to handle most parts
+of the installation.  Currently it uses canned configuration scripts,
+but there is a configure program that will install the correct versions
+for you, unlike what Chapter 8 of the documentation says.
+
+
+0) Install gnumake.  This should be available either where you got IPW,
+   or via anonymous ftp at prep.ai.mit.edu:/pub/gnu/make-3.74.tar.z.  If
+   you do not install gnumake as "make", replace the work "make" in all
+   further instructions with the name you installed it as (ie "gnumake").
+            >> NORMAL MAKE WILL NOT WORK WITH IPW. <<
+   Read the above reasons for using GNU Make.  If this really annoys you,
+   send me mail.  Note that any newer version should work just fine, and
+   I know that version 3.62 and above also work.  Generally, if you have
+   any version of GNU make from the last 5 years, you should be fine.
+
+   The file INSTALL in the GNU make directory should contain all the
+   information needed.  What follows is a step-by-step method that
+   should be plug'n'chug.  For most sites, typing configure; make; make install
+   will be adequate.
+
+   a) Get make-3.74.tar.gz.  This is the newest version as of August 1995.
+      It uses an auto-configuration script, so it should be straightforward
+      to compile even on very odd systems.  Uncompress (or gunzip) the file,
+      then untar it.  Change to it's directory.
+
+   b) Where is it going to be installed?  The default prefix is "/usr/local"
+      which means 'make' will be installed in /usr/local/bin, and the manual
+      will go in /usr/local/man/man1/make.1.  To change this behaviour, add
+      "--prefix=something" to the ./configure statement (see next step).  For
+      example, to install 'make' in /usr/local/gnu/bin and the manual pages
+      in /usr/local/gnu/man/man1/make.1, add "--prefix=/usr/local/gnu" to the
+      ./configure statement.
+
+   c) Run "./configure".  If you wanted it installed in a different
+      directory, don't forget the "--prefix=..." part.  ./configure will
+      test what functionality your operating system has, and should
+      create a Makefile that has all the proper options in it.  This is
+      much easier than trying to do all the work yourself.  If you want
+      make in /usr/local/bin/make, type "./configure".  If you want make
+      in your personal bin directory, type "./configure --prefix=$HOME".
+
+      c1)  If you're on a Data General, you may have to change config.h
+         from "#undef DIRENT" to "#define DIRENT 1".  I haven't checked
+         to see how the newer make versions handle this.
+
+   d) What will it be called?  By default, GNU make will be installed as
+      'make'.  If the directory GNU make is installed in is before
+      /usr/bin in your path, GNU make will be executed.  If /usr/bin is
+      first in your path, you will not be using GNU make when you type 
+      'make'.  A solution is to call GNU make something different.  Usual
+      names are 'gnumake' or 'gmake'.  This lets you use the system make 
+      as 'make' and GNU make as whatever the new name is.  To change the
+      name that is used, after running configure (the previous step),
+      edit the file "Makefile" and change the line "binprefix =" to set the
+      desired prefix, such as "binprefix = gnu" to install as "gnumake".
+
+   e) If your current system does not have a make program, the configure
+      program will have made a Bourne shell script called "build.sh".  Type
+      "sh build.sh" to compile GNU make.  If you already have a version of
+      make, then just "make" should compile GNU make.
+
+   f) Install GNU make.  "make install" should do it.
+
+   g) If you are using csh or tcsh, type "rehash" so it will find the new
+      make.
+ 
+
+
+
+
+1) set the IPW variable.  If you are using the C shell, you can go to
+   the top IPW directory (where this file is located) and type:
+      setenv IPW `pwd`
+   Those are backquotes surrounding the pwd.
+
+2) configure for your machine type.  Examples: 'configure sun4',
+   'configure ibm', 'configure 'hp730', 'configure sun3-sunos3'.  For a
+   list of supported configurations, type 'configure -list'.  If configure
+   complains about GNU make not being available, you _must_ fix that before
+   going on.
+   The arguments for configure are 1) a processor architecture, and 2) an
+   operating system.  The operating system is optional since each architecture
+   has a default operating system for it.  This may not be the one you are
+   running, however.
+
+3) configure for the local installation.
+
+   3a) Change the scratch directory.  This should point at wherever you want
+       temporary files to go.  You can do 'rmdir scratch; ln -s /tmp scratch',
+       or you can link it to a larger disk.  Alternately, you can leave it as
+       it is, which is as a world-writable directory on the same disk that
+       the IPW directory is on.
+
+   3b) Make sure the local Makefile options are correct.  Edit the file
+       lib/make/local and make sure everything is correct for your
+       installation.  This is where the default compiler gets set, the
+       default optimization levels, what your archiver and ranlib commands
+       are called, etc.  The values given are probably correct.
+
+4) make the sources.  'make install'.  Optionally, you can go through
+   the long way (if things aren't going quite right or you want to take
+   it slow.  Either way, installation on a fast machine (Sparc 2 or HP 7xx
+   machine) will take about an hour.  What follows is a list of commands
+   you can use to install IPW in smaller chunks.  This is very similar to
+   what just typing 'make install' does.
+
+    4a) Make sure we can install: 'cd $IPW/src/etc/install; make install'
+    4b) make the libraries: 'cd $IPW/src/lib; make'
+    4c) install the libraries if they all compiled: 'make install'
+    4d) install scripts: 'cd $IPW/src/etc; make install'
+    4e) make standard ipw programs: 'cd $IPW/src/bin; make'
+    4f) install them if all made ok: 'make install'
+    4g) install contributed programs: 'cd $IPW/src/exp; make'
+        (There will be some errors about mising libraries at the link stage.
+         These will be taken care of at the next step)
+    4h) 'make install'
+
+   By default, if an error is encountered, make will stop at that point.  If
+   you are porting IPW to a new system, this may be undesirable.  Use the
+   '--keep-going' (abbreviation '-k') option of GNU make to continue past
+   the error.  This lets you compile everything that is going to work, just
+   leaving the programs that failed to deal with.
+
+   A useful procedure if you are getting errors is to redirect the output
+   of make to a file, then search for any errors after make is done.  This
+   same technique can also be used when running the tests in the next step.
+
+   You might also find that if you are using a new GNU make (3.65 or newer),
+   its default behaviour of printing each directory name is annoying and can
+   hinder finding errors.  If you use the argument '--no-print-directory' to
+   GNU make, the output will be easier to read.
+
+5) run tests.  'cd $IPW/tests; make'.  Errors are indicated by asterisks and
+   a message.  Certain programs will not be tested because their behavior
+   is either not reproducible without problems (ipw, binexp), or they
+   read from tape (tmpt, dempt), or other reasons.  They will be indicated
+   by the line "Not testing program" which is not to be construed as an error
+   message.  Some programs may have the appendage "(sp)" added to the
+   "Program passed" message.  This means one of two things:
+
+     a) your program evaluates float expressions in float precision rather
+        than casting to doubles first.  In standard K&R C, all floats were
+        cast to doubles first, but ANSI C specified that arithmetic on float
+        operands may be done in single precision.  This can make some
+        expressions evaluate faster, but the result will be slightly
+        different.  In some cases your machine will come up with a different
+        result, and the program will return "Small float diff" which means
+        the result is off by a small amount which is most likely caused by
+        small differences in floating point evaluation.
+
+     b) Your system is missing a function such as random(), and a
+        functionally equivalent function has been substituted.  The new
+        function may return different values for the same input, if that
+        is allowed by the function definition (e.g. random).
+
+6) after everthing is successfuly installed, you can reduce disk space
+   usage by: 'make clean' which will remove all the .o files left around.
+
+Notes:
+
+-----
+       If you wish to clean up everything, including the compiled binaries
+     and libraries, the command 'make realclean' is available.  The test
+     directory can also be removed to free up more space.
+
+-----
+       If a program requires an ANSI C compiler, the IPW variable ANSI_CC
+     is defined in $IPW/lib/make/local.  In the programs Makefile, put
+     'CC=$(ANSI_CC)' somewhere.  None of the programs supplied here require
+     an ANSI C compiler, and it is recommended that you use the ansidecl
+     macros to make your programs compliant with both K&R and ANSI C.
+       The following defaults are made for ANSI_CC:
+
+     HP/UX: Currently this is "cc -Aa" which turns on ANSI support for HP's
+            C Compiler.  Not all Machine/OS combinations support this, so
+            you may have to get gcc to support ANSI.  gcc happens to produce
+            better code than HP's bundled C compiler in most cases anyway.
+     SunOS: Currently this is "gcc" which supports ANSI C.  If you have the
+            Sun Unbundled C Compiler, you can change this to "acc" which is
+            Sun's ANSI C Compiler.  Using gcc with the "-Wall" option gives
+            better debugging than acc with "-vc".
+
+       gcc is available from prep.ai.mit.edu:/pub/gnu/gcc-2.7.0.tar.gz.
+     (It is possible that there will be a newer version there).  Gcc is
+     highly recommended in any circumstance, as it solves many portability
+     problems and often generates faster code.
+       Some of the programs have shown problems with very old versions of GCC.
+     By typing "gcc -v" you can see what version of gcc you are running.
+     If your version of gcc is below 2.0, you should get the newer compiler.
+     The problems stem from the optimizer -- systems which use GCC as their
+     native compiler, Data General for instance, will supply you with a
+     more recent version if you ask (DG ships version 1.96 with their 5.4.1
+     systems, but they acknowledge the problems and will ship a 2.2.2 tape
+     on request).
+
+-----
+     grhist uses the "graph" program.  Some sytems like DG/UX don't include
+   it.  A version of graph along with a number of other graphics related
+   programs (plot2ps and xplot are useful) is available from the GNU group
+   as graphics-0.17.tar.gz.  Unfortunately, the GNU version of graph is
+   slightly different from the BSD version.
+
+-----
+     To make the distributed tar file, assuming the name of the directory
+   holding ipw is called "ipw", the following line is used:
+
+        gnutar -cX ipw/exclude.list -zf ipw-dist.tar.gz ipw
+
+     The following should also work, but exclude will have to be changed
+   every time a new binary is added.
+
+        tar -cFFXf ipw/exclude ipw-dist.tar ipw
+
+
+
+-----
+-----
+  If you have any questions or comments, please contact me.
+
+Dana Jacobsen
+c/o US EPA
+200 SW 35th Street
+Corvallis, OR 97333
+
+Phone: (503) 754-4452
+  Fax: (503) 754-4799
+
+ipw@heart.cor.epa.gov
+dana@acm.org
+
+http://www.cor.epa.gov/projects/ipw/

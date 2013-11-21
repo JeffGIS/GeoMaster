@@ -1,0 +1,18 @@
+C_SPECIAL=
+LD_SPECIAL=
+
+LIB=ipw
+OBJS=\
+	_bih.o _nohist.o bihcheck.o bihdup.o bihmake.o bihread.o bihwrite.o \
+	hnbands.o hnbits.o hnbytes.o hnlines.o hnsamps.o hostorder.o \
+	imgsize.o no_history.o sampsize.o bih.o hbyteorder.o bihfree.o
+
+SRCS=\
+	_bih.c _nohist.c bihcheck.c bihdup.c bihmake.c bihread.c bihwrite.c \
+	hnbands.c hnbits.c hnbytes.c hnlines.c hnsamps.c hostorder.c \
+	imgsize.c no_history.c sampsize.c bih.c hbyteorder.c bihfree.c
+
+default: lib
+install: install-lib
+
+# $Header: /usr.MC68020/home/ipw/src/lib/libipw/bih/RCS/Makedefs,v 1.2 89/10/18 20:25:01 frew Exp $

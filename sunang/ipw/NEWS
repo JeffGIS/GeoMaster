@@ -1,0 +1,59 @@
+
+  IPW ERL-C Version: News
+
+
+Release 1.1 (1995 interim release)
+
+  o  major problems in fpvwrite fixed -- solar radiation models now give
+     correct answers, and IPW works on IBM RS/6000's now.
+
+  o  more bugs fixed in internal libraries
+
+  o  make now has options debug, plusdebug, and profile.
+
+  o  txtio routines added by James Dimingo, and many QDIPS programs have
+     been ported over to IPW.
+
+  o  new programs bmask, pmask, and wigmosta to do basin masking and water
+     routing.
+
+Release 1.0
+
+  o  ipwman now proints the author, revision date, and source at the bottom
+     instead of just the revision date.  It also has a -k option, just like
+     UNIX man.
+
+  o  imtoum converts IPW manual pages into UNIX manual pages.
+
+  o  ims uses imtoum to open pageview, ghostview, or xdvi for a nice
+     manual page display.
+
+  o  Added the option to use GNU _quicksort instead of qsort.  For some
+     common inputs, Sun qsort has n squared performance which is extremely
+     poor.  GNU _quicksort is much more stable.
+
+  o  imgstat rewritten, requant replaces requantize.
+
+  o  hdspic was renamed to ipw2hds, ipwtoppm was renamed to ipw2ppm, ipw2pgm
+     was added, ipwfile was added, istatgraph was added, pbm2ipw was added.
+
+  o  qmkhdr and stereol were removed.
+
+  o  IPW can now write LQ headers with more than two breakpoints.
+
+Release 0.5
+
+  o  Testing procedures have been added for most program.  'make tests' will
+     run them.
+
+  o  A new configuration script has been added.  This automatically puts
+     the configuration files into the right places given an architecture
+     and an operating system.
+
+  o  The header files are now all ANSI C compliant.  We use GNU ansidecl,
+     so it will correctly handle both non-ANSI and ANSI compilers.
+
+  o  New ANSI C error routines have been added in src/lib/libipw/error.
+     These use the new stdarg interface instead of varargs, though the old
+     are still supported.  stdarg is standard, varargs was a vague agreement
+     that didn't always match on different operating systems.

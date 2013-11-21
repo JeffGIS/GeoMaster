@@ -1,0 +1,20 @@
+
+/*	SCCS version: @(#)   Makedefs   1.3   10/1/91	*/
+
+HDIR=../../h
+
+C_SPECIAL= -I$(HDIR)
+LD_SPECIAL=
+
+LIB=local
+
+SRCS = \
+	dms.c projname.c projunits.c readproj.c unpack_dms.c writeproj.c
+
+OBJS =\
+	dms.o projname.o projunits.o readproj.o unpack_dms.o writeproj.o
+
+$(OBJS):	$(HDIR)/mproj.h
+
+default: lib
+install: install-lib

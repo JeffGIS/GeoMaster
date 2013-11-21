@@ -1,0 +1,423 @@
+BOOL DisplaySIDInVP32 (LPVIEWPORT pVP,LPSTR File)
+{   BITMAPFILEHEADER bmfHead;
+	BITMAPINFOHEADER	DibInfo;
+	LPBITMAPINFOHEADER	pDibInfo=&DibInfo;
+//	LPSTR pImage;
+	int		i, bmx, bmy, vpx, vpy,  OutWidth, InWidth, OutHeight, vpyp, bmyp;
+	long	vpheight, vpwidth, bmwidth, bmheight;   
+	long	BMHeight, BMWidth;//, VPWidth, VPHeight;
+	HDC hdcMem;
+	HBITMAP	hbmPrev, hNewBM;
+	double	BMTopLeftWx, BMTopLeftWy, VPOrigBMx, VPOrigBMy, BMTopLeftVPx, BMTopLeftVPy;
+	double	BMBotLeftWx, BMBotLeftWy, BMTopRightWx, BMTopRightWy;
+	double	BMBotLeftVPx,BMBotLeftVPy,BMTopRightVPx,BMTopRightVPy;
+	double	VPBotLeftBMx, VPBotLeftBMy, VPTopRightBMx, VPTopRightBMy;
+    double	VPTopLeftBMx, VPTopLeftBMy;  
+    UINT	ColorType=DIB_RGB_COLORS;
+	HPALETTE hGSPal;
+	RECT	bm, vp;   
+	short	rop=0;   
+	double	Res=1;  
+	HDC	hDC = pVP->hDC;
+	HDIB32 hDib=0;
+	DWORD Width,Height,TWidth,THeight;
+	DWORD ColorSpace,NumBands,DataType,IsLocked;
+	double MinMag,MaxMag,ULX,ULY,XRes,YRes,XRot,YRot,Mag=1, SidMag;  
+	double BMX[4],BMY[4],BASEX[4],BASEY[4], TileWidth,TileHeight; 
+	float	RSQMIN;
+	double x,y, ximage, yimage,BaseDistPerPixel;
+	HDIB32 hImage,ImageHandle=0;
+	DWORD st,NumMetaRecords;
+	long	Factor=1;  
+	short	irec,ii;  
+	double	conversion, xFactor, xmx, ymn;
+    char	GIFile[MAX_PATH], SaveMAFile[MAX_PATH];  
+    LPSTR	pBS;   
+    BOOL	rtn=FALSE;  
+    short	itilerow,ntilerows,itilecol,ntilecols;
+    HANDLE	hTranBMToBaseT=0,hTranBaseToBMT=0;    
+    long	iw,ih,MaxSidWidth=1024,MaxSidHeight=1024;
+	DWORD	FastCode=(DWORD)0x01000000;
+    BOOL	Fast=TRUE;
+	BOOL	OrthosAreGray=GetGlobalBVal2 ("[%ORTHOSAREGRAY]",FALSE);
+
+	if (pVP->ConvertToGray)
+		OrthosAreGray =  TRUE;
+	if (Fast)
+		FastCode = 0;
+	if (File && !*File)
+		return FALSE;
+	SaveDC (pVP->hDC);    
+	_fstrcpy (SaveMAFile,MaskAreaFile);
+	if (File)
+	{
+		_fstrcpy (GIFile,File);
+		_fstrlwr (GIFile);
+		if ((pBS = _fstrrchr (GIFile,'\\')))
+		{   
+    		int		RegionType;
+    		RECT	Rect; 
+    		
+    		_fstrcpy (pBS,"\\global.ini");
+    		LoadGlobalInit (GIFile,FALSE); 
+			LayerUnits = PRJ_UNITS[3];  
+			GSSiDeleteObject(&pVP->hRgn);
+			pVP->hRgn = CreateVPRgn(FALSE,FALSE); 
+			RegionType = GetRgnBox (pVP->hRgn,&Rect);
+			SelectClipRgn (pVP->hDC,pVP->hRgn);
+			GSSiDeleteObject(&pVP->hRgn); 
+			if (RegionType == NULLREGION)
+			{
+				rtn = TRUE;
+        		goto Exit;
+			}
+		}
+	}
+    if (LayerUnits == 1 && PRJ_UNITS[1] == 2)
+    	conversion = FTM;
+    else if (LayerUnits == 2 && PRJ_UNITS[1] == 1)
+    	conversion = MFT;
+    else
+    	conversion = 1;
+
+	if (File)
+		ImageHandle=MrSidOpen (File);
+	else
+		ImageHandle = MrSIDImageHandle;
+	st = MrSidGetInfo (ImageHandle,&Width,&Height,&ColorSpace,&NumBands,&DataType,&MinMag,&MaxMag,
+					   &IsLocked,&ULX,&ULY,&XRes,&YRes,&XRot,&YRot,&NumMetaRecords); 
+	ULX *= conversion;
+	ULY *= conversion;
+	XRes *= conversion;
+	YRes *= conversion;
+	NumMetaRecords=0;
+	for (irec=0;irec<NumMetaRecords;irec++)
+	{   
+		char	Tag[128]; 
+		short	datatype,numDims;
+		LPDWORD	pDims; 
+		LPVOID	pData;
+		DWORD st = GMMrSidGetMetadataRecord(ImageHandle,
+		                               irec,
+		                               Tag,
+		                               &datatype,
+		                               &numDims,
+		                               &pDims,
+		                               &pData);
+		if (st)
+			ii=1;
+	}
+	BaseDistPerPixel = (pVP->NewBounds.xmx - pVP->NewBounds.xmn)/
+	    				   		 ((long)pVP->DrawRect.right - (long)pVP->DrawRect.left);
+	xFactor = XRes;   
+	if (xFactor < BaseDistPerPixel)
+	{
+		while (xFactor < BaseDistPerPixel && 1/(double)Factor >= MinMag) 
+		{
+			Factor *=2;	
+			xFactor *= 2;
+		} 
+		Factor /= 2;
+		xFactor /= 2; 
+	}
+	Mag = Factor;
+	{       
+	    CloseTRANS2 (&hTranBMToBase);
+	    CloseTRANS2 (&hTranBaseToBM); 
+	    BMX[0]=0;
+	    BMX[1]=0;                                                                           
+	    BMX[2]=Width-1;
+	    BMX[3]=Width-1;
+	    BMY[0]=Height-1;
+	    BMY[1]=0;
+	    BMY[2]=0;
+	    BMY[3]=Height-1;
+	    BASEX[0]=ULX;
+	    BASEX[1]=ULX;
+	    BASEX[2]=ULX + XRes * (Width-1);
+	    BASEX[3]=BASEX[2];
+	    BASEY[0]=ULY + YRes * (Height-1);
+	    BASEY[1]=ULY;
+	    BASEY[2]=BASEY[1];
+	    BASEY[3]=BASEY[0];
+	    hTranBMToBase = STRAN2 (BMX,BMY,BASEX,BASEY,4,&RSQMIN,1,NULL);
+	    hTranBaseToBM = STRAN2 (BASEX,BASEY,BMX,BMY,4,&RSQMIN,1,NULL);
+    }
+    ntilerows = ntilecols = 1; 
+    iw = pVP->DrawRect.right - pVP->DrawRect.left;
+    while (iw > MaxSidWidth) 
+    {
+    	iw -= MaxSidWidth;
+    	ntilecols ++;
+    }
+    ih = pVP->DrawRect.bottom - pVP->DrawRect.top;
+    while (ih > MaxSidHeight) 
+    {
+    	ih -= MaxSidHeight;
+    	ntilerows ++;
+    }
+    TileWidth = (pVP->WBounds.xmx - pVP->WBounds.xmn) / ntilecols;
+    TileHeight = (pVP->WBounds.ymx - pVP->WBounds.ymn) / ntilerows;
+    for (itilerow=0;itilerow<ntilerows;itilerow++)
+    {
+    	for (itilecol=0;itilecol<ntilecols;itilecol++)
+    	{   
+    		MNMXCORD	TileBounds,MrSidTileBounds;
+    		
+    		TileBounds.xmn = pVP->WBounds.xmn + itilecol * TileWidth;
+    		TileBounds.xmx = TileBounds.xmn + TileWidth;
+    		TileBounds.ymn = pVP->WBounds.ymn + itilerow * TileHeight;
+    		TileBounds.ymx = TileBounds.ymn + TileHeight;
+			if (*MrSidProjection)
+				ConvertRectCoord (&MrSidTileBounds,&TileBounds,1,0);
+			else
+				MrSidTileBounds = TileBounds;
+			x = max (ULX,MrSidTileBounds.xmn);
+			y = min (ULY,MrSidTileBounds.ymx);	  
+			ymn = max (MrSidTileBounds.ymn,ULY + (Height-1) * YRes);  
+			xmx = min (MrSidTileBounds.xmx,ULX + (Width-1) * XRes); 
+			if (x >= xmx || y <= ymn)
+				goto NextTile;
+			TRANS2 (x,y,&ximage,&yimage,hTranBaseToBM);  
+			ximage /= Mag;
+			yimage /= Mag;
+			TWidth = ((xmx - x)/XRes)/Mag +1/Mag;
+			THeight = ((y - ymn)/-YRes)/Mag +1/Mag;
+			SidMag=1/Mag;
+    		CurView->OrthoRes = XRes;
+
+			hDib = MrSidGetImage (ImageHandle,&ximage,&yimage,&TWidth,&THeight,&SidMag,OrthosAreGray,CurView->HalfTone); 
+		    if (!hDib)
+		    	goto NextTile;
+		//	AdjustDIBColorPallet (hDib);    
+		    if (!GetBitmapInfoFromHandle (&DibInfo,hDib))  
+		    {
+		        DestroyDIB32 (hDib,FALSE); 
+				goto NextTile; 
+			}
+		//    st = DisplayBMInRect32 (hDC,hDib, pVP->DrawRect,TRUE); 
+		//    return TRUE;
+			BMWidth = DibInfo.biWidth;   
+			BMHeight = DibInfo.biHeight;  
+			Res = Mag;
+			{       
+			    CloseTRANS2 (&hTranBMToBaseT);
+			    CloseTRANS2 (&hTranBaseToBMT); 
+			    BMX[0]=0;
+			    BMX[1]=0;
+			    BMX[2]=BMWidth-1;
+			    BMX[3]=BMX[2];
+			    BMY[0]=0;
+			    BMY[1]=BMHeight-1;
+			    BMY[2]=BMY[1];
+			    BMY[3]=0;
+			    BASEX[0]=x;//-(XRes)*Mag;
+			    BASEX[1]=BASEX[0];
+		//	    BASEX[2]=x+(BMWidth+1)*(XRes)*Mag;
+			    BASEX[2]=x+(BMWidth)*(XRes)*Mag;
+			    BASEX[3]=BASEX[2];
+			    BASEY[0]=y;//+(YRes)*Mag;
+		//	    BASEY[0]=y+(BMHeight+1)*(YRes)*Mag;
+			    BASEY[1]=y+(BMHeight)*(YRes)*Mag;
+			    BASEY[2]=BASEY[1];
+			    BASEY[3]=BASEY[0];
+			    hTranBMToBaseT = STRAN2 (BMX,BMY,BASEX,BASEY,4,&RSQMIN,1,NULL);
+			    hTranBaseToBMT = STRAN2 (BASEX,BASEY,BMX,BMY,4,&RSQMIN,1,NULL);
+		    }
+		
+		/*    if (DIBColorsArePalleteEntries)
+		    {
+		    	ColorType = DIB_PAL_COLORS; 
+		    } */
+		//   	pImage =(LPSTR) pDibInfo + sizeof(BITMAPINFOHEADER) + pDibInfo->biClrUsed * 4;     
+		    
+		//    VPWidth = (long)pVP->DrawRect.right - (long)pVP->DrawRect.left ;
+		//    VPHeight = (long)pVP->DrawRect.bottom - (long)pVP->DrawRect.top;
+			if (*MrSidProjection)
+			{
+				XFORM	xForm;
+				double	bmx[4], bmy[4], vpx[4], vpy[4];
+				double	wx[4], wy[4];
+				HANDLE	hTran;
+
+				wx[0] = TileBounds.xmn;
+				wy[0] = TileBounds.ymn;
+				wx[1] = TileBounds.xmn;
+				wy[1] = TileBounds.ymx;
+				wx[2] = TileBounds.xmx;
+				wy[2] = TileBounds.ymx;
+				wx[3] = TileBounds.xmx;
+				wy[3] = TileBounds.ymn;
+				for (i=0;i<4;i++)
+				{
+					TRANS2 (wx[i],wy[i],&vpx[i],&vpy[i],pVP->hTranBaseToVP);
+					ConvertMrSidXY (&wx[i],&wy[i]);
+					TRANS2 (wx[i],wy[i],&bmx[i],&bmy[i],hTranBaseToBMT);
+				}
+				hTran = STRAN2 (bmx,bmy,vpx,vpy,4,&RSQMIN,1,NULL);
+				
+				xForm = SetXFORMFromTRANS (hTran);
+				SaveDC (pVP->hDC);
+			    SetDisplayMode (pVP->hDC, GF_TEXTMODE);  
+				SetGraphicsMode(pVP->hDC, GM_ADVANCED);
+				SetWorldTransform(pVP->hDC, &xForm);
+				SetMapMode (pVP->hDC, MM_ISOTROPIC );
+			    CloseTRANS2 (&hTran);
+				i=StretchDIBitsFromHandle (pVP->hDC,0,0,BMWidth,BMHeight,
+													0,0,BMWidth,BMHeight,
+//					   	i=StretchDIBitsFromHandle (pVP->hDC,vpx[0],vpy[1],vpx[2]-vpx[0],fabs(vpy[1]-vpy[0]),
+//															bmx[0],bmy[0],bmx[2]-bmx[0],fabs(bmy[1]-bmy[0]),
+					    		   //bmxz,bmyz-bmheightz+1,
+								   //BMRect.right - BMRect.left,BMRect.bottom -BMRect.top,
+					   			   //bmwidthz,bmheightz,
+					   			   hDib,ColorType,RastOpts[rop]+FastCode, 1);   //
+				goto NextTile;
+			}
+			TRANS2 (0,BMHeight-1,&BMTopLeftWx,&BMTopLeftWy,hTranBMToBaseT);
+			TRANS2 (0,0,&BMBotLeftWx,&BMBotLeftWy,hTranBMToBaseT);
+			TRANS2 (BMBotLeftWx,BMBotLeftWy,
+					&BMBotLeftVPx,&BMBotLeftVPy,pVP->hTranBaseToVP);
+			TRANS2 (BMWidth-1,BMHeight-1,&BMTopRightWx,
+					&BMTopRightWy,hTranBMToBaseT);
+			TRANS2 (BMTopRightWx,BMTopRightWy,
+					&BMTopRightVPx,&BMTopRightVPy,pVP->hTranBaseToVP);
+			TRANS2 (pVP->NewBounds.xmn,pVP->NewBounds.ymn,&VPOrigBMx,&VPOrigBMy,
+				    hTranBaseToBMT);
+			TRANS2 (pVP->NewBounds.xmx,pVP->NewBounds.ymx,&VPTopRightBMx,&VPTopRightBMy,
+				    hTranBaseToBMT);
+			TRANS2 (BMTopLeftWx,BMTopLeftWy,
+					&BMTopLeftVPx,&BMTopLeftVPy,pVP->hTranBaseToVP);
+			if (BMBotLeftVPx < pVP->DrawRect.left)
+			{
+				bm.left = IDNINT (VPOrigBMx);
+				vp.left = pVP->DrawRect.left;
+			}
+			else
+			{
+				bm.left = 0;
+				vp.left = IDNINT (BMBotLeftVPx - 0.25);
+			}
+			if (BMTopRightVPy < pVP->DrawRect.top)
+			{
+				bm.top = IDNINT (VPTopRightBMy);
+				vp.top = pVP->DrawRect.top;
+			}
+			else
+			{
+				bm.top = BMHeight;
+				vp.top = IDNINT (BMTopRightVPy - 0.25);
+			}
+		
+			if (BMTopRightVPx > pVP->DrawRect.right)
+			{
+				bm.right = IDNINT (VPTopRightBMx);
+				vp.right = pVP->DrawRect.right;
+			}
+			else
+			{
+				bm.right = BMWidth;
+				vp.right = IDNINT (BMTopRightVPx  + 0.25);
+			}
+			if (BMBotLeftVPy > pVP->DrawRect.bottom)
+			{
+				bm.bottom = IDNINT (VPOrigBMy);
+				vp.bottom = pVP->DrawRect.bottom;
+			}
+			else
+			{
+				bm.bottom = 0;
+				vp.bottom = IDNINT (BMBotLeftVPy + 0.25);
+			}
+			vpx = vp.left;
+			vpy = vp.top;
+			bmx = bm.left;
+			bmy = bm.top;
+			vpwidth = vp.right - vp.left + 1;
+			vpheight = vp.bottom - vp.top + 1;
+			bmheight = bm.top - bm.bottom;// + 1;
+			bmwidth = bm.right - bm.left;// + 1;
+//		   	SetStretchBltMode(hDC, StretchMode);   
+		   	rop = GetGlobalLVal2 ("[%RASTEROPT]",0);  
+		   	OutWidth = vpwidth; 
+		   	OutHeight = vpheight;
+		   	InWidth = bmwidth;  
+		//   	if (GetGlobalBVal2 ("[%PR]",FALSE) && OutWidth < InWidth) 
+			{
+				RECT	BMRect;
+	            
+	            BMRect.left=bmx;
+	            BMRect.right = bmx + bmwidth;
+	            BMRect.top = bmy - bmheight;
+	            BMRect.bottom = bmy;
+//			SelectClipRgn (hDC,0);
+			   	if (Printing && DoShrinkOrtho && OutWidth < InWidth)
+			   	{   
+				    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;  
+					
+					if (!hNewBM)
+						goto DoNotShrink;
+					{
+						BITMAP  bmp; 
+						HDC		hDCMain = GetDC (hWndMain);
+						HDC		hdcMem = CreateCompatibleDC(hDC);
+						HDIB	hDIB;
+							
+						ReleaseDC (hWndMain,hDCMain);
+				//    	GetObject(hNewBM, sizeof(BITMAP), &bmp);
+						hbmPrev = SelectObject(hdcMem, hNewBM);
+							
+		/*			   	SetStretchBltMode(hdcMem, StretchMode);   
+				   		i=StretchDIBitsFromHandle (hdcMem,0,0,OutWidth,OutHeight,
+				    					   bmx,bmy-bmheight+1,
+				   						   bmwidth,bmheight,
+				   						   hDib,1);*/
+				   		i=StretchDIBitsFromHandle (hdcMem,0,0,OutWidth,OutHeight,
+				   							BMRect.left,BMRect.top,
+				    					   //bmxz,bmyz-bmheightz+1, 
+				    					   BMRect.right - BMRect.left,BMRect.bottom -BMRect.top,
+				   						   //bmwidthz,bmheightz,
+				   						   hDib,ColorType,RastOpts[rop]+FastCode, 1);
+				//	   				      ColorType,RastOpts[rop]);
+						i=BitBlt(hDC, vpx,vpy,(int)vpwidth,(int)vpheight, hdcMem, 0, 0,SRCCOPY);
+				//	    hDIB = BitmapToDIB (hNewBM,NULL);  
+						if (hbmPrev)
+			        		SelectObject(hdcMem, hbmPrev);
+						DeleteDC(hdcMem);    
+				//	    SaveDIB (hDIB,"c:\\test.bmp");
+						DeleteObject (hNewBM);  
+					}
+			    }
+				else 	  
+				{
+DoNotShrink:
+					   	i=StretchDIBitsFromHandle (hDC,vpx,vpy,vpwidth,vpheight,
+										   BMRect.left,BMRect.top,
+					    				   //bmxz,bmyz-bmheightz+1,
+										   BMRect.right - BMRect.left,BMRect.bottom -BMRect.top,
+					   				       //bmwidthz,bmheightz,
+					   				       hDib,ColorType,RastOpts[rop]+FastCode, 1);   //
+//				   				      ColorType,RastOpts[rop]); 
+				}  
+			}
+		    nOrthoBytes += (long) bmwidth * (long) bmheight * 3;
+		    nOrthoBlocks++;
+		// 	GlobalUnlock (hDib);
+		    DestroyDIB32 (hDib,FALSE); 
+		    rtn = TRUE;  
+NextTile:
+		    CloseTRANS2 (&hTranBMToBaseT);
+		    CloseTRANS2 (&hTranBaseToBMT); 
+		    if (ntilerows > 1 && !CheckForContinue (FALSE))
+		    	goto Exit;
+		}
+	}
+Exit:
+	if (File && ImageHandle)
+		st = MrSidClose (ImageHandle);
+    CloseTRANS2 (&hTranBMToBase);
+    CloseTRANS2 (&hTranBaseToBM); 
+	RestoreDC (pVP->hDC,-1);
+	_fstrcpy (MaskAreaFile,SaveMAFile);
+    return rtn;
+}
+

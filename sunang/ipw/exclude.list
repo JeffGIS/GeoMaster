@@ -1,0 +1,17 @@
+ipw/scratch/*
+ipw/scratch-ours/*
+ipw/bin/*
+ipw/etc/*
+ipw/src/bin/Work/*
+ipw/src/exp/erlc/bin/Work/*
+ipw/src/exp/erlc/bin/qdips/Work/*
+ipw/src/exp/erlc/lib/qdips/Work/*
+ipw/exclude
+ipw/export_ipw
+ipw/tests/[a-z]*
+ipw/ChangeLog.old
+ipw/%Changes
+ipw/.rhosts
+*.o
+*.a
+*.ln

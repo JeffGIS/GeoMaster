@@ -1,0 +1,27 @@
+Changes to network address location:
+
+1)	The global [%ADDRANGEOFFDIST] controls the distance from the intersection
+	to the from or to address range point will be located. Set it in base units
+	(meters in your case). This applies to all street segments so it can be
+	set once in the [%DL]global.ini file.  
+	
+2)	High and Low segment addresses. You can now set a high and low address on both
+	the left and right side of a street segment. These represent the actual existing
+	address range for the segment. Either may be zero, if so they default to the from
+	and to address range (or block address range). They each have an offset distance
+	associated with them which is expressed as a percentage of the segment length and
+	represents the distance from the nearest intersection. The last command in the
+	network.txt graphics function file is used to set the high address value (in this
+	case the low address value is not used). It uses the macro file macros\highadd.txt.
+	
+3)	When an address is located manually (by using the  Locate Network Address function)
+	the macro file set with the [%PLMACRO] global (plmacro.txt by default) will be executed.
+	The 'pl' in the name stand for 'point location'. The same macro will be executed
+	if the Locate Coordinate function is used. The supplied plmacro.txt file locates an
+	infobox (infobox\addloc.txt) at the address displaying the text defined with
+	the [%NETADDRESS] global. By default this global is defined as
+		
+		[%NETADDRESS]=@[%NETHOUSE] @[%NETSTREET] @[%NETZIP] 
+		
+	The individual globals may be used in an infobox or elsewhere instead of the [%NETADDRESS]
+	global.

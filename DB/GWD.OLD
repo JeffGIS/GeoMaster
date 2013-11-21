@@ -1,0 +1,3898 @@
+#include "..\geomastr\GW.h"
+#include <windows.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <math.h> 
+#include <float.h> 
+#include <direct.h>
+
+#include "shr.h"
+#include "gmlimits.h"
+#include "bigmemln.h"
+#include "bigmem.h"
+#include "..\geomastr\resource.h"
+#include "GWD.h" 
+#include "bt.h"
+#include <sql.h>
+
+static	long	debugoff=5368;
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+FARPROC lpfnFIELDSMsgProc; 
+HWND	hWndFieldList=0;    
+HANDLE  hName=0;   
+extern  HBRUSH  hBackBrush1;
+extern  HWND    hWndMain;   
+extern	BOOL	ExpandTextDataNotFound,ContinueProcessing;
+extern  HANDLE  hInst, FilePathHandle,hHighlight;  
+static  short CurrentIndex=0; 
+static  HANDLE  hAddFile,hFieldsDLT;
+static  LPSTR   pAddFile;  
+static  HWND    hWndAddComboFile=0,hWndComboFile=0; 
+static  HANDLE  hSQLCombo=0, hFLDB;
+static	LPRECT	pFLRect;  
+
+HANDLE	hCFName=0;
+HWND	hFldAppendWnd=0;
+
+
+    struct  { short   Street;long House;char PID[14];} CurAdd;
+
+
+short ComputeGWDKeyLen(LPGWDHEADER lpGWDHead, short KeyID);
+long GetTreeRef(void);
+BOOL FAR PASCAL CREATE_GWD_INDEXMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam);
+BOOL FAR PASCAL COMBO_ADD_FILEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam);
+void CreateCityExtract (void);
+BOOL CreateReport (LPSTR DBName, LPGWDHEADER lpGWDHead, short NumSelect, LPINT Selected,
+                    HWND hWndDlg, short DlgItem, short type,HGLOBAL hSQL);
+BOOL CreateDynamicDialog (LPSTR DBName, LPGWDHEADER lpGWDHead, short NumSelect, LPINT Selected,
+                    HWND hWndDlg, short DlgItem,HGLOBAL hSQL);
+LPSTR FieldNameToTitle (LPSTR FName,LPSTR OutStr);
+BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam);
+
+BOOL NeedSQLValueQuote (HANDLE hSQL,LPSTR FieldName)
+{   
+	BOOL	rtn=FALSE;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPFIELDINFO	lpFieldInfo;   
+	short	i;
+
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+	lpFieldInfo = &FilePtr->FldInfo; 
+	for (i=0;i<FilePtr->NumFields;i++,lpFieldInfo++) 
+	{
+		if (!_fstricmp (lpFieldInfo->name,FieldName))
+		{
+            if (lpFieldInfo->type == SQL_CHAR || lpFieldInfo->type == SQL_VARCHAR)
+				rtn=TRUE; 
+			break; 
+		}
+	}	
+	GlobalUnlock (SQLPtr->OFHandle); 
+	GlobalUnlock (hSQL);
+	return rtn;
+}
+		
+short FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
+{   unsigned short	i, len;
+
+    _llseek (lpGWDHead->Fid,Offset,0);
+    _lread (lpGWDHead->Fid,&len,2); 
+    len = min (len,lpGWDHead->Reclen);
+    _lread (lpGWDHead->Fid,&lpGWDHead->GWDData,len);
+    for (i=len;i<lpGWDHead->Reclen;i++) lpGWDHead->GWDData[i]='\0';
+	return len;
+}
+
+BOOL GetGMDUniqueFieldValues (HANDLE hDB, LPCSTR SQL,
+                              short fieldindex, HANDLE hDBList)
+{                             
+    short   i, ClassNo, ClassZero=0; 
+    LPGWDHEADER lpGWDHead;
+    HANDLE      hBT;
+    long        Offset;
+    char        str[256],Value[256];
+    short       len, pos;
+    HCURSOR hcurSave;
+    
+    hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
+    lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
+    hBT = lpGWDHead->BTHandle[0];
+    pos = BT_FIRST;    
+    while (!BT_FIND (hBT,lpGWDHead->pKeys[0],pos,BT_ANY, (LPSTR)&Offset))
+    {    
+        pos = BT_NEXT; 
+        FillGWDData (lpGWDHead,Offset);
+        if (GMDGetCharFieldVal (lpGWDHead,fieldindex,str))
+        {
+            _fstrncpy (Value,str,(size_t)GetBTKeyLen(hDBList));
+            if (BT_FIND(hDBList,Value,BT_FIRST,BT_EQ,(LPSTR)&ClassNo))
+                BT_PUT (hDBList,Value,(LPSTR)&ClassZero); 
+        }
+    }
+    GlobalUnlock (hDB);
+    GSSiSetCursor (hcurSave); 
+
+    return TRUE;
+} 
+                                       
+BOOL FAR PASCAL COMBO_ADD_FILEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{ 
+    static  HANDLE hDB=0;
+    static  LPGWDHEADER lpGWDHead;
+    static  short DataFileType=0;
+    BOOL    False=FALSE;
+    short     IDC_FieldName=SV_FIELD_NAME, BRtn;
+    
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam, IDC_SQL,
+                     SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES, SV_TABLE_HEADING,&IDC_FieldName,1,
+                     pAddFile, &DataFileType, &hSQLCombo, &False,FALSE))
+                     return TRUE;
+    
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         /* initialize working variables                                */ 
+         hWndAddComboFile = hWndDlg;
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+#if WIN32
+        switch(LOWORD(wParam))
+#else
+        switch(wParam)
+#endif
+           {
+			  case IDC_SETSQL:      
+			  {    
+			     HANDLE hMem;
+			     LPSTR  lpStr, lpWhere;
+				                 
+			     hMem = GSSiGlobAlloc (GHND,4096);
+			     lpStr = GlobalLock (hMem); 
+			     GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
+			     if (GetSQLWhereClause (hWndDlg, hSQLCombo, lpStr))
+			     	SetDlgItemText (hWndDlg,IDC_SQL,lpStr);    
+			     GSSiGlobUlFree (&hMem);
+			     break;
+			  }
+				            
+              case IDC_OPEN_DB:
+                  EnableWindow (GetDlgItem(hWndDlg,IDC_SETSQL),TRUE);
+                  EnableWindow (GetDlgItem(hWndDlg,IDC_SHOW_FIELDS),TRUE);
+                  break;  
+            
+              case IDOK:
+              {
+                
+                short nItems; 
+                char    str[128];
+                  
+                nItems=(short)SendDlgItemMessage(hWndDlg,SV_FIELD_NAME,LB_GETSELCOUNT,0,0); 
+                if (!nItems)
+                {
+                     MessageBox(GetFocus(),"No fields selected",
+                                    "Error",MB_OK|MB_ICONEXCLAMATION);  
+                     break;
+                }
+                GetDlgItemText (hWndDlg,IDC_SQL,str,sizeof(str));
+                if (!str[0])
+                {    
+                    if ((nItems = (short)SendDlgItemMessage(hWndComboFile ,IDC_FILES,LB_GETCOUNT,0,0)))
+                    { 
+
+                         MessageBox(GetFocus(),"No Where Clause",
+                                        "Error",MB_OK|MB_ICONEXCLAMATION);  
+                         break;
+                    }
+                }
+                GlobalUnlock (hSQLCombo);
+                PostMessage(hWndComboFile, WM_COMMAND, IDC_HAVE_FILE, 0L); 
+               } 
+                break;
+
+              case IDCANCEL:
+                GlobalUnlock (hSQLCombo);
+                CloseDataFile (TRUE, &hSQLCombo);
+                DestroyWindow(hWndDlg);
+                break; 
+                  
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} 
+
+HANDLE OpenComboDatabase (LPSTR Name,LPSTR SQL)
+{   
+	LPCOMBOHEADER		pComboHeader;
+    LPCOMBOFILE  		pComboFile; 
+    LPCOMBOFIELDINFO    pComboField;
+    LPFIELDINFO         pField,pFileField;
+    LPWHEREINDEX        pWhereIndex;
+    LPCFIELDINDEX       pCFieldIndex;  
+    LPOPENFILEDATA		FilePtr;
+    LPOPENSQLDATA		SQLPtr; 
+    LPSTR       pWhere, pCField, pSQL=SQL;
+    HANDLE      hDB; 
+    OFSTRUCT    OFStruct;
+    HFILE       FidCF; 
+    short		i;     
+    char		Blanks[]="";
+    long		size, len;
+
+	FidCF = GSSiOpenFile (Name,&OFStruct,OF_READ);
+	if (FidCF == HFILE_ERROR)
+		return 0;
+	
+	hDB = GSSiGlobAlloc (GHND,sizeof(COMBOHEADER));
+	pComboHeader = (LPCOMBOHEADER)GlobalLock (hDB);
+	pComboHeader->hComboFile = GSSiGlobAlloc (GHND,UINT_MAX);
+	pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile);
+	_lread (FidCF,pComboFile,sizeof(COMBOFILE)-sizeof(FIELDINFO));
+	_lread (FidCF,&pComboFile->FldInfo,pComboFile->NumFields*sizeof(FIELDINFO));  
+	size = sizeof(COMBOFILE)+pComboFile->NumFields*sizeof(FIELDINFO);
+	pComboHeader->hComboFields = GSSiGlobAlloc (GHND,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
+	pComboField = (LPCOMBOFIELDINFO)GlobalLock (pComboHeader->hComboFields); 
+	_lread (FidCF,pComboField,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
+	GlobalUnlock (pComboHeader->hComboFields);
+	pComboHeader->hWhere = GSSiGlobAlloc (GHND,UINT_MAX);
+	pWhereIndex = (LPWHEREINDEX) GlobalLock (pComboHeader->hWhere); 
+	_lread (FidCF,pWhereIndex,sizeof(WHEREINDEX));
+	len = pWhereIndex->Len;
+	pWhereIndex++;
+	_lread (FidCF,pWhereIndex,(UINT)len);
+	GlobalUnlock (pComboHeader->hWhere);
+	pComboHeader->hWhere = GlobalReAlloc (pComboHeader->hWhere,sizeof(WHEREINDEX)+len,GMEM_MOVEABLE);
+	pComboHeader->hComputedFields = GSSiGlobAlloc (GHND,UINT_MAX);
+	pCFieldIndex = (LPCFIELDINDEX)GlobalLock(pComboHeader->hComputedFields);
+	_lread (FidCF,pCFieldIndex,sizeof(CFIELDINDEX));
+	len = pCFieldIndex->Len;
+	pCFieldIndex++;
+	_lread (FidCF,pCFieldIndex,(UINT)len);
+	GlobalUnlock (pComboHeader->hComputedFields);
+	pComboHeader->hComputedFields = GlobalReAlloc (pComboHeader->hComputedFields,sizeof(CFIELDINDEX)+len,GMEM_MOVEABLE);
+	GSSiClose (FidCF);
+	for (i=0;i<pComboFile->NumFiles;i++)
+		pComboFile->hSQL[i]=0; 
+	for (i=0;i<pComboFile->NumFiles;i++)
+	{   
+		char	Name[256];
+		
+		sprintf (Name,"CF%i=%s",i,pComboFile->FileNames[i]);
+		if (!OpenDataFile (Name,pSQL,BT_READ,&pComboFile->hSQL[i]))
+		{   
+			GlobalUnlock (hDB);
+			CloseComboDatabase (hDB);
+			return 0;
+		}
+		pSQL = (LPSTR)&Blanks;
+	}
+    pField = &pComboFile->FldInfo; 
+    pComboField = (LPCOMBOFIELDINFO)GlobalLock (pComboHeader->hComboFields);
+    for (i=0;i<pComboFile->NumFields;i++,pField++,pComboField++)
+    {   
+        if (pComboField->fromfile > -1)
+        {
+            SQLPtr = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[pComboField->fromfile]);
+            FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+            pFileField = &FilePtr->FldInfo+pComboField->fromfileindex; 
+            pField->type = pFileField->type;
+            pField->length = pFileField->length;
+            GlobalUnlock (SQLPtr->OFHandle);
+            GlobalUnlock(pComboFile->hSQL[pComboField->fromfile]); 
+        }
+    }
+	GlobalUnlock (pComboHeader->hComboFile); 
+	pComboHeader->hComboFile = GlobalReAlloc (pComboHeader->hComboFile,size,GMEM_MOVEABLE);
+	GlobalUnlock (hDB);
+	return hDB;
+}
+
+BOOL CloseComboDatabase (HANDLE hDB)
+{   
+	LPCOMBOHEADER		pComboHeader;
+    LPCOMBOFILE  		pComboFile; 
+    LPCOMBOFIELDINFO    pComboField;
+    LPWHEREINDEX        pWhereIndex;
+    LPCFIELDINDEX       pCFieldIndex;  
+    LPSTR       pWhere, pCField;
+    OFSTRUCT    OFStruct;
+    HFILE       FidCF; 
+    short		i, len;  
+    
+	if (!hDB)
+		return FALSE;
+	pComboHeader = (LPCOMBOHEADER)GlobalLock (hDB); 
+	pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile);
+	for (i=0;i<pComboFile->NumFiles;i++)
+		CloseDataFile (TRUE,&pComboFile->hSQL[i]);
+	GlobalFree (pComboHeader->hComboFields);
+	GlobalFree (pComboHeader->hWhere);
+	GlobalFree (pComboHeader->hComputedFields);
+	GlobalUnlock (pComboHeader->hComboFile);
+	GlobalFree (pComboHeader->hComboFile);
+	GlobalUnlock (hDB);
+	GlobalFree (hDB);
+	return TRUE;
+}
+
+                                       
+BOOL FAR PASCAL COMBO_FILEMsgProc(HWND hWndDlg, WORD Message, WPARAM wParam, LPARAM lParam)
+{   char str[300];
+    static  HANDLE hDB=0;
+    static  LPGWDHEADER lpGWDHead;
+    short         TabStops[3]={80,160,170}, i,Choice, len;
+    static  short DataFileType, UpdateIndex;
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr; 
+    static      LPCOMBOFILE     pComboFile; 
+    LPFIELDINFO         pField,pFileField;
+    LPCOMBOFIELDINFO    pComboField;
+    LPWHEREINDEX        pWhereIndex;
+    LPCFIELDINDEX       pCFieldIndex;  
+    LPSTR       pWhere, pCField;
+    static      HANDLE      hSQL,hComboFields, hWhere, hComputedFields, hComboFile; 
+    OFSTRUCT    OFStruct;
+    HFILE       FidCF;
+    
+ 
+ short    BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+    
+ switch(Message)
+   {
+    case WM_INITDIALOG:   
+        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_SETTABSTOPS,3,(LPARAM)&TabStops); 
+        SendDlgItemMessage (hWndDlg,IDC_CFTYPE,CB_ADDSTRING,0,(LPARAM)"Integer");
+        SendDlgItemMessage (hWndDlg,IDC_CFTYPE,CB_ADDSTRING,0,(LPARAM)"Real");
+        SendDlgItemMessage (hWndDlg,IDC_CFTYPE,CB_ADDSTRING,0,(LPARAM)"Text");
+        hComboFile = GSSiGlobAlloc (GHND,sizeof(COMBOFILE)+MAXFIELDS*sizeof(FIELDINFO));
+        pComboFile = (LPCOMBOFILE)GlobalLock (hComboFile);
+        hAddFile = GSSiGlobAlloc (GHND,128);
+        pAddFile = GlobalLock (hAddFile);
+        hWndComboFile = hWndDlg;    
+        hComboFields = GSSiGlobAlloc (GHND,MAXFIELDS*sizeof(COMBOFIELDINFO));
+        hWhere = GSSiGlobAlloc (GHND,UINT_MAX); 
+        hComputedFields = GSSiGlobAlloc (GHND,UINT_MAX);
+        if (hCFName)
+        {     
+        	LPSTR	pName;
+        	
+        	  pName = GlobalLock (hCFName);
+              FidCF = GSSiOpenFile (pName,&OFStruct,OF_READ);
+              GlobalUnlock (hCFName);
+              _lread (FidCF,pComboFile,sizeof(COMBOFILE)-sizeof(FIELDINFO));
+              _lread (FidCF,&pComboFile->FldInfo,pComboFile->NumFields*sizeof(FIELDINFO));
+              pComboField = (LPCOMBOFIELDINFO)GlobalLock (hComboFields); 
+              _lread (FidCF,pComboField,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
+              GlobalUnlock (hComboFields);
+              pWhereIndex = (LPWHEREINDEX) GlobalLock (hWhere); 
+              _lread (FidCF,pWhereIndex,sizeof(WHEREINDEX));
+              len = pWhereIndex->Len;
+              pWhereIndex++;
+              _lread (FidCF,pWhereIndex,len);
+              GlobalUnlock (hWhere);
+              pCFieldIndex = (LPCFIELDINDEX)GlobalLock(hComputedFields);
+              _lread (FidCF,pCFieldIndex,sizeof(CFIELDINDEX));
+              len = pCFieldIndex->Len;
+              pCFieldIndex++;
+              _lread (FidCF,pCFieldIndex,len);
+              GlobalUnlock (hComputedFields);
+              GSSiClose (FidCF);
+              for (i=0;i<pComboFile->NumFiles;i++)
+              { 
+                pComboFile->hSQL[i]=0; 
+                OpenDataFile (pComboFile->FileNames[i],"",BT_READ,&pComboFile->hSQL[i]);
+              }
+         }
+   Display:
+        SendDlgItemMessage (hWndDlg,IDC_FILES,LB_RESETCONTENT,0,0);
+        for (i=0;i<pComboFile->NumFiles;i++)
+            SendDlgItemMessage (hWndDlg,IDC_FILES,LB_ADDSTRING,0,(LPARAM)((LPSTR) pComboFile->FileNames[i]));  
+        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_RESETCONTENT,0,0);
+        pWhereIndex = (LPWHEREINDEX)GlobalLock (hWhere); 
+        pField = &pComboFile->FldInfo; 
+        pComboField = (LPCOMBOFIELDINFO)GlobalLock (hComboFields);
+        for (i=0;i<pComboFile->NumFields;i++,pField++,pComboField++)
+        {   
+            if (pComboField->fromfile == -1)
+            {
+                pCFieldIndex =(LPCFIELDINDEX) GlobalLock(hComputedFields);
+                pCField = (LPSTR)pCFieldIndex + (sizeof(CFIELDINDEX) +
+                        pCFieldIndex->offset[pComboField->fromfileindex]); 
+                sprintf (str,"%s\tcomputed\tfrom\t%s",              
+                        pField->name,pCField);
+                GlobalUnlock (hComputedFields);
+            }
+            else
+            {
+                pWhere = (LPSTR)pWhereIndex + (sizeof(WHEREINDEX)+pWhereIndex->offset[pComboField->WhereID]);
+                if (pComboFile->hSQL[pComboField->fromfile])
+                {
+	                SQLPtr = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[pComboField->fromfile]);
+	                FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+	                pFileField = &FilePtr->FldInfo+pComboField->fromfileindex; 
+	                if (pComboField->fromfile)
+	                    sprintf (str,"%s\tfrom %s\tin %i\twhere %s",              
+	                            pField->name,pFileField->name,pComboField->fromfile+1,pWhere);
+	                else
+	                    sprintf (str,"%s\tfrom %s\tin %i",
+	                             pField->name,pFileField->name,pComboField->fromfile+1);
+	                GlobalUnlock (SQLPtr->OFHandle);
+	                GlobalUnlock(pComboFile->hSQL[pComboField->fromfile]);   
+	            }
+	            else
+	            	*str = 0;
+                GlobalUnlock (hWhere); 
+            }
+            SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,0,(LPARAM)((LPSTR) str));  
+        } 
+        GlobalUnlock (hComboFields);
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+#if WIN32
+        switch(LOWORD(wParam))
+#else
+        switch(wParam)
+#endif
+           {
+              case 65001:
+                    Choice=(short)SendDlgItemMessage(hWndDlg,IDC_FIELDS, LB_GETCURSEL,0,0);
+                    pField = &pComboFile->FldInfo; 
+                    pField += Choice;
+                    GetTextString (hWndDlg,pField->name,32,"Enter new field name",NULL,NULL,0);
+                    goto Display;
+                    break;   
+                    
+              case 65004:
+                    Choice=(short)SendDlgItemMessage(hWndDlg,IDC_FIELDS, LB_GETCURSEL,0,0);
+                    pField = &pComboFile->FldInfo; 
+                    pField += Choice;
+					pComboField = (LPCOMBOFIELDINFO)GlobalLock (hComboFields);
+					pComboField += Choice; 
+					UpdateIndex = Choice;
+		            if (pComboField->fromfile == -1)
+		            {
+		                pCFieldIndex =(LPCFIELDINDEX) GlobalLock(hComputedFields);
+		                pCField = (LPSTR)pCFieldIndex + (sizeof(CFIELDINDEX) +
+		                        pCFieldIndex->offset[pComboField->fromfileindex]);
+						SetDlgItemText(hWndDlg,IDC_CFNAME,pField->name);
+		                SetDlgItemText(hWndDlg,IDC_CFDEF,pCField); 
+		                switch (pField->type)
+		                {
+		                	case BT_INTEGER:
+		                		i=0;
+		                		break;
+		                	case BT_REAL:
+		                		i=1;
+		                		break;
+		                	default:
+		                		i=2; 
+			                  	SetDlgItemInt (hWndDlg,IDC_CFLEN,(UINT)pField->length,TRUE); 
+		                		ShowWindow (GetDlgItem(hWndDlg,IDC_CFLEN),TRUE);
+				         		ShowWindow (GetDlgItem(hWndDlg,IDC_CFLEN_TITLE),TRUE);
+ 		                }
+       					SendDlgItemMessage(hWndDlg,IDC_CFTYPE, CB_SETCURSEL,i,0);                 
+		                GlobalUnlock (hComputedFields);
+		                SetDlgItemText (hWndDlg,IDC_ADD_FIELD,"Update");
+		            }
+					GlobalUnlock (hComboFields);
+                    goto Display;
+                    break;   
+                    
+              case 65002:
+              case 65003:
+                    break;
+              
+              case IDOK: 
+              {
+                 short    SaveDrive, Choice;  
+                 BOOL   GotFile; 
+                 char	Name[128];   
+                 LPSTR  pName;
+                 
+                  if (hCFName)
+                  	pName = GlobalLock (hCFName);
+                  else
+                  {
+                  	pName = Name;
+                  	if (!GetSaveName2 (hWndDlg,pName,IDS_FILTERGCF,".GCF",IDS_FILEGCF)) break;   
+                  }
+                  pComboFile->TotFileLen=0;
+                  Choice = 0;
+                  while ((len=(short)SendDlgItemMessage(hWndDlg ,IDC_FILES,LB_GETTEXT,Choice++,(LPARAM)str))>=0)
+                  {
+                    pComboFile->TotFileLen += (len + 1);
+                  }
+                  FidCF = GSSiOpenFile (pName,&OFStruct,OF_CREATE); 
+                  if (hCFName)
+                  {
+                  	GlobalUnlock (hCFName);
+                  	GSSiGlobFree (&hCFName);
+                  }
+                  _lwrite (FidCF,(char *)pComboFile,sizeof(COMBOFILE)+(pComboFile->NumFields-1)*sizeof(FIELDINFO));
+                  Choice = 0;
+                  pComboField = (LPCOMBOFIELDINFO)GlobalLock (hComboFields); 
+                  _lwrite (FidCF,(char *)pComboField,pComboFile->NumFields*sizeof(COMBOFIELDINFO));
+                  GlobalUnlock (hComboFields);
+                  GlobalFree (hComboFields); 
+                  pWhereIndex = (LPWHEREINDEX)GlobalLock (hWhere); 
+                  _lwrite (FidCF,(char *)pWhereIndex,sizeof(WHEREINDEX) + pWhereIndex->Len);
+                  GlobalUnlock (hWhere);
+                  GlobalFree (hWhere);
+                  pCFieldIndex = (LPCFIELDINDEX)GlobalLock(hComputedFields);
+                  _lwrite (FidCF,(char *)pCFieldIndex,sizeof(CFIELDINDEX) + pCFieldIndex->Len);
+                  GlobalUnlock (hComputedFields);
+                  GlobalFree (hComputedFields);
+                  GSSiClose (FidCF);
+                  GlobalUnlock (hAddFile);
+                  GlobalFree (hAddFile);
+                  for (i=0;i<pComboFile->NumFiles;i++)
+                    CloseDataFile (TRUE, &pComboFile->hSQL[i]);
+                  GlobalUnlock (hComboFile);
+                  GlobalFree (hComboFile);
+                  EndDialog(hWndDlg, TRUE);
+              }
+                  break;
+                  
+              case IDC_HAVE_FILE: 
+              {
+                  short   nItems, ComboFileID;
+                  LPINT lpItems;
+                  HANDLE hItems;  
+                  
+                  ComboFileID=(short)SendDlgItemMessage(hWndDlg,IDC_FILES,LB_GETCURSEL,0,0);
+                  if (ComboFileID<0) 
+                  {
+                    SendDlgItemMessage (hWndDlg,IDC_FILES,LB_ADDSTRING,0,(LPARAM)((LPSTR) pAddFile)); 
+                    ComboFileID = pComboFile->NumFiles++;
+                    _fstrcpy (pComboFile->FileNames[ComboFileID],pAddFile);
+                    pComboFile->hSQL[ComboFileID]=hSQLCombo;
+                  }
+                  nItems=(short)SendDlgItemMessage(hWndAddComboFile ,SV_FIELD_NAME,LB_GETSELCOUNT,0,0); 
+                  hItems=GSSiGlobAlloc(GHND,nItems*2);
+                  lpItems=  (LPINT) GlobalLock(hItems);
+                  SendDlgItemMessage(hWndAddComboFile ,SV_FIELD_NAME,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
+                  pField = &pComboFile->FldInfo;
+                  pField += pComboFile->NumFields;
+                  pComboField = (LPCOMBOFIELDINFO)GlobalLock (hComboFields);
+                  pComboField += pComboFile->NumFields;
+                  pWhereIndex = (LPWHEREINDEX)GlobalLock (hWhere); 
+                  while (nItems--)
+                  { 
+                    SendDlgItemMessage(hWndAddComboFile ,SV_FIELD_NAME,LB_GETTEXT,*lpItems,(LPARAM)((LPSTR)str)); 
+                    _fstrcpy (pField->name,str);
+                    pField->index = pComboFile->NumFields;
+                    pComboField->fromfile = ComboFileID;
+                    pComboField->fromfileindex = *lpItems++;
+                    pComboField->WhereID = pWhereIndex->Num; 
+                    pField++;   
+                    pComboField++;
+                    pComboFile->NumFields++;
+                  }
+                  GlobalUnlock (hComboFields); 
+                  GlobalUnlock (hItems);
+                  GlobalFree (hItems);
+                  pWhere = (LPSTR)pWhereIndex + (sizeof(WHEREINDEX) + pWhereIndex->Len); 
+                  pWhereIndex->offset[pWhereIndex->Num] = pWhereIndex->Len;
+                  GetDlgItemText(hWndAddComboFile,IDC_SQL,pWhere,256);
+                  pWhereIndex->Len += _fstrlen(pWhere) + 1;  
+                  pWhereIndex->Num++;
+                  GlobalUnlock (hWhere);
+                  DestroyWindow(hWndAddComboFile); 
+                  goto Display;
+              }
+                  break;
+              
+              case IDCANCEL: 
+                  for (i=0;i<pComboFile->NumFiles;i++)
+                    CloseDataFile (TRUE, &pComboFile->hSQL[i]);
+                  GlobalUnlock (hName);
+                  GlobalUnlock (hAddFile);
+                  GlobalFree (hAddFile); 
+                  GlobalUnlock (hComboFile);
+                  GlobalFree (hWhere);
+                  GlobalFree (hComboFields);
+                  GlobalFree (hComboFile);
+                  GSSiGlobFree (&hCFName);
+                  EndDialog(hWndDlg, FALSE);
+                  break; 
+                  
+              case IDC_ADD_FIELD:
+                  pField = &pComboFile->FldInfo;
+                  GetDlgItemText (hWndDlg,IDC_ADD_FIELD,str,256);
+                  if (*str == 'A') 
+                  	UpdateIndex = pComboFile->NumFields;
+                  pField += UpdateIndex;
+                  SetDlgItemText (hWndDlg,IDC_ADD_FIELD,"Add");
+                  pComboField = (LPCOMBOFIELDINFO)GlobalLock (hComboFields);
+                  pComboField += UpdateIndex;
+                  pCFieldIndex = (LPCFIELDINDEX)GlobalLock(hComputedFields);
+                  if (!GetDlgItemText(hWndDlg,IDC_CFNAME,pField->name,32))
+                  { 
+                     MessageBox( GetFocus(),"No field name",NULL,MB_ICONEXCLAMATION); 
+                  	 break;
+                  }
+                  if (!GetDlgItemText(hWndDlg,IDC_CFTYPE,str,32))
+                  { 
+                     MessageBox( GetFocus(),"Type not specified",NULL,MB_ICONEXCLAMATION); 
+                  	 break;
+                  }
+                  if (!_fstrcmp (str,"Text")) 
+                  {  
+                  	 BOOL Error;
+                  	 
+                  	 pField->type = BT_CHAR;
+                  	 pField->length = GetDlgItemInt (hWndDlg,IDC_CFLEN,&Error,FALSE); 
+                  	 if (!Error || !pField->length)
+	                  { 
+	                     MessageBox( GetFocus(),"Length not specified",NULL,MB_ICONEXCLAMATION); 
+	                  	 break;
+	                  }
+                  }
+                  else if (!_fstrcmp (str,"Real")) 
+                  {
+                  	 pField->type = BT_REAL;
+                  	 pField->length = 8;
+                  }
+                  else
+                  {
+                  	 pField->type = BT_INTEGER;
+                  	 pField->length = 4;
+                  }	 
+                  if (UpdateIndex >= pComboFile->NumFields)
+                  	pField->index = pComboFile->NumFields++;
+                  pComboField->fromfile = -1;
+                  pComboField->fromfileindex = pCFieldIndex->Num;
+                  pComboField->WhereID = 0; 
+                  GlobalUnlock (hComboFields); 
+                  pCField = (LPSTR)pCFieldIndex + (sizeof(CFIELDINDEX) + pCFieldIndex->Len); 
+                  pCFieldIndex->offset[pCFieldIndex->Num] = pCFieldIndex->Len;
+                  GetDlgItemText(hWndDlg,IDC_CFDEF,pCField,256);
+//                  pCFieldIndex->Len += _fstrlen(pCField) + 1;  
+                  pCFieldIndex->Len += 256;  
+                  pCFieldIndex->Num++;
+                  GlobalUnlock (hComputedFields);
+                  goto Display;
+                  
+              case IDC_FIELDS:  
+              {   
+                  HMENU EditMenu;             
+                  POINT position;
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+                  {
+                   case CBN_DBLCLK:
+                   case CBN_SELCHANGE: 
+                        EditMenu=CreatePopupMenu();             
+                        AppendMenu (EditMenu,MF_ENABLED|MF_STRING,65001,IADDR("Change Name",1));
+                        AppendMenu (EditMenu,MF_ENABLED|MF_STRING,65004,IADDR("Edit Definiton",1));
+                        AppendMenu (EditMenu,MF_ENABLED|MF_STRING,65002,IADDR("Delete",1));
+                        AppendMenu (EditMenu,MF_ENABLED|MF_STRING,65003,IADDR("Cancel",1));
+                        GetCursorPos (&position);
+                        TrackPopupMenu (EditMenu,TPM_LEFTBUTTON,position.x,position.y,0,hWndDlg,0);
+                        DestroyMenu (EditMenu); 
+                  }
+                  break;
+              }
+              
+              case IDC_FILES:  
+              {   short   Choice;
+              
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+                  {
+                   case CBN_DBLCLK:
+                     Choice=(short)SendDlgItemMessage(hWndDlg,IDC_FILES, LB_GETCURSEL,0,0);
+                     SendDlgItemMessage(hWndDlg ,IDC_FILES,LB_GETTEXT,Choice,(LPARAM)pAddFile); 
+                     hSQLCombo = pComboFile->hSQL[Choice];
+                     goto GetFile; 
+                  }
+                  break;
+              }
+              
+              case  IDC_EDIT_FILE:
+				  Choice=(short)SendDlgItemMessage(hWndDlg,IDC_FILES, LB_GETCURSEL,0,0);
+				  if (Choice >= 0)
+				  	if (GetTextString (hWndDlg,pComboFile->FileNames[Choice],128,"Edit File Name",NULL,NULL,0))
+	                    goto Display;
+              	  break;
+              	  
+              case  IDC_ADD_FILE:
+                  *pAddFile = 0; 
+                  hSQLCombo = 0;
+         GetFile:
+                {
+                      FARPROC   lpfnCOMBO_ADD_FILEMsgProc; 
+                            
+                      lpfnCOMBO_ADD_FILEMsgProc = MakeProcInstance((FARPROC)COMBO_ADD_FILEMsgProc, hInst);
+                      CreateDialog(hInst, (LPSTR)"COMBO_ADD_FILE", hWndDlg, lpfnCOMBO_ADD_FILEMsgProc);
+                }
+                  break; 
+              case IDC_CFTYPE:  
+              {   short   Choice;
+              
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+                  {
+                   case CBN_DBLCLK:
+                   case CBN_SELCHANGE:
+                     Choice=(short)SendDlgItemMessage(hWndDlg,IDC_CFTYPE, CB_GETCURSEL,0,0);
+                     SendDlgItemMessage(hWndDlg ,IDC_CFTYPE,CB_GETLBTEXT,Choice,(LPARAM)str); 
+                     if (!_fstricmp (str,"Text")) 
+                     {
+				         ShowWindow (GetDlgItem(hWndDlg,IDC_CFLEN),TRUE);
+				         ShowWindow (GetDlgItem(hWndDlg,IDC_CFLEN_TITLE),TRUE);
+                     }
+                     else	
+                     {
+				         ShowWindow (GetDlgItem(hWndDlg,IDC_CFLEN),FALSE);
+				         ShowWindow (GetDlgItem(hWndDlg,IDC_CFLEN_TITLE),FALSE);
+                     }
+                  }
+                  break;
+              }
+              
+                  
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}   
+
+BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam, WORD cntlSQL,
+                                WORD cntlSET_FILE, WORD cntlDATABASE_LIST, WORD cntlTABLE_NAMES,WORD cntlTABLE_NAMES_TITLE,
+                                LPWORD pcntlFIELD_NAMESIn,short NumFieldLists,
+                                LPSTR DataFile, short *DataFileType, HANDLE *hThemeDB, 
+                                LPINT pFieldListIsCBIn,BOOL WantBrackets)
+{
+static short num_tables, LastTableChoice=-2,
+                       LastDBChoice=-2, LastFieldChoice=-2;
+static  FIELDINFO FIELD;
+static  LPFIELDINFO lpFieldInfo = &FIELD;
+    short     Choice, rc, i,j, outlen, deslen,ii;
+    static  BOOL ValidTable = FALSE;     
+    HANDLE   DBHandle;
+    LPSTR   lpSTRING, pBAR;
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr; 
+    LPINT pFieldListIsCB;  
+    LPWORD pcntlFIELD_NAMES; 
+    HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+    LPSTR 	str=GlobalLock (hMem);
+    LPSTR   szDescription=str+128;
+    LPSTR	names=szDescription+128;
+    LPSTR	TableName=names+128;
+    LPSTR	cwd=TableName+128;
+    LPSTR	AttDir=cwd+128;
+    LPSTR	Ext = AttDir+128;
+    LPSTR	ExtID=Ext+16;  
+                                         
+ switch(Message)
+   {
+    case GSSI_REINITDIALOG:
+        ii=1;
+    case WM_INITDIALOG:
+         LastTableChoice=LastDBChoice=LastFieldChoice=-2;
+LoadFields:
+         if (DataFile[0])
+         {  
+            if (!_fstrnicmp (DataFile,"ODBC|",5))
+            {   LPSTR   lpDB, lpTABLE;
+                             
+                SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+                lpDB = &DataFile[5];
+                lpTABLE = _fstrchr (lpDB,'|');
+                if (lpTABLE)
+                {
+                    *lpTABLE = '\0';
+//                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,lpDB);
+                    *lpTABLE++ = '|';
+                    SetDlgItemText(hWndDlg,cntlTABLE_NAMES,lpTABLE);
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_SHOW); 
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_SHOW); 
+                }
+                else  
+                {
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_HIDE);                   
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_HIDE); 
+                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,lpDB);
+                }
+            }
+            else
+            {
+                SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+            }
+            _fstrcpy (ThemeDB,DataFile); 
+            for (i=0,pFieldListIsCB=pFieldListIsCBIn,pcntlFIELD_NAMES=pcntlFIELD_NAMESIn;i<NumFieldLists;i++,pFieldListIsCB++,pcntlFIELD_NAMES++)
+            {
+                if (*pFieldListIsCB)
+                    SendDlgItemMessage (hWndDlg,*pcntlFIELD_NAMES,CB_RESETCONTENT,0,0);
+                else
+                    SendDlgItemMessage (hWndDlg,*pcntlFIELD_NAMES,LB_RESETCONTENT,0,0);
+            }
+            if (!OpenDataFile (DataFile,"",BT_READ,hThemeDB))
+            	goto RtnFalse;
+            // CurTheme is not static, rather than me change your code I opted to store it in ct. lda
+            // I use it for -> case SV_CONTENTS_ICON: and again for ->  case IDCANCEL:
+
+            SQLPtr = (LPOPENSQLDATA) GlobalLock (*hThemeDB);
+            FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+            lpFieldInfo = &FilePtr->FldInfo; 
+            for (i=0;i<FilePtr->NumFields;i++,lpFieldInfo++) 
+            {
+                for (j=0,pFieldListIsCB=pFieldListIsCBIn,pcntlFIELD_NAMES=pcntlFIELD_NAMESIn;j<NumFieldLists;j++,pFieldListIsCB++,pcntlFIELD_NAMES++)
+                {   
+                    if (WantBrackets)
+                        sprintf (str,"[%s]",lpFieldInfo->name);
+                    else
+                        _fstrcpy (str,lpFieldInfo->name);
+                    if (*pFieldListIsCB)
+                        SendDlgItemMessage (hWndDlg,*pcntlFIELD_NAMES,CB_ADDSTRING,
+                                            0,(LPARAM)((LPSTR) str));
+                    else
+                        SendDlgItemMessage (hWndDlg,*pcntlFIELD_NAMES,LB_ADDSTRING,
+                            0,(LPARAM)((LPSTR) str));
+                }
+            }           
+            GlobalUnlock (SQLPtr->OFHandle);
+            GlobalUnlock (*hThemeDB);
+            PostMessage(hWndDlg, WM_COMMAND, IDC_OPEN_DB, 0L);
+            
+         }
+        goto RtnFalse;
+        
+    case WM_DESTROY:
+        CloseDataFile (FALSE,hThemeDB);      
+    	DestroyFieldList ();
+    	goto RtnFalse;
+    	
+    case WM_COMMAND:
+         if (wParam == cntlSET_FILE)
+         {
+             Choice=(short)SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_GETCURSEL,0,0);
+             if (!Choice && *DataFileType == -UMIFS_DATAFILE)
+             	Choice = 3;
+//             if(Choice == LastDBChoice && Choice != 0)break;
+             LastDBChoice = Choice;
+             LastTableChoice = -1;
+             LastFieldChoice = -1; 
+             CloseDataFile (FALSE,hThemeDB);  
+             switch (Choice)
+             {
+             
+             	 case 0:
+	             {  
+	                    
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_HIDE); 
+	                ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_HIDE);  
+	                *AttDir = 0;
+	                _fstrcpy (Ext,".TXT"); 
+	                _fstrcpy (ExtID,"Comma delimited text files");
+	                sprintf (gszFilter,"%s(*%s)|*%s|",ExtID,Ext,_fstrlwr(Ext));
+	                if (GetFileName3(hWndDlg,AttDir,0,IDS_FILETXT))   
+	                {
+	                    _fstrcpy (DataFile,AttDir);
+	                    SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);
+	                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+		                *DataFileType = ODBC_DATAFILE;
+//		                OpenDataFile (DataFile,"",BT_READ,hThemeDB); 
+	                    goto LoadFields;
+	                }
+					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);                 
+	             } 
+	             break;
+	             
+             	 case 1:
+	             {  
+	                    
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_HIDE); 
+	                ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_HIDE);  
+	                *AttDir = 0;
+	                _fstrcpy (Ext,".DBF"); 
+	                _fstrcpy (ExtID,"Dbase Files");
+	                sprintf (gszFilter,"%s(*%s)|*%s|",ExtID,Ext,_fstrlwr(Ext));
+	                if (GetFileName3(hWndDlg,AttDir,0,IDS_FILEDBF))   
+	                {
+	                    _fstrcpy (DataFile,AttDir);
+	                    SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);
+	                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+		                *DataFileType = ODBC_DATAFILE;
+	                    goto LoadFields;
+	                }
+					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);                 
+	             } 
+	             break;
+	             
+             	 case 2:
+	             {  
+	                    
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_HIDE); 
+	                ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_HIDE);  
+	                _fstrcpy (AttDir,"[%DATA_LOC]attribut");
+	                ExpandText (AttDir); 
+	                *AttDir = 0;
+	                _fstrcpy (Ext,".GCF"); 
+	                _fstrcpy (ExtID,"GeoMaster Combo Files");
+	                sprintf (gszFilter,"%s(*%s)|*%s|",ExtID,Ext,_fstrlwr(Ext));
+	                if (GetFileName3(hWndDlg,AttDir,0,IDS_FILEGCF))   
+	                {
+	                    _fstrcpy (DataFile,AttDir);
+	                    SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);
+	                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+	                    if (_fstrstr (DataFile,".GCF"))
+	                        *DataFileType = COMBO_DATAFILE;
+	                    goto LoadFields;
+	                } 
+					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);                 
+	             } 
+	             break;
+
+             	 case 3:
+	             {  
+	                    
+                    ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_HIDE); 
+	                ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_HIDE);  
+	                _fstrcpy (AttDir,"[%DATA_LOC]attribut");
+	                ExpandText (AttDir); 
+	                *AttDir = 0;
+	                _fstrcpy (Ext,".GMD"); 
+	                _fstrcpy (ExtID,"GeoMaster Data Files");
+	                sprintf (gszFilter,"%s(*%s)|*%s|",ExtID,Ext,_fstrlwr(Ext));
+	                if (GetFileName3(hWndDlg,AttDir,0,IDS_FILEGMD))   
+	                {
+	                    _fstrcpy (DataFile,AttDir);
+	                    SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);
+	                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+	                    if (_fstrstr (DataFile,".GMD"))
+	                        *DataFileType = UMIFS_DATAFILE;
+	                    goto LoadFields;
+	                } 
+					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);                 
+	             } 
+	             break;
+
+				 case 4:
+                 {
+                    _fstrcpy (DataFile,"[%INDIR]attribut\\graphics.gmd"); 
+                    SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);
+                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+                    *DataFileType = UMIFS_DATAFILE;
+                    if (cntlSQL)  
+						SetDlgItemText (hWndDlg,cntlSQL,"INT_REFNO=[%INT_REFNO]");	
+                    goto LoadFields;
+                 } 
+				 	             
+				 case 5:
+                 {
+                    _fstrcpy (DataFile,"[%INDIR]attribut\\graphic2.gmd"); 
+                    SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);
+                    SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+                    *DataFileType = UMIFS_DATAFILE;
+                    if (cntlSQL)  
+						SetDlgItemText (hWndDlg,cntlSQL,"INT_REFNO=[%INT_REFNO]");	
+                    goto LoadFields;
+                 } 
+				 	             
+	             case 6:
+	             break;
+	             
+             	 default:
+	             { // user picked a ODBC Driver
+	               _fstrcpy(DataFile, "ODBC|");
+	               SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST,CB_GETLBTEXT, 
+	                                    Choice,(LPARAM)((LPSTR)&DataFile[5]));
+	               SetDlgItemText(hWndDlg,cntlDATABASE_LIST,DataFile);
+	               *DataFileType = ODBC_DATAFILE;
+	               OpenDataFile (DataFile,"",BT_READ,hThemeDB); 
+	               ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES),SW_SHOW);  
+	               ShowWindow (GetDlgItem(hWndDlg,cntlTABLE_NAMES_TITLE),SW_SHOW);  
+	
+	                //goto s44;//LoadFields;  
+	             }  
+	             break;
+	         }
+             goto RtnTrue;
+        }
+        else if (wParam == cntlDATABASE_LIST)
+        {
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+              {
+              case CBN_SELCHANGE:
+              case CBN_DBLCLK:   
+	             Choice=(short)SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_GETCURSEL,0,0); 
+                 if (Choice == 6)    
+                 {
+					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);                 
+                 	break;
+                 }
+                 PostMessage(hWndDlg, WM_COMMAND, cntlSET_FILE, 0L);
+              break;
+              case CBN_DROPDOWN:
+               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_RESETCONTENT,0,0);  
+               if (*DataFileType == -UMIFS_DATAFILE)
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " GeoMaster data files (*.GMD)")); 
+	           else
+	           {
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " Comma delimited text files (*.TXT)"));
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " Dbase files (*.DBF)"));
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " GeoMaster combo files (*.GCF)"));
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " GeoMaster data files (*.GMD)"));
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " GeoMaster graphics data"));
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) " GeoMaster graphics data (basic)"));
+	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) "----------------- ODBC Data Sources -----------------"));
+	               rc = GetDataSource(*hThemeDB, TRUE,
+	                    names, 64, &outlen, szDescription, (SWORD) 64, &deslen); 
+	                 while (rc != SQL_NO_DATA_FOUND)
+	                 { 
+	                  _fstrupr(names);
+	                  if (_fstrcmp (names,"TXT") && _fstrcmp (names,"DBF"))
+	                  	i=(short)SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+	                                        (LPARAM)((LPSTR) names));
+	                  rc = GetDataSource( *hThemeDB, FALSE,  
+	                       names, 64, &outlen, szDescription, (SWORD) 64, &deslen);
+	             	} 
+                 } 
+              } //end of the switch   
+             goto RtnTrue;
+        }
+        else if (wParam == cntlTABLE_NAMES)  
+        {
+              i = HIWORD(lParam);
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+              {
+               case CBN_DBLCLK:
+               case CBN_SELCHANGE:
+                 if(!*hThemeDB || *DataFileType != ODBC_DATAFILE) break; 
+                 DBHandle = GetDBHandleFromSQL (*hThemeDB);
+                 Choice=(short)SendDlgItemMessage(hWndDlg,cntlTABLE_NAMES, CB_GETCURSEL,0,0);
+//               if(Choice == LastTableChoice) break;
+                 LastTableChoice = Choice;
+                  LastFieldChoice = -1;
+                   ValidTable = TRUE;                           
+                   SendDlgItemMessage(hWndDlg,cntlTABLE_NAMES,CB_GETLBTEXT,
+                                    Choice,(DWORD)TableName); 
+                   if ((pBAR = _fstrchr (DataFile,'|')))
+                   		pBAR = _fstrchr (++pBAR,'|');
+                   if (pBAR)
+                   		*pBAR = 0;
+                   _fstrcat(DataFile,"|");
+                   _fstrcat(DataFile,(LPCSTR)TableName);
+                   CloseDataFile (FALSE,hThemeDB);                  
+                    
+                   goto LoadFields; 
+                case CBN_DROPDOWN:
+                   if(!*hThemeDB|| *DataFileType != ODBC_DATAFILE) break;  
+                   DBHandle = GetDBHandleFromSQL (*hThemeDB);
+                   lpSTRING =  GetTableName (DBHandle, TRUE); // the first table name 
+                   if (lpSTRING == 0) break;
+                   i=(short)SendDlgItemMessage (hWndDlg,cntlTABLE_NAMES,CB_RESETCONTENT,0,0);
+                   i = 0;
+                   while (lpSTRING && lpSTRING[0] != 0 )
+                   {
+                    i=(short)SendDlgItemMessage (hWndDlg,cntlTABLE_NAMES,CB_ADDSTRING,0,(LPARAM)((LPSTR) lpSTRING));
+                    lpSTRING =  GetTableName (DBHandle, FALSE); // subsequent table names 
+                   } 
+                     
+               } //end of the switch
+                break; 
+             goto RtnTrue;
+           }
+    default:  
+    RtnFalse:
+    	GSSiGlobUlFree (&hMem);
+        return FALSE;
+   }
+RtnTrue:
+ GSSiGlobUlFree (&hMem);
+ return TRUE;
+} 
+
+BOOL DisplayFieldList (HWND hWnd,HANDLE hDB,LPRECT rect, short type)
+{
+    char	Dialog[12]="FIELDS";  
+    
+    if (!hDB && !type)
+    	return FALSE;
+    hFLDB = hDB; 
+    pFLRect = rect;
+    switch (type) 
+    {   
+    	case 1:
+    	hFLDB = 0;
+    	_fstrcpy (Dialog,"GLOBALS");  
+    	break;
+    	case 3:
+    	hFLDB = 2;
+    	_fstrcpy (Dialog,"GLOBALS2");  
+    	break;
+    	case 2:
+    	hFLDB = 1;
+    	hFieldsDLT = hDB;
+    	_fstrcpy (Dialog,"FIELDS"); 
+    	break;
+    }
+	lpfnFIELDSMsgProc = (DLGPROC) MakeProcInstance((FARPROC)FIELDSMsgProc, hInst);
+	CreateDialog(hInst, (LPSTR)Dialog,hWnd, lpfnFIELDSMsgProc);
+    return TRUE;
+} 
+
+void DestroyFieldList (void)
+{   
+	if (hWndFieldList)
+	{
+		DestroyWindow(hWndFieldList);
+		hWndFieldList = 0;
+		FreeProcInstance((FARPROC) lpfnFIELDSMsgProc);
+	}
+	return;
+}
+
+BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{    
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr;
+	LPFIELDINFO lpFieldInfo;  
+	BOOL	ShowDesc;
+	char	str[144]; 
+	int		i;
+	static	BOOL	AddSpaces=TRUE;
+
+ short    BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG: 
+    	hWndFieldList = hWndDlg;  
+ 		if (pFLRect)
+ 		{   
+ 			
+ 			MoveWindow(hWndDlg, pFLRect->left,pFLRect->top, pFLRect->right-pFLRect->left, pFLRect->bottom-pFLRect->top, FALSE);
+ 		}
+    	if (!hFLDB)
+    	{
+	        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,0,(LPARAM)((LPSTR) "[%UDI]"));
+	        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,0,(LPARAM)((LPSTR) "[%INT_REFNO]"));
+    		break;
+    	}  
+    	if (hFLDB==2)
+		{   
+		    short   TabStops[2]={150,500}; 
+		    BOOL	Expand=TRUE;
+         	
+         	SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+		    
+		    ListGlobals (hWndDlg,IDC_FIELDS,Expand);
+    		break;
+    	}  
+    	if (hFLDB == 1)
+    	{   
+			VARPNT	VarPtr;
+    		short	i;
+			LPSHORT	nDLTvar;
+			LPHANDLE	DLTVar; 
+			LPSHORT	DLTStart,DLTLen;
+			
+			if (hFieldsDLT)
+			{
+				nDLTvar = (LPSHORT)GlobalLock (hFieldsDLT);
+				DLTVar = (LPHANDLE)(nDLTvar + 1);
+				DLTStart = (LPSHORT)(DLTVar + MAXDLTVAR);
+				DLTLen = (LPSHORT)(DLTStart + MAXDLTVAR);  
+	    		for (i=0;i<*nDLTvar;i++)
+	    		{
+					VarPtr = (VARPNT)GlobalLock (DLTVar[i]);
+			        sprintf (str,"[%s]",VarPtr->Name);
+			        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,0,(LPARAM)((LPSTR)str));
+					GlobalUnlock (DLTVar[i]);
+				}
+				GlobalUnlock (hFieldsDLT);
+			}
+			break;
+    	} 
+    	EnableWindow (GetDlgItem(hWndDlg,IDC_SHOWDESCRIPTION),TRUE);
+        SendDlgItemMessage (hWndDlg,IDC_SPACES,(UINT)BM_SETCHECK,AddSpaces,(LPARAM)0L); 
+  	case GSSI_REINITDIALOG:
+		SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_RESETCONTENT,NULL,NULL);
+        ShowDesc = SendDlgItemMessage (hWndDlg,IDC_SHOWDESCRIPTION,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
+		SQLPtr = (LPOPENSQLDATA)GlobalLock (hFLDB);
+		FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+		lpFieldInfo = &FilePtr->FldInfo; 
+		for (i=0;i<FilePtr->NumFields;i++,lpFieldInfo++) 
+		{   
+			if (ShowDesc)
+	        	sprintf (str,"[%s] - %i",lpFieldInfo->name,lpFieldInfo->length);
+	        else
+	        	sprintf (str,"[%s]",lpFieldInfo->name); 
+	        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,0,(LPARAM)((LPSTR) str));
+		}           
+		GlobalUnlock (SQLPtr->OFHandle);
+		GlobalUnlock (hFLDB);
+		
+		 break;                              
+
+    case WM_CLOSE:
+		 AddSpaces = SendDlgItemMessage (hWndDlg,IDC_SPACES,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
+	     DestroyWindow(hWndDlg);  
+	     hWndFieldList = 0;
+         break;  
+         
+
+    case WM_COMMAND:
+#if WIN32
+        switch(LOWORD(wParam))
+#else
+        switch(wParam)
+#endif
+           {  
+           	  case IDC_SHOWDESCRIPTION:
+           	    PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+				break;
+				
+	          case IDC_FIELDS:
+	#if WIN32
+	          switch(LOWORD(wParam))
+	#else
+	          switch(HIWORD(lParam))
+	#endif
+	          {
+                case LBN_SELCHANGE:
+	            {
+	            	HANDLE	hText = GSSiGlobAlloc (GHND,UINT_MAX);  
+	            	HANDLE	hFields;
+	            	LPINT	lpItems;
+	            	short	nItems; 
+	            	LPSTR	pText; 
+	            	BOOL	First;
+	            	
+	                nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELCOUNT,NULL,NULL);  
+	                if (!nItems)
+	                	break;
+	                hFields = GSSiGlobAlloc(GHND,nItems*2);
+	                lpItems = (LPINT)GlobalLock(hFields);
+	                SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELITEMS,nItems,(LPARAM)lpItems); 
+					pText = GlobalLock (hText);  
+	            	if (hFldAppendWnd)
+	            	{   
+	                	SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETTEXT,*lpItems,(LPARAM)pText); 
+	            		SetWindowText (hFldAppendWnd,pText);
+						GSSiGlobUlFree (&hText);
+	            		break;
+	            	}
+	            	OpenClipboard (hWndDlg);
+					EmptyClipboard();
+					First = TRUE;
+					while (nItems--)
+					{   
+						if (First)
+							First=FALSE;
+						else
+						{   
+		                   if (SendDlgItemMessage (hWndDlg,IDC_SPACES,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
+								_fstrcat (pText++," ");
+						}
+							
+	                	SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETTEXT,*lpItems++,(LPARAM)pText); 
+	                	pText = _fstrchr (pText,0);
+					} 
+					GSSiGlobUlFree (&hFields); 
+					GlobalUnlock (hText);
+					SetClipboardData(CF_TEXT, hText);
+			        CloseClipboard();
+	             }
+                 break;
+           	 }
+             break; 
+           }
+         break;
+    default:
+        return FALSE;
+   } 
+ return TRUE;
+}
+  
+BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldName,LPSTR CharVal,BOOL BinMode)
+{ 
+	LPGWFLDINFO lpGWFldInfo;  
+	short	i;
+	
+	for (i=0,lpGWFldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;i++,lpGWFldInfo++)
+	{	
+		if (!_fstricmp (lpGWFldInfo->Name,FieldName))
+			return SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CharVal,BinMode);
+	}
+	return FALSE;
+}
+
+BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,LPSTR CharVal,BOOL BinMode)
+{   
+    LPSTR   lpVal; 
+    short     l, Type=lpGWFldInfo->Type,ln=_fstrlen (CharVal);
+    BOOL	rtn=TRUE;
+    
+    if (BinMode)
+    	Type = BT_CHAR;
+
+    lpGWFldInfo->HasValue = 1;
+    lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+    switch (Type)
+    {   
+        default:
+        case BT_CHAR:
+        	if (BinMode)
+            	_fmemmove ((LPSTR)lpVal,CharVal,lpGWFldInfo->Len);
+        	else
+            	_fstrncpy ((LPSTR)lpVal,CharVal,lpGWFldInfo->Len);
+            if (ln > lpGWFldInfo->Len)
+            	rtn=FALSE;
+            
+        break;
+                                
+        case BT_RIGHT_CHAR:
+            _fmemset (lpVal,' ', lpGWFldInfo->Len);
+            l = _fstrlen (CharVal);
+            lpVal+= max(lpGWFldInfo->Len-l,0);
+            _fmemmove (lpVal,CharVal,max(l,lpGWFldInfo->Len));
+        break;
+                                
+        case BT_INTEGER:
+            if (lpGWFldInfo->Len == 2)
+                *(LPSHORT)lpVal = atoi(CharVal);
+            else
+                *(LPLONG)lpVal = atol(CharVal);
+        break;
+                                
+        case BT_REAL:
+            if (lpGWFldInfo->Len == 4)
+                *(LPFLOAT)lpVal = (float)atof(CharVal);
+            else
+                *(LPDOUBLE)lpVal = atof(CharVal);
+        break;
+     }
+     return rtn; 
+}
+
+BOOL ConvertFieldValFromChar (LPGWDHEADER lpGWDHead,short FieldNum,LPSTR CharVal,LPSTR lpVal)
+{   
+	LPGWFLDINFO lpGWFldInfo=lpGWDHead->pFldInfo;  
+    short     l;
+    
+	lpGWFldInfo+=FieldNum;
+    switch (lpGWFldInfo->Type)
+    {   
+        default:
+        case BT_CHAR:
+           	_fstrncpy ((LPSTR)lpVal,CharVal,lpGWFldInfo->Len);
+        break;
+                                
+        case BT_RIGHT_CHAR:
+            _fmemset (lpVal,' ', lpGWFldInfo->Len);
+            l = _fstrlen (CharVal);
+            lpVal+= max(lpGWFldInfo->Len-l,0);
+            _fmemmove (lpVal,CharVal,max(l,lpGWFldInfo->Len));
+        break;
+                                
+        case BT_INTEGER:
+            if (lpGWFldInfo->Len == 2)
+                *(LPINT)lpVal = atoi(CharVal);
+            else
+                *(LPLONG)lpVal = atol(CharVal);
+        break;
+                                
+        case BT_REAL:
+            if (lpGWFldInfo->Len == 4)
+                *(LPFLOAT)lpVal = (float)atof(CharVal);
+            else
+                *(LPDOUBLE)lpVal = atof(CharVal);
+        break;
+     }
+     return TRUE; 
+}
+
+short TestFieldVal (LPGWDHEADER lpGWDHead,short FieldNum,LPSTR lpVal,short OpCode)
+{   
+	LPGWFLDINFO lpGWFldInfo=lpGWDHead->pFldInfo;  
+    LPSTR   lpVal2; 
+    short     l, rtn=0;
+    
+	lpGWFldInfo+=FieldNum;
+    
+    lpVal2 = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+    switch (lpGWFldInfo->Type)
+    {   
+        default:
+        case BT_CHAR:
+        case BT_RIGHT_CHAR:
+           	rtn = _fstrncmp (lpVal,lpVal2,lpGWFldInfo->Len);
+        break; 
+        
+        case BT_INTEGER:
+            if (lpGWFldInfo->Len == 2)
+            {
+                if (*(LPSHORT)lpVal < *(LPSHORT)lpVal2)
+                	rtn=-1;
+                else if (*(LPSHORT)lpVal > *(LPSHORT)lpVal2)
+                	rtn=1; 
+            }
+            else
+            {
+                if (*(LPLONG)lpVal < *(LPLONG)lpVal2)
+                	rtn=-1;
+                else if (*(LPLONG)lpVal > *(LPLONG)lpVal2)
+                	rtn=1; 
+            }
+        break;
+                                
+        case BT_REAL:
+            if (lpGWFldInfo->Len == 4)
+            {
+                if (*(LPFLOAT)lpVal < *(LPFLOAT)lpVal2)
+                	rtn=-1;
+                else if (*(LPFLOAT)lpVal > *(LPFLOAT)lpVal2)
+                	rtn=1; 
+            }
+            else
+            {
+                if (*(LPDOUBLE)lpVal < *(LPDOUBLE)lpVal2)
+                	rtn=-1;
+                else if (*(LPDOUBLE)lpVal > *(LPDOUBLE)lpVal2)
+                	rtn=1; 
+            }
+        break;
+     }
+     return rtn; 
+}
+
+BOOL SetFieldToMinVal(LPGWDHEADER lpGWDHead,short FieldNum)
+{   
+	LPGWFLDINFO lpGWFldInfo=lpGWDHead->pFldInfo;  
+    LPSTR   lpVal; 
+    short     l;
+    
+	lpGWFldInfo+=FieldNum;
+	
+    lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+    switch (lpGWFldInfo->Type)
+    {   
+        default:
+        case BT_CHAR:
+        case BT_RIGHT_CHAR:
+            _fmemset (lpVal,0, lpGWFldInfo->Len);
+        break;
+                                
+        case BT_INTEGER:
+            if (lpGWFldInfo->Len == 2)
+                *(LPINT)lpVal = SHRT_MIN;
+            else
+                *(LPLONG)lpVal = LONG_MIN;
+        break;
+                                
+        case BT_REAL:
+            if (lpGWFldInfo->Len == 4)
+                *(LPFLOAT)lpVal = FLT_MIN;
+            else
+                *(LPDOUBLE)lpVal = DBL_MIN;
+        break;
+     } 
+     lpGWFldInfo->HasValue = 1;
+     return TRUE; 
+}
+
+BOOL SetFieldValFromLong(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,long LVal)
+{   
+    LPVOID  lpVal;
+    
+    lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+    switch (lpGWFldInfo->Type)
+    {   
+        default:
+        case BT_RIGHT_CHAR:
+        case BT_CHAR: 
+        {   char    format[8]="%";
+            
+            itoa (lpGWFldInfo->Len,&format[1],10);
+            _fstrcat(format,"ld");
+            sprintf ((LPSTR)lpVal,format,LVal);
+        }
+        break; 
+        
+        case BT_INTEGER:
+            if (lpGWFldInfo->Len == 2)
+            {
+                if (LVal > INT_MAX)
+                	return FALSE;
+                *(LPINT)lpVal = LVal;              
+            }
+            else
+                *(LPLONG)lpVal = LVal;
+        break;
+                                
+        case BT_REAL:
+            if (lpGWFldInfo->Len == 4)
+                *(LPFLOAT)lpVal = (float)LVal;
+            else
+                *(LPDOUBLE)lpVal = LVal;
+        break;
+     }
+     return TRUE; 
+} 
+
+HANDLE OpenGWDatabase (LPSTR Name, short Mode)
+{   HANDLE DBHandle;
+    LPGWDHEADER lpGWDHead;
+    GWDHEADER   GWDHead;
+    LPGWFLDINFO lpFieldInfo;
+    OFSTRUCT    OFStruct;
+    char        IndexName[256];
+    short         Fid, i, ii;
+    LPSTR       lpEnd;
+    unsigned    frequency=1000, duration=100; 
+    BTHEAD      BTHead;
+    LPSTR   lpDot;
+    
+Open:
+    if (Mode == BT_READ)
+        Fid =  GSSiOpenFile (Name,&OFStruct,OF_READ);
+    else
+        Fid =  GSSiOpenFile (Name,&OFStruct,OF_READWRITE);
+    
+    if (Fid == HFILE_ERROR)
+    {   
+         return (0);
+    }
+    _lread (Fid,&GWDHead,sizeof(GWDHEADER));
+    DBHandle = GSSiGlobAlloc (GHND,sizeof (GWDHEADER)+GWDHead.Reclen);
+    lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
+    *lpGWDHead = GWDHead;
+    lpGWDHead->Fid =  Fid;
+    lpGWDHead->hFldInfo = GSSiGlobAlloc (GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
+    lpGWDHead->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHead->hFldInfo); 
+    if (!lpGWDHead->Version)
+    {
+        lpGWDHead->TimeStamp = 0; 
+        ii=_llseek (Fid,sizeof (GWDHEADER)-(MAX_GMD_INDEX_FIELDS*sizeof(HANDLE)+
+                                            MAX_GMD_INDEX_FIELDS*sizeof(LPSTR)+
+                                            MAX_GMD_INDEX_FIELDS*sizeof(short)+
+                                            sizeof(time_t)+
+                                            sizeof(HANDLE)+
+                                            sizeof(LPGWFLDINFO)+2),
+                                            0);
+    }
+    for (i=0,lpFieldInfo=lpGWDHead->pFldInfo;i<GWDHead.NumFields;i++,lpFieldInfo++)
+    {
+         _lread (Fid,lpFieldInfo,sizeof(GWFLDINFO));
+         lpEnd = LastNonBlank(lpFieldInfo->Name);
+         lpEnd++;
+         *lpEnd='\0';
+    }
+    for (i=0;i<MAX_GMD_INDEXES;i++) lpGWDHead->BTHandle[i]=0;
+    for (i=0;i<lpGWDHead->NumIndex;i++)
+    {
+        _fstrcpy (IndexName,Name);
+        ExpandText (IndexName);
+        _fstrlwr (IndexName); 
+        lpDot = _fstrrchr (IndexName,'.');
+        if (!lpDot) 
+        {
+            GlobalUnlock (DBHandle);  
+        	return 0; 
+        }
+        _fstrcpy (lpDot,".in");
+        itoa (i+1,_fstrchr(IndexName,'\0'),10);
+        if (!(lpGWDHead->BTHandle[i] = BT_OPEN (IndexName, lpGWDHead->TimeStamp, Mode, 0))) 
+        {   
+            GlobalUnlock (DBHandle);  
+            if (!CreateGWDIndex (DBHandle,IndexName,i))
+                return 0;
+            else
+                goto Open;
+        }
+        
+        GetBTHeader (lpGWDHead->BTHandle[i],&BTHead); 
+        if (!lpGWDHead->lKeys[i] || abs (lpGWDHead->lKeys[i]>256))
+            lpGWDHead->lKeys[i] = ComputeGWDKeyLen(lpGWDHead,i);
+        lpGWDHead->hKeys[i]=GSSiGlobAlloc(GHND,abs(lpGWDHead->lKeys[i]));
+        lpGWDHead->pKeys[i]=GlobalLock(lpGWDHead->hKeys[i]);
+        if (!lpGWDHead->pKeys[i])
+            ii=0;
+    }
+         
+
+    GlobalUnlock (DBHandle);
+    return (DBHandle);
+
+}
+
+BOOL CopyGWDatabase (LPSTR ToName, LPSTR FromName, BOOL CopyData)
+{   HANDLE DBHandle;
+    LPGWDHEADER lpGWDHead;
+    GWDHEADER   GWDHead;
+    LPGWFLDINFO lpFieldInfo;
+    OFSTRUCT    OFStruct, OFStruct2;
+    char        IndexName[256];
+    short       Fid, i, pos=BT_FIRST, length;
+    long		Offset, ii;
+    LPSTR       lpEnd;
+    unsigned    frequency=1000, duration=100; 
+    BTHEAD      BTHead;
+    LPSTR		lpDot;     
+    HFILE		FidFrom, FidTo;
+char	HighlightData[1024];   
+LPLONG	pRefno;
+    
+    FidFrom =  GSSiOpenFile (FromName,&OFStruct,OF_READ);
+    if (FidFrom == HFILE_ERROR)
+    {   
+         return (0);
+    }
+    FidTo =  GSSiOpenFile (ToName,&OFStruct2,OF_CREATE);
+    if (FidTo == HFILE_ERROR)
+    {   
+         return (0);
+    }
+    _lread (FidFrom,&GWDHead,sizeof(GWDHEADER));
+    _lwrite (FidTo,&GWDHead,sizeof(GWDHEADER));
+    DBHandle = GSSiGlobAlloc (GHND,sizeof (GWDHEADER)+GWDHead.Reclen);
+    lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
+    *lpGWDHead = GWDHead;
+    lpGWDHead->Fid =  FidFrom;
+    lpGWDHead->hFldInfo = GSSiGlobAlloc (GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
+    lpGWDHead->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHead->hFldInfo); 
+    for (i=0,lpFieldInfo=lpGWDHead->pFldInfo;i<GWDHead.NumFields;i++,lpFieldInfo++)
+    {
+         _lread (FidFrom,lpFieldInfo,sizeof(GWFLDINFO));
+         _lwrite (FidTo,lpFieldInfo,sizeof(GWFLDINFO));
+    }
+    for (i=0;i<MAX_GMD_INDEXES;i++) lpGWDHead->BTHandle[i]=0;
+    for (i=0;i<1;i++)
+    {
+        _fstrcpy (IndexName,OFStruct.szPathName);
+        _fstrlwr (IndexName); 
+        lpDot = _fstrstr (IndexName,".gmd");
+        if (!lpDot) lpDot = _fstrstr (IndexName,".gwd");
+        if (!lpDot)
+        	return 0;
+        _fstrcpy (lpDot,".in");
+        itoa (i+1,_fstrchr(IndexName,'\0'),10);
+        if (!(lpGWDHead->BTHandle[i] = BT_OPEN (IndexName, lpGWDHead->TimeStamp,OF_READ, 0))) 
+        {   
+			MessageBox (GetFocus(),"Unable to open source file",NULL,MB_ICONEXCLAMATION);
+			GSSiClose (FidFrom);
+			GSSiClose (FidTo);
+			return FALSE;
+        }
+        
+        GetBTHeader (lpGWDHead->BTHandle[i],&BTHead); 
+        if (!lpGWDHead->lKeys[i] || abs (lpGWDHead->lKeys[i]>256))
+            lpGWDHead->lKeys[i] = ComputeGWDKeyLen(lpGWDHead,i);
+        lpGWDHead->hKeys[i]=GSSiGlobAlloc(GHND,abs(lpGWDHead->lKeys[i]));
+        lpGWDHead->pKeys[i]=GlobalLock(lpGWDHead->hKeys[i]);
+        if (!lpGWDHead->pKeys[i])
+            ii=0;
+    }
+    while (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],pos,BT_ANY, (LPSTR)&Offset))
+    { 
+    	pos = BT_NEXT;
+       	length = FillGWDData (lpGWDHead,Offset); 
+     pRefno =  (LPLONG)&lpGWDHead->GWDData;
+	 if (!BT_FIND (hHighlight,(LPSTR)pRefno,BT_FIRST,BT_EQ,(LPSTR)&HighlightData)) 
+	 {
+       	ii = _llseek (FidTo,0,1);
+	    _lwrite (FidTo,(char *)&length,2);
+	    _lwrite (FidTo,(char *)&lpGWDHead->GWDData,length); 
+	 }
+    }
+    BT_CLOSE (lpGWDHead->BTHandle[0]);
+    GSSiGlobUlFree (&DBHandle);
+    GSSiClose (FidFrom);
+    GSSiClose (FidTo);
+    return TRUE;
+}
+
+void CloseGWDatabase (HANDLE DBHandle)
+{
+    LPGWDHEADER lpGWDHead; 
+    BTHEAD  BTHead;
+    
+    short         i,ii;
+    
+    if (!DBHandle)
+    	return;
+    lpGWDHead = (LPGWDHEADER) GlobalLock (DBHandle);
+    GetBTHeader (lpGWDHead->BTHandle[0], &BTHead);
+    if (lpGWDHead->Version && BTHead.BT_BEING_UPDATED)
+    {
+        lpGWDHead->TimeStamp = time(0); 
+         _llseek (lpGWDHead->Fid,0,0);
+         _lwrite (lpGWDHead->Fid,(char *)lpGWDHead ,sizeof(GWDHEADER));
+    }
+    GSSiClose (lpGWDHead->Fid);
+    for (i=0;i<lpGWDHead->NumIndex;i++)
+    {   
+        if (lpGWDHead->BTHandle[i])
+        {
+            BT_SET_TIME_STAMP (lpGWDHead->BTHandle[i], lpGWDHead->TimeStamp);
+            BT_CLOSE (lpGWDHead->BTHandle[i]);
+            GlobalUnlock(lpGWDHead->hKeys[i]);
+            if (GlobalFree(lpGWDHead->hKeys[i]))
+            	ii=1;
+        }
+    }
+    GSSiGlobUlFree (&lpGWDHead->hFldInfo);
+    GSSiGlobUlFree (&DBHandle);
+    return;
+
+}
+
+BOOL BasicDataDisplay (LPSTR DBName,HWND hWndDlg,short dlgitem,short nextbutton,short priorbutton,long RecNum, long iref, LPSTR pSQL)
+{  
+    HANDLE      hSQL;  
+    short		maxline=60;
+    double      rtn;
+    char        str[300];
+    short       ifield,l;
+    LPOPENSQLDATA   SQLPtr;
+    LPFIELDINFO lpFieldInfo; 
+    HANDLE      SaveHandle;
+    LPOPENFILEDATA  FilePtr;  
+    LPSTR		str2;
+    HANDLE		hStr=0;
+    
+    rtn = FALSE;
+    SendDlgItemMessage (hWndDlg,dlgitem,LB_RESETCONTENT,0,0); 
+    hSQL=0;
+    if (!OpenDataFile (DBName,pSQL,BT_READ,&hSQL))
+        return FALSE;  
+        
+    SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+    FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+    lpFieldInfo = &FilePtr->FldInfo; 
+    hStr = GSSiGlobAlloc (GMEM_MOVEABLE,4096); 
+    str2 = GlobalLock (hStr);
+    for (ifield=0;ifield<FilePtr->NumFields;ifield++,lpFieldInfo++)
+    {   
+        BOOL    First=TRUE;
+
+Display:        
+        sprintf (str,"%s\t",lpFieldInfo->name);
+        if ((l=GetValFromOpenFiles (lpFieldInfo->name,str2))<0) 
+        {
+            SetDlgItemText(hWndDlg,IDENTIFY_LINE2,"Data record not found");
+            goto NotFound;
+        }
+        else if (First && SQLPtr->hstmt && RecNum>1 && !ifield) 
+        {   
+            long    irec;
+            
+            for (irec=1;irec<RecNum;irec++) 
+                FetchODBCRecord (SQLPtr);
+            First=FALSE;
+            goto Display;
+        }
+        else
+        {   
+        	LPSTR	str3=str2;
+        	char	c; 
+        	
+        	l = max (l,1);
+        	while (l > 0)
+        	{   
+        		LPSTR	pEnd = _fstrchr(str,0), pCR;
+        		short	n=min(l,maxline); 
+        		short	orign=n;
+        		
+	            _fstrncpy(pEnd,str3,n);  
+	            if (n < l)
+	            {
+	            	while (n && pEnd[n-1] != ' ')
+		            	n--;  
+		            if (!n)
+		            	n=orign;
+		        }
+	            pEnd[n] = 0;   
+	            if ((pCR = _fstrchr (pEnd,'\r')))
+	            {
+	            	*pCR = 0;
+	            	n = _fstrlen (pEnd)+2;
+	            }
+	            l-=n;   
+	            str3+=n;
+	            SendDlgItemMessage (hWndDlg,dlgitem,LB_ADDSTRING,0,(LPARAM)str); 
+	            _fstrcpy (str,"\t");
+	        }
+        }   
+        First=FALSE;
+    }
+    if (nextbutton && SQLPtr->hstmt)
+    {   
+        RETCODE rc; 
+        BOOL    More=TRUE;
+        
+        rc = FetchODBCRecord (SQLPtr);  
+        if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) More=FALSE;
+        EnableWindow (GetDlgItem(hWndDlg,nextbutton),More);
+        More=FALSE;
+        if (RecNum>1) More=TRUE;   
+        EnableWindow (GetDlgItem(hWndDlg,priorbutton),More);
+        
+    }
+    rtn = TRUE;
+NotFound:
+    GlobalUnlock (SQLPtr->OFHandle);
+    GlobalUnlock(hSQL); 
+    CloseDataFile (TRUE, &hSQL); 
+    GSSiGlobUlFree (&hStr);
+    return (int)(rtn);
+} 
+
+BOOL GMDGetNumericKeyVal (LPGWDHEADER lpGWDHead,short Index, short IndexField,double *rtn)
+{   LPSTR   lpVal;
+    LPGWFLDINFO lpGWFldInfo;
+    char        str[64];
+    short         i;
+    LPSTR       ep;  
+    BOOL        Status;
+    
+    Status = TRUE;
+    lpVal = lpGWDHead->pKeys[Index];
+    for (i=0;i<IndexField;i++)
+    {
+        lpGWFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[Index][i];
+        lpVal += lpGWFldInfo->Len;
+    }
+    lpGWFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[Index][IndexField];
+    
+    switch (lpGWFldInfo->Type)
+    {   
+    default:     
+    case BT_RIGHT_CHAR:
+    case BT_CHAR:
+        _fstrncpy (str,lpVal,lpGWFldInfo->Len);
+        str[lpGWFldInfo->Len]='\0';
+        ep = &str[lpGWFldInfo->Len];
+        *ep ='\0';
+        *rtn = strtod (str,&ep);
+        while (*ep)
+            if (*ep++ != ' ')
+                Status=FALSE;
+    break;
+                                            
+    case BT_INTEGER:
+        if (lpGWFldInfo->Len == 2)
+            *rtn = *(LPINT)lpVal;
+        else
+            *rtn = *(LPLONG)lpVal;
+    break;
+                                            
+    case BT_REAL:
+        if (lpGWFldInfo->Len == 4)
+            *rtn = *(LPFLOAT)lpVal;
+        else
+            *rtn = *(LPDOUBLE)lpVal;
+    break;
+    }
+    return Status; 
+}
+
+BOOL GMDGetCharKeyVal (LPGWDHEADER lpGWDHead,short Index, short IndexField,LPSTR str)
+{   LPSTR   lpVal;
+    LPGWFLDINFO lpGWFldInfo;
+    short         i;
+    BOOL        Status;
+    
+    Status = TRUE;
+    lpVal = lpGWDHead->pKeys[Index];
+    for (i=0;i<IndexField;i++)
+    {
+        lpGWFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[Index][i];
+        lpVal += lpGWFldInfo->Len;
+    }
+    lpGWFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[Index][IndexField];
+    
+    switch (lpGWFldInfo->Type)
+    {   
+    default:   
+    case BT_RIGHT_CHAR:
+    case BT_CHAR:
+        _fstrncpy (str,lpVal,lpGWFldInfo->Len);
+        str+=lpGWFldInfo->Len;
+        *str = '\0';
+    break;
+                                            
+    case BT_INTEGER:
+        if (lpGWFldInfo->Len == 2)
+            itoa (*(LPINT)lpVal,str,10);
+        else
+            ltoa (*(LPLONG)lpVal,str,10);
+    break;
+                                            
+    case BT_REAL:
+        if (lpGWFldInfo->Len == 4)
+            sprintf(str,"%f",*(LPFLOAT)lpVal);
+        else
+            sprintf(str,"%f",*(LPDOUBLE)lpVal);
+    break;
+    }
+    return Status; 
+}
+
+double GetNumericFieldData (HANDLE hSQL,LPVOID *hstmt,
+                            LPFIELDINFO lpField, short FunctionID,LPSTR CmdString,long iref, LPINT irc)
+{   
+    double  ValD=0;
+    LPGWDHEADER lpGWDHead;
+    LPGWFLDINFO lpGWFldInfo;
+    HANDLE      hBT, hDB;
+    long        Offset; 
+    BOOL		HaveData=FALSE;
+    double      rtn;
+    char        str[256];
+    short         st, i, len;
+    LPSTR       ep, ValC; 
+    LPVOID      lpVal;
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr;
+    LPSQLFIELD  lpSQLField;
+    
+    if (FunctionID == 6)
+    {   
+    	*irc = 0;
+    	_fstrcpy (str,CmdString);
+		ExpandTextDataNotFound=FALSE;
+    	ExpandText (str);
+    	if (!ContinueProcessing || ExpandTextDataNotFound) 
+    	{
+    		ContinueProcessing = TRUE;
+    		*irc = 1;                 
+    	}
+        else
+        {
+            ValD = strtod (str,&ep);
+            while (*ep)
+                if (*ep++ != ' ')
+                    *irc = -1;
+        }  
+        return (ValD);
+    }
+    *irc = 1;  
+    if (!hSQL)
+    	return FALSE;
+    SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+    FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+    hDB = FilePtr->FileHandle;
+    if (FilePtr->Type == UMIFS_DATAFILE || FilePtr->Type == DTM_DATAFILE)
+    {   
+    	short	FirstCond = BT_EQ; 
+    	GlobalUnlock (SQLPtr->OFHandle); 
+        lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
+        if (lpGWDHead->Version > 1000)
+        {   
+        	if (!LoadInternalGMD (lpGWDHead,iref))
+        		goto NotFound;
+            st = 0;  
+            HaveData=TRUE;
+           	goto Found;
+        }
+        hBT = lpGWDHead->BTHandle[SQLPtr->IndexToUse];
+        if (!hBT) goto NotFound;
+        
+        GWDClearSetValues (lpGWDHead);
+        if (SQLPtr->NumGlobals)
+        {
+            for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
+            {   
+            	_fstrcpy (str,lpSQLField->String);
+            	ExpandText (str);
+//                GetGlobalVal (lpSQLField->hGlobal,str); 
+                lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
+                SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE);  
+            }
+			if (GWDInitUnsetKeyValues (lpGWDHead,SQLPtr->IndexToUse))
+				FirstCond = BT_GE;
+            GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0); 
+            if (SQLPtr->IndexToUse) 
+                SetReadSecIndex(TRUE);
+            st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,FirstCond, (LPSTR)&Offset);
+            SetReadSecIndex(FALSE);
+        }
+        else
+            st = BT_FIND (hBT,(LPSTR)&iref,BT_FIRST,BT_EQ, (LPSTR)&Offset); 
+Found:
+        if (!st)
+        {   
+        	if (!HaveData)
+	        	FillGWDData (lpGWDHead,Offset);
+            for (i=0,lpGWFldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;i++,lpGWFldInfo++)
+            {   if (!_fstrcmp (lpGWFldInfo->Name,lpField->name))
+                {
+                    *irc = 0;
+                    lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+                    switch (lpGWFldInfo->Type)
+                    {   
+                        default:
+                        case BT_RIGHT_CHAR:
+                        case BT_CHAR:
+                            _fstrncpy (str,lpVal,lpGWFldInfo->Len);
+                            str[lpGWFldInfo->Len]='\0';
+                            ep = &str[lpGWFldInfo->Len];
+                            *ep ='\0';
+                            errno = 0;
+                            rtn = strtod (str,&ep);
+                            while (*ep)
+                                if (*ep++ != ' ')
+                                    *irc = -1;
+                        break;
+                                        
+                        case BT_INTEGER:
+                            if (lpGWFldInfo->Len == 2)
+                                rtn = *(LPINT)lpVal;
+                            else
+                                rtn = *(LPLONG)lpVal;
+                        break;
+                                        
+                        case BT_REAL:
+                            if (lpGWFldInfo->Len == 4)
+                                rtn = *(LPFLOAT)lpVal;
+                            else
+                                rtn = *(LPDOUBLE)lpVal;
+                        break;
+                     } 
+					 GlobalUnlock (hSQL);
+                     GlobalUnlock (hDB);
+                     return (rtn);
+                }
+            }
+            goto NotFound;
+        }
+        else
+NotFound:	*irc = 1;
+			GlobalUnlock (hSQL);
+            GlobalUnlock (hDB);
+            return (0);
+    }
+    else
+    {
+        ValC = (LPSTR) GetExternalFieldData (FilePtr ,SQLPtr->SQL, hstmt,
+                                             lpField, TRUE,FunctionID, irc,0,0);
+    	GlobalUnlock (SQLPtr->OFHandle); 
+		GlobalUnlock (hSQL);
+        if (!*irc)
+        {
+            ValD = strtod (ValC,&ep);
+            while (*ep)
+                if (*ep++ != ' ')
+                    *irc = -1;
+        }
+        return (ValD);
+    }
+
+}
+void GetCharFieldData (HANDLE hSQL,LPVOID *hstmt,
+                       LPFIELDINFO lpField, long iref, short FunctionID,LPSTR CmdString,LPSTR Value,LPINT irc)
+{   
+    LPGWDHEADER lpGWDHead;
+    LPGWFLDINFO lpGWFldInfo;
+    HANDLE      hBT, hDB;
+    long        Offset; 
+    HANDLE		hMem = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+    LPSTR       str=GlobalLock (hMem);
+    short         st, i, len;
+    LPSTR       ValC; 
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr;
+    LPSQLFIELD  lpSQLField;
+
+    if (FunctionID == 1)
+    {   
+    	*irc = 0;
+    	_fstrcpy (str,CmdString);
+		ExpandTextDataNotFound=FALSE;
+    	ExpandText (str);
+    	if (ExpandTextDataNotFound)
+    		*irc = 1;
+        else
+        	_fstrcpy (Value,str);  
+        goto Exit;
+    }
+    *irc = 1;  
+    if (!hSQL)
+    	goto Exit;
+    SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+    FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+    hDB = FilePtr->FileHandle;  
+    if (FilePtr->Type == UMIFS_DATAFILE)
+    {
+    	GlobalUnlock (SQLPtr->OFHandle); 
+        lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
+        if (lpGWDHead->Version > 1000)
+        {   
+        	if (!LoadInternalGMD (lpGWDHead,iref))
+        		goto NotFound;
+            if (!GMDGetCharFieldVal (lpGWDHead,lpField->index,Value))
+                goto NotFound;
+            else 
+            {
+   	            *irc = 0;
+            	goto Found;
+            }
+        }
+        hBT = lpGWDHead->BTHandle[SQLPtr->IndexToUse];
+        if (!hBT) goto NotFound;
+        
+        if (SQLPtr->NumGlobals)
+        {
+            for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
+            {
+            	_fstrcpy (str,lpSQLField->String);
+            	ExpandText (str);
+//                GetGlobalVal (lpSQLField->hGlobal,str); 
+                lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
+                SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE);  
+            }
+            GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0);    
+            if (SQLPtr->IndexToUse) 
+                SetReadSecIndex(TRUE);
+            st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,BT_EQ, (LPSTR)&Offset);
+            SetReadSecIndex(FALSE);
+        }
+        else
+            st = BT_FIND (hBT,(LPSTR)&iref,BT_FIRST,BT_EQ, (LPSTR)&Offset);
+        if (!st)
+        {    
+            *irc = 0;
+        	FillGWDData (lpGWDHead,Offset);
+            if (!GMDGetCharFieldVal (lpGWDHead,lpField->index,Value))
+                goto NotFound;
+        }
+        else
+NotFound:*irc = 1; 
+Found:
+        GlobalUnlock (hDB);
+        GlobalUnlock (hSQL);
+    }
+    else if (FilePtr->Type == COMBO_DATAFILE)
+    {   
+    	GlobalUnlock (SQLPtr->OFHandle); 
+    	*irc = 1; 
+    }
+    else
+    {
+        ValC = (LPSTR) GetExternalFieldData (FilePtr ,SQLPtr->SQL, hstmt,
+                                           lpField, TRUE,0, irc,0,0);
+        if (!*irc)
+        {  
+        	size_t	l=GetValListFieldLen (lpField);
+            _fstrncpy (Value,ValC,l);
+            Value[l] = 0;
+        }
+        GlobalUnlock (SQLPtr->OFHandle); 
+        GlobalUnlock (hSQL);
+    } 
+Exit:
+	GSSiGlobUlFree (&hMem); 
+    return;
+
+} 
+
+BOOL UpdateGMDFile (LPSTR File,LPSTR KeyString,LPSTR UpdateString,char Separator)
+{
+	LPGWDHEADER lpGWDHead;
+	HANDLE	hDBDest; 
+	long	Offset;
+	LPSTR	Name,Value,pComma, pEQ;     
+	BOOL	rtn=FALSE;
+	
+	hDBDest = OpenGWDatabase (File,BT_WRITE);   
+	if (!hDBDest)
+		return FALSE;
+	lpGWDHead = (LPGWDHEADER)GlobalLock (hDBDest);
+	_fmemset (&lpGWDHead->GWDData,0,(size_t)lpGWDHead->Reclen); 
+	pComma = KeyString;
+	while (pComma)
+	{   
+		Name = pComma;
+		if ((pEQ = MatchLev (Name,'=')))
+		{   
+			*pEQ++ = 0;
+			Value = pEQ;
+			if ((pComma = MatchLev (Value,Separator)))
+				*pComma++ = 0;
+    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+    			goto Exit;
+		}
+	}
+    if (!GWDFormKey(lpGWDHead,0,TRUE,0))
+    	goto Exit;
+   	if (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ,(LPSTR)&Offset)) 
+	   	FillGWDData (lpGWDHead,Offset);
+	pComma = UpdateString;
+	while (pComma)
+	{   
+		Name = pComma;
+		if ((pEQ = MatchLev (Name,'=')))
+		{   
+			*pEQ++ = 0;
+			Value = pEQ;
+			if ((pComma = MatchLev (Value,';')))
+				*pComma++ = 0;
+    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+    			goto Exit;
+		}
+		else
+			pComma = 0;
+	}
+	rtn = GWDReplaceRecord (lpGWDHead,0,NULL,-1); 
+Exit:
+	GlobalUnlock (hDBDest);
+	CloseGWDatabase (hDBDest);
+	
+	return rtn;
+}
+
+BOOL FindGMDRecord (LPSTR File,LPSTR KeyString)
+{
+	LPGWDHEADER lpGWDHead;
+	HANDLE	hDBDest; 
+	long	Offset;
+	LPSTR	Name,Value,pComma, pEQ;     
+	BOOL	rtn=FALSE;
+	
+	hDBDest = OpenGWDatabase (File,BT_WRITE);   
+	if (!hDBDest)
+		return FALSE;
+	lpGWDHead = (LPGWDHEADER)GlobalLock (hDBDest);
+	_fmemset (&lpGWDHead->GWDData,0,(size_t)lpGWDHead->Reclen); 
+	pComma = KeyString;
+	while (pComma)
+	{   
+		Name = pComma;
+		if ((pEQ = MatchLev (Name,'=')))
+		{   
+			*pEQ++ = 0;
+			Value = pEQ;
+			if ((pComma = MatchLev (Value,';')))
+				*pComma++ = 0;
+    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+    			goto Exit;
+		}
+	}
+    if (!GWDFormKey(lpGWDHead,0,TRUE,0))
+    	goto Exit;
+   	if (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ,(LPSTR)&Offset)) 
+   	{
+	   	FillGWDData (lpGWDHead,Offset);
+	   	rtn = TRUE;
+	}
+Exit:
+	GlobalUnlock (hDBDest);
+	CloseGWDatabase (hDBDest);
+	
+	return rtn;
+}
+
+BOOL DeleteGMDRecords (LPSTR File,LPSTR SQL)
+{
+	LPOPENSQLDATA	SQLPtr;
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPGWDHEADER lpGWDHead;
+	HANDLE	hSQL=0; 
+	LPSTR	Name,Value,pComma, pEQ;
+	
+    if (!OpenDataFile (File,SQL,BT_WRITE,&hSQL))
+    	return FALSE;
+	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+	lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
+	while (FetchDBRec (hSQL))
+	{
+		GWDDeleteRecord (lpGWDHead,SQLPtr->Offset); 
+		SQLPtr->lastreadtime = 0;
+	}
+	GlobalUnlock (FilePtr->FileHandle);
+	GlobalUnlock (SQLPtr->OFHandle); 
+	GlobalUnlock (hSQL);
+	CloseDataFile (TRUE, &hSQL);	
+	return TRUE;
+}
+
+BOOL GMDGetCharFieldVal (LPGWDHEADER lpGWDHead,short Field,LPSTR str)
+{   LPSTR   lpVal;
+    LPGWFLDINFO lpGWFldInfo;
+    BOOL        Status;
+    
+    Status = TRUE;
+    lpGWFldInfo = lpGWDHead->pFldInfo + Field;
+    lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+    
+    switch (lpGWFldInfo->Type)
+    {   
+        default: 
+        case BT_RIGHT_CHAR:
+        case BT_CHAR:
+            _fstrncpy (str,lpVal,lpGWFldInfo->Len);
+            str+=lpGWFldInfo->Len;
+            *str = '\0';
+        break;
+                                                
+        case BT_INTEGER:
+            if (lpGWFldInfo->Len == 2)
+                itoa (*(LPINT)lpVal,str,10);
+            else
+                ltoa (*(LPLONG)lpVal,str,10);
+        break;
+                                                
+        case BT_REAL:
+            if (lpGWFldInfo->Len == 4)
+                sprintf(str,"%f",*(LPFLOAT)lpVal);
+            else
+                sprintf(str,"%f",*(LPDOUBLE)lpVal);
+        break;
+    }
+    return Status; 
+}
+
+double GetNumericFieldDataAtOff (HANDLE hDB,
+                                 LPFIELDINFO lpField, long Offset, LPINT irc)
+{ 
+    static double   ValD=100;
+/*    struct  {char   UseCode[3];
+            long    MarketValue, SaleAmt, SaleDate;
+            }   data;     */
+    LPGWDHEADER lpGWDHead;
+    LPGWFLDINFO lpGWFldInfo;
+    double      rtn;
+    char        str[64];
+    short       i, len;
+    LPSTR       ep; 
+    LPVOID      lpVal;
+
+
+    *irc = 1;
+    
+    if (!hDB)
+    	return (FALSE);
+    lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+            
+    FillGWDData (lpGWDHead,Offset);
+    for (i=0,lpGWFldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;i++,lpGWFldInfo++)
+    {   if (!_fstrcmp (lpGWFldInfo->Name,lpField->name))
+        {
+            *irc = 0;
+            lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+            switch (lpGWFldInfo->Type)
+            {   
+                default:
+                case BT_RIGHT_CHAR:
+                case BT_CHAR:
+                    _fstrncpy (str,lpVal,lpGWFldInfo->Len);
+                    str[lpGWFldInfo->Len]='\0';
+                    ep = &str[lpGWFldInfo->Len];
+                    *ep ='\0';
+                    errno = 0;
+                    rtn = strtod (str,&ep);
+                    while (*ep)
+                        if (*ep++ != ' ')
+                            *irc = -1;
+                break;
+                                            
+                case BT_INTEGER:
+                    if (lpGWFldInfo->Len == 2)
+                        rtn = *(LPINT)lpVal;
+                    else
+                        rtn = *(LPLONG)lpVal;
+                break;
+                                            
+                case BT_REAL:
+                    if (lpGWFldInfo->Len == 4)
+                        rtn = *(LPFLOAT)lpVal;
+                    else
+                        rtn = *(LPDOUBLE)lpVal;
+                break;
+             } 
+             GlobalUnlock (hDB);
+             return (rtn);
+        }
+    
+    } 
+    return FALSE;
+}
+
+BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
+{
+    LPGWFLDINFO pFldInfo;
+    LPGWDHEADER lpGWDHead;
+    long        Offset, nRecs, nLoaded; 
+    short         st, i, ibeg, len, nFld;
+    HANDLE      hVars;
+    BTVARDESC   *pVars;
+    char        str[128], mess[128]; 
+    short       pos, DupPos;
+	
+        sprintf(mess,"Index %i",CreateIndex+1);
+        lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+        hVars = GSSiGlobAlloc (GHND,(lpGWDHead->NumIndexFields[CreateIndex]+1) * sizeof(BTVARDESC));
+        pVars = (BTVARDESC *)GlobalLock(hVars);
+        ibeg = 0;
+        for (i=0;i<lpGWDHead->NumIndexFields[CreateIndex];i++,pVars++) 
+        {
+             pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[CreateIndex][i];
+             pVars->BT_VARLEN=pFldInfo->Len;
+             pVars->BT_VARTYP=pFldInfo->Type;
+             pVars->BT_VAROFF=ibeg;
+             ibeg += pFldInfo->Len;
+        } 
+        nFld = lpGWDHead->NumIndexFields[CreateIndex]; 
+        DupPos = 0;
+        if (lpGWDHead->lKeys[CreateIndex]>0)
+            lpGWDHead->lKeys[CreateIndex]=ibeg;
+        else
+        {   
+            DupPos = nFld;
+            pVars->BT_VARLEN=lpGWDHead->lKeys[0];
+            pVars->BT_VARTYP=BT_CHAR;
+            pVars->BT_VAROFF=ibeg; 
+            ibeg+=lpGWDHead->lKeys[0];
+            lpGWDHead->lKeys[CreateIndex]=-ibeg;  
+            nFld++;
+        } 
+//        lpGWDHead->NumIndexFields[CreateIndex] = nFld;
+        lpGWDHead->hKeys[CreateIndex]=GSSiGlobAlloc(GHND,abs(lpGWDHead->lKeys[CreateIndex]));
+        lpGWDHead->pKeys[CreateIndex]=GlobalLock(lpGWDHead->hKeys[CreateIndex]);
+                                                 
+        _fstrcpy (str,Name); 
+        sprintf (_fstrrchr (str,'.'),".in%i",CreateIndex+1);
+        GlobalUnlock(hVars);
+        pVars = (BTVARDESC *)GlobalLock(hVars);
+        BT_CREATE (str, 4, FALSE,nFld, 1,pVars,FALSE, DupPos, lpGWDHead->TimeStamp, FALSE);
+        GSSiGlobUlFree (&hVars);
+        lpGWDHead->BTHandle[CreateIndex] = BT_OPEN (str, lpGWDHead->TimeStamp, BT_WRITE, 0);
+                            
+        nRecs = BT_NUM_IN_INDEX (lpGWDHead->BTHandle[0]);
+        nLoaded = 0;
+                
+        if (CreateIndex)
+        {   
+        	if (nRecs)
+        	{
+				CreateStatusWindow (hWndMain,1,NULL);
+	        	pos = BT_FIRST;             
+	            while (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],pos,BT_ANY, (LPSTR)&Offset)) 
+	            {   
+	            	pos = BT_NEXT;
+			        FillGWDData (lpGWDHead,Offset);
+	                GWDFormKey(lpGWDHead,CreateIndex,FALSE,0);
+	                BT_PUT (lpGWDHead->BTHandle[CreateIndex],lpGWDHead->pKeys[CreateIndex],(LPSTR)&Offset);
+					StatusWindowUpdate (mess,"Create Index", nRecs, ++nLoaded);
+	            }
+				DestroyStatusWindow();  
+	        }
+        }
+        else
+        {   long    FirstOffset;
+                
+			CreateStatusWindow (hWndMain,1,NULL);
+            Offset = _llseek (lpGWDHead->Fid,0,1);
+            FirstOffset = _llseek (lpGWDHead->Fid,0,2); 
+            nRecs = (FirstOffset - Offset) / lpGWDHead->Reclen +1;  
+            _llseek (lpGWDHead->Fid,Offset,0);
+            while (_lread (lpGWDHead->Fid,&len,2)==2)
+            {   
+            	UINT	ip;
+                _lread (lpGWDHead->Fid,&lpGWDHead->GWDData,(UINT)len); 
+			    for (ip=len;ip<lpGWDHead->Reclen;ip++) lpGWDHead->GWDData[ip]='\0';
+                GWDFormKey(lpGWDHead,CreateIndex,FALSE,0);
+                BT_PUT (lpGWDHead->BTHandle[CreateIndex],lpGWDHead->pKeys[CreateIndex],(LPSTR)&Offset);
+				StatusWindowUpdate (mess,"Create Index", nRecs, ++nLoaded);
+                Offset = _llseek (lpGWDHead->Fid,0,1);
+            }
+			DestroyStatusWindow();  
+        }
+
+        GlobalUnlock (hDB);
+        CloseGWDatabase (hDB);
+ return TRUE;
+} 
+
+short ComputeGWDKeyLen(LPGWDHEADER lpGWDHead, short KeyID)
+{   short l, i;
+    LPGWFLDINFO pFldInfo;
+    
+    l=0;
+    for (i=0;i<lpGWDHead->NumIndexFields[KeyID];i++) 
+    {
+         pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[KeyID][i];
+         l += pFldInfo->Len;
+    } 
+
+    return(l);
+}
+                                       
+BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, WORD Message, WPARAM wParam, LPARAM lParam)
+{ 
+    static  LPSTR   pName=0;
+    static  HANDLE hDB=0;
+    LPGWFLDINFO lpGWFldInfo;
+    static  LPGWDHEADER lpGWDHead;
+    static  HANDLE      hBT;
+    long        Offset; 
+    short         st, i, len, pos=BT_FIRST;
+    static      short Index=0, DataFileType=0;
+    LPVOID      lpVal; 
+    LPSTR	str, str2;
+    short         TabStops[2]={150,500}; 
+    short         Choice;
+    LPOPENFILEDATA  FilePtr;
+    LPOPENSQLDATA   SQLPtr; 
+    static      HANDLE      hSQL; 
+    static      long    CurRec;
+    BTHEAD BTHead;
+    BOOL    False=FALSE;
+    static	short     IDC_FieldName; 
+    static	HANDLE	hSaveBM=0; 
+	LPFIELDINFO	pFldInfo;
+    HANDLE	hMem=0;                  
+ 
+ short    BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (Message == WM_INITDIALOG)  
+ {   
+ 	IDC_FieldName=IDC_DATA_LIST2; 
+    pName=GlobalLock(hName); 
+    hSQL = 0;
+	hSaveBM = EnterBlockingWindow (hWndDlg);
+ }
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam,0,
+                     SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, &IDC_FieldName,1,
+                     pName, &DataFileType, &hSQL, &False,FALSE))
+                     return TRUE;
+ 
+ hMem = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+ str = GlobalLock (hMem);
+ str2 = str + 2048;   
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         /* initialize working variables                                */ 
+    /*   CreateCityExtract ();*/
+         CurrentIndex=0;  
+         SendDlgItemMessage (hWndDlg,IDC_DATA_LIST,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+         SendDlgItemMessage (hWndDlg,IDC_DATA_LIST2,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+        
+OpenDB:          
+         if (!hSQL)
+         	goto RtnFalse;
+         SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+         FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+         hDB = FilePtr->FileHandle;
+         GlobalUnlock (SQLPtr->OFHandle);
+         GlobalUnlock (hSQL);
+         if (!hDB)
+            goto RtnFalse;    
+         if (FilePtr->Type != 1) break;
+         lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+         if (!lpGWDHead->Version)
+         	ShowWindow (GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),SW_HIDE); 
+         CurRec = 0;
+         st = BT_FIND (lpGWDHead->BTHandle[CurrentIndex],lpGWDHead->pKeys[CurrentIndex],BT_FIRST,BT_ANY, (LPSTR)&Offset);
+         CurRec = 1;  
+         GlobalUnlock (hDB);
+         
+Display: 
+         SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_RESETCONTENT,0,0);
+		 if (!st && DataFileType == 1)
+         {  
+	         lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+        	 FillGWDData (lpGWDHead,Offset);  
+	         GetBTHeader (lpGWDHead->BTHandle[CurrentIndex],&BTHead);  
+	         sprintf (str2,"%ld of %ld",CurRec,BTHead.BT_NUMRECS);
+	         SetDlgItemText (hWndDlg,IDC_RECID,str2);
+	         for (i=0,lpGWFldInfo = lpGWDHead->pFldInfo;
+	             i<lpGWDHead->NumFields; i++,lpGWFldInfo++)
+	         {
+	            _fstrcpy (str,lpGWFldInfo->Name);   
+	            _fstrcat (str,"\t"); 
+	            GetValFromOpenFiles (lpGWFldInfo->Name,str2);
+	             _fstrcat(str,str2);
+	             SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_ADDSTRING,0,(LPARAM)str);
+	         }
+			 GlobalUnlock (hDB);
+         } 
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+#if WIN32
+        switch(LOWORD(wParam))
+#else
+        switch(wParam)
+#endif
+           {  
+              case IDC_SORTLIST:
+		          if (SendDlgItemMessage (hWndDlg,IDC_SORTLIST,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
+		          {
+		          	ShowWindow (GetDlgItem (hWndDlg,IDC_DATA_LIST),SW_SHOW);
+		          	ShowWindow (GetDlgItem (hWndDlg,IDC_DATA_LIST2),SW_HIDE);
+				  	IDC_FieldName=IDC_DATA_LIST; 
+				  }
+				  else
+		          {
+		          	ShowWindow (GetDlgItem (hWndDlg,IDC_DATA_LIST2),SW_SHOW);
+		          	ShowWindow (GetDlgItem (hWndDlg,IDC_DATA_LIST),SW_HIDE);
+				  	IDC_FieldName=IDC_DATA_LIST2;
+				  } 
+                  st = 0;
+              	  goto Display;
+              	  
+              case IDC_OPEN_DB:
+         		  if (DataFileType == 1)
+         		  {
+					EnableWindow(GetDlgItem(hWndDlg,IDOK),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_SEARCH),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_FIRST),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_LAST),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_PRIOR),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_INDEXES),TRUE);
+         		  }
+         		  else
+         		  {
+					EnableWindow(GetDlgItem(hWndDlg,IDOK),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_SEARCH),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_FIRST),TRUE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_LAST),FALSE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_PRIOR),FALSE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),FALSE);
+					EnableWindow(GetDlgItem(hWndDlg,IDC_INDEXES),FALSE);
+         		  }
+                  goto OpenDB;
+                  
+              case IDC_SEARCH: 
+         		  if (DataFileType == 1)
+				  {              
+		    	      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+					  for (i=0;i<lpGWDHead->NumIndexFields[CurrentIndex];i++)
+					  { 
+						  lpGWFldInfo = lpGWDHead->pFldInfo;
+						  lpGWFldInfo+=lpGWDHead->IndexFields[CurrentIndex][i];  
+						  *str = 0;
+						  if (!GetTextString (hWndDlg,str,256,lpGWFldInfo->Name,NULL,NULL,0))
+						  	break; 
+		  		 		  SetFieldValFromCharAndName(lpGWDHead,lpGWFldInfo->Name,str,FALSE);
+		  		 	  }
+	                  GWDFormKey(lpGWDHead,CurrentIndex,TRUE,0);
+	                  st = BT_FIND (lpGWDHead->BTHandle[CurrentIndex],lpGWDHead->pKeys[CurrentIndex],BT_FIRST,BT_GE, (LPSTR)&Offset);
+					  GlobalUnlock (hDB);
+	              	  goto Display; 
+              	  }
+              	  else 
+              	  {   
+              	  	  *str = 0;
+                 	  if (GetSQLWhereClause (hWndDlg, hSQL, str)) 
+                 	  {   
+                 	  	  if (hSQL)
+                 	  	  {
+			                  CloseDataFile (TRUE, &hSQL); 
+			              }
+				 		  if (!OpenDataFile (pName,str,BT_READ,&hSQL))
+			 		  		break; 
+				          PostMessage(hWndDlg, WM_COMMAND, IDC_FIRST, 0L);
+			 		  }
+              	  } 
+              	  break;
+              	  
+              case IDC_PRIOR:
+	    	      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+                  st = BT_FIND (lpGWDHead->BTHandle[CurrentIndex],lpGWDHead->pKeys[CurrentIndex],BT_PRIOR,BT_ANY, (LPSTR)&Offset);
+                  if (!st)
+                    CurRec--;
+				  GlobalUnlock (hDB);
+                  goto Display;
+
+              case IDC_SHOWTYPE:
+			    SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_RESETCONTENT,0,0);  
+				SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+				FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+				for (i=0,pFldInfo = &FilePtr->FldInfo; i<FilePtr->NumFields; i++,pFldInfo++)
+				{
+					_fstrcpy (str,pFldInfo->name);   
+					_fstrcat (str,"\t"); 
+				    CreateGMTextHeader (pFldInfo, str);
+					SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_ADDSTRING,0,(LPARAM)str);
+				} 
+				GlobalUnlock (SQLPtr->OFHandle);
+				GlobalUnlock (hSQL);
+              	break;
+              	
+              case IDOK: //next
+                  pos = BT_NEXT;
+              
+              case IDC_FIRST:
+         		  if (DataFileType == 1)
+				  {              
+		    	      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+	                  st = BT_FIND (lpGWDHead->BTHandle[CurrentIndex],lpGWDHead->pKeys[CurrentIndex],pos,BT_ANY, (LPSTR)&Offset);
+	                  if (!st)
+	                  {
+	                  	if (pos == BT_FIRST)
+	                    	CurRec = 1;
+	                    else
+	                    	CurRec++;
+	                  }
+					  GlobalUnlock (hDB);
+	                  goto Display; 
+                  }
+                  else if (hSQL)
+                  {  
+                  	 
+			         SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_RESETCONTENT,0,0);
+				     if (FetchDBRec (hSQL))
+				     {
+				         SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+				         FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+				         for (i=0,pFldInfo = &FilePtr->FldInfo;
+				             i<FilePtr->NumFields; i++,pFldInfo++)
+				         {
+				            _fstrcpy (str,pFldInfo->name);   
+				            _fstrcat (str,"\t"); 
+				            GetValFromOpenFiles (pFldInfo->name,str2);
+				            _fstrcat(str,str2);
+				            SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_ADDSTRING,0,(LPARAM)str);
+				         } 
+				         GlobalUnlock (SQLPtr->OFHandle);
+				         GlobalUnlock (hSQL);
+				     }
+				     else
+				     {
+						EnableWindow(GetDlgItem(hWndDlg,IDOK),FALSE);
+						EnableWindow(GetDlgItem(hWndDlg,IDC_FIRST),FALSE);
+					 }
+			      } 
+			      break;
+                  
+                  
+              case IDC_LAST:
+		    	  lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+                  st = BT_FIND (lpGWDHead->BTHandle[CurrentIndex],lpGWDHead->pKeys[CurrentIndex],BT_LAST,BT_ANY, (LPSTR)&Offset);
+                  if (!st)
+                  {
+                     GetBTHeader (lpGWDHead->BTHandle[CurrentIndex],&BTHead);  
+                     CurRec = BTHead.BT_NUMRECS;
+                  }
+                  GlobalUnlock (hDB);
+                  goto Display; 
+                  
+              case IDCANCEL: 
+                  CloseDataFile (TRUE, &hSQL); 
+                  if (hName)
+                  	GlobalUnlock (hName);
+                  GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
+                  break; 
+                  
+              case IDC_CHANGE_FIELD_NAME:
+                  Choice=(short)SendDlgItemMessage(hWndDlg,IDC_DATA_LIST,
+                                            LB_GETCURSEL,0,0);
+                  if (Choice<0)
+                  {
+                     MessageBox( GetFocus(),"No field selected",
+                                "Error",MB_ICONEXCLAMATION); 
+                     break;
+                  } 
+	    	      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+                  lpGWFldInfo = lpGWDHead->pFldInfo;
+                  lpGWFldInfo+=Choice;
+                  SetDlgItemText(hWndDlg,IDC_NEW_FIELD_NAME,lpGWFldInfo->Name);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_NAME),SW_SHOW);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_CANCEL),SW_SHOW);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_COMMIT),SW_SHOW);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),SW_HIDE);
+		    	  GlobalUnlock (hDB); 
+                  break;
+                  
+              case IDC_NEW_FIELD_COMMIT:
+              {   
+                  GWFLDINFO NewField;
+                  long  loc;
+                   
+                  GetDlgItemText(hWndDlg,IDC_NEW_FIELD_NAME,str,34);
+                  if (!_fstrlen(str)) break;
+                  Choice=(short)SendDlgItemMessage(hWndDlg,IDC_DATA_LIST,
+                                            LB_GETCURSEL,0,0);
+                  if (Choice<0)
+                  {
+                     MessageBox( GetFocus(),"No field selected",
+                                "Error",MB_OK); 
+                     break;
+                  } 
+                  CloseGWDatabase (hDB);
+                  pName = GlobalLock(hName);
+                  hDB = OpenGWDatabase (pName,BT_WRITE);
+                  GlobalUnlock(hName);
+                  if (!hDB)
+                  {
+                     MessageBox( GetFocus(),"Cannot open file for write access",
+                                "Error",MB_OK); 
+                     goto OpenDB;
+                  }
+                   
+                  lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+                  loc = _llseek (lpGWDHead->Fid,sizeof(GWDHEADER)+(Choice * sizeof(GWFLDINFO)),0);
+                  _lread (lpGWDHead->Fid,&NewField,sizeof(GWFLDINFO));
+                  if (_fstricmp (str,"just=right")) 
+                    _fstrncpy (NewField.Name,str,32);   
+                  else
+                    NewField.Type = BT_RIGHT_CHAR;
+                  _llseek (lpGWDHead->Fid,loc,0);
+                  _lwrite (lpGWDHead->Fid,(char *)&NewField,sizeof(GWFLDINFO)); 
+                  
+                  SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
+                  FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+                  FilePtr->FileHandle = hDB;
+                  GlobalUnlock (SQLPtr->OFHandle); 
+                  GlobalUnlock (hSQL); 
+                  GlobalUnlock (hDB);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_NAME),SW_HIDE);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_CANCEL),SW_HIDE);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_COMMIT),SW_HIDE);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),SW_SHOW);
+                  goto OpenDB; 
+              }
+                  
+              case IDC_NEW_FIELD_CANCEL:
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_NAME),SW_HIDE);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_CANCEL),SW_HIDE);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_COMMIT),SW_HIDE);
+                  ShowWindow (GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),SW_SHOW);
+                  break; 
+              case IDC_EDIT_DIALOG_SCREEN: 
+                  EditDynamicDialog (hWndDlg, 0,"",NULL);
+                 break;
+              case IDC_CREATE_DIALOG_SCREEN: 
+              {
+                  short   nItems;
+                  LPINT lpItems;
+                  HANDLE hItems;
+                  
+                  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_DATA_LIST,LB_GETSELCOUNT,0,0); 
+                  if (!nItems)
+                  {
+                     MessageBox(GetFocus(),"No fields selected",
+                                    "Error",MB_OK|MB_ICONEXCLAMATION);  
+                     break;
+                  }
+                  else if(nItems > 180)
+                  {
+                     MessageBox(GetFocus(),"Exceeded Maximum Number of 180 Items",
+                                    "Error",MB_OK|MB_ICONEXCLAMATION);  
+                     break;
+                  }
+                  hItems=GSSiGlobAlloc(GHND,nItems*2);
+                  lpItems=  (LPINT) GlobalLock(hItems);
+                  SendDlgItemMessage(hWndDlg,IDC_DATA_LIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
+                  pName = GlobalLock(hName);
+//HERE I ADD THE STUFF REQUIRED BY THE DYNAMIC DIALOG PROCESSES
+ 
+                  CreateDynamicDialog (pName,lpGWDHead, nItems, lpItems,
+                                hWndDlg,IDC_DATA_LIST, hSQL);
+                  GlobalUnlock(hName);
+                  GSSiGlobUlFree (&hItems);
+                  break;
+              }     
+            //  case IDC_DUMP_FIELDS:     
+              case IDC_CLOSE_DYNDLG:
+#if WIN32
+                  DestroyWindow((HWND)lParam);
+#else
+                  DestroyWindow(wParam);
+#endif
+                  break;
+              
+              case IDC_DUMPTOTXT:
+              {
+                  short   nItems, type;
+                  LPINT lpItems;
+                  HANDLE hItems;
+                  HANDLE	hFile=GSSiGlobAlloc (GHND,256);
+				  HCURSOR hcurSave;
+                  LPSTR	pFile=GlobalLock (hFile); 
+                  BOOL	GMHeader=FALSE;
+                  
+                  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0); 
+                  if (!nItems)
+                  {
+                     GSSiGlobUlFree (&hFile); 
+                     MessageBox(GetFocus(),"No fields selected",
+                                    "Error",MB_OK|MB_ICONEXCLAMATION); 
+                     break;
+                  }
+                  if (!GetSaveName2 (hWndDlg,pFile,IDS_FILTERTEXT,".TXT",IDS_FILETXT))
+                  {
+                     GSSiGlobUlFree (&hFile); 
+                 	 break;
+                  }   
+          	  	  *str = 0;
+             	  if (GetSQLWhereClause (hWndDlg, hSQL, str)) 
+             	  {   
+             	  	  if (hSQL)
+             	  	  {
+		                  CloseDataFile (TRUE, &hSQL); 
+		              }
+		              if (!_fstricmp (str,"All Rows"))
+		              	*str = 0;
+			 		  if (!OpenDataFile (pName,str,BT_READ,&hSQL))
+		 		  		break; 
+		 		  }  
+		 		  
+				  hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
+                  hItems=GSSiGlobAlloc(GHND,(nItems+1)*2);
+                  lpItems=  (LPINT) GlobalLock(hItems); 
+                  *lpItems++ = nItems;
+                  SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
+                  GlobalUnlock (hItems);   
+                  if (MessageBox (hWndDlg,"Use standard header","",MB_YESNO) == IDNO)
+                  	GMHeader = TRUE;
+                  pName = GlobalLock(hName);
+				  OutputToFile (pFile,pName, str, hItems,FALSE,FALSE,GMHeader,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg); 
+				  GSSiSetCursor (hcurSave); 
+                  GlobalUnlock(hName);
+                  GSSiGlobFree (&hItems);
+                  GSSiGlobUlFree (&hFile); 
+                  break; 
+              }
+              	  
+              case IDC_CREATE_REPORT: 
+              {
+                  short   nItems, type;
+                  LPINT lpItems;
+                  HANDLE hItems;
+                  
+                  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_DATA_LIST,LB_GETSELCOUNT,0,0); 
+                  if (!nItems)
+                  {
+                     MessageBox(GetFocus(),"No fields selected",
+                                    "Error",MB_OK|MB_ICONEXCLAMATION);  
+                     break;
+                  }
+                  hItems=GSSiGlobAlloc(GHND,nItems*2);
+                  lpItems=  (LPINT) GlobalLock(hItems);
+                  SendDlgItemMessage(hWndDlg,IDC_DATA_LIST,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
+                  pName = GlobalLock(hName);   
+                  if (wParam == IDC_CREATE_REPORT)
+                    type = 1;
+                  else
+                    type = 2;
+                  CreateReport (pName,lpGWDHead, nItems, lpItems,hWndDlg,IDC_DATA_LIST, type,hSQL);
+                  GlobalUnlock(hName);
+                  GlobalUnlock(hItems);
+                  GlobalFree(hItems);
+                  break; 
+              }
+                  
+              case IDC_INDEXES:
+              {
+               //   short   nItems, ibeg,i,j;
+               //   HANDLE    hItems, hVars;
+                //  LPINT     lpItems;
+                //  BTVARDESC *pVars;
+                //  LPGWDHEADER   lpGWDHead;
+                //  LPGWFLDINFO   pFldInfo;
+                                      
+                  CloseDataFile (TRUE, &hSQL);
+                   
+                 {
+                    FARPROC lpfnGWD_INDEXESMsgProc;
+                    short nRc;
+                            
+                    lpfnGWD_INDEXESMsgProc = MakeProcInstance((FARPROC)GWD_INDEXESMsgProc, hInst);
+                    nRc = DialogBox(hInst, (LPSTR)"GWD_INDEXES", hWndMain, lpfnGWD_INDEXESMsgProc);
+                    FreeProcInstance(lpfnGWD_INDEXESMsgProc);
+                 }
+                 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+
+     
+                  break;
+            }
+            break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default: 
+RtnFalse:
+		GSSiGlobUlFree (&hMem);
+        return FALSE;
+   }
+ GSSiGlobUlFree (&hMem);
+ return TRUE;
+} 
+
+    
+BOOL FAR PASCAL GWD_INDEXESMsgProc(HWND hWndDlg, WORD Message, WPARAM wParam, LPARAM lParam)
+{ 
+    LPSTR   pName, lpDot;
+    static  HANDLE hDB;
+    LPGWFLDINFO lpGWFldInfo;
+    static  LPGWDHEADER lpGWDHead;
+    static  HANDLE      hBT;
+    static  GWDHEADER   SaveGWDHeader;
+    short       i, index;
+    static      short InIndex;  
+    static      BOOL    OpenForWrite;
+    char        str[300], IndexName[128];
+    short         TabStops[2]={150,500};
+    
+    
+ short    BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         /* initialize working variables                                */  
+         pName = GlobalLock(hName);
+         GlobalUnlock(hName);   
+         InIndex = CurrentIndex;
+         
+         hDB = OpenGWDatabase (pName,BT_READ);
+         if (!hDB)
+         	return (FALSE);
+         OpenForWrite = FALSE;
+         lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);  
+         SaveGWDHeader = *lpGWDHead;
+         ShowWindow (GetDlgItem(hWndDlg,IDC_VARIABLES),SW_HIDE);
+         ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES1),SW_HIDE);
+         ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES2),SW_HIDE);
+         ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES3),SW_HIDE);
+SelectIndex:
+         SendDlgItemMessage (hWndDlg,IDC_SELECT,LB_RESETCONTENT,0,0);
+         SendDlgItemMessage (hWndDlg,IDC_SELECT,LB_ADDSTRING,0,(LPARAM)"Primary Index");
+        
+         for (i=1;i<lpGWDHead->NumIndex;i++)
+         {
+            sprintf(str,"Index %i",i+1);
+            SendDlgItemMessage (hWndDlg,IDC_SELECT,LB_ADDSTRING,0,(LPARAM)str);
+         }
+         SendDlgItemMessage (hWndDlg,IDC_SELECT,LB_SETCURSEL,CurrentIndex,0);
+         if (CurrentIndex)
+             EnableWindow(GetDlgItem(hWndDlg,IDC_DELETE_INDEX),TRUE);
+         else
+             EnableWindow(GetDlgItem(hWndDlg,IDC_DELETE_INDEX),FALSE);
+         if (lpGWDHead->lKeys[CurrentIndex]>0)
+            SendDlgItemMessage (hWndDlg,IDC_UNIQUE,(UINT)BM_SETCHECK,TRUE,(LPARAM)0L);
+         else
+            SendDlgItemMessage (hWndDlg,IDC_UNIQUE,(UINT)BM_SETCHECK,FALSE,(LPARAM)0L);
+         if (abs(lpGWDHead->lKeys[CurrentIndex]>9999))
+            EnableWindow(GetDlgItem(hWndDlg,IDC_UNIQUE),TRUE);
+         else        
+            EnableWindow(GetDlgItem(hWndDlg,IDC_UNIQUE),FALSE);      
+DisplayIndex:
+         SendDlgItemMessage (hWndDlg,IDC_INDEX_DEF,LB_RESETCONTENT,0,0);
+         for (i=0;i<lpGWDHead->NumIndexFields[CurrentIndex];i++)
+         {
+            lpGWFldInfo = lpGWDHead->pFldInfo;
+            lpGWFldInfo+=lpGWDHead->IndexFields[CurrentIndex][i];
+            SendDlgItemMessage (hWndDlg,IDC_INDEX_DEF,LB_ADDSTRING,0,(LPARAM)lpGWFldInfo->Name);
+         }
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+#if WIN32
+        switch(LOWORD(wParam))
+#else
+        switch(wParam)
+#endif
+           {
+           
+              case IDOK:
+                 GlobalUnlock (hDB);
+                 CloseGWDatabase (hDB);
+                 if (OpenForWrite)
+                 {
+                     pName = GlobalLock(hName);
+                     hDB = OpenGWDatabase (pName,BT_WRITE);
+                     GlobalUnlock(hName);
+                     if (!hDB)
+                     {
+                         MessageBox( GetFocus(),"Cannot open file for write access",
+                                    "Error",MB_OK); 
+                         EndDialog(hWndDlg, FALSE);
+                         break;
+                     }
+                     GlobalUnlock (hDB);
+                     CloseGWDatabase (hDB);
+                  }
+                  EndDialog(hWndDlg, TRUE); 
+                  break;      
+                  
+              case IDCANCEL:
+                  *lpGWDHead = SaveGWDHeader;   
+                  CurrentIndex = InIndex;
+                  GlobalUnlock (hDB);
+                  CloseGWDatabase (hDB);
+                  EndDialog(hWndDlg, FALSE);
+                  break;  
+                  
+              case IDC_UNIQUE:    
+                  if (SendDlgItemMessage (hWndDlg,IDC_UNIQUE,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
+                      lpGWDHead->lKeys[CurrentIndex]=SHRT_MAX;
+                  else
+                      lpGWDHead->lKeys[CurrentIndex]=SHRT_MIN;   
+                  break;
+                  
+              case IDC_SELECT:
+              {
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+                    {
+                     case LBN_DBLCLK:
+                     case LBN_SELCHANGE:
+                         CurrentIndex=SendDlgItemMessage(hWndDlg,IDC_SELECT,
+                                                         LB_GETCURSEL,0,0); 
+                         ShowWindow (GetDlgItem(hWndDlg,IDC_VARIABLES),SW_HIDE);
+                         ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES1),SW_HIDE);
+                         ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES2),SW_HIDE);
+                         ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES3),SW_HIDE);
+                         goto SelectIndex;
+                         break;
+                    }
+               }
+                 break; 
+                 
+              case IDC_VARIABLES:
+              {
+#if WIN32
+              switch(LOWORD(wParam))
+#else
+              switch(HIWORD(lParam))
+#endif
+                    {
+                     case LBN_DBLCLK:
+                     case LBN_SELCHANGE:
+                         lpGWDHead->IndexFields[CurrentIndex][lpGWDHead->NumIndexFields[CurrentIndex]]=
+                            SendDlgItemMessage(hWndDlg,IDC_VARIABLES,LB_GETCURSEL,0,0); 
+                         lpGWDHead->NumIndexFields[CurrentIndex]++;
+                         goto DisplayIndex;
+                         break;
+                    }
+               }
+                 break; 
+                 
+              case IDC_DELETE_INDEX:
+              {
+                 char   OldName[128];  
+                 short    j;
+                   
+                 if (!CurrentIndex)
+                 {
+                     MessageBox( GetFocus(),"Cannot delete the primary index",
+                                "Error",MB_OK); 
+                     EndDialog(hWndDlg, FALSE);
+                     break;
+                 }
+                 pName = GlobalLock(hName);
+                 GlobalUnlock(hName);
+                 if (!OpenForWrite)
+                 {
+                     GlobalUnlock (hDB);
+                     CloseGWDatabase (hDB);
+                     hDB = OpenGWDatabase (pName,BT_WRITE);
+                     if (!hDB)
+                     {
+                         MessageBox( GetFocus(),"Cannot open file for write access",
+                                    "Error",MB_OK); 
+                         EndDialog(hWndDlg, FALSE);
+                         break;
+                     }
+                     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);  
+                     OpenForWrite = TRUE;  
+                 }
+                 BT_CLOSE(lpGWDHead->BTHandle[CurrentIndex]); 
+                 GlobalUnlock (lpGWDHead->hKeys[CurrentIndex]);
+                 GlobalFree (lpGWDHead->hKeys[CurrentIndex]);
+                 _fstrcpy (IndexName,pName);
+                 _fstrlwr (IndexName); 
+                 lpDot = _fstrstr (IndexName,".gmd");
+                 if (!lpDot) lpDot = _fstrstr (IndexName,".gwd");
+                 _fstrcpy (lpDot,".in");
+                 itoa (CurrentIndex+1,_fstrchr(IndexName,'\0'),10); 
+                 GSSiRemove(IndexName); 
+                 for (index=CurrentIndex;index<lpGWDHead->NumIndex-1;index++)
+                 {
+                     lpGWDHead->NumIndexFields[index]=lpGWDHead->NumIndexFields[index+1]; 
+                     lpGWDHead->lKeys[index] = lpGWDHead->lKeys[index+1];
+                     lpGWDHead->hKeys[index] = lpGWDHead->hKeys[index+1];
+                     lpGWDHead->pKeys[index] = lpGWDHead->pKeys[index+1];
+                     lpGWDHead->BTHandle[index] = lpGWDHead->BTHandle[index+1];   
+                     BT_CLOSE(lpGWDHead->BTHandle[index]);
+                     _fstrcpy (OldName,IndexName);
+                     lpDot = _fstrstr (OldName,".in");
+                     lpDot+=3;
+                     *lpDot = '\0';
+                     itoa (index+2,_fstrchr(OldName,'\0'),10); 
+                     GSSiRename(OldName,IndexName);
+                     lpGWDHead->BTHandle[index] = BT_OPEN (IndexName, lpGWDHead->TimeStamp, BT_WRITE, 0);
+                     for (j=0;j<MAX_GMD_INDEX_FIELDS;j++) lpGWDHead->IndexFields[index][j] = lpGWDHead->IndexFields[index+1][j]; 
+                     _fstrcpy(IndexName,OldName);
+                 }
+                 lpGWDHead->NumIndex--; 
+                 if (CurrentIndex>=lpGWDHead->NumIndex) CurrentIndex--;
+                 _llseek(lpGWDHead->Fid,0,0);
+                 _lwrite(lpGWDHead->Fid,(char *)lpGWDHead,sizeof(GWDHEADER));
+             
+                 GlobalUnlock (hDB);
+                 CloseGWDatabase (hDB);
+                 EndDialog(hWndDlg, TRUE); 
+                 break;
+              }   
+              case IDC_ADD_INDEX: 
+                 if (!OpenForWrite)
+                 {
+                     GlobalUnlock (hDB);
+                     CloseGWDatabase (hDB);
+                     pName = GlobalLock(hName);
+                     GlobalUnlock(hName);
+                     hDB = OpenGWDatabase (pName,BT_WRITE);
+                     if (!hDB)
+                     {
+                         MessageBox( GetFocus(),"Cannot open file for write access",
+                                    "Error",MB_OK); 
+                         EndDialog(hWndDlg, FALSE);
+                         break;
+                     }
+                     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);  
+                     OpenForWrite = TRUE;
+                 }  
+                 CurrentIndex = lpGWDHead->NumIndex;
+                 lpGWDHead->NumIndex++;
+                 lpGWDHead->NumIndexFields[CurrentIndex]=0; 
+                 lpGWDHead->lKeys[CurrentIndex]=SHRT_MAX;
+                 ShowWindow (GetDlgItem(hWndDlg,IDC_VARIABLES),SW_SHOW);
+                 ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES1),SW_SHOW);
+                 ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES2),SW_SHOW);
+                 ShowWindow (GetDlgItem(hWndDlg,IDC_ADDMES3),SW_SHOW);
+                 ShowWindow (GetDlgItem(hWndDlg,IDC_ADD_INDEX),SW_HIDE);
+                 ShowWindow (GetDlgItem(hWndDlg,IDC_DELETE_INDEX),SW_HIDE);
+                 SendDlgItemMessage (hWndDlg,IDC_VARIABLES,LB_RESETCONTENT,0,0);
+                 for (i=0,lpGWFldInfo = lpGWDHead->pFldInfo;
+                      i<lpGWDHead->NumFields; i++,lpGWFldInfo++)
+                     SendDlgItemMessage (hWndDlg,IDC_VARIABLES,LB_ADDSTRING,0,(LPARAM)lpGWFldInfo->Name); 
+                 goto SelectIndex;
+                 break;
+              
+                  
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} 
+
+BOOL GWDFormKey (LPGWDHEADER lpGWDHead, short Index, BOOL Search,long length)
+{   LPSTR   loc, lpVal;
+    short     ibeg, i;
+    LPGWFLDINFO pFldInfo;  
+    BTHEAD  BTHead;
+    
+    GetBTHeader (lpGWDHead->BTHandle[0],&BTHead); 
+    ibeg = 0;
+    for (i=0;i<lpGWDHead->NumIndexFields[Index];i++) 
+    { 
+        loc = lpGWDHead->pKeys[Index] + ibeg;
+        pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[Index][i];
+        if (length && (pFldInfo->Beg + pFldInfo->Len) >= length)
+        	return FALSE;
+        lpVal = &lpGWDHead->GWDData[pFldInfo->Beg];
+        _fmemmove(loc,lpVal,pFldInfo->Len);
+        ibeg += pFldInfo->Len;
+    }
+    if (lpGWDHead->lKeys[Index]<0)
+    {    
+        loc = lpGWDHead->pKeys[Index] + ibeg;
+        if (Search)
+            _fmemset(loc,'\0',lpGWDHead->lKeys[0]);         
+        else
+        {
+            pFldInfo = lpGWDHead->pFldInfo;
+            lpVal = &lpGWDHead->GWDData[pFldInfo->Beg];
+            _fmemmove(loc,lpVal,abs(lpGWDHead->lKeys[0])); 
+        }
+    }
+                 
+    return TRUE;
+}
+ 
+LPFIELDINFO GetFieldInfo (HANDLE TBLHandle, BOOL First, short FieldType)
+{   static icount;
+    static FIELDINFO    Finfo;
+    LPFIELDINFO lpFinfo=&Finfo;
+    LPGWDHEADER lpGWDHead;
+    LPGWFLDINFO lpGWFldInfo;
+	LPCOMBOHEADER		pComboHeader;
+    LPCOMBOFILE  		pComboFile; 
+    LPFIELDINFO         pField;
+
+    if (FieldType == UMIFS_DATAFILE)
+    {
+        lpGWDHead = (LPGWDHEADER)GlobalLock (TBLHandle);
+        if (First)
+        {
+            icount=-1;
+        }
+        icount++;
+        if (icount >= lpGWDHead->NumFields)
+        {
+			GlobalUnlock (TBLHandle);
+        	return (0);
+        }
+        lpGWFldInfo = lpGWDHead->pFldInfo;
+        lpGWFldInfo += icount;
+        _fstrcpy (lpFinfo->name,lpGWFldInfo->Name);  
+        lpFinfo->type = lpGWFldInfo->Type;
+        lpFinfo->length = lpGWFldInfo->Len;
+        GlobalUnlock (TBLHandle);
+        return (lpFinfo);
+    }
+    if (FieldType == DTM_DATAFILE)
+    {
+		LPDTMINFO	pDTMInfo = (LPDTMINFO)GlobalLock (TBLHandle);
+		
+        lpGWDHead = (LPGWDHEADER)GlobalLock (pDTMInfo->hDB);
+        if (First)
+        {
+            icount=-1;
+        }
+        icount++;
+        if (icount >= lpGWDHead->NumFields)
+        	return (0);
+        lpGWFldInfo = lpGWDHead->pFldInfo;
+        lpGWFldInfo += icount;
+        _fstrcpy (lpFinfo->name,lpGWFldInfo->Name);  
+        lpFinfo->type = lpGWFldInfo->Type;
+        lpFinfo->length = lpGWFldInfo->Len;  
+        GlobalUnlock (pDTMInfo->hDB);
+        GlobalUnlock (TBLHandle);
+        return (lpFinfo);
+    }
+    else if (FieldType == COMBO_DATAFILE)
+    {
+		pComboHeader = (LPCOMBOHEADER)GlobalLock (TBLHandle);
+		pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile);
+        if (First)
+        {
+            icount=-1;
+        }
+        icount++;
+        if (icount >= pComboFile->NumFields)
+        {
+			GlobalUnlock (pComboHeader->hComboFile);
+	        GlobalUnlock (TBLHandle);
+        	return (0);
+        }
+        pField = &pComboFile->FldInfo;
+        pField += icount;
+        _fstrcpy (lpFinfo->name,pField->name);  
+        lpFinfo->type = pField->type;
+        lpFinfo->length = pField->length;
+		GlobalUnlock (pComboHeader->hComboFile);
+        GlobalUnlock (TBLHandle);
+        return (lpFinfo);
+    }
+    else
+        return (GetExternalFieldInfo (TBLHandle,First));
+}
+
+BOOL CreateReport (LPSTR DBName, LPGWDHEADER lpGWDHead, short NumSelect, LPINT Selected,
+                    HWND hWndDlg, short DlgItem, short type,HGLOBAL hSQL)
+{   
+    short j;
+    LPSTR  lpBar;
+    HFILE Fid; 
+    LPINT   pSelected;
+    OFSTRUCT    OFStruct;
+    char    str[256],str2[64], FieldName[300];
+    char    File[128], Title[128];
+    
+    *File = 0;
+    if (!GetSaveName2 (hWndDlg,File,IDS_FILTERTEXT,".TXT",IDS_FILERPT))
+    	return FALSE;
+    Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
+    if (Fid == HFILE_ERROR)
+        return FALSE;
+    if (type == 1)
+    { 
+        Title[0]=0;
+        if (!GetTextString (hWndDlg,Title,128,"Enter the report description",NULL,NULL,0))
+        	goto Cancelled;
+        sprintf (str,"GMREPORT %s",Title);
+        fputstring (str,Fid);
+        fputstring ("[%JUST]=C",Fid);
+        fputstring ("[%MARGINS]=0.05",Fid);
+        fputstring ("[%NUM_FONTS]=3",Fid);
+        fputstring ("Arial,B,16,BLACK",Fid);
+        fputstring ("Arial,B,12,BLACK",Fid);
+        fputstring ("Arial,N,12,BLACK",Fid);
+        fputstring ("[%NUM_FILES]=1",Fid);
+        str[0]=0;
+        if (!GetTextString (hWndDlg,Title,128,"Enter the report title",NULL,NULL,0)) 
+        	goto Cancelled;
+        FieldName[0]=0;
+        if (!GetSQLWhereClause (hWndDlg, hSQL, FieldName))  
+        	goto Cancelled;
+        sprintf (str,"%s,%s",DBName,FieldName);
+        fputstring (str,Fid);
+        fputstring ("[%WRAP]=Y",Fid);
+        fputstring ("[%NUM_TABS]=1",Fid);
+        fputstring ("AUTO",Fid); 
+        sprintf (str,"[%%NUM_ROWS]=%i",NumSelect+1);
+        fputstring (str,Fid);
+        sprintf (str,"[%%FONT]=1;%s",Title);
+        fputstring (str,Fid);  
+    } 
+    else
+        fputstring (DBName,Fid);
+    for (j=0,pSelected=Selected;j<NumSelect;j++,pSelected++)
+    {
+        SendDlgItemMessage(hWndDlg,DlgItem,LB_GETTEXT, 
+                                *pSelected,(LPARAM)((LPSTR)FieldName));
+         
+        if ((lpBar = _fstrchr(FieldName,'\t')))
+            *lpBar = '\0';    
+        if (type == 1)
+            sprintf (str,"[%%FONT]=2;[%%JUST]=R;%s$TAB( )[%%FONT]=3;[%%JUST]=L;[%s]",FieldNameToTitle(FieldName,str2),FieldName);
+        else
+            sprintf (str,"[%s]",FieldName);
+        fputstring (str,Fid);
+    }
+    GSSiClose (Fid);  
+    sprintf (str,"Report %s has been created",File);
+    MessageBox( GetFocus(),str,"",MB_OK);  
+    return TRUE;
+Cancelled:       
+	GSSiClose (Fid);
+	GSSiOpenFile (File,&OFStruct,OF_DELETE);
+	return FALSE;
+} 
+
+LPSTR FieldNameToTitle (LPSTR FName,LPSTR OutStr)
+{                               
+    short len,i;
+    LPSTR   str; 
+    BOOL    lastaspace=FALSE;
+    
+    len = _fstrlen(FName);
+    _fstrcpy (OutStr,FName);
+    REPLAC (OutStr,"_"," ",len);
+    
+    str = OutStr;
+    str++;
+    for (i=1;i<len;i++,str++)
+    {   
+        if (!lastaspace)
+            *str = tolower(*str); 
+        if (*str == ' ')
+            lastaspace = TRUE; 
+        else
+            lastaspace = FALSE;
+    }
+    return OutStr;
+}
+
+BOOL GWD_MergeDBs (LPSTR ToDB, LPSTR FromDB, BOOL Replace)
+{
+    GWDHEADER GWDHeadTo, GWDHeadFrom; 
+    LPGWDHEADER lpGWDHeadTo, lpGWDHeadFrom;
+    HANDLE  hDBTo, hDBFrom;   
+    long	Offset, nLoaded=0, nRecs;  
+    short	len, pos=BT_FIRST,i;
+	BOOL	rtn=FALSE; 
+	char	mess[300];
+
+	hDBTo = OpenGWDatabase (ToDB,BT_WRITE); 
+	if (!hDBTo)
+		return FALSE;
+    lpGWDHeadTo = (LPGWDHEADER)GlobalLock (hDBTo);
+	hDBFrom = OpenGWDatabase (FromDB,BT_READ); 
+	if (!hDBFrom)
+	{
+		GlobalUnlock (hDBTo);
+	    CloseGWDatabase (hDBTo); 
+		return FALSE;
+	}
+    lpGWDHeadFrom = (LPGWDHEADER)GlobalLock (hDBFrom);
+    if (lpGWDHeadFrom->NumFields != lpGWDHeadTo->NumFields)
+    {   
+ErrMess:
+		sprintf (mess,"%s and %s have different structures and cannot be merged",ToDB,FromDB);
+    	MessageBox (GetFocus(),mess,NULL,MB_ICONEXCLAMATION);  
+    	goto Exit;
+    }
+    for (i=0;i<lpGWDHeadFrom->NumFields;i++) 
+    {
+    	short l = _fstrlen (lpGWDHeadFrom->pFldInfo[i].Name);
+    	if (_fmemcmp (&lpGWDHeadFrom->pFldInfo[i],&lpGWDHeadTo->pFldInfo[i],l+1+6))
+    		goto ErrMess;
+    }
+	CreateStatusWindow (hWndMain,1,"Merging Databases"); 
+    nRecs = BT_NUM_IN_INDEX (lpGWDHeadFrom->BTHandle[0]);
+    while (ContinueProcessing && !BT_FIND (lpGWDHeadFrom->BTHandle[0],lpGWDHeadFrom->pKeys[0],pos,BT_ANY, (LPSTR)&Offset))
+    {   
+    	pos = BT_NEXT;
+        len = FillGWDData (lpGWDHeadFrom,Offset);
+    	_fmemmove (&lpGWDHeadTo->GWDData,&lpGWDHeadFrom->GWDData,(size_t)lpGWDHeadFrom->Reclen);
+		GWDAddRecord (lpGWDHeadTo,0,NULL);
+		StatusWindowUpdate (NULL,NULL, nRecs, ++nLoaded);
+	}
+	if (ContinueProcessing)
+		rtn = TRUE; 
+Exit:
+	GlobalUnlock (hDBFrom);
+    CloseGWDatabase (hDBFrom); 
+	GlobalUnlock (hDBTo);
+    CloseGWDatabase (hDBTo); 
+	DestroyStatusWindow();  
+	return rtn;
+}  
+
+    
+BOOL GWDAddRecord (LPGWDHEADER lpGWDHead,WORD length,LPSHORT IndexArray)
+{
+    long    Offset,ii; 
+    short   Index; 
+    BOOL	CreateIndexEntry;
+    
+    Offset = _llseek (lpGWDHead->Fid,0,2);  
+    if (Offset == debugoff)
+    	ii=1;
+    if (!length)
+        length = lpGWDHead->Reclen;  
+
+    _lwrite (lpGWDHead->Fid,(char *)&length,2);
+    _lwrite (lpGWDHead->Fid,(char *)&lpGWDHead->GWDData,length);
+    for (Index=0;Index<lpGWDHead->NumIndex;Index++)
+    {   
+    	if (IndexArray)
+    		CreateIndexEntry = *IndexArray++;
+    	else
+    		CreateIndexEntry = TRUE;
+    		    
+        if ((!Index || CreateIndexEntry) && GWDFormKey(lpGWDHead,Index,FALSE,length))
+        {
+        	
+        	BT_PUT (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&Offset); 
+        }
+    }
+
+    return TRUE;
+}
+
+BOOL GWDReplaceRecord (LPGWDHEADER lpGWDHead,WORD length,LPSHORT IndexArray, long Offset)
+{
+    short   Index; 
+    BOOL	CreateIndexEntry;
+    HANDLE	hSaveRec; 
+    LPSTR	pSaveRec; 
+    UINT	oldlength; 
+    long	OldOffset,ii;
+    
+    if (Offset == debugoff)
+    	ii=1;
+    if (!length)
+        length = lpGWDHead->Reclen;
+    if (Offset < 0)
+    {
+        if (GWDFormKey(lpGWDHead,0,FALSE,length))
+        {
+        	if (BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ,(LPSTR)&Offset))
+        		return (GWDAddRecord (lpGWDHead,length,IndexArray));
+        }
+        else
+        	return FALSE;
+    }  
+    hSaveRec = GSSiGlobAlloc (GMEM_MOVEABLE,length);
+    pSaveRec = GlobalLock (hSaveRec);
+    _fmemmove (pSaveRec,&lpGWDHead->GWDData,length);
+	_llseek (lpGWDHead->Fid,Offset,0); 
+    _lread (lpGWDHead->Fid,(char *)&oldlength,2);
+    _lread (lpGWDHead->Fid,(char *)&lpGWDHead->GWDData,oldlength);
+
+    for (Index=1;Index<lpGWDHead->NumIndex;Index++)
+    {   
+        if (GWDFormKey(lpGWDHead,Index,FALSE,oldlength))
+        {
+        	if (!BT_FIND (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],BT_FIRST,BT_EQ,(LPSTR)&OldOffset))
+	        	BT_DELETE (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&OldOffset,FALSE);
+	    }
+    }
+    
+    _fmemmove (&lpGWDHead->GWDData,pSaveRec,length); 
+    GSSiGlobUlFree (&hSaveRec);
+    
+    if (length > oldlength)
+	    Offset = _llseek (lpGWDHead->Fid,0,2);  
+	_llseek (lpGWDHead->Fid,Offset,0); 
+    ii=_lwrite (lpGWDHead->Fid,(char *)&length,2);
+    ii=_lwrite (lpGWDHead->Fid,(char *)&lpGWDHead->GWDData,length);
+
+    for (Index=0;Index<lpGWDHead->NumIndex;Index++)
+    {   
+    	if (IndexArray)
+    		CreateIndexEntry = *IndexArray++;
+    	else
+    		CreateIndexEntry = TRUE;
+    		    
+        if ((!Index || CreateIndexEntry) && GWDFormKey(lpGWDHead,Index,FALSE,length))
+        	BT_PUT (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&Offset);
+    }
+
+    return TRUE;
+}
+
+BOOL GWDDeleteRecord (LPGWDHEADER lpGWDHead,long Offset)
+{
+    short   Index; 
+    BOOL	CreateIndexEntry;
+    HANDLE	hSaveRec; 
+    LPSTR	pSaveRec; 
+    UINT	length; 
+    long	OldOffset,ii;
+    
+	_llseek (lpGWDHead->Fid,Offset,0); 
+    _lread (lpGWDHead->Fid,(char *)&length,2);
+    _lread (lpGWDHead->Fid,(char *)&lpGWDHead->GWDData,length);
+
+    for (Index=0;Index<lpGWDHead->NumIndex;Index++)
+    {   
+        if (GWDFormKey(lpGWDHead,Index,FALSE,length))
+        {
+        	if (!BT_FIND (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],BT_FIRST,BT_EQ,(LPSTR)&OldOffset))
+	        	BT_DELETE (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&OldOffset,FALSE);
+	    }
+    }
+    
+    return TRUE;
+} 
+
+void CreateGMTextHeader (LPFIELDINFO lpFieldInfo, LPSTR lpHead)
+{
+	switch (lpFieldInfo->type)
+	{
+        default: 
+        case SQL_CHAR: 
+        case SQL_VARCHAR:
+		case BT_RIGHT_CHAR:
+		case BT_CHAR: 
+    		sprintf (_fstrchr(lpHead,0),"\"%s(C%i)\"",lpFieldInfo->name,lpFieldInfo->length);
+    		break;
+        case SQL_INTEGER:
+        case SQL_SMALLINT:
+    	case BT_INTEGER:
+    	case BT_INT2:
+    	case BT_INT4:
+    		sprintf (_fstrchr(lpHead,0),"\"%s(B%i)\"",lpFieldInfo->name,lpFieldInfo->length);
+    		break;
+    	case BT_REAL:
+    	case BT_REAL4:
+    	case BT_REAL8:
+        case SQL_NUMERIC:
+        case SQL_FLOAT:
+		case SQL_REAL:
+		case SQL_DOUBLE:
+    		sprintf (_fstrchr(lpHead,0),"\"%s(R%i)\"",lpFieldInfo->name,lpFieldInfo->length);
+    		break;
+    }
+    return;
+}
+
+BOOL CreateGWDDatabase (LPSTR InName,short Version,short NumFields,short NumIndexFields,LPSTR DefStr)
+{
+	GWDHEADER GWDHead; 
+	LPGWDHEADER	lpGWDHead;
+	GWFLDINFO GWFldInfo;
+	LPGWFLDINFO	lpGWFldInfo;
+	OFSTRUCT	OFStruct;  
+	short	i, ifield;     
+	UINT	ibeg;
+	HFILE	FidData;  
+	HANDLE	hVars;
+	LPBTVARDESC pVars; 
+	LPSTR	str, lpTab, pDot; 
+	char	Name[260];
+                      
+    _fstrcpy (Name,InName);
+    _fstrlwr (Name);
+    if (!StringEndsWith (Name,".gmd"))
+    	return FALSE;
+    if ((FidData = GSSiOpenFile (Name,&OFStruct,OF_CREATE))==HFILE_ERROR)
+    	return FALSE;
+	GWDHead.NumFields=0;
+	GWDHead.NumIndex=1;
+ 	GWDHead.Version=Version;
+	GWDHead.NumIndexFields[0]=NumIndexFields;
+	for (i=0;i<NumIndexFields;i++)
+		GWDHead.IndexFields[0][i]=i;
+	_lwrite (FidData,&GWDHead,sizeof(GWDHEADER));
+	ibeg = 0;
+					 
+	 hVars = LocalAlloc (LHND,NumIndexFields * sizeof(BTVARDESC));
+	 pVars = (BTVARDESC *) LocalLock(hVars);
+				     
+	 GWFldInfo.Len = 4;
+	 GWFldInfo.Beg = ibeg;
+	 GWFldInfo.Type = BT_INTEGER;
+	 pVars->BT_VARLEN=4;
+	 pVars->BT_VARTYP=BT_INTEGER;
+	 pVars->BT_VAROFF=0;
+	 ifield=0;
+	 str = DefStr;
+	 NumFields = 4096;		         
+	 for (i=0;i<NumFields;i++,ifield++)
+	 {  
+	 	if ((lpTab = _fstrchr (str,'(')))
+	 	{   
+	 		*lpTab++=0;
+	 		switch (*lpTab)
+	 		{
+		 		case 'C':
+					GWFldInfo.Type = BT_CHAR;
+				break;
+				case 'B':
+					GWFldInfo.Type = BT_INTEGER; 
+				break;
+				case 'R':
+					GWFldInfo.Type = BT_REAL;
+				break;
+				case 'J':
+					GWFldInfo.Type = BT_RIGHT_CHAR;
+				break;
+				default:
+					goto SkipField; 
+			}
+			lpTab++;
+			GWFldInfo.Len = atoi(lpTab);
+			GWFldInfo.Beg = ibeg; 
+			if (ifield<NumIndexFields)
+			{
+				 pVars->BT_VARLEN=GWFldInfo.Len;
+				 pVars->BT_VARTYP=GWFldInfo.Type;
+				 pVars->BT_VAROFF=ibeg; 
+				 pVars++;
+				 GWDHead.lKeys[0]=ibeg+GWFldInfo.Len;
+			}
+							
+			ibeg += GWFldInfo.Len;  
+			if (*str == '"')   
+				str++;
+			_fstrcpy (GWFldInfo.Name,str);
+			_lwrite (FidData,&GWFldInfo,sizeof(GWFldInfo));
+			GWDHead.NumFields++;  
+			str = _fstrchr (lpTab,',');
+			if (!str)
+				break;
+			str++;
+		}
+		else
+		{
+SkipField:
+			LocalUnlock(hVars);
+			LocalFree(hVars);
+			GSSiClose (FidData);
+			GSSiRemove (Name);
+			GSSiMessageBox (Name,"Error in Table Definition String",MB_ICONEXCLAMATION); 
+			return FALSE;
+		}
+	 }
+	 GWDHead.Reclen=ibeg; 
+	 GWDHead.TimeStamp = time(NULL);
+	 _llseek (FidData,0,0);
+	 _lwrite (FidData,&GWDHead,sizeof(GWDHEADER));
+	 _llseek (FidData,0,2);
+	
+	 pDot = _fstrrchr (Name,'.');
+	 _fstrcpy (pDot,".in1");
+	 LocalUnlock(hVars);
+	 pVars =(BTVARDESC *)  LocalLock(hVars);
+	 BT_CREATE (Name, 4, FALSE, NumIndexFields, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
+	 LocalUnlock(hVars);
+	 LocalFree(hVars);
+	 GSSiClose (FidData);
+	return TRUE;			 	 
+}
+
+void GWDClearSetValues (LPGWDHEADER lpGWDHead)
+{   
+	UINT	i;
+    LPGWFLDINFO lpGWFldInfo;
+
+    for (i=0,lpGWFldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;i++,lpGWFldInfo++)
+    	lpGWFldInfo->HasValue = 0;
+	
+	return;
+}
+
+BOOL GWDInitUnsetKeyValues (LPGWDHEADER lpGWDHead,short IndexToUse)
+{
+    LPGWFLDINFO pFldInfo;
+	BOOL	rtn=FALSE;
+	UINT	i;
+	
+    for (i=0;i<lpGWDHead->NumIndexFields[IndexToUse];i++)
+    { 
+    	pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[IndexToUse][i];
+    	if (!pFldInfo->HasValue)
+    	{
+    		rtn = TRUE;
+			SetFieldToMinVal(lpGWDHead,lpGWDHead->IndexFields[IndexToUse][i]);
+    	}
+    }
+	return rtn;
+}
+
+

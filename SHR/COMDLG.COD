@@ -1,0 +1,4038 @@
+;	Static Name Aliases
+;
+;	$S2783_?hFChunk@?1??vdef@@9@9	EQU	?hFChunk@?1??vdef@@9@9
+;	$S2785_?hFRChunk@?1??vdef@@9@9	EQU	?hFRChunk@?1??vdef@@9@9
+;	$S2799_?hDC@?1??vdef@@9@9	EQU	?hDC@?1??vdef@@9@9
+;	$S2672_?lpColorsChunk@?1??GetColor@@9@9	EQU	?lpColorsChunk@?1??GetColor@@9@9
+;	$S2744_?hDevMode@?1??InitializeStruct@@9@9	EQU	?hDevMode@?1??InitializeStruct@@9@9
+	TITLE   c:\gssi\prog\shr\comdlg.c
+	.MODEL  LARGE
+	.386p
+	.387
+INCLUDELIB      LLIBCE
+INCLUDELIB	OLDNAMES.LIB
+COMDLG_TEXT	SEGMENT  WORD USE16 PUBLIC 'CODE'
+COMDLG_TEXT	ENDS
+_DATA	SEGMENT  WORD USE16 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT  WORD USE16 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT  WORD USE16 PUBLIC 'BSS'
+_BSS	ENDS
+$$SYMBOLS	SEGMENT  BYTE USE16 PUBLIC 'DEBSYM'
+$$SYMBOLS	ENDS
+$$TYPES	SEGMENT  BYTE USE16 PUBLIC 'DEBTYP'
+$$TYPES	ENDS
+COMDLG7_DATA	SEGMENT  PARA USE16 PUBLIC 'FAR_DATA'
+COMDLG7_DATA	ENDS
+DGROUP	GROUP	CONST, _BSS, _DATA
+	ASSUME DS: DGROUP, SS: DGROUP
+PUBLIC  _gszAppName
+PUBLIC  _hColorsChunk
+PUBLIC  _gszMenuName
+PUBLIC  _gszCommonWClass
+PUBLIC  _FilterStringID
+PUBLIC  _gszAllocErrorMsg
+PUBLIC  _gszLockErrorMsg
+PUBLIC  _gszFontMsg
+PUBLIC  _gszPrintMsg
+PUBLIC  _gszTestDoc
+PUBLIC  _gszWin31wh
+PUBLIC  _gszLoadStrFail
+PUBLIC  _gszFOSuccess
+PUBLIC  _gszFOFailure
+PUBLIC  _ghFFRDlg
+PUBLIC  _ghPrintingDlg
+PUBLIC  _ghBkgndBrush
+PUBLIC  _ghDlgBrush
+PUBLIC  _ghSelectedFont
+PUBLIC  _hPDChunk
+EXTRN	_itoa:FAR
+EXTRN	SETDLGITEMTEXT:FAR
+EXTRN	ENABLEWINDOW:FAR
+EXTRN	GLOBALFREE:FAR
+EXTRN	GETDC:FAR
+EXTRN	RELEASEDC:FAR
+EXTRN	GLOBALLOCK:FAR
+EXTRN	GLOBALUNLOCK:FAR
+EXTRN	SETTEXTCOLOR:FAR
+EXTRN	GETBKCOLOR:FAR
+EXTRN	GETWINDOWSDIRECTORY:FAR
+EXTRN	SETBKMODE:FAR
+EXTRN	REGISTERWINDOWMESSAGE:FAR
+EXTRN	__aFchkstk:FAR
+EXTRN	PEEKMESSAGE:FAR
+EXTRN	TRANSLATEMESSAGE:FAR
+EXTRN	GETOPENFILENAME:FAR
+EXTRN	GETSAVEFILENAME:FAR
+EXTRN	DISPATCHMESSAGE:FAR
+EXTRN	CREATEFONTINDIRECT:FAR
+EXTRN	__fstrcat:FAR
+EXTRN	DELETEOBJECT:FAR
+EXTRN	MESSAGEBOX:FAR
+EXTRN	SELECTOBJECT:FAR
+EXTRN	INVALIDATERECT:FAR
+EXTRN	UNREALIZEOBJECT:FAR
+EXTRN	__fstrcpy:FAR
+EXTRN	CHOOSECOLOR:FAR
+EXTRN	__fstrlen:FAR
+EXTRN	_wsprintf:FAR
+EXTRN	_GSSiGlobAlloc:FAR
+EXTRN	CHOOSEFONT:FAR
+EXTRN	COMMDLGEXTENDEDERROR:FAR
+EXTRN	CREATESOLIDBRUSH:FAR
+EXTRN	ISDIALOGMESSAGE:FAR
+EXTRN	SETBRUSHORG:FAR
+EXTRN	MAKEPROCINSTANCE:FAR
+EXTRN	OPENFILE:FAR
+EXTRN	LOADSTRING:FAR
+EXTRN	GETDEVICECAPS:FAR
+EXTRN	DESTROYWINDOW:FAR
+_BSS      SEGMENT
+COMM NEAR	_lpInitialDirectory:	BYTE:	 4
+COMM FAR	_gszFilter:	 1:	 256
+COMM FAR	_gszBuffer:	 1:	 256
+COMM NEAR	_ghInst:	BYTE:	 2
+COMM NEAR	_ghWnd:	BYTE:	 2
+COMM NEAR	_wFRMsg:	BYTE:	 2
+COMM NEAR	_wHelpMsg:	BYTE:	 2
+COMM NEAR	_gbMonochrome:	BYTE:	 2
+COMM NEAR	_gbUserAbort:	BYTE:	 2
+_BSS      ENDS
+EXTRN	_PltName:BYTE
+_BSS      SEGMENT
+COMM NEAR	_lpfnFileOpenHook:	BYTE:	 4
+_BSS      ENDS
+EXTRN	_hWndMain:WORD
+_BSS      SEGMENT
+COMM NEAR	_lpfnFindHook:	BYTE:	 4
+COMM NEAR	_PrintMsgWnd:	BYTE:	 2
+COMM NEAR	_lpfnFindReplaceHook:	BYTE:	 4
+_BSS      ENDS
+_DATA      SEGMENT
+_ghFFRDlg	DW	00H
+_ghPrintingDlg	DW	00H
+_ghBkgndBrush	DW	00H
+_ghDlgBrush	DW	00H
+_ghSelectedFont	DW	00H
+_DATA      ENDS
+COMDLG7_DATA      SEGMENT
+_gszAppName	DB	'Common Dialogs',  00H
+	ORG	$+1
+_gszMenuName	DB	'CommonDlgMenu',  00H
+_gszCommonWClass	DB	'CommonWClass',  00H
+	ORG	$+1
+_gszAllocErrorMsg	DB	'Error Allocating Memory!',  00H
+	ORG	$+1
+_gszLockErrorMsg	DB	'Error Locking Memory!',  00H
+_gszFontMsg	DB	'Hello Windows World!',  00H
+	ORG	$+1
+_gszPrintMsg	DB	'Common Dialog Print Sample',  00H
+	ORG	$+1
+_gszTestDoc	DB	'Test-Doc',  00H
+	ORG	$+1
+_gszWin31wh	DB	'win31wh.hlp',  00H
+_gszLoadStrFail	DB	'LoadString failed!',  00H
+	ORG	$+1
+_gszFOSuccess	DB	'File successfully opened and closed',  00H
+_gszFOFailure	DB	'Failure finding specified file',  00H
+COMDLG7_DATA      ENDS
+_DATA      SEGMENT
+_hPDChunk	DW	00H
+_hColorsChunk	DW	00H
+_FilterStringID	DW	013aaH
+_DATA      ENDS
+COMDLG7_DATA      SEGMENT
+$SG2633	DB	'commdlg_FindReplace',  00H
+$SG2634	DB	'commdlg_help',  00H
+$SG2661	DB	'Arial Rounded MT Bold',  00H
+COMDLG7_DATA      ENDS
+_DATA      SEGMENT
+$S2672_?lpColorsChunk@?1??GetColor@@9@9	DD	00H
+$S2744_?hDevMode@?1??InitializeStruct@@9@9	DW	00H
+_DATA      ENDS
+COMDLG7_DATA      SEGMENT
+$SG2887	DB	'Viewport: %d',  00H
+COMDLG7_DATA      ENDS
+_DATA      SEGMENT
+$SG2888	DB	'File: ',  00H
+_DATA      ENDS
+_BSS      SEGMENT
+$S2783_?hFChunk@?1??vdef@@9@9	DW 01H DUP (?)
+$S2785_?hFRChunk@?1??vdef@@9@9	DW 01H DUP (?)
+$S2799_?hDC@?1??vdef@@9@9	DW 01H DUP (?)
+_BSS      ENDS
+COMDLG_TEXT      SEGMENT
+	ASSUME	CS: COMDLG_TEXT
+	PUBLIC	_CDInit
+_CDInit	PROC FAR
+;|*** #define WIN31
+;|*** #define ININIT
+;|*** #include "windows.h"
+;|*** #include "commdlg.h"
+;|*** #include "dlgs.h"
+;|*** #include "\gssi\prog\geomastr\resource.h"
+;|*** #include "cddemo.h"
+;|*** #include "shr.h"
+;|*** /*#include "C:\gssi\prog\cb\cb.h"*/
+;|*** extern char PltName[128];   
+;|*** extern	HWND	hWndMain;
+;|*** HWND	PrintMsgWnd;
+;|*** HANDLE	hPDChunk=NULL;
+;|*** HANDLE hColorsChunk=0;
+;|*** 
+;|*** LPSTR	lpInitialDirectory;
+;|*** int		FilterStringID=IDS_FILTERSTRING;
+;|*** 
+;|*** BOOL CDInit (HWND hWnd, HANDLE Inst)
+;|*** {     HDC	hDC;
+; Line 20
+	*** 000000	55 			push	bp
+	*** 000001	8b ec 			mov	bp,sp
+	*** 000003	b8 04 00 		mov	ax,4
+	*** 000006	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 00000b	57 			push	di
+	*** 00000c	56 			push	si
+;	hDC = -2
+;	Inst = 8
+;	hWnd = 6
+;|*** 
+;|***       ghWnd = hWnd;
+; Line 22
+	*** 00000d	8b 46 06 		mov	ax,WORD PTR [bp+6]	;hWnd
+	*** 000010	a3 00 00 		mov	WORD PTR _ghWnd,ax
+;|*** 	  ghInst = Inst;
+; Line 23
+	*** 000013	8b 46 08 		mov	ax,WORD PTR [bp+8]	;Inst
+	*** 000016	a3 00 00 		mov	WORD PTR _ghInst,ax
+;|***       wFRMsg = RegisterWindowMessage((LPSTR)FINDMSGSTRING);
+; Line 24
+	*** 000019	68 00 00 		push	SEG $SG2633
+	*** 00001c	68 00 00 		push	OFFSET $SG2633
+	*** 00001f	9a 00 00 00 00 		call	FAR PTR REGISTERWINDOWMESSAGE
+	*** 000024	a3 00 00 		mov	WORD PTR _wFRMsg,ax
+;|***       wHelpMsg = RegisterWindowMessage((LPSTR)HELPMSGSTRING);
+; Line 25
+	*** 000027	68 00 00 		push	SEG $SG2634
+	*** 00002a	68 00 00 		push	OFFSET $SG2634
+	*** 00002d	9a 00 00 00 00 		call	FAR PTR REGISTERWINDOWMESSAGE
+	*** 000032	a3 00 00 		mov	WORD PTR _wHelpMsg,ax
+;|***       lpfnFileOpenHook = (FARHOOK)MakeProcInstance(FileOpenHook, ghInst);
+; Line 26
+	*** 000035	68 00 00 		push	SEG FILEOPENHOOK
+	*** 000038	68 00 00 		push	OFFSET FILEOPENHOOK
+	*** 00003b	ff 36 00 00 		push	WORD PTR _ghInst
+	*** 00003f	9a 00 00 00 00 		call	FAR PTR MAKEPROCINSTANCE
+	*** 000044	a3 00 00 		mov	WORD PTR _lpfnFileOpenHook,ax
+	*** 000047	89 16 02 00 		mov	WORD PTR _lpfnFileOpenHook+2,dx
+;|***       lpfnFindHook = (FARHOOK)MakeProcInstance(FindHook, ghInst);
+; Line 27
+	*** 00004b	68 00 00 		push	SEG FINDHOOK
+	*** 00004e	68 00 00 		push	OFFSET FINDHOOK
+	*** 000051	ff 36 00 00 		push	WORD PTR _ghInst
+	*** 000055	9a 00 00 00 00 		call	FAR PTR MAKEPROCINSTANCE
+	*** 00005a	a3 00 00 		mov	WORD PTR _lpfnFindHook,ax
+	*** 00005d	89 16 02 00 		mov	WORD PTR _lpfnFindHook+2,dx
+;|***       lpfnFindReplaceHook = (FARHOOK)MakeProcInstance(FindReplaceHook, ghInst);
+; Line 28
+	*** 000061	68 00 00 		push	SEG FINDREPLACEHOOK
+	*** 000064	68 00 00 		push	OFFSET FINDREPLACEHOOK
+	*** 000067	ff 36 00 00 		push	WORD PTR _ghInst
+	*** 00006b	9a 00 00 00 00 		call	FAR PTR MAKEPROCINSTANCE
+	*** 000070	a3 00 00 		mov	WORD PTR _lpfnFindReplaceHook,ax
+	*** 000073	89 16 02 00 		mov	WORD PTR _lpfnFindReplaceHook+2,dx
+;|***       if (lpfnFileOpenHook == NULL || lpfnFindHook == NULL ||
+;|***           lpfnFindReplaceHook == NULL)
+; Line 30
+	*** 000077	a1 02 00 		mov	ax,WORD PTR _lpfnFileOpenHook+2
+	*** 00007a	0b 06 00 00 		or	ax,WORD PTR _lpfnFileOpenHook
+	*** 00007e	0f 84 16 00 		je	$I2636
+	*** 000082	a1 02 00 		mov	ax,WORD PTR _lpfnFindHook+2
+	*** 000085	0b 06 00 00 		or	ax,WORD PTR _lpfnFindHook
+	*** 000089	0f 84 0b 00 		je	$I2636
+	*** 00008d	a1 02 00 		mov	ax,WORD PTR _lpfnFindReplaceHook+2
+	*** 000090	0b 06 00 00 		or	ax,WORD PTR _lpfnFindReplaceHook
+	*** 000094	0f 85 06 00 		jne	$I2635
+					$I2636:
+;|***          return (FALSE);
+; Line 31
+	*** 000098	b8 00 00 		mov	ax,0
+	*** 00009b	e9 4e 00 		jmp	$EX2631
+;|*** 
+;|***       //Are we in monochrome land????
+;|***       hDC = GetDC(NULL);
+; Line 34
+					$I2635:
+	*** 00009e	6a 00 			push	0
+	*** 0000a0	9a 00 00 00 00 		call	FAR PTR GETDC
+	*** 0000a5	89 46 fe 		mov	WORD PTR [bp-2],ax	;hDC
+;|***       gbMonochrome = (2 == GetDeviceCaps(hDC, NUMCOLORS));  // Monochrome!
+; Line 35
+	*** 0000a8	ff 76 fe 		push	WORD PTR [bp-2]	;hDC
+	*** 0000ab	6a 18 			push	24	;0018H
+	*** 0000ad	9a 00 00 00 00 		call	FAR PTR GETDEVICECAPS
+	*** 0000b2	3d 02 00 		cmp	ax,2
+	*** 0000b5	0f 85 06 00 		jne	$L2964
+	*** 0000b9	b8 01 00 		mov	ax,1
+	*** 0000bc	e9 03 00 		jmp	$L2965
+					$L2964:
+	*** 0000bf	b8 00 00 		mov	ax,0
+					$L2965:
+	*** 0000c2	a3 00 00 		mov	WORD PTR _gbMonochrome,ax
+;|***       ReleaseDC(NULL, hDC);
+; Line 36
+	*** 0000c5	6a 00 			push	0
+	*** 0000c7	ff 76 fe 		push	WORD PTR [bp-2]	;hDC
+	*** 0000ca	9a 00 00 00 00 		call	FAR PTR RELEASEDC
+;|*** 
+;|***       //Load brush for painting GetOpenFileName dlg box
+;|***       if (!gbMonochrome)
+; Line 39
+	*** 0000cf	83 3e 00 00 00 		cmp	WORD PTR _gbMonochrome,0
+	*** 0000d4	0f 85 0e 00 		jne	$I2637
+;|***       {
+; Line 40
+;	hTempBitmap = -4
+;|***          HBITMAP hTempBitmap;
+;|*** 
+;|*** /*         hTempBitmap = LoadBitmap(ghInst, MAKEINTRESOURCE(1));
+;|***          if (hTempBitmap)*/
+;|***          {
+; Line 45
+;|***             ghDlgBrush = CreateSolidBrush(RGB(225,225,255));
+; Line 46
+	*** 0000d8	68 ff 00 		push	255	;00ffH
+	*** 0000db	68 e1 e1 		push	-7711	;e1e1H
+	*** 0000de	9a 00 00 00 00 		call	FAR PTR CREATESOLIDBRUSH
+	*** 0000e3	a3 00 00 		mov	WORD PTR _ghDlgBrush,ax
+;|*** /*            DeleteObject(hTempBitmap);*/
+;|***          }
+; Line 48
+;|***       }
+; Line 49
+;|***       return (TRUE);
+; Line 50
+					$I2637:
+	*** 0000e6	b8 01 00 		mov	ax,1
+	*** 0000e9	e9 00 00 		jmp	$EX2631
+;|*** }
+; Line 51
+					$EX2631:
+	*** 0000ec	5e 			pop	si
+	*** 0000ed	5f 			pop	di
+	*** 0000ee	c9 			leave	
+	*** 0000ef	cb 			ret	
+
+_CDInit	ENDP
+	PUBLIC	_CDClose
+_CDClose	PROC FAR
+;|*** 
+;|*** void CDClose (void)
+;|*** {
+; Line 54
+	*** 0000f0	55 			push	bp
+	*** 0000f1	8b ec 			mov	bp,sp
+	*** 0000f3	b8 04 00 		mov	ax,4
+	*** 0000f6	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 0000fb	57 			push	di
+	*** 0000fc	56 			push	si
+;	lpPDChunk = -4
+;|***     LPPRINTDLG lpPDChunk; 
+;|***     
+;|*** 	if (ghDlgBrush) DeleteObject(ghDlgBrush);
+; Line 57
+	*** 0000fd	83 3e 00 00 00 		cmp	WORD PTR _ghDlgBrush,0
+	*** 000102	0f 84 09 00 		je	$I2641
+	*** 000106	ff 36 00 00 		push	WORD PTR _ghDlgBrush
+	*** 00010a	9a 00 00 00 00 		call	FAR PTR DELETEOBJECT
+;|*** 	if (hPDChunk)
+; Line 58
+					$I2641:
+	*** 00010f	83 3e 00 00 00 		cmp	WORD PTR _hPDChunk,0
+	*** 000114	0f 84 51 00 		je	$I2642
+;|*** 	{   
+; Line 59
+;|*** 		lpPDChunk = GlobalLock (hPDChunk);
+; Line 60
+	*** 000118	ff 36 00 00 		push	WORD PTR _hPDChunk
+	*** 00011c	9a 00 00 00 00 		call	FAR PTR GLOBALLOCK
+	*** 000121	89 46 fc 		mov	WORD PTR [bp-4],ax	;lpPDChunk
+	*** 000124	89 56 fe 		mov	WORD PTR [bp-2],dx
+;|*** 		if (lpPDChunk->hDevMode)
+; Line 61
+	*** 000127	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpPDChunk
+	*** 00012a	26 83 7f 06 00 		cmp	WORD PTR es:[bx+6],0
+	*** 00012f	0f 84 0c 00 		je	$I2643
+;|***            GlobalFree(lpPDChunk->hDevMode);
+; Line 62
+	*** 000133	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpPDChunk
+	*** 000136	26 ff 77 06 		push	WORD PTR es:[bx+6]
+	*** 00013a	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***         if (lpPDChunk->hDevNames)
+; Line 63
+					$I2643:
+	*** 00013f	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpPDChunk
+	*** 000142	26 83 7f 08 00 		cmp	WORD PTR es:[bx+8],0
+	*** 000147	0f 84 0c 00 		je	$I2644
+;|***            GlobalFree(lpPDChunk->hDevNames); 
+; Line 64
+	*** 00014b	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpPDChunk
+	*** 00014e	26 ff 77 08 		push	WORD PTR es:[bx+8]
+	*** 000152	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***         GlobalUnlock (hPDChunk);
+; Line 65
+					$I2644:
+	*** 000157	ff 36 00 00 		push	WORD PTR _hPDChunk
+	*** 00015b	9a 00 00 00 00 		call	FAR PTR GLOBALUNLOCK
+;|***      	GlobalFree (hPDChunk);
+; Line 66
+	*** 000160	ff 36 00 00 		push	WORD PTR _hPDChunk
+	*** 000164	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***     }
+; Line 67
+;|***     if (hColorsChunk)
+; Line 68
+					$I2642:
+	*** 000169	83 3e 00 00 00 		cmp	WORD PTR _hColorsChunk,0
+	*** 00016e	0f 84 09 00 		je	$I2645
+;|***     	GlobalFree(hColorsChunk);
+; Line 69
+	*** 000172	ff 36 00 00 		push	WORD PTR _hColorsChunk
+	*** 000176	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|*** 	return;
+; Line 70
+					$I2645:
+	*** 00017b	e9 00 00 		jmp	$EX2639
+;|*** }
+; Line 71
+					$EX2639:
+	*** 00017e	5e 			pop	si
+	*** 00017f	5f 			pop	di
+	*** 000180	c9 			leave	
+	*** 000181	cb 			ret	
+
+_CDClose	ENDP
+	PUBLIC	_GetFont
+_GetFont	PROC FAR
+;|*** 
+;|*** 
+;|*** BOOL GetFont (HWND ghWnd, LPLOGFONT lpLogFont, COLORREF *dwFontColor)
+;|*** {
+; Line 75
+	*** 000182	55 			push	bp
+	*** 000183	8b ec 			mov	bp,sp
+	*** 000185	b8 40 00 		mov	ax,64	;0040H
+	*** 000188	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 00018d	57 			push	di
+	*** 00018e	56 			push	si
+;	iLogPixsY = -2
+;	lf = -52
+;	lpFontChunk = -56
+;	hFontChunk = -58
+;	hOldFont = -60
+;	wSize = -62
+;	hDC = -64
+;	dwFontColor = 12
+;	lpLogFont = 8
+;	ghWnd = 6
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                             FONTS VARIABLES                      *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    #define DESIREDPOINTSIZE 12
+;|*** 
+;|***    //   HDC            hDC;
+;|***    int iLogPixsY;
+;|***    LOGFONT lf;
+;|***    LPCHOOSEFONT lpFontChunk;
+;|***    HANDLE hFontChunk;
+;|***    HFONT hOldFont;
+;|*** 	WORD wSize;
+;|*** 	HDC	hDC;
+;|*** 
+;|***          wSize = sizeof(CHOOSEFONT);
+; Line 92
+	*** 00018f	c7 46 c2 2e 00 		mov	WORD PTR [bp-62],46	;002eH	;wSize
+;|***          if (!(lpFontChunk = (LPCHOOSEFONT)AllocAndLockMem(&hFontChunk, wSize))
+;|***          )
+; Line 94
+	*** 000194	ff 76 c2 		push	WORD PTR [bp-62]	;wSize
+	*** 000197	8d 46 c6 		lea	ax,WORD PTR [bp-58]	;hFontChunk
+	*** 00019a	16 			push	ss
+	*** 00019b	50 			push	ax
+	*** 00019c	9a 00 00 00 00 		call	FAR PTR _AllocAndLockMem
+	*** 0001a1	83 c4 06 		add	sp,6
+	*** 0001a4	89 46 c8 		mov	WORD PTR [bp-56],ax	;lpFontChunk
+	*** 0001a7	89 56 ca 		mov	WORD PTR [bp-54],dx
+	*** 0001aa	0b d0 			or	dx,ax
+	*** 0001ac	0f 85 06 00 		jne	$I2660
+;|***             return(FALSE);
+; Line 95
+	*** 0001b0	b8 00 00 		mov	ax,0
+	*** 0001b3	e9 76 01 		jmp	$EX2652
+;|***          InitializeStruct(IDC_FONT, (LPSTR)lpFontChunk);
+; Line 96
+					$I2660:
+	*** 0001b6	ff 76 ca 		push	WORD PTR [bp-54]
+	*** 0001b9	ff 76 c8 		push	WORD PTR [bp-56]	;lpFontChunk
+	*** 0001bc	6a 06 			push	6
+	*** 0001be	9a 00 00 00 00 		call	FAR PTR _InitializeStruct
+	*** 0001c3	83 c4 06 		add	sp,6
+;|*** 
+;|***       //Because we are only getting screen fonts, we can set hDC = NULL
+;|***       //If printer fonts are desired, a handle to a printer DC must be passed in
+;|***          lpFontChunk->hDC = NULL;
+; Line 100
+	*** 0001c6	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 0001c9	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|*** 
+;|***          //Now let's initialize the logfont structure.
+;|***       	 lpFontChunk->hwndOwner = ghWnd;
+; Line 103
+	*** 0001cf	8b 46 06 		mov	ax,WORD PTR [bp+6]	;ghWnd
+	*** 0001d2	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 0001d5	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***          hDC = GetDC(ghWnd);
+; Line 104
+	*** 0001d9	ff 76 06 		push	WORD PTR [bp+6]	;ghWnd
+	*** 0001dc	9a 00 00 00 00 		call	FAR PTR GETDC
+	*** 0001e1	89 46 c0 		mov	WORD PTR [bp-64],ax	;hDC
+;|***          iLogPixsY = GetDeviceCaps(hDC, LOGPIXELSY);
+; Line 105
+	*** 0001e4	ff 76 c0 		push	WORD PTR [bp-64]	;hDC
+	*** 0001e7	6a 5a 			push	90	;005aH
+	*** 0001e9	9a 00 00 00 00 		call	FAR PTR GETDEVICECAPS
+	*** 0001ee	89 46 fe 		mov	WORD PTR [bp-2],ax	;iLogPixsY
+;|***          ReleaseDC(ghWnd, hDC);
+; Line 106
+	*** 0001f1	ff 76 06 		push	WORD PTR [bp+6]	;ghWnd
+	*** 0001f4	ff 76 c0 		push	WORD PTR [bp-64]	;hDC
+	*** 0001f7	9a 00 00 00 00 		call	FAR PTR RELEASEDC
+;|***          lf.lfHeight = -1 * (iLogPixsY * DESIREDPOINTSIZE / 72);
+; Line 107
+	*** 0001fc	8b 46 fe 		mov	ax,WORD PTR [bp-2]	;iLogPixsY
+	*** 0001ff	8b c8 			mov	cx,ax
+	*** 000201	d1 e0 			shl	ax,1
+	*** 000203	03 c1 			add	ax,cx
+	*** 000205	c1 e0 02 		shl	ax,2
+	*** 000208	b9 b8 ff 		mov	cx,-72	;ffb8H
+	*** 00020b	99 			cwd	
+	*** 00020c	f7 f9 			idiv	cx
+	*** 00020e	89 46 cc 		mov	WORD PTR [bp-52],ax	;lf
+;|***          lf.lfWidth = 0;
+; Line 108
+	*** 000211	c7 46 ce 00 00 		mov	WORD PTR [bp-50],0
+;|***          lf.lfEscapement = 0;
+; Line 109
+	*** 000216	c7 46 d0 00 00 		mov	WORD PTR [bp-48],0
+;|***          lf.lfOrientation = 0;
+; Line 110
+	*** 00021b	c7 46 d2 00 00 		mov	WORD PTR [bp-46],0
+;|***          lf.lfWeight = 400;
+; Line 111
+	*** 000220	c7 46 d4 90 01 		mov	WORD PTR [bp-44],400	;0190H
+;|***          lf.lfItalic = 0;
+; Line 112
+	*** 000225	c6 46 d6 00 		mov	BYTE PTR [bp-42],0
+;|***          lf.lfUnderline = 0;
+; Line 113
+	*** 000229	c6 46 d7 00 		mov	BYTE PTR [bp-41],0
+;|***          lf.lfStrikeOut = 0;
+; Line 114
+	*** 00022d	c6 46 d8 00 		mov	BYTE PTR [bp-40],0
+;|***          lf.lfCharSet = ANSI_CHARSET;
+; Line 115
+	*** 000231	c6 46 d9 00 		mov	BYTE PTR [bp-39],0
+;|***          lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
+; Line 116
+	*** 000235	c6 46 da 00 		mov	BYTE PTR [bp-38],0
+;|***          lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+; Line 117
+	*** 000239	c6 46 db 00 		mov	BYTE PTR [bp-37],0
+;|***          lf.lfQuality = DEFAULT_QUALITY;
+; Line 118
+	*** 00023d	c6 46 dc 00 		mov	BYTE PTR [bp-36],0
+;|***          lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+; Line 119
+	*** 000241	c6 46 dd 00 		mov	BYTE PTR [bp-35],0
+;|***          _fstrcpy(lf.lfFaceName, "Arial Rounded MT Bold");
+; Line 120
+	*** 000245	68 00 00 		push	SEG $SG2661
+	*** 000248	68 00 00 		push	OFFSET $SG2661
+	*** 00024b	8d 46 de 		lea	ax,WORD PTR [bp-34]
+	*** 00024e	16 			push	ss
+	*** 00024f	50 			push	ax
+	*** 000250	9a 00 00 00 00 		call	FAR PTR __fstrcpy
+	*** 000255	83 c4 08 		add	sp,8
+;|***        	 lpFontChunk->lpLogFont = &lf;
+; Line 121
+	*** 000258	8d 46 cc 		lea	ax,WORD PTR [bp-52]	;lf
+	*** 00025b	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 00025e	26 89 47 08 		mov	WORD PTR es:[bx+8],ax
+	*** 000262	26 8c 57 0a 		mov	WORD PTR es:[bx+10],ss
+;|***          if (lpLogFont->lfHeight)*lpFontChunk->lpLogFont = *lpLogFont;
+; Line 122
+	*** 000266	c4 5e 08 		les	bx,DWORD PTR [bp+8]	;lpLogFont
+	*** 000269	26 83 3f 00 		cmp	WORD PTR es:[bx],0
+	*** 00026d	0f 84 20 00 		je	$I2662
+	*** 000271	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 000274	26 8b 47 08 		mov	ax,WORD PTR es:[bx+8]
+	*** 000278	26 8b 57 0a 		mov	dx,WORD PTR es:[bx+10]
+	*** 00027c	8b 5e 08 		mov	bx,WORD PTR [bp+8]	;lpLogFont
+	*** 00027f	8b 76 0a 		mov	si,WORD PTR [bp+10]
+	*** 000282	1e 			push	ds
+	*** 000283	56 			push	si
+	*** 000284	8b f8 			mov	di,ax
+	*** 000286	8b f3 			mov	si,bx
+	*** 000288	8e c2 			mov	es,dx
+	*** 00028a	1f 			pop	ds
+	ASSUME DS: DGROUP
+	*** 00028b	b9 19 00 		mov	cx,25	;0019H
+	*** 00028e	f3 			rep
+	*** 00028f	a5 			movsw
+	*** 000290	1f 			pop	ds
+	ASSUME DS: DGROUP
+;|***          if (ChooseFont(lpFontChunk)) //Now let's create the selected font!
+; Line 123
+					$I2662:
+	*** 000291	ff 76 ca 		push	WORD PTR [bp-54]
+	*** 000294	ff 76 c8 		push	WORD PTR [bp-56]	;lpFontChunk
+	*** 000297	9a 00 00 00 00 		call	FAR PTR CHOOSEFONT
+	*** 00029c	3d 00 00 		cmp	ax,0
+	*** 00029f	0f 84 64 00 		je	$I2663
+;|***          {
+; Line 124
+;|***             if (ghSelectedFont)
+; Line 125
+	*** 0002a3	83 3e 00 00 00 		cmp	WORD PTR _ghSelectedFont,0
+	*** 0002a8	0f 84 09 00 		je	$I2664
+;|***                DeleteObject(ghSelectedFont);
+; Line 126
+	*** 0002ac	ff 36 00 00 		push	WORD PTR _ghSelectedFont
+	*** 0002b0	9a 00 00 00 00 		call	FAR PTR DELETEOBJECT
+;|***             ghSelectedFont = CreateFontIndirect((LPLOGFONT)(lpFontChunk->
+; Line 127
+					$I2664:
+;|***                                                 lpLogFont));
+; Line 128
+	*** 0002b5	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 0002b8	26 ff 77 0a 		push	WORD PTR es:[bx+10]
+	*** 0002bc	26 ff 77 08 		push	WORD PTR es:[bx+8]
+	*** 0002c0	9a 00 00 00 00 		call	FAR PTR CREATEFONTINDIRECT
+	*** 0002c5	a3 00 00 		mov	WORD PTR _ghSelectedFont,ax
+;|***             *dwFontColor = lpFontChunk->rgbColors;
+; Line 129
+	*** 0002c8	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 0002cb	26 8b 47 12 		mov	ax,WORD PTR es:[bx+18]
+	*** 0002cf	26 8b 57 14 		mov	dx,WORD PTR es:[bx+20]
+	*** 0002d3	c4 5e 0c 		les	bx,DWORD PTR [bp+12]	;dwFontColor
+	*** 0002d6	26 89 07 		mov	WORD PTR es:[bx],ax
+	*** 0002d9	26 89 57 02 		mov	WORD PTR es:[bx+2],dx
+;|***             *lpLogFont=*lpFontChunk->lpLogFont;
+; Line 130
+	*** 0002dd	c4 5e c8 		les	bx,DWORD PTR [bp-56]	;lpFontChunk
+	*** 0002e0	26 8b 47 08 		mov	ax,WORD PTR es:[bx+8]
+	*** 0002e4	26 8b 57 0a 		mov	dx,WORD PTR es:[bx+10]
+	*** 0002e8	1e 			push	ds
+	*** 0002e9	8b f0 			mov	si,ax
+	*** 0002eb	8e da 			mov	ds,dx
+	ASSUME DS: NOTHING
+	*** 0002ed	c4 7e 08 		les	di,DWORD PTR [bp+8]	;lpLogFont
+	*** 0002f0	b9 19 00 		mov	cx,25	;0019H
+	*** 0002f3	f3 			rep
+	*** 0002f4	a5 			movsw
+	*** 0002f5	1f 			pop	ds
+	ASSUME DS: DGROUP
+;|***             InvalidateRect(ghWnd, NULL, TRUE);
+; Line 131
+	*** 0002f6	ff 76 06 		push	WORD PTR [bp+6]	;ghWnd
+	*** 0002f9	6a 00 			push	0
+	*** 0002fb	6a 00 			push	0
+	*** 0002fd	6a 01 			push	1
+	*** 0002ff	9a 00 00 00 00 		call	FAR PTR INVALIDATERECT
+;|***          }
+; Line 132
+;|***          else
+; Line 133
+	*** 000304	e9 0f 00 		jmp	$I2665
+					$I2663:
+;|***          {
+; Line 134
+;|***             ProcessCDError(CommDlgExtendedError());
+; Line 135
+	*** 000307	9a 00 00 00 00 		call	FAR PTR COMMDLGEXTENDEDERROR
+	*** 00030c	52 			push	dx
+	*** 00030d	50 			push	ax
+	*** 00030e	9a 00 00 00 00 		call	FAR PTR _ProcessCDError
+	*** 000313	83 c4 04 		add	sp,4
+;|***          }
+; Line 136
+					$I2665:
+;|***          GlobalUnlock(hFontChunk);
+; Line 137
+	*** 000316	ff 76 c6 		push	WORD PTR [bp-58]	;hFontChunk
+	*** 000319	9a 00 00 00 00 		call	FAR PTR GLOBALUNLOCK
+;|***          GlobalFree(hFontChunk);
+; Line 138
+	*** 00031e	ff 76 c6 		push	WORD PTR [bp-58]	;hFontChunk
+	*** 000321	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***          return(TRUE);
+; Line 139
+	*** 000326	b8 01 00 		mov	ax,1
+	*** 000329	e9 00 00 		jmp	$EX2652
+;|*** 
+;|*** }
+; Line 141
+					$EX2652:
+	*** 00032c	5e 			pop	si
+	*** 00032d	5f 			pop	di
+	*** 00032e	c9 			leave	
+	*** 00032f	cb 			ret	
+
+_GetFont	ENDP
+	PUBLIC	_GetColor
+_GetColor	PROC FAR
+;|*** 
+;|*** BOOL GetColor (HWND hWnd,COLORREF *Color)
+;|*** {
+; Line 144
+	*** 000330	55 			push	bp
+	*** 000331	8b ec 			mov	bp,sp
+	*** 000333	b8 02 00 		mov	ax,2
+	*** 000336	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 00033b	57 			push	di
+	*** 00033c	56 			push	si
+;	wSize = -2
+;	Color = 8
+;	hWnd = 6
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                             COLORS VARIABLES                     *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    static LPCOLORSCHUNK lpColorsChunk = 0;
+;|***    WORD wSize;
+;|***    
+;|***    ghWnd = hWnd;      
+; Line 153
+	*** 00033d	8b 46 06 		mov	ax,WORD PTR [bp+6]	;hWnd
+	*** 000340	a3 00 00 		mov	WORD PTR _ghWnd,ax
+;|*** 
+;|***          if (!hColorsChunk)   //ie, haven't called colors yet
+; Line 155
+	*** 000343	83 3e 00 00 00 		cmp	WORD PTR _hColorsChunk,0
+	*** 000348	0f 85 41 00 		jne	$I2674
+;|***          //so let's initialize everything
+;|***          {
+; Line 157
+;|***             wSize = sizeof(COLORSCHUNK);
+; Line 158
+	*** 00034c	c7 46 fe 64 00 		mov	WORD PTR [bp-2],100	;0064H	;wSize
+;|***             if (!(lpColorsChunk = (LPCOLORSCHUNK)AllocAndLockMem(&hColorsChunk,
+;|***                                                                  wSize)))
+; Line 160
+	*** 000351	ff 76 fe 		push	WORD PTR [bp-2]	;wSize
+	*** 000354	1e 			push	ds
+	*** 000355	68 00 00 		push	OFFSET DGROUP:_hColorsChunk
+	*** 000358	9a 00 00 00 00 		call	FAR PTR _AllocAndLockMem
+	*** 00035d	83 c4 06 		add	sp,6
+	*** 000360	a3 00 00 		mov	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9,ax
+	*** 000363	89 16 02 00 		mov	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9+2,dx
+	*** 000367	a1 02 00 		mov	ax,WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9+2
+	*** 00036a	0b 06 00 00 		or	ax,WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9
+	*** 00036e	0f 85 06 00 		jne	$I2675
+;|***                return (FALSE);
+; Line 161
+	*** 000372	b8 00 00 		mov	ax,0
+	*** 000375	e9 7f 00 		jmp	$EX2670
+;|***             InitializeStruct(IDC_COLORS, (LPSTR)lpColorsChunk);
+; Line 162
+					$I2675:
+	*** 000378	ff 36 02 00 		push	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9+2
+	*** 00037c	ff 36 00 00 		push	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9
+	*** 000380	6a 05 			push	5
+	*** 000382	9a 00 00 00 00 		call	FAR PTR _InitializeStruct
+	*** 000387	83 c4 06 		add	sp,6
+;|***          }
+; Line 163
+;|***          else
+; Line 164
+	*** 00038a	e9 10 00 		jmp	$I2676
+					$I2674:
+;|***          	lpColorsChunk = GlobalLock(hColorsChunk);
+; Line 165
+	*** 00038d	ff 36 00 00 		push	WORD PTR _hColorsChunk
+	*** 000391	9a 00 00 00 00 		call	FAR PTR GLOBALLOCK
+	*** 000396	a3 00 00 		mov	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9,ax
+	*** 000399	89 16 02 00 		mov	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9+2,dx
+					$I2676:
+;|*** /*	 EnableWindow (hWndMain,FALSE);*/
+;|***          if (ChooseColor(&(lpColorsChunk->chsclr)))
+; Line 167
+	*** 00039d	ff 36 02 00 		push	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9+2
+	*** 0003a1	ff 36 00 00 		push	WORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9
+	*** 0003a5	9a 00 00 00 00 		call	FAR PTR CHOOSECOLOR
+	*** 0003aa	3d 00 00 		cmp	ax,0
+	*** 0003ad	0f 84 28 00 		je	$I2677
+;|***          {
+; Line 168
+;|*** 		 	*Color = lpColorsChunk->chsclr.rgbResult;
+; Line 169
+	*** 0003b1	c4 1e 00 00 		les	bx,DWORD PTR $S2672_?lpColorsChunk@?1??GetColor@@9@9
+	*** 0003b5	26 8b 47 08 		mov	ax,WORD PTR es:[bx+8]
+	*** 0003b9	26 8b 57 0a 		mov	dx,WORD PTR es:[bx+10]
+	*** 0003bd	c4 5e 08 		les	bx,DWORD PTR [bp+8]	;Color
+	*** 0003c0	26 89 07 		mov	WORD PTR es:[bx],ax
+	*** 0003c3	26 89 57 02 		mov	WORD PTR es:[bx+2],dx
+;|*** /*	 EnableWindow (hWndMain,TRUE);*/   
+;|*** 			GlobalUnlock(hColorsChunk);
+; Line 171
+	*** 0003c7	ff 36 00 00 		push	WORD PTR _hColorsChunk
+	*** 0003cb	9a 00 00 00 00 		call	FAR PTR GLOBALUNLOCK
+;|*** 		 	return (TRUE);
+; Line 172
+	*** 0003d0	b8 01 00 		mov	ax,1
+	*** 0003d3	e9 21 00 		jmp	$EX2670
+;|*** 		 }
+; Line 173
+;|***          else
+; Line 174
+	*** 0003d6	e9 0f 00 		jmp	$I2678
+					$I2677:
+;|***             ProcessCDError(CommDlgExtendedError()); 
+; Line 175
+	*** 0003d9	9a 00 00 00 00 		call	FAR PTR COMMDLGEXTENDEDERROR
+	*** 0003de	52 			push	dx
+	*** 0003df	50 			push	ax
+	*** 0003e0	9a 00 00 00 00 		call	FAR PTR _ProcessCDError
+	*** 0003e5	83 c4 04 		add	sp,4
+					$I2678:
+;|*** /*	 EnableWindow (hWndMain,TRUE);*/
+;|*** 		 GlobalUnlock(hColorsChunk);
+; Line 177
+	*** 0003e8	ff 36 00 00 		push	WORD PTR _hColorsChunk
+	*** 0003ec	9a 00 00 00 00 		call	FAR PTR GLOBALUNLOCK
+;|***          return (FALSE);                            
+; Line 178
+	*** 0003f1	b8 00 00 		mov	ax,0
+	*** 0003f4	e9 00 00 		jmp	$EX2670
+;|***          
+;|*** }
+; Line 180
+					$EX2670:
+	*** 0003f7	5e 			pop	si
+	*** 0003f8	5f 			pop	di
+	*** 0003f9	c9 			leave	
+	*** 0003fa	cb 			ret	
+
+_GetColor	ENDP
+	PUBLIC	_GetOpenFileCD
+_GetOpenFileCD	PROC FAR
+;|*** 
+;|*** BOOL GetOpenFileCD (HWND hWnd,LPSTR Name, LPSTR lpInitDir)
+;|*** {
+; Line 183
+	*** 0003fb	55 			push	bp
+	*** 0003fc	8b ec 			mov	bp,sp
+	*** 0003fe	b8 9a 00 		mov	ax,154	;009aH
+	*** 000401	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000406	57 			push	di
+	*** 000407	56 			push	si
+;	hfoChunk = -10
+;	hfsChunk = -12
+;	wSize = -14
+;	Result = -16
+;	lpFOChunk = -4
+;	lpFSChunk = -8
+;	lpInitDir = 12
+;	Name = 8
+;	hWnd = 6
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                    FILEOPEN/FILESAVE VARIABLES                   *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    LPFOCHUNK lpFOChunk;    //Pointer to File Open block
+;|***    LPFSCHUNK lpFSChunk;    //Pointer to File Save block
+;|***    HANDLE hfoChunk;     //Handle to File Open block of memory
+;|***    HANDLE hfsChunk;     //Handle to File Save block of memory
+;|*** 
+;|***    WORD wSize;
+;|***    BOOL	Result;
+;|*** 
+;|***          lpInitialDirectory = lpInitDir;
+; Line 197
+	*** 000408	8b 46 0c 		mov	ax,WORD PTR [bp+12]	;lpInitDir
+	*** 00040b	8b 56 0e 		mov	dx,WORD PTR [bp+14]
+	*** 00040e	a3 00 00 		mov	WORD PTR _lpInitialDirectory,ax
+	*** 000411	89 16 02 00 		mov	WORD PTR _lpInitialDirectory+2,dx
+;|***          wSize = sizeof(FOCHUNK);
+; Line 198
+	*** 000415	c7 46 f2 48 02 		mov	WORD PTR [bp-14],584	;0248H	;wSize
+;|***          ghWnd = hWnd;
+; Line 199
+	*** 00041a	8b 46 06 		mov	ax,WORD PTR [bp+6]	;hWnd
+	*** 00041d	a3 00 00 		mov	WORD PTR _ghWnd,ax
+;|***          if (!(lpFOChunk = (LPFOCHUNK)AllocAndLockMem(&hfoChunk, wSize)))
+; Line 200
+	*** 000420	ff 76 f2 		push	WORD PTR [bp-14]	;wSize
+	*** 000423	8d 46 f6 		lea	ax,WORD PTR [bp-10]	;hfoChunk
+	*** 000426	16 			push	ss
+	*** 000427	50 			push	ax
+	*** 000428	9a 00 00 00 00 		call	FAR PTR _AllocAndLockMem
+	*** 00042d	83 c4 06 		add	sp,6
+	*** 000430	89 46 fc 		mov	WORD PTR [bp-4],ax	;lpFOChunk
+	*** 000433	89 56 fe 		mov	WORD PTR [bp-2],dx
+	*** 000436	0b d0 			or	dx,ax
+	*** 000438	0f 85 06 00 		jne	$I2692
+;|***             return (FALSE);
+; Line 201
+	*** 00043c	b8 00 00 		mov	ax,0
+	*** 00043f	e9 af 00 		jmp	$EX2685
+;|***          InitializeStruct(IDC_OPENFILE, (LPSTR)lpFOChunk);
+; Line 202
+					$I2692:
+	*** 000442	ff 76 fe 		push	WORD PTR [bp-2]
+	*** 000445	ff 76 fc 		push	WORD PTR [bp-4]	;lpFOChunk
+	*** 000448	6a 01 			push	1
+	*** 00044a	9a 00 00 00 00 		call	FAR PTR _InitializeStruct
+	*** 00044f	83 c4 06 		add	sp,6
+;|***          if (GetOpenFileName(&(lpFOChunk->of)))
+; Line 203
+	*** 000452	ff 76 fe 		push	WORD PTR [bp-2]
+	*** 000455	ff 76 fc 		push	WORD PTR [bp-4]	;lpFOChunk
+	*** 000458	9a 00 00 00 00 		call	FAR PTR GETOPENFILENAME
+	*** 00045d	3d 00 00 		cmp	ax,0
+	*** 000460	0f 84 63 00 		je	$I2693
+;|***          {
+; Line 204
+;	hFile = -18
+;	ofstruct = -154
+;|***             HANDLE hFile;
+;|***             OFSTRUCT ofstruct;
+;|*** 
+;|***             hFile = OpenFile(lpFOChunk->of.lpstrFile, &ofstruct, OF_EXIST| OF_SHARE_DENY_NONE);
+; Line 208
+	*** 000464	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 000467	26 ff 77 1a 		push	WORD PTR es:[bx+26]
+	*** 00046b	26 ff 77 18 		push	WORD PTR es:[bx+24]
+	*** 00046f	8d 86 66 ff 		lea	ax,WORD PTR [bp-154]	;ofstruct
+	*** 000473	16 			push	ss
+	*** 000474	50 			push	ax
+	*** 000475	68 40 40 		push	16448	;4040H
+	*** 000478	9a 00 00 00 00 		call	FAR PTR OPENFILE
+	*** 00047d	89 46 ee 		mov	WORD PTR [bp-18],ax	;hFile
+;|***               // OF_SHARE_DENY_NONE | OF_SHARE_DENY_READ | OF_SHARE_DENY_WRITE | OF_SHARE_COMPAT);
+;|***             if (hFile != -1)
+; Line 210
+	*** 000480	83 7e ee ff 		cmp	WORD PTR [bp-18],-1	;ffffH	;hFile
+	*** 000484	0f 84 21 00 		je	$I2696
+;|***             {
+; Line 211
+;|***                _fstrcpy (Name,lpFOChunk->of.lpstrFile);
+; Line 212
+	*** 000488	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00048b	26 ff 77 1a 		push	WORD PTR es:[bx+26]
+	*** 00048f	26 ff 77 18 		push	WORD PTR es:[bx+24]
+	*** 000493	ff 76 0a 		push	WORD PTR [bp+10]
+	*** 000496	ff 76 08 		push	WORD PTR [bp+8]	;Name
+	*** 000499	9a 00 00 00 00 		call	FAR PTR __fstrcpy
+	*** 00049e	83 c4 08 		add	sp,8
+;|***                Result = TRUE;
+; Line 213
+	*** 0004a1	c7 46 f0 01 00 		mov	WORD PTR [bp-16],1	;Result
+;|***             }
+; Line 214
+;|***             else
+; Line 215
+	*** 0004a6	e9 1b 00 		jmp	$I2697
+					$I2696:
+;|***             {  MessageBox(hWnd, (LPSTR)gszFOFailure, gszAppName, MB_OK);
+; Line 216
+	*** 0004a9	ff 76 06 		push	WORD PTR [bp+6]	;hWnd
+	*** 0004ac	68 00 00 		push	SEG _gszFOFailure
+	*** 0004af	68 00 00 		push	OFFSET _gszFOFailure
+	*** 0004b2	68 00 00 		push	SEG _gszAppName
+	*** 0004b5	68 00 00 		push	OFFSET _gszAppName
+	*** 0004b8	6a 00 			push	0
+	*** 0004ba	9a 00 00 00 00 		call	FAR PTR MESSAGEBOX
+;|***                Result = FALSE;
+; Line 217
+	*** 0004bf	c7 46 f0 00 00 		mov	WORD PTR [bp-16],0	;Result
+;|***             }
+; Line 218
+					$I2697:
+;|*** 
+;|***             //NOTE!!!  On a closed system (ie, not running on a network) this OpenFile
+;|***             //         call should NEVER fail.  This because we passed in the
+;|***             //         OFN_FILEMUSTEXIST flag to CD.  However, on a network system,
+;|***             //         there is a *very* small chance that between the time CD's checked
+;|***             //         for existance of the file and the time the call to OpenFile
+;|***             //         was made here, someone else on the network has deleted the file.
+;|***             //         MORAL: ALWAYS, ALWAYS, ALWAYS check the return code from your
+;|***             //         call to OpenFile() or _lopen.
+;|***          }
+; Line 228
+;|***          else
+; Line 229
+	*** 0004c4	e9 14 00 		jmp	$I2698
+					$I2693:
+;|***          {
+; Line 230
+;|***             ProcessCDError(CommDlgExtendedError());
+; Line 231
+	*** 0004c7	9a 00 00 00 00 		call	FAR PTR COMMDLGEXTENDEDERROR
+	*** 0004cc	52 			push	dx
+	*** 0004cd	50 			push	ax
+	*** 0004ce	9a 00 00 00 00 		call	FAR PTR _ProcessCDError
+	*** 0004d3	83 c4 04 		add	sp,4
+;|***             Result = FALSE;
+; Line 232
+	*** 0004d6	c7 46 f0 00 00 		mov	WORD PTR [bp-16],0	;Result
+;|***          }
+; Line 233
+					$I2698:
+;|***          GlobalUnlock(hfoChunk);
+; Line 234
+	*** 0004db	ff 76 f6 		push	WORD PTR [bp-10]	;hfoChunk
+	*** 0004de	9a 00 00 00 00 		call	FAR PTR GLOBALUNLOCK
+;|***          GlobalFree(hfoChunk);
+; Line 235
+	*** 0004e3	ff 76 f6 		push	WORD PTR [bp-10]	;hfoChunk
+	*** 0004e6	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***          return (Result);
+; Line 236
+	*** 0004eb	8b 46 f0 		mov	ax,WORD PTR [bp-16]	;Result
+	*** 0004ee	e9 00 00 		jmp	$EX2685
+;|*** }
+; Line 237
+					$EX2685:
+	*** 0004f1	5e 			pop	si
+	*** 0004f2	5f 			pop	di
+	*** 0004f3	c9 			leave	
+	*** 0004f4	cb 			ret	
+
+_GetOpenFileCD	ENDP
+	PUBLIC	_GetSaveFileCD
+_GetSaveFileCD	PROC FAR
+;|*** 
+;|*** BOOL GetSaveFileCD (HWND hWnd,LPSTR Name, LPSTR lpInitDir)
+;|*** {
+; Line 240
+	*** 0004f5	55 			push	bp
+	*** 0004f6	8b ec 			mov	bp,sp
+	*** 0004f8	b8 10 00 		mov	ax,16	;0010H
+	*** 0004fb	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000500	57 			push	di
+	*** 000501	56 			push	si
+;	lpFOChunk = -4
+;	lpFSChunk = -8
+;	hfoChunk = -10
+;	hfsChunk = -12
+;	wSize = -14
+;	Result = -16
+;	lpInitDir = 12
+;	Name = 8
+;	hWnd = 6
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                    FILEOPEN/FILESAVE VARIABLES                   *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    LPFOCHUNK lpFOChunk;    //Pointer to File Open block
+;|***    LPFSCHUNK lpFSChunk;    //Pointer to File Save block
+;|***    HANDLE hfoChunk;     //Handle to File Open block of memory
+;|***    HANDLE hfsChunk;     //Handle to File Save block of memory
+;|*** 
+;|***    WORD wSize;
+;|***    BOOL	Result;
+;|*** 
+;|***          lpInitialDirectory = lpInitDir; 
+; Line 254
+	*** 000502	8b 46 0c 		mov	ax,WORD PTR [bp+12]	;lpInitDir
+	*** 000505	8b 56 0e 		mov	dx,WORD PTR [bp+14]
+	*** 000508	a3 00 00 		mov	WORD PTR _lpInitialDirectory,ax
+	*** 00050b	89 16 02 00 		mov	WORD PTR _lpInitialDirectory+2,dx
+;|***          
+;|***          wSize = sizeof(FOCHUNK);
+; Line 256
+	*** 00050f	c7 46 f2 48 02 		mov	WORD PTR [bp-14],584	;0248H	;wSize
+;|***          ghWnd = hWnd;
+; Line 257
+	*** 000514	8b 46 06 		mov	ax,WORD PTR [bp+6]	;hWnd
+	*** 000517	a3 00 00 		mov	WORD PTR _ghWnd,ax
+;|***          if (!(lpFSChunk = (LPFOCHUNK)AllocAndLockMem(&hfsChunk, wSize)))
+; Line 258
+	*** 00051a	ff 76 f2 		push	WORD PTR [bp-14]	;wSize
+	*** 00051d	8d 46 f4 		lea	ax,WORD PTR [bp-12]	;hfsChunk
+	*** 000520	16 			push	ss
+	*** 000521	50 			push	ax
+	*** 000522	9a 00 00 00 00 		call	FAR PTR _AllocAndLockMem
+	*** 000527	83 c4 06 		add	sp,6
+	*** 00052a	89 46 f8 		mov	WORD PTR [bp-8],ax	;lpFSChunk
+	*** 00052d	89 56 fa 		mov	WORD PTR [bp-6],dx
+	*** 000530	0b d0 			or	dx,ax
+	*** 000532	0f 85 06 00 		jne	$I2712
+;|***             return (FALSE);
+; Line 259
+	*** 000536	b8 00 00 		mov	ax,0
+	*** 000539	e9 6d 00 		jmp	$EX2705
+;|***          InitializeStruct(IDC_SAVEFILE, (LPSTR)lpFSChunk);
+; Line 260
+					$I2712:
+	*** 00053c	ff 76 fa 		push	WORD PTR [bp-6]
+	*** 00053f	ff 76 f8 		push	WORD PTR [bp-8]	;lpFSChunk
+	*** 000542	6a 02 			push	2
+	*** 000544	9a 00 00 00 00 		call	FAR PTR _InitializeStruct
+	*** 000549	83 c4 06 		add	sp,6
+;|***          if (GetSaveFileName(&(lpFSChunk->of)))
+; Line 261
+	*** 00054c	ff 76 fa 		push	WORD PTR [bp-6]
+	*** 00054f	ff 76 f8 		push	WORD PTR [bp-8]	;lpFSChunk
+	*** 000552	9a 00 00 00 00 		call	FAR PTR GETSAVEFILENAME
+	*** 000557	3d 00 00 		cmp	ax,0
+	*** 00055a	0f 84 21 00 		je	$I2713
+;|***          {
+; Line 262
+;|***          	_fstrcpy (Name,(LPSTR)lpFSChunk->of.lpstrFile);
+; Line 263
+	*** 00055e	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000561	26 ff 77 1a 		push	WORD PTR es:[bx+26]
+	*** 000565	26 ff 77 18 		push	WORD PTR es:[bx+24]
+	*** 000569	ff 76 0a 		push	WORD PTR [bp+10]
+	*** 00056c	ff 76 08 		push	WORD PTR [bp+8]	;Name
+	*** 00056f	9a 00 00 00 00 		call	FAR PTR __fstrcpy
+	*** 000574	83 c4 08 		add	sp,8
+;|***          	Result = TRUE;
+; Line 264
+	*** 000577	c7 46 f0 01 00 		mov	WORD PTR [bp-16],1	;Result
+;|***          }
+; Line 265
+;|***          else
+; Line 266
+	*** 00057c	e9 14 00 		jmp	$I2714
+					$I2713:
+;|***          {
+; Line 267
+;|***             ProcessCDError(CommDlgExtendedError());
+; Line 268
+	*** 00057f	9a 00 00 00 00 		call	FAR PTR COMMDLGEXTENDEDERROR
+	*** 000584	52 			push	dx
+	*** 000585	50 			push	ax
+	*** 000586	9a 00 00 00 00 		call	FAR PTR _ProcessCDError
+	*** 00058b	83 c4 04 		add	sp,4
+;|***             Result = FALSE;
+; Line 269
+	*** 00058e	c7 46 f0 00 00 		mov	WORD PTR [bp-16],0	;Result
+;|***          }
+; Line 270
+					$I2714:
+;|***          GlobalUnlock(hfsChunk);
+; Line 271
+	*** 000593	ff 76 f4 		push	WORD PTR [bp-12]	;hfsChunk
+	*** 000596	9a 00 00 00 00 		call	FAR PTR GLOBALUNLOCK
+;|***          GlobalFree(hfsChunk);
+; Line 272
+	*** 00059b	ff 76 f4 		push	WORD PTR [bp-12]	;hfsChunk
+	*** 00059e	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***          return (Result);
+; Line 273
+	*** 0005a3	8b 46 f0 		mov	ax,WORD PTR [bp-16]	;Result
+	*** 0005a6	e9 00 00 		jmp	$EX2705
+;|*** }
+; Line 274
+					$EX2705:
+	*** 0005a9	5e 			pop	si
+	*** 0005aa	5f 			pop	di
+	*** 0005ab	c9 			leave	
+	*** 0005ac	cb 			ret	
+
+_GetSaveFileCD	ENDP
+	PUBLIC	_SetFilterString
+_SetFilterString	PROC FAR
+;|*** 
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  FormatFilterString(void)                                    *
+;|*** *                                                                         *
+;|*** *   Purpose:  To initialize the gszFilter variable with strings from      *
+;|*** *             the string table.  This method of initializing gszBuffer    *
+;|*** *             is necessary to ensure that the strings are contiguous      *
+;|*** *             in memory--which is what COMMDLG.DLL requires.              *
+;|*** *                                                                         *
+;|*** *   Returns:  BOOL  TRUE if successful, FALSE if failure loading string   *
+;|*** *                                                                         *
+;|*** *  Comments:  The string loaded from the string table has some wild       *
+;|*** *             character in it.  This wild character is then replaced      *
+;|*** *             with NULL.  Note that the wild char can be any unique       *
+;|*** *             character the developer chooses, and must be included       *
+;|*** *             as the last character of the string.  A typical string      *
+;|*** *             might look like "Write Files(*.WRI)|*.WRI|" where | is      *
+;|*** *             the wild character in this case.  Implementing it this      *
+;|*** *             way also ensures the string is doubly NULL terminated,      *
+;|*** *             which is also a requirement of this lovely string.          *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             11/19/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** void SetFilterString (int Filter)
+;|*** {
+; Line 306
+	*** 0005ad	55 			push	bp
+	*** 0005ae	8b ec 			mov	bp,sp
+	*** 0005b0	b8 00 00 		mov	ax,0
+	*** 0005b3	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 0005b8	57 			push	di
+	*** 0005b9	56 			push	si
+;	Filter = 6
+;|*** 	FilterStringID = Filter;
+; Line 307
+	*** 0005ba	8b 46 06 		mov	ax,WORD PTR [bp+6]	;Filter
+	*** 0005bd	a3 00 00 		mov	WORD PTR _FilterStringID,ax
+;|*** 	return;
+; Line 308
+	*** 0005c0	e9 00 00 		jmp	$EX2717
+;|*** }
+; Line 309
+					$EX2717:
+	*** 0005c3	5e 			pop	si
+	*** 0005c4	5f 			pop	di
+	*** 0005c5	c9 			leave	
+	*** 0005c6	cb 			ret	
+
+_SetFilterString	ENDP
+	PUBLIC	_FormatFilterString
+_FormatFilterString	PROC FAR
+;|*** 
+;|*** BOOL FormatFilterString (void)
+;|*** {
+; Line 312
+	*** 0005c7	55 			push	bp
+	*** 0005c8	8b ec 			mov	bp,sp
+	*** 0005ca	b8 06 00 		mov	ax,6
+	*** 0005cd	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 0005d2	57 			push	di
+	*** 0005d3	56 			push	si
+;	wCtr = -2
+;	wStringLen = -4
+;	chWildChar = -6
+;|***    WORD wCtr, wStringLen;
+;|***    char chWildChar;
+;|***    
+;|***    if (FilterStringID)
+; Line 316
+	*** 0005d4	83 3e 00 00 00 		cmp	WORD PTR _FilterStringID,0
+	*** 0005d9	0f 84 3b 00 		je	$I2722
+;|***    {
+; Line 317
+;|*** 	   *gszFilter = 0;
+; Line 318
+COMDLG_TEXT      ENDS
+CONST      SEGMENT
+$T2967	DW SEG _gszFilter 
+CONST      ENDS
+COMDLG_TEXT      SEGMENT
+	ASSUME	CS: COMDLG_TEXT
+	*** 0005dd	8e 06 00 00 		mov	es,WORD PTR $T2967
+	*** 0005e1	26 c6 06 00 00 00 	mov	BYTE PTR es:_gszFilter,0
+;|*** 	   if (!(wStringLen = LoadString(ghInst, FilterStringID, gszFilter, sizeof(
+;|*** 	                                 gszFilter))))
+; Line 320
+	*** 0005e7	ff 36 00 00 		push	WORD PTR _ghInst
+	*** 0005eb	ff 36 00 00 		push	WORD PTR _FilterStringID
+	*** 0005ef	06 			push	es
+	*** 0005f0	68 00 00 		push	OFFSET _gszFilter
+	*** 0005f3	68 00 01 		push	256	;0100H
+	*** 0005f6	9a 00 00 00 00 		call	FAR PTR LOADSTRING
+	*** 0005fb	89 46 fc 		mov	WORD PTR [bp-4],ax	;wStringLen
+	*** 0005fe	3d 00 00 		cmp	ax,0
+	*** 000601	0f 85 10 00 		jne	$I2723
+;|*** 	   {
+; Line 321
+;|*** 	      ReportError(IDC_LOADSTRINGFAIL);
+; Line 322
+	*** 000605	6a 03 			push	3
+	*** 000607	9a 00 00 00 00 		call	FAR PTR _ReportError
+	*** 00060c	83 c4 02 		add	sp,2
+;|*** 	      return (FALSE);
+; Line 323
+	*** 00060f	b8 00 00 		mov	ax,0
+	*** 000612	e9 5d 00 		jmp	$EX2718
+;|*** 	   }  
+; Line 324
+;|***    }
+; Line 325
+					$I2723:
+;|***    else
+; Line 326
+	*** 000615	e9 11 00 		jmp	$I2724
+					$I2722:
+;|***    	wStringLen = _fstrlen(gszFilter);
+; Line 327
+	*** 000618	68 00 00 		push	SEG _gszFilter
+	*** 00061b	68 00 00 		push	OFFSET _gszFilter
+	*** 00061e	9a 00 00 00 00 		call	FAR PTR __fstrlen
+	*** 000623	83 c4 04 		add	sp,4
+	*** 000626	89 46 fc 		mov	WORD PTR [bp-4],ax	;wStringLen
+					$I2724:
+;|***    chWildChar = gszFilter[wStringLen - 1];    //Grab the wild character
+; Line 328
+	*** 000629	8e 06 00 00 		mov	es,WORD PTR $T2967
+	*** 00062d	8b 5e fc 		mov	bx,WORD PTR [bp-4]	;wStringLen
+	*** 000630	26 8a 87 ff ff 		mov	al,BYTE PTR es:_gszFilter[bx+65535]
+	*** 000635	88 46 fa 		mov	BYTE PTR [bp-6],al	;chWildChar
+;|***    wCtr = 0;
+; Line 329
+	*** 000638	c7 46 fe 00 00 		mov	WORD PTR [bp-2],0	;wCtr
+;|***    while (gszFilter[wCtr])
+; Line 330
+					$FC2726:
+	*** 00063d	8e 06 00 00 		mov	es,WORD PTR $T2967
+	*** 000641	8b 5e fe 		mov	bx,WORD PTR [bp-2]	;wCtr
+	*** 000644	26 80 bf 00 00 00 	cmp	BYTE PTR es:_gszFilter[bx],0
+	*** 00064a	0f 84 1e 00 		je	$FB2727
+;|***    {
+; Line 331
+;|***       if (gszFilter[wCtr] == chWildChar)
+; Line 332
+	*** 00064e	8a 46 fa 		mov	al,BYTE PTR [bp-6]	;chWildChar
+	*** 000651	8b 5e fe 		mov	bx,WORD PTR [bp-2]	;wCtr
+	*** 000654	26 38 87 00 00 		cmp	BYTE PTR es:_gszFilter[bx],al
+	*** 000659	0f 85 09 00 		jne	$I2728
+;|***          gszFilter[wCtr] = 0;
+; Line 333
+	*** 00065d	8b 5e fe 		mov	bx,WORD PTR [bp-2]	;wCtr
+	*** 000660	26 c6 87 00 00 00 	mov	BYTE PTR es:_gszFilter[bx],0
+;|***       wCtr++;
+; Line 334
+					$I2728:
+	*** 000666	ff 46 fe 		inc	WORD PTR [bp-2]	;wCtr
+;|***    }
+; Line 335
+	*** 000669	e9 d1 ff 		jmp	$FC2726
+					$FB2727:
+;|***    return (TRUE);
+; Line 336
+	*** 00066c	b8 01 00 		mov	ax,1
+	*** 00066f	e9 00 00 		jmp	$EX2718
+;|*** }
+; Line 337
+					$EX2718:
+	*** 000672	5e 			pop	si
+	*** 000673	5f 			pop	di
+	*** 000674	c9 			leave	
+	*** 000675	cb 			ret	
+
+_FormatFilterString	ENDP
+	PUBLIC	_InitializeStruct
+_InitializeStruct	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  InitializeStruct(WORD, LPSTR)                               *
+;|*** *                                                                         *
+;|*** *   Purpose:  To initialize a structure for the current common dialog.    *
+;|*** *             This routine is called just before the common dialogs       *
+;|*** *             API is called.                                              *
+;|*** *                                                                         *
+;|*** *   Returns:  void                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:                                                              *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** 
+;|*** void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
+;|*** {
+; Line 360
+	*** 000676	55 			push	bp
+	*** 000677	8b ec 			mov	bp,sp
+	*** 000679	b8 20 00 		mov	ax,32	;0020H
+	*** 00067c	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000681	57 			push	di
+	*** 000682	56 			push	si
+;	lpFOChunk = -4
+;	lpFSChunk = -8
+;	lpFChunk = -12
+;	lpFRChunk = -16
+;	lpColorsChunk = -20
+;	lpFontChunk = -24
+;	lpPrintChunk = -28
+;	wCtr = -30
+;	hDC = -32
+;	lpStruct = 8
+;	wCommDlgType = 6
+;|***    LPFOCHUNK lpFOChunk;
+;|***    LPFSCHUNK lpFSChunk;
+;|***    LPFINDREPLACECHUNK lpFChunk, lpFRChunk;
+;|***    LPCOLORSCHUNK lpColorsChunk;
+;|***    LPCHOOSEFONT lpFontChunk;
+;|***    LPPRINTDLG lpPrintChunk;
+;|***    WORD wCtr;
+;|***    HDC hDC;
+;|***    static HANDLE	hDevMode=NULL;
+;|*** 
+;|***    switch (wCommDlgType)
+; Line 371
+	*** 000683	8b 46 06 		mov	ax,WORD PTR [bp+6]	;wCommDlgType
+	*** 000686	e9 45 06 		jmp	$S2745
+;|***       {
+; Line 372
+;|***    case IDC_OPENFILE:
+; Line 373
+					$SC2749:
+;|***       lpFOChunk = (LPFOCHUNK)lpStruct;
+; Line 374
+	*** 000689	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 00068c	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 00068f	89 46 fc 		mov	WORD PTR [bp-4],ax	;lpFOChunk
+	*** 000692	89 56 fe 		mov	WORD PTR [bp-2],dx
+;|***       FormatFilterString();  //Formats gszFilter with strings
+; Line 375
+	*** 000695	9a 00 00 00 00 		call	FAR PTR _FormatFilterString
+;|***       *(lpFOChunk->szFile) = 0;
+; Line 376
+	*** 00069a	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00069d	26 c6 47 48 00 		mov	BYTE PTR es:[bx+72],0
+;|***       *(lpFOChunk->szFileTitle) = 0;
+; Line 377
+	*** 0006a2	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006a5	26 c6 87 48 01 00 	mov	BYTE PTR es:[bx+328],0
+;|***       lpFOChunk->of.lStructSize = sizeof(OPENFILENAME);
+; Line 378
+	*** 0006ab	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006ae	26 c7 07 48 00 		mov	WORD PTR es:[bx],72	;0048H
+	*** 0006b3	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpFOChunk->of.hwndOwner = (HWND)ghWnd;
+; Line 379
+	*** 0006b9	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 0006bc	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006bf	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***       lpFOChunk->of.hInstance = (HANDLE)NULL;
+; Line 380
+	*** 0006c3	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006c6	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|***       lpFOChunk->of.lpstrFilter = gszFilter;
+; Line 381
+	*** 0006cc	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006cf	26 c7 47 08 00 00 	mov	WORD PTR es:[bx+8],OFFSET _gszFilter
+	*** 0006d5	26 c7 47 0a 00 00 	mov	WORD PTR es:[bx+10],SEG _gszFilter
+;|***       lpFOChunk->of.lpstrCustomFilter = (LPSTR)NULL;
+; Line 382
+	*** 0006db	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006de	2b c0 			sub	ax,ax
+	*** 0006e0	26 89 47 0e 		mov	WORD PTR es:[bx+14],ax
+	*** 0006e4	26 89 47 0c 		mov	WORD PTR es:[bx+12],ax
+;|***       lpFOChunk->of.nMaxCustFilter = 0L;
+; Line 383
+	*** 0006e8	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006eb	2b c0 			sub	ax,ax
+	*** 0006ed	26 89 47 12 		mov	WORD PTR es:[bx+18],ax
+	*** 0006f1	26 89 47 10 		mov	WORD PTR es:[bx+16],ax
+;|***       lpFOChunk->of.nFilterIndex = 1L;
+; Line 384
+	*** 0006f5	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0006f8	26 c7 47 14 01 00 	mov	WORD PTR es:[bx+20],1
+	*** 0006fe	26 c7 47 16 00 00 	mov	WORD PTR es:[bx+22],0
+;|***       lpFOChunk->of.lpstrFile = lpFOChunk->szFile;
+; Line 385
+	*** 000704	8b 46 fc 		mov	ax,WORD PTR [bp-4]	;lpFOChunk
+	*** 000707	8b 56 fe 		mov	dx,WORD PTR [bp-2]
+	*** 00070a	05 48 00 		add	ax,72	;0048H
+	*** 00070d	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 000710	26 89 47 18 		mov	WORD PTR es:[bx+24],ax
+	*** 000714	26 89 57 1a 		mov	WORD PTR es:[bx+26],dx
+;|***       lpFOChunk->of.nMaxFile = (DWORD)sizeof(lpFOChunk->szFile);
+; Line 386
+	*** 000718	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00071b	26 c7 47 1c 00 01 	mov	WORD PTR es:[bx+28],256	;0100H
+	*** 000721	26 c7 47 1e 00 00 	mov	WORD PTR es:[bx+30],0
+;|***       lpFOChunk->of.lpstrFileTitle = lpFOChunk->szFileTitle;
+; Line 387
+	*** 000727	8b 46 fc 		mov	ax,WORD PTR [bp-4]	;lpFOChunk
+	*** 00072a	8b 56 fe 		mov	dx,WORD PTR [bp-2]
+	*** 00072d	05 48 01 		add	ax,328	;0148H
+	*** 000730	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 000733	26 89 47 20 		mov	WORD PTR es:[bx+32],ax
+	*** 000737	26 89 57 22 		mov	WORD PTR es:[bx+34],dx
+;|***       lpFOChunk->of.nMaxFileTitle = MAXFILETITLELEN;
+; Line 388
+	*** 00073b	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00073e	26 c7 47 24 00 01 	mov	WORD PTR es:[bx+36],256	;0100H
+	*** 000744	26 c7 47 26 00 00 	mov	WORD PTR es:[bx+38],0
+;|***       lpFOChunk->of.lpstrInitialDir = lpInitialDirectory;
+; Line 389
+	*** 00074a	a1 00 00 		mov	ax,WORD PTR _lpInitialDirectory
+	*** 00074d	8b 16 02 00 		mov	dx,WORD PTR _lpInitialDirectory+2
+	*** 000751	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 000754	26 89 47 28 		mov	WORD PTR es:[bx+40],ax
+	*** 000758	26 89 57 2a 		mov	WORD PTR es:[bx+42],dx
+;|***       lpFOChunk->of.lpstrTitle = (LPSTR)NULL;
+; Line 390
+	*** 00075c	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00075f	2b c0 			sub	ax,ax
+	*** 000761	26 89 47 2e 		mov	WORD PTR es:[bx+46],ax
+	*** 000765	26 89 47 2c 		mov	WORD PTR es:[bx+44],ax
+;|***       lpFOChunk->of.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST |
+;|***                             OFN_FILEMUSTEXIST | OFN_SHOWHELP | OFN_ENABLEHOOK;
+; Line 392
+	*** 000769	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00076c	26 c7 47 30 34 18 	mov	WORD PTR es:[bx+48],6196	;1834H
+	*** 000772	26 c7 47 32 00 00 	mov	WORD PTR es:[bx+50],0
+;|***       lpFOChunk->of.nFileOffset = 0;
+; Line 393
+	*** 000778	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00077b	26 c7 47 34 00 00 	mov	WORD PTR es:[bx+52],0
+;|***       lpFOChunk->of.nFileExtension = 0;
+; Line 394
+	*** 000781	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 000784	26 c7 47 36 00 00 	mov	WORD PTR es:[bx+54],0
+;|***       lpFOChunk->of.lpstrDefExt = (LPSTR)NULL;
+; Line 395
+	*** 00078a	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00078d	2b c0 			sub	ax,ax
+	*** 00078f	26 89 47 3a 		mov	WORD PTR es:[bx+58],ax
+	*** 000793	26 89 47 38 		mov	WORD PTR es:[bx+56],ax
+;|***       lpFOChunk->of.lCustData = 0L;
+; Line 396
+	*** 000797	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 00079a	2b c0 			sub	ax,ax
+	*** 00079c	26 89 47 3e 		mov	WORD PTR es:[bx+62],ax
+	*** 0007a0	26 89 47 3c 		mov	WORD PTR es:[bx+60],ax
+;|***       lpFOChunk->of.lpfnHook = (FARHOOK)lpfnFileOpenHook;
+; Line 397
+	*** 0007a4	a1 00 00 		mov	ax,WORD PTR _lpfnFileOpenHook
+	*** 0007a7	8b 16 02 00 		mov	dx,WORD PTR _lpfnFileOpenHook+2
+	*** 0007ab	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0007ae	26 89 47 40 		mov	WORD PTR es:[bx+64],ax
+	*** 0007b2	26 89 57 42 		mov	WORD PTR es:[bx+66],dx
+;|***       lpFOChunk->of.lpTemplateName = (LPSTR)NULL;
+; Line 398
+	*** 0007b6	c4 5e fc 		les	bx,DWORD PTR [bp-4]	;lpFOChunk
+	*** 0007b9	2b c0 			sub	ax,ax
+	*** 0007bb	26 89 47 46 		mov	WORD PTR es:[bx+70],ax
+	*** 0007bf	26 89 47 44 		mov	WORD PTR es:[bx+68],ax
+;|***       break;
+; Line 399
+	*** 0007c3	e9 26 05 		jmp	$SB2746
+;|*** 
+;|***    case IDC_SAVEFILE:
+; Line 401
+					$SC2750:
+;|***       lpFSChunk = (LPFSCHUNK)lpStruct;
+; Line 402
+	*** 0007c6	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 0007c9	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 0007cc	89 46 f8 		mov	WORD PTR [bp-8],ax	;lpFSChunk
+	*** 0007cf	89 56 fa 		mov	WORD PTR [bp-6],dx
+;|***       GetWindowsDirectory(gszBuffer, sizeof(gszBuffer));
+; Line 403
+	*** 0007d2	68 00 00 		push	SEG _gszBuffer
+	*** 0007d5	68 00 00 		push	OFFSET _gszBuffer
+	*** 0007d8	68 00 01 		push	256	;0100H
+	*** 0007db	9a 00 00 00 00 		call	FAR PTR GETWINDOWSDIRECTORY
+;|***       FormatFilterString();  //Formats gszFilter with strings
+; Line 404
+	*** 0007e0	9a 00 00 00 00 		call	FAR PTR _FormatFilterString
+;|***       *(lpFSChunk->szFile) = 0;
+; Line 405
+	*** 0007e5	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0007e8	26 c6 47 48 00 		mov	BYTE PTR es:[bx+72],0
+;|***       lpFSChunk->of.lStructSize = sizeof(OPENFILENAME);
+; Line 406
+	*** 0007ed	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0007f0	26 c7 07 48 00 		mov	WORD PTR es:[bx],72	;0048H
+	*** 0007f5	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpFSChunk->of.hwndOwner = (HWND)ghWnd;
+; Line 407
+	*** 0007fb	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 0007fe	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000801	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***       lpFSChunk->of.hInstance = (HANDLE)NULL;
+; Line 408
+	*** 000805	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000808	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|***       lpFSChunk->of.lpstrFilter = gszFilter;
+; Line 409
+	*** 00080e	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000811	26 c7 47 08 00 00 	mov	WORD PTR es:[bx+8],OFFSET _gszFilter
+	*** 000817	26 c7 47 0a 00 00 	mov	WORD PTR es:[bx+10],SEG _gszFilter
+;|***       lpFSChunk->of.lpstrCustomFilter = (LPSTR)NULL;
+; Line 410
+	*** 00081d	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000820	2b c0 			sub	ax,ax
+	*** 000822	26 89 47 0e 		mov	WORD PTR es:[bx+14],ax
+	*** 000826	26 89 47 0c 		mov	WORD PTR es:[bx+12],ax
+;|***       lpFSChunk->of.nMaxCustFilter = 0L;
+; Line 411
+	*** 00082a	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 00082d	2b c0 			sub	ax,ax
+	*** 00082f	26 89 47 12 		mov	WORD PTR es:[bx+18],ax
+	*** 000833	26 89 47 10 		mov	WORD PTR es:[bx+16],ax
+;|***       lpFSChunk->of.nFilterIndex = 1L;
+; Line 412
+	*** 000837	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 00083a	26 c7 47 14 01 00 	mov	WORD PTR es:[bx+20],1
+	*** 000840	26 c7 47 16 00 00 	mov	WORD PTR es:[bx+22],0
+;|***       lpFSChunk->of.lpstrFile = lpFSChunk->szFile;
+; Line 413
+	*** 000846	8b 46 f8 		mov	ax,WORD PTR [bp-8]	;lpFSChunk
+	*** 000849	8b 56 fa 		mov	dx,WORD PTR [bp-6]
+	*** 00084c	05 48 00 		add	ax,72	;0048H
+	*** 00084f	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000852	26 89 47 18 		mov	WORD PTR es:[bx+24],ax
+	*** 000856	26 89 57 1a 		mov	WORD PTR es:[bx+26],dx
+;|***       lpFSChunk->of.nMaxFile = (DWORD)sizeof(lpFSChunk->szFile);
+; Line 414
+	*** 00085a	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 00085d	26 c7 47 1c 00 01 	mov	WORD PTR es:[bx+28],256	;0100H
+	*** 000863	26 c7 47 1e 00 00 	mov	WORD PTR es:[bx+30],0
+;|***       lpFSChunk->of.lpstrFileTitle = lpFSChunk->szFileTitle;
+; Line 415
+	*** 000869	8b 46 f8 		mov	ax,WORD PTR [bp-8]	;lpFSChunk
+	*** 00086c	8b 56 fa 		mov	dx,WORD PTR [bp-6]
+	*** 00086f	05 48 01 		add	ax,328	;0148H
+	*** 000872	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000875	26 89 47 20 		mov	WORD PTR es:[bx+32],ax
+	*** 000879	26 89 57 22 		mov	WORD PTR es:[bx+34],dx
+;|***       lpFSChunk->of.nMaxFileTitle = MAXFILETITLELEN;
+; Line 416
+	*** 00087d	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000880	26 c7 47 24 00 01 	mov	WORD PTR es:[bx+36],256	;0100H
+	*** 000886	26 c7 47 26 00 00 	mov	WORD PTR es:[bx+38],0
+;|***       lpFSChunk->of.lpstrInitialDir = lpInitialDirectory;
+; Line 417
+	*** 00088c	a1 00 00 		mov	ax,WORD PTR _lpInitialDirectory
+	*** 00088f	8b 16 02 00 		mov	dx,WORD PTR _lpInitialDirectory+2
+	*** 000893	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 000896	26 89 47 28 		mov	WORD PTR es:[bx+40],ax
+	*** 00089a	26 89 57 2a 		mov	WORD PTR es:[bx+42],dx
+;|***       lpFSChunk->of.lpstrTitle = (LPSTR)NULL;
+; Line 418
+	*** 00089e	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008a1	2b c0 			sub	ax,ax
+	*** 0008a3	26 89 47 2e 		mov	WORD PTR es:[bx+46],ax
+	*** 0008a7	26 89 47 2c 		mov	WORD PTR es:[bx+44],ax
+;|***       lpFSChunk->of.Flags = OFN_SHOWHELP | OFN_OVERWRITEPROMPT;
+; Line 419
+	*** 0008ab	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008ae	26 c7 47 30 12 00 	mov	WORD PTR es:[bx+48],18	;0012H
+	*** 0008b4	26 c7 47 32 00 00 	mov	WORD PTR es:[bx+50],0
+;|***       lpFSChunk->of.nFileOffset = 0;
+; Line 420
+	*** 0008ba	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008bd	26 c7 47 34 00 00 	mov	WORD PTR es:[bx+52],0
+;|***       lpFSChunk->of.nFileExtension = 0;
+; Line 421
+	*** 0008c3	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008c6	26 c7 47 36 00 00 	mov	WORD PTR es:[bx+54],0
+;|***       lpFSChunk->of.lpstrDefExt = (LPSTR)NULL;
+; Line 422
+	*** 0008cc	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008cf	2b c0 			sub	ax,ax
+	*** 0008d1	26 89 47 3a 		mov	WORD PTR es:[bx+58],ax
+	*** 0008d5	26 89 47 38 		mov	WORD PTR es:[bx+56],ax
+;|***       lpFSChunk->of.lCustData = 0L;
+; Line 423
+	*** 0008d9	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008dc	2b c0 			sub	ax,ax
+	*** 0008de	26 89 47 3e 		mov	WORD PTR es:[bx+62],ax
+	*** 0008e2	26 89 47 3c 		mov	WORD PTR es:[bx+60],ax
+;|***       lpFSChunk->of.lpfnHook = (FARHOOK)NULL;
+; Line 424
+	*** 0008e6	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008e9	2b c0 			sub	ax,ax
+	*** 0008eb	26 89 47 42 		mov	WORD PTR es:[bx+66],ax
+	*** 0008ef	26 89 47 40 		mov	WORD PTR es:[bx+64],ax
+;|***       lpFSChunk->of.lpTemplateName = (LPSTR)NULL;
+; Line 425
+	*** 0008f3	c4 5e f8 		les	bx,DWORD PTR [bp-8]	;lpFSChunk
+	*** 0008f6	2b c0 			sub	ax,ax
+	*** 0008f8	26 89 47 46 		mov	WORD PTR es:[bx+70],ax
+	*** 0008fc	26 89 47 44 		mov	WORD PTR es:[bx+68],ax
+;|***       break;
+; Line 426
+	*** 000900	e9 e9 03 		jmp	$SB2746
+;|*** 
+;|***    case IDC_FIND:
+; Line 428
+					$SC2751:
+;|***       lpFChunk = (LPFINDREPLACECHUNK)lpStruct;
+; Line 429
+	*** 000903	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 000906	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 000909	89 46 f4 		mov	WORD PTR [bp-12],ax	;lpFChunk
+	*** 00090c	89 56 f6 		mov	WORD PTR [bp-10],dx
+;|***       *(lpFChunk->szFindWhat) = 0;
+; Line 430
+	*** 00090f	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 000912	26 c6 47 24 00 		mov	BYTE PTR es:[bx+36],0
+;|***       *(lpFChunk->szReplaceWith) = 0;
+; Line 431
+	*** 000917	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 00091a	26 c6 47 64 00 		mov	BYTE PTR es:[bx+100],0
+;|***       lpFChunk->fr.lStructSize = sizeof(FINDREPLACE);
+; Line 432
+	*** 00091f	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 000922	26 c7 07 24 00 		mov	WORD PTR es:[bx],36	;0024H
+	*** 000927	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpFChunk->fr.hwndOwner = ghWnd;
+; Line 433
+	*** 00092d	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 000930	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 000933	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***       lpFChunk->fr.hInstance = (HANDLE)NULL;
+; Line 434
+	*** 000937	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 00093a	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|***       lpFChunk->fr.Flags = FR_ENABLEHOOK;
+; Line 435
+	*** 000940	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 000943	26 c7 47 08 00 01 	mov	WORD PTR es:[bx+8],256	;0100H
+	*** 000949	26 c7 47 0a 00 00 	mov	WORD PTR es:[bx+10],0
+;|***       lpFChunk->fr.lpstrFindWhat = (LPSTR)(lpFChunk->szFindWhat);
+; Line 436
+	*** 00094f	8b 46 f4 		mov	ax,WORD PTR [bp-12]	;lpFChunk
+	*** 000952	8b 56 f6 		mov	dx,WORD PTR [bp-10]
+	*** 000955	05 24 00 		add	ax,36	;0024H
+	*** 000958	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 00095b	26 89 47 0c 		mov	WORD PTR es:[bx+12],ax
+	*** 00095f	26 89 57 0e 		mov	WORD PTR es:[bx+14],dx
+;|***       lpFChunk->fr.lpstrReplaceWith = (LPSTR)(lpFChunk->szReplaceWith);
+; Line 437
+	*** 000963	8b 46 f4 		mov	ax,WORD PTR [bp-12]	;lpFChunk
+	*** 000966	8b 56 f6 		mov	dx,WORD PTR [bp-10]
+	*** 000969	05 64 00 		add	ax,100	;0064H
+	*** 00096c	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 00096f	26 89 47 10 		mov	WORD PTR es:[bx+16],ax
+	*** 000973	26 89 57 12 		mov	WORD PTR es:[bx+18],dx
+;|***       lpFChunk->fr.wFindWhatLen = sizeof(lpFChunk->szFindWhat);
+; Line 438
+	*** 000977	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 00097a	26 c7 47 14 40 00 	mov	WORD PTR es:[bx+20],64	;0040H
+;|***       lpFChunk->fr.lCustData = (LONG)CDN_FIND;
+; Line 439
+	*** 000980	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 000983	26 c7 47 18 01 00 	mov	WORD PTR es:[bx+24],1
+	*** 000989	26 c7 47 1a 00 00 	mov	WORD PTR es:[bx+26],0
+;|***       lpFChunk->fr.lpfnHook = (FARHOOK)lpfnFindHook;
+; Line 440
+	*** 00098f	a1 00 00 		mov	ax,WORD PTR _lpfnFindHook
+	*** 000992	8b 16 02 00 		mov	dx,WORD PTR _lpfnFindHook+2
+	*** 000996	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 000999	26 89 47 1c 		mov	WORD PTR es:[bx+28],ax
+	*** 00099d	26 89 57 1e 		mov	WORD PTR es:[bx+30],dx
+;|***       lpFChunk->fr.lpTemplateName = (LPSTR)NULL;
+; Line 441
+	*** 0009a1	c4 5e f4 		les	bx,DWORD PTR [bp-12]	;lpFChunk
+	*** 0009a4	2b c0 			sub	ax,ax
+	*** 0009a6	26 89 47 22 		mov	WORD PTR es:[bx+34],ax
+	*** 0009aa	26 89 47 20 		mov	WORD PTR es:[bx+32],ax
+;|***       break;
+; Line 442
+	*** 0009ae	e9 3b 03 		jmp	$SB2746
+;|*** 
+;|***    case IDC_FINDREPLACE:
+; Line 444
+					$SC2752:
+;|***       lpFRChunk = (LPFINDREPLACECHUNK)lpStruct;
+; Line 445
+	*** 0009b1	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 0009b4	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 0009b7	89 46 f0 		mov	WORD PTR [bp-16],ax	;lpFRChunk
+	*** 0009ba	89 56 f2 		mov	WORD PTR [bp-14],dx
+;|***       *(lpFRChunk->szFindWhat) = 0;
+; Line 446
+	*** 0009bd	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 0009c0	26 c6 47 24 00 		mov	BYTE PTR es:[bx+36],0
+;|***       *(lpFRChunk->szReplaceWith) = 0;
+; Line 447
+	*** 0009c5	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 0009c8	26 c6 47 64 00 		mov	BYTE PTR es:[bx+100],0
+;|***       lpFRChunk->fr.lStructSize = sizeof(FINDREPLACE);
+; Line 448
+	*** 0009cd	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 0009d0	26 c7 07 24 00 		mov	WORD PTR es:[bx],36	;0024H
+	*** 0009d5	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpFRChunk->fr.hwndOwner = ghWnd;
+; Line 449
+	*** 0009db	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 0009de	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 0009e1	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***       lpFRChunk->fr.hInstance = (HANDLE)NULL;
+; Line 450
+	*** 0009e5	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 0009e8	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|***       lpFRChunk->fr.Flags = FR_ENABLEHOOK;
+; Line 451
+	*** 0009ee	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 0009f1	26 c7 47 08 00 01 	mov	WORD PTR es:[bx+8],256	;0100H
+	*** 0009f7	26 c7 47 0a 00 00 	mov	WORD PTR es:[bx+10],0
+;|***       lpFRChunk->fr.lpstrFindWhat = (LPSTR)(lpFRChunk->szFindWhat);
+; Line 452
+	*** 0009fd	8b 46 f0 		mov	ax,WORD PTR [bp-16]	;lpFRChunk
+	*** 000a00	8b 56 f2 		mov	dx,WORD PTR [bp-14]
+	*** 000a03	05 24 00 		add	ax,36	;0024H
+	*** 000a06	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a09	26 89 47 0c 		mov	WORD PTR es:[bx+12],ax
+	*** 000a0d	26 89 57 0e 		mov	WORD PTR es:[bx+14],dx
+;|***       lpFRChunk->fr.wFindWhatLen = sizeof(lpFRChunk->szFindWhat);
+; Line 453
+	*** 000a11	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a14	26 c7 47 14 40 00 	mov	WORD PTR es:[bx+20],64	;0040H
+;|***       lpFRChunk->fr.lpstrReplaceWith = (LPSTR)(lpFRChunk->szReplaceWith);
+; Line 454
+	*** 000a1a	8b 46 f0 		mov	ax,WORD PTR [bp-16]	;lpFRChunk
+	*** 000a1d	8b 56 f2 		mov	dx,WORD PTR [bp-14]
+	*** 000a20	05 64 00 		add	ax,100	;0064H
+	*** 000a23	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a26	26 89 47 10 		mov	WORD PTR es:[bx+16],ax
+	*** 000a2a	26 89 57 12 		mov	WORD PTR es:[bx+18],dx
+;|***       lpFRChunk->fr.wReplaceWithLen = sizeof(lpFRChunk->szReplaceWith);
+; Line 455
+	*** 000a2e	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a31	26 c7 47 16 40 00 	mov	WORD PTR es:[bx+22],64	;0040H
+;|***       lpFRChunk->fr.lCustData = (LONG)CDN_FINDREPLACE;
+; Line 456
+	*** 000a37	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a3a	26 c7 47 18 02 00 	mov	WORD PTR es:[bx+24],2
+	*** 000a40	26 c7 47 1a 00 00 	mov	WORD PTR es:[bx+26],0
+;|***       lpFRChunk->fr.lpfnHook = (FARHOOK)lpfnFindReplaceHook;
+; Line 457
+	*** 000a46	a1 00 00 		mov	ax,WORD PTR _lpfnFindReplaceHook
+	*** 000a49	8b 16 02 00 		mov	dx,WORD PTR _lpfnFindReplaceHook+2
+	*** 000a4d	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a50	26 89 47 1c 		mov	WORD PTR es:[bx+28],ax
+	*** 000a54	26 89 57 1e 		mov	WORD PTR es:[bx+30],dx
+;|***       lpFRChunk->fr.lpTemplateName = (LPSTR)NULL;
+; Line 458
+	*** 000a58	c4 5e f0 		les	bx,DWORD PTR [bp-16]	;lpFRChunk
+	*** 000a5b	2b c0 			sub	ax,ax
+	*** 000a5d	26 89 47 22 		mov	WORD PTR es:[bx+34],ax
+	*** 000a61	26 89 47 20 		mov	WORD PTR es:[bx+32],ax
+;|***       break;
+; Line 459
+	*** 000a65	e9 84 02 		jmp	$SB2746
+;|*** 
+;|***    case IDC_COLORS:
+; Line 461
+					$SC2753:
+;|***       lpColorsChunk = (LPCOLORSCHUNK)lpStruct;
+; Line 462
+	*** 000a68	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 000a6b	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 000a6e	89 46 ec 		mov	WORD PTR [bp-20],ax	;lpColorsChunk
+	*** 000a71	89 56 ee 		mov	WORD PTR [bp-18],dx
+;|***       hDC = GetDC(ghWnd);
+; Line 463
+	*** 000a74	ff 36 00 00 		push	WORD PTR _ghWnd
+	*** 000a78	9a 00 00 00 00 		call	FAR PTR GETDC
+	*** 000a7d	89 46 e0 		mov	WORD PTR [bp-32],ax	;hDC
+;|***       lpColorsChunk->dwCustClrs[0] = GetBkColor(hDC);
+; Line 464
+	*** 000a80	ff 76 e0 		push	WORD PTR [bp-32]	;hDC
+	*** 000a83	9a 00 00 00 00 		call	FAR PTR GETBKCOLOR
+	*** 000a88	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000a8b	26 89 47 24 		mov	WORD PTR es:[bx+36],ax
+	*** 000a8f	26 89 57 26 		mov	WORD PTR es:[bx+38],dx
+;|***       ReleaseDC(ghWnd, hDC);
+; Line 465
+	*** 000a93	ff 36 00 00 		push	WORD PTR _ghWnd
+	*** 000a97	ff 76 e0 		push	WORD PTR [bp-32]	;hDC
+	*** 000a9a	9a 00 00 00 00 		call	FAR PTR RELEASEDC
+;|***       for (wCtr = 1; wCtr <= 15; wCtr++)
+; Line 466
+	*** 000a9f	c7 46 e2 01 00 		mov	WORD PTR [bp-30],1	;wCtr
+	*** 000aa4	e9 03 00 		jmp	$F2754
+					$FC2755:
+	*** 000aa7	ff 46 e2 		inc	WORD PTR [bp-30]	;wCtr
+					$F2754:
+	*** 000aaa	83 7e e2 0f 		cmp	WORD PTR [bp-30],15	;000fH	;wCtr
+	*** 000aae	0f 87 1f 00 		ja	$FB2756
+;|***          lpColorsChunk->dwCustClrs[wCtr] = lpColorsChunk->dwCustClrs[0];
+; Line 467
+	*** 000ab2	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000ab5	26 8b 47 24 		mov	ax,WORD PTR es:[bx+36]
+	*** 000ab9	26 8b 57 26 		mov	dx,WORD PTR es:[bx+38]
+	*** 000abd	8b 76 e2 		mov	si,WORD PTR [bp-30]	;wCtr
+	*** 000ac0	c1 e6 02 		shl	si,2
+	*** 000ac3	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000ac6	26 89 40 24 		mov	WORD PTR es:[bx+36][si],ax
+	*** 000aca	26 89 50 26 		mov	WORD PTR es:[bx+38][si],dx
+	*** 000ace	e9 d6 ff 		jmp	$FC2755
+					$FB2756:
+;|***       lpColorsChunk->chsclr.lStructSize = sizeof(CHOOSECOLOR);
+; Line 468
+	*** 000ad1	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000ad4	26 c7 07 20 00 		mov	WORD PTR es:[bx],32	;0020H
+	*** 000ad9	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpColorsChunk->chsclr.hwndOwner = ghWnd;
+; Line 469
+	*** 000adf	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 000ae2	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000ae5	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***       lpColorsChunk->chsclr.hInstance = NULL;
+; Line 470
+	*** 000ae9	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000aec	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|***       lpColorsChunk->chsclr.rgbResult = (DWORD)(lpColorsChunk->dwColor);
+; Line 471
+	*** 000af2	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000af5	26 8b 47 20 		mov	ax,WORD PTR es:[bx+32]
+	*** 000af9	26 8b 57 22 		mov	dx,WORD PTR es:[bx+34]
+	*** 000afd	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000b00	26 89 47 08 		mov	WORD PTR es:[bx+8],ax
+	*** 000b04	26 89 57 0a 		mov	WORD PTR es:[bx+10],dx
+;|***       lpColorsChunk->chsclr.lpCustColors = (LPDWORD)(lpColorsChunk->dwCustClrs)
+;|***    ;
+; Line 473
+	*** 000b08	8b 46 ec 		mov	ax,WORD PTR [bp-20]	;lpColorsChunk
+	*** 000b0b	8b 56 ee 		mov	dx,WORD PTR [bp-18]
+	*** 000b0e	05 24 00 		add	ax,36	;0024H
+	*** 000b11	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000b14	26 89 47 0c 		mov	WORD PTR es:[bx+12],ax
+	*** 000b18	26 89 57 0e 		mov	WORD PTR es:[bx+14],dx
+;|***       lpColorsChunk->chsclr.Flags = 0;
+; Line 474
+	*** 000b1c	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000b1f	2b c0 			sub	ax,ax
+	*** 000b21	26 89 47 12 		mov	WORD PTR es:[bx+18],ax
+	*** 000b25	26 89 47 10 		mov	WORD PTR es:[bx+16],ax
+;|***       lpColorsChunk->chsclr.lCustData = 0L;
+; Line 475
+	*** 000b29	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000b2c	2b c0 			sub	ax,ax
+	*** 000b2e	26 89 47 16 		mov	WORD PTR es:[bx+22],ax
+	*** 000b32	26 89 47 14 		mov	WORD PTR es:[bx+20],ax
+;|***       lpColorsChunk->chsclr.lpfnHook = (FARHOOK)NULL;
+; Line 476
+	*** 000b36	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000b39	2b c0 			sub	ax,ax
+	*** 000b3b	26 89 47 1a 		mov	WORD PTR es:[bx+26],ax
+	*** 000b3f	26 89 47 18 		mov	WORD PTR es:[bx+24],ax
+;|***       lpColorsChunk->chsclr.lpTemplateName = (LPSTR)NULL;
+; Line 477
+	*** 000b43	c4 5e ec 		les	bx,DWORD PTR [bp-20]	;lpColorsChunk
+	*** 000b46	2b c0 			sub	ax,ax
+	*** 000b48	26 89 47 1e 		mov	WORD PTR es:[bx+30],ax
+	*** 000b4c	26 89 47 1c 		mov	WORD PTR es:[bx+28],ax
+;|***       break;
+; Line 478
+	*** 000b50	e9 99 01 		jmp	$SB2746
+;|*** 
+;|***    case IDC_FONT:
+; Line 480
+					$SC2757:
+;|***       lpFontChunk = (LPCHOOSEFONT)lpStruct;
+; Line 481
+	*** 000b53	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 000b56	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 000b59	89 46 e8 		mov	WORD PTR [bp-24],ax	;lpFontChunk
+	*** 000b5c	89 56 ea 		mov	WORD PTR [bp-22],dx
+;|***       lpFontChunk->lStructSize = sizeof(CHOOSEFONT);
+; Line 482
+	*** 000b5f	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000b62	26 c7 07 2e 00 		mov	WORD PTR es:[bx],46	;002eH
+	*** 000b67	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpFontChunk->hwndOwner = ghWnd;
+; Line 483
+	*** 000b6d	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 000b70	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000b73	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|*** 
+;|***    //The hDC field will be initialized when we return--this avoids passing
+;|***    //the hDC in or getting the DC twice.
+;|***    //The LOGFONT field will also be initialized when we get back.
+;|***    //            lpFontChunk->hDC            = hDC;
+;|***    //            lpFontChunk->lpLogFont      = &lf;
+;|***       lpFontChunk->Flags = CF_SCREENFONTS | CF_EFFECTS | CF_INITTOLOGFONTSTRUCT
+;|***                            | CF_APPLY;
+; Line 491
+	*** 000b77	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000b7a	26 c7 47 0e 41 03 	mov	WORD PTR es:[bx+14],833	;0341H
+	*** 000b80	26 c7 47 10 00 00 	mov	WORD PTR es:[bx+16],0
+;|***       lpFontChunk->rgbColors = RGB(0, 0, 0);
+; Line 492
+	*** 000b86	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000b89	2b c0 			sub	ax,ax
+	*** 000b8b	26 89 47 14 		mov	WORD PTR es:[bx+20],ax
+	*** 000b8f	26 89 47 12 		mov	WORD PTR es:[bx+18],ax
+;|***       lpFontChunk->lCustData = 0L;
+; Line 493
+	*** 000b93	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000b96	2b c0 			sub	ax,ax
+	*** 000b98	26 89 47 18 		mov	WORD PTR es:[bx+24],ax
+	*** 000b9c	26 89 47 16 		mov	WORD PTR es:[bx+22],ax
+;|***       lpFontChunk->lpfnHook = (FARHOOK)NULL;
+; Line 494
+	*** 000ba0	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000ba3	2b c0 			sub	ax,ax
+	*** 000ba5	26 89 47 1c 		mov	WORD PTR es:[bx+28],ax
+	*** 000ba9	26 89 47 1a 		mov	WORD PTR es:[bx+26],ax
+;|***       lpFontChunk->lpTemplateName = (LPSTR)NULL;
+; Line 495
+	*** 000bad	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000bb0	2b c0 			sub	ax,ax
+	*** 000bb2	26 89 47 20 		mov	WORD PTR es:[bx+32],ax
+	*** 000bb6	26 89 47 1e 		mov	WORD PTR es:[bx+30],ax
+;|***       lpFontChunk->hInstance = (HANDLE)NULL;
+; Line 496
+	*** 000bba	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000bbd	26 c7 47 22 00 00 	mov	WORD PTR es:[bx+34],0
+;|***       lpFontChunk->lpszStyle = (LPSTR)NULL;
+; Line 497
+	*** 000bc3	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000bc6	2b c0 			sub	ax,ax
+	*** 000bc8	26 89 47 26 		mov	WORD PTR es:[bx+38],ax
+	*** 000bcc	26 89 47 24 		mov	WORD PTR es:[bx+36],ax
+;|***       lpFontChunk->nFontType = SCREEN_FONTTYPE;
+; Line 498
+	*** 000bd0	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000bd3	26 c7 47 28 00 20 	mov	WORD PTR es:[bx+40],8192	;2000H
+;|***       lpFontChunk->nSizeMin = 0;
+; Line 499
+	*** 000bd9	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000bdc	26 c7 47 2a 00 00 	mov	WORD PTR es:[bx+42],0
+;|***       lpFontChunk->nSizeMax = 0;
+; Line 500
+	*** 000be2	c4 5e e8 		les	bx,DWORD PTR [bp-24]	;lpFontChunk
+	*** 000be5	26 c7 47 2c 00 00 	mov	WORD PTR es:[bx+44],0
+;|***       break;
+; Line 501
+	*** 000beb	e9 fe 00 		jmp	$SB2746
+;|*** 
+;|***    case IDC_PRINTDLG:
+; Line 503
+					$SC2758:
+;|***       lpPrintChunk = (LPPRINTDLG)lpStruct;
+; Line 504
+	*** 000bee	8b 46 08 		mov	ax,WORD PTR [bp+8]	;lpStruct
+	*** 000bf1	8b 56 0a 		mov	dx,WORD PTR [bp+10]
+	*** 000bf4	89 46 e4 		mov	WORD PTR [bp-28],ax	;lpPrintChunk
+	*** 000bf7	89 56 e6 		mov	WORD PTR [bp-26],dx
+;|***       lpPrintChunk->lStructSize = sizeof(PRINTDLG);
+; Line 505
+	*** 000bfa	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000bfd	26 c7 07 34 00 		mov	WORD PTR es:[bx],52	;0034H
+	*** 000c02	26 c7 47 02 00 00 	mov	WORD PTR es:[bx+2],0
+;|***       lpPrintChunk->hwndOwner = ghWnd;
+; Line 506
+	*** 000c08	a1 00 00 		mov	ax,WORD PTR _ghWnd
+	*** 000c0b	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c0e	26 89 47 04 		mov	WORD PTR es:[bx+4],ax
+;|***       lpPrintChunk->hDevMode = NULL;
+; Line 507
+	*** 000c12	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c15	26 c7 47 06 00 00 	mov	WORD PTR es:[bx+6],0
+;|***       lpPrintChunk->hDevNames = (HANDLE)NULL;
+; Line 508
+	*** 000c1b	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c1e	26 c7 47 08 00 00 	mov	WORD PTR es:[bx+8],0
+;|***       lpPrintChunk->hDC = (HDC)NULL;
+; Line 509
+	*** 000c24	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c27	26 c7 47 0a 00 00 	mov	WORD PTR es:[bx+10],0
+;|***       lpPrintChunk->Flags = PD_RETURNDC|PD_NOPAGENUMS|PD_NOSELECTION/*|PD_HIDEPRINTTOFILE*/;
+; Line 510
+	*** 000c2d	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c30	26 c7 47 0c 0c 01 	mov	WORD PTR es:[bx+12],268	;010cH
+	*** 000c36	26 c7 47 0e 00 00 	mov	WORD PTR es:[bx+14],0
+;|***       lpPrintChunk->nFromPage = 1;
+; Line 511
+	*** 000c3c	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c3f	26 c7 47 10 01 00 	mov	WORD PTR es:[bx+16],1
+;|***       lpPrintChunk->nToPage = 1;
+; Line 512
+	*** 000c45	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c48	26 c7 47 12 01 00 	mov	WORD PTR es:[bx+18],1
+;|***       lpPrintChunk->nMinPage = 1;
+; Line 513
+	*** 000c4e	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c51	26 c7 47 14 01 00 	mov	WORD PTR es:[bx+20],1
+;|***       lpPrintChunk->nMaxPage = 1;
+; Line 514
+	*** 000c57	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c5a	26 c7 47 16 01 00 	mov	WORD PTR es:[bx+22],1
+;|***       lpPrintChunk->nCopies = 1;
+; Line 515
+	*** 000c60	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c63	26 c7 47 18 01 00 	mov	WORD PTR es:[bx+24],1
+;|***       lpPrintChunk->hInstance = (HANDLE)NULL;
+; Line 516
+	*** 000c69	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c6c	26 c7 47 1a 00 00 	mov	WORD PTR es:[bx+26],0
+;|***       lpPrintChunk->lCustData = 0L;
+; Line 517
+	*** 000c72	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c75	2b c0 			sub	ax,ax
+	*** 000c77	26 89 47 1e 		mov	WORD PTR es:[bx+30],ax
+	*** 000c7b	26 89 47 1c 		mov	WORD PTR es:[bx+28],ax
+;|***       lpPrintChunk->lpfnPrintHook = (FARHOOK)NULL;
+; Line 518
+	*** 000c7f	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c82	2b c0 			sub	ax,ax
+	*** 000c84	26 89 47 22 		mov	WORD PTR es:[bx+34],ax
+	*** 000c88	26 89 47 20 		mov	WORD PTR es:[bx+32],ax
+;|***       lpPrintChunk->lpfnSetupHook = (FARHOOK)NULL;
+; Line 519
+	*** 000c8c	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c8f	2b c0 			sub	ax,ax
+	*** 000c91	26 89 47 26 		mov	WORD PTR es:[bx+38],ax
+	*** 000c95	26 89 47 24 		mov	WORD PTR es:[bx+36],ax
+;|***       lpPrintChunk->lpPrintTemplateName = (LPSTR)NULL;
+; Line 520
+	*** 000c99	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000c9c	2b c0 			sub	ax,ax
+	*** 000c9e	26 89 47 2a 		mov	WORD PTR es:[bx+42],ax
+	*** 000ca2	26 89 47 28 		mov	WORD PTR es:[bx+40],ax
+;|***       lpPrintChunk->lpSetupTemplateName = (LPSTR)NULL;
+; Line 521
+	*** 000ca6	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000ca9	2b c0 			sub	ax,ax
+	*** 000cab	26 89 47 2e 		mov	WORD PTR es:[bx+46],ax
+	*** 000caf	26 89 47 2c 		mov	WORD PTR es:[bx+44],ax
+;|***       lpPrintChunk->hPrintTemplate = (HANDLE)NULL;
+; Line 522
+	*** 000cb3	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000cb6	26 c7 47 30 00 00 	mov	WORD PTR es:[bx+48],0
+;|***       lpPrintChunk->hSetupTemplate = (HANDLE)NULL;
+; Line 523
+	*** 000cbc	c4 5e e4 		les	bx,DWORD PTR [bp-28]	;lpPrintChunk
+	*** 000cbf	26 c7 47 32 00 00 	mov	WORD PTR es:[bx+50],0
+;|***       break;
+; Line 524
+	*** 000cc5	e9 24 00 		jmp	$SB2746
+;|*** 
+;|***    default:
+; Line 526
+					$SD2759:
+;|***       break;
+; Line 527
+	*** 000cc8	e9 21 00 		jmp	$SB2746
+;|***       }
+; Line 528
+	*** 000ccb	e9 1e 00 		jmp	$SB2746
+					$S2745:
+	*** 000cce	48 			dec	ax
+	*** 000ccf	3d 06 00 		cmp	ax,6
+	*** 000cd2	0f 87 f2 ff 		ja	$SD2759
+	*** 000cd6	d1 e0 			shl	ax,1
+	*** 000cd8	93 			xchg	ax,bx
+	*** 000cd9	2e ff a7 00 00 		jmp	WORD PTR cs:$L2968[bx]
+					$L2968:
+	*** 000cde	00 00 				DW	$SC2749
+	*** 000ce0	00 00 				DW	$SC2750
+	*** 000ce2	00 00 				DW	$SC2751
+	*** 000ce4	00 00 				DW	$SC2752
+	*** 000ce6	00 00 				DW	$SC2753
+	*** 000ce8	00 00 				DW	$SC2757
+	*** 000cea	00 00 				DW	$SC2758
+					$SB2746:
+;|***    return;
+; Line 529
+	*** 000cec	e9 00 00 		jmp	$EX2733
+;|*** }
+; Line 530
+					$EX2733:
+	*** 000cef	5e 			pop	si
+	*** 000cf0	5f 			pop	di
+	*** 000cf1	c9 			leave	
+	*** 000cf2	cb 			ret	
+
+_InitializeStruct	ENDP
+	PUBLIC	_AllocAndLockMem
+_AllocAndLockMem	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  AllocAndLockMem(HANDLE *, WORD)                             *
+;|*** *                                                                         *
+;|*** *   Purpose:  To allocate and lock a chunk of memory for the CD           *
+;|*** *             structure.                                                  *
+;|*** *                                                                         *
+;|*** *   Returns:  LPSTR                                                       *
+;|*** *                                                                         *
+;|*** *  Comments:                                                              *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** 
+;|*** LPSTR AllocAndLockMem (HANDLE *hChunk, WORD wSize)
+;|*** {
+; Line 552
+	*** 000cf3	55 			push	bp
+	*** 000cf4	8b ec 			mov	bp,sp
+	*** 000cf6	b8 04 00 		mov	ax,4
+	*** 000cf9	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000cfe	57 			push	di
+	*** 000cff	56 			push	si
+;	lpChunk = -4
+;	wSize = 10
+;	hChunk = 6
+;|***    LPSTR lpChunk;
+;|*** 
+;|***    *hChunk = GSSiGlobAlloc(GMEM_MOVEABLE, wSize);
+; Line 555
+	*** 000d00	6a 00 			push	0
+	*** 000d02	ff 76 0a 		push	WORD PTR [bp+10]	;wSize
+	*** 000d05	6a 02 			push	2
+	*** 000d07	9a 00 00 00 00 		call	FAR PTR _GSSiGlobAlloc
+	*** 000d0c	83 c4 06 		add	sp,6
+	*** 000d0f	c4 5e 06 		les	bx,DWORD PTR [bp+6]	;hChunk
+	*** 000d12	26 89 07 		mov	WORD PTR es:[bx],ax
+;|***    if (*hChunk)
+; Line 556
+	*** 000d15	c4 5e 06 		les	bx,DWORD PTR [bp+6]	;hChunk
+	*** 000d18	26 83 3f 00 		cmp	WORD PTR es:[bx],0
+	*** 000d1c	0f 84 3b 00 		je	$I2766
+;|***    {
+; Line 557
+;|***       lpChunk = GlobalLock(*hChunk);
+; Line 558
+	*** 000d20	c4 5e 06 		les	bx,DWORD PTR [bp+6]	;hChunk
+	*** 000d23	26 ff 37 		push	WORD PTR es:[bx]
+	*** 000d26	9a 00 00 00 00 		call	FAR PTR GLOBALLOCK
+	*** 000d2b	89 46 fc 		mov	WORD PTR [bp-4],ax	;lpChunk
+	*** 000d2e	89 56 fe 		mov	WORD PTR [bp-2],dx
+;|***       if (!lpChunk)
+; Line 559
+	*** 000d31	8b 46 fe 		mov	ax,WORD PTR [bp-2]
+	*** 000d34	0b 46 fc 		or	ax,WORD PTR [bp-4]	;lpChunk
+	*** 000d37	0f 85 1d 00 		jne	$I2767
+;|***       {
+; Line 560
+;|***          GlobalFree(*hChunk);
+; Line 561
+	*** 000d3b	c4 5e 06 		les	bx,DWORD PTR [bp+6]	;hChunk
+	*** 000d3e	26 ff 37 		push	WORD PTR es:[bx]
+	*** 000d41	9a 00 00 00 00 		call	FAR PTR GLOBALFREE
+;|***          ReportError(IDC_LOCKFAIL);
+; Line 562
+	*** 000d46	6a 02 			push	2
+	*** 000d48	9a 00 00 00 00 		call	FAR PTR _ReportError
+	*** 000d4d	83 c4 02 		add	sp,2
+;|***          lpChunk = NULL;
+; Line 563
+	*** 000d50	2b c0 			sub	ax,ax
+	*** 000d52	89 46 fe 		mov	WORD PTR [bp-2],ax
+	*** 000d55	89 46 fc 		mov	WORD PTR [bp-4],ax	;lpChunk
+;|***       }
+; Line 564
+;|***    }
+; Line 565
+					$I2767:
+;|***    else
+; Line 566
+	*** 000d58	e9 12 00 		jmp	$I2768
+					$I2766:
+;|***    {
+; Line 567
+;|***       ReportError(IDC_ALLOCFAIL);
+; Line 568
+	*** 000d5b	6a 01 			push	1
+	*** 000d5d	9a 00 00 00 00 		call	FAR PTR _ReportError
+	*** 000d62	83 c4 02 		add	sp,2
+;|***       lpChunk = NULL;
+; Line 569
+	*** 000d65	2b c0 			sub	ax,ax
+	*** 000d67	89 46 fe 		mov	WORD PTR [bp-2],ax
+	*** 000d6a	89 46 fc 		mov	WORD PTR [bp-4],ax	;lpChunk
+;|***    }
+; Line 570
+					$I2768:
+;|***    return (lpChunk);
+; Line 571
+	*** 000d6d	8b 46 fc 		mov	ax,WORD PTR [bp-4]	;lpChunk
+	*** 000d70	8b 56 fe 		mov	dx,WORD PTR [bp-2]
+	*** 000d73	e9 00 00 		jmp	$EX2764
+;|*** }
+; Line 572
+					$EX2764:
+	*** 000d76	5e 			pop	si
+	*** 000d77	5f 			pop	di
+	*** 000d78	c9 			leave	
+	*** 000d79	cb 			ret	
+
+_AllocAndLockMem	ENDP
+	PUBLIC	_vdef
+_vdef	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  MainWndProc(HWND, UINT, WPARAM, LPARAM)			  *
+;|*** *                                                                         *
+;|*** *   Purpose:  Standard main window procedure to process messages          *
+;|*** *             for the main window.                                        *
+;|*** *                                                                         *
+;|*** *   Returns:  void                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:  Note the logic for processing of CD Help messages and       *
+;|*** *             Find/FindReplace notification messages.  This is done       *
+;|*** *             under the default processing of the main switch(message)    *
+;|*** *             statement.                                                  *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** void vdef ()
+;|*** {
+; Line 596
+	*** 000d7a	55 			push	bp
+	*** 000d7b	8b ec 			mov	bp,sp
+	*** 000d7d	b8 e6 00 		mov	ax,230	;00e6H
+	*** 000d80	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000d85	57 			push	di
+	*** 000d86	56 			push	si
+;	lpFOChunk = -4
+;	lpFSChunk = -8
+;	hfoChunk = -10
+;	hfsChunk = -12
+;	iLogPixsY = -14
+;	lf = -64
+;	lpFontChunk = -68
+;	hFontChunk = -70
+;	hOldFont = -72
+;	lpFChunk = -76
+;	lpFRChunk = -80
+;	bFCase = -82
+;	bFReverse = -84
+;	bFWord = -86
+;	bFRCase = -88
+;	bFRWord = -90
+;	lpF = -94
+;	dwFFlags = -98
+;	szFDirection = -122
+;	szFCase = -146
+;	szFRCase = -170
+;	szFWord = -196
+;	szFRWord = -222
+;	lpPDChunk = -226
+;	xPage = -228
+;	yPage = -230
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                    FILEOPEN/FILESAVE VARIABLES                   *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    LPFOCHUNK lpFOChunk;    //Pointer to File Open block
+;|***    LPFSCHUNK lpFSChunk;    //Pointer to File Save block
+;|***    HANDLE hfoChunk;     //Handle to File Open block of memory
+;|***    HANDLE hfsChunk;     //Handle to File Save block of memory
+;|*** 
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                             FONTS VARIABLES                      *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    #define DESIREDPOINTSIZE 12
+;|*** 
+;|***    //   HDC            hDC;
+;|***    int iLogPixsY;
+;|***    LOGFONT lf;
+;|***    LPCHOOSEFONT lpFontChunk;
+;|***    HANDLE hFontChunk;
+;|***    HFONT hOldFont;
+;|*** 
+;|*** 
+;|***    /********************************************************************
+;|***    *                                                                   *
+;|***    *                             FIND/FINDREPLACE VARIABLES            *
+;|***    *                                                                   *
+;|***    ********************************************************************/
+;|***    LPFINDREPLACECHUNK lpFChunk, lpFRChunk;
+;|***    static HANDLE hFChunk, hFRChunk;
+;|***    BOOL bFCase, bFReverse, bFWord;
+;|***    BOOL bFRCase, bFRWord;
+;|***    LPFINDREPLACE lpF;
+;|***    DWORD dwFFlags;
+;|***    char szFDirection[MAXFINDDIRECTIONLEN];
+;|***    char szFCase[MAXFINDCASELEN], szFRCase[MAXFINDCASELEN];
+;|***    char szFWord[MAXFINDWORDLEN], szFRWord[MAXFINDWORDLEN];
+;|***    static HDC hDC;
+;|*** 
+;|*** 
+;|***    /*******************************************************************
+;|***    *                                                                  *
+;|***    *                             PRINTDLG VARIABLES                   *
+;|***    *                                                                  *
+;|***    *******************************************************************/
+;|***    LPPRINTDLG lpPDChunk;
+;|***    short xPage, yPage;
+;|*** 
+;|*** /*   switch (message)
+;|***       {
+;|***    case WM_CREATE:
+;|***       wFRMsg = RegisterWindowMessage((LPSTR)FINDMSGSTRING);
+;|***       wHelpMsg = RegisterWindowMessage((LPSTR)HELPMSGSTRING);
+;|***       lpfnFileOpenHook = (FARHOOK)MakeProcInstance(FileOpenHook, ghInst);
+;|***       lpfnFindHook = (FARHOOK)MakeProcInstance(FindHook, ghInst);
+;|***       lpfnFindReplaceHook = (FARHOOK)MakeProcInstance(FindReplaceHook, ghInst);
+;|***       if (lpfnFileOpenHook == NULL || lpfnFindHook == NULL ||
+;|***           lpfnFindReplaceHook == NULL)
+;|***          return (FALSE);
+;|*** 
+;|***       //Are we in monochrome land????
+;|***       hDC = GetDC(NULL);
+;|***       gbMonochrome = (2 == GetDeviceCaps(hDC, NUMCOLORS));  // Monochrome!
+;|***       ReleaseDC(NULL, hDC);
+;|*** 
+;|***       //Load brush for painting GetOpenFileName dlg box
+;|***       if (!gbMonochrome)
+;|***       {
+;|***          HBITMAP hTempBitmap;
+;|*** 
+;|***          hTempBitmap = LoadBitmap(ghInst, MAKEINTRESOURCE(1));
+;|***          if (hTempBitmap)
+;|***          {
+;|***             ghDlgBrush = CreatePatternBrush(hTempBitmap);
+;|***             DeleteObject(hTempBitmap);
+;|***          }
+;|***       }
+;|***       break;
+;|*** 
+;|***    case WM_ERASEBKGND:
+;|***       if (ghBkgndBrush)
+;|***       {
+;|***          GetClientRect(ghWnd, &rc);
+;|***          FillRect((HDC)wParam, &rc, ghBkgndBrush);
+;|***          break;
+;|***       }
+;|***       else
+;|***          return (DefWindowProc(hWnd, message, wParam, lParam));
+;|*** 
+;|***    case WM_PAINT:
+;|***       if (ghSelectedFont)  //Let's output the string
+;|***       {
+;|***          hDC = BeginPaint(hWnd, &ps);
+;|***          hOldFont = SelectObject(hDC, ghSelectedFont);
+;|***          SetBkMode(hDC, TRANSPARENT);
+;|***          SetTextColor(hDC, (COLORREF)dwFontColor);
+;|***          TextOut(hDC, 10, 10, gszFontMsg, 20);
+;|***          SelectObject(hDC, hOldFont);
+;|***          EndPaint(hWnd, &ps);
+;|***          break;
+;|***       }
+;|***       else
+;|***          return (DefWindowProc(hWnd, message, wParam, lParam));
+;|*** 
+;|***    case WM_COMMAND:
+;|***       switch (wParam)
+;|***          {
+;|***       case IDM_FILEOPEN:
+;|***          wSize = sizeof(FOCHUNK);
+;|***          if (!(lpFOChunk = (LPFOCHUNK)AllocAndLockMem(&hfoChunk, wSize)))
+;|***             break;
+;|***          InitializeStruct(IDC_OPENFILE, (LPSTR)lpFOChunk);
+;|***          if (GetOpenFileName(&(lpFOChunk->of)))
+;|***          {
+;|***             HANDLE hFile;
+;|***             OFSTRUCT ofstruct;
+;|*** 
+;|***             hFile = OpenFile(lpFOChunk->of.lpstrFile, &ofstruct, OF_EXIST);
+;|***             if (hFile != -1)
+;|***                MessageBox(hWnd, (LPSTR)gszFOSuccess, gszAppName, MB_OK);
+;|***             else
+;|***                MessageBox(hWnd, (LPSTR)gszFOFailure, gszAppName, MB_OK);
+;|*** 
+;|***             //NOTE!!!  On a closed system (ie, not running on a network) this OpenFile
+;|***             //         call should NEVER fail.  This because we passed in the
+;|***             //         OFN_FILEMUSTEXIST flag to CD.  However, on a network system,
+;|***             //         there is a *very* small chance that between the time CD's checked
+;|***             //         for existance of the file and the time the call to OpenFile
+;|***             //         was made here, someone else on the network has deleted the file.
+;|***             //         MORAL: ALWAYS, ALWAYS, ALWAYS check the return code from your
+;|***             //         call to OpenFile() or _lopen.
+;|***          }
+;|***          else
+;|***          {
+;|***             ProcessCDError(CommDlgExtendedError());
+;|***          }
+;|***          GlobalUnlock(hfoChunk);
+;|***          GlobalFree(hfoChunk);
+;|***          break;
+;|*** 
+;|***       case IDM_FILESAVE:
+;|***          wSize = sizeof(FOCHUNK);
+;|***          if (!(lpFSChunk = (LPFOCHUNK)AllocAndLockMem(&hfsChunk, wSize)))
+;|***             break;
+;|***          InitializeStruct(IDC_SAVEFILE, (LPSTR)lpFSChunk);
+;|***          if (GetSaveFileName(&(lpFSChunk->of)))
+;|***          {
+;|***             wsprintf(gszBuffer, "Save file as: %s", (LPSTR)lpFSChunk->of.
+;|***                      lpstrFile);
+;|***             MessageBox(hWnd, (LPSTR)gszBuffer, gszAppName, MB_OK);
+;|***          }
+;|***          else
+;|***          {
+;|***             ProcessCDError(CommDlgExtendedError());
+;|***          }
+;|***          GlobalUnlock(hfsChunk);
+;|***          GlobalFree(hfsChunk);
+;|***          break;
+;|*** 
+;|***       case IDM_FIND:
+;|***          EnableMenuItem(GetMenu(ghWnd), IDM_FIND, MF_GRAYED);
+;|***          wSize = sizeof(FINDREPLACECHUNK);
+;|***          if (!(lpFChunk = (LPFINDREPLACECHUNK)AllocAndLockMem(&hFChunk, wSize))
+;|***          )
+;|***             break;
+;|***          InitializeStruct(IDC_FIND, (LPSTR)lpFChunk);
+;|***          if (!(ghFFRDlg = FindText(&(lpFChunk->fr))))
+;|***          {
+;|***             GlobalUnlock(hFChunk);
+;|***             GlobalFree(hFChunk);
+;|***             ghFFRDlg = NULL;
+;|***             EnableMenuItem(GetMenu(ghWnd), IDM_FIND, MF_ENABLED);
+;|***             ProcessCDError(CommDlgExtendedError());
+;|***          }
+;|*** 
+;|***          //Note:  DO NOT call GlobalUnlock() and GlobalFree() here since this is
+;|***          //       a modeless dialog.  See default processing below.
+;|***          break;
+;|*** 
+;|***       case IDM_FINDANDREPLACE:
+;|***          EnableMenuItem(GetMenu(ghWnd), IDM_FINDANDREPLACE, MF_GRAYED);
+;|***          wSize = sizeof(FINDREPLACECHUNK);
+;|***          if (!(lpFRChunk = (LPFINDREPLACECHUNK)AllocAndLockMem(&hFRChunk, wSize
+;|***                                                                )))
+;|***             break;
+;|***          InitializeStruct(IDC_FINDREPLACE, (LPSTR)lpFRChunk);
+;|***          if (!(ghFFRDlg = ReplaceText(&(lpFRChunk->fr))))
+;|***          {
+;|***             GlobalUnlock(hFRChunk);
+;|***             GlobalFree(hFRChunk);
+;|***             ghFFRDlg = NULL;
+;|***             EnableMenuItem(GetMenu(ghWnd), IDM_FINDANDREPLACE, MF_ENABLED);
+;|***             ProcessCDError(CommDlgExtendedError());
+;|***          }
+;|*** 
+;|***          //Note:  DO NOT call GlobalUnlock() and GlobalFree() here since this is
+;|***          //       a modeless dialog.  See default processing below.
+;|***          break;
+;|*** 
+;|***       case IDM_COLORS:
+;|***          if (!lpColorsChunk)   //ie, haven't called colors yet
+;|***          //so let's initialize everything
+;|***          {
+;|***             wSize = sizeof(COLORSCHUNK);
+;|***             if (!(lpColorsChunk = (LPCOLORSCHUNK)AllocAndLockMem(&hColorsChunk,
+;|***                                                                  wSize)))
+;|***                break;
+;|***             InitializeStruct(IDC_COLORS, (LPSTR)lpColorsChunk);
+;|***          }
+;|***          if (ChooseColor(&(lpColorsChunk->chsclr)))
+;|***          {
+;|***             if (ghBkgndBrush)
+;|***                DeleteObject(ghBkgndBrush);
+;|***             ghBkgndBrush = CreateSolidBrush(lpColorsChunk->chsclr.rgbResult);
+;|***             InvalidateRect(ghWnd, NULL, TRUE);
+;|***          }
+;|***          else
+;|***          {
+;|***             ProcessCDError(CommDlgExtendedError());
+;|***          }
+;|***          break;
+;|*** 
+;|***       case IDM_FONTS:
+;|***          wSize = sizeof(CHOOSEFONT);
+;|***          if (!(lpFontChunk = (LPCHOOSEFONT)AllocAndLockMem(&hFontChunk, wSize))
+;|***          )
+;|***             break;
+;|***          InitializeStruct(IDC_FONT, (LPSTR)lpFontChunk);
+;|*** 
+;|***       //Because we are only getting screen fonts, we can set hDC = NULL
+;|***       //If printer fonts are desired, a handle to a printer DC must be passed in
+;|***          lpFontChunk->hDC = NULL;
+;|*** 
+;|***          //Now let's initialize the logfont structure.
+;|***          hDC = GetDC(ghWnd);
+;|***          iLogPixsY = GetDeviceCaps(hDC, LOGPIXELSY);
+;|***          ReleaseDC(ghWnd, hDC);
+;|***          lf.lfHeight = -1 * (iLogPixsY * DESIREDPOINTSIZE / 72);
+;|***          lf.lfWidth = 0;
+;|***          lf.lfEscapement = 0;
+;|***          lf.lfOrientation = 0;
+;|***          lf.lfWeight = 400;
+;|***          lf.lfItalic = 0;
+;|***          lf.lfUnderline = 0;
+;|***          lf.lfStrikeOut = 0;
+;|***          lf.lfCharSet = ANSI_CHARSET;
+;|***          lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
+;|***          lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+;|***          lf.lfQuality = DEFAULT_QUALITY;
+;|***          lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+;|***          lstrcpy(lf.lfFaceName, "Modern");
+;|***          lpFontChunk->lpLogFont = &lf;
+;|***          if (ChooseFont(lpFontChunk)) //Now let's create the selected font!
+;|***          {
+;|***             if (ghSelectedFont)
+;|***                DeleteObject(ghSelectedFont);
+;|***             ghSelectedFont = CreateFontIndirect((LPLOGFONT)(lpFontChunk->
+;|***                                                 lpLogFont));
+;|***             dwFontColor = lpFontChunk->rgbColors;
+;|***             InvalidateRect(ghWnd, NULL, TRUE);
+;|***          }
+;|***          else
+;|***          {
+;|***             ProcessCDError(CommDlgExtendedError());
+;|***          }
+;|***          GlobalUnlock(hFontChunk);
+;|***          GlobalFree(hFontChunk);
+;|***          break;
+;|*** 
+;|***       case IDM_PRINT:
+;|***          wSize = sizeof(PRINTDLG);
+;|***          if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
+;|***             break;
+;|***          InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
+;|***          if (PrintDlg(lpPDChunk) != 0)
+;|***          {
+;|***             BOOL bError;
+;|***             FARPROC lpfnAbortProc, lpfnPrintDlgProc;
+;|*** 
+;|***             gbUserAbort = FALSE;
+;|***             bError = FALSE;
+;|***             lpfnPrintDlgProc = MakeProcInstance(PrintDlgProc, ghInst);
+;|***             ghPrintingDlg = CreateDialog(ghInst, "PRINTING", ghWnd,
+;|***                                          lpfnPrintDlgProc);
+;|***             lpfnAbortProc = MakeProcInstance(AbortProc, ghInst);
+;|***             Escape(lpPDChunk->hDC, SETABORTPROC, 0, (LPSTR)lpfnAbortProc, NULL)
+;|***             ;
+;|***             if (Escape(lpPDChunk->hDC, STARTDOC, 8, gszTestDoc, NULL) > 0)
+;|***             {
+;|***                xPage = GetDeviceCaps(lpPDChunk->hDC, HORZRES);
+;|***                yPage = GetDeviceCaps(lpPDChunk->hDC, VERTRES);
+;|***                Rectangle(lpPDChunk->hDC, 0, 0, xPage, yPage);
+;|***                MoveTo(lpPDChunk->hDC, 0, 0);
+;|***                LineTo(lpPDChunk->hDC, xPage, yPage);
+;|***                MoveTo(lpPDChunk->hDC, 0, yPage);
+;|***                LineTo(lpPDChunk->hDC, xPage, 0);
+;|***                dwLen = GetTextExtent(lpPDChunk->hDC, gszBuffer, 26);
+;|***                TextOut(lpPDChunk->hDC, (xPage / 2) - (LOWORD(dwLen) / 2), 50,
+;|***                        gszPrintMsg, 26);
+;|***                Escape(lpPDChunk->hDC, NEWFRAME, 0, NULL, NULL);
+;|***                Escape(lpPDChunk->hDC, ENDDOC, 0, NULL, NULL);
+;|***                DeleteDC(lpPDChunk->hDC);
+;|***                if (lpPDChunk->hDevMode)
+;|***                   GlobalFree(lpPDChunk->hDevMode);
+;|***                if (lpPDChunk->hDevNames)
+;|***                   GlobalFree(lpPDChunk->hDevNames);
+;|***                DeleteDC(lpPDChunk->hDC);
+;|***                if (lpPDChunk->hDevMode)
+;|***                   GlobalFree(lpPDChunk->hDevMode);
+;|***                if (lpPDChunk->hDevNames)
+;|***                   GlobalFree(lpPDChunk->hDevNames);
+;|***          break;
+;|*** 
+;|***       case IDM_ABOUT:
+;|***          lpProcAbout = MakeProcInstance(About, ghInst);
+;|***          DialogBox(ghInst, MAKEINTRESOURCE(1), hWnd, lpProcAbout);
+;|***          FreeProcInstance(lpProcAbout);
+;|***          break;
+;|*** 
+;|***       case IDM_EXIT:
+;|***          PostMessage(hWnd, WM_CLOSE, 0, 0L);
+;|***          break;
+;|*** 
+;|***       default:
+;|***          return (DefWindowProc(hWnd, message, wParam, lParam));
+;|***          }
+;|***       break;
+;|*** 
+;|***    case WM_DESTROY:
+;|***       if (ghDlgBrush)
+;|***          DeleteObject(ghDlgBrush);
+;|***       if (ghBkgndBrush)
+;|***          DeleteObject(ghBkgndBrush);
+;|***       if (ghSelectedFont)
+;|***          DeleteObject(ghSelectedFont);
+;|***       if (lpColorsChunk)  //Clean up memory for colors dialog
+;|***       {
+;|***          GlobalUnlock(hColorsChunk);
+;|***          GlobalFree(hColorsChunk);
+;|***       }
+;|***       PostQuitMessage(0);
+;|***       break;
+;|*** 
+;|***    default:
+;|*** 
+;|***    //Let's keep the logic readable and put it in the switch statement.
+;|***    //Assign some user defined constants here so a switch can be used.
+;|***       if (message == wHelpMsg)
+;|***          wMyMessage = IDC_HELPMSG;
+;|***       if (message == wFRMsg)
+;|***          wMyMessage = IDC_FINDREPLACEMSG;
+;|***       switch (wMyMessage)
+;|***          {
+;|***       case IDC_HELPMSG:
+;|***          WinHelp(ghWnd, gszWin31wh, HELP_INDEX, 0L);
+;|***          break;
+;|*** 
+;|***       case IDC_FINDREPLACEMSG:
+;|***          lpF = (LPFINDREPLACE)lParam;
+;|***          dwFFlags = lpF->Flags;
+;|***          if (dwFFlags & FR_DIALOGTERM)
+;|***          {
+;|***             if (lpF->lCustData == CDN_FIND)
+;|***             {
+;|***                GlobalUnlock(hFChunk);
+;|***                GlobalFree(hFChunk);
+;|***                ghFFRDlg = NULL;
+;|***                EnableMenuItem(GetMenu(ghWnd), IDM_FIND, MF_ENABLED);
+;|***             }
+;|***             else if (lpF->lCustData == CDN_FINDREPLACE)
+;|***             {
+;|***                GlobalUnlock(hFRChunk);
+;|***                GlobalFree(hFRChunk);
+;|***                ghFFRDlg = NULL;
+;|***                EnableMenuItem(GetMenu(ghWnd), IDM_FINDANDREPLACE, MF_ENABLED);
+;|***             }
+;|***             break;
+;|***          }
+;|***          if (lpF->lCustData == CDN_FIND)
+;|***          {
+;|***             bFReverse = (dwFFlags & FR_DOWN ? FALSE : TRUE);
+;|***             bFCase = (dwFFlags & FR_MATCHCASE ? TRUE : FALSE);
+;|***             bFWord = (dwFFlags & FR_WHOLEWORD ? TRUE : FALSE);
+;|***             if (bFReverse)
+;|***                iResult = LoadString(ghInst, IDS_SEARCHUP, szFDirection, sizeof(
+;|***                                     szFDirection));
+;|***             else
+;|***                iResult = LoadString(ghInst, IDS_SEARCHDOWN, szFDirection,
+;|***                                     sizeof(szFDirection));
+;|***             if (!iResult)
+;|***             {
+;|***                ReportError(IDC_LOADSTRINGFAIL);
+;|***                break;
+;|***             }
+;|***             if (bFCase)
+;|***                iResult = LoadString(ghInst, IDS_CASESENSITIVE, szFCase, sizeof(
+;|***                                     szFCase));
+;|***             else
+;|***                iResult = LoadString(ghInst, IDS_IGNORECASE, szFCase, sizeof(
+;|***                                     szFCase));
+;|***             if (!iResult)
+;|***             {
+;|***                ReportError(IDC_LOADSTRINGFAIL);
+;|***                break;
+;|***             }
+;|***             if (bFWord)
+;|***                iResult = LoadString(ghInst, IDS_WHOLEWORD, szFWord, sizeof(
+;|***                                     szFWord));
+;|***             else
+;|***                iResult = LoadString(ghInst, IDS_WHOLEANDSUB, szFWord, sizeof(
+;|***                                     szFWord));
+;|***             if (!iResult)
+;|***             {
+;|***                ReportError(IDC_LOADSTRINGFAIL);
+;|***                break;
+;|***             }
+;|***             wsprintf(gszBuffer, "Find %s, %s, %s, %s", (LPSTR)(lpF->
+;|***                      lpstrFindWhat), (LPSTR)szFDirection, (LPSTR)szFWord, (
+;|***                      LPSTR)szFCase);
+;|***             MessageBox(ghFFRDlg, gszBuffer, gszAppName, MB_OK);
+;|***             break;
+;|***          }
+;|***          if (lpF->lCustData == CDN_FINDREPLACE)
+;|***          {
+;|***             bFRCase = (dwFFlags & FR_MATCHCASE ? TRUE : FALSE);
+;|***             bFRWord = (dwFFlags & FR_WHOLEWORD ? TRUE : FALSE);
+;|***             if (bFRCase)
+;|***                iResult = LoadString(ghInst, IDS_CASESENSITIVE, szFRCase, sizeof
+;|***                                     (szFRCase));
+;|***             else
+;|***                iResult = LoadString(ghInst, IDS_IGNORECASE, szFRCase, sizeof(
+;|***                                     szFRCase));
+;|***             if (!iResult)
+;|***             {
+;|***                ReportError(IDC_LOADSTRINGFAIL);
+;|***                break;
+;|***             }
+;|***             if (bFRWord)
+;|***                iResult = LoadString(ghInst, IDS_WHOLEWORD, szFRWord, sizeof(
+;|***                                     szFRWord));
+;|***             else
+;|***                iResult = LoadString(ghInst, IDS_WHOLEANDSUB, szFRWord, sizeof(
+;|***                                     szFRWord));
+;|***             if (!iResult)
+;|***             {
+;|***                ReportError(IDC_LOADSTRINGFAIL);
+;|***                break;
+;|***             }
+;|***             wsprintf(gszBuffer, "Find %s, Replace with %s, %s, %s", (LPSTR)(lpF
+;|***                      ->lpstrFindWhat), (LPSTR)(lpF->lpstrReplaceWith), (LPSTR)
+;|***                      szFRWord, (LPSTR)szFRCase);
+;|***             MessageBox(ghFFRDlg, gszBuffer, gszAppName, MB_OK);
+;|***             break;
+;|***          }
+;|*** 
+;|***       default:
+;|***          return (DefWindowProc(hWnd, message, wParam, lParam));
+;|***          }
+;|***       break;
+;|***       }
+;|***    return (NULL); */
+;|*** } /* end MainWndProc */
+; Line 1060
+					$EX2770:
+	*** 000d87	5e 			pop	si
+	*** 000d88	5f 			pop	di
+	*** 000d89	c9 			leave	
+	*** 000d8a	cb 			ret	
+
+_vdef	ENDP
+	PUBLIC	FILEOPENHOOK
+FILEOPENHOOK	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  FileOpenHook(HWND, UINT, WPARAM, LPARAM)			  *
+;|*** *                                                                         *
+;|*** *   Purpose:  This function "hooks" the CD GetOpenFileName() procedure    *
+;|*** *             and allows you to process any messages you want.  In this   *
+;|*** *             example, the WM_CTLCOLOR message is being processed to      *
+;|*** *             give the background of the CD a cool color.                 *
+;|*** *                                                                         *
+;|*** *   Returns:  BOOL                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:  This function must be exported and must have an instance    *
+;|*** *             thunk created for it (ie, call MakeProcInstance; see        *
+;|*** *             WM_CREATE processing in the main window procedure above)    *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** 
+;|*** BOOL FAR PASCAL FileOpenHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
+;|***                               lParam)
+;|*** {  return (FALSE);
+; Line 1087
+	*** 000d8b	55 			push	bp
+	*** 000d8c	8b ec 			mov	bp,sp
+	*** 000d8e	b8 00 00 		mov	ax,0
+	*** 000d91	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000d96	57 			push	di
+	*** 000d97	56 			push	si
+;	hDlg = 14
+;	message = 12
+;	wParam = 10
+;	lParam = 6
+	*** 000d98	b8 00 00 		mov	ax,0
+	*** 000d9b	e9 cb 00 		jmp	$EX2811
+;|***    switch (message)
+; Line 1088
+	*** 000d9e	8b 46 0c 		mov	ax,WORD PTR [bp+12]	;message
+	*** 000da1	e9 a9 00 		jmp	$S2812
+;|***       {
+; Line 1089
+;|***    case WM_INITDIALOG:
+; Line 1090
+					$SC2816:
+;|***       return (TRUE);
+; Line 1091
+	*** 000da4	b8 01 00 		mov	ax,1
+	*** 000da7	e9 bf 00 		jmp	$EX2811
+;|*** 
+;|***    case WM_CTLCOLOR:
+; Line 1093
+					$SC2817:
+;|***       if (gbMonochrome || !ghDlgBrush)
+; Line 1094
+	*** 000daa	83 3e 00 00 00 		cmp	WORD PTR _gbMonochrome,0
+	*** 000daf	0f 85 09 00 		jne	$I2819
+	*** 000db3	83 3e 00 00 00 		cmp	WORD PTR _ghDlgBrush,0
+	*** 000db8	0f 85 06 00 		jne	$I2818
+					$I2819:
+;|***          return (FALSE);
+; Line 1095
+	*** 000dbc	b8 00 00 		mov	ax,0
+	*** 000dbf	e9 a7 00 		jmp	$EX2811
+;|***       switch (HIWORD(lParam))
+; Line 1096
+					$I2818:
+	*** 000dc2	8b 46 08 		mov	ax,WORD PTR [bp+8]
+	*** 000dc5	e9 18 00 		jmp	$S2820
+;|***          {
+; Line 1097
+;|***       case CTLCOLOR_LISTBOX:   //Don't mess with the listboxes
+; Line 1098
+					$SC2824:
+;|***          return (FALSE);
+; Line 1099
+	*** 000dc8	b8 00 00 		mov	ax,0
+	*** 000dcb	e9 9b 00 		jmp	$EX2811
+;|*** 
+;|***       case CTLCOLOR_DLG:
+; Line 1101
+					$SC2825:
+;|***          UnrealizeObject(ghDlgBrush);
+; Line 1102
+	*** 000dce	ff 36 00 00 		push	WORD PTR _ghDlgBrush
+	*** 000dd2	9a 00 00 00 00 		call	FAR PTR UNREALIZEOBJECT
+;|***          break;
+; Line 1103
+	*** 000dd7	e9 15 00 		jmp	$SB2821
+;|*** 
+;|***       default:
+; Line 1105
+					$SD2826:
+;|***          break;
+; Line 1106
+	*** 000dda	e9 12 00 		jmp	$SB2821
+;|***          }
+; Line 1107
+	*** 000ddd	e9 0f 00 		jmp	$SB2821
+					$S2820:
+	*** 000de0	48 			dec	ax
+	*** 000de1	48 			dec	ax
+	*** 000de2	0f 84 e2 ff 		je	$SC2824
+	*** 000de6	48 			dec	ax
+	*** 000de7	48 			dec	ax
+	*** 000de8	0f 84 e2 ff 		je	$SC2825
+	*** 000dec	e9 eb ff 		jmp	$SD2826
+					$SB2821:
+;|***       SelectObject((HDC)wParam, ghDlgBrush);
+; Line 1108
+	*** 000def	ff 76 0a 		push	WORD PTR [bp+10]	;wParam
+	*** 000df2	ff 36 00 00 		push	WORD PTR _ghDlgBrush
+	*** 000df6	9a 00 00 00 00 		call	FAR PTR SELECTOBJECT
+;|***       if (HIWORD(lParam) == CTLCOLOR_DLG)
+; Line 1109
+	*** 000dfb	83 7e 08 04 		cmp	WORD PTR [bp+8],4
+	*** 000dff	0f 85 0c 00 		jne	$I2827
+;|***          SetBrushOrg((HDC)wParam, 0, 0);
+; Line 1110
+	*** 000e03	ff 76 0a 		push	WORD PTR [bp+10]	;wParam
+	*** 000e06	6a 00 			push	0
+	*** 000e08	6a 00 			push	0
+	*** 000e0a	9a 00 00 00 00 		call	FAR PTR SETBRUSHORG
+;|***       SetBkMode((HDC)wParam, TRANSPARENT);
+; Line 1111
+					$I2827:
+	*** 000e0f	ff 76 0a 		push	WORD PTR [bp+10]	;wParam
+	*** 000e12	6a 01 			push	1
+	*** 000e14	9a 00 00 00 00 		call	FAR PTR SETBKMODE
+;|***       SetTextColor((HDC)wParam, RGB(0, 0, 0));
+; Line 1112
+	*** 000e19	ff 76 0a 		push	WORD PTR [bp+10]	;wParam
+	*** 000e1c	6a 00 			push	0
+	*** 000e1e	6a 00 			push	0
+	*** 000e20	9a 00 00 00 00 		call	FAR PTR SETTEXTCOLOR
+;|***       return (ghDlgBrush);
+; Line 1113
+	*** 000e25	a1 00 00 		mov	ax,WORD PTR _ghDlgBrush
+	*** 000e28	e9 3e 00 		jmp	$EX2811
+;|*** 
+;|***    case WM_COMMAND:
+; Line 1115
+					$SC2828:
+;|***       switch (wParam)
+; Line 1116
+	*** 000e2b	8b 46 0a 		mov	ax,WORD PTR [bp+10]	;wParam
+	*** 000e2e	e9 09 00 		jmp	$S2829
+;|***          {
+; Line 1117
+;|***       case stc1:
+; Line 1118
+					$SC2833:
+;|***          break;
+; Line 1119
+	*** 000e31	e9 10 00 		jmp	$SB2830
+;|*** 
+;|***       default:
+; Line 1121
+					$SD2834:
+;|***          break;
+; Line 1122
+	*** 000e34	e9 0d 00 		jmp	$SB2830
+;|***          }
+; Line 1123
+	*** 000e37	e9 0a 00 		jmp	$SB2830
+					$S2829:
+	*** 000e3a	2d 40 04 		sub	ax,1088	;0440H
+	*** 000e3d	0f 84 f0 ff 		je	$SC2833
+	*** 000e41	e9 f0 ff 		jmp	$SD2834
+					$SB2830:
+;|***       break;
+; Line 1124
+	*** 000e44	e9 1c 00 		jmp	$SB2813
+;|*** 
+;|***    default:
+; Line 1126
+					$SD2835:
+;|***       break;
+; Line 1127
+	*** 000e47	e9 19 00 		jmp	$SB2813
+;|***       }
+; Line 1128
+	*** 000e4a	e9 16 00 		jmp	$SB2813
+					$S2812:
+	*** 000e4d	2d 19 00 		sub	ax,25	;0019H
+	*** 000e50	0f 84 56 ff 		je	$SC2817
+	*** 000e54	2d f7 00 		sub	ax,247	;00f7H
+	*** 000e57	0f 84 49 ff 		je	$SC2816
+	*** 000e5b	48 			dec	ax
+	*** 000e5c	0f 84 cb ff 		je	$SC2828
+	*** 000e60	e9 e4 ff 		jmp	$SD2835
+					$SB2813:
+;|***    return (FALSE);
+; Line 1129
+	*** 000e63	b8 00 00 		mov	ax,0
+	*** 000e66	e9 00 00 		jmp	$EX2811
+;|*** }
+; Line 1130
+					$EX2811:
+	*** 000e69	5e 			pop	si
+	*** 000e6a	5f 			pop	di
+	*** 000e6b	c9 			leave	
+	*** 000e6c	ca 0a 00 		ret	10	;0000000aH
+
+FILEOPENHOOK	ENDP
+	PUBLIC	FINDHOOK
+FINDHOOK	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  FindHook(HWND, UINT, WPARAM, LPARAM)			  *
+;|*** *                                                                         *
+;|*** *   Purpose:  This function "hooks" the CD FindText() procedure           *
+;|*** *             and allows you to process and messages you want.            *
+;|*** *             The ONLY reason we are hooking the FindText() CD is to      *
+;|*** *             keep track of ghFFRDlg.  This allows proper processing      *
+;|*** *             of IsDialogMessage() in the main message loop.  If your     *
+;|*** *             app will *not* allow both the FindText() and ReplaceText()  *
+;|*** *             CD's to be up at the same time, then hooking will not       *
+;|*** *             be necessary.                                               *
+;|*** *                                                                         *
+;|*** *   Returns:  BOOL                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:  This function must be exported and must have an instance    *
+;|*** *             thunk created for it (ie, call MakeProcInstance; see        *
+;|*** *             WM_CREATE processing in the main window procedure above)    *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** 
+;|*** BOOL FAR PASCAL FindHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
+;|***                           )
+;|*** {
+; Line 1161
+	*** 000e6f	55 			push	bp
+	*** 000e70	8b ec 			mov	bp,sp
+	*** 000e72	b8 00 00 		mov	ax,0
+	*** 000e75	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000e7a	57 			push	di
+	*** 000e7b	56 			push	si
+;	hDlg = 14
+;	message = 12
+;	wParam = 10
+;	lParam = 6
+;|***    switch (message)
+; Line 1162
+	*** 000e7c	8b 46 0c 		mov	ax,WORD PTR [bp+12]	;message
+	*** 000e7f	e9 15 00 		jmp	$S2845
+;|***       {
+; Line 1163
+;|***    case WM_INITDIALOG:
+; Line 1164
+					$SC2849:
+;|***       return (TRUE);
+; Line 1165
+	*** 000e82	b8 01 00 		mov	ax,1
+	*** 000e85	e9 26 00 		jmp	$EX2844
+;|*** 
+;|***    case WM_ACTIVATE:
+; Line 1167
+					$SC2850:
+;|***       ghFFRDlg = hDlg;
+; Line 1168
+	*** 000e88	8b 46 0e 		mov	ax,WORD PTR [bp+14]	;hDlg
+	*** 000e8b	a3 00 00 		mov	WORD PTR _ghFFRDlg,ax
+;|***       break;
+; Line 1169
+	*** 000e8e	e9 17 00 		jmp	$SB2846
+;|*** 
+;|***    default:
+; Line 1171
+					$SD2851:
+;|***       break;
+; Line 1172
+	*** 000e91	e9 14 00 		jmp	$SB2846
+;|***       }
+; Line 1173
+	*** 000e94	e9 11 00 		jmp	$SB2846
+					$S2845:
+	*** 000e97	2d 06 00 		sub	ax,6
+	*** 000e9a	0f 84 ea ff 		je	$SC2850
+	*** 000e9e	2d 0a 01 		sub	ax,266	;010aH
+	*** 000ea1	0f 84 dd ff 		je	$SC2849
+	*** 000ea5	e9 e9 ff 		jmp	$SD2851
+					$SB2846:
+;|***    return (FALSE);
+; Line 1174
+	*** 000ea8	b8 00 00 		mov	ax,0
+	*** 000eab	e9 00 00 		jmp	$EX2844
+;|*** }
+; Line 1175
+					$EX2844:
+	*** 000eae	5e 			pop	si
+	*** 000eaf	5f 			pop	di
+	*** 000eb0	c9 			leave	
+	*** 000eb1	ca 0a 00 		ret	10	;0000000aH
+
+FINDHOOK	ENDP
+	PUBLIC	FINDREPLACEHOOK
+FINDREPLACEHOOK	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  FindReplaceHook(HWND, UINT, WPARAM, LPARAM)		  *
+;|*** *                                                                         *
+;|*** *   Purpose:  This function "hooks" the CD ReplaceText() procedure        *
+;|*** *             and allows you to process and messages you want.            *
+;|*** *             The ONLY reason we are hooking the FindText() CD is to      *
+;|*** *             keep track of ghFFRDlg.  This allows proper processing      *
+;|*** *             of IsDialogMessage() in the main message loop.  If your     *
+;|*** *             app will *not* allow both the FindText() and ReplaceText()  *
+;|*** *             CD's to be up at the same time, then hooking will not       *
+;|*** *             be necessary.                                               *
+;|*** *                                                                         *
+;|*** *   Returns:  BOOL                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:  This function must be exported and must have an instance    *
+;|*** *             thunk created for it (ie, call MakeProcInstance; see        *
+;|*** *             WM_CREATE processing in the main window procedure above)    *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** 
+;|*** BOOL FAR PASCAL FindReplaceHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
+;|***                                  lParam)
+;|*** {
+; Line 1206
+	*** 000eb4	55 			push	bp
+	*** 000eb5	8b ec 			mov	bp,sp
+	*** 000eb7	b8 00 00 		mov	ax,0
+	*** 000eba	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000ebf	57 			push	di
+	*** 000ec0	56 			push	si
+;	hDlg = 14
+;	message = 12
+;	wParam = 10
+;	lParam = 6
+;|***    switch (message)
+; Line 1207
+	*** 000ec1	8b 46 0c 		mov	ax,WORD PTR [bp+12]	;message
+	*** 000ec4	e9 15 00 		jmp	$S2861
+;|***       {
+; Line 1208
+;|***    case WM_INITDIALOG:
+; Line 1209
+					$SC2865:
+;|***       return (TRUE);
+; Line 1210
+	*** 000ec7	b8 01 00 		mov	ax,1
+	*** 000eca	e9 26 00 		jmp	$EX2860
+;|*** 
+;|***    case WM_ACTIVATE:
+; Line 1212
+					$SC2866:
+;|***       ghFFRDlg = hDlg;
+; Line 1213
+	*** 000ecd	8b 46 0e 		mov	ax,WORD PTR [bp+14]	;hDlg
+	*** 000ed0	a3 00 00 		mov	WORD PTR _ghFFRDlg,ax
+;|***       break;
+; Line 1214
+	*** 000ed3	e9 17 00 		jmp	$SB2862
+;|*** 
+;|***    default:
+; Line 1216
+					$SD2867:
+;|***       break;
+; Line 1217
+	*** 000ed6	e9 14 00 		jmp	$SB2862
+;|***       }
+; Line 1218
+	*** 000ed9	e9 11 00 		jmp	$SB2862
+					$S2861:
+	*** 000edc	2d 06 00 		sub	ax,6
+	*** 000edf	0f 84 ea ff 		je	$SC2866
+	*** 000ee3	2d 0a 01 		sub	ax,266	;010aH
+	*** 000ee6	0f 84 dd ff 		je	$SC2865
+	*** 000eea	e9 e9 ff 		jmp	$SD2867
+					$SB2862:
+;|***    return (FALSE);
+; Line 1219
+	*** 000eed	b8 00 00 		mov	ax,0
+	*** 000ef0	e9 00 00 		jmp	$EX2860
+;|*** }
+; Line 1220
+					$EX2860:
+	*** 000ef3	5e 			pop	si
+	*** 000ef4	5f 			pop	di
+	*** 000ef5	c9 			leave	
+	*** 000ef6	ca 0a 00 		ret	10	;0000000aH
+
+FINDREPLACEHOOK	ENDP
+	PUBLIC	ABORTPROC
+ABORTPROC	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  AbortProc (HDC, int)                                        *
+;|*** *                                                                         *
+;|*** *   Purpose:  This is the abort procedure for the PrintDlg sample.        *
+;|*** *                                                                         *
+;|*** *   Returns:  BOOL                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:  This function must be exported and must have an instance    *
+;|*** *             thunk created for it (ie, call MakeProcInstance)            *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             01/31/92  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** BOOL FAR PASCAL __export AbortProc ( HDC hPrinterDC, int nCode )
+;|*** 
+;|*** {
+; Line 1242
+	*** 000ef9	8c d0 			mov	ax,ss
+	*** 000efb	55 			push	bp
+	*** 000efc	8b ec 			mov	bp,sp
+	*** 000efe	1e 			push	ds
+	*** 000eff	8e d8 			mov	ds,ax
+	*** 000f01	b8 12 00 		mov	ax,18	;0012H
+	*** 000f04	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000f09	57 			push	di
+	*** 000f0a	56 			push	si
+;	msg = -20
+;	hPrinterDC = 8
+;	nCode = 6
+;|***     MSG msg;
+;|*** 
+;|***     if (!ghPrintingDlg)              /* If the abort dialog isn't up yet */
+; Line 1245
+	*** 000f0b	83 3e 00 00 00 		cmp	WORD PTR _ghPrintingDlg,0
+	*** 000f10	0f 85 06 00 		jne	$I2874
+;|***         return(TRUE);
+; Line 1246
+	*** 000f14	b8 01 00 		mov	ax,1
+	*** 000f17	e9 5a 00 		jmp	$EX2872
+;|*** 
+;|***     /* Process messages intended for the abort dialog box */
+;|*** 
+;|***     while (!gbUserAbort && PeekMessage(&msg, NULL, NULL, NULL, TRUE))
+; Line 1250
+					$I2874:
+					$FC2876:
+	*** 000f1a	83 3e 00 00 00 		cmp	WORD PTR _gbUserAbort,0
+	*** 000f1f	0f 85 45 00 		jne	$FB2877
+	*** 000f23	8d 46 ec 		lea	ax,WORD PTR [bp-20]	;msg
+	*** 000f26	16 			push	ss
+	*** 000f27	50 			push	ax
+	*** 000f28	6a 00 			push	0
+	*** 000f2a	6a 00 			push	0
+	*** 000f2c	6a 00 			push	0
+	*** 000f2e	6a 01 			push	1
+	*** 000f30	9a 00 00 00 00 		call	FAR PTR PEEKMESSAGE
+	*** 000f35	3d 00 00 		cmp	ax,0
+	*** 000f38	0f 84 2c 00 		je	$FB2877
+;|***         if (!IsDialogMessage(ghPrintingDlg, &msg)) {
+; Line 1251
+	*** 000f3c	ff 36 00 00 		push	WORD PTR _ghPrintingDlg
+	*** 000f40	8d 46 ec 		lea	ax,WORD PTR [bp-20]	;msg
+	*** 000f43	16 			push	ss
+	*** 000f44	50 			push	ax
+	*** 000f45	9a 00 00 00 00 		call	FAR PTR ISDIALOGMESSAGE
+	*** 000f4a	3d 00 00 		cmp	ax,0
+	*** 000f4d	0f 85 14 00 		jne	$I2878
+;|***             TranslateMessage(&msg);
+; Line 1252
+	*** 000f51	8d 46 ec 		lea	ax,WORD PTR [bp-20]	;msg
+	*** 000f54	16 			push	ss
+	*** 000f55	50 			push	ax
+	*** 000f56	9a 00 00 00 00 		call	FAR PTR TRANSLATEMESSAGE
+;|***             DispatchMessage(&msg);
+; Line 1253
+	*** 000f5b	8d 46 ec 		lea	ax,WORD PTR [bp-20]	;msg
+	*** 000f5e	16 			push	ss
+	*** 000f5f	50 			push	ax
+	*** 000f60	9a 00 00 00 00 		call	FAR PTR DISPATCHMESSAGE
+;|***         }
+; Line 1254
+;|*** 
+;|***     /* bAbort is TRUE (return is FALSE) if the user has aborted */
+;|*** 
+;|***     return (!gbUserAbort);
+; Line 1258
+					$I2878:
+	*** 000f65	e9 b2 ff 		jmp	$FC2876
+					$FB2877:
+	*** 000f68	83 3e 00 00 01 		cmp	WORD PTR _gbUserAbort,1
+	*** 000f6d	1b c0 			sbb	ax,ax
+	*** 000f6f	f7 d8 			neg	ax
+	*** 000f71	e9 00 00 		jmp	$EX2872
+;|*** }
+; Line 1259
+					$EX2872:
+	*** 000f74	5e 			pop	si
+	*** 000f75	5f 			pop	di
+	*** 000f76	8d 66 fe 		lea	sp,WORD PTR [bp-2]
+	*** 000f79	1f 			pop	ds
+	ASSUME DS: DGROUP
+	*** 000f7a	5d 			pop	bp
+	*** 000f7b	ca 04 00 		ret	4
+
+ABORTPROC	ENDP
+	PUBLIC	_PrintMessage
+_PrintMessage	PROC FAR
+;|*** /*BOOL FAR PASCAL __export AbortProc ( HDC hPrinterDC, int nCode )
+;|*** 
+;|*** {
+;|***    MSG msg;
+;|*** 
+;|***    while (!gbUserAbort && PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+;|***    {
+;|***       if (!ghPrintingDlg)
+;|***       {
+;|***          TranslateMessage(&msg);
+;|***          DispatchMessage(&msg);
+;|***       }
+;|***       else if (IsWindow(ghPrintingDlg)) 
+;|***       {
+;|***       	if (msg.hwnd == ghPrintingDlg)
+;|***          if (!IsDialogMessage(ghPrintingDlg, &msg))
+;|***          {
+;|***             TranslateMessage(&msg);
+;|***             DispatchMessage(&msg);
+;|***          }
+;|***       }
+;|***    }
+;|***    return !gbUserAbort;
+;|*** } */
+;|*** 
+;|*** void PrintMessage (int	ViewID, LPSTR File, int record)
+;|*** { 
+; Line 1286
+	*** 000f7e	55 			push	bp
+	*** 000f7f	8b ec 			mov	bp,sp
+	*** 000f81	b8 00 01 		mov	ax,256	;0100H
+	*** 000f84	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 000f89	57 			push	di
+	*** 000f8a	56 			push	si
+;	str = -256
+;	record = 12
+;	File = 8
+;	ViewID = 6
+;|*** 	char	str[256];
+;|*** 	
+;|*** 	wsprintf (str,"Viewport: %d",ViewID);
+; Line 1289
+	*** 000f8b	ff 76 06 		push	WORD PTR [bp+6]	;ViewID
+	*** 000f8e	68 00 00 		push	SEG $SG2887
+	*** 000f91	68 00 00 		push	OFFSET $SG2887
+	*** 000f94	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 000f98	16 			push	ss
+	*** 000f99	50 			push	ax
+	*** 000f9a	9a 00 00 00 00 		call	FAR PTR _wsprintf
+	*** 000f9f	83 c4 0a 		add	sp,10	;000aH
+;|*** 	SetDlgItemText (PrintMsgWnd,PRINT_VIEW,str);
+; Line 1290
+	*** 000fa2	ff 36 00 00 		push	WORD PTR _PrintMsgWnd
+	*** 000fa6	68 61 04 		push	1121	;0461H
+	*** 000fa9	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 000fad	16 			push	ss
+	*** 000fae	50 			push	ax
+	*** 000faf	9a 00 00 00 00 		call	FAR PTR SETDLGITEMTEXT
+;|*** 	_fstrcpy (str,"File: ");
+; Line 1291
+	*** 000fb4	1e 			push	ds
+	*** 000fb5	68 00 00 		push	OFFSET DGROUP:$SG2888
+	*** 000fb8	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 000fbc	16 			push	ss
+	*** 000fbd	50 			push	ax
+	*** 000fbe	9a 00 00 00 00 		call	FAR PTR __fstrcpy
+	*** 000fc3	83 c4 08 		add	sp,8
+;|*** 	_fstrcat (str,PltName);
+; Line 1292
+	*** 000fc6	68 00 00 		push	SEG _PltName
+	*** 000fc9	68 00 00 		push	OFFSET _PltName
+	*** 000fcc	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 000fd0	16 			push	ss
+	*** 000fd1	50 			push	ax
+	*** 000fd2	9a 00 00 00 00 		call	FAR PTR __fstrcat
+	*** 000fd7	83 c4 08 		add	sp,8
+;|*** 	SetDlgItemText (PrintMsgWnd,PRINT_FILE,str);
+; Line 1293
+	*** 000fda	ff 36 00 00 		push	WORD PTR _PrintMsgWnd
+	*** 000fde	68 52 04 		push	1106	;0452H
+	*** 000fe1	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 000fe5	16 			push	ss
+	*** 000fe6	50 			push	ax
+	*** 000fe7	9a 00 00 00 00 		call	FAR PTR SETDLGITEMTEXT
+;|***     if (record)
+; Line 1294
+	*** 000fec	83 7e 0c 00 		cmp	WORD PTR [bp+12],0	;record
+	*** 000ff0	0f 84 16 00 		je	$I2889
+;|***     	itoa (record,str,10);
+; Line 1295
+	*** 000ff4	6a 0a 			push	10	;000aH
+	*** 000ff6	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 000ffa	16 			push	ss
+	*** 000ffb	50 			push	ax
+	*** 000ffc	ff 76 0c 		push	WORD PTR [bp+12]	;record
+	*** 000fff	9a 00 00 00 00 		call	FAR PTR _itoa
+	*** 001004	83 c4 08 		add	sp,8
+;|***     else
+; Line 1296
+	*** 001007	e9 05 00 		jmp	$I2890
+					$I2889:
+;|***     	str[0]='\0';
+; Line 1297
+	*** 00100a	c6 86 00 ff 00 		mov	BYTE PTR [bp-256],0	;str
+					$I2890:
+;|***     SetDlgItemText (PrintMsgWnd,IDC_PRINT_RECORD,str);
+; Line 1298
+	*** 00100f	ff 36 00 00 		push	WORD PTR _PrintMsgWnd
+	*** 001013	68 9e 04 		push	1182	;049eH
+	*** 001016	8d 86 00 ff 		lea	ax,WORD PTR [bp-256]	;str
+	*** 00101a	16 			push	ss
+	*** 00101b	50 			push	ax
+	*** 00101c	9a 00 00 00 00 		call	FAR PTR SETDLGITEMTEXT
+;|*** 	return;
+; Line 1299
+	*** 001021	e9 00 00 		jmp	$EX2885
+;|*** }
+; Line 1300
+					$EX2885:
+	*** 001024	5e 			pop	si
+	*** 001025	5f 			pop	di
+	*** 001026	c9 			leave	
+	*** 001027	cb 			ret	
+
+_PrintMessage	ENDP
+	PUBLIC	PRINTDLGPROC
+PRINTDLGPROC	PROC FAR
+;|*** 
+;|*** /**************************************************************************
+;|*** *							  											  *
+;|*** *  Function:  PrintDlgProc (HWND, UINT, WPARAM, LPARAM)		 			  *
+;|*** *                                                                         *
+;|*** *   Purpose:  This is the dialog box procedure for the dialog that pops   *
+;|*** *             up indicating that we are printing.                         *
+;|*** *                                                                         *
+;|*** *   Returns:  BOOL                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:  This function must be exported and must have an instance    *
+;|*** *             thunk created for it (ie, call MakeProcInstance)            *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             01/31/92  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** 
+;|*** BOOL FAR PASCAL _export PrintDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM
+;|***                               lParam)
+;|*** {	char	str[256];
+; Line 1324
+	*** 001028	8c d0 			mov	ax,ss
+	*** 00102a	55 			push	bp
+	*** 00102b	8b ec 			mov	bp,sp
+	*** 00102d	1e 			push	ds
+	*** 00102e	8e d8 			mov	ds,ax
+	*** 001030	b8 00 01 		mov	ax,256	;0100H
+	*** 001033	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 001038	57 			push	di
+	*** 001039	56 			push	si
+;	str = -258
+;	hDlg = 14
+;	message = 12
+;	wParam = 10
+;	lParam = 6
+;|***    switch (message)
+; Line 1325
+	*** 00103a	8b 46 0c 		mov	ax,WORD PTR [bp+12]	;message
+	*** 00103d	e9 52 00 		jmp	$S2901
+;|***       {
+; Line 1326
+;|***    case WM_INITDIALOG: 
+; Line 1327
+					$SC2905:
+;|***    		PrintMsgWnd = hDlg; 
+; Line 1328
+	*** 001040	8b 46 0e 		mov	ax,WORD PTR [bp+14]	;hDlg
+	*** 001043	a3 00 00 		mov	WORD PTR _PrintMsgWnd,ax
+;|*** 
+;|***    		break;
+; Line 1330
+	*** 001046	e9 58 00 		jmp	$SB2902
+;|***    case WM_COMMAND:
+; Line 1331
+					$SC2906:
+;|***       switch (wParam)
+; Line 1332
+	*** 001049	8b 46 0a 		mov	ax,WORD PTR [bp+10]	;wParam
+	*** 00104c	e9 2e 00 		jmp	$S2907
+;|***          {
+; Line 1333
+;|***       case IDCANCEL:
+; Line 1334
+					$SC2911:
+;|*** 		 EnableWindow (hWndMain,TRUE);
+; Line 1335
+	*** 00104f	ff 36 00 00 		push	WORD PTR _hWndMain
+	*** 001053	6a 01 			push	1
+	*** 001055	9a 00 00 00 00 		call	FAR PTR ENABLEWINDOW
+;|***          gbUserAbort = TRUE;
+; Line 1336
+	*** 00105a	c7 06 00 00 01 00 	mov	WORD PTR _gbUserAbort,1
+;|***          DestroyWindow(hDlg);
+; Line 1337
+	*** 001060	ff 76 0e 		push	WORD PTR [bp+14]	;hDlg
+	*** 001063	9a 00 00 00 00 		call	FAR PTR DESTROYWINDOW
+;|***          ghPrintingDlg = NULL;
+; Line 1338
+	*** 001068	c7 06 00 00 00 00 	mov	WORD PTR _ghPrintingDlg,0
+;|***          return TRUE;
+; Line 1339
+	*** 00106e	b8 01 00 		mov	ax,1
+	*** 001071	e9 33 00 		jmp	$EX2899
+;|*** 
+;|***       default:
+; Line 1341
+					$SD2912:
+;|***          return FALSE;
+; Line 1342
+	*** 001074	b8 00 00 		mov	ax,0
+	*** 001077	e9 2d 00 		jmp	$EX2899
+;|***          }
+; Line 1343
+	*** 00107a	e9 09 00 		jmp	$SB2908
+					$S2907:
+	*** 00107d	48 			dec	ax
+	*** 00107e	48 			dec	ax
+	*** 00107f	0f 84 cc ff 		je	$SC2911
+	*** 001083	e9 ee ff 		jmp	$SD2912
+					$SB2908:
+;|***       break;
+; Line 1344
+	*** 001086	e9 18 00 		jmp	$SB2902
+;|*** 
+;|***    default:
+; Line 1346
+					$SD2913:
+;|***       return FALSE;
+; Line 1347
+	*** 001089	b8 00 00 		mov	ax,0
+	*** 00108c	e9 18 00 		jmp	$EX2899
+;|***       }
+; Line 1348
+	*** 00108f	e9 0f 00 		jmp	$SB2902
+					$S2901:
+	*** 001092	2d 10 01 		sub	ax,272	;0110H
+	*** 001095	0f 84 a7 ff 		je	$SC2905
+	*** 001099	48 			dec	ax
+	*** 00109a	0f 84 ab ff 		je	$SC2906
+	*** 00109e	e9 e8 ff 		jmp	$SD2913
+					$SB2902:
+;|***    return TRUE;
+; Line 1349
+	*** 0010a1	b8 01 00 		mov	ax,1
+	*** 0010a4	e9 00 00 		jmp	$EX2899
+;|*** }
+; Line 1350
+					$EX2899:
+	*** 0010a7	5e 			pop	si
+	*** 0010a8	5f 			pop	di
+	*** 0010a9	8d 66 fe 		lea	sp,WORD PTR [bp-2]
+	*** 0010ac	1f 			pop	ds
+	ASSUME DS: DGROUP
+	*** 0010ad	5d 			pop	bp
+	*** 0010ae	ca 0a 00 		ret	10	;0000000aH
+
+PRINTDLGPROC	ENDP
+	PUBLIC	_ProcessCDError
+_ProcessCDError	PROC FAR
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *      File:  ERROR.C                                                     *
+;|*** *                                                                         *
+;|*** *   Purpose:  Contains the error routines for this program                *
+;|*** *                                                                         *
+;|*** * Functions:  void FAR ProcessCDError(DWORD)                              *
+;|*** *             void FAR ReportError(WORD)                                  *
+;|*** *                                                                         *
+;|*** *  Comments:                                                              *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** 
+;|*** #include "cderr.h"
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  ProcessCDError(DWORD)                                       *
+;|*** *                                                                         *
+;|*** *   Purpose:  To report an error that has occurred during the last        *
+;|*** *             call to a CD routine.                                       *
+;|*** *                                                                         *
+;|*** *   Returns:  void                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:                                                              *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** void FAR ProcessCDError(DWORD dwErrorCode)
+;|*** {
+; Line 1389
+	*** 0010b1	55 			push	bp
+	*** 0010b2	8b ec 			mov	bp,sp
+	*** 0010b4	b8 02 00 		mov	ax,2
+	*** 0010b7	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 0010bc	57 			push	di
+	*** 0010bd	56 			push	si
+;	wStringID = -2
+;	dwErrorCode = 6
+;|***    WORD  wStringID;
+;|*** 
+;|***    switch(dwErrorCode)
+; Line 1392
+	*** 0010be	8b 46 06 		mov	ax,WORD PTR [bp+6]	;dwErrorCode
+	*** 0010c1	8b 56 08 		mov	dx,WORD PTR [bp+8]
+	*** 0010c4	e9 de 00 		jmp	$S2918
+;|***       {
+; Line 1393
+;|***          case CDERR_DIALOGFAILURE:   wStringID=IDS_DIALOGFAILURE;   break;
+; Line 1394
+					$SC2922:
+	*** 0010c7	c7 46 fe 89 13 		mov	WORD PTR [bp-2],5001	;1389H	;wStringID
+	*** 0010cc	e9 99 01 		jmp	$SB2919
+;|***          case CDERR_STRUCTSIZE:      wStringID=IDS_STRUCTSIZE;      break;
+; Line 1395
+					$SC2923:
+	*** 0010cf	c7 46 fe 8a 13 		mov	WORD PTR [bp-2],5002	;138aH	;wStringID
+	*** 0010d4	e9 91 01 		jmp	$SB2919
+;|***          case CDERR_INITIALIZATION:  wStringID=IDS_INITIALIZATION;  break;
+; Line 1396
+					$SC2924:
+	*** 0010d7	c7 46 fe 8b 13 		mov	WORD PTR [bp-2],5003	;138bH	;wStringID
+	*** 0010dc	e9 89 01 		jmp	$SB2919
+;|***          case CDERR_NOTEMPLATE:      wStringID=IDS_NOTEMPLATE;      break;
+; Line 1397
+					$SC2925:
+	*** 0010df	c7 46 fe 8c 13 		mov	WORD PTR [bp-2],5004	;138cH	;wStringID
+	*** 0010e4	e9 81 01 		jmp	$SB2919
+;|***          case CDERR_NOHINSTANCE:     wStringID=IDS_NOHINSTANCE;     break;
+; Line 1398
+					$SC2926:
+	*** 0010e7	c7 46 fe 8d 13 		mov	WORD PTR [bp-2],5005	;138dH	;wStringID
+	*** 0010ec	e9 79 01 		jmp	$SB2919
+;|***          case CDERR_LOADSTRFAILURE:  wStringID=IDS_LOADSTRFAILURE;  break;
+; Line 1399
+					$SC2927:
+	*** 0010ef	c7 46 fe 8e 13 		mov	WORD PTR [bp-2],5006	;138eH	;wStringID
+	*** 0010f4	e9 71 01 		jmp	$SB2919
+;|***          case CDERR_FINDRESFAILURE:  wStringID=IDS_FINDRESFAILURE;  break;
+; Line 1400
+					$SC2928:
+	*** 0010f7	c7 46 fe 8f 13 		mov	WORD PTR [bp-2],5007	;138fH	;wStringID
+	*** 0010fc	e9 69 01 		jmp	$SB2919
+;|***          case CDERR_LOADRESFAILURE:  wStringID=IDS_LOADRESFAILURE;  break;
+; Line 1401
+					$SC2929:
+	*** 0010ff	c7 46 fe 90 13 		mov	WORD PTR [bp-2],5008	;1390H	;wStringID
+	*** 001104	e9 61 01 		jmp	$SB2919
+;|***          case CDERR_LOCKRESFAILURE:  wStringID=IDS_LOCKRESFAILURE;  break;
+; Line 1402
+					$SC2930:
+	*** 001107	c7 46 fe 91 13 		mov	WORD PTR [bp-2],5009	;1391H	;wStringID
+	*** 00110c	e9 59 01 		jmp	$SB2919
+;|***          case CDERR_MEMALLOCFAILURE: wStringID=IDS_MEMALLOCFAILURE; break;
+; Line 1403
+					$SC2931:
+	*** 00110f	c7 46 fe 92 13 		mov	WORD PTR [bp-2],5010	;1392H	;wStringID
+	*** 001114	e9 51 01 		jmp	$SB2919
+;|***          case CDERR_MEMLOCKFAILURE:  wStringID=IDS_MEMLOCKFAILURE;  break;
+; Line 1404
+					$SC2932:
+	*** 001117	c7 46 fe 93 13 		mov	WORD PTR [bp-2],5011	;1393H	;wStringID
+	*** 00111c	e9 49 01 		jmp	$SB2919
+;|***          case CDERR_NOHOOK:          wStringID=IDS_NOHOOK;          break;
+; Line 1405
+					$SC2933:
+	*** 00111f	c7 46 fe 94 13 		mov	WORD PTR [bp-2],5012	;1394H	;wStringID
+	*** 001124	e9 41 01 		jmp	$SB2919
+;|***          case PDERR_SETUPFAILURE:    wStringID=IDS_SETUPFAILURE;    break;
+; Line 1406
+					$SC2934:
+	*** 001127	c7 46 fe 95 13 		mov	WORD PTR [bp-2],5013	;1395H	;wStringID
+	*** 00112c	e9 39 01 		jmp	$SB2919
+;|***          case PDERR_PARSEFAILURE:    wStringID=IDS_PARSEFAILURE;    break;
+; Line 1407
+					$SC2935:
+	*** 00112f	c7 46 fe 96 13 		mov	WORD PTR [bp-2],5014	;1396H	;wStringID
+	*** 001134	e9 31 01 		jmp	$SB2919
+;|***          case PDERR_RETDEFFAILURE:   wStringID=IDS_RETDEFFAILURE;   break;
+; Line 1408
+					$SC2936:
+	*** 001137	c7 46 fe 97 13 		mov	WORD PTR [bp-2],5015	;1397H	;wStringID
+	*** 00113c	e9 29 01 		jmp	$SB2919
+;|***          case PDERR_LOADDRVFAILURE:  wStringID=IDS_LOADDRVFAILURE;  break;
+; Line 1409
+					$SC2937:
+	*** 00113f	c7 46 fe 98 13 		mov	WORD PTR [bp-2],5016	;1398H	;wStringID
+	*** 001144	e9 21 01 		jmp	$SB2919
+;|***          case PDERR_GETDEVMODEFAIL:  wStringID=IDS_GETDEVMODEFAIL;  break;
+; Line 1410
+					$SC2938:
+	*** 001147	c7 46 fe 99 13 		mov	WORD PTR [bp-2],5017	;1399H	;wStringID
+	*** 00114c	e9 19 01 		jmp	$SB2919
+;|***          case PDERR_INITFAILURE:     wStringID=IDS_INITFAILURE;     break;
+; Line 1411
+					$SC2939:
+	*** 00114f	c7 46 fe 9a 13 		mov	WORD PTR [bp-2],5018	;139aH	;wStringID
+	*** 001154	e9 11 01 		jmp	$SB2919
+;|***          case PDERR_NODEVICES:       wStringID=IDS_NODEVICES;       break;
+; Line 1412
+					$SC2940:
+	*** 001157	c7 46 fe 9b 13 		mov	WORD PTR [bp-2],5019	;139bH	;wStringID
+	*** 00115c	e9 09 01 		jmp	$SB2919
+;|***          case PDERR_NODEFAULTPRN:    wStringID=IDS_NODEFAULTPRN;    break;
+; Line 1413
+					$SC2941:
+	*** 00115f	c7 46 fe 9c 13 		mov	WORD PTR [bp-2],5020	;139cH	;wStringID
+	*** 001164	e9 01 01 		jmp	$SB2919
+;|***          case PDERR_DNDMMISMATCH:    wStringID=IDS_DNDMMISMATCH;    break;
+; Line 1414
+					$SC2942:
+	*** 001167	c7 46 fe 9d 13 		mov	WORD PTR [bp-2],5021	;139dH	;wStringID
+	*** 00116c	e9 f9 00 		jmp	$SB2919
+;|***          case PDERR_CREATEICFAILURE: wStringID=IDS_CREATEICFAILURE; break;
+; Line 1415
+					$SC2943:
+	*** 00116f	c7 46 fe 9e 13 		mov	WORD PTR [bp-2],5022	;139eH	;wStringID
+	*** 001174	e9 f1 00 		jmp	$SB2919
+;|***          case PDERR_PRINTERNOTFOUND: wStringID=IDS_PRINTERNOTFOUND; break;
+; Line 1416
+					$SC2944:
+	*** 001177	c7 46 fe 9f 13 		mov	WORD PTR [bp-2],5023	;139fH	;wStringID
+	*** 00117c	e9 e9 00 		jmp	$SB2919
+;|***          case CFERR_NOFONTS:         wStringID=IDS_NOFONTS;         break;
+; Line 1417
+					$SC2945:
+	*** 00117f	c7 46 fe a0 13 		mov	WORD PTR [bp-2],5024	;13a0H	;wStringID
+	*** 001184	e9 e1 00 		jmp	$SB2919
+;|***          case FNERR_SUBCLASSFAILURE: wStringID=IDS_SUBCLASSFAILURE; break;
+; Line 1418
+					$SC2946:
+	*** 001187	c7 46 fe a1 13 		mov	WORD PTR [bp-2],5025	;13a1H	;wStringID
+	*** 00118c	e9 d9 00 		jmp	$SB2919
+;|***          case FNERR_INVALIDFILENAME: wStringID=IDS_INVALIDFILENAME; break;
+; Line 1419
+					$SC2947:
+	*** 00118f	c7 46 fe a2 13 		mov	WORD PTR [bp-2],5026	;13a2H	;wStringID
+	*** 001194	e9 d1 00 		jmp	$SB2919
+;|***          case FNERR_BUFFERTOOSMALL:  wStringID=IDS_BUFFERTOOSMALL;  break;
+; Line 1420
+					$SC2948:
+	*** 001197	c7 46 fe a3 13 		mov	WORD PTR [bp-2],5027	;13a3H	;wStringID
+	*** 00119c	e9 c9 00 		jmp	$SB2919
+;|*** 
+;|***          case 0:   //User may have hit CANCEL or we got a *very* random error
+; Line 1422
+					$SC2949:
+;|***          default:
+;|***             return;
+; Line 1424
+	*** 00119f	e9 09 01 		jmp	$EX2916
+;|***       }
+; Line 1425
+	*** 0011a2	e9 c3 00 		jmp	$SB2919
+					$S2918:
+	*** 0011a5	0b d2 			or	dx,dx
+	*** 0011a7	0f 85 f4 ff 		jne	$SC2949
+	*** 0011ab	3d 03 10 		cmp	ax,4099	;1003H
+	*** 0011ae	0f 84 85 ff 		je	$SC2936
+	*** 0011b2	0f 87 57 00 		ja	$L2971
+	*** 0011b6	3d 07 00 		cmp	ax,7
+	*** 0011b9	0f 84 42 ff 		je	$SC2929
+	*** 0011bd	0f 87 1c 00 		ja	$L2972
+	*** 0011c1	48 			dec	ax
+	*** 0011c2	3d 05 00 		cmp	ax,5
+	*** 0011c5	0f 87 d6 ff 		ja	$SC2949
+	*** 0011c9	d1 e0 			shl	ax,1
+	*** 0011cb	93 			xchg	ax,bx
+	*** 0011cc	2e ff a7 00 00 		jmp	WORD PTR cs:$L2973[bx]
+					$L2973:
+	*** 0011d1	00 00 				DW	$SC2923
+	*** 0011d3	00 00 				DW	$SC2924
+	*** 0011d5	00 00 				DW	$SC2925
+	*** 0011d7	00 00 				DW	$SC2926
+	*** 0011d9	00 00 				DW	$SC2927
+	*** 0011db	00 00 				DW	$SC2928
+					$L2972:
+	*** 0011dd	3d 0a 00 		cmp	ax,10	;000aH
+	*** 0011e0	0f 84 33 ff 		je	$SC2932
+	*** 0011e4	0f 87 0f 00 		ja	$L2974
+	*** 0011e8	2d 08 00 		sub	ax,8
+	*** 0011eb	0f 84 18 ff 		je	$SC2930
+	*** 0011ef	48 			dec	ax
+	*** 0011f0	0f 84 1b ff 		je	$SC2931
+	*** 0011f4	e9 a8 ff 		jmp	$SC2949
+					$L2974:
+	*** 0011f7	2d 0b 00 		sub	ax,11	;000bH
+	*** 0011fa	0f 84 21 ff 		je	$SC2933
+	*** 0011fe	2d f6 0f 		sub	ax,4086	;0ff6H
+	*** 001201	0f 84 22 ff 		je	$SC2934
+	*** 001205	48 			dec	ax
+	*** 001206	0f 84 25 ff 		je	$SC2935
+	*** 00120a	e9 92 ff 		jmp	$SC2949
+					$L2971:
+	*** 00120d	3d 0a 10 		cmp	ax,4106	;100aH
+	*** 001210	0f 84 5b ff 		je	$SC2943
+	*** 001214	0f 87 1e 00 		ja	$L2975
+	*** 001218	2d 04 10 		sub	ax,4100	;1004H
+	*** 00121b	3d 05 00 		cmp	ax,5
+	*** 00121e	0f 87 7d ff 		ja	$SC2949
+	*** 001222	d1 e0 			shl	ax,1
+	*** 001224	93 			xchg	ax,bx
+	*** 001225	2e ff a7 00 00 		jmp	WORD PTR cs:$L2976[bx]
+					$L2976:
+	*** 00122a	00 00 				DW	$SC2937
+	*** 00122c	00 00 				DW	$SC2938
+	*** 00122e	00 00 				DW	$SC2939
+	*** 001230	00 00 				DW	$SC2940
+	*** 001232	00 00 				DW	$SC2941
+	*** 001234	00 00 				DW	$SC2942
+					$L2975:
+	*** 001236	3d 01 30 		cmp	ax,12289	;3001H
+	*** 001239	0f 84 4a ff 		je	$SC2946
+	*** 00123d	0f 87 11 00 		ja	$L2977
+	*** 001241	2d 0b 10 		sub	ax,4107	;100bH
+	*** 001244	0f 84 2f ff 		je	$SC2944
+	*** 001248	2d f6 0f 		sub	ax,4086	;0ff6H
+	*** 00124b	0f 84 30 ff 		je	$SC2945
+	*** 00124f	e9 4d ff 		jmp	$SC2949
+					$L2977:
+	*** 001252	2d 02 30 		sub	ax,12290	;3002H
+	*** 001255	0f 84 36 ff 		je	$SC2947
+	*** 001259	48 			dec	ax
+	*** 00125a	0f 84 39 ff 		je	$SC2948
+	*** 00125e	2d fc cf 		sub	ax,-12292	;cffcH
+	*** 001261	0f 84 62 fe 		je	$SC2922
+	*** 001265	e9 37 ff 		jmp	$SC2949
+					$SB2919:
+;|*** 
+;|***    if (!LoadString(ghInst, wStringID, gszBuffer, sizeof(gszBuffer)))
+; Line 1427
+	*** 001268	ff 36 00 00 		push	WORD PTR _ghInst
+	*** 00126c	ff 76 fe 		push	WORD PTR [bp-2]	;wStringID
+	*** 00126f	68 00 00 		push	SEG _gszBuffer
+	*** 001272	68 00 00 		push	OFFSET _gszBuffer
+	*** 001275	68 00 01 		push	256	;0100H
+	*** 001278	9a 00 00 00 00 		call	FAR PTR LOADSTRING
+	*** 00127d	3d 00 00 		cmp	ax,0
+	*** 001280	0f 85 0d 00 		jne	$I2950
+;|***       {
+; Line 1428
+;|***          ReportError(IDC_LOADSTRINGFAIL);
+; Line 1429
+	*** 001284	6a 03 			push	3
+	*** 001286	9a 00 00 00 00 		call	FAR PTR _ReportError
+	*** 00128b	83 c4 02 		add	sp,2
+;|***          return;
+; Line 1430
+	*** 00128e	e9 1a 00 		jmp	$EX2916
+;|***       }
+; Line 1431
+;|*** 
+;|***    MessageBox(ghWnd, gszBuffer, gszAppName, MB_OK);
+; Line 1433
+					$I2950:
+	*** 001291	ff 36 00 00 		push	WORD PTR _ghWnd
+	*** 001295	68 00 00 		push	SEG _gszBuffer
+	*** 001298	68 00 00 		push	OFFSET _gszBuffer
+	*** 00129b	68 00 00 		push	SEG _gszAppName
+	*** 00129e	68 00 00 		push	OFFSET _gszAppName
+	*** 0012a1	6a 00 			push	0
+	*** 0012a3	9a 00 00 00 00 		call	FAR PTR MESSAGEBOX
+;|***    return;
+; Line 1434
+	*** 0012a8	e9 00 00 		jmp	$EX2916
+;|*** }
+; Line 1435
+					$EX2916:
+	*** 0012ab	5e 			pop	si
+	*** 0012ac	5f 			pop	di
+	*** 0012ad	c9 			leave	
+	*** 0012ae	cb 			ret	
+
+_ProcessCDError	ENDP
+	PUBLIC	_ReportError
+_ReportError	PROC FAR
+;|*** 
+;|*** 
+;|*** /**************************************************************************
+;|*** *                                                                         *
+;|*** *  Function:  ReportError(WORD)                                           *
+;|*** *                                                                         *
+;|*** *   Purpose:  To report an error that has occurred while allocating       *
+;|*** *             memory for the CD struct, locking the memory or while       *
+;|*** *             trying to load a resource string.                           *
+;|*** *                                                                         *
+;|*** *   Returns:  void                                                        *
+;|*** *                                                                         *
+;|*** *  Comments:                                                              *
+;|*** *                                                                         *
+;|*** *   History:  Date      Reason                                            *
+;|*** *             --------  -----------------------------------               *
+;|*** *                                                                         *
+;|*** *             10/01/91  Created                                           *
+;|*** *                                                                         *
+;|*** **************************************************************************/
+;|*** void FAR ReportError(WORD wErrorType)
+;|*** {
+; Line 1457
+	*** 0012af	55 			push	bp
+	*** 0012b0	8b ec 			mov	bp,sp
+	*** 0012b2	b8 04 00 		mov	ax,4
+	*** 0012b5	9a 00 00 00 00 		call	FAR PTR __aFchkstk
+	*** 0012ba	57 			push	di
+	*** 0012bb	56 			push	si
+;	lpszErrorMsg = -4
+;	wErrorType = 6
+;|***    LPSTR lpszErrorMsg;
+;|*** 
+;|***    switch( wErrorType )
+; Line 1460
+	*** 0012bc	8b 46 06 		mov	ax,WORD PTR [bp+6]	;wErrorType
+	*** 0012bf	e9 2d 00 		jmp	$S2955
+;|***       {
+; Line 1461
+;|***          case IDC_ALLOCFAIL:
+; Line 1462
+					$SC2959:
+;|*** 
+;|***             lpszErrorMsg=gszAllocErrorMsg;
+; Line 1464
+	*** 0012c2	c7 46 fc 00 00 		mov	WORD PTR [bp-4],OFFSET _gszAllocErrorMsg	;lpszErrorMsg
+	*** 0012c7	c7 46 fe 00 00 		mov	WORD PTR [bp-2],SEG _gszAllocErrorMsg
+;|***             break;
+; Line 1465
+	*** 0012cc	e9 32 00 		jmp	$SB2956
+;|*** 
+;|***          case IDC_LOCKFAIL:
+; Line 1467
+					$SC2960:
+;|*** 
+;|***             lpszErrorMsg=gszLockErrorMsg;
+; Line 1469
+	*** 0012cf	c7 46 fc 00 00 		mov	WORD PTR [bp-4],OFFSET _gszLockErrorMsg	;lpszErrorMsg
+	*** 0012d4	c7 46 fe 00 00 		mov	WORD PTR [bp-2],SEG _gszLockErrorMsg
+;|***             break;
+; Line 1470
+	*** 0012d9	e9 25 00 		jmp	$SB2956
+;|*** 
+;|***          case IDC_LOADSTRINGFAIL:
+; Line 1472
+					$SC2961:
+;|*** 
+;|***             lpszErrorMsg=gszLoadStrFail;
+; Line 1474
+	*** 0012dc	c7 46 fc 00 00 		mov	WORD PTR [bp-4],OFFSET _gszLoadStrFail	;lpszErrorMsg
+	*** 0012e1	c7 46 fe 00 00 		mov	WORD PTR [bp-2],SEG _gszLoadStrFail
+;|***             break;
+; Line 1475
+	*** 0012e6	e9 18 00 		jmp	$SB2956
+;|*** 
+;|***          default:    //let's hope we never get here!
+; Line 1477
+					$SD2962:
+;|***             return;
+; Line 1478
+	*** 0012e9	e9 2f 00 		jmp	$EX2953
+;|***       }
+; Line 1479
+	*** 0012ec	e9 12 00 		jmp	$SB2956
+					$S2955:
+	*** 0012ef	48 			dec	ax
+	*** 0012f0	0f 84 ce ff 		je	$SC2959
+	*** 0012f4	48 			dec	ax
+	*** 0012f5	0f 84 d6 ff 		je	$SC2960
+	*** 0012f9	48 			dec	ax
+	*** 0012fa	0f 84 de ff 		je	$SC2961
+	*** 0012fe	e9 e8 ff 		jmp	$SD2962
+					$SB2956:
+;|*** 
+;|***    MessageBox(ghWnd, (LPSTR)lpszErrorMsg, gszAppName, MB_OK);
+; Line 1481
+	*** 001301	ff 36 00 00 		push	WORD PTR _ghWnd
+	*** 001305	ff 76 fe 		push	WORD PTR [bp-2]
+	*** 001308	ff 76 fc 		push	WORD PTR [bp-4]	;lpszErrorMsg
+	*** 00130b	68 00 00 		push	SEG _gszAppName
+	*** 00130e	68 00 00 		push	OFFSET _gszAppName
+	*** 001311	6a 00 			push	0
+	*** 001313	9a 00 00 00 00 		call	FAR PTR MESSAGEBOX
+;|*** 
+;|***    return;
+; Line 1483
+	*** 001318	e9 00 00 		jmp	$EX2953
+;|*** }
+; Line 1484
+					$EX2953:
+	*** 00131b	5e 			pop	si
+	*** 00131c	5f 			pop	di
+	*** 00131d	c9 			leave	
+	*** 00131e	cb 			ret	
+
+_ReportError	ENDP
+COMDLG_TEXT	ENDS
+END

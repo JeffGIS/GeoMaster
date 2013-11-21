@@ -1,0 +1,14 @@
+C_SPECIAL=
+LD_SPECIAL=
+LINT_SPECIAL=
+
+LIB=Doz
+LIB_DIR=/files/home/solar/ipw/lib
+OBJS=\
+	betanaught.o delted.o mwgamma.o planck.o twostream.o
+
+SRCS=\
+	betanaught.c delted.c mwgamma.c planck.c twostream.c
+
+default: lib
+install: install-lib

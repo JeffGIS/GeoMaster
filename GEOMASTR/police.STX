@@ -1,0 +1,145 @@
+[Main]
+;*** DO NOT TOUCH! The format of this file WILL change.
+Product=Setup Pro
+Version=1.0
+OEM=Eschalon Release Edition
+Base Directory=c:\gssi\prog\gwizinst\geomastr
+
+[Settings]
+Application Name=GeoMaster Crime Mapping
+Window Title=GeoMaster Crime Mapping Setup
+Background Title=GeoMaster Crime Mapping Setup
+Directory=c:\geomastr
+PM Group=GeoMaster
+Prompt PM=FALSE
+Disk Label Mask=Disk #%d
+Background=Dithered Title
+ReadMe Font=Default
+Resize ReadMe=FALSE
+ReadMe At Start=FALSE
+Brand Source=FALSE
+Brand Destination=FALSE
+End Program=
+
+[Branding]
+INI File=
+Section=
+Name=
+Company=
+
+[Files]
+addloc.txt="addloc.txt" 1376 A 0 C X
+address\abbrname.txt="abbrname.txt" 35431 A 0 C A
+attribut\graphics.gmd="graphics.gmd" 2104 A 0 C A
+attribut\graphics.in1="graphics.in1" 9216 A 0 C A
+avifile.dll="avifile.dll" 99840 S 0 C X
+baseproj.cvt="baseproj.cvt" 1066 A 0 C X
+cfccall.txt="cfccall.txt" 10473 A 0 C A
+client.exe="client.exe" 38544 A 0 C A
+cmdid="cmdid" 7501 A 0 C A
+compobj.dll="compobj.dll" 102400 S 0 C X
+conus.las="conus.las" 133712 W 0 C A
+conus.los="conus.los" 133712 W 0 C A
+county.par="county.par" 7150 W 0 C A
+cpn16ut.dll="cpn16ut.dll" 3264 A 0 C A
+crypto16.dll="crypto16.dll" 70400 S 0 C A
+ctl3dv2.dll="ctl3dv2.dll" 27632 S 0 C SB
+ctycoord.hlp="ctycoord.hlp" 4252 W 0 C A
+ctycoord.txt="ctycoord.txt" 4252 A 0 C A
+dibapi.dll="dibapi.dll" 23632 W 0 C N
+digitize.ini="digitize.ini" 498 A 0 C A
+earth.ico="earth.ico" 766 W 0 C N
+flood.txt="flood.txt" 7451 A 0 C A
+fullmenu.txt="fullmenu.txt" 10753 A 0 C A
+function.txt="function.txt" 1850 A 0 C A
+fundir\appl1.txt="appl1.txt" 250 A 0 C X
+fundir\colors.txt="colors.txt" 166 A 0 C X
+fundir\digitize.txt="digitize.txt" 416 A 0 C X
+fundir\index.txt="index.txt" 224 A 0 C X
+fundir\infobox.txt="infobox.txt" 72 A 0 C X
+fundir\network.txt="network.txt" 384 A 0 C X
+fundir\orthos.txt="orthos.txt" 129 A 0 C X
+fundir\samples\addloc.txt="addloc.txt" 1376 A 0 C A
+fundir\samples\appl1.txt="appl1.txt" 250 A 0 C A
+fundir\samples\colors.txt="colors.txt" 170 A 0 C A
+fundir\samples\dig2.txt="dig2.txt" 2039 A 0 C A
+fundir\samples\digitize.txt="digitize.txt" 323 A 0 C A
+fundir\samples\edit.txt="edit.txt" 105 A 0 C A
+fundir\samples\index.txt="index.txt" 224 A 0 C A
+fundir\samples\infobox.txt="infobox.txt" 72 A 0 C A
+fundir\samples\network.txt="network.txt" 384 A 0 C A
+fundir\samples\orthos.txt="orthos.txt" 129 A 0 C A
+fundir\samples\strnet.txt="strnet.txt" 490 A 0 C A
+fundir\samples\strtnet.txt="strtnet.txt" 579 A 0 C A
+fundir\samples\themes.txt="themes.txt" 116 A 0 C A
+fundir\samples\viewport.txt="viewport.txt" 153 A 0 C A
+fundir\themes.txt="themes.txt" 116 A 0 C A
+fundir\viewport.txt="viewport.txt" 153 A 0 C A
+gctp16.dll="gctp16.dll" 14960 W 0 C A
+gctp32.dll="gctp32.dll" 376196 W 0 C A
+global.ini="global.ini" 84 A 0 C X
+gmnosock.exe="gmnosock.exe" 4227800 A 0 C A
+gmutil.exe="gmutil.exe" 87456 A 0 C A
+help\cordcnv1.pcx="cordcnv1.pcx" 30237 A 0 C A
+help\cordcnv2.pcx="cordcnv2.pcx" 32674 A 0 C A
+help\cordcnv3.pcx="cordcnv3.pcx" 30475 A 0 C A
+help\cordcnv4.pcx="cordcnv4.pcx" 21537 A 0 C A
+help\cordcnv5.pcx="cordcnv5.pcx" 35616 A 0 C A
+help\cordcnv6.pcx="cordcnv6.pcx" 31776 A 0 C A
+help\cordcnv7.pcx="cordcnv7.pcx" 26033 A 0 C A
+help\cordcnv8.pcx="cordcnv8.pcx" 32323 A 0 C A
+help\cordcnv9.pcx="cordcnv9.pcx" 64429 A 0 C A
+help\cordcnva.pcx="cordcnva.pcx" 63099 A 0 C A
+help\cordcnvb.pcx="cordcnvb.pcx" 62188 A 0 C A
+help\ctycoord.txt="ctycoord.txt" 4252 A 0 C A
+help\gmhelp.hlp="gmhelp.hlp" 106372 A 0 C A
+help\legend1.bmp="legend1.bmp" 875574 A 0 C A
+help\loadgen.txt="loadgen.txt" 958 A 0 C A
+latlongs.cvt="latlongs.cvt" 998 W 0 C X
+loaddoq.exe="loaddoq.exe" 218256 A 0 C A
+macros\msacctst.txt="msacctst.txt" 242 A 0 C A
+macros\permit.txt="permit.txt" 249 A 0 C A
+macros\pikmacro.txt="pikmacro.txt" 1764 A 0 C A
+maplib\test.plt="test.plt" 121008 A 0 C A
+moveorth.txt="moveorth.txt" 1074 A 0 C A
+msacm.dll="msacm.dll" 49616 S 0 C X
+msvideo.dll="msvideo.dll" 124416 S 0 C X
+nad27sp="nad27sp" 14472 W 0 C A
+nad83sp="nad83sp" 14472 W 0 C A
+netdef.txt="netdef.txt" 1964 A 0 C A
+newpoly.txt="newpoly.txt" 1453 A 0 C A
+odbc.dll="odbc.dll" 56240 S 0 C NB
+odbc16ut.dll="odbc16ut.dll" 5792 S 0 C NB
+odbcadm.exe="odbcadm.exe" 6464 W 0 C NB
+odbccurs.dll="odbccurs.dll" 88896 S 0 C NB
+odbcinst.dll="odbcinst.dll" 92576 S 0 C NB
+offline.txt="offline.txt" 188 A 0 C X
+orthos.txt="orthos.txt" 771 A 0 C A
+piklists\basic2.pik="basic2.pik" 964 A 0 C A
+piklists\deltax.pik="deltax.pik" 964 A 0 C A
+pikmacro.txt="pikmacro.txt" 1583 A 0 C X
+readme.txt="readme.txt" 5635 A 0 C A
+readnad.dll="readnad.dll" 9312 W 0 C A
+scales.txt="scales.txt" 207 A 0 C A
+schema.ini="schema.ini" 242 A 0 C A
+shelexer.txt="shelexer.txt" 1228 A 0 C A
+shields.txt="shields.txt" 203 A 0 C A
+states.txt="states.txt" 4342 A 0 C A
+tagdef.txt="tagdef.txt" 713 A 0 C X
+tiger.gsd="tiger.gsd" 160898 A 0 C X
+ultgrd.dll="ultgrd.dll" 38912 S 0 C N
+utm15.cvt="utm15.cvt" 1004 W 0 C A
+vislists\basic2.vis="basic2.vis" 964 A 0 C A
+vislists\basic3.vis="basic3.vis" 964 A 0 C A
+vislists\index.vis="index.vis" 482 A 0 C X
+vpoffset.txt="vpoffset.txt" 140 A 0 C X
+wincap.exe="wincap.exe" 69440 A 0 C A
+winexec.dll="winexec.dll" 16436 W 0 C N
+zoomtype.txt="zoomtype.txt" 15 A 0 C A
+
+[INI Items]
+0=0 "geomastr.ini" "Install" "InDir" "%d"
+
+[PM Items]
+GeoMaster Crime Mapping=0 "gmnosock.exe test7.gmc" "%d" "" "0"
+

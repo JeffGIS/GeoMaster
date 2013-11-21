@@ -1,0 +1,21 @@
+/*
+ *  dibutil.h
+ *
+ *  Copyright (c) 1991 Microsoft Corporation. All rights reserved.
+ *
+ *  Header file for Device-Independent Bitmap (DIB) API.  Provides
+ *  function prototypes and constants for the following functions:
+ *
+ *  AllocRoomForDIB()   - Allocates memory for a DIB
+ *
+ */
+
+
+/* DIB constants */
+#define PALVERSION   0x300
+
+/* DIB macros */
+#define IS_WIN30_DIB(lpbi)  ((*(LPDWORD)(lpbi)) == sizeof(BITMAPINFOHEADER))
+
+/* function prototypes */
+HANDLE          AllocRoomForDIB(BITMAPINFOHEADER bi, HBITMAP hBitmap);

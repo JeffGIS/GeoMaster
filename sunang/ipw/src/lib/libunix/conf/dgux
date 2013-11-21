@@ -1,0 +1,18 @@
+include $(IPW)/lib/make/Makestart
+#
+# for DG/UX 5.4.1
+
+LIB=unix
+
+SRCS=\
+	src/dysize.c src/isinf.c
+
+VPATH = src
+ 
+OBJS=\
+        dysize.o isinf.o
+
+default: lib
+install: install-lib
+
+include $(IPW)/lib/make/Makerules

@@ -1,0 +1,93 @@
+# local macros: may have to be tuned for new ports
+#
+# these have been tuned for SunOS 4.0.3 on a Sun-3 with an MC68881 FPU
+#
+# !!! WARNING !!!
+#
+# Under SunOS 4.0.[0-3], the default "make" command (/usr/bin/make) is broken
+# and will not build IPW.  Use /usr/old/make instead.  On our system we did
+# the following:
+#	# cd /usr/bin
+#	# mv make make-
+#	# ln -s /usr/old/make
+# so that everybody gets the "old make" by default.
+
+# stuff that should be defined by "ipwmake"
+#	IPW		root of IPW directory tree
+#	IPWMAKE_OPTS	"ipwmake" command-line options
+#	IPWMAKE_ARGS	"ipwmake" command-line arguments
+
+#IPW=
+#IPWMAKE_OPTS=
+#IPWMAKE_ARGS=
+
+# C compiler
+#	CC		C compiler (usually predefined by "make")
+#	C_LOCAL		special local options, always used
+#	C_NORMAL	standard options if no debug/profile
+#	C_DEBUG		debugging options, for "ipwmake -D"
+#	C_PROFILE	profiling options, for "ipwmake -P"
+
+#CC=cc
+C_LOCAL=-pipe -f68881 /usr/lib/f68881/libm.il
+C_NORMAL=-O
+C_DEBUG=-g
+C_PROFILE=-pg -O
+
+# following are for use in C_SPECIAL in Makedefs
+#	C_SINGLE	disable float->double promotion for all-float expr's
+
+C_SINGLE=-fsingle
+
+# loader
+#	CLD		C loader
+#	LD_LOCAL	special local options, always used
+#	LD_NORMAL	standard options if no debug/profile
+#	LD_DEBUG	debugging options, for "ipwmake -D"
+#	LD_PROFILE	profiling options, for "ipwmake -P"
+#	LIBS_LOCAL	local libraries, always used
+
+CLD=$(CC)
+LD_LOCAL=-f68881
+LD_NORMAL=
+LD_DEBUG=-g
+LD_PROFILE=-pg
+LIBS_LOCAL=-lm
+
+# archiver
+#	AR		"ar" command
+#	AR_ROPTS	options to update members
+#	AR_XOPTS	options to extract members and set original
+#				modification times
+#	RANLIB		"ranlib" command
+
+AR=ar
+AR_ROPTS=ruv
+AR_XOPTS=xo
+RANLIB=ranlib
+
+# lint
+#	LINT		"lint" command
+#	LINT_LIBOPT	lint option to create a lint library
+#	LINT_LOCAL	special local options, always used
+#	LINT_NORMAL	standard options if no debug/profile
+#	LINT_DEBUG	debugging options, for "ipwmake -D"
+#	LINT_PREFIX	prepended to $(LIB)
+#	LINT_SUFFIX	appended to $(LIB)
+
+LINT=lint
+LINT_LIBOPT=-C
+LINT_LOCAL=-n #-target=sun3
+LINT_NORMAL=
+LINT_DEBUG=-a -b -c -h
+LINT_PREFIX=llib-l
+LINT_SUFFIX=.ln
+
+# other stuff
+#	CHMOD		"chmod" command
+#	RM		"rm" command
+
+CHMOD=chmod
+RM=rm -f
+
+# $Header: /home/ipw/lib/make/conf/RCS/sun3os4,v 1.1 90/01/31 15:32:18 frew Exp $

@@ -1,0 +1,9 @@
+/*
+ * limits.h for PS/2 AIX
+ */
+
+#define	MAX_INPUT	256
+#define	OPEN_MAX	20
+#define	OPEN_LIMIT	1024
+
+/* $Header: /usr/home/ipw/h/posix/conf/RCS/ps2aix,v 1.2 89/10/27 12:33:39 frew Exp $ */

@@ -1,0 +1,30 @@
+^INFOBOXNAMES
+Using the Infobox Name Field
+
+The infobox name field uniquely identifies an infobox. It is made up of a group field and an
+optional instance field in the format  group:instance. It can be up to 32 characters long.
+For example, the following are valid infobox names:
+
+	TAXINFO:1
+	TAXINFO:2
+	BUILDINGDATA:1
+	TITLEBOX
+
+The first three contain both the group and instance fields, the last contains only the group field.
+All infoboxes currently loaded which share the same group identifier share the same display
+characteristics. Changing the display characteristics of one instance of a group changes the
+same characteristic for all instances of that group. For example, changing the font size
+for the second infobox above (instance 2 of the TAXINFO group) also changes the font size
+of the first infobox.
+
+When you create a new infobox, GeoMaster automatically adds a colon and number to the end
+of the current name or, if the current name ends in a number, increments it to the next number.
+You can override the automatically supplied name by typing in any name you desire.
+
+Selecting the pull-down icon to the right of the name allows you to do one of two things, depending
+on the status of the edit checkbox to the right of the name. If the edit checkbox is checked,
+selecting a name from the name list will save any changes to the current infobox and switch
+to the selected infobox. Any further edits will be applied to this infobox. If the edit checkbox
+is not checked, selecting a name from the list will copy the display characteristics from the
+selected infobox to the current one. The name of the current infobox will change to the next
+available instance of the selected infobox.

@@ -1,0 +1,113 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: test - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\Jeff\AppData\Local\Temp\RSP5241.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\Gssi\prog\solar_calculator\Version2\aa.c"
+"C:\Gssi\prog\solar_calculator\Version2\altaz.c"
+"C:\Gssi\prog\solar_calculator\Version2\angles.c"
+"C:\Gssi\prog\solar_calculator\Version2\annuab.c"
+"C:\Gssi\prog\solar_calculator\Version2\deflec.c"
+"C:\Gssi\prog\solar_calculator\Version2\deltat.c"
+"C:\Gssi\prog\solar_calculator\Version2\diurab.c"
+"C:\Gssi\prog\solar_calculator\Version2\diurpx.c"
+"C:\Gssi\prog\solar_calculator\Version2\dms.c"
+"C:\Gssi\prog\solar_calculator\Version2\domoon.c"
+"C:\Gssi\prog\solar_calculator\Version2\fk4fk5.c"
+"C:\Gssi\prog\solar_calculator\Version2\kepler.c"
+"C:\Gssi\prog\solar_calculator\Version2\kfiles.c"
+"C:\Gssi\prog\solar_calculator\Version2\lightt.c"
+"C:\Gssi\prog\solar_calculator\Version2\lonlat.c"
+"C:\Gssi\prog\solar_calculator\Version2\rplanet.c"
+"C:\Gssi\prog\solar_calculator\Version2\rstar.c"
+"C:\Gssi\prog\solar_calculator\Version2\sun.c"
+"C:\Gssi\prog\solar_calculator\Version2\trnsit.c"
+"C:\Gssi\prog\solar_calculator\Version2\vearth.c"
+]
+Creating command line "cl.exe @C:\Users\Jeff\AppData\Local\Temp\RSP5241.tmp" 
+Creating temporary file "C:\Users\Jeff\AppData\Local\Temp\RSP5252.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test.pdb" /debug /machine:I386 /out:"Debug/test.exe" /pdbtype:sept 
+.\Debug\aa.obj
+.\Debug\altaz.obj
+.\Debug\angles.obj
+.\Debug\annuab.obj
+.\Debug\arcdot.obj
+.\Debug\constel.obj
+.\Debug\deflec.obj
+.\Debug\deltat.obj
+.\Debug\diurab.obj
+.\Debug\diurpx.obj
+.\Debug\dms.obj
+.\Debug\domoon.obj
+.\Debug\ear404.obj
+.\Debug\epsiln.obj
+.\Debug\fk4fk5.obj
+.\Debug\gplan.obj
+.\Debug\jup404.obj
+.\Debug\kepler.obj
+.\Debug\kfiles.obj
+.\Debug\lightt.obj
+.\Debug\lonlat.obj
+.\Debug\mar404.obj
+.\Debug\mer404.obj
+.\Debug\mlat404.obj
+.\Debug\mlr404.obj
+.\Debug\nep404.obj
+.\Debug\nutate.obj
+.\Debug\plu404.obj
+.\Debug\precess.obj
+.\Debug\refrac.obj
+.\Debug\rplanet.obj
+.\Debug\rstar.obj
+.\Debug\sat404.obj
+.\Debug\sidrlt.obj
+.\Debug\sun.obj
+.\Debug\tdb.obj
+.\Debug\trnsit.obj
+.\Debug\ura404.obj
+.\Debug\vearth.obj
+.\Debug\ven404.obj
+.\Debug\zatan2.obj
+]
+Creating command line "link.exe @C:\Users\Jeff\AppData\Local\Temp\RSP5252.tmp"
+<h3>Output Window</h3>
+Compiling...
+aa.c
+altaz.c
+angles.c
+annuab.c
+deflec.c
+deltat.c
+diurab.c
+diurpx.c
+dms.c
+domoon.c
+fk4fk5.c
+kepler.c
+kfiles.c
+lightt.c
+lonlat.c
+rplanet.c
+rstar.c
+sun.c
+trnsit.c
+vearth.c
+Linking...
+LIBCD.lib(crt0.obj) : error LNK2001: unresolved external symbol _main
+Debug/test.exe : fatal error LNK1120: 1 unresolved externals
+Error executing link.exe.
+
+
+
+<h3>Results</h3>
+test.exe - 2 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

@@ -1,0 +1,17 @@
+
+##	SCCS version: @(#)   Makedefs   1.2   9/3/91
+##
+
+C_SPECIAL=
+LD_SPECIAL=
+
+LIB=local
+
+SRCS = \
+	days_in_month.c waterday.c
+
+OBJS =\
+	days_in_month.o waterday.o
+
+default: lib
+install: install-lib

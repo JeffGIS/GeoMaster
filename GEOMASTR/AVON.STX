@@ -1,0 +1,95 @@
+[Main]
+;*** DO NOT TOUCH! The format of this file WILL change.
+Product=Setup Pro
+Version=1.0
+OEM=Eschalon Release Edition
+Base Directory=e:\avon
+
+[Settings]
+Application Name=Avon Data
+Window Title=
+Background Title=
+Directory=e:\avon
+PM Group=
+Prompt PM=TRUE
+Disk Label Mask=Disk #%d
+Background=Dithered Title
+ReadMe Font=Default
+Resize ReadMe=FALSE
+ReadMe At Start=FALSE
+Brand Source=FALSE
+Brand Destination=FALSE
+End Program=
+
+[Branding]
+INI File=
+Section=
+Name=
+Company=
+
+[Files]
+access\parcels.ldb="parcels.ldb" 64 A 0 C A
+access\parcels.mdb="parcels.mdb" 1572864 A 0 C A
+addloc.txt="addloc.txt" 1345 A 0 C A
+attribut\adddata.gmd="adddata.gmd" 341728 A 0 C A
+attribut\adddata.in1="adddata.in1" 160768 A 0 C A
+attribut\adddata.in2="adddata.in2" 431104 A 0 C A
+maplib\baselayr\05500330.plt="05500330.plt" 1366 A 0 C A
+maplib\baselayr\05500340.plt="05500340.plt" 98222 A 0 C A
+maplib\baselayr\05500350.plt="05500350.plt" 35292 A 0 C A
+maplib\baselayr\05600330.plt="05600330.plt" 15826 A 0 C A
+maplib\baselayr\05600340.plt="05600340.plt" 355736 A 0 C A
+maplib\baselayr\05600350.plt="05600350.plt" 295902 A 0 C A
+maplib\baselayr\05600360.plt="05600360.plt" 912 A 0 C A
+maplib\baselayr\05700330.plt="05700330.plt" 13926 A 0 C A
+maplib\baselayr\05700340.plt="05700340.plt" 138726 A 0 C A
+maplib\baselayr\05700350.plt="05700350.plt" 162694 A 0 C A
+maplib\baselayr\05700360.plt="05700360.plt" 2496 A 0 C A
+maplib\baselayr\05800330.plt="05800330.plt" 26722 A 0 C A
+maplib\baselayr\05800340.plt="05800340.plt" 64564 A 0 C A
+maplib\baselayr\05800350.plt="05800350.plt" 67560 A 0 C A
+maplib\baselayr\05800360.plt="05800360.plt" 2918 A 0 C A
+maplib\baselayr\05900330.plt="05900330.plt" 742 A 0 C A
+maplib\baselayr\05900340.plt="05900340.plt" 742 A 0 C A
+maplib\baselayr\05900350.plt="05900350.plt" 742 A 0 C A
+maplib\baselayr\05900360.plt="05900360.plt" 742 A 0 C A
+maplib\baselayr\index="index" 1093 A 0 C A
+maplib\baselayr\index.v01="index.v01" 1029 A 0 C A
+maplib\baselayr\refindex.rin="refindex.rin" 472064 A 0 C A
+maplib\baselayr\tagindex.rin="tagindex.rin" 332800 A 0 C A
+maplib\basemap.plt="basemap.plt" 258050 A 0 C A
+maplib\basemap.rin="basemap.rin" 140288 A 0 C A
+maplib\basemap.tin="basemap.tin" 5120 A 0 C A
+maplib\index.plt="index.plt" 258050 A 0 C A
+maplib\index.rin="index.rin" 5120 A 0 C A
+maplib\index.tin="index.tin" 1024 A 0 C A
+maplib\test.plt="test.plt" 121008 A 0 C A
+maplib\textlayr\05500330.plt="05500330.plt" 742 A 0 C A
+maplib\textlayr\05500340.plt="05500340.plt" 518562 A 0 C A
+maplib\textlayr\05500340.rin="05500340.rin" 1024 A 0 C A
+maplib\textlayr\05500350.plt="05500350.plt" 258850 A 0 C A
+maplib\textlayr\05500350.rin="05500350.rin" 5120 A 0 C A
+maplib\textlayr\05500360.plt="05500360.plt" 742 A 0 C A
+maplib\textlayr\05600330.plt="05600330.plt" 57828 A 0 C A
+maplib\textlayr\05600330.rin="05600330.rin" 1024 A 0 C A
+maplib\textlayr\05600340.plt="05600340.plt" 2053598 A 0 C A
+maplib\textlayr\05600350.plt="05600350.plt" 1821864 A 0 C A
+maplib\textlayr\05600360.plt="05600360.plt" 742 A 0 C A
+maplib\textlayr\05700330.plt="05700330.plt" 58814 A 0 C A
+maplib\textlayr\05700340.plt="05700340.plt" 924912 A 0 C A
+maplib\textlayr\05700350.plt="05700350.plt" 1114392 A 0 C A
+maplib\textlayr\05700360.plt="05700360.plt" 742 A 0 C A
+maplib\textlayr\05800330.plt="05800330.plt" 146754 A 0 C A
+maplib\textlayr\05800340.plt="05800340.plt" 404076 A 0 C A
+maplib\textlayr\05800350.plt="05800350.plt" 313942 A 0 C A
+maplib\textlayr\05800360.plt="05800360.plt" 742 A 0 C A
+maplib\textlayr\05900330.plt="05900330.plt" 742 A 0 C A
+maplib\textlayr\05900340.plt="05900340.plt" 742 A 0 C A
+maplib\textlayr\05900350.plt="05900350.plt" 742 A 0 C A
+maplib\textlayr\05900360.plt="05900360.plt" 742 A 0 C A
+maplib\textlayr\dump.txt="dump.txt" 102 A 0 C A
+maplib\textlayr\index="index" 1146 A 0 C A
+maplib\textlayr\index.v01="index.v01" 1082 A 0 C A
+maplib\textlayr\refindex.rin="refindex.rin" 5120 A 0 C A
+maplib\textlayr\tagindex.rin="tagindex.rin" 5120 A 0 C A
+

@@ -1,0 +1,378 @@
+
+	Steve Moshier's Ephemeris Reader v5.4e
+
+Planetary positions are from DE200.
+Terrestrial east longitude -71.1300 deg
+geocentric latitude 42.0785 deg
+Earth radius 0.99849
+temperature 12.0 C
+pressure 1010 mb
+Input time is TDT.
+Enter starting date of tabulation
+Calendar date: Year (1986) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday 14h 59m 30.854s  UT
+1950 January 1 Sunday 15h 00m 00.000s  TDT
+Julian day 2433283.1250000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (0) ? 
+                   The Sun
+
+JD 2433283.12,  1950 January 1 Sunday 14h 59m 30.854s  UT
+1950 January 1 Sunday 15h 00m 00.000s  TDT
+Opened de200.tst
+First date in file = 2.43326450E+06
+ecliptic long  280d 38' 53.06"   lat    0d 00' 00.02"   rad 9.832359675E-01
+light time 8.1773m,  aberration dRA -0.000s dDec -0.00"
+annual aberration dRA -1.503s dDec -1.77"
+nutation dRA -0.186s dDec -8.39"
+    Apparent:  R.A.  18h 46m 17.861s  Dec.  - 23d 01' 17.01"  
+Apparent longitude 280.641387 deg
+Local apparent sidereal time  16h 57m 45.389s  
+diurnal aberration dRA 0.015s dDec 0.04"
+diurnal parallax dRA 0.219s dDec -7.82"
+atmospheric refraction 0.044 deg  dRA -4.109s dDec 147.38"
+Topocentric:  Altitude 20.104 deg, Azimuth 153.456 deg
+Topocentric: R.A. 18h 46m 13.986s   Dec. - 22d 58' 57.40"  
+local meridian transit 1950 January 1 Sunday 16h 48m 05.478s  UT
+rises 1950 January 1 Sunday 12h 13m 38.691s  UT
+sets 1950 January 1 Sunday 21h 22m 40.790s  UT
+Visible hours 9.1506
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (15) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday 22h 29m 30.854s  UT
+1950 January 1 Sunday 22h 30m 00.000s  TDT
+Julian day 2433283.4375000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (0) ? 
+                  Mercury        
+
+JD 2433283.44,  1950 January 1 Sunday 22h 29m 30.854s  UT
+1950 January 1 Sunday 22h 30m 00.000s  TDT
+ecliptic long   21d 29' 46.33"   lat -  3d 06' 33.50"   rad 3.319334782E-01
+light time 8.1409m,  aberration dRA 0.030s dDec -3.72"
+true geocentric distance 0.9786820 au    equatorial diameter 6.87"
+approx. visual magnitude -2.3, phase 0.578
+Astrometric J2000.0:  R.A.  20h 14m 21.702s  Dec.  - 20d 56' 40.30"  
+Astrometric B1950.0:  R.A.  20h 11m 26.498s  Dec.  - 21d 05' 49.47"  
+elongation from sun 19.48 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -1.366s dDec -4.45"
+nutation dRA -0.107s dDec -7.65"
+Cap Capricorni.    Apparent:  R.A.  20h 11m 25.032s  Dec.  - 21d 06' 01.46"  
+Local apparent sidereal time   0h 28m 59.315s  
+diurnal aberration dRA 0.007s dDec -0.08"
+diurnal parallax dRA -0.429s dDec -6.64"
+atmospheric refraction 0.216 deg  dRA 37.150s dDec 579.45"
+Topocentric:  Altitude 3.437 deg, Azimuth 237.421 deg
+Topocentric: R.A. 20h 12m 01.760s   Dec. - 20d 56' 28.73"  
+local meridian transit 1950 January 1 Sunday 18h 11m 56.064s  UT
+rises 1950 January 1 Sunday 13h 31m 12.077s  UT
+sets 1950 January 1 Sunday 22h 53m 20.101s  UT
+Visible hours 9.3689
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (22) ? Minutes (30) ? Seconds (0.000000) ? 1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+Julian day 2433282.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (1) ? 
+                  Venus          
+
+JD 2433282.50,  1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+ecliptic long   81d 46' 42.62"   lat    0d 19' 42.14"   rad 7.200994769E-01
+light time 3.1162m,  aberration dRA 0.948s dDec 2.67"
+true geocentric distance 0.3746495 au    equatorial diameter 44.52"
+approx. visual magnitude -5.6, phase 0.215
+Astrometric J2000.0:  R.A.  21h 19m 42.910s  Dec.  - 14d 56' 10.34"  
+Astrometric B1950.0:  R.A.  21h 16m 57.543s  Dec.  - 15d 08' 53.42"  
+elongation from sun 36.98 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -1.098s dDec -4.94"
+nutation dRA -0.104s dDec -6.43"
+Cap Capricorni.    Apparent:  R.A.  21h 16m 56.340s  Dec.  - 15d 09' 04.74"  
+Local apparent sidereal time   1h 55m 17.538s  
+diurnal aberration dRA 0.006s dDec -0.06"
+diurnal parallax dRA -1.126s dDec -16.74"
+atmospheric refraction 0.181 deg  dRA 31.327s dDec 469.13"
+Topocentric:  Altitude 4.379 deg, Azimuth 245.104 deg
+Topocentric: R.A. 21h 17m 26.547s   Dec. - 15d 01' 32.41"  
+local meridian transit 1949 December 31 Saturday 19h 21m 41.757s  UT
+rises 1949 December 31 Saturday 14h 16m 28.614s  UT
+sets 1950 January 1 Sunday  0h 27m 24.151s  UT
+Visible hours 10.1821
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+Julian day 2433282.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (2) ? 
+                   The Moon
+
+JD 2433282.50,  1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+Light time = 1.33293 sec
+nutation dRA -0.366s dDec 6.40"
+Geometric lon 61.41243, lat 3.78160, rad 2.6711732e-03
+Apparent geocentric longitude 61.4113266 deg   61d 24' 40.78"  
+   Latitude 3.7815871 deg    3d 46' 53.71"  
+Distance 62.65178822 Earth-radii
+Horizontal parallax    0d 54' 52.38"  Semidiameter    0d 14' 57.10"  
+Elongation from sun 141.24 deg,  Illuminated fraction 0.89
+Phase 3.2 days before Full Moon
+    Apparent:  R.A.  3h 53m 47.386s  Declination   24d 09' 05.05"  
+RA = 58.447443 deg, Dec = 24.151402 deg, pi = 0.9145503 deg
+Local apparent sidereal time   1h 55m 17.538s  
+diurnal aberration dRA 0.015s dDec -0.05"
+diurnal parallax dRA 89.121s dDec -1159.85"
+atmospheric refraction 0.010 deg  dRA -1.812s dDec 23.95"
+Topocentric:  Altitude 59.101 deg, Azimuth 117.089 deg
+Topocentric: R.A.  3h 55m 14.710s   Dec.   23d 50' 09.10"  
+local meridian transit 1950 January 1 Sunday  2h 02m 04.571s  UT
+rises 1949 December 31 Saturday 18h 14m 55.503s  UT
+sets 1950 January 1 Sunday  9h 59m 47.133s  UT
+Visible hours 15.7477
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday  4h 59m 30.855s  UT
+1950 January 1 Sunday  5h 00m 00.000s  TDT
+Julian day 2433282.7083333
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (3) ? 
+                  Mars           
+
+JD 2433282.71,  1950 January 1 Sunday  4h 59m 30.855s  UT
+1950 January 1 Sunday  5h 00m 00.000s  TDT
+ecliptic long  146d 26' 49.70"   lat    1d 50' 06.09"   rad 1.663878132E+00
+light time 10.0924m,  aberration dRA -0.730s dDec 5.24"
+true geocentric distance 1.2135513 au    equatorial diameter 7.71"
+approx. visual magnitude 0.1, phase 0.905
+Astrometric J2000.0:  R.A.  12h 14m 57.537s  Dec.     1d 07' 15.93"  
+Astrometric B1950.0:  R.A.  12h 12m 23.900s  Dec.     1d 23' 56.40"  
+elongation from sun 97.93 degrees, light defl. dRA -0.000s dDec 0.00"
+annual aberration dRA 0.153s dDec -1.98"
+nutation dRA -0.187s dDec 0.85"
+Vir Virginis.    Apparent:  R.A.  12h 12m 23.868s  Dec.     1d 23' 55.26"  
+Local apparent sidereal time   6h 56m 06.822s  
+diurnal aberration dRA 0.003s dDec -0.01"
+diurnal parallax dRA 0.352s dDec -4.82"
+atmospheric refraction 0.097 deg  dRA -17.188s dDec 237.31"
+Topocentric:  Altitude 9.109 deg, Azimuth 96.361 deg
+Topocentric: R.A. 12h 12m 07.035s   Dec.    1d 27' 47.74"  
+local meridian transit 1950 January 1 Sunday 10h 15m 14.092s  UT
+rises 1950 January 1 Sunday  4h 07m 43.297s  UT
+sets 1950 January 1 Sunday 16h 22m 30.456s  UT
+Visible hours 12.2464
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (5) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday 17h 59m 30.854s  UT
+1950 January 1 Sunday 18h 00m 00.000s  TDT
+Julian day 2433283.2500000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (4) ? 
+                  Jupiter        
+
+JD 2433283.25,  1950 January 1 Sunday 17h 59m 30.854s  UT
+1950 January 1 Sunday 18h 00m 00.000s  TDT
+ecliptic long  311d 32' 23.80"   lat -  0d 41' 03.70"   rad 5.074227033E+00
+light time 49.4049m,  aberration dRA -0.626s dDec -2.15"
+true geocentric distance 5.9403749 au    equatorial diameter 33.14"
+approx. visual magnitude -2.0, phase 0.998
+Astrometric J2000.0:  R.A.  20h 39m 46.153s  Dec.  - 18d 59' 47.17"  
+Astrometric B1950.0:  R.A.  20h 36m 54.610s  Dec.  - 19d 10' 25.83"  
+elongation from sun 25.91 degrees, light defl. dRA 0.001s dDec 0.00"
+annual aberration dRA -1.276s dDec -4.88"
+nutation dRA -0.098s dDec -7.24"
+Cap Capricorni.    Apparent:  R.A.  20h 36m 53.242s  Dec.  - 19d 10' 37.84"  
+Local apparent sidereal time  19h 58m 14.959s  
+diurnal aberration dRA 0.016s dDec 0.01"
+diurnal parallax dRA 0.013s dDec -1.29"
+atmospheric refraction 0.030 deg  dRA -1.080s dDec 107.79"
+Topocentric:  Altitude 27.938 deg, Azimuth 169.669 deg
+Topocentric: R.A. 20h 36m 52.192s   Dec. - 19d 08' 51.32"  
+local meridian transit 1950 January 1 Sunday 18h 38m 04.307s  UT
+rises 1950 January 1 Sunday 13h 49m 01.511s  UT
+sets 1950 January 1 Sunday 23h 27m 12.814s  UT
+Visible hours 9.6365
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (18) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday  6h 59m 30.854s  UT
+1950 January 1 Sunday  7h 00m 00.000s  TDT
+Julian day 2433282.7916667
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (5) ? 
+                  Saturn         
+
+JD 2433282.79,  1950 January 1 Sunday  6h 59m 30.854s  UT
+1950 January 1 Sunday  7h 00m 00.000s  TDT
+ecliptic long  163d 47' 49.06"   lat    1d 55' 22.34"   rad 9.353335131E+00
+light time 74.5012m,  aberration dRA -0.416s dDec 2.48"
+true geocentric distance 8.9580130 au    equatorial diameter 18.47"
+approx. visual magnitude 0.7, phase 0.998
+Astrometric J2000.0:  R.A.  11h 26m 54.378s  Dec.     5d 45' 16.63"  
+Astrometric B1950.0:  R.A.  11h 24m 19.622s  Dec.     6d 01' 47.64"  
+elongation from sun 110.86 degrees, light defl. dRA -0.000s dDec 0.00"
+annual aberration dRA 0.440s dDec -3.56"
+nutation dRA -0.144s dDec 2.57"
+Leo Leonis.    Apparent:  R.A.  11h 24m 19.921s  Dec.     6d 01' 46.64"  
+Local apparent sidereal time   8h 56m 26.535s  
+diurnal aberration dRA 0.013s dDec -0.01"
+diurnal parallax dRA 0.029s dDec -0.59"
+atmospheric refraction 0.018 deg  dRA -2.612s dDec 53.13"
+Topocentric:  Altitude 41.209 deg, Azimuth 127.363 deg
+Topocentric: R.A. 11h 24m 17.351s   Dec.    6d 02' 39.16"  
+local meridian transit 1950 January 1 Sunday  9h 26m 59.982s  UT
+rises 1950 January 1 Sunday  3h 02m 55.289s  UT
+sets 1950 January 1 Sunday 15h 51m 05.296s  UT
+Visible hours 12.8028
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (7) ? Minutes (0) ? Seconds (0.000000) ? 1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+Julian day 2433282.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (6) ? 
+                  Uranus         
+
+JD 2433282.50,  1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+ecliptic long   93d 03' 31.25"   lat    0d 15' 18.23"   rad 1.894544459E+01
+light time 149.4507m,  aberration dRA -0.344s dDec 0.06"
+true geocentric distance 17.9698352 au    equatorial diameter 3.90"
+approx. visual magnitude 5.5, phase 1.000
+Astrometric J2000.0:  R.A.   6h 14m 44.838s  Dec.    23d 40' 17.21"  
+Astrometric B1950.0:  R.A.   6h 11m 41.859s  Dec.    23d 41' 15.01"  
+elongation from sun 172.66 degrees, light defl. dRA 0.000s dDec -0.00"
+annual aberration dRA 1.504s dDec -0.52"
+nutation dRA -0.228s dDec 8.37"
+Gem Geminorum.    Apparent:  R.A.   6h 11m 43.136s  Dec.    23d 41' 22.97"  
+Local apparent sidereal time   1h 55m 17.538s  
+diurnal aberration dRA 0.008s dDec -0.09"
+diurnal parallax dRA 0.024s dDec -0.24"
+atmospheric refraction 0.023 deg  dRA -4.937s dDec 49.51"
+Topocentric:  Altitude 34.507 deg, Azimuth 88.030 deg
+Topocentric: R.A.  6h 11m 38.231s   Dec.   23d 42' 12.16"  
+local meridian transit 1950 January 1 Sunday  4h 15m 12.484s  UT
+rises 1949 December 31 Saturday 20h 38m 50.372s  UT
+sets 1950 January 1 Sunday 11h 51m 34.744s  UT
+Visible hours 15.2123
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday 10h 59m 30.854s  UT
+1950 January 1 Sunday 11h 00m 00.000s  TDT
+Julian day 2433282.9583333
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (7) ? 
+                  Neptune        
+
+JD 2433282.96,  1950 January 1 Sunday 10h 59m 30.854s  UT
+1950 January 1 Sunday 11h 00m 00.000s  TDT
+ecliptic long  195d 25' 32.61"   lat    1d 35' 51.38"   rad 3.029526784E+01
+light time 252.7942m,  aberration dRA -0.231s dDec 1.37"
+true geocentric distance 30.3958207 au    equatorial diameter 2.20"
+approx. visual magnitude 8.0, phase 1.000
+Astrometric J2000.0:  R.A.  13h 08m 43.544s  Dec.  -  5d 34' 46.04"  
+Astrometric B1950.0:  R.A.  13h 06m 07.971s  Dec.  -  5d 18' 46.84"  
+elongation from sun 83.21 degrees, light defl. dRA -0.000s dDec 0.00"
+annual aberration dRA -0.166s dDec 0.40"
+nutation dRA -0.251s dDec -1.12"
+Vir Virginis.    Apparent:  R.A.  13h 06m 07.558s  Dec.  -  5d 18' 47.59"  
+Local apparent sidereal time  12h 57m 05.962s  
+diurnal aberration dRA 0.016s dDec 0.00"
+diurnal parallax dRA 0.001s dDec -0.21"
+atmospheric refraction 0.018 deg  dRA -0.167s dDec 63.16"
+Topocentric:  Altitude 42.390 deg, Azimuth 176.958 deg
+Topocentric: R.A. 13h 06m 07.408s   Dec. -  5d 17' 44.64"  
+local meridian transit 1950 January 1 Sunday 11h 08m 31.002s  UT
+rises 1950 January 1 Sunday  5h 25m 45.276s  UT
+sets 1950 January 1 Sunday 16h 51m 16.388s  UT
+Visible hours 11.4253
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (11) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday  0h 01m 30.855s  UT
+1950 January 1 Sunday  0h 02m 00.000s  TDT
+Julian day 2433282.5013889
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (8) ? 
+                  Pluto          
+
+JD 2433282.50,  1950 January 1 Sunday  0h 01m 30.855s  UT
+1950 January 1 Sunday  0h 02m 00.000s  TDT
+ecliptic long  136d 50' 09.55"   lat    8d 01' 34.69"   rad 3.632540869E+01
+light time 295.6706m,  aberration dRA -0.249s dDec 0.23"
+true geocentric distance 35.5510998 au    equatorial diameter 0.12"
+approx. visual magnitude 14.6, phase 1.000
+Astrometric J2000.0:  R.A.   9h 34m 41.526s  Dec.    23d 04' 13.45"  
+Astrometric B1950.0:  R.A.   9h 31m 50.707s  Dec.    23d 17' 37.22"  
+elongation from sun 141.47 degrees, light defl. dRA -0.000s dDec 0.00"
+annual aberration dRA 1.087s dDec -7.06"
+nutation dRA -0.034s dDec 6.06"
+Leo Leonis.    Apparent:  R.A.   9h 31m 51.764s  Dec.    23d 17' 36.27"  
+Local apparent sidereal time   1h 57m 17.867s  
+diurnal aberration dRA -0.007s dDec -0.09"
+diurnal parallax dRA 0.012s dDec -0.18"
+atmospheric refraction 0.536 deg  dRA -95.142s dDec 1415.52"
+Topocentric:  Altitude 0.159 deg, Azimuth 57.291 deg
+Topocentric: R.A.  9h 30m 16.627s   Dec.   23d 41' 11.52"  
+local meridian transit 1950 January 1 Sunday  7h 34m 49.018s  UT
+rises 1950 January 1 Sunday  0h 00m 17.654s  UT
+sets 1950 January 1 Sunday 15h 09m 21.983s  UT
+Visible hours 15.1512
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (2) ? Seconds (0.000000) ? 1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+Julian day 2433282.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (9) ? Name of star catalogue file:  (star.cat) ? Line number (1) ? 2000 00 08 23.265  29 05 25.58   1.039  -16.33 -12.0 0.0240   2.06 alAnd(Alpheratz)       4
+
+
+               alpha Andromedae (Alpheratz)
+
+JD 2433282.50,  1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+approx. visual magnitude 2.1
+Astrometric J2000.0:  R.A.   0h 08m 22.744s  Dec.    29d 05' 33.74"  
+Astrometric B1950.0:  R.A.   0h 05m 47.875s  Dec.    28d 48' 51.95"  
+Astrometric of date:  R.A.   0h 05m 47.876s  Dec.    28d 48' 51.96"  
+elongation from sun 93.24 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.215s dDec 8.66"
+nutation dRA -0.508s dDec -1.10"
+    Apparent:  R.A.   0h 05m 47.153s  Dec.    28d 48' 59.51"  
+Local apparent sidereal time   1h 55m 17.538s  
+diurnal aberration dRA 0.016s dDec 0.05"
+atmospheric refraction 0.008 deg  dRA 1.659s dDec 17.47"
+Topocentric:  Altitude 64.159 deg, Azimuth 247.528 deg
+Topocentric: R.A.  0h 05m 48.828s   Dec.   28d 49' 17.03"  
+local meridian transit 1949 December 31 Saturday 22h 10m 18.429s  UT
+rises 1949 December 31 Saturday 14h 07m 33.386s  UT
+sets 1950 January 1 Sunday  6h 13m 03.432s  UT
+Visible hours 16.0917
+Name of star catalogue file:  (star.cat) ? Can't find file 0
+Operator error.
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1950 January 1 Sunday  7h 59m 30.854s  UT
+1950 January 1 Sunday  8h 00m 00.000s  TDT
+Julian day 2433282.8333333
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (88) ? Name of orbit catalogue file:  (orbit.cat) ? Line number (1) ? 2447120.5 34.0897 267.3835 73.9085 167.4675275 0.00045478773
+
+0.994811 0.0062424619 2433282.423 5.0 0.0 Bradfield_1987s	5
+
+
+                  Bradfield_1987s
+
+JD 2433282.83,  1950 January 1 Sunday  7h 59m 30.854s  UT
+1950 January 1 Sunday  8h 00m 00.000s  TDT
+ecliptic long  173d 04' 37.27"   lat - 34d 00' 52.36"   rad 6.007266864E+01
+light time 497.6676m,  aberration dRA -0.033s dDec 0.25"
+true geocentric distance 59.8382519 au    equatorial diameter 0.00"
+approx. visual magnitude 22.8, phase 1.000
+Astrometric J2000.0:  R.A.  10h 42m 05.757s  Dec.  - 29d 03' 42.25"  
+Astrometric B1950.0:  R.A.  10h 39m 44.524s  Dec.  - 28d 47' 59.06"  
+elongation from sun 103.34 degrees, light defl. dRA -0.000s dDec 0.00"
+annual aberration dRA 0.785s dDec 7.37"
+nutation dRA -0.469s dDec 4.07"
+Hya Hydrae.    Apparent:  R.A.  10h 39m 44.839s  Dec.  - 28d 47' 47.62"  
+Local apparent sidereal time   9h 56m 36.392s  
+diurnal aberration dRA 0.018s dDec 0.02"
+diurnal parallax dRA 0.002s dDec -0.14"
+atmospheric refraction 0.049 deg  dRA -1.940s dDec 173.10"
+Topocentric:  Altitude 18.290 deg, Azimuth 170.057 deg
+Topocentric: R.A. 10h 39m 42.918s   Dec. - 28d 44' 54.63"  
+local meridian transit 1950 January 1 Sunday  8h 42m 32.188s  UT
+rises 1950 January 1 Sunday  4h 39m 05.645s  UT
+sets 1950 January 1 Sunday 12h 45m 58.017s  UT
+Visible hours 8.1145
+
+Enter starting date of tabulation
+Calendar date: Year (1950) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (8) ? Minutes (0) ? Seconds (0.000000) ? 1949 December 31 Saturday 23h 59m 30.855s  UT
+1950 January 1 Sunday  0h 00m 00.000s  TDT
+Julian day 2433282.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (99) ? 

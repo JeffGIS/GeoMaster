@@ -1,0 +1,95 @@
+# local macros: may have to be tuned for new ports
+#
+# these should be correct for Linux 0.99.13 with gcc 2.x
+# also works fine with Linux 1.2.7 and gcc 2.6.3
+
+# For some reason, /bin/sh gives us problems.
+
+SHELL=/bin/bash
+
+# stuff that should be defined by "ipwmake"
+#	IPW		root of IPW directory tree
+#	IPWMAKE_OPTS	"ipwmake" command-line options
+#	IPWMAKE_ARGS	"ipwmake" command-line arguments
+
+#IPW=
+#IPWMAKE_OPTS=
+#IPWMAKE_ARGS=
+
+# C compiler
+#	CC		C compiler (usually predefined by "make")
+#       ANSI_CC         ANSI C compiler (usually acc or gcc)
+#	C_LOCAL		special local options, always used
+#	C_NORMAL	standard options if no debug/profile
+#	C_DEBUG		debugging options, for "ipwmake -D"
+#	C_PROFILE	profiling options, for "ipwmake -P"
+
+CC=gcc
+ANSI_CC=gcc
+C_LOCAL=-pipe -Wall
+C_NORMAL=-O2
+C_DEBUG=-g
+C_PROFILE=-pg
+
+# following are for use in C_SPECIAL in Makedefs
+#	C_SINGLE	disable float->double promotion for all-float expr's
+
+C_SINGLE=
+
+# loader
+#	SPECIAL_CLD	Special program to run in front of the C loader
+#	CLD		C loader
+#	LD_LOCAL	special local options, always used
+#	LD_NORMAL	standard options if no debug/profile
+#	LD_DEBUG	debugging options, for "ipwmake -D"
+#	LD_PROFILE	profiling options, for "ipwmake -P"
+#	LIBS_LOCAL	local libraries, always used
+
+SPECIAL_CLD= $(QUANTIFY)
+CLD= $(SPECIAL_CLD) $(CC)
+LD_LOCAL=
+LD_NORMAL=
+LD_DEBUG=-g
+LD_PROFILE=-pg
+LIBS_LOCAL=-lm
+
+# archiver
+#	AR		"ar" command
+#	AR_ROPTS	options to update members
+#	AR_XOPTS	options to extract members and set original
+#				modification times
+#	RANLIB		"ranlib" command
+
+AR=ar
+AR_ROPTS=ruv
+AR_DOPTS=dv
+AR_XOPTS=xo
+RANLIB=ranlib
+
+# lint
+#	LINT		"lint" command
+#	ANSI_LINT	ANSI C compatible "lint"
+#	LINT_LIBOPT	lint option to create a lint library
+#	LINT_LOCAL	special local options, always used
+#	LINT_NORMAL	standard options if no debug/profile
+#	LINT_DEBUG	debugging options, for "ipwmake -D"
+#	LINT_PREFIX	prepended to $(LIB)
+#	LINT_SUFFIX	appended to $(LIB)
+
+LINT=lint
+ANSI_LINT=alint
+LINT_LIBOPT=-C
+LINT_LOCAL=-n
+LINT_NORMAL=
+LINT_DEBUG=-a -b -c -h
+LINT_PREFIX=llib-l
+LINT_SUFFIX=.ln
+
+# other stuff
+#	CHMOD		"chmod" command
+#	RM		"rm" command
+
+CHMOD=chmod
+RM=rm -f
+
+# $Header: /home/ipw/lib/make/conf/RCS/sun4,v 1.1 89/12/12 19:40:00 frew Exp $

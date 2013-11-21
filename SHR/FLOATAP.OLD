@@ -1,0 +1,983 @@
+
+#include <windows.h>
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "shr.h"  
+
+#define	NVALIDCODES	12
+static short	ValidCodes[NVALIDCODES]={'==','<','>','!=','!<','!>','<>','>=','<=','&&','||','!'};
+static char		LogVals[2][2]={"0","1"};
+    
+double fltread (LPSTR Instr, LPSHORT IRC);
+double ComputeFLTValue (double val1, double val2, char OpCode,LPSHORT IRC);
+BOOL ComputeLogValue (LPSTR val1, LPSTR val2, UINT OpCode,LPSHORT IRC);
+UINT GetBoolOpCode (LPSTR Input,LPSHORT pInc,LPSHORT pNeedArg1,LPSHORT pError);
+short OpRankBool (UINT OpCode);
+
+BOOL LogicP (LPSTR INEXPR,LPSHORT IRC)
+{ 
+// IRC (0=success, 1 = invalid flt value, 2 = error in paren matching, 3 = invalid statement, 4 = devide by 0)  
+    LPSTR	pLchr, pVal1Begin, pVal1End, pVal2Begin, pVal2End, pEnd; 
+    HANDLE	hInput=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+    LPSTR	INPUT = GlobalLock (hInput); 
+    UINT	OpCode, OpCodeNext=0;  
+    BOOL	rtn=0, Value1, Value2, NeedVal1, Error;  
+    short	InBrackets=0;
+    short	Inc;
+
+	*IRC = 0;  
+	_fstrcpy (INPUT,INEXPR);
+	Truncate (INPUT);  
+// remove enclosing parens 
+	if (*INPUT == '(')
+	{
+		pLchr = LastChr (INPUT);
+    	pEnd = MatchLev ((LPSTR)(INPUT+1),')');
+    	if (pEnd == pLchr)
+    	{
+	    	INPUT++;
+	    	*pLchr-- = 0;
+	    }
+    }
+
+// find first value 
+	pVal1Begin = pVal1End = 0; 
+NextVal1:  
+    switch (*INPUT)
+    {   
+    	case 0:
+    		if (!pVal1Begin)
+    		{
+    			rtn = 0;
+    			goto Exit;
+    		} 
+    		if (pVal1End)
+    			*pVal1End = 0; 
+    		rtn = ComputeLogValue (pVal1Begin,NULL,0,IRC);
+    		goto Exit;
+    	case '[':
+			if (!pVal1Begin)
+				pVal1Begin = INPUT;
+    		InBrackets++;
+    		goto Next1;
+    	case ']':
+    		InBrackets--; 
+    		goto Next1;  
+    	default:
+    		break;
+    }
+	if (!InBrackets)  
+    switch (*INPUT)
+    {   
+    	case ' ':  
+    		if (pVal1Begin)
+    			pVal1End = INPUT;
+    		break; 
+    	case '(':
+    		if (!pVal1Begin)
+    			pVal1Begin = INPUT;
+    		INPUT++;
+    		if (!(pEnd = MatchLev (INPUT,')')))
+    		{
+    			*IRC = 2;
+    			goto Exit;
+    		}
+    		INPUT = pEnd;
+    		break;
+/*    	case '!':
+    		if (pVal1Begin)
+    			pVal1End = INPUT; 
+    		else
+    		{
+    			*IRC = 3;
+    			goto Exit;
+    		}
+    		if (*(INPUT+1) == '=')
+    		{
+    			INPUT+=2;
+    			OpCode = 'n';
+    			goto GetSecondValue;
+    		} 
+    	case '>':
+    	case '<':
+    	case '=':
+    		if (pVal1Begin)
+    			pVal1End = INPUT; 
+    		OpCode = *INPUT++;
+    		goto GetSecondValue;*/
+		default: 
+			OpCode = GetBoolOpCode (INPUT,&Inc,&NeedVal1,&Error);
+			if (Error)
+			{
+				*IRC = 5;
+				goto Exit;
+			}
+			if (OpCode)
+			{   
+	    		if (pVal1Begin)
+	    			pVal1End = INPUT; 
+	    		else if (NeedVal1)
+	    		{
+	    			*IRC = 3;
+	    			goto Exit;
+	    		}
+			    INPUT += Inc;
+	    		goto GetSecondValue;
+			}
+			if (!pVal1Begin)
+				pVal1Begin = INPUT;
+			break;
+    }
+Next1:
+    INPUT++;
+    goto NextVal1;
+    		
+GetSecondValue:   
+	InBrackets = 0;
+	pVal2Begin = 0;
+NextOp:
+	pVal2End = 0; 
+NextVal2:  
+    switch (*INPUT)
+    {   
+    	case 0:
+    		if (!pVal2Begin)
+    		{
+    			*IRC = 3;
+    			goto Exit;
+    		}
+    		if (pVal1End) 
+				*pVal1End = 0;
+    		rtn = ComputeLogValue (pVal1Begin,pVal2Begin,OpCode,IRC);
+    		goto Exit;
+    	case '[':
+			if (!pVal2Begin)
+				pVal2Begin = INPUT;
+    		InBrackets++;
+    		goto Next2;
+    	case ']':
+    		InBrackets--; 
+    		goto Next2;  
+    	default:
+    		break;
+    }
+    if (!InBrackets)	
+    switch (*INPUT)
+    {   
+    	case ' ':  
+    		if (pVal2Begin)
+    			pVal2End = INPUT;
+    		break; 
+    	case '(':
+    		if (!pVal2Begin)
+    			pVal2Begin = INPUT;
+    		INPUT++;
+    		if (!(pEnd = MatchLev (INPUT,')')))
+    		{
+    			*IRC = 2;
+    			goto Exit;
+    		}
+    		INPUT = pEnd;
+    		break;
+		default: 
+			OpCodeNext = GetBoolOpCode (INPUT,&Inc,&NeedVal1,&Error);
+			if (Error)
+			{
+				*IRC = 5;
+				goto Exit;
+			}
+			if (OpCodeNext)
+			{   
+	    		if (pVal2Begin)
+	    			pVal2End = INPUT; 
+	    		else if (NeedVal1)
+	    		{
+	    			*IRC = 3;
+	    			goto Exit;
+	    		}
+			    INPUT += Inc;
+	    		goto CheckEndSecondValue;
+			}
+			if (!pVal2Begin)
+				pVal2Begin = INPUT;
+			break;
+    } 
+Next2:
+    INPUT++;
+    goto NextVal2;
+    		
+CheckEndSecondValue:
+    
+	if (OpRankBool(OpCodeNext) == OpRankBool(OpCode))
+    {
+		*pVal1End = 0;
+		*pVal2End = 0;
+	    Value2 = ComputeLogValue (pVal1Begin,pVal2Begin,OpCode,IRC); 
+	    if (*IRC)
+	    	goto Exit;
+		pVal1Begin = (LPSTR)&LogVals[Value2]; 
+		OpCode = OpCodeNext;
+		goto GetSecondValue;
+	} 
+	if (OpRankBool(OpCodeNext) > OpRankBool(OpCode))
+	{
+		pVal1End = pVal2End;
+		OpCode = OpCodeNext;
+		goto GetSecondValue;
+	}
+	goto NextVal2;
+
+Exit:		
+	GlobalUnlock (hInput);
+	GlobalFree (hInput);
+	return rtn; 		
+} 
+
+UINT GetBoolOpCode (LPSTR Input,LPSHORT pInc,LPSHORT pNeedArg1,LPSHORT pError)
+{    
+	UINT	OpCode,i;
+	
+    *pInc = 0;
+    OpCode = *Input;
+    *pError = FALSE;
+	switch (OpCode) 
+	{
+    	case '!':
+    	case '>':
+    	case '<':
+    	case '=':
+    	case '&':
+    	case '|':
+    		(*pInc)++;
+    		Input++;
+    		switch (*Input)
+    		{
+		    	case '>':
+		    	case '<':
+		    	case '=':
+		    	case '&':
+		    	case '|':
+		    		OpCode = (UINT)*Input + (OpCode << 8);   
+		    		*pNeedArg1 = TRUE;
+		    		(*pInc)++;
+		    		break;
+		    	default:
+		    		*pNeedArg1 = FALSE;
+		    }
+		    *pError = TRUE;
+		    for (i=0;i<NVALIDCODES;i++)
+		    	if (OpCode == ValidCodes[i])
+		    		*pError = FALSE;
+		    return OpCode;
+    	default:
+    		return 0;
+    }
+}
+
+
+double fltread (LPSTR Instr, LPSHORT IRC)
+{
+    LPSTR lpEnd, lpComma;
+    double	rtn, val, val1, val2;  
+    HANDLE	hInput=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+    LPSTR	str = GlobalLock (hInput); 
+    
+    _fstrcpy (str,Instr);
+    ExpandText (str);
+
+   	lpEnd = LastChr (str); 
+   	if (*lpEnd == ')')
+   	{
+	    if (!_fstrnicmp (str,"sin(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = sin (val);
+	    }
+	    else if (!_fstrnicmp (str,"cos(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = cos (val);
+	    }
+	    else if (!_fstrnicmp (str,"tan(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = tan (val);
+	    }
+	    else if (!_fstrnicmp (str,"cot(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = 1.0/tan (val);
+	    }
+	    else if (!_fstrnicmp (str,"log(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = log10 (val);
+	    }
+	    else if (!_fstrnicmp (str,"abs(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = fabs (val);
+	    }
+	    else if (!_fstrnicmp (str,"nint(",5))
+	    {
+	    	str+=5;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = IDNINT (val);
+	    }
+	    else if (!_fstrnicmp (str,"int(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = floor (val);
+	    }
+	    else if (!_fstrnicmp (str,"deg(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = RADDEG * val;
+	    }
+	    else if (!_fstrnicmp (str,"rad(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = val/RADDEG;
+	    }
+	    else if (!_fstrnicmp (str,"acos(",5))
+	    {
+	    	str+=5;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = acos (val);
+	    }
+	    else if (!_fstrnicmp (str,"asin(",5))
+	    {
+	    	str+=5;
+	    	*lpEnd = 0;
+	    	val = FltAP (str,IRC);
+	    	if (!*IRC)
+	    		rtn = asin (val);
+	    }
+	    else if (!_fstrnicmp (str,"mod(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+    		lpComma = MatchLev (str,',');
+    		if (!lpComma)
+    		{
+    			*IRC = 3;
+    			return 0;
+    		}
+    		*lpComma++ = 0;
+	    	val1 = FltAP (str,IRC); 
+	    	if (!*IRC)
+	    		val2 = FltAP (lpComma,IRC);
+	    	if (!*IRC)
+	    		rtn = fmod (val1,val2);
+	    }
+	    else if (!_fstrnicmp (str,"min(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+    		lpComma = MatchLev (str,',');
+    		if (!lpComma)
+    		{
+    			*IRC = 3;
+    			return 0;
+    		}
+    		*lpComma++ = 0;
+	    	val1 = FltAP (str,IRC); 
+	    	if (!*IRC)
+	    		val2 = FltAP (lpComma,IRC);
+	    	if (!*IRC)
+	    		rtn = min (val1,val2);
+	    }
+	    else if (!_fstrnicmp (str,"max(",4))
+	    {
+	    	str+=4;
+	    	*lpEnd = 0;
+    		lpComma = MatchLev (str,',');
+    		if (!lpComma)
+    		{
+    			*IRC = 3;
+    			return 0;
+    		}
+    		*lpComma++ = 0;
+	    	val1 = FltAP (str,IRC); 
+	    	if (!*IRC)
+	    		val2 = FltAP (lpComma,IRC);
+	    	if (!*IRC)
+	    		rtn = max (val1,val2);
+	    }
+	    else if (!_fstrnicmp (str,"atan2(",6))
+	    {
+	    	str+=6;
+	    	*lpEnd = 0;
+    		lpComma = MatchLev (str,',');
+    		if (!lpComma)
+    		{
+    			*IRC = 3;
+    			return 0;
+    		}
+    		*lpComma++ = 0;
+	    	val1 = FltAP (str,IRC); 
+	    	if (!*IRC)
+	    		val2 = FltAP (lpComma,IRC);
+	    	if (!*IRC)
+	    		rtn = atan2 (val1,val2);
+	    }
+	    else
+	    	*IRC = 1;
+	}
+	else
+	{
+	    rtn = strtod (str,&lpEnd);
+	    if (*lpEnd)
+	    	*IRC = 1;
+	    else
+	    	*IRC = 0; 
+	}
+    GSSiGlobUlFree (&hInput);
+    return rtn;
+}
+
+BOOL ComputeLogValue (LPSTR Inval1, LPSTR Inval2, UINT OpCode,LPSHORT IRC)
+{   
+	short	irc1=0, irc2=0, rtn=0, rc, ival;
+	double	dval1, dval2; 
+	HANDLE	hVals=GSSiGlobAlloc (GMEM_MOVEABLE,4096); 
+	LPSTR	val1=GlobalLock (hVals), val2=val1+2048;
+	
+	*val1 = 0;
+	*val2 = 0;
+	if (Inval1)
+	{
+		_fstrcpy (val1,Inval1);
+		if (OpCode == '&&' || OpCode == '||')
+		{
+			ival = LogicP (val1,&rc);
+			if (!rc)
+				val1 = (LPSTR)&LogVals[ival];
+		} 
+		else
+			ExpandText (val1);
+		dval1 = fltread (val1,&irc1);
+	}
+	if (Inval2)
+	{   
+		short l=_fstrlen (Inval2);
+		if (l>1 && *Inval2 == '\'' && Inval2[l-1] == '\'')
+		{
+			Inval2++;
+			_fstrcpy (val2,Inval2);
+			*LastChr (val2) = 0; 
+		}
+		else
+			_fstrcpy (val2,Inval2);
+		if (OpCode == '&&' || OpCode == '||')
+		{
+			ival = LogicP (val2,&rc);
+			if (!rc)
+				val2 = (LPSTR)&LogVals[ival];
+		} 
+		else
+			ExpandText (val2);  
+    }
+	switch (OpCode)
+	{   
+		case '&&':
+		if (!_fstrcmp (val1,"1") && !_fstrcmp (val2,"1"))
+			rtn = 1;
+			goto Exit;
+		case '||':
+		if (!_fstrcmp (val1,"1") || !_fstrcmp (val2,"1"))
+			rtn = 1;
+			goto Exit;
+	}
+	
+	if (Inval2)
+	{
+		dval2 = fltread (val2,&irc2);
+		*IRC = 0; 
+	}
+	
+	if (irc1 || irc2)
+	switch (OpCode)
+	{   
+		case 0:
+			if (*val1 && _fstrcmp (val1,"0"))
+				rtn = 1;
+			break;
+		case '!':
+			if (!*val2 || !_fstrcmp (val2,"0"))
+				rtn = 1;
+			break;
+		case '<':
+			if (_fstrcmp (val1,val2) < 0)
+				rtn = 1;
+			break;
+		case '>':
+			if (_fstrcmp (val1,val2) > 0)
+				rtn = 1;
+			break;
+		case '==':
+			if (!_fstrcmp (val1,val2))
+				rtn = 1;
+			break;
+		case '<>':
+		case '!=':
+			if (_fstrcmp (val1,val2))
+				rtn = 1;
+			break;
+		case '!>':
+			if (_fstrcmp (val1,val2) <= 0)
+				rtn = 1;
+			break;
+		case '!<':
+			if (_fstrcmp (val1,val2) >= 0)
+				rtn = 1;
+			break;
+		case '>=':
+			if (_fstrcmp (val1,val2) >= 0)
+				rtn = 1;
+			break;
+		case '<=':
+			if (_fstrcmp (val1,val2) <= 0)
+				rtn = 1;
+			break;
+		case 'a':
+			if (*val1 == '1' && *val2 == '1')
+				rtn = 1;
+			break;
+	}
+	else
+	switch (OpCode)
+	{   
+		case 0:
+			if (dval1)
+				rtn = 1;
+			break;
+		case '<':
+			if (dval1 < dval2)
+				rtn = 1;
+			break;
+		case '>':
+			if (dval1 > dval2)
+				rtn = 1;
+			break;
+		case '==':
+			if (dval1 == dval2)
+				rtn = 1;
+			break;
+		case '<>':
+		case '!=':
+			if (dval1 != dval2)
+				rtn = 1;
+			break;
+		case '!>':
+			if (!(dval1 > dval2))
+				rtn = 1;
+			break;
+		case '!<':
+			if (!(dval1 < dval2))
+				rtn = 1;
+			break;
+		case '>=':
+			if (dval1 >= dval2)
+				rtn = 1;
+			break;
+		case '<=':
+			if (dval1 <= dval2)
+				rtn = 1;
+			break;
+		case '!':
+			if (!dval2)
+				rtn = 1;
+			break;
+	} 
+Exit:
+	GSSiGlobUlFree (&hVals);
+	return rtn;
+}
+
+double ComputeFLTValue (double val1, double val2, char OpCode,LPSHORT IRC)
+{   
+	*IRC = 0;
+	switch (OpCode)
+	{
+		case '+':
+			return (val1 + val2);
+		case '-':
+			return (val1 - val2);
+		case '*':
+			return (val1 * val2);
+		case '/': 
+			if (!val2)
+			{
+				*IRC = 4;
+				return 0;
+			}
+			return (val1 / val2);
+		case 'p':
+			return (pow (val1,val2)); 
+	}
+}
+
+short OpRankBool (UINT OpCode)
+{
+	switch (OpCode)
+	{
+		case '>':
+		case '<':
+		case '!':
+		case '==':
+		case '!=':
+		case '!>':
+		case '!<':
+		case '>=':
+		case '<=':
+			return 1;
+		case '&&':
+		case '||':
+			return 2;
+	} 
+	return 0;
+}
+
+short OpRank (char OpCode)
+{
+	switch (OpCode)
+	{
+		case '+':
+		case '-':
+			return 1;
+		case '*':
+		case '/':
+			return 2;
+		case 'p':
+			return 3; 
+	}
+}
+
+double FltAP (LPSTR INEXPR,LPSHORT IRC)
+{ 
+// IRC (0=success, 1 = invalid flt value, 2 = error in paren matching, 3 = invalid statement, 4 = devide by 0)  
+    LPSTR	pLchr, pVal1Begin, pVal1End, pVal2Begin, pVal2End, pEnd; 
+    HANDLE	hInput=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+    LPSTR	INPUT = GlobalLock (hInput); 
+    char	OpCode, OpCodeNext=0;  
+    double	rtn=0, Value1, Value2;  
+    short	InBrackets=0;
+
+	*IRC = 0;  
+	_fstrcpy (INPUT,INEXPR);
+	Truncate (INPUT);  
+// remove enclosing parens
+	if (*INPUT == '(')
+	{
+		pLchr = LastChr (INPUT);
+    	pEnd = MatchLev ((LPSTR)(INPUT+1),')');
+    	if (pEnd == pLchr)
+    	{
+	    	INPUT++;
+	    	*pLchr-- = 0;
+	    }
+    }
+
+// find first value 
+	pVal1Begin = pVal1End = 0; 
+NextVal1:
+    switch (*INPUT)
+    {   
+    	case 0:
+    		if (!pVal1Begin)
+    		{
+    			rtn = 0;
+    			goto Exit;
+    		} 
+    		if (pVal1End)
+    			*pVal1End = 0; 
+    		rtn = fltread (pVal1Begin,IRC);
+    		goto Exit; 
+    	case '[':
+			if (!pVal1Begin)
+				pVal1Begin = INPUT;
+    		InBrackets++;
+    		goto Next1;
+    	case ']':
+    		InBrackets--; 
+    		goto Next1;  
+    	default:
+    		break;
+    }
+	if (!InBrackets)  
+    switch (*INPUT)
+    {   
+    	case ' ':  
+    		if (pVal1Begin)
+    			pVal1End = INPUT;
+    		break; 
+    	case '(':
+    		if (!pVal1Begin)
+    			pVal1Begin = INPUT;
+    		INPUT++;
+    		if (!(pEnd = MatchLev (INPUT,')')))
+    		{
+    			*IRC = 2;
+    			goto Exit;
+    		}
+    		INPUT = pEnd;
+    		break;
+    	case '*':
+    		if (pVal1Begin)
+    			pVal1End = INPUT; 
+    		else
+    		{
+    			*IRC = 3;
+    			goto Exit;
+    		}
+    		if (*(INPUT+1) == '*')
+    		{
+    			INPUT+=2;
+    			OpCode = 'p';
+    			goto GetSecondValue;
+    		} 
+    	case '+':
+    	case '-':
+    	case '/':
+    		if (pVal1Begin)
+    			pVal1End = INPUT; 
+    		OpCode = *INPUT++;
+    		goto GetSecondValue;
+		default:
+			if (!pVal1Begin)
+				pVal1Begin = INPUT;
+			break;
+    }
+Next1:
+    INPUT++;
+    goto NextVal1;
+    		
+GetSecondValue: 
+	InBrackets = 0;
+	if (pVal1Begin)
+	{   
+		*pVal1End = 0;
+		Value1 = FltAP (pVal1Begin,IRC);
+		if (*IRC)
+		{
+			GSSiGlobUlFree (&hInput);
+			return 0; 
+		}
+	}
+	else           
+		Value1 = 0;
+
+// find second value 
+GetSecondVal:
+	pVal2Begin = 0;
+NextOp:
+	pVal2End = 0; 
+NextVal2:  
+    switch (*INPUT)
+    {   
+    	case 0:
+    		if (!pVal2Begin)
+    		{
+    			*IRC = 3;
+    			goto Exit;
+    		} 
+    		Value2 = FltAP (pVal2Begin,IRC);
+    		if (!*IRC)
+    			rtn = ComputeFLTValue (Value1,Value2,OpCode,IRC);
+    		goto Exit;
+    	case '[':
+			if (!pVal2Begin)
+				pVal2Begin = INPUT;
+    		InBrackets++;
+    		goto Next2;
+    	case ']':
+    		InBrackets--; 
+    		goto Next2;  
+    	default:
+    		break;
+    }
+    if (!InBrackets)	
+    switch (*INPUT)
+    {   
+    	case ' ':  
+    		if (pVal2Begin)
+    			pVal2End = INPUT;
+    		break; 
+    	case '(':
+    		if (!pVal2Begin)
+    			pVal2Begin = INPUT;
+    		INPUT++;
+    		if (!(pEnd = MatchLev (INPUT,')')))
+    		{
+    			*IRC = 2;
+    			goto Exit;
+    		}
+    		INPUT = pEnd;
+    		break;
+    	case '*':
+    		if (pVal2Begin)
+    			pVal2End = INPUT; 
+    		else
+    		{
+    			*IRC = 3;
+    			goto Exit;
+    		}
+    		if (*(INPUT+1) == '*')
+    		{
+    			INPUT+=2;
+    			OpCodeNext = 'p';
+    			goto CheckEndSecondValue;
+    		} 
+    	case '-':
+    		if (pVal2Begin)
+    			pVal2End = INPUT; 
+    		else
+				pVal2Begin = INPUT;
+			break;
+    	case '+':
+    	case '/':
+    		if (pVal2Begin)
+    			pVal2End = INPUT; 
+    		else
+    		{
+    			*IRC = 3;
+    			goto Exit;
+    		}
+    		OpCodeNext = *INPUT++;
+    		goto CheckEndSecondValue;
+		default:
+			if (!pVal2Begin)
+				pVal2Begin = INPUT;
+			break;
+    }   
+Next2:
+    INPUT++;
+    goto NextVal2;
+    		
+CheckEndSecondValue:
+	if (OpRank(OpCodeNext) > OpRank(OpCode))
+		goto NextOp;
+	*pVal2End = 0;
+	Value2 = FltAP (pVal2Begin,IRC);
+	if (!*IRC)
+		Value1 = ComputeFLTValue (Value1,Value2,OpCode,IRC); 
+	if (*IRC)
+		goto Exit;
+	OpCode = OpCodeNext;
+	goto GetSecondVal; 
+
+Exit:		
+	GSSiGlobUlFree (&hInput);
+	return rtn; 		
+} 
+short MATPAR (LPSTR STRING,short IBEG,short IEND)
+{     
+	short	NEST=0;
+	short	I, rtn;
+
+      I   = IBEG;
+      rtn = 0;
+ S10: if (I > IEND)
+   		return rtn;
+      if (STRING[I] !=')')
+        goto S20;
+      if (!NEST)
+        goto S50;
+      NEST--;
+      I++;
+      goto S10;
+  S20:if (STRING[I] =='(')
+  		NEST++;
+      I++;
+      goto S10;
+  S50:rtn = I;
+      return rtn;
+}    
+
+short NDELIM (LPSTR INPUT,short IB,short IE,char DELIM,LPSTR LEVDLM)
+{
+      short FLIP[2]={2,1}, FLOP, ITEST, ILLDLM, IRLDLM, J, rtn, LEVEL;
+      BOOL SAME;
+      
+      if (LEVDLM[0] ==LEVDLM[1]) 
+          SAME = TRUE;
+      else
+          SAME = FALSE;
+      FLOP   = 1;
+      LEVEL  = 0; 
+      for (J = IB;J<IE+1;J++)
+      {
+          ILLDLM = 1;
+          IRLDLM = 1;
+          ITEST  = 1;
+          if (INPUT[J] ==LEVDLM[0])
+          {
+              ILLDLM = 0;
+              if (SAME) IRLDLM = 0;
+          }
+          else if (INPUT[J] ==LEVDLM[1]) 
+              IRLDLM = 0;
+          else if (INPUT[J] ==DELIM && LEVEL ==0) 
+              goto S20;
+          else
+              goto S10;
+
+          if (FLOP) goto S5;
+          if (ILLDLM) goto S2;
+          LEVEL++;
+          FLOP   = FLIP[FLOP];
+          goto S10;
+    S2:   if (IRLDLM) goto S8;
+          LEVEL--;
+          FLOP   = FLIP[FLOP];
+          goto S10;
+    S5:   if (IRLDLM) goto S6;
+          LEVEL--;
+          FLOP   = FLIP[FLOP];
+          goto S10;
+    S6:   if (ILLDLM) goto S8;
+          LEVEL++;
+          FLOP   = FLIP[FLOP];
+          goto S10;
+    S8:   if (!ITEST && !LEVEL) goto S20;
+   S10:;
+   		}
+      rtn  = 0;
+      return rtn;
+  S20: rtn  = J;
+      return rtn;
+}

@@ -1,0 +1,4100 @@
+#include "graphint.h"
+#include "dyndlg.h"
+#include "resource.h"
+#include "GW.h"        
+#include "address.h"
+#include <float.h> 
+#include <direct.h>
+#include "proj.h"   
+#include "translat.h"
+//LDA addition
+#include <sql.h>
+#include <sqlext.h>
+//end lda addition      
+ 
+HWND	hWndTraverseEntry=0;
+FARPROC lpfnTRAVERSE_ENTRYMsgProc;
+BOOL	TrackOutsideVP=FALSE, HighlightThisItem=FALSE, HighlightOnlyPoints=FALSE,PenFromUMList=FALSE, HltDupRefs=FALSE; 
+extern	LPVIEWPORT	LastVP;
+extern	short	DisplayViewID, NumViewportsToDisplay,ProcessSelectedTheme;
+short	NetMarkTimer=0, StreetEditTimer=0, InfoBoxEditTimer=0,EditInfoBox;
+HANDLE	hSpecial=0, hRedLine=0, hLastCmd=0;
+HPEN	hOldPen,hSpecialPen=0;
+HBRUSH	hOldBrush,hSpecialBrush=0;   
+DPOINT	NewCoordPoint;
+extern	COLORREF	WindowColor; 
+static	double	RoundTo[8]={0,0.1,0.01,0.001,0.0001,0.00001,0.000001,0.0000001}; 
+BOOL	StopAtFirstInPickMacro=FALSE;
+
+extern	double	BaseDistToWinDist;
+extern	short	nPoly;
+extern	HPEN	HighlightPen,hAreaBorderPen[2];
+extern	char	CurSymbolFont[4][32];
+extern	long	GlobalColors[10];
+extern	HANDLE	hDynamicSeg,hHighlightArea;
+extern	BOOL	ProcessSingleItem,ProcessAllElements,InExpand,HiPrecis,LoadedHLTFromConfig,MoveOnlyPickedPoint;
+extern	HWND	hWndAddWaypoint;
+extern	double	DeviceToScreenFactor; 
+extern	LPTHEME	ComputePCTTheme;
+extern	BOOL	PickAllPieces,HaveVarFillColor;
+extern	long	PickPieceRefno;
+extern	long	DisplayCycle;
+extern	HFILE	Fid;   
+extern	short   MapVersion, idTimer,CurItemHLTShow;
+extern	double	StreetTextSize,ThemeWidthFactor;
+extern	DPOINT	CurrentPoint;
+extern	BOOL	CursorIsLocked, HaltReport,HighlightPointSym, WantOnlyShapePoints,ItemIsHighlighted;
+extern	BOOL	DisplayCoord[3];
+extern	int		DisplayFinOpt; 
+extern	long	PenCOLOR[8];
+extern	int		PenWIDTH[8];
+extern	long	UsedDescOffset;   
+extern	BOOL	InImediate, Highlight,DisplayHLTPattern,DisplayOnlyNonHLT;
+extern	BOOL	ForAllVis, Display,InDisplayProcessing;
+extern	int		FileNum, CurState;
+extern	long	CurStreetNumbers[4], CurStreet;  
+extern	HANDLE	hDesiredDocs,hEnlargedScreen,hDisplayedRefs;  
+extern	short	MaxPick; 
+extern	HWND	HLTDlgWnd;
+float	NewWidth=0;
+short	NewStyle=PS_SOLID, INewWidth=0, NewProPen=0;  
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+COLORREF		NewColor=0;
+POINT	PickPoint; 
+BOOL	DisableMarginPan=FALSE,MoveShapePoints=TRUE; 
+long	LastRef=LONG_MIN;      
+double	TotHLTLength=0, TotHLTPerim=0, TotHLTArea=0;
+long	TotHLTPoints=0;   
+MNMXCORD HLTBounds;                
+extern	DPOINT	PickPointBase;
+extern	BOOL	DisplayMarkers,IgnoreLbutton;                   
+extern	double	NetTOL;
+extern	HANDLE	hBTNetLinks;
+extern	int		NetworkID;
+extern	int		CurrentType;
+extern	BOOL	ForceRefIndex, ForceTAGIndex;
+extern	long	CurrentRefno;
+extern	short	CurrentSymNum,CurrentSymParent; 
+extern	BOOL	CurSymIsParent;
+extern	double	OffsetLineOffset,LocationOffset;
+extern	int	  	SaveDrive;  
+extern	int		OrthoID;
+extern	double	FileDistToBaseDist;
+extern	double	WindowToFileFactor;
+extern	TAGBOX	TAGBox;
+extern	HCURSOR	hCursor, OldCursor;
+extern	int		QuadTypeNext;
+extern	BOOL	DoPaint, HavePaint, PatternBrush, FileMode, MenuDisplayed;
+extern	HPEN	CurrentPen,HighlightPen;
+extern	int		NumPicked;
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	double	WidthFactor;
+extern	HWND	hWndMain;
+extern	HANDLE	hInst;
+extern	MNMXCORD	ZoomBoxRect;
+extern	BOOL        WindowIsZoomed;
+extern	long		RefMktVal;
+extern  HPEN		hNullPen, hRedPen;
+extern	HBRUSH		hRedBrush, hGreenBrush, hBlueBrush, hBackBrush1;
+extern	LPVISLIST	CurVis;
+extern	LPVIEWPORT	CurView, pViewports[MAX_VIEWPORTS],pViewportsD[MAX_VIEWPORTS];
+extern	HANDLE		hViewports[MAX_VIEWPORTS];
+extern	int			NumViewports;
+extern	LPTHEME		CurTheme;
+extern	HANDLE		hTranFileToBase, hTranBaseToFile, hTranBMToBase, hTranBaseToBM;
+extern	LPORTHO		CurOrtho, OrthoBuffers[8];
+extern	BOOL		Printing;
+extern	int			nPnts;
+extern	LPPOINT		lpPoints2;
+extern	int			PickAp;
+extern	BOOL		UpdateSegment;
+extern	short		CommandViewport;
+extern	BOOL		AddLBUTTON, DisableHalt;
+extern	mnmxCor		NewBounds;    
+
+long	HighlightSequence;
+int		destX, destY, destW, destH, rect_width, rect_height;
+WORD 	bmX, bmY;
+HANDLE		hDibInfo=NULL, hImage=NULL;
+HBITMAP		hBitmap;
+LPBITMAPINFO	pDibInfo=NULL;
+
+
+double	Ceil (double val);
+double	Floor (double val);
+
+HIGHLIGHTDATA	HighlightData;
+
+int		NumPassiveFun=0;
+LPVOID	PassiveFunPTR[32], CurPassiveFun=0; 
+
+HANDLE	hHighlight=0, hHighlight2=0;       
+
+
+void DisplayFramePoints(LPSTR Name)
+{   
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE	hDB, hBT;
+	long	Offset, Frame;
+	int		len, st, w;
+	struct {
+			int		product;
+			long	X,Y;
+			int		speed,
+					azimuth;
+			} data; 
+	HBRUSH	BkBrush, ScatterBrush;
+	HPEN	DotPen, OldPen;
+	POINT	WinPoint;
+	DPOINT	BasePoint;
+
+
+	w=2;
+	if (Printing) w=6;
+	DotPen = CreatePen (PS_SOLID,w,CurTheme->ScatterColor);
+	OldPen = SelectObject (CurView->hDC,DotPen);
+			
+	hDB = OpenGWDatabase (Name,BT_READ);
+    if (!hDB)
+    	return ;
+	lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+	hBT = lpGWDHead->BTHandle[0];
+	st = BT_FIND (hBT,(LPSTR)&Frame,BT_FIRST,BT_ANY, (LPSTR)&Offset);
+    while (!st)
+    {
+    	_llseek (lpGWDHead->Fid,Offset,0);
+       	_lread (lpGWDHead->Fid,&len,2);
+       	_lread (lpGWDHead->Fid,&data,len);
+       	BasePoint.x = data.X;
+       	BasePoint.y = data.Y;
+       	if (PtInWBounds(BasePoint))
+       	{
+	       	WinPoint = BasePtToWinPt (&BasePoint);
+			MoveTo (CurView->hDC,WinPoint.x,WinPoint.y);
+			LineTo (CurView->hDC,WinPoint.x,WinPoint.y); 
+		}
+		st = BT_FIND (hBT,(LPSTR)&Frame,BT_NEXT,BT_ANY, (LPSTR)&Offset);
+    }
+	SelectObject (CurView->hDC,OldPen);
+	DeleteObject (DotPen);
+    GlobalUnlock (hDB);
+    CloseGWDatabase (hDB);
+			
+	return;
+} 
+
+BOOL MoveIntersection (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint, CursorPoint; 
+ DPOINT	MousePointW;
+ static	POINT	StartPoint;
+ DPOINT	BasePoint;
+ static	int	NumItems;
+ int	xmove, ymove, ii;
+ static HANDLE	hOriginalItems, hCurrentItems;
+ HANDLE	hSave;
+ LPTHEME	pTheme;
+ BOOL	ShowMoves=FALSE;//GetGlobalBVal2 ("[%SHOWMOVES]",FALSE);    
+ static	HANDLE	SaveH1, SaveH2; 
+ static	DPOINT	SavePPB;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		NumPicked = NumItems = 0;
+   		hCurrentItems = NULL;
+       	SaveHighlightList (&SaveH1,&SaveH2); 
+   		ClearHighlightList(FALSE);
+   		break;
+    
+    	
+    case WM_LBUTTONDOWN:
+    	break;
+    case GF_CLOSE:  
+		DeleteSavedItems(hCurrentItems); 
+		if (hCurrentItems != hOriginalItems)
+			DeleteSavedItems(hOriginalItems);
+		hCurrentItems = hOriginalItems = NULL;
+    	RestoreHighlightList (SaveH1, SaveH2);
+        break;
+        
+    case WM_LBUTTONUP:
+    {
+    	short	SaveMaxPick, i;
+    	
+		i = NumPicked;
+	    while (i > 0)
+	    {   
+	    	i--;
+		    RemoveFromHighlightList (PickList[i].Refno,2);
+	    	ShowPickedItem (hWndMain,i); 
+		    RemoveFromHighlightList (PickList[i].Refno,0);
+	    	ShowPickedItem (hWndMain,i); 
+	    }
+   		ClearHighlightList(FALSE); 
+   		if (Message == GF_CLOSE)
+   			return FALSE;
+    	MousePoint = MAKEPOINT(lParam);
+	    BasePoint=WinPtToBasePt(MousePoint); 
+	    DoPaint=FALSE; 
+	    WantOnlyShapePoints = TRUE;
+	    PickItems (hWnd,BasePoint); 
+	    WantOnlyShapePoints = FALSE;
+		DoPaint=TRUE; 
+		if (!NumPicked)
+			break;
+		if (MoveShapePoints)
+			PickPointBase = PickList[0].PickedPoint;
+		else
+		{
+			if (ldistp (PickPointBase,PickList[0].BeginPoint) <
+				ldistp (PickPointBase,PickList[0].EndPoint))
+				PickPointBase = PickList[0].BeginPoint;
+			else
+				PickPointBase = PickList[0].EndPoint;
+		}
+	    StartPoint = BasePtToWinPt (&PickPointBase); 
+	    MousePoint = StartPoint;
+        ClientToScreen (CurView->hWnd,(LPPOINT)&MousePoint);
+	    SetCursorPosGM (MousePoint.x,MousePoint.y,0);
+		SavePPB = PickPointBase;
+		i = NumItems = NumPicked;
+	    while (i--)
+	    {
+		    AddToHighlightList (PickList[i].Refno,&PickList[i],TRUE);
+	    	ShowPickedItem (hWndMain,i); 
+		    RemoveFromHighlightList (PickList[i].Refno,2);
+	    }
+		hOriginalItems = CreateSaveList(NumItems);
+		hCurrentItems = hOriginalItems;
+		MovePickListToSaveList (hOriginalItems); 
+	}
+		break;
+
+    case WM_MOUSEMOVE:
+    	if (!ShowMoves) break;
+    case WM_RBUTTONUP:
+    	if (!NumItems) break;
+    	MousePoint = MAKEPOINT(lParam);
+	    if (CursorIsLocked)
+	    { 
+	    	MousePointW = CurrentPoint;
+	    	UnlockCursor ();
+			MousePoint = BasePtToWinPt (&MousePointW);
+			CursorPoint = MousePoint;
+        	ClientToScreen (CurView->hWnd,(LPPOINT)&CursorPoint);
+			SetCursorPosGM (CursorPoint.x,CursorPoint.y,0);
+	    }
+	    else
+			MousePointW = WinPtToBasePt(MousePoint); 
+		PickPointBase = SavePPB;
+	    xmove = MousePoint.x - StartPoint.x ;
+	    ymove = MousePoint.y - StartPoint.y;
+    	if (Message == WM_RBUTTONUP || wParam == MK_RBUTTON)
+    	{   
+    		MoveOnlyPickedPoint = GetGlobalBVal2 ("[%MOVEONLYPICKEDPOINT]",TRUE);
+    		pTheme = AddTheme (GF_UNDRAW_THEME);
+    		DrawSavedItems(hCurrentItems,NULL);	/* Undraws current position */
+    		DeleteTheme (pTheme);  
+    		ClearHighlightList(FALSE);
+    		if (hCurrentItems != hOriginalItems) DeleteSavedItems(hCurrentItems);
+    		hCurrentItems = CreateSaveList(NumItems);
+    		pTheme = AddTheme (GF_MOVE_POLY_THEME);
+    		pTheme->Xmove = xmove;
+    		pTheme->Ymove = -ymove;
+    		pTheme->ClassPnt[0] = MousePointW;
+    		DrawSavedItems(hOriginalItems,hCurrentItems);	/* Draws new position and saves as current*/
+    		hSave = hOriginalItems;
+    		hOriginalItems = hCurrentItems;
+    		hCurrentItems = hSave;
+    		DeleteTheme (pTheme);
+
+    	}
+    	if (Message == WM_RBUTTONUP)
+    	{   WriteSavedItems (hCurrentItems);
+    		NumItems = 0;
+			DeleteSavedItems(hCurrentItems);
+			DeleteSavedItems(hOriginalItems);
+   			hCurrentItems = NULL;
+   			hOriginalItems = NULL;
+   		}
+
+    	break;
+
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+LPTHEME	AddTheme (int ThemeID)
+{	HANDLE handle;
+	LPTHEME	pTheme;
+
+	if (ThemeID == GF_SAVEPOLY_THEME)
+		DestroySavedPolys ();
+	handle = GSSiGlobAlloc (GHND,sizeof(THEME));
+	pTheme = (LPTHEME) GlobalLock (handle);
+	pTheme->ID = ThemeID;
+	pTheme->IsActive = TRUE;
+	pTheme->VPDisplayed = TRUE;
+	pTheme->handle = handle;
+	CurView->pThemes[CurView->NumThemes] = pTheme;
+	CurView->NumThemes++;
+	return (pTheme);
+}
+
+void DeleteTheme (LPTHEME pTheme)
+{	HANDLE handle;
+
+	handle = pTheme->handle;
+	CurView->NumThemes--;
+	GlobalUnlock (handle);
+	GlobalFree (handle);
+	return;
+}
+
+
+HANDLE CreateSaveList (int NumItems)
+{   HANDLE	handle;
+	LPSAVELIST	SaveList;
+	int	item;
+
+	if (NumItems)
+	{
+		handle = GSSiGlobAlloc (GHND,2+sizeof(SAVELISTDATA)*NumItems);
+		SaveList = (LPSAVELIST) GlobalLock (handle);
+		SaveList->NumItems=NumItems;
+		GlobalUnlock (handle);
+		return (handle);
+	}
+	else
+		return (NULL);
+}
+
+void DeleteSavedItems (HANDLE hSaveList)
+{   LPSAVELIST	SaveList;
+	int	item;
+
+	if (!hSaveList)
+		return;
+
+	SaveList = (LPSAVELIST) GlobalLock (hSaveList);
+	for (item=0;item<SaveList->NumItems;item++)
+		GSSiGlobFree ( &(HGLOBAL) SaveList->SLD[item].ItemHandle);
+
+	GSSiGlobUlFree (&hSaveList);
+
+	return;
+}
+
+BOOL DrawSavedItems (HANDLE hSaveList, HANDLE hNewList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	LPITEM		ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			SavedItem;
+	LPSAVELIST	SaveList, NewList;
+	LPSTR		ItemPnt, hpnt;
+	HPEN		hOldPen;
+
+	_fstrcpy (PltName,PickName);
+
+	CloseMap (FALSE);
+    SaveList = (LPSAVELIST)GlobalLock(hSaveList);
+    if (hNewList)
+    	NewList = (LPSAVELIST)GlobalLock(hNewList);
+
+    for (SavedItem=0;SavedItem<SaveList->NumItems;SavedItem++)
+    {
+    	if (!SaveList->SLD[SavedItem].ItemHandle)
+    		continue;
+    	PickList[SavedItem] = SaveList->SLD[SavedItem].PD;
+		GetPickName (SavedItem);
+		if (!*PickName)
+			continue;
+		_fstrcpy(PltName,PickName);
+		if (!OpenMap (CurView->hWnd,CurView->hDC))
+			continue;
+	    ipnt = (LPINT)GlobalLock((HGLOBAL)SaveList->SLD[SavedItem].ItemHandle);
+	    hpnt = (LPSTR)ipnt + 4;
+	    ItemHeader = (LPITEM)hpnt;
+	    if (InvalidItem (ItemHeader,FALSE))
+	    	goto Next;
+		CurView->hRgn = CreateVPRgn(FALSE);
+	  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+	  	DeleteObject(CurView->hRgn);
+	    SetDisplayMode (CurView->hDC, GF_MAPMODE);
+	    if (hNewList)
+	    {   
+	    	NewList->SLD[SavedItem].PD = SaveList->SLD[SavedItem].PD;
+		    NewList->SLD[SavedItem].ItemHandle = GSSiGlobAlloc (GHND,2*abs(ItemHeader->Len)+20);
+		    ItemPnt = (LPSTR) GlobalLock ((HGLOBAL)NewList->SLD[SavedItem].ItemHandle);
+		    _fmemmove (ItemPnt,ipnt,4);
+		    _fmemmove (ItemPnt,hpnt,2*abs(ItemHeader->Len)+16);
+	   	    GlobalUnlock ((HGLOBAL)NewList->SLD[SavedItem].ItemHandle);
+
+	    }
+		CurView->PassID = 2;
+	    NewBounds.xmn = INT_MAX;
+	    NewBounds.ymn = INT_MAX;
+	    NewBounds.xmx = INT_MIN;
+	    NewBounds.ymx = INT_MIN;
+	    ProcessGraphicsRec (CurView->hDC,(LPINT) hpnt,(LPSTR) ipnt,0);
+	    if (NewBounds.xmn != INT_MAX) ItemHeader->MinMax = NewBounds;
+Next:
+		CloseMap (FALSE);
+	    GlobalUnlock((HGLOBAL)SaveList->SLD[SavedItem].ItemHandle);
+	}
+	GlobalUnlock (hSaveList);
+	if (hNewList)
+		GlobalUnlock (hNewList);
+	return TRUE;
+}
+
+BOOL WriteSavedItems (HANDLE hSaveList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			SavedItem;
+	LPSAVELIST	SaveList, NewList;
+	HFILE		Fid;
+	LPSTR		ItemPnt;
+	HPEN		hOldPen;
+	long		SaveLoc;
+	int			i;
+
+	if (!PickName[0])
+		return FALSE;
+	_fstrcpy (PltName,PickName);
+
+	CloseMap (FALSE);
+    SaveList =(LPSAVELIST) GlobalLock(hSaveList);
+
+    for (SavedItem=0;SavedItem<SaveList->NumItems;SavedItem++)
+    {
+    	if (!SaveList->SLD[SavedItem].ItemHandle)
+    		break;
+    	PickList[SavedItem] = SaveList->SLD[SavedItem].PD;
+		GetPickName (SavedItem);
+		if (!*PickName)
+			return FALSE;
+		_fstrcpy(PltName,PickName);
+		Fid = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+		if (Fid == HFILE_ERROR)
+			return FALSE;
+	    ipnt = (LPINT) GlobalLock((HGLOBAL)SaveList->SLD[SavedItem].ItemHandle);
+	    _fmemmove (&SaveLoc,ipnt,4);
+	    i=_llseek (Fid,SaveLoc,0);
+	    ipnt+=2;
+	    ItemHeader = (LPITEM) ipnt;
+	    if (!InvalidItem (ItemHeader,FALSE))
+		    i=_lwrite (Fid,ItemHeader,12+2*abs(ItemHeader->Len));
+	    GlobalUnlock((HGLOBAL)SaveList->SLD[SavedItem].ItemHandle);
+		GSSiClose (Fid); 
+	}
+
+	GlobalUnlock (hSaveList);
+	return TRUE;
+}
+
+BOOL MovePickListToSaveList (HANDLE hSaveList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	LPITEM		ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			Item;
+	LPSTR		ItemPnt;
+	LPSAVELIST	SaveList;
+	HFILE		Fid;
+	WORD		nRead, nBytes;
+	long		SaveLoc;
+	BOOL		rtn=FALSE;
+
+	if (!PickName[0])
+		return FALSE;
+	_fstrcpy (PltName,PickName);
+
+
+    SaveList = (LPSAVELIST)GlobalLock (hSaveList);
+
+	for (Item=0;Item<NumPicked;Item++)
+	{
+		GetPickName (Item);
+		if (!*PickName)
+			break;
+		_fstrcpy(PltName,PickName);
+		Fid = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READ); 
+		if (Fid == HFILE_ERROR)
+			break;
+	    _llseek (Fid,PickList[Item].Segment,0);
+	    nRead = _lread (Fid,&nBytes,2);
+	    hpltBuf = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)nBytes);
+	    LPpltBuf = GlobalLock (hpltBuf);
+	    SaveLoc = _llseek (Fid,0,1) + PickList[Item].Offset;
+	    nRead = _lread (Fid,LPpltBuf,nBytes);
+	    if (nRead != nBytes || PickList[Item].Offset > nRead) 
+	    {
+	    	InvalidItem (NULL,TRUE);
+	    	goto Next;
+	    }
+	    ipnt = (LPINT) (LPpltBuf + PickList[Item].Offset);
+	    ItemHeader =  (LPITEM) ((LPINT)ipnt);
+	    if (InvalidItem (ItemHeader,TRUE))
+	    	goto Next; 
+	    SaveList->SLD[Item].PD = PickList[Item];
+	    SaveList->SLD[Item].ItemHandle = GSSiGlobAlloc (GHND,2*abs(ItemHeader->Len)+20);
+	    ItemPnt = (LPSTR) GlobalLock ((HGLOBAL)SaveList->SLD[Item].ItemHandle);
+	    _fmemmove (ItemPnt,&SaveLoc,4);
+	    ItemPnt +=4;
+	    EndItem = ipnt + abs(ItemHeader->Len);
+	    EndItem+=6;
+	    *EndItem = 0;
+	    _fmemmove (ItemPnt,ipnt,2*abs(ItemHeader->Len)+16);
+   	    GlobalUnlock ((HGLOBAL)SaveList->SLD[Item].ItemHandle);
+   	    rtn = TRUE;  
+Next:
+	    GSSiGlobUlFree (&hpltBuf);
+		GSSiClose (Fid);
+    }
+    GlobalUnlock (hSaveList);
+	return rtn;
+}
+
+void AddPassiveFun (LPVOID Ptr)
+{
+	PassiveFunPTR[NumPassiveFun]=Ptr;
+	NumPassiveFun++;
+	return;
+}
+
+void ProcessPassiveFunctions (HWND hWnd,WORD Message, WORD wParam,LONG lParam)
+{   int	i, ID;
+	POINT	CursorPoint, CurrentPos;
+	LPVIEWPORT	SaveView;
+
+   	if (!HavePaint)
+   		return;
+    if (Message == WM_MOUSEMOVE && CursorIsLocked)
+    {   
+    	if (GetFocus() == hWndMain)
+        if (CurViewActive() && CurView->hTranWinToBase)
+        {   
+		    CursorPoint = BasePtToWinPt (&CurrentPoint);
+		    if (!PtInRect (&CurView->DrawRect,CursorPoint))
+				ZoomToPointAndDist (CurrentPoint, 0,FALSE);
+		    else
+		    { 
+	            ClientToScreen (CurView->hWnd,(LPPOINT)&CursorPoint); 
+	            GetCursorPos (&CurrentPos); 
+	            if (CurrentPos.x != CursorPoint.x ||
+	            	CurrentPos.y != CursorPoint.y) 
+			    	SetCursorPosGM (CursorPoint.x,CursorPoint.y,0); 
+			}
+		}
+    	return; 
+    }
+    
+    if (!DisableMarginPan && !idTimer)
+	for (i=0;i<NumPassiveFun;i++)
+	{
+		CurPassiveFun = PassiveFunPTR[i];
+		ID = *(LPINT) CurPassiveFun;
+
+		switch (ID)
+		   {
+		   	case PF_COORD_DISPLAY:
+		   		DisplayCursorCoordinate (hWnd,Message,wParam,lParam);
+		   		break;
+		   }
+	}
+    if (Message == WM_MOUSEMOVE && !DisableMarginPan && !idTimer && !hEnlargedScreen)
+    {   
+    	short	iview, InfoBoxID;
+		
+		RemoveLinkedCursors ();
+	    SaveView = CurView; 
+		iview = NumViewports;
+		CursorPoint = MAKEPOINT (lParam);
+		if ((InfoBoxID = PtInInfoBoxRect (CursorPoint)))
+		{    
+			if (InfoBoxEditTimer)
+				KillTimer (hWndMain,InfoBoxEditTimer);
+			InfoBoxEditTimer = 7;  
+			EditInfoBox = InfoBoxID;
+			SetTimer(hWndMain, 7, 500, (FARPROC) NULL);  
+		}
+		else if (EditInfoBox)
+		{
+           	 KillTimer(hWndMain,7);    
+			 InfoBoxEditTimer = 0;  
+           	 EditInfoBox = 0;
+        }
+	    while (iview--)
+	    {   SetCurView ( pViewportsD[iview]); 
+	        if (!CurView->DisplayInParent && CurViewActive())
+	        	if (PtInRect (&CurView->Rect,CursorPoint))
+	        	{
+					if (PtInRect (&CurView->DrawRect,CursorPoint))
+					{
+						if (LastVP && LastVP != CurView)
+						{
+							DisplayProfileLoc (NULL,NULL,NULL);
+						    NotifyFunction (LastVP,GF_EXIT_VIEWPORT);  
+							LastVP = CurView;
+						    NotifyFunction (LastVP,GF_ENTER_VIEWPORT);  
+						    if (!NotifyFunction (LastVP,GF_DISPLAYMESS))  
+						        SetPrompt (GetFunStackPrompt(),FALSE);
+						}   
+						else
+							LastVP = CurView;
+						ClientToScreen (hWnd,(LPPOINT)&CursorPoint);
+						SetCursorPosGM  (CursorPoint.x,CursorPoint.y,TRUE);
+//						SetFocus (hWnd);
+					}
+					else if (CurView->MarginPan) 
+					{   
+					    NotifyFunction (LastVP,GF_EXIT_VIEWPORT);  
+						SetPrompt (PRMT_PANPOINT,FALSE);                 
+						SetCurView (0);   
+						LastVP = 0;
+					}
+	        		return;
+	        	}
+	    }
+	    NotifyFunction (LastVP,GF_EXIT_VIEWPORT);  
+	    LastVP = 0;
+		SetPrompt (0,FALSE);
+	    SetCurView ( 0); 
+		RemoveLinkedCursors ();
+	}
+	return;
+
+}
+
+void DisplayCursorCoordinate (HWND hWnd,WORD Message, WORD wParam,LONG lParam)
+{	
+	POINT	CursorPoint;
+	DPOINT	BasePoint;
+	LPVIEWPORT	SaveView; 
+	BOOL	HaveVP = FALSE;
+	short	iview;
+	LPCOORDINATEDISPLAY	CD;
+	LPVIEWPORT	DisplayView; 
+	
+	if (!CurPassiveFun)
+		return;
+	CD = CurPassiveFun; 
+	if (CD->ID != PF_COORD_DISPLAY)
+		return;
+	DisplayView = pViewports[CD->DisplayViewport-1];
+	if (!DisplayView)
+		return;
+    if (!DisplayView->Active)
+    	return;
+    
+
+    if (Message != WM_MOUSEMOVE)
+    	return; 
+	
+    SaveView = CurView;
+	CursorPoint = MAKEPOINT(lParam);
+	iview = NumViewports;
+    while (iview--)
+    {   SetCurView ( pViewportsD[iview]); 
+        if ((HaveVP <= 0 || !CurView->Type) && CurViewActive())
+        {
+        	if (PtInRect (&CurView->Rect,CursorPoint))
+	        {   
+	        	if (CurView->hTranWinToBase) 
+	        	{
+				    BasePoint = WinPtToBasePt (CursorPoint);
+				    DisplayCoordinate (&BasePoint,CursorPoint);
+				    if (CurView->Type)
+				    	HaveVP = 1;
+				    else
+				    	HaveVP = -1;
+			    }
+			    else if (CurView->hProfileElev)
+			    {   
+					BasePoint = WinPtToBasePt (CursorPoint); 
+					if (TranFilePoint (1,&BasePoint) != 2) 
+					{
+						if (DisplayProfileInfo (&BasePoint, CursorPoint))
+							goto Exit; 
+					}
+			    }
+	        }
+	    }
+    }
+    if (!HaveVP) 
+    	DisplayCoordinate (NULL,CursorPoint);
+Exit:
+    SetCurView ( SaveView);
+    return;
+}  
+
+void DisplayCoordinate2 (LPDPOINT pPoint,POINT CursorPoint)
+{
+	UINT	i,ID;
+	
+	for (i=0;i<NumPassiveFun;i++)
+	{
+		CurPassiveFun = PassiveFunPTR[i];
+		ID = *(LPINT) CurPassiveFun;
+
+		switch (ID)
+		{
+		   	case PF_COORD_DISPLAY:   
+		   		DisplayCoordinate (pPoint,CursorPoint);
+		   		return;
+		}
+	}
+	return;
+}
+
+void DisplayCoordinate (LPDPOINT pPoint,POINT CursorPoint)
+{	
+	LPCOORDINATEDISPLAY	CD;
+	char	Text[128]; 
+	DWORD	TextExtent;
+	LPVIEWPORT	DisplayView, SaveView; 
+	DPOINT	OutPoint;  
+	static	DPOINT	CurWorldPoint, CurFormatPoint; 
+	static	short	LastVPType=-1;  
+	BOOL	ShowWorldCoord = FALSE;
+	HFONT	Font, OldFont;
+	COLORREF	OldColor; 
+	short	SaveSize;
+	int		x, y, st;
+	
+	if (!CurPassiveFun)
+		return;
+	CD = CurPassiveFun;  
+	if (CD->ID != PF_COORD_DISPLAY)
+		return;
+
+	DisplayView = pViewports[CD->DisplayViewport-1];
+	if (!DisplayView)
+		return;
+    if (!DisplayView->Active)
+    	return;
+    
+	x=DisplayView->DrawRect.left+1;
+	y=DisplayView->DrawRect.top;
+
+    SaveView=CurView;
+    SetCurView (DisplayView);
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn); 
+  	if (CD->Refresh || !pPoint || (!SaveView->Type && !LastVPType))
+		FillRectPoly (DisplayView->hDC,&DisplayView->DrawRect,CurView->BackGroundColor); 
+    SaveSize = CD->Font.lfHeight;
+	CD->Font.lfHeight = -min (abs(ConvertFontHeightFromPCTofVP (CD->Font.lfHeight,CD->DisplayViewport)),
+							 DisplayView->DrawRect.bottom-DisplayView->DrawRect.top - 1);
+    if (*CD->Font.lfFaceName)
+    	Font = CreateFontIndirect(&CD->Font); 
+    else
+    	Font = 0;   
+    CD->Font.lfHeight = SaveSize;
+    if (Font)
+	    OldFont = SelectObject(CurView->hDC, Font);
+	OldColor = SetTextColor (CurView->hDC,CD->FontColor);
+    SetBkMode(CurView->hDC, OPAQUE);  
+    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+	if (pPoint)
+	{   
+		if (SaveView->Type)
+		{
+			ShowWorldCoord = TRUE;
+			CurWorldPoint = *pPoint;
+		}
+		else
+		{
+			if (LastVPType)
+				ShowWorldCoord = TRUE;
+			CurFormatPoint = *pPoint; 
+		}
+		LastVPType = SaveView->Type;
+		OutPoint = CurWorldPoint;
+		if (CD->DisplayLine[0])
+		{   
+			SetCoordText (Text,CD->LineID[0],OutPoint,(short)PRJ_UNITS[1],CD->Units[0],CD->Precision[0],CD->Commas[0]); 
+			TextExtent = GetTextExtent (DisplayView->hDC,Text, _fstrlen(Text));
+			if (ShowWorldCoord)
+				TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+			y += HIWORD (TextExtent);
+		}
+		if (CD->DisplayLine[1])
+		{
+			st = ConvertCoord (&OutPoint,1,2);     
+			if (!st)
+			{
+				SetCoordText (Text,CD->LineID[1],OutPoint,(short)PRJ_UNITS[2],CD->Units[1],CD->Precision[1],CD->Commas[1]);
+				TextExtent = GetTextExtent (DisplayView->hDC,Text, _fstrlen(Text));
+				if (ShowWorldCoord)
+					TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+				y += HIWORD (TextExtent);
+			}
+		}
+		if (CD->DisplayLine[2])
+		{
+			_fstrcpy (Text,"[%ALT_PROJECTION]");
+			ExpandText (Text); 
+			if (*Text)
+			{   
+				if (!_fstricmp (Text,"SCREEN"))
+				{
+					sprintf (Text,"%6i %6i",CursorPoint.x,CursorPoint.y);
+					st = 0;
+				}
+				else
+				{
+					OutPoint.x=pPoint->x/**MFT*/;
+					OutPoint.y=pPoint->y/**MFT*/; 
+					st = ConvertCoord (&OutPoint,1,3);     
+					if (!st)
+						SetCoordText (Text,CD->LineID[2],OutPoint,(short)PRJ_UNITS[3],CD->Units[2],CD->Precision[2],CD->Commas[2]);
+					else
+					{
+						ConvertCoordError(st); 
+						goto Exit;
+					}
+				} 
+				TextExtent = GetTextExtent (DisplayView->hDC,Text, _fstrlen(Text));
+				if (!st && ShowWorldCoord)
+					TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+				y += HIWORD (TextExtent);
+			}
+		}
+		if (CD->DisplayLine[3])
+		{
+			SetCoordText (Text,CD->LineID[3],CurFormatPoint,(short)PRJ_UNITS[2],CD->Units[3],CD->Precision[3],CD->Commas[3]);
+			TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+			TextExtent = GetTextExtent (DisplayView->hDC,Text, _fstrlen(Text));
+			y += HIWORD (TextExtent);
+		}
+	}
+Exit: 
+	if (Font)
+	{
+	    SelectObject(CurView->hDC, OldFont);
+	    DeleteObject(Font);
+	}	
+	SetTextColor (CurView->hDC,OldColor);
+	RestoreDC (CurView->hDC,-1);
+    SetCurView (SaveView);
+
+	return;
+} 
+
+void SetCoordText (LPSTR Text,LPSTR ID,DPOINT Point,short FromUnits,short ToUnits,short Precision, BOOL Commas)
+{   
+	char	str1[64], str2[64], fmt[32]="%3iD %2iM %2ldS";
+	short	Deg,Min,ii;
+	double	Sec;  
+	
+	Precision--; 
+	Precision = min (7,max(Precision,0));
+	if (Precision)
+		sprintf (&fmt[11],"%i.%ifS",Precision+3,Precision);
+	if (FromUnits == 1 && ToUnits == 2)
+	{
+		Point.x *= FTM;
+		Point.y *= FTM;
+	}
+	else if (FromUnits == 2 && ToUnits == 1)
+	{
+		Point.x *= MFT;
+		Point.y *= MFT;
+	}
+	if (ToUnits == 3)
+	{
+		if (GetDMS (Point.y,&Deg,&Min,&Sec))
+		{   
+			sprintf (&str1[1],"%3iD %6.3fM",abs(Deg),(double)Min+Sec/60);
+			if (Deg < 0)
+				*str1 = 'S';
+			else
+				*str1 = 'N'; 
+		}
+		else
+			*str1 = 0;
+		if (GetDMS (Point.x,&Deg,&Min,&Sec))
+		{
+			sprintf (&str2[1],"%3iD %6.3fM",abs(Deg),(double)Min+Sec/60);
+			if (Deg < 0)
+				*str2 = 'W';
+			else
+				*str2 = 'E';
+		}
+		else
+			*str2 = 0;
+	}
+	else if (ToUnits == 4)
+	{
+		if (GetDMS (Point.y,&Deg,&Min,&Sec))
+		{   
+			if (Precision)
+				sprintf (&str1[1],fmt,abs(Deg),Min,Sec);
+			else
+				sprintf (&str1[1],fmt,abs(Deg),Min,IDNINT(Sec));
+			if (Deg < 0)
+				*str1 = 'S';
+			else
+				*str1 = 'N'; 
+		}
+		else
+			*str1 = 0;
+		if (GetDMS (Point.x,&Deg,&Min,&Sec))
+		{
+			if (Precision)
+				sprintf (&str2[1],fmt,abs(Deg),Min,Sec);
+			else
+				sprintf (&str2[1],fmt,abs(Deg),Min,IDNINT(Sec));
+			if (Deg < 0)
+				*str2 = 'W';
+			else
+				*str2 = 'E';
+		}
+		else
+			*str2 = 0;
+	}
+	else
+	{ 
+		_fstrcpy (str1,ValueConv (Point.x,1,RoundTo[Precision],Commas));
+		_fstrcat (str1,"E");
+		_fstrcpy (str2,ValueConv (Point.y,1,RoundTo[Precision],Commas));
+		_fstrcat (str2,"N");
+	}
+	sprintf (Text,"%s%s  %s",ID,str1,str2);  
+/*	if (hWndAddWaypoint)
+	{
+		NewCoordPoint = Point;
+    	PostMessage (hWndAddWaypoint,WM_COMMAND,IDC_UPDATECOORD, 0L);
+	} */
+	return;
+}  
+
+BOOL DisplayProfileInfo (LPDPOINT pPoint,POINT CursorPoint)
+{	
+	LPCOORDINATEDISPLAY	CD;
+	char	Text[128]; 
+	DWORD	TextExtent;
+	LPVIEWPORT	DisplayView, SaveView; 
+	DPOINT	OutPoint;
+	HFONT	Font, OldFont;
+	COLORREF	OldColor;
+	double	Slope,Dist, Elev;
+	short	SaveSize;
+	int		x, y, st; 
+	BOOL	rtn = FALSE;
+	
+	if (!CurPassiveFun)
+		return FALSE;
+	CD = CurPassiveFun;  
+	if (CD->ID != PF_COORD_DISPLAY)
+		return FALSE;
+
+	DisplayView = pViewports[CD->DisplayViewport-1];
+	if (!DisplayView)
+		return FALSE;
+    if (!DisplayView->Active)
+    	return FALSE;
+    
+	x=DisplayView->DrawRect.left+1;
+	y=DisplayView->DrawRect.top;
+
+    SaveView=CurView;
+    SetCurView (DisplayView);
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn); 
+  	if (CD->Refresh || !pPoint)
+		FillRectPoly (DisplayView->hDC,&DisplayView->DrawRect,CurView->BackGroundColor); 
+    SaveSize = CD->Font.lfHeight;
+	CD->Font.lfHeight = ConvertFontHeightFromPCTofVP (CD->Font.lfHeight,CD->DisplayViewport);
+    if (*CD->Font.lfFaceName)
+    	Font = CreateFontIndirect(&CD->Font); 
+    else
+    	Font = 0;   
+    CD->Font.lfHeight = SaveSize;
+    if (Font)
+	    OldFont = SelectObject(CurView->hDC, Font);
+	OldColor = SetTextColor (CurView->hDC,CD->FontColor);
+    SetBkMode(CurView->hDC, OPAQUE);  
+    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+	if (pPoint)
+	{   
+		if (GetProfileElevAndSlope (pPoint->x,SaveView->hProfileElev,SaveView->nProfileElev,&Elev,&Slope))
+		{
+			Dist = ConvertDist (pPoint->x,4);
+			sprintf (Text,"Dist = %.3f miles, Elevation = %ld feet, Slope = %.0f percent",Dist,IDNINT(Elev),Slope); 
+			TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text)); 
+			rtn = TRUE;
+		}
+	} 
+	if (Font)
+	{
+	    SelectObject(CurView->hDC, OldFont);
+	    DeleteObject(Font);
+	}	
+	SetTextColor (CurView->hDC,OldColor);
+	RestoreDC (CurView->hDC,-1);
+    SetCurView (SaveView);
+
+	return rtn;
+} 
+
+BOOL PanZoomTarget (HWND hWnd, WORD Message, WORD wParam, LONG lParam, short Function)
+{static LONG	DownPoint;  
+ static	BOOL	HaveDownPoint=FALSE, HaveTimer=FALSE; 
+ static	POINT	MovePoint;    
+ static	HBITMAP	hLastBox=NULL;  
+ static	LPVIEWPORT	LastBoxVP=0;   
+ static	HANDLE	hCmd=0;
+ LPSTR	pCmd;
+ DPOINT	PanPoint, BasePoint;
+ POINT	MousePoint, ButtonPoint;
+ RECT	Rect;   
+ HDC	hDC;
+ LPVIEWPORT	SaveVP;
+ char key;
+ BOOL HaveBox;  
+ short	ii, iopt, iview;
+ int	MinMouseMove=5; 
+ static	UINT	CurrentPrompt;
+ static	short	LastItem=0;     
+ static	BOOL	InPanZoom=FALSE;
+  
+  if (InPanZoom)
+  	return FALSE; 
+  if (CurView->pTheme)
+  { 
+  	if (CurView->pTheme->ID == PF_COORD_DISPLAY)
+  	{
+  		if (Function == GF_RUN_COORDDISPLAY_MACRO || Function == GF_PAN_ZOOM_TARGET)  
+  		{
+  			Function = GF_RUN_COORDDISPLAY_MACRO;
+  			goto Next;                           
+  		}
+  	}
+  	if (CurView->pTheme->ID == GF_DISTANCE_THEME)
+  	{
+  		if (Function == GF_RUN_DISTDISPLAY_MACRO || Function == GF_PAN_ZOOM_TARGET)  
+  		{
+  			Function = GF_RUN_DISTDISPLAY_MACRO;
+  			goto Next;                           
+  		}
+  	}
+  }
+  if ((Function == GF_AUTOPICK || Function == GF_PAN_ZOOM_TARGET) && !CurView->BoundsDisplayVP ||
+  	  Function == GF_TOOLBAR && InExpand)
+  	  	return (FALSE);
+Next:
+  InPanZoom = TRUE;
+  switch (Message)
+   {
+   	case GF_CLOSE:
+		GSSiGlobFree (&hCmd);
+   		goto RtnFalse;
+   		
+   	case GF_INIT: 
+   		if (Function == GF_PAN_ZOOM_TARGET)
+   			CurrentPrompt = PRMT_PANZOOM1;
+   		else
+   			CurrentPrompt = 0;
+   	    SetPrompt (CurrentPrompt,TRUE);
+   		break;
+
+    case GF_COMPLETE:
+	    if (CursorIsLocked)
+	    { 
+			MousePoint = BasePtToWinPt (&CurrentPoint);
+	    	UnlockCursor (); // release snap if not in digitize
+			SetCurs (0,FALSE);
+//		    PostMessage (hWnd,WM_LBUTTONDOWN,1,MAKELONG(MousePoint.x,MousePoint.y)); 
+//		    PostMessage (hWnd,WM_LBUTTONUP,0,MAKELONG(MousePoint.x,MousePoint.y)); 
+		    break;
+    	}
+    	if (wParam != GF_ZOOM_RECT)
+    		break;
+    	HaveDownPoint = FALSE;
+   		CurrentPrompt = PRMT_PANZOOM1;
+        SetPrompt (CurrentPrompt,TRUE);
+    	HaveBox = TRUE;
+    	ShowZoomBoxClear (CurView->hDC,&HaveBox);
+    	SetCurView ( pViewports[CurView->BoundsDisplayVP-1]);
+		CurView->NewBounds = ZoomBoxRect;  
+		ZoomBoxRect.xmn = 2;
+		ZoomBoxRect.xmx = 1;
+		DisplayCycle++;  
+		ClearCurrentCD ();
+	    SetBounds (hWnd,CurView->hDC); 
+	    DisplayCycle--;
+		CurView->CurZoomAreaRef = 0;
+		PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, CurView->ID);
+//	    RedisplayViewport(FALSE,FALSE);
+		CurView->WindowIsZoomed = TRUE;
+       	break;
+
+    case WM_LBUTTONUP:
+    	ButtonPoint = MAKEPOINT (lParam);
+    	if (!hLastBox && (Function == GF_RUN_CLASS_MACRO || Function == GF_AUTOPICK)) 
+		{
+			if (Function == GF_RUN_CLASS_MACRO)
+			{
+		   		CurrentPrompt = 0;
+	    	    SetPrompt (CurrentPrompt,TRUE);
+	    	    NumPicked = ClassMacro (MovePoint,1,&hLastBox,&hLastCmd); 
+			}
+			else if (Function == GF_RUN_COORDDISPLAY_MACRO)
+			{
+		   		CurrentPrompt = 0;
+	    	    SetPrompt (CurrentPrompt,TRUE);
+	    	    NumPicked = CoordDisplayMacro (MovePoint); 
+			}
+			else if (Function == GF_RUN_DISTDISPLAY_MACRO)
+			{
+		   		CurrentPrompt = 0;
+	    	    SetPrompt (CurrentPrompt,TRUE);
+	    	    NumPicked = DistDisplayMacro (MovePoint); 
+			}
+    	    else
+	    	{
+				short	SaveMaxPick = MaxPick; 
+				
+		   		if (Function == GF_PAN_ZOOM_TARGET)
+		   			CurrentPrompt = PRMT_PANZOOM1;
+	    	    SetPrompt (CurrentPrompt,TRUE);
+			    if (!CurView->hTranWinToBase) break;
+			    HaltMapDisplay (FALSE);
+			    BasePoint=WinPtToBasePt(MovePoint);
+			    SetPickAp(); 
+				MaxPick = 10;
+				StopAtFirstInPickMacro = TRUE;
+			    PickItems2 (hWnd,BasePoint,FALSE,TRUE);
+				SaveVP=CurView;  
+				for (iview=0;iview<NumViewports;iview++)
+				{
+					SetCurView ( pViewportsD[iview]);
+					if (CurView->DisplayInParent == SaveVP->ID)
+			    		PickItems2 (hWnd,BasePoint,TRUE,FALSE);  
+			    }
+				StopAtFirstInPickMacro = FALSE;
+				MaxPick = SaveMaxPick;
+			} 
+		    while (NumPicked && !hLastBox)
+		    {
+		    	HANDLE	hTxt=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+		    	LPSTR	pTxt=GlobalLock (hTxt);
+		    	
+		    	SetGlobalValue ("%ZOOMSELECTIONTEXT","");
+		    	if ((Function == GF_AUTOPICK || Function == GF_PAN_ZOOM_TARGET))
+		    	{
+			    	ZoomBoxRect = PickList[NumPicked-1].Rect; 
+			    	ProcessPickedItem (NumPicked-1,FALSE);
+			    } 
+		    	hLastCmd = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+		    	pCmd = GlobalLock (hLastCmd); 
+		    	*pCmd = 0;
+			    if (DisplayPickedItems (0,NumPicked,FALSE,pCmd,NULL))
+			    { 
+				    if (GetGlobalCVal ("[%ZOOMSELECTIONTEXT]",pTxt,""))
+				    {   
+				    	MenuDisplayed = FALSE;
+				    	if (StringEndsWith (pCmd,"ZOOM"))
+				    	{
+					   		CurrentPrompt = PRMT_YTBMESSZOOM; 
+					    	ExpandText (pCmd); 
+					    }
+				    	else if (!_fstrnicmp (pCmd,"ZOOM",4))
+					   		CurrentPrompt = PRMT_YTBMESSZOOM; 
+					   	else
+					   		CurrentPrompt = PRMT_YTBMESS;
+				    	GlobalUnlock (hLastCmd); 
+				    	if (MenuDisplayed) 
+				    		GSSiGlobUlFree (&hLastCmd);
+				    	else
+							hLastBox = YellowTextBox (hWnd,pTxt,MovePoint);
+						LastItem = NumPicked; 
+	        			SetPrompt (CurrentPrompt,FALSE);
+				        NumPicked = 1;
+					}
+					else
+						GSSiGlobUlFree (&hLastCmd);
+				}
+				else
+					GSSiGlobUlFree (&hLastCmd);
+				LastBoxVP = CurView;
+				GSSiGlobUlFree (&hTxt);
+				NumPicked--; 
+			}
+    	} 
+        if (!hLastBox || Function == GF_TOOLBAR) goto LButUp;
+   		hDC=GetDC(hWnd);
+		RestoreScreen2 (hDC, hLastBox,0);
+		ReleaseDC (hWnd,hDC); 
+		DestroySavedScreen (&hLastBox,0);
+	    HaltMapDisplay (FALSE);
+
+    	if (Function == GF_PAN_ZOOM_TARGET)
+    		SetCurView ( pViewports[CurView->BoundsDisplayVP-1]);
+		if (!hLastCmd)
+			break;      
+		pCmd = GlobalLock (hLastCmd);
+		ExpandText (pCmd);     
+		iopt = 0;   
+		if (!_fstrnicmp (pCmd,"ZOOM",4))
+			iopt=1;
+		else if (!_fstrnicmp (pCmd,"PMF(",4))
+			iopt=2;
+		else if (!_fstrnicmp (pCmd,"MENU(",5))
+			iopt=3;
+		switch (iopt)
+		{           
+			case 1:
+			{
+				LPSTR	pParen = _fstrchr (pCmd,'(');
+				
+				if (pParen)
+				{
+					HANDLE hMem = GSSiGlobAlloc (GMEM_MOVEABLE,2048);
+					LPSTR pStr=GlobalLock (hMem), pEnd=MatchLev (++pParen,')');
+					
+					if (pEnd)
+						*pEnd = 0;		
+					_fstrcpy (pStr,pParen);
+					ExpandText (pStr);
+					GSSiGlobUlFree (&hMem);
+				}
+				DisplayCycle++;
+				CurView->NewBounds = ZoomBoxRect;
+				ZoomBoxRect.xmn = 2;
+				ZoomBoxRect.xmx = 1; 
+				ClearCurrentCD ();
+				ExpandBounds (&CurView->NewBounds,LocationOffset); 
+			    SetBounds (hWnd,CurView->hDC);
+			    DisplayCycle--;
+				CurView->WindowIsZoomed = TRUE; 
+				CurView->CurZoomAreaRef = 0;
+		   		CurrentPrompt = PRMT_PANZOOM1;
+		        SetPrompt (CurrentPrompt,TRUE);
+				PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, CurView->ID);
+			}
+			break;
+			case 2: 
+			{
+				LPSTR	pNext=pCmd+4, pEnd;
+				
+				if ((pEnd = MatchLev (pNext,')')))
+				{   
+					HANDLE	hSavePM=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+					LPSTR	pSavePM = GlobalLock (hSavePM);   
+					LPVIEWPORT	pSaveVP=CurView;
+					
+					_fstrcpy (pSavePM,CurView->PickMacroFile);
+					*pEnd = 0;
+					_fstrcpy (CurView->PickMacroFile,pNext);
+			   		CurrentPrompt = PRMT_YTBMESS2;
+			        SetPrompt (CurrentPrompt,TRUE);
+				    DisplayPickedItems (CurView->hWnd,LastItem,TRUE,NULL,pNext);  
+				    CurView = pSaveVP;
+				    _fstrcpy (CurView->PickMacroFile,pSavePM);
+				    GSSiGlobUlFree (&hSavePM); 
+				}  
+			} 
+			break;
+			case 3:
+			{
+				POINT	position;
+				HMENU	hMenu;
+				HANDLE	hPopups;
+                
+                pCmd += 5;
+                hMenu = LoadToolBarMenu (pCmd,&hPopups); 
+                if (hMenu)
+                {
+				   	GetCursorPos (&position);
+					TrackPopupMenu (hMenu,TPM_RIGHTBUTTON,position.x,position.y,NULL,hWndMain,NULL);
+					DestroyUserPopups (&hPopups); 
+				}
+			} 
+			
+
+			break; 
+		}
+		GSSiGlobUlFree (&hLastCmd);
+    	break;
+LButUp:
+		if (Function == GF_TOOLBAR)
+		{ 
+			ClearSelectedToolbarIcons ();
+			DisplayToolbarText (ButtonPoint,NULL,2);
+			if (hCmd)
+			{
+				pCmd = GlobalLock (hCmd);
+				//ExpandText (pCmd);     
+				iopt = 0;   
+				if (!_fstrnicmp (pCmd,"MENU(",5))
+					iopt=3;
+				switch (iopt)
+				{   
+					case 0:
+					{
+						long	ICmd;
+			
+						if (*pCmd == '|') 
+							ExecuteCommandString (++pCmd);
+						else
+						{   
+							SaveVP = CurView;
+							SetViewport (CommandViewport); 
+							AddGraphicsCmd (CurView->hWnd,pCmd,FALSE,0); 
+							SetCurView ( SaveVP);
+						}		
+					/*	ICmd = GetCmdID (pCmd); 
+						if (ICmd < 0)
+						{   
+							LPVIEWPORT SaveVP = CurView;
+							ICmd = -ICmd;
+							SetViewport (CommandViewport); 
+							AddGraphicsCmd (CurView->hWnd,pCmd,FALSE,0); 
+							CurView = SaveVP;
+						}	
+					    else if (ICmd)
+			           		PostMessage(hWndMain, WM_COMMAND, ICmd, 0L);*/
+			        }
+			        break;
+			        
+					case 3:
+					{
+						POINT	position;
+						HMENU	hMenu;
+						HANDLE	hPopups;
+		                
+		                pCmd += 5;
+		                hMenu = LoadToolBarMenu (pCmd,&hPopups); 
+		                if (hMenu)
+		                {
+						   	GetCursorPos (&position);
+							TrackPopupMenu (hMenu,TPM_RIGHTBUTTON,position.x,position.y,NULL,hWndMain,NULL);
+							DestroyUserPopups (&hPopups); 
+						}
+					} 
+					
+		
+					break; 
+				}  
+				GSSiGlobUlFree (&hCmd);
+			}
+			break;
+		}  
+	    if (!CurView->hTranWinToBase || !HaveDownPoint || !(Function == GF_PAN_ZOOM_TARGET)) break;
+    	MousePoint = MAKEPOINT (DownPoint); 
+    	HaveDownPoint = FALSE;
+	    PanPoint = WinPtToBasePt (MousePoint); 
+	    SetViewport (CurView->BoundsDisplayVP); 
+	    ClearCurrentCD ();
+		CenterWindow (hWnd,PanPoint,FALSE);
+		break;
+
+    case WM_LBUTTONDOWN:   
+NoBox:    	 
+    	ButtonPoint = MAKEPOINT (lParam);
+		if (Function == GF_TOOLBAR)
+		{   
+			GSSiGlobFree (&hCmd);
+	    	if (HaveTimer)
+	    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
+	    	HaveTimer = FALSE;         
+	    	if (hLastBox) 
+	    	{
+	    		hDC=GetDC(hWnd);
+	    		RestoreScreen2 (hDC, hLastBox,0);
+	    		ReleaseDC (hWnd,hDC); 
+	    		DestroySavedScreen (&hLastBox,0);
+	    		GSSiGlobFree (&hLastCmd);
+	    	}  
+	   		CurrentPrompt = 0;
+    	    NumPicked = 0;
+    	    SetPrompt (CurrentPrompt,TRUE);
+			DisplayToolbarText (ButtonPoint,&hCmd,0);
+			LastBoxVP = 0; 
+			break;
+		}
+    	else if (Function != GF_PAN_ZOOM_TARGET && Function != GF_AUTOPICK) 
+    		break; 
+/*        if (CurView->pTheme)
+        {
+	    	if (hLastBox) 
+	    	{
+	    		hDC=GetDC(hWnd);
+	    		RestoreScreen2 (hDC, hLastBox,0);
+	    		ReleaseDC (hWnd,hDC); 
+	    		DestroySavedScreen (&hLastBox,0);
+	    		GSSiGlobFree (&hLastCmd);
+	    	}  
+	    }*/
+    	HaveDownPoint = TRUE;
+    	DownPoint = lParam;
+    	SaveVP = CurView;
+    	SetCurView ( pViewports[CurView->BoundsDisplayVP-1]);
+    	Rect = CurView->DrawRect;
+    	SetCurView ( SaveVP);
+	  	CurView->ZBRect = Rect;
+		break;
+    
+    case GF_ENTER_VIEWPORT:
+    	break;
+    	    
+   	case GF_REDRAW: 
+   		if (Function == GF_TOOLBAR)
+   			LoadVPToolBar ();	
+    case GF_EXIT_VIEWPORT:
+    	if (HaveTimer)
+    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
+    	HaveTimer = FALSE;         
+		GSSiGlobFree (&hCmd);
+    	if (hLastBox && LastBoxVP == CurView) 
+    	{   
+    		if (Message != GF_REDRAW)
+    		{
+	    		hDC=GetDC(hWnd);
+	    		RestoreScreen2 (hDC, hLastBox,0);
+	    		ReleaseDC (hWnd,hDC);
+	    	}
+    		DestroySavedScreen (&hLastBox,0);  
+    		GSSiGlobFree (&hLastCmd);
+    	}  
+		if (Function == GF_TOOLBAR)
+			ClearSelectedToolbarIcons ();
+    	break;
+    	    
+    case WM_MOUSEMOVE: 
+    {
+    	MovePoint = MAKEPOINT (lParam);
+//        SetPrompt (CurrentPrompt,TRUE); 
+		if (Function == GF_TOOLBAR)
+		{   
+			if (DisplayToolbarText (MovePoint,NULL,2))
+			{    
+				GSSiGlobFree (&hCmd);
+				if (hLastBox) 
+				{
+		    		RestoreScreen2 (CurView->hDC, hLastBox,0);
+		    		DestroySavedScreen (&hLastBox,0);
+		    		GSSiGlobFree (&hLastCmd); 
+		    	}
+				ClearSelectedToolbarIcons ();
+		    	DisplayToolbarText (MovePoint,NULL,2);
+		    }
+		    if (!hLastBox) 
+		    {
+		    	if (HaveTimer)
+		    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
+		    	if (!InDisplayProcessing)
+		    		HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, 500, (FARPROC) NULL); 
+		    	else
+		    		HaveTimer = FALSE;
+            }
+            break;
+		}
+        if (*CurView->PickMacroFile || CurView->Type == MENUVIEWPORT)
+        {
+	    	if (HaveTimer)
+	    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
+	    	HaveTimer = FALSE;
+	    	if (!ScreenIsRegistered(hLastBox))
+	    		hLastBox = 0;
+	    	if (hLastBox)
+	    	{
+				LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (hLastBox);
+				
+				if (PtInRect (&pSaveScreen->Rect,MovePoint))
+					GlobalUnlock (hLastBox);
+				else
+				{
+					GlobalUnlock (hLastBox);
+		    		hDC=GetDC(hWnd);
+		    		RestoreScreen2 (hDC, hLastBox,0);
+		    		ReleaseDC (hWnd,hDC);
+		    		DestroySavedScreen (&hLastBox,0);
+		    		GSSiGlobFree (&hLastCmd);  
+			   		if (Function == GF_PAN_ZOOM_TARGET)
+			   			CurrentPrompt = PRMT_PANZOOM1;
+			   		else
+			   			CurrentPrompt = 0;
+	    		}
+	    	}
+	    	else if (Function == GF_PAN_ZOOM_TARGET)
+	   			CurrentPrompt = PRMT_PANZOOM1;
+	   		else
+	   			CurrentPrompt = 0;
+			SetPrompt (CurrentPrompt,TRUE);
+	    }
+    	if ((Function == GF_AUTOPICK || Function == GF_PAN_ZOOM_TARGET) && wParam == MK_LBUTTON && HaveDownPoint)
+    	{   
+	    	if ((labs ((long)LOWORD(lParam) - (long)LOWORD(DownPoint))) >= MinMouseMove || 
+	    		(labs ((long)HIWORD(lParam) - (long)HIWORD(DownPoint))) >= MinMouseMove)
+	    	{   
+	    		if (pViewports[CurView->BoundsDisplayVP-1]->OrthoRes < 0 && 
+	    			pViewports[CurView->BoundsDisplayVP-1]->WindowZoomedToOrtho)
+	    			HaveDownPoint = FALSE;
+    			else
+    			{
+			    	if (hLastBox) 
+			    	{
+			    		hDC=GetDC(hWnd);
+			    		RestoreScreen2 (hDC, hLastBox,0);
+			    		ReleaseDC (hWnd,hDC);
+			    		DestroySavedScreen (&hLastBox,0); 
+			    		GSSiGlobFree (&hLastCmd);
+			    	}
+					AddGraphicsFunction (hWnd, GF_ZOOM_RECT,0);
+			       	SendMessage (hWnd,WM_LBUTTONDOWN,0L,DownPoint);
+			    }
+	    	}  
+	    }
+	    else if ((*CurView->PickMacroFile  || CurView->Type == MENUVIEWPORT) && !hLastBox)
+	    {   
+	    	if (HaveTimer)
+	    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
+	    	HaveTimer = FALSE;         
+	    	if (!InDisplayProcessing)
+				HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, 500, (FARPROC) NULL);
+        }
+	}
+    	break;
+    
+    case WM_TIMER: 
+    {
+    	if (HaveTimer)
+    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
+    	HaveTimer = FALSE;         
+        if (wParam != GF_PAN_ZOOM_TARGET) goto RtnFalse;
+    	if (InDisplayProcessing)
+    		goto RtnFalse;
+    	if (hLastBox) 
+    	{
+    		hDC=GetDC(hWnd);
+    		RestoreScreen2 (hDC, hLastBox,0);
+    		ReleaseDC (hWnd,hDC);
+    		DestroySavedScreen (&hLastBox,0); 
+    		GSSiGlobFree (&hLastCmd);
+    	}
+    	if ((Function == GF_AUTOPICK || Function == GF_PAN_ZOOM_TARGET))
+    	{
+			short	SaveMaxPick = MaxPick; 
+			
+	   		if (Function == GF_PAN_ZOOM_TARGET)
+	   			CurrentPrompt = PRMT_PANZOOM1;
+    	    SetPrompt (CurrentPrompt,TRUE);
+		    if (!CurView->hTranWinToBase) break;
+		    HaltMapDisplay (FALSE);
+		    BasePoint=WinPtToBasePt(MovePoint);
+		    SetPickAp(); 
+			MaxPick = 10;
+			StopAtFirstInPickMacro = TRUE;
+		    PickItems2 (hWnd,BasePoint,TRUE,TRUE);
+		    
+			SaveVP=CurView;  
+			for (iview=0;iview<NumViewports;iview++)
+			{
+				SetCurView ( pViewportsD[iview]);
+				if (CurView->DisplayInParent == SaveVP->ID)
+		    		PickItems2 (hWnd,BasePoint,TRUE,FALSE);  
+		    }
+		    SetCurView ( SaveVP);
+			StopAtFirstInPickMacro = FALSE;
+			MaxPick = SaveMaxPick; 
+		}
+		else if (Function == GF_TOOLBAR)
+		{
+	   		CurrentPrompt = 0;
+    	    NumPicked = 0;
+    	    SetPrompt (CurrentPrompt,FALSE);
+			hLastBox = DisplayToolbarText (MovePoint,NULL,1);
+			LastBoxVP = CurView;
+		}
+		else if (Function == GF_RUN_CLASS_MACRO)
+		{
+	   		CurrentPrompt = 0;
+    	    SetPrompt (CurrentPrompt,TRUE);
+    	    NumPicked = ClassMacro (MovePoint,2,&hLastBox,&hLastCmd); 
+		}
+		else if (Function == GF_RUN_COORDDISPLAY_MACRO)
+		{
+	   		CurrentPrompt = 0;
+    	    SetPrompt (CurrentPrompt,TRUE);
+    	    NumPicked = CoordDisplayMacro (MovePoint); 
+		}
+		else if (Function == GF_RUN_DISTDISPLAY_MACRO)
+		{
+	   		CurrentPrompt = 0;
+    	    SetPrompt (CurrentPrompt,TRUE);
+    	    NumPicked = DistDisplayMacro (MovePoint); 
+		}
+	    while (NumPicked && !hLastBox)
+	    {
+	    	HANDLE	hTxt=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	    	LPSTR	pTxt=GlobalLock (hTxt);
+	    	
+	    	SetGlobalValue ("%ZOOMSELECTIONTEXT","");
+	    	if ((Function == GF_AUTOPICK || Function == GF_PAN_ZOOM_TARGET))
+	    	{
+		    	ZoomBoxRect = PickList[NumPicked-1].Rect; 
+		    	ProcessPickedItem (NumPicked-1,FALSE);
+		    } 
+	    	hLastCmd = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	    	pCmd = GlobalLock (hLastCmd); 
+	    	*pCmd = 0;
+		    if (DisplayPickedItems (0,NumPicked,FALSE,pCmd,NULL))
+		    { 
+			    if (GetGlobalCVal ("[%ZOOMSELECTIONTEXT]",pTxt,""))
+			    {   
+			    	MenuDisplayed = FALSE;
+			    	if (StringEndsWith (pTxt,"(ZOOM)"))
+			    	{
+				    	short l=_fstrlen (pTxt);
+				    	pTxt[l-6] = 0; 
+						SetGlobalValue ("%ZOOMSELECTIONTEXT",pTxt);
+				   		CurrentPrompt = PRMT_YTBMESSZOOM; 
+				    }
+			    	else if (StringEndsWith (pCmd,"ZOOM"))
+			    	{
+				   		CurrentPrompt = PRMT_YTBMESSZOOM; 
+				    	ExpandText (pCmd); 
+				    }
+			    	else if (!_fstrnicmp (pCmd,"ZOOM",4))
+				   		CurrentPrompt = PRMT_YTBMESSZOOM; 
+				   	else
+				   		CurrentPrompt = PRMT_YTBMESS;
+			    	GlobalUnlock (hLastCmd); 
+			    	if (MenuDisplayed) 
+			    		GSSiGlobUlFree (&hLastCmd);
+			    	else
+						hLastBox = YellowTextBox (hWnd,pTxt,MovePoint);
+					LastItem = NumPicked; 
+        			SetPrompt (CurrentPrompt,FALSE);
+			        NumPicked = 1;
+				}
+				else
+					GSSiGlobUlFree (&hLastCmd);
+			}
+			else
+				GSSiGlobUlFree (&hLastCmd);
+			LastBoxVP = CurView;
+			GSSiGlobUlFree (&hTxt);
+			NumPicked--; 
+		}
+    } 
+    	break;
+    
+    default:
+    	goto RtnFalse;
+    }
+   	InPanZoom = FALSE;
+    return (TRUE); 
+RtnFalse:
+	InPanZoom = FALSE;
+	return (FALSE);
+	
+}
+
+
+LPVOID BoundsDisplayInit (int Type, int DisplayVP, int TargetVP)
+{   HANDLE Handle;
+	LPBOUNDSDISPLAY lpBoundsDisplay;
+
+	Handle = GSSiGlobAlloc (GHND,sizeof(THEME));
+	lpBoundsDisplay = (LPBOUNDSDISPLAY)GlobalLock(Handle); 
+	lpBoundsDisplay->ID = PF_BOUNDS_DISPLAY;
+	lpBoundsDisplay->Handle = Handle;
+	lpBoundsDisplay->DisplayVP = DisplayVP;
+	lpBoundsDisplay->TargetVP = TargetVP;
+	lpBoundsDisplay->Type = Type;
+	return (lpBoundsDisplay);
+}
+
+void BoundsDisplayShow (LPVOID lpV, BOOL *First)
+{	LPBOUNDSDISPLAY lpBoundsDisplay;
+	LPVIEWPORT	SaveVP=CurView;
+	LPVISLIST	SaveVis=CurVis;
+	MNMXCORD	WBounds;
+	POINT		BegPoint, EndPoint;
+	DPOINT		WPoint;
+	HPEN		ArrowPen;
+	short		SaveNum, SaveDVI, SaveFile;
+
+	if (!lpV)
+		return;  
+	SaveFile = CurView->CurFile;
+	WBounds = CurView->WBounds;
+
+	lpBoundsDisplay = lpV; 
+	SetCurView (pViewports[lpBoundsDisplay->DisplayVP-1]);
+	if (!CurViewActive()) 
+	{
+		SetCurView ( SaveVP); 
+		return;
+	}
+	CurView->BoundsDisplayVP = lpBoundsDisplay->TargetVP;
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn);
+
+    
+/*     CurView->NewBounds = WBounds;
+     SetBounds (CurView->hWnd,0);
+     SaveNum=NumViewportsToDisplay;
+     SaveDVI = DisplayViewID;
+     NumViewportsToDisplay = -1;
+     DisplayViewID=CurView->ID-1;
+
+     if (CurView->Bitmap)
+     	DeleteObject (CurView->Bitmap);
+     CurView->Bitmap = 0;
+     CurView->PassID=0;
+     if (DisplayViewport (CurView->hWnd,CurView->hDC))
+     ImediateProcessing (TRUE);
+     DisplayViewID = SaveDVI;
+     NumViewportsToDisplay=SaveNum;
+*/    
+	if (*First) lpBoundsDisplay->SavedScreen = NULL;
+	*First = FALSE;
+	ShowZoomArea (CurView->hDC,&WBounds,
+				               &lpBoundsDisplay->SavedScreen,
+				               &lpBoundsDisplay->SavedRect,
+							   lpBoundsDisplay->BoxPoints);
+
+
+	RestoreDC (CurView->hDC,-1);
+	SetCurView ( SaveVP); 
+	CurView->CurFile = SaveFile;
+	CurVis = SaveVis;
+	return;
+}
+
+long BoundsDisplayRead (LPVOID *lpV,int Fid)
+{	LPBOUNDSDISPLAY lpBoundsDisplay;
+	long	iread;
+	HANDLE	Handle;
+	struct {
+			long	nbytes;
+			int		version;
+			} BV;
+
+	Handle = GSSiGlobAlloc (GHND,sizeof(BOUNDSDISPLAY));
+	lpBoundsDisplay = (LPBOUNDSDISPLAY)GlobalLock(Handle);
+	*lpV = lpBoundsDisplay;
+	iread = 0;
+	iread += _lread (Fid,&BV,sizeof(BV));
+	iread += _lread (Fid,lpBoundsDisplay,(UINT)BV.nbytes-6);
+	lpBoundsDisplay->Handle = Handle;
+	return (iread);
+}
+
+long BoundsDisplayWrite (LPVOID lpV,int Fid)
+{	LPBOUNDSDISPLAY lpBoundsDisplay;
+	long	iread;
+	struct {
+			long	nbytes;
+			int		version;
+			} BV;
+
+	lpBoundsDisplay = lpV;
+	iread = 0;
+	BV.nbytes = sizeof(BV) + sizeof(BOUNDSDISPLAY);
+	BV.version = 1;
+	iread += _lwrite (Fid,&BV,sizeof(BV));
+	iread += _lwrite (Fid,lpBoundsDisplay,sizeof(BOUNDSDISPLAY));
+	return (iread);
+
+}
+
+void BoundsDisplayDestroy (LPVOID lpV)
+{	LPBOUNDSDISPLAY lpBoundsDisplay;
+	HANDLE	Handle;
+
+	if (!lpV)
+		return;
+	lpBoundsDisplay = lpV;
+	Handle = lpBoundsDisplay->Handle;
+	GlobalUnlock (Handle);
+	GlobalFree (Handle);
+    return;
+}
+
+void ShowZoomArea (HDC hDC,LPMNMXCORD WBounds,
+					   HBITMAP *SavedScreen, RECT *SavedRect, POINT Points[7])
+{	HPEN	hWidePen, hOldPen, hArrowPen;
+	int		BoxWidth;
+	int		BoxLineWidth=3 * DeviceToScreenFactor, ArrowLineWidth=4 * DeviceToScreenFactor;
+	int		ArrowLen;
+	RECT	Rect;
+	int		i;   
+	DPOINT	WPoint;
+	POINT MinPoint, MaxPoint;
+    
+/*	if (*SavedScreen)
+	{
+		RestoreScreen (CurView->hDC,*SavedScreen,*SavedRect);
+		DeleteObject (*SavedScreen);
+	}*/ 
+    SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn); 
+	if (!Printing)
+	{
+		if (!CurView->Bitmap && !CurView->LinkedTo)
+		{
+		    CurView->CurZoomAreaRef = 0;
+	    	RedisplayViewport(TRUE,FALSE);
+	        CurView->Bitmap = SaveScreen2 (CurView->hDC, CurView->Rect,CurView,&CurView->BitmapID);
+	        CurView->BitmapRect = CurView->Rect;
+		}
+		else if (CurView->Bitmap && EqualRect(&CurView->Rect,&CurView->BitmapRect))
+			RestoreScreen2 (CurView->hDC,CurView->Bitmap,CurView->BitmapID);
+		else if (!CurView->LinkedTo) 
+		{
+	        DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID);
+	        return;
+	    }
+	}
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn); 
+	hWidePen = CreatePen (PS_SOLID,BoxLineWidth,RGB(0,0,0));
+	hArrowPen = CreatePen (PS_SOLID,ArrowLineWidth,RGB(0,0,0));
+	hOldPen = SelectObject (hDC,hWidePen);
+  	WPoint.x = WBounds->xmn;
+  	WPoint.y = WBounds->ymn;
+  	MinPoint = BasePtToWinPt (&WPoint);
+  	WPoint.x = WBounds->xmx;
+  	WPoint.y = WBounds->ymx;
+  	MaxPoint = BasePtToWinPt (&WPoint);
+    ArrowLen = ArrowLineWidth * 4;
+	Points[0].x=MinPoint.x;
+	Points[0].y=MinPoint.y;
+	Points[1].x=MinPoint.x;
+	Points[1].y=MaxPoint.y;
+	Points[2].x=MaxPoint.x;
+	Points[2].y=MaxPoint.y;
+	Points[3].x=MaxPoint.x;
+	Points[3].y=MinPoint.y;
+	Points[4]=Points[0];
+	Points[6].x = (MinPoint.x + MaxPoint.x) / 2;
+	Points[6].y = (MinPoint.y + MaxPoint.y) / 2;
+	if (Points[6].x < (CurView->DrawRect.left + CurView->DrawRect.right) /2)
+		Points[5].x = Points[6].x + ArrowLen;
+	else
+		Points[5].x = Points[6].x - ArrowLen;
+	if (Points[6].y < (CurView->DrawRect.top + CurView->DrawRect.bottom) /2)
+		Points[5].y = Points[6].y + ArrowLen;
+	else
+		Points[5].y = Points[6].y - ArrowLen;
+
+
+	BoxWidth = min(MaxPoint.x-MinPoint.x,MinPoint.y-MaxPoint.y);
+	if (BoxWidth <= ArrowLineWidth)
+		DrawPointerLine (CurView->hDC,
+		                Points[5],
+		                Points[6],
+		                hArrowPen,
+		                hArrowPen,
+		                (int) (ArrowLineWidth*2.5),0);
+	else
+		Polyline (hDC,Points,5);
+	SelectObject (hDC,hOldPen);
+	DeleteObject (hWidePen);
+	DeleteObject (hArrowPen);
+//    DisplayAllVehicles (FALSE);
+	return;
+
+}
+void ThemePickImage (POINT MousePoint)
+{	HBRUSH	BkBrush;
+	int		iclass;
+	RECT	Rect;
+
+	if (!CurView->pTheme)
+		return;
+	CurTheme = CurView->pTheme;
+	if (!CurTheme->IsActive)
+		return;
+	for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+	{	if (PtInRect(&CurTheme->ClassClrBox[iclass],MousePoint))
+		{   _fstrcpy (FullBM,CurTheme->ClassBM[iclass]);
+			ShowFullBM(FALSE);
+			return;
+		}
+	}
+	return;
+} 
+
+BOOL DisplayNetMarkerThemeLegend(BOOL Init)
+{
+	NETMARKERSTHEMEKEY	NetMarkersThemeKey;
+	double		EndMP, Val, EndVal, MP, AZ, PCT, Length, MPInc=1, MPMod,MMsize=0.1, D,F;
+	long		Refno;
+	short		MPDir, st, bw, n;
+	MARKERVAL	NetMarker, MinMarker, MaxMarker;
+	DPOINT		MarkerPoint; 
+	char		txt[64], Name[64];   
+	BOOL		TextOnEven, Rtn=FALSE, Opened; 
+	COLORREF	color, OldColor; 
+	DPOINT		BPoint;
+	static		LPTHEME	NMTheme;
+	static		NETMARKERSTHEMEKEY	NetMarkersThemeKeyLast; 
+	static		BOOL	HaveInit=FALSE;
+	DWORD		TextDisplayed=0;  
+	short		Dir;
+	
+	if (Init)
+	{
+		NMTheme = CurTheme; 
+		NetMarkersThemeKeyLast.Path = LONG_MIN;
+		NetMarkersThemeKeyLast.StartMP = 0;
+		AddTextRect(NULL); 
+		HaveInit = TRUE;
+		return TRUE;
+	} 
+	if (!HaveInit)
+		return FALSE;
+	CurTheme = NMTheme;
+	NetMarkersThemeKey = NetMarkersThemeKeyLast;
+    SetViewport (CurTheme->TargetViewport); 
+                               
+    TextOnEven = TRUE;
+    
+    if (CurView->WBounds.xmx - CurView->WBounds.xmn > 12000)
+    {	
+    	MPInc = 100;
+/*    	Rtn = FALSE;
+    	goto Exit;  */
+    }
+    else if (CurView->WBounds.xmx - CurView->WBounds.xmn > 8000)
+    	MPInc = 10;
+    else if (CurView->WBounds.xmx - CurView->WBounds.xmn > 4000)
+    	MPInc = 1;
+    else   
+    {
+    	MPInc = 0.1;   
+	    if (CurView->WBounds.xmx - CurView->WBounds.xmn < 2000) 
+	    	TextOnEven = FALSE;
+	}	    
+//    MPInc = -1;	
+	OpenNetLinkAndRef (NetworkID,FALSE,&Opened);  
+	TextOnEven = FALSE;
+    SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn); 
+  	if (*PenCOLOR>0)
+  		color = *PenCOLOR;
+  	else
+  		color = 0; 
+	OldColor = SetTextColor (CurView->hDC,AutoYellow(color));
+    SetBkMode(CurView->hDC, TRANSPARENT);
+
+	CurTheme->hScatterFile = BT_OPEN (CurTheme->ScatterFile,0, BT_READ, 0);
+	if (!BT_FIND (CurTheme->hScatterFile,(LPSTR)&NetMarkersThemeKey,BT_FIRST,BT_GT,
+				  (LPSTR)&EndMP))
+	{   
+		NetMarkersThemeKeyLast = NetMarkersThemeKey;
+	    
+		if (GetMenuState(GetMenu(hWndMain), IDM_SHOW_MILEPOINTS, MF_BYCOMMAND) != MF_CHECKED)  
+			goto Next;
+		if (!GetMilePointFromMP (NetMarkersThemeKey.Path,1,NetMarkersThemeKey.StartMP, &MinMarker,&Dir))
+			goto Next;
+		if (!GetMilePointFromMP (NetMarkersThemeKey.Path,1,EndMP, &MaxMarker,&Dir))
+			goto Next;
+		if (MinMarker.Value > MaxMarker.Value)
+		{
+			NetMarker = MinMarker;
+			MinMarker = MaxMarker;
+			MaxMarker = NetMarker;
+		} 
+		if (MPInc < 0)
+		{  
+			EndVal = MaxMarker.Value;  
+			MinMarker.Value -= 0.0000001;
+			if (!GetNextMilePoint (NetMarkersThemeKey.Path,1, &MinMarker))
+				goto Next; 
+			Val = MinMarker.Value;
+		}
+		else
+		{
+			Val = Ceil (MinMarker.Value/MPInc) * MPInc;    
+			EndVal = Floor (MaxMarker.Value/MPInc) * MPInc; 
+		}
+		EndVal += 0.0000001;
+		while (Val <= EndVal)   
+		{   
+			NetMarker = MinMarker;
+			NetMarker.Value = Val; 
+			if (MPInc > 0.2)          
+				sprintf (txt,"%c%c%.0f%c%c",NetMarker.Prefix[0],NetMarker.Prefix[1],NetMarker.Value,
+										  NetMarker.Suffix[0],NetMarker.Suffix[1]);
+			else if (MPInc > 0)  
+				sprintf (txt,"%c%c%.1f%c%c",NetMarker.Prefix[0],NetMarker.Prefix[1],NetMarker.Value,
+										  NetMarker.Suffix[0],NetMarker.Suffix[1]); 
+			else 
+				sprintf (txt,"%c%c%.5f%c%c",NetMarker.Prefix[0],NetMarker.Prefix[1],NetMarker.Value,
+										  NetMarker.Suffix[0],NetMarker.Suffix[1]); 
+			
+			if (MPInc < 0)
+				bw = 2;
+			else
+			{							  
+				MPMod = fmod (Val,1.0); 
+				if (fabs (MPMod -1.0) < MPInc/20)
+					MPMod = 0;
+				if (TextOnEven && MPMod > MPInc/20)   
+				{
+					bw = 1;
+					txt[0]=0;
+				}
+				else
+					bw = 2; 
+			}
+	    	MP = GetMPFromMilePoint (NetMarkersThemeKey.Path,1,&NetMarker,&MPDir);
+	    	if (MP >= 0)
+	    	{
+		    	GetCoordFromMP (NetMarkersThemeKey.Path,MP,&MarkerPoint,&AZ,&PCT,&Length,&Refno); 
+				DisplayMarkers = TRUE;  
+				if (MPDir < 0)
+					AZ = LTWOPI (AZ + PY);
+				DisplayMarker (MarkerPoint,bw,txt,MMsize,AZ+HALFPI,0,TRUE,FALSE,NULL,NULL);
+				DisplayMarkers = FALSE; 
+			}
+			if (MPInc < 0)
+			{
+				if (!GetNextMilePoint (NetMarkersThemeKey.Path,1, &MinMarker))
+					goto Next; 
+				Val = MinMarker.Value; 
+			}
+			else
+				Val += MPInc;        
+		} 
+	Next: 
+		D=0.5;
+		n=1;
+		OldColor = SetTextColor (CurView->hDC,color);
+		if (GetTrueStreetName (NetMarkersThemeKey.Path,Name,CurState))
+		while (!TextDisplayed && n<8)
+		{   
+			F = D;
+			if (n++%2) 
+			{
+				F = 1.0-F;   
+				D *= 0.5;
+			}
+		    MP = NetMarkersThemeKey.StartMP + (EndMP-NetMarkersThemeKey.StartMP)*F; 
+		    GetCoordFromMP (NetMarkersThemeKey.Path,MP,&BPoint,&AZ,&PCT,&Length,&Refno); 
+			{   
+				POINT	Point; 
+				int		symbol; 
+				float	SizeFactor; 
+								
+				Point = BasePtToWinPt (&BPoint);
+				symbol=ShieldType (Name,&SizeFactor); 
+				if (symbol)   
+				{   
+					COLORREF	OldColor;
+									
+	//				OldColor = SetTextColor (CurView->hDC,StreetTextColor[SNSelectData.Layer]);
+				    SetBkMode (CurView->hDC,TRANSPARENT);
+					TextDisplayed=DispText (CurView->hDC,Point.x-10,Point.x+10, Point.y, 0,2,1,
+						  StreetTextSize,
+						  100, FALSE,0,Name,symbol,TRUE,0,0,-1,0,NULL); 
+	//				SetTextColor (CurView->hDC,OldColor);
+			    }
+			}
+		}
+		Rtn = TRUE;
+	}
+    CloseNetLinkAndRef (Opened);   
+	SetTextColor (CurView->hDC,OldColor); 
+	BT_CLOSE (CurTheme->hScatterFile);
+	CurTheme->hScatterFile = 0;    
+Exit:
+    Opened = FALSE;
+	if (!Rtn) 
+	{
+		HaveInit = FALSE;
+		AddTextRect(NULL);
+	}
+	return Rtn;
+}
+
+void DisplayBMThemeLegend()
+{   int		xmargin, ymargin;
+	long	h, w;
+	HBRUSH	BkBrush;
+	int		iclass;
+	RECT	ClassColorBox;
+
+    CurTheme->NumClass = CurTheme->NumDesiredClass;    
+    if (!CurTheme->NumClass)
+    	return;
+	CurTheme->Rect=PctRect (CurView->DrawRect,-CurTheme->Margin);
+	xmargin = (((long)CurTheme->Rect.right - CurTheme->Rect.left) * CurTheme->InnerMargin) / 100;
+	ymargin = (((long)CurTheme->Rect.bottom - CurTheme->Rect.top) * CurTheme->InnerMargin) / 100;
+	h = (((long)CurTheme->Rect.bottom - CurTheme->Rect.top) * CurTheme->TitleHeight) / 100;
+	CurTheme->TitleBox.top = CurTheme->Rect.top + ymargin;
+	CurTheme->TitleBox.bottom = CurTheme->TitleBox.top + h;
+	CurTheme->TitleBox.left = CurTheme->Rect.left + xmargin;
+	CurTheme->TitleBox.right = CurTheme->Rect.right - xmargin;
+	CurTheme->InfoBox.top = CurTheme->TitleBox.bottom + ymargin;
+	CurTheme->InfoBox.bottom = CurTheme->Rect.bottom - ymargin;
+	CurTheme->InfoBox.left = CurTheme->Rect.left + xmargin;
+	CurTheme->InfoBox.right = CurTheme->Rect.right - ymargin;
+	w = (((long)CurTheme->InfoBox.right - CurTheme->InfoBox.left)
+		- (CurTheme->NumClass+1) * xmargin) / CurTheme->NumClass;
+
+	BkBrush = CreateSolidBrush (CurTheme->BGColor);
+	FillRectPoly (CurView->hDC,&CurTheme->Rect,BkBrush);
+	DeleteObject (BkBrush);
+	FillRectPoly (CurView->hDC,&CurTheme->InfoBox,RGB(255,255,255));
+	FillRectPoly (CurView->hDC,&CurTheme->TitleBox,CurTheme->TitleBoxBG);
+
+	/* Display the color boxes */
+	ClassColorBox = CurTheme->InfoBox;
+	ClassColorBox.bottom = CurTheme->InfoBox.bottom;
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+	{
+		ClassColorBox.left = CurTheme->InfoBox.left + (iclass+1) * xmargin + iclass * w;
+		ClassColorBox.right = ClassColorBox.left + w;
+		DisplayBMFileInRect (CurView->hDC,(LPSTR)&CurTheme->ClassBM[iclass],ClassColorBox,TRUE);
+		CurTheme->ClassClrBox[iclass] = ClassColorBox;
+	}
+
+
+	return;
+}
+BOOL PtInBounds (POINT SegPoint)
+{
+	if (SegPoint.x < CurView->FileBounds.xmn ||
+		SegPoint.x > CurView->FileBounds.xmx ||
+		SegPoint.y < CurView->FileBounds.ymn ||
+		SegPoint.y > CurView->FileBounds.ymx)
+		return (FALSE);
+	else
+		return (TRUE);
+}
+
+BOOL PtInDrawRect (POINT SegPoint)
+{
+	if (SegPoint.x < CurView->DrawRect.left ||
+		SegPoint.x > CurView->DrawRect.right ||
+		SegPoint.y < CurView->DrawRect.top ||
+		SegPoint.y > CurView->DrawRect.bottom)
+		return (FALSE);
+	else
+		return (TRUE);
+}
+
+RECT PctRect (RECT Rect, float Pct)
+{   int	xinc, yinc;
+
+	xinc = IDNINT(((Rect.right - Rect.left) * Pct) / 100);
+	yinc = IDNINT(((Rect.bottom - Rect.top) * Pct) / 100);
+	xinc = min (xinc,yinc);
+
+    InflateRect (&Rect,xinc,xinc);
+	return(Rect);
+}
+BOOL SetDisplayChar (HDC hDC,int Type,long iref,int desc, LPSTR TAG, LPSTR UDI)
+{
+	BOOL rtn; 
+	static	BOOL	LastRtn;   
+	int		st,ii;  
+	short	Dummy;
+	SPECIALDATA	SpecialData;
+	
+	if (ForceRefIndex || ForceTAGIndex)
+		return FALSE; 
+	
+	if (DisplayOnlyNonHLT)
+	{
+    	if (hHighlight)
+    	{
+	    	if (!(st=BT_FIND (hHighlight,(LPSTR)&iref,BT_FIRST,BT_EQ,(LPSTR)&HighlightData))) 
+	    	{
+				rtn = FALSE;
+				goto Exit;
+			}
+		}
+	}
+	if (!hDynamicSeg && !ProcessSingleItem && !ProcessAllElements && iref == LastRef)
+	{ 
+		rtn = LastRtn;
+	}
+	else
+	{   
+		rtn = SetDisplayChar2 (hDC,Type,iref,desc,TAG,UDI);
+		LastRef = iref; 
+		LastRtn = rtn;
+	}
+    st = 31;
+    if (hDC && CurView->PassID) 
+    {
+    	if (hSpecial)
+    	{
+	    	if (!(st=BT_FIND (hSpecial,(LPSTR)&iref,BT_FIRST,BT_EQ,(LPSTR)&SpecialData)))
+			{
+				switch (SpecialData.Type)
+				{   
+					case 1:
+					{
+		        		int	pwidth;           
+				        SelectObject(hDC, GetStockObject(BLACK_PEN));
+					    if (hSpecialPen)
+					    	DeleteObject (hSpecialPen);
+			 			pwidth = IDNINT(WidthFactor*SpecialData.Width);  
+						hSpecialPen = CreatePen(PS_SOLID,pwidth,SpecialData.Color);
+		        		hOldPen = SelectObject (hDC,hSpecialPen);
+		        	}
+		        	case 2: 
+		        	{
+				        SelectObject(hDC, GetStockObject(BLACK_BRUSH));
+					    if (hSpecialBrush)
+					    	DeleteObject (hSpecialBrush);
+						hSpecialBrush = CreateSolidBrush(SpecialData.Color);
+		        		hOldBrush = SelectObject (hDC,hSpecialBrush);
+					}
+		        	break;
+	        	}
+	        	
+			}
+		}
+		   
+    	if (st && hRedLine)
+    	{
+	    	if (!(st=BT_FIND (hRedLine,(LPSTR)&iref,BT_FIRST,BT_EQ,(LPSTR)&SpecialData)))
+			{
+			}
+		}
+		if (CurItemHLTShow > -1)
+		{
+			if (CurItemHLTShow) 
+			{   
+				if (DisplayHLTPattern)
+				switch (Type)
+				{	
+					case GF_POINT:   
+						HighlightPointSym=TRUE;
+						break;
+					case GF_AREA:
+						SetAreaHighlight(hDC);
+						break;
+					case GF_LINE:   
+					case GF_TEXT:
+					case GF_POLYLINE:
+					case GF_CURVE:
+						SetLineHighlight(hDC,CurItemHLTShow);
+				}  
+				HighlightThisItem = TRUE;
+				rtn=TRUE;
+			}
+			else
+				rtn=FALSE;
+		}
+	} 
+Exit:
+	if (hDisplayedRefs && rtn)
+		BT_PUT (hDisplayedRefs,(LPSTR)&iref,(LPSTR)&desc);
+	return rtn;
+}
+
+BOOL SetDisplayChar2 (HDC hDC,int Type,long iref,int desc, LPSTR TAG, LPSTR UDI)
+{   int st,ii; 
+	
+    
+	if (!CurVis->WantType[8] && QuadTypeNext<2)
+		if (GetInVisibility(desc))
+			return(FALSE);
+    st = SetCharsFromTheme (hDC,Type,iref,desc,TAG,UDI);
+    if (st >=0)
+    	return(st);
+    if (CurView->NewObjectMap[desc]) 
+    {   
+		LPNEWOBJECT	pObj=&CurView->NewObject[CurView->NewObjectMap[desc]-1];
+
+    	OpenNewObjects();
+    	if (!pObj->Handle)
+    		goto SetPen;
+    	else if (Display) 
+    	{   
+    		if (Type == GF_AREA)
+    		{
+    			if (pObj->Type == 1)
+					SelectObject(hDC,GetStockObject(NULL_BRUSH));
+    			else
+					SelectObject(hDC,GetStockObject(NULL_PEN));
+			}
+    		CurrentPen =  pObj->Handle;
+   			SelectObject (hDC,CurrentPen); 
+   			HaveVarFillColor = TRUE;  
+   			GlobalColors[0]=RGB(pObj->R,
+   								pObj->G,
+   								pObj->B);
+			SetTextColor (hDC,AutoYellow(RGB(pObj->R,pObj->G,pObj->B)));
+   		}
+   	}
+    else 
+SetPen:
+    if (Type != GF_AREA && Display) 
+    {
+    	if (HiPrecis && PenFromUMList && pens[0])
+    		SelectObject (hDC,pens[0]); 
+    	else if (CurrentPen)
+        	SelectObject (hDC,CurrentPen);
+    }
+	return (TRUE);
+}
+
+int SetCharsFromTheme (HDC hDC, int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
+{	int	itheme;
+	int	irc;
+    short	FromTheme = 0, ToTheme = CurView->NumThemes;
+    
+    if (Highlight)
+    	return -1; 
+    if (ProcessSelectedTheme)
+    { 
+    	FromTheme = ProcessSelectedTheme-1;
+    	ToTheme = ProcessSelectedTheme;
+    }
+	if (!CurView->PassID)
+	{	for (itheme=FromTheme;itheme<ToTheme;itheme++)
+		{	CurTheme = CurView->pThemes[itheme];
+			if (CurTheme->WantDataPass)
+				ThemeSetData (Type,iref,desc, TAG, UDI);
+		}
+		return(0);
+	}
+	else
+	{	irc = -1;
+		for (itheme=FromTheme;itheme<ToTheme;itheme++)
+		{	CurTheme = CurView->pThemes[itheme];
+			switch (ThemeTestChar (Type,iref,desc,TAG,UDI))
+			{
+				case 0:
+					return 0;
+				default:
+					break;
+			}
+		}
+		for (itheme=FromTheme;itheme<ToTheme;itheme++)
+		{	CurTheme = CurView->pThemes[itheme];
+			switch (ThemeSetChar (Type,iref,desc,TAG,UDI))
+			{
+				case 0:
+					return 0;
+				case 1:
+					irc = 1;
+				default:
+					break;
+			}
+		}
+		return(irc);
+	}
+}   
+
+void SaveHighlightList (LPHANDLE pH1, LPHANDLE pH2)
+{   
+	*pH1 = hHighlight;
+	*pH2 = hHighlight2;
+	hHighlight = 0;
+	hHighlight2 = 0;
+	return;
+}
+
+void RestoreHighlightList (HANDLE H1, HANDLE H2)
+{   
+	hHighlight = H1;
+	hHighlight2 = H2;
+	return;
+}
+
+BOOL OpenHighlightList(LPSTR Name1, LPSTR Name2)
+{	BTVARDESC	BTVar[1];
+	char	HighlightFile[144],HighlightFile2[144];  
+	int	ii;
+	long	iref;  
+	short	pos = BT_FIRST;  
+	HIGHLIGHTDATA HighlightData;
+	LPPICKDATA pPickData=&HighlightData.PD;
+	
+	if (hHighlight)
+		return TRUE;
+	if (Name1) 
+		_fstrcpy (HighlightFile,Name1);
+	else
+		GetTempFileName (NULL,"hl1",NULL,(LPSTR)HighlightFile);
+	if (Name2) 
+		_fstrcpy (HighlightFile2,Name2);
+	else
+		GetTempFileName (NULL,"hl2",NULL,(LPSTR)HighlightFile2);
+    
+    ii=sizeof(HIGHLIGHTDATA);
+	hHighlight = BT_OPEN (HighlightFile, 0, BT_WRITE, 0);
+	if (!hHighlight)
+	{
+//		BT_SET_PARMS (8,32,6,30); .9  (no call = .456)
+//		BT_SET_PARMS (8,32,5,18);  .471
+//		BT_SET_PARMS (8,32,5,10);   .471
+//		BT_SET_PARMS (8,32,6,20);   .454
+//		BT_SET_PARMS (16,32,10,24);  .464
+//		BT_SET_PARMS (16,32,8,16);   .504 
+		BT_SET_PARMS (8,32,6,21);    //.447
+		BTVar[0].BT_VARTYP=BT_INTEGER;
+		BTVar[0].BT_VARLEN=4;
+		BTVar[0].BT_VAROFF=0;
+		BT_CREATE (HighlightFile, sizeof(HIGHLIGHTDATA), FALSE, -1, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
+		hHighlight= BT_OPEN (HighlightFile, 0, BT_WRITE, 0);
+		TotHLTLength=TotHLTPerim=TotHLTArea=TotHLTPoints=0;
+
+	}
+	hHighlight2 = BT_OPEN (HighlightFile2, 0, BT_WRITE, 0);
+	if (!hHighlight2)
+	{
+		BTVar[0].BT_VARTYP=BT_INTEGER;
+		BTVar[0].BT_VARLEN=4;
+		BTVar[0].BT_VAROFF=0;
+		BT_CREATE (HighlightFile2, sizeof(long), FALSE, -1, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
+		hHighlight2= BT_OPEN (HighlightFile2, 0, BT_WRITE, 0);  
+		HighlightSequence=0;
+	}
+	TotHLTPerim = 0;
+	TotHLTArea = 0;  
+	TotHLTLength = 0; 
+	TotHLTPoints = 0;   
+	DBoundsInit (&HLTBounds);
+   	while (!BT_FIND (hHighlight,(LPSTR)&iref,pos,BT_ANY,(LPSTR)&HighlightData))
+   	{
+   		pos = BT_NEXT;
+		if (pPickData->Type == 3)
+		{    
+			TotHLTPerim+=pPickData->Length;
+			TotHLTArea+=pPickData->Area;  
+		}
+		else 
+			TotHLTLength+=pPickData->Length;
+	    TotHLTPoints+=pPickData->NumPoints;     
+	    if (pPickData->Type != 6)
+			AddMinMaxD (&HLTBounds, &pPickData->Rect);
+	}
+	return TRUE;
+} 
+
+void AddToHighlightList (long Refno,LPPICKDATA pPickData,BOOL Show)
+{   long	LastRef;
+    HIGHLIGHTDATA	PrevHighlightData;
+    short	st;
+    
+    if (PickAllPieces)
+    	Refno = PickPieceRefno++;
+	OpenHighlightList(NULL,NULL);     
+//Refno  += CurState * 1000000;
+//pPickData->Refno = Refno;
+	if (!BT_FIND (hHighlight2,(LPSTR)&HighlightSequence,BT_LAST,BT_ANY,(LPSTR)&LastRef))
+		HighlightSequence += 1000;
+	else
+		HighlightSequence = 1000;
+	HighlightData.Show = Show;   
+	HighlightData.Sequence = HighlightSequence; 
+	pPickData->HasText = 0;
+	pPickData->HasTextPointer = 0; 
+	switch (pPickData->Type)
+	{    
+		case 1:
+		case GF_POINT:
+			pPickData->Type = 1;
+			break;  
+		case 2:
+		case GF_LINE:
+		case GF_POLYLINE:
+			pPickData->Type = 2;
+			break; 
+		case 3:
+		case GF_AREA:
+			pPickData->Type = 3;     
+			break;
+		case 4:
+		case GF_TEXT:
+			pPickData->Type = 4;
+			pPickData->HasText = 1;
+			break;
+		case 5:
+		case GF_CURVE:
+			pPickData->Type = 5;
+			break;
+	}
+//Refno = HighlightSequence;	// used to make refno unique accross files for freeway plot
+//	pPickData->Refno = Refno;
+	if (HighlightOnlyPoints && pPickData->Type != 1)
+		return;	
+	HighlightData.PD = *pPickData;
+	st = BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_EQ,(LPSTR)&PrevHighlightData); 
+	if (!st)
+	{   
+		if (HighlightData.PD.Segment == PrevHighlightData.PD.Segment &&
+		 	HighlightData.PD.Offset  == PrevHighlightData.PD.Offset  &&
+		 	HighlightData.PD.FileNum == PrevHighlightData.PD.FileNum &&
+		 	HighlightData.PD.FileInIndex == PrevHighlightData.PD.FileInIndex &&
+		 	HighlightData.PD.SubFile == PrevHighlightData.PD.SubFile)
+		{
+			if (HighlightData.PD.Type == 4)
+			{
+				PrevHighlightData.PD.HasText = 1;
+				BT_PUT (hHighlight,(LPSTR)&Refno,(LPSTR)&PrevHighlightData); 
+			}
+		}
+		else if (HltDupRefs)
+		{ 
+			st=1;
+		}
+		return;
+	}
+	else
+	{		
+		BT_PUT (hHighlight,(LPSTR)&Refno,(LPSTR)&HighlightData); 
+		BT_PUT (hHighlight2,(LPSTR)&HighlightSequence,(LPSTR)&Refno);
+		HighlightSequence+=1000; 
+		if (HighlightData.PD.Type == 3)
+		{    
+			TotHLTPerim+=HighlightData.PD.Length;
+			TotHLTArea+=HighlightData.PD.Area;  
+		}
+		else 
+			TotHLTLength+=HighlightData.PD.Length;
+	    TotHLTPoints+=HighlightData.PD.NumPoints;
+	}     
+    if (HighlightData.PD.Type != 6)
+		AddMinMaxD (&HLTBounds, &HighlightData.PD.Rect);
+    if (HLTDlgWnd && !hHighlightArea) 
+    {
+    	PostMessage (HLTDlgWnd,WM_COMMAND,IDC_REDISPLAY, 0L);
+    	PostMessage (HLTDlgWnd,WM_COMMAND,ID_GOTO_BOTTOM, 0L);
+    }
+	return;
+}
+
+void AddToHighlightListSeq (long Refno,LPPICKDATA pPickData,long Sequence,BOOL Show)
+{
+	OpenHighlightList(NULL,NULL);
+	HighlightData.Show = Show;
+	HighlightData.Sequence = Sequence;
+	HighlightData.PD = *pPickData;
+	BT_PUT (hHighlight,(LPSTR)&Refno,(LPSTR)&HighlightData); 
+	BT_PUT (hHighlight2,(LPSTR)&Sequence,(LPSTR)&Refno);
+	HighlightSequence=max(HighlightSequence,Sequence);
+	if (pPickData->Type == 3)
+	{    
+		TotHLTPerim+=pPickData->Length;
+		TotHLTArea+=pPickData->Area;  
+	}
+	else
+		TotHLTLength+=pPickData->Length;
+    TotHLTPoints+=pPickData->NumPoints;
+	AddMinMaxD (&HLTBounds, &pPickData->Rect);
+    if (HLTDlgWnd)
+    	PostMessage (HLTDlgWnd,WM_COMMAND,IDC_REDISPLAY, 0L);
+	return;
+} 
+
+void RemoveFromHighlightList (long Refno,int mode)
+{   long	iref;
+	LPPICKDATA pPickData;
+	
+	OpenHighlightList(NULL,NULL);  
+	if (!BT_FIND(hHighlight,(LPSTR)&Refno,BT_FIRST,BT_EQ,(LPSTR)&HighlightData))
+	{   
+		if (mode == 2)
+		{
+			HighlightData.Show = mode;
+			BT_PUT (hHighlight,(LPSTR)&Refno,(LPSTR)&HighlightData); 
+		}
+		else
+		{    
+			pPickData = &HighlightData.PD;
+			if (pPickData->Type == 3)
+			{    
+				TotHLTPerim-=pPickData->Length;
+				TotHLTArea-=pPickData->Area;  
+			}
+			else
+				TotHLTLength-=pPickData->Length;
+		    TotHLTPoints-=pPickData->NumPoints;
+			if (!BT_FIND(hHighlight2,(LPSTR)&HighlightData.Sequence,BT_FIRST,BT_EQ,(LPSTR)&iref))
+				BT_DELETE(hHighlight2,(LPSTR)&HighlightData.Sequence,(LPSTR)&iref,FALSE); 
+			BT_DELETE (hHighlight,(LPSTR)&Refno,(LPSTR)&HighlightData,FALSE); 
+		    if (HLTDlgWnd && !mode)
+		    	PostMessage (HLTDlgWnd,WM_COMMAND,IDC_REDISPLAY, 0L);
+		}
+	}
+	return;          
+}
+
+void CloseHighlightList (void)
+{
+	BT_CLOSE (hHighlight); 
+	BT_CLOSE (hHighlight2);
+	hHighlight = 0;        
+	hHighlight2= 0;
+	return;
+} 
+
+HFILE SaveHighlightListToConfig (HFILE Fid)
+{
+ 	short	Length, Version=1, id=OB_HIGHLIGHTLIST;    
+ 	OFSTRUCT	OFStruct;
+	long	lFile1, lFile2, pos;
+	char	File1[144], File2[144], Name[144]; 
+
+	if (!hHighlight)	
+		return Fid;
+	if (!GetOpenFilePathname (Fid, Name))
+		return Fid;
+ 	_lwrite (Fid,&id,2);  
+ 	_lwrite (Fid,&Version,2);
+ 	_lwrite (Fid,&Version,2); 
+	BT_GETPATHNAME (hHighlight,File1);		
+	BT_GETPATHNAME (hHighlight2,File2);		
+	CloseHighlightList ();
+	lFile1 = GSSiLength (File1);
+	lFile2 = GSSiLength (File2);
+	_lwrite (Fid,&lFile1,4);
+	_lwrite (Fid,&lFile2,4);  
+	GSSiClose (Fid);
+	copyfile (Name,File1,TRUE,0,0,0,0,0,0);
+	copyfile (Name,File2,TRUE,0,0,0,0,0,0);
+	Fid = GSSiOpenFile (Name,&OFStruct,OF_READWRITE);
+	_llseek (Fid,0,2);
+	OpenHighlightList (File1,File2);
+	return Fid; 
+}
+
+BOOL ReadHighlightListFromConfig (HFILE Fid)
+{
+	char	File1[144], File2[144], Name[144];
+	short	ObjectID,Version;
+	long	lFile1, lFile2, pos;
+
+	if (!GetOpenFilePathname (Fid, Name))
+		return FALSE;
+	_lread (Fid,&ObjectID,2);
+	_lread (Fid,&Version,2);
+	_lread (Fid,&Version,2);  
+	_lread (Fid,&lFile1,4);
+	_lread (Fid,&lFile2,4);
+	ClearHighlightList (FALSE);
+	OpenHighlightList(NULL,NULL);  
+	BT_GETPATHNAME (hHighlight,File1);		
+	BT_GETPATHNAME (hHighlight2,File2);		
+	CloseHighlightList (); 
+	pos = _llseek (Fid,0,1);
+	
+	copyfile (File1,Name,FALSE,pos,pos+lFile1,0,0,0,0);
+	copyfile (File2,Name,FALSE,pos+lFile1,pos+lFile1+lFile2,0,0,0,0);
+	OpenHighlightList (File1,File2);   
+	LoadedHLTFromConfig = TRUE;
+	return TRUE; 
+}
+
+BOOL CopyHighlightList (LPSTR Name)
+{   
+	char	File1[144], File2[144]; 
+	long	lFile1, lFile2;
+	HFILE	Fid;
+	OFSTRUCT	OFStruct;
+	
+	if (!hHighlight)	
+		return FALSE; 
+	BT_GETPATHNAME (hHighlight,File1);		
+	BT_GETPATHNAME (hHighlight2,File2);		
+	CloseHighlightList ();
+	copyfile (Name,File1,FALSE,0,0,0,0,0,0);
+	lFile1 = GSSiLength (Name);
+	copyfile (Name,File2,TRUE,0,0,0,0,0,0);
+	lFile2 = GSSiLength (Name) - lFile1;
+	Fid = GSSiOpenFile (Name,&OFStruct,OF_READWRITE);
+	_llseek (Fid,0,2);
+	_lwrite (Fid,&lFile1,4);
+	_lwrite (Fid,&lFile2,4);
+	GSSiClose (Fid);
+	OpenHighlightList (File1,File2);
+	return TRUE;
+}
+
+BOOL RecallHighlightList (LPSTR Name)
+{   
+	char	File1[144], File2[144];
+	HFILE	Fid, Fid2;
+	OFSTRUCT	OFStruct;
+	long	lFile1,lFile2;  
+	
+	ClearHighlightList (FALSE);
+	OpenHighlightList(NULL,NULL);  
+	BT_GETPATHNAME (hHighlight,File1);		
+	BT_GETPATHNAME (hHighlight2,File2);		
+	CloseHighlightList (); 
+	Fid = GSSiOpenFile (Name,&OFStruct,OF_READWRITE);
+	_llseek (Fid,-8,2);
+	_lread (Fid,&lFile1,4);
+	_lread (Fid,&lFile2,4);
+	GSSiClose (Fid);
+	
+	copyfile (File1,Name,FALSE,0,lFile1,0,0,0,0);
+	copyfile (File2,Name,FALSE,lFile1,lFile1+lFile2,0,0,0,0);
+	OpenHighlightList (File1,File2); 
+	return TRUE;
+}
+
+void ClearHighlightList (BOOL Final)
+{
+	BT_CLOSEANDDELETE (&hHighlight);
+	BT_CLOSEANDDELETE (&hHighlight2);
+	TotHLTLength=TotHLTPerim=TotHLTArea=TotHLTPoints=NumPicked=PickPieceRefno=HighlightSequence=0;  
+	DBoundsInit (&HLTBounds);
+    if (HLTDlgWnd)
+    	PostMessage (HLTDlgWnd,WM_COMMAND,IDC_REDISPLAY, 0L);
+	return;
+}
+
+void UpdateClassValueList()
+{
+	BTVARDESC	BTVar[3];
+	int	i, ifield,ii;
+	OFSTRUCT	OFStruct;
+	LPFIELDINFO	lpFieldInfo;
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;  
+	HANDLE	hBT;
+	char	str[128];
+	
+	if (!CurTheme->hThemeDB) 
+	{
+		if (!OpenThemeDataFile ())
+			return;
+	}					
+	SQLPtr = (LPOPENSQLDATA)GlobalLock(CurTheme->hThemeDB);
+	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
+
+	if (FilePtr->Type == UMIFS_DATAFILE)
+	{   
+		_fstrcpy (str,CurTheme->DataFile);
+		_strlwr (str);
+		if (_fstrstr (str,"graphics.gmd"))
+		{
+			if (!_fstricmp (CurTheme->Field[0].name,"SYMBOL_NAME"))
+			{
+				GetThemeSymbolList (CurTheme->SymNum,CurTheme->hScatterFile);
+			}
+		}
+		else
+			GetGMDUniqueFieldValues (FilePtr->FileHandle, CurTheme->SQL,
+	                              CurTheme->Field[0].index, CurTheme->hScatterFile);  
+	}
+	else
+		GetODBCUniqueFieldValues (FilePtr->FileHandle, NULL, 
+	                              CurTheme->Field[0].name, GetValListFieldLen (&CurTheme->Field[0]),
+	                              CurTheme->hScatterFile);
+    GlobalUnlock (SQLPtr->OFHandle);
+    GlobalUnlock (CurTheme->hThemeDB);
+	return;
+}
+BOOL PickScatterPoint (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint;
+ static	HaveDown=FALSE;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+		ThemePickScatterDiagram (MousePoint);
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+BOOL ZoomOut (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint;
+ DPOINT	CenterPt;
+ MNMXCORD	MinMax;
+ double	Dist;   
+ static	BOOL	HaveDown;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint=MAKEPOINT(lParam);
+		if (!CurView->hTranWinToBase)
+			break;
+	    CenterPt = WinPtToBasePt(MousePoint); 
+	    Dist = CurView->WBounds.xmx - CurView->WBounds.xmn;
+	    MinMax.xmn = CenterPt.x - Dist;
+	    MinMax.xmx = CenterPt.x + Dist;
+	    Dist = CurView->WBounds.ymx - CurView->WBounds.ymn;
+	    MinMax.ymn = CenterPt.y - Dist;
+	    MinMax.ymx = CenterPt.y + Dist; 
+	    CurView->CurZoomAreaRef = 0;
+	    ZoomToRect (MinMax,FALSE);
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+BOOL ZoomIn (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint;
+ DPOINT	CenterPt;
+ MNMXCORD	MinMax;
+ double	Dist;
+ static	BOOL	HaveDown;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint=MAKEPOINT(lParam);
+		if (!CurView->hTranWinToBase)
+			break;
+	    CenterPt = WinPtToBasePt(MousePoint); 
+	    Dist = CurView->WBounds.xmx - CurView->WBounds.xmn;  
+	    Dist/=4;
+	    MinMax.xmn = CenterPt.x - Dist;
+	    MinMax.xmx = CenterPt.x + Dist;
+	    Dist = CurView->WBounds.ymx - CurView->WBounds.ymn;
+	    Dist/=4;
+	    MinMax.ymn = CenterPt.y - Dist;
+	    MinMax.ymx = CenterPt.y + Dist;   
+   	    CurView->CurZoomAreaRef = 0;
+	    ZoomToRect (MinMax,FALSE);
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+BOOL Sponge (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		break;
+
+    case WM_LBUTTONUP:
+		RemoveGraphicsFunction (hWnd); 
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+BOOL PanToPoint (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint; 
+ static	HaveDown=FALSE;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=FALSE;  
+   		
+    case WM_MOUSEMOVE: 
+        SetPrompt (PRMT_PANPOINT,TRUE);
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+		if (CurView->hTranWinToBase) CenterWindow (hWnd,WinPtToBasePt(MousePoint),FALSE);
+		break;
+    
+    case GF_CLOSE:
+    case GF_CANCEL:
+    	HaveDown = FALSE;
+    	return FALSE;
+    	
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+void CancelWindowZoom(void)
+{   
+	if (DisableHalt)
+		return;
+	if (!CurView)
+		return;
+	if (CurView->CurrentFunction==GF_ZOOM_RECT)
+		ZoomRectangle (CurView->hWnd,GF_CANCEL,0,0,0);
+	return;
+}
+
+BOOL MarginPan (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint;
+ static	HaveDownStroke=FALSE;
+ 
+ if (DisableMarginPan)
+ 	return FALSE;
+ if (!CurView->MarginPan)
+ 	return FALSE;
+ switch (Message)
+   {
+   	case GF_INIT:
+   		HaveDownStroke=FALSE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+	    if (PtInRect (&CurView->DrawRect,MousePoint))
+	    {
+	    	HaveDownStroke=FALSE;
+	    	return FALSE;
+	    }
+	    if (!PtInRect (&CurView->Rect,MousePoint))
+	    {
+	    	HaveDownStroke=FALSE;
+	    	return FALSE;
+	    }
+	    if (Message==WM_LBUTTONDOWN)
+	    {
+	    	HaveDownStroke=TRUE;
+	    	return(TRUE);
+	    }
+	    if (!HaveDownStroke)
+	    	return(FALSE);
+		if (CurView->hTranWinToBase)
+		{
+			CancelWindowZoom();
+			CenterWindow (hWnd,WinPtToBasePt(MousePoint),FALSE);
+		}
+    	HaveDownStroke=FALSE;
+		return TRUE;
+		break;
+
+
+    default:
+    	return (FALSE);
+    }
+    return (FALSE);
+}
+
+BOOL ShowItem (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{HDC hDC;
+ char key;
+ POINT	MousePoint;
+ DPOINT	BasePoint;
+ static	HaveDown=FALSE;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint = MAKEPOINT(lParam);
+	    if (!CurView->hTranWinToBase) break;
+	    BasePoint=WinPtToBasePt(MousePoint);
+	    DoPaint=FALSE;
+	    PickItems (hWnd,BasePoint);
+        ClientToScreen (CurView->hWnd,(LPPOINT)&MousePoint);
+	    SetCursorPosGM (MousePoint.x,MousePoint.y,0);
+	    DisplayPickedItems (hWnd,NumPicked,TRUE,NULL,NULL);
+	    DynDlgOn(TRUE);
+		ShowDynWindows ();
+		DoPaint=TRUE;
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+
+BOOL HideItem (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{HDC hDC;
+ char key; 
+ long	LastPicked=LONG_MAX;
+ POINT	MousePoint;
+ DPOINT	BasePoint;
+ static	HaveDown=FALSE;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+	    if (!CurView->hTranWinToBase) break;
+	    BasePoint=WinPtToBasePt(MousePoint);
+	    DoPaint=FALSE;
+	    PickItems (hWnd,BasePoint);
+        if (NumPicked > 0)
+        {
+	        DoPaint=FALSE;
+		    AddToHighlightList (PickList[NumPicked-1].Refno,
+		    					&PickList[0],FALSE);
+		    LastPicked = PickList[NumPicked-1].Refno;
+		    CurView->CurZoomAreaRef = 0;
+		    RedisplayViewport(FALSE,FALSE);
+        }
+		DoPaint=TRUE;
+		break;
+
+    case WM_RBUTTONUP:
+    	if (LastPicked<LONG_MAX)
+    	{
+		    AddToHighlightList (PickList[NumPicked-1].Refno,&PickList[0],TRUE);
+		    CurView->CurZoomAreaRef = 0;
+		    RedisplayViewport(FALSE,FALSE);
+    	}
+    	break;
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+} 
+
+BOOL TraverseEntry (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{HDC hDC;
+ char key; 
+ long	LastPicked=LONG_MAX;
+ POINT	MousePoint;
+ DPOINT	BasePoint;
+ static	HaveDown=FALSE;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		HaveDown=TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+	    if (!CurView->hTranWinToBase) break;
+	    BasePoint=WinPtToBasePt(MousePoint);
+	    DoPaint=FALSE;
+	    PickItems (hWnd,BasePoint);
+		if (!hWndTraverseEntry)
+		{
+		                  
+		  lpfnTRAVERSE_ENTRYMsgProc = MakeProcInstance((FARPROC)TRAVERSE_ENTRYMsgProc, hInst);
+		  hWndTraverseEntry=CreateDialog(hInst,"TRAVERSE_ENTRY",hWndMain, lpfnTRAVERSE_ENTRYMsgProc);
+		}
+		else
+			ShowWindow (hWndTraverseEntry,SW_RESTORE);
+
+		break;
+
+    case WM_RBUTTONUP:
+    	if (LastPicked<LONG_MAX)
+    	{
+		    AddToHighlightList (PickList[NumPicked-1].Refno,&PickList[0],TRUE);
+		    CurView->CurZoomAreaRef = 0;
+		    RedisplayViewport(FALSE,FALSE);
+    	}
+    	break;
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+} 
+
+
+BOOL ColorClass (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{HDC hDC;
+ char key;
+ POINT	MousePoint;
+ DPOINT	BasePoint;
+ BOOL	Cancel;
+ COLORREF	NewColor;
+ static	HaveDown=FALSE;
+ 
+ if (Message == WM_LBUTTONDOWN || Message == GF_INIT)
+ {
+   	AddLBUTTON = TRUE;
+   	HaveDown = TRUE;
+   	return TRUE;
+ }
+    	
+ if (ForAllVis)
+ {  
+ 	BOOL	First=TRUE;
+ 	
+ 	if (Message == WM_LBUTTONUP && HaveDown)
+ 	{
+	    if(GetColor(hWnd,&NewColor))
+	    {   
+	    	int	idesc, newob;
+	    	
+	    	SetCVTFromVis ();
+	    	for (idesc=1;idesc<3201;idesc++) 
+	    	{
+				if (CurView->CurVisType[idesc])
+				{   
+					if (First)
+					{   
+						First = FALSE;
+				    	newob = NextNewObject();
+						SetClassColor (newob,CurView->CurVisType[idesc],NewColor);
+				    }
+					CurView->NewObjectMap[idesc]=newob+1;   
+				}
+			}
+		    CurView->CurZoomAreaRef = 0;
+		    RedisplayViewport(FALSE,FALSE);
+	    }
+		RemoveGraphicsFunction (hWnd); 
+	} 
+	return TRUE;
+ }
+
+
+ switch (Message)
+   {
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint = MAKEPOINT(lParam);
+	    if (!CurView->hTranWinToBase) break;
+        BasePoint=WinPtToBasePt(MousePoint);
+	        DoPaint=FALSE;
+        PickItems (hWnd,BasePoint);
+        if (NumPicked > 0)
+        {
+        	if(GetColor(hWnd,&NewColor))
+        	{   
+        		if (!CurView->NewObjectMap[PickList[NumPicked-1].Desc]) 
+        			CurView->NewObjectMap[PickList[NumPicked-1].Desc] = NextNewObject()+1;
+	        	SetClassColor (CurView->NewObjectMap[PickList[NumPicked-1].Desc]-1,PickList[NumPicked-1].Type,NewColor);
+			    CurView->CurZoomAreaRef = 0;
+			    RedisplayViewport(FALSE,FALSE);
+	        }
+        }
+		DoPaint=TRUE;
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+}
+
+int	NextNewObject(void)
+{
+	return (CurView->NumNewObjects++);
+}
+
+BOOL LineTypeClass (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{HDC hDC;
+ char key;
+ POINT	MousePoint;
+ DPOINT	BasePoint;
+ BOOL	Cancel;
+ static	HaveDown=FALSE;
+ 
+ if (Message == WM_LBUTTONDOWN || Message == GF_INIT)
+ {
+   	AddLBUTTON = TRUE;
+   	HaveDown = TRUE;
+   	return TRUE;
+ }
+    	
+ if (ForAllVis)
+ {  
+ 	if (Message == WM_LBUTTONUP && HaveDown)
+ 	{
+    	int	idesc, newob;
+	    	
+    	newob = NextNewObject();
+        {
+	    	FARPROC lpfnLINETYPEMsgProc; 
+	    	int		nRc;
+		    	
+			DoPaint = FALSE; 
+	        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
+	        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWnd, lpfnLINETYPEMsgProc);
+	        FreeProcInstance(lpfnLINETYPEMsgProc);
+			DoPaint=TRUE;
+	        if (!nRc)
+	        {
+				RemoveGraphicsFunction (hWnd); 
+	        	return TRUE;  
+	        }
+	        SetClassLineType (newob,1,NewWidth,NewStyle,NewProPen,NewColor);
+        }
+	    SetCVTFromVis ();
+    	for (idesc=1;idesc<3201;idesc++) 
+    	{
+			if (CurView->CurVisType[idesc]>0 && CurView->CurVisType[idesc]<3)
+				CurView->NewObjectMap[idesc]=newob+1;
+		}
+	    CurView->CurZoomAreaRef = 0;
+	    RedisplayViewport(FALSE,FALSE);
+		RemoveGraphicsFunction (hWnd); 
+	} 
+	return TRUE;
+ }
+
+ switch (Message)
+   {
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break; 
+    	HaveDown = FALSE;
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+	    if (!CurView->hTranWinToBase) break;
+        BasePoint=WinPtToBasePt(MousePoint);
+        PickItems (hWnd,BasePoint);
+        if (NumPicked > 0)
+        {
+	    	FARPROC lpfnLINETYPEMsgProc; 
+	    	int		nRc;
+	    	
+			DoPaint = FALSE; 
+	        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
+	        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWnd, lpfnLINETYPEMsgProc);
+	        FreeProcInstance(lpfnLINETYPEMsgProc);
+	        if (!nRc) break;
+        	{
+        		if (!CurView->NewObjectMap[PickList[NumPicked-1].Desc]) 
+        			CurView->NewObjectMap[PickList[NumPicked-1].Desc] = NextNewObject()+1;
+	        	SetClassColor (CurView->NewObjectMap[PickList[NumPicked-1].Desc]-1,PickList[NumPicked-1].Type,NewColor);
+	        	SetClassLineType (CurView->NewObjectMap[PickList[NumPicked-1].Desc]-1,PickList[NumPicked-1].Type,
+	        					  NewWidth,NewStyle,NewProPen,NewColor);
+			    CurView->CurZoomAreaRef = 0;
+			    RedisplayViewport(FALSE,FALSE);
+	        }
+			DoPaint=TRUE;
+        }
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+} 
+
+
+BOOL FAR PASCAL LINETYPEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{
+	COLORREF	Color;   
+	short	i;
+	short	IDC_Width[5]={IDC_LINE_WIDTH_1,IDC_LINE_WIDTH_2,IDC_LINE_WIDTH_3,IDC_LINE_WIDTH_4,IDC_LINE_WIDTH_5};
+	short	IDC_Style[5]={IDC_LINE_STYLE_SOLID,IDC_LINE_STYLE_DASH,IDC_LINE_STYLE_DOT,IDC_LINE_STYLE_DASHDOT,IDC_LINE_STYLE_DASHDOTDOT};
+	short	IDC_Propen[7]={IDC_NOPROPEN,IDC_PROPEN1,IDC_PROPEN2,IDC_PROPEN3,IDC_PROPEN4,IDC_PROPEN5,IDC_PROPEN6};
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+		 SendDlgItemMessage (hWndDlg,IDC_NOPROPEN,BM_SETCHECK,TRUE,0L); 
+		 SendDlgItemMessage (hWndDlg,IDC_Style[NewStyle],BM_SETCHECK,TRUE,0L);
+		 if (INewWidth >= 0) 
+		 	SendDlgItemMessage (hWndDlg,IDC_PIXEL_WIDTH,BM_SETCHECK,TRUE,0L);
+		 else if (CurView->BaseUnitsPerPixel)
+		 {
+		 	INewWidth = IDNINT(abs(INewWidth)/CurView->BaseUnitsPerPixel)-1;
+		 	INewWidth = max (0,INewWidth); 
+		 	SendDlgItemMessage (hWndDlg,IDC_PIXEL_WIDTH,BM_SETCHECK,FALSE,0L); 
+         } 
+         INewWidth = abs(INewWidth);
+         INewWidth = min (4,INewWidth);
+		 SendDlgItemMessage (hWndDlg,IDC_Width[INewWidth],BM_SETCHECK,TRUE,0L); 
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+           	case IDC_COLOR:
+           		 Color = NewColor;  
+            	 if (GetColor(hWndDlg,&Color))
+            	 	NewColor = Color;
+           		 break;
+           		 
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_NOPROPEN: 
+            	 for (i=0;i<5;i++)
+            	 {
+		    		 EnableWindow (GetDlgItem(hWndDlg,IDC_Width[i]),TRUE);
+		    		 EnableWindow (GetDlgItem(hWndDlg,IDC_Style[i]),TRUE);
+		    	 }
+		    	 EnableWindow (GetDlgItem(hWndDlg,IDC_COLOR),TRUE);
+		    	 EnableWindow (GetDlgItem(hWndDlg,IDC_PIXEL_WIDTH),TRUE);
+            	 break;
+            case IDC_PROPEN1:
+            case IDC_PROPEN2:
+            case IDC_PROPEN3:
+            case IDC_PROPEN4:
+            case IDC_PROPEN5:
+            case IDC_PROPEN6:
+            	 for (i=0;i<5;i++)
+            	 {
+		    		 EnableWindow (GetDlgItem(hWndDlg,IDC_Width[i]),FALSE);
+		    		 EnableWindow (GetDlgItem(hWndDlg,IDC_Style[i]),FALSE);
+		    	 }
+		    	 EnableWindow (GetDlgItem(hWndDlg,IDC_COLOR),FALSE);
+		    	 EnableWindow (GetDlgItem(hWndDlg,IDC_PIXEL_WIDTH),FALSE);
+            	 break;
+            case IDOK:  
+            {   
+                 
+                 for (i=0;i<5;i++)
+				 	if (SendDlgItemMessage (hWndDlg,IDC_Style[i],BM_GETCHECK,0,0L)) NewStyle=i; 
+                 for (i=0;i<5;i++)
+				 	if (SendDlgItemMessage (hWndDlg,IDC_Width[i],BM_GETCHECK,0,0L)) INewWidth=i;
+				 for (i=0;i<7;i++)
+				 	if (SendDlgItemMessage (hWndDlg,IDC_Propen[i],BM_GETCHECK,0,0L)) NewProPen=i;
+				 if (SendDlgItemMessage (hWndDlg,IDC_PIXEL_WIDTH,BM_GETCHECK,0,0L))
+					NewWidth = INewWidth;
+				 else
+				 {
+				 	INewWidth = -INewWidth;				 	
+				 	NewWidth = (INewWidth-1) * CurView->BaseUnitsPerPixel; 
+				 }
+				 
+                 EndDialog(hWndDlg, TRUE);
+            } 
+                 break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} /* End of LINETYPEMsgProc                                      */
+
+
+
+BOOL ChangeClassVis (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{HDC hDC;
+ char key;
+ POINT	MousePoint;
+ DPOINT	BasePoint;
+ BOOL	Cancel;
+ static	int	LastDesc;
+ static	HaveDown=FALSE;
+
+ switch (Message)
+   {
+   	case GF_INIT: 
+       	AddLBUTTON = TRUE;
+   		LastDesc=-1;   
+   		HaveDown = TRUE;
+   		break;
+
+    case WM_LBUTTONDOWN:
+    	HaveDown = TRUE;
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	if (!HaveDown) break;
+    	HaveDown = FALSE;
+    	MousePoint.x = LOWORD(lParam);
+	    MousePoint.y = HIWORD(lParam);
+	    if (!CurView->hTranWinToBase) break;
+        BasePoint=WinPtToBasePt(MousePoint);
+        PickItems (hWnd,BasePoint);
+        if (NumPicked > 0)
+        {
+			SelectVisList (FALSE);
+        	ToggleVisibility (PickList[NumPicked-1].Desc);
+		    CurView->CurZoomAreaRef = 0;
+		    RedisplayViewport(FALSE,FALSE);
+		    LastDesc = PickList[NumPicked-1].Desc;
+        }
+		break;
+
+    case WM_RBUTTONUP:
+        if (LastDesc > 0)
+        {
+			SelectVisList (FALSE);
+        	ToggleVisibility (LastDesc);
+		    CurView->CurZoomAreaRef = 0;
+		    RedisplayViewport(FALSE,FALSE);
+        }
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+} 
+
+int	SelectPickedItem (void)
+{
+	if (NumPicked > 0)
+		return (NumPicked-1);
+	else
+		return (-1);
+}
+
+void GetItemTAG (int item,LPSTR TAG, LPSTR Symbol, LPLONG Refno)
+{
+	sprintf (TAG,"%s:%s",PickList[item].Prefix,PickList[item].UDI);
+	GetSymbolName (PickList[item].Desc,Symbol,NULL,TRUE,NULL);
+	*Refno=PickList[item].Refno;
+	return;
+} 
+
+BOOL NameInSymList (LPSTR Name,short nNames,LPSTR pNames)
+{   
+	while (nNames--)
+	{
+		if (!_fstricmp (Name,pNames))
+			return TRUE;
+		pNames += 36;
+	}
+	return FALSE;
+} 
+
+short GetSymbolNames (int Desc, LPHANDLE phNames, short From)	
+{
+    short	nNames = 0, maxnames=16, parent, symnum=Desc;
+    HANDLE	hNames = GSSiGlobAlloc (GMEM_MOVEABLE,maxnames*36);  
+    char	Name[36];  
+    LPSTR	pName; 
+    BOOL	IsPar=FALSE;
+    
+    while (symnum && nNames < maxnames)
+    {
+		if (GetSymbolName (symnum, Name,&parent, From,NULL))
+		{
+	    	Truncate(Name); 
+	    	pName = GlobalLock (hNames);
+	    	pName += (36 * nNames); 
+	    	if (IsPar)
+	    		sprintf (pName,"(%s)",Name);
+	    	else
+	    		_fstrcpy (pName,Name);
+	    	nNames++;
+	    	GlobalUnlock (hNames); 
+	    	symnum = parent;  
+	    	IsPar = TRUE;
+	    }
+	    else
+	    	symnum = 0;
+    }
+    *phNames = hNames;
+    return nNames;
+}
+
+BOOL PointInRect (POINT point, RECT rect)
+{
+	if (point.x >= rect.left &&
+		point.x <= rect.right &&
+		point.y >= rect.bottom &&
+		point.y <= rect.top)
+		return (TRUE);
+	else
+		return (FALSE);
+} 
+
+BOOL FillThemeFromGFMenu (void)
+{
+	LPVIEWPORT	SaveVP=CurView; 
+	
+    SetViewport (CurTheme->TargetViewport); 
+    CurTheme->NumClass = 0;
+    LoadFunctionLists (NULL,0,0,2);
+	LoadGFFile (NULL,2); 
+	SetCurView ( SaveVP);
+	
+	return TRUE;
+}
+
+void DisplaySVThemeLegend(short From)
+{   int		xmargin, ymargin, i;
+	long	h, w;
+	int		height, width, x, y, fHeight, MaxTextWidth, MaxTextHeight, twidth, theight;
+	HBRUSH	BkBrush;
+	int		iclass;
+	RECT	ClassColorBox;
+	HFONT	hfont=0, hfontOld=0, hfont2=0;
+	DWORD	TextExtent;
+	char	Text[256], Title[256], ExpLine[256];
+	char	Val1[32], Val2[32];
+	long	TotCount,MaxCount=0;    
+	double	MaxCountD=0, TotCountD=0;
+	float	Pct;
+	int		MinFontHeight=3;
+	int		inc, NumCols, MaxClassPerCol, icol, irow, colw;
+	LPSTR	lpText;
+	char	lpLine[256];        
+	LPTHEME	SavePCTTheme; 
+	LPVIEWPORT	SaveVP=CurView;
+	double	MaskSize, fontfactor=1, ClassMin,ClassMax;  
+	short	SaveFF1=CurTheme->ClassFont1.lfHeight;
+	short	SaveFF2=CurTheme->ClassFont2.lfHeight;
+	RECT	Rect=CurView->Rect;  
+	short	BeginCount, CountTextWidth,CountTextHeight=0, usedclass, classinc;   
+	RECT	UsedBox[MAX_THEME_CLASSES];    
+	double	LineSymFactor = BaseDistToWinDist;
+    
+    SaveDC (CurView->hDC);
+    SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+    if (CurTheme->DisplayDistance) 
+    	GetThemeClassDistance (-1);
+  	SelectClipRgn (CurView->hDC,NULL);
+	InflateRect (&Rect,1,1);
+    FillRectPoly (CurView->hDC,&Rect,WindowColor);
+    if (From < 2)
+    	goto Exit;
+    if (CurTheme->ID == GF_GRAPHICS_FUNCTION_THEME)
+    	FillThemeFromGFMenu (); 
+    if (!CurTheme->NumClass)
+    	goto Exit; 
+    if (CurTheme->ClassFont1.lfHeight)  
+    	fontfactor = (double)CurTheme->ClassFont2.lfHeight/(double)CurTheme->ClassFont1.lfHeight;
+    TotCount = 0;
+	for (iclass=0;iclass<CurTheme->NumClass;iclass++) 
+	{
+		MaxCount = max (MaxCount,CurTheme->ClassCount[iclass]);
+		TotCount += CurTheme->ClassCount[iclass];
+		if (CurTheme->DisplayDistance)
+		{ 
+			MaxCountD = max (MaxCountD,GetThemeClassDistance(iclass));
+			TotCountD += GetThemeClassDistance(iclass);
+		}
+	}
+	if (!TotCount && CurTheme->ClearIfNoCount)
+	{   
+       	DisplayTAGs2 (CurView->hDC,2,0); 
+        goto Exit;
+	}
+    NumCols = CurTheme->NumCols + 1;
+    SetViewport (CurTheme->TargetViewport); 
+    MaskSize = SetMaskSizeVar ();
+	SetCurView ( SaveVP); 
+    _fstrcpy (Title,CurTheme->Title);
+    ExpandText (Title);
+    CurView->hRgn = CreateVPRgn (FALSE);
+    SelectClipRgn (CurView->hDC,CurView->hRgn);
+    DeleteObject(CurView->hRgn); 
+	CurTheme->Rect=PctRect (CurView->DrawRect,-CurTheme->Margin);
+	xmargin = (((long)CurTheme->Rect.right - CurTheme->Rect.left) * CurTheme->InnerMargin) / 100;
+	ymargin = (((long)CurTheme->Rect.bottom - CurTheme->Rect.top) * CurTheme->InnerMargin) / 100;
+	xmargin = min (xmargin,ymargin);
+	ymargin = xmargin;
+	h = (((long)CurTheme->Rect.bottom - CurTheme->Rect.top) * CurTheme->TitleHeight) / 100;
+	CurTheme->TitleBox.top = CurTheme->Rect.top + ymargin;
+	CurTheme->TitleBox.bottom = CurTheme->TitleBox.top + h;
+	CurTheme->TitleBox.left = CurTheme->Rect.left + xmargin;
+	CurTheme->TitleBox.right = CurTheme->Rect.right - xmargin;
+	CurTheme->InfoBox.top = CurTheme->TitleBox.bottom + ymargin;
+	CurTheme->InfoBox.bottom = CurTheme->Rect.bottom - ymargin;
+	CurTheme->InfoBox.left = CurTheme->Rect.left + xmargin;
+	CurTheme->InfoBox.right = CurTheme->Rect.right - ymargin;
+	CurTheme->ScatterBox = CurTheme->InfoBox;
+	w = (((long)CurTheme->InfoBox.right - CurTheme->InfoBox.left) * CurTheme->ScatterWidth) / 100;
+	if (!CurTheme->DisplayScatterDiagram) w=0;
+	CurTheme->ScatterBox.right = CurTheme->InfoBox.left + w;
+
+	FillRectPoly (CurView->hDC,&CurTheme->Rect,CurTheme->BGColor);
+	FillRectPoly (CurView->hDC,&CurTheme->InfoBox,CurTheme->IBBGColor);
+	FillRectPoly (CurView->hDC,&CurTheme->TitleBox,CurTheme->TitleBoxBG);
+
+	width = CurTheme->TitleBox.right - CurTheme->TitleBox.left - xmargin;
+	fHeight = h;
+	twidth = theight = INT_MAX;
+	while ((twidth>width || theight>h) && fHeight>4)
+	{   
+		fHeight--;
+		CurTheme->TitleFont.lfWeight=FW_BOLD;
+		CurTheme->TitleFont.lfHeight = fHeight+1;
+		if (hfontOld) SelectObject(CurView->hDC, hfontOld);
+		if (hfont) DeleteObject(hfont);
+		hfont = CreateFontIndirect((PLOGFONT)&CurTheme->TitleFont);
+		hfontOld = SelectObject(CurView->hDC, hfont);
+		TextExtent = GetTextExtent (CurView->hDC,Title,_fstrlen(Title));
+		lpText = Title;
+		twidth = 0;	
+		theight = 0;
+	    while (NextLine (&lpText,lpLine))
+	    {   
+	    	_fstrcpy(ExpLine,lpLine);
+	    	ExpandText (ExpLine);
+	    	Truncate (ExpLine);
+			TextExtent = GetTextExtent (CurView->hDC,ExpLine,_fstrlen(ExpLine));
+			twidth = max (twidth,LOWORD (TextExtent)); 
+			theight += HIWORD (TextExtent);
+		}
+	} 
+	SetTextColor (CurView->hDC,CurTheme->TitleTextColor);
+	x = CurTheme->TitleBox.left + ((CurTheme->TitleBox.right - CurTheme->TitleBox.left) - twidth)/2;
+	y = CurTheme->TitleBox.top + ((CurTheme->TitleBox.bottom - CurTheme->TitleBox.top) - theight)/2;
+	lpText = Title;
+    while (NextLine (&lpText,lpLine))
+    {
+    	_fstrcpy(ExpLine,lpLine);
+    	ExpandText (ExpLine);
+    	Truncate (ExpLine);
+		TextExtent = GetTextExtent (CurView->hDC,ExpLine,_fstrlen(ExpLine));
+		width = LOWORD (TextExtent);
+		x = CurTheme->TitleBox.left + ((CurTheme->TitleBox.right - CurTheme->TitleBox.left) - width)/2;
+		TextOut(CurView->hDC, x, y, ExpLine,_fstrlen(ExpLine));  
+		y+= HIWORD (TextExtent);
+	}
+
+	ThemeDisplayScatterDiagram();
+
+	/* Display the color boxes */
+	if (CurTheme->DisplayScatterDiagram)
+		inc = 0; /* boxes connect */
+	else
+		inc = ymargin / 2;
+	w = (((long)CurTheme->InfoBox.right - CurTheme->InfoBox.left) * CurTheme->ColorsWidth/NumCols) / 100;
+	if (NumCols > 1)
+	{
+		MaxClassPerCol = CurTheme->NumClass/NumCols;
+		if (CurTheme->NumClass % NumCols)
+			MaxClassPerCol++;
+	}
+	else
+		MaxClassPerCol = CurTheme->NumClass;
+	h = (CurTheme->ScatterBox.bottom - CurTheme->ScatterBox.top + 1) / MaxClassPerCol;    
+	colw = (CurTheme->InfoBox.right - CurTheme->InfoBox.left + 1) / NumCols;
+	SavePCTTheme = ComputePCTTheme;
+	ComputePCTTheme = 0;
+	CreateThemePens (CurTheme);
+	for (i=0;i<CurTheme->NumClass;i++)
+	{
+		icol = i / MaxClassPerCol;
+		irow = i - icol * MaxClassPerCol;
+		ClassColorBox.left = CurTheme->ScatterBox.right+xmargin/2 +
+							 (NumCols - icol -1) * colw;
+		ClassColorBox.right = ClassColorBox.left + w;
+		ClassColorBox.bottom = CurTheme->ScatterBox.bottom-inc/2 - (irow * h); 
+		ClassColorBox.top = ClassColorBox.bottom - h + inc;
+		CurTheme->ClassClrBox[i] = ClassColorBox;
+	}
+	if (CurTheme->InvertLegend)
+	{
+		usedclass = CurTheme->NumClass - 1;    
+		classinc = -1;
+	}
+	else
+	{
+		usedclass = 0;
+		classinc = 1;
+	}
+	for (i=0;i<CurTheme->NumClass;i++)
+	{
+
+
+		if (CurTheme->InvertLegend)
+		{
+			iclass = CurTheme->NumClass - i -1;    
+		}
+		else  
+		{
+			iclass = i;
+		} 
+		iclass = i; 
+		ClassColorBox = CurTheme->ClassClrBox[usedclass];
+	    SetTextColor (CurView->hDC,ColorWOWidth (CurTheme->ClassColor[iclass]));     
+	    SetBkColor (CurView->hDC,RGB(255,255,255));
+	    if (w && h && (!CurTheme->HideNullClasses || CurTheme->ClassCount[iclass]))
+	    {    
+	    	if (CurTheme->DataType == 3 || !CurTheme->ClassSymbol[iclass])
+		    {   
+		    	RECT	FactoredRect=ClassColorBox;
+		    	
+		    	if (CurTheme->FactorLegend)
+		    	{
+		    		if (!MaxCount)
+		    			break; 
+		    		if (CurTheme->DisplayDistance)
+		    			FactoredRect.right = IDNINT ((GetThemeClassDistance(iclass)/MaxCountD)
+		    									 * (FactoredRect.right - FactoredRect.left) +
+		    									 	FactoredRect.left);
+		    		else
+		    			FactoredRect.right = IDNINT (((double)CurTheme->ClassCount[iclass]/MaxCount)
+		    									 * (FactoredRect.right - FactoredRect.left) +
+		    									 	FactoredRect.left);
+		    	}
+		    	if (!CurTheme->FactorLegend || CurTheme->ClassCount[iclass])
+		    	{
+					FillRect (CurView->hDC,&FactoredRect,CurTheme->ClassBrush[iclass]);
+					FrameRect (CurView->hDC,&FactoredRect,GetStockObject(BLACK_BRUSH));  
+				}
+			}
+			else 
+			{   short	symnum=CurTheme->ClassSymbol[iclass];
+			
+			    if (*CurTheme->SymbolFont[0])
+			    {
+			    	_fmemmove (CurSymbolFont,CurTheme->SymbolFont,sizeof(CurSymbolFont));
+			    	symnum = -symnum;
+			    } 
+			    CurrentType = GF_AREA;
+			    nPoly = 0;
+				SetThemeElementCharacteristics (iclass);
+				DisplaySymInRect (CurView->hDC,symnum,ClassColorBox,LineSymFactor);   
+				*CurSymbolFont[0] = 0;
+			} 
+			if (CurTheme->ClassStatus[iclass])
+			{ 
+				HPEN	hPen = CreatePen (PS_SOLID,1,RGB(255,0,0));
+				HPEN	hOldPen = SelectObject (CurView->hDC,hPen);  
+				RECT	Rect = ClassColorBox;
+				
+				InflateRect (&Rect,2,2);
+				MoveTo (CurView->hDC,ClassColorBox.left,ClassColorBox.bottom);
+				LineTo (CurView->hDC,ClassColorBox.right,ClassColorBox.top);
+				MoveTo (CurView->hDC,ClassColorBox.left,ClassColorBox.top);
+				LineTo (CurView->hDC,ClassColorBox.right,ClassColorBox.bottom);
+				SelectObject (CurView->hDC,hOldPen);
+				DeleteObject (hPen);
+			}
+		}
+		if (!CurTheme->CompressNullClasses || !CurTheme->HideNullClasses || CurTheme->ClassCount[iclass]) 
+			usedclass += classinc;
+	}
+    DestroyThemePens (CurTheme); 
+    ComputePCTTheme = SavePCTTheme;
+	fHeight = h-inc;
+	width = colw - (CurTheme->ClassClrBox[0].right - CurTheme->ClassClrBox[0].left) - xmargin;
+	height = CurTheme->ClassClrBox[0].bottom - CurTheme->ClassClrBox[0].top;
+	MaxTextWidth = MaxTextHeight = INT_MAX;
+	CurTheme->ClassFont2.lfItalic=FALSE;
+	CurTheme->ClassFont2.lfWeight=FW_THIN;
+	while (MaxTextWidth > width || MaxTextHeight > height)
+	{   if (fHeight <= MinFontHeight) goto TooSmall;
+		fHeight--;
+
+		MaxTextWidth = MaxTextHeight = 0;
+		CurTheme->ClassFont1.lfHeight = fHeight+1;//-MulDiv(fHeight,GetDeviceCaps(CurView->hDC, LOGPIXELSY), 72);
+		CurTheme->ClassFont1.lfWeight=FW_BOLD;
+
+	    TotCount = 0;
+		for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+		{   
+			if (hfontOld) SelectObject(CurView->hDC, hfontOld);
+			if (hfont) DeleteObject(hfont);
+			hfont = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont1);
+			hfontOld = SelectObject(CurView->hDC, hfont);
+			TotCount += CurTheme->ClassCount[iclass];  
+			SetGlobalValueLong ("%CLASSCOUNT",CurTheme->ClassCount[iclass]);  
+			GetClassMinMax (iclass,&ClassMin,&ClassMax);
+			SetGlobalValueReal ("%CLASSMIN",ClassMin);
+			SetGlobalValueReal ("%CLASSMAX",ClassMax);
+			if (CurTheme->ClassType ==3)
+			{ 
+				_fstrcpy(Text,CurTheme->ClassBM[iclass]);
+				if (CurTheme->AppendCount)
+				{
+					if (CurTheme->DisplayDistance)
+						sprintf (_fstrchr(Text,0),"%.2f",MaxCountD);
+				    else
+						sprintf (_fstrchr(Text,0)," (%ld)",MaxCount);
+				}
+				ExpandText (Text);
+			}
+			else
+			{
+		       	_fstrcpy (Val1,ValueConv ((double)CurTheme->ClassMin[iclass],CurTheme->ValConv,CurTheme->RoundTo,CurTheme->AddCommas));
+		       	_fstrcpy (Val2,ValueConv ((double)CurTheme->ClassMax[iclass],CurTheme->ValConv,CurTheme->RoundTo,CurTheme->AddCommas));
+	            
+	            if (_fstrcmp (Val1,Val2))
+		       		wsprintf (Text,"%s to %s",Val1, Val2);
+		       	else
+		       		_fstrcpy (Text,Val1); 
+		       	_fstrcpy (CurTheme->ClassBM[iclass],Text);
+		    }
+           	TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+           	MaxTextWidth = max (MaxTextWidth,LOWORD (TextExtent));
+           	theight = HIWORD (TextExtent);  
+       		if (CurTheme->PCTByArea)
+            	TotCount = CurTheme->NumNonMask;
+           	if (CurTheme->DisplayPCT || CurTheme->DisplayCount)
+           	{
+				Pct = 100.0;
+				if (CurTheme->PCTByArea)
+					sprintf (Text,"(%5.1f%%) %.2f acres",Pct,MaskSize*Pct/100); 
+				else if (CurTheme->DisplayPCT && CurTheme->DisplayCount)
+					sprintf (Text,"%ld (%5.1f%%)",CurTheme->ClassCount[iclass],Pct);
+				else if (CurTheme->DisplayPCT)
+					sprintf (Text,"%5.1f%%",Pct);
+				else if (CurTheme->DisplayCount)
+					sprintf (Text,"%ld",CurTheme->ClassCount[iclass]);
+				else if (CurTheme->DisplayDistance)
+					sprintf (Text,"%.2f",GetThemeClassDistance(iclass));
+				if (hfontOld) SelectObject(CurView->hDC, hfontOld);
+				if (hfont2) DeleteObject(hfont2);
+				CurTheme->ClassFont2.lfHeight = IDNINT(CurTheme->ClassFont1.lfHeight * fontfactor); 
+				hfont2 = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont2);
+		        SelectObject(CurView->hDC, hfont2);
+		       	TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+	           	MaxTextWidth = max (MaxTextWidth,LOWORD (TextExtent)); 
+	           	theight += HIWORD (TextExtent);
+	        }
+           	MaxTextHeight = max (MaxTextHeight,theight);  
+		}
+    }
+
+TooSmall:	fHeight *= 0.80;
+	if (CurTheme->AppendCount)
+	{ 
+		if (CurTheme->DisplayDistance)
+			sprintf (Text," (%.2f)",MaxCountD);  
+		else
+			sprintf (Text," (%ld)",MaxCount);
+       	TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+       	CountTextWidth = LOWORD (TextExtent); 
+       	BeginCount = MaxTextWidth - CountTextWidth;
+	}
+	if (CurTheme->InvertLegend)
+	{
+		usedclass = CurTheme->NumClass - 1;    
+		classinc = -1;
+	}
+	else
+	{
+		usedclass = 0;
+		classinc = 1;
+	}
+	for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+	{   
+		UsedBox[iclass] = CurTheme->ClassClrBox[usedclass];
+       	y = CurTheme->ClassClrBox[usedclass].top+
+       		((CurTheme->ClassClrBox[usedclass].bottom-CurTheme->ClassClrBox[usedclass].top)-MaxTextHeight)/2;
+		SetGlobalValueLong ("%CLASSCOUNT",CurTheme->ClassCount[iclass]);
+		GetClassMinMax (iclass,&ClassMin,&ClassMax);
+		SetGlobalValueReal ("%CLASSMIN",ClassMin);
+		SetGlobalValueReal ("%CLASSMAX",ClassMax);
+		if (CurTheme->ClassType ==3)
+		{ 
+			_fstrcpy(Text,CurTheme->ClassBM[iclass]);  
+			ExpandText (Text);
+		}
+		else
+		{
+	       	_fstrcpy (Val1,ValueConv ((double)CurTheme->ClassMin[iclass],CurTheme->ValConv,CurTheme->RoundTo,CurTheme->AddCommas));
+	       	_fstrcpy (Val2,ValueConv ((double)CurTheme->ClassMax[iclass],CurTheme->ValConv,CurTheme->RoundTo,CurTheme->AddCommas));
+            if (_fstrcmp (Val1,Val2))
+	       		wsprintf (Text,"%s to %s",Val1, Val2);
+	       	else
+	       		_fstrcpy (Text,Val1); 
+	       	_fstrcpy (CurTheme->ClassBM[iclass],Text);
+	    } 
+		SetTextColor (CurView->hDC,CurTheme->IBTextColor[0]);
+        SelectObject(CurView->hDC, hfont);
+		x =  CurTheme->ClassClrBox[usedclass].right + xmargin/2; 
+		if (!CurTheme->HideNullClasses || CurTheme->ClassCount[iclass]) 
+		{
+			TextOut(CurView->hDC, x, y, Text, _fstrlen(Text)); 
+			if (CurTheme->AppendCount)
+			{   
+				short	BeginCount2;
+				char	CountText[32];
+				
+				TextOut(CurView->hDC, x+BeginCount, y, " (", 2); 
+				if (CurTheme->DisplayDistance)
+					sprintf (CountText,"%.2f)",GetThemeClassDistance(iclass)); 
+				else
+			    	sprintf (CountText,"%ld)",CurTheme->ClassCount[iclass]);
+		       	TextExtent = GetTextExtent (CurView->hDC,CountText,_fstrlen(CountText));
+		       	CountTextWidth = LOWORD (TextExtent); 
+		       	CountTextHeight = HIWORD (TextExtent); 
+		       	BeginCount2 = MaxTextWidth - CountTextWidth;
+				TextOut(CurView->hDC, x+BeginCount2, y,CountText, _fstrlen(CountText)); 
+			}
+		} 
+		SetTextColor (CurView->hDC,CurTheme->IBTextColor[1]);
+       	TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+		if (!CurTheme->CompressNullClasses || !CurTheme->HideNullClasses || CurTheme->ClassCount[iclass]) 
+		{
+			usedclass += classinc;
+       		y += max (CountTextHeight,HIWORD (TextExtent));
+       	}
+		if ((CurTheme->DisplayPCT || CurTheme->DisplayCount)
+		 && (!CurTheme->HideNullClasses || CurTheme->ClassCount[iclass]))
+		{   
+			if (TotCount)
+				Pct = (100.0 * CurTheme->ClassCount[iclass]) / TotCount; 
+			else
+				Pct = 0;
+			sprintf (Text,"[%%CLASSPCT(%i)]=%5.1f",iclass,Pct);
+			ExpandText (Text);
+			if (CurTheme->PCTByArea)
+				sprintf (Text,"(%5.1f%%) %.2f acres",Pct,MaskSize*Pct/100);
+			else if (CurTheme->DisplayPCT && CurTheme->DisplayCount)
+				sprintf (Text,"%ld (%5.1f%%)",CurTheme->ClassCount[iclass],Pct);
+			else if (CurTheme->DisplayPCT)
+				sprintf (Text,"%5.1f%%",Pct);
+			else if (CurTheme->DisplayCount)
+				sprintf (Text,"%ld",CurTheme->ClassCount[iclass]);
+	        SelectObject(CurView->hDC, hfont2);
+	       	TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+			TextOut(CurView->hDC, x+MaxTextWidth/2-LOWORD(TextExtent)/2,
+								  y, Text, _fstrlen(Text));    
+	       	y += HIWORD (TextExtent);
+		}
+
+	} 
+
+	for (iclass=0;iclass<CurTheme->NumClass;iclass++)  //give theme editing functions correct final location
+		CurTheme->ClassClrBox[iclass] = UsedBox[iclass];
+
+
+	SelectObject(CurView->hDC, hfontOld);
+	GSSiDeleteObject(&hfont);
+	GSSiDeleteObject(&hfont2);
+    CurTheme->ClassFont1.lfHeight = SaveFF1;
+    CurTheme->ClassFont2.lfHeight = SaveFF2; 
+Exit:
+	RestoreDC (CurView->hDC,-1);
+	SetCurView ( SaveVP);
+	return;
+}
+BOOL NotifyFunction (LPVIEWPORT pVP,UINT message)
+{   
+	BOOL	st;
+	LPVIEWPORT	SaveVP=CurView;
+	
+	if (!pVP)
+		return FALSE;          
+	SetCurView ( pVP);
+	st = ProcessGraphicsFunction2 (CurView->CurrentFunction,CurView->hWnd,message,0,0L);
+	SetCurView ( SaveVP);   
+	return st;
+}
+	
+

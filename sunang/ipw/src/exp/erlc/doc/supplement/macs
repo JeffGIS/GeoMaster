@@ -1,0 +1,178 @@
+.ND
+.AM
+.PT  
+.nr Fg 0
+.nr Tb 0
+.hw spectro-photometer
+.EQ
+delim @@
+define co2 'roman { C O } sub 2 '
+define mus 'roman { mu S ^ cm sup -1 }'
+define nh4 'roman { {N H sub 4} sup {+} }'
+define no3 'roman { {N O sub 3} sup {-} }'
+define po4 'roman { {P O sub 4} sup {-3} }'
+define ca 'roman { Ca sup {+2} }'
+define mg+ 'roman { Mg sup {+2} }'
+define na 'roman { Na sup {+} }'
+define k+ 'roman { K sup {+} }'
+define so4 'roman { {S O sub 4} sup {-2} }'
+define cl 'roman { Cl sup {-} }'
+define h+ 'roman { H sup {+} }'
+define mueq 'roman { mu eq ~ L sup -1 }'
+define mueqm 'roman { mu eq ~ m sup -2 }'
+define mumol 'roman { mu mol ~ L sup -1 }'
+define mumolm 'roman { mu mol ~ m sup -2 }'
+define cat 'roman { SIGMA + }'
+define ani 'roman { SIGMA - }'
+define catan 'roman { {SIGMA +} / {SIGMA -} }'
+define ca-an 'roman { ({SIGMA +})~-~({SIGMA -}) }'
+define ll 'roman { L sup {-1} }'
+define m2 'roman { m sup {-2} }'
+define eqh 'roman { eq ~ ha sup {-1} }'
+define h2o 'roman { H sub 2 O }'
+define licl 'roman { Li Cl }'
+.EN
+.\" margins (library requires: 1.5i left, else 1.25i)
+.\"
+.\" (ditroff + LaserWriter)
+.if t .nr PO 1i-0.32i
+.if t .nr LL 6.5i
+.if t .nr HM 1i
+.if t .nr FM 1i+1v
+.\"
+.rn PT HD				\" HD invoked at |HM (PT at |HM/2)
+.am HD
+.if \\n(PT>1 'sp			\" blank line after page number
+..
+.\"---------------------------------------------------------------------------
+.\" displaying program text
+.ds CW C				\" constant-width font
+.\"
+.de cS					\" begin program text
+.DS					\"	begin display
+.ft \\*(CW				\"	switch to constant-width font
+..
+.de cE					\" end program text
+.ft P					\"	revert to previous font
+.DE					\"	end display
+..
+.\"---------------------------------------------------------------------------
+.\" modified from ms.toc by Dozier to keep track of figures and tables
+.	\" fS - begin index entry for figures
+.de fS
+.if !\\n(1T .BG
+.ds fL \\n(PN
+.if \\n(.$ .ds fL \\$1
+.nr fJ \\n(.j
+.nr fF \\n(.f
+.nr fX \\n(.s
+.nr fL \\n(.l
+.ls 1
+.br
+.da fT
+.if \\n(.$-1 \{\
+.	nr fI 1
+.	in \\$2n
+.\}
+.ft 1
+.ps \\n(PS
+.ll \\n(LLu-8n
+.na
+.sp \\n(PDu
+..
+.	\" fE - end index entry
+.de fE
+.if !\\*(fLno \\a\\t\\*(fL
+.br
+.da
+.ls
+.ad \\n(fJ
+.ft \\n(fF
+.ps \\n(fX
+.ll \\n(fLu
+.if \\n(fI \{\
+.	nr fI 0
+.	in 0
+.\}
+..
+.	\" fX - print index (list of figures) without title
+.de fX
+.if \\n(VS>=40 .vs \\n(VSu
+.if \\n(VS<=39 .vs \\n(VSp
+.ll \\n(LLu
+.lt \\n(LTu
+.ta \\n(LLu-5n \\n(LLuR
+.in 0
+.nf
+.rs
+.fT
+..
+.	\" fC - list of figures at end of paper
+.de fC
+.bp
+.sp
+.SH
+.ce
+L\s-2IST\s0 \s-2OF\s0 F\s-2IGURES\s0
+.sp
+.fX \\$1
+..
+.	\" tS - begin index entry for tables
+.de tS
+.if !\\n(1T .BG
+.ds tL \\n(PN
+.if \\n(.$ .ds tL \\$1
+.nr tJ \\n(.j
+.nr tF \\n(.f
+.nr tX \\n(.s
+.nr tL \\n(.l
+.ls 1
+.br
+.da tT
+.if \\n(.$-1 \{\
+.	nr tI 1
+.	in \\$2n
+.\}
+.ft 1
+.ps \\n(PS
+.ll \\n(LLu-8n
+.na
+.sp \\n(PDu
+..
+.	\" tE - end index entry
+.de tE
+.if !\\*(tLno \\a\\t\\*(tL
+.br
+.da
+.ls
+.ad \\n(tJ
+.ft \\n(tF
+.ps \\n(tX
+.ll \\n(tLu
+.if \\n(tI \{\
+.	nr tI 0
+.	in 0
+.\}
+..
+.	\" tX - print index (list of tables) without title
+.de tX
+.if \\n(VS>=40 .vs \\n(VSu
+.if \\n(VS<=39 .vs \\n(VSp
+.ll \\n(LLu
+.lt \\n(LTu
+.ta \\n(LLu-5n \\n(LLuR
+.in 0
+.nf
+.rs
+.tT
+..
+.	\" tC - list of tables at end of paper
+.de tC
+.bp
+.sp
+.SH
+.ce
+L\s-2IST\s0 \s-2OF\s0 T\s-2ABLES\s0
+.sp
+.tX \\$1
+..

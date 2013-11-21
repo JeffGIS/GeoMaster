@@ -1,0 +1,176 @@
+VERSION_NUMBER=4.1
+VERSION_DATE=Spring 1993
+VERSION_FILE=/files/data/heart/data1/grassdir/grass4.1/src/CMD/VERSION
+SRC=/files/data/heart/data1/grassdir/grass4.1/src
+OBJARCH=OBJ.sun4
+LIBARCH=LIB.sun4
+
+CC                  = gcc
+ARCH                = sun4
+
+GISBASE             = /usr/local/grassdir/grass4.1/sun4
+UNIX_BIN            = /usr/local/grassdir/grass4.1/bin
+
+DEFAULT_DATABASE    = /usr/local/grassdir/home/data
+DEFAULT_LOCATION    = spearfish
+
+COMPILE_FLAGS       = -O2
+LDFLAGS             = -s
+
+XCFLAGS             = -D_NO_PROTO
+XLDFLAGS            =
+XINCPATH            =
+XMINCPATH           = -I/usr/local/motif/include
+XLIBPATH            = -L/usr/local/motif/lib
+XTLIBPATH           = -L/usr/local/motif/lib
+XMLIBPATH           = -L/usr/local/motif/lib
+XLIB                = -lX11
+XTLIB               = -lXt
+XMLIB               = -lXm
+XEXTRALIBS          =
+
+TERMLIB             = -ltermlib
+CURSES              = -lcurses $(TERMLIB)
+MATHLIB             = -lm
+
+#                   LIBRULE = ar ruv $@ $?
+#                   LIBRULE = ar ruv $@ $?; ranlib $@
+#                   LIBRULE = ar ruv $@ $?; ar ts $@
+#                   LIBRULE = ar rc $@ `lorder $(OBJ) | tsort`
+LIBRULE             = ar ruv $@ $?
+
+USE_TERMIO          =
+USE_MTIO            = -DUSE_MTIO
+USE_FTIME           = -DUSE_FTIME
+DIGITFLAGS          = -DUSE_SETREUID -DUSE_SETEUID -DUSE_SETPRIORITY
+VECTLIBFLAGS        =
+GETHOSTNAME         = -DGETHOSTNAME_OK
+GMAKE = /files/data/heart/data1/grassdir/home/bin/gmake4.1
+# to force make to use /bin/sh
+SHELL           = /bin/sh
+#########################################################################
+# these define the various directories which contain GRASS programs
+# or files used by GRASS programs
+BIN             = $(GISBASE)/bin
+ETC             = $(GISBASE)/etc
+GARDEN_BIN      = $(GISBASE)/garden/bin
+GARDEN_ETC      = $(GISBASE)/garden/etc
+BIN_MAIN_INTER  = $(ETC)/bin/main/inter
+BIN_MAIN_CMD    = $(ETC)/bin/main/cmd
+BIN_ALPHA_INTER = $(ETC)/bin/alpha/inter
+BIN_ALPHA_CMD   = $(ETC)/bin/alpha/cmd
+BIN_CONTRIB_INTER = $(ETC)/bin/contrib/inter
+BIN_CONTRIB_CMD   = $(ETC)/bin/contrib/cmd
+TXT             = $(GISBASE)/txt
+MAN1            = $(GISBASE)/man/1
+MAN2            = $(GISBASE)/man/2
+MAN3            = $(GISBASE)/man/3
+MAN4            = $(GISBASE)/man/4
+MAN5            = $(GISBASE)/man/5
+MAN6            = $(GISBASE)/man/6
+HELP            = $(GISBASE)/man/help
+
+# other
+CFLAGS      =  $(COMPILE_FLAGS) $(EXTRA_CFLAGS) -I$(INCLUDE_DIR) $(USE_TERMIO)
+AR          = $(GMAKE) -makeparentdir $@; $(LIBRULE)
+#MANROFF     = tbl -TX $(SRC)/man.help/man.version $(SRC)/man.help/man.header $? | nroff -Tlp | col -b > $@
+MANROFF     = # 
+MAKEALL     = $(GMAKE) -all
+
+# various source directories and libraries
+SRC_X       = $(SRC)/xgrass
+LIBDIR      = $(SRC)/libes
+X_LIBDIR     = $(SRC_X)/libes
+INCLUDE_DIR = $(SRC)/include
+DIG_LIBDIR  = $(SRC)/mapdev/libes
+DIG_INCLUDE  = $(SRC)/mapdev/lib
+VECT_INCLUDE = -I$(SRC)/mapdev/Vlib -I$(SRC)/mapdev/diglib
+
+VASKLIB     = $(LIBDIR)/$(LIBARCH)/libvask.a
+VASK        = $(VASKLIB) $(CURSES)
+
+GISLIB      = $(LIBDIR)/$(LIBARCH)/libgis.a
+ICONLIB     = $(LIBDIR)/$(LIBARCH)/libicon.a
+LOCKLIB     = $(LIBDIR)/$(LIBARCH)/liblock.a
+IMAGERYLIB  = $(LIBDIR)/$(LIBARCH)/libI.a
+ROWIOLIB    = $(LIBDIR)/$(LIBARCH)/librowio.a
+COORCNVLIB  = $(LIBDIR)/$(LIBARCH)/libcoorcnv.a
+SEGMENTLIB  = $(LIBDIR)/$(LIBARCH)/libsegment.a
+GPROJLIB    = $(LIBDIR)/$(LIBARCH)/libproj.a
+BTREELIB    = $(LIBDIR)/$(LIBARCH)/libbtree.a
+IBTREELIB   = $(LIBDIR)/$(LIBARCH)/libibtree.a
+DLGLIB      = $(LIBDIR)/$(LIBARCH)/libdlg.a
+RASTERLIB   = $(LIBDIR)/$(LIBARCH)/libraster.a
+DISPLAYLIB  = $(LIBDIR)/$(LIBARCH)/libdisplay.a
+D_LIB       = $(LIBDIR)/$(LIBARCH)/libD.a
+DRIVERLIB   = $(SRC)/display/devices/lib/$(LIBARCH)/driverlib.a
+LINKMLIB    = $(LIBDIR)/$(LIBARCH)/liblinkm.a
+BITMAPLIB    = $(LIBDIR)/$(LIBARCH)/libbitmap.a
+XGILIB	    = $(X_LIBDIR)/$(LIBARCH)/libXgi.a
+XGDLIB	    = $(X_LIBDIR)/$(LIBARCH)/libXgd.a
+XPMLIB	    = $(X_LIBDIR)/$(LIBARCH)/libXpm.a
+
+
+DIGLIB      = $(LIBDIR)/$(LIBARCH)/libdig.a
+DIG2LIB     = $(LIBDIR)/$(LIBARCH)/libdig2.a
+VECTLIB_REAL= $(LIBDIR)/$(LIBARCH)/libvect.a
+VECTLIB     = $(VECTLIB_REAL) $(DIG2LIB)
+DIG_ATTLIB  = $(LIBDIR)/$(LIBARCH)/libdig_atts.a
+
+XDISPLAYLIB = $(LIBDIR)/$(LIBARCH)/libXdisplay.a
+#########################################################################
+#
+# SCCS version: @(#)   Gmakefile   1.5   9/5/91
+#
+# Gmakefile for
+#	ipw.to.grass
+#
+# Usage:
+#	gmake		to make executable ipw.to.grass
+#
+
+EXTRA_CFLAGS =  -I$(IPW)/h
+
+SRCS  = ipw2grass.c headers.c main.c
+
+OBJS  = $(OBJARCH)/ipw2grass.o $(OBJARCH)/headers.o $(OBJARCH)/main.o
+
+IPWLIB = $(IPW)/lib/libipw.a
+
+ALL:  CHECK $(BIN_CONTRIB_CMD)/ipw.to.grass
+
+CHECK:
+	@if [ -n "$(IPW)" ]; \
+	then exit 0; \
+	else echo 'Image Processing Workbench source code not available - $$IPW not defined'; \
+		echo "  cannot compile ipw.to.grass"; \
+		exit 1; \
+	fi
+
+$(BIN_CONTRIB_CMD)/ipw.to.grass:	$(OBJS) $(GISLIB)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(IPWLIB) $(GISLIB) $(MATHLIB)
+
+$(GISLIB): #
+
+$(OBJARCH)/headers.o: headers.c
+	rm -f $@
+	$(CC) $(CFLAGS) -c headers.c
+	mv headers.o $@
+$(OBJARCH)/ipw2grass.o: ipw2grass.c
+	rm -f $@
+	$(CC) $(CFLAGS) -c ipw2grass.c
+	mv ipw2grass.o $@
+$(OBJARCH)/main.o: main.c
+	rm -f $@
+	$(CC) $(CFLAGS) -c main.c
+	mv main.o $@
+#########################################################################
+# the tags file created by "make ctags" is great for
+# editing to look for function definitions
+# vi -t <function name>
+
+ctags:
+	ctags *.[ch]
+	sed 's/\?/\//g' tags > tags.tmp
+	mv tags.tmp tags
+tags: ctags ; #

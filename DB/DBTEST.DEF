@@ -1,0 +1,11 @@
+NAME            DBTEST 
+EXETYPE         WINDOWS
+STUB            'WINSTUB.EXE' 
+CODE            PRELOAD MOVEABLE 
+DATA            PRELOAD MOVEABLE MULTIPLE
+HEAPSIZE        4096
+EXPORTS         WndProc          @1
+                TESTLOADMsgProc          @2
+                COMPRESSMsgProc          @3   
+                SPLITMsgProc	 @4
+

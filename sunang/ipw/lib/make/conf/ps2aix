@@ -1,0 +1,84 @@
+# local macros: may have to be tuned for new ports
+#
+# these have been tuned for AIX Version 1.1 on an IBM PS/2 Model 80
+
+# stuff that should be defined by "ipwmake"
+#	IPW		root of IPW directory tree
+#	IPWMAKE_OPTS	"ipwmake" command-line options
+#	IPWMAKE_ARGS	"ipwmake" command-line arguments
+
+#IPW=
+#IPWMAKE_OPTS=
+#IPWMAKE_ARGS=
+
+# C compiler
+#	CC		C compiler (usually predefined by "make")
+#	C_LOCAL		special local options, always used
+#	C_NORMAL	standard options if no debug/profile
+#	C_DEBUG		debugging options, for "ipwmake -D"
+#	C_PROFILE	profiling options, for "ipwmake -P"
+
+#CC=cc
+C_LOCAL=-DBSD -D_BSD -D__BSD43
+C_NORMAL=-O
+C_DEBUG=-g
+C_PROFILE=-p -O
+
+# following are for use in C_SPECIAL in Makedefs
+#	C_SINGLE	disable float->double promotion for all-float expr's
+
+C_SINGLE=
+
+# loader
+#	CLD		C loader
+#	LD_LOCAL	special local options, always used
+#	LD_NORMAL	standard options if no debug/profile
+#	LD_DEBUG	debugging options, for "ipwmake -D"
+#	LD_PROFILE	profiling options, for "ipwmake -P"
+#	LIBS_LOCAL	local libraries, always used
+
+CLD=$(CC)
+LD_LOCAL=-lbsd
+LD_NORMAL=
+LD_DEBUG=-g
+LD_PROFILE=-p
+LIBS_LOCAL=-lm
+
+# archiver
+#	AR		"ar" command
+#	AR_ROPTS	options to update members
+#	AR_XOPTS	options to extract members and set original
+#				modification times
+#				*** NB: can't be done on AIX
+#	RANLIB		"ranlib" command
+
+AR=ar
+AR_ROPTS=ruv
+AR_XOPTS=x
+RANLIB=ar ts
+
+# lint
+#	LINT		"lint" command
+#	LINT_LIBOPT	lint option to create a lint library
+#	LINT_LOCAL	special local options, always used
+#	LINT_NORMAL	standard options if no debug/profile
+#	LINT_DEBUG	debugging options, for "ipwmake -D"
+#	LINT_PREFIX	prepended to $(LIB)
+#	LINT_SUFFIX	appended to $(LIB)
+
+LINT=lint
+LINT_LIBOPT=-o
+LINT_LOCAL=-n
+LINT_NORMAL=
+LINT_DEBUG=-p
+LINT_PREFIX=llib-l
+LINT_SUFFIX=.ln
+
+# other stuff
+#	CHMOD		"chmod" command
+#	RM		"rm" command
+
+CHMOD=chmod
+RM=rm -f
+
+# $Header: /usr/home/ipw/lib/make/conf/RCS/ps2aix,v 1.2 89/10/25 15:42:54 frew Exp $

@@ -1,0 +1,67 @@
+This used to be just the code from wmSun warmed over and stuffed into
+the gkrellmoon plugin. Now it's got a bit more original stuff in it.
+But it's also got a bit more of gkrellmoon, too. So it's still mostly
+from somewhere else.
+
+The gkrellsun plugin displays the sunrise and sunset times for the
+specified latitude and longitude in the current timezone. It also
+displays a graph showing the trajectory of the sun across the sky (at
+both the current latitude and longitude and as it would appear if it
+went directly overhead at solar noon). Finally, it displays a little
+rising and setting moon.
+
+The suninfo program prints the sunrise and sunset times on stdout.
+If you use the -v option, it prints a bunch of other stuff, too.
+
+The gkrellsun plugin now has several options:
+
+* Use 24 hour clock
+
+  Display times of day in 24 hour style instead of am/pm style
+
+* Show moon
+
+  If this option is enabled, the rising and setting moon is displayed.
+
+* Show star
+
+  This option controls the display of a little sun icon on the panel.
+  If show star is enabled, a small "star" will be drawn on top of the
+  display. The star will progress from left to right across the
+  display as the day passes. Its height is calculated according to the
+  suns relative altitude in the sky. On a day when (and at a position
+  where) the sun will be directly overhead at solar noon, this star
+  will follow a semi-circular course passing through the center of the
+  display. On all other days, it'll follow a "flattened" circle across
+  the display.
+
+* Show path
+
+  If this option is enabled, a dotted line is added to the display
+  showing the arc that the star follows across the display.
+
+* Show apogee path
+
+  If this option is enabled, a dotted line is added to the display
+  showing the "apogee sun" arc. That is, the path that would be
+  followed if the sun were to pass directly overhead at solar noon.
+
+* Use orange sun
+
+  This option enables an alternate solar image. This option also
+  controls the style of numerals used to show sunrise and sunset
+  times.
+
+  This image varies in intensity over the course of the day and
+  is "black" at night.
+
+  When this option is used, sunrise and sunset times are displayed
+  in the upper left and right corners of the panel, respectively.
+
+* Show sun rise/set ETA
+
+  If this option is enabled (and you use the orange sun), the
+  estimated time of arrival of sunrise will be shown before the sun
+  rises and the ETA of the sunset will be shown after the sun has
+  risen.
+

@@ -1,0 +1,837 @@
+#include "graphint.h" 
+#include "dict.h"
+#define WIN31
+#include "commdlg.h"
+#include "dlgs.h"
+#include "cddemo.h"
+#include "GW.h"
+#include "resource.h"
+#include <dyndlg.h>
+#include <math.h> 
+#include <direct.h> 
+#include <aviout.h>
+#include <dibapi.h>
+#include <float.h>     
+#include <sys\stat.h> 
+ 
+short	QuadOff,NumQuadSegs,idescblock, NumDescBlocks=4; 
+long	LastQuadOff=-2;
+mnmxCor CurMinMax;    
+BOOL	CheckQuad=FALSE;
+long    QuadOffLoc; 
+BOOL    WantQuadTree2=FALSE;   
+
+extern	short	MaxNewType;
+extern	HFILE	Fid; 
+extern	BOOL	FoundInvalidRec;
+extern	LONG    UsedDescOffset,TranPointOffset, ColorPaletteOffset, GraphicsOffset;
+extern	LONG    NewPrimeOffset,ContinuationOffset;
+extern	long    CurrentSeg;
+extern	long    QuadTreeOffset,DescBlockOffset;           
+extern	long    lBlocksRead, nBlocksRead, nBlocksIn, nBlocksOut, TotDisplayTime;  
+extern	HANDLE  hDescBlock;
+extern	LPVISLIST   CurVis;
+extern	LPVIEWPORT  CurView, pViewports[MAX_VIEWPORTS], pViewportsD[MAX_VIEWPORTS];
+extern	HANDLE      hViewports[MAX_VIEWPORTS];
+extern	short         NumViewports, CurViewID, DisplayViewID, NumViewportsToDisplay;
+extern	HANDLE  hQuadTree, hQuadOffset, hQuadTree2;
+extern	LPSTR   pQuadTree, pQuadSeg, pQuadOffset;  
+extern	WORD    LenQuadBlock;
+extern	LONG    LenQuadSeg;
+extern	LONG    LenQuad, MaxQuadLevel, MaxQuadType,NumQuadSegsProcessed;
+extern	short	QuadLevelAt, QuadTypeNext;
+extern	long	MinFileTime, MaxFileTime, TimeRangeBeg, TimeRangeEnd;
+
+long GetFileConnectOffset(short Type, short Desc,mnmxCor MinMax,short AddLength, long BaseRec,LPSTR Rec)
+{
+    static  long    LastBaseRec, CurRecLenLoc, debugoffset=1673166; 
+    static  short     CurRecLen, LastType=-1; 
+    mnmxCor SaveMinMax;
+    LPINT pQuadOff;
+    QUAD    *pQuad, *InQuad;
+    short QuadOff, InQuadOff, nBytes, nRead, FileHeader[9], ipos;
+    HANDLE      hPltBuf;
+    LPSTR       LPpltBuf;
+    LPINT       ipnt;
+    LPLONG      pOffset;
+    long    Type13Offset;
+    long    Offset, CurOffset, EOFOffset;
+    long    ii, RtnLoc,nn=0;    
+    short	iblock;
+    BOOL    AddEnd=FALSE;  
+    BOOL	InDesc;
+    LPDESCBLOCK pDescBlock;    
+
+
+    pQuadTree = GlobalLock (hQuadTree);
+    pQuadOffset  = GlobalLock (hQuadOffset); 
+    
+    if (((BaseRec >= 0 && BaseRec == LastBaseRec) || hQuadTree2)
+         && Type == LastType && BoundsTotallyInBounds(MinMax,CurMinMax)) 
+    {
+        Type13Offset = _llseek(Fid,-(6+18),2);    
+        nRead = CurRecLen;  
+        AddEnd=TRUE;
+        goto AddToEnd;
+    } 
+    if (hQuadTree2)
+    {
+        SaveMinMax = MinMax;
+        MinMax.xmn = ((long)MinMax.xmn+(long)MinMax.xmx)/2;
+        MinMax.xmx = MinMax.xmn;
+        MinMax.ymn = ((long)MinMax.ymn+(long)MinMax.ymx)/2;
+        MinMax.ymx = MinMax.ymn;
+    }
+    
+    for (QuadLevelAt=1;QuadLevelAt<MaxQuadLevel+1;QuadLevelAt++)
+    {
+        pQuadOff  = (LPINT)(pQuadOffset + (QuadLevelAt-1)*2); 
+        *pQuadOff = abs(*pQuadOff);
+    }
+        
+    QuadLevelAt = 1;
+    QuadTypeNext = -1;
+
+    pQuadOff  = (LPINT)(pQuadOffset + (QuadLevelAt-1)*2);
+    QuadOff   = *pQuadOff;
+    if (QuadOff < 0) QuadOff = -QuadOff;
+    pQuad     = (QUAD *)(pQuadTree + ((long)(QuadOff-1))*LenQuadSeg);
+S20:
+    InQuad = pQuad;
+    InQuadOff = QuadOff;
+    QuadOff = pQuad->Next[0];  
+    ipos=0;
+    QuadLevelAt++;
+    if (QuadOff < 0) goto S40;
+S30:pQuadOff  = (LPINT)(pQuadOffset + (QuadLevelAt-1)*2);
+    *pQuadOff = QuadOff;
+    pQuad = (QUAD *)(pQuadTree + ((long)(QuadOff-1))*LenQuadSeg); 
+    nn++;
+    if (BoundsTotallyInBounds(MinMax,pQuad->MinMax)) goto S20;
+S40:QuadLevelAt--;
+    if (!QuadLevelAt || (hQuadTree2 && ipos))
+    {   
+        pQuad = (QUAD *)InQuad; 
+        CurMinMax = pQuad->MinMax;  
+        if (pQuad->Next[0]>0 || pQuad->Next[1]>0)
+            ii=1;
+        pDescBlock = 0;
+        if (hDescBlock && Desc >0)
+        {
+			pDescBlock = (LPDESCBLOCK)GlobalLock (hDescBlock);
+			pDescBlock += ((long)InQuadOff * (long)MaxQuadType * (long)NumDescBlocks +(long) Type* (long)NumDescBlocks); 
+			for (iblock=0;iblock<NumDescBlocks;iblock++,pDescBlock++)
+			{    
+				if (pDescBlock->Desc < 0)
+					break;
+				if (!pDescBlock->Desc || pDescBlock->Desc == Desc) 
+				{
+					InDesc = TRUE;
+					goto InDBlock;
+				} 
+			}
+			InDesc = FALSE;
+InDBlock:
+			GlobalUnlock (hDescBlock);
+        }
+        else
+        	InDesc = TRUE;
+        if (pQuad->TypeOffset[Type]<0 || !InDesc)
+        {   
+        	iblock = max (0,min (iblock,NumDescBlocks-1));
+            LastQuadOff = -2;
+            QuadOff = InQuadOff;
+            pQuad =(QUAD *)( pQuadTree + ((long)(QuadOff-1))*LenQuadSeg);
+            CurRecLenLoc = _llseek(Fid,-18,2);
+            pQuad->TypeOffset[Type]=CurRecLenLoc;
+            if (hDescBlock)
+            {
+				pDescBlock = (LPDESCBLOCK)GlobalLock (hDescBlock);
+				pDescBlock += ((long)QuadOff * (long)MaxQuadType * (long)NumDescBlocks +(long) Type* (long)NumDescBlocks + iblock); 
+				pDescBlock->Offset = CurRecLenLoc;
+				pDescBlock->Desc = 0;
+				GlobalUnlock (hDescBlock);
+            }
+            ii=_lread(Fid,&FileHeader,18); 
+            ii=_llseek(Fid,GraphicsOffset+18+(QuadOff-1)*LenQuadSeg+12+Type*4,0);
+            ii=_lwrite(Fid,(char *)&CurRecLenLoc,4);
+            ii=_llseek(Fid,CurRecLenLoc,0);
+            ii=_lwrite(Fid,(char *)&AddLength,2); 
+            RtnLoc = _llseek (Fid,0,1);
+            _lwrite (Fid,Rec,AddLength);
+            _lwrite (Fid,(char *)&FileHeader,18);
+            CurRecLen = AddLength;  
+        }
+        else
+        {   
+            if (InQuadOff == LastQuadOff && Type == LastType && !hDescBlock)
+            {   
+                nRead = CurRecLen;
+                Type13Offset = _llseek(Fid,-(6+18),2);    
+                goto AddToEnd;
+            }
+            LastQuadOff = InQuadOff;
+            Offset = pQuad->TypeOffset[Type];    
+	        if (hDescBlock && Desc >0)
+	        {
+				pDescBlock = (LPDESCBLOCK)GlobalLock (hDescBlock);
+				pDescBlock += ((long)InQuadOff * (long)MaxQuadType * (long)NumDescBlocks +(long) Type* (long)NumDescBlocks + iblock); 
+				Offset = pDescBlock->Offset;
+				GlobalUnlock (hDescBlock);
+            }
+            CurRecLenLoc = Offset; 
+            while (Offset >= 0)
+            {
+                CurRecLenLoc = Offset;   
+                if (Offset == debugoffset)
+                	ii=1;
+                _llseek (Fid,Offset,0); 
+                nRead = _lread (Fid,&nBytes,2);
+                CurRecLen = nBytes;
+                hPltBuf = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)nBytes);
+                LPpltBuf = GlobalLock (hPltBuf);
+                nRead = _lread (Fid,LPpltBuf,nBytes);
+                ipnt = (LPINT)LPpltBuf;
+                pOffset = (LPLONG)FindNextGraphicsLink (ipnt);
+                if (pOffset)
+                {
+	                Type13Offset = Offset + ((long)pOffset - (long)ipnt) + 2;
+	                Offset = *pOffset; 
+	            }
+	            else
+	            	Offset = -1;
+                GSSiGlobUlFree (&hPltBuf);
+             }
+    AddToEnd:
+             EOFOffset = _llseek(Fid,-18,2); 
+             if (EOFOffset == debugoffset)
+             	ii=1;
+             ii=_lread(Fid,&FileHeader,18); 
+             if (EOFOffset - Type13Offset == 6 &&
+                 ((long)nRead + (long)AddLength < SHRT_MAX))
+             {
+                _llseek(Fid,CurRecLenLoc,0); 
+                nRead+=(AddLength-8);
+                CurRecLen = nRead;
+                _lwrite(Fid,(char *)&nRead,2); 
+                RtnLoc=_llseek(Fid,Type13Offset-2,0);
+                _lwrite (Fid,Rec,AddLength);
+                _lwrite (Fid,(char *)&FileHeader,18);
+             }
+             else
+             {
+                LastQuadOff = -2;
+               ii= _llseek(Fid,Type13Offset,0);
+               ii= _lwrite(Fid,(char *)&EOFOffset,4);
+               ii= _llseek(Fid,EOFOffset,0); 
+                CurRecLenLoc = EOFOffset;
+               ii= _lwrite(Fid,(char *)&AddLength,2);
+                CurRecLen = AddLength;
+                CurOffset = _llseek(Fid,0,1);  
+                RtnLoc = CurOffset;
+               ii= _lwrite (Fid,Rec,AddLength);
+               ii= _lwrite (Fid,(char *)&FileHeader,18);
+
+             }
+        }   
+        CurrentSeg = CurRecLenLoc;
+        GlobalUnlock (hQuadTree);
+        LastBaseRec = BaseRec; 
+        if (hQuadTree2 && !AddEnd)
+        {   
+            pQuadTree = GlobalLock (hQuadTree2);
+            pQuadOff  = (int *)pQuadOffset;
+            pQuadOff++;
+            while (QuadLevelAt--)
+            {
+                pQuad = (QUAD *)(pQuadTree + ((long)(abs(*pQuadOff)-1))*LenQuadSeg);
+                pQuad->MinMax.xmn = min (pQuad->MinMax.xmn,SaveMinMax.xmn);
+                pQuad->MinMax.ymn = min (pQuad->MinMax.ymn,SaveMinMax.ymn);
+                pQuad->MinMax.xmx = max (pQuad->MinMax.xmx,SaveMinMax.xmx);
+                pQuad->MinMax.ymx = max (pQuad->MinMax.ymx,SaveMinMax.ymx); 
+                pQuadOff++;
+            }
+            GlobalUnlock (hQuadTree2);
+        }
+        GlobalUnlock (hQuadOffset);
+        pQuadTree = 0;
+        pQuadOffset  = 0;
+	    LastType = Type;
+        return RtnLoc;
+    }
+    pQuadOff  = (LPINT)(pQuadOffset + (QuadLevelAt-1)*2);
+    QuadOff   = *pQuadOff;
+    if (QuadOff < 0) goto S40;
+    *pQuadOff = -QuadOff;
+    pQuad = (QUAD *)(pQuadTree + ((long)(QuadOff-1))*LenQuadSeg);  
+    ipos = 1;
+    QuadOff = pQuad->Next[1];
+    if (QuadOff <0) goto S40;
+    QuadLevelAt++;
+    goto S30;
+
+}
+
+BOOL FindNextSegment (void)
+{           
+    BOOL    rtn;
+    short     desc,ii;
+    LPDESCBLOCK pDescBlock; 
+    
+    if (Fid<0 || !hQuadTree)
+    	return (FALSE); 
+//    if (FoundInvalidRec) 2/13/00
+//    	retrn FALSE; 
+    if (MinFileTime > TimeRangeEnd || MaxFileTime < TimeRangeBeg)
+    	return FALSE;
+    if (ContinuationOffset>=0)
+    {
+        CurrentSeg=ContinuationOffset;
+        return (TRUE);
+    }
+    if (!hDescBlock)
+    {
+        rtn = FindNextSegment2(); 
+        return rtn;
+    }
+Next:  
+    if (idescblock >= NumDescBlocks)
+    {
+        rtn = FindNextSegment2();
+        if (!rtn)
+            return (FALSE);  
+        idescblock = 0;
+    } 
+    pDescBlock = (LPDESCBLOCK)GlobalLock (hDescBlock);
+    pDescBlock += ((long)QuadOff * (long)MaxQuadType * (long)NumDescBlocks + (long)QuadTypeNext* (long)NumDescBlocks + idescblock++); 
+    desc = pDescBlock->Desc;
+    CurrentSeg = pDescBlock->Offset;
+    GlobalUnlock (hDescBlock); 
+    if (CurrentSeg < 0)
+    	goto Next;
+    if (desc <= 0)
+    {
+        idescblock=100;  
+        if (desc < 0) goto Next;  
+        return (TRUE); 
+    }
+    if (!GetVisibility(desc))
+        goto Next;
+    return (TRUE);
+    
+}
+
+BOOL FindNextSegment2 (void)
+{   LPINT pQuadOff;
+    QUAD    *pQuad;  
+
+    ReorgOut2 (0,0);
+    pQuadTree = GlobalLock (hQuadTree);
+    pQuadOffset  = GlobalLock (hQuadOffset);
+    
+    if (CheckQuad)
+    {            
+        HFILE   TraceFID;
+        OFSTRUCT    OFStruct;  
+        char    str[128];
+        
+        TraceFID = GSSiOpenFile ("quadchek.txt",&OFStruct,OF_READWRITE);
+        if (TraceFID == HFILE_ERROR)  
+            TraceFID = GSSiOpenFile ("quadchek.txt",&OFStruct,OF_CREATE); 
+        sprintf (str,"%ld %ld %ld %ld",nBlocksRead,lBlocksRead,nBlocksIn,nBlocksOut); 
+        _llseek (TraceFID,0,2);
+        nBlocksRead=lBlocksRead=nBlocksIn=nBlocksOut=0;    
+        fputstring (str,TraceFID);
+        GSSiClose (TraceFID);
+    }
+        
+    pQuadOff  = (LPINT) (pQuadOffset + (QuadLevelAt-1)*2);
+    QuadOff   = *pQuadOff;
+    if (QuadOff < 0) QuadOff = -QuadOff; 
+    pQuad     = (LPQUAD) (pQuadTree + ((long)(QuadOff-1))*LenQuadSeg);
+S20:QuadTypeNext++;
+    if (QuadTypeNext<MaxQuadType)
+    {   if (!CurVis) goto S20;
+        if (!CurVis->WantType[QuadTypeNext] && !(QuadTypeNext == 1 && CurVis->WantType[2])) goto S20;
+        if (CurView->PassID == 2 && (QuadTypeNext != 0)) goto S20;
+        if (CurView->PassID == 3 && (QuadTypeNext == 0)) goto S20;
+        if (pQuad->TypeOffset[QuadTypeNext]<0) goto S20; 
+//if (QuadLevelAt < MaxQuadLevel) goto S20; // time test only!!
+        QuadOffLoc = (long)(LPSTR)&pQuad->TypeOffset[QuadTypeNext] - (long)(LPSTR)pQuadTree + 18;
+        CurrentSeg=pQuad->TypeOffset[QuadTypeNext];
+        GlobalUnlock (hQuadTree);
+        GlobalUnlock (hQuadOffset);
+        return (TRUE);
+    }
+
+    NumQuadSegsProcessed++;
+    QuadTypeNext = -1;
+    QuadOff = pQuad->Next[0];
+    QuadLevelAt++;
+    if (QuadOff < 0) goto S40;
+S30:pQuadOff  = (LPINT) (pQuadOffset + (QuadLevelAt-1)*2);
+    *pQuadOff = QuadOff;
+    pQuad = (LPQUAD) (pQuadTree + ((long)(QuadOff-1))*LenQuadSeg);
+    if (BlockInWindow(&pQuad->MinMax,0)) goto S20;
+S40:QuadLevelAt--;
+    if (!QuadLevelAt)
+    {   
+        GlobalUnlock (hQuadTree);
+        GlobalUnlock (hQuadOffset);
+        return (FALSE);
+    }
+    pQuadOff  = (LPINT) ( pQuadOffset + (QuadLevelAt-1)*2);
+    QuadOff   = *pQuadOff;
+    if (QuadOff < 0) goto S40;
+    *pQuadOff = -QuadOff;
+    pQuad = (LPQUAD) (pQuadTree + ((long)(QuadOff-1))*LenQuadSeg);
+    QuadOff = pQuad->Next[1];
+    if (QuadOff < 0) goto S40;
+    QuadLevelAt++;
+    goto S30;
+
+}  
+
+
+BOOL LoadQuadTree ()
+{   
+	long	nRead; 
+    LPINT	pint;  
+    LPSTR   pQuadTree2; 
+    struct {UINT LQB; long LQS, MQL, MQT, LQ;} ReadStruct; 
+
+    GSSiGlobFree (&hQuadTree);
+    GSSiGlobFree (&hQuadOffset);
+	CurMinMax.xmn = 1;
+	CurMinMax.xmx = -1;
+    NumQuadSegsProcessed=0;
+    idescblock = 100;
+	LastQuadOff = -2;
+    if (!PltName[0] || Fid<0)
+    	return (FALSE);
+    
+    nRead = _lread (Fid,&ReadStruct,sizeof(ReadStruct));
+    
+    LenQuadBlock = ReadStruct.LQB;
+    LenQuadSeg = ReadStruct.LQS;
+    MaxQuadLevel = ReadStruct.MQL;
+    MaxQuadType = ReadStruct.MQT;
+    LenQuad = ReadStruct.LQ; 
+    NumQuadSegs = (short)(LenQuad/LenQuadSeg);
+    if (!LenQuad)
+    	return FALSE;
+    hQuadTree = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)LenQuad);
+    pQuadTree = GlobalLock (hQuadTree);   
+    if (WantQuadTree2)
+    {
+        hQuadTree2 = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)LenQuad);
+        pQuadTree2 = GlobalLock (hQuadTree2);
+        QuadTreeOffset = _llseek (Fid,0,1); 
+        CurMinMax.xmn=SHRT_MAX;
+        CurMinMax.ymn=SHRT_MAX;
+        CurMinMax.xmx=SHRT_MIN;
+        CurMinMax.ymx=SHRT_MIN;
+    }   
+    BigRead (Fid,pQuadTree,LenQuad); 
+    if (hQuadTree2) 
+    {
+        hmemmove (pQuadTree2,pQuadTree,LenQuad);
+        GlobalUnlock(hQuadTree2);
+    }
+    
+    QuadLevelAt = 1;
+    QuadTypeNext = -1;
+    GlobalUnlock (hQuadTree);
+    hQuadOffset=GSSiGlobAlloc (GHND,(DWORD)((MaxQuadLevel+1)*2));
+    pint = (LPINT)GlobalLock(hQuadOffset);
+    *pint = 1;
+    GlobalUnlock(hQuadOffset);
+    return (TRUE);
+}
+
+BOOL SaveQuadTree (void)
+{    
+    LPINT pint;  
+    LPSTR   pQuadTree; 
+    struct {UINT LQB; long LQS, MQL, MQT, LQ;} ReadStruct;
+
+    if (!PltName[0] || Fid<0)
+    	return (FALSE);
+    
+    ReadStruct.LQB=LenQuadBlock;
+    ReadStruct.LQS=LenQuadSeg;
+    ReadStruct.MQL=MaxQuadLevel;
+    ReadStruct.MQT=MaxQuadType;
+    ReadStruct.LQ=LenQuad;
+    _llseek(Fid,GraphicsOffset,0);
+    _lwrite (Fid,&ReadStruct,sizeof(ReadStruct));
+    pQuadTree = GlobalLock (hQuadTree); 
+    BigWrite (Fid,pQuadTree,LenQuad); 
+    GlobalUnlock (hQuadTree);
+    return (TRUE);
+}
+
+BOOL AnyDataInMap (void)
+{   
+	LPSTR	pQuadTree;
+	long	i,j; 
+	BOOL	rtn=FALSE;
+    QUAD    *pQuad;
+	
+    pQuadTree = GlobalLock (hQuadTree);   
+	for (i=0;i<NumQuadSegs;i++)
+	{
+    	pQuad     = (QUAD *)(pQuadTree + ((long)(i))*LenQuadSeg);  
+		for (j=0;j<MaxQuadType;j++)
+		{
+        	if (pQuad->TypeOffset[j]>=0)
+        	{
+        		rtn=TRUE; 
+        		goto Exit;
+	       	}  
+	    }
+    }
+Exit:
+    GlobalUnlock (hQuadTree);
+    return rtn;
+}    
+
+
+long AddSimpleQuadTree (HFILE Fid)
+{   
+    QUAD    Quad; 
+    long    LenQuadSeg, MaxQuadLevel,MaxQuadType,LenQuad;
+    long    NewLoc;    
+    short     lMem, i, i2;
+    
+	MaxQuadType = max (2,MaxNewType)+1;
+    LenQuadSeg = 8 + 4 + 4 * MaxQuadType;
+    MaxQuadLevel = 4;
+    LenQuad = LenQuadSeg*31;
+     
+    NewLoc = _llseek (Fid,0,1); 
+    lMem = LenQuad + 4*4;
+    _lwrite (Fid,(char *)&lMem,2);
+    _lwrite (Fid,(char *)&LenQuadSeg,4);
+    _lwrite (Fid,(char *)&MaxQuadLevel,4);
+    _lwrite (Fid,(char *)&MaxQuadType,4);
+    _lwrite (Fid,(char *)&LenQuad,4);
+    
+//1 
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 2;
+    Quad.Next[1] = 3;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//2 
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 4;
+    Quad.Next[1] = 5;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//3 
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 6;
+    Quad.Next[1] = 7;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//4 
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = 8;
+    Quad.Next[1] = 9;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//5 
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 10;
+    Quad.Next[1] = 11;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//6 
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = 12;
+    Quad.Next[1] = 13;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//7 
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 14;
+    Quad.Next[1] = 15;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+//8 
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MIN/2;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = 16;
+    Quad.Next[1] = 17;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//9 
+    Quad.MinMax.xmn = INT_MIN/2;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = 18;
+    Quad.Next[1] = 19;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//10    
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MIN/2;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 20;
+    Quad.Next[1] = 21;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//11    
+    Quad.MinMax.xmn = INT_MIN/2;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 22;
+    Quad.Next[1] = 23;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//12    
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX/2;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = 24;
+    Quad.Next[1] = 25;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//13    
+    Quad.MinMax.xmn = INT_MAX/2;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//14    
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX/2;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = 28;
+    Quad.Next[1] = 29;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+//15    
+    Quad.MinMax.xmn = INT_MAX/2;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+//16    
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MIN/2;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MIN/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//17    
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MIN/2;
+    Quad.MinMax.ymn = INT_MIN/2;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//18    
+    Quad.MinMax.xmn = INT_MIN/2;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MIN/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//19    
+    Quad.MinMax.xmn = INT_MIN/2;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = INT_MIN/2;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg); 
+//20    
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MIN/2;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//21    
+    Quad.MinMax.xmn = INT_MIN;
+    Quad.MinMax.xmx = INT_MIN/2;
+    Quad.MinMax.ymn = INT_MAX/2;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//22    
+    Quad.MinMax.xmn = INT_MIN/2;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//23    
+    Quad.MinMax.xmn = INT_MIN/2;
+    Quad.MinMax.xmx = 0;
+    Quad.MinMax.ymn = INT_MAX/2;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);
+//24    
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX/2;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MIN/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//25    
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX/2;
+    Quad.MinMax.ymn = INT_MIN/2;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//26    
+    Quad.MinMax.xmn = INT_MAX/2;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MIN;
+    Quad.MinMax.ymx = INT_MIN/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//27    
+    Quad.MinMax.xmn = INT_MAX/2;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MIN/2;
+    Quad.MinMax.ymx = 0;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);  
+//28    
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX/2;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+//29    
+    Quad.MinMax.xmn = 0;
+    Quad.MinMax.xmx = INT_MAX/2;
+    Quad.MinMax.ymn = INT_MAX/2;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+//30    
+    Quad.MinMax.xmn = INT_MAX/2;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = 0;
+    Quad.MinMax.ymx = INT_MAX/2;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+//31    
+    Quad.MinMax.xmn = INT_MAX/2;
+    Quad.MinMax.xmx = INT_MAX;
+    Quad.MinMax.ymn = INT_MAX/2;
+    Quad.MinMax.ymx = INT_MAX;
+    Quad.Next[0] = -1;
+    Quad.Next[1] = -1;
+    for (i=0;i<MaxQuadType;i++)
+        Quad.TypeOffset[i]=-1;
+    _lwrite (Fid,(char *)&Quad,(UINT)LenQuadSeg);   
+    
+    
+    i2 = 0;  
+    _lwrite (Fid,(char *)&i2,2); 
+    return NewLoc;
+}                   
+
+

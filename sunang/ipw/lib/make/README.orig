@@ -1,0 +1,53 @@
+IPW makefile boilerplate.
+
+Files:
+	local	macros that will probably have to be redefined for different
+		UNIX environments
+
+		Preconfigured versions of this file for various existing IPW
+		hosts may be found in the subdirectory "conf".  See the README
+		file therein.
+
+	std	(hopefully) portable macros
+
+	debug	overrides certain std macros, used by ipwmake -D
+
+	profile	overrides certain std macros, used by ipwmake -P
+
+	rules	actual rules used by "make"
+
+		NOTE: This file WILL need to be edited if the AR_XOPTS defined
+		      in "local" does NOT cause "ar" to restore the original
+		      modification times of the extracted files.  See the
+		      comments in the "lib" target.
+
+		      Be warned that this kludge will cause all the ".o" files
+		      associated with library sources to be left in the source
+		      directories, as well as in the library archives, and
+		      will thus cause some additional disk space to be
+		      consumed.  Presumably, this is preferable to having to
+		      recompile the whole library every time you change
+		      something.
+
+Concatenation order:
+	local
+	std
+	[debug OR profile]
+	{Makedefs}
+	rules
+
+Standard macro suffixes:
+	suffix		contents
+	--------	---------------------------------------------------
+	_LOCAL		localisms, machine dependencies, etc.  Always used.
+	_NORMAL		used if no -D or -P argument to ipwmake
+	_DEBUG		used if ipwmake -D
+	_PROFILE	used if ipwmake -P
+	_PREFIX		prepended to a filename
+	_SUFFIX		appended to a filename
+	_STD		always used, including relevant _LOCAL
+	_OPTION		one of relevant _NORMAL, _DEBUG, or _PROFILE
+	_DIR		directory
+	_MODE		protection mode
+
+$Header: /usr/home/ipw/lib/make/RCS/README,v 1.3 89/10/25 15:07:46 frew Exp $

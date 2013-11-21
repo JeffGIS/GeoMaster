@@ -1,0 +1,296 @@
+
+			Exporting data from IPW
+			-----------------------
+
+
+
+Binary raster data can be output from IPW to GRASS, LAS (Land Analysis
+System), or any other GIS, image processing package, or graphics package
+(such as PV-WAVE) which can input data in binary or ASCII raster form.
+
+
+I. IPW image to GRASS raster file
+---------------------------------
+
+To convert an IPW image to a  GRASS raster file, use the ipw.to.grass
+command from GRASS:
+
+NAME
+	ipw.to.grass - Converts IPW image file to GRASS raster map layer
+
+SYNOPSIS
+	ipw.to.grass
+	ipw.to.grass help
+	ipw.to.grass [-o] [ipw=name] map=name [mask=name] [multiplier=value] \
+		[offset=value]
+
+DESCRIPTION
+
+	ipw.to.grass converts a single-band image file in IPW (Image
+	Processing Workbench) format to a GRASS raster map layer.
+	If an IPW image is not specified, standard input will be
+	used.	If an IPW image is specified as a mask, all cells in the 
+	GRASS map layer corresponding to the zero ("no data") values
+	in the mask will be set to zero, regardless of the value
+	in the IPW input image.
+
+	Since GRASS cell values are integers, IPW image floating
+	point values will be truncated to integer values, i.e.
+	29.2 and 29.9 will both be set to 29 in the resulting
+	GRASS cell file.  A multiplier and/or offset may be
+	specified to convert the input IPW floating point pixel
+	values to the GRASS integer values.  If both a multiplier
+	and offset are specified, the data are first multiplied
+	by the multiplier, then the offset will be added.
+
+	In GRASS, the geographic region (window) specifies the north,
+	south, east and west edges of the raster map.  The data values are
+	assumed to be located at the cell centers so that the data value
+	for the north-westernmost pixel (1,1) is actually located at
+	northing NORTH-NSRES/2 and easting WEST+EWRES/2	(where NORTH
+	is the northern edge of the file, WEST is the western edge of
+	the file and NSRES and EWRES are the resolutions in the
+	N/S and E/W directions, respectively).  In IPW, the image origin
+	(beginning line and sample coordinates) are assumed to be at the
+	center of pixel (0,0).  Unless the -o (override) option is set,
+	the geographic region in the GRASS cell header will be set so that:
+		NORTH = bline + dline/2
+		SOUTH = NORTH - nlines * dline
+		WEST = bsamp - dsamp/2
+		EAST = WEST + nsamps * dsamp
+		NSRES = -dline
+		EWRES = dsamp
+	where bline and bsamp are the beginning line, sample coordinates
+	and dline and dsamp are the line, sample increments from the
+	IPW geodetic header, and nlines and nsamps are the number of lines
+	and samples in the IPW file.
+	If the -o option is specified, NORTH will be set to bline and
+	WEST will be set to bsamp.
+	Note: if the IPW image file contains no GEO header, the GRASS
+	active window will be used to define the geographic region.
+
+	Flags:
+	-o		    use the IPW GEO header origin (bline and bsamp)
+			    as the north and west edge of the region
+			    default: origin is offset by half a pixel in
+			    each direction (see discussion above)
+
+	Parameters:
+
+	ipw=name            IPW input image (defaults to standard input)
+	map=name            output GRASS cell file
+	mask=name           IPW mask image
+	multiplier=value    multiply IPW datum by value (before offset)
+			    default: 1.0
+	offset=value        add to map datum (after multiplication)
+			    default: 0.0
+
+EXAMPLES
+	The following command,
+
+		ipw.to.grass ipw=ipwfile map=grasslayer multiplier=10.0 \
+			offset=100.0
+
+	will convert an IPW image called ipwfile to a GRASS map
+	layer called  grasslayer, multiplying all input values by 10
+	then adding 100 before storing in the GRASS output file.
+
+	In the following command,
+
+		demux -b 0 ipw.img | ipw.to.grass map=grass.out \
+			mask=ipwmask offset=0.5
+
+	the IPW command demux is used to extract band 0 from a mult-band
+	IPW image file and feed it as input to ipw.to.grass.  The data are
+	masked by the IPW mask image ipwmask and 0.5 is added to non-masked
+	data to cause rounding to the nearest integer, rather than
+	truncating.
+
+	To convert an N-band IPW image into N GRASS cell files:
+
+		demux -b 1 ipwfile | ipw.to.grass o=cell.1
+			...
+		demux -b N ipwfile | ipw.to.grass o=cell.N
+
+
+
+II.  IPW image to LAS image
+---------------------------
+
+To convert an IPW image to a LAS (Land Analysis System) image file, use the
+ipw2las command:
+
+NAME
+	ipw2las -- Convert an IPW image to a LAS image
+
+SYNOPSIS
+	ipw2las [-r] [-f] -o lasname [-p projdef] [-m mask] [ipwimage]
+
+DESCRIPTION
+	ipw2las converts an image file in IPW (Image Processing Workbench)
+	format to an image in LAS (Land Analysis System) format.  Two
+	LAS files will be written: <lasname>.img and <lasname>.ddr
+	containing the LAS image data and the associated DDR.
+
+	If the -r flag is specified, the IPW pixel data will be copied as
+	their raw values; no floating point conversion will be performed.  If
+	the -f flag is specified, the IPW pixel data will be mapped to
+	floating point according the the linear quantization header and will
+	be written to the LAS image in floating point format.  If neither
+	-r or -f is specified, the IPW pixel data will be mapped to floating
+	point (if an lq header is present) and integerized prior to copying
+	to the LAS image.  (See EXAMPLES)
+
+	The projection definition file is an ASCII file containing the
+	projection parameters created by programs mkgeo, mkalbers, mkutm, etc.
+	See the man page of the appropriate "mk" command for the format of
+	this file.  If a projdef file is not specified, the projection fields
+	in the DDR file will be set to INVALID.
+
+	If an IPW mask image is specified, the pixels that correspond to
+	zero pixels in the mask image will be set to zero in the LAS image,
+	reguardless of the pixel value in the IPW input image.
+
+OPTIONS
+	-r		flag to copy raw pixels to LAS image (no FP conversion)
+	-f		flag for floating point data in LAS image
+	-o		LAS image name 
+	-p		name of projection definition file
+	-k		ASCII key in PROJ file
+	-m		mask image
+
+OPERAND
+	ipwimage	IPW image file (default: stdin)
+
+EXAMPLES
+	In the following examples, the IPW image ipwname is an 8-bit image
+	with a linear quantization header with the map (0,0),(255,1000).
+	The command
+
+		ipw2las -r -o lasname -p projfile ipwname
+
+	will create an 8-bit LAS image with pixel values in the range 0-255.
+	The projection information is set by the values in projfile.
+
+	The command
+
+		ipw2las -f -o lasname ipwname
+
+	will create a floating point LAS image with the values 0-1000.  The
+	DDR file will have no projection information.
+
+
+	The command
+		ipw2las -o lasname ipwname
+
+	will create a LAS image with 2-byte pixels with integer values 0-1000.
+
+
+
+NOTE: prior to using the las.to.ipw command, the following csh commands
+need to be added to the .cshrc file or typed in at the command line:
+
+	setenv LASROOT /usr/packages/sparc/las/las/v5_0
+	setenv WORROOT /usr/packages/sparc/las/world/v2_0
+	setenv TAE /usr/packages/sparc/las/tae/v1_4
+	setenv response LAS50
+	source $LASROOT/lasinit
+
+
+
+III. IPW image to PV-WAVE
+-------------------------
+
+An IPW image can be input to PV-WAVE as raw pixel data or as floating point
+data.  To generate an image file in raw pixel form (bypassing floating point
+conversion) for input to PV-WAVE, use the following command:
+
+	flip -l image.ipw | rmhdr > wave.dat
+
+or to input the image as floating point data:
+
+	flip -l image.ipw | binexp > wave_fp.dat
+
+where image.ipw is the IPW image and wave.dat and wave_fp.dat are the output
+images ready to read into wave.  Note that the flip is necessary to reverse
+the order of the lines since the IPW origin is the upper-left image corner,
+but the PV-WAVE origin is the lower-left image corner.
+
+To input the image and view in in the point & click version of PV-WAVE
+use the following steps:
+
+1.  Run PV-WAVE Point&Click by typing "wavepoint" at the command line.
+
+Note: this requires that the wave initialization shell script has been run 
+in the .cshrc script or at the command line; if not, type
+	source /usr/packages/sparc/wave/wavepoint/bin/wvptsetup
+
+2.  Pull down the File Menu with the right mouse button, slide over to 
+the "Import Data" submenu and select "Binary...".
+
+3.  Click on the "Variables" button in the "Import Data - Binary" window.
+
+4.  Click on "Create" to create a new variable.
+
+5.  In the "Variables - create" window, change the name of the variable, if
+desired.  Set the data type to "Byte" if the IPW image was 1 - 8 bits, or
+"Integer (16 bits)" if the image was 9-16 bits, or floating point if binexp
+was used to export the data.  Set Dimension 1 to the number of samples and
+Dimension 2 to the number of lines.  Then click on "OK" in the "Variables -
+create" and "Variables" windows.
+
+6.  Double-click on the image file name if it appears on the list in the
+"Import Data - Binary" window, or enter the directory and file name and
+click on the "Read" button to read in the image.  If the data is read in
+correctly, the variable name should now appear in the Variables list in the
+PV-WAVE Home window.
+
+7.  To view the image, pull down the View menu and select Image...  The image
+will be displayed in greyscale.
+
+See the PV-WAVE manuals for more information on PV-WAVE or PV-WAVE Point &
+Click.
+
+
+
+IV. IPW image to ASCII text file
+--------------------------------
+
+The IPW program primg can be used to print a subset or all of the pixels in
+an IPW image to an ASCII text file:
+
+NAME
+	primg -- print ascii values in image
+
+SYNOPSIS
+	primg [-a] [-r] [-c coords] [-i image]
+
+DESCRIPTION
+	Primg prints image pixels in human-readable form on the standard
+	output, 1 value per line.
+
+OPTIONS
+	-a	print all pixels in image.  If the -a flag is not specified,
+		then only the pixels at the specified coordinates are printed.
+
+	-r	print raw pixel values, bypassing any floating-point
+		conversion.
+
+	-c	coordinates are read from the file "coords" (default: standard
+		input)
+
+	-i	the input image is read from the file "image" (default:
+		standard input)
+
+	At least one of -[ica] must be specified.  Only one of -[ca] may be
+	specified.
+
+EXAMPLES
+
+FILES
+
+DIAGNOSTICS
+
+RESTRICTIONS
+	The input coordinates must be sorted in ascending line order (sample
+	order is unimportant).

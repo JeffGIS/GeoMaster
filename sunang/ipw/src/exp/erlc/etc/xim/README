@@ -1,0 +1,45 @@
+"xim" is not an IPW command, but is provided to facilitate the use of IPW in
+an X window system environment.
+
+The following copyright restrictions apply to "xim":
+
+	Copyright (c) 1988  Philip R. Thompson
+
+	Computer Resource Laboratory (CRL) Dept. of Architecture and Planning
+	M.I.T., Rm 9-526 Cambridge, MA  02139
+
+	This  software and its documentation may be used, copied, modified,
+	and distributed for any purpose without fee, provided:
+
+		The above copyright notice appears in all copies.
+
+		This disclaimer appears in all source code copies.
+
+		The names of M.I.T. and the CRL are not used in advertising or
+		publicity pertaining to distribution of the software without
+		prior specific written permission from me or CRL.
+
+	I provide this software freely as a public service.  It is NOT a
+	commercial product, and therefore is not subject to an an implied
+	warranty of merchantability or fitness for a particular purpose.  I
+	provide it as is, without warranty.  This software was not sponsored,
+	developed or connected with any grants, funds, salaries, etc.
+
+	This software is furnished  only on the basis that any party who
+	receives it indemnifies and holds harmless the parties who furnish it
+	against any claims, demands, or liabilities connected with using it,
+	furnishing it to others, or providing it to a third party.
+
+	Philip R. Thompson (phils@athena.mit.edu)
+
+In order to compile "xim", you must have the following components of the X
+window system, version 11 release 3, installed on your system:
+
+ - header files, accessible from the C preprocessor as "#include <X11/...>"
+
+ - Xlib, accessible from the C loader as "-lX11"
+
+The IPW command "ipw2xim" will convert an IPW image to the format expected by
+"xim".
+
+$Header: /usr/home/ipw/src/etc/xim/RCS/README,v 1.1 89/10/26 11:36:32 frew Exp $

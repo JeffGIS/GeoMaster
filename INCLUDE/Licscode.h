@@ -1,0 +1,172 @@
+// This is a part of the Sheriff System Development Kit.
+// Copyright (C) 1997-1998 Acudata Limted.
+// All rights reserved.
+//
+// This source code is only intended as a supplement to the
+// Sheriff System Development Kit and related
+// electronic documentation provided with the SDK.
+
+#ifndef LICSCODE_H
+#define LICSCODE_H
+
+//Get LS Status Code
+#define SLS_SCODE(hr)   ((hr) & 0xFFFF)
+//Everything is fine
+#define SLS_SUCCESS		S_OK
+//General Error (unknown error)
+#define SLS_ERROR					MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1000)
+
+//System Error
+#define SLS_E_SYSTEM_ERROR			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1001)
+//Invalid Product Code
+#define SLS_E_PRODUCT_CODE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1002)
+//Invalid Reference Code
+#define SLS_E_REFERENCE_CODE		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1003)
+//Invalid Machine Code
+#define SLS_E_MACHINE_CODE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1004)
+//Invalid System Time
+#define SLS_E_SYSTEM_TIME			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1005)
+//Not Enough Memory
+#define SLS_E_OUT_OF_MEMORY			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1006)
+//Not Enough Handle
+#define SLS_E_OUT_OF_HANDLE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1007)
+//Illegal Challenge
+#define SLS_E_CHALLENGE_ILLEGAL		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1008)
+//Unsuported challenge
+#define SLS_E_CHALLENGE_UNSUPORTED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1009)
+//Connction Sink ID invalid
+#define SLS_E_CONNECTION_ID			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x100A)
+//Invalid Queue Number
+#define SLS_E_QUEUE_NUMBER			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x100B)
+//Queue Too Long
+#define SLS_E_QUEUE_TOO_LONG		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x100C)
+//Failed To Locate Database Path
+#define SLS_E_DATABASE_PATH			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x100D)
+//Invalid SuitID
+#define SLS_E_SUIT_ID				MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x100E)
+//Unregistered Suit
+#define SLS_E_SUIT_UNREGISTERED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x100F)
+//Invalid Augument passed to function
+#define SLS_E_AUGUMENT_INVALID		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1010)
+//Invalid Handle
+#define SLS_E_LICENCE_HANDLE		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1011)
+//Unregistered product/licence
+#define SLS_E_LICENCE_UNREGISTERED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1012)
+//Licence Undefined
+#define SLS_E_LICENCE_UNDEFINED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1013)
+//Licence (run out of cocurrent users)
+#define SLS_E_LICENCE_EXCEEDED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1014)
+//Licence Exhausted (run out of meter units)
+#define SLS_E_LICENCE_EXHAUSTED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1015)
+//Licence Expired
+#define SLS_E_LICENCE_EXPIRED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1016)
+//Licence Invalid (corrupted, tamped)
+#define SLS_E_LICENCE_INVALID		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1017)
+//Licence Suspended
+#define SLS_E_LICENCE_SUSPENDED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1018)
+//Licence Terminated
+#define SLS_E_LICENCE_TERMINATED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1019)
+//Licence Unavaliable
+#define SLS_E_LICENCE_UNAVAILABLE	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x101A)
+//Licence unit not defined
+#define SLS_E_UNIT_UNDEFINED		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x101B)
+//Licence unit shortage (units exceeds reserved units)
+#define SLS_E_UNIT_EXCEEDED			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x101C)
+//Index used to enumerate products
+#define SLS_E_PRODUCT_INDEX			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x101D)
+//Bad Secret
+#define SLS_E_BAD_SECRET			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x101E)
+//Bad MAC(Message Authentication Code)
+#define SLS_E_BAD_MAC				MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x101F)
+
+//Licence File Error(used by Sheriff Light only)
+//The file could not be located.
+#define SLS_E_FILE_NOT_FOUND		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1020)	
+//All or part of the path is invalid.
+#define SLS_E_FILE_BAD_PATH			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1021)	
+//The permitted number of open files was exceeded.
+#define SLS_E_FILE_TOO_MANY			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1022)	
+//The file could not be accessed
+#define SLS_E_FILE_ACCESS_DENIED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1023)	
+//There was an attempt to use an invalid file handle.
+#define SLS_E_FILE_BAD_HANDLE		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1024)	
+//There was an error trying to set the file pointer.
+#define SLS_E_FILE_BAD_SEEK			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1025)	
+//There was a hardware error.
+#define SLS_E_FILE_HARDIO			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1026)	
+//SHARE.EXE was not loaded, or a shared region was locked.
+#define SLS_E_FILE_SHARING			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1027)	
+//There was an attempt to lock a region that was already locked.
+#define SLS_E_FILE_LOCKING			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1028)	
+//The disk is full.
+#define SLS_E_FILE_DISK_FULL		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1029)	
+//The end of file was reached. 
+#define SLS_E_FILE_EOF				MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x102A)	
+//CRC error
+#define SLS_E_FILE_BAD_CRC			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x102B)	
+//Signature error
+#define	SLS_E_FILE_BAD_SIGNATURE	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x102C)
+//Corruption
+#define	SLS_E_FILE_BAD_DATA			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x102D)
+//Disk Signature error
+#define	SLS_E_DISK_BAD_SIGNATURE	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x102E)
+//Failed to remove file
+#define SLS_E_FILE_REMOVE_FAILED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x102F)
+//Invalid Licence Path
+#define	SLS_E_PATH_INVALID			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1030)
+//Failed to create licecne path
+#define	SLS_E_PATH_CREATE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1031)
+//Access(Read/Write) Denied
+#define SLS_E_PATH_ACCESS_DENIED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1032)	
+//Registery operation failure
+#define SLS_E_REG_FAILURE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1033)
+//Licence File been tampered
+#define SLS_E_BAD_LICENCE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1034)
+//Registry has been tampered
+#define SLS_E_BAD_REGISTRY			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1035)
+//Machine Signature is wrong
+#define SLS_E_BAD_MACHINE			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1036)
+//Failed to get machine code
+#define SLS_E_OP_MACHINE_CODE		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1037)
+//Failed to get machine signature
+#define SLS_E_OP_MACHINE_SIGN		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1038)
+//Failed to get file signature
+#define SLS_E_OP_FILE_SIGN			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1039)
+//Failed to get disk signature
+#define SLS_E_OP_DISK_SIGN			MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x103A)
+//Failed to terminate licence
+#define SLS_E_OP_TERMINATION		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x103B)
+//licence error
+#define SLS_E_LICENCE_BAD_TIME		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x103C)
+//licence error
+#define SLS_E_LICENCE_BAD_UNIT		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x103D)
+//licence error
+#define SLS_E_LICENCE_BAD_DATE		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x103E)
+//licence error
+#define SLS_E_LICENCE_BAD_COUSERS	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x103F)
+//licence error
+#define SLS_E_LICENCE_BAD_ACCESSKEY MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1040)
+//Licence key is incorrect
+#define SLS_E_LICENCE_BAD_LICKEY	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1041)
+//bad import licence key
+#define SLS_E_IMPORT_BAD_LICKEY		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1042)
+//incorrect import source signature
+#define SLS_E_IMPORT_BAD_SOURCE		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1043)
+//Cannot reinstate licence			
+#define SLS_E_REINSATTE_BAD_SOURCE	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1044)
+//Export not allowed
+#define SLS_E_EXPORT_NOT_ALLOWED	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1045)
+//User Index out of range
+#define SLS_E_BAD_USER_INDEX		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1046)	
+//Machchine Signatures in reference do not match
+#define SLS_E_UPID_SIGNATURE_REF	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1047)
+//Product Signatures in reference do not match
+#define SLS_E_UMID_SIGNATURE_REF	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1048)
+//Machchine Signatures in licence key do not match
+#define SLS_E_UPID_SIGNATURE_KEY	MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x1049)
+//Refernece Signatutes in licence key do not match
+#define SLS_E_REF_SIGNATURE_KEY		MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x104A)
+//
+#define SLS_LAST_ERROR				MAKE_SCODE(SEVERITY_ERROR, FACILITY_ITF, 0x104B)
+
+#endif

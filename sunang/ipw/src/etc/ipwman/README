@@ -1,0 +1,24 @@
+
+Changes made to ipwman -- August 1992 by Dana Jacobsen, ERL-C
+
+-----
+
+Changed to allow ipwman to get information on all additional files
+by reading $IPW/exp/*/bin and $IPW/exp/*/lib in addition to the
+standard directories.
+
+Use the PAGER variable if it exists instead of assuming more.
+
+Don't automatically strip out all the spaces in front of manual
+sections.  Some people use spaces instead of tabs and this 
+reformatted their man sections into garbage, while providing
+no benefit.  I changed this to remove 0 or 1 space instead of all.
+
+-----
+
+Changes made April 1993 by Dana Jacobsen, ERL-C
+
+Put a sed '$d' right before calling the pager.  This removes the last ^L
+which would cause a blank page to get printed.  The purpose of the control
+L is to seperate man pages if more than one is asked for.  This is nice, but
+we really shouldn't have one at the end.

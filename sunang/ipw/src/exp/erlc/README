@@ -1,0 +1,6 @@
+
+  For IPW -- GRASS conversions, you will want to copy the directories in
+"misc/grass" to your grass directory and gmake them.
+
+  For IPW -- LAS conversions, you will want to compile the programs in
+"misc/las".

@@ -1,0 +1,676 @@
+
+#include <windows.h>
+#include "dde.h"
+#include <ddeml.h>
+#include "client.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h> 
+#include <direct.h> 
+#include <errno.h>
+#include <sql.h>
+#include <sqlext.h> 
+#include "shr.h" 
+#include "gwd.h" 
+#include "bt.h"
+
+
+extern	HWND	hWndMain;
+extern	BOOL	DoPaint;                
+extern	AllVarEqQuestionMark; 
+
+FIELDINFO mine;
+HANDLE	hODBCParams=0;
+#define STR_LEN 128+1 
+#define REM_LEN 254+1
+LPFIELDINFO lpmine; 
+SDWORD cbTableQual, cbTableOwner, cbTableName, cbColumnName;
+UCHAR  szQual[STR_LEN+1],       szTableName[STR_LEN+1],
+       szTableOwner[STR_LEN+1], szTypeName[STR_LEN+1],  
+       szRemarks[REM_LEN+1];
+SDWORD cbRemarks, cbDataType, cbPrecision, cbLength,
+       cbRadix, cbNullable, cbTypeName,cbScale;
+          
+#define MAX_STMT_LEN 100 
+int FindType(char *szTypeName); 
+UDWORD display_size(SWORD coltype, UDWORD collen, UCHAR *colname);
+int i;
+static int  DBType[64]; 
+static HWND DBS[64]; 
+static HENV HENVS[64];
+static HDBC HDBCS[64];
+static HSTMT hstmts[64];
+static char TableNames[64][32];
+static char DBNames[64][64];
+static char DBDataSource[64][64];
+static char indexes[64][32]; 
+
+int FindType(char *szTypeName)
+{
+if(_fstrnicmp (szTypeName,"Char",4) ==0)          return SQL_VARCHAR;
+if(_fstrnicmp (szTypeName,"TEXT",4) ==0)          return SQL_VARCHAR;
+if(_fstrnicmp (szTypeName,"logical",7) == 0)      return SQL_CHAR;
+if(_fstrnicmp (szTypeName,"BIT",3) == 0)          return SQL_CHAR;
+if(_fstrnicmp (szTypeName,"numeric",7) == 0)      return SQL_DOUBLE;
+if(_fstrnicmp (szTypeName,"DOUBLEFLOAT",11) == 0) return SQL_DOUBLE;
+if(_fstrnicmp (szTypeName,"LONG",4) == 0)         return SQL_INTEGER;
+if(_fstrnicmp (szTypeName,"date",4) == 0)         return SQL_VARCHAR;
+if(_fstrnicmp (szTypeName,"DATETIME",8) == 0)     return SQL_DATE;
+if(_fstrnicmp (szTypeName,"float",5) == 0)        return SQL_DOUBLE;
+if(_fstrnicmp (szTypeName,"MEMO",4) == 0)         return SQL_VARCHAR;
+if(_fstrnicmp (szTypeName,"general",7) == 0)      return SQL_VARCHAR;
+if(_fstrnicmp (szTypeName,"byte",4) == 0)         return SQL_CHAR;
+if(_fstrnicmp (szTypeName,"CURRENCY",8) == 0)     return SQL_VARCHAR;
+
+return 0;
+}
+UDWORD display_size(SWORD coltype, UDWORD collen, UCHAR *colname)
+{
+   switch (coltype)
+   {
+      case SQL_CHAR:
+      case SQL_VARCHAR:
+      case SQL_DATE:
+         return(max(collen, _fstrlen(colname)));
+      case SQL_SMALLINT:
+         return(max(6,_fstrlen(colname)));
+      case SQL_INTEGER:
+         return(max(11, _fstrlen(colname)));
+      case SQL_DECIMAL:         
+      case SQL_NUMERIC:         
+      case SQL_REAL:         
+      case SQL_FLOAT:         
+      case SQL_DOUBLE:
+         return(max(15,_fstrlen(colname)));
+      default:
+         return 0;
+   } // end of the switch                  
+return 0;
+}
+
+
+BOOL GetODBCUniqueFieldValues (HANDLE DBhandle, LPCSTR SQL,
+                              LPFIELDINFO field, HANDLE hDBList)
+{                             
+char answer[256], Value[256];
+int   i, ClassNo, ClassZero=0; 
+RETCODE rc;
+HDBC hdbc;
+UDWORD collen;
+SDWORD  lenanswer;
+char sqlstr[256],str[256];
+LPSTR	lpsqlstr=&sqlstr, lpBrack, lpEndBrack, lpParam;
+HSTMT	hstmt; 
+BOOL	rtn=FALSE;
+
+    for(i = 1; i < 64; i++) if(DBS[i] == DBhandle)break;
+    hdbc = HDBCS[i]; 
+    SQLAllocStmt(hdbc, &hstmt);
+    sprintf (sqlstr," Select DISTINCT %s From %s",field->name,DBNames[i]); 
+    rc = SQLPrepare(hstmt, lpsqlstr, SQL_NTS);
+    if(rc |= SQL_SUCCESS) goto Exit;  
+	rc = SQLExecDirect(hstmt, lpsqlstr, SQL_NTS);
+    if(rc ==  SQL_ERROR)
+    {    SDWORD	errno;
+    	 SWORD lmes;
+    	 char	cError[128], Mess[SQL_MAX_MESSAGE_LENGTH], DispStr[SQL_MAX_MESSAGE_LENGTH+300];
+	    	 
+		 lmes = SQL_MAX_MESSAGE_LENGTH-1; 
+	     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC,hstmt,cError,&errno,Mess,SQL_MAX_MESSAGE_LENGTH-2,&lmes);
+	     sprintf (DispStr,"%s   %s",lpsqlstr,Mess);
+		 HaltMapDisplay();
+	     MessageBox(hWndMain,DispStr,"Error in SQL Query",MB_OK|MB_ICONQUESTION); 
+	     return FALSE;
+    }  
+	if(rc |= SQL_SUCCESS) goto Exit;
+	rc = SQLFetch(hstmt);
+	while (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO)
+	{
+	    SQLGetData(hstmt, 1, SQL_C_CHAR, answer, 254, &lenanswer);
+	    if (lenanswer >= 0)
+	    {  
+		    _fstrncpy (Value,answer,field->length);
+		    if (BT_FIND(hDBList,Value,BT_FIRST,BT_EQ,(LPSTR)&ClassNo))
+		    	BT_PUT (hDBList,Value,(LPSTR)&ClassZero); 
+		}
+		rc = SQLFetch(hstmt);
+    } 
+    rtn = TRUE;
+Exit: 
+	 SQLFreeStmt(hstmt, SQL_DROP);
+     return rtn;
+} 
+
+/******************************************************************/
+LPVOID GetExternalFieldData ( HANDLE DBhandle, LPCSTR index, LPVOID *hstmt,
+                              LPFIELDINFO field, BOOL SingleVal, LPINT irc)
+                                 
+{  // index[] = "pidno", keydata[] = "0102824110013" ;                            
+static char answer[256];
+#define MAX_COLS 5
+LPVOID lpvoid = answer;
+int   i,l; 
+double danswer;
+short shorti;
+RETCODE rc;
+HDBC hdbc;
+UDWORD collen;
+SDWORD  lenanswer;
+SWORD nresultcols, scale, coltype, colnamelen, nullable;
+UCHAR colname[32];          
+long  long_i;
+static char szItem[] = "SQL";
+char sqlstr[256],str[260];
+LPSTR	lpsqlstr=&sqlstr, lpBrack, lpEndBrack, lpParam;
+FIELDINFO mine;
+FIELDINFO FAR *LPFIELDINFO = &mine; 
+int		nparam, FldNum;
+BOOL	ExSQL=TRUE;
+
+	if (*hstmt && !SingleVal)
+		ExSQL = FALSE;
+
+   // for(i = 0; i < 128; szValue[i] = ' ',i++);
+    for(i = 1; i < 64; i++) if(DBS[i] == DBhandle)break;
+    *irc = 0;                                       
+    hdbc = HDBCS[i]; 
+    if (!hODBCParams)
+    	hODBCParams = GlobalAlloc (GHND,4096); 
+    if (*hstmt && ExSQL)
+    {
+		SQLFreeStmt(*hstmt, SQL_CLOSE);
+//		*hstmt = 0;    	
+    } 
+    if (!*hstmt)
+    {
+	    SQLAllocStmt(hdbc, hstmt); 
+	    _fstrcpy(sqlstr, "Select ");
+	    if (SingleVal)
+	    	_fstrcat(sqlstr,field->name); 
+	    else
+	    	_fstrcat(sqlstr,"*");
+	    _fstrcat(sqlstr," From ");
+	    _fstrcat(sqlstr, DBNames[i]);
+	    if (index[0])
+	    	_fstrcat(sqlstr, " Where ");
+	    _fstrcpy(str, index);
+//	    AllVarEqQuestionMark=TRUE;
+	    ExpandText (str);
+	    AllVarEqQuestionMark=FALSE;
+	    _fstrcat(sqlstr,str);
+	   // outlen = sizeof(sqlstr);
+/*	    rc = SQLPrepare(*hstmt, lpsqlstr, SQL_NTS);
+	    if(rc |= SQL_SUCCESS) goto s44;  
+	    nparam = 0;   
+	    lpParam = GlobalLock (hODBCParams);
+		lpBrack = index;
+		while ((lpBrack = _fstrchr (lpBrack,'[')))
+		{
+			if (lpEndBrack = _fstrchr (lpBrack,']'))
+			{   
+				++nparam;
+				rc = SQLSetParam(*hstmt, nparam, SQL_C_CHAR, SQL_CHAR, 128, 0,lpParam, NULL);
+				lpParam += 128;   
+				lpBrack = ++lpEndBrack;
+			}
+			else
+				lpBrack++;
+			
+		} 
+		GlobalUnlock (hODBCParams); */
+	  /*  SQLBindCol(*hstmt, 1, SQL_C_CHAR, answer, 254, &lenanswer);*/
+	}
+Execute:
+	if (ExSQL)
+	{           
+/*		lpBrack = index;
+		lpParam = GlobalLock (hODBCParams);
+		while ((lpBrack = _fstrchr (lpBrack,'[')))
+		{
+			if (lpEndBrack = _fstrchr (lpBrack,']'))
+			{   char	SaveChar;
+			
+				SaveChar = *++lpEndBrack;
+				*lpEndBrack = '\0';
+				_fstrcpy (lpParam,lpBrack);
+				ExpandText (lpParam);
+				*lpEndBrack = SaveChar;
+				lpBrack = lpEndBrack;
+				lpParam += 128; 
+			}
+			else
+				lpBrack++;
+			
+		}
+		GlobalUnlock (hODBCParams);  */
+	    rc = SQLExecDirect(*hstmt, lpsqlstr, SQL_NTS);
+//	    rc = SQLExecute(*hstmt); 
+	    if(rc ==  SQL_ERROR)
+	    {    SDWORD	errno;
+	    	 SWORD lmes;      
+	    	 char	cError[128], Mess[SQL_MAX_MESSAGE_LENGTH+10], DispStr[SQL_MAX_MESSAGE_LENGTH+300];
+	    	 
+			 lmes = SQL_MAX_MESSAGE_LENGTH-1; 
+		     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC,*hstmt,cError,&errno,Mess,SQL_MAX_MESSAGE_LENGTH-2,&lmes);
+		     sprintf (DispStr,"%s   %s",lpsqlstr,Mess); 
+		     HaltMapDisplay();
+		     MessageBox(hWndMain,DispStr,"Error in SQL Query",MB_OK|MB_ICONQUESTION); 
+		     goto ErrExit;
+	    }  
+    	if(rc |= SQL_SUCCESS) goto s44;
+	    rc = SQLFetch(*hstmt);
+	    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)goto s44;
+    }
+/*    SQLNumResultCols(*hstmt, &nresultcols);
+    SQLDescribeCol(*hstmt,1,colname, (SWORD) sizeof(colname),
+                     &colnamelen, &coltype, &collen, &scale,
+                     &nullable); */
+   // outlen = display_size(coltype, collen, colname);
+    //SQLGetData(hstmt,1, SQL_C_CHAR, answer, outlen, &lenanswer);
+/*	hstmt = NULL;*/
+    if (SingleVal)
+    	FldNum = 1;
+    else
+    	FldNum = field->index+1;
+    rc = SQLGetData(*hstmt, FldNum, SQL_C_CHAR, str, 256, &lenanswer);
+    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)goto s44;
+/*	if (SingleVal)
+		SQLFreeStmt(*hstmt, SQL_CLOSE); */
+/*	if (field->length)
+		l=field->length;
+	else */
+		l=lenanswer;
+	if (l < 0) l=0;	 
+	_fstrncpy (answer,str,l);
+	answer[l]=0;
+    return &answer;
+    
+    field->type = coltype;
+    switch ( field->type )
+    {  
+       case 1:
+         {   }
+       case  -7: // define SQL_BIT
+         {   }                               
+       case  -1: // define SQL_LONGVARCHAR
+         {   }                               
+       case  10: // define SQL_TIME  UWORD hour; UWORD minute; UWORD second;
+         {   }                               
+       case  11: // define SQL_TIMESTAMP SWORD year; UWORD month; UWORD day;
+         {   }                     //      UWORD hour; UWORD minute; UWORD second; UWORD fraction;    
+       case 12: //#define SQL_CHAR    
+         { 
+           field->length = lenanswer;
+           return &answer;
+         }
+      case 2: // SQL_NUMERIC     
+         {    }
+      case 3: //#define SQL_DECIMA    
+         {    }
+      case 6: //#define SQL_FLOAT
+         {    }
+      case 7: //#define SQL_REAL
+         {    }
+      case 8: //#define SQL_DOUBLE      
+         { 
+           field->length = 8;
+           danswer = atof(answer);
+           return &danswer;
+         }
+       case 4: // SQL_INTEGER     
+         {  
+           field->length = 4;
+           long_i = atol(answer);
+           return &long_i;
+         }
+       case 5: // SQL_SMALLINT 
+         {
+           field->length = 2;
+           shorti = (short) atol(answer);
+           return &shorti;
+         }
+       case  9: // define SQL_DATE
+         { 
+           field->length = lenanswer;
+           return &answer;
+         }                               
+       case  -2: // define SQL_BINARY
+         {   }                               
+       case  -3: // define SQL_VARBINARY
+         {   }                               
+       case  -4: // define SQL_LONGVARBINARY
+         {   }                               
+       case  -5: // define SQL_BIGINT  = an unsigned long
+         {   }                               
+       case  -6: // define SQL_TINYINT  = I think, a signed short
+         {   }                               
+       case  -80: // define SQL_TYPE_DRIVER_START
+         {   }                               
+       } //end of the switch
+  
+    
+s44: if (*hstmt && SingleVal)
+	 {
+	 	SQLFreeStmt(*hstmt, SQL_CLOSE);
+		/*SQLFreeStmt(*hstmt,SQL_UNBIND);*/
+	 } 
+ErrExit:	
+     *irc = 1;
+     return NULL;
+
+} 
+/******************************************************************/
+LPFIELDINFO GetExternalFieldInfo( HANDLE DBhandle, BOOL first)
+{
+RETCODE rc;       
+SWORD Nullable;
+HSTMT hstmt;  
+
+	lpmine = &mine;
+
+  for(i = 1; i < 64; i++) if(DBS[i] == DBhandle)break; 
+  if(first)
+  {
+    mine.precision = 0;
+    mine.scale = 0;
+    mine.radix = 0;
+    mine.length = 0; 
+    SQLAllocStmt(HDBCS[i], &hstmt);
+    rc = SQLColumns(hstmt, NULL, 0, NULL, 0, DBNames[i], SQL_NTS, NULL, 0);
+    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)  goto s44;
+    hstmts[i] = hstmt;
+    SQLBindCol(hstmts[i],  1, SQL_C_CHAR,   szQual, STR_LEN, &cbTableQual); 
+    SQLBindCol(hstmts[i],  2, SQL_C_CHAR,   szTableOwner, STR_LEN, &cbTableOwner); 
+    SQLBindCol(hstmts[i],  3, SQL_C_CHAR,   szTableName, STR_LEN, &cbTableName); 
+    SQLBindCol(hstmts[i],  4, SQL_C_CHAR,   mine.name, 64, &cbColumnName); 
+    SQLBindCol(hstmts[i],  5, SQL_C_SHORT, &mine.type, 2, &cbDataType); 
+    SQLBindCol(hstmts[i],  6, SQL_C_CHAR,   szTypeName, STR_LEN, &cbTypeName); 
+    SQLBindCol(hstmts[i],  7, SQL_C_LONG,  &mine.precision, 4, &cbPrecision); 
+    SQLBindCol(hstmts[i],  8, SQL_C_LONG,  &mine.length, 4, &cbLength); 
+    SQLBindCol(hstmts[i],  9, SQL_C_SHORT, &mine.scale, 2, &cbScale); 
+    SQLBindCol(hstmts[i], 10, SQL_C_SHORT, &mine.radix, 2, &cbRadix); 
+    SQLBindCol(hstmts[i], 11, SQL_C_SHORT, &Nullable, 2, &cbNullable); 
+    SQLBindCol(hstmts[i], 12, SQL_C_CHAR,   szRemarks, REM_LEN, &cbRemarks); 
+   } //end of if (first) 
+    mine.type = 0;
+    mine.index = 0;
+    rc = SQLFetch(hstmts[i]);
+    while(rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO)
+    { 
+       if(mine.type == 0)lpmine->type = FindType(szTypeName); 
+       return lpmine;
+    
+    }
+s44: SQLFreeStmt(hstmts[i], SQL_DROP);
+     return NULL;
+}
+
+
+/******************************************************************/
+HANDLE OpenExternalDatabase( LPSTR name)
+{
+static BOOL first_entry = TRUE;
+int  i, next_one;
+HENV henv;
+HDBC hdbc;
+RETCODE rc; 
+SDWORD nerr;
+SWORD mlen = 253, Moutlen, maxoutlen = 255, outlen;
+char errmess[254], *cptr;
+char tnames[256], cstring[100], uid[]="admin", pwd[]=""; 
+LPSTR	lptnames, lpcstring;
+UWORD fDirection = SQL_FETCH_FIRST; //SQL_FETCH_NEXT
+   if(first_entry)
+   {
+     for (i = 0; i < 64; DBType[i] = -1, i++);
+     first_entry = FALSE;
+   }
+   for(i = 1; i < 64; i++)if(DBType[i] == -1)break;
+   cptr = _fstrchr(name,'|');
+   if(cptr)
+   {
+      _fstrcpy(tnames,&name[5]);
+      cptr = _fstrchr(tnames,'|');
+      if(cptr) *cptr = '\0';
+   }
+   else
+      _fstrcpy(tnames,name);
+ 
+   _fstrcpy(cstring,"DSN=");
+   _fstrcat(cstring,tnames);                                        
+   next_one = i;
+   SQLAllocEnv(&henv);
+   SQLAllocConnect(henv, &hdbc);
+  // rc = SQLConnect(hdbc, name, SQL_NTS,NULL,0, NULL,0); // uid, SQL_NTS, pwd, SQL_NTS);
+   tnames[0] = '\0';
+   lptnames = (LPSTR)tnames;
+   lpcstring = (LPSTR)cstring;
+   rc = SQLDriverConnect(hdbc, NULL, lpcstring, SQL_NTS, lptnames, maxoutlen, &Moutlen, SQL_DRIVER_COMPLETE_REQUIRED);
+   if(rc ==  SQL_ERROR)
+   {
+     SQLError(henv,
+     hdbc,
+     SQL_NULL_HSTMT, 
+     tnames, 
+     &nerr, 
+     errmess,
+     mlen, 
+     &outlen); 
+     MessageBox(NULL,errmess,tnames,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
+
+   }  
+
+   if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)  goto s44;                                                        
+   DBS[next_one] = next_one;
+   DBType[next_one] = 'O';
+   HENVS[next_one] = henv;
+   HDBCS[next_one] = hdbc;
+   _fstrcpy (&DBDataSource[next_one][0],name);
+   return (HANDLE) next_one;
+  
+  
+s44:  SQLDisconnect(hdbc);
+      SQLFreeConnect(hdbc);
+      SQLFreeEnv(henv);
+      return NULL;
+
+   
+} 
+
+/******************************************************************/
+int NumDatabaseTables( char *type, HWND  DBhandle)
+{
+#define STR_RMK 254
+SDWORD cbTableQual, cbTableOwner, cbTableName, cbTableType, cbRemarks;
+UCHAR  szTableQual[STR_LEN+1],   szTableName[STR_LEN+1],
+       szTableOwner[STR_LEN+1],  szTableType[STR_LEN+1],
+       szRemarks[STR_RMK];
+static HSTMT hstmt;
+HDBC hdbc;           
+RETCODE rc;
+int icount;
+    for(i = 1; i < 64; i++)   if(DBS[i] == DBhandle)break; 
+    hdbc = HDBCS[i];
+    SQLAllocStmt(hdbc, &hstmt);
+    rc = SQLTables(hstmt,NULL,0,NULL,0,NULL,0,NULL,0);
+    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)  goto s44;
+    SQLBindCol(hstmt,  1, SQL_C_CHAR,   szTableQual, STR_LEN, &cbTableQual); 
+    SQLBindCol(hstmt,  2, SQL_C_CHAR,   szTableOwner, STR_LEN, &cbTableOwner); 
+    SQLBindCol(hstmt,  3, SQL_C_CHAR,   szTableName, STR_LEN, &cbTableName); 
+    SQLBindCol(hstmt,  4, SQL_C_CHAR,   szTableType, STR_LEN, &cbTableType); 
+    SQLBindCol(hstmt,  5, SQL_C_CHAR,   szRemarks, STR_RMK, &cbRemarks);
+    icount = 1;
+    rc = SQLFetch(hstmt);
+    while (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO)
+    {
+     if(cbTableName > 254) cbTableName = 253;
+     _fmemcpy(&TableNames[icount][0], szTableName, (size_t) cbTableName);
+     TableNames[icount][cbTableName] = '\0';
+     rc = SQLFetch(hstmt);
+     icount++;
+    }
+s44:  SQLFreeStmt(hstmt, SQL_DROP);
+ return icount-1;
+}
+
+/******************************************************************/
+LPSTR GetTableName (HANDLE DBhandle, BOOL first)
+{
+static int icount, num_of_em;
+    if(first)
+    {
+      num_of_em = NumDatabaseTables( "TABLE", DBhandle );
+      icount = 1;
+    }  
+    else
+    {
+      icount++;  
+      if(icount > num_of_em) return NULL;
+    }  
+return &TableNames[icount][0];
+}
+
+
+/******************************************************************/
+HANDLE OpenDatabaseTable (HANDLE DBHandle, LPSTR TableName)
+{ 
+
+  _fstrcpy(&DBNames[DBHandle][0], TableName);
+  return DBHandle;
+  
+} 
+
+/*******************************************************************/ 
+RETCODE GetDataSource(HANDLE CThemeDB, BOOL first, LPSTR names,
+           int maxnamelen, int *namelen, LPSTR desc, int maxdesclen,
+           int *desclen)
+{
+RETCODE rc;
+static HENV henv;
+static HDBC hdbc;
+             if(first)
+             {
+                   SQLAllocEnv(&henv);
+                   SQLAllocConnect(henv, &hdbc);
+                 rc = (SQLDataSources(henv, SQL_FETCH_FIRST,
+                       names, maxnamelen, namelen, desc,  maxdesclen,
+                        desclen));
+                 if(rc == SQL_NO_DATA_FOUND) goto s44;       
+             }
+             else        
+             { 
+                 rc = (SQLDataSources(henv, SQL_FETCH_NEXT,
+                       names, maxnamelen, namelen, desc,  maxdesclen,
+                        desclen));
+                 if(rc == SQL_NO_DATA_FOUND) goto s44;       
+             }
+             return rc;
+s44:         SQLDisconnect(hdbc);
+             SQLFreeConnect(hdbc);
+             SQLFreeEnv(henv); 
+             return rc;    
+}              
+/******************************************************************/
+
+/*
+void GetExternalReport ( HANDLE DBhandle, LPCSTR index, LPVOID keydata,
+                              LPFIELDINFO field,LPCSTR R_or_F_Name)
+// this doesn't work because vendor's don't support SQLProcedures yet.  lda Aug 94
+
+                                 
+{  // index[] = "pidno", keydata[] = "0102824110013" ;                            
+int   i,j, k; 
+RETCODE rc;
+HSTMT hstmt;
+HENV  henv;
+HDBC hdbc;
+UDWORD collen;
+UWORD functions[101];
+UCHAR szProcName[32],szRemark[128];
+short ProcType, count;
+SDWORD cbProcName, cbRemark, cbProcType;
+SWORD errmesslen;
+char sqlstr[128], byte, *point, tnames[128], errmess[128];
+    for(i = 1; i < 64; i++) if(DBS[i] == DBhandle)break;
+    hdbc = HDBCS[i];
+    SQLAllocStmt(hdbc, &hstmt); 
+    SQLBindCol(hstmt,  3, SQL_C_CHAR,    szProcName, 32, &cbProcName); 
+    SQLBindCol(hstmt,  7, SQL_C_CHAR,    szRemark,  127, &cbRemark); 
+    SQLBindCol(hstmt,  8, SQL_C_SSHORT,  &ProcType,   0, &cbProcType); 
+   rc = SQLGetFunctions(hdbc,SQL_API_ALL_FUNCTIONS,functions); 
+ //  rc = SQLProcedures(hstmt,NULL,0,NULL,0,NULL,0); 
+   if(rc ==  SQL_ERROR)
+   {
+     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC, hstmt, tnames,
+      &cbRemark , errmess, 127, &errmesslen);
+     goto s44;
+   }  
+    count = 0;
+    if(rc |= SQL_SUCCESS) goto s44;
+    rc = SQLFetch(hstmt);
+    while (rc)
+    {
+      count++;
+    }
+   // rc = SQLExecDirect(hstmt, sqlstr, SQL_NTS);
+
+   // if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)goto s44;
+
+  
+    
+s44: SQLFreeStmt(hstmts, SQL_DROP);
+     return ;
+}
+*/
+/******************************************************************/
+void CloseExternalDatabase (HANDLE ClientDDE)
+{
+      if(ClientDDE == 0)return;
+      DBType[ClientDDE] = -1;
+      DBS[ClientDDE] = 0;
+      SQLDisconnect(HDBCS[ClientDDE]);
+      SQLFreeConnect(HDBCS[ClientDDE]);
+      SQLFreeEnv(HENVS[ClientDDE]);
+      return;
+} 
+  // The following is a prototype that isn't ready yet... lda  
+/********************************************************************/
+LPFIELDINFO XXXGetExternalFieldInfo( HANDLE DBhandle, BOOL first)
+{
+#define STR_LEN 128+1 
+#define REM_LEN 254+1
+static FIELDINFO mine;
+static FIELDINFO FAR *lpmine = &mine;
+static UWORD icount; 
+UCHAR szTypeName[32];
+SDWORD  pfDesc ;
+RETCODE rc;       
+SWORD cbDescMax = 254, pcbDesc;
+HSTMT hstmt;
+char space[255];
+PTR rgbDesc = space;
+  if(first)
+  {
+    for(i = 1; i < 64; i++) if(DBS[i] == DBhandle)break; 
+    mine.precision = 0;
+    mine.scale = 0;
+    mine.radix = 0;
+    mine.length = 0;
+    icount = 0; 
+    SQLAllocStmt(HDBCS[i], &hstmt);
+   } //end of if (first) 
+    mine.type = 0;
+    icount++;
+    rc = SQLColAttributes(hstmt,icount,SQL_COLUMN_NAME, rgbDesc, cbDescMax, &pcbDesc, &pfDesc);
+    while(rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO)
+    { 
+       if(mine.type == 0)lpmine->type = FindType(szTypeName); 
+       return lpmine;
+    
+    }
+     SQLFreeStmt(hstmt, SQL_DROP);
+     return NULL;
+}             
+                             
+

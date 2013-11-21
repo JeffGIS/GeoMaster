@@ -1,0 +1,45 @@
+
+pow2 is undefined.
+
+  pow2 was changed to ipow2.  This is to prevent any conflicts with those
+  libraries that have added pow2 as a math function.  ipow2 stands for
+  "integer power of 2".
+
+ipw2sun will not compile.
+
+  It only works on big-endian machines.  Solution: use ipw2ppm instead, and
+  use the netpbm package to convert ppm to sun raster if you need that format.
+  You'll have to take the entry for ipw2sun out of $IPW/src/bin/Makefile.
+
+transpose test fails with a comment about cmpimg usage.
+
+  Linux's getopt (as distributed with Slackware) is broken.  Install the
+  getopt that is in the IPW src/etc/getopt directory.  Make sure it is
+  in your path previous to the /usr/bin/getopt program, or just replace that
+  program the the IPW supplied getopt.
+
+Floating point exception.
+
+  Certain programs compute Pi by callting atan2(0,-1).  This works fine unless
+  you have installed the math inline macros, which call the native i386 fpatan
+  function, which doesn't like these arguments.  A couple ways around this.
+  One, have the code "pi = atan2(0,-1)" replaced by "pi = PI", using the
+  predefined PI macro.  Another is to define __NO_MATH_INLINES on the compile
+  line, in the linux config file, or right before the atan2 call.  Presumably
+  you want these for other math calls though.
+
+install: getopt: not found
+
+  Whoops, your vendor and/or shell doesn't have getopt!  Change directory to
+  $IPW/src/etc/getopt, and make install.  Install should be able to find the
+  new getopt now.
+
+ld: $IPW/lib/libipw.a: warning: archive has no table of contents...
+
+  You need to have ranlib defined in $IPW/lib/make/local.
+
+randomize: paste: not found
+
+  paste is a POSIX, XPG, and SVID2 standard, so you ought to have it.  But...
+It's available from GNU (ftp to prep.ai.mit.edu:/pub/gnu) in the textutils
+package (textutils-1.12.tar.gz currently).

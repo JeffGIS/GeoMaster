@@ -1,0 +1,3127 @@
+#include "graphint.h"   
+#include <string.h>
+#include <dos.h>
+#include <math.h>
+#include <conio.h>   
+#include <direct.h>
+#include "winexec.h"
+#include <time.h>  
+#include <ctype.h>
+#include "translat.h"  
+#include "address.h" 
+#include "dict.h"
+#include "client.h"
+#include "pnet.h"     
+#include "extrndb.h"
+#include <float.h>   
+#include <dibapi.h>    
+#include "resource.h"
+#include <mmsystem.h>   
+#include <shellapi.h>   
+#include <winsock.h>
+#include "umio.h"
+#include "p_tol.h"
+
+short	ConfigLevel = 0;
+HANDLE	hSelectItemsArgs=0; 
+HANDLE	hBlockedRefFile=0;
+HFILE	FidBlockedRefs=HFILE_ERROR;
+BOOL	DoDisplayConfigs=FALSE,ContinueTAGs;
+LPSTR	lpCLFile, lpCLGlob; 
+
+extern	char	AccessCode[64];
+extern	char	SerialNumber[66];
+extern	double	OrthScale;
+extern	double	LocationOffset, OffsetLineOffset;
+extern	HANDLE	hTranProjection,hTranProjectionReverse;
+extern	long    nOrthoBlocks;  
+extern	DWORD	nOrthoBytes;
+extern	long	DisplayCycle;
+extern	DWORD	TotCopySize;
+extern	RECT	MainRect;
+extern	BOOL	MemMap,InDrawTAG, AutoReg;    
+extern	HBITMAP	hbmpOld, hMemBitmap;
+extern	short	MemMapWidth,MemMapHeight; 
+extern	HBITMAP	hMemBitmap;
+extern	HDC		hdcMemMap, OldDC;    
+extern	HFILE	FidDisplay;
+extern	long	FirstMergeRecord, LastMergeRecord; 
+extern	MNMXCORD    ZoomBoxRect;
+extern	BOOL	ForceRefIndex, ForceTAGIndex, SaveZoom, SaveGlobals,MaskZoomArea,Printing,ScanForReports;
+extern	HANDLE	hMacArgs,hAddGraphicsFun,hTextString, hPickedTextHeader,hTEXT;
+extern	LPSTR	pMacroReturnValue;
+extern	BOOL	TraceType[4];
+extern	char TagLocPrefix[10]; 
+extern	HANDLE	TagLochSaveGlobal;
+extern	int	TagLocMinChar,CommandViewport;    
+extern	HANDLE	FilePathHandle;
+extern	MNMXCORD	EditBounds; 
+extern	time_t	CurrentChangeDate;
+extern	double	SystemPickAp;   
+extern	BOOL	ExpandTextDataNotFound;
+extern	BOOL	DisableHalt,Highways,Display,DoPaint,AutoPan,OffsetFromLimits,HaveCurrentLBUTTON;
+extern	short	CurFont, PltType, lTextString, TBNum;
+extern	LPVISLIST	CurVis;
+extern	struct	tm	tmtime;  //share with varstuff so %DATE %TIME set from last $CLK call
+extern	HANDLE	hSavedPickList,hHighlight,hHighlight2;
+extern	short	HltFetchPos;
+extern	HWND	hInst, hWndMain;
+extern	LPVIEWPORT	CurView;	
+extern	DPOINT	CLocPoint, CurBP, CurMP, CurEP;
+extern	int		NumPicked;    
+extern	int	PickAp;
+extern	int	DisplayFinOpt;
+extern	LPVIEWPORT	pViewports[MAX_VIEWPORTS];
+extern	int		NumViewports;
+extern	int		NumPicked;    
+extern  long	PRJ_UNITS[4];
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	int		NumSavedPickList;
+extern	HANDLE	hNames1, hNames2,hScreenFile,hAreaOffFile;    
+extern	BOOL	Pick,ContinueProcessing;   
+extern	HDC		hdcMemMap;    
+extern	HCURSOR	hCursor;
+extern	BOOL	OverWritePrompt,IgnoreSelectVP; 
+extern	LPTHEME     CurTheme;
+extern	short	NumTAGDef;
+extern	HANDLE	hTAGDef;  
+extern	long	CurrentRefno;
+extern	HANDLE	hCurPolyPoints;  
+extern	long	nCurPolyPoints;
+extern	HANDLE	LinkToVar;
+extern	FARPROC lpfnADDWAYPOINTMsgProc,lpfnFINDWAYPOINTMsgProc,lpfnGPSMsgProc,lpfnGPSCONFIGMsgProc; 
+
+short GetFunArgs (LPSTR	Args,LPSTR *Arg,short MaxArgs,LPHANDLE phMem)
+{   
+	short	nArgs=1; 
+	LPSTR	*pArg=Arg, LastArg, ParLoc; 
+	UINT	i;
+	                 
+	*phMem = GSSiGlobAlloc (GMEM_MOVEABLE,MaxArgs * 2048); 
+	pArg++;
+	LastArg = *pArg = GlobalLock (*phMem);   
+	pArg++;  
+	_fstrcpy (LastArg,Args);
+	for (i=1;i<MaxArgs;i++,pArg++) 
+	{
+		*pArg = LastArg + 2048;
+		if ((ParLoc = MatchLev (LastArg,',')))
+		{ 
+			_fstrcpy (*pArg,(LPSTR)(ParLoc+1));
+			*ParLoc = 0; 
+			nArgs++;
+		} 
+		else
+			*(*pArg) = 0;
+		ExpandText (LastArg);  
+		LastArg = *pArg;
+	}
+	ExpandText (LastArg);  
+	return nArgs;		
+}
+
+int	GetFunctionValue2 (int FunID,LPSTR Args, LPSTR OutLoc)
+{   HANDLE	hMem=0,hDLT,hSurf, hStr;
+	LPSTR	Arg1, Arg2, Arg3, Arg4, Arg5, Arg6,Arg7, ParLoc, lpstr, lpstrb, str;  
+	LPSTR	pEnd, pCR, pFile, Arg[8];
+	HFILE	Fid1, Fid2, Fid3;   
+	short	nArgs, l, CvtDir, year;    
+	DPOINT	Point, Point2;
+	POINT	Point16;
+	RECT	Rect; 
+	MNMXCORD	Bounds;           
+	long	hNum, Refno,ii,systime, nlong,nl;
+	BOOL	TORF, rtn, Err, PickVis;  
+	LPVIEWPORT	SaveVP=CurView;
+	short SymNum;			
+	short	n, pos, nrem;  
+	double	AZ, Dist,Elevation, RVal, Offset;
+	HFILE	Fid;
+	LPOFSTRUCT	pOFStruct;
+	LPDPOINT	pPoint;
+	HANDLE	hDibInfo;
+	long	ImageOffset;
+	UINT	Delay;
+	
+	if (LinkToVar)
+	{
+		ExpandText (Args);
+		return 0;
+	}
+	if (TraceType[0])
+	{
+		hMem=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+		lpstr = GlobalLock (hMem);
+		sprintf (lpstr,"GFV:%s",Args);
+		GSSiTraceLev (lpstr,1);
+		GSSiGlobUlFree (&hMem);
+	}
+	switch (FunID)
+	{    
+		case 801: /* $POINTSYM(StartSym,displayopt) set point symbol variables */
+		{   
+			short	iopt;
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);  
+			Arg2 = Arg1 + 2048; 
+			if ((ParLoc = MatchLev (Args,',')))
+			{ 
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg2 = 0;
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			iopt = atoi (Arg2); 
+			if (iopt == 3)
+			{
+				FARPROC lpfnNEWPOINTSETMsgProc;
+				
+				lpfnNEWPOINTSETMsgProc = MakeProcInstance((FARPROC)NEWPOINTSETMsgProc, hInst);
+				rtn = DialogBox(hInst, (LPSTR)"NEWPOINTSET", GetFocus(), lpfnNEWPOINTSETMsgProc);
+				FreeProcInstance(lpfnNEWPOINTSETMsgProc);
+			
+			}
+			else
+				rtn = SelectSymbol (CurView->hWnd,1,Arg1,iopt); 
+			if (rtn)
+				goto RtnTrue;
+			else
+				goto RtnFalse;
+		}
+		
+		case 802: // $COPYFILE(tofile,fromfile,A (append) R (replace) or anything else (default - create)
+		{	double	rval;
+			int		l, len; 
+			LPSTR	lpOut; 
+			char	fillchar;
+			BOOL	Append=FALSE;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0'; 
+			}
+			else
+				_fstrcpy (Arg3,"C");
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			if (!_fstricmp ("A",Arg3)) 
+				Append = TRUE;
+			else if (ExistFile (Arg1) && _fstricmp ("R",Arg3))
+				goto RtnFalse;
+			if (copyfile(Arg1,Arg2,Append,0,0,0,0,0,0))
+				goto RtnTrue;
+			else
+            	goto RtnFalse;
+			
+		} 
+		
+		case 803: // $EDITFILE(file)
+		{	
+			LPSTR	cmd;
+			HANDLE	hCmd;
+						
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+			Arg1 = GlobalLock(hMem);
+			
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1); 
+			
+			hCmd = GSSiGlobAlloc (GMEM_MOVEABLE,1024);  
+			cmd = GlobalLock (hCmd);
+			_fstrcpy (cmd,"[%TEXT_EDITOR]");  
+			ExpandText (cmd);
+			_fstrcat (cmd," ");
+			_fstrcat (cmd,Arg1);
+			WinExec (cmd,SW_SHOWMAXIMIZED);
+			GSSiGlobUlFree (&hCmd);
+           	goto RtnTrue;
+		}
+
+		case 804: // $CHANGEPT(file,x,y,tol,F or T) changes nearest point in control file if in tolerance F=change
+				  //								from point, T to point.
+		{	double	rval;   
+			BOOL	rtn=FALSE, AddSpace;
+			int		l, len, minpt=-1, ipt; 
+			LPSTR	lpOut, lpSpace; 
+			char	fillchar; 
+			HFILE	Fid, Fid2;  
+			LPSTR	TmpName, str;  
+			HANDLE	hTemp;
+			double	fromX, fromY, toX, toY, newX, newY, dist, mindist; 
+			LPOFSTRUCT	pOFStruct;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*5+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			Arg5 = Arg4 + 2048; 
+			pOFStruct = (LPOFSTRUCT)(Arg5 + 2048);
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg4,','))) goto Rtn0;
+			_fstrcpy (Arg5,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);  
+			ExpandText (Arg5);  
+			newX = atof (Arg2);
+			newY = atof (Arg3);
+			mindist = atof (Arg4);
+			if ((Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ))==HFILE_ERROR)
+				goto RtnFalse;  
+			hTemp = GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+			TmpName = GlobalLock (hTemp);
+			str = TmpName + 256;
+			GetTempFileName (NULL,"tmp",NULL,(LPSTR)TmpName);
+			Fid2 = GSSiOpenFile (TmpName,pOFStruct,OF_CREATE); 
+			ipt = 0; 
+			lpSpace = Arg5;
+			lpSpace++;
+			if (*lpSpace == 'R') // R for remove (FR or TR)
+				AddSpace=TRUE;  // adding a space at begin of line comments it out
+			else
+				AddSpace=FALSE;
+			while (fgetstring (str,128,Fid))
+			{
+				if (sscanf (str,"%Flf %Flf %Flf %Flf",&fromX,&fromY,&toX,&toY)==4)
+				{   
+					switch (*Arg5)
+					{
+						case 'F':
+						case 'f':
+							if ((dist=LDIST (fromX,fromY,newX,newY)) < mindist)
+							{ 
+								minpt = ipt;
+								mindist = dist;
+							}  
+							break;
+						case 'T':
+						case 't':
+							if ((dist=LDIST (toX,toY,newX,newY)) < mindist)
+							{ 
+								minpt = ipt;
+								mindist = dist;
+							}  
+							break; 
+					}
+				}
+				fputstring (str,Fid2);
+				ipt++;
+			} 
+			GSSiClose (Fid);  
+			GSSiClose (Fid2);
+			if (ipt >= 0)
+			{
+				Fid = GSSiOpenFile (Arg1,pOFStruct,OF_CREATE);
+				Fid2 = GSSiOpenFile (TmpName,pOFStruct,OF_READ); 
+				ipt = 0;
+				while (fgetstring (str,128,Fid2))   
+				{   
+					if (ipt == minpt)
+					{  
+						sscanf (str,"%Flf %Flf %Flf %Flf",&fromX,&fromY,&toX,&toY);
+						if (AddSpace)					
+							sprintf (str,"#%.14lg %.14lg %.14lg %.14lg",fromX,fromY,toX,toY); 
+						else
+						{
+							switch (*Arg5)
+							{
+								case 'F':
+								case 'f':
+									fromX = newX;
+									fromY = newY; 
+									break;
+								case 'T':
+								case 't': 
+									toX = newX;
+									toY = newY;
+							} 
+							sprintf (str,"%.14lg %.14lg %.14lg %.14lg",fromX,fromY,toX,toY);
+						}
+					}
+					ipt++;
+					fputstring (str,Fid);
+				}
+				GSSiClose (Fid);  
+				GSSiClose (Fid2); 
+				rtn=TRUE;
+			}
+			GSSiOpenFile (TmpName,pOFStruct,OF_DELETE); 
+			GlobalUnlock (hTemp);
+			GlobalFree (hTemp);
+			if (rtn)
+				goto RtnTrue;
+			else
+            	goto RtnFalse;
+			
+		} 
+		
+		case 805: // $GOFILEPT(file,N or P or F or num) zooms to next, previous or specified point in file
+		{	 
+			BOOL	rtn=FALSE;
+			HFILE	Fid;  
+			LPSTR	str;  
+			double	dist; 
+			short	ipt;
+			LPOFSTRUCT	pOFStruct;  
+			HANDLE	hTemp;
+			static	short	WantPt=0;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			pOFStruct = (LPOFSTRUCT)(Arg2 + 2048);
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			switch (*Arg2)
+			{
+				case 'N':
+				case 'n': 
+					WantPt++;
+				break;
+				
+				case 'P':
+				case 'p':    
+					WantPt--;
+				break;  
+				
+				case 'F':
+				case 'f':
+					WantPt = 0;
+					break;
+				
+				default:
+					WantPt = atoi (Arg2);
+			}
+			if ((Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ))==HFILE_ERROR)
+				goto RtnFalse;  
+			ipt = 0; 
+			hTemp = GSSiGlobAlloc (GMEM_MOVEABLE,512);
+			str = GlobalLock (hTemp);
+			while (fgetstring (str,128,Fid))
+			{   
+				if (*str && *str != '#')
+				{
+					if (ipt == WantPt)
+					{
+						if (sscanf (str,"%Flf %Flf",&Point.x,&Point.y)==2) 
+							rtn = TRUE;
+						break;
+					}
+					ipt++; 
+				}
+			}
+			GSSiClose (Fid);	
+			GlobalUnlock (hTemp);
+			GlobalFree (hTemp);		
+			if (rtn)
+			{   
+				dist = min (CurView->WBounds.xmx - CurView->WBounds.xmn, CurView->WBounds.ymx - CurView->WBounds.ymn);
+				ZoomToPointAndDist (Point,dist/2,FALSE); 
+				itoa (WantPt,OutLoc,10);
+				goto Rtnl;
+			}
+			else
+			{    
+				WantPt = min (max (WantPt,-1),ipt);
+				Sound (BAD_SOUND);
+            	goto RtnFalse;
+            }
+			
+		}  
+		
+		case 806: /* $COORDLOC(File,CurrentLocGlobal,D or S(sorted) or N or P) coordinate location file*/
+		{	 
+            FARPROC lpfnCOORDLOCMsgProc;
+		    HFILE       Fid; 
+		    LPSTR       lpBAR, LastChar; 
+			LPSTR	str;   
+			HANDLE	hTemp;
+			int		nRc;
+			long	RecNum, WantRec; 
+			LPOFSTRUCT	pOFStruct;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			pOFStruct = (LPOFSTRUCT)(Arg3 + 2048);
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+        	lpCLFile = Arg1;
+        	lpCLGlob = Arg2;
+            _fstrupr (Arg3);
+            switch (*Arg3)
+            {
+            	case 'N':
+            	case 'P':
+
+				    Fid=GSSiOpenFile (lpCLFile,pOFStruct,OF_READ);  
+	    			if (Fid==HFILE_ERROR)
+	    				goto RtnFalse; 
+	    			hTemp = GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+	    			str = GlobalLock (hTemp);
+					if (!GetVal (lpCLGlob, str))
+						_fstrcpy (str,"-1");
+					WantRec = atol (str); 
+					if (*Arg3 == 'N')
+						WantRec++;
+	    			else
+	    				WantRec--;	
+				    RecNum=0;
+				    while (fgetstring (str,128,Fid))
+				    {   
+				    	if (RecNum == WantRec)
+				    	{   
+				    		GSSiClose (Fid);
+			         		SetGlobalValueLong (lpCLGlob,WantRec);
+				    		if ((lpBAR = _fstrrchr (str,'|')))
+				    		{   
+				    			lpBAR++;
+								if (sscanf (lpBAR,"%Flf %Flf",&CLocPoint.x,&CLocPoint.y) == 2)
+								{	
+									GSSiGlobUlFree (&hTemp);
+					              	ZoomToPointAndDist (CLocPoint,LocationOffset,FALSE);
+									ExecutePointLocationMacro (CLocPoint);
+					              	goto RtnTrue;
+					            }
+					        }   
+							GSSiGlobUlFree (&hTemp);
+							goto RtnFalse;
+						}
+				    	RecNum++;
+				    }  
+				    GSSiClose (Fid);
+					GSSiGlobUlFree (&hTemp);
+					goto RtnFalse;
+            	
+            	case 'D':
+            	case 'S':
+		            lpfnCOORDLOCMsgProc = MakeProcInstance((FARPROC)COORDLOCMsgProc, hInst); 
+		            if (*Arg3 == 'D')
+		            	nRc = DialogBox(hInst, (LPSTR)"COORDLOC", hWndMain, lpfnCOORDLOCMsgProc); 
+		            else
+		            	nRc = DialogBox(hInst, (LPSTR)"COORDLOC_SORT", hWndMain, lpfnCOORDLOCMsgProc);
+		            FreeProcInstance(lpfnCOORDLOCMsgProc); 
+		             
+		            if (nRc)
+		            {
+		              	ZoomToPointAndDist (CLocPoint,LocationOffset,FALSE);
+						ExecutePointLocationMacro (CLocPoint);
+		              	goto RtnTrue;
+		            }   
+		            else
+						goto RtnFalse;
+			}
+		}
+		
+		case 807: // $IMAGELIM(Indexfile,IMAGE) returns limits of original image file in indexed ortho
+		{	 
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			if (GetOriginalImageBounds (Arg1,Arg2,&Bounds))
+			{
+				UserBounds[0].x = Bounds.xmn;
+				UserBounds[0].y = Bounds.ymn;
+				UserBounds[1].x = Bounds.xmx;
+				UserBounds[1].y = Bounds.ymx;
+				goto RtnTrue; 
+			}
+			else
+            	goto RtnFalse;
+			
+		}  
+		break;
+		
+		case 808: 
+			if (WMASetUp())
+				goto RtnTrue;
+			else
+				goto RtnFalse;
+		break;
+				
+		case 809: // $LOADTRAN(Transformation file,Type (1=default,2=onescale,3=fixedpoint),which(P for projection trans)V( default loads Viewport transformation file)R (loads reverse viewport trans)
+		{
+			short	Type;
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			if ((ParLoc = MatchLev (Args,',')))
+			{ 
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg2 = 0;
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{ 
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			Type = atoi (Arg2);
+			if (Type < 1 || Type > 3)
+				Type = 1;
+			if (*Arg3 == 'P')
+			{
+				CloseTRANS2 (&hTranProjection);
+				CloseTRANS2 (&hTranProjectionReverse);
+				if ((hTranProjection=LoadTranFile(Arg1,1,Type)))
+				{
+					hTranProjectionReverse=LoadTranFile(Arg1,2,Type);
+					goto RtnTrue;
+				}
+				else
+					goto RtnFalse;
+			}
+			else
+			{   
+				short	from=1,to=2;
+				
+				if (*Arg3 == 'R')
+				{
+					from = 2;
+					to = 1;
+				}
+				if (CurView->hFileTransIn > 1)
+					CloseTRANS2 (&CurView->hFileTransIn);
+				CloseTRANS2 (&CurView->hFileTransOut);
+				if ((CurView->hFileTransIn=LoadTranFile(Arg1,from,Type)))
+				{
+					CurView->hFileTransOut=LoadTranFile(Arg1,to,Type);
+					goto RtnTrue;
+				}
+				CurView->hFileTransIn=1;
+				goto RtnFalse;
+			}
+		} 
+
+		case 810: //$GETCOLOR(variablename)
+		{
+			COLORREF	Color;
+			 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096+256);
+			Arg1 = GlobalLock(hMem); 
+			lpstr = Arg1 + 4096;
+			
+			_fstrcpy (Arg1,Args);  
+			ExpandText (Arg1);
+			if (!*Arg1)
+				goto RtnFalse;
+			sprintf (lpstr,"[%s]",Arg1);
+			Color = GetGlobalLVal (lpstr);
+			if (GetColor(CurView->hWnd,&Color)) 
+			{
+				SetGlobalValueLong(Arg1,Color);
+				goto RtnTrue; 
+			}  
+			else
+				goto RtnFalse;   
+		}
+		break;
+				
+		case 811: //$ADDPOINT(x y)
+		{
+			COLORREF	Color;
+			 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096+256);
+			Arg1 = GlobalLock(hMem); 
+			lpstr = Arg1 + 4096;
+			
+			_fstrcpy (Arg1,Args);  
+			ExpandText (Arg1);
+			if (!*Arg1)
+				goto RtnFalse;
+			if (sscanf (Arg1,"%Flf %Flf",&Point.x,&Point.y) != 2)
+				goto RtnFalse;
+
+			if (AddNewPoint(Point)>0) 
+				goto RtnTrue; 
+			else
+				goto RtnFalse;   
+		}
+		break;
+				
+		case 812:// $LOADEDGE (joinlinefile,allcornerfile,origtpfile,filecornerfile,filelist.txt,mapfilename,outfilename) 
+		{
+/*			LPOFSTRUCT	pOFStruct; 
+			LPSTR		pFile, lpDot, lpEdgeID, lpSpace, lpBeg; 
+			char		EdgeID[8], CornerID[8]; 
+			DPOINT		Point[2], OutPoint, TempPoint;    
+			double		Tol=10.0;  
+			HANDLE		hEdge; 
+			short		nEdge=0,i;
+			LPEDGE		pEdge; 
+			LPCORNER	pCorner;
+			
+			nCorner = 0;
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,8*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			Arg5 = Arg4 + 2048; 
+			Arg6 = Arg5 + 2048; 
+			Arg7 = Arg6 + 2048; 
+			pFile = Arg7 + 2048; 
+			lpstr = pFile + 512;
+			pOFStruct = lpstr + 1024; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg4,','))) goto Rtn0;
+			_fstrcpy (Arg5,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg5,','))) goto Rtn0;
+			_fstrcpy (Arg6,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg6,','))) goto Rtn0;
+			_fstrcpy (Arg7,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+			ExpandText (Arg5);
+			ExpandText (Arg6);
+			ExpandText (Arg7);
+//			nEdge = LoadEdgeFile (Arg1,&hEdge);
+			nFileSides = 0;
+			Fid1 = GSSiOpenFile (Arg2,pOFStruct,OF_READ);
+			if (Fid1 == HFILE_ERROR)
+				goto RtnFalse; 
+			hCorner = GSSiGlobAlloc (GHND,UINT_MAX);
+			pCorner = GlobalLock (hCorner);
+			fgetstring (lpstr,1020,Fid1);
+			ProcessDelimTextHeader(lpstr);	     
+	  		while (fgetstring (lpstr,1020,Fid1))
+	  		{
+      			GetDelimTextData(lpstr);
+				GetGlobalCVal ("[UDI]",pCorner->ID,NULL);
+  				pCorner->Point.x = GetGlobalDVal ("[BPX]");
+  				pCorner->Point.y = GetGlobalDVal ("[BPY]");
+  				pCorner++;
+  				nCorner++; 
+      		} 
+      		GSSiClose (Fid1);
+      		GlobalUnlock (hCorner); 
+			nEdge = LoadEdgeFromCorners (Arg4,&hEdge);
+			if (!nEdge)
+				goto RtnFalse; 
+			Fid3 = GSSiOpenFile (Arg7,pOFStruct,OF_CREATE);
+			Fid1 = GSSiOpenFile (Arg3,pOFStruct,OF_READ);
+			if (Fid1 == HFILE_ERROR)
+				goto RtnFalse;
+			fgetstring (lpstr,1020,Fid1);
+			ProcessDelimTextHeader(lpstr);
+			fputstring ("# Original Transformation Points",Fid3);	     
+	  		while (fgetstring (lpstr,1020,Fid1))
+	  		{
+      			GetDelimTextData(lpstr);
+      			Point[0].x = GetGlobalDVal ("[BPX]");
+      			Point[0].y = GetGlobalDVal ("[BPY]"); 
+      			Point[1] = Point[0];
+   				sprintf (lpstr,"%f %f %f %f",Point[0].x,Point[0].y,Point[1].x,Point[1].y);  
+   				fputstring (lpstr,Fid3);
+      		} 
+      		GSSiClose (Fid1);
+			Fid1 = GSSiOpenFile (Arg4,pOFStruct,OF_READ);
+			if (Fid1 == HFILE_ERROR)
+				goto RtnFalse;
+			fputstring ("# Corner Points",Fid3);	     
+	  		while (fgetstring (lpstr,1020,Fid1))
+	  		{   
+	  			lpSpace = _fstrchr (lpstr,' ');
+	  			*lpSpace++ = 0;
+      			_fstrcpy (CornerID,lpstr); 
+      			lpBeg = lpSpace;
+	  			lpSpace = _fstrchr (lpBeg,' ');
+	  			*lpSpace++ = 0;
+      			Point[0].x = atof (lpBeg);
+      			Point[0].y = atof (lpSpace);
+      			//next line prevents edges ending at corners from being used
+		      	UseEdgePoint (Point[0],&OutPoint,"CORPT",nEdge,hEdge);
+      			if (GetCornerPoint (CornerID,&Point[1]))
+      			{   
+      				SetCornerAdjustment (CornerID,Point[1],Point[0],nEdge,hEdge);
+      				sprintf (lpstr,"%f %f %f %f",Point[0].x,Point[0].y,Point[1].x,Point[1].y);  
+      				fputstring (lpstr,Fid3);
+      			}
+      		} 
+      		GSSiClose (Fid1);
+			Fid1 = GSSiOpenFile (Arg5,pOFStruct,OF_READ);
+			if (Fid1 == HFILE_ERROR)
+				goto RtnFalse; 
+			fputstring ("# Edge Points",Fid3);	     
+			while (fgetstring(pFile,256,Fid1))
+			{
+				Fid2 = GSSiOpenFile (pFile,pOFStruct,OF_READ);
+				if (Fid2 != HFILE_ERROR)
+				{   
+					lpEdgeID = _fstrrchr (pFile,'\\');
+					lpEdgeID++;
+					lpDot = _fstrchr (lpEdgeID,'.');
+					*lpDot = 0;
+					_fstrcpy (EdgeID,lpEdgeID);
+					fgetstring (lpstr,1020,Fid2);
+					ProcessDelimTextHeader(lpstr);	     
+			  		while (fgetstring (lpstr,1020,Fid2))
+			  		{
+		      			GetDelimTextData(lpstr);
+		      			GetGlobalCVal ("[FILENAME]",pFile,NULL);
+		      			if (!_fstricmp (pFile,Arg6))
+		      			{   
+		      				ii=GetGlobalLVal ("[INT_REFNO]"); 
+		      				if (ii == 301935)
+		      					ii=0;
+		      				Point[0].x = GetGlobalDVal ("[BPX]");
+		      				Point[0].y = GetGlobalDVal ("[BPY]");
+		      				Point[1].x = GetGlobalDVal ("[EPX]");
+		      				Point[1].y = GetGlobalDVal ("[EPY]"); 
+		      				if (ldistp (Point[0],Point[1]) > Tol)
+		      				{   
+		      					for (i=0;i<2;i++)
+		      					{
+		      						if (UseEdgePoint (Point[i],&OutPoint,EdgeID,nEdge,hEdge))
+		      						{
+					      				sprintf (lpstr,"%f %f %f %f (%s)",Point[i].x,Point[i].y,OutPoint.x,OutPoint.y, EdgeID);  
+					      				fputstring (lpstr,Fid3);
+					      			}
+					      		}
+			      			}
+		      			}
+				    }
+					GSSiClose (Fid2);
+				}
+			}
+			GSSiGlobFree (&hUseEdgePoint); 
+			GSSiGlobFree (&hEdge); 
+			GSSiGlobFree (&hCorner);
+			GSSiClose (Fid1);
+			GSSiClose (Fid3);*/
+		    goto RtnTrue;
+		}
+		
+		case 813: // $AREAGRID(pathname,symbol,width)
+		{
+			short	DistUnits;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			GetDistAndUnits (Arg3,&Dist,&DistUnits);  
+			Dist = ConvertInDist (Dist,DistUnits+1); 
+			if (CreateAreaGrid (Arg1,Arg2,Dist))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		 
+		case 814: //$TCPCLOSE(socket)
+		{				
+			SOCKET	socket;
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+			Arg1 = GlobalLock(hMem);
+			
+			_fstrcpy (Arg1,Args);
+			*OutLoc = 0;
+			ExpandText (Arg1);        
+			socket = atol (Arg1);
+			if (CloseTCPIPSocket (socket))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+
+		case 815: // $PARSECDT((VAR1,VAR2),(val1,val2)) parses variables from comma delimted text
+		{	 
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1); 
+			if (*Arg1 == '(' && *LastChr(Arg1) == ')')
+			{
+				Arg1++;
+				*LastChr(Arg1) = 0;
+			}
+			ExpandText (Arg2);
+			if (!ProcessDelimTextHeader(Arg1,&hDLT))
+				goto RtnFalse;
+			if (*Arg2 == '(' && *LastChr(Arg2) == ')')
+			{
+				Arg2++;
+				*LastChr(Arg2) = 0;
+			}
+		    rtn = GetDelimTextData(Arg2,hDLT); 
+			GSSiGlobFree (&hDLT);
+			if (rtn)
+				goto RtnTrue;
+			else
+            	goto RtnFalse;
+			
+		}  
+		break;
+		
+		case 816: // $NUMLINES(pathname) returns number of lines in text file
+		{	 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem); 
+			pOFStruct = (LPOFSTRUCT)(Arg1 + 2048);
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+        	nlong = 0;
+			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ); 
+			if (Fid != HFILE_ERROR)
+			{
+	        	while (fgetstring (Arg1,2040,Fid))
+		   			nlong++; 
+		   		GSSiClose (Fid);
+		   	}
+			ltoa (nlong,OutLoc,10);  
+		    goto Rtnl;
+        }
+
+		case 817: // $SCALERNG(maxscale,minscale) returns null if current scale in range else %NIR% (not in range)
+		{	 
+			double	MinScale, MaxScale;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			MaxScale = atof (Arg1);
+			MinScale = atof (Arg2);
+			
+			if (OrthScale < MaxScale && OrthScale >= MinScale)
+				*OutLoc = 0;
+			else
+				_fstrcpy (OutLoc,"%NIR%");
+			goto Rtnl;
+			
+		}  
+		break;
+		
+		case 818: // $ZOOMLIST(SELECT or NEXT or PRIOR)
+		{	 
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			if (!_fstricmp (Arg1,"NEXT"))
+				n=1;
+			else if (!_fstricmp (Arg1,"PRIOR"))
+				n=-1;
+			else
+				n=0;
+			if (DisplayZoomList (n))
+				goto RtnTrue;
+			goto RtnFalse;
+			
+		}  
+		break;
+		
+		case 819: // $MIDPOINT(coord pair)
+		{	 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+			Arg1 = GlobalLock(hMem);
+			
+			_fstrcpy (Arg1,Args);
+			*OutLoc = 0;
+			ExpandText (Arg1);        
+			Bounds = atobounds (Arg1,&Err);
+			if (Err)   
+				*OutLoc = 0; 
+			else
+			{
+				Point = MinMaxMidPointD (&Bounds);
+				sprintf (OutLoc,"%.14lg %.14lg",Point.x,Point.y);
+			}
+			goto Rtnl;
+		}  
+		break;
+		
+		case 820: 
+		{
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			if ((ParLoc = MatchLev (Arg3,',')))
+			{
+				_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg4 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4); 
+			Point2 = atopt (Arg1,&Err); 
+			AZ = atof (Arg2);
+			Dist = atof (Arg3);
+			Offset = atof (Arg4); 
+			Point = dnewpt (Point2,AZ,Dist);
+			if (Offset)
+			{
+				Point2 = Point;
+				Point = dnewpt (Point2,LTWOPI(AZ+HALFPI),Offset);
+			}
+			sprintf (OutLoc,"%.14lg %.14lg",Point.x,Point.y);
+			goto Rtnl;
+		}
+		case 821: // $PATHTYPE(Pathname)
+		{	 
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			n = FileType (Arg1);
+			itoa (n,OutLoc,10);
+			goto Rtnl;
+			
+		}  
+		case 822: // $GMDMERGE(DBTO,DBFROM)
+		{	 
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1); 
+			if (*Arg1 == '(' && *LastChr(Arg1) == ')')
+			{
+				Arg1++;
+				*LastChr(Arg1) = 0;
+			}
+			ExpandText (Arg2);
+			if (GWD_MergeDBs (Arg1,Arg2,TRUE))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		case 823: // $TRUNCATE(arg)
+		{	 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			Truncate (Arg1);
+			_fstrcpy (OutLoc,Arg1);
+			goto Rtnl;
+		}  
+		break;
+		
+		case 824: // $FILETYPE(arg)
+		{	 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			nlong = FileType (Arg1);
+			ltoa (nlong,OutLoc,10);
+			goto Rtnl;
+		}  
+		break; 
+		
+		case 825: //$REGISTER
+            {
+            	UINT	st=IDOK;
+            GetSno:	  
+			   	if (!GetTextString (GetFocus(),SerialNumber,32,"Enter the LMCODE located on the cover of the CD case.",NULL,NULL,0))
+			   		goto RtnFalse;
+			   	while (st == IDOK)
+			   	{   
+			   		short err = CheckForRegistrationServer (hWndMain,SerialNumber);
+             DoReg: 
+             		AutoReg = FALSE;
+			   		switch (err)
+			   		{
+			   			case 0: 
+		            	{
+		                  FARPROC lpfnAUTOREGMsgProc; 
+		                  short	nRc;
+		
+		                  lpfnAUTOREGMsgProc = MakeProcInstance((FARPROC)AUTOREGMsgProc, hInst);
+		                  nRc = DialogBox(hInst, (LPSTR)"AUTOREG", hWndMain, lpfnAUTOREGMsgProc);
+		                  FreeProcInstance(lpfnAUTOREGMsgProc);  
+		                  if (nRc)
+						  { 
+						  	GetTextString (GetFocus(),AccessCode,64,"Use this access code",NULL,NULL,0);  
+			                goto RtnTrue;
+						  }
+		                  
+		            	}
+						st = IDCANCEL;
+		            	break;
+		            	
+		            	case 1:
+		            		st = GSSiMessageBox ("Unable to connect to registration server",0,MB_OKCANCEL);
+		            		break;
+		            	
+		            	case 2:
+		            		st = IDCANCEL;
+		            		break;
+		            	case 3:
+		            		if (GSSiMessageBox ("This number already in use - use anyway?",0,MB_YESNO) == IDYES)
+		            		{
+		            			err = 0;
+		            			goto DoReg;
+		            		}
+		            		st = IDCANCEL;
+		            		break;
+		            	case 4:
+		            		GSSiMessageBox ("Invalid Serial Number",0,MB_ICONEXCLAMATION);
+		            		goto GetSno;
+		            		break;
+	            	}
+	            }
+	            goto RtnFalse;
+            }		
+            break;
+            
+		
+		
+		case 901: /* $ADDSEARCH address search*/
+/*		{	long	House;
+			HANDLE	hMatches; 
+			LPINT	pnMatches;
+			LPSTR	pMatch, lpTab, lpBeg; 
+			int		i;
+					
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4096);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);  
+			ExpandText (Arg2);    
+			House = atol (Arg1);   
+			_fstrupr (Arg2);
+			hMatches = DisplayStreets (NULL,House, 0, Arg2,_fstrlen (Arg2));
+			pnMatches = pMatch = GlobalLock (hMatches);
+			pMatch += 2;
+			sprintf (CmdMess,"%i;",*pnMatches);          
+			for (i=0;i<*pnMatches;i++)
+			{   
+				lpTab = _fstrchr (pMatch,'\t');
+				*lpTab++=0;
+				lpBeg = lpTab;
+				lpTab = _fstrchr (lpTab,'\t');
+				*lpTab++ = 0;
+				SetGlobalValue ("%TARGET_TLID",lpBeg);  
+				AddRefno = atol(lpBeg);
+				lpBeg = lpTab;
+				lpTab = _fstrchr (lpTab,'\t');
+				*lpTab++ = 0;
+				SetGlobalValue ("%TARGET_VIEW",lpBeg); 
+				RealView = atoi(lpBeg);
+				lpBeg = lpTab;
+				lpTab = _fstrchr (lpTab,'\t');
+				*lpTab++ = 0;
+				lpBeg = lpTab;
+				lpTab = _fstrchr (lpTab,'\t');
+				*lpTab++ = 0;
+				lpBeg = lpTab;
+				SetGlobalValue ("%TARGET_FRAME",lpBeg); 
+				AddressFrame = atol (lpBeg);
+	            sprintf (_fstrchr(CmdMess,0),"%s;",pMatch);
+	            pMatch += 256;
+			} 
+			if (*pnMatches==1)
+			{    
+				HFILE	VLFid; 
+				char	BMFile[128],str[260];  
+				LPSTR	lpSpace;
+				OFSTRUCT	OFStruct;   
+				double	Dist;
+				BOOL	firstline=TRUE;
+				HDIB	hDIB;   
+				RECT	Rect;
+				
+				BringWindowToTop (hWndMain);
+				DisplayVideo (AddRefno,AddressFrame,RealView);
+				_fstrcpy (str,"[%VIEW_LIST_FILE]");
+				ExpandText (str);
+				VLFid = GSSiOpenFile (str,&OFStruct,OF_READ);
+				if (VLFid != HFILE_ERROR)
+				{   
+					while (fgetstring (str,256,VLFid)) 
+					{
+						lpSpace = _fstrchr (str,' ');  
+						_fstrcpy (BMFile,++lpSpace); 
+						if (firstline) 
+						{   
+							firstline = FALSE;
+							Dist = atof (str);
+							ZoomToPointAndDist (sAddressPoint,Dist);  
+							SetViewport (1); 
+							Rect = CurView->DrawRect;
+							ClientRectToScreenRect (CurView->hWnd,&Rect);
+							hDIB = CopyScreenToDIB(&Rect);   
+							SaveDIB(hDIB,BMFile);
+						}
+						else
+							GetGeospanView (str,BMFile);
+					}
+					GSSiClose (VLFid);
+			    }
+			}
+			GlobalUnlock (hMatches);
+			GlobalFree (hMatches);
+			GSinitAVI();
+			ReOpenMovie(VideoWnd);
+			goto RtnTrue;
+		} */
+		
+		case 902:// $REDISPLAY()
+		{   
+			if (*Args) 
+			{
+       			 HaltMapDisplay(FALSE);
+				 DisplayCycle++;
+				 TotCopySize = 0;
+	           	 RedisplayViewports(TRUE);
+			}			
+			else
+			{
+				HaltMapDisplay(FALSE);
+				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
+			}
+			goto RtnTrue;
+		}
+		
+		case 903: // $GMDUPDATE(file,setkey,setvars) 
+				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,VAL1=1;VAL3=3) 
+		{	 
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			if (UpdateGMDFile (Arg1,Arg2,Arg3,';'))
+				goto RtnTrue; 
+			else
+            	goto RtnFalse;
+			
+		}  
+		break;  
+		
+		case 906: // $GMDDELETE(file,SQL)  
+		{	 
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			if (DeleteGMDRecords (Arg1,Arg2))
+				goto RtnTrue; 
+			else
+            	goto RtnFalse;
+			
+		}  
+		break;  
+		
+		case 905: // $DELETEREF(refno)  
+		{	 
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg1,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg2,ParLoc);
+			} 
+			else
+				*Arg2 = 0;
+			ExpandText (Arg1); 
+			Refno = atol (Arg1);
+			if (!CurView->UpdateFile)
+			{
+				if (PickByRefno(Refno,NULL,NULL,-1))
+					DeletePickedItem (0,12,92);
+				else
+					goto RtnFalse;
+			}
+			_fstrcpy (PltName,CurView->lpFiles[CurView->UpdateFile-1]);
+    		PltType = 2;
+			AddPolyToMap (0,NULL, NULL,1,Refno,NULL,-1,1,NULL,NULL,NULL,-1,-1,0,0,0,0,0,FALSE);
+			CloseMap(TRUE);
+			CloseRefIndex();    		
+    		ForceRefIndex = ForceTAGIndex = FALSE;
+			goto RtnTrue; 
+		}  
+		break;  
+		
+		
+		case 907: // $MATCHTRAN(jlinefile,filelist,Dist) matches points in tran files withing dist  
+		{	 
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;  
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+            if (MatchTranFunction (Arg1,Arg2,Arg3))
+				goto RtnTrue;
+			goto RtnFalse;
+		}  
+		break;      
+		
+		case 908: // $CREATESYM (symname,type(0=par,1=point,2=line,3=area),parent,desc,replace)
+		{	 
+			short	addorcreate=1, Type;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*5+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			Arg5 = Arg4 + 2048; 
+			str  = Arg5 + 2048;
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg4,','))) goto Rtn0;
+			_fstrcpy (Arg5,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);  
+			ExpandText (Arg5);  
+		    Type = atoi (Arg2);  
+		    TORF = atob (Arg5);    
+		    if (TORF)
+		    	addorcreate=2;
+		    sprintf (str,"$STR(%s,PAR=%s,DES=%s)",Arg1,Arg3,Arg4);
+			n = GetOrCreateSym (str,NULL,NULL,addorcreate,Type);
+			itoa (n,OutLoc,10);
+			goto Rtnl;
+			
+		}  
+		break;
+		
+		case 909://$GETINIVAL(pathname.ini,section,name,default)
+		{
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;  
+			Arg4 = Arg3 + 2048;
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if ((ParLoc = MatchLev (Arg3,','))) 
+			{
+				_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg4 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+			GetPrivateProfileString (Arg2,Arg3,Arg4,OutLoc,256,Arg1); 
+			goto Rtnl;
+		}
+		break;
+		
+		case 910://$SETINIVAL(pathname.ini,section,name,value)
+		{
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;  
+			Arg4 = Arg3 + 2048;
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if ((ParLoc = MatchLev (Arg3,','))) 
+			{
+				_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg4 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+			if (WritePrivateProfileString (Arg2,Arg3,Arg4,Arg1))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		break;
+		
+		case 911: // $POLYPOINT(PointNum,X or Y or B) 
+		{	 
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);   
+			nlong = IDNINT (atof(Arg1));
+			if (nlong > nCurPolyPoints || nlong < 1 || !hCurPolyPoints)
+			{
+				*OutLoc = 0; 
+				goto Rtnl;
+			}
+			pPoint = (LPDPOINT)GlobalLock (hCurPolyPoints);
+			if (*Arg2 == 'X' || *Arg2 == 'x') 
+				sprintf (OutLoc,"%f",pPoint[nlong-1].x);
+			else if (*Arg2 == 'Y' || *Arg2 == 'y') 
+				sprintf (OutLoc,"%f",pPoint[nlong-1].y);
+			else
+				sprintf (OutLoc,"%f %f",pPoint[nlong-1].x,pPoint[nlong-1].y);
+			goto Rtnl;
+		}
+		
+		case 912: // $VEHUPDATE(vehid,point) 
+		{	 
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);  
+			if (!_fstrnicmp (Arg2,"Invalid",7))
+				goto RtnFalse;
+			Point = atopt (Arg2,&Err); 
+			if (SetVehicleLoc (Arg1,Point,0,0))
+				goto RtnTrue;
+			else
+				goto RtnFalse;
+		}
+		
+		case 913: // $HLTOUTPUT()
+		{	 
+			CreateHighlightOutput (NULL,NULL);
+			goto RtnTrue;
+		}
+		
+		case 914: // $INSTALLCD(FromPath,ToPath,SearchString)
+		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
+		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
+        {
+              FARPROC	lpfnCDINSTALLERMsgProc;
+              short		nRc; 
+                  
+              lpfnCDINSTALLERMsgProc = MakeProcInstance((FARPROC)CDINSTALLERMsgProc, hInst);
+              nRc = DialogBox(hInst, (LPSTR)"CDINSTALLER", hWndMain, lpfnCDINSTALLERMsgProc);
+              FreeProcInstance(lpfnCDINSTALLERMsgProc);  
+              if (nRc)
+              	goto RtnTrue;
+              else
+              	goto RtnFalse;
+        }
+		case 915: // $ORTHOSIZE() shows size of orthos plotted since last call  
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);  
+			sprintf (Arg1,"%ld Records, %lu bytes",nOrthoBlocks,nOrthoBytes); 
+			MessageBox (GetFocus(),Arg1,"",MB_OK);
+			nOrthoBlocks=0;  
+			nOrthoBytes=0;
+			goto RtnTrue;
+		
+		case 916:	//$GMDCREATE(Name,numkeyfld,defstring)
+		{
+			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			if (nArgs != 3)
+				goto RtnFalse;
+			n = atoi (Arg[2]);
+			if (CreateGWDDatabase (Arg[1],1,0,n,Arg[3]))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		
+		case 917:	//$FINDFILES(Dir,wildcard,outfile (opt))
+		{
+			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			if (nArgs < 2)
+				goto RtnFalse;
+			if (*Arg[3])
+				Fid =	GSSiOpenFile (Arg[3],NULL,OF_CREATE);
+			else
+				Fid = HFILE_ERROR;
+			nlong = 0;
+			SearchFilesInDir (Arg[1],NULL, Fid,&nlong,Arg[2],1);
+			if (Fid != HFILE_ERROR)
+				GSSiClose (Fid);
+			ltoa (nlong,OutLoc,10);
+			goto Rtnl; 
+					      
+		}
+		
+		case 918:	//$AZMTOBEAR(azm,format)
+		{
+			char	DegC[8],MinC[8],SecC[16], PreDir[4], PostDir[4]; 
+			
+			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			n = atoi (Arg[2]);  
+			AZ = atof (Arg[1]);
+			AZToBear (AZ,PreDir,DegC,MinC,SecC,PostDir); 
+			if ((pEnd = _fstrchr (SecC,'.')))
+			{
+				pEnd += n+1;
+				*pEnd = 0;
+			}
+			
+			sprintf (OutLoc,"%s %s %s %s %s",PreDir,DegC,MinC,SecC,PostDir);
+			goto Rtnl; 
+		}
+		
+		case 919: // $SYMDELETE(symnum)
+		{	 
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args); 
+			ExpandText (Arg1);
+			n = atoi (Arg1);
+			if (DeleteSymbol (n,TRUE))
+				goto RtnTrue;
+			goto RtnFalse;
+		}  
+		break;
+		
+		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc)
+		{	 
+            FARPROC lpfnDECOMPPOLYMsgProc; 
+            short	nRc;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+            lpfnDECOMPPOLYMsgProc = MakeProcInstance((FARPROC)DECOMPPOLYMsgProc, hInst);
+            nRc = DialogBox(hInst, (LPSTR)"DECOMPPOLY", hWndMain, lpfnDECOMPPOLYMsgProc);
+            FreeProcInstance(lpfnDECOMPPOLYMsgProc); 
+             
+            if (nRc)
+            {
+              	PostMessage(hWndMain, WM_COMMAND, 58000, 0L);
+              	goto RtnTrue;
+            }   
+            else
+				goto RtnFalse;
+		}
+		
+		case 1002: // $DELETEFILE(path,Y or N or T or F or 1 or 0 (verify switch))
+		{	double	rval;
+			int		l, len, st; 
+			LPSTR	lpOut; 
+			char	fillchar;
+			LPOFSTRUCT	pOFStruct;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			pOFStruct = (LPOFSTRUCT)(Arg2 + 2048);
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+
+			if (!ExistFile (Arg1))
+				goto RtnTrue;
+			if (!_fstrcspn (Arg2," 1TtYy"))
+			{   
+				HANDLE	hTemp=GSSiGlobAlloc (GMEM_MOVEABLE,512);
+				LPSTR	Mess=GlobalLock (hTemp);
+             	sprintf (Mess,"Delete file '%s'?",Arg1);
+             	st = MessageBox (GetFocus(),Mess,"Verify Delete",MB_YESNO); 
+				GSSiGlobUlFree (&hTemp);
+			}
+			else
+				st = IDYES;
+            
+            if (st != IDYES)
+            	goto RtnFalse;
+            
+			if (GSSiOpenFile (Arg1,pOFStruct,OF_DELETE) != HFILE_ERROR)
+				goto RtnTrue;
+			else
+            	goto RtnFalse;
+			
+		} 
+		
+		
+		case 1003: //$STREETNAME(streetnum)
+		{
+			long	SNum = atol (Args);
+			
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,(LPSTR)(Args));
+			ExpandText (Arg1);
+			SNum = atol (Arg1);
+			if (GetTrueStreetName (SNum,OutLoc,-1))
+          		l = _fstrlen (OutLoc);
+			else 
+			{
+				*OutLoc = 0;
+				l=0;        
+			}
+			goto Rtnl;
+		}
+		
+		case 1004: // $BOUNDPOINT(bounds,1-4 (ll,ul,ur,lr) or 5 center)
+		{	
+			short	opt;
+						
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			if (sscanf (Arg1,"%Flf %Flf %Flf %Flf",&Bounds.xmn, 
+										  		   &Bounds.ymn,
+										  		   &Bounds.xmx,
+										  		   &Bounds.ymx) != 4)
+				goto RtnFalse;
+			ExpandText (Arg2);
+			opt = atoi (Arg2);
+			switch (opt)
+			{
+				case 1:
+					Point.x = Bounds.xmn;
+					Point.y = Bounds.ymn;
+					break;
+				case 2:
+					Point.x = Bounds.xmn;
+					Point.y = Bounds.ymx;
+					break;
+				case 3:
+					Point.x = Bounds.xmx;
+					Point.y = Bounds.ymx;
+					break;
+				case 4:
+					Point.x = Bounds.xmx;
+					Point.y = Bounds.ymn;
+					break;   
+				case 5:
+					Point = MinMaxMidPointD (&Bounds);
+					break;
+				default:
+					goto RtnFalse;
+			}
+			sprintf (OutLoc,"%Flf %Flf",Point.x,Point.y); 
+			l = _fstrlen (OutLoc);  
+		    goto Rtnl;
+		}  
+		
+		case 1005: //$PRINTSETUP() 
+		{
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);  
+          	if (*Arg1) 
+          		n = -2;
+          	else
+          		n = -1;
+			rtn = PrintMap (hWndMain,0,n);
+			goto Rtnrtn;
+		}
+		
+		case 1006: // $SAVESTATUS(varname,YorN) save variable save status
+		{	
+			BOOL	Save;
+			LPSTR	pName;
+						
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = 0;
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);  
+			ExpandText (Arg2);
+			Save = atob (Arg2);
+			if (*Arg1 == '(')
+			{
+				Arg1++;
+				if (!(ParLoc = MatchLev (Arg1,')')))
+					goto Rtn0;
+				*ParLoc = 0;
+			}
+			pName = Arg1; 
+			while (pName)
+			{
+				if ((ParLoc = MatchLev (pName,',')))
+					*ParLoc++ = 0;
+				SetVarSaveStatus (pName,Save);
+				pName = ParLoc;
+			}
+			goto RtnTrue;
+		}
+			
+		case 1007: // $UPDATETIME(varname) last time var was updated
+		{   VARPNT  VarPnt;   
+			HANDLE	handle;
+						
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,(LPSTR)(Args));
+			ExpandText (Arg1);
+			if (handle = FindVar(Arg1))
+			{ 
+				VarPnt = (VARPNT)GlobalLock (handle);
+				ultoa (VarPnt->changetime,OutLoc,10);
+				GlobalUnlock (handle);
+			}
+			else
+				_fstrcpy (OutLoc,"0");
+			goto Rtnl;
+		}
+
+		case 1008: // $REGISTERCD(FromPath,ToPath,SearchString)
+		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
+		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
+		{    
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;  
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+            if (RegisterCD (Arg1,Arg2,Arg3))
+            	goto RtnTrue;
+            goto RtnFalse;
+		}
+
+		case 1009: // $PRINTMERGE(DataFile,MacroFile)
+		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
+		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
+		{    
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);  
+			_fstrcpy (PMDataFile,Arg1);
+			_fstrcpy (PMMacroFile,Arg2);
+			FirstMergeRecord=1;
+			LastMergeRecord=LONG_MAX;
+            if (PrintMerge(hWndMain))
+            	goto RtnTrue;
+            goto RtnFalse;
+		}
+
+        case 1010: //$VEHICLEDEF ()
+        {
+	          FARPROC lpfnVEHICLEDEFMsgProc;
+	
+	          lpfnVEHICLEDEFMsgProc = MakeProcInstance((FARPROC)VEHICLEDEFMsgProc, hInst);
+	          rtn = DialogBox(hInst, (LPSTR)"VEHICLEDEF", hWndMain, lpfnVEHICLEDEFMsgProc);
+	          FreeProcInstance(lpfnVEHICLEDEFMsgProc);  
+	          if (rtn)
+	          	goto RtnTrue;
+	          else
+	          	goto RtnFalse;
+         }
+
+		case 1011: // $SETSYMDESC(Symname,description)
+		{   
+			HANDLE		hSym;
+			LPSYMBOL	pSym;
+			 
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2); 
+			n = GetDictSymbolNumber (Arg1);    
+			if (!n)
+            	goto RtnFalse; 
+			hSym = GetDictSymDesc (n);
+			pSym = (LPSYMBOL)GlobalLock (hSym); 
+			_fstrncpy (pSym->Desc,Arg2,64);
+			GlobalUnlock (hSym);
+            ReplaceSymbol (n,hSym);
+			DestroySymbol (hSym);  
+            goto RtnTrue;
+		}   
+		
+		case 1012: // $INSERTLINE(file,linetoinsertafter,line)
+		{	
+			LPSTR	HaveLine;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048+256+1030+sizeof(OFSTRUCT));
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			pFile = Arg3 + 2048;
+			lpstr = pFile + 256; 
+			*lpstr = 0;
+			pOFStruct = (LPOFSTRUCT)(lpstr + 1030);  
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ);
+			if (Fid == HFILE_ERROR)
+	           	goto RtnFalse; 
+	        _fullpath (pFile,Arg1,256); 
+	        pEnd = _fstrrchr (pFile,'\\');
+	        _fstrcpy (pEnd,"\\tempfile");
+			Fid2 = GSSiOpenFile (pFile,pOFStruct,OF_CREATE);    
+			do
+			{ 
+				if ((HaveLine = fgetstring (lpstr,1024,Fid)))
+					fputstring (lpstr,Fid2);
+			}
+			while (HaveLine && _fstrcmp (lpstr,Arg2)); 
+			fputstring (Arg3,Fid2); 
+			while (fgetstring (lpstr,1024,Fid))
+				fputstring (lpstr,Fid2);
+	        GSSiClose (Fid); 
+	        GSSiClose (Fid2);
+	        GSSiRemove (Arg1);
+	        GSSiRename (pFile,Arg1);
+			goto RtnTrue;
+		} 
+		
+		case 1013: //$CROSSMATCH([%DL]attribut\frommap.txt,[%DL]attribut\fromars.txt,@[UDI],@$OS(@[GEOACCT]),[%DL]attribut\notinmap.txt,[%DL]attribut\notinars.txt)
+		{
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,8*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			Arg5 = Arg4 + 2048; 
+			Arg6 = Arg5 + 2048; 
+			Arg7 = Arg6 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg4,','))) goto Rtn0;
+			_fstrcpy (Arg5,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg5,','))) goto Rtn0;
+			_fstrcpy (Arg6,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg6,','))) goto Rtn0;
+			_fstrcpy (Arg7,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+			ExpandText (Arg5);
+			ExpandText (Arg6);  
+			ExpandText (Arg7);   
+			l = atoi (Arg7);
+			if (CrossMatch (Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,l))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		
+		case 1014: //$AREAINAREA(BoundaryArea,Theme,GMDfile,MinPCT)
+		{
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,5*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			Arg5 = Arg4 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+			RVal = atof (Arg4);
+			if (AreaInArea (Arg1,Arg2,Arg3,RVal))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		
+		case 1015: //$CREATEFILE(pathname)
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,(LPSTR)(Args));
+			ExpandText (Arg1);
+			Fid = _lcreat (Arg1,0);   
+			if (Fid == HFILE_ERROR) 
+				goto RtnFalse;
+			_lclose (Fid);
+          	goto RtnTrue;  
+          	
+		case 1016: // $WINTOWORLD(point,vpname)
+		case 1017: // $WORLDTOWIN(point,vpname)
+		{   
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			if ((ParLoc = MatchLev (Args,',')))
+			{
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				ParLoc = '\0';
+			}
+			else
+				*Arg2 = 0;
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			Point = atopt (Arg1,&Err); 
+			SetCurView ( SetVPFromName (Arg2,&Err)); 
+			if (FunID == 1016) 
+				Point2 = WinPtToBasePtD (&Point);
+			else
+				Point2 = BasePtToWinPtD (&Point);
+			SetCurView ( SaveVP);
+			sprintf (OutLoc,"%.14lg %.14lg",Point2.x,Point2.y);
+			goto Rtnl;
+		}   
+		
+        case 1018: //$ADJUSTPOLY(opt) 
+        {
+			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+        	n = atoi (Arg[1]); 
+            if (AdjustPolygon(n))
+            	goto RtnTrue;
+            goto RtnFalse;
+        }
+        
+		case 1101: //$DUMPGLOBALS(pathname)
+			dumpvars (Args);
+          	goto RtnTrue;  
+          	
+        case 1102: //LAYERBOUNDS (layerid) <100 actual layer, > layer search for layerid, 0=visbounds
+        {   
+        	short	Layer;
+        	BOOL	rtn; 
+        	HANDLE	hSaveVis = GSSiGlobAlloc (GMEM_MOVEABLE,sizeof(VISLIST));
+        	LPVISLIST	pSaveVis = (LPVISLIST)GlobalLock (hSaveVis);
+        	
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,(LPSTR)(Args));
+			ExpandText (Arg1);
+			Layer = atol (Arg1);
+			*pSaveVis = *CurVis; 
+			if (Layer < 0)
+			{
+			}
+			else
+			if (Layer <= CurView->NumFiles)
+			{
+				_fmemset (CurVis->FileIsVisible,0,sizeof(CurVis->FileIsVisible));
+				CurVis->FileIsVisible[Layer-1]=TRUE;
+			}
+			else
+			{
+			}
+			rtn = GetVisBounds (&Bounds,CurView->hDC);
+			*CurVis = *pSaveVis;
+			GSSiGlobUlFree (&hSaveVis);
+			if (!rtn)
+				goto RtnFalse; 
+			sprintf (OutLoc,"%Flf %Flf %Flf %Flf",Bounds.xmn,Bounds.ymn,Bounds.xmx,Bounds.ymx);
+			l = _fstrlen (OutLoc);  
+		    goto Rtnl;
+		}
+		
+        case 1103: //FIXGMERRORS(file)
+        {   
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy (Arg1,(LPSTR)(Args));
+			ExpandText (Arg1); 
+			FixGMErrors(Arg1);
+		    goto Rtnl;
+		} 
+		
+		case 1104: //$ADDWAYPOINT ()
+        {
+        	BOOL	nRc;
+            
+            DoPaint=FALSE;      
+			lpfnADDWAYPOINTMsgProc = MakeProcInstance((FARPROC)ADDWAYPOINTMsgProc, hInst);
+			nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndMain, lpfnADDWAYPOINTMsgProc);
+			FreeProcInstance(lpfnADDWAYPOINTMsgProc); 
+			DoPaint=TRUE;
+            if (nRc)
+            	goto RtnTrue;
+            else
+				goto RtnFalse;
+        }
+		
+		case 1105: //$COMPILETRAN(tranfile)
+		{	
+			HANDLE	hTran; 
+			long	Tran2Offset;    
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*3);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			pOFStruct = (LPOFSTRUCT)(Arg2 + 2048);
+			if ((ParLoc = MatchLev (Args,',')))
+			{ 
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				goto RtnFalse;
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			GSSiRemove (Arg2);
+			if ((hTran=LoadTranFile (Arg1,1,3)))
+			{   
+				Fid = GSSiOpenFile (Arg2,pOFStruct,OF_CREATE);
+				WriteTranData (Fid,hTran); 
+				Tran2Offset = _llseek (Fid,0,2);
+				CloseTRANS2 (&hTran);  
+				hTran=LoadTranFile(Arg1,2,3);
+				WriteTranData (Fid,hTran);
+				CloseTRANS2 (&hTran); 
+				_lwrite (Fid,&Tran2Offset,4);
+				GSSiClose (Fid);
+				goto RtnTrue;
+			}
+			else
+				goto RtnFalse;
+		} 
+
+		
+        case 1106: //$GPSADDPOINT(waypoint)
+        {   
+        	long	WayPointID;
+        	
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg1,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg2,ParLoc);
+			} 
+			else
+				*Arg2 = 0;
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg3,ParLoc);
+			} 
+			else
+				*Arg3 = 0;
+			if ((ParLoc = MatchLev (Arg3,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg4,ParLoc);
+			} 
+			else
+				*Arg4 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4); 
+			Point.x = atof (Arg3);
+			Point.y = atof (Arg4);
+			WayPointID = atol (Arg1); 
+			if (WayPointID)
+				rtn = AddWPToGPSList (Arg1,WayPointID,Arg2,&Point);
+			else 
+			{
+				WayPointID = atol (Arg2);
+				rtn = AddWPToGPSList (Arg1,WayPointID,"",&Point);
+			}
+			if (rtn)
+		    	goto RtnTrue;
+		    else
+		    	goto RtnFalse;
+		}   
+		
+		case 1107: // $UPDATEGRCMD(Varname,VarValue,SavedFileID(optional))
+		{	 
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+            n = atoi (Arg3); 
+			if (UpdateCmdStringInFile (Arg1,Arg2,n))
+              	goto RtnTrue;
+            else
+				goto RtnFalse;
+		} 
+		
+		case 1108: //$RUNTEXTFILE (pathname!statuswindtitle!statuslooptext,command)   or
+				   //$RUNTEXTFILE (pathname(lineno),command) runs only single line
+        {   
+        	LPSTR pStatusText, pLoopText=0, pLineNo;
+        	long	ProcessLine = -1, AtLine=0;
+        	
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*5);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;
+			Arg4 = Arg3 + 2048;
+			pOFStruct = (LPOFSTRUCT)(Arg4 + 2048);
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+            if ((pStatusText = _fstrchr (Arg1,'!')))
+            	*pStatusText++ = 0;   
+            if ((pLineNo = _fstrchr (Arg1,'(')))
+            {
+            	*pLineNo++ = 0;    
+            	ProcessLine =  atol (pLineNo);
+            }
+			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ);
+			if (Fid == HFILE_ERROR)
+	           	goto RtnFalse;
+			if (pStatusText)
+			{   
+				if ((pLoopText = _fstrrchr (pStatusText,'!')))
+					*pLoopText++ = 0;
+		        nlong = _llseek (Fid,0,2);
+		        _llseek (Fid,0,0); 
+				CreateStatusWindow (CurView->hWnd,1,NULL);
+		    }
+	        fgetstring (Arg3,2040,Fid);
+			ProcessDelimTextHeader(Arg3,&hDLT);
+			IgnoreSelectVP = TRUE;
+			while (ContinueProcessing && fgetstring (Arg3,2040,Fid))
+			{   
+				if (ProcessLine < 0 || AtLine == ProcessLine)
+				{
+			    	GetDelimTextData(Arg3,hDLT); 
+			    	_fstrcpy (Arg4,Arg2);
+			    	ExpandText (Arg4);
+		            if (pStatusText)
+						StatusWindowUpdate (pStatusText,pLoopText,nlong,_llseek (Fid,0,1)); 
+					if (ProcessLine >= 0)
+						break;
+				}
+				AtLine++;
+            }  
+            IgnoreSelectVP = FALSE;
+            ContinueProcessing = TRUE;
+			GSSiGlobFree (&hDLT);
+            GSSiClose (Fid);
+            if (pStatusText)
+				DestroyStatusWindow();  
+            goto RtnTrue;
+		}
+		
+		case 1109: //$GETTRANDATA(tranfile) gets tranfile data from highlight list and editlimits
+		{	
+			LPHIGHLIGHTDATA	pHighlightData;
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2048*2+256+sizeof(HIGHLIGHTDATA));
+			Arg1 = GlobalLock(hMem);
+			str = Arg1 + 2048;
+			pOFStruct = (LPOFSTRUCT)(str + 256);
+			pHighlightData = (LPHIGHLIGHTDATA)((LPSTR)pOFStruct + sizeof(OFSTRUCT));
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);   
+			if (!GetLayerBounds (&Bounds,CurView->hDC, CurView->UpdateFile-1))
+				goto RtnFalse;
+			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_CREATE); 
+			if (Fid == HFILE_ERROR)
+				goto RtnFalse;
+			sprintf (str,"L %.14lg %.14lg %.14lg %.14lg",Bounds.xmn,Bounds.ymn,Bounds.xmx,Bounds.ymx);
+			fputstring (str,Fid);				
+			sprintf (str,"%.14lg %.14lg %.14lg %.14lg",Bounds.xmn,Bounds.ymn,Bounds.xmn,Bounds.ymn);
+			fputstring (str,Fid);				
+			sprintf (str,"%.14lg %.14lg %.14lg %.14lg",Bounds.xmn,Bounds.ymx,Bounds.xmn,Bounds.ymx);
+			fputstring (str,Fid);				
+			sprintf (str,"%.14lg %.14lg %.14lg %.14lg",Bounds.xmx,Bounds.ymx,Bounds.xmx,Bounds.ymx);
+			fputstring (str,Fid);				
+			sprintf (str,"%.14lg %.14lg %.14lg %.14lg",Bounds.xmx,Bounds.ymn,Bounds.xmx,Bounds.ymn);
+			fputstring (str,Fid);				
+			pos = BT_FIRST;
+			while (!BT_FIND (hHighlight,(LPSTR)&Refno,pos,BT_ANY,(LPSTR)pHighlightData))
+			{
+				pos = BT_NEXT;
+				switch (pHighlightData->PD.Type)
+				{
+					case 1:
+						Point = Point2 = pHighlightData->PD.BeginPoint;
+						break;
+					case 2:
+						Point = pHighlightData->PD.BeginPoint;
+						Point2 = pHighlightData->PD.EndPoint;
+						break;
+					default:
+						goto NextTranPoint;
+						
+				}  
+				sprintf (str,"%.14lg %.14lg %.14lg %.14lg",Point.x,Point.y,Point2.x,Point2.y);
+				fputstring (str,Fid);				
+NextTranPoint:;
+			}
+			GSSiClose (Fid);
+			goto RtnTrue;
+		} 
+		
+		case 1110: // $GETNEXTLINE(longvar,outvarname,positionvarname,maxline)
+		{	 
+			HANDLE	hGlobal;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048+4096+256);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 4096; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			str	= Arg4 + 4096;
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,',')))
+				goto RtnFalse;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg3,',')))
+				goto RtnFalse;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+            n = _fstrlen (Arg1); 
+    		hGlobal = FindVar(Arg3);	
+			GetGlobalVal (hGlobal,str,0); 
+			pos = atoi (str);
+			if (pos < n)
+			{   
+				if (Arg1[pos] == '\n')
+					pos++;
+				nrem = _fstrlen (&Arg1[pos]);
+				if (!nrem)
+					goto RtnFalse;
+				l = atoi (Arg4);
+				if (l <= 0)
+					goto RtnFalse;
+				nrem = min (l,nrem);
+				pEnd = &Arg1[pos] + nrem;
+				*pEnd = 0;
+				if ((pCR = _fstrchr (&Arg1[pos],'\r')))
+				{
+					*pCR++ = ' ';
+					*pCR = 0;  
+					pEnd = pCR;
+				}
+				if (nrem >= l && _fstrrchr (&Arg1[pos],' ')>&Arg1[pos])
+				{
+					while (*pEnd != ' ')
+					{
+						pEnd--;
+					} 
+					*pEnd = 0;
+				} 
+				SetGlobalValue(Arg2,&Arg1[pos]); 
+				if (*(LPSTR)(pEnd+1) == '\n')
+					pEnd++;
+				nlong = (long)pEnd - (long)Arg1 + 1;
+				SetGlobalValueLong (Arg3,nlong);
+              	goto RtnTrue;
+            }
+            else
+				goto RtnFalse;
+		} 
+		
+		case 1111: //$SELECTITEMS(ToFile,FromFile,Append or Create,Prompt)
+		{   
+			FARPROC lpfnSELECTITEMSMsgProc;
+			
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;  
+			Arg4 = Arg3 + 2048;  
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);  
+			ExpandText (Arg4);  
+			hSelectItemsArgs = GSSiGlobAlloc (GHND,1024);
+			Arg5 = GlobalLock (hSelectItemsArgs);   
+			*Arg5 = *Arg3;
+			_fstrcpy (&Arg5[1],Arg2);
+			_fstrcpy (&Arg5[512],Arg1);
+			_fstrcpy (&Arg5[850],Arg4);
+			GlobalUnlock (hSelectItemsArgs);
+            DoPaint = FALSE;      
+			lpfnSELECTITEMSMsgProc = MakeProcInstance((FARPROC)SELECTITEMSMsgProc, hInst);
+			rtn = DialogBox(hInst, (LPSTR)"SELECTITEMS",hWndMain, lpfnSELECTITEMSMsgProc);
+			FreeProcInstance(lpfnSELECTITEMSMsgProc); 
+			DoPaint = TRUE;                              
+			GSSiGlobFree (&hSelectItemsArgs);
+            if (rtn)
+            	goto RtnTrue;
+            else
+				goto RtnFalse;
+        }  
+			
+		case 1112: //$GPSTRACKING(ONorOFForTOGGLE)
+		{   
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem); 
+			_fstrcpy (Arg1,Args);       
+			ExpandText(Arg1);
+			n = atoi (Arg1); 
+			GPSTracking (n);
+			goto RtnTrue;
+		}
+		
+		case 1113: //$FONTDISPLAY(FontName)
+		{   
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem); 
+			_fstrcpy (Arg1,Args);       
+			ExpandText(Arg1);
+			FontDisplay (Arg1);
+			goto RtnTrue;
+		}
+		
+		case 1114: // $WETLANDDESC(wetsymname,Compressed COW)
+		{   
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2); 
+			n = GetWetlandDescription (Arg1,Arg2,OutLoc);    
+		    goto Rtnl;
+		}
+
+        case 1115: //$GPSADDROUTE(waypoint)
+        {   
+        	long	RouteRef;
+        	
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg1,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg2,ParLoc);
+			} 
+			else
+				*Arg2 = 0;
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg3,ParLoc);
+			} 
+			else
+				*Arg3 = 0;
+			if ((ParLoc = MatchLev (Arg3,',')))
+			{
+				*ParLoc++ = '\0';
+				_fstrcpy (Arg4,ParLoc);
+			} 
+			else
+				*Arg4 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4); 
+			RouteRef = atol (Arg1); 
+			rtn = AddRouteToGPSList (RouteRef);
+			if (rtn)
+		    	goto RtnTrue;
+		    else
+		    	goto RtnFalse;
+		}  
+		
+		case 1116:  // $BLOCKEDREFS(OPEN) 
+					// $BLOCKEDREFS(CLOSE,outpath)
+		{	 
+			LPREFINDEXDATA	pRefIdxData1, pRefIdxData2;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048+sizeof(OFSTRUCT)+2*sizeof(REFINDEXDATA));
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			pOFStruct = (LPOFSTRUCT)(Arg2 + 2048);
+			pRefIdxData1 = (LPREFINDEXDATA)((LPSTR)pOFStruct + sizeof(OFSTRUCT));
+			pRefIdxData2 = (LPREFINDEXDATA)((LPSTR)pRefIdxData1 + sizeof(REFINDEXDATA));
+			
+			if ((ParLoc = MatchLev (Args,','))) 
+			{
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg2 = 0;
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			if (!_fstricmp (Arg1,"OPEN"))
+			{
+				if (!hBlockedRefFile)                                   
+				{
+					hBlockedRefFile = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+		    		pFile = GlobalLock (hBlockedRefFile);
+		        	GetTempFileName (0,"gm",0,pFile);  
+		        }
+		        else
+		        	pFile = GlobalLock (hBlockedRefFile);
+				if (FidBlockedRefs != HFILE_ERROR)
+					GSSiClose (FidBlockedRefs);  
+		        FidBlockedRefs = GSSiOpenFile (pFile,pOFStruct,OF_CREATE);
+				GlobalUnlock (hBlockedRefFile);
+			}   
+			else if (!_fstricmp (Arg1,"CLOSE"))     
+			{
+				if (FidBlockedRefs != HFILE_ERROR)
+				{   
+					_llseek (FidBlockedRefs,0,0); 
+					while (_lread (FidBlockedRefs,&Refno,4) == 4)
+					{ 
+						_lread (FidBlockedRefs,&SymNum,2);
+						_lread (FidBlockedRefs,pRefIdxData2,sizeof(REFINDEXDATA));
+						_lread (FidBlockedRefs,pRefIdxData1,sizeof(REFINDEXDATA)); 
+/*										    PickList[0].View = 0;
+											PickList[0].FileNum = -1;  
+											PickList[0].SubFile = 0;
+											PickList[0].FileInIndex = RefIdxData.FileInIndex;
+											PickList[0].Segment = RefIdxData.Segment;
+											PickList[0].Offset = RefIdxData.Offset; 
+											PickList[0].Element = 0;
+						                    pTheme = AddTheme (GF_SAVEPOLYPARTS_THEME);
+						                    CurView->PassID = 1; 
+						                    ProcessSelectedTheme = CurView->NumThemes;
+	   										BT_DELETE (hTAGIdx,(LPSTR)&TAGKey,(LPSTR)&RefIdxData,FALSE);
+						                    ProcessPickedItem (0,FALSE);*/ 
+					}
+					GSSiClose (FidBlockedRefs);  
+				}
+			}
+			else
+				goto RtnFalse;
+        }
+		
+		case 1117: //$LOADNEWDATA(dir)
+		{   
+			
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem); 
+			_fstrcpy (Arg1,Args);       
+			ExpandText(Arg1);
+			if (LoadNewData (Arg1))
+				goto RtnTrue;  
+			goto RtnFalse;
+		}
+		
+		case 1118: //$THEMEINAREA(BoundaryArea,Theme,GMDfile,MinPCT,Precision)
+		{
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,5*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			Arg5 = Arg4 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+			if (!(ParLoc = MatchLev (Arg3,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+			if (!(ParLoc = MatchLev (Arg4,','))) goto Rtn0;
+			*ParLoc = '\0';
+			_fstrcpy (Arg5,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			ExpandText (Arg4);
+			RVal = atof (Arg4); 
+			nlong = atol (Arg5);
+			if (ThemeInArea (Arg1,Arg2,Arg3,RVal,nlong))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+		
+		case 1201: //$FINDWAYPOINT ()
+        {
+            DoPaint = FALSE;      
+			lpfnFINDWAYPOINTMsgProc = MakeProcInstance((FARPROC)FINDWAYPOINTMsgProc, hInst);
+			rtn = DialogBox(hInst, (LPSTR)"FINDWAYPOINT",hWndMain, lpfnFINDWAYPOINTMsgProc);
+			FreeProcInstance(lpfnFINDWAYPOINTMsgProc); 
+			DoPaint = TRUE;
+            if (rtn)
+            	goto RtnTrue;
+            else
+				goto RtnFalse;
+        }  
+        
+        case 1202: //$SETDATERANGE ()
+        {
+	          FARPROC lpfnDATELIMITSMsgProc;
+	
+	          lpfnDATELIMITSMsgProc = MakeProcInstance((FARPROC)DATELIMITSMsgProc, hInst);
+	          rtn = DialogBox(hInst, (LPSTR)"DATELIMITS", hWndMain, lpfnDATELIMITSMsgProc);
+	          FreeProcInstance(lpfnDATELIMITSMsgProc);  
+	          if (rtn)
+	          	goto RtnTrue;
+	          else
+	          	goto RtnFalse;
+         }
+
+        case 1203: //$LOADUMSYMDEF ()
+        {
+		    CloseSymDict(); 
+		    if (*Args == 'D' || *Args == 'd')
+		    	OpenSymDict (OF_DELETE); 
+            createsymbols (1);
+         	goto RtnTrue;
+        }
+
+        case 1204: //$MAKEQUANFILE (pathname)
+        {   
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg1,',')))
+			{
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg2 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			if (*Arg2)
+		    	TORF = atob (Arg2);    
+		    else
+		    	TORF = TRUE;
+			if (CreateQuantitiesFile (Arg1,TORF))
+				goto RtnTrue;
+			else
+				goto RtnFalse;
+        }
+        
+        case 1205: //$USEDREFTABLE(CREATE,REPLACE(YORN))
+        		   //$USEDREFTABLE(LOAD,HLT)
+        		   //$USEDREFTABLE(CHECK,HLT)
+        {
+			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			if (nArgs < 2)
+				goto RtnFalse;
+			if (URTCommands (nArgs,Arg))
+				goto RtnTrue;
+			goto RtnFalse;
+        }
+           
+		case 1301: //$DISPLAYCONFIG(configfile,world bounds,display rect)
+		{   BOOL SaveSaveZoom = SaveZoom, SaveSaveGlobals = SaveGlobals, rtn;
+
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3);
+			if (!ExistFile (Arg1))
+            	goto RtnFalse;
+			if (sscanf (Arg2,"%Flf %Flf %Flf %Flf",&Bounds.xmn,&Bounds.ymn,
+											  	   &Bounds.xmx,&Bounds.ymx) != 4)
+				goto RtnFalse;
+			if (sscanf (Arg3,"%i %i %i %i",&Rect.left,&Rect.bottom,
+										   &Rect.right,&Rect.top) != 4)
+				goto RtnFalse; 
+			if (!DoDisplayConfigs || !InDrawTAG)
+				goto RtnTrue;
+			SaveZooms (&Bounds);
+	    	hSavedConfig[ConfigLevel] = GSSiGlobAlloc (GMEM_MOVEABLE,256);  
+	    	ConfigRect[ConfigLevel] = Rect;   
+	    	NextCFGTAG[ConfigLevel] = TBNum+1;
+    		pFile = GlobalLock (hSavedConfig[ConfigLevel]);
+        	GetTempFileName (0,"gm",0,pFile); 
+         	SaveZoom = TRUE;
+         	SaveGlobals = TRUE;
+            rtn = SaveConfig (pFile); 
+            GlobalUnlock (hSavedConfig[ConfigLevel]);
+            ConfigLevel++; 
+	    	NextCFGTAG[ConfigLevel] = 0;
+            SaveZoom = SaveSaveZoom;
+            SaveGlobals = SaveSaveGlobals;
+    		_fstrcpy (CfgName,Arg1);
+    		ContinueTAGs = FALSE;
+			PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
+			goto RtnTrue;  
+				
+        }
+        
+        case 1302: //$NUMNONCONTROL (text)
+        {   
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem); 
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+        	nlong = 0;
+        	while (*Arg1)
+        	{
+        		if (!iscntrl(*Arg1))
+        			nlong++;
+        		Arg1++;
+        	}
+			ltoa (nlong,OutLoc,10);  
+		    goto Rtnl;
+        }
+
+		case 1303: // $SPORTMAPORDER()
+        {
+              FARPROC	lpfnSPORTMAPORDERMsgProc;
+              short		nRc; 
+                  
+              lpfnSPORTMAPORDERMsgProc = MakeProcInstance((FARPROC)SPORTMAPORDERMsgProc, hInst);
+              nRc = DialogBox(hInst, (LPSTR)"SPORTMAPORDER", hWndMain, lpfnSPORTMAPORDERMsgProc);
+              FreeProcInstance(lpfnSPORTMAPORDERMsgProc);  
+              if (nRc)
+              	goto RtnTrue;
+              else
+              	goto RtnFalse;
+        }
+		  
+		case 1304: //$ZOOMLISTBUILD (pathname,separator) combines areas with similar UDI (part before sep is same) into zoomlist
+		{   BOOL SaveSaveZoom = SaveZoom, SaveSaveGlobals = SaveGlobals, rtn;
+
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,4*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048; 
+			Arg4 = Arg3 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg2,',')))
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			if ((ParLoc = MatchLev (Arg3,',')))
+			{
+				_fstrcpy (Arg4,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg4 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);
+			ExpandText (Arg3); 
+			ExpandText (Arg4); 
+			if (BuildZoomList (Arg1,Arg2,Arg3,Arg4))
+				goto RtnTrue;
+			else
+				goto RtnFalse; 
+        }
+        
+		case 1305: // $SPLITXFERFILE(xfername,xferdir,numparts)
+		{   
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg2,','))) 
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);  
+			ExpandText (Arg3);  
+			n = atoi (Arg3);
+			if (SplitXFERFile (Arg1,Arg2,n))
+				goto RtnTrue;
+		    goto RtnFalse;
+		}
+
+        case 1401: //$GETTEXTGLOBALS() 
+        {
+		
+			LPGRTEXTHEADER	pPickedTextHeader; 
+			
+			GSSiGlobFree (&hTextString);  
+    		GSSiGlobFree (&hPickedTextHeader);
+		    hPickedTextHeader = GSSiGlobAlloc (GMEM_MOVEABLE,sizeof(GRTEXTHEADER)+512); 
+        	if (GetNextHLTListItem (TRUE)) 
+        	{   
+        		if (hPickedTextHeader)
+        		{
+				    pPickedTextHeader = (LPGRTEXTHEADER)GlobalLock (hPickedTextHeader);
+			       	if (lTextString && hTextString)
+			       	{   
+			       		BOOL	SaveDisableHalt;
+			       		char	str[64]; 
+			       		LPSTR	pString;
+			       		double	THeight;
+			       		
+			       		pString = GlobalLock (hTextString);
+						SetGlobalValue2 (hTEXT,pString,0);
+						GSSiGlobUlFree (&hTextString);
+						THeight = GetTextHeadSize (pPickedTextHeader);
+						sprintf (str,"%f",THeight);
+						if (pPickedTextHeader->HeightIsPixels)
+							_fstrcat (str,"P");
+                        SetGlobalValue ("%TEXTSIZE",str);
+			       	}
+		    		GSSiGlobUlFree (&hPickedTextHeader); 
+		    	}
+        		goto RtnTrue;
+        	}
+        	else 
+        	{
+	    		GSSiGlobFree (&hPickedTextHeader);
+				GSSiGlobFree (&hTextString);  
+        		goto RtnFalse; 
+        	}
+        } 
+        
+        case 1402: //$LOADSSURGOCOMP (compfile,compfile.gmd)
+		{   
+			 
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			ExpandText (Arg2); 
+			if (ImportSSURGOTables (Arg1,Arg2))
+            	goto RtnTrue;
+            goto RtnFalse;
+		} 
+		
+        case 1403: //$SETDESTINATION(bounds or null to clear) 
+        {
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;
+			
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1);
+			
+			if (*Arg1)
+			{
+				Bounds = atobounds (Arg1,&Err);
+				if (Err)
+					goto RtnFalse;
+				SetDestination (&Bounds); 
+			}
+			else
+				SetDestination (NULL);
+           	goto RtnTrue;
+		}
+		
+        case 1501: //$OPENVEHICLEFILE(filename,Delay) 
+        {
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;
+			
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg1,','))) 
+			{
+				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg2 = 0;
+			if ((ParLoc = MatchLev (Arg2,','))) 
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);  
+			ExpandText (Arg3); 
+			nlong = atol (Arg2); 
+            if (OpenDummyVehicleFile(Arg1,nlong))
+            	goto RtnTrue;
+            goto RtnFalse;
+        }
+        case 1502: //$REMOVELINKLINES() 
+        {
+            if (RemoveLinkLines())
+            	goto RtnTrue;
+            goto RtnFalse;
+        }  
+        
+        case 1503: //$GETADDRESSCOORD ()
+		{   
+			 
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,2*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048;  
+			*DestName = 0;
+            {
+                  FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+
+                  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndMain, lpfnADD_MATCH_EDITMsgProc);
+//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
+//                  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);
+            }  
+            goto RtnTrue;
+        }
+  
+        
+        case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
+        {
+			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem);
+			Arg2 = Arg1 + 2048; 
+			Arg3 = Arg2 + 2048;
+			
+			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
+			*ParLoc = '\0';
+			_fstrcpy (Arg1,Args);
+			if ((ParLoc = MatchLev (Arg2,','))) 
+			{
+				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
+				*ParLoc = '\0';
+			}
+			else
+				*Arg3 = 0;
+			ExpandText (Arg1);
+			ExpandText (Arg2);  
+			ExpandText (Arg3);  
+			n = atoi (Arg3);
+            if (CreateSportMapCD(Arg1,Arg2,n))
+            	goto RtnTrue;
+            goto RtnFalse;
+        }
+        case 1801: //$LOADBLOCKINGPOINTS (file)
+        {   
+			hMem = GSSiGlobAlloc(GMEM_MOVEABLE,3*2048);
+			Arg1 = GlobalLock(hMem); 
+			_fstrcpy (Arg1,Args);
+			ExpandText (Arg1); 
+			if (LoadBlockingPoints (Arg1))
+		    	goto RtnTrue;
+		    goto RtnFalse;
+        }
+
+		default:
+			goto Rtn0;
+	}
+Rtnrtn:
+	if (!rtn)
+		goto RtnFalse;
+RtnTrue: 
+	l = 1;                
+	_fstrcpy(OutLoc,"1");
+	goto Exit;
+RtnFalse: 
+	l = 1;
+	_fstrcpy(OutLoc,"0");
+	goto Exit;
+Rtn0:
+	l = 0;
+	goto Exit;
+Rtnl:
+	l = _fstrlen(OutLoc); 
+Exit:
+	GSSiGlobUlFree (&hMem);
+	if (TraceType[0])
+	{
+		hMem=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+		lpstr = GlobalLock (hMem);
+		sprintf (lpstr,"GFV:%s",Args);
+		GSSiTraceLev (lpstr,-1);
+		GSSiGlobUlFree (&hMem);
+	}
+	return (l);
+}  
+
+		
+			

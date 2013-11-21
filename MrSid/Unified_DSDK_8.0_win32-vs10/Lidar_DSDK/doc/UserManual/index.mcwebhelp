@@ -1,0 +1,2 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebHelpSystem DefaultUrl="Content/Introduction.htm" Toc="Data/Toc.xml" Index="Data/Index.xml" Concepts="Data/Concepts.xml" Glossary="Content/Glossary.htm" SearchDatabase="Data/Search.xml" Alias="Data/Alias.xml" Synonyms="Data/Synonyms.xml" Skin="Data/Skinlidar_sdk/Skin.xml" Skins="lidar_sdk" BuildTime="12/14/2010 9:42:48 PM" BuildVersion="6.1.0.24157" TargetType="WebHelp" SkinTemplateFolder="Skin/" InPreviewMode="false" MoveOutputContentToRoot="false" MakeFileLowerCase="false" UseCustomTopicFileExtension="false" />

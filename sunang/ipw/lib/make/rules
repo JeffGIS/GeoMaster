@@ -1,0 +1,76 @@
+# make rules
+
+CFLAGS=$(C_SPECIAL) $(C_OPTION) $(C_STD)
+LINTFLAGS=$(LINT_SPECIAL) $(LINT_OPTION) $(LINT_STD)
+
+#-----------------------------------------------------------------------------
+
+$(SCRIPT): $(SCRIPT).sh
+	-$(INSTALL) -c -m $(SCRIPT_MODE) $(SCRIPT).sh $(SCRIPT_DIR)/$(SCRIPT)
+
+script: $(SCRIPT)
+
+install-script: $(SCRIPT)
+
+#-----------------------------------------------------------------------------
+
+lint:
+	$(LINT) $(LINTFLAGS) $(SRCS) $(LINT_DIR)/$(LINT_PREFIX)*
+
+#-----------------------------------------------------------------------------
+
+LDFLAGS=$(LD_SPECIAL) $(LD_OPTION) $(LD_STD)
+LIB_IPW=$(LIB_DIR)/$(LIB_PREFIX)ipw$(LIB_SUFFIX)
+LIB_UNIX=$(LIB_DIR)/$(LIB_PREFIX)unix$(LIB_SUFFIX)
+LIBS=$(LIBS_SPECIAL) $(LIB_IPW) $(LIB_UNIX) $(LIBS_STD)
+
+$(PGM): $(OBJS)
+	$(CLD) $(LDFLAGS) -o $(PGM) $(OBJS) $(LIBS)
+
+pgm: $(PGM)
+
+install-pgm: $(PGM)
+	-$(INSTALL) $(STRIP) -m $(PGM_MODE) $(PGM) $(PGM_DIR)
+
+#-----------------------------------------------------------------------------
+
+LIB_PATH=$(LIB_DIR)/$(LIB_PREFIX)$(LIB)$(LIB_SUFFIX)
+
+lib:
+# comment out following line if can't extract with orig mod times
+	-$(AR) $(AR_XOPTS) $(LIB_PATH) $(OBJS)
+# comment out following line if can't extract with orig mod times
+	$(MAKE) $(OBJS)
+	$(AR) $(AR_ROPTS) $(LIB_PATH) $(OBJS)
+# comment out following line if can't extract with orig mod times
+	-$(RM) $(OBJS)
+	$(RANLIB) $(LIB_PATH) >/dev/null
+	-$(CHMOD) $(LIB_MODE) $(LIB_PATH)
+
+install-lib: lib
+
+LINTLIB=$(LINT_PREFIX)$(LIB)$(LINT_SUFFIX)
+
+lintlib:
+	$(LINT) $(LINTFLAGS) $(LINT_LIBOPT)$(LIB) $(SRCS)
+	-test -f $(LIB) && mv $(LIB) $(LINTLIB)
+	-$(INSTALL) -m $(LIB_MODE) $(LINTLIB) $(LINT_DIR)
+
+#-----------------------------------------------------------------------------
+
+all:
+	for i in $(DIRS); do \
+		echo '::::::::::::::'; \
+		echo $$i; \
+		echo '::::::::::::::'; \
+		cd $$i; \
+		$(MAKE) $(IPWMAKE_ARGS); \
+		cd ..; \
+	done
+
+#-----------------------------------------------------------------------------
+
+clean:
+	rm -f $(PGM) $(OBJS)
+
+# $Header: /usr/home/ipw/lib/make/RCS/rules,v 1.8 89/10/25 15:00:54 frew Exp $

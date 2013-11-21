@@ -1,0 +1,20 @@
+include $(IPW)/lib/make/Makestart
+#
+# for SunOS 4.x
+
+LIB=unix
+
+# We include GNU _quicksort because Sun's has exponential behavior on 
+# some input such as imgstat usually has.  This makes the answer return
+# in seconds instead of years (it's that bad!).  Just use _quicksort
+# in place of qsort.
+#
+# We will also use GNU alloca and safe xmalloc and xrealloc
+
+SRCS=\
+	src/remove.c src/difftime.c src/gnualloc.c src/_quicksort.c
+
+default: lib
+install: install-lib
+
+include $(IPW)/lib/make/Makerules

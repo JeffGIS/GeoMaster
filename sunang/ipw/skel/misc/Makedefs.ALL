@@ -1,0 +1,8 @@
+# DIRS		directories to run "ipwmake" in
+
+DIRS=
+
+default: all
+install: all
+
+# $Header: /usr/home/ipw/skel/misc/RCS/Makedefs.ALL,v 1.1 89/10/18 20:33:59 frew Exp $

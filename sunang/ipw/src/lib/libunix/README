@@ -1,0 +1,5 @@
+
+  libunix contains substitutes for functions which may be missing from
+some systems, or are present but do not work properly.  Do not use these
+functions if your system has them unless you know the system function
+does not work properly.

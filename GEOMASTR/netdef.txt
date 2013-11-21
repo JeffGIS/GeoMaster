@@ -1,0 +1,35 @@
+Defining a Street Network
+
+The street centerline segments which define a street network should
+not pass through street intersections. They should also not be split
+between tiles. If these segments are extracted from an UltiMap project
+the centerline segments should be extracted in a single map to avoid
+being split between tiles.
+
+To define street networks first copy the ADDRESS subdirectory of the
+GeoMaster install directory to the project home directory. This directory
+initially contains the file 'abbrname.txt' file used in standardizing the
+street names. Also copy the 'network.txt' file in the 'fundir\samples'
+subdirectory of the GeoMaster install directory to the 'fundir' of the
+working directory used to do the network definition. Then create an entry
+int the 'fundir\index.txt' file of the working directory which references
+the 'network.txt' file.
+
+Streets are networked in continuous segments. Highlight a series of connecting
+street centerlines by first using the 'Clear and Highlight' function
+to select the first centerline and then using the 'highlight sequential'
+function to select the last centerline in the segment. All centerlines between
+the two selected ones should be automatically selected. Be sure to use the
+'Clear and Highlight' function for the first segment instead of the 'Highlight/Unhighlight'
+function so that the segments highlighted for the previous street do not
+get included with the current street.
+
+Next set the street name with the 'Set street name' function. After setting
+the name use the 'Define street link' function to store this portion of
+the network. 
+
+To display which streets have been networked you may use the 'Network Mile Markers'
+theme. When this theme is active networked centerlines can be displayed with
+a different line color and style. You may also use the 'Display Net Info' function
+to pick a networked segment and display it's street name and internal marker.
+

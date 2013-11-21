@@ -1,0 +1,1155 @@
+#include <windows.h>
+#include <float.h>
+#include "graphint.h"
+#include "resource.h" 
+#include "offsetmn.h"
+#include "polycom.h"
+#include "commdlg.h"
+
+double  CTOL = 0.002;
+ 
+static	short	AutoZoomNext;
+static	long	ZoomRef;              
+static	char	ZoomPrefix[10], ZoomUDI[66];   
+
+extern	BOOL	AltProjLocked,ContinueProcessing, Display, InDisplayProcessing,MaskOffsetLine;
+extern	BOOL	AutoPan, OffsetFromLimits, ShareEnabled, FileMode,OutlineZoomArea,IgnoreLbutton;
+extern	double	LocationOffset, SymRandom; 
+extern	double	OffsetLineOffset;
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+extern	mnmxCor	MinMax, *pMinMax;
+extern	long	CurrentRefno;   
+extern	long	DisplayCycle;
+extern	double FileDistToBaseDist,FileDistToWinDist;
+extern	double	WindowToFileFactor;
+extern	TAGBOX	TAGBox;
+extern	HCURSOR	hCursor, OldCursor;
+extern	int		QuadTypeNext;
+extern	BOOL	DoPaint, HavePaint;
+extern	HPEN	CurrentPen;
+extern	int		NumPicked;
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	int		WidthFactor;
+extern	HWND	hWndMain;
+extern	HANDLE	hInst;
+extern	MNMXCORD	ZoomBoxRect;
+extern	BOOL        WindowIsZoomed;
+extern	long		RefMktVal;
+extern  HPEN		hNullPen, hRedPen;
+extern	HBRUSH		hRedBrush, hGreenBrush, hBlueBrush,hBackBrush1;
+extern	LPVISLIST	CurVis;
+extern	LPVIEWPORT	CurView, pViewports[MAX_VIEWPORTS];
+extern	HANDLE		hViewports[MAX_VIEWPORTS];
+extern	int			NumViewports;
+extern	LPTHEME		CurTheme;
+extern	LPVOID		TranFileToBase, TranBaseToFile, TranBMToBase, TranBaseToBM;
+extern	BOOL		Printing;
+extern	int			nPnts;
+extern	LPPOINT		lpPoints2;
+extern	int			PickAp;
+extern	BOOL		UpdateSegment;
+extern	short		CommandViewport;
+extern	BOOL		AddLBUTTON; 
+extern	int		 	idTimer, Fid, FidConfig;
+extern	long		UsedDescOffset,TranPointOffset, ColorPaletteOffset, GraphicsOffset, ContinuationOffset; 
+extern	long		LenQuadSeg, LenQuad;
+
+MNMXCORD	Destination;
+BOOL	HaveDestination=FALSE,NextZoomIsDestination=FALSE;
+long	MaskMunic=0; 
+BOOL	GetMaskArea=TRUE, OutlineZoomArea=TRUE,MaskZoomArea=FALSE;
+
+typedef	struct	{char	Name[32];
+				 long	Refno;
+				}MUNICDATA1;
+				
+typedef	struct	{char	Name[32];
+			 	long	FIPS;
+			 	long	x,y;
+			 	}MUNICDATA2; 
+			 	
+struct	{char Name[34]; MNMXCORD Bounds;} OtherZoomRec;
+MUNICDATA1	MunicData1;
+MUNICDATA2	MunicData2;
+
+
+BOOL FAR PASCAL ZOOMLISTMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{ 	int		st, Choice;
+	HFILE	Fid;
+	static	int	CurrentZoomListType=0, CurrentZoomArea=-1, OrigZoomListType, CurrentZoomListMode=0;
+	long	FIPS, Recnum, Loc, Type;
+	int		nread,ii;
+	HANDLE	hBT;
+	char	str[512]; 
+	static	char	SaveAltProj[32];
+	LPSTR	lpTab;
+	int		TabStops[2]={400,500}; 
+	OFSTRUCT	OFStruct;  
+    LPMEASUREITEMSTRUCT lpmis; 
+    LPDRAWITEMSTRUCT lpdis; 
+    TEXTMETRIC tm;    
+    POINT	Point; 
+    short	y, nItem;     
+    static	RECT	LastRect;
+    LPSTR	lpBar, lpColon, lpSC;
+    HBRUSH	hBr;  
+    static	HANDLE	hMacro=0;
+    LPSTR	pMacro;
+	
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+    	GSSiGlobFree (&hMacro);  
+        OrigZoomListType = CurrentZoomListType; 
+		_fstrcpy (SaveAltProj,"[%ALT_PROJECTION]");  
+		ExpandText (SaveAltProj);
+        SetGlobalValue("%ALT_PROJECTION","baseproj.cvt"); 
+        AltProjLocked=TRUE;
+		SendDlgItemMessage (hWndDlg,IDC_MASK,BM_SETCHECK,MaskOffsetLine,0);  
+		SendDlgItemMessage (hWndDlg,IDC_OUTLINE,BM_SETCHECK,OutlineZoomArea,0);  
+Redisplay:
+	    ConvertCoordClose ();
+        LastRect.top = -1000;
+		SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREA_TYPES,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+		SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREAS,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+		SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREA_TYPES,LB_RESETCONTENT,NULL,NULL);
+		SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREAS,CB_RESETCONTENT,NULL,NULL);
+    	GetCurVal (str,sizeof(str),IDS_FILEZMT); 
+		Fid = GSSiOpenFile (str,&OFStruct,OF_READ);
+	    if (Fid == HFILE_ERROR)
+	    	return FALSE; 
+		while (fgetstring (str,500,Fid))
+		{   
+			REPLAC (str,"|","\t",256);
+		 	SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREA_TYPES,LB_ADDSTRING,(WPARAM)NULL,(LPARAM) str); 
+		} 
+		GSSiClose (Fid);
+		if (CurrentZoomListType>=0) 
+		{
+			SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREA_TYPES,LB_SETCURSEL,CurrentZoomListType,NULL);		  
+		    SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREA_TYPES,LB_GETTEXT,CurrentZoomListType,(DWORD)&str);
+	        lpTab = _fstrrchr(str,'\t');   
+	        if (!lpTab)
+	        	break;
+	        lpTab++;   
+	        if (_fstrstr (lpTab,"$TAGLOC"))
+	        {    
+	        	HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,_fstrlen(lpTab)+2);
+	        	LPSTR	pMem=GlobalLock (hMem);
+	        	
+	        	_fstrcpy (pMem,lpTab);
+	        	GlobalUnlock (hMem);  
+	        	CurrentZoomListType = OrigZoomListType;
+		        AltProjLocked=FALSE;
+                SetGlobalValue("%ALT_PROJECTION",SaveAltProj);
+                GSSiGlobFree (&hMacro);
+                EndDialog(hWndDlg, (int)(hMem - INT_MAX));  
+ 		        break;
+	        }
+	        SetDlgItemText (hWndDlg,IDC_CURFILE,lpTab);
+			Fid = GSSiOpenFile (lpTab,&OFStruct,OF_READ);
+		    if (Fid == HFILE_ERROR)
+			{
+				char mess[128];
+						
+OpenEr:			sprintf (mess,"Unable to open zoom list file: %s",lpTab);
+				MessageBox( GetFocus(), mess,"", MB_OK|MB_ICONEXCLAMATION); 
+				break;
+			}
+	        AltProjLocked=FALSE;
+	        SetGlobalValue("%ALT_PROJECTION","baseproj.cvt"); 
+			SetGlobalValue("%PICKLAYERID","0");
+			fgetstring (str,500,Fid); 
+			if ((lpSC = _fstrchr (str,';')))
+			{
+				*lpSC++ = 0;
+				ExpandText (lpSC);
+			}  
+			if (!GetGlobalBVal2 ("[%ALLOWOUTLINE]",TRUE))
+			{
+				SendDlgItemMessage (hWndDlg,IDC_OUTLINE,BM_SETCHECK,FALSE,0);  
+				ShowWindow(GetDlgItem(hWndDlg,IDC_OUTLINE), SW_HIDE);
+			}
+			if (!GetGlobalBVal2 ("[%ALLOWMASK]",TRUE))
+			{
+				SendDlgItemMessage (hWndDlg,IDC_MASK,BM_SETCHECK,FALSE,0);  
+				ShowWindow(GetDlgItem(hWndDlg,IDC_MASK), SW_HIDE);
+			}
+			SetDlgItemText (hWndDlg,IDC_LIST_NAME,str);
+			Loc = _llseek (Fid,0,1);
+			GSSiGlobFree (&hMacro);
+			fgetstring (str,500,Fid);
+			if (!_fstrncmp (str,"$MACRO(",7))
+			{
+				hMacro = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+				pMacro = GlobalLock (hMacro);
+				_fstrcpy (pMacro,str);
+				GlobalUnlock (hMacro);
+				Loc = _llseek (Fid,0,1);
+			}
+			else
+				_llseek (Fid,Loc,0);
+			while (fgetstring (str,500,Fid))
+			{   
+				Type = 0;
+				if ((lpBar = _fstrchr (str,'|')))
+				{
+					*lpBar++ = 0;
+					if (*lpBar != '(')
+						Type = 1000000000;
+				}
+		 		nItem = SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREAS,CB_ADDSTRING,(WPARAM)NULL,(LPARAM) str); 
+	         	SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREAS,CB_SETITEMDATA,(WPARAM)nItem,(LPARAM)Loc+Type);
+				Loc = _llseek (Fid,0,1);
+	        } 
+	        CurrentZoomArea += AutoZoomNext;
+	        CurrentZoomArea = max (CurrentZoomArea,-1);
+			if (CurrentZoomArea>=0) 
+			{
+				if (SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREAS,CB_SETCURSEL,CurrentZoomArea,NULL) != CB_ERR)
+				{
+					SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREAS,CB_GETLBTEXT,CurrentZoomArea,(LPARAM)str);	
+	                if ((lpBar = _fstrchr (str,'|')))
+	                	*lpBar = 0;
+	                SetDlgItemText (hWndDlg,IDC_ZOOM_AREAS,str);
+	//		        SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREAS,CB_SETTOPINDEX,CurrentZoomArea,NULL);
+				}
+				else
+					CurrentZoomArea = -1;
+			}	  
+			GSSiClose (Fid);   
+	        AltProjLocked=TRUE;
+			SetFocus (GetDlgItem(hWndDlg,IDC_ZOOM_AREAS));   
+			if (AutoZoomNext && CurrentZoomArea >= 0)
+				PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+		}
+        break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDC_ZOOM_AREA_TYPES: /* List box                           */
+                 switch(HIWORD(lParam))
+                 {   
+                     case LBN_DBLCLK:
+                     case LBN_SELCHANGE:
+				    	 CurrentZoomListType=SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREA_TYPES,LB_GETCURSEL,NULL,NULL); 
+				    	 CurrentZoomArea = -1;
+				    	 goto Redisplay;
+		 		     break;
+		 		 }
+		 		 break; 
+		 		 
+            case IDC_ZOOM_AREAS: /* List box                           */
+                 switch(HIWORD(lParam))
+                 {   
+                     case CBN_DBLCLK:  
+						 IgnoreLbutton = TRUE;
+				         PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+				         break;
+                     case CBN_SELCHANGE:
+				    	 CurrentZoomArea=SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREAS,CB_GETCURSEL,NULL,NULL);
+                	 	 Loc = SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREAS,CB_GETITEMDATA, CurrentZoomArea, (LPARAM) 0); 
+	 		         	if (Loc < 1000000000) 
+						{   
+							EnableWindow (GetDlgItem(hWndDlg,IDC_MASK),FALSE);
+							EnableWindow (GetDlgItem(hWndDlg,IDC_OUTLINE),FALSE);
+						}
+						else
+						{
+							EnableWindow (GetDlgItem(hWndDlg,IDC_MASK),TRUE);
+							EnableWindow (GetDlgItem(hWndDlg,IDC_OUTLINE),TRUE);
+						}			    	
+		 		     	break;
+		 		 }
+		 		 break; 
+		 	
+		 	case IDC_ADDTOVIEW:	 
+		 	case IDOK: 
+		 	{
+		 		 HANDLE	hTemp, hMem=0;
+		 		 LPSTR	pTemp, lpEndMacro; 
+		 		 MNMXCORD	Bounds;
+		 		 
+		 		 MaskMunic = 0;
+				 SetViewport(CommandViewport);
+		    	 CurrentZoomArea=SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREAS,CB_GETCURSEL,NULL,NULL);
+		    	 NextZoomIsDestination=SendDlgItemMessage(hWndDlg,IDC_SETDEST,BM_GETCHECK,0,0); 
+		         if (CurrentZoomArea != CB_ERR)
+		         {
+                	 Loc = SendDlgItemMessage(hWndDlg,IDC_ZOOM_AREAS,CB_GETITEMDATA, CurrentZoomArea, (LPARAM) 0); 
+                	 Loc = Loc%1000000000;
+					 GetDlgItemText (hWndDlg,IDC_CURFILE,str,sizeof(str));
+					 Fid = GSSiOpenFile (str,&OFStruct,OF_READ);
+				     if (Fid == HFILE_ERROR)
+					 	goto OpenEr;
+					 _llseek (Fid,Loc,0);
+					 fgetstring (str,500,Fid);  
+					 GSSiClose (Fid);
+	 		         if (!(lpTab = _fstrrchr(str,'|')))
+	 		         	break;
+	 		         *lpTab++=0; 
+	 		         SetGlobalValue ("%ZOOM_AREA_ID",str); 
+	 		         if (hMacro)
+	 		         {
+	 		         	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	 		         	pTemp = GlobalLock (hMem); 
+	 		         	pMacro = GlobalLock (hMacro);
+	 		         	_fstrcpy (pTemp,pMacro);
+	 		         	GlobalUnlock (hMacro);
+	 		         	if ((lpEndMacro = MatchLev ((pTemp+7),')')))
+	 		         	{   
+	 		         		sprintf (lpEndMacro,",%s)",lpTab);
+	 		         		ExpandText (pTemp);
+	 		         		lpTab = pTemp;
+	 		         	}
+	 		         }
+	 		         if (*lpTab=='(')
+	 		         {   
+	 		         	DPOINT	MinPoint, MaxPoint;
+	 		            LPSTR	lpEnd=_fstrchr (lpTab,')');
+	 		            
+	 		            lpTab++;  
+	 		            if (lpEnd)
+	 		            	*lpEnd = 0;
+		 		        SetGlobalValue ("%ZOOM_AREA_BOUNDS",lpTab); 
+	 		            
+						if (sscanf (lpTab,"%Flf,%Flf,%Flf,%Flf",&MinPoint.x,&MinPoint.y,&MaxPoint.x,&MaxPoint.y) != 4)
+						{
+							if (sscanf (lpTab,"%Flf %Flf %Flf %Flf",&MinPoint.x,&MinPoint.y,&MaxPoint.x,&MaxPoint.y) != 4)
+								break;    
+						}
+	 		         	if (MinPoint.x>=MaxPoint.x || MinPoint.y >= MaxPoint.y) break;
+	 		         	ConvertCoord(&MinPoint,3,1); 
+	 		         	ConvertCoord(&MaxPoint,3,1);
+		        	 	Bounds.xmn = MinPoint.x;
+		        	 	Bounds.ymn = MinPoint.y;
+		        	 	Bounds.xmx = MaxPoint.x;
+		        	 	Bounds.ymx = MaxPoint.y;     
+	 		         	if (wParam == IDC_ADDTOVIEW)    
+							AddMinMaxD (&CurView->NewBounds, &Bounds);
+	 		         	else
+	 		         		CurView->NewBounds = Bounds;
+		        	 	
+		        	 	ZoomRef=-1;
+		        	 	GetMaskArea=FALSE;
+	 		         }
+	 		         else 
+	 		         {
+	 		         	 if ((lpColon = _fstrchr (lpTab,':')))
+		 		         {  
+		 		         	
+	 		         		*lpColon++ = 0;
+	 		         		_fstrcpy (ZoomPrefix,lpTab);
+	 		         		_fstrcpy (ZoomUDI,lpColon); 
+	 		         		ZoomRef = LONG_MIN;
+		 		         }
+		 		         else
+		 		         {
+		 		         	ZoomRef = atol(lpTab); 
+		 		         }
+		            	 MaskOffsetLine = SendDlgItemMessage (hWndDlg,IDC_MASK,BM_GETCHECK,0,0);  
+		            	 OutlineZoomArea = SendDlgItemMessage (hWndDlg,IDC_OUTLINE,BM_GETCHECK,0,0);  
+		            	 if (MaskOffsetLine || OutlineZoomArea)
+		            		GetMaskArea = TRUE;
+		 		     } 
+	 		         if (!GetMaskArea)
+	 		         	ClearMaskArea();
+			         AltProjLocked=FALSE;
+	                 SetGlobalValue("%ALT_PROJECTION",SaveAltProj); 
+	                 GSSiGlobUlFree (&hMem);
+	                 GSSiGlobFree (&hMacro); 
+	                 if (wParam == IDC_ADDTOVIEW)
+		                 EndDialog(hWndDlg, 2); 
+	                 else
+		                 EndDialog(hWndDlg, TRUE); 
+	             } 
+	             else
+	             	ii=1;
+	        }
+		 	     break;   
+		 	     
+            case IDCANCEL:
+		         AltProjLocked=FALSE;
+                 SetGlobalValue("%ALT_PROJECTION",SaveAltProj);
+                 GSSiGlobFree (&hMacro);
+                 EndDialog(hWndDlg, FALSE);   
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} /* End of ZOOMLISTMsgProc                                      */
+
+BOOL CreateZoomList (LPSTR Name, HWND hWnd)
+{   
+	HFILE		Fid;
+	OFSTRUCT	OFStruct;
+	char		str[260], TypeFile[128], Ext[8];
+	
+	ExpandText (Name);
+	_splitpath (Name,NULL,NULL,NULL,Ext);
+	if (!*Ext)
+		_fstrcat (Name,".txt");
+    SubstituteDL (Name);
+	ExpandText (Name);
+	Fid = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
+	if (Fid == HFILE_ERROR)
+	{
+		MessageBox( hWnd,"Unable to create zoom list file",NULL, MB_OK|MB_ICONEXCLAMATION); 
+		return FALSE; 
+	}
+	*str = 0;
+	if (!GetTextString (hWnd,str,sizeof(str),"Enter the zoom list title",NULL,NULL,0))  
+	{
+		GSSiClose (Fid);
+		Fid = GSSiOpenFile (Name,&OFStruct,OF_DELETE);
+		return FALSE;
+	}
+	fputstring (str,Fid);
+	GSSiClose (Fid);
+	GetCurVal (TypeFile,sizeof(TypeFile),IDS_FILEZMT); 
+	Fid = GSSiOpenFile (TypeFile,&OFStruct,OF_READWRITE);  
+	if (Fid == HFILE_ERROR)
+		return TRUE;
+	_llseek (Fid,0,2);
+	fputstring ("",Fid);   
+	_fstrcat (str,"|");
+	_fstrcat (str,Name);
+	fputstring (str,Fid);	
+	GSSiClose (Fid);	
+	return TRUE;
+}
+
+BOOL FAR PASCAL SAVEZOOMMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{ 	int		Choice, st;
+	HFILE	Fid, FidOut;
+	static	int	CurrentZoomListMode=1;
+	long	FIPS, Recnum, LastLoc;
+	int		nread;
+	HANDLE	hBT;
+	char	str[512], File[128];
+	LPSTR	lpTab, lpBar, lpSC;
+	int		TabStops[2]={400,500}; 
+	OFSTRUCT	OFStruct;
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+		if (!GetGlobalBVal2 ("[%ALLOWNEWZOOMLISTS]",TRUE))
+		{
+			ShowWindow(GetDlgItem(hWndDlg,IDC_ZOOMLIST_FILE), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg,IDC_SET_ZOOMLIST), SW_HIDE);
+		}
+        
+Open:	SendDlgItemMessage (hWndDlg,IDC_ZOOMS_CB,CB_RESETCONTENT,NULL,NULL); 
+		GetCurVal (File,sizeof(File),IDS_FILEZML); 
+		SetDlgItemText (hWndDlg,IDC_ZOOMLIST_FILE,File);
+		Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
+	    if (Fid == HFILE_ERROR)
+	    {
+	    	if (!CreateZoomList (File,hWndDlg))
+	    		break;
+	    	goto Open;
+	   	} 
+	   	GSSiClose (Fid);
+		Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);
+	    if (Fid == HFILE_ERROR)
+	    {  
+			MessageBox( hWndDlg,"Cannot write to zoom list file",NULL, MB_OK|MB_ICONEXCLAMATION); 
+	    	break;
+	    }
+		fgetstring (str,500,Fid);
+		if ((lpSC = _fstrchr (str,';')))
+			*lpSC = 0;  
+		SetDlgItemText (hWndDlg,IDC_LIST_NAME,str);
+    	Recnum = 0;
+    	while (fgetstring (str,500,Fid))
+        {   
+	       	if ((lpBar=_fstrchr(str,'|')))
+	       	{
+	       		*lpBar='\0';
+			 	SendDlgItemMessage (hWndDlg,IDC_ZOOMS_CB,CB_ADDSTRING,NULL,(LPARAM)str);
+			}
+        	Recnum++;
+        }
+	    GSSiClose(Fid); 
+        break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+           	case IDC_SET_ZOOMLIST:
+           	{
+           		char	Ext[6]=".TXT", Name[128]="";
+           		
+           		SetCreateFile ();
+				if (GetFileName2 (hWndDlg,Name,Ext,IDS_FILEZML)) 
+					goto Open;
+			}
+				break;
+           		
+		 	case IDOK:
+		 	{
+		 		char	ZoomName[66], NewStr[256], TempFile[144];
+		 		BOOL	Found=FALSE;
+		 		
+				 GetDlgItemText (hWndDlg,IDC_ZOOMLIST_FILE,File,sizeof(File));
+		 		 GetDlgItemText (hWndDlg,IDC_ZOOMS_CB,ZoomName,64); 
+		 		 if (!ZoomName[0]) break; 
+		 		 SetViewport (CommandViewport);
+		 		 sprintf (NewStr,"%s|(%f,%f,%f,%f)",ZoomName,
+		 										CurView->WBounds.xmn,
+		 										CurView->WBounds.ymn,
+		 										CurView->WBounds.xmx,
+		 										CurView->WBounds.ymx);
+		         GetTempFileName (0,"zml",0,(LPSTR)TempFile); 
+				 Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
+				 FidOut = GSSiOpenFile (TempFile,&OFStruct,OF_CREATE);
+		    	 while (fgetstring (str,500,Fid))
+		         {   
+			       	if ((lpBar=_fstrchr(str,'|')))
+			       	{   
+			       		char	SaveStr[256];
+			       		
+			       		_fstrcpy (SaveStr,str);
+			       		*lpBar='\0'; 
+			       		if (_fstricmp (str,ZoomName))
+			       			_fstrcpy (str,SaveStr);
+			       		else
+			       		{	
+			       			Found=TRUE;
+			       			_fstrcpy (str,NewStr);
+					 	}
+					}
+					fputstring(str,FidOut);
+		         }
+		         if (!Found)
+					fputstring(NewStr,FidOut);
+			     GSSiClose(Fid); 
+		 		 GSSiClose(FidOut);
+		 		 copyfile (File,TempFile,FALSE,0,0,0,0,0,0);
+				 FidOut = GSSiOpenFile (TempFile,&OFStruct,OF_DELETE);
+	             EndDialog(hWndDlg, TRUE);  
+	         }
+		 	     break;
+		 		
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} /* End of SAVEZOOMMsgProc                                      */
+
+
+void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BOOL AddToView)
+{   MNMXCORD Rect;
+    
+	Rect = PickList[Item].Rect; 
+    SetGlobalValue ("%ZOOM_AREA_ID",PickList[Item].UDI); 
+    if (!FromLimits)
+	{
+		Rect.xmn = (Rect.xmn + Rect.xmx)/2;
+		Rect.xmx = Rect.xmn;
+		Rect.ymn = (Rect.ymn + Rect.ymx)/2;
+		Rect.ymx = Rect.ymn;
+	}
+	Rect.xmn -= Offset;
+	Rect.xmx += Offset;
+	Rect.ymn -= Offset;
+	Rect.ymx += Offset;   
+   	if (AddToView)
+   	{    
+		AddMinMaxD (&Rect,&CurView->NewBounds); 
+		CurView->CurZoomAreaRef = 0;
+	}
+	else
+    	CurView->CurZoomAreaRef = PickList[Item].Refno;
+	ZoomToRect(Rect,Immediate);
+    
+	return;
+}  
+
+void SetDestination (LPMNMXCORD pDest)
+{
+	if (pDest)
+	{
+		HaveDestination = TRUE;
+		Destination = *pDest;  
+		SetGlobalValueBool ("%USEDESTINATION",TRUE);
+	}
+	else
+		HaveDestination = FALSE;
+	return;
+}
+
+void ZoomToRect(MNMXCORD Rect,BOOL Immediate)
+{   
+	DPOINT GPSPoint; 
+	char	AVLTrackVehicle[34];
+	double Inc;
+	
+	if (NextZoomIsDestination) 
+	{
+		HaveDestination = TRUE;
+		Destination = Rect;  
+		SetGlobalValueBool ("%USEDESTINATION",TRUE);
+	}
+	NextZoomIsDestination = FALSE;
+	if (GetGlobalBVal2 ("[%ZOOMDISABLED]",FALSE))
+		return;
+	GetGlobalCVal ("[%AVLFOLLOW]",AVLTrackVehicle,0);
+	if (GetVehicleLoc(AVLTrackVehicle,&GPSPoint)) 
+	{   
+		if (HaveDestination && GetGlobalBVal ("[%USEDESTINATION]"))
+    		AddMinMaxD (&Rect,&Destination);  
+		if (!PointInBounds (GPSPoint,&Rect))
+		{
+    		AddDPointToMinMax (&GPSPoint,&Rect);  
+    		Inc = (CurView->WBounds.xmx - CurView->WBounds.xmn) * 0.05;
+    		InflateBounds (&Rect,Inc);
+    	}
+    }
+	CurView->NewBounds = Rect;
+	if (CurView->OrthoRes >=0 || !CurView->WindowZoomedToOrtho)
+	    CurView->WindowZoomedToOrtho = FALSE;   
+	DisplayCycle++; 
+    SetBounds (CurView->hWnd,CurView->hDC); 
+    DisplayCycle--; 
+	CurView->WindowIsZoomed = TRUE;   
+	if (!Display)
+		return; 
+	if (Immediate)
+		RedisplayViewport(Immediate,FALSE);
+	else  
+		PostMessage(CurView->hWnd, WM_COMMAND, IDM_Z_REDRAW, CurView->ID);
+	return;
+}
+
+void ZoomToPointAndDist (DPOINT Point, double dist,BOOL Immediate)
+{
+	MNMXCORD	Rect; 
+    
+    if (dist)
+    {
+		Rect.xmn = Point.x - dist;
+		Rect.xmx = Point.x + dist;
+		Rect.ymn = Point.y - dist;
+		Rect.ymx = Point.y + dist;  
+	}
+	else
+	{
+	    dist = (CurView->WBounds.xmx - CurView->WBounds.xmn)/2;
+	    Rect.xmn = Point.x - dist;
+	    Rect.xmx = Point.x + dist;
+	    dist = (CurView->WBounds.ymx - CurView->WBounds.ymn)/2;
+	    Rect.ymn = Point.y - dist;
+	    Rect.ymx = Point.y + dist; 
+    }
+    CurView->CurZoomAreaRef = 0;
+	ZoomToRect(Rect,Immediate);
+	return;
+}
+
+void ComputePickPoint (LPPOINT BPOINT, LPPOINT EPOINT,double Dist,
+					   double TotDist,LPDOUBLE PCT, LPDOUBLE OffDist,LPDOUBLE AZ,
+				  	   LPMNMXCORL BOUNDS,LPDPOINT PickedPoint,LPPOINT PickAtPoint)
+{	double	PickY, PickX, AZ1, AZ2, INTX, INTY, dinc, x, LineLen,dist1,dist2;
+	long	l;
+    
+    if (!PickAtPoint)
+    {
+		PickX = (double)BOUNDS->xmn + ((double)BOUNDS->xmx-(double)BOUNDS->xmn)/2;
+		PickY = (double)BOUNDS->ymn + ((double)BOUNDS->ymx-(double)BOUNDS->ymn)/2;  
+	}
+	else  
+	{
+		PickX = PickAtPoint->x;
+		PickY = PickAtPoint->y;
+	}
+	AZ1 = getaz (*BPOINT,*EPOINT); 
+	*AZ = AZ1;
+	AZ2 = LTWOPI (AZ1 + HALFPI);
+    LineLen = idist (*BPOINT,*EPOINT);
+	LINSEC ((double)BPOINT->x,(double)BPOINT->y,AZ1, PickX,PickY,AZ2,&INTX,&INTY);
+	if (LDIST (INTX,INTY,(double)BPOINT->x,(double)BPOINT->y) > LineLen ||
+		LDIST (INTX,INTY,(double)EPOINT->x,(double)EPOINT->y)> LineLen)
+	{ 
+		dist1 = LDIST (PickX,PickY,(double)BPOINT->x,(double)BPOINT->y);
+		dist2 = LDIST (PickX,PickY,(double)EPOINT->x,(double)EPOINT->y);
+		if (dist1 < dist2)
+		{  
+			INTX = BPOINT->x;
+			INTY = BPOINT->y;
+		}
+		else 
+		{
+			INTX = EPOINT->x;
+			INTY = EPOINT->y;
+		}
+	}
+	PickedPoint->x = INTX;
+	PickedPoint->y = INTY; 
+	*OffDist = LDIST (INTX,INTY,PickX,PickY)*FileDistToBaseDist;
+	AZ2 = LGETAZ(INTX,INTY,PickX,PickY);
+	if (DeflectionAngle (AZ1,AZ2) >0) *OffDist = -*OffDist; 
+	if (TotDist == 0)
+		*PCT = 0;
+	else
+		*PCT = (Dist + LDIST ((double)BPOINT->x,(double)BPOINT->y,INTX,INTY))/TotDist;
+	return;
+}
+
+void ComputePickPointD (HPDPOINT BPOINT, HPDPOINT EPOINT,double Dist,
+					   double TotDist,LPDOUBLE PCT, LPDOUBLE OffDist,LPDOUBLE AZ,
+				  	   LPMNMXCORD BOUNDS,LPDPOINT PickedPoint)
+{	double	PickY, PickX, AZ1, AZ2, INTX, INTY, dinc, x, LineLen,dist1,dist2;
+	long	l;
+
+	PickX = (double)BOUNDS->xmn + ((double)BOUNDS->xmx-(double)BOUNDS->xmn)/2;
+	PickY = (double)BOUNDS->ymn + ((double)BOUNDS->ymx-(double)BOUNDS->ymn)/2;
+    if (!(LineLen = ldistp (*BPOINT,*EPOINT)))
+    {
+    	*AZ = 0;
+		*PickedPoint = *BPOINT;
+		*OffDist = LDIST (BPOINT->x,BPOINT->y,PickX,PickY);
+		if (TotDist == 0)
+			*PCT = 0;
+		else
+			*PCT = Dist/TotDist;
+		return;
+	}
+    	
+	AZ1 = getazd (BPOINT,EPOINT); 
+	*AZ = AZ1;
+	AZ2 = LTWOPI (AZ1 + HALFPI);
+	LINSEC ((double)BPOINT->x,(double)BPOINT->y,AZ1, PickX,PickY,AZ2,&INTX,&INTY);
+	if (LDIST (INTX,INTY,(double)BPOINT->x,(double)BPOINT->y) > LineLen ||
+		LDIST (INTX,INTY,(double)EPOINT->x,(double)EPOINT->y)> LineLen)
+	{ 
+		dist1 = LDIST (PickX,PickY,(double)BPOINT->x,(double)BPOINT->y);
+		dist2 = LDIST (PickX,PickY,(double)EPOINT->x,(double)EPOINT->y);
+		if (dist1 < dist2)
+		{  
+			INTX = BPOINT->x;
+			INTY = BPOINT->y;
+		}
+		else 
+		{
+			INTX = EPOINT->x;
+			INTY = EPOINT->y;
+		}
+	}
+	PickedPoint->x = INTX;
+	PickedPoint->y = INTY; 
+	*OffDist = LDIST (INTX,INTY,PickX,PickY);
+	AZ2 = LGETAZ(INTX,INTY,PickX,PickY);
+	if (DeflectionAngle (AZ1,AZ2) >0) *OffDist = -*OffDist; 
+	if (TotDist == 0)
+		*PCT = 0;
+	else
+		*PCT = (Dist + LDIST ((double)BPOINT->x,(double)BPOINT->y,INTX,INTY))/TotDist;
+	return;
+}
+
+double DeflectionAngle (double CurAZ, double AZ)
+{   double rtn;
+	CurAZ = LTWOPI (CurAZ); 
+	AZ	  = LTWOPI (AZ);
+	if (CurAZ > AZ)
+	{
+		if (CurAZ - AZ > PY)
+			rtn = TWOPI - (CurAZ-AZ);
+		else
+			rtn = AZ-CurAZ;
+	}
+	else
+	{ 
+		if (AZ - CurAZ > PY)
+			rtn = (AZ-CurAZ)-TWOPI;
+		else
+			rtn = AZ-CurAZ;
+	}
+	return (rtn);
+}
+
+int CopyQuadTree (int FidOut)
+{	
+	LPINT pint; 
+	int	  id; 
+	HANDLE	hQuadTree;
+	LPSTR	pQuadTree;
+	long	LenQuadSeg, MaxQuadLevel, MaxQuadType, LenQuad, BytesLeft; 
+	WORD	nRead, nBytes;
+
+    nRead = _lread (Fid,&id,2);  
+    _lwrite(FidOut,&id,2);
+    nRead = _lread (Fid,&LenQuadSeg,4); 
+    _lwrite(FidOut,&LenQuadSeg,4);
+    nRead = _lread (Fid,&MaxQuadLevel,4);
+    _lwrite(FidOut,&MaxQuadLevel,4);
+    nRead = _lread (Fid,&MaxQuadType,4);
+    _lwrite(FidOut,&MaxQuadType,4);
+    nRead = _lread (Fid,&LenQuad,4);
+    _lwrite(FidOut,&LenQuad,4);
+    BytesLeft = LenQuad;  
+    hQuadTree = GSSiGlobAlloc(GMEM_MOVEABLE,32767);
+    pQuadTree = GlobalLock(hQuadTree);
+    while (BytesLeft)
+    {
+	    if (BytesLeft <= 32767)
+	    	nBytes = BytesLeft;
+	    else
+	    	nBytes = 32767;
+
+	    nRead = _lread (Fid,pQuadTree,nBytes); 
+	    _lwrite(FidOut,pQuadTree,nBytes);
+	    BytesLeft -= nBytes;
+	}
+	GlobalUnlock (hQuadTree);
+	GlobalFree (hQuadTree);
+   	return (MaxQuadType);
+}
+
+BOOL CopyGraphicsBlock (int  FidOut,
+						long NewUsedDescOffset,long NewColorPaletteOffset, long NewTranPointOffset,
+						long NewGraphicsOffset )
+{	HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	LPINT		ipnt;
+	LPLONG		pOffset; 
+	int			Pcode; 
+	WORD		nRead, nBytes;
+	
+
+    nRead = _lread (Fid,&nBytes,2);
+    hpltBuf = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)nBytes);
+    LPpltBuf = GlobalLock (hpltBuf);
+    nRead = _lread (Fid,LPpltBuf,(WORD)nBytes); 
+    if (NewUsedDescOffset >= 0)
+    {
+	    ipnt = (LPINT)LPpltBuf;
+        while (*ipnt > 0)
+        {   Pcode = *ipnt;
+        	ipnt++;
+		    switch (Pcode)
+	        {
+			    case 1: /* color palette offset */
+		 		{   ipnt++;
+		 			ipnt++;
+		 			ipnt++;
+		 			ipnt++;
+		 		}
+	            break;
+
+                case 101:	/*	used description offset	*/
+                {   pOffset = (LPLONG)ipnt;
+                	*pOffset=NewUsedDescOffset;
+                	ipnt += 2;
+                }
+                break;
+
+			    case 102: /* color palette offset */
+                {   pOffset = (LPLONG)ipnt;
+                	*pOffset=NewColorPaletteOffset;
+                	ipnt += 2;
+                }
+                break;
+
+                case 103: /* transformation point offset */
+                {   pOffset = (LPLONG)ipnt;
+                	*pOffset=NewTranPointOffset;
+                	ipnt += 2;
+                }
+                break;
+
+                case 200: /* quad tree offset */
+                {   pOffset = (LPLONG)ipnt;
+                	*pOffset=NewGraphicsOffset;
+                	ipnt += 2;
+                }
+                break;
+
+                case 11: /* get used description list*/
+                {   int	ndesc, i;
+                
+                	moredesc:   ndesc = *ipnt;
+                	ipnt++;
+                	for (i=0;i<ndesc;i++)
+                	{	ipnt++;
+                		ipnt++;
+                    	ipnt+=4;
+                    }
+                	if (ndesc) goto moredesc;
+                }
+                break;
+
+				case 13: /* continuation offset */
+				{	ContinuationOffset = *(LPLONG)ipnt;
+					ipnt += 2;
+					*ipnt = 0;
+                }
+                break;
+
+                default:
+                	*ipnt =0;
+                break;
+
+			}
+        }
+    }
+    _lwrite (FidOut,&nBytes,2);
+    _lwrite (FidOut,LPpltBuf,(WORD)nBytes); 
+
+	GlobalUnlock (hpltBuf);
+    GlobalFree	(hpltBuf);
+    return (TRUE);
+
+}
+
+void ClearQuadTree(int Fid, int Type, long GraphicsOffset)
+{
+	LPINT pQuadOff;
+	QUAD	*pQuad, *InQuad;
+	int	QuadOff, InQuadOff, len, nBytes, FileHeader[9], CurRecLen;
+	HANDLE		hPltBuf;
+	LPSTR		LPpltBuf;
+	LPINT		ipnt;
+	LPLONG		pOffset;
+	long	Type13Offset, CurRecLenLoc;
+	long	Offset, CurOffset, EOFOffset, EndQuad;
+	long	ii, loc, NegOne=-1;  
+
+	QuadOff=1; 
+	loc = GraphicsOffset+18+(QuadOff-1)*LenQuadSeg+12+Type*4;
+	EndQuad = loc + LenQuad -1;
+	while (loc<EndQuad)
+	{
+		ii=_llseek(Fid,loc,0);
+        _lwrite(Fid,&NegOne,4);
+        QuadOff++; 
+		loc = GraphicsOffset+18+(QuadOff-1)*LenQuadSeg+12+Type*4;
+    }
+    return;
+}
+
+LPSHORT FindNextGraphicsLink (HPSHORT ipnt)
+{	int		idesc, ItemLen, TSize;
+	long	*pRefno;
+	long	remlen;
+	LPBYTE	Pcode;
+	int		x1,y1,x2,y2, ipen, i;
+	double	TotDist, WantDist, Dist;
+	LPPOINT	lpPointSave;
+	POINT	CLPointFile;
+	LPLONG		pOffset;
+
+        while (*ipnt != 0)
+        {   Pcode = (BYTE *) ipnt;
+        	ipnt++;
+
+		    switch (*Pcode)
+	        {   
+	        	case 92: /* deleted item */
+				case 12: /* item minmax */
+				{	ipnt += 4;
+					ItemLen = abs(*ipnt);
+					ipnt++;
+					ipnt+=ItemLen;
+                }
+                break;
+
+				case 13: /* continuation offset */
+				{	
+					return(ipnt);
+                }
+                break;
+
+	            default: 
+	            	SkipSubRec (Pcode,&ipnt);
+                break;
+
+			}
+        }
+	return(NULL);
+}
+
+
+     int CURVPLT(lpLine L1,LPLONG np, HPPOINT *lpPoint)
+{
+//C******* SPECIFICATIONS **********************************************
+//C*                                                                   *
+//C*       PROGRAM SUMMARY                                             *
+//C*       ------- -------                                             *
+//C*       THIS ROUTINE PLOTS A CURVE OF LENGTH (L) WITH BEGINNING     *
+//C*       POINT OF (X1,Y1) AND RADIUS POINT OF (X2,Y2).               *
+//          
+//         Arguments
+//  input  lpLine L1 A structure containing information about a line
+//  input  HGLOBAL *heap_ptr is a pointer to an area of memory supplied
+//                   by the calling program, used to contain a series
+//                   of coordinate set structures;
+//  function retrn value: 0 if it added points to *heap_ptr
+//                         -1 if it didn't do anything.
+
+      double  DTH, A1, LenRad, LenCrv;
+      DPOINT TestPoint, HoldPt;
+      POINT  StartPoint, EndPoint, RadPt; 
+      short size, Npts;
+      POINT MyPt;
+    //  XB=L1->x1; //X1;
+    //  YB=L1->y1; //Y1;
+//C******* COMPUTE RADIUS
+     if( L1->rad <= 0)
+     	return -1;  
+//C******* CALCULATE AZIMUTH OF BEGINNING & ENDING ARC RADII 
+
+	 	    TestPoint.x = (CurView->WBounds.xmn + CurView->WBounds.xmx)/2.0;
+	 	    HoldPt.x    = TestPoint.x;
+		    TestPoint.y = (CurView->WBounds.ymn + CurView->WBounds.ymx)/2.0;
+            StartPoint  = BasePtToWinPt (&TestPoint); //center of the screen		    
+            TestPoint.x = HoldPt.x + L1->rad;
+		    EndPoint    = BasePtToWinPt(&TestPoint);
+		    LenRad      = EndPoint.x - StartPoint.x;//length of rad in pixels  
+            TestPoint.x = HoldPt.x + L1->lngth;
+		    EndPoint    = BasePtToWinPt(&TestPoint);
+		    LenCrv      = EndPoint.x - StartPoint.x; //length of the curve in pixels 
+            TestPoint.x = L1->rx;
+            TestPoint.y = L1->ry;
+            RadPt       = BasePtToWinPt(&TestPoint); //rad point in pixels   
+            
+//C******* CALCULATE AZIMUTH OF BEGINNING & ENDING ARC RADII
+      A1 = L1->azm; //atan2(S,C);
+             
+      //A2 = L1->eazm;//A1 - L1->lngth / R;
+      if(LenRad <= CTOL) goto S110; 
+    //  if(L1->lngth <= CTOL) goto S100;
+      DTH = acos ((LenRad - CTOL)/LenRad);
+       if(DTH == 0) goto S110;
+//C******* CALCULATE NUMBER OF VECTORS IN CURVE
+      Npts = (short)(fabs(LenCrv) / (DTH * LenRad));
+      Npts++; // to plot at least the beginning of the curve
+      if(LenCrv < 0)DTH = -DTH;
+      if(Npts < 2)goto S110;
+//C******* PLOT REMAINING VECTORS
+      for (lpPoly1->l = 2;lpPoly1->l <= Npts;lpPoly1->l++)
+      {
+         MyPt.x = LenRad * cos(A1) + RadPt.x;
+         MyPt.y = RadPt.y - (LenRad * sin(A1));
+		// MyPt.y = MyPt.y - CurView->DrawRect.top;
+         **lpPoint = MyPt;
+         *lpPoint = *lpPoint + 1;
+         *np = *np + 1;
+         A1 -=  DTH;
+      }
+//C******* FINISH CURVE
+ S110:  *lpPoint = *lpPoint - 1;
+
+      return 0;
+}
+
+void SetCurvPltCtol (double INCTOL)
+{
+      CTOL = INCTOL;
+      return;
+}  
+    
+    
+BOOL DisplayZoomList (short Opt)
+{                              
+//Opt 0 = display, 1=next, -1=prior
+	FARPROC lpfnZOOMLISTMsgProc;
+	short	PickFile, PickLayerID; 
+	BOOL	AddToView=FALSE; 
+	short	nRc;
+	DWORD lParam;
+	
+	AutoZoomNext = Opt;				
+	lpfnZOOMLISTMsgProc = MakeProcInstance((FARPROC)ZOOMLISTMsgProc, hInst);
+	nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST", hWndMain, lpfnZOOMLISTMsgProc);
+	FreeProcInstance(lpfnZOOMLISTMsgProc);   
+	if (nRc == 2)
+	{
+		AddToView = TRUE;
+		nRc = 1;
+	}
+	if (nRc==1)
+	{   
+		ClearCurrentCD ();
+		SetViewport(CommandViewport);
+	    if (ZoomRef == -1)
+		{   
+		    CurView->CurZoomAreaRef = 0;
+			ZoomToRect (CurView->NewBounds,FALSE);
+	/*						if (CurView->OrthoRes >=0 || !CurView->WindowZoomedToOrtho)
+		    	CurView->WindowZoomedToOrtho = FALSE;
+		    DisplayCycle++;
+		    SetBounds (CurView->hWnd,CurView->hDC);
+		    DisplayCycle--;
+		    RedisplayViewport(FALSE,FALSE);
+			CurView->WindowIsZoomed = TRUE; */
+			return TRUE;
+		} 
+		if (!(PickLayerID = GetGlobalLVal ("[%PICKLAYERID]")))
+			PickFile = -1; 
+		else
+			PickFile = GetPickFile (PickLayerID);
+		if (ZoomRef == LONG_MIN)
+		{
+			if (PickByRefno(ZoomRef,ZoomPrefix,ZoomUDI,PickFile))
+			{
+				SetMaskArea(NumPicked-1,0);
+	    		ZoomToPickedItem(0,100,TRUE,FALSE,AddToView);
+	    	}
+	    	else
+		      	MessageBox( GetFocus(),"Unable to find zoom area",
+	    			 	    "Error", MB_OK|MB_ICONEXCLAMATION);
+		}
+		else
+		{
+			if (PickByRefno(ZoomRef,NULL,NULL,PickFile))
+			{
+				SetMaskArea(NumPicked-1,0);
+	    		ZoomToPickedItem(0,100,TRUE,FALSE,AddToView);
+	    	}
+	    	else
+		      	MessageBox( GetFocus(),"Unable to find zoom area",
+	    			 	    "Error", MB_OK|MB_ICONEXCLAMATION);
+		}
+	}
+	else if (nRc) 
+	{    
+		lParam = (long)nRc + INT_MAX;
+	    PostMessage(hWndMain, WM_COMMAND, IDM_PROCESSTEXT, lParam);
+	}  
+	return TRUE;
+} 
+

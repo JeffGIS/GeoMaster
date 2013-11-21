@@ -1,0 +1,84 @@
+# standard make macros: should not have to be changed
+
+# C preprocessor
+#	CPP_DEFINE	-[DU] options
+#	CPP_INCLUDE	-I options
+
+CPP_DEFINE=-DIPW
+CPP_INCLUDE=-I$(IPW)/h
+
+# C compiler
+#	C_STD		always used
+#	C_OPTION	may be superseded by "ipwmake -[dg]"
+
+C_STD=$(CPP_DEFINE) $(CPP_INCLUDE) $(C_LOCAL)
+C_OPTION=$(C_NORMAL)
+
+# library naming conventions
+#	LIB_PREFIX	prepended to $(LIB)
+#	LIB_SUFFIX	appended to $(LIB)
+
+LIB_PREFIX=lib
+LIB_SUFFIX=.a
+
+# lint
+
+LINT_STD=$(CPP_DEFINE) $(CPP_INCLUDE) $(LINT_LOCAL)
+LINT_OPTION=$(LINT_NORMAL)
+
+# loader
+#	LD_STD		always used
+#	LD_OPTION	may be superseded by "ipwmake -[dg]"
+
+LD_STD=$(LD_LOCAL)
+LD_OPTION=$(LD_NORMAL)
+LIBS_STD=$(LIBS_LOCAL)
+
+# install
+#	ETC_DIR		maintenance directory
+#	INSTALL		"install" command
+#	LIB_DIR		object library directory
+#	LINT_DIR	lint library directory
+#	PGM_DIR		program directory
+#	SCRIPT_DIR	command script directory
+#	LIB_MODE	object library protection mode
+#	LINT_MODE	lint library protection mode
+#	PGM_MODE	program protection mode
+#	SCRIPT_MODE	command script protection mode
+#	STRIP		"-s" if you want installed binaries stripped
+
+ETC_DIR=$(IPW)/etc
+INSTALL=$(ETC_DIR)/install
+LIB_DIR=$(IPW)/lib
+LINT_DIR=$(IPW)/lib
+PGM_DIR=$(IPW)/bin
+SCRIPT_DIR=$(PGM_DIR)
+LIB_MODE=664
+LINT_MODE=664
+PGM_MODE=775
+SCRIPT_MODE=775
+STRIP=-s
+
+# placeholders for standard targets
+
+LIB=NO_LIB
+PGM=NO_PGM
+SCRIPT=NO_SCRIPT
+SUBLIBS=TRUE
+
+# Objects
+
+# This only handles .c files.  By running through a intermediate variable,
+# We'll handle both Fortran and C files.
+# OBJS = $(SRCS:%.c=%.o)
+
+OBJS_TMP1 = $(SRCS:%.c=%.o)
+OBJS = $(OBJS_TMP1:%.f=%.o)
+
+CPP_OBJS =  $(SRCS:%.c=%.i)
+LINT_OBJS = $(SRCS:%.c=%.ln)
+
+ifdef PURIFY
+  PURE_OBJS = $(OBJS:%.o=%_pure_*.o)
+  PURE_XTRA = .pure $(PGM).pure_linkinfo $(PGM).pure_hardlink
+endif

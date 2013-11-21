@@ -1,0 +1,7673 @@
+#include "GW.h"
+#include "Graphics.h"
+#include "resource.h"
+#include "graphint.h"  
+#include "dict.h"       
+#include "ADDRESS.h"
+#include "client.h"    
+#include "translat.h"   
+#include "std.h"   
+#ifndef	_WIN32_WCE
+#include "extrndb.h" 
+#include "winexec.h"
+#include <compobj.h>
+#include <dos.h>
+#include <direct.h>
+#include <scode.h>
+#include <bios.h>
+#include <conio.h>
+#endif
+
+#include <tchar.h>
+#include <winsock.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <dibapi.h>
+#include <mmsystem.h>     
+//#include "geotools.h"
+#include <ctype.h>
+#define DEFINE_GLOBALS
+#include "umio.h" 
+#include "mci.h"   
+#include "crypto16.h" 
+#include <stdio.h>
+//#include "slsapi.h"
+#include "gmextern.h"
+#define WM_F1DOWN	    0x0500  
+extern BOOL FAR PASCAL DynamicMsgProc(HWND hDlg,WORD Msg,WPARAM wParam,LPARAM lParam);
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam);  
+int FAR PASCAL FilterFunc(int nCode,WORD wParam, DWORD lParam);
+BOOL FAR PASCAL PrintDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL InitGraphics (HWND hWhd);
+BOOL EditMenu (HWND hWnd,HANDLE hMenuName);
+BOOL FAR PASCAL LICENSEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam);
+
+HANDLE	hTrace;
+MNMXCORD	Bounds;
+LPSHORT		CurElementPnt;   
+WORD		CurElement;
+HANDLE		hNames1 = 0;
+HANDLE		hNames2 = 0;
+HANDLE		hSegMax = 0;
+HANDLE		hDBSegdata = 0;
+HANDLE		hSegData = 0;
+HANDLE		hActAdd = 0;
+HANDLE		hStreetAdd = 0;
+HANDLE		hIntersect = 0;
+short	BitmapSizeOpt=1;
+UINT	OkToContinueTime=0;
+BOOL 	AddToView=FALSE, InPlotView=FALSE;    
+double	FormatWidth, FormatHeight;
+int		PlotPageWidth, PlotPageHeight, PlotScrollWidth, PlotScrollHeight;
+FARPROC lpfnPRINTMERGETSTMsgProc;
+HBITMAP	hFullWindowBitMap=0;
+RECT	FullWindowBitMapRect,DeskRect;
+time_t	AVLStartTime;
+HANDLE	hPMRecList=0;
+BOOL	ShowMax=TRUE, AutoReg;
+static	long	RemDays;
+BOOL	InDisplayProcessing=FALSE,HavePendingDisplay=FALSE,NoDisplay=FALSE,ReReference=FALSE;
+static	char	Applications[3][12]={"LakeMaster","SportMap","GeoMaster"};
+DWORD	SerNo=0;
+double	SmallFontLargeFontFactor;
+BOOL	SysMenu=FALSE, NoMenu=FALSE, InFileWait=FALSE,HaveBlockingWindow=FALSE;
+BOOL	CheckForDupRefs = FALSE;
+HANDLE	hReorgBUDir=0, hCommand=0, hDupFiles=0,hDupRef=0, hTranReorg=0,hRestoreMainWindow=0;
+long	ReorgBadRecs;
+LPSTR	Command;
+char	GMVersion[32]="GeoMaster version 0.99n",AppName[12];
+HFILE	CopyFID;  
+POINT	CurrentLBUTDOWNLoc;
+BOOL	HaveCurrentLBUTTON=FALSE,PeopleNet=FALSE, InTime=FALSE;
+HWND	ReorghWnd=0,GFMenuWnd=0,hWndPrompt=0,hWndOrthoFilter=0;  
+BOOL	IsAccel=FALSE, InAccel=FALSE, InPaint=FALSE, IgnoreMouseMove=FALSE;
+int		ReorgStatus;
+int		ReorgFileTxt;      
+int		sVPos;  
+int		sHPos;  
+DPOINT	UserSpecifiedBasePoint;
+BOOL	StopAtInt=TRUE; 
+BOOL	IgnoreLbutton=TRUE, LogOn=FALSE, WantDDE=FALSE, DisplayFiles=FALSE;  
+BOOL	ReorgFile=FALSE; 
+HDC hdcMemMap=0, OldDC=0;
+long	NumRequests=0;
+LPPICKDATA	pPickList;
+char TagLocPrefix[10];  
+HANDLE TagLochSaveGlobal=0;
+int	TagLocMinChar = 3;    
+short	DisplayFinOpt = 0;   
+HANDLE	hSavedPickList=0;
+int		NumSavedPickList=0;
+BOOL	Highways=FALSE;
+UINT	PatBMP[5]={IDB_MONO4,IDB_MONO1,IDB_MONO2,IDB_MONO3,IDB_MONO5};
+DWORD	expnot=851349;   
+int	 HLTOUTDataFileType, HLTOUTFormat=0; 
+HANDLE	HLTOutFields=0;
+HANDLE HLTOuthDB;
+HACCEL hAccelTable, hAccelTableHLT;
+FARPROC  lpProcInstance;
+HHOOK Func;
+HHOOK FAR * lpFilterFunc = &Func;
+MNMXCORD	RezoomRect;
+short	BasicDisplayItem;
+clock_t	MaxTimePerSeg=250, Counter;
+HANDLE	hName;    
+HBRUSH	hBackBrush1; 
+BOOL	SaveStuff=FALSE, StandAlone=FALSE;
+BOOL	Pickability;
+HINSTANCE	hInst;
+BOOL	InHelp=FALSE;
+LPSTR	lpDB, lpSQL, lpDesc, lpInsert;
+HWND		DebugInfoWnd;
+BOOL		DebugWait = FALSE;  
+HCURSOR		hCursor=NULL, OldCursor;  
+BOOL		HaveSeg=FALSE;
+HANDLE		hAddGraphicsFun=0; 
+short		AddGraphicsFunVP=0;
+int		  	SaveDrive, OriginalDrive;
+long		FirstMergeRecord, LastMergeRecord; 
+LPSTR		lpFileDesc;
+int			i2, Pcode;
+int			RedrawAfterOK=1;
+int			npicked;
+HWND		hWndMain;
+FARPROC lpfnPRINTINGMsgProc;
+int		ButtonFuncOpt;
+long	iii=0;
+long		RefMktVal=-1;
+LPGWDHEADER	lpGWDHeadWell;  
+BOOL	YearToDate=FALSE;
+UserInfo UI;
+BOOL	AddLBUTTON;
+long	NumPaint=1;
+
+static		char		CfgNameIn[128]=""; 
+			char MODULEIDSTRING[6] = "2301", MODULENAME[]="GeoMaster"; DWORD	App=0; short TrialDays=15;
+//			char MODULEIDSTRING[6] = "2401", MODULENAME[]="GeoMaster"; DWORD	App=0; short TrialDays=15;
+//			char MODULEIDSTRING[6] = "2302", MODULENAME[]="LakeMaster MN/WI"; DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2303", MODULENAME[]="SportMap Minnesota",App=2; short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2304", MODULENAME[]="LakeMaster Lake Mich";DWORD	App=1; short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2305", MODULENAME[]="LakeMaster Lake Erie";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2306", MODULENAME[]="LakeMaster Michigan";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2307", MODULENAME[]="LakeMaster ND & SD";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2308", MODULENAME[]="LakeMaster Lake Ontario";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2309", MODULENAME[]="LakeMaster Illinois";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2310", MODULENAME[]="LakeMaster Iowa";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2311", MODULENAME[]="LakeMaster Ohio";DWORD	App=1;short TrialDays=30;
+//			char MODULEIDSTRING[6] = "2312", MODULENAME[]="LakeMaster New York";DWORD	App=1;short TrialDays=30;
+BOOL	CheckForLicense=FALSE;
+
+
+void SetZoomVP (LPARAM lParam)
+#if ENABLETRACE
+{GSSiEnterProg (425);
+#endif
+{   if (!CurView)                                   
+		SetViewport(*pCommandViewport);
+	else if (GetGlobalBVal2 ("[%ZOOMCMDVPONLY]",FALSE))
+		SetViewport(*pCommandViewport);
+    else if (lParam > 0 && lParam <MAX_VIEWPORTS)
+        SetViewport((short)lParam);	
+    else if (!VPIsMap(CurView->ID))
+		SetViewport(*pCommandViewport);
+{
+#if ENABLETRACE
+GSSiExitProg (425);
+#endif
+	return;
+}
+#if ENABLETRACE
+}
+#endif
+}  
+
+HWND GetParFocus ()
+#if ENABLETRACE
+{GSSiEnterProg (426);
+#endif
+{    
+	HWND hFocus, hPar, hOwn;
+	
+	hPar = hFocus =GetFocus();
+	while (hFocus)
+	{
+		hPar = hFocus;
+		hFocus = GetParent (hPar);    
+//		hOwn = GetWindow (hPar,GW_OWNER);
+	}
+{
+#if ENABLETRACE
+GSSiExitProg (426);
+#endif
+	return hPar;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL CALLBACK EnumChildProc(HWND hCtrl,LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (427);
+#endif
+    {
+    char        str[256];
+    long	lUserData;
+    POINT	Loc; 
+    RECT	Rect;
+    
+    GetWindowText (hCtrl,str,200);  
+    GetWindowRect (hCtrl,&Rect);
+    if (!_fstricmp (str,"OK"))
+    {   
+    	SetFocus (hCtrl);  
+    	GetWindowRect (hCtrl,&Rect);
+    	Loc = RectMid (&Rect);   
+    	SetCursorPos (Loc.x,Loc.y); 
+    	Loc.x = (Rect.right-Rect.left)/2;
+    	Loc.y = (Rect.bottom-Rect.top)/2;
+	    PostMessage (hCtrl,WM_LBUTTONDOWN,1,MAKELONG(Loc.x,Loc.y)); 
+	    PostMessage (hCtrl,WM_LBUTTONUP,0,MAKELONG(Loc.x,Loc.y)); 
+{
+#if ENABLETRACE
+GSSiExitProg (427);
+#endif
+    	return FALSE;
+}
+    }
+{
+#if ENABLETRACE
+GSSiExitProg (427);
+#endif
+    return (TRUE);
+}
+#if ENABLETRACE
+}
+#endif
+    }
+BOOL CALLBACK EnumWndProc(HWND hCtrl,LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (428);
+#endif
+    {
+    char        str[130];
+    long	lUserData; 
+    HWND	hPar;
+    
+    GetWindowText (hCtrl,str,128); 
+    hPar = GetParent (hCtrl); 
+    if (!_fstricmp (str,"America Online Timer"))
+//    if (!_fstricmp (str,"Open Archive"))
+    {
+		EnumChildWindows (hCtrl,EnumChildProc, 0L);
+{
+#if ENABLETRACE
+GSSiExitProg (428);
+#endif
+    	return FALSE;
+}
+    }
+{
+#if ENABLETRACE
+GSSiExitProg (428);
+#endif
+    return (TRUE);
+}
+#if ENABLETRACE
+}
+#endif
+    }
+
+BOOL ShowDialog (void)
+#if ENABLETRACE
+{GSSiEnterProg (429);
+#endif
+{   
+	char	p1[8],p2[8],p3[8],p4[8],p5[8],p6[8], mess[128];
+	int i=GetEncryptedInfo(p1,p2,p3,p4,p5,p6); 
+    
+    sprintf (mess,"%s-%s-%s-%s-%s-%s",p1,p2,p3,p4,p5,p6);
+	GSSiMessageBox (mess,"License Check",MB_OK);
+//int SetActivationCode(LPSTR param1, LPSTR param2, LPSTR param3, LPSTR param4, LPSTR param5, LPSTR param6)
+{
+#if ENABLETRACE
+GSSiExitProg (429);
+#endif
+	return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}   
+
+
+BOOL ValidSerialNum (LPSTR Product,LPSTR SerialNum)
+#if ENABLETRACE
+{GSSiEnterProg (430);
+#endif
+{
+	long	n, Sno = atol (SerialNum);
+	
+	if (!_fstricmp (SerialNum,"BTEST"))
+{
+#if ENABLETRACE
+GSSiExitProg (430);
+#endif
+		return TRUE; 
+}
+	for (n = 10003; n<99999; n+=13)
+		if (n == Sno)
+{
+#if ENABLETRACE
+GSSiExitProg (430);
+#endif
+			return TRUE;
+}
+	MessageBox (GetFocus(),"This is not a valid SportMap Serial Number - Please try again",NULL,MB_ICONEXCLAMATION);
+{
+#if ENABLETRACE
+GSSiExitProg (430);
+#endif
+	return FALSE;                                                                                        
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL ValidateLicense(HWND hWnd)
+#if ENABLETRACE
+{GSSiEnterProg (431);
+#endif
+{ 
+  FARPROC lpfnLICENSEMsgProc;  
+  BOOL	nRc;
+  char	IniName[132], Serno[32]="", str[128];   
+  
+//  DWORD TR = GetTimerResolution();
+  
+  if (!CheckForLicense)
+{
+#if ENABLETRACE
+GSSiExitProg (431);
+#endif
+  	return TRUE;  
+}
+  _fullpath (IniName,"gmapp.ini",255);
+  GetPrivateProfileString ("Install","AppName","GeoMaster",AppName,sizeof(AppName),IniName); 
+  if (!_fstrcmp (AppName,"Sportmap"))
+  { 
+  	do 
+		if (!GetTextString (hWnd,Serno,-32,"Please enter the SportMap Serial Number located on the inside cover",NULL,NULL,0,TRUE))
+{
+#if ENABLETRACE
+GSSiExitProg (431);
+#endif
+			return FALSE;   
+}
+	while (!ValidSerialNum ("SportMap",Serno));
+	WritePrivateProfileString ("SportMap","SerialNum",Serno,"geomastr.ini"); 
+	sprintf (str,"SN%s",Serno);
+	WritePrivateProfileString ("SportMap","OpenOrder",str,"geomastr.ini"); 
+	WritePrivateProfileString ("Install","AppName","SportMap",IniName);
+{
+#if ENABLETRACE
+GSSiExitProg (431);
+#endif
+	return TRUE; 
+}
+  }
+  lpfnLICENSEMsgProc = MakeProcInstance((FARPROC)LICENSEMsgProc, hInst);
+  nRc = DialogBox(hInst, (LPSTR)"LICENSE", hWnd, lpfnLICENSEMsgProc);
+  FreeProcInstance(lpfnLICENSEMsgProc); 
+{
+#if ENABLETRACE
+GSSiExitProg (431);
+#endif
+  return nRc;
+}
+
+#if ENABLETRACE
+}
+#endif
+}  
+
+BOOL GetSerialCode (LPSTR Code)
+#if ENABLETRACE
+{GSSiEnterProg (432);
+#endif
+{
+	char	p[6][8];
+	int i=GetEncryptedInfo(p[0],p[1],p[2],p[3],p[4],p[5]);  
+	int	n=0;
+			    
+    sprintf (Code,"%s",p[0]);   
+    for (i=1;i<6;i++)
+    {
+    	if (!_fstricmp (p[i-1],p[i]))
+    		n++;
+    	else
+    	{
+    		if (n)
+    			sprintf (_fstrchr(Code,0),"-%i",n+1);
+    		n=0;
+			sprintf (_fstrchr(Code,0),"-%s",p[i]);
+    	}
+    }
+	if (n)
+		sprintf (_fstrchr(Code,0),"-%i",n+1);
+    _fstrupr (Code); 
+    REPLAC (Code,"O","$",250);
+{
+#if ENABLETRACE
+GSSiExitProg (432);
+#endif
+	return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}  
+
+BOOL EnterAccessCode (LPSTR Code)
+#if ENABLETRACE
+{GSSiEnterProg (433);
+#endif
+{
+	char	p[6][8];
+//	char	c[64];
+	LPSTR	subc,last;
+	short	i,n=0; 
+	DWORD ru, fe; 
+				
+	_fmemset (p,0,sizeof(p));
+            	
+	subc = Code;   
+	_fstrupr (Code);
+	ReplaceChar (Code,'O','0');
+	ReplaceChar (Code,'$','O');
+            	
+	while (subc)
+	{
+		short	nlast=n-1;
+
+		last = subc;
+		subc = _fstrchr (subc,'-');
+		if (subc)
+			*subc++ = 0; 
+		if (_fstrlen (last) == 1)
+		{   
+			i=atoi(last)-1;
+			while (i--)
+				_fstrcpy (p[n++],p[nlast]);
+		}
+		else
+			_fstrcpy (p[n++],last);
+	}
+	if (n != 6)
+{
+#if ENABLETRACE
+GSSiExitProg (433);
+#endif
+		return FALSE;
+}
+	i=SetActivationCode(p[0],p[1],p[2],p[3],p[4],p[5]);
+	ru = GetRunsCount();
+	fe = GetDateCount();
+	if((LicenseIntegrityCheck() == 1) && (ru > 0))
+	{   
+		UpdateRandom();
+{
+#if ENABLETRACE
+GSSiExitProg (433);
+#endif
+        return TRUE;
+}
+	} 
+{
+#if ENABLETRACE
+GSSiExitProg (433);
+#endif
+	return FALSE;
+}
+#if ENABLETRACE
+}
+#endif
+} 
+
+void BuildRefIndexes (void)
+#if ENABLETRACE
+{GSSiEnterProg (434);
+#endif
+{   
+ 	 LPSTR	pDupFiles;
+ 	 HANDLE	handle;
+			     	 
+	 TimeRangeBeg = 0;
+	 TimeRangeEnd = LONG_MAX;
+	 SetViewport(*pCommandViewport);
+
+	 DisableHalt = TRUE; 
+	 DisableMarginPan = TRUE; 
+	 DoPaint=FALSE; 
+	 SelectVisList (FALSE);
+	 if (!SaveBuildTAGVis) 
+	 {   
+		HANDLE	hVis;
+			    		
+        hVis=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+        SaveBuildTAGVis =(LPVISLIST) GlobalLock (hVis);  
+        *SaveBuildTAGVis = *CurVis;
+        SaveBuildTAGVis->hVisList = hVis;
+        SaveBuildTAGVis->LastVisList = 0;
+        SaveBuildTAGVis->NextVisList = 0;
+     }
+	 InitVis (); 
+	 CurVis->WantType[5]=0; 
+     ClearAllBounds();
+	 IgnoreBounds = TRUE; 
+	 NumCopyFiles = 0;
+	 CopyFileNum = 0;
+	 DoMapCopy = 4; //gets number of files   
+     CurView->CurZoomAreaRef = 0;
+	 IgnoreSelectVP = TRUE; 
+	 RedisplayViewport(TRUE,TRUE); 
+	 IgnoreSelectVP = FALSE;
+	 DoMapCopy = 0;   
+	 NumCopyFiles *= 2;
+	 CreateStatusWindow (hWndMain,2,NULL);
+	 ForceTAGIndex =  TRUE;
+	 CheckForDupRefs = TRUE;
+     ClearAllBounds();
+	 IgnoreBounds = TRUE; 
+	 StoreTAGBounds = GetGlobalBVal2 ("[%STORETAGBOUNDS]",FALSE);
+	 SetWindowText (hWndMain,"Creating TAG index");
+	 SetViewport(*pCommandViewport);
+     CurView->CurZoomAreaRef = 0;
+	 IgnoreSelectVP = TRUE;
+	 RedisplayViewport(TRUE,TRUE);  
+	 IgnoreSelectVP = FALSE;
+	 SetViewport(*pCommandViewport);
+	 SelectVisList (FALSE);
+	 InitVis (); 
+	 CurVis->WantType[5]=0; 
+
+	 ForceTAGIndex =  FALSE; 
+	 StoreTAGBounds = FALSE;
+	 SetWindowText (hWndMain,"Creation of TAG index complete");
+	 ForceRefIndex =  TRUE;
+     ClearAllBounds();
+	 IgnoreBounds = TRUE;
+	 SetWindowText (hWndMain,"Creating Reference index");
+	 SetViewport(*pCommandViewport); 
+	 hDupFiles = GSSiGlobAlloc (GHND,UINT_MAX);
+     CurView->CurZoomAreaRef = 0;
+	 IgnoreSelectVP = TRUE;
+	 RedisplayViewport(TRUE,TRUE);  
+	 IgnoreSelectVP = FALSE;
+	 SetViewport(*pCommandViewport);
+	 pDupFiles = GlobalLock (hDupFiles);
+   	 while (*pDupFiles)
+   	 {
+		hDupRef = BT_OPEN (pDupFiles, 0, BT_READ, 0);    
+		if (hDupRef)
+			FixDupRef (); 
+   		pDupFiles = _fstrchr (pDupFiles,0);
+   		pDupFiles++;
+   	 } 
+     GSSiGlobUlFree (&hDupFiles);
+	 if (SaveBuildTAGVis)
+	 {
+		handle = SaveBuildTAGVis->hVisList; 
+		if (CurVis)
+		{
+			SaveBuildTAGVis->hVisList = CurVis->hVisList;
+			*CurVis = *SaveBuildTAGVis; 
+		}
+		else
+			SelectVisList (FALSE);
+		GSSiGlobUlFree (&handle);
+		SaveBuildTAGVis = 0;
+	 }
+	 ForceRefIndex =  FALSE; 
+	 SetWindowText (hWndMain,"Creation of Reference index complete");
+	 IgnoreBounds = FALSE;
+	 DestroyStatusWindow();  
+	 DisableHalt = FALSE;  
+	 DisableMarginPan = FALSE;
+	 DoPaint=TRUE; 
+	 CheckForDupRefs = FALSE;
+{
+#if ENABLETRACE
+GSSiExitProg (434);
+#endif
+     return;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+
+                            
+BOOL FAR PASCAL LICENSEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (435);
+#endif
+{ 
+	UINT	PrevErrMode;
+	char	UserID[64], Password[32], mess[256], str[260], VolLabel[32];
+	DWORD ru, fe, fech, usr, actusr;
+	static	BOOL	OKtoGo;
+	short	i;	
+
+ int	BRtn;
+ if (WSAIsBlocking ()) 
+ {
+	SetCursor (LoadCursor (NULL,IDC_WAIT));  
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+ 	return TRUE;
+}
+ }
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+    if (!App)
+       	ShowWindow (GetDlgItem(hWndDlg,IDC_REGNOW),SW_HIDE);
+ReCheck:		  
+    {  
+    
+			
+			int	HPI=0, ii;
+			
+			//Initialize your own private values
+			//-----------------------------------
+			//Your Serialization Private Key
+			DWORD SC = 802519233;
+			//Your Activation Private Key
+			DWORD AC = 721063029;
+			//Your main control file string
+			//Maximum runs allowed
+			DWORD MR = 10;
+			//Maximum days allowed
+			DWORD MD = expnot;
+			//Your own key value for NO EXPIRATION
+			//--------------------------------------
+			
+			//Here you set your Private Keys for Serialization and
+			//Activation codes as well as the string to create your
+			//own Main Control File
+			OKtoGo = TRUE;
+			ii=SetGlobals(SC, AC, MODULEIDSTRING);
+			
+		
+			// If you want to allow your application to run if it's never
+			//been installed before (Trialware/Demo), then implement this code:
+			//Check for DEMO Mode then set Days and Runs as needed as well as
+			//the number of allowed users (optional for network environments)  
+			ii=GetDemoMask();
+			ii=ControlFileExists();
+//			if((GetDemoMask() == 0) && (ControlFileExists() != 1))
+			if((ControlFileExists() != 1))
+				{
+					ii=CreateControlFile();
+					ii=SetDemoMask();     
+					ii=SetRunsCount(AC, 10);
+					ii=SetDateCount(AC, TrialDays);
+					ii=SetUsersCount(AC, 1);
+				}
+		
+		
+			//Check for existence of Control File
+			if(ControlFileExists() != 1)
+				ii=CreateControlFile();
+		
+		
+			//License integrity validation
+//			if(LicenseIntegrityCheck() != 1) removed to keep sercode from changing
+//				ResetControlFile();         
+				                     
+				                     
+			//Updates the user time to the control file and if
+			//tampered with then exits
+			if((TimeUpdate() == 0) && (GetRunsCount() != expnot))
+			{
+	
+					ii=CreateControlFile();
+					ii=SetDemoMask();     
+					ii=SetRunsCount(AC, 0);
+					ii=SetDateCount(AC, 0);
+					ii=SetUsersCount(AC, 1);
+					ResetControlFile();
+//					goto RtnFalse;
+				}	
+		
+		
+			//Randomly updates all control points in the user's computer
+			UpdateRandom();
+		
+		
+			//Check for integrity of Users Control in a network (Crash Protection)
+			//(can be ignored in Single User environments)
+			UsersCountValidate(HPI);
+		
+			
+			//Get Runs and Date count plus User Time
+			fech = GetUserTime();
+			ru = GetRunsCount();
+			fe = GetDateCount();
+		
+		
+			//Check for legal settings for days and runs
+			//as well as the NO EXPIRATION value 
+		    if((((DWORD)labs(fe - fech)) > MD) && (ru != expnot))
+			{
+	
+					ii=CreateControlFile();
+					ii=SetDemoMask();     
+					ii=SetRunsCount(AC, 0);
+					ii=SetDateCount(AC, 0);
+					ii=SetUsersCount(AC, 1);
+					ResetControlFile();
+//					goto RtnFalse;
+				}	
+		
+			if((ru > MR) && (ru != expnot))
+				{
+					ResetControlFile();
+//					goto RtnFalse;
+				}
+				
+		
+			//Check for NO EXPIRATION value
+			if((LicenseIntegrityCheck() == 1) && (ru == expnot))
+				goto RtnTrue;   
+	        
+    	 	if (GetGlobalBVal2 ("[%USEDISKREG]",FALSE))
+    	 	{
+				PrevErrMode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);
+	
+				for (i=0;i<26;i++)
+				{   
+					short DriveType = GetDriveType (i);
+					if (DriveType > 0)
+					{   
+						if (GetVolumeLabel(i,VolLabel))
+						{
+							char	DriveID=(char)('A'+i);	
+		                    HFILE	Fid;
+		                    OFSTRUCT	OFStruct;
+		                    
+			            	sprintf (str,"%c:\\gmregist.txt",DriveID); 
+			            	Fid = GSSiOpenFile(str,&OFStruct,OF_READ);
+			            	if (Fid != HFILE_ERROR)
+			            	{
+			            		fgetstring (str,100,Fid);
+			            		GSSiClose (Fid);
+			            		if (EnterAccessCode (str))  
+			            		{
+		        					MessageBox (hWndDlg,"Thank you for registering","",MB_OK);
+									SetErrorMode(PrevErrMode);
+			            			goto RtnTrue;
+			            		}
+			            	}
+			            }
+		            }
+		        }
+				SetErrorMode(PrevErrMode); 
+			}
+			
+			//Decrement runs count by one     
+			RemDays = (long)(fe-fech);  
+			GetGlobalCVal ("[%APPID]",AppName,"GeoMaster");
+			if((LicenseIntegrityCheck() == 1) && (fech < fe) && (ru > 0))
+			{   
+				
+//				DecrementRunsCount();
+				sprintf (mess,"You have %ld days before %s must be registered",RemDays,AppName) ;
+				SetDlgItemText (hWndDlg,IDC_MESS,mess);
+			}
+			else
+			{
+				OKtoGo = FALSE;
+				sprintf (mess,"%s must be registered before you can continue",AppName) ;  
+				SetWindowText (GetDlgItem(hWndDlg,IDOK),"Exit");
+				SetDlgItemText (hWndDlg,IDC_MESS,mess);
+			}
+		
+		
+         	cwCenter(hWndDlg, 0);  
+         	break;
+         	
+		}
+			
+         break; /* End of WM_INITDIALOG                                 */
+RtnFalse:
+		 EndDialog(hWndDlg, FALSE);  
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+		 return FALSE;
+}
+		 
+RtnTrue: 
+		 {
+		 	DWORD ii,jj, MM=0;
+		 	unsigned char AppSerNo[4];
+		 	for (ii=1;ii<33;ii++)
+		 		if (CheckModuleMask (ii))
+		 			SetBit2 ((short)(ii-1),(LPSTR)&MM,TRUE);
+		 	_fmemmove (&AppSerNo,&MM,4); 
+		 	_fmemmove (&SerNo,&AppSerNo[1],3); 
+//		 	App = AppSerNo[0];
+		 } 
+		 Wait (500);
+       	 BringWindowToTop(hWndDlg);
+		 EndDialog(hWndDlg, TRUE);  
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+		 return FALSE;
+}
+		 
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+    	 PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND: 
+         switch(wParam)
+         {  
+            case IDCANCEL: 
+                EndDialog(hWndDlg, FALSE);  
+            break; 
+            
+            case IDOK: 
+                EndDialog(hWndDlg, OKtoGo);
+            break;    
+            
+            case IDC_REGNOW: 
+            {
+				char	mess[256];
+			    
+			    sprintf (mess,"Select either the 'Auto' button to automatically register via the internet or the 'Manual' button to register manually");
+			    SetDlgItemText (hWndDlg,IDC_MESS2,mess);  
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_AUTOREGISTER),SW_SHOW);
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_MANUAL),SW_SHOW);
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_REGNOW),SW_HIDE);
+			}
+			break;
+			    
+            case IDC_MANUAL:
+            {
+            	char	mess[256]; 
+			    sprintf (mess,"Send the above SERIALIZATION CODE to your software vendor to get an ACCESS CODE. Enter the ACCESS CODE below and then select the 'Enter Access Code' button.");
+			    SetDlgItemText (hWndDlg,IDC_MESS2,mess); 
+			    GetSerialCode (mess);
+			    SetDlgItemText (hWndDlg,IDC_SERCODE,mess);
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_SERCODE),SW_SHOW);
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_ACCESSCODE),SW_SHOW); 
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_ENTERACCESS),SW_SHOW);
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_AUTOREGISTER),SW_HIDE);
+            	ShowWindow (GetDlgItem(hWndDlg,IDC_MANUAL),SW_HIDE);
+            //	ShowWindow (GetDlgItem(hWndDlg,IDC_TRANLICENSE),SW_SHOW); 
+            //	ShowWindow (GetDlgItem(hWndDlg,IDC_LICENSEHELP),SW_SHOW);
+            } 
+            break; 
+            
+            case IDC_AUTOREGISTER:
+            {
+            	UINT	st=IDOK;
+            	
+            	AutoReg = TRUE;  
+			   	if (!GetTextString (hWndDlg,SerialNumber,32,"Enter the LMCODE located on the cover of the CD case.",NULL,NULL,0,TRUE))
+			   		break;
+			   	while (st == IDOK)
+			   	{   
+			   		short err = CheckForRegistrationServer (hWndDlg,SerialNumber);
+
+			   		switch (err)
+			   		{
+			   			case 0: 
+			   			if (!_fstricmp (SerialNumber,"JOHNPAULGEORGERINGO"))
+			   				EnterAccessCode (AccessCode);
+			   			else
+		            	{
+		                  FARPROC lpfnAUTOREGMsgProc; 
+		                  short	nRc;
+		
+						  WritePrivateProfileString (MODULENAME,"SerialNumber",SerialNumber,"geomastr.ini"); 
+		                  lpfnAUTOREGMsgProc = MakeProcInstance((FARPROC)AUTOREGMsgProc, hInst);
+		                  nRc = DialogBox(hInst, (LPSTR)"AUTOREG", hWndDlg, lpfnAUTOREGMsgProc);
+		                  FreeProcInstance(lpfnAUTOREGMsgProc);  
+		                  if (nRc)
+						  {   
+		        			MessageBox (hWndDlg,"Thank you for registering","",MB_OK);
+			                goto RtnTrue;
+						  }
+		                  
+		            	}
+						st = IDCANCEL;
+		            	break;
+		            	
+		            	case 1:
+		            		st = GSSiMessageBox ("[REGERRNOCONNECT]",0,MB_OKCANCEL);
+		            		if (st == IDCANCEL) 
+		            			exit (1);
+		            			//BlowOut(NULL,NULL);
+		            		break;
+		            	
+		            	case 2:
+		            		st = IDCANCEL;
+		            		break;
+		            	case 3:
+		            		GSSiMessageBox ("[REGERRSNINUSE]",0,MB_ICONEXCLAMATION);
+		            		st = IDCANCEL;
+		            		break;
+		            	case 4:
+		            		GSSiMessageBox ("[REGERRSNINVALID]",0,MB_ICONEXCLAMATION);
+		            		st = IDCANCEL;
+		            		break;
+	            	}
+	            }
+            }		
+            break;
+            
+            case IDC_TRANLICENSE:   
+				if (TransferHardwareID() != 155)
+					break;
+            	if (GetTransferCode() != 1)
+            		break;
+				ru = GetRunsCount();
+				fe = GetDateCount();
+				if((LicenseIntegrityCheck() == 1) && (ru > 0))
+				{   
+					UpdateRandom();
+        			MessageBox (hWndDlg,"Your license has been transferred","",MB_OK);
+	                EndDialog(hWndDlg, TRUE);
+				}
+				else
+           			MessageBox (hWndDlg,"Invalid Transfer Disk",NULL,MB_ICONEXCLAMATION);
+            break;
+            
+            case IDC_ENTERACCESS:
+            {
+				char	p[6][8], mess[256];
+				char	c[64];
+				LPSTR	subc,last;
+				short	i,n=0;  
+				
+				_fmemset (p,0,sizeof(p));
+            	GetDlgItemText (hWndDlg,IDC_SERCODE,mess,sizeof(mess)); 
+            	GetDlgItemText (hWndDlg,IDC_ACCESSCODE,c,sizeof(c)); 
+            	
+            	if (!_fstricmp (c,"JOHNPAULGEORGERINGO"))
+            	{
+            		EndDialog(hWndDlg, TRUE);
+            		break;
+            	}
+            	_fstrupr (c);
+            	if (!_fstricmp (mess,c))
+            		goto ACErr;
+            	if (EnterAccessCode (c))
+				{   
+        			MessageBox (hWndDlg,"Thank you for registering","",MB_OK);
+	                goto RtnTrue;
+				}
+				else
+        		{   
+        ACErr:
+        			MessageBox (hWndDlg,"Invalid Access Code",NULL,MB_ICONEXCLAMATION);
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+        			return TRUE;
+}
+        		}
+            }
+            break;
+         }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (435);
+#endif
+ return TRUE;            
+}
+#if ENABLETRACE
+}
+#endif
+}  
+
+BOOL ProcessCommandLine (LPSTR lpszCmdLine)
+#if ENABLETRACE
+{GSSiEnterProg (436);
+#endif
+{
+ /***********************************************************************/
+ /* HANDLE hInstance;       handle for this instance                    */
+ /* HANDLE hPrevInstance;   handle for possible previous instances      */
+ /* LPSTR  lpszCmdLine;     long pointer to exec command line           */
+ /* int    nCmdShow;        Show code for main window display           */
+ /***********************************************************************/
+
+ MSG        msg;           /* MSG structure to store your messages        */
+ int        nRc;           /* retrn value from Register Classes          */ 
+ LPSTR	lpSpace, lpStart, lpEnd, lpStr, lpNext; 
+ char	CmdLine[256], str[256]; 
+ time_t	Time; 
+ BOOL	Loaded;  
+ LPSTR	lpOpt; 
+ long	nf; 
+ POINT	CPoint;   
+ HWND	hFocus, hParent;            
+ OFSTRUCT	OFStruct;
+ long	ii;   
+ char drive[34],dir[128]; 
+ short	winx=CW_USEDEFAULT, winy=CW_USEDEFAULT, winh=CW_USEDEFAULT, winw=CW_USEDEFAULT;     
+ static	BOOL	First=TRUE;
+
+/* ltoa (GetComputerID(),str,10);
+ MessageBox (GetFocus(),str,"Processor ID",MB_OK);
+ 
+ sprintf (str,"%f",GetDriveSize ('c'));
+ MessageBox (GetFocus(),str,"Drive Size",MB_OK); */
+ _fstrcpy(CmdLine,lpszCmdLine);   
+ if (First)
+ {
+	InfoBoxInit(&TAGBox);
+	_getcwd (CurDir,128);  
+	SetHandleCount(MAXFILEHANDLES+10);    
+	GetPrivateProfileString ("Install","InDir","c:\\geomastr",str,256,"geomastr.ini"); 
+	_fstrcat (str,"\\");  
+	SetGlobalValue("%INDIR",str);
+	_fullpath (str,"gmapp.ini",255);
+	GetPrivateProfileString ("Install","AppName","GeoMaster",szAppName,sizeof(szAppName),str); 
+	SetGlobalValue ("%APPID",szAppName);
+		 
+	if (!CmdLine[0])
+	GetPrivateProfileString ("Install","DefaultArgs","BASIC1.GMC /WD [%INDIR]",CmdLine,255,str);
+	CreateInternalGlobals ();
+ } 
+
+//OpenPicStream (0);
+
+ if (_fstrstr (CmdLine,"/ID"))
+ {  
+ 	MessageBox (GetFocus(),MODULENAME,"",MB_OK);
+{
+#if ENABLETRACE
+GSSiExitProg (436);
+#endif
+ 	return FALSE;
+}
+ }
+ ExpandText (CmdLine);  
+ _fstrcat (CmdLine," ");
+ if (First)
+ {
+	 lpStart = _fstrstr (CmdLine,"/WD ");
+	 if (lpStart)
+	 {
+	 	char	path[128];  
+	// 	char	dir[128],file[34],ext[8];
+	 	int		idrive;
+	 	lpStart+=4;
+	 	_fstrcpy (path,lpStart);
+	 	if ((lpStart = _fstrchr (path,' ')))
+	 		*lpStart = 0; 
+	 	lpStart = LastChr (path);
+	 	if (*lpStart == '\\' && _fstrlen (path) > 3)
+	 		*lpStart = 0;
+	 	ii = _chdir (path);  
+	// 	_fullpath (str,path,sizeof(str));
+	// 	_splitpath (path,drive,dir,file,ext);
+	 	_splitpath (path,drive,NULL,NULL,NULL);
+	 	if (*drive)
+	 	{   
+	 		_fstrupr (drive);
+	 		idrive = *drive - 'A' + 1;
+		 	_chdrive (idrive);
+	 	} 
+	// 	MessageBox (GetFocus(),path,"WD set",MB_OK);
+	 }	                     
+	 OriginalDrive = SaveDrive = _getdrive();
+	 _getcwd (OriginalDir,128);
+	 _getcwd (CurDir,128);  
+	 CreateCursors();		 	
+	 SetStartupGlobalValues (); 
+ }
+ if ((lpStart = _fstrstr(CmdLine," /SUBDIR ")))
+ {
+ 	lpStart += 9;
+ 	if ((lpNext = _fstrchr (lpStart,' ')))
+ 	{
+ 		*lpNext++ = 0;  
+ 		SetReplacePath (lpStart,1);
+ 		if ((lpStart = _fstrchr (lpNext,' ')))
+ 			*lpStart = 0;
+ 		SetReplacePath (lpNext--,2);
+ 		*lpNext = ' ';
+ 		if (lpStart)
+ 			*lpStart = ' ';
+ 	}
+ }
+	 
+ if ((lpStart = _fstrstr(CmdLine," /CACHE ")))
+ {
+ 	lpStart += 8;
+ 	if ((lpNext = MatchLev (lpStart,' ')))
+ 	{
+ 		*lpNext++ = 0;  
+ 		SetReplacePath (lpStart,3);
+ 		if ((lpStart = _fstrchr (lpNext,' ')))
+ 			*lpStart = 0;
+ 		SetReplacePath (lpNext--,4);
+ 		*lpNext = ' ';
+ 		if (lpStart)
+ 			*lpStart = ' ';
+ 	}
+ }
+	 
+ 
+ if (_fstrstr(CmdLine," /TRACE "))
+ 	SetTrace(1); 
+ else if (_fstrstr(CmdLine," /TRAC "))
+ 	SetTrace(2);
+ 
+ if (First)
+ { 
+	 if (!LoadGlobalInit ("global.ini",TRUE))
+{
+#if ENABLETRACE
+GSSiExitProg (436);
+#endif
+ 	return FALSE; 
+}
+	 _fstrcpy (str,"[%DATA_LOC]");
+	 ExpandText (str);
+	 if (!*str)
+	 {
+		_fstrcpy (str,"[%START_DIR]");
+		ExpandText (str);
+		if (*str)
+		{   
+			LPSTR lpEnd;
+				 		
+			lpEnd = _fstrchr (str,0);
+			lpEnd--;
+			if (*lpEnd != '\\')
+				_fstrcat (str,"\\");
+		}
+		SetGlobalValue("%DATA_LOC",str);
+	 }
+	 else
+	 {
+		LPSTR lpEnd;
+				 		
+		lpEnd = _fstrchr (str,0);
+		lpEnd--;
+		if (*lpEnd != '\\') 
+		{
+			_fstrcat (str,"\\");
+			SetGlobalValue("%DATA_LOC",str);
+		}
+	 }
+	 SetGlobalValue ("%DL",str);
+	 lpEnd = _fstrchr (str,0);
+	 if (lpEnd != str)
+	 {
+	 	lpEnd--;
+	 	if (*lpEnd == '\\')
+	 		*lpEnd = 0;
+	 }
+	 if (*str && _fstricmp (str,CurDir))
+	 	LoadGlobalInit ("[%DL]global.ini",FALSE);
+	 PeopleNet = GetGlobalBVal ("[PEOPLENET]");
+	 _fstrcpy (str,"[%FILEVPEDIT]=@[%DL]"); 
+	 ExpandText (str);
+	 if (GetGlobalCVal ("[%USERDIR]",str,NULL))
+	 	LoadGlobalInit ("[%USERDIR]global.ini",FALSE); 
+	 //dumpvars("Before.txt");  
+	 _fstrcpy (UI.HomeDir,CurDir);
+	 UI.svrName[0]='\0';
+	 UI.Userid[0]='0';
+ }
+/* lpOpt = _fstrstr(CmdLine," /H ");
+ if (lpOpt)
+ {
+ 	UseHardDrive=TRUE;
+ 	lpOpt +=4;
+	_fstrcpy(HardDrive,lpOpt);
+ 	lpSpace = _fstrchr (HardDrive,' '); 
+ 	if (lpSpace)
+ 		*lpSpace = 0;
+ 	_fstrcpy (HardDrive2,HardDrive); 
+ } */ 
+// if (_fstrstr(CmdLine," /GIF ")) GIDIndexFile=TRUE;
+ if ((lpStart = _fstrstr (CmdLine,"/QUERY ")))
+ {
+ 	lpStart+=7;
+ 	_fstrcpy (ThemeDB,lpStart); 
+ 	DisplayFinOpt=3;
+ }	                     
+ if (_fstrstr(CmdLine," /DDE ")) WantDDE = TRUE;
+ if (_fstrstr(CmdLine," /MIN ")) ShowMax=FALSE;
+ if (_fstrstr(CmdLine," /NOMENU "))
+ {
+ 	 NoMenu=TRUE;
+ 	 SysMenu=TRUE;//prevents user menu from loading
+ }  
+ 
+ if (_fstrstr(CmdLine," /NODISPLAY ")) NoDisplay=TRUE;
+ if (_fstrstr(CmdLine," /SYSMENU ")) SysMenu=TRUE;
+ if (_fstrstr(CmdLine," /DM ")) 	DisplayMarkers=TRUE;
+ if (_fstrstr(CmdLine," /DF ")) 	DisplayFiles=TRUE;
+// if (_fstrstr(CmdLine," /VIF "))	RawIndexFile=TRUE;
+ if (_fstrstr(CmdLine," /SCAN "))DoDescScan=TRUE;
+
+ if (_fstrstr(CmdLine," /DB ")) UMIODebug=TRUE;
+ if (_fstrstr(CmdLine," /LOG ")) LogOn=TRUE;
+ if (_fstrstr(CmdLine," /DBE ")) DebugExistFile=TRUE;
+ if (_fstrstr(CmdLine," /NPF ")) PatternBrush=FALSE;
+ if ((lpStart = _fstrstr(CmdLine," /SERVER ")))
+ {
+ 	MemMap=TRUE; 
+ 	lpStart += 9;
+ 	if (*lpStart && *lpStart != '/')
+ 	{
+ 		lpEnd = _fstrchr (lpStart,' ');
+ 		if (lpEnd)
+ 		{
+ 			UINT	port = atol (lpEnd); 
+ 			char	TCPAddress[20];
+ 			*lpEnd = 0;  
+ 			_fstrcpy (TCPAddress,lpStart);
+ 			*lpEnd = ' ';  
+ 			OpenTCPIPServer (TCPAddress,port);
+ 		}
+ 	}
+ }
+ if (_fstrstr(CmdLine," /SHARE "))
+ 	ShareEnabled = TRUE;
+ if (_fstrstr(CmdLine," /KFO "))
+ 	KeepFilesOpen = TRUE;
+ if (First)
+ {
+	 GSSiTrace("*** Start Program ***"); 
+	 GSSiTrace (GMVersion);
+	 GSSiTrace(CmdLine);
+	 Time = time(NULL); 
+	 GSSiTrace(ctime(&Time)); 
+ }
+ _fstrcpy (str,"[%USER_ID]"); 
+ ExpandText (str);
+ if (_fstricmp (str,"[%USER_ID]"))
+	_fstrcpy(UI.Userid,str);
+ _fstrcpy (str,"[%ULTIMAP_SERVER]");
+ ExpandText (str);
+ if (_fstricmp (str,"[%ULTIMAP_SERVER]"))
+	_fstrcpy(UI.svrName,str);
+
+ lpStart = _fstrstr (CmdLine,"/TB ");
+ if (!lpStart) lpStart = _fstrstr (CmdLine,"/IB ");
+ if (lpStart)
+ {
+ 	lpStart+=4;
+ 	lpSpace = _fstrstr(lpStart," ");
+ 	if (lpSpace) *lpSpace = 0;
+	_fstrcpy(TagFile,lpStart);
+	if (lpSpace)
+	 	*lpSpace = ' ';
+ }	                     
+ lpStart = _fstrstr (CmdLine,"/OAX ");
+ if (lpStart)
+ {
+ 	lpStart+=4;
+ 	OrthoAdjustX = atof (lpStart);
+ }	                     
+ lpStart = _fstrstr (CmdLine,"/OAY ");
+ if (lpStart)
+ {
+ 	lpStart+=4;
+ 	OrthoAdjustY = atof (lpStart);
+ }	                     
+
+/*  lpStart = _fstrstr (CmdLine,"/LIB");
+ if (lpStart)
+ {
+   Loaded = LoadLibraries(hInstance);           
+  if(!Loaded) FreeLibraries();
+ } */
+  
+ lpSpace = _fstrstr (CmdLine,"/C ");
+ if (lpSpace)
+ {	*lpSpace = '\0';   
+ 	CreateConfig = TRUE;
+ }
+ 
+ if (_fstrstr (CmdLine, "/POLICE "))
+	 _fstrcpy(szAppName, "GeoMaster/Police"); 
+/* else if (_fstrstr (CmdLine, "/HIGHWAYS ")) 
+ {
+ 	RawIndexFile=TRUE; 
+ 	Highways = TRUE;
+ 	VehSizeOpt = 2;
+	_fstrcpy(szAppName, "GeoMaster/Highways"); 
+ } */
+ else
+	GetGlobalCVal ("[%APPID]",szAppName,"GeoMaster");
+ 
+ if (First)
+ {
+	 lpSpace = _fstrstr (CmdLine," ");
+	 if (lpSpace)
+	 	*lpSpace = 0;
+	 _fstrcpy (CfgName,CmdLine);  
+	 if (lpSpace)
+	 	*lpSpace = ' ';
+	 _fstrupr (CfgName);
+	 if (_fstrstr(CfgName,".PLT"))
+	 {  
+	 	char	fullp[128], Drive[4];
+	 	int		drive;
+	 	
+	 	_fullpath (fullp,CfgName,sizeof(fullp));
+		SetGlobalValue("%PLOT",fullp);
+		_fstrcpy (CfgName,"BASIC1.GMC");
+		GetPrivateProfileString ("Install","InstallDir","C:\\GEOMASTR",CurDir,128,"geomastr.ini");
+	 	_splitpath (CurDir,Drive,NULL,NULL,NULL);
+	 	drive = Drive[0] - 'A' + 1;
+	 	_chdrive (drive);
+	 	_chdir (CurDir);
+	 }
+	 else 
+	 {
+	 	if (!_fstrchr (CfgName,'.'))
+	 		_fstrcat (CfgName,".GMC");
+	 	_fstrcpy (CfgNameIn,CfgName);
+	 }
+ }
+ First = FALSE;
+{
+#if ENABLETRACE
+GSSiExitProg (436);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL GetNodeParms (LPSTR NodeName,LPSTR Parms)
+{
+	char	str[260];
+	OFSTRUCT	OFStruct;
+	char	File[128]="[%DL]nodeparm.txt";
+	HFILE	Fid;
+	
+	*Parms = 0;
+	ExpandText (File);
+	Fid = OpenFile (File,&OFStruct,OF_READ);
+
+	if (Fid == HFILE_ERROR)
+		return FALSE;
+	while (fgetstring (str,256,Fid))
+	{
+		LPSTR pTAB=strchr (str,'\t');
+
+		if (pTAB)
+		{
+			*pTAB = ' ';
+			strcpy (Parms,pTAB);  
+			*pTAB = 0;
+			if (!strcmp (NodeName,str))
+			{
+				_lclose (Fid);
+				return TRUE;
+			}
+		}
+	}
+	_lclose (Fid);
+
+	return FALSE;
+}
+
+BOOL ProcessNodeParms (void)
+{   
+	char	str[256];
+	
+	if (!*NodeName)
+		return FALSE;
+	GetNodeParms (NodeName,str);
+	ProcessCommandLine (str);
+	return TRUE;
+}
+
+BOOL ProcessUserParms (void)
+{
+	return TRUE;
+}
+
+int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
+#if ENABLETRACE
+{GSSiEnterProg (437);
+#endif
+{
+ /***********************************************************************/
+ /* HANDLE hInstance;       handle for this instance                    */
+ /* HANDLE hPrevInstance;   handle for possible previous instances      */
+ /* LPSTR  lpszCmdLine;     long pointer to exec command line           */
+ /* int    nCmdShow;        Show code for main window display           */
+ /***********************************************************************/
+
+ MSG        msg;           /* MSG structure to store your messages        */
+ int        nRc=0;           /* retrn value from Register Classes          */ 
+ time_t	Time; 
+ BOOL	Loaded;  
+ LPSTR	lpOpt; 
+ long	nf; 
+ POINT	CPoint;   
+ HWND	hFocus, hParent;            
+ short	ii,winx=CW_USEDEFAULT, winy=CW_USEDEFAULT, winh=CW_USEDEFAULT, winw=CW_USEDEFAULT;
+
+ hInst = hInstance; 
+ CreateBigMem ();
+ if (!ProcessCommandLine (lpszCmdLine))  
+ {
+{
+#if ENABLETRACE
+GSSiExitProg (437);
+#endif
+	FreeBigMem (); 
+	return FALSE;
+}
+ }
+ProcessNodeParms ();
+ProcessUserParms (); 
+AllowCache = TRUE;
+ if(!hPrevInstance)
+   {
+    /* register window classes if first instance of application         */
+    if ((nRc = nCwRegisterClasses()) == -1)
+      {
+			HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+			LPSTR	str=GlobalLock (hStr); 
+			/* registering one of the windows failed                         */
+			LoadString(hInst, IDS_ERR_REGISTER_CLASS, str, 255);
+			MessageBox(NULL, str, NULL, MB_ICONEXCLAMATION);
+			GSSiGlobUlFree (&hStr);
+{
+#if ENABLETRACE
+GSSiExitProg (437);
+#endif
+			FreeBigMem (); 
+			return nRc;
+}
+      }
+   }
+// if (!ShowMax)
+ {
+ 	winx=0;
+ 	winy=0;
+ 	winw=600;
+ 	winh=300;
+ }
+ if (GetGlobalBVal2 ("[%DualScreen]",FALSE))
+ {   
+	 GetWindowRect(GetDesktopWindow(), &DeskRect); 
+	 winw = DeskRect.right;
+	 winh = DeskRect.bottom;
+ }
+ /* create application's Main window                                    */
+ hWndMain = CreateWindow(
+                szAppName,               /* Window class name           */
+                szAppName,             /* Window's title              */
+                WS_CAPTION      |        /* Title and Min/Max           */
+                WS_SYSMENU      |        /* Add system menu box         */
+                WS_MINIMIZEBOX  |        /* Add minimize box            */
+                WS_MAXIMIZEBOX  |        /* Add maximize box            */
+                WS_THICKFRAME   |        /* thick sizeable frame        */
+                WS_MAXIMIZE     |        /* create maximized window     */
+            /*    WS_CLIPCHILDREN |*/         /* don't draw in child windows areas */
+                WS_OVERLAPPED,
+                winx, winy, winw, winh,
+                /*CW_USEDEFAULT, 0,  */      /* Use default X, Y            */
+                /*CW_USEDEFAULT, 0,*/        /* Use default X, Y            */
+                NULL,                    /* Parent window's handle      */
+                NULL,                    /* Default to Class Menu       */
+                hInst,                   /* Instance of window          */
+                NULL);                   /* Create struct for WM_CREATE */
+
+
+ if(hWndMain == NULL)
+   {
+		HANDLE	hStr=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+		LPSTR	str=GlobalLock (hStr); 
+		LoadString(hInst, IDS_ERR_CREATE_WINDOW, str, 255);
+		MessageBox(NULL, str, NULL, MB_ICONEXCLAMATION);
+		GSSiGlobUlFree (&hStr);
+{
+#if ENABLETRACE
+GSSiExitProg (437);
+#endif
+		FreeBigMem (); 
+		return IDS_ERR_CREATE_WINDOW;
+}
+   }
+   else
+   		OpenTCPIPServer2 (hWndMain);
+
+    {
+    	static	FirstAct=TRUE;
+	    	
+    	if (FirstAct)
+    	{
+	    	FirstAct = FALSE;
+			if (!ValidateLicense(hWndMain))
+			{
+				DestroyWindow(hWndMain); 
+{
+#if ENABLETRACE
+GSSiExitProg (437);
+#endif
+				FreeBigMem (); 
+	        	return 0;
+}
+	        }
+	    } 
+	}
+ 
+ // added by LDA 
+ GotItUp = FALSE;
+ Ready = FALSE; 
+  //  aFormats[0].atom = CF_TEXT; // exception - predefined.
+  //  for (i = 1; i < CFORMATS; i++) 
+  // {
+  //      aFormats[i].atom = RegisterClipboardFormat(aFormats[i].sz);
+   // } // end of lda addition
+
+if (ShowMax)
+	ShowWindow(hWndMain, SW_SHOWMAXIMIZED);
+else
+	ShowWindow(hWndMain, SW_SHOW); 
+	
+   if (!_fstricmp (szAppName,"SportMap"))  
+   		hAccelTable = LoadAccelerators(hInst,szAppName);
+   else if (!Highways)
+   		hAccelTable = LoadAccelerators(hInst,MAKEINTRESOURCE(IDR_ACCELERATOR1)); 
+   else
+   		hAccelTable = LoadAccelerators(hInst,"HIGHWAY_ACCEL");
+
+   hAccelTableHLT = LoadAccelerators(hInst,"HLT_ACCEL");
+   lpProcInstance = MakeProcInstance(FilterFunc, hInst);
+   if(lpProcInstance == NULL)
+   {
+{
+#if ENABLETRACE
+GSSiExitProg (437);
+#endif
+		FreeBigMem (); 
+    	return FALSE;
+}
+   }
+   Func = SetWindowsHookEx(WH_MSGFILTER, lpProcInstance, hInst,NULL );
+   if (WantDDE)
+   	InitDdeStuff(hInst,Highways);                                       
+    // end of lda addition 
+    
+
+
+ while(GetMessage(&msg, NULL, 0, 0))        /* Until WM_QUIT message    */
+   {    
+		if (hWndStrmPipe)
+		{   
+		
+			if (IsDialogMessage(hWndStrmPipe, &msg))
+			{
+				if (msg.message == WM_CHAR && msg.wParam == 5)
+					PostMessage(msg.hwnd, WM_COMMAND, IDC_DYNEDIT, 0L);  
+        		continue; 
+        	}
+        }
+       
+/*	if (!WSAIsBlocking ())*/  
+	if (msg.message == WM_KEYDOWN) 
+	{   
+		HWND	InFocus = GetParFocus();  
+		RECT	Rect;
+		
+		if (!CurrentConfig)
+			SetConfig (1);
+		GetCursorPos (&CPoint); 
+		GetWindowRect (InFocus,&Rect);
+		if (!PtInRect (&Rect,CPoint))
+		{
+			HaltMapDisplay(FALSE);
+			SelectViewport (CPoint,TRUE,FALSE,FALSE);   
+			if (InFocus != GetFocus())
+				PostMessage(GetFocus(),msg.message, msg.wParam,msg.lParam);
+		} 
+			
+	}  
+
+//     	IsAccel = TranslateAccelerator(hWndMain,hAccelTable,&msg); 
+//	 SetWindowText (hWndMain,"NewMSG");
+	 hFocus =GetParFocus(); 
+	 InAccel = TRUE;  
+	 if ((!hFocus || hFocus == hWndMain) && (msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN))
+     	IsAccel = TranslateAccelerator(hWndMain,hAccelTable,&msg); 
+     else if (HLTDlgWnd && hFocus == HLTDlgWnd)
+     	IsAccel = TranslateAccelerator(HLTDlgWnd,hAccelTableHLT,&msg); 
+     else
+      	InAccel = IsAccel = FALSE; 
+	 if (!IsAccel)
+	 {
+	    TranslateMessage(&msg);
+	    DispatchMessage(&msg); 
+//	    Sleep (50);
+//   		 SetWindowText (hWndMain,"NotACC");
+     } 
+     else
+//   		 SetWindowText (hWndMain,"WasACC");
+		ii=1;
+   }
+
+ /* Do clean up before exiting from the application                     */
+ UnhookWindowsHookEx(Func);
+ FreeProcInstance(lpProcInstance);
+ CwUnRegisterClasses(); 
+{
+#if ENABLETRACE
+GSSiExitProg (437);
+#endif
+ FreeBigMem (); 
+#if CHECKMEM
+		 GSSiGLOBALLOCCLOSE ();
+#endif
+ return msg.wParam;
+}
+#if ENABLETRACE
+}
+#endif
+} /*  End of WinMain                                                    */
+/************************************************************************/
+/*                                                                      */
+/* Main Window Procedure                                                */
+/*                                                                      */
+/* This procedure provides service routines for the Windows events      */
+/* (messages) that Windows sends to the window, as well as the user     */
+/* initiated events (messages) that are generated when the user selects */
+/* the action bar and pulldown menu controls or the corresponding       */
+/* keyboard accelerators.                                               */
+/*                                                                      */
+/************************************************************************/
+
+LONG FAR PASCAL WndProc(HWND hWnd, WORD Message, WPARAM wParam, LPARAM lParam)
+#if ENABLETRACE
+{GSSiEnterProg (438);
+#endif
+{
+ HMENU      hMenu=0;            /* handle for the menu                 */
+ HBITMAP    hBitmap=0;          /* handle for bitmaps                  */
+ HDC        hDC;                /* handle for the display device       */
+ PAINTSTRUCT ps;                /* holds PAINT information             */
+ int        nRc=0;              /* retrn code                         */
+ POINT		MousePoint;
+ WORD wSize;
+ DWORD dwLen;
+ HDC	hPr, hMemoryDC;   
+ RECT	Rect;
+ POINT		Factors;
+ DWORD		lCursorLoc;
+ POINT		CursorLoc; 
+ HBRUSH		BkBrush;  
+ BOOL		RedisplayMenu;
+ int		SDC, i, SaveDrive;
+//char	str[256];
+POINT ptCurrent;
+HMENU hmenu;
+LPVIEWPORT	SaveView, SaveView2; 
+int			iview,l,ii, WantVP;
+static FARPROC lpfnDEBUGINFOMsgProc;
+time_t	Time;  
+HANDLE	hSTR;
+LPSTR	str;  
+
+#if ENABLETRACE
+SetLastMessage(Message);
+#endif
+
+ if (Message == GF_CLOSE)
+ {
+ 	if (wParam == GF_DIGITIZE_POLYLINE)
+ 		ii=1;
+ }
+if (Message == GF_TCPIPMESSAGE)
+{   
+	UINT	event = LOWORD (lParam);
+	UINT	err = HIWORD (lParam);
+	SOCKET	sock = wParam;
+	BOOL	IDP = InDisplayProcessing;      
+	
+	if (HaveBlockingWindow)
+		InDisplayProcessing=TRUE;	 
+	if (err)
+		err = WSAGetLastError();	
+	else
+		switch (event)
+		{
+			case FD_READ:
+				ProcessTCPData (sock);
+				break;
+			case FD_CLOSE:
+				CloseTCPIPSocket (sock);
+				break;
+			case FD_ACCEPT: 
+				AcceptTCPConnection (hWnd,sock);
+				break;
+		}   
+	InDisplayProcessing = IDP;
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return TRUE; 
+}
+}
+
+if (Message == WM_COMMNOTIFY) 
+{   
+	BOOL	IDP=InDisplayProcessing;
+	
+	if (HaveBlockingWindow)
+		InDisplayProcessing=TRUE;	
+	ProcessCOMMNotification( hWnd, (WORD) wParam, (LONG) lParam ); 
+	InDisplayProcessing = IDP;
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+}
+
+if (HaveBlockingWindow || Message == WM_CANCELMODE || Message == WM_KILLFOCUS)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+//if (Message == WM_PAINT && hRestoreMainWindow) 
+if (Message == WM_ACTIVATE && wParam == WA_ACTIVE && hFullWindowBitMap) 
+{
+	hDC = GetDC (hWndMain);
+					
+	GetWindowRect (hWndMain,&Rect);
+    SelectClipRgn (hDC,0);
+	RestoreScreen (hDC,hFullWindowBitMap,FullWindowBitMapRect);	     
+	ReleaseDC (hWndMain,hDC);  
+/*
+	GetClientRect(hWndMain, &Rect); 
+	hDC = GetDC (hWndMain); 
+	SelectClipRgn (hDC,NULL);			
+	RestoreScreen (hDC,hRestoreMainWindow,Rect);
+	DeleteObject (hRestoreMainWindow);  
+	hRestoreMainWindow = 0; 
+	ReleaseDC (hWndMain,hDC);*/
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+}
+
+ 
+if (Message == WM_LBUTTONDOWN)
+	IgnoreLbutton = FALSE;
+ if (Printing)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+ 		return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+                      
+ if (Message == WM_KEYDOWN)
+ 	ii=1;
+ if (Message == WM_CHAR)
+ 	ii=1;
+ if (Message == GF_CLOSE)
+ {
+ 	if (lParam)
+ 		SetViewport ((short)lParam); 
+ 	if (wParam == GF_DIGITIZE_POLYLINE)
+ 		ii=1;
+ }
+ if (Message == WM_RBUTTONUP)
+ 	checkvp(1);
+ if (Message == WM_TIMER && wParam == 3)
+ {   WSACancelBlockingCall ();
+ 	 MessageBox( GetFocus(), "Time-out waiting for response","Fatal Error", MB_OK);
+//	 CloseUM(TRUE);
+ 	 BlowOut(NULL,NULL);
+ }
+
+if (Message == WM_MOUSEMOVE)
+{	if (IgnoreMouseMove)
+	{
+		IgnoreMouseMove=FALSE;              		
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+		return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+	} 
+}
+if (Message == WM_CLOSE)
+	Processing = FALSE;
+if (Processing || InFileWait)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return(FALSE);       
+}
+if (Message == WM_LBUTTONUP )
+{
+    if (IgnoreLbutton)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+    	return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+    if (DebugWait)
+	{
+		DebugWait = FALSE;
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	    return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+	}
+    IgnoreLbutton = TRUE;
+}
+if (Message == WM_LBUTTONDOWN )
+{
+    HaltMapDisplay(TRUE);
+	IgnoreLbutton = FALSE;
+	IgnoreSelectVP = FALSE; 
+	CurrentLBUTDOWNLoc=MAKEPOINT(lParam);
+}
+if (DebugWait)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+
+if (!DisableMarginPan && 
+	(Message == WM_LBUTTONDOWN || Message == WM_RBUTTONDOWN || Message == WM_LBUTTONUP))
+	if (!SelectViewport (MAKEPOINT(lParam),FALSE,wParam & MK_DIGITIZER_BUTTON,FALSE))
+		goto S10;
+//if (HaveSeg) 
+{
+	if (ProcessPassiveFunctions (hWnd,Message, wParam,lParam))
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+		return (TRUE);
+}
+	if (ConfigLoaded && CurView && *pNumViewports)
+	{
+//		if (CurView->StartupFunction && !CurView->FunStackHandle && !CurView->CurrentFunction)
+		if (CurView->StartupFunction && !CurView->CurrentFunction && !CurView->FunStackHandle)
+	    {                               
+	    	ResetFunStack (TRUE);
+	       	AddLBUTTON = TRUE;
+			AddGraphicsFunction (0, CurView->StartupFunction,0);        
+		}
+	}
+	if (CurView && CurView->ID == 3)
+		ii=pViewports[2]->FunStackHandle; 
+	SetViewportForCommand (Message, wParam);   
+	if (ProcessGraphicsFunction (hWnd,Message, wParam,lParam))
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+		return (TRUE);
+}
+}
+if (ProcessInfoboxMacro (hWnd,Message, wParam,lParam))
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return (TRUE);
+}
+if (Message == GF_EXECUTE)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return TRUE; 
+}
+S10:
+if (ProcessDocument (hWnd,Message, wParam,lParam))
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	return (TRUE);
+}
+
+ switch (Message)
+   { 
+        	
+    case WM_USER:
+		PostMessage(hWndMain,MM_MCINOTIFY, NULL, 0L); 
+		break;  
+    
+    case WM_F1DOWN: 
+    {
+         //  wParam; contains the handle to the dialog control thats active
+    	 HWND hw;  
+    	 
+		 hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+		 str=GlobalLock (hSTR); 
+    	 
+//         hw = GetDlgCtrlID(wParam); 
+         DoPaint=TRUE;    
+         InHelp=TRUE;
+         if (GFMenuWnd)
+         {   
+         	short	Choice;
+         	LPSTR	lpTAB, lpBAR; 
+         	
+			 Choice=SendDlgItemMessage(GFMenuWnd,ACTIVE_FUN_LB,
+								    LB_GETCURSEL,NULL,NULL); 
+			 SendDlgItemMessage(GFMenuWnd,ACTIVE_FUN_LB,LB_GETTEXT,
+							  Choice,(DWORD)&str); 
+			 lpTAB = _fstrchr (str,'\t');
+			 if (lpTAB)
+			 {
+			 	lpBAR = _fstrchr (lpTAB,'|');
+			 	if (lpBAR)
+			 	{    
+			 		lpTAB++;
+			 		*lpBAR = 0;  
+			 		DisplayHelp (hWnd,lpTAB);
+			 	}
+			 } 
+         } 
+         
+         else
+		 {   
+			_fstrcpy (str,"[%INDIR]help\\gmhelp.hlp");
+			ExpandText (str);
+			WinHelp(GetFocus(),(LPCSTR)str,HELP_KEY,(DWORD)CurHelpTopic);  
+		 } 
+		 GSSiGlobUlFree (&hSTR);
+         InHelp=FALSE;
+    }
+         break;  
+    
+    case GSSI_ADDGF:
+		 SetViewport((short)lParam);            	
+		 if (wParam)
+		 	AddGraphicsFunction (CurView->hWnd,wParam,0);
+		 else if (hAddGraphicsFun) 
+	     {
+	    	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
+		                	
+	    	HaveCurrentLBUTTON=FALSE;  
+	    	SetViewport (AddGraphicsFunVP);
+	    	AddGraphicsCmd (hWndMain,pCmd,TRUE,0); 
+	    	GSSiGlobUlFree (&hAddGraphicsFun);
+	     } 
+         break; 
+         
+    case GF_ADD_EMEBEDDED_CMD:
+		 SetViewport((short)wParam);            	
+		 if (hEmbeddedGFCommand)
+	     {
+	    	LPSTR	pCmd=GlobalLock (hEmbeddedGFCommand); 
+		                	
+	    	HaveCurrentLBUTTON=FALSE; 
+	    	AddGraphicsCmd (hWndMain,pCmd,TRUE,0); 
+	    	GSSiGlobUlFree (&hEmbeddedGFCommand);
+	     } 
+         break;
+   
+    case WM_COMMAND:
+         /* The Windows messages for action bar and pulldown menu items */
+         /* are processed here.                                         */ 
+         
+     	 if (!CurrentConfig)
+    	 	SetConfig (1);
+        if (!DisableHalt)
+         	ContinueProcessing = TRUE; 
+         WantVP = LOWORD(lParam);
+         if (WantVP > 0 && WantVP <= *pNumViewports) 
+         	SetViewport(WantVP);
+         else if (*pNumViewports && wParam < 60000) 
+         {  
+         	POINT CPoint;
+         	
+         	GetCursorPos (&CPoint);
+			ScreenToClient (hWnd,&CPoint);   
+//changed !IsAccel to IsAccel 2/27/00   
+			IsAccel = (HIWORD(lParam) == 1);
+         	if (IsAccel)
+         	{
+         		if (!SelectViewport (CPoint,TRUE,FALSE,FALSE)) 
+		    		SetViewport(*pCommandViewport);
+		    }
+		    else
+				SetViewport(*pCommandViewport);
+         }  
+         if (wParam != IDM_Z_WINDOW && wParam != IDM_DISPLAY_VEHICLES)
+		 	CancelWindowZoom();
+
+//         HaltMapDisplay(FALSE);
+//         DoPaint = FALSE; 
+         if (wParam >= 64000) /* pickmacro*/
+         {
+         	int	item, irec;
+         	
+         	item = (wParam - 64000) / 256;
+         	irec = (wParam - 64000) % 256; 
+         	ProcessPickedItems (hWnd,item, irec);
+
+         }
+         else if (wParam == 63800) /* GRAPHICS_FUNCTION_THEME selection */
+         	ExecuteGFFromTheme ();
+         else if (wParam > 63800) /* GRAPHICS_FUNCTION_THEME Ap List */
+         {  
+         	short WantAp = wParam - 63800; 
+         	
+         	LoadGFFunctionList (WantAp); 
+         }
+         else if (wParam > 60000) /* Viewports menu used for activate/deactivate */
+         {  
+         	short WantVP = wParam - 60000;
+         	
+         	SaveView = CurView;  
+         	if (SetViewport (WantVP))
+         	{
+	         	if (CurViewActive())
+	         	{
+	         	   CheckMenuItem(GetMenu(hWnd), wParam, MF_BYCOMMAND | MF_UNCHECKED);
+	         	   CurView->Active = FALSE;
+	         	   for (iview = 0;iview<*pNumViewports; iview++)
+	         	   {          
+	         	   	   SetCurView ( pViewports[iview]);
+	         	   	   if (CurViewActive() /*&& !FileMode*/)
+	         	   	   {
+			         	   CurView->hRgn = CreateVPRgn(FALSE,FALSE);
+						   SelectClipRgn (CurView->hDC,CurView->hRgn);
+						   DeleteObject(CurView->hRgn); 
+					   }
+	               }
+				   RedisplayWindow();   
+	         	}
+	         	else
+	         	{
+	         	   CheckMenuItem(GetMenu(hWnd), wParam, MF_BYCOMMAND | MF_CHECKED);
+	         	   CurView->Active = TRUE; 
+		           SaveView2 = CurView;
+			       CurView->CurZoomAreaRef = 0;
+	         	   RedisplayViewport (TRUE,FALSE);  
+	         	   SetCurView ( SaveView2);
+	         	   if (CurView->Type == 7)
+	         	   {
+	         	   		SetCurView ( pViewports[CurView->ZoomTarget-1]);
+	      	   		    SetBounds (hWnd,NULL);
+	         	   }
+	         	}  
+	        }
+            DoPaint = TRUE;
+	       	SetCurView ( SaveView);
+
+         } 
+         else if (wParam >= 59500) /* Toolbar commands */
+         {  
+         	int	CmdID;
+         	
+         	CmdID = wParam - 59500;  
+         	if (!CmdID) goto DisplayParcel; 
+         	phWhichCmdList = &hToolCmd;
+         	ExecuteUserCmd (CmdID);   
+         	GSSiGlobFree (&hToolCmd);
+         	DoPaint = TRUE;
+         }
+         else if (wParam >= 58000) /* User commands */
+         {  
+         	int	CmdID;
+         	
+         	CmdID = wParam - 58000;  
+         	if (!CmdID) goto DisplayParcel; 
+         	phWhichCmdList = &hUserCmd;
+         	ExecuteUserCmd (CmdID);
+         	DoPaint = TRUE;
+         }
+         else switch (wParam)
+           {
+            case IDM_VIEW:
+            {
+            	 char title[]="Load GeoMaster Map File";
+
+				 hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+				 str=GlobalLock (hSTR); 
+            	 
+       			 HaltMapDisplay(FALSE);
+                 DoPaint = FALSE;
+				 ButtonFuncOpt=0;
+				 OFTitle = title;
+		         if (GetFileName3 (hWnd,str,IDS_FILTERPLT,IDS_FILEPLT))   
+                 {
+					NewMap();  
+                 	if (_fstrstr (str,".PLT"))
+                 	{   
+			    		SetGlobalValue("%PLOT",str);
+						RedisplayWindow();   
+                 	}
+                 	else if (_fstrstr (str,".BMP"))
+                 	{   
+					    _fstrcpy (FullBM,str);
+						ShowFullBM(FALSE);
+                 	}
+                 	else if (_fstrstr (str,".GMC"))
+                 	{    
+				        UnallocateConfig ();
+                		_fstrcpy (CfgName,str);
+						RedisplayWindow();   
+                 	}
+                  }
+
+				  DoPaint = TRUE;
+				  GSSiGlobUlFree (&hSTR);
+
+            }
+                 break;  
+            
+            case IDM_TRANSFERLICENSE:    
+            	 SetTransferCode (expnot);
+            	 break;
+            	      
+            case IDM_NEWSYM:
+                 {
+                  FARPROC lpfnNEWSYMBOLMsgProc;
+
+                  lpfnNEWSYMBOLMsgProc = MakeProcInstance((FARPROC)NEWSYMBOLMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"NEWSYMBOL", hWnd, lpfnNEWSYMBOLMsgProc);
+                  FreeProcInstance(lpfnNEWSYMBOLMsgProc);
+
+                 }
+            	 break;
+            	 
+            case IDM_EDITSYM:
+                 {
+                  FARPROC lpfnEDITSYMBOLMsgProc;
+
+                  lpfnEDITSYMBOLMsgProc = MakeProcInstance((FARPROC)EDITSYMBOLMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"EDITSYMBOL", hWnd, lpfnEDITSYMBOLMsgProc);
+                  FreeProcInstance(lpfnEDITSYMBOLMsgProc);
+
+                 }
+            	 break;
+            	 
+            case IDM_ABOUT:
+                 {
+                  FARPROC lpfnABOUTMsgProc;
+
+                  lpfnABOUTMsgProc = MakeProcInstance((FARPROC)ABOUTMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"ABOUT", hWnd, lpfnABOUTMsgProc);
+                  FreeProcInstance(lpfnABOUTMsgProc);
+
+                 }
+            	 break;
+            	 
+            case IDM_REORG_BTREE:
+                 {
+                  FARPROC lpfnBTREE_REORGMsgProc;
+
+                  lpfnBTREE_REORGMsgProc = MakeProcInstance((FARPROC)BTREE_REORGMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"BTREE_REORG", hWnd, lpfnBTREE_REORGMsgProc);
+                  FreeProcInstance(lpfnBTREE_REORGMsgProc);
+
+                 }
+            	 break;
+            	 
+            case IDM_CITY_EXTRACT:
+//            	 CreateCityExtract();
+            	 break;  
+            	 
+            case IDM_SETDATERANGE:
+                 {
+                  FARPROC lpfnDATELIMITSMsgProc;
+
+                  lpfnDATELIMITSMsgProc = MakeProcInstance((FARPROC)DATELIMITSMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"DATELIMITS", hWnd, lpfnDATELIMITSMsgProc);
+                  FreeProcInstance(lpfnDATELIMITSMsgProc);
+
+                 }
+            	 break;
+            	 
+            case IDM_SAVE_CONFIG:
+       			 HaltMapDisplay(FALSE);
+            	 DoPaint = FALSE;
+            	 if (GetSaveName2 (hWnd,CfgName,IDS_FILTERGMC,".GMC",IDS_FILEGMC))
+            	 {    
+            	 	if (GetGlobalBVal2 ("[%CFGSAVEPROMPT]",TRUE))
+            	 	{
+	                  FARPROC lpfnCONFIGPARMSMsgProc;
+	
+	                  lpfnCONFIGPARMSMsgProc = MakeProcInstance((FARPROC)CONFIGPARMSMsgProc, hInst);
+	                  nRc = DialogBox(hInst, (LPSTR)"CONFIGPARMS", hWnd, lpfnCONFIGPARMSMsgProc);
+	                  FreeProcInstance(lpfnCONFIGPARMSMsgProc);
+	                 }
+	                 else
+	                 {
+	                 	SaveZoom = TRUE;
+	                 	SaveGlobals = TRUE;
+	                 	nRc=1; 
+	                 }
+	                 if (nRc) SaveConfig (CfgName);
+                 }
+            	 break;  
+            	 
+/*            case IDM_VAN_SMALL: 
+            	 VehLen = 20;
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_SMALL, MF_BYCOMMAND | MF_CHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_MEDIUM, MF_BYCOMMAND | MF_UNCHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_LARGE, MF_BYCOMMAND | MF_UNCHECKED);
+                 break;
+            	 
+            case IDM_VAN_MEDIUM: 
+            	 VehLen = 20 * 4;
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_SMALL, MF_BYCOMMAND | MF_UNCHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_MEDIUM, MF_BYCOMMAND | MF_CHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_LARGE, MF_BYCOMMAND | MF_UNCHECKED);
+                 break;
+            	 
+            case IDM_VAN_LARGE: 
+            	 VehLen = 20 * 8;
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_SMALL, MF_BYCOMMAND | MF_UNCHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_MEDIUM, MF_BYCOMMAND | MF_UNCHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_VAN_LARGE, MF_BYCOMMAND | MF_CHECKED);
+                 break; */
+                
+            case IDM_PLOTVIEW:  
+            	if (!PrinterHeight)
+            	{   
+            		MessageBox (hWnd,"You must use the Print Setup command before using PlotView","",MB_ICONEXCLAMATION);
+            		break;
+            	}
+             	if (InPlotView)
+             	{
+             		InPlotView = 0; 
+             		ShowScrollBar(hWnd, SB_BOTH,FALSE);
+					CheckMenuItem(GetMenu(hWnd), IDM_PLOTVIEW, MF_BYCOMMAND | MF_UNCHECKED);
+             	}
+             	else if (GetFormatDimensions (&FormatWidth,&FormatHeight))
+             	{
+             		InPlotView = 1;
+             		ShowScrollBar(hWnd, SB_BOTH,TRUE);
+					CheckMenuItem(GetMenu(hWnd), IDM_PLOTVIEW, MF_BYCOMMAND | MF_CHECKED);
+             	}
+				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);  
+                break;
+                
+            case IDM_MISC:
+            	MiscFunction(); 
+             	break;
+
+/*            {
+            	DPOINT PT1,PT2,PT3,PT4;
+            	double	lat=45,lon=-93;
+            	
+				PT1 = NewLatLong(lat,lon,5280,0);
+				PT2 = NewLatLong(lat,lon,5280,PY);
+				PT3 = NewLatLong(lat,lon,5280,PY/2);
+				PT4 = NewLatLong(lat,lon,5280,3*PY/2);
+            }*/	
+//            	 LoadCitiesTable ();
+                 
+/*                 {   
+                 	HFILE FidI;
+                 	char	str[20];  
+                 	OFSTRUCT	OFStruct;
+                 	
+                 	FidI = GSSiOpenFile ("creatint.txt",&OFStruct,OF_READ);
+                 	if (FidI == HFILE_ERROR) break;
+                 	while (fgetstring (str,16,FidI))
+                 	{
+	            	 	SetGlobalValue ("STATE",str);
+	            	 	CreateIntersectionFile (TRUE); 
+	            	} 
+	            	GSSiClose (FidI);
+	            	SetWindowText (hWnd,"Intersection Creation Complete"); 
+            	 }   
+            	 
+            	 break; */          
+            	 
+            case IDM_GFKEY:
+				SetViewport(*pCommandViewport);            	
+	            IsGFunctionKey ((WORD)lParam,TRUE);
+                break;
+            	 
+            case IDM_OPEN_DIGITIZER:
+            	if (!OpenDigConnection(hWnd ))
+            		break;
+				GMEnableMenuItem(hWndMain, IDM_CLOSE_DIGITIZER, MF_BYCOMMAND | MF_ENABLED);
+				GMEnableMenuItem(hWndMain, IDM_OPEN_DIGITIZER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+            	break;
+            	 
+            case IDM_CLOSE_DIGITIZER:
+            	CloseDigConnection ();
+				GMEnableMenuItem(hWndMain, IDM_OPEN_DIGITIZER, MF_BYCOMMAND | MF_ENABLED);
+				GMEnableMenuItem(hWndMain, IDM_CLOSE_DIGITIZER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+            	break;   
+            	
+            case IDM_DIG_CONTROL:
+            	OpenDigControlDialog (hWnd);
+            	break;   
+            	
+            case IDM_NEWPOINTSET: 
+            	SetNewElementValues (hWnd,1);
+            	break;
+            	 
+            case IDM_NEWLINESET:   
+            	SetNewElementValues (hWnd,2);
+            	break;
+            	 
+            case IDM_NEWAREASET: 
+            	SetNewElementValues (hWnd,3);
+            	break;
+            	 
+            case IDM_SHOW_DELETES:
+				 if (GWCheckMenuItem(hWnd, wParam))
+				 	ShowDeletedOpt=FALSE;
+				 else
+				 	ShowDeletedOpt=TRUE;
+                 PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);
+            	 break;
+
+            case IDM_SHOW_MILEPOINTS:
+				 GWCheckMenuItem(hWnd, wParam);
+                 PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);
+            	 break;
+
+            case IDM_STOP_ATINT:
+				 StopAtInt = GWCheckMenuItem(hWnd, wParam);
+				 break;
+				 
+            case IDM_DISPLAY_HLT_PATTERN:
+				 DisplayHLTPattern = GWCheckMenuItem(hWnd, wParam);
+				 break;
+				 
+            case IDM_DISPLAY_NONHLT:
+				 DisplayOnlyNonHLT = GWCheckMenuItem(hWnd, wParam);
+				 CheckMenuItem(GetMenu(hWnd), IDM_DISPLAY_HLT, MF_BYCOMMAND | MF_UNCHECKED); 
+				 DisplayOnlyHLT = FALSE;
+				 break;
+				 
+            case IDM_DISPLAY_HLT:
+				 DisplayOnlyHLT = GWCheckMenuItem(hWnd, wParam);
+				 CheckMenuItem(GetMenu(hWnd), IDM_DISPLAY_NONHLT, MF_BYCOMMAND | MF_UNCHECKED);
+				 DisplayOnlyNonHLT = FALSE;
+				 break;
+				 
+            case IDM_COMMAND_INPUT:  
+            	 Command = GlobalLock (hCommand); 
+			   	 if (GetTextString (hWnd,Command,256,"Enter the command",NULL,NULL,0,TRUE))
+			   	 	ExecuteCommandString (Command);
+			   	 GlobalUnlock (hCommand);
+            	 break;
+            
+            case IDM_EXPAND_INPUT:
+            	 
+            	 Command = GlobalLock (hCommand); 
+			   	 if (GetTextString (hWnd,Command,256,"Input",NULL,NULL,0,TRUE)) 
+			   	 {
+		           	LPSTR mess; 
+		           	HANDLE	handle; 
+		           	LPSTR	pExpanded;
+		           	
+		           	handle = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+		           	pExpanded = GlobalLock (handle); 
+		           	mess = pExpanded+3064;
+		           	sprintf (mess,"Expansion of %s",Command); 
+		           	_fstrcpy (pExpanded,Command);
+			   	 	ExpandText (pExpanded);    
+			   	 	MessageBox (GetFocus(),pExpanded,mess,0);
+			   	 	GSSiGlobUlFree (&handle);
+			   	 }
+			   	 GlobalUnlock (hCommand);
+            	 break; 
+            
+            case IDM_NET_MARKER_CHECK:
+				 FindNetSegWOEndMarker (15); 
+				 break;
+				
+			case IDM_NET_CREATE_INT_MARKERS:
+				 CreateIntMarkers ();
+				 break;
+            	
+            case IDM_CREATE_SEGMAX_INDEX:
+       	 		 BuildSegMaxIndex (hWnd);
+                 break;
+                          
+            case IDM_DUMP_INT_TO_TXT:
+            	 DumpIntToTXT ();
+            	 break;
+            	 
+            case IDM_DUMP_INTNAME_TO_TXT:
+            	 DumpIntersectionStreets ("intnames.txt");
+            	 break;
+            	 
+            case IDM_CREATE_ADDLOC:
+            {
+                  FARPROC	lpfnADDLOC_CREATEMsgProc; 
+
+                  lpfnADDLOC_CREATEMsgProc = MakeProcInstance((FARPROC)ADDLOC_CREATEMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_CREATE", hWnd, lpfnADDLOC_CREATEMsgProc);
+                  FreeProcInstance(lpfnADDLOC_CREATEMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_RELOAD_STND_TABLES: 
+            {
+                  FARPROC	lpfnABVEDITMsgProc; 
+
+                  lpfnABVEDITMsgProc = MakeProcInstance((FARPROC)ABVEDITMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"ABVEDIT", hWnd, lpfnABVEDITMsgProc);
+                  FreeProcInstance(lpfnABVEDITMsgProc);
+            }
+            	 break; 
+            	       
+            case IDM_UNLOAD_STREET_NAMES:
+            	 UnloadStreets (hWnd);
+            	 break;
+
+            case IDM_RELOAD_STREET_NAMES:
+            	 ReloadStreets (hWnd);
+	           	 break;
+            	 
+            case IDM_FIND_NONNET_STREETS:
+            	 FindNonNetworkedStreets ();
+            	 break;
+            	 
+            case IDM_REMOVE_NONNET_STREETS:
+            	 RemoveNonNetworkedStreets ();
+            	 break;
+            	 
+            case IDM_ADDLOC_FROMINT: 
+            {
+                  FARPROC	lpfnADDLOC_FROMINTMsgProc; 
+
+                  lpfnADDLOC_FROMINTMsgProc = MakeProcInstance((FARPROC)ADDLOC_FROMINTMsgProc, hInst);
+                  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMINT", hWnd, lpfnADDLOC_FROMINTMsgProc);
+//                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMINT", hWnd, lpfnADDLOC_FROMINTMsgProc);
+//                  FreeProcInstance(lpfnADDLOC_FROMINTMsgProc);
+            }
+            	 break; 
+            	       
+            case IDM_ADDLOC_FROMADD: 
+            {
+                  FARPROC	lpfnADDLOC_FROMADDMsgProc; 
+
+                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((FARPROC)ADDLOC_FROMADDMsgProc, hInst);
+                  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
+//                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
+//                  FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
+            }
+            	 break; 
+            	       
+            case IDM_TEST_STREET: 
+            {
+                  FARPROC	lpfnTEST_STREETMsgProc; 
+
+                  lpfnTEST_STREETMsgProc = MakeProcInstance((FARPROC)TEST_STREETMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"TEST_STREET", hWnd, lpfnTEST_STREETMsgProc);
+                  FreeProcInstance(lpfnTEST_STREETMsgProc);
+            }
+            	 break; 
+
+            case IDM_INTACCIDPROF: 
+            {
+                  FARPROC	lpfnINTACCIDPROFMsgProc; 
+
+                  lpfnINTACCIDPROFMsgProc = MakeProcInstance((FARPROC)INTACCIDPROFMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"INTACCIDPROF", hWnd, lpfnINTACCIDPROFMsgProc);
+                  FreeProcInstance(lpfnINTACCIDPROFMsgProc);
+            }
+            	 break; 
+
+            case IDM_ADDEDIT_HELPER:
+                {
+                  FARPROC lpfnADDEDIT_HELPERMsgProc;
+                  
+				  DoPaint = FALSE;
+                  if (!hWndAddEditHelper)
+                  { 
+					  lpfnADDEDIT_HELPERMsgProc = MakeProcInstance((FARPROC)ADDEDIT_HELPERMsgProc, hInst);
+					  CreateDialog(hInst,"ADDEDIT_HELPER",hWnd, lpfnADDEDIT_HELPERMsgProc);
+				  }
+                }
+                break;
+            
+            case IDM_SAVE_NETINT:
+            	SaveIntersectFile ("netint.gmd");
+				break;
+            
+			case IDM_PROCESSTEXT:
+			{
+				 LPSTR pCmd;
+				 if (!lParam)
+				 	break;  
+				 pCmd = GlobalLock ((HANDLE)lParam); 
+				 if (!pCmd)
+				 	break;
+				 ProcessText (pCmd);
+				 GSSiGlobUlFree ((LPHANDLE)&lParam);
+			}
+				 break;				 
+				             	       
+            case IDM_POINTMAP: 
+            {
+                  FARPROC	lpfnPOINTMAPMsgProc; 
+
+                  lpfnPOINTMAPMsgProc = MakeProcInstance((FARPROC)POINTMAPMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"POINTMAP", hWnd, lpfnPOINTMAPMsgProc);
+                  FreeProcInstance(lpfnPOINTMAPMsgProc);
+            }
+            	 break; 
+            
+            case IDM_RELOAD_MENU:	       
+            case IDM_LOAD_MENU: 
+            {
+            	 LPSTR	StartupMenu=GlobalLock (hStartupMenu);
+            	  
+			   	 if (wParam == IDM_LOAD_MENU)
+			   	 	GetTextString (hWnd,StartupMenu,128,"Enter the menu file",NULL,NULL,0,TRUE);
+			   	 if (!GMLoadMenu (hWnd,StartupMenu))
+				      	MessageBox( GetFocus(),"Failed to load menu file",NULL, MB_OK|MB_ICONEXCLAMATION);
+				 GlobalUnlock (hStartupMenu);
+            }
+            	 break;
+            	      
+            case IDM_EDIT_MENU: 
+            {
+            	EditMenu (hWnd,hStartupMenu);  
+            }
+            	 break;
+            	      
+            case IDM_CREATE_FILELIST: 
+            {
+                FARPROC	lpfnCREATEFILELISTMsgProc; 
+            	
+	           	 _getcwd (CurDir,128);
+           	  	 SaveDrive = _getdrive(); 
+
+                  lpfnCREATEFILELISTMsgProc = MakeProcInstance((FARPROC)CREATEFILELISTMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"CREATEFILELIST", hWnd, lpfnCREATEFILELISTMsgProc);
+                  FreeProcInstance(lpfnCREATEFILELISTMsgProc);
+        		 _chdir (CurDir);
+            	 _chdrive (SaveDrive);
+            }
+            	 break; 
+
+            case IDM_LOADMIF: 
+            {
+                  FARPROC	lpfnLOADMIFMsgProc; 
+
+                  lpfnLOADMIFMsgProc = MakeProcInstance((FARPROC)LOADMIFMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADMIF", hWnd, lpfnLOADMIFMsgProc);
+                  FreeProcInstance(lpfnLOADMIFMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADSHP: 
+            {
+                  FARPROC	lpfnLOADSHPMsgProc; 
+
+                  lpfnLOADSHPMsgProc = MakeProcInstance((FARPROC)LOADSHPMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADSHP", hWnd, lpfnLOADSHPMsgProc);
+                  FreeProcInstance(lpfnLOADSHPMsgProc);
+            }
+            	 break;       
+            	 
+/*            case IDM_LOADGEN: 
+            {
+                  FARPROC	lpfnLOADGENMsgProc; 
+
+                  lpfnLOADGENMsgProc = MakeProcInstance((FARPROC)LOADGENMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADGEN", hWnd, lpfnLOADGENMsgProc);
+                  FreeProcInstance(lpfnLOADGENMsgProc);
+            }
+            	 break;  */    
+            	 
+            case IDM_LOADUMAREAS: 
+            {
+                  FARPROC	lpfnLOADUMAREASMsgProc; 
+
+                  lpfnLOADUMAREASMsgProc = MakeProcInstance((FARPROC)LOADUMAREASMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADUMAREAS", hWnd, lpfnLOADUMAREASMsgProc);
+                  FreeProcInstance(lpfnLOADUMAREASMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADXFER: 
+            {
+                  FARPROC	lpfnLOADXFERMsgProc; 
+
+                  lpfnLOADXFERMsgProc = MakeProcInstance((FARPROC)LOADXFERMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADXFER", hWnd, lpfnLOADXFERMsgProc);
+                  FreeProcInstance(lpfnLOADXFERMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADDGNDUMP: 
+            {
+                  FARPROC	lpfnLOADDGNDUMPMsgProc; 
+
+                  lpfnLOADDGNDUMPMsgProc = MakeProcInstance((FARPROC)LOADDGNDUMPMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADDGNDUMP", hWnd, lpfnLOADDGNDUMPMsgProc);
+                  FreeProcInstance(lpfnLOADDGNDUMPMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADFLOOD: 
+            {
+                  FARPROC	lpfnLOADFLOODMsgProc; 
+
+                  lpfnLOADFLOODMsgProc = MakeProcInstance((FARPROC)LOADFLOODMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADFLOOD", hWnd, lpfnLOADFLOODMsgProc);
+                  FreeProcInstance(lpfnLOADFLOODMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADSSURGO: 
+            {
+                  FARPROC	lpfnLOADSSURGOMsgProc; 
+
+                  lpfnLOADSSURGOMsgProc = MakeProcInstance((FARPROC)LOADSSURGOMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADSSURGO", hWnd, lpfnLOADSSURGOMsgProc);
+                  FreeProcInstance(lpfnLOADSSURGOMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADBNA: 
+            {
+                  FARPROC	lpfnLOADBNAMsgProc; 
+
+                  lpfnLOADBNAMsgProc = MakeProcInstance((FARPROC)LOADBNAMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADBNA", hWnd, lpfnLOADBNAMsgProc);
+                  FreeProcInstance(lpfnLOADBNAMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADDOQS: 
+            {
+                  FARPROC	lpfnLOADDOQSMsgProc; 
+
+                  lpfnLOADDOQSMsgProc = MakeProcInstance((FARPROC)LOADDOQSMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADDOQS", hWnd, lpfnLOADDOQSMsgProc);
+                  FreeProcInstance(lpfnLOADDOQSMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_CREATE_ORTHOCDS: 
+            {
+                  FARPROC	lpfnCREATE_ORTHOCDSMsgProc; 
+
+                  lpfnCREATE_ORTHOCDSMsgProc = MakeProcInstance((FARPROC)CREATE_ORTHOCDSMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"CREATE_ORTHOCDS", hWnd, lpfnCREATE_ORTHOCDSMsgProc);
+                  FreeProcInstance(lpfnCREATE_ORTHOCDSMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_CREATE_ORTHOCDS2: 
+            {
+                  FARPROC	lpfnCREATE_ORTHOCDS2MsgProc; 
+
+                  lpfnCREATE_ORTHOCDS2MsgProc = MakeProcInstance((FARPROC)CREATE_ORTHOCDS2MsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"CREATE_ORTHOCDS2", hWnd, lpfnCREATE_ORTHOCDS2MsgProc);
+                  FreeProcInstance(lpfnCREATE_ORTHOCDS2MsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADDXF: 
+            {
+                  FARPROC	lpfnLOADDXFMsgProc; 
+
+                  lpfnLOADDXFMsgProc = MakeProcInstance((FARPROC)LOADDXFMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOADDXF", hWnd, lpfnLOADDXFMsgProc);
+                  FreeProcInstance(lpfnLOADDXFMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADTIGER: 
+            {
+                  FARPROC	lpfnLOAD_TIGERMsgProc; 
+
+                  lpfnLOAD_TIGERMsgProc = MakeProcInstance((FARPROC)LOAD_TIGERMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOAD_TIGER", hWnd, lpfnLOAD_TIGERMsgProc);
+                  FreeProcInstance(lpfnLOAD_TIGERMsgProc);
+            }
+            	 break;       
+            	 
+            case IDM_LOADTIGER_PN: 
+            {
+                  FARPROC	lpfnLOAD_TIGER_PNMsgProc; 
+
+                  lpfnLOAD_TIGER_PNMsgProc = MakeProcInstance((FARPROC)LOAD_TIGER_PNMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOAD_TIGER_PN", hWnd, lpfnLOAD_TIGER_PNMsgProc);
+                  FreeProcInstance(lpfnLOAD_TIGER_PNMsgProc);
+            }
+            	 break;       
+            	 
+			case IDM_TIGER_OUT:
+				 TIGEROut();
+				 break;       
+				 
+			case IDM_LOAD_DYNAMIC:
+//				 OpenModelessDialog("dyndial.txt");
+				 break;
+				 
+            case IDM_BMP_OUTPUT:
+            	 ExportData (hWnd,ORTHBMP);
+            	 break;
+            	 
+            case IDM_ORACLE_OUTPUT:
+            	 ExportData (hWnd,ORACLE);
+            	 break;
+            	 
+            case IDM_ORACLEDTM_OUTPUT:
+            	 ExportData (hWnd,ORACLEDTM);
+            	 break;
+            	 
+            case IDM_DTMTOTEXT_OUTPUT:
+            	 ExportData (hWnd,DTMTOTEXT);
+            	 break;
+            	 
+            case IDM_SHP_OUTPUT:
+            	 ExportData (hWnd,SHP);
+            	 break;
+            	 
+            case IDM_DXF_OUTPUT:
+            	 ExportData (hWnd,DXF);
+            	 break;
+            	 
+            case IDM_TXT_OUTPUT:
+            	 ExportData (hWnd,TXT);    
+            	//LoadSoilData(1);
+            	 break;
+            	 
+            case IDM_MIF_OUTPUT: 
+            	 ExportData (hWnd,MIF);
+            	 break;       
+            	 
+            case IDM_ZOOM_SCALE:
+       			 HaltMapDisplay(FALSE);
+            {
+                  FARPROC	lpfnZOOMSCALEMsgProc; 
+
+                  lpfnZOOMSCALEMsgProc = MakeProcInstance((FARPROC)ZOOMSCALEMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"ZOOMSCALE", hWnd, lpfnZOOMSCALEMsgProc);
+                  FreeProcInstance(lpfnZOOMSCALEMsgProc);
+                  if (nRc)
+                      PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, CurView->ID);
+
+            }
+            	 break;       
+            	 
+            case IDM_MAX_REFNO:
+            {    
+            	 long	MinRef;
+				 long	MaxRef = GetMaxRefno (-1,&MinRef);
+				 
+				 hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+				 str=GlobalLock (hSTR); 
+				 sprintf (str,"Min/Max refno in this configuration is %ld/%ld",MinRef,MaxRef);
+				 MessageBox(GetFocus(),str," ", MB_OK);
+            	 GSSiGlobUlFree (&hSTR);
+            
+            }
+            	 break;
+            case IDM_P_LEFT:
+            case IDM_P_RIGHT:
+            case IDM_P_UP:
+            case IDM_P_DOWN:
+            {
+            	 float hmove=0, vmove=0;
+            	 
+            	 switch (wParam)
+            	 {
+		            case IDM_P_LEFT:
+		            	hmove = -0.5;
+		            	break;
+		            case IDM_P_RIGHT:
+		            	hmove = 0.5;
+		            	break;
+		            case IDM_P_UP:
+		            	vmove = 0.5;
+		            	break;
+		            case IDM_P_DOWN:
+		            	vmove = -0.5;
+		            	break;
+		         }
+       			 HaltMapDisplay(FALSE);
+    			 {
+					POINT	CPoint; 
+					short	vpid;  
+					GetCursorPos (&CPoint); 
+					ScreenToClient (hWnd,&CPoint);
+				 	vpid = SelectViewport (CPoint,TRUE,FALSE,FALSE);
+				 	if (VPIsMap(vpid) && ((lParam < 1 || lParam >MAX_VIEWPORTS) || vpid == lParam))
+				 		SetZoomVP (vpid); 
+				 	else if (lParam > 0 && lParam <*pNumViewports)
+				 		SetZoomVP (lParam); 
+				 	else
+				 		SetZoomVP (*pCommandViewport); 
+				 }
+                 PanWindow (hWnd, vmove,hmove);
+            }
+                 break;
+
+            case IDM_Z_IN:
+			     ClearCurrentCD ();
+            case IDM_Z_OUT:
+		   		 if (ScaleIsSet (TRUE))
+		   			break;
+            case IDM_Z_CENTER:
+            {
+            	 float ZoomFactor = 2.0;
+            	 
+            	 if (wParam == IDM_Z_CENTER)
+            	 	ZoomFactor = 1.0;
+            	 else if (wParam == IDM_Z_OUT)
+            	 	ZoomFactor = 0.5;
+       			 HaltMapDisplay(FALSE);
+    			 SetZoomVP (lParam);
+    			 {
+					POINT	CPoint; 
+					short	vpid;  
+					GetCursorPos (&CPoint); 
+					ScreenToClient (hWnd,&CPoint);
+				 	vpid = SelectViewport (CPoint,TRUE,FALSE,FALSE);
+				 	if (VPIsMap(vpid) && ((lParam < 1 || lParam >MAX_VIEWPORTS) || vpid == lParam))
+				 	{ 
+				 		double	width = CurView->WBounds.xmx - CurView->WBounds.xmn;
+				 		double	height = CurView->WBounds.ymx - CurView->WBounds.ymn;
+				 		DPOINT	Point = WinPtToBasePt (CPoint);
+                        POINT	CursorPoint=RectMid (&CurView->DrawRect);
+                        
+				 		CurView->WBounds.xmn = Point.x - width/2;
+				 		CurView->WBounds.ymn = Point.y - height/2;
+				 		CurView->WBounds.xmx = Point.x + width/2;
+				 		CurView->WBounds.ymx = Point.y + height/2;
+		                ClientToScreen (hWnd,(LPPOINT)&CursorPoint);
+		                SetCursorPos (CursorPoint.x,CursorPoint.y);
+				 	}
+				 	else if (lParam > 0 && lParam <*pNumViewports)
+				 		SetZoomVP (lParam); 
+				 	else
+				 		SetZoomVP (*pCommandViewport);
+				 }
+                 ZoomWindow (hWnd, ZoomFactor);
+			}
+                 break;
+            case IDM_Z_PRIOR:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Out" here.                         */
+       			 HaltMapDisplay(FALSE);
+    			 SetZoomVP (lParam);
+                 ZoomWindow (hWnd,0);
+                 break;
+
+            case IDM_Z_ORTHO:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Out" here.                         */
+       			 HaltMapDisplay(FALSE);
+				 DoPaint = TRUE;
+				 SetViewport(-99);
+				 SelectVisList (FALSE);
+                 ZoomToBM ();
+                 break;
+
+            case IDM_Z_WINDOW:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Window" here.                      */
+                  //CloseMap (); 
+                  if (iii)	
+                  	ii=0;
+                  iii++;
+//				  SetViewport(*pCommandViewport);
+       			  HaltMapDisplay(FALSE);
+                  AddGraphicsFunction (hWnd,GF_WINDOW_ZOOM,0);
+                  HaltPaint = TRUE;
+                 break;
+
+            case IDM_Z_REZOOM:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "ReZoom" here.                      */
+				 SetViewport(*pCommandViewport);  
+				 CurView->CurZoomAreaRef = LONG_MAX;
+				 ZoomToRect(RezoomRect,FALSE);   
+//				 CurView->WindowIsZoomed = FALSE;
+                 break;
+            
+            case IDM_Z_VISLIMITS:
+            {    
+            	 
+    			 SetZoomVP (lParam);
+				 GetVisBounds (&Bounds,CurView->hDC); 
+				 CurView->CurZoomAreaRef = LONG_MAX - 1;
+				 ZoomToRect(Bounds,FALSE);
+			}   
+				 break;
+				 
+            case IDM_Z_EDITLIMITS: 
+            {
+            	 
+    			 if (!GetLayerBounds (&Bounds,CurView->hDC, CurView->UpdateFile-1))
+    			 	break;
+    			 SetZoomVP (lParam);
+    			 CurView->CurZoomAreaRef = 0;
+				 ZoomToRect(Bounds,FALSE);  
+			}
+    			 break;
+            
+            case IDM_Z_HLTLIMITS: 
+            {
+            	 
+            	 if (!hHighlight)
+            	 	break;
+    			 SetZoomVP (lParam);
+//				 SetViewport(*pCommandViewport);  
+				 CurView->CurZoomAreaRef = 0;
+				 ZoomToRect(HLTBounds,FALSE);  
+			}
+    			 break;
+            
+            case IDM_Z_MASK:
+            {   
+            	LPMNMXCORD pBounds;
+            	
+//				SetViewport(*pCommandViewport);
+				if (CurView->hMaskArea) 
+			    {
+			    	pBounds = (LPMNMXCORD) GlobalLock (CurView->hMaskArea);
+			    	Bounds = *pBounds;
+			    	GlobalUnlock (CurView->hMaskArea);
+					ZoomToRect(Bounds,FALSE);  
+			    }
+            } 
+            	break;
+            
+            case IDM_Z_REDRAW:
+            {
+            	 BOOL	Imed=FALSE;
+            	  
+            	 if (InDisplayProcessing)
+            	 	break;
+            	 if (NeedFullRedisplay()) 
+            	 {
+            	 	RedisplayMenu = FALSE; 
+            	 	goto DoRedisplay;    
+            	 }
+       			 HaltMapDisplay(FALSE);
+		         DoPaint = TRUE;
+                 IgnoreBounds=FALSE;  
+                 if (lParam)
+                 {
+                 	SetViewport((short)lParam);	
+                 	if (CurView->Type == INDEXVIEWPORT)
+                 		Imed = TRUE;
+                 }
+	   			 RedisplayViewport(Imed,FALSE); 
+	   		}
+                 break;
+            
+            case IDM_REDISPLAYVIEWPORTS:  
+            	 DoPaint=TRUE;
+       			 HaltMapDisplay(FALSE);
+   	         	 if (NumViewportsArray[0])
+   	         		SetConfig(0);
+	           	 RedisplayViewports(FALSE);
+				 break; 
+				 
+            case IDM_REDISPLAY:
+            	 RedisplayMenu = TRUE;
+      DoRedisplay:   
+      			 DisplayCycle++;
+				 ClearFullWindowBitmap ();
+       			 HaltMapDisplay(FALSE);
+       			 if (InAccel)
+       			 	ClearCurrentCD ();
+		         DoPaint = TRUE;
+			     ContinueProcessing=TRUE;
+     	         if (ConfigLevel)
+     	         {  
+     	         	UnallocateConfig ();
+			     	InvalidateRect (hWndMain,&ConfigRect[ConfigLevel-1],TRUE); 
+     	         }
+     	         else
+     	         {  
+     	         	SetConfig (1);
+					for (iview = 0;iview < *pNumViewports; iview++)
+						pViewportsD[iview]->Display = TRUE;
+     	         	if (RedisplayMenu && NumViewportsArray[0])
+     	         	{
+     	         		SetConfig(0);
+			     		InvalidateRect (hWndMain,NULL,TRUE);
+			     	}
+			     	else if (IsRectEmpty (&ConfigDisplayRect))
+			     		InvalidateRect (hWndMain,NULL,TRUE);
+			     	else
+			     		InvalidateRect (hWndMain,&ConfigDisplayRect,TRUE);
+			     }
+			     break;    
+			     
+			case IDM_LOAD_DOC_FILE:
+				 LoadDocumentFile (hWnd);
+				 break;        
+				 
+			case IDM_TRACK_LINE_COLOR:
+				 GetColor(hWndMain,&TrackColor);
+				 break;
+			
+			case IDM_CFG1:
+			case IDM_CFG2:
+			case IDM_CFG3:
+			case IDM_CFG4:
+			case IDM_CFG5:
+			{
+				HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+				LPSTR	pStr = GlobalLock (hMem);
+			    short	icfg=1;
+			    
+			    switch (wParam)
+			    {
+			    	case IDM_CFG2:
+			    	icfg = 2; 
+			    	break; 
+			    	case IDM_CFG3:
+			    	icfg = 3; 
+			    	break; 
+			    	case IDM_CFG4:
+			    	icfg = 4; 
+			    	break; 
+			    	case IDM_CFG5:
+			    	icfg = 5; 
+			    	break; 
+			    }
+			     HaltMapDisplay (FALSE);	
+			     sprintf (pStr,"[%%C]=$LOADCFG([%%CFG%i]);[%%C]=$REDISPLAY()",icfg);
+				 ExpandText (pStr);    
+				 GSSiGlobUlFree (&hMem);
+			}
+				 break;
+			
+			case IDM_GPS_ENABLE:   
+				 ProcessText ("$GPSTRACKING(2)");
+				 break;
+			
+			case IDM_USEFULLSCREEN: 
+				 UseFullScreen (hWnd);
+			 	 PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				 break;
+				 
+			case IDM_ADDFORMAT:
+			{
+				 char	title[]="Load GeoMaster Format Configuration File";
+				 HANDLE hSN=GSSiGlobAlloc (GHND,256);
+				 LPSTR	Name = GlobalLock (hSN);
+				 
+       			 HaltMapDisplay(FALSE);
+				 DoPaint = FALSE;
+				 OFTitle = title;
+				 if (GetFileName3(hWndMain,Name,IDS_FILTERGMC,IDS_FILEFMT))   
+				 {   
+				 	 if (LoadFormatCfg (Name))
+			    	 	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				 } 
+				 GSSiGlobUlFree (&hSN);
+			}
+				 break;
+				 	 	 	 
+			case IDM_ADDMENU:
+			{
+				 char	title[]="Load GeoMaster Menu Configuration File";
+				 HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+				 LPSTR	pName=GlobalLock (hMem);
+				 
+       			 HaltMapDisplay(FALSE);
+				 DoPaint = FALSE;
+				 OFTitle = title;
+				 if (GetFileName3(hWndMain,pName,IDS_FILTERGMC,IDS_FILEFMT))
+				 {   
+			 	 	IgnoreSavedMenu = TRUE;
+					if (LoadMenuConfig (pName))
+							 	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAYVIEWPORTS, 0L);
+				 }
+				 GSSiGlobUlFree (&hMem);
+			}
+				 break;
+				 	 	 	 
+			case IDM_CONFIGURE:
+			{
+				 char	title[]="Load GeoMaster Configuration File";
+				 HANDLE hSN=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+				 LPSTR	SaveName = GlobalLock (hSN);
+				 
+       			 HaltMapDisplay(FALSE);
+				 DoPaint = FALSE;
+				 _fstrcpy (SaveName,CfgName); 
+				 OFTitle = title;
+				 if (GetFileName3(hWndMain,CfgName,IDS_FILTERGMC,IDS_FILEGMC))   
+				 {   
+				 	 SaveZooms (NULL);
+	             	 UnallocateConfig();
+			    	 PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				 } 
+				 else
+				 	_fstrcpy (CfgName,SaveName);
+				 GSSiGlobUlFree (&hSN);
+				 break; 
+			}
+			     
+			case IDM_AUTO_CLEAR_OFFSET:
+				 AutoClearOffset = GWCheckMenuItem(hWnd, wParam);  
+				 if (AutoClearOffset)
+					 GMEnableMenuItem(hWndMain, IDM_MASK_OFFLINE, MF_BYCOMMAND | MF_ENABLED);
+				 else
+					 GMEnableMenuItem(hWndMain, IDM_MASK_OFFLINE, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
+				 
+				 break;  
+				 
+			case IDM_MASK_OFFLINE:
+				 MaskOffsetLine = GWCheckMenuItem(hWnd, wParam); 
+				 break;
+				 
+			case IDM_CLEAR_OFF_LINES:    
+//				 SetViewport(*pCommandViewport);
+				 ClearPolyOff();
+				 break;   
+				 
+			case IDM_LOAD_INFO:
+//                  LoadInfo();
+				 break;
+			     
+			case IDM_ZOOM_LIST: 
+				 DisplayZoomList (FALSE);
+				 break;
+				 
+            case IDM_SAVE_ZOOM:
+                 {
+                  FARPROC lpfnSAVEZOOMMsgProc;
+
+                  lpfnSAVEZOOMMsgProc = MakeProcInstance((FARPROC)SAVEZOOMMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"SAVEZOOM", hWnd, lpfnSAVEZOOMMsgProc);
+                  FreeProcInstance(lpfnSAVEZOOMMsgProc);
+                 }
+            	 break;
+            
+            case IDM_L_PARCEL:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Parcel" here.                      */
+                 /*AddGraphicsFunction (hWnd,GF_BLOWUP);*/
+				 if (LocatePID (hWnd,hInst))
+				 	goto DisplayParcel;
+
+                 break; 
+                 
+            case IDM_L_COORDINATE: 
+            {
+            	FARPROC lpfnLOC_COORDMsgProc;
+
+                lpfnLOC_COORDMsgProc = MakeProcInstance((FARPROC)LOC_COORDMsgProc, hInst);
+                nRc = DialogBox(hInst, (LPSTR)"LOC_COORD", hWnd, lpfnLOC_COORDMsgProc);
+                FreeProcInstance(lpfnLOC_COORDMsgProc); 
+                if (nRc)
+                {
+			 		BOOL AP = SetAutoPan (FALSE);
+
+			 		DoPaint = TRUE;
+					ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);   
+					ExecutePointLocationMacro (UserSpecifiedBasePoint);
+                    PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);  
+                    SetAutoPan (AP);
+			 	}
+            }
+            	 break;
+            	 
+            case IDM_L_LATLONG: 
+            {
+            	FARPROC lpfnLOC_LATLONGMsgProc;
+
+                lpfnLOC_LATLONGMsgProc = MakeProcInstance((FARPROC)LOC_LATLONGMsgProc, hInst);
+                nRc = DialogBox(hInst, (LPSTR)"LOC_LATLONG", hWnd, lpfnLOC_LATLONGMsgProc);
+                FreeProcInstance(lpfnLOC_LATLONGMsgProc); 
+                if (nRc)
+                {
+			 		BOOL AP = SetAutoPan (FALSE);
+
+			 		DoPaint = TRUE;
+					ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);   
+					ExecutePointLocationMacro (UserSpecifiedBasePoint);
+                    PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L); 
+                    SetAutoPan (AP);
+			 	}
+            }
+            	 break;
+            	 
+            case IDM_L_REFNO: 
+            	
+            {
+            	FARPROC lpfnLOC_REFNOMsgProc;
+
+                lpfnLOC_REFNOMsgProc = MakeProcInstance((FARPROC)LOC_REFNOMsgProc, hInst);
+                nRc = DialogBox(hInst, (LPSTR)"LOC_REFNO", hWnd, lpfnLOC_REFNOMsgProc);
+                FreeProcInstance(lpfnLOC_REFNOMsgProc); 
+                if (nRc)
+                {   
+                	BOOL	AP;
+                	
+                	if (LocationOffset)
+                	{
+			 			AP = SetAutoPan (FALSE);
+				 		DoPaint = TRUE;
+						ZoomToPickedItem (0,LocationOffset,OffsetFromLimits,FALSE,FALSE);
+			 		}  
+				 	else 
+				 	{
+			 			AP = SetAutoPan (TRUE);
+	 					ShowPickedItem (hWndMain,0);
+	 				} 
+					SetAutoPan (AP);
+	 			}
+			 	
+            }
+            	break;
+            	
+/*            case IDM_L_ROUTEMP:
+            {
+            	DPOINT	Point;
+				BOOL	GotPoint;
+                
+                GotPoint = NetworkLocation (hWnd,hInst,&Point);
+				if (GotPoint && LocationOffset)
+			 	{
+			 		BOOL	AP = SetAutoPan (FALSE);
+			 		
+			 		DoPaint = TRUE;
+					ZoomToPointAndDist (Point, LocationOffset,FALSE);
+					ExecutePointLocationMacro (Point);
+                    PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L); 
+                    SetAutoPan (AP);
+			 	}
+            }
+                break; */
+
+            case IDM_L_ADDRESS:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Address" here.                     */
+				 if (AddressLocationPID (hWnd,hInst)) 
+				 {  
+				 	BOOL	AP;
+DisplayParcel:	 	
+//  				    SetViewport(*pCommandViewport);
+			    	ClearCurrentCD ();
+
+					if (!ExecuteItemLocationMacro (0))
+					{
+						if (LocationOffset)
+					 	{
+				 			AP = SetAutoPan (FALSE);
+							ZoomToPickedItem (0,LocationOffset,OffsetFromLimits,FALSE,AddToView);
+					 	}
+					 	else 
+					 	{
+				 			AP = SetAutoPan (TRUE);
+	    					AddToHighlightList (PickList[0].Refno,&PickList[0],TRUE);
+		 					ShowPickedItem (hWndMain,0);
+		 				}
+		 				SetAutoPan (AP);
+						if (fabs(OffsetLineOffset) > 0.000000001) 
+						{   
+							HaltMapDisplay(FALSE);
+				        	OffsetPickedArea (0,OffsetLineOffset);
+					        DisplayPolyOff();  
+					        DisplayMaskArea();
+						    CurView->CurZoomAreaRef = 0;
+				   			RedisplayViewport(FALSE,FALSE);
+		 				} 
+		 				else if (OffsetLineOffset > 0)
+		 				{ 
+		 					HaltMapDisplay(FALSE);
+		 					SelectAreaToOffsetFile (0);
+						    CurView->CurZoomAreaRef = 0;
+				   			RedisplayViewport(FALSE,FALSE);
+		 				}
+		 			}
+	 				NumSavedPickList = NumPicked;
+	 				if (GetGlobalBVal2 ("[%AUTOIDENTIFY]",TRUE) && NumSavedPickList>0 && !hSavedPickList)
+	 				{    
+	 					hSavedPickList = GSSiGlobAlloc (GMEM_MOVEABLE,NumSavedPickList*sizeof(PICKDATA));
+	 					pPickList = (LPPICKDATA)GlobalLock (hSavedPickList);
+	 					_fmemmove (pPickList,PickList,NumSavedPickList*sizeof(PICKDATA));
+	 					GlobalUnlock (hSavedPickList);
+		 				DisplayFinOpt = 1; 
+		 			}
+		 		 }
+
+                 break; 
+                 
+           case  IDM_L_NET_ADDRESS:
+				 	
+	                if (AddressLocation1 (hWnd,hInst))
+	                {   
+	                	BOOL AP;
+	       NetPointLoc:
+	  				    SetViewport(*pCommandViewport);
+				    	ClearCurrentCD ();
+				 		AP = SetAutoPan (FALSE); 
+				 		DoPaint = TRUE; 
+				 		ClearMaskArea ();
+				 		if (LocationOffset)
+							ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);
+						else
+							CenterWindow (hWnd, UserSpecifiedBasePoint,FALSE);
+						ExecutePointLocationMacro (UserSpecifiedBasePoint);
+	                    PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);   
+	                    SetAutoPan (AP);
+				 	}
+                 break;
+
+
+            case IDM_L_STREET:
+                {
+                  FARPROC lpfnLOC_STREETMsgProc;
+                  
+				  DoPaint = TRUE;
+                  if (!hWndLocStreet)
+                  { 
+					  lpfnLOC_STREETMsgProc = MakeProcInstance((FARPROC)LOC_STREETMsgProc, hInst);
+					  CreateDialog(hInst,"LOC_STREET",hWnd, lpfnLOC_STREETMsgProc);
+				  }
+                }
+                break;
+
+            case IDM_L_INTERSECTION:
+                {
+                  FARPROC lpfnLOC_INTERSECTMsgProc;  
+
+                  lpfnLOC_INTERSECTMsgProc = MakeProcInstance((FARPROC)LOC_INTERSECTMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT", hWnd, lpfnLOC_INTERSECTMsgProc);
+                  FreeProcInstance(lpfnLOC_INTERSECTMsgProc);  
+                  if (nRc)
+                  	goto NetPointLoc;
+                 }
+                 break;       
+                 
+            case IDM_LOCATION_OFFSET: 
+                {
+                  FARPROC lpfnLOCATION_OFFSETMsgProc;
+
+                  lpfnLOCATION_OFFSETMsgProc = MakeProcInstance((FARPROC)LOCATION_OFFSETMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"LOCATION_OFFSET", hWnd, lpfnLOCATION_OFFSETMsgProc);
+                  FreeProcInstance(lpfnLOCATION_OFFSETMsgProc);
+                 }
+
+                 break; 
+                 
+            case IDM_PICKABILITY:
+            	 Pickability = TRUE;
+            	 goto Visible;
+
+            case IDM_VISIBILITY:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Visibility" here.                  */ 
+                 Pickability = FALSE;
+             Visible:
+                 {
+                  FARPROC lpfnVISIBLEMsgProc;  
+                  char	VisDialog[2][10]={"VISIBLE","VISIBLE1"};
+
+				  //SetViewport(*pCommandViewport);
+                  lpfnVISIBLEMsgProc = MakeProcInstance((FARPROC)VISIBLEMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)VisDialog[VisListOpt], hWnd, lpfnVISIBLEMsgProc);
+                  FreeProcInstance(lpfnVISIBLEMsgProc);
+                  if (!Pickability && nRc)
+                  	RedisplayViewport(FALSE,FALSE);
+
+                 }
+                 break;  
+                 
+            case IDM_VISIBILITY2:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Visibility" here.                  */ 
+                 Pickability = FALSE;
+             Visible2:
+                 {
+                  FARPROC lpfnVISIBLE2MsgProc;
+
+//				  SetViewport(*pCommandViewport);
+                  lpfnVISIBLE2MsgProc = MakeProcInstance((FARPROC)VISIBLE2MsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"VISIBLE2", hWnd, lpfnVISIBLE2MsgProc);
+                  FreeProcInstance(lpfnVISIBLE2MsgProc);
+                  if (!Pickability && nRc)
+                  	RedisplayViewport(FALSE,FALSE);
+
+                 }
+                 break;  
+                 
+            case IDM_LOAD_VISIBILITY:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Visibility" here.                  */ 
+                 Pickability = FALSE;
+                 {
+                  FARPROC lpfnVISFILESMsgProc;
+                  
+//				  SetViewport(*pCommandViewport);
+                  lpfnVISFILESMsgProc = MakeProcInstance((FARPROC)VISFILESMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"VISFILES", hWnd, lpfnVISFILESMsgProc);
+                  FreeProcInstance(lpfnVISFILESMsgProc);
+                  if (!Pickability && nRc)
+                  	RedisplayViewport(FALSE,FALSE);
+
+                 }
+                 break;  
+                 
+            case IDM_LOAD_PICKABILITY:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Visibility" here.                  */ 
+                 Pickability = TRUE;
+                 {
+                  FARPROC lpfnVISFILESMsgProc;
+
+//				  SetViewport(*pCommandViewport);
+                  lpfnVISFILESMsgProc = MakeProcInstance((FARPROC)VISFILESMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"VISFILES", hWnd, lpfnVISFILESMsgProc);
+                  FreeProcInstance(lpfnVISFILESMsgProc);
+
+                 }
+                 break;  
+                 
+            case IDM_VIEWPORTS:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Visibility" here.                  */ 
+                 {
+                  FARPROC lpfnVIEWPORTSMsgProc;
+
+                  lpfnVIEWPORTSMsgProc = MakeProcInstance((FARPROC)VIEWPORTSMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"VIEWPORTS", hWnd, lpfnVIEWPORTSMsgProc);
+                  FreeProcInstance(lpfnVIEWPORTSMsgProc);
+                  if (nRc) PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+                 }
+                 break;  
+                 
+            case IDM_MAPCOPY:
+				 TimeRangeBeg=0, TimeRangeEnd=LONG_MAX; 
+				 GetGlobalCVal ("[%COPYMAPTO]",MapCopyPath,"");
+               	 if ((DoMapCopy = GetTextString (hWnd,MapCopyPath,32,"Enter directory to copy to",NULL,NULL,0,TRUE)))
+			     {
+					 VISLIST	SaveVis; 
+					 int		SaveNumVis; 
+					 OFSTRUCT	OFStruct; 
+					 HCURSOR	hcurSave;
+               	 	 
+               	 	 if (!GetTextString (hWnd,MapCopyProjection,128,"Select conversion projection or CANCEL for none","*.CVT",NULL,0,TRUE))
+               	 		MapCopyProjection[0]=0;
+					 
+/*					 CopyFID = GSSiOpenFile ("copylist.txt",&OFStruct,OF_READ);
+					 DoMapCopy = 3;
+					 if (CopyFID != HFILE_ERROR)
+					 {
+					 	short opt=MessageBox (GetFocus(),"Restart using existing list of files?",
+					 								"Copy Map Files",MB_YESNOCANCEL);
+					 	if (opt == IDCANCEL) 
+					 	{
+					 		DoMapCopy = 0;
+					 		break;        
+					 	}
+					 	if (opt == IDYES)
+					 		goto UseOldList;
+					 } */
+					 CopyFID = GSSiOpenFile ("copylist.txt",&OFStruct,OF_CREATE);
+					 DoMapCopy = 1;
+	                 DoPaint = FALSE; 
+	                 DisableHalt=TRUE;
+					 SetViewport(*pCommandViewport);
+					 SaveVis = *CurVis;
+					 InitVis ();   
+					 _fmemmove (CurVis->FileIsVisible,SaveVis.FileIsVisible,sizeof(CurVis->FileIsVisible));
+					 SetViewport(*pCommandViewport);
+				     CurView->CurZoomAreaRef = 0;
+				     hCursor = LoadCursor(NULL, IDC_WAIT);
+				     hcurSave = GSSiSetCursor(hCursor);
+					 RedisplayViewport(TRUE,TRUE); 
+					 GSSiSetCursor(hcurSave);
+					 SetViewport(*pCommandViewport);
+					 *CurVis = SaveVis; 
+					 CopyMapFile ("-DONE-","-DONE-",-1,CurFileIndexEntry); 
+					 DoMapCopy = 2;
+		UseOldList:
+					 GSSiClose (CopyFID); 
+					 CreateStatusWindow (hWnd,1,"Copying Map Data");
+					 CopyMapFile ("","",-1,CurFileIndexEntry); 
+					 DoMapCopy = 0;
+					 DestroyStatusWindow(); 
+					 GSSiRemove ("copylist.txt"); 
+					 DisableHalt=FALSE;
+					 DoPaint = TRUE;
+			     }
+               	  
+            	 break;
+
+            case IDM_CLEAR:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Clear" here.                       */
+//                                   LoadDLT("c:\\work.txt","attribut\\trees");
+
+				 SetGlobalValue("%PLOT","");
+                 ClearMap ();
+                 break;
+            
+            case IDM_PRINTSETUP:  
+            	 InPlotView = 0;
+           		 ShowScrollBar(hWnd, SB_BOTH,FALSE);
+				 CheckMenuItem(GetMenu(hWnd), IDM_PLOTVIEW, MF_BYCOMMAND | MF_UNCHECKED);
+				 if (PrintMap (hWnd,0,-2))  
+				 {
+					GMEnableMenuItem(hWnd, IDM_PLOTVIEW, MF_BYCOMMAND | MF_ENABLED);
+				 	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				 }
+            	 break;
+            	 
+            case IDM_PRINT:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Print" here.                       */
+                 PrintMap (hWnd,1,1);
+                 break;
+
+            case IDM_PRINT_MERGE:
+                 {
+                  FARPROC lpfnPRINTMERGEMsgProc;
+
+                  lpfnPRINTMERGEMsgProc = MakeProcInstance((FARPROC)PRINTMERGEMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"PRINTMERGE", hWnd, lpfnPRINTMERGEMsgProc);
+                  FreeProcInstance(lpfnPRINTMERGEMsgProc);
+                 }
+                  if (nRc==1)
+                  	PrintMerge(hWnd);
+                  else if (nRc==2)
+                 {
+                  
+                  lpfnPRINTMERGETSTMsgProc = MakeProcInstance((FARPROC)PRINTMERGETSTMsgProc, hInst);
+                  nRc = CreateDialog(hInst, (LPSTR)"PRINTMERGETST", hWnd, lpfnPRINTMERGETSTMsgProc);
+                 }
+                 break;
+            
+            case IDM_SMALLBM:
+				 CheckMenuItem(GetMenu(hWnd), IDM_SMALLBM, MF_BYCOMMAND | MF_CHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_LARGEBM, MF_BYCOMMAND | MF_UNCHECKED); 
+				 BitmapSizeOpt=1;
+				 break;
+            case IDM_LARGEBM:     
+				 CheckMenuItem(GetMenu(hWnd), IDM_LARGEBM, MF_BYCOMMAND | MF_CHECKED);
+				 CheckMenuItem(GetMenu(hWnd), IDM_SMALLBM, MF_BYCOMMAND | MF_UNCHECKED);
+				 BitmapSizeOpt = 2; 
+				 break;
+            case IDM_E_TOCLIPBOARD:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "To Clipboard" here.                */
+                 ClipMap (hWnd,NULL,BitmapSizeOpt);
+		     	 PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+                 break;
+
+            case IDM_E_TOFILE:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "To file" here.                     */   
+				{	
+					HDIB	hDib; 
+					
+					hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+					str=GlobalLock (hSTR); 
+            	 	if (GetSaveName2 (hWnd,str,IDS_FILTERBMP,".BMP",IDS_FILEBMP)) 
+            	 	{
+            	 		ExpandText (str);
+		                ClipMap (hWnd,str,BitmapSizeOpt);
+				     	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+					}
+	            	GSSiGlobUlFree (&hSTR);
+				}
+                 break;
+
+            case IDM_HLT_CLEAR:
+            	 ClearHighlightList (FALSE);   
+            	 break;   
+            	 
+            case IDM_HLT_SAVE: 
+            {
+            	char	Ext[8]; 
+            	LPSTR	str, str2;
+            	
+				if (!hHighlight)
+				{
+					MessageBox( GetFocus(),"No Highlight List","Error", MB_OK);
+					break;
+				}  
+           		 _fstrcpy (Ext,".HLT");
+				hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+				str=GlobalLock (hSTR); 
+				str2 = str + 512;
+            	 if (GetSaveName2 (hWnd,str,0,Ext,IDS_FILEHLT))  
+            	 {
+            	 	_fstrcpy (str2,str);
+            	 	*LastChr (str2) = '2';
+	            	CopyHighlightList (str);
+	             }
+            	 GSSiGlobUlFree (&hSTR);
+            }
+
+            	 break;   
+            	 
+            case IDM_DISPLAY_HLT_LIST:
+            	 ShowHLTList(hWnd);
+            	 break;
+            	 
+			case IDM_HLT_IN_AREA:
+				 HighlightInArea (hWnd,NULL,TRUE,TRUE);
+			     CurView->CurZoomAreaRef = 0;
+	   			 RedisplayViewport(FALSE,FALSE);
+            	 break;   
+            	 
+			case IDM_UNHLT_IN_AREA:
+				 HighlightInArea (hWnd,NULL,FALSE,FALSE);
+			     CurView->CurZoomAreaRef = 0;
+	   			 RedisplayViewport(FALSE,FALSE);
+            	 break;   
+            	 
+			case IDM_HLT_IN_VP:
+//				 SetViewport(*pCommandViewport);
+				 HighlightInArea (hWnd,&CurView->WBounds,TRUE,TRUE);
+			     CurView->CurZoomAreaRef = 0;
+	   			 RedisplayViewport(FALSE,FALSE);
+            	 break;   
+            	 
+            case IDM_HLT_OUT_AREAS1: 
+			     GetGlobalCVal ("[%HLTOUTPUTFILE]",HLTOutPath,NULL);
+               	 if (GetTextString (hWnd,HLTOutPath,128,"Output File",NULL,NULL,0,TRUE))
+            	 	HLTOUTFormat=1;  
+            	 
+            	 break; 
+            	 
+            case IDM_HLT_OUTFORMAT:
+                {
+                  FARPROC lpfnHLTOUT_FORMATMsgProc;
+
+                  lpfnHLTOUT_FORMATMsgProc = MakeProcInstance((FARPROC)HLTOUT_FORMATMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"HLTOUT_FORMAT", hWnd, lpfnHLTOUT_FORMATMsgProc);
+                  FreeProcInstance(lpfnHLTOUT_FORMATMsgProc);
+                  HLTOUTFormat=0;
+                 }
+            	 break;
+            	 
+            case IDM_HLT_OUT: 
+            	 CreateHighlightOutput (hWnd,0);
+            	 break;
+
+            case IDM_TAG_CLEAR:
+            	 ClearTAGs ();
+            	 break; 
+            	 
+            case IDM_AREA_OUTLINE:
+            	 OutlineZoomArea= GWCheckMenuItem(hWnd, wParam);
+            	 break;
+            	 
+            case IDM_BUILDREFINDEXES: 
+            	 BuildRefIndexes ();
+            	 break;   
+            	 
+            case IDM_REORGFILE:
+                 {
+                  FARPROC	lpfnREORGMAPMsgProc;
+                  lpfnREORGMAPMsgProc = MakeProcInstance((FARPROC)REORGMAPMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"REORGMAP", hWnd, lpfnREORGMAPMsgProc);
+                  FreeProcInstance(lpfnREORGMAPMsgProc);  
+                  if (nRc==2)
+		     	  	PostMessage(hWnd, WM_COMMAND, IDM_BUILDREFINDEXES, 0L);
+                 }
+            	 break;
+            
+            case ID_OPTIONS_DISPLAYFILEPARAM:
+            	 DisplayFileParam =  GWCheckMenuItem(hWnd, wParam);
+            	 break; 
+
+/*			case IDM_FULL_SCREEN:
+				FullScreenVideo();
+             	break;*/
+	             
+            case IDM_DISPLAY_VEHICLES:
+				 if (/*GetFocus() == hWndMain &&*/ !InDisplayProcessing && !IgnoreAVLTimer)  
+            		UpdateAllVehicles(TRUE); 
+            	 HavePendingDisplay = FALSE;
+                 break;
+                 
+            case IDM_ATTRIBUTE_TRANSFER: 
+                {
+                  FARPROC lpfnATTRIBUTE_TRANSFERMsgProc;
+
+                  lpfnATTRIBUTE_TRANSFERMsgProc = MakeProcInstance((FARPROC)ATTRIBUTE_TRANSFERMsgProc, hInst);
+                  nRc = DialogBox(hInst, (LPSTR)"ATTRIBUTE_TRANSFER", hWnd, lpfnATTRIBUTE_TRANSFERMsgProc);
+                  FreeProcInstance(lpfnATTRIBUTE_TRANSFERMsgProc);
+                 }
+
+                 break; 
+                 
+            case IDM_TEST_ATTRIBUTE:
+                 DoPaint = FALSE;
+				 
+                 {
+				    FARPROC lpfnDISPLAY_GWD_DATAMsgProc;
+				    int	nRc;
+				    LPSTR	pName;
+				     
+				    hName=GSSiGlobAlloc(GHND,256);
+					pName=GlobalLock(hName);
+					GlobalUnlock(hName);	
+				    lpfnDISPLAY_GWD_DATAMsgProc = MakeProcInstance((FARPROC)DISPLAY_GWD_DATAMsgProc, hInst);
+				    nRc = DialogBox(hInst, (LPSTR)"DISPLAY_GWD_DATA", hWndMain, lpfnDISPLAY_GWD_DATAMsgProc);
+				    FreeProcInstance(lpfnDISPLAY_GWD_DATAMsgProc); 
+				    GSSiGlobFree (&hName);
+                 }
+
+				  DoPaint = TRUE;
+            	 break; 
+            
+            case IDM_CHANGE_COMBO_FILE:
+            {    
+            	 LPSTR	pName;
+            	 BOOL	rc;
+            	 
+            	 GSSiGlobFree (&hCFName);
+            	 hCFName = GSSiGlobAlloc (GHND,128);
+            	 pName = GlobalLock (hCFName); 
+				 rc = GetFileName3 (hWnd,pName,IDS_FILTERGCF,IDS_FILEGCF);
+			 	 GlobalUnlock (hCFName);
+				 if (!rc)
+				 {       
+				 	GSSiGlobFree (&hCFName);
+				 	break;
+				 }
+            	 goto EditCombo;
+            	      
+            }
+            	 break;
+
+            case IDM_COMBO_FILE:
+            	 GSSiGlobFree (&hCFName); 
+        EditCombo:
+            {
+                  FARPROC	lpfnCOMBO_FILEMsgProc; 
+
+                  lpfnCOMBO_FILEMsgProc = MakeProcInstance((FARPROC)COMBO_FILEMsgProc, hInst);
+                  DialogBox(hInst, (LPSTR)"COMBO_FILE", hWnd, lpfnCOMBO_FILEMsgProc);
+                  FreeProcInstance(lpfnCOMBO_FILEMsgProc);
+            }
+            	 break;
+            	 
+            case IDM_EXIT:
+            	 goto Close;
+            	 break;
+
+            case IDM_H_BASICS:
+                 /* Place User Code to respond to the                   */
+                 /* Menu Item Named "Basics" here.                      */
+                 //lda addition
+         		 DoPaint=TRUE;
+				{   
+					
+					hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,256);
+					str=GlobalLock (hSTR); 
+					_fstrcpy (str,"[%INDIR]help\\gmhelp.hlp");
+					ExpandText (str);
+					WinHelp(GetFocus(),str,HELP_KEY,(DWORD)"Help Contents");  
+            	 	GSSiGlobUlFree (&hSTR);
+					break; 
+				}
+                 //end of lda addition
+                  break;
+
+            case IDM_CREATE_LAYERINDX:
+            {
+            	
+	           	 _getcwd (CurDir,128);
+           	  	 SaveDrive = _getdrive(); 
+            	 LoadMapDir(hWnd);
+        		 _chdir (CurDir);
+            	 _chdrive (SaveDrive);
+            }
+            	 break;
+
+            default:
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+                return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+           }
+         if (!HaltPaint)
+         	DoPaint = TRUE;
+         break;        /* End of WM_COMMAND                             */
+    
+    case WM_SETCURSOR:
+    	 if (idTimer)
+    	 {
+    	 	break;
+    	 } 
+    	 hCursor = VPCursor (hWnd);
+         if (!hCursor)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+         	return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+//         if (GetCursor () != hCursor)  
+//         	GSSiSetCursor (hCursor);
+    	 break;
+    	 
+    case WM_CREATE: 
+    {
+		DWORD	TextExt;
+		short	w,h; 
+		HDC		hDC;
+		
+		 HANDLE hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+		 LPSTR	str=GlobalLock (hSTR); 
+    
+    	 GSSiTrace ("Begin WM_CREATE");
+
+				
+		hDC = GetDC (hWnd);
+		TextExt = GetTextExtent (hDC,"ABCDEFG",7);
+		w = LOWORD(TextExt); 
+		h = HIWORD(TextExt); 
+		SmallFontLargeFontFactor = (double)64/(double)w;
+		ReleaseDC (hWnd,hDC);
+		
+/*         SetScrollRange(hWnd, SB_HORZ, 0, 100, FALSE);                 */
+         sHPos = 0;    /* scroll bar is initially set to 0              */
+
+/*         SetScrollRange(hWnd, SB_VERT, 0, 100, FALSE);                */
+         sVPos = 0;    /*    scroll bar is initially 0                  */
+
+/*         if (!CBInit ()) PostQuitMessage(0);*/
+		 CDInit (hWnd, hInst); /* Initialize Common Dialogs */     
+		 InitGraphics (hWnd);
+		 if (_fstrstr (szAppName,"Highways"))
+		 	SetWindowText (hWnd,"Visual Surveyor");
+		 else if (GetGlobalCVal ("[%WT]",str,NULL))
+		 	SetWindowText (hWnd,str);
+		 ConvertCoordClose();
+		 ConvertCoordInit();
+		 ConvertCoordClose();   
+		 hWndMain = hWnd;
+		 if (!OkToContinue(TRUE))
+		    exit(1);
+		 ProcessGlobal ("[%STARTCMD]");
+		 if ((OkToContinueTime = GetGlobalLVal2 ("[%OkToContinueTime]",0)))
+		 	SetTimer(hWnd, 8, OkToContinueTime, (FARPROC) NULL);
+
+		 GSSiTrace ("End of WM_CREATE");         
+		 GSSiGlobUlFree (&hSTR);
+	}
+        break;       /*  End of WM_CREATE                              */
+    
+		    
+    case WM_SIZE:     /*  code for sizing client area                   */  
+    	 HaltMapDisplay(FALSE); 
+    	 ConfigDisplayRect.left = ConfigDisplayRect.right = 0;
+         switch (wParam)
+           {
+            case SIZE_MINIMIZED:
+		         if (CurView) CloseMap(FALSE);
+		         DoPaint = FALSE;
+		         HavePaint = FALSE;
+		         HaveSeg = FALSE; 
+                 break;
+			case SIZE_MAXIMIZED:
+            case SIZE_RESTORED:  
+            {
+				RECT	WindowRect;
+						
+				GetWindowRect (hWndMain,&WindowRect); 
+				NormalRect (&WindowRect);  
+				if (EqualRect (&FullWindowBitMapRect,&WindowRect))
+            		break;
+            }
+            default: 
+				ClearFullWindowBitmap ();
+	           	if (!Printing && !DisableHalt)
+	            	 	DoPaint = TRUE;
+                 break;
+
+           }
+//           if (hWndPrompt)
+//		       PostMessage(hWndPrompt, GSSI_REINITDIALOG,0, 0L);  
+		 
+           ButtonFuncOpt=0;
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+		   return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+         break;       /* End of WM_SIZE                                 */
+
+   	case WM_TIMER:
+         switch (wParam)
+           {  
+            default:
+            	ii=1;
+            	break;
+            case 1:
+            {	 clock_t StartTime;
+            	 
+            	 if (!*pNumViewports || NoDisplay || InImediate || !DoPaint || InTime) break; 
+            	 InTime = TRUE;
+               	 StartTime = GetTickCount();
+                 if (Counter <MaxTimePerSeg)
+	        	 	Counter = MaxTimePerSeg;  
+	        	 hDC = GetDC   ( hWnd );
+	        	 ReopenMap (TRUE);    
+	        	 TrapKillTimer=FALSE;
+				 while (HaveMapTimer()&&Counter>0)
+				 {	
+					HaveSeg = TRUE;
+					if (OpenMap (hWnd, hDC))
+					{
+						if (!DisplaySeg (hDC,FALSE)) 
+							EndDisplayProcessing (TRUE);
+						else if (MemMap)
+							HaltMapDisplay(FALSE);
+						else 
+							Counter=Counter-(GetTickCount()-StartTime);
+					}
+					else 
+					{
+						EndDisplayProcessing (TRUE);
+						Counter = -1;               
+					}
+				 } 
+				 TrapKillTimer=TRUE;
+				 ReopenMap (FALSE);
+				 ReleaseDC     ( hWnd, hDC );   
+				 if (InDisplayProcessing && !idTimer)
+				 	ii=1;
+				 InTime = FALSE; 
+				 if (!idTimer && !CurrentConfig)
+				 {
+				 	SetConfig(1);
+				   	InvalidateRect (hWndMain,&ConfigDisplayRect,TRUE);
+				 }
+			}
+                 break;
+
+            case 2:
+//	 		  	 SendUMMessage ("%STALIVE");
+                 break;
+
+            case 3:/* Timeout waiting for response */
+		      	 MessageBox( GetFocus(),"Timeout waiting for response",
+	    			 	    "Fatal Error", MB_OK);
+				 KillTimer(hWndMain, 3);
+				 goto Close;
+                 break; 
+                 
+            case 4:
+ 				 if (!DisplayNetMarkerThemeLegend(FALSE)) 
+ 				 {
+ 					KillTimer(hWndMain,NetMarkTimer);  
+ 					NetMarkTimer = 0; 
+ 				 }
+            	 break; 
+            	 
+            case 5:
+ 				 if (!DisplayStreetAddresses(FALSE)) 
+ 				 {
+ 					KillTimer(hWndMain,StreetEditTimer);  
+ 					StreetEditTimer = 0; 
+					if (!MemMap)
+						SaveFullWindowBitmap (hWndMain);
+ 				 }
+            	 break;
+            
+            case 6: //vehicle display timer 
+//				 if (GetFocus() == hWndMain) 
+				 if (!InDisplayProcessing && !IgnoreAVLTimer)
+				 {
+					time_t	curtime;     
+					time (&curtime); 
+					ComputeDummyVehicleLocations (AVLFactor*(curtime - AVLStartTime));
+            		UpdateAllVehicles(TRUE); 
+            	 }
+//            	 ProcessCOMMNotification(hWndMain,0,0 );
+            	 break; 
+            	 
+            case 7: //Infobox edit timer 
+            	 KillTimer(hWndMain,7);
+   	 			 InfoBoxEditTimer = 0;  
+				 ProcessInfoBoxPickMacroFile (EditInfoBox);
+            	 EditInfoBox = 0; 
+            	 break;   
+            case 8: //OkToContinue timer 
+            {
+            	 short st;
+            	 
+            	 KillTimer (hWnd,8);
+            	 st = OkToContinue (TRUE);
+            	 if (!st)
+					BlowOut(NULL,NULL); 
+	 			 SetTimer(hWnd, 8, OkToContinueTime, (FARPROC) NULL);
+	 			 if (st == 3)
+	 			 {
+		 			 if (*UserName)  
+		 			 {  
+		 			 	BOOL	SaveSE=ShareEnabled;
+		 			 	
+		 			 	ShareEnabled = TRUE;
+		 			 	AppendFile ("[%%DL]whosin.txt",UserName);
+		 			 	ShareEnabled = SaveSE;
+		 			 } 
+		 		 }
+		 	}
+				 break;
+
+            case 10: //GPS Timer
+ 				 CloseDigConnection ();
+   				 OpenDigConnection(hWndMain);
+		     	 PostMessage(hWndMain, WM_COMMAND, IDM_DISPLAY_VEHICLES, 0L);
+          	 	 break;
+            	
+            }
+		 break;  
+		 
+    case WM_MBUTTONDOWN:
+         ii=1;
+         break;
+         
+    case WM_LBUTTONDOWN:
+		   if (wParam & MK_RBUTTON)
+//       	   if (wParam == (MK_LBUTTON|MK_RBUTTON))
+       	   		ButtonFuncOpt = 1; 		/* indicates R button down when L button pressed */
+       	   else
+       	   		ButtonFuncOpt = 2;
+       	break;
+
+/*    case WM_LBUTTONUP:
+    	if (ButtonFuncOpt)
+    	{	MousePoint.x = LOWORD(lParam);
+	       	MousePoint.y = HIWORD(lParam);
+	       	MouseInput (hWnd,Message,MousePoint,ButtonFuncOpt);
+	    }
+       	break;
+*/  
+	case WM_CHAR:
+		switch (wParam)
+		{
+			case 6:  //CNTL/F  
+			{
+				POINT	CPoint; 
+				short	vpid;
+					  
+				GetCursorPos (&CPoint); 
+				ScreenToClient (hWnd,&CPoint);
+			 	vpid = SelectViewport (CPoint,FALSE,FALSE,FALSE); 
+			 	MakeVPFullScreen (vpid);
+			}
+	    	break;
+	    	
+			default:
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+			return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+		} 
+		break;
+
+    case WM_KEYDOWN:
+		switch (wParam)
+		{
+			case 27:  //ESC
+	    		HaltMapDisplay (TRUE); 
+	    	break;
+	    	
+			case VK_F12:
+				goto LoadGFMenu;
+		 	default:
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+			return DefWindowProc(hWnd, Message, wParam, lParam);
+}       
+		}
+		break;
+    case WM_RBUTTONDOWN:
+    	GSSiTrace ("Got RBUT");
+//       	   if (wParam == (MK_LBUTTON & MK_RBUTTON))
+       	   if (wParam & MK_LBUTTON)
+LoadGFMenu:
+	   	   {
+		    FARPROC lpfnRBUTOPSMsgProc;
+			HCURSOR	SaveCursor=GSSiSetCursor (LoadCursor(NULL, IDC_ARROW));     
+            
+            GSSiTrace ("Invoke GF menu");
+		    lpfnRBUTOPSMsgProc = MakeProcInstance((FARPROC)RBUTOPSMsgProc, hInst);
+		    nRc = DialogBox(hInst, (LPSTR)"RBUTOPS", hWnd, lpfnRBUTOPSMsgProc);
+		    FreeProcInstance(lpfnRBUTOPSMsgProc);
+			GSSiSetCursor (SaveCursor);
+		    if (nRc)
+		    {
+                if (hAddGraphicsFun)
+                {
+                	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
+                	
+                	ContinueProcessing = TRUE;
+					if (wParam & MK_LBUTTON)
+//       	       	    if (wParam == (MK_LBUTTON|MK_RBUTTON))
+                		HaveCurrentLBUTTON=TRUE;
+                	AddGraphicsCmd (hWndMain,pCmd,FALSE,0); 
+                	GSSiGlobUlFree (&hAddGraphicsFun);
+                }
+		    }
+
+		   }
+       	break;
+
+/*    case WM_MENUSELECT:
+    {
+        UINT	IDMess;
+        short	fwMenu;
+        HANDLE	hmenu;
+        
+        fwMenu = LOWORD(lParam);        
+        hmenu = (HMENU) HIWORD(lParam); 
+        if (!hmenu)
+        	IDMess = 0;
+        else 
+        	IDMess = GetMenuPrompt (wParam);
+        SetPrompt (IDMess,FALSE);
+	    retrn DefWindowProc(hWnd, Message, wParam, lParam); 
+	}
+    	break;   */ //causing page fault in boundscheck on some menus
+    	  
+	case WM_NCHITTEST: 
+	{
+		long	lRetVal; 
+		UINT	IDMess;
+		
+	    lRetVal = DefWindowProc(hWnd, Message, wParam, lParam); 
+	    switch (lRetVal)
+	    {   
+	    	case HTCLIENT:
+	            GSSiSetCursor (hCursor);
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	    		return lRetVal;
+}
+	    	default:   
+	    		if (LastVP)
+			    	NotifyFunction (LastVP,GF_EXIT_VIEWPORT);
+			    LastVP = 0;  
+//	    		sprintf (str,"%ld",(long)lParam);
+//	    		SetGlobalValue ("%M",str);
+	    		
+//	    		IDMess=PRMT_USERMESS;
+				IDMess=0;
+	    	break;
+	    }
+        SetPrompt (IDMess,FALSE); 
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+        return lRetVal;
+}
+	}
+        break;
+        
+    case WM_INITMENUPOPUP:
+    {
+    	short	ii;   
+    	HMENU	hMenu=GetMenu(hWnd);
+    	HaltMapDisplay (TRUE); 
+    	if (!hUserMenu && hMenu)
+    	{
+	    	if (hHighlight)
+				EnableMenuItem(hMenu, IDM_Z_HLTLIMITS, MF_BYCOMMAND | MF_ENABLED);
+			else
+				EnableMenuItem(hMenu, IDM_Z_HLTLIMITS, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
+	    	if (GetGlobalBVal ("[%DISPLAYHLTPATTERN]"))
+	    		CheckMenuItem(hMenu, IDM_DISPLAY_HLT_PATTERN, MF_BYCOMMAND | MF_CHECKED); 
+	    	else
+	    		CheckMenuItem(hMenu, IDM_DISPLAY_HLT_PATTERN, MF_BYCOMMAND | MF_UNCHECKED); 
+	    	if (AutoClearOffset)
+	    		CheckMenuItem(hMenu, IDM_AUTO_CLEAR_OFFSET, MF_BYCOMMAND | MF_CHECKED); 
+	    	else
+	    		CheckMenuItem(hMenu, IDM_AUTO_CLEAR_OFFSET, MF_BYCOMMAND | MF_UNCHECKED); 
+	    	if (MaskOffsetLine)
+	    		CheckMenuItem(hMenu, IDM_MASK_OFFLINE, MF_BYCOMMAND | MF_CHECKED); 
+	    	else
+	    		CheckMenuItem(hMenu, IDM_MASK_OFFLINE, MF_BYCOMMAND | MF_UNCHECKED);  
+	    }
+    	
+    }
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	    return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+    	break; 
+    
+    case WM_SHOWWINDOW:
+    		if (wParam && DoPaint)
+		     	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+    	break;   
+    	
+    case WM_SETFOCUS:
+    	DoPaint = TRUE;
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	    return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+    	break;
+    
+    case WM_PAINT:    /* code for the window's client area              */
+         /* Obtain a handle to the device context                       */
+         /* BeginPaint will sends WM_ERASEBKGND if appropriate          */ 
+    {
+    	 RECT	UpdateRect;
+    	      
+         if (InPaint || Printing || idTimer || InDisplayProcessing)
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	         return DefWindowProc(hWnd, Message, wParam, lParam); 
+}
+	          
+	     if (!GetUpdateRect (hWnd,&UpdateRect,TRUE))
+	     {
+//		 	if (DoPaint)
+//				PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+	        return DefWindowProc(hWnd, Message, wParam, lParam);  
+}
+	     }
+         _fmemset(&ps, 0x00, sizeof(PAINTSTRUCT));
+         hDC = BeginPaint(hWnd, &ps);
+	     if (hFullWindowBitMap) 
+		 {    
+			RECT	WindowRect;
+					
+			GetWindowRect (hWndMain,&WindowRect);
+			NormalRect (&WindowRect);
+//			NormalRect (&FullWindowBitMapRect);   
+			if (EqualRect (&FullWindowBitMapRect,&WindowRect))
+			{
+		        SelectClipRgn (hDC,0);
+				RestoreScreen (hDC,hFullWindowBitMap,WindowRect);	     
+                EndPaint(hWnd, &ps);
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+                return 0;  
+}
+		    }
+		    else
+				ClearFullWindowBitmap ();
+		 } 
+         InPaint = TRUE;
+         GSSiTrace ("Begin WM_PAINT");
+         if (MemMap)
+         {
+			BITMAP	bm; 
+			RECT	Rect;
+			int		i,j;
+            
+            if (!hMemBitmap)
+            {
+				hdcMemMap = CreateCompatibleDC(hDC);    
+				hMemBitmap = CreateCompatibleBitmap (hDC,MemMapWidth,MemMapHeight);
+				hbmpOld = SelectObject(hdcMemMap, hMemBitmap);
+			} 
+			OldDC = hDC;
+			hDC = hdcMemMap;
+			SelectClipRgn (hDC,NULL);			
+			SetDisplayMode (hDC,GF_TEXTMODE);
+			
+			Rect.left=0;
+			Rect.top=0;
+			Rect.bottom=MemMapHeight;
+			Rect.right=MemMapWidth;  
+			FillRectPoly (hDC,&Rect,RGB(255,255,255));  
+			FirstMemMap = TRUE;
+			
+         } 
+         else
+		 {
+			if (HaveSeg && DoPaint)
+	            if (NumPaint++%2) 
+	            {
+	       	         EndPaint(hWnd, &ps);
+	       	         if (DoPaint)
+	       	         {
+//				     	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				         PaintMap(hWnd,hDC,FALSE,&UpdateRect); 
+				         RedisplayLastPrompt ();
+					 }
+				     InPaint = FALSE;
+	      	         break;  
+	
+	            }  
+            
+         }
+         /* Included in case the background is not a pure color         */
+         SetBkMode(hDC, TRANSPARENT);
+         
+ 		 SetDisplayMode (hDC,GF_TEXTMODE);
+		 SelectClipRgn (hDC,NULL);
+
+//         if (DoPaint) HaveSeg = FALSE; 
+         if (!MemMap || FirstMemMap)
+         {
+	         PaintMap(hWnd,hDC,FALSE,&UpdateRect);
+	         RedisplayLastPrompt ();
+	     }
+		 FirstMemMap=FALSE;
+		 SelectClipRgn (hDC,NULL);
+         EndPaint(hWnd, &ps);  
+         GSSiTrace ("End WM_PAINT");
+         InPaint = FALSE; 
+    }
+         break;       /*  End of WM_PAINT                               */
+
+    case WM_VSCROLL:
+         switch(wParam)
+           {
+            case SB_LINEDOWN:
+                 sVPos += 10;
+                 break;
+
+            case SB_LINEUP:
+                 sVPos -= 10;
+                 break;
+
+            case SB_THUMBPOSITION:
+                 sVPos = LOWORD(lParam);
+                 break;
+
+            case SB_PAGEUP:
+                 sVPos -= PlotPageHeight;
+                 break;
+
+            case SB_PAGEDOWN:
+                 sVPos += PlotPageHeight;
+                 break;
+            
+            case SB_ENDSCROLL:
+		         HaltMapDisplay (FALSE);
+		 		 PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
+		 		 return TRUE; 
+            default:
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+                 return FALSE;
+}
+           }
+         sVPos = max(0,min(sVPos,PlotScrollHeight));
+         SetScrollPos(hWnd, SB_VERT, sVPos, TRUE);
+         break;
+
+    case WM_HSCROLL:
+         switch (wParam)
+           {
+            case SB_LINEDOWN:
+                 sHPos += 10;
+                 break;
+
+            case SB_LINEUP:
+                 sHPos -= 10;
+                 break;
+
+            case SB_THUMBPOSITION:
+                 sHPos = LOWORD(lParam);
+                 break;
+
+            case SB_PAGEUP:
+                 sHPos -= PlotPageWidth;
+                 break;
+
+            case SB_PAGEDOWN:
+                 sHPos += PlotPageWidth;
+                 break;
+
+            case SB_ENDSCROLL:
+		         HaltMapDisplay (FALSE);
+		 		 PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
+		 		 return TRUE; 
+            default:
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+                 return FALSE;
+}
+           }
+         sHPos = max (0,min(sHPos,PlotScrollWidth));
+         SetScrollPos(hWnd, SB_HORZ, sHPos, TRUE);
+         break;
+
+    case WM_CLOSE:  /* close the window                                 */
+         /* Destroy child windows, modeless dialogs, then, this window  */
+         /* Destroy child windows, modeless dialogs, then, this window  */
+        // added by lda, but removed when we started using ODBC
+            // DdeNameService(idInst, NULL, NULL, DNS_UNREGISTER); // unregister all services
+            //  UnHszize();
+            // DdeUninitialize(idInst);
+        // end of lda addition
+Close:   HaltMapDisplay(TRUE);  
+		 if (GetGlobalBVal2 ("[%AUTOSAVECFG]",FALSE)) 
+		 {  
+		 	SaveGlobals = TRUE;
+		 	SaveZoom = TRUE;
+		 	SaveConfig (CfgNameIn); 
+		 }
+         QuitGraphics();    
+         DdeBye();
+		 CloseMap (FALSE);
+		 CloseRefIndex ();
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+GSSiEnterProg (0);
+#endif
+         DestroyWindow(hWnd); 
+         return 0;  
+}
+         
+ 	case WM_DESTROY: 
+		 DeleteObject (hBackBrush1); 
+//		 DescScan (-4,0); 
+         if (hWnd == hWndMain)
+           PostQuitMessage(0);  /* Quit the application                 */
+        break;
+
+    default:
+         /* For any message for which you don't specifically provide a  */
+         /* service routine, you should retrn the message to Windows   */
+         /* for default message processing.                             */
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+         return DefWindowProc(hWnd, Message, wParam, lParam);
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (438);
+#endif
+ return 0L;   
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL FAR PASCAL ABOUTMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (439);
+#endif
+{ 
+	char	str[128], cUID[32];	
+	HBITMAP	hBmp; 
+	HDIB	hDIB;
+	HWND	hWnd;
+	HDC		hDC; 
+	RECT	Rect;
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (439);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         
+		 GetGlobalCVal ("[%APPID]",AppName,"GeoMaster");
+       	 SetDlgItemText (hWndDlg,IDC_APP,AppName); 
+			ShowWindow (GetDlgItem(hWndDlg,IDC_LOGO),SW_SHOW);
+	        PostMessage(hWndDlg, WM_COMMAND, IDC_LOGO, 0L);
+         if (SerNo) 
+         {
+         	sprintf (str,"Serial Number: %ld",SerNo);
+         	SetDlgItemText (hWndDlg,IDC_SERIALNUM,str);
+         }
+		 SetDlgItemText (hWndDlg,IDC_VERSION,GMVersion);	
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+    	 PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+         {  
+         	case IDC_LOGO:
+         		if ((hBmp = LoadBitmap (hInst,AppName)))
+         		{
+					hDIB = BitmapToDIB (hBmp, NULL);
+		 			DeleteObject (hBmp);
+					hWnd = GetDlgItem (hWndDlg,IDC_LOGO);
+					GetClientRect (hWnd,&Rect);
+					hDC = GetDC (hWnd); 
+			        SetWindowOrgEx  ( hDC, 0, 0,0 );
+			        SetViewportOrgEx( hDC, 0, 0,0 );    
+				    SetMapMode    ( hDC, MM_TEXT );
+				    SelectClipRgn (hDC,0);
+					FillRect (hDC,&Rect,GetStockObject(WHITE_BRUSH));
+					DisplayBMInRect2 (hDC,hDIB, Rect,0,0,0);
+					ReleaseDC (hWnd,hDC);    
+					DestroyDIB (hDIB); 
+		         }
+         		break;
+         		
+            case IDCANCEL: 
+                EndDialog(hWndDlg, FALSE);
+
+            break;
+         }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (439);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (439);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+} /* End of ABOUTMsgProc                                      */
+
+void EndDisplayProcessing (BOOL Final)
+#if ENABLETRACE
+{GSSiEnterProg (440);
+#endif
+{   DPOINT	NULLPT; 
+	HDIB	hDIB;
+	char	mess[144];  
+	short	ii;
+	LPVIEWPORT	SaveVP,SaveVPIn=CurView;
+	static	BOOL	First=TRUE;
+						     
+//							sprintf (mess,"End of dseg %i",DisplayFinOpt);
+//							SetWindowText (hWnd,mess);
+	if (Final)
+	{
+        IgnoreAVLTimer = FALSE;
+		InDisplayProcessing = FALSE;
+	}
+	CloseSymDict();
+	switch (DisplayFinOpt)
+	{
+		case 1:
+			if (!hSavedPickList) break;  
+			pPickList = (LPPICKDATA)GlobalLock(hSavedPickList);
+			if (NumSavedPickList > 0)
+				_fmemmove (PickList,pPickList,NumSavedPickList*sizeof(PICKDATA)); 
+			GSSiGlobUlFree (&hSavedPickList); 
+		    DisplayPickedItems (0,NumPicked,TRUE,NULL,NULL);  
+								    
+		    break;  
+		case 2: //first display of config 
+		{
+			char	SUC[256];
+			
+			if (InImediate)
+				goto Exit;
+			if (App)
+			{
+				if (GetPrivateProfileString (Applications[App-1],"NewData","",SUC,64,"geomastr.ini"))
+				{
+					if (LoadNewData (SUC))
+						WritePrivateProfileString (Applications[App-1],"NewData",NULL,"geomastr.ini"); 
+				}
+			}
+			if (hStartupCommand) 
+			{   UINT	CmdID;  
+				long	lCmdID;              
+				LPSTR	pStr=GlobalLock (hStartupCommand);
+				
+				_fstrcpy (SUC,pStr);
+				GlobalUnlock (hStartupCommand);					
+				ExpandText (SUC);
+				lCmdID = GetCmdID (SUC);
+				if (lCmdID < 0)
+				{   
+					CmdID = -lCmdID;   
+					SetViewport (*pCommandViewport);
+					AddGraphicsFunction (CurView->hWnd, CmdID,0);
+				}
+				else if (lCmdID)
+					PostMessage(hWndMain, WM_COMMAND, (WPARAM)lCmdID, 0L); 
+				break;
+			} 
+		}
+		case 4:
+			while (DisplayNetMarkerThemeLegend(FALSE));
+			break;
+			
+		case 5:
+			while (DisplayStreetAddresses(FALSE));
+			break;
+		
+		default:                         
+		{
+			char	str[256];  
+			short	i;
+			static	BOOL	First=TRUE;
+			
+			break;
+			if (!DoTime)
+				break;
+/*			sprintf (str,"Display Time = %ld",TotDisplayTime);
+			for (i=0;i<256;i++)    
+			{
+			    if (!First)
+			    {
+			    	if (TypeTime[i])
+			    		sprintf (_fstrchr(str,0),"%i(%ld)",i,TypeTime[i]);
+			    }
+				TypeTime[i]=0;
+			}
+			SetWindowText (hWndMain,str);
+*/   
+			First=FALSE;
+			TotDisplayTime=0;
+		}
+			break;
+	} 
+	EndProcessingThemeLegends (); 
+	if (idTimer)
+		ii=1;
+	SaveVP = CurView;
+    if (Final) 
+    {
+		DisplayAllVehicles (TRUE); 
+	}
+// 	DisplayVehicle (NULLPT,NULLPT,NULLPT,TRUE);  
+    DisplayFinOpt = 0;
+	if (Final)
+	{
+		ApplyVPShadows ();
+//		ApplyVPHalfTone (); 
+	}
+    First = FALSE;
+	Counter = -1; 
+	{   
+		short SaveConfigLevel = ConfigLevel;
+//NextTAG:		
+		if (ConfigLevel)// && (ConfigLevel == SaveConfigLevel))
+		{   
+			LPSTR	pFile;
+			HDC		hDC=GetDC (hWndMain);
+			short	iv;
+			
+	        UnallocateConfig (); 
+	        pFile = GlobalLock (hSavedConfig[ConfigLevel-1]);
+	        _fstrcpy (CfgName,pFile);
+	        GlobalUnlock (hSavedConfig[ConfigLevel-1]); 
+	        OpenConfig(hWndMain,hDC);
+		    for (iv=0;iv<*pNumViewports;iv++) 
+		    {   
+		    	SetViewport (iv+1);
+	        	SetBoundsRect2 (CurView->DrawRect,CurView->hDC);
+            }
+		    SetViewport (*pCommandViewport);
+	        GSSiRemove (CfgName);
+	        ConfigLevel--;
+	        if (!ConfigLevel)   
+	        {
+	        	SetMainRect (hWndMain,hDC,&SaveMainRect);
+	        	_fstrcpy (CfgName,Lev0CfgName);
+	        }
+	        ReleaseDC (hWndMain,hDC); 
+//	        goto NextTAG;
+		}
+		if (CurrentConfig)	
+			DisplayTAGs2 (CurView->hDC,3,NextCFGTAG[ConfigLevel]);
+		if (ConfigLevel)
+			PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);    
+		else if (ResetToViewport)
+		{
+			SetCurView (ResetToViewport); 
+			ResetToViewport = 0;
+		} 
+	} 
+/*	if (FormatViewport)
+	{
+		if (SetViewport (FormatViewport))
+		{
+			FormatViewport = 0; 
+			RedisplayViewport (TRUE,FALSE);
+		}
+		else
+			FormatViewport = 0;
+	}*/	  
+Exit:
+	if (MemMap && *MemMapName)
+	{   
+		char	mess[144];
+		MNMXCORD MnMx;
+		double	Res; 
+		POINT	WinPoint[2];
+							
+		SetViewport (*pCommandViewport);
+		WinPoint[0].x = WinPoint[0].y = 0;	
+		WinPoint[1].x = MemMapWidth-1;
+		WinPoint[1].y = MemMapHeight-1;
+		*(LPDPOINT)&MnMx = WinPtToBasePt (WinPoint[0]);
+		*(LPDPOINT)&MnMx.xmx = WinPtToBasePt (WinPoint[1]);
+		Res = ldistp (*(LPDPOINT)&MnMx,*(LPDPOINT)&MnMx.xmx) / idist (WinPoint[0],WinPoint[1]);
+		if (GetGlobalBVal2 ("[%CREATEWORLDFILE]",FALSE))
+			CreateBPW (MemMapName,MnMx,Res);
+		hDIB = BitmapToDIB (hMemBitmap, NULL);
+		SaveDIB (hDIB,MemMapName);
+		DestroyDIB (hDIB); 
+		
+		NumRequests++;
+		sprintf (mess,"%ld requests processed",NumRequests);
+		if (PeopleNet)
+			SetWindowText (hWndMain,mess);
+	}
+	if (hWndDigControl)
+		PostMessage(hWndDigControl, GSSI_REINITDIALOG, 0, 0L);
+	if (Final && !ConfigLevel && CurrentConfig && !MemMap)
+		SaveFullWindowBitmap (hWndMain);
+{
+#if ENABLETRACE
+GSSiExitProg (440);
+#endif
+	return;								
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+
+BOOL FAR PASCAL CONFIGPARMSMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (441);
+#endif
+{ 	
+ 
+ static	HANDLE	hSaveBM=0;
+ int	BRtn;  
+ char	str[256];  
+ LPSTR	pStr;
+ 
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (441);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG: 
+    	 hSaveBM = EnterBlockingWindow (hWndDlg);
+   	 	 pStr = GlobalLock (hStartupCommand);
+    	 SetDlgItemText (hWndDlg,IDC_STARTCMD,pStr);
+    	 GlobalUnlock (hStartupCommand);
+   	 	 pStr = GlobalLock (hStartupMenu);
+    	 SetDlgItemText (hWndDlg,IDC_STARTMENU,pStr);
+    	 GlobalUnlock (hStartupMenu);
+    	 if (GetNumInfoBox ())
+    	 	EnableWindow (GetDlgItem(hWndDlg,IDC_SAVEINFOBOX),TRUE);
+         if (BT_NUM_IN_INDEX (hHighlight))
+    	 	EnableWindow (GetDlgItem(hWndDlg,IDC_SAVEHLTLIST),TRUE); 
+    	 if (NumViewportsArray[0]) 
+    	 {
+	   	 	EnableWindow (GetDlgItem(hWndDlg,IDC_LINKMENUS),TRUE);
+//	   	 	EnableWindow (GetDlgItem(hWndDlg,IDC_EMBEDMENUS),TRUE);
+	   	 }
+    	 SendDlgItemMessage (hWndDlg,IDC_SAVEGLOBALS,BM_SETCHECK,SaveGlobals,0);
+    	 SendDlgItemMessage (hWndDlg,IDC_SAVEINFOBOX,BM_SETCHECK,SaveInfoBox,0);
+    	 SendDlgItemMessage (hWndDlg,IDC_SAVEHLTLIST,BM_SETCHECK,SaveHLTList,0);
+    	 SendDlgItemMessage (hWndDlg,IDC_LINKMENUS,BM_SETCHECK,SaveMenuName,0);
+    	 SendDlgItemMessage (hWndDlg,IDC_INCLUDEPROMPT,BM_SETCHECK,GetGlobalBVal("[%PROMPTS]"),0);
+    	 if (!pViewportsD[0]->Type && pViewportsD[0]->AutoSize) 
+    	 {
+	   	 	 EnableWindow (GetDlgItem(hWndDlg,IDC_STARTFULL),TRUE);
+	    	 SendDlgItemMessage (hWndDlg,IDC_STARTFULL,BM_SETCHECK,pViewportsD[0]->ShowFullScreen,0);
+	     }
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+			case IDC_WINDOWCOLOR:
+			{
+				COLORREF	Color = WindowColor;
+				
+				 if (GetColor(hWndMain,&Color))
+				 	WindowColor = Color; 
+			}
+				 break;
+			
+			case IDC_LINKMENUS:
+ 				if (SendDlgItemMessage (hWndDlg,wParam,BM_GETCHECK,0,0))
+					 SendDlgItemMessage (hWndDlg,IDC_EMBEDMENUS,BM_SETCHECK,FALSE,0L); 
+				break;
+			case IDC_EMBEDMENUS:
+ 				if (SendDlgItemMessage (hWndDlg,wParam,BM_GETCHECK,0,0))
+					 SendDlgItemMessage (hWndDlg,IDC_LINKMENUS,BM_SETCHECK,FALSE,0L);
+				break;
+ 					
+            case IDOK: 
+            	 pStr = GlobalLock (hStartupCommand);
+            	 GetDlgItemText (hWndDlg,IDC_STARTCMD,pStr,256);
+           	 	 GlobalUnlock (hStartupCommand);
+            	 pStr = GlobalLock (hStartupMenu);
+            	 GetDlgItemText (hWndDlg,IDC_STARTMENU,pStr,128);
+           	 	 GlobalUnlock (hStartupMenu);
+            	 SaveZoom = SendDlgItemMessage (hWndDlg,IDC_SAVEZOOM,BM_GETCHECK,0,0);
+            	 SaveGlobals = SendDlgItemMessage (hWndDlg,IDC_SAVEGLOBALS,BM_GETCHECK,0,0);
+            	 SaveInfoBox = SendDlgItemMessage (hWndDlg,IDC_SAVEINFOBOX,BM_GETCHECK,0,0);
+            	 SaveHLTList = SendDlgItemMessage (hWndDlg,IDC_SAVEHLTLIST,BM_GETCHECK,0,0);    
+            	 SaveMenuName = SendDlgItemMessage (hWndDlg,IDC_LINKMENUS,BM_GETCHECK,0,0);    
+            	 EmbedMenus = SendDlgItemMessage (hWndDlg,IDC_EMBEDMENUS,BM_GETCHECK,0,0);    
+            	 pViewportsD[0]->ShowFullScreen = SendDlgItemMessage (hWndDlg,IDC_STARTFULL,BM_GETCHECK,0,0);    
+            	 SetVarSaveStatus ("%PROMPTS",TRUE);
+            	 SetGlobalValueBool ("%PROMPTS",(BOOL)SendDlgItemMessage (hWndDlg,IDC_INCLUDEPROMPT,BM_GETCHECK,0,0));
+            	 
+	             GSSiEndDialog(hWndDlg, TRUE,hSaveBM);
+            	 break;   
+            	 
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window retrning FALSE       */
+	             GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (441);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (441);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL FAR PASCAL VISFILESMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (442);
+#endif
+{ 	
+ int	TabStops[2]={45,500};
+ struct	_find_t	FileInfo; 
+ char	str[128],desc[100]="", dir[16],File[32];
+ int	i, rtn, st, Choice;
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (442);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+     
+	     SendDlgItemMessage (hWndDlg,IDC_LIST,LB_RESETCONTENT,NULL,NULL);
+       	 SendDlgItemMessage (hWndDlg,IDC_LIST,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+         if (Pickability) 
+         {	SetWindowText (hWndDlg,"Pickability Files");
+	    	SetDlgItemText (hWndDlg,IDC_PROMPT,"Select a pickability file from the list below"); 
+	     }
+	     else
+    	 	SetDlgItemText (hWndDlg,IDC_PROMPT,"Select a visibility file from the list below"); 
+	     
+	     if (!Pickability)
+	     {
+			 _fstrcpy (dir,"vislists\\");
+			 _fstrcpy (str,"vislists");
+		 	 _fstrcat (str,"\\*.vis");
+		 } 
+		 else
+	     {
+			 _fstrcpy (dir,"piklists\\");
+			 _fstrcpy (str,"piklists");
+		 	 _fstrcat (str,"\\*.pik");
+		 }
+		 st = _dos_findfirst (str,_A_NORMAL,&FileInfo);
+		 while (!st)
+		 {   
+			if (FileInfo.name[0] != '.')
+			{   HFILE	Fid;
+				OFSTRUCT	OFStruct;
+				int	Signature, Version;
+				char	Name[64];
+				LPSTR	lpDot;
+				
+				desc[0]=0;
+				sprintf (Name,"%s%s",dir,FileInfo.name);
+				Fid = GSSiOpenFile (Name,&OFStruct,OF_READ);
+				if (Fid != HFILE_ERROR)
+				{
+				    _llseek(Fid,(LONG)-(4),2);
+				
+				    _lread (Fid,&Signature,2);
+				    _lread (Fid,&Version,2);
+				    if (Signature == 28051 && Version == 1)  
+				    {
+				    	_llseek(Fid,(LONG)-(104),2);
+				    	_lread(Fid,desc,100);
+				    } 
+				    GSSiClose (Fid);
+				}
+				if ((lpDot = _fstrchr(FileInfo.name,'.')))
+					*lpDot = 0;
+				sprintf (str,"%s\t%s",FileInfo.name,desc);
+			 	SendDlgItemMessage (hWndDlg,IDC_LIST,LB_ADDSTRING,NULL,(LPARAM)str); 
+			}
+			st = _dos_findnext (&FileInfo);
+		 }
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDOK: 
+				 Choice=SendDlgItemMessage(hWndDlg,IDC_LIST,
+									    LB_GETCURSEL,NULL,NULL);
+				 if (Choice < 0) break; 
+				 SendDlgItemMessage(hWndDlg,IDC_LIST,LB_GETTEXT,
+								 Choice,(DWORD)&str);
+				 *_fstrchr(str,'\t')=0;   
+				 if (Pickability) 
+				 {
+					_fstrcat(str,".PIK");
+				 	LoadPickList (str);
+				 }
+				 else
+				 {
+					_fstrcat(str,".VIS");
+				 	LoadVisList (str); 
+				 }
+                 EndDialog(hWndDlg, TRUE);
+            	 break;   
+            	 
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window retrning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+                 
+            case IDC_LIST: /* List box                              */
+              {
+                switch(HIWORD(lParam))
+                    {
+                     case LBN_DBLCLK:  
+//                     	 IgnoreLbutton = TRUE;
+				         PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+			    	 	 break;
+                    }
+		       }
+		       break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (442);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (442);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL FAR PASCAL DEBUGINFOMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (443);
+#endif
+{ 	
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+         /* initialize working variables                                */  
+         DebugInfoWnd = hWndDlg;
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+           
+              case IDOK:
+                  DebugWait = FALSE;
+                  break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (443);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (443);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL FAR PASCAL HLTOUT_FORMATMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (444);
+#endif
+{ 
+	int nItems, i, Version=1, NumFields;  
+	char	File[128], Ext[8], ExtID[32];
+	LPINT	lpItems;	
+ 	HFILE	Fid;
+ 	OFSTRUCT	OFStruct;  
+ 	BOOL	False=FALSE;  
+ 	int		IDC_FieldName=IDC_FIELDS;
+ 	LPSTR	vbar; 
+ 	char	txt[128], txt2[128];
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (444);
+#endif
+ 	return (BRtn);
+}
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam,IDC_SQL,
+ 					 SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES, SV_TABLE_HEADING,&IDC_FieldName,1,
+ 					 HLTOutDataFile, &HLTOUTDataFileType, &HLTOuthDB, &False,FALSE))
+{
+#if ENABLETRACE
+GSSiExitProg (444);
+#endif
+ 					 	return TRUE;
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+         /* initialize working variables                                */
+	     GetGlobalCVal ("[%HLTOUTPUTFILE]",HLTOutPath,NULL);
+	case GSSI_REINITDIALOG:
+         SetDlgItemText(hWndDlg,IDC_SQL,HLTOutSQL);
+         SetDlgItemText(hWndDlg,IDC_OUTPATH,HLTOutPath); 
+         if (_fstricmp(HLTOutPath,"SCREEN")) 
+         {
+			 SendDlgItemMessage (hWndDlg,IDC_OUT_TO_SCREEN,BM_SETCHECK,FALSE,0L);
+			 EnableWindow (GetDlgItem(hWndDlg,IDC_FIND_FILE),TRUE);
+		 }
+         else 
+         {
+			 SendDlgItemMessage (hWndDlg,IDC_OUT_TO_SCREEN,BM_SETCHECK,TRUE,0L);
+			 EnableWindow (GetDlgItem(hWndDlg,IDC_FIND_FILE),FALSE);
+		 }         
+		 if (HLTOutFields)
+		 {
+             lpItems = (LPINT)GlobalLock(HLTOutFields);
+	         nItems = *lpItems++;
+	     
+	         for (i=0;i<nItems;i++,lpItems++)  
+	         	SendDlgItemMessage(hWndDlg,IDC_FIELDS, LB_SETSEL, TRUE,
+									   MAKELPARAM(*lpItems,0)); 
+			 GlobalUnlock (HLTOutFields);
+         }
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           { 
+           	 case IDC_OUT_TO_SCREEN:
+            	if (SendDlgItemMessage (hWndDlg,IDC_OUT_TO_SCREEN,BM_GETCHECK,0,0))
+            	{
+			         SetDlgItemText(hWndDlg,IDC_OUTPATH,"SCREEN"); 
+					 EnableWindow (GetDlgItem(hWndDlg,IDC_FIND_FILE),FALSE);
+				}
+				else
+            	{
+			         SetDlgItemText(hWndDlg,IDC_OUTPATH,HLTOutPath); 
+					 EnableWindow (GetDlgItem(hWndDlg,IDC_FIND_FILE),TRUE);
+				}
+           	 	break;
+           	 
+           	 case IDC_FIND_FILE:	
+                 if (!GetSaveName2 (hWndDlg,File,IDS_FILTERTEXT,".TXT",IDS_FILETXT))
+                 	break;   
+                 SetDlgItemText (hWndDlg,IDC_OUTPATH,File);
+                 break;
+             case IDC_LOAD:  
+           		 _fstrcpy (Ext,".HOF"); 
+           		 _fstrcpy (ExtID,"Highlight Output Formats");
+             	 sprintf (gszFilter,"%s(*%s)|*%s|",ExtID,Ext,_fstrlwr(Ext));
+				 if (GetFileName3(hWndDlg,File,0,IDS_FILEHOF))   
+				 {
+				 	LPSTR	lpID, lpPW;
+				 	
+	             	if (HLTOutFields)
+	             	 	GlobalFree(HLTOutFields);
+                 	CloseDataFile (FALSE,&HLTOuthDB);
+            	 	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
+            	 	_lread (Fid,&Version,2);
+            	 	_lread (Fid,&HLTOutPath,128);
+            	 	_lread (Fid,&HLTOutDataFile,128);
+            	 	_lread (Fid,&HLTOutSQL,lnHLTOutSQL);
+            	 	_lread (Fid,&nItems,sizeof(int));
+	                 HLTOutFields = GSSiGlobAlloc(GHND,nItems*2+2);
+	                 lpItems = (LPINT)GlobalLock(HLTOutFields);
+			         *lpItems = nItems;
+			         lpItems++;       
+	                 _lread (Fid,lpItems,nItems*sizeof(int));
+					 GlobalUnlock(HLTOutFields);
+            	 	 GSSiClose (Fid); 
+            	 	 lpID = _fstrstr (HLTOutDataFile,";UID="); 
+           	 	 	 lpPW = _fstrstr (HLTOutDataFile,";PWD="); 
+	            	 if (lpID && lpPW)
+	            	 {  
+						vbar = _fstrchr (lpID,'|');
+		            	*lpID = 0; 
+		            	*lpPW = 0;
+		            	if (!_fstrncmp (HLTOutDataFile,"ODBC|",5))
+							_fstrcpy(CurODBCFile,&HLTOutDataFile[5]); 
+						_fstrcpy (txt2,HLTOutDataFile);
+	            	 	if (vbar)
+	            	 	{
+		            		_fstrcat (txt2,vbar);
+		            		*vbar = 0; 
+		            	}
+		            	lpID+=5;
+		            	lpPW+=5;
+						SetODBCPassword (lpID,lpPW);  
+						_fstrcpy (HLTOutDataFile,txt2);
+		             }
+         			 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+            	 }
+				 
+            break;
+            case IDC_SETSQL:      
+            {    
+                 HANDLE hMem;
+                 LPSTR  lpStr;
+                 
+                 hMem = GSSiGlobAlloc (GHND,4096);
+                 lpStr = GlobalLock (hMem); 
+                 GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
+                 if (GetSQLWhereClause (hWndDlg, HLTOuthDB, lpStr))
+                 	SetDlgItemText (hWndDlg,IDC_SQL,lpStr);    
+                 GSSiGlobUlFree (&hMem);
+                 break;
+            }  
+            
+             case IDC_SAVE:
+           		 _fstrcpy (Ext,".HOF");
+            	 if (!GetSaveName2 (hWndDlg,File,0,Ext,IDS_FILEHOF)) 
+            	 	break;
+            	 if (!_fstrncmp (HLTOutDataFile,"ODBC|",5))
+            	 { 
+            	 	vbar = _fstrchr (&HLTOutDataFile[5],'|');
+            	 	if (!vbar) break;
+            	 	*vbar = 0;   
+            	 	_fstrcpy (txt,&HLTOutDataFile[5]);
+            	 	AddPWtoODBCFile (txt); 
+            	 	sprintf (txt2,"ODBC|%s|%s",txt,++vbar); 
+            	 	_fstrcpy (HLTOutDataFile,txt2);
+            	 }
+            	 	
+           	 case IDC_CREATE_OUTPUT:
+                 nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,
+										   LB_GETSELCOUNT,
+										   NULL,
+										   NULL);
+                 if (!nItems)
+                 {
+               	 	MessageBox( GetFocus(), "Error","No Fields Selected", MB_OK);
+				 	break;
+				 }  
+				 if (HLTOutFields)
+				 	GlobalFree(HLTOutFields);
+                 HLTOutFields = GSSiGlobAlloc(GHND,nItems*2+2);
+                 lpItems = (LPINT)GlobalLock(HLTOutFields);
+		         *lpItems = nItems;
+		         lpItems++;       
+                 SendDlgItemMessage(hWndDlg,IDC_FIELDS,
+										   LB_GETSELITEMS,
+										   nItems,
+										   (LPARAM)lpItems); 
+				 GlobalUnlock(HLTOutFields);
+                 CloseDataFile (FALSE,&HLTOuthDB);      
+                 GetDlgItemText(hWndDlg,IDC_SQL,HLTOutSQL,lnHLTOutSQL);
+                 GetDlgItemText(hWndDlg,IDC_OUTPATH,HLTOutPath,128); 
+				 SetGlobalValue("%HLTOUTPUTFILE",HLTOutPath); 
+	             if (wParam == IDC_CREATE_OUTPUT)
+	           	 	 CreateHighlightOutput (hWndDlg,GetDlgItem(hWndDlg,IDC_STATUS));
+	             else
+	             {
+            	 	Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
+            	 	_lwrite (Fid,&Version,2);
+            	 	_lwrite (Fid,&HLTOutPath,128);
+            	 	_lwrite (Fid,&HLTOutDataFile,128);
+            	 	_lwrite (Fid,&HLTOutSQL,lnHLTOutSQL);
+	                 lpItems = (LPINT)GlobalLock(HLTOutFields);  
+	                 _lwrite (Fid,lpItems,(*lpItems+1)*sizeof(int));
+					 GlobalUnlock(HLTOutFields);
+            	 	GSSiClose (Fid);
+            	 }
+                 break;
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window retrning FALSE       */
+                 GetDlgItemText(hWndDlg,IDC_OUTPATH,HLTOutPath,128); 
+				 SetGlobalValue("%HLTOUTPUTFILE",HLTOutPath); 
+                 CloseDataFile (FALSE,&HLTOuthDB);  
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (444);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (444);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL FAR PASCAL REORGMAPMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (445);
+#endif
+{
+	char	str[256];
+	static	HANDLE	hSaveBM=0;
+	
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (445);
+#endif
+ 	return (BRtn);
+}
+ if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (445);
+#endif
+ 	return(FALSE);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:    
+    	 hSaveBM = EnterBlockingWindow (hWndDlg);
+		 SendDlgItemMessage (hWndDlg,IDC_BUILDTAGREF,BM_SETCHECK,TRUE,0L);
+		 SendDlgItemMessage (hWndDlg,IDC_REORG_SYMBOLS,BM_SETCHECK,TRUE,0L);
+		 SendDlgItemMessage (hWndDlg,IDC_CREATE_BACKUP,BM_SETCHECK,GetGlobalBVal2("[%REORG_CREATEBACKUP]",TRUE),0L);
+		 SendDlgItemMessage (hWndDlg,IDC_CONVERT_STREETS,BM_SETCHECK,GetGlobalBVal2("[%REORG_ADDSTREETS]",FALSE),0L);
+		 SendDlgItemMessage (hWndDlg,IDC_REBUILD_QUAD,BM_SETCHECK,TRUE,0L);   
+		 SendDlgItemMessage (hWndDlg,IDC_REMOVEBADRECS,BM_SETCHECK,FALSE,0L);   
+		 SendDlgItemMessage (hWndDlg,IDC_FIXEDTRAN,BM_SETCHECK,TRUE,0L);
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
+         _fstrcpy (str,"*.CVT");
+         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
+		 if (PRJ_UNITS[1] == 1)
+ 		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)0,(LPARAM)NULL); 
+		 else if (PRJ_UNITS[1] == 2)
+ 		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)1,(LPARAM)NULL); 
+ 		 SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj"); 
+		 GetTempFileName (0,"gmb",0,str);
+		 GSSiRemove (str);
+		 SetDlgItemText (hWndDlg,IDC_BUDIR,str);
+    	 Processing = FALSE;
+         cwCenter(hWndDlg, 0);
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+			case IDC_CREATE_BACKUP:
+				if (!SendDlgItemMessage (hWndDlg,IDC_CREATE_BACKUP,BM_GETCHECK,0,0))
+				{
+		 			SendDlgItemMessage (hWndDlg,IDC_REMOVEBADRECS,BM_SETCHECK,FALSE,0L);
+		 			EnableWindow (GetDlgItem(hWndDlg,IDC_REMOVEBADRECS),FALSE);
+		 		}
+		 		else   
+		 			EnableWindow (GetDlgItem(hWndDlg,IDC_REMOVEBADRECS),TRUE);
+				break;
+           
+            case IDC_GETTRANFILE:
+		        if (GetFileName3 (hWndDlg,str,IDS_FILTERCPT,IDS_FILECPT))   
+                { 
+                 	SetDlgItemText (hWndDlg,IDC_TRANFILE,str);
+					ShowWindow (GetDlgItem(hWndDlg,IDC_FIXEDTRAN),SW_SHOW);
+                }
+            	break;
+            	
+           	case IDOK:
+			     {                                     	
+					 LPVISLIST	SaveVis, SaveCurVis; 
+					 int		SaveNumVis;
+					 OFSTRUCT	OFStruct; 
+					 short		i, SaveFPT=FileProjectionType;
+					 HFILE		FidRestart;
+					 HANDLE	hSaveVP=GSSiGlobAlloc (GMEM_MOVEABLE,sizeof(VIEWPORT));
+					 LPVIEWPORT	pSaveVP=(LPVIEWPORT)GlobalLock (hSaveVP);       
+                     char	SaveAltProj[34]; 
+                     BOOL	OpenedSeg=FALSE;
+
+					 TimeRangeBeg=0, TimeRangeEnd=LONG_MAX;
+					 SetViewport(*pCommandViewport);
+			         CloseTRANS2 (&CurView->hTranWinToBase);
+			         CloseTRANS2 (&CurView->hTranBaseToWin);
+			         CloseTRANS2 (&hTranReorg);
+				     GSSiGlobFree (&CurView->hTAGList);
+					 *pSaveVP = *CurView;
+		             CurView->UpdateFile = 0;
+				 	 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);
+/*			 		 FidRestart = GSSiOpenFile ("restart.txt",&OFStruct,OF_READ);
+			 		 if (FidRestart != HFILE_ERROR)
+			 		 {  
+			 		 	fgetstring (RestartName,sizeof(RestartName)-4,FidRestart);
+			 		 	GSSiClose (FidRestart); 
+			 		 }
+			 		 else
+			 		 	RestartName[0]=0; */
+//			 		 RestartOption=TRUE; 
+					 
+                    if (!GetDlgItemText (hWndDlg,IDC_PROJECTION,curproject,lncurproject))
+                    {
+                        MessageBox(GetFocus(),"No output projection set", 0,MB_ICONEXCLAMATION|MB_OK);
+                        goto Exit;
+                    }  
+                    ReorgUpdateBounds = SendDlgItemMessage (hWndDlg,IDC_UPDATEBOUNDS,BM_GETCHECK,0,0);
+				 	FileProjectionType=0;
+                    GetGlobalCVal ("[%ALT_PROJECTION]",SaveAltProj,NULL);
+                    SetGlobalValue("%ALT_PROJECTION",curproject);
+				    ConvertCoordClose ();
+				    ConvertCoordInit();
+                    GetDlgItemText (hWndDlg,IDC_UNITS,curunits,lncurunits);
+                    if (*curunits)
+                    { 
+                        if (!_fstrcmp(curunits,"Feet"))
+                            PRJ_UNITS[3] = 1;
+                        else if (!_fstrcmp(curunits,"Meters"))
+                            PRJ_UNITS[3] = 2;
+                    }
+					 if (GetDlgItemText (hWndDlg,IDC_TRANFILE,str,sizeof(str)))
+					 {  
+					 	if (SendDlgItemMessage (hWndDlg,IDC_FIXEDTRAN,BM_GETCHECK,0,0))
+					 		_fstrcat (str,"(F,3)");
+						hTranReorg = LoadTranFileWithDandT (str);
+						if (!hTranReorg)
+						{
+							MessageBox(GetFocus(),"Invalid transformation file", str,MB_ICONEXCLAMATION|MB_OK);
+							goto Exit;
+						}  
+					 }
+					 else if (PRJ_UNITS[1] != PRJ_UNITS[3] || _fstricmp (curproject,"baseproj.cvt"))
+					 	hTranReorg = 1;
+					 if (SendDlgItemMessage (hWndDlg,IDC_CREATE_BACKUP,BM_GETCHECK,0,0))
+					 {  
+					 	char	TestFile[256];
+					 	OFSTRUCT	OFStruct; 
+					 	LPSTR	pFile;  
+					 	HFILE	hTestFile;
+					 	
+					 	hReorgBUDir = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+					 	pFile = GlobalLock (hReorgBUDir);
+					 	if (!GetDlgItemText (hWndDlg,IDC_BUDIR,pFile,256))
+					 	{
+					 		MessageBox (hWndDlg,"No backup directory",NULL,MB_ICONEXCLAMATION); 
+					 		GSSiGlobUlFree (&hReorgBUDir);
+					 		goto Exit;
+					 	}
+					 	_mkdir (pFile);  
+					 	sprintf (TestFile,"%s\\test.tmp",pFile);
+					 	hTestFile = GSSiOpenFile (TestFile,&OFStruct,OF_CREATE);
+					 	if (hTestFile == HFILE_ERROR)
+					 	{
+					 		MessageBox (hWndDlg,"Unable to create backup directory",NULL,MB_ICONEXCLAMATION); 
+					 		GSSiGlobUlFree (&hReorgBUDir);
+					 		goto Exit;
+					 	} 
+					 	GSSiClose (hTestFile);
+					 	GSSiOpenFile (TestFile,&OFStruct,OF_DELETE);
+					 	GlobalUnlock (hReorgBUDir);
+					 }
+			    	 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);
+			    	 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),FALSE);
+			    	 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE);  
+					 if (SendDlgItemMessage (hWndDlg,IDC_REMOVEBADRECS,BM_GETCHECK,0,0))
+					 {  
+				    	 _fstrcpy (str,"[%INVALIDRECORDOPT]=2");
+				    	 ExpandText (str);
+				     }
+			    	 ReorgBadRecs = 0;
+					 DisableHalt = TRUE;  
+					 DoPaint=FALSE;
+					 Processing = TRUE;
+					 ReorghWnd = hWndDlg;
+					 ReorgStatus = IDC_STATUS;
+					 ReorgFileTxt = IDC_FILE;
+					 SetViewport(*pCommandViewport); 
+					 SelectVisList (FALSE);
+					 SaveCurVis = CurVis;
+					 SaveVis = CurView->pVisList1; 
+					 SaveNumVis = CurView->NumVisList; 
+					 CurView->NumVisList = 1; 
+					 CurVis = CurView->pVisList1;  
+					 CurView->pVisListManual=0;
+					 InitVis ();  
+					 for (i=0;i<MAX_VIEWPORT_FILES;i++)
+					 	CurVis->FileIsVisible[i]=SaveCurVis->FileIsVisible[i];
+                     ReorgFile=TRUE;  
+			    	 IgnoreBounds = TRUE; 
+			    	 ReReference = SendDlgItemMessage (hWndDlg,IDC_REREFERENCE,BM_GETCHECK,0,0);
+	            	 if (SendDlgItemMessage (hWndDlg,IDC_CONVERT_STREETS,BM_GETCHECK,0,0)) 
+	            	 {
+						 OpenStreetSegmentTable (FALSE,&OpenedSeg);
+						 AddStreetNums=TRUE;
+					 }
+	            	 if (SendDlgItemMessage (hWndDlg,IDC_REBUILD_QUAD,BM_GETCHECK,0,0))
+	            	 {   
+	            	 	 LPSTR	pFile;
+	            	 	 
+				    	 SetDlgItemText (hWndDlg,IDC_MESS,"Rebuild Quad Trees"); 
+				         ClearAllBounds();
+						 SetViewport(*pCommandViewport);
+						 hNewQuadFile = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+					 	 pFile = GlobalLock (hNewQuadFile);
+						 GetTempFileName (0,"gm",0,pFile); 
+						 NewQuadFID = GSSiOpenFile (pFile,&OFStruct,OF_CREATE);
+						 GlobalUnlock (hNewQuadFile);
+						 Display=FALSE;		                  
+					     CurView->CurZoomAreaRef = 0;
+						 RedisplayViewport(TRUE,TRUE);
+					 	 Display=TRUE;		                  
+						 GSSiClose (NewQuadFID); 
+					 	 pFile = GlobalLock (hNewQuadFile);
+						 GSSiRemove (pFile); 
+						 GSSiGlobUlFree (&hNewQuadFile);  
+					 }
+					 NewQuadFID = 0;
+				     ReReference = FALSE;
+			    	 
+	            	 if (!SendDlgItemMessage (hWndDlg,IDC_REORG_SYMBOLS,BM_GETCHECK,0,0))    
+						goto Exit;
+			    	 if (ContinueProcessing)
+			    	 {
+				    	 SetDlgItemText (hWndDlg,IDC_MESS,"Reorganize maps"); 
+				         ClearAllBounds();
+						 SetViewport(*pCommandViewport);
+						 Display=FALSE;		                  
+					     CurView->CurZoomAreaRef = 0;
+						 RedisplayViewport(TRUE,TRUE);
+					 	 Display=TRUE;		                  
+				    	 SetDlgItemText (hWndDlg,IDC_MESS,"Reorganization complete"); 
+				     }
+			    	 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);
+			    	 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE);
+			    	 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);
+
+        Exit:    
+					 GSSiGlobFree (&hReorgBUDir);
+				     SetViewport(*pCommandViewport);
+			         CloseTRANS2 (&CurView->hTranWinToBase);
+			         CloseTRANS2 (&CurView->hTranBaseToWin); 
+			         if (hTranReorg == 1)
+			         	hTranReorg = 0;
+				     GSSiGlobFree (&CurView->hTAGList);
+			         CloseTRANS2 (&hTranReorg);
+					 CloseTRANS2 (&hTranBaseToFileReorg);
+                     *CurView = *pSaveVP;
+                     GSSiGlobUlFree (&hSaveVP);  
+			    	 ReorgFile=FALSE;
+					 CurView->pVisList1 = SaveVis;
+					 CurView->NumVisList =SaveNumVis; 
+	                 FileProjectionType = SaveFPT;  
+	                 SetGlobalValue("%ALT_PROJECTION",SaveAltProj);
+	           		 ConvertCoordClose ();
+					 Processing = FALSE;
+					 DisableHalt = FALSE; 
+			 		 RestartOption=FALSE; 
+			 		 CloseStreetSegmentTable(OpenedSeg); 
+			 		 AddStreetNums=FALSE; 
+			 		 ContinueProcessing = TRUE;
+			     } 
+        		 IgnoreBounds = FALSE;
+		    	 _fstrcpy (str,"[%INVALIDRECORDOPT]=2");
+		    	 ExpandText (str);   
+		    	 if (ReorgBadRecs)
+		    	 {
+		    	 	sprintf (str,"%ld invalid records removed",ReorgBadRecs);
+		    	 	GSSiMessageBox (str,"Warning",MB_ICONEXCLAMATION);
+		    	 } 
+		    	 ReorghWnd = 0;
+	             if (SendDlgItemMessage (hWndDlg,IDC_BUILDTAGREF,BM_GETCHECK,0,0))    
+		             GSSiEndDialog(hWndDlg, 2,hSaveBM);
+	             else
+		             GSSiEndDialog(hWndDlg, 1,hSaveBM);
+                 break;
+                  
+            case IDC_EXIT:
+            	 ReorghWnd = 0;
+                 GSSiEndDialog(hWndDlg, 1,hSaveBM);
+                 break;
+                  
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window retrning FALSE       */   
+                 ContinueProcessing=FALSE;  
+				 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (445);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (445);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+} 
+
+BOOL FAR PASCAL PRINTMERGEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (446);
+#endif
+{ 	int		isDir, nchar;
+	char	Name[128], str2[64];    
+	LPSTR	str;
+    HFILE	Fid; 
+    OFSTRUCT	OFStruct; 
+    HANDLE	hMEM=0, hDLT=0;    
+    short	nItems; 
+    static	short	MaxLineLen=0;
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (446);
+#endif
+ 	return (BRtn);
+}
+ if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (446);
+#endif
+ 	return(FALSE);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         cwCenter(hWndDlg, 0);
+		 SendDlgItemMessage (hWndDlg,IDC_ALL_RECORDS,BM_SETCHECK,TRUE,0L);
+		 SendDlgItemMessage (hWndDlg,IDC_SELECTED_RECORDS,BM_SETCHECK,FALSE,0L);
+		 SendDlgItemMessage (hWndDlg,IDC_RECORD_RANGE,BM_SETCHECK,FALSE,0L);
+		 SetDlgItemTextGlobal (hWndDlg,IDC_DATAFILE,"[%FILEPMDATA]",NULL);
+		 SetDlgItemTextGlobal (hWndDlg,IDC_PM_MACRO,"[%FILEPMMACRO]",NULL);
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+           	case IDC_ALL_RECORDS:
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_FROM_REC),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TO_REC),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TO_TEXT),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_SELRETURN),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_RECORD_LIST),SW_HIDE);
+				 break;
+           	
+           	case IDC_RECORD_RANGE:
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_FROM_REC),SW_SHOW);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TO_REC),SW_SHOW);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TO_TEXT),SW_SHOW);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_SELRETURN),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_RECORD_LIST),SW_HIDE);
+				 SetFocus(GetDlgItem(hWndDlg,IDC_FROM_REC));
+				 break;
+           	
+           	case IDC_SELECTED_RECORDS:
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_GET_MACROFILE),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TEST),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_GET_DATAFILE),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDOK),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDCANCEL),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_DATAFILE),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_PM_MACRO),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_SELECTED_RECORDS),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_FROM_REC),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_ALL_RECORDS),SW_HIDE); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_RECORD_RANGE),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TO_REC),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TO_TEXT),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_SELRETURN),SW_SHOW);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_RECORD_LIST),SW_SHOW); 
+			     SendDlgItemMessage (hWndDlg,IDC_RECORD_LIST,LB_RESETCONTENT,NULL,NULL);
+            	 GetDlgItemText(hWndDlg,IDC_DATAFILE,PMDataFile,128);
+				 Fid = GSSiOpenFile (PMDataFile,&OFStruct,OF_READ);
+			     if (Fid == HFILE_ERROR)
+			     {
+					MessageBox( hWndDlg, PMDataFile,"Unable to open data file", MB_OK);
+			     	break;
+			     } 
+				 hMEM = GSSiGlobAlloc (GMEM_MOVEABLE,2048);
+				 str = GlobalLock (hMEM); 
+				 fgetstring (str,1024,Fid);
+				 MaxLineLen = 0; 
+				 while (str[0]=='#' || *LastChr (str) == ';') 
+				 {                
+				  	ExpandText (str);
+				  	if (!fgetstring (str,1024,Fid))
+				  	{    
+		                 GSSiGlobUlFree (&hMEM); 
+		                 break;
+		            }
+				 }
+				  
+				 ProcessDelimTextHeader(str,&hDLT);
+			     
+				 while (fgetstring (str,1024,Fid))
+				 {
+			  		 MaxLineLen = max (MaxLineLen,_fstrlen (str));
+		 			 SendDlgItemMessage (hWndDlg,IDC_RECORD_LIST,LB_ADDSTRING,NULL,(LPARAM)str); 
+				 }
+				 GSSiClose (Fid);
+				 GSSiGlobUlFree (&hMEM); 
+		         GSSiGlobFree (&hDLT);
+						 
+				 break;
+           	
+           	case IDC_SELRETURN:
+				 nItems = SendDlgItemMessage(hWndDlg,IDC_RECORD_LIST,LB_GETSELCOUNT,0,0);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_GET_MACROFILE),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_TEST),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_GET_DATAFILE),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDOK),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDCANCEL),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_ALL_RECORDS),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_RECORD_RANGE),SW_SHOW);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_DATAFILE),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_PM_MACRO),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_SELRETURN),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_RECORD_LIST),SW_HIDE);
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_SELECTED_RECORDS),SW_SHOW); 
+				 ShowWindow (GetDlgItem(hWndDlg,IDC_MESS),SW_SHOW);
+				 sprintf (str2,"%i records selected",nItems);
+				 SetDlgItemText (hWndDlg,IDC_MESS,str2); 
+				 break;
+           		
+            case IDC_GET_DATAFILE: 
+            {
+	             if (GetFileName3(hWndDlg,Name,IDS_FILTERTEXT,IDS_FILEPMDATA))   
+                 {
+         			SetDlgItemText(hWndDlg,IDC_DATAFILE,Name); 
+         		 }
+            }
+            	 break;
+            case IDC_GET_MACROFILE:  
+            {
+	             if (GetFileName3(hWndDlg,Name,IDS_FILTERTEXT,IDS_FILEPMMACRO))   
+                 {
+         			SetDlgItemText(hWndDlg,IDC_PM_MACRO,Name); 
+         		 }
+            }
+            	 break;
+
+            case IDC_TEST:
+            case IDOK: 
+           	 	 GSSiGlobFree (&hPMRecList);
+            	 if (SendDlgItemMessage (hWndDlg,IDC_RECORD_RANGE,BM_GETCHECK,0,0))
+            	 {
+            	 	GetDlgItemText(hWndDlg,IDC_FROM_REC,str2,16);
+ 					FirstMergeRecord=atol(str2);
+            	 	GetDlgItemText(hWndDlg,IDC_TO_REC,str2,16);
+ 					LastMergeRecord=atol(str2); 
+             	 } 
+            	 else if (SendDlgItemMessage (hWndDlg,IDC_SELECTED_RECORDS,BM_GETCHECK,0,0))
+            	 {  
+            	 	HANDLE	hItems;
+            	 	short	i;
+            	 	
+                  	nItems=(short)SendDlgItemMessage(hWndDlg ,IDC_RECORD_LIST,LB_GETSELCOUNT,0,0);
+                  	if (nItems);
+                  	{ 
+	                  	HANDLE	hItems=GSSiGlobAlloc(GHND,nItems*2);
+	                  	LPSHORT	pItems=  (LPSHORT) GlobalLock(hItems);
+	                  	LPSTR	pRec;
+						short	l;
+						
+	                  	SendDlgItemMessage(hWndDlg ,IDC_RECORD_LIST,LB_GETSELITEMS,nItems,(LPARAM)pItems); 
+	                  	hPMRecList = GSSiGlobAlloc (GHND,nItems * (MaxLineLen + 2));
+	                  	pRec = GlobalLock (hPMRecList);
+	                  	for (i=0;i<nItems;i++,pItems++)
+	                  	{
+						 	l=SendDlgItemMessage(hWndDlg,IDC_RECORD_LIST,LB_GETTEXT,*pItems,(LPARAM)pRec); 
+						 	pRec += l;   
+						 	pRec++;
+	                  	}
+	                  	GlobalUnlock (hPMRecList);
+	                  	GSSiGlobUlFree (&hItems);  
+	                }
+             	 }
+             	 else
+             	 {
+					 FirstMergeRecord=1;
+					 LastMergeRecord=LONG_MAX;
+             	 }
+            	 GetDlgItemText(hWndDlg,IDC_DATAFILE,PMDataFile,128);
+            	 GetDlgItemText(hWndDlg,IDC_PM_MACRO,PMMacroFile,128);
+            	 if (wParam == IDC_TEST)
+                 	EndDialog(hWndDlg, 2);  
+                 else
+                 	EndDialog(hWndDlg, 1);
+
+                 break;
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window retrning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (446);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (446);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+} 
+
+
+BOOL FAR PASCAL PRINTMERGETSTMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (447);
+#endif
+{ 	static	long	line;
+	char	Name[128];
+	HFILE	Fid;
+	OFSTRUCT	OFStruct; 
+	HANDLE	hDLT;
+	long	at;
+	char	str[1030], str2[32];
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (447);
+#endif
+ 	return (BRtn);
+}
+ if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (447);
+#endif
+ 	return(FALSE);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         cwCenter(hWndDlg, 0);
+         line=1;
+            
+         goto GetLine;
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+	     DestroyWindow(hWndDlg); 
+	     if (hFullWindowBitMap) 
+		 {    
+			HDC	hDC = GetDC (hWndMain);
+			RECT	WindowRect;
+					
+			GetWindowRect (hWndMain,&WindowRect);
+	        SelectClipRgn (hDC,0);
+			RestoreScreen (hDC,hFullWindowBitMap,WindowRect);	     
+			ReleaseDC (hWndMain,hDC);  
+		 }
+         FreeProcInstance(lpfnPRINTMERGETSTMsgProc);
+         break; /* End of WM_CLOSE                                      */
+
+	case WM_HSCROLL:
+		switch (wParam)
+		{
+		  case SB_LINEDOWN:
+		  line++;
+		  goto GetLine;
+		  break;
+
+		  case SB_LINEUP:
+		  line--;
+		  line = max (line,1); 
+GetLine:  at = 1;
+		  Fid = GSSiOpenFile (PMDataFile,&OFStruct,OF_READ);
+	      if (Fid == HFILE_ERROR)
+	      {
+			MessageBox( hWndDlg, PMDataFile,"Unable to open data file", MB_OK);
+	        PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+	     	break;
+	      } 
+		  
+		  fgetstring (str,1024,Fid);
+		  
+		  while (str[0]=='#' || *LastChr (str) == ';') 
+		  {                
+		  	ExpandText (str);
+		  	if (!fgetstring (str,1024,Fid))
+		  	{
+                 EndDialog(hWndDlg, FALSE); 
+                 break;
+            }
+		  }
+		  
+		  ProcessDelimTextHeader(str,&hDLT); 
+		  if (hDLT)
+		  {
+			  GetPrintMergeRec (0,NULL);
+			  while (GetPrintMergeRec (Fid,str))
+		  	  {  
+				if (at == line) goto GotLine;
+			 	at++;
+			  }
+			  line--;  
+		  }
+		  GSSiClose (Fid);
+		  break;
+GotLine:  GSSiClose (Fid); 
+		  SetDlgItemText(hWndDlg,IDC_DBRECORD,str);
+          GetDelimTextData(str,hDLT);     
+          GSSiGlobFree (&hDLT);
+   		  ltoa (line+FirstMergeRecord-1,str,10);
+		  SetDlgItemText(hWndDlg,IDC_RECORD,str);
+
+	  	  break;
+
+		}
+		break;
+
+     case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDOK:   
+            	 HaltMapDisplay (FALSE);
+		         DoPaint = TRUE;
+			     ProcessMacroFile (PMMacroFile,str2,0);  
+
+                 break;
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+		         PostMessage(hWndDlg, WM_CLOSE, 0, 0L);
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (447);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (447);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+} /* End of PRINTMERGETSTMsgProc                                      */
+
+BOOL FAR PASCAL ATTRIBUTE_TRANSFERMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (448);
+#endif
+{ 	int		isDir, nchar, Choice, iorig,  i,j;
+	LPINT	lpItems;
+	static	HANDLE	hItems=0;  
+	static	int	nItems;
+	char	cmd[512],TagField[33], TagName[9], HPName[33], PCName[13];  
+	char	TxtFile[128];
+	LPSTR	lpDot, lpTab;
+	int			TabStops[2]={300,400}; 
+	BTVARDESC BTVar[2], *pVars;
+	static	int		NumFields, Reclen, len, KeyType;
+	long	Refno, Offset;
+	static	long	TotFileLen, KeySequence=0;
+	char	CRef[16];
+	static	GWDHEADER GWDHead; 
+	static	LPGWDHEADER	lpGWDHead;
+	static	GWFLDINFO GWFldInfo;
+	static	LPGWFLDINFO	lpGWFldInfo;
+	static	HANDLE hBT, hVars, hDB, hBlock, hFldInLen;
+	static	LPINT	pFldInLen;
+	static	LPSTR 	BlockPnt;  
+	LPINT	pLen;
+	LPSTR	pBlock;
+	time_t ltime;
+	HDC	hDC;
+	static	long	TotRecs, nRecs, nLoaded;
+	char	Fname[64], RefStr[32];
+	int		FidData;
+	int		ibeg,NumIndex,NumIndexFields,ifield;
+	OFSTRUCT	OFStruct;
+	LPSTR	lpVal;
+	static	LPSTR	pName; 
+	static	BOOL	TestMode, HaveTimer=FALSE, TextSource=FALSE;   
+	MSG		msg;
+	static	FILE	*Fid;
+	static	LPSTR	lpType, lpEnd;
+	LPSTR	lpRec;
+	char	str[128];
+	static	HANDLE	hRec;
+	int		l, inc,ii;   
+	long	BlockRec;  
+	static	long	debugloaded=24508856;
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         cwCenter(hWndDlg, 0);
+         TotRecs = 0; 
+         TextSource = FALSE;   
+       	 SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_SETTABSTOPS,2,(LPARAM)&TabStops); 
+         break; /* End of WM_INITDIALOG                                 */
+
+/*    case WM_SETCURSOR:
+         if (!hCursor)
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+         	return DefWindowProc(hWndDlg, Message, wParam, lParam); 
+}
+         GSSiSetCursor (hCursor);
+    	 break;  */
+    	 
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+		 if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+		 	return TRUE;
+}
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+   	case WM_TIMER: 
+   		 BlockRec = 100;
+NextRec:
+		 if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+		 	return TRUE;
+}
+/*GetMess: if (PeekMessage(&msg, NULL, 0,0, PM_NOREMOVE)) retrn TRUE;*/
+	 	 if (TotRecs>0)
+		 {  
+/*		 	if (!TextSource)
+		 	{ 
+				SendUMMessage("%NEXT");
+				pBlock = BlockPnt; 
+				GetUMMessage(cmd);
+			    if (!_fstricmp(cmd,"%END"))
+			    	goto Done;
+			    else 
+			    {
+			    	if (KeyType == 1)
+			    	{
+			    		_fstrcpy(RefStr,cmd);
+						GetUMMessage(cmd);
+					}
+					else if (KeyType == 2)
+					{
+						KeySequence++; 
+						ltoa(KeySequence,RefStr,10);
+					}
+				}
+		        while (_fstricmp(cmd,"%END")!=0)
+		        {               
+		         	_fstrncpy(pBlock,cmd,250);
+					GetUMMessage(cmd);
+					pBlock+=250;
+				}
+	            pBlock = BlockPnt;
+	            pLen = pFldInLen;
+	        }
+	        else
+	        {*/   
+	        	BlockRec = LONG_MAX; 
+	        	if (HaveTimer)
+	        	{ 
+        			 KillTimer(hWndDlg, 1);
+                     HaveTimer = FALSE;
+                }
+	        	lpRec = GlobalLock(hRec);
+			    if (!fgetss (lpRec,32000,Fid)) 
+			    	goto Done;
+//			}  
+			Offset = _llseek (lpGWDHead->Fid,0,2);
+			iorig=-1;
+        	for (i=0,lpGWFldInfo=lpGWDHead->pFldInfo;i<lpGWDHead->NumFields;
+        		 i++,lpGWFldInfo++)
+        	{
+		 		lpVal = &lpGWDHead->GWDData[lpGWFldInfo->Beg];
+				if (!i && KeyType<=2)
+				{
+					Refno=atol(RefStr);
+					_fstrcpy(cmd,RefStr);
+				}
+				else if (!TextSource)
+				{ 
+					_fstrncpy(cmd,pBlock,*pLen);
+					pBlock+=*pLen;
+					cmd[*pLen++]='\0';  
+                } 
+                else
+                {   
+            SkipItem: 
+            		if (*lpRec == '"')
+            		{
+            			inc=2;   
+            			lpRec++;
+                		lpEnd = MatchLev(lpRec,'"');
+                		if (!lpEnd)
+                			lpEnd = _fstrchr (lpRec,'"');
+                	}
+                	else 
+                	{
+                		inc=1;
+                		lpEnd = _fstrchr(lpRec,',');
+                	}
+                	if (!lpEnd)
+                		lpEnd = _fstrchr (lpRec,0);
+                	*lpEnd = 0;
+                	_fstrncpy(cmd,lpRec,512);
+                	lpRec = lpEnd;
+                	lpRec += inc;
+                	iorig++;
+  					lpItems=  (LPINT) GlobalLock(hItems); 
+  					while (*lpItems<iorig)
+  						lpItems++; 
+  					GlobalUnlock(hItems);
+  					if (*lpItems > iorig)
+  						goto SkipItem;
+
+                }
+				switch (lpGWFldInfo->Type)
+				{
+		 			case BT_CHAR:
+						_fstrncpy (lpVal,cmd,lpGWFldInfo->Len);
+		 			break;
+				 			
+		 			case BT_RIGHT_CHAR:
+						_fmemset (lpVal,' ', lpGWFldInfo->Len);
+						l = _fstrlen (cmd);
+						lpVal+= max(lpGWFldInfo->Len-l,0);
+						_fmemmove (lpVal,cmd,max(l,lpGWFldInfo->Len));
+		 			break;
+		 			
+		 			case BT_INTEGER:
+		 				if (lpGWFldInfo->Len == 2)
+		 					*(LPINT)lpVal=IDNINT(atof(cmd));
+		 				else
+		 					*(LPLONG)lpVal=IDNINT(atof(cmd));
+		 			break;
+				 			
+		 			case BT_REAL:
+		 			 	if (lpGWFldInfo->Len == 4)
+		 					*(LPFLOAT)lpVal=atof(cmd);
+		 				else
+		 					*(LPDOUBLE)lpVal=atof(cmd);
+		 			break;
+		 		}
+				GSSiTrace(_fstrcat(cmd,lpGWFldInfo->Name));
+		 	}
+	 		lpVal = &lpGWDHead->GWDData[lpGWDHead->pFldInfo->Beg];
+			BT_PUT (hBT,(LPSTR)lpVal,(LPSTR)&Offset);
+			_lwrite (lpGWDHead->Fid,&lpGWDHead->Reclen,2);
+			_lwrite (lpGWDHead->Fid,&lpGWDHead->GWDData,(UINT)lpGWDHead->Reclen);
+			if (TextSource)
+			{
+				nLoaded = ftell(Fid); 
+				if (nLoaded >= debugloaded)
+					ii=1;
+			    GlobalUnlock(hRec);  
+			}
+			else
+				nLoaded++;
+			if (!PctBox (GetDlgItem(hWndDlg,IDC_STATUS_BAR), nRecs, nLoaded,10))
+				TotRecs=0;
+			else
+			{
+				TotRecs--; 
+				if (!(nLoaded%1000) && !TextSource)
+				{
+					 GlobalUnlock (hDB);
+				     CloseGWDatabase (hDB);
+					 hDB = OpenGWDatabase (pName,BT_WRITE);
+				     if (!hDB)
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+				     	return (FALSE);
+}
+					 lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+					 hBT = lpGWDHead->BTHandle[0]; 
+				}
+			} 
+			BlockRec--;
+			if (BlockRec)
+				goto NextRec;
+			else
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+				return TRUE;
+}
+		 }
+				  
+	Done:
+		 EnableWindow(GetDlgItem(hWndDlg,IDC_TEST),TRUE);
+		 EnableWindow(GetDlgItem(hWndDlg,IDOK),TRUE);
+		 KillTimer(hWndDlg, 1);
+		 HaveTimer=FALSE;  
+		 GlobalFree (hItems);
+		 GlobalUnlock (hDB);
+	     CloseGWDatabase (hDB);
+		 GSSiGlobUlFree (&hBlock);
+		 GSSiGlobUlFree (&hFldInLen);
+		 GlobalUnlock(hName);
+		 if (TextSource)
+		 	fclose (Fid);
+/*		 if (!TotRecs && !TextSource)
+		 {  
+			SendUMMessage("%END"); 
+		 	GetUMMessage(cmd);
+			GSSiTrace(cmd);
+         } */
+	 	 TotRecs=0; 
+		 {
+		    FARPROC lpfnDISPLAY_GWD_DATAMsgProc;
+		    int	nRc;
+				
+		    lpfnDISPLAY_GWD_DATAMsgProc = MakeProcInstance((FARPROC)DISPLAY_GWD_DATAMsgProc, hInst);
+		    nRc = DialogBox(hInst, (LPSTR)"DISPLAY_GWD_DATA", hWndMain, lpfnDISPLAY_GWD_DATAMsgProc);
+		    FreeProcInstance(lpfnDISPLAY_GWD_DATAMsgProc);
+		 }
+		 GlobalFree(hName);
+			
+         break; 
+                 
+    case WM_COMMAND:
+         switch(wParam)
+           {   
+           	case IDC_SOURCE_HP:  
+           		TextSource = FALSE;
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_REFNO),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_FIELD),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_TAG),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_NONE),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_LOCATE),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_TEXT_FILE),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_LOCATE),SW_HIDE);
+           		break;
+           	
+           	case IDC_SOURCE_TEXT:  
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_REFNO),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_FIELD),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_TAG),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_KEY_NONE),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_LOCATE),SW_SHOW);
+           		TextSource = TRUE;
+           		break; 
+           		
+           	case IDC_LOCATE: 
+           		*TxtFile = 0;
+           		if (GetFileName3 (hWndDlg,TxtFile,IDS_FILTERTEXT,IDS_FILETXT))
+           		{   
+           			
+           			ExpandText (TxtFile);
+					Fid = fopen (TxtFile,"r");
+				    if (!Fid) break;
+           			SetDlgItemText(hWndDlg,IDC_TEXT_FILE,TxtFile);
+           			hRec = GSSiGlobAlloc(GMEM_MOVEABLE,SHRT_MAX);
+           			lpRec = GlobalLock(hRec);
+				    fgetss (lpRec,32000,Fid);  
+				    while (*lpRec)
+				    {        
+				    	lpRec++;
+				    	if (*lpRec == '"')
+				    		lpRec++;
+				    	if (!(lpType=_fstrchr(lpRec,'('))) goto EndHeader;
+				    	*lpType++=0;
+				    	lpEnd = _fstrchr(lpType,')');
+				    	*lpEnd++=0;
+				    	sprintf (str,"%s\t%s",lpRec,lpType);
+			 			SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,NULL,(LPARAM)str); 
+			 			lpRec = lpEnd;
+			 			lpRec++;
+				    }
+			EndHeader:
+				    fclose (Fid);
+				    GSSiGlobUlFree (&hRec);
+           			
+           		}
+           		break;
+           		
+           	case IDC_KEY_FIELD: 
+				if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+					return TRUE;
+}
+           		KeyType=3;
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_NUM_KEY_FIELDS),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_NUM_KEY_FIELD_TITLE),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_TAG_NAME),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_TAG_NAME_TITLE),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_TAG_FIELD),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_TAG_FIELD_TITLE),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_ZFILL),SW_HIDE);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_FIELDS_TITLE),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_FIELDS),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_GWIZ_NAME),SW_SHOW);
+          		ShowWindow (GetDlgItem(hWndDlg,IDC_GWIZ_NAME_TITLE),SW_SHOW);
+          		if (TextSource)
+          		{
+	          		ShowWindow (GetDlgItem(hWndDlg,IDC_TEXT_FILE),SW_SHOW);
+	          		ShowWindow (GetDlgItem(hWndDlg,IDC_LOCATE),SW_SHOW);
+		      		ShowWindow (GetDlgItem(hWndDlg,IDC_HP_NAME),SW_HIDE);
+		      		ShowWindow (GetDlgItem(hWndDlg,IDC_HP_NAME_TITLE),SW_SHOW);
+		      		SetDlgItemText(hWndDlg,IDC_HP_NAME_TITLE,"Input File"); 
+		      	}
+/*		      	else 
+		      	{
+	          		ShowWindow (GetDlgItem(hWndDlg,IDC_TEXT_FILE),SW_HIDE);
+	          		ShowWindow (GetDlgItem(hWndDlg,IDC_LOCATE),SW_HIDE);
+		      		ShowWindow (GetDlgItem(hWndDlg,IDC_HP_NAME),SW_SHOW);
+		      		ShowWindow (GetDlgItem(hWndDlg,IDC_HP_NAME_TITLE),SW_SHOW);	
+			        SendUMMessage ("%ATTFILES");
+					GetListCB (hWndDlg,IDC_HP_NAME,"HPName");
+		      	}*/	      	
+           		break;
+           		
+             
+            case IDC_HALT:
+            	 if (HaveTimer)
+            	 {
+					KillTimer(hWndDlg, 1);
+					HaveTimer = FALSE;
+            	 	SetDlgItemText(hWndDlg,IDC_HALT,"Continue");
+            	 }
+            	 else
+            	 {
+					SetTimer(hWndDlg, 1, 1, (FARPROC) NULL);
+            	 	HaveTimer=TRUE;               
+            	 	SetDlgItemText(hWndDlg,IDC_HALT,"Halt");
+            	 }
+            	 break; 
+
+            case IDC_TEST:
+            	 if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+            	 	return(TRUE);
+}
+            	 TestMode=TRUE;
+            	 goto StartTransfer;
+            	 
+            case IDOK:
+            	 if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+            	 	return(TRUE);
+}
+            	 TestMode=FALSE;
+            	 
+    StartTransfer:GetDlgItemText(hWndDlg,IDC_GWIZ_NAME,PCName,32);
+               	 if (!PCName[0] && KeyType<4)
+               	 {
+               	 	MessageBox( GetFocus(), "No GeoMaster File Selected","Error", MB_OK);
+				 	break;
+				 } 
+				 if (TextSource)
+				 {
+	               	 GetDlgItemText(hWndDlg,IDC_TEXT_FILE,TxtFile,sizeof(TxtFile));
+	               	 if (!TxtFile[0])
+	               	 {
+	               	 	MessageBox( GetFocus(), "No Text File Selected", "Error",MB_OK);
+					 	break;
+					 }
+				 }
+				 else
+				 {
+	               	 GetDlgItemText(hWndDlg,IDC_HP_NAME,HPName,32);
+	               	 if (!HPName[0])
+	               	 {
+	               	 	MessageBox( GetFocus(), "No HP/Apollo File Selected", "Error",MB_OK);
+					 	break;
+					 }
+				 }
+               	 GetDlgItemText(hWndDlg,IDC_TAG_NAME,TagName,8);
+               	 if (!TagName[0] && KeyType == 1)
+               	 {
+               	 	MessageBox( GetFocus(), "No TAG Selected", "Error",MB_OK);
+				 	break;
+				 }
+               	 GetDlgItemText(hWndDlg,IDC_TAG_FIELD,TagField,32);
+               	 if (!TagField[0] && KeyType==1)
+               	 {
+               	 	MessageBox( GetFocus(), "No TAG Field Selected","Error", MB_OK);
+				 	break;
+				 }
+				 if (KeyType==3)
+				 {
+	               	 GetDlgItemText(hWndDlg,IDC_NUM_KEY_FIELDS,str,32);
+	               	 NumIndexFields = atoi(str);
+	               	 if (NumIndexFields<1||NumIndexFields>8)
+	               	 {
+	               	 	MessageBox( GetFocus(), "The number of key fields must be between 1 and 8","Error", MB_OK);
+					 	break;
+					 }
+				 }
+				 else
+				 	NumIndexFields=1;
+					 
+                 nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,
+										   LB_GETSELCOUNT,
+										   NULL,
+										   NULL);
+                 if (!nItems)
+                 {
+               	 	MessageBox( GetFocus(), "No Fields Selected","Error", MB_OK);
+				 	break;
+				 }
+				 
+		         
+				 _fstrcpy (Fname,"attribut\\");  
+				 _fstrcat (Fname,PCName);
+				 _fstrcpy (str,Fname);
+				 _fstrcat (str,".gmd");
+				 FidData = GSSiOpenFile (str,&OFStruct,OF_CREATE); 
+				 if (FidData == HFILE_ERROR)
+				 {
+	               	MessageBox( GetFocus(), str,"Unable to create data file", MB_OK);
+				 	break;
+				 }
+				 KeySequence=0;
+				 lpGWDHead = &GWDHead; 
+				 _fmemset (lpGWDHead,'\0',sizeof(GWDHead));  
+/*				 if (!TextSource)
+				 {
+					 if (KeyType < 4)
+					 { 
+				         _fstrcpy(cmd,"%TRANDATA "); 
+				         _fstrcat(cmd,HPName); 
+			             SendUMMessage (cmd);
+			             SendUMMessage("%GETSIZE");
+				     }
+				     else
+					 { 
+				         _fstrcpy(cmd,"%TRANTAG "); 
+				         _fstrcat(cmd,HPName); 
+				         SendUMMessage (cmd);
+				         SendUMMessage("-2000000000");
+				     }
+				     
+					 GetUMMessage(cmd);
+				 	 TotFileLen = atol(cmd);
+				 }*/
+				 if (TestMode)
+				 {
+					 TotRecs = 25;
+					 nRecs = TotRecs;
+				 }
+				 else
+				 {
+				 	 nRecs = TotFileLen; 
+					 TotRecs = 2000000000;
+				 }
+				 if (KeyType == 2 || KeyType == 3) _fstrcpy(TagName," "); 
+/*				 if (KeyType < 4 && !TextSource)
+				 {
+			         SendUMMessage(TagName);
+			         _fstrcpy(str,"[");
+			         _fstrcat(str,Truncate(TagField));
+			         _fstrcat(str,"]");
+                   	 if (SendDlgItemMessage (hWndDlg,IDC_ZFILL,BM_GETCHECK,0,0L))
+				         _fstrcat(str,"Z");
+
+			         SendUMMessage(str); 
+			     } */
+				 GWDHead.NumFields=0;
+				 GWDHead.NumIndex=1;
+				 if (GetDlgItemText (hWndDlg,IDC_VERSION,str,16))
+				 	GWDHead.Version=atol(str);
+				 else	
+				 	GWDHead.Version=1;
+				 GWDHead.NumIndexFields[0]=NumIndexFields;
+				 for (i=0;i<NumIndexFields;i++)
+				 	GWDHead.IndexFields[0][i]=i;
+				 _lwrite (FidData,&GWDHead,sizeof(GWDHEADER));
+				 ibeg = 0;
+				 
+				 hVars = LocalAlloc (LHND,NumIndexFields * sizeof(BTVARDESC));
+			     pVars = (BTVARDESC *) LocalLock(hVars);
+			     
+				 GWFldInfo.Len = 4;
+				 GWFldInfo.Beg = ibeg;
+				 GWFldInfo.Type = BT_INTEGER;
+				 pVars->BT_VARLEN=4;
+				 pVars->BT_VARTYP=BT_INTEGER;
+				 pVars->BT_VAROFF=0;
+				 ifield=0;
+			     if (KeyType == 1)
+			     {
+					 _fstrcpy (GWFldInfo.Name,"%INT_REFNO");
+					 _lwrite (FidData,&GWFldInfo,sizeof(GWFldInfo));
+					 GWDHead.NumFields++; 
+					 GWDHead.lKeys[0]=4;
+					 pVars++;
+					 ibeg += GWFldInfo.Len;
+					 ifield=1;
+				 }
+			     else if (KeyType == 2)
+			     {
+					 _fstrcpy (GWFldInfo.Name,"%SEQUENCE");
+					 _lwrite (FidData,&GWFldInfo,sizeof(GWFldInfo));
+					 GWDHead.NumFields++;
+					 GWDHead.lKeys[0]=4;
+					 pVars++; 
+					 ibeg += GWFldInfo.Len;
+					 ifield=1;
+				 }
+		         
+				 hItems=GSSiGlobAlloc(GHND,nItems*2);
+				 lpItems=  (LPINT) GlobalLock(hItems);
+                 SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELITEMS,nItems,(LPARAM)lpItems);
+				 for (i=0;i<nItems;i++,lpItems++,ifield++)
+				 {  
+				 	SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETTEXT,
+				                       *lpItems,(LPARAM)str);
+                    lpTab = _fstrrchr(str,'\t');
+					*lpTab = '\0';
+/*				 	if (!TextSource)
+				 		SendUMMessage(str); */
+				 	lpTab++;  
+				 	if (*lpTab == 'C')
+						GWFldInfo.Type = BT_CHAR;
+					else if (*lpTab == 'B') 
+						GWFldInfo.Type = BT_INTEGER;
+					else if (*lpTab == 'R') 
+						GWFldInfo.Type = BT_REAL;
+					else if (*lpTab == 'J') 
+						GWFldInfo.Type = BT_RIGHT_CHAR;
+					else 
+						goto SkipField;
+					lpTab++;
+					GWFldInfo.Len = atoi(lpTab);
+					GWFldInfo.Beg = ibeg;
+					if (ifield<NumIndexFields)
+					{
+						 pVars->BT_VARLEN=GWFldInfo.Len;
+						 pVars->BT_VARTYP=GWFldInfo.Type;
+						 pVars->BT_VAROFF=ibeg; 
+						 pVars++;
+						 GWDHead.lKeys[0]=ibeg+GWFldInfo.Len;
+					}
+					
+					ibeg += GWFldInfo.Len;
+					_fstrcpy (GWFldInfo.Name,str);
+					_lwrite (FidData,&GWFldInfo,sizeof(GWFldInfo));
+					GWDHead.NumFields++;
+					SkipField:;
+				 }
+				 GlobalUnlock(hItems);
+				 
+/*				 if (!TextSource)
+				 {
+				 	SendUMMessage("%END");
+					 if (KeyType < 4)
+					 {
+				         SendUMMessage("%GETLENGTHS");
+						 GetUMMessage(cmd);
+						 hBlock = GSSiGlobAlloc(GHND,32000);
+						 BlockPnt = GlobalLock(hBlock);
+						 pBlock = BlockPnt; 
+						 hFldInLen = GSSiGlobAlloc(GHND,nItems*sizeof(int));
+						 pFldInLen = (LPINT)GlobalLock(hFldInLen);
+				         while (_fstricmp(cmd,"%END")!=0)
+				         {               
+				         	_fstrncpy(pBlock,cmd,250);
+							GetUMMessage(cmd);
+							pBlock+=250;
+						 }
+		                 pBlock = BlockPnt;
+		                 pLen = pFldInLen;
+						 for (i=0;i<nItems;i++)
+						 {            
+						 	_fstrncpy(str,pBlock,3);
+						 	str[3]='\0';
+						 	*pLen++=atoi(str);
+						 	pBlock+=3;
+						 }
+		             }
+		             else
+		             { */
+						 hBlock = GSSiGlobAlloc(GHND,2500);
+						 BlockPnt = GlobalLock(hBlock);
+						 pBlock = BlockPnt; 
+						 hFldInLen = GSSiGlobAlloc(GHND,nItems*sizeof(int));
+						 pFldInLen = (LPINT) GlobalLock(hFldInLen);
+		                 pLen = pFldInLen;
+						 for (i=0;i<nItems;i++)
+						 {            
+						 	*pLen++=250;
+						 }
+//					 }	             
+//	             }    
+				 GWDHead.Reclen=ibeg; 
+				 GWDHead.TimeStamp = time(NULL);
+				 _llseek (FidData,0,0);
+				 _lwrite (FidData,&GWDHead,sizeof(GWDHEADER));
+			 	 _llseek (FidData,0,2);
+			     
+				 NumIndex = 1;
+			
+			
+				 _fstrcpy (str,Fname);
+				 _fstrcat (str,".in1");
+			     LocalUnlock(hVars);
+			     pVars =(BTVARDESC *)  LocalLock(hVars);
+				 BT_CREATE (str, 4, FALSE, NumIndexFields, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
+			     LocalUnlock(hVars);
+			     LocalFree(hVars);
+			 	 GSSiClose (FidData);
+			 	 
+				 hName = GSSiGlobAlloc(GHND,256);
+				 pName = GlobalLock(hName);
+				 _fstrcpy (pName,Fname);
+				 _fstrcat (pName,".gmd");
+				 hDB = OpenGWDatabase (pName,BT_WRITE);
+			     if (!hDB)
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+			     	return (FALSE);
+}
+				 lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
+				 hBT = lpGWDHead->BTHandle[0]; 
+				 nLoaded=0;
+		TimerOn: SetTimer(hWndDlg, 1, 1, (FARPROC) NULL); 
+				 HaveTimer=TRUE;  
+				 if (TextSource) 
+				 {
+					Fid = fopen (TxtFile,"r"); 
+					fseek (Fid,0,SEEK_END);
+					nRecs = ftell(Fid);
+					fseek (Fid,0,SEEK_SET);
+	       			hRec = GSSiGlobAlloc(GMEM_MOVEABLE,SHRT_MAX);
+	       			lpRec = GlobalLock(hRec);
+				    fgetss (lpRec,32000,Fid);
+				    GlobalUnlock(hRec);  
+				 }
+
+				 EnableWindow(GetDlgItem(hWndDlg,IDC_TEST),FALSE);
+				 EnableWindow(GetDlgItem(hWndDlg,IDOK),FALSE);
+				 break;
+
+            case ID_CLOSE: 
+				 if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+				 	return TRUE;
+}
+            	 if (HaveTimer)
+            	 {
+					 TotRecs = 0;
+            	 }
+            	 else if (TotRecs)
+            	 {
+            	 	 TotRecs = 0;
+					 goto TimerOn;
+            	 }
+            	 else
+            	 {
+//	               	 CloseUM(FALSE);
+	                 EndDialog(hWndDlg, TRUE);
+                 }
+                 break;
+
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */ 
+				 if (WSAIsBlocking ())
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+				 	return TRUE;
+}
+                 if (HaveTimer)
+                 {
+					 TotRecs = 0;
+                 }
+            	 else if (TotRecs)
+            	 {
+            	 	 TotRecs = 0;
+					 goto TimerOn;
+            	 }
+                 else
+                 {
+//	               	 CloseUM(FALSE);
+	                 EndDialog(hWndDlg, FALSE); 
+                 }
+                 break;
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (448);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+} /* End of ATTRIBUTE_TRANSFERMsgProc                                      */ 
+
+
+
+BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (449);
+#endif
+{	int	Choice, But, rc;
+	HWND	hCheckBox;
+	POINT	WinPoints[5], Point;
+	RECT	rect;
+	int		x,y, i;
+	int			TabStops[3]={104,1000,1100};
+	static	BOOL	FunctionSelected;
+	HFILE	Fid;
+	LPSTR	lpBar, lpTab, lpCarrot;
+	int		FunID;
+	static	BOOL	Init;  
+	static	POINT	CursorLoc;  
+	HANDLE	hStr;
+	LPSTR	lpStr, pGCmd;  
+	char	str[260];   
+	long	CurLoc;   
+	BOOL	First;  
+	OFSTRUCT	OFStruct;  
+	static	BOOL	SaveDisableHalt,SaveDisableMarginPan,SaveDoPaint;
+	
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (449);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+		 if (!GetGlobalBVal2 ("[%ALLOWGFMENU]",TRUE))
+    	 {
+	         EndDialog(hWndDlg,FALSE);
+	         break;
+	     }
+		 	
+    	 if (!CurView)
+    	 {
+	         EndDialog(hWndDlg,FALSE);
+	         break;
+	     }
+    	 if (!CurView->FunctionDir[0])
+    	 {
+	         EndDialog(hWndDlg,FALSE);
+	         break;
+	     }
+	  	 Init=GetGlobalBVal2 ("[%GFMENUOLD]",FALSE);
+         HaltMapDisplay(FALSE);
+	  	 SaveDisableHalt = DisableHalt;  
+	  	 DisableHalt = TRUE;
+	  	 SaveDisableMarginPan = DisableMarginPan;  
+	  	 DisableMarginPan = TRUE;    
+	  	 SaveDoPaint = DoPaint;
+	  	 DoPaint = FALSE;
+		 GSSiGlobFree (&hAddGraphicsFun);
+         GetCursorPos (&CursorLoc);
+	     SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_RESETCONTENT,NULL,NULL);
+       	 SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_SETTABSTOPS,3,(LPARAM)&TabStops);
+       	 *TabStops = 900;
+       	 SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+    	 FunctionSelected=FALSE;
+         cwCenter(hWndDlg, 0);
+         /* initialize working variables                                */
+/*         switch(GetLBFunction())
+         	{
+         	 case 1:
+         	 	But=LEFTBUT_CENTER;
+         	 	break;
+         	 case 2:
+         	 	But=LEFTBUT_IDENTIFY;
+         	 	break;
+         	 case 3:
+         	 	But=LEFTBUT_TOGGLEVIS;
+         	 	break;
+         	 }
+         hCheckBox = GetDlgItem (hWndDlg,But);
+       	 SendMessage (hCheckBox,BM_SETCHECK,1L,0L);*/
+
+		 GetWindowRect(GetDlgItem(hWndDlg,ACTIVE_FUN_LB),&rect);
+		 x = rect.left + (rect.right - rect.left)/2;
+		 y = rect.bottom - (rect.bottom - rect.top) / 2;
+		 SetCursorPos (x,y);   
+         LoadFunctionLists (hWndDlg,0,0,1);
+         
+LoadFile:
+	     SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_RESETCONTENT,NULL,NULL); 
+	     LoadGFFile (hWndDlg,1);
+		 if (Init)
+		 {
+		 	hCheckBox = GetDlgItem (hWndDlg,ACTIVE_FUN_LB);
+       	 	SendMessage (hCheckBox,WM_LBUTTONDOWN,1L,0L);
+       	 	Init = FALSE;
+       	 }
+         GFMenuWnd = hWndDlg;
+		 
+         break; /* End of WM_INITDIALOG                                 */
+    
+    case WM_RBUTTONDOWN:
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+    	 break;
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case ACTIVE_FUN_LB: /* List box                              */
+              {
+                switch(HIWORD(lParam))
+                    {
+                     case LBN_DBLCLK:
+                     case LBN_SELCHANGE:
+                     	  if (InHelp)
+                     	  	break;
+                     	  GetCursorPos(&Point);
+                     	  GetWindowRect(GetDlgItem(hWndDlg,ACTIVE_FUN_LB),&rect);
+                     	  if (!PtInRect(&rect,Point)) break;
+		                  Choice=SendDlgItemMessage(hWndDlg,ACTIVE_FUN_LB,
+												    LB_GETCURSEL,NULL,NULL); 
+		         		  SendDlgItemMessage(hWndDlg,ACTIVE_FUN_LB,LB_GETTEXT,
+		         		  					 Choice++,(DWORD)&str);
+					  	  if (!(lpTab=_fstrrchr(str,'\t')))
+					  	  	break; 
+					  	  lpTab++;
+					  	  CurLoc = atol (lpTab); 
+					  	  if (CurLoc < 0)
+					  	  	break; 
+					  	  
+					  	  RunGFCommandFromFileAtLoc (CurView->FunctionFile,CurLoc,FALSE);
+					  	   
+				          SetCursorPos (CursorLoc.x,CursorLoc.y);
+                          FunctionSelected = TRUE;
+  				          PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+			    	 	  break;
+                    }
+		       }
+		       break;
+            case FUNCTION_LIST_LB: /* List box                              */
+              {
+                switch(HIWORD(lParam))
+                    {
+                     case LBN_DBLCLK:
+                     case LBN_SELCHANGE:
+		                  Choice=SendDlgItemMessage(hWndDlg,FUNCTION_LIST_LB,
+												    LB_GETCURSEL,NULL,NULL); 
+		         		  SendDlgItemMessage(hWndDlg,FUNCTION_LIST_LB,LB_GETTEXT,
+		         		  					 Choice,(DWORD)&str);
+						  if (Choice>=0)
+						  {
+							  lpTab = _fstrchr(str,'\t');
+							  if (!lpTab)
+							  	break;
+							  lpTab++;
+							  GetGFFile (CurView->FunctionFile,lpTab);  
+							  if (HIWORD(lParam)==CBN_SELCHANGE)
+							  	goto LoadFile;
+							  else
+							  { 
+								 EditTextFile (hWndDlg,CurView->FunctionFile);
+				              }
+		                  }
+			    	 	  break;
+                    }
+		       } 
+		       break; 
+		       
+		    case IDC_EDITINDEX:
+				 _fstrcpy (str,"fundir\\");
+				 _fstrcat (str,CurView->FunctionDir);   
+				 EditTextFile (hWndDlg,str);
+		         break;
+
+            case IDCANCEL:
+                 GFMenuWnd = 0;
+			  	 DisableHalt = SaveDisableHalt;  
+			  	 DisableMarginPan = SaveDisableMarginPan;  
+			  	 DoPaint = SaveDoPaint;
+                 EndDialog(hWndDlg,FALSE);
+                 break; 
+                 
+            case IDOK:
+			  	 DisableHalt = SaveDisableHalt;  
+			  	 DisableMarginPan = SaveDisableMarginPan;  
+			  	 DoPaint = SaveDoPaint;
+                 GFMenuWnd = 0;
+                 EndDialog(hWndDlg,FunctionSelected);
+                 break;
+                 
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (449);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (449);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL IsGFunctionKey (WORD Key,BOOL SendCmd)
+#if ENABLETRACE
+{GSSiEnterProg (450);
+#endif
+{   
+	long	CurLoc=-1,LastLoc=0;
+	HFILE	Fid; 
+	HANDLE	hStr = GSSiGlobAlloc (GMEM_MOVEABLE,2048);
+	LPSTR	lpStr = GlobalLock (hStr);
+	LPSTR	pFile = lpStr + 1024;
+	LPSTR	lpBar, pGCmd, lpCarrot; 
+	BOOL	HaveCmd=FALSE, rtn; 
+	short	FileNo=0, iview, ifile;  
+	LPTHEME	SaveTheme = CurTheme;
+	LPVIEWPORT	SaveVP = CurView;
+    
+    if (!CurrentConfig)
+    	goto RtnFalse;
+    _fstrcpy (pFile,CurView->FunctionFile);
+Top:
+	Fid = GSSiOpenFile (pFile,NULL,OF_READ);
+	if (Fid == HFILE_ERROR)  
+		goto NextFile;
+	while (fgetstring (lpStr,1020,Fid))
+	{
+		if (*lpStr != '|' && *lpStr != '#')
+		{
+		 	if ((lpBar = _fstrchr(lpStr,'|')))
+		 	{
+				*lpBar++=0; 
+				if ((lpCarrot = _fstrchr(lpStr,'^')))
+				{   
+					lpCarrot++;
+					if (*lpCarrot == Key)
+					{
+						CurLoc = LastLoc;
+						break;
+					}
+				}
+			}
+		}
+		LastLoc = _llseek (Fid,0,1); 
+	}
+	GSSiClose (Fid);
+	if (!CurrentConfig)
+		SetConfig (1);
+	CurView = SaveVP;
+	CurTheme = SaveTheme;
+	if (CurLoc >= 0) 
+	{
+		rtn = RunGFCommandFromFileAtLoc (pFile,CurLoc,SendCmd);
+		GSSiGlobUlFree (&hStr);
+{
+#if ENABLETRACE
+GSSiExitProg (450);  
+#endif
+		return rtn;
+}
+	}  
+NextFile:
+	if (NumViewportsArray[0])
+	{
+		ifile = 0;
+		SetConfig (0);
+		for (iview = 0;iview < *pNumViewports; iview++)
+		{
+			if (pViewportsD[iview]->pTheme)
+			{
+				if (pViewportsD[iview]->pTheme->ID == GF_GRAPHICS_FUNCTION_THEME)
+				{
+					if (FileNo == ifile)
+					{   
+						FileNo++; 
+						GetGFFile (pFile,pViewportsD[iview]->pTheme->SQL);
+						goto Top;
+					}
+					ifile++;
+				}
+			}
+		}
+	}
+
+RtnFalse:
+	GSSiGlobUlFree (&hStr);
+	if (!CurrentConfig)
+		SetConfig (1);
+	CurView = SaveVP;
+	CurTheme = SaveTheme;
+{
+#if ENABLETRACE
+GSSiExitProg (450);
+#endif
+		return FALSE;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+
+
+/************************************************************************/
+/*                                                                      */
+/* nCwRegisterClasses Function                                          */
+/*                                                                      */
+/* The following function registers all the classes of all the windows  */
+/* associated with this application. The function retrns an error code */
+/* if unsuccessful, otherwise it retrns 0.                             */
+/*                                                                      */
+/************************************************************************/
+
+int nCwRegisterClasses(void)
+#if ENABLETRACE
+{GSSiEnterProg (451);
+#endif
+{    
+	HBITMAP hBmp;
+ WNDCLASS   wndclass;    /* struct to define a window class             */
+ _fmemset(&wndclass, 0x00, sizeof(WNDCLASS));
+
+
+ /* load WNDCLASS with window's characteristics                         */
+ wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_CLASSDC;
+ wndclass.lpfnWndProc = WndProc;
+ /* Extra storage for Class and Window objects                          */
+ wndclass.cbClsExtra = 0;
+ wndclass.cbWndExtra = 0;
+ wndclass.hInstance = hInst;
+ wndclass.hIcon = LoadIcon(hInst, "GWIZ");
+ wndclass.hCursor = NULL;//LoadCursor(NULL, IDC_ARROW);
+ /* Create brush for erasing background                                 */
+ hBmp = LoadBitmap (hInst,"BACKGROUND_1");
+ hBackBrush1 = CreatePatternBrush (hBmp); 
+ DeleteObject (hBmp);
+ wndclass.hbrBackground = hBackBrush1 ;
+ if (NoMenu)
+ 	wndclass.lpszMenuName = NULL;
+ else
+ 	wndclass.lpszMenuName = "geomaster";   /* Menu Name is App Name */
+ wndclass.lpszClassName = szAppName; /* Class Name is App Name */
+ if(!RegisterClass(&wndclass))
+{
+#if ENABLETRACE
+GSSiExitProg (451);
+#endif
+   return -1;
+}
+  /* 
+   wndclass.style = NULL;
+   wndclass.lpfnWndProc = DDEWndProc;
+   wndclass.cbClsExtra = 0;
+   wndclass.cbWndExtra = 0;
+   wndclass.hInstance = hInst;
+   wndclass.hIcon = NULL;
+   wndclass.hCursor = NULL;
+   wndclass.hbrBackground = NULL;
+   wndclass.lpszMenuName = NULL;
+   wndclass.lpszClassName = "ClientDDEWndClass";    
+
+ if(!RegisterClass(&wndclass)) retrn -1;  */
+  // following registration added by lda
+       //later removed when we started using ODBC
+   //  wndclass.style = NULL;                    /* Class style(s).                    */
+   //  wndclass.lpfnWndProc = DdeCallback;       /* Function to retrieve messages for  */
+                                               /* windows of this class.             */
+   //  wndclass.cbClsExtra = 0;                  /* No per-class extra data.           */
+   //  wndclass.cbWndExtra = 0;                  /* No per-window extra data.          */
+   //  wndclass.hInstance = hInst;               /* Application that owns the class.   */
+   //  wndclass.hIcon =NULL;
+   //  wndclass.hCursor = NULL;
+   //  wndclass.hbrBackground = NULL;
+   //  wndclass.lpszMenuName =  NULL;           /* Name of menu resource in .RC file. */
+   //  wndclass.lpszClassName = "ServerWClass"; /* Name used in call to CreateWindow. */
+// if(!RegisterClass(& wndclass))   retrn -1; 
+  // wndclass.style = NULL;
+  // wndclass.lpfnWndProc = DDEWndProc;
+  // wndclass.cbClsExtra = 0;
+  // wndclass.cbWndExtra = 0;
+  // wndclass.hInstance = hInst;
+  // wndclass.hIcon = NULL;
+  //wndclass.hCursor = NULL;
+  // wndclass.hbrBackground = NULL;
+  // wndclass.lpszMenuName = NULL;
+  // wndclass.lpszClassName = "ClientDDEWndClass";
+ // if(!RegisterClass(&wndclass))   retrn -1;
+ // end of lda addition   
+
+{
+#if ENABLETRACE
+GSSiExitProg (451);
+#endif
+ return(0);
+}
+#if ENABLETRACE
+}
+#endif
+} /* End of nCwRegisterClasses                                          */
+
+/************************************************************************/
+/*  cwCenter Function                                                   */
+/*                                                                      */
+/*  centers a window based on the client area of its parent             */
+/*                                                                      */
+/************************************************************************/
+
+void cwCenter(hWnd, top)
+HWND hWnd;
+int top;
+#if ENABLETRACE
+{GSSiEnterProg (452);
+#endif
+{
+ POINT      pt;
+ RECT       swp;
+ RECT       rParent;
+ int        iwidth;
+ int        iheight; 
+ HWND		hPWnd;  
+ BOOL		IsClient=TRUE;
+
+ /* get the rectangles for the parent and the child                     */
+ GetWindowRect(hWnd, &swp); 
+ if (!hWndMain || top == INT_MAX)
+ {
+ 	top = 0;
+ 	hPWnd = GetDesktopWindow();  
+ 	IsClient = FALSE;
+ }
+ else
+ 	hPWnd = hWndMain;
+ GetClientRect(hPWnd, &rParent);
+
+ /* calculate the height and width for MoveWindow                       */
+ iwidth = swp.right - swp.left;
+ iheight = swp.bottom - swp.top;
+
+if (top<0)
+{
+	GetCursorPos (&pt);
+	if (top==-1)
+		pt.x=0;
+}
+else
+{
+	 /* find the center point and convert to screen coordinates             */
+	 pt.x = (rParent.right - rParent.left) / 2;
+	 pt.y = (rParent.bottom - rParent.top) / 2; 
+	 if (IsClient)
+	 	ClientToScreen(hWndMain, &pt);
+}
+
+ /* calculate the new x, y starting point                               */
+ pt.x = max (0,pt.x - (iwidth / 2));
+ pt.y = max (0,pt.y - (iheight / 2));
+
+ /* top will adjust the window position, up or down                     */
+ if(top>0)
+   pt.y = pt.y + top;
+
+ /* move the window                                                     */
+ MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
+{
+#if ENABLETRACE
+GSSiExitProg (452);
+#endif
+    return;
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+/************************************************************************/
+/*  CwUnRegisterClasses Function                                        */
+/*                                                                      */
+/*  Deletes any refrences to windows resources created for this         */
+/*  application, frees memory, deletes instance, handles and does       */
+/*  clean up prior to exiting the window                                */
+/*                                                                      */
+/************************************************************************/
+
+void CwUnRegisterClasses(void)
+#if ENABLETRACE
+{GSSiEnterProg (453);
+#endif
+{
+ WNDCLASS   wndclass;    /* struct to define a window class             */
+ _fmemset(&wndclass, 0x00, sizeof(WNDCLASS));
+
+ UnregisterClass(szAppName, hInst);
+ // added by lda then removed when we started using ODBC
+ //UnregisterClass("ClientDDEWndClass", hInst);
+ //UnregisterClass("ServerWClass", hInst);
+{
+#if ENABLETRACE
+GSSiExitProg (453);
+#endif
+    return;
+}
+#if ENABLETRACE
+}
+#endif
+}    /* End of CwUnRegisterClasses                                      */
+
+BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE
+{GSSiEnterProg (454);
+#endif
+{	char	str[256], TAG[64], SymName[34], Addresses[128],str2[32];
+	LONG	Segment, Refno;
+	static int		item;
+	HWND	hWnd; 
+	int		TabStops[2]={100,10};
+    HANDLE hDB;
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	long		Offset; 
+	double		rtn;
+	int			st, i, len;  
+	LPSTR		lpTab;
+	int			Choice;  
+	BOOL		ShowItem=FALSE;    
+	static		long		RecNo;
+
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+{
+#if ENABLETRACE
+GSSiExitProg (454);
+#endif
+ 	return (BRtn);
+}
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+         cwCenter(hWndDlg, 0);
+         /* initialize working variables                                */
+         item = BasicDisplayItem; 
+         RecNo=0;
+Show:    
+		 if (ShowItem)
+		 {
+		     AddToHighlightList (PickList[item].Refno,&PickList[item],TRUE);
+			 
+			 ShowPickedItem (hWndMain, item);  
+		 }
+         GetItemTAG (item,(LPSTR)&TAG,(LPSTR)&SymName,(LPLONG)&Refno);
+         SetDlgItemText (hWndDlg,IDENTIFY_LINE1,TAG);
+/*         if (GetParcelData (Refno, str))
+         	SetDlgItemText (hWndDlg,IDENTIFY_LINE2,str);
+         else
+         	SetDlgItemText (hWndDlg,IDENTIFY_LINE2,Addresses); */
+         wsprintf (str,"Reference  : %ld",Refno);
+         SetDlgItemText (hWndDlg,IDENTIFY_LINE2,str);
+         _fstrcpy(str, "Description: ");
+         _fstrcat(str,SymName); 
+         SetDlgItemText (hWndDlg,IDENTIFY_LINE3,str);
+         SetWindowText (hWndDlg,lpDesc);
+       	 SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
+		 if (*lpDB)
+		 {
+			GetPickName (item); 
+			_fstrcpy (PltName,PickName);
+            OpenMap (CurView->hWnd,CurView->hDC);
+           	ShowWindow (GetDlgItem(hWndDlg,IDENTIFY_DATA),SW_SHOW); 
+           	if (!_fstricmp (lpDB,"GraphicItemInfo"))
+           	{
+				_fstrcpy (str,"File\t");
+		 		_fstrcat(str,PickName); 
+		 		ExpandText (str);
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);
+				_fstrcpy (str,"%INT_REFNO\t");
+		 		_fstrcat(str,ltoa(PickList[item].Refno,str2,10));
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);
+				_fstrcpy (str,"TAG\t");
+		 		_fstrcat(str,PickList[item].Prefix);
+		 		_fstrcat(str,":");
+		 		_fstrcat(str,PickList[item].UDI);
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);
+				_fstrcpy (str,"Segment\t");
+		 		_fstrcat(str,ltoa(PickList[item].Segment,str2,10));
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);
+				_fstrcpy (str,"Offset\t");
+		 		_fstrcat(str,ltoa(PickList[item].Offset,str2,10));
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);
+				_fstrcpy (str,"Symbol Number\t");   
+				GetSymbolName (PickList[item].Desc,_fstrchr(str,0),NULL,-(PickList[item].FileNum+1),NULL);
+				_fstrcat(str," - ");
+		 		_fstrcat(str,itoa(PickList[item].Desc,str2,10));
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);
+				_fstrcpy (str,"Pen\t");
+		 		_fstrcat(str,itoa(PickList[item].ipen,str2,10));
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"PCT\t%f",PickList[item].PCT); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"OffDist\t%f",PickList[item].OffDist); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"NumPoints\t%ld",(long)PickList[item].NumPoints); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"NearPoint\t%ld",(long)PickList[item].NearPoint); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"Length\t%f",PickList[item].Length); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"Area\t%f",PickList[item].Area); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				sprintf (str,"Resolution\t%f",FileDistToBaseDist); 
+				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,NULL,(LPARAM)str);    
+				
+           	}
+           	else
+           	{
+	           	RecNo=1;
+	       		BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL);
+       		}
+       		CloseMap(FALSE);
+		 }
+        else
+           	ShowWindow (GetDlgItem(hWndDlg,IDENTIFY_DATA),SW_HIDE);
+         sprintf(str, "%d of %d Item(s) picked", item+1,npicked );
+         SetDlgItemText (hWndDlg,IDENTIFY_LINE4,str);
+         hWnd = GetDlgItem (hWndDlg,IDENTIFY_NEXT);
+/*         hWnd = GetDlgItem (hWndDlg,IDENTIFY_PREV);
+         if (item>0) EnableWindow (hWnd,HaveImage);*/
+
+         break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDENTIFY_NEXT: /* Button text: "Next"                  */  
+            	 RecNo++;
+       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL);
+                 break;
+            case IDENTIFY_PRIOR: /* Button text: "Next"                  */  
+            	 RecNo--;
+       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL);
+                 break;
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break; 
+                 
+            case IDENTIFY_DATA:
+            
+                switch(HIWORD(lParam))
+                    {
+                     case LBN_DBLCLK:
+		                 Choice=SendDlgItemMessage(hWndDlg,IDENTIFY_DATA,
+												    LB_GETCURSEL,NULL,NULL); 
+		         		 SendDlgItemMessage(hWndDlg,IDENTIFY_DATA,LB_GETTEXT,
+		         		  					Choice,(DWORD)&str);
+		         		 lpTab=_fstrchr(str,'\t');
+		         		 if (lpTab) *lpTab='\0';
+		         		 MessageBox( GetFocus(), str,"Update denied for this field", MB_OK);
+ 
+		         		 break;
+		         	}
+		        break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+{
+#if ENABLETRACE
+GSSiExitProg (454);
+#endif
+        return FALSE;
+}
+   }
+{
+#if ENABLETRACE
+GSSiExitProg (454);
+#endif
+ return TRUE;
+}
+#if ENABLETRACE
+}
+#endif
+} /* End of IDENTIFYMsgProc*/ 
+
+
+UINT GetOPENERR00(void)
+#if ENABLETRACE
+{GSSiEnterProg (455);
+#endif
+{
+{
+#if ENABLETRACE
+GSSiExitProg (455);
+#endif
+	return OPENERR00;
+}
+#if ENABLETRACE
+}
+#endif
+}
+ 
+int FAR PASCAL FilterFunc(int nCode,WORD wParam,DWORD lParam)
+#if ENABLETRACE
+{GSSiEnterProg (456);
+#endif
+{ 
+  DWORD LastlParam;
+  WORD  LastwParam, hw;
+  LPMSG lpmsg = (LPMSG) lParam;
+
+  if (nCode < 0)                         // MUST retrn DefHookProc()
+{
+#if ENABLETRACE
+GSSiExitProg (456);
+#endif
+      return DefHookProc(nCode, wParam, lParam,(FARPROC FAR *) &Func);
+}
+ 
+  if((nCode == MSGF_DIALOGBOX || nCode == MSGF_MENU) &&
+     lpmsg->message == WM_KEYDOWN && lpmsg->wParam == VK_F1)
+     { 
+      //  lpmsg = (LPMSG) LastlParam;
+      //  if(lpmsg->hwnd == NULL)lpmsg = (LPMSG) lParam;
+        PostMessage(hWndMain, WM_F1DOWN,lpmsg->hwnd,lpmsg->lParam);
+{
+#if ENABLETRACE
+GSSiExitProg (456);
+#endif
+        return 1L;
+}
+     }
+     if(Ready && !GotItUp)
+     {
+       if(lpmsg->wParam == 'm' || lpmsg->wParam == 'M')
+       { 
+      //  lpmsg = (LPMSG) LastlParam;
+      //  if(lpmsg->hwnd == NULL)lpmsg = (LPMSG) lParam;
+        if(GetAsyncKeyState(VK_CONTROL) & 0X8000)
+        { 
+          ControlM = TRUE;
+          PostMessage(hDynamicDialog,WM_COMMAND,0,(long) IDM_CONTROL_M);
+{
+#if ENABLETRACE
+GSSiExitProg (456);
+#endif
+          return 1L;
+}
+        }  
+       }
+       else if(lpmsg->message == WM_KEYDOWN && lpmsg->wParam == VK_TAB)
+       {
+          PostMessage(hDynamicDialog,WM_COMMAND,0,(long) VK_TAB);
+{
+#if ENABLETRACE
+GSSiExitProg (456);
+#endif
+          return 1L;
+}
+       
+       }
+     }  
+{
+#if ENABLETRACE
+GSSiExitProg (456);
+#endif
+     return 0;
+}
+#if ENABLETRACE
+}
+#endif
+}      
+
+  
+
+
+
+
+

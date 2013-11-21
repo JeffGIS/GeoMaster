@@ -1,0 +1,7 @@
+COPTS		=
+LIBS		= $(LEQEB) $(LQM) $(LQ) $(lnm)
+LINKOPTS	=
+OBJS		= hle1.o trbxfr.o
+PROGRAM		= trbxfr
+SRCS		= hle1.c trbxfr.c
+DESTDIR		= $(QXPBINDIR)

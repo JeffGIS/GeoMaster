@@ -1,0 +1,2 @@
+include $(IPW)/lib/make/local
+include $(IPW)/lib/make/Makestd

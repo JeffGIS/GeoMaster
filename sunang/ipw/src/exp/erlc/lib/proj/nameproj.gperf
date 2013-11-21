@@ -1,0 +1,134 @@
+%{
+
+/*
+** NAME
+**      nameproj -- return ID of projection for given name
+** 
+** SYNOPSIS
+**      int nameproj (proj_name);
+**      char *proj_name;
+** 
+** DESCRIPTION
+** 
+** RESTRICTIONS
+** 
+** RETURN VALUE
+** 
+** GLOBALS ACCESSED
+** 
+** ERRORS
+** 
+** WARNINGS
+** 
+** APPLICATION USAGE
+** 
+** FUTURE DIRECTIONS
+** 
+** BUGS
+**
+*/
+
+/*
+ * Use: gperf -t -p -j1 -o -k 1,6,8,9,$ nameproj.gperf  > nameproj.c
+ */
+
+#include "ipw.h"
+#include "mproj.h"
+
+%}
+struct projection { char *name; int projid; };
+%%
+geographic, GEO
+Geographic, GEO
+lat/lon, GEO
+geo, GEO
+Universal Transverse Mercator (UTM), UTM
+Universal Transverse Mercator, UTM
+UTM, UTM
+utm, UTM
+State Plane Coordinates, SPCS
+StatePlane, SPCS
+State_Plane, SPCS
+State Plane, SPCS
+Albers Conical Equal Area, ALBERS
+Albers, ALBERS
+albers, ALBERS
+Albers Equal Area, ALBERS
+Lambert Conformal Conic, LAMCC
+Lambert Conformal, LAMCC
+lambert conformal, LAMCC
+LamCC, LAMCC
+lamcc, LAMCC
+Mercator, MERCAT
+mercator, MERCAT
+Polar Stereographic, PS
+Polar, PS
+polar, PS
+Polyconic, POLYC
+polyconic, POLYC
+Equidistant Conic, EQUIDC
+Equidistant, EQUIDC
+equidistant, EQUIDC
+Transverse Mercator, TM
+Transverse, TM
+transverse, TM
+Stereographic, STEREO
+stereographic, STEREO
+Lambert Azimuthal Equal Area, LAMAZ
+Lambert Azimuthal, LAMAZ
+lambert azimuthal, LAMAZ
+Lambert_Azimuth, LAMAZ
+Lambert Azimuth, LAMAZ
+lambert azimuth, LAMAZ
+Lambert, LAMAZ
+lambert, LAMAZ
+Azimuthal Equidistant, AZMEQD
+Azimuthal, AZMEQD
+azimuthal, AZMEQD
+Gnomonic, GNOMON
+gnomonic, GNOMON
+Orthographic, ORTHO
+orthographic, ORTHO
+Ortho, ORTHO
+ortho, ORTHO
+General Vertical Near-Side Perspective, GVNSP
+Vertical Near Side Perspective, GVNSP
+Perspective, GVNSP
+perspective, GVNSP
+Sinusiodal, SNSOID
+sinusiodal, SNSOID
+Equidistant Cylindrical Rectangular, EQRECT
+Equirectangular, EQRECT
+equirectangular, EQRECT
+Miller Cylindrical, MILLER
+Miller, MILLER
+miller, MILLER
+Van der Grinten, VGRINT
+Van der Grinten I, VGRINT
+Van der Grinten 1, VGRINT
+Grinten, VGRINT
+grinten, VGRINT
+Grinten I, VGRINT
+(Hotine) Oblique Mercator, HOM
+Oblique Mercator, HOM
+oblique mercator, HOM
+Oblique_Mercator, HOM
+Space Oblique Mercator (SOM), SOM
+Space_Oblique_Mercator, SOM
+Space Oblique Mercator, SOM
+space oblique mercator, SOM
+SOM, SOM
+som, SOM
+%%
+
+int nameproj(proj_name)
+char *proj_name;
+{
+  struct projection *proj;
+ 
+  proj = in_word_set (proj_name, strlen(proj_name) );
+  if (proj == NULL)
+    return (UNKNOWN);
+ 
+  return (proj->projid);
+}

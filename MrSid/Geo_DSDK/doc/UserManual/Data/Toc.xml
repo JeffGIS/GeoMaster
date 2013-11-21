@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CatapultToc Version="1" DescendantCount="71">
+    <TocEntry Title="Introduction" Link="/Content/Introduction.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Intro.flmsp" PageNumber="1" PageNumberReset="reset" PageNumberFormat="decimal" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Introduction.flpgl" PageType="first" ComputedResetPageLayout="true" ComputedFirstTopic="true" DescendantCount="3">
+        <TocEntry Title="Features" Link="/Content/Features.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="How to Read this Manual" Link="/Content/How_to_Read_this_Manual.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="SDK Contents" Link="/Content/SDK_Contents.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Getting Started" Link="/Content/Getting_Started.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Getting_Started.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="3">
+        <TocEntry Title="System Requirements" Link="/Content/System_Requirements.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Installation" Link="/Content/Installation.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Technical Support" Link="/Content/Technical_Support.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Architecture and Design" Link="/Content/Architecture_and_Design.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Arch_and_Design.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="4">
+        <TocEntry Title="Pipeline Design" Link="/Content/Pipeline_Design.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Strip-Based Decoding" Link="/Content/Shrip_Based_Decoding.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Scenes" Link="/Content/Scenes.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Other Design Considerations" Link="/Content/Other_Design_Considerations.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="The Support Classes" Link="/Content/The_Support_Classes.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Support_Classes.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="4">
+        <TocEntry Title="Preprocessor Constants and Basic Typedefs" Link="/Content/Preprocessor_Constants_and_Basic_Typedefs.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Status Strings" Link="/Content/Status_Strings.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="The LTIFileSpec Class" Link="/Content/The_LTIFileSpec_Class.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Streams" Link="/Content/Streams.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="The SDK Base Classes" Link="/Content/The_SDK_Base_Classes.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_SDK_Base_Classes.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageNumberReset="continue" PageType="first" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="5">
+        <TocEntry Title="Base Enums" Link="/Content/Base_Enums.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Base Classes" Link="/Content/Base_Classes.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="The Image Classes" Link="/Content/The_Image_Classes.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="The Raw Readers and Writers" Link="/Content/The_Raw_Readers_and_Writers.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Scene and Buffer Management" Link="/Content/Scene_and_Buffer_Management.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Concrete Image Readers, Filters and Writers" Link="/Content/Concrete_Image_Readers_Filters_and_Writers.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Concrete_Image_RFWs.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="2">
+        <TocEntry Title="Image Filters" Link="/Content/Image_Filters.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Image Writers" Link="/Content/Image_Writers.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="MrSIDSupport" Link="/Content/MrSID_Support.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_MrSID_Support.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="3">
+        <TocEntry Title="MG2, MG3 and MG4" Link="/Content/MG2_MG3_and_MG4.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Key Features of MrSID" Link="/Content/Key_Features_of_MrSID.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="MrSID Readers" Link="/Content/MrSID_Readers.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="JPEG 2000 Support" Link="/Content/JPEG_2000_Support.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_JPEG_2000_Support.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="1">
+        <TocEntry Title="The JPEG 2000 Reader" Link="/Content/The_JPEG_2000_Reader.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="NITF Support" Link="/Content/NITF_Support.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_NITF_Support.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="2">
+        <TocEntry Title="The NITF Reader" Link="/Content/NITF_Reader.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="NITF Input Metadata" Link="/Content/NITF_Input_Metadata.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Metadata Support" Link="/Content/Metadata_Support.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Metadata_Support.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="3">
+        <TocEntry Title="The Metadata Record" Link="/Content/The_Metadata_Record.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="The Metadata Database" Link="/Content/The_Metadata_Database.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="The Tags" Link="/Content/The_Tags.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="The C API" Link="/Content/The_C_API.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_The_C_API.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="4">
+        <TocEntry Title="Image Support" Link="/Content/Image_Support.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Decode Support" Link="/Content/Decode_Support.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Metadata Support" Link="/Content/Metadata_Support2.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Streams" Link="/Content/Streams2.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Command Line Applications" Link="/Content/Command_Line_Applications.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Command_Line_Apps.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="4">
+        <TocEntry Title="Switches Common to All Tools" Link="/Content/Switches_Common_to_All_Tools.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="mrsidinfo" Link="/Content/mrsidinfo.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="mrsiddecode" Link="/Content/mrsiddecode.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="mrsidviewer" Link="/Content/mrsidviewer.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Appendix A - Technical Notes" Link="/Content/Appendix_A_Technical_Notes.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Appendix_A.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="13">
+        <TocEntry Title="MG3 and MG4 Memory Usage" Link="/Content/MG3_and_MG4_Memory_Usage.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Zoom Levels" Link="/Content/Zoom_Levels.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Coding Conventions" Link="/Content/Coding_Conventions.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Overrides" Link="/Content/Overrides.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Reference Counting" Link="/Content/Reference_Counting.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Notes on Streams" Link="/Content/Notes_on_Streams.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Notes on World Files" Link="/Content/Notes_on_World_Files.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Notes on BBB Files" Link="/Content/Notes_on_BBB_Files.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="GeoTIFF Metadata for JPEG 2000" Link="/Content/GeoTIFF_Metadata_for_JPEG_2000.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Georeferencing of NITF Imagery" Link="/Content/Georeferencing_of_NITF_Imagery.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Metadata Tags" Link="/Content/Metadata_Tags.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Negative y-Resolutions" Link="/Content/Negative_y_Resolutions.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Nodata and Background Pixels" Link="/Content/Nodata_and_Background_Pixels.htm" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Appendix B - Company and Product Information" Link="/Content/Appendix_B_Company_and_Product_Information.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Appendix_B.flmsp" PageNumber="1" StartChapter="true" PageLayout="/Content/Resources/PageLayouts/Getting_Started.flpgl" PageType="first" PageNumberReset="continue" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="4">
+        <TocEntry Title="About LizardTech" Link="/Content/About_LizardTech.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Other LizardTech Products" Link="/Content/Other_LizardTech_Products.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="MrSID and Patents" Link="/Content/MrSID_and_Patents.htm" ComputedFirstTopic="false" DescendantCount="0" />
+        <TocEntry Title="Copyrights, Trademarks and Credits" Link="/Content/Printed_Copyright_Page.htm" conditions="Default.ScreenESDK,Default.ScreenDSDK" ComputedFirstTopic="false" DescendantCount="0" />
+    </TocEntry>
+    <TocEntry Title="Glossary" Link="/Content/Glossary.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Glossary.flmsp" PageNumber="1" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="0" />
+    <TocEntry Title="Reference Manual" Link="/Content/Reference_Manual.htm" StartSection="true" MasterPage="/Content/Resources/MasterPages/Printed_Reference_Manual.flmsp" PageNumber="1" conditions="Default.ScreenESDK,Default.ScreenDSDK" ComputedResetPageLayout="true" ComputedFirstTopic="false" DescendantCount="0" />
+</CatapultToc>

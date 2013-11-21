@@ -1,0 +1,20 @@
+LIBRARY   GCTP16
+EXETYPE   WINDOWS
+CODE      PRELOAD MOVEABLE DISCARDABLE
+DATA      PRELOAD MOVEABLE SINGLE
+HEAPSIZE  5024
+EXPORTS
+          WEP PRIVATE
+          _NADCON=NADCON                          @2 
+          _GCTPZO=GCTPZ0                          @3
+          _CloseGCTPLibrary32=CloseGCTPLibrary32  @4
+          _LoadGCTPLibrary32=LoadGCTPLibrary32    @5
+          _OpenGCTP32=OpenGCTP32                  @6 
+; To implement your own Windows Exit Procedure add the following
+; function to your application (referring to it in the .def file is
+; not required.)  The extern "C" is only required if module is C++.
+; extern "C" int FAR PASCAL _WEP(int)
+; {
+;       /* Your WEP functionality goes here */
+;  return 1;
+; }

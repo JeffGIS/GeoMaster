@@ -1,0 +1,18 @@
+C_SPECIAL=
+LD_SPECIAL=
+
+LIB=ipw
+OBJS=\
+	allocnd.o dtoa.o ecalloc.o frand.o ftoa.o hbit.o \
+	hdralloc.o hstrdup.o imgcopy.o itoa.o ltoa.o ltof.o \
+	ltoi.o ltou.o ndig.o no_tty.o ipow2.o rmlead.o rmtrail.o strdup.o \
+	tdiff.o 
+
+SRCS=\
+	allocnd.c dtoa.c ecalloc.c frand.c ftoa.c hbit.c \
+	hdralloc.c hstrdup.c imgcopy.c itoa.c ltoa.c ltof.ci \
+	ltoi.c ltou.c ndig.c no_tty.c ipow2.c rmlead.c rmtrail.c strdup.c \
+	tdiff.c 
+ 
+default: lib
+install: install-lib

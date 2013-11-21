@@ -1,0 +1,14 @@
+To load files in the ARCGEN format use the 'Load GEN Data' option under the Import Graphics
+utility. The coordinate file should end in the .gen extension and the optional
+polygon ID file should have the same name as the coordinate file and end in the .txt
+extension. You must indicate whether this file contains areas or lines.
+
+The destination file must be an existing .plt file or map directory. There is a new
+graphics function command (GF_CREATE_NULL_DIR) which will create a new directory with
+a tile size with a given accuracy and overlap. The accuracy should match the needs of the
+application and the operlap should be as large as the largest item to be added to the
+directory. The TEST button will display the number of tiles to be created before actually
+using the CREATE button. After creating the tiles in the directory you must use the
+standard 'Create Layer Index' utility to create the index before loading data into the
+tiles.
+

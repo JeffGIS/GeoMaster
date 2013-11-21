@@ -1,0 +1,710 @@
+#include "CONFIG.h"
+#include "graphint.h"
+#define WIN31
+#include "commdlg.h"
+#include "dlgs.h"
+#include "cddemo.h"   
+#include "dict.h"
+#include "GW.h"   
+#include "p_tol.h"  
+#include "MCI.H"
+#include "resource.h"
+#include <dyndlg.h>
+#include <math.h> 
+#include <float.h>   
+#include <mmsystem.h>    
+#include <time.h>   
+#include <direct.h>
+#include "dibapi.h"    
+#include "address.h"  
+#include "winexec.h" 
+#include <shellapi.h>  
+#include <sys\stat.h>    
+
+static	LPTHEME	LastGFTheme=0;
+
+extern	int	  	OriginalDrive;
+extern	double	BaseDistToWinDist,LineSymbolFactor;
+extern	BOOL	Pickability,DisplayOnlyHLT;
+extern	HANDLE	hCurPolyPoints,hSymbolAttributes;  
+extern	long	nCurPolyPoints;
+extern	DPOINT	PickPointBase,NewPointD;
+extern	short	ProcessSelectedTheme;
+extern	BOOL	IgnoreSelectVP,DisplayLinkedCursors,IgnoreMouseMove,WantFunNames,PeopleNet,ConfigLoaded;
+extern	int		SaveDrive;
+extern	RECT	PromptRect;
+extern	MNMXCORD	HLTBounds;                
+extern	DPOINT	CLocPoint;
+extern	short	BasicDisplayItem,StartGEOSPANvp;
+extern	LPSTR	lpDB, lpSQL, lpDesc, lpInsert, lpCLFile, lpCLGlob;
+extern	HANDLE	hIntData;  
+extern	short	NumSymbols, FirstSymbolNum;
+extern	long	TimeRangeBeg, TimeRangeEnd;
+extern	BOOL	InReset, Pickability,RedrawAfterOK;
+extern	mnmxCor CurrentItemMinMax;
+extern	long	LastQuadOff;
+extern	short   MapVersion;
+extern  HANDLE  hDesiredDocs,hStreetSegFields, hImportLimits,hImportRefno,hImportPreSet, hImportFilter,hGRText, hGRTextTPL,hGRCommand, hTimeStamp, hAttImport;
+extern	DWORD	max_check_time;
+extern	HANDLE	hAddGraphicsFun,hReorgBUDir;
+extern	POINT	CurrentLBUTDOWNLoc; 
+extern	COLORREF	TempLineColor, TempFillColor, TempBackColor;
+extern	HANDLE  hSavedZooms;
+extern	long	FastPickFileNum, FastPickFII;
+extern	BOOL	FastPick, InGRCmd,HaveCurrentLBUTTON,CopyRec;
+extern	long    StreetNum, CurPath;
+extern	HANDLE	hDBStreetSegments, hPrefix, hUDI, hTEXT;
+extern	RECT	CurEditRect;
+extern	long	CurDescLoc;  
+extern	short	CurLinkID;
+extern	short	ProcessGCmdStrings;
+extern	time_t	CurrentChangeDate;
+extern	short	NumTAGDef;
+extern	HANDLE	hTAGDef, hSpecial, hRedLine;
+extern	short	lGCmdString, lTextString;
+extern	HANDLE	hGCmdString, hTextString;
+extern  long	PRJ_UNITS[4];
+extern	DPOINT	UserSpecifiedBasePoint;
+extern	BOOL	DisplayMarkers,SetRefno;
+extern	HANDLE	hSavePoly; 
+extern	long	nSavePoly;
+extern	short	idescblock;
+extern	short	DriveDir;
+extern	HWND	VideoCntlWnd;
+extern	HANDLE	hBTNetIntMP,hBTNetIntRef;
+extern	long	NetIntAT,NumPossibleRoutes;
+extern	POINT	PosToPoint[10], PosFromPoint;
+extern	double	PossibleAz[10], PossibleMP[10], PossiblePCT[10], PossibleLength[10]; 
+extern	int		PossibleDir[10]; 
+extern	long	PossibleTLID[10];  
+extern	RECT	PosRouteRect;
+extern	HBITMAP	PosRouteSavedScreen;
+extern	BOOL	TraceNet, HaveTurnArrows;
+extern	int		RouteType, NetworkID, WalkOutRouteOpt;
+extern	HANDLE	hDescBlock;
+extern	int		NumQuadSegs, QuadOff, NumDescBlocks;
+extern	LONG	LenQuad, MaxQuadLevel, MaxQuadType,NumQuadSegsProcessed,CurGCmdStringLoc,CurSNamesLoc,CurTextStringLoc,CurTAGLoc;
+extern	short	CurlTAG;
+extern	int		QuadLevelAt, QuadTypeNext;  
+extern	int		ReorgStatus,ReorgFileTxt; 
+extern	HWND	ReorghWnd, hWndPrompt,hWndOrthoFilter;
+extern	BOOL	ReorgFile,WantQuadTree2,DisableHalt;
+extern	int		NewPolyType;
+extern	long	PRJ_TYPE[4];
+extern	long	InternalRefno;
+extern	long	CurStreetNumbers[4],FromStreet, ToStreet, CurStreet;  
+extern	int		CurrentType;  
+extern	HPPOINT	lpCurPoints;  
+extern	HPDPOINT	lpDCurPoints;  
+extern	BOOL	ContinueProcessing;
+extern	WORD	LenQuadBlock;
+extern	LONG	LenQuadSeg;
+extern	HANDLE hQuadTree, hQuadOffset;
+extern	BOOL	ReorgFile;
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+extern	long	lBlocksRead, nBlocksRead, nBlocksIn, nBlocksOut, TotDisplayTime, DistTime, MapIOTime;
+extern	BOOL	DoGraphics;
+extern	BOOL	UseRefOrTAGIndex;
+extern	int		FileProjectionType;
+extern	BOOL	ForAllVis;
+extern	long	LastRef;
+extern	BOOL	PickOrtho;   
+extern	HANDLE	hHighlightArea;   
+extern	int		CurrentUDILen;   
+extern	BOOL	GetMaskArea,OutlineZoomArea,MaskZoomArea,IgnoreBounds,AutoClearOffset,DisableMarginPan,MaskOffsetLine;
+extern	mnmxCor	MinMax, *pMinMax;
+extern	char	CrimeName[128];
+extern	int		CurrentSymNum;
+extern	double	OffsetLineOffset;
+extern	int		destX, destY, destW, destH, rect_width, rect_height;
+extern	WORD 	bmX, bmY;
+extern	HANDLE		hDibInfo, hImage;
+extern	HBITMAP		hBitmap;
+extern	LPBITMAPINFO	pDibInfo;
+extern	float	ShadowPct, BorderPct;
+extern	COLORREF	WindowColor; 
+extern	HANDLE	hPDChunk;
+extern	int		ShadowInc, SetVisByPar,MaxDimension;
+extern	long	FirstMergeRecord, LastMergeRecord; 
+extern	LPORTHO	CurOrtho;
+extern	long	CurOrthoFrame;  
+extern	int		OrthoID;
+extern	HANDLE	hOrthos;  
+extern	double	OrthoRes;
+extern	long	OrthoUse;
+extern	int		TSize, nBytes, MaxBrush;
+extern	HRGN	hRgn;
+extern	LONG	pu; 
+extern	LPINT	CurElementPnt;
+extern	WORD	CurElement;
+extern	BOOL	PickingByRefno, Pick, FileMode, FirstError, Display, SolidAreas, ParIsVisible, Highlight;
+extern	int		PltType;
+extern	LONG	CurrentSeg, ItemSeg, CurrentRefno;
+extern	int		CurrentDesc, CurrentiPen;
+extern	WORD	CurrentItem;
+extern	int		FileNum;
+extern	RECT	MainRect;
+extern	HANDLE	hRefIdx,hTAGIdx;
+extern	BOOL	NoRefIndex,ForceRefIndex,ForceTAGIndex;
+extern	long	CurrentRefno;
+extern	double FileDistToBaseDist;
+extern	double	WindowToFileFactor;
+extern	TAGBOX	TAGBox;
+extern	HCURSOR	hCursor, OldCursor;
+extern	BOOL	DoPaint, HavePaint;
+extern	HPEN	CurrentPen;
+extern	HPEN	HighlightPen;
+extern	HBRUSH	HighlightBrush;
+extern	int		maxbrush;
+extern	int		NumPicked, MaxPick; 
+extern	double	PickLimit;
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	double		WidthFactor;
+extern	HWND	hWndMain;
+extern	HWND	hInst;
+extern	MNMXCORD	ZoomBoxRect;
+extern	BOOL        WindowIsZoomed;
+extern	long		RefMktVal;
+extern  HPEN		hNullPen, hRedPen;
+extern	HBRUSH		hRedBrush, hGreenBrush, hBlueBrush, hBackBrush1;
+extern	LPVISLIST	CurVis;
+extern	LPVIEWPORT	CurView, pViewports[MAX_VIEWPORTS], pViewportsD[MAX_VIEWPORTS];
+extern	HANDLE		hViewports[MAX_VIEWPORTS];
+extern	int			NumViewports, NumViewportsToDisplay, DisplayViewID;
+extern	LPTHEME		CurTheme;
+extern	LPVOID		TranFileToBase, TranBaseToFile, TranBMToBase, TranBaseToBM;
+extern	HANDLE		hTranFileToBase, hTranBaseToFile, hTranBMToBase, hTranBaseToBM; 
+extern	HANDLE		hTranFileToBaseOld;
+extern	LPORTHO		CurOrtho;
+extern	BOOL		Printing, PrintMerging;
+extern	int			nPnts;
+extern	int			PickAp;
+extern	BOOL		UpdateSegment;
+extern	int			CommandViewport;
+extern	BOOL		AddLBUTTON; 
+extern	int		 	idTimer, Fid, FidConfig;
+extern	long		UsedDescOffset,TranPointOffset, ColorPaletteOffset, GraphicsOffset, ContinuationOffset; 
+extern	long		NewPrimeOffset;
+extern	long		LenQuadSeg, LenQuad;
+extern	long	QuadOffLoc;
+extern	BOOL    MemMap, FirstMemMap, ReorgFile;   
+extern  int     MemMapWidth,MemMapHeight;
+extern	HANDLE	hHighlight, hHighlight2;
+
+BOOL ProcessGraphicsFunction (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{   
+	short	st,ii, CmdLim;
+	LPCMDSTRING    pCmdStr;
+   	HCURSOR	hcurSave; 
+	POINT	CursorLoc; 
+	long	TotLen;
+	
+/*	if (Message == WM_COMMAND) retrn (FALSE);*/
+//	if (!HavePaint) retrn (FALSE);
+	if (!NumViewports)
+		return (FALSE);
+	if (!CurView)
+		return(FALSE); 
+	if (Message == GF_CLEAR_FUN_STACK)
+	{
+		ResetFunStack (TRUE);
+		return TRUE;
+	}
+	if (ProcessTurnArrows(hWnd,Message,wParam,lParam))
+		return (TRUE);
+	if (MarginPan(hWnd,Message,wParam,lParam))
+		return (TRUE);
+	st = ProcessGraphicsFunction2 (CurView->CurrentFunction,hWnd,Message, wParam,lParam); 
+	if (CurView && CurView->FunStackHandle)
+	{
+	    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
+	    CmdLim = pCmdStr->CommandLimit;
+	    GlobalUnlock (CurView->FunStackHandle);  
+		if (hHighlight2)
+			TotLen = BT_NUM_IN_INDEX (hHighlight2);
+		else
+			TotLen = 0;
+	    if (st == GF_READY_TO_PROCESS && !TotLen)
+	    	st = 1;
+		if (st == GF_READY_TO_PROCESS && CmdLim == UINT_MAX)
+		{   
+			if (TotLen)
+			{   
+				short	pos=BT_FIRST; 
+				long	Ref,Sequence, CurLoc=0; 
+				HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA)+sizeof(PICKDATA));
+				LPHIGHLIGHTDATA	pHighlightData=(LPHIGHLIGHTDATA)GlobalLock (hMem);   
+				LPPICKDATA	pSavePickList0=(LPPICKDATA)(pHighlightData+1);
+				LPVIEWPORT	SaveVP=CurView; 
+				
+				if (TotLen > 1 && GetGlobalBVal2("[%SHOWSTATUS]",TRUE))
+					CreateStatusWindow (CurView->hWnd,1,NULL);
+                else 
+                {
+					hCursor =  LoadCursor(NULL, IDC_WAIT);
+					hcurSave = GSSiSetCursor(hCursor); 
+				}
+				*pSavePickList0 = PickList[0];
+			    while (!BT_FIND (hHighlight2,(LPSTR)&Sequence,pos,BT_ANY,(LPSTR)&Ref))
+			    {   
+			    	pos = BT_NEXT; 
+				    if (!BT_FIND (hHighlight,(LPSTR)&Ref,BT_FIRST,BT_EQ,(LPSTR)pHighlightData))
+				    { 
+			    		PickList[0] = pHighlightData->PD;  
+			    		SetCurView ( SaveVP);
+						if (ProcessGraphicsFunction2 (CurView->CurrentFunction,hWnd,GF_EXECUTE, 1,lParam) == GF_EXECUTE_CANCELED)
+							break;
+					}
+					if (TotLen > 1 && GetGlobalBVal2("[%SHOWSTATUS]",TRUE))
+						StatusWindowUpdate ("","Command Execution from Highlight List", TotLen, CurLoc++);
+				} 
+				SetCurView ( SaveVP);
+				ProcessGraphicsFunction2 (CurView->CurrentFunction,hWnd,GF_EXECUTE_FINISHED, wParam,lParam); 
+				if (TotLen > 1 && GetGlobalBVal2("[%SHOWSTATUS]",TRUE))
+					DestroyStatusWindow ();
+				else
+				{
+					hCursor = hcurSave;
+					GSSiSetCursor(hCursor);
+				}
+				PickList[0] = *pSavePickList0;   
+				GSSiGlobUlFree (&hMem);
+			} 
+		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
+			pCmdStr->CommandLimit = 0;
+		    GlobalUnlock (CurView->FunStackHandle);  
+			PostMessage(hWnd, GF_CLOSE,0, 0L);	
+		}
+		else if (st == GF_INCREASE_SUCCESS_COUNT)
+		{
+		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
+			if (pCmdStr->CommandLimit)
+			{   
+				if (pCmdStr->CommandLimit == UINT_MAX-1) //use command coord one time
+					pCmdStr->CommandLimit = 0;
+				pCmdStr->CommandSuccessCount++; 
+				if (pCmdStr->CommandSuccessCount >= pCmdStr->CommandLimit)
+					PostMessage(hWnd, GF_CLOSE,0, 0L);	
+			} 
+		    GlobalUnlock (CurView->FunStackHandle);  
+		}
+		else if (st == GF_DECREASE_SUCCESS_COUNT)
+		{
+		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
+			if (pCmdStr->CommandLimit)
+				pCmdStr->CommandSuccessCount--; 
+		    GlobalUnlock (CurView->FunStackHandle);  
+		}  
+		else if (st == -1 && pCmdStr->CommandLimit)
+		{   
+			PostMessage(hWnd, GF_CLOSE,0, 0L);	
+		}
+	}
+	if (st)
+		return TRUE;  
+	if (Message == GF_CLOSE)
+	{
+		DisableMarginPan=FALSE;
+		RemoveGraphicsFunction (hWnd);
+	}  
+	else if (Message == WM_RBUTTONUP && !(wParam & MK_LBUTTON)) 
+	{
+		if (*CurView->RButFunction)
+			AddGraphicsCmd (CurView->hWnd,CurView->RButFunction,FALSE,0);
+		return TRUE;
+	}
+	else if (Message == WM_CHAR)
+    {
+		switch (wParam)
+		{   
+			case 17: //CNTLQ
+				PostMessage(hWnd, GF_CANCEL,0, 0L);
+				PostMessage(hWnd, GF_CLOSE,0, 0L);
+			break;
+			
+			case 27: //ESC  
+//				PostMessage(hWnd, GF_CLOSE,0, 0L);
+				ProcessErrorString ();	
+				ResetFunStack(TRUE); 
+				DoPaint = TRUE;
+				DisableHalt = FALSE;    
+				ContinueProcessing = TRUE; 
+        		_chdir (OriginalDir);
+            	_chdrive (OriginalDrive);
+            	HaltMapDisplay (TRUE); 
+				
+            break;
+
+            default:
+				GetCursorPos (&CursorLoc);  
+				ScreenToClient (hWnd,&CursorLoc);
+				if (!SelectViewport (CursorLoc,FALSE,FALSE)) 
+					return FALSE;
+                if (IsGFunctionKey (wParam,FALSE))
+                {
+                	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
+                	
+					CurrentLBUTDOWNLoc=CursorLoc; 
+                	HaveCurrentLBUTTON=TRUE;
+                	AddGraphicsCmd (hWndMain,pCmd,TRUE,0); 
+                	GSSiGlobUlFree (&hAddGraphicsFun);
+                	return TRUE;
+                }
+            	return FALSE;
+            break;
+		}  
+		return TRUE;
+	}
+	return FALSE;
+} 
+
+void ResetFunStack (BOOL All)
+{
+    HANDLE	hLast, hSave;
+	LPCMDSTRING    pCmdStr;
+	HANDLE	handle; 
+	BOOL	First=TRUE;
+    
+	CancelWindowZoom();
+    DisableMarginPan=FALSE;	
+    UnlockCursor ();
+    SetGlobalValue("%P","");	 
+	if (CurView->FunStackHandle)
+	{
+		InReset = TRUE;
+	    handle = hSave = CurView->FunStackHandle;
+		while (handle)
+		{   
+	    	pCmdStr = (LPCMDSTRING)GlobalLock (handle); 
+	    	if (!pCmdStr)
+	    	{   
+	    		if (handle == CurView->FunStackHandle)
+	    			CurView->FunStackHandle = 0;
+	    		break;
+	    	}
+	    	hLast = pCmdStr->PrevHandle;
+	    	if (!First || All)
+	    	{ 
+				if (pCmdStr->CurFun) 
+				{
+				    ProcessGraphicsFunction2 (pCmdStr->CurFun,0, GF_CANCEL, 0, 0); 
+				    ProcessGraphicsFunction2 (pCmdStr->CurFun,0, GF_CLOSE, 0, 0); 
+				}
+				GSSiGlobFree (&pCmdStr->hError);
+				GSSiGlobFree (&pCmdStr->hWhile);
+				GSSiGlobUlFree (&handle);
+			} 
+			else
+			{
+				pCmdStr->PrevHandle = 0;
+				GlobalUnlock (handle);
+			}
+			First = FALSE; 
+			handle = hLast; 
+			CurView->FunStackHandle = handle;
+		}
+		if (All)
+		{   
+			CurView->FunStackHandle = 0;
+			CurView->CurrentFunction = 0; 
+		}
+		else
+			CurView->FunStackHandle = hSave;
+	}
+    DisplayFunctionStack(); 
+	SetCurs (0,FALSE);
+    InReset = FALSE; 
+   	GSSiGlobFree(&hCurPolyPoints);
+   	nCurPolyPoints=0;  
+    return;
+}
+
+BOOL ProcessGraphicsFunction2 (short Function,
+							   HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+	LPVIEWPORT	SaveVP=CurView;  
+	BOOL		st;
+    
+    st = ProcessGraphicsFunction3 (Function,hWnd,Message,wParam,lParam);
+	if (ConfigLoaded && !IgnoreSelectVP)
+		SetCurView ( SaveVP);   
+    return st;
+}
+
+
+BOOL RunGFCommandFromFileAtLoc (LPSTR File,long CurLoc,BOOL SendCmd)
+{   
+	LPSTR	lpStr, pGCmd, lpBar;  
+	OFSTRUCT	OFStruct;  
+	HANDLE	hStr; 
+	char	str[128];
+	HFILE	Fid; 
+	BOOL	rtn = FALSE, First=TRUE;
+    
+   	GetGFFile (str,CurView->FunctionFile);
+   	Fid  = GSSiOpenFile (str,&OFStruct,OF_READ); 
+	if (Fid==HFILE_ERROR)
+	{
+		MessageBox( GetFocus(), str,"Unable to load function file", MB_OK);
+		return FALSE;
+	}
+	_llseek (Fid,CurLoc,0);
+   	GSSiGlobUlFree (&hAddGraphicsFun);
+	hAddGraphicsFun = GSSiGlobAlloc (GHND,UINT_MAX);
+	pGCmd = GlobalLock (hAddGraphicsFun);  
+	                     	  
+	hStr = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	lpStr = GlobalLock (hStr);  
+	while (fgetstring (lpStr,4090,Fid))
+	{
+		if (First || *lpStr == '|')
+		{   
+			Truncate (lpStr);
+		 	if ((lpBar = _fstrchr(lpStr,'|')))
+		 	{
+				lpBar++; 
+				_fstrcat (pGCmd,lpBar);  
+				rtn = TRUE;
+			}
+		} 
+		else if (*lpStr == '#')
+			continue;
+		else
+			break;
+		First=FALSE;
+	}
+	GSSiClose (Fid);
+	GSSiGlobUlFree (&hStr);
+	GlobalUnlock (hAddGraphicsFun);  
+	if (SendCmd)
+    {
+    	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
+	                	
+    	HaveCurrentLBUTTON=FALSE; 
+    	AddGraphicsCmd (hWndMain,pCmd,TRUE,0); 
+    	GSSiGlobUlFree (&hAddGraphicsFun);
+    } 
+	return rtn;
+} 
+
+BOOL GetGFIndex (LPSTR IndexPath)
+{   
+	char	str[130];
+	LPSTR	pBS;
+	
+	_fstrcpy (str,CurView->FunctionDir);
+	ExpandText (str);
+	if ((pBS = _fstrrchr (str,'\\')))
+	{
+		_fstrcpy (IndexPath,str);
+		++pBS;
+		if (*pBS)
+			_fstrcat (IndexPath,"\\");
+	}
+	else
+	{   
+		sprintf (IndexPath,"fundir\\%s",str);
+		if (!_fstrchr (str,'.'))
+			_fstrcat (IndexPath,".txt");
+	}
+	return TRUE;
+} 
+
+BOOL GetGFFile (LPSTR File,LPSTR from)
+{
+	char	str[130], gfdir[130];
+	LPSTR	lpBS;
+	
+	_fstrcpy (str,from);
+	ExpandText (str);
+	if ((lpBS = _fstrrchr (str,'\\')))
+		_fstrcpy (File,str);
+	else
+	{
+		GetGFIndex (gfdir);
+		_fullpath (File,gfdir,128); 
+		if ((lpBS = _fstrrchr (File,'\\')))
+		{
+			lpBS++;
+			*lpBS = 0;
+		}
+		else
+			*File = 0;
+		_fstrcat (File,str);
+	}
+	if (!_fstrchr (File,'.'))
+		_fstrcat (File,".txt");
+	return TRUE;
+}  
+
+BOOL ExecuteGFFromTheme (void)
+{
+	return TRUE;
+}
+
+BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt) 
+{
+	char	str[260],path[128],curpath[128], str2[128], delim='\t';
+	HFILE	Fid;
+	OFSTRUCT	OFStruct; 
+	LPSTR	lpBar;
+	short	i,LineNo=0;
+	
+	if (opt == 3)
+		LastGFTheme = CurTheme;
+	if (opt > 1)
+		delim = 0;
+	GetGFIndex (str);
+	Fid = GSSiOpenFile (str,&OFStruct,OF_READ);
+	if (Fid == HFILE_ERROR)
+	{  
+		char	buffer[128];
+				     	
+		MessageBox( GetFocus(), _fullpath(buffer,str,sizeof(buffer)),"Unable to load function Index", MB_OK);
+		return (FALSE);
+	} 
+			     
+	GetGFFile (str2,CurView->FunctionFile); 
+	_fullpath (curpath,str2,sizeof(curpath));
+	while (fgetstring (str,128,Fid))
+	{   
+		LineNo++;
+		lpBar = _fstrchr(str,'|');
+		if (lpBar)
+		{
+			*lpBar++ = delim; 
+			GetGFFile (str2,lpBar); 
+			_fullpath (path,str2,sizeof(path));
+		} 
+		else
+			*path = 0;
+		Truncate (str);
+		switch (opt)
+		{
+			case 1:
+				i=SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_ADDSTRING,NULL,(LPARAM)str);  
+				if (!_fstricmp (path,curpath))
+					SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_SETCURSEL,i,NULL); 
+				break;
+			case 2:
+				if (!_fstricmp (path,curpath))
+					_fstrcpy (CurTheme->Title,str);
+				break;
+			case 3:
+			{
+				UINT	CmdID=63800+LineNo;  
+				AppendMenu (hMenu,MF_ENABLED|MF_STRING,CmdID,str); 
+				break;
+			} 
+			case 4:
+				if (LineNo == WantLine)
+				{
+					LPVIEWPORT	SaveVP=CurView; 
+					_fstrcpy (CurTheme->Title,str);
+				    SetViewport (CurTheme->TargetViewport); 
+					_fstrcpy (CurView->FunctionFile,lpBar);
+					SetCurView ( SaveVP);
+					ThemeDisplayLegend2(3);
+					goto Exit;
+				}
+				break;
+		}
+	}
+Exit:
+	GSSiClose (Fid); 
+	return TRUE;
+} 
+
+BOOL LoadGFFunctionList (short WantLine)
+{                          
+	LPTHEME	SaveTheme = CurTheme;
+	
+	CurTheme = LastGFTheme;
+	LoadFunctionLists (0,0,WantLine,4);
+	CurTheme = SaveTheme;
+	return TRUE;
+} 
+
+BOOL LoadGFFile (HWND hWndDlg,short opt)
+{   
+	LPSTR	lpBar, lpCarrot;
+	HANDLE	hStr = GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+	LPSTR	lpStr = GlobalLock (hStr);
+	HFILE	Fid;
+	OFSTRUCT	OFStruct; 
+	char	Title[128];
+	long	CurLoc;
+	
+	GetGFFile (lpStr,CurView->FunctionFile); 
+	Fid = GSSiOpenFile (lpStr,&OFStruct,OF_READ);
+	if (Fid==HFILE_ERROR)
+	{
+		MessageBox( GetFocus(), lpStr,"Unable to load function file", MB_OK);
+		GSSiGlobUlFree (&hStr);
+		return (FALSE);
+	}
+	CurLoc = _llseek (Fid,0,1);
+	while (fgetstring (lpStr,4090,Fid))
+	{   
+		if (*lpStr == '#')
+			continue;
+		lpBar = _fstrchr(lpStr,'|');
+		if (!lpBar)
+		{
+			ExpandText (lpStr);
+			if (!ContinueProcessing)
+			{
+		     	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L); 
+		     	ContinueProcessing = TRUE;
+				GSSiClose (Fid);
+				GSSiGlobUlFree (&hStr);
+				return TRUE;
+		    }
+		}
+		if (*lpStr != '|')
+		{   
+			if (lpBar)
+		 	{   
+		 		char	key[8];
+					 		
+		 		*lpBar = 0; 
+		 		_fstrcpy (Title,lpStr);
+		 		if ((lpCarrot = _fstrchr (lpStr,'^'))) 
+		 		{   
+		 			*lpCarrot++ = '\t';
+		 			_fstrcpy (key,lpCarrot);
+		 			sprintf (lpCarrot,"(%s)\t%ld",key,CurLoc);
+		 		}
+		 		else
+		 		{
+					*lpBar++ = '\t'; 
+					sprintf (lpBar,"\t%ld",CurLoc); 
+				}
+			}
+			else
+				_fstrcpy (lpStr,"\t\t-1"); 
+			switch (opt)
+			{
+				case 1:
+					SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_ADDSTRING,NULL,(LPARAM)lpStr);
+					break;
+				case 2:
+					if (!lpBar)
+						break; 
+					CurTheme->ClassCount[CurTheme->NumClass] = CurLoc;
+					_fstrcpy (CurTheme->ClassBM[CurTheme->NumClass++],Title);
+					if (CurTheme->NumClass >= MAX_THEME_CLASSES)
+						goto Exit;
+					break;
+			}
+		}
+		CurLoc = _llseek (Fid,0,1);
+	}
+Exit:
+	GSSiClose (Fid);
+	GSSiGlobUlFree (&hStr);
+			 
+	return TRUE;
+}
+
+

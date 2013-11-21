@@ -1,0 +1,20 @@
+include $(IPW)/lib/make/Makestart
+#
+# for AIX 3.2
+
+LIB=unix
+
+SRCS=\
+	src/dysize.c src/isinf.c src/hypot.c
+
+# AIX 3.2 compilers don't support -c and -o in a cc line, so...
+
+VPATH = src
+
+OBJS=\
+	dysize.o isinf.o hypot.o
+
+default: lib
+install: install-lib
+
+include $(IPW)/lib/make/Makerules

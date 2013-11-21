@@ -1,0 +1,11 @@
+This plugin requires GKrellM 1.2.0 or later or GKrellM 2.0 or later.
+
+To build the GKrellM 1.2.x version, use the code in "src"; to build
+the 2.x version, use the code in "src20".
+
+Season the Makefile to taste.
+
+Just type "make".  Then "make install".
+
+Fair warning: development of the 1.2.x version has ended. Future
+development (if there is any) will only occur in the 2.x version.

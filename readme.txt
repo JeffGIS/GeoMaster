@@ -1,0 +1,1 @@
+To build GeoMaster use GEOMASTR\geomastr.vcproj

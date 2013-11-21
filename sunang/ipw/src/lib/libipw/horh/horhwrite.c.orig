@@ -1,0 +1,86 @@
+/* LINTLIBRARY */
+
+#include "ipw.h"
+
+#include "hdrio.h"
+#include "horh.h"
+
+/*
+** NAME
+**	horhwrite -- write an IPW HORH header
+**
+** SYNOPSIS
+**	#include "file.h"
+**
+**	int horhwrite(fd, horhpp)
+**	int fd;
+**	HORH_T **horhpp;
+**
+** DESCRIPTION
+**      horhwrite writes the array of HORH headers pointed to by horhpp
+**	to file descriptor fd.
+**
+** RESTRICTIONS
+**
+** RETURN VALUE
+**	OK for success, ERROR for failure
+**
+** GLOBALS ACCESSED
+**
+** ERRORS
+**
+** WARNINGS
+**
+** APPLICATION USAGE
+**	horhwrite is called by IPW application programs to write
+**	HORH headers.
+**
+** FUTURE DIRECTIONS
+**
+** BUGS
+*/
+
+int
+horhwrite(fd, horhpp)
+	int             fd;		/* output file descriptor	 */
+	HORH_T        **horhpp;		/* -> array of HORH pointers	 */
+{
+	REG_2 int       band;		/* current header band #	 */
+	int             nbands;		/* # bands in output image	 */
+
+	nbands = hnbands(fd);
+
+	assert(horhcheck(horhpp, nbands));
+ /*
+  * loop through possible output bands
+  */
+	for (band = 0; band < nbands; ++band) {
+		REG_1 HORH_T   *horhp;	/* -> current HORH		 */
+		char            s[HREC_SIZ];	/* output value		 */
+
+		horhp = horhpp[band];
+		if (horhp == NULL) {
+			continue;
+		}
+ /*
+  * write preamble
+  */
+		if (hwprmb(fd, HORH_HNAME, band, HORH_VERSION) == ERROR) {
+			return (ERROR);
+		}
+ /*
+  * write fields
+  */
+		(void) sprintf (s, "%.10g", horhp->azimuth);
+		if (hputrec(fd, (char *) NULL, HORH_AZM, s) == ERROR) {
+			return (ERROR);
+		}
+	}
+
+	return (OK);
+}
+
+#ifndef	lint
+static char     rcsid[] = "$Header: horhwrite.c,v 1.1 88/03/06 21:19:55 dozier Exp $";
+
+#endif

@@ -1,0 +1,13 @@
+include $(IPW)/lib/make/Makestart
+#
+# for SunOS 3.x
+
+LIB=unix
+
+SRCS=\
+	src/remove.c
+
+default: lib
+install: install-lib
+
+include $(IPW)/lib/make/Makerules

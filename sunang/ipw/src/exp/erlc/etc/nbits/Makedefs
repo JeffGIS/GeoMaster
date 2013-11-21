@@ -1,0 +1,8 @@
+SCRIPT=nbits
+SCRIPT_DIR=$(LIB_DIR)
+
+default: script
+install: install-script
+
+
+# $Header: /usr.MC68020/home/ipw/src/lib/nbits/RCS/Makedefs,v 1.2 89/10/18 20:26:00 frew Exp $

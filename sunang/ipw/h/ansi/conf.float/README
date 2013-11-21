@@ -1,0 +1,61 @@
+This directory contains various "canned" versions of h/ansi/float.h.  The
+comment at the top of each file notes which floating-point hardware the file
+has been tested on.
+
+If one of these is directly usable in your environment, then copy or link it
+to h/ansi/float.h.
+
+Otherwise, copy the one that most closely approximates your configuration into
+h/ansi/float.h and edit it appropriately.  If your distribution of IPW
+includes the program "machine" (see src/etc/machine), then you may be able to
+use it to generate a float.h automatically.
+
+Once your new float.h works, please mail a copy of it to "ipw@crseo.ucsb.edu"
+so we can incorporate it into the standard distribution.  Be sure that the
+comment at the top of the file adequately describes your particular operating
+system and hardware.
+
+macros:
+
+FLT_RADIX	("b") radix of exponent representation
+
+FLT_ROUNDS	addition rounds (> 0, implementation-dependent), chops (0), or
+			indeterminable (-1)
+
+FLT_MANT_DIG	("p") number of base-b digits in the floating-point mantissa
+DBL_MANT_DIG
+LDBL_MANT_DIG
+
+FLT_EPSILON	minimum positive floating-point number x such that
+DBL_EPSILON		1.0 + x != 1.0
+LDBL_EPSILON
+
+FLT_DIG		number of decimal digits of precision:
+DBL_DIG			if b == 10 then	p
+LDBL_DIG		else (p - 1) * log10(b)
+
+FLT_MIN_EXP	("emin") minimum negative integer such that b**(emin - 1) is a
+DBL_MIN_EXP		normalized floating-point number
+LDBL_MIN_EXP
+
+FLT_MIN		minimum normalized positive floating-point number:
+DBL_MIN			b**(emin - 1)
+LDBL_MIN
+
+FLT_MIN_10_EXP	minimum negative integer such that 10 raised to that power is
+DBL_MIN_10_EXP		in the range of normalized floating-point numbers
+LDBL_MIN_10_EXP
+
+FLT_MAX_EXP	("emax") maximum integer such that b**(emax - 1) is a
+DBL_MAX_EXP		representable finite floating-point number
+LDBL_MAX_EXP
+
+FLT_MAX		maximum representable finite floating-point number:
+DBL_MAX			(1 - b**-p) * b**emax
+LDBL_MAX
+
+FLT_MAX_10_EXP	maximum integer such that 10 raised to that power is in the
+DBL_MAX_10_EXP		range of representable finite floating-point numbers
+LDBL_MAX_10_EXP
+
+$Header: /usr/home/ipw/h/ansi/conf.float/RCS/README,v 1.1 89/10/27 13:06:11 frew Exp $

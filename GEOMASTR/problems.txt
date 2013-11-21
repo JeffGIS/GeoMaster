@@ -1,0 +1,12 @@
+x Symbol origin point on trees
+
+Symbol scale factor  
+
+Symbols on curves
+
+x LANDTIE symbol
+
+x TIFF load
+
+Transparent color on NT
+

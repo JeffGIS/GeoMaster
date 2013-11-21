@@ -1,0 +1,198 @@
+HANDLE CreateSaveList (int NumItems)
+{   HANDLE	handle;
+	LPSAVELIST	SaveList;
+	int	item;
+
+	if (NumItems)
+	{
+		handle = GSSiGlobAlloc (GHND,2+4*NumItems);
+		SaveList = (LPSAVELIST) GlobalLock (handle);
+		SaveList->NumItems=NumItems;
+		for (item=0;item<NumItems;item++) SaveList->ItemHandle[item]=NULL;
+
+		GlobalUnlock (handle);
+		return (handle);
+	}
+	else
+		return (NULL);
+}
+
+void DeleteSavedItems (HANDLE hSaveList)
+{   LPSAVELIST	SaveList;
+	int	item;
+
+	if (!hSaveList) return;
+
+	SaveList = (LPSAVELIST) GlobalLock (hSaveList);
+	for (item=0;item<SaveList->NumItems;item++)
+		GlobalFree ( (HGLOBAL) SaveList->ItemHandle[item]);
+
+	GlobalUnlock (hSaveList);
+	GlobalFree (hSaveList);
+
+	return;
+}
+
+BOOL DrawSavedItems (HANDLE hSaveList, HANDLE hNewList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			SavedItem;
+	LPSAVELIST	SaveList, NewList;
+	int			Fid;
+	LPSTR		ItemPnt, hpnt;
+	HPEN		hOldPen;
+
+	if (!PickName[0]) return FALSE;
+	_fstrcpy (PltName,PickName);
+
+	CloseMap ();
+	if (!OpenMap (CurView->hWnd,CurView->hDC)) return(FALSE);
+    SaveList = (LPSAVELIST)GlobalLock(hSaveList);
+    if (hNewList) NewList = (LPSAVELIST)GlobalLock(hNewList);
+	hOldPen = SelectObject(CurView->hDC, hRedPen);
+	CurrentPen = hRedPen;
+
+    for (SavedItem=0;SavedItem<SaveList->NumItems;SavedItem++)
+    {
+    	if (!SaveList->ItemHandle[SavedItem]) break;
+	    ipnt = (LPINT)GlobalLock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	    hpnt = (LPSTR) ipnt + 4;
+	    ItemHeader = (LPITEM)   hpnt;
+	    if (InvalidItem (ItemHeader))
+	    	return FALSE;
+		CurView->hRgn = CreateVPRgn();
+	  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+	  	DeleteObject(CurView->hRgn);
+	    SetDisplayMode (CurView->hDC, GF_MAPMODE);
+	    if (hNewList)
+	    {
+		    NewList->ItemHandle[SavedItem] = (LPVOID) GSSiGlobAlloc (GHND,2*abs(ItemHeader->Len)+20);
+		    ItemPnt = (LPSTR) GlobalLock ((HGLOBAL)NewList->ItemHandle[SavedItem]);
+		    _fmemmove (ItemPnt,ipnt,4);
+		    _fmemmove (ItemPnt,hpnt,2*abs(ItemHeader->Len)+16);
+	   	    GlobalUnlock ((HGLOBAL)NewList->ItemHandle[SavedItem]);
+
+	    }
+		CurView->PassID = 3;
+	    ProcessGraphicsRec (CurView->hDC,(LPINT) hpnt,(LPSTR) ipnt);
+	    GlobalUnlock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	}
+	SelectObject (CurView->hDC,hOldPen);
+	GlobalUnlock (hSaveList);
+	if (hNewList) GlobalUnlock (hNewList);
+	CloseMap ();
+	return TRUE;
+}
+
+BOOL WriteSavedItems (HANDLE hSaveList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			SavedItem;
+	LPSAVELIST	SaveList, NewList;
+	int			Fid;
+	LPSTR		ItemPnt;
+	HPEN		hOldPen;
+	long		SaveLoc;
+	int			i;
+
+	if (!PickName[0]) return FALSE;
+	_fstrcpy (PltName,PickName);
+
+	CloseMap ();
+	Fid = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+	if (Fid == HFILE_ERROR)
+	{
+		Fid = 0;
+		return FALSE;
+	}
+    SaveList =(LPSAVELIST) GlobalLock(hSaveList);
+
+    for (SavedItem=0;SavedItem<SaveList->NumItems;SavedItem++)
+    {
+    	if (!SaveList->ItemHandle[SavedItem]) break;
+	    ipnt = (LPINT) GlobalLock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	    _fmemmove (&SaveLoc,ipnt,4);
+	    i=_llseek (Fid,SaveLoc,0);
+	    ipnt+=2;
+	    ItemHeader = (LPITEM) ipnt;
+	    if (InvalidItem (ItemHeader))
+	    	return FALSE;
+	    i=_lwrite (Fid,ItemHeader,12+2*abs(ItemHeader->Len));
+	    GlobalUnlock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	}
+	_lclose (Fid);
+   	Fid = 0;
+
+	GlobalUnlock (hSaveList);
+	return TRUE;
+}
+
+BOOL MovePickListToSaveList (HANDLE hSaveList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			Item;
+	LPSTR		ItemPnt;
+	LPSAVELIST	SaveList;
+	int			Fid;
+	WORD		nRead, nBytes;
+	long		SaveLoc;
+
+	if (!PickName[0]) return FALSE;
+	_fstrcpy (PltName,PickName);
+
+	Fid = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READ); 
+	if (Fid == HFILE_ERROR)
+	{
+		Fid = 0;
+		return FALSE;
+	}
+
+    SaveList = (LPSAVELIST)GlobalLock (hSaveList);
+
+	for (Item=0;Item<NumPicked;Item++)
+	{
+	    _llseek (Fid,PickList[Item].Segment,0);
+	    nRead = _lread (Fid,&nBytes,2);
+	    hpltBuf = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)nBytes);
+	    LPpltBuf = GlobalLock (hpltBuf);
+	    SaveLoc = _llseek (Fid,0,1) + PickList[Item].Offset;
+	    nRead = _lread (Fid,LPpltBuf,nBytes);
+	    ipnt = (LPINT) (LPpltBuf + PickList[Item].Offset);
+	    ItemHeader =  (LPITEM) ((LPINT)ipnt);
+	    if (InvalidItem (ItemHeader))
+	    	return FALSE;
+	    SaveList->ItemHandle[Item] = (LPITEM)GSSiGlobAlloc (GHND,2*abs(ItemHeader->Len)+20);
+	    ItemPnt = (LPSTR) GlobalLock ((HGLOBAL)SaveList->ItemHandle[Item]);
+	    _fmemmove (ItemPnt,&SaveLoc,4);
+	    ItemPnt +=4;
+	    EndItem = ipnt + abs(ItemHeader->Len);
+	    EndItem+=6;
+	    *EndItem = 0;
+	    _fmemmove (ItemPnt,ipnt,2*abs(ItemHeader->Len)+16);
+   	    GlobalUnlock ((HGLOBAL)SaveList->ItemHandle[Item]);
+	    GlobalUnlock (hpltBuf);
+	    GlobalFree (hpltBuf);
+    }
+    GlobalUnlock (hSaveList);
+	_lclose (Fid);
+   	Fid = 0;
+	return TRUE;
+}

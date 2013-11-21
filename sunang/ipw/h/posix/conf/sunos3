@@ -1,0 +1,9 @@
+/*
+ * limits.h for SunOS 3.x
+ */
+
+#define	MAX_INPUT	256
+#define	OPEN_MAX	30
+#define	OPEN_LIMIT	1024
+
+/* $Header: /usr/home/ipw/h/posix/conf/RCS/sun3x,v 1.2 89/10/27 12:33:57 frew Exp $ */

@@ -1,0 +1,13 @@
+include $(IPW)/lib/make/Makestart
+#
+# for Linux 0.99.13
+
+LIB=unix
+
+SRCS=\
+	src/dysize.c
+
+default: lib
+install: install-lib
+
+include $(IPW)/lib/make/Makerules

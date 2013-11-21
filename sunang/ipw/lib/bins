@@ -1,0 +1,9 @@
+# list of directories containing IPW commands
+#
+# format is: directory<whitespace>description
+# NO BLANK LINES!
+#
+bin	general-purpose
+etc	maintenance and support
+#
+# $Header: /usr/home/ipw/lib/RCS/bins,v 1.1 89/10/18 18:25:23 frew Exp $

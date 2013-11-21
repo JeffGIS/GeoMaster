@@ -1,0 +1,16 @@
+C_SPECIAL=$(C_SINGLE) -I$(OPENWINHOME)/share/include
+LIBS_SPECIAL=-lX11
+
+PGM=xim
+OBJS=\
+	xim.o
+
+SRCS=\
+	xim.c
+
+PGM_DIR=$(ETC_DIR)
+
+default: pgm
+install: install-pgm
+
+# $Header: /usr.MC68020/home/ipw/adm/snoopy/src/etc/xim/RCS/Makedefs,v 1.1 89/10/26 11:22:04 frew Exp $

@@ -1,0 +1,864 @@
+#include "CONFIG.h"
+#include "graphint.h" 
+#include "dict.h"
+#define WIN31
+#include "commdlg.h"
+#include "dlgs.h"
+#include "cddemo.h"
+#include "GW.h"
+#include "resource.h"
+#include <dyndlg.h>
+#include <math.h> 
+#include <direct.h>   
+#include <ctype.h>
+#include <aviout.h>
+#include <dibapi.h>
+#include <float.h>     
+#include <sys\stat.h>
+
+HANDLE	hAVIFile=0;
+extern	short	NetMarkTimer;
+BOOL	FoundInvalidRec=FALSE, UsePromptWindow=TRUE;
+short   MapVersion;
+short   FirstDisplayPass=1;
+BOOL    RestartOption=FALSE,InImediate=FALSE;   
+char    RestartName[128];
+long    QuadTreeOffset,DescBlockOffset; 
+HANDLE  hDescBlock=0; 
+extern	POINT	CurrentLBUTDOWNLoc;
+extern  BOOL    InReset,HaveCurrentLBUTTON,ContinueProcessing, MemMap, HaveSeg,DisplayFiles,UseBinFileList,RedisplayOnly, Processing, DoTime;
+extern  HWND    ReorghWnd, hWndPrompt;
+extern  short     ReorgStatus,ReorgFileTxt;
+long    lBlocksRead=0, nBlocksRead=0, nBlocksIn=0, nBlocksOut=0, TotDisplayTime=0;  
+long    PickTime=0, CloseTime=0, IntersectTime=0, DistTime=0;
+long    MapIOTime=0, OpenMapTime=0, TextTime=0,TotTextDisplayTime=0;
+BOOL    DisableHalt=FALSE;  
+BOOL    UseRefOrTAGIndex=FALSE;
+extern  short     FileProjectionType;
+extern  HANDLE  hTAGDef;
+extern  BOOL    ReorgFile, PickOrtho; 
+extern  long    ReorgStartQuad; 
+extern	HCURSOR	hLockedCursor, hPickAPCursor, hPickNearCursor,hDigCursor, hWaitCursor; 
+extern	HCURSOR	IDc_SIZENWSE, IDc_SIZE,IDc_SIZEWE,IDc_SIZENS,IDc_SIZENESW;
+BOOL        ForAllVis;
+extern      short     NewPolyType;
+extern      short     EditFileNum;
+BOOL        FirstSchmooze=TRUE;
+extern      HANDLE  hNullFrames;
+BOOL        SaveZoom=FALSE, SaveGlobals=TRUE, SaveInfoBox=TRUE;
+short		DoMapCopy=FALSE;   
+char        MapCopyPath[32]="",MapCopyProjection[16]="";
+char        StartupCommand[256]="", StartupMenu[128]="";
+extern      short         DisplayFinOpt;
+extern      MNMXCORD    RezoomRect;
+extern      HANDLE  hPDChunk, hPolyBuffer,hPolyPartLen;
+extern      long    FirstMergeRecord, LastMergeRecord;
+extern      char    PMDataFile[128], PMMacroFile[128]; 
+extern      char    PickedOrthoName[32];
+double      WindowToFileFactor; 
+double      FileDistToBaseDist=1,FileDistToWinDist=1;
+extern      TAGBOX  TAGBox;
+extern      HWND        DebugInfoWnd;
+extern      BOOL        DebugWait,MaskZoomArea,IgnoreLbutton;   
+extern		long	PenCOLOR[8];
+extern		int		PenWIDTH[8];
+LPVIEWPORT  ResetToViewport=0;
+extern		double      OrthoAdjustX, OrthoAdjustY;
+extern		double	OrthoAdjustFac;
+extern      short         CurrentSymNum;     
+extern      short     VideoTimerNum;
+extern      HWND    VideoCntlWnd;
+extern      BOOL    Driving,CursorIsLocked;
+extern		long	FastPickFileNum, FastPickFII;
+extern		BOOL	FastPick;
+char        CurrentSymName[34];
+long        CurOrthoFrame=-1;
+mnmxCor     MinMax, *pMinMax;
+HANDLE      LastParList=0;
+BOOL        PickingByRefno=FALSE, IgnoreBounds=FALSE;
+BOOL        PatternBrush=TRUE;
+BOOL        DisplayFileParam=FALSE;
+BOOL        ForceRefIndex=FALSE, ForceTAGIndex=FALSE;
+BOOL        CreateConfig=FALSE; 
+BOOL        NoRefIndex = FALSE;
+extern		BOOL	ShowFileBounds;
+BOOL        Display = TRUE;
+HWND        hWndMain;
+HMENU       hViewportsMenu=0;
+LPORTHO     CurOrtho=0;  
+short         OrthoID=0;
+HANDLE      hOrthos=0;
+HANDLE      hMenuMask;  
+long        OrthoUse=LONG_MIN;
+extern      BOOL    Printing, PrintMerging;
+BOOL        SolidAreas=TRUE; 
+char        PltName[128];
+char        PickName[128];
+short         PltType;
+char        CfgName[128];
+char        PlotName[9];
+short         idTimer=0, Fid=-1, FidConfig=0;
+short         FileNum, TSize=0;
+/*LPVOID        TranFileToBase=0, TranBaseToFile=0, TranBMToBase=0, TranBaseToBM=0;*/
+HANDLE      hTranFileToBase=0, hTranBaseToFile=0, hTranBMToBase=0, hTranBaseToBM=0; 
+HANDLE		hTranFileToBaseOld=0;
+BOOL        FirstError, DoPaint=TRUE, HavePaint=FALSE,HaltPaint=FALSE;
+BOOL        Highlight=FALSE;
+BOOL        FileMode=FALSE, HaveBasePens;
+HANDLE      hDupDesc=0;
+BOOL        *pDupDesc;
+LONG        pu=0; 
+RECT        MainRect;
+LONG        UsedDescOffset,TranPointOffset, ColorPaletteOffset, GraphicsOffset;
+LONG        NewPrimeOffset;
+short         nPnts, nRead, nBytes;
+short         i2, Pcode;
+short         PickAp=3;
+extern      HCURSOR     hCursor, OldCursor;
+double      WidthFactor;
+RGBQUAD     rgb;
+HPEN        hSavePen, h0Pen, hRedPen, pens[MAXPENS], HighlightPen, UnHighlightPen; 
+extern		COLORREF	HighlightColor;
+HPEN        CurrentPen=0, hProPen[8]={0,0,0,0,0,0,0,0};
+HBRUSH      brushes[MAXPENS], hRedBrush, hGreenBrush, hBlueBrush, HighlightBrush;
+short         maxbrush;
+static POINT    Points[4];
+HANDLE hQuadTree=0, hQuadOffset=0, hQuadTree2=0;
+LPSTR       pQuadTree, pQuadSeg, pQuadOffset;  
+WORD        LenQuadBlock;
+LONG        LenQuadSeg;
+LONG        LenQuad, MaxQuadLevel, MaxQuadType,NumQuadSegsProcessed;
+short         QuadLevelAt, QuadTypeNext;
+LONG        ContinuationOffset;
+BOOL        Wincap=TRUE, Pick=FALSE;
+short         SetVisByPar=-1;
+BOOL        ParIsVisible;
+BOOL        CreateRefIndex=FALSE,CreateTAGIndex=FALSE;
+BOOL        AutoPan=TRUE;
+HANDLE      hRefIdx=0,hTAGIdx=0;
+short ShadowInc;
+float   ShadowPct = (float)1.0, BorderPct = (float)0.5;
+short MaxDimension;
+BYTE    InVisBits[400];
+BYTE    Mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
+
+float   PixelsPerHInch; 
+
+HANDLE  hSavedZooms=0;
+HRGN        hRgn;
+MNMXCORD    ZoomBoxRect;
+
+static   long   PrimeOffset;
+short     NumMenuMask;
+
+PICKDATA    PickList[MAXPICKITEMS]; 
+long	PickedStreets[MAXPICKITEMS][4];
+short     NumPicked, MaxPick=1;
+mnmxCor PickMinMax;
+LONG    CurrentSeg, CurrentRefno, ItemSeg;
+short     CurrentDesc, CurrentiPen;
+char    CurrentTAG[10], CurrentUDI[66];
+short     CurrentUDILen;
+WORD    CurrentItem;
+RECT    CurrentRect, ClipRect;
+HANDLE  hVisList=0;
+POINT   ZBPoints[5];
+int     FileInIndex;
+REFINDEXDATA    RefIdxData;      
+extern  LPINT       CurElementPnt;
+         
+LPVISLIST   CurVis=0;
+LPVIEWPORT  CurView=0, pViewports[MAX_VIEWPORTS], pViewportsD[MAX_VIEWPORTS];
+HANDLE      hViewports[MAX_VIEWPORTS];
+short         NumViewports=0, CurViewID=0, DisplayViewID, NumViewportsToDisplay;
+COLORREF    WindowColor; 
+extern      short         CommandViewport;
+LPTHEME     CurTheme=0;
+
+extern  HANDLE  hDesiredDocs,hStreetSegFields, hImportLimits, hGRText, hGRCommand;
+extern  BOOL    UpdateOrthoIndex;
+extern  short NumPassiveFun;
+extern  BOOL    AddLBUTTON;
+extern  HANDLE  hInst;
+extern  char    FullBM[256];  
+extern  HANDLE  hMemPrintCrime,hODBCPW,hGCmdString;
+
+char    TagFile[144];
+
+BOOL AdjustCurLoc (LPHANDLE phCmdStr);
+short IsGFCmd (LPSTR str,LPSHORT pLimit);
+
+void QuitGraphics()
+{   
+    if (hTAGDef)
+        GlobalFree (hTAGDef);
+
+	DispText (0,0,0,0,0,0,0,0,0,0,NULL,-1,0);
+    CloseHighlightList();
+    ClearPick (); 
+    DestroyCursors ();
+    if (hDesiredDocs)
+    {
+        GlobalUnlock (hDesiredDocs);
+        GlobalFree (hDesiredDocs);
+    } 
+    GSSiGlobFree (&hNullFrames);   
+    GSSiGlobFree (&hSavedZooms);
+    GSSiGlobFree (&hMemPrintCrime); 
+    GSSiGlobFree (&hODBCPW);
+	GSSiGlobFree (&hGCmdString);  
+	GSSiGlobFree (&hPolyBuffer);
+	GSSiGlobFree (&hPolyPartLen);
+    return;
+}
+
+void CloseAllIndexes ()
+{   short iview, ifile;
+    LPVIEWPORT  SaveView;
+    
+    if (FidConfig<=0) return;
+    CloseOrthoAVI ();
+    SaveView = CurView;
+    for (iview=0;iview<NumViewports;iview++)
+    {   
+        CurView = pViewports[iview];
+        if (!CurView) break;      
+        if (CurView->SubFile)
+        {
+            _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
+            CurView->SubFile =CurView->RestoreFile = 0;
+        } 
+        if (CurView->hBinFileList) 
+        {
+            GlobalFree (CurView->hBinFileList);
+            CurView->hBinFileList = 0;
+        }
+        for (ifile=0;ifile<CurView->NumFiles;ifile++)
+        {   
+        
+            if (CurView->FileType[ifile]>3 && CurView->hlpIndex[ifile])
+            {   
+                CloseMapIndex (CurView->lpFiles[ifile],
+                               CurView->hlpIndex[ifile],FALSE);
+                CurView->hlpIndex[ifile] = 0;
+            }
+        }
+    }
+    CurView = SaveView;
+    return;
+}
+
+void UnallocateConfig ()
+{   short iview, ifile;
+    HANDLE handle;
+    
+    if (FidConfig<=0) return;
+    GlobalFree (hMenuMask);
+    for (iview=0;iview<NumViewports;iview++)
+    {   
+        CurView = pViewports[iview];
+        if (!CurView) break; 
+    	ClearPolyOff ();
+//        SaveDisplayRedefFile(CurView->DisplayRedefFile);
+        if (CurView->hPenRedef)
+            GlobalFree (CurView->hPenRedef);
+        CurView->hPenRedef=0;
+        if (CurView->Bitmap) DeleteObject (CurView->Bitmap);
+        for (ifile=0;ifile<CurView->NumFiles;ifile++)
+        {
+            if (CurView->FileType[ifile]>3 && CurView->hlpIndex[ifile])
+            {
+                CloseMapIndex (CurView->lpFiles[ifile],
+                               CurView->hlpIndex[ifile],FALSE);
+                CurView->hlpIndex[ifile] = 0;
+            }
+        }
+        CloseObject (CurView->pTheme); 
+        BoundsDisplayDestroy (CurView->lpBoundsDisplay); 
+        CurView->lpBoundsDisplay=0;
+        
+        CurVis = CurView->pVisList1;
+        if (CurView->pVisListManual == CurVis)
+            CurView->pVisListManual=0;
+        while (CurVis)
+        {
+            handle = CurVis->hVisList;
+            CurVis =  (LPVISLIST) CurVis->NextVisList;
+            GlobalUnlock(handle);
+            GlobalFree(handle);
+        }   
+        CurVis = CurView->pPickList1;  
+        if (CurView->pPickListManual == CurVis)
+            CurView->pPickListManual=0;
+        while (CurVis)
+        {
+            handle = CurVis->hVisList;
+            CurVis =  (LPVISLIST) CurVis->NextVisList;
+            GlobalUnlock(handle);
+            GlobalFree(handle);
+        }   
+        if (CurView->pVisListManual)
+        {
+            handle = CurView->pVisListManual->hVisList;
+            GlobalUnlock(handle);
+            GlobalFree(handle);
+        }
+        if (CurView->pPickListManual)
+        {
+            handle = CurView->pPickListManual->hVisList;
+            GlobalUnlock(handle);
+            GlobalFree(handle);
+        } 
+        {
+		    HANDLE	hLast;
+			LPCMDSTRING    pCmdStr;
+					
+		    while (CurView->FunStackHandle)
+		    { 
+		    	pCmdStr = GlobalLock (CurView->FunStackHandle); 
+		    	hLast = pCmdStr->PrevHandle;
+	    		GlobalUnlock (CurView->FunStackHandle);
+	    		GlobalFree (CurView->FunStackHandle);
+	    		CurView->FunStackHandle = hLast; 
+	    	}
+		}        
+	 	CloseEditRect();
+        if (CurView->hTAGList) 
+            GlobalFree(CurView->hTAGList); 
+        UnloadReport (CurView->hReport);  
+            CurView->hReport=0;
+            
+        
+        CloseTRANS2 (&CurView->hTranWinToBase);
+        CloseTRANS2 (&CurView->hTranBaseToWin); 
+
+        GlobalUnlock (hViewports[iview]);
+        GlobalFree (hViewports[iview]);
+    } 
+    if (hViewportsMenu) 
+    {
+        short ii;
+        ii = DestroyMenu (hViewportsMenu);
+    }
+    CurView = 0;
+    hViewportsMenu = 0;
+    ClearTAGs();
+    FidConfig = 0;
+    NumViewports = 0;
+    NumPassiveFun = 0;  
+	if (hWndPrompt)
+	    DestroyWindow(hWndPrompt);
+
+    return;
+}
+BOOL OpenConfig (HWND hWnd,HDC hDC)
+{   short     Signature, Version, n;
+    OFSTRUCT    OFStruct;
+    short     len, iv,MenuMask, i;
+    LPVIEWPORT  SaveView;
+    LPSTR   LastVisList;
+    LPVISLIST   SaveVis;
+    short     imenu,   NumIB;
+    short     NumViews;
+    LPINT   lpMenuMask; 
+    long    ii;   
+    char    Cfg[9];
+    
+    if (FidConfig>0) return (TRUE);
+    if (CreateConfig) CreateTestConfig ();
+    if (!CfgName[0]) return (FALSE);
+    RezoomRect.xmn = 0;
+    RezoomRect.xmx = -1;
+    NumViewports = 0;  
+    _fmemset (pViewports,0,MAX_VIEWPORTS*sizeof(LPVIEWPORT));
+    _splitpath (CfgName,0,0,Cfg,0);
+    SetGlobalValue ("%CONFIG",Cfg);
+    FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCT)&OFStruct,OF_READ);
+    if (FidConfig == HFILE_ERROR) 
+    {   char    DLName[128];
+    
+        _fstrcpy (DLName,"[%DATA_LOC]");
+        _fstrcat (DLName,CfgName);
+        FidConfig = GSSiOpenFile (DLName,(LPOFSTRUCT)&OFStruct,OF_READ);
+        if (FidConfig == HFILE_ERROR)
+        {
+            MessageBox( GetFocus(), "Configuration file not found",CfgName, MB_OK);
+            return (FALSE);
+        } 
+    }
+    _llseek(FidConfig,(LONG)-(4),2);
+
+    _lread (FidConfig,&Signature,2);
+    _lread (FidConfig,&Version,2);
+    if (Signature != 28052)
+    {   CloseConfig ();
+        MessageBox( GetFocus(), "This is not a valid configuration file",CfgName, MB_OK);
+        return (FALSE);
+    }
+    if (Version > 4)
+    {   CloseConfig ();
+        MessageBox( GetFocus(), "This configuration file version is not recognized",CfgName, MB_OK);
+        return(FALSE);
+    }
+    
+    if (!TagFile[0])
+        GetTempFileName (0,"dlt",0,(LPSTR)&TagFile); 
+    
+    _llseek(FidConfig,0,0);
+    if (Version >= 3)
+    {
+        _lread (FidConfig,StartupCommand,sizeof(StartupCommand));
+        _lread (FidConfig,StartupMenu,sizeof(StartupMenu));
+        _lread (FidConfig,&NumIB,sizeof(NumIB));  
+        while (NumIB--)
+        {
+            _lread(FidConfig,&TAGBox,sizeof(TAGBOX));
+            SaveTAG(0);
+        }  
+        if (StartupMenu[0])
+        {
+            if (!GMLoadMenu (hWndMain,StartupMenu)) 
+            {   
+                char    mess[256];
+                
+                sprintf (mess,"Failed to load menu '%s'",StartupMenu);
+                MessageBox( GetFocus(), mess,0, MB_OK|MB_ICONEXCLAMATION);
+            }
+        }
+        
+    }   
+    _lread (FidConfig,&NumViews,2);
+    _lread (FidConfig,&CommandViewport,2); 
+    _lread (FidConfig,&NumMenuMask,sizeof(NumMenuMask)); 
+    hMenuMask=GSSiGlobAlloc(GMEM_MOVEABLE,(NumMenuMask+1)*sizeof(short));
+    lpMenuMask=GlobalLock(hMenuMask); 
+    for (imenu=0;imenu<NumMenuMask;imenu++,lpMenuMask++)
+    {
+        _lread (FidConfig,lpMenuMask,sizeof(MenuMask));  
+        if (hWnd)
+        {
+            if (!DeleteMenu (GetMenu(hWnd),*lpMenuMask,MF_BYCOMMAND))
+                ii=1;
+        }
+    }
+    GlobalUnlock(hMenuMask); 
+    if (hWnd) DrawMenuBar(hWnd); 
+    _lread (FidConfig,&WindowColor,4);
+    _lread(FidConfig,&TAGBox,sizeof(TAGBOX));
+    ii=sizeof(VIEWPORT);
+    ii=sizeof(NEWOBJECT);
+    for (iv=0;iv<NumViews;iv++)
+    {
+        hViewports[iv]=GSSiGlobAlloc (GHND,sizeof(VIEWPORT)+MAX_VIEWPORT_FILES*128);
+        if (!hViewports[iv]) return(MemError());
+        CurView = (LPVIEWPORT) GlobalLock (hViewports[iv]);
+        pViewports[iv]=CurView;
+        pViewportsD[iv]=CurView;
+        if (Version == 1)
+        {
+            i=_lread (FidConfig,CurView,sizeof(VIEWPORT_v0));
+            _fstrcpy (CurView->PickMacroFile,"pikmacro.txt"); 
+        } 
+        else if (Version < 4)
+        {
+            i=_lread (FidConfig,CurView,sizeof(VIEWPORT_v2)); 
+            CurView->NumNewObjects=0; 
+            _fmemset (CurView->NewObjectMap,0,sizeof(CurView->NewObjectMap));
+        }
+        else 
+            i=_lread (FidConfig,CurView,sizeof(VIEWPORT)); 
+        CurView->Version=4; 
+        CurView->NumThemes=0; 
+		CurView->hMaskArea = 0;
+        CurView->hTranWinToBase=0; 
+        CurView->hTranBaseToWin=0;
+        CurView->hTAGList=0;  
+        CurView->hPenRedef=0; 
+        CurView->hReport=0;  
+        CurView->hBinFileList=0;
+        CurView->SubFile=0;CurView->RestoreFile=0; 
+        CurView->hCursor=0;
+        CurView->LastCursor=0;  
+        CurView->FunStackHandle=0;   
+        CurView->CurrentFunction = 0; 
+        CurView->hEditRect=0;
+        CurView->HaveEditRect=FALSE;
+        if (CurView->OldFunctionStact0)
+        {
+        	CurView->StartupFunction = CurView->OldFunctionStact0;
+        	CurView->OldFunctionStact0 = 0; 
+        	_fmemset (CurView->Space2,0,sizeof(CurView->Space2));
+        }        	
+        if (CurView->StartupFunction)
+        {
+           	AddLBUTTON = TRUE;
+			AddGraphicsFunction (0, CurView->StartupFunction);        
+		}
+        if (!_fstricmp (CurView->FunctionDir,"fundir"))
+            _fstrcpy (CurView->FunctionDir,"index.txt");
+        if (CurView->Type != 7) CurView->ZoomTarget = 0;
+
+        for (i=0;i<CurView->NumFiles;i++)
+        {
+            _lread (FidConfig,&len,2);
+            CurView->lpFiles[i]=(LPSTR) &CurView->EndOfViewport + i * 128;
+            _lread (FidConfig,CurView->lpFiles[i],len); 
+            _fstrupr (CurView->lpFiles[i]);
+
+        } 
+        for (i=0;i<CurView->NumVisList;i++)
+        {
+            hVisList=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+            if (!hVisList) return(MemError());
+            CurVis =(LPVISLIST) GlobalLock (hVisList);
+            _lread (FidConfig,CurVis,sizeof(VISLIST));
+            CurVis->hVisList = hVisList;
+            if (!i)
+            {
+                CurView->pVisList1=CurVis;
+                CurVis->LastVisList = 0;
+            }
+            else
+            {   
+                CurVis->LastVisList = LastVisList;
+                SaveVis = CurVis;
+                CurVis =(LPVISLIST) LastVisList;
+                CurVis->NextVisList = (LPSTR)SaveVis;
+                CurVis = SaveVis;
+            }
+            CurVis->NextVisList = 0;
+            LastVisList = (LPSTR)CurVis;
+        } 
+        for (i=0;i<CurView->NumPickList;i++)
+        {
+            hVisList=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+            if (!hVisList) return(MemError());
+            CurVis =(LPVISLIST) GlobalLock (hVisList);
+            _lread (FidConfig,CurVis,sizeof(VISLIST));
+            CurVis->hVisList = hVisList;
+            if (!i)
+            {
+                CurView->pPickList1=CurVis;
+                CurVis->LastVisList = 0;
+            }
+            else
+            {   
+                CurVis->LastVisList = LastVisList;
+                SaveVis = CurVis;
+                CurVis =(LPVISLIST) LastVisList;
+                CurVis->NextVisList = (LPSTR)SaveVis;
+                CurVis = SaveVis;
+            }
+            CurVis->NextVisList = 0;
+            LastVisList = (LPSTR)CurVis;
+        } 
+        if (CurView->pVisListManual)
+        {
+            hVisList=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+            CurVis =(LPVISLIST) GlobalLock (hVisList);
+            _lread (FidConfig,CurVis,sizeof(VISLIST));
+            CurVis->hVisList = hVisList;   
+            CurView->pVisListManual = CurVis;
+        }
+        if (CurView->pPickListManual)
+        {
+            hVisList=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+            CurVis =(LPVISLIST) GlobalLock (hVisList);
+            _lread (FidConfig,CurVis,sizeof(VISLIST));
+            CurVis->hVisList = hVisList;   
+            CurView->pPickListManual = CurVis;
+        }
+        if (CurView->VisName[0])
+            LoadVisList (CurView->VisName);
+        if (CurView->PickName[0])
+            LoadPickList (CurView->PickName);
+        LoadDisplayRedefFile(CurView->DisplayRedefFile);
+        if (CurView->pTheme)
+        {
+            ReadObject(FidConfig,FALSE,&CurView->pTheme);
+            CurView->pTheme->DisplayViewport = CurView->ID;
+        }
+        if (CurView->BoundsDisplayID)
+        {
+            BoundsDisplayRead (&CurView->lpBoundsDisplay,FidConfig);
+        }
+        if (CurView->ZoomTarget && CurView->ZoomTarget < CurView->ID)
+        {
+            pViewportsD[iv] = pViewportsD[CurView->ZoomTarget-1];
+            pViewportsD[CurView->ZoomTarget-1]=CurView;
+        } 
+
+//          AddActivateSwitch();
+
+    }
+    n = 0; 
+    for (iv=0;iv<NumViews;iv++)
+    {   
+        if (pViewports[iv]->Type == 7)
+            pViewportsD[n++] = pViewports[iv];
+    }
+    for (iv=0;iv<NumViews;iv++)
+    {   
+        if (pViewports[iv]->Type != 7 && !pViewports[iv]->pTheme)
+            pViewportsD[n++] = pViewports[iv];
+    }
+    for (iv=0;iv<NumViews;iv++)
+    {   
+        if (pViewports[iv]->Type != 7 && pViewports[iv]->pTheme)
+            pViewportsD[n++] = pViewports[iv];
+    }
+    
+    for (iv=0;iv<NumViews;iv++)
+    {
+        CurView = pViewports[iv];
+        if (CurView->pTheme)
+        {
+            SaveView = CurView;
+            CurTheme = CurView->pTheme;
+            CurView = pViewports[CurTheme->TargetViewport-1]; 
+            if (CurView)
+            {
+                CurView->pThemes[CurView->NumThemes]=CurTheme;
+                CurView->NumThemes++;  
+            }
+            CurView=SaveView;  
+        }
+    }
+    while (ReadObject (FidConfig, FALSE,NULL));
+    _lclose (FidConfig);
+    if (ExistFile ("startup.bmp") && FirstSchmooze)
+    { 
+        FirstSchmooze=FALSE;
+        {
+#if WIN32
+          DialogBox(hInst, (LPSTR)"SCHMOOZ", hWnd, SCHMOOZMsgProc);
+#else
+          FARPROC lpfnSCHMOOZMsgProc;
+          lpfnSCHMOOZMsgProc = MakeProcInstance((FARPROC)SCHMOOZMsgProc, hInst);
+          DialogBox(hInst, (LPSTR)"SCHMOOZ", hWnd, lpfnSCHMOOZMsgProc);
+          FreeProcInstance(lpfnSCHMOOZMsgProc);
+#endif
+        }
+    }
+    NumViewports = NumViews;
+    TransferSavedZoom ();  
+    CurView=pViewports[CommandViewport-1];
+    if (!CurView->HaveBounds && hDC)
+    {
+    	if (GetVisBounds (&CurView->NewBounds,hDC))
+    	{   
+    		CurView->HaveBounds=TRUE;
+    		CurView->WBounds = CurView->NewBounds;
+//           	SetBounds(CurView->hWnd,hDC); 
+        }
+    }
+    ResetToViewport = 0;  
+	ClearHighlightList (); 
+    if (UsePromptWindow)
+    {
+	  FARPROC lpfnPROMPTSMsgProc;
+	  
+      lpfnPROMPTSMsgProc = MakeProcInstance((FARPROC)PROMPTSMsgProc, hInst);
+      CreateDialog(hInst, (LPSTR)"PROMPTS", hWnd, lpfnPROMPTSMsgProc);
+    }
+    return(TRUE); 
+}
+
+BOOL SaveConfig (LPSTR Name)
+{   short     Signature, Version=4;  
+    OFSTRUCT    OFStruct;
+    short     len, iv,  i;
+    short     imenu;
+    LPINT   lpMenuMask;
+    short     NumViews; 
+    LPVISLIST   SaveVisList, SavePickList;
+    HBITMAP SaveBitmap;   
+    short     NumIB;
+    
+    FidConfig = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+    if (FidConfig == HFILE_ERROR) 
+    {   char    str[256];
+        
+        sprintf (str,"Unable to create config file: %s",Name);
+        MessageBox( GetFocus(), str,0, MB_OK|MB_ICONEXCLAMATION);
+        return (FALSE);
+    }
+
+    _lwrite (FidConfig,StartupCommand,sizeof(StartupCommand));
+    _lwrite (FidConfig,StartupMenu,sizeof(StartupMenu)); 
+    if (SaveInfoBox)
+    	NumIB = GetNumInfoBox ();
+    else
+    	NumIB = 0;
+    _lwrite (FidConfig,(char *)&NumIB,sizeof(NumIB)); 
+    if (NumIB)
+        WriteInfoBoxes (FidConfig);
+    NumViews=NumViewports; 
+    _lwrite (FidConfig,(char *)&NumViewports,2);
+    _lwrite (FidConfig,(char *)&CommandViewport,2);               
+    _lwrite (FidConfig,(char *)&NumMenuMask,sizeof(NumMenuMask)); 
+    lpMenuMask = GlobalLock (hMenuMask); 
+    for (imenu=0;imenu<NumMenuMask;imenu++,lpMenuMask++)
+    {
+        _lwrite (FidConfig,(char *)lpMenuMask,sizeof(short));  
+    } 
+    GlobalUnlock (hMenuMask);
+    _lwrite (FidConfig,(char *)&WindowColor,4);
+    _lwrite(FidConfig,(char *)&TAGBox,sizeof(TAGBOX));
+    for (iv=0;iv<NumViews;iv++)
+    {
+        CurView = pViewports[iv]; 
+        SaveBitmap = CurView->Bitmap;
+        CurView->Bitmap = 0;
+        SavePickList = CurView->pPickList1;
+        SaveVisList = CurView->pVisList1;
+        CurView->pPickList1 = 0;
+        CurView->pVisList1 = 0;  
+        if (!SaveZoom)
+        {
+            CurView->WindowIsZoomed = FALSE; 
+            CurView->HaveBounds = FALSE;
+        }
+        CloseNewObjects();
+        i=_lwrite (FidConfig,(char *)CurView,sizeof(VIEWPORT)); 
+        CurView->pPickList1 = SavePickList;
+        CurView->pVisList1 = SaveVisList;
+        for (i=0;i<CurView->NumFiles;i++)
+        {   
+            len = _fstrlen(CurView->lpFiles[i])+1;
+            _lwrite (FidConfig,(char *)&len,2);
+            CurView->lpFiles[i]=(LPSTR) &CurView->EndOfViewport + i * 128;
+            _lwrite (FidConfig,CurView->lpFiles[i],len);
+        } 
+        CurVis = CurView->pVisList1;
+        while (CurVis)
+        {  
+            _lwrite (FidConfig,(char *)CurVis,sizeof(VISLIST));
+            CurVis =(LPVISLIST) CurVis->NextVisList;
+        } 
+        CurVis = CurView->pPickList1;
+        while (CurVis)
+        {  
+            _lwrite (FidConfig,(char *)CurVis,sizeof(VISLIST));
+            CurVis =(LPVISLIST) CurVis->NextVisList;
+        } 
+        if (CurView->pVisListManual)
+            _lwrite (FidConfig,(char *)CurView->pVisListManual,sizeof(VISLIST));
+        if (CurView->pPickListManual)
+            _lwrite (FidConfig,(char *)CurView->pPickListManual,sizeof(VISLIST));
+        if (CurView->pTheme)
+        {
+            CurTheme = CurView->pTheme;
+            WriteCurTheme(FidConfig);
+        }
+        if (CurView->BoundsDisplayID)
+        {
+            BoundsDisplayWrite (CurView->lpBoundsDisplay,FidConfig);
+        } 
+        CurView->Bitmap = SaveBitmap;
+    } 
+    if (SaveGlobals)
+    	SaveGlobalVals (FidConfig);
+//    if (SaveInfoBox)
+//    	SaveInfoBoxes (FidConfig);
+    Signature = 28052;
+    _lwrite (FidConfig,(char *)&Signature,2);
+    _lwrite (FidConfig,(char *)&Version,2);
+    _lclose (FidConfig);
+    return(TRUE); 
+}
+
+BOOL CopyVisListToPickList (void)
+{
+    LPVISLIST   FromVis, LastVis;
+    
+    LastVis = 0;
+    CurView->NumPickList = CurView->NumVisList;
+    FromVis = CurView->pVisList1;
+    while (FromVis)
+    {
+        hVisList=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+        if (!hVisList) return(MemError());
+        CurVis =(LPVISLIST) GlobalLock (hVisList);
+        *CurVis = *FromVis; 
+        if (!LastVis) CurView->pPickList1 = CurVis;
+        CurVis->LastVisList = (LPSTR)  LastVis;
+        CurVis->NextVisList = 0;
+        CurVis->hVisList = hVisList; 
+        if (LastVis) LastVis->NextVisList = (LPSTR) CurVis;
+        LastVis = CurVis; 
+        FromVis = (LPVISLIST) FromVis->NextVisList;
+    }
+    return(TRUE);
+}
+
+BOOL LoadPickList (LPSTR InName)
+{   LPVISLIST   SaveVis, LastVisList;
+    short FidVis, nread;
+    OFSTRUCT    OFStruct;
+    char     Name[128];
+   
+    _fstrcpy (Name,InName);
+    if (!ExistFile(Name))
+    {
+        if (!_fstrchr(Name,'\\'))
+        {
+            _fstrcpy (Name,"piklists\\");
+            _fstrcat (Name,InName);
+        }
+        if (!_fstrchr (Name,'.'))
+            _fstrcat (Name,".pik"); 
+        if (!ExistFile(Name))
+            return FALSE;
+    }
+
+    CurVis = CurView->pPickList1;
+    while (CurVis)
+    {
+		if (CurView->pPickListManual == CurVis)
+			CurView->pPickListManual = 0;
+        hVisList = CurVis->hVisList;
+        CurVis =  (LPVISLIST) CurVis->NextVisList;
+        GlobalUnlock(hVisList);
+        GlobalFree(hVisList);
+    }
+    if (CurView->pPickListManual)
+    {
+		hVisList = CurView->pPickListManual->hVisList;
+        GlobalUnlock(hVisList);
+        GlobalFree(hVisList);
+        CurView->pPickListManual=0;
+    }
+    CurView->NumPickList=0;
+    CurView->pPickList1 = 0;
+    FidVis = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ);
+    if (FidVis != HFILE_ERROR)
+    { 
+        LastVisList = 0;
+        hVisList=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+        if (!hVisList) return(MemError());
+        CurVis =(LPVISLIST) GlobalLock (hVisList);
+        nread = _lread (FidVis,CurVis,sizeof(VISLIST));
+        while (nread == sizeof(VISLIST))
+        {
+            CurView->NumPickList++;
+            CurVis->hVisList = hVisList; 
+            if (CurVis->LastVisList == (char *)1)
+            {
+                CurView->pPickListManual = CurVis; 
+                if (!CurView->pPickList1)
+                    CurView->pPickList1=CurVis;
+            }
+            else
+                if (!CurView->pPickList1) CurView->pPickList1 = CurVis;
+            CurVis->LastVisList = (LPSTR) LastVisList; 
+            CurVis->NextVisList = 0;
+            if (LastVisList)
+            {
+                SaveVis = CurVis;
+                CurVis = LastVisList;
+                CurVis->NextVisList = (LPSTR)SaveVis;
+                CurVis = SaveVis;
+            }
+            LastVisList = CurVis; 
+   

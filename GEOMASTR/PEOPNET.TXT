@@ -1,0 +1,59 @@
+Functions:
+
+	$MAKEMAP(COORD,Longitude,Latitude,Scale,OutputBitmapPathname) 
+	
+		where:
+			Longitude and Latitude are in decimal degrees.
+			Scale is in miles.
+			
+		Generates the map as specified in the Grapnical Maps section and
+		places it into the output bitmap.
+			
+	$MAKEMAP(CITY,CityName,Scale,OutputBitmapPathname) 
+	
+		Generates the map centered on the specified city using the specified
+		scale (in miles) and places it into the output bitmap.
+			
+	$WHEREAT(Longitude,Latitude)
+	
+		Returns the four strings specified in item 4 of Textual Description. 
+		The strings are separated in the return field by CRLF characters. 
+	
+	$LOADVIS(VisfileName)
+		
+		May be used to switch to a different visibility file.
+		
+	$LOADINI(INIPathName)
+	
+		May be used to load a global.ini file (or reset all variables by
+		reloading the original one)
+		
+	
+Variables:
+	May be specified in the 'global.ini' file or passed to the GeoMaster Command
+	processor.
+	
+	[ROADS1_WIDTH]  width of roads1 layer in pixels
+	[ROADS2_WIDTH]  width of roads2 layer in pixels
+	[ROADS3_WIDTH]  width of roads3 layer in pixels
+	[WATER_WIDTH]   width of water layer in pixels
+	[OTHER_WIDTH]   width of other layer in pixels
+		
+	[ROADS1_COLOR]  color of roads1 layer (may be set with $RGB function)
+	[ROADS2_COLOR]  color of roads1 layer  
+	[ROADS3_COLOR]  color of roads1 layer 
+	[WATER_COLOR]	color of water layer  
+	[OTHER_COLOR]	color of other layer  
+	
+	[BITMAP_WIDTH]  height of output bitmap in pixels.
+	[BITMAP_HEIGHT]	width of output bitmap in pixels.
+	[BITMAP_BPP]	color depth of output bitmap in bits/pixel. Must be either
+					4(16 colors), 8(256 colors), or 24 (too many colors)
+					
+ 	[IN_CITY_SCALE]	scale in miles to be used if point is in city.  
+ 	[SMALL_CITY_POP]	population used to determine if point is in a small city or larger 
+ 	[LARGE_CITY_POP]	population used to find nearest large city.
+ 	[IN_CITY_POP]	population used to determine if point is in city. 
+ 	
+ 	[MAX_OFF_DIST]	maximum distance point can be off of road and still identified
+ 					as being on road (in feet)

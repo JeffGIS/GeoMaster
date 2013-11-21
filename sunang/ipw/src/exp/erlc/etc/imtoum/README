@@ -1,0 +1,14 @@
+"Pgm.skel":
+
+	This file contains the list of section headings that the program
+	"imtoum" expects an IPW program to have.
+
+
+"Lib.skel":
+
+	This file contains the list of section headings for an IPW library
+	function; this list is based on the list of headings for IPW programs
+	so that the program "imtoum" can be easily modified to handle
+	library functions as well.
+
+5/95, J. Domingo

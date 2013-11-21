@@ -1,0 +1,15 @@
+This package dynamically determines machine dependent constants.  It
+writes out the constants in a form suitable for #include files float.h
+and limits.h.  The algorithm and code for the floating-point
+calculations are from:
+
+    Cody, W. J., "Algorithm 665, MACHAR: A subroutine to dynamically
+	determine machine parameters," ACM Transactions on Mathematical
+	Software, 14, 303-309, 1988.
+
+"Official" descriptions of the variables are from:
+
+    "Draft Proposed American National Standard for Information
+	Systems -- Programming Language C," Doc. No. X3J11/88-001.
+
+$Header: /home/ipw/src/etc/machine/RCS/README,v 1.1 90/01/31 15:33:47 frew Exp $

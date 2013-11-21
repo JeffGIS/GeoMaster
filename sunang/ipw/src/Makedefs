@@ -1,0 +1,8 @@
+# NB: "lib" must be first
+DIRS=\
+	lib etc bin exp
+
+default: all
+install: all
+
+# $Header: /usr.MC68020/home/ipw/src/RCS/Makedefs,v 1.2 89/10/18 20:21:54 frew Exp $

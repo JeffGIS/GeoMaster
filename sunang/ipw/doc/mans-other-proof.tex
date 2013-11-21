@@ -1,0 +1,56 @@
+\documentstyle{article}
+ 
+\setlength{\topmargin} {-0.75in}
+\setlength{\textheight} {9.2in}
+ 
+% The following lets you set just one margin size and let it adjust the
+% rest.  This assumes equal even and odd margins, and 8.5in paper.
+%   It also sets marginal note parameters.
+%
+\newcommand{\marginsize}[1]{%
+  \setlength{\oddsidemargin}{#1}
+  \setlength{\textwidth}{8.5in}                % initially the entire page
+  \addtolength{\textwidth}{-2\oddsidemargin}   % subtract margin size
+  \setlength{\marginparwidth}{.75\oddsidemargin}% set margin note size
+  \setlength{\marginparsep}{.1\oddsidemargin}  % set separation
+  \addtolength{\oddsidemargin}{-1in}           % 0 margin means 1in margin
+  \setlength{\evensidemargin}{\oddsidemargin}  % equal margins
+}
+\marginsize{1.0in}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+\Large\bf      Documentation Checklist -- Other IPW Programs
+\vspace{.3in}
+\end{center}
+ 
+\begin{tabular}{||l|l|l||} \hline
+Program Name & Acceptable & Needs Work \\ \hline\hline
+dempt & & \\ \hline
+elevrad & & \\ \hline
+ipw2pbm & & \\ \hline
+randomize & & \\ \hline
+refdx & & \\ \hline
+seq & & \\ \hline
+solar & & \\ \hline
+solar.old & & \\ \hline
+sunlight & & \\ \hline
+toporad & & \\ \hline
+topquad & & \\ \hline
+twostream & & \\ \hline
+ipwfile & & \\ \hline
+pbm2ipw & & \\ \hline
+ & & \\ \hline
+install & & \\ \hline
+ipwmake & & \\ \hline
+config & & \\ \hline
+atob & & \\ \hline
+btoa & & \\ \hline
+ipwlint & & \\ \hline
+ipwman & & \\ \hline
+mc & & \\ \hline
+objs & & \\ \hline
+\end{tabular}
+\end{document}

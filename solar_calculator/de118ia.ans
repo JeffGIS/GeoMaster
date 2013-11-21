@@ -1,0 +1,353 @@
+
+	Steve Moshier's Ephemeris Reader v5.4
+
+Planetary positions are from DE200.
+Terrestrial east longitude -71.1300 deg
+geocentric latitude 42.0785 deg
+Earth radius 0.99849
+temperature 12.0 C
+pressure 1010 mb
+Input time is TDT.
+Enter starting date of tabulation
+Calendar date: Year (1986) ? Month (1-12) (1) ? Day.fraction (1.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 30 Monday 15h 00m 20.319s  UT
+1969 June 30 Monday 15h 01m 00.000s  TDT
+Julian day 2440403.1256944
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (0) ? 
+                   The Sun
+
+JD 2440403.13,  1969 June 30 Monday 15h 00m 20.319s  UT
+1969 June 30 Monday 15h 01m 00.000s  TDT
+Opened unxp1950.200
+First date in file = 2.43326450E+06
+ecliptic long   98d 37' 47.48"   lat -  0d 00' 00.80"   rad 1.016651189E+00
+light time 8.4552m,  aberration dRA 0.000s dDec 0.00"
+annual aberration dRA -1.457s dDec 1.37"
+nutation dRA 0.187s dDec 8.20"
+    Apparent:  R.A.   6h 37m 33.051s  Dec.    23d 09' 52.85"  
+Apparent longitude 98.624827 deg
+Local apparent sidereal time   4h 49m 49.517s  
+approx local meridian transit 16h 48m 04.720s  UT  (date + 0.70005)
+rises approx   9h 11m 02.914s  UT,  sets approx  24h 24m 54.943s  UT
+diurnal parallax dRA 0.211s dDec -3.07"
+diurnal aberration dRA 0.015s dDec -0.04"
+atmospheric refraction 0.009 deg  dRA -1.609s dDec 23.76"
+Topocentric:  Altitude 60.599 deg, Azimuth 122.004 deg
+Topocentric: R.A.  6h 37m 31.668s   Dec.   23d 10' 13.49"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (15) ? Minutes (1) ? Seconds (0.000000) ? 1969 June 30 Monday 22h 29m 20.318s  UT
+1969 June 30 Monday 22h 30m 00.000s  TDT
+Julian day 2440403.4375000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (0) ? 
+                  Mercury        
+
+JD 2440403.44,  1969 June 30 Monday 22h 29m 20.318s  UT
+1969 June 30 Monday 22h 30m 00.000s  TDT
+ecliptic long  354d 11' 14.65"   lat -  5d 39' 38.77"   rad 3.616657792E-01
+light time 8.2243m,  aberration dRA -0.690s dDec -5.18"
+true geocentric distance 0.9890431 au    equatorial diameter 6.80"
+approx. visual magnitude -2.0, phase 0.553
+Astrometric J2000.0:  R.A.   5h 11m 44.239s  Dec.    20d 54' 14.48"  
+Astrometric B1950.0:  R.A.   5h 08m 45.631s  Dec.    20d 50' 38.62"  
+elongation from sun 20.72 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -1.343s dDec -1.32"
+nutation dRA 0.102s dDec 8.44"
+    Apparent:  R.A.   5h 09m 54.012s  Dec.    20d 52' 11.37"  
+Local apparent sidereal time  12h 20m 03.279s  
+approx local meridian transit 15h 18m 35.314s  UT  (date + 0.63791)
+rises approx   7h 54m 12.905s  UT,  sets approx  22h 43m 49.801s  UT
+diurnal parallax dRA -0.448s dDec -6.27"
+diurnal aberration dRA -0.005s dDec 0.08"
+atmospheric refraction 0.294 deg  dRA 53.459s dDec 750.24"
+Topocentric:  Altitude 2.083 deg, Azimuth 296.951 deg
+Topocentric: R.A.  5h 10m 47.018s   Dec.   21d 04' 35.42"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (22) ? Minutes (30) ? Seconds (0.000000) ? 1969 June 30 Monday 13h 36m 20.319s  UT
+1969 June 30 Monday 13h 37m 00.000s  TDT
+Julian day 2440403.0673611
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (1) ? 
+                  Venus          
+
+JD 2440403.07,  1969 June 30 Monday 13h 36m 20.319s  UT
+1969 June 30 Monday 13h 37m 00.000s  TDT
+ecliptic long  330d 26' 04.31"   lat -  3d 15' 49.15"   rad 7.279727605E-01
+light time 6.7089m,  aberration dRA -0.188s dDec -1.55"
+true geocentric distance 0.8067643 au    equatorial diameter 20.68"
+approx. visual magnitude -4.9, phase 0.563
+Astrometric J2000.0:  R.A.   3h 28m 44.524s  Dec.    15d 52' 23.85"  
+Astrometric B1950.0:  R.A.   3h 25m 55.945s  Dec.    15d 42' 04.52"  
+elongation from sun 45.27 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.967s dDec -2.76"
+nutation dRA 0.038s dDec 7.13"
+    Apparent:  R.A.   3h 27m 00.703s  Dec.    15d 46' 11.50"  
+Local apparent sidereal time   3h 25m 35.717s  
+approx local meridian transit 13h 37m 45.317s  UT  (date + 0.56789)
+rises approx   6h 35m 12.454s  UT,  sets approx  20h 40m 54.908s  UT
+diurnal parallax dRA 0.003s dDec -4.82"
+diurnal aberration dRA 0.016s dDec 0.00"
+atmospheric refraction 0.008 deg  dRA -0.020s dDec 28.75"
+Topocentric:  Altitude 63.505 deg, Azimuth 179.236 deg
+Topocentric: R.A.  3h 27m 00.703s   Dec.   15d 46' 35.43"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (13) ? Minutes (37) ? Seconds (0.000000) ? 1969 June 30 Monday  5h 59m 20.320s  UT
+1969 June 30 Monday  6h 00m 00.000s  TDT
+Julian day 2440402.7500000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (2) ? 
+                   The Moon
+
+JD 2440402.75,  1969 June 30 Monday  5h 59m 20.320s  UT
+1969 June 30 Monday  6h 00m 00.000s  TDT
+Light time = 1.19092 sec
+nutation dRA 0.226s dDec -7.89"
+Geometric lon 284.21592, lat -4.71873, rad 2.3865891e-03
+Apparent geocentric longitude 284.2162558 deg  284d 12' 58.52"  
+   Latitude -4.7187378 deg -  4d 43' 07.46"  
+Distance 55.97692121 Earth-radii
+Horizontal parallax    1d 01' 25.01"  Semidiameter    0d 16' 44.07"  
+Elongation from sun 172.42 deg,  Illuminated fraction 1.00
+Phase 0.4 days past Full Moon
+    Apparent:  R.A. 19h 03m 59.778s  Declination - 27d 22' 40.76"  
+RA = 285.999076 deg, Dec = -27.377989 deg, pi = 1.0236152 deg
+Local apparent sidereal time  19h 47m 20.641s  
+approx local meridian transit  5h 13m 58.168s  UT  (date + 0.21803)
+rises approx   0h 58m 27.428s  UT,  sets approx   9h 33m 36.431s  UT
+diurnal parallax dRA -39.119s dDec -3443.05"
+diurnal aberration dRA 0.018s dDec -0.02"
+atmospheric refraction 0.047 deg  dRA 1.926s dDec 168.75"
+Topocentric:  Altitude 18.718 deg, Azimuth 190.211 deg
+Topocentric: R.A. 19h 03m 22.602s   Dec. - 28d 17' 15.07"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (6) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 30 Monday  4h 59m 20.320s  UT
+1969 June 30 Monday  5h 00m 00.000s  TDT
+Julian day 2440402.7083333
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (3) ? 
+                  Mars           
+
+JD 2440402.71,  1969 June 30 Monday  4h 59m 20.320s  UT
+1969 June 30 Monday  5h 00m 00.000s  TDT
+ecliptic long  266d 19' 51.49"   lat -  1d 06' 49.80"   rad 1.461918507E+00
+light time 4.2630m,  aberration dRA -1.066s dDec 3.89"
+true geocentric distance 0.5125567 au    equatorial diameter 18.26"
+approx. visual magnitude -2.1, phase 0.956
+Astrometric J2000.0:  R.A.  15h 59m 17.099s  Dec.  - 23d 47' 36.09"  
+Astrometric B1950.0:  R.A.  15h 56m 18.088s  Dec.  - 23d 39' 06.62"  
+elongation from sun 143.79 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA 1.153s dDec -3.91"
+nutation dRA 0.013s dDec -7.65"
+    Apparent:  R.A.  15h 57m 28.998s  Dec.  - 23d 42' 38.20"  
+Local apparent sidereal time  18h 47m 10.784s  
+approx local meridian transit  2h 10m 09.800s  UT  (date + 0.09039)
+rises approx  21h 41m 28.362s  UT,  sets approx   6h 38m 51.418s  UT
+diurnal parallax dRA -0.625s dDec -14.29"
+diurnal aberration dRA 0.013s dDec -0.06"
+atmospheric refraction 0.068 deg  dRA 9.090s dDec 209.04"
+Topocentric:  Altitude 13.340 deg, Azimuth 219.392 deg
+Topocentric: R.A. 15h 57m 37.477s   Dec. - 23d 39' 23.52"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (5) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 30 Monday 17h 59m 20.319s  UT
+1969 June 30 Monday 18h 00m 00.000s  TDT
+Julian day 2440403.2500000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (4) ? 
+                  Jupiter        
+
+JD 2440403.25,  1969 June 30 Monday 17h 59m 20.319s  UT
+1969 June 30 Monday 18h 00m 00.000s  TDT
+ecliptic long  188d 46' 32.33"   lat    1d 18' 19.92"   rad 5.452733167E+00
+light time 46.1269m,  aberration dRA -0.517s dDec 3.32"
+true geocentric distance 5.5462237 au    equatorial diameter 35.50"
+approx. visual magnitude -2.0, phase 0.992
+Astrometric J2000.0:  R.A.  11h 57m 01.828s  Dec.     1d 43' 13.72"  
+Astrometric B1950.0:  R.A.  11h 54m 28.062s  Dec.     1d 59' 55.81"  
+elongation from sun 79.46 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.213s dDec 1.87"
+nutation dRA 0.145s dDec -0.65"
+    Apparent:  R.A.  11h 55m 27.948s  Dec.     1d 53' 26.29"  
+Local apparent sidereal time   7h 49m 18.923s  
+approx local meridian transit 22h 04m 52.891s  UT  (date + 0.92006)
+rises approx  15h 55m 50.163s  UT,  sets approx  28h 13m 50.585s  UT
+diurnal parallax dRA 0.069s dDec -1.04"
+diurnal aberration dRA 0.008s dDec -0.01"
+atmospheric refraction 0.040 deg  dRA -6.679s dDec 101.68"
+Topocentric:  Altitude 22.043 deg, Azimuth 108.616 deg
+Topocentric: R.A. 11h 55m 21.345s   Dec.    1d 55' 06.92"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (18) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 30 Monday  6h 59m 20.320s  UT
+1969 June 30 Monday  7h 00m 00.000s  TDT
+Julian day 2440402.7916667
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (5) ? 
+                  Saturn         
+
+JD 2440402.79,  1969 June 30 Monday  6h 59m 20.320s  UT
+1969 June 30 Monday  7h 00m 00.000s  TDT
+ecliptic long   31d 09' 45.46"   lat -  2d 27' 57.56"   rad 9.262194648E+00
+light time 80.6888m,  aberration dRA -0.437s dDec -2.27"
+true geocentric distance 9.7019845 au    equatorial diameter 17.05"
+approx. visual magnitude 0.9, phase 0.998
+Astrometric J2000.0:  R.A.   2h 22m 17.416s  Dec.    11d 40' 12.80"  
+Astrometric B1950.0:  R.A.   2h 19m 35.808s  Dec.    11d 26' 34.17"  
+elongation from sun 61.63 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.634s dDec -2.42"
+nutation dRA 0.033s dDec 5.49"
+    Apparent:  R.A.   2h 20m 38.176s  Dec.    11d 31' 57.23"  
+Local apparent sidereal time  20h 47m 30.498s  
+approx local meridian transit 12h 31m 37.824s  UT  (date + 0.52197)
+rises approx   5h 46m 42.837s  UT,  sets approx  19h 16m 35.835s  UT
+diurnal parallax dRA 0.045s dDec -0.58"
+diurnal aberration dRA 0.002s dDec -0.05"
+atmospheric refraction 0.071 deg  dRA -13.059s dDec 167.55"
+Topocentric:  Altitude 12.738 deg, Azimuth 85.836 deg
+Topocentric: R.A.  2h 20m 25.165s   Dec.   11d 34' 44.16"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (7) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+Julian day 2440402.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (6) ? 
+                  Uranus         
+
+JD 2440402.50,  1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+ecliptic long  183d 15' 09.01"   lat    0d 43' 44.48"   rad 1.830864686E+01
+light time 153.2051m,  aberration dRA -0.299s dDec 1.97"
+true geocentric distance 18.4212543 au    equatorial diameter 3.80"
+approx. visual magnitude 5.5, phase 0.999
+Astrometric J2000.0:  R.A.  12h 03m 04.610s  Dec.     0d 27' 20.92"  
+Astrometric B1950.0:  R.A.  12h 00m 30.890s  Dec.     0d 44' 03.15"  
+elongation from sun 82.07 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.162s dDec 1.33"
+nutation dRA 0.123s dDec -0.81"
+    Apparent:  R.A.  12h 01m 30.777s  Dec.     0d 37' 32.89"  
+Local apparent sidereal time  13h 46m 21.499s  
+approx local meridian transit 22h 14m 46.461s  UT  (date + 0.92693)
+rises approx  16h 10m 24.255s  UT,  sets approx  28h 19m 07.717s  UT
+diurnal parallax dRA -0.010s dDec -0.32"
+diurnal aberration dRA 0.014s dDec 0.00"
+atmospheric refraction 0.018 deg  dRA 1.872s dDec 57.16"
+Topocentric:  Altitude 42.177 deg, Azimuth 216.570 deg
+Topocentric: R.A. 12h 01m 32.653s   Dec.    0d 38' 29.74"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 30 Monday  6h 44m 20.320s  UT
+1969 June 30 Monday  6h 45m 00.000s  TDT
+Julian day 2440402.7812500
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (7) ? 
+                  Neptune        
+
+JD 2440402.78,  1969 June 30 Monday  6h 44m 20.320s  UT
+1969 June 30 Monday  6h 45m 00.000s  TDT
+ecliptic long  237d 35' 35.45"   lat    1d 42' 09.88"   rad 3.032391716E+01
+light time 245.8518m,  aberration dRA -0.252s dDec 0.88"
+true geocentric distance 29.5610479 au    equatorial diameter 2.27"
+approx. visual magnitude 7.9, phase 1.000
+Astrometric J2000.0:  R.A.  15h 39m 25.404s  Dec.  - 17d 43' 46.59"  
+Astrometric B1950.0:  R.A.  15h 36m 34.372s  Dec.  - 17d 34' 04.56"  
+elongation from sun 137.98 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA 1.027s dDec -3.03"
+nutation dRA 0.030s dDec -7.31"
+    Apparent:  R.A.  15h 37m 42.068s  Dec.  - 17d 38' 03.09"  
+Local apparent sidereal time  20h 32m 28.033s  
+approx local meridian transit  1h 50m 23.570s  UT  (date + 0.07666)
+rises approx  20h 55m 03.065s  UT,  sets approx   6h 45m 44.436s  UT
+diurnal parallax dRA -0.015s dDec -0.21"
+diurnal aberration dRA 0.005s dDec -0.07"
+atmospheric refraction 0.528 deg  dRA 94.199s dDec 1338.87"
+Topocentric:  Altitude 0.199 deg, Azimuth 246.160 deg
+Topocentric: R.A. 15h 39m 16.257s   Dec. - 17d 15' 44.49"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (6) ? Minutes (45) ? Seconds (0.000000) ? 1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+Julian day 2440402.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (8) ? 
+                  Pluto          
+
+JD 2440402.50,  1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+ecliptic long  174d 26' 34.45"   lat   15d 33' 38.81"   rad 3.177460982E+01
+light time 266.3037m,  aberration dRA -0.261s dDec 1.12"
+true geocentric distance 32.0200613 au    equatorial diameter 0.13"
+approx. visual magnitude 14.0, phase 1.000
+Astrometric J2000.0:  R.A.  11h 59m 40.413s  Dec.    16d 54' 07.47"  
+Astrometric B1950.0:  R.A.  11h 57m 06.543s  Dec.    17d 10' 49.71"  
+elongation from sun 75.14 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.190s dDec 6.91"
+nutation dRA 0.289s dDec -0.69"
+    Apparent:  R.A.  11h 58m 06.654s  Dec.    17d 04' 25.17"  
+Local apparent sidereal time  13h 46m 21.499s  
+approx local meridian transit 22h 11m 23.027s  UT  (date + 0.92457)
+rises approx  15h 04m 19.992s  UT,  sets approx  29h 18m 24.283s  UT
+diurnal parallax dRA -0.006s dDec -0.12"
+diurnal aberration dRA 0.015s dDec 0.03"
+atmospheric refraction 0.011 deg  dRA 1.636s dDec 31.33"
+Topocentric:  Altitude 55.844 deg, Azimuth 230.750 deg
+Topocentric: R.A. 11h 58m 08.298s   Dec.   17d 04' 56.41"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 30 Monday 10h 17m 20.320s  UT
+1969 June 30 Monday 10h 18m 00.000s  TDT
+Julian day 2440402.9291667
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (9) ? Name of star catalogue file:  (star.cat) ? Line number (1) ? 2000 00 08 23.265  29 05 25.58   1.039  -16.33 -12.0 0.0240   2.06 alAnd(Alpheratz)       4
+
+
+               alpha Andromedae (Alpheratz)
+
+JD 2440402.93,  1969 June 30 Monday 10h 17m 20.320s  UT
+1969 June 30 Monday 10h 18m 00.000s  TDT
+Astrometric J2000.0:  R.A.   0h 08m 22.950s  Dec.    29d 05' 30.57"  
+Astrometric B1950.0:  R.A.   0h 05m 48.081s  Dec.    28d 48' 48.79"  
+Astrometric of date:  R.A.   0h 06m 48.407s  Dec.    28d 55' 19.45"  
+elongation from sun 85.10 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA 0.160s dDec -8.65"
+nutation dRA -0.187s dDec 1.05"
+    Apparent:  R.A.   0h 06m 48.380s  Dec.    28d 55' 11.84"  
+Local apparent sidereal time   0h 06m 03.025s  
+approx local meridian transit 10h 18m 05.550s  UT  (date + 0.42923)
+rises approx   2h 14m 46.018s  UT,  sets approx  18h 21m 25.083s  UT
+diurnal aberration dRA 0.018s dDec 0.00"
+atmospheric refraction 0.004 deg  dRA -0.011s dDec 13.68"
+Topocentric:  Altitude 76.653 deg, Azimuth 179.283 deg
+Topocentric: R.A.  0h 06m 48.387s   Dec.   28d 55' 25.53"  
+Name of star catalogue file:  (star.cat) ? Can't find file 0
+Operator error.
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (10) ? Minutes (18) ? Seconds (0.000000) ? 1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+Julian day 2440402.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (88) ? Name of orbit catalogue file:  (orbit.cat) ? Line number (1) ? 2447120.5 34.0897 267.3835 73.9085 167.4675275 0.00045478773
+
+0.994811 0.0062424619 2433282.423 5.0 0.0 Bradfield_1987s	5
+
+
+                  Bradfield_1987s
+
+JD 2440402.50,  1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+ecliptic long  178d 12' 43.90"   lat - 34d 05' 18.95"   rad 3.734235481E+01
+light time 311.8804m,  aberration dRA -0.041s dDec 0.27"
+true geocentric distance 37.4994826 au    equatorial diameter 0.00"
+approx. visual magnitude 20.7, phase 1.000
+Astrometric J2000.0:  R.A.  10h 49m 08.403s  Dec.  - 29d 34' 37.35"  
+Astrometric B1950.0:  R.A.  10h 46m 46.340s  Dec.  - 29d 18' 44.20"  
+elongation from sun 80.34 degrees, light defl. dRA 0.000s dDec 0.00"
+annual aberration dRA -0.662s dDec -7.95"
+nutation dRA -0.193s dDec 1.89"
+    Apparent:  R.A.  10h 47m 40.838s  Dec.  - 29d 25' 01.51"  
+Local apparent sidereal time  13h 46m 21.499s  
+approx local meridian transit 21h 01m 08.531s  UT  (date + 0.87579)
+rises approx  17h 01m 03.870s  UT,  sets approx  25h 01m 14.288s  UT
+diurnal parallax dRA -0.009s dDec -0.20"
+diurnal aberration dRA 0.013s dDec -0.08"
+atmospheric refraction 0.116 deg  dRA 16.809s dDec 356.90"
+Topocentric:  Altitude 7.473 deg, Azimuth 218.131 deg
+Topocentric: R.A. 10h 47m 57.651s   Dec. - 29d 19' 04.90"  
+
+Enter starting date of tabulation
+Calendar date: Year (1969) ? Month (1-12) (6) ? Day.fraction (30.000000) ? Time: Hours (0) ? Minutes (0) ? Seconds (0.000000) ? 1969 June 29 Sunday 23h 59m 20.321s  UT
+1969 June 30 Monday  0h 00m 00.000s  TDT
+Julian day 2440402.5000000
+Enter interval between tabulations in days (1.000000) ? Number of tabulations to display (1) ? Planet number 0-9 or 88 to read star, 99 to read orbit (99) ? 

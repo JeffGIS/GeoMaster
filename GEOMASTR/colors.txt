@@ -1,0 +1,6 @@
+Colors In GeoMaster
+
+Symbols in GeoMaster are made up of one or more elements. Each element is a single
+polyline or filled polygon. Each element is assigned a color. The colors may be
+fixed or variable. If the color is fixed, that element will always be drawn with that
+color unless the item using the symbol is highlighted or premiered. 

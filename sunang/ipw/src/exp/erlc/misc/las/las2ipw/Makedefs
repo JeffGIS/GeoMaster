@@ -1,0 +1,47 @@
+
+##
+##	SCCS version: @(#)   Makedefs   1.8   9/20/91
+##
+## 	Note:
+##
+##	This program requires the source code for the Land Analysis System
+##	(LAS) software
+##
+##	To set the LAS environment variables LASINCLUDE, LASLIB, etc.:
+##		setenv response LAS50BD
+##		source $LASROOT/lasinit
+##
+
+C_SPECIAL= -I$(LASINCLUDE) -I$(WORINCLUDE) -I$(TINC)
+LD_SPECIAL=
+LIBS_SPECIAL=$(LASLIB)/las.a $(WORLIB)/geolib.a $(WORLIB)/world.a \
+             $(TOLB)/clib.a $(TOLB)/lib.a -ltermlib
+
+PGM=las2ipw
+
+$(PGM):	$(OBJS) check_for_LAS
+
+SRCS = \
+        main.c headers.c copyimg.c copy_byte.c copy_short.c copy_long.c \
+        copy_float.c c_errmsg.c
+
+OBJS =\
+        main.o headers.o copyimg.o copy_byte.o copy_short.o copy_long.o \
+        copy_float.o c_errmsg.o
+
+copy_byte.c        : copy_buf.cpp
+copy_short.c       : copy_buf.cpp
+copy_long.c        : copy_buf.cpp
+copy_float.c       : copy_buf.cpp
+
+check_for_LAS:
+	@if [ -n "$(LASINCLUDE)" ]; \
+	then exit 0; \
+	else echo 'Land Analysis System (LAS) source code not available . . .'; \
+		echo "  cannot compile ipw2las"; \
+		exit 1; \
+	fi
+
+
+default: pgm
+install: install-pgm

@@ -1,0 +1,70 @@
+<html>
+<head><title>Bicubic Interpolation Library</title>
+<meta content="bicubic interpolation library bci" name=keywords>
+</head>
+<body bgcolor = "white">
+<center><h2>Bicubic Interpolation Library</h2></center><br>
+<h3>Documentation</h3>
+<h4>Introduction</h4>
+&nbsp;&nbsp;<b>libbci</b> uses to do 2-dimentional interpolation of 3D data. <br>
+The main goals of the library are:<br>
+&nbsp; - use real 2D method instead of bilinear interpolation method,<br>
+&nbsp; - have choise: use low or high level routines.
+<h4>Installation</h4>
+&nbsp;&nbsp;To install the library you have to extract archive or checkout
+sources from CVS and just type:<br>
+<i>
+# make<br>
+# make install
+</i><br>
+<h4>Usage</h4>
+&nbsp;&nbsp;If you have 3D data (set of (x, y, z) points), you need to
+fill <i>doublexyz</i> structure (see bci.h file for details) with this data,
+but this data must be already sorted. 
+After that use function void td_fillgrid() to get array with better resolution 
+setted by you own.<br>
+<pre STYLE="font: Courier New; font-size: x-small;margin:1px">void td_fillgrid(const doublexyz *inputarray, int icolumns, int irows, 
+doublexyz *outputarray, int ocolumns, int orows)</pre>
+<table>
+<tr><td>inputarray</td><td>array of points on which interpolation will be based,</td></tr>
+<tr><td>icolumns</td><td>number of columns in inputarray array,</td></tr>
+<tr><td>irows</td><td>number of rows in inputarray array,</td></tr>
+<tr><td>outputarray</td><td>array of points where results will be saved,</td></tr>
+<tr><td>ocolumns</td><td>number of columns in outputarray array,</td></tr>
+<tr><td>orows</td><td>number of rows in outputarray array.</td></tr>
+</table>
+<h4>Example</h4>
+&nbsp;&nbsp;xyz[16] is a Row-major array of input points and fxyz[256] is an
+array to be filled after interpolation. So after calling td_fillgrid routine
+you have array with better resolution.<hr>
+<PRE STYLE="font: Courier New; font-size: x-small;margin:1px">#include&lt;bci.h&gt;
+
+int main()
+&#123;
+    int i, j;
+    double x, y;
+    doublexyz xyz[<FONT COLOR=darkblue><b>16</b></FONT>], fxyz[<FONT COLOR=darkblue><b>256</b></FONT>];
+
+    <font color=blue>for</font>(i = <FONT COLOR=darkblue><b>0</b></FONT>; i &lt; <FONT COLOR=darkblue><b>4</b></FONT>; i++)
+        <font color=blue>for</font>(j = <FONT COLOR=darkblue><b>0</b></FONT>; j &lt; <FONT COLOR=darkblue><b>4</b></FONT>; j++) &#123;
+            x = i + <FONT COLOR=darkblue><b>2</b></FONT>.;
+            y = j + <FONT COLOR=darkblue><b>2</b></FONT>.;
+            xyz[<FONT COLOR=darkblue><b>4</b></FONT>*i + j].x = x;
+            xyz[<FONT COLOR=darkblue><b>4</b></FONT>*i + j].y = y;
+            xyz[<FONT COLOR=darkblue><b>4</b></FONT>*i + j].z = <FONT COLOR=darkblue><b>2</b></FONT>. + <FONT COLOR=darkblue><b>2</b></FONT>.*x*x + y*y*y + x*y;
+            printf(<FONT COLOR=green>&quot;%d: %f %f %f\n&quot;</FONT>, <FONT COLOR=darkblue><b>4</b></FONT>*i + j,
+                   xyz[<FONT COLOR=darkblue><b>4</b></FONT>*i + j].x, xyz[<FONT COLOR=darkblue><b>4</b></FONT>*i + j].y, xyz[<FONT COLOR=darkblue><b>4</b></FONT>*i + j].z);
+        &#125;
+
+    td_fillgrid(xyz, <FONT COLOR=darkblue><b>4</b></FONT>, <FONT COLOR=darkblue><b>4</b></FONT>, fxyz, <FONT COLOR=darkblue><b>16</b></FONT>, <FONT COLOR=darkblue><b>16</b></FONT>);
+
+    <font color=blue>for</font>(i = <FONT COLOR=darkblue><b>0</b></FONT>; i &lt; <FONT COLOR=darkblue><b>16</b></FONT>; i++) &#123;
+        <font color=blue>for</font>(j = <FONT COLOR=darkblue><b>0</b></FONT>; j &lt; <FONT COLOR=darkblue><b>16</b></FONT>; j++)
+            printf(<FONT COLOR=green>&quot;%f &quot;</FONT>, fxyz[<FONT COLOR=darkblue><b>16</b></FONT>*i + j].z);
+        printf(<FONT COLOR=green>&quot;\n&quot;</FONT>);
+    &#125;
+&#125;
+</PRE>
+<hr>
+</body>
+</html>

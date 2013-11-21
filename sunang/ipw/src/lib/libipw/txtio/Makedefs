@@ -1,0 +1,12 @@
+C_SPECIAL=
+LD_SPECIAL=
+
+LIB=ipw
+OBJS=\
+	is_a_tty.o 
+
+SRCS=\
+	is_a_tty.c 
+ 
+default: lib
+install: install-lib

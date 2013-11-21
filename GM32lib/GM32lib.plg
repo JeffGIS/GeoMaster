@@ -1,0 +1,151 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: GM32lib - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Release/Demo.res" /d "NDEBUG" "C:\Gssi\prog\GM32lib\Demo.Rc"" 
+Creating temporary file "C:\DOCUME~1\JEFFSM~1\LOCALS~1\Temp\RSP342.tmp" with contents
+[
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GM32LIB_EXPORTS" /D "XPORABOVE" /D "USEFREEIMAGE" /D "USEMRSID" /D "__STDC__" /FR"Release/" /Fp"Release/GM32lib.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\adjlon.c"
+"C:\Gssi\prog\GM32lib\config.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libunix\src\dysize.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\util\ecalloc.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\ephemeris.c"
+"C:\Gssi\prog\GM32lib\filestuff.c"
+"C:\Gssi\prog\GM32lib\freeim.c"
+"C:\Gssi\prog\GM32lib\GM32lib.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\julday.c"
+"C:\Gssi\prog\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\mgrs\mgrs.c"
+"C:\Gssi\prog\minilzo\minilzo.c"
+"C:\Gssi\prog\GM32lib\mrsid.c"
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\nad_cvt.c"
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\nad_init.c"
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\nad_intr.c"
+"C:\Gssi\prog\GM32lib\nadcon.c"
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\pj_errno.c"
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\pj_malloc.c"
+"C:\Gssi\prog\Proj-4\proj-4.4.8\src\pj_open_lib.c"
+"C:\Gssi\prog\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\polarst\polarst.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\rotate.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\sunpath.c"
+"C:\Gssi\prog\sunang\ipw\src\exp\ucsb\bin\sunlight\sunrise.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\error\syserr.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\tmconv.c"
+"C:\Gssi\prog\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\tranmerc\tranmerc.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\unixtime.c"
+"C:\Gssi\prog\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\ups\ups.c"
+"C:\Gssi\prog\garmin\USB\USBSDK.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\error\usrerr.c"
+"C:\Gssi\prog\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\utm\utm.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\weekday.c"
+"C:\Gssi\prog\sunang\ipw\src\lib\libipw\sunang\yrday.c"
+"C:\Gssi\prog\sunang\ipw\src\exp\ucsb\bin\sunlight\zerobr.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\JEFFSM~1\LOCALS~1\Temp\RSP342.tmp" 
+Creating temporary file "C:\DOCUME~1\JEFFSM~1\LOCALS~1\Temp\RSP343.tmp" with contents
+[
+kernel32.lib user32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wow32.lib gdi32.lib setupapi.lib mpr.lib urlmon.lib /nologo /dll /incremental:no /pdb:"Release/GM32lib.pdb" /map:"Release/GM32lib.map" /debug /machine:I386 /def:".\GM32lib.def" /out:"Release/GM32lib.dll" /implib:"Release/GM32lib.lib" 
+.\Release\adjlon.obj
+.\Release\config.obj
+.\Release\dysize.obj
+.\Release\ecalloc.obj
+.\Release\ephemeris.obj
+.\Release\filestuff.obj
+.\Release\freeim.obj
+.\Release\GM32lib.obj
+.\Release\julday.obj
+.\Release\mgrs.obj
+.\Release\minilzo.obj
+.\Release\mrsid.obj
+.\Release\nad_cvt.obj
+.\Release\nad_init.obj
+.\Release\nad_intr.obj
+.\Release\nadcon.obj
+.\Release\pj_errno.obj
+.\Release\pj_malloc.obj
+.\Release\pj_open_lib.obj
+.\Release\polarst.obj
+.\Release\rotate.obj
+.\Release\sunpath.obj
+.\Release\sunrise.obj
+.\Release\syserr.obj
+.\Release\tmconv.obj
+.\Release\tranmerc.obj
+.\Release\unixtime.obj
+.\Release\ups.obj
+.\Release\USBSDK.obj
+.\Release\usrerr.obj
+.\Release\utm.obj
+.\Release\weekday.obj
+.\Release\yrday.obj
+.\Release\zerobr.obj
+.\Release\Demo.res
+..\MrSid\Geo_DSDK\lib\Release_md\lti_dsdk_cdll.lib
+"..\..\..\Program Files\Microsoft Visual Studio\VC98\Lib\VFW32.LIB"
+.\FreeImage.lib
+]
+Creating command line "link.exe @C:\DOCUME~1\JEFFSM~1\LOCALS~1\Temp\RSP343.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+C:\Gssi\prog\GM32lib\Demo.Rc (97): error RC2104 : undefined keyword or key name: IDC_CFGDESC
+
+
+
+
+
+
+Error executing rc.exe.
+Creating temporary file "C:\DOCUME~1\JEFFSM~1\LOCALS~1\Temp\RSP344.tmp" with contents
+[
+/nologo /o"Release/GM32lib.bsc" 
+.\Release\adjlon.sbr
+.\Release\config.sbr
+.\Release\dysize.sbr
+.\Release\ecalloc.sbr
+.\Release\ephemeris.sbr
+.\Release\filestuff.sbr
+.\Release\freeim.sbr
+.\Release\GM32lib.sbr
+.\Release\julday.sbr
+.\Release\mgrs.sbr
+.\Release\minilzo.sbr
+.\Release\mrsid.sbr
+.\Release\nad_cvt.sbr
+.\Release\nad_init.sbr
+.\Release\nad_intr.sbr
+.\Release\nadcon.sbr
+.\Release\pj_errno.sbr
+.\Release\pj_malloc.sbr
+.\Release\pj_open_lib.sbr
+.\Release\polarst.sbr
+.\Release\rotate.sbr
+.\Release\sunpath.sbr
+.\Release\sunrise.sbr
+.\Release\syserr.sbr
+.\Release\tmconv.sbr
+.\Release\tranmerc.sbr
+.\Release\unixtime.sbr
+.\Release\ups.sbr
+.\Release\USBSDK.sbr
+.\Release\usrerr.sbr
+.\Release\utm.sbr
+.\Release\weekday.sbr
+.\Release\yrday.sbr
+.\Release\zerobr.sbr]
+Creating command line "bscmake.exe @C:\DOCUME~1\JEFFSM~1\LOCALS~1\Temp\RSP344.tmp"
+Creating browse info file...
+BSCMAKE: error BK1506 : cannot open file '.\Release\adjlon.sbr': No such file or directory
+Error executing bscmake.exe.
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+GM32lib.dll - 2 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

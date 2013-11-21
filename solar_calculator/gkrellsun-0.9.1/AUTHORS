@@ -1,0 +1,17 @@
+gkrellsun:
+	Norman Walsh <ndw@nwalsh.com>
+
+Based on:
+
+wmSun:
+	(C) Mike Henderson <mghenderson@lanl.gov>.
+
+gkrellmoon:
+	(C) Dale P. Smith <dsmith@altustech.com>
+
+glunarclock:
+	Josh Buhl <jbuhl@users.sourceforge.net>
+
+Based on:
+	wmMoonClock-1.27, (CalcEphem.c, Moon.c, MoonRise.c) 
+	(C) Mike Henderson <mghenderson@lanl.gov>.

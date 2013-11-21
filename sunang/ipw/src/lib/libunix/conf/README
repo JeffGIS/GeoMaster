@@ -1,0 +1,14 @@
+This directory contains various "canned" versions of
+src/lib/libunix/Makedefs.  The comment at the top of each file notes which
+operating system and hardware the file has been tested on.
+
+If one of these is directly usable in your environment, then copy or link it
+to src/lib/libunix/Makedefs.
+
+Otherwise, copy the one that most closely approximates your configuration into
+src/lib/libunix/Makedefs and edit it appropriately.  Once it works, please
+mail a copy of it to "ipw@crseo.ucsb.edu" so we can incorporate it into the
+standard distribution.  Be sure that the comment at the top of the file
+adequately describes your particular operating system and hardware.
+
+$Header: /usr.MC68020/home/ipw/src/lib/libunix/conf/RCS/README,v 1.1 89/10/25 21:42:24 frew Exp $

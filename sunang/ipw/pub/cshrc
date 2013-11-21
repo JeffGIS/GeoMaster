@@ -1,0 +1,45 @@
+# This file is source'd by an IPW csh user.  The user's ~/.cshrc file should
+# contain a line like:
+#
+#	source {IPW_root_directory}/pub/cshrc
+#
+# This file modifies the command search path (see below), so it should be
+# source'd AFTER any search path customization in ~/.cshrc.
+
+# Modified August 1992 -- Dana Jacobsen, ERL-C
+# Now checks for the previous existence of variables IPW and TMPDIR
+# so it doesn't change them.  There is really is no reason to force IPW
+# to have it's own account.  The user can set their IPW variable to
+# where IPW lives before sourcing this file if it does not have it's own
+# account.
+
+# $IPW the root of the IPW directory hierarchy, usually ~ipw.
+#
+if ( $?IPW == 0 ) then
+  setenv IPW ~ipw
+endif
+
+# IPW assumes that shell scripts beginning with a ":" character, and commands
+# issued by "make", will be executed by the Bourne shell.  On some UNIXes
+# (XENIX, AIX, ...) we have observed that the SHELL environment variable
+# affects these assumptions.
+#
+# The problem with this is that most users don't WANT to have their new
+# shells be Bourne shells.. -- Dana Jacobsen
+#
+#setenv SHELL /bin/sh
+
+# $TMPDIR is where IPW commands will create scratch files (i.e. files that the
+# commands try to remove before they terminate).  Scratch files may not be
+# removed if the command that created them terminates abnormally, so $TMPDIR
+# should be someplace that gets cleaned out regularly.
+#
+if ( $?TMPDIR == 0 ) then
+  setenv TMPDIR $IPW/scratch
+endif
+
+# The IPW command directories should normally be appended to the IPW user's
+# command search path.  You may have to put them earlier in the path if IPW
+# command names conflict with other command names on your system.
+#
+set path=($path $IPW/bin $IPW/etc)

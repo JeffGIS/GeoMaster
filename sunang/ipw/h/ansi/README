@@ -1,0 +1,15 @@
+ANSI C header files
+
+IPW requires the following ANSI C header files:
+
+	float.h
+	limits.h
+
+If your system already has these files, copy or [symbolically] link them to
+this directory -- IPW WON'T find them unless they're here.
+
+Preconfigured versions of <float.h> and <limits.h> for various existing IPW
+hosts may be found in the subdirectories "conf.float" and "conf.limits",
+respectively.  See the README file therein.
+
+$Header: /usr/home/ipw/h/ansi/RCS/README,v 1.2 89/10/27 17:52:43 frew Exp $

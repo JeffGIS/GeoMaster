@@ -1,0 +1,23 @@
+# Projection definition for Latitude, Longitude Coordinates
+#
+0                          The USGS projection code
+0                          The zone number
+8                          The USGS Spheroid Code
+1.0                        The ground to grid conversion factor
+0.0                        The x coordinate bias
+0.0                        The y coordinate bias
+0.0                        Parameter #1
+0.0                        Parameter #2
+0.0                        Parameter #3
+0.0                        Parameter #4
+0.0                        Parameter #5
+0.0                        Parameter #6
+0.0                        Parameter #7
+0.0                        Parameter #8
+0.0                        Parameter #9
+0.0                        Parameter #10
+0.0                        Parameter #11
+0.0                        Parameter #12
+0.0                        Parameter #13
+0.0                        Parameter #14
+0.0                        Parameter #15

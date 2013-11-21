@@ -1,0 +1,9 @@
+/*
+ * limits.h for XENIX
+ */
+
+#define	MAX_INPUT	256
+#define	OPEN_MAX	20
+#define	OPEN_LIMIT	1024
+
+/* $Header: /usr/home/ipw/h/posix/conf/RCS/xenix,v 1.2 89/10/27 12:33:59 frew Exp $ */

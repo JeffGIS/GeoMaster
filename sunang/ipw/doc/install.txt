@@ -1,0 +1,660 @@
+
+
+
+
+
+
+
+
+
+                                   Installing IPW
+
+
+                                      J. Frew
+
+                            Computer Systems Laboratory
+                              University of California
+                              Santa Barbara, CA  93016
+
+                                   (805) 961-8413
+
+                                frew@crseo.ucsb.edu
+
+
+
+
+
+            _1.  _I_n_t_r_o_d_u_c_t_i_o_n
+
+            This document describes how to install IPW  on  a  new  host
+            system.   IPW is currently known to operate on the following
+            systems:
+
+                         hardware      |   operating system
+                     _____________________________________|_____________________________________________
+                     S_u_n_-_3_______________|_S_u_n_O_S__3_._4_,__3_._5_,__4_._0_._3_
+                     Sun-4             | SunOS 4.0.3
+                     ___________________|______________________
+                     I_B_M__P_S_/_2__M_o_d_e_l__8_0___|_A_I_X__1_._1_______________
+                     IBM RT Model 135  | AOS 4.3
+
+            If your host is one of these, then installing IPW should  go
+            pretty smoothly.  If not, well, it OUGHT to go smoothly, but
+            will require some thinking on your part.  In any event,  let
+            me  know  if  you  encounter any major omissions or outright
+            lies herein.
+
+            _2.  _A _n_o_t_e _o_n _c_o_n_f_i_g_u_r_a_t_i_o_n _f_i_l_e_s
+
+            In the process of installing IPW you will be modifying a few
+            system-dependent  files.   In  most  (but  not all) cases, a
+            directory containing such a file also contains  a  subdirec-
+            tory named _c_o_n_f.  This subdirectory contains versions of the
+            system-dependent file that have been used  on  existing  IPW
+            host systems.  You can often copy (or link to) the appropri-
+            ate version of the file in _c_o_n_f, instead of creating  a  new
+            file.
+
+            _3.  _C_r_e_a_t_e _I_P_W _a_c_c_o_u_n_t
+
+            Your IPW host system should have a unique  _i_p_w  user  and  a
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 2 -
+
+
+            unique  _i_p_w  group.   Create  them now if they don't already
+            exist (you must be the super-user to do this).  Here is  the
+            relevant entry from our /_e_t_c/_p_a_s_s_w_d file:
+
+                    ipw:*:22:21:(IPW subsystem):/usr/home/ipw:/bin/csh
+
+            The * in the password field will keep the  account  disabled
+            until  we  explicitly  set a password.  The user- and group-
+            IDs, and the home directory, will have to be customized  for
+            your system.
+
+            Here is the relevant line from our /_e_t_c/_g_r_o_u_p file:
+
+                    ipw::21:dozier,frew,judy,venema
+
+            You should edit the user list to include  only  those  users
+            (besides  _i_p_w) to whom you wish to grant write access to IPW
+            source files, libraries, etc.
+
+            Next, make a home directory for _i_p_w:
+
+                    # mkdir ~ipw
+                    # chown ipw ~ipw
+                    # chgrp ipw ~ipw
+                    # chmod 775 ~ipw
+
+            Finally, set a password for the _i_p_w account:
+
+                    # passwd ipw
+
+            All the remaining installation instructions assume  you  are
+            logged in as (or _s_u'd to) _i_p_w.
+
+            _4.  _L_o_a_d _t_h_e _d_i_s_t_r_i_b_u_t_i_o_n _t_a_p_e
+
+            IPW is distributed on magnetic tape as  a  single  UNIX  _t_a_r
+            archive.  To extract the tape, type:
+
+                    % cd ~ipw
+                    % tar xvpbf _b_l_o_c_k_i_n_g-_f_a_c_t_o_r _t_a_p_e-_d_e_v_i_c_e
+
+            where _b_l_o_c_k_i_n_g-_f_a_c_t_o_r is 20 for 1/2-inch tapes, or  200  for
+            1/4-inch  cartridge  tapes.   _t_a_p_e-_d_e_v_i_c_e is the appropriate
+            UNIX tape device name (e.g.,  /_d_e_v/_r_m_t_8,  /_d_e_v/_r_s_t_0,  etc.).
+            The  _p  flag  is  important; it guarantees that the original
+            file permissions will be restored.
+
+            _4._1.  _P_o_s_s_i_b_l_e _o_w_n_e_r_s_h_i_p _p_r_o_b_l_e_m_s
+
+            Do an _l_s -_l_g (or _l_s -_l for USG-derived UNIXes) on ~_i_p_w.   If
+            the  extracted  directories  are owned by user _i_p_w and group
+            _i_p_w, then skip to the next step _C_o_n_f_i_g_u_r_i_n_g _t_h_e _s_h_e_l_l(_s).
+
+            If your UNIX system allows non-privileged users  to  execute
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 3 -
+
+
+            the  chown system call, then the _t_a_r command shown above may
+            set the user- and group-IDs of the  IPW  files  to  whatever
+            they  were  on  the  system  where the distribution tape was
+            created.  These will almost certainly  NOT  be  the  correct
+            user-  and  group-IDs  for your system.  If this occurs, you
+            will have to become root and run _c_h_o_w_n and _c_h_g_r_p on the  IPW
+            hierarchy.
+
+            If your system has the _x_a_r_g_s command, you can type:
+
+                    # find ~ipw -print | xargs chown ipw
+                    # find ~ipw -print | xargs chgrp ipw
+
+            Otherwise, type
+
+                    # find ~ipw -exec chown ipw {} \; -exec chgrp ipw {} \;
+
+
+            _5.  _C_o_n_f_i_g_u_r_i_n_g _t_h_e _s_h_e_l_l(_s)
+
+            From here on, we make 2 important assumptions about the  IPW
+            environment:
+
+            o+    An IPW user's interactive command  interpreter  is  _c_s_h
+                 (the Berkeley "C shell")
+
+            o+    command files ("shell scripts") whose  first  character
+                 is  a  colon  (  :) will be executed by _s_h (the "Bourne
+                 shell").  Your sh must understand the sharp-sign  (  #)
+                 comment convention; no other extensions to the original
+                 Version 7 [1] _s_h are used.
+
+            See _p_u_b/_c_s_h_r_c below for suggestions on dealing  with  depar-
+            tures from these assumptions.
+
+            Also, all path names given below are relative to ~_i_p_w.
+
+            _5._1.  _p_u_b/_c_s_h_r_c
+
+            The file _p_u_b/_c_s_h_r_c should be sourced by all IPW users before
+            they  issue any IPW commands.  Usually, a line like the fol-
+            lowing is placed in an IPW user's ._c_s_h_r_c file:
+
+                    source ~ipw/pub/cshrc
+
+            This file should not need to be changed, but take a look  at
+            it  now.   The  environment  variable _I_P_W must be set to the
+            name of the IPW root directory.   The  environment  variable
+            _T_M_P_D_I_R  must  be  set  to  the  name of a directory on which
+            scratch images may be  written.   Finally,  the  directories
+            ~_i_p_w/_b_i_n and ~_i_p_w/_e_t_c must be in an IPW user's search path.
+
+            If shell scripts beginning with a colon aren't automatically
+            run  by  _s_h,  then you may need to add the following line to
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 4 -
+
+
+            _p_u_b/_c_s_h_r_c:
+
+                    setenv SHELL /bin/sh    # or wherever sh lives
+
+            (This is necessary on some XENIX systems, for instance.)
+
+            If your interactive  command  interpreter  isn't  _c_s_h,  then
+            you'll  need  to  prepare  an  equivalent of _p_u_b/_c_s_h_r_c.  For
+            example, a _p_u_b/_p_r_o_f_i_l_e for _s_h might look like this:
+
+                    IPW=/usr/home/ipw       # or whatever corresponds to ~ipw
+                    TMPDIR=/usr/tmp
+                    export IPW TMPDIR
+                    PATH=$PATH:$IPW/bin:$IPW/etc
+
+            and then _s_h users would put the following in their  ._p_r_o_f_i_l_e
+            file:
+
+                    . /usr/home/ipw/pub/profile
+
+
+            _5._2.  _l_i_b/_i_p_w_e_n_v
+
+            The file _l_i_b/_i_p_w_e_n_v contains local definitions for  nonport-
+            able  UNIX  commands  used  by IPW shell scripts.  Check the
+            definitions in this file and fix any that are  inappropriate
+            for your host:
+
+            AWK  An _a_w_k command that conforms to the 1985 definition [2]
+                 of  the  _a_w_k  language.   As  of  this writing, all IPW
+                 scripts will work with older versions of _a_w_k, but  this
+                 may change with future releases of IPW.
+
+            LC_WDProduce a multi-column listing of  the  current  direc-
+                 tory.   On  some UNIX systems, the _l_s command does this
+                 by default.
+
+            LLG  Produce a "long" directory listing with both the  owner
+                 and  the group of each file.  Some UNIX systems use the
+                 command _l_s -_l_g, while others use _l_s -_l.
+
+            _6.  _C_o_n_f_i_g_u_r_i_n_g _m_a_k_e
+
+            There are a gazillion variations of  the  _m_a_k_e  command  out
+            there.   Instead  of  hoping  you've got a competent one, we
+            just assume the lowest common denominator (Version  7  _m_a_k_e)
+            and  provide an _i_p_w_m_a_k_e command to automatically generate an
+            appropriate _m_a_k_e_f_i_l_e for each command, library, etc.  (actu-
+            ally,  the  rules  and  dependencies  are  piped directly to
+            _m_a_k_e).  _i_p_w_m_a_k_e uses some nonportable "boilerplate" that you
+            will probably have to twiddle.
+
+
+
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 5 -
+
+
+            _6._1.  _l_i_b/_m_a_k_e/_l_o_c_a_l
+
+            The _l_i_b/_m_a_k_e directory contains the boilerplate used by  the
+            _i_p_w_m_a_k_e  command  (the  specific stuff is kept in a _M_a_k_e_d_e_f_s
+            file in each source directory).  You  can  take  a  look  at
+            _e_t_c/_i_p_w_m_a_k_e  to see how it all fits together.  The only file
+            that should  need  changing  should  be  _l_i_b/_m_a_k_e/_l_o_c_a_l.   A
+            detailed  description  of  the contents of _l_i_b/_m_a_k_e/_l_o_c_a_l is
+            beyond the scope of this document; see the comments therein.
+            However, here are some things to watch out for:
+
+            AR_XOPTS
+                 _i_p_w_m_a_k_e's library-update procedure relies on the  abil-
+                 ity  to extract files from an archive with their origi-
+                 nal modification times.  BSD-derived  _a_r's  use  the  _o
+                 qualifier  to do this, while (some) USG _a_r's do this by
+                 default.
+
+                 IF YOUR _a_r CAN'T DO THIS SOMEHOW, YOU'RE S.O.L. !!
+
+            The  directory  _l_i_b/_m_a_k_e/_l_o_c_a_l/_c_o_n_f  contains  versions   of
+            _l_i_b/_m_a_k_e/_l_o_c_a_l for various systems.
+
+            _7.  _C_o_n_f_i_g_u_r_i_n_g _t_h_e _C _c_o_m_p_i_l_e_r
+
+            Now we'll twiddle the header files used by IPW C code.  This
+            basically involves wiring in the specific ways in which your
+            system differs from the "ideal" combination of  ANSI  C  [3]
+            and POSIX [4].
+
+            _7._1.  _h/_c_o_n_f_i_g._h
+
+            The directory _h/_c_o_n_f contains various versions of _h/_c_o_n_f_i_g._h
+            with  reasonably  mnemonic  names  (e.g.  _s_u_n+_s_y_s_v for SunOS
+            with System V  [5]  enhancements).   _h/_c_o_n_f_i_g._h  contains  a
+            whole  bunch of #_d_e_f_i_n_e's Unless your system EXACTLY matches
+            one of the "canned" configurations, you  should  check  each
+            #_d_e_f_i_n_e  against its description in _h/_c_o_n_f/_R_E_A_D_M_E.  Here are
+            some things to pay special attention to:
+
+            CC_NOBCOPY, CC_NOBZERO
+                 Note that these options read as a double-negative; i.e.
+                 _C_C__N_O_B_C_O_P_Y  should  be  1  if _b_c_o_p_y() ISN'T provided in
+                 your host's C library.
+
+            CC_POSIX
+                 If this option is 1, then POSIX include files  will  be
+                 fetched from _h/_p_o_s_i_x instead of from #_i_n_c_l_u_d_e <...>
+
+            CC_SAMESIZE
+                 This option is obsolete; it should always be 0 (zero)
+
+            OPT_BUF
+                 This is the  buffer  size  IPW  uses  with  _r_e_a_d()  and
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 6 -
+
+
+                 _w_r_i_t_e().  It _M_U_S_T _N_O_T be larger than the maximum number
+                 of bytes that may be written to  a  pipe  in  a  single
+                 _w_r_i_t_e().   4096  is  the  largest  portable  value.  On
+                 memory-limited systems, you may want to use  a  smaller
+                 value, in which case 1024 is suggested.
+
+            FREG_?These options are only appropriate for  machines  with
+                 separate  floating-point  registers (e.g. MC68881) that
+                 are known to the C compiler.  Do _N_O_T use  for  machines
+                 that  store  floating-point values in general registers
+                 (e.g. VAX).
+
+            _7._2.  _h/_a_n_s_i
+
+            If your system has ANSI-conforming C header files, then  you
+            must  copy  (or link) <_f_l_o_a_t._h> and <_l_i_m_i_t_s._h> to the direc-
+            tory _h/_a_n_s_i.  Otherwise, you  must  create  substitutes  for
+            these header files, as described below.
+
+            _7._2._1.  _h/_a_n_s_i/_f_l_o_a_t._h
+
+            This is a substitute for the ANSI header file <_f_l_o_a_t._h>.  If
+            you're lucky, you'll be able to use one of the existing ver-
+            sions in _h/_a_n_s_i/_c_o_n_f._f_l_o_a_t.  If you're  a  bit  less  lucky,
+            i.e.  if  your particular machine isn't mentioned explicitly
+            BUT it supports IEEE 754 floating point,  you  can  use  the
+            generic version _h/_a_n_s_i/_c_o_n_f._f_l_o_a_t/_i_e_e_e_7_5_4.
+
+            If, however, you're not so lucky, you'll  have  to  generate
+            these  values  yourself.   First, try going to the directory
+            _s_r_c/_e_t_c/_m_a_c_h_i_n_e and typing _m_a_k_e.  If the  resulting  program
+            _m_a_c_h_i_n_e  compiles  and runs successfully, it will generate a
+            _f_l_o_a_t._h case for your machine - you just have to  catch  the
+            output of _m_a_c_h_i_n_e -_f_l_o_a_t and stuff it into _h/_a_n_s_i/_f_l_o_a_t._h.
+
+            Finally, if _m_a_c_h_i_n_e doesn't  compile  or  run  successfully,
+            you'll have to do some detective work.  Your system may have
+            a file <_v_a_l_u_e_s._h> that contains some  of  the  stuff  you'll
+            need; otherwise, dig into a hardware manual or find a guru.
+
+            _7._2._2.  _h/_a_n_s_i/_l_i_m_i_t_s._h
+
+            This is a substitute for the ANSI  header  file  <_l_i_m_i_t_s._h>.
+            As  for _h/_a_n_s_i/_f_l_o_a_t._h, you may get lucky and be able to use
+            an existing version in  _h/_a_n_s_i/_c_o_n_f._f_l_o_a_t.   Otherwise,  you
+            can use _m_a_c_h_i_n_e -_l_i_m_i_t_s.
+
+            _7._3.  _h/_p_o_s_i_x
+
+            If your system conforms to  the  IEEE  1003  ("POSIX")  UNIX
+            specification,  then  you  must copy (or link) <_l_i_m_i_t_s._h> to
+            the directory _h/_p_o_s_i_x.  Otherwise, you must create a substi-
+            tute for this header file, as described below.
+
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 7 -
+
+
+            _7._3._1.  _h/_p_o_s_i_x/_l_i_m_i_t_s._h
+
+            This is a substitute for the POSIX header  file  <_l_i_m_i_t_s._h>.
+            Actually,  this  file only contains the stuff NOT present in
+            the ANSI <_l_i_m_i_t_s._h> (the real POSIX file also  contains  all
+            the ANSI stuff - aren't standards wonderful?).
+
+            The various possible entries are  documented  in  the  file.
+            Only  a  few  are  currently  used by IPW.  As with the ANSI
+            stuff, you may get lucky and be  able  to  use  one  of  the
+            existing    versions   in   _h/_p_o_s_i_x/_c_o_n_f,   otherwise,   see
+            _h/_p_o_s_i_x/_c_o_n_f/_R_E_A_D_M_E  for  guidance  in  building  your   own
+            _h/_p_o_s_i_x/_l_i_m_i_t_s._h.
+
+            _8.  _s_r_c/_l_i_b/_l_i_b_u_n_i_x
+
+            IPW provides substitutes for  some  ANSI  library  functions
+            that  may  not be available on all systems.  The sources for
+            these functions are in  the  directory  _s_r_c/_l_i_b/_l_i_b_u_n_i_x/_s_r_c.
+            Any  of these functions that your host does not already pro-
+            vide  must  be  copied  (or   linked)   to   the   directory
+            _s_r_c/_l_i_b/_l_i_b_u_n_i_x.   The _M_a_k_e_d_e_f_s file in _s_r_c/_l_i_b/_l_i_b_u_n_i_x must
+            then be edited to select those functions.
+
+            _9.  _B_u_i_l_d_i_n_g _I_P_W
+
+            At this point, you should be able to run _i_p_w_m_a_k_e in the  _s_r_c
+            directory and build the whole wretched mess:
+
+                    % cd ~ipw/src
+                    % ipwmake install >& make.out &
+
+            Any errors in _m_a_k_e._o_u_t (other than those  explicitly  marked
+            _i_g_n_o_r_e_d)  indicate  a  problem,  and  should be tracked down
+            before using IPW.
+
+            _1_0.  _P_o_s_t-_i_n_s_t_a_l_l_a_t_i_o_n _i_s_s_u_e_s
+
+            Certain IPW commands cannot  (yet)  be  installed  automati-
+            cally,  since  they require non-portable system header files
+            and/or function libraries.  At this writing,  the  following
+            commands  must be installed by explicitly running _i_p_w_m_a_k_e in
+            the appropriate source directory:
+
+                          command           require|s
+                        _____________________________________________________|_________________
+                        e_t_c_/_m_c_________-_l_t_e_r_m_c_a_p_____|________
+                                      <suntool/canv|as.h>
+                                      <suntool/scro|llbar.h>
+                                      <suntool/sunv|iew.h>
+                                      -lsuntool  -l|sunwin-
+                                      dow -lpixrect|
+
+
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 8 -
+
+
+                        etc/rastool |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+                                    |
+
+
+
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 9 -
+
+
+                        _____________|______________________
+                        etc/xim     | <X11/Xos.h>
+                                    | <X11/Xlib.h>
+                                    | <X11/Xutil.h>
+                                    | <X11/cursorfont.h>
+                                    | -lX11
+
+            Note that the distributed version of _l_i_b/_i_p_w_e_n_v assumes that
+            the  _m_c  command exists.  If you cannot compile _m_c, then you
+            should change the definition of _L_C__W_D in _l_i_b/_i_p_w_e_n_v.
+
+            If you will be developing your own IPW C programs, then  you
+            will  probably  want  to compile profiled and debugging ver-
+            sions of the IPW libraries, and _l_i_n_t libraries for use  with
+            _i_p_w_m_a_k_e  _l_i_n_t.  Run _i_p_w_m_a_k_e _l_i_n_t_l_i_b, _i_p_w_m_a_k_e -_D, and _i_p_w_m_a_k_e
+            -_P in the appropriate library directories.
+
+            _1_1.  _I_f _Y_o_u _H_a_v_e _P_r_o_b_l_e_m_s ...
+
+            I can be reached at the various  phone/email/USmail  coordi-
+            nates  given  at  the  beginning of this document.  Email is
+            DEFINITELY preferred.  Just to get you going, how about let-
+            ting me know how effective this document was?
+
+            Anybody who gets IPW directly from  me  (i.e.  legitimately)
+            will  be  placed  on  the list for email updates and general
+            chatter.
+
+            Good Luck!
+
+                    -Frew
+
+
+            _R_e_f_e_r_e_n_c_e_s
+
+
+            1.   Bell Telephone Laboratories,  Inc.,  _U_N_I_X  _P_r_o_g_r_a_m_m_e_r'_s
+                 _M_a_n_u_a_l,  _v_o_l. _1, Holt, Rinehart, and Winston, New York,
+                 1983.
+
+            2.   A. V. Aho, B. W. Kernighan, and P. J.  Weinberger,  _T_h_e
+                 _A_W_K  _P_r_o_g_r_a_m_m_i_n_g _L_a_n_g_u_a_g_e, Addison-Wesley, Reading, MA,
+                 1988.
+
+            3.   X3J11  Technical  Committee  on   the   C   Programming
+                 Language,  "Draft  Proposed  American National Standard
+                 for Information  Systems  -  Programming  Language  C,"
+                 X3.159-1989,  X3  Secretariat,  Computer  and  Business
+                 Equipment  Manufacturers  Association,  New   York,   7
+                 December 1988.
+
+            4.   Technical Committee on Operating Systems  of  the  IEEE
+                 Computer  Society,  "IEEE  Standard  Portable Operating
+                 System for  Computer  Environments,"  Std  1003.1-1988,
+                 IEEE, New York, 1988.
+
+
+                               Last change: 90/02/02
+
+
+
+
+
+                                       - 10 -
+
+
+            5.   "System V Interface Definition,  issue  2  (3  vols.),"
+                 Select Code 307-131, AT&T, 1986.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                               Last change: 90/02/02
+
+

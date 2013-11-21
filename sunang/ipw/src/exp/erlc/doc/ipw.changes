@@ -1,0 +1,114 @@
+The following are IPW programs that have been modified:
+
+ipwmake
+-------
+
+Changed ipwmake so that if the Makedefs file doesn't exist but a SCCS 
+directory does, it will try getting the Makedefs file out of sccs.
+
+
+ipwman
+------
+Made following change so that ipwman works for local code:
+
+# following line modified by K. Longley 7/9/90
+#pdirs='bin etc lib'
+pdirs='bin etc lib exp/kelly exp/danny'
+
+
+lincom
+------
+BUG FIX: changed routine headers.c to write only one band of header to the
+output image file in call to gethdrs().
+
+
+mkbih
+-----
+In this copy of mkbih a different annotation string can be specified for each
+band.  This fixes the bug in the original mkbih where the annotation for band 0
+was repeated for each band.
+
+
+shade
+-----
+
+Changed line in shadetbl.c:
+
+ /* Following line changed 8/28/90 by K. Longley USEPA ERL-C:
+  *
+  *			shade[s][a] = mu * maxval + 0.5;
+  *
+  *		Removed addition of 0.5 to prevent rounding
+  *		fpio library would not round if we were using fpvwrite instead
+  *		of doing the mapping ourselves.
+  */
+			shade[s][a] = mu * maxval;
+
+xim
+---
+
+Change to original IPW source:
+
+Added -I$(OPENWINHOME)/share/include to C_SPECIAL in Makedefs to compile for
+SUN Openwindows.
+
+
+libipw
+------
+
+Changed IPW fpio routines:
+
+fpclose.c:
+
+/* Following line changed to prevent infinite loop by K.Longley 9/21/90:
+ *	for (band = 0; band < p->nbands; band) {
+ */
+	for (band = 0; band < p->nbands; band++) {
+
+fpvwrite.c:
+
+	/* Changed 4/26/91 by K. Longley - recompute coefficient in	*/
+	/* double precision to reduce error in pixel computation	*/
+	/*		k1 = p->lininv[band][1];		 	*/
+	/*		if (nbands == 1) {				*/
+	/*			do {					*/
+	/*				*pixp++ = (*bufp++ - k0) * k1;	*/
+	/*			} while (--npixels > 0);		*/
+	/*		}						*/
+	/*		else {						*/
+	/*			do {					*/
+	/*				*pixp = (*bufp - k0) * k1;	*/
+	/*				bufp += nbands;			*/
+	/*				pixp += nbands;			*/
+	/*			} while (--npixels > 0);		*/
+	/*		}						*/
+	/* Above code lines replaced by the following:			*/
+	/*		double k2;					*/
+
+			k2 = (p->maplen[band]-1) /
+				(p->fmax[band] - p->fmin[band]);
+
+			if (nbands == 1) {
+				do {
+					*pixp++ = (*bufp++ - k0) * k2;
+				} while (--npixels > 0);
+			}
+			else {
+				do {
+					*pixp = (*bufp - k0) * k2;
+
+					bufp += nbands;
+					pixp += nbands;
+				} while (--npixels > 0);
+			}
+		}
+	/* end replacement */
+
+
+
+Changed IPW geoh routine:
+
+geohwrite.c:
+
+	Changed all ftoa calls to dtoa - needed more digits when
+writing out bline, bsamp, dline, dsamp.

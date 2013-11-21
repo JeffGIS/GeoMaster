@@ -1,0 +1,7 @@
+DIRS=\
+	install ipwmake atob btoa ipwlint ipwman objs
+
+default: all
+install: all
+
+# $Header: /usr/home/ipw/src/etc/RCS/Makedefs,v 1.3 89/10/25 18:02:00 frew Exp $

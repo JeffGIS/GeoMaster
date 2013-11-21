@@ -1,0 +1,30 @@
+
+#	SCCS version: @(#)   Makedefs   1.4   9/3/91
+
+HDIR=../../h
+
+C_SPECIAL=-I$(HDIR)
+LD_SPECIAL=
+
+LIB=local
+
+SRCS = \
+        _crh.c _crharrays.c crh.c crhcheck.c crhdup.c crhmake.c crhread.c \
+        crhsort.c crhwrite.c
+
+OBJS =\
+        _crh.o _crharrays.o crh.o crhcheck.o crhdup.o crhmake.o crhread.o \
+        crhsort.o crhwrite.o
+
+_crh.o         : $(IPW)/h/ipw.h $(HDIR)/crh.h
+_crharrays.o   : $(IPW)/h/ipw.h $(HDIR)/crh.h
+crh.o          : $(IPW)/h/ipw.h $(HDIR)/crh.h ./_crh.h
+crhcheck.o     : $(IPW)/h/ipw.h $(HDIR)/crh.h ./_crh.h
+crhdup.o       : $(IPW)/h/ipw.h $(HDIR)/crh.h ./_crh.h
+crhmake.o      : $(IPW)/h/ipw.h $(IPW)/h/hdrio.h $(HDIR)/crh.h ./_crh.h
+crhread.o      : $(IPW)/h/ipw.h $(IPW)/h/hdrio.h $(HDIR)/crh.h ./_crh.h
+crhsort.o      : $(IPW)/h/ipw.h $(HDIR)/crh.h
+crhwrite.o     : $(IPW)/h/ipw.h $(IPW)/h/hdrio.h $(HDIR)/crh.h ./_crh.h
+
+default: lib
+install: install-lib

@@ -1,0 +1,8 @@
+# SCRIPT	script name
+
+SCRIPT=
+
+default: script
+install: install-script
+
+# $Header: /usr.MC68020/home/ipw/skel/sh/RCS/Makedefs,v 1.3 89/10/18 20:21:51 frew Exp $

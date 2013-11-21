@@ -1,0 +1,57 @@
+[Main]
+;*** DO NOT TOUCH! The format of this file WILL change.
+Product=Setup Pro
+Version=1.0
+OEM=Eschalon Release Edition
+Base Directory=c:\agawam\maplib\features
+
+[Settings]
+Application Name=
+Window Title=
+Background Title=
+Directory=
+PM Group=
+Prompt PM=TRUE
+Disk Label Mask=Disk #%d
+Background=Dithered Title
+ReadMe Font=Default
+Resize ReadMe=FALSE
+ReadMe At Start=FALSE
+Brand Source=FALSE
+Brand Destination=FALSE
+End Program=
+
+[Branding]
+INI File=
+Section=
+Name=
+Company=
+
+[Files]
+02600370.plt="02600370.plt" 754 A 0 C A
+02600380.plt="02600380.plt" 754 A 0 C A
+02600390.plt="02600390.plt" 754 A 0 C A
+02600390.rin="02600390.rin" 5120 A 0 C A
+02600400.plt="02600400.plt" 754 A 0 C A
+02700370.plt="02700370.plt" 11354 A 0 C A
+02700380.plt="02700380.plt" 310194 A 0 C A
+02700380.rin="02700380.rin" 1024 A 0 C A
+02700390.plt="02700390.plt" 434442 A 0 C A
+02700400.plt="02700400.plt" 65872 A 0 C A
+02800370.plt="02800370.plt" 12958 A 0 C A
+02800380.plt="02800380.plt" 261990 A 0 C A
+02800390.plt="02800390.plt" 997116 A 0 C A
+02800400.plt="02800400.plt" 12624 A 0 C A
+02900370.plt="02900370.plt" 76554 A 0 C A
+02900380.plt="02900380.plt" 797716 A 0 C A
+02900390.plt="02900390.plt" 1036576 A 0 C A
+02900400.plt="02900400.plt" 187348 A 0 C A
+03000370.plt="03000370.plt" 754 A 0 C A
+03000380.plt="03000380.plt" 31222 A 0 C A
+03000390.plt="03000390.plt" 265676 A 0 C A
+03000400.plt="03000400.plt" 1620 A 0 C A
+index="index" 1146 A 0 C A
+index.v01="index.v01" 1082 A 0 C A
+refindex.rin="refindex.rin" 1024 A 0 C A
+tagindex.rin="tagindex.rin" 1024 A 0 C A
+

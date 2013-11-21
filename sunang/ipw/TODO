@@ -1,0 +1,58 @@
+
+    IPW TODO LIST
+
+For release 2.0, September 1995:
+
+  o Complete IPW program documentation.
+
+  o Tests for all IPW programs.
+
+  o Hard-copy manual.
+
+  o Reorganization of IPW directories.
+
+  o Once again, testing on multiple platforms.
+
+  o Color support in xv-3.10 replaces xv-3.00a.
+
+  o new documentation format to easily generate text, hardcopy, and HTML.
+
+For release later:
+
+  o Write a Manual section describing color support in IPW.
+
+  o pnm2ipw to solve the various problems with the current pbm2ipw.  This
+    should also support all formats as defined by the IPW color standard.
+
+  o Manual section for geo referencing.
+
+  o Manual section for conversion to and from GRASS.
+
+  o Merge in changes from BU, CREL, and UCSB.
+
+  o Add some of the more common image processing filters.
+
+  o Built-in RLE or other compressions.  Both a program (icompress) to add
+    and remove compression, and hooks in the pixio layer to do on-the-fly
+    compression and decompression.  Beware of programs that bypass the pixio
+    layer.
+
+  o Buffered I/O at the pixio layer.  Some models read and write individual
+    pixels, which would be sped up by this.  If a request is larger than the
+    buffer, it gets sent right through.  This would be necessary if doing
+    compression.
+
+  o Rewrite ipw.to.grass and grass.to.ipw to make better use of history
+    facilities, and correctly handle global scale images.
+
+  o Option to have fpio layer use calculations rather than LUTs.  For images
+    with a large number of bits (17-32) this could make reading and writing
+    feasible.
+
+For release X, 1996:
+
+  o X interface.  Pull multiband images into various channels then assign
+    RGB to combinations of channels.  Allow arbitrary IPW commands with
+    field replacement of images by channels and have the output assigned
+    to other channels.  Have some builtin image processing capabilities.
+    Programs to examine:  xv, xmosaic, xli, PCI, xgrass.

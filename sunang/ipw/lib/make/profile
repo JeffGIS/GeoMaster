@@ -1,0 +1,8 @@
+# redeclaration of "std" macros, for profiling
+
+C_OPTION=$(C_PROFILE)
+LD_OPTION=$(LD_PROFILE)
+LIB_SUFFIX=_p.a
+STRIP=
+
+# $Header: profile,v 1.1 88/01/13 20:38:33 frew Exp $

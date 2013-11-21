@@ -1,0 +1,36 @@
+[Main]
+;*** DO NOT TOUCH! The format of this file WILL change.
+Product=Setup Pro
+Version=1.0
+OEM=Eschalon Release Edition
+Base Directory=c:\gssi\prog\install\update
+
+[Settings]
+Application Name=Test
+Window Title=
+Background Title=
+Directory=c:\lkmaster
+PM Group=
+Prompt PM=TRUE
+Disk Label Mask=Disk #%d
+Background=Dithered Title
+ReadMe Font=Default
+Resize ReadMe=FALSE
+ReadMe At Start=FALSE
+Brand Source=FALSE
+Brand Destination=FALSE
+End Program=%d\gmno.exe /UPDATE
+
+[Branding]
+INI File=
+Section=
+Name=
+Company=
+
+[Files]
+gmnosock.exe="gmnosock.exe" 4096468 A 0 C A
+
+[INI Items]
+0=0 "lkmaster.ini" "install" "dir" "%d"
+1=0 "lkmaster.ini" "install" "newdata" "%d"
+

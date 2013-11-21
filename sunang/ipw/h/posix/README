@@ -1,0 +1,17 @@
+POSIX header files
+
+IPW requires the following POSIX header files:
+
+	limits.h
+	unistd.h
+
+If your system already has a limits.h, copy or [symbolically] link it to this
+directory -- IPW WON'T find it unless it's here.
+
+Preconfigured versions of <limits.h> for various existing IPW hosts may be
+found in the subdirectory "conf".  See the README file therein.
+
+unistd.h is portable, so the implementation given here may be used in any
+environment.
+
+$Header: /usr/home/ipw/h/posix/RCS/README,v 1.2 89/10/27 18:13:38 frew Exp $

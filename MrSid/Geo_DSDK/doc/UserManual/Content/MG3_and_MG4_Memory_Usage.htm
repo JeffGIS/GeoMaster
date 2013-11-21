@@ -1,0 +1,403 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:disableMasterStylesheet="true" MadCap:tocPath="Appendix A - Technical Notes" MadCap:InPreviewMode="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="WebHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="index.xml" MadCap:SearchType="Stem">
+    <head><title>MG3 and MG4 Memory Usage</title>
+        <link href="SkinSupport/MadCap.css" rel="stylesheet" />
+        <link href="Resources/Stylesheets/mattweb.css" rel="stylesheet" />
+        <script src="SkinSupport/MadCapAll.js" type="text/javascript">
+        </script>
+    </head>
+    <body>
+        <div class="MCBreadcrumbsBox"><span class="MCBreadcrumbsPrefix">You are here: </span><a class="MCBreadcrumbsLink" href="Appendix_A_Technical_Notes.htm">Appendix A - Technical Notes</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">MG3 and MG4 Memory Usage</span>
+        </div>
+        <h2 class="ptdh2"><a name="kanchor71"></a>MG3 and MG4 Memory Usage</h2>
+        <h5>Memory Usage for Lossless Encoding
+
+</h5>
+        <p>MrSID&#160;Generation 3 (MG3) and MrSID&#160;Generation 4 (MG4) formats support lossless encoding. The memory usage for a lossless encode operation is roughly given by the sum
+
+</p>
+        <pre class="codesample04emFirstLine">MainMem + TempMem
+
+</pre>
+        <p>where
+</p>
+        <pre class="codesample04em">MainMem = (8 + 4 * SubblockSize + StripHeight) * NumBands * Width * 4
+
+
+TempMem = 0.005 * (ExpectedOutputFileSize)
+
+</pre>
+        <p>and
+</p>
+        <blockquote>
+            <p><code>SubblockSize</code> is set by user (see below)
+
+</p>
+            <p><code>StripHeight</code> is set by user (see below)
+
+</p>
+            <p><code>NumBands</code> is the number of bands in the image to be encoded
+
+</p>
+            <p><code>Width</code> is the width (in pixels) of the image to be encoded
+
+</p>
+            <p><code>Height</code> is the height (in pixels) of the image to be encoded
+
+</p>
+            <p><code>WordSize</code> is the number of bytes per sample of the image to be encoded (1 or 2)
+
+</p>
+        </blockquote>
+        <p>We can make some important observations from these formulas. First, the <code>TempMem</code> term has a coefficient of 0.5% and is therefore small enough to be typically ignored. Second, the remaining <code>MainMem</code> term is dependent only on the width of the image, i.e. the height does not matter. (One might choose to think of the image width as defining the "space" required for the encode computation and the image height as defining the "time" required.)
+</p>
+        <p>The memory usage is constant over the length of the encode operation.
+
+ 
+
+</p>
+        <h6 class="h7">Subblock Size and Strip Height
+</h6>
+        <p>The subblock size parameter controls how large the bitplane-encoded regions are. Lowering this parameter may lower the memory usage of the encoder but may also decrease the lossless compress ratio somewhat. Raising this parameter may increase memory usage, but may improve the lossless compression ratio. This parameter has little effect on overall encode time. The default value is 64; typically values range from 32 to 256.
+
+</p>
+        <p>The strip height parameter controls how many rows of the input image are processed at one time. Lowering this parameter may reduce memory usage, but may increase the encoding time. Raising this parameter may increase memory usage, but may also decrease encoding time. Unlike the subblock size, changing parameter will not have any effect on the lossless compression ratio of the output image. The default value is 12; typical values range from 2 to 128. Note that this value must be an even number.
+
+</p>
+        <p>Additionally, the encoder may perform better if the subblock size is a multiple of the strip height.
+
+</p>
+        <p>Given the above default values and given that the memory usage formula contains the sum
+
+</p>
+        <pre class="codesample04emFirstLine">4 * SubblockSize + StripHeight
+
+</pre>
+        <p>it is usually more useful to adjust <code>SubblockSize</code> than <code>StripHeight</code> when tuning your memory usage. However, lowering <code>SubblockSize</code> may affect image quality, so care must be taken. Perhaps more importantly, reducing the <code>SubblockSize</code> by a factor four, e.g. from 64 to 16, will increase the number of subblocks in the image by a factor of sixteen: this may result in substantially degraded decode performance.
+
+ 
+
+</p>
+        <h6 class="h7">Example
+
+</h6>
+        <p>Assume an image which is 3000 pixels wide by 4000 pixels high, using 8-bit RGB pixels (24-bit color). Assume the strip height is set to 12 and the subblock size is 64. Then,
+
+</p>
+        <p class="codesampleFirstLine">MainMem     = (8 + 4 * 64 + 12) * 3 * 3000 * 4
+</p>
+        <p class="codesampleIndent03">= 276 * 3 * 3000 * 4
+
+</p>
+        <p class="codesampleIndent03">= 9936000
+
+</p>
+        <p class="codesampleIndent03">~ 9.9 MB
+</p>
+        <p class="codesample">TempMem     = 0.005 * (3000 * 4000 * 3 * 1)
+</p>
+        <p class="codesampleIndent03">= 0.005 * 36000000
+
+</p>
+        <p class="codesampleIndent03">= 180,000
+
+</p>
+        <p class="codesampleIndent03">~ 0.2 MB
+
+</p>
+        <p>The encode process should consume about 10MB of memory.
+
+ 
+
+</p>
+        <h6 class="h7">Hints on Tuning Your Encoder
+
+</h6>
+        <p>If you have a large image to encode, how should you determine what your strip height and subblock size should be? Follow these steps:
+
+</p>
+        <ul>
+            <li value="1">First, determine how much physical memory (RAM) your computer has. Typically this will be anywhere from 128MB up to 2GB.
+
+</li>
+            <li value="2">Next, start your encode job with the default settings for subblock size and strip height. (Do not run any other jobs in the background.)
+
+</li>
+            <li value="3">Open the Windows Task Manager, click the <span style="font-weight: bold;font-style: normal;">Performance</span> tab, and observe the CPU usage meter. If you are consistently running at between about 85 and 100%, your encode job is at peak efficiency; tuning parameters will not help you.
+</li>
+            <li value="4"> If you are not at peak CPU speed, observe the <span class="bolder">Physical Memory</span> box at the bottom of the Performance page. The “Total” value should be approximately equal to the amount of RAM you have. (Note that Total is given in K, not MB.) The “Available” value should have plenty of headroom – if it is regularly below 10MB (or 10000K), then the operating system has run out of physical memory and is using virtual memory instead. This means that active data is being paged out to disk, and your encoder is suffering greatly.
+
+</li>
+            <li value="5">If you are paging, you can try tuning the encoder parameters. Drop your subblock size down to 32, restart your encode job, and observe the memory utilization again. If you are still paging, consider dropping it down to 24. Going down to 16 might begin to affect image quality for certain images. You can reduce the strip height to 8, 4, or 2 and see if that has any additional impact as well. Ideally you should keep the subblock size at 32 or greater and lower the strip height as much as possible without affecting CPU performance.
+</li>
+        </ul>
+        <p>Additional hints:
+
+</p>
+        <ul>
+            <li value="1">If you are reading or writing data across a network, the encoder will probably not be able to run at full CPU speed regardless of your settings. Whenever possible, use local storage.
+
+</li>
+            <li value="2">SCSI disk drives will usually give significantly better performance (5-20%) compared to IDE drives.
+
+</li>
+            <li value="3">Memory is relatively cheap. Buying more memory is rarely a bad idea.
+
+</li>
+            <li value="4">Experienced users can study the performance of the encode process in detail via the <span class="bolder">Process</span> tab of the Task Manager. Watch for lower CPU utilization, high paging rates, and large virtual memory usage.
+
+</li>
+            <li value="5">What kind of an input image are you using? Compressed images, for example JPEG or LZW TIFFs, require additional computation time beyond what the encoder requires for a more “raw” formatted image.
+
+ 
+
+</li>
+        </ul>
+        <h5>Memory Usage for Encoding, Compressing, and Optimizing
+
+</h5>
+        <p>We have 6 modes of operation:
+
+</p>
+        <ul>
+            <li value="1">E0   encode &amp; pass-through optimizer ("vanilla lossless encode")
+
+</li>
+            <li value="2">E1   encode &amp; one-pass optimizer
+
+</li>
+            <li value="3">E2   encode &amp; two-pass ("filter") optimizer
+
+</li>
+            <li value="4">R0   read MrSID and invoke pass-through optimizer ("no compression")
+
+</li>
+            <li value="5">R1   one-pass optimizer
+
+</li>
+            <li value="6">R2   two-pass ("filter") optimizer
+
+ 
+
+</li>
+        </ul>
+        <h6 class="h7">Heuristic Analysis
+
+</h6>
+        <p>For encoding with compression:
+
+</p>
+        <blockquote>
+            <p>if the input file size is less than main memory size,  then
+
+</p>
+            <blockquote>
+                <p>use E1
+
+</p>
+            </blockquote>
+            <p>else
+
+                        </p>
+            <blockquote>
+                <p>if you have enough disk space to store a losslessly compressed image, then
+
+</p>
+            </blockquote>
+            <blockquote>
+                <blockquote>
+                    <p>use the preferred method:
+
+        </p>
+                </blockquote>
+            </blockquote>
+            <blockquote>
+                <blockquote>
+                    <ol>
+                        <li value="1">do a lossless encode (E0)
+
+        </li>
+                        <li value="2">then invoke repurposer (R2)
+
+                        </li>
+                    </ol>
+                </blockquote>
+            </blockquote>
+            <blockquote>
+                <p>else use the last resort:
+
+                                    </p>
+            </blockquote>
+            <blockquote>
+                <blockquote>
+                    <p>use E2. <span class="bolder">Note:</span> this will require a significant amount of time because it runs the encoder twice
+
+</p>
+                </blockquote>
+            </blockquote>
+            <blockquote>
+                <p>endif
+</p>
+            </blockquote>
+            <p>endif
+</p>
+        </blockquote>
+        <p>For compressing an MrSID file with the repurposer:
+
+</p>
+        <blockquote>
+            <p>if the MrSID file size is less than 1/2 main memory size, then
+
+</p>
+            <blockquote>
+                <p>use R1  [because R1 will run faster than R2 on small images]
+
+</p>
+            </blockquote>
+            <p>else
+
+</p>
+            <blockquote>
+                <p>use R2
+
+</p>
+            </blockquote>
+            <p>endif
+
+ 
+
+</p>
+        </blockquote>
+        <h6 class="h7">Formal Analysis
+
+</h6>
+        <p>Let us assume the following variables:
+
+   </p>
+        <blockquote>
+            <p>Fx   size of lossless MrSID file
+
+   </p>
+            <p>Fr   size of input  MrSID file (for repurposing)
+
+   </p>
+            <p>Mx   memory needed to do normal lossless encode
+
+   </p>
+            <p>Tx   "CPU time"  to do normal lossless encode
+
+   </p>
+            <p>Q1   O(Npc*Nc*log_2 Nc)
+
+   </p>
+            <p>Q2   O(Nc*npc)
+
+          </p>
+            <blockquote>
+                <p>Where,
+
+           </p>
+                <blockquote>
+                    <p>Nc  = total number of components in image,
+</p>
+                    <p>Npc = number planes per component
+
+   </p>
+                </blockquote>
+            </blockquote>
+            <p>Ie   time to read in the original file (for encoding)
+
+   </p>
+            <p>Ir   time to read in the input MrSID file (for repurposing)
+
+   Oc   time to write out the compressed file
+
+</p>
+        </blockquote>
+        <p>Then:
+
+   </p>
+        <blockquote>
+            <p>E0   cpu time      Tx
+
+        </p>
+            <blockquote>
+                <p>memory        Mx
+
+        </p>
+                <p>io time       Ie + Oc
+
+   </p>
+            </blockquote>
+            <p>E1   cpu time      Tx + Q1
+
+        </p>
+            <blockquote>
+                <p>memory        Mx+Fx+20*Nc
+</p>
+                <p>io            Ie + Oc
+
+   </p>
+            </blockquote>
+            <p>E2  cpu time       2Tx + Q2
+
+       </p>
+            <blockquote>
+                <p>memory         Mx
+
+       </p>
+                <p>io             2Ie + Oc
+
+   </p>
+            </blockquote>
+            <p>R0  cpu time       (zero)
+
+       </p>
+            <blockquote>
+                <p>memory         (zero)
+
+       </p>
+                <p>io             Ir + Oc
+
+   </p>
+            </blockquote>
+            <p>R1  cpu time       Q1
+</p>
+            <blockquote>
+                <p>memory         Fr + 20*Nc
+
+       </p>
+                <p>io             Ir+ Oc
+
+   </p>
+            </blockquote>
+            <p>R2  cpu time       Q2
+
+       </p>
+            <blockquote>
+                <p>memory         constant
+</p>
+                <p>io             2Ir + Oc
+
+ 
+
+</p>
+            </blockquote>
+        </blockquote>
+        <h6 class="h7">Notes
+
+   </h6>
+        <p>E1 stores the whole lossless encoded image in memory.
+
+   </p>
+        <p>E2 requires two encoding passes, very big time cost but very little memory overhead.
+
+   </p>
+        <p>Q1 and Q2 are very small with respect to encoding time and I/O.
+</p>
+        <p>&#160;</p>
+        <script type="text/javascript" src="SkinSupport/MadCapBodyEnd.js">
+        </script>
+    </body>
+</html>

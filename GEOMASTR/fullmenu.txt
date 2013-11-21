@@ -1,0 +1,143 @@
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Load Map",                   IDM_VIEW
+        MENUITEM "Load &Configuration",         IDM_CONFIGURE
+        MENUITEM "Save Configuration",          IDM_SAVE_CONFIG
+        MENUITEM "Clear",                       IDM_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Print",                      IDM_PRINT
+        MENUITEM "Print &Merge",                IDM_PRINT_MERGE
+        POPUP "&Export"
+        BEGIN
+            MENUITEM "To &Clipboard",               IDM_E_TOCLIPBOARD
+            MENUITEM "To &File",                    IDM_E_TOFILE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Full Screen Image",           IDM_FULL_SCREEN
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_EXIT
+    END
+    POPUP "&Pan"
+    BEGIN
+        MENUITEM "&Left\tLeft Arrow",           IDM_P_LEFT
+        MENUITEM "&Right\tRight Arrow",         IDM_P_RIGHT
+        MENUITEM "&Up\tUp Arrow",               IDM_P_UP
+        MENUITEM "&Down\tDown Arrow",           IDM_P_DOWN
+    END
+    POPUP "&Zoom"
+    BEGIN
+        MENUITEM "&In\tF2",                     IDM_Z_IN
+        MENUITEM "&Out\tF3",                    IDM_Z_OUT
+        MENUITEM SEPARATOR
+        MENUITEM "&Window\tF4",                 IDM_Z_WINDOW
+        MENUITEM "&To Ortho",                   IDM_Z_ORTHO, GRAYED
+        MENUITEM "To S&cale",                   IDM_ZOOM_SCALE
+        MENUITEM SEPARATOR
+        MENUITEM "Re&Zoom\tF5",                 IDM_Z_REZOOM
+        MENUITEM "Re&Draw\tF6",                 IDM_Z_REDRAW
+        MENUITEM "&Redisplay\tF7",              IDM_REDISPLAY
+        MENUITEM SEPARATOR
+        MENUITEM "&List",                       IDM_ZOOM_LIST
+        MENUITEM "&Save Current Zoom",          IDM_SAVE_ZOOM
+    END
+    POPUP "&Highlight"
+    BEGIN
+        MENUITEM "&Clear",                      IDM_HLT_CLEAR
+        MENUITEM "&Save",                       IDM_HLT_SAVE
+        MENUITEM "&Load",                       IDM_HLT_LOAD
+        MENUITEM SEPARATOR
+        MENUITEM "Highlight Within &Area",      IDM_HLT_IN_AREA
+        MENUITEM SEPARATOR
+        POPUP "&Output"
+        BEGIN
+            POPUP "Set &Format and File"
+            BEGIN
+                MENUITEM "Attributes in Comma Delimited Format", IDM_HLT_OUTFORMAT
+                MENUITEM "Areas in ASCII File Format",  IDM_HLT_OUT_AREAS1
+            END
+            MENUITEM "&Create Output File",         IDM_HLT_OUT
+        END
+        MENUITEM "Display Highlight List",      IDM_DISPLAY_HLT_LIST
+    END
+    POPUP "&Locate"
+    BEGIN
+        MENUITEM "&Parcel",                     IDM_L_PARCEL
+        MENUITEM "&Address",                    IDM_L_ADDRESS
+        MENUITEM "&Intersection",               IDM_L_INTERSECTION
+        MENUITEM "Wells",                       IDM_LOC_WELLS
+        MENUITEM "Route and Milepoint",         IDM_L_ROUTEMP
+        MENUITEM SEPARATOR
+        MENUITEM "&Set Location Offset",        IDM_LOCATION_OFFSET
+    END
+    POPUP "&Visibility"
+    BEGIN
+        MENUITEM "&Load",                       IDM_LOAD_VISIBILITY
+        MENUITEM "&Set",                        IDM_VISIBILITY
+    END
+    POPUP "Pic&kability"
+    BEGIN
+        MENUITEM "&Load",                       IDM_LOAD_PICKABILITY
+        MENUITEM "&Set",                        IDM_PICKABILITY
+    END
+    MENUITEM "|",                           IDM_SEP
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Auto Clear Offset Lines",    IDM_AUTO_CLEAR_OFFSET
+        , CHECKED
+        MENUITEM "&Mask Offset Line",           IDM_MASK_OFFLINE
+        MENUITEM "&Clear Current Offset Lines", IDM_CLEAR_OFF_LINES
+        MENUITEM "Delete All InfoBoxes",        IDM_TAG_CLEAR
+    END
+    POPUP "&Utilities"
+    BEGIN
+        MENUITEM "&Attribute Transfer",         IDM_ATTRIBUTE_TRANSFER
+        MENUITEM "&Create Layer Index",         IDM_CREATE_LAYERINDX
+        MENUITEM "&Build TAG Indexes",          IDM_BUILDREFINDEXES
+        MENUITEM "&Test Attribute File",        IDM_TEST_ATTRIBUTE
+        MENUITEM "Create &Null Map",            IDM_NULL_MAP
+        POPUP "Combo Files"
+        BEGIN
+            MENUITEM "Create New Combo File",       IDM_COMBO_FILE
+            MENUITEM "Modify Existing Combo File",  IDM_CHANGE_COMBO_FILE
+        END
+        MENUITEM "Load Address Table",          IDM_LOAD_ADDRESS_TABLE
+        MENUITEM "Load Info",                   IDM_LOAD_INFO
+        MENUITEM "Create Address Location Table",IDM_CREATE_ADDLOC
+        MENUITEM "Load Documents File",         IDM_LOAD_DOC_FILE
+        MENUITEM "Load Menu",                   IDM_LOAD_MENU
+        MENUITEM "Copy Map Data",               IDM_MAPCOPY
+        MENUITEM "Command Input",               IDM_COMMAND_INPUT
+        MENUITEM "Expand Input",                IDM_EXPAND_INPUT
+        MENUITEM "City Extract",                IDM_CITY_EXTRACT
+        MENUITEM "Set Track Line Color",        IDM_TRACK_LINE_COLOR
+        MENUITEM "Reoganize Map",               IDM_REORGFILE
+        MENUITEM "Create State Intersection Tables",IDM_MISC
+        MENUITEM "Load City Minmax",            IDM_MISC2
+        MENUITEM "&Create TIGER Files from highlighted TLIDs",IDM_TIGER_OUT
+        MENUITEM "Remove Null Lines from TXT file",IDM_REMOVE_NULL_LINES
+        MENUITEM "Load Dynamic Dialog",         IDM_LOAD_DYNAMIC
+        POPUP "Graphics Import Functions"
+        BEGIN
+            MENUITEM "Load PEOPLENET Tiger Database",IDM_LOADTIGER_PN
+            MENUITEM "Load SHP Data",               IDM_LOADSHP
+            MENUITEM "Load TIGER Data",             IDM_LOADTIGER
+            MENUITEM "Load MIF Data",               IDM_LOADMIF
+            MENUITEM "Load Point Data",             IDM_POINTMAP
+            MENUITEM "Load BNA Data",               IDM_LOADBNA
+            MENUITEM "Load DXF data",               IDM_LOADDXF
+        END
+        POPUP "Graphics Export Functions"
+        BEGIN
+            MENUITEM "MIF Output",                  IDM_MIF_OUTPUT
+            MENUITEM "SHP Output",                  IDM_SHP_OUTPUT
+        END
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Basics",                     IDM_H_BASICS
+        MENUITEM SEPARATOR
+        MENUITEM "&About  GeoMaster",           IDM_ABOUT
+    END
+    MENUITEM "Viewports",                   IDM_VIEWPORTS
+END

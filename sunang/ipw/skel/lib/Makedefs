@@ -1,0 +1,23 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LINT_SPECIAL	"lint" options
+
+C_SPECIAL=
+LD_SPECIAL=
+LINT_SPECIAL=
+
+# LIB		library name
+# OBJS		component object files
+# SRCS		component source files
+
+LIB=
+OBJS=\
+# vi: type !!objs here
+
+SRCS=\
+# vi: type !!srcs here
+
+default: lib
+install: install-lib
+
+# $Header: /usr.MC68020/home/ipw/skel/lib/RCS/Makedefs,v 1.5 89/10/18 20:21:06 frew Exp $

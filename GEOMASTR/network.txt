@@ -1,0 +1,71 @@
+Creating a Street Network
+
+A street network is a set of interconnected polylines with associated attributes
+describing street names, address ranges, municipality, zipcode, one-way status,
+speed and width and type of roadway. Other information may be linked to the network
+by address, intersection, on street/from street and milepoint.
+
+An intersection table is automatically created from the polylines and may have attributes
+associated with it such as flow control and types of turns permitted.
+
+Markers (Mileposts) may be added to the network to allow attributes stored by milepoint
+to be located along the network.
+
+The street network will support applications such as address and intersection location,
+highway inventory management (sign inventories, pavement management, etc.), accident
+reduction projects and routing applications.
+
+Graphically the smallest component of the street network is the street segment. It is a
+single polyline, with its own unique reference number, which defines a portion of a road
+between two intersections or between an intersection and a dead-end. A segment would only
+pass through an intersection if there is really no connection between the
+roads (i.e an underpass or overpass). The most common situation consists of a single
+polyline between intersections, however multiple polylines may be used to split a street
+at other features (such as railroad and rive crossings) or where the basic characteristics of
+the road change (i.e. type of road, municipality or zipcode).
+
+Each street segment has a corrosponding record in the street segment table containing the
+basic attributes of that segment. These attributes are the street names (up to 4), address
+ranges, left/right municipality, left/right zipcode, street type and width, one-way status
+and speed limit. Other data may be linked to the streets without regard to the definition
+of the segments via dynamic segmentation. A secondary table called the actual address table
+may or may not have entries for a given street segment. This table allows specific addresses
+to be more accuratly located along the segment. 
+
+A path is a series of connected street segments sharing the same street name. One street segment
+may be included in up to four paths. Mile markers may be applied to paths to allow other data
+to be linked to the street network via street and milepoint.
+
+Defining the Network
+
+The polylines defining the street segments should first be loaded into a plt file either by
+translation from another format or via the digitizing funtions. These polylines should begin
+and end at intersections or where basic characteristics of the road change. Other breaks
+may be placed at other significant points if desired. The basic attributes of each segment
+may be entered while digitizing or may be added after the digitizing is complete.
+
+The connectivity of the polylines should be checked after all are completed by using the
+walkout route function to traverse the entire network beginning at any desired point. The
+route file generated can be used to color the map to indicate non-traversed segments (not
+connected to the rest of the network) and dead-end segments (connected at only one end).
+The non-connected segments should be fixed and the dead-ends checked to verify that they
+are valid.
+
+Next the street names should be assigned to all segments if not done during
+the digitizing (or import) process. The STRTNAME theme should be used to 
+verify that all segments have names. The ?? theme can also be used to display
+the names on the segments to verify that they have been correctly assigned.
+
+Once the names have been assigned, the network itself can be created. To do
+this first run the walkout route function again. This identifies all
+connections and intersections in the network. The build paths function uses
+this data to create the network paths. Execute it next. Lastly run the create
+intersections function to build the intersection table.
+
+At this point milepoints may be assigned, the functions which locate data
+via street intersections will work and the routing functions are operable.
+
+To use the network based address location functions you must next create
+the network address data. This consists of at least segment address ranges
+and optionally, zipcodes, municipalities and actual addresses.
+

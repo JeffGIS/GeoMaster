@@ -1,0 +1,531 @@
+
+			Importing data into IPW
+			-----------------------
+
+
+
+I.  Binary Raster data in GRASS, LAS or other formats:
+------------------------------------------------------
+
+Binary raster data can be input to IPW from GRASS, LAS (Land Analysis
+System), or any other GIS or image processing package software which
+can output data in binary raster form (byte or integer data stored in
+rows or columns).
+
+
+GRASS raster files
+------------------
+
+To convert a GRASS raster file to an IPW image, use the grass.to.ipw
+command from GRASS:
+
+SYNOPSIS
+	GRASS> grass.to.ipw help
+	GRASS> grass.to.ipw [-r] [-o] map=name [header=name] [units=name] \
+	                 [divisor=value] [offset=value]	
+
+DESCRIPTION
+	grass.to.ipw converts a GRASS raster file to an IPW image file.
+
+	A linear quantization header may be provided with -h option or stdin;
+	otherwise the number of bits per pixel and floating point map
+	are derived from the min and max cell values (the floating point
+	map maximum may be increased to preserve the precision of the data).
+
+	If both the -r (raw mode) flag and a header file are specified,
+	the given linear quantization header will be written to the output
+	image, but the data values will be copied as raw pixel values
+	bypassing the floating point mapping (see examples below).
+
+	In GRASS, the geographic region (window) specifies the north,
+	south, east and west edges of the raster map.  The data values are
+	assumed to be located at the cell centers so that the data value
+	for the north-westernmost pixel (1,1) is actually located at
+	northing NORTH-NSRES/2 and easting WEST+EWRES/2	(where NORTH
+	is the northern edge of the file, WEST is the western edge of
+	the file and NSRES and EWRES are the resolutions in the
+	N/S and E/W directions, respectively).  In IPW, the image origin
+	(beginning line and sample coordinates) are assumed to be at the
+	center of pixel (0,0).  Unless the -o (override) option is set,
+	the output image GEO header will be set so that:
+		bline = NORTH+NSRES/2
+		bsamp = WEST+EWRES/2.
+		dline = -NSRES
+		dsamp = EWRES
+	If the -o option is specified, bline will be set to NORTH and
+	bsamp will be set to west.
+
+	The output image is written to standard output.
+
+OPTIONS
+
+	Flags:
+	-r                  raw values (don't convert to linear quantization)
+	-o		    use the GRASS NORTH and WEST values for the
+			    GEO origin
+			    default: origin is offset by half a pixel in
+			    each direction (see discussion above)
+
+	Parameters:
+	map=name            input GRASS raster file
+	header=name         input linear quantization header file
+	units=name          data units for annotation
+	divisor=value       divide each map data by this value
+			    default: 1.0
+	offset=value	    add to each map data (prior to division)
+			    default: 0.0
+	
+
+EXAMPLES
+
+	The following command,
+
+		grass.to.ipw map=grasslayer divisor=10.0 offset=-100.0 \
+		       > ipwfile
+
+	will convert a GRASS map layer called  grasslayer to an IPW
+	image file called ipwfile, subtracting 100.0 from all input
+	values then dividing the result by 10.0 before storing in the
+	IPW output file.
+
+	The following pipeline of commands,
+
+		mkbih -l 200 -s 500 -f | mklqh -m 0,0,255,1.275 -f \
+		  | grass.to.ipw -r map=rawlayer > image
+
+	creates an IPW image with 200 lines and 500 samples with linear
+	floating point mapping defined by the pairs (0,0) and (255,1.275).
+	The data values in GRASS raster file "rawlayer" are copied as raw
+	pixel values, so that a value of 200 in input map layer grasslayer
+	is copied as raw value 200 in the IPW image, and will be mapped to
+	floating point value of 1.0.
+
+	To convert several GRASS raster files into a multi-band IPW image:
+		grass.to.ipw map=raster.1 > ipw.1
+		    ...
+		grass.to.ipw map=raster.N > ipw.N
+		mux ipw.1 ... ipw.N > image
+
+
+
+Land Analysis System (LAS) images:
+----------------------------------
+
+To convert a LAS image to an IPW image:
+
+SYNOPSIS
+	las2ipw -i lasname [-r] [-h header] [-g]
+
+DESCRIPTION
+	las2ipw converts an image file in LAS (Land Analysis System) format
+	to IPW (Image Processing Workbench) format.  If an IPW header is
+	provided by the -h option or stdin, the given headers will be written
+	to the IPW file (except a GEO header if -g is not specified);
+	otherwise the contents of the basic image (BI), geodetic (GEO) and
+	linear quantization (LQ) headers are derived from the LAS DDR file.
+	If both the -r flag and a header file are specified, the given
+	linear quantization header will be written to the output image, but
+	the data values will be copied as raw pixel values bypassing the
+	floating point mapping (see examples).  The IPW output image is
+	written to stdout.
+
+OPTIONS
+	-i		LAS image name
+	-r		force raw pixel values to equal LAS image pixel
+			values; bypass floating point conversion if used
+			in conjunction with -h option
+			(can't be used with REAL*4 LAS images) 
+	-h		input header file (default: stdin)
+	-g		flag to override LAS geographic area with GEO header
+			in given header file
+
+EXAMPLES
+	Suppose lasfile.img is a LAS image with pixel data type BYTE with 
+	values ranging from 0-255 and that header is an IPW file with
+	an LQ header defining a linear mapping of pixel value to floating
+	point with map (0,0) and (255,1.0).  The command:
+
+		las2ipw -i lasfile -r -h header -o ipwfile
+
+	will create an 8-bit IPW image file ipwfile with raw pixel values
+	0-255 mapped to floating point 0.0 - 1.0.  The command:
+
+		las2ipw -i lasfile -o ipwfile
+
+	will create the IPW image file ipwfile with raw pixel values 0-255
+	mapped to floating point 0.0 - 255.0.
+
+	Suppose lasreal.img is a LAS image with data type REAL*4 and values
+	ranging from 0.0 to 1000.0, and that real.head is an IPW header file
+	specifying 12-bit pixels with a floating point map of
+	(0,0),(4096,1000.0).  The command:
+
+		las2ipw -i lasreal.img -h real.head -o ipwreal
+
+	will create a 12-bit IPW image ipwreal with raw pixel values 0-4096
+	mapped to floating point values 0.0-1000.0.  (Note that the pixel
+	values will have the approximate values of the original LAS values
+	with an error of no more than 0.244141 (1000/4096)).  The command:
+
+		las2ipw -i lasreal.img -o ipwreal
+
+	will create an 8-bit IPW image ipwreal with raw pixel values 0-255
+	mapped to floating point values 0.0-1000.  Since no header was
+	provided, an 8-bit image (default) was created.
+
+
+NOTE: prior to using the las.to.ipw command, the following csh commands
+need to be added to the .cshrc file or typed in at the command line:
+
+	setenv LASROOT /usr/packages/sparc/las/las/v5_0
+	setenv WORROOT /usr/packages/sparc/las/world/v2_0
+	setenv TAE /usr/packages/sparc/las/tae/v1_4
+	setenv response LAS50
+	source $LASROOT/lasinit
+
+	
+
+
+
+Binary raster data in a format other than GRASS or LAS:
+-------------------------------------------------------
+
+Information needed:
+	- number of lines (rows)
+	- number of samples per line (columns)
+	- number of bits/bytes per pixel (usually one byte, 8 bits)
+	- data type: byte, integer, floating point
+	- number of bands
+	- if multiple bands, data format: band-sequential (BSQ), band
+	  interleaved (BIL), etc.
+	- size of file header, if any
+	- pixel representation information - are the pixel values category
+	  identifiers or can they be mapped to floating point data values?
+	- map projection information (optional):
+		projection name and units
+		projection coordinates of upper-left pixel (center)
+		pixel spacing in line and sample directions
+ 	- size of the image file - if the image has X samples and
+	  Y lines, then the file should be exactly X*Y bytes long (if not,
+	  then the image might have a header, or the records might be
+	  blocked)
+
+EXAMPLE 1
+---------
+To convert the "Vegitation Map of Asia" from SPANS (Spatial Analysis System)
+format to IPW:
+
+We have the following information about the SPANS file vegt.rnl:
+
+	spatial resolution:		: 2.199 km
+	number of lines:		: 3672
+	number of samples:		: 5920
+	number of classes:		: 36
+	Projection			: Lambert Conformal Conic
+		First Parallel		: 20S
+		Second Parallel		: 30S
+		Longitude of origin	: 85E
+		Latitude of origin	: 0 N
+	
+	Location (decimal degrees) of the bottom left corner pixel (center):
+		Longitude:	56.1086E
+		Latitude:	 1.7190S
+
+A long list (ls -l) of the file vegt.rnl shows the size to be 21738240 bytes
+which is exactly 3672 * 5920 bytes.
+
+Steps:
+-----
+1. Determine information for the IPW basic image (BI), linear quantization (LQ),
+   and geodetic (GEO) headers:
+
+	-BI header:
+		nlines = 3672
+		nsamps = 5920
+		nbits = 8
+		nbands = 1
+
+		Note that since the maximum data value is 36, we could make
+		this a 6-bit image (an N bit image can represent values from
+		0 to 2^N - 1; 6-bits can represent values 0-63 which is
+		sufficient for this case).  Some IPW programs will run faster
+		with smaller bits per pixel since look-up tables will be
+		shorter.
+
+	-LQ header:
+		map = 0,0,255,255
+
+		(since this data is integer data, we want to map the values
+		directly to their floating point equivalent; therefore we
+		are mapping raw pixel values 0-255 to floating point values
+		0.0-255.0.  If we had made the image 6-bit, the map would
+		be 0,0,63,63)
+
+	-GEO header:
+		bline = 7589107
+		bsamp = -3312311
+		dline = 2199
+		dsamp = 2199
+		units = m
+		csys = "Lambert Conformal Conic"
+
+		From the file information, all we have are the projection
+		parameters for the Lambert Conformal Conic map projection and
+		the latitude and longitude of the center of the bottom left
+		pixel.  We can obtain the Lambert coordinates in meters
+		for the upper right pixel with the following steps:
+
+			mkgeo > geo.defs
+			mklamcc -p -10,-30 -o 0 -c 85 > lamcc.defs
+			echo "56.1086 -1.7190" | \
+				transcoord -i geo.defs -o lamcc.defs
+			  (output is -3312311 -485621 which is the Lambert
+			   easting and northing for the bottom left pixel)
+
+		Then bline = bottom northing + nlines * dline
+			     -485621 + 3672 * 2199 = 7589107
+		and bsamp = left easting = -3312311
+
+2.  Create the IPW image with the headers defined above - first create the
+headers in a file using the -f (no image copy) option, then append the
+image data to the file:
+
+	mkbih -l 3672 -s 5920 -f | mklqh -m 0,0,255,255 -f | \
+		mkgeoh -o 7589107,-3312311 -d -2199,2199 -u meters
+			-c "Lambert Conformal Conic" -f > vegt.ipw
+	cat vegt.rnl >> vegt.ipw
+
+
+EXAMPLE 2
+---------
+To convert an AVHRR satellite image tape of the Northwest United States:
+
+We have the following information about the file w1.172:
+
+	Data Type:	Byte
+	Number Lines:	948
+	Number Samples:	1070
+	Data Format:	BSQ
+	Number Bands:	4
+
+	Pixel Size:	1101
+	Projection:	Albers conical equal area
+	Center of pixel (1,1)   X = -2384766.0 meters
+				Y = 3192900.0 meters
+
+	Bands: 1 2	Units:  0.25% Albedo
+	Bands: 3 4	Units:  0.50 deg K (0 = 190 deg K)
+
+The file size is 4057520 bytes.
+
+Steps:
+
+1.  The image should be nbands * nlines * nsamps, or 4 * 948 * 1070 = 4057440,
+so our file is 80 bytes too long.  By examination of the file with btoa, it
+is determined that there is an 80-byte header on the file that must be
+stripped before processing:
+
+	dd if=w1.172 bs=80 skip=1 > avhrr.dat
+
+2. Determine information for the IPW basic image (BI), linear quantization (LQ),
+   and geodetic (GEO) headers:
+
+	-BI header (all 4 bands):
+		nlines = 948
+		nsamps = 1070
+		nbits = 8
+
+	-LQ header (bands 1, 2 (IPW bands 0, 1))
+		map = 0,0,255,0.6375
+		units = "%Albedo/100"
+
+		The first two bands contain albedo in units of 0.25%.
+		This means raw pixel value 0 represents 0%, 1 represents
+		.25%, ..., and the maximum raw pixel value 255 = 255 * .25%
+		= 63.75% = 0.6375
+
+	-LQ header (bands 3, 4 (IPW bands 2, 3))
+		map = 0,0,190.0,317.5
+		units = "deg K"
+
+		The second two bands contain temperature in units of 0.5
+		deg K above 190 deg K.  This means raw pixel value 0
+		represents 190 deg K, 1 represents 190.5 deg K, ...,
+		and the maximum raw pixel value 255 represents 255 * .5 + 190
+		= 317.5 deg K.
+
+	-GEO header (all 4 bands):
+		bline = 3192900
+		bsamp = -2384766
+		dline = 1101
+		dsamp = 1101
+		units = m
+		csys = "Albers conical equal area"
+
+
+3.  To create the IPW images with the headers defined above:
+    Since the image has four bands in BSQ format, the first 948 * 1070
+    = 1014360 bytes are band 1 data, the second 1014360 bytes are band 2
+    data, etc.  We can use the dd command to split off the data for each
+    band, appending the data to the header files:
+
+	mkbih -l 948 -s 1070 -a "AVHRR band 1: Albedo" -f \
+		| mklqh -m 0,0,255,0.6375 -u "%Albedo/100" -f \
+		| mkgeoh -o 3192900,-2384766 -d -1101,1101 -u m \
+			-c "Albers conical equal area" -f > band1.ipw
+
+	mkbih -l 948 -s 1070 -a "AVHRR band 2: Albedo" -f \
+		| mklqh -m 0,0,255,0.6375 -u "%Albedo/100" -f \
+		| mkgeoh -o 3192900,-2384766 -d -1101,1101 -u m \
+			-c "Albers conical equal area" -f > band2.ipw
+
+	mkbih -l 948 -s 1070 -a "AVHRR band 3: Temperature" -f \
+		| mklqh -m 0,190,255,317.5 -u "deg K" -f \
+		| mkgeoh -o 3192900,-2384766 -d -1101,1101 -u m \
+			-c "Albers conical equal area" -f > band3.ipw
+
+	mkbih -l 948 -s 1070 -a "AVHRR band 4: Temperature" -f \
+		| mklqh -m 0,190,255,317.5 -u "deg K" -f \
+		| mkgeoh -o 3192900,-2384766 -d -1101,1101 -u m \
+			-c "Albers conical equal area" -f > band4.ipw
+
+	dd if=avhrr.dat bs=1070 count=948 >> band1.ipw
+	dd if=avhrr.dat bs=1070 skip=948 count=948 >> band2.ipw
+	dd if=avhrr.dat bs=1070 skip=1896 count=948 >> band3.ipw
+	dd if=avhrr.dat bs=1070 skip=2844 count=948 >> band4.ipw
+
+
+4.  If desired, the four files can be merged into one 4-band image file
+    using the mux command:
+
+	mux band1.ipw band2.ipw band3.ipw band4.ipw > avhrr.ipw
+
+
+
+
+II.  Raster data in ASCII format:
+---------------------------------
+
+The import program can be used to import ASCII data for a rectangular region
+stored in row order:
+
+NAME
+	import -- import ASCII data file to an IPW image
+
+SYNOPSIS
+	import -l nlines -s nsamps [-b nbands] [-n nbits[,...]] [-i infile]
+
+DESCRIPTION
+	Import reads in an ASCII file of data points and constructs an IPW
+	image.  The data values are assumed to be in band-interleaved-by-pixel,
+	row by column order.  The data values are read free-format; any
+	number of bands/samples per input file line.
+
+OPTIONS
+	l	# lines in output image
+	s	# samples in output image
+	b	# bands in output image (default is 1)
+	n	# bits for each band (default is 8)
+	i	input file (defaults to stdin)
+
+OPERANDS
+
+EXAMPLES
+
+	Suppose file input.dat has the following format:
+
+	0	0.5	2.2	1.3	6.5	12.2
+	21.5	3.5	-1.5	0.1	13.4	-1.9
+
+	The following command:
+
+		import -l 6 -s 2 -i input.dat > image
+
+	creates an image with 6 lines, 2 samples per line where the
+	first lines contains samples 0 and 0.5, line 2 contains samples
+	2.2 and 1.3, etc.
+
+
+
+
+III.  Generating interpolated surfaces from point data
+------------------------------------------------------
+
+The surface program can be used to generate an IPW image containing the
+results of surface interpolation from ASCII point data (input file with
+lines containing easting/longitude northing/latitude data_value):
+
+NAME
+	surface -- interpolate image from irregularly spaced point data
+
+SYNOPSIS
+	surface [-n #points] [-h header] [-m mask] [-p infile]
+
+DESCRIPTION
+	surface reads in an ASCII file of data points and constructs an IPW
+	image by spatial interpolation using an inverse-distance squared
+	weighting algorithm.  The number of nearest neighbors used in the
+	interpolation may be specified (default: 12).  The given header
+	file will be used to determine the number of lines, samples, bits
+	per pixel (in the BIH header) and geographic referencing information
+	(GEO header).  If the header file contains a linear quantization
+	header, it will be used for floating point mapping in the output
+	image; otherwise the mapping will be derived from the data.  The
+	ASCII input file contains easting (x-coordinate), northing 
+	(y-coordinate) data value triplets where the northing and easting
+	are in the same projection units as the given GEO header.
+
+OPTIONS
+	n	# neighbors to use in interpolation (default: 12)
+	h	IPW header file (default: stdin)
+		Note: at least one of (-h,-p) must be specified
+	m	mask image
+	p	points input file (default: stdin)
+		Note: at least one of (-h,-p) must be specified
+
+
+Note: if the ASCII data files contains locations in one projection (for example
+latitude/longitude), and the desired projection for the output image is a
+different projection (for example Albers), use the transcoord program to
+convert the coordinates of the ASCII file:
+
+NAME
+	transcoord -- translate map coordinates to different map projection
+
+SYNOPSIS
+	transcoord -i inproj -o outproj [infile]
+
+DESCRIPTION
+	transcoord translates a file of geographic projection coordinates
+	to another map projection using the USGS General Cartographic
+	Transformation Package (GCTP) software.  The input file is an 
+	ASCII file with one easting, northing pair per line, followed by
+	any other data.  The output file, written to stdout, is an ASCII
+	file with the input map coordinates replaced by the translated
+	coordinates, and the remainder of the data line copied.  The input
+	and output projection parameters are defined in files inproj (-i
+	parameter) and outproj (-o parameter) respectively (see below
+	for file format).
+
+OPTIONS
+	-i	input projection definition file
+
+	-o	output projection definition file
+
+OPERAND
+	infile	input file (default:stdin)
+
+EXAMPLE
+
+FILES
+	The projection definition files are ASCII files with the following
+	format:
+		projection ID
+		units code
+		zone code
+		datum code
+		projection parameters (15 values)
+
+	The files may be created with programs mkgeo, mkalbers, etc.  See
+	the USGS documentation for the General Cartographic Transformation
+	Package for details on the parameters.

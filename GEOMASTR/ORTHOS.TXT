@@ -1,0 +1,20 @@
+Entering ORTHO files
+
+1) Convert TIF to BMP using Graphics Workshop 
+
+2) Place BMP file into 'c:\duluth\orthos' directory
+
+3) Create control file in 'c:\duluth\orthos\orthname.txt'
+
+	First line is FEET or METERS based on the resolution of the image
+	Second line is x coordinate of lower left
+	Third line is y coordinate of lower left
+	Fourth line is resolution of image (feet or meters per pixel)  
+	Fifth line is optional: it contains the full pathname to the BMP
+		file if it is not in the same directory as the TXT control file.
+		(useful if space is an issue)
+	
+4) Do steps 1-3 for all orthos to be loaded into the same directory
+
+5) Load all images in the 'c:\duluth\orthos' directory using the 
+	Create Layer Index function in the utilities menu.

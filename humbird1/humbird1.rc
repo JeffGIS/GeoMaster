@@ -1,0 +1,319 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_HUMBIRD1            ICON                    "humbird1.ICO"
+IDI_SMALL               ICON                    "SMALL.ICO"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDC_HUMBIRD1 MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       IDM_EXIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About ...",                  IDM_ABOUT
+    END
+    POPUP "Options"
+    BEGIN
+        MENUITEM "Show Contour Lines",          IDM_SHOWCON, CHECKED
+        POPUP "Depth Factor"
+        BEGIN
+            MENUITEM "0 (Off)",                     IDM_COLORFAC0
+            MENUITEM "1",                           IDM_COLORFAC1
+            MENUITEM "2",                           IDM_COLORFAC2
+            MENUITEM "3",                           IDM_COLORFAC3
+            MENUITEM "4",                           IDM_COLORFAC4, CHECKED
+            MENUITEM "5",                           IDM_COLORFAC5
+            MENUITEM "6",                           IDM_COLORFAC6
+            MENUITEM "7",                           IDM_COLORFAC7
+            MENUITEM "8",                           IDM_COLORFAC8
+            MENUITEM "9",                           IDM_COLORFAC9
+            MENUITEM "10",                          IDM_COLORFAC10
+        END
+        MENUITEM "Highlight 20 to 30 foot",     IDM_HIGHLIGHT
+        MENUITEM "Highlight 15 to 20 Feet",     IDM_HIGHLIGHT2
+        MENUITEM "Highlight 15 Feet",           IDM_HIGHLIGHT3
+        MENUITEM "Adjust Scale to Image",       IDM_ADJUSTSCALE, CHECKED
+        POPUP "Zoom Factor"
+        BEGIN
+            MENUITEM "2",                           IDM_ZOOMBY2, CHECKED
+            MENUITEM "1.5",                         IDM_ZOOMBY1P5
+            MENUITEM "1.2",                         IDM_ZOOMBY1P2
+        END
+        MENUITEM "Flip Text",                   IDM_FLIPTEXT, CHECKED
+        MENUITEM "Filter Text",                 IDM_DOFILTER, CHECKED
+        MENUITEM "Gray Basemap",                IDM_GRAYMAP
+        POPUP "Low Water Offset"
+        BEGIN
+            MENUITEM "None",                        IDM_OFFSET0, CHECKED
+            MENUITEM "3 Foot",                      IDM_OFFSET3
+            MENUITEM "5 Foot",                      IDM_OFFSET5
+            MENUITEM "7 Foot",                      IDM_OFFSET7
+            MENUITEM "5 Foot High Water",           IDM_OFFSET5HIGH
+            MENUITEM "1 Foot",                      IDM_OFFSET1
+            MENUITEM "55 Foot",                     IDM_OFFSET55
+        END
+        POPUP "Hazard Depth"
+        BEGIN
+            MENUITEM "3 Feet",                      ID_HAZARDDEPTH_3FEET
+            MENUITEM "5 Feet",                      ID_HAZARDDEPTH_5FEET, CHECKED
+            MENUITEM "7 Feet",                      ID_HAZARDDEPTH_7FEET
+        END
+        MENUITEM "Show Hazard Depth",           IDM_SHOWHAZARD
+        MENUITEM "Seamless",                    IDM_SEAMLESS, CHECKED
+        MENUITEM "Display Grid",                ID_OPTIONS_DISPLAYGRID
+    END
+    POPUP "iPilot"
+    BEGIN
+        MENUITEM "Create iPilot Track",         IDM_IPILOT
+        POPUP "Options"
+        BEGIN
+            POPUP "Selected Contour Display"
+            BEGIN
+                MENUITEM "Use Dash Line",               ID_OPTIONS_USEDASHLINE, CHECKED
+                MENUITEM "Line Width = 2",              ID_OPTIONS_LINEWIDTH2
+                MENUITEM "Line Width = 3",              ID_OPTIONS_LINEWIDTH3, CHECKED
+                MENUITEM "Show Selected Contour",       ID_OPTIONS_SHOWSELECTEDCONTOUR, CHECKED
+            END
+            POPUP "Track Line Spacing"
+            BEGIN
+                MENUITEM "5 Meters",                    ID_TRACKLINESPACING_5METERS
+                MENUITEM "10 Meters",                   ID_TRACKLINESPACING_10METERS, CHECKED
+                MENUITEM "15 Meters",                   ID_TRACKLINESPACING_15METERS
+            END
+            POPUP "Track Line Limit"
+            BEGIN
+                MENUITEM "1/2 Mile",                    ID_TRACKLINELIMIT_1MILE, CHECKED
+                MENUITEM "2 Miles",                     ID_TRACKLINELIMIT_2MILES
+                MENUITEM "4 Miles",                     ID_TRACKLINELIMIT_4MILES
+            END
+            POPUP "Track Line Display"
+            BEGIN
+                POPUP "Knot Removal"
+                BEGIN
+                    MENUITEM "0",                           ID_KNOTREMOVAL_0
+                    MENUITEM "25",                          ID_KNOTREMOVAL_25, CHECKED
+                    MENUITEM "100",                         ID_KNOTREMOVAL_100
+                    MENUITEM "All",                         ID_KNOTREMOVAL_ALL
+                END
+                MENUITEM "Smooth",                      ID_OPTIONS_SMOOTH, CHECKED
+                MENUITEM "ReSample",                    ID_OPTIONS_RESAMPLE, CHECKED
+                MENUITEM "Show Point Numbers",          ID_OPTIONS_SHOWPOINTS
+            END
+        END
+        MENUITEM "Continue",                    ID_IPILOT_CONTINUE
+        MENUITEM "Reverse",                     ID_IPILOT_REVERSE
+        MENUITEM "Double Offset",               ID_NEW_OFFSET
+        MENUITEM "Restart",                     ID_IPILOT_RESTART
+        MENUITEM "RestartReverse",              ID_IPILOT_RESTARTREVERSE
+    END
+    MENUITEM "Select Lake",                 IDM_SELECTLAKE
+    MENUITEM "Zoom In",                     IDM_ZOOM_IN
+    MENUITEM "Zoom Out",                    IDM_ZOOM_OUT
+    MENUITEM "Pan Left",                    IDM_PAN_LEFT
+    MENUITEM "Pan Right",                   IDM_PAN_RIGHT
+    MENUITEM "Pan Up",                      IDM_PAN_UP
+    MENUITEM "Pan Down",                    IDM_PAN_DOWN
+    MENUITEM "Capture",                     ID_CAPTURE
+    MENUITEM "Replay",                      ID_REPLAY
+    MENUITEM "ReSelect",                    ID_RESELECT
+    MENUITEM "Redisplay",                   ID_REDISPLAY
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDC_HUMBIRD1 ACCELERATORS 
+BEGIN
+    "?",            IDM_ABOUT,              ASCII,  ALT
+    "/",            IDM_ABOUT,              ASCII,  ALT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG  22, 17, 230, 75
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "System"
+BEGIN
+    ICON            IDI_HUMBIRD1,IDC_MYICON,14,9,20,20
+    LTEXT           "humbird1 Version 1.0",IDC_STATIC,49,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2009",IDC_STATIC,49,20,119,8
+    DEFPUSHBUTTON   "OK",IDOK,195,6,30,11,WS_GROUP
+    LTEXT           "Static",IDC_CARDNAME,53,46,78,8
+    LTEXT           "Static",IDC_CIDMESSAGE,54,58,73,8
+END
+
+IDD_SELECTLAKE DIALOGEX 22, 17, 230, 228
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Lake"
+FONT 8, "System", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,195,6,30,11,WS_GROUP
+    LISTBOX         IDC_LIST1,5,5,187,194,LBS_SORT | LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_REPLAYID,13,217,73,9,ES_AUTOHSCROLL | ES_NUMBER
+END
+
+IDD_CHOOSE_DIALOG DIALOGEX 0, 0, 215, 131
+STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION
+CAPTION "Tracking Options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,170,26,38,14
+    CONTROL         "Green (solid) NorthWest",IDC_DIRECTION1,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,19,132,10
+    GROUPBOX        "Direction of Travel",IDC_STATIC,7,7,151,39
+    PUSHBUTTON      "OK",IDOK,170,7,38,14,WS_DISABLED
+    CONTROL         "Red (dashed) SouthEast",IDC_DIRECTION2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,31,132,10
+    GROUPBOX        "Offset From Selected Contour",IDC_STATIC,7,48,201,52
+    EDITTEXT        IDC_OFFSETVAL,14,61,23,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "feet",IDC_STATIC,39,64,14,8
+    CONTROL         "",IDC_OFFSETLEFT,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,76,177,10
+    CONTROL         "",IDC_OFFSETRIGHT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,87,177,10
+    EDITTEXT        IDC_KNOT,69,103,20,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,96,103,12,14
+    LTEXT           "Knot removal",IDC_STATIC,15,106,50,8
+    EDITTEXT        IDC_NSMOOTH,158,103,20,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Smooth",IDC_STATIC,131,107,26,8
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""resource.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_SELECTLAKE, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 75
+    END
+
+    IDD_CHOOSE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 208
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 124
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+BUOY                    BITMAP                  "bitmap2.bmp"
+PUBLANDING              BITMAP                  "bitmap1.bmp"
+RESORTLANDING           BITMAP                  "publicla.bmp"
+WEED                    BITMAP                  "bmp00001.bmp"
+ROCK                    BITMAP                  "bmp00002.bmp"
+HBSKIN                  BITMAP                  "bmp00003.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_APP_TITLE           "humbird1"
+    IDS_HELLO               "Hello World!"
+    IDC_HUMBIRD1            "HUMBIRD1"
+END
+
+STRINGTABLE 
+BEGIN
+    IDM_FLIPTEXT            "Flip text for easy reading"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,9 @@
+
+
+This is nasty.  ANSI C changed the way variable length arguments worked.
+One of the reasons we really want to do ANSI C is that not only does it
+let us take advantage of prototypes, but it is STANDARD.  The varargs
+interface is not guaranteed to work the same way on all machines.  So,
+we jump through some hoops to get ANSI if we can.
+
+ -- Dana Jacobsen, ERL-C.

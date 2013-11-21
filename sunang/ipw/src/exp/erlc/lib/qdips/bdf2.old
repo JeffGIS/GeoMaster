@@ -1,0 +1,115 @@
+/*
+**  This current version of the function "bdf2" is just simply a call
+**  to the "bdfunc" function.  Therefore, the library function "budit2"
+**  was altered to call "bdfunc" directly.  That way, there was no need
+**  to include "bdf2" in the IPW's qdips library.  See comments below.
+**  J. Domingo, June 1995
+*/
+ 
+/*
+	calculates scaling velocity, temperature, humidity
+	from wind speed measurement at one height, and
+	temperature and specific humidity at another
+*/
+#include	<math.h>
+#include	"qdips.h"
+
+static	double	zpass[3], tpass[2], qpass[2], upass;
+
+int	bdf2(zu, zt, z0, t, t0, q, q0, u, ustar, tstar, qstar)
+double	zu, zt, z0, t, t0, q, q0, u, *ustar, *tstar, *qstar;
+{
+	double	x[3];
+	double	scf();
+
+	zpass[0] = zu;
+	zpass[1] = zt;
+	zpass[2] = z0;
+	tpass[0] = t;
+	tpass[1] = t0;
+	qpass[0] = q;
+	qpass[1] = q0;
+	upass = u;
+
+	/* initial guesses */
+	x[0] = sqrt(t);
+	x[1] = sqrt(q);
+	x[2] = sqrt(u);
+
+	/* t & q at height zu */
+	t = x[0] * x[0];
+	q = x[1] * x[1];
+/*
+**  JBD, 6/95
+**  Since x[0] = sqrt(t) and x[1] = sqrt(q), the assignments above become
+**
+**	t = x[0] * x[0];  --->  t = sqrt(t) * sqrt(t);  --->  t = t;
+**	q = x[1] * x[1];  --->  q = sqrt(q) * sqrt(q);  --->  q = q;
+**
+**  Therefore, t and q are passed to bdfunc unchanged in the call below:
+*/
+
+	bdfunc(zu, z0, t, t0, q, q0, u, 0., ustar, tstar, qstar);
+/*
+**  JBD, 6/95
+**  Hence, a call to bdf2 is equivalent to a call to bdfunc:
+**
+**	bdf2(zu, zt, z0, t, t0, q, q0, u, ustar, tstar, qstar)  --->
+**
+**	bdfunc(zu, z0, t, t0, q, q0, u, 0., ustar, tstar, qstar)
+**
+**  The library function "budit2" used to call bdf2; it now calls bdfunc
+**  directly.
+*/
+
+	return(0);
+}
+
+double	scf(n, x, flag)
+int	n, flag;
+double	*x;
+{
+	double	ustar[3], tstar[3], qstar[3];
+	double	z[3], t[3], q[3], u[3];
+	double	z0, t0, q0, result;
+	int	j, k;
+
+	if (n == 3) {
+		/* knowns */
+		z[0] = zpass[0];
+		z[1] = zpass[1];
+		z0 = zpass[2];
+		t[1] = tpass[0];
+		t0 = tpass[1];
+		q[1] = qpass[0];
+		q0 = qpass[1];
+		u[0] = upass;
+
+		/* unknowns, constrained to be positive */
+		t[0] = x[0]*x[0];
+		q[0] = x[1]*x[1];
+		u[1] = x[2]*x[2];
+
+		/* no. of intervals */
+		k = 2;
+	}
+
+	for (j = 0; j < k; j++)
+		if (bdfunc(z[j],z0,t[j],t0,q[j],q0,u[j],0.,
+		&ustar[j], &tstar[j], &qstar[j]))
+			q_qerror();
+
+	switch(flag) {
+	case 0:
+		result = ustar[0]-ustar[1];
+		break;
+	case 1:
+		result = tstar[0]-tstar[1];
+		break;
+	case 2:
+		result = qstar[0]-qstar[1];
+		break;
+	}
+
+	return(result);
+}

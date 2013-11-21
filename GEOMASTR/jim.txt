@@ -1,0 +1,66 @@
+Jim
+
+This is the code used to return the scale values. 
+
+#define  RADIAN    5.729577951308232e1
+#define  PY        3.141592653589793e0
+
+		DPOINT	PT;
+		double	aspect,dif; 
+		double	xmid,ymid,degperpixelx,degperpixely;
+		MNMXCORD	Rect;
+				
+// CurView->DrawRect represents the current bitmap with top and left = 0 and bottom and right
+// set to the height and width				            
+		aspect = (double)(CurView->DrawRect.bottom-CurView->DrawRect.top)/
+				(CurView->DrawRect.right-CurView->DrawRect.left); 
+// the left and right bitmap edge world coordinates are computed from the centerpoint and
+// scale values. The scale is assumed to be the horizontal distance from the center to
+// the bitmap edge.
+		PT = NewLatLong(DPoint.y,DPoint.x,Scale*5280*FTM,PY/2);
+        Rect.xmx = PT.x;
+		PT = NewLatLong(DPoint.y,DPoint.x,Scale*5280*FTM,3*PY/2);
+        Rect.xmn = PT.x; 
+		PT = NewLatLong(DPoint.y,DPoint.x,Scale*5280*FTM*aspect,0);
+        Rect.ymx = PT.y;
+		PT = NewLatLong(DPoint.y,DPoint.x,-Scale*5280*FTM*aspect,0);
+        Rect.ymn = PT.y;
+		xmid = (Rect.xmn+Rect.xmx)/2;
+		ymid = (Rect.ymn+Rect.ymx)/2; 
+		degperpixelx = (Rect.xmx - Rect.xmn)/
+					  (CurView->DrawRect.right - CurView->DrawRect.left);
+		degperpixely = (Rect.ymx - Rect.ymn)/
+					  (CurView->DrawRect.bottom - CurView->DrawRect.top);
+		sprintf (CmdMess,"%.14lg;%.14lg;%.14lg;%.14lg;%.14lg",xmid,ymid,Scale,degperpixelx,degperpixely);
+
+
+DPOINT NewLatLong(double Lat,double Long,double Dist,double Direction)
+{
+ DPOINT LatLong;
+//given:          Fixed 7 Oct 96 lda
+//  Point N is at the North Pole
+//  Point A is at the Given Lat,Long
+//  Length of two sides of a triangle and the angle it forms
+    double  cosc,cosb,cosa,sinb,sinc,sina,cosC,cosA;
+
+
+    cosc = cos(Dist/6371100);
+    sinc = sin(Dist/6371100);
+    cosb = cos((90e0-Lat)/RADIAN);
+    sinb = sin((90e0-Lat)/RADIAN);
+    cosa = cos(Direction)*sinb*sinc+cosb*cosc;
+    cosA = acos(cosa);
+    cosA *= RADIAN;
+    LatLong.y = 90e0 - cosA;   
+    sina = acos(cosa);
+    sina = sin(sina);
+    cosC = (cosc-(cosb*cosa)) / (sinb*sina);
+    cosC = acos(cosC);
+    cosC *= RADIAN;
+    if(Direction > PY)
+      LatLong.x = Long - cosC;
+    else
+      LatLong.x = Long + cosC;  
+
+  return LatLong;
+}      

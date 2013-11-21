@@ -1,0 +1,77 @@
+#include <windows.h>
+#include <float.h>
+#include "graphint.h"
+#include "resource.h" 
+#include "offsetmn.h"
+#include "polycom.h"
+#include "commdlg.h"
+
+double  CTOL = 0.002;
+ 
+static	short	AutoZoomNext;
+static	long	ZoomRef;              
+static	char	ZoomPrefix[10], ZoomUDI[66];   
+
+extern	BOOL	AltProjLocked,ContinueProcessing, Display, InDisplayProcessing,MaskOffsetLine;
+extern	BOOL	AutoPan, OffsetFromLimits, ShareEnabled, FileMode,OutlineZoomArea,IgnoreLbutton;
+extern	double	LocationOffset, SymRandom; 
+extern	double	OffsetLineOffset;
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+extern	mnmxCor	MinMax, *pMinMax;
+extern	long	CurrentRefno;   
+extern	long	DisplayCycle;
+extern	double FileDistToBaseDist,FileDistToWinDist;
+extern	double	WindowToFileFactor;
+extern	TAGBOX	TAGBox;
+extern	HCURSOR	hCursor, OldCursor;
+extern	int		QuadTypeNext;
+extern	BOOL	DoPaint, HavePaint;
+extern	HPEN	CurrentPen;
+extern	int		NumPicked;
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	int		WidthFactor;
+extern	HWND	hWndMain;
+extern	HANDLE	hInst;
+extern	MNMXCORD	ZoomBoxRect;
+extern	BOOL        WindowIsZoomed;
+extern	long		RefMktVal;
+extern  HPEN		hNullPen, hRedPen;
+extern	HBRUSH		hRedBrush, hGreenBrush, hBlueBrush,hBackBrush1;
+extern	LPVISLIST	CurVis;
+extern	LPVIEWPORT	CurView, pViewports[MAX_VIEWPORTS];
+extern	HANDLE		hViewports[MAX_VIEWPORTS];
+extern	int			NumViewports;
+extern	LPTHEME		CurTheme;
+extern	LPVOID		TranFileToBase, TranBaseToFile, TranBMToBase, TranBaseToBM;
+extern	BOOL		Printing;
+extern	int			nPnts;
+extern	LPPOINT		lpPoints2;
+extern	int			PickAp;
+extern	BOOL		UpdateSegment;
+extern	short		CommandViewport;
+extern	BOOL		AddLBUTTON; 
+extern	int		 	idTimer, Fid, FidConfig;
+extern	long		UsedDescOffset,TranPointOffset, ColorPaletteOffset, GraphicsOffset, ContinuationOffset; 
+extern	long		LenQuadSeg, LenQuad;
+
+MNMXCORD	Destination;
+BOOL	HaveDestination=FALSE,NextZoomIsDestination=FALSE;
+long	MaskMunic=0; 
+BOOL	GetMaskArea=TRUE, OutlineZoomArea=TRUE,MaskZoomArea=FALSE;
+
+typedef	struct	{char	Name[32];
+				 long	Refno;
+				}MUNICDATA1;
+				
+typedef	struct	{char	Name[32];
+			 	long	FIPS;
+			 	long	x,y;
+			 	}MUNICDATA2; 
+			 	
+struct	{char Name[34]; MNMXCORD Bounds;} OtherZoomRec;
+MUNICDATA1	MunicData1;
+MUNICDATA2	MunicData2;
+
+
+BOOL FAR PASCAL ZOOMLISTMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+#if ENABLETRACE

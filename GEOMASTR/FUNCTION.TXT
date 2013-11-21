@@ -1,0 +1,113 @@
+GeoMaster Functions:
+
+$OS(string)
+   
+   (OneSpace) Removes multiple spaces from string and leading and trailing spaces.
+	
+$RND(val,numdec)
+	(Round) Rounds val to specified number of deciminal places.
+	
+$CMA(val)
+	(Commas) Adds commas to numeric values.
+
+$CAL(systime,format)
+	(Calander) returns date in specified format. systime is system time in seconds.   
+	1 - 2/4/97
+	2 - Tue Feb 04 07:05:04 1997
+	
+	Also sets the value of the following global variables:
+		%YEAR
+		%YEAR1900	year - 1900
+		%MONTH		month					(1-12)
+		%YDAY		day of the year			(1-366)    
+		%MDAY		day of the month		(1-31)
+		%WDAY		day of the week			(1-7, 1=Sunday)  
+		%HOUR		hours since midnight	(0-23)
+		%MIN		minutes after the hour	(0-59)
+		%SEC		seconds after the minute(0-60) 
+		%CMONTH		character month			(January, Feburary, etc.)
+		%CDAY		character day			(Sunday, Monday, etc.) 
+		%DATE		the date				(2/4/97)
+		%TIME		the time - no seconds	(4:15 PM)
+		%MTIME		military time			(16:15)				
+	
+$CLK(datetime,format)
+	(Clock) Returns value of system time in seconds from character representation
+	of date and time. Also sets the same global variables set by the $CAL function.  
+    Format specifies the incoming format as follows:
+	1 - 1996-12-01 08:48:00.000 (ODBC format)
+	2 - 96/12/01 06:48:00.000
+	3 - 12/1/96 06:48:00.000
+	
+	The time fields are optional in all formats. 
+	
+$FILL(val,len,fillchar)
+	Left Fills val with fillchar to increase its length to len.
+	
+$FETCH(database name)
+	Fetches the next record from a named database.
+	returns 1 if record fetched or 0 if no more records available   
+
+$WHILE(conditional statement,execute statement)
+	Processes the 'execute statement' while the conditional statement is
+	true (not zero).  
+	
+$D(string)
+	Displays the string.
+	
+$L(num)
+	Advances the line counter by 'num'. 
+	
+$TAB(num)
+	Sets the output position to the specified tab.
+	
+$HLT(CLEAR) 
+	Clear highlight list.
+ or (ITEM,prefix,udi) 
+ 	Highlights item with specified prefix and udi.
+
+$MID(val,begin_byte,end_byte)
+	Returns portion of val from begin_byte to end_byte.
+	
+$TAGLOC(Prefix,minchar)
+	(Tag Locator) Displays a list of UDI values for the specified Prefix after
+	the minchar numbers of characters has been entered. The user may select the
+	desired UDI from the list or completely enter the UDI and hit enter to zoom
+	to the selected item. Uses the Set Location Offset parameters to determine the
+	zoom level.
+
+$VP(SET,viewport_name)
+	Sets the specified viewport as the current viewport.
+ or
+ 	(SHOW,viewport_name)
+    Displays the specified viewport if it is hidden.
+    
+ or
+ 	(HIDE,viewport_name)
+ 	Hides the specified viewport if it is visible.
+
+$LOADPM(pick_macro_file)
+	Loads the specified pickmacro file into the current viewport.
+	
+$LOADVIS(visibility_file)
+	Loads the specified visibility file into the current viewport.
+	
+$LOADPIK(pickability_file)
+	Loads the specified pickability file into the current viewport.
+
+$THEME(LOAD,theme_file) 
+	Loads and activates the specified theme into the current viewport.
+ or
+ 	  (DEACT)
+	Deactivates the current theme in the current viewport.
+
+
+
+Example menu item to use TAGLOC
+
+MENUITEM "Wells",            "$TAGLOC(WELL,3)"
+
+Example menu item to initialize application
+
+MENUITEM "PCA Application",  "$VP(SET,Primary Viewport);$LOADVIS(pcavis);$LOADPIK(pcapik)"
+

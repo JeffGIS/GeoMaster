@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:disableMasterStylesheet="true" MadCap:tocPath="The Support Classes" MadCap:InPreviewMode="false" MadCap:RuntimeFileType="Topic" MadCap:TargetType="WebHelp" MadCap:PathToHelpSystem="../" MadCap:HelpSystemFileName="index.xml" MadCap:SearchType="Stem">
+    <head><title>The LTIFileSpec Class</title>
+        <link href="SkinSupport/MadCap.css" rel="stylesheet" />
+        <link href="Resources/Stylesheets/mattweb.css" rel="stylesheet" />
+        <script src="SkinSupport/MadCapAll.js" type="text/javascript">
+        </script>
+    </head>
+    <body>
+        <div class="MCBreadcrumbsBox"><span class="MCBreadcrumbsPrefix">You are here: </span><a class="MCBreadcrumbsLink" href="The_Support_Classes.htm">The Support Classes</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">The LTIFileSpec Class</span>
+        </div>
+        <h2 class="ptdh2"><a name="kanchor25"></a>The LTIFileSpec Class</h2>
+        <p>For portability between Unix and Windows systems and ease of use in internationalized environments, the SDK uses the class <code>LTFileSpec</code> to represent file names and paths.
+
+</p>
+        <p>In all cases where the SDK requires use of a file name, for example as a function parameter, an <code>LTFileSpec</code> will be used. It is the application’s responsibility to translate filenames from the app-level representation, for example a <code>char*</code>, into an <code>LTFileSpec</code>.
+
+</p>
+        <p>The <code>LTFileSpec</code> class provides the following features:
+
+</p>
+        <ul>
+            <li value="1">creation of an <code>LTFileSpec</code> from a directory path and file name, as represented in a variety of formats (multibyte, UTF-8, <code>wchar_t</code>, etc.)</li>
+            <li value="2">conversion from <code>LTFileSpec</code> to a variety of formats</li>
+            <li value="3">Unix-style <code>dirname()</code> and <code>basename()</code></li>
+            <li value="4">file name extension extraction and replacement</li>
+            <li value="5">differentiation between relative and absolute paths</li>
+        </ul>
+        <p>&#160;</p>
+        <p>&#160;</p>
+        <script type="text/javascript" src="SkinSupport/MadCapBodyEnd.js">
+        </script>
+    </body>
+</html>

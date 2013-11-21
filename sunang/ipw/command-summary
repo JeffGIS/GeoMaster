@@ -1,0 +1,200 @@
+ 
+ IPW general-purpose commands:
+ 
+      addtime -- add delta hours to given date/time
+        advec -- calculates advected energy at a point
+       albedo -- estimates solar albedo over snow for visible and IR bandwidths
+       binexp -- export binary image data (floating point)
+       bitcom -- bitwise band combination
+       bowvap -- calculates evaporation rate from Bowen ratio
+   cell2point -- extract cell data associated with specific points
+      classeq -- classify image by classes defined by equal area histogram
+     classify -- classify image by given class ranges
+       clmask -- make mask image from IPW image
+       cmpimg -- compare two images
+       cnhist -- convert IPW histogram to cumulative normalized ASCII
+   cnhist.all -- cumulative normalized histogram of one or more images
+     convolve -- image convolution
+       cvtime -- converts between time formats
+      declass -- de-classify classified image
+        dempt -- convert USGS DEM to IPW image
+        demux -- demultiplex (extract bands from) IPW image
+       deltaT -- calculate adjusted diurnal temperature range
+       deltaz -- analyze variation between DEM and station elevations
+      despike -- remove abnormally large values from an image
+        dewpt -- converts vapor pressure to dew point temp
+       dither -- create bilevel image using ordered dithering
+        edhdr -- edit image header
+        edimg -- replace image pixels
+      elevrad -- beam and diffuse radiation in elevation image
+         flip -- flip IPW image
+   ftransform -- transform an image based on floating point X,Y pairs
+     gelevrad -- beam and diffuse radiation in global-scale image
+    ggradient -- slope and aspect of global-scale image
+     ghorizon -- calculate horizons for global-scale elevation file
+     glob.alb -- estimates global (280-2800) solar albedo over snow
+                 from time since last snow storm, and solar zenith angle
+        gsnow -- calculates heat flow between snow and soil
+     gradient -- slope and aspect of image
+       grhist -- graph an IPW histogram
+       gshade -- cosine of illumination angle for global-scale images
+    gsunlight -- sun angles for global-scale image
+     gtoporad -- global-scale topographic distribution of solar radiation
+  gtoporad.24 -- global-scale topographic distribution of solar radiation
+                 at even time intervals for 24 hours
+     gtopquad -- daily integrated radiation over global-scale topographic grid
+       gviewf -- compute view factors from global-scale elevation image
+         hcnx -- extract daily hydro-climatological data
+         hist -- compute image histogram
+       histeq -- make histogram-equalization look-up table
+        hor1d -- find angles to local horizon along rows of elevation file
+      horizon -- compute horizon in specified direction
+       hythrm -- converts hygro-thermograph data to vapor pressure
+         iadd -- add or subtract bands
+       idewpt -- converts vapor pressure to dew point temp
+      imgstat -- image statistics
+       imgsum -- sum all unmasked pixels in an image
+       import -- import ASCII data file to an IPW image
+        indvi -- calculate normalized difference vegetation index (ndvi)
+       interp -- interpolate between breakpoints
+        ipott -- calculate potential temperature from air temperature at
+                 specified elevation or vice-versa
+          ipw -- list IPW commands
+      ipw2hds -- convert IPW image to HDS sixel format
+      ipw2las -- Convert an IPW image to a LAS image
+      ipw2pbm -- convert IPW image to PGM or PPM formats
+      ipw2pgm -- convert ipw image to Portable Gray Map (PGM) image
+      ipw2ppm -- convert ipw image to Portable Pixel Map (PPM) image
+       ipw2ps -- convert IPW image to PostScript
+      ipw2sun -- convert IPW image to Sun rasterfile
+      ipw2xim -- convert IPW image to "xim" format
+      ipwfile -- describe an IPW image
+    ipwinterp -- interpolate image based on parameters from istatrel
+       isatvp -- converts dew point temp to sat vapor pressure
+      isnobal -- 2-layer energy balance snowmelt model (IPW version)
+   istatgraph -- plot two images and istatrel's interpolations
+     istatrel -- calculate statistical relation between images
+      itrbxfr -- calculate H & LE using Brutsaert's method
+      las2ipw -- Convert a LAS image to an IPW image
+       lincom -- linear combination of bands
+         lqhx -- transform image to new linear quantization (LQ) header
+         lqmm -- return FP min and max of all given images
+         lutx -- apply lookup table to image
+     mkalbers -- make a projection definition file for the Albers projection
+        mkbih -- make a standalone IPW basic image header
+        mkcrh -- add a class range header to an image
+        mkgeo -- make a projection definition file for the geographic
+                 (lat/long) projection
+       mkgeoh -- add a geodetic header to an image
+    mklambert -- make a projection definition file for the Lambert projection
+      mklamcc -- make a Lambert Conformal Conic projection definition file
+        mklqh -- append an LQ header to an image
+        mklut -- make look-up table
+       mkproj -- make a projection definition file for any defined projections
+       mksath -- add a satellite header to an image
+       mksunh -- add a solar position header to an image
+        mkutm -- make a projection definition file for the UTM projection
+          mse -- 1) calculates moist static energy from air temp, elev,
+                 vapor pressure, and air pressure
+                 2) or inverts moist static energy to calculate vapor
+                 pressure from air temp, elev, and moist satic energy
+     msurface -- surface program optimized for multiple runs
+    msurfprep -- make an image of nearest-neighbor information for
+                 use with the msurface program
+       mkwinh -- add a window header to an image
+       mstats -- image multivariate statistics
+         mult -- multiply or divide bands
+          mux -- band-interleave images
+      pbm2ipw -- convert PGM or PPM images to IPW format
+      penmonx -- calculates LE (Wm-2) using Penman-Monteith method
+       pix2fp -- convert raw pixel to floating-point
+          pmx -- calculates LE (Wm-2) using Penman-Monteith method
+         poly -- print points in polygon
+         pott -- 1) calculates potential temperature from air temperature
+                 at specified elevation,
+                 2) or inverts potential temperature to calculate
+                 air temperature at a specified elevation
+        prhdr -- print IPW image headers
+        primg -- print image pixel values as ASCII text
+      ptaylor -- calculates PE using the Priestly Taylor method
+          ptx -- calculates PE using the Priestly Taylor method
+       random -- generate random values
+    randomize -- shuffle lines
+        refdx -- calculate refractive index from wavelengths
+       reproj -- convert an image to a new geographic projection
+  reproj_area -- calculate minimum bounding rectangle in reprojected space
+      requant -- requantize an IPW image
+       resamp -- resample an image (decrease resolution) by averaging pixels
+                 or taking min or max
+        rh2vp -- convert relative humidity and temperature to vapor pressure
+                 or vice-versa
+        rmhdr -- strip IPW headers from input image
+       rotate -- rotate an IPW image through an arbitrary angle
+      salbedo -- estimates solar albedo over snow for 2 band widths
+                 from time since last snow storm, and solar zenith angle
+        satvp -- converts dew point temp to sat. vapor pressure
+        scale -- image scaling
+     selevrad -- topographic distribution of beam & diffuse radiation over snow
+          seq -- generate sequence of numbers
+        shade -- calculate cosine of local illumination angle
+         skew -- skew image lines
+        sling -- calculates vapor pressure from wet/dry bulb temps
+       snobal -- interactive 2-layer energy balance snowmelt model
+     snowmass -- a simple radiation based daily snowmelt model
+        solar -- exoatmospheric solar irradiance
+       srftmp -- calculates surface temperature for a selected time
+                 period from maximum and minimum daily air temperature
+                 and average surface temperature
+     stoporad -- topographic distribution of solar radiation over snow
+       sunang -- calculate sun angles
+     sunlight -- sunrise and sunset times and quadrature weights
+   sunweights -- Kronrod quadrature weights and sun angles (global-scale)
+      surface -- interpolate image from irregularly spaced point data
+          swe -- computes snow-water-equivalent (swe) for specified layer
+          swp -- calculates soil water potential and saturated and
+                 unsaturated hydraulic conductivity from %sand, %clay,
+                 and soil water content
+       tcloud -- calculate cloudiness attenuation of solar radiation
+      thermin -- calculates incoming lw radiation for a specified
+                 set of elevation levels
+         tmpt -- read Thematic Mapper (TM) image from tape
+      toporad -- topographic distribution of solar radiation
+   toporad.24 -- solar radiation over topographic grid at even time intervals
+                 for a total of 24 hours
+    topotherm -- calculate thermal radiation from the atmosphere
+      topquad -- daily integrated radiation over topographic grid
+         trad -- calculates incoming lw radiation for pairs of air temp and
+                 vapor pressure for specified elevation level
+   transcoord -- translate map coordinates to different map projection
+    transpose -- transpose IPW image
+       trb_Ri -- calculates H & LE using Businger-Dyer model
+       trbxfr -- calculates H & LE using Brutsaert's method
+    twostream -- twostream radiative transfer model of homogeneous layer
+    twostream -- twostream solution for horizontal surface
+     viewcalc -- compute sky view and terrain configuration factors
+        viewf -- compute view factors from elevation image
+         vptr -- calcualtes vapor pressure as a function of measured thermal
+                 radiation and air temperature
+         wbal -- simple water balance model
+        wedge -- linear combination of line and sample coordinates
+     wigmosta -- run Wigmosta's hydrology model
+       window -- extract image window
+         zoom -- enlarge/reduce an IPW image by replication/subsampling
+          zpr -- calculates air pressure from specified elev, or
+                 calculates elev from specified press and temp.
+
+ 
+ IPW maintenance and support commands:
+ 
+         atob -- convert ASCII integers to binary
+         btoa -- convert binary integers to ASCII
+          ims -- interactively display IPW manual pages
+     imtohtml -- convert ipwman output to HTML Web pages
+       imtoum -- convert ipwman output to UNIX nroff manual pages
+      install -- install commands, libraries, etc.
+      ipwlint -- run lint on IPW source files
+      ipwmake -- IPW "make" command
+       ipwman -- generate IPW manual pages from source file comments
+           mc -- multiple column filter
+    objs,srcs -- list of .o,.[cfF] files for use in Makefile/Makedefs
+ 

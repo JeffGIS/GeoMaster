@@ -1,0 +1,59 @@
+
+##
+##	SCCS version: @(#)   Makedefs   1.9   10/1/91
+##
+## 	Note:
+##
+##	This program requires the source code for the Land Analysis System
+##	(LAS) software
+##
+##	To set the LAS environment variables LASINCLUDE, LASLIB, etc.:
+##		setenv response LAS50BD
+##		source $LASROOT/lasinit
+##
+
+C_SPECIAL= -I../h -I$(LASINCLUDE) -I$(WORINCLUDE) -I$(TINC)
+LD_SPECIAL= 
+LIBS_SPECIAL= $(IPW)/lib/liblocal.a \
+             $(LASLIB)/las.a $(WORLIB)/geolib.a $(WORLIB)/world.a \
+             $(WORLIB)/notae.a $(TOLB)/clib.a $(TOLB)/lib.a -ltermlib
+
+PGM=ipw2las
+
+$(PGM):	$(OBJS) check_for_LAS
+
+SRCS = \
+        copyimg.c fix_dms.c headers.c las_dms.c main.c out_byte.c out_float.c \
+        out_long.c out_short.c update_ddr.c out_buf.cpp 
+
+OBJS =\
+        copyimg.o fix_dms.o headers.o las_dms.o main.o out_byte.o out_float.o \
+        out_long.o out_short.o update_ddr.o 
+
+copyimg.o      : $(IPW)/h/ipw.h $(IPW)/h/fpio.h $(LASINCLUDE)/las.h
+fix_dms.o      : ../h/mproj.h
+headers.o      : $(IPW)/h/ipw.h $(IPW)/h/gethdrs.h $(IPW)/h/bih.h \
+                 $(IPW)/h/lqh.h $(IPW)/h/geoh.h $(IPW)/h/fpio.h \
+                 $(LASINCLUDE)/las.h
+main.o         : $(IPW)/h/ipw.h $(LASINCLUDE)/las.h $(IPW)/h/getargs.h \
+                 ../h/mproj.h
+out_byte.o     : ./out_buf.cpp
+out_float.o    : ./out_buf.cpp
+out_long.o     : ./out_buf.cpp
+out_short.o    : ./out_buf.cpp
+update_ddr.o   : $(LASINCLUDE)/las.h ../h/mproj.h
+
+./out_buf.cpp     : $(IPW)/h/ipw.h
+
+
+check_for_LAS:
+	@if [ -n "$(LASINCLUDE)" ]; \
+	then exit 0; \
+	else echo 'Land Analysis System (LAS) source code not available . . .'; \
+		echo "  cannot compile ipw2las"; \
+		exit 1; \
+	fi
+
+
+default: pgm
+install: install-pgm

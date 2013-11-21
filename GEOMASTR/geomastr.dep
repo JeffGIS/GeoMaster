@@ -1,0 +1,4203 @@
+# Microsoft Developer Studio Generated Dependency File, included by geomastr.mak
+
+.\address1.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\address2.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\address3.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\AddressMsgProc.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\adjlon.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+..\gctpc\alberfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\alberinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\alconfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\alconinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\azimfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\aziminv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+"..\libbci-1.1.0\bci.c" : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bci.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\bigmem.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmemln.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gmvardef.h"\
+	"..\include\gssitype.h"\
+	
+
+..\DB\Bt_creat.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\humbird1\COACT\ByteSwap.c : \
+	"..\humbird1\coact\byteswap.h"\
+	"..\humbird1\coact\chartlib.h"\
+	"..\humbird1\coact\fs.h"\
+	
+
+.\cdstuff.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\CLIDATA.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\client.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\cmdtonum.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\SHR\COMDLG.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\cddemo.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\Comput1.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\xll.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\CONNAD83.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\convert.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\CONVRT32.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\copydib.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dibutil.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\gctpc\cproj.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\Creatcfg.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\CVTCOORD.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\p_tol.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	
+
+.\cwconfig.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\testsuite.h"\
+	"..\include\translat.h"\
+	"..\include\umio.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\shapelib\code\dbfopen.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\DDE.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\client.h"\
+	"..\include\compute.h"\
+	"..\include\ddemlsv.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\huge.h"\
+	"..\include\shr.h"\
+	
+
+.\DGNFILE.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dgn7.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\DIBUTIL.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dibutil.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\DICT.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\DICTEDIT.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\digitize.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gps.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\DLGLOOK.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\Document.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\winexec.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\dtm.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bci.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\DTM2.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\Dxfin.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\dxfcom.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\hash.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\dynaedit.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\dyndlg.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\edgmatch.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\eqconfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\eqconinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\equifor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\equiinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\exception.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\export.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\pnet.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\EXPORT2.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\GM32lib\FIIO_Mem.cpp : \
+	"..\gm32lib\fiio_mem.h"\
+	"..\gm32lib\freeimage.h"\
+	
+
+..\SHR\FILE.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dibutil.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\fish.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gps.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\floatap.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\gctpc\for_init.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\GM32lib\freeim.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shldisp.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shobjidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shtypes.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gm32lib\freeimage.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dibutil.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\lzoconf.h"\
+	"..\include\lzodefs.h"\
+	"..\include\minilzo.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\FUNCSUBS.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\function.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shldisp.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shobjidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shtypes.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\client.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\FUNCTN1.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\client.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\functn2.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	"..\include\umio.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\FUNCTN3.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\pnet.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\umio.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\FUNDEFS.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\gctp.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\GM32lib\GM32.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shldisp.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shobjidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shtypes.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gm32lib\freeimage.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\lzoconf.h"\
+	"..\include\lzodefs.h"\
+	"..\include\minilzo.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\GM32LIB.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\dgnlib\cpl_config.h"\
+	"..\dgnlib\cpl_conv.h"\
+	"..\dgnlib\cpl_error.h"\
+	"..\dgnlib\cpl_port.h"\
+	"..\dgnlib\cpl_vsi.h"\
+	"..\dgnlib\dgnlib.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\gnomfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\gnominv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\goodfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\goodinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gps\gps.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gps\garmin.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gps.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphic1.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gps.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	"..\include\umio.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphic2.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\Graphic3.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphic4.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\GRAPHIC5.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\Graphic6.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphic7.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\pnet.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphic8.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\GRAPHIC9.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphic_functions.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphica.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphicb.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\graphicc.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\GRAPHICD.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\GraphMsgProc.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\cddemo.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\GraphMsgProc2.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\cddemo.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\grfunc.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\splines\gspline.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\gssigdi.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	
+
+..\gctpc\gvnspfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\gvnspinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\GWCONFIG.RC : \
+	"..\Citytour\ALIGN_BO.BMP"\
+	"..\Citytour\ALIGN_HO.BMP"\
+	"..\Citytour\ALIGN_LE.BMP"\
+	"..\Citytour\ALIGN_RI.BMP"\
+	"..\Citytour\ALIGN_TO.BMP"\
+	"..\Citytour\ALIGN_VE.BMP"\
+	"..\Citytour\ARROWQ~1.BMP"\
+	"..\Citytour\BITMAP11.BMP"\
+	"..\Citytour\BITMAP13.BMP"\
+	"..\Citytour\BITMAP14.BMP"\
+	"..\Citytour\BITMAP15.BMP"\
+	"..\Citytour\BITMAP16.BMP"\
+	"..\Citytour\BITMAP17.BMP"\
+	"..\citytour\BITMAP18.BMP"\
+	"..\citytour\BITMAP19.BMP"\
+	"..\Citytour\BITMAP2.BMP"\
+	"..\Citytour\BITMAP3.BMP"\
+	"..\Citytour\BITMAP4.BMP"\
+	"..\Citytour\BITMAP9.BMP"\
+	"..\Citytour\BITMAP_R.BMP"\
+	"..\Citytour\BLUE_BIT.BMP"\
+	"..\Citytour\BMP00001.BMP"\
+	"..\Citytour\BMP00002.BMP"\
+	"..\Citytour\BMP00003.BMP"\
+	"..\Citytour\BMP00004.BMP"\
+	"..\Citytour\BMP00005.BMP"\
+	"..\Citytour\BMP00006.BMP"\
+	"..\Citytour\BMP00007.BMP"\
+	"..\Citytour\BMP00008.BMP"\
+	"..\Citytour\BMP00009.BMP"\
+	"..\Citytour\BMP00010.BMP"\
+	"..\Citytour\BMP00011.BMP"\
+	"..\Citytour\BMP00012.BMP"\
+	"..\Citytour\BMP00013.BMP"\
+	"..\Citytour\BMP00014.BMP"\
+	"..\Citytour\BMP00015.BMP"\
+	"..\Citytour\BMP00016.BMP"\
+	"..\Citytour\BMP00017.BMP"\
+	"..\Citytour\BMP00018.BMP"\
+	"..\CITYTOUR\BMP00019.BMP"\
+	"..\Citytour\BMP00020.BMP"\
+	"..\citytour\BMP00021.BMP"\
+	"..\citytour\buoy_green.bmp"\
+	"..\Citytour\CHECKED1.BMP"\
+	"..\Citytour\DOWN_ARR.BMP"\
+	"..\Citytour\GMLOGOW.BMP"\
+	"..\Citytour\GREEN_BI.BMP"\
+	"..\Citytour\LABEL.BMP"\
+	"..\Citytour\LEFT_ARR.BMP"\
+	"..\Citytour\MONO1.BMP"\
+	"..\Citytour\MONO2.BMP"\
+	"..\Citytour\MONO3.BMP"\
+	"..\Citytour\MONO4.BMP"\
+	"..\Citytour\MONO5.BMP"\
+	"..\Citytour\MONO6.BMP"\
+	"..\Citytour\MONO7.BMP"\
+	"..\Citytour\NUMERIC_.BMP"\
+	"..\Citytour\PAT2.BMP"\
+	"..\Citytour\PHONE1.BMP"\
+	"..\Citytour\PICKCURS.BMP"\
+	"..\Citytour\RIGHT_AR.BMP"\
+	"..\Citytour\S_TEMP.BMP"\
+	"..\Citytour\SPORTMAP.BMP"\
+	"..\Citytour\STANDARD.BMP"\
+	"..\Citytour\STATIC_D.BMP"\
+	"..\Citytour\STATIC_U.BMP"\
+	"..\Citytour\SYMBOL.BMP"\
+	"..\Citytour\TDCHECK.BMP"\
+	"..\Citytour\TDFRAME.BMP"\
+	"..\Citytour\TDGROUP.BMP"\
+	"..\Citytour\TDICON.BMP"\
+	"..\Citytour\TDLIST.BMP"\
+	"..\Citytour\TDPOINTR.BMP"\
+	"..\Citytour\TDPUSH.BMP"\
+	"..\Citytour\TDRECT.BMP"\
+	"..\Citytour\TOOLBAR1.BMP"\
+	"..\Citytour\TUCHECK.BMP"\
+	"..\Citytour\TUFRAME.BMP"\
+	"..\Citytour\TUGROUP.BMP"\
+	"..\Citytour\TUICON.BMP"\
+	"..\Citytour\TULIST.BMP"\
+	"..\Citytour\TUPOINTR.BMP"\
+	"..\Citytour\TUPUSH.BMP"\
+	"..\Citytour\TURADIO.BMP"\
+	"..\Citytour\TURECT.BMP"\
+	"..\Citytour\UP_ARROW.BMP"\
+	"..\Citytour\zoompan8.bmp"\
+	"..\include\cddemo.h"\
+	".\ASSOC.ICO"\
+	".\BITMAP2.BMP"\
+	".\BITMAP3.BMP"\
+	".\CUR00001.CUR"\
+	".\CUR00002.CUR"\
+	".\CURSOR_L.CUR"\
+	".\DIGITIZE.CUR"\
+	".\DRAWING.CUR"\
+	".\EARTH.ICO"\
+	".\gw.h"\
+	".\HANDMOVE.CUR"\
+	".\HLP-DWN.BMP"\
+	".\HLP-UP.BMP"\
+	".\HMOVE.CUR"\
+	".\HOME.ICO"\
+	".\icon1.ico"\
+	".\LABEL_CU.CUR"\
+	".\LARROWS.CUR"\
+	".\MAGNIFY.CUR"\
+	".\MEASURE_.CUR"\
+	".\NAMES.ICO"\
+	".\PICK_CUR.CUR"\
+	".\SETTAG.CUR"\
+	".\SHOW.CUR"\
+	".\SYMBOL_C.CUR"\
+	".\TDCOMBO.BMP"\
+	".\TDEDIT.BMP"\
+	".\TOGGLEVI.CUR"\
+	".\TRANBM.BMP"\
+	".\TUCOMBO.BMP"\
+	".\TUEDIT.BMP"\
+	".\WAYPOINT.CUR"\
+	".\ZOOMIN.CUR"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\DB\gwd.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\hamfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\haminv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\SHR\HASH.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\hash.h"\
+	"..\include\mapl.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\hbird.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\hotspots.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\imolwfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\imolwinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\Infobox.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\inv_init.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\lamazfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\lamazinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\lamccfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\lamccinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\license.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shldisp.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shobjidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shtypes.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\crypto32.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\humbird1\LkmToHbirdImage.c : \
+	"..\humbird1\bitmap.h"\
+	"..\humbird1\byteswap.h"\
+	"..\humbird1\chart.h"\
+	"..\humbird1\chartlib.h"\
+	"..\humbird1\classert.h"\
+	"..\humbird1\clmalloc.h"\
+	"..\humbird1\fs.h"\
+	"..\humbird1\lkmhbird.h"\
+	"..\humbird1\lzoconf.h"\
+	"..\humbird1\lzodefs.h"\
+	"..\humbird1\minilzo.h"\
+	"..\humbird1\palette.h"\
+	"..\humbird1\text.h"\
+	
+
+.\makearea.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\mapcopy.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\memalloc.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	
+
+..\gctpc\merfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\merinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\mgrs\mgrs.c : \
+	"..\include\ups.h"\
+	"..\include\utm.h"\
+	"..\mrgscoordinates\mgrs\geotrans2.2.6\dt_cc\mgrs\mgrs.h"\
+	
+
+..\gctpc\millfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\millinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\minilzo\minilzo.c : \
+	"..\minilzo\lzoconf.h"\
+	"..\minilzo\lzodefs.h"\
+	"..\minilzo\minilzo.h"\
+	
+
+..\gctpc\molwfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\molwinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\GM32lib\mrsid.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gm32lib\freeimage.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\mrsid\geo_dsdk\include\base\lti_types.h"\
+	"..\mrsid\geo_dsdk\include\c_api\lt_iocstream.h"\
+	"..\mrsid\geo_dsdk\include\c_api\ltic_api.h"\
+	"..\mrsid\geo_dsdk\include\metadata\lti_metadatatypes.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_base.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_define.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_iocallbackstreamtypes.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_iostatus.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_lib_io.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_platform.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_status.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_types.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_utilstatus.h"\
+	"..\mrsid\geo_dsdk\include\support\lt_utilstatusstrings.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\MS_MAPL.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\nad_cvt.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\nad_init.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\nad_intr.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+..\GM32lib\nadcon.c : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+.\NETWORKS.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\obleqfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\obleqinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\SHR\Odbcmain.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\OFFSET\Offset.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\hash.h"\
+	"..\include\offdefs.h"\
+	"..\include\offsetmn.h"\
+	"..\include\polybt.h"\
+	"..\include\polycom.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\omerfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\omerinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\ORAFILE.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\orthfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\orthinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\orthos.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\paksz.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\PCX\PCXTOBMP.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\peoplnet.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\pnet.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\pj_errno.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\pj_malloc.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+"..\Proj-4\proj-4.4.8\src\pj_open_lib.c" : \
+	"..\proj-4\proj-4.4.8\src\proj_api.h"\
+	"..\proj-4\proj-4.4.8\src\projects.h"\
+	
+
+.\pointlist.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\polarst\polarst.c : \
+	"..\mrgscoordinates\mgrs\geotrans2.2.6\dt_cc\polarst\polarst.h"\
+	
+
+..\OFFSET\POLY.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\cnstnt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\hash.h"\
+	"..\include\offdefs.h"\
+	"..\include\offsetmn.h"\
+	"..\include\polybt.h"\
+	"..\include\polycom.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\polyfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\polyinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\Print.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\cddemo.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\PROFILE.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\psfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\psinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\quad.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\report.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\reportgc.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+.\ROADNAME.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\robfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\robinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\route.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\serio.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\tty.h"\
+	
+
+.\SHPFILE.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\shr.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shldisp.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shobjidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\shtypes.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\sinfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\sininv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\smooth.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\somfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\sominv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\sphdz.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\splines\ssp.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\SHR\STD.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\hash.h"\
+	"..\include\mapl.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\std.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\sterfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\sterinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\stplnfor.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\gctpc\stplninv.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\GCTP2\T2PROJ~1.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gctpc\proj.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	
+
+"..\libbci-1.1.0\tdspl.c" : \
+	"..\include\bci.h"\
+	
+
+..\GM32lib\testMemIO.cpp : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\gm32lib\freeimage.h"\
+	"..\gm32lib\testsuite.h"\
+	
+
+.\themes.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\themes2.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\THEMES3.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\THMMSGP.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\tiff.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\shr.h"\
+	
+
+..\gctpc\tmfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\tminv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\toolbar.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\status.h"\
+	"..\INCLUDE\toolbar.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+"..\libbci-1.1.0\tools.c" : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bci.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\Tran.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\tranlat2.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\tranlat3.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\pnet.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\tranmerc\tranmerc.c : \
+	"..\mrgscoordinates\mgrs\geotrans2.2.6\dt_cc\tranmerc\tranmerc.h"\
+	
+
+..\GCTP2\TRANPR~1.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\compute.h"\
+	"..\include\freeimage.h"\
+	"..\include\gmlimits.h"\
+	"..\include\gssitype.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	
+
+.\translat.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\pnet.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\traverse.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\UGRID.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\ugtable.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\Ugridhlt.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\ugtable.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\Umio.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\umio.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\UNDO.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\untfz.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\ups\ups.c : \
+	"..\include\polarst.h"\
+	"..\mrgscoordinates\mgrs\geotrans2.2.6\dt_cc\ups\ups.h"\
+	
+
+..\garmin\USB\USBSDK.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	
+
+..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\utm\utm.c : \
+	"..\include\tranmerc.h"\
+	"..\mrgscoordinates\mgrs\geotrans2.2.6\dt_cc\utm\utm.h"\
+	
+
+..\gctpc\utmfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\utminv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\vandgfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\vandginv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+.\VARDEF.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\VARSTUF2.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\SHR\VARSTUFF.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\extrndb.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	"..\include\umio.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\vehicle.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\vehicle_server.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\viewport.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dibapi.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\visible.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shapefil.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+.\VOTERS.C : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\wivfor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\wivinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\SHR\Writeavi.c : \
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\basetsd.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\guiddef.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\propidl.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\reason.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\specstrings.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\stralign.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\tvout.h"\
+	"..\..\..\program files\microsoft platform sdk for windows server 2003 r2\include\winefs.h"\
+	"..\include\bigmem.h"\
+	"..\include\bigmemln.h"\
+	"..\include\bt.h"\
+	"..\include\compute.h"\
+	"..\include\dict.h"\
+	"..\include\freeimage.h"\
+	"..\include\gm32lib.h"\
+	"..\include\gmextern.h"\
+	"..\include\gmlimits.h"\
+	"..\include\graphics.h"\
+	"..\include\graphint.h"\
+	"..\include\gssitype.h"\
+	"..\include\gwd.h"\
+	"..\include\proj.h"\
+	"..\include\shr.h"\
+	"..\include\translat.h"\
+	".\gw.h"\
+	{$(INCLUDE)}"address.h"\
+	
+
+..\gctpc\wviifor.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	
+
+..\gctpc\wviiinv.c : \
+	"..\gctpc\cproj.h"\
+	"..\gctpc\proj.h"\
+	

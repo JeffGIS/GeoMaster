@@ -1,0 +1,254 @@
+#!/bin/sh
+# Configuration script for IPW
+#   Made 11 August 1992, Dana Jacobsen
+#   Modelled largely on GNU gcc configure
+#   Configuration ought to be done with autoconfig, but not this release.
+#
+# Usage: configure <architecture> [<OS>]
+
+progname=$0
+
+srcdir=`echo $0 | sed 's|//|/|' | sed 's|/[^/]*$||'`
+if [ x$srcdir = x$0 ]
+then
+srcdir='.'
+fi
+
+remove=rm
+hard_link=ln
+symbolic_link='ln -s'
+copy=cp
+
+arguments=$*
+
+for arg in $*;
+do
+  case $arg in
+    -h | -help | --help | -l | -list | --list)
+        echo "Usage: configure <architecture> [<OS>]"
+        echo ""
+	echo "The supported systems are:"
+	echo ""
+	echo "rs6000     aix3.2   aix3.1      IBM RS/6000 running AIX"
+	echo "dg         dgux                 Data General Aviion running DG/UX"
+	echo "hp         hpux9.0  hpux8.0     Hewlett Packard 9000/700 and 800"
+	echo "sun3       sunos4   sunos3      Sun Microsystems 3/xxx running SunOS"
+	echo "sun4       sunos4   sunos3      Sun Microsystems 4/xxx running SunOS"
+	echo "sparc      solaris2 solaris1    Sun Microsystems Sparc (Sun4) machines"
+	echo "x86        linux                i386/i486/Pentium machines with Linux"
+	echo ""
+	echo "The first column is the hardware, the other columns are the"
+	echo "operating systems.  The first O/S listed is the default."
+	echo ""
+	exit 0
+	;;
+    rs6* | ibmrisc | ibm)
+	host=rs6000
+	os=aix3.2
+	;;
+             # I assume aix3.1 is much like 3.2 -- I don't have any machines
+             # to test.
+    aix3.1)
+	os=aix3.1
+	;;
+             # aix 3.2 is semi-POSIX, and has lots and lots of bugs.  Many
+             # programs don't work under AIX yet.  Since we don't have an
+             # IBM to test, these problems will have to be solved elsewhere.
+    aix | aix3.2)
+	os=aix3.2
+	;;
+    dg | datageneral | data-general | aviion)
+	host=dg
+	os=dgux
+	;;
+    dgux)
+	os=dgux
+	;;
+    i386 | i486 | Pentium | P5 | x86 | Intel)
+	host=x86
+	os=linux
+	;;
+    linux)
+	os=linux
+	;;
+    hp7* | hppa | hp)
+	host=hppa
+	os=hpux8.0
+	;;
+    hp8*)
+	host=hppa
+	os=hpux8.0
+	;;
+             # HP/UX 8.0 has POSIX libraries, but not POSIX include files.
+	     # HP/UX 9.0 seems to be very similar to HP/UX 8.0.  The config
+	     # files work just fine.
+    hpux | hpux8* | hpux9*)
+	os=hpux8.0
+	;;
+             # HP/UX 7.0 doesn't even have POSIX compliant libraries, much
+             # less include files.  HP has a serious case of Not-Invented-Here
+             # syndrome, so has to do everything a little different from
+             # everyone else.  Good Luck.  Get 8.0 or above.
+    hpux7*)
+	os=hpux7.0
+	;;
+    sun | sun4 | sparc | sparc-sunos4 | sparc2)
+	host=sparc
+	os=sunos4
+	;;
+    sparc-sunos3)
+	host=sparc
+	os=sunos3
+	;;
+    sparc-solaris | sparc-solaris2*)
+	host=sparc
+	os=solaris2
+	;;
+    sun3)
+	host=sun3
+	os=sunos4
+	;;
+    sun3-sunos3)
+	host=sun3
+	os=sunos3
+	;;
+             # This should work for normal or ANSI (acc or gcc) compilers.
+             # If something doesn't work for this platform, it is a bug and
+             # should be reported right away.
+             # Not tested, but I assume it works.
+    sunos3)
+	os=sunos3
+	;;
+    sunos4 | solaris1* | solaris-1*)
+	os=sunos4
+	;;
+    solaris | solaris2* | solaris-2*)
+	host=sparc
+	os=solaris2
+	;;
+    *)
+	echo "Unrecognized machine.  You'll have to define it in" 1>&2
+	echo "the configuration directories as well as in the" 1>&2
+	echo "configuration script." 1>&2
+	host=$arg
+	os=$arg
+	;;
+  esac
+done
+
+if test -z "$host"; then
+  echo "No host architecture has been selected."
+  echo ""
+  echo "Usage: configure <architecture> [<OS>]"
+  echo ""
+  echo "For a summary of available options, use configure -list"
+  exit 0;
+fi
+
+if test -z "$os"; then
+  echo "No operating system has been selected."
+  echo ""
+  echo "Usage: configure <architecture> [<OS>]"
+  echo ""
+  echo "For a summary of available options, use configure -list"
+  exit 0;
+fi
+
+echo "Configuring for a $host machine running $os.";
+
+dircs="h/ansi  h/ansi  h/posix  h  lib/make  src/lib/libunix"
+links="float.h  limits.h  limits.h  config.h  local  Makefile"
+files="conf.float/$host  conf.limits/$host  conf/$os  conf/$os  conf/${host}-$os  conf/$os"
+
+while [ -n "$files" ]
+do
+	set $files; file=$1; shift; files=$*
+	set $dircs; dirc=${srcdir}/$1; shift; dircs=$*
+	set $links; link=${dirc}/$1; shift; links=$*
+
+	if [ ! -r "$dirc/$file" ]
+	then
+		echo "$progname: cannot create a link \`$link'," 1>&2
+		echo "since the file \`$dirc/$file' does not exist" 1>&2
+		exit 1
+	fi
+
+	$remove -f $link
+	$symbolic_link $file $link 2>/dev/null || $hard_link $file $link || $copy $dirc/$file $link
+
+	if [ ! -r "$link" ]
+	then
+		echo "$progname: unable to link \`$link' to \`$file'" 1>&2
+		exit 1
+	fi
+	echo "Linked \`$link' to \`$file'"
+done
+
+test -z "$TMPDIR" && TMPDIR=/usr/tmp
+errs=$TMPDIR/errs.$$
+trap 'rm -f $errs' 0
+trap 'rm -f $errs; exit' 1 15
+
+makeres=`which make`
+case "$makeres[1]" in
+  no*) ;;
+  *)  makeres=`make -v -f /dev/null > $errs 2> /dev/null`
+esac
+if test -s $errs; then
+  namemake="make"
+else
+  makeres=`which gmake`
+  case "$makeres[1]" in
+    no*) ;;
+    *)  makeres=`gmake -v -f /dev/null > $errs 2> /dev/null`
+  esac
+  if test -s $errs; then
+    namemake='gmake'
+  else
+    makeres=`which gnumake`
+    case "$makeres[1]" in
+      no*) ;;
+      *)  makeres=`gnumake -v -f /dev/null > $errs 2> /dev/null`
+    esac
+    if test -s $errs; then
+      namemake='gnumake'
+    else
+      namemake=''
+    fi
+  fi
+fi
+
+if test -n "$namemake"; then
+  echo "GNU Make is installed as $namemake"
+else
+  echo 'GNU Make is not installed as make, gmake, or gnumake.'
+  echo 'GNU Make is required for Portable IPW.'
+fi
+
+
+namenawk=`which nawk`
+if test -n "`echo $namenawk | grep 'no nawk'`"; then
+  namenawk=`which gawk`
+  if test -n "`echo $namenawk | grep 'no gawk'`"; then
+    namenawk=`which mawk`
+    if test -n "`echo $namenawk | grep 'no mawk'`"; then
+      namenawk=''
+    fi
+  fi
+fi
+ 
+if test -n "$namenawk"; then
+  echo "New AWK  is installed as $namenawk"
+else
+  echo 'New AWK (nawk) is required by some IPW scripts.  To use these'
+  echo 'scripts, you should acquire nawk.  The freely available programs'
+  echo 'gawk or mawk both work and are faster than AT&Ts nawk.'
+  echo 'For now, standard AWK will be tried just in case it works.'
+  namenawk=`which awk`
+fi
+ 
+# There is a problem with this:  It only works once (once /usr/local/bin/nawk
+# has been replaced, it will never match again).  This should be fixed.
+cat ${srcdir}/lib/ipwenv.sh | sed "s=/usr/local/bin/nawk=$namenawk=" > ${srcdir}/lib/ipwenv
+chmod 755 ${srcdir}/lib/ipwenv
+

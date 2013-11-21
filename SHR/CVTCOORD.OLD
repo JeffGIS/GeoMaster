@@ -1,0 +1,291 @@
+#include <math.h>
+#include "shr.h"
+#include "proj.h"       
+#include "P_TOL.h"
+#include "..\GEOMASTR\resource.h"
+BOOL FirstCvtCoordErr = TRUE;
+extern HANDLE hInst;
+static  Init=FALSE;
+#define Sqr(number)(number*number)
+     
+long ConvertCoordInit (void)
+{    long ok, ID; 
+     char str[64];
+     char Name[64];   
+     
+     if (Init)
+     	return 0;
+     if(!LoadGCTPLibrary32( ))
+     {
+     //  MessageBox(0,"Unable to Open GCTP Library",
+     //    "Coordinate Conversion Error",MB_ICONSTOP);
+         return -4;
+     
+     }  
+     if(!OpenGCTP32(&ok))
+     {
+    //   MessageBox(0,"Unable to Open GCTP",
+    //     "Coordinate Conversion Error",MB_ICONSTOP);
+         CloseGCTPLibrary32();
+         return -5;
+     }       
+      
+
+     _fstrcpy(Name, "baseproj");
+     ID = 1;
+     ok = LoadProjection(ID,Name);
+     if (ok != 0)
+     {         
+        CloseGCTPLibrary32();
+        return ok;
+     } 
+     if (PRJ_UNITS[1] == 4)
+     	P_TOL = 0.000000001;
+     else
+     	P_TOL = 0.0001;
+     _fstrcpy(Name,"latlongs");
+     ID = 2;
+     ok = LoadProjection(ID,Name);
+     if (ok != 0)
+     {         
+        CloseGCTPLibrary32();
+        return ok;
+     } 
+     ID = 3; 
+     _fstrcpy(Name,"[%ALT_PROJECTION]");
+     ExpandText (Name);
+     if (!Name[0] || Name[0] == '[') 
+	     _fstrcpy(Name, "baseproj");
+     
+     ok = LoadProjection(ID,Name);
+     if (ok != 0)
+     {         
+        CloseGCTPLibrary32();
+        return ok;
+     } 
+     Init=TRUE;
+    return 0;
+} 
+
+void ConvertUnits (LPDPOINT DPoint, long from, long to)     
+{
+	if (from == to)
+		return; 
+	if (from == 1 && to == 2)
+	{
+		DPoint->x *= FTM;
+		DPoint->y *= FTM;
+	}
+	else if (from == 2 && to == 1)
+	{
+		DPoint->x *= MFT;
+		DPoint->y *= MFT;
+	}
+	return;
+}
+
+long ConvertCoord (LPDPOINT DPoint, short from, short to)
+{
+TranP TP;
+lpTranP lpTP; 
+long ok;     
+     extern HWND    hWndMain; 
+     long	SaveFromUnits;
+     long	SaveToUnits;
+     
+     ok = ConvertCoordInit();
+     SaveFromUnits=PRJ_UNITS[from];
+     SaveToUnits=PRJ_UNITS[to];
+     if (ok != 0)
+     	return ok;//unable to properly open the files   
+     ConvertUnits (DPoint,PRJ_UNITS[from],PRJ_BASEUNITS[from]);
+     PRJ_UNITS[from] = PRJ_BASEUNITS[from];
+     PRJ_UNITS[to] = PRJ_BASEUNITS[to];
+      
+     lpTP = &TP;
+     ok = TranProjection((long)from, (long)to, &DPoint->x, &DPoint->y);
+     if (ok == 22)
+     { 
+     	DPOINT	TestPoint,TestPoint2, NearPoint;
+     	UINT	i=16, pass=0;
+     	double	dinc=0.001, fac=2, dist=1, dx, dy, mind=99999999, div=2;
+     	
+     	while (i--)
+     	{   
+     		TestPoint=*DPoint;
+     		TestPoint.x += dinc;
+     		TestPoint.y += dinc;
+     		if (!TranProjection((long)from, (long)to, &TestPoint.x, &TestPoint.y))
+     			goto GotNearPoint; 
+     		fac *= 2;
+     		dinc = fac * 0.001;
+     	}                         
+     	ok = 22;  
+     	goto Exit;
+GotNearPoint:
+		i=16;  
+		dx = dy = 0;  
+		while (i-- && dist > 0.0001)
+		{
+			TestPoint.x += dx/div;
+			TestPoint.y += dy/div;
+			TestPoint2 = TestPoint;  
+			if ((ok=TranProjection((long)to, (long)from, &TestPoint2.x, &TestPoint2.y)))	
+				goto Exit;
+			dist = ldistp (TestPoint2,*DPoint); 
+			if (dist < mind)
+			{
+				mind = dist;
+				NearPoint = TestPoint;
+			}
+			dx = DPoint->x - TestPoint2.x;
+			dy = DPoint->y - TestPoint2.y;
+		}
+		if (pass)
+			*DPoint = NearPoint; 
+		else
+		{
+			pass=1;
+			div = 8;          
+			TestPoint = NearPoint;
+			goto GotNearPoint;
+		}
+		ok = 0;
+     }
+     ConvertUnits (DPoint,PRJ_UNITS[to],SaveToUnits);
+Exit:      
+     PRJ_UNITS[from] = SaveFromUnits;
+     PRJ_UNITS[to] = SaveToUnits;
+     
+     return ok;
+}
+
+BOOL ConvertCoordClose (void)
+{   
+	short	ID;
+	
+	for (ID=1;ID<4;ID++)
+	{
+		if (PRJ_TYPE[ID] == 200)
+           PRJ_TYPE[ID] = 0;
+        CloseTRANS2 (&PRJ_TRAN[ID][1]); 
+        CloseTRANS2 (&PRJ_TRAN[ID][2]); 
+    } 
+
+    if (Init)
+        CloseGCTPLibrary32();
+    Init=FALSE;
+    return TRUE;
+}  
+   
+void ConvertCoordError(long ErrNum)
+{ 
+ char szString[64];
+  if(!FirstCvtCoordErr)
+  	return;
+  FirstCvtCoordErr = FALSE;
+ switch (ErrNum)
+ {
+    case 0:
+     break;
+    case -1:
+       LoadString(hInst, IDS_COORD_NEG1, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -2:
+       LoadString(hInst, IDS_COORD_NEG2, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -3:
+       LoadString(hInst, IDS_COORD_NEG3, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -4:
+       LoadString(hInst, IDS_COORD_NEG4, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -5:
+       LoadString(hInst, IDS_COORD_NEG5, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -6:
+       LoadString(hInst, IDS_COORD_NEG6, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -7:
+       LoadString(hInst, IDS_COORD_NEG7, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -8:
+       LoadString(hInst, IDS_COORD_NEG8, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 1:
+       LoadString(hInst, IDS_COORD1, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 2:
+       LoadString(hInst, IDS_COORD2, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 3:
+       LoadString(hInst, IDS_COORD3, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 4:
+       LoadString(hInst, IDS_COORD4, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 5:
+       LoadString(hInst, IDS_COORD5, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 6:
+       LoadString(hInst, IDS_COORD6, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 7:
+       LoadString(hInst, IDS_COORD7, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 8:
+       LoadString(hInst, IDS_COORD8, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 9:
+       LoadString(hInst, IDS_COORD9, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 10:
+       LoadString(hInst, IDS_COORD10, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case 11:
+       LoadString(hInst, IDS_COORD11, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -27:
+       LoadString(hInst, IDS_COORD_NEG27, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -83:
+       LoadString(hInst, IDS_COORD_NEG83, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -31:
+       LoadString(hInst, IDS_COORD_NEG31, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+    case -32:
+       LoadString(hInst, IDS_COORD_NEG32, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    break;
+ 
+    default:
+       LoadString(hInst, IDS_COORD11, szString, sizeof(szString));
+       MessageBox(NULL, szString, NULL, MB_ICONEXCLAMATION);
+    
+ }//end of the switch 
+  
+ return;
+}

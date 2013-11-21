@@ -1,0 +1,35 @@
+.1C
+.ds CF
+.nr VS 14
+.nr HM .5i
+.nr PS 12
+.pn 1
+.nr % 1
+.af PN i
+.LP
+.ce 2
+Global Climate Change Program
+U.S. Environmental Protection Agency
+.nr VS 20
+.sp 2.5i
+.LP
+.ce 4
+\s+5\f3Supplement to the Image Processing Workbench (IPW)\s-5\f1
+\s+5\f3Volume 1.0\s-5\f1
+.sp .5
+\s+5\f3Modifications, Procedures, and Software Additions\s-5\f1
+\s+5\f3November, 1989 to October, 1991\s-5\f1
+.LP
+.ce 8
+.sp .25i
+K\s-3ELLY\s+3 L\s-3ONGLEY\s+3, Programmer
+Oregon State University
+.sp
+D\s-3ANNY\s+3 M\s-3ARKS\s+3, Project Manager
+ManTech Environmental Technology, Inc. 
+.sp
+U.S. EPA Environmental Research Laboratory
+200 S.W. 35th St.
+Corvallis, OR 97330
+(503) 757-4484
+.nr VS 14

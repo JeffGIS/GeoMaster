@@ -1,0 +1,4519 @@
+#include "CONFIG.h"
+#include "graphint.h"
+#define WIN31
+#include "commdlg.h"
+#include "dlgs.h"
+#include "cddemo.h"   
+#include "dict.h"
+#include "GW.h"     
+#include "MCI.H"
+#include "resource.h"
+#include <dyndlg.h>
+#include <math.h>     
+#include <direct.h>
+#include <float.h>   
+#include <mmsystem.h>    
+#include <time.h>
+#include "dibapi.h"    
+#include "translat.h"
+#include "address.h"  
+#include <sys\types.h>
+#include <sys\stat.h>         
+
+HOTSPOTDATA	HSData;
+LPHOTSPOTDATA	pHSData=&HSData;
+ 
+BOOL	SaveColorsInUse = FALSE;
+COLORREF	ComputePCTMaskColor=0, 	ComputePCTBKGColor = RGB (16,0,0), SaveBKGColor;
+short	DefaultHltClass;
+
+extern	struct 	_stat	OpenConfigStat;
+extern	short	ThemePointSym;   
+extern	double	ThemePointSize, CurLength, CurArea;
+extern	DPOINT	CurPointLocD;
+extern	short	InclusionOpt;
+
+static	COLORREF	SaveClassColor[MAX_THEME_CLASSES]; 
+static	char	ClassLink[MAX_THEME_CLASSES][256]; 
+static	char	SELVALDataFile[128]="",SELVALSQL[256]="",SELVALFieldName[66]="";
+static	short	SELVALDataFileType=0;
+static	HANDLE	SELVALhDB=0;
+static	HWND	hWndSELVAL=0;
+static	FARPROC lpfnSELECTVALUESMsgProc;
+
+struct {
+		POINT	Point;
+		short	Sequence;
+		} DisperseKey;  
+struct {
+		short 	FileNum,
+				SubFile;
+		USHORT	FileInIndex;
+		long	Segment;
+		WORD	Offset, Element;  
+		long	Refno;
+		short	Size;
+		POINT	DisplayPoint; 
+		long	Num;
+		} PointDispersionData;    
+		
+THEMEHIGHLIGHTKEY	ThemeHighlightKey;
+THEMEHIGHLIGHTDATA	ThemeHighlightData;
+short	ProcessSelectedTheme=0;   
+
+extern	HWND	PrintMsgWnd;
+extern	int		PickAp;  
+extern	double	PickApW;
+extern	double	CurPointSize;
+extern	double	GraphicsTextFactor,GraphicsPointFactor;
+extern	float	MaxPointSize;
+extern	char	CurSymbolFont[64];
+extern	short	MaxTextLayer,OutDistUnits;
+extern	LPTHEME	CurTheme,ComputePCTTheme;
+extern	BOOL	ExpandTextDataNotFound;
+extern	short	MaxTextLayer;
+extern	DWORD	OtherFontOpts;
+extern	UINT	PatBMP[4];
+extern	short	nPoly;
+extern	HPEN	h0Pen;
+extern	RECT	MaskRect; 
+extern	double	DeviceToScreenFactor; 
+extern	short	LayerID;
+extern	double	FileDistToWinDist;
+extern	long	DisplayCycle;
+extern	HPPOINT	lpCurPoints;    
+extern	HPDPOINT	lpDCurPoints;
+extern	long	nCurPoints;
+extern	double	ThemeWidthFactor;
+extern	double	NetTOL;
+extern	HANDLE	hBTNetLinks;
+extern	int		NetworkID;
+extern	long	TextFreq;
+extern	BOOL	HaveStates[74];
+extern	BOOL	DisplayMarkers,IgnoreLbutton,HaltReport, HiPrecis,ProcessAllElements;                   
+extern	int	  	SaveDrive, CurState;  
+extern	HANDLE	hDesiredDocs, hVALUELIST;  
+extern	long	PenCOLOR[8];
+extern	int		PenWIDTH[8];
+extern	short	NetMarkTimer, StreetEditTimer;
+extern	double	max_check_time;
+extern	COLORREF	TempLineColor, TempFillColor, TempBackColor, NewColor;  
+extern	short	INewWidth,DisplayFinOpt;
+extern	float	NewWidth;
+extern	HANDLE  hSavedZooms;
+extern	long	FastPickFileNum, FastPickFII;
+extern	BOOL	FastPick, InGRCmd,InImediate,HaveCurrentLBUTTON,HaveVarFillColor;
+extern	long    StreetNum, CurPath;
+extern	HANDLE	hDBStreetSegments, hPrefix, hUDI;
+extern	RECT	CurEditRect;
+extern	long	CurDescLoc;  
+extern	short	CurLinkID;
+extern	short	ProcessGCmdStrings;
+extern	time_t	CurrentChangeDate;
+extern	short	NumTAGDef;
+extern	HANDLE	hTAGDef, hSpecial, hRedLine;
+extern	short	lGCmdString;
+extern	HANDLE	hGCmdString;
+extern  long	PRJ_UNITS[4];
+extern	DPOINT	UserSpecifiedBasePoint;
+extern	BOOL	DisplayMarkers,SetRefno;
+extern	HANDLE	hSavePoly,hSavePolyParts;
+extern	long	nSavePoly;
+extern	short	idescblock;
+extern	short	DriveDir;
+extern	HWND	VideoCntlWnd;
+extern	HANDLE	hBTNetIntMP,hBTNetIntRef;
+extern	long	NetIntAT,NumPossibleRoutes;
+extern	POINT	PosToPoint[10], PosFromPoint;
+extern	double	PossibleAz[10], PossibleMP[10], PossiblePCT[10], PossibleLength[10]; 
+extern	int		PossibleDir[10]; 
+extern	long	PossibleTLID[10];  
+extern	RECT	PosRouteRect;
+extern	HBITMAP	PosRouteSavedScreen;
+extern	BOOL	TraceNet, HaveTurnArrows;
+extern	int		RouteType, NetworkID, WalkOutRouteOpt;
+extern	HANDLE	hDescBlock;
+extern	int		NumQuadSegs, QuadOff, NumDescBlocks;
+extern	LONG	LenQuad, MaxQuadLevel, MaxQuadType,NumQuadSegsProcessed,CurGCmdStringLoc,CurSNamesLoc;
+extern	int		QuadLevelAt, QuadTypeNext;  
+extern	int		ReorgStatus,ReorgFileTxt; 
+extern	HWND	ReorghWnd;
+extern	BOOL	ReorgFile,WantQuadTree2,DisableHalt;
+extern	int		NewPolyType;
+extern	long	PRJ_TYPE[4];
+extern	long	InternalRefno;
+extern	long	CurStreetNumbers[4],FromStreet, ToStreet, CurStreet;  
+extern	int		CurrentType;  
+extern	LPPOINT	lpPoints2;    
+extern	BOOL	ContinueProcessing;
+extern	WORD	LenQuadBlock;
+extern	LONG	LenQuadSeg;
+extern	LONG	LenQuad, MaxQuadLevel, MaxQuadType;
+extern	int		QuadLevelAt, QuadTypeNext;
+extern	HANDLE hQuadTree, hQuadOffset;
+extern	BOOL	ReorgFile;
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+extern	int		QuadTypeNext;
+extern	long	lBlocksRead, nBlocksRead, nBlocksIn, nBlocksOut, TotDisplayTime, DistTime, MapIOTime;
+extern	BOOL	DoGraphics;
+extern	BOOL	UseRefOrTAGIndex;
+extern	int		FileProjectionType;
+extern	BOOL	ForAllVis;
+extern	long	LastRef;
+extern	BOOL	PickOrtho;   
+extern	HANDLE	hHighlightArea;   
+extern	int		CurrentUDILen;   
+extern	BOOL	GetMaskArea,OutlineZoomArea,MaskZoomArea,IgnoreBounds,AutoClearOffset,DisableMarginPan,MaskOffsetLine;
+extern	mnmxCor	MinMax, *pMinMax;
+extern	char	CrimeName[128];
+extern	int		CurrentSymNum;
+extern	double	OffsetLineOffset;
+extern	int		destX, destY, destW, destH, rect_width, rect_height;
+extern	WORD 	bmX, bmY;
+extern	HANDLE		hDibInfo, hImage;
+extern	HBITMAP		hBitmap;
+extern	LPBITMAPINFO	pDibInfo;
+extern	float	ShadowPct, BorderPct;
+extern	COLORREF	WindowColor; 
+extern	HANDLE	hPDChunk;
+extern	int		ShadowInc, SetVisByPar,MaxDimension;
+extern	long	FirstMergeRecord, LastMergeRecord; 
+extern	LPORTHO	CurOrtho;
+extern	long	CurOrthoFrame;  
+extern	int		OrthoID;
+extern	HANDLE	hOrthos;  
+extern	double	OrthoRes;
+extern	long	OrthoUse;
+extern	int		TSize, nBytes, MaxBrush;
+extern	HRGN	hRgn;
+extern	LONG	pu; 
+extern	LPINT	CurElementPnt;
+extern	WORD	CurElement;
+extern	BOOL	PickingByRefno, Pick, FileMode, FirstError, Display, SolidAreas, ParIsVisible, Highlight;
+extern	int		PltType;
+extern	LONG	CurrentSeg, ItemSeg, CurrentRefno;
+extern	int		CurrentDesc, CurrentiPen;
+extern	WORD	CurrentItem;
+extern	short	FileNum, SubFile;
+extern	USHORT	FileInIndex;
+extern	RECT	MainRect;
+extern	HANDLE	hRefIdx,hTAGIdx;
+extern	BOOL	NoRefIndex,ForceRefIndex,ForceTAGIndex;
+extern	long	CurrentRefno;
+extern	double FileDistToBaseDist,BaseDistToWinDist;
+extern	double	WindowToFileFactor;
+extern	TAGBOX	TAGBox;
+extern	HCURSOR	hCursor, OldCursor;
+extern	int		QuadTypeNext;
+extern	BOOL	DoPaint, HavePaint;
+extern	HPEN	CurrentPen;
+extern	HPEN	HighlightPen,hAreaBorderPen[2];
+extern	HBRUSH	HighlightBrush;
+extern	int		maxbrush;
+extern	int		NumPicked, MaxPick; 
+extern	double	PickLimit;
+extern	PICKDATA	PickList[MAXPICKITEMS];
+extern	double		WidthFactor;
+extern	HWND	hWndMain;
+extern	HANDLE	hInst;
+extern	MNMXCORD	ZoomBoxRect;
+extern	BOOL        WindowIsZoomed;
+extern	long		RefMktVal;
+extern  HPEN		hNullPen, hRedPen;
+extern	HBRUSH		hRedBrush, hGreenBrush, hBlueBrush, hBackBrush1;
+extern	LPVISLIST	CurVis;
+extern	LPVIEWPORT	CurView, pViewports[MAX_VIEWPORTS], pViewportsD[MAX_VIEWPORTS];
+extern	HANDLE		hViewports[MAX_VIEWPORTS];
+extern	int			NumViewports, NumViewportsToDisplay, DisplayViewID;
+extern	LPVOID		TranFileToBase, TranBaseToFile, TranBMToBase, TranBaseToBM;
+extern	HANDLE		hTranFileToBase, hTranBaseToFile, hTranBMToBase, hTranBaseToBM; 
+extern	HANDLE		hTranFileToBaseOld;
+extern	LPORTHO		CurOrtho;
+extern	BOOL		Printing, PrintMerging;
+extern	int			nPnts;
+extern	int			PickAp;
+extern	BOOL		UpdateSegment;
+extern	int			CommandViewport;
+extern	BOOL		AddLBUTTON; 
+extern	int		 	idTimer, Fid, FidConfig;
+extern	long		UsedDescOffset,TranPointOffset, ColorPaletteOffset, GraphicsOffset, ContinuationOffset; 
+extern	long		NewPrimeOffset;
+extern	long		LenQuadSeg, LenQuad;
+extern	long	QuadOffLoc;
+extern BOOL    MemMap, FirstMemMap, ReorgFile;   
+extern  int     MemMapWidth,MemMapHeight;
+extern	HANDLE	hHighlight, hHighlight2; 
+extern	POINT	CurPointLoc;
+extern	double	CurPointSize;
+
+BOOL FAR PASCAL STREET_TEXTMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+	int	IDC_FieldName=SV_FIELD_NAME; 
+	BOOL	True=TRUE, Err; 
+	short	show;   
+	COLORREF	Color;
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam,IDC_SQL,
+ 					 SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, &IDC_FieldName,1,
+ 					 CurTheme->DataFile, &CurTheme->DataFileType, &CurTheme->hThemeDB, &True,FALSE))
+ 					  return TRUE;
+ if (ThemeCommonCode (hWndDlg, Message, wParam, lParam,CurTheme->hThemeDB))
+ 	return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+    {
+	    LPSTREETTEXTDATA	pStreetData=(LPSTREETTEXTDATA)CurTheme->ClassBM;
+
+        SetDlgItemText(hWndDlg,SV_FIELD_NAME,(LPCSTR)&CurTheme->Field[0].name); 
+        SetDlgItemText(hWndDlg,IDC_SQL,(LPCSTR)&CurTheme->SQL);
+       	SendDlgItemMessage (hWndDlg,IDC_SKIPNOREC,BM_SETCHECK,CurTheme->MissOpt,0L);  
+	    SetDlgItemInt (hWndDlg,IDC_LAYERID,pStreetData->LayerID,TRUE); 
+	    show = SW_HIDE;
+       	SendDlgItemMessage (hWndDlg,IDC_ITALIC,BM_SETCHECK,pStreetData->Italic,0L);  
+       	
+       	SendDlgItemMessage (hWndDlg,IDC_SHADOWTEXT,BM_SETCHECK,pStreetData->Shadow,0L);  
+       	SendDlgItemMessage (hWndDlg,IDC_OPAQUETEXT,BM_SETCHECK,pStreetData->BackgroundOpt,0L);  
+       	SendDlgItemMessage (hWndDlg,IDC_HORTEXT,BM_SETCHECK,pStreetData->HorizontalText,0L);  
+       	SendDlgItemMessage (hWndDlg,IDC_ABOVELINE,BM_SETCHECK,!pStreetData->VJust,0L);  
+   	 	SetDlgItemText (hWndDlg,IDC_EXPRESSION,pStreetData->Expression);
+   	 	SetDlgItemInt (hWndDlg,IDC_EXLEN,pStreetData->NameLength,FALSE); 
+   	 	SetDlgItemText (hWndDlg,IDC_LISTDB,pStreetData->ListFile);
+   	 	SetDlgItemText (hWndDlg,IDC_LISTDATA,pStreetData->ListData);
+   	 	SetDlgItemInt (hWndDlg,IDC_LISTLEN,pStreetData->ListLen,FALSE); 
+   	 	SetDlgItemInt (hWndDlg,IDC_BOUNDSCUTOFF,pStreetData->MinSize,FALSE); 
+    case GSSI_REINITDIALOG:
+		pStreetData=(LPSTREETTEXTDATA)CurTheme->ClassBM;
+	    if (pStreetData->NameSource)
+	    {
+       		SendDlgItemMessage (hWndDlg,IDC_EXTABLE,BM_SETCHECK,TRUE,0L);  
+       		show = SW_SHOW;
+	   	} 
+       	else
+       		SendDlgItemMessage (hWndDlg,IDC_USE_STREETS,BM_SETCHECK,TRUE,0L);
+   		SendDlgItemMessage (hWndDlg,IDC_SHOW_CITIES,BM_SETCHECK,pStreetData->ShowCities,0L);
+   		SendDlgItemMessage (hWndDlg,IDC_SCALETEXT,BM_SETCHECK,pStreetData->ScaleText,0L);
+   		SendDlgItemMessage (hWndDlg,IDC_SHOW_ALLELEM,BM_SETCHECK,pStreetData->ShowAllElements,0L);
+   	 	ShowWindow (GetDlgItem(hWndDlg,SV_DATABASE_LIST),show); 
+//   	 	ShowWindow (GetDlgItem(hWndDlg,SV_TABLE_NAMES),show); 
+//   	 	ShowWindow (GetDlgItem(hWndDlg,SV_TABLE_HEADING),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_EXPRESSION),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_EXLEN),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_EXLEN2),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_SQL),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_SETSQL),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,SV_DATA_FILE),show); 
+   	 	ShowWindow (GetDlgItem(hWndDlg,SV_DATA_FILE2),show);
+   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_SHOW_FIELDS),show);
+    }  
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+                       
+    case WM_COMMAND:
+    {
+		 LPSTREETTEXTDATA	pStreetData=(LPSTREETTEXTDATA)CurTheme->ClassBM;    
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 CloseThemeDataFile(TRUE);
+				 DestroyFieldList ();
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_STREETTEXTFONT:
+            	 pStreetData->StreetTextFont.lfHeight = pStreetData->TextSize * BaseDistToWinDist;
+            	 GetFont (hWndDlg, &pStreetData->StreetTextFont, &pStreetData->TextColor);
+            	 pStreetData->TextSize = pStreetData->StreetTextFont.lfHeight / BaseDistToWinDist;
+            	 break;
+            case IDC_SHADOWCOLOR:
+           		 Color = pStreetData->ShadowColor;  
+            	 if (GetColor(hWndDlg,&Color))
+            	 	pStreetData->ShadowColor = Color;
+            	 break;
+            
+           	case IDC_TEXTCOLOR: 
+           		 Color = pStreetData->TextColor; 
+            	 if (GetColor(hWndDlg,&Color))
+            	 	pStreetData->TextColor = Color;
+           		 break;
+            
+            case IDC_USE_STREETS:  
+            	 pStreetData->NameSource = 0;
+                 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
+                 break;
+            case IDC_EXTABLE:
+            	 pStreetData->NameSource = 1;
+                 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+                 break;
+            case IDC_SHOW_FIELDS: 
+            	 
+            	 DisplayFieldList (hWndDlg,CurTheme->hThemeDB,NULL,0);
+                 break;
+                      
+            case IDC_SAVE_THEME:  
+            case IDOK:
+            {
+            	HANDLE	hItems;
+            	LPINT	lpItems;
+			    BOOL	Err; 
+			    LPSTR	lpEQ;  
+			    char	FieldName[128];
+            	
+				OpenThemeDataFile ();  
+            	pStreetData->ShowAllElements = SendDlgItemMessage (hWndDlg,IDC_SHOW_ALLELEM,BM_GETCHECK,0,0L);  
+            	pStreetData->ShowCities = SendDlgItemMessage (hWndDlg,IDC_SHOW_CITIES,BM_GETCHECK,0,0L);  
+            	pStreetData->ScaleText = SendDlgItemMessage (hWndDlg,IDC_SCALETEXT,BM_GETCHECK,0,0L);  
+            	pStreetData->Italic = SendDlgItemMessage (hWndDlg,IDC_ITALIC,BM_GETCHECK,0,0L);  
+            	pStreetData->Shadow = SendDlgItemMessage (hWndDlg,IDC_SHADOWTEXT,BM_GETCHECK,0,0L);  
+            	CurTheme->MissOpt = SendDlgItemMessage (hWndDlg,IDC_SKIPNOREC,BM_GETCHECK,0,0L);  
+            	pStreetData->HorizontalText = SendDlgItemMessage (hWndDlg,IDC_HORTEXT,BM_GETCHECK,0,0L);  
+            	pStreetData->VJust = !SendDlgItemMessage (hWndDlg,IDC_ABOVELINE,BM_GETCHECK,0,0L);  
+            	pStreetData->BackgroundOpt = SendDlgItemMessage (hWndDlg,IDC_OPAQUETEXT,BM_GETCHECK,0,0L);  
+            	pStreetData->LayerID = GetDlgItemInt (hWndDlg,IDC_LAYERID,&Err,TRUE);
+   	 			GetDlgItemText (hWndDlg,IDC_EXPRESSION,pStreetData->Expression,256);
+   	 			pStreetData->NameLength = GetDlgItemInt (hWndDlg,IDC_EXLEN,&Err,FALSE); 
+		   	 	GetDlgItemText (hWndDlg,IDC_LISTDB,pStreetData->ListFile,128);
+		   	 	GetDlgItemText (hWndDlg,IDC_LISTDATA,pStreetData->ListData,128);
+   	 			pStreetData->ListLen = GetDlgItemInt (hWndDlg,IDC_LISTLEN,&Err,FALSE);
+   	 			pStreetData->ListLen = max (2,pStreetData->ListLen); 
+   	 			pStreetData->MinSize = GetDlgItemInt (hWndDlg,IDC_BOUNDSCUTOFF,&Err,FALSE);
+/*		        GetDlgItemText(hWndDlg,SV_FIELD_NAME,FieldName,128);
+                GetFieldDefFromOpenFiles (FieldName,&CurTheme->Field[0]);
+                pStreetData->NameLength = CurTheme->Field[0].length;*/ 
+       	 		GetDlgItemText (hWndDlg,IDC_SQL,CurTheme->SQL,256);   
+       	 		GetDlgItemText (hWndDlg,SV_DATABASE_LIST,CurTheme->DataFile,sizeof(CurTheme->DataFile));
+       	 		if ((lpEQ = _fstrchr (CurTheme->SQL,'=')))
+       	 		{
+       	 			lpEQ++;
+       	 			_fstrcpy (pStreetData->Macro,lpEQ);
+       	 		}
+       	 		else
+       	 			*pStreetData->Macro = 0;
+                if (wParam == IDC_SAVE_THEME)
+            		SaveCurTheme(hWndDlg);
+				else 
+				{   
+	                CloseThemeDataFile(TRUE);
+					DestroyFieldList ();
+                	EndDialog(hWndDlg, TRUE);
+                }
+            }
+                break;
+
+           }
+    }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+   
+BOOL FAR PASCAL BOUNDS_DISPLAYMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+ char	str[256];
+ LPBOUNDSDISPLAY lpBoundsDisplay;
+ 
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (ThemeCommonCode (hWndDlg, Message, wParam, lParam,0))
+ 	return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+		 if (CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
+		 	break;
+		 lpBoundsDisplay = (LPBOUNDSDISPLAY)&CurTheme->ClassBM; 
+		 SetDlgItemText (hWndDlg,BD_MACRO,CurTheme->Title);        
+		 SetDlgItemText (hWndDlg,IDC_FOCUSREFGLOBAL,lpBoundsDisplay->CurAreaRefGlobal);        
+       	 SendDlgItemMessage (hWndDlg,IDC_SHOWAREAB,BM_SETCHECK,CurTheme->ZeroIsMissing,0L); 
+       	 SendDlgItemMessage (hWndDlg,IDC_DOCLEAR,BM_SETCHECK,!lpBoundsDisplay->IgnoreClear,0L); 
+       	 sprintf (str,"%f",CurTheme->RefValDbl);
+       	 SetDlgItemText (hWndDlg,IDC_VPOFFSET,str);
+
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_SAVE_THEME:  
+            case IDOK:
+            {
+            	HANDLE	hItems;
+            	LPINT	lpItems;
+            	
+                if (wParam == IDC_SAVE_THEME)
+            		SaveCurTheme(hWndDlg);
+				else 
+				{   
+					if (CurTheme->ID == GF_BOUNDS_DISPLAY_THEME)
+					{   
+						lpBoundsDisplay = (LPBOUNDSDISPLAY)&CurTheme->ClassBM; 
+						GetDlgItemText (hWndDlg,IDC_FOCUSREFGLOBAL,lpBoundsDisplay->CurAreaRefGlobal,34);        
+			       	    GetDlgItemText (hWndDlg,IDC_VPOFFSET,str,32);
+			       	    CurTheme->RefValDbl = atof (str);
+	            	 	CurTheme->ZeroIsMissing = SendDlgItemMessage (hWndDlg,IDC_SHOWAREAB,BM_GETCHECK,0,0L);  
+	            	 	lpBoundsDisplay->IgnoreClear = !SendDlgItemMessage (hWndDlg,IDC_DOCLEAR,BM_GETCHECK,0,0L);  
+						GetDlgItemText (hWndDlg,BD_MACRO,CurTheme->Title,256);
+				        BoundsDisplayDestroy (CurView->lpBoundsDisplay); 
+				        CurView->lpBoundsDisplay=0;
+						CurView->Type = 7;
+						CurView->ZoomTarget = CurTheme->TargetViewport;   
+						ResetFunStack (TRUE);
+						AddGraphicsFunction (CurView->hWnd, GF_PAN_ZOOM_TARGET,0);
+						CurView->StartupFunction = GF_PAN_ZOOM_TARGET;   
+					}    	
+                	EndDialog(hWndDlg, TRUE);
+                }
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} 
+
+BOOL FAR PASCAL DISTANCEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+ char	str[256];
+ LPBOUNDSDISPLAY lpBoundsDisplay;
+ 
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (ThemeCommonCode (hWndDlg, Message, wParam, lParam,0))
+ 	return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Miles");
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_SAVE_THEME:  
+            	 SaveCurTheme(hWndDlg);
+            	 break;
+            case IDOK:
+            {
+               	EndDialog(hWndDlg, TRUE);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+ 
+BOOL FAR PASCAL PROFILEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+ char	str[256];
+ LPBOUNDSDISPLAY lpBoundsDisplay;
+ 
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (ThemeCommonCode (hWndDlg, Message, wParam, lParam,0))
+ 	return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
+         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Miles");
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_SAVE_THEME:  
+            	 SaveCurTheme(hWndDlg);
+            	 break;
+            case IDOK:
+            {
+               	EndDialog(hWndDlg, TRUE);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+ 
+BOOL FAR PASCAL COORDGRIDMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+ char	str[256];
+ LPBOUNDSDISPLAY lpBoundsDisplay;
+ 
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (ThemeCommonCode (hWndDlg, Message, wParam, lParam,0))
+ 	return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_SAVE_THEME:  
+            	 SaveCurTheme(hWndDlg);
+            	 break;
+            case IDOK:
+            {
+               	EndDialog(hWndDlg, TRUE);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}         
+
+BOOL GetDMSMajorMinorInc (double DegDifx,LPDOUBLE pMajor, LPDOUBLE pMinor, LPSHORT pFormat)
+{   
+	double	MajorInc, MinorInc, SecDif,MIN=(double)1/60,SEC=MIN/60;
+	short	DegDif, MinDif, fmt=0;
+	
+	GetDMS (DegDifx,&DegDif,&MinDif,&SecDif); 
+	if (DegDif>10)
+	{
+		MajorInc = 2;
+		MinorInc = 1;
+	}
+	else if (DegDif>2)
+	{
+		MajorInc = 1;
+		MinorInc = MIN*10;
+	}
+	else
+	{   
+		fmt = 1;
+		MinDif += DegDif*60;
+		if (MinDif > 40)
+    	{
+    		MajorInc = MIN*20;
+    		MinorInc = MIN*2;
+    	}
+		else if (MinDif > 20)
+    	{
+    		MajorInc = MIN*10;
+    		MinorInc = MIN;
+    	}
+    	else if (MinDif > 10)
+    	{
+    		MajorInc = MIN*5;
+    		MinorInc = MIN;
+    	}
+    	else if (MinDif > 5)
+    	{
+    		MajorInc = MIN * 2;
+    		MinorInc = SEC * 10;
+    	}
+    	else if (MinDif > 2)
+    	{
+    		MajorInc = MIN;
+    		MinorInc = SEC * 10;
+    	}
+    	else 
+    	{   
+    		fmt = 2;
+    		SecDif += 60 * MinDif;
+    		if (SecDif > 100)
+    		{
+	    		MajorInc = SEC * 30;
+	    		MinorInc = SEC * 10;
+    		}
+    		else if (SecDif > 40)
+    		{
+	    		MajorInc = SEC * 20;
+	    		MinorInc = SEC * 10;
+    		}
+    		else if (SecDif > 20)
+    		{
+	    		MajorInc = SEC * 10;
+	    		MinorInc = SEC * 1;
+    		}
+    		else if (SecDif > 10)
+    		{
+	    		MajorInc = SEC * 5;
+	    		MinorInc = SEC * 1;
+    		}
+    		else if (SecDif > 5)
+    		{
+	    		MajorInc = SEC * 2;
+	    		MinorInc = SEC * 1;
+    		}
+    		else if (SecDif > 2)
+    		{
+	    		MajorInc = SEC;
+	    		MinorInc = SEC/10;
+	    	}
+	    	else
+	    	{
+	    		fmt = 3;
+	    		MajorInc = SEC / 2;
+	    		MinorInc = SEC / 10; 
+	    	}
+	    }
+	}  
+	*pMajor = MajorInc;
+	*pMinor = MinorInc; 
+	*pFormat = fmt;
+	return TRUE;
+}
+	
+ 
+void DisplayCoordGridThemeLegend(short From)
+{    
+	short	CurViewID = CurView->ID, reps, h,w;    
+	double	BaseDistPerPixel, MaxWidth, BarWidth, step;
+	POINT	Points[3], MinorPoints[2];  
+	long	IntVal;  
+	char	txt[128], str[16], fmt[16]=" %.0f mile "; 
+	HPEN	OldPen, LinePen;
+	
+//	SetCurView (pViewports[CurTheme->TargetViewport-1]); //tempdebu
+	SetViewport (CurTheme->TargetViewport);   
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	CurView->hRgn = CreateVPRgn (2);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn);
+    SetTextColor (CurView->hDC,0);  
+    if (CurView->MarginPan && !Printing)
+	{   
+		POINT	Point;
+		RECT	Rect;
+		short	symnum, width, height;
+	    LPSYMBOL    CurSymbol;
+	    HANDLE	hSymbol;
+	    BOOL	SaveHVFC=HaveVarFillColor;
+	    HBRUSH	hOldBrush; 
+	    double	Rot=0, QuaterPY=HALFPI/2.0;
+		
+		
+	    width = CurView->Rect.right - CurView->DrawRect.right -2;
+	    height = CurView->Rect.bottom - CurView->DrawRect.bottom -2;
+		symnum = GetDictSymbolNumber ("ARROW1");
+		hSymbol = GetDictSymDesc (symnum);
+		hOldBrush = SelectObject (CurView->hDC,GetStockObject(WHITE_BRUSH));
+	    HaveVarFillColor = TRUE;
+	    Point.x=(CurView->Rect.right + CurView->DrawRect.right)/2;
+	    Point.y=(CurView->Rect.top + CurView->Rect.bottom)/2;  
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.y=(CurView->Rect.top + CurView->DrawRect.top)/2;  
+		Rot = QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.x=(CurView->Rect.left + CurView->DrawRect.right)/2;
+		Rot += QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.x=(CurView->Rect.left + CurView->DrawRect.left)/2;
+		Rot += QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.y=(CurView->Rect.top + CurView->Rect.bottom)/2;  
+		Rot += QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.y=(CurView->Rect.bottom + CurView->DrawRect.bottom)/2;
+		Rot += QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.x=(CurView->Rect.left + CurView->Rect.right)/2;  
+		Rot += QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+	    Point.x=(CurView->Rect.right + CurView->DrawRect.right)/2;
+		Rot += QuaterPY;					
+		DisplayPointSymbol (hSymbol,CurView->hDC, -height, width,Rot, &Point,NULL,FALSE,0,0,FALSE);  
+		DestroySymbol (hSymbol); 
+		HaveVarFillColor = SaveHVFC;
+		SelectObject (CurView->hDC,hOldBrush);
+    }
+    else
+    {   
+    	DPOINT	Point1, Point2;
+    	char	Dir; 
+    	short	Deg1, Deg2, Min1, Min2, DegDif, MinDif, Format, Pass;
+    	double	Rot, pct, Sec1, Sec2, SecDif, finc, MajorInc, MinorInc, MajorX, MinorX, LastX;
+    	
+		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),0);
+		OldPen = SelectObject (CurView->hDC,LinePen);
+	    SetBkMode(CurView->hDC, OPAQUE);  
+	    SetBkColor (CurView->hDC,CurView->BackGroundColor);   
+
+    	w = CurView->DrawRect.right - CurView->DrawRect.left;
+		h = CurView->Rect.bottom - CurView->DrawRect.bottom - 5*DeviceToScreenFactor;
+
+    	Point1.x = CurView->WBounds.xmn;
+    	Point1.y = CurView->WBounds.ymn;
+    	Point2.x = CurView->WBounds.xmx;
+    	Point2.y = CurView->WBounds.ymn;
+    	Dir = 'W';
+	    Points[0].y = CurView->DrawRect.bottom - 4 * DeviceToScreenFactor;
+	    Points[1].y = (CurView->DrawRect.bottom + CurView->Rect.bottom)/2; 
+	    MinorPoints[0].y = CurView->DrawRect.bottom - 1 * DeviceToScreenFactor;
+	    MinorPoints[1].y = (CurView->DrawRect.bottom + CurView->Rect.bottom)/2 - 3 * DeviceToScreenFactor; 
+	    Pass = 2;
+    	
+    	while (Pass--)
+    	{
+	    	ConvertCoord (&Point1,1,2);  
+	    	GetDMS (Point1.x,&Deg1,&Min1,&Sec1);
+	    	ConvertCoord (&Point2,1,2);
+	    	GetDMS (Point2.x,&Deg2,&Min2,&Sec2); 
+	    	GetDMSMajorMinorInc (fabs (Point1.x-Point2.x),&MajorInc,&MinorInc,&Format);
+	    	finc = fmod (Point1.x,MajorInc); 
+	    	MajorX = Point1.x-finc;
+	    	GetDMS (MajorX,&DegDif,&MinDif,&SecDif); 
+	    	MajorX -= MajorInc;
+		    while (MajorX < Point2.x)
+		    {
+			    pct = (MajorX - Point1.x) / (Point2.x - Point1.x);
+			    Points[0].x = CurView->DrawRect.left + w * pct; 
+			    Points[1].x = Points[0].x;
+		    	GetDMS (MajorX,&Deg1,&Min1,&Sec1);
+		    	switch (Format)
+		    	{
+		    		case 0:
+			    		sprintf (txt,"%c%iD",Dir,abs(Deg1));
+		    			break;
+		    		case 1:
+			    		sprintf (txt,"%c%iD %2iM",Dir,abs(Deg1),Min1);
+		    			break;
+		    		case 2:
+			    		sprintf (txt,"%c%iD %2iM %2.0fS",Dir,abs(Deg1),Min1,Sec1);
+			    		break;
+			    	case 3:
+			    		sprintf (txt,"%c%iD %2iM %2.1fS",Dir,abs(Deg1),Min1,Sec1);
+			    		break; 
+			    }
+			    Polyline (CurView->hDC,Points,2);
+				MinorX = MajorX + MinorInc;
+				LastX = MajorX;
+				MajorX += MajorInc;
+				while (MinorX < min (MajorX,Point2.x))
+				{ 
+				    pct = (MinorX - Point1.x) / (Point2.x - Point1.x);
+				    MinorPoints[0].x = CurView->DrawRect.left + w * pct; 
+				    MinorPoints[1].x = MinorPoints[0].x;
+				    Polyline (CurView->hDC,MinorPoints,2);
+				    MinorX += MinorInc;
+				} 
+				if (LastX > Point1.x)
+					DispText (CurView->hDC,Points[1].x-10,Points[1].x+10, Points[1].y,0, 2,2,
+					 		  h,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL);
+			} 
+		    Points[0].y = CurView->DrawRect.top + 4 * DeviceToScreenFactor;
+		    Points[1].y = (CurView->DrawRect.top + CurView->Rect.top)/2; 
+		    MinorPoints[0].y = CurView->DrawRect.top + 1 * DeviceToScreenFactor;
+		    MinorPoints[1].y = (CurView->DrawRect.top + CurView->Rect.top)/2 + 3 * DeviceToScreenFactor; 
+	    	Point1.x = CurView->WBounds.xmn;
+	    	Point1.y = CurView->WBounds.ymx;
+	    	Point2.x = CurView->WBounds.xmx;
+	    	Point2.y = CurView->WBounds.ymx;
+		}
+		
+    	w = CurView->DrawRect.bottom - CurView->DrawRect.top;
+		h = CurView->Rect.right - CurView->DrawRect.right - 5*DeviceToScreenFactor;
+
+    	Dir = 'N';    
+    	Rot = HALFPI;
+    	Point1.x = CurView->WBounds.xmn;
+    	Point1.y = CurView->WBounds.ymn;
+    	Point2.x = CurView->WBounds.xmn;
+    	Point2.y = CurView->WBounds.ymx;
+	    Points[0].x = CurView->DrawRect.left + 4 * DeviceToScreenFactor;
+	    Points[1].x = (CurView->DrawRect.left + CurView->Rect.left)/2; 
+	    MinorPoints[0].x = CurView->DrawRect.left + 1 * DeviceToScreenFactor;
+	    MinorPoints[1].x = (CurView->DrawRect.left + CurView->Rect.left)/2 + 3 * DeviceToScreenFactor; 
+	    Pass = 2;
+    	
+    	while (Pass--)
+    	{
+	    	ConvertCoord (&Point1,1,2);  
+	    	GetDMS (Point1.y,&Deg1,&Min1,&Sec1);
+	    	ConvertCoord (&Point2,1,2);
+	    	GetDMS (Point2.y,&Deg2,&Min2,&Sec2); 
+	    	GetDMSMajorMinorInc (fabs (Point1.y-Point2.y),&MajorInc,&MinorInc,&Format);
+	    	finc = fmod (Point1.y,MajorInc); 
+	    	MajorX = Point1.y-finc;
+	    	GetDMS (MajorX,&DegDif,&MinDif,&SecDif); 
+	    	MajorX -= MajorInc;
+		    while (MajorX < Point2.y)
+		    {
+			    pct = (MajorX - Point1.y) / (Point2.y - Point1.y);
+			    Points[0].y = CurView->DrawRect.bottom - w * pct; 
+			    Points[1].y = Points[0].y;
+		    	GetDMS (MajorX,&Deg1,&Min1,&Sec1);
+		    	switch (Format)
+		    	{
+		    		case 0:
+			    		sprintf (txt,"%c%iD",Dir,abs(Deg1));
+		    			break;
+		    		case 1:
+			    		sprintf (txt,"%c%iD %2iM",Dir,abs(Deg1),Min1);
+		    			break;
+		    		case 2:
+			    		sprintf (txt,"%c%iD %2iM %2.0fS",Dir,abs(Deg1),Min1,Sec1);
+			    		break;
+			    	case 3:
+			    		sprintf (txt,"%c%iD %2iM %2.1fS",Dir,abs(Deg1),Min1,Sec1);
+			    		break; 
+			    }
+			    Polyline (CurView->hDC,Points,2);
+				MinorX = MajorX + MinorInc;
+				LastX = MajorX;
+				MajorX += MajorInc;
+				while (MinorX < min (MajorX,Point2.y))
+				{ 
+				    pct = (MinorX - Point1.y) / (Point2.y - Point1.y);
+				    MinorPoints[0].y = CurView->DrawRect.bottom - w * pct; 
+				    MinorPoints[1].y = MinorPoints[0].y;
+				    Polyline (CurView->hDC,MinorPoints,2);
+				    MinorX += MinorInc;
+				} 
+				if (LastX > Point1.y)
+					DispText (CurView->hDC,Points[1].x-10,Points[1].x+10, Points[1].y, 0,2,2,
+					 		  h,2, FALSE,Rot,txt,0,FALSE,0,0,-1,0,NULL);
+			} 
+
+		    Points[0].x = CurView->DrawRect.right - 4 * DeviceToScreenFactor;
+		    Points[1].x = (CurView->DrawRect.right + CurView->Rect.right)/2; 
+		    MinorPoints[0].x = CurView->DrawRect.right - 1 * DeviceToScreenFactor;
+		    MinorPoints[1].x = (CurView->DrawRect.right + CurView->Rect.right)/2 - 3 * DeviceToScreenFactor; 
+	    	Point1.x = CurView->WBounds.xmx;
+	    	Point1.y = CurView->WBounds.ymn;
+	    	Point2.x = CurView->WBounds.xmx;
+	    	Point2.y = CurView->WBounds.ymx;
+		}
+		SelectObject (CurView->hDC,OldPen);
+		DeleteObject (LinePen);
+	}
+	RestoreDC (CurView->hDC,-1);
+//	SetCurView (pViewports[CurViewID-1]); //tempdebu
+    SetViewport (CurViewID);
+	
+	return;
+}
+   
+HANDLE	CreateListFile (LPSTR File,short lenListData,BOOL SortOnData)
+{
+ 	int		i;
+	BTVARDESC BTVar[2], *pVars;
+	int		NumFields, Reclen, len;
+	long	Refno, Offset;
+	long	TotFileLen;
+	GWDHEADER GWDHead; 
+	LPGWDHEADER	lpGWDHead;
+	GWFLDINFO GWFldInfo;
+	LPGWFLDINFO	lpGWFldInfo;
+	HANDLE hBT, hDB;
+	HFILE	FidData;
+	int		ibeg,NumVars;
+	OFSTRUCT	OFStruct;
+	GWFLDINFO FldInfo;
+	LPSTR	lpDot;  
+
+	 lpGWDHead = &GWDHead; 
+    _fmemset (lpGWDHead,0,sizeof(GWDHEADER));
+
+	 FidData = GSSiOpenFile (File,&OFStruct,OF_CREATE);
+	 GWDHead.NumFields=0;
+	 GWDHead.NumIndex=1; 
+	 if (SortOnData)
+		 GWDHead.NumIndex=2; 
+	 GWDHead.Version=1;
+	 GWDHead.NumIndexFields[0]=1;
+	 GWDHead.IndexFields[0][0]=0;
+	 GWDHead.NumIndexFields[1]=1;
+	 GWDHead.IndexFields[1][0]=4;
+	 _lwrite (FidData,&GWDHead,sizeof(GWDHEADER));
+	ibeg = 0;
+
+	FldInfo.Len = 4;
+	FldInfo.Beg = ibeg;
+	ibeg += FldInfo.Len;
+	FldInfo.Type = BT_INTEGER;
+	_fstrcpy (FldInfo.Name,"Refno");
+	_lwrite (FidData,&FldInfo,sizeof(FldInfo));
+	GWDHead.NumFields++;
+
+	FldInfo.Len = 8;
+	FldInfo.Beg = ibeg;
+	ibeg += FldInfo.Len;
+	FldInfo.Type = BT_CHAR;
+	_fstrcpy (FldInfo.Name,"Prefix");
+	_lwrite (FidData,&FldInfo,sizeof(FldInfo));
+	GWDHead.NumFields++;
+
+	FldInfo.Len = 32;
+	FldInfo.Beg = ibeg;
+	ibeg += FldInfo.Len;
+	FldInfo.Type = BT_CHAR;
+	_fstrcpy (FldInfo.Name,"UDI");
+	_lwrite (FidData,&FldInfo,sizeof(FldInfo));
+	GWDHead.NumFields++;
+	
+	FldInfo.Len = 32;
+	FldInfo.Beg = ibeg;
+	ibeg += FldInfo.Len;
+	FldInfo.Type = BT_CHAR;
+	_fstrcpy (FldInfo.Name,"Symbol");
+	_lwrite (FidData,&FldInfo,sizeof(FldInfo));
+	GWDHead.NumFields++;
+	
+	FldInfo.Len = min(2,lenListData);
+	FldInfo.Beg = ibeg;
+	ibeg += FldInfo.Len;
+	FldInfo.Type = BT_CHAR;
+	_fstrcpy (FldInfo.Name,"ListData");
+	_lwrite (FidData,&FldInfo,sizeof(FldInfo));
+	GWDHead.NumFields++;
+	
+	 GWDHead.Reclen=ibeg; 
+	 GWDHead.TimeStamp = 0;
+	 _llseek (FidData,0,0);
+	 _lwrite (FidData,&GWDHead,sizeof(GWDHEADER));
+ 	 _llseek (FidData,0,2);
+			     
+	 NumVars = 1;
+			
+	 BTVar[0].BT_VARLEN=4;
+	 BTVar[0].BT_VARTYP=BT_INTEGER;
+	 BTVar[0].BT_VAROFF=0;
+	 lpDot = _fstrrchr (File,'.');
+	 _fstrcpy (lpDot,".in1");	
+	 BT_CREATE (File, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
+ 	 GSSiClose (FidData);
+	 _fstrcpy (lpDot,".gmd");	
+
+     hDB = OpenGWDatabase (File,BT_WRITE);
+     return hDB; 
+}  
+
+BOOL AddToListFile (long Refno,LPSTREETTEXTDATA	pStreetData)
+{   
+	LPGWDHEADER	lpGWDHead;    
+	LPLONG		pRefno;     
+	char		str[256];
+	
+	if (!pStreetData->hListDB)
+		return FALSE;   
+	lpGWDHead = (LPGWDHEADER)GlobalLock (pStreetData->hListDB); 
+	pRefno = (LPLONG)&lpGWDHead->GWDData;
+	*pRefno = Refno;
+	SetFieldValFromCharAndName(lpGWDHead,"Symbol","",FALSE);
+	SetFieldValFromCharAndName(lpGWDHead,"Prefix",CurrentTAG,FALSE);
+	SetFieldValFromCharAndName(lpGWDHead,"UDI",CurrentUDI,FALSE); 
+	_fstrcpy (str,pStreetData->ListData);
+	ExpandText (str);
+	SetFieldValFromCharAndName(lpGWDHead,"ListData",str,FALSE);
+	GWDAddRecord (lpGWDHead,0,NULL);      
+	GlobalUnlock (pStreetData->hListDB); 
+	return TRUE;
+}
+
+void DisplayCoordPrintText (void)
+{   
+	short	h,w;
+	LPCOORDINATEDISPLAY	CD; 
+	POINT	Points[3];  
+	char	txt[256]; 
+	
+	CD = (LPCOORDINATEDISPLAY)CurTheme;
+	if (!CD->PrintText)
+		return;  
+	_fstrcpy (txt,CD->PrintText);
+	ExpandText (txt);
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+    CurView->hRgn = CreateVPRgn(FALSE);
+    SelectClipRgn (CurView->hDC,CurView->hRgn);
+    DeleteObject(CurView->hRgn);    
+    SetTextColor (CurView->hDC,0);     
+	FillRectPoly (CurView->hDC,&CurView->DrawRect,CurView->BackGroundColor);  
+	h = (((CurView->DrawRect.bottom - CurView->DrawRect.top) / 2)-3*DeviceToScreenFactor);
+	w = (h+4*DeviceToScreenFactor);
+    SetBkMode(CurView->hDC, OPAQUE);  
+    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+    Points[0].y = (CurView->DrawRect.bottom + CurView->DrawRect.top) / 2;
+    Points[0].x = (CurView->DrawRect.left + CurView->DrawRect.right) / 2; 
+	DispText (CurView->hDC,Points[0].x-10,Points[0].x+10, Points[0].y,0, 2,2,
+			  h*2+6,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL); 
+	RestoreDC (CurView->hDC,-1);
+	return;
+}
+
+void DisplayDistanceThemeLegend(short From,double ThisDist,double TotDist)
+{    
+	short	CurViewID = CurView->ID, reps, h,w;    
+	double	BaseDistPerPixel, MaxWidth, BarWidth, step;
+	POINT	Points[3];  
+	long	IntVal;  
+	char	txt[64], str[16], fmt[16]=" %.0f mile "; 
+	HPEN	OldPen, LinePen;
+	
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+    CurView->hRgn = CreateVPRgn(FALSE);
+    SelectClipRgn (CurView->hDC,CurView->hRgn);
+    DeleteObject(CurView->hRgn);    
+    SetTextColor (CurView->hDC,0);     
+	FillRectPoly (CurView->hDC,&CurView->DrawRect,CurView->BackGroundColor);  
+	h = (((CurView->DrawRect.bottom - CurView->DrawRect.top) / 2)-2*DeviceToScreenFactor);
+	w = (h+4*DeviceToScreenFactor);
+	if (From == 2)
+	{    
+		char	Units[32]="[%DIST_UNITS]";
+		
+		ExpandText (Units);
+		Points[0] = RectMid (&CurView->DrawRect); 
+		if (TotDist)
+		sprintf (txt,"%.1f (%.1f total) %s", ConvertDist(ThisDist,OutDistUnits),
+									ConvertDist(TotDist+ThisDist,OutDistUnits),Units); 
+		else
+		sprintf (txt,"%.1f %s", ConvertDist(ThisDist,OutDistUnits),Units); 
+	}
+	else
+	{
+		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),CurTheme->ScatterColor);
+		OldPen = SelectObject (CurView->hDC,LinePen);
+//		SetCurView (pViewports[CurTheme->TargetViewport-1]); //tempdebu
+	    SetViewport (CurTheme->TargetViewport);   
+	    BaseDistPerPixel = (CurView->WBounds.xmx - CurView->WBounds.xmn)/
+	    				   (CurView->DrawRect.right - CurView->DrawRect.left + 1);	
+	    BaseDistPerPixel = ConvertDist (BaseDistPerPixel,4);  
+//		SetCurView (pViewports[CurViewID-1]); //tempdebu
+	    SetViewport (CurViewID);
+	    MaxWidth = (CurView->DrawRect.right - CurView->DrawRect.left) * BaseDistPerPixel;
+	    reps = 0;
+	    if (MaxWidth > 1)            
+	    {   
+	    	step = 10.0;
+	    	while (MaxWidth > 1)
+	    	{
+	    		MaxWidth /= 10.0;
+	    		reps++;
+	    	}
+	    	IntVal = MaxWidth * 10;
+		    reps--;
+	    	if (IntVal > 1 || reps)
+	    		_fstrcpy (fmt," %.0f miles ");
+	    }
+	    else
+	    {   
+	    	step = 0.1;    
+	    	_fstrcpy (fmt," %.1f mile ");
+	    	while (MaxWidth < 1)
+	    	{
+	    		MaxWidth *= 10.0;
+	    		reps++;
+	    	} 
+	    	IntVal = MaxWidth; 
+	    	itoa (reps,str,10);
+	    	fmt[3] = *str;
+	    }
+	    MaxWidth = IntVal; 
+	    while (reps--)
+	    	MaxWidth *= step;
+	    BarWidth = MaxWidth;
+	    Points[0].y = (CurView->DrawRect.bottom + CurView->DrawRect.top) / 2;
+	    Points[0].x = (CurView->DrawRect.left + CurView->DrawRect.right) / 2; 
+	    Points[1].y = Points[0].y;
+	    Points[1].x = Points[0].x + IDNINT(BarWidth/(2 * BaseDistPerPixel));
+	    Polyline (CurView->hDC,Points,2);
+	    Points[2] = Points[1];  
+	    Points[2].x -= w;
+	    Points[2].y -= h;
+	    Polyline (CurView->hDC,&Points[1],2);
+	    Points[2].y += h*2;   
+	    Polyline (CurView->hDC,&Points[1],2);
+	    Points[1].x = Points[0].x - IDNINT(BarWidth/(2 * BaseDistPerPixel));
+	    Polyline (CurView->hDC,Points,2);
+	    Points[2] = Points[1];  
+	    Points[2].x += w;
+	    Points[2].y -= h;
+	    Polyline (CurView->hDC,&Points[1],2);
+	    Points[2].y += h*2;   
+	    Polyline (CurView->hDC,&Points[1],2); 
+	    sprintf (txt,fmt,BarWidth);
+		SelectObject (CurView->hDC,OldPen);
+		DeleteObject (LinePen);
+	}
+    SetBkMode(CurView->hDC, OPAQUE);  
+    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+	DispText (CurView->hDC,Points[0].x-10,Points[0].x+10, Points[0].y,0, 2,2,
+			  h*2+6,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL); 
+	RestoreDC (CurView->hDC,-1);
+	
+	return;
+}
+
+void DisplayHotSpotThemeLegend(short From)
+{    
+	short	CurViewID = CurView->ID, reps, h,w;    
+	double	BaseDistPerPixel, MaxWidth, BarWidth, step, TotDist,ThisDist;
+	POINT	Points[3];  
+	long	IntVal;  
+	char	txt[64], str[16], fmt[16]=" %.0f mile "; 
+	HPEN	OldPen, LinePen;
+	
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+    CurView->hRgn = CreateVPRgn(FALSE);
+    SelectClipRgn (CurView->hDC,CurView->hRgn);
+    DeleteObject(CurView->hRgn);    
+    SetTextColor (CurView->hDC,0);     
+	FillRectPoly (CurView->hDC,&CurView->DrawRect,CurView->BackGroundColor);  
+	h = (((CurView->DrawRect.bottom - CurView->DrawRect.top) / 2)-2*DeviceToScreenFactor);
+	w = (h+4*DeviceToScreenFactor);
+	if (From == 2)
+	{    
+		char	Units[32]="[%DIST_UNITS]";
+		
+		ExpandText (Units);
+		Points[0] = RectMid (&CurView->DrawRect); 
+		if (TotDist)
+		sprintf (txt,"%.1f (%.1f total) %s", ConvertDist(ThisDist,OutDistUnits),
+									ConvertDist(TotDist+ThisDist,OutDistUnits),Units); 
+		else
+		sprintf (txt,"%.1f %s", ConvertDist(ThisDist,OutDistUnits),Units); 
+	}
+	else
+	{
+		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),CurTheme->ScatterColor);
+		OldPen = SelectObject (CurView->hDC,LinePen);
+//		SetCurView (pViewports[CurTheme->TargetViewport-1]); //tempdebu
+	    SetViewport (CurTheme->TargetViewport);   
+	    BaseDistPerPixel = (CurView->WBounds.xmx - CurView->WBounds.xmn)/
+	    				   (CurView->DrawRect.right - CurView->DrawRect.left + 1);	
+	    BaseDistPerPixel = ConvertDist (BaseDistPerPixel,4);  
+//		SetCurView (pViewports[CurViewID-1]); //tempdebu
+	    SetViewport (CurViewID);
+	    MaxWidth = (CurView->DrawRect.right - CurView->DrawRect.left) * BaseDistPerPixel;
+	    reps = 0;
+	    if (MaxWidth > 1)            
+	    {   
+	    	step = 10.0;
+	    	while (MaxWidth > 1)
+	    	{
+	    		MaxWidth /= 10.0;
+	    		reps++;
+	    	}
+	    	IntVal = MaxWidth * 10;
+		    reps--;
+	    	if (IntVal > 1 || reps)
+	    		_fstrcpy (fmt," %.0f miles ");
+	    }
+	    else
+	    {   
+	    	step = 0.1;    
+	    	_fstrcpy (fmt," %.1f mile ");
+	    	while (MaxWidth < 1)
+	    	{
+	    		MaxWidth *= 10.0;
+	    		reps++;
+	    	} 
+	    	IntVal = MaxWidth; 
+	    	itoa (reps,str,10);
+	    	fmt[3] = *str;
+	    }
+	    MaxWidth = IntVal; 
+	    while (reps--)
+	    	MaxWidth *= step;
+	    BarWidth = MaxWidth;
+	    Points[0].y = (CurView->DrawRect.bottom + CurView->DrawRect.top) / 2;
+	    Points[0].x = (CurView->DrawRect.left + CurView->DrawRect.right) / 2; 
+	    Points[1].y = Points[0].y;
+	    Points[1].x = Points[0].x + IDNINT(BarWidth/(2 * BaseDistPerPixel));
+	    Polyline (CurView->hDC,Points,2);
+	    Points[2] = Points[1];  
+	    Points[2].x -= w;
+	    Points[2].y -= h;
+	    Polyline (CurView->hDC,&Points[1],2);
+	    Points[2].y += h*2;   
+	    Polyline (CurView->hDC,&Points[1],2);
+	    Points[1].x = Points[0].x - IDNINT(BarWidth/(2 * BaseDistPerPixel));
+	    Polyline (CurView->hDC,Points,2);
+	    Points[2] = Points[1];  
+	    Points[2].x += w;
+	    Points[2].y -= h;
+	    Polyline (CurView->hDC,&Points[1],2);
+	    Points[2].y += h*2;   
+	    Polyline (CurView->hDC,&Points[1],2); 
+	    sprintf (txt,fmt,BarWidth);
+		SelectObject (CurView->hDC,OldPen);
+		DeleteObject (LinePen);
+	}
+    SetBkMode(CurView->hDC, OPAQUE);  
+    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+	DispText (CurView->hDC,Points[0].x-10,Points[0].x+10, Points[0].y,0, 2,2,
+			  h*2+6,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL); 
+	RestoreDC (CurView->hDC,-1);
+	
+	return;
+}
+
+void DisplayProfileThemeLegend(void)
+{    
+	short	CurViewID = CurView->ID, reps, h,w;    
+	double	BaseDistPerPixel, MaxWidth, BarWidth, step;
+	POINT	Points[3];  
+	long	IntVal;  
+	char	txt[64], str[16], fmt[16]=" %.0f mile "; 
+	HPEN	OldPen, LinePen;  
+	HANDLE	hProfile, hProfileD, hPolyPoints, hRoute, hSurf, hTran;
+	long	nPolyPoints=0, nProfilePoints=256, nRoute=0;
+	HPDPOINT	pProfileD, pPoly, pRoute;
+	HPPOINT     pProfile;
+	LPPROFILETHEMEDATA	lpProfileData;   
+	HIGHLIGHTDATA	HighlightData,HighlightData1;
+	long	Seq, Refno; 
+	short	pos=BT_FIRST, cond=BT_EQ, IncID;
+	double	LenRoute, IncDist, Dist, ElevRange; 
+	MNMXCORD Bounds; 
+	DPOINT	Point, OpenEnd, Point1, Point2;
+	long	i=0, nGrid;  
+	RECT	ProfileRect; 
+	short	MaxXText=10, MaxYText=10;    
+	double	Ranges[5]={10,50,100,200,500}, MinElev, MaxElev, MinDist,d; 
+	double	RangeInc[5]={1,10,10,20,100};
+	short	nRanges=4;  
+	HPEN	hPen, hOldPen;
+	BOOL	Reverse=FALSE, HaveOpenEnd=FALSE;  
+	POINT	p, GridPoint[2];   
+	DWORD	TextExt;
+   	short np=0;  
+   	char	SurfName[128];  
+   	double	GridSpace=0;
+	
+	GetGlobalCVal ("[%DTMNAME]",SurfName,"[%DL]attribut\\ot1.dtm");
+	lpProfileData = (LPPROFILETHEMEDATA)&CurTheme->ClassBM;    
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+    CurView->hRgn = CreateVPRgn(FALSE);
+    SelectClipRgn (CurView->hDC,CurView->hRgn);
+    DeleteObject(CurView->hRgn);    
+    SetTextColor (CurView->hDC,0);     
+	FillRectPoly (CurView->hDC,&CurView->DrawRect,CurView->BackGroundColor);  
+	if (hHighlight && lpProfileData->MinSeq <= lpProfileData->MaxSeq)
+	{
+        hSurf = DTMOpen (SurfName,DBL_MAX,BT_READ);
+        if (!hSurf)
+        {
+        	goto Exit;
+        }
+        else
+        {
+        	LPDTMINFO	pDTMData=(LPDTMINFO)GlobalLock (hSurf); 
+        	GridSpace = pDTMData->GridSpace;
+        	GlobalUnlock (hSurf);
+		}
+		h = (((CurView->DrawRect.bottom - CurView->DrawRect.top) / 2)-2*DeviceToScreenFactor);
+		w = (h+4*DeviceToScreenFactor); 
+		Seq = lpProfileData->MinSeq; 
+		hRoute = GSSiGlobAlloc (GMEM_MOVEABLE,(long)4096*sizeof(DPOINT));
+	   	pRoute = (HPDPOINT)GlobalLock (hRoute);
+	    do 
+	    {
+	    	if (BT_FIND (hHighlight2,(LPSTR)&Seq,pos,cond,(LPSTR)&Refno))
+	    		goto EndRoute;
+			BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_EQ,(LPSTR)&HighlightData);
+			pos = BT_NEXT;
+			cond = BT_ANY;  
+			PickList[0]=HighlightData.PD; 
+			if (i || Seq == lpProfileData->MaxSeq)
+			{   
+				if (i && !HaveOpenEnd)
+				{
+					MinDist = ldistp (HighlightData1.PD.EndPoint,HighlightData.PD.BeginPoint);
+					d = ldistp (HighlightData1.PD.EndPoint,HighlightData.PD.EndPoint);
+					MinDist = min (d,MinDist);
+					d = min (ldistp (HighlightData1.PD.BeginPoint,HighlightData.PD.BeginPoint),
+							 ldistp (HighlightData1.PD.BeginPoint,HighlightData.PD.EndPoint));
+					if (d < MinDist)   
+					{
+						OpenEnd = HighlightData1.PD.BeginPoint;
+						Reverse = TRUE;
+					}
+					else
+						OpenEnd = HighlightData1.PD.EndPoint;
+			   		GetPolyPoints ((LPPICKDATAHEADER)&HighlightData1.PD,Reverse,&nPolyPoints,&hPolyPoints);
+			   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
+			   		while (nPolyPoints--)
+			   			pRoute[nRoute++] = *pPoly++;
+		   			GSSiGlobUlFree (&hPolyPoints); 
+		   			HaveOpenEnd = TRUE;
+				}
+				Reverse = FALSE;
+				if (HaveOpenEnd)
+				{
+					MinDist = ldistp (OpenEnd,HighlightData.PD.BeginPoint);
+					d = ldistp (OpenEnd,HighlightData.PD.EndPoint);
+					if (d < MinDist)
+					{
+						OpenEnd = HighlightData.PD.EndPoint;
+						Reverse = TRUE;
+					}
+					else
+						OpenEnd = HighlightData.PD.BeginPoint;
+				}
+		   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,Reverse,&nPolyPoints,&hPolyPoints))
+		   		{
+			   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
+			   		while (nPolyPoints--)
+			   			pRoute[nRoute++] = *pPoly++;
+		   			GSSiGlobUlFree (&hPolyPoints); 
+		   		}
+	   		} 
+	   		else
+	   		{
+	   			HighlightData1 = HighlightData;  
+	   			i++;
+	   		}
+   		} while (Seq < lpProfileData->MaxSeq);
+EndRoute: 
+		if (nRoute < 2 || !GridSpace)
+			goto Exit;
+		LenRoute = GetPolyLengthD (pRoute,nRoute);
+		nProfilePoints = 1 + min (CurView->DrawRect.right - CurView->DrawRect.left,LenRoute/GridSpace);
+		IncDist = LenRoute/(nProfilePoints-1);
+		hProfileD = GSSiGlobAlloc (GMEM_MOVEABLE,(long)nProfilePoints*sizeof(DPOINT));
+	   	pProfileD = (HPDPOINT)GlobalLock (hProfileD); 
+	   	Dist = 0; 
+	   	DBoundsInit (&Bounds);
+	   	for (i=0;i<nProfilePoints;i++)
+	   	{   
+	   		short	ii;
+	   		if (i==245)
+	   			ii=1;
+	   		Point = PointAtDistOnPoly (pRoute,nRoute,Dist);   
+	   		pProfileD->x = Dist;
+	   		pProfileD->y = NGIELV (Point,hSurf,1);
+	   		if (pProfileD->y < DBL_MAX)  
+				AddDPointToMinMax (pProfileD,&Bounds);  
+	   		pProfileD++;
+	   		Dist += IncDist;
+	   	}  
+	   	GlobalUnlock (hProfileD);  
+	   	GlobalUnlock (hRoute); 
+	   	ElevRange = Bounds.ymx - Bounds.ymn;
+	   	ElevRange = ConvertDist (ElevRange,1);
+	   	for (i=0;i<nRanges;i++)
+	   		if (ElevRange < Ranges[i])
+	   			break;
+	   	MinElev = Bounds.ymn * MFT;
+	   	MinElev -= fmod (MinElev,Ranges[i]);
+	   	MaxElev += Ranges[i];
+	   	MaxElev = Bounds.ymx * MFT;
+	   	MaxElev -= fmod (MaxElev,Ranges[i]);
+	   	MaxElev += Ranges[i];  
+	   	Bounds.ymn = MinElev * FTM;
+	   	Bounds.ymx = MaxElev * FTM; 
+	   	IncID = i;
+		nGrid = IDNINT((MaxElev - MinElev) / RangeInc[IncID]);
+
+
+	    sprintf (txt,"%.0f",MaxElev);
+	    h = 18*DeviceToScreenFactor;
+		TextExt = DispText (CurView->hDC,p.x-10,p.x+10, -1,0, 2,2,h,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL);
+		MaxXText = LOWORD(TextExt); 
+		MaxYText = HIWORD(TextExt);
+	    ProfileRect = CurView->DrawRect;
+	    InflateRect (&ProfileRect,-(MaxXText+4),-(MaxYText+4));  
+	    hTran = STRANBoundsToRect (&Bounds,&ProfileRect); 
+
+		DTMClose (&hSurf);
+		Point1.x = Bounds.xmn;
+		Point1.y = Bounds.ymn;
+		Point2.x = Bounds.xmx;
+		Point2.y = Bounds.ymn;
+		hPen = CreatePen (PS_DOT,1,RGB(255,0,0));
+		hOldPen = SelectObject (CurView->hDC,hPen);
+		for (i=0;i<=nGrid;i++)
+		{ 
+			GridPoint[0] = TRANDPointToPoint (Point1,hTran);
+			GridPoint[1] = TRANDPointToPoint (Point2,hTran);
+		    Polyline (CurView->hDC,GridPoint,2); 
+		    Point1.y += RangeInc[IncID] * FTM;
+		    Point2.y += RangeInc[IncID] * FTM;
+		} 
+		SelectObject (CurView->hDC,hOldPen); 
+		DeleteObject (hPen); 
+	    hProfile = GSSiGlobAlloc (GMEM_MOVEABLE,nProfilePoints*sizeof(POINT));
+	    pProfile = (HPPOINT)GlobalLock (hProfile);
+	   	pProfileD = (HPDPOINT)GlobalLock (hProfileD); 
+	   	for (i=0;i<nProfilePoints;i++)
+	   	{
+	   		if (pProfileD[i].y < DBL_MAX)
+	   		{ 
+		     	pProfile[np++] = TRANDPointToPoint (pProfileD[i],hTran);  
+		    }
+		    else if (np > 1)
+		    {
+		    	Polyline (CurView->hDC,pProfile,np);
+		    	np =0;  
+		    }
+		    else
+		    	np = 0;
+	    }
+	    if (np > 1)
+	    	Polyline (CurView->hDC,pProfile,np);
+	    GSSiGlobUlFree (&CurView->hProfileElev);
+	    CurView->hProfileElev = hProfileD;  
+	    CurView->nProfileElev = nProfilePoints;
+	    GSSiGlobUlFree (&hProfile);  
+	    CurView->LinkedTo = CurTheme->TargetViewport;   
+	    CloseTRANS2 (&hTran);
+	    CloseTRANS2 (&CurView->hFileTransIn);    
+	    
+	    SetTextColor (CurView->hDC,0); 
+	    p.y = ProfileRect.bottom;
+	    sprintf (txt,"%.0f",MinElev);
+	    p.x = ProfileRect.right + 2;
+		DispText (CurView->hDC,p.x,p.x, p.y,0, 1,2,h,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL);
+	    p.x = ProfileRect.left - 2;
+		DispText (CurView->hDC,p.x,p.x, p.y,0, 4,2,h,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL);
+	    p.y = ProfileRect.top;
+	    sprintf (txt,"%.0f",MaxElev);
+	    p.x = ProfileRect.right + 2;
+		DispText (CurView->hDC,p.x,p.x, p.y,0, 1,2,h,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL);
+	    p.x = ProfileRect.left - 2;
+		DispText (CurView->hDC,p.x,p.x, p.y,0, 4,2,h,2, FALSE,0,txt,0,FALSE,0,0,-1,0,NULL);
+	    
+	    
+	    CurView->hFileTransIn = STRANRectToBounds (&ProfileRect,&Bounds); 
+	    GSSiGlobUlFree (&CurView->hProfileRoute);
+	    CurView->hProfileRoute = hRoute;  
+	    CurView->nProfileRoute = nRoute;
+	} 
+	else
+		CurView->LinkedTo = 0; 
+Exit:
+	RestoreDC (CurView->hDC,-1);
+	
+	return;
+}
+
+HANDLE ExpandThemeValues (HANDLE hBT)
+{   
+	HANDLE	hBTNew;       
+	char	Name[144], Value[256], NewValue[130];
+	short	iclass, pos=BT_FIRST;
+	
+	GetTempFileName (NULL,"thm",NULL,(LPSTR)Name);
+	hBTNew = CreateUniqueList (128,Name);
+    
+    while (!BT_FIND (hBT,Value,pos,BT_ANY,(LPSTR)&iclass))
+    {
+    	pos = BT_NEXT;  
+    	ExpandText (Value);  
+    	_fstrncpy (NewValue,Value,128);
+    	BT_PUT (hBTNew,NewValue,(LPSTR)&iclass);
+    } 
+    BT_CLOSE (hBT);
+	return hBTNew;
+}
+
+BOOL BeginThemePCTByArea (void)
+{   
+	UINT	iclass;
+	
+	if (!CurTheme)
+		return FALSE;
+	if (!CurTheme->PCTByArea)
+		return FALSE;
+//	if (Printing || CurTheme->PCTDisplayCycle == DisplayCycle)
+	if (CurTheme->PCTDisplayCycle == DisplayCycle)
+		return FALSE; 
+	if (!Printing)
+		CurTheme->NumNonMask = 0;
+	for (iclass=0;iclass<MAX_THEME_CLASSES;iclass++) 
+	{   
+		if (!SaveColorsInUse)
+			SaveClassColor[iclass] = CurTheme->ClassColor[iclass];
+		CurTheme->ClassColor[iclass] = RGB (16*(iclass+2),0,0); 
+		if (!Printing)
+			CurTheme->ClassCount[iclass] = 0;                      
+	}
+	SaveColorsInUse = TRUE;
+	return TRUE;
+}
+
+BOOL ComputeThemePCTByArea (BOOL CloseAll)
+{   
+	COLORREF	Color;   
+	UINT	x,y,iclass;
+   	HCURSOR	hcurSave; 
+	 
+	if (!CurTheme)
+		return FALSE;
+	if (!CurTheme->PCTByArea)
+		return FALSE;
+	if (CloseAll)
+	{
+		ComputePCTTheme=0;
+		return FALSE;           
+	}
+//	if (Printing || CurTheme->PCTDisplayCycle == DisplayCycle)
+	if (CurTheme->PCTDisplayCycle == DisplayCycle)
+		return FALSE;
+	
+	CurTheme->PCTDisplayCycle = DisplayCycle;
+	
+	if (!Printing)
+	{
+		if (!CurView->hMaskArea)
+		{   
+			MaskRect = CurView->DrawRect;
+		}
+		if (!PrintMsgWnd)
+		{	
+			hCursor =  LoadCursor(NULL, IDC_WAIT);
+			hcurSave = GSSiSetCursor(hCursor); 
+		}
+	    SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+		y = MaskRect.top;
+		while (y <= MaskRect.bottom)
+		{
+			x = MaskRect.left;
+			while (x <= MaskRect.right)
+			{   
+				Color = GetPixel (CurView->hDC,x,y);
+				if (Color != ComputePCTMaskColor)
+				{
+					CurTheme->NumNonMask++;
+					for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+					{
+						if (Color == CurTheme->ClassColor[iclass])
+						{   
+							CurTheme->ClassCount[iclass]++;
+							break;
+						}
+					}
+				}				
+				x++;
+			}
+			y++;
+		}
+	}
+	for (iclass=0;iclass<MAX_THEME_CLASSES;iclass++) 
+		CurTheme->ClassColor[iclass] = SaveClassColor[iclass]; 
+	SaveColorsInUse = FALSE; 
+	if (!PrintMsgWnd)
+	{
+		hCursor = hcurSave;
+		GSSiSetCursor(hCursor);
+	}	
+	return TRUE;
+} 
+   
+void Display2DThemeLegend (short From)
+{   int		xmargin, ymargin;
+	long	h, w;
+	int		width, x, y, fHeight, MaxTextWidth, twidth, i, j;
+	HBRUSH	BkBrush;
+	int		iclass;
+	RECT	ClassColorBox;
+	HFONT	hfont, hfontOld=0, hfont2;
+	DWORD	TextExtent;
+	char	Text[256], Title[256];
+	char	Val1[32], Val2[32];
+	long	TotCount;
+	float	Pct;
+	int		MinFontHeight=2, left,right, tWidth;
+	int		inc;
+	LPSTR	lpText;
+	char	lpLine[256];  
+	long	Counts[MAX_THEME_CLASSES][MAX_THEME_CLASSES], nMax;
+	HANDLE	hBTX, hBTY;
+	LPTHEME	pThemeX, pThemeY, SaveTheme=CurTheme;
+	short	nClassX, nClassY, VPNumX=CurTheme->DataFileType, VPNumY=CurTheme->DataType;
+	short	pos=BT_FIRST, cval; 
+	COLORREF	Color;
+	THEMEHIGHLIGHTKEY	ThemeHighlightKeyX,ThemeHighlightKeyY;
+	THEMEHIGHLIGHTDATA	ThemeHighlightData;    
+	double	xinc, yinc;
+	RECT	Rect=CurView->Rect;  
+	HCURSOR	hcurSave;
+    
+    SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+  	SelectClipRgn (CurView->hDC,NULL);
+	InflateRect (&Rect,1,1);
+    FillRectPoly (CurView->hDC,&Rect,WindowColor);
+    if (From < 2)
+    	goto Exit;
+    pThemeX = pViewports[VPNumX]->pTheme;
+    pThemeY = pViewports[VPNumY]->pTheme;
+    if (!pThemeX || !pThemeY)
+    	goto Exit;  
+    CurTheme = pThemeX;
+	if (!OpenThemeHighlightFile (BT_READ))
+	{
+		CurTheme = SaveTheme;
+		goto Exit;
+	}
+    hBTX = CurTheme->hHighlightFile;
+    CurTheme = pThemeY;
+	if (!OpenThemeHighlightFile (BT_READ))
+	{   
+	    CurTheme = pThemeX;
+		CloseThemeHighlightFile ();
+		CurTheme = SaveTheme;
+		goto Exit;
+	}
+    hBTY = CurTheme->hHighlightFile;
+	CurTheme = SaveTheme;
+    nClassX = pThemeX->NumClass;
+    nClassY = pThemeY->NumClass; 
+    if (!hBTX || !hBTY || !nClassX || !nClassY)
+    	goto Exit; 
+	hCursor =  LoadCursor(NULL, IDC_WAIT);
+	hcurSave = GSSiSetCursor(hCursor); 
+    _fmemset (Counts,0,MAX_THEME_CLASSES*MAX_THEME_CLASSES*sizeof(long));
+	while (!BT_FIND (hBTX,(LPSTR)&ThemeHighlightKeyX,pos,BT_ANY,(LPSTR)&ThemeHighlightData))
+    {   
+    	pos = BT_NEXT; 
+    	if (ThemeHighlightKeyX.Class > -1)  
+    	{
+    		for (iclass=0;iclass<nClassY;iclass++)
+    		{   
+    			ThemeHighlightKeyY.Class = iclass;
+    			ThemeHighlightKeyY.Refno = ThemeHighlightKeyX.Refno;
+    			if (!BT_FIND (hBTY,(LPSTR)&ThemeHighlightKeyY,BT_FIRST,BT_EQ,(LPSTR)&ThemeHighlightData)) 
+    			{ 
+    				Counts[ThemeHighlightKeyX.Class][ThemeHighlightKeyY.Class]++;
+    				continue;
+    			}
+    		}
+    	}
+    }  
+	hCursor = hcurSave;
+	GSSiSetCursor(hCursor);
+    CurTheme = pThemeX;
+	CloseThemeHighlightFile ();
+    CurTheme = pThemeY;
+	CloseThemeHighlightFile ();
+	CurTheme = SaveTheme;
+    
+    _fstrcpy (Title,CurTheme->Title);
+    ExpandText (Title);
+    
+    SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+  	SelectClipRgn (CurView->hDC,NULL);
+	CurTheme->Rect=PctRect (CurView->DrawRect,-CurTheme->Margin);
+	xmargin = (((long)CurTheme->Rect.right - CurTheme->Rect.left) * CurTheme->InnerMargin) / 100;
+	ymargin = (((long)CurTheme->Rect.bottom - CurTheme->Rect.top) * CurTheme->InnerMargin) / 100;
+	h = (((long)CurTheme->Rect.bottom - CurTheme->Rect.top) * CurTheme->TitleHeight) / 100;
+	CurTheme->TitleBox.top = CurTheme->Rect.top + ymargin;
+	CurTheme->TitleBox.bottom = CurTheme->TitleBox.top + h;
+	CurTheme->TitleBox.left = CurTheme->Rect.left + xmargin;
+	CurTheme->TitleBox.right = CurTheme->Rect.right - xmargin;
+	CurTheme->InfoBox.top = CurTheme->TitleBox.bottom + ymargin;
+	CurTheme->InfoBox.bottom = CurTheme->Rect.bottom - ymargin;
+	CurTheme->InfoBox.left = CurTheme->Rect.left + xmargin;
+	CurTheme->InfoBox.right = CurTheme->Rect.right - ymargin;
+	CurTheme->ScatterBox = CurTheme->InfoBox;
+	CurTheme->ScatterBox.right = CurTheme->InfoBox.right;
+
+	FillRectPoly (CurView->hDC,&CurTheme->Rect,CurTheme->BGColor);
+	FillRectPoly (CurView->hDC,&CurTheme->InfoBox,RGB(255,255,255));
+	FillRectPoly (CurView->hDC,&CurTheme->TitleBox,CurTheme->TitleBoxBG);
+
+	width = CurTheme->TitleBox.right - CurTheme->TitleBox.left;
+	fHeight = CurTheme->TitleHeight+1;
+	twidth = INT_MAX;
+	while (twidth>width && fHeight>2)
+	{   
+		fHeight--;
+		CurTheme->TitleFont.lfHeight = -MulDiv(fHeight,
+											   GetDeviceCaps(CurView->hDC, LOGPIXELSY), 72);
+		hfont = CreateFontIndirect((PLOGFONT)&CurTheme->TitleFont);
+		hfontOld = SelectObject(CurView->hDC, hfont);
+		TextExtent = GetTextExtent (CurView->hDC,Title,_fstrlen(Title));
+		lpText = Title;
+		twidth = 0;	
+	    while (NextLine (&lpText,lpLine))
+	    {
+			TextExtent = GetTextExtent (CurView->hDC,lpLine,_fstrlen(lpLine));
+			twidth = max (twidth,LOWORD (TextExtent));
+		}  
+		SelectObject(CurView->hDC, hfontOld); 
+		DeleteObject(hfont);
+	}
+	x = CurTheme->TitleBox.left + ((CurTheme->TitleBox.right - CurTheme->TitleBox.left) - twidth)/2;
+	CurTheme->TitleFont.lfHeight = -MulDiv(CurTheme->TitleHeight-2,
+										   GetDeviceCaps(CurView->hDC, LOGPIXELSY), 72);
+	hfont = CreateFontIndirect((PLOGFONT)&CurTheme->TitleFont);
+	hfontOld = SelectObject(CurView->hDC, hfont); 
+
+    SetTextColor (CurView->hDC,0); 
+	lpText = Title;	
+	y = CurTheme->TitleBox.top + 1;
+    while (NextLine (&lpText,lpLine))
+    {
+		TextExtent = GetTextExtent (CurView->hDC,lpLine,_fstrlen(lpLine));
+		width = LOWORD (TextExtent);
+		x = CurTheme->TitleBox.left + ((CurTheme->TitleBox.right - CurTheme->TitleBox.left) - width)/2;
+		TextOut(CurView->hDC, x, y, lpLine,_fstrlen(lpLine));  
+		y+= HIWORD (TextExtent);
+	}
+	SelectObject(CurView->hDC, hfontOld); 
+	DeleteObject(hfont);
+    
+    nMax = 0;
+    for (i=0;i<nClassX;i++)
+    	for (j=0;j<nClassY;j++)
+    		nMax = max (nMax,Counts[i][j]); 
+    if (!nMax)
+    	goto Exit;
+	xinc = ((double)CurTheme->InfoBox.right - CurTheme->InfoBox.left)/nClassX;
+	yinc = ((double)CurTheme->InfoBox.bottom - CurTheme->InfoBox.top)/nClassY;
+    for (i=0;i<nClassX;i++)
+    {
+    	for (j=0;j<nClassY;j++)
+    	{
+			ClassColorBox.left = IDNINT (CurTheme->InfoBox.left + xinc * i);
+			ClassColorBox.right = IDNINT (CurTheme->InfoBox.left + xinc * (i+1));
+			ClassColorBox.bottom = IDNINT (CurTheme->InfoBox.bottom - yinc * j);
+			ClassColorBox.top = IDNINT (CurTheme->InfoBox.bottom - yinc * (j+1)); 
+			cval = ((nMax-Counts[i][j]) * 255) / nMax;
+			Color = RGB(cval,cval,cval); 
+			FillRectPoly (CurView->hDC,&ClassColorBox,Color); 
+			if (CurTheme->DisplayCount)
+			{
+			    SetBkMode(CurView->hDC, TRANSPARENT);  
+				CurTheme->ClassFont2.lfHeight = -(ClassColorBox.bottom - ClassColorBox.top - 2* DeviceToScreenFactor); 
+				hfont2 = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont2);
+		        hfontOld = SelectObject(CurView->hDC, hfont2);
+				sprintf (Text,"%ld",Counts[i][j]); 
+				TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+				width = LOWORD (TextExtent);
+				x = ClassColorBox.left + ((ClassColorBox.right - ClassColorBox.left) - width)/2; 
+				y = ClassColorBox.top + 1* DeviceToScreenFactor; 
+				if (cval >150)
+				    SetTextColor (CurView->hDC,0); 
+				else
+				    SetTextColor (CurView->hDC,RGB(255,255,255));  
+				TextOut(CurView->hDC, x, y, Text,_fstrlen(Text)); 
+				SelectObject(CurView->hDC, hfontOld); 
+				DeleteObject(hfont2);
+			}
+    	}
+    }
+    SetTextColor (CurView->hDC,0); 
+	fHeight = 12 * DeviceToScreenFactor; 
+	CurTheme->ClassFont1.lfHeight = fHeight;
+	hfont = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont1);
+	hfontOld = SelectObject(CurView->hDC, hfont);
+	y = ClassColorBox.top - 2*yinc/3 - 2;
+    for (i=0;i<nClassX;i++)
+    {   
+    	LPSTR	pPar;
+    	 
+    	_fstrcpy (Text,pThemeX->ClassBM[i]);
+    	if ((pPar=_fstrrchr (Text,'(')))
+    		*pPar = 0;
+		left = IDNINT (CurTheme->InfoBox.left + xinc * i);
+		right = IDNINT (CurTheme->InfoBox.left + xinc * (i+1));
+       	TextExtent = GetTextExtent (CurView->hDC,Text,_fstrlen(Text));
+       	tWidth = LOWORD (TextExtent); 
+       	x = (left + right) / 2 - tWidth/2;
+		TextOut(CurView->hDC, x,y,Text,_fstrlen(Text));
+    }
+	SelectObject(CurView->hDC, hfontOld);
+	DeleteObject(hfont); 
+Exit:
+	RestoreDC (CurView->hDC,-1);
+	return;
+}  
+
+BOOL FAR PASCAL DISPLAY2DMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	HWND	hCheckBox;
+	RECT	rect;
+	HDC		hDC;
+	char	str[256], names[84], *ptr;
+	int	Choice,i;
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+    	SetDlgItemText(hWndDlg,SV_TITLE,(LPSTR)&CurTheme->Title);
+        i=SendDlgItemMessage (hWndDlg,SV_TARGET,CB_RESETCONTENT,NULL,NULL);
+		for (i=0;i<NumViewports;i++)
+		{
+			SendDlgItemMessage (hWndDlg,SV_VP_NAME1,CB_ADDSTRING,NULL,(LPARAM)pViewports[i]->Name);
+			SendDlgItemMessage (hWndDlg,SV_VP_NAME2,CB_ADDSTRING,NULL,(LPARAM)pViewports[i]->Name);
+		}
+		SendDlgItemMessage (hWndDlg,SV_VP_NAME1,CB_SETCURSEL,CurTheme->DataFileType,NULL);
+		SendDlgItemMessage (hWndDlg,SV_VP_NAME2,CB_SETCURSEL,CurTheme->DataType,NULL);
+       	SendDlgItemMessage (hWndDlg,SV_DISPLAY_COUNT,BM_SETCHECK,CurTheme->DisplayCount,0L);
+       	SendDlgItemMessage (hWndDlg,IDC_SETCOLOR,BM_SETCHECK,(!CurTheme->NotSetColor),0L);   
+
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 CloseThemeDataFile(TRUE);
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_SAVE_THEME:  
+            case IDOK:
+       	 		 GetDlgItemText (hWndDlg,SV_TITLE,CurTheme->Title,256);
+                 CurTheme->DataFileType=SendDlgItemMessage(hWndDlg,SV_VP_NAME1, CB_GETCURSEL,NULL,NULL);
+                 CurTheme->DataType=SendDlgItemMessage(hWndDlg,SV_VP_NAME2, CB_GETCURSEL,NULL,NULL);
+            	 CurTheme->DisplayCount = SendDlgItemMessage (hWndDlg,SV_DISPLAY_COUNT,BM_GETCHECK,0,0L);  
+            	 CurTheme->NotSetColor = !SendDlgItemMessage (hWndDlg,IDC_SETCOLOR,BM_GETCHECK,0,0L);  
+            	 if (wParam == IDC_SAVE_THEME)
+            	 	SaveCurTheme(hWndDlg);
+            	 else
+                 	EndDialog(hWndDlg, TRUE);
+                 break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+
+BOOL ThemeCommonCode (HWND hWndDlg, WORD Message, WORD wParam, LONG lParam, HANDLE hSQL)
+{
+	int	idesc, i, n;
+	LPVIEWPORT	SaveView;
+	COLORREF	Color;  
+	char		Contents[36];
+	
+ switch(Message)
+   { 
+   
+//    case GSSI_REINITDIALOG: 12/6/99 causing contents to reset in streetnametheme
+    case WM_INITDIALOG: 
+    	if (CurTheme->SymNum > 0)
+    	{   
+       		LPVIEWPORT	SaveView=CurView;
+       		
+       		if (CurTheme->TargetViewport && CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
+	    		SetCurView (pViewports[CurTheme->TargetViewport-1]);
+			GetSymbolName (CurTheme->SymNum,Contents,NULL,0,NULL);
+			SetCurView (SaveView);
+   			SetDlgItemText(hWndDlg,SV_CONTENTS_LIST,Contents);
+    	}
+    	else 
+   			SetDlgItemText(hWndDlg,SV_CONTENTS_LIST,CurTheme->Contents);
+
+        i=SendDlgItemMessage (hWndDlg,SV_TARGET,CB_RESETCONTENT,NULL,NULL);
+		for (i=0;i<NumViewports;i++)
+		{
+			SendDlgItemMessage (hWndDlg,SV_TARGET,CB_ADDSTRING,NULL,
+								(LPARAM)pViewports[i]->Name);
+		}
+		SendDlgItemMessage (hWndDlg,SV_TARGET,CB_SETCURSEL,
+							CurTheme->TargetViewport-1,NULL);
+       	SendDlgItemMessage (hWndDlg,SV_DISPLAY_DIST,BM_SETCHECK,CurTheme->DisplayDistance,0L);
+       	SendDlgItemMessage (hWndDlg,SV_DISPLAY_PCT,BM_SETCHECK,CurTheme->DisplayPCT,0L);
+       	SendDlgItemMessage (hWndDlg,SV_DISPLAY_COUNT,BM_SETCHECK,CurTheme->DisplayCount,0L);
+       	SendDlgItemMessage (hWndDlg,SV_APPEND_COUNT,BM_SETCHECK,CurTheme->AppendCount,0L);
+       	SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_SETCHECK,CurTheme->PCTByArea,0L);
+       	SendDlgItemMessage (hWndDlg,SV_INVERT,BM_SETCHECK,CurTheme->InvertLegend,0L);
+       	SendDlgItemMessage (hWndDlg,SV_FLIP,BM_SETCHECK,CurTheme->FlipLegend,0L);
+       	SendDlgItemMessage (hWndDlg,SV_FACTOR,BM_SETCHECK,CurTheme->FactorLegend,0L);   
+       	SendDlgItemMessage (hWndDlg,SV_HIDENULLCLASSES,BM_SETCHECK,CurTheme->HideNullClasses,0L);   
+       	SendDlgItemMessage (hWndDlg,SV_COMPRESSNULLCLASSES,BM_SETCHECK,CurTheme->CompressNullClasses,0L);   
+       	
+       	SendDlgItemMessage (hWndDlg,IDC_SETCOLOR,BM_SETCHECK,(!CurTheme->NotSetColor),0L);   
+       	
+		return FALSE;
+	   
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case SV_TARGET:
+              switch(HIWORD(lParam))
+              {
+               case CBN_DBLCLK:
+               case CBN_SELCHANGE:
+               {
+               		LPVIEWPORT	SaveView;
+               		short	n,i;
+            
+		    		if (CurTheme->TargetViewport)
+		    		{
+			    		SaveView = CurView; 
+			    		SetCurView (pViewports[CurTheme->TargetViewport-1]);
+			    		for (i=0,n=0;i<CurView->NumThemes;i++)
+			    		{
+			    			if (CurView->pThemes[i]!=CurTheme)
+			    				CurView->pThemes[n++]=CurView->pThemes[i];
+			    		}	
+			    		CurView->NumThemes=n;
+			    		SetCurView (SaveView);
+			    	}  
+			    }
+		           break;  
+		      }    		  		    
+              break;
+            
+            case SV_CONTENTS_LIST:
+               { 
+              	switch(HIWORD(lParam))
+                {
+	                 case CBN_DROPDOWN:
+	                 {
+	                 	short	idesc, iparent, i, j;
+                	    LPSTR	pTAGList;  
+                	    HANDLE	hPar=GSSiGlobAlloc (GMEM_MOVEABLE,4096);
+                	    short	nPar=0;
+                	    LPSHORT	pPar, pPar2; 
+                	    char	str[64], SymbolName[34];
+                	    BOOL	IsPar;  
+                	    LPVIEWPORT	SaveVP=CurView;
+	                 	 
+		                CurTheme->TargetViewport=SendDlgItemMessage(hWndDlg,SV_TARGET,
+											       CB_GETCURSEL,NULL,NULL)+1;
+			            SendDlgItemMessage (hWndDlg,SV_CONTENTS_LIST,CB_RESETCONTENT,NULL,NULL); 
+			            if (!CurTheme->TargetViewport) break;
+			            
+			            if (CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
+			            { 
+				            SetViewport (CurTheme->TargetViewport);
+				            SelectVisList (FALSE);
+				        }
+		        		//GetVisList (hWndDlg,0,-SV_CONTENTS_LIST,0,-1);
+	 	                //SendDlgItemMessage (hWndDlg,SV_CONTENTS_LIST,CB_ADDSTRING,NULL,(LPARAM)((LPSTR) "(ALL)"));
+				    	for (idesc=1;idesc<3201;idesc++) 
+				    	{
+							if (CurView->CurVisType[idesc])
+							{   char	SymbolName[34];
+							
+								GetSymbolName (idesc,SymbolName,&iparent,0,&IsPar);
+								if (SymbolName[0] && !IsPar)
+								{
+			 	                	SendDlgItemMessage (hWndDlg,SV_CONTENTS_LIST,CB_ADDSTRING,NULL,(LPARAM)((LPSTR) SymbolName));
+			 	                	pPar = (LPSHORT)GlobalLock (hPar);
+			 	                	for (i=0;i<nPar;i++,pPar++)
+			 	                		if (iparent == *pPar)
+			 	                			goto GotPar;
+			 	                	*pPar = iparent;
+			 	                	nPar++;
+			 	            GotPar: GlobalUnlock (hPar);  
+			 	                }
+		 	                }
+						}     
+ 	                	pPar = (LPSHORT)GlobalLock (hPar);
+ 	                	for (i=0;i<nPar;i++,pPar++)
+ 	                	{
+							GetSymbolName (*pPar,SymbolName,&iparent,0,NULL);
+							if (SymbolName[0])
+							{   
+								sprintf (str,"(%s)",SymbolName);
+			 	                SendDlgItemMessage (hWndDlg,SV_CONTENTS_LIST,CB_ADDSTRING,NULL,(LPARAM)((LPSTR)str));
+		 	                	pPar2 = (LPSHORT)GlobalLock (hPar);
+		 	                	for (j=0;j<nPar;j++,pPar2++)
+		 	                		if (iparent == *pPar2)
+		 	                			goto GotPar2;
+		 	                	*pPar2 = iparent;
+		 	                	nPar++;
+		 	            GotPar2: GlobalUnlock (hPar); 
+		 	                }
+		 	            } 
+ 	            		GSSiGlobUlFree (&hPar);
+                	    
+                	    if (CurView->hTAGList)
+                	    {
+							pTAGList = GlobalLock(CurView->hTAGList);
+							while (*pTAGList)
+							{   
+								char	tag[16];
+								
+								sprintf (tag,"-%s",pTAGList);
+		 	               		SendDlgItemMessage (hWndDlg,SV_CONTENTS_LIST,CB_ADDSTRING,NULL,(LPARAM)((LPSTR)tag));
+								pTAGList+=10;
+							}
+							GlobalUnlock (CurView->hTAGList);
+						}
+                        SetCurView (SaveVP);
+					}
+				    break; 
+				}
+                break;
+               }
+            
+           	case IDC_BGCOLOR: 
+           		 Color = CurTheme->BGColor; 
+            	 if (GetColor(hWndDlg,&Color))
+            	 	CurTheme->BGColor = Color;
+           		 break;
+                 
+           	case IDC_VALBGCOLOR:
+           		 Color = CurTheme->IBBGColor;  
+            	 if (GetColor(hWndDlg,&Color))
+            	 	CurTheme->IBBGColor = Color;
+           		 break;
+                 
+           	case IDC_TITBGCOLOR:  
+           		 Color = CurTheme->TitleBoxBG;
+            	 if (GetColor(hWndDlg,&Color))
+            	 	CurTheme->TitleBoxBG = Color;
+           		 break;
+                 
+            case IDC_TITLEFONT:
+            	 CurTheme->TitleFont.lfHeight = 10;
+            	 GetFont (hWndDlg, &CurTheme->TitleFont, &CurTheme->TitleTextColor);
+            	 break;
+            	 
+            case IDC_VALUEFONT:  
+            	 CurTheme->ClassFont1.lfHeight = 10;
+            	 GetFont (hWndDlg, &CurTheme->ClassFont1, &CurTheme->IBTextColor[0]); 
+            	 break;
+            	      
+            case IDC_PCTFONT:  
+            	 CurTheme->ClassFont2.lfHeight = 10;
+            	 GetFont (hWndDlg, &CurTheme->ClassFont2, &CurTheme->IBTextColor[1]); 
+            	 break;
+            	      
+            case IDC_SETSQL:      
+            {    
+                 HANDLE hMem;
+                 LPSTR  lpStr;
+                 
+                 hMem = GSSiGlobAlloc (GHND,4096);
+                 lpStr = GlobalLock (hMem); 
+                 GetDlgItemText (hWndDlg,IDC_SQL,lpStr,1024);
+                 if (GetSQLWhereClause (hWndDlg, hSQL, lpStr))
+                 	SetDlgItemText (hWndDlg,IDC_SQL,lpStr);    
+                 GSSiGlobUlFree (&hMem);
+                 break;
+            }
+            case IDC_LOAD_THEME:  
+            {
+            	HFILE	Fid;  
+            	char	File[128]=""; 
+            	OFSTRUCT	OFStruct;
+            	LPTHEME	NewTheme; 
+            	short	i,n;
+            	LPVIEWPORT	SaveView;
+            	
+             	 _fstrcpy (gszFilter,"GeoMaster Themes(*.thm)|*.THM|");
+				 if (GetFileName3(hWndDlg,File,0,IDS_FILETHM))
+				 {   
+					 Fid = GSSiOpenFile (File,(LPOFSTRUCT)&OFStruct,OF_READ); 
+					 ReadObject (Fid,TRUE,&NewTheme,0); 
+					 GSSiClose (Fid);
+
+					if (CurView->pTheme)
+					{   
+						CurTheme = CurView->pTheme;
+			    		SaveView = CurView;
+			    		SetCurView (pViewports[CurTheme->TargetViewport-1]);
+			    		for (i=0,n=0;i<CurView->NumThemes;i++)
+			    		{
+			    			if (CurView->pThemes[i]!=CurTheme)
+			    				CurView->pThemes[n++]=CurView->pThemes[i];
+			    		}	
+			    		CurView->NumThemes=n;
+			    		SetCurView (SaveView);
+			   	    	CloseObject (CurView->pTheme);
+			   	    } 
+                     CurTheme = NewTheme;
+                     CurView->pTheme = NewTheme;
+				 	 if (CurTheme->TargetViewport > NumViewports) 
+				 	 	CurTheme->TargetViewport = 1; 
+				 	 if (pViewports[CurTheme->TargetViewport-1]->NumThemes)
+	    		 	 	pViewports[CurTheme->TargetViewport-1]->NumThemes--;
+					 CurTheme->IsActive=FALSE;
+	                 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
+				 }
+			}
+            	 break;
+            	 
+            case IDC_SAVE_THEME:  
+ 
+            case IDOK: 
+                 CurTheme->TargetViewport=SendDlgItemMessage(hWndDlg,SV_TARGET,
+									       CB_GETCURSEL,NULL,NULL)+1;  
+	             CurTheme->DisplayViewport = CurView->ID;
+	    		 SaveView = CurView;
+            	 CurTheme->DisplayDistance = SendDlgItemMessage (hWndDlg,SV_DISPLAY_DIST,BM_GETCHECK,0,0L);  
+            	 CurTheme->DisplayCount = SendDlgItemMessage (hWndDlg,SV_DISPLAY_COUNT,BM_GETCHECK,0,0L);  
+            	 CurTheme->AppendCount = SendDlgItemMessage (hWndDlg,SV_APPEND_COUNT,BM_GETCHECK,0,0L);  
+            	 CurTheme->DisplayPCT = SendDlgItemMessage (hWndDlg,SV_DISPLAY_PCT,BM_GETCHECK,0,0L);  
+            	 CurTheme->PCTByArea = SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_GETCHECK,0,0L);  
+            	 CurTheme->InvertLegend = SendDlgItemMessage (hWndDlg,SV_INVERT,BM_GETCHECK,0,0L);  
+            	 CurTheme->FlipLegend = SendDlgItemMessage (hWndDlg,SV_FLIP,BM_GETCHECK,0,0L);  
+            	 CurTheme->FactorLegend = SendDlgItemMessage (hWndDlg,SV_FACTOR,BM_GETCHECK,0,0L);  
+            	 CurTheme->NotSetColor = !SendDlgItemMessage (hWndDlg,IDC_SETCOLOR,BM_GETCHECK,0,0L);  
+            	 CurTheme->HideNullClasses = SendDlgItemMessage (hWndDlg,SV_HIDENULLCLASSES,BM_GETCHECK,0,0L);  
+            	 CurTheme->CompressNullClasses = SendDlgItemMessage (hWndDlg,SV_COMPRESSNULLCLASSES,BM_GETCHECK,0,0L);  
+ 	    		 SetCurView (pViewports[CurTheme->TargetViewport-1]);
+	    		 for (i=0,n=0;i<CurView->NumThemes;i++)
+	    		 { 
+	    			if (CurView->pThemes[i]==CurTheme)
+	    				n++;
+	    		 }
+	    		 if (!n)
+    				CurView->pThemes[CurView->NumThemes++]=CurTheme;
+	    		 SetCurView (SaveView);
+				 GetDlgItemText (hWndDlg,SV_CONTENTS_LIST,Contents,34);
+				 
+				 if (Contents[0] == '-')
+				 {
+				 	_fstrncpy (CurTheme->Contents,Contents,9);
+				 	CurTheme->Contents[9]=0;
+				 	CurTheme->SymNum = -1;  
+				 }
+				 else if (Contents[0] == '$')
+				 {
+				 	_fstrncpy (CurTheme->Contents,Contents,9);
+				 	CurTheme->Contents[9]=0;
+				 	CurTheme->SymNum = -2;  
+				 }
+				 else if (!_fstricmp (Contents,"(ALL)"))
+				 {
+				 	_fstrncpy (CurTheme->Contents,Contents,9);
+				 	CurTheme->SymNum = 0;  
+				 }
+				 else
+				 {   
+				 	LPSTR	lpContents=Contents;
+				 	if (CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
+						SetViewport (CurTheme->TargetViewport);
+					if (*lpContents == '(')
+					{
+					 	LPSTR	lpEnd;
+					 	
+					 	lpEnd = _fstrchr (Contents,0);
+					 	lpEnd--;
+					 	if (*lpEnd == ')')
+					 	{
+					 		lpContents++;
+					 		*lpEnd = 0;
+					 	} 
+					}
+					*CurTheme->Contents	=0; 
+					{
+					    LPVISLIST	SaveVis=CurVis; 
+					    HANDLE		handle;
+		    
+					    handle=GSSiGlobAlloc (GHND,sizeof(VISLIST));
+    					CurVis = (LPVISLIST)GlobalLock (handle); 
+                        InitVis ();
+						CurTheme->SymNum=GetSymbolNum (lpContents);
+						CurVis = SaveVis;
+						GSSiGlobUlFree (&handle); 
+					}
+				 }
+                 SetCurView (SaveView); 
+                 if (CurTheme->NumClass)
+                 	CurTheme->IsActive = TRUE;
+                 return FALSE; 
+                 
+		    default:
+		        return FALSE;
+		
+
+           }
+         break; 
+
+    default:
+        return FALSE;
+   }  
+ return TRUE;
+}          
+
+BOOL GetValsFromTable(HWND hWnd)
+{
+	
+	GSSiGlobFree (&hVALUELIST); 
+	if (hWndSELVAL)
+		return FALSE;
+	lpfnSELECTVALUESMsgProc = MakeProcInstance((FARPROC)SELECTVALUESMsgProc, hInst);
+	CreateDialog(hInst, (LPSTR)"SELECTVALUES", hWnd, lpfnSELECTVALUESMsgProc);
+//	DialogBox(hInst, (LPSTR)"SELECTVALUES", hWnd, lpfnSELECTVALUESMsgProc);
+//	FreeProcInstance(lpfnSELECTVALUESMsgProc);
+	return TRUE;
+}
+
+void DestroySELECTVALUES (void)
+{   
+	GSSiGlobFree (&hVALUELIST);
+	if (!hWndSELVAL)
+		return;
+	DestroyWindow(hWndSELVAL);
+	hWndSELVAL = 0;
+	FreeProcInstance((FARPROC) lpfnSELECTVALUESMsgProc);
+	return;
+}
+
+BOOL FAR PASCAL SELECTVALUESMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{
+	int	IDC_FieldName=SV_FIELD_NAME; 
+	BOOL	True=TRUE;  
+	LPOPENFILEDATA  FilePtr;
+	LPOPENSQLDATA   SQLPtr;  
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam,IDC_SQL,
+ 					 SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, &IDC_FieldName,1,
+ 					 SELVALDataFile, &SELVALDataFileType, &SELVALhDB, &True,FALSE))
+ 					 return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG: 
+         hWndSELVAL=hWndDlg;
+       	 SetDlgItemText (hWndDlg,IDC_SQL,SELVALSQL);    
+         SetDlgItemText(hWndDlg,SV_FIELD_NAME,SELVALFieldName); 
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDC_EXIT, 0L);
+         break; /* End of WM_CLOSE                                      */
+    
+    case WM_DESTROY:
+		 CloseDataFile (FALSE,&SELVALhDB);              
+		 GSSiGlobFree (&hVALUELIST);
+   		 hWndSELVAL = 0; 
+    	 break;
+    	 
+    case WM_COMMAND:
+    	 switch(wParam)
+           {
+            case IDC_OPEN_DB:
+                 EnableWindow (GetDlgItem(hWndDlg,IDC_SETSQL),TRUE); 
+                 break;
+                      
+            case IDC_SETSQL:      
+            {    
+                 if (GetSQLWhereClause (hWndDlg, SELVALhDB, SELVALSQL))
+                 	SetDlgItemText (hWndDlg,IDC_SQL,SELVALSQL);    
+                 break;
+            }
+            
+            case IDC_EXIT:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+        		 DestroyWindow(hWndDlg);
+        		 hWndSELVAL = 0; 
+                 break;
+            
+            case IDOK:
+            {
+            	HANDLE	hBT;
+				char	TempName[144]="";  
+				char	mess[128];  
+				short	cond = BT_FIRST, Dummy;     
+				long	NumVals=0;
+				LPSTR	pVal, pSQL;
+				            	
+                SQLPtr = (LPOPENSQLDATA)GlobalLock (SELVALhDB);
+                FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+				hBT = CreateUniqueList (32,TempName);  
+				GetDlgItemText (hWndDlg,IDC_SQL,SELVALSQL,256); 
+				if (_fstricmp (SELVALSQL,"ALL ROWS"))
+					pSQL = SELVALSQL;
+				else
+					pSQL = NULL;
+				GetDlgItemText (hWndDlg,SV_FIELD_NAME,SELVALFieldName,64);
+				GetODBCUniqueFieldValues (FilePtr->FileHandle,pSQL,SELVALFieldName,32,hBT); 
+				GlobalUnlock (SELVALhDB); 
+				hVALUELIST = GSSiGlobAlloc (GHND,UINT_MAX);
+				pVal = GlobalLock (hVALUELIST);
+				while (!BT_FIND (hBT,pVal,cond,BT_ANY,(LPSTR)&Dummy))
+				{  
+					cond = BT_NEXT;
+					pVal = _fstrchr (pVal,0);
+					pVal++;       
+					NumVals++;
+				}  
+				BT_CLOSEANDDELETE (&hBT);  
+				GlobalUnlock (hVALUELIST);
+				sprintf (mess,"%ld values retrieved",NumVals);
+				SetDlgItemText (hWndDlg,IDC_MESS,mess); 
+				EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE);
+             }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} 
+
+
+BOOL FAR PASCAL CLASSESFROMTABLEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{
+	int	IDC_FieldName[3]={SV_KEYFIELD_NAME,SV_SYMBOLFIELD_NAME,SV_TITLEFIELD_NAME}; 
+	int	IDC_FieldName2 = SV_VALUEFIELD_NAME;
+	BOOL	True=TRUE;
+	LPOPENFILEDATA  FilePtr;
+	LPOPENSQLDATA   SQLPtr;  
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam,IDC_SQL,
+ 					 SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, IDC_FieldName,3,
+ 					 SELVALDataFile, &SELVALDataFileType, &SELVALhDB, &True,FALSE))
+ 					 return TRUE;
+ if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam,NULL,
+ 					 NULL, IDC_CLASSVALDB, IDC_CLASSVALTABLE,SV_TABLE_HEADING2, &IDC_FieldName2,1,
+ 					 SELVALDataFile, &SELVALDataFileType, &SELVALhDB, &True,FALSE))
+ 					 return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG:  
+    	 SetDlgItemText (hWndDlg,SV_DATABASE_LIST,CurTheme->ClassDefDB);
+       	 SetDlgItemText (hWndDlg,IDC_SQL,SELVALSQL);    
+         SetDlgItemText(hWndDlg,SV_FIELD_NAME,SELVALFieldName);  
+         SetDlgItemText (hWndDlg,IDC_SQL,"ALL ROWS");
+		 SetDlgItemText (hWndDlg,IDC_SQL,CurTheme->ClassDefSQL);
+       	 SetDlgItemText (hWndDlg,SV_TITLEFIELD_NAME,CurTheme->ClassDefTitleField);
+		 SetDlgItemText (hWndDlg,SV_KEYFIELD_NAME,CurTheme->ClassDefKeyField);
+		 SetDlgItemText (hWndDlg,SV_VALUEFIELD_NAME,CurTheme->ClassDefValField);
+		 SetDlgItemText (hWndDlg,SV_SYMBOLFIELD_NAME,CurTheme->ClassDefSymField);
+         SetDlgItemText (hWndDlg,IDC_CLASSVALDB,CurTheme->ClassDefValDB);
+         SetDlgItemText (hWndDlg,IDC_SQL2,CurTheme->ClassDefValSQL);
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+    
+    case WM_COMMAND:
+    	 switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            
+            case IDOK:
+            {
+            	HANDLE	hBT;
+				char	TempName[144]="";  
+				char	Value[132], str[256],SymName[128],CSize[128],CRot[128],CColor[128];  
+				short	cond = BT_FIRST, Dummy, ClassNo;     
+				long	NumVals=0;
+				LPSTR	pVal, pSQL,pColon;
+				 
+				_fmemset (CurTheme->SymbolFont,0,sizeof(CurTheme->SymbolFont));           	
+				CloseDataFile (FALSE,&SELVALhDB); 
+				GetTempFileName (NULL,"unq",NULL,(LPSTR)TempName);
+            	GetDlgItemText (hWndDlg,SV_DATABASE_LIST,SELVALDataFile,128);
+            	_fstrcpy (CurTheme->ClassDefDB,SELVALDataFile);
+            	GetDlgItemText (hWndDlg,IDC_SQL,CurTheme->ClassDefSQL,256);
+            	GetDlgItemText (hWndDlg,SV_TITLEFIELD_NAME,CurTheme->ClassDefTitleField,32);
+            	GetDlgItemText (hWndDlg,SV_KEYFIELD_NAME,CurTheme->ClassDefKeyField,32);
+            	GetDlgItemText (hWndDlg,SV_VALUEFIELD_NAME,CurTheme->ClassDefValField,32);
+            	GetDlgItemText (hWndDlg,SV_SYMBOLFIELD_NAME,CurTheme->ClassDefSymField,32);
+				if (!OpenDataFile (SELVALDataFile,CurTheme->ClassDefSQL,BT_READ,&SELVALhDB))
+					break;
+                SQLPtr = (LPOPENSQLDATA)GlobalLock (SELVALhDB);
+                FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+				hBT = CreateUniqueList (128,TempName);  
+				GetDlgItemText (hWndDlg,IDC_SQL,CurTheme->ClassDefSQL,256); 
+				if (_fstricmp (CurTheme->ClassDefSQL,"ALL ROWS"))
+					pSQL = CurTheme->ClassDefSQL;
+				else
+					pSQL = NULL;
+				GetDlgItemText (hWndDlg,SV_FIELD_NAME,SELVALFieldName,64);
+				GetODBCUniqueFieldValues (FilePtr->FileHandle,pSQL,CurTheme->ClassDefTitleField,128,hBT); 
+				CurTheme->NumClass = 0;
+				while (!BT_FIND (hBT,CurTheme->ClassBM[CurTheme->NumClass],cond,BT_ANY,(LPSTR)&Dummy))
+				{  
+					cond = BT_NEXT; 
+					CurTheme->NumClass++; 
+				}  
+				BT_CLOSEANDDELETE (&hBT);  
+				GlobalUnlock (SELVALhDB); 
+				CloseDataFile (FALSE,&SELVALhDB); 
+				if (*CurTheme->ClassDefSymField)
+				{
+					 sprintf (str,"%s = [%%TEMP]",CurTheme->ClassDefTitleField);            
+					 OpenDataFile (SELVALDataFile,str,BT_READ,&SELVALhDB);
+					 for (ClassNo=0;ClassNo<CurTheme->NumClass;ClassNo++) 
+					 {  
+						SetGlobalValue("%TEMP",CurTheme->ClassBM[ClassNo]);
+						sprintf (ClassLink[ClassNo],"[%s]",CurTheme->ClassDefKeyField);
+						ExpandText (ClassLink[ClassNo]);
+						sprintf (str,"[%s]",CurTheme->ClassDefSymField);
+						ExpandText (str);
+						DecodePointSym (str,SymName,CSize,CRot,CColor);
+						if ((pColon = _fstrchr (SymName,':')))
+						{   
+							short	FontNum;
+							
+							*pColon++ = 0;
+							for (FontNum=0;FontNum<4;FontNum++)
+							{
+								if (!_fstricmp (CurTheme->SymbolFont[FontNum],SymName))
+									break;   
+								if (!*CurTheme->SymbolFont[FontNum])
+								{   
+									_fstrcpy (CurTheme->SymbolFont[FontNum],SymName);
+									break;
+								}
+							}
+							CurTheme->ClassSymbol[ClassNo] = atoi (pColon)+FontNum*1000;
+						}
+						else
+							CurTheme->ClassSymbol[ClassNo] = GetDictSymbolNumber (SymName);
+						CurTheme->ClassColor[ClassNo] = GetColorFromName (CColor);  
+						_fstrncpy (CurTheme->SymSizeC,CSize,32);
+					 }
+					 CloseDataFile (FALSE,&SELVALhDB); 
+				}
+
+    			CurTheme->hScatterFile = CreateClassValueList(); 
+    			CurTheme->AllValueClass = 0;
+            	GetDlgItemText (hWndDlg,IDC_CLASSVALDB,SELVALDataFile,128);
+            	_fstrcpy (CurTheme->ClassDefValDB,SELVALDataFile);
+            	if (!*SELVALDataFile)
+            	{
+					for (ClassNo=1;ClassNo<CurTheme->NumClass+1;ClassNo++) 
+					{  
+						_fstrncpy (Value,ClassLink[ClassNo-1],GetBTKeyLen(CurTheme->hScatterFile)); 
+			    		BT_PUT (CurTheme->hScatterFile,Value,(LPSTR)&ClassNo); 
+			    	}
+            	}
+            	else
+            	{
+					if (!OpenDataFile (SELVALDataFile,CurTheme->ClassDefValSQL,BT_READ,&SELVALhDB))
+						break;
+	                SQLPtr = (LPOPENSQLDATA)GlobalLock (SELVALhDB);
+	                FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
+					for (ClassNo=1;ClassNo<CurTheme->NumClass+1;ClassNo++) 
+					{  
+					    
+						hBT = CreateUniqueList (128,TempName);
+						if (!_fstrnicmp (ClassLink[ClassNo-1],"SQL(",4))  
+						{
+							_fstrcpy (str,&ClassLink[ClassNo-1][4]); 
+							*LastChr(str) = 0;
+						}						
+						else
+							sprintf (str,"%s = '%s'",CurTheme->ClassDefKeyField,ClassLink[ClassNo-1]);
+						GetODBCUniqueFieldValues (FilePtr->FileHandle,str,CurTheme->ClassDefValField,128,hBT);
+						cond = BT_FIRST; 
+						while (!BT_FIND (hBT,str,cond,BT_ANY,(LPSTR)&Dummy))
+						{  
+							cond = BT_NEXT; 
+							_fstrncpy (Value,str,GetBTKeyLen(CurTheme->hScatterFile)); 
+				    		BT_PUT (CurTheme->hScatterFile,Value,(LPSTR)&ClassNo);
+				    	} 
+						BT_CLOSEANDDELETE (&hBT);  
+	                 }
+					 GlobalUnlock (SELVALhDB); 
+					 CloseDataFile (FALSE,&SELVALhDB);
+				} 
+           		BT_CLOSE (CurTheme->hScatterFile);
+           		CurTheme->hScatterFile = 0;
+                EndDialog(hWndDlg, TRUE);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+
+BOOL FAR PASCAL HIGHLIGHTCLASSMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+
+ int	BRtn; 
+ char	str[128]; 
+ short	i, iclass;  
+ 
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+        cwCenter(hWndDlg, 0); 
+		for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+			SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_ADDSTRING,NULL,(LPARAM)((LPSTR)CurTheme->ClassBM[iclass]));
+		SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,TRUE,(LPARAM)DefaultHltClass);
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break; 
+            
+            case IDC_UNHLT:
+            case IDOK:
+            {   
+            	BOOL SavePick;
+            	short	nItems, SaveNThemes;  
+            	HANDLE	hItems;
+            	LPSHORT	pItems; 
+            	LPVIEWPORT	SaveView; 
+            	long	TotItems, CurLoc=0;
+            	
+				nItems=SendDlgItemMessage(hWndDlg,IDC_CLASSHLTLIST,LB_GETSELCOUNT,NULL,NULL); 
+				if (!nItems) break;   
+				if (!OpenThemeHighlightFile (BT_READ)) break;
+					
+				hItems=GSSiGlobAlloc(GHND,nItems*2);
+				pItems=  (LPINT) GlobalLock(hItems);
+				SendDlgItemMessage(hWndDlg,IDC_CLASSHLTLIST,LB_GETSELITEMS,nItems,(LPARAM)pItems); 
+				PickingByRefno=TRUE; 
+				SavePick = Pick;   
+				SaveView = CurView; 
+				SetCurView (pViewports[CurTheme->TargetViewport-1]);
+				Pick = FALSE; 
+				TotItems = 0;
+				for (i=0;i<nItems;i++,pItems++)
+					TotItems += CurTheme->ClassCount[*pItems]; 
+				GlobalUnlock (hItems);
+				pItems=  (LPINT) GlobalLock(hItems);
+				for (i=0;i<nItems;i++,pItems++)
+				{  
+					ThemeHighlightKey.Class = *pItems;
+					ThemeHighlightKey.Refno = LONG_MIN;
+					if (BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,BT_FIRST,BT_GE,(LPSTR)&ThemeHighlightData))
+						ThemeHighlightKey.Class=-10;
+					while (ThemeHighlightKey.Class == *pItems)
+					{   
+						if (wParam == IDC_UNHLT)
+							RemoveFromHighlightList (ThemeHighlightKey.Refno,0);
+						else
+						{   
+							_fmemset (&PickList[0],0,sizeof(PICKDATA));
+						    PickList[0].ViewID = CurView->ID;
+							PickList[0].FileNum = ThemeHighlightData.FileNum;  
+							PickList[0].SubFile = ThemeHighlightData.SubFile;
+							PickList[0].FileInIndex = ThemeHighlightData.FileInIndex;
+							PickList[0].Segment = ThemeHighlightData.Segment;
+							PickList[0].Refno = ThemeHighlightKey.Refno;
+							PickList[0].Desc = 0;
+							PickList[0].Offset = ThemeHighlightData.Offset; 
+							PickList[0].Element = ThemeHighlightData.Element; 
+							PickList[0].Length = ThemeHighlightData.Length; 
+							PickList[0].Area = ThemeHighlightData.Area; 
+							SaveNThemes = CurView->NumThemes;
+							CurView->NumThemes = 0;
+							ProcessPickedItem (0,FALSE); 
+							CurView->NumThemes = SaveNThemes; 
+							PickList[0].Type = 2; 
+							if (CurrentType == GF_AREA)
+								PickList[0].Type = 3; 
+							else if (CurrentType == GF_POINT)
+								PickList[0].Type = 1; 
+							else if (CurrentType == GF_TEXT)
+								PickList[0].Type = 4;  
+							PickList[0].Desc = CurrentDesc;
+							_fstrcpy (PickList[0].Prefix,CurrentTAG);
+							_fstrcpy (PickList[0].UDI,CurrentUDI);
+			     			AddToHighlightList (ThemeHighlightKey.Refno,&PickList[0],TRUE); 
+				     	}
+						if (BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,BT_NEXT,BT_ANY,(LPSTR)&ThemeHighlightData))
+							ThemeHighlightKey.Class=-10;
+	                    PctBox (GetDlgItem(hWndDlg,IDC_STATUS), TotItems, CurLoc++,0);
+					}
+				}
+	            PctBox (GetDlgItem(hWndDlg,IDC_STATUS), TotItems, TotItems,0);
+				GlobalUnlock (hItems);
+				GlobalFree (hItems);
+				PickingByRefno=FALSE;
+				Pick = SavePick;  
+				SetCurView (SaveView);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} 
+
+BOOL FAR PASCAL DISPLAYSELECTEDCLASSESMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+
+ int	BRtn; 
+ char	str[128]; 
+ short	i, iclass, Choice;  
+ 
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+        cwCenter(hWndDlg, 0); 
+		for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+		{
+			Choice = SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_ADDSTRING,NULL,(LPARAM)((LPSTR)CurTheme->ClassBM[iclass]));
+			if (!CurTheme->ClassStatus[iclass])
+				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,TRUE,(LPARAM)Choice);
+		 }
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break; 
+            
+            case IDC_SELALL:
+				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,TRUE,(LPARAM)-1); 
+				break;
+				
+            case IDC_CLEAR:
+				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,FALSE,(LPARAM)-1); 
+				break;
+				
+            case IDOK:
+            {   
+            	short	nItems;  
+            	HANDLE	hItems;
+            	LPSHORT	pItems; 
+            	
+				nItems=SendDlgItemMessage(hWndDlg,IDC_CLASSHLTLIST,LB_GETSELCOUNT,NULL,NULL); 
+				if (!nItems) break;   
+					
+				hItems=GSSiGlobAlloc(GHND,nItems*2);
+				pItems=  (LPINT) GlobalLock(hItems);
+				SendDlgItemMessage(hWndDlg,IDC_CLASSHLTLIST,LB_GETSELITEMS,nItems,(LPARAM)pItems);
+				for (i=0;i<CurTheme->NumClass;i++) 
+					CurTheme->ClassStatus[i] = 1;
+				for (i=0;i<nItems;i++,pItems++)
+					CurTheme->ClassStatus[*pItems] = 0;
+				GSSiGlobUlFree (&hItems);
+                EndDialog(hWndDlg, TRUE);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+} 
+
+short GetThemeRefClass (long Refno)
+{   
+	short	class=-1, iclass;
+	
+	if (CurTheme)
+	{
+		if (OpenThemeHighlightFile (BT_READ))
+		{   
+			for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+			{
+				ThemeHighlightKey.Class = iclass;
+				ThemeHighlightKey.Refno = Refno;
+				if (!BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,BT_FIRST,BT_EQ,(LPSTR)&ThemeHighlightData))
+				{
+					class = iclass+1;
+					break;
+				}
+			}
+			CloseThemeHighlightFile ();
+		}
+	}
+	return class;
+}
+
+short DispersePoint (long Refno,short Class)
+{   
+	short	st, MaxSequence;
+	double	size; 
+	POINT	OrigPoint;
+	
+	if (CurTheme->hHighlightFile)
+	{
+		ThemeHighlightData.FileNum = FileNum;  
+		ThemeHighlightData.SubFile = SubFile;  
+		ThemeHighlightData.FileInIndex = FileInIndex;
+		ThemeHighlightData.Segment = ItemSeg;
+		ThemeHighlightData.Offset = CurrentItem; 
+		ThemeHighlightData.Element = CurElement;
+		ThemeHighlightData.Point = CurPointLocD;
+		ThemeHighlightData.Length = CurLength;
+		ThemeHighlightData.Area = CurArea;
+		ThemeHighlightKey.Refno = Refno; 
+		ThemeHighlightKey.Class = Class;    
+		BT_PUT (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,(LPSTR)&ThemeHighlightData);
+	}
+			
+	if (CurrentType != GF_POINT)
+		return 0;
+	if (!CurTheme->DispersePoints || !CurTheme->hDisperseFile)
+		return 0; 
+	DisperseKey.Point = CurPointLoc;
+	if (CurTheme->DispersePoints == 1)
+	{
+		DisperseKey.Sequence = SHRT_MAX;
+		if ((st = BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,BT_FIRST,BT_GT,(LPSTR)&PointDispersionData)))
+			st = BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,BT_LAST,BT_ANY,(LPSTR)&PointDispersionData);
+		else
+			st = BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,BT_PRIOR,BT_ANY,(LPSTR)&PointDispersionData);
+		if (st) 
+			DisperseKey.Sequence = 1;   
+		else if (DisperseKey.Point.x == CurPointLoc.x && DisperseKey.Point.y == CurPointLoc.y)
+			DisperseKey.Sequence++;                                                           
+		else
+			DisperseKey.Sequence = 1;  
+		PointDispersionData.Num = 0;
+	}
+	else
+	{   
+		DisperseKey.Sequence = Class;
+		if (BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,BT_FIRST,BT_EQ,(LPSTR)&PointDispersionData))
+			PointDispersionData.Num = 0; 
+	}
+	DisperseKey.Point = CurPointLoc;  
+
+	PointDispersionData.FileNum = FileNum;  
+	PointDispersionData.SubFile = SubFile;  
+	PointDispersionData.FileInIndex = FileInIndex;
+	PointDispersionData.Segment = ItemSeg;
+	PointDispersionData.Offset = CurrentItem; 
+	PointDispersionData.Element = CurElement;
+	PointDispersionData.Refno = Refno; 
+	PointDispersionData.Size = IDNINT(CurPointSize);
+	PointDispersionData.Num++;
+    OrigPoint = CurPointLoc;
+	if (CurTheme->DispersePoints == 1)  
+	{
+		if (ThemePointSym)
+		{
+			if (ThemePointSize < 0)
+				size = -ThemePointSize *DeviceToScreenFactor;
+			else
+				size = ThemePointSize / CurView->BaseUnitsPerPixel;
+			size = min(max (size,1),MaxPointSize);
+		}
+		else
+			size =  CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+	
+		CurPointLoc = AddjustPointLoc (CurPointLoc,size,DisperseKey.Sequence);
+	} 
+	PointDispersionData.DisplayPoint = CurPointLoc;
+	CurTheme->MaxDispersion = max (CurTheme->MaxDispersion,abs (CurPointLoc.x-OrigPoint.x));
+	BT_PUT (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,(LPSTR)&PointDispersionData);
+	return (CurTheme->DispersePoints);
+} 
+
+BOOL CreateThemeHighlightFile (void)
+{   
+	LPSTR pName;
+	BTVARDESC	BTVar[2];	
+	
+	CurTheme->hHighlightFileName = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	pName = GlobalLock (CurTheme->hHighlightFileName);
+	GetTempFileName (NULL,"thl",NULL,pName);
+	BTVar[0].BT_VARTYP=BT_INTEGER;
+	BTVar[0].BT_VARLEN=2;
+	BTVar[0].BT_VAROFF=0;
+	BTVar[1].BT_VARTYP=BT_INTEGER;
+	BTVar[1].BT_VARLEN=4;
+	BTVar[1].BT_VAROFF=2;
+	BT_CREATE (pName, sizeof(ThemeHighlightData), FALSE, 2, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+	GlobalUnlock (CurTheme->hHighlightFileName);    
+	return TRUE;
+}
+
+BOOL OpenThemeHighlightFile (short mode)
+{   
+	LPSTR	pName;
+	
+
+	if (!CurTheme->hHighlightFileName)
+	{
+		if (mode == BT_READ)
+			return FALSE;
+		CreateThemeHighlightFile ();
+	}
+	pName = GlobalLock (CurTheme->hHighlightFileName);
+	CurTheme->hHighlightFile = BT_OPEN (pName, 0, mode, 0); 
+	if (mode == BT_WRITE)
+		BT_CLEAR (CurTheme->hHighlightFile);
+	GlobalUnlock (CurTheme->hHighlightFileName);
+	return TRUE;
+}
+
+BOOL CloseThemeHighlightFile (void)
+{
+	BT_CLOSE (CurTheme->hHighlightFile);
+	CurTheme->hHighlightFile = 0;
+	return TRUE;
+} 
+
+BOOL DeleteThemeHighlightFile (void)
+{   
+	LPSTR pName; 
+	OFSTRUCT	OFStruct;
+	
+	if (!CurTheme->hHighlightFileName)
+		return FALSE;
+	CloseThemeHighlightFile (); 
+	pName = GlobalLock (CurTheme->hHighlightFileName);
+	GSSiOpenFile (pName,&OFStruct,OF_DELETE); 
+	GSSiGlobUlFree (&CurTheme->hHighlightFileName);
+	return TRUE;
+}  
+
+BOOL PickDispersedPoints (DPOINT PickPointBase,short PickAp,LPDOUBLE pNearDist)
+{   
+	long	StartX, EndX;
+	short	st, i, Item; 
+	DPOINT	NearPoint; 
+	double	d, MinDist, AZ[3];
+	MNMXCORD Rect;
+	POINT	FilePoint, PickPoint;	
+		
+	for (i=0;i<CurView->NumThemes;i++)
+	{
+		CurTheme = CurView->pThemes[i];
+		if (OpenPointDispersionFile (BT_READ))
+        {
+		    PickPoint = BasePtToWinPt (&PickPointBase);
+		    if (!PickAp)
+			{   
+				d = *pNearDist/CurView->BaseUnitsPerPixel;
+				d = min (d,UINT_MAX);
+				PickAp = IDNINT(d);
+			}
+			StartX = PickPoint.x - PickAp - CurTheme->MaxDispersion; 
+			StartX = max (StartX,SHRT_MIN);	
+			DisperseKey.Point.x = StartX; 
+			EndX = PickPoint.x + PickAp + CurTheme->MaxDispersion; 
+			DisperseKey.Point.y = SHRT_MIN;
+			DisperseKey.Sequence = 0;
+			st = BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,BT_FIRST,BT_GT,(LPSTR)&PointDispersionData);
+			while (!st && DisperseKey.Point.x <= EndX)
+			{
+				NearPoint = WinPtToBasePt(PointDispersionData.DisplayPoint);   
+				FilePoint = PointDispersionData.DisplayPoint;
+				d = (double)PointDispersionData.Size * CurView->BaseUnitsPerPixel; 
+				Rect.xmn = NearPoint.x - d;
+				Rect.xmx = NearPoint.x + d;
+				Rect.ymn = NearPoint.y - d;
+				Rect.ymx = NearPoint.y + d;  
+				AZ[0]=AZ[1]=AZ[2]=0;
+				MinDist = idist (PointDispersionData.DisplayPoint,PickPoint)*CurView->BaseUnitsPerPixel;
+				if (PickAp && MinDist <= PickApW)
+				{
+					if ((Item = PickListAdd (PointDispersionData.FileNum,PointDispersionData.SubFile,PointDispersionData.FileInIndex,
+								 PointDispersionData.Segment,PointDispersionData.Refno,
+								 		CurrentDesc,CurrentiPen,
+								 1,0,MinDist,AZ,0,PointDispersionData.Offset,PointDispersionData.Element,
+							     NearPoint,NearPoint,NearPoint,NearPoint,0,0,&Rect,
+							     FilePoint,FilePoint,FilePoint,1,NULL_ELEV)))
+					{
+						ProcessPickedItem (Item-1,FALSE); 
+						GetVal ("%PREFIX",PickList[Item-1].Prefix);
+						GetVal ("%UDI",PickList[Item-1].UDI);
+					}
+					
+					if (NumPicked == MaxPick && pNearDist)
+					{
+						*pNearDist = min (*pNearDist,PickList[0].OffDist);
+						d = *pNearDist/CurView->BaseUnitsPerPixel;
+						d = min (d,UINT_MAX);
+						PickAp = IDNINT(d);
+						EndX = PickPoint.x + PickAp + CurTheme->MaxDispersion; 
+					} 
+				}
+				st = BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,BT_NEXT,BT_ANY,(LPSTR)&PointDispersionData);
+			}
+			ClosePointDispersionFile (); 
+		}
+	}
+	return TRUE;
+}
+
+BOOL CreatePointDispersionFile (void)
+{   
+	LPSTR pName;
+	BTVARDESC	BTVar[3];	
+	
+	CurTheme->hDisperseFileName = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	pName = GlobalLock (CurTheme->hDisperseFileName);
+	GetTempFileName (NULL,"ptd",NULL,pName);
+	BTVar[0].BT_VARTYP=BT_INTEGER;
+	BTVar[0].BT_VARLEN=2;
+	BTVar[0].BT_VAROFF=0;
+	BTVar[1].BT_VARTYP=BT_INTEGER;
+	BTVar[1].BT_VARLEN=2;
+	BTVar[1].BT_VAROFF=2;
+	BTVar[2].BT_VARTYP=BT_INTEGER;
+	BTVar[2].BT_VARLEN=2;
+	BTVar[2].BT_VAROFF=4;
+	BT_CREATE (pName, sizeof(PointDispersionData), FALSE, 3, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+	GlobalUnlock (CurTheme->hDisperseFileName);    
+	CurTheme->MaxDispersion=0;
+	return TRUE;
+}
+
+BOOL ClosePointDispersionFile (void)
+{   
+	short	st, Desc, NumClass,ClassID[MAX_THEME_CLASSES+2], ClassCounts[MAX_THEME_CLASSES+2]; 
+	POINT	PointLoc, CurPoint, Points[2];  
+	short	pos = BT_FIRST, MaxCount, i;  
+	double	MaxSize, Size;   
+	HPEN	hPen, OldPen, hDashPen;
+	char	str[32];
+	
+	if (CurTheme->DispersePoints == 2)
+	{   
+		CreateClassPens ();
+		hPen = SelectObject(CurView->hDC, GetStockObject(BLACK_PEN)); 
+		hDashPen = CreatePen (PS_DOT,1,0);
+    	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+        CurView->hRgn = CreateVPRgn(FALSE);
+        SelectClipRgn (CurView->hDC,CurView->hRgn);
+        DeleteObject(CurView->hRgn);
+		Desc = GetDictSymbolNumber ("CIRCLE"); 
+		NumClass=0;   
+		CurPoint.x = SHRT_MAX;
+		CurPoint.y = SHRT_MIN;
+Next:
+		st = BT_FIND (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,pos,BT_ANY,(LPSTR)&PointDispersionData);
+			pos = BT_NEXT; 
+			if (st || CurPoint.x != DisperseKey.Point.x || CurPoint.y != DisperseKey.Point.y)
+			{   
+				Points[0] = CurPoint; 
+				i=NumClass; 
+				if (CurTheme->AccumPointBaseSize > 0)
+					MaxSize = CurTheme->AccumPointBaseSize*DeviceToScreenFactor;
+				else if (CurTheme->AccumPointBaseSize < 0)
+					MaxSize = -CurTheme->AccumPointBaseSize * BaseDistToWinDist;
+				
+				while (i--)
+				{   
+					Size = DispersePointSize (MaxSize,MaxCount); 
+					PointLoc = AddjustPointLoc (CurPoint,Size,i+1);
+					switch (ClassID[i])
+					{
+						case -1:
+							if (CurTheme->NoDataBrush)
+								SelectObject (CurView->hDC,CurTheme->NoDataBrush);
+							break;
+						case -2: 
+							if (CurTheme->InvalidDataBrush)
+								SelectObject (CurView->hDC,CurTheme->InvalidDataBrush);
+							break;
+						default:
+							SelectObject (CurView->hDC,CurTheme->ClassBrush[ClassID[i]]);
+							break;
+					}
+		    		HaveVarFillColor = TRUE;
+					Size = DispersePointSize (MaxSize,ClassCounts[i]);
+					Points[1]=PointLoc; 
+					OldPen = SelectObject (CurView->hDC,hDashPen); 
+					if (CurTheme->AccumPointLink)
+						Polyline (CurView->hDC,Points,2); 
+					SelectObject (CurView->hDC,OldPen);
+					DisplayPointItem (CurView->hDC,PointLoc,Size,0,Desc);
+					itoa (ClassCounts[i],str,10);
+					if (IDNINT(Size) && CurTheme->AccumPointText)
+					{
+						COLORREF	OldColor = SetTextColor (CurView->hDC,RGB(255,255,255));
+						DispText (CurView->hDC,PointLoc.x,PointLoc.x, PointLoc.y,0, 2,2,
+						  		Size,2, FALSE,0,str,0,FALSE,0,0,-1,0,NULL);  
+						SetTextColor (CurView->hDC,OldColor);
+					}
+				}
+				NumClass = MaxCount = 0;
+				MaxSize = 0;
+				CurPoint = DisperseKey.Point; 
+			}
+			MaxSize = max (MaxSize,PointDispersionData.Size);
+			ClassID[NumClass] = DisperseKey.Sequence;
+			ClassCounts[NumClass++] = PointDispersionData.Num;
+			MaxCount = max (MaxCount,PointDispersionData.Num);
+		if (!st) goto Next;
+		SelectObject(CurView->hDC,hPen); 
+		DeleteObject (hDashPen);
+	}
+	BT_CLOSE (CurTheme->hDisperseFile);
+	CurTheme->hDisperseFile = 0;
+	DestroyClassPens();
+	return TRUE;
+} 
+
+double DispersePointSize (double InSize, short Count)
+{   
+	float	Size;
+	
+	switch (CurTheme->AccumPointSizeOpt)
+	{
+		case 2:
+			Size = InSize * sqrt ((double)(Count)); 
+            break;
+		case 3:
+			Size = InSize * pow ((double)(Count),0.3333333333); 
+            break;
+        case 1:  
+			Size = InSize * Count; 
+            break;
+		case 5:
+			Size = InSize * (1+log ((double)(Count))); 
+            break;
+		case 4:
+			Size = InSize * (1+log10 ((double)(Count))); 
+            break;
+		case 0:
+			Size = InSize;
+			break;
+	}
+	return Size;
+}
+        
+BOOL OpenPointDispersionFile (short mode)
+{   
+	LPSTR	pName;
+	
+	if (!CurTheme->DispersePoints)
+		return FALSE;
+	if (!CurTheme->hDisperseFileName)
+	{
+		if (mode == BT_READ)
+			return FALSE;
+		CreatePointDispersionFile ();
+	}
+	pName = GlobalLock (CurTheme->hDisperseFileName);
+	CurTheme->hDisperseFile = BT_OPEN (pName, 0, mode, 0); 
+	if (mode == BT_WRITE)
+		BT_CLEAR (CurTheme->hDisperseFile);
+	GlobalUnlock (CurTheme->hDisperseFileName);
+	return TRUE;
+}
+BOOL DeletePointDispersionFile (void)
+{   
+	LPSTR pName; 
+	OFSTRUCT	OFStruct;
+	
+	if (!CurTheme->hDisperseFileName)
+		return FALSE;
+	pName = GlobalLock (CurTheme->hDisperseFileName);
+	GSSiOpenFile (pName,&OFStruct,OF_DELETE); 
+	GlobalUnlock (CurTheme->hDisperseFileName);
+	GSSiGlobFree (&CurTheme->hDisperseFileName);
+	return TRUE;
+} 
+
+BOOL HighlightByClass (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		break;
+
+    case WM_LBUTTONUP: 
+    {
+    	FARPROC lpfnHIGHLIGHTCLASSMsgProc;
+    	short	iclass,i; 
+    	
+    	MousePoint = MAKEPOINT(lParam);
+		if (!CurView->pTheme) break;
+		CurTheme = CurView->pTheme;
+		if (!CurTheme->IsActive) break; 
+		DefaultHltClass = -1;
+		for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+		{
+			if (PtInRect(&CurTheme->ClassClrBox[iclass],MousePoint))
+				DefaultHltClass = iclass;
+		} 
+		DoPaint = FALSE; 
+        lpfnHIGHLIGHTCLASSMsgProc = MakeProcInstance((FARPROC)HIGHLIGHTCLASSMsgProc, hInst);
+        DialogBox(hInst, (LPSTR)"HIGHLIGHTCLASS", CurView->hWnd, lpfnHIGHLIGHTCLASSMsgProc);
+        FreeProcInstance(lpfnHIGHLIGHTCLASSMsgProc);
+		DoPaint=TRUE;
+	}
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+} 
+
+BOOL SelectThemeClasses (short iclass) 
+{
+	FARPROC lpfnDISPLAYSELECTEDCLASSESMsgProc;
+
+	if (!CurView->pTheme)
+		return FALSE;
+	CurTheme = CurView->pTheme;
+	if (!CurTheme->IsActive)
+		return FALSE;
+	if (iclass >= 0) //eventually used to specify class
+		return FALSE;
+	DoPaint = FALSE; 
+    lpfnDISPLAYSELECTEDCLASSESMsgProc = MakeProcInstance((FARPROC)DISPLAYSELECTEDCLASSESMsgProc, hInst);
+    DialogBox(hInst, (LPSTR)"DISPLAYSELECTEDCLASSES", CurView->hWnd, lpfnDISPLAYSELECTEDCLASSESMsgProc);
+    FreeProcInstance(lpfnDISPLAYSELECTEDCLASSESMsgProc);
+	DoPaint=TRUE; 
+	return TRUE;
+}
+
+
+BOOL SelectByClass (HWND hWnd, WORD Message, WORD wParam, LONG lParam)
+{
+ char key;
+ POINT	MousePoint;
+
+ switch (Message)
+   {
+   	case GF_INIT:
+       	AddLBUTTON = TRUE;
+   		break;
+
+    case WM_LBUTTONUP: 
+    {
+    	
+    	SelectThemeClasses (-1);
+	}
+		break;
+
+    default:
+    	return (FALSE);
+    }
+    return (TRUE);
+} 
+
+BOOL DisplayProfileLoc (LPPOINT pWinPoint,LPDPOINT BasePoint,LPVIEWPORT pVP)
+{   
+	static	POINT	LastLine[2];
+	static	LPVIEWPORT	LastVP=0; 
+	LPVIEWPORT	SaveVP=CurView;  
+	short	OldMode; 
+	HPEN	hPen, hOldPen;  
+	double	LastDist;
+	
+	if (LastVP)
+	{ 
+		SaveDC (CurView->hDC);
+	    SetDisplayMode (CurView->hDC,GF_TEXTMODE);
+	    SelectClipRgn (CurView->hDC,0);
+		SetCurView (LastVP);
+		OldMode = SetROP2(CurView->hDC,R2_NOT);
+		hPen = CreatePen (PS_SOLID,0,RGB(255,0,0));
+		hOldPen = SelectObject (CurView->hDC,hPen);
+		Polyline (CurView->hDC,LastLine,2);  
+		SelectObject (CurView->hDC,hOldPen);
+		DeleteObject (hPen);
+    	SetROP2(CurView->hDC,OldMode);
+		SetCurView (SaveVP);
+		RestoreDC (CurView->hDC,-1);  
+	}                        
+	LastVP = pVP;
+	if (!pVP)
+		return FALSE;
+	if (BasePoint->x < 0)
+	{
+		LastVP = 0;
+		return FALSE;
+	}
+	if (pVP->hProfileElev)
+	{
+		LPDPOINT	pProfile = (LPDPOINT)GlobalLock(pVP->hProfileElev);
+		pProfile += (pVP->nProfileElev-1);
+		LastDist = pProfile->x;
+		GlobalUnlock (pVP->hProfileElev);
+		if (BasePoint->x > LastDist)  
+		{
+			LastVP = 0;
+			return FALSE;
+		}
+	}
+	SaveDC (CurView->hDC);
+    SetDisplayMode (CurView->hDC,GF_TEXTMODE);
+    SelectClipRgn (CurView->hDC,0);
+	SetCurView (pVP); 
+	LastLine[0].x = pWinPoint->x;
+	LastLine[1].x = pWinPoint->x;
+	LastLine[0].y = CurView->DrawRect.bottom;
+	LastLine[1].y = CurView->DrawRect.top;
+	OldMode = SetROP2(CurView->hDC,R2_NOT);
+	hPen = CreatePen (PS_SOLID,0,RGB(255,0,0));
+	hOldPen = SelectObject (CurView->hDC,hPen);
+	Polyline (CurView->hDC,LastLine,2);  
+	SelectObject (CurView->hDC,hOldPen);
+	DeleteObject (hPen);
+   	SetROP2(CurView->hDC,OldMode);
+	SetCurView (SaveVP);
+	RestoreDC (CurView->hDC,-1);  
+	return TRUE;
+}  
+
+BOOL GetProfileElevAndSlope (double Dist,HANDLE hProfile,long nProfile,LPDOUBLE Elev, LPDOUBLE Slope)
+{
+	LPDPOINT pProfile;
+	DWORD	i; 
+	double	LastElev, LastDist, inc;
+	
+	if (!hProfile || Dist < 0)
+		return FALSE;
+	
+	pProfile = (LPDPOINT)GlobalLock (hProfile);
+	for (i = 0;i < nProfile;i++,pProfile++)
+	{
+		if (pProfile->x > Dist)
+		{             
+			inc = (Dist - LastDist)/(pProfile->x - LastDist);
+			*Elev =  (LastElev + (pProfile->y - LastElev) * inc) * MFT;
+			*Slope = 100 * (pProfile->y - LastElev)/(pProfile->x - LastDist);
+			GlobalUnlock (hProfile);
+			return TRUE;
+		} 
+		LastElev = pProfile->y;
+		LastDist = pProfile->x;
+	}
+	GlobalUnlock (hProfile);
+	return FALSE;
+} 
+
+void SetupHotSpotMask (short MaskWidth,HANDLE hMask,short DecayOpt)
+{   
+	LPSHORT pMask=(LPSHORT)GlobalLock (hMask);
+	double	d; 
+	double	HalfMaskWidth= MaskWidth/2;
+	POINT	MidPoint={HalfMaskWidth,HalfMaskWidth}, p;
+	
+	switch (DecayOpt)
+	{                     
+		case 1:
+			HalfMaskWidth =  sqrt (HalfMaskWidth);
+			break;  
+		case 2:
+			HalfMaskWidth =  HalfMaskWidth * HalfMaskWidth;  
+			break;
+	}
+	p.y = 0;
+	while (p.y < MaskWidth)
+	{
+		p.x = 0;
+		while (p.x < MaskWidth)
+		{   
+			d = idist (p,MidPoint);
+			switch (DecayOpt)
+			{                     
+				case 1:
+					d = sqrt(d);
+					break; 
+				case 2:
+					d = d * d;
+					break; 
+				case 3:
+					d = 0;
+					break;
+			}
+			*pMask++ = max (0,IDNINT(((HalfMaskWidth - d) / HalfMaskWidth) * 1000));  
+			p.x++;
+		}
+		p.y++;
+	}
+	GlobalUnlock (hMask);
+	return;
+}
+
+
+BOOL ThemeNeedsDataPass (void)
+{	BTVARDESC	BTVar[3];
+	int	i;
+	OFSTRUCT	OFStruct; 
+	char		str[128];
+    
+    if (CurTheme->DisplayViewport && CurTheme->DisplayViewport <= NumViewports)
+    	CurTheme->VPDisplayed = pViewports[CurTheme->DisplayViewport-1]->Active;
+	if (!CurTheme->VPDisplayed || !CurTheme->IsActive ||
+		 CurTheme->ID == PF_COORD_DISPLAY || CurTheme->ID == PF_BOUNDS_DISPLAY)
+		return (FALSE);
+	if (CurTheme->PCTByArea && CurTheme->PCTDisplayCycle != DisplayCycle)
+		ComputePCTTheme = CurTheme;	                                     
+	else
+		ComputePCTTheme = 0;	                                     
+	if (!CurTheme->WantDataPass)
+		return FALSE;
+	if (!CurTheme->Recompute && CurTheme->NumClass)
+		return (FALSE);
+	if (*CurTheme->RefValChar)
+	{
+		_fstrcpy (str,CurTheme->RefValChar);
+		ExpandText (str);  
+		CurTheme->RefValDbl = atof (str);
+	}
+	CurTheme->Xmin = DBL_MAX;
+	CurTheme->Xmax = -DBL_MAX;
+	if (CurTheme->ZeroBased)
+		CurTheme->Ymin = 0;
+	else
+		CurTheme->Ymin = DBL_MAX;
+	CurTheme->Ymax = -DBL_MAX;
+	CurTheme->NumVals = 0;
+	if (CurTheme->SymNum > 0)
+		CurTheme->hVisList = SetThemeVisList (CurTheme->SymNum);
+	if (CurTheme->ID == GF_HOTSPOT_THEME)
+	{   
+		LPHOTSPOTDATA	pHSData = &CurTheme->HotSpotData;
+		double dw, shrinkfactor=1;
+		LPVIEWPORT	SaveVP = CurView; 
+		long	GridSize;
+	    double  BASEX[4], BASEY[4], HSX[4], HSY[4];  
+	    double	BaseDToWinD=1, d1, d2;
+	    DPOINT	dp1, dp2;
+	    float	RSQMIN;
+		
+		GSSiGlobUlFree (&pHSData->hGrid);
+		GSSiGlobUlFree (&pHSData->hMask);
+		CloseTRANS2 (&pHSData->hTranBaseToHotSpot);
+        
+        dp1.x = CurView->WBounds.xmn;
+        dp1.y = CurView->WBounds.ymn;
+        dp2.x = CurView->WBounds.xmx;
+        dp2.y = CurView->WBounds.ymx;
+        d1 = ldistp (dp1,dp2);
+        dp1.x = CurView->DrawRect.left;
+        dp1.y = CurView->DrawRect.right;
+        dp2.x = CurView->DrawRect.top;
+        dp2.y = CurView->DrawRect.bottom;
+        d2 = ldistp (dp1,dp2);
+        if (d1)
+        	BaseDToWinD = d2/d1;
+        
+		SetViewport (CurTheme->TargetViewport);   
+		dw = BaseDToWinD * pHSData->Radius;
+		if (dw > 128)
+			shrinkfactor = dw / 128;
+		pHSData->MaskWidth = IDNINT (dw * shrinkfactor); 
+		pHSData->GridWidth = ((CurView->DrawRect.right - CurView->DrawRect.left) * shrinkfactor)/pHSData->Granularity;
+		pHSData->GridHeight = ((CurView->DrawRect.bottom - CurView->DrawRect.top) * shrinkfactor)/pHSData->Granularity;  
+		GridSize =  (long)pHSData->GridWidth * (long)pHSData->GridHeight * 4; 
+		pHSData->hGrid = GSSiGlobAlloc (GHND,GridSize);
+		pHSData->hMask = GSSiGlobAlloc (GMEM_MOVEABLE,(long)pHSData->MaskWidth * (long)pHSData->MaskWidth * 4); 
+		SetupHotSpotMask (pHSData->MaskWidth,pHSData->hMask,pHSData->DecayOpt);
+		HSX[0]=HSX[1]=0;
+		HSX[2]=HSX[3]=pHSData->GridWidth-1;
+		HSY[0]=HSY[3]=0;
+		HSY[1]=HSY[2]=pHSData->GridHeight-1;
+		BASEX[0]=BASEX[1]=CurView->WBounds.xmn;
+		BASEX[2]=BASEX[3]=CurView->WBounds.xmx;
+		BASEY[0]=BASEY[3]=CurView->WBounds.ymn;
+		BASEY[1]=BASEY[2]=CurView->WBounds.ymx;
+		pHSData->hTranBaseToHotSpot = STRAN2 (BASEX,BASEY,HSX,HSY,4,&RSQMIN,1,NULL);
+		SetCurView (SaveVP);
+	}
+	else
+	{
+		BT_CLOSEANDDELETE (&CurTheme->hScatterFile); 
+		if (CurTheme->DisplayScatterDiagram || CurTheme->ClassType == 2)
+		{
+			if (CurTheme->ScatterFile[0])
+				GSSiOpenFile (CurTheme->ScatterFile,(LPOFSTRUCT)&OFStruct,OF_DELETE);
+			else
+				GetTempFileName (NULL,"thm",NULL,(LPSTR)CurTheme->ScatterFile);
+		
+			BTVar[0].BT_VARTYP=BT_REAL;
+			BTVar[0].BT_VARLEN=8;
+			BTVar[0].BT_VAROFF=0;
+			BTVar[1].BT_VARTYP=BT_REAL;
+			BTVar[1].BT_VARLEN=8;
+			BTVar[1].BT_VAROFF=8;
+			BTVar[2].BT_VARTYP=BT_INTEGER;
+			BTVar[2].BT_VARLEN=4;
+			BTVar[2].BT_VAROFF=16;
+			BT_CREATE (CurTheme->ScatterFile, 16, FALSE, 3, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+			CurTheme->hScatterFile = BT_OPEN (CurTheme->ScatterFile,0, BT_WRITE, 0);  
+		}
+	    if (CurTheme->DataFileType != MSACCESS_DATAFILE) OpenThemeDataFile ();
+    }
+	return(TRUE);
+}
+
+void AddItemToHotSpot (short Type)
+{   
+	LPHOTSPOTDATA	pHSData = &CurTheme->HotSpotData;
+	DPOINT	HotSpotPoint;
+	short	x,y, MaskBegRow, MaskEndRow, MaskBegCol, MaskEndCol,GridBegRow, GridBegCol, GridEndRow, GridEndCol, row, col;
+	HPLONG	pGrid, pGridRow;
+	LPSHORT	pMask, pMaskRow;  
+	long	MaxGrid=0;
+	
+	if (Type != GF_POINT)
+		return;  
+	HotSpotPoint = TranPoint (&CurPointLocD,pHSData->hTranBaseToHotSpot);
+	x = IDNINT (HotSpotPoint.x);
+	y = IDNINT (HotSpotPoint.y);
+	GridBegRow = y - pHSData->MaskWidth/2;
+	if (GridBegRow < 0)
+	{
+		MaskBegRow = -GridBegRow;
+		GridBegRow = 0;
+	}
+	else
+		MaskBegRow = 0;
+	GridEndRow = y + pHSData->MaskWidth/2;
+	if (GridEndRow > pHSData->GridHeight-1)
+	{
+		MaskEndRow = pHSData->MaskWidth - (GridEndRow - (pHSData->GridHeight-1));
+		GridEndRow = pHSData->GridHeight-1;
+	}
+	else
+		MaskEndRow = pHSData->MaskWidth-1;
+	GridBegCol = x - pHSData->MaskWidth/2;
+	if (GridBegCol < 0)
+	{
+		MaskBegCol = -GridBegCol;
+		GridBegCol = 0;
+	}
+	else
+		MaskBegCol = 0;
+	GridEndCol = x + pHSData->MaskWidth/2;
+	if (GridEndCol > pHSData->GridWidth-1)
+	{
+		MaskEndCol = pHSData->MaskWidth - (GridEndCol - (pHSData->GridWidth-1));
+		GridEndCol = pHSData->GridWidth-1;
+	}
+	else
+		MaskEndCol = pHSData->MaskWidth-1;
+	pMaskRow = (LPSHORT)GlobalLock (pHSData->hMask);
+	pMaskRow += (MaskBegRow * pHSData->MaskWidth) + MaskBegCol;
+	pGridRow = (HPLONG)GlobalLock (pHSData->hGrid);
+	pGridRow += (long)pHSData->GridWidth * (long)GridBegRow + (long)GridBegCol; 
+	row = MaskBegRow; 
+	while (row < MaskEndRow)
+	{
+		col = MaskBegCol;
+		pMask = pMaskRow;
+		pGrid = pGridRow;
+		while (col < MaskEndCol)
+		{
+			*pGrid += *pMask;  
+			MaxGrid = max (MaxGrid,*pGrid);
+			pGrid++;
+			pMask++;
+			col++;
+		} 
+		row++;
+		pMaskRow += pHSData->MaskWidth;    
+		pGridRow += pHSData->GridWidth;
+	}
+	GlobalUnlock (pHSData->hGrid);
+	GlobalUnlock (pHSData->hMask);  
+	CurTheme->Ymax = max (CurTheme->Ymax,(double)MaxGrid);
+	return;
+}
+
+BOOL SaveHotSpotSurface (void)
+{
+	LPHOTSPOTDATA	pHSData = &CurTheme->HotSpotData;
+	long	GridSize;
+    HPLONG	pGrid;
+    HFILE	Fid;
+	
+	if (!pHSData->PromptForSave)
+		return FALSE;
+	Fid = GSSiOpenFile (CurTheme->HotSpotSaveTo,NULL,OF_CREATE);
+	if (Fid == HFILE_ERROR)
+		return FALSE;	
+	GridSize =  (long)pHSData->GridWidth * (long)pHSData->GridHeight * 4; 
+	pGrid =  (HPLONG)GlobalLock (pHSData->hGrid); 
+	BigWrite (Fid,(HPSTR)pHSData,sizeof(HOTSPOTDATA));
+	BigWrite (Fid,(HPSTR)pGrid,GridSize);
+	GSSiClose (Fid);
+	return TRUE;
+}
+
+HANDLE LoadHotSpotSurface (LPSTR File)
+{
+	LPHOTSPOTDATA	pHSData;
+	long	GridSize;
+    HPLONG	pGrid;
+    HFILE	Fid; 
+    HANDLE	handle;
+	
+	if (!pHSData->PromptForSave)
+		return FALSE;
+	Fid = GSSiOpenFile (File,NULL,OF_READ);
+	if (Fid == HFILE_ERROR)
+		return FALSE;	
+	handle = GSSiGlobAlloc (GMEM_MOVEABLE,sizeof(HOTSPOTDATA));
+	pHSData = (LPHOTSPOTDATA)GlobalLock (handle);  
+	BigRead (Fid,(HPSTR)pHSData,sizeof(HOTSPOTDATA));
+	GridSize =  (long)pHSData->GridWidth * (long)pHSData->GridHeight * 4;   
+	pHSData->hGrid = GSSiGlobAlloc (GMEM_MOVEABLE,GridSize);
+	pGrid =  (HPLONG)GlobalLock (pHSData->hGrid); 
+	BigRead (Fid,(HPSTR)pGrid,GridSize);   
+	GlobalUnlock (pHSData->hGrid);
+	GSSiClose (Fid); 
+	GlobalUnlock (handle);
+	return handle;
+} 
+
+BOOL CompareHotSpotData (LPHOTSPOTDATA pHSData)
+{   
+	HANDLE	hCompare;
+	LPHOTSPOTDATA	pHSDataCT;
+    HPLONG	pGrid, pGridCT;
+    long	GridSize;  
+    double Factor=1;
+    char	File[150];   
+    LPSTR	pFile=File, pEnd;
+	
+	if (!*CurTheme->HotSpotCompareTo)
+		return FALSE; 
+	_fstrcpy (File,CurTheme->HotSpotCompareTo);
+	ExpandText (File);
+	if (!*File)
+		return FALSE;
+	if (*File == '(')
+	{
+		pEnd = _fstrrchr (File,')');
+		*pEnd++ = 0; 
+		pEnd++;
+		Factor = atof (pEnd);
+		pFile++;
+	}
+	if (!(hCompare = LoadHotSpotSurface (pFile)))
+		return FALSE; 
+	pHSDataCT = (LPHOTSPOTDATA)GlobalLock (hCompare); 
+	pGridCT = (HPLONG)GlobalLock (pHSDataCT->hGrid);   
+	pGrid = (HPLONG)GlobalLock (pHSData->hGrid);     
+	CurTheme->Ymax = LONG_MIN;
+	CurTheme->Ymin = LONG_MAX;
+	if (pHSData->GridWidth == pHSDataCT->GridWidth && pHSData->GridHeight == pHSDataCT->GridHeight)
+	{
+		GridSize =  (long)pHSData->GridWidth * (long)pHSData->GridHeight; 
+		while (GridSize--)
+		{ 
+			(*pGrid) -= (*pGridCT++)/Factor;
+			CurTheme->Ymax = max (CurTheme->Ymax,*pGrid);
+			CurTheme->Ymin = min (CurTheme->Ymin,*pGrid);
+			pGrid++;
+		}  
+	}
+	else
+		GSSiMessageBox ("Unable to compare hot spot surfaces due to unequal dimensions",NULL,MB_ICONEXCLAMATION);
+	GlobalUnlock (pHSData->hGrid);
+	GSSiGlobUlFree (&pHSDataCT->hGrid); 
+	GSSiGlobUlFree (&hCompare); 
+	
+	return TRUE;
+}
+
+void DisplayHotSpots (void)
+{
+	LPHOTSPOTDATA	pHSData = &CurTheme->HotSpotData;
+	LPVIEWPORT	SaveVP = CurView;
+    COLORREF	Color=RGB(255,0,0);  
+    HBRUSH	hBrush=GetStockObject(BLACK_BRUSH);  
+    RECT	Rect; 
+    short	r=255,g=0,b=0,i,j;
+    double	rw, MV;
+    HPLONG	pGridRow = (HPLONG)GlobalLock (pHSData->hGrid), pGrid;
+    
+    if (CurTheme->Ymax > 0 && pHSData->GridWidth)
+    {   
+    	CompareHotSpotData (pHSData);
+    	SaveHotSpotSurface ();
+		SetViewport (CurTheme->TargetViewport);   
+		SaveDC (CurView->hDC);
+	    SetDisplayMode (CurView->hDC,GF_TEXTMODE);
+	    SelectClipRgn (CurView->hDC,0);
+	    switch (pHSData->ColorOpt)
+	    {
+	    	case 0:    
+	    		MV = max (-CurTheme->Ymin,CurTheme->Ymax);
+	    		break;
+	    	case 1:
+	    		MV = sqrt (max (-CurTheme->Ymin,CurTheme->Ymax));
+	    		break;
+	    	case 2:
+	    		MV = pow (max (-CurTheme->Ymin,CurTheme->Ymax),2);
+	    		break;
+	    }
+	    rw = (double)(CurView->DrawRect.right - CurView->DrawRect.left)/(double)pHSData->GridWidth; 
+	    i=0;
+    	Rect.top = CurView->DrawRect.bottom;
+	    while (i < pHSData->GridHeight)
+	    {   
+	    	Rect.bottom = Rect.top;
+	    	Rect.top = Rect.bottom - pHSData->Granularity;
+	    	pGrid = pGridRow;   
+	    	j=0;   
+	    	Rect.right=CurView->DrawRect.left;
+	    	while (j < pHSData->GridWidth)
+	    	{   
+	    		double	GridVal = *pGrid;
+	    		
+	    		switch (pHSData->ColorOpt)
+	    		{
+	    			case 1:
+	    				GridVal = sqrt (fabs (GridVal)) * Signof (GridVal);                 
+	    				break;
+	    			case 2:
+	    				GridVal = pow (GridVal,2);
+	    				break;
+	    			default:
+	    				break;
+	    		}
+		    	Rect.left=Rect.right; 
+	    		Rect.right = Rect.left + pHSData->Granularity;  
+		    	if (*pGrid>0)  
+		    	{
+	    			g = b = 255 * ((1.0-(((double)100-pHSData->ColorMin)/(double)100)*(GridVal / MV))*((double)(100-pHSData->ColorMin)/100));
+		    		Color = RGB(255,g,b);
+		    		hBrush = CreateSolidBrush (Color);
+		    		FillRect (CurView->hDC,&Rect,hBrush);
+		    		DeleteObject (hBrush);
+				}
+		    	else if (*pGrid<0)  
+		    	{
+	    			g = r = 255 * ((1.0-(((double)100-pHSData->ColorMin)/(double)100)*(fabs(GridVal) / MV))*((double)(100-pHSData->ColorMin)/100));
+		    		Color = RGB(r,g,255);
+		    		hBrush = CreateSolidBrush (Color);
+		    		FillRect (CurView->hDC,&Rect,hBrush);
+		    		DeleteObject (hBrush);
+				}
+	            pGrid++;
+	            j++;
+	    	} 
+	    	pGridRow += pHSData->GridWidth;
+	    	i++;
+	    } 
+		RestoreDC (CurView->hDC,-1);  
+		SetCurView (SaveVP);
+	}
+	GlobalUnlock (pHSData->hGrid);
+	return;
+}
+
+BOOL SetVisibilityFromTheme (LPSTR Name,short setopt)
+{   
+	HFILE		Fid;  
+	OFSTRUCT	OFStruct;
+	LPTHEME		pTheme, SaveTheme=CurTheme; 
+	short		pos=BT_FIRST, idesc;
+	char		SymName[128],Data[128];
+	
+	Fid = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ);  
+	if (Fid == HFILE_ERROR)
+		return FALSE;
+	ReadObject (Fid,FALSE,&pTheme,NULL); 
+	GSSiClose (Fid);
+	if (pTheme->ScatterFile)
+	{
+		pTheme->hScatterFile = BT_OPEN (pTheme->ScatterFile,0, BT_READ, 0); 
+		while (!BT_FIND (pTheme->hScatterFile,SymName,pos,BT_ANY,Data))
+		{
+			pos = BT_NEXT;
+			if ((idesc = GetSymbolNum (SymName)))
+			{
+				if (GetVisibility(idesc) != setopt)
+					ToggleVisibility (idesc);
+			}
+		} 
+	}	
+	CloseObject (pTheme);  
+	CurTheme = SaveTheme;
+	return TRUE;
+}  
+
+double GetThemeClassDistance (short iclass)
+{   
+	double	Dist=0, MinDist, Dist2;  
+	DPOINT	MidPoint, FromPoint;
+	HANDLE	handle;  
+	HPDPOINT	pPoint; 
+	long	nPoints=0,i,Mini;
+	short	pos, cond;
+	static	double	ClassDist[MAX_THEME_CLASSES];
+	
+	if (iclass < 0)
+		_fmemset (ClassDist,0,sizeof(double)*MAX_THEME_CLASSES);
+	if (iclass < 0)
+	{	
+		if (!OpenThemeHighlightFile (BT_READ))
+			return 0;
+		for (iclass=0;iclass<CurTheme->NumClass;iclass++)
+		{   
+			Dist = 0;
+			if (CurTheme->ClassCount[iclass])
+			{
+				handle = GSSiGlobAlloc (GMEM_MOVEABLE,(CurTheme->ClassCount[iclass]+1)*sizeof(DPOINT));
+				pPoint = (HPDPOINT)GlobalLock (handle); 
+				ThemeHighlightKey.Class = iclass;
+				ThemeHighlightKey.Refno = LONG_MIN; 
+				nPoints = 0;
+				pos = BT_FIRST;
+				cond = BT_GE;
+				while (!BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,pos,cond,(LPSTR)&ThemeHighlightData))
+				{
+					pos = BT_NEXT;
+					cond = BT_ANY;
+					if (ThemeHighlightKey.Class != iclass)
+						break;
+					if (nPoints)
+					{
+						MidPoint.x += ThemeHighlightData.Point.x;
+						MidPoint.y += ThemeHighlightData.Point.y;
+					}
+					else
+						MidPoint =  ThemeHighlightData.Point;
+					pPoint[nPoints++] = ThemeHighlightData.Point;
+				}
+				MidPoint.x /= nPoints;
+				MidPoint.y /= nPoints;
+				GetGlobalPVal ("[%STARTPOINT]",&MidPoint,&FromPoint); 
+				while (nPoints)
+				{   
+					MinDist = DBL_MAX;
+					for (i=0;i<nPoints;i++) 
+					{
+						Dist2 = ldistp (FromPoint,pPoint[i]);
+						if (Dist2 < MinDist)
+						{
+							MinDist = Dist2;
+							Mini = i;
+						}
+					}
+					Dist += MinDist;
+					FromPoint = pPoint[Mini];
+					nPoints--;
+					if (Mini < nPoints)
+						hmemmove ((HPSTR)&pPoint[Mini],(HPSTR)&pPoint[Mini+1],(long)sizeof(DPOINT)*(nPoints-Mini));
+				}
+				GSSiGlobUlFree (&handle);
+				ClassDist[iclass] = Dist*MFT/5280;
+			}
+		} 
+		CloseThemeHighlightFile (); 
+		return 0;
+	}
+	return ClassDist[iclass];
+}
+void EndProcessingThemeLegends (void)
+{   
+	short	iview, itheme;  
+	LPVIEWPORT	SaveView = CurView;
+	
+	for (iview = 0;iview < NumViewports; iview++)
+    {
+    	SetCurView (pViewports[iview]); 
+        if (CurViewActive() && CurView->pTheme)
+		{
+			CurTheme=CurView->pTheme;
+			if ((CurTheme->ID == PF_COORD_DISPLAY || CurTheme->IsActive) &&
+			    CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
+			    ThemeDisplayLegend(4);
+		}
+	}
+	SetCurView (SaveView);
+	return;
+}
+
+BOOL FAR PASCAL EDIT_ADDS_THEMEMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{	
+ 	FILE	*FidNoteType; 
+ 	char	str[130]; 
+	int		TabStops[2]={1200,1300}; 
+	LPSTR	lpBar, lpName;
+	LPINT	pNumDocs;
+	int		NumDocs=0;
+   	int		nItems;
+
+
+ int	BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ if (ThemeCommonCode (hWndDlg, Message, wParam, lParam,0))
+ 	return TRUE;
+ switch(Message)
+   {
+    case WM_INITDIALOG: 
+    	 switch (CurTheme->Xmove)
+    	 {
+    	 	case 1: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITADDS,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 2: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITNAMES,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 3: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITADDSNAMES,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 4: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITSPEED,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 5: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITTRAFVOL,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 6: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITZIP,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 7: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITONEWAY,BM_SETCHECK,TRUE,0L);
+		 		break;
+    	 	case 8: 
+		 		SendDlgItemMessage (hWndDlg,IDC_EDITLANES,BM_SETCHECK,TRUE,0L);
+		 		break;
+		 }
+		 if (CurTheme->Ymove)
+	 		SendDlgItemMessage (hWndDlg,IDC_ALLOW_ADD,BM_SETCHECK,TRUE,0L);
+		 	
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+         break; /* End of WM_CLOSE                                      */
+
+    case WM_COMMAND:
+         switch(wParam)
+           {
+            case IDCANCEL:
+                 /* Ignore data values entered into the controls        */
+                 /* and dismiss the dialog window returning FALSE       */
+                 EndDialog(hWndDlg, FALSE);
+                 break;
+            case IDC_SAVE_THEME:  
+            case IDOK:
+            {
+            	HANDLE	hItems;
+            	LPINT	lpItems;
+            	
+				if (SendDlgItemMessage (hWndDlg,IDC_EDITADDS,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 1;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITNAMES,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 2;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITADDSNAMES,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 3;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITSPEED,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 4;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITTRAFVOL,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 5;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITZIP,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 6;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITONEWAY,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 7;
+				else if (SendDlgItemMessage (hWndDlg,IDC_EDITLANES,BM_GETCHECK,0,0))
+					CurTheme->Xmove = 8;
+				CurTheme->Ymove = SendDlgItemMessage (hWndDlg,IDC_ALLOW_ADD,BM_GETCHECK,0,0);
+                if (wParam == IDC_SAVE_THEME)
+            		SaveCurTheme(hWndDlg);
+				else            	
+                	EndDialog(hWndDlg, TRUE);
+            }
+                break;
+
+           }
+         break;    /* End of WM_COMMAND                                 */
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+
+void BoundsDisplayTheme (BOOL Init)
+{
+	short		SaveNum, SaveDVI, itheme;    
+	static		BOOL	InBDT=FALSE;
+	
+    if (InBDT)
+    	return;
+    InBDT = TRUE;
+	for (itheme=0;itheme<CurView->NumThemes;itheme++)
+	{
+		CurTheme = CurView->pThemes[itheme];
+		BoundsDisplayTheme2 (Init);
+	}
+	InBDT = FALSE;
+	return;
+} 
+
+void BoundsDisplayTheme2 (BOOL Init)
+{
+	LPVIEWPORT	SaveVP=CurView;
+	DPOINT		WPoint;  
+	BOOL		HaveRef, ClearVP=FALSE;
+	LPSAVESCREEN	pSaveScreen;
+	LPBOUNDSDISPLAY lpBoundsDisplay;
+	MNMXCORD	WBounds, PKBounds;
+	POINT		BegPoint, EndPoint;
+	HPEN		ArrowPen; 
+	long		SaveDispC; 
+	static		LPTHEME		InBDTheme=NULL; 
+	LPTHEME		SaveIBDT;
+
+	if (CurTheme->ID != GF_BOUNDS_DISPLAY_THEME ||
+		!CurTheme->IsActive|| 
+		!CurTheme->VPDisplayed)
+		return; 
+	if (CurTheme == InBDTheme)
+		return; 
+	lpBoundsDisplay = (LPBOUNDSDISPLAY)&CurTheme->ClassBM; 
+	if (Init) 
+	{
+		lpBoundsDisplay->SavedScreen = NULL;
+		lpBoundsDisplay->CurAreaRef = LONG_MAX;
+		return;
+	}   
+//	SetCurView (pViewports[CurTheme->TargetViewport-1]); //tempdebu
+	SetViewport (CurTheme->TargetViewport);
+	WBounds = CurView->WBounds;
+//	SetCurView (pViewports[CurTheme->DisplayViewport-1]); //tempdebu
+	SetViewport (CurTheme->DisplayViewport);
+	if (CurTheme->NumVals == DisplayCycle && !CurView->LinkedTo)  
+	{
+		SetCurView (SaveVP);  
+		return;
+	}
+	SaveIBDT = InBDTheme;  
+	InBDTheme = CurTheme;
+	CurTheme->NumVals = DisplayCycle;
+	CurView->BoundsDisplayVP = CurTheme->TargetViewport; 
+	if (!CurView->hTranWinToBase) 
+	{
+		CurView->NewBounds = WBounds;
+		SetBoundsRect2 (CurView->DrawRect,CurView->hDC); 
+	}  
+	if (!CurView->Bitmap) 
+	{     
+		lpBoundsDisplay->SavedScreen = NULL;
+		lpBoundsDisplay->CurAreaRef = LONG_MAX;
+	}
+	HaveRef = FALSE;
+	if (*lpBoundsDisplay->CurAreaRefGlobal && !lpBoundsDisplay->IgnoreClear)
+	{   
+		long		WantRef;
+		LPVIEWPORT	SaveView=CurView;
+		LPTHEME		SaveTheme=CurTheme;     
+		LPTHEME		pTheme;
+			
+		WantRef = GetGlobalLVal3 (lpBoundsDisplay->CurAreaRefGlobal,LONG_MAX);
+		if (WantRef != LONG_MAX)
+		{
+			if (PickByRefno(WantRef,NULL,NULL,-100))
+			{
+			    SetViewport (PickList[0].ViewID);
+				pTheme = AddTheme (GF_SAVEPOLYPARTS_THEME);
+				CurView->PassID = 2;
+				ProcessSelectedTheme = CurView->NumThemes;
+				ProcessPickedItem (0,FALSE);        		
+				ProcessSelectedTheme = 0;
+				DeleteTheme (pTheme);  
+				GetSavedPolys ();  
+					
+		   		if (hSavePoly)
+				{   LPMNMXCORD lpRect;
+					HPDPOINT	lpDpoint; 
+					BOOL	rtn;  
+					DPOINT	AreaPoints[5]; 
+					LPWORD	pPolyParts; 
+					WORD	nPParts;
+					short	nareas; 
+					long	nPnts;
+						
+                    if (hSavePolyParts)
+                    {
+                    	pPolyParts = (LPWORD)GlobalLock (hSavePolyParts);
+                    	nareas = *pPolyParts++; 
+                    }
+                    else
+                    { 
+                        nareas=1;
+                        nPParts = nSavePoly;  
+                        pPolyParts = &nPParts;
+                    }
+		            lpRect = (LPMNMXCORD) GlobalLock (hSavePoly);
+		            lpRect++;
+		            lpDpoint = (HPDPOINT) lpRect; 
+		            while (nareas-- && !HaveRef)
+		            {
+			            BoundsToPoints (&WBounds,AreaPoints);   
+			            AreaPoints[4] = AreaPoints[0];
+			            HaveRef = PolyInArea (0,*pPolyParts,lpDpoint,5,AreaPoints,InclusionOpt);
+			            lpDpoint += (*pPolyParts+1);
+			            pPolyParts++;
+			        }
+		            GSSiGlobUlFree (&hSavePoly);
+		            GSSiGlobUlFree (&hSavePolyParts);
+		        } 
+		        DestroySavedPolys ();
+			}
+		} 
+		CurTheme = SaveTheme;
+		SetCurView (SaveView);
+	}
+	if (CurTheme->SymNum && !HaveRef)
+	{   
+		long	SaveDisplayCycle = DisplayCycle;
+		LPTHEME	SaveTheme=CurTheme;     
+		short	SaveMaxPick = MaxPick;     
+		BOOL	SaveDH = DisableHalt;
+			
+		WPoint =  MinMaxMidPointD (&WBounds);
+		MaxPick = 10;  
+		DisableHalt=TRUE;
+		HaveRef = PickItems (CurView->hWnd,WPoint); 
+		DisableHalt=SaveDH;
+		MaxPick = SaveMaxPick;
+		CurTheme = SaveTheme;
+	}
+	if (HaveRef)
+	{	
+		long	SaveDisplayCycle = DisplayCycle;
+		LPTHEME	SaveTheme=CurTheme; 
+			    
+    	while (NumPicked--)
+    	{   
+    		if (SymInContents (PickList[NumPicked].Desc,CurTheme->SymNum,CurTheme->Contents))
+    		{
+	    		ProcessPickedItem (NumPicked,FALSE);
+				CurTheme = SaveTheme;	
+	    		ProcessText (CurTheme->Title);
+	    		if (PickList[NumPicked].Refno != lpBoundsDisplay->CurAreaRef)  
+	    		{
+		    		short SaveNumVP=NumViewportsToDisplay,n;
+		    		BOOL	DisplayVP[MAX_VIEWPORTS]; 
+		    		HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+		    		LPSTR	CacheFile=GlobalLock (hMem), SaveScreenFile=CacheFile+256; 
+		    		LPOFSTRUCT	pOFStruct=(LPOFSTRUCT) (SaveScreenFile + 256);  
+		    		long	SaveSize;
+			    		 
+		    		lpBoundsDisplay->CurAreaRef = PickList[NumPicked].Refno;
+		    		n=SaveNumVP;
+		    		while (n--)
+		    			DisplayVP[n] = pViewports[n]->Display;
+		    		if (!Printing)
+		    		{ 
+			    		_fstrcpy (SaveScreenFile,"[%DL]savescrn");
+			    		ExpandText (SaveScreenFile);
+			    		_mkdir (SaveScreenFile);
+			    		sprintf (_fstrchr(SaveScreenFile,0),"\\%lx.scr",lpBoundsDisplay->CurAreaRef);
+			        	DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID);
+		                if (GetCacheFile (CacheFile, SaveScreenFile,FALSE, 0))
+		                {   
+		                	long	UpdateTime;
+		                	if ((CurView->Bitmap = ReadSavedScreen (CacheFile,&UpdateTime)))
+		                	{
+		                		pSaveScreen = (LPSAVESCREEN)GlobalLock (CurView->Bitmap);
+	                			pSaveScreen->pVP = CurView; 
+	                			CurView->BitmapID = pSaveScreen->ID;
+		                		if (CurView->Rect.left != pSaveScreen->Rect.left ||
+		                			CurView->Rect.right != pSaveScreen->Rect.right ||
+		                			CurView->Rect.top != pSaveScreen->Rect.top ||
+		                			CurView->Rect.bottom != pSaveScreen->Rect.bottom)
+		                		{
+		                			GlobalUnlock (CurView->Bitmap);
+		                			DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID); 
+		                			RemoveCacheFile (SaveScreenFile);
+		                		}
+		                		else
+		                		{
+		                			GlobalUnlock (CurView->Bitmap);
+		                		}
+		                	}
+		                } 
+		            } 
+		            PKBounds = PickList[NumPicked].Rect;
+					InflateBounds (&PKBounds,CurTheme->RefValDbl);
+	                if (Printing || !CurView->Bitmap)
+	                {   
+	                	BOOL SaveOZA = OutlineZoomArea, SaveGMA = GetMaskArea; 
+	                	LPVIEWPORT	SaveVP2;
+		                	
+						OutlineZoomArea = GetMaskArea = CurTheme->ZeroIsMissing;
+						SetMaskArea(NumPicked,0);
+						DisableHalt = TRUE; 
+						DisplayCycle--; 
+						SaveVP2 = CurView; 
+					    CurView->CurZoomAreaRef = 0;
+			    		ZoomToRect(PKBounds,TRUE); 
+			    		SetCurView (SaveVP2);
+			    		DisableHalt = FALSE; 
+			    		if (!Printing)
+			    		{ 
+							DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID);
+			                CurView->Bitmap = SaveScreen2 (CurView->hDC, CurView->Rect,CurView,&CurView->BitmapID);
+			                CurView->BitmapRect = CurView->Rect;
+			                WriteSavedScreen (SaveScreenFile,CurView->Bitmap);
+		                	GetCacheFile (CacheFile, SaveScreenFile,TRUE, 0); 
+		                	GSSiRemove (SaveScreenFile);
+		                }
+	                	OutlineZoomArea = SaveOZA;
+						GetMaskArea = SaveGMA;
+		            }
+		            else 
+		            {
+		            	BOOL SaveDisplay=Display;
+			            	
+		            	Display = FALSE;
+						DisplayCycle--;
+					    CurView->CurZoomAreaRef = 0;
+		            	ZoomToRect(PKBounds,2);
+		            	Display = SaveDisplay;                    
+		            	DisplayTAGs2 (CurView->hDC,1,0); 
+		            }
+	                CurView->BitmapRect = CurView->Rect;
+		    		NumViewportsToDisplay = SaveNumVP;
+		    		n=SaveNumVP;
+		    		while (n--)
+		    			pViewports[n]->Display = DisplayVP[n]; 
+		    		NumPicked = 0; 
+		    		GSSiGlobUlFree (&hMem);
+		    	}
+	    	}
+		}
+		DisplayCycle = SaveDisplayCycle;
+	}
+	else if  (CurTheme->SymNum || *lpBoundsDisplay->CurAreaRefGlobal)  
+		ClearVP = TRUE; 
+	if (lpBoundsDisplay->IgnoreClear)
+		ClearVP = FALSE;
+	SaveDC (CurView->hDC);
+	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	if (ClearVP)
+	{   
+		RECT	Rect=CurView->Rect;
+			
+	  	SelectClipRgn (CurView->hDC,NULL);
+		InflateRect (&Rect,1,1);
+		if (*lpBoundsDisplay->CurAreaRefGlobal)
+			SetGlobalValueLong (lpBoundsDisplay->CurAreaRefGlobal,LONG_MAX);
+	    FillRectPoly (CurView->hDC,&Rect,WindowColor);
+       	DisplayTAGs2 (CurView->hDC,2,0); 
+	}
+	CurView->hRgn = CreateVPRgn(FALSE);
+  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	DeleteObject(CurView->hRgn);
+	if (!ClearVP)
+		ShowZoomArea (CurView->hDC,&WBounds,
+					               &lpBoundsDisplay->SavedScreen,
+					               &lpBoundsDisplay->SavedRect,
+								   lpBoundsDisplay->BoxPoints);
+
+
+	RestoreDC (CurView->hDC,-1);  
+	SetCurView (SaveVP);  
+	InBDTheme = SaveIBDT;
+	return;
+}
+
+POINT AddjustPointLoc (POINT Point,float Size,short Sequence)
+{   
+	short	xmove, ymove, shift=0; 
+	float	shiftdist;
+	
+	if (Sequence <= 1)
+		return Point;
+Top:
+	if (Sequence == 1)
+	{
+		xmove = 0;
+		ymove = 0;
+	}
+	else if (Sequence < 4)
+	{  
+		xmove = -1;
+		ymove = Sequence - 2;
+	}	
+	else if (Sequence < 6)
+	{  
+		ymove = 1;
+		xmove = Sequence - 4;
+	}	
+	else if (Sequence < 8)
+	{  
+		xmove = 1;
+		ymove = -(Sequence - 6);
+	}	
+	else if (Sequence < 10)
+	{  
+		ymove = -1;
+		xmove = -(Sequence - 8);
+	}	
+	else if (Sequence < 14)
+	{  
+		xmove = -2;
+		ymove = Sequence - 11;
+	}	
+	else if (Sequence < 18)
+	{  
+		ymove = 2;
+		xmove = Sequence - 15;
+	}	
+	else if (Sequence < 22)
+	{  
+		xmove = 2;
+		ymove = -(Sequence - 19);
+	}	
+	else if (Sequence < 27)
+	{  
+		ymove = -2;
+		xmove = -(Sequence - 23);
+	}	
+	else if (Sequence < 32)
+	{  
+		xmove = -3;
+		ymove = Sequence - 28;
+	}	
+	else if (Sequence < 38)
+	{  
+		ymove = 3;
+		xmove = Sequence - 34;
+	}	
+	else if (Sequence < 44)
+	{  
+		xmove = 3;
+		ymove = -(Sequence - 40);
+	}	
+	else if (Sequence < 51)
+	{  
+		ymove = -3;
+		xmove = -(Sequence - 46);
+	}	
+	else if (Sequence < 58)
+	{  
+		xmove = -4;
+		ymove = Sequence - 53;
+	}	
+	else if (Sequence < 66)
+	{  
+		ymove = 4;
+		xmove = Sequence - 61;
+	}	
+	else if (Sequence < 74)
+	{  
+		xmove = 4;
+		ymove = -(Sequence - 69);
+	}	
+	else if (Sequence < 83)
+	{  
+		ymove = -4;
+		xmove = -(Sequence - 77);
+	}	
+	else if (Sequence < 92)
+	{  
+		xmove = -5;
+		ymove = Sequence - 86;
+	}	
+	else if (Sequence < 102)
+	{  
+		ymove = 5;
+		xmove = Sequence - 96;
+	}	
+	else if (Sequence < 112)
+	{  
+		xmove = 5;
+		ymove = -(Sequence - 106);
+	}	
+	else if (Sequence < 122)
+	{  
+		ymove = -5;
+		xmove = -(Sequence - 116);
+	}	
+	else 
+	{  
+		shift++;
+		Sequence -= 121;
+		goto Top;
+	}
+	shiftdist = shift * 0.25 * Size;	
+	Point.x += IDNINT (xmove * Size*1.2 + shiftdist);
+	Point.y += IDNINT (-ymove * Size*1.2 + shiftdist);
+	return Point;
+}   
+
+BOOL CacheDisplayTheme (short from)
+{   
+	LPVIEWPORT	SaveVP=CurView;
+	HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+	LPSTR	CacheFile=GlobalLock (hMem), SaveScreenFile=CacheFile+256; 
+	LPOFSTRUCT	pOFStruct=(LPOFSTRUCT) (SaveScreenFile + 256); 
+	LPSAVESCREEN	pSaveScreen; 
+	HANDLE	hBitmap;
+	
+	switch (from)
+	{   
+		default: 
+			GSSiGlobUlFree (&hMem);
+			return FALSE;  
+		case 2:
+		case 1: 
+			SetViewport (CurTheme->TargetViewport);
+			if (!CurView->CurZoomAreaRef || !*CurView->CurVisibilityID)
+				break;
+			_fstrcpy (SaveScreenFile,"[%DL]savescrn");
+			ExpandText (SaveScreenFile);
+			_mkdir (SaveScreenFile);
+			sprintf (_fstrchr(SaveScreenFile,0),"\\%lx\\%s.scr",CurView->CurZoomAreaRef,CurView->CurVisibilityID); 
+			if (from == 1)
+			{
+		        if (GetCacheFile (CacheFile, SaveScreenFile,FALSE, 0))
+		        {   
+		        	long	UpdateTime;
+		        	
+		        	if ((hBitmap = ReadSavedScreen (CacheFile, &UpdateTime)))
+		        	{   
+		        		double	dtime = difftime (UpdateTime,OpenConfigStat.st_mtime); 
+                        
+		        		pSaveScreen = (LPSAVESCREEN)GlobalLock (hBitmap);
+		    			pSaveScreen->pVP = CurView; 
+		    			CurView->BitmapID = pSaveScreen->ID;
+		        		if (dtime < 0 ||
+		        			CurView->Rect.left != pSaveScreen->Rect.left ||
+		        			CurView->Rect.right != pSaveScreen->Rect.right ||
+		        			CurView->Rect.top != pSaveScreen->Rect.top ||
+		        			CurView->Rect.bottom != pSaveScreen->Rect.bottom)
+		        		{
+		        			GlobalUnlock (hBitmap);
+		        			DestroySavedScreen (&hBitmap,CurView->BitmapID); 
+		        			RemoveCacheFile (SaveScreenFile);
+		        		}
+		        		else
+		        		{
+		        			GlobalUnlock (hBitmap);
+	        				RestoreScreen2 (CurView->hDC,hBitmap,CurView->BitmapID);
+		        			DestroySavedScreen (&hBitmap,CurView->BitmapID); 
+	   				        CurView->PassID = 99; 
+		        		}
+		        	}
+		        }
+			} 
+			else
+			{   
+				hBitmap = SaveScreen2 (CurView->hDC, CurView->Rect,CurView,&CurView->BitmapID);
+		        WriteSavedScreen (SaveScreenFile,hBitmap);
+		    	GetCacheFile (CacheFile, SaveScreenFile,TRUE, 0); 
+		    	GSSiRemove (SaveScreenFile); 
+		    }
+		break;
+	}
+	GSSiGlobUlFree (&hMem);
+	SetCurView (SaveVP);
+	return TRUE;
+}
+
+
+

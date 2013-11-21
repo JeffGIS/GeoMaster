@@ -1,0 +1,62 @@
+
+##	SCCS version: @(#)   Makedefs   1.1   8/28/91
+##
+## 	Makefile to make libgctp.a:
+##		USGS General Cartographic Transformation Package/II
+
+C_SPECIAL=
+LD_SPECIAL=
+
+LIB=gctp
+
+SRCS = \
+        adjlz0.c asinz0.c blkdta.c dmslz0.c e0fnz0.c e1fnz0.c e2fnz0.c \
+        e3fnz0.c e4fnz0.c gtrnz0.c mlfnz0.c msfnz0.c paksz0.c phi1z0.c \
+        phi2z0.c phi3z0.c phi4z0.c pj01z0.c pj02z0.c pj03z0.c pj04z0.c \
+        pj05z0.c pj06z0.c pj07z0.c pj08z0.c pj09z0.c pj10z0.c pj11z0.c \
+        pj12z0.c pj13z0.c pj14z0.c pj15z0.c pj16z0.c pj17z0.c pj18z0.c \
+        pj19z0.c pj20z0.c qsfnz0.c spakz0.c tsfnz0.c unitz0.c untfz0.c xtra.c
+
+OBJS =\
+        adjlz0.o asinz0.o blkdta.o dmslz0.o e0fnz0.o e1fnz0.o e2fnz0.o \
+        e3fnz0.o e4fnz0.o gtrnz0.o mlfnz0.o msfnz0.o paksz0.o phi1z0.o \
+        phi2z0.o phi3z0.o phi4z0.o pj01z0.o pj02z0.o pj03z0.o pj04z0.o \
+        pj05z0.o pj06z0.o pj07z0.o pj08z0.o pj09z0.o pj10z0.o pj11z0.o \
+        pj12z0.o pj13z0.o pj14z0.o pj15z0.o pj16z0.o pj17z0.o pj18z0.o \
+        pj19z0.o pj20z0.o qsfnz0.o spakz0.o tsfnz0.o unitz0.o untfz0.o xtra.o
+
+
+asinz0.o       : ./gctp.h
+blkdta.o       : ./gctp.h
+dmslz0.o       : ./gctp.h
+e4fnz0.o       : ./gctp.h
+gtrnz0.o       : ./gctp.h
+phi1z0.o       : ./gctp.h
+phi2z0.o       : ./gctp.h
+pj01z0.o       : ./gctp.h
+pj02z0.o       : ./gctp.h ./nad27.h ./nad83.h
+pj03z0.o       : ./gctp.h
+pj04z0.o       : ./gctp.h
+pj05z0.o       : ./gctp.h
+pj06z0.o       : ./gctp.h
+pj07z0.o       : ./gctp.h
+pj08z0.o       : ./gctp.h
+pj09z0.o       : ./gctp.h
+pj10z0.o       : ./gctp.h
+pj11z0.o       : ./gctp.h
+pj12z0.o       : ./gctp.h
+pj13z0.o       : ./gctp.h
+pj14z0.o       : ./gctp.h
+pj15z0.o       : ./gctp.h
+pj16z0.o       : ./gctp.h
+pj17z0.o       : ./gctp.h
+pj18z0.o       : ./gctp.h
+pj19z0.o       : ./gctp.h
+pj20z0.o       : ./gctp.h
+tsfnz0.o       : ./gctp.h
+unitz0.o       : ./gctp.h
+
+./gctp.h          : ./proto.h
+
+default: lib
+install: install-lib

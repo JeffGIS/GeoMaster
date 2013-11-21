@@ -1,0 +1,261 @@
+HANDLE CreateSaveList (int NumItems)
+{   HANDLE	handle;
+	LPSAVELIST	SaveList;
+	int	item;
+
+	if (NumItems)
+	{
+		handle = GSSiGlobAlloc (GHND,2+4*NumItems);
+		SaveList = (LPSAVELIST) GlobalLock (handle);
+		SaveList->NumItems=NumItems;
+		for (item=0;item<NumItems;item++) SaveList->ItemHandle[item]=NULL;
+
+		GlobalUnlock (handle);
+		return (handle);
+	}
+	else
+		return (NULL);
+}
+
+void DeleteSavedItems (HANDLE hSaveList)
+{   LPSAVELIST	SaveList;
+	int	item;
+
+	if (!hSaveList) return;
+
+	SaveList = (LPSAVELIST) GlobalLock (hSaveList);
+	for (item=0;item<SaveList->NumItems;item++)
+		GlobalFree ((HGLOBAL)SaveList->ItemHandle[item]);
+
+	GlobalUnlock (hSaveList);
+	GlobalFree (hSaveList);
+
+	return;
+}
+
+void DrawSavedItems (HANDLE hSaveList, HANDLE hNewList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			SavedItem;
+	LPSAVELIST	SaveList, NewList;
+	int			Fid;
+	LPSTR		ItemPnt, hpnt;
+	HPEN		hOldPen;
+     
+    if (!hSaveList) return;
+	CloseMap ();
+
+    SaveList = (LPSAVELIST)GlobalLock(hSaveList);
+    if (hNewList) NewList = (LPSAVELIST)GlobalLock(hNewList);
+	hOldPen = SelectObject(CurView->hDC, GetStockObject(BLACK_PEN));
+	CurrentPen = hRedPen;
+	CurType=1;
+    for (SavedItem=0;SavedItem<SaveList->NumItems;SavedItem++)
+    {
+		GetPickName (SavedItem);
+		if (!PickName) return;
+		_fstrcpy(PltName,PickName);
+		if (!OpenMap (CurView->hWnd,CurView->hDC)) return;
+    	if (!SaveList->ItemHandle[SavedItem]) break;
+	    ipnt = (LPINT)GlobalLock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	    hpnt = (LPSTR) ipnt + 4;
+	    ItemHeader = (ITEM *)hpnt;
+		CurView->hRgn = CreateVPRgn();
+	  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+	  	DeleteObject(CurView->hRgn);
+	    SetDisplayMode (CurView->hDC, GF_MAPMODE);
+	    if (hNewList)
+	    {
+		    NewList->ItemHandle[SavedItem] = (LPVOID)GSSiGlobAlloc (GPTR,2*abs(ItemHeader->Len)+20);
+		    ItemPnt = (LPSTR) GlobalLock ((HGLOBAL)NewList->ItemHandle[SavedItem]);
+		    _fmemmove (ItemPnt,ipnt,4);
+		    ItemPnt+=4;
+		    _fmemmove (ItemPnt,hpnt,2*abs(ItemHeader->Len)+16);
+	   	    GlobalUnlock ((HGLOBAL)NewList->ItemHandle[SavedItem]);
+
+	    }
+	    NewBounds.xmn = INT_MAX;
+	    NewBounds.ymn = INT_MAX;
+	    NewBounds.xmx = INT_MIN;
+	    NewBounds.ymx = INT_MIN;
+	    ProcessGraphicsRec (CurView->hDC,(LPINT)hpnt);
+	    if (NewBounds.xmn != INT_MAX) ItemHeader->MinMax = NewBounds;
+		CloseMap ();
+	    GlobalUnlock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	}
+	SelectObject (CurView->hDC,hOldPen);
+	GlobalUnlock (hSaveList);
+	if (hNewList) GlobalUnlock (hNewList);
+	return;
+}
+
+
+void WriteSavedItems (HANDLE hSaveList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			SavedItem;
+	LPSAVELIST	SaveList, NewList;
+	int			Fid;
+	LPSTR		ItemPnt;
+	HPEN		hOldPen;
+	long		SaveLoc;
+	int			i;
+
+	CloseMap ();
+    SaveList =(LPSAVELIST) GlobalLock(hSaveList);
+
+    for (SavedItem=0;SavedItem<SaveList->NumItems;SavedItem++)
+    {
+		GetPickName (SavedItem);
+		if (!PickName) return;
+		Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+    	if (!SaveList->ItemHandle[SavedItem]) break;
+	    ipnt = (LPINT) GlobalLock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+	    _fmemmove (&SaveLoc,ipnt,4);
+	    if (_llseek (Fid,SaveLoc,0) == HFILE_ERROR)
+	    {
+		    MessageBox( GetFocus(),"Cannot locate segment",
+	    			 	    "Error", MB_OK);
+	        goto Exit;
+	    }
+	    ipnt+=2;
+	    ItemHeader =  (ITEM *)ipnt; 
+	    ItemHeader->Len = -abs(ItemHeader->Len); /* indicates change */
+	    i=_lwrite (Fid,ItemHeader,12+2*abs(ItemHeader->Len));
+Exit:   GlobalUnlock((HGLOBAL)SaveList->ItemHandle[SavedItem]);
+		_lclose (Fid);
+	   	Fid = 0;
+	}
+
+	GlobalUnlock (hSaveList);
+	return;
+}
+
+void MovePickListToSaveList (HANDLE hSaveList)
+{	LPINT		ipnt, EndItem;
+    HANDLE 		hpltBuf;
+	LPSTR		LPpltBuf;
+	ITEM		*ItemHeader;
+	HDC			hDC;
+	OFSTRUCT	OFStruct;
+	POINT		CenterPoint, WinPoint;
+	BOOL		OpenedFid;
+	int			Item;
+	LPSTR		ItemPnt;
+	LPSAVELIST	SaveList;
+	int			Fid;
+	WORD		nRead, nBytes;
+	long		SaveLoc;
+
+    
+    if (!hSaveList)
+    	return;
+    SaveList = (LPSAVELIST)GlobalLock (hSaveList);
+
+	for (Item=0;Item<NumPicked;Item++)
+	{
+		GetPickName (Item);
+		if (!PickName) return;
+		_fstrcpy (PltName,PickName);
+	
+		Fid = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READ);
+	    _llseek (Fid,PickList[Item].Segment,0);
+	    nRead = _lread (Fid,&nBytes,2);
+	    hpltBuf = GSSiGlobAlloc (GMEM_MOVEABLE,(DWORD)nBytes);
+	    LPpltBuf = GlobalLock (hpltBuf);
+	    SaveLoc = _llseek (Fid,0,1) + PickList[Item].Offset;
+	    nRead = _lread (Fid,LPpltBuf,nBytes);
+	    ipnt = (LPINT)(LPpltBuf + PickList[Item].Offset);
+	    ItemHeader =  (ITEM *)ipnt;
+	    SaveList->ItemHandle[Item] = (LPVOID)GSSiGlobAlloc (GHND,2*abs(ItemHeader->Len)+20);
+	    ItemPnt = (LPSTR) GlobalLock ((HGLOBAL)SaveList->ItemHandle[Item]);
+	    _fmemmove (ItemPnt,&SaveLoc,4);
+	    ItemPnt +=4;
+	    EndItem = ipnt + abs(ItemHeader->Len);
+	    EndItem+=6;
+	    *EndItem = 0;
+	    _fmemmove (ItemPnt,ipnt,2*abs(ItemHeader->Len)+16);
+   	    GlobalUnlock ((HGLOBAL)SaveList->ItemHandle[Item]);
+	    GlobalUnlock (hpltBuf);
+	    GlobalFree (hpltBuf);
+		_lclose (Fid);
+	   	Fid = 0;
+    }
+    GlobalUnlock (hSaveList);
+	return;
+}
+
+BOOL MovePolyLine (void)
+{	int	i, iPickAp, PickedPoint;
+	LPPOINT	lpPoints, lpPointsMin;
+	double	factor, xmove, ymove;
+	double	RefDist1, RefDist2;
+	POINT	RefPoint;
+	int		mini,d,mindist;
+
+	iPickAp = PickAp * iWidthFactor;
+
+    xmove = CurTheme->Xmove * WindowToFileFactor;
+    ymove = CurTheme->Ymove * WindowToFileFactor;
+
+	lpPoints = lpPoints2; 
+	mindist = 32000;
+	mini=-1;
+	for (i=0;i<nPnts;i++,lpPoints++)
+	{
+		d=PointInPickArea (*lpPoints);
+		if (d && d<mindist)
+		{         
+			mindist=d;
+			mini=i;
+			lpPointsMin = lpPoints;
+		}
+	}
+	if (mini>=0)
+	{
+		lpPoints=lpPointsMin;		
+		PickedPoint = mini; 
+		RefPoint = *lpPoints;
+		lpPoints =lpPoints2;
+		RefDist1 = idist (RefPoint,*lpPoints);
+		lpPoints += nPnts-1;
+		RefDist2 = idist (RefPoint,*lpPoints);
+		goto Found;
+	}		
+	return(TRUE);	
+	
+Found:lpPoints = lpPoints2;
+	for (i=0;i<nPnts;i++,lpPoints++)
+	{   
+		if (i == PickedPoint)
+			factor = 1.0;
+		else if (MoveOnlyPickedPoint)
+			factor = 0;
+		else if (i < PickedPoint && RefDist1 > 0)
+			factor = 1.0 - idist (*lpPoints,RefPoint) /(float) RefDist1; 
+		else if (i > PickedPoint && RefDist2 > 0)
+			factor = 1.0 - idist (*lpPoints,RefPoint) /(float) RefDist2;
+		else
+			factor = 0; 
+		lpPoints->x = IDNINT (lpPoints->x + xmove * factor);
+		lpPoints->y = IDNINT (lpPoints->y + ymove * factor);
+		NewBounds.xmn = min (NewBounds.xmn,lpPoints->x);
+		NewBounds.ymn = min (NewBounds.ymn,lpPoints->y);
+		NewBounds.xmx = max (NewBounds.xmx,lpPoints->x);
+		NewBounds.ymx = max (NewBounds.ymx,lpPoints->y);
+	}
+	return(TRUE);
+}
+

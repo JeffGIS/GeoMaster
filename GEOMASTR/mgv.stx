@@ -1,0 +1,63 @@
+[Main]
+;*** DO NOT TOUCH! The format of this file WILL change.
+Product=Setup Pro
+Version=1.0
+OEM=Eschalon Release Edition
+Base Directory=c:\gssi\prog\gwizinst\geomastr
+
+[Settings]
+Application Name=GeoMaster
+Window Title=GeoMaster Setup (Maple Grove)
+Background Title=GeoMaster Setup
+Directory=c:\geomastr
+PM Group=GeoMaster
+Prompt PM=TRUE
+Disk Label Mask=Disk #%d
+Background=Dithered Title
+ReadMe Font=Default
+Resize ReadMe=FALSE
+ReadMe At Start=FALSE
+Brand Source=FALSE
+Brand Destination=FALSE
+End Program=
+
+[Branding]
+INI File=
+Section=
+Name=
+Company=
+
+[Files]
+avifile.dll="avifile.dll" 99840 S 0 C X
+compobj.dll="compobj.dll" 102400 S 0 C X
+conus.las="conus.las" 133712 W 0 C A
+conus.los="conus.los" 133712 W 0 C A
+county.par="county.par" 7150 W 0 C A
+crypto16.dll="crypto16.dll" 70400 S 0 C A
+ctl3dv2.dll="ctl3dv2.dll" 27632 S 0 C SB
+ctycoord.hlp="ctycoord.hlp" 4252 W 0 C A
+dibapi.dll="dibapi.dll" 23632 W 0 C N
+earth.ico="earth.ico" 766 W 0 C N
+gctp16.dll="gctp16.dll" 14960 W 0 C A
+gctp32.dll="gctp32.dll" 376196 W 0 C A
+latlongs.cvt="latlongs.cvt" 998 W 0 C X
+msacm.dll="msacm.dll" 49616 S 0 C X
+msvideo.dll="msvideo.dll" 124416 S 0 C X
+nad27sp="nad27sp" 14472 W 0 C A
+nad83sp="nad83sp" 14472 W 0 C A
+odbc.dll="odbc.dll" 56240 S 0 C NB
+odbc16ut.dll="odbc16ut.dll" 5792 S 0 C NB
+odbcadm.exe="odbcadm.exe" 6464 W 0 C NB
+odbccurs.dll="odbccurs.dll" 88896 S 0 C NB
+odbcinst.dll="odbcinst.dll" 92576 S 0 C NB
+readnad.dll="readnad.dll" 9312 W 0 C A
+ultgrd.dll="ultgrd.dll" 38912 S 0 C N
+utm15.cvt="utm15.cvt" 1004 A 0 C A
+winexec.dll="winexec.dll" 16436 W 0 C N
+
+[INI Items]
+0=0 "geomastr.ini" "Install" "InDir" "%d"
+
+[PM Items]
+GeoMaster MGPDS=0 "gmnosock.exe mgpds.gmc" "s:\geomastr" "" "0"
+

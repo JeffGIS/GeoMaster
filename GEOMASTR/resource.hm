@@ -1,0 +1,5 @@
+// Microsoft Developer Studio generated Help ID include file.
+// Used by GWCONFIG.RC
+//
+#define HIDC_DGNPARMWEIGHT              0x869    // "DGN_OUTPUT"
+#define HIDC_PCTCOLOR                   0xffff0875    // "MODIFIER_COLORINTENSITY"

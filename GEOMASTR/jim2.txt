@@ -1,0 +1,46 @@
+		DPOINT	PT;
+		double	xmid,ymid,degperpixelx,degperpixely, lc;
+		MNMXCORD Rect;
+				
+		PT = NewLatLong(DPoint.y,DPoint.x,Scale*5280*FTM,PY/2);
+        Rect.xmx = PT.x;
+		PT = NewLatLong(DPoint.y,DPoint.x,Scale*5280*FTM,3*PY/2);
+        Rect.xmn = PT.x; 
+		PT = NewLatLong(DPoint.y,DPoint.x,Scale*5280*FTM,0);
+        Rect.ymx = PT.y;
+		PT = NewLatLong(DPoint.y,DPoint.x,-Scale*5280*FTM,0);
+        Rect.ymn = PT.y; 
+		lc = GetLocalCorrection (&Rect);	            
+        if (bmwidth < bmheight)
+        {
+        	degperpixelx = (Rect.xmx - Rect.xmn)/ bmwidth;
+        	degperpixely = degperpixelx * lc;
+        }
+        else
+        {
+        	degperpixely = (Rect.ymx - Rect.ymn) / bmheight;
+        	degperpixelx = degperpixely / lc;
+        }
+
+
+double GetLocalCorrection (LPMNMXCORD pBounds)
+{
+	double	d1,d2,f, MidX, MidY, Dist;
+	DPOINT	p1,p2;                    
+	
+    MidX = (pBounds->xmn + pBounds->xmx) / 2;
+    MidY = (pBounds->ymn + pBounds->ymx) / 2; 
+    Dist = (pBounds->xmx - pBounds->xmn + pBounds->ymx - pBounds->ymn) / 2;
+	p1.x = MidX - Dist;
+	p1.y = MidY;
+	p2.x = MidX + Dist;
+	p2.y = MidY;
+	d1=ArcDistance(p1,p2);
+	p1.y = MidY - Dist;
+	p1.x = MidX;
+	p2.y = MidY + Dist;
+	p2.x = MidX;
+	d2=ArcDistance(p1,p2);
+	f = d1/d2; 
+	return f;
+}

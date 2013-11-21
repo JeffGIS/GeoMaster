@@ -1,0 +1,46 @@
+This directory contains various "canned" versions of h/ansi/limits.h.  The
+comment at the top of each file notes which hardware the file has been tested
+on.
+
+If one of these is directly usable in your environment, then copy or link it
+to h/ansi/limits.h.
+
+Otherwise, copy the one that most closely approximates your configuration into
+h/ansi/limits.h and edit it appropriately.  If your distribution of IPW
+includes the program "machine" (see src/etc/machine), then you may be able to
+use it to generate a limits.h automatically.
+
+Once your new limits.h works, please mail a copy of it to "ipw@crseo.ucsb.edu"
+so we can incorporate it into the standard distribution.  Be sure that the
+comment at the top of the file adequately describes your particular operating
+system and hardware.
+
+macros:
+
+CHAR_BIT	maximum number of bits for smallest object that is not a bit
+		field (byte)
+
+SCHAR_MIN	minimum value for an object of type "signed char"
+SCHAR_MAX	maximum value for an object of type "signed char"
+
+UCHAR_MAX	maximum value for an object of type "unsigned char"
+
+CHAR_MIN	minimum value for an object of type "char"
+CHAR_MAX	maximum value for an object of type "char"
+
+SHRT_MIN	minimum value for an object of type "short int"
+SHRT_MAX	maximum value for an object of type "short int"
+
+USHRT_MAX	maximum value for an object of type "unsigned short int"
+
+INT_MIN		minimum value for an object of type "int"
+INT_MAX		maximum value for an object of type "int"
+
+UINT_MAX	maximum value for an object of type "unsigned int"
+
+LONG_MIN	minimum value for an object of type "long int"
+LONG_MAX	maximum value for an object of type "long int"
+
+ULONG_MAX	maximum value for an object of type "unsigned long int"
+
+$Header: /usr/home/ipw/h/ansi/conf.limits/RCS/README,v 1.1 89/10/27 14:09:26 frew Exp $

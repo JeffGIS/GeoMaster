@@ -1,0 +1,169 @@
+# make rules
+
+CFLAGS=$(C_SPECIAL) $(C_OPTION) $(C_STD)
+LINTFLAGS=$(C_SPECIAL) $(LINT_SPECIAL) $(LINT_OPTION) $(LINT_STD)
+
+#-----------------------------------------------------------------------------
+
+$(SCRIPT): $(SCRIPT).sh
+	@echo
+
+script: $(SCRIPT)
+
+install-script: $(SCRIPT)
+	-$(INSTALL) -c -m $(SCRIPT_MODE) $(SCRIPT).sh $(SCRIPT_DIR)/$(SCRIPT)
+
+#-----------------------------------------------------------------------------
+
+lint:
+	$(LINT) $(LINTFLAGS) $(SRCS) $(wildcard $(LINT_DIR)/$(LINT_PREFIX)*) \
+        	$(LINTGREPV)
+
+#-----------------------------------------------------------------------------
+
+LDFLAGS=$(LD_SPECIAL) $(LD_OPTION) $(LD_STD)
+LIB_IPW=$(LIB_DIR)/$(LIB_PREFIX)ipw$(LIB_SUFFIX)
+LIB_UNIX=$(LIB_DIR)/$(LIB_PREFIX)unix$(LIB_SUFFIX)
+LIBS=$(LIBS_SPECIAL) $(LIB_IPW) $(LIB_UNIX) $(LIBS_STD)
+
+$(PGM): $(OBJS)
+	$(CLD) $(LDFLAGS) -o $(PGM) $(OBJS) $(LIBS) || $(RM) $(PGM)
+
+pgm: $(PGM)
+
+install-pgm: $(PGM)
+	-$(INSTALL) $(STRIP) -m $(PGM_MODE) $(PGM) $(PGM_DIR)
+
+#-----------------------------------------------------------------------------
+
+LIB_PATH=$(LIB_DIR)/$(LIB_PREFIX)$(LIB)$(LIB_SUFFIX)
+
+lib:
+# ipwmake extracts the files from the archive, then puts them back in.  While
+# this is nice in concept, it is extremely tedious when each extract/insert
+# cycle is 30 seconds long (for each subdirectory...)
+# Instead, we leave the .o files, then make the archive.  When the archive is
+# successfully made, do a "make clean" in the lib directory and the .o files
+# will be removed.
+	$(MAKE) $(OBJS)
+
+install-lib: lib
+	$(AR) $(AR_ROPTS) $(LIB_PATH) $(OBJS)
+	$(RANLIB) $(LIB_PATH) >/dev/null
+	-$(CHMOD) $(LIB_MODE) $(LIB_PATH)
+
+LINTLIB=$(LINT_PREFIX)$(LIB)$(LINT_SUFFIX)
+
+lintlib:
+	$(LINT) $(LINTFLAGS) $(LINT_LIBOPT)$(LIB) $(SRCS)
+	-test -f $(LIB) && mv $(LIB) $(LINTLIB)
+	-$(INSTALL) -m $(LIB_MODE) $(LINTLIB) $(LINT_DIR)
+
+#-----------------------------------------------------------------------------
+
+all:
+	for i in $(DIRS); do \
+		echo '::::::::::::::'; \
+		echo $$i; \
+		echo '::::::::::::::'; \
+		cd $$i; \
+		$(MAKE); \
+		cd ..; \
+	done
+
+#-----------------------------------------------------------------------------
+
+install-all:
+	for i in $(DIRS); do \
+		echo '::::::::::::::'; \
+		echo $$i; \
+		echo '::::::::::::::'; \
+		cd $$i; \
+		$(MAKE) install; \
+		cd ..; \
+	done
+
+#-----------------------------------------------------------------------------
+
+realclean:
+ifeq ($(PGM),NO_PGM)
+  ifeq ($(SCRIPT),NO_SCRIPT)
+    ifeq ($(LIB),NO_LIB)
+      ifndef DIRS
+	@echo Nothing to clean.
+      else  #DIRS
+	for i in $(DIRS); do \
+		echo '::::::::::::::'; \
+		echo $$i; \
+		echo '::::::::::::::'; \
+		cd $$i; \
+		$(MAKE) realclean; \
+		cd ..; \
+        done
+      endif
+    else  #LIB
+	rm -f $(OBJS) *.ln core
+    endif
+  else  #SCRIPT
+	@echo Nothing to clean.
+  endif
+else  #PGM
+	rm -f $(PGM) $(OBJS) *.ln core
+endif
+
+#-----------------------------------------------------------------------------
+ 
+clean:
+ifeq ($(PGM),NO_PGM)
+  ifeq ($(SCRIPT),NO_SCRIPT)
+    ifeq ($(LIB),NO_LIB)
+      ifndef DIRS
+	@echo Nothing to clean.
+      else  #DIRS
+	for i in $(DIRS); do \
+		echo '::::::::::::::'; \
+		echo $$i; \
+		echo '::::::::::::::'; \
+		cd $$i; \
+		$(MAKE) clean; \
+		cd ..; \
+        done
+      endif
+    else  #LIB
+	rm -f $(OBJS)
+    endif
+  else  #SCRIPT
+	@echo Nothing to clean.
+  endif
+else  #PGM
+	rm -f $(PGM) $(OBJS)
+endif
+
+#-----------------------------------------------------------------------------
+ 
+uninstall:
+ifeq ($(PGM),NO_PGM)
+  ifeq ($(SCRIPT),NO_SCRIPT)
+    ifeq ($(LIB),NO_LIB)
+      ifndef DIRS
+	@echo Nothing to clean.
+      else  #DIRS
+	for i in $(DIRS); do \
+		echo '::::::::::::::'; \
+		echo $$i; \
+		echo '::::::::::::::'; \
+		cd $$i; \
+		$(MAKE) uninstall; \
+		cd ..; \
+        done
+      endif
+    else  #LIB
+	$(AR) $(AR_DOPTS) $(LIB_PATH) $(OBJS)
+	$(RANLIB) $(LIB_PATH) >/dev/null
+    endif
+  else  #SCRIPT
+	rm -f $(SCRIPT_DIR)/$(SCRIPT)
+  endif
+else  #PGM
+	rm -f $(PGM_DIR)/$(PGM)
+endif

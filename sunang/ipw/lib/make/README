@@ -1,0 +1,107 @@
+
+  A typical IPW Makefile for an application looks something like:
+
+===========================================================
+include $(IPW)/lib/make/Makestart
+ 
+PGM= ipw2ppm
+ 
+SRCS=\
+        headers.c main.c ipwload.c initcolors.c readcolormap.c rgblookup.c \
+        pgmwrite.c ppmwrite.c ipw3ppm.c
+ 
+default: pgm
+install: install-pgm
+ 
+include $(IPW)/lib/make/Makerules
+ 
+$(OBJS): pgm.h
+===========================================================
+
+  First, include Makestart.  Next come the information and definitions that
+are relevent to your program (or library, directory, etc).  Then include
+Makerules, and finally give the dependencies.  Note that the order that these
+things are given is important.  You can change them if you know what you are
+doing, but they have a logic to them.
+
+  Makestart will include local and Makestd.  Here is a description of what
+each file is intended to do:
+
+  local:
+          This file sets up the variables that are appropriate for your
+        machine and O/S.  They define the compiler, compiler options, linker,
+        archiver, lint, and some other commands.
+
+  Makestd:
+          This sets up various variables that shouldn't need to be changed.
+        This includes how to run the C compiler (using the variables defined
+        in local), library prefixes and suffixes, where programs and libraries
+        are found within IPW, permissions that should be set, and how to make
+        object files from C and Fortran code.
+
+  Makerules:
+          This is where the logic of make gets used.  This file tells make
+        what commands get run when any rule is activated.  It also includes
+        logic to do recursive makes on each directory.
+
+
+Instructions for Make files
+---------------------------
+
+Variables:
+
+  DIRS:		make will attempt to do a recursive make on each directory
+		listed in this variable.  Make will run a depth-first algorithm
+		on these directories, so be sure they are defined in the order
+		you want them run.  For top-level directories, be sure to
+		make your libraries before your binaries, i.e. define DIRS to
+		be "lib etc bin" or equivalent.
+
+  SCRIPT:	This is the name of the script that will be installed.  The
+		script itself should have a .sh ending.
+		Defining this variable tells make that you are making a script
+		and not a library or program.
+
+		NOT-DONE: You can make a script entitled script.awk or
+		script.pl which would be a script written in AWK or Perl,
+		and it will install these scripts if the language is available.
+		In local, the preferred order is defined (default is to use
+		Perl, AWK, then shell.
+
+  SCRIPT_DIR:	This is where the script will get installed.  Normally you
+		don't want to change this.
+
+  LIB:		This defines the name of the resulting library that will be
+		made.  Defining this variable tells make that you want to
+		make a library.
+
+  PGM:		The name of the program.
+
+  SRCS:		This lists your source programs.  These are the programs that
+		will be used to make your library or program.  The variable
+		OBJS is automatically defined for you from this one, according
+		to the standard rules for making an object file from source
+		files (set up in Makestd).  In other words, if you have foo.c
+		in SRCS, you will get foo.o in OBJS.
+
+  SUBLIBS:	Define this to "NO_LIBS" to tell make that there are no
+		libraries under this directory.  This will speed up the make
+		process.
+
+Targets:
+
+  default:	This is what happens by default.  Usually for a library this
+		is "lib", for a program "pgm", and for a script, "script".
+		For directories, it is usually "all".
+
+  install:	This is what happens when install is given as an argument to
+		make.  This is usually "install-lib" for libraries, install-pgm
+		for programs, and "install-script" for scripts.  Directories
+		have "install-all" as their install action.
+
+Hints:
+
+  When making libraries that have header files in an h/ directory, set
+C_SPECIAL to the directory where the headers live, e.g.:
+          C_SPECIAL= -I$(IPW)/src/exp/erlc/h
+right after you include Makestart.

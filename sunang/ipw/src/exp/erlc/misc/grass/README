@@ -1,0 +1,78 @@
+Snow melt modeling
+------------------
+isnobal         -- 2-layer energy balance snowmelt model 
+salbedo         -- Estimates solar albedo over snow in two channels 
+selevrad        -- topographic distribution of beam & diffuse radiation over
+		   snow 
+stoporad        -- topographic distribution of solar radiation over snow 
+
+Solar radiation modeling
+------------------------
+gelevrad        -- global-scale beam and diffuse radiation (preprocessor for
+		   gtoporad) 
+ggradient       -- slope and aspect of global-scale image 
+ghorizon        -- cosine horizon angles for global-scale elevation image 
+gshade          -- cosine of illumination angle 
+gsunlight       -- Sun angles for global scale image 
+gtoporad        -- global-scale topographic distribution of solar radiation 
+gtoporad.24     -- global-scale topographic distribution of solar radiation at
+		   even time intervals for 24 hours 
+gtopquad        -- daily integrated radiation over global-scale topographic
+		   grid 
+gviewf          -- sky view and terrain configuration 
+sunweights      -- Kronrod quadrature weights 
+toporad.24      -- solar radiation over topographic grid at even time intervals
+		   for a total of 24 hours 
+
+Map projection conversion
+-------------------------
+mkalbers        -- create Albers projection definition file 
+mkgeo           -- create geographic projection definition file 
+mklambert       -- create Lambert Azimuthal Equal Area projection definition file 
+mklamcc         -- create Lambert Conformal Conic projection definition file 
+mkutm           -- create UTM projection definition file 
+reproj          -- convert image to new geographic projection 
+reproj_area 	-- calculate minimum bounding rectangle in reprojected space
+transcoord      -- translate map coordinates to different map projection 
+
+Image classification
+--------------------
+classeq         -- classify image according to equal area histogram 
+classify        -- classify image by given class ranges 
+clmask          -- make mask image from classified image 
+declass         -- classify image according to equal area histogram 
+mkcrh           -- construct a class range (CR) header 
+
+Image file import/export/interpolation utilities
+------------------------------------------------
+binexp          -- export binary floating point image data 
+grass.to.ipw    -- converts GRASS cell file to IPW image (run from GRASS)
+hcnx		-- Extract daily hydro-climatological or streamflow data
+ipw.to.grass    -- Convert IPW image file to GRASS cell file (run from GRASS)
+import          -- import ASCII file to IPW image 
+ipw2las         -- convert LAS image to IPW image 
+las2ipw         -- convert LAS image to IPW image 
+surface         -- interpolate image from irregularly spaced point data 
+
+Other models
+------------
+ipott           -- Calculate potential temp or air temp 
+itrbxfr         -- calculate H & LE using Brutsaert's method 
+rh2vp           -- convert relative humidity to vapor pressure 
+wbal            -- simple water balance model 
+
+Image file utilities
+--------------------
+cnhist.all      -- cumulative normalized histogram of one or more images 
+ftransform      -- transform image according to floating point X,Y pairs 
+imgstat         -- image statistics 
+imgsum          -- sum all unmasked pixels in an image 
+lqmm            -- min and max of all LQ header(s) 
+pix2fp          -- convert raw pixel to floating-point 
+requantize      -- requantize one or more images 
+resamp          -- zoom image by aggregation of pixel data - taking mean, min,
+		   or max 
+Other
+-----
+addtime         -- add delta hours to given date/time 
+cvtime          -- Converts between time formats 

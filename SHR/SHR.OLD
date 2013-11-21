@@ -1,0 +1,6110 @@
+#include "shr.h" 
+#include "bigmemln.h"
+#include "bigmem.h"
+#include "mapl.h"
+#define  p_tol
+#include "p_tol.h"
+#include "hash.h"    
+#include <direct.h>   
+#include <sys\types.h>
+#include <sys\stat.h>         
+#include <fcntl.h>
+#include <dibapi.h>  
+#include <ctype.h>
+#include <math.h> 
+#include <float.h>   
+#include "winexec.h" 
+#include "..\geomastr\resource.h"
+/*
+ *  The CRC table is alocated and defined at run-time.
+ */
+#define W_FAR far   
+
+HWND FontListhWndDlg; 
+UINT FontListCntl;
+
+#define MAXSAVEDSCREENS	1024
+
+    typedef struct
+        {   long    FileNum;
+            long    FileLength;
+            time_t  LastUsed;
+            char    FileName[128];
+        }   CACHEBUF; 
+
+HFILE	MaxHFile=HFILE_ERROR;
+extern	HBITMAP	hFullWindowBitMap; 
+extern	RECT	FullWindowBitMapRect;
+extern	BOOL	IgnoreLbutton; 
+extern	HFILE	FidSmall;
+long	LastFGSLoc, LastFGSlRec; 
+long	MinCacheDriveFreeSpace=100000000;
+static	HANDLE	hSavedScreens[MAXSAVEDSCREENS];
+static	short	nSavedScreens=0;      
+static	long	NextScreenID=1;
+static unsigned short crc_table[128]={0}; 
+short	MaxWaitCycles=5;
+short   have_crc_table=0;
+static  BOOL    FirstCache = TRUE; 
+static	short	CurTraceLev=0;
+static  char    CacheDir[132]="", CacheIndex[128]; 
+static	char	SubstitutePathnameFrom[64]="", SubstitutePathnameTo[64];
+static	char	CachePathnameFrom[4][64], CachePathnameTo[64];  
+static	short	NumCachePathnameFrom=0;
+
+static	BOOL    TraceTrace = FALSE, NeedStep=FALSE, StepOver=FALSE;;  
+extern	BOOL	TraceType[4];
+BOOL Canceled=FALSE;
+
+long    NumFilesOpened=0,OpenFileTime=0;
+extern	LPSTR	OFTitle;
+extern HWND hInst, hWndMain;  
+extern	BOOL	DoPaint, DoTime, InFileWait, DisableHalt, HaveBlockingWindow;
+HFILE   TraceFid = HFILE_ERROR;
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam);
+
+static  BYTE    Mask[8] = {128, 64, 32, 16, 8, 4, 2, 1}; 
+BOOL    TraceOn=FALSE;
+static  char    SaveWinText[144]; 
+extern  HCURSOR hCursor, OldCursor; 
+extern	HANDLE	hRestoreMainWindow; 
+extern  HBRUSH  hBackBrush1;    
+extern	short	StretchMode;
+short       destX, destY, destW, destH, rect_width, rect_height;
+WORD    bmX, bmY;
+
+BOOL    ShareEnabled=FALSE,DebugExistFile=FALSE;     
+
+BOOL	KeepFilesOpen=FALSE;
+static	NumOpenFiles=0;
+static	OFSTRUCT	OpenFileStruct[MAXFILEHANDLES];
+static	HFILE		OpenFileFid[MAXFILEHANDLES];
+static	UINT		OpenFileMode[MAXFILEHANDLES];
+static	BOOL		OpenFileCloseRequested[MAXFILEHANDLES];
+
+static	HWND	hWndTrace=0;
+FARPROC lpfnTRACEWINDOWMsgProc;    
+
+void HaltMapDisplay(BOOL ClearCFGStack);   
+void DebugShowLine (LPDPOINT p1,LPDPOINT p2);
+
+void CloseAllRequestedFiles (void)
+{ 
+	UINT	i;
+	
+	if (KeepFilesOpen)
+		for (i=0;i<MAXFILEHANDLES;i++)
+		{
+			if (OpenFileFid[i] != HFILE_ERROR)
+			{
+				if (OpenFileCloseRequested[i])
+				{
+					_lclose (OpenFileFid[i]); 
+					LogOpenFilesClose (OpenFileFid[i]); 
+				}
+			}
+		}  
+	return;
+}
+
+void LogOpenFilesOpen (UINT Mode,HFILE Fid,LPOFSTRUCT pOFStruct)
+{   
+	short	i,j,ii; 
+	LPSTR	pDot;   
+	static	BOOL	FirstFileOpen=TRUE;
+	
+	if (FirstFileOpen)
+	{ 
+		for (i=0;i<MAXFILEHANDLES;i++)
+			OpenFileFid[i] = HFILE_ERROR;   
+		FirstFileOpen = FALSE;
+    }
+	if (Fid == HFILE_ERROR)
+		return;
+	if ((pDot=_fstrstr (pOFStruct->szPathName,".PLT")))
+	{
+		char	test[128];  
+		
+		*pDot = 0;
+		_fstrcpy (test,pOFStruct->szPathName);  
+		*pDot = '.';  
+		_fstrcat (test,".rin");
+		for (i=0;i<MAXFILEHANDLES;i++) 
+		{
+			if (OpenFileFid[i] != HFILE_ERROR)
+			{ 
+				if (!_fstricmp (test,OpenFileStruct[i].szPathName))
+					ii=1;//BlowOut();
+			}
+		}
+	}
+	if (Mode & OF_EXIST)
+		return;
+	if (Mode & OF_DELETE)
+		return; 
+	MaxHFile = max (MaxHFile,Fid);
+	for (i=0;i<MAXFILEHANDLES;i++) 
+		if (OpenFileFid[i] == HFILE_ERROR)
+			goto Gotid;
+	i = -1;
+	if (KeepFilesOpen) 
+	{   
+		for (j=0;j<MAXFILEHANDLES;j++)
+		{
+			if (OpenFileFid[j] != HFILE_ERROR) 
+			{
+				if (OpenFileCloseRequested[j])
+				{
+					_lclose (OpenFileFid[j]); 
+					LogOpenFilesClose (OpenFileFid[j]);
+					i = j;
+				}
+			}
+		}
+	}
+	if (i >= 0)
+		goto Gotid;
+	MessageBox (GetFocus(),"Open file limit exceeded",NULL,MB_ICONEXCLAMATION);
+	return;
+Gotid:			
+	OpenFileFid[i] = Fid;     
+	OpenFileStruct[i] = *pOFStruct;
+	OpenFileMode[i] = Mode;
+	OpenFileCloseRequested[i] = FALSE;    
+	NumOpenFiles++;
+	return;
+}
+
+void LogOpenFilesClose (HFILE Fid)
+{   
+	UINT	i,ii;
+	
+	if (Fid == HFILE_ERROR)
+		return;
+	for (i=0;i<MAXFILEHANDLES;i++)
+		if (OpenFileFid[i] == Fid)
+		{
+			OpenFileFid[i] = HFILE_ERROR;
+			NumOpenFiles--; 
+			return;
+		} 
+	ii=1;
+		
+	return;
+} 
+
+HFILE FileAlreadyOpen (LPSTR InName,UINT Mode)
+{   
+	UINT	i;
+	
+	if (KeepFilesOpen) 
+	{   
+		LPSTR	pFullPath = _fullpath (NULL,InName,0);
+		for (i=0;i<MAXFILEHANDLES;i++)
+		{
+			if (OpenFileFid[i] != HFILE_ERROR)
+			{
+				if (!_fstricmp (pFullPath,OpenFileStruct[i].szPathName))
+				{
+					free (pFullPath); 
+					if (Mode == OF_READ && OpenFileMode[i] == OF_READ)
+					{
+						_llseek (OpenFileFid[i],0,0);
+						return OpenFileFid[i];       
+					}
+					_lclose (OpenFileFid[i]); 
+					LogOpenFilesClose (OpenFileFid[i]);
+					return HFILE_ERROR;
+				}
+			}
+		}  
+		free (pFullPath);
+	}
+	return HFILE_ERROR;
+}
+
+BOOL RequestFileClose (HFILE Fid)
+{   
+	UINT	i;
+	
+	if (!KeepFilesOpen || ShareEnabled)
+		return FALSE;
+	for (i=0;i<MAXFILEHANDLES;i++)
+		if (OpenFileFid[i] == Fid) 
+		{ 
+			if (OpenFileMode[i] == OF_READ)
+			{ 
+				OpenFileCloseRequested[i] = TRUE;
+				return TRUE;
+			} 
+			return FALSE;
+		}   
+	return FALSE;
+}
+
+short	GetNumOpenFiles (void)
+{
+	return NumOpenFiles;
+}
+
+short GetOpenFileID (HFILE Fid)
+{   
+	short	i;
+	
+	if (Fid < 0)
+		return -1;
+	for (i=0;i<MAXFILEHANDLES;i++)
+		if (OpenFileFid[i] == Fid) 
+		{   
+			return i;
+		}
+	return -1;
+}  
+
+void DumpOpenFiles (void)
+{   
+	char	str[256];  
+	UINT	i;
+	   
+	if (!TraceOn)  
+		return; 
+	sprintf (str,"%i Open Files:");   
+	GSSiTrace (str);
+	for (i=0;i<MAXFILEHANDLES;i++)
+	{
+		if (OpenFileFid[i] != HFILE_ERROR)
+		{ 
+			sprintf (str,"    -%i %s %u",OpenFileFid[i],OpenFileStruct[i].szPathName,OpenFileMode[i]);    
+			GSSiTrace (str);
+		}
+	}
+	return;
+}
+
+BOOL BackupFiles (LPSTR FileList,LPSTR BUDir)
+{
+	HFILE	Fid1;
+	OFSTRUCT	OFStruct; 
+	char	FromFile[260], ToFile[260];    
+	BOOL	rtn=FALSE;
+	
+	Fid1 = GSSiOpenFile (FileList,&OFStruct,OF_READ);
+	if (Fid1 == HFILE_ERROR)
+		return FALSE; 
+	while (fgetstring (FromFile,256,Fid1))
+	{ 
+		_fstrcpy (ToFile,BUDir);
+		_fstrcat (ToFile,"\\");
+		_fstrcat (ToFile,FromFile);  
+		if (!makedirectories (ToFile,FALSE))
+			goto Exit;
+		if (!copyfile (ToFile,FromFile,FALSE,0,0,0,0,0,0))   
+		{
+			GSSiMessageBox ("Backup failed on above file",FromFile,MB_ICONEXCLAMATION);
+			goto Exit;                                                                 
+		}
+	} 
+	rtn = TRUE;
+Exit:
+	GSSiClose (Fid1);
+	return rtn;
+}
+
+
+void GSSiDeleteObject (HGDIOBJ *handle)
+{   int	i;
+
+	if (*handle)
+	{
+		if (!DeleteObject (*handle))
+			i=1;
+		*handle = 0;
+	}
+	return;
+}
+
+short loadtabs (LPSHORT Tabs)
+{
+	OFSTRUCT OFStruct;
+	HFILE	Fid;   
+	char	txt[256]; 
+	short	n; 
+	LPSTR	lpBeg, lpEnd;
+	
+	Fid = GSSiOpenFile ("tabs.txt",&OFStruct,OF_READ);
+	fgetstring (txt,200,Fid);
+	n = 0;  
+	lpBeg = txt;
+	while (lpBeg)
+	{
+		if ((lpEnd = _fstrchr (lpBeg,' ')))
+			*lpEnd++ = 0;
+		*Tabs++ = atoi (lpBeg);
+		n++;
+		lpBeg = lpEnd; 
+	}   
+	GSSiClose (Fid);
+	return n; 
+}
+
+BOOL makedirectories (LPSTR Name,BOOL IsDir)
+{   
+	char	FullName[128], Dir[130], FName[64], Ext[8], NewName[128]="", drive[4]; 
+	LPSTR	StartDir, EndDir;  
+	OFSTRUCT	OFStruct;
+	BOOL	Replace;
+	
+	_fmemset (Dir,0,130);
+	_fstrcpy (Dir,Name);
+	ExpandText (Dir);
+	_fullpath (FullName,Dir,sizeof(FullName));
+	EndDir = _fstrchr (FullName,0);
+	EndDir++;
+	*EndDir = 0;
+	_splitpath (FullName,drive,Dir,FName,Ext); 
+	
+	if (!IsDir || *Ext)	
+		sprintf (FullName,"%s%s",drive,Dir);
+	else
+		sprintf (FullName,"%s%s%s",drive,Dir,FName); 
+	StartDir = FullName; 
+	while (*StartDir)
+	{
+		EndDir = _fstrchr ((LPSTR)(StartDir+1),'\\');
+		if (!EndDir)
+			EndDir = _fstrchr (StartDir,0); 
+		*EndDir = 0;
+		if (*StartDir != '\\' && *NewName)
+			_fstrcat (NewName,"\\");
+		_fstrcat (NewName,StartDir); 
+		if (*LastChr (NewName) != ':')
+		{
+			if (_mkdir (NewName) == -1 && errno == ENOENT)
+				return FALSE;
+		}
+		StartDir = ++EndDir;
+	} 
+	
+	return TRUE;
+} 
+
+double	GetDriveFreeSpace (char Drive)
+{   
+	short	st, idrive;
+	char	drive = tolower(Drive);
+	
+	struct  {
+	   unsigned total_clusters;          // Clusters per drive
+	   unsigned avail_clusters;          // Available clusters
+	   unsigned sectors_per_cluster;     // Sectors per cluster
+	   unsigned bytes_per_sector;        // Bytes per sector
+	
+	}diskspace; 
+	
+	idrive = drive - 'a' + 1;               
+    st = _dos_getdiskfree(idrive, (struct _diskfree_t *)&diskspace ); 
+    if (st)
+    	return -1;
+    else
+    	return ((double)diskspace.avail_clusters * (double)diskspace.sectors_per_cluster * (double)diskspace.bytes_per_sector); 
+}
+
+double	GetDriveSize (char Drive)
+{   
+	short	st, idrive;
+	char	drive = tolower(Drive);
+	
+	struct  {
+	   unsigned total_clusters;          // Clusters per drive
+	   unsigned avail_clusters;          // Available clusters
+	   unsigned sectors_per_cluster;     // Sectors per cluster
+	   unsigned bytes_per_sector;        // Bytes per sector
+	
+	}diskspace; 
+	
+	idrive = drive - 'a' + 1;               
+    st = _dos_getdiskfree(idrive, (struct _diskfree_t *)&diskspace ); 
+    if (st)
+    	return -1;
+    else
+    	return ((double)diskspace.total_clusters * (double)diskspace.sectors_per_cluster * (double)diskspace.bytes_per_sector); 
+}
+
+long	GetProcessorID (void)
+{
+	DWORD End,Start = GetTickCount();
+	DWORD	i; 
+	double	j;
+	
+	for (i=0;i<100000;i++)
+		j = sqrt ((double)i);
+	End = GetTickCount();
+	return (End-Start);
+} 
+
+long GetComputerID (void)
+{ 
+	long	IDs[5], ID=0;
+	short	i; 
+	double	s = GetDriveSize ('c');
+	
+	for (i=0;i<5;i++)
+		IDs[i] = GetProcessorID(); 
+	ID = 1; 
+	for (i=0;i<5;i++)
+		ID += IDs[i];  
+	ID /= 5;
+	ID += ID%2;
+	return ID;
+}
+
+BOOL GetVolumeLabel(WORD wDrive, LPSTR lpBuff)
+{
+
+    struct _find_t  finfo;
+    char            sztmp[10];
+    
+    *lpBuff = 0;
+    _fstrcpy(sztmp, "X:\\*.*");
+    sztmp[0] = 'A' + wDrive;
+    if (_dos_findfirst(sztmp, _A_VOLID, &finfo) != 0)
+        return FALSE;
+    _fstrcpy(lpBuff, finfo.name); 
+    Strip (lpBuff,'.');
+    return TRUE;
+  
+  
+} 
+
+void AppendFile (LPSTR File,LPSTR Line)
+{
+	OFSTRUCT	OFStruct;
+	HFILE		Fid;
+	
+	Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);
+	if (Fid == HFILE_ERROR)
+		Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE_NODELETE);
+	_llseek (Fid,0,2);
+	fputstring (Line,Fid);
+	GSSiClose (Fid);
+	return;
+}
+
+void AddToMinMaxD (LPMNMXCORD mm1, LPDPOINT pPoint)
+{
+    mm1->xmn = min (mm1->xmn,pPoint->x);
+    mm1->xmx = max (mm1->xmx,pPoint->x);
+    mm1->ymn = min (mm1->ymn,pPoint->y);
+    mm1->ymx = max (mm1->ymx,pPoint->y); 
+    return;
+}
+
+void AddMinMax (LPMINMAX mm1, LPMINMAX mm2)
+{
+    mm1->xmn = min (mm1->xmn,mm2->xmn);
+    mm1->xmx = max (mm1->xmx,mm2->xmx);
+    mm1->ymn = min (mm1->ymn,mm2->ymn);
+    mm1->ymx = max (mm1->ymx,mm2->ymx);
+    return;
+}
+
+void AddMinMaxD (LPMNMXCORD mm1, LPMNMXCORD mm2)
+{
+    mm1->xmn = min (mm1->xmn,mm2->xmn);
+    mm1->xmx = max (mm1->xmx,mm2->xmx);
+    mm1->ymn = min (mm1->ymn,mm2->ymn);
+    mm1->ymx = max (mm1->ymx,mm2->ymx);
+    return;
+}
+
+double ArcDistance(DPOINT p1, DPOINT p2)  
+// retrns distance in meters between two lat-longs
+{
+  double GreatCircle, cos_c, ArcCos, sina,sinb, cosa, cosb, cosl;
+
+    sina =  sin(p1.y/RADIAN);
+    sinb =  sin(p2.y/RADIAN);
+    cosa =  cos(p1.y/RADIAN);
+    cosb =  cos(p2.y/RADIAN);
+    cosl =  cos((p2.x-p1.x)/RADIAN);
+
+   cos_c = sina*sinb+cosa*cosb*cosl;
+   ArcCos = acos(cos_c);
+   GreatCircle = fabs(6371100 * ArcCos);
+
+
+return GreatCircle;
+}  
+
+DPOINT NewLatLong(double Lat,double Long,double Dist,double Direction)
+{
+ DPOINT LatLong;
+//given:          Fixed 7 Oct 96 lda
+//  Point N is at the North Pole
+//  Point A is at the Given Lat,Long
+//  Length of two sides of a triangle and the angle it forms
+    double  cosc,cosb,cosa,sinb,sinc,sina,cosC,cosA;
+
+
+
+    cosc = cos(Dist/6371100);
+    sinc = sin(Dist/6371100);
+    cosb = cos((90e0-Lat)/RADIAN);
+    sinb = sin((90e0-Lat)/RADIAN);
+    cosa = cos(Direction)*sinb*sinc+cosb*cosc;
+    cosA = acos(cosa);
+    cosA *= RADIAN;
+    LatLong.y = 90e0 - cosA;   
+    sina = acos(cosa);
+    sina = sin(sina);
+    cosC = (cosc-(cosb*cosa)) / (sinb*sina);
+    cosC = acos(cosC);
+    cosC *= RADIAN;
+    if(Direction > PY)
+      LatLong.x = Long - cosC;
+    else
+      LatLong.x = Long + cosC;  
+
+  return LatLong;
+}      
+long Factorial (long value)
+{
+    long    n=0;  
+    
+    while (value--)
+        n+=value;
+    return  n;
+} 
+
+UINT ItemInList (short i,UINT nElements,HANDLE hElements)
+{   
+	LPSHORT	Elements;
+	UINT	j;
+	
+	if (!nElements)
+		return 0;
+	Elements = (LPSHORT)GlobalLock (hElements);
+	for (j=0;j<nElements;j++)
+		if (i == Elements[j])
+		{
+			GlobalUnlock (hElements);
+			return (j+1);
+		}
+	GlobalUnlock (hElements);
+	return 0;
+}
+
+short GetLBSelectedItems (HWND hWndDlg,UINT controlid,LPHANDLE phItems)
+{
+	short	nItems=SendDlgItemMessage(hWndDlg,controlid,LB_GETSELCOUNT,NULL,NULL);
+	LPSHORT	pItems;
+	
+	if (nItems)
+	{
+		*phItems=GSSiGlobAlloc(GHND,nItems*2);
+		pItems=  (LPINT) GlobalLock(*phItems);
+		SendDlgItemMessage(hWndDlg,controlid,LB_GETSELITEMS,nItems,(LPARAM)pItems); 
+		GlobalUnlock (*phItems);
+	}
+	else
+		*phItems = 0;
+	return nItems;
+}
+  
+
+void SetDlgItemTextGlobal (HWND hWndDlg,UINT icntl,LPSTR Global,LPSTR Init)
+{
+	char	str[256];
+	
+    GetGlobalCVal (Global,str,Init);
+    SetDlgItemText (hWndDlg,icntl,str);
+    return;
+}
+
+void GetDlgItemTextGlobal (HWND hWndDlg,UINT icntl,LPSTR Global)
+{
+	char	str[300];
+	
+	_fstrcpy (str,Global);
+	_fstrcat (str,"=");
+    GetDlgItemText (hWndDlg,icntl,_fstrchr(str,0),256);
+    ExpandText (str);
+    return;
+}
+
+BOOL StringEndsWith (LPSTR str,LPSTR endstr)
+{
+	short	le=_fstrlen(endstr);
+	short	ls=_fstrlen(str);
+	
+	if (ls<le)
+		return FALSE;
+	str += ls-le;
+	if (_fstricmp (str,endstr))
+		return FALSE;
+	return TRUE;
+}
+
+LPSTR MatchLev (LPSTR InStr, char MatchChar)
+{
+    short lev=0;
+    BOOL    Literal=FALSE; 
+    char	BegLev,EndLev;
+    
+    while (*InStr)
+    {    
+        if (Literal)
+            Literal = FALSE;
+        else
+        {
+            if (*InStr == '@')
+                Literal = TRUE;
+            else if (*InStr == MatchChar && !lev)
+                return (InStr);
+            else if (lev)
+            {
+				if (*InStr == BegLev)
+					lev++;            		
+				else if (*InStr == EndLev)
+					lev--;            		
+			}
+            else
+            	switch (*InStr)
+            	{
+            		case '(':
+            			EndLev = ')'; 
+            			BegLev = *InStr;
+            			lev++;
+            			break;
+            		case '[':
+            			EndLev = ']';
+            			BegLev = *InStr;
+            			lev++;
+            			break;
+            		case '{':
+            			EndLev = '}';
+            			BegLev = *InStr;
+            			lev++;
+            			break; 
+            		default:
+            			break;
+            	}
+            		
+        }
+        InStr++;
+    }
+    return (0);
+}   
+
+LPSTR ldelim (LPSTR str, char delim)
+{
+    short lev=0;
+    BOOL    Literal=FALSE;   
+    LPSTR   ldlm,lpdelim;
+    
+    ldlm = 0;
+    lpdelim = MatchLev (str,delim);
+    while (lpdelim)
+    {
+        ldlm = lpdelim;
+        lpdelim++;
+        lpdelim = MatchLev (lpdelim,delim);
+    }
+    return (ldlm);
+}   
+
+LPSTR strncpy0(LPSTR Buff,LPSTR str, short n)
+{
+    _fstrncpy (Buff,str,n);
+    Buff[n]=0;
+    return Buff;
+}
+
+LPSTR OneSpace (LPSTR Arg1)
+{
+    BOOL LastWasBlank, HaveNonBlank=FALSE; 
+    LPSTR   OutLoc, SaveArg1, SaveOutLoc;
+    long    l;  
+    HANDLE  handle;
+    
+    Truncate (Arg1);
+    SaveArg1 = Arg1;
+    l=_fstrlen(Arg1);
+    if (!l)
+    	return (Arg1);
+    handle = GSSiGlobAlloc (GMEM_MOVEABLE,l+1);
+    OutLoc = GlobalLock (handle);
+    SaveOutLoc = OutLoc;
+    LastWasBlank = FALSE;  
+    while (*Arg1)
+    {   
+        if (*Arg1 == '\t') *Arg1 = ' ';
+        if (*Arg1 != ' ')
+        {   
+            if (LastWasBlank && HaveNonBlank)
+                *OutLoc++ = ' '; 
+            LastWasBlank = FALSE;  
+            HaveNonBlank=TRUE;
+            *OutLoc++ = *Arg1;
+        }                        
+        else
+            LastWasBlank = TRUE;
+        Arg1++;
+    }
+    *OutLoc = 0;    
+    _fstrcpy (SaveArg1,SaveOutLoc);
+    GlobalUnlock (handle);
+    GlobalFree (handle); 
+    return (Arg1);
+}
+
+void BufWrite (HPSTR *pBuf,LPLONG plBuf,HPSTR data,long ldata)
+{   
+	while (ldata--) 
+	{
+		*(*pBuf)++ = *data++;   
+		(*plBuf)++;
+	}
+	return;
+}
+
+void BoundsToPoints (LPMNMXCORD pBounds, LPDPOINT Points)
+{   
+	Points[0].x = pBounds->xmn;
+	Points[0].y = pBounds->ymn;
+	Points[1].x = pBounds->xmn;
+	Points[1].y = pBounds->ymx;
+	Points[2].x = pBounds->xmx;
+	Points[2].y = pBounds->ymx;
+	Points[3].x = pBounds->xmx;
+	Points[3].y = pBounds->ymn;
+	return;
+}
+ 
+BOOL DPointInBounds (LPDPOINT Point,LPMNMXCORD pBounds)
+{    
+	 BOOL	rtn=TRUE;
+	 if (Point->x > pBounds->xmx ||
+	     Point->y > pBounds->ymx ||
+	     Point->x < pBounds->xmn ||
+	     Point->y < pBounds->ymn)
+	     	rtn=FALSE;
+	 return rtn;
+}
+
+DPOINT AverageDPoint (DPOINT Point1, DPOINT Point2)
+{   
+    DPOINT  OutPoint;
+    
+    OutPoint.x = (Point1.x + Point2.x)/2;
+    OutPoint.y = (Point1.y + Point2.y)/2;
+    return (OutPoint);
+}    
+
+POINT AveragePoint (POINT Point1, POINT Point2)
+{   
+    POINT  OutPoint;
+    
+    OutPoint.x = ((long)Point1.x + (long)Point2.x)/2;
+    OutPoint.y = ((long)Point1.y + (long)Point2.y)/2;
+    return (OutPoint);
+}    
+
+DPOINT AverageDPoints (HPDPOINT Point,long nPnts)
+{   
+    DPOINT  OutPoint={0.0,0.0};
+    long	n=nPnts;
+    
+    while (n--)
+    {
+    	OutPoint.x += Point->x;
+    	OutPoint.y += Point++->y;
+    }
+    OutPoint.x /= nPnts;
+    OutPoint.y /= nPnts;
+    return (OutPoint);
+}    
+
+BOOL DisplayTextFileInRect (HDC hDC,LPRECT Rect,LPSTR Name)
+{
+    HFILE	Fid;
+    long    CurLine=0;
+    OFSTRUCT    OFStruct;
+    HFILE   FidOut; 
+    char    str[260]; 
+    short	x,y, l; 
+    DWORD	TextExt;
+    
+    Fid=GSSiOpenFile (Name,&OFStruct,OF_READ);  
+    if (Fid==HFILE_ERROR)
+    	return FALSE; 
+    x = Rect->left;
+    y = Rect->top;
+    while (fgetstring (str,256,Fid))  
+    {
+		ExtTextOut(hDC, x,y, 0, Rect, str, _fstrlen(str),NULL); 
+		l = _fstrlen(str);
+		if (!l)
+		{
+			str[0]=' ';  
+			str[1]=0;
+			l = 1;
+		}
+		TextExt = GetTextExtent (hDC,str, l);
+			
+		y += HIWORD (TextExt);
+    }
+    GSSiClose (Fid);
+	return TRUE;
+}
+
+BOOL RemoveLine (LPSTR Name,LPSTR line)
+{
+    FILE    *Fid;
+    long    CurLine=0;
+    OFSTRUCT    OFStruct;
+    HFILE   FidOut; 
+    char    str[258];
+    
+    Fid=fopen (Name,"r");  
+    if (!Fid)
+    	return FALSE; 
+    FidOut = GSSiOpenFile ("gmtemp.txt",&OFStruct,OF_CREATE);
+    
+    while (fgetss (str,256,Fid))  
+    {
+        if (_fstrcmp (line,str))
+            fputstring(str,FidOut);
+        CurLine++;
+    }
+    fclose (Fid);
+    GSSiClose (FidOut);  
+    GSSiRemove ("gmtemp2.txt");
+    GSSiRename (Name,"gmtemp2.txt");
+    GSSiRename ("gmtemp.txt",Name);
+    return TRUE;
+}
+BOOL    GetSaveName2 (HWND hWnd,LPSTR Name, short StringID, LPSTR Ext,UINT FileNameID)
+{
+	char	str[128];
+	
+    GetCurVal (str,sizeof(str),FileNameID); 
+    _fstrcpy (Name,str); 
+    if (GetSaveName (hWnd,Name, StringID, Ext))
+    {
+    	SetCurVal (Name,FileNameID); 
+    	ExpandText (Name);
+    	return TRUE;
+    }
+    return FALSE;
+}
+    
+BOOL    GetSaveName3 (HWND hWnd,LPSTR Name, short StringID, LPSTR Ext,LPSTR Title,LPSTR VarName)
+{
+	char	str[128]="";
+	                            
+	if (VarName)
+	{   
+		if (*VarName)
+		{
+			sprintf (str,"[%s]",VarName);
+			ExpandText (str);
+		}
+		else
+			VarName = 0;
+	}
+    _fstrcpy (Name,str);
+    if (Title)
+    {
+    	if (*Title)
+    		OFTitle=Title;
+    }
+    if (GetSaveName (hWnd,Name, StringID, Ext))
+    {   
+    	if (VarName)
+    		SetGlobalValue (VarName,Name);
+    	return TRUE;
+    }
+    return FALSE;
+} 
+
+BOOL    GetSaveName (HWND hWnd,LPSTR Name, short StringID, LPSTR Ext)
+{ 
+    char    CurDir[_MAX_PATH], InitDir[_MAX_PATH], Drive[_MAX_DRIVE], Dir[_MAX_DIR];
+    short       SaveDrive; 
+    BOOL    rtn=FALSE; 
+    short	ln; 
+    LPSTR	lpEnd;
+    
+    if (!StringID)
+        sprintf (gszFilter,"%s(*%s)|*%s|","",Ext,_fstrlwr(Ext));
+    SetFilterString (StringID);  
+    _getcwd (CurDir,128);
+    SaveDrive = _getdrive(); 
+    _splitpath (Name,Drive,Dir,0,0); 
+    sprintf (InitDir,"%s%s",Drive,Dir);
+    ln = _fstrlen (InitDir);
+    lpEnd = (LPSTR)InitDir + ln;
+    lpEnd--;
+    if (*lpEnd == '\\') *lpEnd = 0;
+    if (GetSaveFileCD (hWnd,Name,InitDir))
+    {   
+         if (!_fstrstr(Name,"."))
+            _fstrcat(Name,Ext);
+         else
+         {
+            char TestName[128],TestExt[16];
+            _fstrcpy(TestName,Name);
+            _fstrcpy(TestExt,Ext);
+            _fstrupr (TestName); 
+            _fstrupr (TestExt);
+             if (!_fstrstr(TestName,TestExt))
+             {  
+                char    str[128];
+                sprintf (str,"Must have %s extension",Ext);
+                MessageBox(hWnd, str,"Invalid Name", MB_OK|MB_ICONEXCLAMATION);
+                goto RestoreDir;
+             }
+         } 
+         SubstituteDL (Name);
+         rtn=TRUE;
+    }
+RestoreDir:
+    _chdir (CurDir);
+    _chdrive (SaveDrive);   
+    OFTitle = 0;
+    return rtn;
+}
+
+BOOL    GetFileName2 (HWND hWnd,LPSTR Name,LPSTR Ext,UINT FileNameID)
+{   
+	char	str[128], CurExt[8]; 
+	short	l;
+	
+    sprintf (gszFilter,"%s(*%s)|*%s|","",_fstrupr(Ext),_fstrlwr(Ext)); 
+    GetCurVal (str,sizeof(str),FileNameID); 
+    _fstrcpy (Name,str);
+	if (GetFileName (hWnd,Name,0))
+	{
+		_splitpath (Name,NULL,NULL,NULL,CurExt);
+		if (!*CurExt)
+			_fstrcat (Name,Ext);
+    	SetCurVal (Name,FileNameID);
+    	if (*Name == '@')
+    	{
+    		l=_fstrlen (Name);
+    		_fmemmove (Name,(LPSTR)(Name+1),l);
+    	}
+    	return TRUE;
+    }
+    return FALSE;
+
+}
+BOOL    GetFileName3 (HWND hWnd,LPSTR Name,short StringID,UINT FileNameID)
+{
+	char	str[128];
+	
+    GetCurVal (str,sizeof(str),FileNameID); 
+    _fstrcpy (Name,str);
+	if (GetFileName (hWnd,Name,StringID))
+	{
+    	SetCurVal (Name,FileNameID);    
+    	ExpandText (Name);
+    	return TRUE;
+    }
+    return FALSE;
+} 
+
+BOOL    GetFileName4 (HWND hWnd,LPSTR Name,short StringID,LPSTR Ext,LPSTR Title,LPSTR VarName)
+{
+	char	str[128]="";
+
+	if (VarName)
+	{   
+		if (*VarName)
+		{
+			sprintf (str,"[%s]",VarName);
+			ExpandText (str);
+		}
+		else
+			VarName = 0;
+	}
+    _fstrcpy (Name,str); 
+    if (Title)
+    {
+    	if (*Title)
+    		OFTitle=Title;
+    }
+    if (!StringID)
+    	sprintf (gszFilter,"%s(*%s)|*%s|","",_fstrupr(Ext),_fstrlwr(Ext)); 
+	if (GetFileName (hWnd,Name,StringID))
+    {   
+    	if (VarName)
+    		SetGlobalValue (VarName,Name);
+    	return TRUE;
+    }
+	return FALSE;
+}
+
+BOOL    GetFileName (HWND hWnd,LPSTR Name, short StringID)
+{ 
+    char    CurDir[_MAX_DIR+1], InitDir[_MAX_DIR+1], Drive[_MAX_DRIVE+1], Dir[_MAX_DIR+1];
+    short       SaveDrive,ii; 
+    BOOL    rtn=FALSE;
+    LPSTR   lpEnd, lpPrev;
+    
+    SaveCurView (0);
+    SetFilterString (StringID);
+    if (!_getcwd (CurDir,_MAX_DIR))
+    {   
+    	char	str[64];
+    	sprintf (str,"getcwd fails %i",errno);
+    	GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION);
+    }
+    SetWindowText (hWnd,CurDir);
+    SaveDrive = _getdrive(); 
+    _splitpath (Name,Drive,Dir,0,0); 
+    sprintf (InitDir,"%s%s",Drive,Dir);
+    lpEnd = LastChr(InitDir);  
+    lpPrev = lpEnd;
+    if (lpPrev != InitDir)
+    	lpPrev--;
+    if (*lpEnd == '\\' && *lpPrev != ':')
+    	*lpEnd = 0;
+    if (GetOpenFileCD (hWnd,Name,InitDir))
+    {   
+         rtn=TRUE;  
+         SubstituteDL (Name);
+    }
+    _chdrive (SaveDrive);
+    if (_chdrive (SaveDrive))
+    	ii=1; 
+    if (_chdir (CurDir))
+    	ii=1;
+    SaveCurView (1);
+    return rtn;
+}   
+
+void SubstituteDL (LPSTR Name)
+{   
+	if (GetGlobalBVal ("[%SUBDL]"))
+	{  
+		char	DL[128]="[%DL]";
+		short	l=_fstrlen (Name); 
+		HANDLE	hMEM=GSSiGlobAlloc (GMEM_MOVEABLE,l+1);
+		LPSTR	TempName = GlobalLock (hMEM);         	
+		ExpandText (DL);
+		_fstrupr (DL); 
+		_fstrcpy (TempName,Name);
+		_fstrupr (TempName);
+		l = _fstrlen (DL);
+		         	
+		if (!_fstrnicmp (DL,Name,l))
+			sprintf (Name,"@[%cDL]%s",'%',&TempName[l]); 
+		GSSiGlobUlFree (&hMEM);
+	}
+    return;
+}
+
+void ClientRectToScreenRect (HWND hWnd,LPRECT pRect)
+{   
+    POINT   pt;
+    
+    pt.x = pRect->left;
+    pt.y = pRect->bottom;
+    ClientToScreen (hWnd,&pt);
+    pRect->left = pt.x;
+    pRect->bottom = pt.y;
+    pt.x = pRect->right;
+    pt.y = pRect->top;
+    ClientToScreen (hWnd,&pt);
+    pRect->right = pt.x;
+    pRect->top = pt.y; 
+    return;
+}
+
+double Round (double Value,double RoundTo)
+{   
+	double Rem;
+	
+	Rem = fmod(Value,RoundTo);
+	if (Rem >= RoundTo / 2)
+		Value = Value - Rem + RoundTo;
+	else
+		Value = Value - Rem; 
+	return Value;
+} 
+
+double DecDegFromDMS (LPSTR DMS,LPSHORT pErr)
+{   
+	double dir=1, deg,min,sec;   
+	LPSTR	pEnd;
+	
+	switch (*DMS)
+	{
+		case 'N':
+		case 'E':
+			DMS++;
+			break;
+		case 'S':
+		case 'W':
+			dir=-1;
+			DMS++;
+			break;
+	}
+	deg = strtod (DMS,&pEnd);
+	pEnd++;
+	min = strtod (pEnd,&pEnd);
+	pEnd++;
+	sec = strtod (pEnd,&pEnd);  
+	deg += min / 60 + sec / 3600; 
+	deg *= dir;
+	return deg;
+}
+
+BOOL GetDMS (double DecDegrees,LPSHORT Deg,LPSHORT Min,LPDOUBLE Sec)
+{   
+	double	Neg=1, Rem, SEC=(double)1/(double)3600;
+	
+	if (DecDegrees > 360)
+		return FALSE;
+	if (DecDegrees < 0)                
+	{
+		Neg = -1;
+		DecDegrees = fabs (DecDegrees);
+	}
+	DecDegrees += SEC/5000;
+	*Deg = floor (DecDegrees);
+	Rem = DecDegrees - (double)*Deg;
+	Rem *= 60;
+	*Min = floor (Rem);
+	Rem = Rem - (double)*Min;
+	*Sec = Rem * 60;
+	if (*Sec < 0.0000001)
+		*Sec = 0; 
+	*Deg *= Neg;
+	return TRUE;
+}
+
+LPSTR ValueConv (double Value, short ValConv,double RoundTo, BOOL Commas)
+{   static char VCBuff[32];
+    char        fmt[32];
+    LPSTR   p1, p2, bp, pDot;
+    short       n, ndp;  
+    double  rndp;
+    
+    if (RoundTo <= 0) RoundTo = 1; 
+    Value = Round (Value,RoundTo);
+    if (RoundTo<1)
+    {
+        rndp = log10(RoundTo); 
+        ndp = abs((short)IDNINT(rndp)); 
+        sprintf (fmt,"%%.%if",ndp);
+        sprintf (VCBuff,fmt,Value);
+    }
+    else
+        sprintf (VCBuff,"%.0f",Value); 
+    if (Commas)
+    	AddCommas (VCBuff);
+    return (VCBuff);  
+}
+
+LPSTR AddCommas (LPSTR InBuff)
+{
+	char	Buff[32],VCBuff[32];
+    LPSTR   p1, p2, bp, pDot;
+    short	n;
+	
+	if (_fstrlen (InBuff) > 32)
+		return InBuff;
+    _fstrcpy (Buff,InBuff);
+    bp = Buff; 
+    p2=&VCBuff[31]; 
+    pDot = _fstrchr (Buff,'.');
+    if (pDot)
+    {
+    	p1 = pDot-1;
+    	pDot = _fstrchr(Buff,0);
+    	while (pDot > p1)
+    		*p2-- = *pDot--;
+    }
+    else
+    {
+    	p1 = _fstrchr(Buff,0)-1;
+    	*p2-- = 0;
+    }
+    for (n=0;p1>=bp;p1--,n++)
+    {   if (n == 3 && *p1 != '-')
+        {   *p2--=',';
+            n=0;
+        }
+        *p2--=*p1;
+    }
+    ++p2;
+    _fstrcpy (InBuff,p2);
+    return InBuff;
+}
+
+short   Strip(LPSTR str, char chr)
+{   short   n=0;
+    LPSTR strnew;
+                  
+    strnew = str;                 
+    while (*str)
+    {
+        if (*str != chr)
+        {            
+            *strnew = *str;
+            strnew++;      
+        }
+        else
+            n++;
+        str++;
+    }
+    *strnew='\0';
+    return n;
+}
+
+void RWRITE (double RVAL, short NDP, LPSTR OutLoc) 
+ 
+{
+    char    Format[16];
+            
+    sprintf (Format,"%%.%if",NDP);
+    sprintf (OutLoc,Format,RVAL); 
+    return;
+} 
+
+double dread (LPSTR str, short nbytes)
+{
+    char    savechar;
+    LPSTR   pSaveChar;
+    double  rval;
+    
+    pSaveChar = str + nbytes;
+    savechar = *pSaveChar;
+    *pSaveChar = 0;       
+    rval = atof(str);
+    *pSaveChar = savechar;
+    return rval;
+}
+        
+
+long ldread (LPSTR str, short nbytes)
+{
+    char    savechar;
+    LPSTR   pSaveChar;
+    long    rval;
+    
+    pSaveChar = str + nbytes;
+    savechar = *pSaveChar;
+    *pSaveChar = 0;       
+    rval = atol(str);
+    *pSaveChar = savechar;
+    return rval;
+}
+        
+ 
+BOOL rread (LPSTR str, LPDOUBLE lpRval, LPINT lpNdp)
+{
+    LPSTR lpEnd, lpDp;
+    
+    *lpRval = strtod (str,&lpEnd);
+    if (*lpEnd)
+    	return FALSE;
+    lpDp = _fstrchr (str,'.');
+    if (lpDp)
+        *lpNdp = lpEnd - lpDp;
+    else
+        *lpNdp = 0;
+    return TRUE;
+}
+    
+
+LPSTR ReplaceChar (LPSTR str, char from, char to)
+{
+    LPSTR Instr;
+    
+    Instr = str;
+    while (*str)
+    {
+        if (*str == from) *str = to;
+        str++;
+    }
+    return Instr; 
+}  
+
+LPSTR RemoveDoubleQuotes (LPSTR str)
+{        
+	LPSTR	EndChar=str;
+	short	l;
+	
+	if (*str != '"')
+		return str;
+	l = _fstrlen (str);
+	if (l < 2)
+		return str;
+	EndChar += l-1;
+	if (*EndChar != '"')
+		return str;
+	l -= 2;
+	if (!l)
+		*str = 0;
+	else
+	{
+		_fmemmove (str,(LPSTR)(str+1),l);
+		EndChar = str+l;
+		*EndChar = 0;
+	}
+	return str;
+}
+
+LPSTR ConvertCharBtwnDoubleQuotes (LPSTR str, char from, char to)
+{   
+	LPSTR	Begin, End, rtn=str;
+	
+Next:
+	Begin = _fstrchr (str,'"'); 
+	if (!Begin)
+		return rtn;
+	Begin++;
+	End = _fstrchr (Begin,'"');
+	if (!End)
+		return str;
+	while (Begin < End)
+	{
+		if (*Begin == from)
+			*Begin = to;
+		Begin++;
+	}
+	str = Begin + 1;
+	goto Next;
+}
+
+short DrawRectPoly(HDC hDC, LPRECT Rect, HPEN hPen)
+{
+    POINT   Points[5];
+    HPEN    CurPen;
+    short       i;
+    
+    if (hPen)
+        CurPen = SelectObject (hDC,hPen);
+    Points[0].x = Rect->left;
+    Points[0].y = Rect->bottom;
+    Points[1].x = Rect->left;
+    Points[1].y = Rect->top;    
+    Points[2].x = Rect->right;
+    Points[2].y = Rect->top;
+    Points[3].x = Rect->right;
+    Points[3].y = Rect->bottom; 
+    Points[4] = Points[0];
+    i = Polyline (hDC,Points,5);         
+    if (hPen)
+        SelectObject (hDC,CurPen);  
+    return (i);
+}  
+ 
+void hmemmove (HPSTR out,HPSTR in,long len)
+{
+	while (len--)
+		*out++ = *in++;   
+	return;
+}
+
+void hmemset (HPSTR out,char in,long len)
+{
+	while (len--)
+		*out++ = in;   
+	return;
+}
+
+BOOL ReverseBOOL (BOOL In)
+{
+	if (In)
+		return FALSE;
+	return TRUE;
+}
+
+HGLOBAL GSSiGlobAlloc(UINT fuAlloc, long cbAlloc)
+{   HGLOBAL handle;
+    short	ii;
+
+    if (cbAlloc <= 0)
+   {    
+        HaltMapDisplay(FALSE);
+        MessageBox( 0, "Invalid memory allocation",0, MB_OK|MB_ICONEXCLAMATION);
+        BlowOut(NULL,NULL);
+   }
+    if (cbAlloc == 2) 
+    	ii=1;
+    handle = GlobalAlloc (fuAlloc, (DWORD)cbAlloc);
+    if (!handle)
+   {    
+   		HANDLE	hMess = GlobalAlloc (GMEM_MOVEABLE,128);
+   		LPSTR	pMess = GlobalLock (hMess);
+   		
+        HaltMapDisplay(FALSE);   
+        sprintf (pMess,"Error: %ld bytes",cbAlloc);
+        MessageBox( 0, "Insufficient memory for this operation",pMess, MB_OK|MB_ICONEXCLAMATION);  
+        GlobalUnlock (hMess);
+        GlobalFree (hMess);
+        PostMessage(hWndMain, WM_CLOSE, 0, 0L);  
+        BlowOut(NULL,NULL);
+   }
+    
+    return (handle);
+}  
+
+BOOL IntersectBounds (LPMNMXCORD pBounds1,LPMNMXCORD pBounds2,LPMNMXCORD pBoundsInt)
+{   
+	if (pBounds1->xmn > pBounds2->xmx || 
+		pBounds1->ymn > pBounds2->ymx ||
+		pBounds1->xmx < pBounds2->xmn ||
+		pBounds1->ymx < pBounds2->ymn)
+		return FALSE;
+	pBoundsInt->xmn = max (pBounds1->xmn,pBounds2->xmn);
+	pBoundsInt->ymn = max (pBounds1->ymn,pBounds2->ymn);
+	pBoundsInt->xmx = min (pBounds1->xmx,pBounds2->xmx);
+	pBoundsInt->ymx = min (pBounds1->ymx,pBounds2->ymx);
+	return TRUE;
+}
+
+BOOL RectInRect(LPRECT pRectIn,LPRECT pRectTest)
+{   
+	RECT	IntRect;
+	return IntersectRect(&IntRect,pRectIn,pRectTest);
+}
+     
+void InflateBounds (LPMNMXCORD pBounds, double Value)
+{      
+	pBounds->xmn -= Value;
+	pBounds->xmx += Value;
+	pBounds->ymn -= Value;
+	pBounds->ymx += Value;
+	return;
+} 
+
+DPOINT FPointToDPoint (FPOINT point)
+{
+	DPOINT	DPoint;
+	
+	DPoint.x = point.x;
+	DPoint.y = point.y;
+	return DPoint;
+}
+
+FPOINT DPointToFPoint (DPOINT DPoint)
+{
+	FPOINT FPoint ={DPoint.x,DPoint.y};
+	
+	return FPoint;
+}
+
+DPOINT PointToDPoint (POINT Point)
+{
+	DPOINT p;
+	
+	p.x = Point.x;
+	p.y = Point.y;
+	return p;
+}
+
+POINT DPointToPoint (DPOINT Point)
+{
+	POINT p;
+	
+	p.x = max ((long)SHRT_MIN,min ((long)SHRT_MAX,IDNINT (Point.x)));
+	p.y = max ((long)SHRT_MIN,min ((long)SHRT_MAX,IDNINT (Point.y)));
+	return p;
+}
+
+void AddPointToRect (POINT Point,LPRECT pBounds)
+{   
+    pBounds->left = min (pBounds->left,Point.x);
+    pBounds->right = max (pBounds->right,Point.x);
+    pBounds->top = min (pBounds->top,Point.y);
+    pBounds->bottom = max (pBounds->bottom,Point.y);
+    return;
+}
+
+void MinMaxInit (LPMINMAX pMinMax)
+{ 
+	pMinMax->xmn=SHRT_MAX;
+	pMinMax->ymn=SHRT_MAX;
+	pMinMax->xmx=SHRT_MIN;
+	pMinMax->ymx=SHRT_MIN;    
+	return;
+}
+
+void MinMaxInitL (LPMNMXCORL pMinMax)
+{ 
+	pMinMax->xmn=LONG_MAX;
+	pMinMax->ymn=LONG_MAX;
+	pMinMax->xmx=LONG_MIN;
+	pMinMax->ymx=LONG_MIN;    
+	return;
+}
+
+void RectInit (LPRECT pMinMax)
+{ 
+	pMinMax->left=SHRT_MAX;
+	pMinMax->top=SHRT_MAX;
+	pMinMax->bottom=SHRT_MIN;
+	pMinMax->right=SHRT_MIN;    
+	return;
+}
+
+void InflateMinMax (LPMINMAX pBounds, short Value)
+{      
+	pBounds->xmn -= Value;
+	pBounds->xmx += Value;
+	pBounds->ymn -= Value;
+	pBounds->ymx += Value;
+	return;
+} 
+
+void AddPointToMinMax (POINT Point,LPMINMAX pBounds)
+{   
+    pBounds->xmn = min (pBounds->xmn,Point.x);
+    pBounds->ymn = min (pBounds->ymn,Point.y);
+    pBounds->xmx = max (pBounds->xmx,Point.x);
+    pBounds->ymx = max (pBounds->ymx,Point.y);
+    return;
+}
+
+void AddPointToMinMaxL (POINT Point,LPMNMXCORL pBounds)
+{   
+    pBounds->xmn = min (pBounds->xmn,Point.x);
+    pBounds->ymn = min (pBounds->ymn,Point.y);
+    pBounds->xmx = max (pBounds->xmx,Point.x);
+    pBounds->ymx = max (pBounds->ymx,Point.y);
+    return;
+}
+
+void AddDPointToMinMax (LPDPOINT Point,LPMNMXCORD pBounds)
+{   
+    pBounds->xmn = min (pBounds->xmn,Point->x);
+    pBounds->ymn = min (pBounds->ymn,Point->y);
+    pBounds->xmx = max (pBounds->xmx,Point->x);
+    pBounds->ymx = max (pBounds->ymx,Point->y);
+    return;
+}
+
+double BoundsArea (LPMNMXCORD pBounds)
+{
+	double Area;     
+	DPOINT	Point1, Point2, Point3;
+	 
+	Point1.x = pBounds->xmn;
+	Point1.y = pBounds->ymn;
+	Point2.x = pBounds->xmn;
+	Point2.y = pBounds->ymx;
+	Point3.x = pBounds->xmx;
+	Point3.y = pBounds->ymx;
+	Area = ldistp (Point1,Point2) * ldistp (Point2,Point3); 
+	return Area;
+}
+
+POINT MinMaxMidPoint (LPMINMAX pBounds)
+{
+	POINT point;
+	
+	point.x = ((long)pBounds->xmn + (long)pBounds->xmx) / 2;
+	point.y = ((long)pBounds->ymn + (long)pBounds->ymx) / 2;
+
+	return point;
+}
+
+DPOINT MinMaxMidPointD (LPMNMXCORD pBounds)
+{
+	DPOINT point;
+	
+	point.x = (pBounds->xmn + pBounds->xmx) / 2;
+	point.y = (pBounds->ymn + pBounds->ymx) / 2;
+
+	return point;
+}
+
+void DBoundsInit (LPMNMXCORD lpRect)
+{
+    lpRect->xmn = DBL_MAX;
+    lpRect->ymn = DBL_MAX;
+    lpRect->xmx = -DBL_MAX;
+    lpRect->ymx = -DBL_MAX;
+	return;
+} 
+
+BOOL PointInBounds (DPOINT Point,LPMNMXCORD pBounds)
+{     
+	 BOOL InBounds=TRUE;
+     if (Point.x > pBounds->xmx ||
+         Point.y > pBounds->ymx ||
+         Point.x < pBounds->xmn ||
+         Point.y < pBounds->ymn)
+         	InBounds=FALSE;
+
+     return InBounds;
+}
+
+BOOL BoundsInBounds (LPMNMXCORD pBounds1,LPMNMXCORD pBounds2,short Opt)
+{   
+	BOOL InBounds=TRUE;
+	
+	switch (Opt)
+	{
+		case 0: //bounds 1 completely in bounds2
+	    if (pBounds1->xmn < pBounds2->xmn ||   
+	        pBounds1->xmx > pBounds2->xmx ||
+	        pBounds1->ymn < pBounds2->ymn ||
+	        pBounds1->ymx > pBounds2->ymx)
+	        InBounds=FALSE; 
+	    break;
+	    
+	    case 1: //bounds 1 at least partially in bounds2   
+	    if (pBounds1->xmx < pBounds2->xmn ||   
+	        pBounds1->xmn > pBounds2->xmx ||
+	        pBounds1->ymx < pBounds2->ymn ||
+	        pBounds1->ymn > pBounds2->ymx)
+	        InBounds=FALSE; 
+	    break;
+	}
+    return InBounds;
+}
+
+void AdjustBounds (LPMNMXCORD Bounds, double AdjustX, double AdjustY)
+{ 
+    Bounds->xmn += AdjustX;
+    Bounds->xmx += AdjustX;
+    Bounds->ymn += AdjustY;
+    Bounds->ymx += AdjustY;
+    return;
+}
+
+void ExpandBounds (LPMNMXCORD Bounds, double Adjust)
+{ 
+    Bounds->xmn -= Adjust;
+    Bounds->xmx += Adjust;
+    Bounds->ymn -= Adjust;
+    Bounds->ymx += Adjust;
+    return;
+}
+
+void ExpandMinMax (LPMINMAX Bounds, short Adjust)
+{   
+	if ((long)Bounds->xmn - (long) Adjust >= SHRT_MIN)
+    	Bounds->xmn -= Adjust;
+	if ((long)Bounds->xmx + (long) Adjust <= SHRT_MAX)
+    	Bounds->xmx += Adjust;
+	if ((long)Bounds->ymn - (long) Adjust >= SHRT_MIN)
+    	Bounds->ymn -= Adjust;
+	if ((long)Bounds->ymx + (long) Adjust <= SHRT_MAX)
+    	Bounds->ymx += Adjust;
+    return;
+}
+
+void TranBounds (HANDLE TranID,LPMNMXCORD pBounds)
+{   
+	DPOINT	P[4]; 
+	short	i;
+	
+	P[0].x = pBounds->xmn;
+	P[0].y = pBounds->ymn;
+	P[1].x = pBounds->xmn;
+	P[1].y = pBounds->ymx;
+	P[2].x = pBounds->xmx;
+	P[2].y = pBounds->ymx;
+	P[3].x = pBounds->xmx;
+	P[3].y = pBounds->ymn;
+	DBoundsInit (pBounds);
+	for (i=0;i<4;i++) 
+	{
+		TRANS2 (P[i].x,P[i].y,&P[i].x,&P[i].y,TranID); 
+		AddDPointToMinMax (&P[i],pBounds);  
+	}
+	return;    
+}
+
+double TranAngle (HANDLE TranID,LPMNMXCORD pBounds)
+{   
+	DPOINT	P[2]; 
+	short	i; 
+	double	Angle;
+	
+	P[0].x = pBounds->xmn + (pBounds->xmx-pBounds->xmn)/4;
+	P[0].y = (pBounds->ymn + pBounds->ymn)/2;
+	P[1].x = pBounds->xmx - (pBounds->xmx-pBounds->xmn)/4;
+	P[1].y = P[0].y;
+	TRANS2 (P[0].x,P[0].y,&P[0].x,&P[0].y,TranID); 
+	TRANS2 (P[1].x,P[1].y,&P[1].x,&P[1].y,TranID);   
+	Angle = getazd (&P[0],&P[1]);
+	return Angle;    
+}
+
+double TranScale (HANDLE TranID,LPMNMXCORD pBounds)
+{   
+	DPOINT	P[2]; 
+	short	i; 
+	double	dist1,dist2;
+	
+	P[0].x = pBounds->xmn + (pBounds->xmx-pBounds->xmn)/4;
+	P[0].y = (pBounds->ymn + pBounds->ymn)/2;
+	P[1].x = pBounds->xmx - (pBounds->xmx-pBounds->xmn)/4;
+	P[1].y = P[0].y;     
+	dist1 = ldistp (P[0],P[1]);
+	TRANS2 (P[0].x,P[0].y,&P[0].x,&P[0].y,TranID); 
+	TRANS2 (P[1].x,P[1].y,&P[1].x,&P[1].y,TranID);   
+	dist2 = ldistp (P[0],P[1]);
+	if (dist1)
+		return dist2/dist1;    
+	else
+		return 0;
+}
+
+void GSSiGlobFree (LPHANDLE pHandle)
+{   
+	HGLOBAL	st;
+	short	ii;  
+	UINT	flags;
+	short	nLocks;   
+	
+    if (!*pHandle)
+    	return;
+    if (*pHandle < 100)
+    	ii=1; 
+//    flags = GlobalFlags (*pHandle); 
+//    nLocks = flags & GMEM_LOCKCOUNT;
+    st = GlobalFree (*pHandle);
+    if (st)
+    	ii=1;
+    *pHandle=0;
+    return;
+}  
+
+int GSSiRemove (LPSTR Name)
+{   
+	int	i=0;
+	HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,256);
+	LPSTR	str = GlobalLock (hMem);  
+	HFILE	Fid;
+	
+	_fstrcpy (str,Name);
+	ExpandText (str); 
+	if (*str)
+	{
+		if ((Fid = FileAlreadyOpen (str,OF_READ)) != HFILE_ERROR)
+		{
+			_lclose (Fid);	
+		    LogOpenFilesClose (Fid); 
+		}
+		i=remove (str); 
+	} 
+	GSSiGlobUlFree (&hMem);
+	return i;
+}
+
+BOOL GSSiRename (LPSTR FromName, LPSTR ToName)
+{   
+	int	i;
+	char	str1[256],str2[256]; 
+	HFILE	Fid;
+	
+	_fstrcpy (str1,FromName);
+	ExpandText (str1);
+	if ((Fid = FileAlreadyOpen (str1,OF_READ)) != HFILE_ERROR)
+	{
+		_lclose (Fid);	
+	    LogOpenFilesClose (Fid); 
+	}
+	_fstrcpy (str2,ToName);
+	ExpandText (str2);
+	i=rename (str1,str2);
+	if (!i)
+		return TRUE;
+	return FALSE;
+}
+
+void GSSiGlobUlFree (LPHANDLE pHandle)
+{   
+	HGLOBAL	st; 
+	short	ii;
+	
+    if (!*pHandle)
+    	return;
+    if (GlobalUnlock (*pHandle))
+    	ii=1;
+    st = GlobalFree (*pHandle);
+    if (st)
+    	ii=1;
+    *pHandle=0;
+    return;
+}
+
+void SECLIN8(const double *X1,const double *Y1,const double *A1,const double *X2,
+             const double *Y2,const double *A2,double *X3,double *Y3,short *K)
+{                    
+
+double Z1, Z2, DM1, DM2;
+      *K=0;
+      Z1=fabs(cos(*A1));
+      Z2=fabs(cos(*A2));
+/*C******* SEE if THEY ARE PARALLEL*/
+      if(fabs(*A1-*A2) < 1e-5 || fabs(PY - (fabs(*A1 - *A2))) < 1e-5) goto s10;
+/*C*/
+/*C******* if A2=A1+N*PI, N=...,-3,-2,-1,0,1,2,3,..., THE LINES ARE*/
+/*C******* PARALLEL, AND Dfabs(Z1-Z2)=0.*/
+/*C******* THE LINES ARE NOT PARALLEL.*/
+/*C******* if Z1=0, LINE 1 IS VERTICAL. if Z2=0, LINE 2 IS VERTICAL.*/
+      if (min(Z1,Z2) < 1e-5) goto s30;
+/*C*/
+/*C******* THE LINES ARE NEITHER VERTICAL NOR PARALLEL. THE INTERSECT IN*/
+/*C******* EXACTLY ONE PLACE.*/
+      DM1 = sin(*A1)/cos(*A1);
+      DM2 = sin(*A2)/cos(*A2);
+      if(fabs(DM1-DM2)<1e-5) goto s10;
+      *X3 = -(*Y1-*Y2-DM1 * *X1+DM2 * *X2)/(DM1-DM2);
+      *Y3 = *Y1-DM1*(*X1-*X3);
+      return;
+/*C*/
+/*C******* THE LINES ARE PARALLEL.*/
+/*C******* if THE LINES ARE IDENTICAL, THERE ARE AN INFINITE NUMBER OF*/
+/*C******* SOLUTIONS. CHOOSE ONE. if THE LINES ARE DIFFERENT, THERE IS*/
+/*C******* NO SOLUTION.*/
+ s10: *X3=*X1;
+      *Y3=*Y1;
+      if (fabs(Z1+Z2) < 1e-5) goto s50;
+      if (fabs(*Y1 - *Y2 - sin(*A1) /cos(*A1)*(*X1-*X2)) > 1e-5) *K=1;
+      return;
+/*C******* AT LEAST ONE OF THE LINES IS VERTICAL.*/
+ s30: if(Z2<2e-5) goto s40;
+/*C******* ONLY THE FIRST LINE IS VERTICAL.*/
+      *X3=*X1;
+      *Y3=sin(*A2)/cos(*A2)*(*X3-*X2)+*Y2;
+      return;
+/*C******* THE SECOND LINE IS VERTICAL.*/
+ s40: *X3=*X2;
+      *Y3=sin(*A1)/cos(*A1)*(*X3-*X1)+*Y1;
+      return;
+/*C******* BOTH LINES ARE VERTICAL.*/
+ s50: if(fabs(*X1-*X2)>1e-5) *K=1;
+      return;
+ } void ERROr( long istat, char *message)
+{  
+   if(istat != 0)
+   {
+    MessageBox(
+        GetFocus(),
+        message,
+        0,
+        MB_ICONHAND |MB_OK); 
+    }    
+    return;
+}  
+
+LPSTR LastChr (LPSTR str)
+{
+	LPSTR lc;
+	
+	lc = _fstrchr (str,0);
+	if (lc != str)
+		lc--;
+	return lc;
+}
+  
+short FillList (HWND hWndDlg,short Control,LPSTR file, LPSTR DefaultVal)
+{
+    HFILE       Fid;  
+    HANDLE		hMem = GSSiGlobAlloc (GMEM_MOVEABLE,512);
+    LPSTR       str = GlobalLock (hMem);
+    LPOFSTRUCT	pOFStruct = (LPOFSTRUCT) (str + 256); 
+    LPSTR       lpBar, LastChar; 
+    short       Default=-1, l, i, Index, DefaultIndex=-1;
+    short   	TabStops[2]={1000,1100}; 
+    BOOL		UseBAR=FALSE;
+    
+    if (!hWndDlg) *DefaultVal = '\0';
+    if (hWndDlg)
+    {
+        SendDlgItemMessage (hWndDlg,Control,LB_SETTABSTOPS,2,(LPARAM)TabStops);    
+        SendDlgItemMessage (hWndDlg,Control,LB_RESETCONTENT,0,0); 
+    }
+
+    Fid=GSSiOpenFile (file,pOFStruct,OF_READ);  
+    if (Fid == HFILE_ERROR) 
+    	goto Exit; 
+    i=0;
+    while (fgetstring (str,256,Fid))
+    {   
+ 		if (!_fstrnicmp (str,"$GENLIST(",9))
+ 		{
+ 			GenList (hWndDlg,Control,FALSE,FALSE,str,DefaultVal,&UseBAR);
+ 		}
+ 		else
+ 		{
+	        if ((l=_fstrlen(str)))
+	        {
+	            LastChar = str;
+	            LastChar += l;
+	            LastChar--;   
+	            if (*LastChar == '$')
+	            {
+	                Default = i;
+	                *LastChar = '\0';
+	            }
+	        }
+	        lpBar = _fstrchr(str,'|');
+	        if (lpBar)
+	        {
+	            *lpBar = '\t';
+	            if (hWndDlg) 
+	            {
+	                Index = SendDlgItemMessage (hWndDlg,Control,LB_ADDSTRING,0,(LPARAM)str); 
+	                if (i == Default)
+	                	DefaultIndex = Index;
+	            }
+	            else if (i == Default)
+	                _fstrcpy (DefaultVal,++lpBar);
+	        } 
+	    }
+        i++;
+    }
+    GSSiClose (Fid);
+    if (hWndDlg)
+    	SendDlgItemMessage (hWndDlg,Control,LB_SETCURSEL,DefaultIndex,0);
+Exit:
+	GSSiGlobUlFree (&hMem);    
+    return Default;
+}
+
+short FillCBList (HWND hWndDlg,short Control,LPSTR file,short InitVal, LPSTR RtnVal)
+{
+    HFILE       Fid; 
+    char        str[132], INITVAL[256]="";
+    LPSTR       lpBar, LastChar; 
+    short       Default=-1, l, i, Item;
+    short   	TabStops[2]={1000,1100}; 
+    long		Val;
+    OFSTRUCT	OFStruct;
+    
+    if (!hWndDlg) *RtnVal = '\0';
+    if (hWndDlg)
+    {
+        SendDlgItemMessage (hWndDlg,Control,CB_RESETCONTENT,0,0); 
+    }
+
+    Fid=GSSiOpenFile (file,&OFStruct,OF_READ);  
+    if (Fid == HFILE_ERROR)
+    	return -1; 
+    i=0;
+    while (fgetstring (str,128,Fid))
+    {   
+        if ((l=_fstrlen(str)))
+        {
+            LastChar = str;
+            LastChar += l;
+            LastChar--;   
+            if (*LastChar == '$')
+            {
+                Default = i;
+                *LastChar = '\0';
+            }
+        }
+        lpBar = _fstrchr(str,'|');
+        if (lpBar)
+        {
+            *lpBar++ = 0; 
+            Val = atol (lpBar);
+            if (Val == InitVal)
+            	_fstrcpy (INITVAL,str);
+            if (hWndDlg) 
+            { 
+                Item = SendDlgItemMessage (hWndDlg,Control,CB_ADDSTRING,0,(LPARAM)str);
+	         	SendDlgItemMessage (hWndDlg,Control,CB_SETITEMDATA,(WPARAM)Item,(LPARAM)Val);
+            }
+            else if (Val == Control)
+                _fstrcpy (RtnVal,str);
+        }
+        i++;
+    }
+    GSSiClose (Fid);
+	SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
+
+    
+    return Default;
+}  
+
+long GetListNum (LPSTR file, LPSTR Val)
+{
+    HFILE       Fid; 
+    char        str[132];
+    LPSTR       lpBar; 
+    OFSTRUCT	OFStruct; 
+    long		rtn=-1;
+    
+    Fid=GSSiOpenFile (file,&OFStruct,OF_READ);  
+    if (Fid == HFILE_ERROR)
+    	return FALSE; 
+    while (fgetstring (str,128,Fid))
+    {   
+        lpBar = _fstrchr(str,'|');
+        if (lpBar)
+        {
+            *lpBar++ = 0;
+            if (!_fstricmp (str,Val)) 
+            {
+            	rtn = atol (lpBar);
+            	goto Exit;
+            }
+        }
+    } 
+Exit:
+    GSSiClose (Fid);
+    
+    return rtn;
+}
+
+BOOL GetListValue (LPSTR file, long ID, LPSTR Val)
+{
+    HFILE       Fid; 
+    char        str[132];
+    LPSTR       lpBar; 
+    OFSTRUCT	OFStruct; 
+    BOOL		rtn=FALSE;
+    
+    *Val = 0;
+    Fid=GSSiOpenFile (file,&OFStruct,OF_READ);  
+    if (Fid == HFILE_ERROR)
+    	return FALSE; 
+    while (fgetstring (str,128,Fid))
+    {   
+        lpBar = _fstrchr(str,'|');
+        if (lpBar)
+        {
+            *lpBar++ = 0;
+            if (atol (lpBar) == ID) 
+            {
+            	_fstrcpy (Val,str); 
+            	rtn = TRUE;
+            	goto Exit;
+            }
+        }
+    } 
+Exit:
+    GSSiClose (Fid);
+    
+    return rtn;
+}
+
+void ShowProcessingMessage (LPSTR Mess)
+{ 
+    
+    GetWindowText(GetActiveWindow(),SaveWinText,144);
+    SetWindowText (GetActiveWindow(),Mess);
+    hCursor = LoadCursor (0,IDC_WAIT);
+    OldCursor = GSSiSetCursor (hCursor);
+    return;
+}
+
+void ClearProcessingMessage (void)
+{
+    SetWindowText (GetActiveWindow(),SaveWinText);  
+    GSSiSetCursor (OldCursor);
+    return;
+}  
+
+short DeleteDirAndContents (LPSTR Name)
+{
+#if WIN32
+    struct  _finddata_t FileInfo; 
+#else
+    struct  _find_t FileInfo; 
+#endif
+    char    str[128];
+    short       i, rtn, rtn2;
+    int st;
+    _fstrcpy (str,Name);
+    _fstrcat (str,"\\*.*");
+#if WIN32
+    st = _findfirst (str,&FileInfo);
+#else
+    st = _dos_findfirst (str,_A_NORMAL|_A_SUBDIR,&FileInfo);
+#endif
+    while (!st)
+    {   
+        if (FileInfo.name[0] != '.')
+        {
+            sprintf (str,"%s\\%s",Name,FileInfo.name);
+            if (FileInfo.attrib == _A_SUBDIR) 
+            {   
+            	rtn2 = DeleteDirAndContents (str);
+                rtn = max (rtn,rtn2);
+            }
+            else 
+            { 
+                i=GSSiRemove (str);
+                if (i == EACCES)
+                {   char    mes[256];
+                    sprintf (mes,"Unable to delete %s",str);
+                    MessageBox(hWndMain, mes,"Warning", MB_OK|MB_ICONEXCLAMATION); 
+                    rtn = 1;
+                }
+            }
+        }
+#if WIN32
+        st = _findnext (st,&FileInfo);
+#else
+        st = _dos_findnext (&FileInfo);
+#endif
+    }
+    if (_rmdir (Name))
+        {   char    mes[256];
+            sprintf (mes,"Unable to delete %s",Name);
+            MessageBox(hWndMain, mes,"Warning", MB_OK|MB_ICONEXCLAMATION); 
+        return 1;
+    }
+    else
+        return rtn;
+}
+
+long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCard,short Lev)
+{   
+	long	NumFilesIn=*TotFiles;
+#if WIN32
+    struct  _finddata_t FileInfo; 
+#else
+    struct  _find_t FileInfo; 
+#endif
+    char    setstr[128],str[128],FullName[144], TestExt[8], CurDir[64];
+    short       i, rtn;
+    int st;
+    BOOL	FirstPass=TRUE, SubDirOnly; 
+	LPSTR	lc;
+	
+	_fstrcpy (CurDir,CurDirIN);   
+	lc  = LastChr (CurDir);
+    if (*lc == '\\')
+    	*lc = 0;
+Top: 
+	SubDirOnly = FALSE;   
+    if (*WildCard && FirstPass)
+    {   
+    	if (_fstrchr (WildCard,'.'))
+    		sprintf (setstr,"%s\\%s",CurDir,WildCard);
+    	else
+    		sprintf (setstr,"%s\\%s.*",CurDir,WildCard);
+	    st = _dos_findfirst (setstr,_A_NORMAL,&FileInfo);
+    }
+    else 
+    {   
+    	sprintf (setstr,"%s\\*.*",CurDir);
+    	if (*WildCard)
+			SubDirOnly = TRUE;   
+    	st = _dos_findfirst (setstr,_A_SUBDIR,&FileInfo);
+	   	FirstPass=FALSE;
+    }
+    while (!st)
+    {   
+        if (FileInfo.name[0] != '.')
+        {
+            sprintf (str,"%s\\%s",CurDir,FileInfo.name);
+            if (FileInfo.attrib & _A_SUBDIR) 
+            {
+                SearchFilesInDir (str,Ext,OutFile,TotFiles,WildCard,Lev+1);
+            }
+            else if (SubDirOnly)
+            	goto SkipFile; 
+            else
+            {   
+            	
+                _fullpath (FullName,str,sizeof(FullName));
+                _splitpath (FullName,NULL,NULL,NULL,TestExt);  
+/*                if (WildCard)
+                {   short	l;
+                	LPSTR	lpast;
+                	
+                	lpast = _fstrchr (WildCard,'*');
+                	if (lpast)
+                		l=lpast-WildCard;
+                	else
+                		l=_fstrlen(WildCard);
+                	if (_fstrnicmp(WildCard,FileInfo.name,l))
+                		goto SkipFile;
+                } 
+                if (!_fstricmp (Ext,TestExt))
+                {*/
+	                (*TotFiles)++;
+	                if (OutFile != HFILE_ERROR)
+	                	fputstring (FullName,OutFile);
+	            //} 
+	     SkipFile:;
+            }
+        }
+#if WIN32
+        st = _findnext (st,&FileInfo);
+#else
+        st = _dos_findnext (&FileInfo);
+#endif
+    }
+    if (FirstPass)
+    {
+    	FirstPass=FALSE;
+    	goto Top;
+    }
+    return (*TotFiles - NumFilesIn);
+} 
+
+short IsValidDir(LPSTR Name)
+{   short   st;
+    
+    st=_mkdir (Name);
+    if (st < 0 && errno == ENOENT)
+        return 0;
+    else
+        if (!st)          
+        {
+            _rmdir (Name);
+            return 1;
+        }
+    return 2;
+}
+
+long SearchDirectoriesInDir (LPSTR CurDirIN, HFILE OutFile,LPLONG TotFiles,LPSTR WildCard,short Lev)
+{   
+	long	NumFilesIn=*TotFiles;
+#if WIN32
+    struct  _finddata_t FileInfo; 
+#else
+    struct  _find_t FileInfo; 
+#endif
+    char    setstr[128],str[128],FullName[144], TestExt[8], CurDir[64], DirName[34];
+    short       i, rtn;
+    int st;
+    BOOL	FirstPass=TRUE, SubDirOnly; 
+	LPSTR	lc;
+	
+	_fstrcpy (CurDir,CurDirIN);   
+	lc  = LastChr (CurDir);
+    if (*lc == '\\')
+    	*lc = 0;
+	sprintf (setstr,"%s\\*.*",CurDir);
+	st = _dos_findfirst (setstr,_A_SUBDIR,&FileInfo);
+   	FirstPass=FALSE;
+    while (!st)
+    {   
+        if (FileInfo.name[0] != '.')
+        {
+            sprintf (str,"%s\\%s",CurDir,FileInfo.name);
+            if (FileInfo.attrib & _A_SUBDIR) 
+            {
+                SearchDirectoriesInDir (str,OutFile,TotFiles,WildCard,Lev+1);
+                _fullpath (FullName,str,sizeof(FullName));
+                _splitpath (FullName,NULL,NULL,DirName,TestExt); 
+                if (!_fstricmp (DirName,WildCard)) 
+                {
+		            (*TotFiles)++;
+		            if (OutFile != HFILE_ERROR)
+		               	fputstring (FullName,OutFile);
+		        }
+            }
+        }
+#if WIN32
+        st = _findnext (st,&FileInfo);
+#else
+        st = _dos_findnext (&FileInfo);
+#endif
+    }
+    return (*TotFiles - NumFilesIn);
+} 
+
+short GetCacheInfo (LPSTR CacheDir)
+{   
+    short   CacheSize;
+    HFILE   Fid;   
+    char    str[32];
+    OFSTRUCT	OFStruct;
+    
+    *CacheDir = '\0';
+    Fid = GSSiOpenFile ("cache.txt",&OFStruct,OF_READ);
+    if (Fid != HFILE_ERROR)
+    {
+        fgetstring (CacheDir, 128, Fid);  
+        ExpandText (CacheDir);
+        fgetstring (str,16,Fid);
+        CacheSize = (short)atol (str);
+        GSSiClose(Fid);   
+        return CacheSize;
+    }
+    else
+        return 0;
+}
+
+short DeleteCacheDir (void)
+{
+    FirstCache = TRUE;
+	if (!GetCacheInfo (CacheDir))
+		return -1;
+    GSSiRemove ("cache.txt"); 
+    return (DeleteDirAndContents (CacheDir));
+}
+
+BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
+{   
+    static  long    MaxCache;
+    short       NumFiles, NewNumFiles, st, i;
+    long    FreeSpace, MaxFileNum,  CurrentLoc, 
+		     NeedLength,  length; 
+	HANDLE	hMem = GSSiGlobAlloc (GMEM_MOVEABLE,1024);
+    LPSTR    str=GlobalLock (hMem);
+    LPSTR	 CacheFile=str+256;
+    LPOFSTRUCT	pOFStruct = (LPOFSTRUCT)(CacheFile + 128);
+    LPSTR    lpExt,  pBuffer;
+    HFILE    FidIndex=HFILE_ERROR, FidFile;
+    HANDLE  hBuffer=0;
+    HFILE    Fid;
+    CACHEBUF    *pCacheBuf, *pDeleteBuf;   
+    BOOL	rtn=FALSE;
+    
+//goto Exit; 
+    if (FirstCache)
+    {
+        FirstCache = FALSE;
+        Fid = GSSiOpenFile ("cache.txt",pOFStruct,OF_READ);
+        if (Fid != HFILE_ERROR)
+        {
+            fgetstring (CacheDir, 128, Fid);
+            ExpandText (CacheDir);
+            fgetstring (str,16,Fid);
+            MaxCache = atol (str);
+            MaxCache *= ((long)1024 * (long)1024);
+            GSSiClose(Fid); 
+            if (_mkdir (CacheDir) == -1)
+            {
+                if (errno == ENOENT)
+                {
+                    MessageBox( GetFocus(), "Unable to create Cache directory",
+                    CacheDir, MB_OK);
+                    goto NoCache;
+                }
+            } 
+            _fstrcpy(CacheIndex,CacheDir);
+            _fstrcat(CacheIndex,"\\index"); 
+            if (!ExistFile(CacheIndex))
+            {   
+                ShowProcessingMessage ("Creating Cache Directory");
+                FidIndex = GSSiOpenFile(CacheIndex,pOFStruct,OF_CREATE);
+                NumFiles = 0;
+                FreeSpace = MaxCache;
+                MaxFileNum = 0;
+                _lwrite (FidIndex,(char *)&NumFiles,2);
+                _lwrite (FidIndex,(char *)&MaxCache,4);
+                _lwrite (FidIndex,(char *)&FreeSpace,4);
+                _lwrite (FidIndex,(char *)&MaxFileNum,4);
+                GSSiClose (FidIndex);  
+                FidIndex = HFILE_ERROR;
+                _fstrcpy(CacheFile,CacheDir);
+                _fstrcat(CacheFile,"\\freespac");
+                FidFile = GSSiOpenFile(CacheFile,pOFStruct,OF_CREATE);
+                {
+                    long    FileSize, Done=0;
+                    WORD    size;
+                    HANDLE  h0s;
+                    LPSTR   p0s;
+                    
+                    h0s = GSSiGlobAlloc (GHND,INT_MAX);
+                    p0s = GlobalLock (h0s);
+                    FileSize = FreeSpace;
+                    while (FileSize)
+                    {   
+                        size = min (FileSize,INT_MAX);
+                        _lwrite (FidFile,p0s,size);
+                        FileSize-=size; 
+                        Done+=size;
+                        if (StatusWnd)
+                            PctBox (StatusWnd, FreeSpace, Done,0);
+                    }
+                    GSSiGlobUlFree (&h0s);
+                }
+                GSSiClose(FidFile);
+                ClearProcessingMessage();
+                if (st == -1)
+                {    
+                    _rmdir (CacheDir);
+                    MessageBox( GetFocus(), "Unable to adjust Cache directory",
+                    "Insufficient Space or File Handle Limit", MB_OK);
+                    goto NoCache;
+                }
+            }
+        }
+        else
+NoCache:    CacheDir[0]='\0';
+    }    
+    if (CacheDir[0])
+    {   
+        /* Open the cache index and determine if file aleady in cache */
+        lpExt = _fstrrchr (DiskFile,'.');
+        FidIndex = GSSiOpenFile(CacheIndex,pOFStruct,OF_READWRITE);
+        _lread (FidIndex,&NumFiles,2);
+        _lread (FidIndex,&MaxCache,4);
+        _lread (FidIndex,&FreeSpace,4);
+        _lread (FidIndex,&MaxFileNum,4);
+        hBuffer = GSSiGlobAlloc (GMEM_MOVEABLE,(long)sizeof(CACHEBUF)*(NumFiles+1));
+        pBuffer = GlobalLock (hBuffer);
+        pCacheBuf = (CACHEBUF *) pBuffer;
+        for (i=0;i<NumFiles;i++,pCacheBuf++)
+        {   
+            CurrentLoc = _llseek (FidIndex,0,1);
+            _lread (FidIndex,pCacheBuf,sizeof(CACHEBUF));
+            if (!_fstricmp(pCacheBuf->FileName,DiskFile))
+            {
+                sprintf (UseFile,"%s\\%ld%s",CacheDir,pCacheBuf->FileNum,lpExt);    
+            /*  sprintf (UseFile,"%s\\%ld",CacheDir,pCacheBuf->FileNum);    */
+                pCacheBuf->LastUsed = time(0); 
+                _llseek (FidIndex,CurrentLoc,0);
+                _lwrite (FidIndex,(char *)pCacheBuf,sizeof(CACHEBUF));
+                GSSiGlobUlFree(&hBuffer);
+                GSSiClose(FidIndex);
+                FidIndex = HFILE_ERROR;
+                rtn = TRUE;
+                goto Exit;
+            }
+        } 
+        
+        if (!Add) goto UseDiskFile;
+        
+        /* Determine length of new files */
+        if ((length = GSSiLength(DiskFile)) < 0)
+        	goto UseDiskFile;
+        
+        /* Make space for the new file by taking from freespace and/or 
+           deleting existing files */
+        if (length > MaxCache) goto UseDiskFile; 
+        NeedLength = max(0,length - FreeSpace);
+        FreeSpace = max(0,FreeSpace-length);
+        while (NeedLength)
+        {
+            pCacheBuf = (CACHEBUF *) pBuffer;
+            pDeleteBuf = (CACHEBUF *)pBuffer;
+            for (i=0;i<NumFiles;i++,pCacheBuf++)
+            {
+                if (pCacheBuf->LastUsed<pDeleteBuf->LastUsed)
+                    pDeleteBuf = pCacheBuf;
+            }
+            pDeleteBuf->LastUsed = LONG_MAX;
+            if (pDeleteBuf->FileLength >= NeedLength)
+            {
+                FreeSpace = pDeleteBuf->FileLength - NeedLength;   
+                NeedLength = 0;
+            }
+            else
+                NeedLength = NeedLength - pDeleteBuf->FileLength;
+            sprintf (CacheFile,"%s\\%ld",CacheDir,pDeleteBuf->FileNum); 
+            GSSiRemove (CacheFile);
+            pDeleteBuf->FileNum = 0;
+        }
+        
+        /* Adjust the freespace file */
+        _fstrcpy(CacheFile,CacheDir);
+        _fstrcat(CacheFile,"\\freespac");
+       	CloseFidSmall ();
+        FidFile = GSSiOpenFile(CacheFile,pOFStruct,OF_WRITE);
+        st = GSSiChangeLength (FidFile,FreeSpace);
+        GSSiClose(FidFile);
+        CreateFidSmall ();
+        if (st == -1)
+        {    
+            MessageBox( GetFocus(), "Unable to adjust Cache directory",
+            "Insufficient Space or File Handle Limit", MB_OK);
+            goto NoCache;
+        }
+        
+        /* Copy the new file to the cache */
+        pCacheBuf = (CACHEBUF *)pBuffer;
+        pCacheBuf += NumFiles;
+        MaxFileNum++;
+        pCacheBuf->FileNum = MaxFileNum;
+        _fstrcpy (pCacheBuf->FileName,DiskFile);
+        sprintf (UseFile,"%s\\%ld%s",CacheDir,pCacheBuf->FileNum,lpExt);    
+        /*sprintf (UseFile,"%s\\%ld",CacheDir,pCacheBuf->FileNum);  */
+        pCacheBuf->LastUsed = time(0); 
+        pCacheBuf->FileLength = length;
+        
+        sprintf (str,"Copying %s to cache",DiskFile);
+        ShowProcessingMessage (str); 
+        st = copyfile (UseFile,DiskFile,FALSE,0,0,0,0,0,0); 
+        ClearProcessingMessage();
+        if (!st) goto UseDiskFile;
+        
+        /* Update the cache index */
+        _llseek (FidIndex,0,0);
+        _lwrite (FidIndex,(char *)&NumFiles,2);
+        _lwrite (FidIndex,(char *)&MaxCache,4);
+        _lwrite (FidIndex,(char *)&FreeSpace,4);
+        _lwrite (FidIndex,(char *)&MaxFileNum,4);
+        NewNumFiles = 0;
+        pCacheBuf = (CACHEBUF *)pBuffer;
+        NumFiles++;
+        for (i=0;i<NumFiles;i++,pCacheBuf++)
+        {   
+            if (pCacheBuf->FileNum > 0)
+            {
+                NewNumFiles++;
+                _lwrite (FidIndex,(char *)pCacheBuf,sizeof(CACHEBUF));
+            }
+        }
+        _llseek (FidIndex,0,0);
+        _lwrite (FidIndex,(char *)&NewNumFiles,2);
+        
+        GSSiGlobUlFree (&hBuffer);
+        GSSiClose(FidIndex);
+        FidIndex = HFILE_ERROR;  
+        rtn = TRUE;
+        goto Exit;
+    }
+    else
+    {
+UseDiskFile:
+        _fstrcpy (UseFile,DiskFile);
+        GSSiGlobUlFree (&hBuffer);
+        if (FidIndex != HFILE_ERROR)
+        	GSSiClose(FidIndex);
+        goto Exit;
+    }
+Exit:          
+	GSSiGlobUlFree (&hMem);
+	return rtn;
+         
+} 
+
+BOOL RemoveCacheFile (LPSTR File)
+{   
+	HFILE	FidIndex, FidFile;
+	long	MaxCache, FreeSpace, MaxFileNum, CurrentLoc, len, FreeSpaceLoc;
+	short	NumFiles, i, st;
+    LPSTR   pBuffer, lpExt;
+    OFSTRUCT    OFStruct; 
+    HFILE    Fid;
+    CACHEBUF CacheBuf;
+    char	CacheFile[132];
+	
+    if (FirstCache)
+    	return FALSE;
+    lpExt = _fstrrchr (File,'.');
+    FidIndex = GSSiOpenFile(CacheIndex,&OFStruct,OF_READWRITE);
+    if (FidIndex == HFILE_ERROR)
+    	return FALSE;
+    _lread (FidIndex,&NumFiles,2);
+    _lread (FidIndex,&MaxCache,4);
+    FreeSpaceLoc = _llseek (FidIndex,0,1);
+    _lread (FidIndex,&FreeSpace,4);
+    _lread (FidIndex,&MaxFileNum,4);
+    for (i=0;i<NumFiles;i++)
+    {   
+        CurrentLoc = _llseek (FidIndex,0,1);
+        _lread (FidIndex,&CacheBuf,sizeof(CACHEBUF));
+        if (!_fstricmp(CacheBuf.FileName,File))
+        {
+            sprintf (CacheFile,"%s\\%ld%s",CacheDir,CacheBuf.FileNum,lpExt);
+            len = GSSiLength (CacheFile);  
+            FreeSpace += len;
+            GSSiRemove (CacheFile);   
+            CacheBuf.LastUsed = 0;  
+            *CacheBuf.FileName = 0;
+            _llseek (FidIndex,CurrentLoc,0);
+            _lwrite (FidIndex,&CacheBuf,sizeof(CACHEBUF)); 
+            _llseek (FidIndex,FreeSpaceLoc,0);
+            _lwrite (FidIndex,&FreeSpace,4);
+            GSSiClose(FidIndex);
+            sprintf (CacheFile,"%s\\freespac",CacheDir);
+          	CloseFidSmall ();
+	        FidFile = GSSiOpenFile(CacheFile,&OFStruct,OF_WRITE);
+	        st = GSSiChangeLength (FidFile,FreeSpace);
+	        GSSiClose(FidFile);
+          	CreateFidSmall ();
+            return TRUE;
+        } 
+    } 
+        
+	return FALSE;
+}
+
+short RemoveTrailingBlanks (LPSTR str)
+{   short   i;
+
+    i = _fstrlen(str); 
+    str += i;
+    while (i)
+    {
+        str--;
+        if (*str != ' ')
+        	return(i);
+        i--;
+        *str = '\0';
+    }
+    return (i);
+}
+
+BOOL ExistFile(LPSTR Name)
+{   
+    struct  _stat    buf;
+    OFSTRUCT OFStruct; 
+    short   i;             
+    
+    if (GSSiOpenFile(Name,&OFStruct,OF_EXIST)==HFILE_ERROR)
+        return FALSE;
+    return TRUE;
+}
+
+short FileType(LPSTR Name)
+{   
+    OFSTRUCT OFStruct;  
+    
+    if (GSSiOpenFile(Name,&OFStruct,OF_EXIST)==HFILE_ERROR) 
+    {
+    	if (OFStruct.nErrCode == 5)
+    		return 2;
+    	else
+        	return 0;
+    }
+    return 1;
+}
+
+void SetTrace (BOOL On)
+{   
+    if (!On || On == 3)
+    {
+        if (TraceFid != HFILE_ERROR && TraceOn) 
+            _lclose (TraceFid);
+        if (TraceOn == 4)
+        	TraceInWindow (NULL);
+        TraceOn = FALSE; 
+        TraceFid = HFILE_ERROR; 
+    }
+    else
+        TraceOn = On; 
+    if (TraceOn == 4)
+    	TraceType[0] = 1;
+    return;
+}
+
+BOOL FAR PASCAL TRACEWINDOWMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+{    
+ short	TabStops[2]={4,4};
+ short    BRtn;
+ if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
+ 	return (BRtn);
+ switch(Message)
+   {
+    case WM_INITDIALOG:
+
+         SendDlgItemMessage (hWndDlg,IDC_TRACETEXT,LB_SETTABSTOPS,1,(LPARAM)TabStops);    
+		 break; /* End of WM_INITDIALOG                                 */
+
+    case WM_CLOSE:
+         /* Closing the Dialog behaves the same as Cancel               */
+	     DestroyWindow(hWndDlg);
+         hWndTrace = 0;  
+         TraceOn = 0;
+		 FreeProcInstance(lpfnTRACEWINDOWMsgProc);
+         break; /* End of WM_CLOSE                                      */ 
+    case WM_DESTROY:
+    	 break;
+    case WM_COMMAND:
+         switch(wParam)
+         {  
+         	case IDOK:
+         		 break;
+         		 
+           	case IDM_STEPOVER:
+                 StepOver = TRUE;
+           	case IDM_STEP:
+                 NeedStep = FALSE;
+           		 break;
+           		 
+         }
+         break;     
+
+    default:
+        return FALSE;
+   }
+ return TRUE;
+}
+
+void TraceInWindow (LPSTR str)
+{ 
+	MSG	msg;
+	HANDLE	hSTR=0; 
+	short	index;
+	
+    if (!str)
+    {   
+    	if (hWndTrace)
+         	PostMessage(hWndTrace, WM_CLOSE, 0, 0L);
+    	return;
+    }
+	if (!hWndTrace)
+	{ 
+	  lpfnTRACEWINDOWMsgProc = MakeProcInstance((FARPROC)TRACEWINDOWMsgProc, hInst);
+	  hWndTrace=CreateDialog(hInst,"TRACEWINDOW",hWndMain, lpfnTRACEWINDOWMsgProc);
+	}
+	if (CurTraceLev <= 0)
+	{
+    	SendDlgItemMessage (hWndTrace,IDC_TRACETEXT,LB_RESETCONTENT,0,0); 
+    }
+    else if (StepOver)
+    		return; 
+    
+    else
+    {   
+    	LPSTR	str2;
+    	
+    	hSTR = GlobalAlloc (GMEM_MOVEABLE,2048);  
+    	str2 = GlobalLock (hSTR);
+    	_fmemset (str2,'\t',CurTraceLev);
+    	_fstrcpy (&str2[CurTraceLev],str);
+    	str = str2;
+    }
+	index = SendDlgItemMessage (hWndTrace,IDC_TRACETEXT,LB_ADDSTRING,0,(LPARAM)str);
+	GSSiGlobUlFree (&hSTR);  
+	SendDlgItemMessage (hWndTrace,IDC_TRACETEXT,LB_SETTOPINDEX,(WPARAM)index,(LPARAM)0); 
+	NeedStep = TRUE;
+	StepOver = FALSE;
+	while (NeedStep && hWndTrace && GetMessage(&msg,0,0,0))
+	{
+			   
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+		
+	}
+	return; 
+}
+
+
+void GSSiTraceLev (LPSTR str,short lev)
+{
+	if (lev < 0)
+		CurTraceLev--;
+	GSSiTrace (str);
+	if (lev > 0)
+		CurTraceLev++;
+	return;
+}
+
+void GSSiTrace (LPSTR str)
+{   
+	if (!TraceOn)
+		return;
+	{
+	HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,1024+4096);
+    LPSTR   txt = GlobalLock (hMem);
+    LPSTR	errmes = txt + 128;
+    LPSTR	Spaces = errmes + 128; 
+    LPSTR   TraceFile = Spaces + 128;
+    LPSTR	pLine = TraceFile + 128;
+    LPOFSTRUCT    pOFStruct = (LPOFSTRUCT) (pLine + 4096); 
+    
+    switch (TraceOn)
+    {
+    	case 0:
+    		goto Exit;  
+    	case 4:
+    		TraceInWindow (str);
+    		goto Exit;
+    }
+    
+    if (TraceFid == HFILE_ERROR)                                      
+    {   
+    	GetGlobalCVal("[%TRACEFILE]",txt,".\\trace.txt");
+        _fullpath(TraceFile,txt,sizeof(TraceFile));
+        TraceFid = OpenFile (TraceFile,pOFStruct,OF_READWRITE);  
+        if (TraceTrace)
+        {
+            sprintf (txt,"Read trace file %i %i",(short) TraceFid,(short) pOFStruct->nErrCode);
+            SetWindowText (hWndMain,txt);
+            Sleep(500);
+        }
+    }
+    if (TraceFid == HFILE_ERROR)
+    {
+        TraceFid = OpenFile (TraceFile,pOFStruct,OF_CREATE);  
+        if (TraceTrace)
+        {
+            sprintf (txt,"Read trace file %i %i",(short) TraceFid,(short) pOFStruct->nErrCode);
+            SetWindowText (hWndMain,txt);
+            Sleep(500);
+        }
+        if (TraceFid == HFILE_ERROR)
+        {   
+        
+            EnableWindow (hWndMain,FALSE);
+            HaltMapDisplay(FALSE); 
+            TraceOn = FALSE;
+            if (!LoadString(hInst, GetOPENERR00()+pOFStruct->nErrCode, errmes, 32)) errmes[0]='\0';
+            sprintf (txt,"Cannot create %s: error code is %i (%s)",TraceFile,(short)pOFStruct->nErrCode,errmes);
+            MessageBox( GetFocus(), txt,"", MB_OK|MB_ICONQUESTION);
+            goto Exit;  
+        }
+    }
+   	_llseek(TraceFid,0,2);
+    if (CurTraceLev > 0)
+    {
+    	_fmemset (Spaces,' ',CurTraceLev);  
+    	Spaces[CurTraceLev] = 0;
+    } 
+    else
+    	*Spaces = 0;
+    sprintf (pLine,"%s%s",Spaces,str);
+   	fputstring (pLine,TraceFid);  
+    GSSiGlobUlFree (&hMem);
+    if (TraceOn == 2)
+    {
+        _lclose (TraceFid);
+        TraceFid = HFILE_ERROR;
+    }
+Exit:
+	GSSiGlobUlFree (&hMem);
+	}
+    return;
+}     
+           
+BOOL atob (LPSTR Value)
+{ 
+	if (!_fstrcspn (Value," 1TtYy"))
+		return TRUE;
+	return FALSE;
+} 
+
+DPOINT atopt (LPSTR Value,LPSHORT pErr)
+{                 
+	DPOINT	DPoint;
+	
+	if (sscanf (Value,"%Flf %Flf",&DPoint.x,&DPoint.y) != 2)
+	{
+		*pErr = TRUE;
+		DPoint.x = DPoint.y = 0;
+	}
+	else
+		*pErr = FALSE;
+	return DPoint;
+} 
+
+MNMXCORD atobounds (LPSTR Value,LPSHORT err)
+{                 
+	MNMXCORD	Bounds;
+	
+	if (sscanf (Value,"%Flf %Flf %Flf %Flf",&Bounds.xmn,&Bounds.ymn,&Bounds.xmx,&Bounds.ymx) != 4)  
+	{
+		Bounds.xmn=Bounds.ymn=Bounds.xmx=Bounds.ymx = 0;
+		*err = TRUE;
+	}
+	else
+		*err = FALSE;
+	return Bounds;
+} 
+
+RECT atorect (LPSTR Value,LPSHORT pErr)
+{                 
+	RECT	Rect;
+	
+	if (sscanf (Value,"%i %i %i %i",&Rect.left,&Rect.top,&Rect.right,&Rect.bottom) != 4) 
+	{	
+		*pErr = TRUE;
+		Rect.left = Rect.right = Rect.bottom = Rect.top = 0;
+	}
+	else
+		*pErr = FALSE;
+	return Rect;
+}
+
+void recttoa (LPSTR Value,RECT Rect)
+{
+	sprintf (Value,"%i %i %i %i",Rect.left,Rect.top,Rect.right,Rect.bottom);
+	return;
+} 
+
+BOOL GSSiChangeLength (HFILE Fid,long NewLength) 
+{        
+	short	st;
+	
+	st = _chsize (Fid,NewLength);
+	if (!st)
+		return TRUE;
+	return FALSE;
+}  
+
+HFILE GSSiClose (HFILE Fid)
+{   HFILE rtn;  
+	short	ii;
+	 
+	if (Fid == HFILE_ERROR)
+		return 0; 
+	if (Fid <= 0)
+		ii=1;
+	if (RequestFileClose (Fid))
+		return 0;
+    rtn = _lclose (Fid);   
+    if (TraceOn) 
+    {
+	    HANDLE	hMem=GSSiGlobAlloc (GMEM_MOVEABLE,128);
+	    LPSTR	str = GlobalLock (hMem);
+	    if (rtn) 
+	    {
+	    	sprintf (str,"File close failed for %i",(short)Fid);
+	    	MessageBox (GetFocus(),str,NULL,MB_ICONEXCLAMATION);
+	    }
+        sprintf(str,"Close file: %i %i",Fid,rtn);
+        GSSiTrace(str);
+    	GSSiGlobUlFree (&hMem);
+    }
+    LogOpenFilesClose (Fid);
+    return rtn;
+}
+
+short GetDriveNum (char DriveLetter)
+{  
+	short drivenum;
+	
+   if (isupper(DriveLetter))
+	   drivenum    = DriveLetter - 'A' + 1;
+   else
+	   drivenum    = DriveLetter - 'a' + 1;  
+	return drivenum;
+}
+
+HCURSOR GSSiSetCursor (HCURSOR hCursor)
+{   
+	HCURSOR	hCur; 
+	static	HCURSOR hCurrentCursor=0;
+	
+	if (!hCursor)
+		hCursor = LoadCursor(NULL, IDC_ARROW); 
+	if (hCursor != hCurrentCursor)
+		hCur = SetCursor (hCursor);
+	else
+		hCur = hCurrentCursor;
+	hCurrentCursor = hCursor;
+	return hCur;
+}                                  
+
+COLORREF ColorWOWidth (COLORREF InColor)
+{
+	COLORREF OutColor;
+	
+	OutColor = InColor << 8;
+	OutColor = OutColor >> 8;
+	return OutColor;
+}  
+
+void SetFocusAndCursor (HWND hWnd)
+{
+	RECT	rect;
+	short	x,y; 
+	
+	GetWindowRect(hWnd,&rect);
+	x = rect.left + (rect.right - rect.left)/2;
+	y = rect.bottom - (rect.bottom - rect.top) / 2;
+	SetCursorPos (x,y);
+	return;
+} 
+
+void SetReplacePath (LPSTR Name,short opt)
+{
+	switch (opt)
+	{
+		case 1:
+ 			_fstrcpy (SubstitutePathnameFrom,Name);
+ 			break;
+		case 2:
+ 			_fstrcpy (SubstitutePathnameTo,Name);
+ 			break;
+		case 3:
+		{
+			LPSTR	pBeg, pEnd, pSpace;
+			char	temp[128];
+			short	i;
+			
+ 			if (*Name != '(')
+ 			{
+ 				_fstrcpy (CachePathnameFrom[0],Name);
+ 				NumCachePathnameFrom = 1;
+ 			}
+ 			else if ((pEnd = _fstrchr (Name,')')))
+ 			{
+ 				*pEnd = 0;
+ 				_fstrcpy (temp,&Name[1]);
+ 				*pEnd = ')'; 
+ 				pBeg = temp;
+ 				do
+ 				{
+ 					if ((pSpace = _fstrchr (pBeg,' ')))
+ 						*pSpace++ = 0;
+ 					_fstrcpy (CachePathnameFrom[NumCachePathnameFrom++],pBeg);
+ 					pBeg = pSpace;
+ 				}
+ 				while (pSpace);
+ 			} 
+ 			for (i=0;i<NumCachePathnameFrom;i++)
+ 				if (*LastChr(CachePathnameFrom[i]) == '\\')
+ 					*LastChr(CachePathnameFrom[i]) = 0;
+ 		}
+ 			break;
+		case 4:
+ 			_fstrcpy (CachePathnameTo,Name);
+ 			break;
+ 	}
+ 	return;
+} 	
+
+
+HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCT pOFStruct,UINT Mode)
+{   HFILE   Fid=HFILE_ERROR; 
+	HANDLE	hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,2048);
+    LPSTR	str=GlobalLock (hSTR);
+    LPSTR	SaveName=str+256;
+    LPSTR	SaveText=SaveName+256;
+    LPSTR	Name=SaveText+256; 
+    LPSTR	errmes=Name+256;
+    LPSTR	WT=errmes+256;
+    LPSTR	SaveWT=WT+256;  
+    
+    unsigned    frequency=1000, duration=100; 
+    short       NumWait, NumBusyWait,l; 
+    clock_t starttime, nms; 
+    BOOL	UsingSubName=FALSE; 
+	BOOL	UsingCacheName=FALSE;   
+	BOOL	NoDelete = FALSE;
+    static	BOOL	InOpenFile=FALSE;
+    
+    if (!pOFStruct)
+    	pOFStruct = (LPOFSTRUCT) (SaveWT + 256);
+    if (DoTime)
+	    starttime=GetTickCount(); 
+	if (Mode == OF_CREATE_NODELETE)
+	{
+		NoDelete = TRUE;
+		Mode = OF_CREATE;
+	}
+    NumFilesOpened++;
+    _fstrcpy (Name,InName);                                    
+    ExpandText (Name);
+    if (!*Name)
+    	goto Exit; 
+//    SetWindowText (hWndMain,Name);
+    if (!_fstrchr (Name,'\\'))   // change    filex.typ  to .\filex.typ (does this mess up OF_SEARCH?)
+    {
+        LPSTR s1, s2;
+        
+        s1 = _fstrchr (Name,'\0');
+        s2 = s1 + 2;
+        while (s1 != (LPSTR) Name)
+            *s2-- = *s1--;
+        *s2-- = *s1--;
+        *s2-- = '\\';
+        *s2 = '.';
+    }
+    
+    if (!InOpenFile && *SubstitutePathnameFrom && Mode == OF_READ)
+    {  
+    	_fstrcpy (SaveName,Name);
+    	_fullpath (str,Name,256);   
+    	l = _fstrlen(SubstitutePathnameFrom);
+    	if (!_fstrnicmp (str,SubstitutePathnameFrom,l))
+    	{ 
+    		UsingSubName = TRUE;
+    		_fstrcpy (Name,SubstitutePathnameTo);
+    		_fstrcat (Name,&str[l]);
+    	}
+    }    
+                                        
+    NumWait = 0;  
+    NumBusyWait = 0;
+Open2: 
+    if (!UsingSubName && !InOpenFile && NumCachePathnameFrom && Mode == OF_READ)
+    {  
+    	short	icpf;
+    	
+    	_fstrcpy (SaveName,Name);
+    	_fullpath (str,Name,256);
+    	for (icpf = 0;icpf < NumCachePathnameFrom; icpf++)
+    	{   
+	    	l = _fstrlen(CachePathnameFrom[icpf]);
+	    	if (!_fstrnicmp (str,CachePathnameFrom[icpf],l))
+	    	{ 
+	    		UsingCacheName = TRUE;
+	    		_fstrcpy (Name,CachePathnameTo);
+	    		_fstrcat (Name,&str[l]);  
+				{    		
+					double	dtime;
+					struct _stat	statfrom, statto;  
+					HFILE	FidTo;
+					
+					InOpenFile = TRUE;
+					Fid = GSSiOpenFile (SaveName,pOFStruct,Mode);
+					if (Fid == HFILE_ERROR) 
+					{
+						InOpenFile = FALSE;
+						goto Exit;
+					}
+					_fstat (Fid,&statfrom);
+					GSSiClose (Fid);
+					FidTo = GSSiOpenFile (Name,pOFStruct,Mode);
+					if (FidTo == HFILE_ERROR) 
+						dtime = 1;
+					else
+					{
+						_fstat (FidTo,&statto); 
+						dtime = difftime (statfrom.st_mtime,statto.st_mtime); 
+						if (statfrom.st_size != statto.st_size)
+							dtime = 1;
+					}
+					if (dtime>0)
+					{   
+						BOOL	OkToCache=TRUE;
+						
+						if (FidTo != HFILE_ERROR)
+						{
+							GSSiClose (FidTo);
+							GSSiRemove(Name);
+						} 
+						else
+							OkToCache = makedirectories (Name,FALSE);
+						if (OkToCache)
+						{
+							double FreeSpace = GetDriveFreeSpace (*pOFStruct->szPathName); 
+							FreeSpace -= statfrom.st_size;
+							if (FreeSpace < MinCacheDriveFreeSpace)
+								OkToCache = FALSE;
+						} 
+						if (OkToCache)
+						{
+							GetWindowText (hWndMain,SaveWT,256);
+							sprintf (WT,"Caching %s",SaveName);
+							SetWindowText (hWndMain,WT); 
+							copyfile (Name,SaveName,FALSE,0,0,0,0,0,0);  
+							SetWindowText (hWndMain,SaveWT);
+						}
+						else
+						{
+							_fstrcpy (Name,SaveName);
+							UsingCacheName = FALSE;
+						}
+	    		    }       
+	    		    else   
+	    		    {
+		   		    	InOpenFile = FALSE;
+	    		    	Fid = FidTo;
+	    		    	goto Exit;
+	    		    } 
+	   		    	InOpenFile = FALSE;
+	   		    	break;
+	    		}
+	    	}
+    	}
+    }    
+Open: 
+	if (NoDelete)
+	{
+        Fid = OpenFile (Name,pOFStruct,OF_EXIST);
+		if (Fid != HFILE_ERROR)
+			BlowOut("Trying to create existing file",Name);
+        Fid = OpenFile (Name,pOFStruct,Mode);
+    } 
+    else if ((Fid = FileAlreadyOpen (Name,Mode)) != HFILE_ERROR)
+    	goto Exit;
+    else if (Mode == OF_READ && ShareEnabled)
+        Fid = OpenFile (Name,pOFStruct,OF_READ|OF_SHARE_DENY_WRITE);
+    else if (Mode == OF_WRITE && ShareEnabled)
+        Fid = OpenFile (Name,pOFStruct,OF_WRITE|OF_SHARE_EXCLUSIVE);
+    else if (Mode == OF_READWRITE && ShareEnabled)
+        Fid = OpenFile (Name,pOFStruct,OF_READWRITE|OF_SHARE_EXCLUSIVE);
+    else if (Mode == OF_EXIST && ShareEnabled)
+        Fid = OpenFile (Name,pOFStruct,OF_EXIST|OF_SHARE_DENY_WRITE);
+    else
+        Fid = OpenFile (Name,pOFStruct,Mode);
+        
+    if (Fid == HFILE_ERROR)
+    {   
+        short   ii;
+        
+        ii=0;
+        if (pOFStruct->nErrCode == 32 && ShareEnabled)
+        {   
+        	InFileWait = TRUE;
+        	if (GetGlobalBVal2 ("[%WAITBEEP]",TRUE))
+            	Beep (frequency, duration);  
+            GetWindowText(GetActiveWindow(),SaveText,144);
+            sprintf (str,"Waiting for %s",Name);
+            SetWindowText (GetActiveWindow(),str);
+            GSSiTrace(str); 
+            nms = GetGlobalLVal2 ("[%WAITDURATION]",1000);
+            Sleep (nms);
+            SetWindowText (GetActiveWindow(),SaveText);
+            NumWait++;
+		    if (NumWait >= GetGlobalLVal2 ("[%WAITCYCLES]",10))
+		    {   
+		        sprintf (str,"File %s is in use",Name); 
+		        GSSiTrace (str);
+		        DumpOpenFiles ();
+		        if (!OkToContinue (TRUE))
+					BlowOut(NULL,NULL);
+		        if (GSSiMessageBox("Continue to wait?",str,
+		            MB_YESNO|MB_ICONQUESTION|MB_TASKMODAL)==IDYES) 
+		            NumWait = 0;
+		        else
+					BlowOut(NULL,NULL);
+		    }
+            goto Open;
+        } 
+        else if (Mode == OF_READ && pOFStruct->nErrCode==21 && NumBusyWait < 5)
+        {
+            NumBusyWait++;
+            Sleep(2000);
+            goto Open;
+        }
+        else if ((Mode == OF_READ && pOFStruct->nErrCode>3) || 
+                 (Mode != OF_READ && pOFStruct->nErrCode>2 && Mode != OF_EXIST))
+        {    
+            HaltMapDisplay(FALSE); 
+            DoPaint = FALSE;
+            if (!LoadString(hInst, GetOPENERR00()+pOFStruct->nErrCode, errmes, 64))
+            	*errmes=0;
+            sprintf (str,"Error number %i on open (mode %i): %s",(short)pOFStruct->nErrCode,(short) Mode,errmes);
+            if (MessageBox( GetFocus(),str, Name, MB_OKCANCEL|MB_ICONEXCLAMATION) ==  IDCANCEL)
+            	BlowOut(NULL,NULL);
+        } 
+        else if (UsingSubName)
+        {
+        	UsingSubName = FALSE;  
+        	_fstrcpy (Name,SaveName);
+        	goto Open2;
+        }
+        else if (UsingCacheName)
+        {
+        	UsingCacheName = FALSE;  
+        	_fstrcpy (Name,SaveName);
+        	goto Open;
+        }
+    }
+    else if (Mode != OF_EXIST && Mode != OF_DELETE)
+    {   
+    	short ii;
+    	
+    	if (Fid < FidSmall)
+    	{   
+    		_lclose (Fid);
+    		CloseFidSmall ();
+    		CreateFidSmall (); 
+    		goto Open2;
+    	}
+    	if (!Fid) 
+    	{  //this needed in NT environment probably due to a bug in the coord conversion dll - must be closing a FID of 0  
+    		_lclose (Fid);
+    		CreateFidSmall (); 
+    		goto Open2;
+    	}
+    }
+    if (TraceOn)
+    {
+        sprintf (str,"Open file: %s  ID: %i %i %i",Name,Fid,(short)Mode,(short)pOFStruct->nErrCode);
+        GSSiTrace(str); 
+        _fullpath (str,Name,256);
+        GSSiTrace(str);
+    }
+    if (DoTime)
+    	OpenFileTime+=(GetTickCount()-starttime);   
+    InFileWait = FALSE;
+   	LogOpenFilesOpen (Mode,Fid,pOFStruct); 
+Exit:
+	GSSiGlobUlFree (&hSTR);
+	return (Fid);
+}
+
+BOOL copyfile (LPSTR ToFile, LPSTR FromFile,BOOL Append,long BeginPos,long EndPos,HWND hWndDlg,UINT StatusCntl,long TotLen,LPLONG pCurLoc)
+{   UINT nRead;
+    short FidFrom, FidTo;
+    DWORD maxread;
+    OFSTRUCT    fStruct;
+    LPOFSTRUCT  pStruct = &fStruct;
+    HANDLE  hBuffer;
+    LPSTR   pBuffer;
+    HCURSOR hcurSave, hCursor; 
+    long	zeros[64], TotToRead=-1, TotRead=0;
+    
+    if (EndPos > 0)
+    	TotToRead = EndPos - BeginPos;
+
+    maxread = INT_MAX;
+    hBuffer = GSSiGlobAlloc (GMEM_MOVEABLE,maxread);
+    pBuffer = GlobalLock (hBuffer);
+    FidFrom = GSSiOpenFile (FromFile,pStruct,OF_READ);
+    if (FidFrom == HFILE_ERROR) goto RtnFalse;    
+    if (BeginPos > 0)
+    	_llseek (FidFrom,BeginPos,0);	
+   	CloseFidSmall ();
+    if (Append)
+    {
+    	FidTo   = GSSiOpenFile (ToFile,pStruct,OF_READWRITE);  
+    	if (FidTo != HFILE_ERROR)
+    	{
+    		_llseek (FidTo,0,2);
+    		goto Start;
+    	}
+    }
+	makedirectories (ToFile,FALSE);
+   	FidTo = _lcreat (ToFile,0);
+//    FidTo   = GSSiOpenFile (ToFile,pStruct,OF_CREATE);
+    if (FidTo == HFILE_ERROR)
+    {
+        GSSiClose(FidFrom);
+        goto RtnFalse;
+    } 
+Start:
+    hCursor = LoadCursor (0,IDC_WAIT);
+    hcurSave = GSSiSetCursor (hCursor);
+    nRead = _lread (FidFrom,pBuffer,(UINT) maxread);
+    while (nRead)
+    {
+//   _lwrite (FidTo,zeros,256);   
+	    if (nRead == (UINT)HFILE_ERROR) 
+    	{
+		    GSSiClose (FidFrom);
+		    GSSiClose (FidTo);
+		    GSSiSetCursor (hcurSave); 
+    		goto RtnFalse;
+    	}
+	    TotRead += nRead; 
+	    if (TotToRead > 0 && TotRead > TotToRead)
+	    	nRead -= (TotRead - TotToRead);
+        if (_lwrite (FidTo,pBuffer,nRead) != nRead) 
+    	{
+		    GSSiClose (FidFrom);
+		    GSSiClose (FidTo);
+		    GSSiSetCursor (hcurSave); 
+    		goto RtnFalse;
+    	}
+	    if (TotToRead > 0 && TotRead >= TotToRead)
+	    	break;
+    	if (hWndDlg)
+    	{
+    		(*pCurLoc) += nRead;
+	        PctBox (GetDlgItem(hWndDlg,StatusCntl),TotLen,*pCurLoc,0);
+	    }
+    	 
+//   _lwrite (FidTo,zeros,256);
+        nRead = _lread (FidFrom,pBuffer,(UINT) maxread);
+    }
+    GSSiClose (FidFrom);
+    GSSiClose (FidTo);
+    GSSiGlobUlFree (&hBuffer);
+    GSSiSetCursor (hcurSave); 
+    CreateFidSmall ();
+    return (TRUE);
+RtnFalse:
+    GSSiGlobUlFree (&hBuffer);
+    return (FALSE);
+}
+
+LPSTR FirstNonBlank(LPSTR Text)
+{   LPSTR rtn;
+
+    rtn = Text;
+    while (*rtn == ' '|| *rtn=='\t') rtn++;
+    return (rtn);
+}
+
+LPSTR NextBlank(LPSTR Text)
+{   LPSTR rtn;
+
+    rtn = Text;
+    if (!*rtn)
+    	return 0;
+    while (*rtn != ' '&& *rtn!='\t') rtn++;
+    return (rtn);
+}
+
+LPSTR LastNonBlank(LPSTR Text)
+{   LPSTR rtn;
+
+    rtn = Text;
+    while (*Text)
+    {
+        if (*Text!=' ' && *Text!='\t') rtn=Text;
+        Text++;
+    }
+    return (rtn);
+} 
+
+LPSTR PadString (LPSTR str,char padchr,short padlen)
+{
+	short	l=_fstrlen (str);
+	
+	while (l < padlen)
+	{
+		str[l] = padchr;
+		l++;
+	}       
+	str[l]=0;
+	return str; 
+}
+
+LPSTR Truncate(LPSTR Text)
+{   LPSTR rtn, EndChar;
+
+    rtn = Text; 
+    EndChar = _fstrchr (Text,0);
+    while (EndChar > Text)
+    {                    
+    	EndChar--;
+        if (*EndChar != ' ')
+        	goto Exit;
+        *EndChar = 0;
+    } 
+Exit:
+    return (rtn);
+}    
+
+LPSTR TruncateAt (LPSTR Text,LPSTR EndChars)
+{   LPSTR rtn;
+	size_t	i;
+
+    rtn = Text;
+    i = _fstrcspn (Text,EndChars);
+    Text+=i;
+    *Text=0; 
+    return (rtn);
+}   
+
+LPSTR FirstNonInt (LPSTR Text)
+{ 
+
+	while (*Text)
+	{
+		if (!isdigit (*Text))
+			return Text; 
+		Text++;
+	}
+	return Text;
+} 
+
+DPOINT dnewpt (DPOINT OldPoint, double AZM, double DIS)
+{   DPOINT NewPoint;
+
+      NewPoint.x=OldPoint.x+DIS*cos(AZM);
+      NewPoint.y=OldPoint.y+DIS*sin(AZM);
+      return (NewPoint);
+}
+
+void LNEWPT (double X,double Y,LPDOUBLE NewX,LPDOUBLE NewY, double AZM, double DIS)
+{  
+      *NewX=X+DIS*cos(AZM);
+      *NewY=Y+DIS*sin(AZM); 
+      return;
+}
+
+void RestoreScreenRect (HDC hDC, HBITMAP hSavedBM, RECT Rect, RECT NewRect)
+{   HDC     hdcMem;
+    HBITMAP hbmPrev; 
+    short       i;
+
+    SaveDC (hDC);
+    SetMapMode    ( hDC, MM_TEXT );
+    SetWindowOrgEx  ( hDC, 0,   0,0 );
+    SetViewportOrgEx( hDC, 0, 0,0 ); 
+    SelectClipRgn (hDC,0);
+    
+    hdcMem = CreateCompatibleDC(hDC);
+    hbmPrev = SelectObject(hdcMem, hSavedBM);
+
+    i=StretchBlt (hDC, NewRect.left,NewRect.top,
+                NewRect.right-NewRect.left+1,
+                NewRect.bottom-NewRect.top+1,
+                hdcMem, 0, 0,
+                Rect.right-Rect.left+1,
+                Rect.bottom-Rect.top+1,
+                SRCCOPY);
+
+    SelectObject(hdcMem, hbmPrev);
+    DeleteDC(hdcMem);
+    RestoreDC (hDC,-1);
+}
+
+
+void TRAN (void *source, void *dest, size_t count)
+{
+
+    _fmemmove(dest,source,count);
+    return;
+}  
+
+void  STRIPR(LPSTR stuff, short *NLEN,LPSTR out_with,  short llen) 
+{
+LPSTR  loc_it, the_end;
+int    whats_left,idiff,i;
+     
+       
+      the_end =  stuff + _fstrlen(stuff); 
+      
+r10:  loc_it = _fstrstr (stuff, out_with);
+ 
+      while (loc_it)
+      { 
+          whats_left = the_end - loc_it;
+          i = whats_left-llen;
+          if (i <= 0)
+          {
+          	*NLEN = 0;
+          	return;
+          }
+          _fmemmove (loc_it,loc_it+llen,(size_t)(whats_left-llen));
+           the_end -= llen;
+          goto r10;  
+      } 
+      *NLEN = _fstrlen(stuff);     
+return;
+} 
+
+  long  IREAD (LPSTR incoming, long NUMDIG, long *IRC )
+{
+
+long	rtn;
+char	savechr;
+LPSTR	ptr;
+short i;
+*IRC = 0;
+  if (NUMDIG > 31)
+  {
+    *IRC = -1;
+    return 0;
+  }  
+  ptr = incoming;
+  i = NUMDIG;
+  while (i--)
+  {
+    if(*ptr < '0' || *ptr++ > '9')
+    {
+      *IRC = -1;
+      return 0;
+    }
+  }    
+ 
+ ptr = incoming + NUMDIG;
+ savechr = *ptr;
+ *ptr = 0; 
+ rtn = atol(incoming); 
+ *ptr = savechr;
+ return rtn;
+ }
+
+BOOL IWRITE (long ival,LPSTR str ,short len)
+{
+	char	buf[16];
+	UINT	ns, l;
+	
+	ltoa (ival,buf,10);
+	l = _fstrlen (buf);
+	if (l > len)
+		return FALSE;
+	ns = len - l;
+	while (ns--)
+		*str++ = ' ';
+	_fmemmove (str,buf,l);
+	return TRUE;
+}
+
+BOOL IWRITEZ (long ival,LPSTR str ,short len)
+{
+	char	buf[16];
+	UINT	ns, l;
+	
+	ltoa (ival,buf,10);
+	l = _fstrlen (buf);
+	if (l > len)
+		return FALSE;
+	ns = len - l;
+	while (ns--)
+		*str++ = '0';
+	_fmemmove (str,buf,l);
+	return TRUE;
+}
+
+LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, short MAXLEN)
+{
+    LPSTR   IBEG, loc, new;
+    
+      short  STRLEN, CURLEN, OLDLEN, NEWLEN, IDIFF;
+      long  MOVELEN; 
+       
+      OLDLEN = _fstrlen (OLD);
+      NEWLEN = _fstrlen (NEW); 
+      STRLEN = _fstrlen (STRING);
+      IBEG   = STRING;
+      IDIFF  = NEWLEN - OLDLEN;
+      while (*IBEG)
+      {
+          IBEG    = _fstrstr(IBEG,OLD);
+          if (!IBEG) goto Exit;
+          if (!IDIFF)
+          {               
+              new = NEW;
+              while (*new) *IBEG++ = *new++;
+          }
+          else if (IDIFF < 0)
+          {
+              loc = IBEG + OLDLEN;
+              new = NEW;
+              while (*new) *IBEG++ = *new++;
+              new = IBEG;
+              while (*loc) *new++ = *loc++;
+              *new = 0;
+              STRLEN += IDIFF;
+          }
+          else
+          {   
+              CURLEN = IBEG - STRING;
+              MOVELEN = STRLEN - CURLEN;
+              STRLEN += IDIFF;
+              if (STRLEN > MAXLEN)
+              {
+                STRLEN = MAXLEN;
+                goto Exit;
+              }
+              TRAN (IBEG+OLDLEN,IBEG+NEWLEN,(size_t) MOVELEN);
+              new = NEW;
+              while (*new) *IBEG++ = *new++;
+          }
+      }
+Exit:
+      loc = STRING + STRLEN;
+      *loc = '\0';
+      return (STRING);
+}
+    
+void Sound (short Type)
+{
+   switch (Type)
+   {
+        case GOOD_SOUND:
+            MessageBeep (-1);
+            break;
+        case BAD_SOUND:
+            MessageBeep (MB_ICONQUESTION);
+            break;
+   }
+   return; 
+}
+
+/* Sounds the speaker for a time specified in microseconds by duration
+ * at a pitch specified in hertz by frequency.
+ */
+#ifndef WIN32
+void Beep( unsigned frequency, unsigned duration )
+{
+    short control;
+
+    /* If frequency is 0, Beep doesn't try to make a sound. */
+    if( frequency )
+    {
+        /* 75 is about the shortest reliable duration of a sound. */
+        if( duration < 75 )
+            duration = 75;
+
+        /* Prepare timer by sending 10111100 to port 43. */
+        _outp( 0x43, 0xb6 );
+
+        /* Divide input frequency by timer ticks per second and
+         * write (byte by byte) to timer.
+         */
+        frequency = (unsigned)(1193180L / frequency);
+        _outp( 0x42, (char)frequency );
+        _outp( 0x42, (char)(frequency >> 8) );
+
+        /* Save speaker control byte. */
+        control = _inp( 0x61 );
+
+        /* Turn on the speaker (with bits 0 and 1). */
+        _outp( 0x61, control | 0x3 );
+    }
+
+    Sleep( (clock_t)duration );
+
+    /* Turn speaker back on if necessary. */
+    if( frequency )
+        _outp( 0x61, control );
+}
+
+/* Pauses for a specified number of milliseconds. */
+void Sleep( clock_t _wait )
+{
+    clock_t goal;
+
+    goal = _wait + GetTickCount();
+    while( goal > GetTickCount() )
+        ;
+}
+
+#endif
+
+HBITMAP SaveScreen (HDC hDC, RECT Rect)
+{   HDC hdcMem;
+    HBITMAP hbmPrev, hNewBM;
+    short   i,ii; 
+    long	size;
+    
+//    InflateRect (&Rect,2,2);
+    SaveDC (hDC);
+    SetMapMode    ( hDC, MM_TEXT );
+    SetWindowOrgEx  ( hDC, 0,   0,0 );
+    SetViewportOrgEx( hDC, 0, 0,0 );
+  	SelectClipRgn ( hDC,NULL);
+    hdcMem = CreateCompatibleDC(hDC);
+    hNewBM = CreateCompatibleBitmap(hDC,Rect.right-Rect.left+1,
+                                        Rect.bottom-Rect.top+1); 
+    if (hNewBM)
+    {
+        hbmPrev = SelectObject(hdcMem, hNewBM);
+    
+        i=BitBlt(hdcMem, 0, 0, Rect.right-Rect.left+1,
+                             Rect.bottom-Rect.top+1,
+               hDC, Rect.left,Rect.top, SRCCOPY);
+    
+        if (hbmPrev)
+            SelectObject(hdcMem, hbmPrev);
+    }
+    else
+        ii=0;
+    DeleteDC(hdcMem);
+    RestoreDC (hDC,-1); 
+    return (hNewBM);
+}
+
+void RestoreScreen (HDC hDC, HBITMAP hSavedBM, RECT Rect)
+{   HDC     hdcMem;
+    HBITMAP hbmPrev;
+    short       i;
+    
+    if (!hSavedBM) return;
+    SaveDC (hDC);
+    SetMapMode    ( hDC, MM_TEXT );
+    SetWindowOrgEx  ( hDC, 0, 0,0 );
+    SetViewportOrgEx( hDC, 0, 0,0 );
+  	SelectClipRgn ( hDC,NULL);
+    hdcMem = CreateCompatibleDC(hDC);
+    hbmPrev = SelectObject(hdcMem, hSavedBM);
+
+    i=BitBlt(hDC, Rect.left,Rect.top,
+                Rect.right-Rect.left+1,
+                Rect.bottom-Rect.top+1,
+           hdcMem, 0,0,  SRCCOPY);
+
+    SelectObject(hdcMem, hbmPrev);
+    DeleteDC(hdcMem);
+    RestoreDC (hDC,-1);
+    return;
+}
+
+HANDLE SaveScreen2 (HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
+{   
+	HANDLE	handle=GSSiGlobAlloc (GHND,sizeof(SAVESCREEN));
+	LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (handle);
+	
+	if (pID)
+		*pID = NextScreenID; 
+	pSaveScreen->ID = NextScreenID++;
+	pSaveScreen->Rect = Rect;
+	pSaveScreen->hBM = SaveScreen (hDC,Rect);   
+	pSaveScreen->pVP = pVP;
+	GlobalUnlock (handle);
+	RegisterSavedScreen (handle);  
+    return (handle);
+}
+
+BOOL ScreenIsRegistered (HANDLE hSavedScreen)
+{   
+	UINT	i;
+	
+    if (!hSavedScreen)
+    	return FALSE; 
+    for (i=0;i<nSavedScreens;i++)
+    	if (hSavedScreen == hSavedScreens[i])
+    		return TRUE;
+    return FALSE;
+}
+
+void RestoreScreen2 (HDC hDC, HANDLE hSavedScreen,long ID)
+{
+	LPSAVESCREEN	pSaveScreen;
+	HDC     hdcMem;
+    HBITMAP hbmPrev;
+    short       i;
+    
+    if (!ScreenIsRegistered(hSavedScreen))
+    	return;
+	pSaveScreen=(LPSAVESCREEN)GlobalLock (hSavedScreen); 
+	if (ID && pSaveScreen->ID != ID)
+		goto Exit;
+    SaveDC (hDC);
+    SetMapMode    ( hDC, MM_TEXT );
+    SetWindowOrgEx  ( hDC, 0, 0,0 );
+    SetViewportOrgEx( hDC, 0, 0,0 );
+  	SelectClipRgn ( hDC,NULL);
+    hdcMem = CreateCompatibleDC(hDC);
+    hbmPrev = SelectObject(hdcMem, pSaveScreen->hBM);
+    	
+    i=BitBlt(hDC, pSaveScreen->Rect.left,pSaveScreen->Rect.top,
+                pSaveScreen->Rect.right-pSaveScreen->Rect.left+1,
+                pSaveScreen->Rect.bottom-pSaveScreen->Rect.top+1,
+           hdcMem, 0, 0,  SRCCOPY);
+
+    SelectObject(hdcMem, hbmPrev);
+    DeleteDC(hdcMem);
+    RestoreDC (hDC,-1);
+Exit: 
+    GlobalUnlock (hSavedScreen);
+    return;
+} 
+
+void DestroySavedScreen (LPHANDLE phSavedScreen,long ID)
+{
+	LPSAVESCREEN	pSaveScreen; 
+	short	i;
+
+    if (!ScreenIsRegistered(*phSavedScreen))
+    {
+		*phSavedScreen = 0;
+    	return; 
+    }
+	pSaveScreen=(LPSAVESCREEN)GlobalLock (*phSavedScreen);
+	if (ID && pSaveScreen->ID != ID)
+	{
+		GlobalUnlock (*phSavedScreen);
+		return;
+	}
+	if (pSaveScreen->hBM) 
+		DeleteObject(pSaveScreen->hBM); 
+	GlobalUnlock (*phSavedScreen);
+	GlobalFree (*phSavedScreen); 
+	UnRegisterSavedScreen (*phSavedScreen);
+	*phSavedScreen = 0;
+	return;
+}  
+
+BOOL WriteSavedScreen (LPSTR File,HANDLE hSavedScreen)
+{
+	OFSTRUCT	OFStruct;
+	HFILE		Fid;
+	HANDLE		handle;
+	long		SaveSize,ii;
+	LPSAVESCREEN pSaveScreen;
+	HPSTR	pBM;
+	HDIB	hDIB;
+	BOOL	rtn=FALSE;
+	
+	if (!*File)
+		return FALSE;
+	makedirectories (File,FALSE);
+	pSaveScreen = (LPSAVESCREEN)GlobalLock (hSavedScreen); 
+	hDIB = BitmapToDIB (pSaveScreen->hBM, NULL);
+	SaveDIB (hDIB,File);
+	DestroyDIB (hDIB); 
+	Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);  
+	if (Fid == HFILE_ERROR)
+		goto Exit;
+    ii=_llseek (Fid,0,2);
+	_lwrite (Fid,&pSaveScreen->Rect,sizeof(RECT));
+	GSSiClose (Fid);
+Exit:
+	GlobalUnlock (hSavedScreen);
+	return TRUE;
+}
+
+HANDLE	ReadSavedScreen (LPSTR File,LPLONG pUpdateTime)
+{
+	OFSTRUCT	OFStruct;
+	HFILE		Fid;
+	HANDLE		handle;
+	long		SaveSize,ii;
+	LPSAVESCREEN pSaveScreen;
+	HPSTR	pBM;  
+	HDIB	hDIB; 
+	HPALETTE	hPal;
+	struct _stat	Stat;
+	
+	if (!*File)
+		return 0;
+	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
+	if (Fid == HFILE_ERROR)
+		return FALSE;
+	_fstat (Fid,&Stat);
+	*pUpdateTime = Stat.st_mtime;
+	handle = GSSiGlobAlloc (GMEM_MOVEABLE,sizeof(SAVESCREEN));  
+	pSaveScreen = (LPSAVESCREEN)GlobalLock (handle);
+	ii=_llseek (Fid,0,2);                
+	ii=_llseek (Fid,ii-sizeof(RECT),0);                
+	_lread (Fid,&pSaveScreen->Rect,sizeof(RECT));
+	GSSiClose (Fid);
+	hDIB = LoadDIB (File); 
+	hPal = CreateDIBPalette (hDIB);
+	pSaveScreen->hBM = DIBToBitmap (hDIB,hPal); 
+	pSaveScreen->ID = NextScreenID++; 
+	if (hPal)
+    	DeleteObject (hPal); 
+	DestroyDIB (hDIB); 
+	GlobalUnlock (handle);
+	RegisterSavedScreen (handle);  
+	return handle;
+} 
+
+void RegisterSavedScreen (HANDLE hSavedScreen)
+{	
+	short	i;
+
+	if (nSavedScreens == MAXSAVEDSCREENS)
+		return; 
+	for (i=0;i<nSavedScreens;i++)
+		if (hSavedScreen == hSavedScreens[i])
+			return;
+	hSavedScreens[nSavedScreens++] = hSavedScreen;
+	return;		
+}   
+
+void ReduceSavedScreens (void)
+{   
+	short	i,n=0;
+	
+	for (i=0;i<nSavedScreens;i++)
+		if (hSavedScreens[i]) 
+			hSavedScreens[n++] = hSavedScreens[i];
+	nSavedScreens = n;
+	
+	return;
+}
+
+void UnRegisterSavedScreen (HANDLE hSavedScreen)
+{	
+	short	i;
+
+	for (i=0;i<nSavedScreens;i++)
+		if (hSavedScreen == hSavedScreens[i]) 
+			hSavedScreens[i] = 0; 
+	ReduceSavedScreens ();
+	return;		
+}
+   
+void ClearSavedScreens(LPVOID pVP, LPRECT pRect)
+{
+	LPSAVESCREEN	pSaveScreen; 
+	RECT	IntRect;
+	short	i;
+
+	for (i=0;i<nSavedScreens;i++)
+	{
+		pSaveScreen=(LPSAVESCREEN)GlobalLock (hSavedScreens[i]);
+		if (pSaveScreen)
+		{
+			if (pSaveScreen->pVP == pVP || !pVP)
+			{
+				DeleteObject(pSaveScreen->hBM); 
+				GSSiGlobUlFree (&hSavedScreens[i]);
+			}
+			else if (pRect && IntersectRect (&IntRect,&pSaveScreen->Rect,pRect))
+			{
+				DeleteObject(pSaveScreen->hBM); 
+				GSSiGlobUlFree (&hSavedScreens[i]);
+			}
+			else
+				GlobalUnlock (hSavedScreens[i]);
+		}
+		else
+			hSavedScreens[i] = 0;
+	}
+	ReduceSavedScreens ();
+	return;
+}
+
+void ResaveSavedScreens(void)
+{   int	iscreen;
+
+/*	for (iscreen=0;iscreen<nSavedScreens;iscreen++)
+	{
+		if (*SavedScreens[iscreen])
+		{
+			DeleteObject(*SavedScreens[iscreen]);
+			*SavedScreens[iscreen]=SaveScreen (CurView->hDC,SavedRects[iscreen]);
+		}
+	}*/
+} 
+
+BOOL    GetBit (short ibit, LPSTR lpBytes)
+{   short       bit, byte;
+
+    byte = ibit/8;
+    bit  = ibit%8;
+    lpBytes += byte;
+    if (Mask[bit] & *lpBytes)
+        return 1;
+    else
+        return 0;
+}
+
+void SetBit (short ibit, LPSTR lpBytes, BOOL setto)
+{   short       bit, byte;
+
+    byte = ibit/8;
+    bit  = ibit%8;
+    lpBytes += byte;
+    if (setto)
+        *lpBytes = Mask[bit] | *lpBytes;
+    else
+        if (Mask[bit] & *lpBytes) *lpBytes = Mask[bit] ^ *lpBytes;
+
+    return;
+} 
+
+void SetBit2 (short ibit, LPSTR lpBytes, BOOL setto)
+{   short       bit, byte;
+
+    byte = ibit/8;
+    bit  = 7-ibit%8;
+    lpBytes += byte;
+    if (setto)
+        *lpBytes = Mask[bit] | *lpBytes;
+    else
+        if (Mask[bit] & *lpBytes) *lpBytes = Mask[bit] ^ *lpBytes;
+
+    return;
+} 
+
+long GSSiLength (LPSTR File)
+{
+	OFSTRUCT	OFStruct;
+	HFILE		Fid;
+	long		l;
+	
+	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
+	if (Fid == HFILE_ERROR)
+		return -1;
+	l = GSSifilelength (Fid);
+	GSSiClose(Fid);
+	return l;
+}
+
+long GSSifilelength (HFILE Fid)
+{                
+    long    CurLoc, Len;
+    
+    CurLoc = _llseek (Fid,0,1);
+    Len = _llseek (Fid,0,2);
+    _llseek (Fid,CurLoc,0);
+    return (Len);
+}
+
+/************************************************************************/
+/*  GWCheckMenuItem Function                                            */
+/*                                                                      */
+/*  checks and unchecks menu items based on their current state         */
+/*  retrns the new state                                                                    */
+/************************************************************************/
+
+BOOL GWCheckMenuItem(HWND hWnd, WORD wItem)
+{
+ HANDLE     hMenu = GetMenu(hWnd);
+ WORD       wState;
+ 
+ if (!hMenu)
+ 	return FALSE;
+ wState = GetMenuState(hMenu, wItem, MF_BYCOMMAND);
+ if(wState == (wState | MF_CHECKED))
+ {
+   CheckMenuItem(hMenu, wItem, MF_BYCOMMAND | MF_UNCHECKED);
+   return (FALSE);
+ }
+ else
+   CheckMenuItem(hMenu, wItem, MF_BYCOMMAND | MF_CHECKED);
+ return (TRUE);
+
+}
+
+
+
+LPSTR StrEnd (LPSTR str)
+/*  Retrns pointer to first space after last non-space or end of string */
+{   LPSTR rtn;
+
+    rtn = 0;
+    while (*str)
+    {   if (*str == ' ')
+            if (!rtn) rtn = str;
+        else
+            rtn = 0;
+        str++;
+    }
+    if (!rtn) rtn = str;
+    return (rtn);
+}
+
+short EndStr (LPSTR str)
+/*  Retrns length to first space after last non-space or end of string */
+{   short rtn, i;
+
+    rtn = 0;
+    i=0;
+    while (*str)
+    {   if (*str == ' ')
+        {
+            if (!rtn) rtn = i;
+        }
+        else
+            rtn =  0;
+        str++;
+        i++;
+    }
+    if (!rtn) rtn = i;
+    return (rtn);
+}
+
+BOOL WriteErrorHandler (HFILE Fid)
+{
+    short	i;
+
+	if ((i=GetOpenFileID (Fid)) >= 0) 
+	{
+		if (!OpenFileMode[i])
+			BlowOut ("WRITE attempted on file open for READ", OpenFileStruct[i].szPathName); 
+		else
+			BlowOut ("Disk full", OpenFileStruct[i].szPathName);
+	} 
+	else
+		BlowOut ("Disk full", ""); 
+	return TRUE;
+}
+
+BOOL fputstring(LPSTR lpStr, HFILE Fid)
+{   
+    UINT    len; 
+    
+    len=_fstrlen(lpStr);
+    if (len)
+    {
+        if (_lwrite (Fid,(char *)lpStr,len)!=len) 
+        {
+Error:      
+			WriteErrorHandler (Fid);
+		}
+    }
+    if (_lwrite (Fid,"\r\n",2) != 2)
+    	goto Error;
+    return TRUE;
+} 
+
+BOOL GetOpenFilePathname (HFILE Fid,LPSTR Name)
+{   
+	short	i;
+	
+	if ((i=GetOpenFileID (Fid)) >= 0)
+	{
+		_fstrcpy (Name,OpenFileStruct[i].szPathName); 
+		return TRUE;
+	}
+	return FALSE;
+}
+
+LPSTR fgetstring (LPSTR lpStr, USHORT len, HFILE Fid)
+{   UINT   lrec;
+    LPSTR lpEnd; 
+    DWORD   loc; 
+    
+    *lpStr = 0;            
+    loc = _llseek (Fid,0,1); 
+	LastFGSLoc = loc;    
+    lrec = _lread (Fid,lpStr,len+1);
+    if (!lrec || lrec == (UINT)HFILE_ERROR)
+    	return 0; 
+    lpEnd = lpStr;
+    while (lrec--)
+    {
+    	if (*lpEnd == '\r' || *lpEnd == '\n')
+    		break;
+    	lpEnd++;
+    }
+    *lpEnd++ = 0; 
+    if (*lpEnd == '\n') lpEnd++;
+    lrec =  lpEnd - lpStr;
+    LastFGSlRec = lrec;
+    _llseek (Fid,loc,0);
+    _llseek (Fid,lrec,1);
+    return lpStr;
+}
+
+void fputss (LPSTR lpStr, FILE *Fid)
+{
+    fputs (lpStr,Fid);
+    fputs ("\r\n",Fid);
+    return;
+}
+LPSTR fgetss (LPSTR lpStr, short len, FILE *Fid)
+{   LPSTR i, r;
+
+    r = fgets (lpStr,len, Fid);
+    if (r)
+    {
+        i = _fstrchr (lpStr,'\r');
+        if (i) *i = '\0';
+        i = _fstrchr (lpStr,'\n');
+        if (i) *i = '\0';
+    }
+    return (r);
+}
+
+float MULREG (double Y[], double X1[], double X2[], short N,
+             LPDOUBLE A,LPDOUBLE B, LPDOUBLE C)
+
+/******* SPECIFICATIONS ***********************************************
+C*                                                                    *
+C*       PROGRAM SUMMARY                                              *
+C*       ------- -------                                              *
+C*    MULREG PERFORMS A MULTIPLE LINEAR REGRESSION OF Y ON X1, X2 AND*
+C*    THE PARAMETERS OF THE REGRESSION IN A,B,C AND RSQ.              *
+C*    THE EQUATION IS OF THE FORM                                     *
+C*         Y = A*X1 + B*X2 + C                                        *
+C*                                                                    *
+C*       ARGUMENT DESCRIPTION                                         *
+C*       -------- -----------                                         *
+C*    Y       R*8(N) THE Y VALUES                                     *
+C*    X1      R*8(N) THE X1 VALUES                                    *
+C*    X2      R*8(N) THE X2 VALUES                                    *
+C*    N       I*4    THE NUMBER OF Y, X1 AND X2 VALUES                *
+C*    A       R*8    THE A VALUE                                      *
+C*    B       R*8    THE B VALUE                                      *
+C*    C       R*8    THE C VALUE                                      *
+C*    RSQ     R*8    THE R-SQUARED VALUE INDICATING THE SIGNIFICANCE  *
+C*                   OF THE REGRESSION                                *
+C*                                                                    *
+C*       AUTHOR                                                       *
+C*       ------                                                       *
+C*     JEFF SMITH                                                     *
+C**********************************************************************
+C*/
+{
+      double    D, DY, SMD1SQ, SMD2SQ,
+                SMYSQ, SMD1D2, SMD1Y, SMD2Y, YHAT, X1HAT, X2HAT, D1, D2;
+      short         I;
+      float     RSQ;
+
+      RSQ    = (float)0.0;
+      SMD1SQ = 0e0;
+      SMD2SQ = 0e0;
+      SMYSQ  = 0e0;
+      SMD1D2 = 0e0;
+      SMD1Y  = 0e0;
+      SMD2Y  = 0e0;
+      YHAT   = AMEAN (Y,N);
+      X1HAT  = AMEAN (X1,N);
+      X2HAT  = AMEAN (X2,N);
+      for (I=0;I<N;I++)
+      {
+          D1     = X1[I] - X1HAT;
+          D2     = X2[I] - X2HAT;
+          DY     = Y[I]  - YHAT;
+          SMD1SQ = SMD1SQ + pow (D1,2);
+          SMD2SQ = SMD2SQ + pow (D2,2);
+          SMD1D2 = SMD1D2 + D1 * D2;
+          SMYSQ  = SMYSQ  + pow (DY,2);
+          SMD1Y  = SMD1Y  + D1 * DY;
+          SMD2Y  = SMD2Y  + D2 * DY;
+      }
+      D      = SMD1SQ * SMD2SQ - pow (SMD1D2,2);
+      if (D == 0E0)
+      	return (float)(0.0);
+      *B      = (SMD2SQ * SMD1Y - SMD1D2 * SMD2Y) / D;
+      *C      = (SMD1SQ * SMD2Y - SMD1D2 * SMD1Y) / D;
+      *A      = YHAT - *B * X1HAT - *C * X2HAT; 
+      if (!SMYSQ)
+      	RSQ = 1.0;
+      else
+      	RSQ    = (float)((*B * SMD1Y + *C * SMD2Y) / SMYSQ);
+      return(RSQ);
+}
+
+double AMEAN (double X[],short N)
+{
+      double SUM;
+      short  I;
+
+      SUM    = 0;
+      for (I=0;I<N;I++) SUM+=X[I];
+      return (SUM / N);
+}
+
+long    IDNINT (double X)
+{
+    if (X < 0)
+        return ((long) (X - 0.5));
+    else
+        return ((long) (X + 0.5));
+}
+
+BOOL  POINT_IN_AREA (POINT PickPoint, DWORD nPoints, HPPOINT lpAreaPoints)
+{
+    BOOL    rtn;
+    HANDLE  hPoint;
+    HPDPOINT  pDPoint; 
+    DPOINT  PickPointD;
+    DWORD   i;
+     
+    PickPointD.x = PickPoint.x;
+    PickPointD.y = PickPoint.y; 
+    hPoint = GSSiGlobAlloc(GMEM_MOVEABLE,(long)nPoints * sizeof(DPOINT));
+    pDPoint = (HPDPOINT)GlobalLock(hPoint);
+    i=nPoints;
+    while (i--)
+    {
+        pDPoint->x = lpAreaPoints->x;
+        pDPoint++->y = lpAreaPoints++->y;
+    }
+    GlobalUnlock (hPoint);
+    pDPoint = (HPDPOINT)GlobalLock(hPoint);
+    rtn = POINT_IN_AREAD (PickPointD,nPoints,pDPoint,NULL);
+    GSSiGlobUlFree (&hPoint);
+    return rtn;
+}
+   BOOL  POINT_IN_AREAD (DPOINT PickPoint, DWORD nPoints, HPDPOINT lpAreaPoints,LPDOUBLE pNextXIntersect)
+{
+/*C******* SPECIFICATIONS ***********************************************
+C*                                                                    *
+C*       PROGRAM SUMMARY                                              *
+C*       ------- -------                                              *
+C*       THIS ROUTINE DETERMINES if THE POINT SEGPOS IS IN THE        *
+C*       AREA DEFINED IN THE PICKED AREA COMMON.                      *
+C*                                                                    *
+C*       ARGUMENT DESCRIPTION                                         *
+C*       -------- -----------                                         *
+C*       SEGPOS   R*4[1] THE SEGMENT COORDINATES OF THE POINT         *
+C*                                                                    *
+C*       AUTHOR: JEFF SMITH                                           *
+C*                                                                    *
+C**********************************************************************
+C*/
+#if WIN32
+    DPOINT  *lpPoint;
+#else
+    HPDPOINT lpPoint;
+#endif
+
+    double   A1, A2, INTX, INTY, XP, YP, XMID1, XMID2, YMID1, YMID2, AMID,
+             PAX1, PAY1, PAX2, PAY2, MXX, MNY, MXY,
+             XMIDMN, XMIDMX, YMIDMN, YMIDMX, XMID2_NEED, YMID2_NEED;
+
+    BOOL HAVE_MID1, NEED_MID1, p_in_a;
+
+    long  IRC ;
+    DWORD	ip;
+    short NIN;
+      
+      if (pNextXIntersect)
+      	*pNextXIntersect = DBL_MAX;
+      A2 =  (double) 0;
+      p_in_a = FALSE;
+
+      XP = PickPoint.x;
+      YP = PickPoint.y;
+
+      HAVE_MID1 = FALSE;
+      NEED_MID1 = FALSE;
+      NIN = 0;
+
+      lpPoint = lpAreaPoints + (nPoints-1);
+      PAX1 = lpPoint->x;
+      PAY1 = lpPoint->y;
+      lpPoint = lpAreaPoints;
+      for (ip = 0; ip <nPoints; ip++,lpPoint++)
+      {
+/*C******* LOOK ONLY FOR INTERSECTIONS WITH X GE XP  */
+          PAX2 = lpPoint->x;
+          PAY2 = lpPoint->y;
+          MXX = max (PAX1,PAX2);
+          MNY = min (PAY1,PAY2);
+          MXY = max (PAY1,PAY2);
+          if (XP > MXX) goto S100;
+          if (YP < MNY) goto S100;
+          if (YP > MXY) goto S100;
+          A1 = LGETAZ (PAX1,PAY1,PAX2,PAY2);
+          IRC = LIN_SEC (PAX1,PAY1,A1, XP, YP, A2, &INTX, &INTY);
+/*C******* IGNORE PARALLEL LINES */
+          if (IRC != 0)  goto S100;
+/*C******* if POINT ON AREA SIDE IT IS IN THE AREA */
+          if (LDIST(INTX,INTY,XP,YP) <= P_TOL)
+          	return(TRUE);
+          if (INTX < XP)  goto S100;
+          if (pNextXIntersect)
+          	*pNextXIntersect = min (*pNextXIntersect,INTX);
+          NIN++;
+/*             if intersection within p_tol of the begin point of this line
+C              find the midpoint of the last non-parallel line and intersect
+C              the horizontal line with the line between the found midpoint
+C              and the midpoint of this line. if the intersection
+C              is not between the midpoints keep this intersection. */
+          if (LDIST(INTX,INTY,PAX1,PAY1) <= P_TOL)
+          {
+               if (HAVE_MID1)
+	           {  XMID2  = (PAX1 + PAX2) / (double) 2;
+	              YMID2  = (PAY1 + PAY2) / (double) 2;
+	              XMIDMN = min (XMID1, XMID2);
+	              XMIDMX = max (XMID1, XMID2);
+	              YMIDMN = min (YMID1, YMID2);
+	              YMIDMX = max (YMID1, YMID2);
+	              AMID   = LGETAZ (XMID1,YMID1,XMID2,YMID2);
+	              IRC = LIN_SEC (XMID1,YMID1,AMID,XP,YP,A2,&INTX,&INTY);
+	              if (IRC == 0 && (INTX >= XMIDMN &&
+	                  INTX <= XMIDMX)&& (INTY >= YMIDMN &&
+	                  INTY <= YMIDMX))
+	              { NIN--; }  
+	           }
+	           else
+               {   
+               	  NEED_MID1 = TRUE;
+                  XMID2_NEED = (PAX1 + PAX2) / (double) 2 ;
+                  YMID2_NEED = (PAY1 + PAY2) / (double) 2 ;
+               }
+          }
+          if (fabs (PAY1 - PAY2) > P_TOL)
+          {
+	          HAVE_MID1 = TRUE;
+	          XMID1 = (PAX1 + PAX2) / (double) 2 ;
+	          YMID1 = (PAY1 + PAY2) / (double) 2 ; 
+	      }
+S100:     PAX1 = PAX2;
+          PAY1 = PAY2;
+      } /* end of the for loop */
+
+
+
+      if (NEED_MID1)
+      {   XMID2  = XMID2_NEED;
+          YMID2  = YMID2_NEED;
+          XMIDMN = min (XMID1, XMID2);
+          XMIDMX = max (XMID1, XMID2);
+          YMIDMN = min (YMID1, YMID2);
+          YMIDMX = max (YMID1, YMID2) ;
+          AMID  = LGETAZ (XMID1,YMID1,XMID2,YMID2);
+          IRC = LIN_SEC (XMID1,YMID1,AMID,XP,YP,A2,&INTX,&INTY);
+
+          if (IRC == 0 &&
+             (INTX >= XMIDMN && INTX <= XMIDMX)&&
+             (INTY >= YMIDMN && INTY <= YMIDMX))
+             { NIN--;}
+      }
+      if (NIN % 2  == 1){ p_in_a = TRUE;}
+      return(p_in_a);
+}
+
+BOOL LININT (double L1X1, double L1Y1, double L1X2, double L1Y2,
+			 double L2X1, double L2Y1, double L2X2, double L2Y2)
+{
+      double SLOPE1, SLOPE2, YINT1, YINT2, X, Y, XDIFF, YDIFF;
+      BOOL INF1, INF2;
+      
+      if ( (L1X1 ==L2X1 && L1Y1 ==L2Y1) ||
+           (L1X1 ==L2X2 && L1Y1 ==L2Y2) ||
+           (L1X2 ==L2X1 && L1Y2 ==L2Y1) ||
+           (L1X2 ==L2X2 && L1Y2 ==L2Y2) ) goto S550;
+      XDIFF  = L1X1 - L1X2;
+      YDIFF  = L1Y1 - L1Y2;
+      if (fabs (XDIFF) <1e-20) goto S10;
+      SLOPE1 = YDIFF / XDIFF;
+      YINT1  = L1Y1 - SLOPE1 * L1X1;
+      INF1   = FALSE;
+      goto S20;
+ S10: INF1   = TRUE;
+      YINT1  = L1Y1;
+ S20: XDIFF  = L2X1 - L2X2;
+      YDIFF  = L2Y1 - L2Y2;
+      if (fabs (XDIFF) <1e-20) goto S30;
+      SLOPE2 = YDIFF / XDIFF;
+      YINT2  = L2Y1 - SLOPE2 * L2X1;
+      INF2   = FALSE;
+      goto S50;
+ S30: INF2   = TRUE;
+      YINT2  = L2Y1;
+ S50: if (!INF1) goto S60;
+      if (!INF2) goto S100;
+      goto S250;
+ S60: if (!INF2) goto S300;
+      goto S200;
+//******* SLOPE1 IS INFINITE - SLOPE2 IS NOT
+S100: X      = L1X1;
+      Y      = SLOPE2 * X + YINT2;
+      goto S500;
+//******* SLOPE2 IS INFINITE - SLOPE1 IS NOT
+S200: X      = L2X1;
+      Y      = SLOPE1 * X + YINT1;
+      goto S500;
+//******* BOTH SLOPES ARE INFINITE
+S250: if (L1X1 ==L2X1) goto S510;
+      goto S550;
+//****** NIETHER SLOPE IS INFINITE
+S300: if (SLOPE1 !=SLOPE2) goto S310;
+      if (YINT1  !=YINT2)  goto S550;
+      goto S510;
+S310: X      = (YINT2 - YINT1) / (SLOPE1 - SLOPE2);
+      Y      = SLOPE1 * X + YINT1;
+//****** DETERMINE IF THE POINT X,Y IS ON BOTH LINES
+S500: if (X <min (L1X1,L1X2) || X > max (L1X1,L1X2) ||
+          X <min (L2X1,L2X2) || X > max (L2X1,L2X2) ||
+          Y <min (L1Y1,L1Y2) || Y > max (L1Y1,L1Y2) ||
+          Y <min (L2Y1,L2Y2) || Y > max (L2Y1,L2Y2))
+          goto S550;
+S510: return TRUE;
+S550: return FALSE;
+}
+
+short LIN_SEC (double X1IN,double Y1IN,double A1,double X2IN,double Y2IN,
+             double A2,double *X3,double *Y3)
+ {  short   irc;
+    // retrns 0 if successful, 1 if lines parallel or 2 if cooincident
+    irc = LINSEC_TOL (X1IN, Y1IN, A1, X2IN, Y2IN, A2, X3, Y3, P_TOL);
+    if (irc == 1)
+    	return(0);
+    if (!irc)
+    	return(2);
+    return(1);
+ }
+
+short LINSEC (double X1IN,double Y1IN,double A1,double X2IN,double Y2IN,
+            double A2,double *X3,double *Y3)
+ {
+/*C******* SPECIFICATIONS ***********************************************
+C*                                                                    *
+C*       PROGRAM SUMMARY                                              *
+C*       ------- -------                                              *
+C*       SUBROUTINE LINSEC (LINE INTERSECT) DETERMINES THE            *
+C*       COORDINATES OF THE INTERSECTION BETWEEN 2 LINES WHEN         *
+C*       GIVEN A STARTING POINT AND AZIMUTH. IT COMPUTES ANY          *
+C*       INTERSECTION, BE IT ON EITHER THE FORWARD OR BACK            *
+C*       AZIMUTH.                                                     *
+C*                                                                    *
+C*       POSSIBLE WARNINGS OR ERRORS:                                 *
+C*                                                                    *
+C*       RC = 0 - GIVEN COORDINATES ARE EQUAL                         *
+C*       RC = 1 - COMPUTATION WAS SUCCESSFUL                          *
+C*       RC = 2 - COULD NOT COMPUTE INTERSECTION BECAUSE LINES        *
+C*                ARE PARALLEL                                        *
+C*                                                                    *
+C*       AUTHOR: LARRY PRATT                                          *
+C*                                                                    *
+C*       ARGUMENT DESCRIPTION                                         *
+C*       -------- -----------                                         *
+C*       A1      AZIMUTH OF THE FIRST LINE                            *
+C*       A2      AZIMUTH OF THE SECOND LINE                           *
+C*       RC      RETRN CODE                                          *
+C*       X1      X-COORDINATE ALONG THE FIRST LINE                    *
+C*       X2      X-COORDINATE ALONG THE SECOND LINE                   *
+C*       X3      X-COORDINATE THE INTERSECTION POINT                  *
+C*       Y1      Y-COORDINATE ALONG THE FIRST LINE                    *
+C*       Y2      Y-COORDINATE ALONG THE SECOND LINE                   *
+C*       Y3      Y-COORDINATE THE INTERSECTION POINT                  *
+C*                                                                    *
+C*   89/12/30 - JS - offset x and y coords by x1,y1 to reduce error   *
+C*                                                                    *
+C**********************************************************************
+*/
+
+      double  TOL ;
+      TOL = P_TOL;
+      return (LINSEC_TOL (X1IN, Y1IN, A1, X2IN, Y2IN, A2, X3, Y3, TOL));
+
+}
+
+short LINSEC_TOL (double X1IN,double Y1IN,double A1,double X2IN,double Y2IN,
+      double A2,double *X3,double *Y3,double INTOL)
+{
+
+    double X2, Y2, Z1, Z2, DM1, DM2, TOL, ADIFF,  TAZ;
+    short       RC;
+
+      if (INTOL == 0.0) { TOL = 1e-4;}
+      else { TOL = INTOL;}
+
+      X2 = X2IN - X1IN; /* delta_x*/
+      Y2 = Y2IN - Y1IN; /*  delta_y */
+      RC = 1;
+      Z1 = fabs(cos(A1)); /*   cosine of line in radians  */
+      Z2 = fabs(cos(A2));
+      ADIFF = fabs (A1-A2);
+      if (ADIFF < (TOL * 1e-3)) {goto S10;}/*  parallel  check for coincident */
+      if (fabs (PY-ADIFF) < (TOL * 1e-3)) {goto S10;} /*parallel  check for coincident*/
+      if (min(Z1, Z2) < (TOL * 1e-3)) {goto S30;} /*going straight up */
+      DM1 = tan(A1);  /*tangent of line in radians */
+      DM2 = tan(A2);
+      if (fabs(DM1-DM2) < (TOL * 1e-3))
+       {goto S10;} /*parallel  check for coincident */
+
+    /*gets here if lines aren't parallel or going straight up */
+      *X3 = -(-Y2+DM2*X2)/(DM1-DM2);
+      *Y3 = DM1* *X3;
+      goto S1000;
+
+/*c*    gets here if the lines are virtually parallel*/
+S10:   *X3 = 0;
+       *Y3 = 0;
+       RC = 2; /*lines parallel and NOT coincident */
+       if (fabs(Z1+Z2) < (TOL * 1e-3)) 
+       	{goto S50;} /*going straight up */
+       RC = 0; /*lines parallel and coincident*/
+       TAZ = LDIST(X1IN, Y1IN, X2IN, Y2IN);
+       if (TAZ <= TOL)
+       	{goto S1000;} /*lines start the same place*/
+       TAZ= LGETAZ(X1IN, Y1IN, X2IN, Y2IN);
+       if(fabs(TAZ-A1) <= (TOL * 1e-3)){
+             *X3 = X2IN;
+             *Y3 = Y2IN;}
+       else
+         {if(fabs(TAZ-LTWOPI(A1+PY)) <= (TOL * 1e-3))
+            { *X3 = X1IN;
+              *Y3 = Y1IN;}
+          else 
+          	{ RC = 2;}
+         }
+      goto Exit;
+
+/*c*    here it handles lines going straight up*/
+S30:  if (Z2 < (TOL * 1e-3)) {goto S40;}
+      *X3 = 0;
+      *Y3 = tan(A2)*(*X3-X2)+Y2;
+      goto S1000;
+S40:  if (Z1 < (TOL * 1e-3)){ goto S50;}
+      *X3 = X2;
+      *Y3 = tan(A1)* *X3;
+      goto S1000;
+S50:  if (fabs(X2) <= (TOL * 1e-3))
+		 {RC = 0;}
+S1000:*X3 = *X3 + X1IN ;
+      *Y3 = *Y3 + Y1IN ;
+Exit:
+      return(RC);
+ }
+
+BOOL GetPerpendicularIntersect (LPDPOINT Point,LPDPOINT Line,LPDPOINT IntPoint)
+{
+	double	AZ1, AZ2, LineLen;
+
+	AZ1 = getazd (&Line[0],&Line[1]); 
+	AZ2 = LTWOPI (AZ1 + HALFPI);
+    LineLen = ldistp (Line[0],Line[1]);
+	LINSEC (Line[0].x,Line[0].y,AZ1,Point->x,Point->y,AZ2,&IntPoint->x,&IntPoint->y);
+	if (ldistp (*IntPoint,Line[0]) > LineLen || 
+		ldistp (*IntPoint,Line[1]) > LineLen)
+		return FALSE;
+	return TRUE;
+}
+
+BOOL NextLine (LPSTR *lpText,LPSTR lpLine)
+{   LPSTR loc;
+
+    if (!**lpText)
+    	return (FALSE);
+    _fstrcpy(lpLine,*lpText);
+    loc = _fstrstr(lpLine,"\r\n");
+    if (loc)
+    {
+        *lpText = loc + 2;
+        *loc = '\0';
+    }
+    else
+        *lpText += _fstrlen(*lpText);
+    if (!_fstrlen(lpLine)) _fstrcpy (lpLine," ");
+    return (TRUE);
+}
+
+short   Signof (double val)
+{
+    if (val < 0)
+        return -1;
+    if (val > 0)
+        return 1;
+    return 0;
+}
+
+short   lSignof (long val)
+{
+    if (val < 0)
+        return -1;
+    if (val > 0)
+        return 1;
+    return 0;
+}
+
+double   dSignof (double val)
+{
+    if (val < 0)
+        return (double)-1.0;
+    if (val > 0)
+        return (double)1.0;
+    return 0;
+}
+
+double  AZDF(double AZC, double AZP, double RL)
+{   
+	double	rtn=LTWOPI(DSIGN(LTWOPI(AZC-AZP), RL));
+	
+	return rtn;
+};
+
+double DSIGN(const double Value, const double Sign)
+{ 
+	double rtn;
+	
+	rtn = (Sign >= 0e0) ? fabs(Value) : -fabs(Value);
+	return rtn;
+}
+	
+
+POINT newpt (POINT OldPoint, double AZM, double DIS)
+{   POINT NewPoint;
+
+      NewPoint.x= IDNINT((OldPoint.x+DIS*cos(AZM)));
+      NewPoint.y= IDNINT((OldPoint.y+DIS*sin(AZM)));
+      return (NewPoint);
+}
+
+double getaz (POINT Point1, POINT Point2)
+{   
+	double	rtn=LTWOPI(atan2(((double)Point2.y-(double)Point1.y),((double)Point2.x-(double)Point1.x)));
+	return rtn;
+}
+
+double getazd (HPDPOINT Point1, HPDPOINT Point2)
+{   
+	double 	rtn=LTWOPI(atan2((Point2->y-Point1->y),(Point2->x-Point1->x)));
+	return rtn;
+}
+
+double LGETAZ(double X1, double Y1, double X2, double Y2)
+{   
+	double	rtn=LTWOPI(atan2(Y2 - Y1,X2 - X1));
+	return rtn;
+}
+
+double LTWOPI (double AZ1)
+{
+      if (AZ1<0)
+      	return (TWOPI + fmod(AZ1,TWOPI));
+      if (AZ1 == 0)
+      	return (AZ1);
+      return (fmod(AZ1,TWOPI));
+}
+
+POINT MidPoint (POINT Point1, POINT Point2)
+{   POINT point;
+
+    point.x = ((long)Point1.x + (long)Point2.x)/2;
+    point.y = ((long)Point1.y + (long)Point2.y)/2;
+    return (point);
+
+}
+
+DPOINT MidPointD (DPOINT Point1, DPOINT Point2)
+{   DPOINT point;
+
+    point.x = (Point1.x + Point2.x)/2;
+    point.y = (Point1.y + Point2.y)/2;
+    return (point);
+
+}
+
+double idist(POINT Point1, POINT Point2)
+{
+    return (sqrt (pow((double)Point1.x-(double)Point2.x,2)
+            +pow((double)Point1.y-(double)Point2.y,2)));
+}
+double ldistp(DPOINT Point1, DPOINT Point2)
+{
+    return (sqrt (pow(Point1.x-Point2.x,2)
+            +pow(Point1.y-Point2.y,2)));
+}
+LPSTR IADDR (LPSTR InAdd, long Offset)
+{
+    return (InAdd + (Offset-1));
+}
+
+void GSSiERROR (HWND hWnd, short ErrorNum, LPSTR ErrorMessage)
+{
+    MessageBox( hWnd, ErrorMessage,"GSSi Error Message", MB_OK);
+    return;
+}
+
+BOOL MemError ()
+{
+    MessageBox( GetFocus(), "Insufficient memory for this operation","Fatal Error", MB_OK);
+    return(FALSE);
+}  
+
+BOOL IsInteger(LPSTR str)
+{
+    while (*str)
+    {
+        if (!isdigit(*str++))
+            return FALSE;
+    }
+    return TRUE;
+}
+
+BOOL CheckForContinue (void)
+{
+ MSG            msg; 
+
+ while (PeekMessage(&msg,0,0,0,PM_REMOVE))
+ {
+	if (msg.message == WM_QUIT)
+    	return FALSE;
+//	if (msg.message == WM_PAINT)
+//    	rturn TRUE;
+	if (msg.message == WM_COMMAND && msg.wParam == IDCANCEL)
+        return FALSE;
+	if (msg.message == WM_KEYDOWN && msg.wParam == 27)
+		return FALSE;  
+   
+	TranslateMessage(&msg);
+	DispatchMessage(&msg);
+
+ }
+ return TRUE;
+}
+
+BOOL WaitForKeystroke (void)
+{
+ MSG            msg; 
+
+ while (PeekMessage(&msg,0,0,0,PM_REMOVE))
+ {
+	if (msg.message == WM_QUIT)
+    	return FALSE;
+	if (msg.message == WM_PAINT)
+	{
+	  TranslateMessage(&msg);
+	  DispatchMessage(&msg);
+	}
+	if(msg.message == WM_KEYDOWN)
+        return TRUE;
+ }
+ return FALSE;
+}
+
+BOOL UpdateSysMsgFile (LPSTR Msg)
+{
+	HFILE Fid;
+	HANDLE	hSTR=GSSiGlobAlloc (GMEM_MOVEABLE,1024); 
+	LPSTR	Name=GlobalLock (hSTR);
+	LPOFSTRUCT pOFStruct=(LPOFSTRUCT)(Name+256); 
+	long	loc=0, LastLoc=0;
+ 		
+	_fstrcpy (Name,"[%DL]sysmsg.txt");
+	ExpandText (Name);
+	Fid=OpenFile (Name,pOFStruct,OF_READWRITE);
+	if (Fid != HFILE_ERROR)
+	{  
+		while (fgetstring (Name,300,Fid))
+		{
+			loc = LastLoc;
+			LastLoc = _llseek (Fid,0,1);
+		}
+		_llseek (Fid,loc,0);
+		fputstring (Msg,Fid);
+		_lclose (Fid);  
+	} 
+	GSSiGlobUlFree (&hSTR);	
+	return TRUE;
+}	
+
+
+BOOL PctBox (HWND hWnd, LONG MaxLen, LONG Done, short InFreq)
+{short  x,y;
+ HBRUSH  hRedBrush;
+ double         PCTDone,PercentDone; 
+ static			double	debugpct=32.55;  
+ static			short	LastIPCT=-1;
+ char           Text[32];
+ static	char	LastText[32]="";
+ static	HWND	LasthWnd=0;
+ MSG            msg; 
+ HDC            hDC; 
+ RECT           Rect, Rect2, Rect3;
+ DWORD          TextExt;
+ short          Twidth, Theight, i=0, Freq,ii; 
+ BOOL           ShowNums=FALSE;
+#if WIN32
+ SIZE Size;
+ LPSIZE lpSize = &Size;
+#endif
+ Freq = abs(InFreq);
+ if (Freq && Done < MaxLen)
+ {  
+    if (Done%Freq)
+    	return(2);
+ }
+while (PeekMessage(&msg,0,0,0,PM_REMOVE))
+{
+/*  if (msg.message == WM_QUIT)
+  	retrn FALSE;
+  if(msg.message == WM_COMMAND && msg.wParam == IDCANCEL)
+  {
+	Canceled = TRUE;
+	retrn FALSE;
+  }*/
+//  if (msg.message != WM_NCHITTEST)
+  {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+  }
+}
+ if (!hWnd)
+ 	return FALSE;
+ if (MaxLen < 0)
+ {
+    MaxLen = -MaxLen;
+    ShowNums=TRUE;
+ } 
+ if (!MaxLen)
+ 	return FALSE;
+ PercentDone = ((double) max(Done,0))/MaxLen;
+ PCTDone = PercentDone*100.0; 
+ if (PCTDone >= debugpct)
+ 	ii=1; 
+ if (ShowNums)
+     sprintf(Text, "%.1f%% (%ld of %ld)",PCTDone,Done,MaxLen);
+ else
+     sprintf(Text, "%.1f%%",PCTDone);
+ if (hWnd == LasthWnd && !_fstrcmp (Text,LastText))
+ 	return TRUE;
+ LasthWnd = hWnd;
+ _fstrcpy (LastText,Text); 
+ hDC = GetDC (hWnd);
+ SaveDC (hDC);
+ SetMapMode    ( hDC, MM_TEXT );
+ SetWindowOrgEx  ( hDC, 0,0, 0 );
+ SetViewportOrgEx( hDC, 0, 0, 0 );
+ SelectClipRgn (hDC,0);
+ GetClientRect (hWnd,&Rect); 
+ Rect2 = Rect;  
+ Rect3 = Rect;
+ InflateRect(&Rect3,1,1);
+ hRedBrush = CreateSolidBrush (RGB(255,0,0));
+ if (InFreq >=0)  
+ 	FrameRect (hDC,&Rect3,hRedBrush);
+ 
+#if WIN32
+ TextExt = GetTextExtentPoint (hDC,Text,strlen(Text),lpSize);
+ Twidth = (short)lpSize->cx;
+ Theight = (short)lpSize->cy;
+#else
+ TextExt = GetTextExtent (hDC,Text,_fstrlen(Text));
+ Twidth = LOWORD(TextExt);
+ Theight = HIWORD(TextExt);
+#endif
+ 
+ x=(Rect.left+Rect.right-Twidth)/2;
+ y=(Rect.top+Rect.bottom-Theight)/2;
+ Rect.right = IDNINT(Rect.right * PercentDone);  
+ Rect2.left = Rect.right;
+ FillRect (hDC,&Rect2,GetStockObject(WHITE_BRUSH));  
+ FillRect (hDC,&Rect,hRedBrush); 
+ if (Done >= 0) 
+ 	TextOut (hDC,x,y,Text,_fstrlen(Text));
+ DeleteObject(hRedBrush);
+ RestoreDC (hDC,-1);
+ ReleaseDC(hWnd,hDC); 
+ if (GetGlobalBVal2("[%IGNORESYSMSG]",FALSE))
+ {
+ 	short iPCT = (short) PCTDone / 10; 
+ 	
+ 	if (iPCT != LastIPCT)
+ 	{   
+ 		char	Step[64];
+ 		
+ 		GetGlobalCVal ("[%STEP]",Step,NULL);
+	    sprintf(Text, "%s (%.1f percent complete)",Step,PCTDone);
+ 	    UpdateSysMsgFile (Text);      
+ 		LastIPCT = iPCT;
+ 	}
+ }
+ return (TRUE);
+
+}
+/****************************************************************************
+
+    FUNCTION: GetPrinterDC()
+
+    PURPOSE:  Get hDc for current device on current output port according to
+              info in WIN.INI.
+
+    COMMENTS:
+
+        Searches WIN.INI for information about what printer is connected, and
+        if found, creates a DC for the printer.
+
+        retrns
+            hDC > 0 if success
+            hDC = 0 if failure
+
+****************************************************************************/
+
+HANDLE GetPrinterDC()
+{
+    char pPrintInfo[80];
+    LPSTR lpTemp;
+    LPSTR lpPrintType;
+    LPSTR lpPrintDriver;
+    LPSTR lpPrintPort;
+
+    if (!GetProfileString("windows", "Device", (LPSTR)"", pPrintInfo, 80))
+        return (0);
+    lpTemp = lpPrintType = pPrintInfo;
+    lpPrintDriver = lpPrintPort = 0;
+    while (*lpTemp) {
+        if (*lpTemp == ',') {
+            *lpTemp++ = 0;
+            while (*lpTemp == ' ')
+                lpTemp = AnsiNext(lpTemp);
+            if (!lpPrintDriver)
+                lpPrintDriver = lpTemp;
+            else {
+                lpPrintPort = lpTemp;
+                break;
+            }
+        }
+        else
+            lpTemp = AnsiNext(lpTemp);
+    }
+
+    return (CreateDC(lpPrintDriver, lpPrintType, lpPrintPort, NULL));
+}
+
+BOOL BigWrite (HFILE Fid,HPSTR pMF,DWORD isize)
+{  
+    unsigned short mx;
+    DWORD   remain;
+    HPSTR lpMF;
+
+    mx = 32767;
+    lpMF = pMF;
+    remain = isize;
+    while (remain > 0)
+        if (remain > mx)
+        {   if (_lwrite (Fid,lpMF,mx) != mx)
+				WriteErrorHandler (Fid);
+            remain -= mx;
+            lpMF += mx;
+        }
+        else
+        {   if (_lwrite (Fid,lpMF,(UINT) remain) != remain)
+				WriteErrorHandler (Fid);
+            remain = 0;
+        }
+
+     return (TRUE);
+}
+
+DWORD BigRead (HFILE Fid,HPSTR pBuf,DWORD isize)
+{   
+    HPSTR	ipnt;
+
+    UINT        nRead;
+    DWORD       nRead4;
+
+    nRead4 = 0;
+    for (ipnt=pBuf;isize>UINT_MAX;ipnt+=nRead)
+    {   
+        nRead = _lread (Fid,ipnt,UINT_MAX-16);  
+        if (!nRead || nRead == HFILE_ERROR) break;
+        nRead4+=nRead; 
+        isize -= nRead;
+    }
+    nRead = _lread (Fid,ipnt,(UINT)isize);
+    if (nRead != HFILE_ERROR)
+        nRead4 += nRead;
+    return (nRead4);
+
+}
+
+void farfree(void far *block)
+{
+#if WIN32
+    HANDLE h = GlobalHandle(block);
+#else
+    HANDLE h = GlobalHandle(FP_SEG(block));
+#endif
+    if (! h)
+    	return;
+    GlobalUnlock(h);
+    GlobalFree(h);
+}
+
+short DisplayBMFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAspect)
+{ 
+    OFSTRUCT    fStruct;
+    LPOFSTRUCT  pStruct = &fStruct;
+    LPBITMAPINFOHEADER  pDibInfo;
+    LPSTR pImage;
+    short     rtn;
+    HDIB  hDibInfo;
+    char	Name[128];
+    
+    _fstrcpy (Name,ImageFile);
+    ExpandText (Name);
+    if (!Name[0])
+    	return FALSE;  
+    _fstrlwr (Name);
+    hDibInfo=LoadDIB(Name);
+    if (hDibInfo < ERR_MAX )
+    {   
+    	GSSiMessageBox ("Error loading bitmap",Name,MB_ICONEXCLAMATION);
+    	DIBError(hDibInfo);
+    	return FALSE;
+    }
+    /*if (!LoadBitMap (ImageFile, &hDibInfo, &hImage)) retrn FALSE;*/
+    pDibInfo = (LPBITMAPINFOHEADER) GlobalLock (hDibInfo);
+    /*pImage = GlobalLock (hImage);*/
+    
+    pImage =(LPSTR) pDibInfo;
+    pImage += sizeof(BITMAPINFOHEADER) + pDibInfo->biClrUsed * 4;     
+    rtn = DisplayBMInRect (hDC,pDibInfo,pImage, Rect, MaintainAspect); 
+    GlobalUnlock (hDibInfo);
+    DestroyDIB (hDibInfo); 
+    return rtn;
+}
+
+short  DisplayBMInRect (HDC hDC,LPBITMAPINFOHEADER pDibInfo,LPSTR pImage, RECT Rect, BOOL MaintainAspect)
+{   short   i;
+    UINT	ColorOpt;
+    
+    if (MaintainAspect)
+        ComputeBMLoc (Rect,(LPBITMAPINFO) pDibInfo);
+    else
+    { 
+        destX = (short)Rect.left;
+        destY = (short)Rect.top;
+        destW = (short)(Rect.right - Rect.left + 1);
+        destH = (short)(Rect.bottom - Rect.top + 1);
+    }
+    SetStretchBltMode(hDC, StretchMode); 
+/*    if (pDibInfo->biClrUsed)
+    	ColorOpt = DIB_PAL_COLORS;
+    else*/
+    	ColorOpt = DIB_RGB_COLORS;
+    i=StretchDIBits (hDC,destX,destY,
+                       destW, destH,
+                       0,0,
+                       (short) pDibInfo->biWidth,
+                       (short) pDibInfo->biHeight,
+                       pImage,
+                      (LPBITMAPINFO)pDibInfo,
+                      (UINT)ColorOpt,
+                      (DWORD) SRCCOPY);
+/*  GlobalUnlock (hImage);
+    GlobalUnlock (hDibInfo);
+    GlobalFree (hImage);
+    GlobalFree (hDibInfo);*/
+
+    return (destY+destH);
+}
+
+BOOL  DisplayBMInRect2 (HDC hDC, HANDLE hBM, RECT Rect, double Factor,double VPct, double HPct)
+{   short   i=0;
+	LPBITMAPINFOHEADER pDibInfo;
+	LPSTR pImage;  
+	short	xoff=IDNINT(HPct),yoff=IDNINT(VPct);
+    
+    if (!hBM)
+    	return FALSE;
+    pDibInfo = (LPBITMAPINFOHEADER)GlobalLock (hBM);
+    if (!pDibInfo)
+    	return FALSE;
+    pImage = FindDIBBits ((LPSTR)pDibInfo);
+    if (!Factor)
+		i=DisplayBMInRect (hDC,pDibInfo,pImage, Rect, TRUE);
+	else
+	{
+        destX = (short)Rect.left;
+        destY = (short)Rect.top;
+        destW = (short)(Rect.right - Rect.left + 1);
+        destH = (short)(Rect.bottom - Rect.top + 1);
+	    SetStretchBltMode(hDC, StretchMode); 
+	    i=StretchDIBits (hDC,destX,destY,
+	                       destW, destH,
+	                       xoff,yoff,
+	                       (short) IDNINT(min(destW*Factor,(pDibInfo->biWidth-xoff)*Factor)),
+	                       (short) IDNINT(min(destH*Factor,(pDibInfo->biHeight-yoff)*Factor)),
+	                       pImage,
+	                      (LPBITMAPINFO)pDibInfo,
+	                      (UINT)DIB_RGB_COLORS,
+	                      (DWORD) SRCCOPY);
+    }  
+    GlobalUnlock (hBM); 
+    if (i)
+    	return TRUE;
+    else
+    	return FALSE;
+}
+
+BOOL CheckBoardBMInRect (HDC hDC,LPSTR ImageFile1,LPSTR ImageFile2, RECT Rect, BOOL MaintainAspect)
+{  
+    OFSTRUCT    fStruct;
+    LPOFSTRUCT  pStruct = &fStruct;
+    LPBITMAPINFOHEADER    pDibInfo;
+    LPSTR pImage;
+    short        i,  x, y, nrow, ncol, w=1, DeleteBM; 
+    long    j;
+    HANDLE  hDib;  
+    HDC     hDCMem;
+    HBITMAP hBMMem, hbmpOld;
+    COLORREF    White, Color, Yellow=RGB(255,255,0);
+
+    if (!ImageFile1[0])
+    	return FALSE; 
+    if (ExistFile(ImageFile1))
+    {
+        j=0;
+        LoadBitMap (ImageFile1, -1,&hDib, &DeleteBM,24,0,0); 
+    }
+    else
+    {
+        j=157001;
+        LoadBitMap (ImageFile2,-1, &hDib, &DeleteBM,24,0,0); 
+    }
+    pDibInfo = (LPBITMAPINFOHEADER) GlobalLock (hDib);
+    pImage = (LPSTR)pDibInfo + (pDibInfo->biSize+pDibInfo->biClrUsed*sizeof(COLORREF)); 
+
+    hDCMem = CreateCompatibleDC (hDC);
+
+    hBMMem = CreateCompatibleBitmap(hDC, Rect.right - Rect.left,Rect.bottom - Rect.top);
+
+    hbmpOld = SelectObject(hDCMem, hBMMem);
+    if (MaintainAspect)
+        ComputeBMLoc (Rect, (LPBITMAPINFO)pDibInfo);
+    else
+    { 
+        destX = (short)Rect.left;
+        destY = (short)Rect.top;
+        destW = (short)(Rect.right - Rect.left + 1);
+        destH = (short)(Rect.bottom - Rect.top + 1);
+    }
+    SetStretchBltMode(hDCMem, StretchMode);
+    i=StretchDIBits (hDCMem,0,0,
+                       destW, destH,
+                       0,0,
+                       (short) pDibInfo->biWidth,
+                       (short) pDibInfo->biHeight,
+                       pImage,
+                      (LPBITMAPINFO)pDibInfo,
+                      (UINT)DIB_RGB_COLORS,
+                      (DWORD) SRCCOPY);
+    nrow = destH/w;
+    ncol = destW/w;  
+    White = GetPixel (hDCMem,1,1);
+    for (;j<160000;j++)
+    {   
+        x = (short)(IDNINT(((double)rand()/RAND_MAX) * destW));
+        y = (short)(IDNINT(((double)rand()/RAND_MAX) * destH)); 
+        if (j<127000)
+        {
+            if ((Color=GetPixel (hDCMem,x,y)) != White)
+                SetPixel (hDC,x,y,White);
+        }
+        else if (j<157000)
+        {
+            Color=GetPixel (hDCMem,x,y);
+            SetPixel (hDC,x,y,Color);
+        }
+        else if (j==157000)
+        {   
+            
+            GlobalUnlock (hDib);
+            if (DeleteBM)
+            	GlobalFree (hDib); 
+            SelectObject(hDCMem, hbmpOld); 
+            DeleteObject (hBMMem);
+            LoadBitMap (ImageFile2, -1,&hDib, &DeleteBM,24,0,0);
+		    pDibInfo = (LPBITMAPINFOHEADER) GlobalLock (hDib);
+		    pImage = (LPSTR)pDibInfo + (pDibInfo->biSize+pDibInfo->biClrUsed*sizeof(COLORREF)); 
+        
+            hBMMem = CreateCompatibleBitmap(hDC, Rect.right - Rect.left,Rect.bottom - Rect.top);
+        
+            hbmpOld = SelectObject(hDCMem, hBMMem);
+            if (MaintainAspect)
+                ComputeBMLoc (Rect, (LPBITMAPINFO)pDibInfo);
+            else
+            { 
+                destX = (short)Rect.left;
+                destY = (short)Rect.top;
+                destW = (short)(Rect.right - Rect.left + 1);
+                destH = (short)(Rect.bottom - Rect.top + 1);
+            }
+            SetStretchBltMode(hDCMem, StretchMode);
+            i=StretchDIBits (hDCMem,0,0,
+                               destW, destH,
+                               0,0,
+                               (short) pDibInfo->biWidth,
+                               (short) pDibInfo->biHeight,
+                               pImage,
+                              (LPBITMAPINFO)pDibInfo,
+                              (UINT)DIB_RGB_COLORS,
+                              (DWORD) SRCCOPY);
+        }
+        else
+        {
+            w=2;
+            if (j>159000) w=4;
+            x -= x%w;
+            y -= y%w;
+            BitBlt (hDC,x,y,w,w,
+                    hDCMem,x,y,SRCCOPY); 
+        }
+    } 
+    i=BitBlt (hDC,destX,destY,destW,destH,
+            hDCMem,0,0,SRCCOPY);
+/*  GlobalUnlock (hImage);
+    GlobalFree (hImage);*/
+    GlobalUnlock (hDib);
+            if (DeleteBM)
+    GlobalFree (hDib);
+    SelectObject(hDCMem, hbmpOld); 
+    DeleteObject (hBMMem);
+    DeleteDC(hDCMem);
+
+    return (TRUE);
+}     
+
+POINT RectMid (LPRECT rect)
+{
+	POINT	p;
+	
+	p.x = rect->left + (rect->right - rect->left)/2;
+	p.y = rect->top + (rect->bottom - rect->top)/2;
+	return p;
+}
+
+void ComputeBMLoc (RECT Rect,LPBITMAPINFO pDibInfo )
+{    float  pw, ph;
+
+     if (!pDibInfo)
+     	return;
+     rect_width = Rect.right - Rect.left + 1;
+     rect_height = Rect.bottom - Rect.top + 1;
+     ph = (float)pDibInfo->bmiHeader.biHeight / rect_height;
+     pw = (float)pDibInfo->bmiHeader.biWidth / rect_width;
+     if (ph > pw)
+        {destY = (short)Rect.top;
+         destH = (short)rect_height;
+         destW = (short)(IDNINT(destH * ((double)pDibInfo->bmiHeader.biWidth /
+                          (double)pDibInfo->bmiHeader.biHeight)));
+         destX = (short)(Rect.left + (rect_width - destW) / 2);}
+     else
+        {destX = (short)Rect.left;
+         destW = (short)rect_width;
+         destH = (short)(IDNINT(destW * ((double)pDibInfo->bmiHeader.biHeight /
+                          (double)pDibInfo->bmiHeader.biWidth)));
+         destY = (short)(Rect.top + (rect_height - destH) / 2);}
+     bmX = bmY = 0;
+     return;
+}  
+
+BOOL GetDIBDimensions(LPSTR File,LPSHORT height,LPSHORT width)
+{
+    HFILE  Fid;
+    OFSTRUCT    OFStruct;
+    BITMAPFILEHEADER bmfHead;
+    BITMAPINFO    DibInfo; 
+    
+    Fid = GSSiOpenFile (File,&OFStruct,OF_READ); 
+    if (Fid == HFILE_ERROR)
+    	return FALSE;
+    _lread (Fid,&bmfHead,sizeof(BITMAPFILEHEADER));
+    _lread (Fid,&DibInfo,sizeof(BITMAPINFO));
+    *height = DibInfo.bmiHeader.biHeight;
+    *width = DibInfo.bmiHeader.biWidth;
+    GSSiClose (Fid);
+    return TRUE;
+}
+
+BOOL LoadBitMap (LPSTR ImageFile, long frame, LPHANDLE phDib, LPSHORT pDeleteBM,
+                 short BitCount,short width, short height)
+{   UINT nRead;
+    HFILE  Fid;
+    OFSTRUCT    fStruct;
+    LPOFSTRUCT  pStruct = &fStruct;
+    BITMAPFILEHEADER bmfHead;
+    LPBITMAPINFO    pDibInfo;
+    LPSTR pImage;
+    long	nBytes; 
+    short	ShouldDelete;    
+    BOOL	rtn=TRUE;
+    char	NewName[144];
+
+    if (!ImageFile[0])
+    	return (FALSE); 
+    _fstrcpy (NewName,ImageFile);
+    ConvertNameToCDName (NewName);
+    if (frame >= 0)
+    {   
+                
+        rtn = AVIFrameToDIB (NewName,frame,phDib,pDeleteBM,BitCount,width,height);
+
+    }
+    else if (_fstrstr (NewName,".pcx"))
+    {
+    	*phDib = BMPFromPCX (NewName);   
+    	*pDeleteBM = TRUE;
+    }
+    else if (_fstrstr (NewName,".tif"))
+    {
+    	*phDib = BMPFromTIF (NewName);   
+    	*pDeleteBM = TRUE;
+    }
+    else 
+    {
+        Fid = GSSiOpenFile (NewName,pStruct,OF_READ); 
+        if (Fid == HFILE_ERROR)
+        	return FALSE;
+        nRead = _lread (Fid,&bmfHead,sizeof(BITMAPFILEHEADER));
+        nBytes = bmfHead.bfSize-sizeof(BITMAPFILEHEADER);
+        *phDib = GSSiGlobAlloc(GMEM_MOVEABLE,nBytes);
+        pDibInfo = (LPBITMAPINFO) GlobalLock(*phDib);
+    
+//        BigRead (Fid,pDibInfo,nBytes);   
+        _hread (Fid,pDibInfo,nBytes);
+        if (! pDibInfo->bmiHeader.biSizeImage)
+        	pDibInfo->bmiHeader.biSizeImage= bmfHead.bfSize-bmfHead.bfOffBits;
+        if (! pDibInfo->bmiHeader.biClrUsed)
+            {
+            if (pDibInfo->bmiHeader.biBitCount==4) pDibInfo->bmiHeader.biClrUsed=16;
+            if (pDibInfo->bmiHeader.biBitCount==8) pDibInfo->bmiHeader.biClrUsed=256;
+            }
+        GSSiClose (Fid); 
+        GlobalUnlock (*phDib);
+    }    
+    return rtn;
+}
+
+BOOL ReadBitMapHeader (HFILE Fid, LPHANDLE phDibInfo, LPLONG ImageOffset)
+{   UINT nRead;
+    BITMAPFILEHEADER bmfHead;
+    LPBITMAPINFO    pDibInfo;
+
+    if (!Fid || Fid==HFILE_ERROR)
+    	return (FALSE);
+
+    nRead = _lread (Fid,&bmfHead,sizeof(BITMAPFILEHEADER));
+    *phDibInfo = GSSiGlobAlloc(GMEM_MOVEABLE,
+                 bmfHead.bfOffBits-sizeof(BITMAPFILEHEADER));
+    pDibInfo = (LPBITMAPINFO) GlobalLock(*phDibInfo);
+
+    nRead = _lread (Fid,pDibInfo,sizeof(BITMAPINFOHEADER));
+    if (! pDibInfo->bmiHeader.biSizeImage)
+    pDibInfo->bmiHeader.biSizeImage= bmfHead.bfSize-bmfHead.bfOffBits; 
+/*    if (pDibInfo->bmiHeader.biBitCount > 8) 
+    {
+    	pDibInfo->bmiHeader.biClrUsed=0;
+    	pDibInfo->bmiHeader.biClrImportant=0; 
+    } */
+    if (! pDibInfo->bmiHeader.biClrUsed)
+        {
+        if (pDibInfo->bmiHeader.biBitCount==4) pDibInfo->bmiHeader.biClrUsed=16;
+        if (pDibInfo->bmiHeader.biBitCount==8) pDibInfo->bmiHeader.biClrUsed=256;
+        }
+    nRead = _lread (Fid,pDibInfo->bmiColors,(UINT)pDibInfo->bmiHeader.biClrUsed*4); 
+    *ImageOffset = _llseek (Fid,0,1);
+    GlobalUnlock (*phDibInfo);
+    return (TRUE);
+}
+
+/*
+ *  Calculate the CRC for a buffer "icp", of "icnt" length, based upon
+ *  initial CRC "icrc".  For XMODEM-style CRC calculation, initialize
+ *  icrc to 0; for CCITT-recommended CRC calculation, initialize icrc
+ *  to -1.
+ */
+
+WORD ECRCMem(WORD *icrc, BYTE *icp, WORD icnt)
+/* icrc = initial crc */
+/* icp = buffer */
+/* icnt = buffer len */
+    {
+    register unsigned short crc = *icrc;
+    BYTE W_FAR *cp = (BYTE W_FAR *) icp;
+    register WORD cnt = icnt;
+
+    /*
+     *  If CRC lookup table has not already been built, callocate memory
+     *  and build table.
+     */
+    if (have_crc_table == 0)
+        {
+        register short i;
+        WORD b, v;  
+        have_crc_table = 1;                        
+        for (b = 0;  b <= (1 << 8) - 1;  ++b)
+            {
+            for (v = b << 8,  i = 8;  --i >= 0;  )
+                v = v & 0x8000 ? (v << 1) ^ 0x1021 : v << 1;
+            crc_table[b] = v;
+            }
+        }
+
+    while (cnt--)
+        crc = (crc << 8) ^ crc_table[(crc >> 8) ^ *cp++];
+
+    *icrc = crc;
+    return 0;   // all ok
+    }   // ECrcBuf
+
+DWORD CRC16 (LPSTR Array, short nc)
+{
+
+    UINT    CRC=0; 
+    short       i;
+
+    while (0 < nc--)
+    {
+        CRC = CRC ^ (short)*Array++ << 8;
+        for (i=0; i<8; i++)  
+        {
+            if (CRC & 0x8000)
+                CRC = CRC << 1 ^ 0x1021;
+            else
+                CRC = CRC << 1;
+        }
+    }
+    return ((DWORD)CRC * (DWORD) CRC);
+}
+short DrawCircle (HDC hDC,POINT Point,double Radius,short Width,COLORREF Color)
+{   
+    short   npts; 
+    DPOINT  Newpt, Dpoint;  
+    HPEN    OldPen, Pen; 
+    double  dinc, az;
+                        
+    Pen = CreatePen (PS_SOLID,Width,Color);
+    OldPen = SelectObject (hDC,Pen);
+    Dpoint.x = Point.x;
+    Dpoint.y = Point.y;
+    
+    npts = (short)(2 * PY * Radius);
+    dinc = 1.0/Radius;    
+    az=0;
+    Newpt = dnewpt (Dpoint,az,Radius);
+    MoveToEx (hDC,(int)IDNINT(Newpt.x),(int)IDNINT(Newpt.y),0);   
+    while (npts--) 
+    {
+        az+=dinc;
+        Newpt = dnewpt (Dpoint,az,Radius);
+        LineTo (hDC,(int)IDNINT(Newpt.x),(int)IDNINT(Newpt.y));   
+    } 
+    SelectObject (hDC,OldPen);
+    DeleteObject (Pen);
+    return 0;
+}
+
+double ComputeAreaAreaD (HPDPOINT lpDpoints,long nPnts,LPDOUBLE pPerim)
+{    
+	DWORD	i; 
+	DPOINT	BeginPoint, EndPoint, LastPoint;
+	double	Area=0,Perim=0;    
+
+	for (i=0;i<nPnts;i++,lpDpoints++)
+	{   
+		if (!i)
+			BeginPoint = *lpDpoints;
+		else  
+		{
+			Perim += ldistp(LastPoint,*lpDpoints);
+			Area += ( LastPoint.y - lpDpoints->y) * (lpDpoints->x + LastPoint.x) / 2;
+		}
+		LastPoint = *lpDpoints;
+	} 
+	Perim += ldistp(LastPoint,BeginPoint);
+	Area += (LastPoint.y - BeginPoint.y) * (BeginPoint.x + LastPoint.x) / 2;  
+	if (pPerim)
+		*pPerim = Perim;
+	return (Area);
+}  
+
+BOOL SamePoint (POINT p1, POINT p2)
+{
+	if (p1.x == p2.x && p1.y == p2.y)
+		return TRUE;
+	return FALSE;
+}  
+
+BOOL SameDPoint (LPDPOINT p1, LPDPOINT p2)
+{
+    if (LDIST(p1->x,p1->y,p2->x,p2->y) <= P_TOL)
+    	return TRUE; 
+    return FALSE;
+}
+ 
+int CALLBACK EnumFontFamProc(lpnlf, lpntm, FontType, lParam)
+	LOGFONT FAR* lpnlf;	/* address of structure with logical-font data	*/
+	TEXTMETRIC FAR* lpntm;	/* address of structure with physical-font data	*/
+	int FontType;	/* type of font	*/
+	LPARAM lParam;	/* address of application-defined data	*/
+{
+	if (FontType == TRUETYPE_FONTTYPE)              
+		SendDlgItemMessage (FontListhWndDlg,FontListCntl,CB_ADDSTRING,NULL,(LPARAM)((LPSTR)lpnlf->lfFaceName));
+	return 1;
+} 
+
+void flip (LPSTR In, short n)
+{ 
+    char Out[32];
+    LPSTR SaveIn=In;
+    short     num=n, i=0;
+    
+    while (num--)
+        Out[num]=*In++;
+    _fmemmove (SaveIn,Out,n);
+    return;
+}   
+    
+
+
+void GMMessageBox (UINT Message, UINT Title, UINT Style)
+{   
+	char	Msg[256], Tit[128]; 
+	
+	DoPaint = FALSE;
+	if (!LoadString(hInst, Message, Msg, sizeof(Msg)))
+		*Msg=0;
+	if (!LoadString(hInst, Title, Tit, sizeof(Tit)))
+		*Tit=0;
+	MessageBox (GetFocus(),Msg,Tit,Style); 
+	DoPaint = TRUE;
+	return;
+}
+                        
+void FillFontNameList (HWND hWndDlg,UINT ListBox)
+{   
+	HDC hDC=GetDC (hWndDlg);
+	FONTENUMPROC lpEnumFamCallBack; 
+	int aFontCount[] = { 0, 0, 0 };
+	
+	FontListhWndDlg = hWndDlg;
+	FontListCntl = ListBox;
+	lpEnumFamCallBack = (FONTENUMPROC) MakeProcInstance(
+	    (FARPROC) EnumFontFamProc, hInst);
+	EnumFontFamilies(hDC, (LPCSTR)NULL, lpEnumFamCallBack, (LPSTR) aFontCount);
+	FreeProcInstance((FARPROC) lpEnumFamCallBack);
+	ReleaseDC (hWndDlg,hDC);
+	return;
+} 
+void AZToBear (double AZ,LPSTR PreDir,LPSTR DegC,LPSTR MinC,LPSTR SecC,LPSTR PostDir)
+{
+      short IDEG, IMIN, QUAD;
+      double AN, SEC;
+      char DIR1[5]="NSSN", DIR2[5]="EEWW";
+//C******* CHANGE AZIMUTH TO USER BEARING
+      AN = LTWOPI(HALFPI - AZ);
+//C
+//C******* FIND QUADRANT THAT AZIMUTH IS IN
+      if (TWOPI - AN > PIHALF) goto S50;
+      if (TWOPI - AN > PY) goto S20;
+      if (TWOPI - AN > HALFPI) goto S30;
+      goto S40;
+//C
+//C******* AZIMUTH IS IN THE SE QUADRANT
+ S20: AN = PY - AN;
+      QUAD = 2;
+      goto S60;
+//C
+//C******* AZIMUTH IS IN THE SW QUADRANT
+ S30: AN = AN - PY;
+      QUAD = 3;
+      goto S60;
+//C
+//C******* AZIMUTH IS IN THE NW QUADRANT
+ S40: AN = TWOPI - AN;
+      QUAD = 4;
+      goto S60;
+//C
+//C******* AZIMUTH IS IN THE NE QUADRANT
+ S50: QUAD = 1;
+    
+//C******* INITIALIZE ARRAY TO BLANKS
+ S60: 
+//C
+//C******* CHANGE FROM RADIANS TO DEGREES
+      AN = AN * RADIAN + HAFSEC;
+//C
+//C******* DETERMINE MINUTES
+      IDEG = AN;
+      AN = (AN - IDEG) * 6E1;
+//C
+//C******* DETERMINE SECONDS
+      IMIN = AN;
+      SEC = fabs((AN - IMIN) * 6E1  - 5E-2);
+//C
+//C******* PUT BEARING IN CHARACTER FORMAT 
+	  *PreDir = DIR1[QUAD-1]; 
+	  PreDir[1]=0;
+	  *PostDir = DIR2[QUAD-1];
+	  PostDir[1]=0;  
+	  sprintf (DegC,"%2.2i",IDEG);  
+	  sprintf (MinC,"%2.2i",IMIN);  
+	  sprintf (SecC,"%05.2f",SEC);
+   return;
+}
+
+void AZToAZIM (double AZ,LPSTR DegC,LPSTR MinC,LPSTR SecC)
+{
+      short IDEG, IMIN, QUAD;
+      double AN, SEC;
+//C******* CHANGE AZIMUTH TO USER BEARING
+      AN = LTWOPI(HALFPI - AZ);
+//C******* CHANGE FROM RADIANS TO DEGREES
+      AN = AN * RADIAN + HAFSEC;
+//C
+//C******* DETERMINE MINUTES
+      IDEG = AN;
+      AN = (AN - IDEG) * 6E1;
+//C
+//C******* DETERMINE SECONDS
+      IMIN = AN;
+      SEC = fabs((AN - IMIN) * 6E1  - 5E-2);
+//C
+//C******* PUT BEARING IN CHARACTER FORMAT 
+	  itoa (IDEG,DegC,10);
+	  itoa (IMIN,MinC,10);
+	  sprintf (SecC,"%.4f",SEC);
+   return;
+}
+
+void SIOOpenError (LPSTR Port,int Error)
+{       
+	char	title[144],mess[256];
+	
+	switch (Error)
+	{
+   		
+		case IE_BADID:
+			_fstrcpy(mess,"The device identifier is invalid or unsupported.");
+			break;
+		case IE_BAUDRATE:
+			_fstrcpy(mess,"The device's baud rate is unsupported.");
+			break;
+		case IE_BYTESIZE:
+			_fstrcpy(mess,"The specified byte size is invalid.");
+			break;
+		case IE_DEFAULT:
+			_fstrcpy(mess,"The default parameters are in error."); 
+			break;
+		case IE_HARDWARE:
+			_fstrcpy(mess,"The hardware is not available (is locked by another device).");
+			break;
+		case IE_MEMORY:
+			_fstrcpy(mess,"The function cannot allocate the queues."); 
+			break;
+		case IE_NOPEN:
+			_fstrcpy(mess,"The device is not open."); 
+			break;
+		case IE_OPEN:
+			_fstrcpy(mess,"The device is already open."); 
+            break;
+  	} 
+  	sprintf(title,"Error opening port %s",Port);
+  	MessageBox (GetFocus(),mess,title,MB_ICONEXCLAMATION);
+  	return;
+}
+
+void DumpDCB (int Stream)
+{   
+	DCB		dcb;
+	LPDCB	pDCB=&dcb;
+	char	str[128];
+    if (TraceOn)
+    {  
+		GetCommState (Stream,&dcb);
+		sprintf (str,"%s:%u","Id",(UINT)pDCB->Id);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","BaudRate",(UINT)pDCB->BaudRate);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","ByteSize",(UINT)pDCB->ByteSize);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","Parity",(UINT)pDCB->Parity);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","StopBits",(UINT)pDCB->StopBits);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","RlsTimeout",(UINT)pDCB->RlsTimeout);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","CtsTimeout",(UINT)pDCB->CtsTimeout);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","DsrTimeout",(UINT)pDCB->DsrTimeout);
+		GSSiTrace (str);
+		
+		sprintf (str,"%s:%u","fBinary",(UINT)pDCB->fBinary);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fRtsDisable",(UINT)pDCB->fRtsDisable);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fParity",(UINT)pDCB->fParity);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fOutxCtsFlow",(UINT)pDCB->fOutxCtsFlow);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fOutxDsrFlow",(UINT)pDCB->fOutxDsrFlow);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fDummy",(UINT)pDCB->fDummy);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fDtrDisable",(UINT)pDCB->fDtrDisable);
+		GSSiTrace (str);
+	
+	
+		sprintf (str,"%s:%u","fOutX",(UINT)pDCB->fOutX);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fInX",(UINT)pDCB->fInX);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fPeChar",(UINT)pDCB->fPeChar);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fNull",(UINT)pDCB->fNull);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fChEvt",(UINT)pDCB->fChEvt);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fDtrflow",(UINT)pDCB->fDtrflow);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fRtsflow",(UINT)pDCB->fRtsflow);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","fDummy2",(UINT)pDCB->fDummy2);
+		GSSiTrace (str);
+	
+		sprintf (str,"%s:%u","XonChar",(UINT)pDCB->XonChar);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","XoffChar",(UINT)pDCB->XoffChar);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","XonLim",(UINT)pDCB->XonLim);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","XoffLim",(UINT)pDCB->XoffLim);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","PeChar",(UINT)pDCB->PeChar);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","EofChar",(UINT)pDCB->EofChar);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","EvtChar",(UINT)pDCB->EvtChar);
+		GSSiTrace (str);
+		sprintf (str,"%s:%u","TxDelay",(UINT)pDCB->TxDelay);
+		GSSiTrace (str);
+	}
+	return;
+}
+
+BOOL EditTextFile (HWND hWnd,LPSTR Name)
+{
+	char	Editor[256], mess[128];
+	DWORD	WVer;
+	int		WinVer, DosVer;
+	UINT	ierr;
+	BOOL	rtn = TRUE;
+
+    if (ExistFile(Name))
+    {							      	 
+		 sprintf (Editor,"notepad.exe %s",Name);
+		 WVer = GetVersion ();
+		 WinVer = HIBYTE(LOWORD(WVer)); 
+//				 WinVer=31;
+		 if (WinVer <95)
+		 {
+			 if ((ierr = WinExecEx (Editor,SW_SHOWMAXIMIZED)) < 32)
+			 {  
+			 	rtn = FALSE;
+			 	sprintf (mess,"Error loading editor: %i",(int) ierr);
+			 	MessageBox (GetFocus(),mess,NULL,0);  
+			 }
+		 }
+		 else
+		 {
+			 if ((ierr = WinExec (Editor,SW_SHOW)) < 32)
+			 {  
+			 	rtn = FALSE;
+			 	sprintf (mess,"Error loading editor: %i",(int) ierr);
+			 	MessageBox (GetFocus(),mess,NULL,0);  
+			 }
+			 else if (hWnd)
+			 	ShowWindow (hWnd,SW_MINIMIZE);
+		}
+	 }
+	 return rtn;
+}  
+
+BOOL GetCDDriveForVol (LPSTR VolID,LPSTR Drive)
+{
+	short	i; 
+	char	VolLabel[32];
+	UINT	PrevErrMode;
+	
+	if (_fstrchr (VolID,':'))
+	{
+		_fstrcpy (Drive,VolID);
+		return TRUE;
+	}
+	PrevErrMode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);
+
+	for (i=3;i<26;i++)
+	{   
+		if (GetDriveType (i) == DRIVE_REMOTE)
+		{                 
+			if (GetVolumeLabel(i,VolLabel))
+			{   
+				Truncate (VolID);
+                if (!_fstricmp(VolLabel,VolID))
+                {
+                	sprintf (Drive,"%c:",(char)('A'+i)); 
+					SetErrorMode(PrevErrMode);
+                	return TRUE;  
+                }
+            } 
+        }
+	} 
+	SetErrorMode(PrevErrMode);
+	return FALSE;
+} 
+
+void ClearFullWindowBitmap (void)
+{
+	if (hFullWindowBitMap)
+		DeleteObject (hFullWindowBitMap);
+	hFullWindowBitMap = 0; 
+	return;
+}
+
+HANDLE	EnterBlockingWindow (HWND hWndDlg)
+{
+	HANDLE	hBM=0;  
+	RECT	Rect;
+	HDC		hDC;
+	
+	if (HaveBlockingWindow || !hWndMain)
+		return hBM;
+	HaltMapDisplay (FALSE);
+	GetClientRect(hWndMain, &Rect); 
+	hDC = GetDC (hWndMain);   
+	hBM = SaveScreen2 (hDC,Rect,NULL,0);	
+	ReleaseDC (hWndMain,hDC);    
+	HaveBlockingWindow = TRUE;
+	return hBM;
+}   
+
+BOOL MinimizeWindowIfOverMain (HWND hWnd)
+{   
+	RECT	WindRect, MainRect, IntRect;
+	
+	GetWindowRect (hWnd,&WindRect);
+	GetWindowRect (hWndMain,&MainRect);  
+	if (IntersectRect (&IntRect,&WindRect,&MainRect))
+		ShowWindow (hWnd,SW_MINIMIZE);
+	else
+		return FALSE;
+	return TRUE;
+}
+
+void LeaveBlockingWindow(HANDLE hSavedScreen)
+{   
+	RECT	Rect;
+	HDC		hDC=GetDC (hWndMain);
+
+	RestoreScreen2 (hDC,hSavedScreen,0);
+	DestroySavedScreen (&hSavedScreen,0);
+	HaveBlockingWindow = FALSE;
+	IgnoreLbutton = TRUE;  
+	ReleaseDC (hWndMain,hDC);
+	return;
+}  
+
+void GSSiEndDialog(HWND hWndDlg,BOOL rtn,HANDLE hSavedScreen)
+{   
+	RECT	Rect;
+	HDC		hDC=GetDC (hWndMain);
+
+//	RestoreScreen2 (hDC,hSavedScreen,0); 
+	if (hSavedScreen)
+	{
+		DestroySavedScreen (&hSavedScreen,0);
+		HaveBlockingWindow = FALSE;
+	}
+	IgnoreLbutton = TRUE;  
+	ReleaseDC (hWndMain,hDC);
+	EndDialog(hWndDlg,rtn);
+	return;
+}  
+
+void FixRect (LPRECT pRect)
+{          
+	if (pRect->top < 0)
+	{
+		pRect->bottom += pRect->top;
+		pRect->top = 0;
+	}
+	if (pRect->left < 0)
+	{
+		pRect->right += pRect->left;
+		pRect->left = 0;
+	}
+	return;
+}   
+
+BOOL NormalRect (LPRECT Rect)
+{   
+	long	w=(long)Rect->right - (long)Rect->left;
+	long	h=(long)Rect->bottom - (long)Rect->top;
+	
+	if (w > SHRT_MAX || h > SHRT_MAX)
+		return FALSE;
+	Rect->left = Rect->top = 0;
+	Rect->right = w;
+	Rect->bottom = h;
+	
+	return TRUE;
+}
+
+BOOL WindowIsCovered (HWND hWnd,BOOL ClientOnly)
+{ 
+	RECT	rMyRect, rOtherRect, rDestRect;  
+	HWND	hPrevWnd, hNextWnd; 
+	POINT	Point1, Point2;
+	
+	if (ClientOnly)
+	{
+		GetClientRect (hWnd,&rMyRect); 
+		Point1.x = rMyRect.left;
+		Point1.y = rMyRect.top;
+		Point2.x = rMyRect.right;
+		Point2.y = rMyRect.bottom;
+		ClientToScreen (hWnd,&Point1);
+		ClientToScreen (hWnd,&Point2);
+		rMyRect.left = Point1.x;
+		rMyRect.top = Point1.y;
+		rMyRect.right = Point2.x;
+		rMyRect.bottom = Point2.y;
+	}
+	else
+	{
+		GetWindowRect(hWnd, &rMyRect); 
+		FixRect (&rMyRect);
+	} 
+      /*  Start from the current window and use the GetWindow()
+       *  function to move through the previous window handles.
+       */
+  	for (hPrevWnd = hWnd;
+      	(hNextWnd = GetWindow(hPrevWnd, GW_HWNDPREV)) != NULL;
+      	 hPrevWnd = hNextWnd)
+    {
+      /*  Get the window rectangle dimensions of the window that
+       *  is higher Z-Order than the application's window.
+       */
+    	GetWindowRect(hNextWnd, &rOtherRect);
+        FixRect (&rOtherRect);
+      /*  Check to see if this window is visible and if intersects
+       *  with the rectangle of the application's window. If it does,
+       *  call MessageBeep(). This intersection is an area of this
+       *  application's window that is not visible.
+       */
+    	if (IsWindowVisible(hNextWnd) &&
+           	IntersectRect(&rDestRect, &rMyRect, &rOtherRect))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+
+                         

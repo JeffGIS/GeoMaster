@@ -1,0 +1,9 @@
+# redeclaration of "std" macros, for debugging
+
+C_OPTION=$(C_DEBUG)
+LD_OPTION=$(LD_DEBUG)
+LIB_SUFFIX=_d.a
+LINT_OPTION=$(LINT_DEBUG)
+STRIP=
+
+# $Header: debug,v 1.3 88/01/17 17:17:42 frew Exp $

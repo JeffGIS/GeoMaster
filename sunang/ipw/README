@@ -1,0 +1,67 @@
+
+         IPW -- Image Processing Workbench -- ERL-C Version
+
+
+  This, the ERL-C version of IPW, is a merger of the original work done
+by Jim Frew at UCSB, his subsequent work, and the work done at the EPA
+Environmental Research Laboratory, Corvallis, Oregon.  
+
+  The main differences are:
+
+    o  This version is more portable than the original.  A configuration
+       script makes installation easier.  The header files and some of the
+       programs have been changed to support ANSI C if it is available.  To
+       determine if it has been installed correctly, test procedures are
+       available.
+
+    o  The documentation has been heavily updated.  The on-line manual
+       pages are now much more complete and describe the programs more
+       accurately.  A Postscript formatted IPW User's Manual will be
+       provided soon.
+
+    o  Many (over 80) programs have been added.
+
+    o  GNU Make is used instead of the ipwmake scripts.  This yields better
+       functionality for the make files.
+
+
+
+  The complete source, including on-line documentation and testing
+procedures, is available in the file ipw-dist.tar.gz in this directory.
+Some useful tools are located in the Support/ directory.  See the README
+file in that directory for descriptions.
+
+  For everything you need to get IPW running, get the files ipw-dist.tar.gz
+and Support/make-3.74.tar.gz.  Don't forget to use the ftp command
+'type binary' when downloading compressed (*.Z or *.gz) files.  Inside the IPW
+distribution (ipw-dist.tar.gz), you will find a file called "INSTALL" that
+gives detailed information on how to install both GNU Make and IPW in
+your environment.
+
+The primary distribution points for IPW are:
+
+    ftp://morpheus.cor.epa.gov/pub/misc/ipw/
+
+and
+
+    http://www.cor.epa.gov/projects/ipw/
+
+(our WWW server is not yet available to all sites -- government sites can
+ use ice.cor.epa.gov as the address for now.)
+
+
+  If you have any questions or comments, please contact me by whichever
+means is most convenient to you.
+
+Dana Jacobsen
+US EPA
+200 SW 35th Street
+Corvallis, OR 97333
+
+Phone: (503) 754-4452
+  Fax: (503) 754-4799
+
+ipw@heart.cor.epa.gov
+dana@acm.org
+
+http://www.cor.epa.gov/projects/ipw/

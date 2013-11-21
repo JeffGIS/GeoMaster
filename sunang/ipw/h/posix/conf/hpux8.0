@@ -1,0 +1,30 @@
+/*
+ * limits.h for HP/UX 8.0
+ */
+
+#define _POSIX_MAX_INPUT         255
+#define _POSIX_OPEN_MAX           16
+
+/*
+ * The following limits are not actually invariant, but can vary by file
+ * system or device.  the correct values can be determined using the 
+ * pathconf() function.  The default values are provided here because the
+ * constants are specified by several publications including XPG Issue 2
+ * and SVID Issue 2.
+ */
+#    define MAX_INPUT   512     /* Max number of bytes allowed in a terminal 
+                                   input queue */ 
+
+
+/*
+ * The following limts are not actually invariant, but are configurable.
+ * The correct values can be determined using the sysconf() function.
+ * The default values are provided here because the constants are specified
+ * by several publications including XPG (X/Open Portability Guide) Issue 2
+ * and SVID (System V Interface Definition) Issue 2.
+ */
+#    define OPEN_MAX            60      /* Maximum number of files that one 
+                                           process can have open at any given 
+                                           time */
+#define OPEN_LIMIT 1024
+

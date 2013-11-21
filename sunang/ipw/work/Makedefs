@@ -1,0 +1,36 @@
+#
+#	SCCS version: @(#)   Makedefs   1.6   9/3/91
+#
+
+C_SPECIAL   =  -I../h
+LD_SPECIAL  =
+LIBS_SPECIAL= $(IPW)/lib/liblocal.a
+
+PGM=itrbxfr
+
+SRCS = \
+        bihvalid.c get_sample.c headers.c hle1.c itrbxfr.c main.c newlqh.c \
+        output.c
+
+OBJS =\
+        bihvalid.o get_sample.o headers.o hle1.o itrbxfr.o main.o newlqh.o \
+        output.o
+
+
+bihvalid.o     : $(IPW)/h/ipw.h $(IPW)/h/bih.h
+get_sample.o   : $(IPW)/h/ipw.h ../h/crh.h
+headers.o      : $(IPW)/h/ipw.h $(IPW)/h/bih.h ../h/crh.h \
+                 $(IPW)/h/fpio.h $(IPW)/h/gethdrs.h ./itrbxfr.h
+hle1.o         : ../h/physdefs.h ../h/physmacs.h
+itrbxfr.o      : $(IPW)/h/ipw.h ../h/newdefs.h \
+                 ../h/physdefs.h ../h/physmacs.h \
+                 ./itrbxfr.h
+main.o         : $(IPW)/h/ipw.h ../h/newdefs.h $(IPW)/h/getargs.h \
+                 ./itrbxfr.h
+newlqh.o       : $(IPW)/h/ipw.h $(IPW)/h/lqh.h ./itrbxfr.h $(IPW)/h/gethdrs.h
+output.o       : $(IPW)/h/ipw.h ./itrbxfr.h
+
+./itrbxfr.h       : $(IPW)/h/lqh.h
+
+default: pgm
+install: install-pgm

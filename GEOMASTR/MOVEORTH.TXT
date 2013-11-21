@@ -1,0 +1,19 @@
+Moving Arial Photos:
+
+To slide arial photos around do the following:
+
+1)	Save off a copy of the index for the arial photo layer (or layers) to be adjusted.
+	If after moving the photos around you wish to go back to the way they were just replace
+	the index with the saved off version. For example if your arial photos are in a directory
+	named 'C:\geomastr\airphoto' copy 'c:\geomastr\airphoto\index' to
+	'c:\geomastr\airphoto\index.sav'.
+	
+2)	You move one original air photo at a time. Set the Pickability option so that the
+	Arial photo layer is pickable. Select the photo to be moved with the
+	'Display Single Original Ortho' graphic function (in the 'fundir\orthos.txt' file).
+	Then move this photo with the 'Adjust Displayed Ortho' function. This function
+	accepts two points (using the left mouse button). The first point marks the location
+	in the photo and the second its new location in the map. You can move a photo as many
+	times as necessary to get it positioned correctly.
+	
+3)	Use the 'Display All Orthos' functions to turn all photos back on.

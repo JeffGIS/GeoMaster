@@ -1,0 +1,91 @@
+//Microsoft App Studio generated resource script.
+//
+#include "sqlcntl.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+#ifdef APSTUDIO_INVOKED
+//////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "sqlcntl.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+/////////////////////////////////////////////////////////////////////////////////////
+#endif    // APSTUDIO_INVOKED
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+SQL_BETWEEN DIALOG DISCARDABLE  0, 0, 224, 39
+STYLE WS_POPUP | WS_VISIBLE | WS_BORDER
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_BETWEEN1,44,4,76,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BETWEEN2,144,4,76,13,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,4,20,37,14
+    PUSHBUTTON      "Cancel",IDCANCEL,184,20,37,14
+    LTEXT           "BETWEEN",IDC_STATIC,4,8,36,8
+    LTEXT           "AND",IDC_STATIC,124,8,16,8
+END
+
+SQLWHERE DIALOG DISCARDABLE  0, 0, 350, 245
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "SQL Where Clause Builder"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,4,4,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,292,4,50,14
+    LISTBOX         IDC_FIELDLIST,4,100,84,140,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Globals",IDC_STATIC,208,88,84,8
+    LISTBOX         IDC_OPLIST,100,100,96,140,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Operators",IDC_STATIC,100,88,96,8
+    LISTBOX         IDC_GLOBALLIST,208,100,84,140,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Save",IDC_SAVESQL,296,100,50,14
+    PUSHBUTTON      "Load",IDC_LOADSQL,296,120,50,14
+    EDITTEXT        IDC_SQL,4,24,340,60,ES_MULTILINE | ES_AUTOHSCROLL
+    CTEXT           "SQL Where Clause",IDC_STATIC,64,12,224,8
+    CTEXT           "Fields",IDC_STATIC,4,88,84,8
+END
+
+
+#ifndef APSTUDIO_INVOKED
+////////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

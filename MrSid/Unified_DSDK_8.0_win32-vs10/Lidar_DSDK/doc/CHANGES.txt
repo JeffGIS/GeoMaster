@@ -1,0 +1,35 @@
+
+RELEASE NOTES:
+
+1.1.1 December 2010
+  - Turned the SDK library into a DLL and removed the static version.
+  - Turned Bounds::Huge into a function Bounds::Huge().
+
+1.1.0 March 2010
+  - Revised file format (MG4 4.0.0.3) to support lossless floating point
+    compression.
+  - Added PointInfo class to replace the (ChannelInfo[], length) idiom.
+    1.0.1:  
+      iter = reader->createIterator(bounds, 
+                                    1.0, 
+                                    reader->getChannelInfo(), 
+                                    reader->getNumChannels(), 
+                                    NULL);                                    
+    1.1.0:  
+      iter = reader->createIterator(bounds, 
+                                    1.0, 
+                                    reader->getPointInfo(), 
+                                    NULL);
+  - Removed LTLogMessage functions. The information can be retrieved from the
+      Error object.
+  - Added experimental SWIG-based C#, Python and Ruby bindings to the 
+    contributions directory.
+  - Robustness improvements to viewer application.
+
+1.0.1 September 2009
+  - Revised file format (MG4 4.0.0.2) to support faster decodes.
+
+1.0.0 July 2009
+  - This is the first public release of the LizardTech LiDAR SDK.
+
+

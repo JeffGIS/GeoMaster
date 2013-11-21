@@ -1,0 +1,52 @@
+This directory contains various "canned" versions of h/posix/limits.h.  The
+comment at the top of each file notes which operating system and hardware the
+file has been tested on.
+
+If one of these is directly usable in your environment, then copy or link it
+to h/posix/limits.h.
+
+Otherwise, copy the one that most closely approximates your configuration into
+h/posix/limits.h and edit it appropriately.  Once it works, please mail a copy
+of it to "ipw@crseo.ucsb.edu" so we can incorporate it into the standard
+distribution.  Be sure that the comment at the top of the file adequately
+describes your particular operating system.
+
+NOTE!  These files should contain ONLY those macros that are UNIQUE to the
+       POSIX <limits.h>.  Also, macros which are unused by IPW need not be
+       defined.
+
+macros:
+	ARG_MAX		maximum length of argument for exec() in bytes,
+				including environ data
+	CHILD_MAX	maximum number of offspring per user ID
+	CLK_TCK		number of clock ticks per second
+	FCHR_MAX	maximum size of a file in bytes
+	LOCK_MAX	maximum number of system lock table entries
+	LINK_MAX	maximum number of links to a file
+	MAX_INPUT	maximum number of characters allowed for terminal
+				input
+	NAME_MAX	maximum number of characters in a file name
+	NGROUPS_MAX	maximum number of simultaneous supplementary group IDs
+				per process
+	OPEN_LIMIT	maximum number of files that one process can have open
+				at any given time.  Use 1024.
+	OPEN_MAX	minimum number of files open concurrently guaranteed
+	PASS_MAX	maximum number of characters in a password
+	PATH_MAX	maximum number of characters in a path name
+	PID_MAX		maximum value for a process ID
+	PIPE_BUF	maximum number of bytes that is guaranteed to be
+				atomic when writing to a pipe
+	PIPE_MAX	maximum number of bytes that can be written to a pipe
+				in a single write operation
+	PROC_MAX	maximum number of simultaneous processes
+	STD_BLK		standard number of bytes in a physical I/O block;
+				also, the maximum number of bytes guaranteed
+				to be transferred in atomic I/O actions
+	SYS_NMLN	maximum number of characters for strings returned by
+				the uname() function
+	SYS_OPEN	maximum number of files that can be open on the system
+				at any one time
+	UID_MAX		maximum value for a user or group ID
+	WORD_BIT	number of bits in a word or in data of type int
+
+$Header: /usr/home/ipw/h/posix/conf/RCS/README,v 1.2 89/10/27 12:35:24 frew Exp $

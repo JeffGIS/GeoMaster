@@ -1,0 +1,25 @@
+include $(IPW)/lib/make/Makestart
+#
+# for Solaris 2.1 or 2.2
+
+LIB=unix
+
+# We include GNU _quicksort because Sun's has exponential behavior on 
+# some input such as imgstat usually has.  This makes the answer return
+# in seconds instead of years (it's that bad!).  Just use _quicksort
+# in place of qsort.
+#
+# We will also use GNU alloca and safe xmalloc and xrealloc
+#
+# Solaris 2.2 dropped the isinf function and neglected to mention any
+# replacement.  We'll need the isinf function.
+
+SRCS=\
+	src/gnualloc.c src/_quicksort.c \
+	src/dysize.c src/random.c \
+	src/isinf.c
+
+default: lib
+install: install-lib
+
+include $(IPW)/lib/make/Makerules

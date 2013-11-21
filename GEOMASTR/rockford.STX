@@ -1,0 +1,57 @@
+[Main]
+;*** DO NOT TOUCH! The format of this file WILL change.
+Product=Setup Pro
+Version=1.0
+OEM=Eschalon Release Edition
+Base Directory=d:\rockford
+
+[Settings]
+Application Name=Rockford Data
+Window Title=Rockford Data Installation
+Background Title=
+Directory=
+PM Group=
+Prompt PM=TRUE
+Disk Label Mask=Disk #%d
+Background=Dithered Title
+ReadMe Font=Default
+Resize ReadMe=FALSE
+ReadMe At Start=FALSE
+Brand Source=FALSE
+Brand Destination=FALSE
+End Program=
+
+[Branding]
+INI File=
+Section=
+Name=
+Company=
+
+[Files]
+address\abbrname.txt="abbrname.txt" 35424 A 0 C A
+address\segmax.btr="segmax.btr" 734208 A 0 C A
+address\stndsn.ary="stndsn.ary" 18132 A 0 C A
+address\stndsn.hsh="stndsn.hsh" 21206 A 0 C A
+address\strname.gmd="strname.gmd" 1226508 A 0 C A
+address\strname.in1="strname.in1" 62464 A 0 C A
+address\strname.in2="strname.in2" 263168 A 0 C A
+address\strname.in3="strname.in3" 267264 A 0 C A
+address\strname.in4="strname.in4" 271360 A 0 C A
+address\strname.in5="strname.in5" 267264 A 0 C A
+address\strname.in6="strname.in6" 267264 A 0 C A
+address\strname.in7="strname.in7" 263168 A 0 C A
+address\strname.in8="strname.in8" 263168 A 0 C A
+address\strtseg.gmd="strtseg.gmd" 1504974 A 0 C A
+address\strtseg.in1="strtseg.in1" 218112 A 0 C A
+clines.gmc="clines.gmc" 74828 A 0 C A
+maplib\clines.plt="clines.plt" 872024 A 0 C A
+maplib\clines.rin="clines.rin" 291840 A 0 C A
+maplib\clines.tin="clines.tin" 5120 A 0 C A
+networks\net1\intmp.btr="intmp.btr" 496640 A 0 C A
+networks\net1\intpaths.btr="intpaths.btr" 443392 A 0 C A
+networks\net1\intref.btr="intref.btr" 1987584 A 0 C A
+networks\net1\markers1.btr="markers1.btr" 1024 A 0 C A
+networks\net1\markers2.btr="markers2.btr" 1024 A 0 C A
+networks\net1\netrefs.btr="netrefs.btr" 455680 A 0 C A
+networks\netlinks.btr="netlinks.btr" 631808 A 0 C A
+

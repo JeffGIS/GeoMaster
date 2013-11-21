@@ -1,0 +1,10 @@
+/*
+ * limits.h for Solaris 2.1
+ */
+
+#define _POSIX_MAX_INPUT         255
+#define _POSIX_OPEN_MAX           16
+
+#define MAX_INPUT       512      /* max size of a char input buffer */
+#define OPEN_MAX        20
+#define OPEN_LIMIT      1024     /* max # of files a process can have open */

@@ -1,0 +1,44 @@
+.\" IPW document macros (supplement for -ms)
+.\"
+.\" stuff you may want to change
+.\"
+.\".fp 1 NR				\" your favorite "roman" font
+.\".fp 2 NI				\" your favorite "italic" font
+.\".fp 3 NB				\" your favorite "bold" font
+.\".fp 7 CW				\" your favorite constant-width font
+.sw 1 1
+.sw 2 1
+.sw 3 1
+.nr PS 11				\" your favorite point size
+.nr VS 13				\" your favorite vertical spacing
+.\"
+.\" stuff you probably won't need to change
+.\"
+.de CW					\" switch to constant-width font
+.nr PQ \\n(.f
+.if t .ft 7
+.ie \\$1 .if n .ul 999
+.el .if n .ul 1
+.if t .if !\\$1 \&\\$1\f\\n(PQ\\$2
+.if n .if \\n(.$=1 \&\\$1
+.if n .if \\n(.$>1 \&\\$1\c
+.if n .if \\n(.$>1 \&\\$2
+..
+.de CS					\" begin constant-width display
+.DS
+.ft 7
+..
+.de CE					\" end constant-width display
+.ft P
+.DE
+..
+.de MD					\" set modification date
+.ie \\$7 .ds CF Printed:\ \n(yr/\n(mo/\n(dy
+.el .ds CF Last change:\ \\$4
+.if \\$7Locked .ds CF Printed:\ \n(yr/\n(mo/\n(dy
+..
+.ds i \s-1IPW\s0
+.ds UX \s-1UNIX\s0
+.nr PO 1.25i
+.\"
+.\" $Header: /usr.MC68020/home/ipw/doc/RCS/macs,v 1.3 89/10/18 17:52:29 frew Exp $
