@@ -1,0 +1,10 @@
+Input for toporad:
+images
+	beam irrad
+	diffuse irrad
+	mu sub s
+	vf
+	ct
+	albedo
+constant
+	mu sub 0

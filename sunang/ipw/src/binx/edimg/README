@@ -1,0 +1,7 @@
+fixed to work with lq's
+(has same problem as primg)
+
+also, image write failed
+no header for floating-point I/O initialization
+
+$Header: /usr/home/ipw/src/bin/edimg/RCS/README,v 1.1 89/10/18 18:28:40 frew Exp $

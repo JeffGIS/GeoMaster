@@ -1,0 +1,25 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL=
+LD_SPECIAL=
+LIBS_SPECIAL=
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM=ipw2hds
+OBJS=\
+	hdspic.o headers.o main.o parm.o
+
+SRCS=\
+	hdspic.c headers.c main.c parm.c
+
+default: pgm
+install: install-pgm
+
+$(OBJS): pgm.h
+
+# $Header: /usr.MC68020/home/ipw/src/bin/hdspic/RCS/Makedefs,v 1.2 89/10/18 20:22:32 frew Exp $

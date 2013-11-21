@@ -1,0 +1,22 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL=
+LD_SPECIAL=
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM= sunang
+OBJS=\
+	main.o sunang_opts.o
+
+SRCS=\
+	main.c sunang_opts.c
+
+default: pgm
+install: install-pgm
+
+# $Header: /usr.MC68020/home/ipw/src/bin/sunang/RCS/Makedefs,v 1.2 89/10/18 20:23:51 frew Exp $

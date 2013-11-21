@@ -1,0 +1,5 @@
+
+SCRIPT=randomize
+
+default: script
+install: install-script

@@ -1,0 +1,29 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL=
+LD_SPECIAL=
+LIBS_SPECIAL=
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM= dempt
+OBJS=\
+	atoid.o bigatof.o demhdr.o fillvec.o headers.o litatof.o main.o \
+	output.o parm.o prdemhdr.o profhdr.o profiles.o proj.o prprofhdr.o \
+	units.o
+
+SRCS=\
+	atoid.c bigatof.c demhdr.c fillvec.c headers.c litatof.c main.c \
+	output.c parm.c prdemhdr.c profhdr.c profiles.c proj.c prprofhdr.c \
+	units.c
+
+default: pgm
+install: install-pgm
+
+$(OBJS): pgm.h
+
+# $Header: /usr.MC68020/home/ipw/src/bin/dempt/RCS/Makedefs,v 1.2 89/10/18 20:22:10 frew Exp $

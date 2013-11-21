@@ -1,0 +1,15 @@
+Wed May 10 09:01:08 PDT 1989
+
+This version of mstats does not yet support the -c and -r options, BUT:
+
+-- it is much less sensitive to roundoff error.  All floating-point arithmetic
+   is done in double precision.  In one memorable case, the old mstats
+   reported a NEGATIVE variance for a an image with a small absolute range of
+   values.
+
+-- it's twice as fast as the old one (on Sun-3's, anyway ...)
+
+Please try this mstats on any test cases you have and report the results to
+frew@crseo.ucsb.edu.  Thanks.
+
+$Header: /usr/home/ipw/src/bin/mstats/RCS/README,v 1.1 89/10/18 18:30:07 frew Exp $

@@ -1,0 +1,26 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL=-fsingle
+LD_SPECIAL=-fsingle
+LIBS_SPECIAL= $(HOME)/lib/libDoz.a
+PGM_DIR=$(HOME)/bin
+PGM_MODE=711
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM= elevrad
+OBJS=\
+	data.o elevrad.o init_tau.o main.o radtbls.o
+
+SRCS=\
+	data.c elevrad.c init_tau.c main.c radtbls.c
+
+default: pgm
+install: install-pgm
+
+radtbls.o: elevrad.h
+elevrad.o: elevrad.h

@@ -1,0 +1,13 @@
+DIRS=\
+	bitcom cmpimg cnhist convolve demux dither edhdr edimg flip \
+	gradient grhist hist histeq hor1d horizon interp ipw \
+	ipw2hds ipw2pbm ipw2ps ipw2sun ipw2xim \
+	lincom lqhx lutx mkbih mkgeoh mklqh mklut mksath mksunh mkwinh \
+	mstats mult mux poly prhdr primg random rmhdr shade skew \
+	sunang tmpt transpose viewcalc viewf wedge window zoom
+
+
+default: all
+install: all
+
+# $Header: /home/ipw/src/bin/RCS/Makedefs,v 1.5 90/01/28 13:22:52 frew Exp $

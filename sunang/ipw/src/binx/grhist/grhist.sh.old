@@ -1,0 +1,72 @@
+: ${IPW?}
+
+## NAME
+##	grhist -- graph an IPW histogram
+##
+## SYNOPSIS
+##	grhist [graph-options]
+##
+## DESCRIPTION
+##	grhist reads an IPW histogram from the standard input, and writes a
+##	graphic rendition of the histogram (using graph(1)) on the standard
+##	output.
+##
+## OPTIONS
+##	Any command-line arguments are passed to graph(1).
+##
+## EXAMPLES
+##	To compute and plot a histogram on the LaserWriter:
+##		hist image | grhist | lpr -g
+##
+##	To plot a (precomputed) histogram on a Tektronix 4014:
+##		grhist <histogram | plot -T4014
+##
+## FILES
+##
+## DIAGNOSTICS
+##
+## RESTRICTIONS
+##	The output of grhist is constrained by the output options of the
+##	graph(1) program.
+##
+## FUTURE DIRECTIONS
+##	grhist is implemented as the pipeline
+##		rmhdr | btoa | awk | graph
+##	It may be desirable to reimplement grhist as a single program.
+##
+## BUGS
+
+PATH="$PATH:$IPW/lib"
+. ipwenv
+
+graph_opts=
+
+case $* in
+-H)	usage $0 '[graph-options]' 'plot a histogram'
+	exit 1
+	;;
+esac
+
+rmhdr |
+	btoa -4 |
+	$AWK 'BEGIN {
+		sum = 0
+	}
+	{
+		hold[NR-1] = $1
+		sum += $1
+		nmax = NR
+	}
+	END {
+		for (j = 0; j < nmax; ++j) {
+			if (hold[j] != 0) {
+				print j, 0
+				print j, 100 * hold[j] / sum, "\" \""
+			}
+		}
+	}' |
+	graph -b $*
+
+exit 0
+
+# $Header: /usr/home/ipw/src/bin/grhist/RCS/grhist.sh,v 1.2 89/10/23 18:34:45 frew Exp $

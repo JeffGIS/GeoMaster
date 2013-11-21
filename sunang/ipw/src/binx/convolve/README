@@ -1,0 +1,43 @@
+Feb 23 18:39 1988
+
+11 x 11 kernel (C/marr) on crseo-server:
+	338.3u 5.4s 5:49 98% 16+40k 34+67io 0pf+0w
+
+Execution time is dominated by FLOPS.
+
+Possible tweak: exploit symmetric kernels
+e.g., save line from conv1d() for later use.
+Avoids nsamps multiplies for each re-use,
+but requires some fearsome bookkeeping.
+
+Should try this first INSIDE conv1d
+(exploit horizontal symmetry)
+
+Massive space-for-speed tweak:
+separate line buffers for each UNIQUE COEFFICIENT.
+(this is probably a loss....)
+-------------------------------------------------------------------------------
+Sun Mar 13 17:12:56 PST 1988
+
+Set up separate fpixel[pixel] maps for each unique kernel coefficient.  Read
+pixels, write fpixels.  Old multiply + add becomes array-ref + add.
+
+11 x 11 kernel (C/marr) on crseo-server:
+	143.3u 0.5s 2:24 99% 16+48k 48+49io 0pf+0w
+-------------------------------------------------------------------------------
+   %  cumulative    self              self    total          
+ time   seconds   seconds    calls  ms/call  ms/call name    
+ 81.8      32.62    32.62     1530    21.32    21.32  _conv1d [4]
+ 12.6      37.66     5.04      512     9.84    11.27  _fpvwrite [5]
+
+   %  cumulative    self              self    total          
+ time   seconds   seconds    calls  ms/call  ms/call name    
+ 69.4      15.80    15.80     1530    10.33    10.33  _conv1d [2]
+ 21.6      20.72     4.92      510     9.65    11.75  _fpvwrite [3]
+
+   %  cumulative    self              self    total          
+ time   seconds   seconds    calls  ms/call  ms/call name    
+ 67.0      13.66    13.66     1530     8.93     8.93  _conv1d [4]
+ 25.2      18.80     5.14      510    10.08    11.46  _fpvwrite [5]
+
+$Header: /usr/home/ipw/src/bin/convolve/RCS/README,v 1.1 89/10/18 18:26:32 frew Exp $

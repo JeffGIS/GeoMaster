@@ -1,0 +1,26 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL= -fsingle
+LD_SPECIAL= -fsingle
+LIBS_SPECIAL= -lm
+PGM_DIR= $(HOME)/bin
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM= toporad
+OBJS=\
+	head_final.o head_init.o main.o radcalc.o toporad.o
+
+SRCS=\
+	head_final.c head_init.c main.c radcalc.c toporad.c
+
+default: pgm
+install: install-pgm
+
+head_init.o: toporad.h
+radcalc.o: toporad.h
+toporad.o: toporad.h

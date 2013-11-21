@@ -1,0 +1,17 @@
+C_SPECIAL=
+LD_SPECIAL=
+LIBS_SPECIAL=
+
+PGM=ipw2sun
+OBJS=\
+	bitmap.o main.o sunhdr.o sunras.o
+
+SRCS=\
+	bitmap.c main.c sunhdr.c sunras.c
+
+default: pgm
+install: install-pgm
+
+$(OBJS): sunras.h
+
+# $Header: /usr.MC68020/home/ipw/src/bin/sunras/RCS/Makedefs,v 1.2 89/10/18 20:23:53 frew Exp $

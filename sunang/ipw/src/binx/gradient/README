@@ -1,0 +1,7 @@
+Structure of program is:
+main		- parse options & open files
+gradient	- create headers & orchestrate computation
+gradx		- read input data, allocate buffers, call gradu for ea line
+gradu		- compute diff x & y, slopes/aspects, write line
+
+$Header: /usr/home/ipw/src/bin/gradient/RCS/README,v 1.1 89/10/18 18:29:15 frew Exp $

@@ -1,0 +1,15 @@
+Some sample kernels for "convolve":
+
+avg	3x3 8-neighbor uniform average
+
+grad	3x3 4-neighbor diagonal gradient
+
+lap	3x3 4-neighbor Laplacian
+
+marr	11x11 circular Marr (Laplacian-of-Gaussian)
+
+sharp	3x3 4-neighbor sharpening (Laplacian+original)
+
+vert	3x3 6-neighbor vertical edge (Sobel)
+
+$Header: /local/share/pkg/ipw/src/bin/convolve/Kernels/RCS/README,v 1.1 90/11/11 14:33:35 frew Exp $

@@ -1,0 +1,22 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL=
+LD_SPECIAL=
+PGM_DIR=$(HOME)/bin
+PGM_MODE=711
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM=twostream
+OBJS=\
+	betanaught.o delted.o main.o mwgamma.o twostream.o
+
+SRCS=\
+	betanaught.c delted.c main.c mwgamma.c twostream.c
+
+default: pgm
+install: install-pgm

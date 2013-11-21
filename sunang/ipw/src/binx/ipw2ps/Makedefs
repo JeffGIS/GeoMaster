@@ -1,0 +1,17 @@
+C_SPECIAL=
+LD_SPECIAL=
+LIBS_SPECIAL=
+
+PGM=ipw2ps
+OBJS=\
+	main.o pspic.o pspicx.o
+
+SRCS=\
+	main.c pspic.c pspicx.c
+
+default: pgm
+install: install-pgm
+
+$(OBJS): pspic.h
+
+# $Header: /usr.MC68020/home/ipw/src/bin/pspic/RCS/Makedefs,v 1.2 89/10/18 20:23:36 frew Exp $

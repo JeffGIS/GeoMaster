@@ -1,0 +1,270 @@
+: 'DO NOT DELETE THIS LINE: it keeps this script from being run by csh'
+#-----------------------------------------------------------------------
+# Copyright (c) 1990 The Regents of the University of California.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms are permitted
+# provided that: (1) source distributions retain this entire copyright
+# notice and comment, and (2) distributions including binaries display
+# the following acknowledgement:  ``This product includes software
+# developed by the Computer Systems Laboratory, University of
+# California, Santa Barbara and its contributors'' in the documentation
+# or other materials provided with the distribution and in all
+# advertising materials mentioning features or use of this software.
+#
+# Neither the name of the University nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#-----------------------------------------------------------------------
+
+: ${IPW?}
+
+## NAME
+##	viewf -- compute view factors from elevation image
+##
+## SYNOPSIS
+##	viewf [-x] image
+##
+## DESCRIPTION
+##	viewf reads elevation data from {image} (default: standard input)
+##	and writes the corresponding sky view and terrain configuration
+##	factors to the standard output.
+##
+##	viewf first calculates the gradient using the IPW command gradient,
+##	then a 16-angle (32-angle with the -x option) horizon image using
+##	hor1d.  It then passes these to viewcalc.
+##
+## OPTIONS
+##
+## EXAMPLES
+##	The command:
+##
+##		viewf image
+##
+##	is equivalent to:
+##
+##		gradient image  >{grad}
+##		horizon -a {azm01} image  >{horz01}
+##		...
+##		horizon -a {azm16} image  >{horz16}
+##		mux {horz??} | viewcalc -s {grad}
+##
+## FILES
+##	$TMPDIR/viewf.{NNNNN}/*
+##
+##		Temporary directory containing intermediate gradient
+##		and horizon files.
+##
+##	$TMPDIR/mux{NNNNN}
+##	$TMPDIR/skew{NNNNN}
+##
+##		Temporary files used by mux and skew
+##
+## DIAGNOSTICS
+##	See gradient, hor1d, mux, skew, transpose, viewcalc.
+##
+## RESTRICTIONS
+##	viewf cannot read the elevation image from standard input.
+##
+##	The use of 16 horizon images is hard-coded in viewf.  In practice
+##	this has proven to yield sufficient resolution even in very
+##	rugged terrain.  However, as the scale goes down (below 50 meters?),
+##	more angles are needed.  The -x option allows 32 angles.
+##
+## FUTURE DIRECTIONS
+##	Should be able to specify number of directions on command line,
+##	but this is hard to implement in an efficient way.  Viewf is
+##	currently implemented as a shell script.  It may be desirable
+##	to reimplement viewf as a program.
+##
+## HISTORY
+##	7/1/90	 Written by James Frew, UCSB.
+##	8/3/95	 Added -x option to select 32 angles.  Dana Jacobsen, ERLC.
+##	8/3/95	 Changed getopt to getopts.  Dana Jacobsen, ERLC.
+##
+## BUGS
+##
+## SEE ALSO
+##	IPW:  gradient, hor1d, mux, skew, transpose, viewcalc, gviewf
+
+PATH="$PATH:$IPW/lib"
+. ipwenv
+
+pgm=`basename $0`
+synopsis='[-x] elev_image'
+description='sky view and terrain configuration'
+tdir=$TMPDIR/$pgm.$$
+
+angles=16
+
+while getopts 'Hx' c
+do
+	case $c in
+	-)	shift
+		break;;
+	x)	angles=32;;
+	H)	usage $pgm "$synopsis" "$description"
+		exit 1;;
+	*)	usage $pgm "$synopsis" "$description"
+		exit 1;;
+	esac
+done
+shift `expr $OPTIND - 1`
+
+# must have exactly 1 input image
+
+image=$1
+case $# in
+0)	sherror $pgm "can't read from standard input"
+	usage $pgm "$synopsis" "$description"
+	exit 1
+	;;
+1)	;;
+*)	usage $pgm "$synopsis" "$description"
+	exit 1
+	;;
+esac
+
+if [ ! -r $image ] ; then
+	sherror $pgm "can't open file", $image
+	exit 1
+fi
+
+# can't write image data to terminal
+
+test -t 1 && {
+	sherror $pgm "can't write image data to a terminal"
+	exit 1
+}
+
+trap 'rm -f -r $tdir' 0
+trap 'exit 0' 1 2 3 15
+
+# make directory for temporary files
+mkdir $tdir
+
+# horizons in E and W directions
+hor1d -a 90 $image > $tdir/horz.e
+hor1d -b -a 90 $image > $tdir/horz.w
+
+# horizons in SSW and NNE directions
+skew -a -22.5 $image | \
+	transpose > $tdir/sxt1
+hor1d -a -22.5 $tdir/sxt1 | \
+	transpose | \
+	skew > $tdir/horz.ssw
+hor1d -b -a -22.5 $tdir/sxt1 | \
+	transpose | skew > $tdir/horz.nne
+
+# horizons in SW and NE directions
+skew -a -45 $image | \
+	transpose > $tdir/sxt2
+hor1d -a -45 $tdir/sxt2 | \
+	transpose | \
+	skew > $tdir/horz.sw
+hor1d -b -a -45 $tdir/sxt2 | \
+	transpose | \
+	skew > $tdir/horz.ne
+
+# horizons in SSE and NNW directions
+skew -a 22.5 $image | \
+	transpose > $tdir/sxt3
+hor1d -a 22.5 $tdir/sxt3 | \
+	transpose | \
+	skew > $tdir/horz.sse
+hor1d -b -a 22.5 $tdir/sxt3 | \
+	transpose | \
+	skew > $tdir/horz.nnw
+
+# horizons in SE and NW directions
+skew -a 45 $image | \
+	transpose > $tdir/sxt4
+hor1d -a 45 $tdir/sxt4 | \
+	transpose | \
+	skew > $tdir/horz.se
+hor1d -b -a 45 $tdir/sxt4 | \
+	transpose | \
+	skew > $tdir/horz.nw
+
+# horizons in S and N directions
+transpose $image > $tdir/xt
+hor1d -a 0 $tdir/xt | \
+	transpose > $tdir/horz.s
+hor1d -b -a 0 $tdir/xt | \
+	transpose > $tdir/horz.n
+
+# horizons in ENE and WSW directions
+skew -a -22.5 $tdir/xt | \
+	transpose > $tdir/xts1
+hor1d -a 112.5 $tdir/xts1 | \
+	transpose | \
+	skew | \
+	transpose > $tdir/horz.ene
+hor1d -b -a 112.5 $tdir/xts1 | \
+	transpose | \
+	skew | \
+	transpose > $tdir/horz.wsw
+
+# horizons in ESE and WNW directions
+skew -a 22.5 $tdir/xt | \
+	transpose > $tdir/xts2
+hor1d -a 67.5 $tdir/xts2 | \
+	transpose | \
+	skew | \
+	transpose > $tdir/horz.ese
+hor1d -b -a 67.5 $tdir/xts2 | \
+	transpose | \
+	skew | \
+	transpose > $tdir/horz.wnw
+
+
+if [ $angles -eq 32 ] ; then
+skew -a -11.25 $image | transpose > $tdir/sxt1s
+hor1d    -a -11.25 $tdir/sxt1s | transpose | skew > $tdir/horz.ssws
+hor1d -b -a -11.25 $tdir/sxt1s | transpose | skew > $tdir/horz.nnes
+
+skew -a -33.75 $image | transpose > $tdir/sxt2s
+hor1d    -a -33.75 $tdir/sxt1s | transpose | skew > $tdir/horz.sws
+hor1d -b -a -33.75 $tdir/sxt1s | transpose | skew > $tdir/horz.nes
+
+skew -a  11.25 $image | transpose > $tdir/sxt3s
+hor1d    -a  11.25 $tdir/sxt3s | transpose | skew > $tdir/horz.sses
+hor1d -b -a  11.25 $tdir/sxt3s | transpose | skew > $tdir/horz.nnws
+
+skew -a  33.75 $image | transpose > $tdir/sxt4s
+hor1d    -a  33.75 $tdir/sxt4s | transpose | skew > $tdir/horz.ses
+hor1d -b -a  33.75 $tdir/sxt4s | transpose | skew > $tdir/horz.nws
+
+skew -a -11.25 $tdir/xt | transpose >$tdir/xts1s
+hor1d    -a  101.25 $tdir/xts1s | transpose | skew | transpose > $tdir/horz.enes
+hor1d -b -a  101.25 $tdir/xts1s | transpose | skew | transpose > $tdir/horz.wsws
+
+skew -a -33.75 $tdir/xt | transpose >$tdir/xts3s
+hor1d    -a  123.75 $tdir/xts3s | transpose | skew | transpose > $tdir/horz.enen
+hor1d -b -a  123.75 $tdir/xts3s | transpose | skew | transpose > $tdir/horz.wswn
+
+skew -a  11.25 $tdir/xt | transpose >$tdir/xts2s
+hor1d    -a  78.75 $tdir/xts2s | transpose | skew | transpose > $tdir/horz.esen
+hor1d -b -a  78.75 $tdir/xts2s | transpose | skew | transpose > $tdir/horz.wnwn
+
+skew -a  33.75 $tdir/xt | transpose >$tdir/xts4s
+hor1d    -a  56.25 $tdir/xts4s | transpose | skew | transpose > $tdir/horz.eses
+hor1d -b -a  56.25 $tdir/xts4s | transpose | skew | transpose > $tdir/horz.wnws
+
+fi
+
+# create gradient file
+gradient $image > $tdir/gradient
+
+# mux horizon together and pipe into view factor calculations
+mux $tdir/horz.* | \
+	viewcalc -s $tdir/gradient
+
+
+exit 0
+
+# $Header: /local/share/pkg/ipw/src/bin/viewf/RCS/viewf.sh,v 1.7 90/11/16 16:51:55 frew Exp $

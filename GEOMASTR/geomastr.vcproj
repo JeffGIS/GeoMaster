@@ -6404,24 +6404,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\sunang\ipw\src\exp\ucsb\bin\sunlight\zerobr.c"
+				RelativePath="..\sunang\ipw\src\zerobr.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -6461,19 +6445,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gctpc\proj.h"
-				>
-			</File>
-			<File
 				RelativePath="..\INCLUDE\PROJ.H"
 				>
 			</File>
 			<File
-				RelativePath=".\resource.h"
+				RelativePath="..\gctpc\proj.h"
 				>
 			</File>
 			<File
 				RelativePath="..\GMEdit\GMEdit\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
 				>
 			</File>
 			<File
@@ -6562,11 +6546,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Citytour\BITMAP2.BMP"
+				RelativePath="BITMAP2.BMP"
 				>
 			</File>
 			<File
-				RelativePath="BITMAP2.BMP"
+				RelativePath="..\Citytour\BITMAP2.BMP"
 				>
 			</File>
 			<File
@@ -6766,11 +6750,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CURSOR_L.CUR"
+				RelativePath="CURSOR_L.CUR"
 				>
 			</File>
 			<File
-				RelativePath="CURSOR_L.CUR"
+				RelativePath=".\CURSOR_L.CUR"
 				>
 			</File>
 			<File
@@ -6866,15 +6850,15 @@
 				>
 			</File>
 			<File
+				RelativePath="icon1.ico"
+				>
+			</File>
+			<File
+				RelativePath="icon1.ico"
+				>
+			</File>
+			<File
 				RelativePath="..\GMEdit\GMEdit\icon1.ico"
-				>
-			</File>
-			<File
-				RelativePath="icon1.ico"
-				>
-			</File>
-			<File
-				RelativePath="icon1.ico"
 				>
 			</File>
 			<File

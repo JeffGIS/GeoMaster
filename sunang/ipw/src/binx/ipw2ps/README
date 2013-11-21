@@ -1,0 +1,63 @@
+Subject: Re: Getting 255 Grey Levels
+Keywords: Apple LaserWriter, image operator, setscreen
+Date: 23 Mar 89 11:30:48 GMT
+
+In article <1597@murdu.oz> rab@murdu.oz (Richard Alan Brown) writes:
+
+> Firstly, according to the PostScript book (reference manual), the
+> LaserWriter should produce 255 grey levels with the image operator if the
+> correct parameters have been supplied. With the default settings, it seems
+> that in fact you can only get 32 grey levels, yet inspection of the output
+> suggests that the printer should be able to do much better than this.
+> Reading the red book, it seems that the actual rendering of grey levels is
+> done via the setscreen operator, which determines how pixels are filled in
+> to acheive various levels from black to white.
+
+> Has anyone out there figured out how to modify the default setscreen
+> parameters to get 255 grey levels?
+
+The default screen frequency is 60 dots/inch on an Apple LaserWriter, which
+has a resolution of 300 pixels/inch.  300/60=5, so each screen dot has a
+maximum size of 5 by 5 pixels.  Making all those 25 pixels black, gives you a
+black printout.  Making 0 of them black, gives you a white printout.  That
+means you can achieve 26 grey levels at this screen frequency.  If you want
+more grey levels, you will either have to lower the frequency or use a printer
+with a higher resolution.  As you need at least 16 by 16 pixels to get 256
+grey levels, the screen frequency to use on the Apple LaserWriter is
+300/16=19.
+
+If you want to try this on your Apple LaserWriter, add the following line to
+your PostScript program to set the screen frequency to 19:
+
+	currentscreen 3 -1 roll pop 19 3 1 roll setscreen
+
+Jan Michael Rynning,			jmr@nada.kth.se
+Department of Numerical Analysis	If you can't fully handle domains:
+  and Computing Science,		ARPA: jmr%nada.kth.se@uunet.uu.net
+Royal Institute of Technology,		UUCP: {uunet,mcvax,...}!nada.kth.se!jmr
+S-100 44 Stockholm,			BITNET: jmr@sekth
+Sweden.					Phone: +46-8-7906288
+-------------------------------------------------------------------------------
+From: stew@endor.harvard.edu (Stew Rubenstein)
+Subject: Re: Getting 255 Grey Levels
+Date: 25 Mar 89 03:55:48 GMT
+Organization: Cambridge Scientific Computing, Inc.
+
+> ...
+> If you want to try this on your Apple LaserWriter, add the following line to
+> your PostScript program to set the screen frequency to 19:
+>
+>	currentscreen 3 -1 roll pop 19 3 1 roll setscreen
+
+Sorry, it's not that simple.  The default screen on the laserwriter is not at
+90 degrees, so it's not a simple 5x5 box.  In fact, the default screen is at
+45 degrees, and has 32 dots, so you get 33 gray levels.
+
+To get more gray levels, you need a coarser screen.  To make matters more
+complicated, you don't generally get the exact frequency and screen angle you
+request, because it has to take the closest values which are possible given
+the limited resolution of the printer.  For a good discussion of this, see
+chapter 10 of "Real Word PostScript", Stephen F. Roth, ed., Addison-Wesley,
+1988.
+
+$Header: /usr/home/ipw/src/bin/pspic/RCS/README,v 1.1 89/10/18 18:30:51 frew Exp $

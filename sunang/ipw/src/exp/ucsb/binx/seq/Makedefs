@@ -1,0 +1,22 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL=
+LD_SPECIAL=
+LIBS_SPECIAL=
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM_DIR=$(HOME)/bin
+PGM=seq
+OBJS=\
+	main.o seqloop.o square.o
+
+SRCS=\
+	main.c seqloop.c square.c
+
+default: pgm
+install: install-pgm

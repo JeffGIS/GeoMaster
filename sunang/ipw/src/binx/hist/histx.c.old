@@ -1,0 +1,33 @@
+#include "ipw.h"
+
+#include "hist.h"
+
+/*
+ * histx -- accumulate histogram of 1 image line
+ */
+
+void
+histx(i_buf, m_buf, nsamps, nbands, histo)
+	REG_1 pixel_t  *i_buf;		/* -> image line		 */
+	REG_3 pixel_t  *m_buf;		/* -> mask line			 */
+	REG_6 int       nsamps;		/* # samples / line		 */
+	REG_5 int       nbands;		/* # bands/ sample		 */
+	REG_2 hist_t   **histo;		/* -> histogram array		 */
+{
+	do {
+		REG_4 int       band;	/* band counter			 */
+
+		band = 0;
+		do {
+			if (m_buf == NULL || *m_buf++ != 0) {
+				++histo[*i_buf][0];
+			}
+			i_buf++;
+		} while (++band < nbands);
+	} while (--nsamps > 0);
+}
+
+#ifndef	lint
+static char     rcsid[] = "$Header: histx.c,v 1.2 89/01/23 14:13:42 frew Exp $";
+
+#endif

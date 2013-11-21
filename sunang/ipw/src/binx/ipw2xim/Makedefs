@@ -1,0 +1,13 @@
+PGM=ipw2xim
+OBJS=\
+	headers.o ipw2xim.o main.o parm.o ximhdr.o
+
+SRCS=\
+	headers.c ipw2xim.c main.c parm.c ximhdr.c
+
+default: pgm
+install: install-pgm
+
+$(OBJS): pgm.h
+
+# $Header: /home/ipw/src/bin/ipw2xim/RCS/Makedefs,v 1.1 89/10/25 19:53:52 frew Exp $

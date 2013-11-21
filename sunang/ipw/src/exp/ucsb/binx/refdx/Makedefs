@@ -1,0 +1,27 @@
+# C_SPECIAL	"cc" options
+# LD_SPECIAL	loader options
+# LIBS_SPECIAL	object libraries
+
+C_SPECIAL= -I/files/home/solar/ipw/src/exp/dozier/h
+LD_SPECIAL=
+LIBS_SPECIAL=
+
+# PGM		program name
+# OBJS		component object files
+# SRCS		component source files
+
+PGM_DIR=$(HOME)/bin
+PGM=refdx
+OBJS=\
+	akcoef.o main.o modprod.o refh2o.o refice.o spval1.o vdcps.o vtdbl.o \
+	wavechoice.o
+
+SRCS=\
+	akcoef.c main.c modprod.c refh2o.c refice.c spval1.c vdcps.c vtdbl.c \
+	wavechoice.c
+
+default: pgm
+install: install-pgm
+
+refh2o.o:	genref.cpp genreft.cpp waterdata.h
+refice.o:	genref.cpp genreft.cpp icedata.h

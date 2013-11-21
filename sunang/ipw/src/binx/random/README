@@ -1,0 +1,35 @@
+The random program works now.
+
+here's how to get random image samples:
+
+% random -s seed -n #pixels -r sline,lline,ssamp,lsamp | sort -n > pts
+
+the file pts will contain random line and sample numbers.
+
+[note that you must specify a seed each time you run this.
+if you don't give a seed, it will always print the same
+random numbers.]
+
+now you can use primg to get the pixel values.
+
+for S readable image random samples:
+
+% foreach i (slope elev radiation ...)
+> primg -i $i -p pts > $i.S
+> end
+%
+
+or if you want ipw readable random sample images:
+
+% mkhdr -l nlines -s nsamps > hdr
+
+% foreach i (slope elev radiation ...)
+> cp hdr $i.ipw
+> primg -i $i -c pts >> $i.ipw
+> end
+
+%
+
+let me know if you have any questions or problems.
+
+$Header: /usr/home/ipw/src/bin/random/RCS/README,v 1.1 89/10/18 18:31:29 frew Exp $

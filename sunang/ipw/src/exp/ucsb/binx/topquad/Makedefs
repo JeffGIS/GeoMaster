@@ -1,0 +1,8 @@
+# SCRIPT	script name
+
+SCRIPT=topquad
+PGM_DIR=$(HOME)/bin
+PGM_MODE=755
+
+default: script
+install: install-script
