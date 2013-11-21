@@ -1420,7 +1420,7 @@ else
 if (BackgroundTask)
 	PostMessage (hWndMain,GF_PROCESS_BACKGROUND_CMD,0,0);
  nMess=-1;
- while(GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
+ while(hWndMain && GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
    {    
 #if	_DEBUG
 	 nMess++;
@@ -4619,7 +4619,7 @@ DisplayParcel:
 				 }
 				 if (Counter > 0)
 					 lastVPID = 1;
-				 else
+				 else if (CurView)
 					 lastVPID = CurView->ID;
 				 if (HaveScreenBuffer (0)) 
 				 {
@@ -5268,6 +5268,7 @@ Close:   HaltMapDisplay(TRUE);
 			 CloseMap (FALSE);
 			 CloseRefIndex (TRUE);
 	         QuitGraphics();    
+			 hWndMain = 0;
 	         //DdeBye();
 #if ENABLETRACE
 GSSiEnterProg (0);

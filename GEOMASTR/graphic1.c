@@ -1407,7 +1407,7 @@ RtnFalse:
 //    CurView->WBounds = SaveWBounds;   
 //    CurView->Bounds = SaveBounds;
     GSSiGlobUlFree (&hpltBuf);
-    if (*hDC)
+    if (CurView && *hDC)
     {
         SetDisplayMode (*hDC,GF_TEXTMODE);
         SelectClipRgn (*hDC,0);
