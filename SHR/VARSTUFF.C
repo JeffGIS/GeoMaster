@@ -2358,6 +2358,8 @@ GSSiExitProg (532);
 			BaseUnitsPerOrthoPixel=atof (Value);
 			if (!BaseUnitsPerOrthoPixel)
 				BaseUnitsPerOrthoPixel=1;
+			GetViewportScale(CurView->hDC);
+
 			break;
 			
 		case 85:
@@ -9615,7 +9617,7 @@ GetScale:
 	{
 		for (ires=1;ires<numOrthoLevs-1;ires++)
 		{
-			if (OrthScale <= (OrthRes[ires]+OrthRes[ires+1])/2.0)
+			if (OrthScale <= OrthRes[ires+1]-(OrthRes[ires+1] - OrthRes[ires]) / 4.0)
 				break;
 		}
 	}

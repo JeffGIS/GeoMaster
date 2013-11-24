@@ -204,7 +204,13 @@ extern BOOL	AllowCache;
    		return hDIB;
    
 	//SetCursor(LoadCursor(NULL, IDC_WAIT));
-	hDIB = BMPHandleFromEXT (lpFileName); 
+	hDIB = BMPHandleFromEXT(lpFileName);
+	if (!hDIB && ExistFile(lpFileName))
+	{
+		AddBMPToCache32(0, 0);
+		hDIB = BMPHandleFromEXT(lpFileName);
+	}
+
 	if (strnicmp (lpFileName,"http:",5))
 	{
 		if (AdjustColorsToVP)
