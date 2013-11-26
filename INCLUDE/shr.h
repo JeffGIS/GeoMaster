@@ -521,7 +521,7 @@ HANDLE  BMPFromEXT (LPSTR ImageFile);
 BOOL SetDIBMonoColors(HDIB32 hDib,LPLONG Colors); 
 BOOL  BMPToEXT (HANDLE hBMP,LPSTR ImageFile,DWORD Flag); 
 BOOL  BMPToEXT32 (HDIB32 hDib,LPSTR ImageFile,DWORD Flag); 
-DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile); 
+DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile,double factor); 
 int  DisplayBMFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, short MaintainAspect);
 int  DisplayBMInRect (HDC hDC,LPBITMAPINFOHEADER pDibInfo,LPSTR pImage, RECT Rect, short MaintainAspect,LPRECT pOutRect);
 short  DisplayPCXFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAspect);
@@ -1036,7 +1036,7 @@ BOOL GMFISetGeoTiffData (DWORD hBMP,DWORD pScaleX, DWORD pScaleY, DWORD pBitmapP
 HDIB32 GMRotateImageClassic (HDIB32 hDib,double DegreesRotation);
 HANDLE GMFreeImageRotateClassic (HANDLE hDIBIn,LPDOUBLE pRotate);
 DWORD GMFICopy (DWORD hDIBIn,DWORD left,DWORD right, DWORD top, DWORD bottom);
-BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile);
+BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile,double factor);
 BOOL GMFIBMPToEXT (LPSTR lpszPathName,LPSTR FromMem,DWORD * pSize,DWORD Flag);
 BOOL GMFIBMPHandleToEXT (LPSTR lpszPathName,HANDLE hBMP,DWORD Flag);
 BOOL GMSetDIBMonoColors (HANDLE hBMP,LPLONG Colors);

@@ -1,4 +1,4 @@
-char	GMVersion[36]="GeoMaster version 34d (build 2)";
+char	GMVersion[36]="GeoMaster version 34d (build 3)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
 int		DepthColorIntensity=4;

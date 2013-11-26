@@ -5576,7 +5576,7 @@ SaveVis:
 			long	ICmd;
 			
 			nArgs = GetFunArgs (Args,Arg,4,&hMem);  
-			if (BMPFileFromEXT (Arg[2],Arg[1])) 
+			if (BMPFileFromEXT (Arg[2],Arg[1],1)) 
 				goto RtnTrue;
 			goto RtnFalse;
 		}

@@ -756,11 +756,11 @@ HDIB32  CopyBMP32 (HDIB32 hBitmap,DWORD left,DWORD right, DWORD top, DWORD botto
 	return (HDIB32)st;
 }	
 
-DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile) 
+DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile,double factor) 
 {
 	DWORD	st;
 
-   		st = GMFIBMPFileFromEXT (ImageFile,BMPFile);
+   		st = GMFIBMPFileFromEXT (ImageFile,BMPFile,factor);
    		return st;
 	
 }
