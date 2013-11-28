@@ -16812,6 +16812,9 @@ GSSiExitProg (1280);
 			SendDlgItemMessage (hWndDlg,IDC_GRIDNAME,CB_ADDSTRING,0,(LPARAM)"LatLon");
 			SendDlgItemMessage (hWndDlg,IDC_GRIDNAME,CB_ADDSTRING,0,(LPARAM)"GoogleMaps");
 			SendDlgItemMessage (hWndDlg,IDC_GRIDNAME,CB_SETCURSEL,CurTheme->GridID,0); 
+			SendDlgItemMessage(hWndDlg, IDC_DISPLAYGRIDTEXT, BM_SETCHECK, CurTheme->ShowValue, 0L);
+			SetDlgItemText(hWndDlg, IDC_GRIDTEXT, CurTheme->DataDisplayMacro);
+
 			SetViewport (CurTheme->TargetViewport);   
 			iZoom = GetGoogleZoomForSCale (CurView->Scale);
 			SetDlgItemInt (hWndDlg,IDC_ZOOMLEV,iZoom,TRUE);
@@ -16841,6 +16844,8 @@ GSSiExitProg (1280);
 
 			    CurTheme->GridID = SendDlgItemMessage(hWndDlg,IDC_GRIDNAME,CB_GETCURSEL,0,0); 
 				CurTheme->GridZoom = GetDlgItemInt (hWndDlg,IDC_ZOOMLEV,&err,FALSE);
+				CurTheme->ShowValue = SendDlgItemMessage(hWndDlg, IDC_DISPLAYGRIDTEXT, BM_GETCHECK, 0, 0);
+				GetDlgItemText(hWndDlg, IDC_GRIDTEXT, CurTheme->DataDisplayMacro,sizeof(CurTheme->DataDisplayMacro)-1);
 
                	EndDialog(hWndDlg, TRUE);
             }

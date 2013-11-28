@@ -11438,6 +11438,18 @@ GSSiExitProg (391);
 #endif
 }
 
+void CenterRectOnPoint(LPRECT pRect, POINT center)
+{
+	RECT outRect;
+
+	outRect.left = center.x - RECTWIDTH(pRect) / 2;
+	outRect.right = center.x + RECTWIDTH(pRect) / 2;
+	outRect.top = center.y - RECTHEIGHT (pRect) / 2;
+	outRect.bottom = center.y + RECTHEIGHT(pRect) / 2;
+	*pRect = outRect;
+	return;
+}
+
 POINT RectMid (LPRECT rect)
 #if ENABLETRACE
 {GSSiEnterProg (396);

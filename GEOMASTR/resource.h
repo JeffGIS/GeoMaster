@@ -1117,6 +1117,7 @@
 #define IDC_VOTER_CAMPDONOR             822
 #define IDC_CHECK4                      822
 #define IDC_VHCONNECT                   822
+#define IDC_DISPLAYGRIDTEXT             822
 #define IDC_SAVEZOOM                    823
 #define IDC_VOTER_FECDONOR              823
 #define IDC_VPCOPY                      824
@@ -3217,6 +3218,7 @@
 #define IDB_MACROSTACK                  2201
 #define IDC_CUSTOM1                     2202
 #define IDC_FILEVIEW                    2203
+#define IDC_GRIDTEXT                    2204
 #define IDC_ALTF11                      2205
 #define IDC_ALTF1NAME11                 2206
 #define IDC_ALTF12                      2208
@@ -3562,7 +3564,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1234
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2204
+#define _APS_NEXT_CONTROL_VALUE         2205
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

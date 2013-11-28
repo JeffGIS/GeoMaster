@@ -531,6 +531,7 @@ int  DisplayBMInRect32_2 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect,D
 BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ);
 BOOL DisplaySIDInVP32 (LPVIEWPORT pVP,LPSTR BMFile);
 //BOOL CheckBoardBMInRect (HDC hDC,LPSTR ImageFile1, LPSTR ImageFile2,RECT Rect, BOOL MaintainAspect);
+void CenterRectOnPoint(LPRECT pRect,POINT center);
 POINT RectMid (LPRECT rect);
 DPOINT RectMidD (LPRECT rect);
 void ComputeBMLoc (RECT Rect,LPBITMAPINFO pDibInfo,short MaintainAspect);  
