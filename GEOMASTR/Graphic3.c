@@ -3142,25 +3142,19 @@ HANDLE OpenMapIndex (LPSTR Name,LPMNMXCORD pIndexBounds)
     MNMXCORD    TestBounds;
 	MNMXCORD	FileBounds;
     char        File[MAX_PATH], drive[8], dir[MAX_PATH], leaf[40], IndexRes[16]; 
+	char		inName[MAX_PATH];
     short	SaveUnits;
 
     strcpy (ImageExtension,".gci");
     _fstrcpy (File,Name);
     ExpandText (File);
-    _splitpath (File,drive,dir,leaf,0); 
+Start:
+	strcpy(inName, File);
+	_splitpath(File, drive, dir, leaf, 0);
     if (!_fstrnicmp (leaf,"index",5))
     	_fstrcpy (IndexRes,&leaf[5]);
     else
     	IndexRes[0]=0;
-Start:
-    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_READ);
-    if (FidIndex == HFILE_ERROR)
-{
-#if ENABLETRACE
-GSSiExitProg (61);
-#endif
-        return(0);                                                
-}
     UseDGNColors = TRUE;
     SetGlobalValue ("%WANTPASS","");
     SetGlobalValue ("%INDEXRES",IndexRes);
@@ -3195,6 +3189,22 @@ GSSiExitProg (61);
 	    	GSSiClose (FidZM);
 	    } 
 	}
+	//The [%ORTHORES] value may have changed
+	_fstrcpy(File, Name);
+	ExpandText(File);
+	if (stricmp(File, inName))
+	{
+		goto Start;
+	}
+	FidIndex = GSSiOpenFile(Name, (LPOFSTRUCT)&OFStruct, OF_READ);
+	if (FidIndex == HFILE_ERROR)
+	{
+#if ENABLETRACE
+		GSSiExitProg(61);
+#endif
+		return(0);
+	}
+
     EndOffset = GSSillseek(FidIndex,(LONG)-(6),2);
     BigRead (FidIndex,(HPSTR)&Signature,4);
     BigRead (FidIndex,(HPSTR)&Version,2);
@@ -3202,7 +3212,7 @@ GSSiExitProg (61);
     {    
         GSSiClose (FidIndex); 
         ContinueProcessing=FALSE;
-        GSSiMessageBox("This is not a valid index file",OFStruct.szPathName, MB_OK,0);
+        GSSiMessageBox("This is not a valid index file",File, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (61);
