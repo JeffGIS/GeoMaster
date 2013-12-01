@@ -74,6 +74,8 @@
 #define GSSi_DimMenu 0x5117
 #define GSSI_GPS	0x5118
 
+#define GSSI_GMEDITCOMPLETE 0x5119
+
 
 #define MK_DIGITIZER_BUTTON	    0x0020
 
@@ -240,7 +242,8 @@ BOOL GSSiChangeLength (HFILE Fid,long NewLength);
 void CreateFidSmall (void);
 void CloseFidSmall (void);
 BOOL GMEdit (HWND hWnd,LPSTR file);
-BOOL EditTextFile (HWND hWnd,LPSTR Name);
+void GMEditReturn(void);
+BOOL EditTextFile(HWND hWnd, LPSTR Name);
 void CloseVars (void);
 void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
 void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);

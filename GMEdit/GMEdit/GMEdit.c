@@ -65,6 +65,7 @@ static	int		insertLine;
 static	BOOL	setToFind = FALSE;
 static	BOOL	standAlone = FALSE;
 static	char	currentBreakpoint[32]={0};
+static  HWND	hWndGMEditReturn = 0;
 
 
 static HANDLE hFunDefDB=0;
@@ -130,9 +131,17 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	MSG msg;
 	HACCEL hAccelTable;
 	SIZE size;
-	LPSTR pFile = strstr (lpCmdLine,"/GMEdit ");
-//createFunIDFile ();
+	LPSTR pFile = strstr(lpCmdLine, "/GMEdit ");
+	LPSTR pWnd = strstr(lpCmdLine, "/W ");
+	//createFunIDFile ();
 
+	//MessageBox(0, lpCmdLine, 0, MB_OK);
+	if (pWnd)
+	{
+		*pWnd = 0;
+		pWnd += 3;
+		hWndGMEditReturn = (HWND)atoi(pWnd);
+	}
 	if (pFile)
 	{
 		LPSTR pFS;
@@ -176,7 +185,13 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	}
 
 	GSSiGlobFree (&hFile);
-	return (int) msg.wParam;
+	if (hWndGMEditReturn)
+	{
+		//sprintf(str, "send %ld to %ld", GSSI_GMEDITCOMPLETE, (DWORD)hWndGMEditReturn);
+		//MessageBox(0, str, 0, MB_OK);
+		PostMessage(hWndGMEditReturn, GSSI_GMEDITCOMPLETE, 0, 0);
+	}
+	return (int)msg.wParam;
 }
 
 

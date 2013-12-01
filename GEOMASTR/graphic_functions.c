@@ -8001,11 +8001,14 @@ BOOL EditPickMacro (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 
 			GetPMName(CurView->PickMacroFile,PMFile);
 		    GMEdit (hWndMain,PMFile);
-			PostMessage(hWnd, GF_CLOSE,0, 0L); 
         }
        	break;
 
-    default:
+	case GSSI_GMEDITCOMPLETE:
+		PostMessage(hWnd, GF_CLOSE, 0, 0L);
+		break;
+
+	default:
 {
 #if ENABLETRACE
 GSSiExitProg (749);

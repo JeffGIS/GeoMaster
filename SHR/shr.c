@@ -11775,12 +11775,19 @@ GSSiExitProg (413);
 #endif
 }
 
+void GMEditReturn(void)
+{
+	EscapeFunction(FALSE);
+	return;
+}
+
 BOOL GMEdit (HWND hWnd, LPSTR File)
 {
 	BOOL rtn=TRUE;
 	char str[MAX_PATH+32];
 
-	sprintf (str,"$SESSION(CREATE,GMEdit /GMEdit %s)",File);
+	CloseAllRequestedFiles(FALSE);
+	sprintf (str,"$SESSION(CREATE,GMEdit /GMEdit %s /W %ld)",File,(DWORD)hWnd);
 	ProcessText (str);
 	return rtn;
 }
