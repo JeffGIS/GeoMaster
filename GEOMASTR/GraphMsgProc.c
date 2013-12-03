@@ -1590,7 +1590,7 @@ BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	static	POINT	CursorLoc;  
 	HANDLE	hStr;
 	LPSTR	lpStr, pGCmd;  
-	char	str[260];   
+	char	str[260], curName[64];   
 	long	CurLoc;   
 	BOOL	First;  
 	OFSTRUCT	OFStruct;  
@@ -1661,8 +1661,23 @@ GSSiExitProg (449);
 		 y = rect.bottom - (rect.bottom - rect.top) / 2;
 		 SetCursorPos (x,y);   
          LoadFunctionLists (hWndDlg,0,0,1);
-         
-LoadFile:
+ LoadFile:
+		 _splitpath(CurView->FunctionFile, 0, 0, curName, 0);
+		 Choice = 0;
+		 while (SendDlgItemMessage(hWndDlg, FUNCTION_LIST_LB, LB_GETTEXT, Choice++, (DWORD)str) != LB_ERR)
+		 {
+			 lpTab = _fstrchr(str, '\t');
+			 if (!lpTab)
+				 break;
+			 *lpTab++ = 0;
+			 if (!stricmp(lpTab, curName))
+			 {
+				 SetDlgItemText(hWndDlg, IDC_LISTNAME, str);
+				 SendDlgItemMessage(hWndDlg, FUNCTION_LIST_LB, LB_SETTOPINDEX, --Choice,0);
+				 break;
+			 }
+		 }
+
 	     SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_RESETCONTENT,0,0); 
 	     LoadGFFile (hWndDlg,"",1,FALSE);
 		 if (Init)
@@ -1683,6 +1698,11 @@ LoadFile:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
+
+	case GSSI_GMEDITCOMPLETE:
+		GMEditReturn();
+		goto LoadFile;
+		break;
 
     case WM_COMMAND:
          switch(LOWORD(wParam))
@@ -1733,7 +1753,8 @@ LoadFile:
 							  lpTab = _fstrchr(str,'\t');
 							  if (!lpTab)
 							  	break;
-							  lpTab++;
+							  *lpTab++ = 0;
+							  SetDlgItemText(hWndDlg, IDC_LISTNAME, str);
 							  GetGFFile (CurView->FunctionFile,lpTab,0);  
 							  if (HIWORD(wParam)==CBN_SELCHANGE)
 							  	goto LoadFile;
