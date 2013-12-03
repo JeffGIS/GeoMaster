@@ -1350,7 +1350,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
                 MessageBox( GetFocus(),File, "Unable to open ortho bitmap", MB_OK);
                 goto Exit;
             }
-            if (_fstrstr (File,".tif")) 
+			if (!UseFreeImage && _fstrstr(File, ".tif"))
             {   
             	short	NumStrips;
             	

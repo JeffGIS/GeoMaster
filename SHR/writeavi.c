@@ -455,7 +455,10 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 	short	lhead; 
 	OFSTRUCT	OFStruct; 
 	DWORD	CompressorID=mmioFOURCC('M', 'S', 'V', 'C');
-	 
+
+
+
+
 	*NewDIB = 0;
 	_fstrcpy (Name,File);
 	ExpandText (Name);   
@@ -560,13 +563,18 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 		{   
 			HANDLE	hMess=GSSiGlobAlloc ( 377,GMEM_MOVEABLE,256);
 			LPSTR	pMess=GlobalLock (hMess);
-			
-			sprintf (pMess,"%s:%ld",File,frame);        
-			AppendFile ("[%DL]abends\\ortherr.txt",pMess);
-			GSSiMessageBox (pMess,"Error in Ortho File",MB_ICONEXCLAMATION,0);
-			GSSiGlobUlFree (&hMess); 
-			ContinueProcessing = FALSE;
-			return FALSE;           
+			static  BOOL showMessage = TRUE;
+
+			if (showMessage)
+			{
+				sprintf (pMess,"%s:%ld",File,frame);        
+				AppendFile ("[%DL]abends\\ortherr.txt",pMess);
+				if (GSSiMessageBox(pMess, "Error in Ortho File", MB_OKCANCEL, 0) == IDCANCEL)
+					showMessage = FALSE;
+				GSSiGlobUlFree (&hMess); 
+				ContinueProcessing = FALSE;
+			}
+			return FALSE;
 		}
 		hCompressedData = GSSiGlobAlloc ( 378,GMEM_MOVEABLE,lRec+1024);
 		lpbiHeadIn = (LPBIHEADER)GlobalLock (hCompressedData);
