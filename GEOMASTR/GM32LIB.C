@@ -1501,6 +1501,34 @@ BOOL URLToFile (LPSTR URL,LPSTR File)
    	return rc;
 } 
 
+LPSTR requestFromURL(LPSTR url)
+{
+	char tempFile[MAX_PATH];
+	LPSTR	pFile = 0;
+
+	GSSiGetTempFileName(0, "gmt", 0, tempFile);
+	if (URLToFile(url, tempFile))
+	{
+		int	lFile = GSSiLength(tempFile);
+
+		if (lFile > 0)
+		{
+			OFSTRUCT OFStruct;
+			HFILE	Fid = OpenFile(tempFile, &OFStruct, OF_READ);
+
+			if (Fid != HFILE_ERROR)
+			{
+				pFile = malloc(lFile + 1);
+				_lread(Fid, pFile, lFile);
+				pFile[lFile] = 0;
+				_lclose(Fid);
+			}
+		}
+	}
+	remove(tempFile);
+	return pFile;
+}
+
 /*BOOL GetLastFileWriteTime (LPSTR File,LPDWORD pLowTime,LPDWORD pHighTime,LPDWORD pTimeDiff)
 {
 	MYPROC	Proc;  

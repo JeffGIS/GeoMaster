@@ -486,7 +486,7 @@ GSSiExitProg (1350);
 								{	
 									GSSiGlobUlFree (&hTemp);
 					              	ZoomToPointAndDist (CLocPoint,LocationOffset,FALSE);
-									ExecutePointLocationMacro (CLocPoint);
+									ExecutePointLocationMacro (CLocPoint,0);
 					              	goto RtnTrue;
 					            }
 					        }   
@@ -511,7 +511,7 @@ GSSiExitProg (1350);
 		            if (nRc)
 		            {
 		              	ZoomToPointAndDist (CLocPoint,LocationOffset,FALSE);
-						ExecutePointLocationMacro (CLocPoint);
+						ExecutePointLocationMacro (CLocPoint,0);
 		              	goto RtnTrue;
 		            }   
 		            else
@@ -3039,6 +3039,14 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		}
 		
+		case 1037: // $WAITFORKEY(useGetMessage)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			*OutLoc = WaitForKeystroke(atob(Arg[1]));
+			OutLoc[1] = 0;
+			goto Rtnl;
+		}
+
 		case 1101: //$DUMPGLOBALS(pathname)
 			dumpvars (Args);
           	goto RtnTrue;  
@@ -4879,29 +4887,48 @@ GSSiExitProg (1350);
         case 1503: //$GETADDRESSCOORD (House,Street,City,ZIP,OUTVARNAME,outmacro)
 		{   
 			 
-			nArgs = GetFunArgs (Args,Arg,-6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,-9,&hMem); 
 			if (!nArgs)
 			{
 				rtn = AddressLocation1 (CurView->hWnd,hInst,IDM_L_NET_ADDRESS);
 				if (rtn)
-					ExecutePointLocationMacro (UserSpecifiedBasePoint);
+					ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
 			}
-			else if (!stricmp (Arg[1],"MAPQUEST"))
+			else if (!stricmp(Arg[1], "MAPQUEST"))
 			{
 				DPOINT	Point;
 				int	rtn;
 				char	Quality[32];
-				
-				ExpandText (Arg[2]);
-				ExpandText (Arg[3]); 
-				rtn = atoi (Arg[3]);
+
+				ExpandText(Arg[2]);
+				ExpandText(Arg[3]);
+				rtn = atoi(Arg[3]);
 				if (!rtn)
 					rtn = 3;
-				if ((rtn=GetMapQuestLocation (Arg[2],Quality,&CurrentPoint,rtn)))
+				if ((rtn = GetMapQuestLocation(Arg[2], Quality, &CurrentPoint, rtn)))
 				{
-					ExecutePointLocationMacro (CurrentPoint);
+					ExecutePointLocationMacro(CurrentPoint,0);
 				}
-				itoa (rtn,OutLoc,10);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "GOOGLE"))
+			{
+				DPOINT	Point;
+				BOOL	haveVPPoints;
+				DPOINT	vpPoints[2];
+				char	Quality[32];
+
+				ExpandText(Arg[2]);
+				ExpandText(Arg[3]);
+				rtn = atoi(Arg[3]);
+				if (!rtn)
+					rtn = 3;
+				if ((rtn = GetGoogleLocation(Arg[2],1,Arg[7],&CurrentPoint,&haveVPPoints,vpPoints,Arg[8],Arg[9])))
+				{
+					ExecutePointLocationMacro(CurrentPoint,Arg[7]);
+				}
+				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
 			else
@@ -5385,7 +5412,7 @@ GSSiExitProg (1350);
 				rtn = DialogBox(hInst, (LPSTR)"LOC_INTERSECT", CurView->hWnd, lpfnLOC_INTERSECTMsgProc);
 				FreeProcInstance(lpfnLOC_INTERSECTMsgProc);  
 				if (rtn)
-					ExecutePointLocationMacro (UserSpecifiedBasePoint);
+					ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
 			}
 			else
 			{

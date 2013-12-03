@@ -1979,7 +1979,7 @@ GSSiExitProg (977);
 #endif
 }
 
-BOOL ExecutePointLocationMacro (DPOINT DPoint)
+BOOL ExecutePointLocationMacro (DPOINT DPoint,LPSTR locatedTo)
 #if ENABLETRACE
 {GSSiEnterProg (978);
 #endif

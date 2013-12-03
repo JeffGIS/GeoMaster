@@ -1,12 +1,53 @@
 #include "graphint.h"
 #include "extrndb.h" 
 #include "std.h"  
-
+#include "jansson.h"
+#include "curl\curl.h"
 #include "gmextern.h"   
 
 static	double	IntersectionAverageDist=10;
 static HANDLE	hNames;
 static HANDLE	hCurStreets=0;
+
+
+#define BUFFER_SIZE  (256 * 1024)  /* 256 KB */
+
+#define URL_FORMAT   "http://github.com/api/v2/json/commits/list/%s/%s/master"
+#define URL_SIZE     256
+
+/* Return the offset of the first newline in text or the length of
+text if there's no newline */
+static int newline_offset(const char *text)
+{
+	const char *newline = strchr(text, '\n');
+	if (!newline)
+		return strlen(text);
+	else
+		return (int)(newline - text);
+}
+
+struct write_result
+{
+	char *data;
+	int pos;
+};
+
+static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+	struct write_result *result = (struct write_result *)stream;
+
+	if (result->pos + size * nmemb >= BUFFER_SIZE - 1)
+	{
+		fprintf(stderr, "error: too small buffer\n");
+		return 0;
+	}
+
+	memcpy(result->data + result->pos, ptr, size * nmemb);
+	result->pos += size * nmemb;
+
+	return size * nmemb;
+}
+
 
 void DisplayCurStreets (BOOL Clear,int Flash)
 {
@@ -3827,76 +3868,76 @@ short GetNameTypeList (short Type,LPSHORT nList,HANDLE hList,
 	return nAdded;
 }
 
-int GetMapQuestLocation (LPSTR FullAddressIN,LPSTR Quality,LPDPOINT pPoint,int MaxAcceptableQuality)
+int GetMapQuestLocation(LPSTR FullAddressIN, LPSTR Quality, LPDPOINT pPoint, int MaxAcceptableQuality)
 {
-	int		rtn=0;
-	char	CMD[512]="http://www.mapquestapi.com/geocoding/v1/address?key=Fmjtd%7Cluu72q01nq%2Crl%3Do5-5yb20&callback=renderOptions&inFormat=kvp&outFormat=json&location=";
+	int		rtn = 0;
+	char	CMD[512] = "http://www.mapquestapi.com/geocoding/v1/address?key=Fmjtd%7Cluu72q01nq%2Crl%3Do5-5yb20&callback=renderOptions&inFormat=kvp&outFormat=json&location=";
 	char	TempFile[MAX_PATH], FullAddress[256];
 
-	strcpy (FullAddress,FullAddressIN);
-	REPLAC (FullAddress,"&","AND",256);
-	REPLAC (FullAddress,"/"," AND ",256);
-	strcat (CMD,FullAddress);
-   	GSSiGetTempFileName (0,"gmt",0,TempFile);  
-	if (URLToFile (CMD,TempFile))
+	strcpy(FullAddress, FullAddressIN);
+	REPLAC(FullAddress, "&", "AND", 256);
+	REPLAC(FullAddress, "/", " AND ", 256);
+	strcat(CMD, FullAddress);
+	GSSiGetTempFileName(0, "gmt", 0, TempFile);
+	if (URLToFile(CMD, TempFile))
 	{
-		int	lFile = GSSiLength (TempFile);
+		int	lFile = GSSiLength(TempFile);
 
 		if (lFile > 0)
 		{
-			HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFile);
-			LPSTR	pFile = GlobalLock (hMem);
-			HFILE	Fid = GSSiOpenFile (TempFile,0,OF_READ);
-			DPOINT	LatLng={0,0};
+			HANDLE	hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, lFile);
+			LPSTR	pFile = GlobalLock(hMem);
+			HFILE	Fid = GSSiOpenFile(TempFile, 0, OF_READ);
+			DPOINT	LatLng = { 0, 0 };
 
 			if (Fid != HFILE_ERROR)
 			{
 				LPSTR	ql, pEnd, plat, plng;
 
-				BigRead (Fid,pFile,lFile);
-				GSSiClose (Fid);
-				ql = strstr (pFile,"\"geocodeQuality\":\"");
+				BigRead(Fid, pFile, lFile);
+				GSSiClose(Fid);
+				ql = strstr(pFile, "\"geocodeQuality\":\"");
 				if (ql)
 				{
 					ql += 18;
-					pEnd = strchr (ql,'"');
+					pEnd = strchr(ql, '"');
 					if (pEnd)
 					{
 						*pEnd = 0;
-						strcpy (Quality,ql);
-						if (!stricmp (Quality,"ADDRESS"))
+						strcpy(Quality, ql);
+						if (!stricmp(Quality, "ADDRESS"))
 							rtn = 1;
-						else if (!stricmp (Quality,"INTERSECTION"))
+						else if (!stricmp(Quality, "INTERSECTION"))
 							rtn = 2;
-						else if (!stricmp (Quality,"POINT"))
+						else if (!stricmp(Quality, "POINT"))
 							rtn = 3;
-						else if (!stricmp (Quality,"STREET"))
+						else if (!stricmp(Quality, "STREET"))
 							rtn = 4;
 						if (rtn && rtn <= MaxAcceptableQuality)
 						{
-							plat = strstr (pFile,"\"lat\":");
-							plng = strstr (pFile,"\"lng\":");
+							plat = strstr(pFile, "\"lat\":");
+							plng = strstr(pFile, "\"lng\":");
 							if (plat)
 							{
-								if ((pEnd = strchr (plat,',')))
+								if ((pEnd = strchr(plat, ',')))
 								{
 									*pEnd++ = 0;
 									plat += 6;
-									LatLng.y = atof (plat);
+									LatLng.y = atof(plat);
 									if (plng)
 									{
-										plng+=6;
-										if ((pEnd = strchr (plng,'}')))
+										plng += 6;
+										if ((pEnd = strchr(plng, '}')))
 										{
 											*pEnd = 0;
-											LatLng.x = atof (plng);
+											LatLng.x = atof(plng);
 										}
 									}
 								}
 							}
 							if (LatLng.x != 0 && LatLng.y != 0)
 							{
-								if (!ConvertCoord (&LatLng,2,1))
+								if (!ConvertCoord(&LatLng, 2, 1))
 									*pPoint = LatLng;
 								else
 									rtn = 0;
@@ -3909,11 +3950,103 @@ int GetMapQuestLocation (LPSTR FullAddressIN,LPSTR Quality,LPDPOINT pPoint,int M
 					}
 				}
 			}
-			GSSiGlobUlFree (&hMem);
+			GSSiGlobUlFree(&hMem);
 		}
-		
+
 	}
-	GSSiRemove (TempFile);
+	GSSiRemove(TempFile);
+	return rtn;
+}
+
+static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoints, LPDPOINT pVPPoints, const char * formattedAddress,LPSTR locType,LPSTR types)
+{
+	unsigned int i;
+	char *text;
+	double latitude, longitude;
+
+	json_t *root;
+	json_error_t error;
+	json_t *status;
+	json_t *results;
+	const char * status_text;
+
+	*pHaveVPPoints = FALSE;
+	text = requestFromURL(url);
+	if (!text)
+		return -1;
+
+	root = json_loads(text, 0, &error);
+	free(text);
+
+	if (!root)
+	{
+		fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+		return -1;
+	}
+
+	status = json_object_get(root, "status");
+	status_text = json_string_value(status);
+	results = json_object_get(root, "results");
+	if (!json_is_array(results))
+	{
+		fprintf(stderr, "error: results is not an array\n");
+		return -1;
+	}
+
+	for (i = 0; i < json_array_size(results); i++)
+	{
+		json_t *result, *formatted_address, *message, *geometry, *location, *lat, *lng;
+		const char *message_text, *formattedadd;
+
+		result = json_array_get(results, i);
+		if (!json_is_object(result))
+		{
+			fprintf(stderr, "error: result %d is not an object\n", i + 1);
+			return -1;
+		}
+
+		formatted_address = json_object_get(result, "formatted_address");
+		if (!json_is_string(formatted_address))
+		{
+			fprintf(stderr, "error: formatted_address %d: id is not a string\n", i + 1);
+			return -1;
+		}
+
+		geometry = json_object_get(result, "geometry");
+		if (!json_is_object(geometry))
+		{
+			fprintf(stderr, "error: geometry %d: message is not an object\n", i + 1);
+			return -1;
+		}
+		location = json_object_get(geometry, "location");
+		lat = json_object_get(location, "lat");
+		lng = json_object_get(location, "lng");
+		pLocPoint->y = json_real_value(lat);
+		pLocPoint->x = json_real_value(lng);
+		formattedadd = json_string_value(formatted_address);
+		strcpy(formattedAddress, formattedadd);
+	}
+
+	json_decref(root);
+	return 1;
+}
+
+
+int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch,LPSTR formattedAddress, LPDPOINT pLocPoint, LPBOOL pHaveVPPoints,LPDPOINT pVPPoints,LPSTR locType,LPSTR types)
+//returns num matches found, -1 if request fails, -2 if unable to convert coord.
+{
+	int		rtn = 0;
+	char	CMD[512], fmt[] = "http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true";
+	char	TempFile[MAX_PATH], FullAddress[256];
+
+	strcpy(FullAddress, FullAddressIN);
+	REPLAC(FullAddress, "&", "AND", 256);
+	REPLAC(FullAddress, "/", " AND ", 256);
+	REPLAC(FullAddress, " ", "+", 256);
+	sprintf (CMD,fmt, FullAddress);
+	rtn = decodeGoogleLocation(CMD, pLocPoint, pHaveVPPoints,pVPPoints, formattedAddress,locType,types);
+	if (ConvertCoord(pLocPoint, 2, 1))
+		rtn = -2;
 	return rtn;
 }
 

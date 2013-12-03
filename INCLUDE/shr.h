@@ -1152,6 +1152,7 @@ BOOL GetTXTUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName,short FieldLen
 BOOL GetDBUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName, LPHANDLE phDBList);
 DWORD SendEMail (LPSTR cmd);
 BOOL URLToFile (LPSTR URL,LPSTR File);
+LPSTR requestFromURL(LPSTR url);
 
   void CNGRNT(const double *BX1,const double *BY1,const double *EX1,const double *EY1,
                     const double *BX2,const double *BY2,const double *EX2,const double *EY2,
