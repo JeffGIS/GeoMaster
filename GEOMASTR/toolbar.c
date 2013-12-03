@@ -3184,6 +3184,7 @@ int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int ir
 	RECT	Rect;
 	int		w,h;
 	static	int	firstRowH;
+	static	BOOL	display=FALSE;
 
 	if (!GetObject(*hBM, sizeof(bm), (LPSTR)&bm))
 		return 0;
@@ -3207,10 +3208,10 @@ int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int ir
 	{
 		FirstButtonBitmapHeight[ToolbarID] = bm.bmHeight;
 		firstRowH = bm.bmHeight+4;
-		MoveWindow(hWndBtn,ix+1,2,bm.bmWidth,bm.bmHeight,FALSE);
+		MoveWindow(hWndBtn,ix+1,2,bm.bmWidth,bm.bmHeight,display);
 	}
 	else
-		MoveWindow(hWndBtn,ix+1,firstRowH+2+(irow-1)*(bm.bmHeight+4),bm.bmWidth,bm.bmHeight,FALSE);
+		MoveWindow(hWndBtn,ix+1,firstRowH+2+(irow-1)*(bm.bmHeight+4),bm.bmWidth,bm.bmHeight,display);
 	//hWDP = DeferWindowPos (hWDP,hWndBtn,0,ix+1,irow*(bm.bmHeight+4),bm.bmWidth,bm.bmHeight,SWP_NOZORDER);
 	return ix + bm.bmWidth + 2;
 }
@@ -3499,7 +3500,7 @@ switch(Message)
 				DisplayMenuStatus[ToolbarID] = DMS_NOTDISPLAYED;
 			return DefWindowProc(hWndDlg, Message, wParam, lParam);
 		}
-
+		break;
 /*	case WM_SHOWWINDOW:
 		//PostMessage (hWndDlg,GSSi_DimMenu,0,0);
 		SetWindowPos (hWndDlg,HWND_NOTOPMOST,0,0,0,0,SWP_DRAWFRAME|SWP_SHOWWINDOW|SWP_NOSIZE|SWP_NOMOVE);
