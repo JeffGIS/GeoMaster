@@ -112,7 +112,8 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp (str,"PING",4)) return 428; 
 			if (!_fstrnicmp (str,"YEAR",4)) return 429; 
 			if (!_fstrnicmp (str,"GRID",4)) return 430; 
-			if (!_fstrnicmp (str,"DUMP",4)) return 431; 
+			if (!_fstrnicmp (str,"DUMP", 4)) return 431;
+			if (!_fstrnicmp (str,"RAND", 4)) return 432;
 			return 0;   
 }
 int	GetFunctionID5 (LPSTR str)
@@ -424,8 +425,9 @@ int	GetFunctionID10 (LPSTR str)
 			if (!_fstrnicmp (str,"CHECKPOINT",10)) return 1033; 
 			if (!_fstrnicmp (str,"PCTINAREAS",10)) return 1034; 
 			if (!_fstrnicmp (str,"PROJECTION",10)) return 1035; 
-			if (!_fstrnicmp (str,"BACKGROUND",10)) return 1036; 
-			return 0; 
+			if (!_fstrnicmp(str, "BACKGROUND", 10)) return 1036;
+			if (!_fstrnicmp(str, "WAITFORKEY", 10)) return 1037;
+			return 0;
 }
 int	GetFunctionID11 (LPSTR str)
 {

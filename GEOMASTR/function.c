@@ -3770,12 +3770,40 @@ SetVis:
 		case 431: //$DUMP(FILES)
 		{
 			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
-			if (nArgs < 0)
+			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp (Arg[1],"FILES"))
 				DumpOpenFiles (Arg[2]);
 		    goto RtnTrue;
 		}
+		case 432: //$RAND(INIT,seed,RANGEMIN,RANGEMAX)
+				  //$RAND()
+		{
+				// Generate random numbers in the half-closed interval
+				// [range_min, range_max). In other words,
+				// range_min <= random number < range_max
+				static int range_min=0, range_max=RAND_MAX;
+
+				nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+				if (!nArgs)
+				{
+					int u = (double)rand() / (RAND_MAX + 1) * (range_max - range_min)
+							+ range_min;
+					itoa(u, OutLoc, 10);
+
+				}
+				else
+				{
+					int seed = atoi(Arg[2]);
+					srand(seed);
+					range_min = atoi(Arg[3]);
+					range_max = atoi(Arg[4]);
+					*OutLoc = 0;
+				}
+				goto Rtnl;
+		}
+
+
 		default:
 			goto Rtn0;
 	}
