@@ -1058,8 +1058,9 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	{
 		isGMEdit = TRUE;
 		CreateBigMem ();
+		AllowCache = FALSE;
 		ProcessCommandLine ("");
-		return WinMainGMEdit(hInstance, hPrevInstance, lpszCmdLine, nCmdShow);
+		return WinMainGMEdit(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 	else
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
@@ -2277,7 +2278,11 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
     }
          break;  
     
-    case GSSI_GPSwnd: 
+	case GSSI_GMEDITCOMPLETE:
+		GMEditReturn();
+		break;
+
+	case GSSI_GPSwnd:
     	 GPSInputWnd = (HWND)lParam;
     	 break;
 
@@ -2911,7 +2916,6 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			case IDM_PROCESSTEXT:
 			{
 				 LPSTR pCmd;
-				 char	tmp[32];
 
 				 if (!lParam)
 				 {
