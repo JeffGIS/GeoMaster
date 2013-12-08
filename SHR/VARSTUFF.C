@@ -3659,9 +3659,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CONTOURDISPLAYORIGINAL",363,FALSE);
 	AllocateTypeVar("%MAXBMPCACHE",364,FALSE);
 	AllocateTypeVar("%WANTPNDATA",365,FALSE);
-	AllocateTypeVar("%TESTDL",366,FALSE);
-
-	
+	AllocateTypeVar("%TESTDL", 366, FALSE);
+	AllocateTypeVar("%WINDOWSVERSION", 367, FALSE);
 	
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4767,6 +4766,10 @@ GSSiExitProg (533);
 		case 366:
 			strcpy (OutStr,TestFileLocation);
 			break;
+		case 367:
+			GetWindowsVersion(OutStr);
+			break;
+
 	}
 	GlobalUnlock (hGlobal);
 {

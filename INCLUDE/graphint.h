@@ -1035,7 +1035,7 @@ BOOL SeeIfToolbarShouldBeDocked (HWND hWnd,LPPOINT pPos);
 int GetToolbarDockingStatus (int ToolbarID,LPINT pWidth);
 void SetToolbarDockingStatus (int ToolbarID,int Status,int Width);
 HWND DoCreateDialogTooltip(int ToolbarID) ;
-int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR Type,int Height,int nPerRow,LPSTR Pos,BOOL CheckForDocked,BOOL Float); 
+int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR Type,int Height,int nPerRow,LPSTR Pos,BOOL CheckForDocked,BOOL Float,LPDPOINT pCenterPoint,double scale); 
 int AddButtonToToolbar (HWND hWndDlg,LPSTR BMPath,LPSTR ButtonText,int filepos,LPINT piButton);
 int AddButtonToCMDMenu (HWND hWndDlg,LPSTR BMPath,LPSTR ButtonText,int filepos);
 void DisplayAllToolbars (int Opt);

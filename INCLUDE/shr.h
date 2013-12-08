@@ -1300,6 +1300,7 @@ void RemoveFromMacroStack (int macroID);
 void AtBreakPoint (LPSTR Args);
 void SetDebug (BOOL state);
 BOOL GetDebug (void);
+void GetWindowsVersion(LPSTR Ver);
 
 
 

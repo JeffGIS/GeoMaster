@@ -4100,7 +4100,7 @@ HWND VisibilityControl (HWND hWnd,HWND hInst,LPSTR ConnectToVP,LPRECT pRect,doub
 	}
 	if (!hWndMenu)
 		return FALSE;
-	ToolbarID = LoadToolbar (hWndMenu,"","VIS",0,1,"0 0",CheckForDock,pWMH->Float);
+	ToolbarID = LoadToolbar (hWndMenu,"","VIS",0,1,"0 0",CheckForDock,pWMH->Float,0,0);
 	SetToolbarDockingStatus (ToolbarID,pWMH->isDocked,pWMH->dockWidth);
 	if (!pWMH->Factor)
 		pWMH->Factor = 1;

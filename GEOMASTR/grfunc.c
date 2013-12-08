@@ -1104,7 +1104,7 @@ GSSiExitProg (1347);
 	if (opt == 3)
 	{
 		_splitpath (lpStr,0,0,Title,0);
-		SetWindowText (hWndDlg,Title);
+		SetGlobalValue("[%MENUTITLE]", Title);
 	}
 	CurLoc = 0;
 	if (opt == 3 && !FloatingTB)
@@ -1233,11 +1233,15 @@ GSSiExitProg (1347);
 						LPSTR	lpBM;
 
 						GetGlobalCVal ("[%ICONLIB]",BMPath,"[%DL]icons");
+						Truncate(BMPath); // allows BMPath to be ' ' so full pathname can be entered after &
 						if ((lpBM = strrchr (Title,'&')))
 						{
 							*lpBM++ = 0;
-							sprintf (strchr (BMPath,0),"\\%s",lpBM);
-							AddButtonToToolbar (hWndDlg,BMPath,Title,CurLoc,&iButton);
+							if (*BMPath)
+								sprintf(strchr(BMPath, 0), "\\%s", lpBM);
+							else
+								sprintf(strchr(BMPath, 0), "%s", lpBM);
+							AddButtonToToolbar(hWndDlg, BMPath, Title, CurLoc, &iButton);
 						}
 					}
 					break;
@@ -1269,6 +1273,12 @@ Exit:
 		CurTheme->NumClass = CurTheme->NumDesiredClass;	
 	GSSiClose (Fid);
 	GSSiGlobUlFree (&hStr);
+	if (opt == 3)
+	{
+		GetGlobalCVal("[%MENUTITLE]", Title, 0);
+		SetWindowText(hWndDlg, Title);
+	}
+
 			 
 {
 #if ENABLETRACE

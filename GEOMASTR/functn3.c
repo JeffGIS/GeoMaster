@@ -6067,14 +6067,18 @@ HaveVP:;
 			}
 			goto Rtnrtn;
 		}
-		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos)
+		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos,DPoint,Scale)
 				  //$TOOLBAR(LOAD,DOCK,Pathname,
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
 			if (nArgs < 2)
 				goto RtnFalse;
-			if (!stricmp (Arg[1],"LOAD"))
-				rtn = LoadToolbar (CurView->hWnd,Arg[3],Arg[2],atoi(Arg[4]),atoi(Arg[5]),Arg[6],TRUE,FALSE); 
+			if (!stricmp(Arg[1], "LOAD"))
+			{
+				Point = atopt(Arg[7], &Err);
+				RVal = atof(Arg[8]);
 
+				rtn = LoadToolbar(CurView->hWnd, Arg[3], Arg[2], atoi(Arg[4]), atoi(Arg[5]), Arg[6], TRUE, FALSE,&Point,RVal);
+			}
 			goto Rtnrtn;
 		case 774: //$NETWORK(FALSEINT,STREETLIST
 				  //$NETWORK(FALSEINT,LOAD
