@@ -25545,7 +25545,6 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_ADDSTRING,0,(LPARAM)str);
 	                SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_ADDSTRING,0,(LPARAM)lpStr);
                  }
-                 GlobalUnlock (hMem);
                  GSSiGlobUlFree (&hMem);
                  break;
             }    

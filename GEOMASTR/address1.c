@@ -3963,6 +3963,7 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 	unsigned int i;
 	char *text;
 	double latitude, longitude;
+	int rtn = -1, nResults = 0;
 
 	json_t *root;
 	json_error_t error;
@@ -3990,7 +3991,7 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 	if (!json_is_array(results))
 	{
 		fprintf(stderr, "error: results is not an array\n");
-		return -1;
+		goto Exit;
 	}
 
 	for (i = 0; i < json_array_size(results); i++)
@@ -4002,21 +4003,21 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 		if (!json_is_object(result))
 		{
 			fprintf(stderr, "error: result %d is not an object\n", i + 1);
-			return -1;
+			goto Exit;
 		}
 
 		formatted_address = json_object_get(result, "formatted_address");
 		if (!json_is_string(formatted_address))
 		{
 			fprintf(stderr, "error: formatted_address %d: id is not a string\n", i + 1);
-			return -1;
+			goto Exit;
 		}
 
 		geometry = json_object_get(result, "geometry");
 		if (!json_is_object(geometry))
 		{
 			fprintf(stderr, "error: geometry %d: message is not an object\n", i + 1);
-			return -1;
+			goto Exit;
 		}
 		location = json_object_get(geometry, "location");
 		lat = json_object_get(location, "lat");
@@ -4025,10 +4026,12 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 		pLocPoint->x = json_real_value(lng);
 		formattedadd = json_string_value(formatted_address);
 		strcpy(formattedAddress, formattedadd);
+		nResults++;
 	}
-
+	rtn = nResults;
+Exit:
 	json_decref(root);
-	return 1;
+	return rtn;
 }
 
 

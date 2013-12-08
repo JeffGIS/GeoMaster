@@ -1505,9 +1505,17 @@ LPSTR requestFromURL(LPSTR url)
 {
 	char tempFile[MAX_PATH];
 	LPSTR	pFile = 0;
+	BOOL	doRemove = FALSE;
+	BOOL	readFromExistingFile = TRUE;
 
-	GSSiGetTempFileName(0, "gmt", 0, tempFile);
-	if (URLToFile(url, tempFile))
+	GetGlobalCVal("[%URLFILE]", tempFile, 0);
+	if (!*tempFile)
+	{
+		doRemove = TRUE;
+		readFromExistingFile = FALSE;
+		GSSiGetTempFileName(0, "gmt", 0, tempFile);
+	}
+	if (readFromExistingFile || URLToFile(url, tempFile))
 	{
 		int	lFile = GSSiLength(tempFile);
 
@@ -1525,7 +1533,8 @@ LPSTR requestFromURL(LPSTR url)
 			}
 		}
 	}
-	remove(tempFile);
+	if (doRemove)
+		remove(tempFile);
 	return pFile;
 }
 
