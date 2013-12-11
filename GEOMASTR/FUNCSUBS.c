@@ -248,6 +248,7 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			ProcessText (Arg[7]);
 		}
 		GSSiGlobUlFree (&hSTR);
+		BT_CLOSEANDDELETE(&hBT);
 	}
 	CloseDataFile (TRUE, &hDB);   
 	IgnoreSelectVP = FALSE;
