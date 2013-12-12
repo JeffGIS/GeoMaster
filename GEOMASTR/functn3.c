@@ -930,7 +930,7 @@ GotFile:
 		    }
 		    else
 	    		pFile = GlobalLock (hScreenFile);
-			if (OutputToFile (pFile,TRUE,Arg[1], Arg[2], 0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,0,0,0)) 
+			if (OutputToFile (pFile,TRUE,Arg[1], Arg[2], 0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,0,0,0,TRUE)) 
 			{
 	    		GlobalUnlock (hScreenFile);  
         		ShowGrid(hWndMain,Arg[5],Arg[6]);

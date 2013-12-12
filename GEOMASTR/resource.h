@@ -3223,6 +3223,7 @@
 #define IDC_COMMAND                     2205
 #define IDC_ALTF1NAME11                 2206
 #define IDC_LISTNAME                    2206
+#define IDC_TABDLM                      2207
 #define IDC_ALTF12                      2208
 #define IDC_ALTF1NAME12                 2209
 #define PRMT_HIGHLIGHT                  5035
@@ -3566,7 +3567,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1235
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2207
+#define _APS_NEXT_CONTROL_VALUE         2208
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

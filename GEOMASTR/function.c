@@ -1471,6 +1471,12 @@ SetVis:
 				if (GPSPassTo)
 					nRc = TRUE;
 			}
+			else if (!stricmp(Arg[1], "CURRENT"))
+			{
+				//GetGPSLocation(&Point.y, &Point.x);
+				dpointtoa(OutLoc,&Point);
+				goto Rtnl;
+			}
 			else
             {
 				lpfnGPSCONFIGMsgProc = MakeProcInstance((FARPROC)GPSCONFIGMsgProc, hInst);

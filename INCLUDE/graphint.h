@@ -879,7 +879,7 @@ BOOL ProcessInfoboxMacro (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 //void termAVI(void);
 long HighlightInArea (HWND hWnd,LPMNMXCORD pBounds,BOOL AddToList,BOOL DisplayNum,HANDLE hMask);  
 BOOL ContinuePickingInArea (BOOL Display);
-BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd);
+BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd,LPSTR outFile,BOOL tabDlm);
 void RedrawActiveFunctions(short Cmd); 
 BOOL CreatePoly (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
 BOOL RedefinePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,int Function);

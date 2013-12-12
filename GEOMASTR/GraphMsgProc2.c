@@ -1165,7 +1165,7 @@ BOOL FAR PASCAL HLTOUT_FORMATMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 	LPINT	lpItems;	
  	HFILE	Fid;
  	OFSTRUCT	OFStruct;  
- 	BOOL	False=FALSE;  
+ 	BOOL	False=FALSE, tabDlm;  
  	int		IDC_FieldName=IDC_FIELDS;
  	LPSTR	vbar; 
  	char	txt[128], txt2[128];
@@ -1329,8 +1329,7 @@ GSSiExitProg (444);
                	 	GSSiMsgBox( GetFocus(), "Error","No Fields Selected", MB_OK,0);
 				 	break;
 				 }  
-				 if (HLTOutFields)
-				 	GSSiGlobUlFree (&HLTOutFields);
+				 GSSiGlobFree (&HLTOutFields);
                  HLTOutFields = GSSiGlobAlloc (  23,GHND,nItems*4+4);
                  lpItems = (LPINT)GlobalLock(HLTOutFields);
 		         *lpItems = nItems;
@@ -1344,8 +1343,10 @@ GSSiExitProg (444);
                  GetDlgItemText(hWndDlg,IDC_SQL,HLTOutSQL,lnHLTOutSQL);
                  GetDlgItemText(hWndDlg,IDC_OUTPATH,HLTOutPath,128); 
 				 SetGlobalValue("%HLTOUTPUTFILE",HLTOutPath); 
+				 tabDlm = SendDlgItemMessage(hWndDlg, IDC_TABDLM, BM_GETCHECK, 0, 0);
+
 	             if (wParam == IDC_CREATE_OUTPUT)
-	           	 	 CreateHighlightOutput (hWndDlg,GetDlgItem(hWndDlg,IDC_STATUS));
+	           	 	 CreateHighlightOutput (hWndDlg,GetDlgItem(hWndDlg,IDC_STATUS),HLTOutPath,tabDlm);
 	             else
 	             {
             	 	Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);

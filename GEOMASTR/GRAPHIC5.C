@@ -368,7 +368,7 @@ GSSiExitProg (729);
 #endif
 }
 
-BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd)
+BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd,LPSTR outPath,BOOL tabDlm)
 #if ENABLETRACE
 {GSSiEnterProg (730);
 #endif
@@ -379,7 +379,7 @@ BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd)
 	BOOL	OutToScreen=FALSE;
 	
 	hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
-    GetGlobalCVal ("[%HLTOUTPUTFILE]",HLTOutPath,0);
+    GetGlobalCVal ("[%HLTOUTPUTFILE]",HLTOutPath,outPath);
     if (_fstricmp(HLTOutPath,"SCREEN")) 
     {
     	_fstrcpy(HLTOutPathScreen,HLTOutPath);  
@@ -403,7 +403,7 @@ BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd)
     switch (HLTOUTFormat)
     {
     	case 0:
-			nrecs = OutputToFile (HLTOutPathScreen,TRUE,HLTOutDataFile, HLTOutSQL, HLTOutFields,0,0,TRUE,FALSE,OutToScreen,FALSE,FALSE,0,StatusWnd,hWnd);
+			nrecs = OutputToFile (HLTOutPathScreen,TRUE,HLTOutDataFile, HLTOutSQL, HLTOutFields,0,0,TRUE,FALSE,OutToScreen,FALSE,FALSE,0,StatusWnd,hWnd,tabDlm);
 			break;
 		case 1:
 			nrecs = OutputHLTAreas (HLTOUTFormat,HLTOutPath);

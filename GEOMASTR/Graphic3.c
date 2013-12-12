@@ -2581,7 +2581,7 @@ Exit:
 	return NumFields;
 }
 
-long OutputToFile (LPSTR File, BOOL Create,LPSTR DBName,LPSTR pSQL, HANDLE hFieldsIN,HANDLE hKeyFields,HANDLE hFieldTypes,BOOL UseHLT,BOOL OutToScreen,int GMHeader,BOOL Compress,BOOL ScanForFieldTypes,long NumToScan,HWND StatusWnd,HWND hWndDlg)
+long OutputToFile (LPSTR File, BOOL Create,LPSTR DBName,LPSTR pSQL, HANDLE hFieldsIN,HANDLE hKeyFields,HANDLE hFieldTypes,BOOL UseHLT,BOOL OutToScreen,int GMHeader,BOOL Compress,BOOL ScanForFieldTypes,long NumToScan,HWND StatusWnd,HWND hWndDlg,BOOL tabDlm)
 #if ENABLETRACE
 {GSSiEnterProg (603);
 #endif
@@ -2608,7 +2608,6 @@ long OutputToFile (LPSTR File, BOOL Create,LPSTR DBName,LPSTR pSQL, HANDLE hFiel
     long	OriginalRecordNumber=0; 
 	BOOL	WantXML=GetGlobalBVal2 ("[%WANTXML]",TRUE);
 	char	dlm[4]=",";
-	BOOL	tabDlm=TRUE;
     
     HIGHLIGHTDATA   HighlightData;
     

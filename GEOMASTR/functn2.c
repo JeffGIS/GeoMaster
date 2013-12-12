@@ -1729,7 +1729,7 @@ GSSiExitProg (1350);
 		
 		case 913: // $HLTOUTPUT()
 		{	 
-			CreateHighlightOutput (0,0);
+			CreateHighlightOutput (0,0,0,0);
 			goto RtnTrue;
 		}
 		
@@ -1846,7 +1846,7 @@ GSSiExitProg (1350);
 				ScanForFieldTypes (Arg[3],&hFieldTypes,TRUE,atol(Arg[9]));
 			if (*Arg[2] == 'A' || *Arg[2] == 'a')
 				Create = FALSE;
-			rtn = OutputToFile (Arg[1],Create,Arg[3],Arg[4], hFields,hKeyFields,hFieldTypes,FALSE,FALSE,2,atob(Arg[7]),atob(Arg[8]),atol(Arg[9]),(HWND)1,hWndMain);
+			rtn = OutputToFile (Arg[1],Create,Arg[3],Arg[4], hFields,hKeyFields,hFieldTypes,FALSE,FALSE,2,atob(Arg[7]),atob(Arg[8]),atol(Arg[9]),(HWND)1,hWndMain,TRUE);
 			GSSiGlobFree (&hKeyFields);
 			GSSiGlobFree (&hFields);
 			GSSiGlobFree (&hFieldTypes);

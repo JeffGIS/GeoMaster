@@ -4248,7 +4248,7 @@ DisplayParcel:
             	 break;
             	 
             case IDM_HLT_OUT: 
-            	 CreateHighlightOutput (hWnd,0);
+            	 CreateHighlightOutput (hWnd,0,0,0);
             	 break;
 
             case IDM_TAG_CLEAR:
