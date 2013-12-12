@@ -450,12 +450,16 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 	LPBITMAPINFOHEADER  lpbi; 
 	BITMAPINFOHEADER  	bi;
 	LPSTR		lpDIBBits;
-	char		Name[MAX_PATH], str[256];   
+	char		Name[MAX_PATH], str[512];   
 	LONG	ICRtn;
 	short	lhead; 
 	OFSTRUCT	OFStruct; 
 	DWORD	CompressorID=mmioFOURCC('M', 'S', 'V', 'C');
-	                      
+
+
+
+
+	*NewDIB = 0;
 	_fstrcpy (Name,File);
 	ExpandText (Name);   
     if (DisplayFiles==1)
@@ -487,7 +491,10 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 			{
 				GSSiClose (GCIFid);  
 				if (FirstErr)
-					GSSiMessageBox ("Failed to open decompressor",NULL,MB_ICONEXCLAMATION,0);
+				{
+					sprintf(str, "Failed to open decompressor.\r\n\r\nTo fix do the following:\r\n\topen a 'command prompt' using a rightclick\r\n\tselect, 'Run as Administrtor'\r\n\t(32bit users can skip the next step)\r\n\ttype: cd C:\\Windows\\SysWOW64\r\n - press enter\r\r\ttype : regsvr32 ir50_32.dll - press enter");
+					GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION,0);
+				}
 				FirstErr = FALSE;
 
 				return FALSE; 
@@ -556,13 +563,18 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 		{   
 			HANDLE	hMess=GSSiGlobAlloc ( 377,GMEM_MOVEABLE,256);
 			LPSTR	pMess=GlobalLock (hMess);
-			
-			sprintf (pMess,"%s:%ld",File,frame);        
-			AppendFile ("[%DL]abends\\ortherr.txt",pMess);
-			GSSiMessageBox (pMess,"Error in Ortho File",MB_ICONEXCLAMATION,0);
-			GSSiGlobUlFree (&hMess); 
-			ContinueProcessing = FALSE;
-			return FALSE;           
+			static  BOOL showMessage = TRUE;
+
+			if (showMessage)
+			{
+				sprintf (pMess,"%s:%ld",File,frame);        
+				AppendFile ("[%DL]abends\\ortherr.txt",pMess);
+				if (GSSiMessageBox(pMess, "Error in Ortho File", MB_OKCANCEL, 0) == IDCANCEL)
+					showMessage = FALSE;
+				GSSiGlobUlFree (&hMess); 
+				ContinueProcessing = FALSE;
+			}
+			return FALSE;
 		}
 		hCompressedData = GSSiGlobAlloc ( 378,GMEM_MOVEABLE,lRec+1024);
 		lpbiHeadIn = (LPBIHEADER)GlobalLock (hCompressedData);

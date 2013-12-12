@@ -1,18 +1,23 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "geomastr", "geomastr.vcproj", "{1B60D38A-19E2-4C09-BE1B-70138EF8338F}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "geomastr", "geomastr.vcxproj", "{1B60D38A-19E2-4C09-BE1B-70138EF8338F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
+		xponly|Win32 = xponly|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.Debug|Win32.Build.0 = Debug|Win32
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.Release|Win32.ActiveCfg = Release|Win32
 		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.Release|Win32.Build.0 = Release|Win32
+		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.xponly|Win32.ActiveCfg = xponly|Win32
+		{1B60D38A-19E2-4C09-BE1B-70138EF8338F}.xponly|Win32.Build.0 = xponly|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

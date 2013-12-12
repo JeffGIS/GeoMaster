@@ -2418,6 +2418,7 @@ void SetLinkedVPBounds (LPMNMXCORD TransBounds,LPMNMXCORD NewBounds,double Scale
 }
 
 void SetBounds (HWND hWnd,HDC hDC)
+//if hDC == 1 does not set prior bounds
 #if ENABLETRACE
 {GSSiEnterProg (25);
 #endif
@@ -2429,15 +2430,22 @@ void SetBounds (HWND hWnd,HDC hDC)
 	RECT		Rect1;
     
     if (CurView->Type == VPTYPE_PROFILE || 
-       (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)) ||
-        CurView->BoundsDisplayCycle == DisplayCycle)
+       (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))
 {
 #if ENABLETRACE
 GSSiExitProg (25);
 #endif
     	return; 
 }
-    if (SaveVis)
+	if (CurView->BoundsDisplayCycle == DisplayCycle)
+	{
+		SetBounds2(hWnd, CurView->hDC);
+#if ENABLETRACE
+		GSSiExitProg(25);
+#endif
+		return;
+	}
+	if (SaveVis)
     	lSaveVis = GlobalSize (SaveVis->hVisList);
 	CurView->BoundsDisplayCycle = DisplayCycle;
     SetNewBounds = TRUE;
@@ -2553,6 +2561,7 @@ GSSiExitProg (25);
 	    }
 	}   
     SetCurView ( SaveView);
+
     if (lSaveVis && !IsBadWritePtr (SaveVis,lSaveVis))  
     	CurVis = SaveVis;
 	if (CurView->MaxOffsetDist)

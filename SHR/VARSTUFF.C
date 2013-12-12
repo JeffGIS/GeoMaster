@@ -2358,6 +2358,8 @@ GSSiExitProg (532);
 			BaseUnitsPerOrthoPixel=atof (Value);
 			if (!BaseUnitsPerOrthoPixel)
 				BaseUnitsPerOrthoPixel=1;
+			GetViewportScale(CurView->hDC);
+
 			break;
 			
 		case 85:
@@ -3657,9 +3659,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CONTOURDISPLAYORIGINAL",363,FALSE);
 	AllocateTypeVar("%MAXBMPCACHE",364,FALSE);
 	AllocateTypeVar("%WANTPNDATA",365,FALSE);
-	AllocateTypeVar("%TESTDL",366,FALSE);
-
-	
+	AllocateTypeVar("%TESTDL", 366, FALSE);
+	AllocateTypeVar("%WINDOWSVERSION", 367, FALSE);
 	
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4765,6 +4766,10 @@ GSSiExitProg (533);
 		case 366:
 			strcpy (OutStr,TestFileLocation);
 			break;
+		case 367:
+			GetWindowsVersion(OutStr);
+			break;
+
 	}
 	GlobalUnlock (hGlobal);
 {
@@ -9615,7 +9620,7 @@ GetScale:
 	{
 		for (ires=1;ires<numOrthoLevs-1;ires++)
 		{
-			if (OrthScale <= (OrthRes[ires]+OrthRes[ires+1])/2.0)
+			if (OrthScale <= OrthRes[ires+1]-(OrthRes[ires+1] - OrthRes[ires]) / 4.0)
 				break;
 		}
 	}

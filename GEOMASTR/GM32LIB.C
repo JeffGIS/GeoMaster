@@ -756,11 +756,11 @@ HDIB32  CopyBMP32 (HDIB32 hBitmap,DWORD left,DWORD right, DWORD top, DWORD botto
 	return (HDIB32)st;
 }	
 
-DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile) 
+DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile,double factor) 
 {
 	DWORD	st;
 
-   		st = GMFIBMPFileFromEXT (ImageFile,BMPFile);
+   		st = GMFIBMPFileFromEXT (ImageFile,BMPFile,factor);
    		return st;
 	
 }
@@ -1500,6 +1500,43 @@ BOOL URLToFile (LPSTR URL,LPSTR File)
    	BOOL	rc = GMURLDownloadToFile (URL,File);
    	return rc;
 } 
+
+LPSTR requestFromURL(LPSTR url)
+{
+	char tempFile[MAX_PATH];
+	LPSTR	pFile = 0;
+	BOOL	doRemove = FALSE;
+	BOOL	readFromExistingFile = TRUE;
+
+	GetGlobalCVal("[%URLFILE]", tempFile, 0);
+	if (!*tempFile)
+	{
+		doRemove = TRUE;
+		readFromExistingFile = FALSE;
+		GSSiGetTempFileName(0, "gmt", 0, tempFile);
+	}
+	if (readFromExistingFile || URLToFile(url, tempFile))
+	{
+		int	lFile = GSSiLength(tempFile);
+
+		if (lFile > 0)
+		{
+			OFSTRUCT OFStruct;
+			HFILE	Fid = OpenFile(tempFile, &OFStruct, OF_READ);
+
+			if (Fid != HFILE_ERROR)
+			{
+				pFile = malloc(lFile + 1);
+				_lread(Fid, pFile, lFile);
+				pFile[lFile] = 0;
+				_lclose(Fid);
+			}
+		}
+	}
+	if (doRemove)
+		remove(tempFile);
+	return pFile;
+}
 
 /*BOOL GetLastFileWriteTime (LPSTR File,LPDWORD pLowTime,LPDWORD pHighTime,LPDWORD pTimeDiff)
 {

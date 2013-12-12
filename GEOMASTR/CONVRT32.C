@@ -3456,7 +3456,14 @@ GSSiExitProg (101);
         SetCurView ( pViewports[iv]); 
         SaveBitmap = CurView->Bitmap;
         CurView->Bitmap = 0;
-        if (!CurView->lpBoundsDisplay)
+		if (CurView->DisplayedFullScreen)
+		{
+			CurView->TagPoint = CurView->TagPointSave;
+			CurView->Width = CurView->SaveWidth;
+			CurView->Height = CurView->SaveHeight;
+			CurView->DisplayedFullScreen = 0;
+		}
+		if (!CurView->lpBoundsDisplay)
         	CurView->BoundsDisplayID = 0;
 		CurView->NumVisList = 0;  
         CurVis = CurView->pVisList1;
@@ -3534,13 +3541,6 @@ GSSiExitProg (101);
             BoundsDisplayWrite (CurView->lpBoundsDisplay,FidConfig);
         } 
         CurView->Bitmap = SaveBitmap;
-		if (CurView->DisplayedFullScreen)
-		{
-			CurView->TagPoint = CurView->TagPointSave;
-			CurView->Width = CurView->SaveWidth; 
-			CurView->Height = CurView->SaveHeight;
-			CurView->DisplayedFullScreen = 0;
-		}
     } 
     
     if (SaveCfgSizePos)

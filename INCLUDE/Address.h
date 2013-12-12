@@ -486,7 +486,9 @@ COLORREF GetRoadColor (int n);
 BOOL AddZipCenterMatch (HWND hWndDlg,UINT icntl,long ZipCode);
 short AddPrecinctCenterMatch (HWND hWndDlg,UINT icntl,long ZipCode);
 int GetMapQuestLocation (LPSTR FullAddress,LPSTR Quality,LPDPOINT pPoint,int MaxAcceptableQuality);
-BOOL AddMapQuestMatch (HWND hWndDlg,UINT icntl,LPSTR FullAddress);
+int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch, LPSTR formattedAddress, LPDPOINT pLocPoint, LPBOOL pHaveVPPoints, LPDPOINT pVPPoints, LPSTR locType, LPSTR types);
+
+BOOL AddMapQuestMatch(HWND hWndDlg, UINT icntl, LPSTR FullAddress);
 BOOL ReverseGeocodeCommand (int nArgs,LPSTR *Arg,LPSTR OutLoc);
 
 

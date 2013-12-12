@@ -31,6 +31,7 @@ LRESULT CALLBACK GetMsgProc(
   LPARAM lParam   // address of structure with message
 );
 
+static char selectedStartCmd[1024]; 
 static MSG	pmsg[100]={0};
 static	int	activeCount=0;
 static WINDOWPOS lastWP={0};
@@ -127,6 +128,7 @@ void SetInClientMain (void)
 	inClientMain=0;
 	return;
 }
+
 
 BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 {
@@ -531,35 +533,6 @@ GSSiExitProg (436);
  _fstrcat (CmdLine," ");
  if (First)
  {
-	 lpStart = _fstrstr (CmdLine,"/WD ");//should no longer be used
-	 lpStart = 0;
-	 if (lpStart)
-	 {
-	 	char	path[128];  
-	// 	char	dir[128],file[34],ext[8];
-	 	int		idrive;
-	 	lpStart+=4;
-	 	_fstrcpy (path,lpStart);
-	 	if ((lpStart = _fstrstr (path," /"))) 
-	 		*lpStart = 0;	
-	 	else if ((lpStart = _fstrchr (path,';')))
-	 		*lpStart = 0; 
-	 	lpStart = LastChr (path);
-	 	if (*lpStart == '\\' && _fstrlen (path) > 3)
-	 		*lpStart = 0;  
-//		GetShortPathName (path,128);
-	 	ii = _chdir (path);  
-	// 	_fullpath (str,path,sizeof(str));
-	// 	_splitpath (path,drive,dir,file,ext);
-	 	_splitpath (path,drive,0,0,0);
-	 	if (*drive)
-	 	{   
-	 		_fstrupr (drive);
-	 		idrive = *drive - 'A' + 1;
-		 	_chdrive (idrive);
-	 	} 
-	// 	GSSiMsgBox (GetFocus(),path,"WD set",MB_OK);
-	 }	                     
  }
  if ((lpStart = _fstrstr(CmdLine," /TOP ")))
  {
@@ -915,19 +888,179 @@ BOOL ProcessUserParms (void)
 	return TRUE;
 }
 
+BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+	LPSTR lpStart, lpTab;
+	OFSTRUCT	OFStruct;
+	HFILE	fid;
+	char	txt[1024], str[1024];
+	int		tabStops[2] = { 500, 2000 };
+	char	path[MAX_PATH];
+	int		choice;
+
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+	case GSSI_REINITDIALOG:
+
+		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_SETTABSTOPS,1, (LPARAM)tabStops);
+		*selectedStartCmd = 0;
+		cwCenter(hWndDlg, 0);
+		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_RESETCONTENT, 0, 0);
+		fid = OpenFile("cmdlines.txt", &OFStruct, OF_READ);
+		if (fid != HFILE_ERROR)
+		while (fgetstring2(txt, 1020, fid))
+		{
+			lpStart = _fstrstr(txt, "/WD ");
+			if (lpStart)
+			{
+				char	path[MAX_PATH];
+				LPSTR  lpEnd = 0;
+
+				*lpStart = 0;
+				lpStart += 4;
+				if (*lpStart == '"')
+					lpEnd = strchr(lpStart + 1, '"');
+				else
+				{
+					int i = strcspn(lpStart, " ;");
+					if (lpStart[i])
+						lpEnd = &lpStart[i];
+				}
+				if (lpEnd)
+					*lpEnd++ = 0;
+				else
+					lpEnd = strchr(txt, 0);
+				sprintf(str, "%s%s\t%s", txt, lpEnd, lpStart);
+				SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)str);
+			}
+		}
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case GSSI_GMEDITCOMPLETE:
+		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+		break;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			EndDialog(hWndDlg, FALSE);
+			break;
+
+		case IDC_DIRECTORY:
+			switch (HIWORD(wParam))
+			{
+			case EN_CHANGE:
+				if (GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH - 1))
+				{
+					char curPath[MAX_PATH];
+					GetCurrentDirectory(MAX_PATH - 1, curPath);
+					if (_chdir(path) < 0)
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+					else
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+					_chdir(curPath);
+				}
+			}
+			break;
+
+		case IDC_LIST1:
+			switch (HIWORD(wParam))
+			{
+			case LBN_SELCHANGE:
+				choice = SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_GETCURSEL, 0, 0);
+				if (choice != LB_ERR)
+				{
+					SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_GETTEXT, choice, (DWORD)str);
+					lpTab = strchr(str, '\t');
+					*lpTab++ = 0;
+					SetDlgItemText(hWndDlg, IDC_COMMAND, str);
+					SetDlgItemText(hWndDlg, IDC_DIRECTORY, lpTab);
+					GetCurrentDirectory(MAX_PATH - 1, path);
+					if (_chdir(lpTab) < 0)
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+					else
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+					_chdir(path);
+				}
+				break;
+			case LBN_DBLCLK:
+				PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+				break;
+			}
+			break;
+
+		case IDC_EDIT:
+			GMEdit(hWndDlg, "cmdlines.txt");
+			break;
+
+		case IDOK:
+		{
+					 char	drive[32];
+					 int		idrive;
+					 GetDlgItemText(hWndDlg, IDC_COMMAND, selectedStartCmd, 1020);
+					 GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH);
+					 if (*path)
+					 {
+						 ii = _chdir(path);
+						 _splitpath(path, drive, 0, 0, 0);
+						 if (*drive)
+						 {
+							 _fstrupr(drive);
+							 idrive = *drive - 'A' + 1;
+							 _chdrive(idrive);
+						 }
+					 }
+
+					 EndDialog(hWndDlg, TRUE);
+					 break;
+		}
+	}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
+
+BOOL GetCmdFileEntry(LPSTR cmdItem)
+{
+	BOOL rtn = FALSE;
+	rtn = DialogBox(hInst, (LPSTR)"SELECTGMSTARTCMD", 0, SelectGMCmdMsgProc);
+	strcpy(cmdItem, selectedStartCmd);
+	return rtn;
+}
+
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
+
 	//MessageBox (0,lpszCmdLine,"First",MB_OK);
-	strncpy (cmdLine,lpszCmdLine,1024);
+	if (strstr(lpszCmdLine, "/CMDFILE "))
+	{
+		if (!GetCmdFileEntry(cmdLine))
+			return 0;
+	}
+	else
+		strncpy (cmdLine,lpszCmdLine,1024);
 	if (*LastChr (cmdLine) != ';')
 		strcat (cmdLine," ");
 	if (strstr (cmdLine,"/GMEdit"))
 	{
 		isGMEdit = TRUE;
 		CreateBigMem ();
+		AllowCache = FALSE;
 		ProcessCommandLine ("");
-		return WinMainGMEdit(hInstance, hPrevInstance, lpszCmdLine, nCmdShow);
+		return WinMainGMEdit(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 	else
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
@@ -2145,7 +2278,11 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
     }
          break;  
     
-    case GSSI_GPSwnd: 
+	case GSSI_GMEDITCOMPLETE:
+		GMEditReturn();
+		break;
+
+	case GSSI_GPSwnd:
     	 GPSInputWnd = (HWND)lParam;
     	 break;
 
@@ -2779,7 +2916,6 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			case IDM_PROCESSTEXT:
 			{
 				 LPSTR pCmd;
-				 char	tmp[32];
 
 				 if (!lParam)
 				 {
@@ -3576,7 +3712,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 
 			 		DoPaint = TRUE;
 					ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);   
-					ExecutePointLocationMacro (UserSpecifiedBasePoint);
+					ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
                     PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);  
                     SetAutoPan (AP);
 			 	}
@@ -3596,7 +3732,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 
 			 		DoPaint = TRUE;
 					ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);   
-					ExecutePointLocationMacro (UserSpecifiedBasePoint);
+					ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
                     PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L); 
                     SetAutoPan (AP);
 			 	}
@@ -3732,7 +3868,7 @@ DisplayParcel:
 							ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);
 						else
 							CenterWindow (UserSpecifiedBasePoint,FALSE);
-						ExecutePointLocationMacro (UserSpecifiedBasePoint);
+						ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
 	                    PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);   
 	                    SetAutoPan (AP);
 				 	}
@@ -4112,7 +4248,7 @@ DisplayParcel:
             	 break;
             	 
             case IDM_HLT_OUT: 
-            	 CreateHighlightOutput (hWnd,0);
+            	 CreateHighlightOutput (hWnd,0,0,0);
             	 break;
 
             case IDM_TAG_CLEAR:

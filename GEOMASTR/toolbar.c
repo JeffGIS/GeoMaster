@@ -73,6 +73,8 @@ static	short	nToolbarsRight=0;
 static	short	ToolbarsTop[MAX_TOOLBARS]={0};
 static	short	nToolbarsTop=0;
 static	short	ToolbarsBottom[MAX_TOOLBARS]={0};
+static	DPOINT	ToolbarDPoint[MAX_TOOLBARS];
+static	double	ToolbarReZoomScale[MAX_TOOLBARS];
 static	short	nToolbarsBottom=0;
 static	UINT	Buttons[MAX_TOOLBAR_BUTTONS]={IDC_BUTTON1,IDC_BUTTON2,IDC_BUTTON3,IDC_BUTTON4,IDC_BUTTON5,
 							  IDC_BUTTON11,IDC_BUTTON12,IDC_BUTTON13,IDC_BUTTON14,IDC_BUTTON15,IDC_BUTTON16,IDC_BUTTON17,IDC_BUTTON18,IDC_BUTTON19,IDC_BUTTON20,
@@ -3031,7 +3033,7 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
     {
 		return FALSE;
     }
-	ID = LoadToolbar (hwndPanZoomRot,"","ZOOM",0,1,"0 0",TRUE,FALSE);
+	ID = LoadToolbar (hwndPanZoomRot,"","ZOOM",0,1,"0 0",TRUE,FALSE,0,0);
 	DisplayAllToolbars (2);
 
 	return TRUE;
@@ -3097,6 +3099,8 @@ void RemoveToolbar (int ToolbarID,BOOL DoAdjust)
 			memmove (ToolbarConfigNumPerRow[i],ToolbarConfigNumPerRow[i+1],sizeof(ToolbarConfigNumPerRow[0]));
 			nToolbarRows[i] = nToolbarRows[i+1];
 			ToolbarRect[i] = ToolbarRect[i+1];
+			ToolbarDPoint[i] = ToolbarDPoint[i + 1];
+			ToolbarReZoomScale[i] = ToolbarReZoomScale[i + 1];
 //static	POINTS	ToolbarConfigs[MAX_TOOLBARS][MAX_TOOLBAR_CONTROLS];
 			ToolbarPos[i] = ToolbarPos[i+1];
 		}
@@ -3184,6 +3188,7 @@ int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int ir
 	RECT	Rect;
 	int		w,h;
 	static	int	firstRowH;
+	static	BOOL	display=FALSE;
 
 	if (!GetObject(*hBM, sizeof(bm), (LPSTR)&bm))
 		return 0;
@@ -3207,10 +3212,10 @@ int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int ir
 	{
 		FirstButtonBitmapHeight[ToolbarID] = bm.bmHeight;
 		firstRowH = bm.bmHeight+4;
-		MoveWindow(hWndBtn,ix+1,2,bm.bmWidth,bm.bmHeight,FALSE);
+		MoveWindow(hWndBtn,ix+1,2,bm.bmWidth,bm.bmHeight,display);
 	}
 	else
-		MoveWindow(hWndBtn,ix+1,firstRowH+2+(irow-1)*(bm.bmHeight+4),bm.bmWidth,bm.bmHeight,FALSE);
+		MoveWindow(hWndBtn,ix+1,firstRowH+2+(irow-1)*(bm.bmHeight+4),bm.bmWidth,bm.bmHeight,display);
 	//hWDP = DeferWindowPos (hWDP,hWndBtn,0,ix+1,irow*(bm.bmHeight+4),bm.bmWidth,bm.bmHeight,SWP_NOZORDER);
 	return ix + bm.bmWidth + 2;
 }
@@ -3411,7 +3416,7 @@ void AddToolbarConfig (int ToolbarID,int nInRow)
 	for (i=0;i<nToolbarConfigs[ToolbarID];i++)
 		if (ToolbarConfigNumPerRow[ToolbarID][i] == nInRow)
 			return;
-	ToolbarConfigNumPerRow[ToolbarID][nToolbarConfigs[ToolbarID]++] = nInRow;
+	ToolbarConfigNumPerRow[ToolbarID][nToolbarConfigs[ToolbarID]++] = max (1,nInRow);
 	return;
 }
 
@@ -3499,7 +3504,7 @@ switch(Message)
 				DisplayMenuStatus[ToolbarID] = DMS_NOTDISPLAYED;
 			return DefWindowProc(hWndDlg, Message, wParam, lParam);
 		}
-
+		break;
 /*	case WM_SHOWWINDOW:
 		//PostMessage (hWndDlg,GSSi_DimMenu,0,0);
 		SetWindowPos (hWndDlg,HWND_NOTOPMOST,0,0,0,0,SWP_DRAWFRAME|SWP_SHOWWINDOW|SWP_NOSIZE|SWP_NOMOVE);
@@ -3608,7 +3613,7 @@ FromNotify:
 				strcpy (Pathname,ToolbarPath[ToolbarID]);
 				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
 				DestroyWindow (hWndDlg);
-				LoadToolbar (hWndMain,Pathname,"DOCK",0,nPerRow,"",TRUE,FALSE);
+				LoadToolbar (hWndMain,Pathname,"DOCK",0,nPerRow,"",TRUE,FALSE,&ToolbarDPoint[ToolbarID],ToolbarReZoomScale[ToolbarID]);
 			}
 			else
 			{
@@ -3708,7 +3713,7 @@ TryAgain:
 		GetWindowRect (hWndDlg,&WindRect);
 		winc = (WindRect.right - WindRect.left) - (rect.right - rect.left);
 		hinc = (WindRect.bottom - WindRect.top) - (rect.bottom - rect.top);
-		MaxControlsInRow = min (MaxControlsInRow,nToolbarControls[ToolbarID]);
+		MaxControlsInRow = max (1,min (MaxControlsInRow,nToolbarControls[ToolbarID]));
 		if (FirstToolbarPass)// || (MaxControlsInRow > 1 && (MaxToolbarX+winc+1 > MaxDesiredToolbarWidth)))
 		{
 			int	LastMaxControlsInRow = MaxControlsInRow, i;
@@ -3733,12 +3738,15 @@ TryAgain:
 		{
 			hWDP = DeferWindowPos (hWDP,hWndDlg,0,pt.x,pt.y,
 				   MaxToolbarX+winc+1,
-				   (MaxButtonBitmapHeight[ToolbarID]+8)*(nToolbarRow++ - 1)+2 *(FirstButtonBitmapHeight[ToolbarID]+2)+hinc+winc,SWP_NOZORDER);
+				   (MaxButtonBitmapHeight[ToolbarID]+8)*(nToolbarRow++ - 1) +2*(FirstButtonBitmapHeight[ToolbarID]+2)+hinc,SWP_NOZORDER);
 		}
 		else
-			hWDP = DeferWindowPos (hWDP,hWndDlg,0,pt.x,pt.y,
-				   MaxToolbarX+winc+1,
-				   (MaxButtonBitmapHeight[ToolbarID]+8)*(nToolbarRow++)+FirstButtonBitmapHeight[ToolbarID]+4+hinc+winc,SWP_NOZORDER);
+		{
+			int w = MaxToolbarX + winc + 1;
+			int h = (MaxButtonBitmapHeight[ToolbarID] + 8)*nToolbarRow + FirstButtonBitmapHeight[ToolbarID] + 4 + hinc + winc;
+			nToolbarRow++;
+			hWDP = DeferWindowPos (hWDP,hWndDlg,0,pt.x,pt.y, w, h,SWP_NOZORDER);
+		}
 
 		if (CreateConfigs[ToolbarID])
 		{
@@ -3838,7 +3846,7 @@ TryAgain:
  return TRUE;
 }
 
-int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LPSTR Pos,BOOL CheckForDocked,BOOL Float) 
+int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LPSTR Pos,BOOL CheckForDocked,BOOL Float,LPDPOINT pCenterPoint,double  scale) 
 {
 	static	BOOL	First=TRUE;
 	char	Type[32];
@@ -3890,7 +3898,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 	ToolbarIDCur = ToolbarID;
 	DisplayMenuStatus[ToolbarID] = DMS_NOTDISPLAYED;
 	ToolbarFloatNumPerRow[ToolbarID] = nPerRow;
-	ToolbarConfigNumPerRow[ToolbarID][0] = nPerRow;
+	ToolbarConfigNumPerRow[ToolbarID][0] = max (1,nPerRow);
 	nToolbarConfigs[ToolbarID] = 0;
 	ToolbarType[ToolbarID] = TBT_STANDARDMENU;
 	GSSiDeleteObject (&ToolbarImage[ToolbarID]);
@@ -4227,6 +4235,12 @@ LRESULT CALLBACK GetTBMoveMsgProc(int nCode, WPARAM wParam, LPARAM lParam)
 			{
 			   	POINT MousePoint = POINTStoPOINT(MAKEPOINTS(lpmsg->lParam));
 				RECT	rect;
+
+				if (GetDebug() && GetKeyState(VK_CONTROL) & 0x1000)
+				{
+					GMEdit(hWndMain, ToolbarPath[ToolbarID]);
+					return 0;
+				}
 
 				GetClientRect (lpmsg->hwnd,&rect);
 
@@ -5089,7 +5103,7 @@ void SaveToolbarsInConfig (HFILE Fid)
 	{
 		BigWrite (Fid,(HPSTR)&ToolbarType[i],4,-1);Length+=4;
 		BigWrite (Fid,(HPSTR)&ToolbarFloating[i],4,-1);Length+=4;
-		BigWrite (Fid,(HPSTR)&ToolbarConfigNumPerRow[0][i],4,-1);Length+=4;
+		BigWrite (Fid,(HPSTR)&ToolbarConfigNumPerRow[i][0],4,-1);Length+=4;
 		BigWrite (Fid,(HPSTR)&ToolbarHeight[i],4,-1);Length+=4;
 		rect = ToolbarRect[i];
 		ScreenRectToClientRect (hWndMain,&rect); (hWndMain,&rect);
@@ -5159,13 +5173,6 @@ void LoadToolbarsInConfig (HFILE Fid)
 	DisplayToolbars = TRUE;
 	AdjustToolbarPositions ();
 	return;
-
-
-					//$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos)
-				  //$TOOLBAR(LOAD,DOCK,Pathname,
-//				rtn = LoadToolbar (CurView->hWnd,Arg[3],Arg[2],atoi(Arg[4]),atoi(Arg[5]),Arg[6],TRUE,FALSE); 
-
-//			$VIS(CONTROL,,400 500,0.80)
 
 }
 LRESULT CALLBACK TabSubclassProc (HWND hwnd, UINT message, 

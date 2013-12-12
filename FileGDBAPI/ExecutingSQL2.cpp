@@ -1,3 +1,4 @@
+#if !XPVERSION
 /**
  * Sample: ExecutingSQL
  *
@@ -12,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+
 //#include <glut.h>
 //#include <atlbase.h>
 //#include <atlstr.h>
@@ -189,6 +191,15 @@ extern "C" void ClearCurVals (LPOPENFILEDATA FilePtr);
 typedef short	BOOL16;
 #include "bt.h"
 
+extern "C" BOOL FGDBCheck(void)
+{
+	if (not || noq || nod)
+		return FALSE;
+	return TRUE;
+}
+
+
+
 /*
 // Prototype for conversion functions
 std::wstring StringToWString(const std::string& s);
@@ -321,13 +332,6 @@ HaveDB:
 	}
     return idb + 1;
 }
-extern "C" BOOL FGDBCheck (void)
-{
-	if (not || noq || nod)
-		return FALSE;
-	return TRUE;
-}
-
 extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pnRows,LPMNMXCORD pBounds)
 {   
 	long	hr, rc;
@@ -1021,3 +1025,5 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 Exit:
     return lpvoid;
 }
+
+#endif

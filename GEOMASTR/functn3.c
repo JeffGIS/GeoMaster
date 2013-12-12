@@ -930,7 +930,7 @@ GotFile:
 		    }
 		    else
 	    		pFile = GlobalLock (hScreenFile);
-			if (OutputToFile (pFile,TRUE,Arg[1], Arg[2], 0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,0,0,0)) 
+			if (OutputToFile (pFile,TRUE,Arg[1], Arg[2], 0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,0,0,0,TRUE)) 
 			{
 	    		GlobalUnlock (hScreenFile);  
         		ShowGrid(hWndMain,Arg[5],Arg[6]);
@@ -5576,7 +5576,7 @@ SaveVis:
 			long	ICmd;
 			
 			nArgs = GetFunArgs (Args,Arg,4,&hMem);  
-			if (BMPFileFromEXT (Arg[2],Arg[1])) 
+			if (BMPFileFromEXT (Arg[2],Arg[1],1)) 
 				goto RtnTrue;
 			goto RtnFalse;
 		}
@@ -6067,14 +6067,18 @@ HaveVP:;
 			}
 			goto Rtnrtn;
 		}
-		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos)
+		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos,DPoint,Scale)
 				  //$TOOLBAR(LOAD,DOCK,Pathname,
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
 			if (nArgs < 2)
 				goto RtnFalse;
-			if (!stricmp (Arg[1],"LOAD"))
-				rtn = LoadToolbar (CurView->hWnd,Arg[3],Arg[2],atoi(Arg[4]),atoi(Arg[5]),Arg[6],TRUE,FALSE); 
+			if (!stricmp(Arg[1], "LOAD"))
+			{
+				Point = atopt(Arg[7], &Err);
+				RVal = atof(Arg[8]);
 
+				rtn = LoadToolbar(CurView->hWnd, Arg[3], Arg[2], atoi(Arg[4]), atoi(Arg[5]), Arg[6], TRUE, FALSE,&Point,RVal);
+			}
 			goto Rtnrtn;
 		case 774: //$NETWORK(FALSEINT,STREETLIST
 				  //$NETWORK(FALSEINT,LOAD

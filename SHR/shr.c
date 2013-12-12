@@ -11438,6 +11438,18 @@ GSSiExitProg (391);
 #endif
 }
 
+void CenterRectOnPoint(LPRECT pRect, POINT center)
+{
+	RECT outRect;
+
+	outRect.left = center.x - RECTWIDTH(pRect) / 2;
+	outRect.right = center.x + RECTWIDTH(pRect) / 2;
+	outRect.top = center.y - RECTHEIGHT (pRect) / 2;
+	outRect.bottom = center.y + RECTHEIGHT(pRect) / 2;
+	*pRect = outRect;
+	return;
+}
+
 POINT RectMid (LPRECT rect)
 #if ENABLETRACE
 {GSSiEnterProg (396);
@@ -11763,12 +11775,44 @@ GSSiExitProg (413);
 #endif
 }
 
+void GMEditReturn(void)
+{
+	EscapeFunction(FALSE);
+	return;
+}
+
+void GetNonCachedFile(LPSTR file)
+{
+	int icpf=0, l;
+	char CacheFromName[MAX_PATH];
+	char nonCachedFile[MAX_PATH];
+
+	l = strlen(CachePathnameTo);
+	if (!_fstrnicmp(file, CachePathnameTo, l))
+	{
+		if (file[l] == '#')
+		{
+			icpf = atoi(&file[l + 1]);
+			l += 2;
+		}
+		strcpy(nonCachedFile, CachePathnameFrom[icpf]);
+		strcat(nonCachedFile, &file[l]);
+		ExpandText(nonCachedFile);
+		strcpy(file, nonCachedFile);
+	}
+	return;
+}
+
 BOOL GMEdit (HWND hWnd, LPSTR File)
 {
 	BOOL rtn=TRUE;
 	char str[MAX_PATH+32];
+	char nonCachedFile[MAX_PATH];
 
-	sprintf (str,"$SESSION(CREATE,GMEdit /GMEdit %s)",File);
+	strcpy(nonCachedFile, File);
+	GetNonCachedFile(nonCachedFile);
+	CloseAllRequestedFiles(FALSE);
+	sprintf(str, "$SESSION(CREATE,GMEdit /GMEdit %s /W %ld)", nonCachedFile, (DWORD)hWnd);
 	ProcessText (str);
 	return rtn;
 }

@@ -948,12 +948,27 @@ void DisplayCoordGridThemeLegend(short From)
 								else
 								{
 									Polygon (CurView->hDC,sPoints,4);
-									sprintf (txt,"%i",iZoom);
-									TextOut (CurView->hDC,cp.x-15,cp.y-16,txt,strlen(txt));
-									sprintf (txt,"%i-%i",tilex,tiley);
-									TextOut (CurView->hDC,cp.x-35,cp.y,txt,strlen(txt));
-									itoa (GridCelID,txt,10);
-									TextOut (CurView->hDC,cp.x-35,cp.y+16,txt,strlen(txt));
+									if (CurTheme->ShowValue)
+									{
+										RECT rect;
+										POINT center;
+										
+										TileXYToQuadKey(tilex,tiley,iZoom,quadKey,24);
+										SetGlobalValueLong("%GRIDZOOM", iZoom);
+										SetGlobalValueLong("%GRIDX",tilex);
+										SetGlobalValueLong("%GRIDY", tiley);
+										SetGlobalValueLong("%GRIDID", GridCelID);
+										SetGlobalValue("%GRIDQUADKEY", quadKey);
+										strcpy(txt, CurTheme->DataDisplayMacro);
+										ExpandText(txt);
+										RectInit(&rect);
+										for (i = 0; i < 4;i++)
+											AddPointToRect(sPoints[i], &rect);
+										center = RectMid(&rect);
+										DrawTextEx(CurView->hDC, txt, strlen(txt), &rect, DT_CENTER|DT_CALCRECT, 0);
+										CenterRectOnPoint(&rect, center);
+										DrawTextEx(CurView->hDC, txt, strlen(txt), &rect, DT_CENTER, 0);
+									}
 								}
 							}
 						}

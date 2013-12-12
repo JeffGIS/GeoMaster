@@ -1,0 +1,894 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="xponly|Win32">
+      <Configuration>xponly</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1B60D38A-19E2-4C09-BE1B-70138EF8338F}</ProjectGuid>
+    <RootNamespace>geomastr</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <UseOfAtl>false</UseOfAtl>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <UseOfAtl>false</UseOfAtl>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.21005.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>GeoMaster34e</TargetName>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>GeoMaster34e_xp</TargetName>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <EmbedManifest>true</EmbedManifest>
+    <TargetName>GeoMaster34d</TargetName>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/geomastr.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Geo_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;XPORABOVE;WINVER=0x0502;_WIN32_WINNT=0x0502;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>false</StringPooling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StructMemberAlignment>2Bytes</StructMemberAlignment>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>.\Release/geomastr.pch</PrecompiledHeaderOutputFile>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
+      <Version>34.51</Version>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Release/$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\Release/$(TargetName).map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <HeapReserveSize>32000000</HeapReserveSize>
+      <StackReserveSize>4000000</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <SwapRunFromCD>false</SwapRunFromCD>
+      <SwapRunFromNET>false</SwapRunFromNET>
+    </Link>
+    <Bscmake>
+      <OutputFile>.\Release/geomastr.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/geomastr.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Geo_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;XPORABOVE;XPVERSION;WINVER=0x0502;_WIN32_WINNT=0x0502;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>false</StringPooling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StructMemberAlignment>2Bytes</StructMemberAlignment>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>.\Release/geomastr.pch</PrecompiledHeaderOutputFile>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
+      <Version>34.51</Version>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Release/$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\Release/$(TargetName).map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <HeapReserveSize>32000000</HeapReserveSize>
+      <StackReserveSize>4000000</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <SwapRunFromCD>false</SwapRunFromCD>
+      <SwapRunFromNET>false</SwapRunFromNET>
+    </Link>
+    <Bscmake>
+      <OutputFile>.\Release/geomastr.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/geomastr.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Geo_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;NO_STRICT;XPORABOVE;USEMRSID;_WIN32_WINNT=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <StructMemberAlignment>2Bytes</StructMemberAlignment>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <PrecompiledHeaderOutputFile>.\Debug/geomastr.pch</PrecompiledHeaderOutputFile>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPI.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>Debug/$(TargetName).exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile />
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\Debug/$(TargetName).map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <HeapReserveSize>16000000</HeapReserveSize>
+      <StackReserveSize>4000000</StackReserveSize>
+      <LargeAddressAware />
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <SwapRunFromCD>true</SwapRunFromCD>
+      <SwapRunFromNET>true</SwapRunFromNET>
+      <TurnOffAssemblyGeneration>false</TurnOffAssemblyGeneration>
+      <AdditionalOptions>
+      </AdditionalOptions>
+    </Link>
+    <Bscmake>
+      <OutputFile>.\Debug/geomastr.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\FileGDBAPI\FGDBStub.c" />
+    <ClCompile Include="..\solar_calculator\Version2\aa.c" />
+    <ClCompile Include="..\Proj-4\src\aasincos.c" />
+    <ClCompile Include="address1.c" />
+    <ClCompile Include="address2.c" />
+    <ClCompile Include="address3.c" />
+    <ClCompile Include="AddressMsgProc.c" />
+    <ClCompile Include="..\Proj-4\src\adjlon.c" />
+    <ClCompile Include="..\gctpc\alberfor.c" />
+    <ClCompile Include="..\gctpc\alberinv.c" />
+    <ClCompile Include="..\gctpc\alconfor.c" />
+    <ClCompile Include="..\gctpc\alconinv.c" />
+    <ClCompile Include="..\solar_calculator\Version2\altaz.c" />
+    <ClCompile Include="..\solar_calculator\Version2\angles.c" />
+    <ClCompile Include="..\solar_calculator\Version2\annuab.c" />
+    <ClCompile Include="..\solar_calculator\Version2\arcdot.c" />
+    <ClCompile Include="..\gctpc\azimfor.c" />
+    <ClCompile Include="..\gctpc\aziminv.c" />
+    <ClCompile Include="..\email\jwsmtp\base64.cpp" />
+    <ClCompile Include="..\libbci-1.1.0\bci.c" />
+    <ClCompile Include="bigmem.c" />
+    <ClCompile Include="..\gctpc\br_gctp.c" />
+    <ClCompile Include="..\DB\Bt_creat.c" />
+    <ClCompile Include="..\humbird1\byteswap.c" />
+    <ClCompile Include="cdstuff.c" />
+    <ClCompile Include="..\SHR\CLIDATA.C" />
+    <ClCompile Include="cmdtonum.c" />
+    <ClCompile Include="..\SHR\COMDLG.c" />
+    <ClCompile Include="..\email\jwsmtp\compat.cpp" />
+    <ClCompile Include="..\SHR\Comput1.c" />
+    <ClCompile Include="..\SHR\CONNAD83.C" />
+    <ClCompile Include="..\solar_calculator\Version2\constel.c" />
+    <ClCompile Include="convert.c" />
+    <ClCompile Include="CONVRT32.C" />
+    <ClCompile Include="..\SHR\copydib.c" />
+    <ClCompile Include="..\dgnlib\cpl_conv.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_dir.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_error.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_multiproc.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_path.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_string.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_vsil_simple.cpp" />
+    <ClCompile Include="..\dgnlib\cpl_vsisimple.cpp" />
+    <ClCompile Include="..\gctpc\cproj.c" />
+    <ClCompile Include="Creatcfg.c" />
+    <ClCompile Include="..\SHR\CVTCOORD.C" />
+    <ClCompile Include="cwconfig.c" />
+    <ClCompile Include="..\shapelib\code\dbfopen.c" />
+    <ClCompile Include="debugging.c" />
+    <ClCompile Include="..\solar_calculator\Version2\deflec.c" />
+    <ClCompile Include="..\solar_calculator\Version2\deltat.c" />
+    <ClCompile Include="dgn7functions.c" />
+    <ClCompile Include="DGNFILE.C" />
+    <ClCompile Include="..\dgnlib\dgnfloat.cpp" />
+    <ClCompile Include="..\dgnlib\dgnhelp.cpp" />
+    <ClCompile Include="..\dgnlib\dgnopen.cpp" />
+    <ClCompile Include="..\dgnlib\dgnread.cpp" />
+    <ClCompile Include="..\dgnlib\dgnstroke.cpp" />
+    <ClCompile Include="..\dgnlib\dgnwrite.cpp" />
+    <ClCompile Include="..\SHR\DIBUTIL.C" />
+    <ClCompile Include="DICT.C" />
+    <ClCompile Include="DICTEDIT.C" />
+    <ClCompile Include="digitize.c" />
+    <ClCompile Include="..\solar_calculator\Version2\diurab.c" />
+    <ClCompile Include="..\solar_calculator\Version2\diurpx.c" />
+    <ClCompile Include="..\SHR\DLGLOOK.C" />
+    <ClCompile Include="..\solar_calculator\Version2\dms.c" />
+    <ClCompile Include="..\Proj-4\src\dmstor.c" />
+    <ClCompile Include="Document.c" />
+    <ClCompile Include="..\solar_calculator\Version2\domoon.c" />
+    <ClCompile Include="dtm.c" />
+    <ClCompile Include="DTM2.C" />
+    <ClCompile Include="Dxfin.c" />
+    <ClCompile Include="dynaedit.c" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libunix\src\dysize.c" />
+    <ClCompile Include="..\solar_calculator\Version2\ear404.c" />
+    <ClCompile Include="edgmatch.c" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\ephemeris.c" />
+    <ClCompile Include="..\solar_calculator\Version2\epsiln.c" />
+    <ClCompile Include="..\gctpc\eqconfor.c" />
+    <ClCompile Include="..\gctpc\eqconinv.c" />
+    <ClCompile Include="..\gctpc\equifor.c" />
+    <ClCompile Include="..\gctpc\equiinv.c" />
+    <ClCompile Include="exception.c" />
+    <ClCompile Include="..\FileGDBAPI\ExecutingSQL2.cpp" />
+    <ClCompile Include="export.c" />
+    <ClCompile Include="EXPORT2.C" />
+    <ClCompile Include="..\GM32lib\FIIO_Mem.cpp" />
+    <ClCompile Include="..\SHR\FILE.C" />
+    <ClCompile Include="fish.c" />
+    <ClCompile Include="..\solar_calculator\Version2\fk4fk5.c" />
+    <ClCompile Include="..\SHR\floatap.c" />
+    <ClCompile Include="..\gctpc\for_init.c" />
+    <ClCompile Include="..\GM32lib\freeim.c" />
+    <ClCompile Include="FUNCSUBS.c" />
+    <ClCompile Include="function.c" />
+    <ClCompile Include="FUNCTN1.C" />
+    <ClCompile Include="functn2.c" />
+    <ClCompile Include="FUNCTN3.C" />
+    <ClCompile Include="FUNDEFS.C" />
+    <ClCompile Include="..\gctpc\gctp.c" />
+    <ClCompile Include="..\Proj-4\src\geocent.c" />
+    <ClCompile Include="GetSDChipID.c" />
+    <ClCompile Include="..\GM32lib\GM32.c" />
+    <ClCompile Include="GM32LIB.C" />
+    <ClCompile Include="..\GMEdit\GMEdit\GMEdit.c" />
+    <ClCompile Include="..\gctpc\gnomfor.c" />
+    <ClCompile Include="..\gctpc\gnominv.c" />
+    <ClCompile Include="..\gctpc\goodfor.c" />
+    <ClCompile Include="..\gctpc\goodinv.c" />
+    <ClCompile Include="..\solar_calculator\Version2\gplan.c" />
+    <ClCompile Include="..\gps\gps.c" />
+    <ClCompile Include="graphic1.c" />
+    <ClCompile Include="graphic2.c" />
+    <ClCompile Include="Graphic3.c" />
+    <ClCompile Include="graphic4.c" />
+    <ClCompile Include="GRAPHIC5.C" />
+    <ClCompile Include="Graphic6.c" />
+    <ClCompile Include="graphic7.c" />
+    <ClCompile Include="graphic8.c" />
+    <ClCompile Include="GRAPHIC9.c" />
+    <ClCompile Include="graphic_functions.c" />
+    <ClCompile Include="graphica.c" />
+    <ClCompile Include="graphicb.c" />
+    <ClCompile Include="graphicc.c" />
+    <ClCompile Include="GRAPHICD.C" />
+    <ClCompile Include="GraphMsgProc.c" />
+    <ClCompile Include="GraphMsgProc2.c" />
+    <ClCompile Include="grfunc.c" />
+    <ClCompile Include="..\splines\gspline.c" />
+    <ClCompile Include="gssigdi.c" />
+    <ClCompile Include="..\gctpc\gvnspfor.c" />
+    <ClCompile Include="..\gctpc\gvnspinv.c" />
+    <ClCompile Include="..\DB\gwd.c" />
+    <ClCompile Include="..\gctpc\hamfor.c" />
+    <ClCompile Include="..\gctpc\haminv.c" />
+    <ClCompile Include="..\SHR\HASH.C" />
+    <ClCompile Include="hbird.c" />
+    <ClCompile Include="hotspots.c" />
+    <ClCompile Include="..\gctpc\imolwfor.c" />
+    <ClCompile Include="..\gctpc\imolwinv.c" />
+    <ClCompile Include="Infobox.c" />
+    <ClCompile Include="internet.c" />
+    <ClCompile Include="..\gctpc\inv_init.c" />
+    <ClCompile Include="..\SHR\IsLaptop.cpp" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\julday.c" />
+    <ClCompile Include="..\solar_calculator\Version2\jup404.c" />
+    <ClCompile Include="..\solar_calculator\Version2\kepler.c" />
+    <ClCompile Include="..\solar_calculator\Version2\kfiles.c" />
+    <ClCompile Include="..\gctpc\lamazfor.c" />
+    <ClCompile Include="..\gctpc\lamazinv.c" />
+    <ClCompile Include="..\gctpc\lamccfor.c" />
+    <ClCompile Include="..\gctpc\lamccinv.c" />
+    <ClCompile Include="license.c" />
+    <ClCompile Include="lidar.c" />
+    <ClCompile Include="..\solar_calculator\Version2\lightt.c" />
+    <ClCompile Include="..\humbird1\LkmToHbirdImage.c" />
+    <ClCompile Include="..\solar_calculator\Version2\lonlat.c" />
+    <ClCompile Include="..\email\jwsmtp\mailer.cpp" />
+    <ClCompile Include="makearea.c" />
+    <ClCompile Include="mapcopy.c" />
+    <ClCompile Include="..\solar_calculator\Version2\mar404.c" />
+    <ClCompile Include="..\SHR\memalloc.c" />
+    <ClCompile Include="..\solar_calculator\Version2\mer404.c" />
+    <ClCompile Include="..\gctpc\merfor.c" />
+    <ClCompile Include="..\gctpc\merinv.c" />
+    <ClCompile Include="..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\mgrs\mgrs.c" />
+    <ClCompile Include="..\gctpc\millfor.c" />
+    <ClCompile Include="..\gctpc\millinv.c" />
+    <ClCompile Include="..\minilzo\minilzo.c" />
+    <ClCompile Include="..\solar_calculator\Version2\mlat404.c" />
+    <ClCompile Include="..\solar_calculator\Version2\mlr404.c" />
+    <ClCompile Include="..\gctpc\molwfor.c" />
+    <ClCompile Include="..\gctpc\molwinv.c" />
+    <ClCompile Include="..\GM32lib\mrsid.c" />
+    <ClCompile Include="..\SHR\MS_MAPL.C" />
+    <ClCompile Include="MSPFence.c" />
+    <ClCompile Include="..\Proj-4\src\nad_cvt.c" />
+    <ClCompile Include="..\Proj-4\src\nad_init.c" />
+    <ClCompile Include="..\Proj-4\src\nad_intr.c" />
+    <ClCompile Include="..\GM32lib\nadcon.c" />
+    <ClCompile Include="..\solar_calculator\Version2\nep404.c" />
+    <ClCompile Include="NETWORKS.c" />
+    <ClCompile Include="..\solar_calculator\Version2\nutate.c" />
+    <ClCompile Include="..\gctpc\obleqfor.c" />
+    <ClCompile Include="..\gctpc\obleqinv.c" />
+    <ClCompile Include="..\SHR\Odbcmain.c" />
+    <ClCompile Include="..\OFFSET\Offset.c" />
+    <ClCompile Include="..\gctpc\omerfor.c" />
+    <ClCompile Include="..\gctpc\omerinv.c" />
+    <ClCompile Include="ORAFILE.C" />
+    <ClCompile Include="..\gctpc\orthfor.c" />
+    <ClCompile Include="..\gctpc\orthinv.c" />
+    <ClCompile Include="orthos.c" />
+    <ClCompile Include="..\gctpc\paksz.c" />
+    <ClCompile Include="..\PCX\PCXTOBMP.C" />
+    <ClCompile Include="peoplnet.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_aea.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_aeqd.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_airy.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_aitoff.c" />
+    <ClCompile Include="..\Proj-4\src\pj_apply_gridshift.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_august.c" />
+    <ClCompile Include="..\Proj-4\src\pj_auth.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_bacon.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_bipc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_boggs.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_bonne.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_cass.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_cc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_cea.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_chamb.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_collg.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_crast.c" />
+    <ClCompile Include="..\Proj-4\src\pj_datum_set.c" />
+    <ClCompile Include="..\Proj-4\src\pj_datums.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_denoy.c" />
+    <ClCompile Include="..\Proj-4\src\pj_deriv.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eck1.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eck2.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eck3.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eck4.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eck5.c" />
+    <ClCompile Include="..\Proj-4\src\pj_ell_set.c" />
+    <ClCompile Include="..\Proj-4\src\pj_ellps.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eqc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_eqdc.c" />
+    <ClCompile Include="..\Proj-4\src\pj_errno.c" />
+    <ClCompile Include="..\Proj-4\src\pj_factors.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_fahey.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_fouc_s.c" />
+    <ClCompile Include="..\Proj-4\src\pj_fwd.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_gall.c" />
+    <ClCompile Include="..\Proj-4\src\pj_gauss.c" />
+    <ClCompile Include="..\Proj-4\src\pj_geocent.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_geos.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_gins8.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_gn_sinu.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_gnom.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_goode.c" />
+    <ClCompile Include="..\Proj-4\src\pj_gridinfo.c" />
+    <ClCompile Include="..\Proj-4\src\pj_gridlist.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_gstmerc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_hammer.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_hatano.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_imw_p.c" />
+    <ClCompile Include="..\Proj-4\src\pj_init.c" />
+    <ClCompile Include="..\Proj-4\src\pj_initcache.c" />
+    <ClCompile Include="..\Proj-4\src\pj_inv.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_krovak.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_labrd.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_laea.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_lagrng.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_larr.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_lask.c" />
+    <ClCompile Include="..\Proj-4\src\pj_latlong.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_lcc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_lcca.c" />
+    <ClCompile Include="..\Proj-4\src\pj_list.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_loxim.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_lsat.c" />
+    <ClCompile Include="..\Proj-4\src\pj_malloc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_mbt_fps.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_mbtfpp.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_mbtfpq.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_merc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_mill.c" />
+    <ClCompile Include="..\Proj-4\src\pj_mlfn.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_mod_ster.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_moll.c" />
+    <ClCompile Include="..\Proj-4\src\pj_msfn.c" />
+    <ClCompile Include="..\Proj-4\src\pj_mutex.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_nell.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_nell_h.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_nocol.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_nsper.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_nzmg.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_ob_tran.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_ocea.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_oea.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_omerc.c" />
+    <ClCompile Include="..\Proj-4\src\pj_open_lib.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_ortho.c" />
+    <ClCompile Include="..\Proj-4\src\pj_param.c" />
+    <ClCompile Include="..\Proj-4\src\pj_phi2.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_poly.c" />
+    <ClCompile Include="..\Proj-4\src\pj_pr_list.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_putp2.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_putp3.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_putp4p.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_putp5.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_putp6.c" />
+    <ClCompile Include="..\Proj-4\src\pj_qsfn.c" />
+    <ClCompile Include="..\Proj-4\src\pj_release.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_robin.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_rpoly.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_sconics.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_somerc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_stere.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_sterea.c" />
+    <ClCompile Include="..\Proj-4\src\pj_strerrno.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_sts.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_tcc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_tcea.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_tmerc.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_tpeqd.c" />
+    <ClCompile Include="..\Proj-4\src\pj_transform.c" />
+    <ClCompile Include="..\Proj-4\src\pj_tsfn.c" />
+    <ClCompile Include="..\Proj-4\src\pj_units.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_urm5.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_urmfps.c" />
+    <ClCompile Include="..\Proj-4\src\pj_utils.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_vandg.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_vandg2.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_vandg4.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_wag2.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_wag3.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_wag7.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_wink1.c" />
+    <ClCompile Include="..\Proj-4\src\PJ_wink2.c" />
+    <ClCompile Include="..\Proj-4\src\pj_zpoly1.c" />
+    <ClCompile Include="..\solar_calculator\Version2\plu404.c" />
+    <ClCompile Include="pngrid.c" />
+    <ClCompile Include="pointlist.c" />
+    <ClCompile Include="..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\polarst\polarst.c" />
+    <ClCompile Include="..\OFFSET\POLY.C" />
+    <ClCompile Include="..\gctpc\polyfor.c" />
+    <ClCompile Include="..\gctpc\polyinv.c" />
+    <ClCompile Include="..\solar_calculator\Version2\precess.c" />
+    <ClCompile Include="Print.c" />
+    <ClCompile Include="PROFILE.C" />
+    <ClCompile Include="..\Proj-4\src\proj_mdist.c" />
+    <ClCompile Include="..\Proj-4\src\proj_rouss.c" />
+    <ClCompile Include="..\gctpc\psfor.c" />
+    <ClCompile Include="..\gctpc\psinv.c" />
+    <ClCompile Include="quad.c" />
+    <ClCompile Include="..\solar_calculator\Version2\refrac.c" />
+    <ClCompile Include="report.C" />
+    <ClCompile Include="..\gctpc\reportgc.c" />
+    <ClCompile Include="ROADNAME.C" />
+    <ClCompile Include="..\gctpc\robfor.c" />
+    <ClCompile Include="..\gctpc\robinv.c" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\rotate.c" />
+    <ClCompile Include="route.c" />
+    <ClCompile Include="..\solar_calculator\Version2\rplanet.c" />
+    <ClCompile Include="..\solar_calculator\Version2\rstar.c" />
+    <ClCompile Include="..\solar_calculator\Version2\sat404.c" />
+    <ClCompile Include="..\email\SendEmail.cpp" />
+    <ClCompile Include="..\SHR\serio.c" />
+    <ClCompile Include="SHPFILE.C" />
+    <ClCompile Include="..\SHR\shr.c" />
+    <ClCompile Include="..\solar_calculator\Version2\sidrlt.c" />
+    <ClCompile Include="..\gctpc\sinfor.c" />
+    <ClCompile Include="..\gctpc\sininv.c" />
+    <ClCompile Include="smooth.c" />
+    <ClCompile Include="..\gctpc\somfor.c" />
+    <ClCompile Include="..\gctpc\sominv.c" />
+    <ClCompile Include="..\gctpc\sphdz.c" />
+    <ClCompile Include="..\splines\ssp.c" />
+    <ClCompile Include="..\SHR\STD.C" />
+    <ClCompile Include="..\gctpc\sterfor.c" />
+    <ClCompile Include="..\gctpc\sterinv.c" />
+    <ClCompile Include="..\gctpc\stplnfor.c" />
+    <ClCompile Include="..\gctpc\stplninv.c" />
+    <ClCompile Include="..\solar_calculator\Version2\sun.c" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\sunpath.c" />
+    <ClCompile Include="..\sunang\ipw\src\sunrise.c" />
+    <ClCompile Include="..\GCTP2\T2PROJ~1.C" />
+    <ClCompile Include="tabbed.c" />
+    <ClCompile Include="..\solar_calculator\Version2\tdb.c" />
+    <ClCompile Include="..\libbci-1.1.0\tdspl.c" />
+    <ClCompile Include="..\GM32lib\testMemIO.cpp" />
+    <ClCompile Include="themes.c" />
+    <ClCompile Include="themes2.c" />
+    <ClCompile Include="THEMES3.C" />
+    <ClCompile Include="THMMSGP.C" />
+    <ClCompile Include="..\SHR\tiff.c" />
+    <ClCompile Include="TileIndex.c" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\tmconv.c" />
+    <ClCompile Include="..\gctpc\tmfor.c" />
+    <ClCompile Include="..\gctpc\tminv.c" />
+    <ClCompile Include="toolbar.c" />
+    <ClCompile Include="..\libbci-1.1.0\tools.c" />
+    <ClCompile Include="Tran.c" />
+    <ClCompile Include="tranlat2.c" />
+    <ClCompile Include="tranlat3.c" />
+    <ClCompile Include="..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\tranmerc\tranmerc.c" />
+    <ClCompile Include="..\GCTP2\TRANPR~1.C" />
+    <ClCompile Include="translat.c" />
+    <ClCompile Include="traverse.c" />
+    <ClCompile Include="..\solar_calculator\Version2\trnsit.c" />
+    <ClCompile Include="..\SHR\UGRID.C" />
+    <ClCompile Include="Ugridhlt.c" />
+    <ClCompile Include="..\SHR\Umio.c" />
+    <ClCompile Include="..\SHR\UNDO.C" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\unixtime.c" />
+    <ClCompile Include="..\gctpc\untfz.c" />
+    <ClCompile Include="..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\ups\ups.c" />
+    <ClCompile Include="..\solar_calculator\Version2\ura404.c" />
+    <ClCompile Include="..\garmin\USB\USBSDK.c" />
+    <ClCompile Include="..\MRGSCoordinates\Mgrs\geotrans2.2.6\dt_cc\utm\utm.c" />
+    <ClCompile Include="..\gctpc\utmfor.c" />
+    <ClCompile Include="..\gctpc\utminv.c" />
+    <ClCompile Include="..\gctpc\vandgfor.c" />
+    <ClCompile Include="..\gctpc\vandginv.c" />
+    <ClCompile Include="VARDEF.C" />
+    <ClCompile Include="..\SHR\VARSTUF2.C" />
+    <ClCompile Include="..\SHR\VARSTUFF.C" />
+    <ClCompile Include="..\solar_calculator\Version2\vearth.c" />
+    <ClCompile Include="vehicle.c" />
+    <ClCompile Include="vehicle_server.c" />
+    <ClCompile Include="..\solar_calculator\Version2\ven404.c" />
+    <ClCompile Include="viewport.c" />
+    <ClCompile Include="viscontrol.c" />
+    <ClCompile Include="visible.c" />
+    <ClCompile Include="VOTERS.C" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\weekday.c" />
+    <ClCompile Include="..\gctpc\wivfor.c" />
+    <ClCompile Include="..\gctpc\wivinv.c" />
+    <ClCompile Include="..\SHR\Writeavi.c" />
+    <ClCompile Include="..\gctpc\wviifor.c" />
+    <ClCompile Include="..\gctpc\wviiinv.c" />
+    <ClCompile Include="XMLProcessing.c" />
+    <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\yrday.c" />
+    <ClCompile Include="..\solar_calculator\Version2\zatan2.c" />
+    <ClCompile Include="..\sunang\ipw\src\zerobr.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">\Gssi\prog16\GM32lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">true</ExcludedFromBuild>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">\Gssi\prog16\GM32lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">\Gssi\prog16\GM32lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <ResourceCompile Include="GWCONFIG.RC" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\INCLUDE\Bt.h" />
+    <ClInclude Include="..\gctpc\cproj.h" />
+    <ClInclude Include="..\INCLUDE\gmextern.h" />
+    <ClInclude Include="..\INCLUDE\gmlimits.h" />
+    <ClInclude Include="..\INCLUDE\gmvardef.h" />
+    <ClInclude Include="GoogleDef.h" />
+    <ClInclude Include="..\INCLUDE\GRAPHICS.H" />
+    <ClInclude Include="..\INCLUDE\graphint.h" />
+    <ClInclude Include="..\INCLUDE\PROJ.H" />
+    <ClInclude Include="..\gctpc\proj.h" />
+    <ClInclude Include="..\GMEdit\GMEdit\resource.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\INCLUDE\shr.h" />
+    <ClInclude Include="..\INCLUDE\TileGraphics.h" />
+    <ClInclude Include="..\INCLUDE\toolbar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Citytour\ALIGN_BO.BMP" />
+    <Image Include="..\Citytour\ALIGN_HO.BMP" />
+    <Image Include="..\Citytour\ALIGN_LE.BMP" />
+    <Image Include="..\Citytour\ALIGN_RI.BMP" />
+    <Image Include="..\Citytour\ALIGN_TO.BMP" />
+    <Image Include="..\Citytour\ALIGN_VE.BMP" />
+    <Image Include="..\Citytour\ARROWQ~1.BMP" />
+    <Image Include="ASSOC.ICO" />
+    <Image Include="..\Citytour\BITMAP11.BMP" />
+    <Image Include="..\Citytour\BITMAP13.BMP" />
+    <Image Include="..\Citytour\BITMAP14.BMP" />
+    <Image Include="..\Citytour\BITMAP15.BMP" />
+    <Image Include="..\Citytour\BITMAP16.BMP" />
+    <Image Include="..\Citytour\BITMAP17.BMP" />
+    <Image Include="..\citytour\BITMAP18.BMP" />
+    <Image Include="..\citytour\BITMAP19.BMP" />
+    <Image Include="BITMAP2.BMP" />
+    <Image Include="..\Citytour\BITMAP2.BMP" />
+    <Image Include="..\citytour\BITMAP20.BMP" />
+    <Image Include="..\citytour\BITMAP21.BMP" />
+    <Image Include="..\Citytour\BITMAP3.BMP" />
+    <Image Include="BITMAP3.BMP" />
+    <Image Include="..\Citytour\BITMAP4.BMP" />
+    <Image Include="..\Citytour\BITMAP9.BMP" />
+    <Image Include="..\Citytour\BITMAP_R.BMP" />
+    <Image Include="..\Citytour\BLUE_BIT.BMP" />
+    <Image Include="..\Citytour\BMP00001.BMP" />
+    <Image Include="..\Citytour\BMP00002.BMP" />
+    <Image Include="..\Citytour\BMP00003.BMP" />
+    <Image Include="..\Citytour\BMP00004.BMP" />
+    <Image Include="..\Citytour\BMP00005.BMP" />
+    <Image Include="..\Citytour\BMP00006.BMP" />
+    <Image Include="..\Citytour\BMP00007.BMP" />
+    <Image Include="..\Citytour\BMP00008.BMP" />
+    <Image Include="..\Citytour\BMP00009.BMP" />
+    <Image Include="..\Citytour\BMP00010.BMP" />
+    <Image Include="..\Citytour\BMP00011.BMP" />
+    <Image Include="..\Citytour\BMP00012.BMP" />
+    <Image Include="..\Citytour\BMP00013.BMP" />
+    <Image Include="..\Citytour\BMP00014.BMP" />
+    <Image Include="..\Citytour\BMP00015.BMP" />
+    <Image Include="..\Citytour\BMP00016.BMP" />
+    <Image Include="..\Citytour\BMP00017.BMP" />
+    <Image Include="..\Citytour\BMP00018.BMP" />
+    <Image Include="..\citytour\BMP00019.BMP" />
+    <Image Include="..\Citytour\BMP00020.BMP" />
+    <Image Include="..\citytour\BMP00021.BMP" />
+    <Image Include="..\citytour\BMP00022.BMP" />
+    <Image Include="..\citytour\BMP00023.BMP" />
+    <Image Include="..\citytour\BMP00024.BMP" />
+    <Image Include="..\citytour\BMP00025.BMP" />
+    <Image Include="..\CITYTOUR\BMP00026.BMP" />
+    <Image Include="..\CITYTOUR\BMP00027.BMP" />
+    <Image Include="..\citytour\BMP02PCT.BMP" />
+    <Image Include="..\citytour\BMP06PCT.BMP" />
+    <Image Include="..\citytour\BMP25PCT.BMP" />
+    <Image Include="..\citytour\buoy_green.bmp" />
+    <Image Include="..\Citytour\CHECKED1.BMP" />
+    <Image Include="..\citytour\CRAYONS.BMP" />
+    <Image Include="..\Citytour\DOWN_ARR.BMP" />
+    <Image Include="EARTH.ICO" />
+    <Image Include="..\citytour\GEOMASTE.BMP" />
+    <Image Include="..\GMEdit\GMEdit\GMEdit.ico" />
+    <Image Include="..\GMEdit\GMEdit\gmedit_icon1.ico" />
+    <Image Include="..\GMEdit\GMEdit\gmedit_icon2.ico" />
+    <Image Include="..\Citytour\GMLOGOW.BMP" />
+    <Image Include="..\Citytour\GREEN_BI.BMP" />
+    <Image Include="HLP-DWN.BMP" />
+    <Image Include="HLP-UP.BMP" />
+    <Image Include="HOME.ICO" />
+    <Image Include="ICO00001.ICO" />
+    <Image Include="icon1.ico" />
+    <Image Include="..\GMEdit\GMEdit\icon1.ico" />
+    <Image Include="..\GMEdit\GMEdit\icon2.ico" />
+    <Image Include="ICON6.ICO" />
+    <Image Include="ICON7.ICO" />
+    <Image Include="ICON8.ICO" />
+    <Image Include="..\Citytour\LABEL.BMP" />
+    <Image Include="..\Citytour\LEFT_ARR.BMP" />
+    <Image Include="..\Citytour\MONO1.BMP" />
+    <Image Include="..\Citytour\MONO2.BMP" />
+    <Image Include="..\Citytour\MONO3.BMP" />
+    <Image Include="..\Citytour\MONO4.BMP" />
+    <Image Include="..\Citytour\MONO5.BMP" />
+    <Image Include="..\Citytour\MONO6.BMP" />
+    <Image Include="..\Citytour\MONO7.BMP" />
+    <Image Include="NAMES.ICO" />
+    <Image Include="..\Citytour\NUMERIC_.BMP" />
+    <Image Include="..\Citytour\PAT2.BMP" />
+    <Image Include="..\Citytour\PHONE1.BMP" />
+    <Image Include="..\Citytour\PICKCURS.BMP" />
+    <Image Include="..\Citytour\RIGHT_AR.BMP" />
+    <Image Include="..\Citytour\S_TEMP.BMP" />
+    <Image Include="..\Citytour\SPORTMAP.BMP" />
+    <Image Include="..\Citytour\STANDARD.BMP" />
+    <Image Include="..\Citytour\STATIC_D.BMP" />
+    <Image Include="..\Citytour\STATIC_U.BMP" />
+    <Image Include="..\Citytour\SYMBOL.BMP" />
+    <Image Include="..\Citytour\TDCHECK.BMP" />
+    <Image Include="TDCOMBO.BMP" />
+    <Image Include="TDEDIT.BMP" />
+    <Image Include="..\Citytour\TDFRAME.BMP" />
+    <Image Include="..\Citytour\TDGROUP.BMP" />
+    <Image Include="..\Citytour\TDICON.BMP" />
+    <Image Include="..\Citytour\TDLIST.BMP" />
+    <Image Include="..\Citytour\TDPOINTR.BMP" />
+    <Image Include="..\Citytour\TDPUSH.BMP" />
+    <Image Include="..\Citytour\TDRECT.BMP" />
+    <Image Include="..\Citytour\TOOLBAR1.BMP" />
+    <Image Include="TRANBM.BMP" />
+    <Image Include="..\Citytour\TUCHECK.BMP" />
+    <Image Include="TUCOMBO.BMP" />
+    <Image Include="TUEDIT.BMP" />
+    <Image Include="..\Citytour\TUFRAME.BMP" />
+    <Image Include="..\Citytour\TUGROUP.BMP" />
+    <Image Include="..\Citytour\TUICON.BMP" />
+    <Image Include="..\Citytour\TULIST.BMP" />
+    <Image Include="..\Citytour\TUPOINTR.BMP" />
+    <Image Include="..\Citytour\TUPUSH.BMP" />
+    <Image Include="..\Citytour\TURADIO.BMP" />
+    <Image Include="..\Citytour\TURECT.BMP" />
+    <Image Include="..\CITYTOUR\UNLOCKTO.BMP" />
+    <Image Include="..\Citytour\UP_ARROW.BMP" />
+    <Image Include="..\citytour\zoompan24.bmp" />
+    <Image Include="..\Citytour\zoompan8.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CUR00001.CUR" />
+    <None Include="CUR00002.CUR" />
+    <None Include="CURSOR5.CUR" />
+    <None Include="CURSOR6.CUR" />
+    <None Include="CURSOR7.CUR" />
+    <None Include="CURSOR_L.CUR" />
+    <None Include="DIGITIZE.CUR" />
+    <None Include="DRAWING.CUR" />
+    <None Include="HANDMOVE.CUR" />
+    <None Include="HMOVE.CUR" />
+    <None Include="LABEL_CU.CUR" />
+    <None Include="LARROWS.CUR" />
+    <None Include="MAGNIFY.CUR" />
+    <None Include="MEASURE_.CUR" />
+    <None Include="PICK_CUR.CUR" />
+    <None Include="SETTAG.CUR" />
+    <None Include="SHOW.CUR" />
+    <None Include="SYMBOL_C.CUR" />
+    <None Include="TOGGLEVI.CUR" />
+    <None Include="WAYPOINT.CUR" />
+    <None Include="winzoom.cur" />
+    <None Include="ZOOMIN.CUR" />
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

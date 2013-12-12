@@ -1590,7 +1590,7 @@ BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	static	POINT	CursorLoc;  
 	HANDLE	hStr;
 	LPSTR	lpStr, pGCmd;  
-	char	str[260];   
+	char	str[260], curName[64];   
 	long	CurLoc;   
 	BOOL	First;  
 	OFSTRUCT	OFStruct;  
@@ -1661,8 +1661,23 @@ GSSiExitProg (449);
 		 y = rect.bottom - (rect.bottom - rect.top) / 2;
 		 SetCursorPos (x,y);   
          LoadFunctionLists (hWndDlg,0,0,1);
-         
-LoadFile:
+ LoadFile:
+		 _splitpath(CurView->FunctionFile, 0, 0, curName, 0);
+		 Choice = 0;
+		 while (SendDlgItemMessage(hWndDlg, FUNCTION_LIST_LB, LB_GETTEXT, Choice++, (DWORD)str) != LB_ERR)
+		 {
+			 lpTab = _fstrchr(str, '\t');
+			 if (!lpTab)
+				 break;
+			 *lpTab++ = 0;
+			 if (!stricmp(lpTab, curName))
+			 {
+				 SetDlgItemText(hWndDlg, IDC_LISTNAME, str);
+				 SendDlgItemMessage(hWndDlg, FUNCTION_LIST_LB, LB_SETTOPINDEX, --Choice,0);
+				 break;
+			 }
+		 }
+
 	     SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_RESETCONTENT,0,0); 
 	     LoadGFFile (hWndDlg,"",1,FALSE);
 		 if (Init)
@@ -1683,6 +1698,11 @@ LoadFile:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
+
+	case GSSI_GMEDITCOMPLETE:
+		GMEditReturn();
+		goto LoadFile;
+		break;
 
     case WM_COMMAND:
          switch(LOWORD(wParam))
@@ -1733,7 +1753,8 @@ LoadFile:
 							  lpTab = _fstrchr(str,'\t');
 							  if (!lpTab)
 							  	break;
-							  lpTab++;
+							  *lpTab++ = 0;
+							  SetDlgItemText(hWndDlg, IDC_LISTNAME, str);
 							  GetGFFile (CurView->FunctionFile,lpTab,0);  
 							  if (HIWORD(wParam)==CBN_SELCHANGE)
 							  	goto LoadFile;
@@ -16812,6 +16833,9 @@ GSSiExitProg (1280);
 			SendDlgItemMessage (hWndDlg,IDC_GRIDNAME,CB_ADDSTRING,0,(LPARAM)"LatLon");
 			SendDlgItemMessage (hWndDlg,IDC_GRIDNAME,CB_ADDSTRING,0,(LPARAM)"GoogleMaps");
 			SendDlgItemMessage (hWndDlg,IDC_GRIDNAME,CB_SETCURSEL,CurTheme->GridID,0); 
+			SendDlgItemMessage(hWndDlg, IDC_DISPLAYGRIDTEXT, BM_SETCHECK, CurTheme->ShowValue, 0L);
+			SetDlgItemText(hWndDlg, IDC_GRIDTEXT, CurTheme->DataDisplayMacro);
+
 			SetViewport (CurTheme->TargetViewport);   
 			iZoom = GetGoogleZoomForSCale (CurView->Scale);
 			SetDlgItemInt (hWndDlg,IDC_ZOOMLEV,iZoom,TRUE);
@@ -16841,6 +16865,8 @@ GSSiExitProg (1280);
 
 			    CurTheme->GridID = SendDlgItemMessage(hWndDlg,IDC_GRIDNAME,CB_GETCURSEL,0,0); 
 				CurTheme->GridZoom = GetDlgItemInt (hWndDlg,IDC_ZOOMLEV,&err,FALSE);
+				CurTheme->ShowValue = SendDlgItemMessage(hWndDlg, IDC_DISPLAYGRIDTEXT, BM_GETCHECK, 0, 0);
+				GetDlgItemText(hWndDlg, IDC_GRIDTEXT, CurTheme->DataDisplayMacro,sizeof(CurTheme->DataDisplayMacro)-1);
 
                	EndDialog(hWndDlg, TRUE);
             }
@@ -25519,7 +25545,6 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_ADDSTRING,0,(LPARAM)str);
 	                SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_ADDSTRING,0,(LPARAM)lpStr);
                  }
-                 GlobalUnlock (hMem);
                  GSSiGlobUlFree (&hMem);
                  break;
             }    

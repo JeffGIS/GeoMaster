@@ -44,7 +44,6 @@
 #ifndef _CL_ASSERT_H
 #define _CL_ASSERT_H
 
-#include "error.h"
 
 //**********************************************************************
 // macros

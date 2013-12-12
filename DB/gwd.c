@@ -4510,7 +4510,7 @@ Display2:
                   pName = GlobalLock(hNameLocal); 
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_SHOW);   
                   Processing = TRUE;
-				  OutputToFile (pFile,TRUE,pName, str, hItems,NULL,0,FALSE,FALSE,GMHeader,FALSE,FALSE,0,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg);
+				  OutputToFile (pFile,TRUE,pName, str, hItems,NULL,0,FALSE,FALSE,GMHeader,FALSE,FALSE,0,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg,TRUE);
 				  ContinueProcessing = TRUE; 
 				  Processing = FALSE;
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_HIDE);
@@ -4568,7 +4568,7 @@ Display2:
                   pName = GlobalLock(hNameLocal); 
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_SHOW);   
                   Processing = TRUE;
-				  OutputToFile (pFile,TRUE,pName, str, hItems,NULL,0,FALSE,FALSE,GMHeader,FALSE,FALSE,0,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg);
+				  OutputToFile (pFile,TRUE,pName, str, hItems,NULL,0,FALSE,FALSE,GMHeader,FALSE,FALSE,0,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg,TRUE);
 				  ContinueProcessing = TRUE; 
 				  Processing = FALSE;
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_HIDE);

@@ -1410,7 +1410,7 @@ BOOL SetTypeVisByName (LPSTR Name,int OnOrOff)
 	BOOL	Reverse;
 	
 	for (i=0;i<15;i++)
-		if (!stricmp (Name,"ALL") || !stricmp (Name,TypeNames[i]))
+		if (!stricmp (Name,"ALL") || !strnicmp (Name,TypeNames[i],min(4,strlen(TypeNames[i]))))
 		{
 			int	j=i;
 

@@ -587,7 +587,7 @@ BOOL GMFIBMPFromEXT (LPSTR lpszPathName,LPSTR ToMem,DWORD * pSize)
 	return rtn;
 }
 
-BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile)
+BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile,double factor)
 {
 	FIBITMAP *dib = NULL;
 	DWORD	rtn=0;
@@ -615,7 +615,14 @@ BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile)
 
 			if (dib != NULL)
 			{
-
+				if (factor != 1.0)
+				{
+					int w, h;
+					LPBITMAPINFOHEADER pDibInfo = FreeImage_GetInfoHeader(dib);
+					FIBITMAP *dib2 = FreeImage_Rescale(dib,pDibInfo->biWidth*factor,pDibInfo->biHeight*factor, FILTER_CATMULLROM);
+					FreeImage_Unload(dib);
+					dib = dib2;
+				}
 				rtn = FreeImage_Save(FIF_BMP, dib,ToFile,BMP_DEFAULT);
 //				FreeImage_SaveBMP(dib, ToFile);
 
@@ -1063,6 +1070,11 @@ BOOL GetBitmapInfoFromHandle (LPBITMAPINFOHEADER pDibInfoD,HDIB32 hDib)
 	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)hDib);
 
 	*pDibInfoD = *pDibInfo;
+	if (pDibInfoD->biSizeImage == 0)
+	{
+		pDibInfoD->biSizeImage = ((((pDibInfoD->biWidth * (DWORD)pDibInfoD->biBitCount) + 31) & ~31) >> 3)
+			* pDibInfoD->biHeight;
+	}
 	return TRUE;
 }
 int SetCurImage (LPSTR Name)
@@ -1305,7 +1317,7 @@ DWORD GM32StretchDIBitsFromHandle (HDC hDC16,DWORD destX,DWORD destY,DWORD destW
 }
 
 
-BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile)
+BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile,double factor)
 {
 	return FALSE;
 }

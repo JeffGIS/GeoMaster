@@ -74,6 +74,8 @@
 #define GSSi_DimMenu 0x5117
 #define GSSI_GPS	0x5118
 
+#define GSSI_GMEDITCOMPLETE 0x5119
+
 
 #define MK_DIGITIZER_BUTTON	    0x0020
 
@@ -240,7 +242,8 @@ BOOL GSSiChangeLength (HFILE Fid,long NewLength);
 void CreateFidSmall (void);
 void CloseFidSmall (void);
 BOOL GMEdit (HWND hWnd,LPSTR file);
-BOOL EditTextFile (HWND hWnd,LPSTR Name);
+void GMEditReturn(void);
+BOOL EditTextFile(HWND hWnd, LPSTR Name);
 void CloseVars (void);
 void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
 void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
@@ -521,7 +524,7 @@ HANDLE  BMPFromEXT (LPSTR ImageFile);
 BOOL SetDIBMonoColors(HDIB32 hDib,LPLONG Colors); 
 BOOL  BMPToEXT (HANDLE hBMP,LPSTR ImageFile,DWORD Flag); 
 BOOL  BMPToEXT32 (HDIB32 hDib,LPSTR ImageFile,DWORD Flag); 
-DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile); 
+DWORD  BMPFileFromEXT (LPSTR ImageFile,LPSTR BMPFile,double factor); 
 int  DisplayBMFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, short MaintainAspect);
 int  DisplayBMInRect (HDC hDC,LPBITMAPINFOHEADER pDibInfo,LPSTR pImage, RECT Rect, short MaintainAspect,LPRECT pOutRect);
 short  DisplayPCXFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAspect);
@@ -531,6 +534,7 @@ int  DisplayBMInRect32_2 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect,D
 BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ);
 BOOL DisplaySIDInVP32 (LPVIEWPORT pVP,LPSTR BMFile);
 //BOOL CheckBoardBMInRect (HDC hDC,LPSTR ImageFile1, LPSTR ImageFile2,RECT Rect, BOOL MaintainAspect);
+void CenterRectOnPoint(LPRECT pRect,POINT center);
 POINT RectMid (LPRECT rect);
 DPOINT RectMidD (LPRECT rect);
 void ComputeBMLoc (RECT Rect,LPBITMAPINFO pDibInfo,short MaintainAspect);  
@@ -1036,7 +1040,7 @@ BOOL GMFISetGeoTiffData (DWORD hBMP,DWORD pScaleX, DWORD pScaleY, DWORD pBitmapP
 HDIB32 GMRotateImageClassic (HDIB32 hDib,double DegreesRotation);
 HANDLE GMFreeImageRotateClassic (HANDLE hDIBIn,LPDOUBLE pRotate);
 DWORD GMFICopy (DWORD hDIBIn,DWORD left,DWORD right, DWORD top, DWORD bottom);
-BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile);
+BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile,double factor);
 BOOL GMFIBMPToEXT (LPSTR lpszPathName,LPSTR FromMem,DWORD * pSize,DWORD Flag);
 BOOL GMFIBMPHandleToEXT (LPSTR lpszPathName,HANDLE hBMP,DWORD Flag);
 BOOL GMSetDIBMonoColors (HANDLE hBMP,LPLONG Colors);
@@ -1148,6 +1152,7 @@ BOOL GetTXTUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName,short FieldLen
 BOOL GetDBUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName, LPHANDLE phDBList);
 DWORD SendEMail (LPSTR cmd);
 BOOL URLToFile (LPSTR URL,LPSTR File);
+LPSTR requestFromURL(LPSTR url);
 
   void CNGRNT(const double *BX1,const double *BY1,const double *EX1,const double *EY1,
                     const double *BX2,const double *BY2,const double *EX2,const double *EY2,
@@ -1295,6 +1300,7 @@ void RemoveFromMacroStack (int macroID);
 void AtBreakPoint (LPSTR Args);
 void SetDebug (BOOL state);
 BOOL GetDebug (void);
+void GetWindowsVersion(LPSTR Ver);
 
 
 

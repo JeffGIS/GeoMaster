@@ -1,7 +1,9 @@
+#if XPVERSION
 #include "graphint.h"
 
 int  OpenFGDB2 (LPSTR DBName,LPSTR Table,LPSTR SQL)
 {
+	MessageBox(0, "This version of GeoMaster (XP) does not support filegeodatabases", 0, MB_ICONEXCLAMATION);
 	return FALSE;
 }
 int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSize,LPHANDLE phList)
@@ -46,8 +48,8 @@ LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPVOID *hstmt,
 {
 	return 0;
 }
-BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response)
+BOOL FGDBCheck(void)
 {
-
 	return FALSE;
 }
+#endif

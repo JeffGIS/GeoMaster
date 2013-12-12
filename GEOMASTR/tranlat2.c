@@ -1137,14 +1137,14 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
     UINT	n,m,BPP;
     OFSTRUCT    OFStruct;
     HFILE   FidBM, FidBMOrig=HFILE_ERROR;
-    char	ClipFile[144];
-    char    fNameBM[128], NameOnly[64], Ext[5], leaf[34], daterange[32],TempDir[128]="",IndexName[128];
+    char	ClipFile[MAX_PATH];
+    char    fNameBM[MAX_PATH], NameOnly[64], Ext[5], leaf[34], daterange[32],TempDir[MAX_PATH]="",IndexName[MAX_PATH];
     long    rowinc, rowinc2, colinc, rowlen, OutLen, 
-		    NumFile,  ImageOffset, OrigBMRowLen;
+			NumFile, ImageOffset, OrigBMRowLen, lenSourceRow;
     HPSTR   p0s;
     BOOL    First=TRUE, ImageIsFliped=FALSE, ImageIsTiff=FALSE;  
     RECT32	ClipRect;  
-    short	iOrthoRes, sizefac[4]={1,2,4,8};
+    short	iOrthoRes, iInc,sizefac[4]={1,2,4,8};
     long	FirstBufRow, OrigBMHeight,OrigRow, OrigCol, AutoClip=0,TIFFrowinc;
     short	OrigRowInc, ii, BitCount; 
     HANDLE	hRowBufs=0, hAllRows=0, hTran=0, hTIFFStrip=0;
@@ -1158,9 +1158,10 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
    	HFILE	FidClip;
    	LPSTR	pDot;  
    	char	str[132];
+	HDIB32	hDibFactored = 0;
     BITMAPINFOHEADER DibInfo;     
     double	conversion=1;
-	BOOL	DoDelete=FALSE;
+	BOOL	DoDelete=FALSE, oldMethod=FALSE;
     
 	if (SizeOpt == 1)
 	{
@@ -1168,10 +1169,11 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 	}
 	else
 	{
-    approx_width *= sizefac[SizeOpt];
-    approx_height*= sizefac[SizeOpt];
+		approx_width *= sizefac[SizeOpt];
+		approx_height*= sizefac[SizeOpt];
 	}
-    
+	iOrthoRes = max(1, atoi(cOrthoRes));
+
     switch (Type)
     {
         case 5: 
@@ -1297,19 +1299,39 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
             
             if (UseFreeImage)
             {   
-            	char	OutFile[144];
-            	
-				GSSiGetTempFileName (0,"gm",0,OutFile); 
-            	
-				if (!BMPFileFromEXT (File,OutFile)) 
+				if (oldMethod)
 				{
-					UseFreeImage = FALSE;
-//				if (!LoadBMP (hWnd,File,OutFile,TRUE,".tif"))
-					break; 
-				} 
-				_fstrcpy (File,OutFile);
-				DoDelete = TRUE;
-            }
+            		char	OutFile[MAX_PATH];
+            	
+					GSSiGetTempFileName (0,"gm",0,OutFile); 
+            	
+					if (!BMPFileFromEXT(File, OutFile, 1))
+					{
+						UseFreeImage = FALSE;
+	//				if (!LoadBMP (hWnd,File,OutFile,TRUE,".tif"))
+						break; 
+					} 
+					_fstrcpy (File,OutFile);
+					DoDelete = TRUE;
+				}
+				else
+				{
+					HDIB32 hDib = BMPHandleFromEXT(File);
+					LPBITMAPINFOHEADER pDibInfo;
+					BITMAPINFOHEADER dibInfo;
+					double factor;
+
+					GetBitmapInfoFromHandle(&dibInfo, hDib);
+					hDibInfo = GSSiGlobAlloc(1000,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER));
+					pDibInfo = GlobalLock(hDibInfo);
+					*pDibInfo = dibInfo;
+					GlobalUnlock(hDibInfo);
+					factor = 1.0 / iOrthoRes;
+					hDibFactored = FreeImage_Rescale(hDib, dibInfo.biWidth*factor, dibInfo.biHeight*factor, FILTER_CATMULLROM);
+					FreeImage_Unload(hDib);
+
+				}
+			}
             else if (_fstrstr (File,".pcx")) 
             {    
             	
@@ -1328,7 +1350,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
                 MessageBox( GetFocus(),File, "Unable to open ortho bitmap", MB_OK);
                 goto Exit;
             }
-            if (_fstrstr (File,".tif")) 
+			if (!UseFreeImage && _fstrstr(File, ".tif"))
             {   
             	short	NumStrips;
             	
@@ -1371,7 +1393,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 	            ImageIsTiff = TRUE;
             	ImageIsFliped = TRUE;
             }
-			else
+			else if (oldMethod)
 			{            
             	ReadBitMapHeader (FidBMOrig, &hDibInfo,&ImageOffset);
 	            pDibInfo = (LPBITMAPINFO)GlobalLock (hDibInfo); 
@@ -1387,7 +1409,6 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 	        }
             
 ProcessBitmap:
-            iOrthoRes = max (1,atoi (cOrthoRes)); 
             if (!hDibInfo)
             	goto Exit;
             pDibInfo = (LPBITMAPINFO)GlobalLock (hDibInfo);
@@ -1531,258 +1552,272 @@ ProcessBitmap:
             for (irow = 0; irow < nrow; irow++)
             {    
             	ii=1; 
-                for (icol = 0; icol < ncol; icol++)
-                {
-                  FileNum++;
-                  /*_fstrcpy (fNameBM,Dir);
-                  _fstrcat (fNameBM,"\\");
-                  _fstrcat (fNameBM,NameOnly);*/
-                  sprintf (fNameBM,"%s\\%s.%3.3x",TempDir,NameOnly,FileNum%4096);
-                  if (PCXFile) 
-                  { 
-                  	short	l=_fstrlen (Dir);
-                  	
-                  	if (!_fstrnicmp (Dir,File,l))  
-                  		_fstrcpy (leaf,&File[l]);
-                  	else
-                  		sprintf (leaf,"%s.pcx",NameOnly); 
-                  }
-                  else if (BWTIFFile) 
-                  	sprintf (leaf,"%s.tif",NameOnly);
-                  else if (BWBMPFile) 
-                  	sprintf (leaf,"%s.bmp",NameOnly);
-                  else
-                  	sprintf (leaf,"%s.%3.3x",NameOnly,FileNum%4096);
-                  
-                  if (icol == ncol-1)
-                  {
-                    inc = last_width%4;
-                    if (inc) inc = 4-inc;
-                    rowlen = (last_width + inc);
-                    if (AviOut)
-                        pDibInfoOut->bmiHeader.biWidth = approx_width;
-                    else if (BytesPerPel)
-                        pDibInfoOut->bmiHeader.biWidth = IDNINT(2*last_width/BytesPerPel);
-                  }
-                  else
-                  {
-                  /*    rowlen = colinc;*/
-                    inc = width%4;
-                    if (inc) inc = 4-inc;
-                    rowlen = (width + inc);
-                  
-                    pDibInfoOut->bmiHeader.biWidth = IDNINT(2*width/BytesPerPel);
-                  } 
-                  if (!CreateOutputFile)
-                  	goto WriteIndex; 
-                  OutLen = rowlen;
-                  GSSiGlobFree (&hOutRow);
-	              hOutRow = GSSiGlobAlloc ( 550,GMEM_MOVEABLE,OutLen);
-                  if (irow == nrow-1 && !AviOut)
-                    pDibInfoOut->bmiHeader.biHeight = last_height;
-                  else
-                    pDibInfoOut->bmiHeader.biHeight = height;
-                  
-                  pDibInfoOut->bmiHeader.biSizeImage =
-                    IDNINT((long)pDibInfoOut->bmiHeader.biHeight *
-                    (long)pDibInfoOut->bmiHeader.biWidth *
-                    (long)BytesPerPel)/2;
+				for (icol = 0; icol < ncol; icol++)
+				{
+					FileNum++;
+					/*_fstrcpy (fNameBM,Dir);
+					_fstrcat (fNameBM,"\\");
+					_fstrcat (fNameBM,NameOnly);*/
+					sprintf(fNameBM, "%s\\%s.%3.3x", TempDir, NameOnly, FileNum % 4096);
+					if (PCXFile)
+					{
+						short	l = _fstrlen(Dir);
 
-                  FidBM = GSSiOpenFile (fNameBM,&OFStruct,OF_CREATE);
-                  bmfHead.bfType = 19778;
-                  bmfHead.bfSize = sizeof(BITMAPFILEHEADER) + HeadLen +
-                                   pDibInfoOut->bmiHeader.biSizeImage;
-                  bmfHead.bfReserved1 = 0;
-                  bmfHead.bfReserved2 = 0;
-                  bmfHead.bfOffBits = HeadLen + sizeof(BITMAPFILEHEADER);
-                  if (pDibInfoOut->bmiHeader.biClrUsed == 2)
-                  {
-					RGBQUAD clrtab[] = {{ 0, 0, 0, 0 }, 
-					                   {255, 255, 255, 0 }};
-                  	if (PhotoInterp == 1)
-                  	{
-		               pDibInfoOut->bmiColors[0] = clrtab[0];
-		               pDibInfoOut->bmiColors[1] = clrtab[1];
-                  	}
-                  	else
-                  	{
-		               pDibInfoOut->bmiColors[1] = clrtab[0];
-		               pDibInfoOut->bmiColors[0] = clrtab[1];
-                  	}
-                  }
-                  BigWrite (FidBM,(char *)&bmfHead,sizeof(BITMAPFILEHEADER),-1);
-                  BigWrite (FidBM,(char *)pDibInfoOut,HeadLen,-1);
-				  OrigRow = ClipRect.bottom + irow * (long)height * iOrthoRes;
-				  OrigCol = ClipRect.left + icol * IDNINT((2*(long)width)/BytesPerPel) * iOrthoRes; 
-				  MinRow = OrigRow;
-				  MinCol = OrigCol;  
-				  OrigRowInc = iOrthoRes;
-				  if (ImageIsFliped) 
-				  {
+						if (!_fstrnicmp(Dir, File, l))
+							_fstrcpy(leaf, &File[l]);
+						else
+							sprintf(leaf, "%s.pcx", NameOnly);
+					}
+					else if (BWTIFFile)
+						sprintf(leaf, "%s.tif", NameOnly);
+					else if (BWBMPFile)
+						sprintf(leaf, "%s.bmp", NameOnly);
+					else
+						sprintf(leaf, "%s.%3.3x", NameOnly, FileNum % 4096);
+					if (oldMethod)
+						iInc = iOrthoRes;
+					else
+						iInc = 1;
+					{
+					if (icol == ncol - 1)
+					{
+						inc = last_width % 4;
+						if (inc) inc = 4 - inc;
+						rowlen = (last_width + inc);
+						if (AviOut)
+							pDibInfoOut->bmiHeader.biWidth = approx_width;
+						else if (BytesPerPel)
+							pDibInfoOut->bmiHeader.biWidth = IDNINT(2 * last_width / BytesPerPel);
+					}
+					else
+					{
+						/*    rowlen = colinc;*/
+						inc = width % 4;
+						if (inc) inc = 4 - inc;
+						rowlen = (width + inc);
+
+						pDibInfoOut->bmiHeader.biWidth = IDNINT(2 * width / BytesPerPel);
+					}
+					if (!CreateOutputFile)
+						goto WriteIndex;
+					OutLen = rowlen;
+					GSSiGlobFree(&hOutRow);
+					hOutRow = GSSiGlobAlloc(550, GMEM_MOVEABLE, OutLen);
+					if (irow == nrow - 1 && !AviOut)
+						pDibInfoOut->bmiHeader.biHeight = last_height;
+					else
+						pDibInfoOut->bmiHeader.biHeight = height;
+
+					pDibInfoOut->bmiHeader.biSizeImage =
+						IDNINT((long)pDibInfoOut->bmiHeader.biHeight *
+						(long)pDibInfoOut->bmiHeader.biWidth *
+						(long)BytesPerPel) / 2;
+
+					FidBM = GSSiOpenFile(fNameBM, &OFStruct, OF_CREATE);
+					bmfHead.bfType = 19778;
+					bmfHead.bfSize = sizeof(BITMAPFILEHEADER)+HeadLen +
+						pDibInfoOut->bmiHeader.biSizeImage;
+					bmfHead.bfReserved1 = 0;
+					bmfHead.bfReserved2 = 0;
+					bmfHead.bfOffBits = HeadLen + sizeof(BITMAPFILEHEADER);
+					if (pDibInfoOut->bmiHeader.biClrUsed == 2)
+					{
+						RGBQUAD clrtab[] = { { 0, 0, 0, 0 },
+						{ 255, 255, 255, 0 } };
+						if (PhotoInterp == 1)
+						{
+							pDibInfoOut->bmiColors[0] = clrtab[0];
+							pDibInfoOut->bmiColors[1] = clrtab[1];
+						}
+						else
+						{
+							pDibInfoOut->bmiColors[1] = clrtab[0];
+							pDibInfoOut->bmiColors[0] = clrtab[1];
+						}
+					}
+					BigWrite(FidBM, (char *)&bmfHead, sizeof(BITMAPFILEHEADER), -1);
+					BigWrite(FidBM, (char *)pDibInfoOut, HeadLen, -1);
+					OrigRow = ClipRect.bottom + irow * (long)height * iInc;
+					OrigCol = ClipRect.left + icol * IDNINT((2 * (long)width) / BytesPerPel) * iInc;
+					MinRow = OrigRow;
+					MinCol = OrigCol;
+					OrigRowInc = iInc;
+					if (ImageIsFliped)
+					{
 						rowinc2 = -rowinc;
-						OrigRow = OrigBMHeight - OrigRow -1;   
-						OrigRowInc = -iOrthoRes;
-				  }
-				  else   
-				  		rowinc2 = rowinc;
-          		  FirstBufRow = max (0,min (OrigRow,OrigRow+(pDibInfoOut->bmiHeader.biHeight-1)*OrigRowInc));
-          		    
-	SkipAllRows:		  
-                  for (jrow = 0; jrow <pDibInfoOut->bmiHeader.biHeight; jrow++)
-                  { 
-		            pRow = GlobalLock (hRow);   
-		            pWrite = GlobalLock (hOutRow); 
-		            phOrigRow = 0;
-		            UsedAllRows=FALSE;   
-                    if (irow == nrow-1)
-                    	ThisHeight = last_height;
-                    else
-                    	ThisHeight = height;
-		            
-                    if (irow == nrow-1 && jrow >= last_height) 
-                        pWrite = p0s;
-                    else
-                    {   
-                    	if (hAllRows)
-                    	{
-                    		HPBYTE pAllRows=GlobalLock (hAllRows);
-                    		
-                    		pAllRows += ((long)(OrigRow - FirstBufRow)*rowinc);
-                    		OrigRowData = pAllRows;     
-                    		UsedAllRows = TRUE;
-                    	}
-                    	else 
-                    	{   
-                    		long	RowInc=1, ThisRow=FirstBufRow; 
-                    		long	CurTIFFStrip;
-                    		
-                    		if (!hRowBufs)
-			            	{
-            					hRowBufs = GSSiGlobAlloc ( 551,GHND,sizeof(HANDLE)*height);
-		                    	phOrigRow = (LPHANDLE)GlobalLock (hRowBufs); 
-		                    	if (ImageIsFliped) 
-		                    	{
-		                    		phOrigRow += (ThisHeight-1);
-            					    RowInc = -1;
-            					}  
-            					CurTIFFStrip = -1;
-            					for (i = 0;i < ThisHeight; i++)
-            					{   
-			                		DWORD	OffsetD;
-            						if (ThisRow < OrigBMHeight)
-            						{   
-					                	*phOrigRow = GSSiGlobAlloc ( 552,GMEM_MOVEABLE,rowinc);
-					                	OrigRowData = GlobalLock (*phOrigRow);
-					                	if (hTIFFOffsets)
-					                	{
-					                		HPULONG	pOffset=(HPULONG)GlobalLock (hTIFFOffsets); 
-					                		HPLONG	pLength=(HPLONG)GlobalLock (hTIFFLengths);
- 						            		long	Strip=ThisRow/RowsPerStrip,
-						            				StripOffset=(ThisRow%RowsPerStrip)*TIFFrowinc;   
-							                
-							                if (Strip != CurTIFFStrip)
-							                {    		
-						                		pOffset += Strip;  
-						                		pLength += Strip;
-						                		OffsetD = (DWORD)*pOffset;// + StripOffset; 
-						                		Length = *pLength;
-								                GSSiGlobFree (&hTIFFStrip);
-				            					hTIFFStrip = GSSiGlobAlloc ( 553,GMEM_MOVEABLE,max (rowinc*RowsPerStrip,Length)); 
-				            					pTIFFStrip = GlobalLock (hTIFFStrip);
-							                	GSSillseek2 (FidBMOrig,OffsetD,0);
-							                	BigRead (FidBMOrig,pTIFFStrip,Length);
-							                	DecompressTIFF (pTIFFStrip,Length,rowinc*RowsPerStrip,TIFFCompression);  
-							                	GlobalUnlock (hTIFFStrip);
-							                }
-					                		GlobalUnlock (hTIFFOffsets);
-					                		GlobalUnlock (hTIFFLengths);
-							                CurTIFFStrip = Strip;
-			            					pTIFFStrip = GlobalLock (hTIFFStrip);
-							                hmemmove (OrigRowData,(HPBYTE)(pTIFFStrip+StripOffset),TIFFrowinc);
-						                	GlobalUnlock (hTIFFStrip);
-					                	}
-					                	else 
-					                	{
-					                		Length = TIFFrowinc;
-					                    	OffsetD = (DWORD)ImageOffset + (DWORD)ThisRow * (DWORD)TIFFrowinc;   
-						                	GSSillseek2 (FidBMOrig,OffsetD,0);
-						                	BigRead (FidBMOrig,OrigRowData,Length);
-					                    } 
-					                    GlobalUnlock (*phOrigRow);
-					                	CheckForContinue (TRUE);
-					                }
-					                ThisRow += iOrthoRes;   
-					                phOrigRow += RowInc;
-				                } 
-				                GlobalUnlock (hRowBufs); 
-				                GSSiGlobFree (&hTIFFStrip);
-			                }
-	                    	phOrigRow = (LPHANDLE)GlobalLock (hRowBufs);
-	                    	phOrigRow += jrow;
-	                    	OrigRowData = GlobalLock (*phOrigRow);
-		                }
-                   		OrigRow += OrigRowInc;
-                   		OrigRowData += OrigCol*IDNINT(BytesPerPel/2);
-                        MoveHtoF (pRow,OrigRowData,OrigBMRowLen-(OrigCol*IDNINT(BytesPerPel/2)));
-                        if (phOrigRow)
-                        {
-	                        GlobalUnlock (*phOrigRow);
-	                        GlobalUnlock (hRowBufs);
-	                    } 
-	                    if (UsedAllRows)
-	                    	GlobalUnlock (hAllRows);
-                        BPP = max (1,IDNINT(BytesPerPel/2));
-                        pWrite2 = pWrite;
-                        hmemset (pWrite2,0,OutLen); 
-                        {
-                        	UINT	i,j,jinc=iOrthoRes*BPP;
-							if (ImageIsTiff)
-		                        for (i=0,j=0;i<OutLen-BPP+1 && j<OrigWidth*BPP;i+=BPP,j+=jinc,pRow+=jinc)
-		                        {
-		                        	n=BPP;
-		                        	while (n--)
-		                        		*pWrite2++ = *(HPBYTE)(pRow+n); 
-		                        }
-	                        else
-		                        for (i=0,j=0;i<OutLen-BPP+1 && j<OrigWidth*BPP;i+=BPP,j+=jinc,pRow+=jinc)
-		                        {
-		                        	n=BPP; 
-		                        	m=0;
-		                        	while (n--)
-		                        		*pWrite2++ = *(HPBYTE)(pRow+m++);
-		                        }
-	                    }
-                    }  
-                    if (BigWrite (FidBM,pWrite,OutLen,-1) != OutLen)
-                    {   
-                    	char	mess[128];
-                    	
-                    	sprintf (mess,"Error writing %ld bytes to bitmap on chan %i - disk may be full",(long)OutLen,FidBM);
-                        MessageBox(GetFocus(),mess,OFStruct.szPathName,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
-                        GSSiClose (FidBM); 
-                        GSSiClose (FidBMOrig); 
-                        GSSiGlobUlFree (&h0s);
-                        GSSiGlobUlFree (&hRow);
-                        GSSiGlobUlFree (&hOutRow);
-                        GSSiGlobUlFree (&hDibInfo);
-                        GSSiGlobUlFree (&hDibInfoOut);
-						GSSiGlobFree (&hTIFFOffsets);                        
-						GSSiGlobFree (&hTIFFLengths);                        
-                        goto Exit;
-                    }
-                    GlobalUnlock (hOutRow); 
-                    GlobalUnlock (hRow);
-                    if (AviOut && rowlen < width)
-                        BigWrite(FidBM,p0s,width-rowlen,-1);
-                    CheckForContinue (TRUE);
-                  } 
-                  GSSiClose (FidBM);  
-                  
+						OrigRow = OrigBMHeight - OrigRow - 1;
+						OrigRowInc = -iInc;
+					}
+					else
+						rowinc2 = rowinc;
+					FirstBufRow = max(0, min(OrigRow, OrigRow + (pDibInfoOut->bmiHeader.biHeight - 1)*OrigRowInc));
+
+				SkipAllRows:
+					for (jrow = 0; jrow < pDibInfoOut->bmiHeader.biHeight; jrow++)
+					{
+						pRow = GlobalLock(hRow);
+						pWrite = GlobalLock(hOutRow);
+						phOrigRow = 0;
+						UsedAllRows = FALSE;
+						if (irow == nrow - 1)
+							ThisHeight = last_height;
+						else
+							ThisHeight = height;
+
+						if (irow == nrow - 1 && jrow >= last_height)
+							pWrite = p0s;
+						else
+						{
+							if (hAllRows)
+							{
+								HPBYTE pAllRows = GlobalLock(hAllRows);
+
+								pAllRows += ((long)(OrigRow - FirstBufRow)*rowinc);
+								OrigRowData = pAllRows;
+								UsedAllRows = TRUE;
+							}
+							else if (oldMethod)
+							{
+								long	RowInc = 1, ThisRow = FirstBufRow;
+								long	CurTIFFStrip;
+
+								if (!hRowBufs)
+								{
+									hRowBufs = GSSiGlobAlloc(551, GHND, sizeof(HANDLE)*height);
+									phOrigRow = (LPHANDLE)GlobalLock(hRowBufs);
+									if (ImageIsFliped)
+									{
+										phOrigRow += (ThisHeight - 1);
+										RowInc = -1;
+									}
+									CurTIFFStrip = -1;
+									for (i = 0; i < ThisHeight; i++)
+									{
+										DWORD	OffsetD;
+										if (ThisRow < OrigBMHeight)
+										{
+											*phOrigRow = GSSiGlobAlloc(552, GMEM_MOVEABLE, rowinc);
+											OrigRowData = GlobalLock(*phOrigRow);
+											if (hTIFFOffsets)
+											{
+												HPULONG	pOffset = (HPULONG)GlobalLock(hTIFFOffsets);
+												HPLONG	pLength = (HPLONG)GlobalLock(hTIFFLengths);
+												long	Strip = ThisRow / RowsPerStrip,
+													StripOffset = (ThisRow%RowsPerStrip)*TIFFrowinc;
+
+												if (Strip != CurTIFFStrip)
+												{
+													pOffset += Strip;
+													pLength += Strip;
+													OffsetD = (DWORD)*pOffset;// + StripOffset; 
+													Length = *pLength;
+													GSSiGlobFree(&hTIFFStrip);
+													hTIFFStrip = GSSiGlobAlloc(553, GMEM_MOVEABLE, max(rowinc*RowsPerStrip, Length));
+													pTIFFStrip = GlobalLock(hTIFFStrip);
+													GSSillseek2(FidBMOrig, OffsetD, 0);
+													BigRead(FidBMOrig, pTIFFStrip, Length);
+													DecompressTIFF(pTIFFStrip, Length, rowinc*RowsPerStrip, TIFFCompression);
+													GlobalUnlock(hTIFFStrip);
+												}
+												GlobalUnlock(hTIFFOffsets);
+												GlobalUnlock(hTIFFLengths);
+												CurTIFFStrip = Strip;
+												pTIFFStrip = GlobalLock(hTIFFStrip);
+												hmemmove(OrigRowData, (HPBYTE)(pTIFFStrip + StripOffset), TIFFrowinc);
+												GlobalUnlock(hTIFFStrip);
+											}
+											else
+											{
+												Length = TIFFrowinc;
+												OffsetD = (DWORD)ImageOffset + (DWORD)ThisRow * (DWORD)TIFFrowinc;
+												GSSillseek2(FidBMOrig, OffsetD, 0);
+												BigRead(FidBMOrig, OrigRowData, Length);
+											}
+											GlobalUnlock(*phOrigRow);
+											CheckForContinue(TRUE);
+										}
+										ThisRow += iInc;
+										phOrigRow += RowInc;
+									}
+									GlobalUnlock(hRowBufs);
+									GSSiGlobFree(&hTIFFStrip);
+								}
+								phOrigRow = (LPHANDLE)GlobalLock(hRowBufs);
+								phOrigRow += jrow;
+								OrigRowData = GlobalLock(*phOrigRow);
+								lenSourceRow = OrigBMRowLen;
+							}
+							else
+							{
+								BITMAPINFOHEADER dibInfo;
+
+								GetBitmapInfoFromHandle(&dibInfo, hDibFactored);
+								OrigRowData = FreeImage_GetScanLine(hDibFactored, OrigRow);
+								lenSourceRow = dibInfo.biSizeImage / dibInfo.biHeight;
+								OrigWidth = dibInfo.biWidth;
+							}
+							OrigRow += OrigRowInc;
+							OrigRowData += OrigCol*IDNINT(BytesPerPel / 2);
+							MoveHtoF(pRow, OrigRowData, lenSourceRow - (OrigCol*IDNINT(BytesPerPel / 2)));
+							if (phOrigRow)
+							{
+								GlobalUnlock(*phOrigRow);
+								GlobalUnlock(hRowBufs);
+							}
+							if (UsedAllRows)
+								GlobalUnlock(hAllRows);
+							BPP = max(1, IDNINT(BytesPerPel / 2));
+							pWrite2 = pWrite;
+							hmemset(pWrite2, 0, OutLen);
+							{
+								UINT	i, j, jinc = iInc*BPP;
+								if (ImageIsTiff)
+								for (i = 0, j = 0; i < OutLen - BPP + 1 && j < OrigWidth*BPP; i += BPP, j += jinc, pRow += jinc)
+								{
+									n = BPP;
+									while (n--)
+										*pWrite2++ = *(HPBYTE)(pRow + n);
+								}
+								else
+								for (i = 0, j = 0; i < OutLen - BPP + 1 && j < OrigWidth*BPP; i += BPP, j += jinc, pRow += jinc)
+								{
+									n = BPP;
+									m = 0;
+									while (n--)
+										*pWrite2++ = *(HPBYTE)(pRow + m++);
+								}
+							}
+						}
+						if (BigWrite(FidBM, pWrite, OutLen, -1) != OutLen)
+						{
+							char	mess[128];
+
+							sprintf(mess, "Error writing %ld bytes to bitmap on chan %i - disk may be full", (long)OutLen, FidBM);
+							MessageBox(GetFocus(), mess, OFStruct.szPathName, MB_OK | MB_ICONQUESTION | MB_TASKMODAL);
+							GSSiClose(FidBM);
+							GSSiClose(FidBMOrig);
+							GSSiGlobUlFree(&h0s);
+							GSSiGlobUlFree(&hRow);
+							GSSiGlobUlFree(&hOutRow);
+							GSSiGlobUlFree(&hDibInfo);
+							GSSiGlobUlFree(&hDibInfoOut);
+							GSSiGlobFree(&hTIFFOffsets);
+							GSSiGlobFree(&hTIFFLengths);
+							goto Exit;
+						}
+						GlobalUnlock(hOutRow);
+						GlobalUnlock(hRow);
+						if (AviOut && rowlen < width)
+							BigWrite(FidBM, p0s, width - rowlen, -1);
+						CheckForContinue(TRUE);
+					}
+					GSSiClose(FidBM);
+				}
                   if (AviOut)
                   {  
                      LPBITMAPINFOHEADER pDIB;
                      HDIB   hDIB, hNewDIB;
-                     char AVIFile[128];
+                     char AVIFile[MAX_PATH];
                      BOOL   st;  
                      long	nc;
                      char	OrthoImageExtension[6]=".gci";
@@ -1903,7 +1938,10 @@ Exit:
             FreeRowBuffers (&hRowBufs,height);
             GSSiGlobFree (&hAllRows); 
             if (FidBMOrig != HFILE_ERROR)
-            	GSSiClose (FidBMOrig);   
+            	GSSiClose (FidBMOrig); 
+			if (hDibFactored)
+				FreeImage_Unload(hDibFactored);
+
             GSSiGlobFree (&hRow);
             GSSiGlobFree (&hOutRow);
             GSSiGlobUlFree (&h0s);
