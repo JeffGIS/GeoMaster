@@ -27,7 +27,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <UseOfAtl>false</UseOfAtl>
     <CharacterSet>NotSet</CharacterSet>
@@ -128,7 +128,7 @@
     <Link>
       <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.51</Version>
+      <Version>34.53</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
