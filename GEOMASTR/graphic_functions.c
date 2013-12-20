@@ -1624,6 +1624,7 @@ Next:
 	    }
     	goto RtnFalse;
     case WM_LBUTTONUP:
+	case WM_LBUTTONDBLCLK:
     	ButtonPoint = POINTStoPOINT(MAKEPOINTS(lParam));
 		if (Function == GF_AUTO_IDENTIFY)
 		{   
@@ -12974,6 +12975,8 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 		return TimerID;
 	if (!CurView)
 		return FALSE;
+	if (isTouchScreen)
+		Scale *= 2;
 	HaltMapDisplay (FALSE);
 	switch (inc)
 	{

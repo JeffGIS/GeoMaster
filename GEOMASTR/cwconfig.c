@@ -1044,6 +1044,12 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 {
 	char cmdLine[1024];
 
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	GetNumMonitors();
+	typeChassis = ChassisType();
+	if (typeChassis == 3)
+		isTouchScreen = TRUE;
+	MonitorType(1);
 	//MessageBox (0,lpszCmdLine,"First",MB_OK);
 	if (strstr(lpszCmdLine, "/CMDFILE "))
 	{
@@ -1105,7 +1111,6 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
  InitCtrls.dwICC = ICC_WIN95_CLASSES;
  InitCtrls.dwSize = sizeof (INITCOMMONCONTROLSEX);
  InitCommonControlsEx(&InitCtrls);
- CoInitialize (NULL);
 // LoadPuertoRicoCities (1);
 // AddPuertoRicoToCities4 (1);
 
@@ -1153,9 +1158,9 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 }
 */
  
-#if !CHECKMEM
+//#if !CHECKMEM
 	AddVectoredHandlers (0,0);
-#endif
+//#endif
 //long size=1024L*1024L*256;
  //HANDLE hMem=GSSiGlobAlloc (0,GHND,size);
  //GSSiGlobFree (&hMem);
@@ -1724,7 +1729,8 @@ GSSiExitProg (437);
 #if CHECKMEM
 		 GSSiGLOBALLOCCLOSE ();
 #endif
-exit:
+	 exit:
+ CoUninitialize();
 #if _DEBUG
 	_CrtDumpMemoryLeaks();
 #endif
@@ -1817,7 +1823,10 @@ SetLastMessage(Message);
   if (Message == WM_SIZE)
 	  ii=1;
   if (Message == WM_LBUTTONDBLCLK)
-	ii=1;
+  {
+	  ii = IsPointOnTouchScreen(hWnd,POINTStoPOINT(MAKEPOINTS(lParam)));
+
+  }
   if (Message == WM_F1DOWN)
   	ii=1;
   if (Message == WM_SHOWWINDOW)
@@ -4671,14 +4680,18 @@ DisplayParcel:
 		         	CloseMap(FALSE);
                  break;
 			case SIZE_MAXIMIZED:
+				AdjustToolbarPositions();
+				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
+				break;
             case SIZE_RESTORED:  
             {
-
+			    HaltMapDisplay(FALSE);
 				hDC = GetDC (hWnd);
 				HavePaint = SaveHavePaint;		
 				GetClientRect (hWndMain,&WindowRect); 
 				NormalRect (&WindowRect);  
-				RestoreScreenRect (hDC,hBMMove,MoveStartRect,WindowRect);
+				//RestoreScreenRect (hDC,hBMMove,MoveStartRect,WindowRect);
+				RestoreFullWindowBitmap();
 				ReleaseDC (hWnd,hDC);
 				AdjustToolbarPositions ();
 				if (EqualRect (&FullWindowBitMapRect,&WindowRect))

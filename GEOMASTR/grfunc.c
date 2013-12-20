@@ -388,7 +388,8 @@ GSSiExitProg (1338);
 	else if (Message == GF_ENTER_VIEWPORT)
 	{
 	}  
-	else if (Message == WM_RBUTTONUP && !(wParam & MK_LBUTTON)) 
+	else if ((Message == WM_RBUTTONUP && !(wParam & MK_LBUTTON)) ||
+			 Message == WM_LBUTTONDBLCLK) 
 	{   
 		short	VPID;
 		POINT	ButtonPoint = POINTStoPOINT(MAKEPOINTS(lParam));
