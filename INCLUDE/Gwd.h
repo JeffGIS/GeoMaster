@@ -8,7 +8,7 @@ BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldType
 short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldIDs,BOOL DoScan,long NumToScan);
 long OutputToFile(LPSTR OutFile, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFields, HANDLE hKeyFields, HANDLE hFieldTypes, BOOL UseHLT, BOOL OutToScreen, int GMHeader, BOOL Compress, BOOL ScanForFieldTypes, long NumToScan, HWND StatusWnd, HWND hWndDlg, BOOL tabDlm);
 double GetNumericFieldData (HANDLE hDB,LPFIELDINFO lpField, int FunctionID,int MultiValOption,LPSTR CmdString, long iref, int Type,LPSHORT irc,LPSTR DataFileID);
-int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref,short FunctionID,LPSTR CmdString, LPSTR Value,LPSTR DataFileID,int combineOption);
+int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref,short FunctionID,LPSTR CmdString, LPSTR Value,int maxLen,LPSTR DataFileID,int combineOption);
 BOOL SetFieldValFromDlgItem (LPGWDHEADER lpGWDHead,HWND hWndDlg,UINT icntl,LPSTR FieldName);
 BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpField,LPSTR CharVal,BOOL BinMode,BOOL IncrementValue);
 BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldName,LPSTR CharVal,BOOL BinMode);

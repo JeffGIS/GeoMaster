@@ -540,7 +540,6 @@ void QuitGraphics()
 	SaveDataToUndoFile (0,0,0,0,0);    
 	CheckPointEnd ();
 	AllowJournal = FALSE;
-	CoUninitialize();
 	GetTempDir (0);
 	ConvertToNewLocation (0,0);
 	ScreenBufferDC ((HWND)1,0);

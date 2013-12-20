@@ -931,6 +931,7 @@ static short num_tables, LastTableChoice=-2,
 static  FIELDINFO FIELD;
 static  LPFIELDINFO lpFieldInfo = &FIELD;
     short     Choice, rc, i,j, outlen, deslen,ii;
+	int		  type;
     static  BOOL ValidTable = FALSE;     
     HANDLE   DBHandle;
     LPSTR   lpSTRING, pBAR;
@@ -993,7 +994,7 @@ LoadFields:
                 else
                     SendDlgItemMessage (hWndDlg,*pcntlFIELD_NAMES,LB_RESETCONTENT,0,0);
             }
-            if (OpenDataFile (DataFile,"",BT_READ,hThemeDB))
+            if ((type = OpenDataFile (DataFile,"",BT_READ,hThemeDB)))
 			{
 	            SQLPtr = (LPOPENSQLDATA) GlobalLock (*hThemeDB);
 	            FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
@@ -1016,6 +1017,7 @@ LoadFields:
 	            }           
 	            GlobalUnlock (SQLPtr->OFHandle);
 	            GlobalUnlock (*hThemeDB); 
+				*DataFileType = type;
 	        }
             PostMessage(hWndDlg, WM_COMMAND, IDC_OPEN_DB, 0L);
             
@@ -2463,7 +2465,7 @@ double GetNumericFieldData (HANDLE hSQL,LPFIELDINFO lpField, int FunctionID,int 
     long        Offset; 
     BOOL		HaveData=FALSE;
     double      rtn, Sum=0, MinMax, Minv, Maxv;                  
-    HANDLE		hMem = GSSiGlobAlloc ( 271,GMEM_MOVEABLE,512);
+    HANDLE		hMem = GSSiGlobAlloc ( 271,GMEM_MOVEABLE,4096);
     LPSTR		str=GlobalLock (hMem);
     short         st, i, len;
     LPSTR       ep, ValC; 
@@ -2808,13 +2810,13 @@ GSSiExitProg (633);
 #endif
 }
 
-int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short FunctionID,LPSTR CmdString,LPSTR Value,LPSTR DataFileID,int combineOption)
+int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short FunctionID,LPSTR CmdString,LPSTR Value,int maxLen,LPSTR DataFileID,int combineOption)
 #if ENABLETRACE
 {GSSiEnterProg (634);
 #endif
 {   
-    HANDLE		hMem = GSSiGlobAlloc ( 272,GMEM_MOVEABLE,512);
-    LPSTR       str=GlobalLock (hMem);
+	HANDLE		hMem = GSSiGlobAlloc(272, GMEM_MOVEABLE, 4096);
+	LPSTR		str = GlobalLock(hMem);
     short       irc=0;
 	int			n=0;
 	HANDLE		hCombined=0;
@@ -2855,7 +2857,7 @@ int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref, short Function
 		}
 		if (!n)
 		{
-			strcpy (Value,str);
+			strncpy0 (Value,str,maxLen-1);
 			if (hCombined)
 			{
 				pCombined = GlobalLock (hCombined);
@@ -2915,20 +2917,21 @@ inserted:
 	}
 	if (!n)
     	irc = 1;
-	GSSiGlobUlFree (&hMem); 
 	if (hCombined)
 	{
 		pCombined = GlobalLock (hCombined);
 		if (n)
 		{
-			sprintf (Value,"%s(%i)",pCombined,nValues[0]);
+			sprintf (str,"%s(%i)",pCombined,nValues[0]);
 			for (i=1;i<n;i++)
 			{
-				sprintf (strchr(Value,0),"-%s(%i)",pCombined+i*(MAX_COMBINED_ELEMENT_LENGTH+1),nValues[i]);
+				sprintf (strchr(str,0),"-%s(%i)",pCombined+i*(MAX_COMBINED_ELEMENT_LENGTH+1),nValues[i]);
 			}
 		}
 		GSSiGlobUlFree (&hCombined);
+		strncpy0(Value, str, maxLen - 1);
 	}
+	GSSiGlobUlFree(&hMem);
 {
 #if ENABLETRACE
 GSSiExitProg (634);

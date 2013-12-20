@@ -466,11 +466,11 @@ GSSiExitProg (1262);
 				goto RtnNotProcessed;
 			SwitchThemeSHPFile ();		
 			status = GetCharFieldData (CurTheme->hThemeDB,
-				&CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,CityData.Text,CurTheme->DataFileID,0);
+				&CurTheme->Field, iref, CurTheme->FieldFun, CurTheme->Value, CityData.Text, MAX_CITYNAME_LENGTH,CurTheme->DataFileID, 0);
 			if (!status)
 			{
 				status = GetCharFieldData (CurTheme->hThemeDB,
-									&CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->ClassBM[0],Value,CurTheme->DataFileID,0);
+									&CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->ClassBM[0],Value,sizeof(Value),CurTheme->DataFileID,0);
 				pop = atoi (Value);
 				if (pop >= CurTheme->MinCityPop)
 				{
@@ -1319,7 +1319,7 @@ SetClassChar:
 NextValue:		
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
-								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,CurTheme->DataFileID,CurTheme->MultiValOption); 
+								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,sizeof(Value),CurTheme->DataFileID,CurTheme->MultiValOption); 
 CheckStatus:
 				if (status)
 				{   
@@ -1340,12 +1340,12 @@ CheckStatus:
 					{
 						if (ClassNo < MinClass && CurTheme->MultiValOption < 2)   
 						{
-							_fstrcpy (MinClassValue,Value);
+							strncpy0 (MinClassValue,Value,sizeof(MinClassValue)-1);
 							MinClass = ClassNo;
 						}
 						else if (ClassNo > MinClass && CurTheme->MultiValOption == 2)   
 						{
-							_fstrcpy (MinClassValue,Value);
+							strncpy0(MinClassValue, Value, sizeof(MinClassValue)-1);
 							MinClass = ClassNo;
 						}
 						else if (CurTheme->MultiValOption == 3)
@@ -1353,7 +1353,7 @@ CheckStatus:
 							CurTheme->ClassCount[ClassNo-1]++;
 							if (ClassNo > MinClass)
 							{
-								strcpy (MinClassValue,Value);
+								strncpy0(MinClassValue, Value, sizeof(MinClassValue)-1);
 								MinClass = ClassNo;
 							}
 						}
@@ -1377,14 +1377,14 @@ CheckStatus:
 							CurTheme->ClassCount[ClassNo-1]++;
 							if (ClassNo > MinClass)
 							{
-								strcpy (MinClassValue,Value);
+								strncpy0(MinClassValue, Value, sizeof(MinClassValue)-1);
 								MinClass = ClassNo;
 							}
 						}
 					}
 					else if (CurTheme->AllValueClass && CurTheme->AllValueClass < CurTheme->NumClass+1)
 					{
-						_fstrcpy (MinClassValue,Value);
+						strncpy0(MinClassValue, Value, sizeof(MinClassValue)-1);
 						MinClass = ClassNo;
 					}
 					goto NextValue;
@@ -1402,7 +1402,7 @@ CheckStatus:
 			{		
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
-					&CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,CurTheme->DataFileID,CurTheme->MultiValOption);
+					&CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,sizeof(Value),CurTheme->DataFileID,CurTheme->MultiValOption);
 			} 
 			if (status==1)
 				goto ProcessMissing; 
@@ -1445,10 +1445,10 @@ CheckStatus:
 					else
 						ShowVal.AZ = -LTWOPI(CurView->Rotation);
 					SetShowValPoly (iref,FALSE);
-					_fstrcpy (ShowVal.Text,Value);
+					strncpy0 (ShowVal.Text, Value, sizeof(ShowVal.Text)-1);
 				}
 			} 
-			strcpy (CurTheme->CurValue,Value);
+			strncpy0(CurTheme->CurValue, Value,sizeof(CurTheme->CurValue)-1);
 			_fstrncpy (KeyVal,Value,lnKey);
 			KeyVal[lnKey]=0;
 			ClassNo = 0;

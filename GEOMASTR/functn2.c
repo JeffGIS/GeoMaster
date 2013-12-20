@@ -3923,6 +3923,20 @@ GSSiExitProg (1350);
 				goto Rtnl;
 			}
 
+		case 1137:
+		{
+				LPSTR	pName;
+
+				nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+				hName = GSSiGlobAlloc(17, GHND, 1024);
+				pName = GlobalLock(hName);
+				strcpy(pName, Arg[2]);
+				GlobalUnlock(hName);
+				CreateDialog(hInst, (LPSTR)"DISPLAY_GWD_DATA", hWndMain, (DLGPROC)DISPLAY_GWD_DATAMsgProc);
+				goto RtnTrue;
+		}
+
+			break;
 		case 1201: //$FINDWAYPOINT ()
         {
             DoPaint = FALSE;      

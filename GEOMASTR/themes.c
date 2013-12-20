@@ -2533,7 +2533,7 @@ InvalidSV1:
 NextValue:		
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
-								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,CurTheme->DataFileID,CurTheme->MultiValOption); 
+								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,256,CurTheme->DataFileID,CurTheme->MultiValOption); 
 CheckStatus:
 				if (status)
 				{
@@ -2578,7 +2578,7 @@ CheckStatus:
 			{
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
-								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,CurTheme->DataFileID,CurTheme->MultiValOption); 
+								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,256,CurTheme->DataFileID,CurTheme->MultiValOption); 
 			}
 			if (status==1)
 				goto ProcessMissing; 

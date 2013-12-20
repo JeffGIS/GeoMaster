@@ -467,7 +467,9 @@ int	GetFunctionID11 (LPSTR str)
 			if (!_fstrnicmp (str,"SCREENCOLOR",11)) return 1134; 
 			if (!_fstrnicmp (str,"INTERTWINED",11)) return 1135; 
 			if (!_fstrnicmp (str,"INTERLEAVED",11)) return 1135; 
-			if (!_fstrnicmp (str,"STRINGTONUM",11)) return 1136; 
+			if (!_fstrnicmp(str, "STRINGTONUM", 11)) return 1136;
+			if (!_fstrnicmp(str, "DATADISPLAY", 11)) return 1137;
+
 			return 0; 
 			
 }
