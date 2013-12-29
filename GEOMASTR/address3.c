@@ -1597,13 +1597,20 @@ BOOL GetFieldInfoFromName (HANDLE hDB,LPSTR FldName,LPSTR pFldType,LPSHORT pFldL
 			default:
 			case BT_CHAR:
 			break;
-						
+				
+			case SQL_INTEGER:
+			case SQL_SMALLINT:
 			case BT_INTEGER:
 			case BT_INT2:
 			case BT_INT4:
 			*pFldType = 'B';
 			break;
-						
+					
+			case SQL_NUMERIC:
+			case SQL_DECIMAL:
+			case SQL_FLOAT:
+			case SQL_REAL:
+			case SQL_DOUBLE:
 			case BT_REAL:
 			case BT_REAL4:
 			case BT_REAL8:

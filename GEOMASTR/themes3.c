@@ -1950,10 +1950,9 @@ BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
     LPOPENFILEDATA  FilePtr;
     LPOPENSQLDATA   SQLPtr;
 	LPFIELDINFO lpFieldInfo;  
-	BOOL	ShowDesc;
 	char	str[512]; 
 	int		i;
-	static	BOOL	AddSpaces=TRUE, AddBrackets=TRUE, AddCommas=FALSE, AddTabs=FALSE, AddQuotes=FALSE, FirstShow;
+	static	BOOL	AddSpaces=TRUE, AddBrackets=TRUE, AddCommas=FALSE, AddTabs=FALSE, AddQuotes=FALSE, FirstShow, ShowDesc=FALSE, AddNewLine=FALSE;
 
  short    BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
@@ -1984,7 +1983,7 @@ GSSiExitProg (620);
 			ShowWindow(GetDlgItem(hWndDlg,IDC_COMMASBTWNFIELDS),SW_HIDE);   
 			ShowWindow(GetDlgItem(hWndDlg,IDC_QUOTESAROUNDFIELDS),SW_HIDE);   
 			ShowWindow(GetDlgItem(hWndDlg,IDC_TABBTWNFIELDS),SW_HIDE);   
-			ShowWindow(GetDlgItem(hWndDlg,IDC_SHOWDESCRIPTION),SW_HIDE);   
+			ShowWindow(GetDlgItem(hWndDlg,IDC_ADDNEWLINE),SW_HIDE);   
 			SendDlgItemMessage (hWndDlg,IDC_BRACKETFIELDS,(UINT)BM_SETCHECK,TRUE,(LPARAM)0L); 
 			SendDlgItemMessage (hWndDlg,IDC_COMMASBTWNFIELDS,(UINT)BM_SETCHECK,TRUE,(LPARAM)0L); 
 		}
@@ -1994,7 +1993,8 @@ GSSiExitProg (620);
 			SendDlgItemMessage (hWndDlg,IDC_BRACKETFIELDS,(UINT)BM_SETCHECK,AddBrackets,(LPARAM)0L); 
 			SendDlgItemMessage (hWndDlg,IDC_COMMASBTWNFIELDS,(UINT)BM_SETCHECK,AddCommas,(LPARAM)0L); 
 			SendDlgItemMessage (hWndDlg,IDC_QUOTESAROUNDFIELDS,(UINT)BM_SETCHECK,AddQuotes,(LPARAM)0L); 
-			SendDlgItemMessage (hWndDlg,IDC_TABBTWNFIELDS,(UINT)BM_SETCHECK,AddTabs,(LPARAM)0L); 
+			SendDlgItemMessage(hWndDlg, IDC_TABBTWNFIELDS, (UINT)BM_SETCHECK, AddTabs, (LPARAM)0L);
+			SendDlgItemMessage(hWndDlg, IDC_ADDNEWLINE, (UINT)BM_SETCHECK, AddNewLine, (LPARAM)0L);
 		}
     	if (!hFLDB)
     	{
@@ -2039,12 +2039,11 @@ GSSiExitProg (620);
 			}
 			break;
     	} 
-    	EnableWindow (GetDlgItem(hWndDlg,IDC_SHOWDESCRIPTION),TRUE);
+    	EnableWindow (GetDlgItem(hWndDlg,IDC_SHOWDESCRIPT),TRUE);
     	EnableWindow (GetDlgItem(hWndDlg,IDC_SHOWDATA),TRUE);
 
   	case GSSI_REINITDIALOG:
 		SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_RESETCONTENT,0,0);
-        ShowDesc = SendDlgItemMessage (hWndDlg,IDC_SHOWDESCRIPTION,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
 		SQLPtr = (LPOPENSQLDATA)GlobalLock (hFLDB);
 		FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
 		lpFieldInfo = &FilePtr->FldInfo; 
@@ -2092,20 +2091,25 @@ GSSiExitProg (620);
                		GlobalUnlock (SQLPtr->OFHandle);
                		GlobalUnlock (*lpFileHandle);
                	}
-               	if (FoundIt)
-               		break;
+				if (FoundIt)
+				{
+					ShowDesc = FALSE;
+					break;
+				}
             }
             GlobalUnlock (FilePathHandle);
          }
-		 break;                              
+		ShowDesc = FALSE;
+		break;
 
     case WM_CLOSE:
 		 AddSpaces = SendDlgItemMessage (hWndDlg,IDC_SPACES,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);     
 		 AddBrackets = SendDlgItemMessage (hWndDlg,IDC_BRACKETFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);     
 		 AddCommas = SendDlgItemMessage (hWndDlg,IDC_COMMASBTWNFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);     
 		 AddQuotes = SendDlgItemMessage (hWndDlg,IDC_QUOTESAROUNDFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);     
-		 AddTabs = SendDlgItemMessage (hWndDlg,IDC_TABBTWNFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);     
-	     DestroyWindow(hWndDlg);  
+		 AddTabs = SendDlgItemMessage(hWndDlg, IDC_TABBTWNFIELDS, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+		 AddNewLine = SendDlgItemMessage(hWndDlg, IDC_ADDNEWLINE, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+		 DestroyWindow(hWndDlg);
          break;  
 
     case WM_DESTROY:
@@ -2144,7 +2148,8 @@ GSSiExitProg (620);
 			  case IDCANCEL:
 				  EndDialog (hWndDlg,0);
 				  break;
-           	  case IDC_SHOWDESCRIPTION:
+           	  case IDC_SHOWDESCRIPT:
+				ShowDesc = TRUE;
            	    PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
 				break;
 			
@@ -2201,8 +2206,9 @@ GSSiExitProg (620);
         	  case IDC_TABBTWNFIELDS:
         	  case IDC_COMMASBTWNFIELDS:
         	  case IDC_BRACKETFIELDS:
-        	  case IDC_QUOTESAROUNDFIELDS:
-        	  	goto OutputFields;  
+			  case IDC_QUOTESAROUNDFIELDS:
+			  case IDC_ADDNEWLINE:
+				  goto OutputFields;
         	  	
 	          case IDC_FIELDS:
 	          switch(HIWORD(wParam))
@@ -2218,9 +2224,9 @@ GSSiExitProg (620);
 	            	LPSTR	pText; 
 	            	BOOL	First,KeepMemLengthSave=KeepMemLength; 
 	            	char	quote[2]="";
+					char	fieldType='C';
+					short	fieldLen;
 	            	
-					if (SendDlgItemMessage (hWndDlg,IDC_QUOTESAROUNDFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))	 
-                    	_fstrcpy (quote,"\"");
 	            	
 	            	KeepMemLength = TRUE;  
 	            	hText = GSSiGlobAlloc ( 261,GHND,USHRT_MAX);
@@ -2248,18 +2254,31 @@ GSSiExitProg (620);
 							First=FALSE;
 						else
 						{   
-		                   if (SendDlgItemMessage (hWndDlg,IDC_TABBTWNFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))  
-		                   { 
-		                   		_fstrcat (pText,"$CHR(9)");
-		                   		pText += 7; 
-		                   }
-		                   if (SendDlgItemMessage (hWndDlg,IDC_COMMASBTWNFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
+							if (SendDlgItemMessage(hWndDlg, IDC_TABBTWNFIELDS, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L))
+							{
+								_fstrcat(pText, "$CHR(9)");
+								pText += 7;
+							}
+							if (SendDlgItemMessage(hWndDlg, IDC_COMMASBTWNFIELDS, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L))
 								_fstrcat (pText++,",");
-		                   if (SendDlgItemMessage (hWndDlg,IDC_SPACES,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
+		                    if (SendDlgItemMessage (hWndDlg,IDC_SPACES,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
 								_fstrcat (pText++," ");
+							if (SendDlgItemMessage(hWndDlg, IDC_ADDNEWLINE, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L))
+							{
+								_fstrcat(pText, "\r\n");
+								pText += 2;
+							}
 						}
-	                	SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETTEXT,*lpItems++,(LPARAM)str);
-						if ((pTab = strchr (str,'\t')))
+						SendDlgItemMessage(hWndDlg, IDC_FIELDS, LB_GETTEXT, *lpItems++, (LPARAM)str);
+						if (hFLDB == (HANDLE)1)
+							fieldType = 'C';
+						else
+							GetFieldInfoFromName(hFLDB, str, &fieldType, &fieldLen);
+						if (SendDlgItemMessage(hWndDlg, IDC_QUOTESAROUNDFIELDS, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L) && fieldType == 'C')
+							_fstrcpy(quote, "'");
+						else
+							*quote = 0;
+						if ((pTab = strchr(str, '\t')))
 							*pTab = 0;
 						if (SendDlgItemMessage (hWndDlg,IDC_BRACKETFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))	 
 							sprintf (pText,"%s[%s]%s",quote,str,quote); 
