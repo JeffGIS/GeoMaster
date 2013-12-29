@@ -1,4 +1,6 @@
 extern int			DepthColorIntensity;
+extern int			typeChassis;
+extern BOOL			isTouchScreen;
 extern int			ShallowWaterHighlight;
 extern int			WaterLevelOffset;
 extern HFILE			SavedGraphicsFid;

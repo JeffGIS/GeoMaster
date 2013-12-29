@@ -5690,7 +5690,13 @@ HRGN CreateVPRgn (BOOL Invert,BOOL InReset)
     LPVIEWPORT  SaveVP;
     static	BOOL	testspeed=FALSE;
 	static	int	ncalls=0;
-    
+	
+	if (!CurView)
+		return 0;
+
+	//if (BufferedScreen && hDCScreenBuffer == CurView->hDC)
+	//	return 0;
+
 //    if (Printing)
 //    	return 0;
 //return 0; 
