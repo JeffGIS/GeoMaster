@@ -10,6 +10,7 @@
 
 static	char	MsgAtPos[1024];  
 static	int		MsgAtPosLoc; 
+static	UINT	MsgAtPosOpt;
 static	char	TypeName[5][8]={"Point","Line","Area","Text","Line"};
 
 BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
@@ -19,9 +20,74 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 { 	
  switch(Message)
    {
-    case WM_INITDIALOG:
-         cwCenter(hWndDlg, MsgAtPosLoc);
-		SetDlgItemText (hWndDlg,IDC_MESSAGE,MsgAtPos);
+	 case WM_INITDIALOG:
+	 {
+		HDC hDC = GetDC(hWndDlg);
+		SIZE txSize;
+		int	iwidth, iheight, border, framewidth, move, i, nbuttons=3;
+		RECT	rect, crect;
+		HWND buttons[3];
+
+		buttons[0] = GetDlgItem(hWndDlg, IDYES);
+		buttons[1] = GetDlgItem(hWndDlg, IDNO);
+		buttons[2] = GetDlgItem(hWndDlg, IDCANCEL);
+
+		GetTextExtentPoint32(hDC, MsgAtPos, strlen(MsgAtPos), &txSize);
+		ReleaseDC(hWndDlg, hDC);
+		GetWindowRect(GetDlgItem(hWndDlg,IDC_MESSAGE), &rect);
+		ScreenRectToClientRect(hWndDlg, &rect);
+		border = rect.left;
+		iheight = RECTHEIGHT(&rect);
+		iwidth = max(RECTWIDTH(&rect), txSize.cx + 6);
+		SetWindowPos(GetDlgItem(hWndDlg, IDC_MESSAGE), 0, rect.left, rect.top, iwidth, iheight, SWP_NOZORDER | SWP_NOOWNERZORDER);
+		GetWindowRect(hWndDlg, &rect);
+		GetClientRect(hWndDlg, &crect);
+		framewidth = crect.left;
+		iheight = RECTHEIGHT(&rect);
+		iwidth = max(RECTWIDTH(&rect), txSize.cx + 6+border*2);
+		move = (iwidth - RECTWIDTH(&rect))/2;
+		SetWindowPos(hWndDlg, 0, rect.left, rect.top, iwidth+framewidth, iheight, SWP_NOZORDER | SWP_NOOWNERZORDER);
+
+		for (i = 0; i < nbuttons; i++)
+		{
+			RECT brect;
+
+			GetWindowRect(buttons[i], &brect);
+			ScreenRectToClientRect(hWndDlg, &brect);
+			SetWindowPos(buttons[i], 0, brect.left+move, brect.top, RECTWIDTH(&brect), RECTHEIGHT(&brect), SWP_NOZORDER | SWP_NOOWNERZORDER);
+			if (i == 1)
+				SetWindowPos(GetDlgItem(hWndDlg,IDOK), 0, brect.left + move, brect.top, RECTWIDTH(&brect), RECTHEIGHT(&brect), SWP_NOZORDER | SWP_NOOWNERZORDER);
+		}
+		switch (MsgAtPosOpt)
+		{
+		case MB_OK:
+			ShowWindow(GetDlgItem(hWndDlg, IDOK), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDYES), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDNO), SW_HIDE);
+			break;
+		case MB_YESNO:
+			ShowWindow(GetDlgItem(hWndDlg, IDOK), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDYES), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDNO), SW_SHOW);
+			break;
+		case MB_YESNOCANCEL:
+			ShowWindow(GetDlgItem(hWndDlg, IDOK), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDYES), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDNO), SW_SHOW);
+			break;
+		case MB_OKCANCEL:
+			ShowWindow(GetDlgItem(hWndDlg, IDOK), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDYES), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDNO), SW_HIDE);
+			break;
+		}
+		SetDlgItemText(hWndDlg, IDC_MESSAGE, MsgAtPos);
+		cwCenter(hWndDlg, MsgAtPosLoc);
+	 }
          break;  
     case WM_CLOSE:
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
@@ -33,11 +99,11 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			if (GetUpdateRect (hWndDlg,&Rect,TRUE))
 			{
 				PAINTSTRUCT	PaintSt;
-				HBRUSH	hBr=CreateSolidBrush (RGB(128,128,255)), hOldBr;
+				HBRUSH	hBr=CreateSolidBrush (RGB(196,196,255)), hOldBr;
 
 				BeginPaint (hWndDlg,&PaintSt);
 				hOldBr = SelectObject (PaintSt.hdc,hBr);
-				FillRect (PaintSt.hdc,&Rect,hBr);
+				//FillRect (PaintSt.hdc,&Rect,hBr);
 				SelectObject (PaintSt.hdc,hOldBr);
 				GSSiDeleteObject (&hBr);
 				EndPaint (hWndDlg,&PaintSt);
@@ -48,14 +114,16 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
     case WM_COMMAND:
          switch(LOWORD(wParam))
            {
-           
+			  case IDYES:
               case IDOK:
   					 EndDialog(hWndDlg, IDYES);
                   break;
-
-              case IDCANCEL:
-  					 EndDialog(hWndDlg, IDNO);
-                  break;
+			  case IDNO:
+				  EndDialog(hWndDlg, IDNO);
+				  break;
+			  case IDCANCEL:
+				  EndDialog(hWndDlg, IDCANCEL);
+				  break;
 
            }
          break;   
@@ -87,6 +155,7 @@ int MessageBoxAtPosition (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPST
 	MsgAtPosLoc = -2;
 	if (*Position == 'W')
 		MsgAtPosLoc = 0;
+	MsgAtPosOpt = Flag;
     irc = DialogBox(hInst, (LPSTR)"MESSAGEBOXATPOS", hWnd, MESSAGEBOXATPOSMsgProc);
 	return irc;
 }

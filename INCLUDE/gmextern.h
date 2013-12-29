@@ -1,5 +1,6 @@
 extern int			DepthColorIntensity;
 extern int			typeChassis;
+extern int			numMonitors;
 extern BOOL			isTouchScreen;
 extern int			ShallowWaterHighlight;
 extern int			WaterLevelOffset;

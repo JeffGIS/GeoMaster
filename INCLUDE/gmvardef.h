@@ -1,7 +1,8 @@
-char	GMVersion[36]="GeoMaster version 34e (build 3)";
+char	GMVersion[36]="GeoMaster version 34f (build 1)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
 int		typeChassis = 0;
+int		numMonitors = 1;
 BOOL	isTouchScreen = FALSE;
 int		DepthColorIntensity=4;
 int		ShallowWaterHighlight=0;

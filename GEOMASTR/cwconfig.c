@@ -1043,13 +1043,22 @@ BOOL GetCmdFileEntry(LPSTR cmdItem)
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
+	//char monName[128];
+	int  monStatus;
 
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	GetNumMonitors();
+	numMonitors = GetNumMonitors();
 	typeChassis = ChassisType();
 	if (typeChassis == 3)
+	{
+		RECT rect;
+
 		isTouchScreen = TRUE;
-	MonitorType(1);
+		GetClientRect(GetDesktopWindow(), &rect);
+		if (RECTWIDTH(&rect) > 1280 || RECTHEIGHT(&rect)>1280)
+			isTouchScreen = FALSE;
+	}
+	//monStatus = MonitorType(1,monName);
 	//MessageBox (0,lpszCmdLine,"First",MB_OK);
 	if (strstr(lpszCmdLine, "/CMDFILE "))
 	{

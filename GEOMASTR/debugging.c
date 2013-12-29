@@ -7,15 +7,37 @@ static BOOL doDebug=FALSE;
 static char BreakCondition[256]={0};
 static char DisplayValue[256]={0};
 static char macroStack[MAX_MACRO_STACK][MAX_PATH];
+static UINT macroUse[MAX_MACRO_STACK];
 static int lnMacroStack=0;
+static UINT nextMacroUse = 1;
 static char currentMacro[MAX_PATH];
+static RECT currentRect = { 0 };
 
-
+#define NUM_DB_CHILDWND	12
+#define SNAP_LEFT	-1
+#define SNAP_TOP	-1
+#define SNAP_BOTTOM	-2
+#define SNAP_RIGHT	-2
+static UINT childWndID[NUM_DB_CHILDWND] = {IDB_MACROSTACK,IDC_FILEVIEW,IDB_MOVETOMON2,IDCANCEL,IDOK,IDC_STATIC_BP,IDC_STATIC_BC,IDC_STATIC_DV,IDB_BREAKPOINTS,IDB_BREAKCONDITION,IDB_VALUETODISPLAY1,IDB_DISPLAYVALUE1};
+static RECT childWndPCT[NUM_DB_CHILDWND] = {SNAP_LEFT,SNAP_TOP,0,0,
+											SNAP_LEFT,0,SNAP_RIGHT,0,
+											0,SNAP_TOP,0,0,
+											0,0,SNAP_RIGHT,0,
+											0, SNAP_TOP, SNAP_RIGHT, 0,
+											SNAP_LEFT, 0, 0, 0,
+											0,0,0,0,
+											0,0,0,0,
+											SNAP_LEFT,0,0,SNAP_BOTTOM,
+											0,0,0,0,
+											0,0,0,0,
+											0,0,0,0
+											};
+static int childWndBorder;
+static RECT crectDBOrig;
 
 static TCHAR szTitle[]="GMEdit";					// The title bar text
 static TCHAR szWindowClass[]="GMEditor";		// the main window class name
 LRESULT CALLBACK	WndProcGMEdit(HWND, UINT, WPARAM, LPARAM);
-void GMEditSetFile (LPSTR file,LPSTR bpid);
 
 ATOM DBRegisterClass(HINSTANCE hInstance)
 {
@@ -44,6 +66,15 @@ ATOM DBRegisterClass(HINSTANCE hInstance)
 	return c;
 }
 
+POINT WindowMidPoint(HWND hWnd)
+{
+	POINT pt;
+	RECT  rect;
+
+	GetWindowRect(hWnd, &rect);
+	pt = RectMid(&rect);
+	return pt;
+}
 //
 //   FUNCTION: InitInstance(HINSTANCE, int)
 //
@@ -138,7 +169,69 @@ void FAR PASCAL DBSubclassControl(HWND hCtrl, void FAR *Callback)
     SetProp (hCtrl, "PrLO", (HANDLE) LOWORD (lpOrgProc));
     }
 
+void SetDBChildWindowParms(HWND hWndDlg)
+{
+	int i;
+	RECT rect, crect;
+	float	 w, h;
 
+	GetClientRect(hWndDlg, &crect);
+	crectDBOrig = crect;
+	w = RECTWIDTH(&crect);
+	h = RECTHEIGHT(&crect);
+
+	for (i = 0; i < NUM_DB_CHILDWND; i++)
+	{
+		GetWindowRect (GetDlgItem (hWndDlg,childWndID[i]), &rect);
+		ScreenRectToClientRect(hWndDlg, &rect);
+		if (!i)
+			childWndBorder = rect.left;
+		if (!childWndPCT[i].left)
+			childWndPCT[i].left = 1000 * (rect.left / w);
+		if (!childWndPCT[i].right)
+			childWndPCT[i].right = 1000 * (rect.right / w);
+		if (!childWndPCT[i].top)
+			childWndPCT[i].top = 1000 * (rect.top / h);
+		if (!childWndPCT[i].bottom)
+			childWndPCT[i].bottom = 1000 * (rect.bottom / h);
+	}
+	return;
+}
+
+void AdjustDBChildWindows(HWND hWndDlg)
+{
+	int i;
+	RECT crect, rect;
+	float	 w, h;
+	int border;
+
+	GetClientRect(hWndDlg, &crect);
+	w = RECTWIDTH(&crect);
+	h = RECTHEIGHT(&crect);
+	border = childWndBorder * w / RECTWIDTH(&crectDBOrig);
+	for (i = 0; i < NUM_DB_CHILDWND; i++)
+	{
+		if (childWndPCT[i].left < 0)
+			rect.left = crect.left + border;
+		else
+			rect.left = (w * childWndPCT[i].left) / 1000;
+		if (childWndPCT[i].right < 0)
+			rect.right = crect.right - border;
+		else
+			rect.right = (w * childWndPCT[i].right) / 1000;
+		if (childWndPCT[i].top < 0)
+			rect.top = crect.top + border;
+		else
+			rect.top = (h * childWndPCT[i].top) / 1000;
+		if (childWndPCT[i].bottom < 0)
+			rect.bottom = crect.bottom - border;
+		else
+			rect.bottom = (h * childWndPCT[i].bottom) / 1000;
+
+		MoveWindow(GetDlgItem(hWndDlg, childWndID[i]), rect.left, rect.top, RECTWIDTH(&rect), RECTHEIGHT(&rect), TRUE);
+	}
+	return;
+}
 
 BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
@@ -152,28 +245,49 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 
  switch(Message)
    {
-    case WM_INITDIALOG:  
-		 hWndAddEdit = hWndDlg; //does IsDialog processing
-		 firstPaint = TRUE;
-		 //DBSubclassControl(hWndDlg, DebugSubclassProc);
-//    	 hSaveBM = EnterBlockingWindow (hWndDlg);
-//		 SetWindowText (hWndDlg,MBHTitle);
-		 SetDlgItemText (hWndDlg,IDB_BREAKCONDITION,BreakCondition);
-		 SetDlgItemText (hWndDlg,IDB_VALUETODISPLAY1,DisplayValue);
-		 hDisplay = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
-		 pDisplay = GlobalLock (hDisplay);
-		 strcpy (pDisplay,DisplayValue);
-		 doDebug=FALSE;
-		 ExpandText (pDisplay);
-		 doDebug=TRUE;
-		 SetDlgItemText (hWndDlg,IDB_DISPLAYVALUE1,pDisplay);
-		 GSSiGlobUlFree (&hDisplay);
-		 for (i=0;i<lnMacroStack;i++)
-			 SendDlgItemMessage (hWndDlg,IDB_MACROSTACK,LB_ADDSTRING,0,(LPARAM)macroStack[i]); 
+		 case WM_INITDIALOG:
+		 {
+			char curFile[MAX_PATH];
 
-		 //GMEditSetFile ("[%DL]fundir\\appl1.txt");
-         cwCenter(hWndDlg, 0);
-			
+			hWndAddEdit = hWndDlg; //does IsDialog processing
+			firstPaint = TRUE;
+			numMonitors = GetNumMonitors();
+			EnableWindow(GetDlgItem(hWndDlg, IDB_MOVETOMON2), numMonitors > 1);
+			//DBSubclassControl(hWndDlg, DebugSubclassProc);
+			//    	 hSaveBM = EnterBlockingWindow (hWndDlg);
+			//		 SetWindowText (hWndDlg,MBHTitle);
+			SetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition);
+			SetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue);
+			hDisplay = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+			pDisplay = GlobalLock(hDisplay);
+			strcpy(pDisplay, DisplayValue);
+			doDebug = FALSE;
+			ExpandText(pDisplay);
+			doDebug = TRUE;
+			SetDlgItemText(hWndDlg, IDB_DISPLAYVALUE1, pDisplay);
+			GSSiGlobUlFree(&hDisplay);
+			for (i = 0; i < lnMacroStack; i++)
+				SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_ADDSTRING, 0, (LPARAM)macroStack[i]);
+
+			//GMEditSetFile ("[%DL]fundir\\appl1.txt");
+			GMEditGetFile(curFile);
+			i = SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_FINDSTRING, (WPARAM)-1, (LPARAM)curFile);
+			SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_SETCURSEL, i,0);
+
+			if (IsRectEmpty(&currentRect))
+			{
+				RECT mainrect;
+
+				GetWindowRect(hWndMain, &mainrect);
+				SetDBChildWindowParms(hWndDlg);
+				MoveWindow(hWndDlg, mainrect.left, mainrect.top, RECTWIDTH(&mainrect), RECTHEIGHT(&mainrect), TRUE);
+				GetWindowRect(hWndDlg, &currentRect);
+			}
+			else
+			{
+				MoveWindow(hWndDlg, currentRect.left, currentRect.top, RECTWIDTH(&currentRect), RECTHEIGHT(&currentRect), TRUE);
+			}
+		 }
          break; /* End of WM_INITDIALOG                                 */
 
 	case WM_ACTIVATE:
@@ -191,25 +305,44 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 		 return FALSE;
 		 break;
 
+	case WM_ENTERSIZEMOVE:
+		if (hDBWnd)
+		{
+			ShowWindow(hDBWnd, SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_FILEVIEW), SW_SHOW);
+		}
+		break;
+
 	case WM_MOVE:
+	case WM_EXITSIZEMOVE:
 		 if (!firstPaint)
 		 {
+			 RECT wRect;
+			 AdjustDBChildWindows(hWndDlg);
+			 GetWindowRect(hWndDlg, &wRect);
 			 GetWindowRect (GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
 			 //ScreenRectToClientRect (hWndDlg,&rect);
-			 MoveWindow (hDBWnd,rect.left,rect.top,RECTWIDTH(&rect),RECTHEIGHT(&rect),FALSE);
 
 			 //ShowWindow(hDBWnd,SW_SHOW);
-			 UpdateWindow(hDBWnd);
+			 if (hDBWnd)
+			 {
+				 MoveWindow(hDBWnd, rect.left, rect.top, RECTWIDTH(&rect), RECTHEIGHT(&rect), FALSE);
+				 ShowWindow(GetDlgItem(hWndDlg, IDC_FILEVIEW), SW_HIDE);
+				 ShowWindow(hDBWnd, SW_SHOW);
+				 InvalidateRect(hDBWnd, 0, TRUE);
+				 UpdateWindow(hDBWnd);
+			 }
 		 }
 		break;
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
-    	 SendMessage(hDBWnd , WM_CLOSE, 0, 0L);
     	 PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
 
 	case WM_DESTROY:
+		 GetWindowRect(hWndDlg, &currentRect);
 		 hWndAddEdit = 0;
+		 SendMessage(hDBWnd, WM_CLOSE, 0, 0L);
 		 break;
 
     case WM_COMMAND:
@@ -226,6 +359,23 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                 EndDialog(hWndDlg, TRUE);
             break;
 
+			case IDB_MOVETOMON2:
+			{
+			   POINT pt = WindowMidPoint(GetDlgItem(hWndDlg, IDB_MOVETOMON2));
+			   HMONITOR hMonitor;
+			   MONITORINFOEX mi;
+
+			   hMonitor = GetOtherMonitor(pt);
+
+			   if (hMonitor)
+			   {
+				   mi.cbSize = sizeof(mi);
+				   GetMonitorInfo(hMonitor,(LPMONITORINFO) &mi);
+				   MoveWindow(hWndDlg, mi.rcWork.left, mi.rcWork.top, RECTWIDTH(&mi.rcWork), RECTHEIGHT(&mi.rcWork), TRUE);
+			   }
+
+			}
+				break;
 			case IDB_VALUETODISPLAY1:
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
@@ -296,7 +446,7 @@ BOOL GetDebug (void)
 }
 void AtBreakPoint (LPSTR Args)
 {
-	int rtn;
+	int rtn, maxmacro, maxi, i;
 	BOOL err, rc;
 
 	if (!doDebug)
@@ -315,7 +465,18 @@ void AtBreakPoint (LPSTR Args)
 		if (!rc)
 			return;
 	}
-	GMEditSetFile (macroStack[lnMacroStack-1],Args);
+	maxmacro = 0;
+	maxi = 0;
+	for (i = 0; i<lnMacroStack; i++)
+	{
+		if (macroUse[i] > maxmacro)
+		{
+			maxmacro = macroUse[i];
+			maxi = i;
+		}
+	}
+
+	GMEditSetFile (macroStack[maxi],Args);
 	rtn = DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
 	return;
 }
@@ -337,21 +498,37 @@ void OutFunction (int funid,LPSTR outString)
 
 int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int NumArgs)
 {
-	int i;
+	int i, mini;
+	UINT minUse = UINT_MAX;
 
 	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc
 	strcpy (currentMacro,File);
 	SubstituteDL (currentMacro,FALSE);
 	for (i=0;i<lnMacroStack;i++)
 	{
-		if (!stricmp (currentMacro,macroStack[i]))
+		if (!stricmp(currentMacro, macroStack[i]))
+		{
+			macroUse[i] = nextMacroUse++;
 			return i;
+		}
+		if (macroUse[i] < minUse)
+		{
+			minUse = macroUse[i];
+			mini = i;
+		}
 	}
-	if (lnMacroStack >= MAX_MACRO_STACK-1)
-		return -1;
-	strcpy (macroStack[lnMacroStack],currentMacro);
-	
-	return lnMacroStack++;
+	if (lnMacroStack >= MAX_MACRO_STACK - 1)
+	{
+		strcpy(macroStack[mini], currentMacro);
+		macroUse[mini] = nextMacroUse++;
+		return mini;
+	}
+	else
+	{	
+		strcpy(macroStack[lnMacroStack], currentMacro);
+		macroUse[lnMacroStack] = nextMacroUse++;
+		return lnMacroStack++;
+	}
 }
 
 void RemoveFromMacroStack (int macroID)
@@ -359,7 +536,7 @@ void RemoveFromMacroStack (int macroID)
 	if (macroID < 0)
 		lnMacroStack = 0;
 	else
-		lnMacroStack--;
+		macroUse[lnMacroStack] = -abs(macroUse[lnMacroStack]);
 	return;
 }
 

@@ -243,6 +243,8 @@ void CreateFidSmall (void);
 void CloseFidSmall (void);
 BOOL GMEdit (HWND hWnd,LPSTR file);
 void GMEditReturn(void);
+void GMEditSetFile(LPSTR file, LPSTR bpid);
+void GMEditGetFile(LPSTR file);
 BOOL EditTextFile(HWND hWnd, LPSTR Name);
 void CloseVars (void);
 void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
@@ -451,7 +453,7 @@ void CDClose (void);
 BOOL GetColor (HWND hWnd,COLORREF *Color);  
 int GetColorFromPalette (HWND hWnd,LPRGBTRIPLE pColors,int nColors);
 COLORREF GetNextUniqueColor (LPLONG pColor);
-void cwCenter(HWND, int);
+void cwCenter(HWND hWnd, int top);
 int nCwRegisterClasses(LPSTR Menu);
 void CwUnRegisterClasses(void);
 GSSIPeekMessage(
@@ -1301,6 +1303,11 @@ void AtBreakPoint (LPSTR Args);
 void SetDebug (BOOL state);
 BOOL GetDebug (void);
 void GetWindowsVersion(LPSTR Ver);
+int ChassisType(void); // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
+int MonitorType(int which,LPSTR monName);
+int GetNumMonitors(void);
+HMONITOR GetOtherMonitor(POINT pt);
+BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);
 
 
 

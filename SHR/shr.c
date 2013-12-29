@@ -12449,12 +12449,14 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 /*  cwCenter Function                                                   */
 /*                                                                      */
 /*  centers a window based on the client area of its parent             */
-/*                                                                      */
+/*  top >  0         - adjust top up                                    */
+/*  top == 0         - center in parent                                 */
+/*  top == SHRT_MAX  - center in desktop                                */
+/*  top == -1		 - left justifies window in parent on cursor        */
+/*  top == -2		 - center on cursor in parent                       */
 /************************************************************************/
 
-void cwCenter(hWnd, top)
-HWND hWnd;
-int top;
+void cwCenter(HWND hWnd, int top)
 #if ENABLETRACE
 {GSSiEnterProg (452);
 #endif
@@ -12465,10 +12467,14 @@ int top;
  int        iwidth;
  int        iheight; 
  HWND		hPWnd;  
- BOOL		IsClient=TRUE;
+ BOOL		IsClient=FALSE;
 
  /* get the rectangles for the parent and the child                     */
- GetWindowRect(hWnd, &swp); 
+ if (!GetWindowRect(hWnd, &swp))
+	 return;
+
+begin:
+
  if (!hWndMain || top == SHRT_MAX)
  {
  	top = 0;
@@ -12477,7 +12483,8 @@ int top;
  }
  else
  	hPWnd = hWndMain;
- GetClientRect(hPWnd, &rParent);
+// GetClientRect(hPWnd, &rParent);
+ GetWindowRect(hPWnd, &rParent);
 
  /* calculate the height and width for MoveWindow                       */
  iwidth = swp.right - swp.left;
@@ -12505,6 +12512,18 @@ else
  /* top will adjust the window position, up or down                     */
  if(top>0)
    pt.y = pt.y + top;
+ else
+ {
+	 if (pt.x + iwidth > rParent.right)
+		 pt.x = rParent.right - iwidth;
+	 if (pt.y < rParent.top)
+		 pt.y = rParent.top;
+	 if (pt.x < 0 || pt.y < 0)
+	 {
+		 top = SHRT_MAX;
+		 goto begin;
+	 }
+ }
 
  /* move the window                                                     */
  //MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);

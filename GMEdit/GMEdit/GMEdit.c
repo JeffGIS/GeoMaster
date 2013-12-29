@@ -62,7 +62,7 @@ static	HANDLE	hFRChunk=0;
 static	int		firstLine;          // first line in the invalidated area 
 static	int		lastLine;           // last line in the invalidated area 
 static	int		insertLine;
-static	BOOL	setToFind = FALSE;
+static	BOOL	setToFind = FALSE;	// set scroll loc to found position
 static	BOOL	standAlone = FALSE;
 static	char	currentBreakpoint[32]={0};
 static  HWND	hWndGMEditReturn = 0;
@@ -83,6 +83,12 @@ void GMEditSetFile (LPSTR file,LPSTR bpid)
 		strcpy (currentBreakpoint,bpid);
 	else
 		*currentBreakpoint = 0;
+	return;
+}
+
+void GMEditGetFile(LPSTR file)
+{ 
+	strcpy(file, fileToEdit);
 	return;
 }
 
@@ -610,7 +616,15 @@ int InsertCharAtLoc (HWND hWnd,char key,int insertLoc,int *pinsertLoc2,HANDLE hF
 			insertLoc--;
 		}
 	}
-	else if (key != '\x18')
+	else if (key == '\x18') //delete
+	{
+		if (insertLoc < lFile && pFile[insertLoc] == '\n')
+		{
+			memmove(&pFile[insertLoc], &pFile[*pinsertLoc2], lFile - idiff - insertLoc + 1);
+			lFile -= idiff;
+		}
+	}
+	else
 	{
 		if (lFile > insertLoc)
 			memmove (&pFile[insertLoc+1],&pFile[insertLoc],lFile-insertLoc+1);
@@ -840,27 +854,46 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 	char	wantKey[130];
 	int		loc, ibeg, iend, keypos, endkey=128, lkey=0, ln;
 	char	nextKey[130];
-	char	str[256];
+	char	str[1024];
+	char testFile[MAX_PATH + 128];
 	int iMenuOpt = 60000;
 	LPSTR pInsertOpts;
 
 	if (*phMenu)
 	    DestroyMenu (*phMenu);  
 	*phMenu = 0;
-	if (!hFile ||insertLoc <= 0)
+	if (!hFile ||insertLoc < 0)
 		return;
 
 	GSSiGlobFree (&hInsertOpts);
 	hInsertOpts = GSSiGlobAlloc (1785,GHND,USHRT_MAX);
 	pInsertOpts = GlobalLock (hInsertOpts);
 	pFile = GlobalLock (hFile);
+
+	if (insertLoc >= 0 && insertLoc2 >= insertLoc)
+	{
+		strncpy0(testFile, &pFile[insertLoc], min(sizeof(testFile)-1, insertLoc2 - insertLoc));
+		pBeg = testFile;
+		if (strchr(pBeg, '[') || strchr(pBeg, '$'))
+		{
+			sprintf(str, "|$EXPAND(%s", pBeg);
+			strcpy(pInsertOpts, str);
+			pInsertOpts = strchr(pInsertOpts, 0);
+			pInsertOpts++;
+			sprintf(str, "Expand:%s", pBeg);
+			if (!*phMenu)
+				*phMenu = CreatePopupMenu();
+			AppendMenu(*phMenu, MF_ENABLED | MF_STRING, iMenuOpt++, str);
+		}
+	}
+
 	if (hFunDefDB) //check for $function matches
 	{
 		loc = insertLoc-1;
 		keypos = endkey;
 		wantKey[keypos] = 0;
 		wantKey[keypos+1] = 0;
-		while (lkey == 0 && loc && keypos--)
+		while (lkey == 0 && loc >= 0 && keypos--)
 		{
 			switch (*&pFile[loc])
 			{
@@ -908,7 +941,6 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 		}
 	}
 	{	//check for file matches
-		char testFile[MAX_PATH+128];
 
 		if (insertLoc == insertLoc2)
 		{
@@ -958,7 +990,9 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 		}
 		else
 			pBeg = testFile;
-		if (!strncmp (pBeg,"ODBC|",5) || FileType (pBeg) == 1)
+
+
+		if (!strncmp(pBeg, "ODBC|", 5) || FileType(pBeg) == 1)
 		{
 			HANDLE hDB=0;
 			int itype = OpenDataFile (testFile,"",OF_READ,&hDB);
@@ -980,14 +1014,20 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			}
 			if (itype && (itype != GMTEXT_DATAFILE || GetNumDBFields (hDB) > 1))
 			{
-				sprintf (str,"|$FIELDS(%s)",testFile);
-				strcpy (pInsertOpts,str);
-				pInsertOpts = strchr (pInsertOpts,0);
+				sprintf(str, "|$FIELDS(%s)", testFile);
+				strcpy(pInsertOpts, str);
+				pInsertOpts = strchr(pInsertOpts, 0);
 				pInsertOpts++;
-				sprintf (str,"Display Fields for %s",pBeg);
+				sprintf(str, "Display Fields for %s", pBeg);
 				if (!*phMenu)
-					*phMenu = CreatePopupMenu ();
-				AppendMenu (*phMenu,MF_ENABLED|MF_STRING,iMenuOpt++,str);
+					*phMenu = CreatePopupMenu();
+				AppendMenu(*phMenu, MF_ENABLED | MF_STRING, iMenuOpt++, str);
+				sprintf(str, "|$DATADISPLAY(BASIC,%s)", testFile);
+				strcpy(pInsertOpts, str);
+				pInsertOpts = strchr(pInsertOpts, 0);
+				pInsertOpts++;
+				sprintf(str, "Open %s in DATADISPLAY", pBeg);
+				AppendMenu(*phMenu, MF_ENABLED | MF_STRING, iMenuOpt++, str);
 			}
 			CloseDataFile (FALSE,&hDB);
 		}
@@ -1210,11 +1250,13 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			 if (!strnicmp (&pFile[insertLoc],lpfr->lpstrFindWhat,strlen(lpfr->lpstrFindWhat)) &&
 				 insertLoc2 - insertLoc == strlen (lpfr->lpstrFindWhat))
 				 inc = 1;
-			 if ((pFound = StrStrI (&pFile[insertLoc+inc],lpfr->lpstrFindWhat)))
+			 if ((pFound = StrStrI(&pFile[insertLoc + inc], lpfr->lpstrFindWhat)))
 			 {
 				 insertLoc = (int)(pFound - pFile);
-				 insertLoc2 = insertLoc + strlen (lpfr->lpstrFindWhat);
+				 insertLoc2 = insertLoc + strlen(lpfr->lpstrFindWhat);
 			 }
+			 else
+				 MessageBoxAtPosition(hWnd, "The specified text was not found", "Find", MB_OK,"C");
 			 GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
 			 SetCaretPos(insertPoint.x, insertPoint.y); 
 			 GlobalUnlock (hFile);
@@ -1326,7 +1368,19 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		}
         return 0; 
 	 case WM_DESTROY:
-		DeleteObject (hFont);
+		if (changesMade)
+		{
+			int st;
+
+			sprintf(str, "Do you want to save changes to: %s?", fileToEdit);
+			st = MessageBoxAtPosition(hWnd, str, "GMEdit", MB_YESNOCANCEL, "W");
+
+			if (st == IDYES)
+			{
+				GMEditSaveUpdates(hWnd);
+			}
+		}
+		DeleteObject(hFont);
 		AutoInsertClose ();
 		GSSiGlobFree (&hFile);
 		GSSiGlobFree (&hFChunk);
@@ -1343,16 +1397,17 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		if (changesMade)
 		{
 			int st;
-			
-			sprintf (str,"Do you want to save changes to\r\n%s?",fileToEdit);
-			st = MessageBox (hWnd,str,"GMEdit",MB_YESNOCANCEL);
+
+			sprintf(str, "Do you want to save changes to: %s?", fileToEdit);
+			st = MessageBoxAtPosition(hWnd, str, "GMEdit", MB_YESNOCANCEL, "C");
 
 			if (st == IDCANCEL)
 				return 0;
 			if (st == IDYES)
 			{
-				GMEditSaveUpdates (hWnd);
+				GMEditSaveUpdates(hWnd);
 			}
+			changesMade = FALSE;
 		}
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	
@@ -1368,6 +1423,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		getLinesAndMaxLine (hdc,hFile,hFont);
 		EndPaint(hWnd, &ps);
 		setScroll (hWnd);
+		DrawMenuBar(hWnd);
 		
 		break;
 
@@ -1736,7 +1792,16 @@ case WM_HSCROLL:
 				}
 				if (*pInsertOpts == '|')
 				{
-					ProcessText (pInsertOpts+1);
+					if (!strncmp(pInsertOpts + 1, "$EXPAND(", 8))
+					{
+						LPSTR pTemp = malloc(USHRT_MAX);
+						strcpy(pTemp, pInsertOpts + 9);
+						ExpandText(pTemp);
+						MessageBoxAtPosition(hWnd, pTemp, "", MB_OK,"C");
+						free(pTemp);
+					}
+					else
+						ProcessText (pInsertOpts+1);
 					GSSiGlobUlFree (&hInsertOpts);
 				}
 				else

@@ -17,6 +17,7 @@
 #define IDOK2                           3
 #define IDC_DATE_TODAY                  4
 #define IDC_CLEARHLTLIST                4
+#define IDOK3                           4
 #define IDC_DATE_THISWEEK               5
 #define IDC_DATE_THISMONTH              6
 #define IDC_DATE_THISYEAR               7
@@ -1262,6 +1263,7 @@
 #define IDC_SELECTVHSTART2              871
 #define IDC_FENCEDEACTIVATE             871
 #define IDC_DEFINERANDOM                871
+#define IDC_SHOWDESCRIPT                871
 #define IDC_SAADD                       872
 #define IDC_GET_SYMP                    872
 #define IDC_SET_AREASYM                 872
@@ -2485,6 +2487,7 @@
 #define IDC_PLC                         1544
 #define IDC_AREAS                       1545
 #define IDC_SHOWDESCRIPTION             1546
+#define IDC_ADDNEWLINE                  1546
 #define IDC_SELECTMATCH                 1547
 #define IDC_ALLELEM                     1548
 #define IDC_SECLONG2                    1549
@@ -3225,7 +3228,11 @@
 #define IDC_LISTNAME                    2206
 #define IDC_TABDLM                      2207
 #define IDC_ALTF12                      2208
+#define IDC_STATIC_BP                   2208
 #define IDC_ALTF1NAME12                 2209
+#define IDC_STATIC_BC                   2209
+#define IDC_STATIC_DV                   2210
+#define IDB_MOVETOMON2                  2211
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3567,7 +3574,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1235
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2208
+#define _APS_NEXT_CONTROL_VALUE         2212
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif
