@@ -62,7 +62,7 @@
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34e</TargetName>
+    <TargetName>GeoMaster34f</TargetName>
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -70,7 +70,7 @@
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34e_xp</TargetName>
+    <TargetName>GeoMaster34f_xp</TargetName>
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -128,7 +128,7 @@
     <Link>
       <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.53</Version>
+      <Version>34.61</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -197,7 +197,7 @@
     <Link>
       <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.51</Version>
+      <Version>34.61</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
