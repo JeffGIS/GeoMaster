@@ -818,8 +818,9 @@ ErrMes:
 	    	 BOOL	FirstErr=TRUE;
 	    	 
 			 //MessageBox (0,"Have ODBC Error",0,MB_ICONEXCLAMATION|MB_TASKMODAL);
-	    	 if (ShowODBCErrors)
+	    	 if (ShowSQLErrors)
 	    	 {
+				 numSQLErrors++;
 		    	 *pParms = 0;
 				 for (i=0;i<nODBCParms;i++)
 				 {
@@ -843,14 +844,20 @@ ErrMes:
 			     FirstErr = FALSE;
 			     sprintf (DispStr,"Query:%s\r\nParms:%s\r\nError Num: %ld(%i)\r\nError Message:%s",sqlstr,pParms,ierrno,rcer,Mess); 
 			     DoPaint = FALSE;
-			     if (GSSiMsgBox(hWndMain,DispStr,"Error in SQL Query",MB_OKCANCEL|MB_ICONQUESTION,0)
-			     	 == IDCANCEL)
+				 if (ShowSQLErrors == 1)
 				 {
-			     	 HaltReport=TRUE;  
-					 ContinueProcessing = FALSE;
+					 if (GSSiMsgBox(hWndMain, DispStr, "Error in SQL Query", MB_OKCANCEL | MB_ICONQUESTION, 0)
+						 == IDCANCEL)
+					 {
+						 HaltReport = TRUE;
+						 ContinueProcessing = FALSE;
+					 }
 				 }
-			     else
-			     	goto NextErr;  
+				 else if (*SQLErrorLog)
+				 {
+					 AppendFile(SQLErrorLog, DispStr);
+				 }
+			     goto NextErr;  
 		EndErr:
 			     DoPaint = TRUE;
 			     GSSiGlobUlFree (&hMem);
@@ -1199,7 +1206,7 @@ s44: if (*hstmt && SingleVal)
 		/*SQLFreeStmt(*hstmt,SQL_UNBIND);*/
 	 } 
 ErrExit:	
-	if (ShowODBCErrors)
+	if (ShowSQLErrors)
      *irc = 1;
 	GSSiGlobUlFree (&hSTR); 
 	*answer = 0;
@@ -1770,7 +1777,9 @@ void SubstituteDBQ (LPSTR str,LPSTR pDBQ)
 		else
 			*pTable = 0;
 	}
-	if (!(pDBQstr = strstr (str,";DBQ=")))
+	if (!(pDBQstr = strstr(str, ";DBQ=")))
+		pDBQstr = strstr(str, ";DBQ@=");
+	if (!pDBQstr)
 		strcat (pDB,DBQ);
 	else
 	{
@@ -1794,6 +1803,57 @@ void SubstituteDBQ (LPSTR str,LPSTR pDBQ)
 	return;
 }
 
+LRESULT CALLBACK WndProcEXTDB(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+
+ATOM EXTDBRegisterClass(HINSTANCE hInstance)
+{
+	WNDCLASSEX wcex;
+	static ATOM c;
+	static BOOL first = TRUE;
+
+	if (!first)
+		return c;
+	first = FALSE;
+	wcex.cbSize = sizeof(WNDCLASSEX);
+
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = WndProcEXTDB;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = 0;
+	wcex.hCursor = LoadCursor(NULL, IDC_IBEAM);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_GMEDIT);
+	wcex.lpszClassName = "EXTDBWindow";
+	wcex.hIconSm = 0;
+
+	c = RegisterClassEx(&wcex);
+	return c;
+}
+
+HWND InitEXTDBInstance(HWND hWndPar, LPRECT pRect)
+{
+	HWND hWnd;
+
+	//hWndPar=0;
+	hWnd = CreateWindow("EXTDBWindow", "External DB", WS_POPUPWINDOW | WS_VSCROLL | WS_HSCROLL,
+		pRect->left, pRect->right, RECTWIDTH(pRect), RECTHEIGHT(pRect), hWndPar, NULL, hInst, NULL);
+
+	if (!hWnd)
+	{
+		return FALSE;
+	}
+
+	//MoveWindow (hWnd,0,0,500,500,TRUE);
+	return hWnd;
+}
+
+
 /******************************************************************/
 HANDLE OpenExternalDatabase( LPSTR Inname)
 {
@@ -1802,9 +1862,9 @@ int  i, next_one, j;
 BOOL	SaveDoPaint, DoPrompt=FALSE;
 HDBC hdbc;
 RETCODE rc; 
-HANDLE	htnames=GSSiGlobAlloc ( 164,GHND,2048+256+256+256+256+256+1024);
+HANDLE	htnames=GSSiGlobAlloc ( 164,GHND,2048+256+1024+256+256+256+1024);
 SDWORD nerr;
-SWORD mlen = 253, Moutlen, maxoutlen = 255, outlen;
+SWORD mlen = 253, Moutlen, maxoutlen = 1024, outlen;
 LPSTR cptr;
 char  uid[]="admin", pwd[]=""; 
 LPSTR	lptnames, lpcstring, lpUID, pPassWord;
@@ -1814,9 +1874,9 @@ LPSTR tnames = GlobalLock (htnames);
 LPSTR errmess = tnames + (1024+512);  
 LPSTR DBAndTable = tnames + 2048;
 LPSTR cstring = tnames + (2048+256);    
-LPSTR cwd = tnames + (2048+256+256);
-LPSTR File = tnames + (2048+256+256+256);  
-LPSTR DriverName = tnames + (2048+256+256+256+256);  
+LPSTR cwd = tnames + (2048+256+1024);
+LPSTR File = tnames + (2048+256+1024+256);  
+LPSTR DriverName = tnames + (2048+256+1024+256+256);  
 LPSTR name = DriverName+256;
 LPSTR pDBQ, pSC;
 short	qclen;
@@ -1904,14 +1964,24 @@ TryAgain:
    else
    {
        HCURSOR hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
-		    
+	   //HDC hDC = GetDC(hWndMain);
+	   HWND hWnd;
+	   RECT rect = { 0, 0, 100, 100 };
+	   
+	   //SaveDC(hDC);
+
 //testvalue(1); 
 		SaveCurView (0);
 //		MessageBox (0,lpcstring,"Connect",MB_OK);
-	   rc = SQLDriverConnect(hdbc, hWndMain, lpcstring, SQL_NTS, lptnames, maxoutlen, &Moutlen,SQL_DRIVER_COMPLETE_REQUIRED);
+		//EXTDBRegisterClass(hInst);
+		//hWnd = InitEXTDBInstance(0, &rect);
+//calling this with MS Access Database driver messes up font in main window
+		rc = SQLDriverConnect(hdbc, 0, lpcstring, strlen(lpcstring), lptnames, maxoutlen, &Moutlen, SQL_DRIVER_COMPLETE_REQUIRED);
 //testvalue(1); 
 	   SaveCurView (1);
 	   GSSiSetCursor (hcurSave);
+	  // RestoreDC(hDC, -1);
+	  // ReleaseDC(hWndMain, hDC);
    }
    DoPaint = SaveDoPaint;
 //testvalue(1);

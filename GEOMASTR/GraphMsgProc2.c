@@ -92,7 +92,7 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
     case WM_CLOSE:
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
-	case WM_PAINT:
+/*	case WM_PAINT:
 		{
 			RECT	Rect;
 
@@ -109,13 +109,19 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 				EndPaint (hWndDlg,&PaintSt);
 			}
 		}
-			break;
+			break;*/
 
     case WM_COMMAND:
          switch(LOWORD(wParam))
            {
 			  case IDYES:
-              case IDOK:
+			  case IDOK:
+			  {
+						   SIZE txSize;
+						   HDC hDC = GetDC(GetDlgItem(hWndDlg, IDC_MESSAGE));
+						   GetTextExtentPoint32(hDC, MsgAtPos, strlen(MsgAtPos), &txSize);
+						   ReleaseDC(GetDlgItem(hWndDlg, IDC_MESSAGE), hDC);
+			  }
   					 EndDialog(hWndDlg, IDYES);
                   break;
 			  case IDNO:

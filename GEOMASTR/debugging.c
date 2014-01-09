@@ -332,6 +332,8 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				 InvalidateRect(hDBWnd, 0, TRUE);
 				 UpdateWindow(hDBWnd);
 			 }
+			 UpdateWindow(hWndDlg);
+
 		 }
 		break;
     case WM_CLOSE:

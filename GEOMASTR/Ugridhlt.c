@@ -977,761 +977,781 @@ RedrawTable:
 			return 0;
 		}
 		case WM_COMMAND:{
-			switch(LOWORD(wParam)){
-                case IDC_REDISPLAY: 
-                	lastrow = -1;
-                	goto Redisplay;
+							switch (LOWORD(wParam)){
+							case IDC_REDISPLAY:
+								lastrow = -1;
+								goto Redisplay;
 
-			case ID_SETCOLWIDTHS:
-				shrink *= 0.8;
-				RowHeight = 16*shrink;
-				SendDlgItemMessage(hwnd,IDC_UGTABLE,LB_SETITEMHEIGHT,0,MAKELPARAM(RowHeight, 0)); 
-				break;
-
-				case IDC_UGTABLE:{
-
-					//find the message sent (ti->msg)
-					switch((HIWORD(wParam))){
-						case LBN_DBLCLK:
-							PostMessage(hwnd, WM_COMMAND, ID_ZOOM_CURRENTITEM, 0L); 
-							break;
-						case LBN_SELCHANGE:
-							nItems = GetLBSelectedItems (hwnd,IDC_UGTABLE, &hItems);
-							if (!nItems)
+							case ID_SETCOLWIDTHS:
+								shrink *= 0.8;
+								RowHeight = 16 * shrink;
+								SendDlgItemMessage(hwnd, IDC_UGTABLE, LB_SETITEMHEIGHT, 0, MAKELPARAM(RowHeight, 0));
 								break;
-							pItems = GlobalLock (hItems);
-							CurRow = *pItems;
-							GSSiGlobUlFree (&hItems);
-							break;
-						case TBN_WANTTEXT :{
-							// check to see if the row is the same as the last
-							// if not then get a new record from the database
-							// (this way a record doesnt need to be read in each time
-							// a cell within the table needs to be drawn)   
-							
-							long	n;
-							
-							*ti->buf = 0;
-							if (ti->row < startdata)
-							{
-							    switch (ti->row)
-								{
-									case 0:
-										switch (ti->col)
-										{
-											case 0:
-												_fstrcpy (ti->buf,"Units");
-												break;
-											case 5:  
-											case 7:
-												_fstrcpy (ti->buf,cLUnits[OutDistUnits-1]);
-												ti->alignment=TA_CENTER; 
-												break;
-											case 6:
-												ti->alignment=TA_CENTER; 
-												_fstrcpy (ti->buf,cAUnits[OutAreaUnits-1]);
-												break;
-										}
-										break;
-									case -1:  
-										switch (ti->col)
-										{
-											case 0:
-												{
-													int	n = BT_NUM_IN_INDEX (hHighlight); 
-													sprintf (ti->buf,"%ld",n);
+
+							case IDC_UGTABLE:{
+
+												 //find the message sent (ti->msg)
+												 switch ((HIWORD(wParam))){
+												 case LBN_DBLCLK:
+													 PostMessage(hwnd, WM_COMMAND, ID_ZOOM_CURRENTITEM, 0L);
+													 break;
+												 case LBN_SELCHANGE:
+													 nItems = GetLBSelectedItems(hwnd, IDC_UGTABLE, &hItems);
+													 if (!nItems)
+														 break;
+													 pItems = GlobalLock(hItems);
+													 CurRow = *pItems;
+													 GSSiGlobUlFree(&hItems);
+													 break;
+												 case TBN_WANTTEXT:{
+																	   // check to see if the row is the same as the last
+																	   // if not then get a new record from the database
+																	   // (this way a record doesnt need to be read in each time
+																	   // a cell within the table needs to be drawn)   
+
+																	   long	n;
+
+																	   *ti->buf = 0;
+																	   if (ti->row < startdata)
+																	   {
+																		   switch (ti->row)
+																		   {
+																		   case 0:
+																			   switch (ti->col)
+																			   {
+																			   case 0:
+																				   _fstrcpy(ti->buf, "Units");
+																				   break;
+																			   case 5:
+																			   case 7:
+																				   _fstrcpy(ti->buf, cLUnits[OutDistUnits - 1]);
+																				   ti->alignment = TA_CENTER;
+																				   break;
+																			   case 6:
+																				   ti->alignment = TA_CENTER;
+																				   _fstrcpy(ti->buf, cAUnits[OutAreaUnits - 1]);
+																				   break;
+																			   }
+																			   break;
+																		   case -1:
+																			   switch (ti->col)
+																			   {
+																			   case 0:
+																			   {
+																						 int	n = BT_NUM_IN_INDEX(hHighlight);
+																						 sprintf(ti->buf, "%ld", n);
+																			   }
+																				   break;
+																			   case 5:
+																				   _fstrcpy(ti->buf, LinOpt(TotHLTLength));
+																				   ti->alignment = TA_RIGHT;
+																				   break;
+																			   case 6:
+																				   _fstrcpy(ti->buf, AreaOpt(TotHLTArea));
+																				   ti->alignment = TA_RIGHT;
+																				   break;
+																			   case 7:
+																				   _fstrcpy(ti->buf, LinOpt(TotHLTPerim));
+																				   ti->alignment = TA_RIGHT;
+																				   break;
+																			   }
+																			   break;
+																		   case 2:
+																		   {
+																					 LPSTR lpEnd;
+
+																					 _fmemset(ti->buf, '-', 255);
+																					 lpEnd = ti->buf + 255;
+																					 *lpEnd = 0;
+																		   }
+																			   break;
+																		   }
+
+																	   }
+																	   else if (ti->row != lastrow)
+																	   {
+																		   //find the record that coresponds to the row given 
+																		   long	RecNum = ti->row - startdata + 1;
+
+																		   if (GetRowHighlightData(RecNum, &HighlightData))
+																			   lastrow = ti->row;
+																	   }
+
+																	   // get the field that co-responds to the column and put it
+																	   // in the ti->buf parameter 
+																	   if (ti->row >= startdata)
+																	   {
+																		   long	RecNum = ti->row - startdata + 1;
+
+																		   if (HLTRowSelected(RecNum))
+																		   {
+																			   ti->textcolor = GetSysColor(COLOR_HIGHLIGHTTEXT);
+																			   ti->backcolor = GetSysColor(COLOR_HIGHLIGHT);
+																		   }
+																		   else
+																		   {
+																			   ti->textcolor = GetSysColor(COLOR_WINDOWTEXT);
+																			   ti->backcolor = GetSysColor(COLOR_WINDOW);
+																		   }
+																		   switch (ti->col)
+																		   {
+																		   case 0:
+																			   ltoa(ti->row + 1 - startdata, ti->buf, 10);
+																			   ti->alignment = TA_RIGHT;
+																			   break;
+																		   case 1:
+																			   ltoa(HighlightData.PD.Refno, ti->buf, 10);
+																			   ti->alignment = TA_RIGHT;
+																			   break;
+																		   case 2:
+																			   _fstrcpy(ti->buf, Types[HighlightData.PD.Type]);
+																			   if (HighlightData.PD.Type != 4 && HighlightData.PD.HasText)
+																				   _fstrcat(ti->buf, "/T");
+																			   ti->alignment = TA_LEFT;
+																			   break;
+																		   case 3:
+																			   if (!SetRefno && !_fstricmp(HighlightData.PD.Prefix, "REFNO"))
+																				   sprintf(ti->buf, "INTREFNO:%ld", HighlightData.PD.Refno);
+																			   else if (*HighlightData.PD.Prefix)
+																			   {
+																				   _fstrcpy(ti->buf, HighlightData.PD.Prefix);
+																				   _fstrcat(ti->buf, ":");
+																				   _fstrcat(ti->buf, HighlightData.PD.UDI);
+																			   }
+																			   else
+																				   *ti->buf = 0;
+																			   ti->alignment = TA_LEFT;
+																			   break;
+																		   case 4:
+																		   {
+																					 char	SymName[34];
+
+																					 if (!CurrentConfig)
+																						 SetConfig(1);
+
+																					 SetConfig(HighlightData.PD.ConfigID);
+																					 SetViewport(HighlightData.PD.ViewID);
+																					 GetSymbolName(HighlightData.PD.Desc, SymName, 0, -(HighlightData.PD.FileNum + 1), 0);
+																					 _fstrcpy(ti->buf, SymName);
+																					 ti->alignment = TA_LEFT;
+																					 break;
+																		   }
+																		   case 5:
+																			   if (HighlightData.PD.Type != 2 && HighlightData.PD.Type != 5) break;
+																			   _fstrcpy(ti->buf, LinOpt(HighlightData.PD.Length));
+																			   ti->alignment = TA_RIGHT;
+																			   break;
+																		   case 6:
+																			   if (HighlightData.PD.Type != 3) break;
+																			   _fstrcpy(ti->buf, AreaOpt(HighlightData.PD.Area));
+																			   ti->alignment = TA_RIGHT;
+																			   break;
+																		   case 7:
+																			   if (HighlightData.PD.Type != 3) break;
+																			   _fstrcpy(ti->buf, LinOpt(HighlightData.PD.Length));
+																			   ti->alignment = TA_RIGHT;
+																			   break;
+
+																		   default:;
+																		   }
+																	   }
+																	   // set the alignment for the first three fields according
+																	   // to the alignment selected from the menu
+
+																	   // menu selected color options 
+																	   //ti->textcolor=GetSysColor(COLOR_HIGHLIGHTTEXT);
+																	   //ti->backcolor=GetSysColor(COLOR_HIGHLIGHT);
+																	   return 0;
+												 }
+
+												 case TBN_ROWCHANGE:
+												 {
+																	   long	RecNum = ti->row - startdata + 1;
+																	   static	long	LastRecNum;
+																	   //display the new row number in the status window
+																	   //wsprintf(string,"Row Changed To: %ld",ti->row);
+																	   //SetDlgItemText(hwnd,IDC_STATUS,string); 
+																	   if (!HLTRowSelected(RecNum))
+																		   SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_SETHIGHLIGHT, FALSE, 0);
+																	   CurRow = ti->row;
+																	   if (InFlash && CurRow >= startdata - 1)
+																		   PostMessage(hwnd, WM_COMMAND, ID_FLASH_CURRENTITEM, 0L);
+																	   else if (ti->wParam & CONTROLKEY)
+																	   {
+																		   LastRecNum = RecNum;
+																		   HLTSelectAdd(RecNum);
+																		   TB_RedrawTable(hwnd);
+																	   }
+																	   else if (ti->wParam & SHIFTKEY)
+																	   {
+																		   long	iRec = min(LastRecNum, RecNum), EndRec = max(LastRecNum, RecNum);
+																		   if (iRec == LastRecNum)
+																			   iRec++;
+																		   if (EndRec == LastRecNum)
+																			   EndRec--;
+																		   GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+																		   while (iRec <= EndRec)
+																			   HLTSelectAdd(iRec++);
+																		   GSSiSetCursor(0);
+																		   TB_RedrawTable(hwnd);
+																	   }
+																	   else
+																	   {
+																		   //SendDlgItemMessage(hwnd,IDC_UGTABLE,LB_SETCURSEL,-1,0);
+																		   //SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,ti->row);
+																		   //TB_RedrawTable (GetDlgItem(hwnd,IDC_UGTABLE));
+																		   //HLTSelectClear (FALSE);
+																	   }
+																	   return 0;
+												 }
+
+												 case TBN_COLCHANGE:{
+																		//display the new column number in the status window
+																		//wsprintf(string,"Col Changed To: %d",ti->col);
+																		//SetDlgItemText(hwnd,IDC_STATUS,string);
+
+																		return 1;
+												 }
+
+												 case TBN_ROWSELECTED:{
+																		  //display the row/column that was selected
+																		  //wsprintf(string," Row:%ld  Col:%d  Selected",ti->row,ti->col);
+																		  //SetDlgItemText(hwnd,IDC_STATUS,string);
+
+																		  //if multiple selection is on then tag/untag the field
+																		  //if(color==3){
+																		  //retrive the current record
+																		  //	fseek(fptr,ti->row * sizeof(DATA),SEEK_SET);
+																		  //	fread(&data,sizeof(DATA),1,fptr);
+
+																		  //if it is not already selected then select it
+																		  //		if(data.flag==0){
+																		  //			data.flag=1;
+																		  //		}
+																		  //otherwise un-select it
+																		  //		else{
+																		  //			data.flag=0;
+																		  //		}
+
+																		  //save the record
+																		  //		fseek(fptr,ti->row * sizeof(DATA),SEEK_SET);
+																		  //		fwrite(&data,sizeof(DATA),1,fptr);
+
+																		  //clear the lastrow flag
+																		  //		lastrow=-1;
+
+																		  //redraw the table so the changes will be shown
+																		  //		TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
+																		  //	}
+																		  PostMessage(hwnd, WM_COMMAND, ID_ZOOM_CURRENTITEM, 0L);
+																		  return 1;
+												 }
+
+												 case TBN_KEYBOARD:{
+																	   //display the key that was hit
+																	   //wsprintf(string,"Key: %c",ti->wParam);
+																	   //SetDlgItemText(hwnd,IDC_STATUS,string);
+																	   //search the database for the closest match
+																	   //	t=0;					//set the counter to zero
+																	   //	rewind(fptr);     //start from the beginning of the file
+																	   //	while(1){
+																	   //retrive a record
+																	   //		x=fread(&data,sizeof(DATA),1,fptr);
+																	   //		if(x==0){
+																	   //	t--;
+																	   //				break;
+																	   //		}
+
+																	   //		if(data.Company[0] >= ti->wParam){
+																	   //			break;
+																	   //		}
+																	   //		t++;
+																	   //	}
+																	   //clear the lastrow flag
+																	   //lastrow=-1;
+
+																	   //update the table position
+																	   //SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,t);
+
+																	   return 1;
+												 }
+												 }
+												 return 1;
+							}
+							case IDC_UGTABLEHDG:{
+													ii = HIWORD(wParam);
+													switch (HIWORD(wParam)){
+													case TBN_WANTHDG:{
+																		 //set the text buffer to the column name  
+																		 *ti->buf = 0;
+																		 switch (ti->col)
+																		 {
+																		 default:
+																			 _fstrcpy(ti->buf, hdg[ti->col]);
+																			 break;
+																		 case 5:
+																		 case 7:
+																			 sprintf(ti->buf, "%s\r\n(%s)", hdg[ti->col], cLUnits[OutDistUnits - 1]);
+																			 break;
+																		 case 6:
+																			 sprintf(ti->buf, "%s\r\n(%s)", hdg[ti->col], cAUnits[OutAreaUnits - 1]);
+																			 break;
+																		 }
+																		 ti->alignment = TA_CENTER;
+																		 return 1;
+													}
+													}
+							}
+							case IDC_UGTABLEFTR:{
+													ii = HIWORD(wParam);
+													switch (HIWORD(wParam)){
+													case TBN_WANTFTR:{
+																		 //set the text buffer to the column name  
+																		 *ti->buf = 0;
+																		 switch (ti->col)
+																		 {
+																		 case 0:
+																		 {
+																				   int	n = BT_NUM_IN_INDEX(hHighlight);
+																				   sprintf(ti->buf, "%ld", n);
+																				   ti->alignment = TA_RIGHT;
+																		 }
+																			 break;
+																		 case 5:
+																			 _fstrcpy(ti->buf, LinOpt(TotHLTLength));
+																			 ti->alignment = TA_RIGHT;
+																			 break;
+																		 case 6:
+																			 _fstrcpy(ti->buf, AreaOpt(TotHLTArea));
+																			 ti->alignment = TA_RIGHT;
+																			 break;
+																		 case 7:
+																			 _fstrcpy(ti->buf, LinOpt(TotHLTPerim));
+																			 break;
+																		 }
+													}
+													}
+													return 1;
+							}
+
+							case IDC_SEARCH:{
+												//if the search edit box has changed do a new search
+												if (HIWORD(lParam) == EN_CHANGE){
+
+													//get the text from the control
+													GetDlgItemText(hwnd, IDC_SEARCH, string, 50);
+
+													//search the database for the closest match
+													t = 0;					//set the counter to zero
+													//	rewind(fptr);     //start from the beginning of the file
+													//	while(1){
+													//retrive a record
+													//	x=fread(&data,sizeof(DATA),1,fptr);
+													//	if(x==0){
+													//		t--;
+													//		break;
+													//	}
+
+													//	if(_fstricmp(data.Company,string)>=0){
+													//		break;
+													//	}
+													//	t++;
+													//	}
+													//clear the lastrow flag
+													lastrow = -1;
+
+													//update the table position
+													SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_GOTOROW, 0, t);
 												}
-												break;
-											case 5:  
-												_fstrcpy (ti->buf,LinOpt(TotHLTLength)); 
-												ti->alignment=TA_RIGHT; 
-												break;
-											case 6:
-												_fstrcpy (ti->buf,AreaOpt(TotHLTArea)); 
-												ti->alignment=TA_RIGHT; 
-												break;
-											case 7:
-												_fstrcpy (ti->buf,LinOpt(TotHLTPerim)); 
-												ti->alignment=TA_RIGHT; 
-												break;
-										}
-										break;
-									case 2: 
-									{
-										LPSTR lpEnd;
-										
-										_fmemset (ti->buf,'-',255);
-										lpEnd = ti->buf + 255;
-										*lpEnd = 0;   
-									}
-										break;
-								} 
-								
-							}
-							else if(ti->row!=lastrow)
-							{
-								//find the record that coresponds to the row given 
-								long	RecNum = ti->row-startdata+1;
-								
-								if (GetRowHighlightData (RecNum,&HighlightData))  
-									lastrow=ti->row;
+												return 0;
 							}
 
-							// get the field that co-responds to the column and put it
-							// in the ti->buf parameter 
-							if (ti->row >= startdata) 
-							{
-								long	RecNum = ti->row-startdata+1; 
-								
-								if (HLTRowSelected (RecNum))
-								{ 
-									ti->textcolor=GetSysColor(COLOR_HIGHLIGHTTEXT);
-									ti->backcolor=GetSysColor(COLOR_HIGHLIGHT);
+							case ID_DOCK:
+								switch (Dock)
+								{
+								case 0:
+								case 2:
+									Dock = 1;
+									break;
+								case 1:
+									Dock = 2;
 								}
-								else
-								{ 
-									ti->textcolor=GetSysColor(COLOR_WINDOWTEXT);
-									ti->backcolor=GetSysColor(COLOR_WINDOW);
-								}
-								switch (ti->col)
-								{  
-									case 0:
-										ltoa (ti->row+1-startdata,ti->buf,10);
-										ti->alignment=TA_RIGHT; 
-										break; 
-									case 1:
-										ltoa (HighlightData.PD.Refno,ti->buf,10);
-										ti->alignment=TA_RIGHT; 
-										break; 
-									case 2:
-										_fstrcpy (ti->buf,Types[HighlightData.PD.Type]);
-										if (HighlightData.PD.Type != 4 && HighlightData.PD.HasText)
-											_fstrcat (ti->buf,"/T");
-										ti->alignment=TA_LEFT;
-										break;
-									case 3: 
-										if (!SetRefno && !_fstricmp (HighlightData.PD.Prefix,"REFNO"))
-											sprintf (ti->buf,"INTREFNO:%ld",HighlightData.PD.Refno);
-										else if (*HighlightData.PD.Prefix)
-										{  
-											_fstrcpy (ti->buf,HighlightData.PD.Prefix);
-											_fstrcat (ti->buf,":");
-											_fstrcat (ti->buf,HighlightData.PD.UDI); 
-										}
-										else
-											*ti->buf = 0;
-										ti->alignment=TA_LEFT;
-										break; 
-									case 4:  
-									{
-										char	SymName[34];
-										
-										if (!CurrentConfig)
-											SetConfig (1);
-     
-									    SetConfig (HighlightData.PD.ConfigID);
-										SetViewport (HighlightData.PD.ViewID);
-										GetSymbolName (HighlightData.PD.Desc,SymName,0,-(HighlightData.PD.FileNum+1),0);
-										_fstrcpy (ti->buf,SymName);
-										ti->alignment=TA_LEFT;
-										break;  
-									}
-									case 5:
-										if (HighlightData.PD.Type != 2 && HighlightData.PD.Type != 5) break;
-										_fstrcpy (ti->buf,LinOpt(HighlightData.PD.Length)); 
-										ti->alignment=TA_RIGHT;
-										break;
-									case 6:
-										if (HighlightData.PD.Type != 3) break;
-										_fstrcpy (ti->buf,AreaOpt(HighlightData.PD.Area)); 
-										ti->alignment=TA_RIGHT;
-										break;
-									case 7:
-										if (HighlightData.PD.Type != 3) break;
-										_fstrcpy (ti->buf,LinOpt(HighlightData.PD.Length)); 
-										ti->alignment=TA_RIGHT;
-										break;
-										
-									default:;
-								} 
-							} 
-							// set the alignment for the first three fields according
-							// to the alignment selected from the menu
+								GetWindowRect(hwnd, &WindRect);
+								DestroyWindow(hwnd);
+								break;
+							case IDM_HLTSORT_SYMBOL:
+								BuildSortList(SORTONSYMBOL);
+								TB_RedrawTable(hwnd);
+								return 0;
 
-							// menu selected color options 
-							//ti->textcolor=GetSysColor(COLOR_HIGHLIGHTTEXT);
-							//ti->backcolor=GetSysColor(COLOR_HIGHLIGHT);
+							case IDM_HLTSORT_TAG:
+								BuildSortList(SORTONTAG);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case IDM_HLTSORT_AREA:
+								BuildSortList(SORTONAREA);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case IDM_HLTSORT_HSEQ:
+								BuildSortList(SORTONSEQ);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case IDM_HLTSORT_REFNO:
+								BuildSortList(SORTONREF);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case IDM_HLTSORT_PERIMETER:
+							case IDM_HLTSORT_LENGTH:
+								BuildSortList(SORTONLEN);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case IDM_HLTSORT_PDIVAREA:
+								BuildSortList(SORTONPERDIVAREA);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case IDM_HLTSORT_TYPE:
+								BuildSortList(SORTONTYPE);
+								TB_RedrawTable(hwnd);
+								return 0;
+
+							case ID_OPTIONS_LINEARUNITS_FEET:
+							case ID_OPTIONS_LINEARUNITS_METERS:
+							case ID_OPTIONS_LINEARUNITS_MILES:
+							case ID_OPTIONS_LINEARUNITS_KILOMETERS:
+							case ID_OPTIONS_LINEARUNITS_YARDS:
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_FEET, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_METERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_MILES, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_KILOMETERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_YARDS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), LOWORD(wParam), MF_BYCOMMAND | MF_CHECKED);
+								switch (LOWORD(wParam))
+								{
+								case ID_OPTIONS_LINEARUNITS_FEET:
+									OutDistUnits = 1;
+									break;
+								case ID_OPTIONS_LINEARUNITS_METERS:
+									OutDistUnits = 2;
+									break;
+								case ID_OPTIONS_LINEARUNITS_YARDS:
+									OutDistUnits = 3;
+									break;
+								case ID_OPTIONS_LINEARUNITS_MILES:
+									OutDistUnits = 4;
+									break;
+								case ID_OPTIONS_LINEARUNITS_KILOMETERS:
+									OutDistUnits = 5;
+									break;
+								}
+								SetLinPrecision(hwnd, (short)GetGlobalLVal2("[%DISTANCEPRECISION]", 4));
+								return 0;
+
+							case ID_OPTIONS_AREAUNITS_SQUAREFEET:
+							case ID_OPTIONS_AREAUNITS_SQUAREMETERS:
+							case ID_OPTIONS_AREAUNITS_SQUAREYARDS:
+							case ID_OPTIONS_AREAUNITS_ACRES:
+							case ID_OPTIONS_AREAUNITS_SQUAREMILES:
+							case ID_OPTIONS_AREAUNITS_SQUAREKILOMETERS:
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREFEET, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREMETERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREYARDS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_ACRES, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREMILES, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREKILOMETERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), LOWORD(wParam), MF_BYCOMMAND | MF_CHECKED);
+								switch (LOWORD(wParam))
+								{
+								case ID_OPTIONS_AREAUNITS_SQUAREFEET:
+									OutAreaUnits = 1;
+									break;
+								case ID_OPTIONS_AREAUNITS_SQUAREMETERS:
+									OutAreaUnits = 2;
+									break;
+								case ID_OPTIONS_AREAUNITS_SQUAREYARDS:
+									OutAreaUnits = 3;
+									break;
+								case ID_OPTIONS_AREAUNITS_SQUAREMILES:
+									OutAreaUnits = 4;
+									break;
+								case ID_OPTIONS_AREAUNITS_SQUAREKILOMETERS:
+									OutAreaUnits = 5;
+									break;
+								case ID_OPTIONS_AREAUNITS_ACRES:
+									OutAreaUnits = 6;
+									break;
+								}
+								SetAreaPrecision(hwnd, (short)GetGlobalLVal2("[%AREAPRECISION]", 0));
+								return 0;
+
+							case ID_OPTIONS_AREAPRECISION_WHOLENUMBERS:
+								AreaPrecision = 0;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_AREAPRECISION_01:
+								AreaPrecision = 1;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_AREAPRECISION_001:
+								AreaPrecision = 2;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_AREAPRECISION_0001:
+								AreaPrecision = 3;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_AREAPRECISION_00001:
+								AreaPrecision = 4;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_CHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS:
+								LinPrecision = 0;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_LINEARPRECISION_01:
+								LinPrecision = 1;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_LINEARPRECISION_001:
+								LinPrecision = 2;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_LINEARPRECISION_0001:
+								LinPrecision = 3;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_CHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_OPTIONS_LINEARPRECISION_00001:
+								LinPrecision = 4;
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
+								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_CHECKED);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								return 0;
+
+							case ID_GOTO_TOP:{
+												 //update the table position
+												 SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_GOTOROW, 0, 0);
+
+												 return 0;
+							}
+
+							case ID_GOTO_BOTTOM:{
+													//get the number of records in the database
+													// BTHEAD	BTHead; 
+													//get the number of records in the datafile    
+													if (BT_NUM_IN_INDEX(hHighlight))
+														iRow = BT_NUM_IN_INDEX(hHighlight) + startdata - 1;
+													else
+														iRow = 0;
+													//update the table position
+													SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_GOTOROW, 0, iRow);
+
+													return 0;
+							}
+
+							case ID_SAVE_WIDTHS:{
+													//retrieve the widths of the columns in the table and save them
+													for (t = 0; t < nCol; t++){
+														savecol[t] = (int)SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_GETCOLWIDTH, t, 0);
+													}
+
+													return 0;
+							}
+
+							case ID_RESTORE_WIDTHS:{
+													   //use the previously saved column widths to set the coulmn withs
+													   for (t = 0; t < nCol; t++){
+														   SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_SETCOLWIDTH,
+															   t, savecol[t]);
+													   }
+													   //redraw the table
+													   TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+
+													   return 0;
+							}
+
+							case ID_TEXT_LEFT:{
+												  //set the alignment flag to 1 (1=left)
+												  align = TA_LEFT;
+												  //redraw the table
+												  TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+												  return 0;
+							}
+
+							case ID_TEXT_RIGHT:{
+												   //set the alignment flag to 2 (2=right)
+												   align = TA_RIGHT;
+												   //redraw the table
+												   TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+												   return 0;
+							}
+
+							case ID_TEXT_CENTER:{
+													//set the alignment flag to 3 (3=center)
+													align = TA_CENTER;
+													//redraw the table
+													TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+													return 0;
+							}
+
+							case ID_REMOVE:
+							{
+											  long	Refno, RecNum;
+											  HANDLE	hList = hHighlight2;
+											  int		nItems = GetLBSelectedItems(hwnd, IDC_UGTABLE, &hItems);
+
+											  if (nItems)
+											  {
+												  HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, nItems * sizeof (long));
+												  LPLONG	pRefs = GlobalLock(hMem);
+
+												  GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+												  pItems = GlobalLock(hItems);
+												  for (i = 0; i < nItems; i++)
+												  {
+													  GetRowHighlightData((*pItems++) + 1, &HighlightData);
+													  pRefs[i] = HighlightData.PD.Refno;
+												  }
+												  for (i = 0; i < nItems; i++)
+													  RemoveFromHighlightList(pRefs[i], 1);
+												  GSSiGlobUlFree(&hMem);
+											  }
+											  GSSiSetCursor(0);
+											  GSSiGlobUlFree(&hItems);
+											  goto Redisplay;
+							}
+
+							case ID_DESELECTHLT:
+								HLTSelectClear(FALSE);
+								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								break;
+
+							case ID_CLEARHLT:
+							{
+												long	Refno, RecNum;
+												short	pos = BT_FIRST;
+												HANDLE	hHighlightOld = hHighlight;
+												int		nItems = GetLBSelectedItems(hwnd, IDC_UGTABLE, &hItems);
+
+												if (!hHighlight)
+													break;
+												if (nItems)
+												{
+													HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, nItems * sizeof (long));
+													LPLONG	pRefs = GlobalLock(hMem);
+
+													GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+													pItems = GlobalLock(hItems);
+													for (i = 0; i < nItems; i++)
+													{
+														GetRowHighlightData((*pItems++) + 1, &HighlightData);
+														pRefs[i] = HighlightData.PD.Refno;
+													}
+													hHighlight = 0;
+													BT_CLOSEANDDELETE(&hHighlight2);
+													OpenHighlightList("", 0);
+													for (i = 0; i < nItems; i++)
+													{
+														if (!BT_FIND(hHighlightOld, (LPSTR)&pRefs[i], BT_FIRST, BT_EQ, (LPSTR)&HighlightData))
+														{
+															BT_PUT(hHighlight, (LPSTR)&pRefs[i], (LPSTR)&HighlightData);
+															BT_PUT(hHighlight2, (LPSTR)&HighlightData.Sequence, (LPSTR)&pRefs[i]);
+														}
+													}
+													BT_CLOSEANDDELETE(&hHighlightOld);
+													GSSiGlobUlFree(&hMem);
+													GSSiGlobUlFree(&hItems);
+												}
+												else
+													ClearHighlightList(FALSE);
+												PostMessage(hWndMain, WM_COMMAND, IDM_Z_REDRAW, 0L);
+												goto Redisplay;
+							}
+
+								return 0;
+
+					case ID_ZOOM_CURRENTITEM:
+					{
+						int		nItems = GetLBSelectedItems(hwnd, IDC_UGTABLE, &hItems);
+
+						if (nItems > 1)
+						{
+							MNMXCORD bounds;
+
+							DBoundsInit(&bounds);
+
+							pItems = GlobalLock(hItems);
+							for (i = 0; i < nItems; i++)
+							{
+								GetRowHighlightData((*pItems++) + 1, &HighlightData);
+								AddMinMaxD(&bounds, &HighlightData.PD.Rect);
+							}
+							ZoomToRect(bounds, FALSE);
 							return 0;
 						}
-
-						case TBN_ROWCHANGE :
-						{
-							long	RecNum = ti->row-startdata+1; 
-							static	long	LastRecNum; 
-							//display the new row number in the status window
-							//wsprintf(string,"Row Changed To: %ld",ti->row);
-							//SetDlgItemText(hwnd,IDC_STATUS,string); 
-							if (!HLTRowSelected (RecNum)) 
-								SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_SETHIGHLIGHT,FALSE,0);
-                            CurRow = ti->row; 
-                            if (InFlash && CurRow >= startdata-1)
-								PostMessage(hwnd, WM_COMMAND, ID_FLASH_CURRENTITEM, 0L);
-							else if (ti->wParam & CONTROLKEY)  
-							{
-								LastRecNum = RecNum;
-								HLTSelectAdd (RecNum); 
-					            TB_RedrawTable (hwnd);
-							}
-							else if (ti->wParam & SHIFTKEY)  
-							{
-								long	iRec = min (LastRecNum,RecNum), EndRec = max (LastRecNum,RecNum);    
-								if (iRec == LastRecNum)
-									iRec++;
-								if (EndRec == LastRecNum)
-									EndRec--;
-								GSSiSetCursor(LoadCursor(0, IDC_WAIT));
-								while (iRec <= EndRec)
-									HLTSelectAdd (iRec++);  
-								GSSiSetCursor (0); 
-					            TB_RedrawTable (hwnd);
-							}                             
-							else
-							{   
-								//SendDlgItemMessage(hwnd,IDC_UGTABLE,LB_SETCURSEL,-1,0);
-								//SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,ti->row);
-								//TB_RedrawTable (GetDlgItem(hwnd,IDC_UGTABLE));
-								//HLTSelectClear (FALSE);
-							}  
-                            return 0;
-						}
-
-						case TBN_COLCHANGE :{
-							//display the new column number in the status window
-							//wsprintf(string,"Col Changed To: %d",ti->col);
-							//SetDlgItemText(hwnd,IDC_STATUS,string);
-
-							return 1;
-						}
-
-						case TBN_ROWSELECTED:{
-							//display the row/column that was selected
-							//wsprintf(string," Row:%ld  Col:%d  Selected",ti->row,ti->col);
-							//SetDlgItemText(hwnd,IDC_STATUS,string);
-
-							//if multiple selection is on then tag/untag the field
-							//if(color==3){
-								//retrive the current record
-							//	fseek(fptr,ti->row * sizeof(DATA),SEEK_SET);
-							//	fread(&data,sizeof(DATA),1,fptr);
-
-								//if it is not already selected then select it
-						//		if(data.flag==0){
-						//			data.flag=1;
-						//		}
-								//otherwise un-select it
-						//		else{
-						//			data.flag=0;
-						//		}
-
-							  	//save the record
-						//		fseek(fptr,ti->row * sizeof(DATA),SEEK_SET);
-						//		fwrite(&data,sizeof(DATA),1,fptr);
-
-								//clear the lastrow flag
-						//		lastrow=-1;
-
-								//redraw the table so the changes will be shown
-						//		TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-						//	}
-							PostMessage(hwnd, WM_COMMAND, ID_ZOOM_CURRENTITEM, 0L); 
-							return 1;
-						}
-
-						case TBN_KEYBOARD:{
-							//display the key that was hit
-							//wsprintf(string,"Key: %c",ti->wParam);
-							//SetDlgItemText(hwnd,IDC_STATUS,string);
-							//search the database for the closest match
-						//	t=0;					//set the counter to zero
-						//	rewind(fptr);     //start from the beginning of the file
-						//	while(1){
-								//retrive a record
-						//		x=fread(&data,sizeof(DATA),1,fptr);
-						//		if(x==0){
-                        //	t--;
-					//				break;
-						//		}
-
-						//		if(data.Company[0] >= ti->wParam){
-						//			break;
-						//		}
-						//		t++;
-						//	}
-							//clear the lastrow flag
-							//lastrow=-1;
-
-							//update the table position
-							//SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,t);
-
-							return 1;
-						}
-					}
-					return 1;
-				}
-				case IDC_UGTABLEHDG:{
-					ii = HIWORD(wParam);
-					switch(HIWORD(wParam)){
-						case TBN_WANTHDG :{
-							//set the text buffer to the column name  
-							*ti->buf = 0;
-							switch (ti->col)
-							{
-								default:
-									_fstrcpy(ti->buf,hdg[ti->col]);
-									break;
-								case 5:
-								case 7:
-									sprintf (ti->buf,"%s\r\n(%s)",hdg[ti->col],cLUnits[OutDistUnits-1]);
-									break;
-								case 6:
-									sprintf (ti->buf,"%s\r\n(%s)",hdg[ti->col],cAUnits[OutAreaUnits-1]);
-									break;
-							}
-							ti->alignment=TA_CENTER;
-							return 1;
-							}
-					}
-					}
-				case IDC_UGTABLEFTR:{
-					ii = HIWORD(wParam);
-					switch(HIWORD(wParam)){
-						case TBN_WANTFTR :{
-							//set the text buffer to the column name  
-							*ti->buf = 0;
-							switch (ti->col)
-							{
-								case 0:
-									{
-										int	n = BT_NUM_IN_INDEX (hHighlight); 
-										sprintf (ti->buf,"%ld",n);
-										ti->alignment=TA_RIGHT; 
-									}
-									break;
-								case 5:  
-									_fstrcpy (ti->buf,LinOpt(TotHLTLength)); 
-									ti->alignment=TA_RIGHT; 
-									break;
-								case 6:
-									_fstrcpy (ti->buf,AreaOpt(TotHLTArea)); 
-									ti->alignment=TA_RIGHT; 
-									break;
-								case 7:
-									_fstrcpy (ti->buf,LinOpt(TotHLTPerim)); 
-									break;
-							}
-						}
-					}
-					return 1;
-				}
-
-				case IDC_SEARCH:{
-					//if the search edit box has changed do a new search
-					if(HIWORD(lParam)==EN_CHANGE){
-
-						//get the text from the control
-						GetDlgItemText(hwnd,IDC_SEARCH,string,50);
-
-						//search the database for the closest match
-						t=0;					//set the counter to zero
-					//	rewind(fptr);     //start from the beginning of the file
-					//	while(1){
-							//retrive a record
-						//	x=fread(&data,sizeof(DATA),1,fptr);
-						//	if(x==0){
-						//		t--;
-						//		break;
-						//	}
-
-						//	if(_fstricmp(data.Company,string)>=0){
-						//		break;
-						//	}
-						//	t++;
-					//	}
-						//clear the lastrow flag
-						lastrow=-1;
-
-						//update the table position
-						SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,t);
-					}
-					return 0;
-				}
-
-				case ID_DOCK:
-					switch (Dock)
-					{
-					case 0:
-					case 2:
-						Dock = 1;
-						break;
-					case 1:
-						Dock = 2;
-					}
-					GetWindowRect (hwnd,&WindRect);
-					DestroyWindow (hwnd);
-					break;
-				case IDM_HLTSORT_SYMBOL:
-					BuildSortList (SORTONSYMBOL);
-					TB_RedrawTable(hwnd);
-					return 0;
-					 
-				case IDM_HLTSORT_TAG:   
-					BuildSortList (SORTONTAG);
-					TB_RedrawTable(hwnd);
-					return 0;
-				
-				case IDM_HLTSORT_AREA:   
-					BuildSortList (SORTONAREA);
-					TB_RedrawTable(hwnd);
-					return 0;
-				
-				case IDM_HLTSORT_HSEQ:
-					BuildSortList (SORTONSEQ);
-					TB_RedrawTable(hwnd);
-		            return 0;
-				
-				case IDM_HLTSORT_REFNO	:
-					BuildSortList (SORTONREF);
-					TB_RedrawTable(hwnd);
-		            return 0;
-
-				case IDM_HLTSORT_PERIMETER	:
-				case IDM_HLTSORT_LENGTH	:
-					BuildSortList (SORTONLEN);
-					TB_RedrawTable(hwnd);
-		            return 0;
-                
-                case IDM_HLTSORT_PDIVAREA:
-					BuildSortList (SORTONPERDIVAREA);
-					TB_RedrawTable(hwnd);
-		            return 0;
-		            
-				case IDM_HLTSORT_TYPE	:
-					BuildSortList (SORTONTYPE);
-					TB_RedrawTable(hwnd);
-		            return 0;
-
-				case ID_OPTIONS_LINEARUNITS_FEET:
-				case ID_OPTIONS_LINEARUNITS_METERS:
-				case ID_OPTIONS_LINEARUNITS_MILES:
-				case ID_OPTIONS_LINEARUNITS_KILOMETERS:
-				case ID_OPTIONS_LINEARUNITS_YARDS:
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_FEET, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_METERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_MILES, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_KILOMETERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARUNITS_YARDS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), LOWORD(wParam), MF_BYCOMMAND | MF_CHECKED);
-					switch(LOWORD(wParam))
-					{
-						case ID_OPTIONS_LINEARUNITS_FEET:
-							OutDistUnits = 1; 
-							break; 
-						case ID_OPTIONS_LINEARUNITS_METERS:
-							OutDistUnits = 2; 
-							break; 
-						case ID_OPTIONS_LINEARUNITS_YARDS:
-							OutDistUnits = 3; 
-							break; 
-						case ID_OPTIONS_LINEARUNITS_MILES:
-							OutDistUnits = 4; 
-							break; 
-						case ID_OPTIONS_LINEARUNITS_KILOMETERS:
-							OutDistUnits = 5; 
-							break; 
-					}
-					SetLinPrecision (hwnd,(short)GetGlobalLVal2 ("[%DISTANCEPRECISION]",4));
-					return 0;
-
-				case ID_OPTIONS_AREAUNITS_SQUAREFEET:
-				case ID_OPTIONS_AREAUNITS_SQUAREMETERS:
-				case ID_OPTIONS_AREAUNITS_SQUAREYARDS:
-				case ID_OPTIONS_AREAUNITS_ACRES:
-				case ID_OPTIONS_AREAUNITS_SQUAREMILES:
-				case ID_OPTIONS_AREAUNITS_SQUAREKILOMETERS:  
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREFEET, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREMETERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREYARDS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_ACRES, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREMILES, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAUNITS_SQUAREKILOMETERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), LOWORD(wParam), MF_BYCOMMAND | MF_CHECKED);
-					switch(LOWORD(wParam))
-					{
-						case ID_OPTIONS_AREAUNITS_SQUAREFEET:
-							OutAreaUnits = 1;
-							break;
-						case ID_OPTIONS_AREAUNITS_SQUAREMETERS:
-							OutAreaUnits = 2;
-							break;
-						case ID_OPTIONS_AREAUNITS_SQUAREYARDS:
-							OutAreaUnits = 3;
-							break;
-						case ID_OPTIONS_AREAUNITS_SQUAREMILES:
-							OutAreaUnits = 4; 
-							break;
-						case ID_OPTIONS_AREAUNITS_SQUAREKILOMETERS:
-							OutAreaUnits = 5;
-							break;
-						case ID_OPTIONS_AREAUNITS_ACRES:
-							OutAreaUnits = 6;
-		                    break;
-					}
-					SetAreaPrecision (hwnd,(short)GetGlobalLVal2 ("[%AREAPRECISION]",0));
-					return 0;
-
-				case ID_OPTIONS_AREAPRECISION_WHOLENUMBERS:
-					AreaPrecision = 0; 
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_AREAPRECISION_01:
-					AreaPrecision = 1;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_AREAPRECISION_001:
-					AreaPrecision = 2;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_AREAPRECISION_0001:
-					AreaPrecision = 3;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_AREAPRECISION_00001:
-					AreaPrecision = 4;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_CHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS:
-					LinPrecision = 0;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_LINEARPRECISION_01:
-					LinPrecision = 1;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_LINEARPRECISION_001:
-					LinPrecision = 2;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_LINEARPRECISION_0001:
-					LinPrecision = 3;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_CHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_OPTIONS_LINEARPRECISION_00001:
-					LinPrecision = 4;
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
-				 	CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_CHECKED);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;  
-					
-				case ID_GOTO_TOP:{
-					//update the table position
-					SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,0);
-
-					return 0;
 					}
 
-				case ID_GOTO_BOTTOM:{
-					//get the number of records in the database
-		           // BTHEAD	BTHead; 
-					//get the number of records in the datafile    
-					if (BT_NUM_IN_INDEX (hHighlight))
-						iRow =  BT_NUM_IN_INDEX (hHighlight)+startdata-1;
-					else
-						iRow = 0;
-					//update the table position
-					SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,iRow);
-
-					return 0;
-				}
-
-				case ID_SAVE_WIDTHS:{
-					//retrieve the widths of the columns in the table and save them
-					for(t=0;t<nCol;t++){
-						savecol[t]=(int)SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GETCOLWIDTH,t,0);
-					}
-
-					return 0;
-				}
-
-				case ID_RESTORE_WIDTHS:{
-					//use the previously saved column widths to set the coulmn withs
-					for(t=0;t<nCol;t++){
-						SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_SETCOLWIDTH,
-							t,savecol[t]);
-					}
-					//redraw the table
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-
-					return 0;
-				}
-
-				case ID_TEXT_LEFT:{
-					//set the alignment flag to 1 (1=left)
-					align=TA_LEFT;
-					//redraw the table
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;
-				}
-
-				case ID_TEXT_RIGHT:{
-					//set the alignment flag to 2 (2=right)
-					align=TA_RIGHT;
-					//redraw the table
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;
-				}
-
-				case ID_TEXT_CENTER:{
-					//set the alignment flag to 3 (3=center)
-					align=TA_CENTER;
-					//redraw the table
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE));
-					return 0;
-				}
-				
-				case ID_REMOVE:
-				{
-					long	Refno, RecNum; 
-					HANDLE	hList=hHighlight2;
-					int		nItems = GetLBSelectedItems (hwnd,IDC_UGTABLE, &hItems);
-
-					if (nItems)
-					{
-						HANDLE hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,nItems * sizeof (long));
-						LPLONG	pRefs = GlobalLock (hMem);
-
-						GSSiSetCursor(LoadCursor(0, IDC_WAIT));
-						pItems = GlobalLock (hItems);
-						for (i=0;i<nItems;i++)
-						{
-							GetRowHighlightData ((*pItems++)+1,&HighlightData);
-							pRefs[i] = HighlightData.PD.Refno;
-						}
-						for (i=0;i<nItems;i++)
-							RemoveFromHighlightList (pRefs[i],1); 
-						GSSiGlobUlFree (&hMem);
-					}
-					GSSiSetCursor (0);
-					GSSiGlobUlFree (&hItems);
-					goto Redisplay;  
-				}
-				
-				case ID_DESELECTHLT: 
-					HLTSelectClear (FALSE);
-					TB_RedrawTable(GetDlgItem(hwnd,IDC_UGTABLE)); 
-					break;
-						  
-				case ID_CLEARHLT:
-				{
-					long	Refno, RecNum; 
-					short	pos=BT_FIRST;
-					HANDLE	hHighlightOld = hHighlight;
-					int		nItems = GetLBSelectedItems (hwnd,IDC_UGTABLE, &hItems);
-
-					if (!hHighlight)
-						break;
-					if (nItems)
-					{
-						HANDLE hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,nItems * sizeof (long));
-						LPLONG	pRefs = GlobalLock (hMem);
-
-						GSSiSetCursor(LoadCursor(0, IDC_WAIT));
-						pItems = GlobalLock (hItems);
-						for (i=0;i<nItems;i++)
-						{
-							GetRowHighlightData ((*pItems++)+1,&HighlightData);
-							pRefs[i] = HighlightData.PD.Refno;
-						}
-						hHighlight = 0; 
-						BT_CLOSEANDDELETE (&hHighlight2);
-						OpenHighlightList ("",0);
-						for (i=0;i<nItems;i++)
-						{   
-						    if (!BT_FIND (hHighlightOld,(LPSTR)&pRefs[i],BT_FIRST,BT_EQ,(LPSTR)&HighlightData))
-						    {
-						    	BT_PUT (hHighlight,(LPSTR)&pRefs[i],(LPSTR)&HighlightData);
-						    	BT_PUT (hHighlight2,(LPSTR)&HighlightData.Sequence,(LPSTR)&pRefs[i]);
-						    }
-						} 
-						BT_CLOSEANDDELETE (&hHighlightOld);
-						GSSiGlobUlFree (&hMem);
-						GSSiGlobUlFree (&hItems);
-					}
-					else
-						ClearHighlightList (FALSE); 
-					PostMessage(hWndMain, WM_COMMAND, IDM_Z_REDRAW, 0L);
-					goto Redisplay;
-				}
-					  
-					return 0;
-
-				case ID_ZOOM_CURRENTITEM:
 					if (CurRow >= startdata)
 					{   
 						HaltMapDisplay (FALSE);

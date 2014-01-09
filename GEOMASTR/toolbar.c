@@ -24,12 +24,20 @@ static	int		nToolbarRow, rowY, nControlsInRow, MaxControlsInRow, MaxDesiredToolb
 static	BOOL	FirstToolbarPass;
 
 typedef struct	{UINT	CntlID;
+				 WNDPROC	wndProc;
 				 HBITMAP	hBM;
 				 int	FileLoc;
 				 int	w,h; // h and w of entire toolbar with this number of controls per row
 				 char	Label[80];} TOOBAR_CONTROL_INFO;
 typedef TOOBAR_CONTROL_INFO	*LPTOOBAR_CONTROL_INFO;
 
+typedef struct { HDIB32 hDib32;
+				 BOOL haveTracking;
+				} TEMPWINDDATA;
+typedef TEMPWINDDATA *LPTEMPWINDDATA;
+
+static	HWND	currentToolbarWnd = 0;
+static	int		nextToolbarId = 1;
 static	int		BestW, BestH, TotBestWH;
 static	int		BestRowConfigs[MAX_TOOLBARS];
 static	int		BestTBConfigs[MAX_TOOLBARS];
@@ -41,6 +49,7 @@ static	HWND	hwndPanZoomRot=0;
 static	int		iPerfmonView=0;
 static	char	ToolbarPath[MAX_TOOLBARS][MAX_PATH];
 HWND	ToolbarWindow[MAX_TOOLBARS];
+static	int		ToolbarId[MAX_TOOLBARS];
 static	BOOL	ToolbarFloating[MAX_TOOLBARS];
 static	int		ToolbarType[MAX_TOOLBARS];
 static	int		ToolbarFloatNumPerRow[MAX_TOOLBARS];
@@ -74,8 +83,12 @@ static	short	ToolbarsTop[MAX_TOOLBARS]={0};
 static	short	nToolbarsTop=0;
 static	short	ToolbarsBottom[MAX_TOOLBARS]={0};
 static	DPOINT	ToolbarDPoint[MAX_TOOLBARS];
+static	int		ToolbarVPID[MAX_TOOLBARS];
 static	double	ToolbarReZoomScale[MAX_TOOLBARS];
+static	int		HaveTrackMouseEvent[MAX_TOOLBARS];
+static	int		ToolbarPointerType[MAX_TOOLBARS];
 static	short	nToolbarsBottom=0;
+static	char	ToolbarHoverCmd[MAX_TOOLBARS][MAX_TOOLBAR_HOVERCMD + 1] = { 0 };
 static	UINT	Buttons[MAX_TOOLBAR_BUTTONS]={IDC_BUTTON1,IDC_BUTTON2,IDC_BUTTON3,IDC_BUTTON4,IDC_BUTTON5,
 							  IDC_BUTTON11,IDC_BUTTON12,IDC_BUTTON13,IDC_BUTTON14,IDC_BUTTON15,IDC_BUTTON16,IDC_BUTTON17,IDC_BUTTON18,IDC_BUTTON19,IDC_BUTTON20,
 							  IDC_BUTTON21,IDC_BUTTON22,IDC_BUTTON23,IDC_BUTTON24,IDC_BUTTON25,IDC_BUTTON26,IDC_BUTTON27,IDC_BUTTON28,IDC_BUTTON29,IDC_BUTTON30,
@@ -146,6 +159,8 @@ BOOL OnWMNotify(HWND hWndDlg,LPARAM lParam);
 BOOL CALLBACK EnumChildProcTT(HWND hwndCtrl, LPARAM lParam);
 void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect);
 HANDLE FillTBRows (int nTBTot,LPSHORT TB,int nInIndexArray,LPSHORT IndexArray,int nRows,int iRow,int lastRow,LPHANDLE phOut);
+void DrawBtnFocusRect(HWND BtnWnd);
+LRESULT CALLBACK ButtonSubclassProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 HWND CursorInVisMenuWnd (POINT pt)
 {
@@ -1148,12 +1163,12 @@ BOOL AdjustToolbarPositions (void)
 			ToolBarStartPoint.y = TotBestConfigRect[ToolbarID].top;
 			if (ToolbarFloating[ToolbarID] && ToolbarType[ToolbarID] == TBT_STANDARDMENU_DOCKED)
 			{
-				HANDLE	SaveToolbarHandle = ToolbarHandle[ToolbarID];
+				HWND	SaveToolbarWindow = ToolbarWindow[ToolbarID];
 				DisplayToolbars = FALSE;
-				ToolbarHandle[ToolbarID] = 0;
-				DestroyWindow (ToolbarWindow[ToolbarID]);
+				ToolbarWindow[ToolbarID] = 0;
+				DestroyWindow(SaveToolbarWindow);
 				//DisplayToolbars = TRUE;
-				ToolbarHandle[ToolbarID] = SaveToolbarHandle;
+				ToolbarWindow[ToolbarID] = SaveToolbarWindow;
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
@@ -1251,12 +1266,12 @@ BOOL AdjustToolbarPositions (void)
 			ToolBarStartPoint.y = TotBestConfigRect[ToolbarID].top+MainRect.bottom-ToolbarWidthBottom;
 			if (ToolbarFloating[ToolbarID] && ToolbarType[ToolbarID] == TBT_STANDARDMENU_DOCKED)
 			{
-				HANDLE	SaveToolbarHandle = ToolbarHandle[ToolbarID];
+				HWND	SaveToolbarWindow = ToolbarWindow[ToolbarID];
 				DisplayToolbars = FALSE;
-				ToolbarHandle[ToolbarID] = 0;
-				DestroyWindow (ToolbarWindow[ToolbarID]);
+				ToolbarWindow[ToolbarID] = 0;
+				DestroyWindow(SaveToolbarWindow);
 				//DisplayToolbars = TRUE;
-				ToolbarHandle[ToolbarID] = SaveToolbarHandle;
+				ToolbarWindow[ToolbarID] = SaveToolbarWindow;
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
@@ -1354,12 +1369,13 @@ BOOL AdjustToolbarPositions (void)
 			ToolBarStartPoint.y = TotBestConfigRect[ToolbarID].top;
 			if (ToolbarFloating[ToolbarID] && ToolbarType[ToolbarID] == TBT_STANDARDMENU_DOCKED)
 			{
-				HANDLE	SaveToolbarHandle = ToolbarHandle[ToolbarID];
+				HWND saveToolbarWindow = ToolbarWindow[ToolbarID];
+
+				ToolbarWindow[ToolbarID] = 0;
 				DisplayToolbars = FALSE;
-				ToolbarHandle[ToolbarID] = 0;
-				DestroyWindow (ToolbarWindow[ToolbarID]);
+				DestroyWindow(saveToolbarWindow);
 				//DisplayToolbars = TRUE;
-				ToolbarHandle[ToolbarID] = SaveToolbarHandle;
+				ToolbarWindow[ToolbarID] = saveToolbarWindow;
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
@@ -1457,12 +1473,13 @@ BOOL AdjustToolbarPositions (void)
 			ToolBarStartPoint.y = TotBestConfigRect[ToolbarID].top;
 			if (ToolbarFloating[ToolbarID] && ToolbarType[ToolbarID] == TBT_STANDARDMENU_DOCKED)
 			{
-				HANDLE	SaveToolbarHandle = ToolbarHandle[ToolbarID];
+				HWND saveToolbarWindow = ToolbarWindow[ToolbarID];
+
+				ToolbarWindow[ToolbarID] = 0;
 				DisplayToolbars = FALSE;
-				ToolbarHandle[ToolbarID] = 0;
-				DestroyWindow (ToolbarWindow[ToolbarID]);
+				DestroyWindow(saveToolbarWindow);
 				//DisplayToolbars = TRUE;
-				ToolbarHandle[ToolbarID] = SaveToolbarHandle;
+				ToolbarWindow[ToolbarID] = saveToolbarWindow;
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
@@ -1489,15 +1506,15 @@ BOOL AdjustToolbarPositions (void)
 			{
 				case TBT_STANDARDMENU_DOCKED:
 				{
-					HANDLE	SaveToolbarHandle = ToolbarHandle[ToolbarID];
+					HWND	SaveToolbarWindow = ToolbarWindow[ToolbarID];
 					int	h,w;
 
 					GetWindowRect (ToolbarWindow[ToolbarID],&rect);
 					DisplayToolbars = FALSE;
-					ToolbarHandle[ToolbarID] = 0;
-					DestroyWindow (ToolbarWindow[ToolbarID]);
+					ToolbarWindow[ToolbarID] = 0;
+					DestroyWindow(SaveToolbarWindow);
 					//DisplayToolbars = TRUE;
-					ToolbarHandle[ToolbarID] = SaveToolbarHandle;
+					ToolbarWindow[ToolbarID] = SaveToolbarWindow;
 					ToolbarFloating[ToolbarID] = TRUE;
 					ToolbarCurrentConfig[ToolbarID] = 0;
 					ToolBarStartPoint.x = rect.left;
@@ -2396,8 +2413,11 @@ HRGN	hRgn;
 			DestroySavedScreen (&hSavePZRScreenNoIcons,0);
 			KillTimer (hWnd,TimerID);
 			
-			DestroyToolbar (ToolbarID);
-			RemoveToolbar (ToolbarID,TRUE);
+			if (ToolbarID > -1)
+			{
+				DestroyToolbar(ToolbarID);
+				RemoveToolbar (ToolbarID,TRUE);
+			}
 			hWndPZR = 0;
 		}
 		break;
@@ -2970,7 +2990,7 @@ BOOL RegisterPanZoomRotClass(void)
 BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
 {
 	RECT	Rect;
-	int		ID;
+	int		Id;
 
 	if (!hWnd)
 	{
@@ -3033,24 +3053,44 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
     {
 		return FALSE;
     }
-	ID = LoadToolbar (hwndPanZoomRot,"","ZOOM",0,1,"0 0",TRUE,FALSE,0,0);
+	Id = LoadToolbar (hwndPanZoomRot,"","ZOOM",0,1,"0 0",TRUE,FALSE,0,0,0);
 	DisplayAllToolbars (2);
 
 	return TRUE;
 }
 
-int GetToolbarIDFromWnd (HWND hWndDlg)
+BOOL SetToolbarHoverCmd(int toolbarId,LPSTR cmd)
+{
+	int ToolbarID = GetToolbarIDFromId(toolbarId);
+
+	if (ToolbarID >= 0)
+		strncpy(ToolbarHoverCmd[ToolbarID], cmd, MAX_TOOLBAR_HOVERCMD);
+	return TRUE;
+}
+
+int GetToolbarIDFromWnd(HWND hWndDlg)
 {
 	int	i;
 
-	for (i=0;i<nToolbars;i++)
+	for (i = 0; i<nToolbars; i++)
 	{
 		if (hWndDlg == ToolbarWindow[i])
 			return i;
 	}
 	return -1;
 }
-int GetToolbarIDFromWnd2 (HWND hWndDlg)
+int GetToolbarIDFromId(int Id)
+{
+	int	i;
+
+	for (i = 0; i<nToolbars; i++)
+	{
+		if (Id == ToolbarId[i])
+			return i;
+	}
+	return -1;
+}
+int GetToolbarIDFromWnd2(HWND hWndDlg)
 {
 	int	i;
 
@@ -3075,6 +3115,7 @@ void RemoveToolbar (int ToolbarID,BOOL DoAdjust)
 	{
 		for (i=ToolbarID;i<nToolbars;i++)
 		{
+			ToolbarId[i] = ToolbarId[i + 1];
 			ToolbarWindow[i] = ToolbarWindow[i+1];
 			ToolbarHandle[i] = ToolbarHandle[i+1];
 			ToolbarImage[i] = ToolbarImage[i+1];
@@ -3100,7 +3141,11 @@ void RemoveToolbar (int ToolbarID,BOOL DoAdjust)
 			nToolbarRows[i] = nToolbarRows[i+1];
 			ToolbarRect[i] = ToolbarRect[i+1];
 			ToolbarDPoint[i] = ToolbarDPoint[i + 1];
+			ToolbarVPID[i] = ToolbarVPID[i + 1];
 			ToolbarReZoomScale[i] = ToolbarReZoomScale[i + 1];
+			HaveTrackMouseEvent[i] = HaveTrackMouseEvent[i + 1];
+			ToolbarPointerType[i] = ToolbarPointerType[i + 1];
+			strcpy(ToolbarHoverCmd[i], ToolbarHoverCmd[i + 1]);
 //static	POINTS	ToolbarConfigs[MAX_TOOLBARS][MAX_TOOLBAR_CONTROLS];
 			ToolbarPos[i] = ToolbarPos[i+1];
 		}
@@ -3314,7 +3359,13 @@ int AddButtonToToolbar2 (int ToolbarID,HWND hWndDlg,LPSTR BMPath,LPSTR ButtonTex
 	pTBInfo->hBM = hBM;
 	pTBInfo->FileLoc = filepos;
 	strncpy0 (pTBInfo->Label,ButtonText,63);
-	GlobalUnlock (ToolbarHandle[ToolbarID]);
+	if (FirstToolbarPass)
+	{
+		pTBInfo->wndProc = (WNDPROC)SetWindowLong(GetDlgItem(hWndDlg, button), GWL_WNDPROC, (LONG)ButtonSubclassProc);
+		if (pTBInfo->wndProc == ButtonSubclassProc)
+			ii = 1;
+	}
+	GlobalUnlock(ToolbarHandle[ToolbarID]);
 	if (FirstToolbarPass)
 		nToolbarControls[ToolbarID]++;
 	return ToolbarX;
@@ -3348,6 +3399,7 @@ BOOL ProcessToolbarCmd (HWND hWndDlg,UINT CntlID)
 	{
 		 if (pTBInfo->CntlID == CntlID)
 		 {
+			 currentToolbarWnd = hWndDlg;
 			 RunGFCommandFromFileAtLoc (ToolbarPath[ToolbarID],pTBInfo->FileLoc,TRUE,0);
 			 rtn = TRUE;
 			 break;
@@ -3355,6 +3407,13 @@ BOOL ProcessToolbarCmd (HWND hWndDlg,UINT CntlID)
 	}
 	GlobalUnlock (ToolbarHandle[ToolbarID]);
 	return rtn;
+}
+BOOL DestroyCurrentToolbar(void)
+{
+	if (!currentToolbarWnd)
+		return FALSE;
+	DestroyWindow(currentToolbarWnd);
+	return TRUE;
 }
 void DestroyAllToolbars (void)
 {
@@ -3442,12 +3501,68 @@ BOOL RestoreToolbarImage (int ToolbarID)
 		return FALSE;
 }
 
+void DrawToolbarPointer(int toolbarID)
+{
+    POINT toolbarPoint;
+	HPEN  ArrowPen;
+	LPVIEWPORT SaveView=CurView;
+	RECT	rect;
+	int LineWidth=4, TipWidth = 3;
+	HANDLE hPointer;
+	static int PLstyle = 3, BorderStyle=1;
+	COLORREF PointerColor=RGB(0,0,255), BorderColor=RGB(0,0,255);
+
+	SetViewport(ToolbarVPID[toolbarID]);
+	SaveDC(CurView->hDC);
+	SetDisplayMode(CurView->hDC, GF_MAPMODE);
+	GSSiDeleteObject(&CurView->hRgn);
+	CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+	SelectClipRgn(CurView->hDC, CurView->hRgn);
+	GSSiDeleteObject(&CurView->hRgn);
+	if (PointInWBounds(&ToolbarDPoint[toolbarID]))
+	{
+		POINT MapPoint = BasePtToWinPt(&ToolbarDPoint[toolbarID]);
+		SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+		SetCurView(SaveView);
+		GetWindowRect(ToolbarWindow[toolbarID],&rect);
+		toolbarPoint = RectMid(&rect);
+		ArrowPen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
+		//DrawPointerLine(CurView->hDC, toolbarPoint, MapPoint, ArrowPen, ArrowPen, 10, 0);
+		hPointer = DrawTAGPointerLine(CurView->hDC, toolbarPoint, MapPoint, FALSE, LineWidth, TipWidth,
+			PLstyle, PointerColor, BorderStyle, BorderColor);
+		DeleteObject(ArrowPen);
+	}
+	RestoreDC(CurView->hDC, -1);
+	
+
+/*	hPointer = ShowPointerLine(CurView->hDC, TAGBox.rect, TAGBox.TAGPointScr, TAGBox.ConnectPoint, &HavePL, MoveMode, LineWidth, Elwh, Elwh, pRect);
+	if (hPointer)
+	{
+		HRGN    NewRgn;
+		LPPOINT	pPPoints = (LPPOINT)GlobalLock(hPointer);
+
+		NewRgn = CreatePolygonRgn(pPPoints, 3, ALTERNATE);
+		GSSiGlobUlFree(&hPointer);
+		CombineRgn(NewRgn, hRgn, NewRgn, RGN_DIFF);
+		SelectClipRgn(hDC, NewRgn);
+		GSSiDeleteObject(&NewRgn);
+	}
+	*/
+
+	return;
+}
+
+void RemoveToolbarPointer(int toolbarID)
+{
+	return;
+}
+
 BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 	static	HBITMAP	hBM1,hBM2,hBM3;
 	HDIB	hDIB;
 	HPALETTE	hPal;
-	int		ix=0, winc, hinc, nWidth, nHeight, fwSide, ToobarID,ii, nPerRow;
+	int		ix=0, winc, hinc, nWidth, nHeight, fwSide, ii, nPerRow;
 	int	w,h;
 	RECT	rect, WindRect;
 	LPRECT	lprc;
@@ -3455,7 +3570,7 @@ BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lP
 	POINT	pt;
 	static	int		iConfig;
 	int		ID = GetToolbarIDFromWnd (hWndDlg);
-	int		HaveTrackMouseEvent;
+//	int		HaveTrackMouseEvent;
 	long	lRetVal;
 	int		ToolbarID=-1;
 
@@ -3568,9 +3683,35 @@ FromNotify:
 	break;
 
 	case WM_MOUSEMOVE:
-		ii=1;
+		/*if (!HaveTrackMouseEvent[ToolbarID])
+		{
+			TRACKMOUSEEVENT EventTrack;
+
+			EventTrack.dwFlags = TME_LEAVE;
+			EventTrack.cbSize = sizeof(TRACKMOUSEEVENT);
+			EventTrack.hwndTrack = hWndDlg;
+			EventTrack.dwHoverTime = 200;
+			TrackMouseEvent(&EventTrack);
+			HaveTrackMouseEvent[ToolbarID] = TRUE;
+			DrawToolbarPointer(ToolbarID);
+//			DrawBtnFocusRect(hWndDlg);
+		} 
+
 		break;
 
+	case WM_TIMER:
+		KillTimer(hWndDlg, 1);
+		ProcessText(ToolbarHoverCmd[ToolbarID]);
+		break;
+
+	case WM_MOUSELEAVE:
+//		DrawBtnFocusRect(hWndDlg);
+		HaveTrackMouseEvent[ToolbarID] = FALSE;
+		RemoveToolbarPointer(ToolbarID);
+		if (*ToolbarHoverCmd[ToolbarID])
+			ii = KillTimer(hWndDlg, 1);
+		break;
+*/
 	case WM_SIZE:
 		//if (!DestroyToolbar (hWndDlg))
 		nWidth = LOWORD(lParam);
@@ -3613,7 +3754,7 @@ FromNotify:
 				strcpy (Pathname,ToolbarPath[ToolbarID]);
 				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
 				DestroyWindow (hWndDlg);
-				LoadToolbar (hWndMain,Pathname,"DOCK",0,nPerRow,"",TRUE,FALSE,&ToolbarDPoint[ToolbarID],ToolbarReZoomScale[ToolbarID]);
+				LoadToolbar (hWndMain,Pathname,"DOCK",0,nPerRow,"",TRUE,FALSE,&ToolbarDPoint[ToolbarID],ToolbarReZoomScale[ToolbarID],ToolbarVPID[ToolbarID]);
 			}
 			else
 			{
@@ -3766,11 +3907,14 @@ TryAgain:
 			}
 			if (iConfig == nToolbarConfigs[ToolbarID])
 			{
-				HANDLE	saveToolbarHandle = ToolbarHandle[ToolbarID];
+				//HANDLE	saveToolbarHandle = ToolbarHandle[ToolbarID];
+				HWND saveToolbarWindow = ToolbarWindow[ToolbarID];
 
-				ToolbarHandle[ToolbarID] = 0;
+				//ToolbarHandle[ToolbarID] = 0;
+				ToolbarWindow[ToolbarID] = 0;
 				DestroyWindow (hWndDlg);
-				ToolbarHandle[ToolbarID] = saveToolbarHandle;
+				//ToolbarHandle[ToolbarID] = saveToolbarHandle;
+				ToolbarWindow[ToolbarID] = saveToolbarWindow;
 			}
 			else
 			{
@@ -3805,17 +3949,18 @@ TryAgain:
 		 DestroyWindow (hWndDlg);
          break; /* End of WM_CLOSE                                      */
 	case WM_DESTROY:
-		 ToolbarID = GetToolbarIDFromWnd (hWndDlg);
-		 if (ToolbarID > -1)
-		 {
-			if (ToolbarHandle[ToolbarID])
+	{
+		int  ToolbarID2 = GetToolbarIDFromWnd(hWndDlg);
+		if (ToolbarID2 > -1)
+		{
+			if (ToolbarHandle[ToolbarID2])
 			{
-				DestroyToolbar (ToolbarID);
-				RemoveToolbar (ToolbarID,TRUE);
+				DestroyToolbar(ToolbarID2);
+				RemoveToolbar(ToolbarID2, TRUE);
 			}
-		 }
-		 AdjustToolbarPositions ();
-		 
+		}
+		AdjustToolbarPositions();
+	}
 		 break;
 	case WM_NOTIFY:
 		 OnWMNotify(hWndDlg,lParam);
@@ -3846,7 +3991,7 @@ TryAgain:
  return TRUE;
 }
 
-int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LPSTR Pos,BOOL CheckForDocked,BOOL Float,LPDPOINT pCenterPoint,double  scale) 
+int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LPSTR Pos,BOOL CheckForDocked,BOOL Float,LPDPOINT pCenterPoint,double  scale,int vpID) 
 {
 	static	BOOL	First=TRUE;
 	char	Type[32];
@@ -3894,6 +4039,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 	ToolbarHeight[nToolbars] = Height;
 	ToolbarHandle[nToolbars] = GSSiGlobAlloc (1570,GHND,MAX_TOOLBAR_BUTTONS*sizeof(TOOBAR_CONTROL_INFO));
 	strcpy (ToolbarPath[nToolbars],Pathname);
+	ToolbarId[nToolbars] = nextToolbarId++;
 	ToolbarID = nToolbars++;
 	ToolbarIDCur = ToolbarID;
 	DisplayMenuStatus[ToolbarID] = DMS_NOTDISPLAYED;
@@ -3901,6 +4047,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 	ToolbarConfigNumPerRow[ToolbarID][0] = max (1,nPerRow);
 	nToolbarConfigs[ToolbarID] = 0;
 	ToolbarType[ToolbarID] = TBT_STANDARDMENU;
+	ToolbarDPoint[ToolbarID].x = ToolbarDPoint[ToolbarID].y = 0;
 	GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 	if (!stricmp (Type,"ZOOM"))
 	{
@@ -3929,6 +4076,12 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		BOOL	saveDisplayToolbars = DisplayToolbars;
 
 		DisplayToolbars = FALSE;
+		if (pCenterPoint)
+		{
+			ToolbarDPoint[ToolbarID] = *pCenterPoint;
+			ToolbarReZoomScale[ToolbarID] = scale;
+			ToolbarVPID[ToolbarID] = vpID;
+		}
 		ToolbarType[ToolbarID] = TBT_STANDARDMENU_DOCKED;
 		ToolbarFloating[ToolbarID] = FALSE;
 		ToolbarIDCur = ToolbarID;
@@ -3978,7 +4131,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 	if (CheckForDocked && !ToolbarFloating[ToolbarID])
 		SeeIfToolbarShouldBeDocked (ToolbarWindow[ToolbarID],&ToolBarStartPoint);
 	ConfigChangesMade = TRUE;
-	return ToolbarID;
+	return ToolbarId[ToolbarID];
 }
 
 HWND CreateToolbarWnd (HWND hWnd) 
@@ -4164,6 +4317,7 @@ void DrawBtnFocusRect (HWND BtnWnd)
 				HaveTrackMouseEvent = TRUE;
 	            DrawBtnFocusRect(lpmsg->hwnd);
 			}*/
+			ii = 1;
         case WM_LBUTTONDOWN: 
         case WM_LBUTTONUP: 
         case WM_RBUTTONUP: 
@@ -4468,7 +4622,9 @@ Exit:
 	int	ToolbarID = GetToolbarIDFromWnd2 (hWndDlg);
 	static	char text[256];
  
-	if (ToolbarID < 0 || lpnmhdr->code == NM_HOVER)
+	if (ToolbarID < 0)
+		return FALSE;
+	if (lpnmhdr->code == NM_HOVER)
 		return FALSE;
 	*text = 0;
     if (lpnmhdr->code == TTN_NEEDTEXT)
@@ -4497,6 +4653,8 @@ Exit:
 					strcpy (text,pTBInfo->Label);
 			GlobalUnlock (ToolbarHandle[ToolbarID]);
 			lpttt->lpszText = text; 
+			if (*ToolbarHoverCmd[ToolbarID])
+				ii = SetTimer(hWndDlg, 1, 5000, 0);
 			return TRUE;
 		}
 	} 
@@ -4678,6 +4836,21 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
     case WM_INITDIALOG:
          /* initialize working variables                                */  
         // DebugInfoWnd = hWndDlg;
+		switch (FileType(PictViewerDir))
+		{
+		case 0:
+			return 0;
+		case 1://file
+			if ((pBS = strrchr(PictViewerDir, '\\')))
+			{
+				*pBS++ = 0;
+				strcpy(FileName, pBS);
+			}
+			break;
+		case 2://directory
+			*FileName = 0;
+			break;
+		}
 		pBS = strrchr (PictViewerDir,'\\');
 		SetWindowText (hWndDlg,pBS+1);
         cwCenter(hWndDlg, 0);
@@ -4696,7 +4869,6 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 		GetWindowRect (GetDlgItem (hWndDlg,IDC_PREVPICT),&rect);
 		prvlft = rect.left - WindRect.left;
 		prvbot = WindRect.bottom - rect.top;
-		*FileName = 0;
     case GSSI_REINITDIALOG:
 	{
 		char	ListFile[256], test[256]; 
@@ -5175,8 +5347,7 @@ void LoadToolbarsInConfig (HFILE Fid)
 	return;
 
 }
-LRESULT CALLBACK TabSubclassProc (HWND hwnd, UINT message, 
-                             WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK TabSubclassProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	extern WNDPROC	g_OrigTabProc;
 
@@ -5220,4 +5391,268 @@ LRESULT CALLBACK TabSubclassProc (HWND hwnd, UINT message,
 
 	}
 	return CallWindowProc (g_OrigTabProc, hwnd, message, wParam, lParam);
+}
+
+LRESULT CALLBACK ButtonSubclassProc(HWND hwnd, UINT message,WPARAM wParam, LPARAM lParam)
+{
+	HWND	hWndPar = GetParent(hwnd);
+	int		ToolbarID = GetToolbarIDFromWnd2(hwnd);
+	int		ButtonNumber = 0;
+	LPTOOBAR_CONTROL_INFO pTBInfo;
+	WNDPROC	g_OrigTabProc;
+
+	if (ToolbarID < 0)
+		return DefWindowProc(hwnd, message, wParam, lParam);
+	if (!ToolbarHandle[ToolbarID])
+		return DefWindowProc(hwnd, message, wParam, lParam);
+
+	pTBInfo = (LPTOOBAR_CONTROL_INFO)GlobalLock(ToolbarHandle[ToolbarID]);
+	for (ButtonNumber = 0; ButtonNumber < nToolbarControls[ToolbarID]; ButtonNumber++,pTBInfo++)
+	{
+		if (GetDlgItem(ToolbarWindow[ToolbarID], pTBInfo->CntlID) == hwnd)
+			goto foundControl;
+	}
+	GlobalUnlock(ToolbarHandle[ToolbarID]);
+	return DefWindowProc(hwnd, message, wParam, lParam);
+
+foundControl:
+	g_OrigTabProc = pTBInfo->wndProc;
+	GlobalUnlock(ToolbarHandle[ToolbarID]);
+
+	switch (message)
+	{
+		case WM_MOUSEMOVE:
+
+		break;
+
+		case WM_MOUSEHOVER:
+			ProcessText(ToolbarHoverCmd[ToolbarID]);
+		//break;
+
+		case WM_MOUSELEAVE:
+		//		DrawBtnFocusRect(hWndDlg);
+			HaveTrackMouseEvent[ToolbarID] = FALSE;
+			RemoveToolbarPointer(ToolbarID);
+		break;
+		
+		case WM_LBUTTONDOWN:
+			if (!HaveTrackMouseEvent[ToolbarID])
+			{
+				TRACKMOUSEEVENT EventTrack;
+
+				EventTrack.dwFlags = TME_LEAVE | TME_HOVER;
+				EventTrack.cbSize = sizeof(TRACKMOUSEEVENT);
+				EventTrack.hwndTrack = hwnd;
+				EventTrack.dwHoverTime = 500;
+				TrackMouseEvent(&EventTrack);
+				HaveTrackMouseEvent[ToolbarID] = TRUE;
+				DrawToolbarPointer(ToolbarID);
+				//			DrawBtnFocusRect(hWndDlg);
+			}
+			break;
+
+	}
+	return CallWindowProc(g_OrigTabProc, hwnd, message, wParam, lParam);
+}
+
+
+LRESULT CALLBACK WndProcTempImage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	HANDLE hTempWindata;
+	LPTEMPWINDDATA pTempWindata;
+
+	switch (message)
+	{
+	case WM_CREATE:
+	{
+	  return 0;
+	}
+		break;
+
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC		hDC;
+		memset(&ps, 0x00, sizeof(PAINTSTRUCT));
+		hDC = BeginPaint(hWnd, &ps);
+		hTempWindata = (HANDLE)GetWindowLong(hWnd, GWL_USERDATA);
+		pTempWindata = GlobalLock(hTempWindata);
+		DisplayBMInRect32(hDC, pTempWindata->hDib32, ps.rcPaint, TRUE);
+		GlobalUnlock(hTempWindata);
+		EndPaint(hWnd, &ps);
+	}
+		break;
+
+	case WM_MOUSEMOVE:
+		hTempWindata = (HANDLE)GetWindowLong(hWnd, GWL_USERDATA);
+		if (hTempWindata)
+		{
+			pTempWindata = GlobalLock(hTempWindata);
+			if (!pTempWindata->haveTracking)
+			{
+				TRACKMOUSEEVENT EventTrack;
+
+				pTempWindata->haveTracking = TRUE;
+				EventTrack.dwFlags = TME_LEAVE;
+				EventTrack.cbSize = sizeof(TRACKMOUSEEVENT);
+				EventTrack.hwndTrack = hWnd;
+				EventTrack.dwHoverTime = 0;
+				TrackMouseEvent(&EventTrack);
+			}
+			GlobalUnlock(hTempWindata);
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		case WM_MOUSELEAVE:
+			DestroyWindow(hWnd);
+		break;
+
+	case WM_DESTROY:
+		hTempWindata = (HANDLE)GetWindowLong(hWnd, GWL_USERDATA);
+		pTempWindata = GlobalLock(hTempWindata);
+		GMDestroyDIB32(pTempWindata->hDib32);
+		GSSiGlobUlFree(&hTempWindata);
+		break;
+	}
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+
+ATOM TempImageRegisterClass(HINSTANCE hInstance)
+{
+	WNDCLASSEX wcex;
+	static ATOM c;
+	static BOOL first = TRUE;
+
+	if (!first)
+		return c;
+	first = FALSE;
+	wcex.cbSize = sizeof(WNDCLASSEX);
+
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = WndProcTempImage;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = 0;
+	wcex.hCursor = LoadCursor(NULL, IDC_IBEAM);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = NULL;
+	wcex.lpszClassName = "TempImageWindow";
+	wcex.hIconSm = 0;
+
+	c = RegisterClassEx(&wcex);
+	return c;
+}
+
+HWND InitTempImageInstance(HWND hWndPar, LPSTR imageFile,int centerOpt)
+{
+	HWND hWnd;
+	RECT	rect;
+	LPRECT pRect = &rect;
+	HDIB32 hDib32 = BMPHandleFromEXT(imageFile);
+	BITMAPINFOHEADER DibInfo;
+	int	width, height;
+	HANDLE hTempWindata;
+	LPTEMPWINDDATA pTempWindata;
+	POINT centerPoint = { 0 }, rectMidpt;
+	RECT	wrect;
+	int		xmove, ymove;
+
+	if (!hDib32)
+		return NULL;
+	GetDIBDimensionsFromHandle(hDib32, &height, &width);
+	TempImageRegisterClass(hInst);
+
+	rect.left = rect.top = 0;
+	rect.right = width;
+	rect.bottom = height;
+	GetWindowRect(hWndPar, &wrect);
+	switch (centerOpt)
+	{
+	case 0://on cursor
+		GetCursorPos(&centerPoint);
+		break;
+	case 1://in parent window
+		centerPoint = RectMid(&wrect);
+		break;
+	}
+	rectMidpt = RectMid(&rect);
+	xmove = centerPoint.x - rectMidpt.x;
+	ymove = centerPoint.y - rectMidpt.y;
+
+	rect.left += xmove;
+	rect.right += xmove;
+	rect.top += ymove;
+	rect.bottom += ymove;
+	xmove = ymove = 0;
+	if (rect.top < wrect.top)
+		ymove = wrect.top - rect.top;
+	else if (rect.bottom > wrect.bottom)
+		ymove = wrect.bottom - rect.bottom;
+	if (rect.left < wrect.left)
+		xmove = wrect.left - rect.left;
+	else if (rect.right > wrect.right)
+		xmove = wrect.right - rect.right;
+	rect.left += xmove;
+	rect.right += xmove;
+	rect.top += ymove;
+	rect.bottom += ymove;
+	hWnd = CreateWindowEx(WS_EX_TOOLWINDOW,
+						  "TempImageWindow", "External DB",
+						  WS_VISIBLE | WS_POPUP,
+						  pRect->left, pRect->top, RECTWIDTH(pRect), RECTHEIGHT(pRect), 
+						  hWndPar, NULL, hInst, hDib32);
+
+	if (!hWnd)
+	{
+		return FALSE;
+	}
+	hTempWindata = GSSiGlobAlloc(1782,GHND, sizeof(TEMPWINDDATA));
+	pTempWindata = GlobalLock(hTempWindata);
+	pTempWindata->hDib32 = hDib32;
+	GlobalUnlock(hTempWindata);
+	SetWindowLong(hWnd, GWL_USERDATA, (LONG)hTempWindata);
+	InvalidateRect(hWnd, 0,TRUE);
+
+	//MoveWindow (hWnd,0,0,500,500,TRUE);
+	return hWnd;
+}
+
+BOOL GetToolbarBounds(HWND hWnd,LPMNMXCORD pBounds)
+{
+	MNMXCORD bounds;
+	int i;
+	BOOL rtn = FALSE;
+	RECT rect;
+	int	dst;
+	DPOINT p;
+
+	GetClientRect(hWnd, &rect);
+	dst = max(RECTWIDTH(&rect), RECTHEIGHT(&rect));
+	DBoundsInit(&bounds);
+	for (i = 0; i < nToolbars; i++)
+	{
+		if (ToolbarDPoint[i].x)
+		{
+			AddDPointToMinMax(&ToolbarDPoint[i],&bounds);
+			p = ToolbarDPoint[i];
+			p.x += dst * ToolbarReZoomScale[i];
+			AddDPointToMinMax(&ToolbarDPoint[i], &bounds);
+			p = ToolbarDPoint[i];
+			p.x -= dst * ToolbarReZoomScale[i];
+			AddDPointToMinMax(&ToolbarDPoint[i], &bounds);
+			p = ToolbarDPoint[i];
+			p.y += dst * ToolbarReZoomScale[i];
+			AddDPointToMinMax(&ToolbarDPoint[i], &bounds);
+			p = ToolbarDPoint[i];
+			p.y -= dst * ToolbarReZoomScale[i];
+			AddDPointToMinMax(&ToolbarDPoint[i], &bounds);
+			rtn = TRUE;
+		}
+	}
+
+	*pBounds = bounds;
+	return rtn;
 }

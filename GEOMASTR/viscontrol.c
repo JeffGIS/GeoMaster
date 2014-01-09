@@ -3953,7 +3953,7 @@ HWND VisibilityControl (HWND hWnd,HWND hInst,LPSTR ConnectToVP,LPRECT pRect,doub
 	HWND	hwndTT;
 	RECT	rect;
 	LPVIEWPORT	pVP,pSaveVP=CurView;
-	int		ii, SaveConfig = CurrentConfig;
+	int		ii, SaveConfig = CurrentConfig, vpID=0;
 	BOOL	Float=!Docked, err;
 	LPWINDOWMENUHEADER pWMH;
 	static nFirst=0;
@@ -4030,6 +4030,7 @@ HWND VisibilityControl (HWND hWnd,HWND hInst,LPSTR ConnectToVP,LPRECT pRect,doub
 	}*/
 	FirstDisplay = First;
 	pVP = SetVPFromName (ConnectToVP,&err);
+	vpID = pVP->ID;
 //	if (!*ConnectToVP)
 //		Float = TRUE;
 	rect = *pRect;
@@ -4100,7 +4101,7 @@ HWND VisibilityControl (HWND hWnd,HWND hInst,LPSTR ConnectToVP,LPRECT pRect,doub
 	}
 	if (!hWndMenu)
 		return FALSE;
-	ToolbarID = LoadToolbar (hWndMenu,"","VIS",0,1,"0 0",CheckForDock,pWMH->Float,0,0);
+	ToolbarID = LoadToolbar (hWndMenu,"","VIS",0,1,"0 0",CheckForDock,pWMH->Float,0,0,vpID);
 	SetToolbarDockingStatus (ToolbarID,pWMH->isDocked,pWMH->dockWidth);
 	if (!pWMH->Factor)
 		pWMH->Factor = 1;

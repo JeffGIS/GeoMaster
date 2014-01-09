@@ -211,6 +211,8 @@ int WINAPI DlgDirList32 (HWND hWndDlg, LPSTR cType, int LBCNTL, int CurrentDirCN
 BOOL ExistFile(LPSTR Name);
 int GetPathType (LPSTR InName);
 short FileType(LPSTR Name);
+short FileType_old(LPSTR Name);
+BOOL IsLocalFile(LPSTR Name);
 HANDLE GetFilesToClose (HANDLE hSQL);
 BOOL DeleteFilesInList (HANDLE hList);
 void Sound (short Type);

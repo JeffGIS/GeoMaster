@@ -471,6 +471,14 @@ BOOL GetDriveUNC (LPSTR Drive,LPSTR Name)
 	*Name = 0;
 	return FALSE;
 }
+BOOL IsLocalFile(LPSTR Name)
+{
+	char UNC[128];
+
+	if (GetDriveUNC(Name, UNC))
+		return FALSE;
+	return TRUE;
+}
 
 BOOL isCardAvailable() 
 { 

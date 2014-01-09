@@ -15,6 +15,8 @@
 #include "graphint.h"  
 #include "umio.h"
 #include "CDDEMO.h"
+#include "extrndb.h"   
+#include <sqlext.h>
 
 #include "gmextern.h"
 
@@ -48,7 +50,7 @@ static	int		LINES=0, maxLine=0;
 static	float	avCharWidth;
 static	int		xChar;       // horizontal scrolling unit 
 static	int		yChar;       // vertical scrolling unit 
-static	int insertLoc=0, insertLoc2;
+static	int insertLoc=0, insertLoc2=-1;
 static	POINT	insertPoint = {0};
 static	POINT	insertPoint2;
 static	HANDLE	hInsertOpts=0;
@@ -62,6 +64,9 @@ static	HANDLE	hFRChunk=0;
 static	int		firstLine;          // first line in the invalidated area 
 static	int		lastLine;           // last line in the invalidated area 
 static	int		insertLine;
+static  int		currentLine = -1;
+static	RECT	currentRect;
+static	BOOL	displayOnlyCurrentLine = FALSE;
 static	BOOL	setToFind = FALSE;	// set scroll loc to found position
 static	BOOL	standAlone = FALSE;
 static	char	currentBreakpoint[32]={0};
@@ -142,6 +147,10 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	//createFunIDFile ();
 
 	//MessageBox(0, lpCmdLine, 0, MB_OK);
+	/*{
+		HANDLE FileHandle = OpenExternalDatabase("ODBC|MS Access Database;DBQ=C:\\geomas\\projects\\corners\\tables\\Update_ADA_Curb_Ramp_Inventory.mdb|JEFF");
+		//CloseDataFile(FALSE,&FileHandle);
+	}*/
 	if (pWnd)
 	{
 		*pWnd = 0;
@@ -285,9 +294,10 @@ void GMEditDisplayText2 (HWND hWnd,HDC hdc,HANDLE hFile,HFONT hFont,RECT rcPaint
 	SCROLLINFO si; 
 	SIZE size;
 	int rtn = 0;
-	int yPos, xPos, rowHeight, x, y, tablen, ic;
+	int yPos, xPos, rowHeight, rowWidth, x, y, tablen, ic;
 	HFONT hOldFont;
  
+	GetClientRect(hWnd, &currentRect);
 	// Get vertical scroll bar position.
     si.cbSize = sizeof (si);
     si.fMask  = SIF_PAGE|SIF_POS|SIF_RANGE|SIF_TRACKPOS;
@@ -300,9 +310,16 @@ void GMEditDisplayText2 (HWND hWnd,HDC hdc,HANDLE hFile,HFONT hFont,RECT rcPaint
 
 	hOldFont = SelectObject (hdc,hFont);
   // Find painting limits.
-    firstLine = max (0, yPos + rcPaint.top / yChar);
-    lastLine = min (LINES - 1, yPos + rcPaint.bottom / yChar);
-     
+	if (currentLine > -1 && displayOnlyCurrentLine)
+	{
+		firstLine = lastLine = currentLine;
+	}
+	else
+	{
+		firstLine = max (0, yPos + rcPaint.top / yChar);
+		lastLine = min (LINES - 1, yPos + rcPaint.bottom / yChar);
+	}
+
 	GetTextMetrics(hdc, &tm);
 	rowHeight = tm.tmHeight;
 	tablen = tm.tmAveCharWidth * 5;
@@ -333,9 +350,17 @@ void GMEditDisplayText2 (HWND hWnd,HDC hdc,HANDLE hFile,HFONT hFont,RECT rcPaint
 					}
 					if (x > rcPaint.left-xChar-1)
 					{
+						ic = (int)(pFile - pFileBegin);
+						if (ic == insertLoc || ic == insertLoc-1)
+						{
+							currentLine = line;
+							currentRect.left = xChar;
+							//currentRect.right = INT_MAX;
+							currentRect.top = y;
+							currentRect.bottom = y + rowHeight;
+						}
 						if (icBeg > -1)
 						{
-							ic = (int)(pFile - pFileBegin);
 							if (ic >= icBeg && ic < icEnd)
 								TextOut (hdc,x,y,pFile,1);
 						}
@@ -374,13 +399,15 @@ void GMEditDisplayTextBetweenLocs (HWND hWnd,HANDLE hFile,HFONT hFont,int icBeg,
 	RECT rcPaint;
 	COLORREF bkColor, oldBColor;
 	COLORREF textColor, oldTColor;
-	
+
 	if (icBeg < 0 || icEnd < 0)
 		return;
 	if (icBeg != icEnd)
 	{
 		HDC hdc=GetDC (hWnd);
+		int saveLine = currentLine;
 
+		currentLine = -1;
 		if (icBeg > icEnd)
 		{
 			int i = icBeg;
@@ -404,6 +431,7 @@ void GMEditDisplayTextBetweenLocs (HWND hWnd,HANDLE hFile,HFONT hFont,int icBeg,
 		SetBkColor (hdc,oldBColor);
 		SetTextColor (hdc,oldTColor);
 		ReleaseDC (hWnd,hdc);
+		currentLine = saveLine;
 	}
 
 	return;
@@ -1012,7 +1040,42 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 					*phMenu = CreatePopupMenu ();
 				AppendMenu (*phMenu,MF_ENABLED|MF_STRING,iMenuOpt++,str);
 			}
-			if (itype && (itype != GMTEXT_DATAFILE || GetNumDBFields (hDB) > 1))
+			if (itype == ODBC_DATAFILE && GetNumDBFields(hDB) < 1)
+			{
+				HMENU hSubMenu=0;
+				int	  iSubMenuItem = 1;
+				HANDLE DBHandle = GetDBHandleFromSQL(hDB);
+				LPSTR lpSTRING = GetTableName(DBHandle, TRUE); // the first table name 
+				if (lpSTRING && *lpSTRING)
+					hSubMenu = CreatePopupMenu();
+				while (lpSTRING && *lpSTRING)
+				{
+					AppendMenu(hSubMenu, MF_ENABLED | MF_STRING, iSubMenuItem++, lpSTRING);
+					lpSTRING = GetTableName(DBHandle, FALSE); // subsequent table names 
+				}
+				if (hSubMenu)
+				{
+					POINT menuPoint = insertPoint;
+					menuPoint.y += yChar;
+					ClientToScreen(hWnd, &menuPoint);
+					AppendMenu(hSubMenu, MF_ENABLED | MF_STRING, 0, "Cancel");
+					iSubMenuItem = TrackPopupMenu(hSubMenu, TPM_RETURNCMD | TPM_NONOTIFY|TPM_LEFTBUTTON | TPM_TOPALIGN | TPM_LEFTALIGN, menuPoint.x, menuPoint.y, 0, hWnd, 0);
+					if (iSubMenuItem > 0)
+					{
+						TCHAR tableName[128];
+
+						if (GetMenuString(hSubMenu, iSubMenuItem, tableName, sizeof(tableName)-1, MF_BYCOMMAND) > 0)
+						{
+							CloseDataFile(FALSE, &hDB);
+							sprintf(strchr(testFile, 0), "|%s", tableName);
+							OpenDataFile(testFile, "", OF_READ, &hDB);
+						}
+					}
+					DestroyMenu(hSubMenu);
+				}
+			}
+
+			if (itype && GetNumDBFields(hDB) > 1)
 			{
 				sprintf(str, "|$FIELDS(%s)", testFile);
 				strcpy(pInsertOpts, str);
@@ -1217,6 +1280,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	int fontSize=18;
 	int	insertLoc3;
 	int cursorWidth=1, cursorHeight = fontSize;
+	int saveLine;
 	POINT mousePoint;
 	RECT rect;
 	char key;
@@ -1429,13 +1493,23 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
      case WM_CHAR:
 		key = wParam;
+		displayOnlyCurrentLine = FALSE;
+		saveLine = currentLine;
+		currentLine = -1;
 		switch (key)
 		{
+		case VK_BACK:
+			saveLine = -1;
 		default:
-			insertLoc = InsertCharAtLoc (hWnd,key,insertLoc,&insertLoc2,hFile);
+			displayOnlyCurrentLine = TRUE;
+			currentLine = saveLine;
+			insertLoc = InsertCharAtLoc(hWnd, key, insertLoc, &insertLoc2, hFile);
 			GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
 			SetCaretPos(insertPoint.x, insertPoint.y); 
-			InvalidateRect (hWnd,0,TRUE);
+			if (currentLine > -1)
+				InvalidateRect (hWnd,&currentRect,TRUE);
+			else
+				InvalidateRect(hWnd, 0, TRUE);
 			break;
 		case 27: //escape
 			break;
@@ -1517,6 +1591,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;
 		case VK_HOME:
+			currentLine = -1;
 	        GetScrollInfo (hWnd, SB_HORZ, &si);
 			ScrollWindow(hWnd,- si.nPos,0, NULL, NULL);
 			insertPoint.x = -(si.nPos * xChar) + xChar/2;
@@ -1528,6 +1603,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				InvalidateRect (hWnd,0,TRUE);
 			break;
 		case VK_END:
+			currentLine = -1;
 			insertPoint.x = 32000;
 			insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
 			SetCaretPos(insertPoint.x, insertPoint.y); 
@@ -1538,6 +1614,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				InvalidateRect (hWnd,0,TRUE);
 			break;
 		case VK_DELETE:
+			currentLine = -1;
 			if (hFile)
 			{
 				int ln;
@@ -1555,17 +1632,20 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			}
 			break;
 		case VK_F1:
-			AutoInsert (hWnd,hFile,&hMenu);
+			currentLine = -1;
+			AutoInsert(hWnd, hFile, &hMenu);
 			break;
 		case VK_LEFT:
-			insertLoc = insertLoc2 = max (0,insertLoc-1);
+			currentLine = -1;
+			insertLoc = insertLoc2 = max(0, insertLoc - 1);
 			GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,-1);
 			insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
 			SetCaretPos(insertPoint.x, insertPoint.y); 
 			//AutoInsert (hWnd,hFile,insertLoc,&hMenu);
 			break;
 		case VK_RIGHT:
-			insertLoc = insertLoc2 = min (strlen(pFile)-1,insertLoc+1);
+			currentLine = -1;
+			insertLoc = insertLoc2 = min(strlen(pFile) - 1, insertLoc + 1);
 			GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,1);
 			insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
 			SetCaretPos(insertPoint.x, insertPoint.y); 
@@ -1573,7 +1653,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			//AutoInsert (hWnd,hFile,insertLoc,&hMenu);
 			break;
 		case VK_UP:
-			insertPoint.x -= xChar/2;
+			currentLine = -1;
+			insertPoint.x -= xChar / 2;
 			insertPoint.y -= yChar;
 			insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
 			GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
@@ -1582,7 +1663,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			//AutoInsert (hWnd,hFile,insertLoc,&hMenu);
 			break;
 		case VK_DOWN:
-			insertPoint.x -= xChar/2;
+			currentLine = -1;
+			insertPoint.x -= xChar / 2;
 			insertPoint.y += yChar;
 			insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
 			GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
@@ -1596,6 +1678,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		}
 		break;
 	case WM_LBUTTONDOWN:
+		currentLine = -1;
     	insertPoint = POINTStoPOINT(MAKEPOINTS(lParam));
 		GMEditDisplayTextBetweenLocs (hWnd,hFile,hFont,insertLoc,insertLoc2,FALSE);
 		insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
@@ -1606,7 +1689,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		if (wParam != MK_LBUTTON)
 			break;
 	case WM_LBUTTONUP:
-    	insertPoint2 = POINTStoPOINT(MAKEPOINTS(lParam));
+		currentLine = -1;
+		insertPoint2 = POINTStoPOINT(MAKEPOINTS(lParam));
 		insertLoc3 =  GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint2);
 		if (insertLoc3 != insertLoc2)
 		{
@@ -1616,7 +1700,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		}
 		break;
     case WM_SIZE:  
-		GetWindowRect (hWnd,&rect);
+		currentLine = -1;
+		GetWindowRect(hWnd, &rect);
 		return DefWindowProc(hWnd, message, wParam, lParam);
 case WM_SETFOCUS: 
  
@@ -1642,7 +1727,8 @@ case WM_HSCROLL:
         si.cbSize = sizeof (si);
         si.fMask  = SIF_ALL;
 
-        // Save the position for comparison later on.
+		currentLine = -1;
+		// Save the position for comparison later on.
         GetScrollInfo (hWnd, SB_HORZ, &si);
         xPos = si.nPos;
         switch (LOWORD (wParam))
@@ -1694,7 +1780,9 @@ case WM_HSCROLL:
 		int		fwKeys = LOWORD(wParam);    // key flags
 		int		oldPos;
 		short	zDelta = (short) HIWORD(wParam);    // wheel rotation
-        si.cbSize = sizeof (si);
+ 
+		currentLine = -1;
+		si.cbSize = sizeof (si);
         si.fMask  = SIF_ALL;
         GetScrollInfo (hWnd, SB_VERT, &si);
 		oldPos = si.nPos;
@@ -1711,7 +1799,8 @@ case WM_HSCROLL:
 	}       
     case WM_VSCROLL:
         // Get all the vertial scroll bar information.
-        si.cbSize = sizeof (si);
+		currentLine = -1;
+		si.cbSize = sizeof (si);
         si.fMask  = SIF_ALL;
         GetScrollInfo (hWnd, SB_VERT, &si);
 
@@ -1778,6 +1867,7 @@ case WM_HSCROLL:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
 		// Parse the menu selections:
+		currentLine = -1;
 		if (wmId >= 60000)
 		{
 			int insertOpt = wmId - 60000;
@@ -1797,7 +1887,7 @@ case WM_HSCROLL:
 						LPSTR pTemp = malloc(USHRT_MAX);
 						strcpy(pTemp, pInsertOpts + 9);
 						ExpandText(pTemp);
-						MessageBoxAtPosition(hWnd, pTemp, "", MB_OK,"C");
+						MessageBoxAtPosition(0, pTemp, "", MB_OK,"C");
 						free(pTemp);
 					}
 					else

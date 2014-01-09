@@ -1229,7 +1229,7 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
     TipWidth = min (rect.right - rect.left,rect.bottom - rect.top);
     TipWidth /= 5;
 	if (*HavePL)
-		hPointer = DrawTAGPointerLine (hDC,LastBP,LastEP,MoveMode,LineWidth,TipWidth);
+		hPointer = DrawTAGPointerLine(hDC, LastBP, LastEP, MoveMode, LineWidth, TipWidth, TAGBox.PLstyle, TAGBox.PointerColor, TAGBox.BorderStyle, TAGBox.BorderColor);
 	LastBP = begpoint;
 	LastEP = endpoint;
 	if (PtInRect(&rect,endpoint))
@@ -1259,7 +1259,7 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
             DeleteObject (OvrLapRgn);  
             DeleteObject (NewRgn);
 	  	}
-		hPointer = DrawTAGPointerLine (hDC,RectMid(&rect),endpoint,MoveMode,LineWidth,TipWidth);
+		hPointer = DrawTAGPointerLine(hDC, RectMid(&rect), endpoint, MoveMode, LineWidth, TipWidth, TAGBox.PLstyle, TAGBox.PointerColor, TAGBox.BorderStyle, TAGBox.BorderColor);
     	RestoreDC (hDC,-1);
 		*HavePL = TRUE;
 	}
@@ -1309,7 +1309,8 @@ void DrawPointerLine (HDC hDC,POINT begpoint,POINT endpoint,HPEN LinePen, HPEN T
 	return;
 }
 
-HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,int LineWidth,double TipWidth)
+HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,int LineWidth,double TipWidth,
+	int PLstyle, COLORREF PointerColor, int BorderStyle, COLORREF BorderColor)
 {   LPPOINT	Points; 
 	COLORREF	color;
 	HPEN	hOldPen=0, hPen=0;
@@ -1322,10 +1323,10 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
 	BOOL	TransParent=FALSE;
 	HANDLE	hPointer=0;
 
-    switch (TAGBox.PLstyle)
+    switch (PLstyle)
     {
     	case 1:
-			hPen = CreatePen (PS_SOLID,(int)IDNINT(1*DeviceToScreenFactor),TAGBox.PointerColor);
+			hPen = CreatePen (PS_SOLID,(int)IDNINT(1*DeviceToScreenFactor),PointerColor);
 			DrawPointerLine (hDC,begpoint,endpoint,hPen,hPen,(int)IDNINT(5*DeviceToScreenFactor),0); 
 			GSSiDeleteObject (&hPen);
     		break;
@@ -1359,18 +1360,18 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
             else
             	hBrush = CreateSolidBrush (color);*/
 			OldMode = GetROP2 (hDC);
-			hBrush = CreateGMBrush (TAGBox.PointerColor,-2,hDC);
+			hBrush = CreateGMBrush (PointerColor,-2,hDC);
 			OldBrush = SelectObject (hDC,hBrush); 
 			SelectObject (hDC,GetStockObject (NULL_PEN));
 			Polygon (hDC,(LPPOINT)Points,3);
         	SetROP2(hDC,OldMode);
 			SelectObject (hDC,GetStockObject (NULL_BRUSH));
-			if (TAGBox.BorderStyle)
+			if (BorderStyle)
 			{
-				if (TAGBox.BorderStyle<4)
-					color = TAGBox.BorderColor;
+				if (BorderStyle<4)
+					color = BorderColor;
 				else
-					color = TAGBox.PointerColor;
+					color = PointerColor;
 				hPen = CreatePen (PS_SOLID,LineWidth,color);
 				hOldPen=SelectObject (hDC,hPen);
 /*			if (!TransParent)

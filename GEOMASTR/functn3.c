@@ -1141,18 +1141,30 @@ GotCloseFilehSQL:
 
 				goto RtnTrue;
 			}
-			if (!_fstricmp (Arg[1],"SCREEN"))
+			if (!_fstricmp(Arg[1], "SCREEN"))
 			{
-			    _fstrcpy (FullBM,Arg[2]);
-				rtn = ShowFullBM(TRUE,0,0);
+				_fstrcpy(FullBM, Arg[2]);
+				rtn = ShowFullBM(TRUE, 0, 0);
 				goto Rtnrtn;
 			}
-			if (!_fstricmp (Arg[1],"WINDOW"))
+			if (!_fstricmp(Arg[1], "TEMP"))
+			{
+				rtn = (BOOL)InitTempImageInstance(hWndMain, Arg[2], 0);
+				goto Rtnrtn;
+			}
+			if (!_fstricmp(Arg[1], "VIEW"))
+			{
+				rtn = (BOOL)ViewImage(hWndMain, Arg[2]);
+				goto Rtnrtn;
+			}
+
+
+			if (!_fstricmp (Arg[1],"WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))
 			{
 			    HDIB32	hDib32 = LoadDIB32(Arg[2],FALSE);
 				RECT	WindowRect;
 
-				rtn = FALSE;
+ 				rtn = FALSE;
 				if (hDib32)
 				{
 					HDC	hDC = GetDC (hWndMain);
@@ -1160,7 +1172,9 @@ GotCloseFilehSQL:
 
 					rtn = TRUE;
 					SetDisplayMode (hDC, GF_SCREENMODE); 
-					GetWindowRect (hWndMain,&WindowRect);
+					WindowRect = atorect(Arg[4], &Err);
+					if (Err)
+						GetWindowRect (hWndMain,&WindowRect);
 					if (atob (Arg[3]))
 					{
 						hBM = SaveScreen (hDC, WindowRect);
@@ -3156,7 +3170,16 @@ GotCloseFilehSQL:
 				SetPickGlobals (0);
 				boundstoa (OutLoc,&Bounds);
 				goto Rtnl;  
-			} 
+			}
+			else if (!_fstricmp(Arg[1], "TOOLBAR"))//$BOUNDS(TOOLBAR,All or id,vp)
+			{
+				SetCurView(SetVPFromName(Arg[3], &Err));
+				if (GetToolbarBounds(CurView->hWnd, &Bounds))
+				{
+					boundstoa(OutLoc, &Bounds);
+					goto Rtnl;
+				}
+			}
 			
 			goto RtnFalse;
 		} 
@@ -6067,17 +6090,27 @@ HaveVP:;
 			}
 			goto Rtnrtn;
 		}
-		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos,DPoint,Scale)
+		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos,DPoint,Scale,vpID)
 				  //$TOOLBAR(LOAD,DOCK,Pathname,
-			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
-			if (nArgs < 2)
+			nArgs = GetFunArgs (Args,Arg,9,&hMem); 
+			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp(Arg[1], "LOAD"))
 			{
 				Point = atopt(Arg[7], &Err);
 				RVal = atof(Arg[8]);
 
-				rtn = LoadToolbar(CurView->hWnd, Arg[3], Arg[2], atoi(Arg[4]), atoi(Arg[5]), Arg[6], TRUE, FALSE,&Point,RVal);
+				rtn = LoadToolbar(CurView->hWnd, Arg[3], Arg[2], atoi(Arg[4]), atoi(Arg[5]), Arg[6], TRUE, FALSE,&Point,RVal,atoi(Arg[9]));
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			if (!stricmp(Arg[1], "HOVER"))
+			{
+				rtn = SetToolbarHoverCmd(atoi(Arg[2]), Arg[3]);
+			}
+			if (!stricmp(Arg[1], "DESTROY"))
+			{
+				rtn = DestroyCurrentToolbar();
 			}
 			goto Rtnrtn;
 		case 774: //$NETWORK(FALSEINT,STREETLIST

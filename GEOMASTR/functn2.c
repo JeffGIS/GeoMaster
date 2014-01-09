@@ -3935,8 +3935,16 @@ GSSiExitProg (1350);
 				CreateDialog(hInst, (LPSTR)"DISPLAY_GWD_DATA", hWndMain, (DLGPROC)DISPLAY_GWD_DATAMsgProc);
 				goto RtnTrue;
 		}
-
 			break;
+
+		case 1138://$ISLOCALFILE(File)
+		{
+				nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+				if (IsLocalFile(Arg[1]))
+					goto RtnTrue;
+				goto RtnFalse;
+		}
+
 		case 1201: //$FINDWAYPOINT ()
         {
             DoPaint = FALSE;      

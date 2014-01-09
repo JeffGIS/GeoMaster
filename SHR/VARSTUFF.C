@@ -2870,7 +2870,7 @@ GSSiExitProg (532);
         case 212: HighlightMultRefs = atol (Value);
         	break;
         	
-        case 213: ShowODBCErrors = atob (Value);
+        case 213: ShowSQLErrors = atoi (Value);
         	break;
         	
         case 216: TraceRef = atob (Value);
@@ -3275,6 +3275,9 @@ GSSiExitProg (532);
 				*LastChr (TestFileLocation) != '/')
 				strcat (TestFileLocation,"\\");
 			break;
+		case 368:
+			strcpy(SQLErrorLog, Value);
+			break;
     default:
  			break;
 	}
@@ -3504,7 +3507,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%USEDGNCOLORS",210,FALSE); 
 	AllocateTypeVar("%SHOWNODESREF",211,FALSE); 
 	AllocateTypeVar("%HIGHLIGHTMULTREFS",212,FALSE); 
-	AllocateTypeVar("%SHOWODBCERRORS",213,FALSE); 
+	AllocateTypeVar("%SHOWSQLERRORS",213,FALSE); 
 	AllocateTypeVar("%SD",214,FALSE); 
 	AllocateTypeVar("%DLLDIR",215,FALSE); 
 	AllocateTypeVar("%TRACEREF",216,FALSE); 
@@ -3661,7 +3664,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%WANTPNDATA",365,FALSE);
 	AllocateTypeVar("%TESTDL", 366, FALSE);
 	AllocateTypeVar("%WINDOWSVERSION", 367, FALSE);
-	
+	AllocateTypeVar("%SQLERRORLOG", 368, FALSE);
+
 //	AllocateTypeVar("%DL",191,FALSE);
 	
 {
@@ -4396,7 +4400,7 @@ GSSiExitProg (533);
         	ltoa (FontColors[Index],OutStr,10);
         	break; 
 		case 213:
-			btoa (ShowODBCErrors,OutStr);
+			itoa (ShowSQLErrors,OutStr,10);
 			break;                         
 		case 214:
 			_fstrcpy (OutStr,StartupDir);
@@ -4768,6 +4772,9 @@ GSSiExitProg (533);
 			break;
 		case 367:
 			GetWindowsVersion(OutStr);
+			break;
+		case 368:
+			strcpy(OutStr, SQLErrorLog);
 			break;
 
 	}
