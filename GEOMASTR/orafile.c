@@ -1025,7 +1025,7 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 		case ORAT_ARC: 
 			if (CurrentORAFileType == ORAT_TEXT)
 			{
-				if (CurView->PassID && CurView->PassID != 4 && CurView->PassID != 3)
+				if (CurView->PassID && CurView->PassID != 4 && CurView->PassID != 3 && CurView->PassID != 5)
 					goto RtnFalse;  
 				else 
 				{
@@ -1051,8 +1051,11 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 			nOrdPerPoint = 2;
 		case 3003:
 		case ORAT_POLYGON:
-			if (CurView->PassID && CurView->PassID != 4 && CurView->PassID != 2)
-				goto RtnFalse;
+			if (CurView->PassID && CurView->PassID < 4)
+			{
+				if (CurView->PassID && CurView->PassID != 4 && CurView->PassID != 2)
+					goto RtnFalse;
+			}
 			if (!GetTypeVisibility(TYPE_AREA))
 				goto RtnFalse;
 		    if (CurrentDesc > 0 && CurrentDesc < 3201)
