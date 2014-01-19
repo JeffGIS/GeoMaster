@@ -3461,7 +3461,13 @@ GSSiExitProg (760);
 			return FALSE;
 }
 		} 
+		else
+			AddToMacroStack(2, 0, Name2, 0,0);
+
 	}
+	else
+		AddToMacroStack(2, 0, Name, 0, 0);
+
 	GSSiGlobFree (&hUserCmd);
 	phWhichCmdList = &hUserCmd;
 	hUserCmd = GSSiGlobAlloc ( 360,GHND,USHRT_MAX);

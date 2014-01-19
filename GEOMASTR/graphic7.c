@@ -4132,6 +4132,11 @@ GSSiExitProg (908);
 #endif
     	return rtn;  
 }
+	if (File)
+		AddToMacroStack(2, 0, File, 0, 0);
+	else
+		AddToMacroStack(2, 0, PMFile, 0, 0);
+
     hStr = GSSiGlobAlloc ( 670,GMEM_MOVEABLE,2048*4);
     str=GlobalLock (hStr);
 	origstr = str;
@@ -4254,11 +4259,13 @@ Top:
 	    		{
 		    		FidLast = FidPM;
 					FidPM = GSSiOpenFile (pIncludePath,&OFStruct,OF_READ);  
-					if (FidPM == HFILE_ERROR)  
+					if (FidPM == HFILE_ERROR)
 					{
 						FidPM = FidLast;
 						FidLast = HFILE_ERROR;
-					} 
+					}
+					else
+						AddToMacroStack(5, 0, pIncludePath, 0, 0);
 					goto Top;
 				}
 	    	}
@@ -5117,6 +5124,7 @@ GSSiExitProg (919);
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis ();
+	CurVis->WantType[8] = 1;
 	ShowValue (CurView->hDC,TRUE);
 	IgnorePrevLayers = FALSE;
 	OpenPrevLayers (FileNum,LayerID);
