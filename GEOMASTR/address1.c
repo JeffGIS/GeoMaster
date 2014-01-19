@@ -499,7 +499,7 @@ BOOL AddressLocation1 (HWND hWnd, HINSTANCE hInst,UINT iopt)
       switch (nRc)
 	  {
 	  case 1:
-      	PickByRefno (AddRefno,AddPrefix,AddUDI,-1);
+      	PickByRefno (AddRefno,AddPrefix[0],AddUDI,-1);
 		break;
 	  case 2:
       	HighlightStreet (hWnd,AddRefno);
@@ -516,16 +516,25 @@ BOOL LocatePID (HWND hWnd, HINSTANCE hInst)
      {
       FARPROC lpfnLOCATEPIDMsgProc;
       short	nRc;
+	  int	n = 0;
 
       lpfnLOCATEPIDMsgProc = MakeProcInstance((FARPROC)LOCATEPIDMsgProc, hInst);
       nRc = DialogBox(hInst, (LPSTR)"LOCATEPID", hWnd, lpfnLOCATEPIDMsgProc);
       FreeProcInstance(lpfnLOCATEPIDMsgProc);
-      if (nRc)
-        if (!(AddRefno = PickByRefno (AddRefno,AddPrefix,AddUDI,-1)))
-            GSSiMsgBox( hWndMain, "Graphic record not found for this parcel",
-                        "Unable to Locate", MB_OK|MB_APPLMODAL,0);
-	        else
-	        	AddRefno = PickList[0].Refno;
+	  if (nRc)
+	  {
+		  while (n < 4 && *AddPrefix[n])
+		  {
+			  if ((AddRefno = PickByRefno(AddRefno, AddPrefix[n], AddUDI, -1)))
+			  {
+				  AddRefno = PickList[0].Refno;
+				  return nRc;
+			  }
+			  n++;
+		  }
+		  GSSiMsgBox(hWndMain, "Graphic record not found for this parcel",
+			  "Unable to Locate", MB_OK | MB_APPLMODAL, 0);
+	  }
 
       return (nRc);
      }
@@ -534,27 +543,28 @@ BOOL LocatePID (HWND hWnd, HINSTANCE hInst)
 
 BOOL AddressLocationPID (HWND hWnd, HINSTANCE hInst)
 {     
-      {
 	      FARPROC lpfnADDRESSPIDMsgProc;
 		  short	nRc;
+		  int	n = 0;
 	
 	      lpfnADDRESSPIDMsgProc = MakeProcInstance((FARPROC)ADDRESSPIDMsgProc, hInst);
 	      nRc = DialogBox(hInst, (LPSTR)"ADDRESS1", hWnd, lpfnADDRESSPIDMsgProc);
 	      FreeProcInstance(lpfnADDRESSPIDMsgProc);
-	      if (nRc==1) 
-	      {
-	        if (!PickByRefno (AddRefno,AddPrefix,AddUDI,-1) || PickList[0].Type == 6) 
-	        {
-	            GSSiMsgBox( hWndMain, "Graphic record not found for this address",
-	                        "Unable to Locate", MB_OK|MB_APPLMODAL,0);
-	            nRc = 0;
-	        }
-	        else
-	        	AddRefno = PickList[0].Refno;
-	      }
+		  if (nRc == 1)
+		  {
+			  while (n < 4 && *AddPrefix[n])
+			  {
+				  if (!PickByRefno(AddRefno, AddPrefix[n++], AddUDI, -1) || PickList[0].Type == 6)
+					  continue;
+				  AddRefno = PickList[0].Refno;
+				  return nRc;
+			  }
+			  GSSiMsgBox(hWndMain, "Graphic record not found for this address",
+				  "Unable to Locate", MB_OK | MB_APPLMODAL, 0);
+			  nRc = 0;
+		  }
         
       	  return (nRc);
-     }
 }
 
 short DisplayStreets (HWND hDlg,LONG House, int OddEven, LPSTR InName,int nchar,USHORT EntryControl)

@@ -163,8 +163,20 @@ GetPID:
     {
         str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;}
     }
+	memset(AddPrefix, 0, sizeof(AddPrefix));
     str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;}
-    _fstrcpy(AddPrefix,str);  
+	{
+		int n = 0;
+		LPSTR pBeg = str;
+		while (pBeg && n < 4)
+		{
+			LPSTR pEnd = strchr(str, ';');
+			if (pEnd)
+				*pEnd++ = 0;
+			_fstrcpy(AddPrefix[n++], pBeg);
+			pBeg = pEnd;
+		}
+	}
     str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;} 
     _fstrcpy(AddUDIVar,str); 
     str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;}  
@@ -829,7 +841,6 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 	                 GetDlgItemText (hWndDlg,IDC_STREET2,Street2,33); 
 	                 WaitCursor (1);
 					 match = INT_MATCH (Street1,Street2,MunName,0,3,&hMatch,&StreetNum1,&StreetNum2,&MunicNum);     
-					 totmatch += match;
 					 WaitCursor (-1); 
 					 if (match)                                                                                     
 					 	pMatch = (LPADDMATCH)GlobalLock (hMatch); 
@@ -842,9 +853,12 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 						{ 
 							GetMunicName (pMatch->Munic,MunName,MunAbv);
 							sprintf (_fstrchr(str,0),",%s\t%20.8f,%20.8f",MunName,pMatch->Point.x,pMatch->Point.y);
-		                    if (SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_FINDSTRINGEXACT,-1,(LPARAM)str) == LB_ERR)
-		                    	SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_ADDSTRING,0,(LPARAM)str);   
-		                }
+							if (SendDlgItemMessage(hWndDlg, IDC_INT_MATCHES, LB_FINDSTRINGEXACT, -1, (LPARAM)str) == LB_ERR)
+							{
+		                    	SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_ADDSTRING,0,(LPARAM)str); 
+								totmatch++;
+							}
+						}
 	                    pMatch++;
 					 } 
 			 		 GSSiGlobUlFree (&hMatch); 

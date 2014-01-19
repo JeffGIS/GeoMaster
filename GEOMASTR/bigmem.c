@@ -117,7 +117,7 @@ RECT	ConfigDisplayRect={0,0,0,0};
 
 char	AppName[16];
 char	szAppName[20];
-char    AddPrefix[10];
+char    AddPrefix[4][10] = { 0 };
 char	AddUDI[34];
 char	AddUDIVar[32];  
 char	CurrentOrthoOrigName[128];
