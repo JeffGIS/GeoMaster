@@ -3816,7 +3816,8 @@ void ShowPickedItem (HWND hWnd, int InItem)
 	if (CurView->DisplayInParent && CurView->Parent)
 		SetViewport (CurView->Parent);
     CloseMap (FALSE);
-	SelectVisList (FALSE);
+	if (InItem >= 0)
+		SelectVisList (FALSE);
     if (!OpenMap (CurView->hWnd,CurView->hDC))
     	goto Exit;
 
@@ -5215,6 +5216,7 @@ GSSiExitProg (57);
     else
     {   
   		SetTransparency (0);
+		ShowBufferedScreen(TRUE, FALSE,0, 0);
 		CurView->PassID++;
         CurView->CurFile=-1; 
         CurView->FirstFile = TRUE;
@@ -5229,7 +5231,8 @@ GSSiExitProg (57);
         {
  			SetTransparency (0);
             CurView->PassID++; 
-            CurView->CurFile=-1;
+			ShowBufferedScreen(TRUE, FALSE, CurView->ID, 0);
+			CurView->CurFile = -1;
 		}
         if (!CurVis)
             WT = FALSE;
@@ -5239,7 +5242,8 @@ GSSiExitProg (57);
         {
 			SetTransparency (0);
             CurView->PassID++;   
-            CurView->CurFile=-1;
+			ShowBufferedScreen(TRUE, FALSE, CurView->ID, 0);
+			CurView->CurFile = -1;
 		}
 		if (CurView->PassID > 2 && ComputePCTTheme)
 			goto NoFile;

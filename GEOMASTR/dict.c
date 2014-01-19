@@ -1285,8 +1285,8 @@ HANDLE DisplayPointSymbol (HANDLE hSymbol, HDC hDC, double Vsize, double Hsize, 
 		}
 		if (CurVis) 
 		{
-			if (!CurVis->WantType[8])
-			goto Exit;
+			if (!CurVis->WantType[8] && !ItemIsHighlighted)
+				goto Exit;
 		}
 Next:
 		GlobalUnlock (hSymbol);   
@@ -1294,7 +1294,7 @@ Next:
 		{
 			hSymbol = hSymbolInvis = GetDictSymDesc (InvisiblePointSymbol,0);
 		}
-		if (!hSymbol)  
+		else
 		{
 			InvisiblePointSymbol = GetDictSymbolNumber ("CIRCLE");
 			if (!InvisiblePointSymbol)
