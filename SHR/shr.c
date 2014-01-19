@@ -2926,7 +2926,7 @@ BOOL    GetSaveName2 (HWND hWnd,LPSTR Name, UINT StringID, LPSTR Ext,UINT FileNa
 {GSSiEnterProg (212);
 #endif
 {
-	char	str[128];
+	char	str[MAX_PATH];
 	char	ext[64]={0};
 
 	if (Ext)
@@ -2977,7 +2977,7 @@ BOOL    GetSaveName3 (HWND hWnd,LPSTR Name, UINT StringID, LPSTR Ext,LPSTR Title
     if (Title)
     {
     	if (*Title)
-    		OFTitle=Title;
+    		strcpy (OFTitle,Title);
     }
 	if (*str)
 		pName = str;
@@ -3068,7 +3068,7 @@ BOOL    GetSaveName (HWND hWnd,LPSTR Name, UINT StringID, LPSTR Ext)
 RestoreDir:
     _chdir (CurDir);
     _chdrive (SaveDrive);   
-    OFTitle = 0;
+    *OFTitle = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (214);
@@ -3219,7 +3219,7 @@ BOOL    GetFileName4 (HWND hWnd,LPSTR Name,UINT StringID,LPSTR ext,LPSTR Title,L
     if (Title)
     {
     	if (*Title)
-    		OFTitle=Title;
+    		strcpy (OFTitle,Title);
     }
     if (!StringID)
     	sprintf (gszFilter,"%s(*%s)|*%s|","",_fstrupr(Ext),_fstrlwr(Ext)); 
@@ -7146,17 +7146,17 @@ HCURSOR GSSiSetCursor (HCURSOR hCursorIn)
 extern	BOOL	ddbug;
 	if (ddbug)
 		ddbug=FALSE;
-	if (hCursorIn && hCurrentCursor && hCursorIn != hCurrentCursor)
-		ii=1;
 	if (!hCursorIn)
 		hCursorIn = LoadCursor(0, IDC_ARROW); 
-//	if (hCursor != hCurrentCursor)
-	if (!BackgroundTask)
-		hCur = SetCursor (hCursorIn);
-//	else
-//		hCur = hCurrentCursor;
-	hCurrentCursor = hCursorIn;    
-	hCursor = hCursorIn;
+	if (hCursorIn &&  hCursorIn != hCurrentCursor)
+	{
+		if (!BackgroundTask)
+			hCur = SetCursor(hCursorIn);
+		//	else
+		//		hCur = hCurrentCursor;
+		hCurrentCursor = hCursorIn;
+		hCursor = hCursorIn;
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (303);
@@ -12526,8 +12526,8 @@ else
  }
 
  /* move the window                                                     */
- //MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
- SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
+ MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
+ //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
 {
 #if ENABLETRACE
 GSSiExitProg (452);

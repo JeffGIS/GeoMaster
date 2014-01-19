@@ -4002,7 +4002,7 @@ BOOL GPSImportUSRWP (HWND hWndDlg,UINT Control,UINT StatusControl)
 
 
 	WPNum = 0;  
-	OFTitle = title; 
+	strcpy (OFTitle,title); 
 	if (!GetFileName3(hWndDlg,USRFileName,IDS_FILTERUSR,IDS_FILEUSR)) 
 		return FALSE;  
 	
@@ -4268,7 +4268,7 @@ BOOL GPSImportGPXWP (HWND hWndDlg,UINT Control,UINT StatusControl)
 
 
 	WPNum = 0;  
-	OFTitle = title; 
+	strcpy (OFTitle,title); 
 	if (!GetFileName3(hWndDlg,USRFileName,IDS_FILTERUSR,IDS_FILEUSR)) 
 		return FALSE;  
 	

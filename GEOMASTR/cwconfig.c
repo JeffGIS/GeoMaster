@@ -2510,7 +2510,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
        			 HaltMapDisplay(FALSE);
                  DoPaint = FALSE;
 				 ButtonFuncOpt=0;
-				 OFTitle = title4;
+				 strcpy (OFTitle,title4);
 		         if (GetFileName3 (hWnd,str,IDS_FILTERPLT,IDS_FILEPLT))   
                  {
 					NewMap();
@@ -3609,7 +3609,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 
        			 HaltMapDisplay(FALSE);
 				 DoPaint = FALSE;
-				 OFTitle = title2;
+				 strcpy (OFTitle,title2);
 				 if (GetFileName3(hWndMain,Name,IDS_FILTERGMC,IDS_FILEFMT))   
 				 {   
 				 	 if (LoadFormatCfg (Name))
@@ -3626,7 +3626,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 
        			 HaltMapDisplay(FALSE);
 				 DoPaint = FALSE;
-				 OFTitle = title3;
+				 strcpy (OFTitle,title3);
 				 if (GetFileName3(hWndMain,pName,IDS_FILTERGMC,IDS_FILEMEN))
 				 {   
 			 	 	IgnoreSavedMenu = TRUE;
@@ -3645,7 +3645,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
        			 HaltMapDisplay(FALSE);
 				 DoPaint = FALSE;
 				 _fstrcpy (SaveName,CfgName); 
-				 OFTitle = title1;
+				 strcpy (OFTitle,title1);
 				 if (GetFileName3(hWndMain,CfgName,IDS_FILTERGMC,IDS_FILEGMC))   
 				 {       
 				 	 ForceBounds = FALSE;

@@ -1028,7 +1028,7 @@ long	nCurPoints;
 POINT	CurStartPoint;
 POINT	CurEndPoint;
 float	MaxPointSize=9999.0;
-LPSTR	OFTitle=0;
+char	OFTitle[256] = { 0 };
 short	ConvertMapVP=-1;
 short	ConvertMapFileNo=-1;
 short	LayerID=-1;

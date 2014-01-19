@@ -18,6 +18,7 @@ char	CurVirtPrinter[128];
 char	VirtPrinterImageFile[256]="";
 short	NumPrintCopies=0;
 char	CustomHeight[16]="",CustomWidth[16]="";
+static	char	customFilter[256] = { 0 };
 
 static	HWND		NameWnd,OpenWnd;
 static	HWND        ghFFRDlg;
@@ -793,8 +794,8 @@ BOOL GetSaveFileCD (HWND hWnd,LPSTR Name, LPSTR lpInitDir)
    WORD wSize;  
    short	st;
    BOOL	Result; 
-   char	FName[128];
-   char	nam[34],ext[8];
+   char	FName[MAX_PATH];
+   char	nam[64],ext[32];
    DWORD	ErCode; 
    BOOL	First=TRUE; 
          
@@ -960,8 +961,8 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpFOChunk->of.hwndOwner = (HWND)ghWnd;
       lpFOChunk->of.hInstance = (HANDLE)ghInst;;
       lpFOChunk->of.lpstrFilter = gszFilter;
-      lpFOChunk->of.lpstrCustomFilter = (LPSTR)NULL;
-      lpFOChunk->of.nMaxCustFilter = 0L;
+      lpFOChunk->of.lpstrCustomFilter = customFilter;
+      lpFOChunk->of.nMaxCustFilter = 255L;
       lpFOChunk->of.nFilterIndex = 1L;
       lpFOChunk->of.lpstrFile = lpFOChunk->szFile;
       lpFOChunk->of.lpstrFile = InitialFile;
@@ -970,7 +971,7 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpFOChunk->of.nMaxFileTitle = MAXFILETITLELEN;
       lpFOChunk->of.lpstrInitialDir = InitialDirectory; 
       lpFOChunk->of.lpstrTitle = OFTitle;
-      //OFTitle = 0;
+      *OFTitle = 0;
       lpFOChunk->of.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST |//OFN_EXPLORER |
                             OFN_FILEMUSTEXIST | ExtraOpenFlags;//|OFN_ENABLEHOOK;//|OFN_ENABLETEMPLATE;//
       ExtraOpenFlags  = 0;
@@ -989,19 +990,19 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpFSChunk->of.lStructSize = sizeof(OPENFILENAME);
       lpFSChunk->of.hwndOwner = (HWND)ghWnd;
       lpFSChunk->of.hInstance = (HANDLE)ghInst;
-      lpFSChunk->of.lpstrFilter = gszFilter;
-      lpFSChunk->of.lpstrCustomFilter = (LPSTR)NULL;
-      lpFSChunk->of.nMaxCustFilter = 0L;
-      lpFSChunk->of.nFilterIndex = 1L;
-      lpFSChunk->of.lpstrFile = InitialFile;;
+	  lpFSChunk->of.lpstrFilter = gszFilter;
+      lpFSChunk->of.lpstrCustomFilter = customFilter;
+      lpFSChunk->of.nMaxCustFilter = 255;
+	  lpFSChunk->of.nFilterIndex = 1;
+	  lpFSChunk->of.lpstrFile = InitialFile;;
       lpFSChunk->of.nMaxFile = (DWORD)sizeof(lpFSChunk->szFile);
-      lpFSChunk->of.lpstrFileTitle = lpFSChunk->szFileTitle;
-      lpFSChunk->of.nMaxFileTitle = MAXFILETITLELEN;
-      lpFSChunk->of.lpstrInitialDir = InitialDirectory;
+	  lpFSChunk->of.lpstrFileTitle = lpFSChunk->szFileTitle;
+	  lpFSChunk->of.nMaxFileTitle =  MAXFILETITLELEN;
+	  lpFSChunk->of.lpstrInitialDir = InitialDirectory;
       lpFSChunk->of.lpstrTitle = OFTitle; 
-      OFTitle = 0;
+      *OFTitle = 0;
       if (OverWritePrompt)
-      	lpFSChunk->of.Flags =  OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | ExtraOpenFlags; 
+		  lpFSChunk->of.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | ExtraOpenFlags;
       else
       	lpFSChunk->of.Flags =  ExtraOpenFlags;  
       ExtraOpenFlags = 0;
@@ -1096,18 +1097,19 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpPrintChunk->hDevNames = (HANDLE)NULL;
       lpPrintChunk->hDC = (HDC)NULL;
       lpPrintChunk->Flags = PD_RETURNDC|PD_NOPAGENUMS|PD_NOSELECTION|PD_ENABLEPRINTTEMPLATE|PD_ENABLEPRINTHOOK/*|PD_ENABLESETUPTEMPLATE|PD_ENABLESETUPHOOK|PD_HIDEPRINTTOFILE*/;
-      lpPrintChunk->Flags = PD_RETURNDC|PD_NOPAGENUMS|PD_NOSELECTION|PD_ENABLEPRINTHOOK/*|PD_ENABLESETUPTEMPLATE|PD_ENABLESETUPHOOK|PD_HIDEPRINTTOFILE*/;
-      lpPrintChunk->nFromPage = 1;
+//	  lpPrintChunk->Flags = PD_RETURNDC | PD_NOPAGENUMS | PD_NOSELECTION | PD_ENABLEPRINTHOOK/*|PD_ENABLESETUPTEMPLATE|PD_ENABLESETUPHOOK|PD_HIDEPRINTTOFILE*/;
+//	  lpPrintChunk->Flags = PD_RETURNDC | PD_NOPAGENUMS | PD_NOSELECTION | PD_PRINTSETUP;
+	  lpPrintChunk->nFromPage = 1;
       lpPrintChunk->nToPage = 1;
       lpPrintChunk->nMinPage = 1;
       lpPrintChunk->nMaxPage = 1;
       lpPrintChunk->nCopies = 1;
       lpPrintChunk->hInstance = ghInst;
       lpPrintChunk->lCustData = 0L;
-      lpPrintChunk->lpfnPrintHook = (LPOFNHOOKPROC)PrintSetupHook;
-      lpPrintChunk->lpfnSetupHook = (LPOFNHOOKPROC)PrintSetupHook;
-      lpPrintChunk->lpPrintTemplateName = "PRINTDLGGM";
-      lpPrintChunk->lpSetupTemplateName = "PRNSETUPDLGGM";
+	  lpPrintChunk->lpfnPrintHook = 0;// (LPOFNHOOKPROC)PrintSetupHook;
+	  lpPrintChunk->lpfnSetupHook = 0;// (LPOFNHOOKPROC)PrintSetupHook;
+	  lpPrintChunk->lpPrintTemplateName = 0;// "PRINTDLGGM";
+	  lpPrintChunk->lpSetupTemplateName = 0;// "PRNSETUPDLGGM";
       lpPrintChunk->hPrintTemplate = (HANDLE)NULL;
       lpPrintChunk->hSetupTemplate = (HANDLE)NULL;
       break;
@@ -2103,8 +2105,8 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			SendDlgItemMessage (hDlg,rad2,BM_SETCHECK,!(pDevMode->dmOrientation==DMORIENT_PORTRAIT),0);  
 			GlobalUnlock (lpPDChunk->hDevMode); 
 			IgnoreLock = FALSE;
-		}*/
-/*   	if (SendDlgItemMessage (hDlg,rad3,BM_GETCHECK,0,0))
+		}
+   	if (SendDlgItemMessage (hDlg,rad3,BM_GETCHECK,0,0))
     	{  
     		PostMessage (GetDlgItem(hDlg,rad3),WM_LBUTTONDOWN,0,0);  
     		PostMessage (GetDlgItem(hDlg,rad3),WM_LBUTTONUP,0,0); 
@@ -2114,7 +2116,7 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
     		PostMessage (GetDlgItem(hDlg,rad4),WM_LBUTTONDOWN,0,0);  
     		PostMessage (GetDlgItem(hDlg,rad4),WM_LBUTTONUP,0,0); 
     	} */
-    //	break;
+    	break;
     	
     case WM_COMMAND:
          switch(LOWORD(wParam))

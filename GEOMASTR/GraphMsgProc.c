@@ -13831,7 +13831,7 @@ GSSiExitProg (1001);
 				 GSSiGlobFree (&hName);
 				 hName = GSSiGlobAlloc ( 779,GMEM_MOVEABLE,256);
 				 pName = GlobalLock (hName); 
-				 OFTitle = title;
+				 strcpy (OFTitle,title);
 				 if (GetFileName3(hWndMain,pName,IDS_FILTERGMC,IDS_FILEGMC))   
 				 {   
 					SetDlgItemText (hWndDlg,IDC_FROMCFGPATH,pName);
