@@ -1298,7 +1298,7 @@ Next:
 		{
 			InvisiblePointSymbol = GetDictSymbolNumber ("CIRCLE");
 			if (!InvisiblePointSymbol)
-				goto Exit;
+				goto Exit2;
 			hSymbol = hSymbolInvis = GetDictSymDesc (InvisiblePointSymbol,0);
 		} 
 
@@ -1308,7 +1308,7 @@ Next:
 		Vsize *= InvisPointFactor; 
 	} 
 	else if (ShowBadSyms)
-		goto Exit;  
+		goto Exit2;  
 
 	if (lpSym->BaseScale == 15)  
 	{
@@ -1666,7 +1666,8 @@ Next:
 SkipElement:;				
 	} 
 Exit:
-	GlobalUnlock (hSymbol);   
+	GlobalUnlock (hSymbol);
+Exit2:
 	DestroySymbol (hSymbolInvis); 
 	if (hDC > (HWND)1)
 		RestoreDC (hDC,-1);
