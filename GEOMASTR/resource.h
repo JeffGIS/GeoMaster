@@ -15,9 +15,9 @@
 #define IDS_STRING3                     3
 #define IDC_MAPHISTORY                  3
 #define IDOK2                           3
+#define IDC_GEOCODE_FROMFILE            3
 #define IDC_DATE_TODAY                  4
 #define IDC_CLEARHLTLIST                4
-#define IDOK3                           4
 #define IDC_DATE_THISWEEK               5
 #define IDC_DATE_THISMONTH              6
 #define IDC_DATE_THISYEAR               7
@@ -517,6 +517,7 @@
 #define IDC_LATITUDE                    513
 #define IDC_VHSTARTHOUR                 513
 #define IDC_CURLOC                      513
+#define IDC_PARCELFILE                  513
 #define IDC_FROM_REC                    514
 #define IDC_EDIT6                       514
 #define IDC_POSTDIR                     514
@@ -525,16 +526,21 @@
 #define IDC_VOTER_LAST_NAME             514
 #define IDC_LONGITUDE                   514
 #define IDC_VHENDHOUR                   514
+#define IDC_DATAPAGE                    514
 #define IDC_VPMARGIN                    515
 #define IDC_SECLONG                     515
 #define IDC_VOTER_WORK_PHONE            515
+#define IDC_EXTERNALSITE                515
 #define IDC_CFNAME                      516
 #define IDC_SECLAT                      516
 #define IDC_VOTER_EMAIL                 516
+#define IDC_MAPSITE                     516
 #define IDC_MILEPOINT                   517
 #define IDC_VOTER_STREET_NAME           517
+#define IDC_WEBSITE                     517
 #define IDC_STARTMENU                   518
 #define IDC_VOTER_ZIP                   518
+#define IDC_CONTACT                     518
 #define IDC_PASSWORD                    519
 #define IDC_VOTER_SALUTATION            519
 #define IDC_RADIO1                      520
@@ -551,6 +557,7 @@
 #define IDC_ZOOMTOVOTER                 520
 #define IDC_GF_CIRCLE                   520
 #define IDC_VEHDISPLAY_ALL              520
+#define IDC_PARCELFILE2                 520
 #define IDC_ALL_RECORDS                 521
 #define IDC_VIEW_MULTIHITS              521
 #define IDC_VIEW_ALL                    521
@@ -2093,6 +2100,7 @@
 #define ID_FINDANDREPLACE               1234
 #define IDC_SKIP_NOGRAPHIC              1235
 #define IDM_FINDANDREPLACE              1235
+#define IDC_CENTERPOINT_CURSOR          1235
 #define IDC_ALFPREFIX                   1236
 #define ID_FILE_SAVE                    1236
 #define IDC_HNDELIM                     1237
@@ -3233,6 +3241,29 @@
 #define IDC_STATIC_BC                   2209
 #define IDC_STATIC_DV                   2210
 #define IDB_MOVETOMON2                  2211
+#define IDC_GEOCODE_TYPE                2212
+#define IDC_GEOCODE_MAP                 2213
+#define IDC_GEOCODE_ACTION              2214
+#define IDC_GEOCODE_OPERATION           2215
+#define IDC_LOCINTERSECTION             2216
+#define IDC_LOCADDRESS                  2217
+#define IDC_LOCPID                      2218
+#define IDC_INPUT                       2219
+#define IDC_MATCHLIST                   2220
+#define IDC_DATA_STATUS_1               2222
+#define IDC_DATA_STATUS_2               2223
+#define IDC_DATA_STATUS_3               2224
+#define IDC_DATA_STATUS_4               2225
+#define IDC_DATA_STATUS_5               2226
+#define IDC_OTHERDATA_STATUS_1          2227
+#define IDC_OTHERDATA_STATUS_2          2228
+#define IDC_OTHERDATA_STATUS_3          2229
+#define IDC_MAP_STATUS_1                2230
+#define IDC_MAP_STATUS_2                2231
+#define IDC_MAP_STATUS_3                2232
+#define IDC_MAP_STATUS_4                2233
+#define IDC_DISCLAIMER                  2234
+#define IDC_COST                        2235
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3502,6 +3533,7 @@
 #define IDS_FILEDGC                     5300
 #define IDC_REPLAYVEHHISTORY            5301
 #define IDS_PNDEF                       5301
+#define IDS_FILTERPLT_ONLY              5302
 #define IDC_CD1                         9001
 #define IDC_CD2                         9002
 #define IDC_CD3                         9003
@@ -3572,9 +3604,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1235
+#define _APS_NEXT_RESOURCE_VALUE        1238
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2212
+#define _APS_NEXT_CONTROL_VALUE         2236
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

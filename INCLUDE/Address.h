@@ -456,7 +456,13 @@ long GetMunicFromName (LPSTR MunName);
 long GetStreetNumFromRawName (LPSTR Name,LPSTR TrueName);
 long StandardizedMunic (long Munic);
 BOOL SeparateIntStreets (LPSTR Street,LPSTR Street1,LPSTR Street2);
-BOOL SeparateOnFromToStreets (LPSTR StreetIN,LPSTR OnStreet,LPSTR FromStreet,LPSTR ToStreet);
+void SetSecondaryIntInput(HWND hWnd);
+void SetSecondaryAddInput(HWND hWnd);
+void SetSecondaryTAGInput(HWND hWnd);
+void SetIntMatchControl(HWND hWndDlg, UINT control);
+void SetAddMatchControl(HWND hWndDlg, UINT control);
+void SetTAGMatchControl(HWND hWndDlg, UINT control);
+BOOL SeparateOnFromToStreets(LPSTR StreetIN, LPSTR OnStreet, LPSTR FromStreet, LPSTR ToStreet);
 BOOL AddToUserDefinedAddress (LPUSERLOCATEDADDRESSKEY pULAddKey, LPADDMATCH	pAM);
 BOOL AddToUserDefinedAddressFromFile (LPSTR File);
 BOOL FoundUserAssignedAddress (long IHouse,LPSTR Street,long IMunic,BOOL BlockCenter,LPHANDLE phMatch);
@@ -490,6 +496,7 @@ int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch, LPSTR formattedAddress
 
 BOOL AddMapQuestMatch(HWND hWndDlg, UINT icntl, LPSTR FullAddress);
 BOOL ReverseGeocodeCommand (int nArgs,LPSTR *Arg,LPSTR OutLoc);
+BOOL GeocodeAlltypes(HWND hWnd,LPSTR OutLoc, LPSTR Arg1);
 
 
 

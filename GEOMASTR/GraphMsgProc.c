@@ -39,7 +39,9 @@ static char		SymCopyFromPath[MAX_PATH]={0};
 static char		photoFile1[MAX_PATH];
 static char		photoFile2[MAX_PATH];
 static char		notesFile[MAX_PATH];
-
+static HWND		hWndSecondaryTAGInput = 0;
+static LPSTR	captureClipboardTitle;
+static LPSTR	captureClipboardMenu;
 
 
 static struct {long   TLID;
@@ -15077,11 +15079,17 @@ GSSiExitProg (1298);
 #endif
 }
 
+void SetSecondaryTAGInput(HWND hWnd)
+{
+	hWndSecondaryTAGInput = hWnd;
+	return;
+}
+
 BOOL FAR PASCAL TAGLOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1032);
 #endif
-{ 	int		st, choice, n,idx,ifile,i,ii;
+{ 	int		st,choice, n,idx,ifile,i,ii;
 	int		TabStops[3]={900,1000,1100}; 
 	static	char	str[256], str2[256];
 	static	HANDLE	hSaveBM=0;
@@ -15108,13 +15116,16 @@ GSSiExitProg (1032);
  switch(Message)
    {
     case WM_INITDIALOG:  
-	{   int	st, iview;
+	{   int		iview;
 		long	rtn;
 		LPVIEWPORT	SaveView;
 		LPVISLIST	SaveVis; 
 		HANDLE		hVisList;
+		HWND	hParDlg, hPar;
 		BOOL	SaveUseRORTI = UseRefOrTAGIndex;
 //		SetWindowText (hWndMain,"Step 1");
+		SetSecondaryTAGInput(0);
+
 		if (!CurrentConfig) 
 		{
 			SetConfig (1);   
@@ -15125,7 +15136,21 @@ GSSiExitProg (1032);
 		nfile = 0;  
 	    SaveView = CurView;
 	    SaveVis = CurVis;
-		
+	
+		hParDlg = GetParent(hWndDlg);
+		hPar = GetDlgItem(hParDlg, IDC_GEOCODE_OPERATION);
+
+		if (hPar)
+		{
+			RECT pRect;
+			RECT wRect;
+			GetWindowRect(hPar, &pRect);
+			GetWindowRect(hWndDlg, &wRect);
+			// ClientRectToScreenRect(GetParent(hPar), &pRect);
+			// ScreenRectToClientRect(hParDlg, &pRect);
+			MoveWindow(hWndDlg, pRect.left, pRect.top, RECTWIDTH(&pRect), RECTHEIGHT(&pRect), TRUE);
+		}
+
 		SendDlgItemMessage (hWndDlg,IDC_AUTOHIGHLIGHT,BM_SETCHECK,AutoHighlight,0L);
 		if (TagLocTitle && *TagLocTitle)  
 			_fstrcpy (str,TagLocTitle);
@@ -15260,6 +15285,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
                  {	case EN_CHANGE: 
             Display:
                  	{
+					    int st = 0;
 						short	nlast=0, maxlast;
 						HANDLE	hTag=0, hIdx=0;  
 						LPTAGKEY	pTag;
@@ -15281,6 +15307,8 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 						_fstrcpy (SubUDI,TAGKey.UDI);  
 						for (ifile=0;ifile<nfile;ifile++)
 						{
+							if (st == 32)
+								continue;
 							if (ifile == 30)
 								ii=1;
 							if (nlast > 0)
@@ -15360,9 +15388,14 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							    _fstrcpy (LastUDI,TAGKey.UDI); 
 				 				if (!st)
 									st = BT_FIND (hTIDX[ifile],(LPSTR)&TAGKey,BT_NEXT,BT_ANY,(LPSTR)space);
-								if (GSSiPeekMessage(&msg,GetDlgItem(hWndDlg,IDC_TAGVALUE),WM_KEYDOWN,WM_KEYDOWN,PM_NOREMOVE))
-									st = 31;	                                                             
-						    }
+								if (GSSiPeekMessage(&msg, GetDlgItem(hWndDlg, IDC_TAGVALUE), WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+									st = 32;
+								if (hWndSecondaryTAGInput)
+								{
+									if (GSSiPeekMessage(&msg, hWndSecondaryTAGInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+										st = 32;
+								}
+							}
 							DisplayDisconnected (hWndDlg,nlast,MaxDist,hIdx,hTag,udi);
 						} 
 						for (ifile=0;ifile<nfile;ifile++)
@@ -25606,7 +25639,6 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                 	SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_DELETESTRING,Choice,0);
 		                SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_INSERTSTRING,Choice,(LPARAM)lpStr);
 	                 }
-	                 GlobalUnlock (hMem);
 	                 GSSiGlobUlFree (&hMem);
 		         }
 		         
@@ -30595,4 +30627,278 @@ BOOL FAR PASCAL LOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lP
  return TRUE;
 } 
 
+BOOL CaptureClipboard(LPSTR title, LPSTR menu)
+{
+	BOOL rc;
 
+	captureClipboardTitle = title;
+	captureClipboardMenu = menu;
+	rc = DialogBox(hInst, (LPSTR)"CAPTURE_CLIPBOARD", hWndMain, CAPTURE_CLIPBOARDMsgProc);
+	return rc;
+}
+BOOL FAR PASCAL CAPTURE_CLIPBOARDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{ 	
+	char	str[256];
+	static	int	parcelDataStatus, otherDataStatus, mapStatus;
+
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+		parcelDataStatus = otherDataStatus = mapStatus = 0;
+		if (!OpenClipboard(hWndMain))
+		{
+			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			return FALSE;
+		}
+		EmptyClipboard();
+		SetWindowText(hWndDlg, captureClipboardTitle);
+
+		{
+			HANDLE hCmd = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+			LPSTR pCmd = GlobalLock(hCmd);
+			sprintf(pCmd, "$OPEN(DAT=[%DL]attribut\\countydata.gmd,COUNTYID=%s);$ADDRESS(SET,I4,%i,[DAT.DATASTATUS]);$ADDRESS(SET,I4,%i,[DAT.OTHERDATASTATUS]);$ADDRESS(SET,I4,%i,[DAT.MAPSTATUS]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.CONTACT]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.COST]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.MAPWEBSITE]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.COUNTYWEBSITE]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.PARCELFILE]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.PARCELFILE2]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.DATADOWNLOADSITE]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.EXTERNALDATASITE]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.NOTES]);\
+$DIALOGITEM(%i,%i,SETTEXT,[DAT.DISCLAIMER]);$CLOSE(DAT););",
+						  captureClipboardTitle, 
+						  &parcelDataStatus, &otherDataStatus, &mapStatus,
+						  (UINT)hWndDlg, IDC_CONTACT,
+						  (UINT)hWndDlg, IDC_COST,
+						  (UINT)hWndDlg, IDC_MAPSITE,
+						  (UINT)hWndDlg, IDC_WEBSITE,
+						  (UINT)hWndDlg, IDC_PARCELFILE,
+						  (UINT)hWndDlg, IDC_PARCELFILE2,
+						  (UINT)hWndDlg, IDC_DATAPAGE,
+						  (UINT)hWndDlg, IDC_EXTERNALSITE,
+						  (UINT)hWndDlg, IDC_NOTES,
+						  (UINT)hWndDlg, IDC_DISCLAIMER
+						  );
+			ProcessText(pCmd);
+			GSSiGlobUlFree(&hCmd);
+			switch (parcelDataStatus)
+			{
+			case 1:
+				SendDlgItemMessage(hWndDlg, IDC_DATA_STATUS_1, BM_SETCHECK, TRUE, 0L);
+				break;
+			case 2:
+				SendDlgItemMessage(hWndDlg, IDC_DATA_STATUS_2, BM_SETCHECK, TRUE, 0L);
+				break;
+			case 3:
+				SendDlgItemMessage(hWndDlg, IDC_DATA_STATUS_3, BM_SETCHECK, TRUE, 0L);
+				break;
+			case 4:
+				SendDlgItemMessage(hWndDlg, IDC_DATA_STATUS_4, BM_SETCHECK, TRUE, 0L);
+				break;
+			case 5:
+				SendDlgItemMessage(hWndDlg, IDC_DATA_STATUS_5, BM_SETCHECK, TRUE, 0L);
+				break;
+			}
+		}
+
+		switch (otherDataStatus)
+		{
+		case 1:
+			SendDlgItemMessage(hWndDlg, IDC_OTHERDATA_STATUS_1, BM_SETCHECK, TRUE, 0L);
+			break;
+		case 2:
+			SendDlgItemMessage(hWndDlg, IDC_OTHERDATA_STATUS_2, BM_SETCHECK, TRUE, 0L);
+			break;
+		case 3:
+			SendDlgItemMessage(hWndDlg, IDC_OTHERDATA_STATUS_3, BM_SETCHECK, TRUE, 0L);
+			break;
+		}
+		switch (mapStatus)
+		{
+		case 1:
+			SendDlgItemMessage(hWndDlg, IDC_MAP_STATUS_1, BM_SETCHECK, TRUE, 0L);
+			break;
+		case 2:
+			SendDlgItemMessage(hWndDlg, IDC_MAP_STATUS_2, BM_SETCHECK, TRUE, 0L);
+			break;
+		case 3:
+			SendDlgItemMessage(hWndDlg, IDC_MAP_STATUS_3, BM_SETCHECK, TRUE, 0L);
+			break;
+		case 4:
+			SendDlgItemMessage(hWndDlg, IDC_MAP_STATUS_4, BM_SETCHECK, TRUE, 0L);
+			break;
+		}
+
+	SetTimer(hWndDlg, 1, 100, (FARPROC)0);
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_TIMER:
+		if (OpenClipboard(hWndMain))
+		{
+			HANDLE hText = GetClipboardData(CF_TEXT);
+			LPSTR  pText;
+			if (hText)
+			{
+				POINT position;
+				LPSTR txt;
+				int	  icmd;
+				HMENU hMenu = CreatePopupMenu();
+				int	  ltxt;
+				HANDLE htxt;
+
+				IgnoreLock = TRUE;
+				pText = GlobalLock(hText);
+				ltxt = strlen(pText)+1;
+				htxt = GSSiGlobAlloc(0, GMEM_MOVEABLE, ltxt);
+				txt = GlobalLock(htxt);
+				strcpy(txt, pText);
+				SetGlobalValue("%CLIPBOARDTEXT",pText);
+				GlobalUnlock(hText);
+				IgnoreLock = FALSE;
+				EmptyClipboard();
+				CloseClipboard();
+				sprintf(str, "$MENU(%s)", captureClipboardMenu);
+				//ProcessText(str);
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 1, "Parcel data file");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 10, "Secondary data file");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 2, "Data download site");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 3, "Online map site");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 4, "County website");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 5, "External data site");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 6, "Disclaimer");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 9, "Notes");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 7, "Contact email");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 8, "Cost");
+				AppendMenu(hMenu, MF_ENABLED | MF_STRING, 0, "Cancel");
+
+				GetCursorPos(&position);
+				icmd = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_NONOTIFY | TPM_LEFTBUTTON, position.x, position.y, 0, hWndDlg, 0);
+				DestroyMenu(hMenu);
+				switch (icmd)
+				{
+				case 0:
+					break;
+				case 1:
+					SetDlgItemText(hWndDlg, IDC_PARCELFILE, txt);
+					break;
+				case 2:
+					SetDlgItemText(hWndDlg, IDC_DATAPAGE, txt);
+					break;
+				case 3:
+					SetDlgItemText(hWndDlg, IDC_MAPSITE, txt);
+					break;
+				case 4:
+					SetDlgItemText(hWndDlg, IDC_WEBSITE, txt);
+					break;
+				case 5:
+					SetDlgItemText(hWndDlg, IDC_EXTERNALSITE, txt);
+					break;
+				case 6:
+					SetDlgItemText(hWndDlg, IDC_DISCLAIMER, txt);
+					break;
+				case 7:
+					SetDlgItemText(hWndDlg, IDC_CONTACT, txt);
+					break;
+				case 8:
+					SetDlgItemText(hWndDlg, IDC_COST, txt);
+					break;
+				case 9:
+					SetDlgItemText(hWndDlg, IDC_NOTES, txt);
+					break;
+				case 10:
+					SetDlgItemText(hWndDlg, IDC_PARCELFILE2, txt);
+					break;
+				}
+				GSSiGlobUlFree(&htxt);
+			}
+		}
+		CloseClipboard();
+		break;
+	case WM_CLOSE:
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDOK:
+		{
+			HANDLE hCmd = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+			LPSTR pCmd = GlobalLock(hCmd);
+			sprintf(pCmd, "$GMDUPDATE([%DL]attribut\\countydata.gmd,COUNTYID=%s,DATASTATUS=%i;OTHERDATASTATUS=%i;MAPSTATUS=%i;\
+CONTACT=$DIALOGITEM(%i,%i,GETTEXT,128);\
+COST=$DIALOGITEM(%i,%i,GETTEXT,128);\
+MAPWEBSITE=$DIALOGITEM(%i,%i,GETTEXT,255);\
+COUNTYWEBSITE=$DIALOGITEM(%i,%i,GETTEXT,255);\
+PARCELFILE=$DIALOGITEM(%i,%i,GETTEXT,255);\
+PARCELFILE2=$DIALOGITEM(%i,%i,GETTEXT,255);\
+DATADOWNLOADSITE=$DIALOGITEM(%i,%i,GETTEXT,255);\
+EXTERNALDATASITE=$DIALOGITEM(%i,%i,GETTEXT,255);\
+NOTES=$DIALOGITEM(%i,%i,GETTEXT,255);\
+DISCLAIMER=$DIALOGITEM(%i,%i,GETTEXT,8192));",
+captureClipboardTitle, parcelDataStatus, otherDataStatus, mapStatus,
+												(UINT)hWndDlg, IDC_CONTACT,
+												(UINT)hWndDlg, IDC_COST,
+												(UINT)hWndDlg, IDC_MAPSITE,
+												(UINT)hWndDlg, IDC_WEBSITE,
+												(UINT)hWndDlg, IDC_PARCELFILE,
+												(UINT)hWndDlg, IDC_PARCELFILE2,
+												(UINT)hWndDlg, IDC_DATAPAGE,
+												(UINT)hWndDlg, IDC_EXTERNALSITE,
+												(UINT)hWndDlg, IDC_NOTES,
+												(UINT)hWndDlg, IDC_DISCLAIMER
+												);
+			ProcessText(pCmd);
+			GSSiGlobUlFree(&hCmd);
+			EndDialog(hWndDlg, TRUE);
+		}
+			break;
+		case IDCANCEL:
+			KillTimer(hWndDlg, 1);
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDC_DATA_STATUS_1:
+			parcelDataStatus = 1;
+			break;
+		case IDC_DATA_STATUS_2:
+			parcelDataStatus = 2;
+			break;
+		case IDC_DATA_STATUS_3:
+			parcelDataStatus = 3;
+			break;
+		case IDC_DATA_STATUS_4:
+			parcelDataStatus = 4;
+			break;
+		case IDC_DATA_STATUS_5:
+			parcelDataStatus = 5;
+			break;
+		case IDC_OTHERDATA_STATUS_1:
+			otherDataStatus = 1;
+			break;
+		case IDC_OTHERDATA_STATUS_2:
+			otherDataStatus = 2;
+			break;
+		case IDC_OTHERDATA_STATUS_3:
+			otherDataStatus = 3;
+			break;
+		case IDC_MAP_STATUS_1:
+			mapStatus = 1;
+			break;
+		case IDC_MAP_STATUS_2:
+			mapStatus = 2;
+			break;
+		case IDC_MAP_STATUS_3:
+			mapStatus = 3;
+			break;
+		case IDC_MAP_STATUS_4:
+			mapStatus = 4;
+			break;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}

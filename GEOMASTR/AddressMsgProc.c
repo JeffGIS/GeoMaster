@@ -41,6 +41,13 @@ static LPADDMATCH	pAddEditMatch=0;
 static long	EditPath1;
 static long	EditPath2;
 static short	Trigger=3;
+static HWND		hWndSecondaryAddInput = 0;
+static UINT		intMatchList;
+static HWND		intMatchWnd;
+static UINT		addMatchList;
+static HWND		addMatchWnd;
+
+void AddAddMatch(HWND hWndDlg, LPSTR str);
 
 void SetAddEditValues (LPSTR House,LPSTR Street,LPSTR City,LPSTR ZIP,LPSTR OutVar,LPSTR Macro,LPADDMATCH pMatch)
 {   
@@ -205,6 +212,13 @@ void    CloseAddressFilesPID (void)
     return;
 
 }
+
+void SetSecondaryAddInput(HWND hWnd)
+{
+	hWndSecondaryAddInput = hWnd;
+	return;
+}
+
 short DisplayStreetsPIDFromStreetNum (HWND hDlg,LONG HouseMin, LONG HouseMax, short OddEven, long InStreet,long WantMunicNum,USHORT EntryControl)
 {
     short stName, ch,  pos;
@@ -284,7 +298,12 @@ FirstAdd:
                                   BT_NEXT,BT_ANY,(LPSTR)&Offset);
 				if (GSSiPeekMessage(&msg,GetDlgItem(hDlg,EntryControl),WM_KEYDOWN,WM_KEYDOWN,PM_NOREMOVE))
 					stName = 31;	                                                             
-                
+				if (hWndSecondaryAddInput)
+				{
+					if (GSSiPeekMessage(&msg, hWndSecondaryAddInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+						stName = 31;
+				}
+
             }
         }
     }
@@ -309,7 +328,7 @@ short DisplayStreetsPID (HWND hDlg,LONG HouseMin, LONG HouseMax, short OddEven, 
 
     ch = 0;          
     /* clear the address menu */
-    SendDlgItemMessage (hDlg,IDM_STREET_MENU,LB_RESETCONTENT,0,0);
+    SendDlgItemMessage (addMatchWnd,addMatchList,LB_RESETCONTENT,0,0);
     if (nchar<1)
     	return 0;    
     LastStreet[0]='\0';
@@ -372,10 +391,10 @@ FirstAdd:
                     {
                         if (labs(ihouse-(HouseMax+HouseMin)/2)<labs(lhouse-(HouseMax+HouseMin)/2))
                         { 
-                            short n=(short)SendDlgItemMessage (hDlg,IDM_STREET_MENU,LB_GETCOUNT,0,0); 
+                            short n=(short)SendDlgItemMessage (hDlg,addMatchList,LB_GETCOUNT,0,0); 
                             
                             if (n)
-                            	SendDlgItemMessage (hDlg,IDM_STREET_MENU,LB_DELETESTRING,n-1,0);
+                            	SendDlgItemMessage (hDlg,addMatchList,LB_DELETESTRING,n-1,0);
                         }
                         else
                             goto NextAdd;  
@@ -397,17 +416,24 @@ FirstAdd:
 	                GlobalUnlock (hAddDisplayLine);
 	                ExpandText (AddText);
 	                sprintf (DisplayAdd,"%s\t%ld",AddText,Offset);
-	                SendDlgItemMessage (hDlg,IDM_STREET_MENU,LB_ADDSTRING,0,
-	                                    (LPARAM)&DisplayAdd);
+					AddAddMatch(hDlg, DisplayAdd);
+	                //SendDlgItemMessage (hDlg,IDM_STREET_MENU,LB_ADDSTRING,0,
+	                //                    (LPARAM)&DisplayAdd);
 	            }
         NextAdd:stName = BT_FIND (lpGWDHeadPID->BTHandle[PIDAddIndex],lpGWDHeadPID->pKeys[PIDAddIndex],
                                   BT_NEXT,BT_ANY,(LPSTR)&Offset);
 				if (GSSiPeekMessage(&msg,GetDlgItem(hDlg,EntryControl),WM_KEYDOWN,WM_KEYDOWN,PM_NOREMOVE))
-					stName = 31;	                                                             
+					stName = 31;
+				if (hWndSecondaryAddInput)
+				{
+					if (GSSiPeekMessage(&msg, hWndSecondaryAddInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+						stName = 31;
+				}
                 
             }
         }
     }
+	AddAddMatch(hDlg, 0);
 
     GlobalUnlock (hPIDAddDB);
     return (0);
@@ -646,6 +672,43 @@ Display: if (LocationChoice<0)
  return TRUE;
 }
 
+void SetIntMatchControl(HWND hWndDlg,UINT control)
+{
+	intMatchWnd = hWndDlg;
+	if (control)
+	{
+		intMatchList = control;
+	}
+	else
+	{
+		intMatchList = IDC_INT_MATCHES;
+	}
+	return;
+}
+
+void AddIntMatch(HWND hWndDlg,LPSTR str)
+{
+	if (str)
+		SendDlgItemMessage(intMatchWnd, intMatchList, LB_ADDSTRING, 0, (LPARAM)str);
+	else if (hWndDlg != intMatchWnd)
+	{
+		int nInList = SendDlgItemMessage(intMatchWnd, intMatchList, LB_GETCOUNT, 0, 0);
+		RECT	rect, prect;
+		int		h = nInList * 16 + 6;
+
+		GetWindowRect(GetDlgItem(intMatchWnd, intMatchList), &rect);
+		ScreenRectToClientRect(intMatchWnd, &rect);
+		MoveWindow(GetDlgItem(intMatchWnd, intMatchList), rect.left, rect.top, RECTWIDTH(&rect), h, TRUE);
+		ShowWindow(GetDlgItem(intMatchWnd, intMatchList), SW_SHOW);
+		GetWindowRect(GetDlgItem(intMatchWnd, intMatchList), &rect);
+		GetWindowRect(intMatchWnd, &prect);
+		prect.bottom = rect.bottom + 7;
+		MoveWindow(intMatchWnd, prect.left, prect.top, RECTWIDTH(&prect), RECTHEIGHT(&prect),TRUE);
+	}
+
+	return;
+}
+
 BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 	static	char	Street1[36]="", Street2[36]="";   
@@ -657,6 +720,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  	short	Choice, FindOpt; 
  	LPSTR	lpTAB;  
  	char	MunName[66]; 
+	HWND	hPar, hParDlg;
  	static	BOOL	OnlyPrime=TRUE, IgnoreChange=FALSE;
 	
  short  BRtn;
@@ -664,6 +728,9 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  switch(Message)
    {
     case WM_INITDIALOG:  
+		SetSecondaryIntInput(0);
+		intMatchList = IDC_INT_MATCHES;
+		intMatchWnd = hWndDlg;
          SendDlgItemMessage (hWndDlg,IDM_STREET_MENU1,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
          SendDlgItemMessage (hWndDlg,IDM_STREET_MENU2,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
          SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
@@ -690,14 +757,32 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
             SendDlgItemMessage (hWndDlg,IDC_IN_PRIMARY_CITY_ONLY,BM_SETCHECK,OnlyPrime,0L); 
          }
          SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,BM_SETCHECK,TRUE,0L); 
+		 hParDlg = GetParent(hWndDlg);
+		 hPar = GetDlgItem(hParDlg, IDC_GEOCODE_OPERATION);
+
+		 if (hPar)
+		 {
+			 RECT pRect;
+			 RECT wRect;
+			 GetWindowRect(hPar, &pRect);
+			 GetWindowRect(hWndDlg, &wRect);
+			// ClientRectToScreenRect(GetParent(hPar), &pRect);
+			// ScreenRectToClientRect(hParDlg, &pRect);
+			 MoveWindow(hWndDlg, pRect.left, pRect.top, RECTWIDTH(&pRect), RECTHEIGHT(&pRect), TRUE);
+		 }
          PostMessage(hWndDlg, WM_COMMAND, IDC_TEST_INT, 0L);
-         
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
+
+	case WM_DESTROY:
+		CloseStreetNameTable();
+		CloseNetIntersect(Opened);
+		OnlyPrime = SendDlgItemMessage(hWndDlg, IDC_IN_PRIMARY_CITY_ONLY, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+		break;
 
     case WM_COMMAND:
          switch(LOWORD(wParam))
@@ -716,7 +801,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 							PostMessage(hWndDlg, WM_COMMAND, IDC_TEST_INT, 0L);
 							break;
 						}
-		         		SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_RESETCONTENT,0,0); 
+		         		SendDlgItemMessage (intMatchWnd,intMatchList,LB_RESETCONTENT,0,0); 
                         ls1 = GetDlgItemText (hWndDlg,IDC_STREET1,Street1,33); 
 		         		FindOpt = SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
                         if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU1,Street1,ls1,IDC_STREET1,FindOpt,TRUE)>=0) 
@@ -729,7 +814,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
             case IDC_STREET2: /* Edit Control                            */
                  switch (HIWORD(wParam))
                  {  case EN_CHANGE:
-		         		SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_RESETCONTENT,0,0); 
+					 SendDlgItemMessage(intMatchWnd, intMatchList, LB_RESETCONTENT, 0, 0);
                         ls2 = GetDlgItemText (hWndDlg,IDC_STREET2,Street2,33);
 		         		FindOpt = SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);
                         if (DisplayStreetsINT (hWndDlg,IDM_STREET_MENU2,Street2,ls2,IDC_STREET2,FindOpt,TRUE)>=0)
@@ -804,8 +889,9 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 				 char		MunAbv[32];   
 				 UINT		List2cntl=IDM_STREET_MENU2;		
 				 long		MunicNum, WantMunic=0;
+				 int		totmatchStart;
 				 
-         		 SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_RESETCONTENT,0,0); 
+				 SendDlgItemMessage(intMatchWnd, intMatchList, LB_RESETCONTENT, 0, 0);
          		 if (SendDlgItemMessage (hWndDlg,IDC_IN_PRIMARY_CITY_ONLY,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
          		 {
 	         		 if (GetGlobalCVal ("[%WANTCITY]",MunName,NULL))
@@ -830,11 +916,14 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 					{ 
 						GetMunicName (pMatch->Munic,MunName,MunAbv);
 						sprintf (_fstrchr(str,0),",%s\t%20.8f,%20.8f",MunName,pMatch->Point.x,pMatch->Point.y);
-	                    SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_ADDSTRING,0,(LPARAM)str);   
+						AddIntMatch(hWndDlg, str);
 	                }
                     pMatch++;
 				 } 
-		 		 GSSiGlobUlFree (&hMatch); 
+				 if (totmatch)
+					 AddIntMatch(hWndDlg, 0);
+				 GSSiGlobUlFree(&hMatch);
+				 totmatchStart = totmatch;
          		 if (SendDlgItemMessage (hWndDlg,IDC_TRYHARDER,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
          		 {
 	                 GetDlgItemText (hWndDlg,IDC_STREET1,Street1,33);
@@ -853,9 +942,9 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 						{ 
 							GetMunicName (pMatch->Munic,MunName,MunAbv);
 							sprintf (_fstrchr(str,0),",%s\t%20.8f,%20.8f",MunName,pMatch->Point.x,pMatch->Point.y);
-							if (SendDlgItemMessage(hWndDlg, IDC_INT_MATCHES, LB_FINDSTRINGEXACT, -1, (LPARAM)str) == LB_ERR)
+							if (SendDlgItemMessage(intMatchWnd, intMatchList, LB_FINDSTRINGEXACT, -1, (LPARAM)str) == LB_ERR)
 							{
-		                    	SendDlgItemMessage (hWndDlg,IDC_INT_MATCHES,LB_ADDSTRING,0,(LPARAM)str); 
+								AddIntMatch(hWndDlg, str);
 								totmatch++;
 							}
 						}
@@ -863,6 +952,9 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 					 } 
 			 		 GSSiGlobUlFree (&hMatch); 
 				 }
+				 if (totmatch > totmatchStart)
+					 AddIntMatch(hWndDlg, 0);
+
 				 if (totmatch == 1)
 				 	Enable=TRUE;
 				 else
@@ -3250,6 +3342,43 @@ GSSiExitProg (850);
 #endif
 }
 
+void SetAddMatchControl(HWND hWndDlg, UINT control)
+{
+	addMatchWnd = hWndDlg;
+	if (control)
+	{
+		addMatchList = control;
+	}
+	else
+	{
+		addMatchList = IDM_STREET_MENU;
+	}
+	return;
+}
+
+void AddAddMatch(HWND hWndDlg, LPSTR str)
+{
+	if (str)
+		SendDlgItemMessage(addMatchWnd, addMatchList, LB_ADDSTRING, 0, (LPARAM)str);
+	else if (hWndDlg != addMatchWnd)
+	{
+		int nInList = SendDlgItemMessage(addMatchWnd, addMatchList, LB_GETCOUNT, 0, 0);
+		RECT	rect, prect;
+		int		h = nInList * 16 + 6;
+
+		GetWindowRect(GetDlgItem(addMatchWnd, addMatchList), &rect);
+		ScreenRectToClientRect(addMatchWnd, &rect);
+		MoveWindow(GetDlgItem(addMatchWnd, addMatchList), rect.left, rect.top, RECTWIDTH(&rect), h, TRUE);
+		ShowWindow(GetDlgItem(addMatchWnd, addMatchList), SW_SHOW);
+		GetWindowRect(GetDlgItem(addMatchWnd, addMatchList), &rect);
+		GetWindowRect(addMatchWnd, &prect);
+		prect.bottom = rect.bottom + 7;
+		MoveWindow(addMatchWnd, prect.left, prect.top, RECTWIDTH(&prect), RECTHEIGHT(&prect), TRUE);
+	}
+
+	return;
+}
+
 BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
  short i,nchar,ikey;
@@ -3268,13 +3397,17 @@ BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  BOOL   Error;
  static	BOOL	OnlyPrime=TRUE;  
  static	long	MunicNum=0;  
+ HWND	hPar, hParDlg;
 
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
  switch(Message)
    {
     case WM_INITDIALOG:  
-         cwCenter(hWndDlg, 0);
+		SetSecondaryAddInput(0);
+		addMatchList = IDM_STREET_MENU;
+		addMatchWnd = hWndDlg;
+		cwCenter(hWndDlg, 0);
          /* initialize working variables                                */
          SendDlgItemMessage (hWndDlg,IDM_STREET_MENU,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
 #if WIN32
@@ -3314,7 +3447,20 @@ BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
          }
 		 else
 			MunicNum = 0;
-         goto Display;
+		 hParDlg = GetParent(hWndDlg);
+		 hPar = GetDlgItem(hParDlg, IDC_GEOCODE_OPERATION);
+
+		 if (hPar)
+		 {
+			 RECT pRect;
+			 RECT wRect;
+			 GetWindowRect(hPar, &pRect);
+			 GetWindowRect(hWndDlg, &wRect);
+			 // ClientRectToScreenRect(GetParent(hPar), &pRect);
+			 // ScreenRectToClientRect(hParDlg, &pRect);
+			 MoveWindow(hWndDlg, pRect.left, pRect.top, RECTWIDTH(&pRect), RECTHEIGHT(&pRect), TRUE);
+		 }
+		 goto Display;
          
          break; /* End of WM_INITDIALOG                                 */
 

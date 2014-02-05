@@ -24,6 +24,311 @@ static	HFONT	hDelayedFont=0;
 static	RECT	FlagRects[MAX_FLAGS];
 static	int		nFlags;	
 
+int GetGeocodeType(LPSTR Input) //returns 1 if intersection,2 if house-street,3 if all numeric(PID)
+{
+	char Street1[100], Street2[100], House[32];
+	int	IHouse;
+	LPSTR	Street;
+	int	maxHouseLen = 4;
+
+	if (IsInteger(Input) && strlen(Input) > maxHouseLen)
+	{
+		return 3;
+	}
+	else if (SeparateIntStreets(Input, Street1, Street2))
+	{
+		Truncate(Street1);
+		Truncate(Street2);
+		IHouse = 0;
+		Street = Street1;
+		if (*Street1 && *Street2)
+			return 1;
+	}
+	else
+	{
+		Street = GetHouseAndStreet(Input, House);
+		IHouse = atol(House);
+		if (IHouse && *Street)
+			return 2;
+	}
+	return 0;
+}
+
+BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+
+	RECT	rect, crect, rect2;
+	int		w, h;
+	int		nRc;
+	int		TabStops[2] = { 1000, 2000 };
+	static HWND hSubWnd = 0;
+	static int geocodeType = 1;
+	static	char	input[256] = { 0 };
+	char	txt[256];
+	static	int fullHeight, fullWidth,collapsedHeight=56, collapsedWidth, border;
+	static	RECT	collapsedCancelRect, expandedCancelRect;
+	static	BOOL	collapsed = TRUE;
+	static	int		currentGeocodeType = 0;
+
+		int	BRtn;
+		if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		{
+			return (BRtn);
+		}
+		switch (Message)
+		{
+		case WM_INITDIALOG:
+			hSubWnd = 0;
+			SendDlgItemMessage(hWndDlg, IDC_MATCHLIST, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
+
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Intersection");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "House - Street Name");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Parcel ID");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Taxpayer Name");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Common Name");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, "Zoom to location at 200 scale");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, "Place Pin at location");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, "Create StreetView insert");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_SETCURSEL, geocodeType - 1, 0);
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_SETSEL, TRUE, 0);
+
+			//cwCenter(hWndDlg, 0);
+			//SetDlgItemText(hWndDlg, IDC_WAITMESS, GMmess);
+			//$TAGLOC(PINCA, 5, LASTPID, Locate Parcel, Primary Viewport)
+			strcpy(TagLocPrefix, "PINCA");
+
+			GetWindowRect(GetDlgItem(hWndDlg, IDOK), &rect);
+			GetWindowRect(hWndDlg, &rect);
+			GetClientRect(hWndDlg, &crect);
+			border = max (4,(RECTWIDTH(&rect) - RECTWIDTH(&crect)) / 2);
+			fullWidth = RECTWIDTH(&rect);
+			fullHeight = RECTHEIGHT(&rect);
+			GetWindowRect(GetDlgItem(hWndDlg, IDCANCEL), &rect2);
+			expandedCancelRect = rect2;
+			ScreenRectToClientRect(hWndDlg, &expandedCancelRect);
+			w = RECTWIDTH(&rect2);
+			h = RECTHEIGHT(&rect2);
+			GetWindowRect(GetDlgItem(hWndDlg, IDOK), &rect2);
+			ScreenRectToClientRect(hWndDlg, &rect2);
+			collapsedWidth = rect2.right + w + border*2;
+			MoveWindow(hWndDlg, rect.left, rect.top, collapsedWidth, collapsedHeight, TRUE);
+			MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), rect2.right + border, rect2.top, w, h,TRUE);
+			GetWindowRect(GetDlgItem(hWndDlg, IDCANCEL), &collapsedCancelRect);
+			ScreenRectToClientRect(hWndDlg, &collapsedCancelRect);
+
+			//PostMessage(hWndDlg, WM_NEXTDLGCTL, IDC_INPUT, TRUE);
+			SetFocus(GetDlgItem(hWndDlg, IDC_INPUT));
+			return FALSE;
+			break; /* End of WM_INITDIALOG                                 */
+
+		case WM_TIMER:
+			KillTimer(hWndDlg, 1);
+//			if (!collapsed)
+//				PostMessage(hWndDlg, WM_COMMAND, IDOK, 0);
+			{
+				HDC hDC = GetDC(GetDlgItem(hWndDlg, IDC_GEOCODE_MAP));
+				RECT	rect;
+				int		igray = 240;
+
+				GetClientRect(GetDlgItem(hWndDlg, IDC_GEOCODE_MAP), &rect);
+				FillRectPoly(hDC, &rect, RGB(igray, igray, igray));
+				DisplayBMFileInRect(hDC, "C:\\Users\\jeffrey\\Pictures\\Untitled.bmp", rect, TRUE);
+				ReleaseDC(GetDlgItem(hWndDlg, IDC_GEOCODE_MAP), hDC);
+			}
+			break;
+
+		case WM_CLOSE:
+			/* Closing the Dialog behaves the same as Cancel               */
+			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			break; /* End of WM_CLOSE                                      */
+
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+			case IDC_MATCHLIST:
+				break;
+
+			case IDC_INPUT:
+				switch (HIWORD(wParam))
+				{
+				case EN_CHANGE:
+					if (GetDlgItemText(hWndDlg, IDC_INPUT, input,255))
+					{
+						int i = GetGeocodeType(input);
+						SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_SETCURSEL, i - 1, 0);
+						if (i)
+						{
+							geocodeType = i;
+							GetDlgItemText(hWndDlg, IDC_INPUT, input, 255);
+							switch (geocodeType)
+							{
+							case 1:
+								PostMessage(hWndDlg, WM_COMMAND, IDC_LOCINTERSECTION, 0);
+								break;
+							case 2:
+								PostMessage(hWndDlg, WM_COMMAND, IDC_LOCADDRESS, 0);
+								break;
+							case 3:
+								PostMessage(hWndDlg, WM_COMMAND, IDC_LOCPID, 0);
+								break;
+							}
+
+						}
+					}
+				}
+				break;
+			case IDCANCEL:
+				if (hSubWnd)
+					SendMessage(hSubWnd, WM_COMMAND, IDCANCEL, 0L);
+				hSubWnd = 0;
+				EndDialog(hWndDlg, FALSE);
+				break;
+			case IDOK:
+				GetDlgItemText(hWndDlg, IDOK, txt, 4);
+				if (*txt == 'V')
+				{
+					collapsed = FALSE;
+					SetDlgItemText(hWndDlg, IDOK, "^");
+					GetWindowRect(hWndDlg, &rect);
+					MoveWindow(hWndDlg, rect.left, rect.top, fullWidth, fullHeight, TRUE);
+					MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), expandedCancelRect.left, expandedCancelRect.top, RECTWIDTH(&expandedCancelRect), RECTHEIGHT(&expandedCancelRect), TRUE);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_TYPE), SW_SHOW);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_ACTION), SW_SHOW);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_MAP), SW_SHOW);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_FROMFILE), SW_SHOW);
+
+					switch (geocodeType)
+					{
+					case 1:
+						PostMessage(hWndDlg, WM_COMMAND, IDC_LOCINTERSECTION, 0);
+						break;
+					case 2:
+						PostMessage(hWndDlg, WM_COMMAND, IDC_LOCADDRESS, 0);
+						break;
+					}
+					SetTimer(hWndDlg, 1, 100, (FARPROC)0);
+				}
+				else
+				{
+					collapsed = TRUE;
+					if (hSubWnd)
+						SendMessage(hSubWnd, WM_COMMAND, IDCANCEL, 0L);
+					hSubWnd = 0;
+					SetDlgItemText(hWndDlg, IDOK, "V");
+					GetWindowRect(hWndDlg, &rect);
+					MoveWindow(hWndDlg, rect.left, rect.top, collapsedWidth, collapsedHeight, TRUE);
+					MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), collapsedCancelRect.left, collapsedCancelRect.top, RECTWIDTH(&collapsedCancelRect), RECTHEIGHT(&collapsedCancelRect), TRUE);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_TYPE), SW_HIDE);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_ACTION), SW_HIDE);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_MAP), SW_HIDE);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_GEOCODE_FROMFILE), SW_HIDE);
+				}
+				break;
+			case IDC_LOCINTERSECTION:
+			{
+				char street1[100], street2[100];
+				//nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT1", hWndDlg, LOC_INTERSECTMsgProc);
+				GetDlgItemText(hWndDlg, IDC_INPUT, input, 255);
+				SeparateIntStreets(input, street1, street2);
+				if (!collapsed || (*street1 && *street2))
+				{
+					if (currentGeocodeType != geocodeType)
+					{
+						currentGeocodeType = geocodeType;
+						if (hSubWnd)
+						{
+							SendMessage(hSubWnd, WM_COMMAND, IDCANCEL, 0L);
+							hSubWnd = 0;
+						}
+					}
+					if (!hSubWnd)
+					{
+						hSubWnd = CreateDialog(hInst, (LPSTR)"LOC_INTERSECT1", hWndDlg, LOC_INTERSECTMsgProc);
+						SetSecondaryIntInput(GetDlgItem(hWndDlg, IDC_INPUT));
+					}
+					GetDlgItemText(hWndDlg, IDOK, txt, 4);
+					if (*txt == 'V')
+						SetIntMatchControl(hWndDlg, IDC_MATCHLIST);
+					else
+					{
+						SetIntMatchControl(hSubWnd, 0);
+						ShowWindow(GetDlgItem(hWndDlg, IDC_MATCHLIST), SW_HIDE);
+						ShowWindow(hSubWnd,SW_SHOW);
+					}
+
+					//SetFocus(GetDlgItem(hSubWnd, IDC_STREET2));
+					SetFocus(GetDlgItem(hWndDlg, IDC_INPUT));
+					SetDlgItemText(hSubWnd, IDC_STREET1, street1);
+					SetDlgItemText(hSubWnd, IDC_STREET2, street2);
+				}
+
+			}
+				break;
+			case IDC_LOCADDRESS:
+			{
+					LPSTR Street;
+					char House[32];
+
+					if (currentGeocodeType != geocodeType)
+					{
+						currentGeocodeType = geocodeType;
+						if (hSubWnd)
+						{
+							SendMessage(hSubWnd, WM_COMMAND, IDCANCEL, 0L);
+							hSubWnd = 0;
+						}
+					}
+					if (!hSubWnd)
+					{
+						hSubWnd = CreateDialog(hInst, (LPSTR)"ADDRESS3", hWndDlg, ADDRESSPIDMsgProc);
+						SetSecondaryAddInput(GetDlgItem(hWndDlg, IDC_INPUT));
+					}
+					GetDlgItemText(hWndDlg, IDOK, txt, 4);
+					if (*txt == 'V')
+						SetAddMatchControl(hWndDlg, IDC_MATCHLIST);
+					else
+					{
+						SetAddMatchControl(hSubWnd, 0);
+						ShowWindow(GetDlgItem(hWndDlg, IDC_MATCHLIST), SW_HIDE);
+						ShowWindow(hSubWnd, SW_SHOW);
+					}
+					SetFocus(GetDlgItem(hWndDlg, IDC_INPUT));
+					GetDlgItemText(hWndDlg, IDC_INPUT, input, 255);
+					Street = GetHouseAndStreet(input, House);
+
+					SetDlgItemText(hSubWnd, IDM_HOUSE, House);
+					SetDlgItemText(hSubWnd, IDM_STREET, Street);
+			}
+				break;
+
+			case IDC_LOCPID:
+			{
+					if (!hSubWnd)
+					{
+						hSubWnd = CreateDialog(hInst, (LPSTR)"TAGLOC1", hWndDlg, TAGLOCMsgProc);
+						SetSecondaryTAGInput(GetDlgItem(hWndDlg, IDC_INPUT));
+					}
+					SetFocus(GetDlgItem(hWndDlg, IDC_INPUT));
+
+					SetDlgItemText(hSubWnd, IDC_TAGVALUE,input);
+			}
+				break;
+
+			}
+			break;    /* End of WM_COMMAND                                 */
+
+		default:
+			return FALSE;
+		}
+			return TRUE;
+}
+
+BOOL GeocodeAlltypes(HWND hWnd,LPSTR OutLoc, LPSTR Arg1)
+{
+	int nRc = DialogBox(hInst, (LPSTR)"GEOCODE_ALLTYPES", hWnd, GeocodeAlltypesMsgProc);
+
+	return TRUE;
+}
 
 BOOL ReverseGeocodeCommand (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 {

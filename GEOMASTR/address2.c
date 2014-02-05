@@ -1817,8 +1817,9 @@ BOOL SeparateIntStreets (LPSTR Street,LPSTR Street1,LPSTR Street2)
 	char	SepString[32];
 	int		ii;
 
-	if (!stricmp (Street,"I 94 & WEAVER LAKE RD N"))
-		ii=1;
+	*Street1 = *Street2 = 0;
+//	if (!stricmp (Street,"I 94 & WEAVER LAKE RD N"))
+//		ii=1;
 	GetGlobalCVal ("[%ADDSEPSTRING]",SepString,"/");
 	_fstrcpy (Street1,Street);
 	OneHalfLoc = _fstrstr (Street1,"1/2 ");

@@ -257,6 +257,7 @@ BOOL FAR PASCAL COMBO_ADD_FILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 BOOL FAR PASCAL SIGN_INVENTORYsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL DBLOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL LOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL CAPTURE_CLIPBOARDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SQL_LIKEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SQL_INMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SQL_VALUEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -267,6 +268,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK TabbedWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
+BOOL CaptureClipboard(LPSTR title, LPSTR menu);
 HWND WINAPI DoCreateTabControl(HWND hwndParent,int nTabs,LPSTR TabItems,int TabItemLen,LPRECT pRect,BOOL Verticle,BOOL Flat,int xPad,int yPad);
 HWND WINAPI DoCreateDisplayWindow(HWND hwndParent);
 BOOL RegisterFloatMenuClass(BOOL UnRegister);
@@ -1169,8 +1171,9 @@ BOOL EditSymbol (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Func
 BOOL RotateSymbols (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
 BOOL ResizePoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
 BOOL MovePoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
-BOOL MoveOffsetLine (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
-BOOL ProcessCmdString (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
+BOOL MoveOffsetLine(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function);
+BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function);
+BOOL ProcessCmdString(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors);
 void TempPolyline (HDC hDC, LPPOINT pPoints, short nPnts, LPSTR TopText, LPSTR BottomText);

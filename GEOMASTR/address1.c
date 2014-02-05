@@ -8,6 +8,7 @@
 static	double	IntersectionAverageDist=10;
 static HANDLE	hNames;
 static HANDLE	hCurStreets=0;
+static HWND		hWndSecondaryIntInput = 0;
 
 
 #define BUFFER_SIZE  (256 * 1024)  /* 256 KB */
@@ -701,6 +702,11 @@ short DisplayStreets (HWND hDlg,LONG House, int OddEven, LPSTR InName,int nchar,
     return (0);
 } 
 */ 
+void SetSecondaryIntInput(HWND hWnd)
+{
+	hWndSecondaryIntInput = hWnd;
+	return;
+}
 
 short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT EntryControl,short FindOpt,BOOL CheckForSegs)
 {
@@ -764,7 +770,15 @@ short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT E
 		{
 			NumDisplay = -1;
 			GetNext = FALSE;
-		}	                                                             
+		}
+		if (hWndSecondaryIntInput)
+		{
+			if (GSSiPeekMessage(&msg, hWndSecondaryIntInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+			{
+				NumDisplay = -1;
+				GetNext = FALSE;
+			}
+		}
     }
     pos = BT_FIRST;
     cond = BT_GE; 
@@ -811,7 +825,15 @@ short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT E
 			NumDisplay = -1;
 			GetNext = FALSE;
 		}	                                                             
-    }
+		if (hWndSecondaryIntInput)
+		{
+			if (GSSiPeekMessage(&msg, hWndSecondaryIntInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+			{
+				NumDisplay = -1;
+				GetNext = FALSE;
+			}
+		}
+	}
     GlobalUnlock (hDBStreetNames);      
     
     return (NumDisplay);

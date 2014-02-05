@@ -281,8 +281,9 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp (str,"SESSION",7)) return 778; 
 			if (!_fstrnicmp (str,"COMPOSE",7)) return 779; 
 			if (!_fstrnicmp (str,"BATTERY",7)) return 780; 
-			if (!_fstrnicmp (str,"GEOCODE",7)) return 781; 
-			
+			if (!_fstrnicmp(str, "GEOCODE", 7)) return 781;
+			if (!_fstrnicmp(str, "ADDRESS", 7)) return 782;
+
 			return 0;
 }
 int	GetFunctionID8 (LPSTR str)
@@ -385,8 +386,9 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp (str,"POINTINVP",9)) return 943; 
 			if (!_fstrnicmp (str,"BLOCKTEXT",9)) return 944; 
 			if (!_fstrnicmp (str,"LINKLINES",9)) return 945; 
-			if (!_fstrnicmp (str,"CLEARFILE",9)) return 946; 
-			return 0; 
+			if (!_fstrnicmp(str, "CLEARFILE",9)) return 946;
+			if (!_fstrnicmp(str, "CLIPBOARD",9)) return 947;
+			return 0;
 }
 int	GetFunctionID10 (LPSTR str)
 {
@@ -427,6 +429,7 @@ int	GetFunctionID10 (LPSTR str)
 			if (!_fstrnicmp (str,"PROJECTION",10)) return 1035; 
 			if (!_fstrnicmp(str, "BACKGROUND", 10)) return 1036;
 			if (!_fstrnicmp(str, "WAITFORKEY", 10)) return 1037;
+			if (!_fstrnicmp(str, "DIALOGITEM", 10)) return 1038;
 			return 0;
 }
 int	GetFunctionID11 (LPSTR str)

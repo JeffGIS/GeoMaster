@@ -2984,6 +2984,7 @@ GSSiExitProg (1319);
 					ii = rtn;
 				}
 			}
+			CloseThemeDataFile(FALSE);
 	    }
 {
 #if ENABLETRACE

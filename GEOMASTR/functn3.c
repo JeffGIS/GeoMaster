@@ -1067,11 +1067,17 @@ GotCloseFilehSQL:
     	
 		case 510: // $MACRO(macro file pathname,arg1,arg2...arg10)
 				  // $MACRO(pathname(type),arg1,arg2) runs multiple macros from directory pathname (not sure about this one)
+				  // $MACRO() clears macro buffer
 		{				
 			HANDLE	hMacroArgs=0;
 			LPSTR	LastArg, pMacroArg,pName,pSTR, pPAR, pEnd,pLoc;   
 			short	NumArgs=0;
 			
+			if (!*Args)
+			{
+				CloseBufferedMacros();
+				goto RtnTrue;
+			}
 			hMem = GSSiGlobAlloc ( 843,GMEM_MOVEABLE,4*2048);
 			Arg1 = GlobalLock(hMem); 
 			pName = Arg1 + 2048;
@@ -3988,7 +3994,31 @@ GotCloseFilehSQL:
 					}
 					goto RtnFalse;
 				}
-				else if (!stricmp (Arg[1],"RESCALE"))//file,width,height,outfile,opt
+				else if (!stricmp(Arg[1], "HASBACKGROUNDCOLOR"))
+				{
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
+
+					if (hDIB)
+					{
+						rtn = FreeImage_HasBackgroundColor(hDIB);
+						FreeImage_Unload(hDIB);
+						goto Rtnrtn;
+					}
+					goto RtnFalse;
+				}
+				else if (!stricmp(Arg[1], "ISTRANSPARENT"))
+				{
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
+
+					if (hDIB)
+					{
+						rtn = FreeImage_IsTransparent(hDIB);
+						FreeImage_Unload(hDIB);
+						goto Rtnrtn;
+					}
+					goto RtnFalse;
+				}
+				else if (!stricmp(Arg[1], "RESCALE"))//file,width,height,outfile,opt
 				{
 					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
 
@@ -6278,6 +6308,7 @@ HaveVP:;
 					}
 					//zoomBounds = atobounds(Arg[4],ierr);
 					CRFlags = DETACHED_PROCESS;
+					// for mapserver addd BELOW_NORMAL_PRIORITY_CLASS
 					//ExpandText(Arg[2]);
 					if (*TestFileLocation)
 						sprintf (strchr(Arg[2],0)," [%%TESTDL]=%s;",TestFileLocation);
@@ -6371,12 +6402,28 @@ HaveVP:;
 			}
 
 		case 781: //$GEOCODE(FORWARD,)
-				  //$GEOCODE(REVERSE,point,format)
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			//$GEOCODE(REVERSE,point,format)
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem);
 			*OutLoc = 0;
-			if (!stricmp (Arg[1],"REVERSE"))
-				ReverseGeocodeCommand (nArgs-1,&Arg[1],OutLoc);
+			if (!stricmp(Arg[1], "REVERSE"))
+				ReverseGeocodeCommand(nArgs - 1, &Arg[1], OutLoc);
+			else if (!stricmp(Arg[1], "ALLTYPES"))
+				GeocodeAlltypes(hWndMain, OutLoc, Arg[2]);
 			goto Rtnl;
+		case 782: //$ADDRESS(SET,(I2orI4orR4orR8),address,value)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			if (!stricmp(Arg[1], "SET"))
+			{
+				if (!stricmp(Arg[2], "I4"))
+				{
+					LPINT pI4 = (LPINT)atoi(Arg[3]);
+					*pI4 = atoi(Arg[4]);
+					goto RtnTrue;
+				}
+			}
+			goto RtnFalse;
+		}
 
 		default:
 			goto Rtn0;

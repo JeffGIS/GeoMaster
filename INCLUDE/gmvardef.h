@@ -1602,8 +1602,12 @@ char	LoginPassword[32];
 char	LoginTitle[128];
 SOCKET	CurrentServerSocket=0;
 BOOL	InServerMode=FALSE;
-BOOL	UpdateServer=FALSE;
-BOOL	PickSubVP=TRUE;
+BOOL	UpdateServer = FALSE;
+BOOL	MapServer = FALSE;
+char	MapServerOutputBitmapFile[MAX_PATH];
+HWND	MapServerCalledFromWnd=0;
+UINT	MapServerCallNumber;
+BOOL	PickSubVP = TRUE;
 int		SizeSYMBOL_V1;
 int		SizeBOUNDSDISPLAY16;
 int		SizeVISLIST16;
@@ -1625,8 +1629,10 @@ char    CacheDir[MAX_PATH]="";
 char	CacheIndex[MAX_PATH]; 
 char	SubstitutePathnameFrom[MAX_PATH]="";
 char	SubstitutePathnameTo[MAX_PATH];
-char	CachePathnameFrom[4][MAX_PATH];  
-SHOWVAL ShowVal={0};
+char	CachePathnameFrom[4][MAX_PATH];
+char	MapserverFile[MAX_PATH] = { 0 };
+HBITMAP hMapServerBM = 0;
+SHOWVAL ShowVal = { 0 };
 int		ii;
 
 
