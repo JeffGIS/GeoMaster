@@ -2257,7 +2257,19 @@ GSSiExitProg (1350);
 				rtn = FALSE;
 			goto Rtnrtn;
 		}
-
+		case 947: //$CLIPBOARD(CAPTURE,title,menu)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "CAPTURE"))
+			{
+				nRc = CaptureClipboard(Arg[2], Arg[3]);
+				if (nRc)
+					goto RtnTrue;
+			}
+			goto RtnFalse;
+		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             FARPROC lpfnDECOMPPOLYMsgProc; 
@@ -3045,6 +3057,30 @@ GSSiExitProg (1350);
 			*OutLoc = WaitForKeystroke(atob(Arg[1]));
 			OutLoc[1] = 0;
 			goto Rtnl;
+		}
+
+		case 1038:  //$DIALOGITEM(hWndDlg,item,GETTEXT,maxlen)
+					//$DIALOGITEM(hWndDlg,item,SETTEXT,value)
+		{
+			HWND hWndDlg;
+			UINT item;
+			int  maxlen;
+
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			hWndDlg = (HWND)atoi(Arg[1]);
+			item = (UINT)atoi(Arg[2]);
+			if (!stricmp(Arg[3], "GETTEXT"))
+			{ 
+				maxlen = atoi(Arg[4]);
+				GetDlgItemText(hWndDlg, item, OutLoc, maxlen);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[3], "SETTEXT"))
+			{
+				if (SetDlgItemText(hWndDlg, item, Arg[4]))
+					goto RtnTrue;
+			}
+			goto RtnFalse;
 		}
 
 		case 1101: //$DUMPGLOBALS(pathname)

@@ -256,7 +256,7 @@ void LogUsageInfo (int From,LPSTR mess)
 {
 	char str[256],DateTime[64];
 
-	if (LogUsage)
+	if (LogUsage && !MapServer)
 	{  
 		BOOL	SaveSE=ShareEnabled;
 		long	Minutes; 
@@ -769,6 +769,7 @@ BOOL DisplaySeg (HDC *hDC,BOOL Immediate)
 //    static char       LPpltBuf[UINT_MAX];
     LPSHORT       ipnt;
     short         iview,ii;
+	short		nContinues;
 	BOOL		rtn;
     long        SegStart;  
 //    MNMXCORD	SaveWBounds = CurView->WBounds;
@@ -797,7 +798,7 @@ GSSiExitProg (12);
     }
     if (!OpenMap (CurView->hWnd,CurView->hDC))
     	goto Next;
-    if (Display && !Pick && !FileMode)
+	if (Display && !Pick && !FileMode && CurView->hDC)
     {   
         if (!CurView->hRgn)
         	CurView->hRgn = CreateVPRgn (FALSE,FALSE);
@@ -1333,7 +1334,8 @@ Next:
 		}
 		ItemAddedToHLT = FALSE;
 		HLTGraphicsPos = 0;
-		while (ProcessGraphicsRec (*hDC,ipnt,LPpltBuf,nRead))
+		nContinues = 1;
+		while (ContinueProcessing && ProcessGraphicsRec(*hDC, ipnt, LPpltBuf, nRead))
         {
 		    GSSiGlobUlFree (&hpltBuf);
             
@@ -1351,6 +1353,10 @@ Next:
 		    	goto RtnTrue;
 		    }
 		    ipnt = (LPSHORT)LPpltBuf;
+			if (!(nContinues++ % 16))
+			{
+				ContinueProcessing = CheckForContinue(FALSE);
+			}
         }
 		if (FastMapCopy)
 		{
@@ -1380,7 +1386,7 @@ RtnTrue:
 //    CurView->WBounds = SaveWBounds;   
 //    CurView->Bounds = SaveBounds;
     GSSiGlobUlFree (&hpltBuf);
-    if (*hDC)
+    if (ContinueProcessing && *hDC)
     {
         SetDisplayMode (*hDC,GF_TEXTMODE);
         if (CurView && *hDC == CurView->hTransparentDC)
@@ -4857,7 +4863,7 @@ GSSiExitProg (56);
 }
      SaveRect = CurView->DrawRect;
      CurView->DrawRect = CurView->Rect;
-     if (!FileMode)
+	 if (!FileMode && CurView->hDC)
      {
 	     GSSiDeleteObject(&CurView->hRgn);
 //		 SetDisplayMode (CurView->hDC, GF_TEXTMODE);

@@ -32,6 +32,49 @@ static HIGHLIGHTDATA	HighlightData;
 		struct tm      * sunrise (double lat, double lon, int year, int month, int day);
 void DrawAlphaBlend (HWND hWnd, HDC hdcwnd);
 
+LPSTR priorchr(LPSTR pstr, char c)
+{
+	while (*pstr != c)
+		pstr--;
+
+	return pstr;
+}
+void GetMassShapeFiles(void)
+{
+	char file[] = "c:\\temp\\maparcels2.txt";
+	int lfile = GSSiLength(file), i, i2;
+	HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, lfile + 1);
+	LPSTR pFile = GlobalLock(hFile);
+	//HANDLE hFile2 = GSSiGlobAlloc(0, GMEM_MOVEABLE, lfile + 1);
+	//LPSTR pFile2 = GlobalLock(hFile2);
+	LPSTR pEnd, pBeg;
+	char outfile[] = "c:\\temp\\ma_shape_files.txt";
+	HFILE fid = GSSiOpenFile(file, 0, OF_READ);
+
+	BigRead(fid, pFile, lfile);
+	//lfile /= 2;
+	pEnd = pFile;
+	//for (i = 0, i2 = 0; i < lfile; i++, i2 += 2)
+	//	pFile[i] = pFile2[i2];
+	pFile[lfile] = 0;
+	lfile = strlen(pFile);
+	pBeg = strstr(pEnd, "/L3_SHP_");
+	while (pBeg)
+	{
+		LPSTR pStart;
+		pStart = priorchr(pBeg, '"');
+		pEnd = strchr(pBeg, '"');
+		pStart++;
+		*pEnd++ = 0;
+		AppendFile(outfile, pStart);
+		pBeg = strstr(pEnd, "/L3_SHP_");
+	}
+	GSSiGlobUlFree(&hFile);
+	//GSSiGlobUlFree(&hFile2);
+	GSSiClose(fid);
+	return;
+}
+
 void ReopenFTP (LPFTPSTRUCT pFTPStruct)
 {
 	FTPClose (pFTPStruct->hFTP);
@@ -3227,7 +3270,8 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			isLaptop(1);
+			GetMassShapeFiles();
+			//isLaptop(1);
 			//TestConvertToJP2 (1);
 			//char	ToFile[MAX_PATH]="c:\\temp\\test.zip";
 			//char	FromFile[MAX_PATH]="ftp://ftp.lmic.state.mn.us/pub/data/remote_sensing/naip/2009/naip09_carver.zip";
