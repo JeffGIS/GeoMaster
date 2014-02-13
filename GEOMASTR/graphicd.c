@@ -2833,8 +2833,9 @@ Exit:
 		DisplayCurStreets (FALSE,0);
 		if (!DisplayAllVehicles (TRUE,FALSE)) 
 		{
-			if (Final < 2 && BufferedScreen)
-				ShowBufferedScreen (TRUE,TRUE,0,0);
+			//if (Final < 2 && BufferedScreen)
+			//	ShowBufferedScreen (TRUE,TRUE,-99,0);
+			SaveMapServerFile();
 		}
 	}
 /*	{
@@ -2920,6 +2921,9 @@ Exit:
 	}	
 	BlockSocketProcessing (FALSE);
 	GdiFlush ();
+	GSSiSetCursor (VPCursor (hWndMain));
+	PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
+
 	if (Final)
 		ResetShowOnlyVis ();
 {

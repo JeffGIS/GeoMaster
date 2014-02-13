@@ -1554,6 +1554,8 @@ GSSiExitProg (1350);
 				goto RtnTrue;
 			if (*Args && CurView) 
 			{
+				 HDC hDC = 0;
+
        			 HaltMapDisplay(FALSE);  
        			 if (!CurrentConfig)
        			 {  
@@ -1562,9 +1564,17 @@ GSSiExitProg (1350);
 	       		 }
 				 DisplayCycle++;
 				 TotCopySize = 0;
+				 if (!CurView->hDC)
+				 {
+					 hDC = GetDC(hWndMain);
+					 for (i = 0; i < *pNumViewports; i++)
+						 pViewports[i]->hDC = hDC;
+				 }
 		     	 SetMainRect (CurView->hWnd,CurView->hDC,0,0);
 			     SetupViewports (CurView->hWnd,CurView->hDC,0,MainRect,0); 
 	           	 RedisplayViewports(TRUE);
+				 if (hDC)
+					 ReleaseDC(hWndMain, hDC);
 			}			
 			else
 			{
@@ -3288,12 +3298,13 @@ GSSiExitProg (1350);
 			IgnoreSelectVP = TRUE;    
 			CurLoc = 0;
 		    fgetstring (Arg3,4090,Fid);
-		    while (*LastChr (Arg3) == ';')
-		    {
-		        ExpandText (Arg3);
-				CurLoc = GSSillseek (Fid,0,1);  
-		        fgetstring (Arg3,4090,Fid);
-		    }
+			if (!pVarName)
+				while (*LastChr(Arg3) == ';')
+				{
+					ExpandText (Arg3);
+					CurLoc = GSSillseek (Fid,0,1);  
+					fgetstring (Arg3,4090,Fid);
+				}
 			GSSillseek (Fid,CurLoc,0);
 		    if (!pVarName)
 				ProcessDelimTextHeader(Arg3,pFileName,Fid,&hDLT,0);

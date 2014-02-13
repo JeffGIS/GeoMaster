@@ -83,7 +83,7 @@ void OpenOrthos ()
 	return;
 }
 
-void CloseOrthos (void)
+void CloseOrthos (BOOL Clear)
 {   int	i;
     LPORTHO	CurOrtho;
     
@@ -104,7 +104,9 @@ void CloseOrthos (void)
 			}
 		} 
 	}
-	GSSiGlobUlFree (&hOrthos);
+	GlobalUnlock(hOrthos);
+	if (Clear)
+		GSSiGlobFree (&hOrthos);
 	CurOrtho = NULL;
 	return;
 }
@@ -951,6 +953,8 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ)
     }
 	else */
 	GetBitmapInfoFromHandle (&DibInfo,hDib);
+	SetDisplayMode(hDC, GF_TEXTMODE);
+
 	if (pDibInfo->biBitCount == 32)
 	{
 		    float fAlphaFactor;    // used to do premultiply 
@@ -988,8 +992,8 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ)
 					//else
 					//	fAlphaFactor = 1;
 					//fAlphaFactor = (float)pBits->rgbReserved / (float)0xff; 
-					if (pBits->rgbReserved > 0 && pBits->rgbReserved < 255)
-						ii=1;
+					if (pBits->rgbReserved == 0)// && pBits->rgbReserved < 255)
+						pBits->rgbReserved = 255;
 					fAlphaFactor = (float)pBits->rgbReserved / (float)0xff; 
 
 					pBits->rgbBlue *= fAlphaFactor; 

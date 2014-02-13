@@ -138,23 +138,26 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 		
 	if (!BufferedScreen)
 		return hDC;    
-	hDCMain = GetDC (hWndMain);
+	if (MapServer)
+		hDCMain = GetDC(hWndMain);
+	else
+		hDCMain = GetDC(hWndMain);
 	GetClientRect (hWnd,&Rect);  
 	if (!hDCScreenBuffer)
 	{
 		CurrentBufferRect.left=CurrentBufferRect.right=CurrentBufferRect.top=CurrentBufferRect.bottom=0;
-		hDCScreenBuffer = CreateCompatibleDC(hDC);    
+		hDCScreenBuffer = CreateCompatibleDC(hDCMain);    
 	}
 	if (!IsIconic (hWndMain) && !EqualRect (&Rect,&CurrentBufferRect))
 	{
 		CurrentBufferRect = Rect;
-		hBitmapScreenBuffer = CreateCompatibleBitmap (hDCMain,CurrentBufferRect.right-CurrentBufferRect.left+1,   
-															  CurrentBufferRect.bottom-CurrentBufferRect.top+1); 
+		hBitmapScreenBuffer = CreateCompatibleBitmap (hDCMain,RECTWIDTH(&CurrentBufferRect),   
+															  RECTHEIGHT(&CurrentBufferRect)); 
 		hbmpOld = SelectObject (hDCScreenBuffer,hBitmapScreenBuffer);
 		if (hbmpOrig)
 			GSSiDeleteObject (&hbmpOld);
 		else
-			hbmpOrig = hbmpOld;
+			hMapServerBM = hbmpOrig = hbmpOld;
 	}
 	if (hDCMain == hDC)  
 	{
@@ -166,7 +169,10 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
         SetIconicRect (MainRect,ConfigDisplayRect);
     	//ShowWindow (hWndMain,SW_HIDE);//SHOWMINIMIZED); 
     }
-    ReleaseDC (hWndMain,hDCMain); 
+	if (MapServer)
+		ReleaseDC(hWndMain, hDCMain);
+	else
+	    ReleaseDC (hWndMain,hDCMain); 
 	return hDCScreenBuffer;
 }
 

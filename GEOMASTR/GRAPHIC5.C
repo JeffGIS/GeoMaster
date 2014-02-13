@@ -4231,7 +4231,7 @@ GSSiExitProg (771);
 	if (!NumStates || PeopleNet)
 		NumStates = 73;
 	OldColor = SetTextColor (CurView->hDC,ConvertColor(CityTextColor,CurTheme->UseHalfTone));
-	if (NumStates > 5) 
+	if (NumStates > 5 && !GetGlobalBVal2("[%CREATECITIES]", FALSE))
 	{
 		Cities4FID = GSSiOpenFile ("[%CITYDATALOC]cities4.dat",&OFStruct,OF_READ); 
 		if (Cities4FID == HFILE_ERROR)
@@ -4255,8 +4255,13 @@ GSSiExitProg (771);
 	hBuf = GSSiGlobAlloc ( 364,GMEM_MOVEABLE,lbuf);
 	pBuf = (LPCITIESDATA4)GlobalLock (hBuf);
 
-	if (GetGlobalBVal2 ("[%CREATECITIES]",FALSE))    
-    	FidOut = GSSiOpenFile ("[%DL]cities6.dat",&OFStruct,OF_CREATE);
+	if (GetGlobalBVal2("[%CREATECITIES]", FALSE))
+	{
+		MinDisplayPop = 0;
+		NumStates = 0;
+		memset(HaveStates, 0x1, sizeof(HaveStates));
+		FidOut = GSSiOpenFile("[%DL]cities6.dat", &OFStruct, OF_CREATE);
+	}
 	while (istate)
 	{	
 		if (NumStates <= 5)
@@ -5915,7 +5920,7 @@ GSSiExitProg (724);
             	 
             case IDC_APPLY:
             case IDOK: 
-				 CloseOrthos ();
+				CloseOrthos(TRUE);
             	 *CARed = GetScrollPos (GetDlgItem(hWndDlg,IDC_RED_ADJUST),SB_CTL) -100;
             	 *CAGreen = GetScrollPos (GetDlgItem(hWndDlg,IDC_GREEN_ADJUST),SB_CTL) -100;
             	 *CABlue = GetScrollPos (GetDlgItem(hWndDlg,IDC_BLUE_ADJUST),SB_CTL) -100;

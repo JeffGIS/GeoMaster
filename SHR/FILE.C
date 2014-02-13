@@ -279,6 +279,8 @@ WORD FAR SaveDIB(HDIB hDib, LPSTR lpFileName)
    DWORD dwDIBSize;
    DWORD dwError;   // Error return from MyWrite
 
+   if (!*lpFileName)
+	   return ERR_OPEN;
    if (!hDib)
       return ERR_INVALIDHANDLE;
    fh = GSSiOpenFile(lpFileName, &of, OF_CREATE | OF_READWRITE);

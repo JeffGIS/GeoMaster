@@ -361,7 +361,7 @@ HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal)
       biBits = 4;
    else if (biBits <= 8)
       biBits = 8;
-   else /* if greater than 8-bit, force to 24-bit */
+   else if (biBits != 32)
       biBits = 24;
 
    /* initialize BITMAPINFOHEADER */

@@ -794,7 +794,7 @@ Exit:
     *pNumViewports = 0;  
     *pCommandViewport = 0;
     ClearTAGs();
-	CloseOrthos ();
+	CloseOrthos(TRUE);
     FidConfig = HFILE_ERROR;
 //	if (hWndPrompt)
 //	    DestroyWindow(hWndPrompt);

@@ -2747,7 +2747,10 @@ SetVis:
 				if (Err)
 					goto RtnFalse; 
 				Offset = atobasedist (Arg[3],&Err);
-				Immediate = atob(Arg[4]);
+				if (!stricmp(Arg[4], "-1"))
+					Immediate = -1;
+				else
+					Immediate = atob(Arg[4]);
 				SetCurView ( SetVPFromName (Arg[5],&Err)); 
 				ZoomToPointAndScale (Point,Offset,Immediate);
 			}

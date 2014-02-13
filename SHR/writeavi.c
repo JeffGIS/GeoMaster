@@ -635,7 +635,8 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 		}
 		else
 		{
-			*NewDIB = (HANDLE)HIWORD((DWORD)(lpbi));	
+			//*NewDIB = (HANDLE)HIWORD((DWORD)(lpbi));
+			*NewDIB = (HANDLE)(DWORD)(lpbi);
 			*ShouldDeleteBM = FALSE;
 		}
 /*			if (TraceOn)		

@@ -1738,7 +1738,7 @@ extern	BOOL	UpdateServer;
 extern	BOOL	MapServer;
 extern	char	MapServerOutputBitmapFile[MAX_PATH];
 extern	HWND	MapServerCalledFromWnd;
-extern	UINT	MapServerCallNumber;
+extern  int		MapserverRequestID;
 extern	BOOL	PickSubVP;
 extern	int		SizeSYMBOL_V1;
 extern	int		SizeBOUNDSDISPLAY16;

@@ -1227,13 +1227,24 @@ void ZoomToPointAndScale (DPOINT MidPointW,double Scale,BOOL Imediate)
 	
 	if (CurView->ZoomLocked)
 		return;	
-	ClearFullWindowBitmap (0);
     if (Scale < GetGlobalDVal2 ("[%MINSCALE]",0))
     	Scale = GetGlobalDVal2 ("[%MINSCALE]",0);
 	if (!ScaleIsSet(FALSE))
 		CurView->Scale = Scale;
 	CurView->MidPointW = MidPointW;
+	CurView->HaveBounds = TRUE;
+	CurView->WindowIsZoomed = TRUE;
 
+	if (Imediate < 0)
+	{
+		CurView->LastWidth = 0;
+		DisplayCycle++;
+		SelectVisList(FALSE);
+		SetBounds(CurView->hWnd, CurView->hDC);
+		DisplayCycle--;
+		return;
+	}
+	ClearFullWindowBitmap(0);
 	CloseThemeFiles();
 
 	if (CurView->DisplayCycle < DisplayCycle)

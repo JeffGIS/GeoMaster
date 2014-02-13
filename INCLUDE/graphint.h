@@ -418,7 +418,7 @@ BOOL ShowFullBM(BOOL FullMenu,int rotate,int left);
 HWND InitTempImageInstance(HWND hWndPar, LPSTR imageFile,int centerOpt);
 void OpenOrthos (void);
 //BOOL GetCurOrtho(int id);
-void CloseOrthos (void);
+void CloseOrthos (BOOL Clear);
 BOOL OrthoInBuffer(LPSTR Name, long frame);
 BOOL RectInWBounds (LPMNMXCORD MinMax,short From);
 BOOL PtInWBounds (LPDPOINT Point);
@@ -2349,9 +2349,15 @@ BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
 BOOL RunForAll (int nArgs,LPSTR *Args,LPSTR OutLoc);
 HANDLE GetDistinctValues (HWND hWnd,LPSTR value,int ln,HANDLE hDB,int nStatus);
+BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPSTR title,int textFade);
 
-
-
+HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect);
+void StopBackgroundMapServer(HWND hWnd);
+BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR txt,int id);
+BOOL GetMapserverFileName(HWND hBackGroundServer, LPSTR name);
+HWND FindWindowByProcessID(DWORD ProcessID, LPSTR Text);
+BOOL CopyMapserverFileToFile(HWND hBackGroundServer,LPSTR File);
+BOOL SaveMapServerFile(void);
 
 
 

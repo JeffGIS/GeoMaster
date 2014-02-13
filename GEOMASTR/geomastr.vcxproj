@@ -65,6 +65,8 @@
     <TargetName>GeoMaster34f</TargetName>
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">
     <OutDir>Release\</OutDir>
@@ -150,6 +152,10 @@
     <Bscmake>
       <OutputFile>.\Release/geomastr.bsc</OutputFile>
     </Bscmake>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">
     <Midl>
@@ -457,6 +463,7 @@
     <ClCompile Include="..\gctpc\molwinv.c" />
     <ClCompile Include="..\GM32lib\mrsid.c" />
     <ClCompile Include="..\SHR\MS_MAPL.C" />
+    <ClCompile Include="MapServer.c" />
     <ClCompile Include="MSPFence.c" />
     <ClCompile Include="..\Proj-4\src\nad_cvt.c" />
     <ClCompile Include="..\Proj-4\src\nad_init.c" />

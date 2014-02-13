@@ -305,6 +305,8 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 
+	MergeImageIntoViewport(0,0,0);
+
 	ProcessText ("$LINKLINES(CLEAR)");
 
 	if (g_hook)
@@ -510,7 +512,7 @@ void QuitGraphics()
 //    FreeLibraries();   
     if (ncalls1 != ncalls2)
     	ncalls1=0;
-	CloseOrthos ();
+	CloseOrthos(TRUE);
 	ClearSavedScreens((HWND)-1,0,0);
 	STNDSN_CLEAR(); 
 	CloseStreetNameTable ();
@@ -760,6 +762,100 @@ GSSiExitProg (10);
 #endif
 } 
 
+BOOL GetNextOrthoTileFromIndex(void)
+{
+	BOOL rtn = FALSE;
+	
+	if (CurView->FileType[CurView->CurFile] == 5 && CurView->hlpIndex[CurView->CurFile])
+	{
+		LPFILEINDEX lpIndex = (LPFILEINDEX)GlobalLock(CurView->hlpIndex[CurView->CurFile]);
+Next:
+		if (GetNextIndexEntry(lpIndex))
+		{
+			MNMXCORD	TestBounds = lpIndex->CurrentEntry->Bounds;
+			char		CurEntryName[MAX_PATH];
+
+			rtn = TRUE;
+			strcpy(CurEntryName, lpIndex->CurrentEntry->Name);
+			if (!AdjustFileBounds(CurView->ID, CurView->CurFile, &TestBounds, CurEntryName))
+				rtn = FALSE;
+			else if (!RectInWBounds(&TestBounds, 0))
+				goto Next;
+			else
+			{
+				LPSTR	lpAT;
+
+				if ((lpAT = _fstrrchr(lpIndex->CurrentEntry->Name, '@')))
+				{
+					lpAT++;
+					CurOrthoFrame = atol(lpAT);
+					if (CurOrthoFrame < 0)
+						goto Next;
+				}
+				else
+					CurOrthoFrame = lpIndex->FileInIndex - 1;
+				CloseOrthos(FALSE);
+				if (hOrthos)
+				{
+					LPORTHO CurOrtho = (LPORTHO)GlobalLock(hOrthos) + OrthoID;
+					float   RSQMIN;
+					double  BASEX[4], BASEY[4], BMX[4], BMY[4];
+
+					lpIndex->CurrentEntry->Bounds = TestBounds;
+					_fstrcpy(CurOrtho->Name, PltName);
+					if (*CurEntryName == '.')
+						_fstrcpy(CurOrtho->OrigName, CurrentOrthoOrigName);
+					else
+						_fstrcpy(CurOrtho->OrigName, CurEntryName);
+					CurOrtho->Frame = CurOrthoFrame;
+					CurOrtho->Bounds = lpIndex->CurrentEntry->Bounds;
+					CurOrtho->Width = lpIndex->CurrentEntry->BMWidth;
+					CurOrtho->Height = lpIndex->CurrentEntry->BMHeight;
+					CurOrtho->BitCount = lpIndex->CurrentEntry->BMBitCount;
+					ComputeIndexOrthoRes(lpIndex);
+					CurOrtho->Res = lpIndex->OrthoRes;
+
+					//Offset = CurOrthoFrame;
+					CurOrtho->LastUsed = OrthoUse++;
+					CloseTRANS2(&hTranBMToBase);
+					CloseTRANS2(&hTranBaseToBM);
+					if (CurOrtho->BitCount != 8)
+						ii = 1;
+					BMX[0] = -1;
+					BMX[1] = -1;
+					BMX[2] = lpIndex->CurrentEntry->BMWidth;
+					BMX[3] = BMX[2];
+					BMY[0] = -1;
+					BMY[1] = lpIndex->CurrentEntry->BMHeight;
+					BMY[2] = BMY[1];
+					BMY[3] = -1;
+					BASEX[0] = CurOrtho->Bounds.xmn - CurOrtho->Res;
+					BASEX[1] = BASEX[0];
+					BASEX[2] = CurOrtho->Bounds.xmx + CurOrtho->Res;
+					BASEX[3] = BASEX[2];
+					BASEY[0] = CurOrtho->Bounds.ymn - CurOrtho->Res;
+					BASEY[1] = CurOrtho->Bounds.ymx + CurOrtho->Res;
+					BASEY[2] = BASEY[1];
+					BASEY[3] = BASEY[0];
+					CurView->FileMNMX = CurOrtho->Bounds;
+					hTranBMToBase = STRAN2(1614, BMX, BMY, BASEX, BASEY, 4, &RSQMIN, 1, 0);
+					hTranBaseToBM = STRAN2(1615, BASEX, BASEY, BMX, BMY, 4, &RSQMIN, 1, 0);
+					GlobalUnlock(hOrthos);
+					GlobalUnlock(CurView->hlpIndex[CurView->CurFile]);
+				}
+				else
+					rtn = FALSE;
+			}
+		}
+		else if ((lpIndex = GetNextIndexHeader(&CurView->hlpIndex[CurView->CurFile], TRUE)))
+			goto Next;
+		else 
+			rtn = FALSE;
+	}
+
+	return rtn;
+}
+
 BOOL DisplaySeg (HDC *hDC,BOOL Immediate)
 #if ENABLETRACE
 {GSSiEnterProg (12);
@@ -913,7 +1009,13 @@ GSSiExitProg (12);
         		else if (_fstrstr(PltName,".BMP") || _fstrstr(PltName,".JPG") || _fstrstr(PltName,".PNG") || _fstrstr(PltName,".GIF")|| _fstrstr(PltName,".TIF")|| _fstrstr(PltName,".PCX") || !_fstrnicmp (PltName,"http:",5))
 					goto DisplayImage;
 				else
-            		DisplayOrthoPhoto ();  
+				{
+					do
+					{
+						DisplayOrthoPhoto();
+					} while (GetNextOrthoTileFromIndex());
+					//ShowBufferedScreen(TRUE, TRUE, -99, 0);
+				}
 			}
         }
         else
@@ -1888,10 +1990,12 @@ BOOL RedisplayViewport (BOOL Imediate, BOOL OnePass)
     
     if (MemMap)
     	hDC = hdcMemMap; 
-//    else if (!BufferedScreen)
-    	hDC = CurView->hDC;
-//    else
-//    	hDC = hDCMain;	
+	else if (!BufferedScreen)
+		hDC = CurView->hDC;
+	else if (MapServer)
+		hDC = GetDC(NULL);
+	else
+    	hDC = hDCMain;	
 	BlockSocketProcessing (1);
 	if (CurView->hWnd)
 	{
@@ -6121,8 +6225,8 @@ NotIn:
         if (CurView->OrthoRes >=0 && CurView->WindowZoomedToOrtho)
     		CurView->OrthoRes = lpIndex->OrthoRes;
     }
-    _fstrcpy (PltName,CurEntryName); 
-/*    if (*PltName == '\\')
+/*    _fstrcpy (PltName,CurEntryName);
+    if (*PltName == '\\')
     	lpSlash = 0;
     else
     	lpSlash = _fstrrchr(PltName,'\\'); 
@@ -7006,6 +7110,8 @@ GSSiExitProg (86);
     	lastcycle = DisplayCycle;
     } */
 //    CloseSymDict(); 
+	NotifyFunction((LPVIEWPORT)-1, GF_HALTDISPLAY);
+
     DisplayHollowLines (TRUE);  
     DisplayLayeredSymbols (0,TRUE);
 	LoadIndexParm (0);

@@ -4796,8 +4796,8 @@ void CloseMap (BOOL Update)
 		    	idTimer=0;
 		    	if (CurrentConfig)
 		    	{
-		        	GSSiSetCursor (VPCursor (hWndMain));
-		        	PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
+		        	//GSSiSetCursor (VPCursor (hWndMain));
+		        	//PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
 		        }
 	        }
 	        else
@@ -7031,7 +7031,8 @@ void EscapeFunction (BOOL DoHalt)
 	LPVIEWPORT SaveVP = CurView;
 	int	i;
 
-	SetConfig (1);
+	MergeImageIntoViewport(0, 0,0);
+	SetConfig(1);
 	NumTAGDef = -1;  
 	BlockVehicleDisplay = 0;
 	BlockSocketProcessing (FALSE);
@@ -7048,7 +7049,7 @@ void EscapeFunction (BOOL DoHalt)
 		HaltMapDisplay (TRUE);
 	}
     CloseSymDict();  
-	CloseOrthos ();
+	CloseOrthos(TRUE);
 	GetSymAttrFile (0,0,0,0,0,0);
 	AddBMPToCache (0,0);
 	AddBMPToCache32 (0,0);

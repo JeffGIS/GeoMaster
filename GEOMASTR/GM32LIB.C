@@ -1122,7 +1122,7 @@ HDIB32 BitmapToDIB32 (HBITMAP hBitmap)
 	MYPROC	Proc;
 	DWORD	rtn;
 	 
-   	rtn = GM32BitmapToDIB (hBitmap); 
+   	rtn = GM32BitmapToDIB ((DWORD)hBitmap); 
    	return (HDIB32)rtn;
 } 
 

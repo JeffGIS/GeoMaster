@@ -321,6 +321,55 @@ Exit:
     return nRc;
 }
 
+
+BOOL FAR PASCAL TemplateMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+
+	int	BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+
+		cwCenter(hWndDlg, 0);
+		SetDlgItemText(hWndDlg, IDC_WAITMESS, GMmess);
+		SetTimer(hWndDlg, 1, 10000, (FARPROC)0);
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_TIMER:
+		PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+		break;
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			KillTimer(hWndDlg, 1);
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDOK:
+			KillTimer(hWndDlg, 1);
+			EndDialog(hWndDlg, TRUE);
+			break;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+		return TRUE;
+}
+void CallTemplateMsgProc(void)
+{
+	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, TemplateMESSAGEMsgProc);
+}
+
 BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1250);
@@ -2423,7 +2472,8 @@ BOOL FAR PASCAL COORDDISPLAYMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPA
 #if ENABLETRACE
 {GSSiEnterProg (1240);
 #endif
-{	
+{
+	static BOOL usedProjectionDir;
  char	str[128];
  UINT	idc_units[5]={IDC_UNITS1,IDC_UNITS2,IDC_UNITS3,IDC_UNITS4,IDC_UNITS5};
  UINT	idc_precis[5]={IDC_PRECISION1,IDC_PRECISION2,IDC_PRECISION3,IDC_PRECISION4,IDC_PRECISION5};
@@ -2457,8 +2507,14 @@ GSSiExitProg (1240);
        	 SetDlgItemText (hWndDlg,IDC_ID3,CD->LineID[2]);
        	 SetDlgItemText (hWndDlg,IDC_ID4,CD->LineID[3]);
        	 SetDlgItemText (hWndDlg,IDC_ELEVATIONID,CD->ElevationID);
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
+         _fstrcpy (str,"[%DL]projections\\*.CVT");
+		 ExpandText(str);
+		 usedProjectionDir = DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 if (!usedProjectionDir)
+		 {
+			 _fstrcpy(str, "*.CVT");
+			 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 }
          SetDlgItemText (hWndDlg,IDC_PROJECTION,CD->AltCVTFile);
          SetDlgItemText (hWndDlg,IDC_PRINTTEXT,CD->PrintText);
          SetDlgItemText (hWndDlg,IDC_ELEVATIONSURFACE,CD->ElevSurface);
@@ -2549,7 +2605,12 @@ GSSiExitProg (1240);
 		       	 if (CD->DisplayLine[2])
 		       	 {  
 		       	 	GetDlgItemText (hWndDlg,IDC_PROJECTION,CD->AltCVTFile,sizeof(CD->AltCVTFile));
-	                SetGlobalValue("%ALT_PROJECTION",CD->AltCVTFile);
+
+					if (usedProjectionDir)
+						sprintf(str,"[%%DL]projections\\%s", CD->AltCVTFile);
+					else
+						strcpy(str, CD->AltCVTFile);
+	                SetGlobalValue("%ALT_PROJECTION",str);
 				    ConvertCoordClose ();
 					ConvertCoordInit();  
 		       	 }
@@ -13564,8 +13625,11 @@ HaveEmpty:
 	         		  	ShowWindow (GetDlgItem(hWndDlg,IDC_SETSHAPEPARAM),TRUE); 
 	         		  else
 	         		  	ShowWindow (GetDlgItem(hWndDlg,IDC_SETSHAPEPARAM),FALSE); 
-	         		  if (strstr (File,"FILELIST.TXT"))	 
-						SendDlgItemMessage(hWndDlg,IDC_PATH_TYPE,CB_SETCURSEL,2,0);
+					  if (strstr(File, "FILELIST.TXT"))
+					  {
+						  if (SendDlgItemMessage(hWndDlg, IDC_PATH_TYPE, CB_GETCURSEL, 0, 0) != 3)
+							  SendDlgItemMessage(hWndDlg, IDC_PATH_TYPE, CB_SETCURSEL, 2, 0);
+					  }
 	         	 }
 		    }
 		    	 break;      

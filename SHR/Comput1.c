@@ -734,10 +734,10 @@ Exit:
 //		HPALETTE	hPal = CreateDIBPalette (hBM);
 //		hBM = DIBToBitmap (hBM,hPal); 
 		HDIB hDib;
-		hDib=BitmapToDIB (hBMItem,(HPALETTE) 0);
+		hDib=BitmapToDIB (hBMItem,(HPALETTE) 0,0);
 		SaveDIB (hDib,"c:\\testitem.bmp");
 		GSSiGlobFree (&hDib);
-		hDib=BitmapToDIB (hBMArea,(HPALETTE) 0);
+		hDib=BitmapToDIB (hBMArea,(HPALETTE) 0,0);
 		SaveDIB (hDib,"c:\\testarea.bmp");
 		GSSiGlobFree (&hDib);
  //   	SaveBitmap (hBM,"c:\\test.bmp",0,0);

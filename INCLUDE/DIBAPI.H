@@ -62,7 +62,7 @@
 
 /* Function prototypes */
 
-HDIB      FAR  BitmapToDIB (HBITMAP hBitmap, HPALETTE hPal);
+HDIB      FAR  BitmapToDIB (HBITMAP hBitmap, HPALETTE hPal,LPINT plbitmap);
 HDIB FAR BitmapToDIB2(HBITMAP hBitmap, HPALETTE hPal,LPINT piScanLine,LPINT pnScanLine);
 HDIB      FAR  ChangeBitmapFormat (HBITMAP  hBitmap,
                                    WORD     wBitCount,

@@ -3264,6 +3264,14 @@
 #define IDC_MAP_STATUS_4                2233
 #define IDC_DISCLAIMER                  2234
 #define IDC_COST                        2235
+#define IDC_SPEED_1                     2236
+#define IDC_SPEED_2                     2237
+#define IDC_SPEED_3                     2238
+#define IDC_SPEED_4                     2239
+#define IDC_FADE_FULL                   2239
+#define IDC_FADE_PARTIAL                2240
+#define IDC_FADE_NONE                   2241
+#define IDC_SELECT_ALL                  2242
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3606,7 +3614,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1238
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2236
+#define _APS_NEXT_CONTROL_VALUE         2243
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

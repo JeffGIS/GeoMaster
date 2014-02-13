@@ -1458,7 +1458,8 @@ BOOL RestoreFullWindowBitmap (void)
 	{
 		HDC	hDC = GetDC (hWndMain);
     
- 		SaveDC (hDC);
+		MergeImageIntoViewport(0, 0,0);
+		SaveDC(hDC);
 		SelectClipRgn (hDC,0);
 		RestoreScreen (hDC,hFullWindowBitMap,FullWindowBitMapRect);	     
 		ReleaseDC (hWndMain,hDC);
@@ -1484,7 +1485,13 @@ BOOL SaveFullWindowBitmap (HWND hWnd)
 	HDC		hDC; 
 	LPVIEWPORT	SaveVP=CurView;
 	
-	if (InDisplayProcessing || !CurrentConfig || !CurView)// || HaveScreenBuffer (0)) 
+	if (hWnd == (HWND)-1)
+	{
+		if (hFullWindowBitMap)
+			return TRUE;
+		hWnd = 0;
+	}
+	if (MapServer || InDisplayProcessing || !CurrentConfig || !CurView)// || HaveScreenBuffer (0)) 
 // || IsIconic (hWnd))
 {
 #if ENABLETRACE
@@ -1499,7 +1506,7 @@ GSSiExitProg (1157);
 	if (!hWnd)
 	{
 		NormalRect (&FullWindowBitMapRect); 
-		if (!IsRectEmpty (&FullWindowBitMapRect))
+		if (CurView->hDC && !IsRectEmpty(&FullWindowBitMapRect))
 			hFullWindowBitMap = SaveScreen (CurView->hDC, FullWindowBitMapRect);
 		CurView = SaveVP;
 		return TRUE; 

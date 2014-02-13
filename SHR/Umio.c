@@ -2267,7 +2267,7 @@ BOOL ProcessFTSegment (SOCKET socket,long ID,LPBYTE pSeg,short SegLen)
     		
     		HaltMapDisplay (TRUE);
 		    CloseSymDict();  
-			CloseOrthos ();
+			CloseOrthos(TRUE);
 			AddBMPToCache (NULL,0);
 			AddBMPToCache32 (NULL,0);
     		CloseAllRequestedFiles(FALSE); 

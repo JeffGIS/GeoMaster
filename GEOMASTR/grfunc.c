@@ -1852,7 +1852,10 @@ BOOL ProcessGraphicsFunction3 (short Function,
 	    case GF_IMAGEZOOM:
 	    	 return (ImageZoom (hWnd,Message,wParam,lParam)); 
              break;
-   }
+		case GF_DISPLAY_DATED_ORTHOS:
+			return (DisplayDatedOrthos(hWnd, Message, wParam, lParam, Function));
+			break;
+  }
    return (FALSE);
 } 
 

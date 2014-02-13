@@ -1606,7 +1606,7 @@ BOOL	UpdateServer = FALSE;
 BOOL	MapServer = FALSE;
 char	MapServerOutputBitmapFile[MAX_PATH];
 HWND	MapServerCalledFromWnd=0;
-UINT	MapServerCallNumber;
+int		MapserverRequestID=0;
 BOOL	PickSubVP = TRUE;
 int		SizeSYMBOL_V1;
 int		SizeBOUNDSDISPLAY16;

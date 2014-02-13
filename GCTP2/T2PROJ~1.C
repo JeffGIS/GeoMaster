@@ -461,8 +461,11 @@ C-------------------------------        */
 	   else
 			sprintf (PNAME,"%s%s%s","[%DL]",NAME2,Suffix);
 //       SetWindowText(hWndMain,PNAME);
-       if(!ExistFile(PNAME))
-       { 
+	   if (!ExistFile(PNAME))
+		   sprintf(PNAME, "%s%s%s", "[%DL]projections\\", NAME2, Suffix);
+
+	   if (!ExistFile(PNAME))
+	   {
            sprintf (PNAME,"%s%s",NAME2,Suffix);
            lpFile1=GSSiOpenFile (PNAME,lpOBF,OF_READ);
            if(lpFile1 == HFILE_ERROR)

@@ -1293,6 +1293,9 @@
     <ClCompile Include="..\FileGDBAPI\FGDBStub.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MapServer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">

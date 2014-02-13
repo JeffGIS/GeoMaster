@@ -2839,7 +2839,43 @@ Exit:
 	return rtn;
 }
 
-BOOL ShowBufferedScreen (BOOL Display,BOOL ResetDC,int VPID,LPRECT pUpdateRect)
+BOOL SaveMapServerFile(void)
+{
+	HDC		hDC, hDCBuf;
+	RECT	Rect;
+	HBITMAP	hBitmap, hTempBM;
+	short	i, ii, iview;
+	HRGN	hRgnMain;
+	POINT	Point;
+
+	if (MapServer)
+	{
+		if (MapserverRequestID)
+		{
+			BITMAP bm;
+			HBITMAP hBM = SelectObject(CurView->hDC, hMapServerBM);
+			HDIB32 hDIB32;
+			int	   lbitmap;
+
+			GetObject(hBM, sizeof(BITMAP), &bm);
+			hDIB32 = BitmapToDIB32(hBM);
+			strcpy(MapServerOutputBitmapFile, MapserverFile);
+			//SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
+
+			SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
+			GMDestroyDIB32(hDIB32);
+
+			SelectObject(CurView->hDC, hBM);
+			if (MapServerCalledFromWnd)
+				PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(0, MAPSERVER_RETURNED_IMAGE), MapserverRequestID);
+			return TRUE;
+		}
+	}
+	return FALSE;
+
+}
+
+BOOL ShowBufferedScreen (BOOL Display,BOOL resetDC,int VPID,LPRECT pUpdateRect)
 {
 	if (BufferedScreen && !MemMap)
 	{
@@ -2850,9 +2886,11 @@ BOOL ShowBufferedScreen (BOOL Display,BOOL ResetDC,int VPID,LPRECT pUpdateRect)
 		HRGN	hRgnMain;
 		POINT	Point;
 
+		if (VPID < 0)
+			return FALSE;
         hDC  = GetDC (hWndMain);
 		SetDisplayMode (hDC, GF_SCREENMODE); 
-		if (VPID)
+		if (VPID > 0)
 			Rect = pViewports[VPID-1]->ScreenRect;
 		else
 			GetClientRect (hWndMain,&Rect);
@@ -2893,7 +2931,7 @@ BOOL ShowBufferedScreen (BOOL Display,BOOL ResetDC,int VPID,LPRECT pUpdateRect)
 		}
 		SelectClipRgn (hDC,0);
 		DeleteObject (hRgnMain);
-		if (ResetDC)
+		if (resetDC)
 			for (i=0;i<*pNumViewports;i++) 
 			{
 				pViewports[i]->hDC = hDC;  

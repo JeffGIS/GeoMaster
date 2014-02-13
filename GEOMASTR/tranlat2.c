@@ -1322,6 +1322,13 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 					double factor;
 
 					GetBitmapInfoFromHandle(&dibInfo, hDib);
+					if (dibInfo.biBitCount == 8)
+					{
+						HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib);
+						GetBitmapInfoFromHandle(&dibInfo, hDib24);
+						FreeImage_Unload(hDib);
+						hDib = hDib24;
+					}
 					hDibInfo = GSSiGlobAlloc(1000,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER));
 					pDibInfo = GlobalLock(hDibInfo);
 					*pDibInfo = dibInfo;

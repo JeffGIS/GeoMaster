@@ -588,7 +588,7 @@ BOOL DisplayModifier (HDC hDC,int viewport,int layer,int symnum,int modnum,int t
 
     if ((hBmp = LoadBitmap (hInst,BMName)))
     {
-		hDIB = BitmapToDIB (hBmp, 0);
+		hDIB = BitmapToDIB (hBmp, 0,0);
 		DeleteObject (hBmp);
 		DisplayBMInRect2 (hDC,hDIB, Rect,0,0,0,0);
 		DestroyDIB (hDIB); 

@@ -115,6 +115,7 @@ typedef TRN FAR *LPTRN;
 #define  GOOD_SOUND 1
 #define  BAD_SOUND  2  
 
+HWND WindowExists(HWND hWnd);
 HWND FindWindowByName (LPSTR WindowName);
 HBITMAP GetToolBitmap (LPSTR BMPath);
 BOOL WaitForProcessToEnd (DWORD pID,LPINT pMaxWait);
@@ -721,8 +722,9 @@ void AdjustBounds (LPMNMXCORD Bounds, double AdjustX, double AdjustY);
 void ExpandBounds (LPMNMXCORD Bounds, double Adjust);
 void ExpandMinMax (LPMINMAX Bounds, int Adjust);
 void ExpandMinMaxL (LPMNMXCORL Bounds, long Adjust);
-void TranBounds (HANDLE TranID,LPMNMXCORD pBounds);
-void AdjustRectToRect (LPRECT pRectToAdjust,LPRECT pRect);
+void TranBounds(HANDLE TranID, LPMNMXCORD pBounds);
+void ConvertBounds(LPMNMXCORD pBounds, int from, int to);
+void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect);
 void DebugShowLine (LPDPOINT p1,LPDPOINT p2);
 double MinAngleToTheRight (double AZ1,double AZ2);
 short GetValListFieldLen (LPFIELDINFO pField);
@@ -974,7 +976,8 @@ DWORD GM32DeleteLargeMemDC (HDC hDC16,DWORD hOldBitmap);
 DWORD GM32GetDIBPalette (HDIB32 hDIB,LPLONG pPalletSize,LPRGBQUAD pPalletIn);
 DWORD GM32SetDIBPalette(HDIB32 hDIB,DWORD PalletSize,LPRGBQUAD pPalletIn);
 DWORD GM32QuantizeDIB (HDIB32 hDIB,DWORD Flag);
-WORD GM32SaveBitmap (HANDLE hBitmap16,LPSTR OutFile,long Format,DWORD Flag);
+DWORD GM32BitmapToDIB(DWORD hBitmap16);
+WORD GM32SaveBitmap(HANDLE hBitmap16, LPSTR OutFile, long Format, DWORD Flag);
 WORD GM32SaveDIB (HDIB32 hDIB,LPSTR OutFile,long Format,DWORD Flag);
 HDIB32 GM32AllocateDIB (DWORD Width,DWORD Height,DWORD BitsPerPixel);
 DWORD GM32PasteDIB (HDIB32 ToDIB,HDIB32 FromDIB,DWORD Left,DWORD Top,DWORD Alpha);

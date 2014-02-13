@@ -11001,7 +11001,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          _fstrcpy (str,"*.CVT");
          DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
-		 CloseOrthos ();
+		 CloseOrthos(TRUE);
          SaveMaxOrtho = GetGlobalLVal ("[%ORTHO_BUFFERS]");
          nbufs = GetGlobalLVal ("[%CVTBUFFERS]");
          if (!nbufs)
@@ -11029,7 +11029,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  break;
                  
             case IDC_EXIT:     
-				 CloseOrthos ();
+				CloseOrthos(TRUE);
 				 SetViewport(*pCommandViewport);
                  ContinueProcessing = TRUE;
 		         FastOrthos = SaveFastOrthos;

@@ -686,7 +686,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
     if (!hDibIs32Bit (CurOrtho->hDib))
     	GlobalUnlock ((HANDLE)CurOrtho->hDib);      
 	GlobalUnlock (hOrthos);
-	CloseOrthos ();   
+	CloseOrthos (TRUE);   
     NumItems = BT_NUM_IN_INDEX(hHighlight);
     id = 101;  
     while (!BT_FIND (hHighlight,(LPSTR)&iref,BT_FIRST,BT_ANY,(LPSTR)&HighlightData)&&ContinueProcessing)
@@ -700,7 +700,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
         NeedToClip = FALSE;
         PickList[0]=HighlightData.PD;
 		SetPickGlobals (0);
-		CloseOrthos ();
+		CloseOrthos(TRUE);
 		CurView->NewBounds = PickList[0].Rect;
 		InflateBounds (&CurView->NewBounds,Offset+1);
 		  
@@ -869,10 +869,10 @@ Exit:
 		RemoveFromHighlightList (iref,0);
 		GSSiClose (FidBM);
         PctBox (GetDlgItem(hWndDlg,IDC_STATUS2),NumItems,Item++,0); 
-		CloseOrthos (); 
+		CloseOrthos(TRUE);
     } 
     GSSiGlobUlFree (&hDibInfoOut);
-	CloseOrthos ();  
+	CloseOrthos(TRUE);
 	Display16BitColor = SaveD16BC;
     return rtn;
 }

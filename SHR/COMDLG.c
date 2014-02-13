@@ -795,7 +795,7 @@ BOOL GetSaveFileCD (HWND hWnd,LPSTR Name, LPSTR lpInitDir)
    short	st;
    BOOL	Result; 
    char	FName[MAX_PATH];
-   char	nam[64],ext[32];
+   char	nam[256],ext[128];
    DWORD	ErCode; 
    BOOL	First=TRUE; 
          
@@ -1002,7 +1002,7 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpFSChunk->of.lpstrTitle = OFTitle; 
       *OFTitle = 0;
       if (OverWritePrompt)
-		  lpFSChunk->of.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | ExtraOpenFlags;
+		  lpFSChunk->of.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_EXPLORER | ExtraOpenFlags;
       else
       	lpFSChunk->of.Flags =  ExtraOpenFlags;  
       ExtraOpenFlags = 0;

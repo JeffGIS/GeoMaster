@@ -66,9 +66,9 @@ static LPSTR	lpFileDesc;
 static short	i2;
 static short	Pcode;
 static short	npicked;
-static FARPROC	lpfnPRINTINGMsgProc;
 static short	ButtonFuncOpt;
 static long	iii=0;
+static FARPROC	lpfnPRINTINGMsgProc;
 static BOOL	YearToDate=FALSE;
 static long	NumPaint=1;    
 static BOOL	SaveHavePaint=FALSE;   
@@ -80,6 +80,7 @@ static char	title3[]="Load GeoMaster Menu Configuration File";
 static char title4[]="Find GeoMaster Graphics Data";
 static RECT customRect;
 static BOOL setWindowToTopOfZ = FALSE;
+static int  mapServerWidth, mapServerHeight;
 
 BOOL	DoReset=FALSE;
 static		char		CfgNameIn[MAX_PATH]=""; 
@@ -657,8 +658,39 @@ GSSiExitProg (436);
  if (_fstrstr(CmdLine," /LOG ")) LogOn=TRUE;
  if (_fstrstr(CmdLine," /DBE ")) DebugExistFile=TRUE;
  if (_fstrstr(CmdLine," /NPF ")) PatternBrush=FALSE; 
- if (_fstrstr(CmdLine," /UPDATESERVER ")) UpdateServer=TRUE; 
- if (_fstrstr(CmdLine," /RESET "))
+ if (_fstrstr(CmdLine, " /UPDATESERVER ")) UpdateServer = TRUE; //MGV police new update server
+ if ((lpStart = _fstrstr(CmdLine, " /MAPSERVER ")))//background map server
+ {
+	 lpStart += 12;
+	 if ((lpNext = _fstrchr(lpStart, ' ')))
+	 {
+		 *lpNext = 0;
+		 MapServerCalledFromWnd = (HWND)atoi(lpStart);
+		 *lpNext++ = ' ';
+		 lpStart = lpNext;
+		 if (*lpStart == '\'')
+		 {
+			 lpStart++;
+			 lpNext = strchr(lpStart, '\'');
+			 *lpNext = 0;
+			 strcpy(MapserverFile, lpStart);
+			 *lpNext++ = '\'';
+		 }
+		 else
+		 {
+			 lpNext = _fstrchr(lpStart, ' ');
+			 *lpNext++ = 0;
+			 strcpy(MapserverFile, lpStart);
+			 *--lpNext = ' ';
+		 }
+		 MapServer = TRUE;
+		 BufferedScreen = TRUE;
+		 AllowCache = FALSE;
+		 NoAccel = TRUE;
+		 NoMenu = TRUE;
+	 }
+ }
+ if (_fstrstr(CmdLine, " /RESET "))
  	DoReset = TRUE;  
 // 	MessageBox (0,CmdLine,0,MB_OK);
  if ((lpStart = _fstrstr(CmdLine," /SERVER ")))
@@ -1040,12 +1072,37 @@ BOOL GetCmdFileEntry(LPSTR cmdItem)
 	return rtn;
 }
 
+void writeTestStruct(void)
+{
+	int l;
+	FILE *fid = fopen("c:\\temp\\teststruct.bin", "wt");
+	struct {
+		int i4val;
+		short i2val;
+		float f4val;
+		double f8val;
+		char	textval[32];
+	}test;
+	test.i4val = 12345678;
+	test.i2val = 456;
+	test.f4val = 1002.345;
+	test.f8val = 123456789.123;
+	strcpy(test.textval, "How is this working");
+
+	l = sizeof (test);
+	fwrite(&test, l, 1, fid);
+	fclose(fid);
+	return;
+
+}
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus;
-
+	 
+	//GetMassShapeFiles();
+	//writeTestStruct();
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	numMonitors = GetNumMonitors();
 	typeChassis = ChassisType();
@@ -1346,7 +1403,8 @@ ExpandDL ();
 
 }*/
 
-nTempFilesCleared = ClearGMTempFiles ();
+if (!MapServer)
+	nTempFilesCleared = ClearGMTempFiles ();
 //MessageBox (0,"Past ClearGMTempFiles","",MB_OK);
 ProcessUserParms ();
 {
@@ -1462,25 +1520,41 @@ GSSiExitProg (437);
 //			winh = RECTHEIGHT (&DeskRectC);
 }
  /* create application's Main window                                    */
- hWndMain = CreateWindow(
-                szAppName,               /* Window class name           */
-                szAppName,             /* Window's title              */
-                WS_CAPTION      |        /* Title and Min/Max           */
-                WS_SYSMENU      |        /* Add system menu box         */
-                WS_MINIMIZEBOX  |        /* Add minimize box            */
-                WS_MAXIMIZEBOX  |        /* Add maximize box            */
-                WS_THICKFRAME   |        /* thick sizeable frame        */
-                WS_MAXIMIZE     |        /* create maximized window     */
-            /*    WS_CLIPCHILDREN |*/         /* don't draw in child windows areas */
-                WS_OVERLAPPED,
-                winx, winy, winw, winh,
-                /*CW_USEDEFAULT, 0,  */      /* Use default X, Y            */
-                /*CW_USEDEFAULT, 0,*/        /* Use default X, Y            */
-                0,                    /* Parent window's handle      */
-                0,                    /* Default to Class Menu       */
-                hInst,                   /* Instance of window          */
-                0);                   /* Create struct for WM_CREATE */
+	 {
+		 char mapServerAppName[] = { "GeoMaster MapServer" };
+		 HWND hPar = 0;
+		 LPSTR pAppName = szAppName;
+		 DWORD style = WS_CAPTION |        /* Title and Min/Max           */
+			 WS_SYSMENU |        /* Add system menu box         */
+			 WS_MINIMIZEBOX |        /* Add minimize box            */
+			 WS_MAXIMIZEBOX |        /* Add maximize box            */
+			 WS_THICKFRAME |        /* thick sizeable frame        */
+			 WS_MAXIMIZE |        /* create maximized window     */
+			 /*    WS_CLIPCHILDREN |*/         /* don't draw in child windows areas */
+			 WS_OVERLAPPED;
 
+		 if (MapServer)
+		 {
+			 style = 0;
+			 mapServerWidth = winw;
+			 mapServerHeight = winh;
+			 winw = 100;
+			 winh = 100;
+			 pAppName = mapServerAppName;
+		 }
+
+		 hWndMain = CreateWindow(
+			 szAppName,               /* Window class name           */
+			 pAppName,             /* Window's title              */
+			 style,
+			 winx, winy, winw, winh,
+			 /*CW_USEDEFAULT, 0,  */      /* Use default X, Y            */
+			 /*CW_USEDEFAULT, 0,*/        /* Use default X, Y            */
+			 hPar,                    /* Parent window's handle      */
+			 0,                    /* Default to Class Menu       */
+			 hInst,                   /* Instance of window          */
+			 0);                   /* Create struct for WM_CREATE */
+	 }
  if (hWndLinkedTo)
 	 PostMessage (hWndLinkedTo,GF_CONNECT_PROCESS,(WPARAM)hWndMain,0);
  //TraceWnd = hWndMain;
@@ -1508,7 +1582,7 @@ GSSiExitProg (437);
     	if (FirstAct)
     	{
 	    	FirstAct = FALSE;
-			if (!ValidateLicense(hWndMain))
+			if (!MapServer && !ValidateLicense(hWndMain))
 			{
 				DestroyWindow(hWndMain); 
 {
@@ -1532,7 +1606,9 @@ GSSiExitProg (437);
    // } // end of lda addition
 if (setWindowToTopOfZ)
 	SetWindowPos (hWndMain,HWND_TOP,0,0,0,0,SWP_NOSIZE);
-if (BackgroundTask && !UpdateServer)
+if (MapServer)
+	ShowWindow(hWndMain, SW_HIDE);
+else if (BackgroundTask && !UpdateServer)
 	ShowWindow(hWndMain, SW_SHOWMINIMIZED);
 else if (ShowMax == 10)
 	ShowWindow(hWndMain, SW_SHOWMAXIMIZED);
@@ -1566,7 +1642,26 @@ else
  ii=GetLastError();  
 if (BackgroundTask)
 	PostMessage (hWndMain,GF_PROCESS_BACKGROUND_CMD,0,0);
- nMess=-1;
+else if (MapServer)
+{
+	if (HaveWMCreate)
+	{
+		if (OpenConfig(hWndMain, 0))
+		{
+			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_READY, (WPARAM)hWndMain, 0);
+			MoveWindow(hWndMain, 0, 0, mapServerWidth, mapServerHeight, TRUE);
+			//PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 99L);
+			SetTimer(hWndMain, SUICIDE_TIMER, 2000, 0);
+		}
+		else
+		{
+			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_FAILED, (WPARAM)hWndMain, 0);
+			PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);
+		}
+
+	}
+}
+nMess = -1;
  while(hWndMain && GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
    {    
 #if	_DEBUG
@@ -1575,9 +1670,13 @@ if (BackgroundTask)
 		 nMess = 0;
 	 pmsg[nMess] = msg;   // pmsg[nMess-1] pmsg[nMess-2] pmsg[nMess-3] pmsg[nMess-4] pmsg[nMess-5] 
 	 sizeof (msg);
-	    if (msg.message == WM_CLOSE)
-			ii=1;
-	    if (msg.message == WM_LBUTTONDBLCLK)
+	 if (msg.message == WM_PRINT)
+		 ii = 1;
+	 if (msg.message == WM_PRINTCLIENT)
+		 ii = 1;
+	 if (msg.message == WM_CLOSE)
+		 ii = 1;
+	 if (msg.message == WM_LBUTTONDBLCLK)
 			ii=1;
 	    if (msg.message == WM_SETFOCUS)
 			ii=1;
@@ -1924,6 +2023,35 @@ if (Message == WM_CHAR && wParam == '\b' && !(lParam & KF_UP) && CursorIsLocked)
 if (Message == WM_CHAR && wParam == 26) //CNTL/Z
 	goto Return0;
 
+if (Message == GF_MAPSERVER_REQUEST)
+{
+	HFILE Fid;
+	OFSTRUCT OFStruct;
+	//MessageBox(hWnd, "Got request", "", MB_OK);
+
+	MapserverRequestID = lParam;
+	MapServerCalledFromWnd = (HWND)wParam;
+	Fid = OpenFile(MapserverFile, &OFStruct, OF_READ);
+	if (Fid != HFILE_ERROR)
+	{
+		LPSTR cmd = (LPSTR)malloc(4096);
+		int ln = _llseek(Fid, 0, 2);
+
+		_llseek(Fid, 0, 0);
+		_lread(Fid, cmd,ln);
+		_lclose(Fid);
+		//MessageBox(hWnd, cmd, "", MB_OK);
+		ProcessText (cmd);
+		free(cmd);
+	}
+
+	{
+#if ENABLETRACE
+		GSSiExitProg(438);
+#endif
+		return TRUE;
+	}
+}
 if (Message == GF_PRCESSTCPCMD)
 {
 	if (lParam)
@@ -2074,10 +2202,12 @@ if (Message == WM_LBUTTONUP )
 
 if (Message == WM_LBUTTONDOWN )
 {
-    HaltMapDisplay(TRUE);
 	IgnoreLbutton = FALSE;
 	IgnoreSelectVP = FALSE; 
 	CurrentLBUTDOWNLoc=POINTStoPOINT(MAKEPOINTS(lParam));
+	if (ProcessGraphicsFunction(hWnd, Message, wParam, lParam))
+		goto Return0;
+	HaltMapDisplay(TRUE);
 }
 if (DebugWait)
 	goto ReturnDefault;
@@ -3483,6 +3613,13 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 break; 
 				 
             case IDM_REDISPLAY:  
+				if (lParam == 99)
+				{
+					CurView->HaveBounds = TRUE;
+					CurView->WindowIsZoomed = TRUE;
+					ProcessText("$REDISPLAY(T)");
+					break;
+				}
             	 RedisplayMenu = TRUE;
       DoRedisplay:   
       			 DisplayCycle++;
@@ -3911,7 +4048,7 @@ DisplayParcel:
                   FARPROC lpfnLOC_INTERSECTMsgProc;  
 
                   lpfnLOC_INTERSECTMsgProc = MakeProcInstance((FARPROC)LOC_INTERSECTMsgProc, hInst);
-                  nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT", hWnd, lpfnLOC_INTERSECTMsgProc);
+                  nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT1", hWnd, lpfnLOC_INTERSECTMsgProc);
                   FreeProcInstance(lpfnLOC_INTERSECTMsgProc);  
                   if (nRc)
                   	goto NetPointLoc;
@@ -4449,7 +4586,7 @@ DisplayParcel:
 		 InitGraphics (hWnd);
 /*		 if (_fstrstr (szAppName,"Highways"))
 		 	SetWindowText (hWnd,"Visual Surveyor");
-		 else*/ if (GetGlobalCVal ("[%WT]",str,0))
+		 else*/ if (!MapServer && GetGlobalCVal ("[%WT]",str,0))
 		 	SetWindowText (hWnd,str);
 		 ConvertCoordClose();
 		 ConvertCoordInit();
@@ -4551,9 +4688,27 @@ DisplayParcel:
 	case WM_WINDOWPOSCHANGING:
 		{
 			LPWINDOWPOS pWpos = (LPWINDOWPOS)lParam;
-			int w = pWpos->cx - pWpos->x;
-			int h = pWpos->cy - pWpos->y;
+			int w = pWpos->cx;
+			int h = pWpos->cy;
 
+			if (MapServer)
+			{
+				RECT wrect, crect;
+
+				if (w && h)
+				{
+					GetWindowRect(hWnd, &wrect);
+					GetClientRect(hWnd, &crect);
+					pWpos->cx += RECTWIDTH(&wrect) - RECTWIDTH(&crect);
+					pWpos->cy += RECTHEIGHT(&wrect) - RECTHEIGHT(&crect);
+					crect.left = crect.top = 0;
+					crect.right = w;
+					crect.bottom = h;
+					SetMainRect(CurView->hWnd, CurView->hDC, &crect, 0);
+					SetupViewports(CurView->hWnd, CurView->hDC, 0, MainRect, 0);
+				}
+				return 0;
+			}
 			if (w >0 || h > 0)
 				goto ReturnDefault;
 		}
@@ -4900,6 +5055,13 @@ DisplayParcel:
 		     	 PostMessage(hWndMain, WM_COMMAND, IDM_DISPLAY_VEHICLES, 0L);
           	 	 break;
 			
+			case SUICIDE_TIMER:
+				if (MapServerCalledFromWnd && !WindowExists(MapServerCalledFromWnd))
+				{
+					PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);//allows imediate processing to terminate 
+				}
+				break;
+
 			case GF_WHEELZOOM: //WheelZoom Timer
 				 WheelZoom (0,0,1);
 				 break;
@@ -5178,9 +5340,19 @@ GSSiExitProg (438);
     
     case WM_KILLFOCUS:
      	if (!WindowIsCovered (hWnd,1) && !MemMap)
- 			SaveFullWindowBitmap (0);
+ 			SaveFullWindowBitmap ((HWND)-1);
 		goto ReturnDefault;
-    	
+    
+	case WM_PRINT:
+		for (i = 0; i < *pNumViewports; i++)
+			pViewports[i]->hDC = (HDC)wParam;
+		ProcessText("$REDISPLAY(T)");
+
+		break;
+	case	WM_PRINTCLIENT:
+		ii = 1;
+		break;
+
     case WM_PAINT:    /* code for the window's client area              */
          /* Obtain a handle to the device context                       */
          /* BeginPaint will sends WM_ERASEBKGND if appropriate          */ 

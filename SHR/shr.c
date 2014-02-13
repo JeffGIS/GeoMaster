@@ -4830,6 +4830,40 @@ GSSiExitProg (263);
 #endif
 }
 
+void ConvertBounds(LPMNMXCORD pBounds, int from, int to)
+#if ENABLETRACE
+{
+	GSSiEnterProg(263);
+#endif
+	{   
+		DPOINT	P[4];
+		short	i;
+
+		P[0].x = pBounds->xmn;
+		P[0].y = pBounds->ymn;
+		P[1].x = pBounds->xmn;
+		P[1].y = pBounds->ymx;
+		P[2].x = pBounds->xmx;
+		P[2].y = pBounds->ymx;
+		P[3].x = pBounds->xmx;
+		P[3].y = pBounds->ymn;
+		DBoundsInit(pBounds);
+		for (i = 0; i<4; i++)
+		{
+			if (!ConvertCoord(&P[i], from, to))
+				AddDPointToMinMax(&P[i], pBounds);
+		}
+		{
+#if ENABLETRACE
+			GSSiExitProg(263);
+#endif
+			return;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+
 void TranBoundsToRect (HANDLE TranID,LPMNMXCORD pBounds,LPRECT pRect)
 #if ENABLETRACE
 {GSSiEnterProg (263);
@@ -9699,7 +9733,7 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	pSaveScreen->hBM = SaveScreen (hDC,Rect);
 	if (dbug)
 	{
-		HDIB hDib=BitmapToDIB (pSaveScreen->hBM, 0);
+		HDIB hDib=BitmapToDIB (pSaveScreen->hBM, 0,0);
 		SaveDIB (hDib,"c:\\temp.bmp");
 	}
 	if (!pSaveScreen->hBM)
@@ -9895,7 +9929,7 @@ GSSiExitProg (334);
 }
 	makedirectories (File,FALSE,FALSE);
 	pSaveScreen = (LPSAVESCREEN)GlobalLock (hSavedScreen); 
-	hDIB = BitmapToDIB (pSaveScreen->hBM, 0);
+	hDIB = BitmapToDIB (pSaveScreen->hBM, 0,0);
 	SaveDIB (hDIB,File);
 	DestroyDIB (hDIB); 
 	Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);  
@@ -11908,7 +11942,7 @@ void ShowCheck (HDC hDC,LPRECT pRect,BOOL Checked,LPRECT pOutRect)
 
 	if ((hBmp = LoadBitmap (hInst,BMName)))
     {
-		HDIB	hDIB = BitmapToDIB (hBmp, 0);
+		HDIB	hDIB = BitmapToDIB (hBmp, 0,0);
 
 		DeleteObject (hBmp);
 		//SetDisplayMode (hDC, GF_SCREENMODE); 

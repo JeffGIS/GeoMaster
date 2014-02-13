@@ -2170,14 +2170,17 @@ GSSiExitProg (532);
 			   
 		case 16:
 			//ExpandText (Value);
-			if (CurView)
+			if (!MapServer)
 			{
-				if (CurView->hWnd)
-					SetWindowText (CurView->hWnd,Value); 
-				break;
-			}                      
-			if (hWndMain)
-				SetWindowText (hWndMain,Value); 
+				if (CurView)
+				{
+					if (CurView->hWnd)
+						SetWindowText(CurView->hWnd, Value);
+					break;
+				}
+				if (hWndMain)
+					SetWindowText(hWndMain, Value);
+			}
 			break;
 			   
 		case 19:
@@ -2882,14 +2885,17 @@ GSSiExitProg (532);
         case 218: PickPoints = atob (Value);
         	break;
         case 220:
-        	AllowCache = atob (Value); 
-        	if (!AllowCache) 
-        	{
-       			AddBMPToCache32 (0,0);
-            	CacheAlreadyChecked (0,0,0);
-            }
-			if (AllowJournal)
-				AllowCache = FALSE;
+			if (!MapServer)
+			{
+				AllowCache = atob(Value);
+				if (!AllowCache)
+				{
+					AddBMPToCache32(0, 0);
+					CacheAlreadyChecked(0, 0, 0);
+				}
+				if (AllowJournal)
+					AllowCache = FALSE;
+			}
         	break;    
         case 221: 
         	_fstrcpy (MaskAreaFile,Value); 

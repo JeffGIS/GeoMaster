@@ -18,16 +18,12 @@ static char	CurrentDialogFile[256]="";
 #define MAXSCREENS	9
 static HBITMAP	hScreenBM[MAXSCREENS]={0};
 static HWND	hWndFound;
+static HWND wantWnd;
 static LPSTR	pFindWindowText=0;
 
-BOOL CALLBACK FWBNEnumWndProc(HWND hCtrl,LONG lParam)
+BOOL CALLBACK WEEnumWndProc(HWND hCtrl, LONG lParam)
 {
-	char        str[130];
-	long	lUserData; 
-	HWND	hPar;
-	    
-	GetWindowText (hCtrl,str,128); 
-	if (!strnicmp (str,(LPSTR)lParam,sizeof((LPSTR)lParam)))
+	if (hCtrl == wantWnd)
 	{
 		hWndFound = hCtrl;
 		return FALSE;
@@ -35,19 +31,42 @@ BOOL CALLBACK FWBNEnumWndProc(HWND hCtrl,LONG lParam)
 	return TRUE;
 }
 
-HWND FindWindowByName (LPSTR WindowName)
-{   
+HWND WindowExists(HWND hWnd)
+{
+	wantWnd = hWnd;
+	hWndFound = 0;
+	EnumWindows(WEEnumWndProc, 0);
+	return hWndFound;
+}
+
+BOOL CALLBACK FWBNEnumWndProc(HWND hCtrl, LONG lParam)
+{
+	char        str[130];
+	long	lUserData;
+	HWND	hPar;
+
+	GetWindowText(hCtrl, str, 128);
+	if (!stricmp(str, (LPSTR)lParam))
+	{
+		hWndFound = hCtrl;
+		return FALSE;
+	}
+	return TRUE;
+}
+
+HWND FindWindowByName(LPSTR WindowName)
+{
 	char	str[256], mess[128];
 	DWORD	WVer;
 	int		WinVer, DosVer;
 	UINT	ierr;
 	BOOL	rtn = TRUE;
-    FARPROC lpfnEnumWndProc;
-    
-    hWndFound = 0;
-	EnumWindows (FWBNEnumWndProc,(LPARAM)WindowName);   
+	FARPROC lpfnEnumWndProc;
+
+	hWndFound = 0;
+	EnumWindows(FWBNEnumWndProc, (LPARAM)WindowName);
 	return hWndFound;
-} 
+}
 
 BOOL CALLBACK FWBPEnumWndProc(HWND hCtrl,LONG lParam)
 {
@@ -62,7 +81,7 @@ BOOL CALLBACK FWBPEnumWndProc(HWND hCtrl,LONG lParam)
 		if (pFindWindowText && *pFindWindowText)
 		{
 			GetWindowText (hCtrl,txt,256);
-			if (strnicmp (txt,pFindWindowText,sizeof(pFindWindowText)))
+			if (stricmp (txt,pFindWindowText))
 				return TRUE;
 		}
 		hWndFound = hCtrl;
@@ -3805,16 +3824,31 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp (Arg[2],"COMMAND"))
 				SendMessage(hWnd, WM_COMMAND, atol(Arg[3]), 0L);
-			else if (!stricmp (Arg[2],"POSITION"))
+			else if (!stricmp(Arg[2], "POSITION"))
 			{
-				int x = atoi (Arg[3]);
-				int y = atoi (Arg[4]);
-				int w = atoi (Arg[5]);
-				int h = atoi (Arg[6]);
+				int x = atoi(Arg[3]);
+				int y = atoi(Arg[4]);
+				int w = atoi(Arg[5]);
+				int h = atoi(Arg[6]);
 				if (w && h)
-					SetWindowPos (hWnd,HWND_TOP,x,y,w,h,0);
+					SetWindowPos(hWnd, HWND_TOP, x, y, w, h, 0);
 			}
-     		goto RtnTrue; 
+			else if (!stricmp(Arg[2], "MOVE"))
+			{
+				Rect = atorect(Arg[3], &Err);
+				if (!Err)
+					MoveWindow(hWnd, Rect.left, Rect.top, RECTWIDTH(&Rect), RECTHEIGHT(&Rect), TRUE);
+			}
+			else if (!stricmp(Arg[2], "HIDE"))
+				ShowWindow(hWnd, SW_HIDE);
+			else if (!stricmp(Arg[2], "SHOW"))
+				ShowWindow(hWnd, SW_SHOW);
+			else if (!stricmp(Arg[2], "MINIMIZE"))
+				ShowWindow(hWnd, SW_FORCEMINIMIZE);
+			else if (!stricmp(Arg[2], "RESTORE"))
+				ShowWindow(hWnd, SW_RESTORE);
+
+			goto RtnTrue;
 		} 
 
 		case 639: //$SCREEN(SAVE,n) or (RESTORE,n)

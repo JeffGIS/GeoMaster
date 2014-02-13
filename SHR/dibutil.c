@@ -729,7 +729,7 @@ HBITMAP FAR DIB32ToBitmap(HDIB32 hDIB32, HPALETTE hPal)
  ************************************************************************/
 
 
-HDIB FAR BitmapToDIB(HBITMAP hBitmap, HPALETTE hPal)
+HDIB FAR BitmapToDIB(HBITMAP hBitmap, HPALETTE hPal,LPINT plbitmap)
 {
    BITMAP bm;                   // bitmap structure
    BITMAPINFOHEADER bi;         // bitmap header
@@ -824,8 +824,12 @@ HDIB FAR BitmapToDIB(HBITMAP hBitmap, HPALETTE hPal)
 
    /* realloc the buffer big enough to hold all the bits */
    dwLen = bi.biSize + PaletteSize((LPSTR)&bi) + bi.biSizeImage;
-   if (h = GSSiGlobalReAlloc (0,hDIB, dwLen, GMEM_MOVEABLE))
-      hDIB = h;
+   if (h = GSSiGlobalReAlloc(0, hDIB, dwLen, GMEM_MOVEABLE))
+   {
+	   hDIB = h;
+	   if (plbitmap)
+			*plbitmap = dwLen;
+   }
    else
    {
       /* clean up and return NULL */

@@ -179,7 +179,7 @@ HDIB FAR CopyScreenToDIB(LPRECT lpRect)
    hPalette = GetSystemPalette();
 
    /* convert the bitmap to a DIB */
-   hDIB = BitmapToDIB(hBitmap, hPalette);
+   hDIB = BitmapToDIB(hBitmap, hPalette,0);
 
    /* clean up */  
    if (hPalette)

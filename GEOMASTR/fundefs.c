@@ -155,7 +155,7 @@ int	GetFunctionID5 (LPSTR str)
 			if (!_fstrnicmp (str,"CACHE",5)) return 535; 
 			if (!_fstrnicmp (str,"ABEND",5)) return 536; 
 			if (!_fstrnicmp (str,"UNLIT",5)) return 537; 
-			if (!_fstrnicmp (str,"PLIST",5)) return 538; 
+			if (!_fstrnicmp(str, "PLIST", 5)) return 538;
 
 			return 0;		
 }
