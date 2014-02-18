@@ -3144,7 +3144,7 @@ HANDLE OpenMapIndex (LPSTR Name,LPMNMXCORD pIndexBounds)
 {
     OFSTRUCT    OFStruct; 
     short     Version;
-    HFILE   FidIndex, FidZM;
+    HFILE   FidIndex=HFILE_ERROR, FidZM;
     long    Signature, EndOffset;
     HANDLE  Handle;
     LPFILEINDEX lpIndex;
