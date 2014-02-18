@@ -11913,7 +11913,7 @@ void ClearFullWindowBitmap (HWND hWnd)
 		ClearMeterPrompts (hDC);
 		ReleaseDC (hWnd,hDC);
 	}
-	if (hFullWindowBitMap)
+	if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)
 	{
 		GSSiDeleteObject (&hFullWindowBitMap);
 		GdiFlush ();
@@ -12487,7 +12487,8 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 /*  top == 0         - center in parent                                 */
 /*  top == SHRT_MAX  - center in desktop                                */
 /*  top == -1		 - left justifies window in parent on cursor        */
-/*  top == -2		 - center on cursor in parent                       */
+/*  top == -2		 - center on cursor in parent						*/
+/*  top == -3        - center at bottom - 16                            */
 /************************************************************************/
 
 void cwCenter(HWND hWnd, int top)
@@ -12524,7 +12525,13 @@ begin:
  iwidth = swp.right - swp.left;
  iheight = swp.bottom - swp.top;
 
-if (top<0)
+ if (top == -3)//center at bottom
+ {
+	 pt.y = rParent.bottom - iheight - 16;
+	 pt.x = RECTWIDTH(&rParent)/2 - iwidth/2;
+	 goto Exit;
+ }
+else if (top<0)
 {
 	GetCursorPos (&pt);
 	if (top==-1)
@@ -12559,6 +12566,7 @@ else
 	 }
  }
 
+ Exit:
  /* move the window                                                     */
  MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
  //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);

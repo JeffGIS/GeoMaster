@@ -1454,7 +1454,7 @@ GSSiExitProg (1156);
 
 BOOL RestoreFullWindowBitmap (void)   
 { 
-	if (hFullWindowBitMap)
+	if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)
 	{
 		HDC	hDC = GetDC (hWndMain);
     
@@ -1485,6 +1485,8 @@ BOOL SaveFullWindowBitmap (HWND hWnd)
 	HDC		hDC; 
 	LPVIEWPORT	SaveVP=CurView;
 	
+	if ((int)hFullWindowBitMap == -1)
+		return FALSE;
 	if (hWnd == (HWND)-1)
 	{
 		if (hFullWindowBitMap)

@@ -335,6 +335,7 @@
     <ClCompile Include="..\SHR\CVTCOORD.C" />
     <ClCompile Include="cwconfig.c" />
     <ClCompile Include="..\shapelib\code\dbfopen.c" />
+    <ClCompile Include="DatedDisplay.c" />
     <ClCompile Include="debugging.c" />
     <ClCompile Include="..\solar_calculator\Version2\deflec.c" />
     <ClCompile Include="..\solar_calculator\Version2\deltat.c" />
@@ -751,6 +752,11 @@
     <Image Include="..\Citytour\ALIGN_TO.BMP" />
     <Image Include="..\Citytour\ALIGN_VE.BMP" />
     <Image Include="..\Citytour\ARROWQ~1.BMP" />
+    <Image Include="..\CITYTOUR\BMP00028.BMP" />
+    <Image Include="..\CITYTOUR\BMP00029.BMP" />
+    <Image Include="..\CITYTOUR\BMP00030.BMP" />
+    <Image Include="..\CITYTOUR\CANCELOLD.BMP" />
+    <Image Include="..\CITYTOUR\PLAY_STA.BMP" />
     <Image Include="ASSOC.ICO" />
     <Image Include="..\Citytour\BITMAP11.BMP" />
     <Image Include="..\Citytour\BITMAP13.BMP" />

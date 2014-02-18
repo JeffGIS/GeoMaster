@@ -98,3 +98,8 @@ WORD      FAR  SaveDIB (HDIB, LPSTR);
 HBITMAP CreateBitmapMask(HBITMAP hbmColour, COLORREF crTransparent);
 void SetImageFileRotation (int r);
 HDIB32 BMPToDIB32(HANDLE hBMP);
+int SetBitmapHeightToButton(HWND hWndBtn, HBITMAP *hBM, int iHeight);
+int SetBitmapSizeToButton(HWND hWndBtn, HBITMAP *hBM);
+void SetWindowSizeToBitmap(HWND hWnd, HBITMAP hBmp);
+int SetButtonSizetoBitmap(int ToolbarID, HWND hWndBtn, HBITMAP *hBM, int ix, int irow, int RowHeight, int filepos);
+HBITMAP PadBitmapToConsistentSize(HWND hWnd, HBITMAP hBM, int w, int h, BOOL Stretch);

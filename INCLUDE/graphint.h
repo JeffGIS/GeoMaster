@@ -2350,6 +2350,7 @@ BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
 BOOL RunForAll (int nArgs,LPSTR *Args,LPSTR OutLoc);
 HANDLE GetDistinctValues (HWND hWnd,LPSTR value,int ln,HANDLE hDB,int nStatus);
 BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPSTR title,int textFade);
+LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, LPINT pLeaveCounter);
 
 HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect);
 void StopBackgroundMapServer(HWND hWnd);

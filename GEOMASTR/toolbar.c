@@ -3227,6 +3227,27 @@ HBITMAP PadBitmapToConsistentSize (HWND hWnd,HBITMAP hBM,int w, int h,BOOL Stret
 	return hBMNew;
 }
 
+void SetWindowSizeToBitmap(HWND hWnd, HBITMAP hBmp)
+{
+	BITMAP	bm;
+	RECT	wrect, crect;
+	int		border;
+	POINT	midp;
+
+	if (!GetObject(hBmp, sizeof(bm), (LPSTR)&bm))
+		return;
+	GetWindowRect(hWnd, &wrect);
+	GetClientRect(hWnd, &crect);
+	midp = RectMid(&wrect);
+	border = RECTWIDTH(&wrect) - RECTWIDTH(&crect);
+	wrect.left = midp.x - (bm.bmWidth + border) / 2;
+	wrect.top = midp.y - (bm.bmHeight + border) / 2;
+	wrect.bottom = wrect.top + bm.bmHeight + border;
+	wrect.right = wrect.left + bm.bmWidth + border;
+	MoveWindow(hWnd, wrect.left, wrect.top, RECTWIDTH(&wrect), RECTHEIGHT(&wrect),FALSE);
+	return;
+}
+
 int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int irow,int RowHeight,int filepos)
 {
 	BITMAP	bm;
@@ -3265,32 +3286,32 @@ int SetButtonSizetoBitmap (int ToolbarID,HWND hWndBtn,HBITMAP *hBM,int ix,int ir
 	return ix + bm.bmWidth + 2;
 }
 
-int SetBitmapHeightToButton (HWND hWndBtn,HBITMAP *hBM,int iHeight)
+int SetBitmapHeightToButton(HWND hWndBtn, HBITMAP *hBM, int iHeight)
 {
 	BITMAP	bm;
 	RECT	Rect;
-	HBITMAP	rtn=0;
-	int		rc=-1;
+	HBITMAP	rtn = 0;
+	int		rc = -1;
 
 	if (GetObject(*hBM, sizeof(bm), (LPSTR)&bm))
 	{
-		HDC	hDC = GetDC (hWndBtn);
-	    HDC	hDC2 = CreateCompatibleDC(hDC); 
-	    HDC	hDC3 = CreateCompatibleDC(hDC); 
-		double	factor = (double)iHeight/bm.bmHeight;
+		HDC	hDC = GetDC(hWndBtn);
+		HDC	hDC2 = CreateCompatibleDC(hDC);
+		HDC	hDC3 = CreateCompatibleDC(hDC);
+		double	factor = (double)iHeight / bm.bmHeight;
 		int	Width = bm.bmWidth * factor;
-	    HBITMAP	hBM2 = CreateCompatibleBitmap(hDC,Width,iHeight); 
-		HBITMAP	hBMOld2 = SelectObject(hDC2,hBM2);
-		HBITMAP	hBMOld3 = SelectObject(hDC3,*hBM);
+		HBITMAP	hBM2 = CreateCompatibleBitmap(hDC, Width, iHeight);
+		HBITMAP	hBMOld2 = SelectObject(hDC2, hBM2);
+		HBITMAP	hBMOld3 = SelectObject(hDC3, *hBM);
 
-		SetStretchBltMode (hDC2, COLORONCOLOR);
+		SetStretchBltMode(hDC2, COLORONCOLOR);
 
-	    rc = StretchBlt(hDC2,0,0,Width,iHeight,
-					    hDC3,0,0,bm.bmWidth,bm.bmHeight,
-						SRCCOPY);
+		rc = StretchBlt(hDC2, 0, 0, Width, iHeight,
+			hDC3, 0, 0, bm.bmWidth, bm.bmHeight,
+			SRCCOPY);
 		SelectObject(hDC2, hBMOld2);
 		SelectObject(hDC3, hBMOld3);
-		ReleaseDC (hWndBtn,hDC);
+		ReleaseDC(hWndBtn, hDC);
 		GSSiDeleteObject(hBM);
 		DeleteDC(hDC2);
 		DeleteDC(hDC3);
@@ -3299,7 +3320,45 @@ int SetBitmapHeightToButton (HWND hWndBtn,HBITMAP *hBM,int iHeight)
 	}
 	return rc;
 }
-	BOOL AddToolToToolTip (HWND hwndCtrl,int ToolbarID) 
+int SetBitmapSizeToButton(HWND hWndBtn, HBITMAP *hBM)
+{
+	BITMAP	bm;
+	RECT	Rect;
+	HBITMAP	rtn = 0;
+	int		rc = -1;
+
+	if (GetObject(*hBM, sizeof(bm), (LPSTR)&bm))
+	{
+		HDC	hDC = GetDC(hWndBtn);
+		HDC	hDC2 = CreateCompatibleDC(hDC);
+		HDC	hDC3 = CreateCompatibleDC(hDC);
+		int	Width, Height;
+		RECT rect;
+
+		GetClientRect(hWndBtn, &rect);
+		Width = RECTWIDTH(&rect);
+		Height = RECTHEIGHT(&rect);
+		HBITMAP	hBM2 = CreateCompatibleBitmap(hDC, Width, Height);
+		HBITMAP	hBMOld2 = SelectObject(hDC2, hBM2);
+		HBITMAP	hBMOld3 = SelectObject(hDC3, *hBM);
+
+		SetStretchBltMode(hDC2, COLORONCOLOR);
+
+		rc = StretchBlt(hDC2, 0, 0, Width, Height,
+			hDC3, 0, 0, bm.bmWidth, bm.bmHeight,
+			SRCCOPY);
+		SelectObject(hDC2, hBMOld2);
+		SelectObject(hDC3, hBMOld3);
+		ReleaseDC(hWndBtn, hDC);
+		GSSiDeleteObject(hBM);
+		DeleteDC(hDC2);
+		DeleteDC(hDC3);
+		*hBM = hBM2;
+		rc = Width;
+	}
+	return rc;
+}
+BOOL AddToolToToolTip(HWND hwndCtrl, int ToolbarID)
 	{ 
     TOOLINFO ti; 
  

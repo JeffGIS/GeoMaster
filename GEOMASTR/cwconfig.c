@@ -1099,13 +1099,14 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 {
 	char cmdLine[1024];
 	//char monName[128];
-	int  monStatus;
+	int  monStatus, mouseType;
 	 
 	//GetMassShapeFiles();
 	//writeTestStruct();
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	numMonitors = GetNumMonitors();
 	typeChassis = ChassisType();
+	//mouseType = MouseType();
 	if (typeChassis == 3)
 	{
 		RECT rect;
@@ -5374,7 +5375,7 @@ GSSiExitProg (438);
 	     }
          _fmemset(&ps, 0x00, sizeof(PAINTSTRUCT));
          hDC = hDCScreen = BeginPaint(hWnd, &ps);
-	     if (hFullWindowBitMap) 
+		 if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)
 		 {    
 			RECT	WindowRect;
 					

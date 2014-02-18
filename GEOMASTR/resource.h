@@ -2109,6 +2109,7 @@
 #define ID_FILE_EXIT                    1238
 #define IDC_DELIMS_TITLE                1239
 #define IDM_FILE_EXIT                   1239
+#define IDB_BITMAP21                    1239
 #define IDC_TIME                        1240
 #define IDC_CITY_FIELD                  1240
 #define IDM_FILE_SAVE                   1240
@@ -3267,11 +3268,17 @@
 #define IDC_SPEED_1                     2236
 #define IDC_SPEED_2                     2237
 #define IDC_SPEED_3                     2238
-#define IDC_SPEED_4                     2239
 #define IDC_FADE_FULL                   2239
 #define IDC_FADE_PARTIAL                2240
 #define IDC_FADE_NONE                   2241
 #define IDC_SELECT_ALL                  2242
+#define IDC_TILED                       2243
+#define IDC_PAUSE                       2243
+#define IDC_SEQUENTIAL                  2244
+#define IDC_PLAY                        2244
+#define IDC_LOOP                        2245
+#define IDC_SLIDER1                     2245
+#define IDC_SPEED_0                     2246
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3606,15 +3613,19 @@
 #define IDB_DOWN_ARROW5                 9055
 #define IDB_UNDOCKTOOL_HOR              9056
 #define IDB_UNDOCKTOOL_VERT             9057
+#define IDB_PLAY_START                  9058
+#define IDB_PLAY_PAUSE                  9059
+#define IDB_RIGHT_ARROW3                9060
+#define IDB_CANCEL                      9060
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1238
+#define _APS_NEXT_RESOURCE_VALUE        1240
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2243
+#define _APS_NEXT_CONTROL_VALUE         2246
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

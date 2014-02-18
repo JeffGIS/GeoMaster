@@ -1296,6 +1296,9 @@
     <ClCompile Include="MapServer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DatedDisplay.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -1726,6 +1729,21 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\Citytour\zoompan8.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\BMP00028.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\PLAY_STA.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\BMP00029.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\BMP00030.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\CANCELOLD.BMP">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

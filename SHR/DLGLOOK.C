@@ -668,7 +668,7 @@ BOOL FAR PASCAL DIALOGSTYLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	LPCONTROLDEF	pControlDef;
 	short	i,ii;
 	char	str[256];
-return FALSE;
+//return FALSE;
  switch(Message)
    {
    	case WM_RBUTTONDOWN:
@@ -708,7 +708,9 @@ return FALSE;
 	   	}
     	InDynClose = FALSE;*/
     	return bRtn;
-    	
+//	case WM_MOUSEMOVE:
+//		ii = 1;
+//		break;
     case WM_COMMAND:  
     //	return ProcessDynEdit (hWndDlg,hWndEdit,wParam,lParam);
     	
