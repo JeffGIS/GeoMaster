@@ -1310,6 +1310,7 @@ BOOL GetDebug (void);
 void GetWindowsVersion(LPSTR Ver);
 int ChassisType(void); // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
 int MonitorType(int which,LPSTR monName);
+int GetMouseType(void);
 int GetNumMonitors(void);
 HMONITOR GetOtherMonitor(POINT pt);
 BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);

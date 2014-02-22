@@ -432,7 +432,7 @@ extern "C" int isLaptop(int ii)
 		return rtn;
 	}
 
-	extern "C" int MonitorType(int whichDisplay,LPSTR monName) // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
+	extern "C" int MonitorType(int whichDisplay, LPSTR monName) // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
 	{
 		HRESULT hres;
 		int rtn = -1;
@@ -444,25 +444,25 @@ extern "C" int isLaptop(int ii)
 		cout << "Failed to initialize COM library. Error code = 0x" << hex << hres << endl;
 		return 1;
 		}
-		
-		// Set general COM security levels 
+
+		// Set general COM security levels
 		hres = ::CoInitializeSecurity(
-			NULL,
-			-1,                          // COM authentication 
-			NULL,                        // Authentication services 
-			NULL,                        // Reserved 
-			RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication 
-			RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation 
-			NULL,                        // Authentication info 
-			EOAC_NONE,                   // Additional capabilities 
-			NULL                         // Reserved 
-			);
+		NULL,
+		-1,                          // COM authentication
+		NULL,                        // Authentication services
+		NULL,                        // Reserved
+		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
+		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
+		NULL,                        // Authentication info
+		EOAC_NONE,                   // Additional capabilities
+		NULL                         // Reserved
+		);
 
 		if (FAILED(hres))
 		{
-			//     cout << "Failed to initialize security. Error code = 0x" << hex << hres << endl; 
-			//      ::CoUninitialize(); 
-			return rtn;
+		//     cout << "Failed to initialize security. Error code = 0x" << hex << hres << endl;
+		//      ::CoUninitialize();
+		return rtn;
 		}
 		else*/
 		{
@@ -521,6 +521,87 @@ extern "C" int isLaptop(int ii)
 				}
 			}
 		}
+
+
+		return rtn;
+	}
+	extern "C" int MouseType(void) // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
+	{
+		HRESULT hres;
+		int rtn = -1;
+		int avail, statusinfo;
+		char		mouseName[256];
+		char		mouseDesc[256];
+
+			WMIQuery query;
+			if (query.Initialize())
+			{
+				IEnumWbemClassObject* pEnumerator = query.Query(_T("SELECT * FROM Win32_PointingDevice"));
+
+				if (pEnumerator != NULL)
+				{
+					// Get the data from the query 
+					IWbemClassObject *pclsObj;
+					ULONG uReturn = 0;
+
+					while (pEnumerator)
+					{
+						HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+
+						if (0 == uReturn)
+						{
+							break;
+						}
+
+						VARIANT vtProp;
+						BSTR	name;
+
+						hr = pclsObj->Get(L"ConfigManagerErrorCode", 0, &vtProp, 0, 0);
+						rtn = vtProp.iVal;
+						VariantClear(&vtProp);
+						hr = pclsObj->Get(L"Availability", 0, &vtProp, 0, 0);
+						rtn = vtProp.iVal;
+						avail = vtProp.intVal;
+						VariantClear(&vtProp);
+						hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
+						{
+							_bstr_t b(vtProp.bstrVal);
+							const char* c = b;
+							strcpy(mouseName, c);
+
+							//wstrcpy(name,vtProp.bstrVal);
+							VariantClear(&vtProp);
+						}
+						hr = pclsObj->Get(L"Description", 0, &vtProp, 0, 0);
+						{
+							_bstr_t b(vtProp.bstrVal);
+							const char* c = b;
+							strcpy(mouseDesc, c);
+
+							//wstrcpy(name,vtProp.bstrVal);
+							VariantClear(&vtProp);
+						}
+						hr = pclsObj->Get(L"DeviceID", 0, &vtProp, 0, 0);
+						{
+							_bstr_t b(vtProp.bstrVal);
+							const char* c = b;
+							//strcpy(monName, c);
+
+							//wstrcpy(name,vtProp.bstrVal);
+							VariantClear(&vtProp);
+						}
+						hr = pclsObj->Get(L"Status", 0, &vtProp, 0, 0);
+						VariantClear(&vtProp);
+						hr = pclsObj->Get(L"StatusInfo", 0, &vtProp, 0, 0);
+						rtn = vtProp.iVal;
+						VariantClear(&vtProp);
+
+						pclsObj->Release();
+					}
+
+					pEnumerator->Release();
+				}
+			}
 
 
 		return rtn;
