@@ -1469,6 +1469,7 @@ BOOL UpdateRecord (int Item,int Desc,LPSTR NewPrefix, LPSTR NewUDI,LPLINEDESCRIP
 BOOL UpdateRecordCopy (int Option);
 void SetSysMess (LPSTR mess);
 BOOL GetLastPrompt (LPSTR lp);
+void SetPrompt(UINT PromptID, BOOL SetVP);
 void SetPrompt2 (short Function,UINT PromptID);
 void RedisplayLastPrompt (void);
 BOOL DisplaySymInDlg (HWND hWndDlg,UINT Control,LPSTR SymName,COLORREF Color);

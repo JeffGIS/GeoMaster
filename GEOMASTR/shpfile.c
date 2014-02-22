@@ -4054,8 +4054,8 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
     
     if (CurView->ID == dbugid)
     	ii=1; 
-    if (RecordNumber == DebugRecNum)
-    	save = TRUE;
+   // if (RecordNumber == DebugRecNum)
+   // 	save = TRUE;
     SHPHeader.ShapeType = SHPType;//SHPT_POLYGONZ;
     sprintf (str,"[%s.%s]",FileID[IsFGDB],ShapeFieldName);
     ExpandText (str);
@@ -5117,8 +5117,8 @@ BOOL ProcessPGDBRecord (HDC hDC,long RecordNumber,int IsFGDB)
     
     if (CurView->ID == dbugid)
     	ii=1; 
-    if (RecordNumber == DebugRecNum)
-    	save = TRUE;
+    //if (RecordNumber == DebugRecNum)
+    //	save = TRUE;
     SHPHeader.ShapeType = SHPType;//SHPT_POLYGONZ;
     sprintf (str,"[%s.%s]",FileID[IsFGDB],ShapeFieldName);
     ExpandText (str);
