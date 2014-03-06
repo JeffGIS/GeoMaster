@@ -149,6 +149,7 @@ LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM w
 		if (wParam != LEAVE_WINDOW_TIMER)
 			break;
 
+		lRtn = 1;
 		if (!(*pLeaveCounter)++)
 			break;
 
@@ -165,6 +166,7 @@ LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM w
 			if (!PtInRect(&rect, pt))
 			{
 				AnimateWindow(hWndDlg, 400, AW_BLEND | AW_HIDE);
+				wantnextblt();
 				SetFocus(GetParent(hWndDlg));
 			}
 		}
@@ -13227,6 +13229,7 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
         hBmpOld = SelectObject(hdcMemMap,hBmpScreen); 
 		{   
 			RECT	VPRect=CurView->ScreenRect, BMRect;
+			HDC		hDC = GetDC(CurView->hWnd);
 
 			if (!From)
 				KillTimer (CurView->hWnd,TimerID);
@@ -13257,22 +13260,22 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 			GSSiDeleteObject(&CurView->hRgn);  
 			CurView->hRgn = CreateVPRgn(FALSE,FALSE);
 			pZoomOutExclusionArea = 0;
-			SelectClipRgn (CurView->hDC,CurView->hRgn);
+			SelectClipRgn (hDC,CurView->hRgn);
 			GSSiDeleteObject(&CurView->hRgn);  
 			if (inc < 0)
 			{
 				HBRUSH hBrush	 = CreateSolidBrush (CurView->BackGroundColor);
-				HBRUSH hOldBrush = SelectObject (CurView->hDC,hBrush);
+				HBRUSH hOldBrush = SelectObject (hDC,hBrush);
 
-				FillRect (CurView->hDC,&CurView->ScreenRect,hBrush);
-				SelectObject (CurView->hDC,hOldBrush);
+				FillRect (hDC,&CurView->ScreenRect,hBrush);
+				SelectObject (hDC,hOldBrush);
 				GSSiDeleteObject (&hBrush);
 				CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-				SelectClipRgn (CurView->hDC,CurView->hRgn);
+				SelectClipRgn (hDC,CurView->hRgn);
 				GSSiDeleteObject(&CurView->hRgn);  
 			}
-			SetStretchBltMode(CurView->hDC,COLORONCOLOR);
-			StretchBlt (CurView->hDC,
+			SetStretchBltMode(hDC,COLORONCOLOR);
+			StretchBlt (hDC,
 									 VPRect.left,VPRect.top,
 									 OutWidth,
 									 OutHeight,  
@@ -13284,6 +13287,7 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 			if (!From)
 				TimerID = SetTimer(CurView->hWnd, GF_WHEELZOOM,WheelZoomTimeout, (FARPROC) 0);
 			BlockVehicleDisplay = 1;
+			ReleaseDC(CurView->hWnd, hDC);
 		}
 		SelectObject(hdcMemMap,hBmpOld); 
 		DeleteDC (hdcMemMap);
@@ -13299,11 +13303,13 @@ BOOL MoveScreen (int xinc,int yinc,HANDLE hSavedScreen,int ScreenID)
 	HRGN	NewRgn,DiffRgn;
 	int		TypeRegion;
 	LPSAVESCREEN	pSavedScreen;
+	HDC		savehDC = CurView->hDC;
     
 	if (!xinc && !yinc)
 		return FALSE;
     if (!ScreenIsRegistered(hSavedScreen,ScreenID))
 		return FALSE;
+	CurView->hDC = GetDC(CurView->hWnd);
 	pSavedScreen = (LPSAVESCREEN)GlobalLock (hSavedScreen);  
 	SaveRect = pSavedScreen->Rect;  
 	pSavedScreen->Rect.left+=xinc;
@@ -13318,8 +13324,8 @@ BOOL MoveScreen (int xinc,int yinc,HANDLE hSavedScreen,int ScreenID)
 	DeleteObject (NewRgn);
 
 	GlobalUnlock (hSavedScreen); 
-	SelectClipRgn (CurView->hDC,CurView->hRgn);
-	GSSiDeleteObject(&CurView->hRgn);  
+	SelectClipRgn(CurView->hDC, CurView->hRgn);
+	GSSiDeleteObject(&CurView->hRgn);
 	//if (GetGlobalBVal2 ("[%SLIDESCREENCLEAR]",FALSE
 	//FillRectPoly (CurView->hDC,&CurView->DrawRect,CurView->BackGroundColor);
 	FillRect (CurView->hDC,&CurView->ScreenRect,GetStockObject(WHITE_BRUSH));
@@ -13330,6 +13336,8 @@ BOOL MoveScreen (int xinc,int yinc,HANDLE hSavedScreen,int ScreenID)
 	pSavedScreen = (LPSAVESCREEN)GlobalLock (hSavedScreen);
 	pSavedScreen->Rect = SaveRect;    
    	GlobalUnlock (hSavedScreen);
+	ReleaseDC(CurView->hWnd, CurView->hDC);
+	CurView->hDC = savehDC;
 	return TRUE;
 }
 

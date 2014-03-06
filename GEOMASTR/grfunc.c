@@ -1292,7 +1292,7 @@ GSSiExitProg (1347);
 #endif
 }
 
-BOOL ProcessGraphicsFunction3 (short Function,
+BOOL ProcessGraphicsFunction4 (short Function,
 							   HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 {   
 	if (Message == GF_CLOSE && wParam && Function != wParam)
@@ -1858,6 +1858,54 @@ BOOL ProcessGraphicsFunction3 (short Function,
   }
    return (FALSE);
 } 
+BOOL ProcessGraphicsFunction3(short Function,
+	HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+{
+	BOOL rtn;
+	LPVIEWPORT SaveVP = CurView;
+
+	if (Message == WM_TIMER)
+	{
+		int vpid = HIWORD(wParam);
+		int lo = LOWORD(wParam);
+
+		if (vpid)
+		{
+			SetViewport(vpid);
+			Function = CurView->CurrentFunction;
+			wParam = lo;
+		}
+	}
+	else if (Message == GF_MAPSERVER_RESPONSE)
+	{
+		int vpid = HIWORD(wParam);
+		int lo = LOWORD(wParam);
+
+		if (vpid)
+		{
+			SetViewport(vpid);
+			Function = CurView->CurrentFunction;
+			wParam = lo;
+		}
+	}
+	else if (Message == GF_MAPSERVER_READY || Message == GF_MAPSERVER_FAILED)
+	{
+		int vpid = lParam;
+
+		if (vpid)
+		{
+			SetViewport(vpid);
+			Function = CurView->CurrentFunction;
+			lParam = 0;
+		}
+	}
+
+	rtn = ProcessGraphicsFunction4(Function, hWnd, Message, wParam, lParam);
+
+	CurView = SaveVP;
+	return rtn;
+
+}
 
 void DisplayGFList (void)
 {

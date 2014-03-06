@@ -1458,7 +1458,7 @@ BOOL RestoreFullWindowBitmap (void)
 	{
 		HDC	hDC = GetDC (hWndMain);
     
-		MergeImageIntoViewport(0, 0,0);
+		MergeImageIntoViewport(0, 0, 0, 0);
 		SaveDC(hDC);
 		SelectClipRgn (hDC,0);
 		RestoreScreen (hDC,hFullWindowBitMap,FullWindowBitMapRect);	     

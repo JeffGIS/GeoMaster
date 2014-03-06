@@ -9,7 +9,7 @@ static HWND MapServerWnd[MAX_MAPSERVERS] = { 0 };
 static int	nMapServers = 0;
 static HANDLE hThread = 0;
 
-BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade);
+BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFade);
 void __cdecl BackgroundMergeImageIntoViewport(LPHANDLE phArgs);
 
 static int continueBackgroundMerge;
@@ -113,7 +113,7 @@ void StopBackgroundMapServer(HWND hWndServer)
 	return;
 }
 
-BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd,int id)
+BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd,LPARAM id)
 {
 	HFILE Fid;
 	OFSTRUCT OFStruct;
@@ -152,7 +152,7 @@ BOOL CopyMapserverFileToFile(HWND hBackGroundServer, LPSTR File)
 }
 
 
-BOOL MergeImageIntoViewport(HBITMAP hNewBitmap, LPSTR title,int textFade)
+BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPRECT pRect, LPSTR title,int textFade)
 {
 	static HANDLE hArgs;
 	LPSTR arg1;
@@ -181,8 +181,9 @@ BOOL MergeImageIntoViewport(HBITMAP hNewBitmap, LPSTR title,int textFade)
 	arg3 = arg2 + 4096;
 	arg4 = arg3 + 4096;
 	itoa((int)hNewBitmap, arg1, 10);
-	strcpy(arg2, title);
-	itoa(textFade, arg3, 10);
+	recttoa(arg2, *pRect);
+	strcpy(arg3, title);
+	itoa(textFade, arg4, 10);
 
 	GlobalUnlock(hArgs);
 	continueBackgroundMerge = 1;
@@ -198,18 +199,20 @@ void __cdecl BackgroundMergeImageIntoViewport(LPHANDLE phArgs)
 	HBITMAP hNewBitmap = (HBITMAP)atoi(arg1);
 	char	title[256];
 	int		textFade=100;
+	int		err;
+	RECT	rect = atorect (arg2,&err);
 
-	strcpy(title, arg2);
-	textFade = atoi(arg3);
+	strcpy(title, arg3);
+	textFade = atoi(arg4);
 
 
 	GlobalUnlock(*phArgs);
 	GSSiGlobFree(phArgs);
-	MergeImageIntoViewport2(hNewBitmap,title,textFade);
+	MergeImageIntoViewport2(hNewBitmap,rect,title,textFade);
 	return;
 }
 
-BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade)
+BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFade)
 {
 	BLENDFUNCTION bf;
 	BOOL	rtn = TRUE;
@@ -229,7 +232,7 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade)
 		BITMAP bm;
 		HBITMAP hbm=0, hBMSave=0;
 		HBITMAP hBMOrig, hBMTemp, hBMTempOld;
-		RECT	rect, rect2, textRect;
+		RECT	rect2, textRect;
 		HFONT	OldFont;
 		int		oldMode;
 		int		height;
@@ -238,16 +241,17 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade)
 		
 		HFONT hFont = CreateFont(256, 0, 0, 0, FW_HEAVY, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
 
-		GetClientRect(CurView->hWnd, &rect);
+		//GetClientRect(CurView->hWnd, &rect);
 		rect2 = rect;
 		OldFont = SelectObject(TransparentDC, hFont);
 		height = DrawText(TransparentDC, title, -1, &rect2, DT_CALCRECT | DT_SINGLELINE | DT_LEFT);
-		textRect = rect;
-		textRect.bottom -= height/2;
+		textRect.left = textRect.top = 0;
+		textRect.bottom = RECTHEIGHT(&rect) - height/2;
+		textRect.right = RECTWIDTH(&rect);
 		SelectObject(TransparentDC, OldFont);
 		DeleteObject(hFont);
 		factor = 2*((float)RECTWIDTH(&rect) / (float)RECTWIDTH(&rect2)) / 3;
-		hFont = CreateFont(256 * factor, 0, 0, 0, FW_HEAVY, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");		GetClientRect(CurView->hWnd, &rect);
+		hFont = CreateFont(256 * factor, 0, 0, 0, FW_HEAVY, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
 		w = RECTWIDTH(&rect);
 		h = RECTHEIGHT(&rect);
 		bf.BlendOp = AC_SRC_OVER;
@@ -328,20 +332,20 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade)
 				if (dbug)
 				BitBlt(hDC,rect.left, rect.top, w, h,
 					TransparentDC, rect.left, rect.top, SRCCOPY);
-				BitBlt(tempDC, rect.left, rect.top, w, h,
-					saveDC, rect.left, rect.top, SRCCOPY);
-				AlphaBlend(tempDC, rect.left, rect.top, w, h,
+				BitBlt(tempDC, 0,0, w, h,
+					saveDC,0,0, SRCCOPY);
+				AlphaBlend(tempDC, 0,0, w, h,
 					TransparentDC,
-					rect.left, rect.top,
+					0,0,
 					w, h,
 					bf);
 				BitBlt(hDC, rect.left, rect.top, w, h,
-					tempDC, rect.left, rect.top, SRCCOPY);
+					tempDC, 0,0, SRCCOPY);
 			}
 			else
 				AlphaBlend(hDC, rect.left, rect.top, w, h,
 				TransparentDC,
-				rect.left, rect.top,
+				0, 0,
 				w, h,
 				bf);
 			/*{
@@ -394,10 +398,10 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade)
 						int lenBits = bm.bmWidthBytes * bm.bmHeight;
 						LPBYTE	pBits = malloc(lenBits);
 						GetBitmapBits(hNewBitmap, lenBits, pBits);
-						for (irow = max(0, rect.top); irow<min(rect.bottom, bm.bmHeight); irow++)
+						for (irow = 0; irow<min(rect.bottom, bm.bmHeight); irow++)
 						{
 							LPRGBQUAD pclr = (LPRGBQUAD)(pBits + bm.bmWidthBytes*irow);
-							int firstCol = max(0, rect.left);
+							int firstCol = 0;
 
 							pclr += firstCol;
 
@@ -443,6 +447,7 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,LPSTR title,int textFade)
 		DeleteDC(saveDC);
 		DeleteObject(hFont);
 		GdiFlush();
+		//wantnextblt();
 		hThread = 0;
 		//ReleaseDC (CurView->hWnd,hDC);
 	}
