@@ -8216,17 +8216,23 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 						ExpandText (str);
 						CurrentSHPRec = atol (str);
 					}
-					else if (!_fstrnicmp (SQLPtr->SQL,"%SHAPEREC=",10))
+					else if (!_fstrnicmp(SQLPtr->SQL, "%SHAPEREC=", 10))
 					{
-						_fstrcpy (str,&SQLPtr->SQL[10]);
-						ExpandText (str);
-						CurrentSHPRec = atol (str);
+						_fstrcpy(str, &SQLPtr->SQL[10]);
+						ExpandText(str);
+						CurrentSHPRec = atol(str);
 					}
-					else if (!_fstrnicmp (SQLPtr->SQL,"%DBFREC=",8))
+					else if (!_fstrnicmp(SQLPtr->SQL, "%SHPRECNO=", 10))
 					{
-						_fstrcpy (str,&SQLPtr->SQL[8]);
-						ExpandText (str);
-						CurrentDBFRec = atol (str);
+						_fstrcpy(str, &SQLPtr->SQL[10]);
+						ExpandText(str);
+						CurrentSHPRec = atol(str);
+					}
+					else if (!_fstrnicmp(SQLPtr->SQL, "%DBFREC=", 8))
+					{
+						_fstrcpy(str, &SQLPtr->SQL[8]);
+						ExpandText(str);
+						CurrentDBFRec = atol(str);
 					}
 					if (FilePtr->Type == SHAPE_DATAFILE)
 						CurrentRec = CurrentSHPRec;
@@ -9795,6 +9801,8 @@ int	GetUpdateFieldType (LPSTR SetFieldName)
 				return 1;
 			if (end == '(')
 				return 2;
+			if (end == '$')
+				return 3;
 		}
 		if (!(ploc = strchr (ploc,';')))
 			ploc = strchr (lpUpdateFieldList,0);

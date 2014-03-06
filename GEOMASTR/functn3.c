@@ -6395,6 +6395,10 @@ HaveVP:;
 					SendConnectedProcessCommand (hProcessWnd,Arg[2]);
 					goto RtnTrue;
 				}
+				else if (!stricmp(Arg[1], "PATH"))
+				{
+					GetModuleFileName(NULL, OutLoc, MAX_PATH);
+				}
 				goto Rtnl;
 
 			}

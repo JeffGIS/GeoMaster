@@ -2796,7 +2796,14 @@ GSSiExitProg (603);
 	}
 	if (GMHeader == 2)
 	{
-		hDB = OpenGWDatabase (File,BT_WRITE);
+		hDB = OpenGWDatabase(File, BT_WRITE);
+		{
+			LPGWDHEADER	lpGWDHead;
+
+			lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+			OriginalRecordNumber = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
+			GlobalUnlock(hDB);
+		}
 		lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
 	}
 	else
@@ -2871,7 +2878,9 @@ GSSiExitProg (603);
 
 		    	_fstrcpy (FieldName,pFieldInfo->Name);   
 		    	FieldType = pFieldInfo->Type;
-				if (GetValFromOpenFiles (FieldName,str,4096) < 0)
+				if (!stricmp (FieldName, "UNIQUEID"))
+					ltoa(OriginalRecordNumber, str, 10);
+				else if (GetValFromOpenFiles (FieldName,str,4096) < 0)
 					goto NextField;
 			} 
 			if (GMHeader == 2)

@@ -9712,6 +9712,16 @@ GSSiExitProg (329);
 #endif
 }
 
+void dumpmemdc(HDC hdc)
+{
+	HBITMAP hbm = CreateCompatibleBitmap(hdc, 1, 1);
+	HBITMAP hBM = SelectObject(hdc, hbm);
+	HDIB hDib = BitmapToDIB(hBM, 0, 0);
+	SaveDIB(hDib, "c:\\temp\\dump.bmp");
+	SelectObject (hdc,hBM);
+	DeleteObject(hbm);
+	return;
+}
 HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 #if ENABLETRACE
 {GSSiEnterProg (330);
@@ -9734,7 +9744,7 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	if (dbug)
 	{
 		HDIB hDib=BitmapToDIB (pSaveScreen->hBM, 0,0);
-		SaveDIB (hDib,"c:\\temp.bmp");
+		SaveDIB (hDib,"c:\\temp\\temp.bmp");
 	}
 	if (!pSaveScreen->hBM)
 		GSSiGlobUlFree (&handle);
@@ -12420,7 +12430,8 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 //	AppendFile2 ("c:\\messagelog.txt",MessIn);
 //	AppendFile2 ("c:\\messagelog.txt",TitleIn);
 //	SetWindowText (hWndMain,MessIn);
-	Flag = Flag|MB_TASKMODAL;
+	if (!Position || !*Position)
+		Flag = Flag|MB_TASKMODAL;
 	if (TitleIn)
 	{
 		_fstrcpy (Title,TitleIn);
@@ -12489,6 +12500,7 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 /*  top == -1		 - left justifies window in parent on cursor        */
 /*  top == -2		 - center on cursor in parent						*/
 /*  top == -3        - center at bottom - 16                            */
+/*  top == -4        - center at bottom - 16 of CurView                 */
 /************************************************************************/
 
 void cwCenter(HWND hWnd, int top)
@@ -12528,10 +12540,18 @@ begin:
  if (top == -3)//center at bottom
  {
 	 pt.y = rParent.bottom - iheight - 16;
-	 pt.x = RECTWIDTH(&rParent)/2 - iwidth/2;
+	 if (!IsRectEmpty(&PromptRect))
+		 pt.y -= RECTHEIGHT(&PromptRect);
+	 pt.x = RECTWIDTH(&rParent) / 2 - iwidth / 2;
 	 goto Exit;
  }
-else if (top<0)
+ if (top == -4)//center at bottom of vp
+ {
+	 pt.y = CurView->DrawRect.top + CurView->DrawRect.bottom - iheight - 16;
+	 pt.x = CurView->DrawRect.left + RECTWIDTH(&CurView->DrawRect) / 2 - iwidth / 2;
+	 goto Exit;
+ }
+ else if (top<0)
 {
 	GetCursorPos (&pt);
 	if (top==-1)

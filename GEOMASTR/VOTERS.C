@@ -888,7 +888,7 @@ GSSiExitProg (1055);
    {
     case WM_INITDIALOG: 
        	SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_SETTABSTOPS,2,(LPARAM)TabStops);
-    	BasicDataDisplay (DRDataFile,hWndDlg,IDC_FIELDS,IDENTIFY_NEXT,IDENTIFY_PRIOR,1,0,DRSQL);
+    	BasicDataDisplay (DRDataFile,hWndDlg,IDC_FIELDS,IDENTIFY_NEXT,IDENTIFY_PRIOR,1,0,DRSQL,80);
         break; /* End of WM_INITDIALOG                                 */
     
     case WM_CLOSE:

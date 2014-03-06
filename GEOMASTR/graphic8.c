@@ -737,7 +737,7 @@ GSSiExitProg (946);
 	 		else if (PolyInArea (Type,4,(HPDPOINT)&BoundsPoints,AreaAZ,NumMaskPoints,lpDpoints,1,0,-1,phMaskAccelerator))
 	 			rtn = FALSE;
 	 		else
-		 		rtn = PolyInArea (Type,*pnPnts,pPolyPointsD,AreaAZ,NumMaskPoints,lpDpoints,1,0,InclusionOpt,phMaskAccelerator);
+		 		rtn = PolyInArea (Type,*pnPnts,pPolyPointsD,0,NumMaskPoints,lpDpoints,1,0,InclusionOpt,phMaskAccelerator);
 	 	}
 	}   
 	GlobalUnlock (hMaskArea); 

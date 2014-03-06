@@ -1,4 +1,5 @@
-char	GMVersion[36]="GeoMaster version 34f (build 1)";
+#include "GMVersion.h"
+//char	GMVersion[36]="GeoMaster version 34f (build 6)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
 int		typeChassis = 0;
@@ -1607,6 +1608,8 @@ BOOL	MapServer = FALSE;
 char	MapServerOutputBitmapFile[MAX_PATH];
 HWND	MapServerCalledFromWnd=0;
 int		MapserverRequestID=0;
+int		MapserverVPID;
+UINT	showWindowCmd;
 BOOL	PickSubVP = TRUE;
 int		SizeSYMBOL_V1;
 int		SizeBOUNDSDISPLAY16;

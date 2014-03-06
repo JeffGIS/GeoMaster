@@ -2226,13 +2226,12 @@ GSSiExitProg (629);
 #endif
 }
 
-BOOL BasicDataDisplay (LPSTR DBNameIN,HWND hWndDlg,short dlgitem,short nextbutton,short priorbutton,long RecNum, long iref, LPSTR pSQL)
+BOOL BasicDataDisplay (LPSTR DBNameIN,HWND hWndDlg,short dlgitem,short nextbutton,short priorbutton,long RecNum, long iref, LPSTR pSQL,int maxline)
 #if ENABLETRACE
 {GSSiEnterProg (630);
 #endif
 {  
     HANDLE      hSQL;  
-    short		maxline=60;
     double      rtn;
     char        str[300],DBName[MAX_PATH];
     short       ifield,l;

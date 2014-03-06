@@ -132,6 +132,14 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 			DeleteDC (hDCScreenBuffer);  
 			hDCScreenBuffer = 0;
 			hbmpOrig = 0;
+			SetConfig(1);
+			if (*pNumViewports)
+			{
+				SetViewport(*pCommandViewport);
+				hDCMain = GetDC(hWndMain);
+				SetupViewports(CurView->hWnd, hDCMain, 0, MainRect, 0);
+				ReleaseDC(hWndMain, hDCMain);
+			}
 		}
 		return 0;
 	}

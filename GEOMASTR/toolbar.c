@@ -459,6 +459,8 @@ void DisplayAllToolbars (int Opt)
 	int	i;
 	static	int	ii=0;
 
+	if ((int)hFullWindowBitMap == -1)
+		return;
 	if (ii++ == 100)
 		ii=0;
 	switch (Opt)

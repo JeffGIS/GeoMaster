@@ -5269,7 +5269,9 @@ UpdateAddEditFile:
 				 int	iHouse;
 			 	 long 	StreetNum1, StreetNum2, OnStreetNum;
 				 LPADDMATCH	pMatch; 
-            	 
+				
+				 CurEditRec++;
+
 GetNext:
 				 ClearSpecial(); 
 				 SetDlgItemText (hWndDlg,IDC_MESSAGE1,"");
@@ -5406,7 +5408,7 @@ GetNext:
 	        		 sprintf (str,"Record %ld of %ld - Match code %i",*pRecnum,BTHead.BT_NUMRECS,pAMER->AM.MatchCode); 
 				 SetDlgItemText (hWndDlg,IDC_MESS1,str);  */
 	         	 LastRecnum++;
-        		 _fmemmove (&AMER,pAMER,(size_t)lpGWDHead->Reclen);
+        		 _fmemmove (&AMER,pAMER,sizeof(AMER)); 
         		 if (pAMER->AM.StreetNum)
         		 {
         		 	Skip=TRUE; 
@@ -6289,370 +6291,373 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  break;
             }
             
-            case IDOK: 
-            {
-                 long   lineno=0, CurLoc, MidLine, ii, FromDate, ToDate;   
-                 long   NewRefno, StreetNum1, StreetNum2, OnStreetNum, MunicNum; 
-                 short    st, SymNum, iUDI=0, AreaSym, LineSym, LocOpt, Pass=1;
-                 BOOL   Done, First=TRUE; 
-                 HANDLE hMIDstr;
-                     
-                 char   SymName[10], project[32];
-                 double X,Y;
-                 LPSTR  lpTAB; 
-                 DPOINT Point;
-                 BOOL   Store;
-                 short    Symbol=1; 
-                 COLORREF   Color;
-                 LPSTR  lpDot, pSpace, pStreet; 
-                 MNMXCORD MinMaxCoord;  
-                 double coordcvt=1;
-                 short    NumSyms=0;  
-                 HANDLE hSymDesc=0;
-                 short	match, sn, OrigKeyLen;  
-                 BOOL	Opened, OpenedUAA, OpenedSeg=FALSE, OpenedSM;
-				 short	IndexArray[2];
-                 HANDLE	hMatch=0, hDBDest, hBTDest, hBTBadNames;
-                 UINT	len; 
-                 LPADDMATCH	pMatch;
-				 LPADDMATCHEDITREC pAMER;
-			     LPGWDHEADER	lpGWDHead;
-			     BADNAMEKEY		BadNameKey; 
-			     BOOL	UseStoredResults=FALSE, RemoveLastPart=FALSE,OpenedSP;
-       		 	 short	nPartsRemoved=0,AddUDILength=0;
-				 long	UseMult=0;
-				 HANDLE	hKeyFields;
-				 LPSTR	pPar;
+			case IDOK:
+			{
+				long   lineno = 0, CurLoc, MidLine, ii, FromDate, ToDate;
+				long   NewRefno, StreetNum1, StreetNum2, OnStreetNum, MunicNum;
+				short    st, SymNum, iUDI = 0, AreaSym, LineSym, LocOpt, Pass = 1;
+				BOOL   Done, First = TRUE;
+				HANDLE hMIDstr;
 
-				 ContinueProcessing=TRUE;
-				 HaltMapDisplay (FALSE);
-				 CloseAllRequestedFiles (FALSE);
-                 GetDlgItemText (hWndDlg,SV_DATABASE_LIST,IMDataFile,lnIMDataFile);
-                 if (!GetDlgItemText (hWndDlg,IDC_DEST_FILE,DestName,lnDestName))
-                 {
-                    GSSiMsgBox(GetFocus(),"No destination file", 0,MB_ICONQUESTION|MB_OK,0);
-                    break;
-                 }
-				 ExpandText (DestName);
-                 GetDlgItemText (hWndDlg,IDC_STREET,Street,sizeof(Street)); 
-                 GetDlgItemText (hWndDlg,IDC_HOUSE_NUM,HouseNum,sizeof(HouseNum)); 
-                if (!*Street ||!*HouseNum)
-                {
-                    GSSiMsgBox(GetFocus(),"Street and/or House Number field missing", 0,MB_ICONQUESTION|MB_OK,0);
-                    break;
-                }
-                 
-			    MOPT=SendDlgItemMessage(hWndDlg,IDC_MOPT,CB_GETCURSEL,0,0)+1; 
-				if (MOPT > 2)
-					RemoveLastPart=TRUE;
-                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Loading Data");
-                CloseDataFile (TRUE, &hSQL);  
-                GetDlgItemText (hWndDlg,IDC_SQL,(LPSTR)str,256);                
-                pSQL = str;
-                if (!_fstrcmp (pSQL,"ALL ROWS"))
-                    *pSQL = 0;
-                hSQL = 0; 
-                ExpandText (pSQL);
-                if (!OpenDataFile (IMDataFile,pSQL,BT_READ,&hSQL))
-                {  
-                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
-                    break;
-                }
-                AutoEdit = SendDlgItemMessage (hWndDlg,IDC_AUTOEDIT,BM_GETCHECK,0,0L);
-                if (!OpenStreetSegmentTable (FALSE,&OpenedSeg))
-                	break;
-                if (!OpenNetIntersect (NetworkID,FALSE,&Opened))
-                	break;   
-				OpenUserDefinedAddress (FALSE,&OpenedUAA);
-                OpenSegMaxIndex (&OpenedSM);
-                OpenStreetPolys (&OpenedSP);	
-                GetDlgItemText (hWndDlg,IDC_KEY_FIELD,str,256);
-                if (!*str)
-                	OrigKeyLen = 2;
-                else if (_fstrchr (str,'@'))
-                	OrigKeyLen = 100;
-                else
-                	OrigKeyLen = 64; 
-                UseNetBased = SendDlgItemMessage (hWndDlg,IDC_USENETWORK_BASED,BM_GETCHECK,0,0L);
- 			    SelectOne=SendDlgItemMessage(hWndDlg,IDC_SELECT_ONE,BM_GETCHECK,0,0L);
-                if ((UsePointBased = SendDlgItemMessage (hWndDlg,IDC_USEPOINT_BASED,BM_GETCHECK,0,0L)))
-                {   
-                	GWFLDINFO FieldInfo;
-                	
-                	if (!OpenAddressFilesPID (hWndDlg))
-                		break; 
-                	if (GWDGetFieldInfoFromName (hPIDAddDB,AddUDIVar, &FieldInfo,&AddUDIVarIndex))
-                	{
-                		AddUDILength = FieldInfo.Len; 
-                	}
+				char   SymName[10], project[32];
+				double X, Y;
+				LPSTR  lpTAB;
+				DPOINT Point;
+				BOOL   Store;
+				short    Symbol = 1;
+				COLORREF   Color;
+				LPSTR  lpDot, pSpace, pStreet;
+				MNMXCORD MinMaxCoord;
+				double coordcvt = 1;
+				short    NumSyms = 0;
+				HANDLE hSymDesc = 0;
+				short	match, sn, OrigKeyLen;
+				BOOL	Opened, OpenedUAA, OpenedSeg = FALSE, OpenedSM;
+				short	IndexArray[2];
+				HANDLE	hMatch = 0, hDBDest, hBTDest, hBTBadNames;
+				UINT	len;
+				LPADDMATCH	pMatch;
+				LPADDMATCHEDITREC pAMER;
+				LPGWDHEADER	lpGWDHead;
+				BADNAMEKEY		BadNameKey;
+				BOOL	UseStoredResults = FALSE, RemoveLastPart = FALSE, OpenedSP;
+				short	nPartsRemoved = 0, AddUDILength = 0;
+				long	UseMult = 0;
+				HANDLE	hKeyFields;
+				LPSTR	pPar;
 
-                } 
-                if (!AddUDILength)
-                	UsePointBased = FALSE;
-                if (SendDlgItemMessage (hWndDlg,IDC_NEW,BM_GETCHECK,0,0L))
+				ContinueProcessing = TRUE;
+				HaltMapDisplay(FALSE);
+				CloseAllRequestedFiles(FALSE);
+				GetDlgItemText(hWndDlg, SV_DATABASE_LIST, IMDataFile, lnIMDataFile);
+				if (!GetDlgItemText(hWndDlg, IDC_DEST_FILE, DestName, lnDestName))
 				{
-					if (!CreateADD_MATCHTable (DestName,BadNames,"KEY(B4)",AddUDILength))
-					{
-						GSSiMsgBox(GetFocus(),"Unable to create destination file", 0,MB_ICONQUESTION|MB_OK,0);
-						break;
-					}
-					GetFieldIDsFromNames (DestName,&hKeyFields,0,"MatchCode;KEY");
-					GWDAddIndex (DestName,hKeyFields,1,0);
-					GSSiGlobFree (&hKeyFields);
-				}
-			    hDBDest = OpenGWDatabase (DestName,BT_WRITE);
-				if (!hDBDest)
-				{
-					GSSiMsgBox(GetFocus(),"Cannot open destination file", 0,MB_ICONQUESTION|MB_OK,0);
+					GSSiMsgBox(GetFocus(), "No destination file", 0, MB_ICONQUESTION | MB_OK, 0);
 					break;
 				}
-//			    hBTBadNames = BT_OPEN (BadNames,0,BT_WRITE,0);
-			    lpGWDHead = (LPGWDHEADER)GlobalLock (hDBDest); 
-                  
-                EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),FALSE); 
-                EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
-                EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
+				ExpandText(DestName);
+				GetDlgItemText(hWndDlg, IDC_STREET, Street, sizeof(Street));
+				GetDlgItemText(hWndDlg, IDC_HOUSE_NUM, HouseNum, sizeof(HouseNum));
+				if (!*Street || !*HouseNum)
+				{
+					GSSiMsgBox(GetFocus(), "Street and/or House Number field missing", 0, MB_ICONQUESTION | MB_OK, 0);
+					break;
+				}
 
-                if (First)
-                {   
-                	HCURSOR	OldCursor;
-                	
-                    OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
-                    TotAddLen = NumSQLRows (hSQL);  
-		            GSSiSetCursor (OldCursor);
-                }
-                First = FALSE;
-                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Loading Data");
-                
-                pAMER = (LPADDMATCHEDITREC)&lpGWDHead->GWDData[lpGWDHead->pFldInfo->Len];
-                
-                Processing = TRUE;    
-                NewRefno=0;
-                Done = FALSE; 
-                //StartFastPick (65);
-                NumMatched = NumNoMatch = NumInvalid = NumMultMatch = 0;
-        NextLine:
-                 if (!FetchDBRec (hSQL) || !ContinueProcessing)
-                    goto EndFile; 
-                    
-                 lineno++; 
-                 GetDlgItemText (hWndDlg,IDC_STREET,Street,256);
-                 pStreet = Street;
-                 GetDlgItemText (hWndDlg,IDC_HOUSE_NUM,HouseNum,256); 
-                 GetDlgItemText (hWndDlg,IDC_ZIP,ZIP,128); 
-                 GetDlgItemText (hWndDlg,IDC_CITY,City,128); 
-                 ExpandText(pStreet);
-				 if ((pPar = strrchr (pStreet,'(')))
-					 *pPar = 0;
-				 if ((pPar = strrchr (pStreet,'[')))
-					 *pPar = 0;
-                 ExpandText(HouseNum); 
-                 OneSpace (pStreet);
-                 OneSpace (HouseNum); 
-                 ExpandText(City);  
-                 ExpandText(ZIP);      
-                 match = 0;
-				 nPartsRemoved=0;
-                 if (!_fstricmp (HouseNum,"STREET")) 
-                 	pStreet = GetHouseAndStreet (pStreet,HouseNum);
-                 _fstrcpy (OrigStreet,pStreet); 
-               	 MunicNum = GetMunicFromName (City);    
-        		 if (*HouseNum || !*pStreet)
-        		 {   
-        TryAgain:
-					 match = ADD_MATCH (pStreet,HouseNum,City,ZIP,MOPT,
-					 					&hMatch,&StreetNum,&MunicNum,UsePointBased,UseNetBased,0,0,0); 
-					 if (!match && RemoveLastPart && nPartsRemoved < 2)
-					 {
-					 	LPSTR	pSpace=_fstrrchr (pStreet,' '); 
-					 	
-					 	if (pSpace)
-					 	{
-					 		*pSpace = 0;  
-					 		GSSiGlobFree (&hMatch);
-					 		nPartsRemoved++;
-					 		goto TryAgain;
-					 	}
-					 }
-				 }
-				 else if (SeparateOnFromToStreets (pStreet,OnStreet,Street1,Street2))
-					 match = OFT_MATCH (OnStreet,Street1,Street2,City,0,MOPT,&hMatch,&OnStreetNum,&StreetNum1,&StreetNum2,&MunicNum,0,0,0,0); 
-			 	 else if (SeparateIntStreets (pStreet,Street1,Street2))
-					 match = INT_MATCH (Street1,Street2,City,0,MOPT,&hMatch,&StreetNum1,&StreetNum2,&MunicNum); 
-			 	 else if (FoundUserAssignedAddress (0,Street,MunicNum,FALSE,&hMatch))
-			 	     match = 1;
+				MOPT = SendDlgItemMessage(hWndDlg, IDC_MOPT, CB_GETCURSEL, 0, 0) + 1;
+				if (MOPT > 2)
+					RemoveLastPart = TRUE;
+				SetDlgItemText(hWndDlg, IDC_PROCESS_MESS, "Loading Data");
+				CloseDataFile(TRUE, &hSQL);
+				GetDlgItemText(hWndDlg, IDC_SQL, (LPSTR)str, 256);
+				pSQL = str;
+				if (!_fstrcmp(pSQL, "ALL ROWS"))
+					*pSQL = 0;
+				hSQL = 0;
+				ExpandText(pSQL);
+				if (!OpenDataFile(IMDataFile, pSQL, BT_READ, &hSQL))
+				{
+					GSSiMsgBox(GetFocus(), "Cannot open data file", 0, MB_ICONQUESTION | MB_OK, 0);
+					break;
+				}
+				AutoEdit = SendDlgItemMessage(hWndDlg, IDC_AUTOEDIT, BM_GETCHECK, 0, 0L);
+				if (!OpenStreetSegmentTable(FALSE, &OpenedSeg))
+					break;
+				if (!OpenNetIntersect(NetworkID, FALSE, &Opened))
+					break;
+				OpenUserDefinedAddress(FALSE, &OpenedUAA);
+				OpenSegMaxIndex(&OpenedSM);
+				OpenStreetPolys(&OpenedSP);
+				GetDlgItemText(hWndDlg, IDC_KEY_FIELD, str, 256);
+				if (!*str)
+					OrigKeyLen = 2;
+				else if (_fstrchr(str, '@'))
+					OrigKeyLen = 100;
+				else
+					OrigKeyLen = 64;
+				UseNetBased = SendDlgItemMessage(hWndDlg, IDC_USENETWORK_BASED, BM_GETCHECK, 0, 0L);
+				SelectOne = SendDlgItemMessage(hWndDlg, IDC_SELECT_ONE, BM_GETCHECK, 0, 0L);
+				if ((UsePointBased = SendDlgItemMessage(hWndDlg, IDC_USEPOINT_BASED, BM_GETCHECK, 0, 0L)))
+				{
+					GWFLDINFO FieldInfo;
 
-				 _fmemset (pAMER,0,(size_t)lpGWDHead->Reclen);
-			//	 pAMER->RecordNum = lineno; 
-				 _fstrncpy (pAMER->Street,OrigStreet,64);
-				 _fstrncpy (pAMER->House,HouseNum,12);
-				 _fstrncpy (pAMER->City,City,32);
-				 _fstrncpy (pAMER->ZIP,ZIP,12);
-				 pAMER->AM.PartsRemoved = nPartsRemoved;
-                 GetDlgItemText (hWndDlg,IDC_KEY_FIELD,str,256);  
-                 if (!*str || !_fstricmp (str,"%RECORDOFFSET"))
-                 { 
-                 	LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL); 
-                 	
-                 	ltoa (SQLPtr->Offset,str,10);
-                 	GlobalUnlock (hSQL);
-                 }
-                 else
-                 	ExpandText (str);
-				 SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[0],str,FALSE,FALSE); 
-		 		 SetFieldValFromCharAndName(lpGWDHead,"OriginalFileKey",str,FALSE);
- //                _fstrncpy (pAMER->OrigKey,str,OrigKeyLen);
-				 if (match > 1)
-				 {
-					 DPOINT p = {0,0};
+					if (!OpenAddressFilesPID(hWndDlg))
+						break;
+					if (GWDGetFieldInfoFromName(hPIDAddDB, AddUDIVar, &FieldInfo, &AddUDIVarIndex))
+					{
+						AddUDILength = FieldInfo.Len;
+					}
 
-					 pMatch = (LPADDMATCH)GlobalLock (hMatch); 
-					 for (i=0;i<match;i++)
-					 {
-						 p.x += pMatch[i].Point.x;
-						 p.y += pMatch[i].Point.y;
-					 }
-					 p.x /= match;
-					 p.y /= match;
-					 for (i=0;i<match;i++)
-					 {
-						 double d = ldistp (p,pMatch[i].Point);
-						 if (d > GetGlobalDVal2 ("[%AddMatchAverageDist]",25))
-							 goto OutOfRange;
-					 }
-					 pMatch[0].Point = p;
-					 match = 1;
-OutOfRange:
-					 GlobalUnlock (hMatch);
-				 }
-				 switch (match)
-				 {  
-				 	case -1:
-				 		NumInvalid++;
-				 		goto NextStep;
-				 		break;
-				 	case 1:
-				 		NumMatched++;
-				 		pMatch = (LPADDMATCH)GlobalLock (hMatch); 
-				 		pAMER->AM = *pMatch;  
-				 		if (UseStoredResults)
-				 		{   
-				 			if (_fstrlen (pStreet) <= STORED_STREET_LEN && 
-				 				_fstrlen (HouseNum) <= STORED_HOUSE_LEN &&
-				 				_fstrlen (City) <= STORED_CITY_LEN &&
-				 				_fstrlen (ZIP) <= STORED_ZIP_LEN)
-				 			{
-				 			}
+				}
+				if (!AddUDILength)
+					UsePointBased = FALSE;
+				if (SendDlgItemMessage(hWndDlg, IDC_NEW, BM_GETCHECK, 0, 0L))
+				{
+					if (!CreateADD_MATCHTable(DestName, BadNames, "KEY(B4)", AddUDILength))
+					{
+						GSSiMsgBox(GetFocus(), "Unable to create destination file", 0, MB_ICONQUESTION | MB_OK, 0);
+						break;
+					}
+					GetFieldIDsFromNames(DestName, &hKeyFields, 0, "MatchCode;KEY");
+					GWDAddIndex(DestName, hKeyFields, 1, 0);
+					GSSiGlobFree(&hKeyFields);
+				}
+				hDBDest = OpenGWDatabase(DestName, BT_WRITE);
+				if (!hDBDest)
+				{
+					GSSiMsgBox(GetFocus(), "Cannot open destination file", 0, MB_ICONQUESTION | MB_OK, 0);
+					break;
+				}
+				//			    hBTBadNames = BT_OPEN (BadNames,0,BT_WRITE,0);
+				lpGWDHead = (LPGWDHEADER)GlobalLock(hDBDest);
+
+				EnableWindow(GetDlgItem(hWndDlg, IDC_EXIT), FALSE);
+				EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+				EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), TRUE);
+
+				if (First)
+				{
+					HCURSOR	OldCursor;
+
+					OldCursor = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+					TotAddLen = NumSQLRows(hSQL);
+					GSSiSetCursor(OldCursor);
+				}
+				First = FALSE;
+				SetDlgItemText(hWndDlg, IDC_PROCESS_MESS, "Loading Data");
+
+				pAMER = (LPADDMATCHEDITREC)&lpGWDHead->GWDData[lpGWDHead->pFldInfo->Len];
+
+				Processing = TRUE;
+				NewRefno = 0;
+				Done = FALSE;
+				//StartFastPick (65);
+				NumMatched = NumNoMatch = NumInvalid = NumMultMatch = 0;
+			NextLine:
+				if (!FetchDBRec(hSQL) || !ContinueProcessing)
+					goto EndFile;
+
+				lineno++;
+				GetDlgItemText(hWndDlg, IDC_STREET, Street, 256);
+				pStreet = Street;
+				GetDlgItemText(hWndDlg, IDC_HOUSE_NUM, HouseNum, 256);
+				GetDlgItemText(hWndDlg, IDC_ZIP, ZIP, 128);
+				GetDlgItemText(hWndDlg, IDC_CITY, City, 128);
+				ExpandText(pStreet);
+				if ((pPar = strrchr(pStreet, '(')))
+					*pPar = 0;
+				if ((pPar = strrchr(pStreet, '[')))
+					*pPar = 0;
+				ExpandText(HouseNum);
+				OneSpace(pStreet);
+				OneSpace(HouseNum);
+				ExpandText(City);
+				ExpandText(ZIP);
+				match = 0;
+				nPartsRemoved = 0;
+				if (!_fstricmp(HouseNum, "STREET"))
+					pStreet = GetHouseAndStreet(pStreet, HouseNum);
+				_fstrcpy(OrigStreet, pStreet);
+				MunicNum = GetMunicFromName(City);
+				if (*HouseNum || !*pStreet)
+				{
+				TryAgain:
+					match = ADD_MATCH(pStreet, HouseNum, City, ZIP, MOPT,
+						&hMatch, &StreetNum, &MunicNum, UsePointBased, UseNetBased, 0, 0, 0);
+					if (!match && RemoveLastPart && nPartsRemoved < 2)
+					{
+						LPSTR	pSpace = _fstrrchr(pStreet, ' ');
+
+						if (pSpace)
+						{
+							*pSpace = 0;
+							GSSiGlobFree(&hMatch);
+							nPartsRemoved++;
+							goto TryAgain;
+						}
+					}
+				}
+				else if (SeparateOnFromToStreets(pStreet, OnStreet, Street1, Street2))
+					match = OFT_MATCH(OnStreet, Street1, Street2, City, 0, MOPT, &hMatch, &OnStreetNum, &StreetNum1, &StreetNum2, &MunicNum, 0, 0, 0, 0);
+				else if (SeparateIntStreets(pStreet, Street1, Street2))
+					match = INT_MATCH(Street1, Street2, City, 0, MOPT, &hMatch, &StreetNum1, &StreetNum2, &MunicNum);
+				else if (FoundUserAssignedAddress(0, Street, MunicNum, FALSE, &hMatch))
+					match = 1;
+
+				_fmemset(pAMER, 0, (size_t)lpGWDHead->Reclen);
+				//	 pAMER->RecordNum = lineno; 
+				_fstrncpy(pAMER->Street, OrigStreet, 64);
+				_fstrncpy(pAMER->House, HouseNum, 12);
+				_fstrncpy(pAMER->City, City, 32);
+				_fstrncpy(pAMER->ZIP, ZIP, 12);
+				pAMER->AM.PartsRemoved = nPartsRemoved;
+				GetDlgItemText(hWndDlg, IDC_KEY_FIELD, str, 256);
+				if (!*str || !_fstricmp(str, "%RECORDOFFSET"))
+				{
+					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQL);
+
+					ltoa(SQLPtr->Offset, str, 10);
+					GlobalUnlock(hSQL);
+				}
+				else
+					ExpandText(str);
+				SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[0], str, FALSE, FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "OriginalFileKey", str, FALSE);
+				//                _fstrncpy (pAMER->OrigKey,str,OrigKeyLen);
+				if (match > 1)
+				{
+					DPOINT p = { 0, 0 };
+
+					pMatch = (LPADDMATCH)GlobalLock(hMatch);
+					for (i = 0; i < match; i++)
+					{
+						p.x += pMatch[i].Point.x;
+						p.y += pMatch[i].Point.y;
+					}
+					p.x /= match;
+					p.y /= match;
+					for (i = 0; i<match; i++)
+					{
+						double d = ldistp(p, pMatch[i].Point);
+						if (d > GetGlobalDVal2("[%AddMatchAverageDist]", 25))
+							goto OutOfRange;
+					}
+					pMatch[0].Point = p;
+					match = 1;
+				OutOfRange:
+					GlobalUnlock(hMatch);
+				}
+				switch (match)
+				{
+				case -1:
+					NumInvalid++;
+					goto NextStep;
+					break;
+				case 1:
+					NumMatched++;
+					pMatch = (LPADDMATCH)GlobalLock(hMatch);
+					pAMER->AM = *pMatch;
+					if (UseStoredResults)
+					{
+						if (_fstrlen(pStreet) <= STORED_STREET_LEN &&
+							_fstrlen(HouseNum) <= STORED_HOUSE_LEN &&
+							_fstrlen(City) <= STORED_CITY_LEN &&
+							_fstrlen(ZIP) <= STORED_ZIP_LEN)
+						{
+						}
 						//	pStreet
 						//	HouseNum 
 						//	City  
 						//	ZIP      
 
-				 		}
-					   	GlobalUnlock (hMatch);
-				 		IndexArray[1]=FALSE;
-				 		break;
-				 	case 0:    
-				 		NumNoMatch++;
-				 		BadNameKey.RecNum = lineno;
-				 		if (!StreetNum)
-				 		{
-				 			_fstrncpy (BadNameKey.Name,pStreet,40);
-				 			sn = 1;
-				 			//BT_PUT (hBTBadNames,(LPSTR)&BadNameKey,(LPSTR)&sn);
-				 		}
-				 		goto NextStep;
-				 	default:
-				 		NumMultMatch++; 
-						if (SendDlgItemMessage (hWndDlg,IDC_SELECT_ONE,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
-						{
-							int which = UseMult++ % match;
-				 			NumMatched++;
-				 			pMatch = (LPADDMATCH)GlobalLock (hMatch); 
-				 			pAMER->AM = pMatch[which];  
-					   		GlobalUnlock (hMatch);
-				 			IndexArray[1]=FALSE;
-							break;
-						}
-				 		match = 4;
-		NextStep: 
-				 		pAMER->AM.MatchCode = match; 
-				 		pAMER->AM.StreetNum = StreetNum;
-				 		pAMER->AM.Munic = MunicNum;
-				 		_fstrncpy (pAMER->Street,OrigStreet,MAXSTREETNAMELEN);
-				 		IndexArray[1] = TRUE;
-				 		break; 
-				 }
-				 if (hMatch && pMatch->LocationCode > 0)
-				 {
-					 AddDPointToMinMax (&pMatch->Point,&lpGWDHead->FileBounds);
-				 }
-		 		 GSSiGlobFree (&hMatch);
-		 		 GetDlgItemText (hWndDlg,IDC_SYMBOL,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"Symbol",str,FALSE);
-		 		 GetDlgItemText (hWndDlg,IDC_FROMDATE,str,250);
-				 ExpandText (str);
-				 FromDate = max (0,atoi (str));
-				 pAMER->FromDate = FromDate;
-		 		 SetFieldValFromCharAndName(lpGWDHead,"FromDateC",str,FALSE);
-		 		 GetDlgItemText (hWndDlg,IDC_TODATE,str,250);
-				 ExpandText (str);
-				 ToDate = max (FromDate,atoi (str));
-				 pAMER->ToDate = ToDate;
-		 		 SetFieldValFromCharAndName(lpGWDHead,"ToDateC",str,FALSE);
-				 lpGWDHead->MinTime = min (lpGWDHead->MinTime,FromDate);
-				 lpGWDHead->MaxTime = max (lpGWDHead->MaxTime,ToDate);
-		 		 GetDlgItemText (hWndDlg,IDC_NOTE,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"Note",str,FALSE);
-				 GWDAddRecord (lpGWDHead,0,0);//IndexArray);
-//                 sprintf (str,"%ld %ld",TotLen, NumMatched); 
-//                 SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,str);
-                 PctBox (GetDlgItem(hWndDlg,IDC_STATUS1), TotAddLen, NumMatched,0);
-                 PctBox (GetDlgItem(hWndDlg,IDC_STATUS2), TotAddLen, lineno,0);
-                 goto NextLine;
-                 
-        EndFile: 
-				 rtn=ContinueProcessing;
- 				 ContinueProcessing=TRUE;
- 	    		 EndFastPick();
- 				 SetGlobalValueLong ("%NUMMATCH",NumMatched); 
- 				 SetGlobalValueLong ("%NUMNOMATCH",NumNoMatch); 
- 				 SetGlobalValueLong ("%NUMMULTIMATCH",NumMultMatch); 
+					}
+					GlobalUnlock(hMatch);
+					IndexArray[1] = FALSE;
+					break;
+				case 0:
+					NumNoMatch++;
+					BadNameKey.RecNum = lineno;
+					if (!StreetNum)
+					{
+						_fstrncpy(BadNameKey.Name, pStreet, 40);
+						sn = 1;
+						//BT_PUT (hBTBadNames,(LPSTR)&BadNameKey,(LPSTR)&sn);
+					}
+					goto NextStep;
+				default:
+					NumMultMatch++;
+					if (SendDlgItemMessage(hWndDlg, IDC_SELECT_ONE, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L))
+					{
+						int which = UseMult++ % match;
+						NumMatched++;
+						pMatch = (LPADDMATCH)GlobalLock(hMatch);
+						pAMER->AM = pMatch[which];
+						GlobalUnlock(hMatch);
+						IndexArray[1] = FALSE;
+						break;
+					}
+					match = 4;
+				NextStep:
+					pAMER->AM.MatchCode = match;
+					pAMER->AM.StreetNum = StreetNum;
+					pAMER->AM.Munic = MunicNum;
+					_fstrncpy(pAMER->Street, OrigStreet, MAXSTREETNAMELEN);
+					IndexArray[1] = TRUE;
+					break;
+				}
+				if (hMatch && pMatch->LocationCode > 0)
+				{
+					AddDPointToMinMax(&pMatch->Point, &lpGWDHead->FileBounds);
+				}
+				GSSiGlobFree(&hMatch);
+				GetDlgItemText(hWndDlg, IDC_SYMBOL, str, 250);
+				SetFieldValFromCharAndName(lpGWDHead, "Symbol", str, FALSE);
+				GetDlgItemText(hWndDlg, IDC_FROMDATE, str, 250);
+				ExpandText(str);
+				FromDate = max(0, atoi(str));
+				pAMER->FromDate = FromDate;
+				SetFieldValFromCharAndName(lpGWDHead, "FromDateC", str, FALSE);
+				GetDlgItemText(hWndDlg, IDC_TODATE, str, 250);
+				ExpandText(str);
+				ToDate = max(FromDate, atoi(str));
+				pAMER->ToDate = ToDate;
+				SetFieldValFromCharAndName(lpGWDHead, "ToDateC", str, FALSE);
+				lpGWDHead->MinTime = min(lpGWDHead->MinTime, FromDate);
+				lpGWDHead->MaxTime = max(lpGWDHead->MaxTime, ToDate);
+				GetDlgItemText(hWndDlg, IDC_NOTE, str, 250);
+				SetFieldValFromCharAndName(lpGWDHead, "Note", str, FALSE);
+				GWDAddRecord(lpGWDHead, 0, 0);//IndexArray);
+				//                 sprintf (str,"%ld %ld",TotLen, NumMatched); 
+				//                 SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,str);
+				PctBox(GetDlgItem(hWndDlg, IDC_STATUS1), TotAddLen, NumMatched, 0);
+				PctBox(GetDlgItem(hWndDlg, IDC_STATUS2), TotAddLen, lineno, 0);
+				goto NextLine;
 
-				 sprintf (str,"Finished - %ld matched, %ld no hits, %ld multiple hits, %ld invalid data",NumMatched,NumNoMatch,NumMultMatch,NumInvalid);
-                 SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,str);
-                 Done=TRUE;
-                 if (hSQL)
-                 {
-                    CloseDataFile (TRUE, &hSQL);  
-                 } 
-    			 GlobalUnlock (hDBDest);
-				 CloseGWDatabase (hDBDest);  
-				 hDBDest = 0;
+			EndFile:
+				rtn = ContinueProcessing;
+				ContinueProcessing = TRUE;
+				EndFastPick();
+				SetGlobalValueLong("%NUMMATCH", NumMatched);
+				SetGlobalValueLong("%NUMNOMATCH", NumNoMatch);
+				SetGlobalValueLong("%NUMMULTIMATCH", NumMultMatch);
+
+				sprintf(str, "Finished - %ld matched, %ld no hits, %ld multiple hits, %ld invalid data", NumMatched, NumNoMatch, NumMultMatch, NumInvalid);
+				SetDlgItemText(hWndDlg, IDC_PROCESS_MESS, str);
+				Done = TRUE;
+				if (hSQL)
+				{
+					CloseDataFile(TRUE, &hSQL);
+				}
+				GlobalUnlock(hDBDest);
+				CloseGWDatabase(hDBDest);
+				hDBDest = 0;
 				// BT_CLOSE (hBTBadNames);  
-				 CloseStreetNameTable();  
-				 GetMunicFromName (NULL);
-			  	 GetNumZIPsInMunic (0,NULL);
-				 CloseSegMaxIndex (OpenedSM);  
-				 CloseStreetPolys (OpenedSP);
-				 CloseStreetSegmentTable (TRUE);
-				 CloseNetIntersect (Opened);  
-				 CloseUserDefinedAddress (OpenedUAA);
-				 CloseAddressFilesPID ();
-                 DisableHalt = FALSE; 
-				 ContinueProcessing=TRUE;
-				 HaltMapDisplay (FALSE);
-                 EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_DEST),TRUE); 
-                 EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_HELPER),TRUE); 
-        Reset:   
-        		 Processing = FALSE;
-				 ContinueProcessing=TRUE;
-                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
-                 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
-                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
-				 FileIsOpen=FALSE;
-				 if (/*NumMatched != TotAddLen && */AutoEdit)
-					CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndMain, ADD_MATCH_EDITMsgProc);
+				CloseStreetNameTable();
+				GetMunicFromName(NULL);
+				GetNumZIPsInMunic(0, NULL);
+				CloseSegMaxIndex(OpenedSM);
+				CloseStreetPolys(OpenedSP);
+				CloseStreetSegmentTable(TRUE);
+				CloseNetIntersect(Opened);
+				CloseUserDefinedAddress(OpenedUAA);
+				CloseAddressFilesPID();
+				DisableHalt = FALSE;
+				ContinueProcessing = TRUE;
+				HaltMapDisplay(FALSE);
+				EnableWindow(GetDlgItem(hWndDlg, IDC_EDIT_DEST), TRUE);
+				EnableWindow(GetDlgItem(hWndDlg, IDC_EDIT_HELPER), TRUE);
+			Reset:
+				Processing = FALSE;
+				ContinueProcessing = TRUE;
+				EnableWindow(GetDlgItem(hWndDlg, IDC_EXIT), TRUE);
+				EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+				EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), FALSE);
+				FileIsOpen = FALSE;
+				if (/*NumMatched != TotAddLen && */AutoEdit)
+				{
+					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndMain, ADD_MATCH_EDITMsgProc);
+					PostMessage(hDlg, WM_COMMAND, IDC_ISMODELESS, 0);
+				}
 		         	//PostMessage(hWndDlg, WM_COMMAND, IDC_EDIT_DEST, 0L);
 				 if (*AutoExportName)
 		         	PostMessage(hWndDlg, WM_COMMAND, IDC_EXIT, 0L);

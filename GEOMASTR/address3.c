@@ -81,14 +81,14 @@ BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			hSubWnd = 0;
 			SendDlgItemMessage(hWndDlg, IDC_MATCHLIST, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
 
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Intersection");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "House - Street Name");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Parcel ID");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Taxpayer Name");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, "Common Name");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, "Zoom to location at 200 scale");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, "Place Pin at location");
-			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, "Create StreetView insert");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, (LPARAM)"Intersection");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, (LPARAM)"House - Street Name");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, (LPARAM) "Parcel ID");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, (LPARAM)"Taxpayer Name");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_ADDSTRING, 0, (LPARAM)"Common Name");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, (LPARAM) "Zoom to location at 200 scale");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, (LPARAM) "Place Pin at location");
+			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_ADDSTRING, 0, (LPARAM) "Create StreetView insert");
 			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_TYPE, LB_SETCURSEL, geocodeType - 1, 0);
 			SendDlgItemMessage(hWndDlg, IDC_GEOCODE_ACTION, LB_SETSEL, TRUE, 0);
 

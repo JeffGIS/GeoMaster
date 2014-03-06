@@ -1441,7 +1441,7 @@ Show:
            	else
            	{
 	           	RecNo=1;
-	       		BasicDataDisplay (DBName,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL);
+	       		BasicDataDisplay (DBName,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,120);
 				SetPhotoAndNotesFiles (hWndDlg,IDENTIFY_DATA,IDC_PHOTO1,IDC_PHOTO2,IDC_NOTES,photoFile1,photoFile2,notesFile);
        		}
        		CloseMap(FALSE);
@@ -1472,14 +1472,14 @@ Show:
  				 sprintf (cmd,"$IMAGE()");
 				 ExpandText (cmd);
             	 RecNo++;
-       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL);
+       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,80);
 				 SetPhotoAndNotesFiles (hWndDlg,IDENTIFY_DATA,IDC_PHOTO1,IDC_PHOTO2,IDC_NOTES,photoFile1,photoFile2,notesFile);
                  break;
             case IDENTIFY_PRIOR: /* Button text: "Next"                  */  
   				 sprintf (cmd,"$IMAGE()");
 				 ExpandText (cmd);
             	 RecNo--;
-       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL);
+       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,80);
 				 SetPhotoAndNotesFiles (hWndDlg,IDENTIFY_DATA,IDC_PHOTO1,IDC_PHOTO2,IDC_NOTES,photoFile1,photoFile2,notesFile);
                  break;
             case IDCANCEL:
@@ -1516,6 +1516,12 @@ Show:
 							 {
 								 sprintf (str,"Update of field %s not allowed",SetFieldName);
 								 MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
+								 break;
+							 }
+							 if (UpdateType == 3)
+							 {
+								 sprintf(cmd, "$WEB(%s)", lpTab);
+								 ProcessText(cmd);
 								 break;
 							 }
 							 GetDlgItemText (hWndDlg,IDENTIFY_LINE0,DBName,MAX_PATH);

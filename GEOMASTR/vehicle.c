@@ -2867,7 +2867,7 @@ BOOL SaveMapServerFile(void)
 
 			SelectObject(CurView->hDC, hBM);
 			if (MapServerCalledFromWnd)
-				PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(0, MAPSERVER_RETURNED_IMAGE), MapserverRequestID);
+				PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(MAPSERVER_RETURNED_IMAGE, MapserverVPID), MapserverRequestID);
 			return TRUE;
 		}
 	}
@@ -2877,7 +2877,7 @@ BOOL SaveMapServerFile(void)
 
 BOOL ShowBufferedScreen (BOOL Display,BOOL resetDC,int VPID,LPRECT pUpdateRect)
 {
-	if (BufferedScreen && !MemMap)
+	if (BufferedScreen && !MemMap && (int)hFullWindowBitMap != -1)
 	{
 		HDC		hDC, hDCBuf;
 		RECT	Rect; 
@@ -2915,9 +2915,11 @@ BOOL ShowBufferedScreen (BOOL Display,BOOL resetDC,int VPID,LPRECT pUpdateRect)
 		hDCBuf = hDCScreenBuffer;//ScreenBufferDC (CurView->hWnd,hDC);  
 		for (iview=0;iview<*pNumViewports;iview++)  
 			pViewports[iview]->hDC = hDCBuf;    
-	  	SelectClipRgn (hDC,hRgnMain);
+		SelectClipRgn(hDC, hRgnMain);
+		//dumpmemdc(hDCBuf);
         if (Display)
 		{
+			SetDisplayMode(CurView->hDC, GF_SCREENMODE);
 			if (pUpdateRect)
 				ii=BitBlt(hDC, pUpdateRect->left, pUpdateRect->top,
 							 RECTWIDTH(pUpdateRect),RECTHEIGHT(pUpdateRect),

@@ -3990,7 +3990,7 @@ int GetMapQuestLocation(LPSTR FullAddressIN, LPSTR Quality, LPDPOINT pPoint, int
 	return rtn;
 }
 
-static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoints, LPDPOINT pVPPoints, const char * formattedAddress,LPSTR locType,LPSTR types)
+static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoints, LPDPOINT pVPPoints, char * formattedAddress,LPSTR locType,LPSTR types)
 {
 	unsigned int i;
 	char *text;

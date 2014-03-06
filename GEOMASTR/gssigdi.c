@@ -109,7 +109,7 @@ static	int		CurVPOrgEx_x, CurVPOrgEx_y;
 static	int		CurWINExtEx_x, CurWINExtEx_y;
 static	int		CurWINOrgEx_x, CurWINOrgEx_y;
 static	HFILE	FidSTG=HFILE_ERROR;
-
+static	BOOL	wantnextbltblt = FALSE;
 
 #pragma pack(2)
 static	struct {short opt;
@@ -684,8 +684,14 @@ BOOL	 WINAPI GSSiStretchBlt(__in HDC hdcDest, __in int xDest, __in int yDest, __
 	return StretchBlt(hdcDest,xDest, yDest,wDest, hDest, hdcSrc,xSrc, ySrc, wSrc,hSrc, rop);
 }
 
+void wantnextblt(void)
+{
+	wantnextbltblt = TRUE;
+}
 BOOL	WINAPI GSSiBitBlt( __in HDC hdc, __in int x, __in int y, __in int cx, __in int cy, __in_opt HDC hdcSrc, __in int x1, __in int y1, __in DWORD rop)
 {
+	if (wantnextbltblt)
+		wantnextbltblt = FALSE;
 	return BitBlt(hdc, x, y, cx, cy,  hdcSrc, x1, y1, rop);
 }
 
