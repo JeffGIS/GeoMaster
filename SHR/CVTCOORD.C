@@ -41,6 +41,23 @@ void SetVPRotation (double AZ)
 	return;
 }
   
+void FreePROJ(int id)
+{
+	int i;
+	projPJ pjsave;
+
+	if (!PRJ_PROJ4DEF[id])
+		return;
+	pjsave = PRJ_PROJ4DEF[id];
+	PRJ_PROJ4DEF[id] = 0;
+	for (i = 0; i < MAX_PROJ; i++)
+	{
+		if (pjsave == PRJ_PROJ4DEF[i])
+			return;
+	}
+	pj_free(pjsave);
+	return;
+}
 
 BOOL InitProj4CoordConv (BOOL Delete)
 {
@@ -48,20 +65,17 @@ BOOL InitProj4CoordConv (BOOL Delete)
 
 	if (Delete)
 	{
-		for (id = 0;id < MAXPROJ4PROJ;id++)
-			if (*projid[id])
-			{
-				pj_free(projdef[id]);
-			}
+		for (id = 0; id < MAX_PROJ; id++)
+			FreePROJ(id);
 		return TRUE;
 	}
 //	if (!(projdef[1] = pj_init_plus("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ")) )
 //	if (!(projdef[1] = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs")) )
 
-	if (!(projdef[1] = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs")) )
+	if (!(PRJ_PROJ4DEF[GOOGLEMAPSPROJECTION] = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs")))
        return FALSE;
 	strcpy (projid[1],"GoogleMaps");
-    if (!(projdef[0] = pj_init_plus("+proj=latlong +datum=WGS84")) )
+	if (!(PRJ_PROJ4DEF[LATLONPROJECTION] = pj_init_plus("+proj=latlong +datum=WGS84")))
        return FALSE;
 	strcpy (projid[0],"LATLON");
 	return TRUE;
@@ -265,9 +279,19 @@ long ok;
      ok = ConvertCoordInit();
 	 if (!ok && !NeedToConvertCoord (from,to))
 		 return ok;
- 	 if (!ok && from < 0) // indicates proj4 projection
+	 if (!ok && PRJ_TYPE[from] == PROJ4PROJECTION) // indicates proj4 projection
 	 {
-		 ok = pj_transform(projdef[abs(from)], projdef[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL );
+		 if (PRJ_TYPE[to] == PROJ4PROJECTION)
+		 {
+			 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[to], 1, 1, &DPoint->x, &DPoint->y, NULL);
+			 {
+#if ENABLETRACE
+				 GSSiExitProg(1335);
+#endif
+				 return ok;//unable to properly open the files   
+			 }
+		 }
+		 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL);
 		 DPoint->x *= RAD_TO_DEG;
 		 DPoint->y *= RAD_TO_DEG;
 		 from = 2;
@@ -279,9 +303,9 @@ GSSiExitProg (1335);
 #endif
      	return ok;//unable to properly open the files   
 }
-	 if (to < 0)
+	 if (PRJ_TYPE[to] == PROJ4PROJECTION)
 	 {
-		 saveto = abs (to);
+		 saveto = to;
 		 to = 2;
 	 }
      SaveFromUnits=PRJ_UNITS[from];
@@ -348,7 +372,7 @@ Exit:
 	 {
 		 DPoint->x *= DEG_TO_RAD;
 		 DPoint->y *= DEG_TO_RAD;
- 		 ok = pj_transform(projdef[LATLONPROJECTION],projdef[saveto],  1, 1, &DPoint->x, &DPoint->y, NULL );
+		 ok = pj_transform(PRJ_PROJ4DEF[LATLONPROJECTION], PRJ_PROJ4DEF[saveto], 1, 1, &DPoint->x, &DPoint->y, NULL);
 	 }
      *DPoint = TranPoint (DPoint,hTranRotation);
      

@@ -1524,7 +1524,7 @@ BOOL HaveNonBKColorInGoogleBounds (LPMNMXCORD pGoogleBounds,HDIB32 hDib32)
 	BoundsToPoints (pGoogleBounds,points,0);
 	for (i=0;i<4;i++)
 	{
-		ConvertCoord (&points[i],-1,1);
+		ConvertCoord(&points[i], GOOGLEMAPSPROJECTION, 1);
 		screenPt = BasePtToScreenPt (&points[i]);
 		AddPointToRect (screenPt,&screenRect);
 	}
@@ -2335,6 +2335,8 @@ void AddGraphicsCmd (HWND hWnd,LPSTR Cmd,BOOL Keydef, UINT StartPrompt)
 	LPSTR	pPrevCmd; 
 	BOOL	SameCmd=FALSE;
 	
+	if (hWnd)
+		SetFocus(hWnd);
 	_fstrcpy (pCmdStr->Cmd,Cmd);
 	pCmdStr->EndLoc = len;
 	pCmdStr->MyHandle = hCmd;  

@@ -70,10 +70,10 @@
  * Use _vsnprintf() in Windows environment.
  */
 
-#include "cpl_error.h"
-#include "cpl_vsi.h"
-#include "cpl_conv.h"
-#include "cpl_multiproc.h"
+#include "cpl_error_fwd.h"
+#include "cpl_vsi_fwd.h"
+#include "cpl_conv_fwd.h"
+#include "cpl_multiproc_fwd.h"
 
 #if defined(WIN32CE)
 #  include "cpl_wince.h"

@@ -87,8 +87,8 @@
  *
  **********************************************************************/
 
-#include "cpl_multiproc.h"
-#include "cpl_conv.h"
+#include "cpl_multiproc_fwd.h"
+#include "cpl_conv_fwd.h"
 
 #if !defined(WIN32CE)
 #  include <time.h>

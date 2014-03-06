@@ -305,7 +305,7 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 
-	MergeImageIntoViewport(0,0,0);
+	MergeImageIntoViewport(0, 0, 0, 0);
 
 	ProcessText ("$LINKLINES(CLEAR)");
 
@@ -1988,7 +1988,9 @@ BOOL RedisplayViewport (BOOL Imediate, BOOL OnePass)
     HDC	hDC,hDCMain = GetDC (hWndMain);  
 	BOOL	SaveDisplay[MAX_VIEWPORTS];
     
-    if (MemMap)
+	if (!Imediate)
+		InImediate = FALSE;
+	if (MemMap)
     	hDC = hdcMemMap; 
 	else if (!BufferedScreen)
 		hDC = CurView->hDC;
@@ -2314,7 +2316,9 @@ void RedisplayViewports (BOOL Imediate)
 #endif
 {   short iview;
 
- 	ClearFullWindowBitmap (0);
+	if (!Imediate)
+		InImediate = FALSE;
+	ClearFullWindowBitmap(0);
     NumViewportsToDisplay = *pNumViewports;
     DisplayViewID=0;
     for (iview=0;iview<NumViewportsToDisplay;iview++)
@@ -3287,7 +3291,7 @@ POINT BasePtToWinPt (LPDPOINT WPoint)
      	case 3: //google maps projection
 			{
 			PPoint = *WPoint;
-			ConvertCoord (&PPoint,1,-1);
+			ConvertCoord(&PPoint, 1, GOOGLEMAPSPROJECTION);
      		TRANS2 (WPoint->x,WPoint->y,&WinPointDt.x,&WinPointDt.y,CurView->hTranBaseToVP);
      		TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranProjectionToScreen);
 			}
@@ -3341,7 +3345,7 @@ DPOINT BasePtToWinPtD (LPDPOINT WPoint)
      		break;
 		case 3:
 			PPoint = *WPoint;
-			ConvertCoord (&PPoint,1,-1);
+			ConvertCoord(&PPoint, 1, GOOGLEMAPSPROJECTION);
      		TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranProjectionToScreen);
 			break;
      }
@@ -5043,6 +5047,9 @@ BOOL DisplayViewport (HWND hWnd, HDC hDC, BOOL Immediate)
 { 
 BOOL    WT; 
 static	short   FirstDisplayPass=1;
+
+if (!Immediate)
+	InImediate = FALSE;
 
 	if (NumViewportsToDisplay < 0)
 		goto NextView;

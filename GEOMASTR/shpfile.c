@@ -241,6 +241,7 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 	int		itype;
 	HFILE	Fid; 
 	BOOL	FileIsIndex;
+	BOOL	havePrj = FALSE;
 	struct _stati64    statParmFile; 
 
     if (!SHPFileName)
@@ -288,8 +289,13 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 			GetGlobalCVal ("[%DefaultShapeAreaSymbol]",SHPParms,"PARCEL"); 
 		break;
 	}
-	GetGlobalCVal ("[%DefaultShapeProjection]",Projection,"BASEPROJ"); 
-	LoadProjection(0,Projection); 
+	if (!SHPOpenPrj(SHPFileName, 0))
+	{
+		GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+		LoadProjection(0, Projection);
+	}
+	else
+		havePrj = TRUE;
 	GetGlobalCVal ("[%DefaultShapeUnits]",Units,"FEET"); 
 	PGDBCnvFac=1;
 	if (!_fstricmp (Units,"FEET"))
@@ -368,19 +374,25 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
     GSSifstat (Fid,&statParmFile);
     SHPParmTime = statParmFile.st_mtime;
 	fgetstring (Projection,MAX_PATH,Fid); 
-	if (!*Projection)
-		GetGlobalCVal ("[%DefaultShapeProjection]",Projection,"BASEPROJ"); 
-	LoadProjection(0,Projection); 
+	if (!havePrj)
+	{
+		if (!*Projection)
+			GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+		LoadProjection(0, Projection);
+	}
 	SHPProjectionIsBase = IS_BASE[0];
 	fgetstring (Units,32,Fid);
 	if (!*Units)
 		GetGlobalCVal ("[%DefaultShapeUnits]",Units,"FEET"); 
-	if (!_fstricmp (Units,"FEET"))
-		PRJ_UNITS[0] = 1;
-	else if (!_fstricmp (Units,"METERS"))
-		PRJ_UNITS[0] = 2; 
-	else
-		PRJ_UNITS[0] = 4;
+	if (!havePrj)
+	{
+		if (!_fstricmp(Units, "FEET"))
+			PRJ_UNITS[0] = 1;
+		else if (!_fstricmp(Units, "METERS"))
+			PRJ_UNITS[0] = 2;
+		else
+			PRJ_UNITS[0] = 4;
+	}
 	fgetstring (SHPRefno,255,Fid); 
 	if (IndexEntryStartRef != LONG_MAX)
 		SHPBaseRefno = IndexEntryStartRef;

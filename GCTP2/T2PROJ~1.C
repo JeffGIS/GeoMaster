@@ -22,7 +22,7 @@ extern long FAR PASCAL NADCON (long *KEY, double *TMP_CORDS);
 #define FTM 3.04800609601219e-1
 #define COUNTY 50
 //{Geographic Coordinate System
-#define GEO 0
+#define GEOx 0
 #define DEG 4
 #define DEG_UNITS 4
 #define PRJ_GEO 0
@@ -381,7 +381,21 @@ C-------------------------------        */
 //C---------------------
 //C   SUBROUTINE START
 //C---------------------
-
+	   if (*INNAME == '+')
+	   {
+		   if (PRJ_PROJ4DEF[ID])
+			   FreePROJ(ID);
+		   if (!(PRJ_PROJ4DEF[ID] = pj_init_plus(INNAME)))
+		   {
+			   PRJ_PROJ4DEF[ID] = 0;
+			   return 4;
+		   }
+		   IS_BASE[ID] = FALSE;
+		   PRJ_TYPE[ID] = PROJ4PROJECTION;
+		   PRJ_SPHEROID[ID] = PRJ_SPHEROID[1];
+		   PRJ_ZONE[ID] = PRJ_ZONE[1];
+		   return 0;
+	   }
        _fstrcpy(NAME,INNAME); 
 	   ExpandText (NAME);
        _fstrupr (NAME);   
@@ -397,6 +411,7 @@ C-------------------------------        */
        {     
        		IS_BASE[ID]=TRUE; 
        		PRJ_TYPE[ID]=PRJ_TYPE[1];
+			PRJ_PROJ4DEF[ID] = PRJ_PROJ4DEF[1];
 			PRJ_SPHEROID[ID]=PRJ_SPHEROID[1];
 			PRJ_ZONE[ID]=PRJ_ZONE[1];
 			PRJ_GRND_TO_GRID[ID]=PRJ_GRND_TO_GRID[1];
@@ -505,7 +520,15 @@ GotFirstLine:
 
       // READ (99,*,END=2000) PRJ_TYPE[ID]; 
         PRJ_TYPE[ID]= atol(str);
-        if(PRJ_TYPE[ID] == 0)
+		if (PRJ_TYPE[ID] == -1)
+		{
+			PRJ_TYPE[ID] = PROJ4PROJECTION;
+			PRJ_UNITS[ID] = 2;
+			_fstrcpy(PROJECTION_UNITS[ID], "METERS");
+			PRJ_PROJ4DEF[ID] = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs");
+			goto S190;
+		}
+        else if(PRJ_TYPE[ID] == 0)
         { 
            PRJ_UNITS[ID] = 4;
            _fstrcpy(PROJECTION_UNITS[ID],"DEGREE");
@@ -624,28 +647,31 @@ S190:
        if(PRJ_TYPE[ID] == 1 )
            if(PRJ_ZONE[ID] == 0) PRJ_ZONE[ID] = 61;
        else 
-           if (PRJ_TYPE[ID] > 2 && PRJ_TYPE[ID] != 50) PRJ_ZONE[ID] = 61;
+		   if (PRJ_TYPE[ID] > 2 && PRJ_TYPE[ID] != 50 && PRJ_TYPE[ID] != PROJ4PROJECTION) PRJ_ZONE[ID] = 61;
         GSSiClose(lpFile1);
 	   if (ID != 1 && !IS_BASE[ID])
 	   {
-		   IS_BASE[ID] = TRUE;
-		   if (PRJ_GRND_TO_GRID[1] != PRJ_GRND_TO_GRID[ID])
-			   IS_BASE[ID] = FALSE;
-		   if (PRJ_X_BIAS[1] != PRJ_X_BIAS[ID])
-			   IS_BASE[ID] = FALSE;
-		   if (PRJ_Y_BIAS[1] != PRJ_Y_BIAS[ID])
-			   IS_BASE[ID] = FALSE;
-		   if (PRJ_SPHEROID[1] != PRJ_SPHEROID[ID])
-			   IS_BASE[ID] = FALSE;
-		   if (PRJ_TYPE[1] != PRJ_TYPE[ID])
-			   IS_BASE[ID] = FALSE;
-		   if (PRJ_UNITS[1] != PRJ_UNITS[ID])
-			   IS_BASE[ID] = FALSE;
-		   if (PRJ_SPHEROID[1] != PRJ_SPHEROID[ID])
-			   IS_BASE[ID] = FALSE;
-	       for( I = 0; I < 15;I++)
-				if (PRJ_PARMS[1][I] != PRJ_PARMS[ID][I])
-					IS_BASE[ID] = FALSE;
+		   if (PRJ_TYPE[1] != PROJ4PROJECTION && PRJ_TYPE[ID] != PROJ4PROJECTION)
+		   {
+			   IS_BASE[ID] = TRUE;
+			   if (PRJ_GRND_TO_GRID[1] != PRJ_GRND_TO_GRID[ID])
+				   IS_BASE[ID] = FALSE;
+			   if (PRJ_X_BIAS[1] != PRJ_X_BIAS[ID])
+				   IS_BASE[ID] = FALSE;
+			   if (PRJ_Y_BIAS[1] != PRJ_Y_BIAS[ID])
+				   IS_BASE[ID] = FALSE;
+			   if (PRJ_SPHEROID[1] != PRJ_SPHEROID[ID])
+				   IS_BASE[ID] = FALSE;
+			   if (PRJ_TYPE[1] != PRJ_TYPE[ID])
+				   IS_BASE[ID] = FALSE;
+			   if (PRJ_UNITS[1] != PRJ_UNITS[ID])
+				   IS_BASE[ID] = FALSE;
+			   if (PRJ_SPHEROID[1] != PRJ_SPHEROID[ID])
+				   IS_BASE[ID] = FALSE;
+			   for (I = 0; I < 15; I++)
+				   if (PRJ_PARMS[1][I] != PRJ_PARMS[ID][I])
+					   IS_BASE[ID] = FALSE;
+		   }
 	   }
        return 0;
 }       

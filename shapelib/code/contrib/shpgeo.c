@@ -1,3 +1,6 @@
+#include "graphint.h"
+#include "translat.h"
+#include "extrndb.h"
 /******************************************************************************
  * Copyright (c) 1999, Carl Anderson
  *

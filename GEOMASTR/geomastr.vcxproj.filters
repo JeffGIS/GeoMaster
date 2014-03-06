@@ -1299,6 +1299,12 @@
     <ClCompile Include="DatedDisplay.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shpproj.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OGRCoordConversion.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">

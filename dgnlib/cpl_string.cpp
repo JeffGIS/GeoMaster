@@ -213,8 +213,8 @@
  *
  **********************************************************************/
 
-#include "cpl_string.h"
-#include "cpl_vsi.h"
+#include "cpl_string_fwd.h"
+#include "cpl_vsi_fwd.h"
 
 #if defined(WIN32CE)
 #  include <wce_errno.h>

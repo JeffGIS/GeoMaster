@@ -88,9 +88,9 @@
  *
  **********************************************************************/
 
-#include "cpl_conv.h"
-#include "cpl_string.h"
-#include "cpl_multiproc.h"
+#include "cpl_conv_fwd.h"
+#include "cpl_string_fwd.h"
+#include "cpl_multiproc_fwd.h"
 
 CPL_CVSID("$Id: cpl_path.cpp,v 1.19 2005/07/11 13:52:03 fwarmerdam Exp $");
 

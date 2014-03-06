@@ -5872,7 +5872,7 @@ double CourseOverGroundBase (LPDPOINT pPt1, LPDPOINT pPt2)
 double ConvertDist (double Dist,int opt)
 {   
 //char	DistUnitOpts[5][12]={"FEET","METERS","YARDS","MILES","KILOMETERS"};
-	extern  long  PRJ_UNITS[4];
+	extern  long  PRJ_UNITS[MAX_PROJ];
 	switch (PRJ_UNITS[1])
 	{
 		case 1:
@@ -5913,7 +5913,7 @@ double ConvertDist (double Dist,int opt)
 double ConvertInDist (double Dist,int opt)
 {   
 //char	DistUnitOpts[5][12]={"FEET","METERS","YARDS","MILES","KILOMETERS"};
-	extern  long  PRJ_UNITS[4];
+	extern  long  PRJ_UNITS[MAX_PROJ];
 	if (PRJ_UNITS[1] == 2) //meters
 	switch (opt)
 	{
@@ -6023,7 +6023,7 @@ double ConvertDist2 (double Dist,int from, int to)
 
 double ConvertArea (double area,int opt)   
 {
-	extern  long  PRJ_UNITS[4];
+	extern  long  PRJ_UNITS[MAX_PROJ];
 //char	AreaUnitOpts[6][10]={"SQRFEET","SQRMETERS","SQRYARDS","SQRMILES","SQRKILOS","ACRES"};
 	if (PRJ_UNITS[1] == 1)
 	switch (opt)

@@ -6296,7 +6296,7 @@ FPOINT BasePtToWinPtF (LPDPOINT WPoint)
      		break;
  		case 3:
 			PPoint = *WPoint;
-			ConvertCoord (&PPoint,1,-1);
+			ConvertCoord(&PPoint, 1, GOOGLEMAPSPROJECTION);
      		TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranProjectionToScreen);
 			break;
     } 

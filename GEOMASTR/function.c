@@ -3294,7 +3294,7 @@ SetVis:
 			DPoint.x = x;
 			DPoint.y = y;
 
-			ii = ConvertCoord (&DPoint,2,-1);
+			ii = ConvertCoord (&DPoint,2,GOOGLEMAPSPROJECTION);
 
 			ii = 1;
 			sprintf (txt,"%f\t%f\t%i\t%i",y,x,iy,ix);

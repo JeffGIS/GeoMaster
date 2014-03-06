@@ -49,8 +49,8 @@
  *
  **********************************************************************/
 #include <windows.h>
-#include "cpl_conv.h"
-#include "cpl_string.h"
+#include "cpl_conv_fwd.h"
+#include "cpl_string_fwd.h"
 
 CPL_CVSID("$Id: cpl_dir.cpp,v 1.6 2006/02/19 21:54:34 mloskot Exp $");
 

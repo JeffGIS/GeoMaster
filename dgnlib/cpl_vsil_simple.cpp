@@ -33,7 +33,7 @@
  * $Log: cpl_vsil.cpp,v $
  */
 
-#include "cpl_vsi.h"
+#include "cpl_vsi_fwd.h"
 
 CPL_CVSID("$Id: cpl_vsil.cpp,v 1.6 2006/01/11 00:29:54 fwarmerdam Exp $");
 

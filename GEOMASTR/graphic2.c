@@ -834,6 +834,7 @@ void DisplayCoordinate (LPDPOINT pPoint,POINT CursorPoint)
 	double	Elevation;
 	LPDOUBLE	pElevation;
 	SIZE	txSize;
+	HDC		hDC;
 	
 	if (!CurPassiveFun)
 {
@@ -872,14 +873,15 @@ GSSiExitProg (116);
 
     SaveView=CurView;
     SetCurView (DisplayView);
-	SaveDC (CurView->hDC);
-	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	hDC = GetDC(DisplayView->hWnd);
+	SaveDC (hDC);
+	SetDisplayMode (hDC, GF_TEXTMODE);
     GSSiDeleteObject(&CurView->hRgn);
 	CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	SelectClipRgn (hDC,CurView->hRgn);
   	GSSiDeleteObject(&CurView->hRgn); 
   	if (CD->Refresh || !pPoint || (!SaveView->Type && !LastVPType))
-		FillRectPoly (DisplayView->hDC,&DisplayView->DrawRect,ConvertColor(CurView->BackGroundColor,-1)); 
+		FillRectPoly (hDC,&DisplayView->DrawRect,ConvertColor(CurView->BackGroundColor,-1)); 
     SaveSize = CD->Font.lfHeight;
 	CD->Font.lfHeight = -min (abs(ConvertFontHeightFromPCTofVP (CD->Font.lfHeight,CD->DisplayViewport)),
 							 DisplayView->DrawRect.bottom-DisplayView->DrawRect.top - 1);
@@ -889,10 +891,10 @@ GSSiExitProg (116);
     	Font = 0;   
     CD->Font.lfHeight = SaveSize;
     if (Font)
-	    OldFont = SelectObject(CurView->hDC, Font);
-	OldColor = SetTextColor (CurView->hDC,CD->FontColor);
-    SetBkMode(CurView->hDC, OPAQUE);  
-    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+	    OldFont = SelectObject(hDC, Font);
+	OldColor = SetTextColor (hDC,CD->FontColor);
+    SetBkMode(hDC, OPAQUE);  
+    SetBkColor (hDC,CurView->BackGroundColor);
 	if (pPoint)
 	{   
 		LastDPoint = *pPoint;
@@ -930,9 +932,9 @@ GSSiExitProg (116);
 
 			SetCoordText (Text,CD->LineID[0],OutPoint,CD->ElevationID,pElevation,(short)PRJ_UNITS[1],CD->Units[0],CD->Precision[0],CD->Commas[0],
 							   CD->ElevUnits,CD->ElevPrecision,CD->ElevCommas,CD->MultiLine); 
-			GetTextExtentPoint32 (DisplayView->hDC,Text, _fstrlen(Text),&txSize);
+			GetTextExtentPoint32 (hDC,Text, _fstrlen(Text),&txSize);
 			if (ShowWorldCoord)
-				TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+				TextOut(hDC, x, y, Text, _fstrlen(Text));
 			y += txSize.cy;    
 			pElevation = 0;
 		}
@@ -943,13 +945,13 @@ GSSiExitProg (116);
 			{
 				SetCoordText (Text,CD->LineID[1],OutPoint,CD->ElevationID,pElevation,(short)PRJ_UNITS[2],CD->Units[1],CD->Precision[1],CD->Commas[1],
 							   	   CD->ElevUnits,CD->ElevPrecision,CD->ElevCommas,CD->MultiLine); 
-				GetTextExtentPoint32 (DisplayView->hDC,Text, _fstrlen(Text),&txSize);
+				GetTextExtentPoint32 (hDC,Text, _fstrlen(Text),&txSize);
 				if (ShowWorldCoord)
 				{
 				if (CD->MultiLine)
-					DrawText(DisplayView->hDC,Text, strlen(Text),&DisplayView->DrawRect, DT_LEFT);
+					DrawText(hDC,Text, strlen(Text),&DisplayView->DrawRect, DT_LEFT);
 				else
-					TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+					TextOut(hDC, x, y, Text, _fstrlen(Text));
 				}
 				y += txSize.cy;
 			}
@@ -980,9 +982,9 @@ GSSiExitProg (116);
 						goto Exit;
 					}
 				} 
-				GetTextExtentPoint32 (DisplayView->hDC,Text, _fstrlen(Text),&txSize);
+				GetTextExtentPoint32 (hDC,Text, _fstrlen(Text),&txSize);
 				if (!st && ShowWorldCoord)
-					TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
+					TextOut(hDC, x, y, Text, _fstrlen(Text));
 				y += txSize.cy;
 			}
 		}
@@ -990,8 +992,8 @@ GSSiExitProg (116);
 		{
 			SetCoordText (Text,CD->LineID[3],CurFormatPoint,0,0,(short)PRJ_UNITS[2],CD->Units[3],CD->Precision[3],CD->Commas[3],
 							   CD->ElevUnits,CD->ElevPrecision,CD->ElevCommas,CD->MultiLine); 
-			TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text));
-			GetTextExtentPoint32 (DisplayView->hDC,Text, _fstrlen(Text),&txSize);
+			TextOut(hDC, x, y, Text, _fstrlen(Text));
+			GetTextExtentPoint32 (hDC,Text, _fstrlen(Text),&txSize);
 			y += txSize.cy;
 		}
 	}
@@ -999,15 +1001,16 @@ Exit:
 	if (Font)
 	{
 	    if (OldFont)
-	    	SelectObject(CurView->hDC, OldFont);
+	    	SelectObject(hDC, OldFont);
 	    DeleteObject(Font);
 	}
 	if (CurView)
 	{	
-		SetTextColor (CurView->hDC,OldColor);
-		RestoreDC (CurView->hDC,-1); 
+		SetTextColor (hDC,OldColor);
+		RestoreDC (hDC,-1); 
 	}
     SetCurView (SaveView);
+	ReleaseDC(DisplayView->hWnd, hDC);
 
 {
 #if ENABLETRACE
@@ -1181,6 +1184,7 @@ BOOL DisplayProfileInfo (LPDPOINT pPoint,POINT CursorPoint)
 	short	SaveSize;
 	int		x, y, st; 
 	BOOL	rtn = FALSE;
+	HDC		hDC;
 	
 	if (!CurrentConfig || !CurPassiveFun)
 {
@@ -1219,15 +1223,16 @@ GSSiExitProg (118);
 
     SaveView=CurView;
     SetCurView (DisplayView);
-	SaveDC (CurView->hDC);
-	SetDisplayMode (CurView->hDC, GF_TEXTMODE);
+	hDC = GetDC(DisplayView->hWnd);
+	SaveDC (hDC);
+	SetDisplayMode (hDC, GF_TEXTMODE);
     GSSiDeleteObject(&CurView->hRgn);
 	CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-  	SelectClipRgn (CurView->hDC,CurView->hRgn);
+  	SelectClipRgn (hDC,CurView->hRgn);
   	GSSiDeleteObject(&CurView->hRgn); 
   	if (CD->Refresh || !pPoint)
   	{
-		FillRectPoly (DisplayView->hDC,&DisplayView->DrawRect,ConvertColor(CurView->BackGroundColor,-1));  
+		FillRectPoly (hDC,&DisplayView->DrawRect,ConvertColor(CurView->BackGroundColor,-1));  
 	}
     SaveSize = CD->Font.lfHeight;
 	CD->Font.lfHeight = -min (abs(ConvertFontHeightFromPCTofVP (CD->Font.lfHeight,CD->DisplayViewport)),
@@ -1238,10 +1243,10 @@ GSSiExitProg (118);
     	Font = 0;   
     CD->Font.lfHeight = SaveSize;
     if (Font)
-	    OldFont = SelectObject(CurView->hDC, Font);
-	OldColor = SetTextColor (CurView->hDC,CD->FontColor);
-    SetBkMode(CurView->hDC, OPAQUE);  
-    SetBkColor (CurView->hDC,CurView->BackGroundColor);
+	    OldFont = SelectObject(hDC, Font);
+	OldColor = SetTextColor (hDC,CD->FontColor);
+    SetBkMode(hDC, OPAQUE);  
+    SetBkColor (hDC,CurView->BackGroundColor);
 	if (pPoint)
 	{   
 		if (GetProfileElevAndSlope (pPoint->x,SaveView->hProfileElev[0],SaveView->nProfileElev[0],&Elev,&Slope,DBL_MAX))
@@ -1252,17 +1257,18 @@ GSSiExitProg (118);
 				d -= CurTheme->CrossSectionWidth[0];
 			Dist = ConvertDist (d,SaveView->ProfileDistUnits);
 			sprintf (Text,"Dist = %.3f %s, Elevation = %.1f feet, Slope = %.1f percent                ",Dist,_fstrlwr(DistUnitOpts[SaveView->ProfileDistUnits-1]),Elev * MFT,Slope); 
-			TextOut(DisplayView->hDC, x, y, Text, _fstrlen(Text)); 
+			TextOut(hDC, x, y, Text, _fstrlen(Text)); 
 			rtn = TRUE;
 		}
 	} 
 	if (Font)
 	{
-	    SelectObject(CurView->hDC, OldFont);
+	    SelectObject(hDC, OldFont);
 	    DeleteObject(Font);
 	}	
-	SetTextColor (CurView->hDC,OldColor);
-	RestoreDC (CurView->hDC,-1);
+	SetTextColor (hDC,OldColor);
+	RestoreDC (hDC,-1);
+	ReleaseDC (DisplayView->hWnd,hDC);
     SetCurView (SaveView);
 
 {

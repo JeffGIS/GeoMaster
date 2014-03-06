@@ -341,6 +341,8 @@ void UnRegisterSavedScreen (HANDLE hSavedScreen);
 BOOL ScreenIsRegistered (HANDLE hSavedScreen,long ID);
 void ClearSavedScreens(HWND hWnd,LPVOID pVP,LPRECT pRect);
 void ResaveSavedScreens(void);
+void dumpmemdc(HDC hdc);
+void wantnextblt(void);
 void SetBit (int ibit, LPSTR lpBytes, BOOL setto);
 void SetBit2 (int ibit, LPSTR lpBytes, BOOL setto);
 BOOL GetBit (int ibit, LPSTR lpBytes);
@@ -595,6 +597,8 @@ void ClearDlgPrompts (void);
 void GMMessageBox (UINT Message, UINT Title, UINT Style);
 long LoadProjection(long nj, LPSTR NAME); 
 long TranProjection(long I, long O, double *x, double *y); 
+int ConvertPRJtoProj4(char *in, char * out);
+
 //extern long FAR PASCAL CloseLibrary(void);
 //extern BOOL FAR PASCAL OpenGCTPLibrary(void);
 //extern BOOL FAR PASCAL OpenGCTP(long far *d);   

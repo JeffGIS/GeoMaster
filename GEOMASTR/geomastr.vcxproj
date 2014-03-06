@@ -63,7 +63,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34f</TargetName>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -81,9 +81,9 @@
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
-    <TargetName>GeoMaster34d</TargetName>
+    <TargetName>GeoMaster34f</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -128,11 +128,11 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.61</Version>
+      <Version>34.64</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -261,10 +261,10 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPI.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPI.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile />
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -285,6 +285,12 @@
     <Bscmake>
       <OutputFile>.\Debug/geomastr.bsc</OutputFile>
     </Bscmake>
+    <PreBuildEvent>
+      <Command>c:\GSSiSourceCode\GeoMaster\SetGMVersion.bat</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Set current version</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\FileGDBAPI\FGDBStub.c" />
@@ -643,6 +649,7 @@
     <ClCompile Include="..\solar_calculator\Version2\sidrlt.c" />
     <ClCompile Include="..\gctpc\sinfor.c" />
     <ClCompile Include="..\gctpc\sininv.c" />
+    <ClCompile Include="shpproj.c" />
     <ClCompile Include="smooth.c" />
     <ClCompile Include="..\gctpc\somfor.c" />
     <ClCompile Include="..\gctpc\sominv.c" />
@@ -657,6 +664,7 @@
     <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\sunpath.c" />
     <ClCompile Include="..\sunang\ipw\src\sunrise.c" />
     <ClCompile Include="..\GCTP2\T2PROJ~1.C" />
+    <ClCompile Include="OGRCoordConversion.c" />
     <ClCompile Include="tabbed.c" />
     <ClCompile Include="..\solar_calculator\Version2\tdb.c" />
     <ClCompile Include="..\libbci-1.1.0\tdspl.c" />

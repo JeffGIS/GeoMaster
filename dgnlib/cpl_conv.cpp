@@ -188,10 +188,10 @@
  *
  */
 
-#include "cpl_conv.h"
-#include "cpl_string.h"
-#include "cpl_vsi.h"
-#include "cpl_multiproc.h"
+#include "cpl_conv_fwd.h"
+#include "cpl_string_fwd.h"
+#include "cpl_vsi_fwd.h"
+#include "cpl_multiproc_fwd.h"
 
 CPL_CVSID("$Id: cpl_conv.cpp,v 1.52 2006/03/04 00:46:43 mloskot Exp $");
 

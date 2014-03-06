@@ -1,4 +1,5 @@
 #include "graphint.h"   
+#include "extrndb.h"   
 #include "dibapi.h"
 #include <psapi.h>
 #include <wininet.h>
@@ -129,6 +130,7 @@ HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
 BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 {
 //$FORALL(RECORDS,file,sql,initalize,return,executable statements)
+//$FORALL(TABLES,file,wildcard,initalize,return,executable statements)
 //$FORALL(FIELDS,file,type(def all),initalize,return,executable statements)
 //$FORALL(DISTINCT,file,sql,initalize,return,value,executable statements,varprefix(opt))
   	LPSTR	pEnd, pStatusText, pLoopText=0, pLineNo, pFile, pFileName, pVarName=0;
@@ -188,6 +190,28 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			if (ProcessLine >= 0)
 				break; 
 			CurLoc++;  
+		}
+	}
+	else if (!stricmp(Arg[1], "TABLES"))
+	{
+		long	n = 0;
+		LPSTR	lpSTRING;
+		short	NS;
+		HANDLE	DBHandle;
+		char	TableName[128];
+		char	TablePartialName[128];
+
+		strupr(TablePartialName);
+		DBHandle = GetDBHandleFromSQL(hDB);
+		lpSTRING = GetTableName(DBHandle, TRUE);
+		while (lpSTRING && *lpSTRING)
+		{
+			strupr(lpSTRING);
+			if (strstr(lpSTRING, TablePartialName))
+			{
+				n++;
+			}
+			lpSTRING = GetTableName(DBHandle, FALSE);
 		}
 	}
 	else if (!stricmp (Arg[1],"DISTINCT"))
@@ -737,8 +761,11 @@ int GetGoogleZoomForSCale (double scale)
 int GetTranID (LPSTR cid)
 {
 	int	id;
+	int ib = 0;
 
-	for (id = 0;id < MAXPROJ4PROJ;id++)
+	if (*cid)
+		ib = FIRST_USER_PROJ;
+	for (id = ib;id < MAX_PROJ;id++)
 		if (!stricmp (projid[id],cid))
 			return id;
 
@@ -778,11 +805,13 @@ BOOL GetGoogleZoomAndTileFromBounds (LPMNMXCORD pBoundsInBaseProjection,int Star
 
 void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5, LPSTR Arg6,LPSTR OutLoc)
 {
+#define MAXUSERPROJ	8
 	DPOINT	wpoint, newpoint1, newpoint2;
 	double	dist, scale, az;
 	BOOL	err;
 	int		rc, id;
 	char	str[512];
+	static	projPJ	projdef[MAXUSERPROJ] = { 0 };
 
 	strcpy (OutLoc,"0");
 	if (!stricmp (Arg1,"DEFINE"))
@@ -800,6 +829,8 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 	else if (!stricmp (Arg1,"DELETE"))
 	{
 		if ((id = GetTranID (Arg2)) < 0)
+			return;
+		if (id < FIRST_USER_PROJ)
 			return;
 		pj_free(projdef[id]);
 		*projid[id] = 0;

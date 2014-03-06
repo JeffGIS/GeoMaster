@@ -51,9 +51,13 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
           *X = X2;
           *Y = Y2;
         }       
-        if(PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION)
+		if (PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION || PRJ_TYPE[ID_FROM] == PROJ4PROJECTION)
         {
-			IRC = pj_transform(projdef[GOOGLEMAPSPROJECTION], projdef[LATLONPROJECTION], 1, 1, X,Y, NULL );
+			int id = PRJ_ZONE[ID_FROM];
+
+			if (PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION)
+				id = GOOGLEMAPSPROJECTION;
+			IRC = pj_transform(PRJ_PROJ4DEF[ID_FROM], PRJ_PROJ4DEF[2], 1, 1, X, Y, NULL);
 			if (IRC)
            		return IRC;                   
 			*X *= RAD_TO_DEG;
@@ -83,7 +87,7 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
 			//if (IRC)
            		return IRC;                   
 		}
-        if(PRJ_TYPE[ID_TO] == SphericalMercatorPROJECTION)
+		if (PRJ_TYPE[ID_TO] == SphericalMercatorPROJECTION || PRJ_TYPE[ID_TO] == PROJ4PROJECTION)
         {
 			SAVE_PRJ_TYPE = PRJ_TYPE[ID_TO];
 			SAVEXBIAS = PRJ_X_BIAS[ID_TO];
@@ -111,7 +115,7 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
            		return IRC;                   
 			*X *= DEG_TO_RAD;
 			*Y *= DEG_TO_RAD;
-			IRC = pj_transform( projdef[LATLONPROJECTION], projdef[GOOGLEMAPSPROJECTION],1, 1, X,Y, NULL );
+			IRC = pj_transform(PRJ_PROJ4DEF[2], PRJ_PROJ4DEF[ID_TO], 1, 1, X, Y, NULL);
 			if (IRC)
            		return IRC;                   
 		}

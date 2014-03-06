@@ -74,10 +74,10 @@
  * added VSIFlush
  */
 
-#include "cpl_config.h"
-#include "cpl_port.h"
-#include "cpl_vsi.h"
-#include "cpl_error.h"
+#include "cpl_config_fwd.h"
+#include "cpl_port_fwd.h"
+#include "cpl_vsi_fwd.h"
+#include "cpl_error_fwd.h"
 
 CPL_CVSID("$Id: cpl_vsisimple.cpp,v 1.21 2006/03/27 15:24:41 fwarmerdam Exp $");
 

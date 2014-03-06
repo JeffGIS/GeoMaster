@@ -163,7 +163,7 @@
 #ifndef _DGNLIB_H_INCLUDED
 #define _DGNLIB_H_INCLUDED
 
-#include "cpl_conv.h"
+#include "cpl_conv_fwd.h"
 
 CPL_C_START
 
