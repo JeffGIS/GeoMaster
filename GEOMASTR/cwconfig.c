@@ -24,7 +24,7 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 int PASCAL WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 LONG FAR PASCAL WndProcGMEdit(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
-
+int ConvertPRJtoProj4(char *in, char * out);
 LRESULT CALLBACK GetMsgProc(
   int code,       // hook code
   WPARAM wParam,  // removal flag
@@ -933,6 +933,16 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	switch (Message)
 	{
 	case WM_INITDIALOG:
+		fid = OpenFile("lastcmdline.txt", &OFStruct, OF_READ);
+		if (fid != HFILE_ERROR)
+		{
+			fgetstring2(txt, 1020, fid);
+			SetDlgItemText(hWndDlg, IDC_COMMAND, txt);
+			fgetstring2(txt, 1020, fid);
+			SetDlgItemText(hWndDlg, IDC_DIRECTORY, txt);
+			_lclose(fid);
+		}
+
 	case GSSI_REINITDIALOG:
 
 		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_SETTABSTOPS,1, (LPARAM)tabStops);
@@ -941,31 +951,34 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_RESETCONTENT, 0, 0);
 		fid = OpenFile("cmdlines.txt", &OFStruct, OF_READ);
 		if (fid != HFILE_ERROR)
-		while (fgetstring2(txt, 1020, fid))
 		{
-			lpStart = _fstrstr(txt, "/WD ");
-			if (lpStart)
+			while (fgetstring2(txt, 1020, fid))
 			{
-				char	path[MAX_PATH];
-				LPSTR  lpEnd = 0;
-
-				*lpStart = 0;
-				lpStart += 4;
-				if (*lpStart == '"')
-					lpEnd = strchr(lpStart + 1, '"');
-				else
+				lpStart = _fstrstr(txt, "/WD ");
+				if (lpStart)
 				{
-					int i = strcspn(lpStart, " ;");
-					if (lpStart[i])
-						lpEnd = &lpStart[i];
+					char	path[MAX_PATH];
+					LPSTR  lpEnd = 0;
+
+					*lpStart = 0;
+					lpStart += 4;
+					if (*lpStart == '"')
+						lpEnd = strchr(lpStart + 1, '"');
+					else
+					{
+						int i = strcspn(lpStart, " ;");
+						if (lpStart[i])
+							lpEnd = &lpStart[i];
+					}
+					if (lpEnd)
+						*lpEnd++ = 0;
+					else
+						lpEnd = strchr(txt, 0);
+					sprintf(str, "%s%s\t%s", txt, lpEnd, lpStart);
+					SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)str);
 				}
-				if (lpEnd)
-					*lpEnd++ = 0;
-				else
-					lpEnd = strchr(txt, 0);
-				sprintf(str, "%s%s\t%s", txt, lpEnd, lpStart);
-				SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)str);
 			}
+			_lclose(fid);
 		}
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -1034,24 +1047,31 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 
 		case IDOK:
 		{
-					 char	drive[32];
-					 int		idrive;
-					 GetDlgItemText(hWndDlg, IDC_COMMAND, selectedStartCmd, 1020);
-					 GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH);
-					 if (*path)
-					 {
-						 ii = _chdir(path);
-						 _splitpath(path, drive, 0, 0, 0);
-						 if (*drive)
-						 {
-							 _fstrupr(drive);
-							 idrive = *drive - 'A' + 1;
-							 _chdrive(idrive);
-						 }
-					 }
+			char	drive[32];
+			int		idrive;
+			GetDlgItemText(hWndDlg, IDC_COMMAND, selectedStartCmd, 1020);
+			GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH);
+			fid = OpenFile("lastcmdline.txt", &OFStruct, OF_CREATE);
+			if (fid != HFILE_ERROR)
+			{
+				fputstring2(selectedStartCmd, fid);
+				fputstring2(path, fid);
+				_lclose(fid);
+			}
+			if (*path)
+			{
+				ii = _chdir(path);
+				_splitpath(path, drive, 0, 0, 0);
+				if (*drive)
+				{
+					_fstrupr(drive);
+					idrive = *drive - 'A' + 1;
+					_chdrive(idrive);
+				}
+			}
 
-					 EndDialog(hWndDlg, TRUE);
-					 break;
+			EndDialog(hWndDlg, TRUE);
+			break;
 		}
 	}
 		break;    /* End of WM_COMMAND                                 */
@@ -1100,9 +1120,16 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus, mouseType;
-	 
+//#define FV	$(TargetName) 
+	//UDPmain(22336);
 	//GetMassShapeFiles();
 	//writeTestStruct();
+	//char tt[] = {FV};
+	/*char prj[1024];
+	HFILE fid = GSSiOpenFile("C:\\CountyData\\Cleveland\\AreaParcel_11212013\\AREAPARCEL.prj", 0, OF_READ);
+	BigRead(fid, prj, 1023);
+	GSSiClose(fid);
+	ConvertPRJtoProj4(prj, NULL);*/
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	numMonitors = GetNumMonitors();
 	typeChassis = ChassisType();
@@ -1530,7 +1557,7 @@ GSSiExitProg (437);
 			 WS_MINIMIZEBOX |        /* Add minimize box            */
 			 WS_MAXIMIZEBOX |        /* Add maximize box            */
 			 WS_THICKFRAME |        /* thick sizeable frame        */
-			 WS_MAXIMIZE |        /* create maximized window     */
+			 //WS_MAXIMIZE |        /* create maximized window     */
 			 /*    WS_CLIPCHILDREN |*/         /* don't draw in child windows areas */
 			 WS_OVERLAPPED;
 
@@ -1612,9 +1639,25 @@ if (MapServer)
 else if (BackgroundTask && !UpdateServer)
 	ShowWindow(hWndMain, SW_SHOWMINIMIZED);
 else if (ShowMax == 10)
-	ShowWindow(hWndMain, SW_SHOWMAXIMIZED);
+{
+	HDC hDC;
+
+	showWindowCmd = SW_SHOWMAXIMIZED;
+	ShowWindow(hWndMain, SW_HIDE);
+	hDC = GetDC(hWndMain);
+	OpenConfig(hWndMain, hDC);
+	ReleaseDC(hWndMain, hDC);
+}
 else
-	ShowWindow(hWndMain, SW_SHOW); 
+{
+	HDC hDC;
+
+	showWindowCmd = SW_SHOW;
+	ShowWindow(hWndMain, SW_HIDE);
+	hDC = GetDC(hWndMain);
+	OpenConfig(hWndMain, hDC);
+	ReleaseDC(hWndMain, hDC);
+}
    {
 	   RECT	rect;
 
@@ -1649,14 +1692,14 @@ else if (MapServer)
 	{
 		if (OpenConfig(hWndMain, 0))
 		{
-			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_READY, (WPARAM)hWndMain, 0);
+			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_READY, (WPARAM)hWndMain, MapserverVPID);
 			MoveWindow(hWndMain, 0, 0, mapServerWidth, mapServerHeight, TRUE);
 			//PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 99L);
 			SetTimer(hWndMain, SUICIDE_TIMER, 2000, 0);
 		}
 		else
 		{
-			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_FAILED, (WPARAM)hWndMain, 0);
+			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_FAILED, (WPARAM)hWndMain, MapserverVPID);
 			PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);
 		}
 
@@ -1676,6 +1719,8 @@ nMess = -1;
 	 if (msg.message == WM_PRINTCLIENT)
 		 ii = 1;
 	 if (msg.message == WM_CLOSE)
+		 ii = 1;
+	 if (msg.message == WM_PAINT)
 		 ii = 1;
 	 if (msg.message == WM_LBUTTONDBLCLK)
 			ii=1;
@@ -1927,6 +1972,10 @@ SetLastMessage(Message);
   
   if (Message == WM_COMMAND && LOWORD (wParam) == IDM_DISPLAY_VEHICLES)
 	  ii=1;
+  if (Message == WM_PAINT)
+	  ii = 1;
+  if (Message == WM_ERASEBKGND)
+	  ii = 1;
   if (Message == WM_TIMER)
 	  ii=1;
   if (Message == WM_SIZE)
@@ -2030,7 +2079,8 @@ if (Message == GF_MAPSERVER_REQUEST)
 	OFSTRUCT OFStruct;
 	//MessageBox(hWnd, "Got request", "", MB_OK);
 
-	MapserverRequestID = lParam;
+	MapserverRequestID = LOWORD(lParam);
+	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
 	Fid = OpenFile(MapserverFile, &OFStruct, OF_READ);
 	if (Fid != HFILE_ERROR)
@@ -2148,7 +2198,7 @@ if (Message == WM_LBUTTONDOWN)
 	IgnoreLbutton = FALSE;
  if (Printing || Processing)
 	goto ReturnDefault;
-
+#if	_DEBUG
  if (Message == WM_COMMAND)
  	ii=1; 
  if (Message == WM_SYSCOMMAND)
@@ -2157,6 +2207,7 @@ if (Message == WM_LBUTTONDOWN)
  	ii=1;
  if (Message == WM_CHAR)
  	ii=1;
+#endif
  if (Message == GF_CLOSE)
  {  
  	if (!CurrentConfig)
@@ -3592,7 +3643,8 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 	goto DoRedisplay;    
             	 }
        			 HaltMapDisplay(FALSE);
-		         DoPaint = TRUE;
+				 ClearFullWindowBitmap(0);
+				 DoPaint = TRUE;
                  IgnoreBounds=FALSE;  
                  if (lParam)
                  {
@@ -3608,7 +3660,8 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             case IDM_REDISPLAYVIEWPORTS:  
             	 DoPaint=TRUE;
        			 HaltMapDisplay(FALSE);
-  	         	 if (NumViewportsArray[0])
+				 ClearFullWindowBitmap(0);
+				 if (NumViewportsArray[0])
    	         		SetConfig(0);
 	           	 RedisplayViewports(FALSE);
 				 break; 
