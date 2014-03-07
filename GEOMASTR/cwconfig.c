@@ -949,7 +949,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		*selectedStartCmd = 0;
 		cwCenter(hWndDlg, 0);
 		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_RESETCONTENT, 0, 0);
-		fid = OpenFile("cmdlines.txt", &OFStruct, OF_READ);
+		fid = OpenFile("../cmdlines.txt", &OFStruct, OF_READ);
 		if (fid != HFILE_ERROR)
 		{
 			while (fgetstring2(txt, 1020, fid))
@@ -1042,7 +1042,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			break;
 
 		case IDC_EDIT:
-			GMEdit(hWndDlg, "cmdlines.txt");
+			GMEdit(hWndDlg, "../cmdlines.txt");
 			break;
 
 		case IDOK:
