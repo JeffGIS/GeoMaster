@@ -84,6 +84,7 @@
     <TargetName>GeoMaster34f</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -286,10 +287,12 @@
       <OutputFile>.\Debug/geomastr.bsc</OutputFile>
     </Bscmake>
     <PreBuildEvent>
-      <Command>c:\GSSiSourceCode\GeoMaster\SetGMVersion.bat</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PreBuildEvent>
-      <Message>Set current version</Message>
+      <Message>
+      </Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
