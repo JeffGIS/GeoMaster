@@ -7100,6 +7100,22 @@ BOOL LogicPFile (LPOPENSQLDATA	SQLPtr,LPSTR SQL,LPBOOL pErr)
 	return rtn;
 }
 
+int GetDBPos(HANDLE hSQLPtr)
+{
+	LPOPENSQLDATA	SQLPtr;
+	LPOPENFILEDATA	FilePtr;
+	int pos = -1;
+
+	if (hSQLPtr)
+	{
+		SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQLPtr);
+		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		pos = GSSillseek(FilePtr->Fid, 0, 1);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hSQLPtr);
+	}
+	return pos;
+}
 BOOL FetchDBRec (HANDLE hSQLPtr)
 #if ENABLETRACE
 {GSSiEnterProg (573);

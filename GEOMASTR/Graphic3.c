@@ -2420,7 +2420,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
     HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
     LPSTR	str=GlobalLock (hStr);
     short	NumFields=0;
-    BOOL	ReScan=FALSE;
+    BOOL	ReScan=FALSE, useFileLength=FALSE;
     
 	
     if (!OpenDataFile (DBName,"",BT_READ,&hSQL))
@@ -2471,11 +2471,18 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	{
 		CreateStatusWind (hWndMain,1,"Scanning for field defintions");
 		if (NumToScan <= 0)
-			NumToScan = NumSQLRows (hSQL);
+		{
+			useFileLength = TRUE;
+			NumToScan = GSSiLength(DBName);
+		}
 	Top:
 		nScanned = 0;
-		while (nScanned<NumToScan && FetchDBRec (hSQL) && ContinueProcessing) 
+		while (nScanned<NumToScan && StatusWindowUpdate(0, 0, NumToScan, nScanned) && FetchDBRec(hSQL))
 		{
+			if (useFileLength)
+				nScanned = GetDBPos(hSQL);
+			else
+				nScanned++;
 	   		lpFieldInfo = &FilePtr->FldInfo;
 	   		for (i=0;i<FilePtr->NumFields;i++,lpFieldInfo++)
 	   		{
@@ -2558,7 +2565,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 					pFieldTypes[i].Len = lpFieldInfo->length;
 	   			}
 	   		}  
-			StatusWindowUpdate (0,0, NumToScan, ++nScanned);
+			
 		} 
 		if (ReScan)
 		{
@@ -2618,6 +2625,7 @@ long OutputToFile (LPSTR File, BOOL Create,LPSTR DBName,LPSTR pSQL, HANDLE hFiel
     extern  HANDLE  hHighlight; 
     long	OriginalRecordNumber=0; 
 	BOOL	WantXML=GetGlobalBVal2 ("[%WANTXML]",TRUE);
+	BOOL	useFileLength = FALSE;
 	char	dlm[4]=",";
     
     HIGHLIGHTDATA   HighlightData;
@@ -2649,7 +2657,13 @@ GSSiExitProg (603);
     	HCURSOR	OldCursor;
 	                	
         OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT)); 
-    	TotRecs = NumSQLRows (hSQL); 
+		if (GetDBType(hSQL) == GMTEXT_DATAFILE)
+		{
+			TotRecs = GSSiLength(DBName);
+			useFileLength = TRUE;
+		}
+		else
+    		TotRecs = NumSQLRows (hSQL); 
         GSSiSetCursor (OldCursor);
 		if (!TotRecs)
     		goto Exit; 
@@ -2824,17 +2838,21 @@ GSSiExitProg (603);
 	   		PickList[0]=HighlightData.PD;
 			ProcessPickedItem (0,FALSE);  
 	    } 
-		AtRec++;
+		if (useFileLength)
+			AtRec = GetDBPos(hSQL);
+		else
+			AtRec++;
 		if (TotRecs && StatusWnd) 
 		{
-	    	sprintf (str,"%ld records written",AtRec);
-	    	SetWindowText (StatusWnd,str);
+			*str = 0;
+	    	//sprintf (str,"%ld records written",AtRec);
+	    	//SetWindowText (StatusWnd,str);
 			if (StatusWnd == (HWND)1)
 				ContinueProcessing = StatusWindowUpdate (0,str, TotRecs,AtRec);
 			else     		
 	        	PctBox (StatusWnd,TotRecs,AtRec,-1); 
 	    }
-	    else 
+		else if (!useFileLength)
 	    {
 	    	sprintf (str,"%ld records written",AtRec);
 	    	SetWindowText (hWndDlg,str);
