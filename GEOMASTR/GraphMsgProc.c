@@ -17993,6 +17993,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	static	HANDLE	hSaveBM=0;  
 	BOOL	SaveAllowCache=AllowCache;
 	short	NewOpt;
+	static	BOOL	havePrj;
     
 
  short    BRtn;
@@ -18018,6 +18019,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
  switch(Message)
    {
     case WM_INITDIALOG:
+		havePrj = FALSE;
     	 hSaveBM = EnterBlockingWindow (hWndDlg);
          FileIsOpen = FALSE;
          if (NumTAGDef>0)
@@ -18162,6 +18164,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                 HFILE	FidSHP; 
                 LPSTR	pDot;
 				 
+				havePrj = FALSE;
 				GetDlgItemText (hWndDlg,IDC_FILE,LoadName,128);
 				if (strstr (LoadName,".MDB"))
 				{
@@ -18225,9 +18228,16 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 					}
     
 					SetDlgItemText (hWndDlg,IDC_ATTRIBUTE_FILE,str);
+					havePrj = SHPOpenPrj(str, 0);
+
 				}
                 EnableWindow (GetDlgItem(hWndDlg,IDC_GET_SYM),TRUE);
              	EnableWindow (GetDlgItem(hWndDlg,IDC_SHOW_FIELDS),TRUE);
+				if (havePrj)
+				{
+					EnableWindow(GetDlgItem(hWndDlg, IDC_PROJECTION), FALSE);
+					EnableWindow(GetDlgItem(hWndDlg, IDC_UNITS), FALSE);
+				}
 				switch (SHPHeader.ShapeType)
 				{   
 					case 8: //multipoints
@@ -18410,6 +18420,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				 HANDLE	hRec=0;
 				 int	BinSizeR;
 				 LPSTR	pRec;
+				 int	prjID;
                  
                  SetViewport (*pCommandViewport);
              	 if (hImportPreSet)
@@ -18440,13 +18451,6 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				 HiPrecis = SendDlgItemMessage (hWndDlg,IDC_HIPRECIS,BM_GETCHECK,0,0);
 				 Create = SendDlgItemMessage (hWndDlg,IDC_CREATE_SYMS,BM_GETCHECK,0,0);
                  *curproject = 0;
-                 if (!GetDlgItemText (hWndDlg,IDC_PROJECTION,curproject,lncurproject))
-                 {
-                    GSSiMsgBox(GetFocus(),"No input projection set", 0,MB_ICONEXCLAMATION|MB_OK,0);
-                    break;
-                 }   
-                 if ((lpDot=_fstrrchr(curproject,'.')))
-                        *lpDot = 0;  
                  
                  if (hStreetSegFields)
                  	OpenStreetSegmentTable (TRUE,&OpenedSeg); 
@@ -18454,36 +18458,52 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  {      
                  	SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Creating intersection file");
                     CreateIntersectionFile (TRUE,GetDlgItem(hWndDlg,IDC_STATUS));
-                 }*/    
-                 GetGlobalCVal ("[%ALT_PROJECTION]",SaveAltProj,0);
-                 SetGlobalValue("%ALT_PROJECTION",curproject);
-				 ConvertCoordClose ();
-				 ConvertCoordInit(); 
-			 	 if (GetDlgItemText (hWndDlg,IDC_STARTNO,str,128))
-			 	 {
-			 		ExpandText (str);
-			 		StartRefno = atol (str);
-			 	 }
-			 	 else
-			 		StartRefno = 1;
-                 GetDlgItemText (hWndDlg,IDC_UNITS,curunits,lncurunits);
-                 if (*curunits)
-                 { 
-                        if (!_fstrcmp(curunits,"Degrees * 1000000"))
-                            PRJ_UNITS[3] = 5;
-                        else if (!_fstrcmp(curunits,"Feet"))
-                            PRJ_UNITS[3] = 1;
-                        else if (!_fstrcmp(curunits,"Meters"))
-                            PRJ_UNITS[3] = 2;
-                 }
-                 else
-                 {
-                    GSSiMsgBox(GetFocus(),"Units field not set", 0,MB_ICONQUESTION|MB_OK,0);
-                    break;
-                 }
-                 
-                 GetDlgItemText (hWndDlg,IDC_FILE,Name,256); 
-                 GetDlgItemText (hWndDlg,IDC_ATTRIBUTE_FILE,str,256); 
+                 }*/  
+				 GetDlgItemText(hWndDlg, IDC_FILE, Name, 256);
+				 GetGlobalCVal("[%ALT_PROJECTION]", SaveAltProj, 0);
+				 if (havePrj)
+				 {
+					 prjID = 0;
+					 SHPOpenPrj(Name, 0);
+				 }
+				 else
+				 {
+					 prjID = 3;
+					 if (!GetDlgItemText(hWndDlg, IDC_PROJECTION, curproject, lncurproject))
+					 {
+						 GSSiMsgBox(GetFocus(), "No input projection set", 0, MB_ICONEXCLAMATION | MB_OK, 0);
+						 break;
+					 }
+					 if ((lpDot = _fstrrchr(curproject, '.')))
+						 *lpDot = 0;
+					 SetGlobalValue("%ALT_PROJECTION", curproject);
+					 ConvertCoordClose();
+					 ConvertCoordInit();
+					 GetDlgItemText (hWndDlg,IDC_UNITS,curunits,lncurunits);
+					 if (*curunits)
+					 { 
+							if (!_fstrcmp(curunits,"Degrees * 1000000"))
+								PRJ_UNITS[3] = 5;
+							else if (!_fstrcmp(curunits,"Feet"))
+								PRJ_UNITS[3] = 1;
+							else if (!_fstrcmp(curunits,"Meters"))
+								PRJ_UNITS[3] = 2;
+					 }
+					 else
+					 {
+						GSSiMsgBox(GetFocus(),"Units field not set", 0,MB_ICONQUESTION|MB_OK,0);
+						break;
+					 }
+				 }
+
+				 if (GetDlgItemText(hWndDlg, IDC_STARTNO, str, 128))
+				 {
+					 ExpandText(str);
+					 StartRefno = atol(str);
+				 }
+				 else
+					 StartRefno = 1;
+				 GetDlgItemText(hWndDlg, IDC_ATTRIBUTE_FILE, str, 256);
                  _fstrupr (Name);
 				 if (_fstrstr (Name,"FILELIST.TXT"))
 				 {
@@ -18619,7 +18639,7 @@ NextFile:
 	                     Points[3].y = SHPHeader.Ymin; 
 	                     for (i=0;i<4;i++)
 	                     {
-	                        if (ConvertCoord(&Points[i],3,1))
+	                        if (ConvertCoord(&Points[i],prjID,1))
 	                        {   
 	                            GSSiMsgBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK,0);
 	                            goto ErrorEnd;
@@ -18897,7 +18917,7 @@ NextFile:
 		                    for (i=0;i<*pNumPoints;i++,pPoints++)
 		                    {   
 		                    	LastPoint = *pPoints;
-		                        if (ConvertCoord(pPoints,3,1))
+								if (ConvertCoord(pPoints, prjID, 1))
 		                        {   
 		                            //GSSiMsgBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK);
 		                            //goto ErrorEnd;
@@ -19147,7 +19167,7 @@ NextFile:
                     if (SymNum)
                     {
 	                    Store=TRUE; 
-	                    if (ConvertCoord(&SHPPointRec.Point,3,1))
+						if (ConvertCoord(&SHPPointRec.Point, prjID, 1))
 	                    {   
 	                        GSSiMsgBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK,0);
 	                        goto ErrorEnd;
@@ -19223,7 +19243,7 @@ NextFile:
                     	while (SHPMultiPointHeader.NumPoints--)
                     	{
 		                    Store=TRUE; 
-		                    if (ConvertCoord(pPoints,3,1))
+							if (ConvertCoord(pPoints, prjID, 1))
 		                    {   
 		                        GSSiMsgBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK,0);
 		                        goto ErrorEnd;
