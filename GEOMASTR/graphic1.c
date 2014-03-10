@@ -1437,7 +1437,7 @@ Next:
 		ItemAddedToHLT = FALSE;
 		HLTGraphicsPos = 0;
 		nContinues = 1;
-		while (ContinueProcessing && ProcessGraphicsRec(*hDC, ipnt, LPpltBuf, nRead))
+		while (FidMap != HFILE_ERROR && ContinueProcessing && ProcessGraphicsRec(*hDC, ipnt, LPpltBuf, nRead))
         {
 		    GSSiGlobUlFree (&hpltBuf);
             
@@ -7095,7 +7095,8 @@ void HaltMapDisplay(BOOL ClearCFGStack)
     short	ii;  
                         
 //    DisplayFinOpt = 0;  
-	TrapKillTimer=FALSE; 
+	KillTimer(hWndMain, 1);
+	TrapKillTimer = FALSE;
     if (DisableHalt)
 {
 #if ENABLETRACE
