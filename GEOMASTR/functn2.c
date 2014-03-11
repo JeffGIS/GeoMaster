@@ -5229,11 +5229,11 @@ GSSiExitProg (1350);
 			GSSiGlobFree (&hBPEP);
 			if (nlong == 2)
 			{
-				HPDPOINT	pPoints=GlobalLock (hPoints), pNewPoints;
+				HPDPOINT	pPoints=GlobalLock (hPoints);
 				
 				if (SameDPoint (&pPoints[0],&pPoints[1]))
 					nlong = 1;
-				GlobalUnlock (hNewPolyPoints);
+				GlobalUnlock (hPoints);
 			}
 			if (atob(Arg[6]))
 			{

@@ -56,18 +56,19 @@ BOOL GenericWriter(FIBITMAP* dib, const char* lpszPathName, int flag) {
 	if(dib) {
 		// try to guess the file format from the file extension
 		fif = FreeImage_GetFIFFromFilename(lpszPathName);
-	//	sprintf (str,"FIF = %i",fif);
-	//	MessageBox (0,str,NULL,MB_OK);
 		if(fif != FIF_UNKNOWN ) {
 			// check that the plugin has sufficient writing and export capabilities ...
 			WORD bpp = FreeImage_GetBPP(dib);
-		//	sprintf (str,"bpp = %i-%i-%i",bpp,FreeImage_FIFSupportsWriting(fif),FreeImage_FIFSupportsExportBPP(fif, bpp));
-		//	MessageBox (0,str,NULL,MB_OK);
-			if(FreeImage_FIFSupportsWriting(fif) && FreeImage_FIFSupportsExportBPP(fif, bpp)) {
-				// ok, we can save the file
-		//		MessageBox (0,"Attempting write",NULL,MB_OK);
+			if (fif == FIF_JPEG && (bpp != 8 && bpp != 24))
+			{
+				FIBITMAP* dib2 = FreeImage_ConvertTo24Bits(dib);
+				bSuccess = FreeImage_Save(fif, dib2, lpszPathName, flag);
+
+				FreeImage_Unload(dib2);
+			}
+			else if(FreeImage_FIFSupportsWriting(fif) && FreeImage_FIFSupportsExportBPP(fif, bpp)) 
+			{
 				bSuccess = FreeImage_Save(fif, dib, lpszPathName, flag);
-				// unless an abnormal bug, we are done !
 			}
 		}
 	}

@@ -129,7 +129,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.64</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -149,6 +149,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <SwapRunFromCD>false</SwapRunFromCD>
       <SwapRunFromNET>false</SwapRunFromNET>
+      <DelayLoadDLLs>gdal110.dll</DelayLoadDLLs>
     </Link>
     <Bscmake>
       <OutputFile>.\Release/geomastr.bsc</OutputFile>
@@ -262,7 +263,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPI.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPI.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -282,6 +283,7 @@
       <TurnOffAssemblyGeneration>false</TurnOffAssemblyGeneration>
       <AdditionalOptions>
       </AdditionalOptions>
+      <DelayLoadDLLs>gdal110.dll</DelayLoadDLLs>
     </Link>
     <Bscmake>
       <OutputFile>.\Debug/geomastr.bsc</OutputFile>
@@ -744,6 +746,8 @@
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
+    <ClInclude Include="GMVersion.h" />
+    <ClInclude Include="GMVersionRC_1.h" />
     <ClInclude Include="GoogleDef.h" />
     <ClInclude Include="..\INCLUDE\GRAPHICS.H" />
     <ClInclude Include="..\INCLUDE\graphint.h" />

@@ -924,6 +924,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 {
 	LPSTR lpStart, lpTab;
 	OFSTRUCT	OFStruct;
+	static char cmdFile[MAX_PATH];
 	HFILE	fid;
 	char	txt[1024], str[1024];
 	int		tabStops[2] = { 500, 2000 };
@@ -952,6 +953,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		fid = OpenFile("../cmdlines.txt", &OFStruct, OF_READ);
 		if (fid != HFILE_ERROR)
 		{
+			strcpy(cmdFile, OFStruct.szPathName);
 			while (fgetstring2(txt, 1020, fid))
 			{
 				lpStart = _fstrstr(txt, "/WD ");
@@ -1042,7 +1044,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			break;
 
 		case IDC_EDIT:
-			GMEdit(hWndDlg, "../cmdlines.txt");
+			GMEdit(hWndDlg, cmdFile);
 			break;
 
 		case IDOK:

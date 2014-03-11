@@ -2738,6 +2738,7 @@ GSSiExitProg (100);
         {
             GSSiMessageBox("Configuration file not found",CfgName, MB_OK,0);
 			GetGlobalCVal ("[%DEFAULTCONFIG]",CfgName,"basic1.gmc");
+			ShowWindow(hWndMain, SW_SHOW);
 {
 #if ENABLETRACE
 GSSiExitProg (100);
