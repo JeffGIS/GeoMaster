@@ -7283,7 +7283,10 @@ GSSiExitProg (573);
 		    					SetFieldToMinVal (lpGWDHead,lpGWDHead->IndexFields[0][i]);
 			    			}
 		    			}
-						cond = BT_EQ;
+						if (lpGWDHead->lKeys[SQLPtr->IndexToUse] < 0)
+							cond = BT_GE;
+						else
+							cond = BT_EQ;
 						for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
 						{   
 				    		if (lpSQLField->FieldNum >= 0 &&
