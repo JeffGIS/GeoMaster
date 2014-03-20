@@ -1363,9 +1363,6 @@
     <ClInclude Include="GMVersion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GMVersionRC_1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP">

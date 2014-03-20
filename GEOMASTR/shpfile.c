@@ -4554,6 +4554,11 @@ NextPt:;
 				sprintf (AZC,"[%s.ANGLE]",FileID[IsFGDB]);
 				sprintf (THeightC,"[%s.FONTSIZE]",FileID[IsFGDB]);
 		    	ExpandText (THeightC);
+				if (!*THeightC)
+				{
+					strcpy(THeightC, "[%FONTSIZE]");
+					ExpandText(THeightC);
+				}
 		    	THeight = atof (THeightC)*NonPltFileDistToBaseDist * 1.55165; 
 				pNumPoints = (LPINT)GlobalLock (hPolyPartLen);    
 				lpDCurPoints = pPoints;
