@@ -281,6 +281,11 @@ long ok;
 		 return ok;
 	 if (!ok && PRJ_TYPE[from] == PROJ4PROJECTION) // indicates proj4 projection
 	 {
+		 if (pj_is_latlong(PRJ_PROJ4DEF[from]))
+		 {
+			 DPoint->x *= DEG_TO_RAD;
+			 DPoint->y *= DEG_TO_RAD;
+		 }
 		 if (PRJ_TYPE[to] == PROJ4PROJECTION)
 		 {
 			 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[to], 1, 1, &DPoint->x, &DPoint->y, NULL);
