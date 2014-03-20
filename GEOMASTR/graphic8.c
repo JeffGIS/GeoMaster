@@ -3959,19 +3959,22 @@ GSSiExitProg (993);
 #if ENABLETRACE
 GSSiExitProg (993);
 #endif
-    	return (AddPolySymbolToProfile(CurrentDesc,0,lpDpoints,nPnts,hElev,hProfileSymbols,&NumProfileSymbols));
+return (AddPolySymbolToProfile(CurrentDesc, 0, lpDpoints, nPnts, hElev, hProfileSymbols, &NumProfileSymbols));
 }
     if (hHighlightArea)
 	{
 		if (nPoly > 1)
 		{
+			HPDPOINT lpFirstPt = lpDpoints;
     		LPINT	pPartLen = (LPINT)GlobalLock (hPolyPartLen);
 
 			for (ipoly = 0; ipoly < nPoly;ipoly++,pPartLen++)
 			{
-				rtn = PickPolyInAreaD(0,lpDpoints,*pPartLen,0,0,0);
+				rtn = PickPolyInAreaD(0, lpDpoints, *pPartLen, 0, 0, 0, nPoly, hPolyPartLen, nPnts, lpFirstPt);
 				if (rtn)
+				{
 					break;
+				}
 				lpDpoints += *pPartLen;
 				if (ipoly)
 					lpDpoints++;
@@ -3979,7 +3982,7 @@ GSSiExitProg (993);
 			GlobalUnlock (hPolyPartLen);
 		}
 		else
-			rtn = PickPolyInAreaD(0,lpDpoints,nPnts,0,0,0);
+			rtn = PickPolyInAreaD(0,lpDpoints,nPnts,0,0,0,0,0,0,0);
 {
 #if ENABLETRACE
 GSSiExitProg (993);
@@ -4233,7 +4236,7 @@ GSSiExitProg (994);
 #endif
 }
 
-BOOL PickPolyInAreaD (short Type,HPDPOINT lpDpoints,long nPnts,int PolyID,LPDOUBLE pAZ,LPDOUBLE pSize)
+BOOL PickPolyInAreaD(short Type, HPDPOINT lpDpoints, long nPnts, int PolyID, LPDOUBLE pAZ, LPDOUBLE pSize, int nPoly, HANDLE hPolyPartLen, long nTotPnts, HPDPOINT lpFirstPt)
 #if ENABLETRACE
 {GSSiEnterProg (995);
 #endif
@@ -4304,6 +4307,24 @@ Exit:
 			PickList[0].BPAZ = BPAZ;   
 			PickList[0].EPAZ = BPAZ;  
 		} 
+		if (CurrentType == GF_AREA && nPoly > 1)
+		{
+			LPINT	pPartLen = (LPINT)GlobalLock(hPolyPartLen);
+			int ipoly;
+			double d;
+
+			Area = ComputeAreaAreaD(lpFirstPt, nTotPnts, &Perim);
+			for (ipoly = 0; ipoly < nPoly-1; ipoly++, pPartLen++)
+			{
+				lpFirstPt += *pPartLen;
+				if (ipoly)
+					lpFirstPt++;
+				d = ldistpp(lpFirstPt - 1, lpFirstPt);
+				Perim -= d*2;
+			}
+			GlobalUnlock(hPolyPartLen);
+
+		}
 		PickList[0].PPAZ = AZ;
 		PickList[0].HiPrecis = 1;
 		PickList[0].ViewID = CurView->ID;

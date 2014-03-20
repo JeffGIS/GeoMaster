@@ -55,7 +55,7 @@ GSSiExitProg (1015);
 #if ENABLETRACE
 GSSiExitProg (1015);
 #endif
-    	return (PickPolyInAreaD(1,lpPoints,nPnts,0,0,0));
+    	return (PickPolyInAreaD(1,lpPoints,nPnts,0,0,0,0,0,0,0));
 }
 	
 	TotDistW=0;   

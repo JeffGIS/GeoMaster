@@ -584,7 +584,7 @@ BOOL PickPolyline (HPPOINTS lpPoints2,long nPnts, int PolyID, short Type,LPFLOAT
 BOOL PickPolylineD (HPDPOINT lpPoints,long nPnts, int PolyID,short Type,LPDOUBLE pAZ,LPDOUBLE pSize,long PinA);
 BOOL PickPolyInArea (short Type,HPPOINTS lpPoints,long nPnts,int PolyID);
 BOOL PickPointItem (POINT Point, float size, float rot, int Symbol);
-BOOL PickPolyInAreaD (short Type,HPDPOINT lpPoints,long nPnts,int PolyID,LPDOUBLE pAZ,LPDOUBLE pSize);
+BOOL PickPolyInAreaD(short Type, HPDPOINT lpPoints, long nPnts, int PolyID, LPDOUBLE pAZ, LPDOUBLE pSize, int nPoly, HANDLE hPolyPartLen, long nTotPnts, HPDPOINT lpFirstPt);
 BOOL PickPointItemD (LPDPOINT pPoint, double size, double rot, int Symbol);
 BOOL PtInMinMax (POINT SegPoint,mnmxCor MinMax);
 BOOL PickItemBeingDigitized (void);

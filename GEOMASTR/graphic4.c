@@ -494,7 +494,7 @@ ShrinkText:
 							rtn = TRUE;
 						}
 						else if (hHighlightArea && !NullLine)
-							PickPolyInAreaD(1,RectPoints,4,0,0,0);
+							PickPolyInAreaD(1, RectPoints, 4, 0, 0, 0, 0, 0, 0, 0);
 						else if (!NullLine)
 						{	
 							short SavePP = PickPerim;
@@ -639,7 +639,7 @@ ShrinkText:
 								RectPoints[2] = dnewpt (RectPoints[1],TXRot2+HALFPI,-height);
 								RectPoints[3] = dnewpt (RectPoints[2],TXRot2,-width); 
 								if (hHighlightArea)
-									Picked = PickPolyInAreaD(1,RectPoints,4,0,0,0);
+									Picked = PickPolyInAreaD(1, RectPoints, 4, 0, 0, 0, 0, 0, 0, 0);
 								else if (pBounds) 
 								{   
 									for (i=0;i<4;i++)
@@ -3140,7 +3140,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 	        		NumDeletesProcessed++;
 					ItemIsDeleted = 2;   
 	        		if (Visible && Pick && PickDeletes)
-						PickPolyInAreaD (6,0,0,0,0,0);
+						PickPolyInAreaD(6, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 					if (ForceRefIndex || ForceTAGIndex)
 						goto ProcessRefno;
 	        	break;
@@ -4786,7 +4786,7 @@ GSSiExitProg (707);
 #if ENABLETRACE
 GSSiExitProg (707);
 #endif
-    	return (PickPolyInAreaD(1,lpPoints,nPnts,0,pAZ,pSize));
+return (PickPolyInAreaD(1, lpPoints, nPnts, 0, pAZ, pSize, 0, 0, 0, 0));
 }
 	
 	TotDistW=0;  
