@@ -1829,7 +1829,8 @@ S10:
 					while (GetNextPrintReport (First,ReportName,&Refno,Prefix,UDI,InitCmd))
 					{
 				   		First = FALSE;  
-						strncpy0 (HighlightData.PD.Prefix,Prefix,32);
+						SetUDIValue(Prefix, UDI);
+						strncpy0(HighlightData.PD.Prefix, Prefix, 32);
 						strncpy0 (HighlightData.PD.UDI,UDI,64);
 						HighlightData.PD.Refno = Refno;
 						BT_PUT (hHighlight,(LPSTR)&Refno,(LPSTR)&HighlightData); 
@@ -1850,7 +1851,8 @@ S10:
 					HANDLE	hView;  
 			   		
 			   		First = FALSE;  
-				    if (GetGlobalLVal2 ("[%PRINTWPOPT]",FALSE) == 1)
+					SetUDIValue(Prefix, UDI);
+					if (GetGlobalLVal2("[%PRINTWPOPT]", FALSE) == 1)
 			   		{
 				   		PrintReport2 (hPr,PrinterDC,IsVirtPrinter,mfDC,ReportName,Refno,Prefix,UDI,InitCmd);      
 				   	}

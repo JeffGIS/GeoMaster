@@ -3925,6 +3925,10 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	IgnorePrevLayers = TRUE; 
 	SetConfig (PickList[Item].ConfigID);
     SetViewport (PickList[Item].ViewID); 
+	SetGlobalValueLong("%PICKED_REFNO", PickList[Item].Refno);
+	SetGlobalValue("%PICKED_PREFIX", PickList[Item].Prefix);
+	SetGlobalValue("%PICKED_UDI", PickList[Item].UDI);
+
     DisplayVP = CurView; 
     SaveNumThemes = CurView->NumThemes;
     if (!DoDisplayIn || DoDisplayIn == 2)
@@ -4240,6 +4244,8 @@ GSSiExitProg (692);
 }
 	 
 RtnFalse:  
+	SetUDIValue(PickList[Item].Prefix, PickList[Item].UDI);
+
 	GSSiGlobUlFree (&hVisList);
 	ProcessSingleItem = FALSE;
 	DisplayDispersedPoint = FALSE;    

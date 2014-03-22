@@ -1106,10 +1106,10 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpPrintChunk->nCopies = 1;
       lpPrintChunk->hInstance = ghInst;
       lpPrintChunk->lCustData = 0L;
-	  lpPrintChunk->lpfnPrintHook = 0;// (LPOFNHOOKPROC)PrintSetupHook;
-	  lpPrintChunk->lpfnSetupHook = 0;// (LPOFNHOOKPROC)PrintSetupHook;
-	  lpPrintChunk->lpPrintTemplateName = 0;// "PRINTDLGGM";
-	  lpPrintChunk->lpSetupTemplateName = 0;// "PRNSETUPDLGGM";
+	  lpPrintChunk->lpfnPrintHook = (LPOFNHOOKPROC)PrintSetupHook;
+	  lpPrintChunk->lpfnSetupHook = (LPOFNHOOKPROC)PrintSetupHook;
+	  lpPrintChunk->lpPrintTemplateName = "PRINTDLGGM";
+	  lpPrintChunk->lpSetupTemplateName = "PRNSETUPDLGGM";
       lpPrintChunk->hPrintTemplate = (HANDLE)NULL;
       lpPrintChunk->hSetupTemplate = (HANDLE)NULL;
       break;
