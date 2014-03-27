@@ -62,11 +62,13 @@
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34f</TargetName>
+    <TargetName>GeoMaster34g</TargetName>
     <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <TargetExt>
+    </TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">
     <OutDir>Release\</OutDir>

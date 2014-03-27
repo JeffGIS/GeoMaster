@@ -1244,6 +1244,10 @@ GSSiExitProg (1347);
 								sprintf(strchr(BMPath, 0), "%s", lpBM);
 							AddButtonToToolbar(hWndDlg, BMPath, Title, CurLoc, &iButton);
 						}
+						else
+						{
+							AddButtonToToolbar(hWndDlg,0, Title, CurLoc, &iButton);
+						}
 					}
 					break;
 				case 4:

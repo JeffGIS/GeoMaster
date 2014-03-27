@@ -4421,7 +4421,8 @@ Top:
     if (FirstDisplayOfConfig)
     {   
         First = FALSE;
-        DisplayFinOpt = 2;  
+        DisplayFinOpt = 2;
+		DisplayAllToolbars(4);
         FirstDisplayOfConfig = FALSE;
     }
     HavePaint = TRUE;  

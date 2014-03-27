@@ -3390,7 +3390,38 @@ int AddButtonToToolbar2 (int ToolbarID,HWND hWndDlg,LPSTR BMPath,LPSTR ButtonTex
 		button = Buttons[ButtonNumber+5];
 
 	if (FirstToolbarPass)
-		hBM = GetToolBitmap(BMPath); 
+	{
+		if (BMPath)
+			hBM = GetToolBitmap(BMPath);
+		else
+		{
+			int ln = strlen(ButtonText);
+			SIZE	txSize;
+			HDC		hDC = GetDC(hWndMain);
+			HDC		hDCtemp = CreateCompatibleDC(hDC);
+			HBITMAP hBMPtemp;
+			RECT	rect = { 0 };
+			HFONT	hFont,hOldFont;
+
+			hFont = CreateFont(38, 0, 0, 0, FW_BLACK,0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+			hOldFont = SelectObject(hDC, hFont);
+			GetTextExtentPoint32(hDC, ButtonText, ln, &txSize);
+			SelectObject(hDC, hOldFont);
+			rect.right = txSize.cx + 6;
+			rect.bottom = txSize.cy + 6;
+			hBM = CreateCompatibleBitmap(hDC, rect.right, rect.bottom);
+			ReleaseDC(hWndMain, hDC);
+			hBMPtemp = SelectObject(hDCtemp, hBM);
+			hOldFont = SelectObject(hDCtemp, hFont);
+			FillRect(hDCtemp, &rect, GetStockObject(LTGRAY_BRUSH));
+			SetBkMode(hDCtemp,TRANSPARENT);
+			TextOut(hDCtemp, 3, 3, ButtonText, ln);
+			SelectObject(hDCtemp, hOldFont);
+			SelectObject(hDCtemp, hBMPtemp);
+			DeleteDC(hDCtemp);
+			DeleteObject(hFont);
+		}
+	}
 	else
 	{
 		pTBInfo = (LPTOOBAR_CONTROL_INFO)GlobalLock (ToolbarHandle[ToolbarID]) + ButtonNumber;
