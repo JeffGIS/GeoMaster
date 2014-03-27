@@ -1062,9 +1062,9 @@ GSSiExitProg (1350);
           lpfnREORGMAPMsgProc = MakeProcInstance((FARPROC)REORGMAPMsgProc, hInst);
           nRc = DialogBox(hInst, (LPSTR)"REORGMAP", CurView->hWnd, lpfnREORGMAPMsgProc);
           FreeProcInstance(lpfnREORGMAPMsgProc);  
-          if (nRc==2)
-     	  	PostMessage(CurView->hWnd, WM_COMMAND, IDM_BUILDREFINDEXES, 0L); 
-     	  GSSiGlobFree (&hReorgParms);
+		  GSSiGlobFree(&hReorgParms);
+		  if (nRc == 2)
+     	  	SendMessage(CurView->hWnd, WM_COMMAND, IDM_BUILDREFINDEXES, 0L); 
      	  goto RtnTrue;
         }
 
@@ -3821,6 +3821,8 @@ GSSiExitProg (1350);
 			if (!stricmp (Arg[1],"LOADADDITIONAL"))
 			{
 				nRc = AddAdditionalUDI (Arg[2],Arg[3],Arg[4],Arg[6],Arg[5]);
+				itoa(nRc, OutLoc,10);
+				goto Rtnl;
 			}
 			else if (!stricmp (Arg[1],"CREATE"))
 			{

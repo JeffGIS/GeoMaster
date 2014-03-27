@@ -515,7 +515,7 @@ int GetFGDBCVal (LPFIELDINFO field,LPSTR answer,int lMaxAnswer)
 	{
 		LPCURVAL pCurVal= (LPCURVAL)GlobalLock (field->hCurVal);
 
-		if (pCurVal->Value)
+		if (pCurVal->length)
 		switch (field->type)
 		{
 		case BT_INTEGER:

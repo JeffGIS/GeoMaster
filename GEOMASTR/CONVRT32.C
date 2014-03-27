@@ -3187,7 +3187,10 @@ BDOK:
 		showWindowCmd = SW_SHOW;
 	}
 	if (!MapServer && !IsWindowVisible(hWndMain))
+	{
 		ShowWindow(hWndMain, showWindowCmd);
+	}
+	DisplayAllToolbars(4);
 	if (hStartupMenu)
 	{
         pStr = GlobalLock (hStartupMenu);
