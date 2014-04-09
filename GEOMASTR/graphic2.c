@@ -3254,6 +3254,7 @@ HaveObj:
 	CurView->NewObject[iobj].Width = 0;
 	if (iobj == CurView->NumNewObjects && CurView->NumNewObjects < MAX_NEW_OBJECTS)
 		CurView->NumNewObjects++;
+	TurnOffAutoVis(TRUE);
 {
 #if ENABLETRACE
 GSSiExitProg (159);

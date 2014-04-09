@@ -16776,7 +16776,8 @@ GSSiExitProg (158);
         		else 
         			newob = CurView->NewObjectMap[PickList[NumPicked-1].Desc] - 1;
         		CurView->NewObjectMap[PickList[NumPicked-1].Desc] = newob + 1;
-				if (Function == GF_SIZE_CLASSTEXT_ALLVIS)
+				if (Function == GF_SIZE_CLASSTEXT ||
+					Function == GF_SIZE_CLASSTEXT_ALLVIS)
 	    			CurView->NewObjectTextFactor[newob] *= factor;
 				else
 				{

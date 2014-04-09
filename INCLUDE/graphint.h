@@ -1032,6 +1032,7 @@ BOOL AdjustToolbarPositions (void);
 BOOL DestroyToolbar (int ToolbarID);
 void DestroyAllToolbars (void);
 BOOL DestroyCurrentToolbar(void);
+BOOL ReloadToolbar(LPSTR pOpt);
 BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 int GetToolbarIDFromWnd (HWND hWndDlg);
 void RemoveToolbar (int ToolbarID,BOOL DoAdjust);
