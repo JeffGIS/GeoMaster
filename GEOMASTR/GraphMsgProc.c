@@ -1647,7 +1647,7 @@ BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	static	POINT	CursorLoc;  
 	HANDLE	hStr;
 	LPSTR	lpStr, pGCmd;  
-	char	str[260], curName[64];   
+	char	str[512], curName[128];   
 	long	CurLoc;   
 	BOOL	First;  
 	OFSTRUCT	OFStruct;  

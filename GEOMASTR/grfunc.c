@@ -708,7 +708,7 @@ BOOL RunGFCommandFromFileAtLoc (LPSTR File,long CurLoc,BOOL SendCmd,short opt)
 	HANDLE	hStr = GSSiGlobAlloc (1240,GMEM_MOVEABLE,4096);
 	LPSTR	lpStr = GlobalLock (hStr);  
 	BOOL	SaveIgnoreFileOpenError=IgnoreFileOpenError;
-	int		iStack;
+	int		iStack, lcmd;
     
    	GetGFFile (lpStr,File,opt);
 Open: 
@@ -779,6 +779,7 @@ GSSiExitProg (1341);
 	GSSiClose (Fid);
 	iStack = AddToMacroStack (2,0,File,0,CurLoc);
 	sprintf (strchr (pGCmd,0),"$E(%i)",iStack);
+	lcmd = strlen(pGCmd);
 	GSSiGlobUlFree (&hStr);
 	GlobalUnlock (hAddGraphicsFun);  
 	if (SendCmd)
@@ -917,7 +918,7 @@ BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt)
 {GSSiEnterProg (1345);
 #endif
 {
-	char	str[260],path[MAX_PATH],curpath[MAX_PATH], str2[MAX_PATH+32], delim='\t';
+	char	str[512],path[MAX_PATH],curpath[MAX_PATH], str2[MAX_PATH+32], delim='\t';
 	HFILE	Fid=HFILE_ERROR;
 	LPSTR	lpBar;
 	short	i,LineNo=0;
@@ -1046,7 +1047,7 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 	HANDLE	hStr = GSSiGlobAlloc (1241,GMEM_MOVEABLE,4096);
 	LPSTR	lpStr = GlobalLock (hStr);
 	HFILE	Fid;
-	char	Title[256];
+	char	Title[512];
 	long	CurLoc; 
 	short	MaxClass=MAX_THEME_CLASSES; 
 	BOOL	First=TRUE;  
@@ -1204,7 +1205,7 @@ GSSiExitProg (1347);
 				case 1:
 					//ExpandText (Title);
 					//SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_ADDSTRING,0,(LPARAM)Title);
-					//ExpandText (lpStr);
+					ExpandText (lpStr);
 					SendDlgItemMessage (hWndDlg,ACTIVE_FUN_LB,LB_ADDSTRING,0,(LPARAM)lpStr);
 					break;
 				case 2:
@@ -1213,9 +1214,9 @@ GSSiExitProg (1347);
 					CurTheme->ClassCount[CurTheme->NumClass] = CurLoc+1; 
 					if (SkipThisEntry)
 						CurTheme->ClassCount[CurTheme->NumClass] *= -1;	
-					if (_fstrlen (Title) > 127) 
+					ExpandText(Title);
+					if (_fstrlen(Title) > 127)
 					{
-						ExpandText (Title); 
 						if (_fstrlen (Title) > 127) 
 							_fstrcpy (CurTheme->ClassBM[CurTheme->NumClass++],"Title too long");
 						else
@@ -1235,7 +1236,8 @@ GSSiExitProg (1347);
 
 						GetGlobalCVal ("[%ICONLIB]",BMPath,"[%DL]icons");
 						Truncate(BMPath); // allows BMPath to be ' ' so full pathname can be entered after &
-						if ((lpBM = strrchr (Title,'&')))
+						ExpandText (Title);
+						if ((lpBM = strrchr(Title, '&')))
 						{
 							*lpBM++ = 0;
 							if (*BMPath)

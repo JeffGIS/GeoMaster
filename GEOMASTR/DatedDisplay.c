@@ -306,7 +306,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 	case GF_INIT:
 		hWndDatedOrthos = hWnd;
 		//GetClientRect(hWnd, &rect);
-		haveScreenBuf = HaveScreenBuffer(0);
+		haveScreenBuf = (BOOL)HaveScreenBuffer(0);
 		if (haveScreenBuf)
 			ProcessText("[%BUFFERSCREEN]=0");
 		rect.left = rect.top = 0;

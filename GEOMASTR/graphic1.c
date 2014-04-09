@@ -1204,7 +1204,7 @@ Next:
 						char	mess[64];
 
 						sprintf (mess,"%i records copied",FastMapCopynRecs);
-						SetWindowText (CurView->hWnd,mess);
+						StatusExtraInfoUpdate(mess);
 					}
 				}
 			}
@@ -1250,7 +1250,7 @@ Next:
 						char	mess[64];
 
 						sprintf (mess,"%i records copied",FastMapCopynRecs);
-						SetWindowText (CurView->hWnd,mess);
+						StatusExtraInfoUpdate(mess);
 					}
 				}
 			}
@@ -1294,7 +1294,7 @@ Next:
 						char	mess[64];
 
 						sprintf (mess,"%i records copied",FastMapCopynRecs);
-						SetWindowText (CurView->hWnd,mess);
+						StatusExtraInfoUpdate(mess);
 					}
 				}
 			}
@@ -1352,7 +1352,7 @@ Next:
 						char	mess[64];
 
 						sprintf (mess,"%i records copied",FastMapCopynRecs);
-						SetWindowText (CurView->hWnd,mess);
+						StatusExtraInfoUpdate(mess);
 					}
 				}
 			}
@@ -1480,7 +1480,7 @@ Next:
 				char	mess[64];
 
 				sprintf (mess,"%i records copied",FastMapCopynRecs);
-				SetWindowText (CurView->hWnd,mess);
+				StatusExtraInfoUpdate(mess);
 			}
 		}
 

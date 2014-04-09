@@ -1261,6 +1261,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
     static	long	debugrefno=658447;    
     short	ii;
 	static	BOOL	ShowOnlyDebugRef=FALSE;
+	static	char	debugUDI[34] = "283401320222";
     
     if (TraceRef)
     {
@@ -1276,6 +1277,17 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
     	SetWindowText (TraceWnd,str);  
     	GSSiGlobUlFree (&hMem);
     } 
+	if (*debugUDI)
+	{
+		LPSTR pUDI = strchr(lpTAG, ':');
+
+		if (pUDI)
+		{
+			pUDI++;
+			if (!stricmp(debugUDI, pUDI))
+				ii = 1;
+		}
+	}
     if (CurrentRefno == debugrefno)
     	ii=1;
 /*if (CurrentRefno != 658191 && CurrentRefno != 658138)

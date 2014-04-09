@@ -697,16 +697,16 @@ END
 RBUTOPS DIALOGEX 7, 15, 274, 234
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Graphics Function Menu"
-FONT 8, "Helv", 0, 0, 0x0
+FONT 10, "Courier New", 700, 0, 0x0
 BEGIN
     LISTBOX         ACTIVE_FUN_LB,4,36,141,196,LBS_USETABSTOPS | WS_VSCROLL | WS_TABSTOP
     CTEXT           "Active Functions",IDC_LISTNAME,4,24,141,8
     PUSHBUTTON      "Exit",IDCANCEL,229,4,40,14
     PUSHBUTTON      "Unlock",UNLOCK,52,4,40,14,NOT WS_VISIBLE
     LISTBOX         FUNCTION_LIST_LB,147,36,122,176,LBS_SORT | LBS_USETABSTOPS | WS_VSCROLL | WS_TABSTOP
-    CTEXT           "Function Lists",REDRAW_AF_OK,151,25,100,8
+    CTEXT           "Function Lists",REDRAW_AF_OK,151,25,116,8
     PUSHBUTTON      "OK",IDOK,174,4,32,14,NOT WS_VISIBLE
-    PUSHBUTTON      "Edit Index",IDC_EDITINDEX,230,215,40,14
+    PUSHBUTTON      "Edit Index",IDC_EDITINDEX,223,215,47,14
 END
 
 ADDRESS1 DIALOGEX 32, 16, 323, 145
@@ -8992,8 +8992,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,7,102,0
- PRODUCTVERSION 34,7,102,0
+ FILEVERSION 34,7,106,0
+ PRODUCTVERSION 34,7,106,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9010,7 +9010,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34g build 102"
+            VALUE "FileVersion", "34g build 106"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"

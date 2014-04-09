@@ -2859,6 +2859,7 @@ GotCloseFilehSQL:
 					// $BOUNDS(MID,BOUNDS) returns midpoint 
 					// $BOUNDS(MIN,BOUNDS) returns min point  
 					// $BOUNDS(MAX,BOUNDS) returns max point 
+				    // $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
 					// $BOUNDS(LAYER,layer name,vpname)
 		{				
 			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
@@ -3156,7 +3157,18 @@ GotCloseFilehSQL:
 				boundstoa (OutLoc,&Bounds);
 				goto Rtnl;  
 			} 
-			else if (!_fstricmp (Arg[1],"REF"))
+			else if (!_fstricmp(Arg[1], "CONTAINS"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err)
+					goto RtnFalse;
+				Point = atopt(Arg[3], &Err);
+				if (Err)
+					goto RtnFalse;
+				if (PointInBounds(Point, &Bounds))
+					goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "REF"))
 			{   
 				short	PickFile, PickLayerID;
 				
@@ -3741,12 +3753,18 @@ GotCloseFilehSQL:
 		case 635:	//$FIELDS(datafile)
 		{
         	HANDLE	hDB=0;  
+			int iType = -2;
         	
 			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
 			if (nArgs < 1)
 				goto RtnFalse;
-            if (!OpenDataFile (Arg[1],"",BT_READ,&hDB))
-            	goto RtnFalse; 
+			if (!(hDB = GetOpenDatabaseFromID(Arg[1])))
+			{
+				if (!OpenDataFile(Arg[1], "", BT_READ, &hDB))
+					goto RtnFalse;
+			}
+			else
+				iType = 2;
 			if (*Arg[2])
 			{
 				rtn = GetFieldList (CurView->hWnd,hDB,0,Arg[3],Arg[2]);
@@ -3754,7 +3772,7 @@ GotCloseFilehSQL:
 			}
 			else
 			{
-				if (DisplayFieldList (CurView->hWnd,hDB,0,-2,Arg[3]))
+				if (DisplayFieldList (CurView->hWnd,hDB,0,iType,Arg[3]))
 					goto RtnTrue;
 				else
 				{
@@ -4379,9 +4397,9 @@ GotCloseFilehSQL:
 					/* $HLTAREA(LOAD,name) loads hlt area from file */     
 					// $HLTAREA(CLEAR)
 					// $HLTAREA(SET,PICKED,n)
-					// $HLTAREA(SET,ITEM,TAGorRefno)
+					// $HLTAREA(SET,ITEM,TAGorRefno,use pickability(TorF))
 		{	double	rval;
-			int		l, len; 
+			int		l, len, usePick=-1; 
 			LPSTR	lpOut; 
 			char	fillchar;
 			LPSTR	pFile;
@@ -4409,7 +4427,10 @@ GotCloseFilehSQL:
 						Refno = atol (Arg[3]); 
 						Arg[3] = 0;
 					}
-	            	if (!PickByRefno (Refno,Arg[3],lpColon,-1))
+					if (atob(Arg[4]))
+						usePick = -101;
+					
+	            	if (!PickByRefno (Refno,Arg[3],lpColon,usePick))
 						goto RtnFalse; 
 					Dist = atobasedist(Arg[4],&Err);
 					if (Dist) 
@@ -4670,7 +4691,7 @@ GotCloseFilehSQL:
 			LPSTR	str, lpSave;    
 			BOOL	rtn,ResetSubDL;
 			
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			_fstrupr (Arg[1]);  
@@ -4704,14 +4725,31 @@ GotCloseFilehSQL:
                 	rtn = GetSaveName3 (GetFocus(),str,0,Arg[2],Arg[3],Arg[4]);
                 	break; 
 				case 'D':
-					rtn = GetFolderName (GetFocus(),Arg[4],str,Arg[3]);
+				{
+					LPSTR VarName = Arg[4];
+					if (VarName)
+					{
+						if (*VarName)
+						{
+							sprintf(str, "[%s]", VarName);
+							ExpandText(str);
+							strcpy(Arg[6], str);
+						}
+						else
+							VarName = 0;
+					}
 
-                	//rtn = GetSaveName3 (GetFocus(),str,0,Arg[2],Arg[3],Arg[4]);
-                	if (rtn)
-                		{
-                			if (FileType (str) == 1)
-                				GSSiRemove (str);
-                		}
+					rtn = GetFolderName(GetFocus(), Arg[6], str, Arg[3]);
+
+					//rtn = GetSaveName3 (GetFocus(),str,0,Arg[2],Arg[3],Arg[4]);
+					if (rtn)
+					{
+						if (FileType(str) == 1)
+							GSSiRemove(str);
+						else if (VarName)
+							SetGlobalValue(VarName, str);
+					}
+				}
                 	break; 
                 default:
                 	rtn=FALSE;
@@ -6156,6 +6194,7 @@ HaveVP:;
 		}
 		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos,DPoint,Scale,vpID)
 				  //$TOOLBAR(LOAD,DOCK,Pathname,
+				  //$TOOLBAR(RELOAD,CURRENT(defalut) or ALL)
 			nArgs = GetFunArgs (Args,Arg,9,&hMem); 
 			if (nArgs < 1)
 				goto RtnFalse;
@@ -6175,6 +6214,10 @@ HaveVP:;
 			if (!stricmp(Arg[1], "DESTROY"))
 			{
 				rtn = DestroyCurrentToolbar();
+			}
+			if (!stricmp(Arg[1], "RELOAD"))
+			{
+				rtn = ReloadToolbar(Arg[2]);
 			}
 			goto Rtnrtn;
 		case 774: //$NETWORK(FALSEINT,STREETLIST

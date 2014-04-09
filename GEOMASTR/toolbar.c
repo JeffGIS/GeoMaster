@@ -3507,7 +3507,22 @@ BOOL DestroyCurrentToolbar(void)
 	DestroyWindow(currentToolbarWnd);
 	return TRUE;
 }
-void DestroyAllToolbars (void)
+BOOL ReloadToolbar(LPSTR pOpt)
+{
+	if (!*pOpt || !stricmp(pOpt, "CURRENT"))
+	{
+		if (!currentToolbarWnd)
+			return FALSE;
+		PostMessage(currentToolbarWnd, WM_EXITSIZEMOVE, 0, 0);
+	}
+	else if (!stricmp(pOpt, "ALL"))
+	{
+	}
+	else
+		return FALSE;
+	return TRUE;
+}
+void DestroyAllToolbars(void)
 {
 	int	i;
 
@@ -3840,7 +3855,7 @@ FromNotify:
 		{
 			char	Pathname[MAX_PATH];
 
-			if (isDocked)
+			if (ToolbarIsDocked(ToolbarID))
 			{
 				nPerRow = nToolbarRows[ToolbarID];
 				strcpy (Pathname,ToolbarPath[ToolbarID]);

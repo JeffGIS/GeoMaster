@@ -2016,7 +2016,7 @@ BOOL makedirectories2 (LPSTR Name,BOOL IsDir,BOOL Verify)
 {GSSiEnterProg (182);
 #endif
 {   
-	char	FullName[MAX_PATH], Dir[MAX_PATH], FName[128], Ext[32], NewName[MAX_PATH]="", drive[32]; 
+	char	FullName[MAX_PATH], Dir[MAX_PATH], FName[MAX_PATH], Ext[64], NewName[MAX_PATH]="", drive[32]; 
 	LPSTR	StartDir, EndDir,pFull;  
 	OFSTRUCT	OFStruct;
 	BOOL	Replace; 
@@ -5651,7 +5651,7 @@ long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,
 {   
 	DWORD	hDir, Type;
 	long	NumFilesIn=*TotFiles;
-    char    setstr[1024],FileName[256],FullName[256], TestExt[8], CurDir[256], str[2048], WildCard[256];
+    char    setstr[1024],FileName[256],FullName[256], TestExt[64], CurDir[256], str[2048], WildCard[256];
     short       i, rtn,ii;
     int st;
     BOOL	FirstPass=TRUE, SubDirOnly; 
@@ -5703,7 +5703,7 @@ Top:
 			if (Type)
             {   
             	if (WantSub)
-                	SearchFilesInDir (str,Ext,OutFile,TotFiles,WildCard,Lev+1,WantSub,FALSE);
+					SearchFilesInDir(str, Ext, OutFile, TotFiles, WildCard, Lev + 1, WantSub, fileNameOnly);
             }
             else if (SubDirOnly)
             	goto SkipFile; 

@@ -735,6 +735,7 @@ double MinAngleToTheRight (double AZ1,double AZ2);
 short GetValListFieldLen (LPFIELDINFO pField);
 BOOL CreateStatusWind (HWND hWnd,int nStatusBars,LPSTR Title);
 BOOL StatusWindowUpdate (LPSTR Title, LPSTR Mess, DWORD Tot, DWORD Done);
+void StatusExtraInfoUpdate(LPSTR mess);
 BOOL StatusWindowUpdate2 (LPSTR Mess, DWORD Tot, DWORD Done);
 BOOL DestroyStatusWindow (long Macro);
 void TranBoundsToRect (HANDLE TranID,LPMNMXCORD pBounds,LPRECT pRect);

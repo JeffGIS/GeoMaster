@@ -9916,4 +9916,3 @@ BOOL GetUpdateFieldValue (HWND hWndDlg,LPSTR SetFieldName,LPSTR NewValue)
 	}
 	return FALSE;
 }
-

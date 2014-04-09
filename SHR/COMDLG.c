@@ -66,6 +66,7 @@ static HANDLE	hColorsChunk=0;
 static short	ExtraOpenFlags=0;
 static char		InitialDirectory[MAX_PATH];
 static char		InitialFile[MAX_PATH]; 
+static char		OFTitle2[256];
 static char		Filter[256],CustomFilter[256],FileTitle[256],InitialDir[256],Title[256],DefExt[256];
 static UINT		FilterStringID=IDS_FILTERSTRING;   
 static short	fsLen;
@@ -769,7 +770,8 @@ BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title)
 	bi.lpszTitle = title;
 	bi.pidlRoot = ILCreateFromPathA(startDir);
 	bi.pszDisplayName = outDir;
-	bi.ulFlags = BIF_USENEWUI;
+	bi.ulFlags = BIF_DONTGOBELOWDOMAIN | BIF_RETURNONLYFSDIRS | BIF_EDITBOX;
+//	bi.ulFlags = BIF_USENEWUI | BIF_DONTGOBELOWDOMAIN | BIF_NEWDIALOGSTYLE;
 
 	if ((pidList = SHBrowseForFolder (&bi)))
 	{
@@ -970,7 +972,8 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
       lpFOChunk->of.lpstrFileTitle = lpFOChunk->szFileTitle;
       lpFOChunk->of.nMaxFileTitle = MAXFILETITLELEN;
       lpFOChunk->of.lpstrInitialDir = InitialDirectory; 
-      lpFOChunk->of.lpstrTitle = OFTitle;
+	  strcpy(OFTitle2, OFTitle);
+	  lpFOChunk->of.lpstrTitle = OFTitle2;
       *OFTitle = 0;
       lpFOChunk->of.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST |//OFN_EXPLORER |
                             OFN_FILEMUSTEXIST | ExtraOpenFlags;//|OFN_ENABLEHOOK;//|OFN_ENABLETEMPLATE;//
@@ -999,7 +1002,8 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
 	  lpFSChunk->of.lpstrFileTitle = lpFSChunk->szFileTitle;
 	  lpFSChunk->of.nMaxFileTitle =  MAXFILETITLELEN;
 	  lpFSChunk->of.lpstrInitialDir = InitialDirectory;
-      lpFSChunk->of.lpstrTitle = OFTitle; 
+	  strcpy(OFTitle2, OFTitle);
+      lpFSChunk->of.lpstrTitle = OFTitle2; 
       *OFTitle = 0;
       if (OverWritePrompt)
 		  lpFSChunk->of.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_EXPLORER | ExtraOpenFlags;

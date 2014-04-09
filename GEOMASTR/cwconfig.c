@@ -1875,17 +1875,17 @@ nMess = -1;
  /* Do clean up before exiting from the application                     */
  //UnhookWindowsHookEx(Func);
  //UnhookWindowsHookEx(MHookFunc);
- UnhookWindowsHookEx(PrevFIHook);
- CwUnRegisterClasses(); 
+   FreeBigMem();
+#if CHECKMEM
+   GSSiGLOBALLOCCLOSE();
+#endif
+   UnhookWindowsHookEx(PrevFIHook);
+   CwUnRegisterClasses(); 
 {
 #if ENABLETRACE
 GSSiExitProg (437);
 #endif
- FreeBigMem (); 
-#if CHECKMEM
-		 GSSiGLOBALLOCCLOSE ();
-#endif
-	 exit:
+//	 exit:
  CoUninitialize();
 #if _DEBUG
 	_CrtDumpMemoryLeaks();
@@ -4104,7 +4104,7 @@ DisplayParcel:
                   FARPROC lpfnLOC_INTERSECTMsgProc;  
 
                   lpfnLOC_INTERSECTMsgProc = MakeProcInstance((FARPROC)LOC_INTERSECTMsgProc, hInst);
-                  nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT1", hWnd, lpfnLOC_INTERSECTMsgProc);
+                  nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT", hWnd, lpfnLOC_INTERSECTMsgProc);
                   FreeProcInstance(lpfnLOC_INTERSECTMsgProc);  
                   if (nRc)
                   	goto NetPointLoc;

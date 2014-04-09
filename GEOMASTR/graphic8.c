@@ -588,28 +588,30 @@ BOOL SelectAreaToOffsetFile (int Item,double Offset)
  LPTHEME	pTheme;
  int		nPnts;
  LPDPOINT	lpDpoint;
- LPINT		pPolyParts;
+ LPINT		pPolyParts=0;
 
     if (Item < 0 || Item >=MAXPICKITEMS) 
     	return FALSE;
 	if (PickList[Item].Type == 2 || PickList[Item].Type == 3)
 	{ 
-		HANDLE hPoly;
+		HANDLE hPoly=0;
+		HANDLE hPolyPartLen=0;
  		int nLoops = GetPolyPointsWithParts ((LPPICKDATAHEADER)&PickList[0],&nPnts,&hPoly,&hPolyPartLen);
 		if (nLoops)
 		{   
 			LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock (hPoly);
 			
 			lpDpoint = (HPDPOINT)(pBounds+1);
-			pPolyParts = GlobalLock (hPolyPartLen);
-			pPolyParts++;//first element is npoly
+			if (nLoops > 1)
+			{
+				pPolyParts = GlobalLock(hPolyPartLen);
+				pPolyParts++;//first element is npoly
+			}
 			AddAreaToOffsetFile (PickList[Item].Refno,PickList[Item].Type,nPnts, lpDpoint,nLoops,pPolyParts,Offset);
-			GSSiGlobUlFree (&hPoly);
-			GSSiGlobUlFree (&hPolyPartLen);
-
 		}
+		GSSiGlobUlFree(&hPoly);
+		GSSiGlobUlFree(&hPolyPartLen);
 
-		
 		
 /*		SetConfig (PickList[Item].ConfigID);
 	    SetViewport (PickList[Item].ViewID);

@@ -327,7 +327,7 @@ lpACounty lpCty = &ACty;
   CurCountyNo = Countyno; 
   if (DoRead)
   {
-	  F1 = GSSiOpenFile ("county.par",&OFStruct,OF_READ);
+	  F1 = GSSiOpenFile ("[%DL]county.par",&OFStruct,OF_READ);
 	  if (F1 == HFILE_ERROR) 
 	  {
 	      GSSiMessageBox("Unable to open file COUNTY.PAR",

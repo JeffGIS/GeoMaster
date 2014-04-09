@@ -742,6 +742,13 @@ BOOL CreateStatusWind (HWND hWnd,int nStatusBarsIN,LPSTR Title)
 	return TRUE;
 } 
 
+void StatusExtraInfoUpdate(LPSTR mess)
+{
+	if (PrintMsgWnd)
+		SetDlgItemText(PrintMsgWnd, IDC_PRINTERINFO, mess);
+	return;
+}
+
 BOOL StatusWindowUpdate (LPSTR Title, LPSTR Mess, DWORD Tot, DWORD Done)
 {   
 	char	MessText[256];
