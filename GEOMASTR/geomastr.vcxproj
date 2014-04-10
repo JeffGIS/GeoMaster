@@ -82,7 +82,7 @@
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
-    <TargetName>GeoMaster34f</TargetName>
+    <TargetName>GeoMaster34g</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>

@@ -1167,6 +1167,10 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 	{
 		approx_width = approx_height = 256;
 	}
+	else if (SizeOpt == 3)
+	{
+		approx_width = approx_height = 512;
+	}
 	else
 	{
 		approx_width *= sizefac[SizeOpt];
