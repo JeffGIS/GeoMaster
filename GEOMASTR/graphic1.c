@@ -1010,10 +1010,14 @@ GSSiExitProg (12);
 					goto DisplayImage;
 				else
 				{
+					int n = 1;
 					do
 					{
 						DisplayOrthoPhoto();
-					} while (GetNextOrthoTileFromIndex());
+						if (!(n++ % 16))
+							ContinueProcessing = CheckForContinue(FALSE);
+
+					} while (ContinueProcessing && GetNextOrthoTileFromIndex());
 					//ShowBufferedScreen(TRUE, TRUE, -99, 0);
 				}
 			}
