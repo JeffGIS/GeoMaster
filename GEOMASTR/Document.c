@@ -184,7 +184,7 @@ BOOL ProcessDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
  if (Message != WM_COMMAND) return FALSE;
  if (wParam < 32000 || wParam > 33000) return FALSE;
          	
-	HaltMapDisplay(FALSE);
+	HaltMapDisplay(FALSE,TRUE);
  	rec = wParam - 32000;
  	irec = 0;
 	FidNoteType=GSSiOpenFile("document.txt",&OFStruct,OF_READ);

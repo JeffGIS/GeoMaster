@@ -5727,7 +5727,7 @@ GetNext:
        		 	    	ProcessGlobal ("[%ADDEDITCITYZOOM]");
 			 	 	FirstAttempt = FALSE; 
 			 	 }
-				 HaltMapDisplay (FALSE);
+				 HaltMapDisplay (FALSE,FALSE);
 				 if (ValidBounds2 (&DisplayBounds))
 				 {
 					 InflateBounds (&DisplayBounds,50);
@@ -6327,7 +6327,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				LPSTR	pPar;
 
 				ContinueProcessing = TRUE;
-				HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE, TRUE);
 				CloseAllRequestedFiles(FALSE);
 				GetDlgItemText(hWndDlg, SV_DATABASE_LIST, IMDataFile, lnIMDataFile);
 				if (!GetDlgItemText(hWndDlg, IDC_DEST_FILE, DestName, lnDestName))
@@ -6643,7 +6643,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				CloseAddressFilesPID();
 				DisableHalt = FALSE;
 				ContinueProcessing = TRUE;
-				HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE,TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDC_EDIT_DEST), TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDC_EDIT_HELPER), TRUE);
 			Reset:

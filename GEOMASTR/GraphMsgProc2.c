@@ -1119,7 +1119,7 @@ GSSiExitProg (1002);
 	 	InitDlgPrompts (0);    
 	 	break;
     case WM_INITDIALOG:  
-    	 HaltMapDisplay (FALSE);
+    	 HaltMapDisplay (FALSE,TRUE);
    	 	 HaveBlockingWindow = TRUE;
     	 ClearDlgPrompts ();
          cwCenter(hWndDlg, 0);
@@ -4224,7 +4224,7 @@ BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  switch(Message)
    {
     case WM_INITDIALOG:
-	     HaltMapDisplay(TRUE); 
+	     HaltMapDisplay(TRUE,TRUE); 
 		 DisableUndo (TRUE);
 	     CloseSymDict();  
 		 CloseAllRequestedFiles(FALSE);
@@ -4417,7 +4417,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 		 long	NextFileLoc=0, loc, len, FileLength, EndOfFile;
 		  
 	     UpdateID = 0;
-		 HaltMapDisplay(TRUE); 
+		 HaltMapDisplay(TRUE,TRUE); 
 		 DisableUndo (TRUE);
 	     CloseSymDict();  
 		 CloseAllRequestedFiles(FALSE);
@@ -6729,7 +6729,7 @@ BOOL FAR PASCAL TRAVERSE_ENTRYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 		 	case IDC_TESTMODE:
 		 	{
 //		 		short	icfg=1; 
-			    HaltMapDisplay (FALSE);	
+			    HaltMapDisplay (FALSE,TRUE);	
 //		 		SetViewport (*pCommandViewport);
 //		 		RezoomRect = CurView->WBounds;
 //				if (SendDlgItemMessage (hWndDlg,IDC_TESTMODE,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L)) 

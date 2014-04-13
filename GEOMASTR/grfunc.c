@@ -526,7 +526,7 @@ GSSiExitProg (1338);
 				ContinueProcessing = TRUE; 
 				ResetOriginalDrive ();
             	SetGlobalValue ("%NEXTCVAL",""); 
-            	HaltMapDisplay (TRUE);
+            	HaltMapDisplay (TRUE,TRUE);
             	CacheAlreadyChecked (0,0,0);
 			}	
             break;
@@ -548,7 +548,7 @@ GSSiExitProg (1338);
 			    	GSSiGlobUlFree (&hAddGraphicsFun);
 					CurrentLBUTDOWNLoc=CursorLoc; 
                 	HaveCurrentLBUTTON=TRUE;
-	            	HaltMapDisplay (FALSE);
+	            	HaltMapDisplay (FALSE,TRUE);
                 	AddGraphicsCmd (hWndMain,pCmd2,TRUE,0); 
                 	GSSiGlobUlFree (&hCmd2);
 

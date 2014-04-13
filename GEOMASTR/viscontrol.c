@@ -2766,7 +2766,7 @@ LONG FAR PASCAL CatalogMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG l
 		pWMH = GlobalLock (hInitData);
 		if (!pWMH->menuHandle[pWMH->currentMenu])
 		{
-			HaltMapDisplay (FALSE);
+			HaltMapDisplay (FALSE,TRUE);
 			InitCatalogData (hInitData,0);
 		}
 		pVCHeader = GlobalLock (pWMH->menuHandle[pWMH->currentMenu]);

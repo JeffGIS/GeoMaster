@@ -1763,7 +1763,7 @@ BOOL CreateStreetSegmentTable (LPSTR File)
 
 	if (ExistFile(File))
 	{
-		HaltMapDisplay(FALSE);
+		HaltMapDisplay(FALSE,FALSE);
 		GSSiMsgBox( GetFocus(),File,"Trying to create existing file", MB_OK,0);
         BlowOut(0,0);
 	}

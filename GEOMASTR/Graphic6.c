@@ -2714,7 +2714,7 @@ GSSiExitProg (813);
 				NewQuadFID = 0;  
 				ReorgFile = FALSE;
 				GSSiClose (ReorgFile);
-				HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE,FALSE);
 				GSSiMsgBox( hWndMain, "Error writing TEMP file - probably due to full disk","Reorg Aborted", MB_ICONEXCLAMATION,0);
 			}
 			lbuf = 0;

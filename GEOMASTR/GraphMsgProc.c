@@ -1682,7 +1682,7 @@ GSSiExitProg (449);
 	         break;
 	     }
 	  	 Init=GetGlobalBVal2 ("[%GFMENUOLD]",FALSE);
-         HaltMapDisplay(FALSE);
+         HaltMapDisplay(FALSE,TRUE);
 	  	 SaveDisableHalt = DisableHalt;  
 	  	 DisableHalt = TRUE;
 	  	 SaveDisableMarginPan = DisableMarginPan;  
@@ -6248,7 +6248,7 @@ GotLine:  GSSiClose (Fid);
          switch(LOWORD(wParam))
            {
             case IDOK:   
-            	 HaltMapDisplay (FALSE);
+				 HaltMapDisplay(FALSE, FALSE);
 		         DoPaint = TRUE;
 		         if (*PMMacroFile)
 			     	ProcessMacroFile (PMMacroFile,str2,0,0);  

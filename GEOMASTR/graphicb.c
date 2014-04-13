@@ -3985,7 +3985,7 @@ BOOL ProcessVPPixelThemes (void)
 				}
 	    		else if (msg.message == WM_KEYDOWN && msg.wParam == 27)  
 	    		{   
-	    			HaltMapDisplay (FALSE);
+	    			HaltMapDisplay (FALSE,TRUE);
 					return FALSE;
 				}
 			}

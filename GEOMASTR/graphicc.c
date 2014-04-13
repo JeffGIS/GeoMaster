@@ -7046,7 +7046,7 @@ void EscapeFunction (BOOL DoHalt)
 	if (DoHalt)
 	{
 		ResetFunStack (TRUE);
-		HaltMapDisplay (TRUE);
+		HaltMapDisplay (TRUE,TRUE);
 	}
     CloseSymDict();  
 	CloseOrthos(TRUE);

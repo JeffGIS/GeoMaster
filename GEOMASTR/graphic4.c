@@ -1286,6 +1286,11 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 			pUDI++;
 			if (!stricmp(debugUDI, pUDI))
 				ii = 1;
+			else
+			{
+				Visible = FALSE;
+				goto Exit;
+			}
 		}
 	}
     if (CurrentRefno == debugrefno)
@@ -4304,7 +4309,7 @@ GSSiExitProg (693);
 		{
 			char	mess[512];
 
-			HaltMapDisplay(FALSE);
+			HaltMapDisplay(FALSE,FALSE);
 			sprintf (mess,"Invalid header (%i)\r\nReference and TAG indexes may need to be recreated",*Pcode);
 			GSSiMsgBox (0,mess,PltName,MB_ICONEXCLAMATION,0);
 	        BlowOut(0,0);   

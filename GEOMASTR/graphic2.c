@@ -555,7 +555,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 							if (CurView->DisplayedFullScreen)
 								MakeVPFullScreen (CurView->ID,0);
 						    CurView = SaveView;
-							HaltMapDisplay(FALSE); 
+							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
 							PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 						}
@@ -578,7 +578,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 		        		{
 							MakeVPFullScreen (CurView->ID,!CurView->DisplayedFullScreen);
 						    CurView = SaveView;
-							HaltMapDisplay(FALSE); 
+							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
 							PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 						}
@@ -607,14 +607,14 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 							if (!CurView->DisableZoomMacro)
 								PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 						    CurView = SaveView;
-							HaltMapDisplay(FALSE); 
+							HaltMapDisplay(FALSE, FALSE);
 							IgnoreLbutton = TRUE;  
 						}
 		        		else if (Message == WM_RBUTTONDOWN) 
 		        		{   
 							RestoreScreen2 (CurView->hDC, hLastBox,0,FALSE);
 							DestroySavedScreen (&hLastBox,0);
-							HaltMapDisplay(FALSE); 
+							HaltMapDisplay(FALSE,TRUE); 
 		        			if (SelectZoomMacro (hWndMain))
 		        			{
 		        				CurView->DisableZoomMacro = FALSE;

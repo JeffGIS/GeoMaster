@@ -76,7 +76,7 @@ GSSiExitProg (871);
       FARPROC lpfnWAITMESSAGEMsgProc;
       short	nRc;
 	              
-	  HaltMapDisplay(FALSE); 
+	  HaltMapDisplay(FALSE,FALSE); 
 	  CloseAllRequestedFiles (FALSE);
 	  ODBCTerminate (TRUE);
       lpfnWAITMESSAGEMsgProc = MakeProcInstance((FARPROC)WAITMESSAGEMsgProc, hInst);
@@ -158,7 +158,7 @@ GSSiExitProg (872);
 			case 'A':
 			case 'a':
  				DoPaint = FALSE;
-				HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE,TRUE);
 				GSSiMsgBox( GetFocus(),GMmess,"GeoMaster System Message", MB_OK|MB_ICONEXCLAMATION,0);
  				BlowOut(0,0);
  			case 'M':
@@ -196,7 +196,7 @@ GSSiExitProg (872);
  			}
  			case 'S':
  			case 's': 
-				HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE,TRUE);
 				GSSiMsgBox( GetFocus(),GMmess,"GeoMaster System Message", MB_OK|MB_ICONEXCLAMATION,0);
 				KeepFilesOpen = SaveKFO;
 {
@@ -257,7 +257,7 @@ GSSiExitProg (874);
 }
 	sprintf (GMmess,"Please load the CD named %s",VolLabel);
 	_fstrcpy (WaitForVolLabel,VolLabel);
-	HaltMapDisplay(FALSE);  
+	HaltMapDisplay(FALSE,TRUE);  
 	DoPaint = FALSE; 
 	DisableHalt = TRUE;
 	lpfnWAITMESSAGEMsgProc = MakeProcInstance((FARPROC)WAITMESSAGECDMsgProc, hInst);

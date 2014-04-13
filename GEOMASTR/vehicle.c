@@ -255,7 +255,7 @@ BOOL BackupFences (LPSTR CAN,LPSTR File)
 {
 	BOOL rtn;
 
-	HaltMapDisplay(FALSE); 
+	HaltMapDisplay(FALSE,TRUE); 
 	CloseAllRequestedFiles (FALSE);
 	rtn = SaveFencesToFile (File,CAN);
 	return rtn;
@@ -497,7 +497,7 @@ BOOL ImportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 					Fid = GSSiOpenFile (FenceFileBackup,0,OF_CREATE);
 					BigWrite (Fid,pFile,lFile,-1);
 					GSSiClose (Fid);
-					HaltMapDisplay(FALSE); 
+					HaltMapDisplay(FALSE,FALSE); 
 					CloseAllRequestedFiles (FALSE);
 					BlockSocketProcessing (5);
 					RecallFencesFromFile (FenceFileBackup,Account);
@@ -1477,7 +1477,7 @@ BOOL ExportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 	//GSSiGetTempFileName (0,"gm",0,(LPSTR)TempName);
 	sprintf (TempName,"[%%DL]FenceBackup\\%s_[%%SYS_CLOCK]",Account);
 	ExpandText (TempName);
-	HaltMapDisplay(FALSE); 
+	HaltMapDisplay(FALSE,TRUE); 
 	CloseAllRequestedFiles (FALSE);
 	BlockSocketProcessing (6);
 	if (!SaveFencesToFile (TempName,Account))
@@ -5304,7 +5304,7 @@ Reload:
 					char	CAN[64]="[CAN]";
 
 					ExpandText (CAN);
-					HaltMapDisplay(FALSE); 
+					HaltMapDisplay(FALSE,TRUE); 
 					CloseAllRequestedFiles (FALSE);
 					BlockSocketProcessing (7);
 					SaveFencesToFile (str,CAN);
@@ -5322,7 +5322,7 @@ Reload:
 
 	                WaitCursor (1);
 					ExpandText (CAN);
-					HaltMapDisplay(FALSE); 
+					HaltMapDisplay(FALSE,TRUE); 
 					CloseAllRequestedFiles (FALSE);
 					BlockSocketProcessing (8);
 					RecallFencesFromFile (str,CAN);

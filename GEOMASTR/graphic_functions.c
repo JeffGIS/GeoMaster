@@ -1932,7 +1932,7 @@ LButUp:
 		   		if (Function == GF_PAN_ZOOM_TARGET)
 		   			CurrentPrompt = PRMT_PANZOOM1;
 	    	    SetPrompt (CurrentPrompt,TRUE);
-			    HaltMapDisplay (FALSE);
+			    HaltMapDisplay (FALSE,TRUE);
 			    BasePoint=WinPtSToBasePt(POINTtoPOINTS(ButtonPoint));
 			    SetPickAp(0); 
 		    	if (InOnePick)
@@ -2081,7 +2081,7 @@ LButUp:
 		RestoreScreen2 (hDC, hLastBox,0,FALSE);
 		ReleaseDC (hWnd,hDC); 
 		DestroySavedScreen (&hLastBox,0);
-	    HaltMapDisplay (FALSE);
+	    HaltMapDisplay (FALSE,TRUE);
 
 		if (hLastHLT)
 		{
@@ -2582,7 +2582,7 @@ DoPick:
 	   		if (Function == GF_PAN_ZOOM_TARGET)
 	   			CurrentPrompt = PRMT_PANZOOM1;
     	    SetPrompt (CurrentPrompt,TRUE);
-		    HaltMapDisplay (FALSE);
+		    HaltMapDisplay (FALSE,TRUE);
 		    BasePoint=ScreenPtToBasePt(MovePoint);
 		    SetPickAp(0); 
 			MaxPick = GetGlobalLVal2 ("[%AUTOPICKMAXPICK]",MAXPICKITEMS); 
@@ -3997,7 +3997,7 @@ NextPan:
 		if (HaveTimer)
 			break;
 Done:
-		HaltMapDisplay(FALSE); 
+		HaltMapDisplay(FALSE,FALSE); 
 		ClearFullWindowBitmap (0);
 		MultiZoomLevel = 0;    
     	HaveDown = FALSE;  
@@ -5516,7 +5516,7 @@ GSSiExitProg (726);
 	    	CurView->OrthoDisplayName[0]=0; 
 //            RemoveGraphicsFunction (hWnd,0);
 		    CurView->CurZoomAreaRef = 0;
-			HaltMapDisplay(FALSE);
+			HaltMapDisplay(FALSE,TRUE);
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
 			PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, CurView->ID);
 //	    	RedisplayViewport(FALSE,FALSE);
@@ -13191,7 +13191,7 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 		return FALSE;
 	if (isTouchScreen)
 		Scale *= 2;
-	HaltMapDisplay (FALSE);
+	HaltMapDisplay (FALSE,FALSE);
 	switch (inc)
 	{
 	case INT_MAX:

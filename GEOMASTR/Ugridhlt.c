@@ -1754,7 +1754,7 @@ RedrawTable:
 
 					if (CurRow >= startdata)
 					{   
-						HaltMapDisplay (FALSE);
+						HaltMapDisplay (FALSE,TRUE);
 						if (!CurrentConfig)
 							SetConfig (1);
 						SetViewport(*pCommandViewport);

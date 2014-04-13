@@ -2054,7 +2054,7 @@ Start:
 		    GSSiClose (FidSD);
 			goto Start;
 		} 
-		HaltMapDisplay(FALSE);
+		HaltMapDisplay(FALSE,TRUE);
 		if (GSSiMsgBox( GetFocus(), "Symbol file not found",Name,
 		    MB_OKCANCEL|MB_ICONEXCLAMATION,0) == IDCANCEL)
 			BlowOut(0,0);

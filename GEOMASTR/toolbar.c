@@ -2624,7 +2624,7 @@ HRGN	hRgn;
 		}
 
 	case WM_LBUTTONDOWN:
-	    HaltMapDisplay (FALSE);
+	    HaltMapDisplay (FALSE,TRUE);
 		SetSysMess (0);
 	case WM_MOUSEMOVE:
 		ToolbarID = GetToolbarIDFromWnd (hWndPZR);

@@ -1123,7 +1123,7 @@ BOOL CreateAllSizes (HWND hWndDlg)
 			GSSiGlobUlFree (&hMemDIB);
 			DeleteObject (hMemBitmap); 
 			DeleteObject (hSaveBitmap); 
-			HaltMapDisplay (FALSE);
+			HaltMapDisplay (FALSE,FALSE);
 		}
  		iSavedImage++;
         PctBox (GetDlgItem(hWndDlg,IDC_PROGRESS), TotLen, GSSillseek (Fid,0,1),0);
@@ -2292,7 +2292,7 @@ BOOL ProcessConnectedCommand (UINT ID)
 	Fid = OpenFile (ConFile,&OFStruct,OF_READ);
 	if (Fid == HFILE_ERROR)
 		return FALSE;
-    HaltMapDisplay(TRUE);
+    HaltMapDisplay(TRUE,FALSE);
 	lMem = _llseek (Fid,0,2);
 	_llseek (Fid,0,0);
 	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMem);

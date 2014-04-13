@@ -311,7 +311,7 @@ void QuitGraphics()
 
 	if (g_hook)
 		UnhookWindowsHookEx (g_hook);
-	HaltMapDisplay (FALSE);
+	HaltMapDisplay (FALSE,FALSE);
 	InQuitGraphics = TRUE;
 	DestroyAllToolbars ();
 	StopBackgroundCache ();
@@ -1302,7 +1302,7 @@ Next:
 					}
 				}
 			}
-			if (!CheckForContinue (FALSE))
+			if (!(n%16) && !CheckForContinue (FALSE))
 			{
 		    	CloseMap(FALSE);
 				goto RtnFalse;
@@ -2075,7 +2075,7 @@ GSSiExitProg (18);
     if (!InShowZoomArea)
 		InLinkedList (-1);
     if (Imediate < 2)
-		HaltMapDisplay(FALSE);
+		HaltMapDisplay(FALSE,FALSE);
     ContinueProcessing=TRUE;
     GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
     NumViewportsToDisplay = *pNumViewports;
@@ -4174,7 +4174,7 @@ short CenterWindow (DPOINT CenterPoint, BOOL Imediate)
 #endif
 {    double BWidth, BHeight;
      
-	 HaltMapDisplay(FALSE); 
+	 HaltMapDisplay(FALSE,FALSE); 
 	 CurView->LastWidth = 0;
 	 ZoomToPointAndScale (CenterPoint,CurView->Scale,Imediate);
 {
@@ -4388,7 +4388,7 @@ GSSiExitProg (54);
 		ClientRectStart = ClientRect;
 
     if (!PeopleNet) 
-    	HaltMapDisplay(FALSE); 
+    	HaltMapDisplay(FALSE,FALSE); 
     if (!OpenConfig(hWnd,hDC))
 {
 #if ENABLETRACE
@@ -7090,7 +7090,7 @@ GSSiExitProg (85);
 #endif
 }
 
-void HaltMapDisplay(BOOL ClearCFGStack)
+void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
 #if ENABLETRACE
 {GSSiEnterProg (86);
 #endif
@@ -7190,7 +7190,8 @@ GSSiExitProg (86);
     InDisplayProcessing = FALSE;  
     TrapKillTimer=TRUE;   
     CurTheme = SaveTheme;
-	SaveFullWindowBitmap (0); 
+	if (saveScreen)
+		SaveFullWindowBitmap (0); 
 {
 #if ENABLETRACE
 GSSiExitProg (86);

@@ -1556,7 +1556,7 @@ GSSiExitProg (1350);
 			{
 				 HDC hDC = 0;
 
-       			 HaltMapDisplay(FALSE);  
+       			 HaltMapDisplay(FALSE,FALSE);  
        			 if (!CurrentConfig)
        			 {  
 	       			 SetConfig (1); 
@@ -1578,7 +1578,7 @@ GSSiExitProg (1350);
 			}			
 			else
 			{
-				HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE,FALSE);
 				ii=1;
 				ClearFullWindowBitmap(CurView->hWnd);
 				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);

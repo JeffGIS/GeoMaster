@@ -6588,7 +6588,7 @@ BOOL ProcessUpdateFile (HANDLE hMem)
 	HFILE	Fid, FidUp;
 
 	BackgroundUpdateMessage ("Processing update file");
-	HaltMapDisplay (FALSE);
+	HaltMapDisplay (FALSE,TRUE);
 	CloseAllRequestedFiles (FALSE);
 	Fid = GSSiOpenFile (pFile,0,OF_READ);
 	if (Fid != HFILE_ERROR)

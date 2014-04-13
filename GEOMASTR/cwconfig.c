@@ -136,7 +136,7 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 	 BOOL rtn=FALSE;
 	 RECT WindowRect;
 
-	 HaltMapDisplay(FALSE);
+	 HaltMapDisplay(FALSE,TRUE);
 	 GMDestroyDIB32 (hWindowDib32);
 	 hWindowDib32 = 0;
 	 GetClientRect (hWndMain,&WindowRect);   
@@ -1842,7 +1842,7 @@ nMess = -1;
 		if (!PtInRect (&Rect,CPoint))
 		{
 			ScreenToClient (CurView->hWnd,&CPoint);   
-			HaltMapDisplay(FALSE);
+			HaltMapDisplay(FALSE,TRUE);
 			SelectViewport (CPoint,TRUE,FALSE,FALSE);   
 			if (InFocus != GetFocus())
 				PostMessage(GetFocus(),msg.message, msg.wParam,msg.lParam);
@@ -2057,7 +2057,7 @@ if (Message == WM_SETCURSOR)
 
 if (InSmoothZoom && (Message == WM_LBUTTONDOWN || Message == WM_RBUTTONDOWN || Message == WM_LBUTTONUP || Message == WM_RBUTTONUP))
  {  
-	 HaltMapDisplay (FALSE);
+	 HaltMapDisplay (FALSE,TRUE);
  	 SetViewport (MultiZoomVP);
  	 if (ProcessGraphicsFunction (hWnd,Message, wParam,lParam))
 		goto Return0;
@@ -2261,7 +2261,7 @@ if (Message == WM_LBUTTONDOWN )
 	CurrentLBUTDOWNLoc=POINTStoPOINT(MAKEPOINTS(lParam));
 	if (ProcessGraphicsFunction(hWnd, Message, wParam, lParam))
 		goto Return0;
-	HaltMapDisplay(TRUE);
+	HaltMapDisplay(TRUE,TRUE);
 }
 if (DebugWait)
 	goto ReturnDefault;
@@ -2691,7 +2691,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 hSTR=GSSiGlobAlloc (   7,GMEM_MOVEABLE,1024);
 				 str=GlobalLock (hSTR); 
             	 
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,TRUE);
                  DoPaint = FALSE;
 				 ButtonFuncOpt=0;
 				 strcpy (OFTitle,title4);
@@ -3377,7 +3377,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 break;       
             	 
             case IDM_ZOOM_SCALE:
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
             {
                   FARPROC	lpfnZOOMSCALEMsgProc; 
 
@@ -3425,7 +3425,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 		            	pandir = 3;
 		            	break;
 		         }
-       			 HaltMapDisplay(FALSE);
+				 HaltMapDisplay(FALSE, FALSE);
     			 {
 					POINT	CPoint; 
 					GetCursorPos (&CPoint); 
@@ -3468,7 +3468,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 	ZoomFactor = 1.0;
             	 else if (LOWORD(wParam) == IDM_Z_OUT)
             	 	ZoomFactor = 0.5;
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
     			 if (SetZoomVP (lParam))
 					 Point = CurView->MidPointW;
 				 else
@@ -3533,7 +3533,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             case IDM_Z_PRIOR:
                  /* Place User Code to respond to the                   */
                  /* Menu Item Named "Out" here.                         */
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
     			 SetZoomVP (lParam);
                  ZoomWindow (hWnd,0);
                  break;
@@ -3543,7 +3543,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                  /* Menu Item Named "Out" here.                         */
 		   		 if (ScaleIsSet (TRUE))
 		   			break;
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
 				 DoPaint = TRUE;
 				 SetViewport(-99);
 				 SelectVisList (FALSE);
@@ -3558,7 +3558,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                   	ii=0;
                   iii++;
 //				  SetViewport(*pCommandViewport);
-       			  HaltMapDisplay(FALSE);
+       			  HaltMapDisplay(FALSE,FALSE);
                   AddGraphicsFunction (hWnd,GF_WINDOW_ZOOM,0);
                   HaltPaint = TRUE;
                  break;
@@ -3644,7 +3644,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 	RedisplayMenu = FALSE; 
             	 	goto DoRedisplay;    
             	 }
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
 				 ClearFullWindowBitmap(0);
 				 DoPaint = TRUE;
                  IgnoreBounds=FALSE;  
@@ -3661,7 +3661,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             
             case IDM_REDISPLAYVIEWPORTS:  
             	 DoPaint=TRUE;
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
 				 ClearFullWindowBitmap(0);
 				 if (NumViewportsArray[0])
    	         		SetConfig(0);
@@ -3679,7 +3679,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 RedisplayMenu = TRUE;
       DoRedisplay:   
       			 DisplayCycle++;
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,FALSE);
   				 ClearFullWindowBitmap (0);
       			 if (InAccel)
        			 	ClearCurrentCD ();
@@ -3778,7 +3778,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			    	icfg = 5; 
 			    	break; 
 			    }
-			     HaltMapDisplay (FALSE);	
+			     HaltMapDisplay (FALSE,TRUE);	
 			     sprintf (pStr,"[%%C]=$LOADCFG([%%CFG%i]);[%%C]=$REDISPLAY()",icfg);
 				 ExpandText (pStr);    
 				 GSSiGlobUlFree (&hMem);
@@ -3800,7 +3800,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 HANDLE hSN=GSSiGlobAlloc (  11,GHND,256);
 				 LPSTR	Name = GlobalLock (hSN);
 				 
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,TRUE);
 				 DoPaint = FALSE;
 				 strcpy (OFTitle,title2);
 				 if (GetFileName3(hWndMain,Name,IDS_FILTERGMC,IDS_FILEFMT))   
@@ -3817,7 +3817,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 HANDLE	hMem=GSSiGlobAlloc (  12,GMEM_MOVEABLE,256);
 				 LPSTR	pName=GlobalLock (hMem);
 				 
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,TRUE);
 				 DoPaint = FALSE;
 				 strcpy (OFTitle,title3);
 				 if (GetFileName3(hWndMain,pName,IDS_FILTERGMC,IDS_FILEMEN))
@@ -3835,7 +3835,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 HANDLE hSN=GSSiGlobAlloc (  13,GMEM_MOVEABLE,256);
 				 LPSTR	SaveName = GlobalLock (hSN);
 				 
-       			 HaltMapDisplay(FALSE);
+       			 HaltMapDisplay(FALSE,TRUE);
 				 DoPaint = FALSE;
 				 _fstrcpy (SaveName,CfgName); 
 				 strcpy (OFTitle,title1);
@@ -4033,7 +4033,7 @@ DisplayParcel:
 		 				GSSiGlobUlFree (&hSTR);
 						if (fabs(OffsetLineOffset) > 0.000000001) 
 						{   
-							HaltMapDisplay(FALSE);
+							HaltMapDisplay(FALSE,FALSE);
 				        	OffsetPickedArea (0,OffsetLineOffset);
 					        DisplayPolyOff();  
 					        DisplayMaskArea();
@@ -4042,7 +4042,7 @@ DisplayParcel:
 		 				} 
 		 				else if (OffsetLineOffset > 0)
 		 				{ 
-		 					HaltMapDisplay(FALSE);
+							HaltMapDisplay(FALSE, FALSE);
 		 					SelectAreaToOffsetFile (0,0);
 						    CurView->CurZoomAreaRef = 0;
 				   			RedisplayViewport(FALSE,FALSE);
@@ -4788,7 +4788,7 @@ DisplayParcel:
 		switch (wParam)
 		{
 		case SC_MINIMIZE:
-	    	HaltMapDisplay(FALSE); 
+	    	HaltMapDisplay(FALSE,TRUE); 
 			//SaveFullWindowBitmap (hWndMain);
 				// if (hCacheThread)
 				//	 ii = SuspendThread(hCacheThread);
@@ -4905,7 +4905,7 @@ DisplayParcel:
 				break;
             case SIZE_RESTORED:  
             {
-			    HaltMapDisplay(FALSE);
+				HaltMapDisplay(FALSE, TRUE);
 				hDC = GetDC (hWnd);
 				HavePaint = SaveHavePaint;		
 				GetClientRect (hWndMain,&WindowRect); 
@@ -4970,7 +4970,7 @@ DisplayParcel:
 						if (!DisplaySeg (&CurView->hDC,FALSE)) 
 							EndDisplayProcessing (TRUE);
 						else if (MemMap && _fstricmp (MemMapName,"%SCREEN"))
-							HaltMapDisplay(FALSE);
+							HaltMapDisplay(FALSE, TRUE);
 						else 
 						{   
 							EndTime = GetTickCount();
@@ -5325,7 +5325,7 @@ GSSiExitProg (438);
     {
     	short	ii;   
     	HMENU	hMenu=GetMenu(hWnd);
-    	HaltMapDisplay (TRUE); 
+    	HaltMapDisplay (TRUE,TRUE); 
     	if (!hUserMenu && hMenu)
     	{
 	    	if (hHighlight)
@@ -5553,7 +5553,7 @@ GSSiExitProg (438);
                  break;
             
             case SB_ENDSCROLL:
-		         HaltMapDisplay (FALSE);
+		         HaltMapDisplay (FALSE,TRUE);
 		 		 PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 		 		 goto Return0;
 
@@ -5588,7 +5588,7 @@ GSSiExitProg (438);
                  break;
 
             case SB_ENDSCROLL:
-		         HaltMapDisplay (FALSE);
+		         HaltMapDisplay (FALSE,TRUE);
 		 		 PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 		 		 goto Return0;
             default:
@@ -5608,7 +5608,7 @@ GSSiExitProg (438);
         // end of lda addition  
 		 PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);//allows imediate processing to terminate 
 		 break;
-Close:   HaltMapDisplay(TRUE);
+Close:   HaltMapDisplay(TRUE,FALSE);
 		 if (hWndVehTime)
 			 DestroyWindow (hWndVehTime);
 		 DisplayToolbars = FALSE;

@@ -1541,7 +1541,7 @@ short GetTypeVisibility (int type);
 void NewMap(void);
 //int GetLBFunction(void);
 //void SetLBFunction(int Fun);
-void HaltMapDisplay(BOOL ClearCFGStack);
+void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen);
 void ShowPickedItem (HWND hWnd, int Item);
 BOOL DisplayPickedItems (HWND hWnd,int NumPicked,BOOL UseMenu, LPSTR Cmd,LPSTR File,BOOL SavePickList);
 void GetItemTAG (int item,LPSTR TAG, LPSTR Symbol, LPLONG Refno);

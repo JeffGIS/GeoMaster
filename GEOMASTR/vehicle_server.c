@@ -968,7 +968,7 @@ int UploadFence (LPSTR Account,LPSTR FileLength,LPSTR FileLengthCmp)
 
 	if (!stricmp (FileLength,"*RENAME*"))
 	{
-		HaltMapDisplay(FALSE); 
+		HaltMapDisplay(FALSE,TRUE); 
 		CloseAllRequestedFiles (FALSE);  
 		GetPolygonPickAccelerator (1);
 //		sprintf (MapFile,"[%%DL]\\fences\\%s_new",Account);
@@ -1119,7 +1119,7 @@ int UploadFence (LPSTR Account,LPSTR FileLength,LPSTR FileLengthCmp)
 		strcat (MapFile," ");
 		AppendFile (FenceFilelist,MapFile);
 	}*/
-	HaltMapDisplay(FALSE); 
+	HaltMapDisplay(FALSE,TRUE); 
 	CloseAllRequestedFiles (FALSE);  
 	return TRUE;
 }
@@ -1295,7 +1295,7 @@ BOOL RestoreFences (LPSTR CAN,LPSTR File)
 	BOOL rtn;
 	int	iaccount;
 
-	HaltMapDisplay(FALSE); 
+	HaltMapDisplay(FALSE,TRUE); 
 	CloseAllRequestedFiles (FALSE);
 	rtn = RecallFencesFromFile (File,CAN);
 	iaccount = GetAccountNum (CAN);

@@ -888,7 +888,7 @@ BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPA
       case IDCANCEL:
          ContinueProcessing=FALSE;
          DestroyWindow(ProcessStatusWnd); 
-         HaltMapDisplay (FALSE);
+         HaltMapDisplay (FALSE,FALSE);
          return TRUE;
 
       default:
@@ -925,7 +925,7 @@ BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM l
       case IDCANCEL:
          ContinueProcessing=FALSE;
          DestroyWindow(ProcessStatusWnd); 
-         HaltMapDisplay (FALSE);
+         HaltMapDisplay (FALSE,FALSE);
          return TRUE;
 
       default:
@@ -1794,7 +1794,7 @@ S10:
 								   }
 								   while (DisplaySeg (&hPr,FALSE) && CheckPrintAbort (hPr) && CurView); 
 								   if (gbUserAbort)
-						       			HaltMapDisplay (FALSE);
+						       			HaltMapDisplay (FALSE,FALSE);
 							   }
 						   }
 					     }
@@ -3042,7 +3042,7 @@ BOOL PrintMerge (HWND hWnd)
 						       }
 						       while (DisplaySeg (&hPr,FALSE) && CheckPrintAbort (hPr) && CurView); 
 						       if (gbUserAbort)
-						       		HaltMapDisplay (FALSE);
+								   HaltMapDisplay(FALSE, FALSE);
 						   }
 					     }
 					     
@@ -3266,7 +3266,7 @@ BOOL ClipMap (HWND hWnd, LPSTR Name,short SizeOpt,short FormatOpt)
 	double	SavePrinterMarginLeft=PrinterMarginLeft,SavePrinterMarginRight=PrinterMarginRight,SavePrinterMarginTop=PrinterMarginTop,SavePrinterMarginBottom=PrinterMarginBottom;
 	double	sw = GetGlobalDVal2 ("[%SCREENWIDTH]",(double)GetDeviceCaps(CurView->hDC, HORZSIZE) * MFT/100);
     
-    HaltMapDisplay (FALSE);
+    HaltMapDisplay (FALSE,TRUE);
    	BufferedScreen = FALSE; 
 	ScreenBufferDC ((HWND)1,0); 
     if (SizeOpt == 1)

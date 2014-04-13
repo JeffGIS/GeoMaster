@@ -4294,7 +4294,7 @@ GotCloseFilehSQL:
 		{	
 			BOOL 	SaveTrackingStatus = TrackingStatus, ForceOpen;
 
-			HaltMapDisplay (TRUE);	
+			HaltMapDisplay (TRUE,TRUE);	
 			nArgs = GetFunArgs (Args,Arg,6,&hMem);   
 			ForceBounds = FALSE;
 			if (!SaveZooms (0))
