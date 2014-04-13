@@ -3363,7 +3363,7 @@ GoDown:
 			BT_PUT (hBT2,(LPSTR)&BTKey,(LPSTR)&Coord); 
 		} 
 		st = BT_FIND (hBT1,(LPSTR)&BTKey,BT_NEXT,BT_ANY,(LPSTR)&Coord);		
-		CheckForContinue(TRUE);
+		CheckForContinue(TRUE, 0);
 	}    
 EndSplit:   
 	if (!irec)

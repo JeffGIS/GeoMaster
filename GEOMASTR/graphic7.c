@@ -5131,7 +5131,7 @@ GSSiExitProg (919);
 //	if (SaveVis)
 //    	CurVis->WantType[7] = SaveVis->WantType[7];
 	st = BT_FIND (hHighlight,(LPSTR)pStartRef,BT_FIRST,BT_GE,(LPSTR)&HighlightData);
-	while (!st && CheckForContinue (TRUE))
+	while (!st && CheckForContinue (TRUE,0))
 	{   
 		if (CurView->ID == HighlightData.PD.ViewID)// &&
 //			((HighlightData.PD.Type == 3 && (CurView->PassID == 2 || !CurView->PassID) && CurVis->WantType[0]) ||

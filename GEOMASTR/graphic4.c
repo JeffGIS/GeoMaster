@@ -1286,11 +1286,11 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 			pUDI++;
 			if (!stricmp(debugUDI, pUDI))
 				ii = 1;
-			else
+			/*else
 			{
 				Visible = FALSE;
 				goto Exit;
-			}
+			}*/
 		}
 	}
     if (CurrentRefno == debugrefno)

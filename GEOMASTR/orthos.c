@@ -1456,7 +1456,7 @@ DoNotShrink:
 NextTile:
 		    CloseTRANS2 (&hTranBMToBaseT);
 		    CloseTRANS2 (&hTranBaseToBMT); 
-		    if (ntilerows > 1 && !CheckForContinue (FALSE))
+		    if (ntilerows > 1 && !CheckForContinue (FALSE,0))
 		    	goto Exit;
 		}
 	}
@@ -1900,7 +1900,7 @@ DoNotShrink:
 NextTile:
 		    CloseTRANS2 (&hTranBMToBaseT);
 		    CloseTRANS2 (&hTranBaseToBMT); 
-		    if (ntilerows > 1 && !CheckForContinue (FALSE))
+		    if (ntilerows > 1 && !CheckForContinue (FALSE,0))
 		    	goto Exit;
 		}
 	}
@@ -3191,7 +3191,7 @@ BOOL DisplayVirtualPlot (LPSTR VPName)
 			DisplayBMInVP32Ext (CurView->hDC,Name,tilex,tiley,tilew,tileh);
 			tilex += tilew; 
 			n++;  
-			if (!CheckForContinue(FALSE))
+			if (!CheckForContinue(FALSE,0))
 				return FALSE;
 		}
 	}

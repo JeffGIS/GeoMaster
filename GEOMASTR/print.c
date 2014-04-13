@@ -738,7 +738,7 @@ BOOL CreateStatusWind (HWND hWnd,int nStatusBarsIN,LPSTR Title)
     	ShowWindow (GetDlgItem(PrintMsgWnd,IDC_STATUS),SW_HIDE); 
     SaveDH = DisableHalt; 
     DisableHalt = AllowBlock;  
-	CheckForContinue(TRUE);
+	CheckForContinue(TRUE, 0);
 	return TRUE;
 } 
 
@@ -833,7 +833,7 @@ BOOL CreateProcessStatusWindow (HWND hWnd,LPSTR Title)
 	if (Title)
 		SetDlgItemText (ProcessStatusWnd,IDC_STATUSTITLE,Title);
 	CurrentStatusWindowVP = CurView->ID;
-	CheckForContinue(TRUE);
+	CheckForContinue(TRUE, 0);
 	return TRUE;
 } 
 

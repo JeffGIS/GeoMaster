@@ -1576,7 +1576,7 @@ SetVis:
 				SaveZooms (0);
 		        UnallocateConfig ();
 	    		_fstrcpy (CfgName,Arg[2]);
-				CheckForContinue (TRUE);  
+				CheckForContinue (TRUE,0);  
 				if (atob (Arg[3]))
 				{
 					if (!OpenConfig(0,0))

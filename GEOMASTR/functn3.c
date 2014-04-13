@@ -3502,7 +3502,7 @@ GotCloseFilehSQL:
 				SaveZooms (0);
 		        UnallocateConfig ();
 	    		_fstrcpy (CfgName,str);
-				CheckForContinue (TRUE);
+				CheckForContinue(TRUE, 0);
 				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 			} 
 			goto RtnTrue;
@@ -4351,7 +4351,7 @@ GotCloseFilehSQL:
             GPSTracking (0);
     		_fstrcpy (CfgName,Arg[1]); 
     		CFGOpenTrackingStatus = SaveTrackingStatus;
-			CheckForContinue (TRUE);
+			CheckForContinue(TRUE, 0);
 		//	SetWindowText (hWndMain,"Switch"); 
 			if (InAccel || ForceOpen)
 				SendMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, -99);

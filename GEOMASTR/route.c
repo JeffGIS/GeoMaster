@@ -1925,7 +1925,7 @@ BOOL HighlightSequentialItems (HWND hWnd, int Message, WPARAM wParam, LPARAM lPa
 	   	}
     	if (BT_FIND (hBTNext,(LPSTR)&NextKey,BT_FIRST,BT_ANY,(LPSTR)&NextData))
     		NextKey.Cost = INFINITE_COST; 
-    	while (NextKey.Cost < MaxCost && (ContinueProcessing = CheckForContinue (TRUE)))   
+    	while (NextKey.Cost < MaxCost && (ContinueProcessing = CheckForContinue (TRUE,0)))   
     	{   
     		SaveNextKey = NextKey;
     		SaveNextData = NextData;

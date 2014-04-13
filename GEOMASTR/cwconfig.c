@@ -1738,8 +1738,10 @@ nMess = -1;
 			ii=1;
 	  	if (msg.message == WM_SHOWWINDOW)
 			ii=1;
-	   	if (msg.message == WM_KEYDOWN)
-	 		ii=1;
+		if (msg.message == WM_KEYDOWN)
+			ii = 1;
+		if (msg.message == WM_SYSKEYDOWN)
+			ii = 1;
 		if (msg.message == WM_LBUTTONDOWN )
             ii=1;
 		if (msg.message == WM_LBUTTONUP )
@@ -3637,7 +3639,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             {
             	 BOOL	Imed=FALSE;
             	  
-            	 if (InDisplayProcessing)
+            	 if (InDisplayProcessing==1)
             	 	break;
             	 if (NeedFullRedisplay()) 
             	 {
@@ -3696,6 +3698,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
      	         {   
      	         	DetermineVPDisplaySequence ();
      	         	SetConfig (1);
+					InDisplayProcessing = 2;
 					for (iview = 0;iview < *pNumViewports; iview++)
 						pViewportsD[iview]->Display = TRUE;
      	         	if (RedisplayMenu && NumViewportsArray[0])
@@ -5395,7 +5398,7 @@ GSSiExitProg (438);
     goto ReturnDefault;
     
     case WM_KILLFOCUS:
-     	if (!WindowIsCovered (hWnd,1) && !MemMap)
+		if (!WindowIsCovered(hWnd, 1) && !MemMap || !InDisplayProcessing)
  			SaveFullWindowBitmap ((HWND)-1);
 		goto ReturnDefault;
     
@@ -5419,9 +5422,10 @@ GSSiExitProg (438);
 			 StartBackgroundCache ();
 
 //         GSSiTrace ("Enter WM_PAINT");
-         if (InPaint || Printing || idTimer || InDisplayProcessing)
+         if (InPaint || Printing || idTimer || InDisplayProcessing==1)
 			goto ReturnDefault;
-	          
+		 InDisplayProcessing = 0;
+			  
 	     if (!GetUpdateRect (hWnd,&UpdateRect,TRUE))
 	     {
 //		 	if (DoPaint)

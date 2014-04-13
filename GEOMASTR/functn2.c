@@ -975,7 +975,7 @@ GSSiExitProg (1350);
 		
 		case 826: // $CONTINUE() allows termination with esc
 		{	 
-			if (CheckForContinue(TRUE))
+			if (CheckForContinue(TRUE, 0))
 				goto RtnTrue;
 			goto RtnFalse;
 		}  

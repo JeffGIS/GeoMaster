@@ -3172,6 +3172,7 @@ GSSiExitProg (154);
 	    	return(FALSE);
 }
 		CancelWindowZoom();
+		InDisplayProcessing = 2;
 		CenterWindow (ScreenPtToBasePt(MousePoint),FALSE);
     	HaveDownStroke=FALSE;
 {

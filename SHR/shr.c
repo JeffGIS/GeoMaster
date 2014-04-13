@@ -11292,7 +11292,7 @@ BOOL IsInteger(LPSTR str)
     return TRUE;
 }
 
-BOOL CheckForContinue (BOOL QuitOnEscapeOnly)
+BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 #if ENABLETRACE
 {GSSiEnterProg (384);
 #endif
@@ -11300,7 +11300,9 @@ BOOL CheckForContinue (BOOL QuitOnEscapeOnly)
  MSG            msg; 
 
  GdiFlush ();
- while (GSSiPeekMessage(&msg,0,0,0,PM_REMOVE))
+ if (pQuitProcessing)
+	 *pQuitProcessing = FALSE;
+ while (GSSiPeekMessage(&msg,0,0,0,PM_NOREMOVE))
  {
 																							#if ENABLETRACE
 																							SetLastMessage(-1*(long)msg.message);
@@ -11310,7 +11312,9 @@ BOOL CheckForContinue (BOOL QuitOnEscapeOnly)
 																							#if ENABLETRACE
 																							GSSiExitProg (384);
 																							#endif
-    	return FALSE;
+	if (pQuitProcessing)
+		*pQuitProcessing = TRUE;
+	return FALSE;
 }
 //	if (msg.message == WM_PAINT)
 //    	rturn TRUE;
@@ -11319,15 +11323,30 @@ BOOL CheckForContinue (BOOL QuitOnEscapeOnly)
 																							#if ENABLETRACE
 																							GSSiExitProg (384);
 																							#endif
-        return FALSE;
+	if (pQuitProcessing)
+		*pQuitProcessing = TRUE;
+	return FALSE;
 }
 	if (msg.message == WM_KEYDOWN && (!QuitOnEscapeOnly || (msg.wParam == 27)))
 {
 																							#if ENABLETRACE
 																							GSSiExitProg (384);
 																							#endif
+		if (msg.wParam == 27)
+			*pQuitProcessing = TRUE;
+																							
 		return FALSE;  
 }
+	if (msg.message == WM_LBUTTONDOWN ||
+		msg.message == WM_RBUTTONDOWN)
+   {
+#if ENABLETRACE
+		GSSiExitProg(384);
+#endif
+
+		return FALSE;
+	}
+	GSSiPeekMessage(&msg, 0, 0, 0, PM_REMOVE);
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
    

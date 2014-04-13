@@ -1173,7 +1173,7 @@ int ReadComm (HANDLE Stream,LPBYTE Buffer,int MaxRead)
 
 	if (Stream == (HANDLE)-1)
 		return -1;
-	if (!CheckForContinue (TRUE))
+	if (!CheckForContinue (TRUE,0))
 	{
 	//MessageBox (0,"Checkforcont return",0,MB_OK);
 		return 0;
@@ -3347,7 +3347,7 @@ Next:
  		sprintf (str,"%ld points loaded",++nLoaded);
  		SetDlgItemText (hWndDlg,StatusControl,str);
         WPNum++;
-		CheckForContinue (TRUE);    
+		CheckForContinue (TRUE,0);    
 		if (!(l=GetMagellanPacket (Packet)))
 		{
 			if (MessageBox (GetFocus(),"The GPS unit is not responding. Be sure it is turned on, the cable is connected and the baud rate and output format are properly set.",
@@ -3591,7 +3591,7 @@ Top:
  		sprintf (str,"%ld points loaded",++nLoaded);
  		SetDlgItemText (hWndDlg,StatusControl,str);
         WPNum++;
-		CheckForContinue (TRUE);    
+		CheckForContinue (TRUE,0);    
 		if (!(l=GetMagellanPacket (Packet)))
 		{
 			if (MessageBox (GetFocus(),"The GPS unit is not responding. Be sure it is turned on, the cable is connected and the baud rate and output format are properly set.",

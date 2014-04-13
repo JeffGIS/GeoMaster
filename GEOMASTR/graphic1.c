@@ -1015,7 +1015,7 @@ GSSiExitProg (12);
 					{
 						DisplayOrthoPhoto();
 						if (!(n++ % 16))
-							ContinueProcessing = CheckForContinue(FALSE);
+							ContinueProcessing = CheckForContinue(FALSE, 0);
 
 					} while (ContinueProcessing && GetNextOrthoTileFromIndex());
 					//ShowBufferedScreen(TRUE, TRUE, -99, 0);
@@ -1268,6 +1268,8 @@ Next:
     {
     	MNMXCORD	SHPBounds;
     	short	n=0, maxn=100;
+		BOOL quitProcessing;
+
     	do 
     	{
 			if (!ReadFGDBRecordHeader (&SHPBounds))
@@ -1302,10 +1304,13 @@ Next:
 					}
 				}
 			}
-			if (!(n%16) && !CheckForContinue (FALSE))
+			if (!(n % 16) && !CheckForContinue(FALSE, &quitProcessing))
 			{
 		    	CloseMap(FALSE);
-				goto RtnFalse;
+				if (quitProcessing)
+					goto RtnFalse;
+				else
+					goto RtnTrue;
 			}
 			n++;
 		} while (n < maxn && FindNextSegment());
@@ -1443,6 +1448,7 @@ Next:
 		nContinues = 1;
 		while (FidMap != HFILE_ERROR && ContinueProcessing && ProcessGraphicsRec(*hDC, ipnt, LPpltBuf, nRead))
         {
+			BOOL quitProcessing;
 		    GSSiGlobUlFree (&hpltBuf);
             
 			CurrentSeg = ContinuationOffset;
@@ -1461,7 +1467,7 @@ Next:
 		    ipnt = (LPSHORT)LPpltBuf;
 			if (!(nContinues++ % 16))
 			{
-				ContinueProcessing = CheckForContinue(FALSE);
+				ContinueProcessing = CheckForContinue(FALSE,0);
 			}
         }
 		if (FastMapCopy)

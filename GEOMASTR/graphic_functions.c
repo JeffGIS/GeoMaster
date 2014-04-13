@@ -4122,7 +4122,7 @@ NextTile:
 				return TRUE;
 			}
 		}
-		if (!CheckForContinue (TRUE))
+		if (!CheckForContinue (TRUE,0))
 		{
 			SetWindowText (hWndMain,"Cancelled");
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 

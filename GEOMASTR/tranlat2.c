@@ -1745,7 +1745,7 @@ ProcessBitmap:
 												BigRead(FidBMOrig, OrigRowData, Length);
 											}
 											GlobalUnlock(*phOrigRow);
-											CheckForContinue(TRUE);
+											CheckForContinue(TRUE,0);
 										}
 										ThisRow += iInc;
 										phOrigRow += RowInc;
@@ -1820,7 +1820,7 @@ ProcessBitmap:
 						GlobalUnlock(hRow);
 						if (AviOut && rowlen < width)
 							BigWrite(FidBM, p0s, width - rowlen, -1);
-						CheckForContinue(TRUE);
+						CheckForContinue(TRUE,0);
 					}
 					GSSiClose(FidBM);
 				}

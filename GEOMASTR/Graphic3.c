@@ -1295,8 +1295,11 @@ void ZoomToPointAndScale (DPOINT MidPointW,double Scale,BOOL Imediate)
 		goto Exit;
 	if (Imediate)
 		RedisplayViewport(Imediate,FALSE);
-	else  
+	else
+	{
+		InDisplayProcessing = 2;
 		PostMessage(CurView->hWnd, WM_COMMAND, IDM_Z_REDRAW, CurView->ID);
+	}
 	ZoomConnectedProcesses (FALSE);
 Exit:
     SetCurView (SaveVP);

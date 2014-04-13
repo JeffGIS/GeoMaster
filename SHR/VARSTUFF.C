@@ -7354,7 +7354,7 @@ GSSiExitProg (573);
 				nSearch++;
 				if (!(nSearch % 100)) 
 				{
-					if (!CheckForContinue(TRUE))
+					if (!CheckForContinue(TRUE,0))
 					{
 						ContinueProcessing = FALSE;
 				     	HaltReport=TRUE;  

@@ -3622,9 +3622,9 @@ GSSiExitProg (101);
 		int		Flags;
 		HANDLE	hWindowDIB;
         
-		CheckForContinue(TRUE);
+		CheckForContinue(TRUE,0);
 		Sleep (500);
-		CheckForContinue(TRUE);
+		CheckForContinue(TRUE, 0);
 	    if (hConfigDescription)
 	    {
 	    	LPSTR	pConfigDescription = GlobalLock (hConfigDescription);

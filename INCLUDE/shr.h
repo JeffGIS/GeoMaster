@@ -443,7 +443,7 @@ LPSTR IADDR (LPSTR InAdd, long Offset);
 long HADDR (HPSTR InAddress, long Offset);
 //LPSTR NextFld (LPSTR pInRec);
 //LPSTR NextRec (short Fid);
-BOOL CheckForContinue (BOOL QuitOnEscapeOnly);
+BOOL CheckForContinue (BOOL QuitOnEscapeOnly,LPBOOL pQuitProcessing);
 void Wait (long MicroSeconds);
 void Wait2 (long MicroSeconds);
 BOOL WaitForKeystroke (BOOL UseGetMessage);
