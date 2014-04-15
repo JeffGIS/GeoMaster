@@ -83,6 +83,8 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 using namespace std;
 using namespace FileGDBAPI;
 
+#define esriShapeBasicTypeMask 255
+
 #define MAXOPENFGDB	32
 
 static	char		openGDBName[MAXOPENFGDB][MAX_PATH]={0};
@@ -795,6 +797,8 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 				  case fieldTypeDouble:
 					row[iDB].GetDouble(fieldName, doubleField);
 					memmove ((LPSTR)&pCurVal->Value,&doubleField,fieldLength);
+					if (doubleField == 18839.0)
+						ii = 1;
 				  break;
 		          
 				  case fieldTypeString:
@@ -804,6 +808,8 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 					std::string stringField = WStringToString(wstringField);
 					iii = stringField.length();
 					strncpy0 ((LPSTR)&pCurVal->Value,(LPSTR)stringField.c_str(),stringField.length());
+					if (!stricmp((LPSTR)&pCurVal->Value, "283401320222"))
+						ii = 1;
 					  }
 				  break;
 		          
@@ -841,7 +847,12 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 						shpBuf = (LPBYTE)(pFGDBShapeHeader + 1);
 						pFGDBShapeHeader->inUseLength = (int)shapebuf.inUseLength;
 						shapebuf.GetShapeType(shapeType);
-						pFGDBShapeHeader->shapeType = (int)shapeType;
+						if ((shapeType & esriShapeBasicTypeMask) == shapeGeneralPolyline)
+						{
+							pFGDBShapeHeader->shapeType = (int)shapeGeneralPolyline;
+						}
+						else
+							pFGDBShapeHeader->shapeType = (int)shapeType;
 						pFGDBShapeHeader->hasZs = shapebuf.HasZs(shapeType);
 						pFGDBShapeHeader->hasMs = shapebuf.HasMs(shapeType);
 						pFGDBShapeHeader->hasIDs = shapebuf.HasIDs(shapeType);
@@ -851,6 +862,21 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 						pFGDBShapeHeader->hasMaterials = shapebuf.HasMaterials(shapeType);
 						pFGDBShapeHeader->geometryType = shapebuf.GetGeometryType(shapeType);
 						pFGDBShapeHeader->isEmpty = shapebuf.IsEmpty();
+						if (pFGDBShapeHeader->hasCurves)
+						{
+							MultiPartShapeBuffer mpShapebuf;
+							int numCurves;
+							byte *curves;
+
+							row[iDB].GetGeometry(mpShapebuf);
+							mpShapebuf.GetNumCurves(numCurves);
+							mpShapebuf.GetCurves(curves);
+							for (int i = 0; i < numCurves; i++)
+							{
+								//curveType = curves[i].GetCurveType;
+							}
+
+						}
 						memmove (shpBuf,(LPBYTE)shapebuf.shapeBuffer,shapebuf.inUseLength);
 					  }
 				  break;

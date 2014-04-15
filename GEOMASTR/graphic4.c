@@ -1258,7 +1258,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	char	str[16]; 
 	BOOL	Visible=DescIsVisible;
 	HIGHLIGHTDATA	HighlightData;
-    static	long	debugrefno=658447;    
+    static	long	debugrefno=100099028;    
     short	ii;
 	static	BOOL	ShowOnlyDebugRef=FALSE;
 	static	char	debugUDI[34] = "283401320222";
@@ -1294,7 +1294,12 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 		}
 	}
     if (CurrentRefno == debugrefno)
-    	ii=1;
+	   	ii=1;
+	else if (dbug)
+	{
+		Visible = FALSE;
+		goto Exit;
+	}
 /*if (CurrentRefno != 658191 && CurrentRefno != 658138)
 	{
 		Visible = FALSE;

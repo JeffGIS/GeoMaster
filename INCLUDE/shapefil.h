@@ -315,6 +315,7 @@ typedef	struct
 } SHPInfo;
 
 typedef SHPInfo * SHPHandle;
+#define esriShapeBasicTypeMask 255
 
 /* -------------------------------------------------------------------- */
 /*      Shape types (nSHPType)                                          */
@@ -326,6 +327,7 @@ typedef SHPInfo * SHPHandle;
 #define SHPT_POLYGON_PGDB 4//added by GSSi
 #define SHPT_POLYGON	5 
 #define SHPT_POLYLINE_WITHCURVES	536870962	//added by GSSi
+#define SHPT_POLYLINE_WITHCURVESANDZ	-1610612686	//added by GSSi
 #define SHPT_POLYGON_WITHCURVES	536870963	//added by GSSi
 #define SHPT_MULTIPOINT	8
 #define SHPT_POINTZ	11
