@@ -2265,7 +2265,7 @@ BOOL ProcessFTSegment (SOCKET socket,long ID,LPBYTE pSeg,short SegLen)
     		long	lMacro; 
     		LPSTR	pMacro;
     		
-    		HaltMapDisplay (TRUE);
+    		HaltMapDisplay (TRUE,FALSE);
 		    CloseSymDict();  
 			CloseOrthos(TRUE);
 			AddBMPToCache (NULL,0);
@@ -2344,3 +2344,92 @@ WaitAgain:
 		return TRUE;
 	goto WaitAgain;
 }
+
+#include <stdio.h>      /* for printf() and fprintf() */
+//#include <sys/socket.h> /* for socket() and bind() */
+//#include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
+#include <stdlib.h>     /* for atoi() and exit() */
+#include <string.h>     /* for memset() */
+//#include <unistd.h>     /* for close() */
+
+#define ECHOMAX 1024     /* Longest string to echo */
+
+void DieWithError(char *errorMessage);  /* External error handling function */
+
+void DieWithError(LPSTR mess)
+{
+	char str[32];
+
+	int err = WSAGetLastError();
+	WSASetLastError(0);
+	itoa(err, str, 10);
+
+	MessageBox(0, mess,str, MB_ICONEXCLAMATION);
+	return;
+}
+int UDPmain(int port)
+{
+	int sock;                        /* Socket */
+	struct sockaddr_in echoServAddr; /* Local address */
+	struct sockaddr_in echoClntAddr; /* Client address */
+	unsigned int cliAddrLen;         /* Length of incoming message */
+	char echoBuffer[ECHOMAX+1];        /* Buffer for echo string */
+	unsigned short echoServPort;     /* Server port */
+	int recvMsgSize;                 /* Size of received message */
+	char str[1024];
+
+	//if (argc != 2)         /* Test for correct number of parameters */
+	//{
+	//	fprintf(stderr, "Usage:  %s <UDP SERVER PORT>\n", argv[0]);
+	//	exit(1);
+	//}
+
+	echoServPort = port;  /* First arg:  local port */
+	{
+		u_long myAddr;
+		SOCKET ServerSocket;
+		if (!OpenWinSock())
+		{
+			GSSiMsgBox(GetFocus(), "Cannot find Windows Socket Interface", "Error", MB_OK, 0);
+			return FALSE;
+		}
+		_fmemset(&mySockAddr, 0, sizeof(mySockAddr));
+
+		myAddr = inet_addr(IPAddress);
+		ii = 1;
+	}
+
+	/* Create socket for sending/receiving datagrams */
+	if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+		DieWithError("socket() failed");
+
+	/* Construct local address structure */
+	memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
+	echoServAddr.sin_family = AF_INET;                /* Internet address family */
+	echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
+	echoServAddr.sin_port = htons(echoServPort);      /* Local port */
+
+	/* Bind to the local address */
+	if (bind(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
+		DieWithError("bind() failed");
+
+	for (;;) /* Run forever */
+	{
+		/* Set the size of the in-out parameter */
+		cliAddrLen = sizeof(echoClntAddr);
+
+		/* Block until receive message from a client */
+		if ((recvMsgSize = recvfrom(sock, echoBuffer, ECHOMAX, 0,
+			(struct sockaddr *) &echoClntAddr, &cliAddrLen)) < 0)
+			DieWithError("recvfrom() failed");
+		else
+		{
+			echoBuffer[recvMsgSize] = 0;
+			sprintf(str, "%s\n", echoBuffer);
+
+			AppendFile("c:\\temp\\sierratest.txt", str);
+		}
+	}
+	/* NOT REACHED */
+}
+

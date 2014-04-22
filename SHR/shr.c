@@ -60,7 +60,7 @@ static char		NotFoundList[MAXNOTFOUND][MAX_PATH];
 static int		NotFoundCode[MAXNOTFOUND];
 static BYTE		BlockPadding[JOURNAL_BLOCK_SIZE];
 
-void HaltMapDisplay(BOOL ClearCFGStack);   
+void HaltMapDisplay(BOOL ClearCFGStack, BOOL saveScreen);
 void DebugShowLine (LPDPOINT p1,LPDPOINT p2);
 int ActuallyCloseFile (HFILE Fid);
 
@@ -6702,7 +6702,7 @@ GSSiExitProg (294);
         {   
         
             EnableWindow (hWndMain,FALSE);
-            HaltMapDisplay(FALSE); 
+            HaltMapDisplay(FALSE,TRUE); 
             TraceOn = FALSE;
             if (!LoadString(hInst, GetOPENERR00()+pOFStruct->nErrCode, errmes, 32)) errmes[0]='\0';
             sprintf (txt,"Cannot create %s: error code is %i (%s)",TraceFile,(short)pOFStruct->nErrCode,errmes);
@@ -8810,7 +8810,7 @@ Open:
 				AbendWriter (str, Name,0,0);
 			else
 			{
-				HaltMapDisplay(FALSE); 
+				HaltMapDisplay(FALSE,FALSE); 
 				DoPaint = FALSE;
 				if (GSSiMsgBox( GetFocus(),str, 0, MB_OKCANCEL|MB_ICONEXCLAMATION,0) ==  IDCANCEL)
             		BlowOut(0,0);
@@ -11332,7 +11332,7 @@ BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 																							#if ENABLETRACE
 																							GSSiExitProg (384);
 																							#endif
-		if (msg.wParam == 27)
+		if (msg.wParam == 27 && pQuitProcessing)
 			*pQuitProcessing = TRUE;
 																							
 		return FALSE;  
@@ -12007,7 +12007,7 @@ GSSiExitProg (418);
 	if (LastVP)
     	NotifyFunction (LastVP,GF_EXIT_VIEWPORT);
     LastVP = 0;  
-	HaltMapDisplay (FALSE);
+	HaltMapDisplay (FALSE,FALSE);
 	GetClientRect(hWndMain, &Rect); 
 	hDC = GetDC (hWndMain);   
 	hBM = SaveScreen2 (hWndMain,hDC,Rect,0,0);

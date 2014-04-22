@@ -1020,7 +1020,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			pBeg = testFile;
 
 
-		if (!strncmp(pBeg, "ODBC|", 5) || FileType(pBeg) == 1)
+		if (!strncmp(pBeg, "ODBC|", 5) || FileType(pBeg) == 1 || strstr (pBeg,".GDB"))
 		{
 			HANDLE hDB=0;
 			int itype = OpenDataFile (testFile,"",OF_READ,&hDB);
