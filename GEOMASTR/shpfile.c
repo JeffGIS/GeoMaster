@@ -4569,7 +4569,7 @@ if (dbug)
 							if (!Display || FastMapCopy)
 								CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurveChordDist,1);
 							else
-                				CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,DisplayCurveFactor,1); 
+                				CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurView->BaseUnitsPerPixel,1); 
 							NumPointsAdded = NumPoints2 - NumPointsOrig - 1;//sub 1 to account for PT
 							if (NumPointsAdded > 0)
 							{

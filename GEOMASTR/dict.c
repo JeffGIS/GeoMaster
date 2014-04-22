@@ -2440,7 +2440,8 @@ int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT
 			*pBackAZ = LTWOPI (*pBackAZ + HALFPI);
 		else	
 			*pBackAZ = LTWOPI (*pBackAZ - HALFPI);
-		np4 = IDNINT (VectorizationFactor*fabs(CLEN/2)) - 1;  
+//		np4 = IDNINT (VectorizationFactor*fabs(CLEN/2)) - 1;  
+		np4 = IDNINT(fabs(CLEN / 2)/VectorizationFactor) - 1;
 		np = min(max (np4,0),MaxPoints);       
 		if (np)
 		{
