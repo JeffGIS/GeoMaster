@@ -1254,9 +1254,9 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 }
 */
  
-//#if !CHECKMEM
+#if !CHECKMEM
 	AddVectoredHandlers (0,0);
-//#endif
+#endif
 //long size=1024L*1024L*256;
  //HANDLE hMem=GSSiGlobAlloc (0,GHND,size);
  //GSSiGlobFree (&hMem);
@@ -1294,8 +1294,8 @@ SetOldStructSizes ();
 //EnableTrace=2;
  hInst = hInstance; 
 // MessageBox (0,lpszCmdLine,0,MB_OK);  
- if (OFS_MAXPATHNAME != 256)
-	 MessageBox (0,"OFS_MAXPATHNAME is not 256",0,MB_ICONEXCLAMATION);
+// if (OFS_MAXPATHNAME != 256)
+//	 MessageBox (0,"OFS_MAXPATHNAME is not 256",0,MB_ICONEXCLAMATION);
 ii=_WIN32_WINNT;
 {
 	THEME theme;
