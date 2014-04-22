@@ -115,6 +115,16 @@ typedef TRN FAR *LPTRN;
 #define  GOOD_SOUND 1
 #define  BAD_SOUND  2  
 
+#define OFS_MAXPATHNAMEGM 256
+typedef struct _OFSTRUCTGM {
+	BYTE cBytes;
+	BYTE fFixedDisk;
+	WORD nErrCode;
+	WORD Reserved1;
+	WORD Reserved2;
+	CHAR szPathName[OFS_MAXPATHNAMEGM];
+} OFSTRUCTGM, *LPOFSTRUCTGM, *POFSTRUCTGM;
+
 HWND WindowExists(HWND hWnd);
 HWND FindWindowByName (LPSTR WindowName);
 HBITMAP GetToolBitmap (LPSTR BMPath);
@@ -221,10 +231,15 @@ void SetTrace (BOOL On);
 void TraceInWindow (LPSTR str);
 void GSSiTrace (LPSTR str,short From);
 void GSSiTraceLev (LPSTR str,short lev,short From);
-BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCT pOFStruct,UINT Mode);
+BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode);
+HFILE OpenFileGM(
+	_In_    LPCSTR lpFileName,
+	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
+	_In_    UINT uStyle
+	);
 BOOL FileOpenForWrite (HFILE Fid);
-HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCT pOFStruct,UINT opt,UINT ShareOpt);
-HFILE GSSiOpenFile (LPSTR Name,LPOFSTRUCT pOFStruct,UINT Mode);
+HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT opt,UINT ShareOpt);
+HFILE GSSiOpenFile (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode);
 BOOL EditLastTextFile (void);
 BOOL EditLastMenuFile (void);
 LPSTR GetLastPathname (void);
@@ -235,12 +250,12 @@ HFILE OpenTempNamedFile (void);
 int GSSifstat (int Fid, struct _stati64 * pstat);
 BOOL GSSifileinfo (int Fid, LPBY_HANDLE_FILE_INFORMATION pstat);
 BOOL CloseAndDeleteFile (LPHFILE pFid);
-HFILE LogOpenFilesOpen (UINT Mode,HFILE Fid,LPOFSTRUCT pOFStruct);
+HFILE LogOpenFilesOpen (UINT Mode,HFILE Fid,LPOFSTRUCTGM pOFStruct);
 void LogOpenFilesClose (HFILE Fid);
 BOOL RequestFileClose (HFILE Fid);  
 void CloseAllRequestedFiles (BOOL FirstOnly); 
 void DumpOpenFiles (LPSTR File);
-HFILE FileAlreadyOpen (LPSTR Name,UINT Mode,LPOFSTRUCT pOFStruct);
+HFILE FileAlreadyOpen (LPSTR Name,UINT Mode,LPOFSTRUCTGM pOFStruct);
 BOOL GSSiChangeLength (HFILE Fid,long NewLength);      
 void CreateFidSmall (void);
 void CloseFidSmall (void);

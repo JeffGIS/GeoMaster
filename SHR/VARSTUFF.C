@@ -112,7 +112,7 @@ BOOL UpdateGlobalFile (LPSTR RptFileIn,LPSTR VName,LPSTR Value)
 	LPSTR	lpEq,lpDot;
 	HFILE	FidOut;
 	char	OldFile[128],NewFile[128],RptFile[128],VarName[36];
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	BOOL	rtn=FALSE, Found=FALSE;
 	
 	_fstrcpy (RptFile,RptFileIn);
@@ -202,7 +202,7 @@ void GetRunDate (LPSTR RunID, LPSTR Date)
 {
 	char	str[260];
 	HFILE	Fid;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpComma; 
 	
 	Fid = GSSiOpenFile ("rundate.txt",&OFStruct,OF_READ);   
@@ -731,7 +731,7 @@ short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB)
 	LPSTR	str, cName;   
    	LPSTR	drive,dir,fname,ext, driver, table;   
    	LPSTR	Name, TxtRecord;
-   	LPOFSTRUCT	pOFStruct;
+   	LPOFSTRUCTGM	pOFStruct;
 	HANDLE	hMem=0;
 	HFILE	Fid=HFILE_ERROR;    
 	long	GMTextFirstLine=0; 
@@ -770,7 +770,7 @@ GSSiExitProg (520);
 	ext = fname + 64;
 	driver = ext + 8;   
 	table = driver + 128;
-	pOFStruct = (LPOFSTRUCT)(table + 256); 
+	pOFStruct = (LPOFSTRUCTGM)(table + 256); 
 	TxtRecord = (LPSTR) (pOFStruct + 1);
 	Name=cName;
     _fstrcpy (Name,InName);
@@ -1757,7 +1757,7 @@ BOOL LoadTAGDef (void)
 {   
 	HFILE	TDFid; 
 	LPSTR	lpSpace;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	char	TDFile[128], Mess[256];
 	int		i,j, lineno=0;
 	LPTAGDEF	pTAGDef;
@@ -9104,7 +9104,7 @@ void dumpvars (LPSTR Name)
 	unsigned short	i=NumVars; 
 	VARPNT	VarPtr;  
 	char	str[128]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 	
 	Fid = GSSiOpenFile (Name,&OFStruct,OF_CREATE);

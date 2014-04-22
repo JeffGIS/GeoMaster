@@ -116,12 +116,12 @@ void StopBackgroundMapServer(HWND hWndServer)
 BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd,LPARAM id)
 {
 	HFILE Fid;
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	int	serverID = GetMapserverIDFromWnd (hBackGroundServer);
 		
 	if (serverID < 0)
 		return FALSE;
-	Fid = OpenFile(MapServerFile[serverID], &OFStruct, OF_CREATE);
+	Fid = OpenFileGM(MapServerFile[serverID], &OFStruct, OF_CREATE);
 	_lwrite(Fid, cmd, strlen(cmd) + 1);
 	_lclose(Fid);
 	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd, id);

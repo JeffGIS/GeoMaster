@@ -1650,7 +1650,7 @@ BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	char	str[512], curName[128];   
 	long	CurLoc;   
 	BOOL	First;  
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	static	BOOL	SaveDisableHalt,SaveDisableMarginPan,SaveDoPaint;
 	
 
@@ -4642,7 +4642,7 @@ BOOL FAR PASCAL VISIBLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	HANDLE		hVisList,hItems; 
 	double	Scale;
 	int		Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	int		SaveDrive;
 	static	LPVISLIST	ResetVis;
 	static	HANDLE	hSaveBM=0;
@@ -5354,7 +5354,7 @@ BOOL FAR PASCAL VISIBLE2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	LPVISLIST	SaveVis; 
 	HANDLE		hVisList,hItems;
 	int		Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	int		SaveDrive;
 	static	LPVISLIST	ResetVis;
 	LPINT	lpItems; 
@@ -5755,7 +5755,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
             	 	 desc[0]=0;
 	               	 GetTextString (hWndDlg,desc,100,"Description",0,0,0,TRUE,TRUE);
             	 	 
-					 Fid = GSSiOpenFile (SaveName,(LPOFSTRUCT) &OFStruct,OF_CREATE);
+					 Fid = GSSiOpenFile (SaveName,(LPOFSTRUCTGM) &OFStruct,OF_CREATE);
 			   	     SaveVis = CurVis;
 			   	     if (!Pickability)
 			   	     {
@@ -5905,7 +5905,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
 	char	Name[128], str2[64];    
 	LPSTR	str;
     HFILE	Fid; 
-    OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
     HANDLE	hMEM=0, hDLT=0;    
     short	nItems; 
     static	short	MaxLineLen=0;
@@ -6136,7 +6136,7 @@ BOOL FAR PASCAL PRINTMERGETSTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 { 	static	long	line;
 	char	Name[128];
 	HFILE	Fid;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	HANDLE	hDLT;
 	long	at;
 	char	str[1030], str2[32];
@@ -9625,7 +9625,7 @@ BOOL FAR PASCAL SAVEZOOMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	char	str[512], File[128];
 	LPSTR	lpTab, lpBar, lpSC;
 	int		TabStops[2]={400,500}; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
@@ -9781,7 +9781,7 @@ BOOL FAR PASCAL ZOOMLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	static	char	SaveAltProj[32];
 	LPSTR	lpTab;
 	int		TabStops[2]={400,500}; 
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
     LPMEASUREITEMSTRUCT lpmis; 
     LPDRAWITEMSTRUCT lpdis; 
     TEXTMETRIC tm;    
@@ -10496,7 +10496,7 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	char	Cmd[128];
 	int		EditFid;
 	BOOL	EditText = FALSE;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HWND	fWnd,tWnd;
 	DWORD	LOC;
 	int		iloc;
@@ -16088,7 +16088,7 @@ GSSiExitProg (1328);
 BOOL FAR PASCAL DOCUMENTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {	
  	HFILE	FidNoteType; 
- 	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
  	char	str[132]; 
 	int		TabStops[2]={1200,1300}; 
 	LPSTR	lpBar, lpName;
@@ -17018,7 +17018,7 @@ GSSiExitProg (1280);
     static	HANDLE	hDLT=0;  
    	char	CSize[128],CRot[128],CColor[128];
     LPTAGDEF    lpTAGDef; 
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 
 
  short    BRtn;
@@ -17133,7 +17133,7 @@ GSSiExitProg (1280);
             {    
             	 short	Version=1; 
             	 HFILE	FidSave; 
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
             	 
                  if (!GetSaveName2 (hWndDlg,MidName,0,Ext,IDS_FILETL4)) break; 
                  FidSave = GSSiOpenFile (MidName,&OFStruct,OF_CREATE);
@@ -17173,7 +17173,7 @@ GSSiExitProg (1280);
            	{
            		 short Version;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
              	 if (!*AutoExportName)
@@ -17289,7 +17289,7 @@ GSSiExitProg (1280);
                  LPSTR  lpTAB, lpBS, pBeg;
                  short  NumSyms=0, SymNum, TPointSym, TLineSym;  
                  HANDLE hSymDesc=0; 
-                 OFSTRUCT	OFStruct;  
+				 OFSTRUCTGM	OFStruct;
                  BOOL	Create, HiRes=TRUE, FileIsDir=FALSE, DoConvert = TRUE; 
                  HFILE	FidFiles=-2;
                  char	Name[132], FullName[144],drive[8],dir[128],name[16];   
@@ -17972,7 +17972,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
     LPFIELDINFO lpFieldInfo; 
     static		SHPHEADER SHPHeader;
     HANDLE      SaveHandle;
-    OFSTRUCT   OFStruct;
+    OFSTRUCTGM   OFStruct;
     BOOL        More;
 	short		HiPrecis;   
     float		size,rot;
@@ -18262,7 +18262,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
             {    
             	 short	Version=2; 
             	 HFILE	FidSave; 
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
             	 
                  if (!GetSaveName2 (hWndDlg,Name,0,Ext,IDS_FILETL2)) break; 
                  FidSave = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
@@ -18328,7 +18328,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
            	{
            		 short Version;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
              	 if (!*AutoExportName)
@@ -19405,7 +19405,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
     LPFIELDINFO lpFieldInfo; 
     static		SHPHEADER SHPHeader;
     HANDLE      SaveHandle;
-    OFSTRUCT   OFStruct;
+    OFSTRUCTGM   OFStruct;
     BOOL        More;  
     LPSTR		pFile; 
     float		size,rot;
@@ -19539,7 +19539,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
             {    
             	 short	Version=2; 
             	 HFILE	FidSave; 
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
             	 
                  if (!GetSaveName2 (hWndDlg,Name,0,Ext,IDS_FILETL3)) break; 
                  FidSave = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
@@ -19582,7 +19582,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
            	{
            		 short Version;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
              	 if (!*AutoExportName)
@@ -20035,7 +20035,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
     LPOPENSQLDATA   SQLPtr;
     LPFIELDINFO lpFieldInfo; 
     HANDLE      SaveHandle;
-    OFSTRUCT   OFStruct;
+    OFSTRUCTGM   OFStruct;
     BOOL        More;  
     LPSTR		pFile; 
     float		size,rot;
@@ -20137,7 +20137,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
             {    
             	 short	Version=1; 
             	 HFILE	FidSave; 
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
             	 
                  if (!GetSaveName2 (hWndDlg,Name,0,Ext,IDS_FILETL5)) break; 
                  FidSave = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
@@ -20170,7 +20170,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
            	{
            		 short Version;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
 				 if (!GetFileName2 (hWndDlg,Name,Ext,IDS_FILETL5))
@@ -20752,7 +20752,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
     LPOPENSQLDATA   SQLPtr;
     LPFIELDINFO lpFieldInfo; 
     HANDLE      SaveHandle;
-    OFSTRUCT   OFStruct;
+    OFSTRUCTGM   OFStruct;
     BOOL        More, Bool2;  
     LPSTR		pFile; 
     float		size,rot;
@@ -20890,7 +20890,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
             {    
             	 short	Version=1; 
             	 HFILE	FidSave; 
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
             	 short	item=0, nitem;
             	 
                  if (!GetSaveName2 (hWndDlg,Name,0,Ext,IDS_FILETL6)) break; 
@@ -20952,7 +20952,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
            	{
            		 short Version, nitem;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
              	 if (!*AutoExportName)
@@ -23204,7 +23204,7 @@ BOOL FAR PASCAL LOADBNAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  HANDLE hMIDstr;
                  char   Prefix[10], UDI[34], AreaSymName[10], LineSymName[10]; 
                  LPSTR  lpComma;  
-                 OFSTRUCT   OFStruct;
+                 OFSTRUCTGM   OFStruct;
                  long       filecode,filelength,ii=100, NumOverLimit;  
                  HFILE  FidBNA;
                  char   mess[256];  
@@ -23786,7 +23786,7 @@ BOOL FAR PASCAL LOADFLOODMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
     LPLONG      pCounty, pCnty;  
     static      short     FileType = 0;
 	char	VolLabel[16],CurDir[128];
-   	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
    	
  short    BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
@@ -23916,7 +23916,7 @@ BOOL FAR PASCAL LOADFLOODMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
                  HANDLE hMIDstr;
                  char   Prefix[10], UDI[34], AreaSymName[10], LineSymName[10], FloodInfoDB[128]; 
                  LPSTR  lpComma;  
-                 OFSTRUCT   OFStruct;
+                 OFSTRUCTGM   OFStruct;
                  long   filecode,filelength,ii=100, NumOverLimit;  
                  HFILE  FidBNA, FidCvt;
                  char   mess[256];  
@@ -24363,7 +24363,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     LPLONG      pCounty, pCnty;  
     static      short     FileType = 0, nJust;
 	char	drive[8], dir[128], name[10], ext[6], VolLabel[16],CurDir[128], FileName[132], DirName[128];
-   	OFSTRUCT	OFStruct;     
+	OFSTRUCTGM	OFStruct;
    	HFILE	FidList, FidAtt;  
    	char	MUSYM[10], MUID[16];
    	static	HANDLE	hTempFile=0;   
@@ -24435,7 +24435,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 	hTempFile = GSSiGlobAlloc ( 928,GMEM_MOVEABLE,256);
 	                 pFile = GlobalLock (hTempFile);
 					 GSSiGetTempFileName (0,"gm",0,pFile); 
-	            	 FidList = 	GSSiOpenFile (pFile,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	            	 FidList = 	GSSiOpenFile (pFile,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	            	 lpTab = LastChr (DirName);
 	            	 if (*lpTab == '\\')
 	            	 	*lpTab = 0;
@@ -24503,7 +24503,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  HANDLE hMIDstr;
                  char   Prefix[10], UDI[34], AreaSymName[10], LineSymName[10], FloodInfoDB[128]; 
                  LPSTR  lpComma;  
-                 OFSTRUCT   OFStruct;
+                 OFSTRUCTGM   OFStruct;
                  long       filecode,filelength,ii=100, NumOverLimit;  
                  HFILE  FidBNA, FidCvt;
                  char   mess[256];  
@@ -24991,7 +24991,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			    LPGWFLDINFO lpGWFldInfo;      
 				HANDLE  hDB;   
 				long	Offset;
-				OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
 				HFILE	OutFid;
 				short 	pos, cond, iCD, iDOQ, LastFile;
 				LPCDDATA	pCDData; 
@@ -25278,7 +25278,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 			    LPGWFLDINFO lpGWFldInfo;      
 				HANDLE  hDB;   
 				long	Offset;
-				OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
 				HFILE	OutFid;
 				short 	pos, cond, iCD, iDOQ, LastFile;
 				LPCDDATA	pCDData; 
@@ -25392,7 +25392,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 				
 			    while (!BT_FIND (hHighlight,(LPSTR)&Ref,pos,BT_ANY,(LPSTR)&HighlightData))
 			    {   
-			    	OFSTRUCT	OFStruct;
+					OFSTRUCTGM	OFStruct;
 			    	HFILE	Fid = GSSiOpenFile ("[%DL]zonebmps.txt",&OFStruct,OF_READ);
 			    	HANDLE	hDLT;
 			    	
@@ -25757,7 +25757,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
             {    
             	 short	Version=3; 
             	 HFILE	FidSave; 
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
             	 
                  if (!GetSaveName2 (hWndDlg,Name,0,Ext,IDS_FILETL1)) break; 
         Update:
@@ -25817,7 +25817,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
            	{
            		 short Version,nl=128;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
              	 if (!*AutoExportName)
@@ -26469,7 +26469,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  TIGER5 Tiger5; 
                  TIGER1_MN   Tiger1PN; 
                  TIGER1_GEOSPAN     Tiger1GS; 
-                 OFSTRUCT   OFStruct;
+                 OFSTRUCTGM   OFStruct;
                  short        nPoly, lastnpoints, Pass, CoordPass,idesc, NumSyms=0,i, AttFormat=0;
                  long   nVertex;
 			     long	StreetNums[4], TLID, TotLenFL, CurLocFL;
@@ -27103,7 +27103,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  LPTIGER4 Tiger4; 
                  LPTIGER5 Tiger5; 
                  TIGER1_MN  Tiger1PN;  
-                 OFSTRUCT   OFStruct;
+                 OFSTRUCTGM   OFStruct;
                  short        nPoly, lastnpoints, Pass, idesc, NumSyms,i, Stuff[256], FirstType;
                  long   nVertex, StreetNum,  StreetNums[4], Tiger1Snum;
                  HANDLE hPoly, hShapes, hSymDesc=0, *phSymDesc, hCFCC, hBTNames1,hBTNames2;
@@ -27782,7 +27782,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     char    File[128],  ExtID[32], Name[128], str[128];
     LPINT   lpItems;    
     HFILE   Fid;
-    OFSTRUCT    OFStruct;  
+    OFSTRUCTGM    OFStruct;  
     BOOL    False=FALSE;  
     UINT    IDC_FieldName=IDC_FIELDS;
 	short	UnitsOpt;
@@ -28069,7 +28069,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
             {
                 HFILE   FidMIF, FidMID, FidSHP, FidSHPIdx;
                 char    IdxName[128];   
-                OFSTRUCT    OFStruct;  
+                OFSTRUCTGM    OFStruct;  
                 short     pos, nTranFile, nParts;  
                 LPSTR	lpSC;
                 long    CurItem=0, iref, RecNum=0, Index=0, NumDBFRecs=0;
@@ -29893,7 +29893,7 @@ BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
     char    File[128],  ExtID[32], Name[128], str[128];
     LPINT   lpItems;    
     HFILE   Fid;
-    OFSTRUCT    OFStruct;  
+    OFSTRUCTGM    OFStruct;  
     BOOL    False=FALSE, ComputeElev;  
     short     IDC_FieldName=IDC_FIELDS,UnitsOpt;
     LPSTR   vbar; 
@@ -29966,7 +29966,7 @@ BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
             {
                 HFILE   FidMIF, FidMID, FidSHP, FidSHPIdx;
                 char    IdxName[128];   
-                OFSTRUCT    OFStruct;  
+                OFSTRUCTGM    OFStruct;  
                 short     pos, nTranFile, nParts;  
                 LPSTR	lpSC;
                 long    CurItem=0, iref, RecNum=0, Index=0, NumDBFRecs=0;

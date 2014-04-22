@@ -507,7 +507,7 @@ HANDLE ReadVisList (LPSTR InName)
 {   LPVISLIST   SaveVis, LastVisList, NewVisList, CurVis;
     HFILE	FidVis;
 	short	nread,Signature,Version;
-    OFSTRUCT    OFStruct;  
+    OFSTRUCTGM    OFStruct;  
     HANDLE	hVisList,hNewVisList;
     char    Name[MAX_PATH];
 	char	FullName[MAX_PATH];
@@ -519,7 +519,7 @@ HANDLE ReadVisList (LPSTR InName)
     Truncate (Name);
     if (_fstrstr (Name,".TXT"))
         return FALSE;
-    FidVis = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ);
+    FidVis = GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_READ);
     if (FidVis == HFILE_ERROR)
     {
         if (!_fstrchr(Name,'\\'))
@@ -530,7 +530,7 @@ HANDLE ReadVisList (LPSTR InName)
         if (!_fstrchr (Name,'.'))
             _fstrcat (Name,".vis"); 
 		_fullpath (FullName,Name,MAX_PATH);
-	    FidVis = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ);
+	    FidVis = GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 	    if (FidVis == HFILE_ERROR)
 	        return 0;
     }
@@ -566,7 +566,7 @@ BOOL LoadVisList (LPSTR InName)
     short FidVis, nread;  
     HANDLE	hMem=GSSiGlobAlloc ( 713,GMEM_MOVEABLE,1024);
     LPSTR   Name=GlobalLock (hMem);
-    LPOFSTRUCT    pOFStruct = (LPOFSTRUCT)(Name+256);
+    LPOFSTRUCTGM    pOFStruct = (LPOFSTRUCTGM)(Name+256);
     HANDLE	hVisList,hNewVisList; 
 	long	lenVL;
 	short	Version,Signature;
@@ -583,7 +583,7 @@ BOOL LoadVisList (LPSTR InName)
 	    _fstrcat (Name,".VIS"); 
     if (_fstrstr (Name,".TXT"))
         goto Exit;
-    FidVis = GSSiOpenFile (Name,(LPOFSTRUCT)pOFStruct,OF_READ);
+    FidVis = GSSiOpenFile (Name,(LPOFSTRUCTGM)pOFStruct,OF_READ);
     if (FidVis == HFILE_ERROR)
     {
         if (!_fstrchr(Name,'\\'))
@@ -593,7 +593,7 @@ BOOL LoadVisList (LPSTR InName)
         }
         if (!_fstrchr (Name,'.'))
             _fstrcat (Name,".vis"); 
-	    FidVis = GSSiOpenFile (Name,(LPOFSTRUCT)pOFStruct,OF_READ);
+	    FidVis = GSSiOpenFile (Name,(LPOFSTRUCTGM)pOFStruct,OF_READ);
 	    if (FidVis == HFILE_ERROR)
 	    {   
 //	    	sprintf (str,"Unable to open visibility file in viewport %i",CurView->ID);
@@ -1148,7 +1148,7 @@ void TurnOffAutoVis (BOOL OnOff)
 }		   
 
 BOOL SetParentVisibility (int Parent, BOOL Vis, short Layer)
-{   OFSTRUCT    OFStruct;
+{   OFSTRUCTGM    OFStruct;
     HANDLE      hParList;
     PARLIST *pParList;
     HANDLE  CurParList;
@@ -1226,7 +1226,7 @@ BOOL SetParentVisibility (int Parent, BOOL Vis, short Layer)
     			goto FromPltFile;
     		lpBS++;
     		_fstrcpy (lpBS,"symlist");
-            FidMap = GSSiOpenFile (str,(LPOFSTRUCT)&OFStruct,OF_READ); 
+            FidMap = GSSiOpenFile (str,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
             if (FidMap == HFILE_ERROR)
     			goto FromPltFile;
 			MapVersion = 8;
@@ -1257,7 +1257,7 @@ FromPltFile:
     	if (PltType < 5)
         {
             CloseMap (FALSE);
-            FidMap = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READ);
+            FidMap = GSSiOpenFile (PltName,(LPOFSTRUCTGM)&OFStruct,OF_READ);
             if (FidMap != HFILE_ERROR)
             {   
             	BYTE	MV;
@@ -1462,7 +1462,7 @@ BOOL SaveVisFile (LPSTR SaveName,BOOL Pickability,LPSTR desc)
 	int	Signature=28051, Version=2;
 	short	PickSame = 0;
 	
-	Fid = GSSiOpenFile (SaveName,(LPOFSTRUCT) NULL,OF_CREATE);
+	Fid = GSSiOpenFile (SaveName,(LPOFSTRUCTGM) NULL,OF_CREATE);
 	if (Fid == HFILE_ERROR)
 		return FALSE;
 	if (!Pickability)
@@ -1889,7 +1889,7 @@ void AddPenRedef (int ipen, COLORREF Color)
 BOOL LoadDisplayRedefFile (LPSTR Name)
 {   COLORREF	*lpNewColors;
 	short	HavePenRedef;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;  
 //	NEWOBJECT_v0	OldNewObject; 
 	short		i,version=0,Signature;
@@ -1951,7 +1951,7 @@ BOOL LoadDisplayRedefFile (LPSTR Name)
 
 BOOL SaveDisplayRedefFile (LPSTR Name)
 {   COLORREF	*lpNewColors;
-	OFSTRUCT	OFStruct;
+OFSTRUCTGM	OFStruct;
 	short	HavePenRedef;  
 	int		Signature, Version=2;
 	HFILE	Fid;

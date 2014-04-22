@@ -133,7 +133,7 @@ HANDLE LoadReport (LPSTR Name)
 	LPREPORT	pReport;
 	HANDLE	hReport, hBuf, hTempLine;
 	HFILE	Fid;                                
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	long	len; 
 	LPSTR	pBuf, pNextLine, pLine, templine;
 	int		LineNum;
@@ -969,7 +969,7 @@ BOOL ReportToFile (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref,LPSTR File)
 	LPVIEWPORT	SaveView, SaveView2;        
 	HANDLE	hView;   
 	RECT	Rect={0,0,0,0};
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	SaveView = CurView;
 	hView = GSSiGlobAlloc ( 737,GHND,sizeof(VIEWPORT));
@@ -1425,7 +1425,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	long	nLines=0, CurLoc;
     int		height,width,x,y;  
     HFILE	Fid;  
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HANDLE	hSTR;
 	LPSTR	str;    
     

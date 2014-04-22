@@ -84,7 +84,7 @@ BOOL WriteQuadFile (LPQUADDATA pQuadDataIn)
     HANDLE  hVars, hDB;   
     long	Offset;
     short       FidData,ibeg,NumVars, NumSegs;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128], Name[128];
     LPSTR	lpDot;  
@@ -478,7 +478,7 @@ BOOL MarkQuadData (LPSTR Name,LPSTR Quad, LPSTR CDName, short FileNum)
 	    LPGWDHEADER lpGWDHead;
 	    HANDLE  hVars;
 	    short       FidData,NumVars, NumSegs;
-	    OFSTRUCT    OFStruct;
+	    OFSTRUCTGM    OFStruct;
 	    GWFLDINFO FldInfo;    
 	    char	PrimeIndex[128];
 	    LPSTR	lpDot;  
@@ -1044,7 +1044,7 @@ LPSTR GetTIGERFileExtension(char FileType)
 BOOL GetDOQCoord (LPSTR Name,LPMNMXCORD pBounds, LPDOUBLE pResolution,LPRECT32 ClipRect,HFILE *Fid,
 							 LPHANDLE phDibInfo, LPLONG ImageOffset)
 {
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	HANDLE	hTxt=GSSiGlobAlloc ( 545,GMEM_MOVEABLE,USHRT_MAX);
 	LPSTR	txt=GlobalLock (hTxt);  
 	long	BeginBitmap, l, EndFile;
@@ -1135,7 +1135,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
     double  Resolution, MinRow, MinCol, BytesPerPel; 
     WORD    HeadLen;  
     UINT	n,m,BPP;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     HFILE   FidBM, FidBMOrig=HFILE_ERROR;
     char	ClipFile[MAX_PATH];
     char    fNameBM[MAX_PATH], NameOnly[64], Ext[5], leaf[34], daterange[32],TempDir[MAX_PATH]="",IndexName[MAX_PATH];

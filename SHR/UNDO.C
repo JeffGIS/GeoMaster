@@ -3,7 +3,7 @@
 #define	MAXUNDOPOINTS	10
 #include "gmextern.h"
 
-static	OFSTRUCT	OFStructUndo;
+static	OFSTRUCTGM	OFStructUndo;
 static	char		UndoFileName[MAX_PATH]="";
 static	long		LastUndoPointSize[MAXUNDOFILES]; 
 static	short		NumUndoPoints = 0; 
@@ -136,10 +136,10 @@ void RemoveUndoPoint (void)
 {   
 	long	CurLoc, NextLoc; 
 	HFILE	FidUndo;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	return;
-	FidUndo = OpenFile (UndoFileName,&OFStruct,OF_READWRITE); 
+	FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_READWRITE); 
 	BigRead (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
 	CurLoc = _llseek (FidUndo,UndoHeader.FirstSeg,0);
 	BigRead (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));
@@ -378,12 +378,12 @@ HFILE GetUndoFid (short UndoFileID)
 		_lclose (OpenUndoFid);
 	GetUndoFileNameFromUndoFileID (UndoFileID,Name);
 	//GetShortPathName (Name,128);
-	OpenUndoFid = OpenFile (Name,&OFStructUndo,OF_READWRITE); 
+	OpenUndoFid = OpenFileGM (Name,&OFStructUndo,OF_READWRITE); 
 	if (OpenUndoFid == HFILE_ERROR)
 	{
 		if (OFStructUndo.nErrCode == 2) 
 		{
-			OpenUndoFid = OpenFile (Name,&OFStructUndo,OF_CREATE); 
+			OpenUndoFid = OpenFileGM (Name,&OFStructUndo,OF_CREATE); 
 			debugstep=100;	
 		}
 		else
@@ -480,7 +480,7 @@ void RemoveLastUndoPoint ()
 BOOL UndoChanges (HWND hWnd)
 {
 	HFILE	FidUndo;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	long	CurLoc;  
 	long	UndoPointTime;
 	LPSTR	pTime; 
@@ -512,7 +512,7 @@ BOOL UndoChanges (HWND hWnd)
 	pTime = _fstrchr (&UndoPointList[LastUndoPoint],'|');
 	pTime++;
 	UndoPointTime = atol (pTime);
-	FidUndo = OpenFile (UndoFileName,&OFStruct,OF_READWRITE); 
+	FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_READWRITE); 
 	BigRead (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
 	CurLoc = _llseek (FidUndo,UndoHeader.LastSeg,0);  
 if (CurLoc == 1721)
@@ -701,7 +701,7 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 	long	len, LastLoc,IncLen=(long)USHRT_MAX;  
 	long	CurLoc, ResetLoc; 
 	short	UndoFileID;    
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char	Name2[128]; 
 	
 	if (!UndoEnabled || !NumUndoPoints)
@@ -713,7 +713,7 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 			return;   
 		_fstrcpy (Name2,Name);
 		//GetShortPathName (Name2,128);
-		Fid = OpenFile (Name2,&OFStruct,OF_READ); 
+		Fid = OpenFileGM (Name2,&OFStruct,OF_READ); 
 		BeginLoc = 0;
 	}
 	else
@@ -751,7 +751,7 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 void SaveDataToUndoFile (short Type,short UndoFileID, long len, HPSTR pData,long SeekLoc)
 {   
 	HFILE		FidUndo;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	long		HeaderLoc, DataLoc;   
 	short		ii;
 	
@@ -769,7 +769,7 @@ void SaveDataToUndoFile (short Type,short UndoFileID, long len, HPSTR pData,long
 		GetTempDir (UndoFileName);
 		sprintf (_fstrchr (UndoFileName,0),"\\gmundo.tmp"); 
 		//GetShortPathName (UndoFileName,128);
-		FidUndo = OpenFile (UndoFileName,&OFStruct,OF_CREATE);    
+		FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_CREATE);    
 		UndoHeader.FirstSeg = -1;
 		UndoHeader.LastSeg = -1;
 		UndoHeader.FreeSpaceBeg = -1;
@@ -777,7 +777,7 @@ void SaveDataToUndoFile (short Type,short UndoFileID, long len, HPSTR pData,long
 	}
 	else 
 	{
-		FidUndo = OpenFile (UndoFileName,&OFStruct,OF_READWRITE); 
+		FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_READWRITE); 
 		BigRead (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
 	}
 	DataLoc = WriteToUndoFile (FidUndo,pData,len);

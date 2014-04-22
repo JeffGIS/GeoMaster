@@ -315,7 +315,7 @@ typedef struct
 typedef ACounty *lpACounty;
 static	ACounty ACty; 
 static	long	CurCountyNo=-1;
-OFSTRUCT	OFStruct;  
+OFSTRUCTGM	OFStruct;
 BOOL	DoRead = FALSE;
  
 lpACounty lpCty = &ACty; 

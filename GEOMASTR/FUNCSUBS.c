@@ -2473,7 +2473,7 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 	time_t ltime;
 	int		FidData;
 	int		ibeg;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPVOID	lpVal;
 	LPSTR	pName;
 	GWFLDINFO FldInfo;
@@ -2695,7 +2695,7 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
 	time_t ltime;
 	int		FidData;
 	int		ibeg;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPVOID	lpVal;
 	LPSTR	pName;
 	GWFLDINFO FldInfo;
@@ -2927,7 +2927,7 @@ BOOL TABToComma (LPSTR InFile,LPSTR OutFile)
 
 BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile1, LPSTR OutFile2, short CompareLength)
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	BTVARDESC	BTVar[2]; 
 	char		Name1[144], Name2[144], Value[256];      
@@ -3024,7 +3024,7 @@ BOOL CreateSportMapCMD (LPSTR FromPath,LPSTR CmdFile)
 	short	DType, Res, AreaNum;
 	HFILE	Fid,Fid2;  
 	long	TotFiles=0;   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPSTR	pFile=str2, pLoc;    
     
     pLoc = _fstrrchr (FromPath,'\\');
@@ -3032,19 +3032,19 @@ BOOL CreateSportMapCMD (LPSTR FromPath,LPSTR CmdFile)
     _fstrupr (CDName);
 	GSSiGetTempFileName(0,"gma",0,Name);
 	GSSiGetTempFileName(0,"gmb",0,Name2);
-	Fid =	GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	Fid =	GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	SearchDirectoriesInDir (FromPath,Fid,&TotFiles,"wetlands",1); 
 	GSSillseek (Fid,0,0);
 	while (fgetstring (str2,144,Fid))
 	{  
-		Fid2 =	GSSiOpenFile (Name2,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+		Fid2 =	GSSiOpenFile (Name2,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 		SearchFilesInDir (str2, ".plt", Fid2,&TotFiles,"*.plt",1,TRUE,TRUE);     
 		GSSiClose (Fid2);
 		CreateMapIndex (str2,Name2,1,FALSE,"","",FALSE,1,0,0,0,FALSE);
 		GSSiRemove (Name2);
 	}
 	GSSiClose (Fid);
-	Fid =	GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	Fid =	GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	SearchFilesInDir (FromPath, "", Fid,&TotFiles,"index",1,TRUE,TRUE); 
 	GSSillseek (Fid,0,0);
 	while (fgetstring (str2,144,Fid))
@@ -3111,7 +3111,7 @@ BOOL CreateSportMapCMD (LPSTR FromPath,LPSTR CmdFile)
 
 BOOL CreateSportMapCD (LPSTR OrderFile,LPSTR OutDir,short AreaNum)
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		FidOrder;  
 	char		str[260]; 
 	MNMXCORD	Bounds;   
@@ -3411,7 +3411,7 @@ BOOL GetPRIMCornerPoint (short FileID,short PointID,HPDPOINT pPoints,LPDPOINT pB
 BOOL LoadPRIMBounds (short idum)
 {
 	HFILE Fid, Fid2, FidRun, FidAD, FidMore4;
-	OFSTRUCT OFStruct; 
+	OFSTRUCTGM OFStruct; 
 	char	str[260], File[132], leaf[16],dir[128];
 	short	i=0,n, ifile, Maxp=0; 
 	float	RSQMIN;
@@ -3732,7 +3732,7 @@ NextCorner:;
 			{   
 				long	ColWidth = FileWidth, scanlinewidth, HeadLen, irow, icol;      
 				HFILE	FidBM;
-				OFSTRUCT	OFStruct; 
+				OFSTRUCTGM	OFStruct;
 				HANDLE	hDibInfoOut; 
 				LPRGBTRIPLE	pScanLine, pScanLineBeg, pFirstVoid; 
 				RGBTRIPLE	FirstPix, black={0,0,0};
@@ -3875,7 +3875,7 @@ BOOL BuildZoomList (LPSTR Arg1,LPSTR Heading,LPSTR Separator,LPSTR Arg4)
 	long	Refno;    
 	short	pos=BT_FIRST; 
 	char	UDI[66], TempFile[144], LastUDI[66]="", str[260];  
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	HANDLE	hBT;
 	HFILE	FidOut; 
 	double	MinDist = atof (Arg4);
@@ -3942,7 +3942,7 @@ Exit:
 			
 BOOL SplitXFERFile (LPSTR Name,LPSTR Dir,short nPieces)
 { 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid, Fid2;
 	char		NewName[128], line[1030];
 	long		TotLen, PieceEnd=-1, loc;
@@ -5449,7 +5449,7 @@ void CacheFileInBackground (LPSTR FromFileIN,LPSTR CacheDir,LPSTR DataLocDir,LON
 	BY_HANDLE_FILE_INFORMATION fifrom, fito;
 	HFILE	FidFrom, FidTo;
 	int		lDL = 5;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char	FromFile[MAX_PATH];
 	char	ToFile[MAX_PATH];
 	char	ToFileIntermediate[MAX_PATH];
@@ -5491,17 +5491,17 @@ Next:
 	if ((pDot = strrchr (ToFileIntermediate,'.')))
 		*pDot = '$';
 	strcat (ToFileIntermediate,".tbr");
-	FidFrom = OpenFile (FromFile,&OFStruct,OF_READ);
-	FidTo = OpenFile (ToFileIntermediate,&OFStruct,OF_READ);
+	FidFrom = OpenFileGM (FromFile,&OFStruct,OF_READ);
+	FidTo = OpenFileGM (ToFileIntermediate,&OFStruct,OF_READ);
 	if (FidTo == HFILE_ERROR)
-		FidTo = OpenFile (ToFile,&OFStruct,OF_READ);
+		FidTo = OpenFileGM (ToFile,&OFStruct,OF_READ);
 	if (FidFrom == HFILE_ERROR)
 	{
 		if (FidTo != HFILE_ERROR)
 		{
 			_lclose (FidTo);
-			OpenFile (ToFile,&OFStruct,OF_DELETE);
-			OpenFile (ToFileIntermediate,&OFStruct,OF_DELETE);
+			OpenFileGM (ToFile,&OFStruct,OF_DELETE);
+			OpenFileGM (ToFileIntermediate,&OFStruct,OF_DELETE);
 		}
 		return;
 	}
@@ -5542,7 +5542,7 @@ Next:
 				OkToCache = FALSE;
 			if (OkToCache)
 			{
-				FidTo = OpenFile (ToFile,&OFStruct,OFMode);
+				FidTo = OpenFileGM (ToFile,&OFStruct,OFMode);
 				if (FidTo != HFILE_ERROR)
 				{
 					LPSTR	pName = strrchr (FromFile,'\\');
@@ -5564,7 +5564,7 @@ Next:
 						{
 							_lclose (FidTo);
 							FidTo = HFILE_ERROR;
-							OpenFile (ToFile,&OFStruct,OF_DELETE);
+							OpenFileGM (ToFile,&OFStruct,OF_DELETE);
 							break;
 						}
 						TotRead += lRead;
@@ -5581,7 +5581,7 @@ Next:
 							SubstituteDL (FromFileIN,FALSE);
 							sprintf (str,"%s\t%s\t%ld",FromFileIN,DataLocDir,TotRead);
 							sprintf (RestartFile,"%sRestartCache.txt",CacheDir);
-							FidRestart = OpenFile (RestartFile,&OFStruct,OF_CREATE);
+							FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_CREATE);
 							_lwrite (FidRestart,str,600);
 							_lclose (FidRestart);
 						}
@@ -5594,7 +5594,7 @@ Next:
 
 						sprintf (RenameListFileTemp,"%sCacheRenameList\\%ld.tmp",CacheDir,CacheRenameListNum++);
 						sprintf (RenameListFile,"%sCacheRenameList\\%ld.crn",CacheDir,CacheRenameListNum++);
-						FidRenameList = OpenFile (RenameListFileTemp,&OFStruct,OF_CREATE);
+						FidRenameList = OpenFileGM (RenameListFileTemp,&OFStruct,OF_CREATE);
 						_lwrite (FidRenameList,ToFile,MAX_PATH);
 						_lclose (FidRenameList);
 						rename (RenameListFileTemp,RenameListFile);
@@ -5624,15 +5624,15 @@ void ContinueInteruptedCache (LPSTR CacheDir)
 	LONGLONG	RestartPos;
 	LPSTR	DataLocDir;
 	LPSTR	pTab;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 
 	sprintf (RestartFile,"%sRestartCache.txt",CacheDir);
-	FidRestart = OpenFile (RestartFile,&OFStruct,OF_READ);
+	FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_READ);
 	if (FidRestart != HFILE_ERROR)
 	{
 		_lread (FidRestart,str,600);
 		_lclose (FidRestart);
-		FidRestart = OpenFile (RestartFile,&OFStruct,OF_DELETE);
+		FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_DELETE);
 		DataLocDir = strchr (str,'\t');
 		*DataLocDir++ = 0;
 		pTab = strchr (DataLocDir,'\t');
@@ -5651,8 +5651,8 @@ BOOL AnotherProcessIsCaching (LPSTR ProcessIDFile)
 	DWORD	nBytes, nPid;
 	BOOL	rtn=FALSE;
 	DWORD	CachingPid;
-	OFSTRUCT	OFStruct;
-	HFILE	Fid = OpenFile (ProcessIDFile,&OFStruct,OF_READ);
+	OFSTRUCTGM	OFStruct;
+	HFILE	Fid = OpenFileGM (ProcessIDFile,&OFStruct,OF_READ);
 
 	if (Fid == HFILE_ERROR)
 		return FALSE;
@@ -5795,7 +5795,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 	LPSTR	arg1=GlobalLock (*phArgs);
 	LPSTR	arg2 = arg1 + 4096, arg3 = arg2 + 4096, arg4 = arg3 + 4096;
 	FILE	*FidFilelist;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	DWORD	Pid = _getpid ();
 	PVOID	oldValue;
 	int		pass=0;
@@ -5810,7 +5810,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 	strcpy (CachingPidFile,arg4);
 	GlobalUnlock (*phArgs);
 	GSSiGlobFree (phArgs);
-	Fid = OpenFile (CachingPidFile,&OFStruct,OF_CREATE);
+	Fid = OpenFileGM (CachingPidFile,&OFStruct,OF_CREATE);
 	_lwrite (Fid,(LPSTR)&Pid,sizeof(DWORD));
 	_lclose (Fid);
 	GSSiGetTempFileName(0,"gmb",0,tempFile);
@@ -5841,7 +5841,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 									*(pWild-1) = 0;
 								}
 								*pWild++ = 0;
-								Fid2 = OpenFile (tempFile,&OFStruct,OF_CREATE); 
+								Fid2 = OpenFileGM (tempFile,&OFStruct,OF_CREATE); 
 								ii = SearchFilesInDir2 (str, 0, Fid2,&nFiles,pWild,1,wantSub);     
 								_llseek (Fid2,0,0);
 								if (pass)
@@ -5856,7 +5856,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 								else
 									totFiles += nFiles;
 								_lclose (Fid2);
-								OpenFile (tempFile,&OFStruct,OF_DELETE);
+								OpenFileGM (tempFile,&OFStruct,OF_DELETE);
 							}
 						}
 						else if (pass)
@@ -5874,7 +5874,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 					HFILE	FidLastCacheCheck;
 
 					sprintf (LastCacheCheckFile,"%sLastCacheCheck.txt",CacheDir);
-					FidLastCacheCheck = OpenFile(LastCacheCheckFile,&OFStruct,OF_CREATE);
+					FidLastCacheCheck = OpenFileGM(LastCacheCheckFile,&OFStruct,OF_CREATE);
 					if (FidLastCacheCheck != HFILE_ERROR)
 					{
 						_lwrite (FidLastCacheCheck,"Cache check complete",20);
@@ -5887,7 +5887,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 		}
 		pass++;
 	}
-	OpenFile (CachingPidFile,&OFStruct,OF_DELETE);
+	OpenFileGM (CachingPidFile,&OFStruct,OF_DELETE);
 	hCacheThread = 0;
 	//Wow64RevertWow64FsRedirection (oldValue);
 	return;
@@ -5965,7 +5965,7 @@ BOOL StartBackgroundCache (void)
 	char	CachingPidFile[MAX_PATH];
 	char	LastCacheCheckFile[MAX_PATH];
 	BOOL	rtn = FALSE;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	static	BOOL	firstCall=TRUE;
 
 	return TRUE;
@@ -5982,14 +5982,14 @@ BOOL StartBackgroundCache (void)
 
 	ExpandText(BackgroundCacheFilelist);
 	sprintf (LastCacheCheckFile,"%sLastCacheCheck.txt",CachePathnameTo);
-	FidLastCacheCheck = OpenFile(LastCacheCheckFile,&OFStruct,OF_READ);
+	FidLastCacheCheck = OpenFileGM(LastCacheCheckFile,&OFStruct,OF_READ);
 	if (FidLastCacheCheck != HFILE_ERROR)
 	{
 		BY_HANDLE_FILE_INFORMATION fiList, fiLastCacheCheckFile;
 		LONG	dtime;
 		BOOL	st;
 
-		FidList = OpenFile (BackgroundCacheFilelist,&OFStruct,OF_READ);
+		FidList = OpenFileGM (BackgroundCacheFilelist,&OFStruct,OF_READ);
 		st = GetFileInformationByHandle((HANDLE)FidList,&fiList);
 		st = GetFileInformationByHandle((HANDLE)FidLastCacheCheck,&fiLastCacheCheckFile);
 		dtime = CompareFileTime (&fiList.ftLastWriteTime,&fiLastCacheCheckFile.ftLastWriteTime); 
@@ -6094,7 +6094,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 	LPSTR	arg1=GlobalLock (*phArgs);
 	LPSTR	arg2 = arg1 + 4096, arg3 = arg2 + 4096, arg4 = arg3 + 4096, arg5 = arg4 + 4096;
 	FILE	*FidFilelist;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	DWORD	Pid = _getpid ();
 	SOCKET	sock;
 	u_short	port = atoi (arg3);
@@ -6137,7 +6137,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 	{
 		str[36] = 0;
 		BackgroundUpdateMessage (str);
-		Fid = OpenFile (CachingPidFile,&OFStruct,OF_CREATE);
+		Fid = OpenFileGM (CachingPidFile,&OFStruct,OF_CREATE);
 		_lwrite (Fid,(LPSTR)&Pid,sizeof(DWORD));
 		_lclose (Fid);
 	//	ContinueInteruptedCache (CacheDir);
@@ -6146,13 +6146,13 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 			long	ln;
 			LPSTR	pBuf;
 
-			Fid = OpenFile (FileListFile,&OFStruct,OF_READ);
+			Fid = OpenFileGM (FileListFile,&OFStruct,OF_READ);
 			ln = _llseek (Fid,0,2);
 			_llseek (Fid,0,0);
 			pBuf = malloc (ln);
 			_lread (Fid,pBuf,ln);
 			_lclose (Fid);
-			Fid = OpenFile (FileListFile,&OFStruct,OF_DELETE);
+			Fid = OpenFileGM (FileListFile,&OFStruct,OF_DELETE);
 			st = SendNTBlock (sock,pBuf,ln);
 			free (pBuf);
 			if (st)
@@ -6174,7 +6174,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 							sprintf (File,"%s%s",NetTransferDir,localNetTransferFile);
 							free (pBuf);
 							makedirectories (File,FALSE,FALSE);
-							Fid = OpenFile (File,&OFStruct,OF_CREATE);
+							Fid = OpenFileGM (File,&OFStruct,OF_CREATE);
 							if (Fid != HFILE_ERROR)
 							{
 								long	lnBlock;
@@ -6255,7 +6255,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 				else
 					BackgroundUpdateMessage ("Invalid response from update server(3)");
 			}
-			OpenFile (CachingPidFile,&OFStruct,OF_DELETE);
+			OpenFileGM (CachingPidFile,&OFStruct,OF_DELETE);
 		}
 	}
 	else

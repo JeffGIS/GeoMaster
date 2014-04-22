@@ -177,8 +177,8 @@ void GetSHPName (LPSTR Name)
 	
 	if (!*SmallDBFName)
 		GSSiGetTempFileName (0,"gms",0,(LPSTR)SmallDBFName);
-	hMem = GSSiGlobAlloc (1416,GMEM_MOVEABLE,sizeof(OFSTRUCT));
-	pOFStruct = (LPOFSTRUCT)GlobalLock (hMem);	
+	hMem = GSSiGlobAlloc (1416,GMEM_MOVEABLE,sizeof(OFSTRUCTGM));
+	pOFStruct = (LPOFSTRUCTGM)GlobalLock (hMem);	
    	FidSmallDBF = OpenFile (SmallDBFName,pOFStruct,OF_CREATE);
    	GSSiGlobUlFree (&hMem);
 	return;
@@ -186,7 +186,7 @@ void GetSHPName (LPSTR Name)
 
 BOOL CloseFidDBF (BOOL Final)
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		AvailableFid; 
 	BOOL		UseSmall=FALSE;
 	HANDLE		hMem;
@@ -202,9 +202,9 @@ BOOL CloseFidDBF (BOOL Final)
 		FidSmallDBF = HFILE_ERROR;  
 		return TRUE;
 	}
-	hMem = GSSiGlobAlloc (1416,GMEM_MOVEABLE,sizeof(OFSTRUCT)+256);
+	hMem = GSSiGlobAlloc (1416,GMEM_MOVEABLE,sizeof(OFSTRUCTGM)+256);
 	TestName = GlobalLock (hMem);
-	pOFStruct = (LPOFSTRUCT)(TestName + 256);	
+	pOFStruct = (LPOFSTRUCTGM)(TestName + 256);	
 	GSSiGetTempFileName (0,"gms",0,(LPSTR)TestName);
 	AvailableFid = OpenFile (TestName,pOFStruct,OF_CREATE); 
 	if (AvailableFid > 20)
@@ -3469,10 +3469,10 @@ BOOL SaveContours (int NumPoints,HPDPOINT pPoints,LPSTR CurrentUDI)
 		for (i=0;i<nfiles;i++)
 		{
 			char filename[MAX_PATH];
-			OFSTRUCT ofStruct;
+			OFSTRUCTGM OFStruct;
 
 			sprintf (filename,"%s\\file%4.4i.bin",CurrentUDI,i+1);
-			pfid[i] = GSSiOpenFile (filename,&ofStruct,OF_CREATE);
+			pfid[i] = GSSiOpenFile (filename,&OFStruct,OF_CREATE);
 			//GSSiClose (pfid[i]);
 			//pfid[i] = HFILE_ERROR;
 		}

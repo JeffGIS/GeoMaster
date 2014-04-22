@@ -1633,7 +1633,7 @@ void AssignTAGInstance (int PickNum)
 {            
 	int n=0;
 	HFILE	FidTag;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	TAGBOX	TAGBox2;
 	char	Group[34]; 
 	LPSTR	lpColon;  
@@ -1646,7 +1646,7 @@ void AssignTAGInstance (int PickNum)
 	if ((lpColon = _fstrchr (Group,':')))
 		*lpColon = 0;
 	
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READ);
 	if (FidTag != HFILE_ERROR)
 	{
 		while (BigRead (FidTag,(HPSTR)&TAGBox2,sizeof(TAGBOX)) == sizeof(TAGBOX))
@@ -1755,12 +1755,12 @@ void WriteInfoBoxes (HFILE Fid)
 void UpdateInfoBoxVPID (LPSHORT NewIDs)
 {
 	HFILE	FidTag;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	long	loc1=0,loc2;
 	
     if (!*TagFile) 
     	return;
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READWRITE);
 	if (FidTag != HFILE_ERROR)
 	{   
 		while (BigRead (FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX)) == sizeof(TAGBOX))
@@ -1780,16 +1780,17 @@ void UpdateInfoBoxVPID (LPSHORT NewIDs)
 }
 
 void SaveTAG(int PickNum)
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	HFILE		FidTag;
 
 	if (!*TagFile)
 		GSSiGetTempFileName (0,"gmi",0,(LPSTR)TagFile);
 	if (PickNum <= 0) 
 		AssignTAGInstance (PickNum);
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READWRITE);
 	if (FidTag == HFILE_ERROR)
-		FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_CREATE_NODELETE); 
+		FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_CREATE_NODELETE);
 	if (PickNum <= 0) 
 		TBNum = GSSillseek (FidTag,0,2)/sizeof(TAGBOX) + 1; 
 	else
@@ -1810,14 +1811,15 @@ void SaveTAG(int PickNum)
 }
 
 int PickTextBox (LPPOINT MousePoint)
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	int			FidTag, i;
 	TAGBOX	TAGBoxSave;    
 	BOOL	HaveBox=FALSE;
 
 	if (!TagFile[0] || !CurView)
 		return (FALSE);
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READ);
 	if (FidTag<0)return(FALSE);
 	i=0;
 	while (BigRead (FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX)))
@@ -1856,13 +1858,14 @@ GotOne:
 }
 
 void ClearTAGs()
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	int			FidTag;
 
 	if (!*TagFile) return;
 	if (ExistFile(TagFile))
 	{
-		HFILE	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+		HFILE	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READ);
 
 		if (FidTag != HFILE_ERROR)
 		{
@@ -1985,7 +1988,8 @@ Exit:
 }
 
 void ListTAGs(HWND hWndDlg, int idcCB)
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	int		nRead;
 	int		FidTag; 
 	TAGBOX	TAGBox;
@@ -1994,7 +1998,7 @@ void ListTAGs(HWND hWndDlg, int idcCB)
 	if (!TagFile[0]) return;
 
 Restart:
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READ);
 	if (FidTag<0) return;
 	nRead = BigRead(FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX));  
 	if (!nRead) goto Exit;
@@ -2015,7 +2019,8 @@ Exit:
 }
 
 BOOL SelectTAG(int n)
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	int		nRead;
 	int		FidTag;
 	BOOL	rtn=FALSE; 
@@ -2024,7 +2029,7 @@ BOOL SelectTAG(int n)
 	if (!TagFile[0]) return FALSE;
 
 Restart:
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	FidTag = GSSiOpenFile(TagFile, (LPOFSTRUCTGM)&OFStruct, OF_READ);
 	if (FidTag<0) return FALSE;
 	nRead = BigRead(FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX));  
 	if (!nRead) goto Exit;
@@ -2046,7 +2051,8 @@ Exit:
 }
 
 short DeleteTAGByName (LPSTR Name)
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	int		nRead, l=_fstrlen (Name);
 	int		FidTag;
 	BOOL	rtn=FALSE; 
@@ -2056,7 +2062,7 @@ short DeleteTAGByName (LPSTR Name)
 	if (!TagFile[0]) return FALSE;
 
 Restart:
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 	if (FidTag<0) return FALSE;
 	nRead = BigRead(FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX));  
 	if (!nRead) goto Exit;
@@ -2083,7 +2089,8 @@ Exit:
 }
 
 void ConvertTAGV0ToV1(LPSTR TagFile)
-{	OFSTRUCT	OFStruct;
+{
+	OFSTRUCTGM	OFStruct;
 	int		nRead;
 	HFILE			FidTag, FidOut;  
 	typedef struct
@@ -2135,9 +2142,9 @@ void ConvertTAGV0ToV1(LPSTR TagFile)
     lpDot = _fstrchr(V0Name,'.');
     if (lpDot) *lpDot=0;
     _fstrcat (V0Name,".ib0"); 
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 	GSSiGetTempFileName (0,"gm",0,(LPSTR)NewName); 
-	FidOut = GSSiOpenFile (NewName,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	FidOut = GSSiOpenFile (NewName,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	if (FidTag<0) return;
 	while (nRead = BigRead(FidTag,(HPSTR)&TAGBoxV0,sizeof(TAGBOX_V0)))
 	{  
@@ -2188,14 +2195,14 @@ float GetFontWtoH (HDC hDC, LPLOGFONT lpFont)
 /*
 void SaveInfoBoxes (HFILE Fid)
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	int		nRead;
 	HFILE	FidTag; 
 	TAGBOX	TAGBox;
  	short	Length, Version=1, id=OB_SAVEINFOBOX;
 
 	if (!TagFile[0]) return;
-	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	FidTag = GSSiOpenFile (TagFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 	if (FidTag == HFILE_ERROR) return;
  	BigWrite (Fid,&id,2);  
  	BigWrite (Fid,&Version,2);

@@ -2895,7 +2895,7 @@ HGLOBAL PolyBTInit (short lrec,short nkeyfld,short fldtyp[8],short fldlen[8])
       
 /*      {
       	int Fid;
-      	OFSTRUCT OFStruct;  
+      	OFSTRUCTGM OFStruct;  
       	static	First=TRUE;
                            
         if (First)

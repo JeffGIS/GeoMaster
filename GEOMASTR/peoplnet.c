@@ -577,7 +577,7 @@ TryMapAgain2:
     	{   
     		HANDLE	hBTTiger1;
     		HFILE	FidTiger1;
-    		OFSTRUCT	OFStruct; 
+			OFSTRUCTGM	OFStruct;
     		long	Offset, snum, IntLong, IntLat, IntTLID, ToLong, ToLat;
     		TIGER1_PEOPLENET	Tiger1;  
     		char	Buff[64], OnName[128], TestName[128]; 
@@ -747,7 +747,7 @@ BOOL GetCountyName (short State,short County,LPSTR CountyName)
 	{
 		BTVARDESC	BTVar[2];
 		HFILE	Fid;
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		LPSTR	pCounty;   
 		
 		if ((Fid = GSSiOpenFile ("countynm.txt",&OFStruct,OF_READ)) == HFILE_ERROR)
@@ -1059,7 +1059,7 @@ HaveStreet:
 	{   
 		HANDLE	hBTTiger1;
 		HFILE	FidTiger1;
-		OFSTRUCT	OFStruct; 
+		OFSTRUCTGM	OFStruct;
 		long	Offset, snum, IntLong, IntLat, IntTLID, ToLong, ToLat;
 		long	OnRef, OnStreet, IntStreet;
 		TIGER1_PEOPLENET	Tiger1;  
@@ -1312,7 +1312,7 @@ BOOL GetCityCoord (LPSTR Name,LPDPOINT pDPoint,LPMNMXCORD pMinMax)
 	int		rtn, istate;  
 	HFILE	FidTiger1; 
 	TIGER1_PEOPLENET	Tiger1;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpComma; 
 	int		cond;
 
@@ -1447,7 +1447,7 @@ short GetStateNum (LPSTR ID)
 	HFILE	Fid;
 	char	StateStr[132];  
 	int		istate=0;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	Fid = GSSiOpenFile ("[%INDIR]states.txt",&OFStruct,OF_READ); 
 	if (Fid==HFILE_ERROR)
@@ -1925,7 +1925,7 @@ HANDLE PNOpen (void)
 	HANDLE DBHandle=0;
     LPGWDHEADER lpGWDHead;
     LPGWFLDINFO lpFieldInfo;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
 
 	return DBHandle;
 }

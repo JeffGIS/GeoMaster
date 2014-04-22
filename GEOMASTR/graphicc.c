@@ -11,7 +11,7 @@ static	short	NumPrevLayers=0;
 static	HANDLE	hPrevLayers[MAX_VIEWPORT_FILES];  
 static	char	LayerRefIndexFile[MAX_VIEWPORT_FILES][MAX_PATH]; 
 static	char	ReopenRefName[MAX_PATH], ReopenTAGName[MAX_PATH];
-static	OFSTRUCT	OFStructOpenMap;
+static	OFSTRUCTGM	OFStructOpenMap;
 static	BOOL	FirstSNMess=TRUE;  
 static	char	JLBPFile[256]="";
 static	HANDLE	hDBJLBP=0;
@@ -3276,7 +3276,7 @@ GSSiExitProg (1076);
     }
     if (Delete && ForceRefIndex)
     {   
-    	OFSTRUCT OFStruct;
+    	OFSTRUCTGM OFStruct;
     	
     	GSSiRemove (RefIndexFile);  
     	//retrn;
@@ -3512,7 +3512,7 @@ void ReopenMap (BOOL Open)
 {GSSiEnterProg (1074);
 #endif
 {    
-	static		OFSTRUCT	OFStruct;
+	static		OFSTRUCTGM	OFStruct;
 	short		ii; 
 	LPSTR		pDot;
 	char		str[MAX_PATH],str2[MAX_PATH];
@@ -3721,7 +3721,7 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
 #endif
 {   //hWnd,hDC used only as flags
 	short     Signature, i;   
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     static		UINT	OpenMode=1000;   
     UINT		WantMode;
     char        mess[MAX_PATH];
@@ -3833,7 +3833,7 @@ ProcessImageFile:
     } 
     if (PltType == 7)
     {
-	    FidMap = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStructOpenMap,OpenMode);
+	    FidMap = GSSiOpenFile (PltName,(LPOFSTRUCTGM)&OFStructOpenMap,OpenMode);
 	    if (FidMap == HFILE_ERROR) 
 	        goto RtnFalse;  
        	ProcessDisplayMacro (FidMap,1);
@@ -3909,7 +3909,7 @@ ProcessImageFile:
 	}*/
 	if (!strstr (PltName,".GDB") && !strstr (PltName,".gdb")) 
 	{
-		FidMap = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStructOpenMap,OpenMode); 
+		FidMap = GSSiOpenFile (PltName,(LPOFSTRUCTGM)&OFStructOpenMap,OpenMode); 
 		if (pPar)
     		*pPar = '(';
 		if (FidMap == HFILE_ERROR) 
@@ -4023,7 +4023,7 @@ DoSid:
 	    	if ((pDot = _fstrrchr (TranName,'.')))
 	    	{   
 	    		_fstrcpy (pDot,".ctr");
-				TranFid = GSSiOpenFile (TranName,(LPOFSTRUCT)&OFStruct,OF_READ); 
+				TranFid = GSSiOpenFile (TranName,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
 				if (TranFid != HFILE_ERROR)
 				{
 					if ((hTranProjection=ReadTranData(TranFid)))
@@ -5316,7 +5316,7 @@ BOOL CreateNewMap (LPSTR NewName,LPMNMXCORD MinMaxCoord,short NumSyms,HANDLE hSy
     HANDLE  hMem;
     LPSHORT   pInt;  
     HFILE   Fid;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     short     lMem, Signature, Version, i2, i, n, NumParent;  
     MNMXCORD    MinMaxD;
     mnmxCor     MinMax;  

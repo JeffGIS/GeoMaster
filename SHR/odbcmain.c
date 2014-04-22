@@ -113,7 +113,7 @@ HANDLE CreateUniqueList (int length, LPSTR Name)
 
 	BTVARDESC	BTVar[2];
 	int	i, ifield;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HANDLE	hBT; 
 	HANDLE	hMem=0;
 	
@@ -1701,7 +1701,7 @@ BOOL AddPWtoODBCFile (LPSTR lpcstring)
 		if (GetGlobalCVal ("[%ODBCPASSWORDFILE]",str,0))
 		{   
 			char		SaveCurODBCFile[144];
-			OFSTRUCT	OFStruct;
+			OFSTRUCTGM	OFStruct;
 			HFILE		Fid=GSSiOpenFile (str,&OFStruct,OF_READ);
 			LPSTR		pSpace; 
 			

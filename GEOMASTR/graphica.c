@@ -2164,7 +2164,7 @@ BOOL GetSymbolName (int Desc, LPSTR Name,LPSHORT pParent, int From, LPBOOL pIsPa
 {
 	static		int		LastDesc=-1, LastIsPar, LastParent;
 	static		char	LastName[lnCurrentSymName]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     short       Signature,l;   
     long   		PrimeOffset; 
     BOOL		rtn;
@@ -2227,7 +2227,7 @@ GSSiExitProg (1093);
 	    DuplicateDescInit();
         CloseMap (FALSE);  
         _fstrcpy (PltName,EditName);
-        FidMap = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READ); 
+        FidMap = GSSiOpenFile (PltName,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
         if (FidMap != HFILE_ERROR)
         {
 		    GSSillseek(FidMap,(LONG)-(6),2);
@@ -3977,7 +3977,7 @@ void ConvertIndexV1ToV2(LPSTR InName)
 {GSSiEnterProg (1119);
 #endif
 {
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     short     NumFiles;
     HFILE   FidIndex,FidIndexNew;
     long    IndexLen;
@@ -3994,7 +3994,7 @@ void ConvertIndexV1ToV2(LPSTR InName)
     _fmemset (&Index,0,STOREDINDEXLENGTH);
     _fstrcpy (Name,InName);        
     ExpandText(Name);
-    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_READ);
+    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCTGM) &OFStruct,OF_READ);
     _fstrcpy (NewName,Name);
     _fstrcat (NewName,".new");
     FidIndexNew = GSSiOpenFile(NewName,&OFStruct,OF_CREATE);
@@ -4424,7 +4424,7 @@ BOOL CreateQuantitiesFile (LPSTR InName,BOOL LoadFromHLT,LPSTR ThemeVPName)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars,i;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	PrimeIndex[MAX_PATH], Name[MAX_PATH], SymName[66], ThemeID[80];
     LPSTR	lpDot, lpEnd;

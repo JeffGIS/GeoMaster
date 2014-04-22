@@ -949,7 +949,7 @@ void DisplayTIGERName (long refno)
     HANDLE      hBTTiger1Out;
     HFILE   FidTiger1Out;
     long    Offset;  
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     TIGER1_PEOPLENET    Tiger1PN;
     char    Name[34];  
     HMENU   NameMenu;
@@ -1037,7 +1037,7 @@ void CreateIntersectionFile (BOOL GeoMaster,HWND hWndStatus)
 	hIntersect = BT_OPEN (File, ltime, BT_WRITE, 0);  
 	if (GeoMaster) 
 	{   
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		
 		hSegData = BT_OPEN ("[%DL][%STATE]\\tiger1.btr", 0, BT_READ, 0); 
 		Tiger1FID = GSSiOpenFile("[%DL][%STATE]\\tiger1.dat",&OFStruct,OF_READ);

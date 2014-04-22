@@ -367,7 +367,7 @@ BOOL UpdateOrthoIndexWrite (LPSTR Name, double AdjustX, double AdjustY)
 {GSSiEnterProg (943);
 #endif
 {
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     HFILE   FidIndex=0;
     long    EndOffset, NextHeaderOffset, WriteLoc, SaveLoc;
     HANDLE  Handle;
@@ -376,7 +376,7 @@ BOOL UpdateOrthoIndexWrite (LPSTR Name, double AdjustX, double AdjustY)
     MNMXCORD    TestBounds;
 	MNMXCORD	FileBounds, NewBounds;
     
-    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_READWRITE);
+    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCTGM) &OFStruct,OF_READWRITE);
     if (FidIndex == HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -521,7 +521,7 @@ GSSiExitProg (944);
 }
 /*	if (First)
 	{   
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		HFILE		Fid;  
 		char		Name[144], str[52], str2[34];
 		BTVARDESC	BTVar[2];
@@ -2061,7 +2061,7 @@ BOOL FixGMErrors (LPSTR File)
 {GSSiEnterProg (980);
 #endif
 {
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	HFILE	Fid, FidMap2;
 	char	str[260];
 	LPSTR	lpE, lpC;

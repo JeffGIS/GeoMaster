@@ -35,10 +35,10 @@ static double	ARCTOL=5e-1;
 static HFILE	DXFDXF;
 static HWND	hWnd;
 static BOOL	HaveExtents=FALSE;
-static OFSTRUCT	OBF;
-static OFSTRUCT	OUTF;
-static LPOFSTRUCT	lpOBF=&OBF;
-static LPOFSTRUCT	lpOUTF=&OUTF;
+static OFSTRUCTGM	OBF;
+static OFSTRUCTGM	OUTF;
+static LPOFSTRUCTGM	lpOBF = &OBF;
+static LPOFSTRUCTGM	lpOUTF = &OUTF;
 static short	Hid=0;
 static double	SCALE=1e0;
 static double	TSZFAC=1e0;
@@ -3282,7 +3282,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
     char		Ext[6]=".TL2";
    	HFILE	FidDSC, FidFileList;  
    	BOOL	MoreFiles;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
     long	TotLenFL, CurLocFL;
     RECT    rect;
                     DPOINT PT1,PT2,PT3,PT4,PT11,PT12,PT13,PT14;
@@ -3364,7 +3364,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
            	{
            		 short Version;     
             	 HFILE	FidSave;
-            	 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
            		 
            		 
              	 if (!*AutoExportName)

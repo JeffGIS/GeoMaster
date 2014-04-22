@@ -2604,7 +2604,7 @@ BOOL CacheDisplayTheme (short from)
 	LPVIEWPORT	SaveVP=CurView;
 	HANDLE	hMem = GSSiGlobAlloc (1333,GMEM_MOVEABLE,1024);
 	LPSTR	CacheFile=GlobalLock (hMem), SaveScreenFile=CacheFile+256; 
-	LPOFSTRUCT	pOFStruct=(LPOFSTRUCT) (SaveScreenFile + 256); 
+	LPOFSTRUCTGM	pOFStruct=(LPOFSTRUCTGM) (SaveScreenFile + 256); 
 	LPSAVESCREEN	pSaveScreen; 
 	HANDLE	hBitmap; 
 	BOOL	rtn=FALSE;  
@@ -3185,7 +3185,7 @@ BOOL DeleteThemeHighlightFile (void)
 #endif
 {   
 	LPSTR pName; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	if (!CurTheme->hHighlightFileName)
 {

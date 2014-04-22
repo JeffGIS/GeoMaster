@@ -48,7 +48,7 @@ static	short	lNewTAG;
 static	PICKDATA	SavedPickList[MAXPICKITEMS+3];  
 static	short	nSavePickList=0;
 static	char	SysMess[256];
-static	OFSTRUCT	OFStruct; 
+static	OFSTRUCTGM	OFStruct;
 static	LPSTR	fgstat, origstr;
 static	char	text[4096];
 static	int		nwin;
@@ -112,7 +112,7 @@ short OkToContinue2 (BOOL ForceCheck)
 	static	DWORD	last_check=0;     
 	long	last_msg_time, msg_time;
 	int	ii, l;    
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	char	str[128], macro[256];
 	BOOL	SaveKFO	= KeepFilesOpen;
 	
@@ -1961,7 +1961,7 @@ void CloseObject (LPVOID pObject)
 #if ENABLETRACE
 {GSSiEnterProg (901);
 #endif
-{   OFSTRUCT    OFStruct;
+{   OFSTRUCTGM    OFStruct;
     HANDLE  handle;
     
     CurTheme = pObject;
@@ -4544,7 +4544,7 @@ BOOL ProcessPickedItems (HWND hWnd,int item, int irec)
     int		rec; 
     long	CurLoc;
     short	Layer;   
-    OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
     LPVIEWPORT	SaveVP=CurView;
     
     for (i=0;i<nSavePickList;i++)

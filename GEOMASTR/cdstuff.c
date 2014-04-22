@@ -70,7 +70,7 @@ RegisterCD (LPSTR FromPath,LPSTR ToPath,LPSTR SearchString)
 	char	Name[MAX_PATH], str2[150], file[MAX_PATH], lastpath[MAX_PATH], VolLabel[34], Prefix[128];
 	HFILE	OutFileFID, Fid;  
 	long	TotFiles=0;   
-	OFSTRUCT	OFStruct;    
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpIdx, pRes, pBS;
 	short	l=_fstrlen(FromPath), dnum;
 
@@ -96,7 +96,7 @@ Retry:
 	if (OutFileFID == HFILE_ERROR)
 		return FALSE;
 	GSSiGetTempFileName(0,"gm",0,Name);
-	Fid =	GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	Fid =	GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	SearchFilesInDir (FromPath, "", Fid,&TotFiles,SearchString,1,TRUE,FALSE); 
 	GSSillseek (Fid,0,0);
 	*lastpath = 0; 
@@ -359,7 +359,7 @@ BOOL InstallCD (LPSTR FromPath,LPSTR ToPath,LPSTR Exclude,HWND hWndDlg,UINT MsgC
 	char	TempName[144], str2[150], file[144], str[144], VolLabel[34], Prefix[128];
 	HFILE	OutFileFID, Fid;  
 	long	TotFiles=0, TotLen=0, CurLoc=0;   
-	OFSTRUCT	OFStruct;    
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpIdx, pRes, pBS;
 	short	l=_fstrlen(FromPath), dnum; 
 	char	SearchString[32]="*.*";
@@ -369,7 +369,7 @@ BOOL InstallCD (LPSTR FromPath,LPSTR ToPath,LPSTR Exclude,HWND hWndDlg,UINT MsgC
 	hcurSave = GSSiSetCursor(LoadCursor(NULL, IDC_WAIT)); 
 	SetDlgItemText (hWndDlg,MsgCntl,"Preparing to copy files");
 	GSSiGetTempFileName(0,"gm",0,TempName);
-	Fid = GSSiOpenFile (TempName,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	Fid = GSSiOpenFile (TempName,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	SearchFilesInDir (FromPath, "", Fid,&TotFiles,SearchString,1,TRUE,FALSE); 
 	GSSillseek (Fid,0,0);
 	while (fgetstring (str2,144,Fid))
@@ -424,7 +424,7 @@ BOOL InstallCD (LPSTR FromPath,LPSTR ToPath,LPSTR Exclude,HWND hWndDlg,UINT MsgC
 short SaveCurrentCD (HWND hWndDlg)
 {   
 	HFILE		FidTemp, FidOrder;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char		str[260], str2[270];
 	int			Choice, CDNum, i;
 	
@@ -458,7 +458,7 @@ long GetCurrentCD (HWND hWndDlg,short NumCDs,LPLONG pOrderFreeSpace)
 {   
 	short	CDNum;
 	HFILE		FidTemp, FidOrder;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char		str[260], str2[270];
 	short		Choice, i; 
 	LPSTR		pBeg, pLastTab;

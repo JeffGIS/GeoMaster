@@ -1985,7 +1985,7 @@ void DestroyDummyVehicles (void)
 
 BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid, Fid2;
 	LPDUMMYVEHICLE pDummyVehicle;    
 	LPMOVELIST	pMoveList;
@@ -2106,7 +2106,7 @@ BOOL ComputeDummyVehicleLocations (time_t AVLTime)
 	double	Dist;
 	UINT	i,j; 
 	char	str[130];
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	if (!hDummyVehicles)
 		return FALSE;    
@@ -2650,7 +2650,7 @@ BOOL FlashVehicle (LPSTR VehID)
 BOOL SetVehicleLoc (LPSTR VehID,DPOINT DPoint,int Speed,int Heading,int Status,BOOL DisplayVehicles,BOOL ValidCoord,int VehTime,BOOL FromHist)
 {   
 	HFILE		Fid;
-	OFSTRUCT	OFStruct;    
+	OFSTRUCTGM	OFStruct;
 	char		str[260], file[128],txt[64]; 
 	DPOINT		CLPoint,LastPt;
 	double		AZ, Length, seconds=0;  

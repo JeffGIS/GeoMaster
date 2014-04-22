@@ -72,7 +72,7 @@ BOOL    OpenAddressFilesPID (HWND hWnd)
     short       nf, ifile;
     HFILE    Fid;  
     LPSTR   AddDisplayLine;  
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 
     PIDAddIndex = 0; 
     StreetNumIndex = 0;
@@ -1071,7 +1071,7 @@ BOOL FAR PASCAL ADDEDIT_HELPERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				 HANDLE	hMatch=0;
 				 long	StreetNum, ii=0, iadd;
 				 short	match;
-				 OFSTRUCT	OFStruct;
+				 OFSTRUCTGM	OFStruct;
 				 HFILE	FidOut; 
 				 long	TotRecs, NumRecs=0, Inc=0, LastRange, CurCount, Range, LastCount, BegRange, RangeWidth=100, NearAdd;
 				 char	LastName[66], LastCity[34], Near[16];
@@ -1434,7 +1434,7 @@ ShowList1:
 BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
 
-   	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	static	HFILE	Fid;
 	static	HANDLE	hBT, hName;
 	static	struct	{short	Type;
@@ -1840,7 +1840,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
     UINT        FieldLists[3]={IDC_KEY_FIELD,IDC_XFIELD,IDC_YFIELD},
                 FieldListTypes[3]={TRUE,TRUE,TRUE}; 
     HFILE		FidSave;
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     char	Ext[6]=".NL2";
     char	Street1[256], Street2[256], BadNames[MAX_PATH], City[34];
 	char	Name[128]; 
@@ -2288,7 +2288,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
     UINT	    FieldLists[3]={IDC_KEY_FIELD,IDC_XFIELD,IDC_YFIELD},
                 FieldListTypes[3]={TRUE,TRUE,TRUE}; 
     HFILE		FidSave;
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     char	Ext[6]=".NL4";
     char	OnStreet[256], FromStreet[256],ToStreet[256], BadNames[MAX_PATH], City[34]; 
     char	OnStreetOrig[256], FromStreetOrig[256],ToStreetOrig[256];//temp debug
@@ -2857,7 +2857,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 //    static      short IMDataFileType;
 //    static      char    IMDataFile[128]; 
     HFILE		FidSave;
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     char	Ext[6]=".NL3";
     BOOL	Opened;
     
@@ -5943,7 +5943,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
     UINT        FieldLists[3]={IDC_KEY_FIELD,IDC_XFIELD,IDC_YFIELD},
                 FieldListTypes[3]={TRUE,TRUE,TRUE}; 
     HFILE		FidSave;
-    LPOFSTRUCT	pOFStruct;
+	LPOFSTRUCTGM	pOFStruct;
     char	Ext[6]=".NL1";
     LPSTR	Street, HouseNum, City, ZIP, BadNames, OrigStreet;
     static	BOOL	RecalledName;
@@ -5960,7 +5960,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  if (DATAFILEMsgProc(hWndDlg,Message,wParam,lParam, 0,
                      SV_SET_FILE, SV_DATABASE_LIST, SV_TABLE_NAMES,SV_TABLE_HEADING, FieldLists,0,
                      IMDataFile, &IMDataFileType, &hSQL,FieldListTypes,TRUE))  goto RtnTrue;  
- hStr = GSSiGlobAlloc ( 120,GHND,256+256+256+256*4+256+256+256+256+sizeof(OFSTRUCT));
+ hStr = GSSiGlobAlloc(120, GHND, 256 + 256 + 256 + 256 * 4 + 256 + 256 + 256 + 256 + sizeof(OFSTRUCTGM));
  str = GlobalLock (hStr);
  Street = str + 256;
  HouseNum = Street + 256;
@@ -5974,7 +5974,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  OnStreet = OrigStreet + 256;
  *Street1 = 0;
  *Street2 = 0;  
- pOFStruct = (LPOFSTRUCT)(Street2 + 256);
+ pOFStruct = (LPOFSTRUCTGM)(Street2 + 256);
  switch(Message)
    {
     case WM_INITDIALOG: 

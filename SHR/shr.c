@@ -33,7 +33,7 @@ static	short	CurTraceLev=0;
 static	HANDLE	hCacheAlreadyChecked=0;
 static	BOOL    TraceTrace = FALSE, NeedStep=FALSE, StepOver=FALSE;;  
 static  BYTE    Mask[8] = {128, 64, 32, 16, 8, 4, 2, 1}; 
-static	OFSTRUCT	OpenFileStruct[MAXFILEHANDLES];
+static	OFSTRUCTGM	OpenFileStruct[MAXFILEHANDLES];
 static	UINT		OpenFileMode[MAXFILEHANDLES];
 static	HANDLE		OpenFileHandle[MAXFILEHANDLES];
 static	long		OpenFilePosition[MAXFILEHANDLES];
@@ -102,6 +102,26 @@ long Time64toTime32 (time_t time64)
 	return rtn;
 }
 
+HFILE OpenFileGM(
+	_In_    LPCSTR lpFileName,
+	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
+	_In_    UINT uStyle
+	)
+{
+	HFILE fid;
+	char fullPath[MAX_PATH];
+
+	int ln = GetFullPathName(lpFileName, MAX_PATH, fullPath, 0);
+
+	if (ln < OFS_MAXPATHNAME)
+		fid = OpenFile(lpFileName, (LPOFSTRUCT)lpReOpenBuff, uStyle);
+	else
+	{
+		fid = OpenFile(lpFileName, (LPOFSTRUCT)lpReOpenBuff, uStyle);
+	}
+
+	return fid;
+}
 
 BOOL FileOpenForWrite (HFILE Fid)
 {
@@ -200,7 +220,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 	char JournalFileName[MAX_PATH];
 	LPSTR	pDot;
 	HFILE	FidJnl;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	JOURNALHEADER	JournalHeader;
 	LPLONG	pNumIndexBlocks;
 	BOOL	st;
@@ -213,7 +233,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 	if (Mode == OF_CREATE)
 		goto Create;
 /*	{
-		FidJnl = OpenFile (JournalFileName,&OFStruct,OF_CREATE);
+		FidJnl = OpenFileGM (JournalFileName,&OFStruct,OF_CREATE);
 		OpenFileFid[Fid] = FidJnl;
 		OpenFilePosition[Fid] = 0;
 		OpenFileLength[Fid] = OriginalFileLength[Fid] = 0;
@@ -223,7 +243,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 		strcpy (OpenFileName[Fid],Name);
 		return 1;
 	}*/
-	FidJnl = OpenFile (JournalFileName,&OFStruct,Mode);
+	FidJnl = OpenFileGM (JournalFileName,&OFStruct,Mode);
 	if (FidJnl != HFILE_ERROR)
 	{
 		_lread (FidJnl,&JournalHeader,sizeof(JOURNALHEADER));
@@ -257,7 +277,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 					iFid = _open (JournalFileName,_O_RDWR);
 					ii=_chsize(iFid,JournalHeader.BlockIndexLoc);
 					_close (iFid);
-					FidJnl = OpenFile (JournalFileName,&OFStruct,Mode);
+					FidJnl = OpenFileGM (JournalFileName,&OFStruct,Mode);
 				}
 				GlobalUnlock (JournalFileIndex[Fid]);
 			}
@@ -290,7 +310,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 		goto Exit;
 	}
 Create:
-	FidJnl = OpenFile (JournalFileName,&OFStruct,OF_CREATE);
+	FidJnl = OpenFileGM (JournalFileName,&OFStruct,OF_CREATE);
 	memset (&JournalHeader,0,sizeof(JOURNALHEADER));
 	JournalHeader.CheckPointID = CurrentCheckPointID;
 	JournalHeader.BlockIndexLoc = -1;
@@ -408,7 +428,7 @@ BOOL ApplyJournal (LPSTR FileName)
 	char JournalFileName[MAX_PATH];
 	LPSTR	pDot;
 	HFILE	FidJnl;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	JOURNALHEADER	JournalHeader;
 	LPLONG	pNumIndexBlocks;
 	BOOL	st;
@@ -418,7 +438,7 @@ BOOL ApplyJournal (LPSTR FileName)
 	if ((pDot = strrchr (JournalFileName,'.')))
 		*pDot = '_';
 	strcat (JournalFileName,".jnl");
-	FidJnl = OpenFile (JournalFileName,&OFStruct,OF_READ);
+	FidJnl = OpenFileGM (JournalFileName,&OFStruct,OF_READ);
 	if (FidJnl != HFILE_ERROR)
 	{
 		_lread (FidJnl,&JournalHeader,sizeof(JOURNALHEADER));
@@ -432,7 +452,7 @@ BOOL ApplyJournal (LPSTR FileName)
 			}
 			else if (JournalHeader.OrigFileLength < 0) //file created
 			{
-				HFILE	FidFile = OpenFile(FileName,&OFStruct,OF_CREATE);
+				HFILE	FidFile = OpenFileGM(FileName,&OFStruct,OF_CREATE);
 				HANDLE	hJournalRecord = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
 				LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 				int		nread;
@@ -449,7 +469,7 @@ BOOL ApplyJournal (LPSTR FileName)
 				LPJOURNALINDEXRECORD pIndexRecord;
 				HANDLE hIndex = GSSiGlobAlloc (1599,GHND,sizeof(int)+JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
 				int	i;
-				HFILE	FidFile = OpenFile(FileName,&OFStruct,OF_READWRITE);
+				HFILE	FidFile = OpenFileGM(FileName,&OFStruct,OF_READWRITE);
 
 				char	JLogFile[MAX_PATH];
 				HFILE	JLog=HFILE_ERROR;
@@ -461,9 +481,9 @@ BOOL ApplyJournal (LPSTR FileName)
 				ii=_lread (FidJnl,pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
 				if (GetGlobalCVal ("[%JLOG]",JLogFile,0))
 				{
-					JLog = OpenFile (JLogFile,&OFStruct,OF_READWRITE);
+					JLog = OpenFileGM (JLogFile,&OFStruct,OF_READWRITE);
 					if (JLog == HFILE_ERROR)
-							JLog = OpenFile (JLogFile,&OFStruct,OF_CREATE);
+							JLog = OpenFileGM (JLogFile,&OFStruct,OF_CREATE);
 					_llseek (JLog,0,2);
 					ln = strlen (JournalFileName);
 					_lwrite (JLog,(LPSTR)&ln,2);
@@ -521,7 +541,7 @@ BOOL DeleteFileInJournal (LPSTR FileName)
 	char JournalFileName[MAX_PATH];
 	LPSTR	pDot;
 	HFILE	FidJnl;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	JOURNALHEADER	JournalHeader;
 	LPLONG	pNumIndexBlocks;
 	BOOL	st;
@@ -530,7 +550,7 @@ BOOL DeleteFileInJournal (LPSTR FileName)
 	if ((pDot = strrchr (JournalFileName,'.')))
 		*pDot = '_';
 	strcat (JournalFileName,".jnl");
-	FidJnl = OpenFile (JournalFileName,&OFStruct,OF_CREATE);
+	FidJnl = OpenFileGM (JournalFileName,&OFStruct,OF_CREATE);
 	if (FidJnl != HFILE_ERROR)
 	{
 		memset (&JournalHeader,0,sizeof(JOURNALHEADER));
@@ -1269,7 +1289,7 @@ int	FileAlreadyNotFound (LPSTR Name,int opt,int ierrno)
 	return rc;
 }
 
-HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCT pOFStruct,UINT opt,UINT ShareOpt)
+HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT opt,UINT ShareOpt)
 {
 	HFILE	Fid;
 	UINT	opt2=_O_RDONLY|_O_BINARY, pmode=0,i,ii;
@@ -1300,7 +1320,7 @@ HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCT pOFStruct,UINT opt,UINT ShareOpt)
 
 				Fid = _open (Name,opt2,0);
 				NumActualOpen++;
-				_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAME);
+				_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAMEGM);
 				if (Fid == HFILE_ERROR)
 				{
 					if (errno == EACCES)
@@ -1388,7 +1408,7 @@ HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCT pOFStruct,UINT opt,UINT ShareOpt)
 	{
 		if (AllowJournal && CurrentCheckPointID)
 		{
-			_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAME);
+			_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAMEGM);
 			pOFStruct->nErrCode = 0;
 			Fid = LogOpenFilesOpen (opt,(HFILE)-2,pOFStruct);
 			OpenJournal (Name,Fid,OF_CREATE);
@@ -1439,7 +1459,7 @@ HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCT pOFStruct,UINT opt,UINT ShareOpt)
 		}
 	}
 	NumActualOpen++;
-	_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAME);
+	_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAMEGM);
 	if (Fid == HFILE_ERROR)
 	{
 		if (errno == EACCES)
@@ -1548,7 +1568,7 @@ void CloseAllRequestedFiles (BOOL FirstOnly)
 																							#endif
 }
 
-HFILE LogOpenFilesOpen (UINT Mode,HFILE Fid,LPOFSTRUCT pOFStruct)
+HFILE LogOpenFilesOpen (UINT Mode,HFILE Fid,LPOFSTRUCTGM pOFStruct)
 																							#if ENABLETRACE
 																							{GSSiEnterProg (172);
 																							#endif
@@ -1730,7 +1750,7 @@ void CheckOpenFiles (void)
 																							#endif
 } 
 
-HFILE FileAlreadyOpen (LPSTR InName,UINT Mode,LPOFSTRUCT pOFStruct)
+HFILE FileAlreadyOpen (LPSTR InName,UINT Mode,LPOFSTRUCTGM pOFStruct)
 																							#if ENABLETRACE
 																							{GSSiEnterProg (174);
 																							#endif
@@ -1904,7 +1924,7 @@ BOOL BackupFiles (LPSTR FileList,LPSTR BUDir)
 #endif
 {
 	HFILE	Fid1;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct; 
 	char	FromFile[260], ToFile[260];    
 	BOOL	rtn=FALSE;
 	
@@ -1980,7 +2000,7 @@ short loadtabs (LPINT Tabs)
 {GSSiEnterProg (181);
 #endif
 {
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	HFILE	Fid;   
 	char	txt[256]; 
 	short	n; 
@@ -2018,7 +2038,7 @@ BOOL makedirectories2 (LPSTR Name,BOOL IsDir,BOOL Verify)
 {   
 	char	FullName[MAX_PATH], Dir[MAX_PATH], FName[MAX_PATH], Ext[64], NewName[MAX_PATH]="", drive[32]; 
 	LPSTR	StartDir, EndDir,pFull;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	BOOL	Replace; 
 	DWORD	Err;
 	
@@ -2233,7 +2253,7 @@ int AppendFile (LPSTR InFile,LPSTR Line)
 {GSSiEnterProg (188);
 #endif
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	int			rtn=0;
 	BOOL		SaveAllowJournal = AllowJournal;
@@ -2274,7 +2294,7 @@ int AppendFile2 (LPSTR InFile,LPSTR Line)
 {GSSiEnterProg (188);
 #endif
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	int			rtn=0;
 	BOOL		SaveAllowJournal = AllowJournal;
@@ -2291,9 +2311,9 @@ int AppendFile2 (LPSTR InFile,LPSTR Line)
 	ExpandText (File);
 	if (!*File)
 		goto Exit;
-	Fid = OpenFile (File,&OFStruct,OF_READWRITE);
+	Fid = OpenFileGM (File,&OFStruct,OF_READWRITE);
 	if (Fid == HFILE_ERROR)
-		Fid = OpenFile (File,&OFStruct,OF_CREATE);
+		Fid = OpenFileGM (File,&OFStruct,OF_CREATE);
 	if (Fid == HFILE_ERROR) 
 		goto Exit;
 	rtn = _llseek (Fid,0,2)+1;
@@ -2837,7 +2857,7 @@ BOOL DisplayTextFileInRect (HDC hDC,LPRECT Rect,LPSTR Name)
 {
     HFILE	Fid;
     long    CurLine=0;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     HFILE   FidOut; 
     char    str[260]; 
     short	x,y, l; 
@@ -2886,7 +2906,7 @@ BOOL RemoveLine (LPSTR Name,LPSTR line)
 {
     FILE    *Fid;
     long    CurLine=0;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     HFILE   FidOut; 
     char    str[258];
     
@@ -5034,7 +5054,7 @@ GSSiExitProg (267);
 
 int GSSiRemove (LPSTR Name)
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	
 //	return GSSiRemove2 (Name);
@@ -5398,7 +5418,7 @@ short FillCBList (HWND hWndDlg,UINT Control,LPSTR file,short InitVal, LPSTR RtnV
     short       Default=-1, l, i, Item;
     int      	TabStops[2]={1000,1100}; 
     long		Val;
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     
     if (!hWndDlg) *RtnVal = '\0';
     if (hWndDlg)
@@ -5468,7 +5488,7 @@ long GetListNum (LPSTR file, LPSTR Val)
     HFILE       Fid; 
     char        str[132];
     LPSTR       lpBar; 
-    OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
     long		rtn=-1;
     
     Fid=GSSiOpenFile (file,&OFStruct,OF_READ);  
@@ -5515,7 +5535,7 @@ BOOL GetListValue (LPSTR file, long ID, LPSTR Val)
     HFILE       Fid; 
     char        str[132];
     LPSTR       lpBar; 
-    OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
     BOOL		rtn=FALSE;
     
     *Val = 0;
@@ -6008,7 +6028,7 @@ BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
 	HANDLE	hMem = GSSiGlobAlloc (  86,GMEM_MOVEABLE,4096);
     LPSTR    str=GlobalLock (hMem);
     LPSTR	 CacheFile=str+256;
-    LPOFSTRUCT	pOFStruct = (LPOFSTRUCT)(CacheFile + 256);
+    LPOFSTRUCTGM	pOFStruct = (LPOFSTRUCTGM)(CacheFile + 256);
     LPSTR    lpExt,  pBuffer;
     HFILE    FidIndex=HFILE_ERROR, FidFile;
     HANDLE  hBuffer=0;
@@ -6240,7 +6260,7 @@ BOOL RemoveCacheFile (LPSTR File)
 	long	MaxCache, FreeSpace, MaxFileNum, CurrentLoc, len, FreeSpaceLoc;
 	short	NumFiles, i, st;
     LPSTR   pBuffer, lpExt;
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     HFILE    Fid;
     CACHEBUF CacheBuf;
     char	CacheFile[132];
@@ -6347,7 +6367,7 @@ BOOL ExistFile(LPSTR Name)
 #endif
 {   
     struct  _stat    buf;
-    OFSTRUCT OFStruct; 
+    OFSTRUCTGM OFStruct; 
     short   i;    
 	BOOL	rtn=FALSE;
     
@@ -6430,7 +6450,7 @@ short FileType_old(LPSTR Name)
 {GSSiEnterProg (289);
 #endif
 {   
-    OFSTRUCT OFStruct;  
+    OFSTRUCTGM OFStruct;  
     
     if (GSSiOpenFile(Name,&OFStruct,OF_EXIST)==HFILE_ERROR) 
     {
@@ -6665,7 +6685,7 @@ GSSiExitProg (294);
     LPSTR	Spaces = errmes + 128; 
     LPSTR   TraceFile = Spaces + 128;
     LPSTR	pLine = TraceFile + 128;
-    LPOFSTRUCT    pOFStruct = (LPOFSTRUCT) (pLine + 4096); 
+    LPOFSTRUCTGM    pOFStruct = (LPOFSTRUCTGM) (pLine + 4096); 
     
     InTrace = TRUE;
     switch (TraceOn)
@@ -6681,7 +6701,7 @@ GSSiExitProg (294);
     {   
     	strcpy (txt,"c:\\trace.txt");
         _fullpath(TraceFile,txt,128);
-        TraceFid = OpenFile (TraceFile,pOFStruct,OF_READWRITE); 
+        TraceFid = OpenFileGM (TraceFile,pOFStruct,OF_READWRITE); 
         if (TraceTrace)
         {
             sprintf (txt,"Read trace file %i %i",(short) TraceFid,(short) pOFStruct->nErrCode);
@@ -6691,7 +6711,7 @@ GSSiExitProg (294);
     }
     if (TraceFid == HFILE_ERROR)
     {
-        TraceFid = OpenFile (TraceFile,pOFStruct,OF_CREATE);  
+        TraceFid = OpenFileGM (TraceFile,pOFStruct,OF_CREATE);  
         if (TraceTrace)
         {
             sprintf (txt,"Read trace file %i %i",(short) TraceFid,(short) pOFStruct->nErrCode);
@@ -7602,7 +7622,7 @@ short CacheAlreadyChecked (LPSTR Name,int lCacheDir,UINT Mode)
 	if (!hCacheAlreadyChecked)
 	{
 		HFILE	Fid;
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		char	BGCacheList[MAX_PATH];
 
 /*		strcpy (BGCacheList,"[%DL]BACKGROUNDCACHEFILELIST.TXT");
@@ -7683,7 +7703,7 @@ Exit:
 	return rtn;
 } 
 
-BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCT pOFStruct,UINT Mode)
+BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode)
 {   
 	LPSTR	ErrMess, str;
 	HANDLE	hStr;
@@ -7809,7 +7829,7 @@ BOOL ConvertFileNameToCacheFileName (LPSTR FileName)
 	}
 	else if (AllowCache)
 	{
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
 		HFILE Fid = GSSiOpenFile (FileName,&OFStruct,OF_READ);
 		
@@ -7890,7 +7910,7 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 	if (First && HaveDL)
 	{
 		int TotLen=0;
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		char	AutoMoveList[MAX_PATH];
 		BOOL	NeedCreateDir=FALSE;
 
@@ -8354,7 +8374,7 @@ void ConvertToTestName (LPSTR Name,UINT Mode)
 	}
 	return;
 }
-HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCT pOFStruct,UINT Mode)
+HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 #if ENABLETRACE
 {GSSiEnterProg (307);
 #endif
@@ -8370,7 +8390,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCT pOFStruct,UINT Mode)
     LPSTR	SaveWT=CacheFromName+512;    
     LPSTR	LongName=SaveWT+512;
     LPSTR	NoCacheVal=LongName+512; 
-	LPOFSTRUCT	pOFStruct2=(LPOFSTRUCT)(NoCacheVal+512);
+	LPOFSTRUCTGM	pOFStruct2=(LPOFSTRUCTGM)(NoCacheVal+512);
     
     unsigned    frequency=1000, duration=100; 
     short       NumWait, NumBusyWait,l,ii; 
@@ -8396,7 +8416,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCT pOFStruct,UINT Mode)
 	}
     
     if (!pOFStruct)
-    	pOFStruct = (LPOFSTRUCT) (pOFStruct2 + 1);
+    	pOFStruct = (LPOFSTRUCTGM) (pOFStruct2 + 1);
     if (DoTime)
 	    starttime=GetTickCount(); 
 	if (Mode == OF_CREATE_NODELETE)
@@ -8421,17 +8441,6 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCT pOFStruct,UINT Mode)
     Truncate (Name);
     if (!*Name)
     	goto Exit; 
-	{
-		char	tmp[256];
-		strcpy (tmp,Name);
-		strlwr (tmp);
-		if (_fstrstr (tmp,".tmp"))
-		{
-			ii=1;
-			if (Mode == OF_CREATE)
-				ii=1;
-		}
-	}
 	ConvertToNewLocation (Name,TRUE);
 	if (Mode == OF_CREATE && _fstrlen (Name) < 3)
 		ii=1;
@@ -8888,8 +8897,8 @@ BOOL copyfile (LPSTR ToFileIn, LPSTR FromFile,short AppendOrReplace,long BeginPo
 {   UINT nRead;
     short FidFrom, FidTo;
     DWORD maxread;
-    OFSTRUCT    fStruct;
-    LPOFSTRUCT  pStruct = &fStruct;
+    OFSTRUCTGM    fStruct;
+    LPOFSTRUCTGM  pStruct = &fStruct;
     HANDLE  hBuffer;
     LPSTR   pBuffer;
     HCURSOR hcurSave, hCursor;
@@ -9921,7 +9930,7 @@ BOOL WriteSavedScreen (LPSTR File,HANDLE hSavedScreen,LPMNMXCORD pBounds)
 {GSSiEnterProg (334);
 #endif
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	HANDLE		handle;
 	long		SaveSize,ii;
@@ -9967,7 +9976,7 @@ HANDLE	ReadSavedScreen (LPSTR File,LPLONG pUpdateTime,LPMNMXCORD pBounds)
 {GSSiEnterProg (335);
 #endif
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	HANDLE		handle;
 	long		SaveSize,ii;
@@ -10274,7 +10283,7 @@ long GSSiLength (LPSTR File)
 {GSSiEnterProg (344);
 #endif
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	long		l;
 	
@@ -12467,16 +12476,16 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 		*Mess = 0;
 	if (BackgroundTask)
 	{   
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		BOOL		SaveCP = ContinueProcessing;
 
 		ContinueProcessing = TRUE;
 
 		GetGlobalCVal ("[%BACKGROUNDLOGFILE]",File,"bkglog.txt");
 		//GetShortPathName2 (File,128);
-		Fid = OpenFile (File,&OFStruct,OF_READWRITE);
+		Fid = OpenFileGM (File,&OFStruct,OF_READWRITE);
 		if (Fid == HFILE_ERROR)
-			Fid = OpenFile (File,&OFStruct,OF_CREATE);
+			Fid = OpenFileGM (File,&OFStruct,OF_CREATE);
 		if (Fid != HFILE_ERROR) 
 		{
 			int	len;

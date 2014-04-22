@@ -1265,8 +1265,8 @@ HANDLE WriteDIBToMem (HDIB32 hDib,int Format, int flags,LPINT pSize)
 
 DWORD GMFIBMPHandleFromEXT (LPSTR PathName)
 {
-	OFSTRUCT	OFStruct;
-	HFILE Fid = OpenFile (PathName,&OFStruct,OF_READ);
+	OFSTRUCTGM	OFStruct;
+	HFILE Fid = OpenFileGM (PathName,&OFStruct,OF_READ);
 	HANDLE	handle;
 
 	if (Fid == HFILE_ERROR)

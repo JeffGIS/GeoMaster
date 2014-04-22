@@ -784,7 +784,7 @@ long far pascal UGRID_HLTDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPa
 	HMENU 	hmenu;
 	LPWINDOWPOS wp;
 	DLGPROC dlgproc;  
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpStr; 
 	char	val[256]; 
 	LPLONG	pRefList;

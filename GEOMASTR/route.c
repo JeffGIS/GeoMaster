@@ -402,7 +402,7 @@ short LoadSoilData (short idum)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	Name[128];   
     char	PrimeIndex[128];
@@ -572,7 +572,7 @@ void ClosePolyIDFile (void)
 BOOL OpenPolyIDFile (LPSTR Name)
 {   
 	HANDLE	hDB; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	if (!CreatePolyIDFile (Name))
 		return FALSE;
@@ -589,7 +589,7 @@ BOOL CreatePolyIDFile (LPSTR InName)
     LPGWDHEADER16 lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	Name[MAX_PATH];   
     char	PrimeIndex[MAX_PATH];
@@ -751,7 +751,7 @@ BOOL LineInt (LPLINEINT lInt1, LPLINEINT lInt2)
 	float	RSQMIN; 
 	BOOL	First=TRUE;
 	HFILE Fid;
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	char	str[260]; 
 
 Top:	
@@ -843,7 +843,7 @@ Top:
 short LoadTranFilePoints (LPSTR Name,LPDOUBLE XFROM, LPDOUBLE YFROM, LPDOUBLE XTO, LPDOUBLE YTO)
 {
 	HFILE Fid;
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	char	str[260]; 
 	HANDLE	handle=0, hcoord=GSSiGlobAlloc ( 584,GMEM_MOVEABLE,4096); 
 	float	RSQMIN;
@@ -1634,7 +1634,7 @@ BOOL HighlightSequentialItems (HWND hWnd, int Message, WPARAM wParam, LPARAM lPa
 				{   
 					case GF_BUILD_NETWORK:
 					{
-						OFSTRUCT	OFStruct;
+						OFSTRUCTGM	OFStruct;
 						char	NetChainFile[MAX_PATH];
 					
 						GSSiGetTempFileName (0,"gmh",0,(LPSTR)ChainedFile);

@@ -984,7 +984,7 @@ BOOL SaveRouteNextFile (HANDLE hBTNext,LPSTR Name)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128];
     LPSTR	lpDot;
@@ -1142,7 +1142,7 @@ BOOL SaveRouteAtFile (HANDLE hBTAt,LPSTR Name)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128];
     LPSTR	lpDot;
@@ -1322,7 +1322,7 @@ BOOL SaveIntersectFile (LPSTR Name)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars, NumSegs;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128];
     LPSTR	lpDot;  
@@ -1444,7 +1444,7 @@ BOOL LoadVideoIndex (LPSTR File)
 	char	TrueName[34]; 
 	int		dir,ii; 
 	double	MP;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	FidBadMP;
 	BOOL	LastMPBad;
 	double	BadBegin, BadEnd;
@@ -1723,7 +1723,7 @@ BOOL FindNetSegWOEndMarker (double Tol)
 	int	st, pos; 
 	long	Link1, Link2, Link, Path; 
 	HFILE	FidMissMark, FidEndPoint, FidDupName;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HCURSOR	hcurSave;    
 	double	MP; 
 	DPOINT	DPoint;
@@ -1927,7 +1927,7 @@ BOOL DumpIntToTXT (void)
 	long	NetIntAT=LONG_MIN, TotNum, CurLoc=0;
 	BOOL	Opened=FALSE;
 	HFILE	FidOut;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char	str[256];
 	HCURSOR	hcurSave; 
     
@@ -2327,7 +2327,7 @@ BOOL CreateIntMarkers (void)
 	long	Offset, NetIntAT=LONG_MIN, NumBadInt=1;
 	BOOL	Opened1=FALSE, Opened2=FALSE;
 	HFILE	FidIntMark,FidBadInt;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	double	PCT, MPinc;
 	char	TrueName[34], str[256];
 	short	Dir, nBad;    
@@ -2749,7 +2749,7 @@ void DumpIntersectionStreets (LPSTR Name,BOOL EliminateDuplicateStreets)
 	long	LastInt=LONG_MAX;
 	short	pos=BT_FIRST;
 	int		nStreets, i, j;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 	long	StreetNums[16]; 
 	char	StreetName[80];

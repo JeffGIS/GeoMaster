@@ -66,8 +66,8 @@ BOOL DecompInit (LPMNMXCORD Rect)
 	double	MaxDist;
 	short	ld;
 	BTVARDESC	BTVar[6];
-	char	File[144];  
-	OFSTRUCT	OFStruct;
+	char	File[MAX_PATH];  
+	OFSTRUCTGM	OFStruct;
 
 	MaxDist = max (Rect->xmx - Rect->xmn,Rect->ymx - Rect->ymn); 
 	AddNodeBias.x =  (Rect->xmx + Rect->xmn)/2;
@@ -219,7 +219,7 @@ BOOL DumpLinkData (LPSTR InName)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	Name[MAX_PATH];   
     typedef struct {
@@ -262,7 +262,7 @@ BOOL DumpLinkData (LPSTR InName)
 BOOL OpenRefConnectionFile (LPSTR InName,LPMNMXCORD pBounds)
 {   
 	HANDLE	hDB; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char	Name[MAX_PATH];   
 	LPSTR	pBS;  
 	float	RSQMIN;
@@ -320,7 +320,7 @@ BOOL CreateRefConnectionFile (LPSTR InName,LPMNMXCORD pBounds)
     LPGWDHEADER16 lpGWDHead;
     HANDLE  hVars, hDB;
     short       FidData,ibeg,NumVars;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	Name[MAX_PATH], FullName[MAX_PATH];   
     char	PrimeIndex[MAX_PATH];
@@ -1705,7 +1705,7 @@ BOOL OutputRefConnect (void)
 	DPOINT	ConnectPointBase,OpEndBase;
 	HANDLE	hLinkPoints = GSSiGlobAlloc ( 578,GMEM_MOVEABLE,(long)USHRT_MAX*16*sizeof(DPOINT));
 	HPDPOINT	pLinkPoints;    
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
     BTVARDESC  Vars;  
     BOOL	JustDebugRec=FALSE,NoIslands=FALSE, StoreIslands=GetGlobalBVal2 ("[%STOREISLANDS]",TRUE); 
     int		PromptForUnattached=GetGlobalLVal2 ("[%LOADUNATTACHEDAREAS]",0);
@@ -2353,7 +2353,7 @@ BOOL AddNodeInit (LPMNMXCORD Rect)
 	short	ld;
 	BTVARDESC	BTVar[3];
 	char	File[MAX_PATH];  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 
 	MaxDist = max (Rect->xmx - Rect->xmn,Rect->ymx - Rect->ymn); 
 	AddNodeBias.x =  (Rect->xmx + Rect->xmn)/2;
@@ -2680,7 +2680,7 @@ static	long	debuglinkref=184,debugarearef=2, debugloops=146, debuglink=185;
     	DPOINT	ConnectPointBase,OpEndBase;
     	HANDLE	hLinkPoints = GSSiGlobAlloc ( 590,GMEM_MOVEABLE,(long)USHRT_MAX*(long)16);
     	HPDPOINT	pLinkPoints;    
-    	OFSTRUCT	OFStruct;  
+		OFSTRUCTGM	OFStruct;
    	    BTVARDESC  Vars;  
    	    BOOL	JustDebugRec=FALSE,NoIslands=FALSE;
    	    char	mess[128]; 

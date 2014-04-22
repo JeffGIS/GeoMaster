@@ -1619,8 +1619,8 @@ BOOL LoadBitMap (LPSTR ImageFile, long frame, LPHDIB32 phDib, LPSHORT pDeleteBM,
 #endif
 {   UINT nRead;
     HFILE  Fid;
-    OFSTRUCT    fStruct;
-    LPOFSTRUCT  pStruct = &fStruct;
+	OFSTRUCTGM    fStruct;
+	LPOFSTRUCTGM  pStruct = &fStruct;
     BITMAPFILEHEADER bmfHead;
     LPBITMAPINFO    pDibInfo;
     LPSTR pImage;

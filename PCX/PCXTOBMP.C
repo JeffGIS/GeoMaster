@@ -34,7 +34,7 @@ HANDLE  BMPFromPCX (LPSTR ImageFile)
  	char  	*pBits;
  	LPSTR		pImage;
  	HANDLE	hFileBuf=0, hBits=0;   
- 	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
  	HANDLE	hDibInfo;
  	long	ImageOffset, rowlen; 
 

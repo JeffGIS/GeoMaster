@@ -354,7 +354,7 @@ BOOL CloseComboDatabase (HANDLE hDB)
     LPWHEREINDEX        pWhereIndex;
     LPCFIELDINDEX       pCFieldIndex;  
     LPSTR       pWhere, pCField;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     HFILE       FidCF; 
     short		i, len;  
     
@@ -478,7 +478,7 @@ BOOL FAR PASCAL COMBO_FILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     LPCFIELDINDEX       pCFieldIndex;  
     LPSTR       pWhere, pCField;
     static      HANDLE      hSQL,hComboFields, hWhere, hComputedFields, hComboFile; 
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     HFILE       FidCF;
     
  
@@ -1944,7 +1944,7 @@ void SetGWDCurrentOffset (LPGWDHEADER lpGWDHead,long Offset)
 {   HANDLE DBHandle;
     LPGWDHEADER lpGWDHead;
     LPGWFLDINFO lpFieldInfo;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     char        IndexName[256];
     short       i, j, ii;
     LPSTR       lpEnd;                     
@@ -1983,7 +1983,7 @@ HANDLE OpenGWDatabase (LPSTR InName, short Mode)
 {   HANDLE DBHandle;
     LPGWDHEADER lpGWDHead;
     LPGWFLDINFO lpFieldInfo;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     char        IndexName[256];
     short       i, j, ii;
 	HFILE		Fid;
@@ -5711,7 +5711,7 @@ BOOL CreateReport (LPSTR DBName, LPGWDHEADER lpGWDHead, int NumSelect, LPINT Sel
     LPSTR  lpBar;
     HFILE Fid; 
     LPINT   pSelected;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     char    str[256],str2[64], FieldName[300];
     char    File[256], Title[128];
     
@@ -6015,7 +6015,7 @@ BOOL GetCacheBlock (int BlockID,HFILE FidFrom,HFILE FidTo,HFILE FidNetTransfer,i
 int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromCheckPointID,HFILE FidNetTransfer)
 {
 	int		rtn=0; //0=updated OK,1=cant find cpl file,2=file too old to update,3=no need to update
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid, FidFrom, FidTo=HFILE_ERROR;
 	CHECKPNTLOGHEADER CheckPntLogHeader;
 	CHECKPNTLOGRECORD CheckPntLogRecord;
@@ -6033,7 +6033,7 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 	pDot = strrchr (CPLFile,'.');
 	strcpy (pDot,"_gmd.cpl");
 
-	Fid  = OpenFile (CPLFile,&OFStruct,OF_READ);
+	Fid  = OpenFileGM (CPLFile,&OFStruct,OF_READ);
 	if (Fid != HFILE_ERROR)
 	{
 		_lread (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER));
@@ -6051,9 +6051,9 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 				if (!ifile)
 				{
 					strcpy (FromIndexFile,FromFile);
-					FidFrom = OpenFile (FromFile,&OFStruct,OF_READ);
+					FidFrom = OpenFileGM (FromFile,&OFStruct,OF_READ);
 					if (FidNetTransfer == HFILE_ERROR)
-						FidTo = OpenFile (CacheFile,&OFStruct,OF_READWRITE);
+						FidTo = OpenFileGM (CacheFile,&OFStruct,OF_READWRITE);
 					else
 					{
 						int	lnf = strlen(CacheFile)+1;
@@ -6067,13 +6067,13 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 					strcpy (FromIndexFile,FromFile);
 					pDot = strrchr (FromIndexFile,'.');
 					sprintf (pDot,".in%i",ifile);
-					FidFrom = OpenFile (FromIndexFile,&OFStruct,OF_READ);
+					FidFrom = OpenFileGM (FromIndexFile,&OFStruct,OF_READ);
 					strcpy (ToIndexFile,CacheFile);
 					pDot = strrchr (ToIndexFile,'.');
 					sprintf (pDot,".in%i",ifile);
 					if (FidNetTransfer == HFILE_ERROR)
 					{
-						FidTo = OpenFile (ToIndexFile,&OFStruct,OF_READWRITE);
+						FidTo = OpenFileGM (ToIndexFile,&OFStruct,OF_READWRITE);
 						CacheAlreadyChecked (ToIndexFile,_fstrlen(CachePathnameTo),CHECKTIMESTAMP);  
 					}
 					else
@@ -6250,7 +6250,7 @@ BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile)
 	BOOL rtn=FALSE;
 	LPSTR	pDot = strrchr (FromFile,'.');
 	HFILE	Fid;
-	OFSTRUCT  OFStruct;
+	OFSTRUCTGM  OFStruct;
     GWDHEADER GWDHead, GWDHeadFrom;
 
 	if (pDot && !stricmp (pDot,".gmd"))
@@ -6264,7 +6264,7 @@ BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile)
 
 				if (GWDHead.CheckPointID)
 				{
-					Fid = OpenFile (FromFile,&OFStruct,OF_READ);
+					Fid = OpenFileGM (FromFile,&OFStruct,OF_READ);
 					if (Fid != HFILE_ERROR)
 					{
 						ii=_lread (Fid,(HPSTR)&GWDHeadFrom,sizeof(GWDHEADER));
@@ -6296,7 +6296,7 @@ int UpdateGMDFromCheckPointLog_net (int CheckPointIDCache,HFILE FidNetTransfer,L
 	int rtn=10;//0=file updated,10=not checkpointed gmd file,1=cant find cpl file,2=file too old to update,3=no need to update
 	LPSTR	pDot;
 	HFILE	Fid;
-	OFSTRUCT  OFStruct;
+	OFSTRUCTGM  OFStruct;
     GWDHEADER GWDHead;
 	char	fromFile[MAX_PATH];
 	char	cacheFile[MAX_PATH];
@@ -6309,7 +6309,7 @@ int UpdateGMDFromCheckPointLog_net (int CheckPointIDCache,HFILE FidNetTransfer,L
 	pDot  = strrchr (fromFile,'.');
 	if (pDot && !stricmp (pDot,".gmd"))
 	{
-		Fid = OpenFile (fromFile,&OFStruct,OF_READ);
+		Fid = OpenFileGM (fromFile,&OFStruct,OF_READ);
 		if (Fid != HFILE_ERROR)
 		{
 			_lread (Fid,(HPSTR)&GWDHead,sizeof(GWDHEADER));
@@ -6328,7 +6328,7 @@ int checkcpl (int i)
 {
 //	char	File[]="C:\\Users\\Jeff\\Downloads\\inc_comments_gmd.cpl";
 	char	File[]="C:\\Users\\Jeff\\Downloads\\mgv2\\incident_gmd.cpl";
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 	CHECKPNTLOGHEADER CheckPntLogHeader;
 	CHECKPNTLOGRECORD CheckPntLogRecord;
@@ -6339,10 +6339,10 @@ int checkcpl (int i)
 	int		ifile=0;
     GWDHEADER GWDHead;
 return 1;
-	Fid = OpenFile ("E:\\GMMGVPOL_Test\\attribut\\Incident.gmd",&OFStruct,OF_READ);
+	Fid = OpenFileGM ("E:\\GMMGVPOL_Test\\attribut\\Incident.gmd",&OFStruct,OF_READ);
 	_lread (Fid,&GWDHead,sizeof(GWDHEADER));
 	_lclose (Fid);
-	Fid  = OpenFile (File,&OFStruct,OF_READ);
+	Fid  = OpenFileGM (File,&OFStruct,OF_READ);
 	_lread (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER));
 	while (CheckPntLogHeader.LastCheckPointLoc[ifile] >= 0)
 	{
@@ -7898,7 +7898,7 @@ BOOL CreateGWDDatabase (LPSTR InName,int Version,BOOL Compress,int NumFields,int
     LPGWFLDINFO pFldInfo;
 	LPGWFLDINFO	lpGWFldInfo;
 	LPGWFLDINFO	lpFieldInfo;   
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	short	i, ifield;     
 	UINT	ibeg;
 	HFILE	FidData;  

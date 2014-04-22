@@ -155,7 +155,7 @@ BOOL PickedItemMinMax (int Item, LPMNMXCORD lpRect)
 	LPSTR		LPpltBuf;
 	ITEM		*ItemHeader;
 	HDC			hDC;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	BOOL		rtn=FALSE, SaveDisplay, SavePick, SavePT = ProcessThemes; 
 	WORD		nBytes, nRead;
 	
@@ -955,7 +955,7 @@ BOOL CreateZoomList (LPSTR Name, HWND hWnd)
 #endif
 {   
 	HFILE		Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char		str[260], TypeFile[128], Ext[8];
 	
 	ExpandText (Name);
@@ -3172,7 +3172,7 @@ HANDLE OpenMapIndex (LPSTR Name,LPMNMXCORD pIndexBounds)
 {GSSiEnterProg (61);
 #endif
 {
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     short     Version;
     HFILE   FidIndex=HFILE_ERROR, FidZM;
     long    Signature, EndOffset;
@@ -3236,7 +3236,7 @@ GSSiExitProg (61);
 	{
 		goto Start;
 	}
-	FidIndex = GSSiOpenFile(Name, (LPOFSTRUCT)&OFStruct, OF_READ);
+	FidIndex = GSSiOpenFile(Name, (LPOFSTRUCTGM)&OFStruct, OF_READ);
 	if (FidIndex == HFILE_ERROR)
 	{
 #if ENABLETRACE
@@ -3365,7 +3365,7 @@ GSSiExitProg (61);
 short GetMapIndexType (LPSTR Name)
 {   
 	short	Type = 0;
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     short     Version;
     HFILE   FidIndex;
     long    Signature, EndOffset;
@@ -3383,7 +3383,7 @@ short GetMapIndexType (LPSTR Name)
     	_fstrcpy (IndexRes,&leaf[5]);
     else
     	IndexRes[0]=0;
-    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_READ);
+	FidIndex = GSSiOpenFile(Name, (LPOFSTRUCTGM)&OFStruct, OF_READ);
     if (FidIndex == HFILE_ERROR)
         return(0);                                                
     EndOffset = GSSillseek(FidIndex,(LONG)-(6),2);
@@ -3408,7 +3408,7 @@ LPFILEINDEX GetNextIndexHeader(LPHANDLE pHandle,BOOL UseCurView)
 #endif
 {
     HFILE   FidIndex=0;
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     LPFILEINDEX lpIndex;
     FILEINDEX CurIndex,NextIndex;
     short	ii;
@@ -3489,7 +3489,7 @@ void CloseMapIndex (LPSTR Name,HANDLE hlpFI, BOOL Write,BOOL CloseParmFiles)
 {GSSiEnterProg (63);
 #endif
 { 
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     short FidIdx;
     short     Version=1;
     long    Signature=80251; 
@@ -3510,7 +3510,7 @@ GSSiExitProg (63);
     lpFI = (LPFILEINDEX)GlobalLock(hlpFI);
     if (Write)
     { 
-        FidIdx = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_CREATE);
+        FidIdx = GSSiOpenFile (Name,(LPOFSTRUCTGM) &OFStruct,OF_CREATE);
         BigWrite (FidIdx,(char *)&lpFI->Type,2,-1);
         BigWrite (FidIdx,(char *)&lpFI->NumFiles,2,-1);
         BigWrite (FidIdx,(char *)&lpFI->Length,4,-1);
@@ -4345,7 +4345,7 @@ BOOL AddStreetNumber (HPSTR buf,LPLONG len)
 	if (HaveState != CurState)
 	{   
 		char	str[8]; 
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 				
 		if (hData)
 			GSSiClose (hData); 

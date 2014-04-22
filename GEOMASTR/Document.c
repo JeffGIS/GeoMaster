@@ -10,7 +10,7 @@ BOOL CreateCompressedImage (LPSTR ToName,LPSTR FromName)
 {   
 	HANDLE	hlpFI;
     LPFILEINDEX lpFI;
-    OFSTRUCT    OFStruct;
+	OFSTRUCTGM    OFStruct;
 	short  SizeOpt;   
 	HFILE   FidIndex;
 	short     Version=1;
@@ -33,7 +33,7 @@ BOOL CreateCompressedImage (LPSTR ToName,LPSTR FromName)
 	fputstring ("1.0",FidIndex);           
 	fputstring (FromName,FidIndex);
 	GSSiClose (FidIndex);
-	FidIndex = GSSiOpenFile (Index,(LPOFSTRUCT) &OFStruct,OF_CREATE); 
+	FidIndex = GSSiOpenFile (Index,(LPOFSTRUCTGM) &OFStruct,OF_CREATE); 
 	
 	hlpFI = GSSiGlobAlloc ( 408,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 	lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
@@ -99,7 +99,7 @@ BOOL DisplayDocumentList (HWND hWnd,LPSTR Prefix,LPSTR UDI,int Item, HMENU InMen
 	HMENU	DocMenu; 
 	WORD	MenItem=32000; 
 	HFILE	FidDoc;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpBar;
 	BOOL	Found; 
 	POINT	position;
@@ -175,8 +175,8 @@ BOOL ProcessDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 { 
     int		rec, irec;
  	HFILE	FidNoteType; 
- 	char	File[128], str[132]; 
- 	OFSTRUCT	OFStruct;
+ 	char	File[MAX_PATH], str[132]; 
+	OFSTRUCTGM	OFStruct;
  	LPSTR	lpBar; 
  	BOOL	DisplayProp=TRUE;
    	UINT	hI;
@@ -242,7 +242,7 @@ BOOL ProcessDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 BOOL DisplayShellExError (UINT ierror, LPSTR DocFile)
 {   
 	char		File[128]="[%INDIR]shelexer.txt";
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid; 
 	char		str[256], Mess[256];  
 	LPSTR		lpErMess;

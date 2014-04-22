@@ -422,7 +422,7 @@ BOOL FindNextSegment2 (void)
     if (CheckQuad)
     {            
         HFILE   TraceFID;
-        OFSTRUCT    OFStruct;  
+        OFSTRUCTGM    OFStruct;  
         char    str[128];
         
         TraceFID = GSSiOpenFile ("quadchek.txt",&OFStruct,OF_READWRITE);

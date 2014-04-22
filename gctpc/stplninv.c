@@ -84,7 +84,7 @@ double azimuth,lat_orig,lon_orig,lon1=0,lat1=0,lon2=0,lat2=0;
 long mode,iflg;
 long status;
 HFILE ptr;  
-OFSTRUCT	OFStruct;
+OFSTRUCTGM	OFStruct;
 
 ind = -1;
 

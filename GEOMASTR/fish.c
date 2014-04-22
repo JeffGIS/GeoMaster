@@ -602,7 +602,7 @@ BOOL FAR PASCAL GPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lPar
 	int	Choice,ii; 
 	int	index;
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;    
+	OFSTRUCTGM	OFStruct;
 	BOOL	HaveData;
 	static	BOOL    SearchALL;
 	static	BOOL	HaveGPS, InTran; 
@@ -1502,7 +1502,7 @@ BOOL GetLonText (LPSTR Lon, double lon)
 
 BOOL AddRouteToGPSList (long RouteRef)
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;  
 	long		npnts;
 	long		i;
@@ -1561,7 +1561,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 	HANDLE	hDBWP;
     LPGWDHEADER lpGWDHead; 
 	LPWAYPOINTDATA	pWPData; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;  
 	long		Offset;
 	char		str[256], Lat[32],Long[32],Depth[128], File[144]; 
@@ -1740,7 +1740,7 @@ HANDLE	CreateFoundWPDB (void)
 	HANDLE hBT, hDB;
 	HFILE	FidData;
 	int		ibeg,NumVars;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	GWFLDINFO FldInfo;
 	char	File[128]; 
 	LPSTR	lpDot;  
@@ -1839,7 +1839,7 @@ HANDLE	CreateGPSWPDB (void)
 	HANDLE hBT, hDB;
 	HFILE	FidData;
 	int		ibeg,NumVars;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	GWFLDINFO FldInfo;
 	char	File[]={"[%DL]attribut\\ingps.gmd"}; 
 	LPSTR	lpDot;  
@@ -1917,7 +1917,7 @@ void UpdateGPSWPDB (LPSTR InFile)
 	long	Refno;
 	HFILE	Fid;
 	char	str[260],File[MAX_PATH];    
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     
     if (InFile)
     	_fstrcpy (File,InFile);
@@ -2202,7 +2202,7 @@ Exit:
 BOOL SaveGPSList (HWND hWndDlg)
 {   
 	char	File[144], str[256];
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid=HFILE_ERROR; 
 	short	Choice;
 	
@@ -2307,7 +2307,7 @@ BOOL RunSportMapStartupCommand (void)
 			{
 				char	DriveID=(char)('A'+i);	
                 HFILE	Fid;
-                OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
 	            
 	            if (!_fstrncmp (VolLabel,"SM",2))
 	            {   

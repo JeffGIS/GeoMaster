@@ -31,7 +31,7 @@ void BlowOut (LPSTR Message, LPSTR Title)
 {GSSiEnterProg (1);
 #endif
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;  
 	static		BOOL	InBlowOut=FALSE;
 
@@ -70,11 +70,11 @@ void BlowOut (LPSTR Message, LPSTR Title)
 
 void LogCode (LPSTR str)
 {
-	OFSTRUCT	OFStruct;
-	HFILE Fid=OpenFile ("c:\\temp\\codes.txt",&OFStruct,OF_READWRITE);
+	OFSTRUCTGM	OFStruct;
+	HFILE Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_READWRITE);
 
 	if (Fid == HFILE_ERROR)
-		Fid=OpenFile ("c:\\temp\\codes.txt",&OFStruct,OF_CREATE);
+		Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_CREATE);
 	_llseek (Fid,0,2);
 	_lwrite (Fid,str,strlen(str)+1);
 	_lwrite (Fid,"\r\n",2);
@@ -911,7 +911,7 @@ GSSiExitProg (12);
         if (GetCopySize)
         {   
         	HFILE	Fid;
-        	OFSTRUCT	OFStruct;
+			OFSTRUCTGM	OFStruct;
         	long	Offset, lRec;
         	
 		    if (PltType == 5)
@@ -3847,7 +3847,7 @@ BOOL OpenPlotFile (void)
 #if ENABLETRACE
 {GSSiEnterProg (47);
 #endif
-{   OFSTRUCT    OFStruct;
+{   OFSTRUCTGM    OFStruct;
 
     if (FidMap != HFILE_ERROR)
 {
@@ -3863,7 +3863,7 @@ GSSiExitProg (47);
 #endif
     	return(FALSE);
 }
-    FidMap = GSSiOpenFile (PltName,(LPOFSTRUCT)&OFStruct,OF_READ); 
+    FidMap = GSSiOpenFile (PltName,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
     if (FidMap == HFILE_ERROR)
     {
 {
@@ -5439,7 +5439,7 @@ BOOL GetMapIndexBounds (LPSTR Name,LPMNMXCORD FileBounds)
 {GSSiEnterProg (60);
 #endif
 {
-    OFSTRUCT    OFStruct; 
+	OFSTRUCTGM    OFStruct;
     short     Version;
     HFILE   FidIndex=0;
     long    Signature, EndOffset;
@@ -5449,7 +5449,7 @@ Start:
 	FileBounds->xmx = -1;
 	FileBounds->ymn = 0;
 	FileBounds->ymx = -1;
-    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_READ);
+    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCTGM) &OFStruct,OF_READ);
     if (FidIndex == HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -5514,7 +5514,7 @@ BOOL GetPickName (int Item)
     LPSTR lpSlash, lpParen;
     LPFILEINDEX lpIndex;  
     LPVIEWPORT  SaveView;  
-    OFSTRUCT    OFStruct; 
+	OFSTRUCTGM    OFStruct;
     HANDLE	hBinFileList;
     BOOL    SaveIgnoreBounds;
     short     ifile, SaveCurFile=CurView->CurFile;
@@ -6132,7 +6132,7 @@ Next:
         if (UpdateOrthoIndex && CurView->FileType[CurView->CurFile]==5)
         {   
             HFILE   FidIndex;
-            OFSTRUCT    OFStruct;
+			OFSTRUCTGM    OFStruct;
             
             FidIndex = GSSiOpenFile(lpIndex->FileName,&OFStruct,OF_READWRITE);
             GSSillseek (FidIndex,lpIndex->FirstIndexFileOffset,0);
@@ -6368,7 +6368,7 @@ DisplayFile:
 /*    if (RestartOption)
     {
         HFILE   FidRestart;
-        OFSTRUCT    OFStruct;
+        OFSTRUCTGM    OFStruct;
         
         if (RestartName[0])
         {
@@ -6769,7 +6769,7 @@ HANDLE LoadBinaryFileList (LPSTR TextFile,LPSTR BinFile)
     double  dtime;
     short     ii, NumFiles; 
     LPSHORT   lpNumFiles;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     long     len;
     LPFILELISTENTRY lpEntry; 
     MNMXCORD	TotMinMax;
@@ -6786,11 +6786,11 @@ HANDLE LoadBinaryFileList (LPSTR TextFile,LPSTR BinFile)
     if (PeopleNet)
     {   
     	statbin.st_size = USHRT_MAX;
-		FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+		FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 		if (FidBin != HFILE_ERROR)
 			goto GetBin;
 	}
-    FidTxt = GSSiOpenFile (TextFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+    FidTxt = GSSiOpenFile (TextFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
     if (FidTxt==HFILE_ERROR) 
 {
 #if ENABLETRACE
@@ -6801,7 +6801,7 @@ GSSiExitProg (70);
     if (!UseBinFileList)
     	goto MakeBin;
     ii=GSSifstat (FidTxt,&stattxt);
-    FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+    FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
     if (FidBin==HFILE_ERROR) 
         goto MakeBin;
     ii=GSSifstat (FidBin,&statbin);
@@ -6816,7 +6816,7 @@ GSSiExitProg (70);
 MakeBin:
 	Display = FALSE;
     if (UseBinFileList)
-    	FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+    	FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
     NumFiles = 0;    
     hBinFileList = GSSiGlobAlloc (  53,GMEM_MOVEABLE,16*(long)USHRT_MAX);
     lpNumFiles = (LPSHORT)GlobalLock (hBinFileList);
@@ -6910,7 +6910,7 @@ GSSiExitProg (70);
     BigWrite (FidBin,(HPSTR)lpNumFiles,len,-1); 
     GSSiClose (FidBin);
     GSSiGlobUlFree (&hBinFileList);
-    FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+    FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
     ii=GSSifstat (FidBin,&statbin);
     
 GetBin:
@@ -6918,7 +6918,7 @@ GetBin:
 	if (First2Bytes != Marker)
 	{
 	    GSSiClose (FidBin); 
-	    FidTxt = GSSiOpenFile (TextFile,(LPOFSTRUCT)&OFStruct,OF_READ);
+	    FidTxt = GSSiOpenFile (TextFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 		goto MakeBin;
 	}
     hBinFileList = GSSiGlobAlloc (  54,GMEM_MOVEABLE,(int)statbin.st_size);

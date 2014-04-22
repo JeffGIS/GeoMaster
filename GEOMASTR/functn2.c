@@ -132,7 +132,7 @@ int	GetFunctionValue3 (int FunID,LPSTR Args, LPSTR OutLoc)
 	short	i,n, pos, nrem,st, nRc;  
 	double	AZ, Dist,Dist2,Elevation, RVal, Offset;
 	HFILE	Fid;
-	LPOFSTRUCT	pOFStruct;
+	LPOFSTRUCTGM	pOFStruct;
 	HPDPOINT	pPoint;
 	HANDLE	hDibInfo;
 	long	ImageOffset;
@@ -354,7 +354,7 @@ GSSiExitProg (1350);
 			LPSTR	str;  
 			double	dist; 
 			short	ipt;
-			LPOFSTRUCT	pOFStruct;  
+			LPOFSTRUCTGM	pOFStruct;  
 			HANDLE	hTemp;
 			static	short	WantPt=0;
 			
@@ -362,7 +362,7 @@ GSSiExitProg (1350);
 			hMem = GSSiGlobAlloc (1148,GMEM_MOVEABLE,2048*2+256);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
-			pOFStruct = (LPOFSTRUCT)(Arg2 + 2048);
+			pOFStruct = (LPOFSTRUCTGM)(Arg2 + 2048);
 			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
 			*ParLoc = '\0';
 			_fstrcpy (Arg1,Args);
@@ -434,14 +434,14 @@ GSSiExitProg (1350);
 			HANDLE	hTemp;
 			int		nRc;
 			long	RecNum, WantRec; 
-			LPOFSTRUCT	pOFStruct;
+			LPOFSTRUCTGM	pOFStruct;
 			
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
 			hMem = GSSiGlobAlloc (1150,GMEM_MOVEABLE,4*2048);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048; 
-			pOFStruct = (LPOFSTRUCT)(Arg3 + 2048);
+			pOFStruct = (LPOFSTRUCTGM)(Arg3 + 2048);
 			
 			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
 			*ParLoc = '\0';
@@ -753,7 +753,7 @@ GSSiExitProg (1350);
 		{	 
 			hMem = GSSiGlobAlloc (1157,GMEM_MOVEABLE,2*2048);
 			Arg1 = GlobalLock(hMem); 
-			pOFStruct = (LPOFSTRUCT)(Arg1 + 2048);
+			pOFStruct = (LPOFSTRUCTGM)(Arg1 + 2048);
 			_fstrcpy (Arg1,Args);
 			ExpandText (Arg1);
         	nlong = 0;
@@ -2598,14 +2598,14 @@ GSSiExitProg (1350);
 			LPSTR	HaveLine;
 			
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1189,GMEM_MOVEABLE,3*2048+256+1030+sizeof(OFSTRUCT));
+			hMem = GSSiGlobAlloc(1189, GMEM_MOVEABLE, 3 * 2048 + 256 + 1030 + sizeof(OFSTRUCTGM));
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
 			Arg3 = Arg2 + 2048; 
 			pFile = Arg3 + 2048;
 			lpstr = pFile + 256; 
 			*lpstr = 0;
-			pOFStruct = (LPOFSTRUCT)(lpstr + 1030);  
+			pOFStruct = (LPOFSTRUCTGM)(lpstr + 1030);  
 			
 			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
 			*ParLoc = '\0';
@@ -3166,7 +3166,7 @@ GSSiExitProg (1350);
 			hMem = GSSiGlobAlloc (1197,GMEM_MOVEABLE,2048*3);
 			Arg1 = GlobalLock(hMem);
 			Arg2 = Arg1 + 2048; 
-			pOFStruct = (LPOFSTRUCT)(Arg2 + 2048);
+			pOFStruct = (LPOFSTRUCTGM)(Arg2 + 2048);
 			if ((ParLoc = MatchLev (Args,',')))
 			{ 
 				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));

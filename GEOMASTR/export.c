@@ -578,7 +578,7 @@ HANDLE GetBMPBlock (short nRows, short nCols,short nBytesPerPel,double Res,doubl
 BOOL ClipBMP (LPSTR Name)
 {   
 	HFILE	FidIn, FidOut;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     BITMAPINFOHEADER DibInfoIn, DibInfoOut;
     BITMAPFILEHEADER bmfHeadIn, bmfHeadOut;
     RECT	ClipRect;    
@@ -640,7 +640,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
     BITMAPFILEHEADER bmfHead;
     WORD    HeadLen, irow, icol, i; 
     HFILE	FidBM, FidBPW;
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     LPSTR	pRow;   
     double	X, Y, XFROM[4],YFROM[4],XTO[4],YTO[4];
     DPOINT	BasePoint, DPoint; 
@@ -896,7 +896,7 @@ void TIGEROut(void)
     char    StreetName[34], str[128], OutRec[256], FileName[128];
     short      st, st2, st3, stn,  Version, hltpos,i, ipos;
 	BTVARDESC BTVar[2];
-    OFSTRUCT    OFStruct;
+	OFSTRUCTGM    OFStruct;
     HCURSOR hcurSave; 
     BOOL    Good, FirstMap=TRUE, OpenedSeg=FALSE;
     long    NewFileMarker=LONG_MIN, TLIDOut=1;  

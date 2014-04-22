@@ -5557,7 +5557,7 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 { 
     int		irec;
  	HFILE	FidNoteType; 
- 	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
  	char	File[128], str[132],Ext[16];
  	static	char	Name[128]; 
  	LPSTR	lpBar;  
@@ -5776,7 +5776,7 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	        	 if (!ExistFile(str))
 	        	 {   
 	        	 	HFILE	InfoID;
-	        	 	OFSTRUCT	OFStruct;
+					OFSTRUCTGM	OFStruct;
 	        	 	
 	        	 	InfoID = GSSiOpenFile(str,&OFStruct,OF_CREATE);
 	        	 	GSSiClose(InfoID);
@@ -7266,7 +7266,7 @@ BOOL CreateNetLink (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short f
  DPOINT	BasePoint;
  //BTHEAD	BTHead;   
  char	mess[128];  
- OFSTRUCT	OFStruct; 
+ OFSTRUCTGM	OFStruct;
  static	long	TotLen;
  long	CurLoc, StreetNums[32], NumStreets; 
  struct {long	Ref, SNum;} RouteRefKey;  
@@ -8259,7 +8259,7 @@ BOOL ClearRedef(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     
     case GF_EXECUTE: 
         { 
-		    OFSTRUCT OFStruct;
+		    OFSTRUCTGM OFStruct;
 		     
 		    GSSiRemove (CurView->DisplayRedefFile);
 		    RemoveVPRedef ();
@@ -8547,7 +8547,7 @@ GSSiExitProg (975);
 		DPOINT	BasePoint;
     	short	ID, ls;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
         if (Message == GF_EXECUTE)
         	Item = 0;
@@ -8573,7 +8573,7 @@ GSSiExitProg (975);
        		
 			if (GetTextString (hWnd,pString,lGCmdString-1,"Edit Graphics Command String",0,0,0,TRUE,TRUE))
 			{
-				Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+				Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 				if (Fid != HFILE_ERROR)
 				{
 					GSSillseek (Fid,CurGCmdStringLoc,0);
@@ -8720,7 +8720,7 @@ GSSiExitProg (853);
     	short	ID, rtn;  
     	HFILE	Fid; 
 		float	SymSize, SymRot;
-    	OFSTRUCT	OFStruct; 
+		OFSTRUCTGM	OFStruct;
     	long	Ref; 
    		BOOL	SaveDisableHalt= DisableHalt;
 
@@ -10768,7 +10768,7 @@ BOOL AddSegStreetName (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		DPOINT	BasePoint;
     	short	ID, ls, len, i;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		LPGWDHEADER	lpGWDHead;
 	    LPSEGDATAGM	pSegdata;  
 	    long	Offset; 
@@ -10814,7 +10814,7 @@ BOOL AddSegStreetName (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			        	SaveDisableHalt = DisableHalt;
 			    	    DisableHalt = TRUE;
 		       		
-						Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+						Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 						if (Fid != HFILE_ERROR)
 						{
 							GSSillseek (Fid,CurSNamesLoc,0);
@@ -11089,7 +11089,7 @@ BOOL ProcessCmdString (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		DPOINT	BasePoint;
     	short	ID, ls;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
     	short	SavePGC=ProcessGCmdStrings;
 
         GSSiGlobFree (&hGCmdString);
@@ -11267,7 +11267,7 @@ ClearEnd:
     {   
     	char	TranFileName[128], FullName[128]; 
     	HFILE	FidTran;
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
     	LPSTR	lpSlash;
     	
     	_fstrcpy (TranFileName,CurView->lpFiles[0]);
@@ -11335,7 +11335,7 @@ BOOL TrackPhotoLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     {   
     	char	TranFileName[128], FullName[128]; 
     	HFILE	FidTran;
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
     	short	i;
     	LPSTR	lpSlash;
     	
@@ -11714,7 +11714,7 @@ GSSiExitProg (879);
 		DPOINT	BasePoint;
     	short	ID, ls;  
     	HFILE	Fid;
-    	OFSTRUCT	OFStruct; 
+		OFSTRUCTGM	OFStruct;
     	GRTEXTHEADER	GRTextHeader;
 		LPGRTEXTHEADER	pPickedTextHeader;
 
@@ -11786,7 +11786,7 @@ GSSiExitProg (879);
 				{
 			       	if (CurTextStringLoc && NewLen <= lTextString)
 					{
-						Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+						Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 						if (Fid != HFILE_ERROR)
 						{
 							GSSillseek (Fid,CurTextStringLoc,0);
@@ -11901,7 +11901,7 @@ BOOL EditTextMultiple (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		DPOINT	BasePoint;
     	short	ID, ls;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct; 
+		OFSTRUCTGM	OFStruct;
     	GRTEXTHEADER	GRTextHeader; 
     	short	pos = BT_FIRST;
     	HIGHLIGHTDATA	HighlightData; 
@@ -11934,7 +11934,7 @@ BOOL EditTextMultiple (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 					{
 			       		if (_fstrlen (ChangeCommand) <= lTextString)
 						{   
-							Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+							Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 							if (Fid != HFILE_ERROR)
 							{
 								GSSillseek (Fid,CurTextStringLoc,0);
@@ -12145,7 +12145,7 @@ GSSiExitProg (843);
 		DPOINT	BasePoint;
     	short	ID, ls;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
     	HaveNewSettings = FALSE;
      	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
@@ -12174,7 +12174,7 @@ GSSiExitProg (843);
 				FARPROC	lpfnTEXTHEADEDITMsgProc;
 				short	rc; 
 				
-				Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READ);
+				Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 				if (Fid != HFILE_ERROR)
 				{
 					GSSillseek (Fid,CurTextHeaderLoc,0);
@@ -12227,7 +12227,7 @@ GSSiExitProg (843);
 
 			if (!CurView->UpdateFile || !_fstricmp (EditName,PickName))
 			{
-				Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+				Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 				if (Fid != HFILE_ERROR)
 				{   
 					
@@ -13722,7 +13722,7 @@ GSSiExitProg (1052);
 		DPOINT	BasePoint;
     	short	ID;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
         if (Message == GF_EXECUTE)
         	Item = 0;
@@ -13747,7 +13747,7 @@ GSSiExitProg (1052);
         	SaveDisableHalt = DisableHalt;
     	    DisableHalt = TRUE;
        		
-			Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+			Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{   
 				short	l;
@@ -15355,7 +15355,7 @@ GSSiExitProg (1110);
 		DPOINT	BasePoint;
     	short	ID;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
  		if (CursorIsLocked)  
  		{
@@ -15388,7 +15388,7 @@ GSSiExitProg (1110);
         	SaveDisableHalt = DisableHalt;
     	    DisableHalt = TRUE;
        		
-			Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+			Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{   
 				short	l;
@@ -15475,7 +15475,7 @@ GSSiExitProg (1110);
 		DPOINT	BasePoint;
     	short	ID;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
  		if (CursorIsLocked)  
  		{
@@ -15508,7 +15508,7 @@ GSSiExitProg (1110);
         	SaveDisableHalt = DisableHalt;
     	    DisableHalt = TRUE;
        		
-			Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+			Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{   
 				short	l;
@@ -15731,7 +15731,7 @@ BOOL IdentifyTraverseLeg (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,s
 		DPOINT	BasePoint;
     	short	ID;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
  		if (CursorIsLocked)  
  		{
@@ -15792,7 +15792,7 @@ GSSiExitProg (1053);
 		DPOINT	BasePoint;
     	short	ID;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;   
+		OFSTRUCTGM	OFStruct;
     	COLORREF	NewColor;
 
         if (Message == WM_LBUTTONUP)
@@ -15816,7 +15816,7 @@ GSSiExitProg (1053);
        		
        		if (!HaveNewSettings)
        		{
-				Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READ);
+				Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 				if (Fid != HFILE_ERROR)
 				{
 					GSSillseek (Fid,Loc,0);
@@ -15846,7 +15846,7 @@ GSSiExitProg (1053);
 					}
 				}
 			}
-			Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+			Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{   
 				short	l;
@@ -15874,7 +15874,7 @@ GSSiExitProg (1053);
        		
        		if (!HaveNewSettings)
        		{
-				Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READ);
+				Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 				if (Fid != HFILE_ERROR)
 				{
 					GSSillseek (Fid,Loc,0);
@@ -15903,7 +15903,7 @@ GSSiExitProg (1053);
 					}
 				}
 			}
-			Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+			Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{   
 				short	l;
@@ -17592,7 +17592,7 @@ BOOL TraceDownstream (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short
 		DPOINT	BasePoint;
     	short	ID;  
     	HFILE	Fid; 
-    	OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 
  		if (CursorIsLocked)  
  		{

@@ -263,8 +263,8 @@ long  GET_COUNTY_PARMS (long COUNTYID,long *CNO,long *CPART)
        long  ID;
 static short CNOAR[102], CPARTAR[102];
        char Cnum[6], far *lpPtr, far *lpNext, far *lpStuff;
-       OFSTRUCT OF ;
-       OFSTRUCT FAR* lpOF = &OF;
+       OFSTRUCTGM OF ;
+       OFSTRUCTGM FAR* lpOF = &OF;
 static  BOOL FIRST = TRUE;
        HFILE lpFile;
        HGLOBAL Handle;

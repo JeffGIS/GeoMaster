@@ -1437,7 +1437,7 @@ BOOL LoadAbbreviations(LPSTR AddressDir)
       long   STNDSP, LOC, IOFF, NUM, AR,  LM, ISTAT;
       char file2[MAX_PATH];
       char VALS[88], ABREV[13],  outval[104]  ;  
-      OFSTRUCT OF;
+      OFSTRUCTGM OF;
       HFILE fptr;
       UINT pchar;
 	  int	ID;

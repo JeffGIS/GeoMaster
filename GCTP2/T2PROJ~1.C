@@ -366,8 +366,8 @@ C-------------------------------        */
        float RSQ;
        char *Ptr;
        HFILE lpFile1; 
-       OFSTRUCT  OBF;
-       OFSTRUCT FAR *lpOBF = &OBF;
+       OFSTRUCTGM  OBF;
+       OFSTRUCTGM FAR *lpOBF = &OBF;
        short       I, Units;
        HGLOBAL Handle;             
        BOOL       END;

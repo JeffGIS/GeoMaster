@@ -131,7 +131,7 @@ int	GetFunctionValue2 (int FunID,LPSTR Args, LPSTR OutLoc)
 	short	n, n1,n2,pos, nrem, nRc;  
 	double	AZ, Dist,Elevation, RVal;
 	HFILE	Fid;
-	LPOFSTRUCT	pOFStruct;
+	LPOFSTRUCTGM	pOFStruct;
 	LPDPOINT	pPoint;
 	HANDLE	hDibInfo;
 	long	ImageOffset; 
@@ -1101,7 +1101,7 @@ GotCloseFilehSQL:
 			Arg1 = GlobalLock(hMem); 
 			pName = Arg1 + 2048;
 			pSTR = pName + 2048;   
-			pOFStruct = (LPOFSTRUCT)(pSTR + 2048);
+			pOFStruct = (LPOFSTRUCTGM)(pSTR + 2048);
 			if ((ParLoc = MatchLev (Args,',')))
 			{
 				*ParLoc++ = 0; 
@@ -3366,7 +3366,7 @@ GotCloseFilehSQL:
 			
 			_fstrcpy (Arg1,Args);
 			ExpandText (Arg1);
-			pOFStruct = (LPOFSTRUCT)(Arg1 + 2048); 
+			pOFStruct = (LPOFSTRUCTGM)(Arg1 + 2048); 
 			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ);
 			if (Fid == HFILE_ERROR)
 				goto RtnFalse;
@@ -4697,7 +4697,7 @@ GotCloseFilehSQL:
 			_fstrupr (Arg[1]);  
 			if (*Arg[1] ==  'A')
 			{
-				OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
 				HFILE		Fid = GSSiOpenFile (Arg[2],&OFStruct,OF_READ);
 
 				*OutLoc = 0;

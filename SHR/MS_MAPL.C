@@ -29,8 +29,8 @@ struct lda4
   
 DWORD total;
 HFILE hf;
-OFSTRUCT openbuff;
-OFSTRUCT FAR* lpOpenBuff = &openbuff;
+OFSTRUCTGM openbuff;
+OFSTRUCTGM FAR* lpOpenBuff = &openbuff;
 BOOL written;
 
 	if (Firstx)
@@ -109,8 +109,8 @@ BOOL written;
 {             
 
 HFILE hf;
-OFSTRUCT openbuff;
-OFSTRUCT FAR* lpOpenBuff = &openbuff;
+OFSTRUCTGM openbuff;
+OFSTRUCTGM FAR* lpOpenBuff = &openbuff;
 char holder[64]; 
 char *cp = holder;
 int i; 

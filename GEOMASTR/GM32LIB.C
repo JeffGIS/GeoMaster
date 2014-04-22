@@ -1521,8 +1521,8 @@ LPSTR requestFromURL(LPSTR url)
 
 		if (lFile > 0)
 		{
-			OFSTRUCT OFStruct;
-			HFILE	Fid = OpenFile(tempFile, &OFStruct, OF_READ);
+			OFSTRUCTGM OFStruct;
+			HFILE	Fid = OpenFileGM(tempFile, &OFStruct, OF_READ);
 
 			if (Fid != HFILE_ERROR)
 			{

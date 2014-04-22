@@ -1369,7 +1369,7 @@ BOOL DeletePointDispersionFile (void)
 #endif
 {   
 	LPSTR pName; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	if (!CurTheme->hDisperseFileName)
 {

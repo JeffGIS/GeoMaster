@@ -106,7 +106,7 @@ HDIB FAR LoadDIB(LPSTR lpFileName)
 {
    HDIB hDIB=0;
    int hFile;
-   OFSTRUCT ofs;
+   OFSTRUCTGM ofs;
    short	lName=_fstrlen (lpFileName);
    LPBITMAPINFOHEADER  pDibInfo;
    LPLONG	pColors;
@@ -275,7 +275,7 @@ WORD FAR SaveDIB(HDIB hDib, LPSTR lpFileName)
    BITMAPFILEHEADER bmfHdr; // Header for Bitmap file
    LPBITMAPINFOHEADER lpBI;   // Pointer to DIB info structure
    int fh;     // file handle for opened file
-   OFSTRUCT of;     // OpenFile structure
+   OFSTRUCTGM of;     // OpenFile structure
    DWORD dwDIBSize;
    DWORD dwError;   // Error return from MyWrite
 

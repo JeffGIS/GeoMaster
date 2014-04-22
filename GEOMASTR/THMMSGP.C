@@ -1019,7 +1019,7 @@ HANDLE	CreateListFile (LPSTR File,short lenListData,BOOL SortOnData)
 	HANDLE hBT, hDB;
 	HFILE	FidData;
 	int		ibeg,NumVars;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	GWFLDINFO FldInfo;
 	LPSTR	lpDot;  
 
@@ -2605,7 +2605,7 @@ GSSiExitProg (1294);
             {
             	HFILE	Fid;  
             	char	File[128]=""; 
-            	OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
             	LPTHEME	NewTheme; 
             	short	i,n;
             	LPVIEWPORT	SaveView;
@@ -2613,7 +2613,7 @@ GSSiExitProg (1294);
              	 _fstrcpy (gszFilter,"GeoMaster Themes(*.thm)|*.THM|");
 				 if (GetFileName3(hWndDlg,File,0,IDS_FILETHM))
 				 {   
-					 Fid = GSSiOpenFile (File,(LPOFSTRUCT)&OFStruct,OF_READ); 
+					 Fid = GSSiOpenFile (File,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
 					 ReadObject (&Fid,TRUE,&NewTheme,0); 
 					 GSSiClose (Fid);
 
@@ -2942,7 +2942,7 @@ BOOL ThemeNeedsDataPass (BOOL PixelThemesOnly)
 #endif
 {	BTVARDESC	BTVar[3];
 	int	i;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	char		str[128];
     
     if (CurTheme->DisplayViewport && CurTheme->DisplayViewport <= *pNumViewports)
@@ -3152,12 +3152,12 @@ BOOL SetVisibilityFromTheme (LPSTR Name,LPSTR SymPrefix,short setopt)
 #endif
 {   
 	HFILE		Fid;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPTHEME		pTheme, SaveTheme=CurTheme; 
 	short		pos=BT_FIRST, idesc;
 	char		SymName[128],Data[128];
 	
-	Fid = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ);  
+	Fid = GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_READ);  
 	if (Fid == HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -3204,7 +3204,7 @@ BOOL GetSymListFromTheme (LPSTR Name,LPSTR SymList,int maxlen)
 #endif
 {   
 	HFILE		Fid;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPTHEME		pTheme, SaveTheme=CurTheme; 
 	short		pos=BT_FIRST;
 	char		SymName[128],Data[128];
@@ -3212,7 +3212,7 @@ BOOL GetSymListFromTheme (LPSTR Name,LPSTR SymList,int maxlen)
 	BOOL		rtn=FALSE;
 	
 	*SymList = 0;
-	Fid = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ);  
+	Fid = GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_READ);  
 	if (Fid == HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -3538,7 +3538,7 @@ GSSiExitProg (1330);
 		    		BOOL	DisplayVP[MAX_VIEWPORTS]; 
 		    		HANDLE	hMem = GSSiGlobAlloc (1027,GMEM_MOVEABLE,1024);
 		    		LPSTR	CacheFile=GlobalLock (hMem), SaveScreenFile=CacheFile+256; 
-		    		LPOFSTRUCT	pOFStruct=(LPOFSTRUCT) (SaveScreenFile + 256);  
+		    		LPOFSTRUCTGM	pOFStruct=(LPOFSTRUCTGM) (SaveScreenFile + 256);  
 		    		long	SaveSize;
 			    		 
 		    		lpBoundsDisplay->CurAreaRef = PickList[NumPicked].Refno;

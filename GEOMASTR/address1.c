@@ -1162,7 +1162,7 @@ BOOL CreateStreetNameTable (LPSTR Dir)
     LPGWDHEADER16 lpGWDHead;
     HANDLE  hVars, hDB;
     int      FidData,ibeg,NumVars,i;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;
     char    File[MAX_PATH], PrimeIndex[MAX_PATH], RemoveName[MAX_PATH];
     
@@ -1752,7 +1752,7 @@ BOOL CreateStreetSegmentTable (LPSTR File)
 	time_t ltime;
 	int		FidData;
 	int		ibeg,NumVars,NumIndex;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPVOID	lpVal;
 	LPSTR	pName;
 	GWFLDINFO FldInfo;
@@ -2176,7 +2176,7 @@ BOOL CreateINT_MATCHTable (LPSTR File,LPSTR BadNames,short OrigKeyLen)
 	time_t ltime;
 	int		FidData;
 	int		ibeg,NumVars,NumIndex;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPVOID	lpVal;
 	LPSTR	pName;
 	GWFLDINFO FldInfo;
@@ -2446,7 +2446,7 @@ BOOL CreateADD_MATCHTable (LPSTR File,LPSTR BadNames,LPSTR KeyDef,short AddUDILe
 	time_t ltime;
 	int		FidData;
 	int		ibeg,NumVars,NumIndex;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPVOID	lpVal;
 	LPSTR	pName;
 	GWFLDINFO FldInfo;

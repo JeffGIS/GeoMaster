@@ -2683,7 +2683,7 @@ BOOL PrintMerge (HWND hWnd)
    double	SaveSFLFF=SmallFontLargeFontFactor;
    LPDEVMODE pDevMode;
    DEVMODE	SaveDevMode;  
-   OFSTRUCT	OFStruct;
+   OFSTRUCTGM	OFStruct;
    char		str2[32], SavePrintName[34], PrintDriver[64],PrintType[64],PrintPort[64];
    long		Refno;
    COLORREF	SaveColor = WindowColor;

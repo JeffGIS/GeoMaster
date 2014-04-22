@@ -51,7 +51,7 @@ BOOL DisplayHelp (LPSTR HelpFileIn,LPSTR HelpTopic)
 	DWORD	rtn=FALSE;
 	DWORD	CRFlags;
 	char	HelpFile[MAX_PATH];
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 
 	if (HelpFileIn)
@@ -808,7 +808,7 @@ DWORD WINAPI GM32GetLongPathName (LPSTR Name,DWORD MaxLen)
 {
 	char NewName[256];
 	DWORD	rtn=TRUE;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid=OpenFile (Name,&OFStruct,OF_EXIST);
 
 	if (Fid == HFILE_ERROR && OFStruct.nErrCode != 5)
@@ -822,7 +822,7 @@ DWORD WINAPI GM32GetLongPathName (LPSTR Name,DWORD MaxLen)
 
 DWORD GM32CreateFile (LPSTR Name)
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE Fid = OpenFileGSSi (Name,&OFStruct,OF_CREATE,0); 
 	
 	if (Fid == HFILE_ERROR)
@@ -1334,7 +1334,7 @@ BOOL GM32GetGMCName(HWND hWnd,LPSTR PathName,
 
 /*			if (!GetShortPathName (ShortName,LongName,256))//short is really long
 			{
-				OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
 
 				HFILE	Fid2 = OpenFile (ShortName,&OFStruct,OF_CREATE);
 				_lclose (Fid2);

@@ -519,7 +519,7 @@ BOOL BT_CREATE (LPSTR FNAME, int DATLEN, BOOL DATED, int NVARIn, int NVAR2,
      +     TIME_CHECK /.TRUE./
 */
       HGLOBAL	hBTree;
-      OFSTRUCT	OFStruct;
+	  OFSTRUCTGM	OFStruct;
       long		keylen; 
       BOOL		rtn;    
       int		NVAR = abs (NVARIn);
@@ -697,7 +697,7 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
 	  long		flen,ii;
 	  HGLOBAL	hBTHEADER=0;
 	  HFILE		Fid;
-	  OFSTRUCT	OFStruct;
+	  OFSTRUCTGM	OFStruct;
       unsigned frequency=1000, duration=100; 
 	  LPBTHEAD	BT_HEAD;
       //char		str[256];
@@ -708,9 +708,9 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
       hBTHEADER = GSSiGlobAlloc ( 102,GHND,1024);
       BT_HEAD = (LPBTHEAD)GlobalLock(hBTHEADER);
 	  if (!ACCESS)
-	      Fid = GSSiOpenFile (FNAME,(LPOFSTRUCT) &OFStruct,OF_READ);
+	      Fid = GSSiOpenFile (FNAME,(LPOFSTRUCTGM) &OFStruct,OF_READ);
       else
-	      Fid = GSSiOpenFile (FNAME,(LPOFSTRUCT) &OFStruct,OF_READWRITE);
+		  Fid = GSSiOpenFile(FNAME, (LPOFSTRUCTGM)&OFStruct, OF_READWRITE);
 	
 	  if (Fid == HFILE_ERROR)
 	  {   
@@ -1261,7 +1261,7 @@ void CreateFidSmall (void)
 #endif
 {   
 	HANDLE	hMem;
-	LPOFSTRUCT	pOFStruct;
+	LPOFSTRUCTGM	pOFStruct;
 {
 #if ENABLETRACE
 GSSiExitProg (480);
@@ -1270,8 +1270,8 @@ GSSiExitProg (480);
 }
 	if (!*SmallName)
 		GSSiGetTempFileName (0,"GMS",0,(LPSTR)SmallName);
-	hMem = GSSiGlobAlloc ( 108,GMEM_MOVEABLE,sizeof(OFSTRUCT));
-	pOFStruct = (LPOFSTRUCT)GlobalLock (hMem);	
+	hMem = GSSiGlobAlloc(108, GMEM_MOVEABLE, sizeof(OFSTRUCTGM));
+	pOFStruct = (LPOFSTRUCTGM)GlobalLock (hMem);	
 //   	FidSmall = OpenFile (SmallName,pOFStruct,OF_CREATE);
    	FidSmall = _open (SmallName,_O_CREAT,_S_IREAD | _S_IWRITE);
    	GSSiGlobUlFree (&hMem);

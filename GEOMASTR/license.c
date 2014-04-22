@@ -679,7 +679,7 @@ ReCheck:
 						{
 							char	DriveID=(char)('A'+i);	
 		                    HFILE	Fid;
-		                    OFSTRUCT	OFStruct;
+							OFSTRUCTGM	OFStruct;
 		                    
 			            	sprintf (str,"%c:\\gmregist.txt",DriveID); 
 			            	Fid = GSSiOpenFile(str,&OFStruct,OF_READ);

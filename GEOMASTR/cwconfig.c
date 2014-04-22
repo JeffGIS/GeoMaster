@@ -288,7 +288,7 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
  long	nf; 
  POINT	CPoint;   
  HWND	hFocus, hParent;            
- OFSTRUCT	OFStruct;
+ OFSTRUCTGM	OFStruct;
  long	ii;   
  char drive[34],dir[MAX_PATH]; 
  int	winx=CW_USEDEFAULT, winy=CW_USEDEFAULT, winh=CW_USEDEFAULT, winw=CW_USEDEFAULT;     
@@ -923,7 +923,7 @@ BOOL ProcessUserParms (void)
 BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 	LPSTR lpStart, lpTab;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	static char cmdFile[MAX_PATH];
 	HFILE	fid;
 	char	txt[1024], str[1024];
@@ -934,7 +934,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	switch (Message)
 	{
 	case WM_INITDIALOG:
-		fid = OpenFile("lastcmdline.txt", &OFStruct, OF_READ);
+		fid = OpenFileGM("lastcmdline.txt", &OFStruct, OF_READ);
 		if (fid != HFILE_ERROR)
 		{
 			fgetstring2(txt, 1020, fid);
@@ -950,7 +950,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		*selectedStartCmd = 0;
 		cwCenter(hWndDlg, 0);
 		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_RESETCONTENT, 0, 0);
-		fid = OpenFile("../cmdlines.txt", &OFStruct, OF_READ);
+		fid = OpenFileGM("../cmdlines.txt", &OFStruct, OF_READ);
 		if (fid != HFILE_ERROR)
 		{
 			strcpy(cmdFile, OFStruct.szPathName);
@@ -1053,7 +1053,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			int		idrive;
 			GetDlgItemText(hWndDlg, IDC_COMMAND, selectedStartCmd, 1020);
 			GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH);
-			fid = OpenFile("lastcmdline.txt", &OFStruct, OF_CREATE);
+			fid = OpenFileGM("lastcmdline.txt", &OFStruct, OF_CREATE);
 			if (fid != HFILE_ERROR)
 			{
 				fputstring2(selectedStartCmd, fid);
@@ -1128,7 +1128,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	//writeTestStruct();
 	//char tt[] = {FV};
 	/*char prj[1024];
-	HFILE fid = GSSiOpenFile("C:\\CountyData\\Cleveland\\AreaParcel_11212013\\AREAPARCEL.prj", 0, OF_READ);
+	HFILE fid = GSSiOpenFileGM("C:\\CountyData\\Cleveland\\AreaParcel_11212013\\AREAPARCEL.prj", 0, OF_READ);
 	BigRead(fid, prj, 1023);
 	GSSiClose(fid);
 	ConvertPRJtoProj4(prj, NULL);*/
@@ -2080,13 +2080,13 @@ if (Message == WM_CHAR && wParam == 26) //CNTL/Z
 if (Message == GF_MAPSERVER_REQUEST)
 {
 	HFILE Fid;
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	//MessageBox(hWnd, "Got request", "", MB_OK);
 
 	MapserverRequestID = LOWORD(lParam);
 	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
-	Fid = OpenFile(MapserverFile, &OFStruct, OF_READ);
+	Fid = OpenFileGM(MapserverFile, &OFStruct, OF_READ);
 	if (Fid != HFILE_ERROR)
 	{
 		LPSTR cmd = (LPSTR)malloc(4096);
@@ -2868,7 +2868,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 /*                 {   
                  	HFILE FidI;
                  	char	str[20];  
-                 	OFSTRUCT	OFStruct;
+                 	OFSTRUCTGM	OFStruct;
                  	
                  	FidI = GSSiOpenFile ("creatint.txt",&OFStruct,OF_READ);
                  	if (FidI == HFILE_ERROR) break;
@@ -4220,7 +4220,7 @@ DisplayParcel:
 			     {
 					 VISLIST	SaveVis; 
 					 int		SaveNumVis; 
-					 OFSTRUCT	OFStruct; 
+					 OFSTRUCTGM	OFStruct;
 					 HCURSOR	hcurSave;
                	 	 
                	 	 if (!GetTextString (hWnd,MapCopyProjection,128,"Select conversion projection or CANCEL for none","*.CVT",0,0,TRUE,TRUE))

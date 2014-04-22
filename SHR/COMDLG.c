@@ -103,7 +103,7 @@ BOOL GetFile32 (short opt,LPOPENFILENAME pof,DWORD lFilters)
 	char	str[512], ExPath[128];
 	UINT hI; 
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;  
 	short	opt=1, ln, ln0=0;
 	static	HANDLE		hSaveBM;
    
@@ -704,7 +704,7 @@ BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
          if (st)
          {
             HFILE hFile;
-            OFSTRUCT ofstruct;
+            OFSTRUCTGM OFStruct;
             
 //            if (AllowCreate)
 //            {
@@ -1306,7 +1306,7 @@ void vdef ()
          if (GetOpenFileName(&(lpFOChunk->of)))
          {
             HANDLE hFile;
-            OFSTRUCT ofstruct;
+            OFSTRUCTGM OFStruct;
 
             hFile = OpenFile(lpFOChunk->of.lpstrFile, &ofstruct, OF_EXIST);
             if (hFile != -1)

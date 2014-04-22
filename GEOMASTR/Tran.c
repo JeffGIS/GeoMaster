@@ -598,7 +598,7 @@ HANDLE LoadTranFileWithDandT (LPSTR Name)
 	char	Name2[256];
 	HANDLE	handle;   
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	BOOL	Invert=FALSE;
 	
 	if (!_fstrncmp (Name,"|OPP|",5))

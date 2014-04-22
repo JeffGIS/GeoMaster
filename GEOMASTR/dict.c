@@ -3195,7 +3195,7 @@ SkipStdSyms:
 	if (type)
 	{
 		HFILE	FidSymUse, FidSymPar, FidSymDump;
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		char	str[260], Snam[34];
 		LPSTR	pStr;
 		long	nrecs, nrecs2, TotLen, CurLoc;
@@ -3967,7 +3967,7 @@ BOOL BigPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width)
 	if (!rtn)
 	{
 /*		char	mess[128];
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		HFILE	Fid; 
 		short	n=0;
 		
@@ -4033,7 +4033,7 @@ BOOL FlatEndPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width,COLORREF C
 	if (!rtn)
 	{
 /*		char	mess[128];
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		HFILE	Fid; 
 		short	n=0;
 		

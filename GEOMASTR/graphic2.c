@@ -2731,7 +2731,7 @@ HFILE SaveHighlightListToConfig (HFILE Fid)
 #endif
 {
  	short	Length, Version=1, id=OB_HIGHLIGHTLIST;    
- 	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	long	lFile1, lFile2, pos;
 	char	File1[144], File2[144], Name[144]; 
 
@@ -2879,7 +2879,7 @@ BOOL CopyHighlightList (LPSTR Name)
 	char	File1[MAX_PATH], File2[MAX_PATH]; 
 	long	lFile1, lFile2;
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	BOOL	rtn=FALSE;
 	
 	if (!hHighlight)	
@@ -2924,7 +2924,7 @@ BOOL RecallHighlightList (LPSTR Name)
 {   
 	char	File1[MAX_PATH], File2[MAX_PATH];
 	HFILE	Fid, Fid2;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	long	lFile1,lFile2;  
 	BOOL	rtn=FALSE;
 	
@@ -3006,7 +3006,7 @@ void UpdateClassValueList()
 {
 	BTVARDESC	BTVar[3];
 	int	i, ifield,ii;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPFIELDINFO	lpFieldInfo;
 	LPOPENFILEDATA	FilePtr;
 	LPOPENSQLDATA	SQLPtr;  

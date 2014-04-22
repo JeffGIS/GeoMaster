@@ -2125,7 +2125,7 @@ HANDLE OpenComboDatabase (LPSTR Name,LPSTR SQL)
     LPOPENSQLDATA		SQLPtr; 
     LPSTR       pWhere, pWhere2, pCField, pSQL=SQL;
     HANDLE      hDB; 
-    OFSTRUCT    OFStruct;
+	OFSTRUCTGM    OFStruct;
     HFILE       FidCF; 
     short		i;     
     char		Blanks[]="";
@@ -2616,7 +2616,7 @@ void SaveLocalConfigToNetwork (HFILE FidConfig,LPSTR ConfigPath)
 			sprintf (ToPath,"%s%s\\%s",SaveLocalConfigNetDir,User,ConfigPath);
 			REPLAC (&ToPath[3], ":","", MAX_PATH);
 			{
-				OFSTRUCT	OFStruct;
+				OFSTRUCTGM	OFStruct;
 				HFILE FidTo = GSSiOpenFile (ToPath,&OFStruct,OF_CREATE);
 
 				if (FidTo != HFILE_ERROR)
@@ -2641,7 +2641,7 @@ BOOL OpenConfig (HWND hWnd,HDC hDC)
 {GSSiEnterProg (100);
 #endif
 {   short     Signature, Version, n;
-    OFSTRUCT    OFStruct;  
+	OFSTRUCTGM    OFStruct;
     HANDLE		hVisList;
     short     len, iv,MenuMask;
 	int	i;
@@ -2724,7 +2724,7 @@ GSSiExitProg (100);
     *pNumViewports = 0;  
     _fmemset (pViewports,0,MAX_VIEWPORTS*sizeof(LPVIEWPORT)); 
     GSSiGlobFree (&hConfigDescription);
-    FidConfig = GSSiOpenFile (FullPath,(LPOFSTRUCT)&OFStruct,OF_READ);
+    FidConfig = GSSiOpenFile (FullPath,(LPOFSTRUCTGM)&OFStruct,OF_READ);
     if (FidConfig == HFILE_ERROR) 
     {   char    DLName[MAX_PATH];
     
@@ -2732,7 +2732,7 @@ GSSiExitProg (100);
 		{
 			_fstrcpy (DLName,"[%DL]");
 			_fstrcat (DLName,CfgName);
-			FidConfig = GSSiOpenFile (DLName,(LPOFSTRUCT)&OFStruct,OF_READ);
+			FidConfig = GSSiOpenFile (DLName,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 		}
         if (FidConfig == HFILE_ERROR)
         {
@@ -3874,7 +3874,7 @@ NEWOBJECT ReadNewObject_V0(HFILE Fid)
 int	CreateTestConfig (void)
 {	short		Signature, Version=4;
 	short		len, i;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char	File[128];
 	HFILE		FidConfig;
 	char	CfgName[256];
@@ -3890,7 +3890,7 @@ int	CreateTestConfig (void)
                   
 	_fstrcpy (CfgName,"basic1.gmc");
 	GSSiRemove (CfgName);
-	FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCT)&OFStruct,OF_CREATE); 
+	FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCTGM)&OFStruct,OF_CREATE); 
 	
     BigWrite (FidConfig,(HPSTR)StartupCommand,sizeof(StartupCommand),-1);
     BigWrite (FidConfig,(HPSTR)StartupMenu,sizeof(StartupMenu),-1);
@@ -4215,7 +4215,7 @@ int	CreateTestConfig (void)
 
 	_fstrcpy (CfgName,"basic2.gmc");
 	GSSiRemove (CfgName);
-	FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
     BigWrite (FidConfig,(HPSTR)StartupCommand,sizeof(StartupCommand),-1);
     BigWrite (FidConfig,(HPSTR)StartupMenu,sizeof(StartupMenu),-1);
     BigWrite (FidConfig,(HPSTR)&NumIB,sizeof(NumIB),-1);  
@@ -4583,7 +4583,7 @@ int	CreateTestConfig (void)
 	_fstrcpy (CfgName,"formats\\format1.gmc");
 	makedirectories (CfgName,FALSE,FALSE);
 	GSSiRemove (CfgName);
-	FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCT)&OFStruct,OF_CREATE);
+	FidConfig = GSSiOpenFile (CfgName,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
     BigWrite (FidConfig,(HPSTR)StartupCommand,sizeof(StartupCommand),-1);
     BigWrite (FidConfig,(HPSTR)StartupMenu,sizeof(StartupMenu),-1);
     BigWrite (FidConfig,(HPSTR)&NumIB,sizeof(NumIB),-1);  

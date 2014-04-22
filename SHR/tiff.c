@@ -483,7 +483,7 @@ HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check)
  	char  	*pBits;
  	HPSTR		pImage;
  	HANDLE	hFileBuf=0;   
- 	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
  	HANDLE	hDibInfo;
  	long	ImageOffset, rowlen, outrowlen, row; 
     short	FirstBufRow, ThisHeight,RowsPerStrp=1,PhotoInterp,SamplesPerPix,PlanarConfig,BitsPerSmple[8];
@@ -623,7 +623,7 @@ short DisplayTIFFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAsp
 
 /*short DisplayTIFFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAspect)
 { 
-    OFSTRUCT    fStruct;
+    OFSTRUCTGM    fStruct;
     LPOFSTRUCT  pStruct = &fStruct;
     LPBITMAPINFOHEADER  pDibInfo;
     LPSTR pImage;

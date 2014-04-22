@@ -1614,7 +1614,7 @@ void __cdecl BackgroundFileSend (LPHANDLE phArgs)
 	HFILE	Fid;
 	LPSTR	arg1=GlobalLock (*phArgs);
 	LPSTR	arg2 = arg1 + MAX_PATH, arg3 = arg2 + MAX_PATH, arg4 = arg3 + MAX_PATH;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	int		iThread, ier;
 	long	startLoc, lenFile, totRead=0;
 	SOCKET	sock;
@@ -1627,7 +1627,7 @@ void __cdecl BackgroundFileSend (LPHANDLE phArgs)
 	sock = (SOCKET)atoi (arg3);
 	iThread = atoi (arg4);
 	GSSiGlobUlFree (phArgs);
-	Fid = OpenFile (File,&OFStruct,OF_READ);
+	Fid = OpenFileGM (File,&OFStruct,OF_READ);
 	lenFile = _llseek (Fid,0,2);
 	_llseek (Fid,startLoc,0);
 	while (totRead < lenFile && ContinueBackgroundCache && (lenBuf = _lread (Fid,pBuf,SHRT_MAX))>0)
@@ -1659,7 +1659,7 @@ void __cdecl BackgroundFileSend (LPHANDLE phArgs)
 	_lclose (Fid);
 	free (pBuf);
 	if (totRead == lenFile)
-		Fid = OpenFile (File,&OFStruct,OF_DELETE);
+		Fid = OpenFileGM (File,&OFStruct,OF_DELETE);
 	CloseTCPIPSocket (sock,FALSE);
 	hBGFileTranThread[iThread] = 0;
 	return;

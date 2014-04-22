@@ -74,7 +74,7 @@ static BYTE	ColorUsed[256];
 
 BOOL OpenDGNFile (LPSTR InName,LPMNMXCORD pBounds)
 {   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 
 //	SetWindowText (hWndMain,InName);	

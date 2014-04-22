@@ -81,7 +81,7 @@ double center_lat,false_east,false_north;
 double azimuth,lat_orig,lon_orig,lon1=0,lat1=0,lon2=0,lat2=0;
 long mode,iflg;
 HFILE ptr;
-OFSTRUCT	OFStruct;
+OFSTRUCTGM	OFStruct;
 
 ind = -1;
 

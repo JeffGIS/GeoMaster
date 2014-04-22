@@ -70,7 +70,7 @@ HANDLE GetMultiFile (HWND hWnd,LPSTR Ext,LPSTR StartDir,LPLONG pTotFiles)
 	int		SaveDrive;     
 	HANDLE	hName=0;
 	LPSTR	pName;   
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
   	_getcwd (CurDir,MAX_PATH); 
   	SaveDrive = _getdrive();
@@ -2228,7 +2228,7 @@ BOOL ReorgFileOpen (LPSTR PltFile)
 {GSSiEnterProg (810);
 #endif
 {               
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	LPSTR	lpExt;
 	LPSTR	pFile;
 	
@@ -2362,7 +2362,7 @@ GSSiExitProg (811);
 		BOOL	First;
 		HANDLE	hBuf=0, hRec; 
 		LPITEM	ItemHeader;  
-		OFSTRUCT	OFStruct;
+		OFSTRUCTGM	OFStruct;
 		long	TotLen, loc;    
 		struct	{short	link;
 				 long	Offset;
@@ -3198,7 +3198,7 @@ long BuildNewQuadTree (HFILE ReorgFileFID,HFILE NewQuadFID)
 	long	Offset,loc=0,TotLen; 
 	HPSTR	buf;
 	LPITEM	ItemHeader;  
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	BTVARDESC	BTVar[2];   
 	char	BTFile[128], ReorgDir[128];
 	HANDLE	hBT1, hBT2;   
@@ -4551,7 +4551,7 @@ BOOL SetNewRefno (LPSTR EditFile,long Refno)
     HFILE	Fid;
 	char	str[MAX_PATH]; 
 	char	NewRefnoPath[MAX_PATH]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpBS;
 	
 	_fstrcpy (str,EditFile);

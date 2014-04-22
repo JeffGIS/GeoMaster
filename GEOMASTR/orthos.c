@@ -2039,7 +2039,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 	BOOL	CurHeaderWritten;  
 	HFILE   FidIndex, FidFileList, Fid;
     LPFILEINDEX lpFI;
-    OFSTRUCT    OFStruct;
+    OFSTRUCTGM    OFStruct;
     char    Index[256], cOrthRes[4];
 	short     Version=2, NumLevs=1, CurLev=0;
 	long    Signature=80251, FirstHeaderOffset, LastHeaderOffset, CurOffset=0;
@@ -2084,7 +2084,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 			UserDefinedImageQuality = 7200; 
 		sprintf (Index,"%s\\index%s",ToDir,cOrthRes);
 			                 
-		FidIndex = GSSiOpenFile (Index,(LPOFSTRUCT) &OFStruct,OF_CREATE); 
+		FidIndex = GSSiOpenFile (Index,(LPOFSTRUCTGM) &OFStruct,OF_CREATE); 
 			
 		hlpFI = GSSiGlobAlloc(1744,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 		lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
@@ -2549,7 +2549,7 @@ BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 Clip
     char    str[132], str2[132], str3[132],TempFile[MAX_PATH]="", ext[6]=".bmp"; 
     LPSTR   lpTXT, pDot;
     HFILE	Fid, FidOut;
-    OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
     double  conversion;  
     int		ncor,n,i;
     float	rv, rv1, rv2, RSQMIN;
@@ -3201,7 +3201,7 @@ BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName)
 {
 	BOOL rtn = TRUE;
 
-    OFSTRUCT    OFStruct; 
+    OFSTRUCTGM    OFStruct; 
     short     Version;
     HFILE   FidIndex, FidIndexOut, FidJP2Out;
     long    Signature, EndOffset;
@@ -3224,7 +3224,7 @@ BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName)
     	_fstrcpy (IndexRes,&leaf[5]);
     else
     	IndexRes[0]=0;
-    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCT) &OFStruct,OF_READ);
+    FidIndex = GSSiOpenFile (Name,(LPOFSTRUCTGM) &OFStruct,OF_READ);
     if (FidIndex == HFILE_ERROR)
        return rtn; 
 	FidIndexOut = GSSiOpenFile (NewName,0,OF_CREATE);

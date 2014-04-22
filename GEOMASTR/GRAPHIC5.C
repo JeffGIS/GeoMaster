@@ -171,7 +171,7 @@ HANDLE GetNextHighlightArea (long AreaNum,LPMNMXCORD pBounds,LPINT pType,LPINT p
 {GSSiEnterProg (729);
 #endif
 { 
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	static	HFILE	FidAO; 
 	long	Num=0;
 	LPMNMXCORD	lpRect; 
@@ -2017,7 +2017,7 @@ BOOL DeletePickedItem (int Item,short OldType,short NewType)
 #endif
 {   
 	HFILE	FidDel; 
-	OFSTRUCT	OFStruct;     
+	OFSTRUCTGM	OFStruct;
 	BOOL	Opened = FALSE, rtn=FALSE;
 	short	ii;
 	long	Loc;
@@ -2029,7 +2029,7 @@ BOOL DeletePickedItem (int Item,short OldType,short NewType)
 		GetPickName (Item);   
 		if (MapFileType (PickName) != MT_PLT)
 			goto Exit;
-		FidDel = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);  
+		FidDel = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);  
 		Opened = TRUE;
 	} 
 	else
@@ -2097,7 +2097,7 @@ BOOL DeletePickedItem2 (int Item)
 {   
 	short	OldType=12,NewType=92; 
 	HFILE	FidDel; 
-	OFSTRUCT	OFStruct;     
+	OFSTRUCTGM	OFStruct;
 	BOOL	Opened = FALSE, rtn=TRUE;
 	short	ii;
 	long	Loc;
@@ -2979,7 +2979,7 @@ BOOL SnapPickedItemInPlace (int Item)
 	LPSTR		LPpltBuf;
 	LPITEM		ItemHeader;
 	HDC			hDC;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	POINT		CenterPoint, WinPoint;
 	BOOL		SaveDisplay=Display, Rtn=FALSE;   
 	HANDLE		hVisList=0;
@@ -3362,7 +3362,7 @@ BOOL EditMenu (HWND hWnd,HANDLE hMenuName)
 	char	str[512], mess[512];
 	LPSTR	MenuName; 
 	UINT	ierr;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 	
 	if (!hMenuName)
@@ -3424,7 +3424,7 @@ BOOL GMLoadMenu (HWND hWnd,LPSTR Name)
 #endif
 {               
 	HFILE	MFid;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	HMENU	hMenu=0, hMenuOld; 
 	int		line=0, l;  
 	long	NewLen;
@@ -3530,7 +3530,7 @@ HMENU GMCreateMenu (HFILE MFid,LPINT line,LPSTR FileName)
 	UINT	CmdID; 
 	int		BeginLine=*line, checked; 
 	HFILE	FidLast=HFILE_ERROR;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	BOOL	SkipLine=FALSE;
 	BOOL	first = TRUE;
 	int		startLoc = GSSillseek (MFid,0,1);
@@ -3845,7 +3845,7 @@ long OutputHLTAreas (int HLTOUTFormat,LPSTR HLTOutPath)
 	long	Refno; 
 	int		pos=BT_FIRST; 
 	LPTHEME	pTheme;                                        
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	FidOut;
 	char	txt[128];  
 	DPOINT	CP;
@@ -4129,7 +4129,7 @@ void DisplayStreetText(void)
 	char	Name[260]; 
 	BTVARDESC	BTVar[4];
 	TIGER1_PEOPLENET	Tiger1PN; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	long	Offset, LastNum;     
 	char	SelectFile[144], SortFile[144],SaveFontName[LF_FACESIZE+2];
 	short	n;    
@@ -4722,7 +4722,7 @@ BOOL OpenShields (void)
 {   
 	char	str[132], SymName[64], IDText[256];     
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;   
+	OFSTRUCTGM	OFStruct;   
 	LPSHIELDS	pShields;
 	BOOL	Error=FALSE;
 	LPSTR	pParen,pComma, pEnd; 

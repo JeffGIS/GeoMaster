@@ -77,7 +77,7 @@ BOOL CreateINT_ACCIDTable (LPSTR File)
 	time_t ltime;
 	int		FidData;
 	int		ibeg,NumVars;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPVOID	lpVal;
 	LPSTR	pName;
 	GWFLDINFO FldInfo;
@@ -409,7 +409,7 @@ BOOL GetSegDataGM (long TLID,LPSEGDATAGM pSegdata)
 BOOL UnloadStreets (HWND hWnd)
 {   
 	char	Name[128], TrueName[66], str[256]; 
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	long	StreetNum;
 	HFILE	Fid;
 	BOOL	Opened;
@@ -456,7 +456,7 @@ BOOL UnloadStreets (HWND hWnd)
 BOOL ReloadStreets (HWND hWnd)
 {   
 	char	Name[128], str[256]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;   
 	LPSTR	lpComma, TrueName;  
 	long	StreetNum;
@@ -558,7 +558,7 @@ HANDLE CreateAddLocTable (LPSTR OutDBName,short UDIFieldLen, short AdditionalFie
     long        StartHouse,EndHouse, Recno=0;
     GWDHEADER16 GWDHead; 
     HFILE   OutFid;
-    OFSTRUCT    OFStruct;
+	OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;
     BOOL    First;
     LPSTR   lpDot, lpSpace,lpDash;
@@ -1354,7 +1354,7 @@ BOOL GetMunicName (long MCDIn,LPSTR Name,LPSTR Abv)
 BOOL GetZIPCenter (long ZIP,LPDPOINT Point)
 {
 	HFILE	Fid;
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	char	File[128];   
 	DPOINT	point;
 	long	zip, lon, lat;  
@@ -1391,7 +1391,7 @@ BOOL GetZIPCenter (long ZIP,LPDPOINT Point)
 BOOL ReloadSTNDTables (void)
 {   
 	char	Name[MAX_PATH], TrueName[66], TempFile[MAX_PATH]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid; 
 	long	TotLen,CurLoc;
 	
@@ -1465,7 +1465,7 @@ BOOL ReloadSTNDTables (void)
 BOOL FindNonNetworkedStreets (void)
 {   
 	char	str[128]="", TrueName[66]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;  
 	long	NumNotNet=0, TotNum=0; 
 	
@@ -1499,7 +1499,7 @@ BOOL RemoveNonNetworkedStreets (void)
 	LPGWDHEADER lpGWDHead;
     LPGWFLDINFO lpGWFldInfo;      
 	char	str[132]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 	HCURSOR	hcurSave; 
 	long	Offset;
@@ -1538,7 +1538,7 @@ BOOL RemoveNonNetworkedStreets (void)
 	BTVARDESC BTVar[2];  
 	HANDLE	hBT, hBT2, hBT3;
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;  
 	long	FIPSCode, FIPSCodeCity, FIPSCodeCounty;      
 	short	Dummy=0;
 
@@ -1590,7 +1590,7 @@ BOOL RemoveNonNetworkedStreets (void)
 	BTVARDESC BTVar[2];  
 	HANDLE	hBT, hBT2, hBT3;
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;  
 	long	Count;      
 	short	Dummy=0;   
 	struct	{
@@ -1665,7 +1665,7 @@ BOOL RemoveNonNetworkedStreets (void)
 	BTVARDESC BTVar[2];  
 	HANDLE	hBT, hBT2, hBT3;
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;  
 	long	FIPSCode, FIPSCodeCity, FIPSCodeCounty;      
 	short	Dummy=0;
 
@@ -1765,7 +1765,7 @@ int LoadMCDS4 (int dummy)
 	BTVARDESC BTVar[2];  
 	HANDLE	hBT, hBT2, hBT3;
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	long	FIPSCode, FIPSCodeCity, FIPSCodeCounty;      
 	short	Dummy=0;
 

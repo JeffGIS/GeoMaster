@@ -116,7 +116,7 @@ BOOL ImportSSURGOTables (LPSTR CompFile,LPSTR CompGMD)
 	HANDLE	hLoc=GSSiGlobAlloc ( 922,GMEM_MOVEABLE,4096);  
 	LPSTR	*loc=(LPSTR*)GlobalLock (hLoc);
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	LPSTR	lpTAB, EndVar, Val;
 	short	nVar=1,nVar2=1, i,j;  
 	LPGWDHEADER lpGWDHead;
@@ -431,7 +431,7 @@ BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt)
 	short	NumSyms=0, TINSym, n;  
 	char	str[260];   
 	HFILE	FidTIN;
-	OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
 	long	TotLen, CurLoc,PointID[4];  
 	double	Elev;
 	DPOINT	Point;
@@ -509,7 +509,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
 {
 	char	str[260], TrackID[66];  
 	MNMXCORD	Bounds;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid, Fid2; 
 	HANDLE	hDLT=0, hDLT2=0;   
 	BOOL	err;

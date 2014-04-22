@@ -7,7 +7,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 	char	str[256],FullName[128], Dir[150], FName[16], Ext[8], NewName[128], FileName[128],IndexName[128], FromFileName[128]; 
 	char	DataLoc[MAX_PATH]="[%DL]test.txt", Drive[16], DLDrive[16], DLDir[128];
 	LPSTR	StartDir, EndDir, pDir;  
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	BOOL	Replace;      
 	HFILE	FromFid, GCIFid=HFILE_ERROR, FidIndex;
 	FILEINDEXENTRY	IndexEntry, IndexEntry2; 

@@ -237,7 +237,7 @@ void AddMSLink (DGNHandle hNewDGN,DGNElemCore *psMember,LPSTR MSLinkVals)
 int DGNWriteGeoMaster (LPSTR Infile)
 {
 	char	str[520],Outfile[MAX_PATH+2],Seedfile[MAX_PATH+2], MSLinkValues[512], DGNLevC[66];
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE	Fid=GSSiOpenFile (Infile,&OFStruct,OF_READ);
     DGNHandle hNewDGN;
     DGNPoint   asPoints[500];

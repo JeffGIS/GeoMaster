@@ -665,9 +665,9 @@ void GetProgName (short i, LPSTR Name)
 {   
 	char	str[512]; 
 	short	n;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct; 
 	LPSTR	pLoc; 
-	HFILE Fid=OpenFile (FName,&OFStruct,OF_READ);  
+	HFILE Fid=OpenFileGM (FName,&OFStruct,OF_READ);  
 	
 	*Name = 0;
 	while (tgetstring (str,500,Fid))

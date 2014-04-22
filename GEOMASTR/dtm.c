@@ -545,7 +545,7 @@ BOOL LoadERDASDem (void)
 	} erdhead;
 	erdhead eh; 
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 //	static	short	row[19580]; 
 	UINT	irow, icol;   
 	DPOINT	Point;
@@ -1013,7 +1013,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 																							#endif
 {
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	UINT	irow, icol;   
 	DPOINT	Point;
 	HFILE		Fid1, Fid2;
@@ -1283,7 +1283,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 																							#endif
 {
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	UINT	irow, icol;   
 	DPOINT	Point;
 	HFILE		Fid1, Fid2;
@@ -2965,7 +2965,7 @@ long GetDTMHoles (LPSTR DTMName, LPSTR OutFile)
 	long	Cell[32][32]; 
 	char	str[260];
 	HFILE	OutFid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	long	nRecs, nLoaded=0;
 	
 	hSurf = DTMOpen (DTMName, LONG_MAX,BT_READ,0);

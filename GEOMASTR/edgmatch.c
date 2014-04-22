@@ -161,7 +161,7 @@ short LoadEdgeFile (LPSTR File,LPHANDLE hEdge)
 	LPEDGE		pEdge; 
 	short	nEdge=0;
 	HFILE	Fid1;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	DPOINT	TempPoint; 
 	HANDLE	hStr;    
 	LPSTR	lpstr;   
@@ -248,7 +248,7 @@ short LoadEdgeFromCorners (LPSTR File,LPHANDLE hEdge)
 	LPEDGE		pEdge; 
 	short	nEdge=0, n=0, j, i, ID1, Next;
 	HFILE	Fid1;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	DPOINT	TempPoint, Point[4]; 
 	HANDLE	hStr;    
 	LPSTR	lpstr, lpSpace, pC, pSideID; 
@@ -526,7 +526,7 @@ BOOL ApplyCornerAdjustment (LPSTR EdgeID,double EdgeDist,LPDPOINT pPoint,short n
 
 BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 {
-	LPOFSTRUCT	pOFStruct; 
+	LPOFSTRUCTGM	pOFStruct;
 	LPSTR	pFile; 
 	char	id[8]; 
 	double	MatchTol, AvDist, AZ;  
@@ -546,7 +546,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 	HFILE	Fid1, Fid2;
 	
 	str = GlobalLock(hMem);
-	pOFStruct = (LPOFSTRUCT) (str + 2048);   
+	pOFStruct = (LPOFSTRUCTGM) (str + 2048);   
 	pFile = str + 2048 + 1024;
 	MatchTol = atof (Arg3);
 	nEdge = LoadEdgeFile (Arg1,&hEdge);

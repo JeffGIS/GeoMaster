@@ -22,12 +22,12 @@ HFILE GetCfgFid (LPSTR Name,LPSHORT pVersion)
 {GSSiEnterProg (1003);
 #endif
 {
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	short		Signature;
 	
 	*pVersion = 0;
-	Fid = GSSiOpenFile (Name,(LPOFSTRUCT)&OFStruct,OF_READ); 
+	Fid = GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
 	if (Fid == HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -2280,7 +2280,7 @@ BOOL ProcessConnectedCommand (UINT ID)
 	HFILE	Fid;
 	char	ConFile[MAX_PATH];
 	char	TempDir[MAX_PATH];
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	HANDLE	hMem;
 	LPSTR	pMem;
 	int		lMem;
@@ -2289,7 +2289,7 @@ BOOL ProcessConnectedCommand (UINT ID)
 	rtn = GetTempFileName (TempDir,"gml",ID,ConFile); 
 	if (!rtn)
 		return FALSE;
-	Fid = OpenFile (ConFile,&OFStruct,OF_READ);
+	Fid = OpenFileGM (ConFile,&OFStruct,OF_READ);
 	if (Fid == HFILE_ERROR)
 		return FALSE;
     HaltMapDisplay(TRUE,FALSE);
@@ -2312,7 +2312,7 @@ void ZoomConnectedProcesses (BOOL Remove)
 	static	char	ConFile[MAX_PATH];
 	char	TempDir[MAX_PATH];
 	char	Cmd[256];
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	if (!NumConnectedProcesses)
 		return;
@@ -2327,7 +2327,7 @@ void ZoomConnectedProcesses (BOOL Remove)
 		GetTempPath (MAX_PATH,TempDir);
 		ID = GetTempFileName (TempDir,"gml",0,ConFile); 
 	}
-	Fid = OpenFile (ConFile,&OFStruct,OF_CREATE);
+	Fid = OpenFileGM (ConFile,&OFStruct,OF_CREATE);
 	sprintf (Cmd,"$ZOOM(POINTANDSCALE,%f %f,%f,F,COMMAND)",CurView->MidPointW.x,CurView->MidPointW.y,CurView->Scale);
 	_lwrite (Fid,Cmd,strlen(Cmd)+1);
 	_lclose (Fid);
@@ -2345,7 +2345,7 @@ void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd)
 	static	char	ConFile[MAX_PATH];
 	char	TempDir[MAX_PATH];
 	char	Cmd[256];
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	
 	if (!NumConnectedProcesses)
 		return;
@@ -2360,7 +2360,7 @@ void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd)
 		GetTempPath (MAX_PATH,TempDir);
 		ID = GetTempFileName (TempDir,"gml",0,ConFile); 
 	}
-	Fid = OpenFile (ConFile,&OFStruct,OF_CREATE);
+	Fid = OpenFileGM (ConFile,&OFStruct,OF_CREATE);
 	_lwrite (Fid,Cmd,strlen(cmd)+1);
 	_lclose (Fid);
 

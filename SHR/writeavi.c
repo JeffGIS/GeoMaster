@@ -81,7 +81,7 @@ BOOL CreateGCIFile (LPSTR Name,LPBITMAPINFOHEADER lpbi, HANDLE hFile)
 	LONG	ICRtn;
 	short	lhead;
     LPAVIFILE	pAVIFile;  
-    OFSTRUCT	OFStruct;  
+	OFSTRUCTGM	OFStruct;
     LPBITMAPINFOHEADER	lpbiHead;  
     HANDLE	hHeader; 
     DWORD	CompressorID; 
@@ -453,7 +453,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 	char		Name[MAX_PATH], str[512];   
 	LONG	ICRtn;
 	short	lhead; 
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	DWORD	CompressorID=mmioFOURCC('M', 'S', 'V', 'C');
 
 

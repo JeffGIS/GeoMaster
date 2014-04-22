@@ -1567,7 +1567,7 @@ BOOL DisplayPolyOff (void)
  HANDLE	hPoly; 
  LPSTR	lpColon;
  HPEN	hPen, OldPen;
- OFSTRUCT OFStruct;
+ OFSTRUCTGM OFStruct;
  HFILE	FidAO;
  LPSTR	pFile; 
  int	OffLineWidth, w;
@@ -1818,7 +1818,7 @@ BOOL AddAreaToOffsetFile (long Refno,int Type,int np, HPDPOINT lpDPoint,int nPol
 {
 	MNMXCORD Rect; 
 	HFILE	FidAO;
-	OFSTRUCT	OFStruct;        
+	OFSTRUCTGM	OFStruct;
 	long	loc; 
 	DWORD	i;  
 	DPOINT	BasePoint;    
@@ -2310,7 +2310,7 @@ BOOL GetFontFileName (LPSTR FontName,LPSTR FileName)
 #endif
 {   
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	char	str[130];
 	LPSTR	pSC;
 	
@@ -3647,7 +3647,7 @@ long GetNewRefno (LPSTR EditFile,LPSTR Prefix, LPSTR UDI,LPSHORT pSymNum,LPBOOL 
 {   int		n,ii;
 	long	TLID, Delay=5000000; 
 	char	str[MAX_PATH]; 
-	OFSTRUCT	OFStruct;
+	OFSTRUCTGM	OFStruct;
 	unsigned frequency=1000, duration=100; 
 	char	NewRefnoPath[MAX_PATH]; 
 	extern	BOOL    ShareEnabled;

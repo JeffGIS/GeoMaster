@@ -339,7 +339,7 @@ GSSiExitProg (1076);
     }
     if (Delete && ForceTAGIndex)
     {   
-    	OFSTRUCT OFStruct;
+    	OFSTRUCTGM OFStruct;
     	
     	GSSiRemove (TAGIndexFile);
 //    	retrn TRUE;
@@ -392,7 +392,7 @@ BOOL ChangePickedItemRefno (short Item, long NewRefno)
 	short	ID, ls, TAGHead, ID2;
 	BOOL	rtn=FALSE;  
 	HFILE	Fid; 
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	LPLONG	pRefno;  
 	long	Loc, OldRef;
 	BOOL	SaveDisableHalt = DisableHalt;
@@ -1581,7 +1581,7 @@ void DisplayTransformThemeLegend(short From)
 #endif
 {
 	HFILE Fid;
-	OFSTRUCT OFStruct;
+	OFSTRUCTGM OFStruct;
 	char	str[260]; 
 	long	BeginLoc;
 	HANDLE	hTran1=0, hTran2=0, hcoord=GSSiGlobAlloc ( 971,GMEM_MOVEABLE,2*16*(long)MAXTRANPOINTS+MAXTRANPOINTS*2); 
@@ -1981,7 +1981,7 @@ BOOL LoadVPToolBar (void)
 {   
 	BOOL	rtn=FALSE;  
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;    
+	OFSTRUCTGM	OFStruct;
 	long	len=0, line=1; 
 	int	height, width, type;
 	LPSHORT	pInt, pLen;
@@ -2234,7 +2234,7 @@ HMENU LoadToolBarMenu (LPSTR Name,LPHANDLE phPopups)
 #endif
 {               
 	HFILE	MFid;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	HMENU	hMenu=0; 
 	int		line=1, l;  
 	long	NewLen;
@@ -2519,7 +2519,7 @@ BOOL LinfitFilePoints (LPSTR FileList,LPSTR ExclusionList,short FitType,LPSTR Fi
 	double	D1, D2, MinD, A, B, MAXDIF, Dist;    
 	char	File[132], str[260]; 
 	HFILE	Fid1, Fid2;
-	OFSTRUCT	OFStruct; 
+	OFSTRUCTGM	OFStruct;
 	HANDLE	hDLT; 
 	short	SymNum;
 	MNMXCORD Bounds;  
@@ -2969,7 +2969,7 @@ BOOL UpdateCmdStringInFile (LPSTR VarName,LPSTR VarVal,short FilePos)
 #endif
 {   
 	HFILE	Fid;
-	OFSTRUCT	OFStruct;      
+	OFSTRUCTGM	OFStruct;
 	BOOL	rtn=TRUE; 
 	short	ID, ls;  
 	long	loc;
@@ -2988,7 +2988,7 @@ GSSiExitProg (1067);
 #endif
 		return FALSE;
 }
-	Fid = GSSiOpenFile (PickName,(LPOFSTRUCT)&OFStruct,OF_READWRITE);
+	Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);
 	if (Fid == HFILE_ERROR)
 {
 #if ENABLETRACE
