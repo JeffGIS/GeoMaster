@@ -372,6 +372,7 @@ int		NumNewPolyPoints=0;
 HANDLE	hNewPolyPoints=0;
 HANDLE	hCurPolyPoints=NULL; 
 char	MoveHorzVert=0;   
+char	literalChar = '@';
 LPVIEWPORT	CurPolyVP=NULL;
 long	nCurPolyPoints=0;
 DPOINT	DigWorldControlPoint;

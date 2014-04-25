@@ -1306,15 +1306,17 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQL)
     LPGWDHEADER	lpGWDHead;    
 	LPGWFLDINFO	lpGWFldInfo; 
 	LPFIELDINFO	pFieldInfo;
+	char litAndBracket[3] = "@[";
     short	i,ii;
     
+	litAndBracket[0] = literalChar;
     _fstrcpy (str,SQL); 
     if (*str == '(' && *LastChr(str) == ')')
     {
 	    _fstrcpy (SQLPtr->SQL,&str[1]);  
 		*LastChr (SQLPtr->SQL) = 0;
     }
-    else if (!_fstrnicmp (str,"@[",2))
+    else if (!_fstrnicmp (str,litAndBracket,2))
     {
     	ExpandText (str);
     	ExpandText (str);
@@ -3284,7 +3286,10 @@ GSSiExitProg (532);
 		case 368:
 			strcpy(SQLErrorLog, Value);
 			break;
-    default:
+		case 369:
+			literalChar = Value[0];
+			break;
+		default:
  			break;
 	}
 /*	if (TraceOn)
@@ -3671,6 +3676,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%TESTDL", 366, FALSE);
 	AllocateTypeVar("%WINDOWSVERSION", 367, FALSE);
 	AllocateTypeVar("%SQLERRORLOG", 368, FALSE);
+	AllocateTypeVar("%LITERALCHAR", 369, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4782,6 +4788,10 @@ GSSiExitProg (533);
 		case 368:
 			strcpy(OutStr, SQLErrorLog);
 			break;
+		case 369:
+			OutStr[0] = literalChar;
+			OutStr[1] = 0;
+			break;
 
 	}
 	GlobalUnlock (hGlobal);
@@ -5315,10 +5325,17 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 		*VarPtr->Value = 0;
 		VarPtr->changetime = NextVarTime();
 		SetLinkedVarTime (VarPtr); 
-		GlobalUnlock (DLTVar[ivar]);
+		if (nDLTvar == 1)
+		{
+			VarPtr->Len = strlen(str);
+			strncpy0(VarPtr->Value, str, VarPtr->Len);
+		}
+		GlobalUnlock(DLTVar[ivar]);
 		AddToChangedGlobalList (DLTVar[ivar]);
 	} 
-	ivar=0;
+	if (nDLTvar == 1)
+		goto RtnTrue;
+	ivar = 0;
 	if (DLTStart[0]>=0)
 	{   
 		LineLen = _fstrlen(str);
@@ -6016,7 +6033,7 @@ GSSiExitProg (558);
 	}
 	while (*InLoc && ContinueProcessing)
 	{
-		if (*InLoc == '@') /* literal */
+		if (*InLoc == literalChar) /* literal */
 		{
 			if (!hMem)
 			{
@@ -6028,7 +6045,7 @@ GSSiExitProg (558);
 			}
 			InLoc++;
 			*OutLoc++ = *InLoc;
-			if (*InLoc && *InLoc != '@')
+			if (*InLoc && *InLoc != literalChar)
 				InLoc++;
 			FoundLit = TRUE;
 		}
@@ -9719,7 +9736,7 @@ void SaveGlobalVals (HFILE Fid)
 					_fstrcpy (str,VarPtr->Value);  
 				SubstituteDL (str,TRUE);
 				pstr = str;
-				if (*str == '@')
+				if (*str == literalChar)
 					pstr++;
 				_fstrcpy (pMem,pstr);  
 				l = _fstrlen (pMem);

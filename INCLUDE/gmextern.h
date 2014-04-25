@@ -782,6 +782,7 @@ extern POINT			CurStartPoint;
 extern POINT			CurEndPoint;
 extern HANDLE			hCurPolyPoints;
 extern char			MoveHorzVert;
+extern char			literalChar;
 extern LPVIEWPORT			CurPolyVP;
 extern long			nCurPolyPoints;
 extern float			MaxPointSize;
