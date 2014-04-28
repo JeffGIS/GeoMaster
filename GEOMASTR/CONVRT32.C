@@ -2652,11 +2652,13 @@ BOOL OpenConfig (HWND hWnd,HDC hDC)
     short     NumViews;
     LPSHORT   lpMenuMask; 
     long    ii;   
-    char    Cfg[128], str[256], FullPath[MAX_PATH], Suffix[8];
+    char    Cfg[128], str[512], FullPath[MAX_PATH], Suffix[8];
     LPSTR	pStr; 
     static	BOOL	First = TRUE;
     long	lenCfg;
 	int		MaxFileLength = MAX_PATH;
+	LPSTR	pTE, pTEend;
+	char	setTestEnv[MAX_PATH + 64] = { 0 };
 
     if (FidConfig != HFILE_ERROR)
 {
@@ -2681,6 +2683,16 @@ GSSiExitProg (100);
     	_fstrcat (CfgName,".gmc");
     _fullpath (FullPath,CfgName,sizeof(FullPath)); 
     _fstrlwr (FullPath);
+	if ((pTE = strstr(FullPath, "\\testenvironments\\")))
+	{
+		pTE += strlen("\\testenvironments\\");
+		if ((pTEend = strchr(pTE, '\\')))
+		{
+			*pTEend = 0;
+			sprintf (setTestEnv,"[%%TESTDL]=[%%DL]testenvironments\\%s", pTE);
+			*pTEend = '\\';
+		}
+	}
     _splitpath (FullPath,0,0,Cfg,Suffix);
     SetGlobalValue ("%CONFIGPATH",FullPath); 
     SetGlobalValue ("%CONFIG",Cfg);
@@ -2748,7 +2760,8 @@ GSSiExitProg (100);
         } 
     } 
 	SaveLocalConfigToNetwork (FidConfig,FullPath);
-	GSSifstat (FidConfig,&OpenConfigStat);
+	ProcessText(setTestEnv);
+	GSSifstat(FidConfig, &OpenConfigStat);
     SetGlobalValue ("%CONFIG",Cfg);
     SetCurVal (FullPath,IDS_FILEGMC);
     lenCfg = GSSillseek (FidConfig,0,2);
