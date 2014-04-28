@@ -11265,7 +11265,7 @@ ClearEnd:
 		
     case WM_RBUTTONUP:
     {   
-    	char	TranFileName[128], FullName[128]; 
+    	char	TranFileName[MAX_PATH], FullName[MAX_PATH]; 
     	HFILE	FidTran;
 		OFSTRUCTGM	OFStruct;
     	LPSTR	lpSlash;
@@ -11333,7 +11333,7 @@ BOOL TrackPhotoLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     
     case WM_LBUTTONDOWN:
     {   
-    	char	TranFileName[128], FullName[128]; 
+    	char	TranFileName[MAX_PATH], FullName[MAX_PATH]; 
     	HFILE	FidTran;
 		OFSTRUCTGM	OFStruct;
     	short	i;

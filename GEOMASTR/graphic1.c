@@ -254,7 +254,7 @@ void FreeSavedConfigs (void)
 
 void LogUsageInfo (int From,LPSTR mess)
 {
-	char str[256],DateTime[64];
+	char str[512],DateTime[64];
 
 	if (LogUsage && !MapServer)
 	{  
@@ -4225,7 +4225,7 @@ GSSiExitProg (52);
 
 void DisplayCloseIcon (void)
 { 
-	char	str[128];
+	char	str[MAX_PATH];
 	int		x,y;
 	
 	if (CurView && CurView->hDC && !InShowZoomArea && !Printing && !InSmoothZoom && !MemMap)

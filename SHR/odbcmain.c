@@ -1694,13 +1694,13 @@ BOOL AddPWtoODBCFile (LPSTR lpcstring)
 	int	i;
 	LPSHORT	pnumPW; 
 	BOOL	rtn=FALSE;
-	char	str[128];
+	char	str[MAX_PATH+2];
     
     if (!hODBCPW)
     {
 		if (GetGlobalCVal ("[%ODBCPASSWORDFILE]",str,0))
 		{   
-			char		SaveCurODBCFile[144];
+			char		SaveCurODBCFile[MAX_PATH];
 			OFSTRUCTGM	OFStruct;
 			HFILE		Fid=GSSiOpenFile (str,&OFStruct,OF_READ);
 			LPSTR		pSpace; 
@@ -1709,7 +1709,7 @@ BOOL AddPWtoODBCFile (LPSTR lpcstring)
 				return FALSE;   
 			_fstrcpy (SaveCurODBCFile,CurODBCFile);
 
-			while (fgetstring (str,120,Fid))
+			while (fgetstring (str,MAX_PATH,Fid))
 			{   
 				if ((pSpace = _fstrstr (str," UID=")))
 				{   
@@ -1880,7 +1880,7 @@ LPSTR DriverName = tnames + (2048+256+1024+256+256);
 LPSTR name = DriverName+256;
 LPSTR pDBQ, pSC;
 short	qclen;
-char	additional[128]={0};
+char	additional[256]={0};
 
 	strcpy (name,Inname);
 	ExpandText (name);

@@ -22,7 +22,7 @@ static	char	ClassLink[MAX_THEME_CLASSES][256];
 static COLORREF	LastTAGBGcolor=RGB(255,255,0);
 static COLORREF	LastTAGTXcolor=RGB(0,0,0);
 static COLORREF	LastTAGBORcolor=RGB(0,0,0);
-static	char	DumpFileName[144]="";
+static	char	DumpFileName[MAX_PATH]="";
 static	char	OldValListFile[MAX_PATH];  
 static	char	SELVALDataFile[MAX_PATH]="",SELVALSQL[256]="",SELVALFieldName[66]="";
 static	short	SELVALDataFileType=0;
@@ -6321,7 +6321,7 @@ BOOL FAR PASCAL STRMPIPEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
  
  if (Message == WM_INITDIALOG)
  {  
- 	char	FileName[128];
+ 	char	FileName[MAX_PATH];
  	
  	GetGlobalCVal ("[%ARG1]",FileName,0);
  	SetDynDlgData (hWndDlg,FileName,cntls,sizeof (cntls));
@@ -6396,7 +6396,7 @@ BOOL FAR PASCAL STRMPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
  
  if (Message == WM_INITDIALOG)
  {  
- 	char	FileName[128];
+ 	char	FileName[MAX_PATH];
  	
  	GetGlobalCVal ("[%ARG1]",FileName,0);
  	SetDynDlgData (hWndDlg,FileName,cntls,sizeof (cntls));
@@ -24362,7 +24362,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     long        TotLen, CurLoc, County, NumCounties;
     LPLONG      pCounty, pCnty;  
     static      short     FileType = 0, nJust;
-	char	drive[8], dir[128], name[10], ext[6], VolLabel[16],CurDir[128], FileName[132], DirName[128];
+	char	drive[8], dir[128], name[10], ext[6], VolLabel[16],CurDir[128], FileName[MAX_PATH], DirName[128];
 	OFSTRUCTGM	OFStruct;
    	HFILE	FidList, FidAtt;  
    	char	MUSYM[10], MUID[16];

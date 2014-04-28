@@ -1797,7 +1797,7 @@ int DisplayBMFileInRect (HDC hDC,LPSTR ImageFile, RECT InRect, short MaintainAsp
 { 
     int     rtn;
     HDIB32  hDibInfo;
-    char	Name[128];  
+    char	Name[MAX_PATH];  
     RGBQUAD	*pColors;
 	RECT	Rect=InRect;
     

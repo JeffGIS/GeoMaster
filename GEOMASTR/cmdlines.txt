@@ -1,5 +1,7 @@
-projects\alleywalls\alleymaps.gmc /F /WD c:\geomas
+projects\alleywalls\alleymaps.gmc /F /WD "C:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\GEOMas"
 configs\HCPropExtract\propload.gmc /F /WD c:\geomas
+configs\Illinois.gmc /F /WD "I:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\CountyData"
+configs\Cleveland.gmc /F /WD "I:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\CountyData"
 configs\Cleveland.gmc /F /WD c:\countydata
 configs\jeff\centerline_load_problem.gmc /F [%USERLEV]=2; /WD c:\geomas
 configs\basic1.gmc /F [%USERLEV]=2; /WD c:\geomas
@@ -125,6 +127,10 @@ granth.gmc /WD c:\granth
 
 
 granth
+
+
+
+
 
 
 

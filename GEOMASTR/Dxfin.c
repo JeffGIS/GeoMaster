@@ -356,7 +356,7 @@ void DxfIn(void)
       MSG far *lpMSG;   
       BOOL MoreFiles=FALSE; 
       HFILE	FidFileList;
-      char	FileName[130];
+      char	FileName[MAX_PATH];
       char  mess[256];
    
      static BOOL  PREPROCESSING = FALSE;    

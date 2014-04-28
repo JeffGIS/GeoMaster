@@ -1560,11 +1560,12 @@ BOOL DisplayPolyOff (void)
  DPOINT	BasePoint;
  BOOL	Cancel;
  LPTHEME	pTheme;
- UINT	npx, i;
+ UINT	npx, i, j;
  HPDPOINT	lpDpoint;
  HPPOINT	lpPoint, lpPoly;
  char	cCor[32], str[64];
- HANDLE	hPoly; 
+ HANDLE	hPoly;
+ HANDLE hPolyPartLen = 0;
  LPSTR	lpColon;
  HPEN	hPen, OldPen;
  OFSTRUCTGM OFStruct;
@@ -1575,6 +1576,7 @@ BOOL DisplayPolyOff (void)
  int	NumEntries;
  short	Version;
  HIGHLIGHTAREAHEADER	Header;
+ BOOL	showBorder=TRUE, doFill = FALSE;
     
    	if (!hAreaOffFile)
 {
@@ -1612,12 +1614,17 @@ GSSiExitProg (1158);
 	    hPoly = GSSiGlobAlloc (1251,GMEM_MOVEABLE,(Header.np+1)*sizeof(POINT));
 	    lpPoint = (HPPOINT) GlobalLock (hPoly);
 	    lpPoly = lpPoint;  
+		if (Header.nPoly > 1)
+			hPolyPartLen = GSSiGlobAlloc(1789, GMEM_MOVEABLE, Header.nPoly*sizeof(int));
+		else
+			hPolyPartLen = 0;
 	    if (MaskOffsetLine && CurView->ID == Header.VPID)
 	    {   
 			LPMNMXCORD	lpRect; 
 	    	
 	    	ClearMaskArea ();
-		    CurView->hMaskArea = GSSiGlobAlloc (1252,GMEM_MOVEABLE,sizeof(MNMXCORD)+(long)Header.np*sizeof(DPOINT));
+			CurView->NumMaskAreaParts = Header.nPoly - 1;
+			CurView->hMaskArea = GSSiGlobAlloc(1252, GMEM_MOVEABLE, sizeof(MNMXCORD)+(long)Header.np*sizeof(DPOINT)+CurView->NumMaskAreaParts*sizeof(int));
 		    CurView->NumMaskPoints = Header.np; 
 		    CurView->MaskAreaRefno = Header.Refno;
 		    lpRect = (LPMNMXCORD) GlobalLock (CurView->hMaskArea);
@@ -1627,24 +1634,35 @@ GSSiExitProg (1158);
 		    BigRead (FidAO,lpDpoint,Header.np*sizeof(DPOINT));
 			for (i=0;i<Header.np;i++,lpPoint++,lpDpoint++)
 				*lpPoint = BasePtToWinPt(lpDpoint);
-			GlobalUnlock (CurView->hMaskArea);
-    	}
+			if (Header.nPoly > 1)
+			{
+				BigRead(FidAO, lpDpoint, Header.nPoly*sizeof(int));
+			}
+			GlobalUnlock(CurView->hMaskArea);
+		}
 		else if (CurView->ID != Header.VPID || !CurViewActive() ||!RectInWBounds (&Header.Bounds,1))
 		{
 			GSSillseek (FidAO,Header.np*sizeof(DPOINT),1);
+			if (Header.nPoly > 1)
+				GSSillseek (FidAO,Header.nPoly*sizeof(int),1);
 			goto Next;
 		}
 		else
 		{
-			HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,Header.np*sizeof(DPOINT));
+			HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, Header.np*sizeof(DPOINT));
 
-		    lpDpoint = (LPDPOINT) GlobalLock (hPoints);  
-		    BigRead (FidAO,lpDpoint,Header.np*sizeof(DPOINT));
-			for (i=0;i<Header.np;i++,lpPoint++,lpDpoint++)
+			lpDpoint = (LPDPOINT)GlobalLock(hPoints);
+			BigRead(FidAO, lpDpoint, Header.np*sizeof(DPOINT));
+			for (i = 0; i<Header.np; i++, lpPoint++, lpDpoint++)
 				*lpPoint = BasePtToWinPt(lpDpoint);
-			GSSiGlobUlFree (&hPoints);
+			GSSiGlobUlFree(&hPoints);
+			if (Header.nPoly > 1)
+			{
+				LPINT pPolyPartLen = GlobalLock(hPolyPartLen);
+				BigRead(FidAO, pPolyPartLen, Header.nPoly*sizeof(int));
+				GlobalUnlock(hPolyPartLen);
+			}
 		}
-	    *lpPoint= *lpPoly;
 		SetDisplayMode (CurView->hDC, GF_TEXTMODE);
 		if (!FileMode)
 		{
@@ -1681,22 +1699,47 @@ GSSiExitProg (1158);
 		    OldPen = SelectObject (CurView->hDC,hPen); 
 		    if (OutlineZoomArea && !ComputePCTTheme)
 			{
-				if (Header.Type == 3)
+				if (Header.Type == 3)//area
 				{
 					HBRUSH hBrush, hOldBrush;
 
 					hBrush = CreatePatternBrush(hbmp);
 					//hBrush = CreateSolidBrush (OffLineColor);
 					hOldBrush = SelectObject (CurView->hDC,hBrush);
-					i=Polygon (CurView->hDC,lpPoly,Header.np);
-					SetROP2(CurView->hDC,OldMode);
-					SelectObject (CurView->hDC,GetStockObject (NULL_BRUSH));
-					i=Polygon (CurView->hDC,lpPoly,Header.np);
-					SelectObject (CurView->hDC,hOldBrush);
-					DeleteObject (hBrush);
+					//GWPolygonD(CurView->hDC, lpPoly, Header.np, Header.nPoly, hPolyPartLen, 0, showBorder,doFill, 0);
+					if (Header.nPoly < 2)
+					{
+						i = Polygon(CurView->hDC, lpPoly, Header.np);
+						SetROP2(CurView->hDC, OldMode);
+						SelectObject(CurView->hDC, GetStockObject(NULL_BRUSH));
+						i = Polygon(CurView->hDC, lpPoly, Header.np);
+						SelectObject(CurView->hDC, hOldBrush);
+						DeleteObject(hBrush);
+					}
+					else
+					{
+						LPINT pPartLen = GlobalLock(hPolyPartLen);
+
+						SelectObject(CurView->hDC, GetStockObject(NULL_PEN));
+						i = Polygon(CurView->hDC, lpPoly, Header.np);
+						SelectObject(CurView->hDC, hPen);
+						for (j = 0; j < 2; j++)
+						{
+							LPPOINT pPoint = lpPoly;
+							for (i = 0; i < Header.nPoly; i++)
+							{
+								Polyline(CurView->hDC, pPoint, pPartLen[i]);
+								pPoint += pPartLen[i];
+								if (i)
+									pPoint++;
+							}
+							SetROP2(CurView->hDC, OldMode);
+						}
+						GlobalUnlock(hPolyPartLen);
+					}
 				}
 				else
-		    		i=Polyline (CurView->hDC,lpPoly,Header.np);
+					i=Polyline (CurView->hDC,lpPoly,Header.np);
 			}
 	        DeleteObject (hbmp); 
 		    SelectObject (CurView->hDC,OldPen);
@@ -1707,6 +1750,7 @@ GSSiExitProg (1158);
 		} 
 	Next:
 	    GSSiGlobUlFree (&hPoly);
+		GSSiGlobFree (&hPolyPartLen);
 	}
 	GSSiClose(FidAO);
    	GlobalUnlock (hAreaOffFile);

@@ -746,6 +746,7 @@ void StatusExtraInfoUpdate(LPSTR mess)
 {
 	if (PrintMsgWnd)
 		SetDlgItemText(PrintMsgWnd, IDC_PRINTERINFO, mess);
+	else SetWindowText(hWndMain, mess);
 	return;
 }
 

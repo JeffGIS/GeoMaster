@@ -1747,7 +1747,7 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 	LPDTMDATA	pDTMData;
 	static	BOOL	First=TRUE;  
 	short	Type=0;
-	char	FileName[128],str[128]; 
+	char	FileName[MAX_PATH],str[MAX_PATH]; 
 	HFILE	FidSurf;
 	
 	DTMRenderGridSpacing = GetGlobalDVal2("[%DTMGridSpacing]",-300.0);   

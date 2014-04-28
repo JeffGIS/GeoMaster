@@ -19,7 +19,9 @@ void SetSavedGraphicsFid (int Type);
 void SaveTileGraphics (HFILE Fid,HDC hDC,int type,LPPOINT points,int np);
 
 
-#if CHECKMEM        
+#if CHECKMEM    
+void MEMERR(LPSTR Mess);
+
 #define PostMessageA GSSiPOSTMESSAGE 
 BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
 #define	GlobalLock	GSSiGLOBALLOCK

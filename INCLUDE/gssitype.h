@@ -866,7 +866,7 @@ typedef ELEMENT	FAR	*LPELEMENT;
 
 typedef struct
 	{
-		char	Name[128];
+		char	Name[MAX_PATH];
 		char	OrigName[68];
 		BOOL	DIBColorsArePalleteEntries;
 		long	Frame;

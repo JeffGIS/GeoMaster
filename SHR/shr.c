@@ -108,16 +108,42 @@ HFILE OpenFileGM(
 	_In_    UINT uStyle
 	)
 {
-	HFILE fid;
-	char fullPath[MAX_PATH];
+	HFILE fid = (int)INVALID_HANDLE_VALUE;
+	char *fullPath;
+	int ln;
+	OFSTRUCT ofStruct;
 
-	int ln = GetFullPathName(lpFileName, MAX_PATH, fullPath, 0);
-
+	fullPath = _fullpath(lpReOpenBuff->szPathName, lpFileName, MAX_PATH);
+	if (!fullPath)
+		return HFILE_ERROR;
+	ln = strlen(fullPath);
 	if (ln < OFS_MAXPATHNAME)
-		fid = OpenFile(lpFileName, (LPOFSTRUCT)lpReOpenBuff, uStyle);
-	else
 	{
-		fid = OpenFile(lpFileName, (LPOFSTRUCT)lpReOpenBuff, uStyle);
+		fid = OpenFile(fullPath, &ofStruct, uStyle);
+		lpReOpenBuff->nErrCode = ofStruct.nErrCode;
+		lpReOpenBuff->fFixedDisk = ofStruct.fFixedDisk;
+	}
+	else switch (uStyle)
+	{
+	case OF_READ:
+		fid = (int)CreateFile(lpFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_READWRITE:
+		fid = (int)CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_CREATE:
+		fid = (int)CreateFile(lpFileName, GENERIC_READ|GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_EXIST:
+		if (GetPathType2((LPSTR)lpFileName)==1)
+			fid = 1;
+		break;
+	case OF_DELETE:
+		if (!remove(lpFileName))
+			fid = 1;
+	default:
+		MessageBox(0, "Invalid Style in OpenFileGM", 0, MB_ICONEXCLAMATION);
+		break;
 	}
 
 	return fid;
@@ -3325,7 +3351,7 @@ void SubstituteDL (LPSTR Name,BOOL WantAt)
 {   
 	if (GetGlobalBVal ("[%SUBDL]"))
 	{  
-		char	DL[128]="[%DL]";
+		char	DL[MAX_PATH]="[%DL]";
 		short	l=_fstrlen (Name); 
 		HANDLE	hMEM=GSSiGlobAlloc (  82,GMEM_MOVEABLE,l+1);
 		LPSTR	TempName = GlobalLock (hMEM);         	
@@ -6401,24 +6427,15 @@ GSSiExitProg (288);
 #endif
 }
 
-
-int GetPathType (LPSTR InName) //returns: 0=not found,1=file, 2=directory,3=http
-#if ENABLETRACE
-{GSSiEnterProg (288);
-#endif
-{   
-	char	Name[MAX_PATH];
+int GetPathType2(LPSTR Name) //returns: 0=not found,1=file, 2=directory,3=http
+{
 	WIN32_FILE_ATTRIBUTE_DATA	WFAD;
 	int		rtn = 0;
-    
-	strcpy (Name,InName);
-	ExpandText (Name);
-	ConvertToNewLocation (Name,TRUE);
-    if (*Name)
-    {
+	if (*Name)
+	{
 		if (_fstrnicmp (Name,"http:",5))
 		{
-			if (GetFileAttributesEx(Name,GetFileExInfoStandard,&WFAD))
+			if (GetFileAttributesEx(Name, GetFileExInfoStandard, &WFAD))
 			{
 				if (WFAD.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 					rtn = 2;
@@ -6429,6 +6446,21 @@ int GetPathType (LPSTR InName) //returns: 0=not found,1=file, 2=directory,3=http
 		else
 			rtn = 3;
 	}
+	return rtn;
+}
+
+int GetPathType (LPSTR InName) //returns: 0=not found,1=file, 2=directory,3=http
+#if ENABLETRACE
+{GSSiEnterProg (288);
+#endif
+{   
+	char	Name[MAX_PATH];
+	int		rtn;
+    
+	strcpy (Name,InName);
+	ExpandText (Name);
+	ConvertToNewLocation (Name,TRUE);
+	rtn = GetPathType2 (Name);
 {
 #if ENABLETRACE
 GSSiExitProg (288);

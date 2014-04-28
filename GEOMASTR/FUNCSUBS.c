@@ -2081,7 +2081,7 @@ BOOL SaveMaskAreas (LPSTR Directory)
 	HANDLE	hPnts;
 	HPDPOINT	Points;
 	HFILE	Fid;
-	char	FileName[128];
+	char	FileName[MAX_PATH];
 	
 	while (!BT_FIND (hHighlight,(LPSTR)&Refno,pos,BT_ANY,(LPSTR)&HighlightData))
 	{   

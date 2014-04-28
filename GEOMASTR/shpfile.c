@@ -1485,6 +1485,8 @@ BOOL ProcessSHPRecord (HDC hDC,HFILE FidSHP,long RecordNumber)
 	int			BorderSymNum;
 
 	nrecs++;
+	if (RecordNumber == 66)
+		ii = 1;
     if (CurView->ID == dbugid)
     	ii=1;
 	if (Pick)
@@ -1765,17 +1767,36 @@ DoPoly:
 						}   
 						GlobalUnlock (hPolyPartLen); 
 					}
-					else if (CopyRec)  
+					else if (CopyRec)
 					{
-						
-						pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
+						pNumPoints = (LPINT)GlobalLock(hPolyPartLen);//pNumPoints[1]
 						if (nPoly > 1)
 						{
-						ii=1;
+							HANDLE	hhPoly = GSSiGlobAlloc(418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
+							LPHANDLE phPoly = (LPHANDLE)GlobalLock(hhPoly);
+							HPDPOINT	pPoints1 = (HPDPOINT)GlobalLock(hPoints), pPoints2;
+
+							for (i = 0; i<nPoly; i++)
+							{
+								phPoly[i] = GSSiGlobAlloc(420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);
+								pPoints2 = (HPDPOINT)GlobalLock(phPoly[i]);
+								hmemmove((HPSTR)pPoints2, (HPSTR)pPoints1, sizeof(DPOINT)*(long)pNumPoints[i]);
+								GlobalUnlock(phPoly[i]);
+								pPoints1 += pNumPoints[i];
+								if (i)
+									pPoints1++;
+							}
+							GlobalUnlock(hPoints);
+							AddPolyToBuffer(nPoly, pNumPoints, phPoly, TYPE_POLYLINE, CurrentRefno, 0, -1, CurrentDesc, 0, CurrentPrefix, CurrentUDI,
+								-1, -1, 0, 0, 0, 0, 0, TRUE, &hUpdateBuf, &lUpdateBuf);
+							for (i = 0; i<nPoly; i++)
+								GSSiGlobFree(&phPoly[i]);
+							GSSiGlobUlFree(&hhPoly);
 						}
-						AddPolyToBuffer (nPoly,pNumPoints,&hPoints,TYPE_POLYLINE,CurrentRefno,0,-1,CurrentDesc,0,CurrentPrefix,CurrentUDI,
-										 -1,-1,0,0,0,0,0,TRUE,&hUpdateBuf,&lUpdateBuf); 
-						GlobalUnlock (hPolyPartLen);
+						else
+							AddPolyToBuffer(nPoly, pNumPoints, &hPoints, TYPE_POLYLINE, CurrentRefno, 0, -1, CurrentDesc, 0, CurrentPrefix, CurrentUDI,
+							-1, -1, 0, 0, 0, 0, 0, TRUE, &hUpdateBuf, &lUpdateBuf);
+						GlobalUnlock(hPolyPartLen);
 					}
 					else
 					{    

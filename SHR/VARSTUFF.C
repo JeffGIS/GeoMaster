@@ -267,8 +267,8 @@ BOOL LoadGlobalInit (LPSTR File,BOOL First)
 {GSSiEnterProg (518);
 #endif
 {   
-	HANDLE	hMem=GSSiGlobAlloc (1504,GMEM_MOVEABLE,2048);
-	LPSTR	str=GlobalLock (hMem), str2=str+520, mess=str2+520;
+	HANDLE	hMem=GSSiGlobAlloc (1504,GMEM_MOVEABLE,4096*3);
+	LPSTR	str=GlobalLock (hMem), str2=str+4096, mess=str2+4096;
 	HFILE	Fid;  
 	int		n=0; 
 	BOOL	noerr=TRUE; 

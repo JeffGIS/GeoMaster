@@ -10,7 +10,7 @@ static	char	CurrentCD[32]="";
 
 BOOL FileOnSystem (LPSTR Name)
 {   
-	char	NewName[144];
+	char	NewName[MAX_PATH];
 	
 	_fstrcpy (NewName,Name);
 	ExpandText (NewName);
@@ -206,7 +206,7 @@ void CloseCDLookUpTable (void)
 
 BOOL ConvertNameToCDName (LPSTR Name)
 {   
-	char	Drive[34], NewName[144], Mess[128]; 
+	char	Drive[34], NewName[MAX_PATH], Mess[MAX_PATH]; 
 	short	n;
 	BOOL	SaveDP = DoPaint, SaveDH = DisableHalt;
 	short	Response=1;

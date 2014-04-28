@@ -893,7 +893,7 @@ void ConvertCoordExport (LPDPOINT pDPoint)
 void TIGEROut(void)
 {
     long    Num, TLID, Frame, Offset, Refno,SNum, AltNum,NextAltNum=1;
-    char    StreetName[34], str[128], OutRec[256], FileName[128];
+    char    StreetName[34], str[128], OutRec[256], FileName[MAX_PATH];
     short      st, st2, st3, stn,  Version, hltpos,i, ipos;
 	BTVARDESC BTVar[2];
 	OFSTRUCTGM    OFStruct;

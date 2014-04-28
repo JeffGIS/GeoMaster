@@ -4,7 +4,7 @@
 
 BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileIndexEntry)
 {   
-	char	str[256],FullName[128], Dir[150], FName[16], Ext[8], NewName[128], FileName[128],IndexName[128], FromFileName[128]; 
+	char	str[512], FullName[MAX_PATH], Dir[MAX_PATH], FName[MAX_PATH], Ext[8], NewName[MAX_PATH], FileName[128], IndexName[MAX_PATH], FromFileName[MAX_PATH];
 	char	DataLoc[MAX_PATH]="[%DL]test.txt", Drive[16], DLDrive[16], DLDir[128];
 	LPSTR	StartDir, EndDir, pDir;  
 	OFSTRUCTGM	OFStruct;
@@ -14,7 +14,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 	LPFILEINDEX		lpFI;
 	LPFILEINDEXENTRY pEntry=&IndexEntry2;                
     LPFILEINDEX lpIndex;
-	char	CurFileName[128];   
+	char	CurFileName[MAX_PATH];   
     MNMXCORD	FileBounds; 
     BOOL	CurHeaderWritten;  
 	HANDLE	hlpFI;  

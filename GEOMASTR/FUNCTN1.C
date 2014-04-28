@@ -29,7 +29,7 @@ int	GetFunctionValue (int FunID,LPSTR Args, LPSTR OutLoc)
 {   HANDLE	hMem=0,hDLT,hSurf;
 	LPSTR	Arg1, Arg2, Arg3, Arg4, Arg5, Arg6,Arg7, ParLoc, lpstr, lpstrb;  
 	BOOL	FromLimits, Immediate; 
-	LPSTR	pEnd, pCR, pFile, Arg[20], pVal;
+	LPSTR	pEnd, pCR, pFile, Arg[20] = { 0 }, pVal;
 	short	nArgs, layer;
 	HFILE	Fid1, Fid2, Fid3;   
 	int		l, CvtDir, year,i;    

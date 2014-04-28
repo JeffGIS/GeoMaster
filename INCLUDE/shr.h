@@ -220,7 +220,8 @@ long SearchFilesInDir (LPSTR CurDir, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LP
 long SearchDirectoriesInDir (LPSTR CurDirIN, HFILE OutFile,LPLONG TotFiles,LPSTR WildCard,int Lev);
 int WINAPI DlgDirList32 (HWND hWndDlg, LPSTR cType, int LBCNTL, int CurrentDirCNTL, UINT Flags);
 BOOL ExistFile(LPSTR Name);
-int GetPathType (LPSTR InName);
+int GetPathType(LPSTR InName);
+int GetPathType2(LPSTR InName);
 short FileType(LPSTR Name);
 short FileType_old(LPSTR Name);
 BOOL IsLocalFile(LPSTR Name);

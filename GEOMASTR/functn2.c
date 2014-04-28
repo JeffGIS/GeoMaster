@@ -117,7 +117,7 @@ int	GetFunctionValue3 (int FunID,LPSTR Args, LPSTR OutLoc)
 #endif
 {   HANDLE	hMem=0,hDLT,hSurf, hStr;
 	LPSTR	Arg1, Arg2, Arg3, Arg4, Arg5, Arg6,Arg7, ParLoc, lpstr, lpstrb, str;  
-	LPSTR	pEnd, pCR, pFile, Arg[20];  
+	LPSTR	pEnd, pCR, pFile, Arg[20] = { 0 };
 	HPSTR	pMem1,pMem2;
 	HFILE	Fid1, Fid2, Fid3;   
 	short	nArgs, l, CvtDir, year;    
@@ -1663,8 +1663,12 @@ GSSiExitProg (1350);
 		
 		case 909://$GETINIVAL(pathname.ini,section,name,default)
 		{
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
-			GetPrivateProfileString (Arg[2],Arg[3],Arg[4],OutLoc,256,Arg[1]); 
+			int ln;
+			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			if (!GetShortPathName(Arg[1], Arg[6], MAX_PATH))
+				*OutLoc = 0;
+			else
+				GetPrivateProfileString (Arg[2],Arg[3],Arg[4],OutLoc,256,Arg[6]); 
 			goto Rtnl;
 		}
 		break;

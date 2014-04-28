@@ -1058,7 +1058,7 @@ GSSiExitProg (950);
 		{
 			if (*PickedOrthoName)
 			{   
-				HANDLE	hName=GSSiGlobAlloc ( 757,GMEM_MOVEABLE,128);
+				HANDLE	hName=GSSiGlobAlloc ( 757,GMEM_MOVEABLE,512);
 				LPSTR	pName = GlobalLock (hName), lpChr; 
 				short	i;
 				
@@ -1832,7 +1832,7 @@ GSSiExitProg (973);
 	    {
 	    	if (CurView->NumMaskAreaParts)
 	    	{   
-	    		HPWORD	pPartLen = (HPSHORT)&lpFirstPoint[CurView->NumMaskPoints];
+	    		LPINT	pPartLen = (LPINT)&lpFirstPoint[CurView->NumMaskPoints];
 				short	i,nPoly = CurView->NumMaskAreaParts+1;
 
         		for (i=0;i<nPoly;i++)

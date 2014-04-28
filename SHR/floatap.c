@@ -56,7 +56,7 @@ BOOL LogicP (LPSTR INEXPR,LPBOOL IRC)
 { 
 // IRC (0=success, 1 = invalid flt value, 2 = error in paren matching, 3 = invalid statement, 4 = devide by 0, 5=invalid op code)  
     LPSTR	pLchr, pVal1Begin, pVal1End, pVal2Begin, pVal2End, pEnd; 
-    HANDLE	hInput=GSSiGlobAlloc ( 744,GMEM_MOVEABLE,1024);
+    HANDLE	hInput=GSSiGlobAlloc ( 744,GMEM_MOVEABLE,4096);
     LPSTR	INPUT = GlobalLock (hInput); 
     UINT	OpCode, OpCodeNext=0;  
     BOOL	rtn=0, Value1, Value2, NeedVal1, Error;  

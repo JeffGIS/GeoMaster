@@ -27,7 +27,7 @@
 #define lnDistUnitOpts 12     
 #define lnIMDataFile 256
 #define lnDestName 256 
-#define lnNoCache 256  
+#define lnNoCache 4096  
 #define lnUserName 64
 #define lnNodeName 64   
 #define lnAccessCode 64 
