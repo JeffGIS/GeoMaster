@@ -111,7 +111,7 @@ BOOL UpdateGlobalFile (LPSTR RptFileIn,LPSTR VName,LPSTR Value)
 	HFILE	Fid; 
 	LPSTR	lpEq,lpDot;
 	HFILE	FidOut;
-	char	OldFile[128],NewFile[128],RptFile[128],VarName[36];
+	char	OldFile[MAX_PATH], NewFile[MAX_PATH], RptFile[MAX_PATH], VarName[36];
 	OFSTRUCTGM	OFStruct;
 	BOOL	rtn=FALSE, Found=FALSE;
 	

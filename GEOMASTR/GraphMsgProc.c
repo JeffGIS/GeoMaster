@@ -11941,7 +11941,7 @@ BOOL FAR PASCAL LOADTHEMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	HFILE		Fid;
 	int			Choice, rtn; 
 	LPSTR		lpBS;
-	char		Name[128], str[128];   
+	char		Name[MAX_PATH], str[MAX_PATH];   
 	static		HANDLE	hSaveBM=0;
 	int			TabStops=2000;
 	static		int			DVP;
@@ -17292,7 +17292,7 @@ GSSiExitProg (1280);
 				 OFSTRUCTGM	OFStruct;
                  BOOL	Create, HiRes=TRUE, FileIsDir=FALSE, DoConvert = TRUE; 
                  HFILE	FidFiles=-2;
-                 char	Name[132], FullName[144],drive[8],dir[128],name[16];   
+                 char	Name[MAX_PATH], FullName[MAX_PATH],drive[8],dir[MAX_PATH],name[32];   
                  long	ForeColor, PenColor;
                  short	PenWidth;
 

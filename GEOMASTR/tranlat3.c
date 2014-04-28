@@ -578,7 +578,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
   
 BOOL OpenChronoIndex (LPSTR PName,LPMNMXCORD pMinMaxCoord)
 {
-	static	char	Drive[8], Dir[144], FullName[144];
+	static	char	Drive[8], Dir[MAX_PATH], FullName[MAX_PATH];
     LPFILEINDEX lpIndex;
  	HANDLE	handle;    
  	LPSTR	pChronoDir, pPar, pName;
@@ -702,7 +702,7 @@ BOOL GetChronoIndexedEditFile (LPSTR PName,long BegTime, long EndTime)
 
 BOOL AddSymToDir (LPSTR DirName,short NumSyms,HANDLE hSymDesc,short NumPens,LPPENDESC pPenDesc)
 {
-	char	Drive[8], Dir[128], FullName[144];
+	char	Drive[8], Dir[MAX_PATH], FullName[MAX_PATH];
     LPFILEINDEX lpIndex;
  	HANDLE	handle;
  	BOOL	rtn=FALSE; 
@@ -909,7 +909,7 @@ HANDLE LoadDLGPoints (LPINT pNumSides,LPSHORT *pLineID,HANDLE hLineIndex,HFILE F
 
 BOOL GetIndexedEditFile (LPSTR PltName,LPMNMXCORD pBounds)
 { 
-	char	Drive[8], Dir[128], FullName[144];
+	char	Drive[8], Dir[MAX_PATH], FullName[MAX_PATH];
     LPFILEINDEX lpIndex;
  	HANDLE	handle;
  	BOOL	rtn=FALSE; 

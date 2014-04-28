@@ -2135,7 +2135,7 @@ void ConvertTAGV0ToV1(LPSTR TagFile)
 } TAGBOX_V0;
 
 	TAGBOX_V0	TAGBoxV0;
-	char	V0Name[128],NewName[144];
+	char	V0Name[MAX_PATH],NewName[144];
 	LPSTR	lpDot;
     
     _fullpath(V0Name,TagFile,sizeof(V0Name)); 

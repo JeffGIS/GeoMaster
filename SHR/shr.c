@@ -111,17 +111,16 @@ HFILE OpenFileGM(
 	HFILE fid = (int)INVALID_HANDLE_VALUE;
 	char *fullPath;
 	int ln;
-	OFSTRUCT ofStruct;
 
+	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
 	fullPath = _fullpath(lpReOpenBuff->szPathName, lpFileName, MAX_PATH);
 	if (!fullPath)
 		return HFILE_ERROR;
 	ln = strlen(fullPath);
 	if (ln < OFS_MAXPATHNAME)
 	{
-		fid = OpenFile(fullPath, &ofStruct, uStyle);
-		lpReOpenBuff->nErrCode = ofStruct.nErrCode;
-		lpReOpenBuff->fFixedDisk = ofStruct.fFixedDisk;
+		fid = OpenFile(fullPath,(LPOFSTRUCT) lpReOpenBuff, uStyle);
+		return fid;
 	}
 	else switch (uStyle)
 	{
@@ -132,10 +131,10 @@ HFILE OpenFileGM(
 		fid = (int)CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_CREATE:
-		fid = (int)CreateFile(lpFileName, GENERIC_READ|GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = (int)CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_EXIST:
-		if (GetPathType2((LPSTR)lpFileName)==1)
+		if (GetPathType2((LPSTR)lpFileName) == 1)
 			fid = 1;
 		break;
 	case OF_DELETE:
@@ -145,7 +144,8 @@ HFILE OpenFileGM(
 		MessageBox(0, "Invalid Style in OpenFileGM", 0, MB_ICONEXCLAMATION);
 		break;
 	}
-
+	if (fid == HFILE_ERROR)
+		lpReOpenBuff->nErrCode = GetLastError();
 	return fid;
 }
 
@@ -6711,12 +6711,12 @@ GSSiExitProg (294);
 		return;
 }   
 	{
-	HANDLE	hMem=GSSiGlobAlloc (  89,GMEM_MOVEABLE,1024+4096);
+	HANDLE	hMem=GSSiGlobAlloc (  89,GMEM_MOVEABLE,1024+4096+128);
     LPSTR   txt = GlobalLock (hMem);
     LPSTR	errmes = txt + 128;
     LPSTR	Spaces = errmes + 128; 
     LPSTR   TraceFile = Spaces + 128;
-    LPSTR	pLine = TraceFile + 128;
+    LPSTR	pLine = TraceFile + 256;
     LPOFSTRUCTGM    pOFStruct = (LPOFSTRUCTGM) (pLine + 4096); 
     
     InTrace = TRUE;
@@ -6732,7 +6732,7 @@ GSSiExitProg (294);
     if (TraceFid == HFILE_ERROR)                                      
     {   
     	strcpy (txt,"c:\\trace.txt");
-        _fullpath(TraceFile,txt,128);
+        _fullpath(TraceFile,txt,256);
         TraceFid = OpenFileGM (TraceFile,pOFStruct,OF_READWRITE); 
         if (TraceTrace)
         {

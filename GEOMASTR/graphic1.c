@@ -6682,7 +6682,7 @@ GSSiExitProg (68);
     		goto NextFile;
     	_fstrcpy (str,CurView->lpFiles[CurView->CurFile]);
     	ExpandText(str);
-    	_fullpath (TAGVisList,str,128); 
+    	_fullpath (TAGVisList,str,255); 
     	lpBS = _fstrrchr (TAGVisList,'\\');
     	lpBS++;
     	*lpBS = 0; 
