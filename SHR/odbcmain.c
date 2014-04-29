@@ -2915,6 +2915,7 @@ BOOL FAR PASCAL DBLOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
     case WM_INITDIALOG:  
     
     	 hSaveBM = EnterBlockingWindow (hWndDlg);
+		 SetDlgItemText(hWndDlg, IDC_DBNAME, CurODBCFile);
          cwCenter(hWndDlg, 0);
 			
          break; /* End of WM_INITDIALOG                                 */

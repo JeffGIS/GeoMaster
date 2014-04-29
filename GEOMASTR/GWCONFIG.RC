@@ -2341,10 +2341,10 @@ BEGIN
     CTEXT           "Line Symbol",IDC_STATIC,112,124,68,8
 END
 
-DBLOGIN DIALOG 0, 0, 187, 45
+DBLOGIN DIALOGEX 0, 0, 187, 60
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Database Login"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     EDITTEXT        IDC_USERID,44,8,80,13,ES_AUTOHSCROLL
     EDITTEXT        IDC_PASSWORD,44,24,80,13,ES_PASSWORD | ES_AUTOHSCROLL
@@ -2352,6 +2352,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,131,23,50,14
     LTEXT           "User",IDC_STATIC,4,12,20,8
     LTEXT           "Password",IDC_STATIC,4,28,32,8
+    CTEXT           "Static",IDC_DBNAME,4,47,177,8
 END
 
 SCROLLREPORT DIALOG 0, 0, 440, 294
@@ -8570,6 +8571,11 @@ BEGIN
         LEFTMARGIN, 1
     END
 
+    "DBLOGIN", DIALOG
+    BEGIN
+        BOTTOMMARGIN, 45
+    END
+
     "LOC_COORD", DIALOG
     BEGIN
     END
@@ -8992,8 +8998,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,8,105,0
- PRODUCTVERSION 34,8,105,0
+ FILEVERSION 34,8,106,0
+ PRODUCTVERSION 34,8,106,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9010,7 +9016,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34h build 105"
+            VALUE "FileVersion", "34h build 106"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"
