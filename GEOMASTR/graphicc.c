@@ -4796,8 +4796,8 @@ void CloseMap (BOOL Update)
 		    	idTimer=0;
 		    	if (CurrentConfig)
 		    	{
-		        	//GSSiSetCursor (VPCursor (hWndMain));
-		        	//PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
+		        	GSSiSetCursor (VPCursor (hWndMain));
+		        	PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
 		        }
 	        }
 	        else
