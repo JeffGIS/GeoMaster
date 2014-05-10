@@ -104,8 +104,6 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 LONG WINAPI
 VectoredHandler1(struct _EXCEPTION_POINTERS *pExceptionInfo)
 {
-	char	str[128];
-
 	if (pExceptionInfo->ExceptionRecord->ExceptionCode == 1073807366)
 		return EXCEPTION_CONTINUE_SEARCH;
 	if (pExceptionInfo->ExceptionRecord->ExceptionCode == 3765269347)

@@ -247,6 +247,7 @@ LPSTR GetLastPathname (void);
 LPSTR GetLastAccessedFile (void);
 HFILE GSSiClose (HFILE Fid);
 HFILE GSSiClose2 (LPHFILE pFid);
+int StoreTestToProduction(LPSTR testDir, int option);
 HFILE OpenTempNamedFile (void);
 int GSSifstat (int Fid, struct _stati64 * pstat);
 BOOL GSSifileinfo (int Fid, LPBY_HANDLE_FILE_INFORMATION pstat);

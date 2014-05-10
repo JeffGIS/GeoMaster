@@ -435,7 +435,7 @@ GSSiExitProg (612);
 #endif
 } 
 
-BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldTypes,LPSTR FieldListIN)
+BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTypes, LPSTR FieldListIN, LPHANDLE phValues)
 {   
 	//gets sequential field number from field name list separated by ;
 	  
@@ -451,6 +451,7 @@ BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldType
 	long		lMem=strlen(FieldListIN)+1;
 	HANDLE		hMem;
 	LPSTR		FieldList;
+	int			numFieldTypes = 0;
 	
 	*phFieldIDs = 0;
 	if (!*FieldListIN)
@@ -468,13 +469,21 @@ BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldType
     	if (!*phFieldTypes)
     		*phFieldTypes = GSSiGlobAlloc ( 243,GHND,USHRT_MAX); 
     	pFieldTypes = (LPGWFLDINFO)GlobalLock (*phFieldTypes);
-    	while (*pFieldTypes->Name)
-    		pFieldTypes++;
+		while (*pFieldTypes->Name)
+		{
+			numFieldTypes++;
+			pFieldTypes++;
+		}
     }
     pFieldID = (LPINT)GlobalLock (*phFieldIDs);  
     pNumFields = pFieldID++;
     while (FieldList)
     {
+		int addedField = 0;
+		LPSTR pEq, pValue;
+		LPHANDLE pHandle;
+		int ln;
+
 		if ((pSC = _fstrchr (FieldList,';')))
 			*pSC = 0;
 		if ((pPar = _fstrchr (FieldList,'(')))
@@ -485,7 +494,32 @@ BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldType
 				if (!GetFieldTypeAndLenFromChar (pPar,pFieldTypes,0)) 
 					goto Exit; 
 				_fstrcpy (pFieldTypes->Name,FieldList);
+				if ((pEq = strchr(pPar, '=')))
+				{
+					pEq++;
+					if (phValues)
+					{
+						int id = 1;
+						if (!*phValues)
+							*phValues = GSSiGlobAlloc(1791, GHND, USHRT_MAX);
+						pHandle = GlobalLock(*phValues);
+						while (*pHandle)
+						{
+							id++;
+							pHandle++;
+						}
+						pFieldTypes->filler = id;
+						ln = strlen(pEq);
+						*pHandle = GSSiGlobAlloc(1792, GMEM_MOVEABLE, ln + 1);
+						pValue = GlobalLock(*pHandle);
+						strcpy(pValue, pEq);
+						GlobalUnlock(*pHandle);
+						GlobalUnlock(*phValues);
+					}
+				}
 				pFieldTypes++;
+				numFieldTypes++;
+				addedField = numFieldTypes;
 			}
 		}
 	    lpFieldInfo = &FilePtr->FldInfo;   
@@ -503,8 +537,14 @@ BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldType
 	    		(*pNumFields)++;
 	    		goto Next;
 	    	}
-	    } 
-	    goto Exit;
+	    }
+		if (addedField)
+		{
+			*pFieldID++ = -(1+addedField);
+			(*pNumFields)++;
+		}
+		else
+			goto Exit;
 Next:
 	    if (pSC)
 	    	*pSC++ = ';';
@@ -516,13 +556,13 @@ Exit:
 	GlobalUnlock (SQLPtr->OFHandle);
     CloseDataFile (TRUE, &hDB);
     GlobalUnlock (*phFieldIDs);
-	if (phFieldTypes)
+	if (phFieldTypes && *phFieldTypes)
 		GlobalUnlock (*phFieldTypes);
     if (!rtn) 
     {
     	GSSiGlobFree (phFieldIDs);
 		if (phFieldTypes)
-			GSSiGlobFree (phFieldTypes); 
+			GSSiGlobFree (*phFieldTypes); 
 	}
 	GSSiGlobUlFree (&hMem);
 	return rtn;

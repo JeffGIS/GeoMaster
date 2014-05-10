@@ -403,7 +403,7 @@ BOOL CreateHighlightOutput (HWND hWnd, HWND StatusWnd,LPSTR outPath,BOOL tabDlm)
     switch (HLTOUTFormat)
     {
     	case 0:
-			nrecs = OutputToFile (HLTOutPathScreen,TRUE,HLTOutDataFile, HLTOutSQL, HLTOutFields,0,0,TRUE,FALSE,OutToScreen,FALSE,FALSE,0,StatusWnd,hWnd,tabDlm);
+			nrecs = OutputToFile (HLTOutPathScreen,TRUE,HLTOutDataFile, HLTOutSQL, HLTOutFields,0,0,0,TRUE,FALSE,OutToScreen,FALSE,FALSE,0,StatusWnd,hWnd,tabDlm);
 			break;
 		case 1:
 			nrecs = OutputHLTAreas (HLTOUTFormat,HLTOutPath);

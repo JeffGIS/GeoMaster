@@ -2602,7 +2602,7 @@ Exit:
 	return NumFields;
 }
 
-long OutputToFile (LPSTR File, BOOL Create,LPSTR DBName,LPSTR pSQL, HANDLE hFieldsIN,HANDLE hKeyFields,HANDLE hFieldTypes,BOOL UseHLT,BOOL OutToScreen,int GMHeader,BOOL Compress,BOOL ScanForFieldTypes,long NumToScan,HWND StatusWnd,HWND hWndDlg,BOOL tabDlm)
+long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFieldsIN, HANDLE hKeyFields, HANDLE hFieldTypes, HANDLE hValues, BOOL UseHLT, BOOL OutToScreen, int GMHeader, BOOL Compress, BOOL ScanForFieldTypes, long NumToScan, HWND StatusWnd, HWND hWndDlg, BOOL tabDlm)
 #if ENABLETRACE
 {GSSiEnterProg (603);
 #endif
@@ -2736,13 +2736,21 @@ GSSiExitProg (603);
 					FieldID = *pFieldIDIN++;
 				else
 					FieldID++; 
-	    		lpFieldInfo = &FilePtr->FldInfo + FieldID;
-				if (WantXML || !StringEndsWith (lpFieldInfo->name,"_XML"))
+				if (FieldID < 0)
 				{
-					if (!InFieldIDList (FieldID,hKeyFields) && lpFieldInfo->type != -151)
+					*pFieldID++ = FieldID;
+					(*pNumFields)++;
+				}
+				else
+				{
+					lpFieldInfo = &FilePtr->FldInfo + FieldID;
+					if (WantXML || !StringEndsWith(lpFieldInfo->name, "_XML"))
 					{
-						*pFieldID++ = FieldID;
-						(*pNumFields)++;
+						if (!InFieldIDList(FieldID, hKeyFields) && lpFieldInfo->type != -151)
+						{
+							*pFieldID++ = FieldID;
+							(*pNumFields)++;
+						}
 					}
 				}
 			}
@@ -2758,9 +2766,30 @@ GSSiExitProg (603);
 		{   
 			if (*lpHead)
 				_fstrcat (lpHead,dlm);
-    		if (*pFieldID < 0)
+    		if (*pFieldID == -1)
     			_fstrcat (lpHead,"UNIQUEID(B4)"); 
-    		else
+			else if (*pFieldID < 0)
+			{
+				if (hFieldTypes && GMHeader)
+				{
+					LPGWFLDINFO pFieldTypes = (LPGWFLDINFO)GlobalLock(hFieldTypes);
+					FIELDINFO fieldInfo;
+
+					memset(&fieldInfo, 0, sizeof(FIELDINFO));
+					pFieldTypes += abs(*pFieldID + 2);
+					strcpy(fieldInfo.name, pFieldTypes->Name);
+					fieldInfo.type = pFieldTypes->Type;
+					fieldInfo.length = pFieldTypes->Len;
+					if (!CreateGMTextHeader(&fieldInfo, lpHead))
+					{
+						GlobalUnlock(hFields);
+						GlobalUnlock(hFieldTypes);
+						goto Exit;
+					}
+					GlobalUnlock(hFieldTypes);
+				}
+			}
+			else
     		{
 	    		lpFieldInfo = &FilePtr->FldInfo + *pFieldID;
 				if (GMHeader)
@@ -2878,12 +2907,35 @@ GSSiExitProg (603);
         	
         	if (pFieldID)
 			{
-				if (*pFieldID < 0) 
+				if (*pFieldID == -1) 
         		{
         			_fstrcpy (FieldName,"UNIQUEID");
         			ltoa (OriginalRecordNumber,str,10);   
         			FieldType = BT_INTEGER;
         		}
+				else if (*pFieldID < 0)
+				{
+					LPGWFLDINFO pFieldTypes = (LPGWFLDINFO)GlobalLock(hFieldTypes);
+
+					pFieldTypes += abs(*pFieldID + 2);
+					_fstrcpy(FieldName, pFieldTypes->Name);
+					FieldType = pFieldTypes->Type;
+					*str = 0;
+					if (pFieldTypes->filler && hValues)
+					{
+						int id = pFieldTypes->filler-1;
+						LPHANDLE phValues = GlobalLock(hValues);
+						LPSTR pValues;
+
+						while (id--)
+							phValues++;
+						pValues = GlobalLock(*phValues);
+						strcpy(str, pValues);
+						GlobalUnlock(*phValues);
+						GlobalUnlock(hValues);
+					}
+					GlobalUnlock(hFieldTypes);
+				}
         		else 
         		{
 			    	lpFieldInfo = &FilePtr->FldInfo + *pFieldID;  

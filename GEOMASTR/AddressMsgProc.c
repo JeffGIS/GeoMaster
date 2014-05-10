@@ -6398,7 +6398,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 						GSSiMsgBox(GetFocus(), "Unable to create destination file", 0, MB_ICONQUESTION | MB_OK, 0);
 						break;
 					}
-					GetFieldIDsFromNames(DestName, &hKeyFields, 0, "MatchCode;KEY");
+					GetFieldIDsFromNames(DestName, &hKeyFields, 0, "MatchCode;KEY",0);
 					GWDAddIndex(DestName, hKeyFields, 1, 0);
 					GSSiGlobFree(&hKeyFields);
 				}

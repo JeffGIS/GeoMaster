@@ -73,8 +73,8 @@
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34f_xp</TargetName>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <TargetName>GeoMaster34h_xp</TargetName>
+    <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -204,11 +204,11 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.61</Version>
+      <Version>34.8</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -225,6 +225,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <SwapRunFromCD>false</SwapRunFromCD>
       <SwapRunFromNET>false</SwapRunFromNET>
+      <DelayLoadDLLs>gdal110.dll</DelayLoadDLLs>
     </Link>
     <Bscmake>
       <OutputFile>.\Release/geomastr.bsc</OutputFile>
@@ -389,6 +390,7 @@
     <ClCompile Include="EXPORT2.C" />
     <ClCompile Include="..\GM32lib\FIIO_Mem.cpp" />
     <ClCompile Include="..\SHR\FILE.C" />
+    <ClCompile Include="FileOpenDlg.cpp" />
     <ClCompile Include="fish.c" />
     <ClCompile Include="..\solar_calculator\Version2\fk4fk5.c" />
     <ClCompile Include="..\SHR\floatap.c" />

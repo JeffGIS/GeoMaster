@@ -1,3 +1,4 @@
+configs\CrystalLake2.gmc /F /WD I:\\CountyData
 projects\alleywalls\alleymaps.gmc /F /WD "C:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\GEOMas"
 configs\HCPropExtract\propload.gmc /F /WD c:\geomas
 configs\Illinois.gmc /F /WD "I:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\CountyData"
@@ -23,6 +24,7 @@ configs\basic1.gmc /F [%USERLEV]=2; /WD h:\geomas
 configs\test.gmc /F [%USERLEV]=2; /WD h:\geomas
 police\configs\startup_2013.gmc /F [%USERLEV]=2; /WD c:\GMProjects\Mpls
 police\configs\startup_2014.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
+configs\basic1.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\addressedit.gmc /F [%USERLEV]=2; /WD j:\Mpls
 Lisa.gmc /F /WD h:\Ameritrak\GMAVLUS
 /GMEdit [%DL]pikmacro\pikmacro.txt /WD c:\geomas [%TESTDL]=[%DL]TestDirectories\test1;
@@ -127,6 +129,8 @@ granth.gmc /WD c:\granth
 
 
 granth
+
+
 
 
 

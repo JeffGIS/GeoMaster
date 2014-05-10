@@ -2743,7 +2743,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 	{
 		HANDLE	hKeyFields;
 			
-		GetFieldIDsFromNames (OutName,&hKeyFields,0,"GridID;GridCellID");
+		GetFieldIDsFromNames (OutName,&hKeyFields,0,"GridID;GridCellID",0);
 		GWDAddIndex (OutName,hKeyFields,1,0);
 		GSSiGlobFree (&hKeyFields);
 	}

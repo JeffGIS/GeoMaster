@@ -499,13 +499,13 @@ BOOL CreateRefConnectionFile (LPSTR InName,LPMNMXCORD pBounds)
 	{
 		HANDLE	hKeyFields;
 			
-		GetFieldIDsFromNames (Name,&hKeyFields,0,"BPXFile;BPYFile");
+		GetFieldIDsFromNames (Name,&hKeyFields,0,"BPXFile;BPYFile",0);
 		GWDAddIndex (Name,hKeyFields,FALSE,0);
 		GSSiGlobFree (&hKeyFields);
-		GetFieldIDsFromNames (Name,&hKeyFields,0,"EPXFile;EPYFile");
+		GetFieldIDsFromNames (Name,&hKeyFields,0,"EPXFile;EPYFile",0);
 		GWDAddIndex (Name,hKeyFields,FALSE,0);
 		GSSiGlobFree (&hKeyFields);
-		GetFieldIDsFromNames (Name,&hKeyFields,0,"ConnectionStatus");
+		GetFieldIDsFromNames (Name,&hKeyFields,0,"ConnectionStatus",0);
 		GWDAddIndex (Name,hKeyFields,FALSE,0);
 		GSSiGlobFree (&hKeyFields);
 	} 
@@ -1534,13 +1534,13 @@ BOOL OutputConnectedLinks (LPSTR OutFile)
 	if (!OpenRefConnectionFile ("[%CONSTATFILE].gmd",&CurView->FileMNMX))
 		return FALSE;
 	CloseRefConnectFile (); 
-	if (!GetFieldIDsFromNames ("[%CONSTATFILE].gmd",&hKeyFields,0,"BPConnections"))
+	if (!GetFieldIDsFromNames ("[%CONSTATFILE].gmd",&hKeyFields,0,"BPConnections",0))
 		return FALSE;
 	rtn = GWDAddIndex ("[%CONSTATFILE].gmd",hKeyFields,FALSE,0);
 	GSSiGlobFree (&hKeyFields);
     if (!rtn)
     	return FALSE;
-	if (!GetFieldIDsFromNames ("[%CONSTATFILE].gmd",&hKeyFields,0,"EPConnections"))
+	if (!GetFieldIDsFromNames ("[%CONSTATFILE].gmd",&hKeyFields,0,"EPConnections",0))
 		return FALSE;
 	rtn = GWDAddIndex ("[%CONSTATFILE].gmd",hKeyFields,FALSE,0);
 	GSSiGlobFree (&hKeyFields);

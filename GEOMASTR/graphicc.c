@@ -603,10 +603,10 @@ LPJLBPDATA	pData;
 		{
 			HANDLE	hKeyFields;
 				
-			GetFieldIDsFromNames (JLBPFile,&hKeyFields,0,"BPX;BPY");
+			GetFieldIDsFromNames (JLBPFile,&hKeyFields,0,"BPX;BPY",0);
 			GWDAddIndex (JLBPFile,hKeyFields,FALSE,0);
 			GSSiGlobFree (&hKeyFields);
-			GetFieldIDsFromNames (JLBPFile,&hKeyFields,0,"EPX;EPY");
+			GetFieldIDsFromNames (JLBPFile,&hKeyFields,0,"EPX;EPY",0);
 			GWDAddIndex (JLBPFile,hKeyFields,FALSE,0);
 			GSSiGlobFree (&hKeyFields);
 		} 
