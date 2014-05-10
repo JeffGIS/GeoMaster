@@ -949,7 +949,7 @@ GotFile:
 		    }
 		    else
 	    		pFile = GlobalLock (hScreenFile);
-			if (OutputToFile (pFile,TRUE,Arg[1], Arg[2], 0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,0,0,0,TRUE)) 
+			if (OutputToFile (pFile,TRUE,Arg[1], Arg[2], 0,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,0,0,0,TRUE)) 
 			{
 	    		GlobalUnlock (hScreenFile);  
         		ShowGrid(hWndMain,Arg[5],Arg[6]);
@@ -6502,6 +6502,16 @@ HaveVP:;
 					*pI4 = atoi(Arg[4]);
 					goto RtnTrue;
 				}
+			}
+			goto RtnFalse;
+		}
+		case 783: //$TESTENV(STORE,testdir)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			if (!stricmp(Arg[1], "STORE"))
+			{
+				rtn = StoreTestToProduction(Arg[2], 1);
+				goto Rtnrtn;
 			}
 			goto RtnFalse;
 		}

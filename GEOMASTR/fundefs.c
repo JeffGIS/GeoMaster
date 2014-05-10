@@ -283,6 +283,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp (str,"BATTERY",7)) return 780; 
 			if (!_fstrnicmp(str, "GEOCODE", 7)) return 781;
 			if (!_fstrnicmp(str, "ADDRESS", 7)) return 782;
+			if (!_fstrnicmp(str, "TESTENV", 7)) return 783;
 
 			return 0;
 }

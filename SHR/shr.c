@@ -8364,6 +8364,91 @@ BOOL EditLastTextFile (void)
 		GMEdit (hWndMain,LastTextFile); 
 	return TRUE;
 }
+BOOL GetProdNameFromTestName(LPSTR testDir, LPSTR toName, LPSTR fileName)
+{
+	int ln = strlen(testDir);
+
+	if (strnicmp(fileName, testDir, ln))
+		return FALSE;
+	sprintf(toName, "[%%DL]%s", &fileName[ln+1]);
+	ExpandText(toName);
+	return TRUE;
+}
+
+int StoreTestToProduction(LPSTR testDir, int option)
+{
+	//returns 0 if successful, 1 if unable to lock file, 2 if unable to rename file, 3 if unable to copy file
+	char tempName[MAX_PATH];
+	char fileName[MAX_PATH + 2];
+	char toName[MAX_PATH];
+	char deleteName[MAX_PATH];
+	HFILE FidTemp;
+	int TotFiles = 0;
+	HANDLE *fid;
+	HANDLE hFid;
+	int iFile = 0;
+	int rtn = 0;
+
+	//option 1 tests to see if all files to be replaced can be opened with exclusive write. 2 actually does the store
+	EscapeFunction(TRUE);
+	AllowCache = FALSE;
+
+	GSSiGetTempFileName(0, "gm", 0, tempName);
+	FidTemp = GSSiOpenFile(tempName, 0, OF_CREATE);
+	SearchFilesInDir(testDir, "", FidTemp, &TotFiles,"*.*", 1, TRUE, TRUE);
+	if (!TotFiles)
+		return FALSE;
+	GSSillseek(FidTemp, 0, 0);
+	hFid = GSSiGlobAlloc(1790, GHND, TotFiles * sizeof(HFILE));
+	fid = GlobalLock(hFid);
+	while (fgetstring(fileName, MAX_PATH, FidTemp))
+	{
+		GetProdNameFromTestName(testDir,toName, fileName);
+		if (ExistFile(toName))
+		{
+			fid[iFile] = CreateFile(toName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+			if (fid[iFile] == INVALID_HANDLE_VALUE)
+			{
+				rtn = 1;
+				iFile--;
+				while (iFile >= 0)
+				{
+					if (fid[iFile])
+						CloseHandle(fid[iFile]);
+					iFile--;
+				}
+				goto Exit;
+			}
+		}
+		iFile++;
+	}
+	GSSillseek(FidTemp, 0, 0);
+	iFile = 0;
+	while (fgetstring(fileName, MAX_PATH, FidTemp))
+	{
+		GetProdNameFromTestName(testDir, toName, fileName);
+		if (fid[iFile])
+		{
+			CloseHandle(fid[iFile]);
+			sprintf(deleteName, "%s.dlt", toName);
+			if (!GSSirenamefile(toName, deleteName))
+			{
+				rtn = 2;
+			}
+		}
+		if (!GSSiCopyFile(fileName, toName, FALSE))
+		{
+			rtn = 3;
+		}
+		iFile++;
+	}
+Exit:
+	GSSiGlobUlFree(&hFid);
+	GSSiClose(FidTemp);
+	GSSiRemove2(tempName);
+
+	return rtn;
+}
 
 void ConvertToTestName (LPSTR Name,UINT Mode)
 {
