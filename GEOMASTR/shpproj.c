@@ -9,7 +9,7 @@ int SHPOpenPrj( LPSTR ShpFileName,int projectionID )
 	HFILE	fid;
 	int		rtn = 0;
 
-	if (!GetGlobalLVal2("%USEOSRLIB", FALSE))
+	if (!GetGlobalLVal2("[%USEOSRLIB]", FALSE))
 		return 0;
 
 	strcpy(prjFileName, ShpFileName);
