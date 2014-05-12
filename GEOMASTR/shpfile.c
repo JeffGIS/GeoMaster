@@ -623,9 +623,10 @@ BOOL SetSHPParms (long RecordNumber)
 	CurrentSHPRec = RecordNumber;
 	if (strchr (SHPRefno,'['))
 	{
+		BOOL err;
+
 		strcpy (str,SHPRefno);
-		ExpandText (str);
-		CurrentRefno = atoi (str);
+		CurrentRefno = FltAP(str, &err);
 	}
 	else
 		CurrentRefno = SHPBaseRefno + RecordNumber + IndexEntryStartRecord;
@@ -1783,8 +1784,6 @@ DoPoly:
 								hmemmove((HPSTR)pPoints2, (HPSTR)pPoints1, sizeof(DPOINT)*(long)pNumPoints[i]);
 								GlobalUnlock(phPoly[i]);
 								pPoints1 += pNumPoints[i];
-								if (i)
-									pPoints1++;
 							}
 							GlobalUnlock(hPoints);
 							AddPolyToBuffer(nPoly, pNumPoints, phPoly, TYPE_POLYLINE, CurrentRefno, 0, -1, CurrentDesc, 0, CurrentPrefix, CurrentUDI,

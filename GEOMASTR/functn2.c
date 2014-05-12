@@ -1851,7 +1851,7 @@ GSSiExitProg (1350);
 			HANDLE  hValues = 0;
 			
 			nArgs = GetFunArgs (Args,Arg,9,&hMem);
-			if (!GetFieldIDsFromNames (Arg[3],&hKeyFields,&hFieldTypes,Arg[5],0))
+			if (!GetFieldIDsFromNames(Arg[3], &hKeyFields, &hFieldTypes, Arg[5], &hValues))
 				goto RtnFalse;
 			if (!GetFieldIDsFromNames (Arg[3],&hFields,&hFieldTypes,Arg[6],&hValues))
 			{

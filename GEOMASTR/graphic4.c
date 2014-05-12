@@ -1300,12 +1300,12 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 		Visible = FALSE;
 		goto Exit;
 	}
-/*if (CurrentRefno != 658191 && CurrentRefno != 658138)
+/*if (CurrentRefno != 11687)
 	{
 		Visible = FALSE;
 		goto Exit; 
-	}*/
-	else if (ShowOnlyDebugRef)
+	}
+	else*/ if (ShowOnlyDebugRef)
 	{
 		Visible = FALSE;
 		goto Exit; 
