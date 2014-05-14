@@ -886,8 +886,8 @@ GSSiExitProg (520);
     	Type =IMAGE_DATAFILE;
     else
     	goto RtnFalse;
-    if ((FilePtr = InOpenFileList(Name,Type,Access)))
-    	goto ProcessSQL;
+   // if ((FilePtr = InOpenFileList(Name,Type,Access)))
+   // 	goto ProcessSQL;
 	switch (Type)
 	{   
 		case 0:
@@ -1136,7 +1136,7 @@ GMTEXT_ERROR:
 			}
 			else
 			{   
-				if (!ProcessDelimTextHeader(TxtRecord,Name,Fid,&FileHandle,0))
+				if (!ProcessDelimTextHeader(TxtRecord, Name, Fid, &FileHandle, 0,  IDName))
 				{
 					GSSiClose (Fid);
 					goto GMTEXT_ERROR; 
@@ -5121,7 +5121,7 @@ GSSiExitProg (541);
 #endif
 } 
 
-short ProcessDelimTextHeader(LPSTR INstr,LPSTR File,HFILE Fid,LPHANDLE phDLT,char InDelim)
+short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT, char InDelim, LPSTR IDName)
 #if ENABLETRACE
 {GSSiEnterProg (542);
 #endif
@@ -5239,7 +5239,10 @@ Next:if (*str == '"')
 	}
 	else
 		DLTStart[*nDLTvar]=-1;	
-	strcpy (varname,BeginLoc);
+	if (IDName && *IDName)
+		sprintf(varname, "%s.%s", IDName, BeginLoc);
+	else
+		strcpy (varname,BeginLoc);
 	REPLAC (varname,"[","(",128);
 	REPLAC (varname,"]",")",128);
 	DLTVar[(*nDLTvar)++] = AllocateVar(varname);  

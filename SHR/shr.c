@@ -8833,8 +8833,8 @@ Open:
 	    	mode2 = OF_CREATE;
         Fid = OpenFileGSSi (Name,pOFStruct,mode2,0);
     } 
-    else if ((Fid = FileAlreadyOpen (Name,Mode,pOFStruct)) != HFILE_ERROR)
-    	goto Exit;
+    //else if ((Fid = FileAlreadyOpen (Name,Mode,pOFStruct)) != HFILE_ERROR)
+    //	goto Exit;
     else if (Mode == OF_READ && ShareEnabled) 
     {
 	    if (DisplayFiles==4)
