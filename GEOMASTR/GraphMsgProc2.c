@@ -5087,7 +5087,7 @@ SelectFiles:
 	                    		GSSillseek (FidFileList,0,0);
 	                    	} 
 	                    	fgetstring (str,128,FidFileList);
-							if (!ProcessDelimTextHeader(str,0,FidFileList,&hDLT,0))
+							if (!ProcessDelimTextHeader(str, 0, FidFileList, &hDLT, 0, 0))
 								goto Exit;
 	                    	
 	                    	while (ContinueProcessing && fgetstring (str,258,FidFileList))
@@ -5105,7 +5105,7 @@ SelectFiles:
 							    	if (FidSkip != HFILE_ERROR)
 							    	{   
 							    		fgetstring (skipfile,MAX_PATH,FidSkip);
-										ProcessDelimTextHeader(skipfile,0,FidSkip,&hDLTSkip,0);
+										ProcessDelimTextHeader(skipfile, 0, FidSkip, &hDLTSkip, 0, 0);
 										while (fgetstring (skipfile,MAX_PATH,FidSkip))
 										{
 											GetDelimTextData(skipfile,hDLTSkip); 

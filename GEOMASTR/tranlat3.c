@@ -524,7 +524,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
     _fstrcpy (PltName,PltFile);
     CreateNewMap (PltFile,&Bounds,0,NULL,0,NULL,0,0,TRUE); 
     fgetstring (str,256,Fid);
-	ProcessDelimTextHeader(str,NULL,Fid,&hDLT,0); 
+	ProcessDelimTextHeader(str, NULL, Fid, &hDLT, 0, 0);
  	       
     while (fgetstring (str,256,Fid))
     {
@@ -542,7 +542,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
 
 		    fgetstring (str,256,Fid2);
 				        
-			ProcessDelimTextHeader(str,NULL,Fid,&hDLT2,0); 
+			ProcessDelimTextHeader(str, NULL, Fid, &hDLT2, 0, 0);
 		    while (fgetstring (str,256,Fid2))
 		    {
 				GetDelimTextData(str,hDLT2);

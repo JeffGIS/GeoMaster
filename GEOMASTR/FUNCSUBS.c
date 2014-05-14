@@ -2954,7 +2954,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 		goto Exit;
 		
 	fgetstring (str,1024,Fid);
-	if (!ProcessDelimTextHeader(str,0,Fid,&hDLT,0))
+	if (!ProcessDelimTextHeader(str,0,Fid,&hDLT,0,0))
 	{
 		GSSiClose (Fid);
 		goto Exit;
@@ -2974,7 +2974,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 		goto Exit;
 		
 	fgetstring (str,1024,Fid);
-	if (!ProcessDelimTextHeader(str,0,Fid,&hDLT,0))
+	if (!ProcessDelimTextHeader(str,0,Fid,&hDLT,0,0))
 	{
 		GSSiClose (Fid);
 		goto Exit;
@@ -3676,7 +3676,7 @@ NextCorner:;
 	if (FidRun == HFILE_ERROR)
 		goto Exit;
 	fgetstring (str,128,FidRun);
-	ProcessDelimTextHeader(str,0,FidRun,&hDLT,0);
+	ProcessDelimTextHeader(str,0,FidRun,&hDLT,0,0);
 
 	GSSiGetTempFileName (0,"gmp",0,(LPSTR)str);
 	BTVar[0].BT_VARTYP=BT_CHAR;
@@ -4924,7 +4924,7 @@ BOOL FilterTextFile (LPSTR InFile,LPSTR OutFile,MNMXCORD Bounds)
 	 
 	TotLen = GSSillseek (FidIn,0,2);
 	GSSillseek (FidIn,0,0);
-	ProcessDelimTextHeader(str,InFile,FidIn,&TxtHandle,0);
+	ProcessDelimTextHeader(str, InFile, FidIn, &TxtHandle, 0, 0);
 	fputstring (str,FidOut); 
 	CreateStatusWind (hWndMain,1,"Filtering Points"); 
 	lineno = 1;

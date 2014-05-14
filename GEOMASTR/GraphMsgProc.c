@@ -6004,7 +6004,7 @@ GSSiExitProg (446);
 		            }
 				 }
 				  
-				 ProcessDelimTextHeader(str,0,Fid,&hDLT,0);
+				 ProcessDelimTextHeader(str, 0, Fid, &hDLT, 0, 0);
 			     
 				 while (fgetstring (str,1024,Fid))
 				 {
@@ -6219,7 +6219,7 @@ GetLine:  at = 1;
             }
 		  }
 		  
-		  ProcessDelimTextHeader(str,0,Fid,&hDLT,0); 
+		  ProcessDelimTextHeader(str, 0, Fid, &hDLT, 0, 0);
 		  if (hDLT)
 		  {
 			  GetPrintMergeRec (0,0);
@@ -17111,7 +17111,7 @@ GSSiExitProg (1280);
                             lpEnd = _fstrchr (fldstr,0);
                             lpEnd-=2;
                             *lpEnd = 0;
-							ProcessDelimTextHeader(fldstr,0,FidMIF,&hDLT,0); 
+							ProcessDelimTextHeader(fldstr, 0, FidMIF, &hDLT, 0, 0);
 							GlobalUnlock (hFldstr);
 							GSSiGlobUlFree (&hFldstr);  
 							EnableWindow (GetDlgItem(hWndDlg,IDC_SHOW_FIELDS),TRUE);
@@ -17424,7 +17424,7 @@ NextPass:
 		                    if (NumDataFlds)
 		                    	_fstrcat (pHeader,",");  
                     	} 
-						ProcessDelimTextHeader(pHeader,0,FidMIF,&hDLT,0); 
+						ProcessDelimTextHeader(pHeader, 0, FidMIF, &hDLT, 0, 0);
 						GlobalUnlock (hHeader);
 						GSSiGlobUlFree (&hHeader);
                     }
@@ -25397,7 +25397,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 			    	HANDLE	hDLT;
 			    	
 			    	fgetstring (str,256,Fid);
-					ProcessDelimTextHeader(str,0,Fid,&hDLT,0);
+					ProcessDelimTextHeader(str, 0, Fid, &hDLT, 0, 0);
 		  			while (fgetstring (str,256,Fid))
 		  			{
 						GetDelimTextData(str,hDLT);  

@@ -2818,7 +2818,7 @@ BOOL PrintMerge (HWND hWnd)
 	    DI.lpszDocName = LeafName;
 	    DI.lpszOutput = NULL;  
 	    
-		ProcessDelimTextHeader(str,0,FidPM,&hDLT,0); 
+		ProcessDelimTextHeader(str, 0, FidPM, &hDLT, 0, 0);
 		GetPrintMergeRec (0,0);
 		record = 0; 
  	    IgnoreLock = TRUE;

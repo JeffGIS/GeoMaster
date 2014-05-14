@@ -40,7 +40,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	hCorner = GSSiGlobAlloc (1045,GHND,USHRT_MAX);
 	pCorner = (LPCORNER)GlobalLock (hCorner);
 	fgetstring (lpstr,1020,Fid1);
-	ProcessDelimTextHeader(lpstr,0,Fid1,&hDLT,0);	     
+	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
 	while (fgetstring (lpstr,1020,Fid1))
 	{
 		GetDelimTextData(lpstr,hDLT);
@@ -61,7 +61,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	if (Fid1 == HFILE_ERROR)
 		goto RtnFalse;
 	fgetstring (lpstr,1020,Fid1);
-	ProcessDelimTextHeader(lpstr,0,Fid1,&hDLT,0);
+	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
 	fputstring ("# Original Transformation Points",Fid3);	     
 	while (fgetstring (lpstr,1020,Fid1))
 	{
@@ -113,7 +113,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 			*lpDot = 0;
 			_fstrcpy (EdgeID,lpEdgeID);
 			fgetstring (lpstr,1020,Fid2);
-			ProcessDelimTextHeader(lpstr,0,Fid2,&hDLT,0);	     
+			ProcessDelimTextHeader(lpstr, 0, Fid2, &hDLT, 0, 0);
 	  		while (fgetstring (lpstr,1020,Fid2))
 	  		{
       			GetDelimTextData(lpstr,hDLT);
@@ -175,7 +175,7 @@ short LoadEdgeFile (LPSTR File,LPHANDLE hEdge)
 	hStr = GSSiGlobAlloc (1047,GMEM_MOVEABLE,1024);
 	lpstr = GlobalLock (hStr);
 	fgetstring (lpstr,1020,Fid1);
-	ProcessDelimTextHeader(lpstr,0,Fid1,&hDLT,0);	     
+	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
 	while (fgetstring (lpstr,1020,Fid1))
 	{
 		GetDelimTextData(lpstr,hDLT);

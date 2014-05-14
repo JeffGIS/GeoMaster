@@ -732,7 +732,7 @@ GSSiExitProg (1350);
 				*LastChr(Arg1) = 0;
 			}
 			ExpandText (Arg2);
-			if (!ProcessDelimTextHeader(Arg1,0,HFILE_ERROR,&hDLT,delim))
+			if (!ProcessDelimTextHeader(Arg1, 0, HFILE_ERROR, &hDLT, delim, 0))
 				goto RtnFalse;
 			if (*Arg2 == '(' && *LastChr(Arg2) == ')')
 			{
@@ -3323,7 +3323,7 @@ GSSiExitProg (1350);
 				}
 			GSSillseek (Fid,CurLoc,0);
 		    if (!pVarName)
-				ProcessDelimTextHeader(Arg3,pFileName,Fid,&hDLT,0);
+				ProcessDelimTextHeader(Arg3, pFileName, Fid, &hDLT, 0, 0);
 		    else
 		    	hDLT = 0;
 			while (ContinueProcessing  && fgetstring (Arg3,4090,Fid))

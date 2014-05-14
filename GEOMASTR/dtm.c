@@ -828,7 +828,7 @@ BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
 		FidIn = GSSiOpenFile (InFile,0,OF_READ); 
 		TotLen = GSSillseek (FidIn,0,2);
 		GSSillseek (FidIn,0,0);
-		ProcessDelimTextHeader(str,InFile,FidIn,&TxtHandle,0); 
+		ProcessDelimTextHeader(str, InFile, FidIn, &TxtHandle, 0, 0);
 		CreateStatusWind (hWndMain,1,"Getting Min/Max Values"); 
 NextFile:
 		lineno = 1;
@@ -888,7 +888,7 @@ NextFile:
 	TotLen = (DWORD)GSSillseek (FidIn,0,2);
 	GSSillseek (FidIn,0,0);
 	GSSiGlobFree (&TxtHandle);  
-	ProcessDelimTextHeader(str,InFile,FidIn,&TxtHandle,0);    
+	ProcessDelimTextHeader(str, InFile, FidIn, &TxtHandle, 0, 0);
 	FileEnd = FileEndSave;
 NextFile2:
 	while (ContinueProcessing && fgetstring (str,64,FidIn))

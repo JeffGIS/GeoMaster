@@ -2579,7 +2579,7 @@ GSSiExitProg (1056);
 			return FALSE; 
 }
 		fgetstring (str,256,Fid2);
-		ProcessDelimTextHeader(str,0,Fid2,&hDLT,0);
+		ProcessDelimTextHeader(str, 0, Fid2, &hDLT, 0, 0);
 		NumPoints = 0;	
 		DBoundsInit (&Bounds);     
 	  	while (fgetstring (str,256,Fid2))

@@ -155,7 +155,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			pData=GlobalLock(hData);
 			pOutData = pData + 8192;
 			GSSillseek(fptr,0,0);
-			nCol=ProcessDelimTextHeader(pData,pFile,fptr,&hDLT,0);   
+			nCol = ProcessDelimTextHeader(pData, pFile, fptr, &hDLT, 0, 0);
 			GlobalUnlock (hScreenFile);
 			hFile = hScreenFile;
 			hScreenFile = 0;

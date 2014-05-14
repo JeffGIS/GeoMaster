@@ -2123,7 +2123,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		    		GSSillseek (FidFileList,0,0);
 		    	} 
 		    	fgetstring (str,128,FidFileList);
-				if (!ProcessDelimTextHeader(str,NULL,FidFileList,&hDLT,0))
+				if (!ProcessDelimTextHeader(str, NULL, FidFileList, &hDLT, 0, 0))
 					goto Exit;
 			                    	
 		    	while (fgetstring (str,128,FidFileList))
@@ -2141,7 +2141,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 				    	if (FidSkip != HFILE_ERROR)
 				    	{   
 				    		fgetstring (skipfile,128,FidSkip);
-							ProcessDelimTextHeader(skipfile,NULL,FidSkip,&hDLTSkip,0);
+							ProcessDelimTextHeader(skipfile, NULL, FidSkip, &hDLTSkip, 0, 0);
 							while (fgetstring (skipfile,128,FidSkip))
 							{
 								GetDelimTextData(skipfile,hDLTSkip); 

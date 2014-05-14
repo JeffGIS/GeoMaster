@@ -2153,7 +2153,7 @@ BOOL ComputeDummyVehicleLocations (time_t AVLTime)
 				if ((pData = _fstrchr (str,':')))
 				{
 					pData++;
-					ProcessDelimTextHeader("VEHID,VEHSEQ,VEHTIME,VEHLAT,VEHLON,VEHSPEED",0,Fid,&hDLT,0);
+					ProcessDelimTextHeader("VEHID,VEHSEQ,VEHTIME,VEHLAT,VEHLON,VEHSPEED", 0, Fid, &hDLT, 0, 0);
 				    GetDelimTextData(pData,hDLT); 
 					GSSiGlobFree (&hDLT); 
 					_fstrcpy (str,"$CLK([VEHTIME],1)");
