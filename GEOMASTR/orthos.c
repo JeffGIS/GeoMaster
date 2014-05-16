@@ -781,7 +781,7 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
 	return (TRUE);
 }
 
-BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ)
+BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 {
 //    BITMAPFILEHEADER bmfHead;
 	BITMAPINFOHEADER	DibInfo;
@@ -826,6 +826,8 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ)
 //	AdjustDIBColorPallet (hDib);    
 	if (!GetImageBounds (BMFile,hDib,&BitmapBounds,&WBounds))
 		return FALSE;
+	if (fitToVP)
+		WBounds = CurView->WBounds;
 	CurView->OrthoRes = (WBounds.xmx - WBounds.xmn)/(BitmapBounds.xmx - BitmapBounds.xmn);
 	SetCurImage (BMFile);
 	BMWidth = IDNINT(BitmapBounds.xmx+1);

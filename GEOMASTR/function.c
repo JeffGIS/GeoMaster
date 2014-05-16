@@ -1997,13 +1997,16 @@ SetVis:
 		}
 			
 		case 343: // $AZM(point1,point2 or pointlist) */ 
+				  // $AZM(REVERSE,az)
+				  // $AZM(GETMIDS,azms,dlm) returns 2 perpendiculars if only one az
 		case 354: // $COG(point1,point2 or pointlist) */ Course over ground
 		{
-			double az;
+			double az,az2;
 			int	nPoints;
 			HANDLE	hPoints;
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+
 			switch (nArgs)
 			{
 			default:
@@ -2020,8 +2023,79 @@ SetVis:
 				GSSiGlobUlFree (&hPoints);
 				break;
 			case 2:
-				Point = atopt (Arg[1],&Err);
+				if (!stricmp(Arg[1], "REVERSE"))
+				{
+					az = atof(Arg[2]);
+					az = LTWOPI(az + PY);
+					ftoa(OutLoc, az);
+					goto Rtnl;
+				}
+				else if (!stricmp(Arg[1], "NORMALIZE"))
+				{
+					az = atof(Arg[2]);
+					az = LTWOPI(az);
+					ftoa(OutLoc, az);
+					goto Rtnl;
+				}
+				Point = atopt(Arg[1], &Err);
 				Point2 = atopt (Arg[2],&Err);
+				break;
+			case 3: 
+				if(!stricmp(Arg[1], "GETMIDS"))
+				{
+					BTVARDESC	BTVar[2];
+					HANDLE hSortList;
+					char dlm = *Arg[3];
+					int	naz = 1;
+					short pos;
+					LPSTR pDlm = Arg[2];
+					LPSTR pAz;
+
+					while ((pDlm = strchr(pDlm, dlm)))
+					{
+						naz++;
+						pDlm++;
+					}
+					if (naz == 1)
+					{
+						az = atof(Arg[2]);
+						sprintf(OutLoc, "%5.3f%c%5.3f", LTWOPI(az - PY / 2),dlm, LTWOPI(az + PY / 2));
+						goto Rtnl;
+					}
+					GSSiGetTempFileName(0, "gm", 0, Arg[5]);
+					BTVar[0].BT_VARTYP = BT_REAL;
+					BTVar[0].BT_VARLEN = 8;
+					BTVar[0].BT_VAROFF = 0;
+					BT_CREATE(Arg[5], 4, FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+					hSortList = BT_OPEN(Arg[5], 0, BT_WRITE, 0);
+					pDlm = pAz = Arg[2];
+					naz = 1;
+					while ((pDlm = strchr(pDlm, dlm)))
+					{
+						pDlm++;
+						az = atof(pAz);
+						pAz = pDlm;
+						BT_PUT(hSortList, (LPSTR)&az, (LPSTR)&naz);
+						naz++;
+					}
+					az = atof(pAz);
+					BT_PUT(hSortList, (LPSTR)&az, (LPSTR)&naz);
+					BT_FIND(hSortList, (LPSTR)&az, BT_LAST, BT_ANY, (LPSTR)&naz);
+					az = az - TWOPI;
+					pos = BT_FIRST;
+					while (!BT_FIND(hSortList, (LPSTR)&az2, pos, BT_ANY, (LPSTR)&naz))
+					{
+						if (pos == BT_FIRST)
+							sprintf(OutLoc, "%5.3f", LTWOPI((az + az2) / 2));
+						else
+							sprintf(strchr(OutLoc, 0), "%c%5.3f", dlm, LTWOPI((az + az2) / 2));
+						pos = BT_NEXT;
+						az = az2;
+					}
+					BT_CLOSEANDDELETE(&hSortList);
+					goto Rtnl;
+				}
+				goto RtnFalse;
 				break;
 			}
 			if (FunID == 354)

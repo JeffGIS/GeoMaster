@@ -1721,7 +1721,8 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 					 HANDLE	  hAccel;
 					} POINTINAREASTRUCT; 
 	typedef	POINTINAREASTRUCT	*LPPOINTINAREASTRUCT; 
-					
+		
+	*OutLoc = 0;
 	if (!stricmp (Args[1],"LOAD"))
 	{
 		switch (PickList[0].Type)
@@ -1836,6 +1837,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			GSSiGlobFree (&PIAStruct->hAccel);
 			GSSiGlobFree (&PIAStruct->hPolyPartLen);
 			GSSiGlobUlFree (&hPIAStruct);
+			strcpy(OutLoc, "1");
 			rtn = TRUE;
 		}
 	}
@@ -1851,6 +1853,9 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			HPDPOINT	Points = GlobalLock (PIAStruct->hPoints);
 
 			rtn = POINT_IN_AREAD (WPoint, PIAStruct->nPoints,Points,1,0,0,&PIAStruct->hAccel);
+			if (rtn)
+				strcpy(OutLoc, "1");
+
 			GlobalUnlock (PIAStruct->hPoints);
 		}
 		GlobalUnlock (hPIAStruct);

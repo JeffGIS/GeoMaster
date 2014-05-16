@@ -3630,9 +3630,11 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     _fstrcpy (WorldFile,PathName);
     if ((pDot = _fstrrchr (WorldFile,'.')))
     {
-    	if (!_fstricmp (pDot,".tif"))
-    		_fstrcpy (pDot,".tfw");
-    	else if (!_fstricmp (pDot,".bmp"))
+		if (!_fstricmp(pDot, ".tif"))
+			_fstrcpy(pDot, ".tfw");
+		else if (!_fstricmp(pDot, ".jpg"))
+			_fstrcpy(pDot, ".jpw");
+		else if (!_fstricmp(pDot, ".bmp"))
 		{
 			LPBITMAPINFO pDibInfo;
 			HANDLE hDibInfo;

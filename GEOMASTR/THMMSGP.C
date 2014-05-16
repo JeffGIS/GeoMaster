@@ -1314,7 +1314,7 @@ void DisplayNorthArrowLegend (int From)
 					CurView->hRgn = CreateVPRgn(FALSE,FALSE);
 					RegionType = SelectClipRgn (CurView->hDC,CurView->hRgn); 
 					GSSiDeleteObject(&CurView->hRgn);    
-					DisplayBMFileInVP32 (CurView->hDC, File,0);
+					DisplayBMFileInVP32 (CurView->hDC, File,0,0);
 					RestoreDC (CurView->hDC,-1);
 					CurView->Rotation = SaveRot;
 					DisplayCycle = SaveCycle;

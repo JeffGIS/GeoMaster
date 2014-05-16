@@ -1060,7 +1060,7 @@ DisplayImage:
 					DestroyDIB32(hDib32,FALSE);
 				}
 				else
-					DisplayBMFileInVP32 (CurView->hDC, PltName,0);//CurView->Rotation);		        	
+					DisplayBMFileInVP32 (CurView->hDC, PltName,0,TRUE);//CurView->Rotation);		        	
 //            	DisplayBMFileInRect (CurView->hDC,PltName,CurView->DrawRect,TRUE); 
             }
         	else if (strstr(PltName,".SID") || strstr(PltName,".JP2"))

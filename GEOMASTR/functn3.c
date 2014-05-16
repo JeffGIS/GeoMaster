@@ -4218,6 +4218,21 @@ GotCloseFilehSQL:
 			RunForAll (nArgs,Arg,OutLoc);
 			goto Rtnl;
 		}
+		case 645: //$GOOGLE(GROUNDRES,base coord,zoomLev)
+		{
+			
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem);
+
+			if (!stricmp(Arg[1], "GROUNDRES"))
+			{
+				DPOINT pt = atopt(Arg[2], &Err);
+				ConvertCoord(&pt, 1, 2);
+				RVal = GroundResolution(pt.y, atoi(Arg[3]));
+				ftoa(OutLoc, RVal);
+				goto Rtnl;
+			}
+
+		}
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{				
 			hMem = GSSiGlobAlloc ( 877,GMEM_MOVEABLE,4096);

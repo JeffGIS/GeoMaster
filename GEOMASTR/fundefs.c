@@ -204,7 +204,8 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp (str,"GETVAL",6)) return 641; 
 			if (!_fstrnicmp (str,"BUTTON",6)) return 642; 
 			if (!_fstrnicmp (str,"BITMAP",6)) return 643; 
-			if (!_fstrnicmp (str,"FORALL",6)) return 644; 
+			if (!_fstrnicmp(str, "FORALL",6)) return 644;
+			if (!_fstrnicmp(str, "GOOGLE",6)) return 645;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)
