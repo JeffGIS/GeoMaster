@@ -3190,13 +3190,6 @@ BDOK:
     while (ReadObject (&FidConfig, FALSE,0,0));
 	if (!IsRectEmpty(&InitWindowRect))
 	{
-		//ShowWindow (hWndMain,SW_RESTORE);
-		//SetWindowPos(hWndMain,HWND_TOP,InitWindowRect.left,InitWindowRect.top,
-		//					   		   InitWindowRect.right-InitWindowRect.left,
-		//					   		   InitWindowRect.bottom-InitWindowRect.top,SWP_NOZORDER);
-		MoveWindow(hWndMain, InitWindowRect.left, InitWindowRect.top,
-			InitWindowRect.right - InitWindowRect.left,
-			InitWindowRect.bottom - InitWindowRect.top, FALSE);
 		showWindowCmd = SW_SHOW;
 	}
 	if (!MapServer && !IsWindowVisible(hWndMain))

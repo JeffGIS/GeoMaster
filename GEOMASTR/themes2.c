@@ -717,6 +717,11 @@ GSSiExitProg (1262);
 					MidPoint.ShadowColor = pStreetData->ShadowColor;
 					MidPoint.TextColor = CurTheme->ClassColor[0];
 				}
+				else
+				{
+					MidPoint.TextColor = 0;
+					MidPoint.ShadowColor = RGB (255,255,255);
+				}
             	ipos = 0;  
             	if (Piece == 1)
             		WantDist *= 2;   

@@ -211,13 +211,17 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOOL replace,BOOL showStatus,LPSTR errorVarName)
 {
 	BOOL rtn=FALSE;
-	
+	char localPath[MAX_PATH];
+
+	strcpy(localPath, lpszLocalfile);
+	ExpandText(localPath);
+
 	if (!replace)
 	{
 		//check for existing file
 	}
 	else
-		rtn = FtpPutFile(hConnect,lpszLocalfile,lpszRemoteFile,FTP_TRANSFER_TYPE_BINARY,0);
+		rtn = FtpPutFile(hConnect, localPath, lpszRemoteFile, FTP_TRANSFER_TYPE_BINARY, 0);
 	if (!rtn)
 		SetInternetErrorVar (errorVarName);
 	return rtn;

@@ -13185,6 +13185,8 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 	MSG		msg;
 	static	HBITMAP	hBmpScreen=0;
  
+	if (GetGlobalBVal2("[%DISABLEWHEEL]", FALSE))
+		return FALSE;
 	if (inc == -1)
 		return TimerID;
 	if (!CurView)

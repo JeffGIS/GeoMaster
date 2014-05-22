@@ -2397,9 +2397,12 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			if (VPIsMap(vpid))
 			{
 				WheelZoom (INT_MAX,0,1);
-				itoa (GF_SLIDE_SCREEN,txt,10);
-				AddGraphicsCmd (hWndMain,txt,FALSE,0); 
-				PostMessage(hWnd,WM_LBUTTONDOWN, wParam, lParam); 
+				if (!GetGlobalBVal2("[%DISABLEWHEEL]", FALSE))
+				{
+					itoa(GF_SLIDE_SCREEN, txt, 10);
+					AddGraphicsCmd(hWndMain, txt, FALSE, 0);
+					PostMessage(hWnd, WM_LBUTTONDOWN, wParam, lParam);
+				}
 			}
 			else
 			{

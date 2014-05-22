@@ -383,23 +383,34 @@ BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 	short	ln; 
 	DWORD	FailIfExists=TRUE;
 	short	AppendOrReplace=0;
-	
+	char	fromPath[MAX_PATH], toPath[MAX_PATH];
+
 	if (Replace) 
 	{
 		AppendOrReplace = 0;
 		FailIfExists = FALSE;
 	}
-	ConvertToNewLocation (OldName,FALSE);
-	ConvertToNewLocation (NewName,FALSE);
+	strcpy(fromPath, OldName);
+	ExpandText(fromPath);
+	strcpy(toPath, NewName);
+	ExpandText(toPath);
+	ConvertToNewLocation(fromPath, FALSE);
+	ConvertToNewLocation(toPath, FALSE);
 	if (UndoEnabled)
-   		return (copyfile (NewName,OldName,AppendOrReplace,0,0,0,0,0,0));
-   	makedirectories (NewName,FALSE,FALSE);
-	if (!strnicmp (OldName,"ftp:",4) || !strnicmp (OldName,"http:",5)) 
-		ln = URLToFile (OldName,NewName);
+		return (copyfile(toPath, fromPath, AppendOrReplace, 0, 0, 0, 0, 0, 0));
+	makedirectories(toPath, FALSE, FALSE);
+	if (!strnicmp(fromPath, "ftp:", 4) || !strnicmp(fromPath, "http:", 5))
+		ln = URLToFile(fromPath, toPath);
 	else
 	{
-		ln = CopyFile (OldName,NewName,FailIfExists);
-		FileAlreadyNotFound (NewName,3,0);
+		char mess[256];
+		ln = CopyFile(fromPath, toPath, FailIfExists);
+		if (!ln)
+		{
+			DWORD ierr = GetLastError();
+			GetSystemErrMessage(ierr,mess);
+		}
+		FileAlreadyNotFound(toPath, 3, 0);
 	}
 	return ln;
 }

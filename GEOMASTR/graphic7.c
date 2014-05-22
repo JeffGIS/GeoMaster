@@ -1392,6 +1392,12 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 			else
 				GSSilread (*Fid,&InitWindowRect,sizeof(RECT));
 			SaveCfgSizePos = TRUE;
+			if (!IsRectEmpty(&InitWindowRect))
+			{
+				MoveWindow(hWndMain, InitWindowRect.left, InitWindowRect.top,
+					InitWindowRect.right - InitWindowRect.left,
+					InitWindowRect.bottom - InitWindowRect.top, FALSE);
+			}
 			goto RtnTrue;
 			
     	

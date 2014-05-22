@@ -864,7 +864,7 @@ Exit:
     GSSiGlobUlFree (&hSTR); 
     if (DeleteMacro)
     	GSSiGlobFree (&hMacro);  
-    CloseMacroFiles (ThisMacro);   
+    //CloseMacroFiles (ThisMacro);   
     InGRFCmd = InGRFCmd;
 	DestroyStatusWindow (CurrentMacro);
     CurrentMacro--;

@@ -2,6 +2,7 @@
 #include <limits.h>
 #include "TileGraphics.h"
 
+BOOL GetSystemErrMessage(DWORD errorcode, LPSTR Mess);
 HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc);
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc);
 void GSSiGlobFree (LPHANDLE pHandle); 
@@ -923,9 +924,9 @@ HPEN WINAPI GSSiEXTCREATEPEN( DWORD iPenStyle,
 		return rtn;
 	if (!rtn)
 	{
-		char Mess[1024];
-
-		GetSystemErrMessage (Mess);
+		char mess[1024];
+		DWORD ierr = GetLastError();
+		GetSystemErrMessage(ierr, mess);
 		MEMERR ("ExtCreatePen Failed");
 	}
 	else

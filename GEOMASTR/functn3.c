@@ -5,6 +5,7 @@
 #include <mmsystem.h>
 #include "gmextern.h"
 
+
 static	char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 static	BOOL	InAtPrint=FALSE;
 static short	nSetVals=0;
@@ -4219,6 +4220,7 @@ GotCloseFilehSQL:
 			goto Rtnl;
 		}
 		case 645: //$GOOGLE(GROUNDRES,base coord,zoomLev)
+				  //$GOOGLE(SCALE,base coord,zoomlev)
 		{
 			
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem);
@@ -4231,7 +4233,27 @@ GotCloseFilehSQL:
 				ftoa(OutLoc, RVal);
 				goto Rtnl;
 			}
+			if (!stricmp(Arg[1], "SCALE"))
+			{
+				DPOINT pt = atopt(Arg[2], &Err);
+				int ilev = atoi(Arg[3]);
+				DPOINT pt1, pt2;
+				DPOINT ptp1, ptp2;
+				double d;
 
+				pt1 = pt2 = pt;
+				ConvertCoord(&pt1, 1, 2);
+				LatLongToPixelXYd(pt1.y, pt1.x, ilev, &ptp1.x, &ptp1.y);
+				ptp1.x += 1000;
+				PixelXYToLatLongd(ptp1.x, ptp1.y, ilev, &pt2.y, &pt2.x);
+				pt2.y = -pt2.y;
+				ConvertCoord(&pt2, 2, 1);
+				d = ldistp(pt, pt2);
+				RVal = d / 1000;
+				ftoa(OutLoc, RVal);
+				goto Rtnl;
+			}
+			goto RtnFalse;
 		}
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{				
@@ -6209,8 +6231,9 @@ HaveVP:;
 		}
 		case 773: //$TOOLBAR(LOAD,FLOAT,Pathname,height,nperrowfloating,pos,DPoint,Scale,vpID)
 				  //$TOOLBAR(LOAD,DOCK,Pathname,
-				  //$TOOLBAR(RELOAD,CURRENT(defalut) or ALL)
-			nArgs = GetFunArgs (Args,Arg,9,&hMem); 
+			//$TOOLBAR(RELOAD,CURRENT(defalut) or ALL)
+			//$TOOLBAR(REDISPLAY,CURRENT(defalut) or ALL)
+			nArgs = GetFunArgs(Args, Arg, 9, &hMem);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp(Arg[1], "LOAD"))
@@ -6233,6 +6256,10 @@ HaveVP:;
 			if (!stricmp(Arg[1], "RELOAD"))
 			{
 				rtn = ReloadToolbar(Arg[2]);
+			}
+			if (!stricmp(Arg[1], "REDISPLAY"))
+			{
+				rtn = RedisplayToolbar(Arg[2]);//not working yet
 			}
 			goto Rtnrtn;
 		case 774: //$NETWORK(FALSEINT,STREETLIST

@@ -3402,8 +3402,9 @@ int AddButtonToToolbar2 (int ToolbarID,HWND hWndDlg,LPSTR BMPath,LPSTR ButtonTex
 			HBITMAP hBMPtemp;
 			RECT	rect = { 0 };
 			HFONT	hFont,hOldFont;
+			int		fontHeight = GetGlobalLVal2("[%TOOLBARFONTHEIGHT]", 38);
 
-			hFont = CreateFont(38, 0, 0, 0, FW_BLACK,0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+			hFont = CreateFont(fontHeight, 0, 0, 0, FW_BLACK,0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
 			hOldFont = SelectObject(hDC, hFont);
 			GetTextExtentPoint32(hDC, ButtonText, ln, &txSize);
 			SelectObject(hDC, hOldFont);
@@ -3509,6 +3510,7 @@ BOOL DestroyCurrentToolbar(void)
 }
 BOOL ReloadToolbar(LPSTR pOpt)
 {
+	int i;
 	if (!*pOpt || !stricmp(pOpt, "CURRENT"))
 	{
 		if (!currentToolbarWnd)
@@ -3517,11 +3519,39 @@ BOOL ReloadToolbar(LPSTR pOpt)
 	}
 	else if (!stricmp(pOpt, "ALL"))
 	{
+		for (i = 0; i < nToolbars; i++)
+		{
+			if (ToolbarWindow[i])
+				PostMessage(ToolbarWindow[i], WM_EXITSIZEMOVE, 0, 0);
+		}
 	}
 	else
 		return FALSE;
 	return TRUE;
 }
+
+BOOL RedisplayToolbar(LPSTR pOpt)
+{
+	int i;
+	if (!*pOpt || !stricmp(pOpt, "CURRENT"))
+	{
+		if (!currentToolbarWnd)
+			return FALSE;
+		//PostMessage(currentToolbarWnd, WM_EXITSIZEMOVE, 0, 0);
+	}
+	else if (!stricmp(pOpt, "ALL"))
+	{
+		for (i = 0; i < nToolbars; i++)
+		{
+			if (ToolbarWindow[i])
+				LoadGFFile(ToolbarWindow[i], ToolbarPath[i], 5, ToolbarFloating[i]);
+		}
+	}
+	else
+		return FALSE;
+	return TRUE;
+}
+
 void DestroyAllToolbars(void)
 {
 	int	i;
@@ -3857,11 +3887,12 @@ FromNotify:
 
 			if (ToolbarIsDocked(ToolbarID))
 			{
+				int height = ToolbarHeight[ToolbarID];
 				nPerRow = nToolbarRows[ToolbarID];
 				strcpy (Pathname,ToolbarPath[ToolbarID]);
 				GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
 				DestroyWindow (hWndDlg);
-				LoadToolbar (hWndMain,Pathname,"DOCK",0,nPerRow,"",TRUE,FALSE,&ToolbarDPoint[ToolbarID],ToolbarReZoomScale[ToolbarID],ToolbarVPID[ToolbarID]);
+				LoadToolbar (hWndMain,Pathname,"DOCK",height,nPerRow,"",TRUE,FALSE,&ToolbarDPoint[ToolbarID],ToolbarReZoomScale[ToolbarID],ToolbarVPID[ToolbarID]);
 			}
 			else
 			{
@@ -5385,7 +5416,7 @@ void SaveToolbarsInConfig (HFILE Fid)
 		BigWrite (Fid,(HPSTR)&ToolbarConfigNumPerRow[i][0],4,-1);Length+=4;
 		BigWrite (Fid,(HPSTR)&ToolbarHeight[i],4,-1);Length+=4;
 		rect = ToolbarRect[i];
-		ScreenRectToClientRect (hWndMain,&rect); (hWndMain,&rect);
+		ScreenRectToClientRect (hWndMain,&rect);
 		BigWrite (Fid,(HPSTR)&rect,sizeof(RECT),-1);Length+=sizeof(RECT);
 		strcpy (path,ToolbarPath[i]);
 		SubstituteDL (path,FALSE);
@@ -5424,14 +5455,15 @@ void LoadToolbarsInConfig (HFILE Fid)
 		GSSilread (Fid,&rect,sizeof(RECT));
 		GSSilread (Fid,path,MAX_PATH);
 
-//		ScreenRectToClientRect (hWndMain,&rect);
+		//ClientRectToScreenRect (hWndMain,&rect);
 
 		switch (iType)
 		{
-		case TBT_STANDARDMENU:
 		case TBT_STANDARDMENU_DOCKED:
 			pt = RectMid (&rect);
-			sprintf (cmd,"$TOOLBAR(LOAD,DOCK,%s,%i,%i,%i %i)",path,h,npr,pt.x,pt.y);
+			pt.x = rect.left;
+			pt.y = rect.top;
+			sprintf(cmd, "$TOOLBAR(LOAD,DOCK,%s,%i,%i,%i %i)", path, h, npr, pt.x, pt.y);
 			ProcessText (cmd);
 			break;
 		case TBT_ZOOMPAN:

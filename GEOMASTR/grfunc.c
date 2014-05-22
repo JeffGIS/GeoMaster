@@ -1062,6 +1062,7 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 	{
 		case 3:
 		case 4:
+		case 5://toolbar redisplay
 			strcpy (lpStr,InFile);
 		break;
 		case 2:
@@ -1253,6 +1254,7 @@ GSSiExitProg (1347);
 					}
 					break;
 				case 4:
+				case 5:
 					if (!lpBar)
 						break;
 					if (!SkipThisEntry)
@@ -1264,9 +1266,12 @@ GSSiExitProg (1347);
 						{
 							*lpBM++ = 0;
 							sprintf (strchr (BMPath,0),"\\%s",lpBM);
-							AddButtonToCMDMenu (hWndDlg,BMPath,Title,CurLoc);
+							if (opt == 5)
+								RedisplayButtonToCMDMenu(hWndDlg, BMPath, Title, CurLoc);
+							else
+								AddButtonToCMDMenu(hWndDlg, BMPath, Title, CurLoc);
 						}
-						else
+						else if (opt == 4)
 							AddButtonToCMDMenu (hWndDlg,0,Title,CurLoc);
 					}
 					break;

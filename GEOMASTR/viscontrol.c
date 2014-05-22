@@ -4333,3 +4333,28 @@ int AddButtonToCMDMenu (HWND hWndDlg,LPSTR BMPath,LPSTR ButtonText,int filepos)
 	return 0;
 }
 
+int RedisplayButtonToCMDMenu(HWND hWndDlg, LPSTR BMPath, LPSTR ButtonText, int filepos)
+{
+	HBITMAP	hBM = GetToolBitmap(BMPath);
+//does not work yet
+	if (!pCMDHeader)
+	{
+		hWMH = GetMenuWindowHandle(hWndDlg);
+		if (hWMH)
+		{
+			pWMH = (LPWINDOWMENUHEADER)GlobalLock(hWMH);
+			{
+				LPWINDOWMENUHEADER savepWMH2 = pWMH;
+				HANDLE	savehWMH2 = hWMH;
+
+				pCMDHeader = (LPCMDMENUHEADER)GlobalLock(pWMH->menuHandle[pWMH->currentMenu]);
+				//rtn = CMDMenuWndProc(hWnd, Message, wParam, lParam);
+				pWMH = savepWMH2;
+				hWMH = savehWMH2;
+				GlobalUnlock(pWMH->menuHandle[pWMH->currentMenu]);
+			}
+		}
+	}
+	return 0;
+}
+
