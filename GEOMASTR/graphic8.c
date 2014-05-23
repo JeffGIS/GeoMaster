@@ -4306,8 +4306,8 @@ Exit:
 			PickList[0].BPAZ = PickList[0].EPAZ = AZ;   
 		else 
 		{
-			PickList[0].BPAZ = BPAZ;   
-			PickList[0].EPAZ = BPAZ;  
+			PickList[0].BPAZ = getazd(&lpDpointIn[0], &lpDpointIn[1]);
+			PickList[0].EPAZ = getazd(&lpDpointIn[nPnts - 2], &lpDpointIn[nPnts - 1]);
 		} 
 		if (CurrentType == GF_AREA && nPoly > 1)
 		{
