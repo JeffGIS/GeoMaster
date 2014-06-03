@@ -194,6 +194,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 				Done += numBytesRead;
 				BigWrite (Fid,pBuffer,numBytesRead,-1);
 			};
+			StatusWindowUpdate(leafName, Tot, Tot, Done);
 			DestroyStatusWindow (0);
 			GSSiClose (Fid);
 			GSSiGlobUlFree (&hBuffer);
@@ -201,8 +202,11 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 		}
 	}
 	else
-		rtn = FtpGetFile(hConnect,lpszRemoteFile,lpszNewFile,!replace,
-						  FILE_ATTRIBUTE_NORMAL ,FTP_TRANSFER_TYPE_BINARY,0);
+	{
+		makedirectories(lpszNewFile, FALSE, FALSE);
+		rtn = FtpGetFile(hConnect, lpszRemoteFile, lpszNewFile, !replace,
+			FILE_ATTRIBUTE_NORMAL, FTP_TRANSFER_TYPE_BINARY, 0);
+	}
 	if (!rtn)
 		SetInternetErrorVar (errorVarName);
 	return rtn;
