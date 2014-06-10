@@ -4233,6 +4233,16 @@ GotCloseFilehSQL:
 				ftoa(OutLoc, RVal);
 				goto Rtnl;
 			}
+			if (!stricmp(Arg[1], "PIXELXY"))
+			{
+				DPOINT pt = atopt(Arg[2], &Err);
+				POINT  pixpt;
+				ConvertCoord(&pt, 1, 2);
+				int ilev = atoi(Arg[3]);
+				LatLongToPixelXY(pt.y, pt.x, ilev, &pixpt.x, &pixpt.y);
+				pttoa(OutLoc, pixpt);
+				goto Rtnl;
+			}
 			if (!stricmp(Arg[1], "SCALE"))
 			{
 				DPOINT pt = atopt(Arg[2], &Err);

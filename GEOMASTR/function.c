@@ -3244,6 +3244,7 @@ SetVis:
 				goto RtnTrue;
 			}
 			else if (!stricmp (Arg[1],"ITEM"))//$PICK(ITEM,refno or tag,point,vp) picks nearest point on item to point
+											  //$PICK(ITEM,refno or tag) sets pick globals for item
 			{
 				short	UsePickList=-1;
 
@@ -3253,6 +3254,15 @@ SetVis:
 				{
 					Refno = atol (Arg[2]); 
 					Arg[2] = 0;
+				}
+				if (!*Arg[3])
+				{
+					if (PickByRefno(Refno, Arg[2], lpColon, UsePickList))
+					{
+						SetPickGlobals(0);
+						goto RtnTrue;
+					}
+					goto RtnFalse;
 				}
 				Point = atopt (Arg[3],&Err);
 				if (Err)

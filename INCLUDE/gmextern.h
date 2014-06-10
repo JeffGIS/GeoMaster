@@ -503,7 +503,7 @@ extern BOOL			InExpand;
 extern BOOL			LoadedHLTFromConfig;
 extern BOOL			MoveOnlyPickedPoint;
 extern BOOL			ForceHLT;
-extern double			ItemSymbolWidth;
+extern float			ItemSymbolWidth;
 extern BOOL			PickAllPieces;
 extern int			CurThemeClass;
 extern BOOL			HaveVarFillColor; 

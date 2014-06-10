@@ -114,7 +114,9 @@ BOOL UpdateGlobalFile (LPSTR RptFileIn,LPSTR VName,LPSTR Value)
 	char	OldFile[MAX_PATH], NewFile[MAX_PATH], RptFile[MAX_PATH], VarName[36];
 	OFSTRUCTGM	OFStruct;
 	BOOL	rtn=FALSE, Found=FALSE;
+	BOOL	saveAllowCache = AllowCache;
 	
+	AllowCache = FALSE;
 	_fstrcpy (RptFile,RptFileIn);
 	ExpandText (RptFile);
 	_fstrcpy(VarName,"[");
@@ -137,6 +139,7 @@ BOOL UpdateGlobalFile (LPSTR RptFileIn,LPSTR VName,LPSTR Value)
 			} 
 		}
 		GSSiGlobUlFree (&hStr);
+		AllowCache = saveAllowCache;
 {
 #if ENABLETRACE
 GSSiExitProg (515);
@@ -179,11 +182,13 @@ GSSiExitProg (515);
 	}                     
 	GSSiClose (Fid);
 	GSSiClose (FidOut);
-	if (!GSSiRemove (OldFile))
+	CloseAllRequestedFiles(FALSE);
+	if (!GSSiRemove(OldFile))
 		GSSiRename (NewFile,OldFile);  
 	else
 		MessageBox (0,OldFile,"Unable to update file",MB_ICONEXCLAMATION);
 	GSSiGlobUlFree (&hStr);
+	AllowCache = saveAllowCache;
 {
 #if ENABLETRACE
 GSSiExitProg (515);

@@ -1666,7 +1666,7 @@ GSSiExitProg (1350);
 			int ln;
 			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
 			if (!GetShortPathName(Arg[1], Arg[6], MAX_PATH))
-				*OutLoc = 0;
+				strcpy (OutLoc,Arg[4]);
 			else
 				GetPrivateProfileString (Arg[2],Arg[3],Arg[4],OutLoc,256,Arg[6]); 
 			goto Rtnl;

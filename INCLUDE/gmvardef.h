@@ -349,7 +349,7 @@ TAGBOX	TAGBox;
 int		CurThemeClass=-1;
 BOOL	HaveVarFillColor=FALSE; 
 LPTHEME	StreetCenterline=NULL;
-double	ItemSymbolWidth=0;
+float	ItemSymbolWidth=0;
 int		CurrentGridLevel=0;
 int		CurrentGridRow=0;
 int		CurrentGridCol=0;

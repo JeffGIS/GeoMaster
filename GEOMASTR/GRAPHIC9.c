@@ -1849,14 +1849,15 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
 	BOOL    SaveNRI = NoRefIndex;
 	HANDLE	hCurView=0;  
 	LPVIEWPORT	SaveVP=CurView;
+	int ft;
 	
     if (!CurView) 
     {
     	hCurView = GSSiGlobAlloc (0,GHND,sizeof(VIEWPORT));
     	CurView = (LPVIEWPORT)GlobalLock (hCurView);
     }
-    
-    if (FileType (File) == 2)
+	ft = MapFileType(File);
+	if (ft != MT_FILE_GEO_DB && FileType(File) == 2)
     {   
     	HANDLE	handle, hMem = GSSiGlobAlloc ( 972,GMEM_MOVEABLE,256);
     	LPSTR	pName = GlobalLock (hMem);
@@ -1866,7 +1867,7 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
     	CloseMapIndex (pName,handle,FALSE,TRUE);  
     	GSSiGlobUlFree (&hMem);
     }
-	else switch (MapFileType (File))
+	else switch (ft)
 	{
 	case	MT_INDEX:
     {   

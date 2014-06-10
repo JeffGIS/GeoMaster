@@ -194,7 +194,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 				Done += numBytesRead;
 				BigWrite (Fid,pBuffer,numBytesRead,-1);
 			};
-			StatusWindowUpdate(leafName, Tot, Tot, Done);
+			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow (0);
 			GSSiClose (Fid);
 			GSSiGlobUlFree (&hBuffer);
@@ -224,8 +224,55 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 	{
 		//check for existing file
 	}
+	if (showStatus)
+	{
+		HANDLE handle = FtpOpenFile(hConnect, lpszRemoteFile, GENERIC_WRITE, FTP_TRANSFER_TYPE_BINARY, 0);
+		if (handle)
+		{
+			__int64 size = GSSiLength(lpszLocalfile);
+			DWORD Tot = (DWORD)size;
+			DWORD Done = 0;
+			LPSTR Title, Mess;
+			DWORD dwNumberOfBytesToRead = USHRT_MAX;
+			DWORD numBytesRead;
+			DWORD dwNumberOfBytesToWrite, numBytesWritten;
+			HFILE Fid;
+			HANDLE hBuffer;
+			LPSTR pBuffer, leafName;
+
+			if (!(leafName = strrchr(lpszRemoteFile, '/')))
+				leafName = lpszRemoteFile;
+			Fid = GSSiOpenFile(lpszLocalfile, 0, OF_READ);
+			if (Fid == HFILE_ERROR)
+			{
+				if (errorVarName && *errorVarName)
+					SetGlobalValue(errorVarName, "Unable to open source file");
+				InternetCloseHandle(handle);
+				return FALSE;
+			}
+			hBuffer = GSSiGlobAlloc(0, GMEM_MOVEABLE, dwNumberOfBytesToRead + 32);
+			pBuffer = GlobalLock(hBuffer);
+			rtn = TRUE;
+			CreateStatusWind(0, 1, leafName);
+			while (rtn && Done < Tot &&	StatusWindowUpdate(leafName, 0, Tot, Done))
+			{
+				dwNumberOfBytesToWrite = numBytesRead = BigRead(Fid, pBuffer, dwNumberOfBytesToRead);
+				rtn = InternetWriteFile(handle, pBuffer, dwNumberOfBytesToWrite, &numBytesWritten);
+				if (numBytesRead != dwNumberOfBytesToWrite)
+					rtn = 0;
+				Done += numBytesRead;
+			};
+			StatusWindowUpdate(leafName, 0,Tot, Tot);
+			DestroyStatusWindow(0);
+			GSSiClose(Fid);
+			GSSiGlobUlFree(&hBuffer);
+			InternetCloseHandle(handle);
+		}
+	}
 	else
+	{
 		rtn = FtpPutFile(hConnect, localPath, lpszRemoteFile, FTP_TRANSFER_TYPE_BINARY, 0);
+	}
 	if (!rtn)
 		SetInternetErrorVar (errorVarName);
 	return rtn;
