@@ -1,4 +1,6 @@
-configs\CrystalLake2.gmc /F /WD I:\\CountyData
+configs\PedRampStatus.gmc /F /WD c:\ADAPedRamps\PreSurvey
+configs\PrelimSurvey.gmc /F /WD c:\ADAPedRamps\PreSurvey
+configs\CrystalLake2.gmc /F /WD I:\CountyData
 projects\alleywalls\alleymaps.gmc /F /WD "C:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\GEOMas"
 configs\HCPropExtract\propload.gmc /F /WD c:\geomas
 configs\Illinois.gmc /F /WD "I:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\CountyData"
@@ -129,6 +131,10 @@ granth.gmc /WD c:\granth
 
 
 granth
+
+
+
+
 
 
 
