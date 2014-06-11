@@ -4256,7 +4256,7 @@ GotCloseFilehSQL:
 				LatLongToPixelXYd(pt1.y, pt1.x, ilev, &ptp1.x, &ptp1.y);
 				ptp1.x += 1000;
 				PixelXYToLatLongd(ptp1.x, ptp1.y, ilev, &pt2.y, &pt2.x);
-				pt2.y = -pt2.y;
+				//pt2.y = -pt2.y;
 				ConvertCoord(&pt2, 2, 1);
 				d = ldistp(pt, pt2);
 				RVal = d / 1000;

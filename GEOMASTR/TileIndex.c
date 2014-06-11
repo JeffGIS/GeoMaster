@@ -130,7 +130,7 @@ void PixelXYToLatLong(int pixelX, int pixelY, int levelOfDetail, double *latitud
 {
     unsigned int mapSize = MapSize(levelOfDetail);
     double x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;
-    double y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize);
+    double y = 0.5 - (Clip(mapSize - pixelY, 0, mapSize - 1) / mapSize);
 
     *latitude = 90 - 360 * atan(exp(-y * 2 * PI)) / PI;
     *longitude = 360 * x;
@@ -140,7 +140,7 @@ void PixelXYToLatLongd(double pixelX, double pixelY, int levelOfDetail, double *
 {
     unsigned int mapSize = MapSize(levelOfDetail);
     double x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;
-    double y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize);
+	double y = 0.5 - (Clip(mapSize - pixelY, 0, mapSize - 1) / mapSize);
 
     *latitude = 90 - 360 * atan(exp(-y * 2 * PI)) / PI;
     *longitude = 360 * x;

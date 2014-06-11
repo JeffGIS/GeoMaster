@@ -3724,7 +3724,7 @@ SetVis:
 			else if (!stricmp (Arg[1],"LL"))
 			{
 				i = atoi (Arg[2]);
-				if (i < 0 || i > 20)
+				if (i < 0 || i > 21)
 					goto RtnFalse;
 				Point16.x = atoi (Arg[3]);
 				Point16.y = atoi (Arg[4]);
