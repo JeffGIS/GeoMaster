@@ -8229,6 +8229,25 @@ BEGIN
     PUSHBUTTON      "",IDCANCEL,245,20,14,10,BS_BITMAP | BS_FLAT
 END
 
+RemoteNetworkAnalyzer DIALOGEX 0, 0, 543, 293
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Remote Network Analyzer"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Map",IDOK,16,272,50,14
+    PUSHBUTTON      "Clear",IDCANCEL,486,272,50,14
+    LISTBOX         IDC_LIST1,7,29,529,186,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Client ID           Status            Update Freq            Packet Size            Average Time            Median Time              Longest Time",IDC_STATIC,11,17,510,11
+    EDITTEXT        IDC_PACKETSIZE,82,231,26,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Packet Size (K)",IDC_STATIC,15,235,50,8
+    EDITTEXT        IDC_UPDATEFREQ,81,250,27,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Update Freg  (Sec)",IDC_STATIC,14,254,63,8
+    CONTROL         "",IDC_DATETIMEPICKER1,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,103,271,100,15
+    LTEXT           "From:",IDC_STATIC,81,278,21,8
+    CONTROL         "",IDC_DATETIMEPICKER2,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,232,271,100,15
+    LTEXT           "To:",IDC_STATIC,210,278,12,8
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -8661,6 +8680,10 @@ BEGIN
         RIGHTMARGIN, 501
     END
 
+    "CENFIELDS", DIALOG
+    BEGIN
+    END
+
     "SETSHAPEPARAM", DIALOG
     BEGIN
         BOTTOMMARGIN, 268
@@ -8999,6 +9022,14 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 259
     END
+
+    "RemoteNetworkAnalyzer", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 536
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 286
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -9009,8 +9040,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,8,115,0
- PRODUCTVERSION 34,8,115,0
+ FILEVERSION 34,8,116,0
+ PRODUCTVERSION 34,8,116,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9027,7 +9058,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34h build 115"
+            VALUE "FileVersion", "34h build 116"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"
