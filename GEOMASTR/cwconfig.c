@@ -950,7 +950,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		*selectedStartCmd = 0;
 		cwCenter(hWndDlg, 0);
 		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_RESETCONTENT, 0, 0);
-		fid = OpenFileGM("./cmdlines.txt", &OFStruct, OF_READ);
+		fid = OpenFileGM("../cmdlines.txt", &OFStruct, OF_READ);
 		if (fid != HFILE_ERROR)
 		{
 			strcpy(cmdFile, OFStruct.szPathName);
