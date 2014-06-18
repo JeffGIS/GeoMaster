@@ -83,11 +83,13 @@ void GetSymDictChildren (int Parent,LPSHORT pnChildren,LPHANDLE phChildren,int S
 	n = lChildList;
 	while (n--) 
 	{
+		if (pChildList->SymNum == 29)
+			ii = 1;
 		if (pChildList->Parent == Parent)
 		{
 			if (!pChildList->Type && SearchSubPar)
 				GetSymDictChildren (pChildList->SymNum,pnChildren,phChildren,SymType,SearchSubPar);
-			else if (SymType < 0 || pChildList->Type == SymType)
+			if (SymType < 0 || pChildList->Type == SymType)
 			{
 				pChildren = (LPSHORT)GlobalLock (*phChildren);
 				pChildren += *pnChildren;
@@ -120,6 +122,8 @@ void BuildChildList (void)
 		if (hSymbol)
 		{ 
 			pSymbol = (LPSYMBOL)GlobalLock (hSymbol);  
+			if (pSymbol->Number == 29)
+				ii = 1;
 			pChildList->Type = pSymbol->Type;
 			pChildList->Parent = pSymbol->Parent;
 			pChildList++->SymNum = i;

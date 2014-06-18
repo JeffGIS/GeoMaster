@@ -1177,7 +1177,9 @@ BOOL SetParentVisibility (int Parent, BOOL Vis, short Layer)
 		{		
 			Child = (LPSHORT)GlobalLock (hChildren);
 			while (nChildren--)  
-			{  
+			{ 
+				if (*Child == 29)
+					ii = 1;
 				if (Vis == 3)
 				{
 					if (GetVisibility(*Child))
