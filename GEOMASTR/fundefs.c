@@ -338,7 +338,8 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp (str,"CHECKSUM",8)) return 846; 
 			if (!_fstrnicmp (str,"MAXSLOPE",8)) return 847; 
 			if (!_fstrnicmp (str,"FILETIME",8)) return 848; 
-			if (!_fstrnicmp (str,"FUNCTION",8)) return 849; 
+			if (!_fstrnicmp(str, "FUNCTION", 8)) return 849;
+			if (!_fstrnicmp(str, "FILEPART", 8)) return 850;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)
@@ -553,8 +554,9 @@ int	GetFunctionID15 (LPSTR str)
 			if (!_fstrnicmp (str,"ADDRESSLOCATION",15)) return 1505;  
 			if (!_fstrnicmp (str,"CREATEWORDINDEX",15)) return 1506;  
 			if (!_fstrnicmp (str,"GETMAXFILEREFNO",15)) return 1507;  
-			if (!_fstrnicmp (str,"DELETEDIRECTORY",15)) return 1508;  
-			
+			if (!_fstrnicmp(str, "DELETEDIRECTORY", 15)) return 1508;
+			if (!_fstrnicmp(str, "NETWORKANALYZER", 15)) return 1509;
+
 			return 0;
 }
 int	GetFunctionID16 (LPSTR str)

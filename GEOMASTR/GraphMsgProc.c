@@ -322,7 +322,7 @@ Exit:
 }
 
 
-BOOL FAR PASCAL TemplateMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 
 	int	BRtn;
@@ -333,13 +333,7 @@ BOOL FAR PASCAL TemplateMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 	case WM_INITDIALOG:
 
 		cwCenter(hWndDlg, 0);
-		SetDlgItemText(hWndDlg, IDC_WAITMESS, GMmess);
-		SetTimer(hWndDlg, 1, 10000, (FARPROC)0);
 		break; /* End of WM_INITDIALOG                                 */
-
-	case WM_TIMER:
-		PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
-		break;
 
 	case WM_CLOSE:
 		/* Closing the Dialog behaves the same as Cancel               */
@@ -350,11 +344,9 @@ BOOL FAR PASCAL TemplateMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 		switch (LOWORD(wParam))
 		{
 		case IDCANCEL:
-			KillTimer(hWndDlg, 1);
 			EndDialog(hWndDlg, FALSE);
 			break;
 		case IDOK:
-			KillTimer(hWndDlg, 1);
 			EndDialog(hWndDlg, TRUE);
 			break;
 		}
@@ -367,7 +359,47 @@ BOOL FAR PASCAL TemplateMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 }
 void CallTemplateMsgProc(void)
 {
-	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, TemplateMESSAGEMsgProc);
+	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, TemplateMsgProc);
+}
+
+BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+
+	int	BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+
+		cwCenter(hWndDlg, 0);
+		SetDlgItemInt(hWndDlg, IDC_PACKETSIZE, 4, FALSE);
+		SetDlgItemInt(hWndDlg, IDC_UPDATEFREQ, 15, FALSE);
+		SendDlgItemMessage(hWndDlg, IDC_POINTFONTS, LB_ADDSTRING, 0, (LPARAM)"Test1                 Off                 15                           4K                          163                            111                            21459");
+
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDOK:
+			EndDialog(hWndDlg, TRUE);
+			break;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
 }
 
 BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)

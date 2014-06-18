@@ -5795,3 +5795,25 @@ BOOL GetToolbarBounds(HWND hWnd,LPMNMXCORD pBounds)
 	*pBounds = bounds;
 	return rtn;
 }
+
+int RedisplayButtonToCMDMenu(HWND hWndDlg, LPSTR BMPath, LPSTR ButtonText, int iButton)
+{
+	LPTOOBAR_CONTROL_INFO	pTBInfo;
+	int	i, ToolbarID;
+	HBITMAP	hBM, hOldBM;
+
+	ToolbarID = GetToolbarIDFromWnd(hWndDlg);
+	if (ToolbarID < 0)
+		return FALSE;
+	hBM = GetToolBitmap(BMPath);
+	pTBInfo = GlobalLock(ToolbarHandle[ToolbarID]);
+	pTBInfo += iButton;
+	hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, pTBInfo->CntlID, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM);
+	pTBInfo->hBM = hBM;
+	GlobalUnlock(ToolbarHandle[ToolbarID]);
+
+	GSSiDeleteObject(&hOldBM);
+
+	return 0;
+}
+

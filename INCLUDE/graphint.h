@@ -79,6 +79,8 @@
 
 #define		CDSize	630
 
+BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);

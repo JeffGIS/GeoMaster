@@ -1534,6 +1534,62 @@ GSSiExitProg (1350);
 			goto Rtnrtn;
 		}
 
+		case 850: // $FILEPART(DRIVEDIR,filepath)
+			// $FILEPART(DIR,filepath)
+			// $FILEPART(DRIVE,filepath)
+			// $FILEPART(NAME,filepath)
+			// $FILEPART(EXT,filepath)
+		{
+
+			rtn = FALSE;
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem);
+			*OutLoc = 0;
+			LPSTR drive = Arg[3];
+			LPSTR dir = drive + _MAX_DRIVE + 1;
+			LPSTR name = dir + _MAX_DIR + 1;
+			LPSTR ext = name + _MAX_FNAME + 1;
+			LPSTR lastdir;
+
+			_splitpath(Arg[2], drive, dir, name, ext);
+			if (*dir)
+			{
+				dir++;
+				*LastChr(dir) = 0;
+			}
+			if (!stricmp(Arg[1], "DRIVE"))
+				strcpy(OutLoc, drive);
+			else if (!stricmp(Arg[1], "DRIVEDIR"))
+				sprintf(OutLoc,"%s\\%s",drive, dir);
+			else if (!stricmp(Arg[1], "DIR"))
+				strcpy(OutLoc, dir);
+			else if (!stricmp(Arg[1], "LASTDIR"))
+			{
+				if ((lastdir = strrchr(dir, '\\')))
+					strcpy(OutLoc, ++lastdir);
+				else
+					strcpy(OutLoc, dir);
+			}
+			else if (!stricmp(Arg[1], "WOLASTDIR"))
+			{
+				if ((lastdir = strrchr(dir, '\\')))
+					*lastdir = 0;
+				sprintf(OutLoc,"%s\\%s",drive,dir);
+			}
+			else if (!stricmp(Arg[1], "NAME"))
+				strcpy(OutLoc, name);
+			else if (!stricmp(Arg[1], "EXT"))
+				strcpy(OutLoc, ext);
+			else if (!stricmp(Arg[1], "WOEXT"))
+			{
+				if (!(lastdir = strrchr(Arg[2], '\\')))
+					lastdir = Arg[2];
+				if ((lastdir = strrchr(lastdir, '.')))
+					*lastdir = 0;
+				strcpy(OutLoc, Arg[2]);
+			}
+			goto Rtnl;
+		}
+
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs (Args,Arg,7,&hMem);
@@ -5175,7 +5231,11 @@ GSSiExitProg (1350);
             	goto RtnFalse;
 			
 		} 
-		
+		case 1509://$NETWORKANALYZER
+		{
+			rtn = DialogBox(hInst, (LPSTR)"RemoteNetworkAnalyzer", GetFocus(), NetworkAnalyzerMsgProc);
+			goto RtnTrue;
+		}
         case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
         {
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;

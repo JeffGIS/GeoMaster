@@ -1261,18 +1261,24 @@ GSSiExitProg (1347);
 					{
 						LPSTR	lpBM;
 
-						GetGlobalCVal ("[%ICONLIB]",BMPath,"[%DL]icons");
-						if ((lpBM = strrchr (Title,'&')))
+						GetGlobalCVal("[%ICONLIB]", BMPath, "[%DL]icons");
+						Truncate(BMPath); // allows BMPath to be ' ' so full pathname can be entered after &
+						ExpandText(Title);
+						if ((lpBM = strrchr(Title, '&')))
 						{
 							*lpBM++ = 0;
-							sprintf (strchr (BMPath,0),"\\%s",lpBM);
+							if (*BMPath)
+								sprintf(strchr(BMPath, 0), "\\%s", lpBM);
+							else
+								sprintf(strchr(BMPath, 0), "%s", lpBM);
 							if (opt == 5)
-								RedisplayButtonToCMDMenu(hWndDlg, BMPath, Title, CurLoc);
+								RedisplayButtonToCMDMenu(hWndDlg, BMPath, Title, iButton);
 							else
 								AddButtonToCMDMenu(hWndDlg, BMPath, Title, CurLoc);
 						}
 						else if (opt == 4)
 							AddButtonToCMDMenu (hWndDlg,0,Title,CurLoc);
+						iButton++;
 					}
 					break;
 			}
