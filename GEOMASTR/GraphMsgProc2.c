@@ -4605,8 +4605,31 @@ BOOL FAR PASCAL LOADMDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
 		 	 
 		 	 if (!_fstricmp (&AutoExportName[l-12],"filelist.txt"))
 		 	 { 
-		 	 	AutoFileList = TRUE;   
-		 	 	itype = 1;
+				HFILE	FidAutoFileList;
+				AutoFileList = TRUE;
+				itype = 1;
+				FidAutoFileList = GSSiOpenFile(AutoExportName, 0, OF_READ);
+				if (FidAutoFileList != HFILE_ERROR)
+				{
+					LPSTR pDot;
+					fgetstring(str, MAX_PATH, FidAutoFileList);
+					GSSiClose(FidAutoFileList);
+					pDot = strrchr(str, '.');
+					if (pDot)
+					{
+						pDot++;
+						if (!stricmp(pDot, "BPW"))
+						{
+							PostMessage(hWndDlg, WM_COMMAND, LMD_TYPE_ORTHO, 0L);
+							PostMessage(hWndDlg, WM_COMMAND, IDC_BPW, 0L);
+						}
+						else if (!stricmp(pDot, "TFW"))
+						{
+							PostMessage(hWndDlg, WM_COMMAND, LMD_TYPE_ORTHO, 0L);
+							PostMessage(hWndDlg, WM_COMMAND, IDC_TFW, 0L);
+						}
+					}
+				}
 		 	 }
 		 	 else
 		 	 {
@@ -4980,6 +5003,7 @@ SelectFiles:
 							SetDlgItemText(hWndDlg,IDC_DESTDIR,ToDir);
 		                if (AutoFileList)
 		                {
+							GSSiClose2(&FidAutoFileList);
 		                 	FidAutoFileList = GSSiOpenFile (AutoExportName,0,OF_READ);   
 		                 	Num = NumRowsInTxtFile (FidAutoFileList);
 		                }
@@ -5326,8 +5350,7 @@ SelectFiles:
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE);  
-                 if (FidAutoFileList != HFILE_ERROR)
-                 	GSSiClose (FidAutoFileList);
+               	 GSSiClose2 (&FidAutoFileList);
                  if (*AutoExportName)
                  	GSSiEndDialog(hWndDlg, ContinueProcessing,hSaveBM); 
                  else if (ContinueProcessing)

@@ -1130,7 +1130,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 		   last_height, last_width, FileNum, inc, jrow,
 		   approx_width=80, approx_height=60, ires, numres=3;
 	long	ClipWidth, ClipHeight, i, OrigWidth, OrigHeight;
-    HANDLE  hDibInfo, hRow=0,hOutRow=0,h0s, hDibInfoOut;
+    HANDLE  hDibInfo=0, hRow=0,hOutRow=0,h0s=0, hDibInfoOut=0;
     HANDLE	hTIFFOffsets=0, hTIFFLengths=0; 
     double  Resolution, MinRow, MinCol, BytesPerPel; 
     WORD    HeadLen;  
@@ -1853,7 +1853,7 @@ ProcessBitmap:
                      GSSiRemove (fNameBM);
                      if (!st)
                      {
-                        MessageBox(0,"Error writing output file - disk may be full",
+                        MessageBox(0,"Error writing output file - disk may be full or compressor missing",
                                      AVIFile,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
                      	ContinueProcessing = FALSE;
                      	goto Exit;
