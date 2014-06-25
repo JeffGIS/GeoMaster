@@ -1493,6 +1493,7 @@ SetVis:
         {
         	BOOL	nRc=FALSE;
 
+
 			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
 			DoPaint = FALSE;      
             if (!_fstricmp (Arg[1],"WPTRAN"))
