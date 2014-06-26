@@ -1767,6 +1767,7 @@ extern	char	CachePathnameFrom[4][MAX_PATH];
 extern	char	MapserverFile[MAX_PATH];
 extern  HBITMAP hMapServerBM;
 extern	SHOWVAL ShowVal;
+extern	int		expandOnly;
 extern	int		ii;
 
 
