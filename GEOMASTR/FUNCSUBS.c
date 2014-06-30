@@ -1013,7 +1013,7 @@ NextGrids:
 	return;
 }
 
-BOOL GetSymAttrFile (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPSTR OverrideAppendVal,LPSTR AttrFile)
+BOOL GetSymAttrFile2 (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPSTR OverrideAppendVal,LPSTR AttrFile)
 {
 	static	BOOL First=TRUE;
 	static	HANDLE	hSymAttrFiles=0;
@@ -1022,6 +1022,7 @@ BOOL GetSymAttrFile (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPST
 	LPSTR	pSymAttrFiles;
 	LPSTR	pSC;
 	BOOL	rtn=FALSE;
+	OFSTRUCTGM OFStruct;
 
 	if (!SymName)
 	{
@@ -1036,7 +1037,7 @@ BOOL GetSymAttrFile (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPST
 		int		l=0;
 
 		First = FALSE;
-		Fid = GSSiOpenFile ("[%DL]symattrfiles.txt",0,OF_READ);
+		Fid = GSSiOpenFile ("[%DL]symattrfiles.txt",&OFStruct,OF_READ);
 		if (Fid != HFILE_ERROR)
 		{
 			char	str[302];
@@ -1084,7 +1085,7 @@ BOOL GetSymAttrFile (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPST
 		if (OverrideAppendVal && *OverrideAppendVal)
 			strncpy0 (AppendVal,OverrideAppendVal,sizeof(AppendVal)-1);
 		else
-		strcpy (AppendVal,SymAppendVar);
+			strcpy (AppendVal,SymAppendVar);
 		ExpandText (AppendVal);
 		if (*SymName == '#')
 		{
@@ -1157,8 +1158,66 @@ BOOL GetSymAttrFile (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPST
 	}
 	return rtn;
 }
+BOOL GetSymAttrFile(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LPSTR OverrideAppendVal, LPSTR AttrFile)
+{
+	int SymNum, iParent;
+	char	symnumC[8];
+	LPSTR pTab;
+	BOOL rtn = GetSymAttrFile2(SymName, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
 
-TIMERPROC UserTimerProc(HWND hwnd,UINT uMsg,UINT dEvent,DWORD dwTime)
+	if (!rtn)
+	{
+		if (*SymName == '#')
+			SymNum = atoi(&SymName[1]);
+		else
+			SymNum = GetDictSymbolNumber(SymName);
+		iParent = GetDictSymParent(SymNum);
+		sprintf(symnumC, "#%i", iParent);
+		rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+	}
+	if (rtn && AttrFile)
+	{
+		pTab = strrchr(AttrFile, '\t');
+		if (pTab)
+			*pTab = 0;
+	}
+	return rtn;
+}
+
+BOOL GetSymAttrKey(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LPSTR OverrideAppendVal, LPSTR Key)
+{
+	int		SymNum, iParent;
+	char	symnumC[8];
+	LPSTR	pTab;
+	char	AttrFile[MAX_PATH];
+	BOOL	rtn = GetSymAttrFile2(SymName, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+	
+	*Key = 0;
+	if (!rtn)
+	{
+		if (*SymName == '#')
+			SymNum = atoi(&SymName[1]);
+		else
+			SymNum = GetDictSymbolNumber(SymName);
+		iParent = GetDictSymParent(SymNum);
+		sprintf(symnumC, "#%i", iParent);
+		rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+	}
+	if (rtn)
+	{
+		pTab = strrchr(AttrFile, '\t');
+		if (pTab)
+		{
+			pTab++;
+			strcpy(Key, pTab);
+		}
+		else
+			rtn = FALSE;
+	}
+	return rtn;
+}
+
+TIMERPROC UserTimerProc(HWND hwnd, UINT uMsg, UINT dEvent, DWORD dwTime)
 {
 	int id = dEvent - USERTIMER -1;
 	time_t	ThisTime = GetTickCount ();

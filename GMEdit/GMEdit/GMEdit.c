@@ -156,6 +156,7 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 		*pWnd = 0;
 		pWnd += 3;
 		hWndGMEditReturn = (HWND)atoi(pWnd);
+		ExpandText(pWnd); //sets test env if included
 	}
 	if (pFile)
 	{

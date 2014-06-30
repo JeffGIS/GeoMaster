@@ -1294,6 +1294,33 @@ GSSiExitProg (520);
 #endif
 } 
 
+void ExpandSYMATTRKEY(LPSTR str)
+{
+	LPSTR pLoc = strstr(str, "$SYMATTRKEY(");
+	LPSTR pBeg, pRest;
+
+	if (pLoc)
+	{
+		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096*2);
+		LPSTR  pMem = GlobalLock(hMem);
+		LPSTR  pRest = pMem + 4096;
+
+		pBeg = pLoc + 12;
+		pBeg = MatchLev(pBeg, ')');
+		if (pBeg)
+		{
+			strcpy(pRest, ++pBeg);
+			*pBeg = 0;
+			strcpy(pMem, pLoc);
+			ExpandText(pMem);
+			strcpy(pLoc, pMem);
+			strcat(pLoc, pRest);
+		}
+		GSSiGlobUlFree(&hMem);
+	}
+	return;
+}
+
 void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQL)
 #if ENABLETRACE
 {GSSiEnterProg (521);
@@ -1316,6 +1343,7 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQL)
     
 	litAndBracket[0] = literalChar;
     _fstrcpy (str,SQL); 
+	ExpandSYMATTRKEY(str);
     if (*str == '(' && *LastChr(str) == ')')
     {
 	    _fstrcpy (SQLPtr->SQL,&str[1]);  
@@ -3287,6 +3315,7 @@ GSSiExitProg (532);
 			if (*LastChr (TestFileLocation) != '\\' &&
 				*LastChr (TestFileLocation) != '/')
 				strcat (TestFileLocation,"\\");
+			EscapeFunction(FALSE);
 			break;
 		case 368:
 			strcpy(SQLErrorLog, Value);
@@ -6284,6 +6313,8 @@ GSSiExitProg (558);
 				goto OutChar;  
 			if (!(FunID = GetFunctionID(InLoc,BegBrack)))
 				goto OutChar; 
+			if (expandOnly && FunID != expandOnly)
+				goto OutChar;
 			if (AllVarEqQuestionMark == 2)
 				AddToODBCParms (InLoc,EndBrack);
 			if (!hMem)

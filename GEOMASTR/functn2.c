@@ -3165,6 +3165,17 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		}
 
+		case 1039:	//$SYMATTRKEY(SYMNAME,override control global(opt),new dir,reference file,addrefno)
+		{
+			BOOL	AddRef;
+
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			if (nArgs < 1)
+				goto RtnFalse;
+			AddRef = atob(Arg[4]);
+			GetSymAttrKey(Arg[1], Arg[3], AddRef, Arg[5], Arg[2], OutLoc);
+			goto Rtnl;
+		}
 		case 1101: //$DUMPGLOBALS(pathname)
 			dumpvars (Args);
           	goto RtnTrue;  
