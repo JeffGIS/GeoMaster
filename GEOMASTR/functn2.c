@@ -1644,7 +1644,7 @@ GSSiExitProg (1350);
 			goto RtnTrue;
 		}
 		
-		case 903: // $GMDUPDATE(file,setkey,setvars) 
+		case 903: // $GMDUPDATE(file,setkey,setvars,updateonly(opt-will not add new rec if true - default F)) 
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,VAL1=1;VAL3=3) 
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,FileID) updates all fields in file FileID that are in file.gmd
 		{	 

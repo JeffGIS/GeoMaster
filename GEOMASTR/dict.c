@@ -3369,6 +3369,7 @@ BOOL SetPointRot (LPDOUBLE pRot, LPSTR NewSymRot)
 	double	factor=1;
 	char	txt[128];     
 	LPSTR	pEnd;
+	double  deg;
 	
 	if (NewSymRot)
 		_fstrcpy (txt,NewSymRot);
@@ -3384,9 +3385,14 @@ BOOL SetPointRot (LPDOUBLE pRot, LPSTR NewSymRot)
 	if (*pEnd == 'D')
 	{
 		*pEnd = 0;
+		deg = atof(txt);
 		factor = RADDEG;
+		deg = (360 - deg);
+		*pRot = deg * factor;
 	}
-	*pRot = atof(txt) * factor;
+	else
+		*pRot = atof(txt) * factor;
+	*pRot = LTWOPI(*pRot);
 	return TRUE;
 }
 
