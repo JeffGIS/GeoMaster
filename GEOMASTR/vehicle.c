@@ -4649,7 +4649,7 @@ BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 							strcpy (VDCONNID,pLoc);
 							sprintf (KeyString,"VDCONNID=%s",VDCONNID);
 							sprintf (UpdateString,"VDHISTSELECT=%i;VDHISTCOLOR=%i;VDHISTCONNECT=%i",Display,color,Connect);
-							UpdateGMDFile ("[VEHICLEDATAFILE]",KeyString,UpdateString,';',1);
+							UpdateGMDFile ("[VEHICLEDATAFILE]",KeyString,UpdateString,';',1,FALSE);
 							if (Display && Connect)
 								AddToSymList (LineSym,&NumSyms,&hSymDesc); 
 							if (Display && ValidBounds (&TotBounds))

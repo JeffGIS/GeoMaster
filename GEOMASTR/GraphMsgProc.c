@@ -1583,7 +1583,7 @@ Show:
 										GlobalUnlock (hSQL);
 										CloseDataFile (TRUE, &hSQL); 
 										GetDlgItemText (hWndDlg,IDENTIFY_SQL,str,256);
-										if (!UpdateGMDFile (DBName,str,str2,';',FALSE))
+										if (!UpdateGMDFile (DBName,str,str2,';',FALSE,FALSE))
 		         							GSSiMsgBox( GetFocus(), str2,"Invalid value", MB_OK,0);
 									}
 									else if (Type == ODBC_DATAFILE)

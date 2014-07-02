@@ -1644,21 +1644,23 @@ GSSiExitProg (1350);
 			goto RtnTrue;
 		}
 		
-		case 903: // $GMDUPDATE(file,setkey,setvars,updateonly(opt-will not add new rec if true - default F)) 
+		case 903: // $GMDUPDATE(file,setkey,setvars,truncate(0,1or2 def 1 adds even if fields dont exist - 2 adds but warns),updateonly(opt-will not add new rec if true - default F)) 
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,VAL1=1;VAL3=3) 
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,FileID) updates all fields in file FileID that are in file.gmd
 		{	 
-			
-			nArgs = GetFunArgs (Args,Arg,-4,&hMem); 
+			BOOL updateOnly;
+			nArgs = GetFunArgs (Args,Arg,-5,&hMem); 
 			if (nArgs < 3)
 				goto RtnFalse;  
 			ExpandText (Arg[1]);
-			ExpandText (Arg[4]);
+			ExpandText(Arg[4]);
+			ExpandText(Arg[5]);
 			if (*Arg[4])
 				n=atoi(Arg[4]);
 			else
 				n=1;
-			n = UpdateGMDFile (Arg[1],Arg[2],Arg[3],';',n);
+			updateOnly = atob(Arg[5]);
+			n = UpdateGMDFile (Arg[1],Arg[2],Arg[3],';',n,updateOnly);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}  

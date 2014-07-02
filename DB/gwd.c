@@ -2943,7 +2943,7 @@ GSSiExitProg (634);
 #endif
 } 
 
-int UpdateGMDFile (LPSTR InFile,LPSTR KeyString,LPSTR UpdateStringIN,char Separator,BOOL Truncate)
+int UpdateGMDFile (LPSTR InFile,LPSTR KeyString,LPSTR UpdateStringIN,char Separator,BOOL Truncate,BOOL updateOnly)
 #if ENABLETRACE
 {GSSiEnterProg (635);
 #endif
@@ -3107,7 +3107,11 @@ NextRec:
 		rtn = 2;
 	}
 	else
+	{
+		if (updateOnly)
+			goto Exit;
 		rtn = 1;
+	}
 	if (!MatchLev (UpdateString,'='))  
 	{
 		if (FilePathHandle) 
