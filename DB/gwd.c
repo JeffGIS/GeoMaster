@@ -5262,6 +5262,7 @@ LPFIELDINFO GetFieldInfo (HANDLE TBLHandle, BOOL First, short FieldType,LPBOOL p
 	LPSTR	DLTDelim;   
 	LPSHORT	DLTStart, DLTLen,DLTType;
 	static	nFields;
+	LPSTR	pDot;
 
     if (First)
         icount=-1;
@@ -5286,7 +5287,11 @@ GSSiExitProg (645);
 }
         }
 		VarPtr = (VARPNT)GlobalLock (DLTVar[icount]);
-        _fstrcpy (lpFinfo->name,VarPtr->Name); 
+		if ((pDot = strchr(VarPtr->Name, '.')))
+			pDot++;
+		else
+			pDot = VarPtr->Name;
+        _fstrcpy (lpFinfo->name,pDot); 
         if (DLTType[icount])
         {
 	        lpFinfo->type = DLTType[icount];  

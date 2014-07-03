@@ -8375,9 +8375,9 @@ BOOL GetProdNameFromTestName(LPSTR testDir, LPSTR toName, LPSTR fileName)
 	return TRUE;
 }
 
-int StoreTestToProduction(LPSTR testDir, int option)
+int StoreTestToProduction(LPSTR testDirIN, int option)
 {
-	//returns 0 if successful, 1 if unable to lock file, 2 if unable to rename file, 3 if unable to copy file
+	//returns 0 if successful, 1 if unable to lock file, 2 if unable to rename file, 3 if unable to copy file, 4 failed to restore after unsuccessful store
 	char tempName[MAX_PATH];
 	char fileName[MAX_PATH + 2];
 	char toName[MAX_PATH];
@@ -8386,9 +8386,12 @@ int StoreTestToProduction(LPSTR testDir, int option)
 	int TotFiles = 0;
 	HANDLE *fid;
 	HANDLE hFid;
-	int iFile = 0;
+	int iFile = 0, lastGoodFile = -1;
 	int rtn = 0;
+	char testDir[MAX_PATH];
 
+	sprintf(testDir, "[%%DL]TESTENVIRONMENTS\\%s", testDirIN);
+	ExpandText(testDir);
 	//option 1 tests to see if all files to be replaced can be opened with exclusive write. 2 actually does the store
 	EscapeFunction(TRUE);
 	AllowCache = FALSE;
@@ -8430,22 +8433,53 @@ int StoreTestToProduction(LPSTR testDir, int option)
 		if (fid[iFile])
 		{
 			CloseHandle(fid[iFile]);
-			sprintf(deleteName, "%s.dlt", toName);
-			if (!GSSirenamefile(toName, deleteName))
+			if (!rtn)
 			{
-				rtn = 2;
+				sprintf(deleteName, "%s.dlt", toName);
+				if (ExistFile(deleteName))
+					GSSiRemove(deleteName);
+				if (!GSSirenamefile(toName, deleteName))
+				{
+					rtn = 2;
+				}
 			}
 		}
-		if (!GSSiCopyFile(fileName, toName, FALSE))
+		if (!rtn)
 		{
-			rtn = 3;
+			lastGoodFile = iFile;
+			if (!GSSiCopyFile(fileName, toName, FALSE))
+			{
+				rtn = 3;
+			}
 		}
 		iFile++;
+	}
+	if (rtn)
+	{
+		//use lastGoodFile and rtn to undo changes
+		GSSillseek(FidTemp, 0, 0);
+		iFile = 0;
+		while (fgetstring(fileName, MAX_PATH, FidTemp))
+		{
+			if (iFile <= lastGoodFile)
+			{
+				GetProdNameFromTestName(testDir, toName, fileName);
+				sprintf(deleteName, "%s.dlt", toName);
+				if (ExistFile(deleteName))
+				{
+					GSSiRemove(toName);
+					if (!GSSirenamefile(deleteName, toName))
+					{
+						rtn = 4;
+					}
+				}
+			}
+		}
 	}
 Exit:
 	GSSiGlobUlFree(&hFid);
 	GSSiClose(FidTemp);
-	GSSiRemove2(tempName);
+	GSSiRemove(tempName);
 
 	return rtn;
 }

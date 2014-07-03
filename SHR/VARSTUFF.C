@@ -8065,6 +8065,8 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 			rtn = GetGlobalVal (hGlobal,Value,0);
 			goto GetOut;
         }
+		if (!stricmp(IDName, "GRID"))
+			ii = 1;
 		if (!stricmp (IDName,"BDDLIST"))
 		{
 			rtn = GetDlgListVal (VarName,Value);
