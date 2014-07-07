@@ -285,6 +285,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "GEOCODE", 7)) return 781;
 			if (!_fstrnicmp(str, "ADDRESS", 7)) return 782;
 			if (!_fstrnicmp(str, "TESTENV", 7)) return 783;
+			if (!_fstrnicmp(str, "COPYDIR", 7)) return 784;
 
 			return 0;
 }
@@ -390,7 +391,7 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp (str,"BLOCKTEXT",9)) return 944; 
 			if (!_fstrnicmp (str,"LINKLINES",9)) return 945; 
 			if (!_fstrnicmp(str, "CLEARFILE",9)) return 946;
-			if (!_fstrnicmp(str, "CLIPBOARD",9)) return 947;
+			if (!_fstrnicmp(str, "CLIPBOARD", 9)) return 947;
 			return 0;
 }
 int	GetFunctionID10 (LPSTR str)

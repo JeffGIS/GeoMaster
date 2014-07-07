@@ -2534,24 +2534,16 @@ GSSiExitProg (1350);
 			BOOL	Save;
 			LPSTR	pName;
 						
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1185,GMEM_MOVEABLE,2048*2+256);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = 0;
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);  
-			ExpandText (Arg2);
-			Save = atob (Arg2);
-			if (*Arg1 == '(')
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+			Save = atob(Arg[2]);
+			if (*Arg[1] == '(')
 			{
-				Arg1++;
-				if (!(ParLoc = MatchLev (Arg1,')')))
+				Arg[1]++;
+				if (!(ParLoc = MatchLev (Arg[1],')')))
 					goto Rtn0;
 				*ParLoc = 0;
 			}
-			pName = Arg1; 
+			pName = Arg[1]; 
 			while (pName)
 			{
 				if ((ParLoc = MatchLev (pName,',')))

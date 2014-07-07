@@ -2343,7 +2343,8 @@ GSSiExitProg (811);
 	GSSiGlobFree (&hReorgBuf); 
 	
 	CloseMap(FALSE);
-	_fstrcpy (OldName,PltFile);
+	CloseAllRequestedFiles(TRUE);
+	_fstrcpy(OldName, PltFile);
 	ExpandText (OldName);
 	GSSiRemove (OldName);
 	GSSiRename  (ReorgName,OldName);                      

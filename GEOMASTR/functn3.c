@@ -6568,6 +6568,24 @@ HaveVP:;
 			goto RtnFalse;
 		}
 
+		case 784: //$COPYDIR(TODIR,FROMDIR,T or F replace,T or F display status window)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			*OutLoc = 0;
+			if (!FileType(Arg[2]) == 2)
+			{
+				sprintf(OutLoc, "%s is not a directory", Arg[2]);
+				goto Rtnl;
+			}
+			if (FileType(Arg[1]) && !atob (Arg[3]))
+			{
+				sprintf(OutLoc, "%s already exists", Arg[1]);
+				goto Rtnl;
+			}
+			rtn = CopyDirectory(Arg[1], Arg[2], atob(Arg[3]), Arg[4]);
+			goto Rtnrtn;
+		}
+
 		default:
 			goto Rtn0;
 	}

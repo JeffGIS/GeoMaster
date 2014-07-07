@@ -416,6 +416,7 @@ BOOL ConvertFileNameToCacheFileName (LPSTR FileName);
 DWORD GM32GetSpecialDirectory (LPSTR Path);
 BOOL GSSirenamefile (LPSTR OldName,LPSTR NewName);
 BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace);
+BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle);
 BOOL NameContainsDL (LPSTR Name);
 void WriteTranData (HFILE Fid,HANDLE hTran);
 double GetTranAZ (HANDLE hTrans);

@@ -377,6 +377,49 @@ BOOL GetLongPathName3 (LPSTR Name,short MaxLen)
 		strcpy (Name,LongName);
 	return ln;
 }
+BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle)
+{
+	BOOL rtn = FALSE;
+	int exists = FileType(toDir);
+	char	TempName[MAX_PATH], fromPath[MAX_PATH], toPath[MAX_PATH];
+	char	fileName[MAX_PATH];
+	HFILE	Fid;
+	long	TotFiles = 0;
+	int		ldir, lfile;
+	int		numDone = 0;
+
+	if (exists && !replace)
+		return rtn;
+	if (exists == 1 && replace)
+		GSSiRemove(toDir);
+	if (exists == 2 && replace)
+	{
+		rtn = DeleteDirAndContents(toDir);
+		if (!rtn)
+			return rtn;
+	}
+
+	ExpandText(fromDir);
+	ldir = strlen(fromDir);
+	GSSiGetTempFileName(0, "gmc", 0, TempName);
+	Fid = GSSiOpenFile(TempName, 0, OF_CREATE);
+	SearchFilesInDir(fromDir, "*", Fid, &TotFiles, "*", 1, TRUE,TRUE);
+	GSSillseek(Fid, 0, 0);
+	if (*statusTitle)
+		CreateStatusWind(hWndMain, 1, statusTitle);
+
+	while (StatusWindowUpdate(0, "", TotFiles,numDone++) && fgetstring(fromPath, 255, Fid))
+	{
+		sprintf(toPath, "%s%s", toDir, &fromPath[ldir]);
+		GSSiCopyFile(fromPath, toPath, FALSE);
+	}
+	GSSiClose(Fid);
+	GSSiRemove(TempName);
+	if (*statusTitle)
+		DestroyStatusWindow(0);
+
+	return rtn;
+}
 
 BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 {

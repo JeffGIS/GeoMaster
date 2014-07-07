@@ -871,16 +871,22 @@ DWORD GM32RemoveDir (LPSTR Name)
 
 DWORD GM32Remove (LPSTR InName)
 {
+	//return 0 if successfull or error code if not
 	char	Name[MAX_PATH];
-	int		st,ii;
+	int		st;
 	
 	strcpy (Name,InName);
 	ConvertToNewLocation (Name,FALSE);
-	st=remove (Name);
-	ii=errno;
+	st=DeleteFile (Name);
+	if (!st)
+	{
+		st = GetLastError();
+		if (st != 2)
+			st = st;
+	}
+	else
+		st = 0;
 
-	if (st < 0)
-		ii=errno;
 	return st;
 }
 
