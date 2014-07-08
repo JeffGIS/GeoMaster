@@ -873,7 +873,7 @@ DWORD GM32Remove (LPSTR InName)
 {
 	//return 0 if successfull or error code if not
 	char	Name[MAX_PATH];
-	int		st;
+	int		st,ii;
 	
 	strcpy (Name,InName);
 	ConvertToNewLocation (Name,FALSE);
@@ -882,7 +882,7 @@ DWORD GM32Remove (LPSTR InName)
 	{
 		st = GetLastError();
 		if (st != 2)
-			st = st;
+			ii = st;
 	}
 	else
 		st = 0;
