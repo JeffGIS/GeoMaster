@@ -1056,11 +1056,11 @@ DisplayImage:
 				    if (_fstrstr (PltName,"LOGO"))
 				    	ii=1;
 					SetDisplayMode (*hDC, GF_SCREENMODE); 
-					DisplayBMInRect32 (CurView->hDC,hDib32,CurView->ScreenRect,FALSE);
+					DisplayBMInRect32 (CurView->hDC,hDib32,CurView->ScreenRect,TRUE);
 					DestroyDIB32(hDib32,FALSE);
 				}
 				else
-					DisplayBMFileInVP32 (CurView->hDC, PltName,0,TRUE);//CurView->Rotation);		        	
+					DisplayBMFileInVP32 (CurView->hDC, PltName,0,FALSE);//CurView->Rotation);		        	
 //            	DisplayBMFileInRect (CurView->hDC,PltName,CurView->DrawRect,TRUE); 
             }
         	else if (strstr(PltName,".SID") || strstr(PltName,".JP2"))

@@ -1792,7 +1792,14 @@ short GMDNextCodeInList (int code)
 	}
 	return nextcode;
 }
+int GMDFindUsingKeyList(LPGWDHEADER	lpGWDHead, LPINT pGMDpos, LPINT pGMDcond, LPLONG pOffset)
+{
+	int rtn;
 
+	rtn = BT_FIND(lpGWDHead->BTHandle[lpGWDHead->SpatialIndex], lpGWDHead->pKeys[lpGWDHead->SpatialIndex], *pGMDpos, *pGMDcond, (LPSTR)pOffset);
+
+	return rtn;
+}
 long GetGMDRecordOffset (long record,BOOL UseBounds)
 {
 	LPOPENFILEDATA	FilePtr;
@@ -1833,7 +1840,7 @@ long GetGMDRecordOffset (long record,BOOL UseBounds)
 			}
 			//BT_CLOSE (hBT);
 		}*/
-		while (!BT_FIND (lpGWDHead->BTHandle[lpGWDHead->SpatialIndex],lpGWDHead->pKeys[lpGWDHead->SpatialIndex],GMDpos,GMDcond, (LPSTR)&Offset))
+		while (!GMDFindUsingKeyList(lpGWDHead, &GMDpos, &GMDcond, &Offset))
 		{
 			static	int	dbval=987690,dboffset=570964760;
 			if (Offset == dboffset)

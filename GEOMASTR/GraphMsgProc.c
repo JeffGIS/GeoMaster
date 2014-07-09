@@ -13534,8 +13534,9 @@ HaveEmpty:
 	         	  ShowWindow (GetDlgItem(hWndDlg,IDC_RENDERASSETTINGS),SW_HIDE);
 	          	  ShowWindow (GetDlgItem(hWndDlg,IDC_ENTER_LAYER),SW_HIDE);
 	          	  ShowWindow (GetDlgItem(hWndDlg,IDC_ENTER_CANCEL),SW_HIDE);
-	          	  ShowWindow (GetDlgItem(hWndDlg,IDC_FIND_PATH),SW_HIDE); 
-	          	  goto Display;		
+				  ShowWindow(GetDlgItem(hWndDlg, IDC_FIND_PATH), SW_HIDE);
+				  ShowWindow(GetDlgItem(hWndDlg, IDC_STRETCHIMAGE), SW_HIDE);
+				  goto Display;
 		          break; 
 		          
 		    case IDC_DELETEFILE:
