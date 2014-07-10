@@ -313,6 +313,8 @@ void QuitGraphics()
 		UnhookWindowsHookEx (g_hook);
 	HaltMapDisplay (FALSE,FALSE);
 	InQuitGraphics = TRUE;
+	BT_CLOSEANDDELETE(&hGMDKeyList);
+
 	DestroyAllToolbars ();
 	StopBackgroundCache ();
 	//ShowCounts (1);

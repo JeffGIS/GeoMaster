@@ -1795,8 +1795,25 @@ short GMDNextCodeInList (int code)
 int GMDFindUsingKeyList(LPGWDHEADER	lpGWDHead, LPINT pGMDpos, LPINT pGMDcond, LPLONG pOffset)
 {
 	int rtn;
+	int dummy;
 
-	rtn = BT_FIND(lpGWDHead->BTHandle[lpGWDHead->SpatialIndex], lpGWDHead->pKeys[lpGWDHead->SpatialIndex], *pGMDpos, *pGMDcond, (LPSTR)pOffset);
+	if (hGMDKeyList)
+	{
+		if (BT_FIND(hGMDKeyList, lpGWDHead->pKeys[0], GMDKeyListPos, BT_ANY, (LPSTR)&dummy))
+		{
+			rtn = 31;
+			GMDKeyListPos = BT_FIRST;
+		}
+		else
+		{
+			int ii = *(LPINT)lpGWDHead->pKeys[0];
+			short iii = *(LPSHORT)(lpGWDHead->pKeys[0] + 4);
+			rtn = BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)pOffset);
+			GMDKeyListPos = BT_NEXT;
+		}
+	}
+	else
+		rtn = BT_FIND(lpGWDHead->BTHandle[lpGWDHead->SpatialIndex], lpGWDHead->pKeys[lpGWDHead->SpatialIndex], *pGMDpos, *pGMDcond, (LPSTR)pOffset);
 
 	return rtn;
 }

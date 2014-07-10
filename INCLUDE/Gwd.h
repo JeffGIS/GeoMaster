@@ -20,7 +20,8 @@ BOOL ConvertFieldValFromChar (LPGWDHEADER lpGWDHead,int FieldNum,LPSTR CharVal,L
 BOOL GWDFormKey (LPGWDHEADER lpGWDHead, int Index, BOOL Search,long length,int Month);
 BOOL GMDGetFileMinMax (LPSTR FileName,LPMNMXCORD pBounds,LPINT pMinTime,LPINT pMaxTime);
 BOOL GMDUpdateMinMax (LPGWDHEADER lpGWDHead,LPDPOINT pDPoint);
-BOOL LoadDLT (LPSTR DLTName,LPSTR DBName);
+HANDLE GMDKeyListFormKey(HANDLE hKeyList, LPSTR val);
+BOOL LoadDLT(LPSTR DLTName, LPSTR DBName);
 BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL GWD_INDEXESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL COMBO_FILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);

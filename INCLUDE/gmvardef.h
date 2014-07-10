@@ -822,6 +822,8 @@ int		MonthEnd=SHRT_MAX;
 int		GMDMinCode=0;
 int		GMDMaxCode=LONG_MAX;
 char	GMDCodeList[4096]="";
+HANDLE  hGMDKeyList = 0;
+int		GMDKeyListPos=0;
 BOOL	WantGMDNegGrid=FALSE;
 char	GMDWhere[256];
 BOOL	NoDisplay=FALSE;

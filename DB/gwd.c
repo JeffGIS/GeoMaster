@@ -14,6 +14,8 @@ static	int	updateGMDlenIndex = 0;
 
 extern char	CacheTitle[256];
 
+BOOL GMDKeyListAdd(LPSTR key);
+BOOL GMDCreateKeyList(LPSTR FileName);
 
 HANDLE GetFilesToClose (HANDLE hSQL)
 {
@@ -5131,6 +5133,67 @@ BOOL GMDUpdateMinMax (LPGWDHEADER lpGWDHead,LPDPOINT pDPoint)
 	return rtn;
 }
 
+BOOL GMDKeyListAdd(LPSTR key)
+{
+	BOOL rtn = FALSE;
+	static UINT iSeq = 0;
+	HANDLE hKey = BT_FormKey(hGMDKeyList,key);
+	LPSTR  pKey = GlobalLock(hKey);
+
+	BT_PUT(hGMDKeyList, pKey,(LPSTR) &iSeq);
+	iSeq++;
+	GSSiGlobUlFree(&hKey);
+
+	return rtn;
+}
+
+BOOL GMDCreateKeyList(LPSTR FileName)
+{
+	BOOL rtn = FALSE;
+	HANDLE	hDB = OpenGWDatabase(FileName, BT_READ);
+
+	BT_CLOSEANDDELETE(&hGMDKeyList);
+	if (hDB)
+	{
+		LPGWDHEADER lpGWDHead = GlobalLock(hDB);
+		int NumIndexFields = lpGWDHead->NumIndexFields[0];
+		//GWFLDINFO GWFldInfo;
+		LPGWFLDINFO pFldInfo;
+		//LPGWFLDINFO	lpGWFldInfo;
+		//LPGWFLDINFO	lpFieldInfo;
+		short	i, ifield;
+		UINT	ibeg;
+		HANDLE	hVars;
+		LPBTVARDESC pVars;
+		char	tmpName[MAX_PATH];
+
+		GSSiGetTempFileName(0, "gm", 0, (LPSTR)tmpName);
+		hVars = LocalAlloc(LHND, NumIndexFields * sizeof(BTVARDESC));
+		pVars = (BTVARDESC *)LocalLock(hVars);
+		ibeg = 0;
+		for (i = 0; i<NumIndexFields; i++, pVars++)
+		{
+			pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[0][i];
+			pVars->BT_VARLEN = pFldInfo->Len;
+			pVars->BT_VARTYP = pFldInfo->Type;
+			pVars->BT_VAROFF = ibeg;
+			ibeg += pFldInfo->Len;
+		}
+		LocalUnlock(hVars);
+		pVars = (BTVARDESC *)LocalLock(hVars);
+		BT_CREATE(tmpName, 4, FALSE, NumIndexFields, 1, pVars, FALSE, 0, lpGWDHead->TimeStamp, FALSE);
+		LocalUnlock(hVars);
+		LocalFree(hVars);
+
+		GlobalUnlock(hDB);
+		CloseGWDatabase(hDB);
+		hGMDKeyList = BT_OPEN(tmpName, lpGWDHead->TimeStamp, BT_WRITE, 0);
+		GMDKeyListPos = BT_FIRST;
+		rtn = TRUE;
+	}
+	return rtn;
+}
+
 BOOL GWDFormKey (LPGWDHEADER lpGWDHead, int Index, BOOL Search,long length,int Month)
 #if ENABLETRACE
 {GSSiEnterProg (644);
@@ -6878,14 +6941,30 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		GlobalUnlock (hDB);
 		CloseGWDatabase (hDB); 
 	}
-	else if (!stricmp (Arg[1],"SETLIMITS"))
+	else if (!stricmp(Arg[1], "SETLIMITS"))
 	{
 		MNMXCORD Bounds;
 		long	MinTime, MaxTime;
 
-		rtn = GMDGetFileMinMax (Arg[2],&Bounds,&MinTime,&MaxTime);
+		rtn = GMDGetFileMinMax(Arg[2], &Bounds, &MinTime, &MaxTime);
 	}
-	else if (!stricmp (Arg[1],"GETCPID"))
+	else if (!stricmp(Arg[1], "KEYLIST"))
+	{
+		if (!stricmp(Arg[2], "CREATE"))
+		{
+			rtn = GMDCreateKeyList(Arg[3]);
+		}
+		else if (!stricmp(Arg[2], "DELETE"))
+		{
+			BT_CLOSEANDDELETE(&hGMDKeyList);
+		}
+		if (!stricmp(Arg[2], "ADD"))
+		{
+			rtn = GMDKeyListAdd(Arg[3]);
+		}
+
+	}
+	else if (!stricmp(Arg[1], "GETCPID"))
 	{
 		hDB1 = OpenGWDatabase (Arg[2],BT_READ);
 		if (!hDB1)

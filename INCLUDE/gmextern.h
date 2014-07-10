@@ -135,6 +135,8 @@ extern int			MonthEnd;
 extern int			GMDMinCode;
 extern int			GMDMaxCode; 
 extern char			GMDCodeList[4096]; 
+extern HANDLE		hGMDKeyList;
+extern int			GMDKeyListPos;
 extern BOOL			WantGMDNegGrid;
 extern char			GMDWhere[256];
 extern BOOL			NoDisplay;

@@ -251,7 +251,7 @@ GSSiExitProg (460);
 #endif
 }
  
-/*BOOL GetBTHeader (HGLOBAL IBTID,LPBTHEAD BTHead)
+BOOL GetBTHeader (HGLOBAL IBTID,LPBTHEAD BTHead)
 #if ENABLETRACE
 {GSSiEnterProg (461);
 #endif
@@ -272,7 +272,7 @@ GSSiExitProg (461);
 #endif
     	return FALSE;
 }
-    *BTHead = *BT_HEAD;
+	*BTHead = pBTree->BT_HEAD;
     DeallocateBTMem(pBTree,IBTID); 
 {
 #if ENABLETRACE
@@ -283,7 +283,7 @@ GSSiExitProg (461);
 #if ENABLETRACE
 }
 #endif
-} */
+} 
 
 HFILE GetBTFid (HGLOBAL IBTID)
 {
@@ -3486,3 +3486,57 @@ GSSiExitProg (513);
 #endif
 }
 
+HANDLE BT_FormKey(HANDLE hKeyList, LPSTR val)
+{
+	int i;
+	BTHEAD btHead;
+	HANDLE hKey = 0;
+	LPSTR loc,nxtLoc=val;
+	LPSTR pKey;
+
+	if (GetBTHeader(hKeyList, &btHead))
+	{
+		LPBTVARDESC pFldInfo = &btHead.BT_VARDESC;
+
+		hKey = GSSiGlobAlloc(0, GMEM_MOVEABLE, btHead.BT_KEYLEN + 2);
+		pKey = GlobalLock(hKey);
+		for (i = 0; i < btHead.BT_NVARS; i++, pFldInfo++)
+		{
+			loc = nxtLoc;
+			nxtLoc = strchr(loc, ';');
+			if (nxtLoc)
+				*nxtLoc++ = 0;
+			switch (pFldInfo->BT_VARTYP)
+			{
+			case BT_INTEGER:
+			case BT_INT2:
+			case BT_INT4:
+				if (pFldInfo->BT_VARLEN == 2)
+					*(LPSHORT)pKey = atoi(loc);
+				else
+					*(LPINT)pKey = atoi(loc);
+				break;
+
+			case BT_REAL:
+			case BT_REAL4:
+			case BT_REAL8:
+				if (pFldInfo->BT_VARLEN == 4)
+					*(LPFLOAT)pKey = atof(loc);
+				else
+					*(LPDOUBLE)pKey = atof(loc);
+				break;
+
+			default:
+				_fmemmove(pKey, loc, pFldInfo->BT_VARLEN);
+				break;
+			case BT_CHAR:
+				_fstrncpy(pKey,loc, pFldInfo->BT_VARLEN);
+				break;
+			}
+			pKey += pFldInfo->BT_VARLEN;
+		}
+		GlobalUnlock(hKey);
+	}
+	return hKey;
+
+}
