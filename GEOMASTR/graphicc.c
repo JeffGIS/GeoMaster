@@ -2200,10 +2200,15 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 	GlobalUnlock (FilePtr->FileHandle);
 	GlobalUnlock (SQLPtr->OFHandle); 
 	GlobalUnlock (GMDHandle);
-	if (WantGMDNegGrid && !GMDPoint.x)
+	if (WantGMDNegGrid)
 	{
-		SelectClipRgn (CurView->hDC,0);
-		GMDPoint = SubVPMidPointWorld;
+		if (!GMDPoint.x)
+		{
+			SelectClipRgn(CurView->hDC, 0);
+			GMDPoint = SubVPMidPointWorld;
+		}
+		else
+			goto RtnFalse;
 	}
 	ConvertCoord(&GMDPoint,0,1);
 	InGraphicsProcessor = TRUE;
