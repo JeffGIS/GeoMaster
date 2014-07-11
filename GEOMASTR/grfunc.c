@@ -935,7 +935,7 @@ BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt)
 	{
 		if (WantLine == 1)
 		{
-			sprintf (str2,"$EDITFILE(%s)",str);
+			sprintf (str2,"$EDITFILE(%s,T)",str);
 			ProcessText (str2);
 			goto Exit;
 		}

@@ -2200,7 +2200,7 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 	GlobalUnlock (FilePtr->FileHandle);
 	GlobalUnlock (SQLPtr->OFHandle); 
 	GlobalUnlock (GMDHandle);
-	if (WantGMDNegGrid)
+	if (WantGMDNegGrid && !GMDPoint.x)
 	{
 		SelectClipRgn (CurView->hDC,0);
 		GMDPoint = SubVPMidPointWorld;
@@ -2360,7 +2360,7 @@ long ReadGMDHeader (HFILE FidORA,LPMNMXCORD pMinMaxCoord)
 
 BOOL ExpandGMDPointBounds (LPMNMXCORD pBounds)
 {
-	char	str[128];
+	char	str[256];
 	short	RectMax; 
 	double	symsize;
 	RECT	SymRect;
@@ -2369,6 +2369,19 @@ BOOL ExpandGMDPointBounds (LPMNMXCORD pBounds)
 	LPGWDHEADER		lpGWDHead;
 	int		FromTime, ToTime;
 	DPOINT	WPoint;
+	static MNMXCORD ProjectBounds = { 0 };;
+	static BOOL first = TRUE;
+
+	if (first)
+	{
+		BOOL Err;
+		first = FALSE;
+		if (GetGlobalCVal("[%PROJECTBOUNDS]", str, 0))
+		{
+			ProjectBounds = atobounds(str, &Err);
+		}
+	}
+
 
     SQLPtr = (LPOPENSQLDATA)GlobalLock (GMDHandle);
 	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
@@ -2383,7 +2396,7 @@ BOOL ExpandGMDPointBounds (LPMNMXCORD pBounds)
 			GMDPoint.y = GMDGetRealFieldVal (lpGWDHead,lpGWDHead->YField);
 			break;
 	}
-	if (WantGMDNegGrid)
+	if (WantGMDNegGrid && !PointInBounds(GMDPoint,&ProjectBounds))
 		GMDPoint = SubVPMidPointWorld;
 	ConvertCoord(&GMDPoint,0,1);
 	strcpy (str,GMDSymbol);

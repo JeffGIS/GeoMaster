@@ -222,21 +222,31 @@ GSSiExitProg (1350);
             	goto RtnFalse;
 		} 
 		
-		case 803: // $EDITFILE(file)
+		case 803: // $EDITFILE(file,TorF (use GMEdit))
 		{	
 			LPSTR	cmd;
 			HANDLE	hCmd;
 						
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
 			
-			hCmd = GSSiGlobAlloc (1145,GMEM_MOVEABLE,1024);  
-			cmd = GlobalLock (hCmd);
-			_fstrcpy (cmd,"[%TEXT_EDITOR]");  
-			ExpandText (cmd);
-			_fstrcat (cmd," ");
-			_fstrcat (cmd,Arg[1]);
-			WinExec (cmd,SW_SHOWMAXIMIZED);
-			GSSiGlobUlFree (&hCmd);
+			if (atob(Arg[2]))
+			{
+				LPSTR pcmd = malloc(MAX_PATH * 2);
+				sprintf(pcmd, "$GMEDIT(%s)", Arg[1]);
+				ExpandText(pcmd);
+				free(pcmd);
+			}
+			else
+			{
+				hCmd = GSSiGlobAlloc(1145, GMEM_MOVEABLE, 1024);
+				cmd = GlobalLock(hCmd);
+				_fstrcpy(cmd, "[%TEXT_EDITOR]");
+				ExpandText(cmd);
+				_fstrcat(cmd, " ");
+				_fstrcat(cmd, Arg[1]);
+				WinExec(cmd, SW_SHOWMAXIMIZED);
+				GSSiGlobUlFree(&hCmd);
+			}
            	goto RtnTrue;
 		}
 

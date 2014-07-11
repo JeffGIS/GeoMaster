@@ -29,6 +29,7 @@ police\configs\startup_2014.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\basic1.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\addressedit.gmc /F [%USERLEV]=2; /WD j:\Mpls
 Lisa.gmc /F /WD h:\Ameritrak\GMAVLUS
+/GMEdit [%DL]police\macros\crimevis.txt /W 0 /WD L:\MPD\GeoMaster\Mpls
 /GMEdit [%DL]pikmacro\pikmacro.txt /W 0 /WD c:\geomas [%TESTDL]=[%DL]TestDirectories\test1;
 /GMEdit [%DL]fundir\adafiles.txt /WD c:\geomas
 /GMEdit [%DL]projects\corners\macros\LoadUpdateData.txt /WD c:\geomas
@@ -131,6 +132,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 

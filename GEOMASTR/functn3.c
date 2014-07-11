@@ -4265,6 +4265,26 @@ GotCloseFilehSQL:
 			}
 			goto RtnFalse;
 		}
+		case 646: //$GMEDIT(file,TorF(create if new))
+		{
+			LPSTR pcmd;
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+			if (!ExistFile(Arg[1]))
+			{
+				if (atob(Arg[2]))
+				{
+					HFILE fid = GSSiOpenFile(Arg[1], 0, OF_CREATE);
+					GSSiClose(fid);
+				}
+				else
+					goto RtnFalse;
+			}
+			pcmd = malloc(MAX_PATH * 2);
+			sprintf(pcmd, "$SESSION(CREATE,GMEdit /GMEdit %s)", Arg[1]);
+			ExpandText(pcmd);
+			free(pcmd);
+			goto RtnTrue;
+		}
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{				
 			hMem = GSSiGlobAlloc ( 877,GMEM_MOVEABLE,4096);

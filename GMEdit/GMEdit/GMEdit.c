@@ -983,6 +983,8 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 				case '(':
 				case ',':
 				case '\r':
+				case '\t':
+				case '{':
 				case '\n':
 				case ';':
 					goto s10;
@@ -999,7 +1001,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			}
 	s10:
 			loc++;
-			iend = strcspn (&pFile[loc],",);!\r\n");
+			iend = strcspn (&pFile[loc],",)};!\r\n\t");
 			if (!strnicmp (&pFile[loc+iend],";DBQ=",5))
 				iend += 5 + strcspn (&pFile[loc+iend+5],",);!\r\n");
 			strncpy0 (testFile,&pFile[loc],min(sizeof(testFile)-1,iend));
@@ -1086,7 +1088,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 				if (!*phMenu)
 					*phMenu = CreatePopupMenu();
 				AppendMenu(*phMenu, MF_ENABLED | MF_STRING, iMenuOpt++, str);
-				sprintf(str, "|$DATADISPLAY(BASIC,%s)", testFile);
+				sprintf(str, "|$DATADISPLAY(BASIC,%s)", pBeg);
 				strcpy(pInsertOpts, str);
 				pInsertOpts = strchr(pInsertOpts, 0);
 				pInsertOpts++;

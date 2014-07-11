@@ -3541,7 +3541,7 @@ Top:
 	{  
 		if (stricmp (str,"BEGIN") && first && GetDebug ())
 		{
-			sprintf (str,"MENUITEM \"Edit Menu\", \"[C]=$EDITFILE(%s)\"",FileName);
+			sprintf (str,"MENUITEM \"Edit Menu\", \"[C]=$EDITFILE(%s,T)\"",FileName);
 			GSSillseek (MFid,startLoc,0);
 			first = FALSE;
 		}
