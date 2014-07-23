@@ -87,3 +87,4 @@ long FilePos (LPSTR Cmd,LPSTR FileID,LPSTR Pos,int index);
 BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex);
 long GetGWDCurrentOffset (LPGWDHEADER lpGWDHead);
 int GridFromPoint (LPGWDHEADER lpGWDHead,LPDPOINT pPoint);
+long GetGMDRecordOffset(long record, BOOL UseBounds);
