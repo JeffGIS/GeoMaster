@@ -174,7 +174,7 @@ Close:
     GSSillseek (lpGWDHead->Fid,0,0);
 	lpGWDHead->NumFields++; 
 	pNewFldInfo->Beg = lpGWDHead->Reclen; 
-	pNewFldInfo->HasValue = pNewFldInfo->filler = 0;
+	pNewFldInfo->HasValue = pNewFldInfo->ValueID = pNewFldInfo->fill = 0;
 	lpGWDHead->Reclen += pNewFldInfo->Len;
 	if (lpGWDHead->StoredAs32)
 	    BigWrite (lpGWDHead->Fid,(HPSTR)lpGWDHead ,sizeof(GWDHEADER),-1);

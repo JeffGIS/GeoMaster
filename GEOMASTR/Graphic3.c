@@ -2602,6 +2602,35 @@ Exit:
 	return NumFields;
 }
 
+BOOL GetValFromFieldValue(LPSTR FieldName,HANDLE hFieldTypes, HANDLE hValues, LPSTR str)
+{
+	BOOL rtn = FALSE;
+	LPHANDLE phValues;
+	LPSTR pValue;
+	LPGWFLDINFO pFieldTypes;
+
+	if (!hFieldTypes || !hValues)
+		return FALSE;
+	phValues = GlobalLock(hValues);
+	pFieldTypes = (LPGWFLDINFO)GlobalLock(hFieldTypes);
+	while (*pFieldTypes->Name)
+	{
+		if (!stricmp(pFieldTypes->Name, FieldName))
+		{
+			pValue = GlobalLock(*phValues);
+			strcpy(str, pValue);
+			GlobalUnlock(*phValues);
+			rtn = TRUE;
+			break;
+		}
+		pFieldTypes++;
+		phValues++;
+	}
+	GlobalUnlock(hValues);
+	GlobalUnlock(hFieldTypes);
+	return rtn;
+}
+
 long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFieldsIN, HANDLE hKeyFields, HANDLE hFieldTypes, HANDLE hValues, BOOL UseHLT, BOOL OutToScreen, int GMHeader, BOOL Compress, BOOL ScanForFieldTypes, long NumToScan, HWND StatusWnd, HWND hWndDlg, BOOL tabDlm)
 #if ENABLETRACE
 {GSSiEnterProg (603);
@@ -2921,9 +2950,9 @@ GSSiExitProg (603);
 					_fstrcpy(FieldName, pFieldTypes->Name);
 					FieldType = pFieldTypes->Type;
 					*str = 0;
-					if (pFieldTypes->filler && hValues)
+					if (pFieldTypes->ValueID && hValues)
 					{
-						int id = pFieldTypes->filler-1;
+						int id = pFieldTypes->ValueID-1;
 						LPHANDLE phValues = GlobalLock(hValues);
 						LPSTR pValues;
 
@@ -2951,8 +2980,10 @@ GSSiExitProg (603);
 
 		    	_fstrcpy (FieldName,pFieldInfo->Name);   
 		    	FieldType = pFieldInfo->Type;
-				if (!stricmp (FieldName, "UNIQUEID"))
+				if (!stricmp(FieldName, "UNIQUEID"))
 					ltoa(OriginalRecordNumber, str, 10);
+				else if (GetValFromFieldValue(FieldName,hFieldTypes, hValues, str))
+					;
 				else if (GetValFromOpenFiles (FieldName,str,4096) < 0)
 					goto NextField;
 			} 

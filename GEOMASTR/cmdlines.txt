@@ -1,3 +1,5 @@
+configs\jeff\basemap_good.gmc /F [%USERLEV]=2; /WD L:\geomas
+police\configs\test.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\PedRampStatus.gmc /F /WD c:\ADAPedRamps\PreSurvey
 configs\PrelimSurvey.gmc /F /WD c:\ADAPedRamps\PreSurvey
 configs\CrystalLake2.gmc /F /WD I:\CountyData
@@ -132,6 +134,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 

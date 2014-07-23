@@ -1716,6 +1716,8 @@ int GridInWBounds (LPGWDHEADER lpGWDHead,LPSHORT pGrid)
 		*pGrid = -1;
 		return 0;
 	}
+	if (hGMDKeyList)
+		return 1;
 	if (!BoundsInBounds (&lpGWDHead->GridBounds,&CurView->WBounds,1))
 		return 0;
 	if (*pGrid < 0)
