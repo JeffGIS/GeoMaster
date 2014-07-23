@@ -3215,6 +3215,7 @@ void RemoveVPRedef (void)
 		GSSiGlobUlFree (&CurView->hPenRedef);
     CurView->hPenRedef=0;
 	_fmemset (CurView->NewObjectMap,0,sizeof(CurView->NewObjectMap));
+	memset(CurView->HaveLayerColor, 0, sizeof(CurView->HaveLayerColor));
 	ConfigChangesMade = TRUE;
 	return;
 }
