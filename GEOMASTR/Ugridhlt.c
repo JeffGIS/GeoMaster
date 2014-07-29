@@ -582,7 +582,7 @@ void HLTSelectClear (BOOL Delete)
 BOOL BuildSortList (short opt)
 {
 	BTVARDESC	BTVar[2];
-	char	File[MAX_PATH], Key[260], TAG[44], SymName[34];
+	char	File[MAX_PATH], Key[260], TAG[80], SymName[34];
 	short	pos=BT_FIRST;   
 	long	Refno;
 	HCURSOR	hcurSave;
