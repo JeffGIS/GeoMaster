@@ -3860,13 +3860,13 @@ GSSiExitProg (1228);
 				}
 			}
 		//	ThemeWidthFactor = GetWValue (CurTheme->ClassColor[iclass]) + 1;  
-			if (CurTheme->ClassFactor[iclass])
-				ThemeWidthFactor = CurTheme->ClassFactor[iclass];
-			else
-				ThemeWidthFactor = 1;
 			if (!CurTheme->NotSetColor) 
 			{
-				SelectObject (CurView->hDC,CurTheme->ClassBrush[iclass]);
+				if (CurTheme->ClassFactor[iclass])
+					ThemeWidthFactor = CurTheme->ClassFactor[iclass];
+				else
+					ThemeWidthFactor = 1;
+				SelectObject(CurView->hDC, CurTheme->ClassBrush[iclass]);
 				HaveVarFillColor = TRUE;  
 				ThemePointColor = GlobalColors[0]=CurTheme->ClassColor[iclass];
 				ThemePointUseHalfTone = CurTheme->UseHalfTone; 

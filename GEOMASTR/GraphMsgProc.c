@@ -11884,7 +11884,8 @@ GSSiExitProg (1247);
             	 CurTheme->AddCommas = SendDlgItemMessage (hWndDlg,SV_INSERT_COMMAS,BM_GETCHECK,0,0L); 
             	 CurTheme->ZeroBased = SendDlgItemMessage (hWndDlg,SV_CB_ZEROBASED,BM_GETCHECK,0,0L); 
             	 CurTheme->ShowValue = SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_GETCHECK,0,0L); 
-            	 CurTheme->ComputeAreaAndLength = SendDlgItemMessage (hWndDlg,SV_COMPUTEAREA,BM_GETCHECK,0,0L); 
+				 CurTheme->DelayTextDisplay = SendDlgItemMessage(hWndDlg, SV_DELAY_VALUE, BM_GETCHECK, 0, 0L);
+				 CurTheme->ComputeAreaAndLength = SendDlgItemMessage(hWndDlg, SV_COMPUTEAREA, BM_GETCHECK, 0, 0L);
             	 CurTheme->DispersePoints = 0;
             	 if (SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_GETCHECK,0,0L))
             	 	CurTheme->DispersePoints = 1;
