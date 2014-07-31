@@ -508,7 +508,7 @@ BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTyp
 							id++;
 							pHandle++;
 						}
-						pFieldTypes->filler = id;
+						pFieldTypes->ValueID = id;
 						ln = strlen(pEq);
 						*pHandle = GSSiGlobAlloc(1792, GMEM_MOVEABLE, ln + 1);
 						pValue = GlobalLock(*pHandle);

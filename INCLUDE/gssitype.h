@@ -3167,7 +3167,8 @@ typedef struct {short     Beg;
                 short     Type;
                 char	  Name[33];
 				BYTE	  HasValue:1, 
-						  filler:7;
+						  ValueID:4,
+						  fill:3;
                 } GWFLDINFO;
 typedef GWFLDINFO FAR  *LPGWFLDINFO;
 typedef struct {

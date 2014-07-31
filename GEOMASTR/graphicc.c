@@ -1716,6 +1716,8 @@ int GridInWBounds (LPGWDHEADER lpGWDHead,LPSHORT pGrid)
 		*pGrid = -1;
 		return 0;
 	}
+	if (hGMDKeyList)
+		return 1;
 	if (!BoundsInBounds (&lpGWDHead->GridBounds,&CurView->WBounds,1))
 		return 0;
 	if (*pGrid < 0)
@@ -1799,6 +1801,7 @@ int GMDFindUsingKeyList(LPGWDHEADER	lpGWDHead, LPINT pGMDpos, LPINT pGMDcond, LP
 
 	if (hGMDKeyList)
 	{
+Top:
 		if (BT_FIND(hGMDKeyList, lpGWDHead->pKeys[0], GMDKeyListPos, BT_ANY, (LPSTR)&dummy))
 		{
 			rtn = 31;
@@ -1808,8 +1811,11 @@ int GMDFindUsingKeyList(LPGWDHEADER	lpGWDHead, LPINT pGMDpos, LPINT pGMDcond, LP
 		{
 			int ii = *(LPINT)lpGWDHead->pKeys[0];
 			short iii = *(LPSHORT)(lpGWDHead->pKeys[0] + 4);
+			*(LPSHORT)(lpGWDHead->pKeys[0] + 4) = 1; //temp for MP only
 			rtn = BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)pOffset);
 			GMDKeyListPos = BT_NEXT;
+			if (rtn)
+				goto Top;
 		}
 	}
 	else
@@ -1822,7 +1828,7 @@ long GetGMDRecordOffset (long record,BOOL UseBounds)
 	LPOPENFILEDATA	FilePtr;
 	LPOPENSQLDATA	SQLPtr;
 	LPGWDHEADER		lpGWDHead;
-	long			Offset=-1;
+	long			Offset=-2;
 	double			xval,yval,StartTime,v;
 	int				i,ii;
 	LPVIEWPORT		SaveVP = CurView;
