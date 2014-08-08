@@ -113,8 +113,9 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp (str,"YEAR",4)) return 429; 
 			if (!_fstrnicmp (str,"GRID",4)) return 430; 
 			if (!_fstrnicmp (str,"DUMP", 4)) return 431;
-			if (!_fstrnicmp (str,"RAND", 4)) return 432;
-			return 0;   
+			if (!_fstrnicmp(str, "RAND", 4)) return 432;
+			if (!_fstrnicmp(str, "AREA", 4)) return 433;
+			return 0;
 }
 int	GetFunctionID5 (LPSTR str)
 {

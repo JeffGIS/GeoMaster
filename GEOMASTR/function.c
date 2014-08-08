@@ -3940,8 +3940,56 @@ SetVis:
 				}
 				goto Rtnl;
 		}
-
-
+			break;
+		case 433: //AREA(DUMP,FILE,OPT)
+		{
+#define COORDINATEMULTIPLIER	10000000
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			if (!nArgs)
+				goto RtnFalse;
+			{
+				HANDLE hPoly = 0;
+				HANDLE hPolyPartLen = 0;
+				int nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&PickList[0], &nPnts, &hPoly, &hPolyPartLen);
+				if (nLoops)
+				{
+					HFILE fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+					if (fid != HFILE_ERROR)
+					{
+						LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
+						HPDPOINT lpDpoint = (HPDPOINT)(pBounds + 1);
+						BigWrite(fid, &nPnts, 4, -1);
+						BigWrite(fid, &nLoops, 4, -1);
+						if (nLoops > 1)
+						{
+							LPINT pPolyParts = GlobalLock(hPolyPartLen);
+							pPolyParts++;//first element is npoly
+							BigWrite(fid, pPolyParts, nLoops * 4, -1);
+							GlobalUnlock(hPolyPartLen);
+						}
+						for (i = 0; i < nPnts; i++)
+						{
+							int ix, iy;
+							DPOINT pt = lpDpoint[i];
+							POINT ipt;
+							ConvertCoord(&pt, 1, 2);
+							ipt.x = IDNINT(pt.x * COORDINATEMULTIPLIER);
+							ipt.y = IDNINT(pt.y * COORDINATEMULTIPLIER);
+							BigWrite(fid, &ipt, sizeof(POINT), -1);
+						}
+						GSSiClose(fid);
+						GlobalUnlock(hPoly);
+					}
+					else
+						nLoops = 0;
+				}
+				GSSiGlobFree(&hPoly);
+				GSSiGlobFree(&hPolyPartLen);
+				itoa(nLoops, OutLoc, 10);
+				goto Rtnl;
+			}
+		}
+			break;
 		default:
 			goto Rtn0;
 	}
