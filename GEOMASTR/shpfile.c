@@ -475,8 +475,11 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		case SHPT_POLYGON:
 			itype = 3;
 		}
-		if (!GetOrCreateSym (hWnd,SymName,0,0,GetGlobalLVal2 ("[%ALLOWSYMBOLCREATION]",0),itype))
-			MessageBox (0,"Symbol not found",SymName,MB_ICONEXCLAMATION);
+		if (!GetOrCreateSym(hWnd, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), itype))
+		{
+			ExpandText(SymName);
+			MessageBox(0, "Symbol not found", SymName, MB_ICONEXCLAMATION);
+		}
 	}
 	if (fgetstring (str,256,Fid))
 		_fstrcpy (SHPBeginDate,str);
