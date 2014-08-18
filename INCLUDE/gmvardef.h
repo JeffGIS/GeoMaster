@@ -555,7 +555,6 @@ long	CurrentDBFRec;
 HFILE	SHPIDXFid=HFILE_ERROR; 
 long	NumSHPRecs; 
 long	NumDBFRecs;
-long	NumDBFRecs; 
 long	NumSHPDBFRecs;
 long	SHPRecOffset;  
 HANDLE	hSHPDBF=0; 

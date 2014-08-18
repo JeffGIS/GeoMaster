@@ -1600,12 +1600,25 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		}
 
+		case 851: // $MOVEFILE(Frompath,Topath)
+		{
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem);
+			if (nArgs == 2)
+			{
+				if (!makedirectories(Arg[2], FALSE, FALSE))
+					goto RtnFalse;
+				if (MoveFile(Arg[1], Arg[2]))
+					goto RtnTrue;
+			}
+			goto RtnFalse;
+		}
+
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
-			nArgs = GetFunArgs (Args,Arg,7,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem);
 			if (nArgs < 1)
 				goto RtnFalse;
-			nlong =  AddMatchSingle (Arg[1],Arg[2],Arg[3],Arg[7],&Point,0,atoi(Arg[6])); 
+			nlong = AddMatchSingle(Arg[1], Arg[2], Arg[3], Arg[7], &Point, 0, atoi(Arg[6]));
 			if (*Arg[4])
 				SetGlobalValue (Arg[4],Arg[7]);
 			if (*Arg[5])
