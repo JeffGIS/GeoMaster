@@ -4612,8 +4612,13 @@ BOOL FAR PASCAL LOADMDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
 				if (FidAutoFileList != HFILE_ERROR)
 				{
 					LPSTR pDot;
+					LPSTR pTab;
 					fgetstring(str, MAX_PATH, FidAutoFileList);
+					if (!strnicmp(str, "FULLNAME\t",9))
+						fgetstring(str, MAX_PATH, FidAutoFileList);
 					GSSiClose(FidAutoFileList);
+					if ((pTab = strchr(str, '\t')))
+						*pTab = 0;
 					pDot = strrchr(str, '.');
 					if (pDot)
 					{
@@ -5081,8 +5086,15 @@ SelectFiles:
 	                 {  
 	                 	if (!ContinueProcessing)
 	                 		break;  
-	                 	if (AutoFileList)
-	                 		fgetstring (str,250,FidAutoFileList);                               
+						if (AutoFileList)
+						{
+							LPSTR pTab;
+							fgetstring(str, 250, FidAutoFileList);
+							if ((pTab = strchr(str, '\t')))
+								*pTab = 0;
+							if (!stricmp(str, "FULLNAME"))
+								continue;
+						}
 	                 	else if (*AutoExportName)
 	                 		_fstrcpy (str,AutoExportName);
 	                 	else
