@@ -3806,6 +3806,7 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
 	OpenMapOpenBP = FALSE;
 	ExpandPltName (PltName);
     MapType = MapFileType (PltName);
+	SetGlobalValue("%MAPFILE", PltName);
 	switch (MapType)
 	{
 		default:
@@ -4832,6 +4833,7 @@ void CloseMap (BOOL Update)
 #endif
 {   short i,ii;
 
+	SetGlobalValue("%MAPFILE", "");
 	if (InOpenMap)
 		ii=1;
 	ClosePrevLayers ();

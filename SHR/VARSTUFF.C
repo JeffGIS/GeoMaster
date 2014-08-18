@@ -3711,6 +3711,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%WINDOWSVERSION", 367, FALSE);
 	AllocateTypeVar("%SQLERRORLOG", 368, FALSE);
 	AllocateTypeVar("%LITERALCHAR", 369, FALSE);
+	AllocateTypeVar("%SHAPEREC", 370, FALSE);
+	AllocateTypeVar("%DBFREC", 371, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4825,6 +4827,12 @@ GSSiExitProg (533);
 		case 369:
 			OutStr[0] = literalChar;
 			OutStr[1] = 0;
+			break;
+		case 370:
+			ltoa(CurrentSHPRec, OutStr, 10);
+			break;
+		case 371:
+			ltoa(CurrentDBFRec, OutStr, 10);
 			break;
 
 	}
