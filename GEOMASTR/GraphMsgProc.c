@@ -25508,6 +25508,90 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
    }
  return TRUE;    
 }
+void removeChrFromStr(LPSTR str, char *c)
+{
+	int i = 0;
+	while (*str)
+	{
+		if (str == c)
+		{
+			i++;
+			c = 0;
+		}
+		else
+		{
+			*str = *(str + i);
+			str++;
+		}
+	}
+	return;
+}
+void RemoveDuplicateChar(LPSTR str)
+{
+	int i = 0;
+	char lastChr = 0;
+
+	if (!str)
+		return;
+	lastChr = *str++;
+
+	while (*str)
+	{
+		if (*(str+i) == lastChr)
+		{
+			i++;
+			lastChr = 0;
+		}
+		else
+		{
+			*str = *(str + i);
+			lastChr = *str;
+			str++;
+		}
+	}
+	return;
+}
+void ConvertFieldNameTo10Char(LPSTR nameIN)
+{
+	int ntoRemove;
+		
+	ntoRemove = strlen(nameIN) - 10;
+
+	if (ntoRemove > 0)
+		RemoveDuplicateChar(nameIN);
+	ntoRemove = strlen(nameIN) - 10;
+
+	while (ntoRemove > 0)
+	{
+		LPSTR pChr = strpbrk(nameIN, "aeiouy");
+		if (pChr)
+		{
+			removeChrFromStr(nameIN, pChr);
+			ntoRemove--;
+		}
+		else
+			break;
+	}
+	while (ntoRemove > 0)
+	{
+		LPSTR pChr = strpbrk(nameIN, "AEIOUY");
+		if (pChr)
+		{
+			removeChrFromStr(nameIN, pChr);
+			ntoRemove--;
+		}
+		else
+			break;
+	}
+	return;
+}
+HANDLE Create10CharFieldNames(HWND hWndDlg,UINT iDC_FIELDS, int nItems, LPINT lpItems)
+{
+	HANDLE hNames = 0;
+	//ConvertFieldNameTo10Char(outName);
+	return hNames;
+}
+
 BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
     short   i;
@@ -28145,6 +28229,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				int			nconPnts;
 				HANDLE		hConPnts=0;
 				BOOL		thinnedContours=FALSE;
+				HANDLE		h10CharFieldNames = 0;
 
                 CloseDataFile (FALSE,&MIFOuthDB);  
                 GetDlgItemText (hWndDlg,IDC_SHAPETYPE,str,sizeof(str));
@@ -28289,14 +28374,25 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 SQLPtrATT = (LPOPENSQLDATA)GlobalLock (MIFOuthDB);
                 FilePtrATT = (LPOPENFILEDATA)GlobalLock (SQLPtrATT->OFHandle); 
                 lpItems = (LPINT)GlobalLock (MIFOutFields); 
+				h10CharFieldNames = Create10CharFieldNames(hWndDlg, IDC_FIELDS, nItems, lpItems);
+				;
                 for (i=0;i<nItems;i++,lpItems++) 
                 {   
                 	DBFFieldType	DBFFldType; 
                 	short			nWidth, nDecimals=0, DBFLen;
+					char			outName[64];
+					LPSTR			pEq;
                 	
                     SendDlgItemMessage(hWndDlg,IDC_FIELDS,
                                                LB_GETTEXT,
                                                *lpItems,(LPARAM)Name);
+					if ((pEq = strchr(Name, '=')))
+					{
+						*pEq++ = 0;
+						strncpy(outName, pEq,sizeof(outName)-1);
+					}
+					else
+						strncpy(outName, Name, sizeof(outName)-1);
                     lpFldInfo = &FilePtrATT->FldInfo;
                     lpFldInfo += *lpItems;
 				    switch (lpFldInfo->type)
@@ -28355,7 +28451,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                    break;
 									                    
 	                    case SHP:
-							DBFAddField(pDBF,lpFldInfo->name,DBFFldType, DBFLen, nDecimals );
+							DBFAddField(pDBF,outName,DBFFldType, DBFLen, nDecimals );
 
                     		//sprintf (_fstrchr(OutRec,0),"\"%s\" %s",lpFldInfo->name,Type);
 					}        
