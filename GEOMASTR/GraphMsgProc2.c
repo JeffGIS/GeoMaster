@@ -3466,6 +3466,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
         		*pDOT = 0;
         		sprintf (str,"%s_%s.gsp",GSPName,FGDBTable);
 		        _fstrcpy (GSPName,str);
+				OpenFGDB(LPSTR DBName, LPSTR Table, LPSTR SQL)
         	}
         	else
         		_fstrcpy (pDOT,".gsp");
