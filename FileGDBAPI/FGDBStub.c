@@ -38,13 +38,13 @@ BOOL FGDBFreeStmt(int iSt)
 {
 	return FALSE;
 }
-int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
+int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 {
 	return FALSE;
 }
 LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPVOID *hstmt,
 									 LPFIELDINFO infield, BOOL SingleVal, short FunctionID,short *irc,
-									 int NumFields,LPFIELDINFO FirstField)
+									 int NumFields,LPFIELDINFO FirstField,int singleValID)
 {
 	return 0;
 }

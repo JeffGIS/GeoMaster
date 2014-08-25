@@ -871,7 +871,7 @@ GSSiExitProg (520);
 	}
     else if (_fstrstr(Name,".MDB("))  
     	Type = PGDB_DATAFILE;    
-    else if (_fstrstr(Name,".GDB("))  
+    else if (_fstrstr(Name,".GDB"))  
     	Type = FGDB_DATAFILE;    
     else if (_fstrstr(Name,".GCN"))
     	Type = GMCENSUS_DATAFILE;
@@ -1034,12 +1034,13 @@ GSSiExitProg (520);
         {
         	char	Name2[256];
         	
-		    if (!(pTable = _fstrrchr (Name,'('))) 
-		    	break; 
-		    *pTable++ = 0; 
-		    *LastChr (pTable) = 0; 
+			if ((pTable = _fstrrchr(Name, '(')))
+			{
+				*pTable++ = 0;
+				*LastChr(pTable) = 0;
+			}
 	       	FileHandle = (HANDLE)OpenFGDB2 (Name,pTable,"");
-            if(FileHandle)
+            if(FileHandle && pTable)
 	          	FileHandle =(HANDLE)OpenDatabaseTable ((int)FileHandle, pTable);
 	    }
  	    	break;
@@ -1189,6 +1190,8 @@ AllocFilePtr:
     FilePtr->myhandle = handle;  
     FilePtr->Type = Type;  
     FilePtr->Fid = Fid;
+	if (pTable)
+		strcpy(FilePtr->table, pTable);
     FilePtr->HaveNonStandardFields = HaveNonStandardFields;
 	{
 		char path[MAX_PATH];
@@ -1321,26 +1324,40 @@ void ExpandSYMATTRKEY(LPSTR str)
 	return;
 }
 
-void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQL)
+void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQLIN)
 #if ENABLETRACE
 {GSSiEnterProg (521);
 #endif
 {
     short	NumFieldInSQL = 0; 
-    HANDLE	hMem=GSSiGlobAlloc ( 187,GMEM_MOVEABLE,4096);
+    HANDLE	hMem=GSSiGlobAlloc ( 187,GMEM_MOVEABLE,4096*2);
     LPSTR	str=GlobalLock (hMem);
+	LPSTR	SQL = str + 4096;
     HANDLE	hFields = GSSiGlobAlloc (1755,GHND,MAXFIELDINSQL*sizeof(SQLFIELD));
     LPSQLFIELD	SQLField = (LPSQLFIELD)GlobalLock(hFields);     
 	LPSQLFIELD	lpSQLField; 
     LPSTR	lpFieldStart = str;  
     LPSTR	lpEq; 
-    LPSTR	pEnd, pBrack;
+    LPSTR	pEnd, pBrack, pColon;
     LPGWDHEADER	lpGWDHead;    
 	LPGWFLDINFO	lpGWFldInfo; 
 	LPFIELDINFO	pFieldInfo;
 	char litAndBracket[3] = "@[";
     short	i,ii;
     
+	strcpy(SQL, SQLIN);
+	if ((pColon = strrchr(SQL, ':')))
+	{
+		*pColon++ = 0;
+		for (i = 0, pFieldInfo = &FilePtr->FldInfo; i < FilePtr->NumFields; i++, pFieldInfo++)
+		{
+			if (!stricmp(pColon, pFieldInfo->name))
+			{
+				SQLPtr->singleValID = i + 1;
+				break;
+			}
+		}
+	}
 	litAndBracket[0] = literalChar;
     _fstrcpy (str,SQL); 
 	ExpandSYMATTRKEY(str);
@@ -7492,14 +7509,14 @@ GSSiExitProg (573);
 		        SQLPtr->st = 0;    
 				GetFGDBFieldData (FilePtr,SQLPtr->SQL,&SQLPtr->hstmt,
 	            	                  lpFieldInfo, FALSE,0, &st,
-	                       		   	  FilePtr->NumFields,&FilePtr->FldInfo);
+									  FilePtr->NumFields, &FilePtr->FldInfo, SQLPtr->singleValID);
 				irc = st;
 	        }
 	        else    
 	        {   
 	        	int	rc;
 		                	
-			    irc = FetchFGDBRecord (FilePtr);  
+				irc = FetchFGDBRecord(FilePtr, SQLPtr->singleValID);
 			    if(irc)
 			    {
 					FGDBCloseCursor((int)SQLPtr->hstmt);
@@ -8720,7 +8737,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 						ValC = (LPSTR) GetFGDBFieldData (FilePtr,
 														 sql,&SQLPtr->hstmt,
 	                                   		   			 lpFieldInfo, FALSE,0, &irc,FilePtr->NumFields,
-	                                   		   			 &FilePtr->FldInfo);
+	                                   		   			 &FilePtr->FldInfo,0);
 						GSSiGlobUlFree (&hsql);
 					}
 	                if (irc)

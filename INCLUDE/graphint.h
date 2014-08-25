@@ -2237,12 +2237,12 @@ int  FGDBGetFieldCount(int iDB);
 int  NumRowsInFGDBTable(int iDB);
 BOOL FGDBCloseCursor(int iSt);
 BOOL FGDBFreeStmt(int iSt);
-int FetchFGDBRecord (LPOPENFILEDATA	FilePtr);
+int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID);
 BOOL GetPGDBTable (HWND hWnd,LPSTR File);
 BOOL GetFGDBTable (HWND hWnd,LPSTR File);
 LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPVOID *hstmt,
 						 LPFIELDINFO infield, BOOL SingleVal, short FunctionID,short *irc,
-						 int NumFields,LPFIELDINFO FirstField);
+						 int NumFields, LPFIELDINFO FirstField, int singleValID);
 long ListPGDBTables (LPSTR DBNameIN,HWND hWndDlg,UINT ListCntl,int ListType);
 long ListFGDBTables (LPSTR DBNameIN,HWND hWndDlg,UINT ListCntl,int ListType);
 long ReadPGDBHeader (LPSTR DBName,LPMNMXCORD pMinMaxCoord);

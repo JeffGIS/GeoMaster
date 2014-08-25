@@ -230,6 +230,110 @@ BOOL SelectSHPFile (LPSTR File,LPSTR SymName)
 	return TRUE;
 }  
 
+int GetSHPSymListFilePath(LPSTR symlistFile, LPSTR SHPFileName)
+{
+	BOOL rtn = 0;
+	char tempPath[MAX_PATH];
+	LPSTR pLoc, pEnd;
+
+	strcpy(tempPath, SHPFileName);
+	strupr(tempPath);
+	if ((pLoc = strstr(tempPath, ".GDB(")))
+	{
+		*pLoc = 0;
+		pLoc += 5;
+		if ((pEnd = strchr(pLoc, ')')))
+			*pEnd = 0;
+		sprintf(symlistFile, "%s_%s.symlist", tempPath, pLoc);
+		rtn = MT_FILE_GEO_DB;
+	}
+	return rtn;
+}
+
+void CreateSHPSymlistFile(LPSTR SHPFileName, int NumSHPParms, LPSTR SymName)
+{
+	char symlistFile[MAX_PATH];
+	HANDLE hStr = 0;
+	LPSTR str, sql, sname, tableName, pTableName;
+	int iType;
+	HANDLE hDB = 0;
+	HWND hWnd = 0;
+	HFILE fid;
+
+	if (CurView)
+		hWnd = CurView->hWnd;
+
+	if (NumSHPParms != 1 || *SymName != '[' || *LastChr(SymName) != ']')
+		return;
+	if ((iType = GetSHPSymListFilePath(symlistFile, SHPFileName)))
+	{
+		if (FileType(symlistFile) != 1)
+		{
+			switch (iType)
+			{
+			case MT_FILE_GEO_DB:
+			{
+				hStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096+1024);
+				str = GlobalLock(hStr);
+				sql = str + 4096;
+				sname = sql + 512;
+				tableName = sname + 256;
+				sprintf(str, "FGDB=%s", SHPFileName);
+				if ((pTableName = strrchr(str, '(')))
+				{
+					pTableName++;
+					strcpy(tableName, pTableName);
+					*LastChr(tableName) = 0;
+				}
+				if (!strnicmp(SymName, "[FGDB.", 6))
+				{
+					strcpy(sname, &SymName[6]);
+					*LastChr(sname) = 0;
+				}
+				else if (*SymName == '[')
+				{
+					strcpy(sname, &SymName[1]);
+					*LastChr(sname) = 0;
+				}
+				sprintf(sql, ":%s", sname);
+				//sprintf(sql, "SELECT %s FROM %s:%s", sname, tableName,sname);
+				if (OpenDataFile(str,sql,BT_READ,&hDB))
+				{
+					int ln = 66;
+					int pos = BT_FIRST;
+					int count, numSymbols;
+					char value[256];
+					HANDLE hSymbols;
+					LPSTR pSymbols;
+					int lSymbols = 0;
+					HANDLE hBTDistinct = GetDistinctValues(hWnd, SymName, ln, hDB, 1024);
+					numSymbols = BT_NUM_IN_INDEX(hBTDistinct);
+					hSymbols = GSSiGlobAlloc(0,GHND, ln*numSymbols + 32);
+					pSymbols = GlobalLock(hSymbols);
+					while (!BT_FIND(hBTDistinct, value, pos, BT_ANY, (LPSTR)&count))
+					{
+						strcpy(&pSymbols[lSymbols], value);
+						lSymbols += strlen(value) + 1;
+						pos = BT_NEXT;
+					}
+					BT_CLOSEANDDELETE(&hBTDistinct);
+					CloseDataFile(FALSE,&hDB);
+					fid = GSSiOpenFile(symlistFile, 0, OF_CREATE);
+					BigWrite(fid, pSymbols, lSymbols + 2,-1);
+					GSSiClose(fid);
+					GSSiGlobUlFree(&hSymbols);
+				}
+				GSSiGlobUlFree(&hStr);
+			}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	return;
+}
+
 void DecodeSHPParam (LPSTR str,LPSTR cDesc,LPSTR cIF, LPSTR cColor, LPSTR cWidth, LPSTR cRot)
 { 
 	char	nullchr=0;
@@ -481,7 +585,8 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 			MessageBox(0, "Symbol not found", SymName, MB_ICONEXCLAMATION);
 		}
 	}
-	if (fgetstring (str,256,Fid))
+	//CreateSHPSymlistFile(SHPFileName, NumSHPParms, SymName); could speed up file gdb and shp processing for multiple symbol files when symbol name contained in a variable
+	if (fgetstring(str, 256, Fid))
 		_fstrcpy (SHPBeginDate,str);
 	if (fgetstring (str,256,Fid))
 		_fstrcpy (SHPEndDate,str);

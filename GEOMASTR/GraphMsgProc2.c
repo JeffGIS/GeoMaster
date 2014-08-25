@@ -3396,7 +3396,7 @@ BOOL FillSymbolListFromVariable (HWND hWndDlg,UINT idc_SYMBOL_LIST,UINT idc_SQL_
 	if (*SymName != '[' || *LastChr (SymName) != ']')
 		return FALSE;
 	strncpy0 (symnam,&SymName[1],strlen(SymName)-2);
-	hBTDistinct = GetDistinctValues (hWndDlg,SymName,ln,hDB,10000);
+	hBTDistinct = GetDistinctValues (hWndDlg,SymName,ln,hDB,1024);
 
 	SendDlgItemMessage (hWndDlg,idc_SYMBOL_LIST,LB_RESETCONTENT,0,0);
 	SendDlgItemMessage (hWndDlg,idc_SQL_LIST,LB_RESETCONTENT,0,0);
@@ -3805,7 +3805,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 			          	OtherParam = IDC_SYMBOL_LIST;
 			          else
 			          	OtherParam = IDC_SQL_LIST; 
-			 		  SendDlgItemMessage(hWndDlg,OtherParam,LB_SETCURSEL,-1,0);
+			 		  SendDlgItemMessage(hWndDlg,OtherParam,LB_SETCURSEL,Choice,0);
 				 	  EnableWindow (GetDlgItem(hWndDlg,IDC_SADELETE),TRUE);
 				 	  EnableWindow (GetDlgItem(hWndDlg,IDC_SAMODIFY),TRUE);
 				 	  break; 

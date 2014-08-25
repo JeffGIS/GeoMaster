@@ -4368,53 +4368,64 @@ DoSid:
 			CloseTRANS2 (&hTranBaseToFile);  
 			CloseTRANS2 (&hTranFileToVP);  
 			strcpy (ShapeFieldName,"SHAPE");
-			if (!(SHPType = ReadFGDBHeader (PltName,&CurView->FileMNMX)))
+			if (hDC)
 			{
-		    	CloseMap(FALSE);
-		    	goto RtnFalse;
-		    }
-			LoadSHPParm (PltName,SHPType,CurView->hWnd); 
-			Points[0].x = CurView->FileMNMX.xmn;   
-			Points[0].y = CurView->FileMNMX.ymn;   
-			Points[1].x = CurView->FileMNMX.xmn;   
-			Points[1].y = CurView->FileMNMX.ymx;   
-			Points[2].x = CurView->FileMNMX.xmx;   
-			Points[2].y = CurView->FileMNMX.ymx;   
-			Points[3].x = CurView->FileMNMX.xmx;   
-			Points[3].y = CurView->FileMNMX.ymn; 
-			DBoundsInit (&CurView->FileMNMX);
-			Dist1 = ldistp (Points[0],Points[2]); 
-			for (i=0;i<4;i++)
-			{
-				if (ConvertCoord(&Points[i],0,1))
-				{   
-				    MessageBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK);
-				    goto RtnFalse;
+				if (!(SHPType = ReadFGDBHeader(PltName, &CurView->FileMNMX)))
+				{
+					CloseMap(FALSE);
+					goto RtnFalse;
 				}
-				AddDPointToMinMax (&Points[i],&CurView->FileMNMX); 
+				LoadSHPParm(PltName, SHPType, CurView->hWnd);
+				Points[0].x = CurView->FileMNMX.xmn;
+				Points[0].y = CurView->FileMNMX.ymn;
+				Points[1].x = CurView->FileMNMX.xmn;
+				Points[1].y = CurView->FileMNMX.ymx;
+				Points[2].x = CurView->FileMNMX.xmx;
+				Points[2].y = CurView->FileMNMX.ymx;
+				Points[3].x = CurView->FileMNMX.xmx;
+				Points[3].y = CurView->FileMNMX.ymn;
+				DBoundsInit(&CurView->FileMNMX);
+				Dist1 = ldistp(Points[0], Points[2]);
+				for (i = 0; i < 4; i++)
+				{
+					if (ConvertCoord(&Points[i], 0, 1))
+					{
+						MessageBox(GetFocus(), "Unable to convert coordinates as specified", 0, MB_ICONQUESTION | MB_OK);
+						goto RtnFalse;
+					}
+					AddDPointToMinMax(&Points[i], &CurView->FileMNMX);
+				}
+				Dist2 = ldistp(Points[0], Points[2]);
+				NonPltFileDistToBaseDist = FTM;//Dist2/Dist1;
+				if (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn >
+					CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)
+				{
+					MinMax.xmn = -32000;
+					MinMax.xmx = 32000;
+					MinMax.ymn = -32000 * ((CurView->FileMNMX.ymx - CurView->FileMNMX.ymn) / (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn));
+					MinMax.ymx = -MinMax.ymn;
+				}
+				else
+				{
+					MinMax.ymn = -32000;
+					MinMax.ymx = 32000;
+					MinMax.xmn = -32000 * ((CurView->FileMNMX.xmx - CurView->FileMNMX.xmn) / (CurView->FileMNMX.ymx - CurView->FileMNMX.ymn));
+					MinMax.xmx = -MinMax.xmn;
+				}
+				CreateFileTran(&MinMax, &CurView->FileMNMX);
+				OpenFGDBFileIndex(PltName, &CurView->WBounds);
 			}
-			Dist2 = ldistp (Points[0],Points[2]); 
-			NonPltFileDistToBaseDist = FTM;//Dist2/Dist1;
-			if (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn >
-				CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)
-			{
-				MinMax.xmn = -32000;
-				MinMax.xmx = 32000;
-				MinMax.ymn = -32000 * ((CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)/(CurView->FileMNMX.xmx - CurView->FileMNMX.xmn));
-				MinMax.ymx = -MinMax.ymn;
-			} 
 			else
 			{
-				MinMax.ymn = -32000;
-				MinMax.ymx = 32000;
-				MinMax.xmn = -32000 * ((CurView->FileMNMX.xmx - CurView->FileMNMX.xmn)/(CurView->FileMNMX.ymx - CurView->FileMNMX.ymn));
-				MinMax.xmx = -MinMax.xmn;
-			} 
-			CreateFileTran (&MinMax,&CurView->FileMNMX); 
+				LoadSHPParm(PltName, SHPType, CurView->hWnd);
+				if (!(SHPType = ReadFGDBHeader(PltName, 0)))
+				{
+					CloseMap(FALSE);
+					goto RtnFalse;
+				}
+			}
 			NextSHPRec = 0;
-			if (hDC)
-				OpenFGDBFileIndex (PltName,&CurView->WBounds); 
-        }
+		}
         break;
 
 		case MT_ORA: //oracle export file  

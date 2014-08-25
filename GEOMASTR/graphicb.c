@@ -1507,6 +1507,8 @@ GSSiExitProg (1157);
 	ClearFullWindowBitmap (hWnd);	
 	if (!hWnd)
 	{
+		if (!*pNumViewports)
+			return FALSE;
 		NormalRect (&FullWindowBitMapRect); 
 		if (CurView->hDC && !IsRectEmpty(&FullWindowBitMapRect))
 			hFullWindowBitMap = SaveScreen (CurView->hDC, FullWindowBitMapRect);

@@ -114,9 +114,12 @@ BOOL FileIsVisible (LPSTR FileName)
 					else if (SHPType == SHPT_TEXT && (!GetTypeVisibility(TYPE_TEXT) || (CurView->PassID && CurView->PassID != 3)))
 						rtn = FALSE;  
 				}
-				if (rtn)
-					if (LoadSHPParm (PltName,SHPType,CurView->hWnd))
-						rtn = IsSHPFileVisible ();
+				if (rtn && OpenMap((HWND)1,(HDC)1))
+				{
+					if (LoadSHPParm(PltName, SHPType, CurView->hWnd))
+						rtn = IsSHPFileVisible();
+					CloseMap(FALSE);
+				}
 			}
 			else
 				rtn = FALSE;

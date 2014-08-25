@@ -2908,7 +2908,7 @@ Exit:
 		}
 		GSSiGlobUlFree (&hTemp);
 	} 
-	if (Final && CurView && !ConfigLevel)
+	if (Final && *pNumViewports && CurView && !ConfigLevel)
 	{
 		ProcessText (CurView->EndDisplayCmd);
 		DisplayAllToolbars (2);

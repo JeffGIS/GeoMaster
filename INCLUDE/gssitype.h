@@ -644,6 +644,7 @@ typedef struct
         HFILE	Fid;
         HANDLE  SQLHandles[MAXSQLPERFILE];
         char    fullpath[_MAX_PATH];   
+		char	table[256];
         short	HaveNonStandardFields;
         FIELDINFO   FldInfo;
     }OPENFILEDATA;
@@ -683,6 +684,7 @@ typedef struct
         short   IndexToUse; 
         short	Unique;
         short   NumGlobals;
+		short	singleValID;
         SQLFIELD    SQLField; 
     }OPENSQLDATA; 
 typedef OPENSQLDATA FAR *LPOPENSQLDATA;    

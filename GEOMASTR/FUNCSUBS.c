@@ -113,11 +113,12 @@ HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
 			else
 				count = 1;
 			BT_PUT (hBT,value,(LPSTR)&count);
-			if (nStatus && numRows > nStatus)
+			curLoc++;
+			if (nStatus && numRows > nStatus && !(curLoc % nStatus))
 			{
 				int nfound = BT_NUM_IN_INDEX (hBT);
-				sprintf (strchr (str,0),":%i found",nfound);
-				rc = StatusWindowUpdate (0,str,numRows,++curLoc);
+				sprintf (strchr (str,0),"\r%i found",nfound);
+				rc = StatusWindowUpdate (0,str,numRows,curLoc);
 			}
 		}
 		WaitCursor (-1);

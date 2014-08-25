@@ -4994,7 +4994,7 @@ DisplayParcel:
 				 }
 				 if (Counter > 0)
 					 lastVPID = 1;
-				 else if (CurView)
+				 else if (*pNumViewports && CurView)
 					 lastVPID = CurView->ID;
 				 if (HaveScreenBuffer (0)) 
 				 {

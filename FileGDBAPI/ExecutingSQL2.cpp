@@ -124,19 +124,20 @@ typedef SQLFIELD    FAR *LPSQLFIELD;
 
 typedef struct
     {   
-        HANDLE  myhandle,
-                FileHandle,
-                BufferHandle; 
-        short   Type,
-                NumSQLs,
-                NumFields; 
-        long    FirstLineOffset;
-        HFILE	Fid;
-        HANDLE  SQLHandles[MAXSQLPERFILE];
-        char    fullpath[_MAX_PATH];   
-        short	HaveNonStandardFields;
-        FIELDINFO   FldInfo;
-    }OPENFILEDATA;
+		HANDLE  myhandle,
+			FileHandle,
+			BufferHandle;
+		short   Type,
+			NumSQLs,
+			NumFields;
+		long    FirstLineOffset;
+		HFILE	Fid;
+		HANDLE  SQLHandles[MAXSQLPERFILE];
+		char    fullpath[_MAX_PATH];
+		char	table[256];
+		short	HaveNonStandardFields;
+		FIELDINFO   FldInfo;
+}OPENFILEDATA;
 typedef OPENFILEDATA    FAR *LPOPENFILEDATA;    
 typedef struct
     {   
@@ -155,7 +156,8 @@ typedef struct
         short   IndexToUse; 
         short	Unique;
         short   NumGlobals;
-        SQLFIELD    SQLField; 
+		short	singleValID;
+		SQLFIELD    SQLField;
     }OPENSQLDATA; 
 typedef OPENSQLDATA FAR *LPOPENSQLDATA;    
 typedef struct {int   length; char Value;} CURVAL;
@@ -304,8 +306,6 @@ extern "C" int OpenFGDB2 (LPCTSTR DBName,LPSTR Table,LPSTR SQL)
 {   
 	int		rtn=-1;
 	long	hr;
-	string	tablename  = LPCTSTR(Table);
-	wstring wtablename (tablename.begin(),tablename.end());
 	int		idb;
 	vector<wstring> childList(1); 
 	
@@ -321,16 +321,21 @@ HaveDB:
 		return 0;
 	openGDBid[idb] = openID;
 	gdbInUse[idb] = 1;
-	if (*Table)
+	if (Table)
 	{
-		if ((hr = geodatabase[openGDBid[idb]].OpenTable (wtablename,table[idb])) != S_OK)
+		string	tablename = LPCTSTR(Table);
+		wstring wtablename(tablename.begin(), tablename.end());
+		if (*Table)
 		{
-			CloseGDBid (openGDBid[idb]);
-			gdbInUse[idb] = 0;
-			return 0;
+			if ((hr = geodatabase[openGDBid[idb]].OpenTable(wtablename, table[idb])) != S_OK)
+			{
+				CloseGDBid(openGDBid[idb]);
+				gdbInUse[idb] = 0;
+				return 0;
+			}
+			gdbInUse[idb] = 2;
+			not++;
 		}
-		gdbInUse[idb] = 2;
-		not++;
 	}
     return idb + 1;
 }
@@ -732,7 +737,7 @@ extern "C" int  NumRowsInFGDBTable(int iDB)
 	return nRows;
 }
 
-extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
+extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 {	
 	int	rc=-1;
 	if (FilePtr)
@@ -767,6 +772,8 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 			fieldInfo.GetFieldCount(nFields);
 			for (long fieldNumber = 0; fieldNumber < nFields; fieldNumber++,pField++)
 			{
+				if (singleValID && fieldNumber != singleValID - 1)
+					continue;
 			  fieldInfo.GetFieldType(fieldNumber, fieldType);
 			  fieldInfo.GetFieldName(fieldNumber, fieldName);
 			  fieldInfo.GetFieldLength(fieldNumber, fieldLength);
@@ -808,8 +815,8 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 					std::string stringField = WStringToString(wstringField);
 					iii = stringField.length();
 					strncpy0 ((LPSTR)&pCurVal->Value,(LPSTR)stringField.c_str(),stringField.length());
-					if (!stricmp((LPSTR)&pCurVal->Value, "283401320222"))
-						ii = 1;
+					//if (!stricmp((LPSTR)&pCurVal->Value, "283401320222"))
+					//	ii = 1;
 					  }
 				  break;
 		          
@@ -948,7 +955,7 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr)
 }
 extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPVOID *hstmt,
 									 LPFIELDINFO infield, BOOL SingleVal, short FunctionID,short *irc,
-									 int NumFields,LPFIELDINFO FirstField)
+									 int NumFields,LPFIELDINFO FirstField,int singleValID)
 {
 	static char answer[4096];
 	string	sQL;
@@ -999,23 +1006,23 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 		sQL = LPCTSTR(indexIN);
 		wstring sql (sQL.begin(),sQL.end());
 	    if (SingleVal)
-	    {   
-	    	if (FunctionID)
-	    		sprintf (sqlstr,"%s(\"%s\")",FunctionName[FunctionID-1],infield->name);
+	    {  
+			if (FunctionID)
+				sprintf(sqlstr, "%s(\"%s\")", FunctionName[FunctionID - 1], infield->name);
 			else
-	    		sprintf (sqlstr,"%s",infield->name);
-			wstring wsqlstr (sqlstr,sqlstr+strlen(sqlstr));
+				sprintf(sqlstr, "%s", infield->name);
+			wstring wsqlstr(sqlstr, sqlstr + strlen(sqlstr));
 			if (haveEnvelope)
 			{
 
-				if ((hr = table[iDB].Search(wsqlstr,sql,envelope, true, attributeQueryRows[iDB])) != S_OK)
+				if ((hr = table[iDB].Search(wsqlstr, sql, envelope, true, attributeQueryRows[iDB])) != S_OK)
 					*irc = 1;
 				else
 					noq++;
 			}
 			else
 			{
-				if ((hr = table[iDB].Search(wsqlstr,sql, true, attributeQueryRows[iDB])) != S_OK)
+				if ((hr = table[iDB].Search(wsqlstr, sql, true, attributeQueryRows[iDB])) != S_OK)
 					*irc = 1;
 				else
 					noq++;
@@ -1040,7 +1047,7 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 			goto Exit;
 		else
 			gdbInUse[iDB] = 3;
-		*irc = FetchFGDBRecord (FilePtr);
+		*irc = FetchFGDBRecord (FilePtr,singleValID);
 	};
  	GetFGDBCVal (infield,answer,4096);
 	if (SingleVal)
