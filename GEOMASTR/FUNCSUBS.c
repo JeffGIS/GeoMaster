@@ -83,7 +83,7 @@ HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
 	int			count, numRows = 0, curLoc = 0, rc=1;
 	short		pos;
 	
-	if (ln > 0 && ln < 128)
+	if (hDB && ln > 0 && ln < 128)
 	{
 		GSSiGetTempFileName (0,"gmd",0,tempFile); 
 			

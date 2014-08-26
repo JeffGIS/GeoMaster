@@ -7073,35 +7073,39 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 				 		SendDlgItemMessage (hWndDlg,IDC_PSYMLIST,LB_SETTOPINDEX,(WPARAM)i,(LPARAM)0); 
 				 	}
                 }
-		       	EnableWindow (GetDlgItem(hWndDlg,IDOK),symnum);
-		       	EnableWindow (GetDlgItem(hWndDlg,IDC_NEWSYM),!symnum);
-				if (!symnum)
-					break;
-		        hSymbol = GetDictSymDesc (symnum,0);
-				nc = GetDlgItemText (hWndDlg,IDC_SYMCOLOR,CurSymColor,64);  
-				ExpandText (CurSymColor);
-           		Color = atol (CurSymColor);
-           		if (nc < 18 && Color >= 0)
-           		{
-           			HaveVarFillColor = TRUE;  
-           			GlobalColors[0]=Color;
-					hBrush = CreateSolidBrush(Color);  
-					hOldBrush = SelectObject (hDC,hBrush);
-           		} 
-           		else
-           			HaveVarFillColor = FALSE;  
-           			
-           		LineSymbolFactor = -1;  
-           		GraphicsPointFactor = 1;
-		    	DisplaySymInWindow (hWnd,hDC,hSymbol,0,0,hBackBrush1,-2); 
-		    	DestroySymbol (hSymbol);    
-		    	LineSymbolFactor = SaveLSF;
-				HaveVarFillColor = SaveHVFC; 
-				GraphicsPointFactor = SaveGPF;
-				if (hOldBrush) 
+				if (*str != '[')
 				{
-					GSSiDeleteObject (&hBrush);
-					SelectObject (hDC,hOldBrush);
+					EnableWindow(GetDlgItem(hWndDlg, IDOK), symnum);
+					EnableWindow(GetDlgItem(hWndDlg, IDC_NEWSYM), !symnum);
+					if (symnum)
+					{
+						hSymbol = GetDictSymDesc(symnum, 0);
+						nc = GetDlgItemText(hWndDlg, IDC_SYMCOLOR, CurSymColor, 64);
+						ExpandText(CurSymColor);
+						Color = atol(CurSymColor);
+						if (nc < 18 && Color >= 0)
+						{
+							HaveVarFillColor = TRUE;
+							GlobalColors[0] = Color;
+							hBrush = CreateSolidBrush(Color);
+							hOldBrush = SelectObject(hDC, hBrush);
+						}
+						else
+							HaveVarFillColor = FALSE;
+
+						LineSymbolFactor = -1;
+						GraphicsPointFactor = 1;
+						DisplaySymInWindow(hWnd, hDC, hSymbol, 0, 0, hBackBrush1, -2);
+						DestroySymbol(hSymbol);
+						LineSymbolFactor = SaveLSF;
+						HaveVarFillColor = SaveHVFC;
+						GraphicsPointFactor = SaveGPF;
+						if (hOldBrush)
+						{
+							GSSiDeleteObject(&hBrush);
+							SelectObject(hDC, hOldBrush);
+						}
+					}
 				}
 				ReleaseDC (hWnd,hDC);   
 		    }

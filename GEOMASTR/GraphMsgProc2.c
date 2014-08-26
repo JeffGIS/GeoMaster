@@ -3434,94 +3434,104 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  	return (BRtn);
  switch(Message)
    {
-    case WM_INITDIALOG:
-		Opened = FALSE;
-    	SHPIndexType=1;  
-    	GetSHPName (str); 
-    	SetDlgItemText (hWndDlg,IDC_SHAPEFILE,str);
-        _fstrcpy (GSPName,str);   
-        IsPGDB = FALSE;  
-        IsFGDB = FALSE;  
-        *PGDBTable = 0;
-        if ((pDOT = _fstrrchr (GSPName,'.')))
-        {
-        	if (!_fstrnicmp (pDOT,".mdb",4))
-        	{
-        		if (*(pDOT+4) != '(')
-        			return FALSE; 
-        		IsPGDB = TRUE;
-        		_fstrcpy (PGDBTable,pDOT+5);
-        		*LastChr (PGDBTable) = 0; 
-        		*pDOT = 0;
-        		sprintf (str,"%s_%s.gsp",GSPName,PGDBTable);
-		        _fstrcpy (GSPName,str);
-        	}
-        	else if (!_fstrnicmp (pDOT,".gdb",4))
-        	{
-        		if (*(pDOT+4) != '(')
-        			return FALSE; 
-        		IsFGDB = TRUE;
-        		_fstrcpy (FGDBTable,pDOT+5);
-        		*LastChr (FGDBTable) = 0; 
-        		*pDOT = 0;
-        		sprintf (str,"%s_%s.gsp",GSPName,FGDBTable);
-		        _fstrcpy (GSPName,str);
-				OpenFGDB(LPSTR DBName, LPSTR Table, LPSTR SQL)
-        	}
-        	else
-        		_fstrcpy (pDOT,".gsp");
-        }
-        else
-        	break;
-    	SetCurVal (GSPName,IDS_FILEGSP); 
-        LoadTAGDef ();   
-        if (NumTAGDef)
-         { 
-            LPTAGDEF    lpTAGDef; 
-            
-            lpTAGDef = (LPTAGDEF)GlobalLock (hTAGDef);
-            for (i=0;i<NumTAGDef;i++,lpTAGDef++) 
-            {
-                SendDlgItemMessage (hWndDlg,IDC_TAPREFIX,CB_ADDSTRING,0,(LPARAM)lpTAGDef->Prefix);
-                SendDlgItemMessage (hWndDlg,IDC_REF_PREFIX,CB_ADDSTRING,0,(LPARAM)lpTAGDef->Prefix);
-            }
-            GlobalUnlock (hTAGDef);
-         } 
-         EnableWindow (GetDlgItem(hWndDlg,IDC_SAADD),TRUE);
-         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
-         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
-         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
-         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         FillProjectionList (hWndDlg,IDC_PROJECTION,&CurProj,IDC_UNITS,&CurUnits);
-//         _fstrcpy (str,"*.CVT");
-//         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
-		 if (PRJ_UNITS[1] == 1)
- 		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)0,(LPARAM)0); 
-		 else if (PRJ_UNITS[1] == 2)
- 		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)1,(LPARAM)0); 
- 		 SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj"); 
-		 SendDlgItemMessage (hWndDlg,IDC_INDEXSTANDARD,BM_SETCHECK,SHPIndexType == 0,0L);
-		 SendDlgItemMessage (hWndDlg,IDC_INDEXSIMPLE,BM_SETCHECK,SHPIndexType == 1,0L);
-		 SendDlgItemMessage (hWndDlg,IDC_INDEXQUAD,BM_SETCHECK,SHPIndexType == 2,0L);  
-    	 GetSHPName (str);
-    	 if (IsPGDB)
-		 	SHPType = ReadPGDBHeader (str,&Bounds);
-    	 else if (IsFGDB)
-		 	SHPType = ReadFGDBHeader (str,&Bounds);
-		 else
+ case WM_INITDIALOG:
+ {
+	 char originalName[MAX_PATH];
+
+	 Opened = FALSE;
+	 SHPIndexType = 1;
+	 GetSHPName(str);
+	 strcpy(originalName, str);
+	 SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
+	 _fstrcpy(GSPName, str);
+	 IsPGDB = FALSE;
+	 IsFGDB = FALSE;
+	 *PGDBTable = 0;
+	 if ((pDOT = _fstrrchr(GSPName, '.')))
+	 {
+		 if (!_fstrnicmp(pDOT, ".mdb", 4))
 		 {
-		 	Fid = GSSiOpenFile (str,0,OF_READ);
-		 	if (Fid == HFILE_ERROR)
-		 		goto LoadGSP;
-		 	SHPType = ReadSHPHeader (Fid,&Bounds,str);  
-		 	GSSiClose (Fid);
-		 }  
-		 ii = SHPType;
-		 SetDlgItemText (hWndDlg,IDC_SHPMINX,ftoa(str,Bounds.xmn));
-		 SetDlgItemText (hWndDlg,IDC_SHPMAXX,ftoa(str,Bounds.xmx));
-		 SetDlgItemText (hWndDlg,IDC_SHPMINY,ftoa(str,Bounds.ymn));
-		 SetDlgItemText (hWndDlg,IDC_SHPMAXY,ftoa(str,Bounds.ymx));
-         goto LoadGSP;
+			 if (*(pDOT + 4) != '(')
+				 return FALSE;
+			 IsPGDB = TRUE;
+			 _fstrcpy(PGDBTable, pDOT + 5);
+			 *LastChr(PGDBTable) = 0;
+			 *pDOT = 0;
+			 sprintf(str, "%s_%s.gsp", GSPName, PGDBTable);
+			 _fstrcpy(GSPName, str);
+		 }
+		 else if (!_fstrnicmp(pDOT, ".gdb", 4))
+		 {
+			 char fgdbPath[MAX_PATH];
+
+			 if (*(pDOT + 4) != '(')
+				 return FALSE;
+			 IsFGDB = TRUE;
+			 _fstrcpy(FGDBTable, pDOT + 5);
+			 *LastChr(FGDBTable) = 0;
+			 *pDOT = 0;
+			 sprintf(fgdbPath, "%s.gdb", GSPName);
+			 sprintf(str, "%s_%s.gsp", GSPName, FGDBTable);
+			 _fstrcpy(GSPName, str);
+			 OpenFGDB(fgdbPath, FGDBTable, "");
+			 hSHPDBF = FGDBHandle;
+			 Opened = TRUE;
+		 }
+		 else
+			 _fstrcpy(pDOT, ".gsp");
+	 }
+	 else
+		 break;
+	 SetCurVal(GSPName, IDS_FILEGSP);
+	 LoadTAGDef();
+	 if (NumTAGDef)
+	 {
+		 LPTAGDEF    lpTAGDef;
+
+		 lpTAGDef = (LPTAGDEF)GlobalLock(hTAGDef);
+		 for (i = 0; i < NumTAGDef; i++, lpTAGDef++)
+		 {
+			 SendDlgItemMessage(hWndDlg, IDC_TAPREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+			 SendDlgItemMessage(hWndDlg, IDC_REF_PREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+		 }
+		 GlobalUnlock(hTAGDef);
+	 }
+	 EnableWindow(GetDlgItem(hWndDlg, IDC_SAADD), TRUE);
+	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Feet");
+	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Meters");
+	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees");
+	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees * 1000000");
+	 FillProjectionList(hWndDlg, IDC_PROJECTION, &CurProj, IDC_UNITS, &CurUnits);
+	 //         _fstrcpy (str,"*.CVT");
+	 //         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
+	 if (PRJ_UNITS[1] == 1)
+		 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+	 else if (PRJ_UNITS[1] == 2)
+		 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
+	 SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
+	 SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == 0, 0L);
+	 SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == 1, 0L);
+	 SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == 2, 0L);
+	 GetSHPName(str);
+	 if (IsPGDB)
+		 SHPType = ReadPGDBHeader(str, &Bounds);
+	 else if (IsFGDB)
+		 SHPType = ReadFGDBHeader(str, &Bounds);
+	 else
+	 {
+		 Fid = GSSiOpenFile(str, 0, OF_READ);
+		 if (Fid == HFILE_ERROR)
+			 goto LoadGSP;
+		 SHPType = ReadSHPHeader(Fid, &Bounds, str);
+		 GSSiClose(Fid);
+	 }
+	 ii = SHPType;
+	 SetDlgItemText(hWndDlg, IDC_SHPMINX, ftoa(str, Bounds.xmn));
+	 SetDlgItemText(hWndDlg, IDC_SHPMAXX, ftoa(str, Bounds.xmx));
+	 SetDlgItemText(hWndDlg, IDC_SHPMINY, ftoa(str, Bounds.ymn));
+	 SetDlgItemText(hWndDlg, IDC_SHPMAXY, ftoa(str, Bounds.ymx));
+	 goto LoadGSP;
+ }
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_COMMAND:
@@ -3895,11 +3905,14 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
             	SetGlobalValueBool ("%AUTOSHPPARM",FALSE);
             	if (Opened) 
             	{
-            	 	if (IsPGDB)
-            	 		OpenPGDB (0,0,0);
-            	 	else
+					if (IsPGDB)
+						OpenPGDB(0, 0, 0);
+					else if (IsFGDB)
+						OpenFGDB(0, 0, 0);
+					else
 						CloseDataFile (TRUE,&hSHPDBF); 
 					DestroyFieldList();
+					hSHPDBF = 0;
 				}
 	            EndDialog(hWndDlg,FALSE);  
 				break;
@@ -3984,11 +3997,14 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 				GSSiClose (Fid);
             	if (Opened) 
             	{
-            	 	if (IsPGDB)
-            	 		OpenPGDB (0,0,0);
-            	 	else
-						CloseDataFile (TRUE,&hSHPDBF); 
-					DestroyFieldList ();
+					if (IsPGDB)
+						OpenPGDB(0, 0, 0);
+					else if (IsFGDB)
+						OpenFGDB(0, 0, 0);
+					else
+						CloseDataFile(TRUE, &hSHPDBF);
+					DestroyFieldList();
+					hSHPDBF = 0;
 				}
 	            EndDialog(hWndDlg,TRUE);  
 				break;
