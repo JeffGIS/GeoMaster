@@ -2331,7 +2331,8 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
 	long	TotFiles=0, Loc;    
 	int		Item;
 	LPSTR	pName;
-    
+	char	defaultProj[256]="";
+
     if (!hProjectionFile)
     {
     	hProjectionFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,256); 
@@ -2356,6 +2357,7 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
         	Item = SendDlgItemMessage (hWndDlg,cntl,CB_ADDSTRING,0,(LPARAM)&Name[1]); 
         	if (*pCurProj < 0) 
         	{
+				strcpy(defaultProj, &Name[1]);
         		*pCurProj = Item;
 				fgetstring (str,64,Fid2);
 				*pCurUnits = UnitsFromText (&str[1]);
@@ -2368,6 +2370,10 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
 
 	GSSiClose (Fid);
 	GlobalUnlock (hProjectionFile);
+	if (*defaultProj)
+	{
+		*pCurProj = SendDlgItemMessage(hWndDlg, cntl, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)defaultProj);
+	}
 	return TotFiles;
 }
 
