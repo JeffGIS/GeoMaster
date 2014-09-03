@@ -4288,6 +4288,7 @@ GSSiExitProg (1350);
 		{   
 			HDIB32 hDib32In, hDib32Out=0;
 			
+			rtn = 0;
 			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
 			if (nArgs < 2)
 				goto RtnFalse;  
@@ -4305,8 +4306,11 @@ GSSiExitProg (1350);
 				case 4:
 					hDib32Out = FreeImage_ConvertTo4Bits(hDib32In);
 					break;
+				case -8:
+					hDib32Out = FreeImage_ConvertTo8Bits(hDib32In);
+					break;
 				case 8:
-					hDib32Out = FreeImage_ColorQuantize(hDib32In,FIQ_NNQUANT);
+					hDib32Out = FreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
 					break;
 				case 16:
 					hDib32Out = FreeImage_ConvertTo16Bits565(hDib32In);

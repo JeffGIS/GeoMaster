@@ -162,7 +162,7 @@ BEGIN
         MENUITEM "&Set",                        IDM_VISIBILITY
         MENUITEM "Set (alternate)",             IDM_VISIBILITY2
         MENUITEM SEPARATOR
-        MENUITEM "IDM_DISPLAY_HLT",             ID_VISIBILITY_IDM
+        MENUITEM "Display Highlighted Items",   IDM_DISPLAY_HLT
         MENUITEM "Display Only &Non-Highlighted Data", IDM_DISPLAY_NONHLT
     END
     POPUP "Pic&kability"

@@ -6439,6 +6439,7 @@ HaveVP:;
 					PROCESS_INFORMATION pi;
 					DWORD	CRFlags=0;
 					RECT	rect;
+					char	startIn[MAX_PATH] = "[%DL]";
 					//MNMXCORD zoomBounds;
 			
 					CloseAllRequestedFiles (FALSE);
@@ -6461,13 +6462,14 @@ HaveVP:;
 					//ExpandText(Arg[2]);
 					if (*TestFileLocation)
 						sprintf (strchr(Arg[2],0)," [%%TESTDL]=%s;",TestFileLocation);
+					ExpandText(startIn);
 					if(CreateProcess(modulePath,Arg[2], 
 										NULL,             // Process handle not inheritable. 
 										NULL,             // Thread handle not inheritable. 
 										FALSE,            // Set handle inheritance to FALSE. 
 										CRFlags,		  // creation flags. 
 										NULL,             // Use parent's environment block. 
-										NULL,             // Use parent's starting directory. 
+										startIn,             // Use parent's starting directory. 
 										&si,              // Pointer to STARTUPINFO structure.
 										&pi )             // Pointer to PROCESS_INFORMATION structure.
 						) 

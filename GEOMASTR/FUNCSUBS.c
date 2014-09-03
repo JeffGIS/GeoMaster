@@ -1783,7 +1783,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 	typedef	POINTINAREASTRUCT	*LPPOINTINAREASTRUCT; 
 		
 	*OutLoc = 0;
-	if (!stricmp (Args[1],"LOAD"))
+	if (!stricmp (Args[1],"LOAD")) //$POINTINAREA(LOAD,offset)
 	{
 		switch (PickList[0].Type)
 		{
@@ -1820,7 +1820,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			}
 		}
 	}
-	else if (!stricmp (Args[1],"SAVE"))
+	else if (!stricmp (Args[1],"SAVE"))//$POINTINAREA(SAVE,hpia)
 	{
 		HANDLE	hPIAStruct = (HANDLE)atol (Args[2]);
 		if (hPIAStruct)
@@ -1850,7 +1850,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			GlobalUnlock (hPIAStruct);
 		}
 	}
-	else if (!stricmp (Args[1],"RECALL"))
+	else if (!stricmp (Args[1],"RECALL"))//$POINTINAREA(RECALL,path)
 	{
 		HFILE	Fid = GSSiOpenFile (Args[2],0,OF_READ);
 
@@ -1886,7 +1886,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			rtn = TRUE;
 		}
 	}
-	else if (!stricmp (Args[1],"DESTROY"))
+	else if (!stricmp (Args[1],"DESTROY"))//$POINTINAREA(DESTROY,hpia)
 	{
 		HANDLE	hPIAStruct = (HANDLE)atol (Args[2]);
 		if (hPIAStruct)
@@ -1901,7 +1901,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			rtn = TRUE;
 		}
 	}
-	else if (!stricmp (Args[1],"TEST"))
+	else if (!stricmp (Args[1],"TEST"))//$POINTINAREA(TEST,hpia,point)
 	{
 		HANDLE	hPIAStruct = (HANDLE)atol (Args[2]);
 		LPPOINTINAREASTRUCT	PIAStruct = (LPPOINTINAREASTRUCT)GlobalLock (hPIAStruct);
