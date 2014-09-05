@@ -547,6 +547,7 @@ int	GetFunctionID14 (LPSTR str)
 			if (!_fstrnicmp (str,"RECOVERPLTFILE",14)) return 1409; 
 			if (!_fstrnicmp (str,"STRINGFROMFILE",14)) return 1410;
 			if (!_fstrnicmp (str,"GLOBALFROMFILE",14)) return 1411;
+			if (!_fstrnicmp (str,"COMPRESSEDFILE",14)) return 1412;
 			
 			return 0;
 }
