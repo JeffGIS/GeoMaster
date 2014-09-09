@@ -5021,7 +5021,12 @@ GSSiExitProg (1350);
 				GSSiClose (Fid);
 			}
 			goto Rtnl;
-		
+
+		case 1412: //$COMPRESSEDFILE(CREATE,File,filelistfile)
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			rtn = CompressedFileCmd (nArgs, Arg);
+			goto Rtnrtn;
+			
         case 1501: //$OPENVEHICLEFILE(filename,Delay) 
         {
 			hMem = GSSiGlobAlloc (1226,GMEM_MOVEABLE,3*2048);

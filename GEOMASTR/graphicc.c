@@ -826,19 +826,26 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
     long	CompressedLength;  
 	HFILE	Fid=GSSiOpenFile (FileToAdd,0,OF_READ);
 	long	TotLen = GSSifilelength (Fid);
-	
-   	PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
+	BOOL	rtn = FALSE;
+
+	if (Fid == HFILE_ERROR)
+		goto Exit;
+   	if (hWndStatus)
+		PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
 	while ((lRec=BigRead (Fid,pRec,MaxLength)))
 	{
 	 	lRec = CompressBinaryRecord (pRec,pCompressedRec,lRec); 	    
     	BigWrite (FidTF,(HPSTR)&lRec,4,-1);
     	BigWrite (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
-    	PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
+    	if (hWndStatus)
+			PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
     }
     GSSiClose (Fid);
+	rtn = TRUE;
+Exit:
     GSSiGlobUlFree (&hCompressedRec); 
     GSSiGlobUlFree (&hRec);
-    return TRUE; 
+    return rtn; 
 }
 
 BOOL GetFileFromTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToGet,long LenToRead,long MaxLength)

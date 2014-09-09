@@ -2356,7 +2356,9 @@ BOOL SetTransparency (int tranValue);
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
 BOOL RunForAll (int nArgs,LPSTR *Args,LPSTR OutLoc);
-HANDLE GetDistinctValues (HWND hWnd,LPSTR value,int ln,HANDLE hDB,int nStatus);
+BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength);
+BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);
+HANDLE GetDistinctValues(HWND hWnd, LPSTR value, int ln, HANDLE hDB, int nStatus);
 BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPRECT pRect,LPSTR title,int textFade);
 LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, LPINT pLeaveCounter);
 

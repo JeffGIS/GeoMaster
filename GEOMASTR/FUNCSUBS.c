@@ -75,6 +75,54 @@ static	double gTileScale[MAXGZOOMS+1];
 
 #define MAXRAWLINES	1024
 
+BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
+{
+	BOOL rtn = FALSE;
+	HFILE FidTF, fidFiles;
+	char filePath[MAX_PATH + 2];
+
+	if (nArgs < 3)
+		goto Exit;
+	if (!stricmp(Arg[1], "CREATE"))
+	{
+		long	NextFileLoc = 0, loc=0, len;
+		long	TotLen;
+		long	MaxLength = 8L * (long)USHRT_MAX;
+		short	Version = 101;
+
+		fidFiles = GSSiOpenFile(Arg[3], 0, OF_READ);
+		if (fidFiles == HFILE_ERROR)
+			goto Exit;
+		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+		if (FidTF == HFILE_ERROR)
+		{
+			GSSiClose(fidFiles);
+			goto Exit;
+		}
+
+		BigWrite(FidTF, (HPSTR)&Version, 2, -1);
+		BigWrite(FidTF, (HPSTR)&MaxLength, 4, -1);
+		while (fgetstring(filePath, MAX_PATH, fidFiles))
+		{
+			len = _fstrlen(filePath) + 1;
+			BigWrite(FidTF, (HPSTR)&len, 4, -1);
+			BigWrite(FidTF, (HPSTR)filePath, len, -1);
+			AddFileToTransferFile(0, FidTF, filePath, MaxLength);
+			loc = -1;
+			BigWrite(FidTF, (HPSTR)&loc, 4, -1);
+		}
+		loc = -1;
+		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
+		loc = 32349;
+		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
+		GSSiClose(fidFiles);
+		GSSiClose(FidTF);
+		rtn = TRUE;
+	}
+Exit:
+	return rtn;
+}
+
 HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
 {
 	HANDLE hBT=0;
