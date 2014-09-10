@@ -2251,6 +2251,8 @@ GSSiExitProg (810);
 }
 	*lpExt = 0;
 	_fstrcat (ReorgName,".reo");
+	CloseAllRequestedFiles(TRUE);
+	KeepFilesOpen = FALSE;
 	ReorgfileFID = GSSiOpenFile (ReorgName,&OFStruct,OF_CREATE);
 	hReorgBuf = GSSiGlobAlloc ( 504,GMEM_FIXED,USHRT_MAX); 
 	lReorgBuf = 0; 
