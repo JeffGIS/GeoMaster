@@ -4243,6 +4243,15 @@ GotCloseFilehSQL:
 				pttoa(OutLoc, pixpt);
 				goto Rtnl;
 			}
+			if (!stricmp(Arg[1], "LATLON"))
+			{
+				DPOINT pt = atopt(Arg[2], &Err);
+				DPOINT llpt;
+				int ilev = atoi(Arg[3]);
+				PixelXYToLatLongd(pt.x, pt.y, ilev, &llpt.y, &llpt.x);
+				dpointtoa(OutLoc, &llpt);
+				goto Rtnl;
+			}
 			if (!stricmp(Arg[1], "SCALE"))
 			{
 				DPOINT pt = atopt(Arg[2], &Err);
