@@ -2251,7 +2251,7 @@ GSSiExitProg (810);
 }
 	*lpExt = 0;
 	_fstrcat (ReorgName,".reo");
-	CloseAllRequestedFiles(TRUE);
+	CloseAllRequestedFiles(FALSE);
 	KeepFilesOpen = FALSE;
 	ReorgfileFID = GSSiOpenFile (ReorgName,&OFStruct,OF_CREATE);
 	hReorgBuf = GSSiGlobAlloc ( 504,GMEM_FIXED,USHRT_MAX); 
@@ -2345,7 +2345,7 @@ GSSiExitProg (811);
 	GSSiGlobFree (&hReorgBuf); 
 	
 	CloseMap(FALSE);
-	CloseAllRequestedFiles(TRUE);
+	CloseAllRequestedFiles(FALSE);
 	_fstrcpy(OldName, PltFile);
 	ExpandText (OldName);
 	GSSiRemove (OldName);
