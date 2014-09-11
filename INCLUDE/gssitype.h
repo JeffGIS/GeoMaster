@@ -3218,8 +3218,8 @@ typedef struct {
                 long  TimeStamp;
                 HANDLE  hFldInfo;                       
                 LPGWFLDINFO pFldInfo;
-				MNMXCORD	FileBoundsx;
-				MNMXCORD	GridBoundsx;
+				MNMXCORD	FileBounds;
+				MNMXCORD	GridBounds;
 				int		GridInc;
 				double	GridXInc, GridYInc;
 				long	MinTime,

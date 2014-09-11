@@ -2188,7 +2188,7 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 	ExpandText (str);
 	CurrentDesc = atol (str);
 	if (!GetVisibility (CurrentDesc))
-		goto RtnFalse;;
+		goto RtnFalse;
 	if (*GMDWhere)
 	{
 		BOOL irc;
