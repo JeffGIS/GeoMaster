@@ -1,6 +1,7 @@
 configs\places.gmc /F [%USERLEV]=2; /WD J:\ADAPedRamps\PreSurvey
 configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD J:\ADAPedRamps\PreSurvey
 configs\jeff\basemap_good.gmc /F [%USERLEV]=2; /WD L:\geomas
+police\configs\test.gmc /F [%USERLEV]=2; /WD J:\Mpls
 police\configs\test.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\PedRampStatus.gmc /F /WD c:\ADAPedRamps\PreSurvey
 configs\PrelimSurvey.gmc /F /WD c:\ADAPedRamps\PreSurvey
@@ -136,6 +137,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 

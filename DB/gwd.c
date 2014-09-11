@@ -5242,7 +5242,8 @@ BOOL GWDFormKey (LPGWDHEADER lpGWDHead, int Index, BOOL Search,long length,int M
 				memmove (&DPoint.x,&lpGWDHead->GWDData[pFldInfo->Beg],8); 
 				pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->YField;
 				memmove (&DPoint.y,&lpGWDHead->GWDData[pFldInfo->Beg],8); 
-				pSIIndex2->Grid = GridFromPoint (lpGWDHead,&DPoint);
+				GMDUpdateMinMax(lpGWDHead, &DPoint);
+				pSIIndex2->Grid = GridFromPoint(lpGWDHead, &DPoint);
 				if (Search)
 					pSIIndex2->PrimeIndex = LONG_MIN;         
 				else
