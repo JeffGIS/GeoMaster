@@ -1360,7 +1360,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
     	goto Exit;
     SetTextColor (CurView->hDC,0);     
 	FillRectPoly (CurView->hDC,&CurView->ScreenRect,ConvertColor(CurView->BackGroundColor,-1));  
-	h = (((CurView->ScreenRect.bottom - CurView->ScreenRect.top) / 2)-2*DeviceToScreenFactor);
+	h = (((CurView->ScreenRect.bottom - CurView->ScreenRect.top)/2)-2*DeviceToScreenFactor);
 	w = (h+4*DeviceToScreenFactor);
 	if (From == 2)
 	{    
@@ -1368,7 +1368,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		
 		if (!DistUnits)
 			DistUnits = OutDistUnits;
-		h = min (16,0.9 * (CurView->ScreenRect.bottom - CurView->ScreenRect.top));
+		h = min (32,0.9 * (CurView->ScreenRect.bottom - CurView->ScreenRect.top));
 		Points[0] = RectMid (&CurView->ScreenRect); 
 		if (TotDist > 0)
 		{

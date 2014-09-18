@@ -1899,7 +1899,7 @@ BOOL GWDAddIndex (LPSTR Name,HANDLE hKeyFields,int IndexType,LPMNMXCORD pBounds)
 	case 3: //spatial index (month,code,grid)
 		if (*pFields++ != 5)
 			break;
-		lpGWDHead->GridBounds = *pBounds;
+		lpGWDHead->GridBounds = lpGWDHead->FileBounds = *pBounds;
 		lpGWDHead->SpatialIndex = lpGWDHead->NumIndex;
 		lpGWDHead->NumIndexFields[lpGWDHead->NumIndex] = 3;
 		lpGWDHead->GridInc = 128;
@@ -5242,8 +5242,10 @@ BOOL GWDFormKey (LPGWDHEADER lpGWDHead, int Index, BOOL Search,long length,int M
 				memmove (&DPoint.x,&lpGWDHead->GWDData[pFldInfo->Beg],8); 
 				pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->YField;
 				memmove (&DPoint.y,&lpGWDHead->GWDData[pFldInfo->Beg],8); 
-				GMDUpdateMinMax(lpGWDHead, &DPoint);
+				//GMDUpdateMinMax(lpGWDHead, &DPoint);
 				pSIIndex2->Grid = GridFromPoint(lpGWDHead, &DPoint);
+				if (pSIIndex2->Grid < 0)
+					return FALSE;
 				if (Search)
 					pSIIndex2->PrimeIndex = LONG_MIN;         
 				else
@@ -7469,8 +7471,8 @@ int GWDAddRecord (LPGWDHEADER lpGWDHead,long length,LPSHORT IndexArray)//returns
 					ToMonth = SysMonthFromSymTime (Time);
 					for (Month = FromMonth;Month <= ToMonth;Month++)
 					{
-						GWDFormKey(lpGWDHead,Index,FALSE,0,Month);
-						BT_PUT (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&Offset);
+						if (GWDFormKey(lpGWDHead,Index,FALSE,0,Month))
+							BT_PUT (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&Offset);
 					}
 				}
 				continue;
