@@ -75,6 +75,294 @@ static	double gTileScale[MAXGZOOMS+1];
 
 #define MAXRAWLINES	1024
 
+typedef struct {DPOINT pt; 
+				int nLines;
+				int streetRef[2];
+				float streetOffset[2];
+				int numStreets;
+}FIXNODE;
+typedef struct {
+				int refno;
+				int bpNode, epNode;
+				double trueDist, curDist, diffDist;
+}FIXLINE;
+
+void AddStreetRefToNode(int inode, int streetRef, float streetOffset, FIXNODE *nodes)
+{
+	if (streetRef && nodes[inode].numStreets < 2)
+	{
+		if (nodes[inode].numStreets)
+		{
+			if (streetRef != nodes[inode].streetRef[0])
+			{
+				nodes[inode].numStreets = 2;
+				nodes[inode].streetOffset[1] = streetOffset;
+				nodes[inode].streetRef[1] = streetRef;
+			}
+		}
+		else
+		{
+			nodes[inode].numStreets = 1;
+			nodes[inode].streetOffset[0] = streetOffset;
+			nodes[inode].streetRef[0] = streetRef;
+		}
+	}
+	return;
+}
+
+static BOOL GetStreetPoly(int streetRef, int *pnStreetPoints, LPDPOINT *pStreetPoints)
+{
+	static DPOINT street1[2] = { 160725.78, 49553.61, 160724.87, 49355.31 };
+	static DPOINT street2[2] = { 160585.26, 49355.73, 160724.87, 49355.31 };
+	static DPOINT street3[2] = { 160647.79, 49368.10, 160648.66, 49452.66 };
+	static DPOINT street4[2] = { 160725.78, 49553.61, 160600.48, 49553.97 };
+
+	if (streetRef == 10024)
+	{
+		*pnStreetPoints = 2;
+		*pStreetPoints = street1;
+		return TRUE;
+	}
+	if (streetRef == 7592)
+	{
+		*pnStreetPoints = 2;
+		*pStreetPoints = street2;
+		return TRUE;
+	}
+	if (streetRef == 11)
+	{
+		*pnStreetPoints = 2;
+		*pStreetPoints = street3;
+		return TRUE;
+	}
+	if (streetRef == 5067 && GetGlobalBVal2 ("[USEFRANK]",FALSE))
+	{
+		*pnStreetPoints = 2;
+		*pStreetPoints = street4;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void SetLineToTrueDist(int lineno, FIXLINE *lines, FIXNODE *nodes)
+{
+	double az = getazd(&nodes[lines[lineno].bpNode].pt, &nodes[lines[lineno].epNode].pt);
+	DPOINT midPt = MidPointD(nodes[lines[lineno].bpNode].pt,nodes[lines[lineno].epNode].pt);
+	double d = FTM * lines[lineno].trueDist / 2;
+	int nStreetPoints;
+	HPDPOINT pStreetPoints;
+	DPOINT IntPoint;
+	double OffDist, PolyDist;
+	int i;
+	
+	nodes[lines[lineno].bpNode].pt = dnewpt(midPt, az, -d);
+	nodes[lines[lineno].epNode].pt = dnewpt(midPt, az, d);
+	for (i = 0; i < 2; i++)
+	{
+		if (GetStreetPoly(nodes[lines[lineno].bpNode].streetRef[i], &nStreetPoints, &pStreetPoints))
+		{
+			if (GetPerpendicularOffsetToPoly(&nodes[lines[lineno].bpNode].pt, nStreetPoints, pStreetPoints, &IntPoint, &OffDist, &PolyDist, 0))
+			{
+				az = getazd(&IntPoint, &nodes[lines[lineno].bpNode].pt);
+				nodes[lines[lineno].bpNode].pt = dnewpt(IntPoint, az, nodes[lines[lineno].bpNode].streetOffset[i] * FTM);
+			}
+		}
+		if (GetStreetPoly(nodes[lines[lineno].epNode].streetRef[i], &nStreetPoints, &pStreetPoints))
+		{
+			if (GetPerpendicularOffsetToPoly(&nodes[lines[lineno].epNode].pt, nStreetPoints, pStreetPoints, &IntPoint, &OffDist, &PolyDist, 0))
+			{
+				az = getazd(&IntPoint, &nodes[lines[lineno].epNode].pt);
+				nodes[lines[lineno].epNode].pt = dnewpt(IntPoint, az, nodes[lines[lineno].epNode].streetOffset[i] * FTM);
+			}
+		}
+	}
+	return;
+}
+
+int ComputeDistDiff(int numLines, FIXLINE *lines, FIXNODE *nodes, double *totDiff)
+{
+	int i, iMax = 0;
+	double diff, maxDiff = -1, tDiff = 0;
+
+	for (i = 0; i < numLines; i++)
+	{
+		double d = ldistpp(&nodes[lines[i].bpNode].pt, &nodes[lines[i].epNode].pt) * MFT;
+		diff = fabs (d - lines[i].trueDist);
+		tDiff += diff;
+		if (diff > maxDiff)
+		{
+			maxDiff = diff;
+			iMax = i;
+		}
+	}
+	*totDiff = tDiff;
+	return iMax;
+}
+
+int addFixNode(double x, double y, int *numNodes, FIXNODE *nodes)
+{
+	int i, iNode = *numNodes;
+	DPOINT pt;
+
+	pt.x = x;
+	pt.y = y;
+	if (!*numNodes)
+	{
+		nodes[0].nLines = 1;
+		nodes[0].pt = pt;
+		(*numNodes) = 1;
+		return 0;
+	}
+	for (i = 0; i < *numNodes; i++)
+	{
+		if (ldistpp(&nodes[i].pt, &pt) < 0.0001)
+		{
+			nodes[i].nLines++;
+			return i;
+		}
+	}
+	nodes[iNode].nLines = 1;
+	nodes[iNode].pt = pt;
+	(*numNodes)++;
+	return iNode;
+}
+
+BOOL FixAreaToOutfile(LPSTR OutFile, LPMNMXCORD pBounds,int numLines, FIXLINE *lines, FIXNODE *nodes)
+{
+	HIGHLIGHTDATA	HighlightData;
+	short			ipos = BT_FIRST;
+	long			Refno, nPnts;
+	HANDLE			hPoints;
+	HPDPOINT3D		lpPoints;
+	DPOINT3D		Point;
+	double			LineLength, DistInc, AtDist;
+	HFILE			Fid;
+	char			str[256];
+	char			cref[32];
+	long			nNodePoints, i;
+	short	SymNum;
+	short	NumSyms = 0;
+	HANDLE	hSymDesc = 0;
+	int		nPoints = 0;
+	int		np;
+	BOOL	rtn;
+
+	SymNum = GetOrCreateSym(0, "PEN1", &NumSyms, &hSymDesc, FALSE, 0);
+	if (!SymNum)
+		return FALSE;
+	_fstrcpy(PltName, OutFile);
+	PltType = 2;
+	EditBounds = *pBounds;
+	if (!OpenMap(CurView->hWnd, 0))
+		return FALSE;
+	AddToSymList(SymNum, &NumSyms, &hSymDesc);
+	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, 2 * sizeof(DPOINT));
+	nPoints = 2;
+	for (i = 0; i < numLines; i++)
+	{
+		LPDPOINT points = GlobalLock(hPoints);
+
+		points[0] = nodes[lines[i].bpNode].pt;
+		points[1] = nodes[lines[i].epNode].pt;
+		GlobalUnlock(hPoints);
+		_fstrcpy(PltName, OutFile);
+		Refno = lines[i].refno;
+		itoa(Refno, cref, 10);
+		rtn = AddPolyToMap(1, &nPoints, &hPoints, 1, Refno, 0, -1, SymNum, 0, "REFNO", cref, -1, -1, -1, 0, 0, 0, 0, TRUE, 0);
+	}
+	GSSiGlobFree(&hPoints);
+	AddSymToMap(NumSyms, hSymDesc, 0, 0);
+	CloseMap(TRUE);
+	DestroySymList(&NumSyms, &hSymDesc);
+	return rtn;
+}
+
+int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker)
+{
+	BOOL rtn = 2;
+	int numLines = 0, maxDiffLine=-1, Tot;
+	typedef struct {
+		int ref;
+		double trueLength, currentLength, fromX, fromY, toX, toY;
+		int fromStreetRef, toStreetRef;
+		float fromStreetOffset, toStreetOffset;
+		int marker;
+	}LINEREC;
+	LINEREC *pLineRec;
+	FIXNODE *nodes;
+	FIXLINE *lines;
+	int numNodes = 0;
+	double totDiff = 999999, lastTotDiff;
+	HANDLE	hDB;
+	LPGWDHEADER lpGWDHead;
+	int pos = BT_FIRST, Offset, iNode, nloops=0;
+	MNMXCORD bounds;
+
+	hDB = OpenGWDatabase(inGMDFile, BT_READ);
+	if (!hDB)
+		return 0;
+	lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+	pLineRec = (LINEREC *)lpGWDHead->GWDData;
+	Tot = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
+	if (Tot > 0)
+	{
+		nodes = calloc(Tot * 2,sizeof(FIXNODE));
+		lines = calloc(Tot,sizeof(FIXLINE));
+		while (!BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&Offset))
+		{
+			pos = BT_NEXT;
+			FillGWDData(lpGWDHead, Offset);
+			if (pLineRec->currentLength > 0 && pLineRec->marker == marker)
+			{
+				lines[numLines].refno = pLineRec->ref;
+				lines[numLines].trueDist = pLineRec->trueLength;
+				lines[numLines].bpNode = addFixNode(pLineRec->fromX, pLineRec->fromY, &numNodes, nodes);
+				lines[numLines].epNode = addFixNode(pLineRec->toX, pLineRec->toY, &numNodes, nodes);
+				AddStreetRefToNode(lines[numLines].bpNode, pLineRec->fromStreetRef, pLineRec->fromStreetOffset, nodes);
+				AddStreetRefToNode(lines[numLines].epNode, pLineRec->toStreetRef, pLineRec->toStreetOffset, nodes);
+				numLines++;
+			}
+		}
+	}
+	GlobalUnlock(hDB);
+	CloseGWDatabase(hDB);
+	if (!numLines)
+		return 0;
+	for (iNode = 0; iNode < numNodes; iNode++)
+	{
+		if (nodes[iNode].nLines < 2)
+		{
+			rtn = -(iNode + 1);
+			goto Exit;
+		}
+	}
+	do
+	{
+		nloops++;
+		lastTotDiff = totDiff;
+		if (maxDiffLine >= 0)
+		{
+			SetLineToTrueDist(maxDiffLine, lines, nodes);
+		}
+		maxDiffLine = ComputeDistDiff(numLines, lines, nodes, &totDiff);
+	} while (totDiff > fixTo && nloops < 1000000);// && lastTotDiff > totDiff);
+	bounds = CurView->WBounds;
+	//if (totDiff <= fixTo)
+	{
+		rtn = 0;
+		if (CreateNewMap(outPltFile, &bounds, 0, 0, 0, 0, 0, 0, FALSE))
+		{
+			FixAreaToOutfile(outPltFile,&bounds, numLines, lines, nodes);
+			rtn = 1+totDiff;
+		}
+	}
+
+Exit:
+	free(nodes);
+	free(lines);
+	return rtn;
+}
+
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 {
 	BOOL rtn = FALSE;

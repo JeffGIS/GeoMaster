@@ -148,6 +148,8 @@ int SetConfig (int in)
 	short	ii;
 	int	n = abs (in);
 	
+	if (InDisplayProcessing)
+		ii = 1;
 	if (!n)
 		ii=1;
 	else if (n!=1)

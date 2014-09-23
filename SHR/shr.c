@@ -7174,7 +7174,21 @@ int ActuallyCloseFile (HFILE Fid)
 		else if (OpenFileFid[Fid] == HFILE_ERROR)
 			rtn = 0;
 		else if (OpenFileFid[Fid] != (HFILE)-2)
-			rtn = _close (OpenFileFid[Fid]); 
+		{
+			int i;
+			rtn = _close(OpenFileFid[Fid]);
+			//close any other handles on same file if close was requested
+			for (i = 0; i < MAXFILEHANDLES; i++)
+			{
+				if (i != Fid && OpenFileFid[i] > 0 && OpenFileCloseRequested[i] && !stricmp(OpenFileName[i], OpenFileName[Fid]))
+				{
+					rtn = _close(OpenFileFid[i]);
+					CloseJournal(i);
+					*OpenFileName[i] = 0;
+					LogOpenFilesClose(i);
+				}
+			}
+		}
 		else
 			rtn = 0;
 		if (rtn == HFILE_ERROR || TraceOn) 
@@ -8867,8 +8881,8 @@ Open:
 	    	mode2 = OF_CREATE;
         Fid = OpenFileGSSi (Name,pOFStruct,mode2,0);
     } 
-    //else if ((Fid = FileAlreadyOpen (Name,Mode,pOFStruct)) != HFILE_ERROR)
-    //	goto Exit;
+    else if ((Fid = FileAlreadyOpen (Name,Mode,pOFStruct)) != HFILE_ERROR)
+    	goto Exit;
     else if (Mode == OF_READ && ShareEnabled) 
     {
 	    if (DisplayFiles==4)

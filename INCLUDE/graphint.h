@@ -2361,6 +2361,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);
 HANDLE GetDistinctValues(HWND hWnd, LPSTR value, int ln, HANDLE hDB, int nStatus);
 BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPRECT pRect,LPSTR title,int textFade);
 LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, LPINT pLeaveCounter);
+int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker);
 
 HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect);
 void StopBackgroundMapServer(HWND hWnd);

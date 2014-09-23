@@ -108,6 +108,18 @@ HHOOK	PrevFIHook;
 static	int nhookcalls=0;
 static	UINT	inClientMain=0;
 
+void my_invalid_parameter_handler(
+	const wchar_t * expression,
+	const wchar_t * function,
+	const wchar_t * file,
+	unsigned int line,
+	uintptr_t pReserved
+	)
+{
+	MessageBox(0, "Invalid parameter", 0, MB_ICONEXCLAMATION);
+	_exit(23);
+}
+
 DWORD CALLBACK ForegroundIdleProc(
   int code,      // hook code
   DWORD wParam,  // not used
@@ -1132,6 +1144,10 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	BigRead(fid, prj, 1023);
 	GSSiClose(fid);
 	ConvertPRJtoProj4(prj, NULL);*/
+	_set_invalid_parameter_handler(
+		my_invalid_parameter_handler
+		);
+
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	numMonitors = GetNumMonitors();
 	typeChassis = ChassisType();
@@ -5843,7 +5859,5 @@ void usrerr(const char *fmt, ...)
 	MessageBox (0,fmt,0,0x00000030L);
 	return;
 }
-
-
 
 

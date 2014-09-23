@@ -1762,7 +1762,7 @@ RedrawTable:
 						{
 							PickList[0]=HighlightData.PD; 
 							SetPickGlobals (0);
-							ZoomToPickedItem (0,LocationOffset,TRUE,FALSE,FALSE);
+							ZoomToPickedItem (0,1.0,TRUE,FALSE,FALSE);
 						} 
 					}
 					return 0;

@@ -2051,6 +2051,11 @@ GSSiExitProg (627);
 	}
     lpGWDHead->Fid =  Fid; 
     SetGWDCurrentOffset (lpGWDHead,-1);
+	if (lpGWDHead->NumFields <= 0)
+	{
+		GSSiClose(Fid);
+		return 0;
+	}
     lpGWDHead->hFldInfo = GSSiGlobAlloc ( 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
     lpGWDHead->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHead->hFldInfo);   
     if (lpGWDHead->StoredAs32)

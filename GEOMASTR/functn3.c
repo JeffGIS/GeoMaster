@@ -4294,6 +4294,21 @@ GotCloseFilehSQL:
 			free(pcmd);
 			goto RtnTrue;
 		}
+		case 647: //$FIXMAP(gmdfile,pltfile)
+		{
+			LPSTR pcmd;
+			int marker;
+
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem);
+			if (nArgs < 4)
+				goto RtnFalse;
+			RVal = atof(Arg[3]);
+			marker = atoi(Arg[4]);
+			rtn = FixMapCmd(Arg[1],Arg[2],RVal,marker);
+			itoa(rtn, OutLoc, 10);
+			goto Rtnl;
+		}
+
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{				
 			hMem = GSSiGlobAlloc ( 877,GMEM_MOVEABLE,4096);
@@ -4484,6 +4499,8 @@ GotCloseFilehSQL:
 		
 			if (!_fstricmp (Arg[1],"CLEAR")) 
 			{
+				if (!CurrentConfig)
+					ii = 1;
 				ClearPolyOff(atob(Arg[2]));
 				goto RtnTrue;
 			}

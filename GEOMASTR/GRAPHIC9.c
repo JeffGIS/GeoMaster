@@ -977,6 +977,8 @@ GSSiExitProg (1035);
 		return FALSE;
 }
 	Parent = CurView->Parent;
+	if (Parent > *pNumViewports)
+		return FALSE;
 	while (Parent)
 	{
 		if (!pViewports[Parent-1]->Active)
