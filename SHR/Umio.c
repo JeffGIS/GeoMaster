@@ -70,6 +70,7 @@ static	int		ReplayOutputLen,ReplayInputLen;
 static	int		MinReplayPos,CurReplayPos;
 static	char	LogConnect[64];
 static	char	Last32Commands[32][256];
+static  char	Last32CommandsTime[32][128];
 static	int		NumLogCommands=0;
 static	int		NumConnections=0;
 static	HWND	hWndVehTimer;
@@ -149,8 +150,11 @@ BOOL PaintServerInfo (HDC hDC,LPRECT pRect)
 
 	for (i=NumLogCommands-1;i>=0;i--)
 	{
-		ExtTextOut (hDC,x,y,0,0,Last32Commands[i],strlen(Last32Commands[i]),0);
-		GetTextExtentPoint32(hDC,Last32Commands[i],strlen(Last32Commands[i]),&txsize);
+		char str[512];
+
+		sprintf(str, "%s: %s", Last32CommandsTime[i], Last32Commands[i]);
+		ExtTextOut (hDC,x,y,0,0,str,strlen(str),0);
+		GetTextExtentPoint32(hDC, str, strlen(str), &txsize);
 		y += txsize.cy + 2;
 	}
 
@@ -166,10 +170,12 @@ void LogServerActivity (LPSTR Mess)
 	char	ServerLogFile[MAX_PATH];
 	HDC		hDCScreen;
 	RECT	rect;
+	char	TimeAndDate[128] = "$CAL([%SYS_CLOCK])";
 
 	if (!InServerMode)
 		return;
 
+	ExpandText(TimeAndDate);
 	if (First)
 	{
 		memset (Last32Commands,0,sizeof(Last32Commands));
@@ -183,13 +189,11 @@ void LogServerActivity (LPSTR Mess)
 			memmove (Last32Commands[0],Last32Commands[1],31*256);
 			NumLogCommands--;
 		}
+		strcpy(Last32CommandsTime[NumLogCommands], TimeAndDate);
 		strncpy0 (Last32Commands[NumLogCommands++],Mess,255);
 	}
 	if (GetGlobalCVal ("[%SERVERACTIVITYLOGFILE]",ServerLogFile,0))
 	{
-		char	TimeAndDate[128]="$CAL([%SYS_CLOCK])";
-	
-		ExpandText (TimeAndDate);
 		AppendFile2 (ServerLogFile,TimeAndDate);
 		AppendFile2 (ServerLogFile,Mess);
 	}

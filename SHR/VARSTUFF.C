@@ -6334,8 +6334,17 @@ GSSiExitProg (558);
 			
 			if (!(BegBrack = _fstrchr(InLoc,'(')))
 				goto OutChar;
-			if (!(EndBrack = MatchLev((LPSTR)(BegBrack+1),')')))
-				goto OutChar;  
+			if (!(EndBrack = MatchLev((LPSTR)(BegBrack + 1), ')')))
+			{
+				if (GetFunctionID(InLoc, BegBrack))
+				{
+					char mess[128];
+					*(BegBrack+1) = 0;
+					sprintf(mess, "Unmatched parentheses at %s", InLoc);
+					MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+				}
+				goto OutChar;
+			}
 			if (!(FunID = GetFunctionID(InLoc,BegBrack)))
 				goto OutChar; 
 			if (expandOnly && FunID != expandOnly)
