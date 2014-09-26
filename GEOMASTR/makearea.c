@@ -822,21 +822,23 @@ NextRec:
 						PickList[0] = HighlightData.PD;
 					    SetConfig (PickList[0].ConfigID);
 					    SetViewport (PickList[0].ViewID);
-						GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly);
-						pPoint = (HPDPOINT)GlobalLock (hPoly);
-				        LastPoint = DPointToFilePointL (pPoint++,hTranToLPoint); 
-				        nPnts--;
-				        while (nPnts--)
-				        {
-							hpLineInt->Point1 = LastPoint;
-							hpLineInt->Point2 = DPointToFilePointL (pPoint,hTranToLPoint);
-							hpLineInt->Refno = Refno;
-							hpLineInt->Mnx = min (hpLineInt->Point1.x,hpLineInt->Point2.x );
-							hpLineInt++->Mxx = max (hpLineInt->Point1.x,hpLineInt->Point2.x );
-							NumLines++;  
-							LastPoint = DPointToFilePointL (pPoint++,hTranToLPoint);
-			            }  
-		                GSSiGlobUlFree (&hPoly);
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+						{
+							pPoint = (HPDPOINT)GlobalLock(hPoly);
+							LastPoint = DPointToFilePointL(pPoint++, hTranToLPoint);
+							nPnts--;
+							while (nPnts--)
+							{
+								hpLineInt->Point1 = LastPoint;
+								hpLineInt->Point2 = DPointToFilePointL(pPoint, hTranToLPoint);
+								hpLineInt->Refno = Refno;
+								hpLineInt->Mnx = min(hpLineInt->Point1.x, hpLineInt->Point2.x);
+								hpLineInt++->Mxx = max(hpLineInt->Point1.x, hpLineInt->Point2.x);
+								NumLines++;
+								LastPoint = DPointToFilePointL(pPoint++, hTranToLPoint);
+							}
+							GSSiGlobUlFree(&hPoly);
+						}
 			         }
 				}	
 		        for (il = 0, hpLineInt1=hpLineIntStart; il<NumLines-1; il++,hpLineInt1++) 

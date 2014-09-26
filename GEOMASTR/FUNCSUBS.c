@@ -86,6 +86,7 @@ typedef struct {
 				int bpNode, epNode;
 				double trueDist, curDist, diffDist;
 }FIXLINE;
+static BOOL useRStreet, useUStreet, useBStreet;
 
 void AddStreetRefToNode(int inode, int streetRef, float streetOffset, FIXNODE *nodes)
 {
@@ -117,13 +118,13 @@ static BOOL GetStreetPoly(int streetRef, int *pnStreetPoints, LPDPOINT *pStreetP
 	static DPOINT street3[2] = { 160647.79, 49368.10, 160648.66, 49452.66 };
 	static DPOINT street4[2] = { 160725.78, 49553.61, 160600.48, 49553.97 };
 
-	if (streetRef == 10024)
+	if (streetRef == 10024 && useRStreet)
 	{
 		*pnStreetPoints = 2;
 		*pStreetPoints = street1;
 		return TRUE;
 	}
-	if (streetRef == 7592)
+	if (streetRef == 7592 && useBStreet)
 	{
 		*pnStreetPoints = 2;
 		*pStreetPoints = street2;
@@ -135,7 +136,7 @@ static BOOL GetStreetPoly(int streetRef, int *pnStreetPoints, LPDPOINT *pStreetP
 		*pStreetPoints = street3;
 		return TRUE;
 	}
-	if (streetRef == 5067 && GetGlobalBVal2 ("[USEFRANK]",FALSE))
+	if (streetRef == 5067 && useUStreet)
 	{
 		*pnStreetPoints = 2;
 		*pStreetPoints = street4;
@@ -277,6 +278,24 @@ BOOL FixAreaToOutfile(LPSTR OutFile, LPMNMXCORD pBounds,int numLines, FIXLINE *l
 	return rtn;
 }
 
+double fixMapFit(double fixTo, int maxLoops, int numLines, FIXLINE *lines, FIXNODE *nodes)
+{
+	double totDiff=99999,lastTotDiff;
+	int maxDiffLine=-1;
+	int nloops = 0;
+	do
+	{
+		nloops++;
+		lastTotDiff = totDiff;
+		if (maxDiffLine >= 0)
+		{
+			SetLineToTrueDist(maxDiffLine, lines, nodes);
+		}
+		maxDiffLine = ComputeDistDiff(numLines, lines, nodes, &totDiff);
+	} while (totDiff > fixTo && nloops < maxLoops);// && lastTotDiff > totDiff);
+	return totDiff;
+}
+
 int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker)
 {
 	BOOL rtn = 2;
@@ -289,10 +308,11 @@ int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker)
 		int marker;
 	}LINEREC;
 	LINEREC *pLineRec;
-	FIXNODE *nodes;
+	FIXNODE *nodes, *savenodes;
 	FIXLINE *lines;
 	int numNodes = 0;
-	double totDiff = 999999, lastTotDiff;
+	int maxLoops = 10000;
+	double fit;
 	HANDLE	hDB;
 	LPGWDHEADER lpGWDHead;
 	int pos = BT_FIRST, Offset, iNode, nloops=0;
@@ -324,6 +344,7 @@ int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker)
 			}
 		}
 	}
+	savenodes = calloc(numNodes, sizeof(FIXNODE));
 	GlobalUnlock(hDB);
 	CloseGWDatabase(hDB);
 	if (!numLines)
@@ -336,16 +357,11 @@ int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker)
 			goto Exit;
 		}
 	}
-	do
-	{
-		nloops++;
-		lastTotDiff = totDiff;
-		if (maxDiffLine >= 0)
-		{
-			SetLineToTrueDist(maxDiffLine, lines, nodes);
-		}
-		maxDiffLine = ComputeDistDiff(numLines, lines, nodes, &totDiff);
-	} while (totDiff > fixTo && nloops < 1000000);// && lastTotDiff > totDiff);
+	useBStreet = useUStreet = FALSE;
+	useRStreet = TRUE;
+	fit = fixMapFit(0.1, 10000, numLines, lines, nodes);
+	useBStreet = FALSE;
+	fit = fixMapFit(0.1, 10000, numLines, lines, nodes);
 	bounds = CurView->WBounds;
 	//if (totDiff <= fixTo)
 	{
@@ -353,13 +369,14 @@ int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker)
 		if (CreateNewMap(outPltFile, &bounds, 0, 0, 0, 0, 0, 0, FALSE))
 		{
 			FixAreaToOutfile(outPltFile,&bounds, numLines, lines, nodes);
-			rtn = 1+totDiff;
+			rtn = 1+fit;
 		}
 	}
 
 Exit:
 	free(nodes);
 	free(lines);
+	free(savenodes);
 	return rtn;
 }
 
