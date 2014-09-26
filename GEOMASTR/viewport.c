@@ -987,15 +987,23 @@ void EmbedMenusInConfig (HFILE Fid, LPSTR TempName)
  	BigWrite (Fid,(HPSTR)&Version,2,-1);
  	BigWrite (Fid,(HPSTR)&Version,2,-1);
  	FidTemp = GSSiOpenFile (TempName,0,OF_READ);
- 	Length = GSSillseek (FidTemp,0,2);
- 	GSSillseek (FidTemp,0,0);
-	BigWrite (Fid,(HPSTR)&Length,4,-1);
-	hTemp = GSSiGlobAlloc (1543,GMEM_MOVEABLE,Length);
-	pTemp = GlobalLock (hTemp);
-	BigRead (FidTemp,pTemp,Length);
-	GSSiClose (FidTemp);
-	BigWrite (Fid,pTemp,Length,-1);
-	GSSiGlobUlFree (&hTemp); 
+	if (FidTemp != HFILE_ERROR)
+	{
+		Length = GSSillseek(FidTemp, 0, 2);
+		if (Length)
+		{
+			GSSillseek(FidTemp, 0, 0);
+			BigWrite(Fid, (HPSTR)&Length, 4, -1);
+			hTemp = GSSiGlobAlloc(1543, GMEM_MOVEABLE, Length);
+			pTemp = GlobalLock(hTemp);
+			BigRead(FidTemp, pTemp, Length);
+			BigWrite(Fid, pTemp, Length, -1);
+			GSSiGlobUlFree(&hTemp);
+		}
+		GSSiClose(FidTemp);
+	}
+	else
+		ii=1;
 {
 #if ENABLETRACE
 GSSiExitProg (601);

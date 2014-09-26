@@ -172,7 +172,8 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 	 		SaveCfgImage = GetGlobalBVal2 ("[%CFGSAVEIMAGE]",FALSE);
      		rtn=1; 
 		 }
-		 if (rtn)
+		SetConfig(1);
+		if (rtn)
      		SaveConfig (CfgName,TRUE);
 	 } 
 	 GMDestroyDIB32 (hWindowDib32);

@@ -4575,6 +4575,7 @@ GSSiExitProg (1350);
         	GSSiGetTempFileName (0,"gm",0,pFile); 
          	SaveZoom = TRUE;
          	SaveGlobals = TRUE;
+			SetConfig(1);
             rtn = SaveConfig (pFile,TRUE); 
             GlobalUnlock (hSavedConfig[ConfigLevel]); 
             if (!ConfigLevel)

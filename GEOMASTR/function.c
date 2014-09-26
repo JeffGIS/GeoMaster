@@ -1593,6 +1593,7 @@ SetVis:
              	SaveZoom = TRUE;
              	SaveGlobals = TRUE; 
              	SaveCfgImage = TRUE;
+				SetConfig(1);
 	            rtn = SaveConfig (Arg[2],TRUE);
 	            SaveZoom = SaveSaveZoom;
 	            SaveGlobals = SaveSaveGlobals; 

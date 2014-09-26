@@ -3487,6 +3487,7 @@ GotCloseFilehSQL:
 					SaveZoom = TRUE;
 					SaveGlobals = TRUE;
 					sprintf (str2,"%s\\%s\\map%5.5ld.gmc",MSDir,Arg2,NewNum);
+					SetConfig(1);
 					rtn = SaveConfig (str2,TRUE);
 					SaveZoom = SaveSaveZoom;
 					SaveGlobals = SaveSaveGlobals;
