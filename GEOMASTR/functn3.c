@@ -4309,6 +4309,15 @@ GotCloseFilehSQL:
 			itoa(rtn, OutLoc, 10);
 			goto Rtnl;
 		}
+		case 648: //$SQLITE(gmdfile,pltfile)
+		{
+			nArgs = GetFunArgs(Args, Arg, 10, &hMem);
+			if (nArgs < 2)
+				goto RtnFalse;
+			rtn = SQLiteCmd(nArgs,Arg);
+			itoa(rtn, OutLoc, 10);
+			goto Rtnl;
+		}
 
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{				

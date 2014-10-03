@@ -84,7 +84,7 @@
     <EmbedManifest>true</EmbedManifest>
     <TargetName>GeoMaster34g</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -303,6 +303,8 @@
     <ClCompile Include="..\FileGDBAPI\FGDBStub.c" />
     <ClCompile Include="..\solar_calculator\Version2\aa.c" />
     <ClCompile Include="..\Proj-4\src\aasincos.c" />
+    <ClCompile Include="..\SQLite3\shell.c" />
+    <ClCompile Include="..\SQLite3\sqlite3.c" />
     <ClCompile Include="address1.c" />
     <ClCompile Include="address2.c" />
     <ClCompile Include="address3.c" />
@@ -673,6 +675,7 @@
     <ClCompile Include="..\sunang\ipw\src\sunrise.c" />
     <ClCompile Include="..\GCTP2\T2PROJ~1.C" />
     <ClCompile Include="OGRCoordConversion.c" />
+    <ClCompile Include="SQLiteCmd.c" />
     <ClCompile Include="tabbed.c" />
     <ClCompile Include="..\solar_calculator\Version2\tdb.c" />
     <ClCompile Include="..\libbci-1.1.0\tdspl.c" />
@@ -749,6 +752,8 @@
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
+    <ClInclude Include="..\SQLite3\sqlite3.h" />
+    <ClInclude Include="..\SQLite3\sqlite3ext.h" />
     <ClInclude Include="GMVersion.h" />
     <ClInclude Include="GoogleDef.h" />
     <ClInclude Include="..\INCLUDE\GRAPHICS.H" />
