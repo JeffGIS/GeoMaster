@@ -7247,7 +7247,10 @@ extern	BOOL	ddbug;
 	if (ddbug)
 		ddbug=FALSE;
 	if (!hCursorIn)
-		hCursorIn = LoadCursor(0, IDC_ARROW); 
+	{
+		hCursorIn = LoadCursor(0, IDC_ARROW);
+		hCurrentCursor = 0;
+	}
 	if (hCursorIn &&  hCursorIn != hCurrentCursor)
 	{
 		if (!BackgroundTask)

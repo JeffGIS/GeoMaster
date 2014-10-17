@@ -2068,7 +2068,7 @@ if (Message == WM_SETCURSOR)
 			 if (!hCursor)
 				goto ReturnDefault;
 		 }
-         if (GetCursor () != hCursor)  
+         //if (GetCursor () != hCursor)  
          	GSSiSetCursor (hCursor);
  		 goto Return0;
 
@@ -3686,7 +3686,10 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
        			 HaltMapDisplay(FALSE,FALSE);
 				 ClearFullWindowBitmap(0);
 				 if (NumViewportsArray[0])
-   	         		SetConfig(0);
+				 {
+					 SetConfig(0);
+					 RedisplayViewports(TRUE);
+				 }
 	           	 RedisplayViewports(FALSE);
 				 break; 
 				 

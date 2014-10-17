@@ -63,7 +63,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34h</TargetName>
-    <IncludePath>$(IncludePath);..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>

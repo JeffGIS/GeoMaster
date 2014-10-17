@@ -3207,12 +3207,15 @@ BOOL ThemeEdit (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			}
 		} 
 		if (nRc)
-{
+		{
+			RedisplayViewports(FALSE);
+			{
 #if ENABLETRACE
-GSSiExitProg (1252);
+				GSSiExitProg (1252);
 #endif
-			return GF_INCREASE_SUCCESS_COUNT; 
-}
+				return GF_INCREASE_SUCCESS_COUNT;
+			}
+		}
    		break;
 
     default:
