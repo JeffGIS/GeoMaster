@@ -438,7 +438,10 @@ void SetDebug (BOOL state)
 {
 	doDebug = state;
 	if (doDebug)
+	{
+		CloseBufferedMacros();
 		DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
+	}
 	//CreateDialog (hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
 	return;
 }
