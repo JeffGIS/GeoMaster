@@ -1904,11 +1904,11 @@ GSSiExitProg (527);
 void SetGlobalValue (LPSTR InName, LPSTR InValue) 
 {
 	if (*InName)
-		SetGlobalValue4 (InName,InValue,FALSE);
+		SetGlobalValue4 (InName,InValue,FALSE,0,0);
 	return;
 }
 
-void SetGlobalValue4 (LPSTR InName, LPSTR InValue,BOOL Raw)
+void SetGlobalValue4(LPSTR InName, LPSTR InValue, BOOL Raw, LPSHORT pBrkPt, int bpOffset)
 #if ENABLETRACE
 {GSSiEnterProg (528);
 #endif
@@ -6037,7 +6037,7 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 	return rtn;
 }
 
-LPSTR ExpandTextDB (LPSTR InText,LPBYTE pBrkPt,int bpOffset)
+LPSTR ExpandTextDB (LPSTR InText,LPSHORT pBrkPt,int bpOffset)
 #if ENABLETRACE
 {GSSiEnterProg (558);
 #endif
@@ -6148,7 +6148,7 @@ GSSiExitProg (558);
 						ExpandTextDB(EqText,pBrkPt,(int)(EqLoc-startLoc));
 					else
 					{
-						SetGlobalValue DB(VName, EqText);
+						SetGlobalValue4(VName, EqText,FALSE, pBrkPt, (int)(EqLoc - startLoc));
 						if (!ContinueProcessing && DisplayFailure)
 						{
 							if (DisplayFailure == 2)
@@ -6182,8 +6182,9 @@ GSSiExitProg (558);
 		{
 			long	lWhile, lLoop, nLoops=-1;  
 			LPSTR	pWhile, pWhile2, pLoop;
-			LPBYTE  pLoopBP=0;
-			HANDLE	hLoop, hLoopBP=0, hWhile, hStr;
+			LPSHORT  pLoopBP=0;
+			HANDLE	hLoop, hLoopBP=0, hWhile, hStr, hWhileBP=0;
+			LPSHORT pWhileBP = 0;
 				
 			InLoc += 6;
 			pEnd = MatchLev (InLoc,')');
@@ -6213,7 +6214,14 @@ GSSiExitProg (558);
 			pWhile2 = GlobalLock (hWhile);
 			_fstrncpy (pWhile2,pWhile,(size_t)lWhile); 
 			GlobalUnlock (hWhile); 
-			hStr = GSSiGlobAlloc ( 212,GMEM_MOVEABLE,USHRT_MAX);
+			if (pBrkPt)
+			{
+				hWhileBP = GSSiGlobAlloc(211, GHND, sizeof(short)*(lWhile + 1));
+				pWhileBP = GlobalLock(hWhileBP);
+				memmove(pWhileBP, &pBrkPt[(int)(pWhile-InText)], lWhile*sizeof(short));
+				GlobalUnlock(hWhileBP);
+			}
+			hStr = GSSiGlobAlloc(212, GMEM_MOVEABLE, USHRT_MAX);
 			pStr = GlobalLock (hStr); 
 			nLoops = 0;
 	NextWhileLoop: 
@@ -6225,7 +6233,11 @@ GSSiExitProg (558);
 				pWhile = GlobalLock (hWhile);
 				_fstrcpy (pStr,pWhile);
 				GlobalUnlock (hWhile);
-				Rtn = LogicP (pStr,&rc);
+				if (hWhileBP)
+					pWhileBP = GlobalLock(hWhileBP);
+				Rtn = LogicP BP (pStr,&rc,pWhileBP);
+				if (hWhileBP)
+					GlobalUnlock(hWhileBP);
 //				ExpandText (pStr);
 //				if (!_fstrcspn (pStr," 1TtYy"))     
 				if (Rtn && !rc)
@@ -6247,6 +6259,7 @@ GSSiExitProg (558);
 			GSSiGlobFree (&hLoop);
 			GSSiGlobFree(&hLoopBP);
 			GSSiGlobFree (&hWhile);
+			GSSiGlobFree(&hWhileBP);
 	WhileError:
 			if (!hMem)
 			{
