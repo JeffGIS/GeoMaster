@@ -64,7 +64,7 @@ HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LP
     INTERNET_PORT nServerPort = INTERNET_DEFAULT_FTP_PORT;
     DWORD dwService = INTERNET_SERVICE_FTP;
     DWORD dwFlags = INTERNET_FLAG_PASSIVE;
-    DWORD_PTR dwContext = NULL;
+    DWORD_PTR dwContext = 0;
 	HINTERNET ic = NULL;
 
 	hInternet = InternetOpen ("GeoMaster",INTERNET_OPEN_TYPE_DIRECT,NULL,NULL,0);
@@ -175,8 +175,8 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			LPSTR pBuffer, leafName;
 
 			if (!(leafName = strrchr (lpszRemoteFile,'/')))
-				leafName=lpszRemoteFile;
-			Fid = GSSiOpenFile (lpszNewFile,0,OF_CREATE);
+				leafName=(LPSTR)lpszRemoteFile;
+			Fid = GSSiOpenFile ((LPSTR)lpszNewFile,0,OF_CREATE);
 			if (Fid == HFILE_ERROR)
 			{
 				if (errorVarName && *errorVarName)
@@ -203,7 +203,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 	}
 	else
 	{
-		makedirectories(lpszNewFile, FALSE, FALSE);
+		makedirectories((LPSTR)lpszNewFile, FALSE, FALSE);
 		rtn = FtpGetFile(hConnect, lpszRemoteFile, lpszNewFile, !replace,
 			FILE_ATTRIBUTE_NORMAL, FTP_TRANSFER_TYPE_BINARY, 0);
 	}
@@ -229,7 +229,7 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 		HANDLE handle = FtpOpenFile(hConnect, lpszRemoteFile, GENERIC_WRITE, FTP_TRANSFER_TYPE_BINARY, 0);
 		if (handle)
 		{
-			__int64 size = GSSiLength(lpszLocalfile);
+			__int64 size = GSSiLength((LPSTR)lpszLocalfile);
 			DWORD Tot = (DWORD)size;
 			DWORD Done = 0;
 			LPSTR Title, Mess;
@@ -241,8 +241,8 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 			LPSTR pBuffer, leafName;
 
 			if (!(leafName = strrchr(lpszRemoteFile, '/')))
-				leafName = lpszRemoteFile;
-			Fid = GSSiOpenFile(lpszLocalfile, 0, OF_READ);
+				leafName = (LPSTR)lpszRemoteFile;
+			Fid = GSSiOpenFile((LPSTR)lpszLocalfile, 0, OF_READ);
 			if (Fid == HFILE_ERROR)
 			{
 				if (errorVarName && *errorVarName)

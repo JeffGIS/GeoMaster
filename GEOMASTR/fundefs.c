@@ -209,6 +209,7 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "GOOGLE",6)) return 645;
 			if (!_fstrnicmp(str, "GMEDIT",6)) return 646;
 			if (!_fstrnicmp(str, "FIXMAP",6)) return 647;
+			if (!_fstrnicmp(str, "SQLITE",6)) return 648;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)

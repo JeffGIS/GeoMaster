@@ -1823,7 +1823,7 @@ BOOL GetFieldList (HWND hWnd,HANDLE hDB,LPRECT rect, LPSTR Title,LPSTR Outvar)
     nRc = DialogBox(hInst, (LPSTR)Dialog, hWnd, lpfnFIELDSMsgProc);
     FreeProcInstance(lpfnFIELDSMsgProc);  
 	if (nRc)
-		SetGlobalValue4 (Outvar,GetFieldOutput,TRUE);  
+		SetGlobalValue4 (Outvar,GetFieldOutput,TRUE,0,0);  
  	pFieldsTitle = 0;
     return nRc;
 }

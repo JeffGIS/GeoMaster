@@ -3488,11 +3488,11 @@ LPSTR AddCommas (LPSTR InBuff)
 {GSSiEnterProg (225);
 #endif
 {
-	char	Buff[32],VCBuff[32];
+	char	Buff[64],VCBuff[64];
     LPSTR   p1, p2, bp, pDot;
     short	n;
 	
-	if (_fstrlen (InBuff) > 32)
+	if (_fstrlen (InBuff) > 63)
 {
 #if ENABLETRACE
 GSSiExitProg (225);
@@ -3501,7 +3501,7 @@ GSSiExitProg (225);
 }
     _fstrcpy (Buff,InBuff);
     bp = Buff; 
-    p2=&VCBuff[31]; 
+    p2=&VCBuff[63]; 
     pDot = _fstrchr (Buff,'.');
     if (pDot)
     {
@@ -7247,7 +7247,10 @@ extern	BOOL	ddbug;
 	if (ddbug)
 		ddbug=FALSE;
 	if (!hCursorIn)
-		hCursorIn = LoadCursor(0, IDC_ARROW); 
+	{
+		hCursorIn = LoadCursor(0, IDC_ARROW);
+		hCurrentCursor = 0;
+	}
 	if (hCursorIn &&  hCursorIn != hCurrentCursor)
 	{
 		if (!BackgroundTask)

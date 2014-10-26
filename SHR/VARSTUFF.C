@@ -1904,11 +1904,11 @@ GSSiExitProg (527);
 void SetGlobalValue (LPSTR InName, LPSTR InValue) 
 {
 	if (*InName)
-		SetGlobalValue4 (InName,InValue,FALSE);
+		SetGlobalValue4 (InName,InValue,FALSE,0,0);
 	return;
 }
 
-void SetGlobalValue4 (LPSTR InName, LPSTR InValue,BOOL Raw)
+void SetGlobalValue4(LPSTR InName, LPSTR InValue, BOOL Raw, LPSHORT pBrkPt, int bpOffset)
 #if ENABLETRACE
 {GSSiEnterProg (528);
 #endif
@@ -6037,16 +6037,17 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 	return rtn;
 }
 
-LPSTR ExpandText (LPSTR InText)
+LPSTR ExpandTextDB (LPSTR InText,LPSHORT pBrkPt,int bpOffset,int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (558);
 #endif
 {
 	HANDLE	hMem=0, hMemTrace;
 	LPSTR	InLoc, OutLoc, NewText, BegBrack, EndBrack, loc, EqLoc, pLchr;
-	LPSTR	pEnd, pStr;
+	LPSTR	pEnd, pStr, startLoc = InText;
 	long	l,ii;
-	BOOL	FoundLit=FALSE, SaveIE=InExpand, ExpandTrace=FALSE;;
+	BOOL	FoundLit=FALSE, SaveIE=InExpand, ExpandTrace=FALSE;
+	int		lLoopBP = 0;
 	
 	InExpand = TRUE;
 	if (TraceOn)
@@ -6081,7 +6082,10 @@ LPSTR ExpandText (LPSTR InText)
 		NewText = GlobalLock(hMem); 
 		*lc = 0;
 		_fstrcpy (NewText,(InLoc+1));
-		lc = ExpandText (NewText);
+		if (pBrkPt)
+			lc = ExpandTextDB(NewText, pBrkPt,bpOffset + (int)((InLoc + 1) - startLoc),bpLen);
+		else
+			lc = ExpandText(NewText);
 		_fstrcpy (InText,NewText);
 		GSSiGlobUlFree (&hMem);
 		if (ExpandTrace)
@@ -6141,17 +6145,25 @@ GSSiExitProg (558);
 				hMemEq = GSSiGlobAlloc ( 209,GMEM_MOVEABLE,USHRT_MAX);
 				EqText = GlobalLock(hMemEq);
 				l = (SemiCLoc - EqLoc);
-				if (l>0) _fmemmove(EqText,++EqLoc,(size_t) l);  
-				if (LinkToVar)
-					ExpandText (EqText);
-				else  
+				if (l > 0)
 				{
-					SetGlobalValue (VName,EqText); 
-					if (!ContinueProcessing && DisplayFailure)
-					{   
-						if (DisplayFailure == 2)
-							DisplayFailure = 0;
-						MessageBox (hWndMain,EqLoc,"Statement failed",MB_OK|MB_APPLMODAL); 
+					_fmemmove(EqText, ++EqLoc, (size_t)l);
+					if (LinkToVar)
+					{
+						if (pBrkPt)
+							ExpandTextDB(EqText, pBrkPt, bpOffset + (int)(EqLoc - startLoc), bpLen);
+						else
+							ExpandText(EqText);
+					}
+					else
+					{
+						SetGlobalValue4(VName, EqText, FALSE, pBrkPt, bpOffset + (int)(EqLoc - startLoc));
+						if (!ContinueProcessing && DisplayFailure)
+						{
+							if (DisplayFailure == 2)
+								DisplayFailure = 0;
+							MessageBox(hWndMain, EqLoc, "Statement failed", MB_OK | MB_APPLMODAL);
+						}
 					}
 				}
 				GSSiGlobUlFree (&hMemEq);
@@ -6161,13 +6173,19 @@ GSSiExitProg (558);
 			}
 			else
 			{
+				LPSTR il;
+
 				l = EndBrack - InLoc - 1; 
 				InLoc++;
 				_fmemmove(OutLoc,InLoc,(size_t) l);
+				il = InLoc;
 				InLoc = ++EndBrack;
 				loc = OutLoc + l;
 				*loc = '\0';
-				loc = ExpandText (OutLoc);
+				if (pBrkPt)
+					loc = ExpandTextDB(OutLoc, pBrkPt, bpOffset + (int)(il - startLoc), bpLen);
+				else
+					loc = ExpandText(OutLoc);
 			    l = GetVal(OutLoc,OutLoc);
 			    OutLoc+=l;
 			}
@@ -6176,7 +6194,10 @@ GSSiExitProg (558);
 		{
 			long	lWhile, lLoop, nLoops=-1;  
 			LPSTR	pWhile, pWhile2, pLoop;
-			HANDLE	hLoop, hWhile, hStr;
+			LPSHORT  pLoopBP=0;
+			int		lWhileBP = 0;
+			HANDLE	hLoop, hLoopBP=0, hWhile, hStr, hWhileBP=0;
+			LPSHORT pWhileBP = 0;
 				
 			InLoc += 6;
 			pEnd = MatchLev (InLoc,')');
@@ -6192,16 +6213,41 @@ GSSiExitProg (558);
 			if (!pEnd)
 				goto WhileError; 
 			lLoop = pEnd++ - InLoc;
-			hLoop = GSSiGlobAlloc ( 210,GHND,lLoop+1);
-			pLoop = GlobalLock (hLoop);
-			_fstrncpy (pLoop,InLoc,(size_t)lLoop); 
+			hLoop = GSSiGlobAlloc(210, GHND, lLoop + 1);
+			pLoop = GlobalLock(hLoop);
+			if (pBrkPt)
+			{
+				int loopBPOffset = bpOffset + (int)(InLoc - startLoc);
+
+				lLoopBP = bpLen - loopBPOffset;
+				if (lLoopBP > 0)
+				{
+					hLoopBP = GSSiGlobAlloc(210, GHND, (lLoopBP + 1)*sizeof(short));
+					pLoopBP = GlobalLock(hLoopBP);
+					memmove(pLoopBP, &pBrkPt[loopBPOffset], lLoopBP * sizeof(short));
+					GlobalUnlock(hLoopBP);
+				}
+			}
+			_fstrncpy(pLoop, InLoc, lLoop);
 			GlobalUnlock (hLoop);
 			InLoc = pEnd;
 			hWhile = GSSiGlobAlloc ( 211,GHND,lWhile+1);
 			pWhile2 = GlobalLock (hWhile);
 			_fstrncpy (pWhile2,pWhile,(size_t)lWhile); 
 			GlobalUnlock (hWhile); 
-			hStr = GSSiGlobAlloc ( 212,GMEM_MOVEABLE,USHRT_MAX);
+			if (pBrkPt)
+			{
+				int whileOffset = bpOffset + (int)(pWhile - startLoc);
+				lWhileBP = bpLen - whileOffset;
+				if (lWhileBP > 0)
+				{
+					hWhileBP = GSSiGlobAlloc(211, GHND, sizeof(short)*(lWhileBP + 1));
+					pWhileBP = GlobalLock(hWhileBP);
+					memmove(pWhileBP, &pBrkPt[whileOffset], lWhileBP*sizeof(short));
+					GlobalUnlock(hWhileBP);
+				}
+			}
+			hStr = GSSiGlobAlloc(212, GMEM_MOVEABLE, USHRT_MAX);
 			pStr = GlobalLock (hStr); 
 			nLoops = 0;
 	NextWhileLoop: 
@@ -6213,7 +6259,14 @@ GSSiExitProg (558);
 				pWhile = GlobalLock (hWhile);
 				_fstrcpy (pStr,pWhile);
 				GlobalUnlock (hWhile);
-				Rtn = LogicP (pStr,&rc);
+				if (hWhileBP)
+				{
+					pWhileBP = GlobalLock(hWhileBP);
+					Rtn = LogicPBP(pStr, &rc, pWhileBP,lWhileBP);
+					GlobalUnlock(hWhileBP);
+				}
+				else
+					Rtn = LogicP(pStr, &rc);
 //				ExpandText (pStr);
 //				if (!_fstrcspn (pStr," 1TtYy"))     
 				if (Rtn && !rc)
@@ -6221,7 +6274,14 @@ GSSiExitProg (558);
 					pLoop = GlobalLock (hLoop);
 					_fstrcpy (pStr,pLoop);
 					GlobalUnlock (hLoop);
-					ExpandText (pStr);
+					if (hLoopBP)
+					{
+						pLoopBP = GlobalLock(hLoopBP);
+						ExpandTextDB(pStr, pLoopBP, 0, lLoopBP);
+						GlobalUnlock(hLoopBP);
+					}
+					else
+						ExpandText(pStr);
 					if (ContinueProcessing) 
 					{
 						nLoops++;
@@ -6231,7 +6291,9 @@ GSSiExitProg (558);
 			}
 			GSSiGlobUlFree (&hStr);
 			GSSiGlobFree (&hLoop);
+			GSSiGlobFree(&hLoopBP);
 			GSSiGlobFree (&hWhile);
+			GSSiGlobFree(&hWhileBP);
 	WhileError:
 			if (!hMem)
 			{
@@ -6248,7 +6310,9 @@ GSSiExitProg (558);
 		{
 			long	lIF, lTHEN;  
 			LPSTR	pEndIF, pStartIF=InLoc;
-			LPSTR	pIF, pIF2, pTHEN;
+			LPSTR	pIF, pIF2, pTHEN, pELSE;
+			int		lIFBP = 0, lIFOffset;
+			HANDLE	hIFBP = 0;
 			HANDLE	hIF;
 			BOOL	IfRtn, IfOK = FALSE;
 			BOOL	rc;
@@ -6278,8 +6342,15 @@ GSSiExitProg (558);
 			hIF = GSSiGlobAlloc ( 214,GMEM_MOVEABLE,USHRT_MAX);
 			pIF2 = GlobalLock (hIF);
 			strncpy0 (pIF2,pIF,(size_t)lIF); 
-			IfRtn = LogicP (pIF2,&rc); 
-			GSSiGlobUlFree (&hIF);
+			lIFOffset = bpOffset + (int)(pIF - startLoc);
+			lIFBP = lIFOffset - bpLen;
+			if (pBrkPt && lIFBP > 0)
+			{
+				IfRtn = LogicPBP(pIF2, &rc, &pBrkPt[lIFOffset],lIFBP);
+			}
+			else
+				IfRtn = LogicP(pIF2, &rc);
+			GSSiGlobUlFree(&hIF);
 			if (rc)
 				goto IfError; 
 			if (!hMem)
@@ -6291,14 +6362,21 @@ GSSiExitProg (558);
 				OutLoc = NewText + l;
 			}  
 			if (IfRtn)
-			{   
+			{ 
+				int lTHENBP, thenBPOffset;
+
 				if (*pEndIF == ';')
 					InLoc = pEndIF + 1;
 				else
 					InLoc = pEndIF;
 				_fstrncpy (OutLoc,pTHEN,(size_t)lTHEN);
 				OutLoc[lTHEN]=0;
-				ExpandText (OutLoc); 
+				thenBPOffset = bpOffset + (int)(pTHEN - startLoc);
+				lTHENBP = bpLen - thenBPOffset;
+				if (lTHENBP > 0)
+					ExpandTextDB(OutLoc, pBrkPt, thenBPOffset, lTHENBP);
+				else
+					ExpandText(OutLoc);
 				OutLoc = _fstrchr (OutLoc,0);
 			}
 			else
@@ -6307,12 +6385,24 @@ GSSiExitProg (558);
 				if (!_fstrncmp (InLoc,"ELSE",4))
 				{
 					InLoc += 4;
+					pELSE = InLoc;
 					l = pEndIF - InLoc;
 					if (l)
 					{
-						_fstrncpy (OutLoc,InLoc,(size_t)l);
+						int elseOffset;
+						int lELSEBP = 0;
+
+						_fstrncpy (OutLoc,pELSE,(size_t)l);
 						OutLoc[l]=0;
-						ExpandText (OutLoc); 
+						if (pBrkPt)
+						{
+							elseOffset = bpOffset + (int)(pELSE - startLoc);
+							lELSEBP = bpLen - elseOffset;
+						}
+						if (lELSEBP > 0)
+							ExpandTextDB(OutLoc, pBrkPt, elseOffset, lELSEBP);
+						else
+							ExpandText(OutLoc);
 						OutLoc = _fstrchr (OutLoc,0);
 					}
 				}	
@@ -6461,6 +6551,13 @@ GSSiExitProg (558);
 #if ENABLETRACE
 }
 #endif
+}
+
+LPSTR ExpandText(LPSTR InText)
+{
+	LPSTR rtn = ExpandTextDB(InText, 0, 0, 0);
+
+	return rtn;
 }
 
 double GetGlobalDVal (LPSTR Global)

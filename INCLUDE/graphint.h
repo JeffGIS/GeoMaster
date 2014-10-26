@@ -30,6 +30,8 @@
 
 //#include "client.h"    
 //#include "minilzo.h"
+#define BP_BEGINLINE 1
+#define BP_BEGINCMD	 3
 
 #define	NULLOFF	65535
 
@@ -2358,6 +2360,7 @@ BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
 BOOL RunForAll (int nArgs,LPSTR *Args,LPSTR OutLoc);
 BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength);
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);
+int SQLiteCmd(int nArgs, LPSTR *ARG);
 HANDLE GetDistinctValues(HWND hWnd, LPSTR value, int ln, HANDLE hDB, int nStatus);
 BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPRECT pRect,LPSTR title,int textFade);
 LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, LPINT pLeaveCounter);

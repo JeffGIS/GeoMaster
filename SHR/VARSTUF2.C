@@ -692,6 +692,9 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	ULONG	Oldest; 
 	LPSTR	Args[MAX_MACRO_ARGS];
 	int		macroID;
+	HANDLE	hBreakPoints = 0;
+	LPSHORT pBreakPoints = 0;
+	int		lm=0;
    
     InGRFCmd = FALSE; 
     macroID = AddToMacroStack (1,CurrentMacro,Name,phArgs,NumArgs);
@@ -770,19 +773,34 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    		rtn = FALSE;
 	    		goto Exit; 
 	    	}
-			if (NumBufferedMacros == MAX_BUFFERED_MACROS) 
+			lm = GSSifilelength(Fid);
+			if (NumBufferedMacros == MAX_BUFFERED_MACROS)
 			{
 				i = OldestID;
-				hMacro = hBufferedMacros[i];   
+				GSSiGlobFree (&hBufferedMacros[i]);
+				hMacro = GSSiGlobAlloc(245, GMEM_MOVEABLE, lm + 1);
+				hBufferedMacros[i] = hMacro;
 			}
 			else 
 			{
-				i = NumBufferedMacros++; 
-				hMacro = GSSiGlobAlloc ( 245,GMEM_MOVEABLE,USHRT_MAX); 
-				hBufferedMacros[i] = hMacro;
+				hMacro = GSSiGlobAlloc ( 245,GMEM_MOVEABLE,lm+1); 
+				if (!GetDebug())
+				{
+					i = NumBufferedMacros++;
+					hBufferedMacros[i] = hMacro;
+				}
+				else
+				{
+					DeleteMacro = TRUE;
+					hBreakPoints = GSSiGlobAlloc(2451, GHND, sizeof(short)*(lm + 1));
+					pBreakPoints = GlobalLock(hBreakPoints);
+				}
 			} 
-			_fstrcpy (BufferedMacroNames[i],str);
-	    	LastMacroUse[i] = CurrentMacroTime++;
+			if (!GetDebug())
+			{
+				_fstrcpy(BufferedMacroNames[i], str);
+				LastMacroUse[i] = CurrentMacroTime++;
+			}
 	    	pMacro = GlobalLock (hMacro);
     		*pMacro = 0;
 	    	while (fgetstring (str,4090,Fid))
@@ -790,6 +808,8 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    		{   
 	    			Truncate (str);
 	    			pStr = FirstNonBlank(str);
+					if (pBreakPoints)
+						pBreakPoints[lMacro] = pBreakPoints[lMacro] | BP_BEGINLINE;
 	    			lMacro += _fstrlen (pStr);   
 	    			if (lMacro > USHRT_MAX)
 	    			{
@@ -838,8 +858,10 @@ ProcessMacro:
     			hMacArgs = *phArgs;
     		else
     			hMacArgs = 0;
-
-	    	ExpandText (pCmd);
+			if (pBreakPoints)
+				ExpandTextDB(pCmd, pBreakPoints, 0, lm);
+			else
+				ExpandText(pCmd);
     		hMacArgs = SaveMacArgs;
 		    SetGlobalValueLong ("%NUMARGS",NumArgs);
 	    	if (!ContinueProcessing)
@@ -862,6 +884,7 @@ Exit:
 	GSSiGlobUlFree (&hTemp);
    	GSSiGlobUlFree (&hCmd); 
     GSSiGlobUlFree (&hSTR); 
+	GSSiGlobUlFree(&hBreakPoints);
     if (DeleteMacro)
     	GSSiGlobFree (&hMacro);  
     //CloseMacroFiles (ThisMacro);   
