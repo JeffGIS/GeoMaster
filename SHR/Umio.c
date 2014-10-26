@@ -186,7 +186,8 @@ void LogServerActivity (LPSTR Mess)
 	{
 		if (NumLogCommands == 32)
 		{
-			memmove (Last32Commands[0],Last32Commands[1],31*256);
+			memmove(Last32Commands[0], Last32Commands[1], 31 * 256);
+			memmove(Last32CommandsTime[0], Last32CommandsTime[1], 31 * 128);
 			NumLogCommands--;
 		}
 		strcpy(Last32CommandsTime[NumLogCommands], TimeAndDate);
