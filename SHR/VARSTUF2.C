@@ -808,6 +808,8 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    		{   
 	    			Truncate (str);
 	    			pStr = FirstNonBlank(str);
+					if (pBreakPoints)
+						pBreakPoints[lMacro] = pBreakPoints[lMacro] | BP_BEGINLINE;
 	    			lMacro += _fstrlen (pStr);   
 	    			if (lMacro > USHRT_MAX)
 	    			{

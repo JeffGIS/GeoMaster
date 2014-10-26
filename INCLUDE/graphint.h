@@ -30,6 +30,8 @@
 
 //#include "client.h"    
 //#include "minilzo.h"
+#define BP_BEGINLINE 1
+#define BP_BEGINCMD	 3
 
 #define	NULLOFF	65535
 

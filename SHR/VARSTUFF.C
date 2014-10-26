@@ -6083,7 +6083,7 @@ LPSTR ExpandTextDB (LPSTR InText,LPSHORT pBrkPt,int bpOffset,int bpLen)
 		*lc = 0;
 		_fstrcpy (NewText,(InLoc+1));
 		if (pBrkPt)
-			lc = ExpandTextDB(NewText, pBrkPt, (int)((InLoc + 1) - startLoc),bpLen);
+			lc = ExpandTextDB(NewText, pBrkPt,bpOffset + (int)((InLoc + 1) - startLoc),bpLen);
 		else
 			lc = ExpandText(NewText);
 		_fstrcpy (InText,NewText);
@@ -6151,13 +6151,13 @@ GSSiExitProg (558);
 					if (LinkToVar)
 					{
 						if (pBrkPt)
-							ExpandTextDB(EqText, pBrkPt, (int)(EqLoc - startLoc), bpLen);
+							ExpandTextDB(EqText, pBrkPt, bpOffset + (int)(EqLoc - startLoc), bpLen);
 						else
 							ExpandText(EqText);
 					}
 					else
 					{
-						SetGlobalValue4(VName, EqText,FALSE, pBrkPt, (int)(EqLoc - startLoc));
+						SetGlobalValue4(VName, EqText, FALSE, pBrkPt, bpOffset + (int)(EqLoc - startLoc));
 						if (!ContinueProcessing && DisplayFailure)
 						{
 							if (DisplayFailure == 2)
@@ -6183,7 +6183,7 @@ GSSiExitProg (558);
 				loc = OutLoc + l;
 				*loc = '\0';
 				if (pBrkPt)
-					loc = ExpandTextDB(OutLoc, pBrkPt, (int)(il - startLoc), bpLen);
+					loc = ExpandTextDB(OutLoc, pBrkPt, bpOffset + (int)(il - startLoc), bpLen);
 				else
 					loc = ExpandText(OutLoc);
 			    l = GetVal(OutLoc,OutLoc);
@@ -6217,7 +6217,7 @@ GSSiExitProg (558);
 			pLoop = GlobalLock(hLoop);
 			if (pBrkPt)
 			{
-				int loopBPOffset = (int)(InLoc - startLoc);
+				int loopBPOffset = bpOffset + (int)(InLoc - startLoc);
 
 				lLoopBP = bpLen - loopBPOffset;
 				if (lLoopBP > 0)
@@ -6237,7 +6237,7 @@ GSSiExitProg (558);
 			GlobalUnlock (hWhile); 
 			if (pBrkPt)
 			{
-				int whileOffset = (int)(pWhile - startLoc);
+				int whileOffset = bpOffset + (int)(pWhile - startLoc);
 				lWhileBP = bpLen - whileOffset;
 				if (lWhileBP > 0)
 				{
@@ -6342,7 +6342,7 @@ GSSiExitProg (558);
 			hIF = GSSiGlobAlloc ( 214,GMEM_MOVEABLE,USHRT_MAX);
 			pIF2 = GlobalLock (hIF);
 			strncpy0 (pIF2,pIF,(size_t)lIF); 
-			lIFOffset = (int)(pIF - startLoc);
+			lIFOffset = bpOffset + (int)(pIF - startLoc);
 			lIFBP = lIFOffset - bpLen;
 			if (pBrkPt && lIFBP > 0)
 			{
@@ -6371,7 +6371,7 @@ GSSiExitProg (558);
 					InLoc = pEndIF;
 				_fstrncpy (OutLoc,pTHEN,(size_t)lTHEN);
 				OutLoc[lTHEN]=0;
-				thenBPOffset = (int)(pTHEN - startLoc);
+				thenBPOffset = bpOffset + (int)(pTHEN - startLoc);
 				lTHENBP = bpLen - thenBPOffset;
 				if (lTHENBP > 0)
 					ExpandTextDB(OutLoc, pBrkPt, thenBPOffset, lTHENBP);
@@ -6396,7 +6396,7 @@ GSSiExitProg (558);
 						OutLoc[l]=0;
 						if (pBrkPt)
 						{
-							elseOffset = pELSE - startLoc;
+							elseOffset = bpOffset + (int)(pELSE - startLoc);
 							lELSEBP = bpLen - elseOffset;
 						}
 						if (lELSEBP > 0)
