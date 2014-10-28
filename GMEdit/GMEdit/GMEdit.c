@@ -609,63 +609,68 @@ top:
 
 int InsertCharAtLoc (HWND hWnd,char key,int insertLoc,int *pinsertLoc2,HANDLE hFile)
 {
-	LPSTR pFile=GlobalLock (hFile);
-	int lFile = strlen (pFile);
-	int idiff;
+	if (!hFile)
+		return 0;
+	else
+	{
+		LPSTR pFile = GlobalLock(hFile);
+		int lFile = strlen(pFile);
+		int idiff;
 
-	if (insertLoc < 0)
-		return insertLoc;
-	if (*pinsertLoc2 < 0)
-		*pinsertLoc2 = insertLoc;
-	if (insertLoc > *pinsertLoc2)
-	{
-		int i = insertLoc;
-		insertLoc = *pinsertLoc2;
-		*pinsertLoc2 = i;
-	}
-	idiff = *pinsertLoc2 - insertLoc;
-	if (idiff)
-	{
-		memmove (&pFile[insertLoc],&pFile[*pinsertLoc2],lFile-idiff-insertLoc+1);
-		lFile -= idiff;
-	}
-	if (key == VK_BACK)
-	{
-		if (lFile && insertLoc > 0)
+		if (insertLoc < 0)
+			return insertLoc;
+		if (*pinsertLoc2 < 0)
+			*pinsertLoc2 = insertLoc;
+		if (insertLoc > *pinsertLoc2)
 		{
-			if (pFile[insertLoc-1] == '\n')
-			{
-				if (insertLoc > 1 && pFile[insertLoc-2] == '\r')
-				{
-					memmove (&pFile[insertLoc-1],&pFile[insertLoc],lFile-insertLoc+1);
-					insertLoc--;
-				}
-			}
-			memmove (&pFile[insertLoc-1],&pFile[insertLoc],lFile-insertLoc+1);
-			insertLoc--;
+			int i = insertLoc;
+			insertLoc = *pinsertLoc2;
+			*pinsertLoc2 = i;
 		}
-	}
-	else if (key == '\x18') //delete
-	{
-		if (insertLoc < lFile && pFile[insertLoc] == '\n')
+		idiff = *pinsertLoc2 - insertLoc;
+		if (idiff)
 		{
 			memmove(&pFile[insertLoc], &pFile[*pinsertLoc2], lFile - idiff - insertLoc + 1);
 			lFile -= idiff;
 		}
-	}
-	else
-	{
-		if (lFile > insertLoc)
-			memmove (&pFile[insertLoc+1],&pFile[insertLoc],lFile-insertLoc+1);
+		if (key == VK_BACK)
+		{
+			if (lFile && insertLoc > 0)
+			{
+				if (pFile[insertLoc - 1] == '\n')
+				{
+					if (insertLoc > 1 && pFile[insertLoc - 2] == '\r')
+					{
+						memmove(&pFile[insertLoc - 1], &pFile[insertLoc], lFile - insertLoc + 1);
+						insertLoc--;
+					}
+				}
+				memmove(&pFile[insertLoc - 1], &pFile[insertLoc], lFile - insertLoc + 1);
+				insertLoc--;
+			}
+		}
+		else if (key == '\x18') //delete
+		{
+			if (insertLoc < lFile && pFile[insertLoc] == '\n')
+			{
+				memmove(&pFile[insertLoc], &pFile[*pinsertLoc2], lFile - idiff - insertLoc + 1);
+				lFile -= idiff;
+			}
+		}
 		else
-			pFile[insertLoc+1] = 0;
-		pFile[insertLoc++] = key;
+		{
+			if (lFile > insertLoc)
+				memmove(&pFile[insertLoc + 1], &pFile[insertLoc], lFile - insertLoc + 1);
+			else
+				pFile[insertLoc + 1] = 0;
+			pFile[insertLoc++] = key;
+		}
+		GlobalUnlock(hFile);
+		*pinsertLoc2 = insertLoc;
+		changesMade = TRUE;
+		EnableMenuItem(GetMenu(hWnd), IDM_FILE_SAVE, MF_ENABLED);
+		return insertLoc;
 	}
-	GlobalUnlock (hFile);
-	*pinsertLoc2 = insertLoc;
-	changesMade = TRUE;
-	EnableMenuItem(GetMenu(hWnd), IDM_FILE_SAVE, MF_ENABLED);
-	return insertLoc;
 }
 
 int GetInsertPointFromLoc (HWND hWnd,HANDLE hFile,HFONT hFont,LPPOINT pcursorLoc,int insertLoc,int inc)
