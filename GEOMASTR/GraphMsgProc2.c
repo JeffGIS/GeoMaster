@@ -1204,6 +1204,7 @@ Redisplay:
 			    	 	 }
 			    	 	 else
 			    	 	 	pViewports[Choice]->Active = TRUE; 
+						 TurnOffAutoVis(TRUE);
 			    	 	 goto Redisplay;
                     }
 		       }

@@ -4,6 +4,7 @@
 #define MAX_MACRO_STACK 64
 static int nFunLevs=0, ii;
 static BOOL doDebug=FALSE;
+static int	breakAt = BA_FUNCTION;
 static char BreakCondition[256]={0};
 static char DisplayValue[256]={0};
 static char macroStack[MAX_MACRO_STACK][MAX_PATH];
@@ -251,6 +252,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 
 			hWndAddEdit = hWndDlg; //does IsDialog processing
 			firstPaint = TRUE;
+			SetGlobalValueBool("%IGNORESYSMSG", TRUE);
 			numMonitors = GetNumMonitors();
 			EnableWindow(GetDlgItem(hWndDlg, IDB_MOVETOMON2), numMonitors > 1);
 			//DBSubclassControl(hWndDlg, DebugSubclassProc);
@@ -414,7 +416,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 							hDBWnd = 0;
 							//break;
 						}
-						GMEditSetFile (str,0);
+						GMEditSetFile (str,0,0);
 						GetWindowRect (GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
 						hDBWnd = CreateDebugFileDisplayWindow (hWndDlg,&rect);
 						PostMessage (hWndDlg,WM_MOVE,0,0);
@@ -449,7 +451,19 @@ BOOL GetDebug (void)
 {
 	return doDebug;
 }
-void AtBreakPoint (LPSTR Args)
+void breakAtPos(int pos, LPSHORT pBrkPt, int bpOffset, int bpLen, int from)
+{
+	if (pos + bpOffset < bpLen)
+	{
+		if (pBrkPt[pos + bpOffset] || (from == BA_FUNCTION && breakAt == BA_FUNCTION))
+		{
+			AtBreakPoint("",1+pos + bpOffset);
+		}
+	}
+
+}
+
+void AtBreakPoint (LPSTR Args,int bploc)
 {
 	int rtn, maxmacro, maxi, i;
 	BOOL err, rc;
@@ -481,7 +495,7 @@ void AtBreakPoint (LPSTR Args)
 		}
 	}
 
-	GMEditSetFile (macroStack[maxi],Args);
+	GMEditSetFile (macroStack[maxi],Args,bploc);
 	rtn = DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
 	return;
 }

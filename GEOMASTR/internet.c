@@ -296,7 +296,7 @@ BOOL FTPCreateDirectory(HANDLE hConnect,LPCTSTR lpszRemoteDir,LPSTR errorVarName
 		SetInternetErrorVar (errorVarName);
 	return rtn;
 }
-BOOL FTPGetDirectory(HANDLE hConnect,LPCTSTR lpszRemoteDir,LPSTR errorVarName)
+BOOL FTPGetDirectory(HANDLE hConnect,LPSTR lpszRemoteDir,LPSTR errorVarName)
 {
 	BOOL rtn=FALSE;
 	DWORD lnDir=MAX_PATH;

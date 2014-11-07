@@ -1904,11 +1904,11 @@ GSSiExitProg (527);
 void SetGlobalValue (LPSTR InName, LPSTR InValue) 
 {
 	if (*InName)
-		SetGlobalValue4 (InName,InValue,FALSE,0,0);
+		SetGlobalValue4 (InName,InValue,FALSE,0,0,0);
 	return;
 }
 
-void SetGlobalValue4(LPSTR InName, LPSTR InValue, BOOL Raw, LPSHORT pBrkPt, int bpOffset)
+void SetGlobalValue4(LPSTR InName, LPSTR InValue, BOOL Raw, LPSHORT pBrkPt, int bpOffset,int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (528);
 #endif
@@ -1944,7 +1944,10 @@ GSSiExitProg (528);
 				Value++;
 			}
 		}
-		ExpandText (Value);
+		if (pBrkPt)
+			ExpandTextDB(Value, pBrkPt, bpOffset, bpLen);
+		else
+			ExpandText(Value);
 	}
 	FoundLit = FoundLiteral;
 	if (*InName == '.')	                  
@@ -6036,7 +6039,6 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 
 	return rtn;
 }
-
 LPSTR ExpandTextDB (LPSTR InText,LPSHORT pBrkPt,int bpOffset,int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (558);
@@ -6073,6 +6075,7 @@ LPSTR ExpandTextDB (LPSTR InText,LPSHORT pBrkPt,int bpOffset,int bpLen)
 		}
 	}
 	InLoc = InText;   
+	if (pBrkPt) breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen,BA_EXPANDTEXT);
 	if (*InLoc == '{')
 	{   
 		LPSTR	lc = LastChr (InLoc);
@@ -6157,7 +6160,7 @@ GSSiExitProg (558);
 					}
 					else
 					{
-						SetGlobalValue4(VName, EqText, FALSE, pBrkPt, bpOffset + (int)(EqLoc - startLoc));
+						SetGlobalValue4(VName, EqText, FALSE, pBrkPt, bpOffset + (int)(EqLoc - startLoc),bpLen);
 						if (!ContinueProcessing && DisplayFailure)
 						{
 							if (DisplayFailure == 2)
@@ -6437,6 +6440,9 @@ GSSiExitProg (558);
 			}
 			if (!(FunID = GetFunctionID(InLoc,BegBrack)))
 				goto OutChar; 
+			if (pBrkPt)
+				breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen,BA_FUNCTION);
+
 			if (expandOnly && FunID != expandOnly)
 				goto OutChar;
 			if (AllVarEqQuestionMark == 2)
@@ -6467,13 +6473,13 @@ GSSiExitProg (558);
 				else
 				{
 					if (FunID > 799 && FunID != 904)
-			    		l = GetFunctionValue3(FunID,OutLoc,OutLoc); 
+						l = GetFunctionValue3(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack-startLoc)+bpOffset, bpLen);
 			    	else if (FunID > 499)
-			    		l = GetFunctionValue2(FunID,OutLoc,OutLoc); 
+						l = GetFunctionValue2(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);
 			    	else if (FunID > 299)
-			    		l = GetFunctionValue1(FunID,OutLoc,OutLoc); 
+						l = GetFunctionValue1(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);
 			    	else
-			    		l = GetFunctionValue(FunID,OutLoc,OutLoc); 
+						l = GetFunctionValue(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);
 			    }
 				OutFunction (FunID,OutLoc);
 		    }
