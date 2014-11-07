@@ -709,7 +709,7 @@ GSSiExitProg (436);
  if ((lpStart = _fstrstr(CmdLine," /SERVER ")))
  {
  	MemMap=TRUE;  
-	NoMenu = TRUE;
+	NoMenu = FALSE;// TRUE;
  	InServerMode = TRUE;
    	if (BufferedScreen)
 	{
