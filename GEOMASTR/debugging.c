@@ -7,9 +7,9 @@ static BOOL doDebug=FALSE;
 static char BreakCondition[256]={0};
 static char DisplayValue[256]={0};
 static char macroStack[MAX_MACRO_STACK][MAX_PATH];
-static UINT macroUse[MAX_MACRO_STACK];
+static int macroUse[MAX_MACRO_STACK];
 static int lnMacroStack=0;
-static UINT nextMacroUse = 1;
+static int nextMacroUse = 1;
 static char currentMacro[MAX_PATH];
 static RECT currentRect = { 0 };
 
@@ -541,7 +541,7 @@ void RemoveFromMacroStack (int macroID)
 	if (macroID < 0)
 		lnMacroStack = 0;
 	else
-		macroUse[lnMacroStack] = -abs(macroUse[lnMacroStack]);
+		macroUse[macroID] = -abs(macroUse[macroID]);
 	return;
 }
 

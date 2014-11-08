@@ -12,7 +12,7 @@ configs\Illinois.gmc /F /WD "I:\VeryLongFolderNameFor Testing If GeoMaster Works
 configs\Cleveland.gmc /F /WD "I:\VeryLongFolderNameFor Testing If GeoMaster WorksWIthVeryLong-names\Long-SubfolderNameToSeeIF-This makes any difference\CountyData"
 configs\Cleveland.gmc /F /WD c:\countydata
 configs\jeff\centerline_load_problem.gmc /F [%USERLEV]=2; /WD c:\geomas
-configs\basic1.gmc /F [%USERLEV]=2; /WD c:\geomas
+configs\SpecialAssessments\SPECIALASSESSMENTREPORT.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\geomas
 configs\basic1.gmc /F [%USERLEV]=2; /WD c:\geomas /SERVER 192.168.13.100 22335
 configs\DatedOrthoStartup.gmc /F [%USERLEV]=2; /WD c:\geomas
 basic1.gmc /F /WD c:\spm3
@@ -21,6 +21,7 @@ configs\orthoserver.gmc /F [%USERLEV]=2; /WD c:\geomas /MAPSERVER 0 'c:\temp\tes
 configs\testdatedorthos.gmc /F [%USERLEV]=2; /WD c:\geomas
 configs\MGVNEW.gmc /F [%USERLEV]=2; /WD f:\gm2000
 configs\basic1.gmc /F [%USERLEV]=2; /WD f:\gm2000
+configs\test.gmc /F [%USERLEV]=2; /WD c:\geomas
 configs\test.gmc /F [%USERLEV]=2; /WD c:\geomas
 configs\basemap.gmc /F [%USERLEV]=2; /WD C:\geomas
 configs\basemap.gmc /F [%USERLEV]=2; /WD L:\geomas
@@ -137,6 +138,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 
