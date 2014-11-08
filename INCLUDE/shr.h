@@ -115,6 +115,9 @@ typedef TRN FAR *LPTRN;
 #define  GOOD_SOUND 1
 #define  BAD_SOUND  2  
 
+#define BA_EXPANDTEXT	1
+#define BA_FUNCTION		2
+
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {
 	BYTE cBytes;
@@ -263,7 +266,7 @@ void CreateFidSmall (void);
 void CloseFidSmall (void);
 BOOL GMEdit (HWND hWnd,LPSTR file);
 void GMEditReturn(void);
-void GMEditSetFile(LPSTR file, LPSTR bpid);
+void GMEditSetFile(LPSTR file, LPSTR bpid,int bploc);
 void GMEditGetFile(LPSTR file);
 BOOL EditTextFile(HWND hWnd, LPSTR Name);
 void CloseVars (void);
@@ -305,7 +308,7 @@ BOOL GetVarSaveStatus (LPSTR Name);
 void SetUDIValue (LPSTR Name, LPSTR Value);
 void SetUDIValueLen (LPSTR Name, LPSTR Value, short len);
 void SetGlobalValue (LPSTR Name, LPSTR Value); 
-void SetGlobalValue4 (LPSTR InName, LPSTR InValue,BOOL Raw,LPSHORT pBrkPt,int bpOffset);
+void SetGlobalValue4 (LPSTR InName, LPSTR InValue,BOOL Raw,LPSHORT pBrkPt,int bpOffset,int bplen);
 void SetGlobalValue2 (HANDLE handle, LPSTR Value, short Index);
 void SetGlobalValue3 (LPSTR Name, LPSTR Value, short Index, BOOL FoundLit);
 void SetGlobalValueLen (LPSTR Name, LPSTR Value, short len);
@@ -800,10 +803,10 @@ BOOL SamePoint (POINT p1, POINT p2);
 BOOL SameLPoint (LPOINT p1, LPOINT p2);
 BOOL SameDPoint (LPDPOINT p1, LPDPOINT p2);
 int	GetFunctionID (LPSTR str, LPSTR ParenLoc);
-int	GetFunctionValue (int FunID,LPSTR Args, LPSTR OutLoc);
-int	GetFunctionValue1 (int FunID,LPSTR Args, LPSTR OutLoc);
-int	GetFunctionValue2 (int FunID,LPSTR Args, LPSTR OutLoc);
-int	GetFunctionValue3 (int FunID,LPSTR Args, LPSTR OutLoc);
+int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc,LPSHORT pBrkPt, int bpOffset, int bpLen);
+int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen);
+int	GetFunctionValue2(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen);
+int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen);
 COLORREF ColorWOWidth (COLORREF InColor);
 COLORREF ColorWithWidth (COLORREF Color,int Width);
 double FltAP (LPSTR INEXPR,LPBOOL IRC);
@@ -1321,7 +1324,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOOL replace,BOOL showStatus,LPSTR errorVarName);
 BOOL FTPDeleteFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPSTR errorVarName);
 BOOL FTPCreateDirectory(HANDLE hConnect,LPCTSTR lpszRemoteDir,LPSTR errorVarName);
-BOOL FTPGetDirectory(HANDLE hConnect,LPCTSTR lpszRemoteDir,LPSTR errorVarName);
+BOOL FTPGetDirectory(HANDLE hConnect,LPSTR lpszRemoteDir,LPSTR errorVarName);
 BOOL FTPSetDirectory(HANDLE hConnect,LPCTSTR lpszRemoteDir,LPSTR errorVarName);
 __int64 FTPGetFileSize (HANDLE hConnect);
 
@@ -1330,7 +1333,8 @@ void  InFunction (int funid,LPSTR inString);
 void OutFunction (int funid,LPSTR outString);
 int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int NumArgs);
 void RemoveFromMacroStack (int macroID);
-void AtBreakPoint (LPSTR Args);
+void breakAtPos(int pos, LPSHORT pBrkPt, int bpOffset, int bpLen,int from);
+void AtBreakPoint(LPSTR Args,int bploc);
 void SetDebug (BOOL state);
 BOOL GetDebug (void);
 void GetWindowsVersion(LPSTR Ver);

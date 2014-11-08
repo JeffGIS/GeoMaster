@@ -71,6 +71,7 @@ static	BOOL	setToFind = FALSE;	// set scroll loc to found position
 static	BOOL	standAlone = FALSE;
 static	char	currentBreakpoint[32]={0};
 static  HWND	hWndGMEditReturn = 0;
+static	int		breakAtLoc = -1;
 
 
 static HANDLE hFunDefDB=0;
@@ -81,13 +82,15 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProcGMEdit(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	AboutGMEdit(HWND, UINT, WPARAM, LPARAM);
 
-void GMEditSetFile (LPSTR file,LPSTR bpid)
+void GMEditSetFile (LPSTR file,LPSTR bpid,int bploc)
 {
-	strcpy (fileToEdit,file);
-	if (bpid)
-		strcpy (currentBreakpoint,bpid);
-	else
-		*currentBreakpoint = 0;
+	*currentBreakpoint = 0;
+	breakAtLoc = -1;
+	strcpy(fileToEdit, file);
+	if (bploc)
+		breakAtLoc = bploc-1;
+	else if (bpid)
+		strcpy(currentBreakpoint, bpid);
 	return;
 }
 
@@ -551,7 +554,61 @@ int FindBreakpoint (LPSTR bp)
 {
 	int loc = 0;
 	char brkp[64];
+	int rtn = 0;
 
+	if (breakAtLoc > -1)
+	{
+		LPSTR pFile = GlobalLock(hFile);
+		LPSTR pFileBegin = pFile;
+		int locMacro=0, locFile=0;
+		BOOL lastWasLineTerm=TRUE;
+
+		while (*pFile)
+		{
+			if (*pFile == '#' && lastWasLineTerm)
+			{
+				while (*pFile != '\r' && *pFile != '\n')
+				{
+					locFile++;
+					pFile++;
+				}
+			}
+			if (locMacro >= breakAtLoc)
+			{
+				while (*pFile == '\r' || *pFile == '\n')
+				{
+					locFile++;
+					pFile++;
+					lastWasLineTerm = TRUE;
+				}
+				if (*pFile == '#' && lastWasLineTerm)
+				{
+					while (*pFile != '\n')
+					{
+						locFile++;
+						pFile++;
+					}
+					locFile++;
+				}
+
+				rtn = locFile;
+				break;
+			}
+			if (*pFile != '\r' && *pFile != '\n')
+			{
+				locMacro++;
+				lastWasLineTerm = FALSE;
+			}
+			else
+				lastWasLineTerm = TRUE;
+			if (*pFile == '\t')
+				ii = 1; 
+			locFile++;
+			pFile++;
+		}
+		GlobalUnlock(hFile);
+		return rtn;
+	}
 	sprintf (brkp,"$B(%s",bp);
 	if (hFile)
 	{
@@ -738,6 +795,7 @@ int GetInsertPointFromLoc (HWND hWnd,HANDLE hFile,HFONT hFont,LPPOINT pcursorLoc
 				}
 				else if (*pFile == '\r')
 				{
+					ii = 1;
 				}
 				else if (*pFile == '\n')
 				{
@@ -1500,6 +1558,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
      case WM_CHAR:
+		if (!hFile)
+			 break;
 		key = wParam;
 		displayOnlyCurrentLine = FALSE;
 		saveLine = currentLine;

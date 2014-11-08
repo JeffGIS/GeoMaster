@@ -695,6 +695,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	HANDLE	hBreakPoints = 0;
 	LPSHORT pBreakPoints = 0;
 	int		lm=0;
+	int		atLoc;
    
     InGRFCmd = FALSE; 
     macroID = AddToMacroStack (1,CurrentMacro,Name,phArgs,NumArgs);
@@ -840,7 +841,8 @@ ProcessMacro:
     	{   
 			HANDLE SaveMacArgs;
 			
-    		pEndCmd = MatchLev (pMacro,';');
+			//if (pBreakPoints) breakAtPos(pMacro - pTemp, pBreakPoints, 0, lm);
+			pEndCmd = MatchLev(pMacro, ';');
     		if (!pEndCmd)
     		{
     			AtEnd = TRUE;
@@ -849,6 +851,7 @@ ProcessMacro:
     		else
     			*pEndCmd = 0;
     		_fstrcpy (pCmd,pMacro); 
+			atLoc = (int)(pMacro - pTemp);
     		pMacro = pEndCmd;
     		if (!AtEnd)
     			*pMacro++ = ';';
@@ -859,7 +862,7 @@ ProcessMacro:
     		else
     			hMacArgs = 0;
 			if (pBreakPoints)
-				ExpandTextDB(pCmd, pBreakPoints, 0, lm);
+				ExpandTextDB(pCmd, pBreakPoints,atLoc, lm);
 			else
 				ExpandText(pCmd);
     		hMacArgs = SaveMacArgs;

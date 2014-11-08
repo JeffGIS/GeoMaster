@@ -289,7 +289,7 @@ GSSiExitProg (1348);
 			break;
 
 		case 106://$B(breakpointid)
-			AtBreakPoint (Args);
+			AtBreakPoint (Args,0);
 			*OutLoc = 0;
 			goto Rtnl;
 			break;
