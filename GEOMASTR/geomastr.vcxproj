@@ -62,7 +62,7 @@
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34h</TargetName>
+    <TargetName>GeoMaster34i</TargetName>
     <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
@@ -82,7 +82,7 @@
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
-    <TargetName>GeoMaster34g</TargetName>
+    <TargetName>GeoMaster34i</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
@@ -132,7 +132,7 @@
     <Link>
       <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.8</Version>
+      <Version>34.9</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
