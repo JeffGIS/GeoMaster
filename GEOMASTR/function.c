@@ -86,7 +86,7 @@ void ReopenFTP (LPFTPSTRUCT pFTPStruct)
 	return;
 }
 
-int	GetFunctionValue1 (int FunID,LPSTR Args, LPSTR OutLoc)
+int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
 #endif
@@ -129,6 +129,7 @@ int	GetFunctionValue1 (int FunID,LPSTR Args, LPSTR OutLoc)
 	short	ndec; 
 	LPHIGHLIGHTDATA	pHighlightData;
 
+	setFunctionDebugParms(pBrkPt, bpOffset, bpLen);
 	if (LinkToVar)
 	{
 		ExpandText (Args);
@@ -157,7 +158,7 @@ GSSiExitProg (1348);
 			BOOL	AddC=FALSE;
 			BOOL	removeZ=FALSE;
 			
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,4,&hMem, pBrkPt, bpOffset, bpLen); 
 			AddC = atob (Arg[3]);
 			removeZ = atob (Arg[4]);
 			ndec = atoi (Arg[2]);
@@ -275,7 +276,7 @@ GSSiExitProg (1348);
 		{	double	rval;
 			int		iformat; 
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			iformat = atoi(Arg[2]);
 			if (iformat == 11)//hh:mm:ss
 			{
@@ -338,7 +339,7 @@ GSSiExitProg (1348);
 		{	double	rval;
 			int		iformat; 
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			Arg1 = Arg[1];
 			iformat = atoi(Arg[2]);
 			switch (iformat)
@@ -575,7 +576,7 @@ GSSiExitProg (1348);
 		{	   
 			
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!_fstrcmp(Arg[1],"COUNT"))
 			{
 				nlong = BT_NUM_IN_INDEX (hHighlight);
@@ -825,7 +826,7 @@ GSSiExitProg (1348);
 			int		ndec, start, len, end; 
 			LPSTR	lpEnd;
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto Rtn0;
 			l = strlen (Arg[1]);
@@ -870,7 +871,7 @@ GSSiExitProg (1348);
 
 		case 309: /* $RGB(r,g,b) returns color value */ 
 		{	
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			
 			ltoa ((long)RGB(atoi (Arg[1]),atoi (Arg[2]),atoi (Arg[3])),OutLoc,10);
 			goto Rtnl;
@@ -878,7 +879,7 @@ GSSiExitProg (1348);
 		case 351: /* $HSL(r,g,b) returns color value */ 
 		{	DWORD	h,l,s;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+		nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			ii = ColorHLSToRGB(atoi (Arg[1]),atoi (Arg[2]),atoi (Arg[3]));
 			ltoa ((long)ii,OutLoc,10);
 			goto Rtnl;
@@ -985,7 +986,7 @@ GSSiExitProg (1348);
 
 		case 312: /* $CMD(cmdid) invokes menu command */
 		{	
-			nArgs = GetFunArgs (Args,Arg,-2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
 			ICmd = GetCmdID (Arg[1],0); 
 			if (!ICmd && strchr (Arg[1],';'))
 				ICmd = -1;
@@ -1023,7 +1024,7 @@ GSSiExitProg (1348);
 		case 314: /* $LWR(cmdid) returns lower cased string, if second arg true 1st char is upcase*/
 		{	
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			_fstrlwr (Arg[1]);   
 			if (atob (Arg[2]))
 				UpcaseFirst (Arg[1]);
@@ -1269,7 +1270,7 @@ TryDDEInitAgain:
 		}  
 		
 		case 319:  //$RAW(global name - not in brackets) gets raw global value
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			ExpandGlobalRaw (Arg[1],atob(Arg[2]),OutLoc,2048);
 			goto Rtnl;
 			
@@ -1285,7 +1286,7 @@ TryDDEInitAgain:
 				int		x,y,w,h;
 				BOOL	Early;
 
-				nArgs = GetFunArgs (Args,Arg,8,&hMem); 
+				nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 		//		hI=(UINT)ShellExecute (hWndMain,0,Arg[2],0,0,SW_HIDE);//SW_SHOWMAXIMIZED);
 		//		if (DisplayShellExError (hI,Arg[1]))
 		//			goto RtnFalse;
@@ -1352,7 +1353,7 @@ SetVis:
 				SetConfig (1);
 				SetViewport (*pCommandViewport);
 			}
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 			{
 				FARPROC lpfnVISIBLEMsgProc;  
@@ -1494,7 +1495,7 @@ SetVis:
         	BOOL	nRc=FALSE;
 
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			DoPaint = FALSE;      
             if (!_fstricmp (Arg[1],"WPTRAN"))
              {
@@ -1565,7 +1566,7 @@ SetVis:
 		{	
 			HDC	hDC;			
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			
@@ -1633,7 +1634,7 @@ SetVis:
 		case 328:  //$MON(returns month(1-12) from system time)
 				   //$MON(time,2) returns Mar 09
 				   //$MON(time,3) returns month number beginning with 0=Jan 1970
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			n = atoi (Arg[2]);
 			systime = max (0,atol (Arg[1]));
 			if (systime < 0)
@@ -1686,7 +1687,7 @@ SetVis:
 			HANDLE	hDB=0;
 			int		IDB;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			*OutLoc = 0;
@@ -1772,7 +1773,7 @@ SetVis:
 			
 		case 332: // $ELV(point,surfacehandle)
 		{	 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			hSurf = (HANDLE)atol (Arg[2]); 
@@ -1798,7 +1799,7 @@ SetVis:
 				  // $DTM(CLOSE,surfacehandle)  
 				  // $DTM(COPY,tosurf,fromsurf,area)
 		{	 
-			nArgs = GetFunArgs (Args,Arg,7,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (!_fstricmp (Arg[1],"OPEN"))
@@ -1876,7 +1877,7 @@ SetVis:
 			
 			if (*Args == '[')
 			{
-				nArgs = GetFunArgs (Args,Arg,1,&hMem);  
+				nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 				if (nArgs)
 					nlong = IDNINT(atof (Arg[1]))+1; 
 			}
@@ -1901,7 +1902,7 @@ SetVis:
 
 			if (*Args == '[')
 			{
-				nArgs = GetFunArgs (Args,Arg,1,&hMem);  
+				nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 				if (nArgs)
 					nlong = IDNINT(atof (Arg[1]))-1; 
 			}
@@ -1927,7 +1928,7 @@ SetVis:
 			LPSTR	lpOut; 
 			char	fillchar='0';
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			l = _fstrlen(Arg[1]);
 			len = IDNINT(atof (Arg[2])); 
@@ -2007,7 +2008,7 @@ SetVis:
 			int	nPoints;
 			HANDLE	hPoints;
 			
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 
 			switch (nArgs)
 			{
@@ -2116,7 +2117,7 @@ SetVis:
 		{	
 			short	newob=-1;
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			SaveVP = CurView;      
 			SetCurView ( SetVPFromName (Arg[2],&Err));  
 			if (!CurView)
@@ -2183,7 +2184,7 @@ SetVis:
 		case 345: /* $ABS(val) */ 
 		{	double az;
 			
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			RVal = atof (Arg[1]);
@@ -2194,7 +2195,7 @@ SetVis:
 		
 		case 347: /* $GMD(val) */ 
 		{
-			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			GMDFunctions (nArgs,Arg,OutLoc);
@@ -2204,7 +2205,7 @@ SetVis:
 		case 348: /* $MOD(val) */ 
 		{	int	i1,i2;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			i1 = atoi (Arg[1]);
@@ -2223,7 +2224,7 @@ SetVis:
 
 		case 349: // $NUM(val) converts single character to integer
 		{	
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			if (nArgs == 1)
 			{
@@ -2241,7 +2242,7 @@ SetVis:
 			time_t	itime;
 			double	Altitude, Az;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 		    //tm = *sunrise (double lat, double lon, int year, int month, int day);
 			
 			Point = atopt (Arg[2],&Err);
@@ -2289,7 +2290,7 @@ SetVis:
 			HANDLE hFTPStruct;
 			LPFTPSTRUCT pFTPStruct;
 
-			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (!_fstricmp(Arg[1],"OPEN"))
 			{
@@ -2503,7 +2504,7 @@ SetVis:
 
 		case 356://$DSN(EXISTS,name,localmachine(TorF))
 		{
-			nArgs = GetFunArgs (Args,Arg,5,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (nArgs < 2)
 				goto RtnFalse;
@@ -2537,7 +2538,7 @@ SetVis:
 		{	   
 			BOOL	FromLimits, Immediate; 
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem);
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);
 			if (!_fstricmp(Arg[1],"COOR"))
 			{
 				if (nArgs < 3)
@@ -2846,7 +2847,7 @@ SetVis:
 		{	long pos;
 			LPSTR	loc;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			loc = _fstrchr (Arg[1],*Arg[2]);
@@ -2860,7 +2861,7 @@ SetVis:
 		{	long pos;
 			LPSTR	loc;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			loc = _fstrrchr (Arg[1],*Arg[2]);
@@ -2877,7 +2878,7 @@ SetVis:
 			LPSTR	lpOut; 
 			char	fillchar='0';
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			
 			l = _fstrlen(Arg[1]);
 			len = IDNINT(atof (Arg[2])); 
@@ -2896,7 +2897,7 @@ SetVis:
 			short	Mode=BT_READ; 
 			HFILE	Fid;
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse; 
 			switch (*Arg[3])
@@ -2946,7 +2947,7 @@ SetVis:
 		{	
 			short	i;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			SaveVP = CurView;      
 			SetCurView ( SetVPFromName (Arg[2],&Err));  
 			if (!CurView)
@@ -3008,7 +3009,7 @@ SetVis:
 		{	long pos;
 			LPSTR	loc;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			loc = _fstrstr (Arg[1],Arg[2]);
@@ -3021,7 +3022,7 @@ SetVis:
 
 		case 412: /* $TEST(string1,string2,Message) tests string1 vs string2. If not same displays message and returns false */ 
 		{	
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
 				goto RtnFalse;
 			if (!_fstricmp (Arg[1],Arg[2])) 
@@ -3034,7 +3035,7 @@ SetVis:
 		case 413: // $MASK(CLEAR)  
  		{	
  			 
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!_fstrcmp (Arg[1],"CLEAR")) 
@@ -3134,7 +3135,7 @@ SetVis:
 		case 415: /* $DIST(point1,point2) */ 
 		{	double dist;
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			Point = atopt (Arg[1],&Err);
@@ -3153,7 +3154,7 @@ SetVis:
 			HMENU	hMenu;
 			HANDLE	hPopups;
 			
-			nArgs = GetFunArgs (Args,Arg,-3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,-3,&hMem, pBrkPt, bpOffset, bpLen); 
 	        
 	        if (!nArgs)
 	        {   
@@ -3234,7 +3235,7 @@ SetVis:
 				goto RtnFalse;
 			
 		case 419: //$PICK(point,vpname)  
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp (Arg[1],"SELECT"))
@@ -3319,7 +3320,7 @@ SetVis:
 		
 		case 421: //$SNAP(POINT,)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			Point = atopt (Arg[2],&Err);
@@ -3348,7 +3349,7 @@ SetVis:
 
 		case 423: //$UNDO()
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 0)
 				goto RtnFalse;
 
@@ -3368,7 +3369,7 @@ SetVis:
 			//DrawAlphaBlend (CurView->hWnd, CurView->hDC);
 		//GetModuleFileName(0,ToFile,MAX_PATH);
 		/*ii=1;
-		nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+		nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 		{
 			double x = -84 - 12.194/60;
 			double y = 34 + 6.403/60;
@@ -3508,7 +3509,7 @@ SetVis:
 		    goto RtnTrue;
 		case 425: //$HELP(help file,topic)
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 0)
 				goto RtnFalse;
 
@@ -3529,7 +3530,7 @@ SetVis:
 			LPSTR		Prefix,lpColon;
 			BOOL		UnSplined=TRUE;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp (Arg[1],"PICKED"))
@@ -3654,7 +3655,7 @@ SetVis:
 
 		case 427: //$REAL()
 		{
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,1,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 0)
 				goto RtnFalse;
 
@@ -3663,14 +3664,14 @@ SetVis:
 		}
 		case 428: //$PING(n)
 		{
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,1,&hMem, pBrkPt, bpOffset, bpLen); 
 			pVal = GlobalLock (hCmdMess);
 			sprintf (pVal,">Pong:%s;\r\n",Arg[1]);
 			GlobalUnlock (hCmdMess);
 		    goto RtnTrue;
 		}
 		case 429:  //$YEAR(returns year from system time)
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			n = atoi (Arg[2]);
 			systime = max (0,atol (Arg[1]));
 			if (systime < 0)
@@ -3701,7 +3702,7 @@ SetVis:
 		{
 			long GridCelID;
 
-			nArgs = GetFunArgs (Args,Arg,7,&hMem);
+			nArgs = GetFunArgs (Args,Arg,7,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (!stricmp (Arg[1],"SPLIT"))
@@ -3908,7 +3909,7 @@ SetVis:
 		}
 		case 431: //$DUMP(FILES)
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp (Arg[1],"FILES"))
@@ -3923,7 +3924,7 @@ SetVis:
 				// range_min <= random number < range_max
 				static int range_min=0, range_max=RAND_MAX;
 
-				nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+				nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 				if (!nArgs)
 				{
 					int u = (double)rand() / (RAND_MAX + 1) * (range_max - range_min)
@@ -3945,7 +3946,7 @@ SetVis:
 		case 433: //AREA(DUMP,FILE,OPT)
 		{
 #define COORDINATEMULTIPLIER	10000000
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 				goto RtnFalse;
 			{

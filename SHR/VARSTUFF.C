@@ -6205,16 +6205,25 @@ GSSiExitProg (558);
 			InLoc += 6;
 			pEnd = MatchLev (InLoc,')');
 			if (!pEnd)
-				goto WhileError; 
+			{
+				MessageBox(0,InLoc,"Error in WHILE", MB_ICONEXCLAMATION);
+				goto WhileError;
+			}
 			pWhile = InLoc;
 			lWhile = pEnd++ - InLoc; 
 			if (*pEnd != '{')
-				goto WhileError;   
+			{
+				MessageBox(0,InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
+				goto WhileError;
+			}
 			InLoc = pEnd;
 			InLoc++;
 			pEnd = MatchLev (InLoc,'}');
 			if (!pEnd)
-				goto WhileError; 
+			{
+				MessageBox(0,InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
+				goto WhileError;
+			}
 			lLoop = pEnd++ - InLoc;
 			hLoop = GSSiGlobAlloc(210, GHND, lLoop + 1);
 			pLoop = GlobalLock(hLoop);

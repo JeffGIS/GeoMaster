@@ -590,23 +590,29 @@ int FindBreakpoint (LPSTR bp)
 					}
 					locFile++;
 				}
-
+				while (*pFile == '\t')
+				{
+					locFile++;
+					pFile++;
+				}
 				rtn = locFile;
-				break;
+				goto Exit;
 			}
 			if (*pFile != '\r' && *pFile != '\n')
 			{
-				locMacro++;
+				if (*pFile != '\t')
+					locMacro++;
 				lastWasLineTerm = FALSE;
 			}
 			else
 				lastWasLineTerm = TRUE;
-			if (*pFile == '\t')
-				ii = 1; 
 			locFile++;
 			pFile++;
 		}
+		rtn = locFile;
+	Exit:
 		GlobalUnlock(hFile);
+		rtn = (int)(pFile - pFileBegin);
 		return rtn;
 	}
 	sprintf (brkp,"$B(%s",bp);

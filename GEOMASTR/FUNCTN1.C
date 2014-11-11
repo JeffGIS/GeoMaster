@@ -22,7 +22,7 @@ short OptionInList (LPSTR Val,LPSTR ListVals,int NumInList,int ListItemSize)
 	return 0;
 }
 
-int	GetFunctionValue (int FunID,LPSTR Args, LPSTR OutLoc)
+int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
 #endif
@@ -60,7 +60,7 @@ int	GetFunctionValue (int FunID,LPSTR Args, LPSTR OutLoc)
 	LPFILEPATH	FilePathPtr;
 	LPHANDLE	lpFileHandle; 
 	short	ndec; 
-	
+
 	if (LinkToVar)
 	{
 		ExpandText (Args);
@@ -87,14 +87,10 @@ GSSiExitProg (1348);
 			int		l,i,x;
 			LPSTR	loc,endloc,tab;
 			
-			hMem = GSSiGlobAlloc ( 786,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);    
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (FidDisplay != HFILE_ERROR)
 			{
-				fputstring (Arg1,FidDisplay);
+				fputstring (Arg[1],FidDisplay);
 				goto RtnTrue;
 			}
 			if (!CurReport)
@@ -104,8 +100,8 @@ GSSiExitProg (1348);
 				LPSTR	pLine;     
 				
 				pLine = GlobalLock (CurReport->hScrollLine); 
-				if (_fstrlen (pLine) + _fstrlen (Arg1) < 1020)
-					_fstrcat(pLine,Arg1);
+				if (_fstrlen (pLine) + _fstrlen (Arg[1]) < 1020)
+					_fstrcat(pLine,Arg[1]);
 				GlobalUnlock (CurReport->hScrollLine);
 				goto RtnTrue;
 			}
@@ -116,8 +112,8 @@ GSSiExitProg (1348);
 				SelectObject (CurReport->hDC,CurReport->hFonts[CurFont-1]);
 				SetTextColor (CurReport->hDC,CurReport->FontColor[CurFont-1]); 
 			}
-			loc = Arg1;
-			endloc = _fstrchr (Arg1,0);
+			loc = Arg[1];
+			endloc = _fstrchr (Arg[1],0);
 			while (loc < endloc)
 			{ 
 				tab = _fstrchr (loc,'\t');
@@ -185,21 +181,16 @@ GSSiExitProg (1348);
 		{	
 			int	nlines;
 						
-			hMem = GSSiGlobAlloc ( 787,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+
 			if (FidMacroOutput != HFILE_ERROR)
 			{
-				_fstrcpy (Arg1,Args);
-				ExpandText (Arg1); 
-				fputstring (Arg1,FidMacroOutput);
+				fputstring (Arg[1],FidMacroOutput);
 				goto RtnTrue;
 			}
 			if (!CurReport)
 				goto RtnFalse;
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
-			nlines = max (1,atoi (Arg1));  
+			nlines = max (1,atoi (Arg[1]));  
 			if (CurReport->hScrollLine)
 			{
 				LPSTR	pLine;     
@@ -242,16 +233,12 @@ GSSiExitProg (1348);
 		case 103: /* $X(str) extracts x value from point */
 		{				
 			
-			hMem = GSSiGlobAlloc ( 788,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
-			if ((pEnd = _fstrchr (Arg1,' ')))
+			if ((pEnd = _fstrchr (Arg[1],' ')))
 			{
 				*pEnd = 0;
-				_fstrcpy (OutLoc,Arg1);
+				_fstrcpy (OutLoc,Arg[1]);
 			}
 			goto Rtnl;   
 		}
@@ -259,13 +246,9 @@ GSSiExitProg (1348);
 		case 104: /* $Y(str) extracts x value from point */
 		{				
 			
-			hMem = GSSiGlobAlloc ( 789,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
-			if ((pEnd = _fstrchr (Arg1,' ')))
+			if ((pEnd = _fstrchr (Arg[1],' ')))
 			{
 				*pEnd++ = 0;
 				_fstrcpy (OutLoc,pEnd);
@@ -275,7 +258,7 @@ GSSiExitProg (1348);
 		
 		case 105: //$C(val,i) returns 1 based character from val. i can be L or l for last char
 			{
-				nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+				nArgs = GetFunArgs(Args, Arg, 2, &hMem,pBrkPt, bpOffset,bpLen);
 				l = strlen (Arg[1]);
 				if (*Arg[2] == 'L' || *Arg[2] == 'l')
 					i = l;
@@ -303,26 +286,22 @@ GSSiExitProg (1348);
 			BOOL LastWasBlank, HaveNonBlank=FALSE; 
 			LPSTR	SaveOutLoc; 
 			
-			hMem = GSSiGlobAlloc ( 790,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
-			LastWasBlank = FALSE;  
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			LastWasBlank = FALSE;
 			SaveOutLoc = OutLoc;
-			while (*Arg1)
+			while (*Arg[1])
 			{
-				if (*Arg1 != ' ')
+				if (*Arg[1] != ' ')
 				{   
 					if (LastWasBlank && HaveNonBlank)
 						*OutLoc++ = ' '; 
 					LastWasBlank = FALSE;  
 					HaveNonBlank=TRUE;
-					*OutLoc++ = *Arg1;
+					*OutLoc++ = *Arg[1];
 				}                        
 				else
 					LastWasBlank = TRUE;
-				Arg1++;
+				Arg[1]++;
 			}
 			*OutLoc = '\0';  
 			OutLoc = SaveOutLoc;
@@ -334,12 +313,8 @@ GSSiExitProg (1348);
 			int		iview;
 			int		ndec, ntoadd; 
 			
-			hMem = GSSiGlobAlloc ( 791,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			if (!rread (Arg1,&rval,&ndec)) goto Rtn0;
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!rread(Arg[1], &rval, &ndec)) goto Rtn0;
 			iview = IDNINT(rval); 
 			if (iview == 3)
 				iview = 1; 
@@ -355,12 +330,8 @@ GSSiExitProg (1348);
 			int		iview;
 			int		ndec, ntoadd; 
 			
-			hMem = GSSiGlobAlloc ( 792,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			if (!rread (Arg1,&rval,&ndec)) goto Rtn0;
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!rread(Arg[1], &rval, &ndec)) goto Rtn0;
 			iview = IDNINT(rval); 
 			if (iview == 3)
 				iview = 5; 
@@ -393,7 +364,7 @@ GSSiExitProg (1348);
 		{	
 			short	SaveCurrentConfig=CurrentConfig;
 			
-			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			SaveVP = CurView; 
 			Err = 0;

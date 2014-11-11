@@ -8,20 +8,30 @@
 #include "freeimage.h"
 
 static	char	PolyProbListFile[MAX_PATH];
+LPSHORT pFunBrkPt;
+int funBpOffset, funBpLen;
 
-short GetFunArgs (LPSTR	Args,LPSTR *Arg,short MaxArgs,LPHANDLE phMem)
+void setFunctionDebugParms(LPSHORT pBrkPt, int bpOffset, int bpLen)
+{
+	pFunBrkPt = pBrkPt;
+	funBpOffset = bpOffset;
+	funBpLen = bpLen;
+	return;
+}
+
+short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPSHORT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1349);
 #endif
 {   
 	short	nArgs=1; 
-	LPSTR	*pArg=Arg, LastArg, ParLoc; 
+	int		bpOffInc;
+	LPSTR	*pArg=Arg, LastArg, ParLoc, begArgs; 
 	UINT	i;
-#define	MAXARGLENGTH	SHRT_MAX
 	                 
 	*phMem = GSSiGlobAlloc (1141,GMEM_MOVEABLE,abs(MaxArgs) * MAXARGLENGTH); 
 	pArg++;
-	LastArg = *pArg = GlobalLock (*phMem);   
+	LastArg = begArgs = *pArg = GlobalLock (*phMem);   
 	pArg++;  
 	_fstrcpy (LastArg,Args);
 	if (*Args) 
@@ -37,12 +47,14 @@ short GetFunArgs (LPSTR	Args,LPSTR *Arg,short MaxArgs,LPHANDLE phMem)
 			} 
 			else
 				*(*pArg) = 0;
+			bpOffInc = strlen(LastArg)+1;
 			if (MaxArgs > 0)
-				ExpandText (LastArg);  
+				ExpandTextDB (LastArg,pFunBrkPt,funBpOffset,funBpLen);  
+			funBpOffset += bpOffInc;
 			LastArg = *pArg;
 		} 
 		if (MaxArgs > 0)
-			ExpandText (LastArg);
+			ExpandTextDB(LastArg, pFunBrkPt, funBpOffset, funBpLen);
 	}  
 	else 
 	{
@@ -111,7 +123,7 @@ GSSiExitProg (1349);
 #endif
 }
 
-int	GetFunctionValue3 (int FunID,LPSTR Args, LPSTR OutLoc)
+int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1350);
 #endif
@@ -141,6 +153,7 @@ int	GetFunctionValue3 (int FunID,LPSTR Args, LPSTR OutLoc)
 	HWND	hWnd;
 	SOCKET	socket;
 	
+	setFunctionDebugParms(pBrkPt, bpOffset, bpLen);
 	if (LinkToVar)
 	{
 		ExpandText (Args);
@@ -165,7 +178,7 @@ GSSiExitProg (1350);
 		{   
 			short	iopt;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			iopt = atoi (Arg[2]); 
 			if (iopt == 3)
 			{
@@ -198,7 +211,7 @@ GSSiExitProg (1350);
 				from=1;
 				to=2;
 			}
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			_fstrupr (Arg[3]);
@@ -227,7 +240,7 @@ GSSiExitProg (1350);
 			LPSTR	cmd;
 			HANDLE	hCmd;
 						
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			if (atob(Arg[2]))
 			{
@@ -262,7 +275,7 @@ GSSiExitProg (1350);
 			HANDLE	hTemp;
 			double	fromX, fromY, toX, toY, newX, newY, dist, mindist; 
 
-			nArgs = GetFunArgs (Args,Arg,5,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 5)
 				goto RtnFalse; 
 			newX = atof (Arg[2]);
@@ -368,17 +381,8 @@ GSSiExitProg (1350);
 			HANDLE	hTemp;
 			static	short	WantPt=0;
 			
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1148,GMEM_MOVEABLE,2048*2+256);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			pOFStruct = (LPOFSTRUCTGM)(Arg2 + 2048);
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			switch (*Arg2)
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			switch (*Arg[2])
 			{
 				case 'N':
 				case 'n': 
@@ -396,9 +400,9 @@ GSSiExitProg (1350);
 					break;
 				
 				default:
-					WantPt = atoi (Arg2);
+					WantPt = atoi (Arg[2]);
 			}
-			if ((Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ))==HFILE_ERROR)
+			if ((Fid = GSSiOpenFile (Arg[1],0,OF_READ))==HFILE_ERROR)
 				goto RtnFalse;  
 			ipt = 0; 
 			hTemp = GSSiGlobAlloc (1149,GMEM_MOVEABLE,512);
@@ -446,31 +450,16 @@ GSSiExitProg (1350);
 			long	RecNum, WantRec; 
 			LPOFSTRUCTGM	pOFStruct;
 			
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1150,GMEM_MOVEABLE,4*2048);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			Arg3 = Arg2 + 2048; 
-			pOFStruct = (LPOFSTRUCTGM)(Arg3 + 2048);
-			
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
-			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			ExpandText (Arg3);
-        	lpCLFile = Arg1;
-        	lpCLGlob = Arg2;
-            _fstrupr (Arg3);
-            switch (*Arg3)
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			lpCLFile = Arg[1];
+        	lpCLGlob = Arg[2];
+            _fstrupr (Arg[3]);
+            switch (*Arg[3])
             {
             	case 'N':
             	case 'P':
 
-				    Fid=GSSiOpenFile (lpCLFile,pOFStruct,OF_READ);  
+				    Fid=GSSiOpenFile (lpCLFile,0,OF_READ);  
 	    			if (Fid==HFILE_ERROR)
 	    				goto RtnFalse; 
 	    			hTemp = GSSiGlobAlloc (1151,GMEM_MOVEABLE,1024);
@@ -478,7 +467,7 @@ GSSiExitProg (1350);
 					if (!GetVal (lpCLGlob, str))
 						_fstrcpy (str,"-1");
 					WantRec = atol (str); 
-					if (*Arg3 == 'N')
+					if (*Arg[3] == 'N')
 						WantRec++;
 	    			else
 	    				WantRec--;	
@@ -512,7 +501,7 @@ GSSiExitProg (1350);
             	case 'D':
             	case 'S':
 		            lpfnCOORDLOCMsgProc = MakeProcInstance((FARPROC)COORDLOCMsgProc, hInst); 
-		            if (*Arg3 == 'D')
+		            if (*Arg[3] == 'D')
 		            	nRc = DialogBox(hInst, (LPSTR)"COORDLOC", hWndMain, lpfnCOORDLOCMsgProc); 
 		            else
 		            	nRc = DialogBox(hInst, (LPSTR)"COORDLOC_SORT", hWndMain, lpfnCOORDLOCMsgProc);
@@ -532,16 +521,8 @@ GSSiExitProg (1350);
 		case 807: // $IMAGELIM(Indexfile,IMAGE) returns limits of original image file in indexed ortho
 		{	 
 			
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1152,GMEM_MOVEABLE,2048*2);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			if (GetOriginalImageBounds (Arg1,Arg2,&Bounds))
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (GetOriginalImageBounds(Arg[1], Arg[2], &Bounds))
 			{
 				UserBounds[0].x = Bounds.xmn;
 				UserBounds[0].y = Bounds.ymn;
@@ -566,7 +547,7 @@ GSSiExitProg (1350);
 		{
 			short	Type;
 			
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;  
 			if (*Arg[4])
@@ -626,19 +607,14 @@ GSSiExitProg (1350);
 		{
 			COLORREF	Color;
 			 
-			hMem = GSSiGlobAlloc (1153,GMEM_MOVEABLE,4096+256);
-			Arg1 = GlobalLock(hMem); 
-			lpstr = Arg1 + 4096;
-			
-			_fstrcpy (Arg1,Args);  
-			ExpandText (Arg1);
-			if (!*Arg1)
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!*Arg[1])
 				goto RtnFalse;
-			sprintf (lpstr,"[%s]",Arg1);
+			sprintf (lpstr,"[%s]",Arg[1]);
 			Color = GetGlobalLVal (lpstr);
 			if (GetColor(CurView->hWnd,&Color)) 
 			{
-				SetGlobalValueLong(Arg1,Color);
+				SetGlobalValueLong(Arg[1],Color);
 				goto RtnTrue; 
 			}  
 			else
@@ -650,7 +626,7 @@ GSSiExitProg (1350);
 		{
 			COLORREF	Color;
 			 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (sscanf (Arg[1],"%Flf %Flf",&Point.x,&Point.y) != 2)
@@ -665,7 +641,7 @@ GSSiExitProg (1350);
 				
 		case 812:// $LOADEDGE (joinlinefile,allcornerfile,origtpfile,filecornerfile,filelist.txt,mapfilename,outfilename) 
 		{
-			nArgs = GetFunArgs (Args,Arg,7,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 7)
 				goto RtnFalse;
 			if (LoadEdge (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6],Arg[7]))
@@ -679,7 +655,7 @@ GSSiExitProg (1350);
 			short	DistUnits; 
 			double Width, Height;
 			
-			nArgs = GetFunArgs (Args,Arg,9,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			Width = atof(Arg[4]);
@@ -726,30 +702,22 @@ GSSiExitProg (1350);
 		{
 			char	delim=',';
 
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1156,GMEM_MOVEABLE,3096*2);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 4096; 
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
-			if (*Arg1 != '(')
-				delim = *Arg1++;
-			if (*Arg1 == '(' && *LastChr(Arg1) == ')')
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (*Arg[1] != '(')
+				delim = *Arg[1]++;
+			if (*Arg[1] == '(' && *LastChr(Arg[1]) == ')')
 			{
-				Arg1++;
-				*LastChr(Arg1) = 0;
+				Arg[1]++;
+				*LastChr(Arg[1]) = 0;
 			}
-			ExpandText (Arg2);
-			if (!ProcessDelimTextHeader(Arg1, 0, HFILE_ERROR, &hDLT, delim, 0))
+			if (!ProcessDelimTextHeader(Arg[1], 0, HFILE_ERROR, &hDLT, delim, 0))
 				goto RtnFalse;
-			if (*Arg2 == '(' && *LastChr(Arg2) == ')')
+			if (*Arg[2] == '(' && *LastChr(Arg[2]) == ')')
 			{
-				Arg2++;
-				*LastChr(Arg2) = 0;
+				Arg[2]++;
+				*LastChr(Arg[2]) = 0;
 			}
-		    rtn = GetDelimTextData(Arg2,hDLT); 
+		    rtn = GetDelimTextData(Arg[2],hDLT); 
 			GSSiGlobFree (&hDLT);
 			if (rtn)
 				goto RtnTrue;
@@ -761,16 +729,12 @@ GSSiExitProg (1350);
 		
 		case 816: // $NUMLINES(pathname) returns number of lines in text file
 		{	 
-			hMem = GSSiGlobAlloc (1157,GMEM_MOVEABLE,2*2048);
-			Arg1 = GlobalLock(hMem); 
-			pOFStruct = (LPOFSTRUCTGM)(Arg1 + 2048);
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-        	nlong = 0;
-			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			nlong = 0;
+			Fid = GSSiOpenFile (Arg[1],0,OF_READ); 
 			if (Fid != HFILE_ERROR)
 			{
-	        	while (fgetstring (Arg1,2040,Fid))
+	        	while (fgetstring (Arg[1],2040,Fid))
 		   			nlong++; 
 		   		GSSiClose (Fid);
 		   	}
@@ -782,17 +746,9 @@ GSSiExitProg (1350);
 		{	 
 			double	MinScale, MaxScale;
 			
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1158,GMEM_MOVEABLE,2048*2);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			MaxScale = atof (Arg1);
-			MinScale = atof (Arg2);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			MaxScale = atof(Arg[1]);
+			MinScale = atof (Arg[2]);
 			
 			if (OrthScale < MaxScale && OrthScale >= MinScale)
 				*OutLoc = 0;
@@ -806,15 +762,12 @@ GSSiExitProg (1350);
 		case 818: // $ZOOMLIST(SELECT or NEXT or PRIOR)
 		{	 
 			
-			hMem = GSSiGlobAlloc (1159,GMEM_MOVEABLE,2048*2);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			if (!_fstricmp (Arg1,"NEXT"))
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!_fstricmp(Arg[1], "NEXT"))
 				n=1;
-			else if (!_fstricmp (Arg1,"PRIOR"))
+			else if (!_fstricmp (Arg[1],"PRIOR"))
 				n=-1;
-			else if (!_fstricmp (Arg1,"FIRST"))
+			else if (!_fstricmp (Arg[1],"FIRST"))
 				n=0;
 			if (DisplayZoomList (n))
 				goto RtnTrue;
@@ -826,7 +779,7 @@ GSSiExitProg (1350);
 		case 819: // $MIDPOINT(coord pair)
 				  // $MIDPOINT(ITEM,TagOrRef)
 		{	
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			if (!stricmp (Arg[1],"ITEM"))
 			{
@@ -850,7 +803,7 @@ GSSiExitProg (1350);
 		
 		case 820://$NEWPOINT(STARTPOINT,AZ,DIST,OFFSET) 
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			Point2 = atopt (Arg[1],&Err); 
 			AZ = atof (Arg[2]);
 			Dist = atof (Arg[3]);
@@ -867,50 +820,36 @@ GSSiExitProg (1350);
 		case 821: // $PATHTYPE(Pathname)
 		{	 
 			
-			hMem = GSSiGlobAlloc (1162,GMEM_MOVEABLE,2048*2);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			n = FileType (Arg1);
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			n = FileType(Arg[1]);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 			
 		}  
 		case 822: // $GMDMERGE(DBTO,DBFROM)
 		{	 
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1163,GMEM_MOVEABLE,2048*2);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
-			if (*Arg1 == '(' && *LastChr(Arg1) == ')')
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (*Arg[1] == '(' && *LastChr(Arg[1]) == ')')
 			{
-				Arg1++;
-				*LastChr(Arg1) = 0;
+				Arg[1]++;
+				*LastChr(Arg[1]) = 0;
 			}
-			ExpandText (Arg2);
-			if (GWD_MergeDBs (Arg1,Arg2,TRUE))
+			if (GWD_MergeDBs (Arg[1],Arg[2],TRUE))
 				goto RtnTrue;
 			goto RtnFalse;
 		}
 		case 823: // $TRUNCATE(arg)
 		{	 
-			hMem = GSSiGlobAlloc (1164,GMEM_MOVEABLE,2048*2);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			Truncate (Arg1);
-			_fstrcpy (OutLoc,Arg1);
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			Truncate(Arg[1]);
+			_fstrcpy (OutLoc,Arg[1]);
 			goto Rtnl;
 		}  
 		break;
 		
 		case 824: // $FILETYPE(arg)
 		{	 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs > 1)
 			{
 				HFILE Fid = GSSiOpenFile (Arg[1],0,OF_READ);
@@ -994,7 +933,7 @@ GSSiExitProg (1350);
 		{   
 			long	LineNo=0; 
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			if (nArgs)
 			{
@@ -1015,7 +954,7 @@ GSSiExitProg (1350);
 		{   
 			long	LineNo=0; 
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			if (nArgs == 2)
 				GMDHeaderToTableDef (Arg[2],OutLoc);
@@ -1028,7 +967,7 @@ GSSiExitProg (1350);
             FARPROC lpfnOWNERLOCMsgProc;
 			int		nRc;
 			
- 			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 			{
 				lpfnOWNERLOCMsgProc = MakeProcInstance((FARPROC)OWNERLOCMsgProc, hInst);
@@ -1064,7 +1003,7 @@ GSSiExitProg (1350);
           FARPROC	lpfnREORGMAPMsgProc;  
           LPSTR		pReorgParms;
           
-		  nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+		  nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
           hReorgParms = GSSiGlobAlloc (1166,GMEM_MOVEABLE,1024);
           pReorgParms = GlobalLock (hReorgParms);  
           sprintf (pReorgParms,"%s\t%s\t%s\t%s",Arg[1],Arg[2],Arg[3],Arg[4]);
@@ -1090,7 +1029,7 @@ GSSiExitProg (1350);
         {
           HWND	hWnd;
           
-		  nArgs = GetFunArgs (Args,Arg,1,&hMem);
+		  nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 		  if (!nArgs)
 		  	goto RtnFalse; 
 		  if (!_fstricmp (Arg[1],"MAIN"))
@@ -1106,7 +1045,7 @@ GSSiExitProg (1350);
         {
           HWND	hWnd;
           
-		  nArgs = GetFunArgs (Args,Arg,1,&hMem);
+		  nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 		  if (!nArgs)
 		  	goto RtnFalse; 
 		  if (!_fstricmp (Arg[1],"MAKETEXT"))
@@ -1127,7 +1066,7 @@ GSSiExitProg (1350);
 		
 		case 834: //$CHECKTIF(name)
         {
-		  nArgs = GetFunArgs (Args,Arg,1,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 		  if (!nArgs)
 		  	goto RtnFalse; 
 		  if (BMPFromTIF (Arg[1],TRUE))
@@ -1137,7 +1076,7 @@ GSSiExitProg (1350);
 		
 		case 835: //$GMDREORG(Name,IndexToReorgOn(0=primary=default),Compress,Verify,AddFieldDef)
         {
-		  nArgs = GetFunArgs (Args,Arg,-5,&hMem);
+			nArgs = GetFunArgs(Args, Arg, -5, &hMem, pBrkPt, bpOffset, bpLen);
 		  if (!nArgs)
 		  	goto RtnFalse;  
 		  ExpandText (Arg[1]);
@@ -1153,7 +1092,7 @@ GSSiExitProg (1350);
 		{
 			FARPROC lpfnLOADMDMsgProc;
 			                  
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse; 
 			_fstrcpy (AutoExportName,Arg[3]);
@@ -1171,7 +1110,7 @@ GSSiExitProg (1350);
 		case 837: //$TIMESPAN(S,M,H,D)
 		{
 			                  
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			nlong = GetSecondsInSample ();
@@ -1199,7 +1138,7 @@ GSSiExitProg (1350);
 		
 		case 838: //$COPYTEXT(tofile,fromfile,FIRSTorLAST,nlines)
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			if (CopyTextFile (Arg[1],Arg[2],Arg[3],Arg[4]))
@@ -1210,7 +1149,7 @@ GSSiExitProg (1350);
 		case 840: // $COLORMAP(CREATE,pathname,vpname)
 				  //		  (ADD,pathname,color)
 		{
-			nArgs = GetFunArgs (Args,Arg,6,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			if (!_fstricmp (Arg[1],"CREATE"))
@@ -1256,7 +1195,7 @@ GSSiExitProg (1350);
 		
 		case 841: // $MAPIMAGE(GET,MIpathname,MIID,OutFile)
 		{
-			nArgs = GetFunArgs (Args,Arg,8,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			if (!stricmp (Arg[1],"GET"))
@@ -1399,7 +1338,7 @@ GSSiExitProg (1350);
 		
 		case 842: // $XMLTOGMD(type,xmlfile,gmdfile)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse; 
 			if (!stricmp (Arg[1],"MNDOTSTATIONS"))
@@ -1417,7 +1356,7 @@ GSSiExitProg (1350);
 		
 		case 843: // $PNETGRID
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			if (!stricmp (Arg[1],"CREATE"))
 				CreatePNetStateGrid (atoi(Arg[2]));
@@ -1467,7 +1406,7 @@ GSSiExitProg (1350);
 		
 		case 844: // $CPTTOBPW(ImageFile)
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			if (CreateBPWFromCPT (Arg[1]))
@@ -1477,7 +1416,7 @@ GSSiExitProg (1350);
 		
 		case 845: // $FILELIST OutFile New, SearchLoc, WildCard,SearchSubdir,WantDirectories)
 		{
-			nArgs = GetFunArgs (Args,Arg,8,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			n = GetFileList (Arg[1],atob(Arg[2]),Arg[3],Arg[4],atob(Arg[5]),atob (Arg[6]));
@@ -1487,7 +1426,7 @@ GSSiExitProg (1350);
 
 		case 846: // $CHECKSUM(filename,frombyte(opt),tobyte(opt)) neg frombyte implies last abs(frombyte) bytes
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			n = GetFileChecksum (Arg[1],atoi(Arg[2]),atoi(Arg[3]));
@@ -1498,7 +1437,7 @@ GSSiExitProg (1350);
 		{
 			double frontSlope, sideSlope;
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			frontSlope = atof (Arg[1]);
@@ -1513,7 +1452,7 @@ GSSiExitProg (1350);
 			time_t	fileTime=-1;
 			long	time32=-1, TimeDiff;
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			if (!stricmp (Arg[1],"CREATE"))
@@ -1530,7 +1469,7 @@ GSSiExitProg (1350);
 		{
 
 			rtn = FALSE;
-			nArgs = GetFunArgs (Args,Arg,-16,&hMem);
+			nArgs = GetFunArgs(Args, Arg, -16, &hMem, pBrkPt, bpOffset, bpLen);
 
 			for (i=0;i<nArgs;i++)
 			{
@@ -1552,7 +1491,7 @@ GSSiExitProg (1350);
 		{
 
 			rtn = FALSE;
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			LPSTR drive = Arg[3];
 			LPSTR dir = drive + _MAX_DRIVE + 1;
@@ -1602,7 +1541,7 @@ GSSiExitProg (1350);
 
 		case 851: // $MOVEFILE(Frompath,Topath)
 		{
-			nArgs = GetFunArgs(Args, Arg, 7, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs == 2)
 			{
 				if (!makedirectories(Arg[2], FALSE, FALSE))
@@ -1615,7 +1554,7 @@ GSSiExitProg (1350);
 
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
-			nArgs = GetFunArgs(Args, Arg, 7, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			nlong = AddMatchSingle(Arg[1], Arg[2], Arg[3], Arg[7], &Point, 0, atoi(Arg[6]));
@@ -1672,7 +1611,7 @@ GSSiExitProg (1350);
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,FileID) updates all fields in file FileID that are in file.gmd
 		{	 
 			BOOL updateOnly;
-			nArgs = GetFunArgs (Args,Arg,-5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, -5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;  
 			ExpandText (Arg[1]);
@@ -1691,7 +1630,7 @@ GSSiExitProg (1350);
 		
 		case 906: // $GMDDELETE(file,SQL)  
 		{	 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			n = DeleteGMDRecords (Arg[1],Arg[2]);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
@@ -1701,7 +1640,7 @@ GSSiExitProg (1350);
 		case 905: // $DELETEREF(refno)  
 		{	 
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 				goto RtnFalse;
 			SetCurView ( SetVPFromName (Arg[2],&Err)); 
@@ -1716,7 +1655,7 @@ GSSiExitProg (1350);
 		case 907: // $MATCHTRAN(jlinefile,filelist,Dist) matches points in tran files withing dist  
 		{	 
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs != 3)
 				goto RtnFalse;
             if (MatchTranFunction (Arg[1],Arg[2],Arg[3]))
@@ -1729,7 +1668,7 @@ GSSiExitProg (1350);
 		{	 
 			short	addorcreate=1, Type;
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 		    Type = atoi (Arg[2]);  
 		    TORF = atob (Arg[5]);    
 		    if (TORF)
@@ -1745,7 +1684,7 @@ GSSiExitProg (1350);
 		case 909://$GETINIVAL(pathname.ini,section,name,default)
 		{
 			int ln;
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (!GetShortPathName(Arg[1], Arg[6], MAX_PATH))
 				strcpy (OutLoc,Arg[4]);
 			else
@@ -1756,7 +1695,7 @@ GSSiExitProg (1350);
 		
 		case 910://$SETINIVAL(pathname.ini,section,name,value)
 		{
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (WritePrivateProfileString (Arg[2],Arg[3],Arg[4],Arg[1]))
 				goto RtnTrue;
 			goto RtnFalse;
@@ -1765,7 +1704,7 @@ GSSiExitProg (1350);
 		
 		case 911: // $POLYPOINT(PointNum,X or Y or B) 
 		{	 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0; 
 			if (strcspn (Arg[2],"XxYyBb") < 6)
 			{
@@ -1807,7 +1746,7 @@ GSSiExitProg (1350);
 		{	 
 			BOOL	ValidCoord;
 
-			nArgs = GetFunArgs (Args,Arg,9,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (!_fstrnicmp (Arg[2],"Invalid",7))
@@ -1855,7 +1794,7 @@ GSSiExitProg (1350);
 		
 		case 916:	//$GMDCREATE(Name,numkeyfld,defstring,Compress(YorN)) if numkeyfld == 0 defstring is path of db to copy from
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			n = atoi (Arg[2]);
@@ -1866,7 +1805,7 @@ GSSiExitProg (1350);
 		
 		case 917:	//$FINDFILES(Dir,wildcard,outfile (opt),WantSub,HeaderRecord)
 		{
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (*Arg[3])
@@ -1890,7 +1829,7 @@ GSSiExitProg (1350);
 		{
 			char	DegC[8],MinC[8],SecC[16], PreDir[4], PostDir[4]; 
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			n = atoi (Arg[2]);  
 			AZ = atof (Arg[1]);
 			if (n)
@@ -1914,7 +1853,7 @@ GSSiExitProg (1350);
 		
 		case 919: // $SYMDELETE(symnum,close(TF))
 		{	 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			n = atoi (Arg[1]);
 			if (DeleteSymbol (n,atob(Arg[2])))
 				goto RtnTrue;
@@ -1931,7 +1870,7 @@ GSSiExitProg (1350);
 			BOOL	Create = TRUE;
 			HANDLE  hValues = 0;
 			
-			nArgs = GetFunArgs (Args,Arg,9,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!GetFieldIDsFromNames(Arg[3], &hKeyFields, &hFieldTypes, Arg[5], &hValues))
 				goto RtnFalse;
 			if (!GetFieldIDsFromNames (Arg[3],&hFields,&hFieldTypes,Arg[6],&hValues))
@@ -1968,7 +1907,7 @@ GSSiExitProg (1350);
 		case 921: // $LAYERNAME(layernum,viewport name(opt) 
 		{	 
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			n = atoi (Arg[1]);
 			SetCurView ( SetVPFromName (Arg[2],&Err)); 
 			_fstrcpy (OutLoc,CurView->FileID[n]);
@@ -1982,7 +1921,7 @@ GSSiExitProg (1350);
 			long	id=1;
 			char	Delim=',';
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			Fid = GSSiOpenFile (Arg[1],0,OF_READ);
 			if (Fid == HFILE_ERROR)
 	           	goto RtnFalse; 
@@ -2004,7 +1943,7 @@ GSSiExitProg (1350);
 		
 		case 923: // $TRANIMAGE(ImageFile,TranFile,OutBMPFile,OutBPWFile,AreaFileOrTAG)
 		{	
-			nArgs = GetFunArgs (Args,Arg,5,&hMem);  
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (TransformImage (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5]))
 				goto RtnTrue;
 			goto RtnFalse;
@@ -2012,13 +1951,9 @@ GSSiExitProg (1350);
 		
 		case 924: // $SYMPARENT(symnum)  
 		{				
-			hMem = GSSiGlobAlloc (1178,GMEM_MOVEABLE,4096);
-			Arg1 = GlobalLock(hMem);
-			
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1); 
-			*OutLoc = 0;  
-			SymNum = atol (Arg1);
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			SymNum = atol (Arg[1]);
 			if ((SymNum = GetDictSymParent (SymNum)))
 				GetDictSymName (SymNum,OutLoc);
 			goto Rtnl;   
@@ -2029,7 +1964,7 @@ GSSiExitProg (1350);
 		{	
 			long	ICmd;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 		    
 		    if (!_fstricmp (Arg[1],"STORMPIPE"))
             {
@@ -2046,7 +1981,7 @@ GSSiExitProg (1350);
 
 		case 926: //$CURSORLOC(none W or C) returns world (default or W) or client coord of cursor
 		{   
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			GetCursorPos (&Point16); 
 			*OutLoc = 0;
 			ScreenToClient (CurView->hWnd,&Point16);
@@ -2068,7 +2003,7 @@ GSSiExitProg (1350);
 			HANDLE	hTran;
 			int		dir,type;
 			
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			dir = atoi (Arg[3]);
@@ -2093,7 +2028,7 @@ GSSiExitProg (1350);
 
 		case 928: //$CHANGETAG(Refno,newTAG)  
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			Refno = atol (Arg[1]); 
 			if (!PickByRefno (Refno,0,0,-1))
 				goto RtnFalse;
@@ -2105,7 +2040,7 @@ GSSiExitProg (1350);
 		
 		case 929: //$LAYERPATH(Layer name or #,opt viewport name)  
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0; 
 			_fmemmove (Arg[1]+6,Arg[1],_fstrlen (Arg[1])+1);
 			_fstrncpy (Arg[1],"LAYER:",6);
@@ -2116,7 +2051,7 @@ GSSiExitProg (1350);
 		
 		case 930: //$FINDFIELD(FIELD or TABLE,DBName,partialfieldname,outfile)
         {
-		  nArgs = GetFunArgs (Args,Arg,4,&hMem);
+		  nArgs = GetFunArgs (Args,Arg,4,&hMem, pBrkPt, bpOffset, bpLen);
 		  if (nArgs < 4)
 		  	goto RtnFalse;
 		  if (!_fstricmp (Arg[1],"FIELD")) 
@@ -2129,7 +2064,7 @@ GSSiExitProg (1350);
 		 
 		case 931: //$GETPICKED(item)  
 		{
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			n = atoi(Arg[1]);  
@@ -2143,7 +2078,7 @@ GSSiExitProg (1350);
 			
 		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach
 		{
-			nArgs = GetFunArgs (Args,Arg,-6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,-6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
 				goto RtnFalse;
 			ExpandText (Arg[3]);
@@ -2157,7 +2092,7 @@ GSSiExitProg (1350);
 
 		case 933: //$URLTOFILE(URL,File)
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (URLToFile (Arg[1],Arg[2]))
@@ -2167,7 +2102,7 @@ GSSiExitProg (1350);
 
 		case 934: //$STREETNUM(Name,Add(TorF))
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (atob (Arg[2]))
 				nlong = AddStreetName (Arg[1],0,"","","",""); 
 			else
@@ -2182,7 +2117,7 @@ GSSiExitProg (1350);
 		    LPGWFLDINFO pFldInfo; 
 		    FIELDINFO	FldInfo;
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			n = ScanForFieldTypes (Arg[1],&hFieldTypes,atob(Arg[2]),atol(Arg[3])); 
 			if (!n)
 				goto RtnFalse;
@@ -2203,7 +2138,7 @@ GSSiExitProg (1350);
 		}  
 		case 936: //$NEWLATLON(StartPT,distinmeters,AZ)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			Point = atopt (Arg[1],&Err); 
@@ -2215,7 +2150,7 @@ GSSiExitProg (1350);
 	
 		case 937: //$INTERSECT(REF1,REF2,outvarname(opt - use %WX %WY by default)
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (IntersectRefs(Arg[1],Arg[2],Arg[3],Arg[4]))
@@ -2225,7 +2160,7 @@ GSSiExitProg (1350);
 	
 		case 938: //$MOVEPOINT(refno,newcoord)
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
 			Refno = atol (Arg[1]);
@@ -2239,7 +2174,7 @@ GSSiExitProg (1350);
 	
 		case 939: //$COMBOFILE(CREATE,name,fielddefs,reffile1,...reffilen)
 		{
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 12, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			rtn = CreateComboFile (Arg[2],Arg[3],Arg[4],Arg[5],Arg[6],Arg[7],Arg[8],Arg[9],Arg[10],Arg[11],Arg[12]);
@@ -2250,7 +2185,7 @@ GSSiExitProg (1350);
 		{
 			LPSTR	CmdMess = GlobalLock (hCmdMess);
 
-			nArgs = GetFunArgs (Args,Arg,1,&hMem);
+			nArgs = GetFunArgs (Args,Arg,1,&hMem, pBrkPt, bpOffset, bpLen);
 			strcpy (CmdMess,Arg[1]);
 			GlobalUnlock (hCmdMess);
 			goto RtnTrue;
@@ -2259,7 +2194,7 @@ GSSiExitProg (1350);
 		case 941: //NEARPOINT(CREATE,NPTable,FromDB,FromSQL,FromPoint,FromRef,FromDesc,FromPrefix,FromUDI)
 				  //NEARPOINT(FIND,Point,idesc,FoundPointVar,FoundRefVar)
 		{
-			nArgs = GetFunArgs (Args,Arg,-9,&hMem);
+			nArgs = GetFunArgs(Args, Arg, -9, &hMem, pBrkPt, bpOffset, bpLen);
 			ExpandText (Arg[1]);
 			ExpandText (Arg[2]);
 			if (!stricmp (Arg[1],"CREATE"))
@@ -2299,7 +2234,7 @@ GSSiExitProg (1350);
 				  //$POINTLIST(AZM,name,pct,before;after;at(default)) at averages before and after if at node point
 				  //$POINTLIST(INTERSECT,name,name2,COUNT;id;Farthest;nearest,farornearpoint)
 		{
-			nArgs = GetFunArgs (Args,Arg,6,&hMem);
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (PointListCommands (nArgs,Arg,OutLoc))
@@ -2309,7 +2244,7 @@ GSSiExitProg (1350);
 
 		case 943: //$POINTINVP(type(WORLD or SCREEN),x y,VPName)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			Point = atopt (Arg[2],&Err); 
@@ -2328,7 +2263,7 @@ GSSiExitProg (1350);
 		{
 			float f=1;
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (nArgs > 1)
@@ -2343,7 +2278,7 @@ GSSiExitProg (1350);
 				  //$LINKLINES(COMPUTE) return #lines
 				  //$LINKLINES(GET,line #)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			LinkLinesFunction (Arg[1],Arg[2],OutLoc);
@@ -2351,7 +2286,7 @@ GSSiExitProg (1350);
 		}
 		case 946: //$CLEARFILE(filepath)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			Fid = GSSiOpenFile (Arg[1],0,OF_CREATE);
@@ -2366,7 +2301,7 @@ GSSiExitProg (1350);
 		}
 		case 947: //$CLIPBOARD(CAPTURE,title,menu)
 		{
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp(Arg[1], "CAPTURE"))
@@ -2381,7 +2316,7 @@ GSSiExitProg (1350);
 		{	 
             FARPROC lpfnDECOMPPOLYMsgProc; 
 			
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			hDCPSetup = GSSiGlobAlloc (1179,GMEM_MOVEABLE,1024);
@@ -2408,7 +2343,7 @@ GSSiExitProg (1350);
 		
 		case 1002: // $DELETEFILE(path,Y or N or T or F or 1 or 0 (verify switch))
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 
@@ -2440,7 +2375,7 @@ GSSiExitProg (1350);
 		{
 			long	SNum, index;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 			{
 				*OutLoc = 0;
@@ -2465,21 +2400,13 @@ GSSiExitProg (1350);
 		{	
 			short	opt;
 						
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1183,GMEM_MOVEABLE,2048*2+256);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			if (sscanf (Arg1,"%Flf %Flf %Flf %Flf",&Bounds.xmn, 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (sscanf(Arg[1], "%Flf %Flf %Flf %Flf", &Bounds.xmn,
 										  		   &Bounds.ymn,
 										  		   &Bounds.xmx,
 										  		   &Bounds.ymx) != 4)
 				goto RtnFalse;
-			ExpandText (Arg2);
-			opt = atoi (Arg2);
+			opt = atoi (Arg[2]);
 			switch (opt)
 			{
 				case 1:
@@ -2527,7 +2454,7 @@ GSSiExitProg (1350);
 		
 		case 1005: //$PRINTSETUP() 
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);  
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!_fstricmp (Arg[1],"READ"))
 			{
            		Fid = GSSiOpenFile (Arg[2],0,OF_READ);
@@ -2557,7 +2484,7 @@ GSSiExitProg (1350);
 			BOOL	Save;
 			LPSTR	pName;
 						
-			nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			Save = atob(Arg[2]);
 			if (*Arg[1] == '(')
 			{
@@ -2581,11 +2508,8 @@ GSSiExitProg (1350);
 		{   VARPNT  VarPnt;   
 			HANDLE	handle;
 						
-			hMem = GSSiGlobAlloc (1186,GMEM_MOVEABLE,2048);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,(LPSTR)(Args));
-			ExpandText (Arg1);
-			if (handle = FindVar(Arg1))
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			if (handle = FindVar(Arg[1]))
 			{ 
 				VarPnt = (VARPNT)GlobalLock (handle);
 				ultoa (VarPnt->changetime,OutLoc,10);
@@ -2600,22 +2524,8 @@ GSSiExitProg (1350);
 		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
 		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
 		{    
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1187,GMEM_MOVEABLE,3*2048);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			Arg3 = Arg2 + 2048;  
-			
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
-			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			ExpandText (Arg3);
-            if (RegisterCD (Arg1,Arg2,Arg3))
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (RegisterCD(Arg[1], Arg[2], Arg[3]))
             	goto RtnTrue;
             goto RtnFalse;
 		}
@@ -2624,7 +2534,7 @@ GSSiExitProg (1350);
 		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
 		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
 		{    
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			_fstrcpy (PMDataFile,Arg[1]);
 			_fstrcpy (PMMacroFile,Arg[2]);
 			FirstMergeRecord=1;
@@ -2659,22 +2569,13 @@ GSSiExitProg (1350);
 			HANDLE		hSym;
 			LPSYMBOL	pSym;
 			 
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1188,GMEM_MOVEABLE,2*2048);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			ExpandText (Arg2); 
-			n = GetDictSymbolNumber (Arg1);    
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			n = GetDictSymbolNumber(Arg[1]);
 			if (!n)
             	goto RtnFalse; 
 			hSym = GetDictSymDesc (n,0);
 			pSym = (LPSYMBOL)GlobalLock (hSym); 
-			_fstrncpy (pSym->Desc,Arg2,64);
+			_fstrncpy (pSym->Desc,Arg[2],64);
 			GlobalUnlock (hSym);
             ReplaceSymbol (n,hSym);
 			DestroySymbol (hSym);  
@@ -2685,51 +2586,36 @@ GSSiExitProg (1350);
 		{	
 			LPSTR	HaveLine;
 			
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc(1189, GMEM_MOVEABLE, 3 * 2048 + 256 + 1030 + sizeof(OFSTRUCTGM));
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			Arg3 = Arg2 + 2048; 
-			pFile = Arg3 + 2048;
-			lpstr = pFile + 256; 
+			nArgs = GetFunArgs(Args, Arg,5, &hMem, pBrkPt, bpOffset, bpLen);
+			lpstr = Arg[4];
 			*lpstr = 0;
-			pOFStruct = (LPOFSTRUCTGM)(lpstr + 1030);  
-			
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			if (!(ParLoc = MatchLev (Arg2,','))) goto Rtn0;
-			_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			ExpandText (Arg3);
-			Fid = GSSiOpenFile (Arg1,pOFStruct,OF_READ);
+			pFile = Arg[5];
+			Fid = GSSiOpenFile(Arg[1], 0, OF_READ);
 			if (Fid == HFILE_ERROR)
 	           	goto RtnFalse; 
-	        _fullpath (pFile,Arg1,256); 
+	        _fullpath (pFile,Arg[1],256); 
 	        pEnd = _fstrrchr (pFile,'\\');
 	        _fstrcpy (pEnd,"\\tempfile");
-			Fid2 = GSSiOpenFile (pFile,pOFStruct,OF_CREATE);    
+			Fid2 = GSSiOpenFile (pFile,0,OF_CREATE);    
 			do
 			{ 
 				if ((HaveLine = fgetstring (lpstr,1024,Fid)))
 					fputstring (lpstr,Fid2);
 			}
-			while (HaveLine && _fstrcmp (lpstr,Arg2)); 
-			fputstring (Arg3,Fid2); 
+			while (HaveLine && _fstrcmp (lpstr,Arg[2])); 
+			fputstring (Arg[3],Fid2); 
 			while (fgetstring (lpstr,1024,Fid))
 				fputstring (lpstr,Fid2);
 	        GSSiClose (Fid); 
 	        GSSiClose (Fid2);
-	        GSSiRemove (Arg1);
-	        GSSiRename (pFile,Arg1);
+	        GSSiRemove (Arg[1]);
+	        GSSiRename (pFile,Arg[1]);
 			goto RtnTrue;
 		} 
 		
 		case 1013: //$CROSSMATCH([%DL]attribut\frommap.txt,[%DL]attribut\fromars.txt,@[UDI],@$OS(@[GEOACCT]),[%DL]attribut\notinmap.txt,[%DL]attribut\notinars.txt)
 		{
-			nArgs = GetFunArgs (Args,Arg,7,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 7)
 				goto RtnFalse;
 			l = atoi (Arg[7]);
@@ -2741,7 +2627,7 @@ GSSiExitProg (1350);
 		case 1014: //$AREAINAREA(THEME,BoundaryArea,Theme,GMDfile,MinPCT) 
 				   //$AREAINAREA(RASTER,BoundaryArea,GMDfile,speed,MinPCT,IncludeBoundaries)
 		{
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			RVal = atof (Arg[5]);
 			SetCurView ( SetVPFromName (Arg[6],&Err)); 
 			if (!_fstricmp (Arg[1],"THEME"))
@@ -2758,11 +2644,8 @@ GSSiExitProg (1350);
 		}
 		
 		case 1015: //$CREATEFILE(pathname)
-			hMem = GSSiGlobAlloc (1191,GMEM_MOVEABLE,2048);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,(LPSTR)(Args));
-			ExpandText (Arg1);
-			Fid = GSSiOpenFile (Arg1,0,OF_CREATE); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			Fid = GSSiOpenFile(Arg[1], 0, OF_CREATE);
 			if (Fid == HFILE_ERROR) 
 				goto RtnFalse;
 			GSSiClose (Fid);
@@ -2771,22 +2654,9 @@ GSSiExitProg (1350);
 		case 1016: // $WINTOWORLD(point,vpname)
 		case 1017: // $WORLDTOWIN(point,vpname)
 		{   
-			hMem = GSSiGlobAlloc (1192,GMEM_MOVEABLE,2*2048);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			
-			if ((ParLoc = MatchLev (Args,',')))
-			{
-				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-				ParLoc = '\0';
-			}
-			else
-				*Arg2 = 0;
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			Point = atopt (Arg1,&Err); 
-			SetCurView ( SetVPFromName (Arg2,&Err)); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			Point = atopt(Arg[1], &Err);
+			SetCurView ( SetVPFromName (Arg[2],&Err)); 
 			if (FunID == 1016) 
 				Point2 = WinPtToBasePtD (&Point);
 			else
@@ -2798,7 +2668,7 @@ GSSiExitProg (1350);
 		
         case 1018: //$ADJUSTPOLY(opt) 
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp (Arg[1],"BPEP"))
 			{
 				Refno = atol (Arg[2]);
@@ -2830,7 +2700,7 @@ GSSiExitProg (1350);
         
         case 1019:	//$TABTOCOMMA(INFILE,OUTFILE)
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs != 2)
 				goto RtnFalse;
 			TABToComma (Arg[1],Arg[2]);
@@ -2838,18 +2708,13 @@ GSSiExitProg (1350);
         }
 		case 1020: //$SELECTICON(iconlib)
 		{   
-			
-			hMem = GSSiGlobAlloc (1193,GMEM_MOVEABLE,2*2048);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048;  
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);   
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			goto Rtnl;
 		}  
 		 
         case 1021:	//$MOVECURSOR(world coord,vp(opt))
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (*Arg[1]) 
 			{
 				Point = atopt (Arg[1],&Err);
@@ -2885,7 +2750,7 @@ GSSiExitProg (1350);
 
         case 1022:	//$CURSORINVP(vpname)
         {
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs)
 			{ 
 				SetCurView ( SetVPFromName (Arg[1],&Err)); 
@@ -2912,7 +2777,7 @@ GSSiExitProg (1350);
         
         case 1024:	//$FULLSCREEN(vpname)
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);  
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			n = 2;
 			if (nArgs)
 			{ 
@@ -2930,7 +2795,7 @@ GSSiExitProg (1350);
         }
         case 1025:	//$REFCONNECT(CHECK or FIX)
         {
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs) 
 			{   
 				if (!_fstricmp (Arg[1],"CHECK"))
@@ -2973,7 +2838,7 @@ GSSiExitProg (1350);
 
         case 1026:	//$SCREENTOVP(screen coord,vpname(opt))
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs > 1)
 			{ 
 				SetCurView ( SetVPFromName (Arg[2],&Err)); 
@@ -2992,7 +2857,7 @@ GSSiExitProg (1350);
         
         case 1027:	//$AREACENTER(Outfile,speedfac,usemask)
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (GetAreaCenters (Arg[1],atoi(Arg[2]),atob(Arg[3])))
@@ -3002,7 +2867,7 @@ GSSiExitProg (1350);
 		
         case 1028:	//$SERVERFILE(GET or SEND or DELETE,socket,serverfilename,localfilename,statusupdatecommand,completioncommand)
         {
-			nArgs = GetFunArgs (Args,Arg,-6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, -6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
 			ExpandText (Arg[1]);
@@ -3017,7 +2882,7 @@ GSSiExitProg (1350);
 		
         case 1029:	//$SPLITLINES(MaxPoints)
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (SplitHighlightedPolys (atoi(Arg[1])))
@@ -3027,7 +2892,7 @@ GSSiExitProg (1350);
 		
         case 1030:	//$INVERTRECT(rect,vp);
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			Rect = atorect (Arg[1],&Err);
@@ -3047,7 +2912,7 @@ GSSiExitProg (1350);
 
         case 1031:	//$SETMAPTIME(MapPath,MinTime,MaxTime);
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 
@@ -3058,7 +2923,7 @@ GSSiExitProg (1350);
 		
         case 1032:	//$GETMAPTIME(MapPath,MIN or MAX);
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			nlong = GetMapTime (Arg[1],Arg[2]);
@@ -3068,7 +2933,7 @@ GSSiExitProg (1350);
 		
         case 1033:	//$CHECKPOINT();
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			CheckPointBegin ();
 			goto RtnTrue;
 		}
@@ -3079,7 +2944,7 @@ GSSiExitProg (1350);
 					//$PCTINAREAS(4,handle); returns result as num between 0 and 1
 					//$PCTINAREAS(5,handle); destroys handle
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 
 			PCTInAreaFunction (atoi(Arg[1]),Arg[2],Arg[3],OutLoc);
 			goto Rtnl;
@@ -3092,7 +2957,7 @@ GSSiExitProg (1350);
 					//$PROJECTION(CONVERT,point,fromid,toid)
 					//$PROJECTION(CONVERSIONGRID,bounds,accuracy,outfile,projidfrm(opt),projidto(opt))
         {
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 
 			ProjectionFunction (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6],OutLoc);
 			goto Rtnl;
@@ -3100,7 +2965,7 @@ GSSiExitProg (1350);
 		case 1036: // $BACKGROUND(SET,ITEM,COLOR,VP)
 				   // $BACKGROUND(CLEAR,VP)
  		{	
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!_fstrcmp (Arg[1],"CLEAR")) 
@@ -3152,7 +3017,7 @@ GSSiExitProg (1350);
 		
 		case 1037: // $WAITFORKEY(useGetMessage)
 		{
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = WaitForKeystroke(atob(Arg[1]));
 			OutLoc[1] = 0;
 			goto Rtnl;
@@ -3165,7 +3030,7 @@ GSSiExitProg (1350);
 			UINT item;
 			int  maxlen;
 
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			hWndDlg = (HWND)atoi(Arg[1]);
 			item = (UINT)atoi(Arg[2]);
 			if (!stricmp(Arg[3], "GETTEXT"))
@@ -3186,7 +3051,7 @@ GSSiExitProg (1350);
 		{
 			BOOL	AddRef;
 
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			AddRef = atob(Arg[4]);
@@ -3204,11 +3069,8 @@ GSSiExitProg (1350);
         	HANDLE	hSaveVis = GSSiGlobAlloc (1194,GMEM_MOVEABLE,sizeof(VISLIST));
         	LPVISLIST	pSaveVis = (LPVISLIST)GlobalLock (hSaveVis);
         	
-			hMem = GSSiGlobAlloc (1195,GMEM_MOVEABLE,2048);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,(LPSTR)(Args));
-			ExpandText (Arg1);
-			Layer = atol (Arg1);
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			Layer = atol(Arg[1]);
 			*pSaveVis = *CurVis; 
 			if (Layer < 0)
 			{
@@ -3234,11 +3096,8 @@ GSSiExitProg (1350);
 		
         case 1103: //$FIXGMERRORS(file)
         {   
-			hMem = GSSiGlobAlloc (1196,GMEM_MOVEABLE,2048);
-			Arg1 = GlobalLock(hMem);
-			_fstrcpy (Arg1,(LPSTR)(Args));
-			ExpandText (Arg1); 
-			FixGMErrors(Arg1);
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			FixGMErrors(Arg[1]);
 		    goto Rtnl;
 		} 
 		
@@ -3262,28 +3121,15 @@ GSSiExitProg (1350);
 			HANDLE	hTran; 
 			long	Tran2Offset;    
 			
-			hMem = GSSiGlobAlloc (1197,GMEM_MOVEABLE,2048*3);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			pOFStruct = (LPOFSTRUCTGM)(Arg2 + 2048);
-			if ((ParLoc = MatchLev (Args,',')))
-			{ 
-				_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-				*ParLoc = '\0';
-			}
-			else
-				goto RtnFalse;
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			GSSiRemove (Arg2);
-			if ((hTran=LoadTranFile (Arg1,1,3,0,0)))
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			GSSiRemove(Arg[2]);
+			if ((hTran=LoadTranFile (Arg[1],1,3,0,0)))
 			{   
-				Fid = GSSiOpenFile (Arg2,pOFStruct,OF_CREATE);
+				Fid = GSSiOpenFile (Arg[2],0,OF_CREATE);
 				WriteTranData (Fid,hTran); 
 				Tran2Offset = GSSillseek (Fid,0,2);
 				CloseTRANS2 (&hTran);  
-				hTran=LoadTranFile(Arg1,2,3,0,0);
+				hTran=LoadTranFile(Arg[1],2,3,0,0);
 				WriteTranData (Fid,hTran);
 				CloseTRANS2 (&hTran); 
 				BigWrite (Fid,(HPSTR)&Tran2Offset,4,-1);
@@ -3299,7 +3145,7 @@ GSSiExitProg (1350);
         {   
         	long	WayPointID;
         	
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			Point.x = atof (Arg[3]);
@@ -3321,27 +3167,9 @@ GSSiExitProg (1350);
 		case 1107: // $UPDATEGRCMD(Varname,VarValue,SavedFileID(optional))
 		{	 
 			
-			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1199,GMEM_MOVEABLE,3*2048);
-			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 2048; 
-			Arg3 = Arg2 + 2048; 
-			
-			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
-			*ParLoc = '\0';
-			_fstrcpy (Arg1,Args);
-			if ((ParLoc = MatchLev (Arg2,',')))
-			{
-				_fstrcpy (Arg3,(LPSTR)(ParLoc+1));
-				*ParLoc = '\0';
-			}
-			else
-				*Arg3 = 0;
-			ExpandText (Arg1);
-			ExpandText (Arg2);
-			ExpandText (Arg3);
-            n = atoi (Arg3); 
-			if (UpdateCmdStringInFile (Arg1,Arg2,n))
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			n = atoi(Arg[3]);
+			if (UpdateCmdStringInFile (Arg[1],Arg[2],n))
               	goto RtnTrue;
             else
 				goto RtnFalse;
@@ -3356,15 +3184,16 @@ GSSiExitProg (1350);
 			static	int istatus=0;
         	
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
-			hMem = GSSiGlobAlloc (1200,GMEM_MOVEABLE,8192*4);
+			hMem = GSSiGlobAlloc(1200, GMEM_MOVEABLE, MAXARGLENGTH * 2 + 4096 + 1024);
 			Arg1 = GlobalLock(hMem);
-			Arg2 = Arg1 + 8192; 
-			Arg3 = Arg2 + 8192;
-			Arg4 = Arg3 + 8192;
+			Arg2 = Arg1 + 1024;
+			Arg3 = Arg2 + MAXARGLENGTH;
+			Arg4 = Arg3 + 4096;
 			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
 			*ParLoc = '\0';
 			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
+			ExpandTextDB(Arg1,pBrkPt, bpOffset, bpLen);
+			bpOffset += strlen(Args) + 1;
 			if (!(pEnd = strchr (Arg1,'.')))
 				pEnd = Arg1;
             if ((pStatusText = _fstrchr (pEnd,'!')))
@@ -3435,7 +3264,7 @@ GSSiExitProg (1350);
 						if (!rc)
 							break;
 					}
-			    	ExpandText (Arg4);
+					ExpandTextDB(Arg4, pBrkPt, bpOffset, bpLen);
 					if (ProcessLine >= 0)
 						break; 
 					CurLoc = GSSillseek (Fid,0,1);  
@@ -3470,7 +3299,7 @@ GSSiExitProg (1350);
 			short	from=1,to=2, Type;
 			HANDLE	hTrans;
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (nArgs == 1)
@@ -3559,7 +3388,7 @@ GSSiExitProg (1350);
 		{	 
 			HANDLE	hGlobal;
 			
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			str = Arg[5];
             n = _fstrlen (Arg[1]); 
     		hGlobal = FindVar(Arg[3]);	
@@ -3610,7 +3439,7 @@ GSSiExitProg (1350);
 		{   
 			FARPROC lpfnSELECTITEMSMsgProc;
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 4)
 				goto RtnFalse;
 			hSelectItemsArgs = GSSiGlobAlloc (1203,GHND,1024);
@@ -3642,7 +3471,7 @@ GSSiExitProg (1350);
 			
 		case 1112: //$GPSTRACKING(ONorOFForTOGGLE)
 		{   
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)  
 			{
 				if (GPSTracking (-1))
@@ -3685,7 +3514,7 @@ GSSiExitProg (1350);
         {   
         	long	RouteRef;
         	
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			RouteRef = atol (Arg[1]); 
@@ -3757,7 +3586,7 @@ GSSiExitProg (1350);
 		
 		case 1118: //$THEMEINAREA(BoundaryArea,Theme,GMDfile,MinPCT,Precision)
 		{
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 5)
 				goto RtnFalse;
 			RVal = atof (Arg[4]); 
@@ -3784,7 +3613,7 @@ GSSiExitProg (1350);
 		{	
 			double	GroupDist;
 				
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 12, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 10)
 				goto RtnFalse;
 			Dist = atobasedist (Arg[7],&Err);
@@ -3805,7 +3634,7 @@ GSSiExitProg (1350);
 		case 1121: //$GETTEMPFILE(prefix,suffix)
 		{	
 			LPSTR	pSuf;	
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!*Arg[1])
 				_fstrcpy (Arg[1],"gm"); 
 			pSuf = Arg[2];
@@ -3823,7 +3652,7 @@ GSSiExitProg (1350);
 			int		IndexType;
 			MNMXCORD	Bounds;
 			
-			nArgs = GetFunArgs (Args,Arg,4,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!GetFieldIDsFromNames (Arg[1],&hKeyFields,0,Arg[2],0))
 				goto RtnFalse;
 			if (IsInteger(Arg[3]))
@@ -3845,7 +3674,7 @@ GSSiExitProg (1350);
 		{	 
 			HANDLE	hKeyFields;
 			
-			nArgs = GetFunArgs (Args,Arg,1,&hMem);
+			nArgs = GetFunArgs (Args,Arg,1,&hMem, pBrkPt, bpOffset, bpLen);
 			rtn = AddFalseIntersection ();
 			if (rtn) 
 				goto RtnTrue; 
@@ -3857,7 +3686,7 @@ GSSiExitProg (1350);
 
 		case 1124: // $DUMPDGNSYMS(dgnfile,dumpfile) 
 		{	 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			DumpDGNSyms (Arg[1],Arg[2]);
 			goto RtnTrue; 
 		}  
@@ -3865,7 +3694,7 @@ GSSiExitProg (1350);
         
 		case 1125: // $SCREENCACHE(CLEAR) 
 		{	 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			DeleteCacheDir ();
 			RemoveVPBitmaps ();
 			goto RtnTrue; 
@@ -3875,7 +3704,7 @@ GSSiExitProg (1350);
 		case 1126: // $VIRTUALPLOT(Display,name) 
 				   // $VIRTUALPLOT(SAVE,vpindex,imagepathname)
 		{	 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);   
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!_fstricmp (Arg[1],"DISPLAY"))
 				rtn = DisplayVirtualPlot (Arg[2]);
 			if (!_fstricmp (Arg[1],"SAVE"))
@@ -3888,7 +3717,7 @@ GSSiExitProg (1350);
 		{	
 			GWFLDINFO	FieldInfo;
 			 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
        		_fstrncpy (FieldInfo.Name,Arg[2],sizeof(FieldInfo.Name));
 	 		if (GetFieldTypeAndLenFromChar (Arg[3],&FieldInfo,0))
 				if (GWDAddField (Arg[1],&FieldInfo))
@@ -3901,7 +3730,7 @@ GSSiExitProg (1350);
 		{	
 			GWFLDINFO	FieldInfo;
 			 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (GMDCopyFile (Arg[1],Arg[2],Arg[3]))
 				goto RtnTrue;
 			goto RtnFalse;
@@ -3914,7 +3743,7 @@ GSSiExitProg (1350);
 			HANDLE	hViewport; 
 			LPVIEWPORT	pViewport;
 			                  
-			nArgs = GetFunArgs (Args,Arg,6,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			if (!stricmp (Arg[1],"LOADADDITIONAL"))
@@ -3939,7 +3768,7 @@ GSSiExitProg (1350);
 		
         case 1130:	//$INSERTLINES(BEGIN,FILE)
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;   
 			rtn = Insert (Arg[1],Arg[2],Arg[3]);
@@ -3950,7 +3779,7 @@ GSSiExitProg (1350);
         {
 			HDIB32 hDib32In, hDib32Out;
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			hDib32In = BMPHandleFromEXT (Arg[1]);
@@ -3974,7 +3803,7 @@ GSSiExitProg (1350);
         {
 			BOOL	AddRef;
 
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,5,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse; 
 			AddRef = atob (Arg[4]);
@@ -3986,7 +3815,7 @@ GSSiExitProg (1350);
 					//$POINTINAREA(TEST,Point)
 					//$POINTINAREA(DESTROY)
         {
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			if (PointInAreaFunctions (nArgs,Arg,OutLoc))
@@ -3997,7 +3826,7 @@ GSSiExitProg (1350);
 		case 1134:// $SCREENCOLOR(GET,basept,vpname)
 				  // $SCREENCOLOR(SET,basept,color,vpname)
 
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			if (!stricmp (Arg[1],"GET"))
@@ -4028,7 +3857,7 @@ GSSiExitProg (1350);
 			{
 				int ix,iy;
 
-				nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+				nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 				if (nArgs < 2)
 					goto RtnFalse; 
 				if (!stricmp (Arg[1],"SET"))
@@ -4056,7 +3885,7 @@ GSSiExitProg (1350);
 
 				nlong = 0;
 
-				nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+				nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 				nMax = atoi (Arg[2]);
 
 				pLoc = (unsigned char *)Arg[1];
@@ -4076,7 +3905,7 @@ GSSiExitProg (1350);
 		{
 				LPSTR	pName;
 
-				nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+				nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 				hName = GSSiGlobAlloc(17, GHND, 1024);
 				pName = GlobalLock(hName);
 				strcpy(pName, Arg[2]);
@@ -4088,7 +3917,7 @@ GSSiExitProg (1350);
 
 		case 1138://$ISLOCALFILE(File)
 		{
-				nArgs = GetFunArgs(Args, Arg, 2, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 				if (IsLocalFile(Arg[1]))
 					goto RtnTrue;
 				goto RtnFalse;
@@ -4134,7 +3963,7 @@ GSSiExitProg (1350);
 
         case 1204: //$MAKEQUANFILE (pathname)
         {   
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (*Arg[2])
@@ -4151,7 +3980,7 @@ GSSiExitProg (1350);
         		   //$USEDREFTABLE(LOAD,HLT)
         		   //$USEDREFTABLE(CHECK,HLT)
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (URTCommands (nArgs,Arg))
@@ -4164,7 +3993,7 @@ GSSiExitProg (1350);
         	HANDLE		hPnts;
         	HPDPOINT	Points;
         	
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			Bounds = atobounds (Arg[1],&Err);
@@ -4190,7 +4019,7 @@ GSSiExitProg (1350);
         
         case 1207: //$UPDATEGLOBAL(file,varname,varvalue) 
         {
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (nArgs == 2)
@@ -4208,7 +4037,7 @@ GSSiExitProg (1350);
         
 		case 1208: //$CHANGESYMBOL(Refno,newsymbolname)  
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			Refno = atol (Arg[1]); 
 			if (!PickByRefno (Refno,0,0,-1))
 				goto RtnFalse;
@@ -4221,7 +4050,7 @@ GSSiExitProg (1350);
 		
 		case 1209: //$ORATABLENAME(ORAFILENAME)
 		{
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 			GetORATableName (Arg[1],OutLoc);
 		    goto Rtnl;
@@ -4230,7 +4059,7 @@ GSSiExitProg (1350);
 		
 		case 1210: //$LONGPATHNAME (ShortName)
 		{   
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,12,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;  
 			GetLongPathName2 (Arg[1],256);
@@ -4240,7 +4069,7 @@ GSSiExitProg (1350);
 		
 		case 1211: //$HOTSPOTVALUE(Point)
 		{   
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 12, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;  
 			Point = atopt(Arg[1],&Err);
@@ -4253,7 +4082,7 @@ GSSiExitProg (1350);
         {
             FARPROC lpfnBUILDXFERFILEMsgProc;
 			
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			st = 0;  
 			SetTransferFileName (Arg[1],Arg[2]);
@@ -4277,7 +4106,7 @@ GSSiExitProg (1350);
         
 		case 1213: //$NAMESPLITTER(Name,Type)
 		{   
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
 			GetSTDNamePart (Arg[1],Arg[2],OutLoc);
@@ -4289,7 +4118,7 @@ GSSiExitProg (1350);
 			HDIB32 hDib32In, hDib32Out=0;
 			
 			rtn = 0;
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
 			hDib32In = BMPHandleFromEXT (Arg[1]);
@@ -4355,7 +4184,7 @@ GSSiExitProg (1350);
 
 		case 1215: //$POLYPROBLEMS(Which Prob to check for (1-n) default=0or all),Symbol to display,size
 		{ 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			rtn = 0;
 			if (HiPrecis && (CurrentType == GF_AREA || CurrentType == GF_POLYLINE))
 			{   
@@ -4384,7 +4213,7 @@ GSSiExitProg (1350);
 		}
 		case 1216: //$AREASTOLINES()
 		{   
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;  
 			if (AreasToLines (hWndMain,Arg[1],Arg[2],Arg[3]))
@@ -4394,7 +4223,7 @@ GSSiExitProg (1350);
 
 		case 1217: //$PCTINHLTAREA(item)
 		{   
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;  
 			RVal = PercentOfItemInHighlightAreas (atoi(Arg[1]));
@@ -4406,7 +4235,7 @@ GSSiExitProg (1350);
 		{
 			int	nDiff;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				nDiff = -1;
 			else
@@ -4421,7 +4250,7 @@ GSSiExitProg (1350);
 			LPSYMBOL	pSym;
 			int			np;
 			 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			n = GetDictSymbolNumber (Arg[1]);    
 			if (!n)
             	goto RtnFalse; 
@@ -4443,7 +4272,7 @@ GSSiExitProg (1350);
 		{
 			int	nDiff;
 
-			nArgs = GetFunArgs (Args,Arg,7,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp (Arg[1],"OPEN"))
 			{
 				int init[5];
@@ -4482,7 +4311,7 @@ GSSiExitProg (1350);
 		{
 			int	nDiff;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp (Arg[1],"OPEN"))
 			{
 				strcpy (saveContoursDir,Arg[2]);
@@ -4498,7 +4327,7 @@ GSSiExitProg (1350);
 		}
 		case 1222: //$TRANSPARENCY(SET,value,vp)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (!Display)
 				goto RtnFalse;
@@ -4508,7 +4337,7 @@ GSSiExitProg (1350);
 		}
 		case 1223: //$SQLFIELDTYPE(gmdtype)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (!nArgs)
 				goto RtnFalse;
@@ -4517,7 +4346,7 @@ GSSiExitProg (1350);
 		}
 		case 1224: //$GMDFIELDTYPE(sqltype)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (!nArgs)
 				goto RtnFalse;
@@ -4527,7 +4356,7 @@ GSSiExitProg (1350);
 
 		case 1225: //$INSERTFORMAT(value,type)
 		{
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (nArgs < 2)
 				goto RtnFalse;
@@ -4552,7 +4381,7 @@ GSSiExitProg (1350);
 			case 1301: //$DISPLAYCONFIG(configfile,world bounds,display rect)
 		{   BOOL SaveSaveZoom = SaveZoom, SaveSaveGlobals = SaveGlobals, rtn;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+		nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			if (!ExistFile (Arg[1]))
@@ -4692,7 +4521,7 @@ GSSiExitProg (1350);
 		{   
 			FARPROC lpfnSELECTDBITEMSMsgProc;
 			
-			nArgs = GetFunArgs (Args,Arg,9,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 7)
 				goto RtnFalse;
 			hSelectItemsArgs = GSSiGlobAlloc (1220,GHND,128+1024+256+1024+256+64+64+256+256);
@@ -4718,7 +4547,7 @@ GSSiExitProg (1350);
         }  
 		case 1307: //$CREATESF3FILE (Infile,OutFile)
 		{   
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 12, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
 			if (CreateSF3File (Arg[1],Arg[2]))
@@ -4728,7 +4557,7 @@ GSSiExitProg (1350);
 				
 		case 1308: //$CREATESF1FILE (Infile,OutFile)
 		{   
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 12, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
 			if (CreateSF1File (Arg[1],Arg[2]))
@@ -4738,7 +4567,7 @@ GSSiExitProg (1350);
 
 		case 1309: //$SHORTPATHNAME (LongName)
 		{   
-			nArgs = GetFunArgs (Args,Arg,12,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,12,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;  
 			GetShortPathName2 (Arg[1],256);
@@ -4748,7 +4577,7 @@ GSSiExitProg (1350);
 				
 		case 1310: //$PROCESSSTATUS (CREATE,ViewportName,TITLE)
 		{   
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;  
 			SetCurView (SetVPFromName (Arg[2],&Err));
@@ -4759,7 +4588,7 @@ GSSiExitProg (1350);
 				
 		case 1311: //$LINESTOPOINTS(OutFile,sampledistance)
 		{   
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;  
 			if (LinesToPoints (Arg[1],atof(Arg[2])))
@@ -4843,7 +4672,7 @@ GSSiExitProg (1350);
 		
         case 1403: //$SETDESTINATION(bounds or null to clear) 
         {
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			if (nArgs)
 			{
@@ -4877,7 +4706,7 @@ GSSiExitProg (1350);
         {   
         	HANDLE	hPoints, hTran=0;
         	
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 				goto RtnFalse;
 			*OutLoc = 0; 
@@ -4906,7 +4735,7 @@ GSSiExitProg (1350);
         {   
         	HANDLE	hPoints, hTran=0;
         	
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs<2)
 				goto RtnFalse;     
 			if (SplitMrSidFile (Arg[1],Arg[2]))
@@ -4919,7 +4748,7 @@ GSSiExitProg (1350);
         	HANDLE	hPoints, hTran=0;
         	 
 			nlong = -1;
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs<1)
 				goto RtnFalse; 
 			if (nArgs == 1)
@@ -4942,7 +4771,7 @@ GSSiExitProg (1350);
         {   
         	HANDLE	hPoints, hTran=0;
         	
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs<3)
 				goto RtnFalse;     
 			if (FilterTextFile (Arg[1],Arg[2],atobounds(Arg[3],&Err)))
@@ -4951,14 +4780,14 @@ GSSiExitProg (1350);
 		}
 		
 		case 1409: //$RECOVERPLTFILE(inname,outname)
-			nArgs = GetFunArgs (Args,Arg,2,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			if (RecoverPltFile (Arg[1],Arg[2]))
 				goto RtnTrue;
 			goto RtnFalse;
 		
 		case 1410: //$STRINGFROMFILE(File,string,nchartoreturnafterstring)
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			strcpy (OutLoc,"0");
 			Fid = GSSiOpenFile (Arg[1],0,OF_READ);
 			if (Fid != HFILE_ERROR)
@@ -4991,7 +4820,7 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		
 		case 1411: //$GLOBALFROMFILE(File,globalvarname,replace0with)
-			nArgs = GetFunArgs (Args,Arg,3,&hMem);    
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			rtn = FALSE;
 			SetGlobalValue (Arg[2],"");
 			Fid = GSSiOpenFile (Arg[1],0,OF_READ);
@@ -5024,7 +4853,7 @@ GSSiExitProg (1350);
 			goto Rtnl;
 
 		case 1412: //$COMPRESSEDFILE(CREATE,File,filelistfile)
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			rtn = CompressedFileCmd (nArgs, Arg);
 			goto Rtnrtn;
 			
@@ -5068,7 +4897,7 @@ GSSiExitProg (1350);
         case 1503: //$GETADDRESSCOORD (House,Street,City,ZIP,OUTVARNAME,outmacro)
 		{   
 			 
-			nArgs = GetFunArgs (Args,Arg,-9,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, -9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 			{
 				rtn = AddressLocation1 (CurView->hWnd,hInst,IDM_L_NET_ADDRESS);
@@ -5149,7 +4978,7 @@ GSSiExitProg (1350);
         
         case 1504: //$TEXTTOCLIPBOARD(text) 
         {
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
            	if (!OpenClipboard (hWndMain))
            		goto RtnFalse;
 			EmptyClipboard();
@@ -5178,7 +5007,7 @@ GSSiExitProg (1350);
         {
             FARPROC	lpfnADDLOC_CREATEMsgProc; 
               
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse; 
 			if (!_fstricmp (Arg[1],"CREATE"))
@@ -5216,7 +5045,7 @@ GSSiExitProg (1350);
         {
             FARPROC	lpfnADDLOC_CREATEMsgProc; 
               
-			nArgs = GetFunArgs (Args,Arg,-3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, -3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse; 
 			if (CreateWordIndex (Arg[1],Arg[2],Arg[3]))
@@ -5228,7 +5057,7 @@ GSSiExitProg (1350);
         {
             FARPROC	lpfnADDLOC_CREATEMsgProc; 
               
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
 			nlong = MaxFileRefno (Arg[1]);
@@ -5240,7 +5069,7 @@ GSSiExitProg (1350);
 		{
 			int	type;
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 
@@ -5304,7 +5133,7 @@ GSSiExitProg (1350);
 	    case 1602: //$ADDISLANDSTOPOLY(Reverse,deleteislands)
         {
               
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (AddIslandsToPoly (atob (Arg[1]),atob (Arg[2])))
 				goto RtnTrue;
 			goto RtnFalse;
@@ -5314,7 +5143,7 @@ GSSiExitProg (1350);
         {
             HANDLE	hPoints;
               
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			nlong = PointsBetweenMP (atol(Arg[1]),atof(Arg[2]),atof(Arg[3]),&hPoints);
 			*OutLoc = 0; 
 			if (hPoints)
@@ -5337,7 +5166,7 @@ GSSiExitProg (1350);
             HANDLE	hPoints, hBPEP=0;
 			LPDPOINT	pNewBPEP=0;
               
-			nArgs = GetFunArgs (Args,Arg,6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (GetPointsFromList (Arg[5],&hBPEP) != 2)
 				GSSiGlobFree (&hBPEP);
 			nlong = PointsBetweenPCT (atol(Arg[1]),atof(Arg[2]),atof(Arg[3]),atob(Arg[4]),&hPoints,&hCurvePoints,hBPEP); 
@@ -5404,7 +5233,7 @@ GSSiExitProg (1350);
                         
 	    case 1605: //$FILLRECTWITHGRID(pltfile,symbolname,bounds,gridspace)
         {
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
         	
 			Bounds = atobounds (Arg[3],&Err);
 			if (Err)
@@ -5419,7 +5248,7 @@ GSSiExitProg (1350);
 
 		case 1606: //$APPENDFILETOFILE(tofile,fromfile)
 		{
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			strcpy (OutLoc,"-1");
 			if (nArgs < 2)
 				goto Rtnl;
@@ -5450,7 +5279,7 @@ GSSiExitProg (1350);
 	    case 1701: //$RECOVERPLTFROMRIN(pltname)
         {
               
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (RecoverPLTFromRIN (Arg[1]))
 				goto RtnTrue;
 			goto RtnFalse;
@@ -5460,7 +5289,7 @@ GSSiExitProg (1350);
         {   
 //        	HDIB	hDIB;
         	
-			nArgs = GetFunArgs (Args,Arg,1,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
            	if (!OpenClipboard (hWndMain))
            		goto RtnFalse; 
            	if (!_fstricmp (Arg[1],"CLIENT"))
@@ -5498,7 +5327,7 @@ GSSiExitProg (1350);
 			double	x;
 			DPOINT	Points[2];
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			*OutLoc = 0;
@@ -5509,7 +5338,7 @@ GSSiExitProg (1350);
 		}
 
 		case 1704://$SPLITCONTOURLINES(split line opt)
-			nArgs = GetFunArgs (Args,Arg,3,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			i = atoi (Arg[1]);
 			rtn = SplitContourLines (i);
 			goto Rtnrtn;
@@ -5562,7 +5391,7 @@ GSSiExitProg (1350);
 	    case 1803: //$ADJOININGAREASFILE(CREATE,NAME)
         {
               
-			nArgs = GetFunArgs (Args,Arg,2,&hMem); 
+			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (CreateAdjoiningAreasFile (Arg[2]))
 				goto RtnTrue;
 			goto RtnFalse;
@@ -5570,7 +5399,7 @@ GSSiExitProg (1350);
 	    case 1804: //$GETNEARESTINTCOORD(x,y,streetnum,nchar,filename)
         {
               
-			nArgs = GetFunArgs (Args,Arg,5,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (GetNearestIntPoint(Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],OutLoc))
 				goto Rtnl;
 			goto RtnFalse;
@@ -5588,7 +5417,7 @@ GSSiExitProg (1350);
 
 		case 2001: //$GETINTERSECTIONCOORD
 		{
-			nArgs = GetFunArgs (Args,Arg,-6,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, -6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 			{
 				FARPROC lpfnLOC_INTERSECTMsgProc;  
@@ -5634,7 +5463,7 @@ GSSiExitProg (1350);
         }
   
 		case 2002:	//$ADDCONTOURSPLITLINES(nmaxrowcol)
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			Bounds=atobounds (Arg[1],&Err);
@@ -5654,7 +5483,7 @@ GSSiExitProg (1350);
         		   // reflist global contains list of refnos linked in order of length (longest first)
         		   // point list global contains handle to point list
         {   
-			nArgs = GetFunArgs (Args,Arg,4,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			nlong = JoinLinesBetweenPoints (Arg[1],Arg[2],Arg[3],Arg[4]);
 			ltoa (nlong,OutLoc,10);
 			goto Rtnl;
@@ -5662,7 +5491,7 @@ GSSiExitProg (1350);
 
 		case 2601: //$GETSTREETSEGSBETWEENPOINTS(
         {   
-			nArgs = GetFunArgs (Args,Arg,8,&hMem); 
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			nlong = GetStreetSegsBetweenPoints (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6],Arg[7],Arg[8]);
 			ltoa (nlong,OutLoc,10);
 			goto Rtnl;

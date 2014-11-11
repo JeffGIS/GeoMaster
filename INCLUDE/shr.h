@@ -807,7 +807,8 @@ int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc,LPSHORT pBrkPt, int bpO
 int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen);
 int	GetFunctionValue2(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen);
 int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen);
-COLORREF ColorWOWidth (COLORREF InColor);
+short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPSHORT pBrkPt, int bpOffset, int bpLen);
+COLORREF ColorWOWidth(COLORREF InColor);
 COLORREF ColorWithWidth (COLORREF Color,int Width);
 double FltAP (LPSTR INEXPR,LPBOOL IRC);
 BOOL LogicP (LPSTR INEXPR,LPBOOL IRC);

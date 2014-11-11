@@ -78,6 +78,7 @@
 #define		MAXWISEQ		2000
 
 #define		MAX_MACRO_ARGS	16
+#define		MAXARGLENGTH	SHRT_MAX
 
 #define		MAXSAVEDIMAGES	16
 
