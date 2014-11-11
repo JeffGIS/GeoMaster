@@ -111,7 +111,7 @@ GSSiExitProg (1349);
 #endif
 }
 
-int	GetFunctionValue3 (int FunID,LPSTR Args, LPSTR OutLoc)
+int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1350);
 #endif

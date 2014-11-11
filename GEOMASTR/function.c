@@ -86,7 +86,7 @@ void ReopenFTP (LPFTPSTRUCT pFTPStruct)
 	return;
 }
 
-int	GetFunctionValue1 (int FunID,LPSTR Args, LPSTR OutLoc)
+int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
 #endif
