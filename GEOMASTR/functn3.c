@@ -4876,7 +4876,7 @@ TestGPRtn:	if (ResetSubDL)
 		}
 		case 730: // $SYMNAME (symnum,from(opt)) from=4 forces to get from file not dict
 		{	
-			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			SymNum = atoi(Arg[1]);
 			if (*Arg[2]) 
 				GetSymbolName (SymNum,OutLoc,0,atoi(Arg[2]),0);
