@@ -106,7 +106,7 @@ HWND FindWindowByProcessID (DWORD ProcessID,LPSTR Text)
 	return hWndFound;
 } 
 
-int	GetFunctionValue2(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
+int	GetFunctionValue2(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
 #endif

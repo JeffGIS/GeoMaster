@@ -8,18 +8,8 @@
 #include "freeimage.h"
 
 static	char	PolyProbListFile[MAX_PATH];
-LPSHORT pFunBrkPt;
-int funBpOffset, funBpLen;
 
-void setFunctionDebugParms(LPSHORT pBrkPt, int bpOffset, int bpLen)
-{
-	pFunBrkPt = pBrkPt;
-	funBpOffset = bpOffset;
-	funBpLen = bpLen;
-	return;
-}
-
-short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPSHORT pBrkPt, int bpOffset, int bpLen)
+short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1349);
 #endif
@@ -49,12 +39,12 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPSHORT 
 				*(*pArg) = 0;
 			bpOffInc = strlen(LastArg)+1;
 			if (MaxArgs > 0)
-				ExpandTextDB (LastArg,pFunBrkPt,funBpOffset,funBpLen);  
-			funBpOffset += bpOffInc;
+				ExpandTextDB (LastArg,pBrkPt,bpOffset,bpLen);  
+			bpOffset += bpOffInc;
 			LastArg = *pArg;
 		} 
 		if (MaxArgs > 0)
-			ExpandTextDB(LastArg, pFunBrkPt, funBpOffset, funBpLen);
+			ExpandTextDB(LastArg, pBrkPt, bpOffset, bpLen);
 	}  
 	else 
 	{
@@ -123,7 +113,7 @@ GSSiExitProg (1349);
 #endif
 }
 
-int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
+int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1350);
 #endif
@@ -153,7 +143,6 @@ int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int b
 	HWND	hWnd;
 	SOCKET	socket;
 	
-	setFunctionDebugParms(pBrkPt, bpOffset, bpLen);
 	if (LinkToVar)
 	{
 		ExpandText (Args);

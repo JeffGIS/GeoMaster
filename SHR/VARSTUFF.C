@@ -1908,7 +1908,7 @@ void SetGlobalValue (LPSTR InName, LPSTR InValue)
 	return;
 }
 
-void SetGlobalValue4(LPSTR InName, LPSTR InValue, BOOL Raw, LPSHORT pBrkPt, int bpOffset,int bpLen)
+void SetGlobalValue4(LPSTR InName, LPSTR InValue, BOOL Raw, LPBREAKPOINT pBrkPt, int bpOffset,int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (528);
 #endif
@@ -6039,7 +6039,7 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 
 	return rtn;
 }
-LPSTR ExpandTextDB (LPSTR InText,LPSHORT pBrkPt,int bpOffset,int bpLen)
+LPSTR ExpandTextDB (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (558);
 #endif
@@ -6197,10 +6197,9 @@ GSSiExitProg (558);
 		{
 			long	lWhile, lLoop, nLoops=-1;  
 			LPSTR	pWhile, pWhile2, pLoop;
-			LPSHORT  pLoopBP=0;
+			LPBREAKPOINT  pLoopBP = 0, pWhileBP = 0;
 			int		lWhileBP = 0;
 			HANDLE	hLoop, hLoopBP=0, hWhile, hStr, hWhileBP=0;
-			LPSHORT pWhileBP = 0;
 				
 			InLoc += 6;
 			pEnd = MatchLev (InLoc,')');

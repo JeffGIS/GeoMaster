@@ -451,11 +451,11 @@ BOOL GetDebug (void)
 {
 	return doDebug;
 }
-void breakAtPos(int pos, LPSHORT pBrkPt, int bpOffset, int bpLen, int from)
+void breakAtPos(int pos, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen, int from)
 {
 	if (pos + bpOffset < bpLen)
 	{
-		if (pBrkPt[pos + bpOffset] || (from == BA_FUNCTION && breakAt == BA_FUNCTION))
+		if (pBrkPt[pos + bpOffset].beginLine || (from == BA_FUNCTION && breakAt == BA_FUNCTION))
 		{
 			AtBreakPoint("",1+pos + bpOffset);
 		}

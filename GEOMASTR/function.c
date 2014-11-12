@@ -86,7 +86,7 @@ void ReopenFTP (LPFTPSTRUCT pFTPStruct)
 	return;
 }
 
-int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
+int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
 #endif
@@ -129,7 +129,6 @@ int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int b
 	short	ndec; 
 	LPHIGHLIGHTDATA	pHighlightData;
 
-	setFunctionDebugParms(pBrkPt, bpOffset, bpLen);
 	if (LinkToVar)
 	{
 		ExpandText (Args);

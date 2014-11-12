@@ -2671,6 +2671,12 @@ typedef struct
 
 
 #pragma pack(2)
+typedef struct {unsigned	short	beginLine : 1,
+									textColor : 4,
+									filler : 11;
+}BREAKPOINT;
+typedef BREAKPOINT *LPBREAKPOINT;
+
 typedef struct
 	{	HANDLE	hVisList;
 		LPSTR	LastVisList,

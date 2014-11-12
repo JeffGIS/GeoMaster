@@ -693,7 +693,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	LPSTR	Args[MAX_MACRO_ARGS];
 	int		macroID;
 	HANDLE	hBreakPoints = 0;
-	LPSHORT pBreakPoints = 0;
+	LPBREAKPOINT	pBreakPoints = 0;
 	int		lm=0;
 	int		atLoc;
    
@@ -793,8 +793,8 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 				else
 				{
 					DeleteMacro = TRUE;
-					hBreakPoints = GSSiGlobAlloc(2451, GHND, sizeof(short)*(lm + 1));
-					pBreakPoints = GlobalLock(hBreakPoints);
+					hBreakPoints = GSSiGlobAlloc(2451, GHND, sizeof(BREAKPOINT)*(lm + 1));
+					pBreakPoints = (LPBREAKPOINT)GlobalLock(hBreakPoints);
 				}
 			} 
 			if (!GetDebug())
@@ -810,7 +810,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    			Truncate (str);
 	    			pStr = FirstNonBlank(str);
 					if (pBreakPoints)
-						pBreakPoints[lMacro] = pBreakPoints[lMacro] | BP_BEGINLINE;
+						pBreakPoints[lMacro].beginLine = 1;
 	    			lMacro += _fstrlen (pStr);   
 	    			if (lMacro > USHRT_MAX)
 	    			{

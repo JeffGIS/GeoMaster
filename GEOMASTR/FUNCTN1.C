@@ -22,7 +22,7 @@ short OptionInList (LPSTR Val,LPSTR ListVals,int NumInList,int ListItemSize)
 	return 0;
 }
 
-int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc, LPSHORT pBrkPt, int bpOffset, int bpLen)
+int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
 #endif
