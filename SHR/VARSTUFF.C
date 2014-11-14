@@ -6049,8 +6049,8 @@ LPSTR ExpandTextDB (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 	LPSTR	pEnd, pStr, startLoc = InText;
 	long	l,ii;
 	BOOL	FoundLit=FALSE, SaveIE=InExpand, ExpandTrace=FALSE;
-	int		lLoopBP = 0, loopBPOffset, whileBpOffset;
-	int		elseBpOffset, thenBpOffset;
+	int		loopBPOffset=0, whileBpOffset=0;
+	int		elseBpOffset=0, thenBpOffset=0;
 	
 	InExpand = TRUE;
 	if (TraceOn)
@@ -6121,7 +6121,11 @@ GSSiExitProg (558);
 		}
 		else if (*InLoc == '[')
 		{   
-			if (!(EndBrack = MatchLev((LPSTR)(InLoc+1),']'))) goto OutChar; 
+			if (!(EndBrack = MatchLev((LPSTR)(InLoc + 1), ']')))
+			{
+				MessageBox(0, InLoc, "No matching bracket", MB_ICONEXCLAMATION);
+				goto OutChar;
+			}
 			if (!hMem)
 			{
 				hMem = GSSiGlobAlloc ( 208,GMEM_MOVEABLE,USHRT_MAX);
@@ -6198,9 +6202,7 @@ GSSiExitProg (558);
 		{
 			long	lWhile, lLoop, nLoops=-1;  
 			LPSTR	pWhile, pWhile2, pLoop;
-			LPBREAKPOINT  pLoopBP = 0, pWhileBP = 0;
-			int		lWhileBP = 0;
-			HANDLE	hLoop, hLoopBP=0, hWhile, hStr, hWhileBP=0;
+			HANDLE	hLoop, hWhile, hStr;
 				
 			InLoc += 6;
 			pEnd = MatchLev (InLoc,')');
@@ -6228,18 +6230,8 @@ GSSiExitProg (558);
 			hLoop = GSSiGlobAlloc(210, GHND, lLoop + 1);
 			pLoop = GlobalLock(hLoop);
 			if (pBrkPt)
-			{
 				loopBPOffset = bpOffset + (int)(InLoc - startLoc);
 
-				lLoopBP = bpLen - loopBPOffset;
-				if (lLoopBP > 0)
-				{
-					hLoopBP = GSSiGlobAlloc(210, GHND, (lLoopBP + 1)*sizeof(BREAKPOINT));
-					pLoopBP = GlobalLock(hLoopBP);
-					memmove(pLoopBP, &pBrkPt[loopBPOffset], lLoopBP * sizeof(BREAKPOINT));
-					GlobalUnlock(hLoopBP);
-				}
-			}
 			_fstrncpy(pLoop, InLoc, lLoop);
 			GlobalUnlock (hLoop);
 			InLoc = pEnd;
@@ -6248,17 +6240,7 @@ GSSiExitProg (558);
 			_fstrncpy (pWhile2,pWhile,(size_t)lWhile); 
 			GlobalUnlock (hWhile); 
 			if (pBrkPt)
-			{
 				whileBpOffset = bpOffset + (int)(pWhile - startLoc);
-				lWhileBP = bpLen - whileBpOffset;
-				if (lWhileBP > 0)
-				{
-					hWhileBP = GSSiGlobAlloc(211, GHND, sizeof(BREAKPOINT)*(lWhileBP + 1));
-					pWhileBP = GlobalLock(hWhileBP);
-					memmove(pWhileBP, &pBrkPt[whileBpOffset], lWhileBP*sizeof(BREAKPOINT));
-					GlobalUnlock(hWhileBP);
-				}
-			}
 			hStr = GSSiGlobAlloc(212, GMEM_MOVEABLE, USHRT_MAX);
 			pStr = GlobalLock (hStr); 
 			nLoops = 0;
@@ -6271,29 +6253,13 @@ GSSiExitProg (558);
 				pWhile = GlobalLock (hWhile);
 				_fstrcpy (pStr,pWhile);
 				GlobalUnlock (hWhile);
-				if (hWhileBP)
-				{
-					pWhileBP = GlobalLock(hWhileBP);
-					Rtn = LogicPBP(pStr, &rc, pWhileBP,lWhileBP);
-					GlobalUnlock(hWhileBP);
-				}
-				else
-					Rtn = LogicP(pStr, &rc);
-//				ExpandText (pStr);
-//				if (!_fstrcspn (pStr," 1TtYy"))     
+				Rtn = LogicPBP(pStr, &rc, pBrkPt,whileBpOffset,bpLen);
 				if (Rtn && !rc)
 				{
 					pLoop = GlobalLock (hLoop);
 					_fstrcpy (pStr,pLoop);
 					GlobalUnlock (hLoop);
-					if (hLoopBP)
-					{
-						pLoopBP = GlobalLock(hLoopBP);
-						ExpandTextDB(pStr, pBrkPt, loopBPOffset, bpLen);
-						GlobalUnlock(hLoopBP);
-					}
-					else
-						ExpandText(pStr);
+					ExpandTextDB(pStr, pBrkPt, loopBPOffset, bpLen);
 					if (ContinueProcessing) 
 					{
 						nLoops++;
@@ -6303,9 +6269,7 @@ GSSiExitProg (558);
 			}
 			GSSiGlobUlFree (&hStr);
 			GSSiGlobFree (&hLoop);
-			GSSiGlobFree(&hLoopBP);
 			GSSiGlobFree (&hWhile);
-			GSSiGlobFree(&hWhileBP);
 	WhileError:
 			if (!hMem)
 			{
@@ -6334,7 +6298,10 @@ GSSiExitProg (558);
 			InLoc += 3;
 			pEnd = MatchLev (InLoc,')');
 			if (!pEnd)
-				goto IfError; 
+			{
+				MessageBox(0, InLoc, "Error in IF conditional statement", MB_ICONEXCLAMATION);
+				goto IfError;
+			}
 			pIF = InLoc;
 			lIF = pEnd++ - InLoc; 
 			if (!(pEnd = FirstNonBlank(pEnd)))
@@ -6342,13 +6309,19 @@ GSSiExitProg (558);
 			if (!_fstrncmp (pEnd,"THEN",4))
 				pEnd+=4;
 			if (*pEnd != '{')
-				goto IfError;   
+			{
+				MessageBox(0, InLoc, "Missing opening brace in IF statement", MB_ICONEXCLAMATION);
+				goto IfError;
+			}
 			InLoc = pEnd;
 			InLoc++;
 			pTHEN = InLoc;
 			pEnd = MatchLev (InLoc,'}');
 			if (!pEnd)
-				goto IfError; 
+			{
+				MessageBox(0, InLoc, "Missing matching brace in IF statement", MB_ICONEXCLAMATION);
+				goto IfError;
+			}
 			lTHEN = pEnd++ - pTHEN;
 			InLoc = pEnd;
 			hIF = GSSiGlobAlloc ( 214,GMEM_MOVEABLE,USHRT_MAX);
@@ -6358,7 +6331,7 @@ GSSiExitProg (558);
 			lIFBP = lIFOffset - bpLen;
 			if (pBrkPt && lIFBP > 0)
 			{
-				IfRtn = LogicPBP(pIF2, &rc, &pBrkPt[lIFOffset],lIFBP);
+				IfRtn = LogicPBP(pIF2, &rc, pBrkPt,lIFOffset,bpLen);
 			}
 			else
 				IfRtn = LogicP(pIF2, &rc);

@@ -51,11 +51,11 @@ void ConvertSQLToLogicP (LPSTR pLogicP,LPSTR pSQL)
 
 BOOL LogicP(LPSTR INEXPR, LPBOOL IRC)
 {
-	BOOL rtn = LogicPBP(INEXPR, IRC,0,0);
+	BOOL rtn = LogicPBP(INEXPR, IRC,0,0,0);
 	return rtn;
 }
 
-BOOL LogicPBP (LPSTR INEXPR,LPBOOL IRC,LPBREAKPOINT pBrkPt,int lenBP)
+BOOL LogicPBP(LPSTR INEXPR, LPBOOL IRC, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1190);
 #endif
