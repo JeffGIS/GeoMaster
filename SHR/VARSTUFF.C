@@ -6125,7 +6125,8 @@ GSSiExitProg (558);
 		{   
 			if (!(EndBrack = MatchLev((LPSTR)(InLoc + 1), ']')))
 			{
-				MessageBox(0, InLoc, "No matching bracket", MB_ICONEXCLAMATION);
+				if (strnicmp (InLoc+1,"$BOOL",5))
+					MessageBox(0, InLoc, "No matching bracket", MB_ICONEXCLAMATION);
 				goto OutChar;
 			}
 			if (!hMem)
