@@ -117,6 +117,9 @@ typedef TRN FAR *LPTRN;
 
 #define BA_EXPANDTEXT	1
 #define BA_FUNCTION		2
+#define BA_BEGINBLOCK	3
+#define BA_NEXTPOS		4
+#define BA_NEXTLINE		5
 
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {

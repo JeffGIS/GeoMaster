@@ -6080,6 +6080,7 @@ LPSTR ExpandTextDB (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 	if (*InLoc == '{')
 	{   
 		LPSTR	lc = LastChr (InLoc);
+		if (pBrkPt) breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen, BA_BEGINBLOCK);
 		if (*lc != '}')
 			goto OutChar; 
 		hMem = GSSiGlobAlloc ( 206,GMEM_MOVEABLE,USHRT_MAX);
@@ -6103,6 +6104,7 @@ GSSiExitProg (558);
 	}
 	while (*InLoc && ContinueProcessing)
 	{
+		if (pBrkPt) breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen, BA_NEXTPOS);
 		if (*InLoc == literalChar) /* literal */
 		{
 			if (!hMem)
@@ -6359,7 +6361,7 @@ GSSiExitProg (558);
 				thenBpOffset = bpOffset + (int)(pTHEN - startLoc);
 				lTHENBP = bpLen - thenBpOffset;
 				if (lTHENBP > 0)
-					ExpandTextDB(OutLoc, pBrkPt, thenBpOffset, lTHENBP);
+					ExpandTextDB(OutLoc, pBrkPt, thenBpOffset, bpLen);
 				else
 					ExpandText(OutLoc);
 				OutLoc = _fstrchr (OutLoc,0);
@@ -6385,7 +6387,7 @@ GSSiExitProg (558);
 							lELSEBP = bpLen - elseBpOffset;
 						}
 						if (lELSEBP > 0)
-							ExpandTextDB(OutLoc, pBrkPt, elseBpOffset, lELSEBP);
+							ExpandTextDB(OutLoc, pBrkPt, elseBpOffset, bpLen);
 						else
 							ExpandText(OutLoc);
 						OutLoc = _fstrchr (OutLoc,0);

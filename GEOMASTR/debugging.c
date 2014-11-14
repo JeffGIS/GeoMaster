@@ -4,7 +4,7 @@
 #define MAX_MACRO_STACK 64
 static int nFunLevs=0, ii;
 static BOOL doDebug=FALSE;
-static int	breakAt = BA_FUNCTION;
+static int	breakAt = BA_NEXTLINE;
 static char BreakCondition[256]={0};
 static char DisplayValue[256]={0};
 static char macroStack[MAX_MACRO_STACK][MAX_PATH];
@@ -455,7 +455,9 @@ void breakAtPos(int pos, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen, int from)
 {
 	if (pos + bpOffset < bpLen)
 	{
-		if (pBrkPt[pos + bpOffset].beginLine || (from == BA_FUNCTION && breakAt == BA_FUNCTION))
+		if ((pBrkPt[pos + bpOffset].beginLine &&  from == BA_NEXTPOS && breakAt == BA_NEXTLINE) ||
+			(from == BA_FUNCTION && breakAt == BA_FUNCTION) ||
+			from == BA_BEGINBLOCK)
 		{
 			AtBreakPoint("",1+pos + bpOffset);
 		}

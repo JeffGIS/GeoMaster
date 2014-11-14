@@ -612,7 +612,6 @@ int FindBreakpoint (LPSTR bp)
 		rtn = locFile;
 	Exit:
 		GlobalUnlock(hFile);
-		rtn = (int)(pFile - pFileBegin);
 		return rtn;
 	}
 	sprintf (brkp,"$B(%s",bp);

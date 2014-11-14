@@ -28,16 +28,18 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKP
 	{
 		for (i=1;i<abs(MaxArgs);i++,pArg++) 
 		{
+			int incPar = 0;
 			*pArg = LastArg + MAXARGLENGTH;
 			if ((ParLoc = MatchLev (LastArg,',')))
 			{ 
 				_fstrcpy (*pArg,(LPSTR)(ParLoc+1));
 				*ParLoc = 0; 
 				nArgs++;
+				incPar = 1;
 			} 
 			else
 				*(*pArg) = 0;
-			bpOffInc = strlen(LastArg)+1;
+			bpOffInc = strlen(LastArg)+incPar;
 			if (MaxArgs > 0)
 				ExpandTextDB (LastArg,pBrkPt,bpOffset,bpLen);  
 			bpOffset += bpOffInc;
