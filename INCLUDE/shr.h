@@ -120,6 +120,9 @@ typedef TRN FAR *LPTRN;
 #define BA_BEGINBLOCK	3
 #define BA_NEXTPOS		4
 #define BA_NEXTLINE		5
+#define BA_NEXTBP		6
+#define BA_SHOWFUN		7
+#define BA_RETURN		8
 
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {
@@ -1335,12 +1338,18 @@ __int64 FTPGetFileSize (HANDLE hConnect);
 
 void  InFunction (int funid,LPSTR inString);
 void OutFunction (int funid,LPSTR outString);
-int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int NumArgs);
+void SetFunctionDBIn(LPSTR InLoc);
+void SetFunctionDBOut(LPSTR OutLoc);
+void DebugReturn(LPSTR rtnValue);
+int AddToMacroStack(int from, int iCurrentMacro, LPSTR File, LPHANDLE phArgs, int NumArgs);
 void RemoveFromMacroStack (int macroID);
+BOOL AddBreakpoint(LPSTR macroFile, int insertLoc);
+void setMacroBrkPtHandle(int macroID, HANDLE hBreakPoints, int lnBP);
 void breakAtPos(int pos, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen, int from);
 void AtBreakPoint(LPSTR Args,int bploc);
 void SetDebug (BOOL state);
 BOOL GetDebug (void);
+BOOL getDebugMacro(int macroID);
 void GetWindowsVersion(LPSTR Ver);
 int ChassisType(void); // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
 int MonitorType(int which,LPSTR monName);

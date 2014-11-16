@@ -2762,6 +2762,7 @@ GotCloseFilehSQL:
 		case 613: // $RETURN(value) returns from current macro
 		{				
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			DebugReturn(Arg[1]);
 			if (pMacroReturnValue)
 				_fstrcpy (pMacroReturnValue,Arg[1]);    
 			ContinueProcessing = FALSE;

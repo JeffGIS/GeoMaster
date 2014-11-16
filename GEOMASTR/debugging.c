@@ -2,29 +2,45 @@
 #include "gmextern.h"
 
 #define MAX_MACRO_STACK 64
+#define MAX_BREAKPOINTS	16
 static int nFunLevs=0, ii;
 static BOOL doDebug=FALSE;
 static int	breakAt = BA_NEXTLINE;
 static char BreakCondition[256]={0};
 static char DisplayValue[256]={0};
 static char macroStack[MAX_MACRO_STACK][MAX_PATH];
+static char breakPointFile[MAX_BREAKPOINTS][MAX_PATH];
+static int  breakPointLoc[MAX_BREAKPOINTS];
+static int	nBreakPoints = 0;
+static HANDLE macroBrkPtHandle[MAX_MACRO_STACK] = { 0 };
+static int  macroBPLen[MAX_MACRO_STACK];
 static int macroUse[MAX_MACRO_STACK];
+static int currentStackPosition[MAX_MACRO_STACK];
+static BOOL debugMacro[MAX_MACRO_STACK] = { 0 };
 static int lnMacroStack=0;
 static int nextMacroUse = 1;
 static char currentMacro[MAX_PATH];
 static RECT currentRect = { 0 };
+static HANDLE hFunIn=0;
+static HANDLE hShowFunIn = 0;
+static int	funInLev = 0;
+static int  returnLevel = -1;
 
-#define NUM_DB_CHILDWND	12
+#define NUM_DB_CHILDWND	17
 #define SNAP_LEFT	-1
 #define SNAP_TOP	-1
 #define SNAP_BOTTOM	-2
 #define SNAP_RIGHT	-2
-static UINT childWndID[NUM_DB_CHILDWND] = {IDB_MACROSTACK,IDC_FILEVIEW,IDB_MOVETOMON2,IDCANCEL,IDOK,IDC_STATIC_BP,IDC_STATIC_BC,IDC_STATIC_DV,IDB_BREAKPOINTS,IDB_BREAKCONDITION,IDB_VALUETODISPLAY1,IDB_DISPLAYVALUE1};
+static UINT childWndID[NUM_DB_CHILDWND] = { IDB_MACROSTACK, IDC_FILEVIEW, IDB_MOVETOMON2, IDCANCEL, IDOK, ID_DBNEXTFUN, ID_DBNEXTBP, ID_DBSHOWFUN, ID_DBTORETURN,IDC_STATIC_BP, IDC_STATIC_BC, IDC_STATIC_DV, IDB_BREAKPOINTS, IDB_BREAKCONDITION, IDB_VALUETODISPLAY1, IDB_DISPLAYVALUE1 };
 static RECT childWndPCT[NUM_DB_CHILDWND] = {SNAP_LEFT,SNAP_TOP,0,0,
 											SNAP_LEFT,0,SNAP_RIGHT,0,
 											0,SNAP_TOP,0,0,
 											0,0,SNAP_RIGHT,0,
-											0, SNAP_TOP, SNAP_RIGHT, 0,
+											0, 0, 0, 0,
+											0, 0, 0, 0,
+											0, 0, 0, 0,
+											0, 0, 0, 0,
+											0, 0, 0, 0,
 											SNAP_LEFT, 0, 0, 0,
 											0,0,0,0,
 											0,0,0,0,
@@ -242,6 +258,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	LPSTR	pDisplay;
 	RECT	rect;
 	int		i;
+	char	str[300];
 	static	BOOL	firstPaint=TRUE;
 
  switch(Message)
@@ -249,6 +266,9 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 		 case WM_INITDIALOG:
 		 {
 			char curFile[MAX_PATH];
+			int	TabStops[2] = { 20, 1000 };
+
+			SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_SETTABSTOPS, 2, (LPARAM)TabStops);
 
 			hWndAddEdit = hWndDlg; //does IsDialog processing
 			firstPaint = TRUE;
@@ -268,8 +288,6 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			doDebug = TRUE;
 			SetDlgItemText(hWndDlg, IDB_DISPLAYVALUE1, pDisplay);
 			GSSiGlobUlFree(&hDisplay);
-			for (i = 0; i < lnMacroStack; i++)
-				SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_ADDSTRING, 0, (LPARAM)macroStack[i]);
 
 			//GMEditSetFile ("[%DL]fundir\\appl1.txt");
 			GMEditGetFile(curFile);
@@ -289,6 +307,14 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			{
 				MoveWindow(hWndDlg, currentRect.left, currentRect.top, RECTWIDTH(&currentRect), RECTHEIGHT(&currentRect), TRUE);
 			}
+		 case GSSI_REINITDIALOG:
+			 SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_RESETCONTENT, 0,0);
+			 for (i = 0; i < lnMacroStack; i++)
+			 {
+				 sprintf(str, "%c\t%s", debugMacro[i] ? 'X' : ' ', macroStack[i]);
+				 SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_ADDSTRING, 0, (LPARAM)str);
+			 }
+
 		 }
          break; /* End of WM_INITDIALOG                                 */
 
@@ -357,17 +383,50 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				EndDialog(hWndDlg, IDCANCEL);
             break; 
             
-            case IDOK:
-				GetDlgItemText (hWndDlg,IDB_BREAKCONDITION,BreakCondition,sizeof(BreakCondition)-1);
-				GetDlgItemText (hWndDlg,IDB_VALUETODISPLAY1,DisplayValue,sizeof(DisplayValue)-1);
-                EndDialog(hWndDlg, TRUE);
-            break;
+			case IDOK:
+				GetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition, sizeof(BreakCondition)-1);
+				GetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue, sizeof(DisplayValue)-1);
+				breakAt = BA_NEXTLINE;
+				EndDialog(hWndDlg, TRUE);
+				break;
+
+			case ID_DBNEXTFUN:
+				GetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition, sizeof(BreakCondition)-1);
+				GetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue, sizeof(DisplayValue)-1);
+				breakAt = BA_FUNCTION;
+				EndDialog(hWndDlg, TRUE);
+				break;
+
+			case ID_DBNEXTBP:
+				GetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition, sizeof(BreakCondition)-1);
+				GetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue, sizeof(DisplayValue)-1);
+				breakAt = BA_NEXTBP;
+				EndDialog(hWndDlg, TRUE);
+				break;
+
+			case ID_DBSHOWFUN:
+				GetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition, sizeof(BreakCondition)-1);
+				GetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue, sizeof(DisplayValue)-1);
+				breakAt = BA_SHOWFUN;
+				hShowFunIn = hFunIn;
+				hFunIn = 0;
+				funInLev = 0;
+				EndDialog(hWndDlg, TRUE);
+				break;
+
+			case ID_DBTORETURN:
+				GetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition, sizeof(BreakCondition)-1);
+				GetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue, sizeof(DisplayValue)-1);
+				breakAt = BA_RETURN;
+				returnLevel = CurrentMacro;
+				EndDialog(hWndDlg, TRUE);
+				break;
 
 			case IDB_MOVETOMON2:
 			{
 			   POINT pt = WindowMidPoint(GetDlgItem(hWndDlg, IDB_MOVETOMON2));
 			   HMONITOR hMonitor;
-			   MONITORINFOEX mi;
+			   MONITORINFO mi;
 
 			   hMonitor = GetOtherMonitor(pt);
 
@@ -400,13 +459,22 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			break;
 			case IDB_MACROSTACK:
 			{
-                 switch(HIWORD(wParam))
-                 {   
+				switch (HIWORD(wParam))
+				{
+					case LBN_DBLCLK:
+					{
+						int item = SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_GETCURSEL, 0, 0);
+						if (item >= 0)
+						{
+							debugMacro[item] = !debugMacro[item];
+							PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+						}
+					}
+						 break;
                      case LBN_SELCHANGE: 
 					 {
+						LPSTR pTab;
 						int item=SendDlgItemMessage(hWndDlg,IDB_MACROSTACK,LB_GETCURSEL,0,0);
-						char str[MAX_PATH];
-
 						if (item < 0)
 							break;
 						SendDlgItemMessage(hWndDlg,IDB_MACROSTACK,LB_GETTEXT,item,(DWORD)str);
@@ -416,12 +484,15 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 							hDBWnd = 0;
 							//break;
 						}
-						GMEditSetFile (str,0,0);
-						GetWindowRect (GetDlgItem (hWndDlg,IDC_FILEVIEW),&rect);
-						hDBWnd = CreateDebugFileDisplayWindow (hWndDlg,&rect);
-						PostMessage (hWndDlg,WM_MOVE,0,0);
-						ShowWindow (hDBWnd,SW_SHOW);
-						InvalidateRect (hDBWnd,0,TRUE);
+						if ((pTab = strchr(str, '\t')))
+						{
+							GMEditSetFile(++pTab, 0, 0);
+							GetWindowRect(GetDlgItem(hWndDlg, IDC_FILEVIEW), &rect);
+							hDBWnd = CreateDebugFileDisplayWindow(hWndDlg, &rect);
+							PostMessage(hWndDlg, WM_MOVE, 0, 0);
+							ShowWindow(hDBWnd, SW_SHOW);
+							InvalidateRect(hDBWnd, 0, TRUE);
+						}
 					 }
 				 }
 			}
@@ -451,18 +522,108 @@ BOOL GetDebug (void)
 {
 	return doDebug;
 }
-void breakAtPos(int pos, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen, int from)
+
+BOOL getDebugMacro(int macroID)
 {
-	if (pos + bpOffset < bpLen)
+	if (macroID < lnMacroStack)
+		return debugMacro[macroID];
+	return FALSE;
+}
+
+
+int getMacroIDFromMacroFile(LPSTR macroFile)
+{
+	int i;
+	for (i = 0; i < lnMacroStack; i++)
 	{
-		if ((pBrkPt[pos + bpOffset].beginLine &&  from == BA_NEXTPOS && breakAt == BA_NEXTLINE) ||
-			(from == BA_FUNCTION && breakAt == BA_FUNCTION) ||
-			from == BA_BEGINBLOCK)
+		if (!stricmp(macroFile, macroStack[i]))
+			return i;
+	}
+	return -1;
+}
+
+BOOL SetBreakPointLoc(int macroID, int insertLoc)
+{
+	BOOL rtn = FALSE;
+	if (macroID >= 0 && macroBrkPtHandle[macroID])
+	{
+		LPBREAKPOINT pBrkPt = GlobalLock(macroBrkPtHandle[macroID]);
+		if (insertLoc < macroBPLen[macroID])
+			pBrkPt[insertLoc].bpSet = TRUE;
+		GlobalUnlock (macroBrkPtHandle[macroID]);
+		rtn = TRUE;
+	}
+	return rtn;
+}
+void addBreakpoints(int macroID)
+{
+	int i;
+	for (i = 0; i < nBreakPoints; i++)
+	{
+		int mid = getMacroIDFromMacroFile(breakPointFile[i]);
+		if (mid == macroID)
+			SetBreakPointLoc(mid, breakPointLoc[i]);
+	}
+}
+BOOL AddBreakpoint(LPSTR macroFile, int insertLoc)
+{
+	BOOL rtn = FALSE;
+
+	if (nBreakPoints-1 >= MAX_BREAKPOINTS)
+		return FALSE;
+	strcpy(breakPointFile[nBreakPoints], macroFile);
+	breakPointLoc[nBreakPoints++] = insertLoc;
+	int macroID = getMacroIDFromMacroFile(macroFile);
+
+	rtn = SetBreakPointLoc(macroID, insertLoc);
+	return rtn;
+
+}
+void setMacroBrkPtHandle(int macroID, HANDLE hBreakPoints, int lnBP)
+{
+	if (macroID < lnMacroStack)
+	{
+		macroBrkPtHandle[macroID] = hBreakPoints;
+		macroBPLen[macroID] = lnBP;
+		addBreakpoints(macroID);
+	}
+	return;
+}
+
+int getMacroIDFromCurrentMacro(void)
+{
+	int i;
+
+	if (CurrentMacro > 0)
+	{
+		for (i = 0; i < lnMacroStack; i++)
 		{
-			AtBreakPoint("",1+pos + bpOffset);
+			if (currentStackPosition[i] == CurrentMacro)
+				return i;
 		}
 	}
-
+	return -1;
+}
+void breakAtPos(int pos, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen, int from)
+{
+	int macroID = getMacroIDFromCurrentMacro();
+	if (macroID >= 0 && macroID < lnMacroStack)
+	{
+		if (debugMacro[macroID])
+		{
+			if (pos + bpOffset < bpLen)
+			{
+				if ((pBrkPt[pos + bpOffset].beginLine &&  from == BA_NEXTPOS && breakAt == BA_NEXTLINE) ||
+					(pBrkPt[pos + bpOffset].bpSet &&  from == BA_NEXTPOS && breakAt == BA_NEXTBP) ||
+					(from == BA_FUNCTION && breakAt == BA_FUNCTION) ||
+					(from == BA_NEXTPOS && breakAt == BA_NEXTPOS) ||
+					from == BA_BEGINBLOCK)
+				{
+					AtBreakPoint("", 1 + pos + bpOffset);
+				}
+			}
+		}
+	}
 }
 
 void AtBreakPoint (LPSTR Args,int bploc)
@@ -516,10 +677,58 @@ void OutFunction (int funid,LPSTR outString)
 		ii=1;
 	return;
 }
+void SetFunctionDBIn(LPSTR InLoc)
+{
+	int ln = strlen(InLoc) + 1;
+	LPSTR pFunIn;
+
+	GSSiGlobFree(&hFunIn);
+	if (!hFunIn)
+	{
+		hFunIn = GSSiGlobAlloc(1792, GMEM_MOVEABLE, ln);
+		pFunIn = GlobalLock(hFunIn);
+		strcpy(pFunIn, InLoc);
+		GlobalUnlock(hFunIn);
+	}
+	funInLev++;
+	return;
+}
+void SetFunctionDBOut(LPSTR OutLoc)
+{
+	GSSiGlobFree(&hFunIn);
+	if (!hShowFunIn)
+		return;
+	if (funInLev--)
+		return;
+	if (breakAt == BA_SHOWFUN)
+	{
+		int lnOut = strlen(OutLoc);
+		LPSTR pIn = GlobalLock(hShowFunIn);
+		int lnIn = strlen(pIn);
+		HANDLE hStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, lnIn + lnOut + 256);
+		LPSTR pStr = GlobalLock(hStr);
+		sprintf(pStr, "In: %s\nOut: %s", pIn, OutLoc);
+		MessageBox(0, pStr, "Function In/Out", MB_OK);
+		GSSiGlobUlFree(&hStr);
+		GlobalUnlock(hShowFunIn);
+		breakAt = BA_NEXTPOS;
+	}
+	GSSiGlobFree(&hShowFunIn);
+	return;
+}
+void DebugReturn(LPSTR rtnValue)
+{
+	if (breakAt == BA_RETURN && returnLevel == CurrentMacro)
+	{
+		MessageBox(0, rtnValue, "Returns", MB_OK);
+		breakAt = BA_NEXTPOS;
+	}
+	return;
+}
 
 int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int NumArgs)
 {
-	int i, mini;
+	int i, mini=0, rtn;
 	UINT minUse = UINT_MAX;
 
 	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc
@@ -530,7 +739,8 @@ int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int N
 		if (!stricmp(currentMacro, macroStack[i]))
 		{
 			macroUse[i] = nextMacroUse++;
-			return i;
+			rtn = i;
+			goto Exit;
 		}
 		if (macroUse[i] < minUse)
 		{
@@ -542,14 +752,17 @@ int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int N
 	{
 		strcpy(macroStack[mini], currentMacro);
 		macroUse[mini] = nextMacroUse++;
-		return mini;
+		rtn = mini;
+		goto Exit;
 	}
 	else
 	{	
 		strcpy(macroStack[lnMacroStack], currentMacro);
 		macroUse[lnMacroStack] = nextMacroUse++;
-		return lnMacroStack++;
+		rtn = lnMacroStack++;
 	}
+Exit: currentStackPosition[rtn] = iCurrentMacro;
+	return rtn;
 }
 
 void RemoveFromMacroStack (int macroID)
@@ -557,7 +770,11 @@ void RemoveFromMacroStack (int macroID)
 	if (macroID < 0)
 		lnMacroStack = 0;
 	else
+	{
 		macroUse[macroID] = -abs(macroUse[macroID]);
+		currentStackPosition[macroID] = 0;
+		macroBrkPtHandle[macroID] = 0;
+	}
 	return;
 }
 

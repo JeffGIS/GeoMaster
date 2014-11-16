@@ -16,10 +16,15 @@
 #define IDC_MAPHISTORY                  3
 #define IDOK2                           3
 #define IDC_GEOCODE_FROMFILE            3
+#define ID_DBNEXTFUN                    3
 #define IDC_DATE_TODAY                  4
 #define IDC_CLEARHLTLIST                4
+#define ID_DBNEXTBP                     4
 #define IDC_DATE_THISWEEK               5
+#define ID_DBSHOWFUN                    5
 #define IDC_DATE_THISMONTH              6
+#define ID_DBSHOWFUN2                   6
+#define ID_DBTORETURN                   6
 #define IDC_DATE_THISYEAR               7
 #define IDC_DATE_LASTWEEK               8
 #define IDNO2                           8

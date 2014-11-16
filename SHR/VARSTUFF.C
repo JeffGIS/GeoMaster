@@ -6426,8 +6426,10 @@ GSSiExitProg (558);
 			if (!(FunID = GetFunctionID(InLoc,BegBrack)))
 				goto OutChar; 
 			if (pBrkPt)
-				breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen,BA_FUNCTION);
-
+			{
+				SetFunctionDBIn(InLoc);
+				breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen, BA_FUNCTION);
+			}
 			if (expandOnly && FunID != expandOnly)
 				goto OutChar;
 			if (AllVarEqQuestionMark == 2)
@@ -6470,6 +6472,7 @@ GSSiExitProg (558);
 		    }
 		    else
 		    	l=0;
+			SetFunctionDBOut(OutLoc);
 		    OutLoc+=l;
 		}
 		else

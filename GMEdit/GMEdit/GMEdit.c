@@ -550,6 +550,38 @@ PastLastLine:
 	ReleaseDC (hWnd,hdc);
 	return rtn;
 }
+int FileLocToMacroLoc(int fileLoc)
+{
+	LPSTR pFile = GlobalLock(hFile);
+	LPSTR pFileBegin = pFile;
+	int locMacro = 0, locFile = 0;
+	BOOL lastWasLineTerm = TRUE;
+
+	while (locFile < fileLoc && *pFile)
+	{
+		if (*pFile == '#' && lastWasLineTerm)
+		{
+			while (*pFile != '\r' && *pFile != '\n')
+			{
+				locFile++;
+				pFile++;
+			}
+		}
+		if (*pFile != '\r' && *pFile != '\n')
+		{
+			if (*pFile != '\t')
+				locMacro++;
+			lastWasLineTerm = FALSE;
+		}
+		else
+			lastWasLineTerm = TRUE;
+		locFile++;
+		pFile++;
+	}
+	GlobalUnlock(hFile);
+	return locMacro;
+}
+
 int FindBreakpoint (LPSTR bp)
 {
 	int loc = 0;
@@ -1750,13 +1782,21 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	    //    return TRUE;
 		}
 		break;
+	case WM_RBUTTONDOWN:
+		currentLine = -1;
+		insertPoint = POINTStoPOINT(MAKEPOINTS(lParam));
+		insertLoc = insertLoc2 = GetInsertLocFromPoint(hWnd, hFile, hFont, &insertPoint);
+		AddBreakpoint(fileToEdit,FileLocToMacroLoc(insertLoc));
+		GetInsertPointFromLoc(hWnd, hFile, hFont, &insertPoint, insertLoc, 0);
+		SetCaretPos(insertPoint.x, insertPoint.y);
+		break;
 	case WM_LBUTTONDOWN:
 		currentLine = -1;
-    	insertPoint = POINTStoPOINT(MAKEPOINTS(lParam));
-		GMEditDisplayTextBetweenLocs (hWnd,hFile,hFont,insertLoc,insertLoc2,FALSE);
-		insertLoc =  insertLoc2 = GetInsertLocFromPoint (hWnd,hFile,hFont,&insertPoint);
-		GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
-        SetCaretPos(insertPoint.x, insertPoint.y); 
+		insertPoint = POINTStoPOINT(MAKEPOINTS(lParam));
+		GMEditDisplayTextBetweenLocs(hWnd, hFile, hFont, insertLoc, insertLoc2, FALSE);
+		insertLoc = insertLoc2 = GetInsertLocFromPoint(hWnd, hFile, hFont, &insertPoint);
+		GetInsertPointFromLoc(hWnd, hFile, hFont, &insertPoint, insertLoc, 0);
+		SetCaretPos(insertPoint.x, insertPoint.y);
 		break;
 	case WM_MOUSEMOVE:
 		if (wParam != MK_LBUTTON)

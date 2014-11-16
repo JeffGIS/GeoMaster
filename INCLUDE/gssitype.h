@@ -2672,8 +2672,9 @@ typedef struct
 
 #pragma pack(2)
 typedef struct {unsigned	short	beginLine : 1,
+									bpSet:1,
 									textColor : 4,
-									filler : 11;
+									filler : 10;
 }BREAKPOINT;
 typedef BREAKPOINT *LPBREAKPOINT;
 

@@ -683,7 +683,6 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
     int		status;     
     LPSTR	SaveRtnPointer, pEndCmd;
    	LPSTR	pStr; 
-   	long	ThisMacro;   
    	BOOL	SaveIGFC =InGRFCmd;
 	HANDLE	hCmd=0;
 	LPSTR	pCmd;
@@ -698,8 +697,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	int		atLoc;
    
     InGRFCmd = FALSE; 
-    macroID = AddToMacroStack (1,CurrentMacro,Name,phArgs,NumArgs);
-    ThisMacro = ++CurrentMacro;
+    macroID = AddToMacroStack (1,++CurrentMacro,Name,phArgs,NumArgs);
     if (RtnVal)
     	*RtnVal = 0;
     SetGlobalValueLong ("%NUMARGS",NumArgs);
@@ -795,6 +793,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 					DeleteMacro = TRUE;
 					hBreakPoints = GSSiGlobAlloc(2451, GHND, sizeof(BREAKPOINT)*(lm + 1));
 					pBreakPoints = (LPBREAKPOINT)GlobalLock(hBreakPoints);
+					setMacroBrkPtHandle(macroID, hBreakPoints,lm);
 				}
 			} 
 			if (!GetDebug())
