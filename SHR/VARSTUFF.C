@@ -6125,7 +6125,7 @@ GSSiExitProg (558);
 		{   
 			if (!(EndBrack = MatchLev((LPSTR)(InLoc + 1), ']')))
 			{
-				if (strnicmp (InLoc+1,"$BOOL",5))
+				if (strnicmp (InLoc+1,"$BOOL",5) && GetDebug())
 					MessageBox(0, InLoc, "No matching bracket", MB_ICONEXCLAMATION);
 				goto OutChar;
 			}
@@ -6211,14 +6211,16 @@ GSSiExitProg (558);
 			pEnd = MatchLev (InLoc,')');
 			if (!pEnd)
 			{
-				MessageBox(0,InLoc,"Error in WHILE", MB_ICONEXCLAMATION);
+				if (GetDebug())
+					MessageBox(0, InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
 				goto WhileError;
 			}
 			pWhile = InLoc;
 			lWhile = pEnd++ - InLoc; 
 			if (*pEnd != '{')
 			{
-				MessageBox(0,InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
+				if (GetDebug())
+					MessageBox(0,InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
 				goto WhileError;
 			}
 			InLoc = pEnd;
@@ -6226,7 +6228,8 @@ GSSiExitProg (558);
 			pEnd = MatchLev (InLoc,'}');
 			if (!pEnd)
 			{
-				MessageBox(0,InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
+				if (GetDebug())
+					MessageBox(0,InLoc, "Error in WHILE", MB_ICONEXCLAMATION);
 				goto WhileError;
 			}
 			lLoop = pEnd++ - InLoc;
@@ -6302,7 +6305,8 @@ GSSiExitProg (558);
 			pEnd = MatchLev (InLoc,')');
 			if (!pEnd)
 			{
-				MessageBox(0, InLoc, "Error in IF conditional statement", MB_ICONEXCLAMATION);
+				if (GetDebug())
+					MessageBox(0, InLoc, "Error in IF conditional statement", MB_ICONEXCLAMATION);
 				goto IfError;
 			}
 			pIF = InLoc;
@@ -6322,7 +6326,8 @@ GSSiExitProg (558);
 			pEnd = MatchLev (InLoc,'}');
 			if (!pEnd)
 			{
-				MessageBox(0, InLoc, "Missing matching brace in IF statement", MB_ICONEXCLAMATION);
+				if (GetDebug())
+					MessageBox(0, InLoc, "Missing matching brace in IF statement", MB_ICONEXCLAMATION);
 				goto IfError;
 			}
 			lTHEN = pEnd++ - pTHEN;
@@ -6419,7 +6424,8 @@ GSSiExitProg (558);
 					char mess[128];
 					*(BegBrack+1) = 0;
 					sprintf(mess, "Unmatched parentheses at %s", InLoc);
-					MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+					if (GetDebug())
+						MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 				}
 				goto OutChar;
 			}
@@ -6427,7 +6433,10 @@ GSSiExitProg (558);
 				goto OutChar; 
 			if (pBrkPt)
 			{
+				char save = *(EndBrack+1);
+				*(EndBrack + 1) = 0;
 				SetFunctionDBIn(InLoc);
+				*(EndBrack + 1) = save;
 				breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen, BA_FUNCTION);
 			}
 			if (expandOnly && FunID != expandOnly)

@@ -616,8 +616,7 @@ void breakAtPos(int pos, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen, int from)
 				if ((pBrkPt[pos + bpOffset].beginLine &&  from == BA_NEXTPOS && breakAt == BA_NEXTLINE) ||
 					(pBrkPt[pos + bpOffset].bpSet &&  from == BA_NEXTPOS && breakAt == BA_NEXTBP) ||
 					(from == BA_FUNCTION && breakAt == BA_FUNCTION) ||
-					(from == BA_NEXTPOS && breakAt == BA_NEXTPOS) ||
-					from == BA_BEGINBLOCK)
+					(from == BA_NEXTPOS && breakAt == BA_NEXTPOS))
 				{
 					AtBreakPoint("", 1 + pos + bpOffset);
 				}
