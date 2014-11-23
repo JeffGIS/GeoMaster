@@ -88,6 +88,52 @@ typedef struct {
 }FIXLINE;
 static BOOL useRStreet, useUStreet, useBStreet;
 
+
+//sample code to create full screen window
+/*hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
+	CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+
+WINDOWPLACEMENT g_wpPrev = { sizeof(g_wpPrev) };
+
+void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags)
+{
+	DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
+	if (dwStyle & WS_OVERLAPPEDWINDOW) {
+		MONITORINFO mi = { sizeof(mi) };
+		if (GetWindowPlacement(hwnd, &g_wpPrev) &&
+			GetMonitorInfo(MonitorFromWindow(hwnd,
+			MONITOR_DEFAULTTOPRIMARY), &mi)) {
+			SetWindowLong(hwnd, GWL_STYLE,
+				dwStyle & ~WS_OVERLAPPEDWINDOW);
+			SetWindowPos(hwnd, HWND_TOP,
+				mi.rcMonitor.left, mi.rcMonitor.top,
+				mi.rcMonitor.right - mi.rcMonitor.left,
+				mi.rcMonitor.bottom - mi.rcMonitor.top,
+				SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+		}
+	}
+	else {
+		SetWindowLong(hwnd, GWL_STYLE,
+			dwStyle | WS_OVERLAPPEDWINDOW);
+		SetWindowPlacement(hwnd, &g_wpPrev);
+		SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	}
+}
+*/
+HWND GetTopParent (HWND	hWnd)
+{
+	HWND hWndPar;
+	hWndPar = GetParent(hWnd);
+	while (hWndPar)
+	{
+		hWnd = hWndPar;
+		hWndPar = GetParent(hWnd);
+	}
+	return hWnd;
+}
+
 void AddStreetRefToNode(int inode, int streetRef, float streetOffset, FIXNODE *nodes)
 {
 	if (streetRef && nodes[inode].numStreets < 2)

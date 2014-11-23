@@ -136,6 +136,10 @@ typedef struct _OFSTRUCTGM {
 
 HWND WindowExists(HWND hWnd);
 HWND FindWindowByName (LPSTR WindowName);
+HWND GetTopParent(HWND	hWnd);
+void ShowHideWindows(LPSTR WindowName, UINT fun);
+void ShowHideChildren(HWND hWndPar, UINT fun);
+
 HBITMAP GetToolBitmap (LPSTR BMPath);
 BOOL WaitForProcessToEnd (DWORD pID,LPINT pMaxWait);
 void UnixTimeToFileTime(time_t t, LPFILETIME pft);

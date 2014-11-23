@@ -22,6 +22,11 @@ static HWND	hWndFound;
 static HWND wantWnd;
 static LPSTR	pFindWindowText=0;
 
+typedef struct {
+	DWORD process, thread;
+}WINPROCESSANDTHREAD;
+typedef WINPROCESSANDTHREAD *LPWINPROCESSANDTHREAD;
+
 BOOL CALLBACK WEEnumWndProc(HWND hCtrl, LONG lParam)
 {
 	if (hCtrl == wantWnd)
@@ -63,13 +68,66 @@ HWND FindWindowByName(LPSTR WindowName)
 	UINT	ierr;
 	BOOL	rtn = TRUE;
 	FARPROC lpfnEnumWndProc;
+	DWORD thread, process;
+	 
+	hWndFound = FindWindow (WindowName,0);
+	if (!hWndFound)
+		hWndFound = FindWindow(0,WindowName);
+	//EnumWindows(FWBNEnumWndProc, (LPARAM)WindowName);
+	//ierr = GetWindowModuleFileName(hWndFound, str, 256);
 
-	hWndFound = 0;
-	EnumWindows(FWBNEnumWndProc, (LPARAM)WindowName);
 	return hWndFound;
 }
+BOOL CALLBACK ShowEnumWndProc(HWND hCtrl, LPWINPROCESSANDTHREAD pWpt)
+{
+	DWORD process;
+	DWORD thread = GetWindowThreadProcessId(hCtrl, &process);
+	if (pWpt->thread == thread && pWpt->process == process)
+	{
+		ShowWindow(hCtrl, SW_SHOW);
+		//SetWindowPos(hCtrl, HWND_TOP,0,0,0,0, SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);
+	}
+	return TRUE;
+}
+BOOL CALLBACK HideEnumWndProc(HWND hCtrl, LPWINPROCESSANDTHREAD pWpt)
+{
+	DWORD process;
+	DWORD thread = GetWindowThreadProcessId(hCtrl, &process);
+	if (pWpt->thread == thread && pWpt->process == process)
+	{
+		ShowWindow(hCtrl, SW_HIDE);
+		//SetWindowPos(hCtrl, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_HIDEWINDOW);
+	}
+	return TRUE;
+}
 
-BOOL CALLBACK FWBPEnumWndProc(HWND hCtrl,LONG lParam)
+void ShowHideWindows(LPSTR WindowName, UINT fun)
+{
+	WINPROCESSANDTHREAD wpt;
+
+	wpt.thread = GetWindowThreadProcessId(hWndFound, &wpt.process);
+
+	if (fun == SW_SHOW)
+		EnumWindows(ShowEnumWndProc, (LPARAM)&wpt);
+	else
+		EnumWindows(HideEnumWndProc, (LPARAM)&wpt);
+	return;
+}
+BOOL CALLBACK ShowChildEnumWndProc(HWND hCtrl, LONG lParam)
+{
+	ShowWindow(hCtrl, lParam);
+	return TRUE;
+}
+
+void ShowHideChildren(HWND hWndPar, UINT fun)
+{
+	ShowWindow(hWndPar, fun);
+	EnumChildWindows(hWndPar, ShowChildEnumWndProc, fun);
+
+	return;
+}
+
+BOOL CALLBACK FWBPEnumWndProc(HWND hCtrl, LONG lParam)
 {
 	char    txt[256];
 	long	lUserData; 
@@ -3758,6 +3816,20 @@ GotCloseFilehSQL:
 				ShowWindow(hWnd, SW_HIDE);
 			else if (!stricmp(Arg[2], "SHOW"))
 				ShowWindow(hWnd, SW_SHOW);
+			else if (!stricmp(Arg[2], "HIDEALL"))
+				ShowHideWindows(Arg[1], SW_HIDE);
+			else if (!stricmp(Arg[2], "SHOWALL"))
+				ShowHideWindows(Arg[1], SW_SHOW);
+			else if (!stricmp(Arg[2], "SHOWCHILDREN"))
+				ShowHideChildren(GetTopParent(hWnd), SW_SHOW);
+			else if (!stricmp(Arg[2], "HIDECHILDREN"))
+				ShowHideChildren(GetTopParent(hWnd), SW_HIDE);
+			else if (!stricmp(Arg[2], "HIDEPAR"))
+				ShowWindow(GetTopParent(hWnd), SW_HIDE);
+			else if (!stricmp(Arg[2], "SHOWPAR"))
+				SetWindowPos(GetTopParent(hWnd), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+
+				//ShowWindow(GetTopParent(hWnd), SW_SHOW);
 			else if (!stricmp(Arg[2], "MINIMIZE"))
 				ShowWindow(hWnd, SW_FORCEMINIMIZE);
 			else if (!stricmp(Arg[2], "RESTORE"))
