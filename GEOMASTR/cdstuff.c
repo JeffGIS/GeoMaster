@@ -64,7 +64,7 @@ BOOL CDIsRegistered  (LPSTR VolLabel)
 	return FALSE;
 }
 
-RegisterCD (LPSTR FromPath,LPSTR ToPath,LPSTR SearchString)
+BOOL RegisterCD (LPSTR FromPath,LPSTR ToPath,LPSTR SearchString)
 { 
 	HCURSOR	hcurSave;  
 	char	Name[MAX_PATH], str2[150], file[MAX_PATH], lastpath[MAX_PATH], VolLabel[34], Prefix[128];

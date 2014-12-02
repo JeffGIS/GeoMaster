@@ -12370,7 +12370,7 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				NumItems = BT_NUM_IN_INDEX(hHighlight); 
 				MaxHandle = 0; 
       			CurItem = 0;
-      _fstrcpy (TmpName,"c:\\dgntest.txt");
+				GSSiGetTempFileName(0, "gmt", 0, TmpName);
 				if (!makedirectories (Name,FALSE,FALSE))
 					FidMIF = HFILE_ERROR;
 				else  

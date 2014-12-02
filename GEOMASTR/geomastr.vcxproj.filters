@@ -1317,6 +1317,9 @@
     <ClCompile Include="SQLiteCmd.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParcelTran.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">

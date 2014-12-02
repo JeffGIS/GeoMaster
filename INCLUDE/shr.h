@@ -494,13 +494,13 @@ COLORREF GetNextUniqueColor (LPLONG pColor);
 void cwCenter(HWND hWnd, int top);
 int nCwRegisterClasses(LPSTR Menu);
 void CwUnRegisterClasses(void);
-GSSIPeekMessage(
+BOOL GSSIPeekMessage(
     __out LPMSG lpMsg,
     __in_opt HWND hWnd,
     __in UINT wMsgFilterMin,
     __in UINT wMsgFilterMax,
     __in UINT wRemoveMsg);
-GSSiGetMessage(
+BOOL GSSiGetMessage(
     __out LPMSG lpMsg,
     __in_opt HWND hWnd,
     __in UINT wMsgFilterMin,

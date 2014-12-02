@@ -695,7 +695,13 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	LPBREAKPOINT	pBreakPoints = 0;
 	int		lm=0;
 	int		atLoc;
-   
+	BOOL	loadOnly = FALSE;
+
+	if (NumArgs < 0)
+	{
+		loadOnly = TRUE;
+		NumArgs = 0;
+	}
     InGRFCmd = FALSE; 
     macroID = AddToMacroStack (1,++CurrentMacro,Name,phArgs,NumArgs);
     if (RtnVal)
@@ -836,7 +842,7 @@ ProcessMacro:
 		pCmd = GlobalLock (hCmd);     
 		if (!*pMacro)
 	   		rtn = FALSE;
-    	while (*pMacro)
+    	while (!loadOnly && *pMacro)
     	{   
 			HANDLE SaveMacArgs;
 			

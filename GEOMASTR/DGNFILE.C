@@ -681,7 +681,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
     ULONG		i,j,n;
     short		nPoly, Type, ltag;
     HANDLE		hPoints, hPartIndex, hPolyPartLen;  
-    LPUSHORT	pNumPoints;
+    LPINT		pNumPoints;
     long		NumPoints; 
     HPEN		hOldPen=0, hTempPen=0;
 	HBRUSH		hOldBrush=0, hDeletePen=0, hTempBrush=0;  
@@ -908,7 +908,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 					break;
 			}
 	        pPartIndex[NumParts]= NumPoints;
-            pNumPoints = (LPUSHORT)GlobalLock (hPolyPartLen);
+            pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
 	        for (i=0;i<nPoly;i++)
 	        {   
 	            long    numpoints, startpoint,ii; 
@@ -1021,7 +1021,7 @@ ProcessMultipoint:
 	        pPartIndex[NumParts]= NumPoints;
 	                    
             pPoints = pFirstPoint = (LPDPOINT)GlobalLock (hPoints); 
-            pNumPoints = (LPUSHORT)GlobalLock (hPolyPartLen);
+            pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
 	        for (i=0;i<nPoly;i++)
 	        {   
 	            long    numpoints, startpoint,ii; 
@@ -1097,7 +1097,7 @@ DoPoly:
 						}
 						if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI) > 0)
 						{   
-							pNumPoints = (LPWORD)GlobalLock (hPolyPartLen);
+							pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
 			        		for (i=0;i<nPoly;i++)
 			        		{   
 								if (*pNumPoints > 300)
@@ -1123,6 +1123,37 @@ DoPoly:
 				if (Pick)
 				{   
 					PickPolygonD (pPoints,NumPoints,nPoly,hPolyPartLen,9999999,0);
+				}
+				else if (CopyRec)
+				{
+					pNumPoints = (LPINT)GlobalLock(hPolyPartLen);//pNumPoints[1]
+					if (nPoly > 1)
+					{
+						HANDLE	hhPoly = GSSiGlobAlloc(418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
+						LPHANDLE phPoly = (LPHANDLE)GlobalLock(hhPoly);
+						HPDPOINT	pPoints1 = (HPDPOINT)GlobalLock(hPoints), pPoints2;
+
+						for (i = 0; i<nPoly; i++)
+						{
+							phPoly[i] = GSSiGlobAlloc(420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);
+							pPoints2 = (HPDPOINT)GlobalLock(phPoly[i]);
+							hmemmove((HPSTR)pPoints2, (HPSTR)pPoints1, sizeof(DPOINT)*(long)pNumPoints[i]);
+							GlobalUnlock(phPoly[i]);
+							pPoints1 += pNumPoints[i];
+							if (i)
+								pPoints1++;
+						}
+						GlobalUnlock(hPoints);
+						AddPolyToBuffer(nPoly, pNumPoints, phPoly, TYPE_AREA, CurrentRefno, 0, -1, CurrentDesc, 0, CurrentPrefix, CurrentUDI,
+							-1, -1, 0, 0, 0, 0, 0, TRUE, &hUpdateBuf, &lUpdateBuf);
+						for (i = 0; i<nPoly; i++)
+							GSSiGlobFree(&phPoly[i]);
+						GSSiGlobUlFree(&hhPoly);
+					}
+					else
+						AddPolyToBuffer(nPoly, pNumPoints, &hPoints, TYPE_AREA, CurrentRefno, 0, -1, CurrentDesc, 0, CurrentPrefix, CurrentUDI,
+						-1, -1, 0, 0, 0, 0, 0, TRUE, &hUpdateBuf, &lUpdateBuf);
+					GlobalUnlock(hPolyPartLen);
 				}
 				else
 				{    

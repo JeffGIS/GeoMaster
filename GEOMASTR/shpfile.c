@@ -1884,7 +1884,7 @@ DoPoly:
 							HANDLE	hhPoly = GSSiGlobAlloc(418, GMEM_MOVEABLE, sizeof(HANDLE)*nPoly);
 							LPHANDLE phPoly = (LPHANDLE)GlobalLock(hhPoly);
 							HPDPOINT	pPoints1 = (HPDPOINT)GlobalLock(hPoints), pPoints2;
-
+							
 							for (i = 0; i<nPoly; i++)
 							{
 								phPoly[i] = GSSiGlobAlloc(420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)pNumPoints[i]);

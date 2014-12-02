@@ -1694,7 +1694,7 @@ BOOL CreateAreaGridFromGrid (LPSTR File,LPSTR SymName,LPSTR PrefixIN,int MaxZoom
 BOOL CreateAreaGrid (LPSTR File,LPSTR Symbol,double Width); 
 BOOL SaveContourElevPoints (HDC hDC,LPSTR SymName,HPFPOINT lpPoints,int nPnts);
 BOOL FileOnSystem (LPSTR Name);
-RegisterCD (LPSTR FromPath,LPSTR ToPath,LPSTR SearchString);    
+BOOL RegisterCD (LPSTR FromPath,LPSTR ToPath,LPSTR SearchString);    
 BOOL CDIsRegistered  (LPSTR VolLabel);
 void OpenDisplayedRefs(void);
 void CloseDisplayedRefs(void);
@@ -2080,6 +2080,7 @@ long ClearGMTempFiles (void);
 BOOL CopyTextFile (LPSTR ToFike,LPSTR FromFile,LPSTR Opt,LPSTR Value);
 BOOL GetSymAttrFile(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LPSTR OverrideAppendVal, LPSTR AttrFile);
 BOOL GetSymAttrKey(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LPSTR OverrideAppendVal, LPSTR Key);
+BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc);
 BOOL PointListCommands(int nArgs, LPSTR *Arg, LPSTR OutLoc);
 BOOL PListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc);
 BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc);

@@ -21586,7 +21586,7 @@ BeginLoad:
 				_fstrcpy (CurrentFile,Name);
             	sprintf (str,"%s %s %s %ld","[%DL]dgndump.exe",Name,pFile,(long)hWndDlg);
             	ExpandText (str);
-				AppendFile ("c:\\temp.txt",str);
+				//AppendFile ("c:\\temp.txt",str);
             	GlobalUnlock (hTempFile);
 				hI = WinExec (str,SW_SHOWNORMAL);
 				if (hI <32)

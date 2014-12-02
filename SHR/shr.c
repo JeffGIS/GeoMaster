@@ -12830,7 +12830,7 @@ GSSiExitProg (453);
 #endif
 }    /* End of CwUnRegisterClasses                                      */
 
-GSSiPeekMessage(
+BOOL GSSiPeekMessage(
     __out LPMSG lpMsg,
     __in_opt HWND hWnd,
     __in UINT wMsgFilterMin,
@@ -12845,7 +12845,7 @@ GSSiPeekMessage(
 	return rtn;
 }
 
-GSSiGetMessage(
+BOOL GSSiGetMessage(
     __out LPMSG lpMsg,
     __in_opt HWND hWnd,
     __in UINT wMsgFilterMin,

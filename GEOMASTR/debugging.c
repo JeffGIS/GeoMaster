@@ -457,6 +457,10 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 						break;
 				 }
 			break;
+			case IDC_DBADDFILE:
+				ProcessMacroFile(str, 0, 0, -1);
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+				break;
 			case IDB_MACROSTACK:
 			{
 				switch (HIWORD(wParam))

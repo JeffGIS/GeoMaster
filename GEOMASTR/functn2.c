@@ -3049,6 +3049,16 @@ GSSiExitProg (1350);
 			GetSymAttrKey(Arg[1], Arg[3], AddRef, Arg[5], Arg[2], OutLoc);
 			goto Rtnl;
 		}
+
+		case 1040:	//$PARCELTRAN
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			ParcelTranFunction(nArgs,Arg, OutLoc);
+			goto Rtnl;
+		}
+
 		case 1101: //$DUMPGLOBALS(pathname)
 			dumpvars (Args);
           	goto RtnTrue;  

@@ -1466,7 +1466,7 @@ extern HANDLE			hTranExport[2];
 extern BOOL			HaveLastTriangle;
 extern long			MostPoints;
 //extern char			DynDlgName[10];
-extern struct			tmtmtime;//sharewithvarstuffso%DATE%TIMEsetfromlast$CLKcall;
+//extern struct			tmtmtime;//sharewithvarstuffso%DATE%TIMEsetfromlast$CLKcall;
 extern FARPROC			lpfnPRINTMERGETSTMsgProc;
 extern HANDLE			hDCPSetup;
 extern long			nOrthoBlocks;

@@ -501,6 +501,7 @@
     <ClCompile Include="orthos.c" />
     <ClCompile Include="..\gctpc\paksz.c" />
     <ClCompile Include="..\PCX\PCXTOBMP.C" />
+    <ClCompile Include="ParcelTran.c" />
     <ClCompile Include="peoplnet.c" />
     <ClCompile Include="..\Proj-4\src\PJ_aea.c" />
     <ClCompile Include="..\Proj-4\src\PJ_aeqd.c" />

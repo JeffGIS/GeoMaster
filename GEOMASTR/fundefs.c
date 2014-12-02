@@ -440,6 +440,7 @@ int	GetFunctionID10 (LPSTR str)
 			if (!_fstrnicmp(str, "WAITFORKEY", 10)) return 1037;
 			if (!_fstrnicmp(str, "DIALOGITEM", 10)) return 1038;
 			if (!_fstrnicmp(str, "SYMATTRKEY", 10)) return 1039;
+			if (!_fstrnicmp(str, "PARCELTRAN", 10)) return 1040;
 			return 0;
 }
 int	GetFunctionID11 (LPSTR str)
