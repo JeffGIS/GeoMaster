@@ -12441,8 +12441,9 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 					fputstring (str,FidMIF); line++;
 				}
       			CurItem = 0;
-				strcpy (DBName,"ODBC|PROPINFO;DBQ=[%DL]ATTRIBUT\\PROPINFO.MDB|PropInfo");
-				sprintf (str,"$OPEN(DB=%s,pid='@[PIDNO]')",DBName);
+				//strcpy(DBName, "ODBC|PROPINFO;DBQ=[%DL]ATTRIBUT\\PROPINFO.MDB|PropInfo");
+				strcpy(DBName, "[%DL]ATTRIBUT\\[PROP_DATE]\\PROPINFO.GMD");
+				sprintf(str, "$OPEN(DB=%s,pid='@[PIDNO]')", DBName);
 				ExpandText (str);
                 SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,"Creating extract file");
 				pos = BT_FIRST;
