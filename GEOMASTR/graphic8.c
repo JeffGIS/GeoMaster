@@ -580,7 +580,7 @@ GSSiExitProg (944);
 #endif
 }
 
-BOOL SelectAreaToOffsetFile (int Item,double Offset)
+BOOL SelectAreaToOffsetFile (int Item,double Offset,HANDLE hTran)
 #if ENABLETRACE
 {GSSiEnterProg (945);
 #endif
@@ -597,11 +597,18 @@ BOOL SelectAreaToOffsetFile (int Item,double Offset)
 		HANDLE hPoly=0;
 		HANDLE hPolyPartLen=0;
  		int nLoops = GetPolyPointsWithParts ((LPPICKDATAHEADER)&PickList[0],&nPnts,&hPoly,&hPolyPartLen);
+
 		if (nLoops)
 		{   
 			LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock (hPoly);
 			
 			lpDpoint = (HPDPOINT)(pBounds+1);
+			if (hTran)
+			{
+				int i;
+				for (i = 0; i<nPnts; i++)
+					lpDpoint[i] = TranPoint(&lpDpoint[i], hTran);
+			}
 			if (nLoops > 1)
 			{
 				pPolyParts = GlobalLock(hPolyPartLen);

@@ -514,6 +514,16 @@ typedef struct
      } TRANDATA;
 typedef TRANDATA    FAR *LPTRANDATA;
 
+typedef struct {
+	char ID[12];
+	int np;
+	HANDLE hFromPt;
+	HANDLE hToPt;
+	HANDLE hTran;
+	int nParcels, nParcelsMatched;
+} PARCELTRAN;
+typedef PARCELTRAN *LPPARCELTRAN;
+
 typedef struct	{
 				 MNMXCORD FromMNMX, ToMNMX; 
 				 DPOINT FromPT[4];

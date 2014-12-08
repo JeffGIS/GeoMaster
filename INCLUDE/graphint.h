@@ -290,7 +290,7 @@ int	NextNewObject(BOOL DisplayMessage);
 BOOL OffsetPickedArea (int Item, double Dist);
 HANDLE OffsetPickedArea2 (int Item, double Dist,LPLONG pNumPoints);
 BOOL OffsetHighlightedLines (int NumPoints,HANDLE hPoints, double Dist);
-BOOL SelectAreaToOffsetFile (int Item,double Offset);
+BOOL SelectAreaToOffsetFile (int Item,double Offset,HANDLE hTran);
 int CurvePoints (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINT *Points,double CurveExpansionFactor,long MaxPoints);
 int CurvePointsS (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINTS *Points,double CurveExpansionFactor,long MaxPoints);
 int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points,LPDOUBLE pBackAZ,long MaxPoints,double VectorizationFactor,short LoopFactor);

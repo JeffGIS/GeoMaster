@@ -686,16 +686,22 @@ GSSiExitProg (1348);
 			if (!_fstrcmp(Arg[1],"COPY")) //delete existing,showstatus(opt),newrefs(opt),TranFile(opt),ConvertCurvesToPolylines
 			{   
 				BOOL	SaveAllowCache = AllowCache;
-
+				BOOL	closeTran = TRUE;
 				AllowCache = FALSE;
 				FromLimits = atob (Arg[2]);//delete existing highlighted items
 				Immediate = atob (Arg[3]);//show status option
-				if (*Arg[5])
+				if (IsInteger(Arg[5]) && atoi(Arg[5]) > 0)
+				{
+					hTran = (HANDLE)atoi(Arg[5]);
+					closeTran = FALSE;
+				}
+				else if (*Arg[5])
 					hTran=LoadTranFileWithDandT(Arg[5]);
 				else
 					hTran = 0;
 				rtn = CopyHighlightedRecords (FromLimits,Immediate,atob(Arg[4]),hTran,atob(Arg[6]));
-				CloseTRANS2 (&hTran);
+				if (closeTran)
+					CloseTRANS2 (&hTran);
 				AllowCache = SaveAllowCache;
 				if (rtn)
 					goto RtnTrue;

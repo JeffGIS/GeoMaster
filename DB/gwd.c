@@ -1385,14 +1385,14 @@ LoadFields:
                 case CBN_DROPDOWN:
                    if(!*hThemeDB|| *DataFileType != ODBC_DATAFILE) break;  
                    DBHandle = GetDBHandleFromSQL (*hThemeDB);
-                   lpSTRING =  GetTableName (DBHandle, TRUE); // the first table name 
+                   lpSTRING =  GetTableName (DBHandle, TRUE,*DataFileType); // the first table name 
                    if (lpSTRING == 0) break;
                    i=(short)SendDlgItemMessage (hWndDlg,cntlTABLE_NAMES,CB_RESETCONTENT,0,0);
                    i = 0;
                    while (lpSTRING && lpSTRING[0] != 0 )
                    {
                     i=(short)SendDlgItemMessage (hWndDlg,cntlTABLE_NAMES,CB_ADDSTRING,0,(LPARAM)((LPSTR) lpSTRING));
-                    lpSTRING =  GetTableName (DBHandle, FALSE); // subsequent table names 
+					lpSTRING = GetTableName(DBHandle, FALSE,*DataFileType); // subsequent table names 
                    } 
                      
                } //end of the switch

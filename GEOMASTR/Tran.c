@@ -843,7 +843,12 @@ HANDLE STRANBoundsToBounds (LPMNMXCORD FromRect,LPMNMXCORD ToRect)
 HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN,int Type,LPMNMXCORD pBounds)
 {
 	HANDLE hTran; 
-	double	XFROM[4],YFROM[4],XTO[4],YTO[4];  
+	//double	XFROM[4],YFROM[4],XTO[4],YTO[4]; 
+	HANDLE hFromTo = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPt * 4 * sizeof(double));
+	LPDOUBLE XFROM = GlobalLock(hFromTo);
+	LPDOUBLE YFROM = &XFROM[nPt];
+	LPDOUBLE XTO = &YFROM[nPt];
+	LPDOUBLE YTO = &XTO[nPt];
 	float	RSQMIN;
 	int	i;
 
@@ -855,9 +860,10 @@ HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN
 		YTO[i] = ToPt[i].y;
 	}
 	
-	hTran = STRAN2 (id,XFROM,YFROM,XTO,YTO,nPt,(LPFLOAT)&RSQMIN,1,pBounds);
+	hTran = STRAN2 (id,XFROM,YFROM,XTO,YTO,nPt,(LPFLOAT)&RSQMIN,Type,pBounds);
 	if (pRSQMIN)
 		*pRSQMIN = RSQMIN;
+	GSSiGlobUlFree(&hFromTo);
 	return hTran;
 }
 
@@ -1003,6 +1009,11 @@ void TRANS2 (double XIN,double YIN, LPDOUBLE XOUT,LPDOUBLE YOUT, HANDLE hlpTran)
 	  Point.x = XIN;
 	  Point.y = YIN;	
       TranPtr = (LPTRANDATA)GlobalLock(hlpTran); 
+	  if (!strncmp((LPSTR)TranPtr, "PARCELTRAN", 10))
+	  {
+		  TranToParcelPoints(&XIN, &YIN, XOUT, YOUT, (LPPARCELTRAN)TranPtr);
+		  goto Exit;
+	  }
 /* 3/15/07 not sure why you would want to do this - messes up using bounds for az computation ($GETTRANDATA)
 		   seems better to use not fixed tran if out of bounds
       if (!PointInBounds (Point,&TranPtr->Bounds))

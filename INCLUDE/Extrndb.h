@@ -21,11 +21,11 @@ HANDLE OpenDDEExternalDatabase ( LPSTR Name);
 
 long FindFieldName (LPSTR DBName,LPSTR FldPartialName,LPSTR OutFile);
 long FindTableName (LPSTR DBName,LPSTR TablePartialName,LPSTR OutFile);
-int	NumDatabaseTables ( char *type, HANDLE DBhandle);
+int	NumDatabaseTables ( char *type, HANDLE DBhandle,int itype);
 int	NumDDEDatabaseTables ( char *type, HANDLE DBhandle);
 /*	Returns the number of tables in the database	*/
 
-LPSTR GetTableName (HANDLE DBhandle, BOOL First);
+LPSTR GetTableName (HANDLE DBhandle, BOOL First,int dataFileType);
 LPSTR GetDDETableName (HANDLE DBhandle, BOOL First);
 /*	Returns the name of a table in the database		*/
 /*	If First is TRUE returns the first table.		*/

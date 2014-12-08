@@ -1625,7 +1625,7 @@ GSSiExitProg (672);
 			if (PickByRefno(ZoomRef,ZoomPrefix,ZoomUDI,PickFile))
 			{
 				SetMaskArea(NumPicked-1,0,1);
-				SelectAreaToOffsetFile (NumPicked-1,0);
+				SelectAreaToOffsetFile(NumPicked - 1, 0, 0);
 	    		ZoomToPickedItem(0,100,TRUE,FALSE,AddToView);
 	    	}
 	    	else
@@ -1637,7 +1637,7 @@ GSSiExitProg (672);
 			if (PickByRefno(ZoomRef,0,0,PickFile))
 			{
 				SetMaskArea(NumPicked-1,0,1);
-				SelectAreaToOffsetFile (NumPicked-1,0);
+				SelectAreaToOffsetFile(NumPicked - 1, 0, 0);
 	    		ZoomToPickedItem(0,100,TRUE,FALSE,AddToView);
 	    	}
 	    	else

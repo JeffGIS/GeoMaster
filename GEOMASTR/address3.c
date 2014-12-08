@@ -1342,11 +1342,11 @@ TryAgain:
 				if (!GetExtents && !UseFlag && (Shadow == 1 && !symbol || Shadow > 1))
 				{   
 					short	i, inc=max(1,(TAGBox.LogFont.lfHeight-5)/10); 
-					int		iDeviceToScreenFactor = IDNINT(DeviceToScreenFactor);
+					int		iDeviceToScreenFactor = max(1, DeviceToScreenFactor + 0.5);//IDNINT(DeviceToScreenFactor);
 					
 					OldColor = SetTextColorDelayed (hDC,ConvertColor(ShadowColor,UseHalfTone),CurTheme);  
 					i = 1;
-					while (i <= iDeviceToScreenFactor*2)
+					while (i <= iDeviceToScreenFactor)//*2)
 					{
 						TextOutDelayed (hDC,xt+i,Y+i,pText3,ltext,CurTheme); 
 						TextOutDelayed (hDC,xt-i,Y+i,pText3,ltext,CurTheme); 

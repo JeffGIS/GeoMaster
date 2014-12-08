@@ -4069,7 +4069,7 @@ DisplayParcel:
 		 				else if (OffsetLineOffset > 0)
 		 				{ 
 							HaltMapDisplay(FALSE, FALSE);
-		 					SelectAreaToOffsetFile (0,0);
+							SelectAreaToOffsetFile(0, 0, 0);
 						    CurView->CurZoomAreaRef = 0;
 				   			RedisplayViewport(FALSE,FALSE);
 		 				}

@@ -538,6 +538,7 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 	static	int istatus=0;
 	BOOL	rtn=FALSE;
 	HANDLE	hDB=0;
+	short	itype;
 
 	
 	ExpandText (Arg[1]);
@@ -554,7 +555,7 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 	}
 	ExpandText (pFile);
 	ExpandText (Arg[3]);
-	OpenDataFile (pFile,Arg[3],OF_READ,&hDB);
+	itype = OpenDataFile (pFile,Arg[3],OF_READ,&hDB);
 	if (!hDB)
    		goto Exit;
 	if (pStatusText)
@@ -603,7 +604,7 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 
 		strupr(TablePartialName);
 		DBHandle = GetDBHandleFromSQL(hDB);
-		lpSTRING = GetTableName(DBHandle, TRUE);
+		lpSTRING = GetTableName(DBHandle, TRUE,itype);
 		while (lpSTRING && *lpSTRING)
 		{
 			strupr(lpSTRING);
@@ -611,7 +612,7 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			{
 				n++;
 			}
-			lpSTRING = GetTableName(DBHandle, FALSE);
+			lpSTRING = GetTableName(DBHandle, FALSE,itype);
 		}
 	}
 	else if (!stricmp (Arg[1],"DISTINCT"))
@@ -2784,7 +2785,7 @@ BOOL AreaInArea2 (LPSTR TAGOrRef,LPSTR AinAGMD,int SpeedFactor,double MinPCT,BOO
 		st = PickByRefno (BoundaryAreaRef,0,0,-100);
 	}
 NextArea:
-	if (!st || !SelectAreaToOffsetFile (0,0))
+	if (!st || !SelectAreaToOffsetFile(0, 0, 0))
 		goto Exit;
 	if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nBoundaryPoints,&hBoundaryPoints))
 		goto Exit;

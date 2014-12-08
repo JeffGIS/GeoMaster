@@ -2093,7 +2093,7 @@ GotCloseFilehSQL:
 			goto RtnFalse;
 		}
 
-		case 532: //$POINT(DISPLAY,id or coord,symbol,size,color)
+		case 532: //$POINT(DISPLAY,id or coord,symbol,size,color,text)
 		{
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
@@ -4452,7 +4452,7 @@ GotCloseFilehSQL:
 		case 706:	/* $HLTAREA(SAVE,name) saves hlt area to file */   
 					/* $HLTAREA(LOAD,name) loads hlt area from file */     
 					// $HLTAREA(CLEAR)
-					// $HLTAREA(SET,PICKED,n)
+					// $HLTAREA(SET,PICKED,n,hTran(opt))
 					// $HLTAREA(SET,ITEM,TAGorRefno,use pickability(TorF))
 		{	double	rval;
 			int		l, len, usePick=-1; 
@@ -4474,7 +4474,7 @@ GotCloseFilehSQL:
 			{
 				if (!_fstricmp (Arg[2],"PICKED"))
 				{   
-					SelectAreaToOffsetFile (atoi(Arg[3])-1,atof(Arg[3]));  
+					SelectAreaToOffsetFile (atoi(Arg[3])-1,atof(Arg[3]),(HANDLE)atoi(Arg[4]));  
 				} 
 				else if (!_fstricmp (Arg[2],"ITEM"))
 				{
@@ -4497,7 +4497,7 @@ GotCloseFilehSQL:
 							goto RtnFalse;
 					}
 					else	
-						SelectAreaToOffsetFile (0,0);  
+						SelectAreaToOffsetFile(0, 0, 0);
 				} 
 				else if (!_fstricmp (Arg[2],"HLTLIST"))
 				{
@@ -4509,7 +4509,7 @@ GotCloseFilehSQL:
 					while (!BT_FIND (hHighlight,(LPSTR)&StartRef,BT_FIRST,BT_GT,(LPSTR)&HighlightData))
 					{
 						PickList[0]=HighlightData.PD;
-						SelectAreaToOffsetFile (0,atof(Arg[3])); 
+						SelectAreaToOffsetFile(0, atof(Arg[3]), 0);
 					}
 					AutoClearOffset = SaveAutoClearOffset; 
 				} 

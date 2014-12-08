@@ -709,7 +709,7 @@ LPCURVAL	pCurVal;
 		    }
 		    else
 		    	SkipFirstField = SelectAllStatement (FilePtr,sqlstr);
-		    if (qc && _fstrchr (TableNames[i],' '))
+		    if (qc)// && _fstrchr (TableNames[i],' '))
 		    	sprintf (_fstrchr(sqlstr,0)," From %c%s%c",qc,TableNames[i],qc);
 		    else
 		    	sprintf (_fstrchr(sqlstr,0)," From %s",TableNames[i]);
@@ -2083,7 +2083,7 @@ void ODBCTerminate (BOOL Quit)
 }	
 
 /******************************************************************/
-int NumDatabaseTables( char *type, HWND  DBhandle)
+int NumDatabaseTables( char *type, HWND  DBhandle,int itype)
 {
 #define STR_RMK 254
 SDWORD cbTableQual, cbTableOwner, cbTableName, cbTableType, cbRemarks;
@@ -2091,36 +2091,60 @@ UCHAR  szTableQual[STR_LEN+1],   szTableName[STR_LEN+1],
        szTableOwner[STR_LEN+1],  szTableType[STR_LEN+1],
        szRemarks[STR_RMK];  
        char	Owner[64]; 
-       char	TableTypes[]="'TABLE','VIEW'";
+	   char	TableTypes[34] = "'TABLE','VIEW'";
        short	lOwner, ln; 
        LPSTR	pTables;
+	   char buffer[1024] = { 0 };
+	   SQLSMALLINT	lbuf;
 static HSTMT hstmt;      
 		long	TotLen=0;
 HDBC hdbc;           
 RETCODE rc;
 int icount; 
 short	i;
+	
     GSSiGlobFree (&hTableNames);
     i=(int)DBhandle;
     hdbc = HDBCS[i];
     SQLAllocStmt(hdbc, &hstmt);
+
+	rc = SQLGetInfo(hdbc, SQL_DRIVER_NAME, buffer, sizeof(buffer) - 1, &lbuf);
+	rc = SQLGetInfo(hdbc, SQL_DATA_SOURCE_NAME, buffer, sizeof(buffer) - 1, &lbuf);
+
+//	if (itype == 4)
+//		strcpy(TableTypes, "'SYSTEM TABLE','TABLE','VIEW'");
+
 //    rc = SQLTables(hstmt,0,0,0,0,0,0,0,0); 
 	GetGlobalCVal ("[%TABLEOWNER]",Owner,0);
 	lOwner = _fstrlen (Owner);  
 	if (lOwner)
     	rc = SQLTables(hstmt,0,0,Owner,lOwner,0,0,TableTypes,(short)_fstrlen(TableTypes));
     else
-    	rc = SQLTables(hstmt,0,0,0,0,0,0,TableTypes,(short)_fstrlen(TableTypes));
-    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)  goto s44;
-    SQLBindCol(hstmt,  1, SQL_C_CHAR,   szTableQual, STR_LEN, &cbTableQual); 
-    SQLBindCol(hstmt,  2, SQL_C_CHAR,   szTableOwner, STR_LEN, &cbTableOwner); 
-    SQLBindCol(hstmt,  3, SQL_C_CHAR,   szTableName, STR_LEN, &cbTableName); 
-    SQLBindCol(hstmt,  4, SQL_C_CHAR,   szTableType, STR_LEN, &cbTableType); 
-    SQLBindCol(hstmt,  5, SQL_C_CHAR,   szRemarks, STR_RMK, &cbRemarks);
+		rc = SQLTables(hstmt, 0, 0, 0, 0, 0, 0, TableTypes, (short)_fstrlen(TableTypes));
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) goto s44;
+	SQLBindCol(hstmt, 1, SQL_C_CHAR, szTableQual, STR_LEN, &cbTableQual);
+	SQLBindCol(hstmt, 2, SQL_C_CHAR, szTableOwner, STR_LEN, &cbTableOwner);
+	SQLBindCol(hstmt, 3, SQL_C_CHAR, szTableName, STR_LEN, &cbTableName);
+	SQLBindCol(hstmt, 4, SQL_C_CHAR, szTableType, STR_LEN, &cbTableType);
+	SQLBindCol(hstmt, 5, SQL_C_CHAR, szRemarks, STR_RMK, &cbRemarks);
+	rc = SQLFetch(hstmt);
+	if (!(rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO))
+	{
+		strcpy(TableTypes, "'SYSTEM TABLE','TABLE','VIEW'");
+		SQLCloseCursor(hstmt);
+		SQLFreeStmt(hstmt, SQL_DROP);
+		SQLAllocStmt(hdbc, &hstmt);
+		rc = SQLTables(hstmt, 0, 0, 0, 0, 0, 0, TableTypes, (short)_fstrlen(TableTypes));
+		SQLBindCol(hstmt, 1, SQL_C_CHAR, szTableQual, STR_LEN, &cbTableQual);
+		SQLBindCol(hstmt, 2, SQL_C_CHAR, szTableOwner, STR_LEN, &cbTableOwner);
+		SQLBindCol(hstmt, 3, SQL_C_CHAR, szTableName, STR_LEN, &cbTableName);
+		SQLBindCol(hstmt, 4, SQL_C_CHAR, szTableType, STR_LEN, &cbTableType);
+		SQLBindCol(hstmt, 5, SQL_C_CHAR, szRemarks, STR_RMK, &cbRemarks);
+		rc = SQLFetch(hstmt);
+	}
     icount = 1; 
     hTableNames = GSSiGlobAlloc ( 165,GHND,USHRT_MAX);
     pTables = GlobalLock (hTableNames);
-    rc = SQLFetch(hstmt);
     while ((rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) && TotLen < USHRT_MAX - 256)
     {   
     	short	ii;
@@ -2153,12 +2177,13 @@ long FindTableName (LPSTR DBName,LPSTR TablePartialName,LPSTR OutFile)
 	short	NS;   
 	HANDLE	DBHandle;
 	char	TableName[128];
+	short	itype;
 	
-    if (!OpenDataFile (DBName,"",BT_READ,&hDB))
+    if (!(itype=OpenDataFile (DBName,"",BT_READ,&hDB)))
     	return 0; 
     _fstrupr (TablePartialName);
 	DBHandle = GetDBHandleFromSQL (hDB);
-	lpSTRING =  GetTableName (DBHandle, TRUE); 
+	lpSTRING =  GetTableName (DBHandle, TRUE,itype); 
 	while (lpSTRING && *lpSTRING) 
 	{   
 		_fstrupr (lpSTRING);
@@ -2167,7 +2192,7 @@ long FindTableName (LPSTR DBName,LPSTR TablePartialName,LPSTR OutFile)
 			n++;
 			AppendFile (OutFile,lpSTRING); 
 		}
-		lpSTRING =  GetTableName (DBHandle,FALSE); 
+		lpSTRING =  GetTableName (DBHandle,FALSE,itype); 
 	}
     CloseDataFile (TRUE, &hDB);
 	return n;
@@ -2181,19 +2206,20 @@ long FindFieldName (LPSTR DBName,LPSTR FldPartialName,LPSTR OutFile)
 	short	NS;   
 	HANDLE	DBHandle;
 	char	TableName[128];
+	short	itype;
 	
-    if (!OpenDataFile (DBName,"",BT_READ,&hDB))
+    if (!(itype=OpenDataFile (DBName,"",BT_READ,&hDB)))
     	return 0; 
     _fstrupr (FldPartialName);
 	DBHandle = GetDBHandleFromSQL (hDB);
-	lpSTRING =  GetTableName (DBHandle, TRUE); 
+	lpSTRING =  GetTableName (DBHandle, TRUE,itype); 
 	while (lpSTRING && *lpSTRING) 
 	{ 
 		BOOL	First=TRUE;
 		LPFIELDINFO pFld; 
 		HANDLE	hDB2=0;
 		
-		sprintf (TableName,"%s|%s",DBName,lpSTRING);
+		sprintf (TableName,"%s|%s",DBName,lpSTRING,itype);
 	    if (OpenDataFile (TableName,"",BT_READ,&hDB2)) 
 	    {
 			LPFIELDINFO	lpFieldInfo;
@@ -2225,14 +2251,14 @@ long FindFieldName (LPSTR DBName,LPSTR FldPartialName,LPSTR OutFile)
 			GlobalUnlock (hDB2);
 		    CloseDataFile (TRUE, &hDB2);
 		}
-		lpSTRING =  GetTableName (DBHandle,FALSE); 
+		lpSTRING =  GetTableName (DBHandle,FALSE,itype); 
 	}
     CloseDataFile (TRUE, &hDB);
 	return n;
 }
 
 /******************************************************************/
-LPSTR GetTableName (HANDLE DBhandle, BOOL first)
+LPSTR GetTableName (HANDLE DBhandle, BOOL first,int itype)
 {
 	static int icount, num_of_em;
 	LPSTR	pTable;
@@ -2240,7 +2266,7 @@ LPSTR GetTableName (HANDLE DBhandle, BOOL first)
 	
     if(first)
     {
-      num_of_em = NumDatabaseTables( "TABLE", DBhandle );
+      num_of_em = NumDatabaseTables( "TABLE", DBhandle,itype);
       icount = 1;
     }  
     else

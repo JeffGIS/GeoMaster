@@ -59,7 +59,7 @@ BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			{
 				HANDLE hSymbol = GetDictSymDesc (symnum,0);
 
-				DisplayPointSymbol (hSymbol,CurView->hDC, width, width,0, &Point,0,FALSE,0,0,FALSE,FALSE,0,0);  
+				DisplayPointSymbol (hSymbol,CurView->hDC, width, width,0, &Point,0,FALSE,0,0,FALSE,FALSE,Arg[6],0);  
 				DestroySymbol (hSymbol);
 				return TRUE;
 			}

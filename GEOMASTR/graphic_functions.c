@@ -4623,7 +4623,7 @@ GSSiExitProg (716);
 		if (Message == GF_USEPICKED)
 			Item = 0;
         if (Function == GF_SELECT_HIGHLIGHT_AREA)
-			SelectAreaToOffsetFile (Item,OffsetLineOffset);
+			SelectAreaToOffsetFile(Item, OffsetLineOffset, 0);
         else
         	OffsetPickedArea (Item,OffsetLineOffset);
 		DisplayPolyOff();  

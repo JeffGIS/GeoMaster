@@ -1148,13 +1148,13 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 				HMENU hSubMenu=0;
 				int	  iSubMenuItem = 1;
 				HANDLE DBHandle = GetDBHandleFromSQL(hDB);
-				LPSTR lpSTRING = GetTableName(DBHandle, TRUE); // the first table name 
+				LPSTR lpSTRING = GetTableName(DBHandle, TRUE,itype); // the first table name 
 				if (lpSTRING && *lpSTRING)
 					hSubMenu = CreatePopupMenu();
 				while (lpSTRING && *lpSTRING)
 				{
 					AppendMenu(hSubMenu, MF_ENABLED | MF_STRING, iSubMenuItem++, lpSTRING);
-					lpSTRING = GetTableName(DBHandle, FALSE); // subsequent table names 
+					lpSTRING = GetTableName(DBHandle, FALSE,itype); // subsequent table names 
 				}
 				if (hSubMenu)
 				{

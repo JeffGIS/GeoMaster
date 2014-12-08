@@ -5270,7 +5270,8 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 	*(LPPICKDATAHEADER)&PickList[0] = *PickData;
 	if (PickList[0].Type == 2 || PickList[0].Type == 3 || PickList[0].Type == 5)
 	{   
-	    SetConfig (PickList[0].ConfigID);
+		GSSiGlobFree(&hSavePolyElev);
+		SetConfig(PickList[0].ConfigID);
 	    SetViewport (PickList[0].ViewID);
 		pTheme = AddTheme (GF_SAVEPOLYPARTS_THEME); 
 		SavePass = CurView->PassID;
@@ -5301,6 +5302,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 			*phPoints = hSavePoly;
 			hSavePoly = 0;
         }
+		GSSiGlobFree (&hSavePolyElev);
 	} 
 	CurTheme = SaveTheme;
 	SetCurView ( SaveVP);

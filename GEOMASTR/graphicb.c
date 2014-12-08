@@ -1006,7 +1006,7 @@ GSSiExitProg (1149);
 		st = PickByRefno (AreaRef,0,0,-1);
 	}
 	sprintf (BoundaryTAG,"%s:%s",PickList[0].Prefix,PickList[0].UDI);
-	if (!SelectAreaToOffsetFile (0,0))
+	if (!SelectAreaToOffsetFile(0, 0, 0))
 {
 #if ENABLETRACE
 GSSiExitProg (1149);
@@ -1110,7 +1110,7 @@ BOOL ThemeInArea (LPSTR TAGOrRef,LPSTR ThemeVPName,LPSTR TinAGMD,double MinPCT,l
 	} 
 	if (!st)
 		goto Exit;
-	if (!SelectAreaToOffsetFile (0,0))
+	if (!SelectAreaToOffsetFile(0, 0, 0))
 		goto Exit;
 	sprintf (BoundaryTAG,"%s:%s",PickList[0].Prefix,PickList[0].UDI);  
 
