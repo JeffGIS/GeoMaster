@@ -1547,7 +1547,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				GMEditSaveUpdates(hWnd);
 			}
 		}
-		DeleteObject(hFont);
+		GSSiDeleteObject(&hFont);
 		AutoInsertClose ();
 		GSSiGlobFree (&hFile);
 		GSSiGlobFree (&hFChunk);
