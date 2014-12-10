@@ -276,7 +276,7 @@
       <SubSystem>Windows</SubSystem>
       <HeapReserveSize>16000000</HeapReserveSize>
       <StackReserveSize>4000000</StackReserveSize>
-      <LargeAddressAware />
+      <LargeAddressAware>true</LargeAddressAware>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>

@@ -382,8 +382,7 @@ HANDLE	hSTR = 0;
 		char	qc=QuoteChar[DBNamePtr[(int)FilePtr->FileHandle]][0];
 		char	qs[2]="";
 		
-		*qs = qc;
-		if (_fstrchr (TableNames[(int)FilePtr->FileHandle],' '))
+		if (_fstrchr(TableNames[(int)FilePtr->FileHandle], ' ') || strchr(TableNames[(int)FilePtr->FileHandle], '$'))
 			_fstrcpy (qs,QuoteChar[DBNamePtr[(int)FilePtr->FileHandle]]);
     
 	    if (qc)
@@ -710,7 +709,7 @@ LPCURVAL	pCurVal;
 		    }
 		    else
 		    	SkipFirstField = SelectAllStatement (FilePtr,sqlstr);
-		    if (qc)// && _fstrchr (TableNames[i],' '))
+			if (qc && (_fstrchr(TableNames[i], ' ') || strchr(TableNames[i], '$')))
 		    	sprintf (_fstrchr(sqlstr,0)," From %c%s%c",qc,TableNames[i],qc);
 		    else
 		    	sprintf (_fstrchr(sqlstr,0)," From %s",TableNames[i]);
