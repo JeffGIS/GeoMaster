@@ -382,6 +382,7 @@ HANDLE	hSTR = 0;
 		char	qc=QuoteChar[DBNamePtr[(int)FilePtr->FileHandle]][0];
 		char	qs[2]="";
 		
+		*qs = qc;
 		if (_fstrchr (TableNames[(int)FilePtr->FileHandle],' '))
 			_fstrcpy (qs,QuoteChar[DBNamePtr[(int)FilePtr->FileHandle]]);
     
