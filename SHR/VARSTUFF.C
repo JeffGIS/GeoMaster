@@ -1346,7 +1346,7 @@ void ProcessFileSQL (LPOPENSQLDATA SQLPtr,LPOPENFILEDATA FilePtr,LPSTR SQLIN)
     short	i,ii;
     
 	strcpy(SQL, SQLIN);
-	if ((pColon = strrchr(SQL, ':')))
+	if ((pColon = strrchr(SQL, ':')) && !charLevel (pColon,SQL))
 	{
 		*pColon++ = 0;
 		for (i = 0, pFieldInfo = &FilePtr->FldInfo; i < FilePtr->NumFields; i++, pFieldInfo++)

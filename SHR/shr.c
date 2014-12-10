@@ -2599,7 +2599,62 @@ short NumMatchChar (LPSTR str1,LPSTR str2,int maxchar)
 	}
 	return n;
 }
+int charLevel(LPSTR pchar, LPSTR inStr)
+{
+	int lev = 0;
+	BOOL    Literal = FALSE;
+	char	BegLev, EndLev;
 
+	if (pchar && inStr)
+	{
+		while (*inStr && pchar > inStr)
+		{
+			if (Literal)
+				Literal = FALSE;
+			else
+			{
+				if (*inStr == '@')
+					Literal = TRUE;
+				else if (lev)
+				{
+					if (*inStr == BegLev)
+						lev++;
+					else if (*inStr == EndLev)
+						lev--;
+				}
+				else
+					switch (*inStr)
+				{
+					case '\'':
+						EndLev = '\'';
+						BegLev = *inStr;
+						lev++;
+						break;
+					case '(':
+						EndLev = ')';
+						BegLev = *inStr;
+						lev++;
+						break;
+					case '[':
+						EndLev = ']';
+						BegLev = *inStr;
+						lev++;
+						break;
+					case '{':
+						EndLev = '}';
+						BegLev = *inStr;
+						lev++;
+						break;
+					default:
+						break;
+				}
+
+			}
+			inStr++;
+		}
+	}
+	return lev;
+}
 
 LPSTR MatchLev (LPSTR InStr, char MatchChar)
 #if ENABLETRACE
