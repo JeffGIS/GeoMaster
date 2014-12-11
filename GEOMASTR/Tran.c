@@ -335,6 +335,56 @@ GSSiExitProg (1436);
 #endif
 }
 
+BOOL DisplayTranTriangles(HANDLE hTran,LPVIEWPORT CurView)
+{
+	BOOL rtn = FALSE;
+	LPTRANDATA pTran;
+	int I;
+	LPTRANDATA  TranPtr;
+	HANDLE hTranp;
+
+	if (!hTran)
+		return FALSE;
+	pTran = GlobalLock(hTran);
+	if (!strncmp((LPSTR)pTran, "PARCELTRAN", 10))
+	{
+		LPPARCELTRAN pParTran = (LPPARCELTRAN)pTran;
+
+		hTranp = pParTran->hTran;
+		GlobalUnlock(hTran);
+		hTran = hTranp;
+		pTran = GlobalLock(hTran);
+		if (pTran->TriHandle)
+		{
+			HPTRANTRI	Tri = (HPTRANTRI)GlobalLock(pTran->TriHandle);
+
+			rtn = TRUE;
+			SaveDC(CurView->hDC);
+			SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+			GSSiDeleteObject(&CurView->hRgn);
+			CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+			SelectClipRgn(CurView->hDC, CurView->hRgn);
+			GSSiDeleteObject(&CurView->hRgn);
+			CreateRandomBrushes(NULL, 0);
+			for (I = 0; I < Tri->NumTri; I++)
+			{
+				HBRUSH	hOldBrush;
+				HPEN	hOldPen, hPen = GetStockObject(BLACK_PEN);
+
+				hOldBrush = SelectRandomBrush(CurView->hDC, I, &hPen, 0);
+				hOldPen = SelectObject(CurView->hDC, hPen);
+				GWPolygonD(CurView->hDC, Tri[I].FromPT, 4, 1, NULL, 0, FALSE, TRUE, 0);
+				SelectObject(CurView->hDC, hOldBrush);
+				SelectObject(CurView->hDC, hOldPen);
+			}
+			RestoreDC(CurView->hDC, -1);
+			GlobalUnlock(pTran->TriHandle);
+		}
+	}
+	GlobalUnlock(hTran);
+	return rtn;
+}
+
 HANDLE ReadTranData (HFILE Fid)
 {
     HANDLE  hTran;

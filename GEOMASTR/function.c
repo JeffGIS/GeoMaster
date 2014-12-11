@@ -3997,6 +3997,18 @@ SetVis:
 			}
 		}
 			break;
+		case 434: //$TRAN(DISPLAY,htran)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "DISPLAY"))
+			{
+				HANDLE hTran = (HANDLE)atoi(Arg[2]);
+				rtn = DisplayTranTriangles(hTran, CurView);
+			}
+			goto Rtnrtn;
+		}
 		default:
 			goto Rtn0;
 	}

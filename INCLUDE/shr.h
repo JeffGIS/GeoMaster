@@ -417,7 +417,8 @@ HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN
 POINT TRANDPointToPoint (HPDPOINT pDpoint,HANDLE hTran);
 HANDLE DPolyToPPoly (LPINT pnpnts, HANDLE hDPoly,HANDLE hTran);
 HANDLE ReadTranData (HFILE Fid);
-POINT TranPoint16 (POINT pPoint,HANDLE hTran);
+BOOL DisplayTranTriangles(HANDLE hTran, LPVIEWPORT CurView);
+POINT TranPoint16(POINT pPoint, HANDLE hTran);
 DPOINT TranPoint (LPDPOINT pPoint,HANDLE hTran);  
 void SetVPRotation (double AZ);
 XFORM SetXFORMFromTRANS (HANDLE hlpTran);
