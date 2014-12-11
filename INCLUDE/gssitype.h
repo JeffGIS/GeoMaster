@@ -517,6 +517,8 @@ typedef TRANDATA    FAR *LPTRANDATA;
 typedef struct {
 	char ID[12];
 	int np;
+	HANDLE hParNumPt;
+	HANDLE hpParPnts;
 	HANDLE hFromPt;
 	HANDLE hToPt;
 	HANDLE hTran;

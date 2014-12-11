@@ -267,6 +267,7 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 {
 	BOOL rtn = FALSE;
 	HANDLE hParcelTran=0;
+	int i;
 
 	*OutLoc = 0;
 	if (nArgs < 1)
@@ -275,8 +276,11 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	{
 		HANDLE hParTran = GSSiGlobAlloc(1793, GHND, sizeof(PARCELTRAN));
 		LPPARCELTRAN pParTran = GlobalLock(hParTran);
+		int nParcels = atoi(Arg[2]);
 
 		strcpy(pParTran->ID, "PARCELTRAN");
+		pParTran->hParNumPt = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(int));
+		pParTran->hpParPnts = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(HANDLE));
 		pParTran->hFromPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
 		pParTran->hToPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
 		GlobalUnlock(hParTran);
@@ -291,6 +295,13 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		if (hParcelTran)
 		{
 			LPPARCELTRAN pParTran = (LPPARCELTRAN)GlobalLock(hParcelTran);
+			LPHANDLE phParPnts = GlobalLock(pParTran->hpParPnts);
+			for (i = 0; i < pParTran->nParcels; i++,phParPnts++)
+			{
+				GSSiGlobFree(phParPnts);
+			}
+			GSSiGlobUlFree(&pParTran->hpParPnts);
+			GSSiGlobFree(&pParTran->hParNumPt);
 			GSSiGlobFree(&pParTran->hFromPt);
 			GSSiGlobFree(&pParTran->hToPt);
 			CloseTRANS2(&pParTran->hTran);
@@ -309,7 +320,6 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		hParcelTran = (HANDLE)atoi(Arg[2]);
 		LPPARCELTRAN pParTran = (LPPARCELTRAN)GlobalLock(hParcelTran);
 
-		pParTran->nParcels++;
 
 		if (lpColon)
 		{
@@ -320,6 +330,12 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			{
 				if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts1, &hPoly1))
 				{
+					LPINT	pnpt = (LPINT)GlobalLock(pParTran->hParNumPt);
+					pnpt[pParTran->nParcels] = npnts1;
+					GlobalUnlock(pParTran->hParNumPt);
+					LPHANDLE phParPnts = (LPHANDLE)GlobalLock(pParTran->hpParPnts);
+					phParPnts[pParTran->nParcels] = hPoly1;
+					GlobalUnlock(pParTran->hpParPnts);
 					ProcessText(Arg[5]);
 					if (PickByRefno(0, Arg[3], lpColon, -1))
 					{
@@ -330,11 +346,11 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 					}
 
 				}
+				pParTran->nParcels++;
 			}
 			*lpColon = ':';
 			rtn = TRUE;
 		}
-		GSSiGlobFree(&hPoly1);
 		GSSiGlobFree(&hPoly2);
 		GlobalUnlock(hParcelTran);
 
@@ -352,6 +368,7 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 				LPDPOINT toPt = GlobalLock(pParTran->hToPt);
 				float RSQMIN;
 
+				SetCurrentParcelTran(pParTran);
 				pParTran->hTran = STRANPoints(0, fromPt, toPt, pParTran->np, &RSQMIN, 3, 0);
 				GlobalUnlock(pParTran->hFromPt);
 				GlobalUnlock(pParTran->hToPt);

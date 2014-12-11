@@ -1,9 +1,17 @@
 #include "graphint.h"
 
 static  BYTE    Mask[8] = {128, 64, 32, 16, 8, 4, 2, 1}; 
+static	LPPARCELTRAN currentParcelTran = 0;
+static  double currentBASX, currentBASY;
 
 #include "gmextern.h"
  
+void SetCurrentParcelTran(LPPARCELTRAN pParTran)
+{
+	currentParcelTran = pParTran;
+	return;
+}
+
 HANDLE STRAN2 (int ID,double X1[], double Y1[],double X2[],double Y2[],int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds)
 /*    ENTRY      TRNPRO (XIN,YIN,XOUT,YOUT,TRNNUM)
 C     ENTRY      TRANS2 (XIN,YIN,XOUT,YOUT,TRNNUM)
@@ -221,7 +229,11 @@ C
       TranPtr->NSETPT = N; 
       TranPtr->LastTri = 0;
 	  if (TranPtr->FIXEDP)
-      	TranPtr->TriHandle = TRFTRI_SET (XT1,YT1,XT2,YT2,N,BASX1,BASY1,BASX2,BASY2,hTran,&TranPtr->TriBounds);
+	  {
+		  currentBASX = BASX1;
+		  currentBASY = BASY1;
+		  TranPtr->TriHandle = TRFTRI_SET(XT1, YT1, XT2, YT2, N, BASX1, BASY1, BASX2, BASY2, hTran, &TranPtr->TriBounds);
+	  }
       else if (!*RSQMIN || *RSQMIN > 1.05)
       {
 	    TranPtr->ONE_SCALE = TRUE;
@@ -323,7 +335,7 @@ S1000:
       GSSiGlobUlFree (&hTemp);
       GSSiGlobUlFree (&hTran);
 Exit:
-      
+	  currentParcelTran = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (1436);
@@ -1200,6 +1212,75 @@ XFORM SetXFORMFromTRANS (HANDLE hlpTran)
     return XForm;
 } 
 
+int priorParPoint(int i, int nParPnt)
+{
+	if (!i)
+		i = nParPnt - 1;
+	else
+		i--;
+	return i;
+}
+int nextParPoint(int i, int nParPnt)
+{
+	if (i == nParPnt - 1)
+		i = 0;
+	else
+		i++;
+	return i;
+}
+
+BOOL pointsAreParcelBoundaryLine(double X1, double Y1, double X2, double Y2, int nParPnt, LPDPOINT parPoints)
+{
+	int i;
+	DPOINT p1,p2;
+
+	p1.x = X1 + currentBASX;
+	p1.y = Y1 + currentBASY;
+	p2.x = X2 + currentBASX;
+	p2.y = Y2 + currentBASY;
+
+	for (i = 0; i < nParPnt; i++)
+	{
+		if (SameDPoint(&p1, &parPoints[i]))
+		{
+			if (SameDPoint(&p2, &parPoints[priorParPoint(i, nParPnt)]) ||
+				SameDPoint(&p2, &parPoints[nextParPoint(i, nParPnt)]))
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+double LDISTtran(double X1,double Y1,double X2, double Y2)
+{
+	double d;
+
+	if (currentParcelTran)
+	{
+		int i;
+		LPINT pnp = GlobalLock(currentParcelTran->hParNumPt);
+		LPHANDLE phParPoints = GlobalLock(currentParcelTran->hpParPnts);
+		for (i = 0; i < currentParcelTran->nParcels; i++,pnp++)
+		{
+			LPDPOINT pParPoints = GlobalLock(phParPoints[i]);
+
+			if (pointsAreParcelBoundaryLine(X1, Y1, X2, Y2,*pnp,pParPoints))
+			{
+				GlobalUnlock(currentParcelTran->hParNumPt);
+				GlobalUnlock(phParPoints[i]);
+				GlobalUnlock(currentParcelTran->hpParPnts);
+				return 0;
+			}
+			GlobalUnlock(phParPoints[i]);
+		}
+		GlobalUnlock(currentParcelTran->hpParPnts);
+		GlobalUnlock(currentParcelTran->hParNumPt);
+	}
+
+	d = LDIST(X1, Y1, X2, Y2);
+	return d;
+}
+
 HANDLE TRFTRI_SET (LPDOUBLE XT,LPDOUBLE YT,LPDOUBLE XT2,LPDOUBLE YT2,
 				   int NSETPTin,double BASX1, double BASY1,double BASX2, double BASY2,HANDLE hTran,LPMNMXCORD pTriBounds)   
 {
@@ -1375,7 +1456,7 @@ typedef TRACK	FAR	*LPTRACK;
           {
               P1[NDIST] = I;
               P2[NDIST] = J;
-              D = LDIST (XT[I],YT[I],XT[J],YT[J]);
+              D = LDISTtran (XT[I],YT[I],XT[J],YT[J]);
               for (iord = 0;iord<NDIST;iord++)
               {
               	if (D < DIST[ORDERD[iord]]) 
