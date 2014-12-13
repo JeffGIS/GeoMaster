@@ -274,19 +274,21 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		goto Exit;
 	if (!stricmp(Arg[1], "INIT"))
 	{
-		HANDLE hParTran = GSSiGlobAlloc(1793, GHND, sizeof(PARCELTRAN));
-		LPPARCELTRAN pParTran = GlobalLock(hParTran);
 		int nParcels = atoi(Arg[2]);
+		if (nParcels > 0)
+		{
+			HANDLE hParTran = GSSiGlobAlloc(1793, GHND, sizeof(PARCELTRAN));
+			LPPARCELTRAN pParTran = GlobalLock(hParTran);
 
-		strcpy(pParTran->ID, "PARCELTRAN");
-		pParTran->hParNumPt = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(int));
-		pParTran->hpParPnts = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(HANDLE));
-		pParTran->hFromPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
-		pParTran->hToPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
-		GlobalUnlock(hParTran);
-
-		itoa((int)hParTran, OutLoc, 10);
-		rtn = TRUE;
+			strcpy(pParTran->ID, "PARCELTRAN");
+			pParTran->hParNumPt = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(int));
+			pParTran->hpParPnts = GSSiGlobAlloc(1794, GHND, nParcels*sizeof(HANDLE));
+			pParTran->hFromPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
+			pParTran->hToPt = GSSiGlobAlloc(1794, GMEM_MOVEABLE, MAX_PARTRAN_POINTS * sizeof(DPOINT));
+			GlobalUnlock(hParTran);
+			itoa((int)hParTran, OutLoc, 10);
+			rtn = TRUE;
+		}
 		goto Exit;
 	}
 	if (!stricmp(Arg[1], "FREE"))
@@ -381,9 +383,11 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	if (!stricmp(Arg[1], "OUTPUT"))
 	{
 		hParcelTran = (HANDLE)atoi(Arg[2]);
-		LPPARCELTRAN pParTran = (LPPARCELTRAN)GlobalLock(hParcelTran);
-		/*if (pParTran->np > 2)
+		if (hParcelTran)
 		{
+			LPPARCELTRAN pParTran = (LPPARCELTRAN)GlobalLock(hParcelTran);
+			/*if (pParTran->np > 2)
+			{
 			LPDPOINT fromPt = GlobalLock(pParTran->hFromPt);
 			LPDPOINT toPt = GlobalLock(pParTran->hToPt);
 			float RSQMIN;
@@ -391,8 +395,9 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			pParTran->hTran = STRANPoints(0, fromPt, toPt, pParTran->np, &RSQMIN, 1, 0);
 			GlobalUnlock(pParTran->hFromPt);
 			GlobalUnlock(pParTran->hToPt);
-		}*/
-		GlobalUnlock(hParcelTran);
+			}*/
+			GlobalUnlock(hParcelTran);
+		}
 
 		goto Exit;
 	}
