@@ -63,6 +63,9 @@
 #define DOWN_3D		2
 #define	NO_3D		3
 
+#define VARSPACE_LOCAL	1
+#define VARSPACE_GLOBAL	2
+
 #define GSSI_REINITDIALOG       0x5110  
 #define GSSI_ADDGF 0x5111
 #define GSSI_REPOSITION 0x5112
@@ -1348,6 +1351,9 @@ void OutFunction (int funid,LPSTR outString);
 void SetFunctionDBIn(LPSTR InLoc);
 void SetFunctionDBOut(LPSTR OutLoc);
 void DebugReturn(LPSTR rtnValue);
+HANDLE CreateVarSpace(int type);
+void DestroyVarSpace(HANDLE hVarSpace);
+void SetVarSpace(int type, HANDLE hVarSpace);
 int AddToMacroStack(int from, int iCurrentMacro, LPSTR File, LPHANDLE phArgs, int NumArgs);
 void RemoveFromMacroStack (int macroID);
 BOOL AddBreakpoint(LPSTR macroFile, int insertLoc);

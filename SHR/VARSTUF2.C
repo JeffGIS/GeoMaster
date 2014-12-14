@@ -3,13 +3,14 @@
 
 #include "gmextern.h"     
 
-#define	MAX_BUFFERED_MACROS	4
+#define	MAX_BUFFERED_MACROS	32
 
 static	HANDLE	hBufferedMacros[MAX_BUFFERED_MACROS];
 static	char	BufferedMacroNames[MAX_BUFFERED_MACROS][256];
 static	short	NumBufferedMacros=0;  
 static	ULONG	CurrentMacroTime=0;
 static	ULONG	LastMacroUse[MAX_BUFFERED_MACROS];
+static	HANDLE	MacroVarSpace[MAX_MACRO_STACK] = { 0 };
 
 BOOL LoadInternalGMD (LPGWDHEADER lpGWDHead,long iref)
 #if ENABLETRACE
@@ -704,7 +705,9 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	}
     InGRFCmd = FALSE; 
     macroID = AddToMacroStack (1,++CurrentMacro,Name,phArgs,NumArgs);
-    if (RtnVal)
+	MacroVarSpace[CurrentMacro] = CreateVarSpace(VARSPACE_LOCAL);
+	SetVarSpace(VARSPACE_LOCAL, MacroVarSpace[CurrentMacro]);
+	if (RtnVal)
     	*RtnVal = 0;
     SetGlobalValueLong ("%NUMARGS",NumArgs);
     if (*Name)
@@ -898,7 +901,9 @@ Exit:
     //CloseMacroFiles (ThisMacro);   
     InGRFCmd = InGRFCmd;
 	DestroyStatusWindow (CurrentMacro);
+	DestroyVarSpace(MacroVarSpace[CurrentMacro]);
     CurrentMacro--;
+	SetVarSpace(VARSPACE_LOCAL, MacroVarSpace[CurrentMacro]);
 	RemoveFromMacroStack (macroID);
 {
 #if ENABLETRACE

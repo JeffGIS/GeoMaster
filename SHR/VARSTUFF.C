@@ -8,16 +8,27 @@
 
 struct	tm	tmtime;
 
+typedef struct {
+	int NumVars;
+	int MaxVars;
+	HANDLE hVarNameTable;
+	HANDLE VarHandles[];
+}VARSPACE;
+typedef VARSPACE *LPVARSPACE;
+
+static	LPVARSPACE pVarSpace = 0;
+static	HANDLE hGlobalVarSpace = 0;
+static	HANDLE hLocalVarSpace = 0;
 static	DWORD	VarTime=1;
-static	int	NumVars=0;
-static	HANDLE	VarHandles[MAXGLOBALS];
+//static	int	NumVars=0;
+//static	HANDLE	VarHandles[MAXGLOBALS];
 static	char	shrtxt[256]; 
-static	HANDLE	hVarNameTable=0; 
+//static	HANDLE	hVarNameTable=0; 
 static	BOOL	FoundLiteral=FALSE;   
 static	LPCOMBOFILE	CurrentComboFile=NULL;
 static	double	BaseUnitsPerOrthoPixel=1;  
 static	short	nChangedGlobals=0;
-static	HANDLE	ChangedGlobals[32];     
+static	HANDLE	ChangedGlobals[MAX_CHANGED_GLOBALS];     
 static	HANDLE	UseOnlyOneDBHandle=0;
 static	ULONG	NumFetch=0;
 static	LPSTR	MBHMess, MBHTitle;
@@ -39,6 +50,68 @@ void SetShowDepthColors (BOOL In);
 void SetHighlightDepth (int In);
 
 
+HANDLE CreateVarSpace(int type)
+{
+	HANDLE hSpace;
+	LPVARSPACE pVarSpace;
+
+	switch (type)
+	{
+	case VARSPACE_GLOBAL:
+		hSpace = GSSiGlobAlloc(2000, GHND, sizeof(VARSPACE) + MAXGLOBALS*sizeof(HANDLE));
+		pVarSpace = GlobalLock(hSpace);
+		pVarSpace->MaxVars = MAXGLOBALS;
+		GlobalUnlock(hSpace);
+		hGlobalVarSpace = hSpace;
+		break;
+	case VARSPACE_LOCAL:
+		hSpace = GSSiGlobAlloc(2001, GHND, sizeof(VARSPACE) + MAX_LOCAL_VARS*sizeof(HANDLE));
+		pVarSpace = GlobalLock(hSpace);
+		pVarSpace->MaxVars = MAX_LOCAL_VARS;
+		GlobalUnlock(hSpace);
+		break;
+	}
+	return hSpace;
+}
+
+void SetVarSpace(int type, HANDLE hVarSpace)
+{
+	switch (type)
+	{
+	case VARSPACE_GLOBAL:
+		break;
+	case VARSPACE_LOCAL:
+		hLocalVarSpace = hVarSpace;
+		break;
+	}
+	return;
+}
+HANDLE SetVarSpaceFromName(LPSTR Name)
+{
+	HANDLE hVarSpace;
+
+	if (*Name == '~')
+		hVarSpace = hLocalVarSpace;
+	else
+		hVarSpace = hGlobalVarSpace;
+	return hVarSpace;
+}
+
+void DestroyVarSpace(HANDLE hVarSpace)
+{
+	if (hVarSpace == (HANDLE)-1)
+		hVarSpace = hGlobalVarSpace;
+	if (hVarSpace)
+	{
+		LPVARSPACE savepVarSpace = pVarSpace;
+
+		pVarSpace = GlobalLock(hVarSpace);
+		CloseVars();
+		GSSiGlobUlFree(&hVarSpace);
+		pVarSpace = savepVarSpace;
+	}
+	return;
+}
 void SetUseOnlyOneDBHandle (HANDLE handle)
 {
 	UseOnlyOneDBHandle = handle;
@@ -5597,20 +5670,20 @@ void UpdateVarHandle (HANDLE OldHandle,HANDLE NewHandle)
 	UINT	i,l	;
 	VARPNT  VarPnt;
 	
-	for (i=0;i<NumVars;i++)
+	for (i=0;i<pVarSpace->NumVars;i++)
 	{   
-		if (VarHandles[i] == OldHandle)
-			VarHandles[i] = NewHandle;
+		if (pVarSpace->VarHandles[i] == OldHandle)
+			pVarSpace->VarHandles[i] = NewHandle;
 		else
 		{
-			VarPnt = (VARPNT)GlobalLock (VarHandles[i]);
+			VarPnt = (VARPNT)GlobalLock(pVarSpace->VarHandles[i]);
 			l=VarPnt->NumLinkedVars;  
 			while (l--)
 			{
 				if (VarPnt->LinkedVar[l] == OldHandle)
 					VarPnt->LinkedVar[l] = NewHandle;
 			}
-			GlobalUnlock (VarHandles[i]); 
+			GlobalUnlock(pVarSpace->VarHandles[i]);
 		}
 	}
 {
@@ -5662,6 +5735,7 @@ HANDLE	AllocateVar (LPSTR Name)
 #endif
 {   VARPNT  VarPnt;   
 	HANDLE	handle;
+	HANDLE	hVarSpace;
 
 	if (handle = FindVar(Name))
 {
@@ -5672,13 +5746,23 @@ GSSiExitProg (550);
 }
 	
 	AddToVarNameTable (Name);
-	handle = GSSiGlobAlloc ( 197,GHND,sizeof(VARINFO));
-	VarHandles[NumVars++]= handle;
+	hVarSpace = SetVarSpaceFromName(Name);
+	if (!hVarSpace)
+	{
+#if ENABLETRACE
+		GSSiExitProg(587);
+#endif
+		return (NULL);
+	}
+	pVarSpace = GlobalLock(hVarSpace);
+	handle = GSSiGlobAlloc(197, GHND, sizeof(VARINFO));
+	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
 	VarPnt = (VARPNT)GlobalLock(handle);  
 	VarPnt->Handle = handle;
 	_fstrcpy(VarPnt->Name,Name);   
 	VarPnt->Save = TRUE;//(*Name != '%'); 2010 01-20 to save street name and width vars for Mpls
 	GlobalUnlock (handle);
+	GlobalUnlock(hVarSpace);
 {
 #if ENABLETRACE
 GSSiExitProg (550);
@@ -5752,26 +5836,36 @@ void AddToVarNameTable (LPSTR Name)
 {   
 	LPVARNAMEINDEXITEM	lpVN;  
 	UINT	i;
+	HANDLE	hVarSpace=SetVarSpaceFromName(Name);
 	
-	if (NumVars >= MAXGLOBALS) 
+	if (!hVarSpace)
+	{
+#if ENABLETRACE
+		GSSiExitProg(552);
+#endif
+		return;
+	}
+	pVarSpace = GlobalLock(hVarSpace);
+	if (pVarSpace->NumVars >= pVarSpace->MaxVars)
 		BlowOut ("Maximum globals exceeded",0);
 	if (_fstrlen (Name) > 61)
 		GSSiMsgBox (GetFocus(),"Length of variable name exceeds 61 characters",Name,MB_ICONEXCLAMATION,0);
-	if (!hVarNameTable)
-		hVarNameTable = GSSiGlobAlloc ( 198,GMEM_MOVEABLE,(long)sizeof(VARNAMEINDEXITEM)*MAXGLOBALS);
-	lpVN = (LPVARNAMEINDEXITEM)GlobalLock (hVarNameTable); 
-	for (i=0;i<NumVars;i++,lpVN++)
+	if (!pVarSpace->hVarNameTable)
+		pVarSpace->hVarNameTable = GSSiGlobAlloc(198, GMEM_MOVEABLE, (long)sizeof(VARNAMEINDEXITEM)*pVarSpace->MaxVars);
+	lpVN = (LPVARNAMEINDEXITEM)GlobalLock(pVarSpace->hVarNameTable);
+	for (i = 0; i<pVarSpace->NumVars; i++, lpVN++)
 	{
 		if (_fstricmp (Name,lpVN->Name) < 0)
 		{   
-			_fmemmove ((LPVOID)(lpVN+1),(LPVOID)lpVN,((USHORT)NumVars-i)*sizeof(VARNAMEINDEXITEM));
+			_fmemmove((LPVOID)(lpVN + 1), (LPVOID)lpVN, ((USHORT)pVarSpace->NumVars - i)*sizeof(VARNAMEINDEXITEM));
 			goto Exit;
 		}
 	}
 Exit:
 	strncpy0 (lpVN->Name,Name,62);
-	lpVN->id = NumVars; 
-	GlobalUnlock (hVarNameTable);   
+	lpVN->id = pVarSpace->NumVars;
+	GlobalUnlock(pVarSpace->hVarNameTable);
+	GlobalUnlock (hVarSpace);
 {
 #if ENABLETRACE
 GSSiExitProg (552);
@@ -5788,7 +5882,7 @@ void DestroyVarNameTable (void)
 {GSSiEnterProg (553);
 #endif
 {  
-	GSSiGlobFree (&hVarNameTable);
+	GSSiGlobFree(&pVarSpace->hVarNameTable);
 {
 #if ENABLETRACE
 GSSiExitProg (553);
@@ -5824,7 +5918,7 @@ GSSiExitProg (554);
 	AddToVarNameTable (Name);
 	
 	handle = GSSiGlobAlloc ( 199,GHND,sizeof(VARINFO));
-	VarHandles[NumVars++]= handle;
+	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
 	VarPnt = (VARPNT)GlobalLock(handle);  
 	VarPnt->Type = Type; 
 	VarPnt->Save = Save;
@@ -9264,18 +9358,18 @@ void ListGlobals (HWND hWndDlg,WORD Control,BOOL Expand)
 {GSSiEnterProg (585);
 #endif
 {
-	unsigned short	i=NumVars; 
+	unsigned short	i = pVarSpace->NumVars;
 	VARPNT	VarPtr;  
 	char	str[1024]; 
 	
 	while (i--)
 	{   
-		VarPtr = (VARPNT)GlobalLock (VarHandles[i]); 
+		VarPtr = (VARPNT)GlobalLock(pVarSpace->VarHandles[i]);
 		sprintf (str,"%s\t%s",VarPtr->Name,VarPtr->Value); 
 		if (Expand)
 			ExpandText (str);  
         SendDlgItemMessage (hWndDlg,Control,LB_ADDSTRING,0,(LPARAM)((LPSTR)str));
-		GlobalUnlock (VarHandles[i]);
+		GlobalUnlock(pVarSpace->VarHandles[i]);
 	} 
 {
 #if ENABLETRACE
@@ -9293,7 +9387,7 @@ void dumpvars (LPSTR Name)
 {GSSiEnterProg (586);
 #endif
 {   
-	unsigned short	i=NumVars; 
+	unsigned short	i = pVarSpace->NumVars;
 	VARPNT	VarPtr;  
 	char	str[128]; 
 	OFSTRUCTGM	OFStruct;
@@ -9303,10 +9397,10 @@ void dumpvars (LPSTR Name)
 
 	while (i--)
 	{   
-		VarPtr = (VARPNT)GlobalLock (VarHandles[i]); 
-		sprintf (str,"%ld %s:%s",(long)VarHandles[i],VarPtr->Name,VarPtr->Value);   
+		VarPtr = (VARPNT)GlobalLock(pVarSpace->VarHandles[i]);
+		sprintf(str, "%ld %s:%s", (long)pVarSpace->VarHandles[i], VarPtr->Name, VarPtr->Value);
 		fputstring (str,Fid);
-		GlobalUnlock (VarHandles[i]);
+		GlobalUnlock(pVarSpace->VarHandles[i]);
 	} 
 	GSSiClose (Fid);
 {
@@ -9330,19 +9424,31 @@ HANDLE FindVar (LPSTR Name)
 	VARPNT	VarPtr;
 	LPVARNAMEINDEXITEM	lpVN; 
 	HANDLE	rtn=NULL; 
+	HANDLE	hVarSpace=SetVarSpaceFromName(Name);
     
-	if (!hVarNameTable)
-{
+	if (!hVarSpace)
+	{
 #if ENABLETRACE
-GSSiExitProg (587);
+		GSSiExitProg(587);
 #endif
 		return (NULL);
-}
+	}
+	pVarSpace = GlobalLock(hVarSpace);
+	if (!pVarSpace->hVarNameTable)
+	{
+		GlobalUnlock(hVarSpace);
+		{
+#if ENABLETRACE
+			GSSiExitProg (587);
+#endif
+			return (NULL);
+		}
+	}
     if (!_fstrnicmp (Name,"G.",2))
     	Name += 2;
-	lpVN = (LPVARNAMEINDEXITEM)GlobalLock (hVarNameTable); 
+	lpVN = (LPVARNAMEINDEXITEM)GlobalLock(pVarSpace->hVarNameTable);
 	BegID = 0;
-	EndID = NumVars-1; 
+	EndID = pVarSpace->NumVars - 1;
 Start:
 	if (EndID < BegID)
 		goto Exit;
@@ -9359,10 +9465,11 @@ Start:
 		goto Start;
 	}
 	else
-		rtn = VarHandles[lpVN[MidID].id]; 
+		rtn = pVarSpace->VarHandles[lpVN[MidID].id];
 Exit:
-	GlobalUnlock (hVarNameTable);
-{
+	GlobalUnlock(pVarSpace->hVarNameTable);
+	GlobalUnlock(hVarSpace);
+	{
 #if ENABLETRACE
 GSSiExitProg (587);
 #endif
@@ -9380,22 +9487,22 @@ void CloseVars (void)
 {   int	i,ii;
 	VARPNT	VarPtr; 
 
-	for (i=0;i<NumVars;i++)
+	for (i = 0; i<pVarSpace->NumVars; i++)
 	{   
-		if ((VarPtr = (VARPNT)GlobalLock (VarHandles[i])))
+		if ((VarPtr = (VARPNT)GlobalLock(pVarSpace->VarHandles[i])))
 		{
 			if (VarPtr->ValueIsHandle)
 			{
 				HANDLE handle = (HANDLE)atol (VarPtr->Value);
 				GSSiGlobFree (&handle);
 			}
-			GSSiGlobUlFree (&VarHandles[i]);
+			GSSiGlobUlFree(&pVarSpace->VarHandles[i]);
 		}
 		else
-			VarHandles[i] = 0;
+			pVarSpace->VarHandles[i] = 0;
 	}
 	DestroyVarNameTable (); 
-	NumVars = 0;
+	pVarSpace->NumVars = 0;
 	HaveDL = FALSE;
 {
 #if ENABLETRACE
@@ -9874,7 +9981,7 @@ void SaveGlobalVals (HFILE Fid)
 {GSSiEnterProg (601);
 #endif
 {
-	unsigned short	i=NumVars; 
+	unsigned short	i = pVarSpace->NumVars;
 	LPSTR	pstr;
 	VARPNT	VarPtr;
     HANDLE	hMem=GSSiGlobAlloc ( 241,GMEM_MOVEABLE,USHRT_MAX);
@@ -9891,7 +9998,7 @@ void SaveGlobalVals (HFILE Fid)
  	BigWrite (Fid,(HPSTR)&Version,2,-1);
 	while (i--)
 	{   
-		VarPtr = (VARPNT)GlobalLock (VarHandles[i]); 
+		VarPtr = (VARPNT)GlobalLock(pVarSpace->VarHandles[i]);
 		if (VarPtr)
 		{    
 	if (!_fstricmp (VarPtr->Name,"%PLOT"))
@@ -9906,7 +10013,7 @@ void SaveGlobalVals (HFILE Fid)
 				*pMem = VarPtr->ContainsGorF;
 				pMem++; 
 				if (!VarPtr->ContainsGorF)
-					GetGlobalVal (VarHandles[i],str,0);
+					GetGlobalVal(pVarSpace->VarHandles[i], str, 0);
 				else
 					_fstrcpy (str,VarPtr->Value);  
 				SubstituteDL (str,TRUE);
@@ -9918,7 +10025,7 @@ void SaveGlobalVals (HFILE Fid)
 				pMem += (l+1);
 				lMem += (l+1);
 			}	
-			GlobalUnlock (VarHandles[i]);
+			GlobalUnlock(pVarSpace->VarHandles[i]);
 		}
 	} 
 	BigWrite (Fid,(HPSTR)&nVars,2,-1);

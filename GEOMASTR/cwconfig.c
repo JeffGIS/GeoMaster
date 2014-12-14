@@ -1173,6 +1173,9 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		strncpy (cmdLine,lpszCmdLine,1024);
 	if (*LastChr (cmdLine) != ';')
 		strcat (cmdLine," ");
+
+	CreateVarSpace(VARSPACE_GLOBAL);
+
 	if (strstr (cmdLine,"/GMEdit"))
 	{
 		isGMEdit = TRUE;

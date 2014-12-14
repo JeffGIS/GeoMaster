@@ -528,7 +528,7 @@ void QuitGraphics()
 	GetSymAttrFile (0,0,0,0,0,0);
 	ODBCTerminate (TRUE);
 	//dumpvars("After.txt");
-	CloseVars(); 
+	DestroyVarSpace((HANDLE)-1);
 	CDClose(); 
 	CloseBufferedMacros ();
 	Time = time(0);

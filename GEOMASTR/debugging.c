@@ -1,8 +1,6 @@
 #include "graphint.h"  
 #include "gmextern.h"
 
-#define MAX_MACRO_STACK 64
-#define MAX_BREAKPOINTS	16
 static int nFunLevs=0, ii;
 static BOOL doDebug=FALSE;
 static int	breakAt = BA_NEXTLINE;
