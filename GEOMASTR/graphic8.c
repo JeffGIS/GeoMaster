@@ -615,9 +615,11 @@ BOOL SelectAreaToOffsetFile (int Item,double Offset,HANDLE hTran)
 				pPolyParts++;//first element is npoly
 			}
 			AddAreaToOffsetFile (PickList[Item].Refno,PickList[Item].Type,nPnts, lpDpoint,nLoops,pPolyParts,Offset);
+			if (nLoops > 1)
+				GlobalUnlock(hPolyPartLen);
 		}
 		GSSiGlobUlFree(&hPoly);
-		GSSiGlobUlFree(&hPolyPartLen);
+		GSSiGlobFree(&hPolyPartLen);
 
 		
 /*		SetConfig (PickList[Item].ConfigID);

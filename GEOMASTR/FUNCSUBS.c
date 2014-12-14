@@ -2208,12 +2208,12 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 				PIAStruct->hAccel = PointInAreaAcceleratorSetupMono (nPnts,pPoints,PIAStruct->nPoly,PIAStruct->hPolyPartLen,PIAStruct->Offset,pBounds); 
 				PIAStruct->nPoints = nPnts;
 				PIAStruct->nPoly = nLoops;
-				PIAStruct->hPoints = GSSiGlobAlloc (1598,GMEM_MOVEABLE,sizeof(DPOINT)*nPnts);
+				PIAStruct->Bounds = *pBounds;
+				PIAStruct->hPoints = GSSiGlobAlloc(1598, GMEM_MOVEABLE, sizeof(DPOINT)*nPnts);
 				pPoints2 = (HPDPOINT)GlobalLock (PIAStruct->hPoints);
 				memmove (pPoints2,pPoints,nPnts*sizeof(DPOINT));
 				GSSiGlobUlFree (&hPoly);
 				GlobalUnlock (PIAStruct->hPoints);
-				PIAStruct->Bounds = *pBounds;
 				GlobalUnlock (hPIAStruct);
 				ltoa ((long)hPIAStruct,OutLoc,10);
 				rtn = TRUE;
@@ -2266,7 +2266,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			pPoints = (HPDPOINT)GlobalLock (PIAStruct->hPoints);
 			BigRead (Fid,pPoints,sizeof(DPOINT)*PIAStruct->nPoints);
 			GlobalUnlock (PIAStruct->hPoints);
-			if (PIAStruct->nPoly > 1)
+			if (PIAStruct->nPoly > 0)
 			{
 				PIAStruct->hPolyPartLen = GSSiGlobAlloc (1598,GMEM_MOVEABLE,(PIAStruct->nPoly+1)*sizeof(long));
 				pPolyPartLen = GlobalLock (PIAStruct->hPolyPartLen);
