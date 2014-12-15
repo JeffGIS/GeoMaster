@@ -528,7 +528,6 @@ void QuitGraphics()
 	GetSymAttrFile (0,0,0,0,0,0);
 	ODBCTerminate (TRUE);
 	//dumpvars("After.txt");
-	DestroyVarSpace((HANDLE)-1);
 	CDClose(); 
 	CloseBufferedMacros ();
 	Time = time(0);
@@ -546,7 +545,8 @@ void QuitGraphics()
 	AllowJournal = FALSE;
 	GetTempDir (0);
 	ConvertToNewLocation (0,0);
-	ScreenBufferDC ((HWND)1,0);
+	DestroyVarSpace((HANDLE)-1);
+	ScreenBufferDC((HWND)1, 0);
 	GSSiGlobFree (&hSaveWindowText);
 	GSSiGlobFree (&hPNAddData);
 	RegisterFloatMenuClass(TRUE);
