@@ -1533,7 +1533,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 						_fstrcat (pTemp,&pVVal[5]);
 						SetGlobalValue3 (pVName,pTemp,0,(BOOL)FoundLit); 
 					}
-					else
+					else if (*pVName != '~')
 						SetGlobalValue3 (pVName,pVVal,0,(BOOL)FoundLit);
 				}
 				pVName = _fstrchr (pVVal,0);
