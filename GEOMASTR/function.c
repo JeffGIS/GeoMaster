@@ -3344,10 +3344,13 @@ SetVis:
 			
 			_fstrcpy (Arg1,Args);
 			ExpandText (Arg1); 
-			hExitMessage = GSSiGlobAlloc (0,GMEM_MOVEABLE,512);
-			ExitMessage = GlobalLock (hExitMessage);
-			_fstrcpy (ExitMessage,Arg1);    
-			GlobalUnlock (hExitMessage);
+			if (*Arg1)
+			{
+				hExitMessage = GSSiGlobAlloc(0, GMEM_MOVEABLE, 512);
+				ExitMessage = GlobalLock(hExitMessage);
+				_fstrcpy(ExitMessage, Arg1);
+				GlobalUnlock(hExitMessage);
+			}
 			PostMessage(hWndMain, WM_CLOSE, 0, 0L);
    			goto RtnTrue;
 		}

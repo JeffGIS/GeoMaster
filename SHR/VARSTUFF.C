@@ -90,7 +90,7 @@ HANDLE SetVarSpaceFromName(LPSTR Name)
 {
 	HANDLE hVarSpace;
 
-	if (*Name == '~')
+	if (*Name == '~' && hLocalVarSpace)
 		hVarSpace = hLocalVarSpace;
 	else
 		hVarSpace = hGlobalVarSpace;
