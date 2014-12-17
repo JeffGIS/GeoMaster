@@ -2799,9 +2799,9 @@ BOOL ShowNodePoints (HDC hDC,long nPnts,HPDPOINT pPoints,HANDLE hUnSplinedPoly,l
 			Size = 4;
 		DisplayMarker (pPoints[i],Size,0,0,0,Color,TRUE,FALSE,0,0,0,0,0); 
 		if (i)
-			SimplePointer (CurView->hDC, &pPoints[i-1], &pPoints[i],1,0,5,0);
+			SimplePointer (CurView->hDC, &pPoints[i-1], &pPoints[i],1,0,7,0);
 		else if (Closed)
-			SimplePointer (CurView->hDC, &pPoints[nPnts-1], &pPoints[i],1,0,5,0);
+			SimplePointer (CurView->hDC, &pPoints[nPnts-1], &pPoints[i],1,0,7,0);
 	}
 	DisplayMarkers = FALSE;  
 	if (hUnSplinedPoly)

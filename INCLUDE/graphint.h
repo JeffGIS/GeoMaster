@@ -2357,7 +2357,7 @@ BOOL SetTransparency (int tranValue);
 
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
-BOOL RunForAll (int nArgs,LPSTR *Args,LPSTR OutLoc);
+BOOL RunForAll(int nArgs, LPSTR *Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength);
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);
 int SQLiteCmd(int nArgs, LPSTR *ARG);

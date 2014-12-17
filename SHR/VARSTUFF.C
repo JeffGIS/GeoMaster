@@ -405,7 +405,7 @@ Next:
 		sprintf (str,"Loading global init file %s",File);
 		GSSiTrace (str,0);
 	} 
-	while (fgetstring (str,512,Fid))
+	while (fgetstring (str,4090,Fid))
 	{
 		n++;
 		if (str[0] != '\0' && str[0] != '#')
@@ -5958,6 +5958,32 @@ GSSiExitProg (555);
 }
 #endif
 }  
+
+void ProcessTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
+#if ENABLETRACE
+{
+	GSSiEnterProg(556);
+#endif
+	{
+		if (*InText)
+		{
+			HANDLE	handle = GSSiGlobAlloc(200, GMEM_MOVEABLE, (long)4096 * 4);
+			LPSTR	Text = GlobalLock(handle);
+
+			_fstrcpy(Text, InText);
+			ExpandTextDB(Text,pBrkPt, bpOffset, bpLen);
+			GSSiGlobUlFree(&handle);
+		}
+{
+#if ENABLETRACE
+	GSSiExitProg(556);
+#endif
+	return;
+}
+#if ENABLETRACE
+}
+#endif
+}
 
 void ProcessText (LPSTR InText)
 #if ENABLETRACE

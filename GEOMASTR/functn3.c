@@ -4184,7 +4184,7 @@ GotCloseFilehSQL:
 				  //$FORALL(DISTINCT,file,sql,initalize,return,value,executable statements)
 		{
 			nArgs = GetFunArgs (Args,Arg,-9,&hMem, pBrkPt, bpOffset, bpLen); 
-			RunForAll (nArgs,Arg,OutLoc);
+			RunForAll(nArgs, Arg, OutLoc, pBrkPt, bpOffset, bpLen);
 			goto Rtnl;
 		}
 		case 645: //$GOOGLE(GROUNDRES,base coord,zoomLev)

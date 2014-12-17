@@ -527,7 +527,7 @@ HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
 	return hBT;
 }
 
-BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
+BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 {
 //$FORALL(RECORDS,file,sql,initalize,return,executable statements)
 //$FORALL(TABLES,file,wildcard,initalize,return,executable statements)
@@ -587,7 +587,7 @@ BOOL RunForAll (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 				if (!rc)
 					break;
 			}
-    		ProcessText (Arg[6]);
+			ProcessTextDB(Arg[6], pBrkPt, bpOffset, bpLen);
 			if (ProcessLine >= 0)
 				break; 
 			CurLoc++;  
