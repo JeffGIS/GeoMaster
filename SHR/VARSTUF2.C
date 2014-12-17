@@ -671,7 +671,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 {GSSiEnterProg (608);
 #endif
 {   
-	HANDLE	hSTR=GSSiGlobAlloc ( 244,GMEM_MOVEABLE,4096+1024);
+	HANDLE	hSTR=GSSiGlobAlloc ( 244,GMEM_MOVEABLE,4096+USHRT_MAX);
 	LPSTR	str = GlobalLock (hSTR);
     LPSTR	RtnValue=&str[4096];   
 	HANDLE	hMacro = 0, hTemp=0;

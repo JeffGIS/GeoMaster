@@ -2822,7 +2822,7 @@ GotCloseFilehSQL:
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			DebugReturn(Arg[1]);
 			if (pMacroReturnValue)
-				_fstrcpy (pMacroReturnValue,Arg[1]);    
+				_fstrncpy(pMacroReturnValue, Arg[1], MAXARGLENGTH);
 			ContinueProcessing = FALSE;
             goto RtnTrue;
 		}
