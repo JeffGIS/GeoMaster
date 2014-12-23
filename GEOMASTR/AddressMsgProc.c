@@ -6492,7 +6492,11 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				_fstrncpy(pAMER->ZIP, ZIP, 12);
 				pAMER->AM.PartsRemoved = nPartsRemoved;
 				GetDlgItemText(hWndDlg, IDC_KEY_FIELD, str, 256);
-				if (!*str || !_fstricmp(str, "%RECORDOFFSET"))
+				if (!_fstricmp(str, "%RECORDNUMBER"))
+				{
+					itoa(lineno, str, 10);
+				}
+				else if (!*str || !_fstricmp(str, "%RECORDOFFSET"))
 				{
 					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQL);
 
