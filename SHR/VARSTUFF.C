@@ -100,7 +100,10 @@ HANDLE SetVarSpaceFromName(LPSTR Name)
 void DestroyVarSpace(HANDLE hVarSpace)
 {
 	if (hVarSpace == (HANDLE)-1)
+	{
 		hVarSpace = hGlobalVarSpace;
+		HaveDL = FALSE;
+	}
 	if (hVarSpace)
 	{
 		LPVARSPACE savepVarSpace = pVarSpace;
@@ -9529,7 +9532,6 @@ void CloseVars (void)
 	}
 	DestroyVarNameTable (); 
 	pVarSpace->NumVars = 0;
-	HaveDL = FALSE;
 {
 #if ENABLETRACE
 GSSiExitProg (588);

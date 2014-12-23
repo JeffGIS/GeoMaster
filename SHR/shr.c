@@ -7984,6 +7984,7 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 
 	if (!Path)
 	{
+		//MessageBox(0, "Freed", 0, MB_OK);
 		GSSiGlobFree (&hConvert);
 		First = TRUE;
 		return TRUE;
@@ -8022,10 +8023,12 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 		Recursive = TRUE;
 		strcpy (AutoMoveList,AutoMoveFile);
 		ExpandText (AutoMoveList);
+		//MessageBox(0, AutoMoveList, 0, MB_OK);
 		Fid = GSSiOpenFile (AutoMoveList,0,OF_READ);
 		if (Fid != HFILE_ERROR)
 		{
-			hConvert = GSSiGlobAlloc (1547,GMEM_MOVEABLE,USHRT_MAX);
+			//MessageBox(0, "Opened", 0, MB_OK);
+			hConvert = GSSiGlobAlloc(1547, GMEM_MOVEABLE, USHRT_MAX);
 			pConvert = GlobalLock (hConvert);
 			while (fgetstring (str,256,Fid))
 			{
@@ -8042,7 +8045,12 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 			GSSiClose (Fid);
 			GlobalUnlock (hConvert);
 			hConvert = GSSiGlobalReAlloc (0,hConvert,TotLen,GMEM_MOVEABLE);
-			st = SHGetFolderPath (0,CSIDL_COMMON_APPDATA,0,SHGFP_TYPE_CURRENT,NewPath);
+			st = SHGetFolderPath(0, CSIDL_COMMON_APPDATA, 0, SHGFP_TYPE_CURRENT, NewPath);
+			/*{
+				char mes[512];
+				sprintf(mes, "totlen=%i %ld %s", TotLen, (int)hConvert,NewPath);
+				MessageBox(0, mes, 0, MB_OK);
+			}*/
 			strcpy (DLPath,"[%DL]");
 			ExpandText (DLPath);
 			*LastChr(DLPath) = 0;
@@ -8065,8 +8073,15 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 			MessageBox (0,FullPath,0,MB_OK);
 	}
 	if (!hConvert)
+	{
+		Recursive = FALSE;
 		return FALSE;
+	}
 	_fullpath (FullPath,Path,MAX_PATH);
+	/*if (dbug)
+	{
+		MessageBox(0, FullPath,"FullPath", MB_OK);
+	}*/
 	pConvert = GlobalLock (hConvert);
 	while (*pConvert)
 	{
@@ -8075,6 +8090,11 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 		if ((pTab = strchr (pConvert,'\t')))
 			*pTab = 0;
 		l = strlen (pConvert);
+		/*if (dbug)
+		{
+			MessageBox(0, pConvert, "pConvert", MB_OK);
+		}*/
+
 		if (!strnicmp (FullPath,pConvert,l))
 		{
 			char	MoveToPath[MAX_PATH];
