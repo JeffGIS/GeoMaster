@@ -74,7 +74,7 @@ int	GetFunctionID3 (LPSTR str)
 			if (!_fstrnicmp (str,"NUM",3)) return 349;
 			if (!_fstrnicmp (str,"SUN",3)) return 350;
 			if (!_fstrnicmp (str,"HSL",3)) return 351;
-			if (!_fstrnicmp (str,"STR",3)) return 352;
+			//if (!_fstrnicmp (str,"STR",3)) return 352;
 			if (!_fstrnicmp (str,"LIT",3)) return 353;
 			if (!_fstrnicmp (str,"COG",3)) return 354;
 			if (!_fstrnicmp (str,"FTP",3)) return 355;
