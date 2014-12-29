@@ -371,9 +371,11 @@ BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 				float RSQMIN;
 
 				SetCurrentParcelTran(pParTran);
+				WaitCursor(1);
 				pParTran->hTran = STRANPoints(0, fromPt, toPt, pParTran->np, &RSQMIN, 3, 0);
 				GlobalUnlock(pParTran->hFromPt);
 				GlobalUnlock(pParTran->hToPt);
+				WaitCursor(-1);
 			}
 			GlobalUnlock(hParcelTran);
 		}

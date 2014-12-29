@@ -1323,9 +1323,10 @@ C*
 	MNMXCORD MinMaxCoord;
 	DPOINT	Point1,Point2;
 	double	width, height;  
-	
+#define MAX_LINES_AT_POINT	255	
 typedef struct {short	nlines;
-		 		short	lines[31];} POINTINFO;
+				short	lines[MAX_LINES_AT_POINT];
+} POINTINFO;
 typedef POINTINFO	HUGE	*HPPOINTINFO;
 typedef struct {char	left,right;} TRACK;
 typedef TRACK	FAR	*LPTRACK;
@@ -1486,16 +1487,21 @@ typedef TRACK	FAR	*LPTRACK;
 		  }
           LP1[NLINES] = (short)IP1;
           LP2[NLINES] = (short)IP2;  
-          if (PointInfo[IP1].nlines >= 31 ||  
-          	  PointInfo[IP2].nlines >= 31)  
+          if (PointInfo[IP1].nlines >= MAX_LINES_AT_POINT ||  
+			  PointInfo[IP2].nlines >= MAX_LINES_AT_POINT)
           	GSSiMessageBox ("Too many lines at one point - add more interior points",
           					"Transformation Error",MB_ICONEXCLAMATION,0);
-          else
+		  else if (NLINES < MXPF)
           {
 	          PointInfo[IP1].lines[PointInfo[IP1].nlines++]=(short)NLINES;
 	          PointInfo[IP2].lines[PointInfo[IP2].nlines++]=(short)NLINES++;
 	      }
-  S200:;
+		  else
+		  {
+			  GSSiMessageBox("Too many points",
+				  "Transformation Error", MB_ICONEXCLAMATION, 0);
+		  }
+	  S200:;
 	} 
 	
 		DBoundsInit (&MinMaxCoord);
