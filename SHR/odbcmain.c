@@ -1149,7 +1149,19 @@ ErrMes:
 				}
 		    	GlobalUnlock (hBinVal);
 		    }
-    		else
+			else if (field->type == SQL_REAL || field->type == SQL_FLOAT)
+			{
+				float rval;
+				rc = SQLGetData(*hstmt, FldNum, SQL_C_FLOAT, &rval, 4, &lenanswer);
+				ftoa(str, rval);
+			}
+			else if (field->type == SQL_DOUBLE)
+			{
+				double rval;
+				rc = SQLGetData(*hstmt, FldNum, SQL_C_DOUBLE, &rval, 8, &lenanswer);
+				ftoa(str, rval);
+			}
+			else
 		    	rc = SQLGetData(*hstmt, FldNum, SQL_C_CHAR, str, 4095, &lenanswer);
 		    if(rc ==  SQL_ERROR) 
 		    	goto ErrMes;
