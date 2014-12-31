@@ -3248,11 +3248,49 @@ GotCloseFilehSQL:
 			goto RtnFalse;
 		}
 		
-		case 619: // $EXPAND(value)  
-		{				
-			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
-			ExpandText(Arg[1]);
-			_fstrcpy (OutLoc,Arg[1]);
+		case 619: // $EXPAND(value,arg1IsFile(TorF),maxexpandedfilelength(def is USHRT_MAX))  
+		{	
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (atob(Arg[2]))
+			{
+				int memSize = GSSiLength(Arg[1]);
+
+				if (memSize > 0)
+				{
+					int maxMemSize = atoi(Arg[3]);
+
+					if (maxMemSize <= 0)
+						maxMemSize = MAXARGLENGTH;
+					else
+						maxMemSize += 2;
+					memSize = max(memSize, maxMemSize);
+					{
+						HFILE Fid = GSSiOpenFile(Arg[1], 0, OF_READ);
+						HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, memSize);
+						LPSTR pFile = GlobalLock(hFile);
+						int len = memSize;
+						LPSTR pLoc = pFile;
+
+						while (fgetstring(pLoc, len, Fid))
+						{
+							int l = strlen(pLoc);
+							len -= l;
+							pLoc += l;
+						}
+						
+						GSSiClose(Fid);
+						ExpandText(pFile);
+						strcpy(OutLoc, pFile);
+						GSSiGlobUlFree(&hFile);
+					}
+				}
+			}
+			else
+			{
+				ExpandText(Arg[1]);
+				_fstrcpy(OutLoc, Arg[1]);
+			}
    			goto Rtnl;
 		}
 		
