@@ -359,7 +359,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				 UpdateWindow(hDBWnd);
 			 }
 			 UpdateWindow(hWndDlg);
-
+			 setScroll(GetDlgItem(hWndDlg, IDC_FILEVIEW));
 		 }
 		break;
     case WM_CLOSE:

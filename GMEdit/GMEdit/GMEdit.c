@@ -370,6 +370,7 @@ void GMEditDisplayText2 (HWND hWnd,HDC hdc,HANDLE hFile,HFONT hFont,RECT rcPaint
 						}
 						else
 							TextOut (hdc,x,y,pFile,1);
+						//GdiFlush();
 					}
 					GetTextExtentPoint32(hdc,pFile,1,&size);
 					x += size.cx;
@@ -582,7 +583,7 @@ int FileLocToMacroLoc(int fileLoc)
 	return locMacro;
 }
 
-int FindBreakpoint (LPSTR bp)
+BOOL FindBreakpoint (LPSTR bp,LPINT pLoc)
 {
 	int loc = 0;
 	char brkp[64];
@@ -644,28 +645,35 @@ int FindBreakpoint (LPSTR bp)
 		rtn = locFile;
 	Exit:
 		GlobalUnlock(hFile);
-		return rtn;
+		//breakAtLoc = -1;
+		*pLoc = rtn;
+		return TRUE;
 	}
-	sprintf (brkp,"$B(%s",bp);
-	if (hFile)
+	if (*bp)
 	{
-		LPSTR pFile = GlobalLock (hFile);
-		LPSTR pFileBegin = pFile;
-
-		while (*pFile)
+		sprintf(brkp, "$B(%s", bp);
+		if (hFile)
 		{
-			if (!strncmp (pFile,brkp,strlen(brkp)) &&
-				(*(pFile+strlen(brkp))==',' ||
-				*(pFile+strlen(brkp))==')'))
+			LPSTR pFile = GlobalLock(hFile);
+			LPSTR pFileBegin = pFile;
+
+			while (*pFile)
 			{
-				loc = (int)(pFile - pFileBegin);
-				break;
+				if (!strncmp(pFile, brkp, strlen(brkp)) &&
+					(*(pFile + strlen(brkp)) == ',' ||
+					*(pFile + strlen(brkp)) == ')'))
+				{
+					loc = (int)(pFile - pFileBegin);
+					break;
+				}
+				pFile++;
 			}
-			pFile++;
+			GlobalUnlock(hFile);
 		}
-		GlobalUnlock (hFile);
+		*pLoc = loc;
+		return TRUE;
 	}
-	return loc;
+	return FALSE;
 }
 
 void verifyLineBreaks (HANDLE hFile)
@@ -771,7 +779,7 @@ int GetInsertPointFromLoc (HWND hWnd,HANDLE hFile,HFONT hFont,LPPOINT pcursorLoc
 {
 	LPSTR pFile, pFileBegin;
 	TEXTMETRIC	tm;
-	SCROLLINFO si; 
+	SCROLLINFO siH,siV; 
 	SIZE size;
 	RECT rcPaint;
 	int rtn = 0;
@@ -781,14 +789,16 @@ int GetInsertPointFromLoc (HWND hWnd,HANDLE hFile,HFONT hFont,LPPOINT pcursorLoc
  
 	GetClientRect (hWnd,&rcPaint);
 	// Get vertical scroll bar position.
-    si.cbSize = sizeof (si);
-    si.fMask  = SIF_PAGE|SIF_POS|SIF_RANGE|SIF_TRACKPOS;
-    GetScrollInfo (hWnd, SB_VERT, &si);
-    yPos = si.nPos;
+	siV.cbSize = sizeof (siV);
+	siV.fMask = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_TRACKPOS;
+	siH.cbSize = sizeof (siH);
+	siH.fMask = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_TRACKPOS;
+	GetScrollInfo(hWnd, SB_VERT, &siV);
+    yPos = siV.nPos;
 
     // Get horizontal scroll bar position.
-    GetScrollInfo (hWnd, SB_HORZ, &si);
-    xPos = si.nPos;
+    GetScrollInfo (hWnd, SB_HORZ, &siH);
+    xPos = siH.nPos;
 
 	hOldFont = SelectObject (hdc,hFont);
      
@@ -919,6 +929,7 @@ BOOL setScroll (HWND hWnd)
     xClient = RECTWIDTH (&rect); 
 
     // Set the vertical scrolling range and page size
+	memset(&siy, 0, sizeof(siy));
     siy.cbSize = sizeof(siy); 
     siy.fMask  = SIF_RANGE | SIF_PAGE; 
     siy.nMin   = 0; 
@@ -927,7 +938,8 @@ BOOL setScroll (HWND hWnd)
     SetScrollInfo(hWnd, SB_VERT, &siy, TRUE); 
 
     // Set the horizontal scrolling range and page size. 
-    six.cbSize = sizeof(six); 
+	memset(&six, 0, sizeof(six));
+	six.cbSize = sizeof(six);
     six.fMask  = SIF_RANGE | SIF_PAGE; 
     six.nMin   = 0; 
     six.nMax   = maxLine;//2 + 2*xClientMax / xChar; 
@@ -950,7 +962,7 @@ BOOL setScroll (HWND hWnd)
 		GetScrollInfo (hWnd, SB_HORZ, &six);
 		SetScrollInfo(hWnd, SB_VERT, &siy, TRUE); 
 		GetScrollInfo (hWnd, SB_VERT, &siy);
-		ScrollWindow(hWnd,xPos - six.nPos,yPos - siy.nPos, NULL, NULL);
+		ScrollWindow(hWnd, xPos - six.nPos,max(0, min(LINES - siy.nPage, yPos - siy.nPos)), NULL, NULL);
 		GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
 		SetCaretPos(insertPoint.x, insertPoint.y); 
 		setToFind = FALSE;
@@ -1382,12 +1394,13 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	size_t abcLength;        // length of an abc[] item 
 	int fontSize=18;
 	int	insertLoc3;
-	int cursorWidth=1, cursorHeight = fontSize;
+	int cursorWidth=5, cursorHeight = fontSize-2;
 	int saveLine;
 	POINT mousePoint;
 	RECT rect;
 	char key;
 	static HMENU hMenu=0;
+	int loc;
 
 
 	if (message == 	uFindReplaceMsg)
@@ -1524,13 +1537,13 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         ReleaseDC (hWnd, hdc); 
 		AutoInsertOpen ();
 		GetWindowRect (hWnd,&rect);
-		if ((insertLoc = FindBreakpoint (currentBreakpoint)))
+		if (FindBreakpoint (currentBreakpoint,&loc))
 		{
-			 insertLoc2 = insertLoc;
+			 setScroll(hWnd);
+			 insertLoc2 = insertLoc = loc;
 			 GetInsertPointFromLoc (hWnd,hFile,hFont,&insertPoint,insertLoc,0);
 			 SetCaretPos(insertPoint.x, insertPoint.y); 
 			 setToFind = TRUE;
-			 setScroll (hWnd);
 			 InvalidateRect (hWnd,0,TRUE);
 		}
         return 0; 
@@ -1584,14 +1597,19 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		ii=1;
 		break;
 	case WM_PAINT:
- 		hdc = BeginPaint(hWnd, &ps);
+		setScroll(hWnd);
+		hdc = BeginPaint(hWnd, &ps);
 		GMEditDisplayText (hWnd,hdc,hFile,hFont,ps.rcPaint);
 		GMEditDisplayTextBetweenLocs (hWnd,hFile,hFont,insertLoc,insertLoc2,TRUE);
 		getLinesAndMaxLine (hdc,hFile,hFont);
 		EndPaint(hWnd, &ps);
-		setScroll (hWnd);
 		DrawMenuBar(hWnd);
-		
+		if (FindBreakpoint(currentBreakpoint,&loc))
+		{
+			insertLoc2 = insertLoc = loc;
+			GetInsertPointFromLoc(hWnd, hFile, hFont, &insertPoint, insertLoc, 0);
+			SetCaretPos(insertPoint.x, insertPoint.y);
+		}
 		break;
 
      case WM_CHAR:
