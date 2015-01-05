@@ -3368,12 +3368,14 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
+			char SSID[40];
+			wlanGetCurrentSSID(SSID, sizeof(SSID));
+			/*HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR  pMem = GlobalLock(hMem);
 			HFILE  Fid = GSSiOpenFile("C:\\GEOMas\\projects\\corners\\Macros\\loadadafiles.txt", 0, OF_READ);
 			BigRead(Fid, pMem, SHRT_MAX - 2);
 			GSSiClose(Fid);
-			GSSiGlobUlFree(&hMem);
+			GSSiGlobUlFree(&hMem);*/
 			//GetMassShapeFiles();
 			//isLaptop(1);
 			//TestConvertToJP2 (1);

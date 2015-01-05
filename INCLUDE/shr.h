@@ -1372,6 +1372,8 @@ int GetNumMonitors(void);
 HMONITOR GetOtherMonitor(POINT pt);
 BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);
 
+BOOL wlanGetCurrentSSID(char * pSSID, int maxSSID);
+
 
 
 

@@ -731,6 +731,7 @@
     <ClCompile Include="..\SHR\Writeavi.c" />
     <ClCompile Include="..\gctpc\wviifor.c" />
     <ClCompile Include="..\gctpc\wviiinv.c" />
+    <ClCompile Include="wlan.cpp" />
     <ClCompile Include="XMLProcessing.c" />
     <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\yrday.c" />
     <ClCompile Include="..\solar_calculator\Version2\zatan2.c" />
