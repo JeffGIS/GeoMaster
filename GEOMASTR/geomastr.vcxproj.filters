@@ -1323,6 +1323,9 @@
     <ClCompile Include="wlan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkAdapters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">

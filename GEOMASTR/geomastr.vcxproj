@@ -487,6 +487,7 @@
     <ClCompile Include="..\Proj-4\src\nad_intr.c" />
     <ClCompile Include="..\GM32lib\nadcon.c" />
     <ClCompile Include="..\solar_calculator\Version2\nep404.c" />
+    <ClCompile Include="NetworkAdapters.cpp" />
     <ClCompile Include="NETWORKS.c" />
     <ClCompile Include="..\solar_calculator\Version2\nutate.c" />
     <ClCompile Include="..\gctpc\obleqfor.c" />

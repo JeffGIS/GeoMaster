@@ -3370,6 +3370,7 @@ SetVis:
 		{
 			char SSID[40];
 			wlanGetCurrentSSID(SSID, sizeof(SSID));
+			networkAdapters();
 			/*HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR  pMem = GlobalLock(hMem);
 			HFILE  Fid = GSSiOpenFile("C:\\GEOMas\\projects\\corners\\Macros\\loadadafiles.txt", 0, OF_READ);
