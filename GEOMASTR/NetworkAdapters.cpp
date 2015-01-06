@@ -10,9 +10,9 @@
 
 /* Note: could also use malloc() and free() */
 
-extern "C" bool networkAdapters(void)
+extern "C" bool getipAddressForMACAddress(LPSTR ipAddress,  UCHAR DOT11_MAC_ADDRESS[6])
 {
-
+	bool rtn = false;
 	/* Declare and initialize variables */
 
 	// It is possible for an adapter to have multiple
@@ -36,8 +36,8 @@ extern "C" bool networkAdapters(void)
 	ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
 	pAdapterInfo = (IP_ADAPTER_INFO *)MALLOC(sizeof(IP_ADAPTER_INFO));
 	if (pAdapterInfo == NULL) {
-		printf("Error allocating memory needed to call GetAdaptersinfo\n");
-		return 1;
+		//printf("Error allocating memory needed to call GetAdaptersinfo\n");
+		return false;
 	}
 	// Make an initial call to GetAdaptersInfo to get
 	// the necessary size into the ulOutBufLen variable
@@ -45,25 +45,26 @@ extern "C" bool networkAdapters(void)
 		FREE(pAdapterInfo);
 		pAdapterInfo = (IP_ADAPTER_INFO *)MALLOC(ulOutBufLen);
 		if (pAdapterInfo == NULL) {
-			printf("Error allocating memory needed to call GetAdaptersinfo\n");
-			return 1;
+			//printf("Error allocating memory needed to call GetAdaptersinfo\n");
+			return false;
 		}
 	}
 
 	if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR) {
 		pAdapter = pAdapterInfo;
-		while (pAdapter) {
-			printf("\tComboIndex: \t5d\n", pAdapter->ComboIndex);
+		while (pAdapter)
+		{
+/*			printf("\tComboIndex: \t5d\n", pAdapter->ComboIndex);
 			printf("\tAdapter Name: \t%s\n", pAdapter->AdapterName);
 			printf("\tAdapter Desc: \t%s\n", pAdapter->Description);
-			printf("\tAdapter Addr: \t");
-			for (i = 0; i < pAdapter->AddressLength; i++) {
-				if (i == (pAdapter->AddressLength - 1))
-					printf("%.2X\n", (int)pAdapter->Address[i]);
-				else
-					printf("%.2X-", (int)pAdapter->Address[i]);
+			printf("\tAdapter Addr: \t");*/
+			if (pAdapter->AddressLength == 6)
+			for (i = 0; i < pAdapter->AddressLength; i++)
+			{
+				if (pAdapter->Address[i] != DOT11_MAC_ADDRESS[i])
+					goto NextAdapter;
 			}
-			printf("\tIndex: \t%d\n", pAdapter->Index);
+/*			printf("\tIndex: \t%d\n", pAdapter->Index);
 			printf("\tType: \t");
 			switch (pAdapter->Type) {
 			case MIB_IF_TYPE_OTHER:
@@ -90,11 +91,12 @@ extern "C" bool networkAdapters(void)
 			default:
 				printf("Unknown type %ld\n", pAdapter->Type);
 				break;
-			}
+			}*/
 
-			printf("\tIP Address: \t%s\n",
-				pAdapter->IpAddressList.IpAddress.String);
-			printf("\tIP Mask: \t%s\n", pAdapter->IpAddressList.IpMask.String);
+			
+			strcpy (ipAddress,pAdapter->IpAddressList.IpAddress.String);
+			rtn = true;
+			/*printf("\tIP Mask: \t%s\n", pAdapter->IpAddressList.IpMask.String);
 
 			printf("\tGateway: \t%s\n", pAdapter->GatewayList.IpAddress.String);
 			printf("\t***\n");
@@ -105,7 +107,7 @@ extern "C" bool networkAdapters(void)
 					pAdapter->DhcpServer.IpAddress.String);
 
 				printf("\t  Lease Obtained: ");
-				/* Display local time */
+				//Display local time
 				error = _localtime32_s(&newtime, (__time32_t*)&pAdapter->LeaseObtained);
 				if (error)
 					printf("Invalid Argument to _localtime32_s\n");
@@ -115,7 +117,7 @@ extern "C" bool networkAdapters(void)
 					if (error)
 						printf("Invalid Argument to asctime_s\n");
 					else
-						/* asctime_s returns the string terminated by \n\0 */
+						// asctime_s returns the string terminated by \n\0 
 						printf("%s", buffer);
 				}
 
@@ -129,7 +131,7 @@ extern "C" bool networkAdapters(void)
 					if (error)
 						printf("Invalid Argument to asctime_s\n");
 					else
-						/* asctime_s returns the string terminated by \n\0 */
+						// asctime_s returns the string terminated by \n\0 
 						printf("%s", buffer);
 				}
 			}
@@ -144,17 +146,13 @@ extern "C" bool networkAdapters(void)
 					pAdapter->SecondaryWinsServer.IpAddress.String);
 			}
 			else
-				printf("\tHave Wins: No\n");
+				printf("\tHave Wins: No\n");*/
+NextAdapter:
 			pAdapter = pAdapter->Next;
-			printf("\n");
 		}
-	}
-	else {
-		printf("GetAdaptersInfo failed with error: %d\n", dwRetVal);
-
 	}
 	if (pAdapterInfo)
 		FREE(pAdapterInfo);
 
-	return 0;
+	return rtn;
 }

@@ -17,7 +17,7 @@
 #pragma comment(lib, "wlanapi.lib")
 #pragma comment(lib, "ole32.lib")
 
-extern "C" bool wlanGetCurrentSSID(char * pSSID,int maxSSID)
+extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, UCHAR DOT11_MAC_ADDRESS[6])
 {
 
 	// Declare and initialize variables.
@@ -28,7 +28,7 @@ extern "C" bool wlanGetCurrentSSID(char * pSSID,int maxSSID)
 	DWORD dwResult = 0;
 	DWORD dwRetVal = 0;
 	int iRet = 0;
-	UCHAR DOT11_MAC_ADDRESS[6];
+	
 
 	WCHAR GuidString[39] = { 0 };
 

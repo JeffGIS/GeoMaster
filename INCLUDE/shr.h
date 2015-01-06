@@ -1372,8 +1372,8 @@ int GetNumMonitors(void);
 HMONITOR GetOtherMonitor(POINT pt);
 BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);
 
-BOOL wlanGetCurrentSSID(char * pSSID, int maxSSID);
-
+BOOL wlanGetCurrentSSID(char * pSSID, int maxSSID, UCHAR DOT11_MAC_ADDRESS[6]);
+BOOL getipAddressForMACAddress(LPSTR ipAddress, UCHAR DOT11_MAC_ADDRESS[6]);
 
 
 

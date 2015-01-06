@@ -3369,8 +3369,10 @@ SetVis:
 		case 424: //$MISC()
 		{
 			char SSID[40];
-			wlanGetCurrentSSID(SSID, sizeof(SSID));
-			networkAdapters();
+			char ipAddress[32];
+			UCHAR DOT11_MAC_ADDRESS[6];
+			wlanGetCurrentSSID(SSID, sizeof(SSID), DOT11_MAC_ADDRESS);
+			getipAddressForMACAddress(ipAddress,DOT11_MAC_ADDRESS);
 			/*HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR  pMem = GlobalLock(hMem);
 			HFILE  Fid = GSSiOpenFile("C:\\GEOMas\\projects\\corners\\Macros\\loadadafiles.txt", 0, OF_READ);
