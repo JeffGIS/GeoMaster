@@ -10,7 +10,7 @@
 
 /* Note: could also use malloc() and free() */
 
-extern "C" bool getipAddressForMACAddress(LPSTR ipAddress,  UCHAR DOT11_MAC_ADDRESS[6])
+extern "C" bool getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid)
 {
 	bool rtn = false;
 	/* Declare and initialize variables */
@@ -23,6 +23,9 @@ extern "C" bool getipAddressForMACAddress(LPSTR ipAddress,  UCHAR DOT11_MAC_ADDR
 	// first entry for the IP address/mask, and gateway, and
 	// the primary and secondary WINS server for each adapter. 
 
+	WCHAR GuidString[39] = { 0 };
+	StringFromGUID2(*pInterfaceGuid, (LPOLESTR)& GuidString,
+		sizeof(GuidString) / sizeof(*GuidString));
 	PIP_ADAPTER_INFO pAdapterInfo;
 	PIP_ADAPTER_INFO pAdapter = NULL;
 	DWORD dwRetVal = 0;
@@ -58,10 +61,9 @@ extern "C" bool getipAddressForMACAddress(LPSTR ipAddress,  UCHAR DOT11_MAC_ADDR
 			printf("\tAdapter Name: \t%s\n", pAdapter->AdapterName);
 			printf("\tAdapter Desc: \t%s\n", pAdapter->Description);
 			printf("\tAdapter Addr: \t");*/
-			if (pAdapter->AddressLength == 6)
-			for (i = 0; i < pAdapter->AddressLength; i++)
+			for (i = 0; i < strlen(pAdapter->AdapterName); i++)
 			{
-				if (pAdapter->Address[i] != DOT11_MAC_ADDRESS[i])
+				if (pAdapter->AdapterName[i] != GuidString[i])
 					goto NextAdapter;
 			}
 /*			printf("\tIndex: \t%d\n", pAdapter->Index);

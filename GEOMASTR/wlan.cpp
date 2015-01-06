@@ -17,7 +17,7 @@
 #pragma comment(lib, "wlanapi.lib")
 #pragma comment(lib, "ole32.lib")
 
-extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, UCHAR DOT11_MAC_ADDRESS[6])
+extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid)
 {
 
 	// Declare and initialize variables.
@@ -29,9 +29,9 @@ extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, UCHAR DOT11_MAC_AD
 	DWORD dwRetVal = 0;
 	int iRet = 0;
 	
-
+	GUID InterfaceGuid;
 	WCHAR GuidString[39] = { 0 };
-
+	UCHAR DOT11_MAC_ADDRESS[6];
 	unsigned int i, k;
 
 	// variables used for WlanEnumInterfaces
@@ -80,6 +80,8 @@ extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, UCHAR DOT11_MAC_AD
 				// to get current connection attributes
 				if (pIfInfo->isState == wlan_interface_state_connected)
 				{
+					*pInterfaceGuid = pIfInfo->InterfaceGuid;
+					//memcpy(AdapterName, &pIfInfo->InterfaceGuid, sizeof(pIfInfo->InterfaceGuid));
 					dwResult = WlanQueryInterface(hClient,
 						&pIfInfo->InterfaceGuid,
 						wlan_intf_opcode_current_connection,

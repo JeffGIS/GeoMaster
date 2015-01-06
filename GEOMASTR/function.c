@@ -3370,9 +3370,9 @@ SetVis:
 		{
 			char SSID[40];
 			char ipAddress[32];
-			UCHAR DOT11_MAC_ADDRESS[6];
-			wlanGetCurrentSSID(SSID, sizeof(SSID), DOT11_MAC_ADDRESS);
-			getipAddressForMACAddress(ipAddress,DOT11_MAC_ADDRESS);
+			GUID Guid;
+			wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
+			getipAddressForAdapter(ipAddress,&Guid);
 			/*HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR  pMem = GlobalLock(hMem);
 			HFILE  Fid = GSSiOpenFile("C:\\GEOMas\\projects\\corners\\Macros\\loadadafiles.txt", 0, OF_READ);
