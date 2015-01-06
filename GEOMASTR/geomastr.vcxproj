@@ -244,7 +244,7 @@
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Geo_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;NO_STRICT;XPORABOVE;USEMRSID;_WIN32_WINNT=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;NO_STRICT;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <StructMemberAlignment>2Bytes</StructMemberAlignment>
@@ -488,6 +488,7 @@
     <ClCompile Include="..\GM32lib\nadcon.c" />
     <ClCompile Include="..\solar_calculator\Version2\nep404.c" />
     <ClCompile Include="NetworkAdapters.cpp" />
+    <ClCompile Include="NetworkAdaptersInfo.cpp" />
     <ClCompile Include="NETWORKS.c" />
     <ClCompile Include="..\solar_calculator\Version2\nutate.c" />
     <ClCompile Include="..\gctpc\obleqfor.c" />

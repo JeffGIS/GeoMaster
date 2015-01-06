@@ -3371,6 +3371,7 @@ SetVis:
 			char SSID[40];
 			char ipAddress[32];
 			GUID Guid;
+			netAdaptTest();
 			wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
 			getipAddressForAdapter(ipAddress,&Guid);
 			/*HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
