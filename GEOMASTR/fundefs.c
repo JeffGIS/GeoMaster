@@ -116,6 +116,7 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp(str, "RAND", 4)) return 432;
 			if (!_fstrnicmp(str, "AREA", 4)) return 433;
 			if (!_fstrnicmp(str, "TRAN", 4)) return 434;
+			if (!_fstrnicmp(str, "WIFI", 4)) return 435;
 			return 0;
 }
 int	GetFunctionID5 (LPSTR str)

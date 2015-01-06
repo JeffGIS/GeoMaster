@@ -4023,6 +4023,23 @@ SetVis:
 			}
 			goto Rtnrtn;
 		}
+		case 435://$WIFI(Name
+				 //$WIFI(Address
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "NAME"))
+			{
+				GetWifiName(OutLoc);
+			}
+			else if (!stricmp(Arg[1], "ADDRESS"))
+			{
+				GetWifiAddress(OutLoc);
+			}
+			goto Rtnl;
+		}
 		default:
 			goto Rtn0;
 	}

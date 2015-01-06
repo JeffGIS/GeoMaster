@@ -1375,6 +1375,8 @@ BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);
 BOOL wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid);
 BOOL getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid);
 
+void GetWifiName(LPSTR Name);
+void GetWifiAddress(LPSTR address);
 
 
 

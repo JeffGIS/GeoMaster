@@ -4002,7 +4002,8 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 	json_t *status;
 	json_t *results;
 	const char * status_text;
-
+	//add bounds to restrict results, return only results in bounds
+	//&bounds = 34.172684, -118.604794 | 34.236144, -118.50093
 	*pHaveVPPoints = FALSE;
 	text = requestFromURL(url);
 	if (!text)
