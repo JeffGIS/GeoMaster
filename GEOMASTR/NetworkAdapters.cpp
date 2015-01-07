@@ -10,7 +10,7 @@
 
 /* Note: could also use malloc() and free() */
 
-extern "C" bool getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid)
+extern "C" int getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid)
 {
 	bool rtn = false;
 	/* Declare and initialize variables */

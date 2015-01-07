@@ -1372,11 +1372,11 @@ int GetNumMonitors(void);
 HMONITOR GetOtherMonitor(POINT pt);
 BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);
 
-BOOL wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid);
-BOOL getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid);
+int wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid);
+int getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid);
 
-void GetWifiName(LPSTR Name);
-void GetWifiAddress(LPSTR address);
+int GetWifiName(LPSTR Name);
+int GetWifiAddress(LPSTR address);
 
 
 

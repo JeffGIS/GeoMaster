@@ -4037,7 +4037,8 @@ SetVis:
 			}
 			else if (!stricmp(Arg[1], "ADDRESS"))
 			{
-				GetWifiAddress(OutLoc);
+				if (!GetWifiAddress(OutLoc))
+					GetMyIPNetAddress(OutLoc);
 			}
 			goto Rtnl;
 		}

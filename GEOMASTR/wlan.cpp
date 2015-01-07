@@ -17,29 +17,34 @@
 #pragma comment(lib, "wlanapi.lib")
 #pragma comment(lib, "ole32.lib")
 
-extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid);
-extern "C" bool getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid);
+extern "C" int wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid);
+extern "C" int getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid);
 
-extern "C" void GetWifiName(LPSTR Name)
+extern "C" int GetWifiName(LPSTR Name)
 {
 	char SSID[40];
 	char ipAddress[32];
 	GUID Guid;
-	wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
+	bool rtn = wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
 	strcpy(Name, SSID);
+	return rtn;
 }
 
-extern "C" void GetWifiAddress(LPSTR address)
+extern "C" int GetWifiAddress(LPSTR address)
 {
 	char SSID[40];
 	char ipAddress[32] = { 0 };
 	GUID Guid;
-	wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
-	getipAddressForAdapter(ipAddress, &Guid);
+	int rtn = 0;
+	if (wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid))
+	{
+		rtn = getipAddressForAdapter(ipAddress, &Guid);
+	}
 	strcpy(address, ipAddress);
+	return rtn;
 }
 
-extern "C" bool wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid)
+extern "C" int wlanGetCurrentSSID(char * pSSID, int maxSSID, GUID *pInterfaceGuid)
 {
 
 	// Declare and initialize variables.
