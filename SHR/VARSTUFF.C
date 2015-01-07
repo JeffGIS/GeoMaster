@@ -6554,7 +6554,7 @@ GSSiExitProg (558);
 			}
 			if (!(FunID = GetFunctionID(InLoc, BegBrack)))
 			{
-				InLoc = EndBrack + 1;
+				InLoc = EndBrack;
 				goto OutChar;
 			}
 			if (pBrkPt)
