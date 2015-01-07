@@ -1503,6 +1503,8 @@ GSSiExitProg (1350);
 					dir++;
 					*LastChr(dir) = 0;
 				}
+				if (*ext == '.')
+					ext++;
 				if (!stricmp(Arg[1], "DRIVE"))
 					strcpy(OutLoc, drive);
 				else if (!stricmp(Arg[1], "DRIVEDIR"))
@@ -1524,6 +1526,8 @@ GSSiExitProg (1350);
 				}
 				else if (!stricmp(Arg[1], "NAME"))
 					strcpy(OutLoc, name);
+				else if (!stricmp(Arg[1], "NAMEEXT"))
+					sprintf(OutLoc, "%s.%s", name,ext);
 				else if (!stricmp(Arg[1], "EXT"))
 					strcpy(OutLoc, ext);
 				else if (!stricmp(Arg[1], "WOEXT"))
