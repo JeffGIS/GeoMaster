@@ -8442,19 +8442,19 @@ BOOL ValidateGMDIndexes(LPSTR FilePath)
 	LPGWDHEADER lpGWDHead2;
 	long offset, offset2;
 	int index;
+	char txt[128];
 
 	if (!hDB)
 		return FALSE;
 	lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
 	hDB2 = OpenGWDatabase(FilePath, BT_READ);
 	lpGWDHead2 = (LPGWDHEADER)GlobalLock(hDB2);
-	for (index = 1; index < lpGWDHead->NumIndex; index++)
+	for (index = 0; index < lpGWDHead->NumIndex; index++)
 	{
 		int pos = BT_FIRST;
 		int keySt;
 		int numErr = 0;
 		int nRecs = BT_NUM_IN_INDEX(lpGWDHead2->BTHandle[index]), curRec = 0;
-		char txt[128];
 
 		sprintf(txt, "Check Index %1", index + 1);
 		
@@ -8483,7 +8483,10 @@ BOOL ValidateGMDIndexes(LPSTR FilePath)
 					rtn = FALSE;
 			}
 			if (!(curRec++ % 16))
-				StatusWindowUpdate(NULL, NULL, nRecs, curRec);
+			{
+				sprintf(txt, "Index:%i rtn=%i numErr=%i", index,rtn, numErr);
+				StatusWindowUpdate(NULL, txt, nRecs, curRec);
+			}
 		}
 		DestroyStatusWindow(0);
 
