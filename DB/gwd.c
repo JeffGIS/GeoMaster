@@ -7088,7 +7088,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 	}
 	else if (!stricmp(Arg[1], "CHECKINDEX"))
 	{
-		rtn = ValidateGMDIndexes(Arg[2]);
+		rtn = ValidateGMDIndexes(Arg[2],atoi(Arg[3]),atob(Arg[4]));
 		ltoa(rtn, OutLoc, 10);
 	}
 
@@ -8433,15 +8433,15 @@ int NumBytesDifferent (LPSTR File1,LPSTR File2)
 	AllowCache = SaveAllowCache;
 	return nDiff;
 }
-BOOL ValidateGMDIndexes(LPSTR FilePath)
+BOOL ValidateGMDIndexes(LPSTR FilePath,int wantIndex,BOOL displayAfterEachIndex)
 {
-	BOOL rtn = TRUE;
+	BOOL rtn2 = TRUE;
 	HANDLE hDB = OpenGWDatabase(FilePath, BT_READ);
 	HANDLE hDB2;
 	LPGWDHEADER lpGWDHead;
 	LPGWDHEADER lpGWDHead2;
 	long offset, offset2;
-	int index;
+	int index, startIndex, stopIndex;
 	char txt[128];
 
 	if (!hDB)
@@ -8449,14 +8449,25 @@ BOOL ValidateGMDIndexes(LPSTR FilePath)
 	lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
 	hDB2 = OpenGWDatabase(FilePath, BT_READ);
 	lpGWDHead2 = (LPGWDHEADER)GlobalLock(hDB2);
-	for (index = 0; index < lpGWDHead->NumIndex; index++)
+	if (wantIndex)
+	{
+		startIndex = wantIndex - 1;
+		stopIndex = wantIndex;
+	}
+	else
+	{
+		startIndex = 0;
+		stopIndex = lpGWDHead->NumIndex;
+	}
+	for (index = startIndex; index < stopIndex; index++)
 	{
 		int pos = BT_FIRST;
 		int keySt;
+		int rtn = 1;
 		int numErr = 0;
 		int nRecs = BT_NUM_IN_INDEX(lpGWDHead2->BTHandle[index]), curRec = 0;
 
-		sprintf(txt, "Check Index %1", index + 1);
+		sprintf(txt, "Check Index %i", index + 1);
 		
 		CreateStatusWind(hWndMain, 1, txt);
 
@@ -8484,9 +8495,16 @@ BOOL ValidateGMDIndexes(LPSTR FilePath)
 			}
 			if (!(curRec++ % 16))
 			{
-				sprintf(txt, "Index:%i rtn=%i numErr=%i", index,rtn, numErr);
+				sprintf(txt, "Index:%i rtn=%i numErr=%i", index+1,rtn, numErr);
 				StatusWindowUpdate(NULL, txt, nRecs, curRec);
 			}
+		}
+		if (!rtn)
+			rtn2 = FALSE;
+		if (displayAfterEachIndex)
+		{
+			sprintf(txt, "Index:%i rtn=%i numErr=%i", index + 1, rtn, numErr);
+			MessageBox(0, txt, "", MB_OK);
 		}
 		DestroyStatusWindow(0);
 
@@ -8495,5 +8513,5 @@ BOOL ValidateGMDIndexes(LPSTR FilePath)
 	GlobalUnlock(hDB2);
 	CloseGWDatabase(hDB);
 	CloseGWDatabase(hDB2);
-	return rtn;
+	return rtn2;
 }
