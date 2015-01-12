@@ -1630,8 +1630,9 @@ S1000:
 	  if (pBTree->CI_PNT->LNCI <=0)
 	  	BTreeErrorMessage (pBTree,"Invalid LNCI");
 
-	   
-	   if (pBTree->CI_PNT->CITYPE == BT_BOTTOM)
+	  if (pBTree->CI_PNT->CITYPE != BT_UPPER && pBTree->CI_PNT->CITYPE != BT_BOTTOM)
+		  BTreeErrorMessage(pBTree, "Invalid CITYPE");
+	  if (pBTree->CI_PNT->CITYPE == BT_BOTTOM)
        {      if (pBTree->BT_HEAD.BT_DATED)
        		  {   if (_fmemcmp(IADDR((LPSTR)&pBTree->INDEX_ITEM_PNT->INDEX_ENTRY,pBTree->BT_HEAD.BT_KYLEN+1),
                       &pBTree->BTID_DATE,2) < 0) goto S900;
@@ -1647,7 +1648,7 @@ S1000:
               _fmemmove (KEY,&pBTree->INDEX_ITEM_PNT->INDEX_ENTRY,pBTree->BT_HEAD.BT_KYLEN);
               if (FIRST_CALL) pBTree->BT_PATH_CHANGE = FALSE;
        }
-       else
+	   else
 S1005: {      pBTree->POS.POSA = DOWN;
               pBTree->POS.POSB = 1;
               if (pBTree->BT_HEAD.BT_KEYLEN <= 64)

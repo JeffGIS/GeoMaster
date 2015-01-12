@@ -1467,8 +1467,8 @@ ProcessUserParms ();
 }
 PeopleNet = GetGlobalBVal ("[PEOPLENET]");
 
-if (!RunFromCache)
-	AllowCache = TRUE;
+//if (!RunFromCache)
+//	AllowCache = TRUE;
  if(!hPrevInstance)
    {
     /* register window classes if first instance of application         */   

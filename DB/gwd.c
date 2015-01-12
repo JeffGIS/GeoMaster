@@ -3883,39 +3883,42 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
             while (ContinueProcessing && !BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],pos,BT_ANY, (LPSTR)&Offset)) 
             {   
             	pos = BT_NEXT;
-		        FillGWDData (lpGWDHead,Offset);
-
-				if (CreateIndex && CreateIndex == lpGWDHead->SpatialIndex)
+				if (FillGWDData(lpGWDHead, Offset) > 0)
 				{
-					switch (lpGWDHead->SpatialIndexType)
+					if (CreateIndex && CreateIndex == lpGWDHead->SpatialIndex)
 					{
-					case 1:
-					case 2:
+						switch (lpGWDHead->SpatialIndexType)
+						{
+						case 1:
+						case 2:
 						{
 							LPGWFLDINFO pFldInfo;
 							int	Time, FromMonth, ToMonth, Month;
 
 							pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->FromDateField;
- 							Time = *(LPLONG)&lpGWDHead->GWDData[pFldInfo->Beg];
-							FromMonth = SysMonthFromSymTime (Time);
+							Time = *(LPLONG)&lpGWDHead->GWDData[pFldInfo->Beg];
+							FromMonth = SysMonthFromSymTime(Time);
 							pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->ToDateField;
- 							Time = *(LPLONG)&lpGWDHead->GWDData[pFldInfo->Beg];
-							ToMonth = SysMonthFromSymTime (Time);
-							for (Month = FromMonth;Month <= ToMonth;Month++)
+							Time = *(LPLONG)&lpGWDHead->GWDData[pFldInfo->Beg];
+							ToMonth = SysMonthFromSymTime(Time);
+							for (Month = FromMonth; Month <= ToMonth; Month++)
 							{
-								GWDFormKey(lpGWDHead,CreateIndex,FALSE,0,Month);
-								BT_PUT (lpGWDHead->BTHandle[CreateIndex],lpGWDHead->pKeys[CreateIndex],(LPSTR)&Offset);
+								GWDFormKey(lpGWDHead, CreateIndex, FALSE, 0, Month);
+								BT_PUT(lpGWDHead->BTHandle[CreateIndex], lpGWDHead->pKeys[CreateIndex], (LPSTR)&Offset);
 							}
 						}
-						break;
+							break;
+						}
+					}
+					else
+					{
+						GWDFormKey(lpGWDHead, CreateIndex, FALSE, 0, 0);
+						BT_PUT(lpGWDHead->BTHandle[CreateIndex], lpGWDHead->pKeys[CreateIndex], (LPSTR)&Offset);
 					}
 				}
-				else
-                {
-					GWDFormKey(lpGWDHead,CreateIndex,FALSE,0,0);
-					BT_PUT (lpGWDHead->BTHandle[CreateIndex],lpGWDHead->pKeys[CreateIndex],(LPSTR)&Offset);
-				}
 				StatusWindowUpdate (NULL,NULL, nRecs, ++nLoaded);
+				if (nLoaded == 653700)
+					ii = 1;
             }
 			DestroyStatusWindow(0);  
         }
@@ -7083,6 +7086,12 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		}
 		ltoa (rtn,OutLoc,10);
 	}
+	else if (!stricmp(Arg[1], "CHECKINDEX"))
+	{
+		rtn = ValidateGMDIndexes(Arg[2]);
+		ltoa(rtn, OutLoc, 10);
+	}
+
 	else if (!stricmp (Arg[1],"DUMPTOINDEX"))
 	{
 		hDB = OpenGWDatabase (Arg[2],BT_READ);
@@ -8423,4 +8432,65 @@ int NumBytesDifferent (LPSTR File1,LPSTR File2)
 	GSSiGlobUlFree (&hMem);
 	AllowCache = SaveAllowCache;
 	return nDiff;
+}
+BOOL ValidateGMDIndexes(LPSTR FilePath)
+{
+	BOOL rtn = TRUE;
+	HANDLE hDB = OpenGWDatabase(FilePath, BT_READ);
+	HANDLE hDB2;
+	LPGWDHEADER lpGWDHead;
+	LPGWDHEADER lpGWDHead2;
+	long offset, offset2;
+	int index;
+
+	if (!hDB)
+		return FALSE;
+	lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+	hDB2 = OpenGWDatabase(FilePath, BT_READ);
+	lpGWDHead2 = (LPGWDHEADER)GlobalLock(hDB2);
+	for (index = 1; index < lpGWDHead->NumIndex; index++)
+	{
+		int pos = BT_FIRST;
+		int keySt;
+		int numErr = 0;
+		int nRecs = BT_NUM_IN_INDEX(lpGWDHead2->BTHandle[index]), curRec = 0;
+		char txt[128];
+
+		sprintf(txt, "Check Index %1", index + 1);
+		
+		CreateStatusWind(hWndMain, 1, txt);
+
+		while (!BT_FIND(lpGWDHead->BTHandle[index], lpGWDHead->pKeys[index], pos, BT_ANY, (LPSTR)&offset))
+		{
+			int month = 0;
+			pos = BT_NEXT;
+			FillGWDData(lpGWDHead, offset);
+			if (lpGWDHead->SpatialIndexType == 2)
+			{
+				int time = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->FromDateField);
+				if (time)
+					month = SysMonthFromSymTime(time);
+			}
+
+			keySt = GWDFormKey(lpGWDHead, index, FALSE, 0, month);
+			{
+				if (!BT_FIND(lpGWDHead2->BTHandle[index], lpGWDHead->pKeys[index], BT_FIRST, BT_EQ, (LPSTR)&offset2))
+				{
+					if (offset != offset2)
+						numErr++;
+				}
+				else if (keySt)
+					rtn = FALSE;
+			}
+			if (!(curRec++ % 16))
+				StatusWindowUpdate(NULL, NULL, nRecs, curRec);
+		}
+		DestroyStatusWindow(0);
+
+	}
+	GlobalUnlock(hDB);
+	GlobalUnlock(hDB2);
+	CloseGWDatabase(hDB);
+	CloseGWDatabase(hDB2);
+	return rtn;
 }

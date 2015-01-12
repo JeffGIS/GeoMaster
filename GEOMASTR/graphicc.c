@@ -1806,9 +1806,9 @@ int GMDFindUsingKeyList(LPGWDHEADER	lpGWDHead, LPINT pGMDpos, LPINT pGMDcond, LP
 	int rtn;
 	int dummy;
 
+Top:
 	if (hGMDKeyList)
 	{
-Top:
 		if (BT_FIND(hGMDKeyList, lpGWDHead->pKeys[0], GMDKeyListPos, BT_ANY, (LPSTR)&dummy))
 		{
 			rtn = 31;
@@ -1827,7 +1827,11 @@ Top:
 	}
 	else
 		rtn = BT_FIND(lpGWDHead->BTHandle[lpGWDHead->SpatialIndex], lpGWDHead->pKeys[lpGWDHead->SpatialIndex], *pGMDpos, *pGMDcond, (LPSTR)pOffset);
-
+	if (!rtn)
+	{
+		if (FillGWDData(lpGWDHead, *pOffset) < 0)
+			goto Top;
+	}
 	return rtn;
 }
 long GetGMDRecordOffset (long record,BOOL UseBounds)
@@ -2404,6 +2408,7 @@ BOOL ExpandGMDPointBounds (LPMNMXCORD pBounds)
     SQLPtr = (LPOPENSQLDATA)GlobalLock (GMDHandle);
 	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle); 
     lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle);
+	FillGWDData(lpGWDHead,SQLPtr->Offset);
 	switch (lpGWDHead->SpatialIndexType)
 	{
 		case 1:
