@@ -1523,12 +1523,17 @@ GSSiExitProg (1157);
 	else if (!WindowIsCovered (hWnd,1))
 	{    
 		HDC	hDC = GetDC (hWnd);
-		
 		//GetWindowRect (hWnd,&FullWindowBitMapRect);
 		GetClientRect (hWnd,&FullWindowBitMapRect);
 		NormalRect (&FullWindowBitMapRect); 
 		hFullWindowBitMap = SaveScreen (hDC, FullWindowBitMapRect);
-		ReleaseDC (hWnd,hDC);
+		ReleaseDC(hWnd, hDC);
+		/*{
+			char txt[128];
+			static int ncalls = 1;
+			sprintf(txt, "Save window %i", ncalls++);
+			SetWindowText(hWndMain, txt);
+		}*/
 //		hDIB = BitmapToDIB (hFullWindowBitMap, 0);
 //		SaveDIB (hDIB,"c:\\test.bmp");
 //		DestroyDIB (hDIB);   

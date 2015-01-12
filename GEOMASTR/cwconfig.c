@@ -202,7 +202,7 @@ int nCwRegisterClasses(LPSTR Menu)
  _fmemset(&wndclass, 0x00, sizeof(WNDCLASS));
 
   /* load WNDCLASS with window's characteristics                         */
- wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_CLASSDC|CS_DBLCLKS ;
+ wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_CLASSDC | CS_DBLCLKS | CS_OWNDC;
  wndclass.lpfnWndProc = (WNDPROC)WndProc;
  /* Extra storage for Class and Window objects                          */
  wndclass.cbClsExtra = 0;
