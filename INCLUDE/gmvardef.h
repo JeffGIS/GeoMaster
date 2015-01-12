@@ -60,7 +60,7 @@ long	NumOffsetFailed=0;
 BOOL	UseCacheAlreadyChecked=TRUE;   
 long	nTempFilesCleared;
 UINT	CurrentCheckPointID=0;
-BOOL	AllowCache=FALSE;
+BOOL	AllowCache=TRUE;
 BOOL	AllowJournal=FALSE;
 BOOL	AllowBMPCaching=TRUE;
 short	OPCODE_EQ='==';  

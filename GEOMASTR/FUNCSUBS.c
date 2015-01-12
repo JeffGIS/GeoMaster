@@ -2266,7 +2266,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			pPoints = (HPDPOINT)GlobalLock (PIAStruct->hPoints);
 			BigRead (Fid,pPoints,sizeof(DPOINT)*PIAStruct->nPoints);
 			GlobalUnlock (PIAStruct->hPoints);
-			if (PIAStruct->nPoly > 0)
+			if (PIAStruct->nPoly > 1)//changed back to 1 to get police update process to work
 			{
 				PIAStruct->hPolyPartLen = GSSiGlobAlloc (1598,GMEM_MOVEABLE,(PIAStruct->nPoly+1)*sizeof(long));
 				pPolyPartLen = GlobalLock (PIAStruct->hPolyPartLen);
