@@ -1154,12 +1154,14 @@ ErrMes:
 				float rval;
 				rc = SQLGetData(*hstmt, FldNum, SQL_C_FLOAT, &rval, 4, &lenanswer);
 				ftoa(str, rval);
+				lenanswer = strlen(str);
 			}
 			else if (field->type == SQL_DOUBLE)
 			{
 				double rval;
 				rc = SQLGetData(*hstmt, FldNum, SQL_C_DOUBLE, &rval, 8, &lenanswer);
 				ftoa(str, rval);
+				lenanswer = strlen(str);
 			}
 			else
 		    	rc = SQLGetData(*hstmt, FldNum, SQL_C_CHAR, str, 4095, &lenanswer);
