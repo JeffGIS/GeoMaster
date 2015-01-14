@@ -4319,8 +4319,43 @@ GotCloseFilehSQL:
 			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
-			rtn = SQLiteCmd(nArgs,Arg);
+			rtn = SQLiteCmd(nArgs, Arg);
 			itoa(rtn, OutLoc, 10);
+			goto Rtnl;
+		}
+
+		case 649: //$INLIST(file,sql,var,addquotes)
+		{
+			HANDLE hDB=0;
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs < 3)
+				goto RtnFalse;
+			{
+				HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+				LPSTR  pFile = GlobalLock(hFile);
+				LPSTR  pVar = pFile + 300;
+				LPSTR  pVal = pVar + 128;
+
+				sprintf(pFile, "%INLIST=%s", Arg[1]);
+				sprintf(pVar, "[%INLIST.%s]", Arg[3]);
+				if (OpenDataFile(pFile, Arg[2], BT_READ, &hDB))
+				{
+					char delim[2] = { 0 };
+					char quote[2] = { 0 };
+					if (atob(Arg[4]))
+						quote[0] = '\'';
+					while (FetchDBRec(hDB))
+					{
+						strcpy(pVal, pVar);
+						ExpandText(pVal);
+						sprintf(strchr(OutLoc, 0), "%s%s%s%s", delim,quote, pVal,quote);
+						delim[0] = ',';
+					}
+					CloseDataFile(FALSE, &hDB);
+				}
+				GSSiGlobUlFree(&hFile);
+			}
 			goto Rtnl;
 		}
 
