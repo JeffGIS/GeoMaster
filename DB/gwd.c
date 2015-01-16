@@ -204,6 +204,13 @@ Close:
 	return TRUE;
 }
 
+long GetCompressedReclen(LPGWDHEADER lpGWDHead, long Offset)
+{
+	int len;
+
+	return len;
+}
+
 long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
 #if ENABLETRACE
 {GSSiEnterProg (611);
@@ -225,7 +232,22 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
 		goto Exit;
 	}
     SetGWDCurrentOffset (lpGWDHead,Offset);
-    if (GSSillseek (lpGWDHead->Fid,Offset,0) == HFILE_ERROR)
+	if (lpGWDHead->SplitFile)
+	{
+		if (Offset > lpGWDHead->SplitLength)
+		{
+			Offset = Offset - lpGWDHead->SplitLength + (sizeof(GWDHEADER)-2);
+			if (GSSillseek(lpGWDHead->Fid, Offset, 0) == HFILE_ERROR)
+				goto Exit;
+		}
+		else
+		{
+			Offset = Offset - (sizeof(GWDHEADER)-2);
+			if (GSSillseek(lpGWDHead->SplitFid, Offset, 0) == HFILE_ERROR)
+				goto Exit;
+		}
+	}
+	else if (GSSillseek (lpGWDHead->Fid,Offset,0) == HFILE_ERROR)
     	goto Exit;
     if (lpGWDHead->Compressed)
     {
@@ -1994,21 +2016,22 @@ HANDLE OpenGWDatabase (LPSTR InName, short Mode)
     //BTHEAD      BTHead;
     LPSTR   lpDot;
     char	Name[MAX_PATH];
+	char	SplitFileName[MAX_PATH];
 	UINT	ofMode;
 
     updateGMDlenMain = 0;
 	updateGMDlenIndex = 0;
 
 	strcpy (Name,InName);
-	if ((lpDot = strrchr (Name,'.')))
+	if ((lpDot = strrchr(Name, '.')))
 	{
-		if (!stricmp (lpDot,".ORA"))
-			strcpy (lpDot,".GMD");
+		if (!stricmp(lpDot, ".ORA"))
+			strcpy(lpDot, ".GMD");
 	}
 	else
-		return 0;
+		goto Return0;
 	if (stricmp (lpDot,".gmd") && stricmp (lpDot,".dtm"))
-		return 0;
+		goto Return0;
 Open:
     if (Mode == BT_READ)
 		ofMode = OF_READ;
@@ -2037,6 +2060,48 @@ GSSiExitProg (627);
 		GlobalUnlock (DBHandle);
 		DBHandle = GSSiGlobalReAlloc (0,DBHandle,Size,GMEM_MOVEABLE);
 		lpGWDHead =(LPGWDHEADER) GlobalLock (DBHandle);
+		if (lpGWDHead->SplitFile) // splitfiles always have the gsf file one directory level up from the gmd and indexes - allows updates without having to resend the .gsf as long as same lenth as previous.
+		{
+			if (lpGWDHead->SplitLength > 0)
+			{
+				char drive[32], dir[MAX_PATH], fnam[MAX_PATH];
+				LPSTR lpBS;
+				BOOL firstTry = TRUE;
+				OFSTRUCTGM OFStruct;
+
+				strcpy(SplitFileName, Name);
+				ExpandText(SplitFileName);
+				_splitpath(SplitFileName, drive, dir, fnam, 0);
+				lpBS = strrchr(dir, '\\');
+				if (lpBS)
+					*lpBS = 0;
+				sprintf(SplitFileName, "%s%s\\%s_%i.gsf",drive,dir,fnam,lpGWDHead->SplitLength);
+TryAgain:
+				lpGWDHead->SplitFid = GSSiOpenFile(SplitFileName, &OFStruct, OF_READ);
+				if (lpGWDHead->SplitFid == HFILE_ERROR || GSSifilelength(lpGWDHead->SplitFid) != lpGWDHead->SplitLength)
+				{
+					char mess[300];
+					//might have been interupted during transfer. Close and retry.
+					if (firstTry && lpGWDHead->SplitFid != HFILE_ERROR)
+					{
+						firstTry = FALSE;
+						GSSiClose(lpGWDHead->SplitFid);
+						GSSiRemove(OFStruct.szPathName);
+						goto TryAgain;
+					}
+					sprintf(mess, "Missing or invalid split file: %s", SplitFileName);
+					MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+					GSSiGlobUlFree(&DBHandle);
+					GSSiClose(lpGWDHead->SplitFid);
+					GSSiClose(Fid);
+					goto Return0;
+				}
+			}
+			else
+				lpGWDHead->SplitFile = lpGWDHead->SplitLength = 0;
+		}
+		else
+			lpGWDHead->SplitFid = HFILE_ERROR;
 	}
 	else
 	{
@@ -2054,7 +2119,7 @@ GSSiExitProg (627);
 	if (lpGWDHead->NumFields <= 0)
 	{
 		GSSiClose(Fid);
-		return 0;
+		goto Return0;
 	}
     lpGWDHead->hFldInfo = GSSiGlobAlloc ( 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
     lpGWDHead->pFldInfo = (LPGWFLDINFO)GlobalLock(lpGWDHead->hFldInfo);   
@@ -2095,13 +2160,8 @@ GSSiExitProg (627);
         	for (j=0;j<i;j++)
         		BT_CLOSE (lpGWDHead->BTHandle[j]);
             GlobalUnlock (DBHandle);  
-{
-#if ENABLETRACE
-GSSiExitProg (627);
-#endif
-        	return 0; 
-}
-        }
+			goto Return0;
+		}
         _fstrcpy (lpDot,".in");
         itoa (i+1,_fstrchr(IndexName,'\0'),10);
         if (!(lpGWDHead->BTHandle[i] = BT_OPEN (IndexName, lpGWDHead->TimeStamp, Mode, 0))) 
@@ -2119,12 +2179,7 @@ GSSiExitProg (627);
             {   
 	            GlobalUnlock (DBHandle);  
 			    CloseGWDatabase (DBHandle);
-{
-#if ENABLETRACE
-GSSiExitProg (627);
-#endif
-                return 0;
-}
+				goto Return0;
 			}
             else
             {
@@ -2140,12 +2195,7 @@ GSSiExitProg (627);
             {   
 	            GlobalUnlock (DBHandle);  
 			    CloseGWDatabase (DBHandle);
-{
-#if ENABLETRACE
-GSSiExitProg (627);
-#endif
-                return 0;
-}            
+				goto Return0;
 			}
             else 
             {
@@ -2171,6 +2221,13 @@ GSSiExitProg (627);
 GSSiExitProg (627);
 #endif
     return (DBHandle);
+}
+Return0:
+{
+#if ENABLETRACE
+	GSSiExitProg(627);
+#endif
+	return 0;
 }
 
 #if ENABLETRACE
@@ -2210,6 +2267,8 @@ GSSiExitProg (629);
 		}
     }
     GSSiClose (lpGWDHead->Fid);
+	GSSiClose (lpGWDHead->SplitFid);
+
     for (i=0;i<lpGWDHead->NumIndex;i++)
     {   
         if (lpGWDHead->BTHandle[i])
@@ -3782,11 +3841,11 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
     long        Offset, nRecs, nLoaded; 
     short       i, ibeg, len, nFld; 
     long		st,ii;
-    HANDLE      hVars;
+    HANDLE      hVars=0;
     BTVARDESC   *pVars;
     char        str[256], mess[256]; 
     short       pos, DupPos;   
-    BOOL		rtn;
+    BOOL		rtn=FALSE;
 
     hVars = GSSiGlobAlloc ( 273,GHND,(MAX_GMD_INDEX_FIELDS+1) * sizeof(BTVARDESC));
     pVars = (BTVARDESC *)GlobalLock(hVars);
@@ -3794,6 +3853,11 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
 
     sprintf(mess,"Index %i",CreateIndex+1);
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
+	if (!CreateIndex && lpGWDHead->SplitFile)
+	{
+		MessageBox(0, "Cannot rebuild primary index on split gmd file", 0, MB_ICONEXCLAMATION);
+		goto Exit;
+	}
 	if (CreateIndex && CreateIndex == lpGWDHead->SpatialIndex)
 	{
 		switch (lpGWDHead->SpatialIndexType)
@@ -3950,6 +4014,7 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
     lpGWDHead->BTHandle[CreateIndex] = BT_OPEN (str, lpGWDHead->TimeStamp, BT_WRITE, 0);
 	GSSiGlobUlFree (&lpGWDHead->hKeys[CreateIndex]);
 Exit:
+	GSSiGlobUlFree(&hVars);
 	if (lpGWDHead->hKeys[CreateIndex])
 		GlobalUnlock(lpGWDHead->hKeys[CreateIndex]);
     GlobalUnlock (hDB);
@@ -6887,6 +6952,22 @@ BOOL GMDUpdateCheckPointLog (LPSTR FileName)
 	return rtn;
 }
 
+int GetSplitLengthFromRequest(LPGWDHEADER lpGWDHead)
+{
+	int pos = BT_FIRST;
+	long offset, maxOffset = -1;
+
+	while (!BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&offset))
+	{
+		pos = BT_NEXT;
+		if (offset < lpGWDHead->SplitLengthRequested && offset > maxOffset)
+			maxOffset = offset;
+	}
+	maxOffset += GetCompressedReclen(lpGWDHead, maxOffset);
+	
+	return maxOffset;
+}
+
 BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 {
 	HANDLE	hDB, hDB1, hDB2;
@@ -6986,7 +7067,76 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		CloseGWDatabase (hDB1); 
 		return TRUE;
 	}
-	else if (!stricmp (Arg[1],"COMPARE"))
+	else if (!stricmp(Arg[1], "SPLIT"))//$GMD(SPLIT,infile,outfile,splitlen)
+	{
+		int splitLen = atoi(Arg[4]);
+		char SplitFile[MAX_PATH];
+		char drive[32], dir[MAX_PATH], fname[MAX_PATH];
+
+		if (splitLen <= 0)
+			return FALSE;
+		hDB = OpenGWDatabase(Arg[2], BT_READ);
+		if (!hDB)
+			return FALSE;
+		lpGWDHead = GlobalLock(hDB);
+		if (GSSifilelength(lpGWDHead->Fid) > splitLen + lpGWDHead->Reclen * 2)
+		{
+			if (!lpGWDHead->SplitFile)
+			{
+				HFILE FidOut = GSSiOpenFile(Arg[3], 0, OF_CREATE);
+
+				if (FidOut != HFILE_ERROR)
+				{
+					LPSTR pBS;
+					HFILE FidOut2;
+
+					strcpy(SplitFile, Arg[3]);
+					ExpandText(SplitFile);
+					_splitpath(SplitFile, drive, dir, fname, 0);
+					pBS = strrchr(dir, '\\');
+					if (pBS)
+						*pBS = 0;
+					sprintf(SplitFile, "%s%s\\%s_%i.gsf", drive, dir, fname, splitLen);
+					FidOut2 = GSSiOpenFile(SplitFile, 0, OF_CREATE);
+					if (FidOut2 != HFILE_ERROR)
+					{
+						long loc, nRead, didRead;
+#define BUFFERSIZE USHRT_MAX
+						HANDLE hbuf = GSSiGlobAlloc(0, GMEM_MOVEABLE, BUFFERSIZE);
+						LPSTR pbuf = GlobalLock(hbuf);
+
+						lpGWDHead->SplitLengthRequested = splitLen;
+						lpGWDHead->SplitLength = GetSplitLengthFromRequest(lpGWDHead);
+						lpGWDHead->SplitFile = 1;
+						BigWrite(FidOut, lpGWDHead, sizeof(GWDHEADER)-2, -1);
+						loc = GSSillseek(lpGWDHead->Fid, 0, sizeof(GWDHEADER)-2);
+						nRead = lpGWDHead->SplitLength;
+						while (nRead > 0)
+						{
+							didRead = BigRead(lpGWDHead->Fid, pbuf, min(nRead, BUFFERSIZE));
+
+							BigWrite(FidOut2, pbuf, didRead, -1);
+							nRead -= didRead;
+						}
+						GSSiClose(FidOut2);
+						didRead = BigRead(lpGWDHead->Fid, pbuf, BUFFERSIZE);
+						while (didRead > 0)
+						{
+							didRead = BigRead(lpGWDHead->Fid, pbuf, BUFFERSIZE);
+							BigWrite(FidOut2, pbuf, didRead, -1);
+						}
+						GSSiGlobUlFree(&hbuf);
+						GSSiClose(FidOut);
+						rtn = TRUE;
+					}
+				}
+			}
+		}
+		GlobalUnlock(hDB);
+		CloseGWDatabase(hDB);
+		return rtn;
+	}
+	else if (!stricmp(Arg[1], "COMPARE"))
 	{
 		int	NumIndexFields;
 
@@ -7423,7 +7573,7 @@ Exit:
 	return rtn;
 }
     
-int GWDAddRecord (LPGWDHEADER lpGWDHead,long length,LPSHORT IndexArray)//returns 1 if new rec or 2 if replace
+int GWDAddRecord (LPGWDHEADER lpGWDHead,long length,LPSHORT IndexArray)//returns 1 if new rec or 2 if replace. Always writes to end of primary file.
 #if ENABLETRACE
 {GSSiEnterProg (649);
 #endif
@@ -7459,6 +7609,8 @@ int GWDAddRecord (LPGWDHEADER lpGWDHead,long length,LPSHORT IndexArray)//returns
 	    BigWrite (lpGWDHead->Fid,(HPSTR)&ShortLength,2,-1);
 	    BigWrite (lpGWDHead->Fid,(HPSTR)&lpGWDHead->GWDData,length,-1); //&lpGWDHead->GWDData[150]
 	}
+	if (lpGWDHead->SplitFile)
+		Offset += lpGWDHead->SplitLength;
     SetGWDCurrentOffset (lpGWDHead,-1);
     for (Index=0;Index<lpGWDHead->NumIndex;Index++)
     {   
@@ -7538,25 +7690,16 @@ int GWDReplaceRecord (LPGWDHEADER lpGWDHead,long UnCompressedLength,LPSHORT Inde
         UnCompressedLength = lpGWDHead->Reclen;  
     length = UnCompressedLength;
     SetGWDCurrentOffset (lpGWDHead,-1);
-    if (Offset < 0)
+    if (Offset < 0) //find the record
     {
-        if (GWDFormKey(lpGWDHead,0,FALSE,length,0))
-        {
-        	if (BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ,(LPSTR)&Offset))
-{
-#if ENABLETRACE
-GSSiExitProg (650);
-#endif
-        		return (GWDAddRecord (lpGWDHead,length,IndexArray));
-}
-        }
-        else
-{
-#if ENABLETRACE
-GSSiExitProg (650);
-#endif
-        	return FALSE;
-}
+		if (GWDFormKey(lpGWDHead, 0, FALSE, length, 0))
+		{
+			if (BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset))
+			{
+				rtn = GWDAddRecord(lpGWDHead, length, IndexArray);
+			}
+		}
+		goto Exit;
     }  
 	rtn = 2;
     hSaveRec = GSSiGlobAlloc ( 282,GMEM_MOVEABLE,length);
@@ -7621,9 +7764,14 @@ GSSiExitProg (650);
 	    pWriteRec = pCompressedRec;
 	    length = CompressedLength;
 	}  
-    if (length > LastGMDRecordLength || (length < LastGMDRecordLength && length > LastGMDRecordLength -4))
+	else //for uncompresses split files
+	{
+		pCompressedRec = (HPSTR)&lpGWDHead->GWDData;
+		CompressedLength = length;
+	}
+    if (lpGWDHead->SplitFile || length > LastGMDRecordLength || (length < LastGMDRecordLength && length > LastGMDRecordLength -4))
     {
-	    if (lpGWDHead->Compressed)
+		if (!lpGWDHead->SplitFile && lpGWDHead->Compressed)
 	    {    
 	    	long	dellength;
 	    	
@@ -7632,7 +7780,7 @@ GSSiExitProg (650);
 		    {   
 		    	MessageBox (0,"Error writing to gmd file",NULL,MB_ICONEXCLAMATION);
 			    GSSiGlobUlFree (&hCompressedRec);
-		    	return FALSE;
+		    	goto Exit;
 		    } 
 		    dellength = -dellength;   
 		    GSSillseek (lpGWDHead->Fid,Offset,0);
@@ -7646,7 +7794,7 @@ GSSiExitProg (650);
 		if (length < LastGMDRecordLength)
 			WriteDeleteLen = TRUE;
 	}
-    if (lpGWDHead->Compressed)
+	if (lpGWDHead->SplitFile || lpGWDHead->Compressed)
     {
 	    BigWrite (lpGWDHead->Fid,(HPSTR)&CompressedLength,4,-1);
 	    BigWrite (lpGWDHead->Fid,(HPSTR)pCompressedRec,CompressedLength,-1);
@@ -7704,7 +7852,7 @@ GSSiExitProg (650);
         if ((!Index || CreateIndexEntry) && GWDFormKey(lpGWDHead,Index,FALSE,UnCompressedLength,0))
         	BT_PUT (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&Offset);
     }
-
+Exit:
 {
 #if ENABLETRACE
 GSSiExitProg (650);
@@ -7721,27 +7869,31 @@ BOOL GWDDeleteRecord (LPGWDHEADER lpGWDHead,long Offset)
 {GSSiEnterProg (651);
 #endif
 {
-    short   Index; 
-    BOOL	CreateIndexEntry;
-    long	length; 
-    short	ShortLen;
-    long	OldOffset,ii, SaveOffset;
-    
-    SetGWDCurrentOffset (lpGWDHead,-1); 
-    length = FillGWDData (lpGWDHead,Offset);  
+	short   Index;
+	BOOL	CreateIndexEntry;
+	long	length;
+	short	ShortLen;
+	long	OldOffset, ii, SaveOffset;
+	BOOL	rtn = FALSE;
+
+	SetGWDCurrentOffset(lpGWDHead, -1);
+	length = FillGWDData(lpGWDHead, Offset);
 	if (length == -2)
-		return TRUE;
+	{
+		rtn = TRUE;
+		goto Exit;
+	}
 	if (length == -1)
-		return FALSE;
-    SaveOffset = GSSillseek (lpGWDHead->Fid,0,1);
+		goto Exit;
+	SaveOffset = GSSillseek(lpGWDHead->Fid, 0, 1);
     if (GSSillseek (lpGWDHead->Fid,Offset,0) == HFILE_ERROR)
-    	return FALSE;
-    if (lpGWDHead->Compressed)
+		goto Exit;
+	if (lpGWDHead->Compressed)
     {    
     	long	dellength;
     	
-	    if (BigRead (lpGWDHead->Fid,(HPSTR)&dellength,4) != 4)
-	    	return FALSE; 
+		if (BigRead(lpGWDHead->Fid, (HPSTR)&dellength, 4) != 4)
+			goto Exit;
 	    dellength = -dellength;   
 	    GSSillseek (lpGWDHead->Fid,Offset,0);
 	    BigWrite (lpGWDHead->Fid,(HPSTR)&dellength,4,-1);
@@ -7793,12 +7945,13 @@ BOOL GWDDeleteRecord (LPGWDHEADER lpGWDHead,long Offset)
 	        	BT_DELETE (lpGWDHead->BTHandle[Index],lpGWDHead->pKeys[Index],(LPSTR)&OldOffset,FALSE);
 	    }
     }
-    
+	rtn = TRUE;
+Exit:  
 {
 #if ENABLETRACE
 GSSiExitProg (651);
 #endif
-    return TRUE;
+    return rtn;
 }
 #if ENABLETRACE
 }

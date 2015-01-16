@@ -1,3 +1,4 @@
+police\configs\startup_2014.gmc /F [%USERLEV]=2; /WD J:\Mpls
 configs\places.gmc /F [%USERLEV]=2; /WD J:\ADAPedRamps\PreSurvey
 configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD J:\ADAPedRamps\PreSurvey
 configs\jeff\basemap_good.gmc /F [%USERLEV]=2; /WD L:\geomas
@@ -31,7 +32,6 @@ countydata.gmc /F /WD c:\temp\countydata
 configs\basic1.gmc /F [%USERLEV]=2; /WD h:\geomas
 configs\test.gmc /F [%USERLEV]=2; /WD h:\geomas
 police\configs\startup_2013.gmc /F [%USERLEV]=2; /WD c:\GMProjects\Mpls
-police\configs\startup_2014.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\basic1.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\addressedit.gmc /F [%USERLEV]=2; /WD j:\Mpls
 Lisa.gmc /F /WD h:\Ameritrak\GMAVLUS
@@ -138,6 +138,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 

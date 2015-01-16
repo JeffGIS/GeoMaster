@@ -3223,7 +3223,9 @@ typedef struct {
 						NonUniqueSortedBinary:1,
 						StoredAs32:1;
 				short	FileVersion;
-				short	Unused1;
+				unsigned short
+						SplitFile : 1,
+						unused1 : 15;
                 short   NumFields,
                         NumIndex;
                 long    Fid;
@@ -3254,7 +3256,10 @@ typedef struct {
 				BYTE	Contents[400];
 				ULONG	CheckPointID;
 				HANDLE	CheckPointHandle;
-				char	Unused2[248];
+				long	SplitLength;
+				long	SplitLengthRequested;
+				long	SplitFid;
+				char	Unused2[236];
                 char    GWDData[2];
                 }   GWDHEADER;
 typedef GWDHEADER FAR  *LPGWDHEADER;  
