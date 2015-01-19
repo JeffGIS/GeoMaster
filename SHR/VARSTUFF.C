@@ -2100,12 +2100,15 @@ GSSiExitProg (529);
 			MessageBox (0,Value,Name,MB_OK);
 	}
 	handle = AllocateVar (Name); 
-	VP = (VARPNT)GlobalLock (handle);
-	VP->ContainsGorF = FoundLit; 
-	GlobalUnlock (handle);  
-	SetGlobalValue2 (handle,Value,Index);
-	if (FoundLit)
-		LinkIncludedVars (handle,Value);
+	if (handle)
+	{
+		VP = (VARPNT)GlobalLock(handle);
+		VP->ContainsGorF = FoundLit;
+		GlobalUnlock(handle);
+		SetGlobalValue2(handle, Value, Index);
+		if (FoundLit)
+			LinkIncludedVars(handle, Value);
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (529);
@@ -5758,6 +5761,13 @@ GSSiExitProg (550);
 		return (NULL);
 	}
 	pVarSpace = GlobalLock(hVarSpace);
+	if (!pVarSpace)
+	{
+#if ENABLETRACE
+		GSSiExitProg(587);
+#endif
+		return (NULL);
+	}
 	handle = GSSiGlobAlloc(197, GHND, sizeof(VARINFO));
 	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
 	VarPnt = (VARPNT)GlobalLock(handle);  
@@ -5849,6 +5859,13 @@ void AddToVarNameTable (LPSTR Name)
 		return;
 	}
 	pVarSpace = GlobalLock(hVarSpace);
+	if (!pVarSpace)
+	{
+#if ENABLETRACE
+		GSSiExitProg(552);
+#endif
+		return;
+	}
 	if (pVarSpace->NumVars >= pVarSpace->MaxVars)
 		BlowOut ("Maximum globals exceeded",0);
 	if (_fstrlen (Name) > 61)
@@ -9466,6 +9483,13 @@ HANDLE FindVar (LPSTR Name)
 		return (NULL);
 	}
 	pVarSpace = GlobalLock(hVarSpace);
+	if (!pVarSpace)
+	{
+#if ENABLETRACE
+		GSSiExitProg(587);
+#endif
+		return (NULL);
+	}
 	if (!pVarSpace->hVarNameTable)
 	{
 		GlobalUnlock(hVarSpace);

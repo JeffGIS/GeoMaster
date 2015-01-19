@@ -206,9 +206,42 @@ Close:
 
 long GetCompressedReclen(LPGWDHEADER lpGWDHead, long Offset)
 {
-	int len;
+	unsigned short	i;
+	short	ShortLen;
+	int		ii, jj;
+	long	len;
 
-	return len;
+	if (Offset < 0)
+		return -1;
+	if (lpGWDHead->SplitFile)
+	{
+		if (Offset > lpGWDHead->SplitLength)
+		{
+			Offset = Offset - lpGWDHead->SplitLength;
+			if (GSSillseek(lpGWDHead->Fid, Offset, 0) == HFILE_ERROR)
+				return -1;
+		}
+		else
+		{
+			Offset = Offset - ((sizeof(GWDHEADER)) + lpGWDHead->NumFields*sizeof(GWFLDINFO));
+			if (GSSillseek(lpGWDHead->SplitFid, Offset, 0) == HFILE_ERROR)
+				return -1;
+		}
+	}
+	else if (GSSillseek(lpGWDHead->Fid, Offset, 0) == HFILE_ERROR)
+		return -1;
+	if (lpGWDHead->Compressed)
+	{
+		if (BigRead(lpGWDHead->Fid, (HPSTR)&len, 4) != 4)
+			return -1;
+		else
+			return abs(len);
+	}
+	else
+	{
+		BigRead(lpGWDHead->Fid, (HPSTR)&ShortLen, 2);
+		return abs(ShortLen);
+	}
 }
 
 long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
@@ -221,6 +254,7 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
 	HANDLE	hCompressedRec;
 	HPSTR	CompressedRec;   
 	long	len=-1,il;
+	HFILE	fid = lpGWDHead->Fid;
 	static	db=FALSE;
 
 	if (Offset < 0)
@@ -234,16 +268,17 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
     SetGWDCurrentOffset (lpGWDHead,Offset);
 	if (lpGWDHead->SplitFile)
 	{
-		if (Offset > lpGWDHead->SplitLength)
+		if (Offset >= lpGWDHead->SplitLength)
 		{
-			Offset = Offset - lpGWDHead->SplitLength + (sizeof(GWDHEADER)-2);
+			Offset = Offset - lpGWDHead->SplitLength +(sizeof(GWDHEADER)) + lpGWDHead->NumFields*sizeof(GWFLDINFO);
 			if (GSSillseek(lpGWDHead->Fid, Offset, 0) == HFILE_ERROR)
 				goto Exit;
 		}
 		else
 		{
-			Offset = Offset - (sizeof(GWDHEADER)-2);
-			if (GSSillseek(lpGWDHead->SplitFid, Offset, 0) == HFILE_ERROR)
+			Offset = Offset - ((sizeof(GWDHEADER)) + lpGWDHead->NumFields*sizeof(GWFLDINFO));
+			fid = lpGWDHead->SplitFid;
+			if (GSSillseek(fid, Offset, 0) == HFILE_ERROR)
 				goto Exit;
 		}
 	}
@@ -251,21 +286,14 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
     	goto Exit;
     if (lpGWDHead->Compressed)
     {
-	    if (BigRead (lpGWDHead->Fid,(HPSTR)&len,4) != 4)
+	    if (BigRead (fid,(HPSTR)&len,4) != 4)
 		{
 			len = -1;
 	    	goto Exit;
 		}
-		if (db)
-		{
-			char	str[128];
-
-			sprintf (str,"%i,%i",Offset,len);
-			AppendFile ("c:\\tempdb.txt",str);
-		}
 	    if (len < 0)
 	    {
-	    	GSSillseek (lpGWDHead->Fid,-len,1);
+	    	GSSillseek (fid,-len,1);
 	    	len = -2;//deleted record  
 			goto Exit;
 	    }
@@ -282,8 +310,8 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
 
 	    	hCompressedRec = GSSiGlobAlloc (1516,GMEM_MOVEABLE,len);   
 	    	CompressedRec = GlobalLock (hCompressedRec);  
-			jj=GSSillseek (lpGWDHead->Fid,0,1);
-	    	ii=BigRead (lpGWDHead->Fid,CompressedRec,len);
+			jj=GSSillseek (fid,0,1);
+	    	ii=BigRead (fid,CompressedRec,len);
     		len = DecompressBinaryRecord (pDeCompressedRec,lpGWDHead->Reclen,CompressedRec,len);
 			memmove ((HPSTR)&lpGWDHead->GWDData,pDeCompressedRec,min (lpGWDHead->Reclen,len));
 			if (lpGWDHead->Reclen < len)
@@ -296,16 +324,16 @@ long FillGWDData (LPGWDHEADER lpGWDHead,long Offset)
     }
     else
     {
-	    BigRead (lpGWDHead->Fid,(HPSTR)&ShortLen,2); 
+	    BigRead (fid,(HPSTR)&ShortLen,2); 
 	    if (ShortLen < 0)  
 	    {
-	    	GSSillseek (lpGWDHead->Fid,-ShortLen,1);
+	    	GSSillseek (fid,-ShortLen,1);
 	    	len = -2;//deleted record
 			goto Exit;
 	    }
 	    ShortLen = min (ShortLen,lpGWDHead->Reclen);
 	    if (ShortLen)
-	    	BigRead (lpGWDHead->Fid,lpGWDHead->GWDData,ShortLen);//&lpGWDHead->GWDData[150]
+	    	BigRead (fid,lpGWDHead->GWDData,ShortLen);//&lpGWDHead->GWDData[150]
     	for (i=ShortLen;i<lpGWDHead->Reclen;i++)
     		lpGWDHead->GWDData[i]='\0'; 
     	LastGMDRecordLength = len = ShortLen;
@@ -2068,17 +2096,21 @@ GSSiExitProg (627);
 				LPSTR lpBS;
 				BOOL firstTry = TRUE;
 				OFSTRUCTGM OFStruct;
+				long lenSplitFile;
 
 				strcpy(SplitFileName, Name);
 				ExpandText(SplitFileName);
 				_splitpath(SplitFileName, drive, dir, fnam, 0);
+				if (*LastChr(dir) == '\\')
+					*LastChr(dir) = 0;
 				lpBS = strrchr(dir, '\\');
 				if (lpBS)
 					*lpBS = 0;
-				sprintf(SplitFileName, "%s%s\\%s_%i.gsf",drive,dir,fnam,lpGWDHead->SplitLength);
+				sprintf(SplitFileName, "%s%s\\%s_%i.gsf",drive,dir,fnam,lpGWDHead->SplitLengthRequested);
 TryAgain:
 				lpGWDHead->SplitFid = GSSiOpenFile(SplitFileName, &OFStruct, OF_READ);
-				if (lpGWDHead->SplitFid == HFILE_ERROR || GSSifilelength(lpGWDHead->SplitFid) != lpGWDHead->SplitLength)
+				lenSplitFile = GSSifilelength(lpGWDHead->SplitFid);
+				if (lpGWDHead->SplitFid == HFILE_ERROR || lenSplitFile != lpGWDHead->SplitLength - (sizeof(GWDHEADER)+lpGWDHead->NumFields*sizeof(GWFLDINFO)))
 				{
 					char mess[300];
 					//might have been interupted during transfer. Close and retry.
@@ -2089,11 +2121,11 @@ TryAgain:
 						GSSiRemove(OFStruct.szPathName);
 						goto TryAgain;
 					}
+					GSSiClose(lpGWDHead->SplitFid);
+					GSSiClose(Fid);
 					sprintf(mess, "Missing or invalid split file: %s", SplitFileName);
 					MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 					GSSiGlobUlFree(&DBHandle);
-					GSSiClose(lpGWDHead->SplitFid);
-					GSSiClose(Fid);
 					goto Return0;
 				}
 			}
@@ -6956,15 +6988,21 @@ int GetSplitLengthFromRequest(LPGWDHEADER lpGWDHead)
 {
 	int pos = BT_FIRST;
 	long offset, maxOffset = -1;
+	long totLen, nRead = 0;
+	long endoff = lpGWDHead->SplitLengthRequested;// +sizeof(GWDHEADER)+lpGWDHead->NumFields*sizeof(GWFLDINFO);
 
+	CreateStatusWind(hWndMain, 1, "Find Split Point");
+
+	totLen = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
 	while (!BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&offset))
 	{
 		pos = BT_NEXT;
-		if (offset < lpGWDHead->SplitLengthRequested && offset > maxOffset)
+		if (offset < endoff && offset > maxOffset)
 			maxOffset = offset;
+		StatusWindowUpdate(NULL, NULL, totLen, nRead++);
 	}
-	maxOffset += GetCompressedReclen(lpGWDHead, maxOffset);
-	
+	maxOffset += 4 + GetCompressedReclen(lpGWDHead, maxOffset);
+	DestroyStatusWindow(0);
 	return maxOffset;
 }
 
@@ -7072,6 +7110,9 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		int splitLen = atoi(Arg[4]);
 		char SplitFile[MAX_PATH];
 		char drive[32], dir[MAX_PATH], fname[MAX_PATH];
+		char OutFilePath[MAX_PATH];
+		char txt[128];
+		LPSTR pDot;
 
 		if (splitLen <= 0)
 			return FALSE;
@@ -7079,6 +7120,13 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		if (!hDB)
 			return FALSE;
 		lpGWDHead = GlobalLock(hDB);
+		if (splitLen > GSSifilelength(lpGWDHead->Fid))
+		{
+			GlobalUnlock(hDB);
+			CloseGWDatabase(hDB);
+			MessageBox(0, "Split length cannot exceed file length", 0, MB_ICONEXCLAMATION);
+			return FALSE;
+		}
 		if (GSSifilelength(lpGWDHead->Fid) > splitLen + lpGWDHead->Reclen * 2)
 		{
 			if (!lpGWDHead->SplitFile)
@@ -7093,6 +7141,8 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 					strcpy(SplitFile, Arg[3]);
 					ExpandText(SplitFile);
 					_splitpath(SplitFile, drive, dir, fname, 0);
+					if (*LastChr(dir) == '\\')
+						*LastChr(dir) = 0;
 					pBS = strrchr(dir, '\\');
 					if (pBS)
 						*pBS = 0;
@@ -7100,7 +7150,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 					FidOut2 = GSSiOpenFile(SplitFile, 0, OF_CREATE);
 					if (FidOut2 != HFILE_ERROR)
 					{
-						long loc, nRead, didRead;
+						long nRead, didRead, totLen, curLoc, lastLoc,index;
 #define BUFFERSIZE USHRT_MAX
 						HANDLE hbuf = GSSiGlobAlloc(0, GMEM_MOVEABLE, BUFFERSIZE);
 						LPSTR pbuf = GlobalLock(hbuf);
@@ -7108,25 +7158,67 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 						lpGWDHead->SplitLengthRequested = splitLen;
 						lpGWDHead->SplitLength = GetSplitLengthFromRequest(lpGWDHead);
 						lpGWDHead->SplitFile = 1;
-						BigWrite(FidOut, lpGWDHead, sizeof(GWDHEADER)-2, -1);
-						loc = GSSillseek(lpGWDHead->Fid, 0, sizeof(GWDHEADER)-2);
-						nRead = lpGWDHead->SplitLength;
+						BigWrite(FidOut, lpGWDHead, sizeof(GWDHEADER), -1);
+						GSSillseek(lpGWDHead->Fid, sizeof(GWDHEADER), 0);
+						didRead = BigRead(lpGWDHead->Fid, pbuf, lpGWDHead->NumFields*sizeof(GWFLDINFO));
+						BigWrite(FidOut, pbuf,didRead, -1);
+						nRead = lpGWDHead->SplitLength - GSSillseek(lpGWDHead->Fid,0,1);
+						CreateStatusWind(hWndMain, 1, "Write split file");
 						while (nRead > 0)
 						{
 							didRead = BigRead(lpGWDHead->Fid, pbuf, min(nRead, BUFFERSIZE));
 
 							BigWrite(FidOut2, pbuf, didRead, -1);
 							nRead -= didRead;
+							StatusWindowUpdate(NULL, NULL, lpGWDHead->SplitLength, nRead);
 						}
 						GSSiClose(FidOut2);
+						curLoc = GSSillseek(lpGWDHead->Fid, 0, 1);
+						lastLoc = GSSillseek(lpGWDHead->Fid, 0, 2);
+						GSSillseek(lpGWDHead->Fid, curLoc, 0);
+						totLen = lastLoc - curLoc;
 						didRead = BigRead(lpGWDHead->Fid, pbuf, BUFFERSIZE);
+						ii = *(LPINT)pbuf;
 						while (didRead > 0)
 						{
+							BigWrite(FidOut, pbuf, didRead, -1);
+							StatusWindowUpdate(NULL, NULL, totLen, nRead+=didRead);
 							didRead = BigRead(lpGWDHead->Fid, pbuf, BUFFERSIZE);
-							BigWrite(FidOut2, pbuf, didRead, -1);
 						}
-						GSSiGlobUlFree(&hbuf);
 						GSSiClose(FidOut);
+						for (index = 0; index < lpGWDHead->NumIndex; index++)
+						{
+							HFILE IndexFid = GetBTFid(lpGWDHead->BTHandle[index]);
+							HFILE FidOut;
+
+							sprintf(txt, "Copy Index %i", index + 1);
+							strcpy(OutFilePath, Arg[3]);
+							pDot = strrchr(OutFilePath, '.');
+							sprintf(pDot, ".in%i", index + 1);
+							FidOut = GSSiOpenFile(OutFilePath, 0, OF_CREATE);
+							totLen = GSSifilelength(IndexFid);
+							GSSillseek(IndexFid, 0, 0);
+							didRead = BigRead(IndexFid, pbuf, BUFFERSIZE);
+							nRead = 0;
+							while (didRead > 0)
+							{
+								BigWrite(FidOut, pbuf, didRead, -1);
+								didRead = BigRead(IndexFid, pbuf, BUFFERSIZE);
+								StatusWindowUpdate(NULL, txt, totLen, nRead += didRead);
+							}
+							GSSiClose(IndexFid);
+							GSSiClose(FidOut);
+						}
+						*LastChr(Arg[2]) = 'p';
+						if (FileType(Arg[2]))
+						{
+							strcpy(OutFilePath, Arg[3]);
+							*LastChr(Arg[3]) = 'p';
+							CopyFile(Arg[2], Arg[3], FALSE);
+						}
+
+						DestroyStatusWindow(0);
+						GSSiGlobUlFree(&hbuf);
 						rtn = TRUE;
 					}
 				}
