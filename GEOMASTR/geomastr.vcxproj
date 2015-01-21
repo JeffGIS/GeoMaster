@@ -392,6 +392,7 @@
     <ClCompile Include="EXPORT2.C" />
     <ClCompile Include="..\GM32lib\FIIO_Mem.cpp" />
     <ClCompile Include="..\SHR\FILE.C" />
+    <ClCompile Include="FileManager.c" />
     <ClCompile Include="FileOpenDlg.cpp" />
     <ClCompile Include="fish.c" />
     <ClCompile Include="..\solar_calculator\Version2\fk4fk5.c" />

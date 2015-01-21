@@ -1405,7 +1405,7 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		} 
 		
-		case 845: // $FILELIST OutFile New, SearchLoc, WildCard,SearchSubdir,WantDirectories)
+		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories)
 		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
@@ -3931,9 +3931,18 @@ GSSiExitProg (1350);
 		case 1138://$ISLOCALFILE(File)
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-				if (IsLocalFile(Arg[1]))
-					goto RtnTrue;
+			if (IsLocalFile(Arg[1]))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+
+		case 1139://$FILEMANAGER(file)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
 				goto RtnFalse;
+			GMFileManager(Arg[1]);
+			goto RtnTrue;
 		}
 
 		case 1201: //$FINDWAYPOINT ()

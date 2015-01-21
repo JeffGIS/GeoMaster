@@ -5649,7 +5649,7 @@ int GetFileChecksum (LPSTR File,int frombyte,int tobyte)
 int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories)
 {
      int	Num,i;
-     char	str2[_MAX_PATH+2],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
+     char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
      LPSTR	lpBrack; 
      HFILE	OutFileFID, Fid;  
      long	TotFiles=0;
@@ -5678,12 +5678,12 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
  	 Fid =	GSSiOpenFile (TempName,0,OF_CREATE);
      SearchFilesInDir (SearchLoc, "", Fid,&TotFiles,WildCard,1,SearchSubdir,FALSE); 
 	 GSSillseek (Fid,0,0);
-	 while (fgetstring (str2,_MAX_PATH,Fid))
+	 while (fgetstring (str2,_MAX_PATH+80-2,Fid))
 	 { 
 		LPSTR	pLastDir;
 		char	LastDir[_MAX_DIR];
-		LONGLONG	lfile=0;
-		DWORD	lastup=0;
+		//LONGLONG	lfile=0;
+		//DWORD	lastup=0;
 	    struct _stati64    fstat; 
 		HFILE	Fid2;
 		char	timesAndLength[256]={0};
@@ -5694,13 +5694,13 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 
 		if (pTAB)
 			strcpy (timesAndLength,pTAB);
-		if ((Fid2 = GSSiOpenFile (str2,0,OF_READ)) != HFILE_ERROR)
+		/*if ((Fid2 = GSSiOpenFile (str2,0,OF_READ)) != HFILE_ERROR)
 		{
 			GSSifstat (Fid2,&fstat);
 			lastup = fstat.st_mtime;
 			lfile = fstat.st_size;
 			GSSiClose (Fid2);
-		}
+		}*/
  		_splitpath (str2,drive,dir,Name,extension);  
 		strcpy (LastDir,dir);
 		if (*LastChr (LastDir) == '\\')

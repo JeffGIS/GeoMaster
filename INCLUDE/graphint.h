@@ -2374,6 +2374,7 @@ HWND FindWindowByProcessID(DWORD ProcessID, LPSTR Text);
 BOOL CopyMapserverFileToFile(HWND hBackGroundServer,LPSTR File);
 BOOL SaveMapServerFile(void);
 
+void GMFileManager(LPSTR ManagerFile);
 
 
 

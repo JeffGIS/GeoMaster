@@ -68,6 +68,22 @@ extern HWND	TraceWnd2;
 
 char	CacheTitle[256];
 
+int SQLOK(int sqlReturn, char *method, char ** error)
+{
+	if (sqlReturn != SQLITE_OK)
+	{
+		char mess[256];
+
+		if (*error)
+			sprintf(mess, "SQLite error: %s at %s", *error, method);
+		else
+			sprintf(mess, "SQLite error at %s", method);
+		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+	}
+
+	return sqlReturn;
+}
+
 __int64 FileTimeToint64(FILETIME ft)
 {
     ULARGE_INTEGER    lv_Large ;

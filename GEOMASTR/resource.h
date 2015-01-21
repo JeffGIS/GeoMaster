@@ -1314,6 +1314,7 @@
 #define IDC_LOADSQL                     877
 #define IDC_BUTTON8                     877
 #define IDC_LOADTODB                    877
+#define IDC_FMUNDO                      877
 #define IDC_XFIELD                      878
 #define IDC_EXPORTROUTE                 878
 #define IDC_BROWSE_IN                   879
@@ -3290,6 +3291,14 @@
 #define IDC_UPDATEFREQ                  2249
 #define IDC_PACKETSIZE                  2250
 #define IDC_DBADDFILE                   2251
+#define IDC_FMFILE                      2252
+#define IDC_FMFILELIST                  2253
+#define IDC_FMINCLUDEFILE               2254
+#define IDC_FMEXCLUDEFILE               2255
+#define IDC_FMDELETEFILES               2256
+#define IDC_FMINCLUDEDIR                2257
+#define IDC_FMEXCLUDEDIR                2258
+#define IDC_FMCOMMIT                    2259
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3634,9 +3643,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1241
+#define _APS_NEXT_RESOURCE_VALUE        1242
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2252
+#define _APS_NEXT_CONTROL_VALUE         2260
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

@@ -50,6 +50,7 @@
 #include "gssitype.h"
 #include "compute.h"
 #include "dibapi.h"
+#include "sqlite3.h"
 
 #define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
     GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
@@ -142,6 +143,8 @@ HWND FindWindowByName (LPSTR WindowName);
 HWND GetTopParent(HWND	hWnd);
 void ShowHideWindows(LPSTR WindowName, UINT fun);
 void ShowHideChildren(HWND hWndPar, UINT fun);
+
+int SQLOK(int sqlReturn, char *method, char ** error);
 
 HBITMAP GetToolBitmap (LPSTR BMPath);
 BOOL WaitForProcessToEnd (DWORD pID,LPINT pMaxWait);

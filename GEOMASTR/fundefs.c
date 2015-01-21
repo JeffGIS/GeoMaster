@@ -487,6 +487,7 @@ int	GetFunctionID11 (LPSTR str)
 			if (!_fstrnicmp(str, "STRINGTONUM", 11)) return 1136;
 			if (!_fstrnicmp(str, "DATADISPLAY", 11)) return 1137;
 			if (!_fstrnicmp(str, "ISLOCALFILE", 11)) return 1138;
+			if (!_fstrnicmp(str, "FILEMANAGER", 11)) return 1139;
 
 			return 0;
 			

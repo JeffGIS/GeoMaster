@@ -1,25 +1,8 @@
 #include "graphint.h"   
-#include "sqlite3.h"
 #include "gmextern.h"
 //#include "sqlite3ext.h"
 
 int i;
-
-int SQLOK(int sqlReturn, char *method,char ** error)
-{
-	if (sqlReturn != SQLITE_OK)
-	{
-		char mess[256];
-
-		if (*error)
-			sprintf(mess, "SQLite error %s at %s", *error,method);
-		else
-			sprintf(mess, "SQLite error at %s", method);
-		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
-	}
-
-	return sqlReturn;
-}
 
 
 int SQLiteCmd(int nArgs, LPSTR *ARG)
@@ -158,6 +141,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 					//SQLOK(sqlite3_finalize(self.statement), "loadIntersectionTextToDatabase8");
 					GSSiGlobUlFree(&hVal);
+					sqlite3_close(db);
+
 				}
 				GSSiGlobUlFree(&hCmd);
 			}
