@@ -5399,7 +5399,7 @@ BOOL CreateNewMap (LPSTR NewName,LPMNMXCORD MinMaxCoord,short NumSyms,HANDLE hSy
     mnmxCor     MinMax;  
     double  Hinc, Vinc;
     PRIMEOFFSETS NewPrimeOffs;
-    char	Drive[4], Dir[MAX_PATH],name[34],Ext[8], TempName[MAX_PATH];
+	char	Drive[32], Dir[MAX_PATH], name[MAX_PATH], Ext[32], TempName[MAX_PATH];
     double	MinSize = GetGlobalDVal2 ("[%MINMAPWIDTH]",1000000 * P_TOL)/2;
     
     if (MinMaxCoord->xmn == MinMaxCoord->xmx)

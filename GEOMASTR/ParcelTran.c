@@ -17,7 +17,7 @@ $PARCELTRAN(FREE, [~HTRAN]);
 */
 
 
-#define MAX_PARTRAN_POINTS	4096
+#define MAX_PARTRAN_POINTS	4096*4
 
 void TranToParcelPoints(LPDOUBLE XIN, LPDOUBLE YIN, LPDOUBLE  XOUT, LPDOUBLE  YOUT, LPPARCELTRAN pTran)
 {
@@ -114,6 +114,10 @@ static void addPointToList(LPDPOINT fromPt, LPDPOINT toPt, LPPARCELTRAN pParTran
 	LPDPOINT ptfromPt = GlobalLock(pParTran->hFromPt);
 	LPDPOINT pttoPt = GlobalLock(pParTran->hToPt);
 
+	if (pParTran->np >= MAX_PARTRAN_POINTS - 1)
+	{
+		BlowOut("MAX_PARTRAN_POINTS exceeded", "");
+	}
 	ptfromPt[pParTran->np] = *fromPt;
 	pttoPt[pParTran->np++] = *toPt;
 	GlobalUnlock(pParTran->hFromPt);
