@@ -596,6 +596,7 @@
 #define IDC_USETANBEAR                  523
 #define IDC_OUTPUTPASTE                 523
 #define IDC_BORDER_NOTITLE              523
+#define IDC_FMSITETYPEMOBILE            523
 #define IDC_FROM_CENTER                 524
 #define IDC_NOPROPEN                    524
 #define IDC_USERADBEAR                  524
@@ -1304,9 +1305,12 @@
 #define IDC_SEARCHBAIT                  874
 #define IDC_SELECTVHFILL                874
 #define IDC_FENCE_NOTCRITICAL           874
+#define IDC_FMUPDATESITE                874
 #define IDC_BUTTON2                     875
 #define IDC_EXIT                        875
 #define IDC_SEARCHDEPTH                 875
+#define IDC_BUTTON70                    875
+#define IDC_FMCREATEFLASH               875
 #define IDC_SADELETE                    876
 #define IDC_ATEMP                       876
 #define IDC_BUTTON7                     876
@@ -3299,6 +3303,23 @@
 #define IDC_FMINCLUDEDIR                2257
 #define IDC_FMEXCLUDEDIR                2258
 #define IDC_FMCOMMIT                    2259
+#define IDC_FMGROUPLISTDISPLAY          2260
+#define IDC_FMNEWGROUP                  2261
+#define IDC_FMADDGROUP                  2262
+#define IDC_FMOPENDIR                   2264
+#define IDC_FMTOTALS                    2265
+#define IDC_FMSELECTDIR                 2266
+#define IDC_FMGROUPLISTASSIGN           2267
+#define IDC_FMDELETEDIR                 2268
+#define IDC_FMSITELIST                  2269
+#define IDC_FMADDSITE                   2270
+#define IDC_FMNEWGROUP2                 2271
+#define IDC_FMSITETYPECONNECTED         2272
+#define IDC_FMSITETYPEREMOTE            2273
+#define IDC_FMSITETYPDUAL               2274
+#define IDC_FMUPTODIR                   2275
+#define IDC_FMRESCAN                    2276
+#define IDC_FMAUTOSCAN                  2277
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3645,7 +3666,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1242
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2260
+#define _APS_NEXT_CONTROL_VALUE         2278
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif
