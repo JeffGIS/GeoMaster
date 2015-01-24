@@ -1309,7 +1309,6 @@
 #define IDC_BUTTON2                     875
 #define IDC_EXIT                        875
 #define IDC_SEARCHDEPTH                 875
-#define IDC_BUTTON70                    875
 #define IDC_FMCREATEFLASH               875
 #define IDC_SADELETE                    876
 #define IDC_ATEMP                       876
@@ -3306,6 +3305,7 @@
 #define IDC_FMGROUPLISTDISPLAY          2260
 #define IDC_FMNEWGROUP                  2261
 #define IDC_FMADDGROUP                  2262
+#define IDC_FMADDSOURCE                 2263
 #define IDC_FMOPENDIR                   2264
 #define IDC_FMTOTALS                    2265
 #define IDC_FMSELECTDIR                 2266
@@ -3320,6 +3320,9 @@
 #define IDC_FMUPTODIR                   2275
 #define IDC_FMRESCAN                    2276
 #define IDC_FMAUTOSCAN                  2277
+#define IDC_FMNEWSOURCE                 2278
+#define IDC_FMSOURCELIST                2279
+#define IDC_FMHEADER                    2280
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3666,7 +3669,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1242
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2278
+#define _APS_NEXT_CONTROL_VALUE         2281
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

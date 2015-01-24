@@ -7,12 +7,15 @@ static sqlite3* db = NULL;
 static HFILE	fidDeleteList = HFILE_ERROR;
 static int	currentDisplay = 0;
 static int	currentGroup = 1;
+static char currentSource[34] = "[%DL]";
 static LONGLONG  totLen = 0;
 static int totFiles = 0;
 
 #define FM_INCLUDE	1
 #define FM_LOCAL	2
 #define FM_DELETED	3
+
+#define MAX_ENTRY	MAX_PATH*5+80
 
 static LPSTR FMFixPath(LPSTR path)
 {
@@ -22,6 +25,48 @@ static LPSTR FMFixPath(LPSTR path)
 	REPLAC(fixed, "'", "''", strlen(path) * 2);
 	return fixed;
 }
+static void AddFMSource(LPSTR Name)
+{
+	int groupID;
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	char *error = NULL;
+	sqlite3_stmt *statement;
+
+	sprintf(pCmd, "INSERT INTO SOURCE VALUES ('%s',0)", Name);
+	SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Add source", &error);
+	sqlite3_free(error);
+
+	GSSiGlobUlFree(&hCmd);
+}
+static void ListFMSource(HWND hWndDlg)
+{
+	int groupID;
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	char *error = NULL;
+
+	SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_RESETCONTENT, 0, 0);
+
+	sprintf(pCmd, "SELECT SourceName FROM SOURCE WHERE Removed = 0 ");
+	sqlite3_stmt *statement;
+
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "ListSource", &error);
+
+	strcpy(pCmd, "[%DL]");
+	SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)pCmd));
+
+	while (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		LPSTR Name = (LPSTR)sqlite3_column_text(statement, 0);
+		SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)Name));
+	}
+
+	SQLOK(sqlite3_finalize(statement), "finalize ListSource", 0);
+	GSSiGlobUlFree(&hCmd);
+	SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_SELECTSTRING, -1, (LPARAM)((LPSTR)currentSource));
+}
+
 static void AddGroup(LPSTR Name)
 {
 	int groupID;
@@ -36,11 +81,11 @@ static void AddGroup(LPSTR Name)
 
 	if (sqlite3_step(statement) == SQLITE_ROW)
 	{
-		groupID = max(2,sqlite3_column_int(statement, 0));
+		groupID = max(2, sqlite3_column_int(statement, 0));
 	}
 	SQLOK(sqlite3_finalize(statement), "finalize ListGroup", 0);
 	groupID++;
-	sprintf(pCmd, "INSERT INTO GROUPS VALUES (%i,'%s',0)",groupID,Name);
+	sprintf(pCmd, "INSERT INTO GROUPS VALUES (%i,'%s',0)", groupID, Name);
 	SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Add group", &error);
 	sqlite3_free(error);
 
@@ -56,7 +101,7 @@ static void ListGroups(HWND hWndDlg)
 	SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTDISPLAY, LB_RESETCONTENT, 0, 0);
 	SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTASSIGN, LB_RESETCONTENT, 0, 0);
 
-	sprintf(pCmd, "SELECT GroupName,GroupID FROM GROUPS");
+	sprintf(pCmd, "SELECT GroupName,GroupID FROM GROUPS WHERE Removed = 0");
 	sqlite3_stmt *statement;
 
 	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "ListGroups", &error);
@@ -82,7 +127,6 @@ static void ListGroups(HWND hWndDlg)
 	SQLOK(sqlite3_finalize(statement), "finalize ListGroup", 0);
 	GSSiGlobUlFree(&hCmd);
 }
-
 static int FMGroup2(LPSTR path)
 {
 	int st = 0;
@@ -138,10 +182,13 @@ BOOL OpenFileManagerDB(LPSTR path)
 		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 		LPSTR  pCmd = GlobalLock(hCmd);
 
-		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS PATHS (Path CHAR(150) PRIMARY KEY,GroupID INT,UpdateTime INT,Size INT)");
+		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS PATHS (Path CHAR(256) PRIMARY KEY,GroupID INT,UpdateTime INT,Size INT)");
 		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Create FILEMANAGER database", &error);
 		sqlite3_free(error);
 		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS GROUPS (GroupID INT PRIMARY KEY,GroupName CHAR(64),Removed INT)");
+		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Create FILEMANAGER database", &error);
+		sqlite3_free(error);
+		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS SOURCE (SourceName CHAR(64),Removed INT)");
 		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Create FILEMANAGER database", &error);
 		sqlite3_free(error);
 		if (!rtn)
@@ -172,7 +219,7 @@ static BOOL SetFMCode(int code, LPSTR path)
 	LPSTR fixedPath = FMFixPath(path);
 	BOOL  rtn;
 
-	sprintf(pCmd, "INSERT INTO PATHS VALUES('%s',%i,0,0)", fixedPath, code);
+	sprintf(pCmd, "INSERT INTO PATHS VALUES('%s%s',%i,0,0)", currentSource, fixedPath, code);
 	free(fixedPath);
 	rtn = !SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "SetFMCode", &error);
 	sqlite3_free(error);
@@ -187,7 +234,7 @@ BOOL FMIncludeFile(LPSTR path,int group, long lastUpdateTime, long fileSize)
 	LPSTR fixedPath = FMFixPath(path);
 	BOOL  rtn;
 
-	sprintf(pCmd, "INSERT INTO PATHS VALUES('%s',%i,%i,%i)", fixedPath, group, lastUpdateTime, fileSize);
+	sprintf(pCmd, "INSERT INTO PATHS VALUES('%s%s',%i,%i,%i)", currentSource,fixedPath, group, lastUpdateTime, fileSize);
 	free(fixedPath);
 	rtn = !SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Include file", &error);
 	sqlite3_free(error);
@@ -281,7 +328,6 @@ static BOOL FMScan(HWND hWndDlg)
 	char SearchLoc[128] = "[%DL]";
 	char prefix[128];
 	char TempFile[MAX_PATH];
-#define MAX_ENTRY	MAX_PATH*5+80
 	char entry[MAX_ENTRY];
 	char str[MAX_ENTRY];
 	char CtotSize[32];
@@ -292,6 +338,7 @@ static BOOL FMScan(HWND hWndDlg)
 	totFiles = 0, totLen = 0;
 
 	WaitCursor(1);
+	strcpy(SearchLoc, currentSource);
 	SendDlgItemMessage(hWndDlg, IDC_FMFILELIST, LB_RESETCONTENT, 0, 0);
 	ExpandText(SearchLoc);
 	strcpy(prefix, SearchLoc);
@@ -349,6 +396,44 @@ static BOOL FMScan(HWND hWndDlg)
 	WaitCursor(-1);
 	return TRUE;
 };
+static void ListFMSavedFiles(HWND hWndDlg)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	char *error = NULL;
+	char str[MAX_ENTRY];
+	char CtotSize[32];
+	long  fileLen, lastWrite;
+
+	totFiles = 0, totLen = 0;
+	WaitCursor(1);
+	sprintf(pCmd, "SELECT Path,UpdateTime,Size FROM PATHS WHERE GroupID = %i", currentDisplay);
+	sqlite3_stmt *statement;
+
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "ListFiles", &error);
+
+	while (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		LPSTR path = (LPSTR)sqlite3_column_text(statement, 0);
+		int lastWrite = sqlite3_column_int(statement, 1);
+		int fileLen = sqlite3_column_int(statement, 2);
+		char cLastWrite[64];
+		sprintf(cLastWrite, "$CAL(%i,3)", lastWrite);
+		ExpandText(cLastWrite);
+		sprintf(str, "%s\t%s  %i\t%i %i", path, cLastWrite, fileLen, lastWrite, fileLen);
+		SendDlgItemMessage(hWndDlg, IDC_FMFILELIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)str));
+		totFiles++;
+		totLen += fileLen;
+	}
+
+	SQLOK(sqlite3_finalize(statement), "finalize ListGroup", 0);
+	GSSiGlobUlFree(&hCmd);
+	itoa(IDNINT(totLen / (1024.0*1024.0)), CtotSize, 10);
+	AddCommas(CtotSize);
+	sprintf(str, "Total Files: %i Total Size: %s MB      Selected Files: 0   Selected Size: 0 MB", totFiles, CtotSize);
+	SetDlgItemText(hWndDlg, IDC_FMTOTALS, str);
+	WaitCursor(-1);
+}
 
 static void DisplayFMFiles(HWND hWndDlg,BOOL force)
 {
@@ -359,6 +444,9 @@ static void DisplayFMFiles(HWND hWndDlg,BOOL force)
 		{
 		case 0:
 			FMScan(hWndDlg);
+			break;
+		default:
+			ListFMSavedFiles(hWndDlg);
 			break;
 		}
 	}
@@ -441,11 +529,11 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			MessageBox(hWndDlg, "Unable to open FILEMANAGER database", 0, MB_ICONEXCLAMATION);
 		SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTDISPLAY, LB_SETCURSEL,0, 0);
 		SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTASSIGN, LB_SETCURSEL, 0, 0);
-		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, "Engineering\tLocal");
-		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, "Laptops\tDual");
-		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, "Parks\tDetatched");
-		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, "Police\tDetatched");
-
+		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0,(LPARAM) "Engineering\tLocal");
+		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, (LPARAM) "Laptops\tDual");
+		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, (LPARAM)"Parks\tDetatched");
+		SendDlgItemMessage(hWndDlg, IDC_FMSITELIST, LB_ADDSTRING, 0, (LPARAM)"Police\tDetatched");
+		ListFMSource(hWndDlg);
 		break; /* End of WM_INITDIALOG                                 */
 
 	case WM_CLOSE:
@@ -518,6 +606,22 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			DisplayFMFiles(hWndDlg, TRUE);
 			break;
 
+		case IDC_FMSOURCELIST:
+			switch (HIWORD(wParam))
+			{
+			case LBN_SELCHANGE:
+			{
+				i = SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_GETCURSEL, 0, 0);
+				SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_GETTEXT, i, (DWORD)txt);
+				strcpy (currentSource,txt);
+				sprintf(txt, "@%s (%s)", currentSource, currentSource);
+				ExpandText(txt);
+				SetDlgItemText(hWndDlg, IDC_FMHEADER, txt);
+				DisplayFMFiles(hWndDlg, TRUE);
+			}
+				break;
+			}
+			break;
 		case IDC_FMGROUPLISTDISPLAY:
 			switch (HIWORD(wParam))
 			{
@@ -550,7 +654,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			{
 			case EN_CHANGE:
 			{
-				strcpy(txt, "[%DL]");
+				strcpy(txt, currentSource);
 				if (GetDlgItemText(hWndDlg, IDC_FMFILE, strchr(txt, 0), MAX_PATH))
 				{
 					ExpandText(txt);
@@ -646,7 +750,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			GetDlgItemText(hWndDlg, IDC_FMFILE, txt, MAX_PATH);
 			if (*LastChr(txt) == '\\')
 				*LastChr(txt) = 0;
-			sprintf(cmd, "$WEB([%%DL]%s)", txt);
+			sprintf(cmd, "$WEB(%s%s)", currentSource, txt);
 			ExpandText(cmd);
 		}
 			break;
@@ -672,7 +776,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			GetDlgItemText(hWndDlg, IDC_FMFILE, txt, MAX_PATH);
 			if (*LastChr(txt) != '\\')
 				strcat(txt, "\\");
-			SetFMCode(FM_INCLUDE, txt);
+			FMIncludeFile(txt, currentGroup, 0,0);
 			DisplayFMFiles(hWndDlg, FALSE);
 			break;
 		case IDC_FMEXCLUDEDIR:
@@ -693,11 +797,28 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 				break;
 			}
 			break;
-			case IDC_FMADDGROUP:
+		case IDC_FMADDGROUP:
 			GetDlgItemText(hWndDlg, IDC_FMNEWGROUP, txt, 32);
 			AddGroup(txt);
 			SetDlgItemText(hWndDlg, IDC_FMNEWGROUP, "");
 			ListGroups(hWndDlg);
+			break;
+		case IDC_FMNEWSOURCE:
+			switch (HIWORD(wParam))
+			{
+			case EN_CHANGE:
+				if (GetDlgItemText(hWndDlg, IDC_FMNEWSOURCE, txt, 32))
+					EnableWindow(GetDlgItem(hWndDlg, IDC_FMADDSOURCE), TRUE);
+				else
+					EnableWindow(GetDlgItem(hWndDlg, IDC_FMADDSOURCE), FALSE);
+				break;
+			}
+			break;
+		case IDC_FMADDSOURCE:
+			GetDlgItemText(hWndDlg, IDC_FMNEWSOURCE, txt, 32);
+			AddFMSource(txt);
+			SetDlgItemText(hWndDlg, IDC_FMNEWSOURCE, "");
+			ListFMSource(hWndDlg);
 			break;
 		}
 		break;    /* End of WM_COMMAND                                 */
