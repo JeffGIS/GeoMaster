@@ -74,7 +74,7 @@ int SQLOK(int sqlReturn, char *method, char ** error)
 	{
 		char mess[256];
 
-		if (*error)
+		if (error && *error)
 			sprintf(mess, "SQLite error: %s at %s", *error, method);
 		else
 			sprintf(mess, "SQLite error at %s", method);
