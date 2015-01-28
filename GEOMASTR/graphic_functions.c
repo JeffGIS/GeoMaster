@@ -3016,6 +3016,7 @@ BOOL ThemeActivate (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				CurTheme->ID != GF_POLYINFO_THEME && 
 				CurTheme->ID != GF_GRAPHICS_FUNCTION_THEME &&
 				CurTheme->ID != GF_OFFSETAREA_THEME &&
+				CurTheme->ID != GF_AREA_IN_MASK_THEME &&
 				CurTheme->ID != GF_2D_THEME)
 			{   
 				*CurTheme->RefValChar = 0;
@@ -3192,6 +3193,7 @@ BOOL ThemeEdit (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				case GF_STREET_TEXT_THEME:
 			    case GF_BOUNDS_DISPLAY_THEME:     
 				case GF_OFFSETAREA_THEME:
+				case GF_AREA_IN_MASK_THEME:
 			    case GF_PROFILE_THEME:     
 				case GF_PROFILE_LINK_THEME:
 	        	case GF_CONTEST_THEME:

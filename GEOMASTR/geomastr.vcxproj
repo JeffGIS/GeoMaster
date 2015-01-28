@@ -348,6 +348,7 @@
     <ClCompile Include="..\gctpc\cproj.c" />
     <ClCompile Include="Creatcfg.c" />
     <ClCompile Include="..\SHR\CVTCOORD.C" />
+    <ClCompile Include="CreateAreaInMask.c" />
     <ClCompile Include="cwconfig.c" />
     <ClCompile Include="..\shapelib\code\dbfopen.c" />
     <ClCompile Include="DatedDisplay.c" />

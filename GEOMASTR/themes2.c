@@ -912,7 +912,9 @@ GSSiExitProg (1262);
 			}
 		}
 			break; 
-			
+		case GF_AREA_IN_MASK_THEME:
+			ThemeCreateAreaInMask(FALSE);
+			break;
 		case GF_POINT_IN_AREA_THEME: 
 			ii=1;         
 		case GF_HOTSPOT_THEME:

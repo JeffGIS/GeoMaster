@@ -2125,6 +2125,7 @@
 #define IDC_TIMELISTS                   1241
 #define IDC_TIME_TO                     1241
 #define IDM_FILE_SAVEAS                 1241
+#define IDD_DIALOG16                    1242
 #define IDC_STARTTIME                   1243
 #define IDC_ENDTIME                     1244
 #define IDC_AUTOCREATENEWSYMS           1244
@@ -3323,6 +3324,10 @@
 #define IDC_FMNEWSOURCE                 2278
 #define IDC_FMSOURCELIST                2279
 #define IDC_FMHEADER                    2280
+#define IDC_MASKEDAREASFILE             2281
+#define IDC_CMAP_LOW                    2282
+#define IDC_CMAP_MEDIUM                 2283
+#define IDC_CMAP_HIGH                   2284
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3667,9 +3672,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1242
+#define _APS_NEXT_RESOURCE_VALUE        1243
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2281
+#define _APS_NEXT_CONTROL_VALUE         2285
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

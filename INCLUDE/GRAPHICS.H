@@ -354,6 +354,7 @@
 #define OB_TOOLBARS						356  
 #define GF_CITY_THEME					357
 #define OB_SAVEBACKGROUND				358  
+#define GF_AREA_IN_MASK_THEME			359  
 
 
 

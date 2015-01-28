@@ -357,6 +357,7 @@ BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	}
 		return TRUE;
 }
+
 void CallTemplateMsgProc(void)
 {
 	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, TemplateMsgProc);
@@ -12028,8 +12029,9 @@ GSSiExitProg (1257);
  		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Offset Area Theme\t23"));
  		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Connection Line Theme\t24"));
  		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Coordinate Display Theme\t25"));
- 		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"City Display Theme\t26"));
-//		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Two Numeric Value\t2"));
+		 SendDlgItemMessage(hWndDlg, IDC_NEW_THEME, LB_ADDSTRING, 0, (LPARAM)((LPSTR)"City Display Theme\t26"));
+		 SendDlgItemMessage(hWndDlg, IDC_NEW_THEME, LB_ADDSTRING, 0, (LPARAM)((LPSTR)"Create Area in Mask Theme\t27"));
+		 //		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Two Numeric Value\t2"));
 //		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Compare to Reference\t3"));
     case GSSI_REINITDIALOG:
 		 SendDlgItemMessage (hWndDlg,IDC_AVAIL_THEMES,LB_RESETCONTENT,0,0);  

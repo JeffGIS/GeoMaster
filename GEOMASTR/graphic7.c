@@ -1696,6 +1696,7 @@ GSSiExitProg (900);
         case GF_TIME_DISPLAY_THEME: 
         case GF_POINT_IN_AREA_THEME:
 		case GF_OFFSETAREA_THEME:
+		case GF_AREA_IN_MASK_THEME:
 		case GF_CONNECTION_LINE_THEME:
     
             handle=GSSiGlobAlloc ( 658,GHND,sizeof(THEME));
@@ -2003,6 +2004,7 @@ GSSiExitProg (901);
 		case GF_POINT_IN_AREA_THEME:
 		case GF_NORTH_ARROW_THEME:
 		case GF_OFFSETAREA_THEME:
+		case GF_AREA_IN_MASK_THEME:
 		case GF_CONNECTION_LINE_THEME:
             
 			ClearCompareDC (CurTheme,TRUE);

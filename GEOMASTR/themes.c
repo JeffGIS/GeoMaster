@@ -348,11 +348,19 @@ LPTHEME CreateNewTheme (int Choice)
 				break;
 			case 26:
 				pTheme->ID = GF_CITY_THEME;
-				pTheme->Recompute=FALSE;
+				pTheme->Recompute = FALSE;
+				pTheme->WantDataPass = FALSE;
+				pTheme->NumDesiredClass = 1;
+				pTheme->NumClass = 1;
+				break;
+			case 27:
+				pTheme->ID = GF_AREA_IN_MASK_THEME;
+				pTheme->Recompute = FALSE;
 				pTheme->WantDataPass = FALSE;
 				pTheme->NumDesiredClass=1; 
 				pTheme->NumClass=1;   
 				break;
+				
 		}
 	}
 	
@@ -1065,7 +1073,8 @@ void ThemeDisplayLegend2(short BeginOrEndDisplayPass,short FromVPID)
 		case GF_OFFSETAREA_THEME:
 			DisplaySVThemeLegend(BeginOrEndDisplayPass);
 			break;
-
+		case GF_AREA_IN_MASK_THEME:
+			break;
 		case GF_TWO_VALUE_THEME:
 //			DisplayTwoVThemeLegend();
 			break;
@@ -1486,7 +1495,9 @@ GSSiExitProg (1251);
 Top:
 	switch (CurTheme->ID)
 	{   
-		
+		case GF_AREA_IN_MASK_THEME:
+			nRc = DialogBox(hInst, (LPSTR)"CREATE_MASKED_AREA_THEME", hWnd, AreaInMaskThemeMsgProc);
+			break;
 		case GF_GRAPHICS_FUNCTION_THEME:			 
 		case GF_OFFSETAREA_THEME:
 		case GF_SINGLE_VALUE_THEME:
@@ -2034,7 +2045,9 @@ GSSiExitProg (1260);
 			case GF_OFFSETAREA_THEME:
 				ThemeDisplayOffsetAreas ();
 				break;
-
+			case GF_AREA_IN_MASK_THEME:
+				ThemeCreateAreaInMask(TRUE);
+				break;
 			case GF_NORTH_ARROW_THEME:
 				break;
 
@@ -2725,6 +2738,7 @@ BOOL GetThemeIDText (int ID,LPSTR Name)
 	case GF_NORTH_ARROW_THEME:
 	case GF_PROFILE_LINK_THEME:
 	case GF_OFFSETAREA_THEME:
+	case GF_AREA_IN_MASK_THEME:
 	case GF_WHEELZOOM:
 	case GF_CONNECTION_LINE_THEME:
 	case GF_CITY_THEME:
