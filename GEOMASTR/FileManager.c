@@ -3,13 +3,18 @@
 
 static char manFile[MAX_PATH];
 static char deleteFile[MAX_PATH];
+static char IncludedFilesPath[MAX_PATH]="c:\\temp\\FileManagerIncludedFiles.txt";
 static sqlite3* db = NULL;
 static HFILE	fidDeleteList = HFILE_ERROR;
 static int	currentDisplay = 0;
 static int	currentGroup = 1;
 static char currentSource[34] = "[%DL]";
+static char currentDestination[34] = "";
 static LONGLONG  totLen = 0;
+static LONGLONG	 totIncludedLen = 0;
 static int totFiles = 0;
+static int totIncludedFiles = 0;
+static HFILE fidIncludedFiles = HFILE_ERROR;
 
 #define FM_INCLUDE	1
 #define FM_LOCAL	2
@@ -135,7 +140,7 @@ static int FMGroup2(LPSTR path)
 	char *error = NULL;
 	LPSTR fixedPath = FMFixPath(path);
 
-	sprintf (pCmd,"SELECT GroupID FROM PATHS WHERE path ='%s'",fixedPath);
+	sprintf(pCmd, "SELECT GroupID FROM PATHS WHERE path ='%s%s'", currentSource, fixedPath);
 	free(fixedPath);
 	sqlite3_stmt *statement;
 
@@ -248,7 +253,11 @@ BOOL FMDeleteItem(LPSTR path)
 
 	if (rtn)
 	{
-		fputstring(path, fidDeleteList);
+		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+		LPSTR  pCmd = GlobalLock(hCmd);
+		sprintf(pCmd, "%s%s", currentSource,path);
+		fputstring(pCmd, fidDeleteList);
+		GSSiGlobUlFree(&hCmd);
 		rtn = TRUE;
 	}
 	else
@@ -321,6 +330,34 @@ static BOOL FMCommit(void)
 	return rtn;
 }
 
+static BOOL CreateFMExtract(HWND hWndDlg)
+{
+	BOOL rtn = FALSE;
+	char str[512]="";
+	char fromFile[MAX_PATH], toFile[MAX_PATH];
+	LPSTR pTab=str;
+	int totLen, curPos = 0;
+
+	fidIncludedFiles = GSSiOpenFile(IncludedFilesPath, 0, OF_READ);
+	if (fidIncludedFiles != HFILE_ERROR)
+	{
+		totLen = GSSifilelength(fidIncludedFiles);
+		CreateStatusWind(CurView->hWnd, 1, "Create Extract");
+		while (StatusWindowUpdate(0,pTab, totLen, curPos) && fgetstring(str, sizeof(str)-2, fidIncludedFiles))
+		{
+			pTab = strchr(str, '\t');
+			*pTab++ = 0;
+			sprintf(fromFile, "%s%s", str, pTab);
+			sprintf(toFile, "%s\\%s", currentDestination, pTab);
+			GSSiCopyFile(fromFile, toFile, FALSE);
+			curPos = GSSillseek(fidIncludedFiles, 0, 1);
+		}
+		DestroyStatusWindow(0);
+		GSSiClose(fidIncludedFiles);
+	}
+
+	return rtn;
+}
 static BOOL FMScan(HWND hWndDlg)
 {
 	int pos;
@@ -328,15 +365,26 @@ static BOOL FMScan(HWND hWndDlg)
 	char SearchLoc[128] = "[%DL]";
 	char prefix[128];
 	char TempFile[MAX_PATH];
+	char copyPath[MAX_PATH];
 	char entry[MAX_ENTRY];
 	char str[MAX_ENTRY];
 	char CtotSize[32];
-	int nfiles,lprefix;
+	char CtotIncludedSize[32];
+	int nfiles, lprefix;
 	HFILE Fid;
 	long  fileLen, lastWrite;
 	
-	totFiles = 0, totLen = 0;
+	totFiles = 0;
+	totLen = 0;
+	totIncludedFiles = 0;
+	totIncludedLen = 0;
 
+	if (GetDlgItemText(hWndDlg, IDC_FMDEST, currentDestination, sizeof(currentDestination)-1))
+	{
+		fidIncludedFiles = GSSiOpenFile(IncludedFilesPath, 0, OF_CREATE);
+	}
+	else
+		fidIncludedFiles = HFILE_ERROR;
 	WaitCursor(1);
 	strcpy(SearchLoc, currentSource);
 	SendDlgItemMessage(hWndDlg, IDC_FMFILELIST, LB_RESETCONTENT, 0, 0);
@@ -371,6 +419,15 @@ static BOOL FMScan(HWND hWndDlg)
 		switch (FMGroup(pEntry))
 		{
 			case FM_INCLUDE:
+				totIncludedFiles++;
+				totIncludedLen += fileLen;
+				if (fidIncludedFiles != HFILE_ERROR)
+				{
+					sprintf(copyPath, "%s\t%s", currentSource,pEntry);
+					ExpandText(copyPath);
+					fputstring(copyPath, fidIncludedFiles);
+				}
+				break;
 			case FM_LOCAL:
 			case FM_DELETED:
 				break;
@@ -391,9 +448,19 @@ static BOOL FMScan(HWND hWndDlg)
 	GSSiRemove(TempFile);
 	itoa(IDNINT(totLen / (1024.0*1024.0)), CtotSize, 10);
 	AddCommas(CtotSize);
-	sprintf(str, "Total Files: %i Total Size: %s MB      Selected Files: 0   Selected Size: 0 MB", totFiles, CtotSize);
+	itoa(IDNINT(totIncludedLen / (1024.0*1024.0)), CtotIncludedSize, 10);
+	AddCommas(CtotIncludedSize);
+	sprintf(str, "Total Files: %i Total Size: %s MB      Included Files: %i Included Size: %s MB", totFiles, CtotSize, totIncludedFiles, CtotIncludedSize);
 	SetDlgItemText(hWndDlg, IDC_FMTOTALS,str);
 	WaitCursor(-1);
+	if (fidIncludedFiles != HFILE_ERROR)
+	{
+		GSSiClose(fidIncludedFiles);
+		EnableWindow(GetDlgItem(hWndDlg, IDC_FMCREATEEXTRACT),TRUE);
+	}
+	else
+		EnableWindow(GetDlgItem(hWndDlg, IDC_FMCREATEEXTRACT), FALSE);
+
 	return TRUE;
 };
 static void ListFMSavedFiles(HWND hWndDlg)
@@ -513,7 +580,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		EscapeFunction(TRUE);
 		AllowCache = FALSE;
 		CloseAllRequestedFiles(FALSE); 
-		SendDlgItemMessage(hWndDlg, IDC_FMAUTOSCAN, BM_SETCHECK, TRUE, 0);
+		SendDlgItemMessage(hWndDlg, IDC_FMAUTOSCAN, BM_SETCHECK, FALSE, 0);
 		SendDlgItemMessage(hWndDlg, IDC_FMFILELIST, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
 		SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTDISPLAY, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
 		SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTASSIGN, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
@@ -567,6 +634,9 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		case IDC_FMCOMMIT:
 			FMCommit();
 			//DisplayFMFiles(hWndDlg);
+			break;
+		case IDC_FMCREATEEXTRACT:
+			CreateFMExtract(hWndDlg);
 			break;
 		case IDC_FMFILELIST:
 			switch (HIWORD(wParam))
