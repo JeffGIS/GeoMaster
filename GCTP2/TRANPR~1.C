@@ -103,7 +103,7 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
 			//*Y = LAT; //CVTA(LAT);
 			//*X = (-1.0 * LONGITUDE); //CVTA(-LONGITUDE);
 			   
-			IRC = TranProjection2 (ID_FROM,ID_TO,X,Y);
+			IRC = TranProjection (ID_FROM,ID_TO,X,Y);
 			   
 			PRJ_ZONE[ID_TO] = SAVE_PRJ_ZONE;
 			PRJ_TYPE[ID_TO] = SAVE_PRJ_TYPE;

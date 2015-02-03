@@ -3553,7 +3553,13 @@ SetVis:
 			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
-			if (!stricmp (Arg[1],"PICKED"))
+			if (!stricmp(Arg[1], "SAVE"))
+			{
+				if (SaveAreasToFile(Arg[2]))
+					goto RtnTrue;
+				goto RtnFalse;
+			}
+			else if (!stricmp (Arg[1],"PICKED"))
 			{
 				if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPoints,&hPoints))
 					goto RtnFalse;

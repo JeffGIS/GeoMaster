@@ -912,15 +912,13 @@ GSSiExitProg (1262);
 			}
 		}
 			break; 
-		case GF_AREA_IN_MASK_THEME:
-			ThemeCreateAreaInMask(FALSE);
-			break;
 		case GF_POINT_IN_AREA_THEME: 
 			ii=1;         
 		case GF_HOTSPOT_THEME:
 		case GF_OFFSETAREA_THEME:
 		case GF_TIME_DISPLAY_THEME:	
 		case GF_SINGLE_VALUE_THEME:
+		case GF_AREA_IN_MASK_THEME:
 			if (CurTheme->SymNum == -1)
 			{
 				if (_fstricmp (TAG,&CurTheme->Contents[1])) 
@@ -939,6 +937,11 @@ GSSiExitProg (1262);
 				if (!WantDesc)
 					goto RtnNotProcessed;
 			} 
+			if (CurTheme->ID == GF_AREA_IN_MASK_THEME)
+			{
+				ThemeCreateAreaInMask(FALSE);
+				break;
+			}
 			if (CurTheme->ID == GF_HOTSPOT_THEME) 
 			{
 				switch (CurTheme->HotSpotData.PassThrough)

@@ -2537,34 +2537,34 @@ BOOL AddIslandsToPoly (BOOL Reverse,BOOL Delete)
     return (TRUE);
 } 
 
-BOOL SaveMaskAreas (LPSTR Directory)
-{    
+BOOL SaveMaskAreas(LPSTR Directory)
+{
 	short	pos = BT_FIRST;
 	long	Refno;
-	HIGHLIGHTDATA	HighlightData;   
+	HIGHLIGHTDATA	HighlightData;
 	long	nPnts;
 	HANDLE	hPnts;
 	HPDPOINT	Points;
 	HFILE	Fid;
 	char	FileName[MAX_PATH];
-	
-	while (!BT_FIND (hHighlight,(LPSTR)&Refno,pos,BT_ANY,(LPSTR)&HighlightData))
-	{   
+
+	while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+	{
 		pos = BT_NEXT;
 		if (HighlightData.PD.Type == 3)
 		{
-			if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPnts))
-			{  
-				Points = (HPDPOINT)GlobalLock (hPnts);
-				sprintf (FileName,"%s\\%s.bin",Directory,HighlightData.PD.UDI);
-				Fid = GSSiOpenFile (FileName,0,OF_CREATE);  
+			if (GetPolyPoints((LPPICKDATAHEADER)&HighlightData.PD, FALSE, &nPnts, &hPnts))
+			{
+				Points = (HPDPOINT)GlobalLock(hPnts);
+				sprintf(FileName, "%s\\%s.bin", Directory, HighlightData.PD.UDI);
+				Fid = GSSiOpenFile(FileName, 0, OF_CREATE);
 				if (Fid != HFILE_ERROR)
-				{   
-					BigWrite (Fid,(HPSTR)&nPnts,4,-1);
-					BigWrite (Fid,(HPSTR)Points,nPnts*sizeof(DPOINT),-1);
-					GSSiClose (Fid);
+				{
+					BigWrite(Fid, (HPSTR)&nPnts, 4, -1);
+					BigWrite(Fid, (HPSTR)Points, nPnts*sizeof(DPOINT), -1);
+					GSSiClose(Fid);
 				}
-				GSSiGlobUlFree (&hPnts);
+				GSSiGlobUlFree(&hPnts);
 			}
 		}
 		nPoly++;
@@ -2572,7 +2572,56 @@ BOOL SaveMaskAreas (LPSTR Directory)
 	return TRUE;
 }
 
-POINT PIAACenter (LPPIAAStruct pPIAA,LPLONG piCPDist,LPLONG pMaxn,BOOL UsePCTBox,LPBOOL pHaveCP)
+BOOL SaveAreasToFile(LPSTR FileName)
+{    
+	short	pos = BT_FIRST;
+	long	Refno;
+	HIGHLIGHTDATA	HighlightData;
+	long	nPnts;
+	HANDLE	hPoly;
+	HANDLE  hPolyPartLen;
+	HPDPOINT	pPoints;
+	HFILE	Fid;
+	BOOL rtn = FALSE;
+	int nLoops;
+	LPINT pPartLen;
+
+	Fid = GSSiOpenFile(FileName, 0, OF_CREATE);
+	if (Fid != HFILE_ERROR)
+	{
+		while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+		{
+			pos = BT_NEXT;
+			if (HighlightData.PD.Type == 3)
+			{
+				if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly,&hPolyPartLen)))
+				{
+					LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
+					BigWrite(Fid, &Refno, 4, -1);
+					BigWrite(Fid, HighlightData.PD.UDI, 65, -1);
+					BigWrite(Fid, pBounds, sizeof(MNMXCORD), -1);
+					BigWrite(Fid, &nLoops, sizeof(int), -1);
+					if (nLoops > 1)
+					{
+						pPartLen = GlobalLock(hPolyPartLen);
+						BigWrite(Fid, pPartLen, sizeof(int)*nLoops, -1);
+						GlobalUnlock(hPolyPartLen);
+					}
+					pPoints = (HPDPOINT)(pBounds + 1);
+					BigWrite(Fid, (HPSTR)&nPnts, 4, -1);
+					BigWrite(Fid, (HPSTR)pPoints, nPnts*sizeof(DPOINT), -1);
+					GSSiGlobUlFree(&hPoly);
+					GSSiGlobFree(&hPolyPartLen);
+				}
+			}
+		}
+		GSSiClose(Fid);
+		rtn = TRUE;
+	}
+	return rtn;
+}
+
+POINT PIAACenter(LPPIAAStruct pPIAA, LPLONG piCPDist, LPLONG pMaxn, BOOL UsePCTBox, LPBOOL pHaveCP)
 #if ENABLETRACE
 {GSSiEnterProg (1380);
 #endif
