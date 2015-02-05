@@ -3,6 +3,84 @@
 
 #include "gmextern.h"
 
+BOOL SaveAreasToFile(LPSTR FileName)
+{
+	short	pos = BT_FIRST;
+	long	Refno;
+	HIGHLIGHTDATA	HighlightData;
+	long	nPnts;
+	HANDLE	hPoly;
+	HANDLE  hPolyPartLen;
+	HPDPOINT	pPoints;
+	HFILE	Fid;
+	BOOL rtn = FALSE;
+	int nLoops;
+	LPINT pPartLen;
+
+	Fid = GSSiOpenFile(FileName, 0, OF_CREATE);
+	if (Fid != HFILE_ERROR)
+	{
+		while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+		{
+			pos = BT_NEXT;
+			if (HighlightData.PD.Type == 3)
+			{
+				if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly, &hPolyPartLen)))
+				{
+					LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
+					BigWrite(Fid, &Refno, 4, -1);
+					BigWrite(Fid, HighlightData.PD.UDI, 65, -1);
+					BigWrite(Fid, pBounds, sizeof(MNMXCORD), -1);
+					BigWrite(Fid, &nLoops, sizeof(int), -1);
+					if (nLoops > 1)
+					{
+						pPartLen = GlobalLock(hPolyPartLen);
+						BigWrite(Fid, pPartLen, sizeof(int)*nLoops, -1);
+						GlobalUnlock(hPolyPartLen);
+					}
+					pPoints = (HPDPOINT)(pBounds + 1);
+					BigWrite(Fid, (HPSTR)&nPnts, 4, -1);
+					BigWrite(Fid, (HPSTR)pPoints, nPnts*sizeof(DPOINT), -1);
+					GSSiGlobUlFree(&hPoly);
+					GSSiGlobFree(&hPolyPartLen);
+				}
+			}
+		}
+		GSSiClose(Fid);
+		rtn = TRUE;
+	}
+	return rtn;
+}
+
+static BOOL GetAreaFromFile(HFILE Fid,LPMNMXCORD pBounds,LPINT pnPnts,LPHANDLE phDPoints)
+{
+	int Refno;
+	int nLoops;
+	char UDI[66];
+	HPDPOINT pPoints;
+
+	if (Fid == HFILE_ERROR)
+		return FALSE;
+	if (!BigRead(Fid, &Refno, 4))
+		return FALSE;
+	BigRead (Fid,UDI, 65);
+	BigRead (Fid, pBounds, sizeof(MNMXCORD));
+	BigRead(Fid, &nLoops, sizeof(int));
+	if (nLoops > 1)
+	{
+		HANDLE hPartLen = GSSiGlobAlloc(0, GMEM_MOVEABLE, nLoops*sizeof(int));
+		LPINT pPartLen = GlobalLock(hPartLen);
+		BigRead (Fid, pPartLen, sizeof(int)*nLoops);
+		GSSiGlobUlFree (&hPartLen);
+	}
+	*phDPoints = GSSiGlobAlloc(1798, GMEM_MOVEABLE, *pnPnts * sizeof(DPOINT)+4);
+	pPoints = GlobalLock(*phDPoints);
+	BigRead(Fid, (HPSTR)pnPnts, 4);
+	BigRead(Fid, (HPSTR)pPoints, *pnPnts*sizeof(DPOINT));
+
+	return FALSE;
+}
+
 BOOL ThemeCreateAreaInMask(int from)
 {
 	BOOL rtn = FALSE;
@@ -15,7 +93,7 @@ BOOL ThemeCreateAreaInMask(int from)
 	{
 		if (HiPrecis)
 		{
-			MNMXCORD bounds, BMbounds;
+			MNMXCORD bounds, BMbounds, mareaBounds;
 			int width, height;
 			int maxdim = 1024;
 			double fac;
@@ -28,56 +106,78 @@ BOOL ThemeCreateAreaInMask(int from)
 			LPPOINT pPoly;
 			BOOL savebm = TRUE;
 			int i;
-
-			GetPolyBoundsD2(lpDCurPoints, nPnts, &bounds, TYPE_AREA);
-			fac = BoundsWidth(&bounds) / BoundsHeight(&bounds);
-			if (fac > 1)
+			int nMareaPoints;
+			HANDLE hMareaPoints;
+			HFILE Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
+			
+			if (Fid != HFILE_ERROR)
 			{
-				width = maxdim - 4;
-				height = width / fac;
-			}
-			else
-			{
-				height = maxdim - 4;
-				width = height * fac;
-			}
-			hDCMain = GetDC(CurView->hWnd);
-			hDC = CreateCompatibleDC(hDCMain);
-			//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
-			hBM = CreateCompatibleBitmap(hDCMain, width + 4, height + 4);
-			GetObject(hBM, sizeof(bm), (LPSTR)&bm);
-			ReleaseDC(CurView->hWnd, hDCMain);
-			hBMOld = SelectObject(hDC, hBM);
-			SetMapMode(hDC, MM_ISOTROPIC);
-			SetWindowOrgEx(hDC, 0, 0, 0);
-			SetViewportOrgEx(hDC, 0, 0, 0);
-			SetWindowExtEx(hDC, 1024, 1024, 0);
-			SetViewportExtEx(hDC, 1024, 1024, 0);
-			hOldBrush = SelectObject(hDC, hRedBrush);
-			hOldPen = SelectObject(hDC, hRedPen);
-			BMbounds.xmn = 2;
-			BMbounds.ymn = 2;
-			BMbounds.xmx = 2 + width;
-			BMbounds.ymx = 2 + height;
-			hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
-			hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
-			hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
-			pPoly = GlobalLock(hPoly);
-			for (i = 0; i < nPnts; i++)
-				pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);
-			Polygon(hDC, pPoly, nPnts);
-			GSSiGlobUlFree(&hPoly);
-			SelectObject(hDC, hBMOld);
-			DeleteDC(hDC);
+				GetPolyBoundsD2(lpDCurPoints, nPnts, &bounds, TYPE_AREA);
+				fac = BoundsWidth(&bounds) / BoundsHeight(&bounds);
+				if (fac > 1)
+				{
+					width = maxdim - 4;
+					height = width / fac;
+				}
+				else
+				{
+					height = maxdim - 4;
+					width = height * fac;
+				}
+				hDCMain = GetDC(CurView->hWnd);
+				hDC = CreateCompatibleDC(hDCMain);
+				//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
+				hBM = CreateCompatibleBitmap(hDCMain, width + 4, height + 4);
+				GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+				ReleaseDC(CurView->hWnd, hDCMain);
+				hBMOld = SelectObject(hDC, hBM);
+				SetMapMode(hDC, MM_ISOTROPIC);
+				SetWindowOrgEx(hDC, 0, 0, 0);
+				SetViewportOrgEx(hDC, 0, 0, 0);
+				SetWindowExtEx(hDC, 1024, 1024, 0);
+				SetViewportExtEx(hDC, 1024, 1024, 0);
+				hOldBrush = SelectObject(hDC, hRedBrush);
+				hOldPen = SelectObject(hDC, hRedPen);
+				BMbounds.xmn = 2;
+				BMbounds.ymn = 2;
+				BMbounds.xmx = 2 + width;
+				BMbounds.ymx = 2 + height;
+				hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
+				hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
+				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+				pPoly = GlobalLock(hPoly);
+				for (i = 0; i < nPnts; i++)
+					pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);
+				Polygon(hDC, pPoly, nPnts);
+				GSSiGlobUlFree(&hPoly);
+				while (GetAreaFromFile(Fid, &mareaBounds, &nMareaPoints, &hMareaPoints))
+				{
+					if (IntersectBounds(&mareaBounds, &bounds, 0))
+					{
+						LPDPOINT pMareaPoints = GlobalLock(hMareaPoints);
+						hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nMareaPoints * sizeof(POINT));
+						pPoly = GlobalLock(hPoly);
+						for (i = 0; i < nMareaPoints; i++)
+							pPoly[i] = TRANDPointToPoint(&pMareaPoints[i], hTranWtoBM);
+						Polygon(hDC, pPoly, nMareaPoints);
+						GSSiGlobUlFree(&hPoly);
+						GlobalUnlock(hMareaPoints);
+					}
+					GSSiGlobFree(&hMareaPoints);
+				}
+				GSSiClose(Fid);
+				SelectObject(hDC, hBMOld);
+				DeleteDC(hDC);
 
-			if (savebm)
-				SaveBitmap(hBM, "c:\\temp\\test.bmp", 0, 0);
-			GSSiDeleteObject(&hBM);
-			CloseTRANS2(&hTranWtoBM);
-			CloseTRANS2(&hTranBMtoW);
+				if (savebm)
+					SaveBitmap(hBM, "c:\\temp\\test.bmp", 0, 0);
+				GSSiDeleteObject(&hBM);
+				CloseTRANS2(&hTranWtoBM);
+				CloseTRANS2(&hTranBMtoW);
 
-			//nPnts /= 2;
-			rtn = TRUE;
+				//nPnts /= 2;
+				rtn = TRUE;
+			}
 		}
 	}
 	CurView = CurViewSave;
