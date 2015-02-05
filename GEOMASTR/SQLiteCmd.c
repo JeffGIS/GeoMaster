@@ -21,12 +21,24 @@ static LPSTR  PointsToBlob(HPPOINT pPoints, int nPnts)
 		int j;
 		LPBYTE pInts = (LPBYTE)&pPoints[i];
 		unsigned char c;
-		for (j = 0; j < 8; j++,pInts++,lBlob+=2)
+		for (j = 0; j < 8; j++, pInts++, lBlob += 2)
 		{
 			c = *pInts;
 			sprintf(&pBlob[lBlob], "%2.2x", *pInts);
 			//itoa(*pInts, &pBlob[lBlob], 16);
 		}
+	}
+	pBlob[lBlob] = 0;
+	return pBlob;
+}
+static LPSTR  BytesToBlob(LPBYTE pBytes, int nBytes)
+{
+	LPSTR pBlob = malloc(nBytes * 2 +4);
+	int i, lBlob = 0;
+
+	for (i = 0; i < nBytes; i++,lBlob+=2)
+	{
+		sprintf(&pBlob[lBlob], "%2.2x", pBytes[i]);
 	}
 	pBlob[lBlob] = 0;
 	return pBlob;
@@ -153,7 +165,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					if (!rtn)
 						for (index = firstIndex; index < lpGWDHead->NumIndex; index++)
 						{
-							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC",ARG[4], index + 1, ARG[4], (lpGWDHead->pFldInfo + lpGWDHead->IndexFields[1][0])->Name);
+							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", ARG[4], index + 1, ARG[4], (lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name);
 							for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield<lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
 							{
 								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
@@ -303,7 +315,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, fid);
 						for (index = firstIndex; index < lpGWDHead->NumIndex; index++)
 						{
-							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", ARG[5], index + 1, ARG[5], removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[1][0])->Name));
+							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", ARG[5], index + 1, ARG[5], removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name));
 							for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield<lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
 							{
 								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
@@ -343,13 +355,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									{
 										int i;
 										LPBYTE pByte = (LPBYTE)val;
+										LPBYTE pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
 
-										sprintf(strchr(pCmd, 0), "%s'x", delim);
-										for (i = 0; i < lpFieldInfo->Len; i++,pByte++)
-										{
-											itoa((int)*pByte, strchr(pCmd, 0), 16);
-										}
-										sprintf(strchr(pCmd, 0), "'");
+										sprintf(strchr(pCmd, 0), "%sX'%s'", delim,pBlob);
+										free(pBlob);
 									}
 									else
 									{
@@ -393,6 +402,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int nLoops;
 			LPINT pPartLen;
 			HFILE Fid;
+			int nRecs = BT_NUM_IN_INDEX(hHighlight), nLoaded = 0;
+			int keepGoing = 1;
+			int nCanCompress = 0, nTotal = 0;
 
 			if (atob(ARG[3]))
 				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
@@ -403,11 +415,18 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
+				sprintf(pCmd, "Extact Table %s", ARG[4]);
+				CreateStatusWind(hWndMain, 1,pCmd);
+				sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[4]);
+				fputstring(pCmd, Fid);
+				sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", ARG[4]);
+				fputstring(pCmd, Fid);
+
 				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
 				fputstring(pCmd, Fid);
-				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(13),BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT, Points BLOB(%i));", ARG[4],BLOB_MAX);
+				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(13),BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], BLOB_MAX,BLOB_MAX*8);
 				fputstring(pCmd, Fid);
-				while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					pos = BT_NEXT;
 					if (HighlightData.PD.Type == 3)
@@ -419,8 +438,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							DPOINT midPt;
 							HPDPOINT pDPoints;
 							HPPOINT  pPoints;
-							LPSTR blobPoints;
+							LPSTR blobPoints,blobParts;
 							HANDLE hPoints;
+							BOOL canCompress=TRUE;
+							int  np = nPnts;
 
 							ConvertBounds(pBounds, 1, 2);
 							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
@@ -428,28 +449,57 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (nLoops > 1)
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
+								pPartLen++;//first is npoly
+								blobParts = (LPSTR)BytesToBlob((LPBYTE)pPartLen, nLoops*sizeof(int));
 								GlobalUnlock(hPolyPartLen);
 							}
 							pDPoints = (HPDPOINT)(pBounds + 1);
 							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
 							midPt = MinMaxMidPointD(pBounds);
+							nTotal++;
 							for (i = 0; i < nPnts; i++)
 							{
 								ConvertCoord(&pDPoints[i], 1, 2);
-								pPoints[i].x = 1000000 * (pDPoints[i].x - midPt.x);
-								pPoints[i].y = 1000000 * (pDPoints[i].y - midPt.y);
+								pPoints[i].x = 100000000 * (pDPoints[i].x - midPt.x);
+								pPoints[i].y = 100000000 * (pDPoints[i].y - midPt.y);
+								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
+									canCompress = FALSE;
 							}
-							blobPoints = PointsToBlob(pPoints, nPnts);
-							sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s');", ARG[4], Refno, HighlightData.PD.UDI, midPt.x, midPt.y, nPnts, nLoops,blobPoints);
+							if (canCompress)
+							{
+								LPPOINTS pShortPoints = malloc(nPnts*sizeof(POINTS)+4);
+								for (i = 0; i<nPnts; i++)
+								{
+									pShortPoints[i].x = pPoints[i].x;
+									pShortPoints[i].y = pPoints[i].y;
+								}
+								blobPoints = (LPSTR)BytesToBlob((LPBYTE)pShortPoints, nPnts*sizeof(POINTS));
+								free(pShortPoints);
+								np = -nPnts;
+							}
+							else
+								blobPoints = PointsToBlob(pPoints, nPnts);
+							if (nLoops > 1)
+							{
+								sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, HighlightData.PD.UDI, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
+								free(blobParts);
+							}
+							else
+								sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, HighlightData.PD.UDI, midPt.x, midPt.y, np, nLoops, blobPoints);
 							fputstring(pCmd, Fid);
 							free(blobPoints);
 							GSSiGlobUlFree(&hPoints);
 							GSSiGlobUlFree(&hPoly);
 							GSSiGlobFree(&hPolyPartLen);
+							if (canCompress)
+								nCanCompress++;
 						}
 					}
+					sprintf(pCmd, "Can compress %i (%.1f%%)", nCanCompress, (100.0*nCanCompress) / nTotal);
+					keepGoing = StatusWindowUpdate(NULL,pCmd, nRecs, ++nLoaded);
 				}
+				DestroyStatusWindow(0);
 				GSSiClose(Fid);
 				GSSiGlobUlFree(&hCmd);
 			}
