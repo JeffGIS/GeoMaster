@@ -3,6 +3,7 @@
 //#include "sqlite3ext.h"
 
 #define BLOB_MAX	USHRT_MAX
+#define COORDINATE_FACTOR	10000000
 int i;
 
 static LPSTR  DPointsToBlob(HPDPOINT pPoints, int nPnts)
@@ -424,7 +425,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
 				fputstring(pCmd, Fid);
-				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(13),BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], BLOB_MAX,BLOB_MAX*8);
+				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(17),BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], BLOB_MAX,BLOB_MAX*8);
 				fputstring(pCmd, Fid);
 				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
@@ -461,8 +462,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							for (i = 0; i < nPnts; i++)
 							{
 								ConvertCoord(&pDPoints[i], 1, 2);
-								pPoints[i].x = 100000000 * (pDPoints[i].x - midPt.x);
-								pPoints[i].y = 100000000 * (pDPoints[i].y - midPt.y);
+								pPoints[i].x = COORDINATE_FACTOR * (pDPoints[i].x - midPt.x);
+								pPoints[i].y = COORDINATE_FACTOR * (pDPoints[i].y - midPt.y);
 								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
 									canCompress = FALSE;
 							}

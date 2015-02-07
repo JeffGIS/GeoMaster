@@ -73,12 +73,12 @@ static BOOL GetAreaFromFile(HFILE Fid,LPMNMXCORD pBounds,LPINT pnPnts,LPHANDLE p
 		BigRead (Fid, pPartLen, sizeof(int)*nLoops);
 		GSSiGlobUlFree (&hPartLen);
 	}
+	BigRead(Fid, (HPSTR)pnPnts, 4);
 	*phDPoints = GSSiGlobAlloc(1798, GMEM_MOVEABLE, *pnPnts * sizeof(DPOINT)+4);
 	pPoints = GlobalLock(*phDPoints);
-	BigRead(Fid, (HPSTR)pnPnts, 4);
 	BigRead(Fid, (HPSTR)pPoints, *pnPnts*sizeof(DPOINT));
-
-	return FALSE;
+	GlobalUnlock(*phDPoints);
+	return TRUE;
 }
 
 BOOL ThemeCreateAreaInMask(int from)
@@ -100,14 +100,19 @@ BOOL ThemeCreateAreaInMask(int from)
 			HBITMAP hBM, hBMOld;
 			BITMAP	bm;
 			HDC hDC, hDCMain;
+			RECT rect;
 			HBRUSH hOldBrush;
 			HANDLE hTranWtoBM, hTranBMtoW;
 			HANDLE hPoly;
 			LPPOINT pPoly;
 			BOOL savebm = TRUE;
 			int i;
+			static int nTest = 1;
 			int nMareaPoints;
 			HANDLE hMareaPoints;
+			COLORREF blue = RGB(0, 0, 255);
+			HPEN hBluePen;
+			HBRUSH hBlueBrush;
 			HFILE Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
 			
 			if (Fid != HFILE_ERROR)
@@ -128,6 +133,9 @@ BOOL ThemeCreateAreaInMask(int from)
 				hDC = CreateCompatibleDC(hDCMain);
 				//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
 				hBM = CreateCompatibleBitmap(hDCMain, width + 4, height + 4);
+				rect.left = rect.bottom = 0;
+				rect.right = width + 4;
+				rect.top = height + 4;
 				GetObject(hBM, sizeof(bm), (LPSTR)&bm);
 				ReleaseDC(CurView->hWnd, hDCMain);
 				hBMOld = SelectObject(hDC, hBM);
@@ -136,20 +144,18 @@ BOOL ThemeCreateAreaInMask(int from)
 				SetViewportOrgEx(hDC, 0, 0, 0);
 				SetWindowExtEx(hDC, 1024, 1024, 0);
 				SetViewportExtEx(hDC, 1024, 1024, 0);
-				hOldBrush = SelectObject(hDC, hRedBrush);
-				hOldPen = SelectObject(hDC, hRedPen);
+				FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));
 				BMbounds.xmn = 2;
 				BMbounds.ymn = 2;
 				BMbounds.xmx = 2 + width;
 				BMbounds.ymx = 2 + height;
 				hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
 				hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
-				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
-				pPoly = GlobalLock(hPoly);
-				for (i = 0; i < nPnts; i++)
-					pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);
-				Polygon(hDC, pPoly, nPnts);
-				GSSiGlobUlFree(&hPoly);
+
+				SetROP2(hDC, 5);//or 10 for both
+				hOldBrush = SelectObject(hDC, GetStockObject(BLACK_BRUSH));
+				hOldPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+
 				while (GetAreaFromFile(Fid, &mareaBounds, &nMareaPoints, &hMareaPoints))
 				{
 					if (IntersectBounds(&mareaBounds, &bounds, 0))
@@ -166,11 +172,31 @@ BOOL ThemeCreateAreaInMask(int from)
 					GSSiGlobFree(&hMareaPoints);
 				}
 				GSSiClose(Fid);
+
+				hBluePen = CreatePen(PS_SOLID, 1, blue);
+				hBlueBrush = CreateSolidBrush(blue);
+				SelectObject(hDC,hBlueBrush);
+				SelectObject(hDC, hBluePen);
+				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+				pPoly = GlobalLock(hPoly);
+				for (i = 0; i < nPnts; i++)
+					pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);
+				Polygon(hDC, pPoly, nPnts);
+				SelectObject(hDC, hOldBrush);
+				SelectObject(hDC, hOldPen);
+				DeleteObject(hBluePen);
+				DeleteObject(hBlueBrush);
+				GSSiGlobUlFree(&hPoly);
 				SelectObject(hDC, hBMOld);
 				DeleteDC(hDC);
 
 				if (savebm)
-					SaveBitmap(hBM, "c:\\temp\\test.bmp", 0, 0);
+				{
+					char file[MAX_PATH];
+
+					sprintf(file, "c:\\temp\\AreaTests\\test%i.bmp", nTest++);
+					SaveBitmap(hBM, file, 0, 0);
+				}
 				GSSiDeleteObject(&hBM);
 				CloseTRANS2(&hTranWtoBM);
 				CloseTRANS2(&hTranBMtoW);
