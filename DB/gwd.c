@@ -7789,9 +7789,11 @@ int GWDReplaceRecord (LPGWDHEADER lpGWDHead,long UnCompressedLength,LPSHORT Inde
 			if (BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset))
 			{
 				rtn = GWDAddRecord(lpGWDHead, length, IndexArray);
+				goto Exit;
 			}
 		}
-		goto Exit;
+		else
+			goto Exit;
     }  
 	rtn = 2;
     hSaveRec = GSSiGlobAlloc ( 282,GMEM_MOVEABLE,length);

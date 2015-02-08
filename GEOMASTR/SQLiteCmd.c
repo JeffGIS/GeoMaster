@@ -60,6 +60,19 @@ static LPSTR removePCT(LPSTR name)
 	*pOutChar = 0;
 	return newName;
 }
+static void ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
+{
+	int i;
+
+	for (i = 0; i < 100; i++)
+	{
+		if (pOffsets[i] > 0)
+		{
+			FillGWDData(lpGWDHead, pOffsets[i]);
+			pOffsets[i] = *(LPINT)&lpGWDHead->GWDData;
+		}
+	}
+}
 
 int SQLiteCmd(int nArgs, LPSTR *ARG)
 {
@@ -241,15 +254,20 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			CloseGWDatabase(hGMDB);
 		}
 	}
-		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset)
+		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt))
 		{
 			HANDLE hGMDB = OpenGWDatabase(ARG[4], BT_READ);
 			char *error = NULL;
 			BOOL primKeyIsOffset = atob(ARG[6]);
+			BOOL includesPoint = FALSE;
 			HFILE fid;
+
+			if (*ARG[7])
+				includesPoint = TRUE;
 			if (hGMDB)
 			{
 				LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hGMDB);
+				LPGWDHEADER lpGWDOffConv=0;
 
 				if (atob(ARG[3]))
 					fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
@@ -261,10 +279,25 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					LPSTR  pCmd = GlobalLock(hCmd);
 					LPGWFLDINFO lpFieldInfo;
 					char delim[2] = { 0 };
-
+					HANDLE hOffConvDB = 0;
+					HFILE  fidOffConv = HFILE_ERROR;
+					
+					if (*ARG[8])
+					{
+						hOffConvDB = OpenGWDatabase(ARG[8], BT_READ);
+						lpGWDOffConv = (LPGWDHEADER)GlobalLock(hOffConvDB);
+					}
 					GSSillseek(fid, 0, 2);
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[5]);
 					fputstring(pCmd, fid);
+					if (includesPoint)
+					{
+						sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", ARG[5]);
+						fputstring(pCmd, fid);
+						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[5]);
+						fputstring(pCmd, fid);
+						strcpy(lpGWDHead->pFldInfo->Name, "id");
+					}
 
 					if (primKeyIsOffset)
 						sprintf(pCmd, "CREATE TABLE %s (OFFSET INT PRIMARY KEY,", ARG[5]);
@@ -341,6 +374,28 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						{
 							pos = BT_NEXT;
 							FillGWDData(lpGWDHead, Offset);
+
+							if (includesPoint)
+							{
+								MNMXCORD bounds;
+								DPOINT pt;
+								int id = Offset;
+								BOOL err;
+
+								if (!primKeyIsOffset)
+									id = *(LPINT)&lpGWDHead->GWDData;
+								strcpy(pCmd, ARG[7]);
+								ExpandText(pCmd);
+								pt = atopt(pCmd, &err);
+								bounds.xmn = pt.x - 0.00000001;
+								bounds.xmx = pt.x + 0.00000001;
+								bounds.ymn = pt.y - 0.00000001;
+								bounds.ymx = pt.y + 0.00000001;
+								//ConvertBounds(&bounds, 1, 2); point field must be lat lon
+								sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[5], id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
+								fputstring(pCmd, fid);
+							}
+
 							if (primKeyIsOffset)
 								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", ARG[5], Offset);
 							else
@@ -356,7 +411,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									{
 										int i;
 										LPBYTE pByte = (LPBYTE)val;
-										LPBYTE pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
+										LPBYTE pBlob;
+										
+										ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
+										pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
 
 										sprintf(strchr(pCmd, 0), "%sX'%s'", delim,pBlob);
 										free(pBlob);
@@ -384,6 +442,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						GSSiGlobUlFree(&hVal);
 					}
 					GSSiGlobUlFree(&hCmd);
+					if (hOffConvDB)
+					{
+						GlobalUnlock(hOffConvDB);
+						CloseGWDatabase(hOffConvDB);
+					}
 				}
 				if (!rtn)
 					rtn = 1;
@@ -505,6 +568,58 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				GSSiGlobUlFree(&hCmd);
 			}
 		}
-	return rtn;
+		else if (!stricmp(ARG[1], "TEXTFROMPOINT"))//$SQLITE(TEXTFROMPOINT,outfilename,new,tablename,projection)
+		{
+			short	pos = BT_FIRST;
+			long	Refno;
+			HIGHLIGHTDATA	HighlightData;
+			HFILE Fid;
+			int nRecs = BT_NUM_IN_INDEX(hHighlight), nLoaded = 0;
+			int keepGoing = 1;
+
+			if (atob(ARG[3]))
+				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
+			else
+				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+			if (Fid != HFILE_ERROR)
+			{
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				LPSTR  pCmd = GlobalLock(hCmd);
+
+				sprintf(pCmd, "Extact Table %s", ARG[4]);
+				CreateStatusWind(hWndMain, 1, pCmd);
+				sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[4]);
+				fputstring(pCmd, Fid);
+				sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", ARG[4]);
+				fputstring(pCmd, Fid);
+
+				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
+				fputstring(pCmd, Fid);
+				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(17),pointX REAL,pointY REAL);", ARG[4]);
+				fputstring(pCmd, Fid);
+				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+				{
+					pos = BT_NEXT;
+					if (HighlightData.PD.Type == 1)
+					{
+						LPMNMXCORD	pBounds = &HighlightData.PD.Rect;
+						DPOINT pt;
+
+						ConvertBounds(pBounds, 1, 2);
+						sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+						fputstring(pCmd, Fid);
+						pt = HighlightData.PD.BeginPoint;
+						ConvertCoord(&pt, 1, 2);
+						sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f);", ARG[4], Refno, HighlightData.PD.UDI, pt.x,pt.y);
+						fputstring(pCmd, Fid);
+					}
+					keepGoing = StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
+				}
+				DestroyStatusWindow(0);
+				GSSiClose(Fid);
+				GSSiGlobUlFree(&hCmd);
+			}
+		}
+		return rtn;
 }
 
