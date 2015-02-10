@@ -2507,6 +2507,8 @@
 #define IDC_SHOWDESCRIPTION             1546
 #define IDC_ADDNEWLINE                  1546
 #define IDC_SELECTMATCH                 1547
+#define IDC_ADDDESC                     1547
+#define IDC_ADDDEF                      1547
 #define IDC_ALLELEM                     1548
 #define IDC_SECLONG2                    1549
 #define IDC_SECLAT2                     1550

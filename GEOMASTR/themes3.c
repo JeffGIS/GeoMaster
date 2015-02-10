@@ -1952,7 +1952,7 @@ BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
 	LPFIELDINFO lpFieldInfo;  
 	char	str[512]; 
 	int		i;
-	static	BOOL	AddSpaces=TRUE, AddBrackets=TRUE, AddCommas=FALSE, AddTabs=FALSE, AddQuotes=FALSE, FirstShow, ShowDesc=FALSE, AddNewLine=FALSE;
+	static	BOOL	AddSpaces=TRUE, AddBrackets=TRUE, AddCommas=FALSE, AddTabs=FALSE, AddQuotes=FALSE, FirstShow, ShowDesc=FALSE, AddNewLine=FALSE, AddDef=FALSE;
 
  short    BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
@@ -1983,8 +1983,9 @@ GSSiExitProg (620);
 			ShowWindow(GetDlgItem(hWndDlg,IDC_COMMASBTWNFIELDS),SW_HIDE);   
 			ShowWindow(GetDlgItem(hWndDlg,IDC_QUOTESAROUNDFIELDS),SW_HIDE);   
 			ShowWindow(GetDlgItem(hWndDlg,IDC_TABBTWNFIELDS),SW_HIDE);   
-			ShowWindow(GetDlgItem(hWndDlg,IDC_ADDNEWLINE),SW_HIDE);   
-			SendDlgItemMessage (hWndDlg,IDC_BRACKETFIELDS,(UINT)BM_SETCHECK,TRUE,(LPARAM)0L); 
+			ShowWindow(GetDlgItem(hWndDlg, IDC_ADDNEWLINE), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_ADDDEF), SW_HIDE);
+			SendDlgItemMessage(hWndDlg, IDC_BRACKETFIELDS, (UINT)BM_SETCHECK, TRUE, (LPARAM)0L);
 			SendDlgItemMessage (hWndDlg,IDC_COMMASBTWNFIELDS,(UINT)BM_SETCHECK,TRUE,(LPARAM)0L); 
 		}
 		else
@@ -1995,6 +1996,7 @@ GSSiExitProg (620);
 			SendDlgItemMessage (hWndDlg,IDC_QUOTESAROUNDFIELDS,(UINT)BM_SETCHECK,AddQuotes,(LPARAM)0L); 
 			SendDlgItemMessage(hWndDlg, IDC_TABBTWNFIELDS, (UINT)BM_SETCHECK, AddTabs, (LPARAM)0L);
 			SendDlgItemMessage(hWndDlg, IDC_ADDNEWLINE, (UINT)BM_SETCHECK, AddNewLine, (LPARAM)0L);
+			SendDlgItemMessage(hWndDlg, IDC_ADDDEF, (UINT)BM_SETCHECK, AddNewLine, (LPARAM)0L);
 		}
     	if (!hFLDB)
     	{
@@ -2109,6 +2111,7 @@ GSSiExitProg (620);
 		 AddQuotes = SendDlgItemMessage (hWndDlg,IDC_QUOTESAROUNDFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L);     
 		 AddTabs = SendDlgItemMessage(hWndDlg, IDC_TABBTWNFIELDS, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
 		 AddNewLine = SendDlgItemMessage(hWndDlg, IDC_ADDNEWLINE, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
+		 AddDef = SendDlgItemMessage(hWndDlg, IDC_ADDDEF, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L);
 		 DestroyWindow(hWndDlg);
          break;  
 
@@ -2208,6 +2211,7 @@ GSSiExitProg (620);
         	  case IDC_BRACKETFIELDS:
 			  case IDC_QUOTESAROUNDFIELDS:
 			  case IDC_ADDNEWLINE:
+			  case IDC_ADDDEF:
 				  goto OutputFields;
         	  	
 	          case IDC_FIELDS:
@@ -2282,9 +2286,15 @@ GSSiExitProg (620);
 							*pTab = 0;
 						if (SendDlgItemMessage (hWndDlg,IDC_BRACKETFIELDS,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))	 
 							sprintf (pText,"%s[%s]%s",quote,str,quote); 
+						else if (SendDlgItemMessage(hWndDlg, IDC_ADDDEF, (UINT)BM_GETCHECK, (WPARAM)0, (LPARAM)0L))
+						{
+							char def[16];
+							//CreateGMTextHeader(lpFieldInfo, lpHead)
+							sprintf(pText, "%s%s(%c%i)%s", quote, str, fieldType, fieldLen, quote);
+						}
 						else
-							sprintf (pText,"%s%s%s",quote,str,quote);
-	                	pText = _fstrchr (pText,0);
+							sprintf(pText, "%s%s%s", quote, str, quote);
+						pText = _fstrchr(pText, 0);
 					} 
 					GSSiGlobUlFree (&hFields); 
 					GlobalUnlock (hText);

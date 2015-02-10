@@ -30516,6 +30516,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	           	{
 	           		 short Version;     
 	            	 HFILE	FidSave;
+					 int lineSize = 1024;
 	           		 
 	           		 
 	             	 if (!*AutoExportName)
@@ -30530,6 +30531,8 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 	break;
 	                 ii=BigRead (FidSave,Ext,6);
 	                 ii=BigRead (FidSave,(HPSTR)&Version,2);   
+					 if (Version > 1)
+						 lineSize = 4094;
 	                 ii=BigRead (FidSave,Name,sizeof(Name));
 	                 SetDlgItemText (hWndDlg,IDC_OUT_FILE,Name);
 	                 BigRead (FidSave,MIFOutDataFile,128); 
@@ -30544,11 +30547,11 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 			         SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,-1,(LPARAM)curproject);
 	                 BigRead (FidSave,(HPSTR)&Choice,2);
 				     SendDlgItemMessage(hWndDlg,IDC_UNITS,CB_SETCURSEL,Choice,0); 
-	                 BigRead (FidSave,str,1024);
+	                 BigRead (FidSave,str,lineSize);
 	                 SetDlgItemText (hWndDlg,IDC_HEADLINE,str);
-	                 BigRead (FidSave,str,1024);
+					 BigRead(FidSave, str, lineSize);
 	                 SetDlgItemText (hWndDlg,IDC_OUTLINE1,str);
-	                 BigRead (FidSave,str,1024);
+					 BigRead(FidSave, str, lineSize);
 	                 SetDlgItemText (hWndDlg,IDC_OUTLINE2,str);
 	                 BigRead (FidSave,str,1024);
 	                 SetDlgItemText (hWndDlg,IDC_FILTER,str);
@@ -30562,7 +30565,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	           		 
 	            case IDC_SAVE:
 	            {    
-	            	 short	Version=1; 
+	            	 short	Version=2; 
 	            	 HFILE	FidSave; 
 	            	 
 	                 if (!GetSaveName2 (hWndDlg,Name,0,Ext,IDS_FILETXO)) break; 
@@ -30583,12 +30586,12 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 BigWrite (FidSave,curproject,34,-1);
 				     Choice=SendDlgItemMessage(hWndDlg,IDC_UNITS,CB_GETCURSEL,0,0); 
 	                 BigWrite (FidSave,(HPSTR)&Choice,2,-1);
-	                 GetDlgItemText (hWndDlg,IDC_HEADLINE,str,1024);
-	                 BigWrite (FidSave,str,1024,-1);
-	                 GetDlgItemText (hWndDlg,IDC_OUTLINE1,str,1024);
-	                 BigWrite (FidSave,str,1024,-1);
-	                 GetDlgItemText (hWndDlg,IDC_OUTLINE2,str,1024);
-	                 BigWrite (FidSave,str,1024,-1);
+	                 GetDlgItemText (hWndDlg,IDC_HEADLINE,str,4094);
+	                 BigWrite (FidSave,str,4094,-1);
+					 GetDlgItemText(hWndDlg, IDC_OUTLINE1, str, 4094);
+	                 BigWrite (FidSave,str,4094,-1);
+					 GetDlgItemText(hWndDlg, IDC_OUTLINE2, str, 4094);
+	                 BigWrite (FidSave,str,4094,-1);
 	                 GetDlgItemText (hWndDlg,IDC_FILTER,str,1024);
 	                 BigWrite (FidSave,str,1024,-1);
 	//                 GetDlgItemText (hWndDlg,IDC_OUTLINE4,str,1024);
@@ -30705,12 +30708,12 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				    CurItem = 0;
 				    hStr = GSSiGlobAlloc ( 708,GMEM_MOVEABLE,4096);   
 				    lpStr = GlobalLock (hStr);  
-	                if (GetDlgItemText (hWndDlg,IDC_HEADLINE,lpStr,1024))
+	                if (GetDlgItemText (hWndDlg,IDC_HEADLINE,lpStr,4094))
 	                {
 						ExpandText (lpStr);
 						fputstring (lpStr,FidDisplay);
 					}
-					GetDlgItemText (hWndDlg,IDC_OUTLINE1,lpStr,1024);
+					GetDlgItemText (hWndDlg,IDC_OUTLINE1,lpStr,4094);
 					if (strstr (lpStr,"$POLYPOINT"))
 						usePolyPoints = TRUE;
 					while (ContinueProcessing && 
@@ -30771,7 +30774,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 							if (RC || !st)
 								goto Next;
 					    }
-						GetDlgItemText (hWndDlg,IDC_OUTLINE1,lpStr,1024);
+						GetDlgItemText (hWndDlg,IDC_OUTLINE1,lpStr,4094);
 						ExpandText (lpStr);
 					    len=_fstrlen(lpStr);
 						if (len)
