@@ -385,7 +385,19 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								if (!primKeyIsOffset)
 									id = *(LPINT)&lpGWDHead->GWDData;
 								strcpy(pCmd, ARG[7]);
-								ExpandText(pCmd);
+								strupr(pCmd);
+								for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+								{
+									char testVar[128];
+
+									sprintf(testVar, "[%s]", lpFieldInfo->Name);
+									strupr(testVar);
+									if (strstr(pCmd, testVar))
+									{
+										GMDGetCharFieldVal(lpGWDHead, i, val);
+										REPLAC(pCmd, testVar, val, 1024);
+									}
+								}
 								pt = atopt(pCmd, &err);
 								bounds.xmn = pt.x - 0.00000001;
 								bounds.xmx = pt.x + 0.00000001;
