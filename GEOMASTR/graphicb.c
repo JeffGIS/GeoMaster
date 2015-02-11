@@ -5545,9 +5545,14 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 			        				if (strnicmp (pRec->Word,PartLoc[ipart],min(8,PartLen[ipart])))
 										break;
 									nSeqRec = -(pRec->Seq + 1);
+									if (nSeqRec > 0)
+										ii = 1;
 			        				nOffsets = nSeqRec * 100 + pRec->nOffsets;
 									if (!nPartOffsets[ipart])
-										hPartOffsets[ipart] = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXOFFSETS * sizeof(int));
+										hPartOffsets[ipart] = GSSiGlobAlloc(0, GMEM_MOVEABLE, nOffsets * sizeof(int));
+									else
+										hPartOffsets[ipart] = GSSiGlobalReAlloc(0, hPartOffsets[ipart], (nPartOffsets[ipart]+nOffsets) * sizeof(int), GMEM_MOVEABLE);
+
 									pOffsets = (LPLONG)GlobalLock (hPartOffsets[ipart]);
 									if (nPartOffsets[ipart] + pRec->nOffsets >= MAXOFFSETS)
 										GetNext = FALSE;
