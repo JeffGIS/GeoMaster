@@ -415,7 +415,12 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							delim[0] = 0;
 							for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
 							{
-								GMDGetCharFieldVal(lpGWDHead, i, val);
+								if (!stricmp(lpFieldInfo->Name, "Offsets") && lpFieldInfo->Len == 400)
+									GMDGetCharFieldVal(lpGWDHead, -i, val);
+								else
+									GMDGetCharFieldVal(lpGWDHead, i, val);
+								if (!i && !stricmp(val, "BOB"))
+									ii = 1;
 								switch (lpFieldInfo->Type)
 								{
 								case BT_CHAR:
