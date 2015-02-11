@@ -3731,6 +3731,13 @@ BOOL GMDGetCharFieldVal (LPGWDHEADER lpGWDHead,int Field,LPSTR str)
 {   LPSTR   lpVal;
     LPGWFLDINFO lpGWFldInfo;
     BOOL        Status;
+	BOOL	binary = FALSE;
+
+	if (Field < 0)
+	{
+		Field = -Field;
+		binary = TRUE;
+	}
     
     Status = TRUE;
     lpGWFldInfo = lpGWDHead->pFldInfo + Field;
@@ -3741,8 +3748,11 @@ BOOL GMDGetCharFieldVal (LPGWDHEADER lpGWDHead,int Field,LPSTR str)
         default: 
         case BT_RIGHT_CHAR:
         case BT_CHAR:
-            _fstrncpy (str,lpVal,lpGWFldInfo->Len);
-            str+=lpGWFldInfo->Len;
+			if (binary)
+				memmove(str, lpVal, lpGWFldInfo->Len);
+			else
+				_fstrncpy(str, lpVal, lpGWFldInfo->Len);
+			str += lpGWFldInfo->Len;
             *str = '\0';
         break;
                                                 
