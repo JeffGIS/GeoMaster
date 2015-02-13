@@ -510,7 +510,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					pos = BT_NEXT;
-					if (HighlightData.PD.Type == 3)
+					if (HighlightData.PD.Type == 3 && strlen(HighlightData.PD.UDI)>0)
 					{
 
 						if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly, &hPolyPartLen)))
