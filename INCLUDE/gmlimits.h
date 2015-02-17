@@ -23,7 +23,7 @@
 #define		MAXVARLEN			4095*4
 #define		MAXDLTVAR			256
 #define 	MAXSQLPERFILE   	32   
-#define 	MAXTRANPOINTS		1024
+#define 	MAXTRANPOINTS		4096
 #define		MAXORTHOBUFS		2 
 #define		MAXCFGTAGS			32
 #define		MAXOPENSURF			16   
