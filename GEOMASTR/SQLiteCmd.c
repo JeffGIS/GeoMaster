@@ -471,7 +471,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				CloseGWDatabase(hGMDB);
 			}
 		}
-		else if (!stricmp(ARG[1], "TEXTFROMPOLY"))//$SQLITE(TEXTFROMPOLY,outfilename,new,tablename,projection)
+		else if (!stricmp(ARG[1], "TEXTFROMPOLY"))//$SQLITE(TEXTFROMPOLY,outfilename,new,tablename,UDIFieldNameAndType(i.e PID  CHAR(13)-no spaces in name),UDIFieldNameAndType2(i.e PID  CHAR(13)-no spaces in name)
 		{
 			short	pos = BT_FIRST;
 			long	Refno;
@@ -486,8 +486,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int nRecs = BT_NUM_IN_INDEX(hHighlight), nLoaded = 0;
 			int keepGoing = 1;
 			int nCanCompress = 0, nTotal = 0;
+			LPSTR pSpace;
+			BOOL createFile, createTables=TRUE;
 
-			if (atob(ARG[3]))
+			if (*ARG[3] == 'A')
+			{
+				createFile = FALSE;
+				createTables = FALSE;
+			}
+			else
+				createFile = atob(ARG[3]);
+			if (createFile)
 				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
 			else
 				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
@@ -496,23 +505,44 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
-				sprintf(pCmd, "Extact Table %s", ARG[4]);
+				GSSillseek(Fid, 0, 2);
+				sprintf(pCmd, "Extract Table %s", ARG[4]);
 				CreateStatusWind(hWndMain, 1,pCmd);
-				sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[4]);
-				fputstring(pCmd, Fid);
-				sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", ARG[4]);
-				fputstring(pCmd, Fid);
+				if (createTables)
+				{
+					sprintf(pCmd, "DROP TABLE IF EXISTS %s;", ARG[4]);
+					fputstring(pCmd, Fid);
+					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
+					fputstring(pCmd, Fid);
 
-				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
-				fputstring(pCmd, Fid);
-				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(17),BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], BLOB_MAX,BLOB_MAX*8);
-				fputstring(pCmd, Fid);
+					sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
+					fputstring(pCmd, Fid);
+					if (*ARG[6])
+						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6], BLOB_MAX, BLOB_MAX * 8);
+					else
+						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], BLOB_MAX, BLOB_MAX * 8);
+					fputstring(pCmd, Fid);
+					if ((pSpace = strchr(ARG[5], ' ')))
+						*pSpace = 0;
+					sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC);", ARG[4],ARG[5], ARG[4], ARG[5]);
+					fputstring(pCmd, Fid);
+					if (*ARG[6])
+					{
+						if ((pSpace = strchr(ARG[6], ' ')))
+							*pSpace = 0;
+						sprintf(pCmd, "CREATE INDEX %s_Index ON %s ('%s' ASC)", ARG[6], ARG[4], ARG[6]);
+						fputstring(pCmd, Fid);
+					}
+				}
+
 				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					pos = BT_NEXT;
 					if (HighlightData.PD.Type == 3 && strlen(HighlightData.PD.UDI)>0)
 					{
-
+						char UDI[80];
+						strcpy(UDI, HighlightData.PD.UDI);
+						REPLAC(UDI, "'", "''",80);
 						if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly, &hPolyPartLen)))
 						{
 							LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
@@ -563,11 +593,19 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								blobPoints = PointsToBlob(pPoints, nPnts);
 							if (nLoops > 1)
 							{
-								sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, HighlightData.PD.UDI, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
+								if (*ARG[7])
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,ARG[7], midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
+								else
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
 								free(blobParts);
 							}
 							else
-								sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, HighlightData.PD.UDI, midPt.x, midPt.y, np, nLoops, blobPoints);
+							{
+								if (*ARG[7])
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,ARG[7], midPt.x, midPt.y, np, nLoops, blobPoints);
+								else
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLoops, blobPoints);
+							}
 							fputstring(pCmd, Fid);
 							free(blobPoints);
 							GSSiGlobUlFree(&hPoints);

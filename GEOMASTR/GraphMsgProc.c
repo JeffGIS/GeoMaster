@@ -18280,8 +18280,9 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				}
 				switch (SHPHeader.ShapeType)
 				{   
-					case 8: //multipoints
-					case 1: //points
+				case SHPT_MULTIPATCH:
+					case SHPT_POINTZ:
+					case SHPT_POINT:
 	                	SetDlgItemText (hWndDlg,IDC_GET_SYM,"Point Symbol"); 
 	               	break; 
 					case 3: //lines
@@ -19181,7 +19182,7 @@ NextFile:
                     GSSiGlobUlFree (&hhPoly);
                     
                  } 
-                 else if (SHPHeader.ShapeType == 1)
+				 else if (SHPHeader.ShapeType == SHPT_POINT || SHPHeader.ShapeType == SHPT_POINTZ)
                  {  
                     DPOINT  Point;
                     BOOL    Store=TRUE;
