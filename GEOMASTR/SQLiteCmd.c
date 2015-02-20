@@ -488,6 +488,14 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int nCanCompress = 0, nTotal = 0;
 			LPSTR pSpace;
 			BOOL createFile, createTables=TRUE;
+			int wantType = 3;
+			LPSTR pUS = strrchr(ARG[4], '_');
+
+			if (pUS)
+			{
+				if (!stricmp(pUS, "_LINE"))
+					wantType = 2;
+			}
 
 			if (*ARG[3] == 'A')
 			{
@@ -502,7 +510,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 32);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				GSSillseek(Fid, 0, 2);
@@ -537,12 +545,19 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
-					pos = BT_NEXT;
-					if (HighlightData.PD.Type == 3 && strlen(HighlightData.PD.UDI)>0)
+					char UDI[80];
+					if (!stricmp(ARG[5], "SYMBOLNAME"))
 					{
-						char UDI[80];
+						GetSymbolName(HighlightData.PD.Desc, UDI, 0, 0, 0);
+					}
+					else
+					{
 						strcpy(UDI, HighlightData.PD.UDI);
-						REPLAC(UDI, "'", "''",80);
+						REPLAC(UDI, "'", "''", 80);
+					}
+					pos = BT_NEXT;
+					if (HighlightData.PD.Type == wantType && strlen(UDI)>0)
+					{
 						if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly, &hPolyPartLen)))
 						{
 							LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
