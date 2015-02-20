@@ -638,7 +638,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				GSSiGlobUlFree(&hCmd);
 			}
 		}
-		else if (!stricmp(ARG[1], "TEXTFROMPOINT"))//$SQLITE(TEXTFROMPOINT,outfilename,new,tablename,projection)
+		else if (!stricmp(ARG[1], "TEXTFROMPOINT"))//$SQLITE(TEXTFROMPOINT,outfilename,new,tablename,UDIFieldNameAndType(i.e PID  CHAR(13)-no spaces in name),UDIFieldNameAndType2(i.e PID  CHAR(13)-no spaces in name)
 		{
 			short	pos = BT_FIRST;
 			long	Refno;
@@ -646,6 +646,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			HFILE Fid;
 			int nRecs = BT_NUM_IN_INDEX(hHighlight), nLoaded = 0;
 			int keepGoing = 1;
+			LPSTR pSpace;
 
 			if (atob(ARG[3]))
 				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
@@ -665,10 +666,24 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
 				fputstring(pCmd, Fid);
-				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PID CHAR(17),pointX REAL,pointY REAL);", ARG[4]);
+				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,pointX REAL,pointY REAL);", ARG[4],ARG[5]);
+				fputstring(pCmd, Fid);
+				if ((pSpace = strchr(ARG[5], ' ')))
+					*pSpace = 0;
+				sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC);", ARG[4], ARG[5], ARG[4], ARG[5]);
 				fputstring(pCmd, Fid);
 				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
+					char UDI[80];
+					if (!stricmp(ARG[5], "SYMBOLNAME"))
+					{
+						GetSymbolName(HighlightData.PD.Desc, UDI, 0, 0, 0);
+					}
+					else
+					{
+						strcpy(UDI, HighlightData.PD.UDI);
+						REPLAC(UDI, "'", "''", 80);
+					}
 					pos = BT_NEXT;
 					if (HighlightData.PD.Type == 1)
 					{
@@ -680,7 +695,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, Fid);
 						pt = HighlightData.PD.BeginPoint;
 						ConvertCoord(&pt, 1, 2);
-						sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f);", ARG[4], Refno, HighlightData.PD.UDI, pt.x,pt.y);
+						sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f);", ARG[4], Refno, UDI, pt.x,pt.y);
 						fputstring(pCmd, Fid);
 					}
 					keepGoing = StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
