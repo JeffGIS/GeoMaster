@@ -2489,7 +2489,7 @@ GotCloseFilehSQL:
 					hSaveScreen = SaveScreen2 (hWnd,hDC,TBRect,0,0);
 				YellowTextBox (hWnd,ptxt,ScreenPoint,0,0,TRUE,0);
 				GSSiGlobUlFree (&hTxt);
-				while (GSSiGetMessage(&msg, hWnd,0,0))
+				while (GSSiGetMessage(&msg, hWnd,0,0)>0)
 				{   
            			if (msg.message == WM_MOUSEMOVE)
 					{
