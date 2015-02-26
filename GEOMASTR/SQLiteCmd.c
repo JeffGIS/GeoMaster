@@ -657,6 +657,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
+				GSSillseek(Fid, 0, 2);
 				sprintf(pCmd, "Extact Table %s", ARG[4]);
 				CreateStatusWind(hWndMain, 1, pCmd);
 				sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[4]);
