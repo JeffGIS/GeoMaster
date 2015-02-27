@@ -1554,7 +1554,15 @@ GSSiExitProg (1350);
 			}
 			goto RtnFalse;
 		}
-
+		case 852://$HEADTOAZ(heading in deg)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			AZ = atof(Arg[1]);
+			AZ *= RADDEG;
+			AZ = LTWOPI(HALFPI - AZ);
+			ftoa(OutLoc, AZ);
+			goto Rtnl;
+		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
@@ -1610,6 +1618,7 @@ GSSiExitProg (1350);
 		}
 		
 		case 903: // $GMDUPDATE(file,setkey,setvars,truncate(0,1or2 def 1 adds even if fields dont exist - 2 adds but warns),updateonly(opt-will not add new rec if true - default F)) 
+			      // returns 1 if added and no existing record, 2 if added and previous record existed.
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,VAL1=1;VAL3=3) 
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,FileID) updates all fields in file FileID that are in file.gmd
 		{	 
