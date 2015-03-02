@@ -1309,7 +1309,7 @@ void DisplayNorthArrowLegend (int From)
 					CurView->Rotation = SaveRot;
 					CurView->xForm = SavexForm;
 					SetDisplayMode (CurView->hDC, GF_TEXTMODE);
-					CurView->Rotation = 0;
+					//CurView->Rotation = 0; northarrow image not rotating with this line
 					GSSiDeleteObject(&CurView->hRgn);
 					CurView->hRgn = CreateVPRgn(FALSE,FALSE);
 					RegionType = SelectClipRgn (CurView->hDC,CurView->hRgn); 
