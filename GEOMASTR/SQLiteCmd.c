@@ -538,7 +538,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					{
 						if ((pSpace = strchr(ARG[6], ' ')))
 							*pSpace = 0;
-						sprintf(pCmd, "CREATE INDEX %s_Index ON %s ('%s' ASC)", ARG[6], ARG[4], ARG[6]);
+						sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC)", ARG[4], ARG[6], ARG[4], ARG[6]);
 						fputstring(pCmd, Fid);
 					}
 				}
@@ -546,6 +546,14 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					char UDI[80];
+					char Arg7Val[256];
+
+					strcpy(Arg7Val, ARG[7]);
+					if (!stricmp(Arg7Val, "[UDI]"))
+					{
+						strcpy(Arg7Val, HighlightData.PD.UDI);
+						REPLAC(Arg7Val, "'", "''", 80);
+					}
 					if (!stricmp(ARG[5], "SYMBOLNAME"))
 					{
 						GetSymbolName(HighlightData.PD.Desc, UDI, 0, 0, 0);
@@ -609,7 +617,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (nLoops > 1)
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,ARG[7], midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
 								free(blobParts);
@@ -617,7 +625,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,ARG[7], midPt.x, midPt.y, np, nLoops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLoops, blobPoints);
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLoops, blobPoints);
 							}
