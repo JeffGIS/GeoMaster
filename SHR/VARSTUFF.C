@@ -5294,7 +5294,18 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
     		_fstrcpy (pDot,".hdr");
 		FidHdr = GSSiOpenFile (HeaderName,0,OF_READ);
 		if (FidHdr == HFILE_ERROR)
-			FidHdr = Fid;  
+		{
+			LPSTR pBS = strrchr(HeaderName, '\\');
+			if (pBS)
+			{
+				strcpy(pBS, "\\header.hdr");
+				FidHdr = GSSiOpenFile(HeaderName, 0, OF_READ);
+				if (FidHdr == HFILE_ERROR)
+				{
+					FidHdr = Fid;
+				}
+			}
+		}
 		if (!fgetstring (str,USHRT_MAX-2,FidHdr))
 			goto Exit; 
 		pstr = str;
