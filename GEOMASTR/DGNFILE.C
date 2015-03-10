@@ -1181,7 +1181,15 @@ DoPoly:
 					lpDCurPoints = pPoints;
 					nPnts = NumPoints;
 
-					if (PolyInMaskAreaFileCoord (GF_AREA,&NumPoints,0,0,&pPoints,TRUE))
+					if (PolyInMaskAreaFileCoord(GF_AREA, &NumPoints, 0, 0, &pPoints, TRUE))
+					{
+						int	SDCrtn = SetDisplayChar(hDC, GF_AREA, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI);
+
+						if (SDCrtn > 0)
+							ProcessPolygon(hDC, ShowBorder, PltType, hBorderPen, hTempPen, 0);
+				/*		else if (SDCrtn < 0)
+							HaveTXLoc = TRUE;
+						if (PolyInMaskAreaFileCoord(GF_AREA, &NumPoints, 0, 0, &pPoints, TRUE))
 					{
 						if (SetDisplayChar (hDC,GF_AREA,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI) > 0)
 						{   
@@ -1195,7 +1203,7 @@ DoPoly:
 														GetBit (6,(LPSTR)&CurVis->WantType[7])));
 								hDeletePen = GWPolygonD (hDC,pPoints, NumPoints, nPoly, hPolyPartLen,CurrentDesc,ShowBorder,DoFill,0);
 					        }
-						}
+						}*/
 					}
 				}
 			}

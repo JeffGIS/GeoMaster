@@ -4546,6 +4546,9 @@ GSSiExitProg (533);
         	Index = max (0,min(Index,MAXFONTS-1));
         	ltoa (FontColors[Index],OutStr,10);
         	break; 
+		case 210:
+			btoa(UseDGNColors, OutStr);
+			break;
 		case 213:
 			itoa (ShowSQLErrors,OutStr,10);
 			break;                         

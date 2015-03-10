@@ -2612,6 +2612,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 	BOOL	rtn=FALSE;
 	double	Width=1;
 	
+	
 	*phPen = 0;
 	if (pBorderSymbolNum)
 		*pBorderSymbolNum = 0;
@@ -2628,7 +2629,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
     }
     else
     {   
-    	if (MapType == MT_DGN7)
+    	if (UseDGNColors && MapType == MT_DGN7)
     	{
 			if (phBrush && !hTempBrush && !HaveVarFillColor)
 			{
