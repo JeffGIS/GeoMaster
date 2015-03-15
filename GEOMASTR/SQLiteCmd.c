@@ -490,6 +490,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			BOOL createFile, createTables=TRUE;
 			int wantType = 3;
 			LPSTR pUS = strrchr(ARG[4], '_');
+			BOOL skipQuadIndex = atob(ARG[8]);
 
 			if (pUS)
 			{
@@ -523,8 +524,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
 					fputstring(pCmd, Fid);
 
-					sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
-					fputstring(pCmd, Fid);
+					if (!skipQuadIndex)
+					{
+						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
+						fputstring(pCmd, Fid);
+					}
 					if (*ARG[6])
 						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6], BLOB_MAX, BLOB_MAX * 8);
 					else
@@ -579,7 +583,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 							ConvertBounds(pBounds, 1, 2);
 							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
-							fputstring(pCmd, Fid);
+							if (!skipQuadIndex)
+								fputstring(pCmd, Fid);
 							if (nLoops > 1)
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
