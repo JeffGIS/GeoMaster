@@ -422,6 +422,7 @@ HANDLE STRANRectToBounds (LPRECT FromRect,LPMNMXCORD ToRect);
 HANDLE STRANBoundsToBounds (LPMNMXCORD FromRect,LPMNMXCORD ToRect);
 HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN,int Type,LPMNMXCORD pBounds);
 POINT TRANDPointToPoint (HPDPOINT pDpoint,HANDLE hTran);
+void TranPoints(LPDPOINT FromPt, LPDPOINT ToPt, int nPt, HANDLE hTran);
 HANDLE DPolyToPPoly (LPINT pnpnts, HANDLE hDPoly,HANDLE hTran);
 HANDLE ReadTranData (HFILE Fid);
 BOOL DisplayTranTriangles(HANDLE hTran, LPVIEWPORT CurView);

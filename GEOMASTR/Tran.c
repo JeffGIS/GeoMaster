@@ -902,6 +902,14 @@ HANDLE STRANBoundsToBounds (LPMNMXCORD FromRect,LPMNMXCORD ToRect)
 	return hTran;
 }
 
+void TranPoints(LPDPOINT FromPt, LPDPOINT ToPt, int nPt, HANDLE hTran)
+{
+	for (int i = 0; i < nPt; i++)
+	{
+		ToPt[i] = TranPoint(&FromPt[i], hTran);
+	}
+}
+
 HANDLE STRANPoints (int id,LPDPOINT FromPt,LPDPOINT ToPt,int nPt,LPFLOAT pRSQMIN,int Type,LPMNMXCORD pBounds)
 {
 	HANDLE hTran; 
