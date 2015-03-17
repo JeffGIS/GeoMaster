@@ -490,7 +490,12 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			BOOL createFile, createTables=TRUE;
 			int wantType = 3;
 			LPSTR pUS = strrchr(ARG[4], '_');
+			BOOL skipQuadIndex = atob(ARG[8]);
+			BOOL skipConvert = atob(ARG[9]);
+			double coordFactor = COORDINATE_FACTOR;
 
+			if (skipConvert)
+				coordFactor /= 1000;
 			if (pUS)
 			{
 				if (!stricmp(pUS, "_LINE"))
@@ -501,6 +506,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			{
 				createFile = FALSE;
 				createTables = FALSE;
+			}
+			else if (*ARG[3] == 'B')
+			{
+				createFile = FALSE;
+				createTables = TRUE;
 			}
 			else
 				createFile = atob(ARG[3]);
@@ -523,8 +533,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
 					fputstring(pCmd, Fid);
 
-					sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
-					fputstring(pCmd, Fid);
+					if (!skipQuadIndex)
+					{
+						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
+						fputstring(pCmd, Fid);
+					}
 					if (*ARG[6])
 						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6], BLOB_MAX, BLOB_MAX * 8);
 					else
@@ -576,10 +589,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							HANDLE hPoints;
 							BOOL canCompress=TRUE;
 							int  np = nPnts;
+							int  nLops;
 
-							ConvertBounds(pBounds, 1, 2);
+							if (!skipConvert)
+								ConvertBounds(pBounds, 1, 2);
 							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
-							fputstring(pCmd, Fid);
+							if (!skipQuadIndex)
+								fputstring(pCmd, Fid);
 							if (nLoops > 1)
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
@@ -594,9 +610,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							nTotal++;
 							for (i = 0; i < nPnts; i++)
 							{
-								ConvertCoord(&pDPoints[i], 1, 2);
-								pPoints[i].x = COORDINATE_FACTOR * (pDPoints[i].x - midPt.x);
-								pPoints[i].y = COORDINATE_FACTOR * (pDPoints[i].y - midPt.y);
+								if (!skipConvert)
+									ConvertCoord(&pDPoints[i], 1, 2);
+								pPoints[i].x = coordFactor * (pDPoints[i].x - midPt.x);
+								pPoints[i].y = coordFactor * (pDPoints[i].y - midPt.y);
 								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
 									canCompress = FALSE;
 							}
@@ -614,20 +631,23 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							}
 							else
 								blobPoints = PointsToBlob(pPoints, nPnts);
+							nLops = nLoops;
+							if (skipConvert)
+								nLops = -nLoops;
 							if (nLoops > 1)
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLoops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
 								free(blobParts);
 							}
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLoops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobPoints);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLoops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobPoints);
 							}
 							fputstring(pCmd, Fid);
 							free(blobPoints);

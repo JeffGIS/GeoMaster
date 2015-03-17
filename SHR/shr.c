@@ -9736,7 +9736,7 @@ GSSiExitProg (323);
 #endif
 }
 
-LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)
+LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)//neg maxlen implies ignore case
 #if ENABLETRACE
 {GSSiEnterProg (324);
 #endif
@@ -9745,7 +9745,13 @@ LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)
     
       short  STRLEN, CURLEN, OLDLEN, NEWLEN, IDIFF;
       long  MOVELEN; 
-       
+	  BOOL ignoreCase = FALSE;
+      
+	  if (MAXLEN < 0)
+	  {
+		  ignoreCase = TRUE;
+		  MAXLEN = -MAXLEN;
+	  }
       OLDLEN = _fstrlen (OLD);
       NEWLEN = _fstrlen (NEW); 
       STRLEN = _fstrlen (STRING);
@@ -9753,7 +9759,30 @@ LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)
       IDIFF  = NEWLEN - OLDLEN;
       while (*IBEG)
       {
-          IBEG    = _fstrstr(IBEG,OLD);
+		  if (ignoreCase)
+		  {
+			  int lold = strlen(OLD);
+			  int lbeg = strlen(IBEG);
+			  LPSTR upOLD = malloc(lold + 4);
+			  LPSTR upBEG = malloc(lbeg + 4);
+			  LPSTR newBEG;
+			  strcpy(upOLD, OLD);
+			  strupr(upOLD);
+			  strcpy(upBEG, IBEG);
+			  strupr(upBEG);
+			  newBEG = strstr(upBEG, upOLD);
+			  if (newBEG)
+			  {
+				  int inc = newBEG - upBEG;
+				  IBEG = IBEG + inc;
+			  }
+			  else
+				  IBEG = 0;
+			  free(upOLD);
+			  free(upBEG);
+		  }
+		  else
+			IBEG    = _fstrstr(IBEG,OLD);
           if (!IBEG) goto Exit;
           if (!IDIFF)
           {               

@@ -5134,7 +5134,51 @@ GSSiExitProg (1350);
 			rtn = DialogBox(hInst, (LPSTR)"RemoteNetworkAnalyzer", GetFocus(), NetworkAnalyzerMsgProc);
 			goto RtnTrue;
 		}
-        case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
+		case 1510://$COPYWITHREPLACE(tofile,fromfile,fromtext|totext;fromtext2|totext2;etc)
+		{
+			LPSTR line;
+
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 3)
+				goto RtnFalse;
+			line = Arg[4];
+			Fid1 = GSSiOpenFile(Arg[2], 0, OF_READ);
+			if (Fid1 == HFILE_ERROR)
+				goto RtnFalse;
+			Fid2 = GSSiOpenFile(Arg[1], 0, OF_CREATE);
+			if (Fid2 == HFILE_ERROR)
+			{
+				GSSiClose(Fid1);
+				goto RtnFalse;
+			}
+			while (fgetstring(line, 4090, Fid1))
+			{
+				LPSTR fromText, toText, pBeg = Arg[3], pEnd;
+				do {
+					pEnd = strchr(pBeg, ';');
+					if (pEnd) *pEnd = 0;
+					strcpy(Arg[5],pBeg);
+					fromText = Arg[5];
+					toText = strchr(fromText, '|');
+					if (toText)
+					{
+						*toText++ = 0;
+						SubstituteDL(toText, FALSE);
+						REPLAC(line, fromText, toText, -4090);
+					}
+					if (pEnd)
+					{
+						*pEnd = ';';
+						pBeg = pEnd + 1;
+					}
+				} while (pEnd);
+				fputstring(line, Fid2);
+			}
+			GSSiClose(Fid1);
+			GSSiClose(Fid2);
+			goto RtnTrue;
+		}
+		case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
         {
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
 			hMem = GSSiGlobAlloc (1229,GMEM_MOVEABLE,3*2048);
