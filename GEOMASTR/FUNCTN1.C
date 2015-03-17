@@ -432,16 +432,40 @@ GSSiExitProg (1348);
 					rtn = AddLayerToViewport (CurView,Arg[4],Arg[5]);
 					goto Rtnrtn;
 				}
-				if (!strcmp (Arg[3],"GETNUM"))
+				if (!strcmp(Arg[3], "GETNUM"))
 				{
-					for (i=0;i<CurView->NumFiles;i++)
+					for (i = 0; i<CurView->NumFiles; i++)
 					{
-						if (!stricmp (CurView->FileID[i],Arg[4]))
+						if (!stricmp(CurView->FileID[i], Arg[4]))
 						{
-							itoa (i+1,OutLoc,10);
+							itoa(i + 1, OutLoc, 10);
 							goto Rtnl;
 						}
 					}
+				}
+				if (!strcmp(Arg[3], "GETPATH"))
+				{
+					for (i = 0; i<CurView->NumFiles; i++)
+					{
+						if (!stricmp(CurView->FileID[i], Arg[4]))
+						{
+							strcpy(OutLoc, CurView->lpFiles[i]);
+							goto Rtnl;
+						}
+					}
+				}
+				if (!strcmp(Arg[3], "SETPATH"))
+				{
+					strcpy(OutLoc, "0");
+					for (i = 0; i<CurView->NumFiles; i++)
+					{
+						if (!stricmp(CurView->FileID[i], Arg[4]))
+						{
+							strcpy(CurView->lpFiles[i],Arg[5]);
+							strcpy(OutLoc, "1");
+						}
+					}
+					goto Rtnl;
 				}
 				goto RtnFalse;
 			}

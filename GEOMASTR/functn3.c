@@ -6189,7 +6189,13 @@ HaveVP:;
 			}
 			if (!stricmp(Arg[1], "DESTROY"))
 			{
-				rtn = DestroyCurrentToolbar();
+				if (!stricmp(Arg[2], "ALL"))
+				{
+					DestroyAllToolbars();
+					rtn = TRUE;
+				}
+				else
+					rtn = DestroyCurrentToolbar();
 			}
 			if (!stricmp(Arg[1], "RELOAD"))
 			{
