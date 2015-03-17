@@ -570,6 +570,7 @@ int	GetFunctionID15 (LPSTR str)
 			if (!_fstrnicmp (str,"GETMAXFILEREFNO",15)) return 1507;  
 			if (!_fstrnicmp(str, "DELETEDIRECTORY", 15)) return 1508;
 			if (!_fstrnicmp(str, "NETWORKANALYZER", 15)) return 1509;
+			if (!_fstrnicmp(str, "COPYWITHREPLACE", 15)) return 1510;
 
 			return 0;
 }
