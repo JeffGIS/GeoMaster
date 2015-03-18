@@ -6801,8 +6801,14 @@ GSSiExitProg (294);
     }
     
     if (TraceFid == HFILE_ERROR)                                      
-    {   
-    	strcpy (txt,"c:\\trace.txt");
+    { 
+		int saveTraceOn = TraceOn;
+		BOOL saveContinueProcessing = ContinueProcessing;
+		ContinueProcessing = 1;
+		TraceOn = 0;
+		GetGlobalCVal("[%TRACEFILE]",txt,"c:\\temp\\trace.txt");
+		TraceOn = saveTraceOn;
+		ContinueProcessing = saveContinueProcessing;
         _fullpath(TraceFile,txt,256);
         TraceFid = OpenFileGM (TraceFile,pOFStruct,OF_READWRITE); 
         if (TraceTrace)
@@ -8706,6 +8712,8 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
     Truncate (Name);
     if (!*Name)
     	goto Exit; 
+	GSSiTrace(Name, 0);
+
 	ConvertToNewLocation (Name,TRUE);
 	if (Mode == OF_CREATE && _fstrlen (Name) < 3)
 		ii=1;
