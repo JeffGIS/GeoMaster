@@ -2195,7 +2195,7 @@ double	GetDriveFreeSpace (LPSTR Dir)
 	double	FrSpace;
 
 	strcpy (Drive,Dir);
-
+	ExpandText(Drive);
 	if ((pBS = strstr (Drive,":\\")))
 	{
 		pBS+=2;
@@ -8439,13 +8439,19 @@ BOOL CopyFileExtended (LPSTR ToFile,LPSTR FromFile)
 	return rtn;
 }
 
-BOOL CopyFileToCache (LPSTR ToFile, LPSTR FromFile)
+BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 {
-	long	TotLen = GSSiLength (FromFile);
+	long	TotLen = GSSiLength (FromFileIN);
 	long	CurLoc = 0;
 	BOOL	rtn;
 	BOOL	CancelCacheCopy=FALSE;
-	
+	char	FromFile[MAX_PATH], ToFile[MAX_PATH];
+
+	strcpy(FromFile, FromFileIN);
+	strcpy(ToFile, ToFileIN);
+
+	ExpandText(FromFile);
+	ExpandText(ToFile);
 	if (TotLen > DisplayCacheProgressMinFileSize)
 	{
 		strcpy (CacheTitle,"Caching file ... please wait");

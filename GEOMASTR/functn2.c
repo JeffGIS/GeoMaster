@@ -5103,7 +5103,8 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-
+			if (*LastChr(Arg[1]) == '\\')
+				*LastChr(Arg[1]) = 0;
 			type = GetPathType (Arg[1]);
 			if (!type)
 				goto RtnTrue;
@@ -5114,6 +5115,7 @@ GSSiExitProg (1350);
 				HANDLE	hTemp=GSSiGlobAlloc (1181,GMEM_MOVEABLE,512);
 				LPSTR	Mess=GlobalLock (hTemp);
              	sprintf (Mess,"Delete directory '%s'?",Arg[1]);
+				ExpandText(Mess);
              	st = MessageBox (GetFocus(),Mess,"Verify Delete",MB_YESNO); 
 				GSSiGlobUlFree (&hTemp);
 			}

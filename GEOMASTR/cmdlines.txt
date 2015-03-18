@@ -1,7 +1,7 @@
+police\configs\startup_2015.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\MetroGIS.gmc /F [%USERLEV]=2; /WD k:\GMMobile\GMMetroGIS
 configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD d:\ADAPedRamps\PreSurvey
 configs\SpecialAssessments\CreateMap.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD G:\BU_2015_01_16\GEOMas
-police\configs\startup_2014.gmc /F [%USERLEV]=2; /WD J:\Mpls
 configs\places.gmc /F [%USERLEV]=2; /WD J:\ADAPedRamps\PreSurvey
 configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD J:\ADAPedRamps\PreSurvey
 configs\jeff\basemap_good.gmc /F [%USERLEV]=2; /WD L:\geomas
@@ -141,6 +141,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 
