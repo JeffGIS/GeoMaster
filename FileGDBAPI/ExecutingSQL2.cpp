@@ -478,7 +478,7 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 			LPSTR pList;
 			int	i;
 
-			*phList = GSSiGlobAlloc (0,GMEM_MOVEABLE,n*MaxElementSize);
+			*phList = GSSiGlobAlloc (0,GMEM_MOVEABLE,n*MaxElementSize+32);
 			pList = (LPSTR)GlobalLock (*phList);
 			for (i=0;i<n;i++,pList+=MaxElementSize)
 				strcpy (pList,WStringToString(childList[i]).c_str());

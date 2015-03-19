@@ -350,6 +350,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "FILEPART",8)) return 850;
 			if (!_fstrnicmp(str, "MOVEFILE", 8)) return 851;
 			if (!_fstrnicmp(str, "HEADTOAZ", 8)) return 852;
+			if (!_fstrnicmp(str, "DATABASE", 8)) return 853;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

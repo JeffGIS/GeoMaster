@@ -127,9 +127,17 @@ HFILE OpenFileGM(
 	HFILE fid = (int)INVALID_HANDLE_VALUE;
 	char *fullPath;
 	int ln;
+	char	Name[MAX_PATH];
+	int		rtn;
+
+	strcpy(Name, lpFileName);
+	ExpandText(Name);
+
+	if (uStyle == OF_CREATE && !makedirectories(Name, FALSE, TRUE))
+		return HFILE_ERROR;
 
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
-	fullPath = _fullpath(lpReOpenBuff->szPathName, lpFileName, MAX_PATH);
+	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, MAX_PATH);
 	if (!fullPath)
 		return HFILE_ERROR;
 	ln = strlen(fullPath);

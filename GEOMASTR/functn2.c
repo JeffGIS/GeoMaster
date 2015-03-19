@@ -1563,6 +1563,14 @@ GSSiExitProg (1350);
 			ftoa(OutLoc, AZ);
 			goto Rtnl;
 		}
+		case 853://$DATABASE()
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			GetFGDBTable(hWndMain, Arg[1]);
+			strcpy(OutLoc, Arg[1]);
+			goto Rtnl;
+		}
+
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
