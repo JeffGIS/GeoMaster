@@ -2474,6 +2474,8 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	{
 		CreateStatusWind (hWndMain,1,"Scanning for field defintions");
 		if (NumToScan <= 0)
+			NumToScan = NumSQLRows(hSQL);
+		if (NumToScan <= 0)
 		{
 			useFileLength = TRUE;
 			NumToScan = GSSiLength(DBName);
