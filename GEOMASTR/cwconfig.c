@@ -1130,11 +1130,16 @@ void writeTestStruct(void)
 	return;
 
 }
+void testConvertBitmapToPoly(LPSTR file);
+
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus, mouseType;
+
+	testConvertBitmapToPoly("C:\\Temp\\AreaTests2048\\test5.bmp");
+
 //#define FV	$(TargetName) 
 	//UDPmain(22336);
 	//GetMassShapeFiles();

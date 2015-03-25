@@ -95,7 +95,8 @@ BOOL ThemeCreateAreaInMask(int from)
 		{
 			MNMXCORD bounds, BMbounds, mareaBounds;
 			int width, height;
-			int maxdim = 1024;
+			int maxdim = 2048;
+			int margin = 4;
 			double fac;
 			HBITMAP hBM, hBMOld;
 			BITMAP	bm;
@@ -121,34 +122,34 @@ BOOL ThemeCreateAreaInMask(int from)
 				fac = BoundsWidth(&bounds) / BoundsHeight(&bounds);
 				if (fac > 1)
 				{
-					width = maxdim - 4;
+					width = maxdim - margin*2;
 					height = width / fac;
 				}
 				else
 				{
-					height = maxdim - 4;
+					height = maxdim - margin * 2;
 					width = height * fac;
 				}
 				hDCMain = GetDC(CurView->hWnd);
 				hDC = CreateCompatibleDC(hDCMain);
 				//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
-				hBM = CreateCompatibleBitmap(hDCMain, width + 4, height + 4);
+				hBM = CreateCompatibleBitmap(hDCMain, width + margin * 2, height + margin * 2);
 				rect.left = rect.bottom = 0;
-				rect.right = width + 4;
-				rect.top = height + 4;
+				rect.right = width + margin * 2;
+				rect.top = height + margin * 2;
 				GetObject(hBM, sizeof(bm), (LPSTR)&bm);
 				ReleaseDC(CurView->hWnd, hDCMain);
 				hBMOld = SelectObject(hDC, hBM);
 				SetMapMode(hDC, MM_ISOTROPIC);
 				SetWindowOrgEx(hDC, 0, 0, 0);
 				SetViewportOrgEx(hDC, 0, 0, 0);
-				SetWindowExtEx(hDC, 1024, 1024, 0);
-				SetViewportExtEx(hDC, 1024, 1024, 0);
+				SetWindowExtEx(hDC, width, width, 0);
+				SetViewportExtEx(hDC, width, width, 0);
 				FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));
-				BMbounds.xmn = 2;
-				BMbounds.ymn = 2;
-				BMbounds.xmx = 2 + width;
-				BMbounds.ymx = 2 + height;
+				BMbounds.xmn = margin;
+				BMbounds.ymn = margin;
+				BMbounds.xmx = margin + width;
+				BMbounds.ymx = margin + height;
 				hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
 				hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
 
@@ -194,7 +195,7 @@ BOOL ThemeCreateAreaInMask(int from)
 				{
 					char file[MAX_PATH];
 
-					sprintf(file, "c:\\temp\\AreaTests\\test%i.bmp", nTest++);
+					sprintf(file, "c:\\temp\\AreaTests2048\\test%i.bmp", nTest++);
 					SaveBitmap(hBM, file, 0, 0);
 				}
 				GSSiDeleteObject(&hBM);
@@ -208,6 +209,85 @@ BOOL ThemeCreateAreaInMask(int from)
 	}
 	CurView = CurViewSave;
 	return rtn;
+}
+
+static int bitIndex(BITMAP *pbm, int row, int col)
+{
+	int index = -1;
+	
+	if (row < 0 || row >= pbm->bmHeight)
+		return -1;
+	if (col < 0 || col > pbm->bmWidth)
+		return -1;
+	index = row * pbm->bmWidthBytes / 4;
+	index += col;
+	return index;
+}
+static BOOL edgeNode(int row, int col, BITMAP *pbm, LPCOLORREF pbits)
+{
+	BOOL rtn = FALSE;
+	COLORREF blue = 255;
+	int left = bitIndex(pbm, row, col - 1);
+	int right= bitIndex(pbm, row, col + 1);
+	int up   = bitIndex(pbm, row + 1, col);
+	int down = bitIndex(pbm, row - 1, col);
+
+	if (left < 0 || right < 0 || up < 0 || down < 0)
+		rtn = TRUE;
+	else
+	{
+		if (pbits[left] != pbits[right] &&
+			(pbits[left] == blue || pbits[right] == blue))
+			rtn = TRUE;
+		if (pbits[up] != pbits[down] &&
+			(pbits[up] == blue || pbits[down] == blue))
+			rtn = TRUE;
+	}
+	return rtn;
+}
+void testConvertBitmapToPoly(LPSTR file)
+{
+	char outFile[MAX_PATH];
+	HDIB32 hDib32 = GMFIBMPHandleFromEXT(file);
+	BITMAP bm;
+	LPRGBQUAD pbit;
+	LPCOLORREF pbits, pbits2;
+	int row, col;
+	COLORREF white = RGB(255, 255, 255);
+	COLORREF black = 0;
+	COLORREF blue = 255;
+	COLORREF green = RGB(0, 255, 0);
+	int bmsize;
+	if (hDib32)
+	{
+		HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
+		DestroyDIB32(hDib32, FALSE);
+		GetObject(hBM,sizeof(BITMAP) , &bm);
+		bmsize = bm.bmHeight * bm.bmWidthBytes;
+		pbits = (LPCOLORREF)malloc(bmsize);
+		pbits2 = (LPCOLORREF)malloc(bmsize);
+		GetBitmapBits(hBM, bmsize, pbits);
+		for (row = 0; row < bm.bmHeight; row++)
+		{
+			LPCOLORREF pRow = pbits + (row * bm.bmWidthBytes / 4);
+			LPCOLORREF pRow2 = pbits2 + (row * bm.bmWidthBytes / 4);
+			for (col = 0; col < bm.bmWidthBytes / 4; col++, pRow++,pRow2++)
+			{
+				*pRow2 = white;
+				if (*pRow == blue)
+				{
+					if (edgeNode(row,col,&bm,pbits))
+						*pRow2 = black;
+				}
+			}
+		}
+		SetBitmapBits(hBM, bmsize, pbits2);
+		strcpy(outFile, file);
+		REPLAC(outFile, ".bmp", "out.bmp",MAX_PATH);
+		SaveBitmap(hBM, outFile, 0, 0);
+		free(pbits);
+		free(pbits2);
+	}
 }
 
 BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
