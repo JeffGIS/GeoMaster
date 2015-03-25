@@ -2,6 +2,20 @@
 #include "extrndb.h"
 
 #include "gmextern.h"
+static	int	xoff1[8] = { -1, 0, 1, 0, -1, 1, 1, -1 };
+static	int	yoff1[8] = { 0, 1, 0, -1, 1, 1, -1, -1 };
+static	int	xoff2[16] = { -2, -2, -2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2 };
+static	int yoff2[16] = { 0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2, -2, -1 };
+static	int	xoff3[24] = { -3, -3, -3, -3, -2, -1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3 };
+static	int yoff3[24] = { 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -3, -3, -3, -3, -2, -1 };
+static	int	xoff4[32] = { -4, -4, -4, -4, -4, -3, -2, -1, 0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0, -1, -2, -3, -4, -4, -4, -4 };
+static	int yoff4[32] = { 0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0, -1, -2, -3, -4, -4, -4, -4, -4, -4, -4, -4, -4, -3, -2, -1 };
+static	int	xoff5[40] = { -5, -5, -5, -5, -5, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -5, -5, -5, -5 };
+static	int yoff5[40] = { 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -4, -3, -2, -1 };
+
+#define MAX_NEW_POLYGONS 64
+#define MAX_NEW_POLY_POINTS USHRT_MAX * 4
+static int GetNewPolygon(HBITMAP hBM, LPINT pnumNewPoints, LPHANDLE phNewPoints);
 
 BOOL SaveAreasToFile(LPSTR FileName)
 {
@@ -106,7 +120,7 @@ BOOL ThemeCreateAreaInMask(int from)
 			HANDLE hTranWtoBM, hTranBMtoW;
 			HANDLE hPoly;
 			LPPOINT pPoly;
-			BOOL savebm = TRUE;
+			BOOL savebm = FALSE;
 			int i;
 			static int nTest = 1;
 			int nMareaPoints;
@@ -114,6 +128,9 @@ BOOL ThemeCreateAreaInMask(int from)
 			COLORREF blue = RGB(0, 0, 255);
 			HPEN hBluePen;
 			HBRUSH hBlueBrush;
+			int numNewPoints[MAX_NEW_POLYGONS];
+			HANDLE hNewPoints[MAX_NEW_POLYGONS];
+			int nNewPoly = 0;
 			HFILE Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
 			
 			if (Fid != HFILE_ERROR)
@@ -198,7 +215,10 @@ BOOL ThemeCreateAreaInMask(int from)
 					sprintf(file, "c:\\temp\\AreaTests2048\\test%i.bmp", nTest++);
 					SaveBitmap(hBM, file, 0, 0);
 				}
+				nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
 				GSSiDeleteObject(&hBM);
+				for (i = 0; i < nNewPoly; i++)
+					GSSiGlobFree(&hNewPoints[i]);
 				CloseTRANS2(&hTranWtoBM);
 				CloseTRANS2(&hTranBMtoW);
 
@@ -245,6 +265,119 @@ static BOOL edgeNode(int row, int col, BITMAP *pbm, LPCOLORREF pbits)
 	}
 	return rtn;
 }
+static int findStartNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
+{
+	int width = pbm->bmWidthBytes / 4;
+	int indx;
+
+	for (*prow = 0; *prow < pbm->bmHeight; (*prow)++)
+	{
+		indx = *prow * width;
+		for (*pcol = 0; *pcol < pbm->bmWidth; (*pcol)++, indx++)
+			if (!pbits[indx])
+				return indx;
+	}
+	return -1;
+}
+
+static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
+{
+	int i;
+	int indx;
+	for (i = 0; i < 8; i++)
+	{
+		indx = bitIndex(pbm, *prow + yoff1[i], *pcol + xoff1[i]);
+		if (indx >= 0 && !pbits[indx])
+		{
+			(*pcol) += xoff1[i];
+			(*prow) += yoff1[i];
+			return indx;
+		}
+	}
+	//return -1;
+	for (i = 0; i < 16; i++)
+	{
+		indx = bitIndex(pbm, *prow + yoff2[i], *pcol + xoff2[i]);
+		if (indx >= 0 && !pbits[indx])
+		{
+			(*pcol) += xoff2[i];
+			(*prow) += yoff2[i];
+			return indx;
+		}
+
+	}
+
+	return -1;
+
+}
+static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
+{
+	BITMAP bm;
+	LPRGBQUAD pbit;
+	LPCOLORREF pbits, pbits2;
+	int row, col;
+	COLORREF white = RGB(255, 255, 255);
+	COLORREF black = 0;
+	COLORREF blue = 255;
+	COLORREF green = RGB(0, 255, 0);
+	int bmsize;
+	int nPoly = 0;
+
+		GetObject(hBM, sizeof(BITMAP), &bm);
+		bmsize = bm.bmHeight * bm.bmWidthBytes;
+		pbits = (LPCOLORREF)malloc(bmsize);
+		pbits2 = (LPCOLORREF)malloc(bmsize);
+		GetBitmapBits(hBM, bmsize, pbits);
+		//find the edge points
+		for (row = 0; row < bm.bmHeight; row++)
+		{
+			LPCOLORREF pRow = pbits + (row * bm.bmWidthBytes / 4);
+			LPCOLORREF pRow2 = pbits2 + (row * bm.bmWidthBytes / 4);
+			for (col = 0; col < bm.bmWidthBytes / 4; col++, pRow++, pRow2++)
+			{
+				*pRow2 = white;
+				if (*pRow == blue)
+				{
+					if (edgeNode(row, col, &bm, pbits))
+						*pRow2 = black;
+				}
+			}
+		}
+		//create the polygons
+		{
+			int indx;
+			while ((indx = findStartNode(&row, &col, &bm, pbits2)) >= 0)
+			{
+				int nNodes = 0;
+				int startrow = row, startcol = col;
+				LPDPOINT pNewPoints;
+				pbits2[indx] = blue;
+				phNewPoints[nPoly] = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(DPOINT)*MAX_NEW_POLY_POINTS);
+				pNewPoints = GlobalLock(phNewPoints[nPoly]);
+				pNewPoints[nNodes].x = col;
+				pNewPoints[nNodes++].y = row;
+				while ((indx = findNextNode(&row, &col, &bm, pbits2)) >= 0)
+				{
+					pbits2[indx] = blue;
+					pNewPoints[nNodes].x = col;
+					pNewPoints[nNodes++].y = row;
+				}
+				pnumNewPoints[nPoly] = nNodes;
+				if (nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 3)
+				{
+					GlobalUnlock(phNewPoints[nPoly]);
+					phNewPoints[nPoly] = GSSiGlobalReAlloc(0, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
+					nPoly++;
+				}
+				else
+					GSSiGlobUlFree(&phNewPoints[nPoly]);
+			}
+		}
+		free(pbits);
+		free(pbits2);
+		return nPoly;
+}
+
 void testConvertBitmapToPoly(LPSTR file)
 {
 	char outFile[MAX_PATH];
@@ -258,6 +391,7 @@ void testConvertBitmapToPoly(LPSTR file)
 	COLORREF blue = 255;
 	COLORREF green = RGB(0, 255, 0);
 	int bmsize;
+	int nPoly = 0;
 	if (hDib32)
 	{
 		HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
@@ -267,6 +401,7 @@ void testConvertBitmapToPoly(LPSTR file)
 		pbits = (LPCOLORREF)malloc(bmsize);
 		pbits2 = (LPCOLORREF)malloc(bmsize);
 		GetBitmapBits(hBM, bmsize, pbits);
+		//find the edge points
 		for (row = 0; row < bm.bmHeight; row++)
 		{
 			LPCOLORREF pRow = pbits + (row * bm.bmWidthBytes / 4);
@@ -283,8 +418,28 @@ void testConvertBitmapToPoly(LPSTR file)
 		}
 		SetBitmapBits(hBM, bmsize, pbits2);
 		strcpy(outFile, file);
-		REPLAC(outFile, ".bmp", "out.bmp",MAX_PATH);
+		REPLAC(outFile, ".bmp", "edge.bmp",MAX_PATH);
 		SaveBitmap(hBM, outFile, 0, 0);
+		//create the polygons
+		{
+			int indx;
+			while ((indx = findStartNode(&row, &col, &bm, pbits2))>=0)
+			{
+				int nNodes = 0;
+				int startrow = row, startcol = col;
+				pbits2[indx] = blue;
+				while ((indx = findNextNode(&row, &col, &bm, pbits2)) >= 0)
+				{
+					pbits2[indx] = blue;
+					nNodes++;
+				}
+				SetBitmapBits(hBM, bmsize, pbits2);
+				strcpy(outFile, file);
+				REPLAC(outFile, ".bmp", "poly.bmp", MAX_PATH);
+				SaveBitmap(hBM, outFile, 0, 0);
+				nPoly++;
+			}
+		}
 		free(pbits);
 		free(pbits2);
 	}
