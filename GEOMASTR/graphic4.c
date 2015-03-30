@@ -1617,7 +1617,7 @@ BOOL ProcessPolygon (HDC hDC,BOOL ShowBorder,int PltType,HPEN hRandPen,HPEN hTem
 					}   
 					GlobalUnlock (hPolyPartLen); 
 				}
-				else
+				else if (nPnts)
 				{
 					int	np = nPnts;
 					int	dec = 0;
