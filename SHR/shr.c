@@ -8480,9 +8480,23 @@ BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 		DestroyWindow (hWndCache);
 	}
 	else
+	{
 		//rtn = copyfile (ToFile, FromFile,FALSE,0,0,0,0,0,0);
-		rtn = GSSiCopyFile (FromFile,ToFile,TRUE);
-	SetFileAttributes (ToFile,FILE_ATTRIBUTE_NORMAL);
+		//rtn = GSSiCopyFile (FromFile,ToFile,TRUE);
+		rtn = CopyFileEx(FromFile, ToFile, 0, 0, &CancelCacheCopy, 0);
+	}
+	if (TraceOn)
+	{
+		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+		LPSTR pMem = (LPSTR)GlobalLock(hMem);
+		int st = rtn;
+		if (!st)
+			st = GetLastError();
+		sprintf(pMem, "Copied to cache with status %i:%s %s", st, FromFile, ToFile);
+		GSSiTrace(pMem, 0);
+		GSSiGlobUlFree(&hMem);
+	}
+	SetFileAttributes(ToFile, FILE_ATTRIBUTE_NORMAL);
 
 	return rtn;
 }
