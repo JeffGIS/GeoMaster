@@ -6782,8 +6782,9 @@ void GSSiTrace (LPSTR str,short From)
 #endif
 {   
 	static	BOOL	InTrace=FALSE;
-	if (InTrace || !TraceOn || (TraceOn == 4 && !TraceType[From]))
-{
+//	if (InTrace || !TraceOn || (TraceOn == 4 && !TraceType[From]))
+	if (InTrace || !TraceOn || !TraceType[From])
+	{
 #if ENABLETRACE
 GSSiExitProg (294);
 #endif
