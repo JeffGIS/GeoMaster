@@ -109,7 +109,7 @@ BOOL ThemeCreateAreaInMask(int from)
 		{
 			MNMXCORD bounds, BMbounds, mareaBounds;
 			int width, height;
-			int maxdim = 2048;
+			int maxdim = 4096;
 			int margin = 4;
 			double fac;
 			HBITMAP hBM, hBMOld;
@@ -131,6 +131,7 @@ BOOL ThemeCreateAreaInMask(int from)
 			int numNewPoints[MAX_NEW_POLYGONS];
 			HANDLE hNewPoints[MAX_NEW_POLYGONS];
 			int nNewPoly = 0;
+			LPDPOINT pPixelPoints;
 			HFILE Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
 			
 			if (Fid != HFILE_ERROR)
@@ -217,6 +218,33 @@ BOOL ThemeCreateAreaInMask(int from)
 				}
 				nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
 				GSSiDeleteObject(&hBM);
+				GSSiGlobUlFree(&hPolyBuffer);
+				GSSiGlobUlFree(&hPolyPartLen);
+				if (nNewPoly)
+				{
+					int totPoints = nNewPoly;
+					int np = 0, j;
+					for (i = 0; i < nNewPoly; i++)
+						totPoints += numNewPoints[i];
+					hPolyBuffer = GSSiGlobAlloc(1799, GMEM_MOVEABLE, sizeof(DPOINT)*totPoints + 4);
+					lpDCurPoints = GlobalLock(hPolyBuffer);
+					for (i = 0; i < nNewPoly; i++)
+					{
+						if (i)
+							lpDCurPoints[np++] = lpDCurPoints[0];
+						pPixelPoints = GlobalLock(hNewPoints[i]);
+						for (j = 0; j < numNewPoints[i]; j++)
+						{
+							lpDCurPoints[np++] = TranPoint(&pPixelPoints[j], hTranBMtoW);
+						}
+						GlobalUnlock(hNewPoints[i]);
+					}
+					nPnts = np;
+				}
+				else
+					nPnts = 0;
+				nPolyPoints = nPnts;
+
 				for (i = 0; i < nNewPoly; i++)
 					GSSiGlobFree(&hNewPoints[i]);
 				CloseTRANS2(&hTranWtoBM);
@@ -307,6 +335,18 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 
 	}
 
+	for (i = 0; i < 24; i++)
+	{
+		indx = bitIndex(pbm, *prow + yoff3[i], *pcol + xoff3[i]);
+		if (indx >= 0 && !pbits[indx])
+		{
+			(*pcol) += xoff3[i];
+			(*prow) += yoff3[i];
+			return indx;
+		}
+
+	}
+
 	return -1;
 
 }
@@ -346,6 +386,7 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 		//create the polygons
 		{
 			int indx;
+			double Area;
 			while ((indx = findStartNode(&row, &col, &bm, pbits2)) >= 0)
 			{
 				int nNodes = 0;
@@ -362,12 +403,13 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 					pNewPoints[nNodes].x = col;
 					pNewPoints[nNodes++].y = row;
 				}
-				pnumNewPoints[nPoly] = nNodes;
-				if (nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 3)
+				Area = ComputeAreaAreaD(pNewPoints, nNodes, 0);
+				if (fabs(Area) > 10 && nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 3)
 				{
 					GlobalUnlock(phNewPoints[nPoly]);
 					phNewPoints[nPoly] = GSSiGlobalReAlloc(0, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
-					nPoly++;
+
+					pnumNewPoints[nPoly++] = nNodes;
 				}
 				else
 					GSSiGlobUlFree(&phNewPoints[nPoly]);
@@ -437,7 +479,8 @@ void testConvertBitmapToPoly(LPSTR file)
 				strcpy(outFile, file);
 				REPLAC(outFile, ".bmp", "poly.bmp", MAX_PATH);
 				SaveBitmap(hBM, outFile, 0, 0);
-				nPoly++;
+				if (nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 3)
+					nPoly++;
 			}
 		}
 		free(pbits);
