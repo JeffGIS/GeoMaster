@@ -358,7 +358,7 @@ LPTHEME CreateNewTheme (int Choice)
 				pTheme->Recompute = FALSE;
 				pTheme->WantDataPass = FALSE;
 				pTheme->NumDesiredClass=1; 
-				pTheme->NumClass=1;   
+				pTheme->NumClass=1;  
 				break;
 				
 		}

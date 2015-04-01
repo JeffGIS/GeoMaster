@@ -95,6 +95,23 @@ static BOOL GetAreaFromFile(HFILE Fid,LPMNMXCORD pBounds,LPINT pnPnts,LPHANDLE p
 	return TRUE;
 }
 
+static int getMaxBitmapDimension(LPTHEME CurTheme)
+{
+	int rtn;
+	switch (CurTheme->DataType)
+	{
+	case 1:
+		rtn = 1024;
+		break;
+	default:
+		rtn = 2048;
+	case 3:
+		rtn = 4096;
+		break;
+	}
+	return rtn;
+}
+
 BOOL ThemeCreateAreaInMask(int from)
 {
 	BOOL rtn = FALSE;
@@ -109,7 +126,7 @@ BOOL ThemeCreateAreaInMask(int from)
 		{
 			MNMXCORD bounds, BMbounds, mareaBounds;
 			int width, height;
-			int maxdim = 4096;
+			int maxdim = getMaxBitmapDimension(CurTheme);
 			int margin = 4;
 			double fac;
 			HBITMAP hBM, hBMOld;
@@ -219,7 +236,7 @@ BOOL ThemeCreateAreaInMask(int from)
 				nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
 				GSSiDeleteObject(&hBM);
 				GSSiGlobUlFree(&hPolyBuffer);
-				GSSiGlobUlFree(&hPolyPartLen);
+				GSSiGlobFree(&hPolyPartLen);
 				if (nNewPoly)
 				{
 					int totPoints = nNewPoly;
@@ -508,6 +525,7 @@ BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 		case 1:
 			SendDlgItemMessage(hWndDlg, IDC_CMAP_LOW, (UINT)BM_SETCHECK, TRUE, (LPARAM)0L);
 			break;
+		default:
 		case 2:
 			SendDlgItemMessage(hWndDlg, IDC_CMAP_MEDIUM, (UINT)BM_SETCHECK, TRUE, (LPARAM)0L);
 			break;
