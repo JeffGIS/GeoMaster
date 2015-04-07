@@ -1964,7 +1964,7 @@ BOOL LinkLinesFunction (LPSTR Arg1,LPSTR Arg2,LPSTR OutLoc);
 int LinkPipesFunction (int iOpt,int id,double tol,LPINT pnPnts,LPDPOINT3D pPoints3D,LPINT pPipeSize,LPSTR pMaterial);
 BOOL GetGoogleTileBounds (int GZoom,int GRow,int GCol,LPMNMXCORD pBounds);
 void AddjustSphericalMercatorBounds (LPMNMXCORD pBounds);
-double GetGoogleTileBoundsFromPointAndZoom (int GZoom,DPOINT GPoint,LPMNMXCORD pBounds,LPINT pgRow,LPINT pgCol);
+double GetGoogleTileBoundsFromPointAndZoom (int GZoom,DPOINT GPoint,LPMNMXCORD pBounds,LPINT pgRow,LPINT pgCol,LPINT pGoogleRow);
 int GetGoogleZoomForSCale (double scale);
 double GetGoogleScaleForZoom (int iZoom);
 BOOL GetGoogleZoomAndTileFromBounds (LPMNMXCORD pBoundsInBaseProjection,int StartZoom,LPINT pZoom,LPINT pTileX,LPINT pTileY,LPDOUBLE pScale,LPMNMXCORD pTileBounds);

@@ -1542,8 +1542,7 @@ BOOL CreateGoogleMapTiles (LPSTR InFile,int MaxZoom,LPMNMXCORD pBounds)
     char    tempFile2[MAX_PATH];
     BTVARDESC   BTVar[3];
 	HANDLE	hBT, hBT2;
-	struct	{short zm;
-			 int   y,x;} key;	
+	struct	{int zm,y,x;} key;	
 	MNMXCORD	bounds, nxtbounds;
 	MNMXCORD	BoundsInGoogleProjection, gTileBounds;
 	HFILE	fidOut;
@@ -1565,10 +1564,10 @@ BOOL CreateGoogleMapTiles (LPSTR InFile,int MaxZoom,LPMNMXCORD pBounds)
 		if (gridSize > boundsSize)
 			break;
 	}
-	if (!ConvertRectCoord (&BoundsInGoogleProjection,pBounds, 1,-GOOGLEMAPSPROJECTION))
+	if (!ConvertRectCoord (&BoundsInGoogleProjection,pBounds, 1,GOOGLEMAPSPROJECTION))
 		return FALSE;
 	AddjustSphericalMercatorBounds (&BoundsInGoogleProjection);
-	if (!GetGoogleZoomAndTileFromBounds (&BoundsInGoogleProjection,0,&zoom,&tilex,&tiley,&scale,0))
+	if (!GetGoogleZoomAndTileFromBounds (pBounds,0,&zoom,&tilex,&tiley,&scale,0))
 		return rtn;
 	fidOut = GSSiOpenFile (InFile,0,OF_CREATE);
 	if (fidOut == HFILE_ERROR)
@@ -1581,14 +1580,14 @@ BOOL CreateGoogleMapTiles (LPSTR InFile,int MaxZoom,LPMNMXCORD pBounds)
 	hDib32 = BitmapToDIB32 (hBitmap);  
 	DeleteObject (hBitmap);
     BTVar[0].BT_VARTYP=BT_INTEGER;
-    BTVar[0].BT_VARLEN=2;
+    BTVar[0].BT_VARLEN=4;
     BTVar[0].BT_VAROFF=0;
     BTVar[1].BT_VARTYP=BT_INTEGER;
     BTVar[1].BT_VARLEN=4;
-    BTVar[1].BT_VAROFF=2;
+    BTVar[1].BT_VAROFF=4;
     BTVar[2].BT_VARTYP=BT_INTEGER;
     BTVar[2].BT_VARLEN=4;
-    BTVar[2].BT_VAROFF=6;
+    BTVar[2].BT_VAROFF=8;
 	GSSiGetTempFileName (0,"gm",0,(LPSTR)tempFile); 
 	BT_CREATE (tempFile, sizeof(MNMXCORD), FALSE, 3, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
     hBT = BT_OPEN (tempFile,0,BT_WRITE,0); 
@@ -1613,68 +1612,83 @@ BOOL CreateGoogleMapTiles (LPSTR InFile,int MaxZoom,LPMNMXCORD pBounds)
 		BT_DELETE (hBT,(LPSTR)&key,(LPSTR)&bounds,FALSE);
 		if (nxtzoom <= MaxZoom)
 		{
-			int	nxtrow, nxtcol;
+			int	nxtrow, nxtcol, googleRow;
 
 			point.x = bounds.xmn + (bounds.xmx - bounds.xmn) / 4;
 			point.y = bounds.ymn + (bounds.ymx - bounds.ymn) / 4;
-			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol);
+			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol,&googleRow);
 			if (HaveNonBKColorInGoogleBounds (&nxtbounds,hDib32))
 			{
 				key.zm = -nxtzoom;
 				key.x = nxtcol;
-				key.y = nxtrow;
+				key.y = googleRow;
 				BT_PUT (hBT2,(LPSTR)&key,(LPSTR)&nxtbounds);
-				BT_PUT (hBT,(LPSTR)&key,(LPSTR)&nxtbounds);
+				BT_PUT(hBT, (LPSTR)&key, (LPSTR)&nxtbounds);
+				if (key.zm == -18 && key.x == 63121 && key.y == 94253)
+					ii = 1;
+
 			}
 			point.x = bounds.xmn + (bounds.xmx - bounds.xmn) / 4;
 			point.y = bounds.ymn + 3 * (bounds.ymx - bounds.ymn) / 4;
-			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol);
+			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol,&googleRow);
 			if (HaveNonBKColorInGoogleBounds (&nxtbounds,hDib32))
 			{
 				key.zm = -nxtzoom;
 				key.x = nxtcol;
-				key.y = nxtrow;
+				key.y = googleRow;
 				BT_PUT (hBT2,(LPSTR)&key,(LPSTR)&nxtbounds);
 				BT_PUT (hBT,(LPSTR)&key,(LPSTR)&nxtbounds);
+				if (key.zm == -18 && key.x == 63121 && key.y == 94253)
+					ii = 1;
 			}
 			point.x = bounds.xmn + 3 * (bounds.xmx - bounds.xmn) / 4;
 			point.y = bounds.ymn + (bounds.ymx - bounds.ymn) / 4;
-			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol);
+			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol,&googleRow);
 			if (HaveNonBKColorInGoogleBounds (&nxtbounds,hDib32))
 			{
 				key.zm = -nxtzoom;
 				key.x = nxtcol;
-				key.y = nxtrow;
+				key.y = googleRow;
 				BT_PUT (hBT2,(LPSTR)&key,(LPSTR)&nxtbounds);
 				BT_PUT (hBT,(LPSTR)&key,(LPSTR)&nxtbounds);
+				if (key.zm == -18 && key.x == 63121 && key.y == 94253)
+					ii = 1;
 			}
 			point.x = bounds.xmn + 3 * (bounds.xmx - bounds.xmn) / 4;
 			point.y = bounds.ymn + 3 * (bounds.ymx - bounds.ymn) / 4;
-			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol);
+			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol,&googleRow);
 			if (HaveNonBKColorInGoogleBounds (&nxtbounds,hDib32))
 			{
 				key.zm = -nxtzoom;
 				key.x = nxtcol;
-				key.y = nxtrow;
+				key.y = googleRow;
 				BT_PUT (hBT2,(LPSTR)&key,(LPSTR)&nxtbounds);
 				BT_PUT (hBT,(LPSTR)&key,(LPSTR)&nxtbounds);
+				if (key.zm == -18 && key.x == 63121 && key.y == 94253)
+					ii = 1;
 			}
-			point = MinMaxMidPointD (&bounds);
-			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol);
+/*			point = MinMaxMidPointD (&bounds);
+			GetGoogleTileBoundsFromPointAndZoom (nxtzoom,point,&nxtbounds,&nxtrow,&nxtcol,&googleRow);
 			if (HaveNonBKColorInGoogleBounds (&nxtbounds,hDib32))
 			{
 				key.zm = -nxtzoom;
 				key.x = nxtcol;
-				key.y = nxtrow;
+				key.y = googleRow;
 				BT_PUT (hBT2,(LPSTR)&key,(LPSTR)&nxtbounds);
 				BT_PUT (hBT,(LPSTR)&key,(LPSTR)&nxtbounds);
-			}
+				if (key.zm == -18 && key.x == 63121 && key.y == 94253)
+					ii = 1;
+			}*/
 		}
 	}
 
 	BT_CLOSEANDDELETE (&hBT); 
 	sprintf (str,"GZOOM\tGROW\tGCOL\tGBOUNDS");
 	fputstring (str,fidOut);
+/*	key.zm = -18;
+	key.x = 63121;
+	key.y = 94253;
+	BT_FIND(hBT2, (LPSTR)&key, BT_FIRST,BT_EQ, (LPSTR)&bounds);*/
 	while (!BT_FIND (hBT2,(LPSTR)&key,pos,BT_ANY,(LPSTR)&bounds))
 	{
 		pos = BT_NEXT;

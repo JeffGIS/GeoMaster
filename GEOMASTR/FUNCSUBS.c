@@ -71,7 +71,8 @@ static	int		ImageZoomXoff=0,ImageZoomYoff=0;
 static	HBITMAP	ImageZoomSavedScreen=0;
 
 static	double gTileWidth[MAXGZOOMS+1];
-static	double gTileScale[MAXGZOOMS+1];
+static	double gTileScale[MAXGZOOMS + 1];
+static	UINT   gTileNum[MAXGZOOMS + 1];
 
 #define MAXRAWLINES	1024
 
@@ -1088,9 +1089,11 @@ void GoogleTilesInit (void)
 	first = FALSE;
 	gTileWidth[0] = 20037508.342789244 * 2.0;
 	gTileScale[0] = gTileWidth[0] / 256;
+	gTileNum[0] = 1;
 	for ( zoom=1; zoom<=MAXGZOOMS; zoom++)
 	{
-		gTileWidth[zoom] = gTileWidth[zoom-1]/2.0;
+		gTileWidth[zoom] = gTileWidth[zoom - 1] / 2.0;
+		gTileNum[zoom] = gTileNum[zoom - 1] * 2;
 		gTileScale[zoom] = gTileWidth[zoom] / 256;
 	}
 	return;
@@ -1123,19 +1126,22 @@ void AddjustSphericalMercatorBounds (LPMNMXCORD pBounds)
 	return;
 }
 
-double GetGoogleTileBoundsFromPointAndZoom (int GZoom,DPOINT GPoint,LPMNMXCORD pBounds,LPINT pgRow,LPINT pgCol)
+double GetGoogleTileBoundsFromPointAndZoom (int GZoom,DPOINT GPoint,LPMNMXCORD pBounds,LPINT pgRow,LPINT pgCol,LPINT pGoogleRow)
 {
 	int		gRow, gCol, zoom;
 
 	GoogleTilesInit ();		
-	//gRow = (20037508.342789244 - GPoint.y)/gTileWidth[GZoom];
 	gRow = (20037508.342789244 + GPoint.y)/gTileWidth[GZoom];
-	gCol = (GPoint.x+20037508.342789244)/gTileWidth[GZoom];
-	pBounds->xmn = gCol * gTileWidth[GZoom] - 20037508.342789244; 
+	gCol = (GPoint.x + 20037508.342789244) / gTileWidth[GZoom];
+	if (gRow == 167890 && gCol == 63121)
+		ii = 1;
+	pBounds->xmn = gCol * gTileWidth[GZoom] - 20037508.342789244;
 	//pBounds->ymn = 20037508.342789244 - (gRow+1) * gTileWidth[GZoom]; 
 	pBounds->ymn = gRow * gTileWidth[GZoom] - 20037508.342789244; 
 	pBounds->xmx = pBounds->xmn + gTileWidth[GZoom];
 	pBounds->ymx = pBounds->ymn + gTileWidth[GZoom];
+	*pGoogleRow = gTileNum[GZoom] - gRow - 1;
+//	*pGoogleRow = (20037508.342789244 - GPoint.y) / gTileWidth[GZoom];
 	*pgRow = gRow;
 	*pgCol = gCol;
 	return gTileScale[GZoom];
@@ -1177,19 +1183,20 @@ BOOL GetGoogleZoomAndTileFromBounds (LPMNMXCORD pBoundsInBaseProjection,int Star
 {
 	BOOL	rtn = FALSE;
 	int	zoom = -1;
+	int googleRow;
 	MNMXCORD	BoundsInGoogleProjection, gTileBounds;
 	double	scale;
 	
 	*pZoom = 0;
 	*pTileX = *pTileY = 0;
 	*pScale = 0;
-	if (ConvertRectCoord (&BoundsInGoogleProjection,pBoundsInBaseProjection, 1,-GOOGLEMAPSPROJECTION))
+	if (ConvertRectCoord (&BoundsInGoogleProjection,pBoundsInBaseProjection, 1,GOOGLEMAPSPROJECTION))
 	{
 		DPOINT	Point = MinMaxMidPointD (&BoundsInGoogleProjection);
 
 		for (zoom = MAXGZOOMS;zoom > -1;zoom--)
 		{
-			scale = GetGoogleTileBoundsFromPointAndZoom (zoom,Point,&gTileBounds,pTileY,pTileX);
+			scale = GetGoogleTileBoundsFromPointAndZoom (zoom,Point,&gTileBounds,pTileY,pTileX,&googleRow);
 			if (BoundsInBounds (&BoundsInGoogleProjection,&gTileBounds,0))
 			{
 				rtn = TRUE;

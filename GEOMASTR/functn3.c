@@ -4278,6 +4278,18 @@ GotCloseFilehSQL:
 				ftoa(OutLoc, RVal);
 				goto Rtnl;
 			}
+			if (!stricmp(Arg[1], "ROWCOL"))
+			{
+				DPOINT pt = atopt(Arg[2], &Err);
+				int ilev = atoi(Arg[3]);
+				int row, col, googleRow;
+				MNMXCORD bounds;
+				double scale = GetGoogleTileBoundsFromPointAndZoom(ilev, pt, &bounds, &row, &col, &googleRow);
+
+				sprintf(OutLoc, "%i|%i|%i", row, col, googleRow);
+				goto Rtnl;
+			}
+
 			goto RtnFalse;
 		}
 		case 646: //$GMEDIT(file,TorF(create if new))

@@ -890,15 +890,16 @@ void DisplayCoordGridThemeLegend(short From)
 					{
 						DPOINT	Point;
 						int GridCelID;
+						int googleRow;
 
 						AddjustSphericalMercatorBounds (&BoundsInGoogleProjection);
 						InflateBounds (&BoundsInGoogleProjection,-1.0);
 						Point.x = BoundsInGoogleProjection.xmn;
 						Point.y = BoundsInGoogleProjection.ymn;
-						GetGoogleTileBoundsFromPointAndZoom (iZoom,Point,&tileBoundsll,&iTileYLL,&iTileXLL);
+						GetGoogleTileBoundsFromPointAndZoom (iZoom,Point,&tileBoundsll,&iTileYLL,&iTileXLL,&googleRow);
 						Point.x = BoundsInGoogleProjection.xmx;
 						Point.y = BoundsInGoogleProjection.ymx;
-						GetGoogleTileBoundsFromPointAndZoom (iZoom,Point,&tileBoundsur,&iTileYUR,&iTileXUR);
+						GetGoogleTileBoundsFromPointAndZoom (iZoom,Point,&tileBoundsur,&iTileYUR,&iTileXUR,&googleRow);
 						nrows = iTileYUR - iTileYLL + 1;
 						ncols = iTileXUR - iTileXLL + 1;
 						for (irow=0;irow<nrows;irow++)
@@ -909,7 +910,7 @@ void DisplayCoordGridThemeLegend(short From)
 								bounds.ymx = bounds.ymn + tileWidthHeight;
 								bounds.xmn = tileBoundsll.xmn + icol * tileWidthHeight;
 								bounds.xmx = bounds.xmn + tileWidthHeight;
-								tileScale = GetGoogleTileBoundsFromPointAndZoom (iZoom,MinMaxMidPointD (&bounds),&gBounds,&tiley,&tilex);
+								tileScale = GetGoogleTileBoundsFromPointAndZoom (iZoom,MinMaxMidPointD (&bounds),&gBounds,&tiley,&tilex,&googleRow);
 								ConvertRectCoord (&boundsBase, &gBounds,-1,1);
 								ConvertRectCoord (&boundsLL, &gBounds,-1,2);
 								if (!IntersectBounds (&CurView->WBounds,&boundsBase,0))
