@@ -111,6 +111,19 @@ static int getMaxBitmapDimension(LPTHEME CurTheme)
 	}
 	return rtn;
 }
+static saveBitmap(HDC hDC, HBITMAP hBMOld)
+{
+	static BOOL savebm = FALSE;
+	static int nTest = 1;
+	if (savebm)
+	{
+		char file[MAX_PATH];
+		HBITMAP hBM = SelectObject(hDC, hBMOld);
+		sprintf(file, "c:\\temp\\AreaTests\\test%i.bmp", nTest++);
+		SaveBitmap(hBM, file, 0, 0);
+		SelectObject(hDC, hBM);
+	}
+}
 
 BOOL ThemeCreateAreaInMask(int from)
 {
@@ -137,7 +150,6 @@ BOOL ThemeCreateAreaInMask(int from)
 			HANDLE hTranWtoBM, hTranBMtoW;
 			HANDLE hPoly;
 			LPPOINT pPoly;
-			BOOL savebm = FALSE;
 			int i;
 			static int nTest = 1;
 			int nMareaPoints;
@@ -188,7 +200,6 @@ BOOL ThemeCreateAreaInMask(int from)
 				hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
 				hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
 
-				SetROP2(hDC, 5);//or 10 for both
 				hOldBrush = SelectObject(hDC, GetStockObject(BLACK_BRUSH));
 				hOldPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
 
@@ -209,10 +220,14 @@ BOOL ThemeCreateAreaInMask(int from)
 				}
 				GSSiClose(Fid);
 
+				saveBitmap(hDC, hBMOld);
+
+				SetROP2(hDC, 5);//or 10 for both
 				hBluePen = CreatePen(PS_SOLID, 1, blue);
 				hBlueBrush = CreateSolidBrush(blue);
 				SelectObject(hDC,hBlueBrush);
-				SelectObject(hDC, hBluePen);
+				//SelectObject(hDC, hBluePen);
+				SelectObject(hDC, GetStockObject(NULL_PEN));
 				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 				pPoly = GlobalLock(hPoly);
 				for (i = 0; i < nPnts; i++)
@@ -223,16 +238,9 @@ BOOL ThemeCreateAreaInMask(int from)
 				DeleteObject(hBluePen);
 				DeleteObject(hBlueBrush);
 				GSSiGlobUlFree(&hPoly);
+				saveBitmap(hDC, hBMOld);
 				SelectObject(hDC, hBMOld);
 				DeleteDC(hDC);
-
-				if (savebm)
-				{
-					char file[MAX_PATH];
-
-					sprintf(file, "c:\\temp\\AreaTests2048\\test%i.bmp", nTest++);
-					SaveBitmap(hBM, file, 0, 0);
-				}
 				nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
 				GSSiDeleteObject(&hBM);
 				GSSiGlobUlFree(&hPolyBuffer);
