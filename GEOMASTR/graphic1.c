@@ -1020,6 +1020,7 @@ GSSiExitProg (12);
 							ContinueProcessing = CheckForContinue(FALSE, 0);
 
 					} while (ContinueProcessing && GetNextOrthoTileFromIndex());
+					ii = 1;
 					//ShowBufferedScreen(TRUE, TRUE, -99, 0);
 				}
 			}
@@ -1032,7 +1033,12 @@ DisplayImage:
         		_fstrupr (PltName);
         	if (_fstrstr(PltName,".TXT"))
         		DisplayTextFileInRect (*hDC,&CurView->DrawRect,PltName);
-        	else if (_fstrstr(PltName,".BMP") || _fstrstr(PltName,".JPG") || _fstrstr(PltName,".PNG") || _fstrstr(PltName,".GIF")|| _fstrstr(PltName,".TIF")|| _fstrstr(PltName,".PCX") || !_fstrnicmp (PltName,"http:",5))
+			else if (_fstrstr(PltName, ".BMP") || _fstrstr(PltName, ".JPG") || strstr(PltName, ".JP2") || 
+				     _fstrstr(PltName, ".PNG") ||
+					 _fstrstr(PltName, ".GIF") ||
+					 _fstrstr(PltName, ".TIF") ||
+					 _fstrstr(PltName, ".PCX") ||
+					 !_fstrnicmp(PltName, "http:", 5))
         	{
 		        if ((CurView->PassID != 1 && CurView->PassID != 5) && CurView->Type != 5)
 		        	goto Next; 
@@ -1065,7 +1071,7 @@ DisplayImage:
 					DisplayBMFileInVP32 (CurView->hDC, PltName,0,FALSE);//CurView->Rotation);		        	
 //            	DisplayBMFileInRect (CurView->hDC,PltName,CurView->DrawRect,TRUE); 
             }
-        	else if (strstr(PltName,".SID") || strstr(PltName,".JP2"))
+        	else if (strstr(PltName,".SID"))
         	{
 		        if (CurView->PassID != 1 && CurView->Type != 5)
 		        	goto Next; 

@@ -1028,6 +1028,7 @@ BOOL AdjustFileBounds (short VPID, short FileNo, LPMNMXCORD FileBounds, LPSTR In
 #endif
 {   
 	DPOINT	DPoint; 
+	MNMXCORD newBounds;
 	
 	if (FileBounds->xmn > FileBounds->xmx || FileBounds->ymn > FileBounds->ymx)
 {
@@ -1036,19 +1037,40 @@ GSSiExitProg (950);
 #endif
 		return FALSE;
 }
+	DBoundsInit(&newBounds);
+		 
 	if (FileNo == ConvertLayer)
 	{ 
 		DPoint.x = FileBounds->xmn;
 		DPoint.y = FileBounds->ymn;
-		if (ConvertCoord (&DPoint,3,1))
-{
+		if (ConvertCoord(&DPoint, 3, 1))
+		{
 #if ENABLETRACE
-GSSiExitProg (950);
+			GSSiExitProg (950);
 #endif
 			return FALSE;
-}
-		FileBounds->xmn = DPoint.x;
-		FileBounds->ymn = DPoint.y;
+		}
+		AddDPointToMinMax(&DPoint, &newBounds);
+		DPoint.x = FileBounds->xmn;
+		DPoint.y = FileBounds->ymx;
+		if (ConvertCoord(&DPoint, 3, 1))
+		{
+#if ENABLETRACE
+			GSSiExitProg (950);
+#endif
+			return FALSE;
+		}
+		AddDPointToMinMax(&DPoint, &newBounds);
+		DPoint.x = FileBounds->xmx;
+		DPoint.y = FileBounds->ymn;
+		if (ConvertCoord(&DPoint, 3, 1))
+		{
+#if ENABLETRACE
+			GSSiExitProg(950);
+#endif
+			return FALSE;
+		}
+		AddDPointToMinMax(&DPoint, &newBounds);
 		DPoint.x = FileBounds->xmx;
 		DPoint.y = FileBounds->ymx;
 		if (ConvertCoord (&DPoint,3,1))
@@ -1058,8 +1080,8 @@ GSSiExitProg (950);
 #endif
 			return FALSE;
 }
-		FileBounds->xmx = DPoint.x;
-		FileBounds->ymx = DPoint.y;
+		AddDPointToMinMax(&DPoint, &newBounds);
+		*FileBounds = newBounds;
 	}
     else if (OrthoAdjustVP == VPID && OrthoAdjustFile == FileNo) 
     {

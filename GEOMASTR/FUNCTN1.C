@@ -22,6 +22,48 @@ short OptionInList (LPSTR Val,LPSTR ListVals,int NumInList,int ListItemSize)
 	return 0;
 }
 
+static BOOL ConvertColorToTransparent(HDIB32 dib, COLORREF transColorIN)
+{
+	BOOL rtn = FALSE;
+	int r = GetRValue(transColorIN);
+	int g = GetGValue(transColorIN);
+	int b = GetBValue(transColorIN);
+	RGBQUAD rgbQuad;
+	COLORREF *ptransColor = (COLORREF *)&rgbQuad;
+	
+	rgbQuad.rgbBlue = b;
+	rgbQuad.rgbGreen = g;
+	rgbQuad.rgbRed = r;
+	rgbQuad.rgbReserved = 0;
+
+	if (FreeImage_GetWidth(dib))
+	{
+		int bytespp = FreeImage_GetLine(dib) / FreeImage_GetWidth(dib);
+		if (bytespp == 4)
+		{
+			for (unsigned y = 0; y < FreeImage_GetHeight(dib); y++)
+			{
+				LPRGBQUAD pQuadColor = (LPRGBQUAD)FreeImage_GetScanLine(dib, y);
+				COLORREF *pcolorRef = (COLORREF *)pQuadColor;
+				for (unsigned x = 0; x < FreeImage_GetWidth(dib); x++)
+				{
+					pQuadColor->rgbReserved = 0;
+					if (*pcolorRef == *ptransColor)
+					{
+						pQuadColor->rgbReserved = 0;
+						rtn = TRUE;
+					}
+					else
+						pQuadColor->rgbReserved = 255;
+					pQuadColor++;
+					pcolorRef++;
+				}
+			}
+		}
+	}
+	return rtn;
+}
+
 int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
@@ -488,12 +530,32 @@ GSSiExitProg (1348);
 			{
 				HBITMAP hbm;
 				RECT	rect = CurView->DrawRect;
-
+				int		imageFlag = atoi(Arg[7]);
+				COLORREF transColor = atoi(Arg[8]);
 				if (Err)
 					goto RtnFalse;
 				//ClientRectToScreenRect (CurView->hWnd,&rect);
 				hbm = SaveScreen (CurView->hDC,rect);
-				SaveBitmap (hbm,Arg[3],0,0);
+				if (imageFlag < 0)
+				{
+					HDIB32 dib = BitmapToDIB_32(hbm, NULL);
+					if (ConvertColorToTransparent(dib,transColor))
+					{
+						LPSTR pDot = strrchr(Arg[3], '.');
+						strcpy(pDot, ".png");
+						rtn = GMFIBMPHandleToEXT(Arg[3], dib, 0);
+						FreeImage_Unload(dib);
+					}
+					else
+					{
+						HDIB32 dib24 = FreeImage_ConvertTo24Bits(dib);
+						FreeImage_Unload(dib);
+						rtn = GMFIBMPHandleToEXT(Arg[3], dib24, -imageFlag);
+						FreeImage_Unload(dib24);
+					}
+				}
+				else
+					SaveBitmap (hbm,Arg[3],0,imageFlag);
 				GSSiDeleteObject (&hbm);
 				if (*Arg[4])
 				{

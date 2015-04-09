@@ -969,6 +969,7 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 			HBITMAP	hbitmap, hbmold;
 			UINT	ir,ic;
 			int		ubAlpha=255;
+			LPBYTE pImageBits;
     // zero the memory for the bitmap info 
 			ZeroMemory(&bmi, sizeof(BITMAPINFO));
 
@@ -983,10 +984,14 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 
 			// create our DIB section and select the bitmap into the dc 
 			hbitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &pvBits, NULL, 0x0);
-			hbmold = SelectObject(hdc, hbitmap);
-			BitBlt (hdc,0,0,pDibInfo->biWidth,pDibInfo->biHeight,hDC,0,0,SRCCOPY);
-			for (ir=0,pBits=pvBits;ir<pDibInfo->biHeight;ir++)
-				for (ic=0;ic<pDibInfo->biWidth;ic++,pBits++)
+			pImageBits = FreeImage_GetBits(hDib);
+			memcpy(pvBits, pImageBits, pDibInfo->biSizeImage);
+			//BitBlt (hdc,0,0,pDibInfo->biWidth,pDibInfo->biHeight,hDC,0,0,SRCCOPY);
+			for (ir = 0, pBits = pvBits; ir < pDibInfo->biHeight; ir++)
+			{
+				if (ir == pDibInfo->biHeight / 2)
+					ii = 1;
+				for (ic = 0; ic < pDibInfo->biWidth; ic++, pBits++)
 				{
 					///pBits->rgbReserved = max (BlendFactor,*pmaskBits);
 					//if (pBits->rgbReserved)
@@ -996,12 +1001,14 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 					//fAlphaFactor = (float)pBits->rgbReserved / (float)0xff; 
 					if (pBits->rgbReserved == 0)// && pBits->rgbReserved < 255)
 						pBits->rgbReserved = 255;
-					fAlphaFactor = (float)pBits->rgbReserved / (float)0xff; 
+					fAlphaFactor = (float)pBits->rgbReserved / (float)0xff;
 
-					pBits->rgbBlue *= fAlphaFactor; 
-					pBits->rgbRed *= fAlphaFactor; 
-					pBits->rgbGreen *= fAlphaFactor; 
+					pBits->rgbBlue *= fAlphaFactor;
+					pBits->rgbRed *= fAlphaFactor;
+					pBits->rgbGreen *= fAlphaFactor;
 				}
+			}
+			hbmold = SelectObject(hdc, hbitmap);
 			bf.BlendOp = AC_SRC_OVER;
 			bf.BlendFlags = 0;
 			bf.AlphaFormat = AC_SRC_ALPHA;

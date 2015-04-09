@@ -1051,7 +1051,8 @@ long StretchDIBitsFromHandle (HDC hDC,long destX,long destY,long destW,long dest
 					 		  HDIB32 hDib, DWORD ColorType,DWORD RasterOpt,double Factor);
 int SetCurImage (LPSTR Name);
 BOOL SaveBitmap (HBITMAP hBitmap,LPSTR OutFile,long Format,DWORD Flag);  
-BOOL SaveDIB32 (HDIB32 hBitmap,LPSTR OutFile,long Format,DWORD Flag);
+HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal);
+BOOL SaveDIB32(HDIB32 hBitmap, LPSTR OutFile, long Format, DWORD Flag);
 HDIB32 AllocateDIB (DWORD Width,DWORD Height,DWORD BitsPerPixel);
 BOOL PasteDIB (HDIB32 ToDIB,HDIB32 FromDIB,DWORD Left,DWORD Top,DWORD Alpha);
 HDIB32 BitmapToDIB32 (HBITMAP hBitmap); 
