@@ -2083,6 +2083,7 @@ BOOL CopyTextFile (LPSTR ToFike,LPSTR FromFile,LPSTR Opt,LPSTR Value);
 BOOL GetSymAttrFile(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LPSTR OverrideAppendVal, LPSTR AttrFile);
 BOOL GetSymAttrKey(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LPSTR OverrideAppendVal, LPSTR Key);
 BOOL ParcelTranFunction(int nArgs, LPSTR *Arg, LPSTR OutLoc);
+BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc);
 BOOL PointListCommands(int nArgs, LPSTR *Arg, LPSTR OutLoc);
 BOOL PListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc);
 BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc);

@@ -3084,7 +3084,15 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-			ParcelTranFunction(nArgs,Arg, OutLoc);
+			ParcelTranFunction(nArgs, Arg, OutLoc);
+			goto Rtnl;
+		}
+		case 1041:	//$MAILLABELS
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			PrintMailLabels (nArgs, Arg, OutLoc);
 			goto Rtnl;
 		}
 

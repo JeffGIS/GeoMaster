@@ -1335,6 +1335,9 @@
     <ClCompile Include="CreateAreaInMask.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MailLabels.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
