@@ -756,6 +756,7 @@
   <ItemGroup>
     <ClInclude Include="..\INCLUDE\Bt.h" />
     <ClInclude Include="..\gctpc\cproj.h" />
+    <ClInclude Include="..\INCLUDE\colorsByName.h" />
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
