@@ -3371,10 +3371,37 @@ SetVis:
 			char SSID[40];
 			char ipAddress[32];
 			GUID Guid;
-			netAdaptTest();
+
+			{
+#include "colorsByName.h"
+				HDC hDC = CurView->hDC;
+				float w = RECTWIDTH(&CurView->DrawRect)/7.0;
+				float h = RECTHEIGHT(&CurView->DrawRect)/20.0;
+				int icolor = 0;
+				for (int irow = 0; irow < 20; irow++)
+				{
+					for (int icol = 0; icol < 7; icol++)
+					{
+						RECT rect;
+						COLORREF color = RGB(R[icolor], G[icolor], B[icolor]);
+						icolor++;
+						rect.left = CurView->DrawRect.left + icol * w;
+						rect.right = rect.left + w + 1;
+						rect.top = CurView->DrawRect.top + irow * h;
+						rect.bottom = rect.top + h + 1;
+						FillRectColor(hDC, &rect, color);
+					}
+				}
+				GdiFlush();
+				HBITMAP hbmp = SaveScreen(hDC, CurView->DrawRect);
+				GM32SaveBitmap(hbmp, "c:\\temp\\colormap.bmp", 0, 0);
+				DeleteObject(hbmp);
+
+			}
+			/*netAdaptTest();
 			wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
 			getipAddressForAdapter(ipAddress,&Guid);
-			/*HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
+			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR  pMem = GlobalLock(hMem);
 			HFILE  Fid = GSSiOpenFile("C:\\GEOMas\\projects\\corners\\Macros\\loadadafiles.txt", 0, OF_READ);
 			BigRead(Fid, pMem, SHRT_MAX - 2);

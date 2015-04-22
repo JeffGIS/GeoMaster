@@ -1133,16 +1133,17 @@ void writeTestStruct(void)
 void testConvertBitmapToPoly(LPSTR file);
 /*void loadColors(void)
 {
-//#include "c:\Temp\colors.c"
+#include "c:\Temp\colorchart.h"
 	OFSTRUCT OFStruct;
 	HFILE fidIn = GSSiOpenFile("C:\\Users\\jeffrey\\Dropbox\\ColorTable.txt", &OFStruct, OF_READ);
-	HFILE fidOut = GSSiOpenFile("c:\\temp\\colors.c",&OFStruct,OF_CREATE);
+	HFILE fidOut = GSSiOpenFile("c:\\temp\\colors.h",&OFStruct,OF_CREATE);
 	char line[260];
 	char outLine[260];
 	int nColors = 0;
 	int r[256], g[256], b[256];
 	char name[256][32];
 	int maxName = 0;
+	int sort[NUMCOLORNAMES];
 	while (fgetstring(line, 256, fidIn))
 	{
 		LPSTR pName = strstr(line, "name:\"");
@@ -1164,15 +1165,102 @@ void testConvertBitmapToPoly(LPSTR file);
 			r[nColors] = GetRValue(icolor);
 			g[nColors] = GetGValue(icolor);
 			b[nColors] = GetBValue(icolor);
+			pEnd = strstr(pName, "/grey");
+			if (pEnd)
+				*pEnd = 0;
 			strcpy(name[nColors], pName);
 			maxName = max (maxName,strlen(name[nColors]));
 			nColors++;
 		}
 	}
 	GSSiClose(fidIn);
+	for (int i = 0; i < NUMCOLORNAMES; i++)
+	{
+		for (int j = 0; j < nColors; j++)
+		{
+			if (!strcmp(name[j], colorName[i]))
+			{
+				sort[i] = j;
+				goto s10;
+			}
+		}
+
+		ii = 1;
+		s10:
+		continue;
+	}
 	sprintf(outLine, "#define NUMCOLORNAMES %i", nColors);
 	fputstring(outLine, fidOut);
 	sprintf(outLine, "\tchar colorName[NUMCOLORNAMES][%i] ={\"%s\"", maxName + 1, name[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,\"%s\"", name[sort[i]]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
+
+	sprintf(outLine, "\tunsigned char R[NUMCOLORNAMES] ={%i", r[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,%i", r[sort[i]]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
+
+	sprintf(outLine, "\tunsigned char G[NUMCOLORNAMES] ={%i", g[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,%i", g[sort[i]]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
+
+	sprintf(outLine, "\tunsigned char B[NUMCOLORNAMES] ={%i", b[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,%i", b[sort[i]]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
+
+	GSSiClose(fidOut);
+}
+void loadColorChart(void)
+{
+#include "c:\Temp\colors.h"
+	OFSTRUCT OFStruct;
+	LPSTR pName;
+	HFILE fidIn = GSSiOpenFile("C:\\Users\\jeffrey\\Dropbox\\ColorChart.txt", &OFStruct, OF_READ);
+	HFILE fidOut = GSSiOpenFile("c:\\temp\\colorchart.h", &OFStruct, OF_CREATE);
+	char line[12000];
+	char outLine[260];
+	int nColors = 0;
+	char name[140][32];
+	int maxName = 0;
+	BigRead(fidIn, line, sizeof(line));
+	line[sizeof(line)-1] = 0;
+	pName = strstr(line, "background-color:");
+	while (pName)
+	{
+		LPSTR pEnd = strchr(pName, '\"');
+		*pEnd = 0;
+		pName += 17;
+		strcpy(name[nColors], pName);
+		nColors++;
+		pName = strstr(pEnd+1, "background-color:");
+	}
+	GSSiClose(fidIn);
+	sprintf(outLine, "#define NUMCOLORNAMES %i", nColors);
+	fputstring(outLine, fidOut);
+	sprintf(outLine, "\tchar colorName[NUMCOLORNAMES][21] ={\"%s\"", name[0]);
 	fputstring(outLine, fidOut);
 	for (int i = 1; i < nColors; i++)
 	{
@@ -1182,38 +1270,11 @@ void testConvertBitmapToPoly(LPSTR file);
 	sprintf(outLine, "\t};");
 	fputstring(outLine, fidOut);
 
-	sprintf(outLine, "\tunsigned char R[NUMCOLORNAMES] ={\"%i\"", r[0]);
-	fputstring(outLine, fidOut);
-	for (int i = 1; i < nColors; i++)
-	{
-		sprintf(outLine, "\t,\"%i\"", r[i]);
-		fputstring(outLine, fidOut);
-	}
-	sprintf(outLine, "\t};");
-	fputstring(outLine, fidOut);
-
-	sprintf(outLine, "\tunsigned char G[NUMCOLORNAMES] ={\"%i\"", g[0]);
-	fputstring(outLine, fidOut);
-	for (int i = 1; i < nColors; i++)
-	{
-		sprintf(outLine, "\t,\"%i\"", g[i]);
-		fputstring(outLine, fidOut);
-	}
-	sprintf(outLine, "\t};");
-	fputstring(outLine, fidOut);
-
-	sprintf(outLine, "\tunsigned char B[NUMCOLORNAMES] ={\"%i\"", b[0]);
-	fputstring(outLine, fidOut);
-	for (int i = 1; i < nColors; i++)
-	{
-		sprintf(outLine, "\t,\"%i\"", b[i]);
-		fputstring(outLine, fidOut);
-	}
-	sprintf(outLine, "\t};");
-	fputstring(outLine, fidOut);
 
 	GSSiClose(fidOut);
-}*/
+}
+*/
+
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
@@ -1221,6 +1282,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	int  monStatus, mouseType;
 
 	//loadColors();
+	//loadColorChart();
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests2048\\test5.bmp");
 
 //#define FV	$(TargetName) 
