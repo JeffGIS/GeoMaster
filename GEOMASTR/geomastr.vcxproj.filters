@@ -1402,6 +1402,9 @@
     <ClInclude Include="..\SQLite3\sqlite3ext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\INCLUDE\colorsByName.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP">
