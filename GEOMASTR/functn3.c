@@ -4328,7 +4328,7 @@ GotCloseFilehSQL:
 		}
 		case 648: //$SQLITE(gmdfile,pltfile)
 		{
-			nArgs = GetFunArgs(Args, Arg, 12, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 16, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			rtn = SQLiteCmd(nArgs, Arg);
