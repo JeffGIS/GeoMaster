@@ -1135,7 +1135,7 @@ void testConvertBitmapToPoly(LPSTR file);
 {
 #include "c:\Temp\colorchart.h"
 	OFSTRUCT OFStruct;
-	HFILE fidIn = GSSiOpenFile("C:\\Users\\jeffrey\\Dropbox\\ColorTable.txt", &OFStruct, OF_READ);
+	HFILE fidIn = GSSiOpenFile("C:\\Users\\jeffrey\\Dropbox\\ColorChart.txt", &OFStruct, OF_READ);
 	HFILE fidOut = GSSiOpenFile("c:\\temp\\colors.h",&OFStruct,OF_CREATE);
 	char line[260];
 	char outLine[260];
@@ -1232,10 +1232,10 @@ void testConvertBitmapToPoly(LPSTR file);
 	fputstring(outLine, fidOut);
 
 	GSSiClose(fidOut);
-}
-void loadColorChart(void)
+}*/
+/*void loadColorChart(void)
 {
-#include "c:\Temp\colors.h"
+#include "c:\Temp\colorchart.h"
 	OFSTRUCT OFStruct;
 	LPSTR pName;
 	HFILE fidIn = GSSiOpenFile("C:\\Users\\jeffrey\\Dropbox\\ColorChart.txt", &OFStruct, OF_READ);
@@ -1243,7 +1243,8 @@ void loadColorChart(void)
 	char line[12000];
 	char outLine[260];
 	int nColors = 0;
-	char name[140][32];
+	char name[256][32];
+	int r[256], g[256], b[256];
 	int maxName = 0;
 	BigRead(fidIn, line, sizeof(line));
 	line[sizeof(line)-1] = 0;
@@ -1251,10 +1252,29 @@ void loadColorChart(void)
 	while (pName)
 	{
 		LPSTR pEnd = strchr(pName, '\"');
-		*pEnd = 0;
+		*pEnd++ = 0;
 		pName += 17;
 		strcpy(name[nColors], pName);
-		nColors++;
+		LPSTR pRGB = strstr(pEnd, "#");
+		if (pName && pRGB)
+		{
+			char Xcolor[12];
+			COLORREF icolor;
+
+			pRGB++;
+			pEnd = strchr(pRGB, '\"');
+			*pEnd = 0;
+			sprintf(Xcolor, "0X%s", pRGB);
+			icolor = strtol(Xcolor, 0, 16);
+			b[nColors] = GetRValue(icolor);
+			g[nColors] = GetGValue(icolor);
+			r[nColors] = GetBValue(icolor);
+			LPSTR pGray = strstr(pName, "/grey");
+			if (pGray)
+				*pGray = 0;
+			maxName = max (maxName,strlen(name[nColors]));
+			nColors++;
+		}
 		pName = strstr(pEnd+1, "background-color:");
 	}
 	GSSiClose(fidIn);
@@ -1270,6 +1290,35 @@ void loadColorChart(void)
 	sprintf(outLine, "\t};");
 	fputstring(outLine, fidOut);
 
+	sprintf(outLine, "\tunsigned char R[NUMCOLORNAMES] ={%i", r[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,%i", r[i]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
+
+	sprintf(outLine, "\tunsigned char G[NUMCOLORNAMES] ={%i", g[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,%i", g[i]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
+
+	sprintf(outLine, "\tunsigned char B[NUMCOLORNAMES] ={%i", b[0]);
+	fputstring(outLine, fidOut);
+	for (int i = 1; i < nColors; i++)
+	{
+		sprintf(outLine, "\t,%i", b[i]);
+		fputstring(outLine, fidOut);
+	}
+	sprintf(outLine, "\t};");
+	fputstring(outLine, fidOut);
 
 	GSSiClose(fidOut);
 }
