@@ -577,6 +577,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					char Arg7Val[256];
 					char addFieldVals[1024] = { 0 };
 
+					if (Refno == 80002608)
+						ii = 1;
 					if (atob(ARG[10]))
 						strcpy(addFieldVals, ",0");
 					for (int i = 11; i < 16; i += 2)
@@ -688,6 +690,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 					sprintf(pCmd, "Can compress %i (%.1f%%)", nCanCompress, (100.0*nCanCompress) / nTotal);
 					keepGoing = StatusWindowUpdate(NULL,pCmd, nRecs, ++nLoaded);
+					DestroySavedPolys();
 				}
 				DestroyStatusWindow(0);
 				GSSiClose(Fid);
