@@ -471,7 +471,12 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				CloseGWDatabase(hGMDB);
 			}
 		}
-		else if (!stricmp(ARG[1], "TEXTFROMPOLY"))//$SQLITE(TEXTFROMPOLY,outfilename,new,tablename,UDIFieldNameAndType(i.e PID  CHAR(13)-no spaces in name),UDIFieldNameAndType2(i.e PID  CHAR(13)-no spaces in name)
+		else if (!stricmp(ARG[1], "TEXTFROMPOLY"))//$SQLITE(TEXTFROMPOLY,outfilename,new,tablename,
+												  //UDIFieldNameAndType(i.e PID  CHAR(13)-no spaces in name),
+												  //UDIFieldNameAndType2(i.e PID  CHAR(13)-no spaces in name),value,
+												  //skipquad(TF),skipconvert(TF),add LastUpdate Field
+												  //additional field,additional field val,
+												  //...
 		{
 			short	pos = BT_FIRST;
 			long	Refno;
@@ -528,6 +533,16 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				CreateStatusWind(hWndMain, 1,pCmd);
 				if (createTables)
 				{
+					char addFields[256] = {0};
+					
+					if (atob(ARG[10]))
+						strcpy(addFields, ",LASTUPDATE INT");
+					for (int i = 11; i < 16; i+=2)
+					{
+						if (!*ARG[i])
+							break;
+						sprintf(strchr(addFields, 0), ",%s", ARG[i]);
+					}
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s;", ARG[4]);
 					fputstring(pCmd, Fid);
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
@@ -539,9 +554,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, Fid);
 					}
 					if (*ARG[6])
-						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6], BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
 					else
-						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
 					fputstring(pCmd, Fid);
 					if ((pSpace = strchr(ARG[5], ' ')))
 						*pSpace = 0;
@@ -560,6 +575,21 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				{
 					char UDI[80];
 					char Arg7Val[256];
+					char addFieldVals[1024] = { 0 };
+
+					if (Refno == 80002608)
+						ii = 1;
+					if (atob(ARG[10]))
+						strcpy(addFieldVals, ",0");
+					for (int i = 11; i < 16; i += 2)
+					{
+						if (!*ARG[i])
+							break;
+						if (strstr(ARG[i], "CHAR("))
+							sprintf(strchr(addFieldVals, 0), ",'%s'", ARG[i + 1]);
+						else
+							sprintf(strchr(addFieldVals, 0), ",%s", ARG[i + 1]);
+					}
 
 					strcpy(Arg7Val, ARG[7]);
 					if (!stricmp(Arg7Val, "[UDI]"))
@@ -645,9 +675,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val,addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
 							}
 							fputstring(pCmd, Fid);
 							free(blobPoints);
@@ -660,6 +690,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 					sprintf(pCmd, "Can compress %i (%.1f%%)", nCanCompress, (100.0*nCanCompress) / nTotal);
 					keepGoing = StatusWindowUpdate(NULL,pCmd, nRecs, ++nLoaded);
+					DestroySavedPolys();
 				}
 				DestroyStatusWindow(0);
 				GSSiClose(Fid);

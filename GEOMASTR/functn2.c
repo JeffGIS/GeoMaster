@@ -1065,7 +1065,7 @@ GSSiExitProg (1350);
 		  goto RtnFalse;
 		}
 		
-		case 835: //$GMDREORG(Name,IndexToReorgOn(0=primary=default),Compress,Verify,AddFieldDef)
+		case 835: //$GMDREORG(Name,IndexToReorgOn(0=primary=default),Compress,Verify,AddFieldDef(ex. (NEWF1(B4)=10,NEWF2(C1)=T)
         {
 			nArgs = GetFunArgs(Args, Arg, -5, &hMem, pBrkPt, bpOffset, bpLen);
 		  if (!nArgs)
