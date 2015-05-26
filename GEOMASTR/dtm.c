@@ -4272,7 +4272,7 @@ BOOL SetDTMRenderAs (int Layer)
 		if (!DTMSlopeArrowFactor)
 			DTMSlopeArrowFactor = 1; 
 	}  
-	if (CurView->HaveLayerColor[Layer])
+	if (CurView->DarkContourColor[Layer])
 	{   
 		LightContourColor = ColorWOWidth (CurView->LayerColor[Layer]);
 		LightContourWidth = GetWValue (CurView->LayerColor[Layer])/2.0;  

@@ -2817,12 +2817,11 @@ BOOL FAR PASCAL DTMSETTINGSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		 	itoa (i+5,str,10); 
 		 	SendDlgItemMessage (hWndDlg,IDC_CONTOURTEXTSIZE,CB_ADDSTRING,0,(LPARAM)(LPSTR)str); 
 		 }  
-		 if (CurView->HaveLayerColor[DTMSettingLayerNum])
-		 	w = GetWValue (CurView->DarkContourColor[DTMSettingLayerNum]); 
-		 else
+		 w = GetWValue (CurView->DarkContourColor[DTMSettingLayerNum]); 
+		 if (w < 1)
 		 	w = 2;
 		 SendDlgItemMessage (hWndDlg,IDC_DARKCONTOURWIDTH,CB_SETCURSEL,w,0); 
-		 if (CurView->HaveLayerColor[DTMSettingLayerNum])   
+		 if (GetWValue(CurView->DarkContourColor[DTMSettingLayerNum]) > 0)
 		 {
 			NewDarkColor = ColorWOWidth(CurView->DarkContourColor[DTMSettingLayerNum]);
 			NewLightColor = ColorWOWidth(CurView->LayerColor[DTMSettingLayerNum]);
