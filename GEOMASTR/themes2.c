@@ -1409,7 +1409,8 @@ CheckStatus:
 				}
             }
 			else
-			{		
+			{	
+KeepLooking:
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
 					&CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,sizeof(Value),CurTheme->DataFileID,CurTheme->MultiValOption);
@@ -1559,6 +1560,8 @@ CheckStatus:
 					ClassNo = CurTheme->AllValueClass;
 					goto GotClass;
 				}
+				if (!CurTheme->MultiValOption)
+					goto KeepLooking;
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
 				goto ProcessMissing; 

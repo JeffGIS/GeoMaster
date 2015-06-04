@@ -2589,6 +2589,7 @@ CheckStatus:
             }
 			else
 			{
+KeepLooking:
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
 								  &CurTheme->Field,iref,CurTheme->FieldFun,CurTheme->Value,Value,256,CurTheme->DataFileID,CurTheme->MultiValOption); 
@@ -2643,6 +2644,8 @@ CheckStatus:
 				}
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
+				if (!CurTheme->MultiValOption)
+					goto KeepLooking;
 				goto ProcessMissing; 
 			}
 			goto RtnProcessed;
