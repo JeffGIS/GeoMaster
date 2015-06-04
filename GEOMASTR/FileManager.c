@@ -39,7 +39,7 @@ static void AddFMSource(LPSTR Name)
 	sqlite3_stmt *statement;
 
 	sprintf(pCmd, "INSERT INTO SOURCE VALUES ('%s',0)", Name);
-	SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Add source", &error);
+	SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error),db, "Add source", &error);
 	sqlite3_free(error);
 
 	GSSiGlobUlFree(&hCmd);
@@ -56,7 +56,7 @@ static void ListFMSource(HWND hWndDlg)
 	sprintf(pCmd, "SELECT SourceName FROM SOURCE WHERE Removed = 0 ");
 	sqlite3_stmt *statement;
 
-	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "ListSource", &error);
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL),db, "ListSource", &error);
 
 	strcpy(pCmd, "[%DL]");
 	SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)pCmd));
@@ -67,7 +67,7 @@ static void ListFMSource(HWND hWndDlg)
 		SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)Name));
 	}
 
-	SQLOK(sqlite3_finalize(statement), "finalize ListSource", 0);
+	SQLOK(sqlite3_finalize(statement), db, "finalize ListSource", 0);
 	GSSiGlobUlFree(&hCmd);
 	SendDlgItemMessage(hWndDlg, IDC_FMSOURCELIST, LB_SELECTSTRING, -1, (LPARAM)((LPSTR)currentSource));
 }
@@ -82,16 +82,16 @@ static void AddGroup(LPSTR Name)
 
 	sprintf(pCmd, "SELECT MAX(GroupID) FROM GROUPS");
 
-	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "AddGroups", &error);
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), db, "AddGroups", &error);
 
 	if (sqlite3_step(statement) == SQLITE_ROW)
 	{
 		groupID = max(2, sqlite3_column_int(statement, 0));
 	}
-	SQLOK(sqlite3_finalize(statement), "finalize ListGroup", 0);
+	SQLOK(sqlite3_finalize(statement), db, "finalize ListGroup", 0);
 	groupID++;
 	sprintf(pCmd, "INSERT INTO GROUPS VALUES (%i,'%s',0)", groupID, Name);
-	SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Add group", &error);
+	SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Add group", &error);
 	sqlite3_free(error);
 
 	GSSiGlobUlFree(&hCmd);
@@ -109,7 +109,7 @@ static void ListGroups(HWND hWndDlg)
 	sprintf(pCmd, "SELECT GroupName,GroupID FROM GROUPS WHERE Removed = 0");
 	sqlite3_stmt *statement;
 
-	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "ListGroups", &error);
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), db, "ListGroups", &error);
 
 	strcpy(pCmd, "Unassigned\t0");
 	SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTDISPLAY, LB_ADDSTRING, 0, (LPARAM)((LPSTR)pCmd));
@@ -129,7 +129,7 @@ static void ListGroups(HWND hWndDlg)
 		SendDlgItemMessage(hWndDlg, IDC_FMGROUPLISTASSIGN, LB_ADDSTRING, 0, (LPARAM)((LPSTR)pCmd));
 	}
 
-	SQLOK(sqlite3_finalize(statement), "finalize ListGroup", 0);
+	SQLOK(sqlite3_finalize(statement), db, "finalize ListGroup", 0);
 	GSSiGlobUlFree(&hCmd);
 }
 static int FMGroup2(LPSTR path)
@@ -144,12 +144,12 @@ static int FMGroup2(LPSTR path)
 	free(fixedPath);
 	sqlite3_stmt *statement;
 
-	SQLOK(sqlite3_prepare_v2(db,pCmd, -1, &statement, NULL), "get Group",&error);
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), db, "get Group", &error);
 
 	if (sqlite3_step(statement) == SQLITE_ROW)
 		st = sqlite3_column_int(statement, 0);
 
-	SQLOK(sqlite3_finalize(statement), "finalize get Group", 0);
+	SQLOK(sqlite3_finalize(statement), db, "finalize get Group", 0);
 	GSSiGlobUlFree(&hCmd);
 
 	return st;
@@ -180,7 +180,7 @@ static int FMGroup(LPSTR path)
 BOOL OpenFileManagerDB(LPSTR path)
 {
 	char *error = NULL;
-	BOOL rtn = !SQLOK(sqlite3_open(path, &db), "open(Intersections)", &error);
+	BOOL rtn = !SQLOK(sqlite3_open(path, &db), db, "open(Intersections)", &error);
 
 	if (rtn)
 	{
@@ -188,17 +188,17 @@ BOOL OpenFileManagerDB(LPSTR path)
 		LPSTR  pCmd = GlobalLock(hCmd);
 
 		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS PATHS (Path CHAR(256) PRIMARY KEY,GroupID INT,UpdateTime INT,Size INT)");
-		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Create FILEMANAGER database", &error);
+		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Create FILEMANAGER database", &error);
 		sqlite3_free(error);
 		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS GROUPS (GroupID INT PRIMARY KEY,GroupName CHAR(64),Removed INT)");
-		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Create FILEMANAGER database", &error);
+		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Create FILEMANAGER database", &error);
 		sqlite3_free(error);
 		sprintf(pCmd, "CREATE TABLE IF NOT EXISTS SOURCE (SourceName CHAR(64),Removed INT)");
-		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Create FILEMANAGER database", &error);
+		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Create FILEMANAGER database", &error);
 		sqlite3_free(error);
 		if (!rtn)
 		{
-			rtn = !SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), "Start transaction", &error);
+			rtn = !SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), db, "Start transaction", &error);
 			sqlite3_free(error);
 			GSSiGetTempFileName(0, "gm", 0, deleteFile);
 			fidDeleteList = GSSiOpenFile(deleteFile, 0, OF_CREATE);
@@ -212,7 +212,7 @@ BOOL OpenFileManagerDB(LPSTR path)
 
 BOOL FMClose()
 {
-	BOOL rtn = !SQLOK(sqlite3_close(db),"Close FILEMANAGER database",0);
+	BOOL rtn = !SQLOK(sqlite3_close(db), db, "Close FILEMANAGER database", 0);
 	return rtn;
 }
 
@@ -226,7 +226,7 @@ static BOOL SetFMCode(int code, LPSTR path)
 
 	sprintf(pCmd, "INSERT INTO PATHS VALUES('%s%s',%i,0,0)", currentSource, fixedPath, code);
 	free(fixedPath);
-	rtn = !SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "SetFMCode", &error);
+	rtn = !SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "SetFMCode", &error);
 	sqlite3_free(error);
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -241,7 +241,7 @@ BOOL FMIncludeFile(LPSTR path,int group, long lastUpdateTime, long fileSize)
 
 	sprintf(pCmd, "INSERT INTO PATHS VALUES('%s%s',%i,%i,%i)", currentSource,fixedPath, group, lastUpdateTime, fileSize);
 	free(fixedPath);
-	rtn = !SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Include file", &error);
+	rtn = !SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Include file", &error);
 	sqlite3_free(error);
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -276,14 +276,14 @@ static BOOL FMRollBack(HWND hWnd)
 		char *error = NULL;
 
 		sprintf(pCmd, "ROLLBACK TRANSACTION");
-		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Rollback", &error);
+		rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Rollback", &error);
 		sqlite3_free(error);
 		if (!rtn)
 		{
 			GSSiClose(fidDeleteList);
 			fidDeleteList = GSSiOpenFile(deleteFile, 0, OF_CREATE);
 			rtn = TRUE;
-			SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), "Start transaction", &error);
+			SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), db, "Start transaction", &error);
 			sqlite3_free(error);
 		}
 		else
@@ -301,7 +301,7 @@ static BOOL FMCommit(void)
 	char *error = NULL;
 
 	sprintf(pCmd, "COMMIT TRANSACTION");
-	rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "Commit", &error);
+	rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "Commit", &error);
 	sqlite3_free(error);
 	if (!rtn)
 	{
@@ -321,7 +321,7 @@ static BOOL FMCommit(void)
 		GSSiClose(fidDeleteList);
 		fidDeleteList = GSSiOpenFile(deleteFile, 0, OF_CREATE);
 		rtn = TRUE;
-		SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), "Start transaction", &error);
+		SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), db, "Start transaction", &error);
 		sqlite3_free(error);
 	}
 	else
@@ -477,7 +477,7 @@ static void ListFMSavedFiles(HWND hWndDlg)
 	sprintf(pCmd, "SELECT Path,UpdateTime,Size FROM PATHS WHERE GroupID = %i", currentDisplay);
 	sqlite3_stmt *statement;
 
-	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "ListFiles", &error);
+	SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), db, "ListFiles", &error);
 
 	while (sqlite3_step(statement) == SQLITE_ROW)
 	{
@@ -493,7 +493,7 @@ static void ListFMSavedFiles(HWND hWndDlg)
 		totLen += fileLen;
 	}
 
-	SQLOK(sqlite3_finalize(statement), "finalize ListGroup", 0);
+	SQLOK(sqlite3_finalize(statement), db, "finalize ListGroup", 0);
 	GSSiGlobUlFree(&hCmd);
 	itoa(IDNINT(totLen / (1024.0*1024.0)), CtotSize, 10);
 	AddCommas(CtotSize);

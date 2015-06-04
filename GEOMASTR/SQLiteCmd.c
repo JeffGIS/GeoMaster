@@ -92,6 +92,51 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		rtn = sqlite3_close(db);
 	}
+	else if (!stricmp(ARG[1], "STARTTRANS"))
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		int err = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "",0);
+		if (!err)
+		{
+			rtn = 1;
+		}
+	}
+	else if (!stricmp(ARG[1], "ENDTRANS"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		int err = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = 1;
+		}
+	}
+	else if (!stricmp(ARG[1], "CMDFROMFILE"))
+	{
+#define MAXSTR 1020 * 256
+		char *error = NULL;
+		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
+
+		db = (sqlite3*)atoi(ARG[2]);
+		if (fid != HFILE_ERROR)
+		{
+			HANDLE hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
+			LPSTR cmd = GlobalLock(hstr);
+			rtn = 1;
+			while (fgetstring(cmd, MAXSTR - 2, fid))
+			{
+				int err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
+				sqlite3_free(error);
+				if (err)
+				{
+					rtn = 0;
+					break;
+				}
+			}
+			GSSiGlobUlFree(&hstr);
+			GSSiClose(fid);
+		}
+	}
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(ROWS,sqlitehandle,tablename,where clause)
 	{
 		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
@@ -100,13 +145,16 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		sprintf (pCmd,"SELECT COUNT (*) FROM %s",ARG[3]);
 		sqlite3_stmt *statement;
 
-		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, NULL), "get num rows",NULL);
-
-		if (sqlite3_step(statement) == SQLITE_ROW)
+		if (db)
 		{
-			rtn = sqlite3_column_int(statement, 0);
+			SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows",0);
+
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				rtn = sqlite3_column_int(statement, 0);
+			}
+			SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
 		}
-		SQLOK(sqlite3_finalize(statement), "get num rows",NULL);
 		GSSiGlobUlFree(&hCmd);
 	}
 	else if (!stricmp(ARG[1], "FROMGMD"))//$SQLITE(FROMGMD,sqlitehandle,gmdfile,tablename,primkeyisoffset)
@@ -127,7 +175,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				char delim[2] = { 0 };
 
 				sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[4]);
-				rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "$SQLITE(FROMGMD drop table", &error);
+				rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "$SQLITE(FROMGMD drop table", &error);
 				sqlite3_free(error);
 
 				if (primKeyIsOffset)
@@ -174,7 +222,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 						sprintf(strchr(pCmd, 0), "))");
 					}
-					rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "$SQLITE(FROMGMD create table", &error);
+					rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "$SQLITE(FROMGMD create table", &error);
 					sqlite3_free(error);
 					if (!rtn)
 						for (index = firstIndex; index < lpGWDHead->NumIndex; index++)
@@ -185,7 +233,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
 							}
 							sprintf(strchr(pCmd, 0), ")");
-							rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "$SQLITE(FROMGMD create table", &error);
+							rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "$SQLITE(FROMGMD create table", &error);
 							sqlite3_free(error);
 						}
 				}
@@ -201,7 +249,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					
 					sprintf(val, "Load table %s", ARG[4]);
 					CreateStatusWind(hWndMain, 1, val);
-					rtn = SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), "loadIntersectionTextToDatabase2", &error);
+					rtn = SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), db, "loadIntersectionTextToDatabase2", &error);
 					while (!rtn && !BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&Offset))
 					{
 						pos = BT_NEXT;
@@ -228,18 +276,18 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							delim[0] = ',';
 						}
 						sprintf(strchr(pCmd, 0), ")");
-						rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), "$SQLITE(FROMGMD insert record", &error);
+						rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "$SQLITE(FROMGMD insert record", &error);
 						sqlite3_free(error);
 						rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
 					}
 					DestroyStatusWindow(0);
 					if (!rtn)
 					{
-						rtn = SQLOK(sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &error), "$SQLITE(FROMGMD commit transaction", &error);
+						rtn = SQLOK(sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &error), db, "$SQLITE(FROMGMD commit transaction", &error);
 					}
 					else
 					{
-						SQLOK(sqlite3_exec(db, "ROLLBACK TRANSACTION", NULL, NULL, &error), "$SQLITE(FROMGMD rollback transaction", &error);
+						SQLOK(sqlite3_exec(db, "ROLLBACK TRANSACTION", NULL, NULL, &error), db, "$SQLITE(FROMGMD rollback transaction", &error);
 					}
 					//SQLOK(sqlite3_finalize(self.statement), "loadIntersectionTextToDatabase8");
 					GSSiGlobUlFree(&hVal);

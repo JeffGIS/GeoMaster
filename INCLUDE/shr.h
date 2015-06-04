@@ -144,7 +144,7 @@ HWND GetTopParent(HWND	hWnd);
 void ShowHideWindows(LPSTR WindowName, UINT fun);
 void ShowHideChildren(HWND hWndPar, UINT fun);
 
-int SQLOK(int sqlReturn, char *method, char ** error);
+int SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error);
 
 HBITMAP GetToolBitmap (LPSTR BMPath);
 BOOL WaitForProcessToEnd (DWORD pID,LPINT pMaxWait);

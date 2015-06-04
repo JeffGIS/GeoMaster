@@ -68,16 +68,14 @@ extern HWND	TraceWnd2;
 
 char	CacheTitle[256];
 
-int SQLOK(int sqlReturn, char *method, char ** error)
+int SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 {
 	if (sqlReturn != SQLITE_OK)
 	{
 		char mess[256];
+		sprintf(mess,"SQLite Error %i = %i:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
 
-		if (error && *error)
-			sprintf(mess, "SQLite error: %s at %s", *error, method);
-		else
-			sprintf(mess, "SQLite error at %s", method);
 		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 	}
 
