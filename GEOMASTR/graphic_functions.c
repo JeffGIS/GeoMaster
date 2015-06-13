@@ -2104,7 +2104,14 @@ DoCmd:
 		if (!_fstrncmp (pCmd,"$GFLIST",6))
 		{   
 			GSSiGlobUlFree (&hLastCmd);
-			DisplayGFList();
+			if (wParam == MK_CONTROL)
+			{
+				char file[MAX_PATH];
+				sprintf(file, "%s\\%s.txt", "[%DL]fundir", CurTheme->SQL);
+				GMEdit(CurView->hWnd,file);
+			}
+			else
+				DisplayGFList();
 			break;
 		}
 		if (!CurrentConfig)
