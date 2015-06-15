@@ -4656,8 +4656,58 @@ GSSiExitProg (1350);
 			goto Rtnl;   
 		}
 		
+		case 1313: //$ACCELEROMETER(FRONTANGLE,x,y,z)
+		{
+			double x, y, z;
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 4)
+				goto RtnFalse;
+			x = atof(Arg[2]);
+			y = atof(Arg[3]);
+			z = atof(Arg[4]);
+			//(void)slopesFromAccelerometer:(int)nReadings
+			{
+				double denom = sqrt(square(x) + square(y) + square(z));
+				double angz = acos(z / denom);
+				double angy = acos(y / denom);
+				double angx = acos(x / denom);
+				double pct;
+				angx *= RADtoDEG;
+				angy *= RADtoDEG;
+				angz *= RADtoDEG;
+				angx = (angx - 90.0);
+				angy = (angy - 90.0);
+				angz = (180.0 - angz);
+				if (!strcmp(Arg[1], "FRONTANGLE"))
+					ftoa(OutLoc, angy);
+				else if (!strcmp(Arg[1], "FRONTPCT"))
+				{
+					pct = (tan(angy * DEGtoRAD) * 100);
+					ftoa(OutLoc, pct);
+				}
+				else if (!strcmp(Arg[1], "SIDEANGLE"))
+					ftoa(OutLoc, angx);
+				else if (!strcmp(Arg[1], "SIDEPCT"))
+				{
+					pct = (tan(angx * DEGtoRAD) * 100);
+					ftoa(OutLoc, pct);
+				}
+				/*				_lastDegrees = angy;
 
-				
+				_data.frontSlopeDegrees = [self adjustSlope : angy
+				isSideSlope : NO];
+
+				_data.sideSlopeDegrees = [self adjustSlope : angx
+				isSideSlope : YES];
+
+				_data.frontSlopePct = (tan(_data.frontSlopeDegrees * DEGtoRAD) * 100);
+				_data.sideSlopePct = (tan(_data.sideSlopeDegrees * DEGtoRAD) * 100);
+				_data.maxSlopePct = ComputeMaxSlope(_data.frontSlopePct, _data.sideSlopePct);*/
+			}
+
+			goto Rtnl;
+		}
+
         case 1401: //$SETTEXTGLOBALS() 
         {
 		

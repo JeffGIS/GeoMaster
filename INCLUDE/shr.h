@@ -523,6 +523,7 @@ BOOL GetOpenFileCD (HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir);
 BOOL GetSaveFileCD (HWND hWnd, LPSTR Name, LPSTR lpInitDir);
 BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title);
 BOOL GetFont (HWND ghWnd, LPLOGFONT lpLogFont, COLORREF *dwFontColor, COLORREF *dwShadowColor,HFONT *phSelectedFont);
+double square(double val);
 double idist(POINT Point1, POINT Point2);
 double ldistp(DPOINT Point1, DPOINT Point2);
 double l2ddistfrom3d (DPOINT3D Point1, DPOINT3D Point2);
