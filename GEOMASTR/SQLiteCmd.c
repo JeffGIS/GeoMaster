@@ -774,7 +774,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
 				fputstring(pCmd, Fid);
-				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,pointX REAL,pointY REAL);", ARG[4],ARG[5]);
+				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,LONGITUDE REAL,LATITUDE REAL);", ARG[4],ARG[5]);
 				fputstring(pCmd, Fid);
 				if ((pSpace = strchr(ARG[5], ' ')))
 					*pSpace = 0;
