@@ -7352,6 +7352,8 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			lpGWDHead2 = GlobalLock(hDB2);
 			CreateStatusWind(hWndMain, 1, "Compare GMD Keys");
 			nRecs = BT_NUM_IN_INDEX(lpGWDHead1->BTHandle[0]);
+			fputstring("KEY", fidOut);
+
 			while (!BT_FIND(lpGWDHead1->BTHandle[0], lpGWDHead1->pKeys[0], pos, BT_ANY, (LPSTR)&Offset1))
 			{
 				pos = BT_NEXT;
@@ -8781,7 +8783,7 @@ BOOL ValidateGMDIndexes(LPSTR FilePath,int wantIndex,BOOL displayAfterEachIndex)
 		
 		CreateStatusWind(hWndMain, 1, txt);
 
-		while (!BT_FIND(lpGWDHead->BTHandle[index], lpGWDHead->pKeys[index], pos, BT_ANY, (LPSTR)&offset))
+		while (StatusWindowUpdate(NULL, txt, nRecs, curRec) && !BT_FIND(lpGWDHead->BTHandle[index], lpGWDHead->pKeys[index], pos, BT_ANY, (LPSTR)&offset))
 		{
 			int month = 0;
 			pos = BT_NEXT;
@@ -8806,7 +8808,7 @@ BOOL ValidateGMDIndexes(LPSTR FilePath,int wantIndex,BOOL displayAfterEachIndex)
 			if (!(curRec++ % 16))
 			{
 				sprintf(txt, "Index:%i rtn=%i numErr=%i", index+1,rtn, numErr);
-				StatusWindowUpdate(NULL, txt, nRecs, curRec);
+				
 			}
 		}
 		if (!rtn)
