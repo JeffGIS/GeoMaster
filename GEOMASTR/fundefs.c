@@ -539,8 +539,9 @@ int	GetFunctionID13 (LPSTR str)
 			if (!_fstrnicmp (str,"SHORTPATHNAME",13)) return 1309;   
 			if (!_fstrnicmp (str,"PROCESSSTATUS",13)) return 1310;   
 			if (!_fstrnicmp (str,"LINESTOPOINTS",13)) return 1311; 
-			if (!_fstrnicmp (str,"PARENTSYMBOLS",13)) return 1312; 
-			
+			if (!_fstrnicmp(str, "PARENTSYMBOLS", 13)) return 1312;
+			if (!_fstrnicmp(str, "ACCELEROMETER", 13)) return 1313;
+
 			return 0; 
 			
 }

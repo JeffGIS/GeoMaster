@@ -68,6 +68,11 @@ extern HWND	TraceWnd2;
 
 char	CacheTitle[256];
 
+double square(double val)
+{
+	return val * val;
+}
+
 int SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 {
 	if (sqlReturn != SQLITE_OK)

@@ -7322,7 +7322,60 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		rtn = TRUE;
 		ltoa (NumDiffs,OutLoc,10);
 	}
-	else if (!stricmp (Arg[1],"CHECKPOINTLOG"))
+	else if (!stricmp(Arg[1], "COMPAREKEYS"))//$GMD(COMPAREKEYS,db1,db2,outfile) checks to see if all keys in db1 are in db2. Writes list of those which are not to outfile. Returns number of nomatch or -1 if error
+	{
+		int	NoMatch = 0;
+		HFILE fidOut;
+
+		hDB1 = OpenGWDatabase(Arg[2], BT_READ);
+		if (!hDB1)
+			return -1;
+		hDB2 = OpenGWDatabase(Arg[3], BT_READ);
+		if (!hDB2)
+		{
+			CloseGWDatabase(hDB1);
+			return -1;
+		}
+		fidOut = GSSiOpenFile(Arg[4], 0, OF_CREATE);
+		if (fidOut != HFILE_ERROR)
+		{
+			int	pos = BT_FIRST;
+			int ID;
+			char cID[16];
+			LPGWFLDINFO lpGWFldInfo;
+			GWFLDINFO FieldInfo;
+			short	index;
+			char	Val1[256], Val2[256];
+			int		nRecs, nChecked = 0;
+
+			lpGWDHead1 = GlobalLock(hDB1);
+			lpGWDHead2 = GlobalLock(hDB2);
+			CreateStatusWind(hWndMain, 1, "Compare GMD Keys");
+			nRecs = BT_NUM_IN_INDEX(lpGWDHead1->BTHandle[0]);
+			while (!BT_FIND(lpGWDHead1->BTHandle[0], lpGWDHead1->pKeys[0], pos, BT_ANY, (LPSTR)&Offset1))
+			{
+				pos = BT_NEXT;
+				if (BT_FIND(lpGWDHead2->BTHandle[0], lpGWDHead1->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset2))
+				{
+					NoMatch++;
+					ID = *(LPINT)lpGWDHead1->pKeys[0];
+					itoa(ID, cID, 10);
+					fputstring(cID,fidOut);
+				}
+				if (!(nChecked++ % 100))
+					StatusWindowUpdate(NULL, NULL, nRecs, nChecked);
+			}
+			GlobalUnlock(hDB1);
+			GlobalUnlock(hDB2);
+			DestroyStatusWindow(0);
+			GSSiClose(fidOut);
+			rtn = TRUE;
+		}
+		CloseGWDatabase(hDB1);
+		CloseGWDatabase(hDB2);
+		ltoa(NoMatch, OutLoc, 10);
+	}
+	else if (!stricmp(Arg[1], "CHECKPOINTLOG"))
 	{
 		if (!stricmp (Arg[2],"CREATE"))
 		{
