@@ -403,6 +403,8 @@ void QuitGraphics()
 		KillTimer (hWndMain,8);
 	if (HaveReplayTimer)
 		KillTimer (hWndMain,HaveReplayTimer);
+	KillTimer(hWndMain, 1);
+
     CloseSymDict();  
 	AddBMPToCache (0,0);
 	AddBMPToCache32 (0,0);

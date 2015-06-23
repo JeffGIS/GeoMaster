@@ -1775,14 +1775,19 @@ S10:
 				   		else 
 						{  
 						   char	Line1[128], Line3[128], str[MAX_PATH]; 
-						   
+						   LPSTR pPar;
+
 						   DisplayViewport (hWnd,hPr,FALSE);	   
 						   sprintf (Line1,"Page %ld of %ld", Page,TotPage);
 						   sprintf (Line3,"Band %i of %i - Viewport %i",Band,NumVirtualPages,CurView->ID); 
 						   _fstrcpy (str,PltName);
 						   ExpandText (str);
-						   if (ExistFile (str))
+						   if ((pPar = strrchr(str, '(')))
+							   *pPar = 0;
+						   if (FileType (str))
 						   {
+							   if (pPar)
+								   *pPar = '(';
 							   PrintMessage2 (Line1,str,Line3);
 							   if (OpenMap (hWnd, hPr))
 							   {   
