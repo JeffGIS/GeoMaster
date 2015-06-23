@@ -3072,7 +3072,7 @@ GSSiExitProg (991);
 			{
 				LPINT	pPartLen = (LPINT)GlobalLock (hPolyPartLen);
 
-				hPolyPartStart = GSSiGlobAlloc (1771,GMEM_MOVEABLE,nPoly*sizeof(int));
+				hPolyPartStart = GSSiGlobAlloc (1771,GMEM_MOVEABLE,nPoly*sizeof(int)+4);
 				pPolyPartStart = GlobalLock (hPolyPartStart);
 				pPolyPartStart[0] = pPartLen[0]-1;
 				for (ipps = 1;ipps < nPoly;ipps++)
