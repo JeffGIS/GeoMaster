@@ -119,7 +119,7 @@ static saveBitmap(HDC hDC, HBITMAP hBMOld)
 	{
 		char file[MAX_PATH];
 		HBITMAP hBM = SelectObject(hDC, hBMOld);
-		sprintf(file, "c:\\temp\\AreaTests\\test%i.bmp", nTest++);
+		sprintf(file, "c:\\temp\\AreaTests\\test_%i.bmp", CurrentRefno);
 		SaveBitmap(hBM, file, 0, 0);
 		SelectObject(hDC, hBM);
 	}
@@ -129,10 +129,12 @@ BOOL ThemeCreateAreaInMask(int from)
 {
 	BOOL rtn = FALSE;
 	LPVIEWPORT CurViewSave = CurView;
-
+	static int debugref = 100107754;
 	if (CurTheme->TargetViewport)
 		SetViewport(CurTheme->TargetViewport);
 
+	if (CurrentRefno == debugref)
+		ii = 1;
 	if (CurrentType == GF_AREA && !from && CurView->PassID == 2)
 	{
 		if (HiPrecis)
@@ -367,6 +369,18 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 		{
 			(*pcol) += xoff3[i];
 			(*prow) += yoff3[i];
+			return indx;
+		}
+
+	}
+
+	for (i = 0; i < 32; i++)
+	{
+		indx = bitIndex(pbm, *prow + yoff4[i], *pcol + xoff4[i]);
+		if (indx >= 0 && !pbits[indx])
+		{
+			(*pcol) += xoff4[i];
+			(*prow) += yoff4[i];
 			return indx;
 		}
 
