@@ -7357,7 +7357,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			while (!BT_FIND(lpGWDHead1->BTHandle[0], lpGWDHead1->pKeys[0], pos, BT_ANY, (LPSTR)&Offset1))
 			{
 				pos = BT_NEXT;
-				if (BT_FIND(lpGWDHead2->BTHandle[0], lpGWDHead1->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset2))
+				if (Offset1 >= 0 && BT_FIND(lpGWDHead2->BTHandle[0], lpGWDHead1->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset2))
 				{
 					NoMatch++;
 					ID = *(LPINT)lpGWDHead1->pKeys[0];
