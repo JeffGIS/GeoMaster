@@ -18,6 +18,7 @@ typedef struct	{int	NumPoints;
 				 int	Streets[4];
 				 short	HollowStreetWidth;
 				 short	Order;
+				 short  OneWay;
 				 COLORREF	OutlineColor;
 				 COLORREF	FillColor;
 				}STREETHEADER;
@@ -80,6 +81,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 //		pPoints = (LPPOINT)(pHollowStreetWidth+1); 
 		pPoints = (LPPOINT)(pStreet+1);
 		if (!_fmemcmp (CurStreetNumbers,pStreet->Streets,16) &&
+			StreetOneWay == pStreet->OneWay &&
 			Order == pStreet->Order && Width == pStreet->HollowStreetWidth &&
 			FillColor == pStreet->FillColor && OutlineColor == pStreet->OutlineColor &&
 			pStreet->NumPoints+np < MAXPOINTSINLABEL-2)
@@ -193,6 +195,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 	//	pHollowStreetWidth = (LPSHORT)(pStreets+4);
 		pPoints = (LPPOINT)(pStreet+1); 
 		pStreet->HollowStreetWidth = Width;
+		pStreet->OneWay = StreetOneWay;
 		pStreet->Order = Order;
 		pStreet->FillColor = FillColor;
 		pStreet->OutlineColor = OutlineColor;
@@ -572,6 +575,13 @@ BOOL DisplayStreetCenterlines (void)
 						pPoints[pStreet->NumPoints-1] = SaveEP;
 						SelectObject (CurView->hDC,hOldPen);
 						GSSiDeleteObject (&hPen); 
+						if (pStreet->OneWay)
+						{
+							int Width = max(0,min(6,IDNINT((pStreet->HollowStreetWidth-2)) * DeviceToScreenFactor));
+
+							DrawOneWayArrows(CurView->hDC, pStreet->OneWay, pPoints, pStreet->NumPoints, Width);
+						}
+
 					}
 					GlobalUnlock (phLabelLines[i]); 
 				}

@@ -3244,6 +3244,8 @@ GSSiExitProg (532);
 			break;
 		case 312:
 			StreetOneWay = atol (Value);
+			if (StreetOneWay)
+				ii = 1;
 			break;
 		case 313:
 			GMDMinCode = atol (Value);

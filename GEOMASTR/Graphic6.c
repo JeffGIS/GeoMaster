@@ -262,7 +262,7 @@ Top:
 					Rect = NewRect;
 					SavePromptRect = PromptRect;
 					GetGlobalCVal ("[%PRINTPROMPT]",SavePrintPrompt,0);
-					SetGlobalValue ("%PRINTPROMPT","");
+					SetGlobalValue ("%PRINTPROMPT",""); 
 		    		SetMainRect (0,hDC,&NewRect,6);
 					SetGlobalValue ("%PRINTPROMPT",SavePrintPrompt);
 					PromptRect = SavePromptRect;

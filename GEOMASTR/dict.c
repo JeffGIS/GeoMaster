@@ -4213,17 +4213,16 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 	int		nArrows = 2;//(int)(PolyLen / (ArrowLength*2));
 	double	MinTextSize=GetGlobalLVal2 ("[%STREETTEXTMINSIZE]",10)*DeviceToScreenFactor;
 
-	if (Width < MinTextSize)
-		nArrows = 1;
+//	if (Width < MinTextSize)
+//		nArrows = 1;
 	if (!OneWay)
 		return FALSE;
 	{
-		double	ArrowLength=(Width+(2-nArrows))*1.5;
+		double	ArrowLength=Width*4;
 		double	PolyLen = GetPolyLength (Points,npnts);
 		double	GapLength;
 		
-		if (PolyLen < ArrowLength * 4)
-			nArrows = 1;
+		nArrows = max (1,PolyLen / (8 * ArrowLength));
 		GapLength = (PolyLen - nArrows * ArrowLength) / (nArrows+1);
 
 		if (PolyLen < ArrowLength || nArrows < 1)
@@ -4236,15 +4235,16 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 			double		StartArrow, EndArrow;
 			HPPOINT		pArrowPoints;
 			int			ArrowLineWidth = Width/4+1;
-			int			ArrowHeadWidth = Width/2-(nArrows - 2);
-			COLORREF	OneWayArrowColor = RGB(128,128,128);
+			int			ArrowHeadWidth = Width;
+			COLORREF	OneWayArrowColor = RGB(192,192,192);
 			HPEN		hOldPen, hPen = CreatePen (PS_SOLID,ArrowLineWidth,OneWayArrowColor);
 			HPEN		hWhitePen1 = CreatePen (PS_SOLID,ArrowLineWidth+2,RGB(255,255,255));
 			HPEN		hWhitePen2 = CreatePen (PS_SOLID,3,RGB(255,255,255));
+			DPOINT		ArrowHeadD[3];
 			POINT		ArrowHead[3];
-			HBRUSH		hOldBrush, hBrush = CreateSolidBrush (OneWayArrowColor);
+			HBRUSH		hOldBrush, hBrush = CreateSolidBrush(OneWayArrowColor);
 			double		Az;
-			POINT		pt;
+			DPOINT		pt;
 
 	//		if (nArrows == 1)
 	//			ArrowHeadWidth = Width;// - DeviceToScreenFactor;
@@ -4269,32 +4269,36 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 					pArrowDPoints = GlobalLock (hArrowDPoints);
 					hArrowPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,NumArrowPoints*sizeof(POINT));
 					pArrowPoints = GlobalLock (hArrowPoints);
-					nap = 0;
-					for (i=0;i<NumArrowPoints;i++)
-					{
-						pArrowPoints[nap] = DPointToPoint (pArrowDPoints[i]);
-						if (!i || !SamePoint (pArrowPoints[nap],pArrowPoints[nap-1]))
-							nap++;
-					}
-					NumArrowPoints = nap;
 					switch (OneWay)
 					{
 					case 1:
-						Az = getaz (pArrowPoints[NumArrowPoints-1],pArrowPoints[NumArrowPoints-2]);
-						ArrowHead[0] = newpt (pArrowPoints[NumArrowPoints-1],Az,-ArrowLineWidth);
-						pt = newpt (ArrowHead[0],Az,ArrowHeadWidth*2.5);
-						ArrowHead[1] = newpt (pt,Az+HALFPI,ArrowHeadWidth);
-						ArrowHead[2] = newpt (pt,Az-HALFPI,ArrowHeadWidth);
+						Az = getazd (&pArrowDPoints[NumArrowPoints-1],&pArrowDPoints[0]);
+						ArrowHeadD[0] = dnewpt (pArrowDPoints[NumArrowPoints-1],Az,-ArrowLineWidth);
+						pt = dnewpt (ArrowHeadD[0],Az,ArrowHeadWidth*2.5);
+						ArrowHeadD[1] = dnewpt (pt,Az+HALFPI,ArrowHeadWidth);
+						ArrowHeadD[2] = dnewpt (pt,Az-HALFPI,ArrowHeadWidth);
 						break;
 					default:
-						ArrowHead[0] = pArrowPoints[0];
-						Az = getaz (ArrowHead[0],pArrowPoints[1]);
-						pt = newpt (ArrowHead[0],Az,ArrowHeadWidth*2.5);
-						ArrowHead[1] = newpt (pt,Az+HALFPI,ArrowHeadWidth);
-						ArrowHead[2] = newpt (pt,Az-HALFPI,ArrowHeadWidth);
+						ArrowHeadD[0] = pArrowDPoints[0];
+						Az = getazd(&ArrowHeadD[0], &pArrowPoints[NumArrowPoints - 1]);
+						pt = dnewpt (ArrowHeadD[0],Az,ArrowHeadWidth*2.5);
+						ArrowHeadD[1] = dnewpt (pt,Az+HALFPI,ArrowHeadWidth);
+						ArrowHeadD[2] = dnewpt (pt,Az-HALFPI,ArrowHeadWidth);
 						break;
 					}
-					SelectObject (hDC,hBrush);
+					nap = 0;
+					for (i = 0; i<NumArrowPoints; i++)
+					{
+						pArrowPoints[nap] = DPointToPoint(pArrowDPoints[i]);
+						if (!i || !SamePoint(pArrowPoints[nap], pArrowPoints[nap - 1]))
+							nap++;
+					}
+					NumArrowPoints = nap;
+					for (i = 0; i < 3; i++)
+					{
+						ArrowHead[i] = DPointToPoint(ArrowHeadD[i]);
+					}
+					SelectObject(hDC, hBrush);
 					SelectObject (hDC,hWhitePen1);
 					Polyline (hDC,pArrowPoints,NumArrowPoints);
 					SelectObject (hDC,hWhitePen2);

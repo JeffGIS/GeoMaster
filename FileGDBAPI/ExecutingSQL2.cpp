@@ -72,7 +72,7 @@ extern "C" void GSSiRemoveMem (HGLOBAL hglb);
 extern "C" HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc);
 extern "C" MNMXCORD atobounds (LPSTR Value,LPBOOL err);
 extern "C" LPSTR strncpy0(LPSTR Buff,LPSTR str, size_t n);
-
+extern "C" LPSTR ExpandText(LPSTR str);
 
 
 extern "C" HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc);
@@ -966,6 +966,7 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 	LPCURVAL	pCurVal;
 	LPVOID	lpvoid=answer;
 	int		iDB = (int)FilePtr->FileHandle - 1;
+	LPSTR	index=0;
 
 	if (!gdbInUse[iDB])
 	{
@@ -979,14 +980,16 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 	    return lpvoid;
 	}
 
-
+	index = (LPSTR)malloc(4096);
+	strcpy(index, indexIN);
+	ExpandText(index);
 	if (gdbInUse[iDB] == 2)
 	{
 		BOOL	haveEnvelope=FALSE;
 		Envelope envelope;
 		LPSTR	pBounds, pEnd;
 
-		pBounds = (LPSTR)strstr (indexIN,"BOUNDS=(");
+		pBounds = (LPSTR)strstr (index,"BOUNDS=(");
 		if (pBounds)
 		{
 			MNMXCORD	bounds;
@@ -1003,7 +1006,7 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 			envelope.yMax = bounds.ymx;
 			haveEnvelope = TRUE;
 		}
-		sQL = LPCTSTR(indexIN);
+		sQL = LPCTSTR(index);
 		wstring sql (sQL.begin(),sQL.end());
 	    if (SingleVal)
 	    {  
@@ -1056,6 +1059,8 @@ extern "C" LPVOID GetFGDBFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPV
 		FGDBCloseCursor(iDB);
 	}
 Exit:
+	if (index)
+		free(index);
     return lpvoid;
 }
 

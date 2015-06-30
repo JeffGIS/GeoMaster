@@ -909,8 +909,10 @@ void DisplayPromptText (HDC hDC,LPSTR txtIN)
     SetBkMode(hDC, TRANSPARENT);  
   	SelectClipRgn (hDC,0);   
   	SetTextColor (hDC,0); 
-  	if (!Printing)
-		FillRect (hDC,&Rect,GetStockObject (LTGRAY_BRUSH)); 
+	if (!Printing)
+		FillRect(hDC, &Rect, GetStockObject(LTGRAY_BRUSH));
+	else
+		ii = 1;
 	if (*txt)
 	{
 		Rect.left+=2;

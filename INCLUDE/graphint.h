@@ -348,6 +348,7 @@ void DestroySavedGraphicsFile (int Type);
 void SetSavedGraphicsFid (int Type);
 void CreateSavedGraphicsFiles (int Type);
 void DisplaySavedGraphicsFile (HDC hDC,int Type);
+BOOL DrawOneWayArrows(HDC hDC, int OneWay, HPPOINT Points, int npnts, int Width);
 int GWPolyline (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
 int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc);
 int GWPolylineD (HDC hDC, HPDPOINT lpPoints, long npnts,int idesc);

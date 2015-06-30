@@ -8827,3 +8827,28 @@ BOOL ValidateGMDIndexes(LPSTR FilePath,int wantIndex,BOOL displayAfterEachIndex)
 	CloseGWDatabase(hDB2);
 	return rtn2;
 }
+
+BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc)
+{
+	HFILE fid;
+	BYTE bytes[2];
+	BOOL rtn = FALSE;
+	*OutLoc = 0;
+	if (!stricmp(Arg[1], "UPDATE"))
+	{
+		if (ExistFile(Arg[2]))
+		{
+			fid = GSSiOpenFile(Arg[2], 0, OF_READWRITE);
+			if (fid != HFILE_ERROR)
+			{
+				BigRead(fid, bytes, 1);
+				GSSillseek(fid, 0, 0);
+				BigWrite(fid, bytes, 1, -1);
+				GSSiClose(fid);
+				CloseAllRequestedFiles(FALSE);
+				rtn = TRUE;
+			}
+		}
+	}
+	return rtn;
+}

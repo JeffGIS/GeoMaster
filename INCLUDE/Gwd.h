@@ -44,7 +44,8 @@ BOOL FindGMDRecord (LPSTR File,LPSTR KeyString,LPSTR SetValString,short MinMatch
 BOOL GMDCopyRecord (LPSTR File,LPSTR FromKeyString,LPSTR ToKeyString);
 int DeleteGMDRecords (LPSTR File,LPSTR SQLLikeString); 
 BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc);
-BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd,LPSTR AddFieldDefs);
+BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc);
+BOOL GMDReorg(LPSTR Name, int IndexToReorgOn, BOOL Compress, BOOL Verify, HWND hWnd, LPSTR AddFieldDefs);
 BOOL GMDUpdateCheckPointLog (LPSTR FileName);
 BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile);
 BOOL UpdateGMDFromCheckPointLog_net (int CheckPointIDCache,HFILE FidNetTransfer,LPSTR FromFile);
