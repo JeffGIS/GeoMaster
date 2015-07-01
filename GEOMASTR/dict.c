@@ -4236,7 +4236,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 			HPPOINT		pArrowPoints;
 			int			ArrowLineWidth = Width/4+1;
 			int			ArrowHeadWidth = Width;
-			COLORREF	OneWayArrowColor = RGB(192,192,192);
+			COLORREF	OneWayArrowColor = RGB(160,160,160);
 			HPEN		hOldPen, hPen = CreatePen (PS_SOLID,ArrowLineWidth,OneWayArrowColor);
 			HPEN		hWhitePen1 = CreatePen (PS_SOLID,ArrowLineWidth+2,RGB(255,255,255));
 			HPEN		hWhitePen2 = CreatePen (PS_SOLID,3,RGB(255,255,255));
@@ -4280,7 +4280,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 						break;
 					default:
 						ArrowHeadD[0] = pArrowDPoints[0];
-						Az = getazd(&ArrowHeadD[0], &pArrowPoints[NumArrowPoints - 1]);
+						Az = getazd(&ArrowHeadD[0], &pArrowDPoints[NumArrowPoints - 1]);
 						pt = dnewpt (ArrowHeadD[0],Az,ArrowHeadWidth*2.5);
 						ArrowHeadD[1] = dnewpt (pt,Az+HALFPI,ArrowHeadWidth);
 						ArrowHeadD[2] = dnewpt (pt,Az-HALFPI,ArrowHeadWidth);

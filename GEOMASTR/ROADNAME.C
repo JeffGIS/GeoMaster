@@ -583,7 +583,7 @@ BOOL DisplayStreetCenterlines (void)
 						GSSiDeleteObject (&hPen); 
 						if (pStreet->OneWay)
 						{
-							int Width = max(0,min(6,IDNINT((pStreet->HollowStreetWidth-2)) * DeviceToScreenFactor));
+							int Width = max(0,min(6,IDNINT(pStreet->HollowStreetWidth-2))) * DeviceToScreenFactor;
 
 							DrawOneWayArrows(CurView->hDC, pStreet->OneWay, pPoints, pStreet->NumPoints, Width);
 						}

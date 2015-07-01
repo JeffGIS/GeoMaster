@@ -1300,8 +1300,8 @@ short SetupViewport (RECT rect,BOOL ShrinkToFit,int Band)
    		LogPixsX = DevicePixelsPerInch;   
    	else if (InVirtualPrint)
    		LogPixsX = VirtualPrintDPI; 
-	else if (Printing)
-		LogPixsX = (double)GetDeviceCaps(PrinterDC, LOGPIXELSX);
+	else if (Printing && hDCPrinter)
+		LogPixsX = (double)GetDeviceCaps(hDCPrinter, LOGPIXELSX);
 	else
 		LogPixsX = (double)GetDeviceCaps(CurView->hDC, LOGPIXELSX);
 	RectWidth = (long)rect.right - (long)rect.left + 1;

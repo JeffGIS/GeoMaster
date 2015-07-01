@@ -443,7 +443,10 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	{
 		if (!ScreenRes)
 			ScreenRes = GetDeviceCaps(hDC, LOGPIXELSX);  
-		DeviceRes = GetDeviceCaps(hDC, LOGPIXELSX);  
+		if (Printing)
+			DeviceRes = (double)GetDeviceCaps(hDCPrinter, LOGPIXELSX);
+		else
+			DeviceRes = GetDeviceCaps(hDC, LOGPIXELSX);
 	} 
 	if (MemMap)
 		DeviceToScreenFactor = DeviceToScreenFactorMemMap;

@@ -1268,7 +1268,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
 	HENHMETAFILE	hMF=0;
 	short	i;
 	BOOL	SetBuf=FALSE;
-	HDC		mfDC=0;
+	HDC		mfDC = 0, PrinterDC=0;
 	HDC		*pPrinterDC = &PrinterDC;
 	char	InitCmd[256];
     
@@ -1473,6 +1473,10 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
      } 
 S10: 
      InPrintProcess= TRUE;
+	 if (*pPrinterDC)
+		hDCPrinter = *pPrinterDC;
+	 else
+		hDCPrinter = hPr;
 	 SmallFontLargeFontFactor=1;
      if (DoPrint)
      
