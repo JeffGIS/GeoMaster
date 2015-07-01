@@ -967,15 +967,15 @@ extern char	CustomHeight[16],CustomWidth[16];
 
 		    	PageWidth = GetDeviceCaps(p->hDC, HORZRES);
 		    	PageHeight = GetDeviceCaps(p->hDC, VERTRES);
-				hBitmap = CreateCompatibleBitmap (p->hDC,PageWidth,PageHeight);
-				ReleaseDC (hWndMain,hDCMain);
+				hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
 				if (hBitmap)
 				{
 					*PrinterDC = p->hDC;
-					p->hDC = CreateCompatibleDC (p->hDC);
+					p->hDC = CreateCompatibleDC(hDCMain);
 					GetObject(hBitmap, sizeof(bm), (LPSTR)&bm);
 					hbmpVirtPrinterOld = SelectObject(p->hDC, hBitmap); 
 				}
+				ReleaseDC(hWndMain, hDCMain);
 			 }
 			//if (*CustomHeight)
 			{    

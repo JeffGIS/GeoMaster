@@ -1300,9 +1300,11 @@ short SetupViewport (RECT rect,BOOL ShrinkToFit,int Band)
    		LogPixsX = DevicePixelsPerInch;   
    	else if (InVirtualPrint)
    		LogPixsX = VirtualPrintDPI; 
-   	else
-   		LogPixsX = (double)GetDeviceCaps(CurView->hDC, LOGPIXELSX);
-    RectWidth = (long)rect.right - (long)rect.left + 1;
+	else if (Printing)
+		LogPixsX = (double)GetDeviceCaps(PrinterDC, LOGPIXELSX);
+	else
+		LogPixsX = (double)GetDeviceCaps(CurView->hDC, LOGPIXELSX);
+	RectWidth = (long)rect.right - (long)rect.left + 1;
     RectHeight = (long)rect.bottom - (long)rect.top + 1;
     if (!CurView->WindowIsZoomed)
     	CurView->HaveBounds=FALSE;

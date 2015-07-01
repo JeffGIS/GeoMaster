@@ -231,8 +231,8 @@ Top:
 					}
 					rect_width = (long)Rect.right - (long)Rect.left + 1;
 					rect_height = (long)Rect.bottom - (long)Rect.top + 1;
-					ph = w / rect_height;
-					pw = h / rect_width; 
+					pw = w / rect_width;
+					ph = h / rect_height; 
 					NewRect = Rect;
 					if (ph > pw)
 					{
@@ -595,13 +595,24 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	    	if (!Printing)
 	    	{
 	    		RECT	WindRect;  
-				double fac, sw = GetGlobalDVal2 ("[%SCREENWIDTH]",(double)GetDeviceCaps(hDC, HORZSIZE) * MFT/100);
+				double fach, facw,sw = GetGlobalDVal2 ("[%SCREENWIDTH]",(double)GetDeviceCaps(hDC, HORZSIZE) * MFT/100);
 					    		
-	    		GetWindowRect (GetDesktopWindow(),&WindRect);  
-	    		fac = (double) (pViewportsD[0]->Rect.right - pViewportsD[0]->Rect.left) / (double)(WindRect.right - WindRect.left);  
-	    		sw *= fac;      
-	    		DeviceToScreenFactor *= sw / pViewportsD[0]->DesiredWidth;
-	    		//DeviceToScreenFactor *= (double)(MainRect.right - MainRect.left)/(ScreenWindowFactor*(double)(WindRect.right - WindRect.left));
+	    		GetClientRect (GetDesktopWindow(),&WindRect);  
+				if (!IsRectEmpty(&ConfigDisplayRect))
+					WindRect = ConfigDisplayRect;
+				facw = (double)(pViewportsD[0]->Rect.right - pViewportsD[0]->Rect.left) / (double)(WindRect.right - WindRect.left);
+				fach = (double)(pViewportsD[0]->Rect.top - pViewportsD[0]->Rect.bottom) / (double)(WindRect.top - WindRect.bottom);
+				if (fach > facw)
+				{
+					sw *= fach;
+					DeviceToScreenFactor *= sw / pViewportsD[0]->DesiredHeight;
+				}
+				else
+				{
+					sw *= facw;
+					DeviceToScreenFactor *= sw / pViewportsD[0]->DesiredWidth;
+				}
+				//DeviceToScreenFactor *= (double)(MainRect.right - MainRect.left)/(ScreenWindowFactor*(double)(WindRect.right - WindRect.left));
 	    	}
 	    }
 	    else

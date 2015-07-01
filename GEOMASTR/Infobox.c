@@ -1131,10 +1131,13 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 					xt = TAGBox.rect.left + ((TAGBox.rect.right - TAGBox.rect.left) - Twidth) / 2;
 				else
 					xt = x;
-				if (TAGBox.Flags.ShadowText)
-					TextOutWithShadow (hDC,xt,y,ExpLine,_fstrlen(ExpLine),1,TAGBox.FontShadowColor);
-				else
-					TextOut (hDC,xt,y,ExpLine,_fstrlen(ExpLine));
+
+					if (TAGBox.Flags.ShadowText)
+						TextOutWithShadow(hDC, xt, y, ExpLine, _fstrlen(ExpLine), 1, TAGBox.FontShadowColor);
+					else
+						ii = TextOut(hDC, xt, y, ExpLine, _fstrlen(ExpLine));
+				
+
 				yr += Theight * hfactor;
 				y = IDNINT (yr);
 			}

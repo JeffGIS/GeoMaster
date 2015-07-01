@@ -479,11 +479,11 @@ BOOL DisplayStreetCenterlines (void)
 		switch (ShowHollowStreet)
 		{
 		case 0:
-		case 2:
 			rtn = FALSE;
 			break;
 		case 1:
-		
+		case 2:
+
 			SaveDC (CurView->hDC); 
 			InitRecord (CurView->hDC); 
 			SetROP2(CurView->hDC,DisplayRasterOpt);
@@ -510,34 +510,39 @@ BOOL DisplayStreetCenterlines (void)
 				MinOrder = min (MinOrder,pStreet->Order);
 				MaxOrder = max (MaxOrder,pStreet->Order);
 			//	hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth+2*DeviceToScreenFactor,pStreet->OutlineColor);  
-		
-				lb.lbColor = pStreet->OutlineColor;
-				EdgeWidth = pStreet->HollowStreetWidth/8 + 1;
-				hPen = ExtCreatePen (PS_GEOMETRIC|PS_SOLID|PS_ENDCAP_FLAT|PS_JOIN_BEVEL,IDNINT(pStreet->HollowStreetWidth+EdgeWidth*2),&lb,0,0);
+				if (ShowHollowStreet == 1)
+				{
+					lb.lbColor = pStreet->OutlineColor;
+					EdgeWidth = pStreet->HollowStreetWidth / 8 + 1;
+					hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL, IDNINT(pStreet->HollowStreetWidth + EdgeWidth * 2), &lb, 0, 0);
 
-				hOldPen = SelectObject (CurView->hDC,hPen); 
-				Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
-				SelectObject (CurView->hDC,hOldPen);
-				GSSiDeleteObject (&hPen); 
+					hOldPen = SelectObject(CurView->hDC, hPen);
+					Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
+					SelectObject(CurView->hDC, hOldPen);
+					GSSiDeleteObject(&hPen);
+				}
 				GlobalUnlock (phLabelLines[i]); 
 			}
-			for (order = MinOrder;order <= MaxOrder;order++)
+			if (ShowHollowStreet == 1)
 			{
-				for (i=0;i<CurTheme->nLabelLines;i++)   
+				for (order = MinOrder; order <= MaxOrder; order++)
 				{
- 					pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[i]); 
-					pPoints = (LPPOINT)(pStreet+1);  
-					if (pStreet->Order == order)
+					for (i = 0; i < CurTheme->nLabelLines; i++)
 					{
-						//hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth,pStreet->FillColor);  
-						lb.lbColor = pStreet->FillColor;
-						hPen = ExtCreatePen (PS_GEOMETRIC|PS_SOLID|PS_ENDCAP_FLAT|PS_JOIN_BEVEL,pStreet->HollowStreetWidth,&lb,0,0);
-						hOldPen = SelectObject (CurView->hDC,hPen); 
-						Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
-						SelectObject (CurView->hDC,hOldPen);
-						GSSiDeleteObject (&hPen); 
+						pStreet = (LPSTREETHEADER)GlobalLock(phLabelLines[i]);
+						pPoints = (LPPOINT)(pStreet + 1);
+						if (pStreet->Order == order)
+						{
+							//hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth,pStreet->FillColor);  
+							lb.lbColor = pStreet->FillColor;
+							hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL, pStreet->HollowStreetWidth, &lb, 0, 0);
+							hOldPen = SelectObject(CurView->hDC, hPen);
+							Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
+							SelectObject(CurView->hDC, hOldPen);
+							GSSiDeleteObject(&hPen);
+						}
+						GlobalUnlock(phLabelLines[i]);
 					}
-					GlobalUnlock (phLabelLines[i]); 
 				}
 			}
 
@@ -570,7 +575,8 @@ BOOL DisplayStreetCenterlines (void)
 							AZ = getaz (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]);
 							pPoints[pStreet->NumPoints-1] = newpt (pPoints[pStreet->NumPoints-1],AZ,MaxWidth);
 						}
-						Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
+						if (ShowHollowStreet == 1)
+							Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
 						*pPoints = SaveBP;
 						pPoints[pStreet->NumPoints-1] = SaveEP;
 						SelectObject (CurView->hDC,hOldPen);

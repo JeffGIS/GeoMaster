@@ -243,6 +243,7 @@ extern BOOL			InLoadBinaryFileList;
 extern BOOL			WantDescBlock;
 extern BOOL			IgnoreBounds;
 extern BOOL			Printing;   
+extern HDC			PrinterDC;
 extern BOOL			PrintingToMF;
 extern BOOL			InPrintProcess;
 extern BOOL			DisplayHLTPattern;

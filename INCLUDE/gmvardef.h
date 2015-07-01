@@ -1115,6 +1115,7 @@ short	OrthoAdjustFile=-1;
 BOOL	InShowZoomArea = FALSE;
 BOOL	Printing=FALSE; 
 BOOL	PrintingToMF=FALSE;
+HDC		PrinterDC = 0;
 BOOL	InPrintProcess=FALSE;
 BOOL	PrintMerging=FALSE;
 BOOL	DisplaySymbol=TRUE;

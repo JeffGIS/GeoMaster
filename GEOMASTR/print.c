@@ -232,6 +232,8 @@ int GSSiEndPage (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC)
 
 	    if (!GetObject(hBitmap, sizeof(bm), (LPSTR)&bm))
 		   return -1;
+		//GM32SaveBitmap(hBmp, "c:\\temp\\print.bmp", 0, 0);
+
 		if (StartPage(PrinterDC) > 0)
 		{  
 			int		nCopies = lpPDChunk->nCopies;
@@ -1266,7 +1268,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
 	HENHMETAFILE	hMF=0;
 	short	i;
 	BOOL	SetBuf=FALSE;
-	HDC		mfDC=0, PrinterDC=0;
+	HDC		mfDC=0;
 	HDC		*pPrinterDC = &PrinterDC;
 	char	InitCmd[256];
     
