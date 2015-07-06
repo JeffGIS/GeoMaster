@@ -243,45 +243,95 @@ DWORD GM32SetDIBPalette(HDIB32 hDIB,DWORD PalletSize,LPRGBQUAD pPalletIn)
 	return rtn;
 }
 
-int ConvertBitmapColorsInRect (LPSTR BitmapPath,LPMNMXCORD pBounds,COLORREF FromColor,COLORREF ToColor,BOOL CountOnly)
+int ConvertBitmapColorsInRect(LPSTR BitmapPath, LPMNMXCORD pBounds, COLORREF FromColor, COLORREF ToColor, BOOL CountOnly)
 {
 	HDIB32	hDIB, hDIB24;
 	DWORD	nrow, ncol, row, col, begrow, begcol;
-	int		height,width, n=0;
+	int		height, width, n = 0;
 	RGBQUAD	FromColorQ = RGBQUADFromCOLORREF(FromColor);
-	RGBQUAD	ToColorQ   = RGBQUADFromCOLORREF(ToColor);
+	RGBQUAD	ToColorQ = RGBQUADFromCOLORREF(ToColor);
 	RECT	Rect;
-	
-	
-	hDIB = BMPHandleFromEXT (BitmapPath);
+
+
+	hDIB = BMPHandleFromEXT(BitmapPath);
 	if (!hDIB)
 		return -1;
-	BoundsToRect (pBounds,&Rect);
-	hDIB24 = FreeImage_ConvertTo24Bits (hDIB);
+	BoundsToRect(pBounds, &Rect);
+	hDIB24 = FreeImage_ConvertTo24Bits(hDIB);
 	FreeImage_Unload(hDIB);
-	GetDIBDimensionsFromHandle(hDIB24,&height,&width);
-	nrow = min (height,Rect.bottom);
-	ncol = min (width,Rect.right);
+	GetDIBDimensionsFromHandle(hDIB24, &height, &width);
+	nrow = min(height, Rect.bottom);
+	ncol = min(width, Rect.right);
 	begrow = Rect.top;
 	begcol = Rect.left;
 	//CreateStatusWindow(hWndMain,1,0);
-	for (row=begrow;row<nrow;row++)
+	for (row = begrow; row<nrow; row++)
 	{
-		for (col=begcol;col<ncol;col++)
+		for (col = begcol; col<ncol; col++)
 		{
 			RGBQUAD	c;
-					
-			FreeImage_GetPixelColor (hDIB24,col,row,&c);
-			if (COLORREFFromRGBQUAD (c) == FromColor)
+
+			FreeImage_GetPixelColor(hDIB24, col, row, &c);
+			if (COLORREFFromRGBQUAD(c) == FromColor)
 			{
 				n++;
-				FreeImage_SetPixelColor (hDIB24,col,row,&ToColorQ);
+				FreeImage_SetPixelColor(hDIB24, col, row, &ToColorQ);
 			}
 		}
-	//StatusWindowUpdate (0,0,nrow-begrow,row-begrow);
+		//StatusWindowUpdate (0,0,nrow-begrow,row-begrow);
 	}
 	if (!CountOnly)
-		SaveDIB32 (hDIB24,BitmapPath,0,-1);
+		SaveDIB32(hDIB24, BitmapPath, 0, -1);
+	FreeImage_Unload(hDIB24);
+	return n;
+}
+int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColor, COLORREF ToColor, double colordist, LPMNMXCORD pBounds)
+{
+	HDIB32	hDIB, hDIB24;
+	DWORD	nrow, ncol, row, col, begrow, begcol;
+	int		height, width, n = 0;
+	RGBQUAD	FromColorQ = RGBQUADFromCOLORREF(FromColor);
+	RGBQUAD	ToColorQ = RGBQUADFromCOLORREF(ToColor);
+	RECT	Rect;
+
+	hDIB = BMPHandleFromEXT(BitmapPath);
+	if (!hDIB)
+		return -1;
+	hDIB24 = FreeImage_ConvertTo24Bits(hDIB);
+	FreeImage_Unload(hDIB);
+	GetDIBDimensionsFromHandle(hDIB24, &height, &width);
+	if (pBounds)
+	{
+		BoundsToRect(pBounds, &Rect);
+		nrow = min(height, Rect.bottom);
+		ncol = min(width, Rect.right);
+		begrow = Rect.top;
+		begcol = Rect.left;
+	}
+	else
+	{
+		nrow = height;
+		ncol = width;
+		begrow = 0;
+		begcol = 0;
+	}
+	//CreateStatusWindow(hWndMain,1,0);
+	for (row = begrow; row<nrow; row++)
+	{
+		for (col = begcol; col<ncol; col++)
+		{
+			RGBQUAD	c;
+
+			FreeImage_GetPixelColor(hDIB24, col, row, &c);
+			if (RGBQUADDist(c, FromColorQ) <= colordist)
+			{
+				n++;
+				FreeImage_SetPixelColor(hDIB24, col, row, &ToColorQ);
+			}
+		}
+		//StatusWindowUpdate (0,0,nrow-begrow,row-begrow);
+	}
+	n = SaveDIB32(hDIB24, ToPath, 0, -1);
 	FreeImage_Unload(hDIB24);
 	return n;
 }

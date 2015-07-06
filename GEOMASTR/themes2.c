@@ -1560,7 +1560,7 @@ KeepLooking:
 					ClassNo = CurTheme->AllValueClass;
 					goto GotClass;
 				}
-				if (!CurTheme->MultiValOption)
+				if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
 					goto KeepLooking;
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
