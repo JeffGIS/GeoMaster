@@ -374,6 +374,7 @@ Create:
 		JournalFileIndex[Fid] = 0;
 		OriginalFileLength[Fid] = -1;
 		JournalHeader.OrigFileLength = -1;
+		OpenFileLength[Fid] = 0;
 		JournalIsCompleteFile[Fid] = 1;
 	}
 	else
@@ -510,8 +511,9 @@ BOOL ApplyJournal (LPSTR FileName)
 				LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 				int		nread;
 
-				_llseek (FidJnl,sizeof(JOURNALHEADER),0);
-				while ((nread = _lread  (FidJnl,pJournalRecord,USHRT_MAX)) > 0)
+				ii = _llseek(FidJnl,0,2);
+				ii = _llseek(FidJnl, sizeof(JOURNALHEADER), 0);
+				while ((nread = _lread(FidJnl, pJournalRecord, USHRT_MAX)) > 0)
 					_lwrite (FidFile,pJournalRecord,nread);
 				GSSiGlobUlFree (&hJournalRecord);
 				rtn = TRUE;
@@ -570,8 +572,10 @@ BOOL ApplyJournal (LPSTR FileName)
 			}
 		}
 		_lclose (FidJnl);
-		ii=remove (JournalFileName);
-		ii=errno;
+		if (!DeleteFile(JournalFileName))
+		{
+			ii = GetLastError();
+		}
 	}
 
 {
@@ -599,6 +603,8 @@ BOOL DeleteFileInJournal (LPSTR FileName)
 	LPLONG	pNumIndexBlocks;
 	BOOL	st;
 
+	if (!ExistFile(FileName))
+		return rtn;
 	strcpy (JournalFileName,FileName);
 	if ((pDot = strrchr (JournalFileName,'.')))
 		*pDot = '_';
@@ -1457,14 +1463,15 @@ HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT opt,UINT ShareOpt)
 		opt2 = _O_WRONLY|_O_BINARY;
 	if (opt == OF_READWRITE)
 		opt2 = _O_RDWR|_O_BINARY;
-	if (opt == OF_CREATE)
+	if (opt == OF_CREATE || (opt == OF_READWRITE && AllowJournal && CurrentCheckPointID && !ExistFile (Name)))
 	{
 		if (AllowJournal && CurrentCheckPointID)
 		{
 			_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAMEGM);
 			pOFStruct->nErrCode = 0;
 			Fid = LogOpenFilesOpen (opt,(HFILE)-2,pOFStruct);
-			OpenJournal (Name,Fid,OF_CREATE);
+			if (OpenJournal (Name,Fid,OF_CREATE) == 1)
+				CloseJournal(Fid);
 			strcpy (OpenFileName[Fid],Name);
 			NumActualOpen++;
 			return Fid;

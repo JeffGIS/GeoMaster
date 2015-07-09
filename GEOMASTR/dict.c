@@ -4280,7 +4280,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 						break;
 					default:
 						ArrowHeadD[0] = pArrowDPoints[0];
-						Az = getazd(&ArrowHeadD[0], &pArrowPoints[NumArrowPoints - 1]);
+						Az = getazd(&ArrowHeadD[0], &pArrowDPoints[NumArrowPoints - 1]);
 						pt = dnewpt (ArrowHeadD[0],Az,ArrowHeadWidth*2.5);
 						ArrowHeadD[1] = dnewpt (pt,Az+HALFPI,ArrowHeadWidth);
 						ArrowHeadD[2] = dnewpt (pt,Az-HALFPI,ArrowHeadWidth);
