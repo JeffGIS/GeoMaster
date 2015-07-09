@@ -1463,16 +1463,26 @@ HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT opt,UINT ShareOpt)
 		opt2 = _O_WRONLY|_O_BINARY;
 	if (opt == OF_READWRITE)
 		opt2 = _O_RDWR|_O_BINARY;
-	if (opt == OF_CREATE || (opt == OF_READWRITE && AllowJournal && CurrentCheckPointID && !ExistFile (Name)))
+	if (opt == OF_READWRITE && AllowJournal && CurrentCheckPointID && !ExistFile(Name))
+	{
+		_fullpath(pOFStruct->szPathName, Name, OFS_MAXPATHNAMEGM);
+		pOFStruct->nErrCode = 0;
+		Fid = LogOpenFilesOpen(opt, (HFILE)-2, pOFStruct);
+		if (OpenJournal(Name, Fid, OF_CREATE) == 1)
+			CloseJournal(Fid);
+		strcpy(OpenFileName[Fid], Name);
+		NumActualOpen++;
+		return Fid;
+	}
+	if (opt == OF_CREATE)
 	{
 		if (AllowJournal && CurrentCheckPointID)
 		{
-			_fullpath (pOFStruct->szPathName,Name,OFS_MAXPATHNAMEGM);
+			_fullpath(pOFStruct->szPathName, Name, OFS_MAXPATHNAMEGM);
 			pOFStruct->nErrCode = 0;
-			Fid = LogOpenFilesOpen (opt,(HFILE)-2,pOFStruct);
-			if (OpenJournal (Name,Fid,OF_CREATE) == 1)
-				CloseJournal(Fid);
-			strcpy (OpenFileName[Fid],Name);
+			Fid = LogOpenFilesOpen(opt, (HFILE)-2, pOFStruct);
+			OpenJournal(Name, Fid, OF_CREATE);
+			strcpy(OpenFileName[Fid], Name);
 			NumActualOpen++;
 			return Fid;
 		}
