@@ -3702,21 +3702,24 @@ double ComputeAreaAreaD (HPDPOINT lpDpoints,long nPnts,LPDOUBLE pPerim)
 	DPOINT	BeginPoint, EndPoint, LastPoint;
 	double	Area=0,Perim=0;    
 
-	for (i=0;i<nPnts;i++,lpDpoints++)
-	{   
-		if (!i)
-			BeginPoint = *lpDpoints;
-		else  
+	if (nPnts > 2)
+	{
+		for (i = 0; i < nPnts; i++, lpDpoints++)
 		{
-			Perim += ldistp(LastPoint,*lpDpoints);
-			Area += ( LastPoint.y - lpDpoints->y) * (lpDpoints->x + LastPoint.x) / 2;
+			if (!i)
+				BeginPoint = *lpDpoints;
+			else
+			{
+				Perim += ldistp(LastPoint, *lpDpoints);
+				Area += (LastPoint.y - lpDpoints->y) * (lpDpoints->x + LastPoint.x) / 2;
+			}
+			LastPoint = *lpDpoints;
 		}
-		LastPoint = *lpDpoints;
-	} 
-	Perim += ldistp(LastPoint,BeginPoint);
-	Area += (LastPoint.y - BeginPoint.y) * (BeginPoint.x + LastPoint.x) / 2;  
-	if (pPerim)
-		*pPerim = Perim;
+		Perim += ldistp(LastPoint, BeginPoint);
+		Area += (LastPoint.y - BeginPoint.y) * (BeginPoint.x + LastPoint.x) / 2;
+		if (pPerim)
+			*pPerim = Perim;
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (404);

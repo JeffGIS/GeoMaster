@@ -4210,19 +4210,25 @@ int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
 
 BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 {
-	int		nArrows = 2;//(int)(PolyLen / (ArrowLength*2));
-	double	MinTextSize=GetGlobalLVal2 ("[%STREETTEXTMINSIZE]",10)*DeviceToScreenFactor;
+	int		nArrows = 2;
+	COLORREF lineColor = GetGlobalLVal2("[%1WAYARROWLINECOLOR]", RGB(255,255,255));
+	COLORREF fillColor = GetGlobalLVal2("[%1WAYARROWFILLCOLOR]", RGB(160, 160, 160));
+	double   widthFactor = GetGlobalDVal2("[%1WAYARROWWIDTHFACTOR]", 1.0);
+	double   lengthFactor = GetGlobalDVal2("[%1WAYARROWLENGTHFACTOR]", 1.0);
+	double   gapFactor = GetGlobalDVal2("[%1WAYARROWGAPFACTOR]", 1.0);
 
-//	if (Width < MinTextSize)
-//		nArrows = 1;
+	Width *= widthFactor;
+
 	if (!OneWay)
 		return FALSE;
 	{
 		double	ArrowLength=Width*4;
 		double	PolyLen = GetPolyLength (Points,npnts);
-		double	GapLength;
+		double	GapLength = 8;
 		
-		nArrows = max (1,PolyLen / (8 * ArrowLength));
+		GapLength *= gapFactor;
+		ArrowLength *= lengthFactor;
+		nArrows = max (1,PolyLen / (GapLength * ArrowLength));
 		GapLength = (PolyLen - nArrows * ArrowLength) / (nArrows+1);
 
 		if (PolyLen < ArrowLength || nArrows < 1)
@@ -4236,18 +4242,15 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 			HPPOINT		pArrowPoints;
 			int			ArrowLineWidth = Width/4+1;
 			int			ArrowHeadWidth = Width;
-			COLORREF	OneWayArrowColor = RGB(160,160,160);
-			HPEN		hOldPen, hPen = CreatePen (PS_SOLID,ArrowLineWidth,OneWayArrowColor);
-			HPEN		hWhitePen1 = CreatePen (PS_SOLID,ArrowLineWidth+2,RGB(255,255,255));
-			HPEN		hWhitePen2 = CreatePen (PS_SOLID,3,RGB(255,255,255));
+			HPEN		hOldPen, hPen = CreatePen (PS_SOLID,ArrowLineWidth,fillColor);
+			HPEN		hWhitePen1 = CreatePen (PS_SOLID,ArrowLineWidth+2,lineColor);
+			HPEN		hWhitePen2 = CreatePen (PS_SOLID,3,lineColor);
 			DPOINT		ArrowHeadD[3];
 			POINT		ArrowHead[3];
-			HBRUSH		hOldBrush, hBrush = CreateSolidBrush(OneWayArrowColor);
+			HBRUSH		hOldBrush, hBrush = CreateSolidBrush(fillColor);
 			double		Az;
 			DPOINT		pt;
 
-	//		if (nArrows == 1)
-	//			ArrowHeadWidth = Width;// - DeviceToScreenFactor;
 			hOldBrush = SelectObject (hDC,hBrush);
 			hOldPen = SelectObject (hDC,hPen);
 			for (i=0;i<npnts;i++)
