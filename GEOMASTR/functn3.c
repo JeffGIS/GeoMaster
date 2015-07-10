@@ -1217,7 +1217,7 @@ GotCloseFilehSQL:
 				  // $IMAGE(SPLIT,imagefile,outdir,outtype,width,height)
 		{				
 			
-			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (!nArgs)
 			{
 				if (hWndFullBM)
@@ -1280,18 +1280,29 @@ GotCloseFilehSQL:
 				rtn = SplitImage (Arg[2],Arg[3],Arg[4],atoi(Arg[5]),atoi(Arg[6]));
 				goto Rtnrtn;
 			}
-			if (!_fstricmp (Arg[1],"CONVERTCOLOR"))
+			if (!_fstricmp(Arg[1], "CONVERTCOLOR"))
 			{
-				MNMXCORD	rect=atobounds (Arg[3],&Err);
-				
+				MNMXCORD	rect = atobounds(Arg[3], &Err);
+
 				if (!Err)
-					rtn = ConvertBitmapColorsInRect (Arg[2],&rect,atoi(Arg[4]),atoi(Arg[5]),atob(Arg[6]));
+					rtn = ConvertBitmapColorsInRect(Arg[2], &rect, atoi(Arg[4]), atoi(Arg[5]), atob(Arg[6]));
 				else
 					rtn = -1;
-				itoa (rtn,OutLoc,10);
+				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
-			if (!_fstricmp (Arg[1],"VIEW"))
+			if (!_fstricmp(Arg[1], "CONVERTCOLORINRANGE"))//$IMAGE(CONVERTCOLORINRANGE,infile,outfile,fromcolor,tocolor,range,bounds(opt))
+			{
+				MNMXCORD	rect = atobounds(Arg[7], &Err);
+				LPMNMXCORD pBounds=0;
+
+				if (!Err)
+					pBounds = &rect;
+				rtn = ConvertBitmapColorsInRange(Arg[2], Arg[3], atoi(Arg[4]), atoi(Arg[5]), atof(Arg[6]),pBounds);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			if (!_fstricmp(Arg[1], "VIEW"))
 			{
 				rtn = ViewImage (CurView->hWnd,Arg[2]);
 				goto Rtnrtn;
