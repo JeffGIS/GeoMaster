@@ -478,6 +478,7 @@ int	ReducePolyPoints (int nPnts,LPHANDLE phPoly,int MaxPoints);
 BOOL NextLine (LPSTR *lpText,LPSTR lpLine,short nAutoLines); 
 LPSTR PadString (LPSTR str,char padchr,int padlen);
 LPSTR Truncate(LPSTR str); 
+LPSTR Truncate2(LPSTR Text, char c);
 LPSTR TruncateAt (LPSTR str,LPSTR EndChars);           
 LPSTR FirstNonInt (LPSTR Text);  
 LPSTR FirstAlpha (LPSTR Text);

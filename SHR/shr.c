@@ -9442,6 +9442,32 @@ GSSiExitProg (313);
 }
 #endif
 }    
+LPSTR Truncate2(LPSTR Text,char c)
+#if ENABLETRACE
+{GSSiEnterProg (313);
+#endif
+{   LPSTR rtn, EndChar;
+
+rtn = Text;
+EndChar = _fstrchr(Text, 0);
+while (EndChar > Text)
+{
+	EndChar--;
+	if (*EndChar != c)
+		goto Exit;
+	*EndChar = 0;
+}
+Exit:
+{
+#if ENABLETRACE
+	GSSiExitProg(313);
+#endif
+	return (rtn);
+}
+#if ENABLETRACE
+}
+#endif
+}
 
 LPSTR TruncateAt (LPSTR Text,LPSTR EndChars)
 #if ENABLETRACE

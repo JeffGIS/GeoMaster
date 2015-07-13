@@ -829,11 +829,14 @@ GSSiExitProg (1350);
 				goto RtnTrue;
 			goto RtnFalse;
 		}
-		case 823: // $TRUNCATE(arg)
+		case 823: // $TRUNCATE(arg,char(opt))
 		{	 
-			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
-			Truncate(Arg[1]);
-			_fstrcpy (OutLoc,Arg[1]);
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs == 2)
+				Truncate2(Arg[1],*Arg[2]);
+			else
+				Truncate(Arg[1]);
+			_fstrcpy(OutLoc, Arg[1]);
 			goto Rtnl;
 		}  
 		break;

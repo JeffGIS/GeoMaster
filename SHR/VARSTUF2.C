@@ -999,13 +999,40 @@ long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction)
 		 CurView = SaveCurView;
 		 goto Exit;
 	 }
-	 if (!stricmp (CvtFile,"LATLON"))
+	 if (!stricmp(CvtFile, "LATLON"))
 	 {
 		 if (Direction == 1)
-	 		rtn=ConvertCoord (Point,2,1); 
+			 rtn = ConvertCoord(Point, 2, 1);
 		 else
-	 		rtn=ConvertCoord (Point,1,2); 
+			 rtn = ConvertCoord(Point, 1, 2);
 
+		 goto Exit;
+	 }
+
+	 if (!stricmp(CvtFile, "GOOGLE" ))
+	 {
+		 if (Direction == 1)
+			 rtn = ConvertCoord(Point, 2, 0);
+		 else
+			 rtn = ConvertCoord(Point, 0, 2);
+
+		 goto Exit;
+	 }
+	 if (!strnicmp(CvtFile, "GOOGLE", 6))
+	 {
+		 int iLev = atoi(&CvtFile[6]);
+		 if (iLev > 0 && iLev < 22)
+		 {
+			 double pixelX, pixelY;
+
+			 if (Direction == 1)
+				 rtn = ConvertCoord(Point, 2, 1);
+			 else
+				 rtn = ConvertCoord(Point, 1, 2);
+			 LatLongToPixelXYd(Point->y, Point->x, iLev, &pixelX, &pixelY);
+			 Point->x = pixelX;
+			 Point->y = pixelY;
+		 }
 		 goto Exit;
 	 }
 
