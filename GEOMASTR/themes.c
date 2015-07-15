@@ -2644,7 +2644,7 @@ KeepLooking:
 				}
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
-				if (!CurTheme->MultiValOption)
+				if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
 					goto KeepLooking;
 				goto ProcessMissing; 
 			}
