@@ -4249,7 +4249,7 @@ BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
     	 hSaveBM = EnterBlockingWindow (hWndDlg);
        	 cwCenter(hWndDlg, 0); 
        	 SetDlgItemText (hWndDlg,IDC_XFERFILENAME,TransferFileName);
-       	 if (!_fstricmp (BuildTransferFileOption,"RUN")) 
+       	 if (!_fstricmp (BuildTransferFileOption,"RUN"))
        	 {
 			 HFILE	FidTF=GSSiOpenFile (TransferFileName,0,OF_READ);
 			 long	NextFileLoc=0, loc, len,FileLength, EndOfFile; 
@@ -4483,7 +4483,7 @@ FileIsInvalid:
     	 	n++;
     	 }
     	 GSSiClose (FidTF);  
-    	 if (Message == WM_INITDIALOG)
+    	 if (Message == WM_INITDIALOG && !_fstricmp(BuildTransferFileOption, "LOAD"))
          	PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
     	 
     }

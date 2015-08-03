@@ -4143,7 +4143,7 @@ GSSiExitProg (1350);
 	            FreeProcInstance(lpfnBUILDXFERFILEMsgProc);
 	            RunTransferFileCommand ();
 	        }
-			else if (!_fstricmp (Arg[1],"LOAD"))
+			else if (!_fstricmp(Arg[1], "LOAD") || !_fstricmp(Arg[1], "VIEW"))
 			{
 	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((FARPROC)LOADXFERFILEMsgProc, hInst);
 	            st = DialogBox(hInst, (LPSTR)"XFERFILELOAD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);

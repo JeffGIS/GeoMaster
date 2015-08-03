@@ -79,8 +79,9 @@ int	GetFunctionID3 (LPSTR str)
 			if (!_fstrnicmp (str,"COG",3)) return 354;
 			if (!_fstrnicmp (str,"FTP",3)) return 355;
 			if (!_fstrnicmp (str,"DSN",3)) return 356;
-			if (!_fstrnicmp (str,"VAR",3)) return 357;
-			
+			if (!_fstrnicmp(str, "VAR", 3)) return 357;
+			if (!_fstrnicmp(str, "TIN", 3)) return 358;
+
 			return 0;
 }
 int	GetFunctionID4 (LPSTR str)

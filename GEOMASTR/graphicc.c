@@ -4553,6 +4553,40 @@ DoSid:
 			}
         }
         break;
+		case MT_SQLITE: //GMD Point file  
+		{
+			int iType;
+			CloseTRANS2(&hTranFileToBase);
+			CloseTRANS2(&hTranBaseToFile);
+			CloseTRANS2(&hTranFileToVP);
+			GSSiClose(FidMap);
+			if (!(iType = OpenSQLITEMapFile(PltName,&CurView->FileMNMX)))
+				goto RtnFalse;
+			FidMap = HFILE_SQLITE;
+			//ExpandGMDPointBounds (&CurView->FileMNMX);  should get max bounds for all possible gmd symbols
+			if (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn >
+				CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)
+			{
+				MinMax.xmn = -32000;
+				MinMax.xmx = 32000;
+				MinMax.ymn = -32000 * ((CurView->FileMNMX.ymx - CurView->FileMNMX.ymn) / (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn));
+				MinMax.ymx = -MinMax.ymn;
+			}
+			else
+			{
+				MinMax.ymn = -32000;
+				MinMax.ymx = 32000;
+				MinMax.xmn = -32000 * ((CurView->FileMNMX.xmx - CurView->FileMNMX.xmn) / (CurView->FileMNMX.ymx - CurView->FileMNMX.ymn));
+				MinMax.xmx = -MinMax.xmn;
+			}
+			CreateFileTran(&MinMax, &CurView->FileMNMX);
+			if (!GetTypeVisibility(TYPE_POINT))
+			{
+				CloseMap(FALSE);
+				goto RtnFalse;
+			}
+		}
+			break;
 		case MT_DGN7: //DGN file  
 		{   
 			
@@ -4982,7 +5016,9 @@ void CloseMap (BOOL Update)
 	else if (MapType == MT_FILE_GEO_DB)
 		OpenFGDB (0,0,0);
 	else if (MapType == MT_GMD)
-		CloseGMDMapFile (); 
+		CloseGMDMapFile();
+	else if (MapType == MT_SQLITE)
+		CloseSQLITEMapFile();
 	else if (MapType == MT_ORA)
 		OpenORAFileIndex (HFILE_ERROR,0);
 	else if (MapType == MT_DGN7)  

@@ -2640,6 +2640,8 @@ void EndDisplayProcessing (BOOL Final)
 //							sprintf (mess,"End of dseg %i",DisplayFinOpt);
 //							SetWindowText (hWnd,mess);
 //BlockSocketProcessing (7);
+	SaveTINData(0, 0);
+
 	if (totContourPoints)
 	{
 		char mess[128];

@@ -289,6 +289,7 @@ BOOL StartVehTimeMenu (HWND hWnd);
 BOOL VehicleInReplayList (LPSTR ID);
 int	NextNewObject(BOOL DisplayMessage);
 BOOL OffsetPickedArea (int Item, double Dist);
+void SaveTINData(LPDPOINT pDPoint, HANDLE hElev);
 HANDLE OffsetPickedArea2 (int Item, double Dist,LPLONG pNumPoints);
 BOOL OffsetHighlightedLines (int NumPoints,HANDLE hPoints, double Dist);
 BOOL SelectAreaToOffsetFile (int Item,double Offset,HANDLE hTran);
@@ -2380,15 +2381,16 @@ BOOL SaveMapServerFile(void);
 
 void GMFileManager(LPSTR ManagerFile);
 
-
-
-
-
-
-
-
-
-
+int OpenSQLITEMapFile(LPSTR FileName, LPMNMXCORD pBounds);
+void CloseSQLITEMapFile(void);
+BOOL SetSQLITEVis(HWND hWndDlg, int DlgItemSym, int DlgItemPar, HFILE FidSymList);
+BOOL SetSQLITEParms(void);
+BOOL ProcessSQLITERecord(HDC hDC);
+BOOL GetNextSQLITERecord(LPMNMXCORD pBounds);
+BOOL IsSQLITEFileVisible(void);
+BOOL LoadSQLITEParm(LPSTR SHPFileName, long Type, HWND hWnd);
+BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds);
+BOOL GetSQLITERecord(LONGLONG SQLITERec);
 
 
 

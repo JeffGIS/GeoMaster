@@ -1383,23 +1383,39 @@ Next:
     }
 	else if (MapType == MT_GMD)
 	{
-    	MNMXCORD	GMDBounds;
-    	short	n=0, maxn=100;
-    	
-    	do 
-    	{
-			ExpandGMDPointBounds (&GMDBounds);  
+		MNMXCORD	GMDBounds;
+		short	n = 0, maxn = 100;
+
+		do
+		{
+			ExpandGMDPointBounds(&GMDBounds);
 			if (ForceRefIndex || ForceTAGIndex)
-	    		StatusWindowUpdate2 (0,NumGMDRecs,CurrentGMDRec); 
-			if (WantGMDNegGrid || RectInWBounds (&GMDBounds,1))
-				ProcessGMDRecord (*hDC,(HANDLE)FidMap,CurrentGMDRec);
+				StatusWindowUpdate2(0, NumGMDRecs, CurrentGMDRec);
+			if (WantGMDNegGrid || RectInWBounds(&GMDBounds, 1))
+				ProcessGMDRecord(*hDC, (HANDLE)FidMap, CurrentGMDRec);
 			n++;
 		} while (n < maxn && FindNextSegment());
-        if (n < maxn)
-        	goto Next;
- 		goto RtnTrue;
+		if (n < maxn)
+			goto Next;
+		goto RtnTrue;
 	}
-    else if (MapType == MT_DGN7)
+	else if (MapType == MT_SQLITE)
+	{
+		MNMXCORD	GMDBounds;
+		short	n = 0, maxn = 100;
+
+		do
+		{
+			//ExpandGMDPointBounds(&GMDBounds);
+			//if (WantGMDNegGrid || RectInWBounds(&GMDBounds, 1))
+				ProcessSQLITERecord(*hDC);
+			n++;
+		} while (n < maxn && FindNextSegment());
+		if (n < maxn)
+			goto Next;
+		goto RtnTrue;
+	}
+	else if (MapType == MT_DGN7)
     {
 		ProcessDGNRecord (*hDC,-1); 
 		goto RtnTrue;
@@ -4059,10 +4075,17 @@ void ShowPickedItem (HWND hWnd, int InItem)
 	}
 	else if (MapType == MT_GPX)
 	{
-	    if (SavePassID)
-			CurView->PassID=4;
-    	CurrentGPXRec = PickList[Item].Segment;
-    	GetGPXRecordBounds (CurrentDGNRec,&Rect);
+		if (SavePassID)
+			CurView->PassID = 4;
+		CurrentGPXRec = PickList[Item].Segment;
+		GetGPXRecordBounds(CurrentDGNRec, &Rect);
+	}
+	else if (MapType == MT_SQLITE)
+	{
+		if (SavePassID)
+			CurView->PassID = 4;
+		CurrentSQLITERec = PickList[Item].Segment;
+		GetSQLITERecordBounds(CurrentSQLITERec, &Rect);
 	}
 	else if (MapType == MT_INDEX)
 		Rect = CurView->FileMNMX;
@@ -4114,11 +4137,18 @@ void ShowPickedItem (HWND hWnd, int InItem)
 			ProcessORARecord (CurView->hDC,FidMap,CurrentORARec); 
 	    }
 		else if (MapType == MT_GMD)
-		{   
+		{
 			if (SavePassID)
-				CurView->PassID = 4; 
-			ProcessGMDRecord (CurView->hDC,(HANDLE)FidMap,CurrentGMDRec); 
-	    }
+				CurView->PassID = 4;
+			ProcessGMDRecord(CurView->hDC, (HANDLE)FidMap, CurrentGMDRec);
+		}
+		else if (MapType == MT_SQLITE)
+		{
+			if (SavePassID)
+				CurView->PassID = 4;
+			if (GetSQLITERecord(CurrentSQLITERec))
+				ProcessSQLITERecord(CurView->hDC);
+		}
 		else if (MapType == MT_DGN7)
 		{   
 		    if (SavePassID)
@@ -6643,7 +6673,7 @@ GSSiExitProg (68);
 	if (!PeopleNet && (!FastPick || CurView->CurFile != FastPickFileNum || FileInIndex != FastPickFII) &&
 		 CurView->FileType[CurView->CurFile]!=6)
 	{   
-		LPSTR	pMDB=0, pGDB=0; 
+		LPSTR	pMDB=0, pGDB=0, pSLT; 
 		BOOL	st;
 		
 		pGMD = 0;
@@ -6661,20 +6691,27 @@ GSSiExitProg (68);
 				pMDB += 4;
 				*pMDB = 0;
 			}
-			else if ((pGMD = _fstrstr (str,".GMD("))) 
+			else if ((pGMD = _fstrstr(str, ".GMD(")))
 			{
 				pGMD += 4;
 				*pGMD = 0;
 			}
-			st = ExistFile (str);
+			else if ((pSLT = _fstrstr(str, ".SLT(")))
+			{
+				pSLT += 4;
+				*pSLT = 0;
+			}
+			st = ExistFile(str);
 		}
 		if (pMDB)
 			*pMDB = '(';	  
 		else if (pGDB)
 			*pGDB = '(';	  
 		else if (pGMD)
-			*pGMD = '(';	  
-    	if (!st)
+			*pGMD = '(';
+		else if (pSLT)
+			*pSLT = '(';
+		if (!st)
         	goto NextFile;
     } 
     	

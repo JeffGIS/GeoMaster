@@ -2179,7 +2179,13 @@ LPDEBUGARRAY	pDB=0;   */
 									int	SDCrtn = SetDisplayChar (hDC,GF_AREA,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI);
 									
 									if (SDCrtn > 0)
-										ProcessPolygon (hDC,ShowBorder,PltType,hRandPen,hTempPen,ipen);
+									{
+										if (hElevBuffer && nPnts == 3 && FidTINExtract != HFILE_ERROR)
+										{
+											SaveTINData(lpDCurPoints, hElevBuffer);
+										}
+										ProcessPolygon(hDC, ShowBorder, PltType, hRandPen, hTempPen, ipen);
+									}
 									else if (SDCrtn < 0)
 										HaveTXLoc = TRUE;
 								}
@@ -5268,7 +5274,30 @@ GSSiExitProg (713);
 #endif
 }
 
+void SaveTINData(LPDPOINT pDPoint, HANDLE hElev)
+{
+	static BOOL haveData = FALSE;
+	if (pDPoint)
+	{
+		char cbuf[256];
+		LPFLOAT pElev = GlobalLock(hElev);
 
+		sprintf(cbuf, "%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f",
+			pDPoint[0].x*MFT, pDPoint[0].y*MFT, pElev[0] * MFT,
+			pDPoint[1].x*MFT, pDPoint[1].y*MFT, pElev[1] * MFT,
+			pDPoint[2].x*MFT, pDPoint[2].y*MFT, pElev[2] * MFT);
+		GlobalUnlock(hElev);
+		fputstring(cbuf, FidTINExtract);
+		haveData = TRUE;
+	}
+	else if (haveData)
+	{
+		GSSiClose(FidTINExtract);
+		FidTINExtract = HFILE_ERROR;
+		haveData = FALSE;
+	}
+	return;
+}
 
  
 

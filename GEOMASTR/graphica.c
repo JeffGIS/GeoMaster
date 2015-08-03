@@ -2152,9 +2152,11 @@ short MapFileType (LPSTR InName)
 		return MT_SID; 
 	if (!_fstricmp (&Name[l-4],".ORA"))
 		return MT_ORA; 
-	if (!_fstricmp (&Name[l-4],".GMD"))
-		return MT_GMD; 
-	if (!_fstricmp (&Name[l-4],".GPX"))
+	if (!_fstricmp(&Name[l - 4], ".GMD"))
+		return MT_GMD;
+	if (!_fstricmp(&Name[l - 4], ".SLT"))
+		return MT_SQLITE;
+	if (!_fstricmp(&Name[l - 4], ".GPX"))
 		return MT_GPX;
 	if (!_fstricmp (&Name[l-4],".KML"))
 		return MT_KML;
