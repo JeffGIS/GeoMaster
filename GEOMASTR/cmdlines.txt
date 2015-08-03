@@ -1,3 +1,5 @@
+projects\AlleyWalls\WallPoints.GMC /WD j:\BU_2015_01_16\GEOMas
+configs\exportsewer.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
 police\configs\startup_2015.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\MetroGIS.gmc /F [%USERLEV]=2; /WD k:\GMMobile\GMMetroGIS
 configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD d:\ADAPedRamps\PreSurvey
@@ -141,6 +143,8 @@ granth.gmc /WD c:\granth
 
 
 granth
+
+
 
 
 

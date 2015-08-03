@@ -42,19 +42,28 @@ BOOL FileIsVisible (LPSTR FileName)
         case MT_PLT: 
         	rtn = TRUE; 
         	break;
-        case MT_SHP:
-			if (OpenSHPFile (FileName))
-        	{
-				if ((SHPType = ReadSHPHeader (SHPFid,0,FileName)))
+		case MT_SHP:
+			if (OpenSHPFile(FileName))
+			{
+				if ((SHPType = ReadSHPHeader(SHPFid, 0, FileName)))
 				{
-					if (LoadSHPParm (FileName,SHPType,CurView->hWnd))
-						rtn = IsSHPFileVisible ();
+					if (LoadSHPParm(FileName, SHPType, CurView->hWnd))
+						rtn = IsSHPFileVisible();
 				}
-				CloseSHPFile ();
+				CloseSHPFile();
 			}
 			break;
-				 
-        case MT_GMD:
+
+		case MT_SQLITE:
+			if ((SHPType = OpenSQLITEMapFile(FileName,0)))
+			{
+				if (LoadSQLITEParm(FileName, SHPType, CurView->hWnd))
+					rtn = IsSQLITEFileVisible();
+				CloseSQLITEMapFile();
+			}
+			break;
+
+		case MT_GMD:
 			{
 				HANDLE	hDB=0;
 				LPSTR	pPar;
@@ -938,20 +947,33 @@ FromPltFile:
 	        	}
 				break;
 
-         		case MT_GMD:
-	        	{    
-	        		long	SaveGMDRec = CurrentGMDRec;
-	        		
-					if (OpenMap ((HWND)1,0)) 
+				case MT_GMD:
+				{
+					long	SaveGMDRec = CurrentGMDRec;
+
+					if (OpenMap((HWND)1, 0))
 					{
-						SetGMDVis (hWndDlg,DlgItemSym, DlgItemPar,FidSymList);
-		            	CloseMap (FALSE);
-		            }
-		            CurrentGMDRec = SaveGMDRec;
-	        	}
-	        	break;  
-				
-         		case MT_GPX:
+						SetGMDVis(hWndDlg, DlgItemSym, DlgItemPar, FidSymList);
+						CloseMap(FALSE);
+					}
+					CurrentGMDRec = SaveGMDRec;
+				}
+					break;
+
+				case MT_SQLITE:
+				{
+					LONGLONG	SaveSQLITERec = CurrentSQLITERec;
+
+					if (OpenMap((HWND)1, 0))
+					{
+						SetSQLITEVis(hWndDlg, DlgItemSym, DlgItemPar, FidSymList);
+						CloseMap(FALSE);
+					}
+					CurrentSQLITERec = SaveSQLITERec;
+				}
+					break;
+
+				case MT_GPX:
 	        	{    
 	        		long	SaveGPXRec = CurrentGPXRec;
 	        		

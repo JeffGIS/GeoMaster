@@ -1,6 +1,35 @@
 #include "graphint.h"   
 #include "gmextern.h"
+#include "shapefil.h"
 //#include "sqlite3ext.h"
+static	char	SQLITERefno[128] = "0";
+static	char	SQLITEx[128] = "[SQLITE.x]";
+static	char	SQLITEy[128] = "[SQLITE.y]";
+static	char	SQLITEStartTime[128] = "[SQLITE.BDate]";
+static	char	SQLITEEndTime[128] = "[SQLITE.EDate]";
+static	char	SQLITESymbol[128] = "$SYMNUM(WALLPOINT)";
+static	char	SQLITESize[128] = "5";
+static	char	SQLITETAG[128] = "CONTROLN:[SQLITE.Wall Id]", SQLITETag[128];//"CASENUM:[SQLITE.CaseNbr]";
+static	int		SQLITEXIndex = 1, SQLITEYIndex = 2;
+static	int		SQLITEXField = 7, SQLITEYField = 8;
+static	DPOINT	SQLITEPoint;
+static	int		SQLITEPointSize;
+static	long	SQLITEColor = -1;
+static char		SQLITEBeginDate[256];
+static char		SQLITEEndDate[256];
+static time_t	SQLITEParmTime = 0;
+static	int		NumSQLITEParms = 0;
+static short	HaveSQLITESym = -1;
+static BOOL		SQLITEProjectionIsBase;
+static char		SQLITEParms[4096] = "";
+static char		LastSQLITEFile[MAX_PATH] = "";
+static char		SQLITEWhere[256];
+static sqlite3	*SQLITEHandle=0;
+static LONGLONG	NextSQLITERec = 0, SQLITEBaseRefno = 0;
+static MNMXCORD SQLITEFileMNMX;
+static sqlite3_stmt *statement = NULL;
+static char		cmd[1024];
+
 
 #define BLOB_MAX	USHRT_MAX
 #define COORDINATE_FACTOR	10000000
@@ -74,6 +103,55 @@ static void ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 	}
 }
 
+LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
+	sqlite3_stmt *statement;
+	LONGLONG rtn=0;
+
+	if (db)
+	{
+		if (sqlite3_prepare_v2(db, pCmd, -1, &statement, 0) == SQLITE_OK)
+		{
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				rtn = sqlite3_column_int(statement, 0);
+			}
+		}
+		sqlite3_finalize(statement);
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+}
+BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName,LPMNMXCORD pfileMNMX)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+
+	DBoundsInit(pfileMNMX);
+	if (db)
+	{
+		sprintf(pCmd, "SELECT min(minX),max(maxX),min(minY),max(maxY) FROM %s_index", tableName);
+		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0);
+
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			pfileMNMX->xmn = sqlite3_column_double  (statement, 0);
+			pfileMNMX->xmx = sqlite3_column_double(statement, 1);
+			pfileMNMX->ymn = sqlite3_column_double(statement, 2);
+			pfileMNMX->ymx = sqlite3_column_double(statement, 3);
+			rtn = TRUE;
+		}
+		SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+}
+
 int SQLiteCmd(int nArgs, LPSTR *ARG)
 {
 	int rtn = 0;
@@ -85,6 +163,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		if (rtn == SQLITE_OK)
 		{
 			SetGlobalValueLong(ARG[3], (UINT)db);
+			rtn = 1;
 		}
 	}
 	else if (!stricmp(ARG[1], "CLOSE"))
@@ -117,15 +196,20 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 
+		if (strstr(ARG[3], "34850-2"))
+			ii = 1;
 		db = (sqlite3*)atoi(ARG[2]);
 		if (fid != HFILE_ERROR)
 		{
 			HANDLE hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
 			LPSTR cmd = GlobalLock(hstr);
 			rtn = 1;
-			while (fgetstring(cmd, MAXSTR - 2, fid))
+			while (fgetstring(cmd, -(MAXSTR - 2), fid))
 			{
-				int err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
+				int err;
+				
+				//REPLAC(cmd, "/", "//", MAXSTR-2);
+				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
 				sqlite3_free(error);
 				if (err)
 				{
@@ -139,23 +223,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	}
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(ROWS,sqlitehandle,tablename,where clause)
 	{
-		HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
-		LPSTR  pCmd = GlobalLock(hCmd);
 		db = (sqlite3*)atoi(ARG[2]);
-		sprintf (pCmd,"SELECT COUNT (*) FROM %s",ARG[3]);
-		sqlite3_stmt *statement;
-
-		if (db)
-		{
-			SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows",0);
-
-			if (sqlite3_step(statement) == SQLITE_ROW)
-			{
-				rtn = sqlite3_column_int(statement, 0);
-			}
-			SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
-		}
-		GSSiGlobUlFree(&hCmd);
+		rtn = GetSQLITENumRows(db, ARG[3]);
 	}
 	else if (!stricmp(ARG[1], "FROMGMD"))//$SQLITE(FROMGMD,sqlitehandle,gmdfile,tablename,primkeyisoffset)
 	{
@@ -814,5 +883,765 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			}
 		}
 		return rtn;
+}
+
+int SQLITEOpenPrj(LPSTR SQLITEFileName, int projectionID)
+{
+	char	prjFileName[MAX_PATH] = "";
+	LPSTR	pDot;
+	HFILE	fid;
+	int		rtn = 0;
+
+	if (!GetGlobalLVal2("[%USEOSRLIB]", FALSE))
+		return 0;
+	return 0;
+/*	strcpy(prjFileName, SQLITEFileName);
+	ExpandText(prjFileName);
+	if ((pDot = strrchr(prjFileName, '.')))
+	{
+		strcpy(pDot, ".prj");
+		fid = GSSiOpenFile(prjFileName, 0, OF_READ);
+		if (fid != HFILE_ERROR)
+		{
+			int len = GSSifilelength(fid);
+			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, len + 1);
+			LPSTR pMem = GlobalLock(hMem);
+			HANDLE hDef = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+			LPSTR proj4def = GlobalLock(hDef);
+
+			BigRead(fid, pMem, len);
+			pMem[len] = 0;
+			GSSiClose(fid);
+			if (!ConvertPRJtoProj4(pMem, proj4def))
+			{
+				LoadProjection(projectionID, proj4def);
+				rtn = 1;
+			}
+			GSSiGlobUlFree(&hDef);
+			GSSiGlobUlFree(&hMem);
+		}
+	}*/
+	return rtn;
+}
+
+int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
+{
+	int	i;
+	MNMXCORD	FileMNMX, Bounds;
+	DPOINT		Points[4];
+	int rtnType = 0;
+	LPSTR pPar, pEnd;
+	char fileName[MAX_PATH], tableName[100];
+
+	DBoundsInit(&FileMNMX);
+	CloseTRANS2(&hTranFileToBase);
+	CloseTRANS2(&hTranBaseToFile);
+	CloseTRANS2(&hTranFileToVP);
+	strcpy(fileName, FileNameIN);
+	ExpandText(fileName);
+	pPar = strrchr(fileName, '(');
+	if (pPar)
+	{
+		*pPar++ = 0;
+		if ((pEnd = strchr(pPar, ')')))
+		{
+			*pEnd = 0;
+			strcpy(tableName, pPar);
+			if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
+			{
+				if (GetSQLITENumRows(SQLITEHandle, tableName))
+				{
+					if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
+					{
+						rtnType = SHPT_POINT;
+						LoadSQLITEParm(fileName, rtnType, CurView->hWnd);
+
+						Points[0].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
+						Points[0].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
+						Points[1].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
+						Points[1].y = ClipCoordToProjection(SQLITEFileMNMX.ymx, 2, 0, 1);
+						Points[2].x = ClipCoordToProjection(SQLITEFileMNMX.xmx, 1, 0, 1);
+						Points[2].y = ClipCoordToProjection(SQLITEFileMNMX.ymx, 2, 0, 1);
+						Points[3].x = ClipCoordToProjection(SQLITEFileMNMX.xmx, 1, 0, 1);
+						Points[3].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
+						for (i = 0; i<4; i++)
+						{
+							if (ConvertCoord(&Points[i], 0, 1))
+							{
+								MessageBox(GetFocus(), "Unable to convert coordinates as specified", 0, MB_ICONQUESTION | MB_OK);
+								sqlite3_close(SQLITEHandle);
+								SQLITEHandle = 0;
+								return FALSE;
+							}
+							AddDPointToMinMax(&Points[i], &FileMNMX);
+						}
+						if (FileMNMX.xmx - FileMNMX.xmn >
+							FileMNMX.ymx - FileMNMX.ymn)
+						{
+							MinMax.xmn = -32000;
+							MinMax.xmx = 32000;
+							MinMax.ymn = -32000 * ((FileMNMX.ymx - FileMNMX.ymn) / (FileMNMX.xmx - FileMNMX.xmn));
+							MinMax.ymx = -MinMax.ymn;
+						}
+						else
+						{
+							MinMax.ymn = -32000;
+							MinMax.ymx = 32000;
+							MinMax.xmn = -32000 * ((FileMNMX.xmx - FileMNMX.xmn) / (FileMNMX.ymx - FileMNMX.ymn));
+							MinMax.xmx = -MinMax.xmn;
+						}
+						CreateFileTran(&MinMax, &FileMNMX);
+						Bounds = CurView->WBounds;
+						ConvertBounds(&Bounds, 1, 0);
+						sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+							Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+
+						if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) != SQLITE_OK)
+							statement = NULL;
+					}
+				}
+			}
+		}
+	}
+	if (pFileMNMX)
+		*pFileMNMX = FileMNMX;
+	return rtnType;
+}
+
+BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds)
+{
+	BOOL rtn = FALSE;
+	sprintf(cmd, "SELECT LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld",Recno);
+	
+	if (statement)
+		sqlite3_finalize(statement);
+	statement = 0;
+	if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) == SQLITE_OK)
+	{
+		int st = sqlite3_step(statement);
+
+		if (st == SQLITE_ROW)
+		{
+			DPOINT BasePt;
+
+			BasePt.x = sqlite3_column_double(statement, 0);
+			BasePt.y = sqlite3_column_double(statement, 1);
+			ConvertCoord(&BasePt, 0, 1);
+			pBounds->xmn = BasePt.x - 1;
+			pBounds->ymn = BasePt.y - 1;
+			pBounds->xmx = BasePt.x + 1;
+			pBounds->ymx = BasePt.y + 1;
+			rtn = TRUE;
+		}
+		sqlite3_finalize(statement);
+	}
+	statement = NULL;
+	return rtn;
+}
+
+BOOL GetSQLITERecord(LONGLONG SQLITERec)
+{
+	BOOL rtn = FALSE;
+
+	sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", SQLITERec);
+
+	if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) != SQLITE_OK)
+		statement = NULL;
+	else
+	{
+		int st = sqlite3_step(statement);
+
+		if (st == SQLITE_ROW)
+			rtn = TRUE;
+		else
+		{
+			sqlite3_finalize(statement);
+			statement = 0;
+		}
+	}
+	return rtn;
+}
+
+void CloseSQLITEMapFile(void)
+{
+	/*GSSiClose(SHPFid);
+	OpenSHPFileIndex(0, HFILE_ERROR);*/
+	if (SQLITEHandle)
+	{
+		if (statement)
+			sqlite3_finalize(statement);
+		statement = 0;
+		sqlite3_close(SQLITEHandle);
+		SQLITEHandle = 0;
+	}
+	return;
+}
+
+BOOL SetSQLITEVis(HWND hWndDlg, int DlgItemSym, int DlgItemPar, HFILE FidSymList)
+{
+	char	str[128];
+	short	idesc;
+
+	strcpy(str, SQLITESymbol);
+	ExpandText(str);
+	idesc = atol(str);
+	AddSymToList(hWndDlg, DlgItemSym, DlgItemPar, idesc, FidSymList);
+	return TRUE;
+}
+BOOL SetSQLITEParms(void)
+{
+	LPSTR	pDesc, pTAG, pClause, pC, pColor, pWidth, pRot;
+	BOOL	rc;
+	char	str[1024];
+	BOOL	rtn = FALSE;
+
+	strcpy(str, SQLITERefno);
+	ExpandText(str);
+	CurrentRefno = atol(str);
+	if (!SQLITEHandle)
+		return FALSE;
+	SetUseOnlyOneDBHandle(hSHPDBF);
+	pTAG = SQLITETAG;
+	if (*pTAG && (pC = _fstrchr(pTAG, ':')))
+	{
+		_fstrcpy(SQLITETag, pTAG);
+		ExpandText(SQLITETag);
+		pC = _fstrchr(SQLITETag, ':');
+		*pC++ = 0;
+		strncpy0(CurrentPrefix, SQLITETag, MAX_PREFIX_LEN);
+		strncpy0(CurrentUDI, pC--, MAX_UDI_LEN);
+		*pC = ':';
+		ExpandText(CurrentUDI);
+	}
+	else
+	{
+		*SQLITETag = 0;
+		*CurrentPrefix = 0;
+		*CurrentUDI = 0;
+	}
+	if (HaveSQLITESym < 0)
+	{
+/*		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+
+		pDesc = SQLITEParms;
+		while (*pDesc)
+		{
+			pClause = _fstrchr(pDesc, 0) + 1;
+			pColor = _fstrchr(pClause, 0) + 1;
+			pWidth = _fstrchr(pColor, 0) + 1;
+			pRot = _fstrchr(pWidth, 0) + 1;
+			ConvertSQLToLogicP(str, pClause);
+			if (!*pClause || LogicPFile(SQLPtr, str, &rc))
+			{
+				break;
+			}
+			else
+				pDesc = _fstrchr(pRot, 0) + 1;
+		}
+		_fstrcpy(str, pDesc);
+		ExpandText(str);
+		CurrentDesc = GetDictSymbolNumber(str);
+		if (!*pDesc)
+			goto Exit;
+		if (*pColor)
+		{
+			_fstrcpy(str, pColor);
+			ExpandText(str);
+			SQLITEColor = ConvertColor(atol(str), CurrentDesc);
+		}
+		else
+			SQLITEColor = -1;
+		if (*pWidth)
+		{
+			_fstrcpy(str, pWidth);
+			ExpandText(str);
+			SQLITEPointSize = atol(str);
+			switch (*LastChr(str))
+			{
+			case 'P':
+			case 'p':
+				SQLITEPointSize = -SQLITEPointSize;
+				break;
+			case 'F':
+			case 'f':
+				SQLITEPointSize *= FTM;
+				break;
+			}
+			CurPointSize = SQLITEPointSize;
+		}
+		else
+			SQLITEPointSize = 0;
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(SQLITEHandle);*/
+	}
+	else
+		CurrentDesc = HaveSQLITESym;
+	if (*SQLITEBeginDate)
+	{
+		_fstrcpy(str, SQLITEBeginDate);
+		ExpandText(str);
+		GRStartTime = GREndTime = atol(str);
+	}
+	if (*SQLITEEndDate)
+	{
+		_fstrcpy(str, SQLITEEndDate);
+		ExpandText(str);
+		GREndTime = atol(str);
+	}
+	rtn = TRUE;
+Exit:
+	SetUseOnlyOneDBHandle(0);
+	return rtn;
+}
+
+BOOL ProcessSQLITERecord(HDC hDC)
+{
+	LPOPENFILEDATA	FilePtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPGWDHEADER lpGWDHead;
+	BOOL	rtn = FALSE;
+	char	str[128], Prefix[10], UDI[64];
+	long	Refno;
+	short	Symnum;
+	int		st;
+	LPVIEWPORT	SaveVP = CurView;
+	DPOINT BasePt;
+	MNMXCORD	RecordBounds;
+
+	//	if (CurView->DisplayInParent && CurView->Parent)            	
+	//		SetViewport(CurView->Parent);
+	if (CurView->PassID == 2 || !SQLITEHandle)
+		goto RtnFalse;
+	InitRecord(hDC);
+	SetSQLITEParms();
+	strcpy(str, SQLITESymbol);
+	ExpandText(str);
+	CurrentDesc = atol(str);
+	if (!GetVisibility(CurrentDesc))
+		goto RtnFalse;
+	if (*SQLITEWhere)
+	{
+		BOOL irc;
+
+		if (!LogicP(SQLITEWhere, &irc))
+			goto RtnFalse;
+	}
+	BasePt.x = sqlite3_column_double(statement, 2);
+	BasePt.y = sqlite3_column_double(statement, 3);
+	rtn = TRUE;
+	/*	SQLPtr = (LPOPENSQLDATA)GlobalLock(GMDHandle);
+	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+	lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
+	FillGWDData(lpGWDHead, Offset);
+	switch (lpGWDHead->SpatialIndexType)
+	{
+	case 1:
+	case 2:
+		GRStartTime = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->FromDateField);
+		GREndTime = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->ToDateField);
+		GMDPoint.x = GMDGetRealFieldVal(lpGWDHead, lpGWDHead->XField);
+		GMDPoint.y = GMDGetRealFieldVal(lpGWDHead, lpGWDHead->YField);
+		break;
+	}
+	GlobalUnlock(FilePtr->FileHandle);
+	GlobalUnlock(SQLPtr->OFHandle);
+	GlobalUnlock(GMDHandle);
+	if (WantGMDNegGrid)
+	{
+		if (!GMDPoint.x)
+		{
+			SelectClipRgn(CurView->hDC, 0);
+			GMDPoint = SubVPMidPointWorld;
+		}
+		else
+			goto RtnFalse;
+	}*/
+	ConvertCoord(&BasePt, 0, 1);
+	InGraphicsProcessor = TRUE;
+	ShowValue(hDC, FALSE);
+	CurrentRefno = sqlite3_column_int(statement, 0);
+	ItemSeg = CurrentSQLITERec = CurrentRefno;
+	strcpy(str, SQLITERefno);
+	ExpandText(str);
+	SQLITEBaseRefno = atol(str);
+	CurrentRefno += SQLITEBaseRefno;
+	PTRot = 0;
+	if (PointInWBounds(&BasePt))// && GRStartTime >= TimeRangeBeg && SQLITEStartTime < TimeRangeEnd)
+	{
+		LPSTR	pTag;
+		char	Tag[80];
+		short	ltag;
+		short	Dummy;
+
+		//strcpy(Tag, SQLITETAG);
+		//ExpandText(Tag);
+
+		pTag = (LPSTR)sqlite3_column_text(statement, 1);
+		sprintf (Tag,"ALLYWALL:%s", pTag);
+		SetSymNum(CurrentDesc);
+		ltag = _fstrlen(Tag);
+		if (ProcessRefAndTAG(TRUE, Tag, ltag))
+		{
+			HiPrecis = TRUE;
+			lpDCurPoints = &BasePt;
+			CurrentPoint = CurPointLocD = BasePt;
+			ItemSeg = CurrentSQLITERec;
+			LastElementBeginPoint = LastElementEndPoint = BasePt;
+			nPnts = nCurPoints = 1;
+			CurPointLoc = BasePtToWinPt(lpDCurPoints);
+			if (PointIsBlocked(&CurPointLocD, CurrentDesc))
+				goto RtnFalse;
+			InGraphicsProcessor = TRUE;
+			HaveTXLoc = TRUE;
+			CurrentType = GF_POINT;
+			if (CurPointSize < 0)
+				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+			else
+				CurPointSize /= CurView->BaseUnitsPerPixel;
+			CurPointSize *= GraphicsPointFactor;
+			if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
+			{
+				CurrentSeg = CurrentRefno;
+				PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
+			}
+			else if (GetTypeVisibility(TYPE_POINT))
+			{
+				short	iDesc = CurrentDesc;
+
+				if (CurrentDesc > 0 && CurrentDesc < 3201)
+				{
+					if (TSize)
+						CurView->CurVisType[CurrentDesc] = 5;
+					else
+						CurView->CurVisType[CurrentDesc] = 4;
+				}
+				HighlightPointSym = FALSE;
+				if (!GetTypeVisibility(6) && SymbolIsVisible(iDesc))
+				{
+					CurPointSize = 10 * DeviceToScreenFactor;
+					iDesc = InvisiblePointSymbol;
+				}
+				if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
+				{
+					double	size;
+
+					if (ThemePointSym)
+					{
+						iDesc = ThemePointSym;
+						if (ThemePointSize < 0)
+							size = -ThemePointSize *DeviceToScreenFactor;
+						else
+							size = ThemePointSize / CurView->BaseUnitsPerPixel;
+						size *= ThemeWidthFactor;
+						size = min(max(size*GraphicsPointFactor, 1), MaxPointSize);
+					}
+					else if (ItemSymbolWidth > 0)
+						size = ItemSymbolWidth * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+					else if (ItemSymbolWidth < 0)
+						size = -ItemSymbolWidth * BaseDistToWinDist * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+					else
+						size = CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+					if (iDesc < 0)
+					{
+						COLORREF	OldColor;
+
+						if (ThemePointColor > -1)
+							OldColor = SetTextColor(CurView->hDC, ConvertColor(ThemePointColor, ThemePointUseHalfTone));
+						DisplayCharAtLoc(CurView->hDC, CurPointLoc, (short)IDNINT(size), -iDesc);
+						if (ThemePointColor > -1)
+							SetTextColor(CurView->hDC, OldColor);
+					}
+					else
+					{
+						long	DisplayedWidth = 0;
+
+						DisplayPointItem(CurView->hDC, CurPointLoc, size, PTRot, iDesc, &DisplayedWidth);
+						CurView->MaxSymbolWidth = max(CurView->MaxSymbolWidth, DisplayedWidth);
+						CurView->MaxFileDisplayedPointWidth[FileNum] = max(CurView->MaxFileDisplayedPointWidth[FileNum], (DisplayedWidth / FileDistToWinDist) - (((long)CurrentItemMinMax.xmx) - CurrentItemMinMax.xmn));
+					}
+					DBoundsInit(&RecordBounds);
+					AddDPointToMinMax(lpDCurPoints, &RecordBounds);
+					InflateBounds(&RecordBounds, size);
+					GetFileMinMax(&CurrentItemMinMax, &RecordBounds);
+				}
+			}
+			InGraphicsProcessor = FALSE;
+			TXLoc = CurPointLocD;
+			HaveTXLoc = 1;
+		}
+	}
+	ShowValue(hDC, FALSE);
+RtnFalse:
+	CurView = SaveVP;
+	InGraphicsProcessor = FALSE;
+	return rtn;
+}
+BOOL GetNextSQLITERecord(LPMNMXCORD pBounds)
+{
+	char *error = NULL;
+	int rtn = sqlite3_step(statement);
+
+	if (rtn == SQLITE_ROW)
+		return TRUE;
+	if (rtn == SQLITE_DONE)
+		return FALSE;
+	SQLOK(rtn, SQLITEHandle,"", &error);
+	sqlite3_free(error);
+	return FALSE;
+/*	if (!hDGN)
+		return FALSE;
+	if (pBounds)
+	{
+		MNMXCORD	Bounds = *pBounds;
+
+		if (IgnoreBounds)
+			Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
+		pBounds = &Bounds;
+		if (_fmemcmp(pBounds, &DGNLastBounds, sizeof(MNMXCORD)))
+		{
+			MNMXCORD	DGNBounds;
+
+			if (pBounds->xmn || pBounds->xmx || pBounds->ymn || pBounds->ymx)
+			{
+				if (ConvertRectCoord(&DGNBounds, pBounds, 1, 0))
+					DGNLibSetSpatialFilter(hDGN, &DGNBounds);
+			}
+			else
+				DGNLibSetSpatialFilter(hDGN, pBounds);
+			DGNLastBounds = *pBounds;
+		}
+	}
+	pElement = (LPDGNElementCore)GlobalLock(hElement);
+	rtn = DGNLibReadElement(hDGN, pElement, MaxDGNElementSize, &BaseDistToWinDist, &FillColor, &NumAttributes, Attributes);
+	CurrentDGNRec = pElement->element_id;
+	GlobalUnlock(hElement);*/
+}
+BOOL IsSQLITEFileVisible(void)
+{
+/*	LPSTR	pDesc, pClause, pC, pColor, pWidth, pRot;
+	short	idesc, i;
+	char	str[128];
+	//	return TRUE;
+	if (NumIndexSyms)
+	{
+		for (i = 0; i<NumIndexSyms; i++)
+			if (GetVisibility(IndexSyms[i]))
+				return TRUE;
+	}
+	if (!*SHPParms)
+		return TRUE;
+	pDesc = SHPParms;
+	while (*pDesc)
+	{
+		pClause = _fstrchr(pDesc, 0) + 1;
+		pColor = _fstrchr(pClause, 0) + 1;
+		pWidth = _fstrchr(pColor, 0) + 1;
+		pRot = _fstrchr(pWidth, 0) + 1;
+		_fstrcpy(str, pDesc);
+		ExpandText(str);
+		idesc = GetDictSymbolNumber(str);
+		if (GetVisibility(idesc))
+			return TRUE;
+		pDesc = _fstrchr(pRot, 0) + 1;
+	}*/
+	return TRUE;
+}
+BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
+#if ENABLETRACE
+{
+	GSSiEnterProg(1374);
+#endif
+	{
+		
+		char	Name[MAX_PATH], str[260], Projection[MAX_PATH + 2], Units[34];
+		char	SymName[66], cWidth[64], cRot[64], cColor[64], cIF[128];
+		LPSTR	pDot, pTAG, pWidth, pParm = SQLITEParms;
+		short	l;
+		int		itype;
+		HFILE	Fid;
+		BOOL	FileIsIndex;
+		BOOL	havePrj = FALSE;
+		struct _stati64    statParmFile;
+
+		if (!SQLITEFileName)
+		{
+			HaveIndexParmFile = FALSE;
+			goto RtnTrue;
+		}
+		*SQLITEBeginDate = 0;
+		*SQLITEEndDate = 0;
+		SQLITEParmTime = 0;
+		NumSQLITEParms = 0;
+		SQLITEProjectionIsBase = TRUE;
+		_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
+		switch (Type)
+		{
+		case SHPT_POINT:
+		case SHPT_POINTZ:
+			GetGlobalCVal("[%DefaultSQLITEPointSymbol]", SQLITEParms, "CIRCLE");
+			pWidth = _fstrchr(SQLITEParms, 0) + 4;
+			GetGlobalCVal("[%DefaultSQLITEPointSize]", pWidth, "-5");
+			break;
+
+		case SHPT_ARC:
+		case SHPT_ARCZ:
+		case SHPT_ARCM:
+			//case shapePolylineM:
+			//case shapePolylineZM:
+		case shapePolylineZ:
+			GetGlobalCVal("[%DefaultSQLITELineSymbol]", SQLITEParms, "PEN1");
+			break;
+
+		case 4://personalgeodb area type???
+		case SHPT_TEXT:
+		case SHPT_POLYGON:
+		case SHPT_POLYGONM:
+		case SHPT_POLYGONZ:
+		case SHPT_PGDB_POLYGONZ:
+			//case shapePolygonM:
+			//case shapePolygonZM:
+			//case shapePolygonZ:
+			GetGlobalCVal("[%DefaultSQLITEAreaSymbol]", SQLITEParms, "PARCEL");
+			break;
+		}
+		if (!SQLITEOpenPrj(SQLITEFileName, 0))
+		{
+			GetGlobalCVal("[%DefaultSQLITEProjection]", Projection, "LATLONG");
+			LoadProjection(0, Projection);
+		}
+		else
+			havePrj = TRUE;
+		GetGlobalCVal("[%DefaultSQLITEUnits]", Units, "DEGREES");
+		if (!_fstricmp(Units, "FEET"))
+		{
+			PRJ_UNITS[0] = 1;
+		}
+		else if (!_fstricmp(Units, "METERS"))
+			PRJ_UNITS[0] = 2;
+		else
+			PRJ_UNITS[0] = 4;
+		SQLITEBaseRefno = 0;
+		*SQLITERefno = 0;
+		strcpy(Name, SQLITEFileName);
+		pDot = _fstrrchr(Name, '.');
+		if (!pDot)
+			goto RtnFalse;
+		_fstrcpy(pDot, ".slp");
+		Fid = GSSiOpenFile(Name, 0, OF_READ);
+		if (Fid == HFILE_ERROR)
+		{
+			FARPROC lpfnSETSHAPEPARAMMsgProc;
+
+			_fstrcpy(LastSQLITEFile, SQLITEFileName);
+			ExpandText(LastSQLITEFile);
+			if (!Type || !GetGlobalBVal2("[%AUTOSQLITEPARM]", TRUE))
+				goto RtnFalse;
+			goto RtnTrue;
+			{
+				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETSHAPEPARAMMsgProc, hInst);
+				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
+				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
+				Fid = GSSiOpenFile(Name, 0, OF_READ);
+				if (Fid == HFILE_ERROR)
+					goto RtnFalse;
+			}
+		}
+		GSSifstat(Fid, &statParmFile);
+		SQLITEParmTime = statParmFile.st_mtime;
+		fgetstring(Projection, MAX_PATH, Fid);
+		if (!havePrj)
+		{
+			if (!*Projection)
+				GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+			LoadProjection(0, Projection);
+		}
+		SQLITEProjectionIsBase = IS_BASE[0];
+		fgetstring(Units, 32, Fid);
+		if (!*Units)
+			GetGlobalCVal("[%DefaultShapeUnits]", Units, "FEET");
+		if (!havePrj)
+		{
+			if (!_fstricmp(Units, "FEET"))
+				PRJ_UNITS[0] = 1;
+			else if (!_fstricmp(Units, "METERS"))
+				PRJ_UNITS[0] = 2;
+			else
+				PRJ_UNITS[0] = 4;
+		}
+		fgetstring(SQLITERefno, 255, Fid);
+		if (IndexEntryStartRef != LONG_MAX)
+			SQLITEBaseRefno = IndexEntryStartRef;
+		else
+			SQLITEBaseRefno = atol(SQLITERefno);
+		fgetstring(SQLITETAG, 99, Fid);
+		fgetstring(str, 32, Fid);
+		SHPIndexType = atoi(str);
+		_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
+		while (fgetstring(str, 256, Fid))
+		{
+			if (*str == '#')
+				break;
+			DecodeSHPParam(str, SymName, cIF, cColor, cWidth, cRot);
+			_fstrcpy(pParm, SymName);
+			l = _fstrlen(SymName);
+			pParm += l + 1;
+			_fstrcpy(pParm, cIF);
+			l = _fstrlen(cIF);
+			pParm += l + 1;
+			_fstrcpy(pParm, cColor);
+			l = _fstrlen(cColor);
+			pParm += l + 1;
+			_fstrcpy(pParm, cWidth);
+			l = _fstrlen(cWidth);
+			pParm += l + 1;
+			_fstrcpy(pParm, cRot);
+			l = _fstrlen(cRot);
+			pParm += l + 1;
+			NumSQLITEParms++;
+			switch (Type)
+			{
+			default:
+			case SHPT_POINT:
+			case SHPT_POINTZ:
+			case SHPT_MULTIPOINT:
+				itype = 1;
+				break;
+			case SHPT_ARC:
+				itype = 2;
+				break;
+			case SHPT_POLYGON:
+				itype = 3;
+			}
+			if (!GetOrCreateSym(hWnd, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), itype))
+			{
+				ExpandText(SymName);
+				MessageBox(0, "Symbol not found", SymName, MB_ICONEXCLAMATION);
+			}
+		}
+		//CreateSHPSymlistFile(SHPFileName, NumSHPParms, SymName); could speed up file gdb and shp processing for multiple symbol files when symbol name contained in a variable
+		if (fgetstring(str, 256, Fid))
+			_fstrcpy(SQLITEBeginDate, str);
+		if (fgetstring(str, 256, Fid))
+			_fstrcpy(SQLITEEndDate, str);
+
+		GSSiClose(Fid);
+	RtnTrue:
+		{
+#if ENABLETRACE
+			GSSiExitProg(1374);
+#endif
+			return TRUE;
+		}
+	RtnFalse:
+		{
+#if ENABLETRACE
+			GSSiExitProg(1374);
+#endif
+			return FALSE;
+		}
+#if ENABLETRACE
+	}
+#endif
 }
 

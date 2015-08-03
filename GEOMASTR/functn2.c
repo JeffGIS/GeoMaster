@@ -1826,9 +1826,9 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		}
 		
-		case 917:	//$FINDFILES(Dir,wildcard,outfile (opt),WantSub,HeaderRecord)
+		case 917:	//$FINDFILES(Dir,wildcard,outfile (opt),WantSub,HeaderRecord,sort(TORF))
 		{
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;
 			if (*Arg[3])
@@ -1842,7 +1842,66 @@ GSSiExitProg (1350);
 			nlong = 0;
 			SearchFilesInDir (Arg[1],0, Fid,&nlong,Arg[2],1,atob(Arg[4]),TRUE);
 			if (Fid != HFILE_ERROR)
-				GSSiClose (Fid);
+			{
+				if (atob(Arg[6]))
+				{
+					BTVARDESC	BTVar[2];
+					HANDLE	hBTTemp;
+					HANDLE hTmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAX_PATH);
+					LPSTR pTempFile = GlobalLock(hTmp);
+					HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+					LPSTR pLine = GlobalLock(hLine);
+					int offset=0;
+					int pos = BT_FIRST;
+					char sortedFile[MAX_PATH];
+					
+					sprintf (sortedFile,"%s.srt", Arg[3]);
+					Fid2 = GSSiOpenFile(sortedFile, 0, OF_CREATE);
+
+					GSSillseek(Fid, 0, 0);
+					GSSiGetTempFileName(0, "gma", 0, pTempFile);
+
+					BTVar[0].BT_VARTYP = BT_CHAR;
+					BTVar[0].BT_VARLEN = 128;
+					BTVar[0].BT_VAROFF = 0;
+					BT_CREATE(pTempFile, 4, FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+					hBTTemp = BT_OPEN(pTempFile, 0, BT_WRITE, 0);
+					fgetstring(pLine, 4090, Fid);
+					offset = GSSillseek(Fid, 0, 1);
+					while (fgetstring(pLine, 4090, Fid))
+					{
+						LPSTR pTab = strchr(pLine, '\t');
+						if (pTab)
+							*pTab = 0;
+						pTab = strrchr(pLine, '\\');
+						if (pTab)
+							pTab++;
+						else
+							pTab = pLine;
+						BT_PUT(hBTTemp, pTab, (LPSTR)&offset);
+						offset = GSSillseek(Fid, 0, 1);
+					}
+					GSSillseek(Fid, 0, 0);
+					fgetstring(pLine, 4090, Fid);
+					fputstring(pLine, Fid2);
+					while (!BT_FIND(hBTTemp, pLine, pos, BT_ANY, (LPSTR)&offset))
+					{
+						pos = BT_NEXT;
+						GSSillseek(Fid, 0, offset);
+						fgetstring(pLine, 4090, Fid);
+						fputstring(pLine, Fid2);
+					}
+					GSSiClose(Fid2);
+					GSSiClose(Fid);
+					Fid = HFILE_ERROR;
+					GSSiRemove(Arg[3]);
+					GSSiRename(sortedFile, Arg[3]);
+					BT_CLOSEANDDELETE(&hBTTemp);
+					GSSiGlobUlFree(&hLine);
+					GSSiGlobUlFree(&hTmp);
+				}
+				GSSiClose(Fid);
+			}
 			ltoa (nlong,OutLoc,10);
 			goto Rtnl; 
 					      
@@ -4143,7 +4202,7 @@ GSSiExitProg (1350);
 	            FreeProcInstance(lpfnBUILDXFERFILEMsgProc);
 	            RunTransferFileCommand ();
 	        }
-			else if (!_fstricmp (Arg[1],"LOAD"))
+			else if (!_fstricmp(Arg[1], "LOAD") || !_fstricmp(Arg[1], "VIEW"))
 			{
 	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((FARPROC)LOADXFERFILEMsgProc, hInst);
 	            st = DialogBox(hInst, (LPSTR)"XFERFILELOAD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);

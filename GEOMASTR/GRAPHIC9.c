@@ -3216,7 +3216,10 @@ void CreateFileTran (LPMINMAX MinMax,LPMNMXCORD pMinMaxCoord)
 		CreateBaseToVPTran (CurView->DrawRect);  
 	 for (i=0;i<4;i++)
 	 	TRANS2 (XBASE[i],YBASE[i],&XWIN[i],&YWIN[i],CurView->hTranBaseToVP); 
-     hTranFileToBase = STRAN2 (1620,XFILE,YFILE,XBASE,YBASE,4,&RSQMIN,1,0);
+	 CloseTRANS2(&hTranFileToBase);
+	 CloseTRANS2(&hTranBaseToFile);
+	 CloseTRANS2(&hTranFileToVP);
+	 hTranFileToBase = STRAN2(1620, XFILE, YFILE, XBASE, YBASE, 4, &RSQMIN, 1, 0);
      hTranBaseToFile = STRAN2 (1621,XBASE,YBASE,XFILE,YFILE,4,&RSQMIN,1,0); 
      hTranFileToVP  = STRAN2 (1622,XFILE,YFILE,XWIN,YWIN,4,&RSQMIN,1,0);
      return;

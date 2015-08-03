@@ -2532,7 +2532,17 @@ SetVis:
 			goto Rtnrtn;
 		}
 
-		case 401: /* $ZOOM(HLT,hltnum,offset,fromlimits,immediate)   
+		case 358://$TIN(EXPORT,File)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			GSSiClose(FidTINExtract);
+			FidTINExtract = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+			if (FidTINExtract == HFILE_ERROR)
+				goto RtnFalse;
+			goto RtnTrue;
+		}
+
+		case 401: /* $ZOOM(HLT,hltnum,offset,fromlimits,immediate)
 						   ITEM,TAG or Refno,area offset,viewport offset,immediate,vpname(opt))	
 					 	   RECT,minx,miny,maxx,maxy)
 					 	   COOR,xcor,ycor)			 

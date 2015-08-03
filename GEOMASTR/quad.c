@@ -313,15 +313,20 @@ BOOL FindNextSegment (void)
 	    	goto RtnTrue; 
 	    
 		case MT_GMD:
-	    	if (FidMap == HFILE_ERROR)
-	    		goto RtnFalse;
-	    	CurrentGMDRec = NextGMDRec; 
-	    	GMDRecOffset = GetGMDRecordOffset (CurrentGMDRec,TRUE);  
-	    	NextGMDRec = CurrentGMDRec + 1;
-	    	if (GMDRecOffset < 0)
-	    		goto RtnFalse;
-	    	goto RtnTrue; 
-	    
+			if (FidMap == HFILE_ERROR)
+				goto RtnFalse;
+			CurrentGMDRec = NextGMDRec;
+			GMDRecOffset = GetGMDRecordOffset(CurrentGMDRec, TRUE);
+			NextGMDRec = CurrentGMDRec + 1;
+			if (GMDRecOffset < 0)
+				goto RtnFalse;
+			goto RtnTrue;
+
+		case MT_SQLITE:
+			if (GetNextSQLITERecord(&CurView->WBounds))
+				goto RtnTrue;
+			goto RtnFalse;
+
 		case MT_DGN7:
     		if (ReadNextDGNRecord (&CurView->WBounds))
 	    		goto RtnTrue; 
