@@ -37,7 +37,9 @@ BOOL SetInternetErrorVar (LPSTR errorVarName)
 	DWORD internetErr;
 	char errDesc[1024];
 	DWORD lenErrDesc=1024;
-	BOOL rc = InternetGetLastResponseInfo(&internetErr,errDesc,&lenErrDesc);
+	BOOL rc;
+	GetSystemErrMessage(GetLastError(), errDesc);
+	rc = InternetGetLastResponseInfo(&internetErr, errDesc, &lenErrDesc);
 	if (errorVarName && *errorVarName)
 	{
 		if (rc && lenErrDesc)
