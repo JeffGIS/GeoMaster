@@ -10940,13 +10940,14 @@ GSSiExitProg (351);
 #endif
 }
 
-LPSTR fgetstring (LPSTR lpStr, int len, HFILE Fid)
+LPSTR fgetstring (LPSTR lpStr, int lenIN, HFILE Fid)
 #if ENABLETRACE
 {GSSiEnterProg (352);
 #endif
 {   UINT   lrec;
     LPSTR lpEnd; 
     DWORD   loc; 
+	int len = abs(lenIN);
     
     *lpStr = 0;            
     loc = GSSillseek (Fid,0,1); 
@@ -10962,6 +10963,11 @@ GSSiExitProg (352);
     lpEnd = lpStr;
     while (lrec--)
     {
+		if (lenIN < 0)
+		{
+			if (*lpEnd == '\r' && *(lpEnd + 1) != '\n')
+				*lpEnd = ' ';
+		}
     	if (*lpEnd == '\r' || *lpEnd == '\n')
     		break;
     	lpEnd++;

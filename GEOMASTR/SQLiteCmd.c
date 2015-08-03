@@ -113,13 +113,14 @@ LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName)
 
 	if (db)
 	{
-		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0);
-
-		if (sqlite3_step(statement) == SQLITE_ROW)
+		if (sqlite3_prepare_v2(db, pCmd, -1, &statement, 0) == SQLITE_OK)
 		{
-			rtn = sqlite3_column_int(statement, 0);
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				rtn = sqlite3_column_int(statement, 0);
+			}
 		}
-		SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
+		sqlite3_finalize(statement);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -195,15 +196,20 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 
+		if (strstr(ARG[3], "34850-2"))
+			ii = 1;
 		db = (sqlite3*)atoi(ARG[2]);
 		if (fid != HFILE_ERROR)
 		{
 			HANDLE hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
 			LPSTR cmd = GlobalLock(hstr);
 			rtn = 1;
-			while (fgetstring(cmd, MAXSTR - 2, fid))
+			while (fgetstring(cmd, -(MAXSTR - 2), fid))
 			{
-				int err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
+				int err;
+				
+				//REPLAC(cmd, "/", "//", MAXSTR-2);
+				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
 				sqlite3_free(error);
 				if (err)
 				{
@@ -1076,10 +1082,10 @@ BOOL SetSQLITEVis(HWND hWndDlg, int DlgItemSym, int DlgItemPar, HFILE FidSymList
 	char	str[128];
 	short	idesc;
 
-	/*strcpy(str, GMDSymbol);
+	strcpy(str, SQLITESymbol);
 	ExpandText(str);
 	idesc = atol(str);
-	AddSymToList(hWndDlg, DlgItemSym, DlgItemPar, idesc, FidSymList);*/
+	AddSymToList(hWndDlg, DlgItemSym, DlgItemPar, idesc, FidSymList);
 	return TRUE;
 }
 BOOL SetSQLITEParms(void)
