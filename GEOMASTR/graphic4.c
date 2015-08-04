@@ -4219,7 +4219,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 			ProcessGMDRecord(hDC, (HANDLE)FidMap, CurrentGMDRec);
 			break;
 		case MT_SQLITE:
-			ProcessSQLITERecord(hDC, (HANDLE)FidMap, CurrentSQLITERec);
+			ProcessSQLITERecord(hDC);
 			break;
 		case MT_DGN7:
 			ProcessDGNRecord (hDC,CurrentDGNRec);
