@@ -4105,7 +4105,13 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	    	goto RtnFalse;
     	}
     }
-    else if (MapType == MT_HGF)
+	else if (MapType == MT_SQLITE)
+	{
+		CurView->PassID = 4;
+		CurrentSQLITERec = PickList[Item].Segment;
+		GetSQLITERecordBounds(CurrentSQLITERec, &PickList[Item].Rect);
+	}
+	else if (MapType == MT_HGF)
     {
 		int	nBytes4;
 
@@ -4210,8 +4216,11 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 			ProcessORARecord (hDC,FidMap,CurrentORARec); 
 		break;
 		case MT_GMD:
-			ProcessGMDRecord (hDC,(HANDLE)FidMap,CurrentGMDRec); 
-		break;
+			ProcessGMDRecord(hDC, (HANDLE)FidMap, CurrentGMDRec);
+			break;
+		case MT_SQLITE:
+			ProcessSQLITERecord(hDC, (HANDLE)FidMap, CurrentSQLITERec);
+			break;
 		case MT_DGN7:
 			ProcessDGNRecord (hDC,CurrentDGNRec);
 		break;

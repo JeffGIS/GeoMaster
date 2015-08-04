@@ -33,20 +33,23 @@ __int64 FTPGetFileSize (HANDLE hConnect)
 
 BOOL SetInternetErrorVar (LPSTR errorVarName)
 {
-	int ierr = GetLastError ();
+	int ierr = GetLastError (), lnerr;
 	DWORD internetErr;
-	char errDesc[1024];
-	DWORD lenErrDesc=1024;
+	char errDesc[4096];
+	DWORD lenErrDesc=4000;
 	BOOL rc;
 	GetSystemErrMessage(GetLastError(), errDesc);
-	rc = InternetGetLastResponseInfo(&internetErr, errDesc, &lenErrDesc);
+	lnerr = strlen(errDesc);
+	rc = InternetGetLastResponseInfo(&internetErr, strchr(errDesc,0), &lenErrDesc);
 	if (errorVarName && *errorVarName)
 	{
 		if (rc && lenErrDesc)
 		{
-			errDesc[min(1023,lenErrDesc)] = 0;
+			errDesc[min(1023,lnerr+lenErrDesc)] = 0;
 			SetGlobalValue (errorVarName,errDesc); 
 		}
+		else if (lnerr)
+			SetGlobalValue(errorVarName, errDesc);
 		else
 			SetGlobalValue (errorVarName,"No error description available"); 
 	}
@@ -124,7 +127,8 @@ HANDLE ListFtpDir(HANDLE hConnection,HANDLE hFind,LPSTR pWildCard,
 	  hFind = FtpFindFirstFile( hConnection, pWildCard,pdirInfo, dwFindFlags,0 );
 	  if (!hFind)
 	  {
-		  SetInternetErrorVar (errorVarName);
+		  if (GetLastError() != ERROR_NO_MORE_FILES)
+			SetInternetErrorVar(errorVarName);
 		  free (pdirInfo);
 		  return NULL;
 	  }

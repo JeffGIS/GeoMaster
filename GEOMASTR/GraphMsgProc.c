@@ -11274,7 +11274,11 @@ GSSiExitProg (1069);
 					TAGBox = SaveTAG; 
 					MainRect = SaveRect;
 		         }
-		         else
+				 else if (strstr(FullBM, ".TXT"))
+				 {
+
+				 }
+				 else
 				 {
 				 	DisplayBMFileInRect (hDC,FullBM,Rect,TRUE);
 					SetWindowText (hWndDlg,FullBM);
