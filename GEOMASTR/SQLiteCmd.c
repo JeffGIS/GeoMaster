@@ -8,7 +8,7 @@ static	char	SQLITEy[128] = "[SQLITE.y]";
 static	char	SQLITEStartTime[128] = "[SQLITE.BDate]";
 static	char	SQLITEEndTime[128] = "[SQLITE.EDate]";
 static	char	SQLITESymbol[128] = "$SYMNUM(WALLPOINT)";
-static	char	SQLITESize[128] = "5";
+static	char	SQLITESize[128] = "-10";
 static	char	SQLITETAG[128] = "CONTROLN:[SQLITE.Wall Id]", SQLITETag[128];//"CASENUM:[SQLITE.CaseNbr]";
 static	int		SQLITEXIndex = 1, SQLITEYIndex = 2;
 static	int		SQLITEXField = 7, SQLITEYField = 8;
@@ -1100,6 +1100,9 @@ BOOL SetSQLITEParms(void)
 	CurrentRefno = atol(str);
 	if (!SQLITEHandle)
 		return FALSE;
+	strcpy(str, SQLITESize);
+	ExpandText(str);
+	SQLITEPointSize = atol(str);
 	SetUseOnlyOneDBHandle(hSHPDBF);
 	pTAG = SQLITETAG;
 	if (*pTAG && (pC = _fstrchr(pTAG, ':')))
@@ -1295,6 +1298,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 			InGraphicsProcessor = TRUE;
 			HaveTXLoc = TRUE;
 			CurrentType = GF_POINT;
+			CurPointSize = SQLITEPointSize;
 			if (CurPointSize < 0)
 				CurPointSize = -CurPointSize * DeviceToScreenFactor;
 			else
