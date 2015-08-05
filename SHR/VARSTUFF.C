@@ -3424,6 +3424,9 @@ GSSiExitProg (532);
 		case 369:
 			literalChar = Value[0];
 			break;
+		case 372:
+			convertGMDUpdateCommas = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -3814,6 +3817,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%LITERALCHAR", 369, FALSE);
 	AllocateTypeVar("%SHAPEREC", 370, FALSE);
 	AllocateTypeVar("%DBFREC", 371, FALSE);
+	AllocateTypeVar("%CVTGMDUPDATECOMMAS", 372, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4937,6 +4941,9 @@ GSSiExitProg (533);
 			break;
 		case 371:
 			ltoa(CurrentDBFRec, OutStr, 10);
+			break;
+		case 372:
+			btoa(convertGMDUpdateCommas, OutStr);
 			break;
 
 	}

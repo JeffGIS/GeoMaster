@@ -1634,6 +1634,7 @@ GSSiExitProg (1350);
 				  // ex: $GMDUPDATE(file.gmd,KEY1=A;KEY2=B,FileID) updates all fields in file FileID that are in file.gmd
 		{	 
 			BOOL updateOnly;
+			GMDUpdateConvertCommas(Args);
 			nArgs = GetFunArgs(Args, Arg, -5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;  

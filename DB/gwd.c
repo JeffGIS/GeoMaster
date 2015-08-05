@@ -3041,6 +3041,28 @@ GSSiExitProg (634);
 #endif
 } 
 
+void GMDUpdateConvertCommas(LPSTR Args)
+{
+//converts commas in GMDUpdate update values
+	if (convertGMDUpdateCommas)
+	{
+		LPSTR pComma = MatchLev(Args, ',');
+
+		if (pComma)
+		{
+			pComma = MatchLev(pComma + 1, ',');
+			{
+				pComma++;
+				while ((pComma = MatchLev(pComma, ',')))
+				{
+					*pComma = '-';
+				}
+			}
+		}
+	}
+	return;
+}
+
 int UpdateGMDFile (LPSTR InFile,LPSTR KeyString,LPSTR UpdateStringIN,char Separator,BOOL Truncate,BOOL updateOnly)
 #if ENABLETRACE
 {GSSiEnterProg (635);

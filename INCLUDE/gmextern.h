@@ -925,6 +925,7 @@ extern int			gridSymbol;
 extern unsigned int			totContourPoints,trimmedContourPoints,maxContourPoints;
 extern float		removeContourSize, contourPointMergeDist, contourPointLinearSmooth;
 extern BOOL			displayOriginalContours;
+extern BOOL			convertGMDUpdateCommas;
 extern char			saveContoursDir[MAX_PATH];
 extern long			ORAType;
 extern long			NextORARec;  

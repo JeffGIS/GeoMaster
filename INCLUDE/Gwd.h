@@ -39,6 +39,7 @@ BOOL GetGMDUniqueFieldValues (HANDLE DBhandle, LPCSTR SQL,int fieldindex, HANDLE
 int  GWDAddRecord (LPGWDHEADER lpGWDHead,long length, LPSHORT IndexArray); 
 int  GWDReplaceRecord (LPGWDHEADER lpGWDHead,long length,LPSHORT IndexArray, long Offset);
 BOOL GWDDeleteRecord (LPGWDHEADER lpGWDHead,long Offset);
+void GMDUpdateConvertCommas(LPSTR Args);
 int  UpdateGMDFile (LPSTR File,LPSTR KeyString,LPSTR UpdateString,char Separator,BOOL Truncate,BOOL updateOnly);
 BOOL FindGMDRecord (LPSTR File,LPSTR KeyString,LPSTR SetValString,short MinMatchChar,short index);
 BOOL GMDCopyRecord (LPSTR File,LPSTR FromKeyString,LPSTR ToKeyString);

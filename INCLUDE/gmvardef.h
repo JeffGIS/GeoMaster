@@ -562,6 +562,7 @@ int		gridSymbol=0;
 unsigned int		totContourPoints=0,trimmedContourPoints, maxContourPoints=10000;
 float		removeContourSize=0, contourPointMergeDist=0, contourPointLinearSmooth=0;
 BOOL	displayOriginalContours=FALSE;
+BOOL	convertGMDUpdateCommas = FALSE;
 char	saveContoursDir[MAX_PATH];
 long	ORAType;
 long	NextORARec;  
