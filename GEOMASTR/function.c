@@ -973,6 +973,8 @@ GSSiExitProg (1348);
 				
 				if (CurReport->WantSize)
 					factor = 1.0;
+				else
+					ii = 1;
 				Tabloc = CurReport->Rect.left; 
 				i=0;
 				while (itab--)
@@ -984,6 +986,10 @@ GSSiExitProg (1348);
 					else
 						Tabloc += CurReport->TabLen[i-1]*factor;  
 				} 
+				if (CurReport->WantSize)
+					ii = 1;
+				else
+					ii = 2;
 				CurReport->x = Tabloc;
 			}
 			goto RtnTrue;

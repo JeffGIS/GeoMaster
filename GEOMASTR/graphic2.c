@@ -11,6 +11,71 @@ static LPVOID	PassiveFunPTR[32];
 static char	HighlightFile[144]="",HighlightFile2[144]="";  
 static DPOINT	LastDPoint;
 static POINT	LastPoint;
+#define MAX_PICK_BOX 32
+#define PICK_BOX_MACRO_LEN 512
+static int		numPickBoxes=0;
+static RECT		pickBoxRect[MAX_PICK_BOX];
+static int		pickBoxVPID[MAX_PICK_BOX];
+static char		pickBoxMacro[MAX_PICK_BOX][PICK_BOX_MACRO_LEN];
+
+BOOL PickBoxAdd(int VPID, RECT rect, LPSTR macro)
+{
+	BOOL rtn = FALSE;
+
+	if (numPickBoxes < MAX_PICK_BOX)
+	{
+		rtn = TRUE;
+		pickBoxRect[numPickBoxes] = rect;
+		pickBoxVPID[numPickBoxes] = VPID;
+		strncpy(pickBoxMacro[numPickBoxes++], macro, PICK_BOX_MACRO_LEN);
+	}
+	return rtn;
+}
+
+void PickBoxesDestroy(VPID)
+{
+	numPickBoxes = 0;
+}
+
+BOOL ProcessPickBoxes (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+#if ENABLETRACE
+{GSSiEnterProg (113);
+#endif
+{   int	i, ID, InfoBoxID;
+	short	VPID;
+	POINT	CursorPoint, CurrentPos;
+	LPVIEWPORT	SaveView = CurView;
+	static	HANDLE	hLastBox = 0;
+	char	str[256];
+	BOOL	rtn = FALSE;
+
+	if (!CurrentConfig || !HavePaint || CursorIsLocked)
+		goto Exit;
+	CursorPoint = POINTStoPOINT(MAKEPOINTS(lParam));
+	if (Message == WM_LBUTTONDOWN)
+	{
+		for (i = 0; i < numPickBoxes; i++)
+		{
+			if (PtInRect(&pickBoxRect[i], CursorPoint))
+			{
+				ProcessText(pickBoxMacro[i]);
+				rtn = TRUE;
+			}
+		}
+	}
+	Exit:
+	CurView = SaveView;
+{
+#if ENABLETRACE
+	GSSiExitProg(113);
+#endif
+	return rtn;
+}
+
+#if ENABLETRACE
+}
+#endif
+}
 
 
 BOOL ContinuePicking (BOOL QuitOnMMove)
@@ -552,6 +617,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 		        		if (Message == WM_LBUTTONUP)
 		        		{
 			        		CurView->Active = FALSE;
+							PickBoxesDestroy(CurView->ID);
 							if (CurView->DisplayedFullScreen)
 								MakeVPFullScreen (CurView->ID,0);
 						    CurView = SaveView;

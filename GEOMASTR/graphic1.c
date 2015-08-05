@@ -4992,11 +4992,11 @@ GSSiExitProg (56);
         if (!CurView->FitToWindow)
         {
             CurView->ReportFactor = DeviceToScreenFactor;
-            CurView->DrawRect = ReportRect; 
-			CurView->DrawRect.bottom *= DeviceToScreenFactor;
+           // CurView->DrawRect = ReportRect; 
+		   // CurView->DrawRect.bottom *= DeviceToScreenFactor;
 			//CurView->DrawRect.top *= DeviceToScreenFactor;
 			//CurView->DrawRect.left *= DeviceToScreenFactor;
-			CurView->DrawRect.right *= DeviceToScreenFactor;
+			//CurView->DrawRect.right *= DeviceToScreenFactor;
         }
         else
         { 

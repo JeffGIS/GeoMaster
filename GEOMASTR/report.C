@@ -1046,9 +1046,12 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 		ExpandText (FontStr);
     	OldFont = SelectObject(hDC, GetStockObject(SYSTEM_FONT));
     	SelectObject (hDC,OldFont);  
-    		
-		Margin = min (IDNINT(pReport->Margin * (Rect.bottom-Rect.top)), 
-					  IDNINT(pReport->Margin * (Rect.right-Rect.left)));
+    	
+		if (pReport->WantSize)
+			Margin = min(IDNINT(pReport->Margin * (Rect.bottom - Rect.top)),
+			IDNINT(pReport->Margin * (Rect.right - Rect.left)));
+		else
+			Margin = 0;
 		pReport->Rect.left += Margin;
 		pReport->Rect.top += Margin;
 		pReport->Rect.right -= Margin;

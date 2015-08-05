@@ -2496,6 +2496,8 @@ if (!DisableMarginPan &&
 		goto S10; 
 //if (HaveSeg) 
 {
+	if (ProcessPickBoxes(hWnd, Message, wParam, lParam))
+		goto Return0;
 	if (ProcessPassiveFunctions (hWnd,Message, wParam,lParam))
 		goto Return0;
 	if (Message == WM_CHAR)

@@ -4032,6 +4032,7 @@ GotCloseFilehSQL:
 		case 643: //$BITMAP(DISPLAY(onlyinreport),pathname,width,height)
 			{
 				float	width, height;
+				BOOL	wantPickBox;
 				HDIB32	hDIB32;
 				RECT	rect;
 				
@@ -4187,7 +4188,7 @@ GotCloseFilehSQL:
 					goto RtnFalse;
 				width = atof (Arg[3]);
 				height = atof (Arg[4]);
-				
+				wantPickBox = atob(Arg[5]);
 				hDIB32 = LoadDIB32(Arg[2],FALSE);
 				if (hDIB32)
 				{
@@ -4216,7 +4217,18 @@ GotCloseFilehSQL:
 					rect.right = rect.left + width;
 					rect.bottom = rect.top + height;
 					if (!CurReport->WantSize)
-						rtn = DisplayBMInRect32 (CurReport->hDC,hDIB32,rect,TRUE);
+					{
+						rtn = DisplayBMInRect32(CurReport->hDC, hDIB32, rect, TRUE);
+						if (wantPickBox)
+						{
+							char macro[MAX_PATH + 64];
+							int id = 0;
+							if (CurView)
+								id = CurView->ID;
+							sprintf(macro, "$WEB(%s)", Arg[2]);
+							PickBoxAdd(id, rect, macro);
+						}
+					}
 					else
 						rtn = TRUE;
 					DestroyDIB32 (hDIB32,FALSE);

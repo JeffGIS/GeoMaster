@@ -206,7 +206,7 @@ GSSiExitProg (1348);
 		    			p.x = x;
 		    			p.y = CurReport->y;
 		    			AddPointToRect (p,&CurReport->SizeRect);
-		    			p.x = CurReport->x;
+						p.x = CurReport->x;
 		    			p.y = CurReport->y+txSize.cy;
 		    			AddPointToRect (p,&CurReport->SizeRect);
 		    		}
