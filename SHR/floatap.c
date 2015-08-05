@@ -522,15 +522,23 @@ double fltread (LPSTR Instr, LPBOOL IRC)
 	    	if (!*IRC)
 	    		rtn = acos (val);
 	    }
-	    else if (!_fstrnicmp (str,"asin(",5))
-	    {
-	    	str+=5;
-	    	*lpEnd = 0;
-	    	val = FltAP (str,IRC);
-	    	if (!*IRC)
-	    		rtn = asin (val);
-	    }
-	    else if (!_fstrnicmp (str,"mod(",4))
+		else if (!_fstrnicmp(str, "asin(", 5))
+		{
+			str += 5;
+			*lpEnd = 0;
+			val = FltAP(str, IRC);
+			if (!*IRC)
+				rtn = asin(val);
+		}
+		else if (!_fstrnicmp(str, "atan(", 5))
+		{
+			str += 5;
+			*lpEnd = 0;
+			val = FltAP(str, IRC);
+			if (!*IRC)
+				rtn = atan(val);
+		}
+		else if (!_fstrnicmp(str, "mod(", 4))
 	    {
 	    	str+=4;
 	    	*lpEnd = 0;
