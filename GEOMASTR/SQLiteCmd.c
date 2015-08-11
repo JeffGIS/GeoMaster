@@ -174,10 +174,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	else if (!stricmp(ARG[1], "STARTTRANS"))
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		int err = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "",0);
-		if (!err)
+		if (db)
 		{
-			rtn = 1;
+			int err = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+			if (!err)
+			{
+				rtn = 1;
+			}
 		}
 	}
 	else if (!stricmp(ARG[1], "ENDTRANS"))
@@ -219,6 +222,58 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			}
 			GSSiGlobUlFree(&hstr);
 			GSSiClose(fid);
+		}
+	}
+	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd)
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		sqlite3_stmt *statement;
+
+		if (db)
+		{
+			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
+			{
+				if (sqlite3_step(statement) == SQLITE_ROW)
+					rtn = TRUE;
+				sqlite3_finalize(statement);
+			}
+		}
+	}
+	else if (!stricmp(ARG[1], "PREPARE"))//$SQLITE(PREPARE,sqlitehandle,cmd)returns statement address or 0
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		sqlite3_stmt *statement;
+
+		if (db)
+		{
+			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
+				rtn = (int)statement;
+		}
+	}
+	else if (!stricmp(ARG[1], "STEP"))//$SQLITE(STEP,statement) returns statement address or 0
+	{
+		sqlite3_stmt *statement = (sqlite3_stmt *)atoi(ARG[2]);
+		if (sqlite3_step(statement) == SQLITE_ROW)
+			rtn = TRUE;
+	}
+	else if (!stricmp(ARG[1], "FINALIZE"))//$SQLITE(STEP,statement) returns statement address or 0
+	{
+		sqlite3_stmt *statement = (sqlite3_stmt *)atoi(ARG[2]);
+		if (sqlite3_finalize(statement) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	else if (!stricmp(ARG[1], "COLUMN"))//$SQLITE(COLUMN,statement,icol,globalvarname)
+	{
+		sqlite3_stmt *statement = (sqlite3_stmt *)atoi(ARG[2]);
+		int irow = atoi(ARG[3]);
+		LPSTR pval;
+
+		pval = (LPSTR)sqlite3_column_text(statement, irow);
+		if (pval)
+		{
+			if (*ARG[4])
+				SetGlobalValue(ARG[4], pval);
+			rtn = TRUE;
 		}
 	}
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(ROWS,sqlitehandle,tablename,where clause)
