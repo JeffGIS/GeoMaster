@@ -15312,6 +15312,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 						{
 							LPSTR	pPar;
 
+							ExpandText(PltName);
 		         			FileListLoc = GSSillseek (FidFL,0,1);
 							if ((pPar = strrchr (PltName,'(')))
 							{
@@ -15420,6 +15421,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 						_fstrcpy (SubUDI,TAGKey.UDI);  
 						for (ifile=0;ifile<nfile;ifile++)
 						{
+							hTIDX[ifile] = 0;
 							if (st == 32)
 								continue;
 							if (ifile == 30)
