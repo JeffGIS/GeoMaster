@@ -3018,6 +3018,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							LPSTR	pPar;
 
 		         			FileListLoc = GSSillseek (FidFL,0,1);
+							ExpandText(PltName);
 							if ((pPar = strrchr (PltName,'(')))
 							{
 								*pPar = 0;//geofence entry
@@ -5338,6 +5339,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 					pPolyParts = (LPINT)GlobalLock(hSavePolyParts);
 					if (FirstLoop)
 					{
+						*phPoints = hSavePoly;
 						nLoops = *pPolyParts++;
 						*phPolyPartLen = hSavePolyParts;
 						GlobalUnlock(hSavePolyParts);
