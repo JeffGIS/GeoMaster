@@ -2394,7 +2394,8 @@ BOOL IsSQLITEFileVisible(void);
 BOOL LoadSQLITEParm(LPSTR SHPFileName, long Type, HWND hWnd);
 BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds);
 BOOL GetSQLITERecord(LONGLONG SQLITERec);
-
+char *EncodeString(LPDPOINT llpoints, int numPoints);
+LPDPOINT DecodeString(char *encodedString, int *numPoints);
 
 
 
