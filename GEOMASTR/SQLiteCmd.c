@@ -885,6 +885,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							BOOL canCompress=TRUE;
 							int  np = nPnts;
 							int  nLops;
+							double maxd = 0;
 
 							if (!skipConvert)
 								ConvertBounds(pBounds, 1, 2);
@@ -925,7 +926,40 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								np = -nPnts;
 							}
 							else
+							{
+								LPSTR googlestr;
+								int googleln, blobln;
+								//char str[256];
+								LPDPOINT pNewPt = malloc(sizeof(DPOINT)*nPnts + 4);
+								maxd = 0;
 								blobPoints = PointsToBlob(pPoints, nPnts);
+								blobln = strlen(blobPoints);
+
+								/*for (i = 0; i < nPnts; i++)
+								{
+									sprintf(str, "%f\t%f", pDPoints[i].x, pDPoints[i].y);
+									AppendFile("c:\\temp\\compress.txt", str);
+								}*/
+								googlestr = EncodeString(pDPoints, nPnts);
+								//AppendFile("c:\\temp\\compress.txt", googlestr);
+								googleln = strlen(googlestr);
+								pNewPt = DecodeString(googlestr, &nPnts);
+								for (i = 0; i < nPnts; i++)
+								{
+									double dist = ArcDistance(pDPoints[i], pNewPt[i]);
+									if (dist > 10)
+										ii = 1;
+									maxd = max(dist, maxd);
+								}
+								/*for (i = 0; i < nPnts; i++)
+								{
+									sprintf(str, "%f\t%f", pNewPt[i].x, pNewPt[i].y);
+									AppendFile("c:\\temp\\compress.txt", str);
+								}
+								ii = 1;*/
+								free(googlestr);
+								free(pNewPt);
+							}
 							nLops = nLoops;
 							if (skipConvert)
 								nLops = -nLoops;
