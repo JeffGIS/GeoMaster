@@ -242,6 +242,7 @@ GSSiExitProg (1348);
 						or	(GETCLASS,vp name,value,activeclassesonly)
 						or	(GEOCENTER,DISPLAY,vp name)
 						or	(GEOCENTER,GET,vp name,class)
+						or	(CLASSCOUNT,SET,vp name,class,count)
 						or	(SHOWCLASSMEMBERS,vp name,classno,POINT or FLASH,fromPt,ALL or STEP,macro)
 						*/
 		{	 
@@ -266,27 +267,51 @@ GSSiExitProg (1348);
 				SetCurView ( SaveVP);
 				goto Rtnrtn;
 			}
-			else if (!_fstrcmp (Arg[1],"GEOCENTER")) 
-			{   
-				SetCurView ( SetVPFromName (Arg[3],&Err));
+			else if (!_fstrcmp(Arg[1], "GEOCENTER"))
+			{
+				SetCurView(SetVPFromName(Arg[3], &Err));
 				if (!Err && CurView->pTheme)
 				{
-					if (!stricmp (Arg[2],"DISPLAY"))
-						rtn = DisplayThemeGeoCenters (CurView->pTheme);
+					if (!stricmp(Arg[2], "DISPLAY"))
+						rtn = DisplayThemeGeoCenters(CurView->pTheme);
 					else
 					{
-						Point = ComputeThemeClassGeoCenter (CurTheme,atoi (Arg[4]));
-						dpointtoa (OutLoc,&Point);
-						SetCurView ( SaveVP);
+						Point = ComputeThemeClassGeoCenter(CurTheme, atoi(Arg[4]));
+						dpointtoa(OutLoc, &Point);
+						SetCurView(SaveVP);
 						goto Rtnl;
 					}
 				}
 				else
-					rtn = FALSE;   
-				SetCurView ( SaveVP);
+					rtn = FALSE;
+				SetCurView(SaveVP);
 				goto Rtnrtn;
 			}
-			else if (!_fstrcmp (Arg[1],"ACT")) 
+			else if (!_fstrcmp(Arg[1], "CLASSCOUNT"))
+			{
+				SetCurView(SetVPFromName(Arg[3], &Err));
+				if (!Err && CurView->pTheme)
+				{
+					if (!stricmp(Arg[2], "SET"))
+					{
+						int iclass = atoi(Arg[4]);
+						int count = atoi(Arg[5]);
+						CurView->pTheme->ClassCount[iclass] = count;
+						goto RtnTrue;
+					}
+					else
+					{
+						int iclass = atoi(Arg[4]);
+						itoa(CurView->pTheme->ClassCount[iclass], OutLoc, 10);
+						goto Rtnl;
+					}
+				}
+				else
+					rtn = FALSE;
+				SetCurView(SaveVP);
+				goto Rtnrtn;
+			}
+			else if (!_fstrcmp(Arg[1], "ACT"))
 			{   
 				SetCurView ( SetVPFromName (Arg[2],&Err));
 				if (!Err && CurView->pTheme)

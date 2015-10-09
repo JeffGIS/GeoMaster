@@ -1,3 +1,4 @@
+basic1.gmd /WD K:\BUPolice\Mpls\
 projects\AlleyWalls\WallPoints.GMC /WD j:\BU_2015_01_16\GEOMas
 configs\exportsewer.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
 police\configs\startup_2015.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
@@ -143,6 +144,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 
