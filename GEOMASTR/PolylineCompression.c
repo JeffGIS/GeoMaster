@@ -3,6 +3,9 @@
 
 #include "graphint.h"   
 
+//  PolylineCompression.c
+//  CCodeLibrary
+
 
 char *EncodeString(LPDPOINT llpoints, int numPoints)
 {
@@ -17,11 +20,8 @@ char *EncodeString(LPDPOINT llpoints, int numPoints)
 	{
 		DPOINT point = llpoints[i];
 
-		double rLat = roundf(point.y * 1e+5);
-		double rLng = roundf(point.x * 1e+5);
-
-		int newLat = (int)(rLat);
-		int newLng = (int)(rLng);
+		int newLat = (int)(point.y * 1e+6);
+		int newLng = (int)(point.x * 1e+6);
 
 		dlat = (newLat - oldLat);
 		dlng = (newLng - oldLng);
@@ -109,8 +109,8 @@ LPDPOINT DecodeString(char *encodedString, int *numPoints)
 		double dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
 		lng += dlng;
 
-		double finalLat = (lat * 1e-5);
-		double finalLong = (lng * 1e-5);
+		double finalLat = (lat * 1e-6);
+		double finalLong = (lng * 1e-6);
 
 		if (nPoints >= maxSize)
 			llpoints = realloc(llpoints, ((sizeof(DPOINT) * (nPoints + 1)) + 4));
