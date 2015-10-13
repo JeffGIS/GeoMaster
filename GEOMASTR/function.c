@@ -3387,8 +3387,12 @@ SetVis:
 			char SSID[40];
 			char ipAddress[32];
 			GUID Guid;
-
-			{
+			BOOL TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
+			
+			int n = TestSQLiteCrimes(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
+			itoa(n, OutLoc, 10);
+			goto Rtnl;
+			/*{
 #include "colorsByName.h"
 				HDC hDC = CurView->hDC;
 				float w = RECTWIDTH(&CurView->DrawRect)/7.0;
@@ -3413,7 +3417,7 @@ SetVis:
 				GM32SaveBitmap(hbmp, "c:\\temp\\colormap.bmp", 0, 0);
 				DeleteObject(hbmp);
 
-			}
+			}*/
 			/*netAdaptTest();
 			wlanGetCurrentSSID(SSID, sizeof(SSID), &Guid);
 			getipAddressForAdapter(ipAddress,&Guid);
