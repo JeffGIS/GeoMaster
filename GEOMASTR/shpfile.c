@@ -98,6 +98,54 @@ typedef SHPINDEXRECORD	FAR	*LPSHPINDEXRECORD;
 static int minx=458000, miny=4989900, midx=464380, midy=4995700, nrows=0, ncols=0, iwidth=1160, nfiles;
 static RECT ScreenRect;
 
+sqlite3 * NVShapeIndexCreate(LPSTR IndexNameIN)
+{
+	char IndexName[MAX_PATH];
+	char cmd[256];
+	int rtn;
+	sqlite3 * db=NULL;
+	LPSTR pDot;
+
+	return db;
+	strcpy(IndexName, IndexNameIN);
+	if ((pDot = strrchr(IndexName, '.')))
+	{
+		strcpy(pDot, ".nvi");
+		GSSiRemove(IndexName);
+		rtn = sqlite3_open(IndexName, &db);
+		if (rtn == SQLITE_OK)
+		{
+			rtn = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+			sprintf(cmd, "CREATE TABLE SHAPEINDEX (OFFSET INT PRIMARY KEY, SymNum INT);");
+			rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
+			sprintf(cmd, "CREATE VIRTUAL TABLE SHAPEINDEX_index USING rtree(id,minX, maxX, minY, maxY);");
+			rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
+		}
+	}
+	return db;
+}
+
+int NVShapeIndexAdd(sqlite3 * db, long long SHPRecOffset, LPMNMXCORD pBounds, int symnum)
+{
+	char cmd[256];
+	int rtn;
+	return 0;
+	sprintf(cmd, "INSERT INTO SHAPEINDEX VALUES(%li,%i)", SHPRecOffset, symnum);
+	rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
+	sprintf(cmd, "INSERT INTO SHAPEINDEX_index VALUES(%lli,%f,%f,%f,%f)", SHPRecOffset, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+	rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
+	return rtn;
+}
+
+int NVShapeIndexClose(sqlite3 * db)
+{
+	int rtn;
+	return 0;
+	rtn = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+	rtn = sqlite3_close(db);
+	return rtn;
+}
+
 BOOL OpenSHPFile (LPSTR SHPFileName)
 {
 	int	i;
@@ -895,7 +943,8 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	BOOL	ValidRec; 
 	char	Name[MAX_PATH]; 
 	LPSTR	pName;
-	
+	sqlite3 *db;
+
 	NumIndexSyms = 0;
 	RecsPerBlock = 1+NumSHPRecs/(NumIndexBlocks-1);
 	
@@ -914,6 +963,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	SHPIndexType = 0;  
 	CurView->PassID = 4;
 	FidIdx = GSSiOpenFile (IndexName,0,OF_CREATE);
+	db = NVShapeIndexCreate(IndexName);
 	BigWrite (FidIdx,(HPSTR)&Version,2,-1); 
 	BigWrite (FidIdx,(HPSTR)&NumIndexBlocks,4,-1); 
 	BigWrite (FidIdx,(HPSTR)&RecsPerBlock,4,-1); 
@@ -950,6 +1000,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 			IndexRecord.Offset = -1;
 		}
 		BigWrite (FidIdx,(HPSTR)&IndexRecord,sizeof(IndexRecord),-1); 
+		NVShapeIndexAdd(db, SHPRecOffset, &Bounds, IndexRecord.SymNum);
 //		ltoa (CurrentSHPRec,txt,10);
 		if (!(pName = strrchr (SHPFileName,'\\')))
 			pName = SHPFileName;
@@ -966,6 +1017,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	BigWrite (FidIdx,(HPSTR)BlockMinMax,NumIndexBlocks*sizeof(mnmxCor),-1);
 	GSSiClose (Fid);   
 	GSSiClose (FidIdx);
+	NVShapeIndexClose(db);
 	FidIdx = GSSiOpenFile (IndexName,0,OF_READ);  
 	SHPIndexType = SaveIndexType;
 	GSSiGlobUlFree (&hIndexBlocks);

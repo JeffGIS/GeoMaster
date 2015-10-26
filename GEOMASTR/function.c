@@ -3384,14 +3384,14 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			char SSID[40];
+/*			char SSID[40];
 			char ipAddress[32];
 			GUID Guid;
 			BOOL TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
 			
 			int n = TestSQLiteCrimes(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
 			itoa(n, OutLoc, 10);
-			goto Rtnl;
+			goto Rtnl;*/
 			/*{
 #include "colorsByName.h"
 				HDC hDC = CurView->hDC;
