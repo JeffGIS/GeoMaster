@@ -1,3 +1,4 @@
+configs\jeff\manholes.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
 basic1.gmc /WD K:\BUPolice\Mpls\
 projects\AlleyWalls\WallPoints.GMC /WD j:\BU_2015_01_16\GEOMas
 configs\exportsewer.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
@@ -144,6 +145,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 
