@@ -1047,6 +1047,217 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				GSSiGlobUlFree(&hCmd);
 			}
 		}
+
+		else if (!stricmp(ARG[1], "GMMOBILE"))//$SQLITE(GMMOBILE, outfile, datadeffile, dupfile, cenblockfile)
+		{
+			short	pos = BT_FIRST;
+			long	Refno;
+			HIGHLIGHTDATA	HighlightData;
+			long	nPnts;
+			HANDLE	hPoly;
+			HANDLE  hPolyPartLen;
+			HPDPOINT	pPoints;
+			int nLoops;
+			LPINT pPartLen;
+			HFILE Fid;
+			int nRecs = BT_NUM_IN_INDEX(hHighlight), nLoaded = 0;
+			int keepGoing = 1;
+			int nCanCompress = 0, nTotal = 0;
+			LPSTR pSpace;
+			BOOL createFile, createTables = TRUE;
+			int wantType = 3;
+			double coordFactor = COORDINATE_FACTOR;
+			char TableName[] = "PARCELAREA";
+
+			if (createFile)
+				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
+			else
+				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+			if (Fid != HFILE_ERROR)
+			{
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 32);
+				LPSTR  pCmd = GlobalLock(hCmd);
+
+				GSSillseek(Fid, 0, 2);
+				sprintf(pCmd, "Extract Table %s", ARG[4]);
+				CreateStatusWind(hWndMain, 1, pCmd);
+				if (createTables)
+				{
+					sprintf(pCmd, "DROP TABLE IF EXISTS %s;", ARG[4]);
+					fputstring(pCmd, Fid);
+					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
+					fputstring(pCmd, Fid);
+
+					{
+						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
+						fputstring(pCmd, Fid);
+					}
+					sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PIN,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i), Data BLOB(%i));", TableName, BLOB_MAX, BLOB_MAX * 8, BLOB_MAX);
+					fputstring(pCmd, Fid);
+					sprintf(pCmd, "CREATE INDEX %sPIN_Index ON %s ('PIN' ASC);", TableName);
+					fputstring(pCmd, Fid);
+				}
+
+				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+				{
+					char UDI[80];
+					char Arg7Val[256];
+					char addFieldVals[1024] = { 0 };
+
+					if (Refno == 80002608)
+						ii = 1;
+					if (atob(ARG[10]))
+						strcpy(addFieldVals, ",0");
+					for (int i = 11; i < 16; i += 2)
+					{
+						if (!*ARG[i])
+							break;
+						if (strstr(ARG[i], "CHAR("))
+							sprintf(strchr(addFieldVals, 0), ",'%s'", ARG[i + 1]);
+						else
+							sprintf(strchr(addFieldVals, 0), ",%s", ARG[i + 1]);
+					}
+
+					strcpy(Arg7Val, ARG[7]);
+					if (!stricmp(Arg7Val, "[UDI]"))
+					{
+						strcpy(Arg7Val, HighlightData.PD.UDI);
+						REPLAC(Arg7Val, "'", "''", 80);
+					}
+					if (!stricmp(ARG[5], "SYMBOLNAME"))
+					{
+						GetSymbolName(HighlightData.PD.Desc, UDI, 0, 0, 0);
+					}
+					else
+					{
+						strcpy(UDI, HighlightData.PD.UDI);
+						REPLAC(UDI, "'", "''", 80);
+					}
+					pos = BT_NEXT;
+					if (HighlightData.PD.Type == wantType && strlen(UDI)>0)
+					{
+						if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly, &hPolyPartLen)))
+						{
+							LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
+							DPOINT midPt;
+							HPDPOINT pDPoints;
+							HPPOINT  pPoints;
+							LPSTR blobPoints, blobParts;
+							HANDLE hPoints;
+							BOOL canCompress = TRUE;
+							int  np = nPnts;
+							int  nLops;
+							double maxd = 0;
+
+							//if (!skipConvert)
+								ConvertBounds(pBounds, 1, 2);
+							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+							//if (!skipQuadIndex)
+								fputstring(pCmd, Fid);
+							if (nLoops > 1)
+							{
+								pPartLen = GlobalLock(hPolyPartLen);
+								pPartLen++;//first is npoly
+								blobParts = (LPSTR)BytesToBlob((LPBYTE)pPartLen, nLoops*sizeof(int));
+								GlobalUnlock(hPolyPartLen);
+							}
+							pDPoints = (HPDPOINT)(pBounds + 1);
+							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+							pPoints = GlobalLock(hPoints);
+							midPt = MinMaxMidPointD(pBounds);
+							nTotal++;
+							for (i = 0; i < nPnts; i++)
+							{
+								//if (!skipConvert)
+									ConvertCoord(&pDPoints[i], 1, 2);
+								pPoints[i].x = coordFactor * (pDPoints[i].x - midPt.x);
+								pPoints[i].y = coordFactor * (pDPoints[i].y - midPt.y);
+								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
+									canCompress = FALSE;
+							}
+							if (canCompress)
+							{
+								LPPOINTS pShortPoints = malloc(nPnts*sizeof(POINTS) + 4);
+								for (i = 0; i<nPnts; i++)
+								{
+									pShortPoints[i].x = pPoints[i].x;
+									pShortPoints[i].y = pPoints[i].y;
+								}
+								blobPoints = (LPSTR)BytesToBlob((LPBYTE)pShortPoints, nPnts*sizeof(POINTS));
+								free(pShortPoints);
+								np = -nPnts;
+							}
+							else
+							{
+								LPSTR googlestr;
+								int googleln, blobln;
+								//char str[256];
+								LPDPOINT pNewPt = malloc(sizeof(DPOINT)*nPnts + 4);
+								maxd = 0;
+								blobPoints = PointsToBlob(pPoints, nPnts);
+								blobln = strlen(blobPoints);
+
+								/*for (i = 0; i < nPnts; i++)
+								{
+								sprintf(str, "%f\t%f", pDPoints[i].x, pDPoints[i].y);
+								AppendFile("c:\\temp\\compress.txt", str);
+								}*/
+								googlestr = EncodeString(pDPoints, nPnts);
+								//AppendFile("c:\\temp\\compress.txt", googlestr);
+								googleln = strlen(googlestr);
+								pNewPt = DecodeString(googlestr, &nPnts);
+								for (i = 0; i < nPnts; i++)
+								{
+									double dist = ArcDistance(pDPoints[i], pNewPt[i]);
+									if (dist > 10)
+										ii = 1;
+									maxd = max(dist, maxd);
+								}
+								/*for (i = 0; i < nPnts; i++)
+								{
+								sprintf(str, "%f\t%f", pNewPt[i].x, pNewPt[i].y);
+								AppendFile("c:\\temp\\compress.txt", str);
+								}
+								ii = 1;*/
+								free(googlestr);
+								free(pNewPt);
+							}
+							nLops = nLoops;
+							//if (skipConvert)
+								nLops = -nLoops;
+							if (nLoops > 1)
+							{
+								if (*ARG[7])
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
+								else
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
+								free(blobParts);
+							}
+							else
+							{
+								if (*ARG[7])
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, Arg7Val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
+								else
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
+							}
+							fputstring(pCmd, Fid);
+							free(blobPoints);
+							GSSiGlobUlFree(&hPoints);
+							GSSiGlobUlFree(&hPoly);
+							GSSiGlobFree(&hPolyPartLen);
+							if (canCompress)
+								nCanCompress++;
+						}
+					}
+					sprintf(pCmd, "Can compress %i (%.1f%%)", nCanCompress, (100.0*nCanCompress) / nTotal);
+					keepGoing = StatusWindowUpdate(NULL, pCmd, nRecs, ++nLoaded);
+					DestroySavedPolys();
+				}
+				DestroyStatusWindow(0);
+				GSSiClose(Fid);
+				GSSiGlobUlFree(&hCmd);
+			}
+		}
 		else if (!stricmp(ARG[1], "TEXTFROMPOINT"))//$SQLITE(TEXTFROMPOINT,outfilename,new,tablename,UDIFieldNameAndType(i.e PID  CHAR(13)-no spaces in name),UDIFieldNameAndType2(i.e PID  CHAR(13)-no spaces in name)
 		{
 			short	pos = BT_FIRST;

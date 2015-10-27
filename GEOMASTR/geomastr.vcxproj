@@ -418,6 +418,7 @@
     <ClCompile Include="..\gctpc\goodinv.c" />
     <ClCompile Include="..\solar_calculator\Version2\gplan.c" />
     <ClCompile Include="..\gps\gps.c" />
+    <ClCompile Include="GMMobile.c" />
     <ClCompile Include="graphic1.c" />
     <ClCompile Include="graphic2.c" />
     <ClCompile Include="Graphic3.c" />
