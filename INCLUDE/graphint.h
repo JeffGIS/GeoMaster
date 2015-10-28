@@ -2398,7 +2398,7 @@ char *EncodeString(LPDPOINT llpoints, int numPoints);
 LPDPOINT DecodeString(char *encodedString, int *numPoints);
 
 int FindDupParcels(LPSTR DUPFile);
-
+int GMMCompression(LPSTR INFile, LPSTR OUTFile);
 
 
  

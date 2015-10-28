@@ -1,6 +1,160 @@
 #include "graphint.h"   
 #include "gmextern.h"
 
+#define SAME_AS_LAST 6
+#define USE_FIRST_N	 7
+#define REPLACE_LAST_N 8
+#define USE_AS_IS 9
+
+static LPSTR getFieldVal(LPSTR fld)
+{
+	int ln;
+	LPSTR pOut;
+	LPSTR pTab = strchr(fld, '\t');
+	if (pTab)
+		*pTab = 0;
+	ln = strlen(fld) + 1;
+	pOut = calloc(ln,1);
+	strcpy(pOut, fld);
+	if (pTab)
+		*pTab = '\t';
+	return pOut;
+}
+static LPSTR getNewField(LPSTR pCurField, LPSTR pPreField)
+{
+	LPSTR pNewField = malloc(1024);
+
+	LPSTR pCurF = getFieldVal(pCurField);
+	LPSTR pPreF = getFieldVal(pPreField);
+	int lcur = strlen(pCurF);
+	int lpre = strlen(pPreF);
+	int nsame = 0;
+
+	if (!lcur)
+	{
+		*pNewField = USE_AS_IS;
+		pNewField[1] = 0;
+	}
+	else if (!strcmp(pCurF, pPreF))
+	{
+		*pNewField = SAME_AS_LAST;
+		pNewField[1] = 0;
+	}
+	else if (lcur == lpre)
+	{
+		while (pCurF[nsame] ==  pPreF[nsame])
+		{
+			nsame++;
+		}
+		if (nsame > 1)
+		{
+			*pNewField = REPLACE_LAST_N;
+			strcpy(&pNewField[1], &pCurF[nsame]);
+		}
+		else
+		{
+			*pNewField = USE_AS_IS;
+			strcpy(&pNewField[1], pCurF);
+		}
+	}
+	else if (lcur > 2 && lpre > 2 && pCurF[0] == pPreF[0] && pCurF[1] == pPreF[1])
+	{
+		nsame = 2;
+		while (pCurF[nsame] && pCurF[nsame] == pPreF[nsame])
+		{
+			nsame++;
+		}
+		if (nsame > 1 && nsame < 240)
+		{
+			*pNewField = USE_FIRST_N;
+			pNewField[1] = nsame + 10;
+			strcpy(&pNewField[2], &pCurF[nsame]);
+		}
+		else
+		{
+			*pNewField = USE_AS_IS;
+			strcpy(&pNewField[1], pCurF);
+		}
+	}
+	else
+	{
+		*pNewField = USE_AS_IS;
+		strcpy(&pNewField[1], pCurF);
+	}
+	return pNewField;
+}
+int GMMCompression(LPSTR INFile, LPSTR OUTFile)
+/*{
+	int rtn = 0;
+	int flen = GSSiLength(INFile);
+	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen + 4);
+	LPSTR pFile = GlobalLock(hMem);
+	HANDLE hMemCmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen * 2);
+	LPSTR pFileCmp = GlobalLock(hMemCmp);
+	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
+	int flenCmp;
+	BigRead(fid, pFile, flen);
+	GSSiClose(fid);
+
+	flenCmp = CompressBinaryRecord(pFile, pFileCmp, flen);
+	GSSiGlobUlFree(&hMem);
+	GSSiGlobUlFree(&hMemCmp);
+	rtn = (100.0 * flenCmp) / flen;
+	return rtn;
+}*/
+{
+	int rtn = 0;
+	int flen = GSSiLength(INFile);
+	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen + 4);
+	LPSTR pFile = GlobalLock(hMem);
+	HANDLE hMemCmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen * 2);
+	LPSTR pFileCmp = GlobalLock(hMemCmp);
+	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
+	int flenCmp=0;
+	int lfile = 0;
+	int nlines = 0;
+	int lineBeg[1024] = { 0 };
+	BigRead(fid, pFile, flen);
+	flenCmp = CompressBinaryRecord(pFile, pFileCmp, flen);
+	GSSillseek(fid, 0, 0);
+	flenCmp = 0;
+	while (fgetstring(&pFile[lfile], 4096, fid))
+	{
+		lfile += strlen(&pFile[lfile]) + 1;
+		nlines++;
+		lineBeg[nlines] = lfile;
+	}
+	GSSiClose(fid);
+
+	for (int il = nlines - 1; il > 0; il--)
+	{
+		int ifcur = lineBeg[il];
+		int ifpre = lineBeg[il - 1];
+		LPSTR pcurField = &pFile[ifcur];
+		LPSTR ppreField = &pFile[ifpre];
+		while (pcurField)
+		{
+			LPSTR pNewField = getNewField(pcurField, ppreField);
+			strcpy(&pFileCmp[flenCmp], pNewField);
+			flenCmp += strlen(pNewField);
+			free(pNewField);
+			pcurField = strchr(pcurField, '\t');
+			ppreField = strchr(ppreField, '\t');
+			if (pcurField)
+			{
+				pcurField++;
+				ppreField++;
+			}
+			else
+				break;
+		}
+	}
+	flenCmp = CompressBinaryRecord(pFileCmp, pFile, flenCmp);
+	GSSiGlobUlFree(&hMem);
+	GSSiGlobUlFree(&hMemCmp);
+	rtn = (100.0 * flenCmp) / flen;
+	return rtn;
+}
 int FindDupParcels(LPSTR OUTFile)
 {
 	int rtn = 0;

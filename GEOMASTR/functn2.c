@@ -1576,9 +1576,19 @@ GSSiExitProg (1350);
 		case 854://$GMMOBILE(DUPREFS)
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-			nlong = FindDupParcels(Arg[2]);
-			ltoa(nlong, OutLoc, 10);
-			goto Rtnl;
+			if (!stricmp(Arg[1], "DUPPAR"))
+			{
+				nlong = FindDupParcels(Arg[2]);
+				ltoa(nlong, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "COMPRESS"))
+			{
+				nlong = GMMCompression(Arg[2], Arg[3]);
+				ltoa(nlong, OutLoc, 10);
+				goto Rtnl;
+			}
+
 		}
 
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
