@@ -1611,11 +1611,18 @@ Next:
     	if (mine.type < 0 && mine.type != SQL_BIT && mine.type != SQL_TINYINT && mine.type != SQL_GUID
     					  && mine.type != SQL_BIGINT && mine.type != SQL_LONGVARCHAR && mine.type != SQL_UNKCHAR && mine.type != SQL_MSSHAPE) 
     	{   
-    		if (mine.type != SQL_LONGVARBINARY || !UseLongVarBinary)  
-    		{
-	    		*pHaveNonStandardFields = TRUE; 
-	    		if (!ShowNonStandardFields)
-	    			goto Next;
+			if (mine.type != SQL_LONGVARBINARY || !UseLongVarBinary)
+			{
+				if (!stricmp(mine.name, "SHAPE"))
+				{
+					mine.type = SQL_MSSHAPE;
+				}
+				else
+				{
+					*pHaveNonStandardFields = TRUE;
+					if (!ShowNonStandardFields)
+						goto Next;
+				}
     		} 
     	}
     	switch (mine.type)
