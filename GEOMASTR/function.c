@@ -1377,7 +1377,7 @@ SetVis:
 					goto RtnTrue;
 				goto RtnFalse; 
             }
-			if (*Arg[3])
+			if (nArgs > 2  && *Arg[3])
 				SetCurView (SetVPFromName (Arg[3],&Err));   
 			if (nArgs < 2)
 				iopt = 2;
@@ -1492,10 +1492,15 @@ SetVis:
 			else
 			{
 				Pickability = FALSE;
-				if (GetVisibility(idesc) != iopt)
-					ToggleVisibility (idesc);  
-			    if (!PickVis)
-					TurnOffAutoVis (TRUE);		   
+				if (iopt < 0)
+					SetHalfToneVisibility(idesc, iopt < -1);
+				else
+				{
+					if (GetVisibility(idesc) != iopt)
+						ToggleVisibility(idesc);
+					if (!PickVis)
+						TurnOffAutoVis(TRUE);
+				}
 			}
 			
 			goto RtnTrue;

@@ -84,8 +84,36 @@ static LPSTR getNewField(LPSTR pCurField, LPSTR pPreField)
 	return pNewField;
 }
 int GMMCompression(LPSTR INFile, LPSTR OUTFile)
-/*{
+{
 	int rtn = 0;
+	int flen = GSSiLength(INFile);
+	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096*8);
+	LPSTR pFile = GlobalLock(hMem);
+	HANDLE hMemCmp = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096*8);
+	LPSTR pFileCmp = GlobalLock(hMemCmp);
+	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
+	int flenCmp=0;
+	int n = -1;
+	int reclen;
+	
+	while (n < 0)
+	{
+		n = 8;
+		reclen = 0;
+		while (fgetstring(&pFile[reclen], 4000, fid) && n--)
+		{
+			int flen = strlen(&pFile[reclen]);
+			reclen += flen;
+		}
+		flenCmp += CompressBinaryRecord(pFile, pFileCmp, reclen);
+	}
+
+	GSSiClose(fid);
+	GSSiGlobUlFree(&hMem);
+	GSSiGlobUlFree(&hMemCmp);
+	rtn = (100.0 * flenCmp) / flen;
+
+	/*	int rtn = 0;
 	int flen = GSSiLength(INFile);
 	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen + 4);
 	LPSTR pFile = GlobalLock(hMem);
@@ -102,7 +130,7 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 	rtn = (100.0 * flenCmp) / flen;
 	return rtn;
 }*/
-{
+/*{
 	int rtn = 0;
 	int flen = GSSiLength(INFile);
 	HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, flen + 4);
@@ -152,7 +180,7 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 	flenCmp = CompressBinaryRecord(pFileCmp, pFile, flenCmp);
 	GSSiGlobUlFree(&hMem);
 	GSSiGlobUlFree(&hMemCmp);
-	rtn = (100.0 * flenCmp) / flen;
+	rtn = (100.0 * flenCmp) / flen;*/
 	return rtn;
 }
 int FindDupParcels(LPSTR OUTFile)

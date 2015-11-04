@@ -464,9 +464,13 @@ BOOL DisplayStreetCenterlines (void)
 	LOGBRUSH	lb;
 	COLORREF	WHITE=RGB(255,255,255);
 	int		i;
-	int		EdgeWidth = 2;
-	int		MinWidth = INT_MAX, MaxWidth=INT_MIN, MinOrder=INT_MAX, MaxOrder=INT_MIN, order;
+	float	EdgeWidth = 2;
+	float	EdgeWidthFactor = GetGlobalDVal2("[%STREETEDGEWIDTHFACTOR]", 1.0);
+	float	edgeWidthInc = 2;
+	float	MinWidth = INT_MAX, MaxWidth = INT_MIN;
+	int		MinOrder = INT_MAX, MaxOrder = INT_MIN, order;
 	int		MaxEdgeWidth = INT_MIN;
+	float   OverAllStreetWidthFactor = GetGlobalDVal2("[%STREETWIDTHFACTOR2]", 1.0);
 	BOOL	rtn = TRUE;
 
 	lb.lbStyle = BS_SOLID;
@@ -494,11 +498,13 @@ BOOL DisplayStreetCenterlines (void)
 
 			for (i=0;i<CurTheme->nLabelLines;i++)   
 			{
+				float w;
  				pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[i]); 
 				pPoints = (LPPOINT)(pStreet+1);  
-				MinWidth = min (MinWidth,pStreet->HollowStreetWidth);
-				MaxWidth = max (MaxWidth,pStreet->HollowStreetWidth);
-				EdgeWidth = pStreet->HollowStreetWidth / 8 +1;
+				w = pStreet->HollowStreetWidth * OverAllStreetWidthFactor;
+				MinWidth = min (MinWidth,w);
+				MaxWidth = max (MaxWidth,w);
+				EdgeWidth = (w / 8 + edgeWidthInc) * EdgeWidthFactor;
 				MaxEdgeWidth = max (MaxEdgeWidth,EdgeWidth);
 				GlobalUnlock (phLabelLines[i]); 
 			}
@@ -512,9 +518,10 @@ BOOL DisplayStreetCenterlines (void)
 			//	hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth+2*DeviceToScreenFactor,pStreet->OutlineColor);  
 				if (ShowHollowStreet == 1)
 				{
+					float w = pStreet->HollowStreetWidth * OverAllStreetWidthFactor;
 					lb.lbColor = pStreet->OutlineColor;
-					EdgeWidth = pStreet->HollowStreetWidth / 8 + 1;
-					hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL, IDNINT(pStreet->HollowStreetWidth + EdgeWidth * 2), &lb, 0, 0);
+					EdgeWidth = (w / 8 + edgeWidthInc) * EdgeWidthFactor;
+					hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, IDNINT(w + EdgeWidth * 2), &lb, 0, 0);
 
 					hOldPen = SelectObject(CurView->hDC, hPen);
 					Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
@@ -535,7 +542,7 @@ BOOL DisplayStreetCenterlines (void)
 						{
 							//hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth,pStreet->FillColor);  
 							lb.lbColor = pStreet->FillColor;
-							hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL, pStreet->HollowStreetWidth, &lb, 0, 0);
+							hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, pStreet->HollowStreetWidth * OverAllStreetWidthFactor, &lb, 0, 0);
 							hOldPen = SelectObject(CurView->hDC, hPen);
 							Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
 							SelectObject(CurView->hDC, hOldPen);
@@ -624,7 +631,7 @@ BOOL DisplayStreetCenterlines (void)
 					pPoints = (LPPOINT)(pStreet+1);  
 					MinOrder = min (MinOrder,pStreet->Order);
 					MaxOrder = max (MaxOrder,pStreet->Order);
-					EdgeWidth = pStreet->HollowStreetWidth/8 + 1;
+					EdgeWidth = (pStreet->HollowStreetWidth / 8 + edgeWidthInc) * EdgeWidthFactor;
 					hPen = CreatePen (PS_SOLID,IDNINT(pStreet->HollowStreetWidth+EdgeWidth*2),0);  
 
 					hOldPen = SelectObject (hDC,hPen); 
@@ -685,10 +692,11 @@ BOOL DisplayStreetLabels (BOOL Clear)
 	double	TextOffset, TextOffsetBegin;  
 	double	MaxDeflection=GetGlobalDVal2 ("[%STREETTEXTMAXDEFLEXTION]",HALFPI/3), MaxD;
 	double	CharacterSpacingFactor=GetGlobalDVal2 ("[%STREETTEXTSPACING]",1.05);
-	double	MaxTextSize=GetGlobalLVal2 ("[%STREETTEXTMAXSIZE]",14)*DeviceToScreenFactor;
-	double	MinTextSize=GetGlobalLVal2 ("[%STREETTEXTMINSIZE]",10)*DeviceToScreenFactor;
-	double	StreetTextAdjustment=GetGlobalDVal2 ("[%STREETTEXTVERTICALADJUSTMENT]",0.5);
-	long	NameInc=0, LastNameInc;//+1000000000      
+	double	MaxTextSize=GetGlobalLVal2 ("[%STREETTEXTMAXSIZE]",12)*DeviceToScreenFactor;
+	double	MinTextSize=GetGlobalLVal2 ("[%STREETTEXTMINSIZE]",5)*DeviceToScreenFactor;
+	float   OverAllStreetWidthFactor = GetGlobalDVal2("[%STREETWIDTHFACTOR2]", 1.0);
+	double	StreetTextAdjustment = GetGlobalDVal2("[%STREETTEXTVERTICALADJUSTMENT]", 0.6);
+	long	NameInc = 0, LastNameInc;//+1000000000      
 	double	StartTextSize, TextSize;
 	int		NumTries, MaxTriesB=GetGlobalLVal2 ("[%STREETNAMEMAXTRIES]",10), iTextSize;
 	int		MaxTries = MaxTriesB;
@@ -704,6 +712,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 	double	FlipAZ, AZ2, txtfac;
 	double	MaxMoveDist, IncDist;
 	BOOL	rtn=FALSE;
+	int		npass;
 
 
 	if (Clear)
@@ -870,13 +879,13 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						txtfac = StreetTextFactor;
 				}
 				LastNameInc = NameInc;
-	   			TextSize = StartTextSize = min(MaxTextSize*txtfac,(pStreet->HollowStreetWidth)*txtfac-2); 
+	   			TextSize = StartTextSize = min(MaxTextSize*txtfac,(pStreet->HollowStreetWidth * OverAllStreetWidthFactor)*txtfac-2); 
    				TextOffsetBegin = 0;
-	   			if (TextSize <  MinTextSize)
+				if (TextSize <  MinTextSize*txtfac)
 	   			{
-	   				TextSize = StartTextSize = MaxTextSize;
+					TextSize = StartTextSize = MaxTextSize*txtfac;
 	   				if (ShowHollowStreet)
-	   					TextOffsetBegin = pStreet->HollowStreetWidth + TextSize/2 + 1;    
+						TextOffsetBegin = pStreet->HollowStreetWidth* OverAllStreetWidthFactor + TextSize / 2 + 1;
 	   				MaxD = MaxDeflection/2;
 	   			} 
 	   			else 
@@ -885,7 +894,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 	   				MaxD = MaxDeflection;
 	//		     	SetTextColor(CurView->hDC, HollowTextColor);
 	   			}
-				if (TextSize < MinTextSize) 
+				if (TextSize < MinTextSize*txtfac)
 				{   
 					if (ipass)
 					{
@@ -944,7 +953,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				}
 				SelectObject(CurView->hDC,OldFont);
 				GSSiDeleteObject(&hFont);
-				if ((TotLength - (pStreet->HollowStreetWidth)*2) < twidth * CharacterSpacingFactor)
+				if ((TotLength - (pStreet->HollowStreetWidth* OverAllStreetWidthFactor) * 2) < twidth * CharacterSpacingFactor)
 				{
 	NextName2:
 					TextSize -= 2;   
@@ -1045,7 +1054,11 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						goto TryAgain; 
 				}
 				SaveDist = Dist; 
-	//			for (ipass=0;ipass<2;ipass++)
+				if (pStreetData->Shadow)
+					npass = 2;
+				else
+					npass = 1;
+				for (ipass=0;ipass<npass;ipass++)
 				{
 					Dist = StartDist;
 					for (ichar = 0;ichar < nChar;ichar++)   //pPoints[21]
@@ -1090,12 +1103,12 @@ BOOL DisplayStreetLabels (BOOL Clear)
 			   				TextOffset = TextOffsetBegin;
 			   			}
 			   			else */
-			   				TextOffset = TextOffsetBegin * 1.5;  
+						TextOffset = TextOffsetBegin * 1.5 * StreetTextAdjustment;
 	/*			   		if (abs (LogFont.lfEscapement - 900) < 450 ||
 			   				abs (LogFont.lfEscapement - 2700) < 450)
 		   					TextOffset = TextOffsetBegin * 1.7;*/  
 		   				ProjectBasePt (&DPoint);
-						DPoint = dnewpt (DPoint,AZ+HALFPI,(theight+TextOffset)*CurView->BaseUnitsPerPixel*CurView->LLNormFactor*StreetTextAdjustment);
+						DPoint = dnewpt(DPoint, AZ + HALFPI, (theight + TextOffset)*CurView->BaseUnitsPerPixel*CurView->LLNormFactor*StreetTextAdjustment);
 						Point = BasePtToWinPt (UnProjectBasePt (&DPoint)); 
 						AddPointToRect (Point,&txtRect);
 						LogFont.lfOrientation = LogFont.lfEscapement;
@@ -1105,7 +1118,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						{   
 				    		if (symbol)
 				    		{    
-				    			 short MinSize = max (TextSize,pStreet->HollowStreetWidth * 1.25 * ShieldSizeFactor*ShieldFactor);
+								short MinSize = max(TextSize, pStreet->HollowStreetWidth* OverAllStreetWidthFactor * 1.25 * ShieldSizeFactor*ShieldFactor);
 				    			 
 				    			 if (!ShowHollowStreet)
 				    		 		MinSize = 0;
@@ -1132,7 +1145,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				    		}
 				    		else if (!ShieldsOnly)
 				    		{
-								if (pStreetData->Shadow)
+								if (!ipass && pStreetData->Shadow)
 								{   
 									short	i=1,n=max (1,DeviceToScreenFactor+0.5);
 									COLORREF	OldColor = SetTextColor(CurView->hDC, ConvertColor(pStreetData->ShadowColor,CurTheme->UseHalfTone));
@@ -1147,16 +1160,19 @@ BOOL DisplayStreetLabels (BOOL Clear)
 									} 
 									SetTextColor (CurView->hDC,OldColor);
 								}
-								TextOut (CurView->hDC,Point.x,Point.y,&StreetsText[jchar],1);    
-								InflateRect (&txtRect,trinc,trinc);
-								AddTextRect2(&txtRect,TRUE);    
-								DisplayedText = TRUE;
+								else
+								{
+									TextOut(CurView->hDC, Point.x, Point.y, &StreetsText[jchar], 1);
+									InflateRect(&txtRect, trinc, trinc);
+									AddTextRect2(&txtRect, TRUE);
+									DisplayedText = TRUE;
+								}
 							}
 						}  
 						SelectObject(CurView->hDC,OldFont);
 						GSSiDeleteObject(&hFont);   
 					}
-					if (!DisplayedText)  
+					if (ipass == npass-1 && !DisplayedText)  
 					{
 						Dist = SaveDist;
 						goto TryAgain;

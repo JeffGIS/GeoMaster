@@ -710,6 +710,18 @@ BOOL    GetHalfToneVisibility (int idesc)
 
     if (test) return(TRUE); else return (FALSE);
 }
+BOOL    SetHalfToneVisibility(int idesc, BOOL on)
+{
+	short     bit, byte;
+	BOOL    test;
+
+	if (idesc <= 0 || idesc > 3199 || !CurView)
+		return FALSE;
+	byte = idesc / 8;
+	bit = idesc % 8;
+	SetBit(bit, (LPSTR)&CurView->HalfToneVisBits[byte], on);
+	return TRUE;
+}
 
 BOOL    ToggleVisibility (int idesc)
 {   short     bit, byte;

@@ -1547,6 +1547,7 @@ BOOL GetInVisibility (int idesc);
 BOOL ToggleInVisibility (int idesc);
 void ResetShowOnlyVis (void);
 BOOL GetHalfToneVisibility (int idesc);
+BOOL SetHalfToneVisibility(int idesc, BOOL on);
 void SetTypeVisibility (int type, BOOL on);
 void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile, int Layer,HFILE FidSymList);
 short GetTypeVisibility (int type);
