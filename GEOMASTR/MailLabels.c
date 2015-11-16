@@ -43,7 +43,7 @@ static BOOL CALLBACK AbortProcML(HDC hDC, int Error)
 /*==============================================*/
 /* Sample code :  Typical printing process      */
 /* =============================================*/
-BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)
+BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)//print to 5160 labels
 {
 	HWND hWndParent = hWndMain;
 	BOOL rtn = FALSE;
