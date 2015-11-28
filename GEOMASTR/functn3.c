@@ -67,7 +67,7 @@ HWND FindWindowByName(LPSTR WindowName)
 	int		WinVer, DosVer;
 	UINT	ierr;
 	BOOL	rtn = TRUE;
-	FARPROC lpfnEnumWndProc;
+	//DLGPROC lpfnEnumWndProc;
 	DWORD thread, process;
 	 
 	hWndFound = FindWindow (WindowName,0);
@@ -108,9 +108,9 @@ void ShowHideWindows(LPSTR WindowName, UINT fun)
 	wpt.thread = GetWindowThreadProcessId(hWndFound, &wpt.process);
 
 	if (fun == SW_SHOW)
-		EnumWindows(ShowEnumWndProc, (LPARAM)&wpt);
+		EnumWindows((WNDENUMPROC)ShowEnumWndProc, (LPARAM)&wpt);
 	else
-		EnumWindows(HideEnumWndProc, (LPARAM)&wpt);
+		EnumWindows((WNDENUMPROC)HideEnumWndProc, (LPARAM)&wpt);
 	return;
 }
 BOOL CALLBACK ShowChildEnumWndProc(HWND hCtrl, LONG lParam)
@@ -156,7 +156,7 @@ HWND FindWindowByProcessID (DWORD ProcessID,LPSTR Text)
 	int		WinVer, DosVer;
 	UINT	ierr;
 	BOOL	rtn = TRUE;
-    FARPROC lpfnEnumWndProc;
+   // DLGPROC lpfnEnumWndProc;
     
     hWndFound = 0;
 	pFindWindowText = Text;
@@ -558,7 +558,7 @@ GSSiExitProg (1348);
 						{   
 							rtn=FALSE;
 							if (CurView->pTheme)
-								rtn = DialogBox(hInst, (LPSTR)"DEPTHOPTIONS", CurView->hWnd, DEPTHOPTIONSMsgProc);
+								rtn = DialogBox(hInst, (LPSTR)"DEPTHOPTIONS", CurView->hWnd,(DLGPROC) DEPTHOPTIONSMsgProc);
 						}
 
 					}
@@ -1667,10 +1667,10 @@ GotCloseFilehSQL:
 				lpSQLFieldList = Arg[6];
 			displayRect = atorect (Arg[7],&Err);
 		    {
-		 	   FARPROC lpfnIDENTIFYMsgProc;
+		 	   DLGPROC lpfnIDENTIFYMsgProc;
 		         
 		        BasicDisplayItem=-1; 
-			    lpfnIDENTIFYMsgProc = MakeProcInstance((FARPROC)IDENTIFYMsgProc, hInst);
+			    lpfnIDENTIFYMsgProc = MakeProcInstance((DLGPROC)IDENTIFYMsgProc, hInst);
 			    nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, lpfnIDENTIFYMsgProc);
 			    FreeProcInstance(lpfnIDENTIFYMsgProc);
 		    }
@@ -1708,14 +1708,14 @@ GotCloseFilehSQL:
 			{
 				if (!_fstricmp (Arg[2],"NAME"))
 				{
-		            FARPROC lpfnVOTER_NAME_LOCMsgProc;
+		            DLGPROC lpfnVOTER_NAME_LOCMsgProc;
 					int		nRc;
 					
 					if (nArgs > 2)
 						InitVoterNameSearch (Arg[3],Arg[4],Arg[5],Arg[6]);
 					else
 						InitVoterNameSearch (0,0,0,0);
-		            lpfnVOTER_NAME_LOCMsgProc = MakeProcInstance((FARPROC)VOTER_NAME_LOCMsgProc, hInst);
+		            lpfnVOTER_NAME_LOCMsgProc = MakeProcInstance((DLGPROC)VOTER_NAME_LOCMsgProc, hInst);
 		            nRc = DialogBox(hInst, (LPSTR)"VOTER_NAME_LOC", CurView->hWnd, lpfnVOTER_NAME_LOCMsgProc);
 		            FreeProcInstance(lpfnVOTER_NAME_LOCMsgProc); 
 					itoa (nRc,OutLoc,10);
@@ -1766,7 +1766,7 @@ GotCloseFilehSQL:
 		case 527: //$LOGIN(Title,uservarname,pwvarname)
 
 		{
-			FARPROC lpfnDBLOGINMsgProc;
+			DLGPROC lpfnDBLOGINMsgProc;
 			int	nRc;
 			char	var[64],val[128];
 
@@ -1778,7 +1778,7 @@ GotCloseFilehSQL:
 			sprintf (var,"[%s]",Arg[3]);
 			GetGlobalCVal (var,val,0);
 			strcpy (LoginPassword,val);
-			lpfnDBLOGINMsgProc = MakeProcInstance((FARPROC)LOGINMsgProc, hInst);
+			lpfnDBLOGINMsgProc = MakeProcInstance((DLGPROC)LOGINMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"DBLOGIN", hWndMain, lpfnDBLOGINMsgProc);
 			FreeProcInstance(lpfnDBLOGINMsgProc);
 			if (nRc)
@@ -2223,7 +2223,7 @@ GotCloseFilehSQL:
 
 		case 601: /* $TAGLOC(Prefix,minchar,SaveGlobalName(optional-not in brackets),Title(opt),Viewport(opt),Layer(opt),locatetagonly(opt,T locates,)) Tag locator */
 		{	 
-            FARPROC lpfnTAGLOCMsgProc;
+            DLGPROC lpfnTAGLOCMsgProc;
 			int		nRc;
 			
 			nArgs = GetFunArgs (Args,Arg,7,&hMem, pBrkPt, bpOffset, bpLen); 
@@ -2238,7 +2238,7 @@ GotCloseFilehSQL:
             TagLocTitle = Arg[4]; 
             _fstrcpy (TagLocViewport,Arg[5]);
             _fstrcpy (TagLocLayer,Arg[6]);
-              lpfnTAGLOCMsgProc = MakeProcInstance((FARPROC)TAGLOCMsgProc, hInst); 
+              lpfnTAGLOCMsgProc = MakeProcInstance((DLGPROC)TAGLOCMsgProc, hInst); 
               nRc = DialogBox(hInst, (LPSTR)"TAGLOC", hWndMain, lpfnTAGLOCMsgProc);
               FreeProcInstance(lpfnTAGLOCMsgProc); 
              TagLocTitle = 0; 
@@ -2344,13 +2344,13 @@ GotCloseFilehSQL:
 			}
 		    else if (!_fstricmp (Arg[1],"STORMPIPE"))
             {
-                  FARPROC	lpfnSTRMPIPEMsgProc; 
+                  DLGPROC	lpfnSTRMPIPEMsgProc; 
                   
 		          if (hWndStrmPoint)
 		          	SendMessage (hWndStrmPoint,WM_CLOSE,0,0);
                   if (!hWndStrmPipe)
                   {
-	                  lpfnSTRMPIPEMsgProc = MakeProcInstance((FARPROC)STRMPIPEMsgProc, hInst);
+	                  lpfnSTRMPIPEMsgProc = MakeProcInstance((DLGPROC)STRMPIPEMsgProc, hInst);
 	                  CreateDialog(hInst, (LPSTR)"STRMPIPE", hWndMain, lpfnSTRMPIPEMsgProc); 
 	              }
 	              
@@ -2365,13 +2365,13 @@ GotCloseFilehSQL:
             } 
 		    else if (!_fstricmp (Arg[1],"SANPIPE"))
             {
-                  FARPROC	lpfnSTRMPIPEMsgProc; 
+                  DLGPROC	lpfnSTRMPIPEMsgProc; 
                   
 		          if (hWndStrmPoint)
 		          	SendMessage (hWndStrmPoint,WM_CLOSE,0,0);
                   if (!hWndStrmPipe)
                   {
-	                  lpfnSTRMPIPEMsgProc = MakeProcInstance((FARPROC)STRMPIPEMsgProc, hInst);
+	                  lpfnSTRMPIPEMsgProc = MakeProcInstance((DLGPROC)STRMPIPEMsgProc, hInst);
 	                  CreateDialog(hInst, (LPSTR)"STRMPIPE", hWndMain, lpfnSTRMPIPEMsgProc); 
 	              }
 	              
@@ -2386,13 +2386,13 @@ GotCloseFilehSQL:
             } 
 		    else if (!_fstricmp (Arg[1],"STORMPOINT"))
             {
-                  FARPROC	lpfnSTRMPOINTMsgProc; 
+                  DLGPROC	lpfnSTRMPOINTMsgProc; 
                   
 		          if (hWndStrmPipe)
 		          	SendMessage (hWndStrmPipe,WM_CLOSE,0,0);
                   if (!hWndStrmPoint)
                   {
-	                  lpfnSTRMPOINTMsgProc = MakeProcInstance((FARPROC)STRMPOINTMsgProc, hInst);
+	                  lpfnSTRMPOINTMsgProc = MakeProcInstance((DLGPROC)STRMPOINTMsgProc, hInst);
 	                  CreateDialog(hInst, (LPSTR)"STRMPOINT", hWndMain, lpfnSTRMPOINTMsgProc); 
 	              }
 	               
@@ -2408,11 +2408,11 @@ GotCloseFilehSQL:
             } 
 /*		    else if (!_fstricmp (Arg[1],"USER"))
             {
-                  FARPROC	lpfnUSERFORMMsgProc; 
+                  DLGPROC	lpfnUSERFORMMsgProc; 
                   
                   if (!hWndUserForm)
                   {
-	                  lpfnUSERFORMMsgProc = MakeProcInstance((FARPROC)USERFORMMsgProc, hInst);
+	                  lpfnUSERFORMMsgProc = MakeProcInstance((DLGPROC)USERFORMMsgProc, hInst);
 	                  CreateDialog(hInst, (LPSTR)"USERFORM", hWndMain, lpfnUSERFORMMsgProc); 
 	              }
 	               
@@ -2428,13 +2428,13 @@ GotCloseFilehSQL:
             }  */
 		    else if (!_fstricmp (Arg[1],"SANPOINT"))
             {
-                  FARPROC	lpfnSTRMPOINTMsgProc; 
+                  DLGPROC	lpfnSTRMPOINTMsgProc; 
                   
 		          if (hWndStrmPipe)
 		          	SendMessage (hWndStrmPipe,WM_CLOSE,0,0);
                   if (!hWndStrmPoint)
                   {
-	                  lpfnSTRMPOINTMsgProc = MakeProcInstance((FARPROC)STRMPOINTMsgProc, hInst);
+	                  lpfnSTRMPOINTMsgProc = MakeProcInstance((DLGPROC)STRMPOINTMsgProc, hInst);
 	                  CreateDialog(hInst, (LPSTR)"STRMPOINT", hWndMain, lpfnSTRMPOINTMsgProc); 
 	              }
 	               
@@ -2626,9 +2626,9 @@ GotCloseFilehSQL:
 				sprintf (_fstrchr (AutoExportName,0),",%s",Arg[3]);
 			if (!_fstricmp (Arg[1],"DGN"))  
             {
-                  FARPROC	lpfnLOADDGNDUMPMsgProc; 
+                  DLGPROC	lpfnLOADDGNDUMPMsgProc; 
 
-                  lpfnLOADDGNDUMPMsgProc = MakeProcInstance((FARPROC)LOADDGNDUMPMsgProc, hInst);
+                  lpfnLOADDGNDUMPMsgProc = MakeProcInstance((DLGPROC)LOADDGNDUMPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADDGNDUMP", hWndMain, lpfnLOADDGNDUMPMsgProc);
                   FreeProcInstance(lpfnLOADDGNDUMPMsgProc);
                   *AutoExportName=0;
@@ -2639,9 +2639,9 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"SHP")) 
             {
-                  FARPROC	lpfnLOADSHPMsgProc; 
+                  DLGPROC	lpfnLOADSHPMsgProc; 
                   
-                  lpfnLOADSHPMsgProc = MakeProcInstance((FARPROC)LOADSHPMsgProc, hInst);
+                  lpfnLOADSHPMsgProc = MakeProcInstance((DLGPROC)LOADSHPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADSHP", hWndMain, lpfnLOADSHPMsgProc);
                   FreeProcInstance(lpfnLOADSHPMsgProc);  
                   *AutoExportName=0;
@@ -2652,9 +2652,9 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"DXF")) 
             {
-                  FARPROC	lpfnLOADDXFMsgProc; 
+                  DLGPROC	lpfnLOADDXFMsgProc; 
 
-                  lpfnLOADDXFMsgProc = MakeProcInstance((FARPROC)LOADDXFMsgProc, hInst);
+                  lpfnLOADDXFMsgProc = MakeProcInstance((DLGPROC)LOADDXFMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADDXF", hWndMain, lpfnLOADDXFMsgProc);
                   FreeProcInstance(lpfnLOADDXFMsgProc);
                   *AutoExportName=0;
@@ -2665,9 +2665,9 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"POINT")) 
             {
-                  FARPROC	lpfnPOINTMAPMsgProc; 
+                  DLGPROC	lpfnPOINTMAPMsgProc; 
                   
-                  lpfnPOINTMAPMsgProc = MakeProcInstance((FARPROC)POINTMAPMsgProc, hInst);
+                  lpfnPOINTMAPMsgProc = MakeProcInstance((DLGPROC)POINTMAPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"POINTMAP", hWndMain, lpfnPOINTMAPMsgProc);
                   FreeProcInstance(lpfnPOINTMAPMsgProc);
                   *AutoExportName=0;
@@ -2678,9 +2678,9 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"IMAGE")) 
             {
-			      FARPROC lpfnLOADMDMsgProc;
+			      DLGPROC lpfnLOADMDMsgProc;
                   
-			      lpfnLOADMDMsgProc = MakeProcInstance((FARPROC)LOADMDMsgProc, hInst);
+			      lpfnLOADMDMsgProc = MakeProcInstance((DLGPROC)LOADMDMsgProc, hInst);
 			      nRc = DialogBox(hInst, (LPSTR)"LOAD_MD", hWndMain, lpfnLOADMDMsgProc);
 			      FreeProcInstance(lpfnLOADMDMsgProc);
                   *AutoExportName=0;
@@ -2691,10 +2691,10 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"ADDRESS")) 
             {
-                  FARPROC	lpfnADDLOC_FROMADDMsgProc; 
+                  DLGPROC	lpfnADDLOC_FROMADDMsgProc; 
 
 				  
-                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((FARPROC)ADDLOC_FROMADDMsgProc, hInst);
+                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((DLGPROC)ADDLOC_FROMADDMsgProc, hInst);
 			      nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, lpfnADDLOC_FROMADDMsgProc);
 			      FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
                   *AutoExportName=0;
@@ -3469,9 +3469,9 @@ GotCloseFilehSQL:
 			ExpandText (Arg3); 
 			if (!_fstricmp (Arg1,"CREATE"))
             {
-				FARPROC lpfnCREATE_MAPSETMsgProc;
+				DLGPROC lpfnCREATE_MAPSETMsgProc;
 				
-				lpfnCREATE_MAPSETMsgProc = MakeProcInstance((FARPROC)CREATE_MAPSETMsgProc, hInst);
+				lpfnCREATE_MAPSETMsgProc = MakeProcInstance((DLGPROC)CREATE_MAPSETMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"CREATE_MAPSET", hWndMain, lpfnCREATE_MAPSETMsgProc);
 				FreeProcInstance(lpfnCREATE_MAPSETMsgProc);
 
@@ -6008,7 +6008,7 @@ HaveVP:;
 				if (*Arg[2])
 					rtn = CreateProgMonMap (Arg[2],Arg[3]);
 				else
-					rtn = DialogBox(hInst, (LPSTR)"PROGRESS_MONITORING", hWndMain, PROGRESS_MONITORINGMsgProc);
+					rtn = DialogBox(hInst, (LPSTR)"PROGRESS_MONITORING", hWndMain, (DLGPROC)PROGRESS_MONITORINGMsgProc);
 				goto Rtnrtn; 
 			} 
 			if (!_fstricmp (Arg[1],"TIMERDIALOG"))

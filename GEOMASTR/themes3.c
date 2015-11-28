@@ -34,7 +34,7 @@ static	LPRECT	pFLRect;
 static	HANDLE	hFLDB=0,hFieldsDLT;
 static	short	FieldsDisplayOpt=0;  
 static	BOOL	AutoCloseFieldDB=FALSE;
-static FARPROC	lpfnFIELDSMsgProc;
+static  DLGPROC	lpfnFIELDSMsgProc;
 static	char	GetFieldOutput[1024];
 static	LPSTR	pFieldsTitle=0;
 

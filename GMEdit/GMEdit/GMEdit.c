@@ -78,7 +78,7 @@ static HANDLE hFunDefDB=0;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL				InitInstance(HINSTANCE, int);
+BOOL				InitInstanceGM(HINSTANCE hInst, int i);
 LRESULT CALLBACK	WndProcGMEdit(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	AboutGMEdit(HWND, UINT, WPARAM, LPARAM);
 
@@ -179,7 +179,7 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	MyRegisterClass(hInstance);
 
 	// Perform application initialization:
-	if (!InitInstance (hInstance, nCmdShow))
+	if (!InitInstanceGM (hInstance, nCmdShow))
 	{
 		return FALSE;
 	}
@@ -259,7 +259,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstanceGM(HINSTANCE hInstance, int nCmdShow)
 {
    HWND hWnd;
 

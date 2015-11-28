@@ -1064,7 +1064,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int keepGoing = 1;
 			int nCanCompress = 0, nTotal = 0;
 			LPSTR pSpace;
-			BOOL createFile, createTables = TRUE;
+			BOOL createFile=TRUE, createTables = TRUE;
 			int wantType = 3;
 			double coordFactor = COORDINATE_FACTOR;
 			char TableName[] = "PARCELAREA";
@@ -1979,7 +1979,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 		Fid = GSSiOpenFile(Name, 0, OF_READ);
 		if (Fid == HFILE_ERROR)
 		{
-			FARPROC lpfnSETSHAPEPARAMMsgProc;
+			DLGPROC lpfnSETSHAPEPARAMMsgProc;
 
 			_fstrcpy(LastSQLITEFile, SQLITEFileName);
 			ExpandText(LastSQLITEFile);
@@ -1987,7 +1987,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 				goto RtnFalse;
 			goto RtnTrue;
 			{
-				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETSHAPEPARAMMsgProc, hInst);
+				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
 				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
 				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
 				Fid = GSSiOpenFile(Name, 0, OF_READ);

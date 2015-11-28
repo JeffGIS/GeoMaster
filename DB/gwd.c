@@ -917,9 +917,9 @@ GSSiExitProg (616);
                   hSQLCombo = 0;
          GetFile:
                 {
-                      FARPROC   lpfnCOMBO_ADD_FILEMsgProc; 
+                      DLGPROC   lpfnCOMBO_ADD_FILEMsgProc; 
                             
-                      lpfnCOMBO_ADD_FILEMsgProc = MakeProcInstance((FARPROC)COMBO_ADD_FILEMsgProc, hInst);
+                      lpfnCOMBO_ADD_FILEMsgProc = MakeProcInstance((DLGPROC)COMBO_ADD_FILEMsgProc, hInst);
                       CreateDialog(hInst, (LPSTR)"COMBO_ADD_FILE", hWndDlg, lpfnCOMBO_ADD_FILEMsgProc);
                 }
                   break; 
@@ -4772,10 +4772,10 @@ Display2:
                   CloseDataFile (TRUE, &hSQL);
                    
                  {
-                    FARPROC lpfnGWD_INDEXESMsgProc;
+                    DLGPROC lpfnGWD_INDEXESMsgProc;
                     short nRc;
                     hName = hNameLocal;        
-                    lpfnGWD_INDEXESMsgProc = MakeProcInstance((FARPROC)GWD_INDEXESMsgProc, hInst);
+                    lpfnGWD_INDEXESMsgProc = MakeProcInstance((DLGPROC)GWD_INDEXESMsgProc, hInst);
                     nRc = DialogBox(hInst, (LPSTR)"GWD_INDEXES", hWndMain, lpfnGWD_INDEXESMsgProc);
                     FreeProcInstance(lpfnGWD_INDEXESMsgProc); 
                     hName = 0;
@@ -6359,7 +6359,7 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
  					if (FidNetTransfer == HFILE_ERROR && TotBlocksToGet > 32)
 					{
 						sprintf (CacheTitle,"Incremental update from ver %ld to %ld",UpdateFromCheckPointID,CheckPntLogHeader.LastCheckPointID);
-						hWndCache = CreateDialog(hInst, "CACHEFILE", hWndMain, CACHEFILEMsgProc); 
+						hWndCache = CreateDialog(hInst, "CACHEFILE", hWndMain, (DLGPROC)CACHEFILEMsgProc); 
 						DoPCTPeek = hWndCache;
 						SetDlgItemText (hWndCache,IDC_FILEBEINGCACHED,FromIndexFile);
 					}

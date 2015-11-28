@@ -136,7 +136,7 @@ LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM w
 	{
 	case WM_INITDIALOG:
 		*pLeaveCounter = 0;
-		ii = SetTimer(hWndDlg, LEAVE_WINDOW_TIMER, 500, (FARPROC)0);
+		ii = SetTimer(hWndDlg, LEAVE_WINDOW_TIMER, 500, (TIMERPROC)0);
 		break;
 	case WM_NCDESTROY:
 		KillTimer(hWndDlg, LEAVE_WINDOW_TIMER);
@@ -694,9 +694,9 @@ switch (Message)
 		SetDisplayMode (hDC, GF_SCREENMODE);
     	DoPaint = FALSE;
          {
-          FARPROC lpfnTAGEDITMsgProc;
+          DLGPROC lpfnTAGEDITMsgProc;
 
-          lpfnTAGEDITMsgProc = MakeProcInstance((FARPROC)TAGEDITMsgProc, hInst);
+          lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
           nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWnd, lpfnTAGEDITMsgProc);
           FreeProcInstance(lpfnTAGEDITMsgProc);
          }
@@ -1288,11 +1288,11 @@ BOOL LineTypeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		    	
 	    	newob = NextNewObject(TRUE);
 	        {
-		    	FARPROC lpfnLINETYPEMsgProc; 
+		    	DLGPROC lpfnLINETYPEMsgProc; 
 		    	int		nRc;
 			    	
 				DoPaint = FALSE; 
-		        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
+		        lpfnLINETYPEMsgProc = MakeProcInstance((DLGPROC)LINETYPEMsgProc, hInst);
 		        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWnd, lpfnLINETYPEMsgProc);
 		        FreeProcInstance(lpfnLINETYPEMsgProc);
 				DoPaint=TRUE;
@@ -1331,11 +1331,11 @@ BOOL LineTypeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			NumPicked = 1;
         if (NumPicked > 0)
         {
-	    	FARPROC lpfnLINETYPEMsgProc; 
+	    	DLGPROC lpfnLINETYPEMsgProc; 
 	    	int		nRc;
 	    	
 			DoPaint = FALSE; 
-	        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
+	        lpfnLINETYPEMsgProc = MakeProcInstance((DLGPROC)LINETYPEMsgProc, hInst);
 	        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWnd, lpfnLINETYPEMsgProc);
 	        FreeProcInstance(lpfnLINETYPEMsgProc);
 	        if (!nRc) break;
@@ -1419,10 +1419,10 @@ BOOL CreateTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
           	 	break;
           	 if (TAGBox.Flags.AutoEdit)
 	         {
-		          FARPROC lpfnTAGEDITMsgProc;
+		          DLGPROC lpfnTAGEDITMsgProc;
 			
 			   	  DoPaint = FALSE;
-		          lpfnTAGEDITMsgProc = MakeProcInstance((FARPROC)TAGEDITMsgProc, hInst);
+		          lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
 		          nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWndMain, lpfnTAGEDITMsgProc);
 		          FreeProcInstance(lpfnTAGEDITMsgProc);
 	         } 
@@ -1743,7 +1743,7 @@ Next:
 				ScreenToClient (hWnd,&MovePoint); 
 				if (PtInRect (&CurView->ScreenRect,MovePoint))
 				{
-		    		HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)10, (FARPROC) 0); 
+		    		HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)10, (TIMERPROC) 0); 
 		    	}
    				break;
    			default:
@@ -2434,7 +2434,7 @@ NoBox:
 		    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
 				BlockSocketProcessing (FALSE);
 		    	if (!InDisplayProcessing)
-		    		HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",500), (FARPROC) 0); 
+		    		HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",500), (TIMERPROC) 0); 
 		    	else
 		    		HaveTimer = FALSE;
             }
@@ -2508,7 +2508,7 @@ NoBox:
 	    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
 	    	HaveTimer = FALSE; 
 	    	if (!InDisplayProcessing)
-				HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",200), (FARPROC) 0);
+				HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",200), (TIMERPROC) 0);
         }
 	}
 		BlockSocketProcessing (FALSE);
@@ -3707,7 +3707,7 @@ BOOL SmoothZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	MovePoint=POINTStoPOINT(MAKEPOINTS(lParam)); 
 		if (!PtInRect (&SZVPRect ,MovePoint))
 			goto RtnFalse;
-		HaveTimer = SetTimer(hWnd, GF_SMOOTH_ZOOM,500, (FARPROC) 0);
+		HaveTimer = SetTimer(hWnd, GF_SMOOTH_ZOOM,500, (TIMERPROC) 0);
 		TimerType = 1;
 		break;
     case WM_LBUTTONDOWN:
@@ -3717,7 +3717,7 @@ BOOL SmoothZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		if (!PtInRect (&SZVPRect ,MovePoint))
 			goto RtnFalse;
 		TimerType = 2;
-		HaveTimer = SetTimer(hWnd, GF_SMOOTH_ZOOM,500, (FARPROC) 0);
+		HaveTimer = SetTimer(hWnd, GF_SMOOTH_ZOOM,500, (TIMERPROC) 0);
 		break;
 DoBtnDown:
 	{   
@@ -3952,7 +3952,7 @@ Exit:
 	    	KillTimer (hWnd,HaveTimer);
 	    HaveTimer = FALSE;         
 	    if (!InDisplayProcessing)
-			HaveTimer = SetTimer(hWnd, GF_SMOOTH_ZOOM,500, (FARPROC) 0);
+			HaveTimer = SetTimer(hWnd, GF_SMOOTH_ZOOM,500, (TIMERPROC) 0);
 		TimerType = 3;
 	}
     	break;
@@ -4517,9 +4517,9 @@ BOOL EditTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Fun
     		case GF_EDIT_TEXTBOX:
 	    	DoPaint = FALSE;
 	        {
-	          FARPROC lpfnTAGEDITMsgProc;
+	          DLGPROC lpfnTAGEDITMsgProc;
 		
-	          lpfnTAGEDITMsgProc = MakeProcInstance((FARPROC)TAGEDITMsgProc, hInst);
+	          lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWndMain, lpfnTAGEDITMsgProc);
 	          FreeProcInstance(lpfnTAGEDITMsgProc);
 	        }
@@ -5258,7 +5258,7 @@ BOOL EditViewport (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 #endif
 { 
 
-  FARPROC lpfnVPEDITMsgProc;
+  DLGPROC lpfnVPEDITMsgProc;
   int	nRc;
 
   switch (Message)
@@ -5272,7 +5272,7 @@ BOOL EditViewport (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    case GF_EXECUTE:  
 	    {   
 	    	DisableMarginPan = TRUE;
-			lpfnVPEDITMsgProc = MakeProcInstance((FARPROC)VPEDITMsgProc, hInst);
+			lpfnVPEDITMsgProc = MakeProcInstance((DLGPROC)VPEDITMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"VPEDIT", hWndMain,lpfnVPEDITMsgProc);
 			FreeProcInstance(lpfnVPEDITMsgProc);
 			if (nRc)
@@ -7238,10 +7238,10 @@ BOOL SetStreetName (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONUP:
 
    	{
-		FARPROC lpfnGETSTREETNUMMsgProc; 
+		DLGPROC lpfnGETSTREETNUMMsgProc; 
 		BOOL	rc;
 			
-		lpfnGETSTREETNUMMsgProc = MakeProcInstance((FARPROC)GETSTREETNUMMsgProc, hInst);
+		lpfnGETSTREETNUMMsgProc = MakeProcInstance((DLGPROC)GETSTREETNUMMsgProc, hInst);
 		rc=DialogBox(hInst, (LPSTR)"GETSTREETNUM", hWndMain, lpfnGETSTREETNUMMsgProc);
 		FreeProcInstance(lpfnGETSTREETNUMMsgProc);
 		PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -7802,10 +7802,10 @@ BOOL DisplayNetInfo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
-			FARPROC lpfnDISPLAYNETINFOMsgProc; 
+			DLGPROC lpfnDISPLAYNETINFOMsgProc; 
 			BOOL	rc;
 				
-			lpfnDISPLAYNETINFOMsgProc = MakeProcInstance((FARPROC)DISPLAYNETINFOMsgProc, hInst);
+			lpfnDISPLAYNETINFOMsgProc = MakeProcInstance((DLGPROC)DISPLAYNETINFOMsgProc, hInst);
 			rc=DialogBox(hInst, (LPSTR)"DISPLAYNETINFO", hWndMain, lpfnDISPLAYNETINFOMsgProc);
 			FreeProcInstance(lpfnDISPLAYNETINFOMsgProc);
     	} 
@@ -8191,10 +8191,10 @@ BOOL DeleteNetMarker (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
-			FARPROC lpfnDISPLAYNETINFOMsgProc; 
+			DLGPROC lpfnDISPLAYNETINFOMsgProc; 
 			BOOL	rc;
 				
-			lpfnDISPLAYNETINFOMsgProc = MakeProcInstance((FARPROC)DISPLAYNETINFOMsgProc, hInst);
+			lpfnDISPLAYNETINFOMsgProc = MakeProcInstance((DLGPROC)DISPLAYNETINFOMsgProc, hInst);
 			rc=DialogBox(hInst, (LPSTR)"DISPLAYNETINFO", hWndMain, lpfnDISPLAYNETINFOMsgProc);
 			FreeProcInstance(lpfnDISPLAYNETINFOMsgProc);
     	} 
@@ -8432,9 +8432,9 @@ BOOL ShowPolyPoints (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		GetSavedPolys ();
 		if (hSavePoly) 
         {
-              FARPROC	lpfnSHOWPOLYMsgProc; 
+              DLGPROC	lpfnSHOWPOLYMsgProc; 
 
-              lpfnSHOWPOLYMsgProc = MakeProcInstance((FARPROC)SHOWPOLYMsgProc, hInst);
+              lpfnSHOWPOLYMsgProc = MakeProcInstance((DLGPROC)SHOWPOLYMsgProc, hInst);
 //              DialogBox(hInst, (LPSTR)"SHOWPOLY", hWnd, lpfnSHOWPOLYMsgProc);
 //              FreeProcInstance(lpfnSHOWPOLYMsgProc);
               CreateDialog(hInst, (LPSTR)"SHOWPOLY", hWnd, lpfnSHOWPOLYMsgProc);
@@ -9881,11 +9881,11 @@ BOOL SnapTo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Functio
 		}
 		if (Function == GF_SNAP_DIST_AND_DIR) 
 		{   
-			FARPROC lpfnDISTANDDIRMsgProc;
+			DLGPROC lpfnDISTANDDIRMsgProc;
 			HCURSOR	SaveCursor=GSSiSetCursor (LoadCursor(0, IDC_ARROW));     
 
 			
-			lpfnDISTANDDIRMsgProc = MakeProcInstance((FARPROC)DISTANDDIRMsgProc, hInst);
+			lpfnDISTANDDIRMsgProc = MakeProcInstance((DLGPROC)DISTANDDIRMsgProc, hInst);
 			st = DialogBox(hInst, (LPSTR)"DISTANDDIR", hWnd, lpfnDISTANDDIRMsgProc);
 			FreeProcInstance(lpfnDISTANDDIRMsgProc);
 			GSSiSetCursor (SaveCursor);
@@ -9903,7 +9903,7 @@ BOOL SnapTo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Functio
 		}
 		if (Function == GF_SNAP_COORD) 
 		{   
-           	FARPROC lpfnLOC_COORDMsgProc;
+           	DLGPROC lpfnLOC_COORDMsgProc;
 			HCURSOR	SaveCursor=GSSiSetCursor (LoadCursor(0, IDC_ARROW));     
             
 			if (GetGlobalCVal ("[%NEXTCVAL]",str,0))
@@ -9923,7 +9923,7 @@ BOOL SnapTo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Functio
 			else
 			{
 	            InSnap = TRUE;
-	            lpfnLOC_COORDMsgProc = MakeProcInstance((FARPROC)LOC_COORDMsgProc, hInst);
+	            lpfnLOC_COORDMsgProc = MakeProcInstance((DLGPROC)LOC_COORDMsgProc, hInst);
 	            st = DialogBox(hInst, (LPSTR)"LOC_COORD", hWnd, lpfnLOC_COORDMsgProc);
 	            FreeProcInstance(lpfnLOC_COORDMsgProc); 
 				InSnap = FALSE; 
@@ -9943,14 +9943,14 @@ BOOL SnapTo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Functio
 		}
 		if (Function == GF_SNAP_LATLONG) 
 		{   
-           	FARPROC lpfnLOC_LATLONGMsgProc;
+           	DLGPROC lpfnLOC_LATLONGMsgProc;
 			HCURSOR	SaveCursor=GSSiSetCursor (LoadCursor(0, IDC_ARROW));     
             
 			//GetCursorPos (&MousePoint);
 			//ScreenToClient (hWnd,&MousePoint);
 		    //UserSpecifiedBasePoint=WinPtToBasePt(MousePoint);
             InSnap = TRUE;
-            lpfnLOC_LATLONGMsgProc = MakeProcInstance((FARPROC)LOC_LATLONGMsgProc, hInst);
+            lpfnLOC_LATLONGMsgProc = MakeProcInstance((DLGPROC)LOC_LATLONGMsgProc, hInst);
             st = DialogBox(hInst, (LPSTR)"LOC_LATLONG", hWnd, lpfnLOC_LATLONGMsgProc);
             FreeProcInstance(lpfnLOC_LATLONGMsgProc); 
 			GSSiSetCursor (SaveCursor);
@@ -10336,10 +10336,10 @@ NextRef:
 				}
 				else if (Message == WM_LBUTTONUP)
 	            {
-	                  FARPROC	lpfnADDRESS_EDITMsgProc;
+	                  DLGPROC	lpfnADDRESS_EDITMsgProc;
 	                  short	rc; 
 	
-	                  lpfnADDRESS_EDITMsgProc = MakeProcInstance((FARPROC)ADDRESS_EDITMsgProc, hInst);
+	                  lpfnADDRESS_EDITMsgProc = MakeProcInstance((DLGPROC)ADDRESS_EDITMsgProc, hInst);
 	                  rc = DialogBox(hInst, (LPSTR)"ADDRESS_EDIT", hWnd, lpfnADDRESS_EDITMsgProc);
 	                  FreeProcInstance(lpfnADDRESS_EDITMsgProc);
 	                  if (rc)
@@ -10394,11 +10394,11 @@ NextRef:
 				}
 				else if (Message == WM_LBUTTONUP) 
 			   	{
-					FARPROC lpfnGETSTREETNUMMsgProc; 
+					DLGPROC lpfnGETSTREETNUMMsgProc; 
 					BOOL	rc;
 					
 					StreetNum = CurPath=*pChangeAdd;		
-					lpfnGETSTREETNUMMsgProc = MakeProcInstance((FARPROC)GETSTREETNUMMsgProc, hInst);
+					lpfnGETSTREETNUMMsgProc = MakeProcInstance((DLGPROC)GETSTREETNUMMsgProc, hInst);
 					rc=DialogBox(hInst, (LPSTR)"GETSTREETNUM", hWndMain, lpfnGETSTREETNUMMsgProc);
 					FreeProcInstance(lpfnGETSTREETNUMMsgProc);
 				    switch (rc)
@@ -11628,10 +11628,10 @@ BOOL CreateNullMap (HWND hWnd, int Message, short Function)
     {
     	char	Name[MAX_PATH]="";
 		short	nRc;
-		FARPROC lpfnIMPORT_LIMITSMsgProc;
+		DLGPROC lpfnIMPORT_LIMITSMsgProc;
 		MNMXCORD	SaveEditBounds=EditBounds; 
 							
-		lpfnIMPORT_LIMITSMsgProc = MakeProcInstance((FARPROC)IMPORT_LIMITSMsgProc, hInst);
+		lpfnIMPORT_LIMITSMsgProc = MakeProcInstance((DLGPROC)IMPORT_LIMITSMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"IMPORT_LIMITS", hWnd, lpfnIMPORT_LIMITSMsgProc);
 		FreeProcInstance(lpfnIMPORT_LIMITSMsgProc);
 		if (nRc)
@@ -11641,11 +11641,11 @@ BOOL CreateNullMap (HWND hWnd, int Message, short Function)
         	lpLimits = (LPIMPORTLIMITS)GlobalLock (hImportLimits);
 	    	if (Function == GF_CREATE_NULL_DIR)
 	        {
-				FARPROC	lpfnNULLDIRMsgProc; 
+				DLGPROC	lpfnNULLDIRMsgProc; 
 				short		nRc;
 					
 				*(LPMNMXCORD)&UserBounds = lpLimits->MinMax;
-				lpfnNULLDIRMsgProc = MakeProcInstance((FARPROC)NULLDIRMsgProc, hInst);
+				lpfnNULLDIRMsgProc = MakeProcInstance((DLGPROC)NULLDIRMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"NULLDIR", hWnd, lpfnNULLDIRMsgProc);
 				FreeProcInstance(lpfnNULLDIRMsgProc);
 	        }
@@ -12051,7 +12051,7 @@ GSSiExitProg (878);
 		short	Item; 
 		POINT	MousePoint;
 		DPOINT	BasePoint;
-		FARPROC lpfnADDEDITTAGMsgProc;
+		DLGPROC lpfnADDEDITTAGMsgProc;
 		int	nRc; 
 		long	Refno;
     	
@@ -12074,7 +12074,7 @@ GSSiExitProg (878);
 		
 		if (!*NewTAGSave)
 		{				
-			lpfnADDEDITTAGMsgProc = MakeProcInstance((FARPROC)ADDEDITTAGMsgProc, hInst);
+			lpfnADDEDITTAGMsgProc = MakeProcInstance((DLGPROC)ADDEDITTAGMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"ADDEDITTAG", hWndMain, lpfnADDEDITTAGMsgProc);
 			FreeProcInstance(lpfnADDEDITTAGMsgProc);
 			if (!nRc)
@@ -12183,7 +12183,7 @@ GSSiExitProg (843);
        		
        		if ((Function == GF_EDIT_TEXT_HEADER ||Function == GF_SET_TEXT_GLOBALS) && !HaveNewSettings)
        		{
-				FARPROC	lpfnTEXTHEADEDITMsgProc;
+				DLGPROC	lpfnTEXTHEADEDITMsgProc;
 				short	rc; 
 				
 				Fid = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READ);
@@ -12214,7 +12214,7 @@ GSSiExitProg (843);
 						PostMessage(hWnd, GF_CLOSE,0, 0L);
 						break; 
 					}
-					lpfnTEXTHEADEDITMsgProc = MakeProcInstance((FARPROC)TEXTHEADEDITMsgProc, hInst);
+					lpfnTEXTHEADEDITMsgProc = MakeProcInstance((DLGPROC)TEXTHEADEDITMsgProc, hInst);
 					rc = DialogBox(hInst, (LPSTR)"TEXTHEADEDIT", hWnd, lpfnTEXTHEADEDITMsgProc);
 					FreeProcInstance(lpfnTEXTHEADEDITMsgProc);
 					if (rc)
@@ -12599,9 +12599,9 @@ BOOL AdjustBitmapColors (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, s
        	AddLBUTTON = FALSE;  
        	if (!hWndAdjustBitmapColors)
 	    {
-		  FARPROC lpfnADJUSTBITMAPCOLORSMsgProc;
+		  DLGPROC lpfnADJUSTBITMAPCOLORSMsgProc;
 		  
-	      lpfnADJUSTBITMAPCOLORSMsgProc = MakeProcInstance((FARPROC)ADJUSTBITMAPCOLORSMsgProc, hInst);
+	      lpfnADJUSTBITMAPCOLORSMsgProc = MakeProcInstance((DLGPROC)ADJUSTBITMAPCOLORSMsgProc, hInst);
 	      CreateDialog(hInst, (LPSTR)"ADJUSTBITMAPCOLORS", hWnd, lpfnADJUSTBITMAPCOLORSMsgProc);
 	    }
    		break;
@@ -12701,9 +12701,9 @@ BOOL OrthoFilterFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, 
        	AddLBUTTON = FALSE;  
        	if (!hWndOrthoFilter)
 	    {
-		  FARPROC lpfnORTHOFILTERMsgProc;
+		  DLGPROC lpfnORTHOFILTERMsgProc;
 		  
-	      lpfnORTHOFILTERMsgProc = MakeProcInstance((FARPROC)ORTHOFILTERMsgProc, hInst);
+	      lpfnORTHOFILTERMsgProc = MakeProcInstance((DLGPROC)ORTHOFILTERMsgProc, hInst);
 	      CreateDialog(hInst, (LPSTR)"ORTHOFILTER", hWnd, lpfnORTHOFILTERMsgProc);
 	    }
    		break;
@@ -12820,7 +12820,7 @@ BOOL HighlightByClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 
     case WM_LBUTTONUP: 
     {
-    	FARPROC lpfnHIGHLIGHTCLASSMsgProc;
+    	DLGPROC lpfnHIGHLIGHTCLASSMsgProc;
     	short	iclass,i; 
     	
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
@@ -12837,7 +12837,7 @@ BOOL HighlightByClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			}
 		} 
 		DoPaint = FALSE; 
-        lpfnHIGHLIGHTCLASSMsgProc = MakeProcInstance((FARPROC)HIGHLIGHTCLASSMsgProc, hInst);
+        lpfnHIGHLIGHTCLASSMsgProc = MakeProcInstance((DLGPROC)HIGHLIGHTCLASSMsgProc, hInst);
         DialogBox(hInst, (LPSTR)"HIGHLIGHTCLASS", CurView->hWnd, lpfnHIGHLIGHTCLASSMsgProc);
         FreeProcInstance(lpfnHIGHLIGHTCLASSMsgProc);
 		DoPaint=TRUE;
@@ -13006,7 +13006,7 @@ BOOL SelectDist (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 #endif
 {  
  static	HCURSOR	InCursor; 
- FARPROC lpfnSELECTDISTMsgProc;  
+ DLGPROC lpfnSELECTDISTMsgProc;  
  short	nRc;
  
  switch (Message)
@@ -13015,7 +13015,7 @@ BOOL SelectDist (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	   	InCursor = CurView->hCursor;
 		SetCurs ((HCURSOR)2,FALSE);
 //   		SetPrompt (PRMT_SELECT_DIST);
-		lpfnSELECTDISTMsgProc = MakeProcInstance((FARPROC)SELECTDISTMsgProc, hInst);
+		lpfnSELECTDISTMsgProc = MakeProcInstance((DLGPROC)SELECTDISTMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"SELECTDIST", hWnd, lpfnSELECTDISTMsgProc);
 		FreeProcInstance(lpfnSELECTDISTMsgProc);
 	    PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -13234,7 +13234,7 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 			else
 				hBmpScreen = SaveScreen (CurView->hDC,CurView->ScreenRect);
 			if (!From)
-				TimerID = SetTimer(CurView->hWnd, GF_WHEELZOOM,WheelZoomTimeout, (FARPROC) 0);
+				TimerID = SetTimer(CurView->hWnd, GF_WHEELZOOM,WheelZoomTimeout, (TIMERPROC) 0);
 			OrigScale = CurView->Scale;
 			Count = 0;
 		}
@@ -13299,7 +13299,7 @@ BOOL WheelZoom (int inc,int From,double Scale)//if inc == -1 returns TRUE if hav
 									 BMRect.bottom-BMRect.top+1,
 									 SRCCOPY);  
 			if (!From)
-				TimerID = SetTimer(CurView->hWnd, GF_WHEELZOOM,WheelZoomTimeout, (FARPROC) 0);
+				TimerID = SetTimer(CurView->hWnd, GF_WHEELZOOM,WheelZoomTimeout, (TIMERPROC) 0);
 			BlockVehicleDisplay = 1;
 			ReleaseDC(CurView->hWnd, hDC);
 		}
@@ -13488,7 +13488,7 @@ BOOL TraverseEntry (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		if (!hWndTraverseEntry)
 		{
 		                  
-		  lpfnTRAVERSE_ENTRYMsgProc = MakeProcInstance((FARPROC)TRAVERSE_ENTRYMsgProc, hInst);
+		  lpfnTRAVERSE_ENTRYMsgProc = MakeProcInstance((DLGPROC)TRAVERSE_ENTRYMsgProc, hInst);
 		  hWndTraverseEntry=CreateDialog(hInst,"TRAVERSE_ENTRY",hWndMain, lpfnTRAVERSE_ENTRYMsgProc);
 		}
 		else
@@ -16267,13 +16267,13 @@ BOOL EditRedefData (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 {GSSiEnterProg (839);
 #endif
 {
-	FARPROC lpfnRDFEDITMsgProc; 
+	DLGPROC lpfnRDFEDITMsgProc; 
 	short	nRc;
  switch (Message)
    {
    	case GF_INIT:
 		
-		lpfnRDFEDITMsgProc = MakeProcInstance((FARPROC)RDFEDITMsgProc, hInst);
+		lpfnRDFEDITMsgProc = MakeProcInstance((DLGPROC)RDFEDITMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"RDFEDIT", hWnd, lpfnRDFEDITMsgProc);
 		FreeProcInstance(lpfnRDFEDITMsgProc);
 		PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -16632,7 +16632,7 @@ BOOL SetViewportParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,shor
 				Pickability = FALSE; 
 		SetVis:
              {
-              FARPROC lpfnVISIBLEMsgProc;  
+              DLGPROC lpfnVISIBLEMsgProc;  
               char	VisDialog[2][10]={"VISIBLE","VISIBLE1"};
 
 			  if (!CurrentConfig || !CurView)
@@ -16640,7 +16640,7 @@ BOOL SetViewportParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,shor
 			  	SetConfig (1);
 			  	SetViewport(*pCommandViewport);
 			  }
-              lpfnVISIBLEMsgProc = MakeProcInstance((FARPROC)VISIBLEMsgProc, hInst);
+              lpfnVISIBLEMsgProc = MakeProcInstance((DLGPROC)VISIBLEMsgProc, hInst);
               DialogBox(hInst, (LPSTR)VisDialog[VisListOpt], hWnd, lpfnVISIBLEMsgProc);
               FreeProcInstance(lpfnVISIBLEMsgProc);
  
@@ -16655,9 +16655,9 @@ BOOL SetViewportParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,shor
 		SetPik: 
 		    {
 				short	nRc;
-                FARPROC lpfnVISFILESMsgProc;
+                DLGPROC lpfnVISFILESMsgProc;
                   
-				lpfnVISFILESMsgProc = MakeProcInstance((FARPROC)VISFILESMsgProc, hInst);
+				lpfnVISFILESMsgProc = MakeProcInstance((DLGPROC)VISFILESMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"VISFILES", hWnd, lpfnVISFILESMsgProc);
 				FreeProcInstance(lpfnVISFILESMsgProc);
 		    }
@@ -16908,7 +16908,7 @@ BOOL CopyPolylineWithOffset (HWND hWnd, int Message, WPARAM wParam, LPARAM lPara
    {
    	case GF_INIT: 
         {
-            FARPROC lpfnCOPYLINEMsgProc;
+            DLGPROC lpfnCOPYLINEMsgProc;
             short	nRc; 
             
 			if (BT_NUM_IN_INDEX (hHighlight) != 1) 
@@ -16929,7 +16929,7 @@ BOOL CopyPolylineWithOffset (HWND hWnd, int Message, WPARAM wParam, LPARAM lPara
 	   			_fstrcpy (EditName,CurView->lpFiles[CurView->UpdateFile-1]);
    	
                   
-			lpfnCOPYLINEMsgProc = MakeProcInstance((FARPROC)COPYLINEMsgProc, hInst);
+			lpfnCOPYLINEMsgProc = MakeProcInstance((DLGPROC)COPYLINEMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"COPYLINE", hWnd, lpfnCOPYLINEMsgProc);
 			FreeProcInstance(lpfnCOPYLINEMsgProc);
 			if (!nRc)
@@ -16977,7 +16977,7 @@ BOOL LegendSetup (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
  switch (Message)
    {
    	case GF_INIT:  
-		lpfnLEGENDEDITMsgProc = (DLGPROC) MakeProcInstance((FARPROC)LEGENDEDITMsgProc, hInst);
+		lpfnLEGENDEDITMsgProc = (DLGPROC) MakeProcInstance((DLGPROC)LEGENDEDITMsgProc, hInst);
 		CreateDialog(hInst, (LPSTR)"LEGENDEDIT",hWnd, lpfnLEGENDEDITMsgProc);
    		break;
    		
@@ -17806,7 +17806,7 @@ BOOL SetPNParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		if (!hWndPNParms)
 		{
 		                  
-		  lpfnPNPARMSMsgProc = MakeProcInstance((FARPROC)PNPARMSMsgProc, hInst);
+		  lpfnPNPARMSMsgProc = MakeProcInstance((DLGPROC)PNPARMSMsgProc, hInst);
 		  hWndTraverseEntry=CreateDialog(hInst,"PNPARMS",hWnd, lpfnPNPARMSMsgProc);
 		}
 		else

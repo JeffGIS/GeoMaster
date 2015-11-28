@@ -544,14 +544,14 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 	Fid = GSSiOpenFile (Name,0,OF_READ); 
 	if (Fid == HFILE_ERROR)  
 	{
-        FARPROC lpfnSETSHAPEPARAMMsgProc;  
+        DLGPROC lpfnSETSHAPEPARAMMsgProc;  
 
 		_fstrcpy (LastSHPFile,SHPFileName);
 		ExpandText (LastSHPFile); 
 		if (!Type || FileIsIndex || !GetGlobalBVal2 ("[%AUTOSHPPARM]",TRUE))
 			goto RtnFalse;   
 		{
-			lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETSHAPEPARAMMsgProc, hInst);
+			lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
 			DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
 			FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
 			Fid = GSSiOpenFile (Name,0,OF_READ);  
@@ -3531,10 +3531,10 @@ GSSiExitProg (1107);
 BOOL GetPGDBTable (HWND hWnd,LPSTR File)
 {
 	BOOL	rtn;
-	FARPROC lpfnSELECTITEMSMsgProc;
+	DLGPROC lpfnSELECTITEMSMsgProc;
      
     _fstrcpy (PGDBFile,File); 
-	lpfnSELECTITEMSMsgProc = MakeProcInstance((FARPROC)SELECTPGDBMsgProc, hInst);
+	lpfnSELECTITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTPGDBMsgProc, hInst);
 	rtn = DialogBox(hInst, (LPSTR)"SELECTPGDB",hWnd, lpfnSELECTITEMSMsgProc);
 	FreeProcInstance(lpfnSELECTITEMSMsgProc); 
 	if (rtn)
@@ -3544,10 +3544,10 @@ BOOL GetPGDBTable (HWND hWnd,LPSTR File)
 BOOL GetFGDBTable (HWND hWnd,LPSTR File)
 {
 	BOOL	rtn;
-	FARPROC lpfnSELECTITEMSMsgProc;
+	DLGPROC lpfnSELECTITEMSMsgProc;
      
     _fstrcpy (FGDBFile,File); 
-	lpfnSELECTITEMSMsgProc = MakeProcInstance((FARPROC)SELECTFGDBMsgProc, hInst);
+	lpfnSELECTITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTFGDBMsgProc, hInst);
 	rtn = DialogBox(hInst, (LPSTR)"SELECTFGDB",hWnd, lpfnSELECTITEMSMsgProc);
 	FreeProcInstance(lpfnSELECTITEMSMsgProc); 
 	if (rtn)

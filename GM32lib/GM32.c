@@ -1184,7 +1184,7 @@ UINT_PTR CALLBACK OFNHookProcOldStyle(HWND hDlg, UINT message,
 		  }
 		  else if (HIWORD(wParam) == LBN_SELCHANGE)
 		  {
-			  SetTimer(hDlg, 1, 200, (FARPROC) 0);
+			  SetTimer(hDlg, 1, 200, (TIMERPROC) 0);
 			  break;
 		  }
 		  break;

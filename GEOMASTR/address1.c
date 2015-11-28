@@ -486,7 +486,7 @@ BOOL AddressLocation1 (HWND hWnd, HINSTANCE hInst,UINT iopt)
 		  strcpy (TempAddressDir,AltAddressDir);
 		  CloseAllAddressFiles ();
 	  }
-      lpfnADDRESS1MsgProc = MakeProcInstance((FARPROC)ADDRESS1MsgProc, hInst);
+      lpfnADDRESS1MsgProc = MakeProcInstance((DLGPROC)ADDRESS1MsgProc, hInst);
 	  if (iopt == IDM_L_NET_ADDRESS)
 		nRc = DialogBox(hInst, (LPCSTR)"ADDRESS1", hWnd, lpfnADDRESS1MsgProc);
 	  else
@@ -515,11 +515,11 @@ BOOL AddressLocation1 (HWND hWnd, HINSTANCE hInst,UINT iopt)
 BOOL LocatePID (HWND hWnd, HINSTANCE hInst)
 {
      {
-      FARPROC lpfnLOCATEPIDMsgProc;
+      DLGPROC lpfnLOCATEPIDMsgProc;
       short	nRc;
 	  int	n = 0;
 
-      lpfnLOCATEPIDMsgProc = MakeProcInstance((FARPROC)LOCATEPIDMsgProc, hInst);
+      lpfnLOCATEPIDMsgProc = MakeProcInstance((DLGPROC)LOCATEPIDMsgProc, hInst);
       nRc = DialogBox(hInst, (LPSTR)"LOCATEPID", hWnd, lpfnLOCATEPIDMsgProc);
       FreeProcInstance(lpfnLOCATEPIDMsgProc);
 	  if (nRc)
@@ -544,11 +544,11 @@ BOOL LocatePID (HWND hWnd, HINSTANCE hInst)
 
 BOOL AddressLocationPID (HWND hWnd, HINSTANCE hInst)
 {     
-	      FARPROC lpfnADDRESSPIDMsgProc;
+	      DLGPROC lpfnADDRESSPIDMsgProc;
 		  short	nRc;
 		  int	n = 0;
 	
-	      lpfnADDRESSPIDMsgProc = MakeProcInstance((FARPROC)ADDRESSPIDMsgProc, hInst);
+	      lpfnADDRESSPIDMsgProc = MakeProcInstance((DLGPROC)ADDRESSPIDMsgProc, hInst);
 	      nRc = DialogBox(hInst, (LPSTR)"ADDRESS1", hWnd, lpfnADDRESSPIDMsgProc);
 	      FreeProcInstance(lpfnADDRESSPIDMsgProc);
 		  if (nRc == 1)

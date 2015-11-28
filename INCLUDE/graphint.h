@@ -741,7 +741,7 @@ HFILE SaveHighlightListToConfig (HFILE FidConfig);
 BOOL ReadHighlightListFromConfig (HFILE *FidConfig);
 BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL First);
 void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore);
-HANDLE ShowPointerLine (HWND hWnd,RECT rect,POINT endpoint, POINT begpoint, BOOL *HavePL,BOOL MoveMode,int LineWidth,int Elww,int Elwh,LPRECT pClipRect);
+HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *HavePL,BOOL MoveMode,int LineWidth,int Elww,int Elwh,LPRECT pClipRect);
 void DisplayShadow (HDC hDC,LPRECT pRect,short offset);
 BOOL CreateReorgBackupFile (LPSTR PltName);
 void ApplyVPShadows (void);

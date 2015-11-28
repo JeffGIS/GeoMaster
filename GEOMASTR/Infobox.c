@@ -299,10 +299,10 @@ BOOL CreateTAGBoxFromFile (HDC hDC,DPOINT BasePoint,LPSTR File,int item,double M
 	}
 	if (TAGBox.Flags.AutoEdit)
 	{
-		FARPROC lpfnTAGEDITMsgProc;
+		DLGPROC lpfnTAGEDITMsgProc;
 						
 		DoPaint = FALSE;
-		lpfnTAGEDITMsgProc = MakeProcInstance((FARPROC)TAGEDITMsgProc, hInst);
+		lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWndMain, lpfnTAGEDITMsgProc);
 		FreeProcInstance(lpfnTAGEDITMsgProc);
 	} 

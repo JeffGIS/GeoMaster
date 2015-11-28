@@ -54,7 +54,7 @@ static short	MaxWaitCycles=5;
 static short	have_crc_table=0;
 static HFILE	TraceFid=HFILE_ERROR;
 static char		SaveWinText[144];
-static FARPROC	lpfnTRACEWINDOWMsgProc;  
+static DLGPROC	lpfnTRACEWINDOWMsgProc;  
 static int		NumTries=0,NumSuccess=0;
 static char		NotFoundList[MAXNOTFOUND][MAX_PATH];
 static int		NotFoundCode[MAXNOTFOUND];
@@ -6726,7 +6726,7 @@ GSSiExitProg (292);
     }
 	if (!hWndTrace)
 	{ 
-	  lpfnTRACEWINDOWMsgProc = MakeProcInstance((FARPROC)TRACEWINDOWMsgProc, hInst);
+	  lpfnTRACEWINDOWMsgProc = MakeProcInstance((DLGPROC)TRACEWINDOWMsgProc, hInst);
 	  hWndTrace=CreateDialog(hInst,"TRACEWINDOW",hWndMain, lpfnTRACEWINDOWMsgProc);
 	}
 	if (CurTraceLev <= 0)
@@ -8457,7 +8457,7 @@ BOOL CopyFileExtended (LPSTR ToFile,LPSTR FromFile)
 	if (TotLen > DisplayCacheProgressMinFileSize)
 	{
 		strcpy (CacheTitle,"Caching file ... please wait");
-		hWndCache = CreateDialog(hInst, "CACHEFILE", hWndMain, CACHEFILEMsgProc); 
+		hWndCache = CreateDialog(hInst, "CACHEFILE", hWndMain, (DLGPROC)CACHEFILEMsgProc); 
 		DoPCTPeek = hWndCache;
 		SetDlgItemText (hWndCache,IDC_FILEBEINGCACHED,FromFile);
 		//rtn = copyfile (ToFile, FromFile,FALSE,0,0,hWndCache,IDC_CACHEPROGRESS,TotLen,&CurLoc);
@@ -8490,7 +8490,7 @@ BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 	if (TotLen > DisplayCacheProgressMinFileSize)
 	{
 		strcpy (CacheTitle,"Caching file ... please wait");
-		hWndCache = CreateDialog(hInst, "CACHEFILE", hWndMain, CACHEFILEMsgProc); 
+		hWndCache = CreateDialog(hInst, "CACHEFILE", hWndMain,(DLGPROC) CACHEFILEMsgProc); 
 		DoPCTPeek = hWndCache;
 		SetDlgItemText (hWndCache,IDC_FILEBEINGCACHED,FromFile);
 		//rtn = copyfile (ToFile, FromFile,FALSE,0,0,hWndCache,IDC_CACHEPROGRESS,TotLen,&CurLoc);

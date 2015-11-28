@@ -6198,7 +6198,7 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 
 	MBHMess = Mess;
 	MBHTitle = Title;
-	rtn = DialogBox(hInst, (LPSTR)"MESSAGEBOXHALT", hWnd, MESSAGEBOXHALTMsgProc);
+	rtn = DialogBox(hInst, (LPSTR)"MESSAGEBOXHALT", hWnd,(DLGPROC) MESSAGEBOXHALTMsgProc);
 
 	return rtn;
 }

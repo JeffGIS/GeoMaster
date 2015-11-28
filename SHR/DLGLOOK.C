@@ -88,12 +88,12 @@ LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
     	/*	if (ProcessDynEdit (0,hWnd,wParam,lParam))
     			lRtn = 1;
     		else*/
-            	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	break;
     	
     	case WM_NCDESTROY:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg,(WPARAM) wParam, (LPARAM)lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg,(WPARAM) wParam, (LPARAM)lParam);
 	        SetWindowLong (hWnd, GWL_WNDPROC, (LONG) lpOrgProc);
 	        RemoveProp (hWnd, "PrHI");
 	        RemoveProp (hWnd, "PrLO");
@@ -104,7 +104,7 @@ LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
     
     	case WM_NCHITTEST:
 	    {   
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	if (hWnd != LastWnd)
 	    	{
 				Prompt = (UINT)GetProp (hWnd, "GMPr");
@@ -122,7 +122,7 @@ LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
 				ShowDlgUpdateOptions (hWnd,hWnd);
 			}
 			else
-	        	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 			Prompt = (UINT)GetProp (hWnd, "GMMr");
 			SetPromptDlg (Prompt); 
 			LastWnd = hWnd;
@@ -132,7 +132,7 @@ LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
 	    case WM_RBUTTONUP:
 	    {   
 	    	LastWnd = 0;
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    }
     	break;
     	
@@ -147,11 +147,11 @@ LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
         case WM_PAINT:
         {
             //Draw3DFrame (hWnd, 2);
-            lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
         } 
         break;
     	default:
-            lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
         break;
     }
 
@@ -172,12 +172,12 @@ LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lPar
     		if (ProcessDynEdit (0,hWnd,wParam,lParam))
     			lRtn = 1;
     		else
-            	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	break;
     	
     	case WM_NCDESTROY:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg,(WPARAM) wParam, (LPARAM)lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg,(WPARAM) wParam, (LPARAM)lParam);
 	        SetWindowLong (hWnd, GWL_WNDPROC, (LONG) lpOrgProc);
 	        RemoveProp (hWnd, "PrHI");
 	        RemoveProp (hWnd, "PrLO");
@@ -188,7 +188,7 @@ LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lPar
     
     	case WM_NCHITTEST:
 	    {   
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	if (hWnd != LastWnd)
 	    	{
 				Prompt = (UINT)GetProp (hWnd, "GMPr");
@@ -206,7 +206,7 @@ LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lPar
 				ShowDynDlgUpdateOptions (hWnd,hWnd);
 			}
 			else
-	        	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 			Prompt = (UINT)GetProp (hWnd, "GMMr");
 			SetPromptDlg (Prompt); 
 			LastWnd = hWnd;
@@ -216,7 +216,7 @@ LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lPar
 	    case WM_RBUTTONUP:
 	    {   
 	    	LastWnd = 0;
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    }
     	break;
     	
@@ -231,11 +231,11 @@ LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lPar
         case WM_PAINT:
         {
             //Draw3DFrame (hWnd, 2);
-            lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
         } 
         break;
     	default:
-            lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
         break;
     }
 
@@ -350,12 +350,12 @@ LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
     		if (ProcessDlgEdit (0,hWnd,wParam,lParam))
     			lRtn = 1;
     		else
-            	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	break;
     	
     	case WM_NCDESTROY:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	        SetWindowLong (hWnd, GWL_WNDPROC, (LONG) lpOrgProc);
 	        RemoveProp (hWnd, "PrHI");
 	        RemoveProp (hWnd, "PrLO");
@@ -372,7 +372,7 @@ LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
 				ShowDlgUpdateOptions (hWnd,hWnd);
 			}
 			else
-	        	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	LastWnd = hWnd;
 			Prompt = (UINT)GetProp (hWnd, "GMMr");
 			SetPromptDlg (Prompt);  
@@ -383,13 +383,13 @@ LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
     	case WM_RBUTTONUP:
 	    { 
 	    	LastWnd = 0;                            
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    } 
 	    break;
 	    
     	case WM_NCHITTEST:
 	    {   
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);  
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);  
 	    	if (hWnd != LastWnd)
 	    	{   
 	    		LastWnd = hWnd;
@@ -401,7 +401,7 @@ LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
 	    
 	    default:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	
 	        //if (uiMsg == WM_PAINT && UpOrDown)
 	        //    Draw3DFrame (hWnd, UpOrDown);
@@ -425,12 +425,12 @@ LONG Draw3DUpDownDynDialog (HWND hWnd, unsigned uiMsg,
     		if (ProcessDynEdit (0,hWnd,wParam,lParam))
     			lRtn = 1;
     		else
-            	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	break;
     	
     	case WM_NCDESTROY:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	        SetWindowLong (hWnd, GWL_WNDPROC, (LONG) lpOrgProc);
 	        RemoveProp (hWnd, "PrHI");
 	        RemoveProp (hWnd, "PrLO");
@@ -447,7 +447,7 @@ LONG Draw3DUpDownDynDialog (HWND hWnd, unsigned uiMsg,
 				ShowDynDlgUpdateOptions (hWnd,hWnd);
 			}
 			else
-	        	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	LastWnd = hWnd;
 			Prompt = (UINT)GetProp (hWnd, "GMMr");
 			SetPromptDlg (Prompt);  
@@ -458,13 +458,13 @@ LONG Draw3DUpDownDynDialog (HWND hWnd, unsigned uiMsg,
     	case WM_RBUTTONUP:
 	    { 
 	    	LastWnd = 0;                            
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    } 
 	    break;
 	    
     	case WM_NCHITTEST:
 	    {   
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);  
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);  
 	    	if (hWnd != LastWnd)
 	    	{   
 	    		LastWnd = hWnd;
@@ -476,7 +476,7 @@ LONG Draw3DUpDownDynDialog (HWND hWnd, unsigned uiMsg,
 	    
 	    default:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	
 	        //if (uiMsg == WM_PAINT && UpOrDown)
 	        //    Draw3DFrame (hWnd, UpOrDown);

@@ -195,10 +195,10 @@ short SelectSymbol (HWND hWnd,short Type,LPSTR StartSym,short DialogOpt)
 
 short SelectFontSymbol (HWND hWnd,LPSTR FontSizeC, COLORREF *Color)
 {
-	FARPROC lpfnGET_FONTSYMMsgProc;
+	DLGPROC lpfnGET_FONTSYMMsgProc;
 	int	nRc;
 	
-	lpfnGET_FONTSYMMsgProc = MakeProcInstance((FARPROC)GET_FONTSYMMsgProc, hInst);
+	lpfnGET_FONTSYMMsgProc = MakeProcInstance((DLGPROC)GET_FONTSYMMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"GET_FONTSYM", hWnd, lpfnGET_FONTSYMMsgProc);
 	FreeProcInstance(lpfnGET_FONTSYMMsgProc); 
 	return nRc;
@@ -1401,7 +1401,7 @@ Next:
 		if (nElementsToDisplay && !ItemInList (i,nElementsToDisplay,hElementsToDisplay))
 			goto SkipElement;
 		pElement = (LPELEMENT)GlobalLock (*phElement);
-		if (hDC > (HWND)100)
+		if (hDC > (HDC)100)
 		{   
 			hBrush = 0;
 			if (pElement->Type == SVAREA)
@@ -1459,7 +1459,7 @@ Next:
 					PC = Newpt;
 			}
 			Newpt = dnewpt (TiePoint,pVector->AZM+rotation,pVector->Dist);
-			if (!hDC || hDC > (HWND)100) 
+			if (!hDC || hDC > (HDC)100) 
 				Newpt.y = TiePoint.y - (Newpt.y - TiePoint.y); 
 			Newpt.x = TiePoint.x + (Newpt.x - TiePoint.x) * Hsizefactor;
 			Newpt.y = TiePoint.y + (Newpt.y - TiePoint.y) * Vsizefactor; 
@@ -1486,7 +1486,7 @@ Next:
 		} 
 		GlobalUnlock (hCurElement); 
 		pPoint = (LPPOINT)GlobalLock (hCurElement); 
-		if (hDC > (HWND)100)// 4/20/04 && !pBounds)
+		if (hDC > (HDC)100)// 4/20/04 && !pBounds)
 		{   
 			short	Type = pElement->Type;
 			
@@ -1576,7 +1576,7 @@ Next:
 			if (pSymbolRect)
 				AddPointsToSymbolRect (hDC,pPoint,NumElementPoints,Width);
 		}
-		else if (hDC && hDC < (HWND)99) // output symbol to dxf
+		else if (hDC && hDC < (HDC)99) // output symbol to dxf
 		{   
 			switch (pElement->Type)
 			{
@@ -1621,7 +1621,7 @@ Next:
 					break; 
 			}
 		}
-		else if (hDC == (HWND)99) // output symbol to edit file
+		else if (hDC == (HDC)99) // output symbol to edit file
 		{   
 			HANDLE		hDPoint = GSSiGlobAlloc ( 458,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
 			HPDPOINT	pDPoint = (HPDPOINT)GlobalLock (hDPoint);   
@@ -1673,7 +1673,7 @@ Exit:
 	GlobalUnlock (hSymbol);
 Exit2:
 	DestroySymbol (hSymbolInvis); 
-	if (hDC > (HWND)1)
+	if (hDC > (HDC)1)
 		RestoreDC (hDC,-1);
 	return hSaveScreen;
 }

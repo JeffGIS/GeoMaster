@@ -37241,7 +37241,7 @@ static void winDlError(sqlite3_vfs *pVfs, int nBuf, char *zBufOut){
   winGetLastErrorMsg(osGetLastError(), nBuf, zBufOut);
 }
 static void (*winDlSym(sqlite3_vfs *pVfs,void *pH,const char *zSym))(void){
-  FARPROC proc;
+  DLGPROC proc;
   UNUSED_PARAMETER(pVfs);
   proc = osGetProcAddressA((HANDLE)pH, zSym);
   OSTRACE(("DLSYM handle=%p, symbol=%s, address=%p\n",

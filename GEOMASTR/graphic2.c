@@ -435,7 +435,7 @@ BOOL ProcessPassiveFunctions (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam
 			{
 				InfoBoxEditTimer = INFOBOXEDITTIMERID;  
 				EditInfoBox = InfoBoxID;
-				SetTimer(hWndMain, INFOBOXEDITTIMERID, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",500), (FARPROC) 0);  
+				SetTimer(hWndMain, INFOBOXEDITTIMERID, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",500), (TIMERPROC) 0);  
 			}
 			else 
 			{
@@ -532,11 +532,11 @@ GSSiExitProg (113);
 
 BOOL SelectZoomMacro (HWND hWnd)
 {
-	FARPROC lpfnSELECTITEMSMsgProc;
+	DLGPROC lpfnSELECTITEMSMsgProc;
 	BOOL 	rtn;
 
-	lpfnSELECTITEMSMsgProc = MakeProcInstance((FARPROC)SELECTAVMsgProc, hInst);
-	rtn = DialogBox(hInst, (LPSTR)"SELECTONEITEM",hWnd, lpfnSELECTITEMSMsgProc);
+	lpfnSELECTITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTAVMsgProc, hInst);
+	rtn = DialogBox(hInst, (LPSTR)"SELECTONEITEM",hWnd, (DLGPROC)lpfnSELECTITEMSMsgProc);
 	FreeProcInstance(lpfnSELECTITEMSMsgProc); 
 	
 	return rtn;

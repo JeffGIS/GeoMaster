@@ -65,7 +65,7 @@ HANDLE GetMultiFile (HWND hWnd,LPSTR Ext,LPSTR StartDir,LPLONG pTotFiles)
 {
 	short	nRc; 
 	LPSTR	pDir;
-	FARPROC lpfnMULTIFILEMsgProc;  
+	DLGPROC lpfnMULTIFILEMsgProc;  
 	char	CurDir[MAX_PATH];
 	int		SaveDrive;     
 	HANDLE	hName=0;
@@ -84,8 +84,8 @@ HANDLE GetMultiFile (HWND hWnd,LPSTR Ext,LPSTR StartDir,LPLONG pTotFiles)
 	GSSiGetTempFileName (0,"gmm",0,pName);
     GlobalUnlock (hName);  
     hMFName = hName;
-	lpfnMULTIFILEMsgProc = MakeProcInstance((FARPROC)MULTIFILEMsgProc, hInst);
-	nRc = DialogBox(hInst, (LPSTR)"MULTIFILE", hWnd, lpfnMULTIFILEMsgProc);
+	lpfnMULTIFILEMsgProc = MakeProcInstance((DLGPROC)MULTIFILEMsgProc, hInst);
+	nRc = DialogBox(hInst, (LPSTR)"MULTIFILE", hWnd, (DLGPROC)lpfnMULTIFILEMsgProc);
 	FreeProcInstance(lpfnMULTIFILEMsgProc); 
 	GSSiGlobUlFree (&hDir);
     _chdir (CurDir);
@@ -3949,9 +3949,9 @@ void SetTAGDialog (HWND hWnd)
 #endif
 {   
 	short	nRc;
-	FARPROC lpfnSETTAGMsgProc;
+	DLGPROC lpfnSETTAGMsgProc;
 	
-	lpfnSETTAGMsgProc = MakeProcInstance((FARPROC)SETTAGMsgProc, hInst);
+	lpfnSETTAGMsgProc = MakeProcInstance((DLGPROC)SETTAGMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"SETTAG", hWnd, lpfnSETTAGMsgProc);
 	FreeProcInstance(lpfnSETTAGMsgProc);
 {
@@ -4047,9 +4047,9 @@ void SetSYMDialog (HWND hWnd)
 #endif
 {   
 	short	nRc;
-	FARPROC lpfnSETSYMMsgProc;
+	DLGPROC lpfnSETSYMMsgProc;
 	
-	lpfnSETSYMMsgProc = MakeProcInstance((FARPROC)SETSYMMsgProc, hInst);
+	lpfnSETSYMMsgProc = MakeProcInstance((DLGPROC)SETSYMMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"SETSYM", hWnd, lpfnSETSYMMsgProc);
 	FreeProcInstance(lpfnSETSYMMsgProc);
 {

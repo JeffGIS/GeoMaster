@@ -288,6 +288,7 @@ typedef LPOINT  			HUGE *HPLPOINT;
 typedef HANDLE				HDIB32; 
 typedef HDIB32				FAR *LPHDIB32; 
 typedef RECT				HUGE *HPRECT;
+typedef HMENU				*LPHMENU;
 
 #pragma pack(2)
 typedef struct 

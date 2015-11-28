@@ -10,7 +10,7 @@
 static TCHAR g_achTemp[256];  // Temporary buffer for strings. 
 static HWND  g_hwndTab=0;       // Tab control.
 HWND  g_hwndDisplay=0;   // Static control in tab control's display area.
-static FARPROC g_OldProc;
+static WNDPROC g_OldProc;
 WNDPROC	g_OrigTabProc;
 
 void DisplayTabbedMenu (HWND hWnd);
@@ -193,7 +193,7 @@ HWND WINAPI DoCreateTabControl(HWND hwndParent,int nTabs,LPSTR TabItems,int TabI
             return NULL; 
         } 
     } 
-	g_OldProc = (FARPROC)GetWindowLong (hwndTab,GWL_WNDPROC);
+	g_OldProc = (WNDPROC)GetWindowLong (hwndTab,GWL_WNDPROC);
 //	SetWindowLong (hwndTab,GWL_WNDPROC,TabbedWindowProc);
     return hwndTab; 
 } 

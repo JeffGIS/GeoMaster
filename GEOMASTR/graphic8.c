@@ -2573,7 +2573,7 @@ TryAgain:
 			}
 			if (hOldPen)
 				SelectObject (hDC,hOldPen);
-			if (hPen != HighlightPen && hPen != HighlightBrush && hPen != GetStockObject(NULL_PEN) && hReturnPen != hPen)
+			if (hPen != HighlightPen && hPen != (HPEN)HighlightBrush && hPen != (HPEN)GetStockObject(NULL_PEN) && hReturnPen != hPen)
 				GSSiDeleteObject (&hPen);
 			RestoreDC (hDC,-1);
 		} 
@@ -2644,7 +2644,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 	{
 		if (HighlightWidth < 0)//shows highlighted area with border line 
 		{
-			*phPen = HighlightBrush; 
+			*phPen = (HPEN)HighlightBrush; 
 			if (phBrush && !GetTypeVisibility(11) && !GetTypeVisibility(12))
 				*phBrush = 0;
 		}
@@ -3286,7 +3286,7 @@ TryAgain:
 	}
 	if (hOldPen)
 		SelectObject (hDC,hOldPen);
-	if (hPen != HighlightPen && hPen != HighlightBrush && hPen != GetStockObject(NULL_PEN) && hReturnPen != hPen)
+	if (hPen != HighlightPen && hPen != (HPEN)HighlightBrush && hPen != (HPEN)GetStockObject(NULL_PEN) && hReturnPen != hPen)
 		GSSiDeleteObject (&hPen); 
 	if (hDC == CompareDC)
 	{

@@ -1174,7 +1174,7 @@ BOOL AdjustToolbarPositions (void)
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
-				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, TOOLBARMsgProc); 
+				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, (DLGPROC)TOOLBARMsgProc); 
 				DoCreateDialogTooltip(ToolbarID);
 			}
 			else
@@ -1277,7 +1277,7 @@ BOOL AdjustToolbarPositions (void)
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
-				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, TOOLBARMsgProc); 
+				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, (DLGPROC)TOOLBARMsgProc);
 				DoCreateDialogTooltip(ToolbarID);
 			}
 			else
@@ -1381,7 +1381,7 @@ BOOL AdjustToolbarPositions (void)
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
-				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, TOOLBARMsgProc); 
+				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, (DLGPROC)TOOLBARMsgProc);
 				DoCreateDialogTooltip(ToolbarID);
 			}
 			else
@@ -1485,7 +1485,7 @@ BOOL AdjustToolbarPositions (void)
 				ToolbarFloating[ToolbarID] = FALSE;
 				GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 				ToolbarIDCur = ToolbarID;
-				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, TOOLBARMsgProc); 
+				ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWndMain, (DLGPROC)TOOLBARMsgProc);
 				DoCreateDialogTooltip(ToolbarID);
 			}
 			else
@@ -1523,7 +1523,7 @@ BOOL AdjustToolbarPositions (void)
 					ToolBarStartPoint.y = rect.top;
 					GSSiDeleteObject (&ToolbarImage[ToolbarID]);
 					ToolbarIDCur = ToolbarID;
-					ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_FLOAT", hWndMain, TOOLBARMsgProc); 
+					ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_FLOAT", hWndMain, (DLGPROC)TOOLBARMsgProc);
 					DoCreateDialogTooltip(ToolbarID);
 					h = RECTHEIGHT(&ToolbarRect[ToolbarID]);
 					w = RECTWIDTH(&ToolbarRect[ToolbarID]);
@@ -2890,7 +2890,7 @@ CursorMove:
 				else
 					hSavedScreen = SaveScreen2 (CurView->hWnd,CurView->hDC,CurView->ScreenRect,CurView,&ScreenID); 
 				KillTimer (hWnd,TimerID);
-				TimerID = SetTimer(hWnd, GF_SLIDE_SCREEN,TimerInterval, (FARPROC) 0);
+				TimerID = SetTimer(hWnd, GF_SLIDE_SCREEN,TimerInterval, (TIMERPROC) 0);
 				slidex = slidey = slidexinc = slideyinc = 0;
 			}
 			else if (dist < 31)
@@ -2904,7 +2904,7 @@ CursorMove:
 				ZoomScale = (106 - (double)min(105,CursorPoint.x))/5;
 				WheelZoom (zDelta*InOut,1,ZoomScale);
 				KillTimer (hWnd,TimerID);
-				TimerID = SetTimer(hWnd, GF_WHEELZOOM,TimerInterval, (FARPROC) 0);
+				TimerID = SetTimer(hWnd, GF_WHEELZOOM,TimerInterval, (TIMERPROC) 0);
 			}
 			else if (iColor == RED)
 			{
@@ -4223,7 +4223,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		ToolbarType[ToolbarID] = TBT_STANDARDMENU_DOCKED;
 		ToolbarFloating[ToolbarID] = FALSE;
 		ToolbarIDCur = ToolbarID;
-		CreateDialog(hInst, "TOOLBAR_DOCKED", hWnd, TOOLBARMsgProc); 
+		CreateDialog(hInst, "TOOLBAR_DOCKED", hWnd, (DLGPROC)TOOLBARMsgProc);
 		DisplayToolbars = saveDisplayToolbars;
 		ToolbarID = saveToolbarID;
 		if (!ToolbarHandle[ToolbarID])
@@ -4240,7 +4240,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		ToolbarFloating[ToolbarID] = TRUE;
 		DisplayMenuStatus[ToolbarID] = DMS_NOTDISPLAYED;
 		ToolbarIDCur = ToolbarID;
-		ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_FLOAT", hWnd, TOOLBARMsgProc); 
+		ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_FLOAT", hWnd, (DLGPROC)TOOLBARMsgProc);
 		GetWindowRect (ToolbarWindow[ToolbarID],&rect);
 		mp = RectMid (&rect);
 		SetCursorPos (mp.x,mp.y);
@@ -4251,7 +4251,7 @@ int LoadToolbar (HWND hWnd,LPSTR Pathname,LPSTR TypeIn,int Height,int nPerRow,LP
 		ToolbarCurrentConfig[ToolbarID] = 1;
 		ToolbarFloating[ToolbarID] = FALSE;
 		ToolbarIDCur = ToolbarID;
-		ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWnd, TOOLBARMsgProc); 
+		ToolbarWindow[ToolbarID] = CreateDialog(hInst, "TOOLBAR_DOCKED", hWnd, (DLGPROC)TOOLBARMsgProc);
 		DoCreateDialogTooltip(ToolbarID); 
 	}
 	else if (!stricmp (Type,"DOCK"))
@@ -5202,7 +5202,7 @@ BOOL ViewImage (HWND hWnd,LPSTR ImagePath)
 	
 	strcpy (PictViewerDir,ImagePath);
 	if (!ImageWnd)
-		ImageWnd = CreateDialog(hInst, "PICTVIEWER", hWnd, PICTVIEWERMsgProc); 
+		ImageWnd = CreateDialog(hInst, "PICTVIEWER", hWnd, (DLGPROC)PICTVIEWERMsgProc);
 	else
         PostMessage(ImageWnd, GSSI_REINITDIALOG, 0, 0L);
 

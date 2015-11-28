@@ -299,7 +299,7 @@ BOOL OpenBasePens(void)
         else   
         	pens[0] =   CreatePen(PS_SOLID,Width,Color);   
         if (HighlightWidth < 0)
-	        HighlightBrush =   CreatePen(PS_SOLID,
+	        HighlightBrush =  (HBRUSH) CreatePen(PS_SOLID,
     	                       (int) labs(IDNINT(HighlightWidth*fac * PenWidthFactor)),
         	                   HighlightColor);
         else if (PatternBrush || Printing)
@@ -673,7 +673,7 @@ GSSiExitProg (75);
 			}
 			Color = ConvertColor(RGB(PrimeColor[0],PrimeColor[1],PrimeColor[2]),UseHalfTone); 
 			RandColors[i] = Color;
-		    *pRandBrush++ = CreatePen (PS_SOLID,0,Color); 
+		    *pRandBrush++ = (HBRUSH)CreatePen (PS_SOLID,0,Color); 
 			if (SolidAreas && GetBit (7,(LPSTR)&CurVis->WantType[7]))
 			{
 				PATBYTE		PatByte;      
@@ -811,7 +811,7 @@ HBRUSH SelectRandomBrush (HDC hDC,long Refno,HPEN *phSavePen,short UseHalfTone)
 	pRandBrushes = (LPHBRUSH)GlobalLock (hRandBrushes);
 	pRandBrushes += (2*icolor);
 	if (phSavePen && !*phSavePen)
-		*phSavePen = *pRandBrushes;
+		*phSavePen = (HPEN)*pRandBrushes;
 	pRandBrushes++;
 	if (!(SolidAreas && GetBit (7,(LPSTR)&CurVis->WantType[7])))// || !hRandBrushes)
 		hOldBrush = GetStockObject (NULL_BRUSH); 
@@ -2919,7 +2919,7 @@ Exit:
 	if (Final && OkToContinueTime)
 	{
 		KillTimer (hWndMain,OKTOCONTINUETIMER);
-	 	SetTimer(hWndMain, OKTOCONTINUETIMER, OkToContinueTime, (FARPROC) 0);
+	 	SetTimer(hWndMain, OKTOCONTINUETIMER, OkToContinueTime, (TIMERPROC) 0);
 	}	
 	BlockSocketProcessing (FALSE);
 	GdiFlush ();

@@ -64,7 +64,7 @@ BOOL FAR PASCAL LOADWAYPOINTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
        	 SetDlgItemText (hWndDlg,IDC_MESS,str);
        	 SendDlgItemMessage (hWndDlg, IDC_PROMPTFORWPDATA,BM_SETCHECK,PromptForWPData,0);
        	 FirstPaint = TRUE;
-         SetTimer(hWndDlg, 100, 10, (FARPROC) NULL); 
+         SetTimer(hWndDlg, 100, 10, (TIMERPROC) NULL); 
          break;
          
     case WM_TIMER: 
@@ -543,10 +543,10 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                 EnableWindow (GetDlgItem(hWndDlg,IDC_DELETEFISH),FALSE);
             case IDC_EDITFISH:
             {
-				FARPROC lpfnFISHMsgProc; 
+				DLGPROC lpfnFISHMsgProc; 
 				short	nRc;
 				 
-				lpfnFISHMsgProc = MakeProcInstance((FARPROC)FISHMsgProc, hInst);
+				lpfnFISHMsgProc = MakeProcInstance((DLGPROC)FISHMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"FISH", hWndDlg, lpfnFISHMsgProc);
 				FreeProcInstance(lpfnFISHMsgProc);
 				if (nRc)
@@ -562,7 +562,7 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 				 GetWindowRect (hWndDlg,&WindRect);
 //                 DestroyWindow (hWndDlg);
 				 hWndAddWaypoint=0;
-//				 FreeProcInstance((FARPROC)ADDWAYPOINTMsgProc);
+//				 FreeProcInstance((DLGPROC)ADDWAYPOINTMsgProc);
                  GSSiEndDialog(hWndDlg, FALSE,hSaveBM); 
                  if (AllowWPSkip)
                  	ContinueProcessing = FALSE;
@@ -850,7 +850,7 @@ SetGPS:
 			            
 			            DoPaint=FALSE;   
 			            AllowWPSkip=FALSE;   
-						lpfnADDWAYPOINTMsgProc = MakeProcInstance((FARPROC)ADDWAYPOINTMsgProc, hInst);
+						lpfnADDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)ADDWAYPOINTMsgProc, hInst);
 						nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndDlg, lpfnADDWAYPOINTMsgProc);
 						FreeProcInstance(lpfnADDWAYPOINTMsgProc);
 						DoPaint=TRUE; 
@@ -1052,10 +1052,10 @@ SetGPS:
             	
             case IDC_CONFIGGPS:
             {
-				FARPROC lpfnGPSCONFIGMsgProc; 
+				DLGPROC lpfnGPSCONFIGMsgProc; 
 				short	nRc;
 				 
-				lpfnGPSCONFIGMsgProc = MakeProcInstance((FARPROC)GPSCONFIGMsgProc, hInst);
+				lpfnGPSCONFIGMsgProc = MakeProcInstance((DLGPROC)GPSCONFIGMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"GPSCONFIG", hWndDlg, lpfnGPSCONFIGMsgProc);
 				FreeProcInstance(lpfnGPSCONFIGMsgProc);   
 				goto SetGPS;
@@ -2064,9 +2064,9 @@ short GPSLoadToDB (HWND hWndDlg, UINT Control)
 		GlobalUnlock (hItems);
 	}
 	{
-		FARPROC lpfnLOADWAYPOINTSMsgProc;
+		DLGPROC lpfnLOADWAYPOINTSMsgProc;
 		
-		lpfnLOADWAYPOINTSMsgProc = MakeProcInstance((FARPROC)LOADWAYPOINTSMsgProc, hInst);
+		lpfnLOADWAYPOINTSMsgProc = MakeProcInstance((DLGPROC)LOADWAYPOINTSMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"LOADWAYPOINTS", hWndDlg, lpfnLOADWAYPOINTSMsgProc);
 		FreeProcInstance(lpfnLOADWAYPOINTSMsgProc);
 		if (!nRc)
@@ -2746,7 +2746,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 			            
 			            DoPaint=FALSE;      
 			            AllowWPSkip=FALSE;   
-						lpfnADDWAYPOINTMsgProc = MakeProcInstance((FARPROC)ADDWAYPOINTMsgProc, hInst);
+						lpfnADDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)ADDWAYPOINTMsgProc, hInst);
 						nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndDlg, lpfnADDWAYPOINTMsgProc);
 						FreeProcInstance(lpfnADDWAYPOINTMsgProc);
 						DoPaint=TRUE; 
@@ -3017,10 +3017,10 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
             	goto GetList;
      GetList:
 	            {
-					FARPROC lpfnWPSELECTLISTMsgProc; 
+					DLGPROC lpfnWPSELECTLISTMsgProc; 
 					short	nRc;
 					char	DialogName[2][16]={"WPSELECTLIST","WPSELECTLISTSRT"}; 
-					lpfnWPSELECTLISTMsgProc = MakeProcInstance((FARPROC)WPSELECTLISTMsgProc, hInst);
+					lpfnWPSELECTLISTMsgProc = MakeProcInstance((DLGPROC)WPSELECTLISTMsgProc, hInst);
 					nRc = DialogBox(hInst, (LPSTR)DialogName[WPSelSort], hWndDlg, lpfnWPSELECTLISTMsgProc);
 					FreeProcInstance(lpfnWPSELECTLISTMsgProc);
 					if (nRc)
