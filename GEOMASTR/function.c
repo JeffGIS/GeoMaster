@@ -2254,7 +2254,7 @@ SetVis:
 				  // $SUN(ALT,lat lon,systime)
 				  // $SUN(AZ,lat lon,systime)
 		{
-			struct tm tms;
+			//struct tm tms;
 			time_t	itime;
 			double	Altitude, Az;
 

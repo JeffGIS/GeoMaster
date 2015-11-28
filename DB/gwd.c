@@ -5013,6 +5013,8 @@ DisplayIndex:
                  _fstrcpy (lpDot,".in");
                  itoa (CurrentIndex+1,_fstrchr(IndexName,'\0'),10); 
                  GSSiRemove(IndexName); 
+				 if (lpGWDHead->SpatialIndex == CurrentIndex)
+					 lpGWDHead->SpatialIndex = 0;
                  for (index=CurrentIndex;index<lpGWDHead->NumIndex-1;index++)
                  {
                      lpGWDHead->NumIndexFields[index]=lpGWDHead->NumIndexFields[index+1]; 

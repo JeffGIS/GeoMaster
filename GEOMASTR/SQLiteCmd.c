@@ -443,16 +443,26 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	}
 		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt))
 		{
-			HANDLE hGMDB = OpenGWDatabase(ARG[4], BT_READ);
+			HANDLE hGMDB;
 			char *error = NULL;
 			BOOL primKeyIsOffset = atob(ARG[6]);
 			BOOL includesPoint = FALSE;
 			BOOL haveDateAndUCR = FALSE;
 			HFILE fid;
 			char TableName[128];
+			char DBName[256];
+			char SQL[256] = { 0 };
 			BOOL convertToLL = FALSE;
-			LPSTR llLoc;
+			LPSTR llLoc, pBar;
 
+			strcpy(DBName, ARG[4]);
+			pBar = strrchr(DBName, '|');
+			if (pBar)
+			{
+				*pBar++ = 0;
+				strcpy(SQL, pBar);
+			}
+			hGMDB = OpenGWDatabase(DBName, BT_READ);
 			strcpy(TableName, ARG[5]);
 			llLoc = strstr(TableName, "_LATLON");
 			if (llLoc)
@@ -581,9 +591,6 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						int firstIndex = 1;
 						int lastIndex = lpGWDHead->NumIndex;
 
-						if (lpGWDHead->SpatialIndexType > 0)
-							lastIndex--;
-
 						if (primKeyIsOffset || nextId)
 						{
 							firstIndex = 0;
@@ -601,19 +608,22 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, fid);
 						for (index = firstIndex; index < lastIndex; index++)
 						{
-							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", TableName, index + 1, TableName, removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name));
-							for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield<lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
+							if (lpGWDHead->SpatialIndex != index)
 							{
-								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
+								sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", TableName, index + 1, TableName, removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name));
+								for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield < lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
+								{
+									sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
+								}
+								sprintf(strchr(pCmd, 0), ");");
+								fputstring(pCmd, fid);
 							}
-							sprintf(strchr(pCmd, 0), ");");
-							fputstring(pCmd, fid);
 						}
 					}
 
 					if (!rtn)
 					{
-						int pos = BT_FIRST;
+						int pos = BT_FIRST, cond = BT_ANY;
 						long Offset;
 						HANDLE hVal = GSSiGlobAlloc(1797, GMEM_MOVEABLE, 4096);
 						LPSTR val = GlobalLock(hVal);
@@ -622,18 +632,34 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						char xField[128] = { 0 };
 						char yField[128] = { 0 };
 						DPOINT pt;
+						int indx = 0;
 
 						sprintf(val, "Load table %s", ARG[4]);
 						CreateStatusWind(hWndMain, 1, val);
-						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&Offset))
+						if (*SQL)
 						{
+							LPSTR pSpace = strrchr(SQL, ' ');
+							if (!pSpace)
+								pSpace = strrchr(SQL, '>');
+							pSpace++;
+							if (*pSpace == '\'')
+								pSpace++;
+							if (*LastChr(pSpace) == '\'')
+								*LastChr(pSpace) = 0;
+							cond = BT_GE;
+							indx = 2;
+							strncpy(lpGWDHead->pKeys[indx],pSpace,abs(lpGWDHead->lKeys[indx]));
+						}
+						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
+						{
+							int id = Offset;
 							pos = BT_NEXT;
+							cond = BT_ANY;
 							FillGWDData(lpGWDHead, Offset);
 
 							if (includesPoint)
 							{
 								MNMXCORD bounds;
-								int id = Offset;
 								BOOL err;
 
 								if (nextId > 0)
@@ -713,7 +739,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							}
 
 							if (nextId > 0)
-								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, nextId);
+								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, id);
 							else if (primKeyIsOffset)
 								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, Offset);
 							else
@@ -1064,7 +1090,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int keepGoing = 1;
 			int nCanCompress = 0, nTotal = 0;
 			LPSTR pSpace;
-			BOOL createFile, createTables = TRUE;
+			BOOL createFile=TRUE, createTables = TRUE;
 			int wantType = 3;
 			double coordFactor = COORDINATE_FACTOR;
 			char TableName[] = "PARCELAREA";
