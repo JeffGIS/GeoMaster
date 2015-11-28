@@ -6,7 +6,7 @@
 static void DrawStuff(HDC hdc, HDIB32 hDIB32, int x, int y, int width, int height, char lines[4][256],BOOL wantImage);
 static void InitDocStruct(DOCINFO* di, char* docname);
 static BOOL CALLBACK AbortProcML(HDC hDC, int Error);
-static HDC GetPrinterDC(void);
+static HDC GetPrinterdc(void);
 
 static BOOL displayImage(HDC hDC, HDIB32 hDIB32, int x, int y,int width, int height)
 {
@@ -43,7 +43,7 @@ static BOOL CALLBACK AbortProcML(HDC hDC, int Error)
 /*==============================================*/
 /* Sample code :  Typical printing process      */
 /* =============================================*/
-BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)
+BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)//print to 5160 labels
 {
 	HWND hWndParent = hWndMain;
 	BOOL rtn = FALSE;
@@ -53,7 +53,7 @@ BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	char ImagePath[MAX_PATH]="[%DL]icons\\maillabel.bmp";
 
 	// Need a printer DC to print to.
-	hDC = GetPrinterDC();
+	hDC = GetPrinterdc();
 
 	// Did you get a good DC?
 	if (!hDC)
@@ -153,7 +153,7 @@ Exit:
 /*===============================*/
 /* Obtain printer device context */
 /* ==============================*/
-static HDC GetPrinterDC(void)
+static HDC GetPrinterdc(void)
 {
 	PRINTDLG pdlg;
 

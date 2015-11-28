@@ -184,7 +184,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 	HANDLE	hpt;
 	LPPOINT	ppt;
 	HPEN	hPen, hPen2, hRestorePen=0;
-	HPEN	hBrush, hBrush2, hRestoreBrush=0;
+	HBRUSH	hBrush, hBrush2, hRestoreBrush=0;
 	COLORREF	color;
 	int		mode;
 	int	x,y;
@@ -989,7 +989,7 @@ HBRUSH  WINAPI GSSiCREATEBRUSHINDIRECT(LOGBRUSH FAR* logbrush)
 
 HBITMAP WINAPI GSSiLOADBITMAP(HINSTANCE hInst, LPCSTR Name)
 {
-	HBRUSH	rtn = LoadBitmap (hInst,Name);
+	HBITMAP	rtn = LoadBitmap (hInst,Name);
 	
 	if (!InDebug)
 		return rtn;

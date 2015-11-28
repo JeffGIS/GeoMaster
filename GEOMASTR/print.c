@@ -36,7 +36,8 @@ extern char	VirtPrinterImageFile[256];
 
 
 static	short	CurrentStatusWindowVP;
-static	FARPROC lpfnAbortProc=0, lpfnPrintDlgProc=0, lpfnProcessStatusDlgProc;
+static	ABORTPROC lpfnAbortProc = 0;
+static	DLGPROC lpfnPrintDlgProc = 0, lpfnProcessStatusDlgProc;
 
 BOOL CheckPrintAbort (HDC hPr);
 void SetVirtPrinterBackground (HDC hDC,COLORREF WindowColor);
@@ -831,7 +832,7 @@ BOOL CreateProcessStatusWindow (HWND hWnd,LPSTR Title)
     if (ProcessStatusWnd)
     	return FALSE;  
     StatusMacro = CurrentMacro;
-	lpfnProcessStatusDlgProc = MakeProcInstance(ProcessStatusDlgProc, ghInst);
+	lpfnProcessStatusDlgProc = MakeProcInstance((DLGPROC)ProcessStatusDlgProc, ghInst);
 	CreateDialog(ghInst, "PROCESSSTATUS", hWnd,lpfnProcessStatusDlgProc);
 	if (Title)
 		SetDlgItemText (ProcessStatusWnd,IDC_STATUSTITLE,Title);
@@ -1498,7 +1499,7 @@ S10:
 	        ghPrintingDlg = CreateDialog(ghInst, "PRINTING", hWnd2,
 	                                         lpfnPrintDlgProc);
 	        ShowWindow (GetDlgItem(ghPrintingDlg,IDC_STATUS),FALSE);
-		    lpfnAbortProc = MakeProcInstance(AbortProc, ghInst);
+		    lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
 	        SetAbortProc(hPr,lpfnAbortProc);
 		    if (IsVirtPrinter)
 		    {   
@@ -2039,7 +2040,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    short xPage, yPage;
    WORD wSize;
    BOOL bError;
-//   FARPROC lpfnAbortProc, lpfnPrintDlgProc;
+//   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
    HBRUSH	BkBrush;
    BOOL		rtn=TRUE;
    LPVIEWPORT	lpSaveView; 
@@ -2123,7 +2124,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 	    DI.lpszDocName= LeafName;
 	    DI.lpszOutput = NULL;
         
-	    lpfnAbortProc = MakeProcInstance(AbortProc, ghInst);
+	    lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
         SetAbortProc(hPr,lpfnAbortProc);
 		if (GSSiStartDoc(hPr,PrinterDC,IsVirtPrinter,&DI,lpPDChunk)>0)
 	    {   
@@ -2241,7 +2242,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
    short xPage, yPage,x=10, y=10;
    WORD wSize;
    BOOL bError;
-//   FARPROC lpfnAbortProc, lpfnPrintDlgProc;
+//   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
    HBRUSH	BkBrush;
    BOOL		rtn=TRUE;
    LPVIEWPORT	lpSaveView; 
@@ -2321,7 +2322,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
 	    DI.lpszDocName= LeafName;
 	    DI.lpszOutput = NULL;
         
-	    lpfnAbortProc = MakeProcInstance(AbortProc, ghInst);
+		lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
         SetAbortProc(hPr,lpfnAbortProc);
 	    if (StartDoc(hPr,&DI) > 0)
 	    {   
@@ -2450,7 +2451,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
    short xPage, yPage;
    WORD wSize;
    BOOL bError;
-//   FARPROC lpfnAbortProc, lpfnPrintDlgProc;
+//   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
    HBRUSH	BkBrush;
    BOOL		rtn=TRUE;
    LPVIEWPORT	lpSaveView; 
@@ -2497,7 +2498,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
 	    DI.lpszDocName= LeafName;
 	    DI.lpszOutput = NULL;
         
-	    lpfnAbortProc = MakeProcInstance(AbortProc, ghInst);
+		lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
         SetAbortProc(hPr,lpfnAbortProc);
 	    if (StartDoc(hPr,&DI) > 0)
 	    {   
@@ -2679,7 +2680,7 @@ BOOL PrintMerge (HWND hWnd)
    int		SaveShadow = ShadowInc;
    WORD wSize;
    BOOL bError;
-//   FARPROC lpfnAbortProc, lpfnPrintDlgProc;
+//   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
    HBRUSH	BkBrush;
    BOOL		rtn=FALSE;
    LPVIEWPORT	lpSaveView, LastVP; 
@@ -2809,7 +2810,7 @@ BOOL PrintMerge (HWND hWnd)
         lpfnPrintDlgProc = MakeProcInstance(PrintDlgProc, ghInst);
         ghPrintingDlg = CreateDialog(ghInst, "PRINTING", ghWnd,
                                          lpfnPrintDlgProc);
-	    lpfnAbortProc = MakeProcInstance(AbortProc, ghInst);
+		lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
         SetAbortProc(hPr,lpfnAbortProc);
 	    
         SaveViewports (1);
@@ -3429,10 +3430,10 @@ temp:
 BOOL SetupVirtualPrinter (HWND hWnd,LPSTR VPName)
 {
     BOOL nRc;
-   	FARPROC lpfnVIRTUALPRINTERMsgProc; 
+   	DLGPROC lpfnVIRTUALPRINTERMsgProc; 
     
     _fstrcpy (VirtualPrinterPathname,VPName);
-    lpfnVIRTUALPRINTERMsgProc = MakeProcInstance((FARPROC)VIRTUALPRINTERMsgProc, hInst);
+    lpfnVIRTUALPRINTERMsgProc = MakeProcInstance((DLGPROC)VIRTUALPRINTERMsgProc, hInst);
     nRc = DialogBox(hInst, (LPSTR)"VIRTUALPRINTER", hWnd, lpfnVIRTUALPRINTERMsgProc);
     FreeProcInstance(lpfnVIRTUALPRINTERMsgProc);
 	return nRc;

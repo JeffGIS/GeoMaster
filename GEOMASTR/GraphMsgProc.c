@@ -253,8 +253,8 @@ static	UINT	SepCntl[16]=	{IDC_SEP1,
 
 BOOL ExportData (HWND hWnd,short Type)
 {
-    FARPROC lpfnMIF_OUTPUTMsgProc, lpfnDXF_OUTPUTMsgProc, lpfnBMP_OUTPUTMsgProc, lpfnTXT_OUTPUTMsgProc, lpfnORACLEMsgProc;
-    FARPROC	lpfnDTMTOORACLEMsgProc, lpfnDTMTOTEXTMsgProc, lpfnDGN_OUTPUTMsgProc;
+    DLGPROC lpfnMIF_OUTPUTMsgProc, lpfnDXF_OUTPUTMsgProc, lpfnBMP_OUTPUTMsgProc, lpfnTXT_OUTPUTMsgProc, lpfnORACLEMsgProc;
+    DLGPROC	lpfnDTMTOORACLEMsgProc, lpfnDTMTOTEXTMsgProc, lpfnDGN_OUTPUTMsgProc;
     BOOL    nRc; 
     
     EXType = Type;  
@@ -263,28 +263,28 @@ BOOL ExportData (HWND hWnd,short Type)
     	return FALSE;
     if (Type == DGN)
     {   
-	    lpfnDGN_OUTPUTMsgProc = MakeProcInstance((FARPROC)DGN_OUTPUTMsgProc, hInst);
+	    lpfnDGN_OUTPUTMsgProc = MakeProcInstance((DLGPROC)DGN_OUTPUTMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"DGN_OUTPUT", hWnd, lpfnDGN_OUTPUTMsgProc);
 	    FreeProcInstance(lpfnDGN_OUTPUTMsgProc);  
     	goto Exit;
     }
     if (Type == DXF)
     {   
-	    lpfnDXF_OUTPUTMsgProc = MakeProcInstance((FARPROC)DXF_OUTPUTMsgProc, hInst);
+	    lpfnDXF_OUTPUTMsgProc = MakeProcInstance((DLGPROC)DXF_OUTPUTMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"DXF_OUTPUT", hWnd, lpfnDXF_OUTPUTMsgProc);
 	    FreeProcInstance(lpfnDXF_OUTPUTMsgProc);  
     	goto Exit;
     }
     if (Type == ORTHBMP)
     {   
-	    lpfnBMP_OUTPUTMsgProc = MakeProcInstance((FARPROC)BMP_OUTPUTMsgProc, hInst);
+	    lpfnBMP_OUTPUTMsgProc = MakeProcInstance((DLGPROC)BMP_OUTPUTMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"BMP_OUTPUT", hWnd, lpfnBMP_OUTPUTMsgProc);
 	    FreeProcInstance(lpfnBMP_OUTPUTMsgProc);  
     	goto Exit;
     }
     if (Type == TXT)
     {   
-	    lpfnTXT_OUTPUTMsgProc = MakeProcInstance((FARPROC)TXT_OUTPUTMsgProc, hInst);
+	    lpfnTXT_OUTPUTMsgProc = MakeProcInstance((DLGPROC)TXT_OUTPUTMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"TXT_OUTPUT", hWnd, lpfnTXT_OUTPUTMsgProc);
 	    FreeProcInstance(lpfnTXT_OUTPUTMsgProc);  
     	goto Exit;
@@ -292,14 +292,14 @@ BOOL ExportData (HWND hWnd,short Type)
 
     if (Type == ORACLE)
     {   
-	    lpfnORACLEMsgProc = MakeProcInstance((FARPROC)ORACLEMsgProc, hInst);
+	    lpfnORACLEMsgProc = MakeProcInstance((DLGPROC)ORACLEMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"ORACLE", hWnd, lpfnORACLEMsgProc);
 	    FreeProcInstance(lpfnORACLEMsgProc);  
     	goto Exit;
     }
     if (Type == ORACLEDTM)
     {   
-	    lpfnDTMTOORACLEMsgProc = MakeProcInstance((FARPROC)DTMTOORACLEMsgProc, hInst);
+	    lpfnDTMTOORACLEMsgProc = MakeProcInstance((DLGPROC)DTMTOORACLEMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"DTMTOORACLE", hWnd, lpfnDTMTOORACLEMsgProc);
 	    FreeProcInstance(lpfnDTMTOORACLEMsgProc);  
     	goto Exit;
@@ -307,13 +307,13 @@ BOOL ExportData (HWND hWnd,short Type)
 
     if (Type == DTMTOTEXT)
     {   
-	    lpfnDTMTOTEXTMsgProc = MakeProcInstance((FARPROC)DTMTOTEXTMsgProc, hInst);
+	    lpfnDTMTOTEXTMsgProc = MakeProcInstance((DLGPROC)DTMTOTEXTMsgProc, hInst);
 	    nRc = DialogBox(hInst, (LPSTR)"DTMTOTEXT", hWnd, lpfnDTMTOTEXTMsgProc);
 	    FreeProcInstance(lpfnDTMTOTEXTMsgProc);  
     	goto Exit;
     }
 
-    lpfnMIF_OUTPUTMsgProc = MakeProcInstance((FARPROC)MIF_OUTPUTMsgProc, hInst);
+    lpfnMIF_OUTPUTMsgProc = MakeProcInstance((DLGPROC)MIF_OUTPUTMsgProc, hInst);
     nRc = DialogBox(hInst, (LPSTR)"MIF_OUTPUT", hWnd, lpfnMIF_OUTPUTMsgProc);
     FreeProcInstance(lpfnMIF_OUTPUTMsgProc); 
 Exit: 
@@ -360,7 +360,7 @@ BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 
 void CallTemplateMsgProc(void)
 {
-	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, TemplateMsgProc);
+	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, (DLGPROC)TemplateMsgProc);
 }
 
 BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
@@ -665,8 +665,8 @@ GSSiExitProg (1250);
 			case IDC_CLASSES_FROM_TABLE:
 			{
 				BOOL	st;
-		        FARPROC lpfnCLASSESFROMTABLEMsgProc;
-	            lpfnCLASSESFROMTABLEMsgProc = MakeProcInstance((FARPROC)CLASSESFROMTABLEMsgProc, hInst);
+		        DLGPROC lpfnCLASSESFROMTABLEMsgProc;
+	            lpfnCLASSESFROMTABLEMsgProc = MakeProcInstance((DLGPROC)CLASSESFROMTABLEMsgProc, hInst);
 				st = DialogBox(hInst, (LPSTR)"CLASSESFROMTABLE", hWndDlg, lpfnCLASSESFROMTABLEMsgProc);
 				FreeProcInstance(lpfnCLASSESFROMTABLEMsgProc); 
 				if (st)
@@ -682,8 +682,8 @@ GSSiExitProg (1250);
 				 if (CurTheme->NumDesiredClass > 0)
 					 CurTheme->numPreloadedValues = 1;
 		         {
-			          FARPROC lpfnASSIGN_NONNUMERICMsgProc;
-			          lpfnASSIGN_NONNUMERICMsgProc = MakeProcInstance((FARPROC)ASSIGN_NONNUMERICMsgProc, hInst);
+			          DLGPROC lpfnASSIGN_NONNUMERICMsgProc;
+			          lpfnASSIGN_NONNUMERICMsgProc = MakeProcInstance((DLGPROC)ASSIGN_NONNUMERICMsgProc, hInst);
 			          DialogBox(hInst, (LPSTR)"ASSIGN_NONNUMERIC", hWndDlg, lpfnASSIGN_NONNUMERICMsgProc);
 			          FreeProcInstance(lpfnASSIGN_NONNUMERICMsgProc);
 		         }
@@ -750,10 +750,10 @@ GSSiExitProg (1250);
 				SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_SETCHECK,FALSE,0L);
             	if (SendDlgItemMessage (hWndDlg,SV_ACCUMULATE,BM_GETCHECK,0,0L))
 		        {
-			    	FARPROC lpfnACCUMPOINTOPTMsgProc; 
+			    	DLGPROC lpfnACCUMPOINTOPTMsgProc; 
 				    	
 					DoPaint = FALSE; 
-			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((FARPROC)ACCUMPOINTOPTMsgProc, hInst);
+			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((DLGPROC)ACCUMPOINTOPTMsgProc, hInst);
 			        DialogBox(hInst, (LPSTR)"ACCUMPOINTOPT", hWndDlg, lpfnACCUMPOINTOPTMsgProc);
 			        FreeProcInstance(lpfnACCUMPOINTOPTMsgProc);
 					DoPaint=TRUE;
@@ -1038,9 +1038,9 @@ BOOL EditTravLegData (HWND hWnd, LPTRAVLEGDATA pLegData)
 		
 		case 11: //distance and bearing  	
 		{
-			FARPROC lpfnTRAVDANDBMsgProc;
+			DLGPROC lpfnTRAVDANDBMsgProc;
 
-			lpfnTRAVDANDBMsgProc = MakeProcInstance((FARPROC)TRAVDANDBMsgProc, hInst);
+			lpfnTRAVDANDBMsgProc = MakeProcInstance((DLGPROC)TRAVDANDBMsgProc, hInst);
 			st = DialogBox(hInst, (LPSTR)"TRAVDANDB", hWnd, lpfnTRAVDANDBMsgProc);
 			FreeProcInstance(lpfnTRAVDANDBMsgProc);
 		}
@@ -1048,36 +1048,36 @@ BOOL EditTravLegData (HWND hWnd, LPTRAVLEGDATA pLegData)
 		
 		case 21: //type 1 curve   
 		{
-			FARPROC lpfnTRAVTYPE1CRVMsgProc;
+			DLGPROC lpfnTRAVTYPE1CRVMsgProc;
 
-			lpfnTRAVTYPE1CRVMsgProc = MakeProcInstance((FARPROC)TRAVTYPE1CRVMsgProc, hInst);
+			lpfnTRAVTYPE1CRVMsgProc = MakeProcInstance((DLGPROC)TRAVTYPE1CRVMsgProc, hInst);
 			st = DialogBox(hInst, (LPSTR)"TRAVTYPE1CRV", hWnd, lpfnTRAVTYPE1CRVMsgProc);
 			FreeProcInstance(lpfnTRAVTYPE1CRVMsgProc);
 		}
 		break;
 		case 22: //type 2 curve
 		{
-			FARPROC lpfnTRAVTYPE2CRVMsgProc;
+			DLGPROC lpfnTRAVTYPE2CRVMsgProc;
 
-			lpfnTRAVTYPE2CRVMsgProc = MakeProcInstance((FARPROC)TRAVTYPE2CRVMsgProc, hInst);
+			lpfnTRAVTYPE2CRVMsgProc = MakeProcInstance((DLGPROC)TRAVTYPE2CRVMsgProc, hInst);
 			st = DialogBox(hInst, (LPSTR)"TRAVTYPE2CRV", hWnd, lpfnTRAVTYPE2CRVMsgProc);
 			FreeProcInstance(lpfnTRAVTYPE2CRVMsgProc);
 		}
 		break;
 		case 23: //type 3 curve
 		{
-			FARPROC lpfnTRAVTYPE3CRVMsgProc;
+			DLGPROC lpfnTRAVTYPE3CRVMsgProc;
 
-			lpfnTRAVTYPE3CRVMsgProc = MakeProcInstance((FARPROC)TRAVTYPE3CRVMsgProc, hInst);
+			lpfnTRAVTYPE3CRVMsgProc = MakeProcInstance((DLGPROC)TRAVTYPE3CRVMsgProc, hInst);
 			st = DialogBox(hInst, (LPSTR)"TRAVTYPE3CRV", hWnd, lpfnTRAVTYPE3CRVMsgProc);
 			FreeProcInstance(lpfnTRAVTYPE3CRVMsgProc);
 		}
 		break;
 		case 31: //sub-traverse   
 		{
-			FARPROC lpfnSUBTRAVERSEMsgProc;
+			DLGPROC lpfnSUBTRAVERSEMsgProc;
 
-			lpfnSUBTRAVERSEMsgProc = MakeProcInstance((FARPROC)SUBTRAVERSEMsgProc, hInst);
+			lpfnSUBTRAVERSEMsgProc = MakeProcInstance((DLGPROC)SUBTRAVERSEMsgProc, hInst);
 			st = DialogBox(hInst, (LPSTR)"SUBTRAVERSE", hWnd, lpfnSUBTRAVERSEMsgProc);
 			FreeProcInstance(lpfnSUBTRAVERSEMsgProc);
 		}
@@ -1091,11 +1091,11 @@ BOOL EditTravLegData (HWND hWnd, LPTRAVLEGDATA pLegData)
 BOOL EditDTMSettings (HWND hWnd,short LayerNum)
 {   
 	BOOL	rtn=FALSE;
-	FARPROC lpfnDTMSETTINGSMsgProc; 
+	DLGPROC lpfnDTMSETTINGSMsgProc; 
 	
 	DTMSettingLayerNum = LayerNum;
 	DTMSettingVP = CurView;		
-	lpfnDTMSETTINGSMsgProc = MakeProcInstance((FARPROC)DTMSETTINGSMsgProc, hInst);
+	lpfnDTMSETTINGSMsgProc = MakeProcInstance((DLGPROC)DTMSETTINGSMsgProc, hInst);
 	rtn = DialogBox(hInst, (LPSTR)"DTMSETTINGS", hWnd, lpfnDTMSETTINGSMsgProc);
 	FreeProcInstance(lpfnDTMSETTINGSMsgProc);  
 	return rtn;
@@ -1242,7 +1242,7 @@ BOOL FAR PASCAL REGCONNECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                else 
 	                {
 						lStr = 0;
-						SetTimer(hWndDlg, 1, 30000, (FARPROC) 0); 
+						SetTimer(hWndDlg, 1, 30000, (TIMERPROC) 0); 
 					}
 				}
                 else if (CancelledByUser) 
@@ -2039,7 +2039,7 @@ GSSiExitProg (873);
          
          cwCenter(hWndDlg, 0);
 		 SetDlgItemText(hWndDlg,IDC_WAITMESS,GMmess);
-		 SetTimer(hWndDlg, 1, 10000, (FARPROC) 0);
+		 SetTimer(hWndDlg, 1, 10000, (TIMERPROC)0);
          break; /* End of WM_INITDIALOG                                 */
     
     case WM_TIMER:
@@ -2104,7 +2104,7 @@ GSSiExitProg (875);
          
          cwCenter(hWndDlg, 0);
 		 SetDlgItemText(hWndDlg,IDC_WAITMESS,GMmess);
-		 SetTimer(hWndDlg, 100, 2000, (FARPROC) 0);
+		 SetTimer(hWndDlg, 100, 2000, (TIMERPROC)0);
          break; /* End of WM_INITDIALOG                                 */
     
     case WM_TIMER: 
@@ -2119,7 +2119,7 @@ GSSiExitProg (875);
 		 if (GetCDDriveForVol (WaitForVolLabel,WaitForDrive))
     	 	PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
     	 else
-			SetTimer(hWndDlg, 100, 2000, (FARPROC) 0);
+			 SetTimer(hWndDlg, 100, 2000, (TIMERPROC)0);
 {
 #if ENABLETRACE
 GSSiExitProg (875);
@@ -7005,7 +7005,7 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
          {  
             case IDC_NEWSYM:
                  {
-                  FARPROC	lpfnNEWSYMBOLMsgProc = lpfnNEWSYMBOLMsgProc = MakeProcInstance((FARPROC)NEWSYMBOLMsgProc, hInst);
+                  DLGPROC	lpfnNEWSYMBOLMsgProc = lpfnNEWSYMBOLMsgProc = MakeProcInstance((DLGPROC)NEWSYMBOLMsgProc, hInst);
                   short		NewSymNum;
                   HANDLE	hBMSave = hSaveBM;
 
@@ -7941,7 +7941,7 @@ int CreateNewSymbol (HWND hWnd,LPSTR SymName,int Type)
 		strcpy (NewSymbolType,"Area");
 		break;
 	}
-    newSymNum = DialogBox(hInst, (LPSTR)"NEWSYMBOL", hWnd, NEWSYMBOLMsgProc);
+    newSymNum = DialogBox(hInst, (LPSTR)"NEWSYMBOL", hWnd, (DLGPROC)NEWSYMBOLMsgProc);
 
 	return newSymNum;
 }
@@ -9232,7 +9232,7 @@ BOOL FAR PASCAL VIRTUALPRINTERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				lpPDChunkLocal->Flags = PD_HIDEPRINTTOFILE|PD_NOPAGENUMS|PD_RETURNDC;
 				if (PrintDlg(lpPDChunkLocal))
 		     	{
-				   HWND	hPr=lpPDChunkLocal->hDC;
+				   HDC	hPr=lpPDChunkLocal->hDC;
 			       int dpi = GSSiGetDeviceCaps(hPr, LOGPIXELSX); 
 			       RECT	Rect;
 				   long xPage, yPage;
@@ -10849,10 +10849,10 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  
             case IDC_POSITION:
 	        {
-	          FARPROC lpfnINFOBOX_POSMsgProc; 
+	          DLGPROC lpfnINFOBOX_POSMsgProc; 
 	          int	nRc;
 			
-	          lpfnINFOBOX_POSMsgProc = MakeProcInstance((FARPROC)INFOBOX_POSMsgProc, hInst);
+	          lpfnINFOBOX_POSMsgProc = MakeProcInstance((DLGPROC)INFOBOX_POSMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"INFOBOX_POS", hWndDlg, lpfnINFOBOX_POSMsgProc);
 	          FreeProcInstance(lpfnINFOBOX_POSMsgProc);
 	          if (nRc)
@@ -11788,8 +11788,8 @@ GSSiExitProg (1247);
             	 Strip (str,',');
             	 CurTheme->RoundTo = atof(str);
 		         {
-			          FARPROC lpfnCLASS_RANGESMsgProc;
-			          lpfnCLASS_RANGESMsgProc = MakeProcInstance((FARPROC)CLASS_RANGESMsgProc, hInst);
+			          DLGPROC lpfnCLASS_RANGESMsgProc;
+			          lpfnCLASS_RANGESMsgProc = MakeProcInstance((DLGPROC)CLASS_RANGESMsgProc, hInst);
 			          DialogBox(hInst, (LPSTR)"CLASS_RANGES", hWndDlg, lpfnCLASS_RANGESMsgProc);
 			          FreeProcInstance(lpfnCLASS_RANGESMsgProc);
 		         }
@@ -11815,10 +11815,10 @@ GSSiExitProg (1247);
 				SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_SETCHECK,FALSE,0L);
             	if (SendDlgItemMessage (hWndDlg,SV_ACCUMULATE,BM_GETCHECK,0,0L))
 		        {
-			    	FARPROC lpfnACCUMPOINTOPTMsgProc; 
+			    	DLGPROC lpfnACCUMPOINTOPTMsgProc; 
 				    	
 					DoPaint = FALSE; 
-			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((FARPROC)ACCUMPOINTOPTMsgProc, hInst);
+			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((DLGPROC)ACCUMPOINTOPTMsgProc, hInst);
 			        DialogBox(hInst, (LPSTR)"ACCUMPOINTOPT", hWndDlg, lpfnACCUMPOINTOPTMsgProc);
 			        FreeProcInstance(lpfnACCUMPOINTOPTMsgProc);
 					DoPaint=TRUE;
@@ -12182,13 +12182,13 @@ GSSiExitProg (1257);
 
 BOOL LoadTheme (HWND hWnd,LPVIEWPORT pVP)
 {
-    FARPROC lpfnLOADTHEMEMsgProc; 
+    DLGPROC lpfnLOADTHEMEMsgProc; 
 	LPVIEWPORT	SaveView;
     int	nRc, i, n; 
     BOOL	rtn=FALSE;
         
 	DoPaint=FALSE;
-    lpfnLOADTHEMEMsgProc = MakeProcInstance((FARPROC)LOADTHEMEMsgProc, hInst);
+    lpfnLOADTHEMEMsgProc = MakeProcInstance((DLGPROC)LOADTHEMEMsgProc, hInst);
     nRc = DialogBox(hInst, (LPSTR)"LOADTHEME", hWnd, lpfnLOADTHEMEMsgProc);
     FreeProcInstance(lpfnLOADTHEMEMsgProc);
     DoPaint=TRUE;
@@ -12669,8 +12669,8 @@ GSSiExitProg (1247);
             	 Strip (str,',');
             	 CurTheme->RoundTo = atof(str);
 		         {
-			          FARPROC lpfnCLASS_RANGESMsgProc;
-			          lpfnCLASS_RANGESMsgProc = MakeProcInstance((FARPROC)CLASS_RANGESMsgProc, hInst);
+			          DLGPROC lpfnCLASS_RANGESMsgProc;
+			          lpfnCLASS_RANGESMsgProc = MakeProcInstance((DLGPROC)CLASS_RANGESMsgProc, hInst);
 			          DialogBox(hInst, (LPSTR)"CLASS_RANGES", hWndDlg, lpfnCLASS_RANGESMsgProc);
 			          FreeProcInstance(lpfnCLASS_RANGESMsgProc);
 		         }
@@ -12696,10 +12696,10 @@ GSSiExitProg (1247);
 				SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_SETCHECK,FALSE,0L);
             	if (SendDlgItemMessage (hWndDlg,SV_ACCUMULATE,BM_GETCHECK,0,0L))
 		        {
-			    	FARPROC lpfnACCUMPOINTOPTMsgProc; 
+			    	DLGPROC lpfnACCUMPOINTOPTMsgProc; 
 				    	
 					DoPaint = FALSE; 
-			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((FARPROC)ACCUMPOINTOPTMsgProc, hInst);
+			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((DLGPROC)ACCUMPOINTOPTMsgProc, hInst);
 			        DialogBox(hInst, (LPSTR)"ACCUMPOINTOPT", hWndDlg, lpfnACCUMPOINTOPTMsgProc);
 			        FreeProcInstance(lpfnACCUMPOINTOPTMsgProc);
 					DoPaint=TRUE;
@@ -13171,10 +13171,10 @@ HaveEmpty:
                  Pickability = FALSE;
              Visible:
                  {
-                  FARPROC lpfnVISIBLEMsgProc;  
+                  DLGPROC lpfnVISIBLEMsgProc;  
                   char	VisDialog[2][10]={"VISIBLE","VISIBLE1"};
 
-                  lpfnVISIBLEMsgProc = MakeProcInstance((FARPROC)VISIBLEMsgProc, hInst);
+                  lpfnVISIBLEMsgProc = MakeProcInstance((DLGPROC)VISIBLEMsgProc, hInst);
                   DialogBox(hInst, (LPSTR)VisDialog[VisListOpt], hWndDlg, lpfnVISIBLEMsgProc);
                   FreeProcInstance(lpfnVISIBLEMsgProc);
  
@@ -13183,9 +13183,9 @@ HaveEmpty:
            	
            	case IDC_RANCOLOR:
                  {
-                  FARPROC lpfnRANCOLORMsgProc;
+                  DLGPROC lpfnRANCOLORMsgProc;
 
-                  lpfnRANCOLORMsgProc = MakeProcInstance((FARPROC)RANCOLORMsgProc, hInst);
+                  lpfnRANCOLORMsgProc = MakeProcInstance((DLGPROC)RANCOLORMsgProc, hInst);
                   DialogBox(hInst, (LPSTR)"RANCOLOR", hWndDlg, lpfnRANCOLORMsgProc);
                   FreeProcInstance(lpfnRANCOLORMsgProc);
 
@@ -13194,11 +13194,11 @@ HaveEmpty:
            		
            	case IDC_VPCOPYFROM:
            	{
-				FARPROC lpfnCOPYVPFROMMsgProc;
+				DLGPROC lpfnCOPYVPFROMMsgProc;
 				int	nRc;
 				LPVIEWPORT	pCopyFromVP;
 
-				lpfnCOPYVPFROMMsgProc = MakeProcInstance((FARPROC)COPYVPFROMMsgProc, hInst);
+				lpfnCOPYVPFROMMsgProc = MakeProcInstance((DLGPROC)COPYVPFROMMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"COPYVPFROM", hWndDlg,lpfnCOPYVPFROMMsgProc);
 				FreeProcInstance(lpfnCOPYVPFROMMsgProc);
 				if (nRc)
@@ -13443,7 +13443,7 @@ HaveEmpty:
 		         break;
 		    case IDC_SETSHAPEPARAM:
 	             {
-	              FARPROC lpfnSETSHAPEPARAMMsgProc;  
+	              DLGPROC lpfnSETSHAPEPARAMMsgProc;  
 				  int type=0;
 				  SetViewport(*pCommandViewport);    
 				  GetDlgItemText(hWndDlg,IDC_LAYER_PATH,str,sizeof(str)-1); 
@@ -13470,7 +13470,7 @@ HaveEmpty:
 				  		  if (!OpenFGDBFileIndex (str,0))
 				  			;
 					  }
-					  lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETSHAPEPARAMMsgProc, hInst);
+					  lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
 					  DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWndDlg, lpfnSETSHAPEPARAMMsgProc);
 					  FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
 					  switch (type)
@@ -13489,7 +13489,7 @@ HaveEmpty:
 				 }
 				 else
 				 {
-					  lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETGMDPARAMMsgProc, hInst);
+					  lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETGMDPARAMMsgProc, hInst);
 		  			  OpenGMDMapFile (str);
 					  DialogBox(hInst, (LPSTR)"SETGMDPARAM", hWndDlg, lpfnSETSHAPEPARAMMsgProc);
 					  FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
@@ -30868,7 +30868,7 @@ BOOL CaptureClipboard(LPSTR title, LPSTR menu)
 
 	captureClipboardTitle = title;
 	captureClipboardMenu = menu;
-	rc = DialogBox(hInst, (LPSTR)"CAPTURE_CLIPBOARD", hWndMain, CAPTURE_CLIPBOARDMsgProc);
+	rc = DialogBox(hInst, (LPSTR)"CAPTURE_CLIPBOARD", hWndMain, (DLGPROC)CAPTURE_CLIPBOARDMsgProc);
 	return rc;
 }
 BOOL FAR PASCAL CAPTURE_CLIPBOARDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
@@ -30965,7 +30965,7 @@ $DIALOGITEM(%i,%i,SETTEXT,[DAT.DISCLAIMER]);$CLOSE(DAT););",
 			break;
 		}
 
-	SetTimer(hWndDlg, 1, 100, (FARPROC)0);
+	SetTimer(hWndDlg, 1, 100, (TIMERPROC)0);
 		break; /* End of WM_INITDIALOG                                 */
 
 	case WM_TIMER:

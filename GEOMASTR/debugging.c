@@ -136,15 +136,15 @@ LONG FAR PASCAL DebugSubclassProc(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam
 		//case WM_WINDOWPOSCHANGING:
 		//case WM_WINDOWPOSCHANGED:
 		case WM_MOVE:
-            	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	break;
     	
 		case WM_TIMER:
-            	lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            	lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 			break;
     	case WM_NCDESTROY:
         {
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg,(WPARAM) wParam, (LPARAM)lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg,(WPARAM) wParam, (LPARAM)lParam);
 	        SetWindowLong (hWnd, GWL_WNDPROC, (LONG) lpOrgProc);
 	        RemoveProp (hWnd, "PrHI");
 	        RemoveProp (hWnd, "PrLO");
@@ -153,7 +153,7 @@ LONG FAR PASCAL DebugSubclassProc(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam
     
     	case WM_NCHITTEST:
 	    {   
-	        lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+	        lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
 	    	/*if (hWnd != LastWnd)
 	    	{
 				Prompt = (UINT)GetProp (hWnd, "GMPr");
@@ -165,7 +165,7 @@ LONG FAR PASCAL DebugSubclassProc(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam
 	    
    	
     	default:
-            lRtn = CallWindowProc ((FARPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
+            lRtn = CallWindowProc ((WNDPROC)lpOrgProc, hWnd, uiMsg, (WPARAM)wParam, lParam);
         break;
     }
 
@@ -515,7 +515,7 @@ void SetDebug (BOOL state)
 	if (doDebug)
 	{
 		CloseBufferedMacros();
-		DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
+		DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain,(DLGPROC) DEBUGGERMsgProc);
 	}
 	//CreateDialog (hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
 	return;
@@ -660,7 +660,7 @@ void AtBreakPoint (LPSTR Args,int bploc)
 	}
 
 	GMEditSetFile (macroStack[maxi],Args,bploc);
-	rtn = DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain, DEBUGGERMsgProc);
+	rtn = DialogBox(hInst, (LPSTR)"DEBUGGER", hWndMain, (DLGPROC)DEBUGGERMsgProc);
 	return;
 }
 void InFunction (int funid,LPSTR inString)

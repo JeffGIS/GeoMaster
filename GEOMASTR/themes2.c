@@ -2854,7 +2854,7 @@ BOOL SelectThemeClasses (short iclass)
 {GSSiEnterProg (1314);
 #endif
 {
-	FARPROC lpfnDISPLAYSELECTEDCLASSESMsgProc;
+	DLGPROC lpfnDISPLAYSELECTEDCLASSESMsgProc;
 
 	if (!CurView->pTheme)
 {
@@ -2879,7 +2879,7 @@ GSSiExitProg (1314);
 		return FALSE;
 }
 	DoPaint = FALSE; 
-    lpfnDISPLAYSELECTEDCLASSESMsgProc = MakeProcInstance((FARPROC)DISPLAYSELECTEDCLASSESMsgProc, hInst);
+    lpfnDISPLAYSELECTEDCLASSESMsgProc = MakeProcInstance((DLGPROC)DISPLAYSELECTEDCLASSESMsgProc, hInst);
     DialogBox(hInst, (LPSTR)"DISPLAYSELECTEDCLASSES", CurView->hWnd, lpfnDISPLAYSELECTEDCLASSESMsgProc);
     FreeProcInstance(lpfnDISPLAYSELECTEDCLASSESMsgProc);
 	DoPaint=TRUE; 

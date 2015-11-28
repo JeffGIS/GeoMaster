@@ -900,5 +900,5 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 void GMFileManager(LPSTR ManagerFile)
 {
 	strcpy(manFile, ManagerFile);
-	int nRc = DialogBox(hInst, (LPSTR)"FILEMANAGER", hWndMain, FileManagerMsgProc);
+	int nRc = DialogBox(hInst, (LPSTR)"FILEMANAGER", hWndMain,(DLGPROC) FileManagerMsgProc);
 }

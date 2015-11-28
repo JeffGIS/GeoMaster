@@ -359,7 +359,7 @@ void ClearVehicleMenuRects (void)
 BOOL StartVehInfoMenu (LPVIEWPORT pVP)
 {
 	VehStatusVP = pVP;
-	pVP->hWndDlg = CreateDialog(hInst, (LPSTR)"VEHICLE_STATUS", hWndMain, VEHICLE_STATUSMsgProc);
+	pVP->hWndDlg = CreateDialog(hInst, (LPSTR)"VEHICLE_STATUS", hWndMain, (DLGPROC)VEHICLE_STATUSMsgProc);
 	return TRUE;
 }
 
@@ -2005,7 +2005,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 			return FALSE;
 		AVLFactor = labs (InDelay);
 		KillTimer (hWndMain,AVLTimer);
-		SetTimer(hWndMain, AVLTimer, Delay/AVLFactor, (FARPROC) 0);
+		SetTimer(hWndMain, AVLTimer, Delay/AVLFactor, (TIMERPROC) 0);
 		return TRUE; 
 	} 
 	DestroyDummyVehicles ();
@@ -2094,7 +2094,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 	GlobalUnlock (hDummyVehicles);
 	GSSiClose (Fid);
 	AVLTimer = 6;
-	SetTimer(hWndMain, AVLTimer, Delay, (FARPROC) 0); 
+	SetTimer(hWndMain, AVLTimer, Delay, (TIMERPROC) 0); 
 	time (&AVLStartTime); 
 	return TRUE;
 }
@@ -4963,7 +4963,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 							GlobalUnlock (hVehicle[iveh]);
 						}
 
-						CreateDialog(hInst, (LPSTR)"VEHICLE_REPLAY", hWndMain, VEHICLE_TIMEMsgProc);
+						CreateDialog(hInst, (LPSTR)"VEHICLE_REPLAY", hWndMain, (DLGPROC)VEHICLE_TIMEMsgProc);
 					}
 				
 				}

@@ -162,7 +162,7 @@ int MessageBoxAtPosition (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPST
 	if (*Position == 'W')
 		MsgAtPosLoc = 0;
 	MsgAtPosOpt = Flag;
-    irc = DialogBox(hInst, (LPSTR)"MESSAGEBOXATPOS", hWnd, MESSAGEBOXATPOSMsgProc);
+	irc = DialogBox(hInst, (LPSTR)"MESSAGEBOXATPOS", hWnd, (DLGPROC)MESSAGEBOXATPOSMsgProc);
 	return irc;
 }
 
@@ -1180,7 +1180,7 @@ Redisplay:
 					  int	nRc;
 						
 					  lpfnVPEDITMsgProc = MakeProcInstance((FARPROC)VPEDITMsgProc, hInst);
-					  nRc = DialogBox(hInst, (LPSTR)"VPEDIT", hWndMain,lpfnVPEDITMsgProc);
+					  nRc = DialogBox(hInst, (LPSTR)"VPEDIT", hWndMain, (DLGPROC)lpfnVPEDITMsgProc);
 					  FreeProcInstance(lpfnVPEDITMsgProc);
 					  if (nRc)
 					  {  
@@ -2218,7 +2218,7 @@ GSSiExitProg (838);
 					    	
 						DoPaint = FALSE; 
 				        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
-				        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWndDlg, lpfnLINETYPEMsgProc);
+						nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWndDlg, (DLGPROC)lpfnLINETYPEMsgProc);
 				        FreeProcInstance(lpfnLINETYPEMsgProc);
 						DoPaint=TRUE;
 				        if (nRc)
@@ -6116,7 +6116,7 @@ DisplayPoint:
             	{
             	    SetDlgItemText (hWndDlg,IDC_GOSTOP,"Stop");
 	            	inc = 1;
-			  		SetTimer(hWndDlg,1, Delay, (FARPROC) 0);
+			  		SetTimer(hWndDlg,1, Delay, (TIMERPROC) 0);
             	}
             	else
             	{
@@ -8572,7 +8572,7 @@ GSSiExitProg (894);
 			 	   short	nRc;
 			         
 				    lpfnGRTEXTMsgProc = MakeProcInstance((FARPROC)GRTEXTMsgProc, hInst);
-				    nRc = DialogBox(hInst, (LPSTR)"GRTEXT", hWndDlg, lpfnGRTEXTMsgProc);
+					nRc = DialogBox(hInst, (LPSTR)"GRTEXT", hWndDlg, (DLGPROC)lpfnGRTEXTMsgProc);
 				    FreeProcInstance(lpfnGRTEXTMsgProc);
 			
 			    } 
@@ -8782,7 +8782,7 @@ GSSiExitProg (895);
 			 	   short	nRc;
 			         
 				    lpfnGRTEXTMsgProc = MakeProcInstance((FARPROC)GRTEXTMsgProc, hInst);
-				    nRc = DialogBox(hInst, (LPSTR)"GRTEXT", hWndDlg, lpfnGRTEXTMsgProc);
+					nRc = DialogBox(hInst, (LPSTR)"GRTEXT", hWndDlg, (DLGPROC)lpfnGRTEXTMsgProc);
 				    FreeProcInstance(lpfnGRTEXTMsgProc);
 			
 			    } 
@@ -8962,7 +8962,7 @@ GSSiExitProg (896);
 			 	   short	nRc;
 			         
 				    lpfnGRTEXTMsgProc = MakeProcInstance((FARPROC)GRTEXTMsgProc, hInst);
-				    nRc = DialogBox(hInst, (LPSTR)"GRTEXT", hWndDlg, lpfnGRTEXTMsgProc);
+					nRc = DialogBox(hInst, (LPSTR)"GRTEXT", hWndDlg, (DLGPROC)lpfnGRTEXTMsgProc);
 				    FreeProcInstance(lpfnGRTEXTMsgProc);
 			
 			    } 

@@ -3941,15 +3941,15 @@ BOOL FAR PASCAL LOWRANCESCANMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LON
 
 BOOL ScanLowrance (short Option)
 {   
-	FARPROC	lpfnLOWRANCESCANMsgProc;
+	DLGPROC	lpfnLOWRANCESCANMsgProc;
 	BOOL	nRc;
 	
 	LowranceScanOption = Option;
-	lpfnLOWRANCESCANMsgProc = MakeProcInstance((FARPROC)LOWRANCESCANMsgProc, hInst); 
+	lpfnLOWRANCESCANMsgProc = MakeProcInstance((DLGPROC)LOWRANCESCANMsgProc, hInst); 
 	if (Option < 3)
-		nRc = DialogBox(hInst, (LPSTR)"LOWRANCESCAN", hWndMain, lpfnLOWRANCESCANMsgProc); 
+		nRc = DialogBox(hInst, (LPSTR)"LOWRANCESCAN", hWndMain,(DLGPROC) lpfnLOWRANCESCANMsgProc); 
 	else
-		nRc = DialogBox(hInst, (LPSTR)"LOWRANCEREPLACE", hWndMain, lpfnLOWRANCESCANMsgProc);
+		nRc = DialogBox(hInst, (LPSTR)"LOWRANCEREPLACE", hWndMain, (DLGPROC)lpfnLOWRANCESCANMsgProc);
 	FreeProcInstance(lpfnLOWRANCESCANMsgProc);
 	return nRc;   
 }

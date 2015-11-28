@@ -58,7 +58,7 @@ static BOOL	InPaint=FALSE;
 static BOOL	WantDDE=FALSE;
 //static DWORD	expnot=851349;
 static HACCEL	hAccelTableHLT;
-static FARPROC	lpProcInstance;
+static DLGPROC	lpProcInstance;
 static HHOOK	Func;
 static HHOOK	FAR*lpFilterFunc=&Func;
 static HHOOK	MHookFunc;
@@ -68,7 +68,7 @@ static short	Pcode;
 static short	npicked;
 static short	ButtonFuncOpt;
 static long	iii=0;
-static FARPROC	lpfnPRINTINGMsgProc;
+static DLGPROC	lpfnPRINTINGMsgProc;
 static BOOL	YearToDate=FALSE;
 static long	NumPaint=1;    
 static BOOL	SaveHavePaint=FALSE;   
@@ -159,9 +159,9 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 	 {    
  		if (GetGlobalBVal2 ("[%CFGSAVEPROMPT]",TRUE))
  		{
-		  FARPROC lpfnCONFIGPARMSMsgProc;
+		  DLGPROC lpfnCONFIGPARMSMsgProc;
 
-		  lpfnCONFIGPARMSMsgProc = MakeProcInstance((FARPROC)CONFIGPARMSMsgProc, hInst);
+		  lpfnCONFIGPARMSMsgProc = MakeProcInstance((DLGPROC)CONFIGPARMSMsgProc, hInst);
 		  rtn = DialogBox(hInst, (LPSTR)"CONFIGPARMS", hWnd, lpfnCONFIGPARMSMsgProc);
 		  FreeProcInstance(lpfnCONFIGPARMSMsgProc);
 		 }
@@ -1102,7 +1102,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 BOOL GetCmdFileEntry(LPSTR cmdItem)
 {
 	BOOL rtn = FALSE;
-	rtn = DialogBox(hInst, (LPSTR)"SELECTGMSTARTCMD", 0, SelectGMCmdMsgProc);
+	rtn = DialogBox(hInst, (LPCTSTR)"SELECTGMSTARTCMD", 0, (DLGPROC)SelectGMCmdMsgProc);
 	strcpy(cmdItem, selectedStartCmd);
 	return rtn;
 }
@@ -2166,7 +2166,7 @@ HMENU hmenu;
 LPVIEWPORT	SaveView, SaveView2; 
 short	iview,l,ii, WantVP;
 BOOL	rc;
-static FARPROC lpfnDEBUGINFOMsgProc;
+static DLGPROC lpfnDEBUGINFOMsgProc;
 time_t	Time;  
 HANDLE	hSTR;
 LPSTR	str;   
@@ -2527,11 +2527,11 @@ if (!DisableMarginPan &&
 			case 'v':
 			case 'V':
             {
-                 FARPROC lpfnVISIBLEMsgProc;  
+                 DLGPROC lpfnVISIBLEMsgProc;  
                  
                  Pickability = FALSE;  
 
-                 lpfnVISIBLEMsgProc = MakeProcInstance((FARPROC)VISIBLEMsgProc, hInst);
+                 lpfnVISIBLEMsgProc = MakeProcInstance((DLGPROC)VISIBLEMsgProc, hInst);
                  nRc = DialogBox(hInst, (LPSTR)VisDialog[VisListOpt], hWnd, lpfnVISIBLEMsgProc);
                  FreeProcInstance(lpfnVISIBLEMsgProc);
                  if (nRc)
@@ -2967,9 +2967,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 
             case IDM_NEWSYM:
                  {
-                  FARPROC lpfnNEWSYMBOLMsgProc;
+                  DLGPROC lpfnNEWSYMBOLMsgProc;
 
-                  lpfnNEWSYMBOLMsgProc = MakeProcInstance((FARPROC)NEWSYMBOLMsgProc, hInst);
+                  lpfnNEWSYMBOLMsgProc = MakeProcInstance((DLGPROC)NEWSYMBOLMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"NEWSYMBOL", hWnd, lpfnNEWSYMBOLMsgProc);
                   FreeProcInstance(lpfnNEWSYMBOLMsgProc);
 
@@ -2978,9 +2978,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_EDITSYM:
                  {
-                  FARPROC lpfnEDITSYMBOLMsgProc;
+                  DLGPROC lpfnEDITSYMBOLMsgProc;
 
-                  lpfnEDITSYMBOLMsgProc = MakeProcInstance((FARPROC)EDITSYMBOLMsgProc, hInst);
+                  lpfnEDITSYMBOLMsgProc = MakeProcInstance((DLGPROC)EDITSYMBOLMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"EDITSYMBOL", hWnd, lpfnEDITSYMBOLMsgProc);
                   FreeProcInstance(lpfnEDITSYMBOLMsgProc);
 
@@ -2989,9 +2989,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_ABOUT:
                  {
-                  FARPROC lpfnABOUTMsgProc;
+                  DLGPROC lpfnABOUTMsgProc;
 
-                  lpfnABOUTMsgProc = MakeProcInstance((FARPROC)ABOUTMsgProc, hInst);
+                  lpfnABOUTMsgProc = MakeProcInstance((DLGPROC)ABOUTMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"ABOUT", hWnd, lpfnABOUTMsgProc);
                   FreeProcInstance(lpfnABOUTMsgProc);
 
@@ -3000,9 +3000,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_REORG_BTREE:
                  {
-                  FARPROC lpfnBTREE_REORGMsgProc;
+                  DLGPROC lpfnBTREE_REORGMsgProc;
 
-                  lpfnBTREE_REORGMsgProc = MakeProcInstance((FARPROC)BTREE_REORGMsgProc, hInst);
+                  lpfnBTREE_REORGMsgProc = MakeProcInstance((DLGPROC)BTREE_REORGMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"BTREE_REORG", hWnd, lpfnBTREE_REORGMsgProc);
                   FreeProcInstance(lpfnBTREE_REORGMsgProc);
 
@@ -3015,9 +3015,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_SETDATERANGE:
                  {
-                  FARPROC lpfnDATELIMITSMsgProc;
+                  DLGPROC lpfnDATELIMITSMsgProc;
 
-                  lpfnDATELIMITSMsgProc = MakeProcInstance((FARPROC)DATELIMITSMsgProc, hInst);
+                  lpfnDATELIMITSMsgProc = MakeProcInstance((DLGPROC)DATELIMITSMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"DATELIMITS", hWnd, lpfnDATELIMITSMsgProc);
                   FreeProcInstance(lpfnDATELIMITSMsgProc);
 
@@ -3225,9 +3225,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_CREATE_ADDLOC:
             {
-                  FARPROC	lpfnADDLOC_CREATEMsgProc; 
+                  DLGPROC	lpfnADDLOC_CREATEMsgProc; 
 
-                  lpfnADDLOC_CREATEMsgProc = MakeProcInstance((FARPROC)ADDLOC_CREATEMsgProc, hInst);
+                  lpfnADDLOC_CREATEMsgProc = MakeProcInstance((DLGPROC)ADDLOC_CREATEMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"ADDLOC_CREATE", hWnd, lpfnADDLOC_CREATEMsgProc);
                   FreeProcInstance(lpfnADDLOC_CREATEMsgProc);
             }
@@ -3235,9 +3235,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_RELOAD_STND_TABLES: 
             {
-                  FARPROC	lpfnABVEDITMsgProc; 
+                  DLGPROC	lpfnABVEDITMsgProc; 
 
-                  lpfnABVEDITMsgProc = MakeProcInstance((FARPROC)ABVEDITMsgProc, hInst);
+                  lpfnABVEDITMsgProc = MakeProcInstance((DLGPROC)ABVEDITMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"ABVEDIT", hWnd, lpfnABVEDITMsgProc);
                   FreeProcInstance(lpfnABVEDITMsgProc);
             }
@@ -3273,9 +3273,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_ADDLOC_FROMINT: 
             {
-                  FARPROC	lpfnADDLOC_FROMINTMsgProc; 
+                  DLGPROC	lpfnADDLOC_FROMINTMsgProc; 
 
-                  lpfnADDLOC_FROMINTMsgProc = MakeProcInstance((FARPROC)ADDLOC_FROMINTMsgProc, hInst);
+                  lpfnADDLOC_FROMINTMsgProc = MakeProcInstance((DLGPROC)ADDLOC_FROMINTMsgProc, hInst);
                   CreateDialog(hInst, (LPSTR)"ADDLOC_FROMINT", hWnd, lpfnADDLOC_FROMINTMsgProc);
 //                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMINT", hWnd, lpfnADDLOC_FROMINTMsgProc);
 //                  FreeProcInstance(lpfnADDLOC_FROMINTMsgProc);
@@ -3284,9 +3284,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	       
             case IDM_STREET_SEGS_BETWEEN_INTS: 
             {
-                  FARPROC	lpfnSTREET_SEGS_BETWEEN_INTSMsgProc; 
+                  DLGPROC	lpfnSTREET_SEGS_BETWEEN_INTSMsgProc; 
 
-                  lpfnSTREET_SEGS_BETWEEN_INTSMsgProc = MakeProcInstance((FARPROC)STREET_SEGS_BETWEEN_INTSMsgProc, hInst);
+                  lpfnSTREET_SEGS_BETWEEN_INTSMsgProc = MakeProcInstance((DLGPROC)STREET_SEGS_BETWEEN_INTSMsgProc, hInst);
                   CreateDialog(hInst, (LPSTR)"STREET_SEGS_BETWEEN_INTS", hWnd, lpfnSTREET_SEGS_BETWEEN_INTSMsgProc);
 //                  nRc = DialogBox(hInst, (LPSTR)"STREET_SEGS_BETWEEN_INTS", hWnd, lpfnSTREET_SEGS_BETWEEN_INTSMsgProc);
 //                  FreeProcInstance(lpfnSTREET_SEGS_BETWEEN_INTSMsgProc);
@@ -3295,9 +3295,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	       
             case IDM_ADDLOC_FROMADD: 
             {
-                  FARPROC	lpfnADDLOC_FROMADDMsgProc; 
+                  DLGPROC	lpfnADDLOC_FROMADDMsgProc; 
 
-                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((FARPROC)ADDLOC_FROMADDMsgProc, hInst);
+                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((DLGPROC)ADDLOC_FROMADDMsgProc, hInst);
                   CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
 //                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
 //                  FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
@@ -3306,9 +3306,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	       
             case IDM_TEST_STREET: 
             {
-                  FARPROC	lpfnTEST_STREETMsgProc; 
+                  DLGPROC	lpfnTEST_STREETMsgProc; 
 
-                  lpfnTEST_STREETMsgProc = MakeProcInstance((FARPROC)TEST_STREETMsgProc, hInst);
+                  lpfnTEST_STREETMsgProc = MakeProcInstance((DLGPROC)TEST_STREETMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"TEST_STREET", hWnd, lpfnTEST_STREETMsgProc);
                   FreeProcInstance(lpfnTEST_STREETMsgProc);
             }
@@ -3316,9 +3316,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 
             case IDM_INTACCIDPROF: 
             {
-                  FARPROC	lpfnINTACCIDPROFMsgProc; 
+                  DLGPROC	lpfnINTACCIDPROFMsgProc; 
 
-                  lpfnINTACCIDPROFMsgProc = MakeProcInstance((FARPROC)INTACCIDPROFMsgProc, hInst);
+                  lpfnINTACCIDPROFMsgProc = MakeProcInstance((DLGPROC)INTACCIDPROFMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"INTACCIDPROF", hWnd, lpfnINTACCIDPROFMsgProc);
                   FreeProcInstance(lpfnINTACCIDPROFMsgProc);
             }
@@ -3326,12 +3326,12 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 
             case IDM_ADDEDIT_HELPER:
                 {
-                  FARPROC lpfnADDEDIT_HELPERMsgProc;
+                  DLGPROC lpfnADDEDIT_HELPERMsgProc;
                   
 				  DoPaint = FALSE;
                   if (!hWndAddEditHelper)
                   { 
-					  lpfnADDEDIT_HELPERMsgProc = MakeProcInstance((FARPROC)ADDEDIT_HELPERMsgProc, hInst);
+					  lpfnADDEDIT_HELPERMsgProc = MakeProcInstance((DLGPROC)ADDEDIT_HELPERMsgProc, hInst);
 					  CreateDialog(hInst,"ADDEDIT_HELPER",hWnd, lpfnADDEDIT_HELPERMsgProc);
 				  }
                 }
@@ -3363,9 +3363,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				             	       
             case IDM_POINTMAP: 
             {
-                  FARPROC	lpfnPOINTMAPMsgProc; 
+                  DLGPROC	lpfnPOINTMAPMsgProc; 
 
-                  lpfnPOINTMAPMsgProc = MakeProcInstance((FARPROC)POINTMAPMsgProc, hInst);
+                  lpfnPOINTMAPMsgProc = MakeProcInstance((DLGPROC)POINTMAPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"POINTMAP", hWnd, lpfnPOINTMAPMsgProc);
                   FreeProcInstance(lpfnPOINTMAPMsgProc);
             }
@@ -3394,12 +3394,12 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	      
             case IDM_CREATE_FILELIST: 
             {
-                FARPROC	lpfnCREATEFILELISTMsgProc; 
+                DLGPROC	lpfnCREATEFILELISTMsgProc; 
             	
 	           	 _getcwd (CurDir,256);
            	  	 SaveDrive = _getdrive(); 
 
-                  lpfnCREATEFILELISTMsgProc = MakeProcInstance((FARPROC)CREATEFILELISTMsgProc, hInst);
+                  lpfnCREATEFILELISTMsgProc = MakeProcInstance((DLGPROC)CREATEFILELISTMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"CREATEFILELIST", hWnd, lpfnCREATEFILELISTMsgProc);
                   FreeProcInstance(lpfnCREATEFILELISTMsgProc);
         		 _chdir (CurDir);
@@ -3409,9 +3409,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 
             case IDM_LOADMIF: 
             {
-                  FARPROC	lpfnLOADMIFMsgProc; 
+                  DLGPROC	lpfnLOADMIFMsgProc; 
 
-                  lpfnLOADMIFMsgProc = MakeProcInstance((FARPROC)LOADMIFMsgProc, hInst);
+                  lpfnLOADMIFMsgProc = MakeProcInstance((DLGPROC)LOADMIFMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADMIF", hWnd, lpfnLOADMIFMsgProc);
                   FreeProcInstance(lpfnLOADMIFMsgProc);
             }
@@ -3419,9 +3419,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADSHP: 
             {
-                  FARPROC	lpfnLOADSHPMsgProc; 
+                  DLGPROC	lpfnLOADSHPMsgProc; 
 
-                  lpfnLOADSHPMsgProc = MakeProcInstance((FARPROC)LOADSHPMsgProc, hInst);
+                  lpfnLOADSHPMsgProc = MakeProcInstance((DLGPROC)LOADSHPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADSHP", hWnd, lpfnLOADSHPMsgProc);
                   FreeProcInstance(lpfnLOADSHPMsgProc);
             }
@@ -3429,9 +3429,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
 /*            case IDM_LOADGEN: 
             {
-                  FARPROC	lpfnLOADGENMsgProc; 
+                  DLGPROC	lpfnLOADGENMsgProc; 
 
-                  lpfnLOADGENMsgProc = MakeProcInstance((FARPROC)LOADGENMsgProc, hInst);
+                  lpfnLOADGENMsgProc = MakeProcInstance((DLGPROC)LOADGENMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADGEN", hWnd, lpfnLOADGENMsgProc);
                   FreeProcInstance(lpfnLOADGENMsgProc);
             }
@@ -3439,9 +3439,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADUMAREAS: 
             {
-                  FARPROC	lpfnLOADUMAREASMsgProc; 
+                  DLGPROC	lpfnLOADUMAREASMsgProc; 
 
-                  lpfnLOADUMAREASMsgProc = MakeProcInstance((FARPROC)LOADUMAREASMsgProc, hInst);
+                  lpfnLOADUMAREASMsgProc = MakeProcInstance((DLGPROC)LOADUMAREASMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADUMAREAS", hWnd, lpfnLOADUMAREASMsgProc);
                   FreeProcInstance(lpfnLOADUMAREASMsgProc);
             }
@@ -3449,9 +3449,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADXFER: 
             {
-                  FARPROC	lpfnLOADXFERMsgProc; 
+                  DLGPROC	lpfnLOADXFERMsgProc; 
 
-                  lpfnLOADXFERMsgProc = MakeProcInstance((FARPROC)LOADXFERMsgProc, hInst);
+                  lpfnLOADXFERMsgProc = MakeProcInstance((DLGPROC)LOADXFERMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADXFER", hWnd, lpfnLOADXFERMsgProc);
                   FreeProcInstance(lpfnLOADXFERMsgProc);
             }
@@ -3459,9 +3459,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADDGNDUMP: 
             {
-                  FARPROC	lpfnLOADDGNDUMPMsgProc; 
+                  DLGPROC	lpfnLOADDGNDUMPMsgProc; 
 
-                  lpfnLOADDGNDUMPMsgProc = MakeProcInstance((FARPROC)LOADDGNDUMPMsgProc, hInst);
+                  lpfnLOADDGNDUMPMsgProc = MakeProcInstance((DLGPROC)LOADDGNDUMPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADDGNDUMP", hWnd, lpfnLOADDGNDUMPMsgProc);
                   FreeProcInstance(lpfnLOADDGNDUMPMsgProc);
             }
@@ -3469,9 +3469,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADFLOOD: 
             {
-                  FARPROC	lpfnLOADFLOODMsgProc; 
+                  DLGPROC	lpfnLOADFLOODMsgProc; 
 
-                  lpfnLOADFLOODMsgProc = MakeProcInstance((FARPROC)LOADFLOODMsgProc, hInst);
+                  lpfnLOADFLOODMsgProc = MakeProcInstance((DLGPROC)LOADFLOODMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADFLOOD", hWnd, lpfnLOADFLOODMsgProc);
                   FreeProcInstance(lpfnLOADFLOODMsgProc);
             }
@@ -3479,9 +3479,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADSSURGO: 
             {
-                  FARPROC	lpfnLOADSSURGOMsgProc; 
+                  DLGPROC	lpfnLOADSSURGOMsgProc; 
 
-                  lpfnLOADSSURGOMsgProc = MakeProcInstance((FARPROC)LOADSSURGOMsgProc, hInst);
+                  lpfnLOADSSURGOMsgProc = MakeProcInstance((DLGPROC)LOADSSURGOMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADSSURGO", hWnd, lpfnLOADSSURGOMsgProc);
                   FreeProcInstance(lpfnLOADSSURGOMsgProc);
             }
@@ -3489,9 +3489,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADBNA: 
             {
-                  FARPROC	lpfnLOADBNAMsgProc; 
+                  DLGPROC	lpfnLOADBNAMsgProc; 
 
-                  lpfnLOADBNAMsgProc = MakeProcInstance((FARPROC)LOADBNAMsgProc, hInst);
+                  lpfnLOADBNAMsgProc = MakeProcInstance((DLGPROC)LOADBNAMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADBNA", hWnd, lpfnLOADBNAMsgProc);
                   FreeProcInstance(lpfnLOADBNAMsgProc);
             }
@@ -3499,9 +3499,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADDOQS: 
             {
-                  FARPROC	lpfnLOADDOQSMsgProc; 
+                  DLGPROC	lpfnLOADDOQSMsgProc; 
 
-                  lpfnLOADDOQSMsgProc = MakeProcInstance((FARPROC)LOADDOQSMsgProc, hInst);
+                  lpfnLOADDOQSMsgProc = MakeProcInstance((DLGPROC)LOADDOQSMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADDOQS", hWnd, lpfnLOADDOQSMsgProc);
                   FreeProcInstance(lpfnLOADDOQSMsgProc);
             }
@@ -3509,9 +3509,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_CREATE_ORTHOCDS: 
             {
-                  FARPROC	lpfnCREATE_ORTHOCDSMsgProc; 
+                  DLGPROC	lpfnCREATE_ORTHOCDSMsgProc; 
 
-                  lpfnCREATE_ORTHOCDSMsgProc = MakeProcInstance((FARPROC)CREATE_ORTHOCDSMsgProc, hInst);
+                  lpfnCREATE_ORTHOCDSMsgProc = MakeProcInstance((DLGPROC)CREATE_ORTHOCDSMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"CREATE_ORTHOCDS", hWnd, lpfnCREATE_ORTHOCDSMsgProc);
                   FreeProcInstance(lpfnCREATE_ORTHOCDSMsgProc);
             }
@@ -3519,9 +3519,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_CREATE_ORTHOCDS2: 
             {
-                  FARPROC	lpfnCREATE_ORTHOCDS2MsgProc; 
+                  DLGPROC	lpfnCREATE_ORTHOCDS2MsgProc; 
 
-                  lpfnCREATE_ORTHOCDS2MsgProc = MakeProcInstance((FARPROC)CREATE_ORTHOCDS2MsgProc, hInst);
+                  lpfnCREATE_ORTHOCDS2MsgProc = MakeProcInstance((DLGPROC)CREATE_ORTHOCDS2MsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"CREATE_ORTHOCDS2", hWnd, lpfnCREATE_ORTHOCDS2MsgProc);
                   FreeProcInstance(lpfnCREATE_ORTHOCDS2MsgProc);
             }
@@ -3529,9 +3529,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADDXF: 
             {
-                  FARPROC	lpfnLOADDXFMsgProc; 
+                  DLGPROC	lpfnLOADDXFMsgProc; 
 
-                  lpfnLOADDXFMsgProc = MakeProcInstance((FARPROC)LOADDXFMsgProc, hInst);
+                  lpfnLOADDXFMsgProc = MakeProcInstance((DLGPROC)LOADDXFMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOADDXF", hWnd, lpfnLOADDXFMsgProc);
                   FreeProcInstance(lpfnLOADDXFMsgProc);
             }
@@ -3539,9 +3539,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADTIGER: 
             {
-                  FARPROC	lpfnLOAD_TIGERMsgProc; 
+                  DLGPROC	lpfnLOAD_TIGERMsgProc; 
 
-                  lpfnLOAD_TIGERMsgProc = MakeProcInstance((FARPROC)LOAD_TIGERMsgProc, hInst);
+                  lpfnLOAD_TIGERMsgProc = MakeProcInstance((DLGPROC)LOAD_TIGERMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOAD_TIGER", hWnd, lpfnLOAD_TIGERMsgProc);
                   FreeProcInstance(lpfnLOAD_TIGERMsgProc);
             }
@@ -3549,9 +3549,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_LOADTIGER_PN: 
             {
-                  FARPROC	lpfnLOAD_TIGER_PNMsgProc; 
+                  DLGPROC	lpfnLOAD_TIGER_PNMsgProc; 
 
-                  lpfnLOAD_TIGER_PNMsgProc = MakeProcInstance((FARPROC)LOAD_TIGER_PNMsgProc, hInst);
+                  lpfnLOAD_TIGER_PNMsgProc = MakeProcInstance((DLGPROC)LOAD_TIGER_PNMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOAD_TIGER_PN", hWnd, lpfnLOAD_TIGER_PNMsgProc);
                   FreeProcInstance(lpfnLOAD_TIGER_PNMsgProc);
             }
@@ -3605,9 +3605,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             case IDM_ZOOM_SCALE:
        			 HaltMapDisplay(FALSE,FALSE);
             {
-                  FARPROC	lpfnZOOMSCALEMsgProc; 
+                  DLGPROC	lpfnZOOMSCALEMsgProc; 
 
-                  lpfnZOOMSCALEMsgProc = MakeProcInstance((FARPROC)ZOOMSCALEMsgProc, hInst);
+                  lpfnZOOMSCALEMsgProc = MakeProcInstance((DLGPROC)ZOOMSCALEMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"ZOOMSCALE", hWnd, lpfnZOOMSCALEMsgProc);
                   FreeProcInstance(lpfnZOOMSCALEMsgProc);
                   if (nRc)
@@ -3962,7 +3962,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 break;
 			case IDM_ALTACCEL:
 				hAccelMain = hAccelAlt;
-                CreateDialog(hInst, (LPSTR)"ALTACCEL", hWnd, AltAccelMsgProc);
+				CreateDialog(hInst, (LPCTSTR)"ALTACCEL", hWnd, (DLGPROC)AltAccelMsgProc);
 				//hAccelMain = hAccelTable;
 				break;
 			case IDM_ALTACCELF1:
@@ -4123,9 +4123,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 
             case IDM_SAVE_ZOOM:
                  {
-                  FARPROC lpfnSAVEZOOMMsgProc;
+                  DLGPROC lpfnSAVEZOOMMsgProc;
 
-                  lpfnSAVEZOOMMsgProc = MakeProcInstance((FARPROC)SAVEZOOMMsgProc, hInst);
+                  lpfnSAVEZOOMMsgProc = MakeProcInstance((DLGPROC)SAVEZOOMMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"SAVEZOOM", hWnd, lpfnSAVEZOOMMsgProc);
                   FreeProcInstance(lpfnSAVEZOOMMsgProc);
                  }
@@ -4142,9 +4142,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                  
             case IDM_L_COORDINATE: 
             {
-            	FARPROC lpfnLOC_COORDMsgProc;
+            	DLGPROC lpfnLOC_COORDMsgProc;
 
-                lpfnLOC_COORDMsgProc = MakeProcInstance((FARPROC)LOC_COORDMsgProc, hInst);
+                lpfnLOC_COORDMsgProc = MakeProcInstance((DLGPROC)LOC_COORDMsgProc, hInst);
                 nRc = DialogBox(hInst, (LPSTR)"LOC_COORD", hWnd, lpfnLOC_COORDMsgProc);
                 FreeProcInstance(lpfnLOC_COORDMsgProc); 
                 if (nRc)
@@ -4162,9 +4162,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 
             case IDM_L_LATLONG: 
             {
-            	FARPROC lpfnLOC_LATLONGMsgProc;
+            	DLGPROC lpfnLOC_LATLONGMsgProc;
 
-                lpfnLOC_LATLONGMsgProc = MakeProcInstance((FARPROC)LOC_LATLONGMsgProc, hInst);
+                lpfnLOC_LATLONGMsgProc = MakeProcInstance((DLGPROC)LOC_LATLONGMsgProc, hInst);
                 nRc = DialogBox(hInst, (LPSTR)"LOC_LATLONG", hWnd, lpfnLOC_LATLONGMsgProc);
                 FreeProcInstance(lpfnLOC_LATLONGMsgProc); 
                 if (nRc)
@@ -4183,9 +4183,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             case IDM_L_REFNO: 
             	
             {
-            	FARPROC lpfnLOC_REFNOMsgProc;
+            	DLGPROC lpfnLOC_REFNOMsgProc;
 
-                lpfnLOC_REFNOMsgProc = MakeProcInstance((FARPROC)LOC_REFNOMsgProc, hInst);
+                lpfnLOC_REFNOMsgProc = MakeProcInstance((DLGPROC)LOC_REFNOMsgProc, hInst);
                 nRc = DialogBox(hInst, (LPSTR)"LOC_REFNO", hWnd, lpfnLOC_REFNOMsgProc);
                 FreeProcInstance(lpfnLOC_REFNOMsgProc); 
                 if (nRc)
@@ -4318,12 +4318,12 @@ DisplayParcel:
 
             case IDM_L_STREET:
                 {
-                  FARPROC lpfnLOC_STREETMsgProc;
+                  DLGPROC lpfnLOC_STREETMsgProc;
                   
 				  DoPaint = TRUE;
                   if (!hWndLocStreet)
                   { 
-					  lpfnLOC_STREETMsgProc = MakeProcInstance((FARPROC)LOC_STREETMsgProc, hInst);
+					  lpfnLOC_STREETMsgProc = MakeProcInstance((DLGPROC)LOC_STREETMsgProc, hInst);
 					  CreateDialog(hInst,"LOC_STREET",hWnd, lpfnLOC_STREETMsgProc);
 				  }
                 }
@@ -4331,9 +4331,9 @@ DisplayParcel:
 
             case IDM_L_INTERSECTION:
                 {
-                  FARPROC lpfnLOC_INTERSECTMsgProc;  
+                  DLGPROC lpfnLOC_INTERSECTMsgProc;  
 
-                  lpfnLOC_INTERSECTMsgProc = MakeProcInstance((FARPROC)LOC_INTERSECTMsgProc, hInst);
+                  lpfnLOC_INTERSECTMsgProc = MakeProcInstance((DLGPROC)LOC_INTERSECTMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOC_INTERSECT", hWnd, lpfnLOC_INTERSECTMsgProc);
                   FreeProcInstance(lpfnLOC_INTERSECTMsgProc);  
                   if (nRc)
@@ -4343,9 +4343,9 @@ DisplayParcel:
                  
             case IDM_LOCATION_OFFSET: 
                 {
-                  FARPROC lpfnLOCATION_OFFSETMsgProc;
+                  DLGPROC lpfnLOCATION_OFFSETMsgProc;
 
-                  lpfnLOCATION_OFFSETMsgProc = MakeProcInstance((FARPROC)LOCATION_OFFSETMsgProc, hInst);
+                  lpfnLOCATION_OFFSETMsgProc = MakeProcInstance((DLGPROC)LOCATION_OFFSETMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"LOCATION_OFFSET", hWnd, lpfnLOCATION_OFFSETMsgProc);
                   FreeProcInstance(lpfnLOCATION_OFFSETMsgProc);
                  }
@@ -4362,11 +4362,11 @@ DisplayParcel:
                  Pickability = FALSE;
              Visible:
                  {
-                  FARPROC lpfnVISIBLEMsgProc;  
+                  DLGPROC lpfnVISIBLEMsgProc;  
                   char	VisDialog[2][10]={"VISIBLE","VISIBLE1"};
 
 				  //SetViewport(*pCommandViewport);
-                  lpfnVISIBLEMsgProc = MakeProcInstance((FARPROC)VISIBLEMsgProc, hInst);
+                  lpfnVISIBLEMsgProc = MakeProcInstance((DLGPROC)VISIBLEMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)VisDialog[VisListOpt], hWnd, lpfnVISIBLEMsgProc);
                   FreeProcInstance(lpfnVISIBLEMsgProc);
                   if (!Pickability && nRc)
@@ -4381,10 +4381,10 @@ DisplayParcel:
                  Pickability = FALSE;
              Visible2:
                  {
-                  FARPROC lpfnVISIBLE2MsgProc;
+                  DLGPROC lpfnVISIBLE2MsgProc;
 
 //				  SetViewport(*pCommandViewport);
-                  lpfnVISIBLE2MsgProc = MakeProcInstance((FARPROC)VISIBLE2MsgProc, hInst);
+                  lpfnVISIBLE2MsgProc = MakeProcInstance((DLGPROC)VISIBLE2MsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"VISIBLE2", hWnd, lpfnVISIBLE2MsgProc);
                   FreeProcInstance(lpfnVISIBLE2MsgProc);
                   if (!Pickability && nRc)
@@ -4398,10 +4398,10 @@ DisplayParcel:
                  /* Menu Item Named "Visibility" here.                  */ 
                  Pickability = FALSE;
                  {
-                  FARPROC lpfnVISFILESMsgProc;
+                  DLGPROC lpfnVISFILESMsgProc;
                   
 //				  SetViewport(*pCommandViewport);
-                  lpfnVISFILESMsgProc = MakeProcInstance((FARPROC)VISFILESMsgProc, hInst);
+                  lpfnVISFILESMsgProc = MakeProcInstance((DLGPROC)VISFILESMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"VISFILES", hWnd, lpfnVISFILESMsgProc);
                   FreeProcInstance(lpfnVISFILESMsgProc);
                   if (!Pickability && nRc)
@@ -4415,10 +4415,10 @@ DisplayParcel:
                  /* Menu Item Named "Visibility" here.                  */ 
                  Pickability = TRUE;
                  {
-                  FARPROC lpfnVISFILESMsgProc;
+                  DLGPROC lpfnVISFILESMsgProc;
 
 //				  SetViewport(*pCommandViewport);
-                  lpfnVISFILESMsgProc = MakeProcInstance((FARPROC)VISFILESMsgProc, hInst);
+                  lpfnVISFILESMsgProc = MakeProcInstance((DLGPROC)VISFILESMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"VISFILES", hWnd, lpfnVISFILESMsgProc);
                   FreeProcInstance(lpfnVISFILESMsgProc);
 
@@ -4429,9 +4429,9 @@ DisplayParcel:
                  /* Place User Code to respond to the                   */
                  /* Menu Item Named "Visibility" here.                  */ 
                  {
-                  FARPROC lpfnVIEWPORTSMsgProc;
+                  DLGPROC lpfnVIEWPORTSMsgProc;
 
-                  lpfnVIEWPORTSMsgProc = MakeProcInstance((FARPROC)VIEWPORTSMsgProc, hInst);
+                  lpfnVIEWPORTSMsgProc = MakeProcInstance((DLGPROC)VIEWPORTSMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"VIEWPORTS", hWnd, lpfnVIEWPORTSMsgProc);
                   FreeProcInstance(lpfnVIEWPORTSMsgProc);
                   if (nRc)
@@ -4526,9 +4526,9 @@ DisplayParcel:
 
             case IDM_PRINT_MERGE:
                  {
-                  FARPROC lpfnPRINTMERGEMsgProc;
+                  DLGPROC lpfnPRINTMERGEMsgProc;
 
-                  lpfnPRINTMERGEMsgProc = MakeProcInstance((FARPROC)PRINTMERGEMsgProc, hInst);
+                  lpfnPRINTMERGEMsgProc = MakeProcInstance((DLGPROC)PRINTMERGEMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"PRINTMERGE", hWnd, lpfnPRINTMERGEMsgProc);
                   FreeProcInstance(lpfnPRINTMERGEMsgProc);
                  }
@@ -4599,12 +4599,12 @@ DisplayParcel:
                  /* Place User Code to respond to the                   */
                  /* Menu Item Named "To file" here.                     */   
 				{	
-			        FARPROC lpfnEXPORTIMAGEMsgProc; 
+			        DLGPROC lpfnEXPORTIMAGEMsgProc; 
 			        int	nRc;
 					
 					hSTR=GSSiGlobAlloc (  15,GHND,256);
 					str=GlobalLock (hSTR); 
-		            lpfnEXPORTIMAGEMsgProc = MakeProcInstance((FARPROC)EXPORTIMAGEMsgProc, hInst);
+		            lpfnEXPORTIMAGEMsgProc = MakeProcInstance((DLGPROC)EXPORTIMAGEMsgProc, hInst);
 		            nRc = DialogBox(hInst, (LPSTR)"EXPORTIMAGE", hWnd, lpfnEXPORTIMAGEMsgProc);
 		            FreeProcInstance(lpfnEXPORTIMAGEMsgProc);
 	          		if (nRc)
@@ -4679,9 +4679,9 @@ DisplayParcel:
             	 
             case IDM_HLT_OUTFORMAT:
                 {
-                  FARPROC lpfnHLTOUT_FORMATMsgProc;
+                  DLGPROC lpfnHLTOUT_FORMATMsgProc;
 
-                  lpfnHLTOUT_FORMATMsgProc = MakeProcInstance((FARPROC)HLTOUT_FORMATMsgProc, hInst);
+                  lpfnHLTOUT_FORMATMsgProc = MakeProcInstance((DLGPROC)HLTOUT_FORMATMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"HLTOUT_FORMAT", hWnd, lpfnHLTOUT_FORMATMsgProc);
                   FreeProcInstance(lpfnHLTOUT_FORMATMsgProc);
                   HLTOUTFormat=0;
@@ -4706,8 +4706,8 @@ DisplayParcel:
             	 
             case IDM_REORGFILE:
                  {
-                  FARPROC	lpfnREORGMAPMsgProc;
-                  lpfnREORGMAPMsgProc = MakeProcInstance((FARPROC)REORGMAPMsgProc, hInst);
+                  DLGPROC	lpfnREORGMAPMsgProc;
+                  lpfnREORGMAPMsgProc = MakeProcInstance((DLGPROC)REORGMAPMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"REORGMAP", hWnd, lpfnREORGMAPMsgProc);
                   FreeProcInstance(lpfnREORGMAPMsgProc);  
                   if (nRc==2)
@@ -4736,7 +4736,7 @@ DisplayParcel:
                  DoPaint = FALSE;
 				 
                  {
-				    FARPROC lpfnDISPLAY_GWD_DATAMsgProc;
+				    DLGPROC lpfnDISPLAY_GWD_DATAMsgProc;
 				    LPSTR	pName;
 				     
 				    hName=GSSiGlobAlloc (  17,GHND,256);
@@ -4775,9 +4775,9 @@ DisplayParcel:
             	 GSSiGlobFree (&hCFName); 
         EditCombo:
             {
-                  FARPROC	lpfnCOMBO_FILEMsgProc; 
+                  DLGPROC	lpfnCOMBO_FILEMsgProc; 
 
-                  lpfnCOMBO_FILEMsgProc = MakeProcInstance((FARPROC)COMBO_FILEMsgProc, hInst);
+                  lpfnCOMBO_FILEMsgProc = MakeProcInstance((DLGPROC)COMBO_FILEMsgProc, hInst);
                   DialogBox(hInst, (LPSTR)"COMBO_FILE", hWnd, lpfnCOMBO_FILEMsgProc);
                   FreeProcInstance(lpfnCOMBO_FILEMsgProc);
             }
@@ -5320,7 +5320,7 @@ DisplayParcel:
             	 st = OkToContinue (TRUE);
             	 if (!st)
 					BlowOut(0,0); 
-	 			 SetTimer(hWnd, OKTOCONTINUETIMER, OkToContinueTime, (FARPROC) 0);
+	 			 SetTimer(hWnd, OKTOCONTINUETIMER, OkToContinueTime, (TIMERPROC) 0);
 	 			 if (st == 3)
 	 			 {
 		 			 if (*UserName)  
@@ -5426,11 +5426,11 @@ DisplayParcel:
        	   if (wParam & MK_LBUTTON)
 LoadGFMenu:
 	   	   {
-		    FARPROC lpfnRBUTOPSMsgProc;
+		    DLGPROC lpfnRBUTOPSMsgProc;
 			HCURSOR	SaveCursor=GSSiSetCursor (LoadCursor(0, IDC_ARROW));     
             
             GSSiTrace ("Invoke GF menu",0);
-		    lpfnRBUTOPSMsgProc = MakeProcInstance((FARPROC)RBUTOPSMsgProc, hInst);
+		    lpfnRBUTOPSMsgProc = MakeProcInstance((DLGPROC)RBUTOPSMsgProc, hInst);
 		    nRc = DialogBox(hInst, (LPSTR)"RBUTOPS", hWnd, lpfnRBUTOPSMsgProc);
 		    FreeProcInstance(lpfnRBUTOPSMsgProc);
 			GSSiSetCursor (SaveCursor);
@@ -5958,7 +5958,7 @@ int FAR PASCAL FilterFunc(int nCode,WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 GSSiExitProg (456);
 #endif
-      return DefHookProc(nCode, wParam, lParam,(FARPROC FAR *) &Func);
+      return DefHookProc(nCode, wParam, lParam,(HHOOK *) &Func);
 }
   if (lpmsg->message == WM_SHOWWINDOW)
   	ii=1;

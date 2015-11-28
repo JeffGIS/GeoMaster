@@ -2005,7 +2005,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 		Fid = GSSiOpenFile(Name, 0, OF_READ);
 		if (Fid == HFILE_ERROR)
 		{
-			FARPROC lpfnSETSHAPEPARAMMsgProc;
+			DLGPROC lpfnSETSHAPEPARAMMsgProc;
 
 			_fstrcpy(LastSQLITEFile, SQLITEFileName);
 			ExpandText(LastSQLITEFile);
@@ -2013,7 +2013,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 				goto RtnFalse;
 			goto RtnTrue;
 			{
-				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETSHAPEPARAMMsgProc, hInst);
+				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
 				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
 				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
 				Fid = GSSiOpenFile(Name, 0, OF_READ);

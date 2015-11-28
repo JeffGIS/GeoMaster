@@ -173,9 +173,9 @@ GSSiExitProg (1350);
 			iopt = atoi (Arg[2]); 
 			if (iopt == 3)
 			{
-				FARPROC lpfnNEWPOINTSETMsgProc;
+				DLGPROC lpfnNEWPOINTSETMsgProc;
 				
-				lpfnNEWPOINTSETMsgProc = MakeProcInstance((FARPROC)NEWPOINTSETMsgProc, hInst);
+				lpfnNEWPOINTSETMsgProc = MakeProcInstance((DLGPROC)NEWPOINTSETMsgProc, hInst);
 				rtn = DialogBox(hInst, (LPSTR)"NEWPOINTSET", GetFocus(), lpfnNEWPOINTSETMsgProc);
 				FreeProcInstance(lpfnNEWPOINTSETMsgProc);
 			
@@ -432,7 +432,7 @@ GSSiExitProg (1350);
 		
 		case 806: /* $COORDLOC(File,CurrentLocGlobal,D or S(sorted) or N or P) coordinate location file*/
 		{	 
-            FARPROC lpfnCOORDLOCMsgProc;
+            DLGPROC lpfnCOORDLOCMsgProc;
 		    HFILE       Fid; 
 		    LPSTR       lpBAR, LastChar; 
 			LPSTR	str;   
@@ -491,7 +491,7 @@ GSSiExitProg (1350);
             	
             	case 'D':
             	case 'S':
-		            lpfnCOORDLOCMsgProc = MakeProcInstance((FARPROC)COORDLOCMsgProc, hInst); 
+		            lpfnCOORDLOCMsgProc = MakeProcInstance((DLGPROC)COORDLOCMsgProc, hInst); 
 		            if (*Arg[3] == 'D')
 		            	nRc = DialogBox(hInst, (LPSTR)"COORDLOC", hWndMain, lpfnCOORDLOCMsgProc); 
 		            else
@@ -874,10 +874,10 @@ GSSiExitProg (1350);
 			   		{
 			   			case 0: 
 		            	{
-		                  FARPROC lpfnAUTOREGMsgProc; 
+		                  DLGPROC lpfnAUTOREGMsgProc; 
 		                  short	nRc;
 		
-		                  lpfnAUTOREGMsgProc = MakeProcInstance((FARPROC)AUTOREGMsgProc, hInst);
+		                  lpfnAUTOREGMsgProc = MakeProcInstance((DLGPROC)AUTOREGMsgProc, hInst);
 		                  nRc = DialogBox(hInst, (LPSTR)"AUTOREG", hWndMain, lpfnAUTOREGMsgProc);
 		                  FreeProcInstance(lpfnAUTOREGMsgProc);  
 		                  if (nRc)
@@ -958,28 +958,28 @@ GSSiExitProg (1350);
 		
 		case 829: // $OWNERLOC() -kaufman specific
 		{	 
-            FARPROC lpfnOWNERLOCMsgProc;
+            DLGPROC lpfnOWNERLOCMsgProc;
 			int		nRc;
 			
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 			{
-				lpfnOWNERLOCMsgProc = MakeProcInstance((FARPROC)OWNERLOCMsgProc, hInst);
+				lpfnOWNERLOCMsgProc = MakeProcInstance((DLGPROC)OWNERLOCMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"OWNERSEARCH", CurView->hWnd, lpfnOWNERLOCMsgProc);
 			}
 			else if (!stricmp (Arg[1],"MGVPOLICE"))
 			{
-				lpfnOWNERLOCMsgProc = MakeProcInstance((FARPROC)OWNERLOCMsgProc3, hInst);
+				lpfnOWNERLOCMsgProc = MakeProcInstance((DLGPROC)OWNERLOCMsgProc3, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"OWNERSEARCH3", CurView->hWnd, lpfnOWNERLOCMsgProc);
 			}
 			else if (!stricmp (Arg[1],"MPLSPOLICE"))
 			{
-				lpfnOWNERLOCMsgProc = MakeProcInstance((FARPROC)OWNERLOCMsgProc4, hInst);
+				lpfnOWNERLOCMsgProc = MakeProcInstance((DLGPROC)OWNERLOCMsgProc4, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"OWNERSEARCH4", CurView->hWnd, lpfnOWNERLOCMsgProc);
 			}
 			else
 			{
-				lpfnOWNERLOCMsgProc = MakeProcInstance((FARPROC)OWNERLOCMsgProc2, hInst);
+				lpfnOWNERLOCMsgProc = MakeProcInstance((DLGPROC)OWNERLOCMsgProc2, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"OWNERSEARCH2", CurView->hWnd, lpfnOWNERLOCMsgProc);
 			}
             FreeProcInstance(lpfnOWNERLOCMsgProc); 
@@ -994,7 +994,7 @@ GSSiExitProg (1350);
 		
 		case 830: //$REORGMAP(TFbackup,TFbuildtagref,tranfile,TFFixedtran)
         {
-          FARPROC	lpfnREORGMAPMsgProc;  
+          DLGPROC	lpfnREORGMAPMsgProc;  
           LPSTR		pReorgParms;
           
 		  nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
@@ -1002,7 +1002,7 @@ GSSiExitProg (1350);
           pReorgParms = GlobalLock (hReorgParms);  
           sprintf (pReorgParms,"%s\t%s\t%s\t%s",Arg[1],Arg[2],Arg[3],Arg[4]);
           GlobalUnlock (hReorgParms);
-          lpfnREORGMAPMsgProc = MakeProcInstance((FARPROC)REORGMAPMsgProc, hInst);
+          lpfnREORGMAPMsgProc = MakeProcInstance((DLGPROC)REORGMAPMsgProc, hInst);
           nRc = DialogBox(hInst, (LPSTR)"REORGMAP", CurView->hWnd, lpfnREORGMAPMsgProc);
           FreeProcInstance(lpfnREORGMAPMsgProc);  
 		  GSSiGlobFree(&hReorgParms);
@@ -1084,14 +1084,14 @@ GSSiExitProg (1350);
 		
 		case 836: //$MAPINDEX(Create,indexname,filelist)
 		{
-			FARPROC lpfnLOADMDMsgProc;
+			DLGPROC lpfnLOADMDMsgProc;
 			                  
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse; 
 			_fstrcpy (AutoExportName,Arg[3]);
 			_fstrcpy (AutoMapIndexName,Arg[2]);
-			lpfnLOADMDMsgProc = MakeProcInstance((FARPROC)LOADMDMsgProc, hInst);
+			lpfnLOADMDMsgProc = MakeProcInstance((DLGPROC)LOADMDMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"LOAD_MD", hWndMain, lpfnLOADMDMsgProc);
 			FreeProcInstance(lpfnLOADMDMsgProc);  
 			*AutoMapIndexName=0;
@@ -1813,10 +1813,10 @@ GSSiExitProg (1350);
 		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
 		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
         {
-              FARPROC	lpfnCDINSTALLERMsgProc;
+              DLGPROC	lpfnCDINSTALLERMsgProc;
               short		nRc; 
                   
-              lpfnCDINSTALLERMsgProc = MakeProcInstance((FARPROC)CDINSTALLERMsgProc, hInst);
+              lpfnCDINSTALLERMsgProc = MakeProcInstance((DLGPROC)CDINSTALLERMsgProc, hInst);
               nRc = DialogBox(hInst, (LPSTR)"CDINSTALLER", hWndMain, lpfnCDINSTALLERMsgProc);
               FreeProcInstance(lpfnCDINSTALLERMsgProc);  
               if (nRc)
@@ -2068,11 +2068,11 @@ GSSiExitProg (1350);
 		    
 		    if (!_fstricmp (Arg[1],"STORMPIPE"))
             {
-                  FARPROC	lpfnSTRMPIPEMsgProc; 
+                  DLGPROC	lpfnSTRMPIPEMsgProc; 
                   
                   if (!hWndStrmPipe)
                   {
-	                  lpfnSTRMPIPEMsgProc = MakeProcInstance((FARPROC)STRMPIPEMsgProc, hInst);
+	                  lpfnSTRMPIPEMsgProc = MakeProcInstance((DLGPROC)STRMPIPEMsgProc, hInst);
 	                  CreateDialog(hInst, (LPSTR)"STRMPIPE", hWndMain, lpfnSTRMPIPEMsgProc); 
 	              }
             } 
@@ -2414,7 +2414,7 @@ GSSiExitProg (1350);
 		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
-            FARPROC lpfnDECOMPPOLYMsgProc; 
+            DLGPROC lpfnDECOMPPOLYMsgProc; 
 			
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
@@ -2431,7 +2431,7 @@ GSSiExitProg (1350);
 			GlobalUnlock (hDCPSetup);
 			DecompLinkBtwnNodes = atob (Arg[4]);  
 			DecompAutoRun = atob (Arg[5]);
-            lpfnDECOMPPOLYMsgProc = MakeProcInstance((FARPROC)DECOMPPOLYMsgProc, hInst);
+            lpfnDECOMPPOLYMsgProc = MakeProcInstance((DLGPROC)DECOMPPOLYMsgProc, hInst);
             nRc = DialogBox(hInst, (LPSTR)"DECOMPPOLY", hWndMain, lpfnDECOMPPOLYMsgProc);
             FreeProcInstance(lpfnDECOMPPOLYMsgProc); 
              
@@ -2642,7 +2642,7 @@ GSSiExitProg (1350);
 			if (atob (Arg[3]))
             {
                   
-              lpfnPRINTMERGETSTMsgProc = MakeProcInstance((FARPROC)PRINTMERGETSTMsgProc, hInst);
+              lpfnPRINTMERGETSTMsgProc = MakeProcInstance((DLGPROC)PRINTMERGETSTMsgProc, hInst);
               CreateDialog(hInst, (LPSTR)"PRINTMERGETST", hWndMain, lpfnPRINTMERGETSTMsgProc); 
               goto RtnTrue;
             }
@@ -2653,9 +2653,9 @@ GSSiExitProg (1350);
 
         case 1010: //$VEHICLEDEF ()
         {
-	          FARPROC lpfnVEHICLEDEFMsgProc;
+	          DLGPROC lpfnVEHICLEDEFMsgProc;
 	
-	          lpfnVEHICLEDEFMsgProc = MakeProcInstance((FARPROC)VEHICLEDEFMsgProc, hInst);
+	          lpfnVEHICLEDEFMsgProc = MakeProcInstance((DLGPROC)VEHICLEDEFMsgProc, hInst);
 	          rtn = DialogBox(hInst, (LPSTR)"VEHICLEDEF", hWndMain, lpfnVEHICLEDEFMsgProc);
 	          FreeProcInstance(lpfnVEHICLEDEFMsgProc);  
 	          if (rtn)
@@ -3224,7 +3224,7 @@ GSSiExitProg (1350);
         	BOOL	nRc;
             
             DoPaint=FALSE;      
-			lpfnADDWAYPOINTMsgProc = MakeProcInstance((FARPROC)ADDWAYPOINTMsgProc, hInst);
+			lpfnADDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)ADDWAYPOINTMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndMain, lpfnADDWAYPOINTMsgProc);
 			FreeProcInstance(lpfnADDWAYPOINTMsgProc); 
 			DoPaint=TRUE;
@@ -3555,7 +3555,7 @@ GSSiExitProg (1350);
 		
 		case 1111: //$SELECTITEMS(ToFile,FromFile,Append or Create,Prompt,return full line(optdefF),menu2option(defF)
 		{   
-			FARPROC lpfnSELECTITEMSMsgProc;
+			DLGPROC lpfnSELECTITEMSMsgProc;
 			
 			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 4)
@@ -3571,13 +3571,13 @@ GSSiExitProg (1350);
             DoPaint = FALSE;  
             if (atob(Arg[6]))
             {    
-				lpfnSELECTITEMSMsgProc = MakeProcInstance((FARPROC)SELECTITEMSMsgProc2, hInst);
+				lpfnSELECTITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTITEMSMsgProc2, hInst);
 				rtn = DialogBox(hInst, (LPSTR)"SELECTITEMS2",hWndMain, lpfnSELECTITEMSMsgProc);
 				FreeProcInstance(lpfnSELECTITEMSMsgProc); 
 			} 
 			else
             {    
-				lpfnSELECTITEMSMsgProc = MakeProcInstance((FARPROC)SELECTITEMSMsgProc, hInst);
+				lpfnSELECTITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTITEMSMsgProc, hInst);
 				rtn = DialogBox(hInst, (LPSTR)"SELECTITEMS",hWndMain, lpfnSELECTITEMSMsgProc);
 				FreeProcInstance(lpfnSELECTITEMSMsgProc); 
 			}
@@ -4053,7 +4053,7 @@ GSSiExitProg (1350);
 		case 1201: //$FINDWAYPOINT ()
         {
             DoPaint = FALSE;      
-			lpfnFINDWAYPOINTMsgProc = MakeProcInstance((FARPROC)FINDWAYPOINTMsgProc, hInst);
+			lpfnFINDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)FINDWAYPOINTMsgProc, hInst);
 			rtn = DialogBox(hInst, (LPSTR)"FINDWAYPOINT",hWndMain, lpfnFINDWAYPOINTMsgProc);
 			FreeProcInstance(lpfnFINDWAYPOINTMsgProc); 
 			DoPaint = TRUE;
@@ -4065,9 +4065,9 @@ GSSiExitProg (1350);
         
         case 1202: //$SETDATERANGE ()
         {
-	          FARPROC lpfnDATELIMITSMsgProc;
+	          DLGPROC lpfnDATELIMITSMsgProc;
 	
-	          lpfnDATELIMITSMsgProc = MakeProcInstance((FARPROC)DATELIMITSMsgProc, hInst);
+	          lpfnDATELIMITSMsgProc = MakeProcInstance((DLGPROC)DATELIMITSMsgProc, hInst);
 	          rtn = DialogBox(hInst, (LPSTR)"DATELIMITS", hWndMain, lpfnDATELIMITSMsgProc);
 	          FreeProcInstance(lpfnDATELIMITSMsgProc);  
 	          if (rtn)
@@ -4207,7 +4207,7 @@ GSSiExitProg (1350);
 				
 	    case 1212: //$TRANSFERFILE(BUILDorLOAD,name(opt))
         {
-            FARPROC lpfnBUILDXFERFILEMsgProc;
+            DLGPROC lpfnBUILDXFERFILEMsgProc;
 			
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 			
@@ -4215,14 +4215,14 @@ GSSiExitProg (1350);
 			SetTransferFileName (Arg[1],Arg[2]);
 			if (!_fstricmp (Arg[1],"BUILD") || !_fstricmp (Arg[1],"RUN"))
 			{
-	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((FARPROC)BUILDXFERFILEMsgProc, hInst);
+	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)BUILDXFERFILEMsgProc, hInst);
 	            st = DialogBox(hInst, (LPSTR)"XFERFILEBUILD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);
 	            FreeProcInstance(lpfnBUILDXFERFILEMsgProc);
 	            RunTransferFileCommand ();
 	        }
 			else if (!_fstricmp(Arg[1], "LOAD") || !_fstricmp(Arg[1], "VIEW"))
 			{
-	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((FARPROC)LOADXFERFILEMsgProc, hInst);
+	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)LOADXFERFILEMsgProc, hInst);
 	            st = DialogBox(hInst, (LPSTR)"XFERFILELOAD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);
 	            FreeProcInstance(lpfnBUILDXFERFILEMsgProc); 
 	        }
@@ -4568,10 +4568,10 @@ GSSiExitProg (1350);
 
 		case 1303: // $SPORTMAPORDER()
         {
-/*              FARPROC	lpfnSPORTMAPORDERMsgProc;
+/*              DLGPROC	lpfnSPORTMAPORDERMsgProc;
               short		nRc; 
                   
-              lpfnSPORTMAPORDERMsgProc = MakeProcInstance((FARPROC)SPORTMAPORDERMsgProc, hInst);
+              lpfnSPORTMAPORDERMsgProc = MakeProcInstance((DLGPROC)SPORTMAPORDERMsgProc, hInst);
               nRc = DialogBox(hInst, (LPSTR)"SPORTMAPORDER", hWndMain, lpfnSPORTMAPORDERMsgProc);
               FreeProcInstance(lpfnSPORTMAPORDERMsgProc);  
               if (nRc)
@@ -4646,7 +4646,7 @@ GSSiExitProg (1350);
 
 		case 1306: //$SELECTDBITEMS(database,SQL,prompt,displayval,returnval,returnvarname,handlevarname)
 		{   
-			FARPROC lpfnSELECTDBITEMSMsgProc;
+			DLGPROC lpfnSELECTDBITEMSMsgProc;
 			
 			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 7)
@@ -4664,7 +4664,7 @@ GSSiExitProg (1350);
 			_fstrcpy (&Arg1[128+1024+256+1024+256+64+64+256],Arg[9]);//RECT
 			GlobalUnlock (hSelectItemsArgs);
             DoPaint = FALSE;      
-			lpfnSELECTDBITEMSMsgProc = MakeProcInstance((FARPROC)SELECTDBITEMSMsgProc, hInst);
+			lpfnSELECTDBITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTDBITEMSMsgProc, hInst);
 			rtn = DialogBox(hInst, (LPSTR)"SELECTITEMS",hWndMain, lpfnSELECTDBITEMSMsgProc);
 			FreeProcInstance(lpfnSELECTDBITEMSMsgProc); 
 			DoPaint = TRUE;                              
@@ -5129,20 +5129,20 @@ GSSiExitProg (1350);
 				*DestName = 0; 
 				if (nArgs < 6)
 				{
-					  FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 	//                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
 					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
 					  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc); 
 				}  
 				else
 				{
-					  FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 					  HWND	hWndDlg;
 
 					  rtn = TRUE;
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
 					  PostMessage (hWndDlg,WM_COMMAND,IDC_ISMODELESS,0);
 	//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
@@ -5182,7 +5182,7 @@ GSSiExitProg (1350);
 	    		   //$ADDRESSLOCATION(USER,ADD,address,Munic,point,Unmatchable);
 	    		   //$ADDRESSLOCATION(BYAREA,outfile,addresslocationfile,areafieldname)
         {
-            FARPROC	lpfnADDLOC_CREATEMsgProc; 
+            DLGPROC	lpfnADDLOC_CREATEMsgProc; 
               
 			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
@@ -5190,7 +5190,7 @@ GSSiExitProg (1350);
 			if (!_fstricmp (Arg[1],"CREATE"))
 			{
 				_fstrcpy (AutoExportName,Arg[2]);
-				lpfnADDLOC_CREATEMsgProc = MakeProcInstance((FARPROC)ADDLOC_CREATEMsgProc, hInst);
+				lpfnADDLOC_CREATEMsgProc = MakeProcInstance((DLGPROC)ADDLOC_CREATEMsgProc, hInst);
 				rtn = DialogBox(hInst, (LPSTR)"ADDLOC_CREATE", hWndMain, lpfnADDLOC_CREATEMsgProc);
 				FreeProcInstance(lpfnADDLOC_CREATEMsgProc);   
 				if (rtn)
@@ -5220,7 +5220,7 @@ GSSiExitProg (1350);
         
 	    case 1506: //$CREATEWORDINDEX(FromFile,FromField,ToFile)
         {
-            FARPROC	lpfnADDLOC_CREATEMsgProc; 
+            DLGPROC	lpfnADDLOC_CREATEMsgProc; 
               
 			nArgs = GetFunArgs(Args, Arg, -3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
@@ -5232,7 +5232,7 @@ GSSiExitProg (1350);
         
 	    case 1507: //$GETMAXFILEREFNO(filelist.txt)
         {
-            FARPROC	lpfnADDLOC_CREATEMsgProc; 
+            DLGPROC	lpfnADDLOC_CREATEMsgProc; 
               
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
@@ -5279,7 +5279,7 @@ GSSiExitProg (1350);
 		} 
 		case 1509://$NETWORKANALYZER
 		{
-			rtn = DialogBox(hInst, (LPSTR)"RemoteNetworkAnalyzer", GetFocus(), NetworkAnalyzerMsgProc);
+			rtn = DialogBox(hInst, (LPSTR)"RemoteNetworkAnalyzer", GetFocus(), (DLGPROC)NetworkAnalyzerMsgProc);
 			goto RtnTrue;
 		}
 		case 1510://$COPYWITHREPLACE(tofile,fromfile,fromtext|totext;fromtext2|totext2;etc)
@@ -5643,9 +5643,9 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, -6, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!nArgs)
 			{
-				FARPROC lpfnLOC_INTERSECTMsgProc;  
+				DLGPROC lpfnLOC_INTERSECTMsgProc;  
 
-				lpfnLOC_INTERSECTMsgProc = MakeProcInstance((FARPROC)LOC_INTERSECTMsgProc, hInst);
+				lpfnLOC_INTERSECTMsgProc = MakeProcInstance((DLGPROC)LOC_INTERSECTMsgProc, hInst);
 				rtn = DialogBox(hInst, (LPSTR)"LOC_INTERSECT", CurView->hWnd, lpfnLOC_INTERSECTMsgProc);
 				FreeProcInstance(lpfnLOC_INTERSECTMsgProc);  
 				if (rtn)
@@ -5662,20 +5662,20 @@ GSSiExitProg (1350);
 				*DestName = 0; 
 				if (nArgs < 6)
 				{
-					  FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 	//                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
 					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
 					  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc); 
 				}  
 				else
 				{
-					  FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 					  HWND	hWndDlg;
 
 					  rtn = TRUE;
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
 					  PostMessage (hWndDlg,WM_COMMAND,IDC_ISMODELESS,0);
 	//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);

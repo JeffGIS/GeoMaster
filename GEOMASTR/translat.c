@@ -444,7 +444,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	AddAvancedOpt:
 					{
 	        	  	  short	nRc;
-	                  FARPROC lpfnMsgProc=0;
+	                  DLGPROC lpfnMsgProc=0;
 	                  char	DLGName[32]; 
 	                  
 			          Choice=SendDlgItemMessage(hWndDlg,IDC_ADVANCED_OPTS,LB_GETCURSEL,0,0);
@@ -457,7 +457,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hImportLimits);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)IMPORT_LIMITSMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)IMPORT_LIMITSMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"IMPORT_LIMITS");  
 				              }
 			              }
@@ -467,7 +467,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hImportFilter);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)IMPORT_FILTERMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)IMPORT_FILTERMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"IMPORT_FILTER");
 				              }
 			              }
@@ -477,7 +477,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hGRText);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)GRTEXTMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)GRTEXTMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"GRTEXT");
 				              }
 			              }
@@ -487,7 +487,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hGRCommand);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)GRCOMMANDMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)GRCOMMANDMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"GRCOMMAND");
 				              }
 			              }
@@ -497,7 +497,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hAttImport);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)IMPORT_ATTRIBUTESMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)IMPORT_ATTRIBUTESMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"IMPORT_ATTRIBUTES");
 				              }
 			              }
@@ -507,7 +507,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hTimeStamp);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)TIMESTAMPMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)TIMESTAMPMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"TIMESTAMP");
 				              }
 			              }
@@ -517,7 +517,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
 	                	  	  	  GSSiGlobFree (&hStreetSegFields);
 	                	  	  else
 	                	  	  {
-				                  lpfnMsgProc = MakeProcInstance((FARPROC)STREETSEG_FIELDSMsgProc, hInst); 
+				                  lpfnMsgProc = MakeProcInstance((DLGPROC)STREETSEG_FIELDSMsgProc, hInst); 
 				                  _fstrcpy (DLGName,"STREETSEG_FIELDS");
 				              }
 			            

@@ -343,7 +343,7 @@ HWND ShowGrid(HWND hWnd,LPSTR SavePosVName,LPSTR VPName){
 		if (hWndGrid)
 			DestroyWindow (hWndGrid);
 		strcpy (DialogName,"GMGRID");
-		hWndGrid = CreateDialog(hInst,"GMGRID_NOBORDER",hWnd, GMNGRID1DlgProc);
+		hWndGrid = CreateDialog(hInst,"GMGRID_NOBORDER",hWnd, (DLGPROC)GMNGRID1DlgProc);
 		SendMessage(CurView->hWndDlg, GSSI_REPOSITION,0, (LPARAM)0); 
 		InvalidateRect(CurView->hWndDlg,0,TRUE);
 	}
@@ -355,7 +355,7 @@ HWND ShowGrid(HWND hWnd,LPSTR SavePosVName,LPSTR VPName){
 			GMGridRect = CurView->ScreenRect;
 			if (CurView->hWndDlg)
 				DestroyWindow (CurView->hWndDlg);
-			CurView->hWndDlg = CreateDialog(hInst,"GMGRID_NOBORDER",hWnd, GMNGRID1DlgProc);
+			CurView->hWndDlg = CreateDialog(hInst, "GMGRID_NOBORDER", hWnd, (DLGPROC)GMNGRID1DlgProc);
 			SendMessage(CurView->hWndDlg, GSSI_REPOSITION,0, (LPARAM)CurView); 
 			InvalidateRect(CurView->hWndDlg,0,TRUE);
 

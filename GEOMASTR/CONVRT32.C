@@ -1176,7 +1176,7 @@ void ConvertVP_V6_to_V7 (LPVIEWPORT_V7 pCurView,LPVIEWPORT_V6 pVP6)
 	pCurView->ZoomTarget = pVP6->ZoomTarget;
 	pCurView->Active = pVP6->Active;
 	pCurView->hWnd = (HWND)pVP6->hWnd;
-	pCurView->hDC = (HWND)pVP6->hDC;
+	pCurView->hDC = (HDC)pVP6->hDC;
 	pCurView->Display = pVP6->Display;
 	strncpy (pCurView->Name,pVP6->Name,sizeof(pVP6->Name));
 	pCurView->ActivateMenuID = pVP6->ActivateMenuID;
@@ -3220,7 +3220,7 @@ BDOK:
         FirstSchmooze=FALSE;
         {
 #if WIN32
-          DialogBox(hInst, (LPSTR)"SCHMOOZ", hWnd, SCHMOOZMsgProc);
+			DialogBox(hInst, (LPSTR)"SCHMOOZ", hWnd, (DLGPROC)SCHMOOZMsgProc);
 #else
           FARPROC lpfnSCHMOOZMsgProc;
           lpfnSCHMOOZMsgProc = MakeProcInstance((FARPROC)SCHMOOZMsgProc, hInst);
@@ -3842,7 +3842,7 @@ Exit:
 BOOL FindConfigFile (HWND hWnd)
 {
 #if WIN32
-          DialogBox(hInst, (LPSTR)"CONFIGLIST_WIDE", hWnd, CONFIGLISTMsgProc);
+	DialogBox(hInst, (LPSTR)"CONFIGLIST_WIDE", hWnd, (DLGPROC)CONFIGLISTMsgProc);
 #else
           FARPROC lpfnCONFIGLISTMsgProc;
           lpfnCONFIGLISTMsgProc = MakeProcInstance((FARPROC)CONFIGLISTMsgProc, hInst);

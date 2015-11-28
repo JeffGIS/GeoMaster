@@ -2199,7 +2199,7 @@ LPDEBUGARRAY	pDB=0;   */
 						}
 						if (hSavePen && hDC)
 							SelectObject(hDC, hSavePen);  
-						if (hSymbolBorderPen != HighlightBrush && hSymbolBorderPen != GetStockObject(NULL_PEN))
+						if (hSymbolBorderPen != (HPEN)HighlightBrush && hSymbolBorderPen != (HPEN)GetStockObject(NULL_PEN))
 							GSSiDeleteObject (&hSymbolBorderPen);
 					}
 					GSSiGlobUlFree (&hCoords);

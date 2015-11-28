@@ -2,7 +2,7 @@
 #include "extrndb.h"
 
 static	COLORREF	SaveClassColor[MAX_THEME_CLASSES]; 
-static	FARPROC lpfnSELECTVALUESMsgProc;
+static	DLGPROC lpfnSELECTVALUESMsgProc;
 static	BOOL	SaveColorsInUse=FALSE;
 static	COLORREF	SaveBKGColor;     
 static	char	ViewportStatusMessages[MAX_VIEWPORTS][128];
@@ -2863,7 +2863,7 @@ GSSiExitProg (1295);
 #endif
 		return FALSE;
 }
-	lpfnSELECTVALUESMsgProc = MakeProcInstance((FARPROC)SELECTVALUESMsgProc, hInst);
+	lpfnSELECTVALUESMsgProc = MakeProcInstance((DLGPROC)SELECTVALUESMsgProc, hInst);
 	CreateDialog(hInst, (LPSTR)"SELECTVALUES", hWnd, lpfnSELECTVALUESMsgProc);
 //	DialogBox(hInst, (LPSTR)"SELECTVALUES", hWnd, lpfnSELECTVALUESMsgProc);
 //	FreeProcInstance(lpfnSELECTVALUESMsgProc);
@@ -2893,7 +2893,7 @@ GSSiExitProg (1296);
 }
 	DestroyWindow(hWndSELVAL);
 	hWndSELVAL = 0;
-	FreeProcInstance((FARPROC) lpfnSELECTVALUESMsgProc);
+	FreeProcInstance((DLGPROC) lpfnSELECTVALUESMsgProc);
 {
 #if ENABLETRACE
 GSSiExitProg (1296);

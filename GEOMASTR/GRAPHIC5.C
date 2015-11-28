@@ -57,7 +57,7 @@ void AdjustColors (void)
 {GSSiEnterProg (723);
 #endif
 {
-  FARPROC lpfnCOLOR_ADJUSTMsgProc; 
+  DLGPROC lpfnCOLOR_ADJUSTMsgProc; 
   BOOL	rc;
   short red, green,blue, intensity; 
   
@@ -69,7 +69,7 @@ void AdjustColors (void)
   CABlue = &blue;
   CAGreen = &green;
   CAIntensity = &intensity;	
-  lpfnCOLOR_ADJUSTMsgProc = MakeProcInstance((FARPROC)COLOR_ADJUSTMsgProc, hInst);
+  lpfnCOLOR_ADJUSTMsgProc = MakeProcInstance((DLGPROC)COLOR_ADJUSTMsgProc, hInst);
   rc=DialogBox(hInst, (LPSTR)"COLOR_ADJUST", hWndMain, lpfnCOLOR_ADJUSTMsgProc);
   FreeProcInstance(lpfnCOLOR_ADJUSTMsgProc);
 {
@@ -3248,8 +3248,8 @@ GSSiExitProg (753);
     }
     if (!CurView->lpfnFUNSTACKMsgProc)
     {
-		CurView->lpfnFUNSTACKMsgProc = MakeProcInstance((FARPROC)FUNSTACKMsgProc, hInst);
-		CreateDialog(hInst, (LPSTR)"FUNSTACK", CurView->hWnd, CurView->lpfnFUNSTACKMsgProc);
+		CurView->lpfnFUNSTACKMsgProc = MakeProcInstance((DLGPROC)FUNSTACKMsgProc, hInst);
+		CreateDialog(hInst, (LPSTR)"FUNSTACK", CurView->hWnd,(DLGPROC) CurView->lpfnFUNSTACKMsgProc);
 	}
 	else
          PostMessage(CurView->FunStackWnd, WM_COMMAND, IDOK, CurView->ID);
@@ -3293,7 +3293,7 @@ void AddUserPopup (HMENU hNewMenu)
 #endif
 {
 	LPINT	pNumPops;
-	LPHANDLE	hMenu;
+	LPHMENU	phMenu;
 	
 	if (!hNewPopups)
 {
@@ -3304,11 +3304,11 @@ GSSiExitProg (757);
 }
 	pNumPops = (LPINT)GlobalLock (hNewPopups);
 	pNumPops++;
-	hMenu = (HMENU)pNumPops;
+	phMenu = (LPHMENU)pNumPops;
 	pNumPops--;
-	hMenu += *pNumPops;
+	phMenu += *pNumPops;
 	(*pNumPops)++;
-	*hMenu = hNewMenu;
+	*phMenu = hNewMenu;
 	GlobalUnlock (hNewPopups);
 {
 #if ENABLETRACE
@@ -3328,7 +3328,7 @@ void DestroyUserPopups (LPHANDLE hPop)
 {
 	LPINT	pNumPops;
 	int		NumPops;  
-	LPHANDLE	hMenu;
+	LPHMENU	phMenu;
 	
 	if (!*hPop)
 {
@@ -3339,10 +3339,10 @@ GSSiExitProg (758);
 }
 	pNumPops = (LPINT)GlobalLock (*hPop);
 	NumPops = *pNumPops++;
-	hMenu = (HMENU)pNumPops;
-	hMenu += (NumPops-1);
+	phMenu = (LPHMENU)pNumPops;
+	phMenu += (NumPops-1);
 	while (NumPops--)
-		DestroyMenu (*hMenu--); 
+		DestroyMenu (*phMenu--); 
 	GSSiGlobUlFree (hPop);
 {
 #if ENABLETRACE

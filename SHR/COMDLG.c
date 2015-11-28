@@ -57,7 +57,7 @@ static WNDPROC		g_OldEdit=0;
 static LPRGBTRIPLE	pColorPalette;
 static int			nPaletteColors;
 static HWND			hWndCFP;
-//static	FARPROC	lpfnABORTWAITMsgProc;
+//static	DLGPROC	lpfnABORTWAITMsgProc;
 static	BOOL	AllowCreate=FALSE, HaveAbortProc=FALSE;
 static	BYTE	R,G,B,W; 
 
@@ -84,11 +84,11 @@ BOOL GetFile32 (short opt,LPOPENFILENAME pof,DWORD lFilters)
 	
 /*    if (GetGlobalBVal2 ("[%USE32BITGETFILE]",FALSE))
     {
-		FARPROC lpfnGETFILE32MsgProc;  
+		DLGPROC lpfnGETFILE32MsgProc;  
 		
 		GetFile32Opt = opt;
 		pOF = pof;
-		lpfnGETFILE32MsgProc = MakeProcInstance((FARPROC)GETFILE32MsgProc, hInst);
+		lpfnGETFILE32MsgProc = MakeProcInstance((DLGPROC)GETFILE32MsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"GETFILE32", hWndMain, lpfnGETFILE32MsgProc);
 		FreeProcInstance(lpfnGETFILE32MsgProc);   
 		return nRc;
@@ -573,7 +573,7 @@ int GetColorFromPalette (HWND hWnd,LPRGBTRIPLE pColors,int nColors)
 */
 	pColorPalette = pColors;
 	nPaletteColors = nColors;
-	selectedColor = DialogBox (hInst, (LPSTR)"COLORFROMPALETTE", hWnd, COLORFROMPALETTEMsgProc);	
+	selectedColor = DialogBox(hInst, (LPSTR)"COLORFROMPALETTE", hWnd, (DLGPROC)COLORFROMPALETTEMsgProc);
 	return selectedColor;
 }
 
@@ -1061,7 +1061,7 @@ void InitializeStruct (WORD wCommDlgType, LPSTR lpStruct)
          lpColorsChunk->dwCustClrs[wCtr] = lpColorsChunk->dwCustClrs[0];
       lpColorsChunk->chsclr.lStructSize = sizeof(CHOOSECOLOR);
       lpColorsChunk->chsclr.hwndOwner = ghWnd;
-      lpColorsChunk->chsclr.hInstance = ghInst;
+      lpColorsChunk->chsclr.hInstance = (HWND)ghInst;
       lpColorsChunk->chsclr.rgbResult = (DWORD)(lpColorsChunk->dwColor);
       lpColorsChunk->chsclr.lpCustColors = (LPDWORD)(lpColorsChunk->dwCustClrs)
    ;
@@ -1468,7 +1468,7 @@ void vdef ()
          if (PrintDlg(lpPDChunk) != 0)
          {
             BOOL bError;
-            FARPROC lpfnAbortProc, lpfnPrintDlgProc;
+            DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
 
             gbUserAbort = FALSE;
             bError = FALSE;
@@ -2150,10 +2150,10 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
                      GetDlgItemText (hDlg,IDC_VIRTUAL_PRINTER_LIST,CurVirtPrinter,126);  
                      if (!_fstricmp (CurVirtPrinter,"Create New Virtual Printer"))
                      {
-					      FARPROC lpfnVIRTUAL_PRINTER_CREATEMsgProc;
+					      DLGPROC lpfnVIRTUAL_PRINTER_CREATEMsgProc;
 						  short nRc;
 						  
-					      lpfnVIRTUAL_PRINTER_CREATEMsgProc = MakeProcInstance((FARPROC)VIRTUAL_PRINTER_CREATEMsgProc, hInst);
+					      lpfnVIRTUAL_PRINTER_CREATEMsgProc = MakeProcInstance((DLGPROC)VIRTUAL_PRINTER_CREATEMsgProc, hInst);
 					      nRc = DialogBox(hInst, (LPSTR)"VIRTUAL_PRINTER_CREATE", hDlg, lpfnVIRTUAL_PRINTER_CREATEMsgProc);
 					      FreeProcInstance(lpfnVIRTUAL_PRINTER_CREATEMsgProc); 
 					      if (!nRc)
@@ -2268,10 +2268,10 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
                          SendDlgItemMessage(hDlg,wParam,CB_GETLBTEXT,Choice,(DWORD)&str);  
                          if (!_fstricmp (str,"Create New Virtual Printer"))
                          {
-						      FARPROC lpfnVIRTUAL_PRINTER_CREATEMsgProc;
+						      DLGPROC lpfnVIRTUAL_PRINTER_CREATEMsgProc;
 						      short	nRc;
 						      
-						      lpfnVIRTUAL_PRINTER_CREATEMsgProc = MakeProcInstance((FARPROC)VIRTUAL_PRINTER_CREATEMsgProc, hInst);
+						      lpfnVIRTUAL_PRINTER_CREATEMsgProc = MakeProcInstance((DLGPROC)VIRTUAL_PRINTER_CREATEMsgProc, hInst);
 						      nRc = DialogBox(hInst, (LPSTR)"VIRTUAL_PRINTER_CREATE", hDlg, lpfnVIRTUAL_PRINTER_CREATEMsgProc);
 						      FreeProcInstance(lpfnVIRTUAL_PRINTER_CREATEMsgProc);
 						      if (nRc)
@@ -2500,7 +2500,7 @@ SetLastMessage(-1*(long)msg.message);
         HaveAbortProc = FALSE;
 /*		if(!hWndAbortWaitMessage)
 		{
-	          lpfnABORTWAITMsgProc = MakeProcInstance((FARPROC)ABORTWAITMsgProc, ghInst);
+	          lpfnABORTWAITMsgProc = MakeProcInstance((DLGPROC)ABORTWAITMsgProc, ghInst);
 	          CreateDialog(ghInst, (LPSTR)"ABORTWAIT", hWndMain, lpfnABORTWAITMsgProc);
 			  while (PeekMessage(&msg, NULL, NULL, NULL, TRUE));
 	    }*/

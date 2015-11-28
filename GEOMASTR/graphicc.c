@@ -1528,7 +1528,7 @@ BOOL LoadGMDParm (LPSTR GMDFileName,HWND hWnd)
 		if (FileIsIndex)
 			goto RtnFalse;   
 		{
-			DialogBox(hInst, (LPSTR)"SETGMDPARAM", hWnd, SETGMDPARAMMsgProc);
+			DialogBox(hInst, (LPSTR)"SETGMDPARAM", hWnd,(DLGPROC) SETGMDPARAMMsgProc);
 			Fid = GSSiOpenFile (Name,0,OF_READ);  
 			if (Fid == HFILE_ERROR)  
 	        	goto RtnFalse; 

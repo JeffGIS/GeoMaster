@@ -1344,6 +1344,9 @@
     <ClCompile Include="GMMobile.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GDIPls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
