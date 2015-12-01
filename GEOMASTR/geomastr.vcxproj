@@ -502,6 +502,7 @@
     <ClCompile Include="..\OFFSET\Offset.c" />
     <ClCompile Include="..\gctpc\omerfor.c" />
     <ClCompile Include="..\gctpc\omerinv.c" />
+    <ClCompile Include="NVTextDrawing.c" />
     <ClCompile Include="ORAFILE.C" />
     <ClCompile Include="..\gctpc\orthfor.c" />
     <ClCompile Include="..\gctpc\orthinv.c" />

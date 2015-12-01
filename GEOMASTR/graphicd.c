@@ -2606,7 +2606,7 @@ void RunStartupCommand (int opt)
 		GlobalUnlock (hStartupCommand);					
 		if (opt == 1)
 		{
-			if (pVB)
+			if (pVB || InServerMode)
 				ExpandText (SUC);
 		}
 		else
