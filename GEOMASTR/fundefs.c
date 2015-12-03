@@ -354,6 +354,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "HEADTOAZ", 8)) return 852;
 			if (!_fstrnicmp(str, "DATABASE", 8)) return 853;
 			if (!_fstrnicmp(str, "GMMOBILE", 8)) return 854;
+			if (!_fstrnicmp(str, "MAKELONG", 8)) return 855;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

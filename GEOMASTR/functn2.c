@@ -1590,7 +1590,14 @@ GSSiExitProg (1350);
 			}
 
 		}
-
+		case 855: //$MAKELONG(v1,v2)
+		{
+			ULONG ulong;
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			ulong = MAKELONG(atoi(Arg[1]), atoi(Arg[2]));
+			ltoa(ulong, OutLoc, 10);
+			goto Rtnl;
+		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
