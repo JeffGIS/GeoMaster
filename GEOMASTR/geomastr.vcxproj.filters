@@ -1417,6 +1417,12 @@
     <ClInclude Include="..\INCLUDE\colorsByName.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\INCLUDE\rotate256.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\INCLUDE\gssitype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP">

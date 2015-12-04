@@ -2,14 +2,6 @@
 //  CCodeLibrary
 
 #include "graphint.h"
-typedef int NSInteger;
-typedef UINT NSUInteger;
-typedef double CGFloat;
-typedef HDC CGContextRef;
-typedef COLORREF UIColor;
-typedef char NSAttributedString;
-#define YES TRUE
-#define NO	FALSE
 
 static int ii = 0;
 struct CGPoint {
@@ -116,6 +108,10 @@ void CGContextTranslateCTM(CGContextRef context, CGFloat mpX, CGFloat mpY)
 
 void CGContextRotateCTM(CGContextRef context, CGFloat rotateRadians)
 {
+/*	CurView->hTranScreenToVP = STRAN2(1608, XFROM, YFROM, XTO, YTO, 2, &RSQMIN, 1, 0);
+	CurView->xForm = SetXFORMFromTRANS(CurView->hTranScreenToVP);
+	CloseTRANS2(&CurView->hTranScreenToVP);
+*/
 }
 void CGContextSetGrayFillColor(CGContextRef context, int i, int j)
 {
@@ -410,6 +406,10 @@ void drawTextInRotatedRect(char* text, CGContextRef context, CGFloat mpX, CGFloa
 	CGPathRelease(path);
 	CGContextRestoreGState(context);
 	*/
+	UINT format = DT_CENTER|DT_TOP;
+	DRAWTEXTPARAMS parms;
+	LPDRAWTEXTPARAMS pParms = 0;
+	DrawTextEx(context, text, strlen(text), &rect, format, pParms);
 }
 
 int getTextContainerPoints(LPDPOINT textPoints,

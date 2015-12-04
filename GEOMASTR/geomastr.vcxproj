@@ -764,6 +764,8 @@
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
+    <ClInclude Include="..\INCLUDE\gssitype.h" />
+    <ClInclude Include="..\INCLUDE\rotate256.h" />
     <ClInclude Include="..\SQLite3\sqlite3.h" />
     <ClInclude Include="..\SQLite3\sqlite3ext.h" />
     <ClInclude Include="GMVersion.h" />

@@ -6890,6 +6890,16 @@ BOOL GetAreaCenters (LPSTR OutFile,int SpeedFactor,BOOL UseMask)
 		GlobalUnlock (hMaskArea);
 	return TRUE;
 }
-      
 
+void Rotate256(int irot, LPDPOINT pt)
+{
+#include "rotate256.h"
+
+	float XOUT = B1[irot] * pt->x + C1[irot] * pt->y;
+	float YOUT = B2[irot] * pt->y + C2[irot] * pt->x;
+
+	pt->x = XOUT;
+	pt->y = YOUT;
+	return;
+}
 

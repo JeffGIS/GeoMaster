@@ -2401,6 +2401,16 @@ LPDPOINT DecodeString(char *encodedString, int *numPoints);
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);
 
+void drawTextwithinPolygon(char *text
+	/*inContext : */, CGContextRef context
+	/*withinPolygon :*/, LPDPOINT pPoints
+	/*withNumPoints :*/, NSInteger numPoints
+	/*andNumLoops :*/, NSInteger numLoops
+	/*loopLen :*/, int* polyPartLen
+	/*withinBounds :*/, LPMNMXCORD pBounds
+	/*fontSize :*/, CGFloat fontSize
+	/*minFontSize :*/, CGFloat minFontSize
+	/*textColor :*/, UIColor * textColor);
 
  
 

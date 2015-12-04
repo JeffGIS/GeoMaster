@@ -1543,18 +1543,18 @@ HOTSPOTDATA Hotspot16toHotspot32 (LPHOTSPOTDATA16 pHS16)
 
 NEWOBJECT NewObject16_to_NewObject (LPNEWOBJECT16 pNO16)
 {
-	NEWOBJECT NO;
+	NEWOBJECT NOBJ;
 	
-	NO.Handle = (HANDLE)pNO16->Handle;  
-	NO.Width = pNO16->Width;  
-	NO.Type = pNO16->Type;  
-	NO.Style = pNO16->Style;  
-	NO.ProPen = pNO16->ProPen;  
-	NO.R = pNO16->R;  
-	NO.G = pNO16->G;  
-	NO.B = pNO16->B;  
+	NOBJ.Handle = (HANDLE)pNO16->Handle;
+	NOBJ.Width = pNO16->Width;
+	NOBJ.Type = pNO16->Type;
+	NOBJ.Style = pNO16->Style;
+	NOBJ.ProPen = pNO16->ProPen;
+	NOBJ.R = pNO16->R;
+	NOBJ.G = pNO16->G;
+	NOBJ.B = pNO16->B;
 
-	return NO;
+	return NOBJ;
 }
 
 void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)

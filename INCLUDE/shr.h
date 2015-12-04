@@ -1386,5 +1386,8 @@ int getipAddressForAdapter(LPSTR ipAddress, GUID *pInterfaceGuid);
 int GetWifiName(LPSTR Name);
 int GetWifiAddress(LPSTR address);
 
+void Rotate256(int irot, LPDPOINT pt);
+
+
 
 
