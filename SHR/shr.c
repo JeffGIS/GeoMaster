@@ -10109,6 +10109,7 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 {   
 	HANDLE	handle=GSSiGlobAlloc (  96,GHND,sizeof(SAVESCREEN));
 	LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (handle);
+	RECT winRect;
 	BOOL	dbug=FALSE;
 
 	if (pID)
@@ -10119,6 +10120,8 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	else
 		pSaveScreen->ID = 0;
 	pSaveScreen->hWnd = hWnd;
+	GetClientRect(hWnd, &winRect);
+	IntersectRect(&Rect, &Rect, &winRect);
 	pSaveScreen->Rect = Rect;
 	pSaveScreen->hBM = SaveScreen (hDC,Rect);
 	if (dbug)

@@ -215,6 +215,8 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "FIXMAP",6)) return 647;
 			if (!_fstrnicmp(str, "SQLITE", 6)) return 648;
 			if (!_fstrnicmp(str, "INLIST", 6)) return 649;
+			if (!_fstrnicmp(str, "LOWORD", 6)) return 650;
+			if (!_fstrnicmp(str, "HIWORD", 6)) return 651;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)

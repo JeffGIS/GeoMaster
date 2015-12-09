@@ -4418,7 +4418,26 @@ GotCloseFilehSQL:
 			}
 			goto Rtnl;
 		}
-
+		case 650: //$LOWORD(val)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			rtn = atoi(Arg[1]);
+			n = LOWORD(rtn);
+			itoa(n, OutLoc, 10);
+			goto Rtnl;
+		}
+		case 651: //$HIWORD(val)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			rtn = atoi(Arg[1]);
+			n = HIWORD(rtn);
+			itoa(n, OutLoc, 10);
+			goto Rtnl;
+		}
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{				
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
