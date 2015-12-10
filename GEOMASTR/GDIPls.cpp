@@ -2,6 +2,7 @@
 
 #define UNICODE
 #define STRICT
+
 #include <windows.h>
 #include <gdiplus.h>
 #include <math.h>
