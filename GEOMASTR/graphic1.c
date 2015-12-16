@@ -24,8 +24,8 @@ static BOOL	CreateTAGIndex=FALSE;
 static RECT	ClipRectx;   
 
 static	HHOOK	g_hook=NULL;
-
-
+void AAShutDown(void)
+;
 void BlowOut (LPSTR Message, LPSTR Title)
 #if ENABLETRACE
 {GSSiEnterProg (1);
@@ -334,7 +334,7 @@ void QuitGraphics()
 	else
 		*ExitMessage = 0;
 	LogUsageInfo (0,"");
-
+	AAShutDown();
 	InitProj4CoordConv (TRUE);
 	for (i=0;i<MAXMULTILEVELZOOM;i++)
 		GSSiDeleteObject (&hbmpMultiLevel[i]); 

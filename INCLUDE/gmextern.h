@@ -1774,6 +1774,7 @@ extern	char	MapserverFile[MAX_PATH];
 extern  HBITMAP hMapServerBM;
 extern	SHOWVAL ShowVal;
 extern	int		expandOnly;
+extern	BOOL	useGDIPlus;
 extern	int		ii;
 
 

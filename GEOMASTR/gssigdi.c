@@ -2,6 +2,8 @@
 #include <limits.h>
 #include "TileGraphics.h"
 
+extern BOOL useGDIPlus;
+
 BOOL GetSystemErrMessage(DWORD errorcode, LPSTR Mess);
 HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc);
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc);
@@ -18,6 +20,10 @@ BOOL  WINAPI GSSiSetWindowOrgEx( __in HDC hdc, __in int x, __in int y, __out_opt
 BOOL WINAPI GSSiSetWorldTransform( __in HDC hdc, __in CONST XFORM * lpxf);
 void SetSavedGraphicsFid (int Type);
 void SaveTileGraphics (HFILE Fid,HDC hDC,int type,LPPOINT points,int np);
+BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
+BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
+void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, int w);
+void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, COLORREF fillColor);
 
 
 #if CHECKMEM    
@@ -185,7 +191,8 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 	LPPOINT	ppt;
 	HPEN	hPen, hPen2, hRestorePen=0;
 	HBRUSH	hBrush, hBrush2, hRestoreBrush=0;
-	COLORREF	color;
+	COLORREF	color=0, fillColor=0;
+	int curWidth;
 	int		mode;
 	int	x,y;
 	int	PrevSGid=-1;
@@ -208,7 +215,11 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 					hpt = GSSiGlobAlloc (0,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
-					Polyline (hDC,ppt,npt);
+					if (FidSTG == HFILE_ERROR)
+						GSSiPolyline(hDC, ppt, npt);
+					else
+						AAPolyLine(hDC, ppt, npt, color, curWidth);
+					//Polyline(hDC, ppt, npt);
 					GSSiGlobUlFree (&hpt);
 				}
 				break;
@@ -219,13 +230,19 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 					hpt = GSSiGlobAlloc (0,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
-					Polygon (hDC,ppt,npt);
+					if (FidSTG == HFILE_ERROR)
+						GSSiPolygon(hDC, ppt, npt);
+					else
+						AAPolygon(hDC, ppt, npt, &LogPen, fillColor);
+					//Polygon(hDC, ppt, npt);
 					GSSiGlobUlFree (&hpt);
 				}
 				break;
 			case SG_LOGPEN:
 				BigRead (Fid,&ln2,2);
 				BigRead (Fid,&LogPen,sizeof(LOGPEN));
+				color = LogPen.lopnColor;
+				curWidth = LogPen.lopnWidth.x;
 				hPen = CreatePenIndirect(&LogPen);
 				hPen2 = SelectObject (hDC,hPen);
 				if (!hRestorePen)
@@ -237,6 +254,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 				BigRead (Fid,&ln2,2);
 				BigRead (Fid,&LogBrush,sizeof(LOGBRUSH));
 				hBrush = CreateBrushIndirect(&LogBrush);
+				fillColor = LogBrush.lbColor;
 				hBrush2 = SelectObject (hDC,hBrush);
 				if (!hRestoreBrush)
 					hRestoreBrush = hBrush2;
@@ -760,7 +778,33 @@ WritePoly:
 		BigWrite (SavedGraphicsFid,(LPVOID)apt,cpt*sizeof(POINT),-1);
 		return TRUE;
 	}
-	return Polygon (hdc, apt, cpt);
+	{
+		if (useGDIPlus)
+		{
+			HPEN hpn = SelectObject(hdc, GetStockObject(BLACK_PEN));
+			HBRUSH hbr = SelectObject(hdc, GetStockObject(BLACK_BRUSH));
+			if (GetObject(hpn, 0, 0) == sizeof (LOGPEN) &&
+				GetObject(hbr, 0, 0) == sizeof (LOGBRUSH))
+			{
+				LOGPEN lp;
+				LOGBRUSH lb;
+				GetObject(hpn, sizeof(LOGPEN), &lp);
+				GetObject(hbr, sizeof(LOGBRUSH), &lb);
+				AAPolygon(hdc, apt, cpt, &lp,lb.lbColor);
+				SelectObject(hdc, hpn);
+				SelectObject(hdc, hbr);
+			}
+			else
+			{
+				SelectObject(hdc, hpn);
+				SelectObject(hdc, hbr);
+				return Polygon(hdc, apt, cpt);
+			}
+		}
+		else
+			return Polygon(hdc, apt, cpt);
+	}
+	return FALSE;
 }
 
 BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt)
@@ -796,7 +840,29 @@ WritePoly:
 		BigWrite (SavedGraphicsFid,(LPVOID)apt,cpt*sizeof(POINT),-1);
 		return TRUE;
 	}
-	return Polyline (hdc, apt, cpt);
+	{
+		
+		if (useGDIPlus)
+		{
+			HPEN hpn = SelectObject(hdc,GetStockObject(BLACK_PEN));
+			if (GetObject(hpn, 0, 0) == sizeof (LOGPEN))
+			{
+				LOGPEN lp;
+				GetObject(hpn, sizeof(LOGPEN), &lp);
+				if (lp.lopnStyle != PS_NULL)
+					AAPolyLine(hdc, apt, cpt, lp.lopnColor, lp.lopnWidth.x);
+				SelectObject(hdc, hpn);
+			}
+			else
+			{
+				SelectObject(hdc, hpn);
+				return Polyline(hdc, apt, cpt);
+			}
+		}
+		else
+			return Polyline(hdc, apt, cpt);
+	}
+	return FALSE;
 }
 
 BOOL ObjectInUse (HGDIOBJ hobj) 
@@ -1190,4 +1256,9 @@ UINT_PTR WINAPI GSSiSetTimer( __in_opt HWND hWnd,__in UINT_PTR nIDEvent,__in UIN
 BOOL WINAPI GSSiKillTimer(__in_opt HWND hWnd,__in UINT_PTR uIDEvent)
 {
 	return KillTimer (hWnd,uIDEvent);
+}
+
+HGDIOBJ SelObject(HDC hdc, HGDIOBJ hobj)
+{
+	return SelectObject(hdc, hobj);
 }

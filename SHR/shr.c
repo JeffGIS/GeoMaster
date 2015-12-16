@@ -8760,6 +8760,8 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 	ConvertToNewLocation (Name,TRUE);
 	if (Mode == OF_CREATE && _fstrlen (Name) < 3)
 		ii=1;
+	if (*Name == 'l' || *Name == 'L')
+		ii = 1;
 //	if ((Mode == OF_READWRITE || Mode == OF_CREATE) && (strstr (Name,"HIGHWAYS") || strstr (Name,"highways")))
 //		ii=1;
     _fstrcpy (LongName,Name);   

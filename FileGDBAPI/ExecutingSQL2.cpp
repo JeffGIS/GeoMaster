@@ -839,10 +839,12 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 
   
 						ShapeBuffer shapebuf;
+						MultiPartShapeBuffer mpShapebuf;
 						LPFILEGDBRECHEADER	pFGDBShapeHeader;
 						LPBYTE	shpBuf;
 						ShapeType	shapeType;
 						GeometryType geometryType;
+						double* zArray=NULL;
 
 						row[iDB].GetGeometry(shapebuf);
 						GlobalUnlock (pField->hCurVal);
@@ -869,9 +871,13 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 						pFGDBShapeHeader->hasMaterials = shapebuf.HasMaterials(shapeType);
 						pFGDBShapeHeader->geometryType = shapebuf.GetGeometryType(shapeType);
 						pFGDBShapeHeader->isEmpty = shapebuf.IsEmpty();
+						if (pFGDBShapeHeader->hasZs)
+						{
+							row[iDB].GetGeometry(mpShapebuf);
+							mpShapebuf.GetZs(zArray);
+						}
 						if (pFGDBShapeHeader->hasCurves)
 						{
-							MultiPartShapeBuffer mpShapebuf;
 							int numCurves;
 							byte *curves;
 

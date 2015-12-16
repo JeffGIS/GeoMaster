@@ -3427,6 +3427,9 @@ GSSiExitProg (532);
 		case 372:
 			convertGMDUpdateCommas = atob(Value);
 			break;
+		case 373:
+			useGDIPlus = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -3818,6 +3821,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%SHAPEREC", 370, FALSE);
 	AllocateTypeVar("%DBFREC", 371, FALSE);
 	AllocateTypeVar("%CVTGMDUPDATECOMMAS", 372, FALSE);
+	AllocateTypeVar("%USEGDIPLUS", 373, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4944,6 +4948,9 @@ GSSiExitProg (533);
 			break;
 		case 372:
 			btoa(convertGMDUpdateCommas, OutStr);
+			break;
+		case 373:
+			btoa(useGDIPlus, OutStr);
 			break;
 
 	}

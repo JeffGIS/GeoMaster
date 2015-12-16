@@ -4388,6 +4388,9 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 	}
 	HiPrecis = TRUE; 
 	CurrentPen = 0;
+	SetGlobalValueReal("%FGDBZMin",0);
+	SetGlobalValueReal("%FGDBZMax",0);
+
 	switch (pFGDBRecHeader->geometryType)
 	{
 		case geometryPoint:
@@ -4575,6 +4578,8 @@ DoPoly:
 			{
 				double zMin = *(LPDOUBLE)&pRec[recloc];
 				double zMax = *(LPDOUBLE)&pRec[recloc + sizeof(double)];
+				SetGlobalValueReal("%FGDBZMin", zMin);
+				SetGlobalValueReal("%FGDBZMax", zMax);
 				recloc += (2 + SHPPolyHeader.NumPoints) * sizeof (double);
 			}
 			if (pFGDBRecHeader->hasMs)
