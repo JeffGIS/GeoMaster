@@ -105,25 +105,13 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 	{
 
 		Gdiplus::Graphics graphic(hdc);
-		//DPOINT BP = { 150, 150 }, POC = { 550, 550 }, EP = { 150, 150 };
-		//long nPnt = 0;
-		//LPDPOINT lpPoints = (LPDPOINT)malloc(4096 * 32);
-		//LPDPOINT lpPointsInit = lpPoints;
-		//double BackAZ;
-		//double CurveExpansionFactor = 1;
-
-		//CurvePointsD(&BP, &POC, &EP, &nPnt, &lpPoints, &BackAZ, USHRT_MAX, CurveExpansionFactor, 1);
-
-
-		// Pen can also be constructed using a brush or another pen.  There is a second parameter - a width which defaults to 1.0f
-		//Pen	blue(ColorRef, w);
-		//Pen red(Color(8, 255, 0,0), 5);
+		graphic.SetPageUnit(UnitPixel);
+		graphic.SetCompositingQuality(CompositingQualityHighQuality);
 		Pen pn(Color(255, GetRValue(ColorRef), GetGValue(ColorRef), GetBValue(ColorRef)), w);
 		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
 		PointF pt1;
 		PointF pt2;
-		//GraphicsPath pth();
 		Gdiplus::GraphicsPath pth;
 		pn.SetLineJoin(Gdiplus::LineJoin::LineJoinRound);
 		pn.SetStartCap(lincap);
@@ -137,17 +125,12 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 			pth.AddLine(pt1, pt2);
 		}
 		graphic.DrawPath(&pn, &pth);
-		//Gdiplus::Size size(500, 500);
-		//Gdiplus::Point pt(100, 100);
-		//graphic.DrawEllipse(&blue, 200, 200, 400, 400);
-		//free(lpPointsInit);
 	}
-	//GdiplusShutdown(gdiplusToken);
 	SelObject(hdc, hpn);
 	SelObject(hdc, hbr);
 }
 
-extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np,LOGPEN *lp,COLORREF fillColor)
+extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np,LOGPEN *lp,LOGBRUSH *lb)
 {
 	using namespace Gdiplus;
 	GdiplusStartupInput gdiplusStartupInput;
@@ -161,30 +144,17 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np,LOGPEN *lp,COLORREF f
 	{
 
 		Gdiplus::Graphics graphic(hdc);
-		//DPOINT BP = { 150, 150 }, POC = { 550, 550 }, EP = { 150, 150 };
-		//long nPnt = 0;
-		//LPDPOINT lpPoints = (LPDPOINT)malloc(4096 * 32);
-		//LPDPOINT lpPointsInit = lpPoints;
-		//double BackAZ;
-		//double CurveExpansionFactor = 1;
+		graphic.SetPageUnit(UnitPixel);
+		graphic.SetCompositingQuality(CompositingQualityHighQuality);
 
-		//CurvePointsD(&BP, &POC, &EP, &nPnt, &lpPoints, &BackAZ, USHRT_MAX, CurveExpansionFactor, 1);
-
-
-		// Pen can also be constructed using a brush or another pen.  There is a second parameter - a width which defaults to 1.0f
-		//Pen	blue(ColorRef, w);
-		//Pen red(Color(8, 255, 0,0), 5);
-		SolidBrush br(Color(255, GetRValue(fillColor), GetGValue(fillColor), GetBValue(fillColor)));
 		Pen pn(Color(255, GetRValue(lp->lopnColor), GetGValue(lp->lopnColor), GetBValue(lp->lopnColor)), lp->lopnWidth.x);
 		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
-		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
-		PointF pt1;
-		PointF pt2;
-		//GraphicsPath pth();
-		Gdiplus::GraphicsPath pth;
 		pn.SetLineJoin(Gdiplus::LineJoin::LineJoinRound);
 		pn.SetStartCap(lincap);
 		pn.SetEndCap(lincap);
+		PointF pt1;
+		PointF pt2;
+		Gdiplus::GraphicsPath pth;
 		for (int i = 0; i < np - 1; i++)
 		{
 			pt1.X = pPoints[i].x;
@@ -193,15 +163,27 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np,LOGPEN *lp,COLORREF f
 			pt2.Y = pPoints[i + 1].y;
 			pth.AddLine(pt1, pt2);
 		}
-		graphic.FillPath(&br, &pth);
+		if (lb->lbStyle != BS_NULL)
+		{
+			if (lb->lbStyle == BS_HATCHED)
+			{
+				HatchBrush hbr((HatchStyle)lb->lbHatch, Color(255, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				graphic.FillPath(&hbr, &pth);
+			}
+			if (lb->lbStyle == BS_PATTERN)
+			{
+				SolidBrush hbr(Color(128, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				graphic.FillPath(&hbr, &pth);
+			}
+			else
+			{
+				SolidBrush sbr(Color(255, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				graphic.FillPath(&sbr, &pth);
+			}
+		}
 		if (lp->lopnStyle != PS_NULL)
 			graphic.DrawPath(&pn, &pth);
-		//Gdiplus::Size size(500, 500);
-		//Gdiplus::Point pt(100, 100);
-		//graphic.DrawEllipse(&blue, 200, 200, 400, 400);
-		//free(lpPointsInit);
 	}
-	//GdiplusShutdown(gdiplusToken);
 	SelObject(hdc, hpn);
 	SelObject(hdc, hbr);
 }

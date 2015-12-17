@@ -23,7 +23,7 @@ void SaveTileGraphics (HFILE Fid,HDC hDC,int type,LPPOINT points,int np);
 BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
 BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
 void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, int w);
-void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, COLORREF fillColor);
+void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp,LOGBRUSH *lb);
 
 
 #if CHECKMEM    
@@ -233,7 +233,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 					if (FidSTG == HFILE_ERROR)
 						GSSiPolygon(hDC, ppt, npt);
 					else
-						AAPolygon(hDC, ppt, npt, &LogPen, fillColor);
+						AAPolygon(hDC, ppt, npt, &LogPen, &LogBrush);
 					//Polygon(hDC, ppt, npt);
 					GSSiGlobUlFree (&hpt);
 				}
@@ -790,7 +790,7 @@ WritePoly:
 				LOGBRUSH lb;
 				GetObject(hpn, sizeof(LOGPEN), &lp);
 				GetObject(hbr, sizeof(LOGBRUSH), &lb);
-				AAPolygon(hdc, apt, cpt, &lp,lb.lbColor);
+				AAPolygon(hdc, apt, cpt, &lp,&lb);
 				SelectObject(hdc, hpn);
 				SelectObject(hdc, hbr);
 			}

@@ -1952,7 +1952,9 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
 #endif
 {   HPEN        hWidePen, hOldPen;
     short     OldMode, width=3;
-    
+	BOOL		saveuseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 	SaveDC (CurView->hDC);
 	SetDisplayMode (CurView->hDC,GF_SCREENMODE);
     if (!FileMode && Clip)
@@ -1985,6 +1987,7 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
     SetROP2(hDC,OldMode);
     DeleteObject (hWidePen);
 	RestoreDC (CurView->hDC,-1);
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1162);

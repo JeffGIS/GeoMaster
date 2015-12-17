@@ -3962,6 +3962,9 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
 	double	FAC=PIASizeFactor;   
 	short	Offset=3;
     BITMAP	bm;   
+	BOOL	saveuseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 	
 //	if (FAC > 5)
 //		ii=1;
@@ -4176,6 +4179,7 @@ Exit:
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1379);
@@ -4215,7 +4219,9 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
 	short	Offsetx=3;
     BITMAP	bm;   
 	double	PenWidth;
-	
+	BOOL	saveuseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 //	if (FAC > 5)
 //		ii=1;
 	if (nPoints < 16)
@@ -4349,6 +4355,7 @@ Exit:
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1379);
@@ -4815,7 +4822,9 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
 	HANDLE	hBits=0;
 	LPCOLORREF16	pColor16;
 	DWORD	MidPixel;
+	BOOL	saveuseGDIPlus = useGDIPlus;
 	
+	useGDIPlus = FALSE;
 //	if (FAC > 5)
 //		ii=1;
 	if (nPoints < 16)
@@ -5051,6 +5060,7 @@ Exit:
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1378);
