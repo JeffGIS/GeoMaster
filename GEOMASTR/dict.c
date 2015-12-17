@@ -4112,7 +4112,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 		hCPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
 		GetObject (hCPen,sizeof(LOGPEN),&lPen);
 		if (Width > 0)
-			width = IDNINT (Width);
+			width = IDNINT(Width * DeviceToScreenFactor);
 		else
 		{
 			if (PRJ_UNITS[1] == 4)
@@ -4508,7 +4508,7 @@ int GWPolylineScreen2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
     	dw=(double)StreetWidth/CurView->MetersPerPixel;   
     else
     	dw=GetSymbolWidth(abs(idesc));
-    dw *= ThemeWidthFactor * StreetWidthFactor;
+	dw *= ThemeWidthFactor * StreetWidthFactor;
 	w = IDNINT (dw);
 	InflateRect (&CurView->DrawRect,w,w);
     SaveDC (hDC);
