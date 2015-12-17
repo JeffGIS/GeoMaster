@@ -7578,9 +7578,15 @@ GSSiExitProg (573);
 			}
 			while (!SQLPtr->st)  
 			{
+NextTextRec:
 		    	SQLPtr->Offset = GSSillseek (FilePtr->Fid,0,1);  
 		    	if (!fgetstring (str,4090,FilePtr->Fid))
 		    		SQLPtr->st = 1;
+				else if (*str == '[' && *LastChr(str) == ';')
+				{
+					ProcessText(str);
+					goto NextTextRec;
+				}
 		    	else
 		    	{   
 		    		BOOL	Err;
