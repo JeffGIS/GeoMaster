@@ -1884,6 +1884,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ClassDiagram1.cd" />
+    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPI.dll">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />

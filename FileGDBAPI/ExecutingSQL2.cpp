@@ -461,7 +461,7 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 	int		n;
 	string undr = Under;
 	wstring	type[3]= {L"Table",L"Feature Class",L"Feature Dataset"};
-	vector<wstring> childList(1); 
+	vector<wstring> childList(5); 
 	wstring	under (undr.begin(),undr.end());
 	
 	
