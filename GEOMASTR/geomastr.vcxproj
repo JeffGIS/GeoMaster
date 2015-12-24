@@ -758,6 +758,14 @@
     <ResourceCompile Include="GWCONFIG.RC" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\FileGDBAPI\2013\include\FileGDBAPI.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\FileGDBCore.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Geodatabase.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\GeodatabaseManagement.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Raster.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Row.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Table.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Util.h" />
     <ClInclude Include="..\INCLUDE\Bt.h" />
     <ClInclude Include="..\gctpc\cproj.h" />
     <ClInclude Include="..\INCLUDE\colorsByName.h" />
@@ -941,6 +949,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib" />
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

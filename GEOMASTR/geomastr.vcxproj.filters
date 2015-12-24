@@ -1423,6 +1423,30 @@
     <ClInclude Include="..\INCLUDE\gssitype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\FileGDBAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\FileGDBCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\Geodatabase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\GeodatabaseManagement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\Raster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\Row.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\Table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileGDBAPI\2013\include\Util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP">
@@ -1893,5 +1917,13 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib">
+      <Filter>Source Files</Filter>
+    </Library>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib">
+      <Filter>Source Files</Filter>
+    </Library>
   </ItemGroup>
 </Project>
