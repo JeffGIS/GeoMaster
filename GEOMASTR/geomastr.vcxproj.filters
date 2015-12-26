@@ -1920,6 +1920,9 @@
     <None Include="..\FreeImage\Dist\x32\FreeImage.dll">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\MrSid\Raster_DSDK\lib\lti_dsdk_cdll_9.5.dll">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
