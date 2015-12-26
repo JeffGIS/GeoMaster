@@ -769,6 +769,7 @@
     <ClInclude Include="..\INCLUDE\Bt.h" />
     <ClInclude Include="..\gctpc\cproj.h" />
     <ClInclude Include="..\INCLUDE\colorsByName.h" />
+    <ClInclude Include="..\INCLUDE\FreeImage.h" />
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
@@ -923,6 +924,7 @@
   <ItemGroup>
     <None Include="..\FileGDBAPI\2013\bin\FileGDBAPI.dll" />
     <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll" />
+    <None Include="..\FreeImage\Dist\x32\FreeImage.dll" />
     <None Include="CUR00001.CUR" />
     <None Include="CUR00002.CUR" />
     <None Include="CURSOR5.CUR" />

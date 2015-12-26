@@ -1447,6 +1447,9 @@
     <ClInclude Include="..\FileGDBAPI\2013\include\Util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\INCLUDE\FreeImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP">
@@ -1912,6 +1915,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\FreeImage\Dist\x32\FreeImage.dll">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
