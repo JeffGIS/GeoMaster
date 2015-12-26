@@ -926,6 +926,7 @@
     <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll" />
     <None Include="..\FreeImage\Dist\x32\FreeImage.dll" />
     <None Include="..\MrSid\Raster_DSDK\lib\lti_dsdk_cdll_9.5.dll" />
+    <None Include="..\MrSid\Raster_DSDK\lib\tbb.dll" />
     <None Include="CUR00001.CUR" />
     <None Include="CUR00002.CUR" />
     <None Include="CURSOR5.CUR" />
