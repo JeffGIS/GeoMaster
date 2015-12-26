@@ -514,7 +514,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", TableName);
 						fputstring(pCmd, fid);
 						if (haveDateAndUCR)
-							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
+							//sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
+							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id, minTime, maxTime, minUCR, maxUCR,minX, maxX, minY, maxY);", TableName);
 						else
 							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", TableName);
 						fputstring(pCmd, fid);
@@ -585,6 +586,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 						delim[0] = ',';
 					}
+					if (haveDateAndUCR)
+						sprintf(strchr(pCmd, 0), ",SUNANGLE INT");
 					if (!rtn)
 					{
 						int ifield, index;
@@ -653,6 +656,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
 						{
 							int id = Offset;
+							int sunAngle=0;
 							pos = BT_NEXT;
 							cond = BT_ANY;
 							FillGWDData(lpGWDHead, Offset);
@@ -722,7 +726,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 										if (pSpace)
 										{
 											int itime = atoi(++pSpace);
+											char daynight[256];
 											ftimebeg = itime / 1000 - 1;
+											sprintf(daynight, "$SUN(ALT, -93.33 45.0, %i)", itime);
+											ExpandText(daynight);
+											sunAngle = IDNINT(atof(daynight));
 											ftimeend = ftimebeg + 2;
 											pSpace = strchr(pSpace, ' ');
 											if (pSpace)
@@ -731,7 +739,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 											}
 										}
 									}
-									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx,ftimebeg,ftimeend,fUCR*10.0,fUCR*10.0);
+									/*{
+										if (pSpace)
+										{
+											int itime = atoi(pCmd);
+											ftimebeg = itime / 1000 - 1;
+											ftimeend = ftimebeg + 2;
+											fUCR = atoi(++pSpace);
+										}
+									}*/
+									//sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0);
+									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
 								}
 								else
 									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
@@ -791,6 +809,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								}
 								delim[0] = ',';
 							}
+							if (haveDateAndUCR)
+								sprintf(strchr(pCmd, 0), "%s%i", delim, sunAngle);
 							sprintf(strchr(pCmd, 0), ")");
 							fputstring(pCmd, fid);
 							rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
