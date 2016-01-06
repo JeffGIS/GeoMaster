@@ -4323,7 +4323,15 @@ GSSiExitProg (244);
 }
 #endif
 }
+BOOL DPointInRect(LPDPOINT pt, LPRECT rect)
+{
+	BOOL rtn = TRUE;
 
+	if (pt->x < rect->left || pt->x > rect->right ||
+		pt->y < rect->top || pt->y > rect->bottom)
+		rtn = FALSE;
+	return rtn;
+}
 HANDLE DPointsToPoints(HANDLE hDPoints, int np)
 {
 	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(POINT) + 4);
