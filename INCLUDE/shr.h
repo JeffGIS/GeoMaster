@@ -748,6 +748,7 @@ void RoundToPTOL (LPDPOINT Point);
 void InflateBounds (LPMNMXCORD pBounds, double Value);
 void InflateMinMax (LPMINMAX pBounds, int Value);
 void InflateMinMaxL (LPMNMXCORL pBounds, int Value);
+BOOL DPointInRect(LPDPOINT pt, LPRECT rect);
 BOOL RectInRect(LPRECT pRectIn,LPRECT pRectTest);
 BOOL RectCompletelyInRect(LPRECT pRectIn,LPRECT pRectTest);
 BOOL IntersectBounds (LPMNMXCORD pBounds1,LPMNMXCORD pBounds2,LPMNMXCORD pBoundsInt);
