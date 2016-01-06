@@ -2660,7 +2660,7 @@ BOOL OpenConfig (HWND hWnd,HDC hDC)
 	LPSTR	pTE, pTEend;
 	char	setTestEnv[MAX_PATH + 64] = { 0 };
 
-    if (FidConfig != HFILE_ERROR)
+	if (FidConfig != HFILE_ERROR)
 {
 #if ENABLETRACE
 GSSiExitProg (100);

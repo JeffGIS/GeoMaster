@@ -530,6 +530,8 @@ extern double			StreetWidthFactor;
 extern double			StreetWidth;
 extern long			FillStreetWithThisColor;
 extern double			StreetTextFactor;
+extern char			StreetBPType[2];
+extern char			StreetEPType[2];
 extern BOOL			PrimeNameOnly;
 extern double			ThemeWidthFactor;
 extern DPOINT			CurrentPoint;

@@ -1137,6 +1137,8 @@ double	StreetTextFactor=1;
 double	StreetWidthFactor=1;
 double	StreetWidth=12;
 long	FillStreetWithThisColor = -1;
+char	StreetBPType[2];
+char	StreetEPType[2];
 BOOL	PrimeNameOnly=FALSE;
 HANDLE	hMemMapColorMap=0;    
 double	MemMapRotation=0;

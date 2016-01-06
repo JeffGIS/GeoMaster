@@ -176,6 +176,7 @@ HANDLE CreateCirclePoly (DPOINT CenterPt,double Radius,LPLONG pnPnts,double Vect
 	if (np > 1600)
 		np = 1600;
 	DeltaAz = TWOPI / np;
+	np++;
 	*pnPnts = np;
 	handle = GSSiGlobAlloc ( 751,GMEM_MOVEABLE,(long)sizeof(DPOINT)*np); 
 	pPoint = (HPDPOINT)GlobalLock (handle); 

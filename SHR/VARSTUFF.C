@@ -3430,6 +3430,12 @@ GSSiExitProg (532);
 		case 373:
 			useGDIPlus = atob(Value);
 			break;
+		case 374:
+			strncpy(StreetBPType,Value,2);
+			break;
+		case 375:
+			strncpy(StreetEPType,Value,2);
+			break;
 		default:
  			break;
 	}
@@ -3822,6 +3828,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%DBFREC", 371, FALSE);
 	AllocateTypeVar("%CVTGMDUPDATECOMMAS", 372, FALSE);
 	AllocateTypeVar("%USEGDIPLUS", 373, FALSE);
+	AllocateTypeVar("%STREETBPTYPE", 374, FALSE);
+	AllocateTypeVar("%STREETEPTYPE", 375, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4951,6 +4959,12 @@ GSSiExitProg (533);
 			break;
 		case 373:
 			btoa(useGDIPlus, OutStr);
+			break;
+		case 374:
+			strcpy(OutStr, StreetBPType);
+			break;
+		case 375:
+			strcpy(OutStr, StreetEPType);
 			break;
 
 	}

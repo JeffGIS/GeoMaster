@@ -91,14 +91,14 @@ extern "C" void AAShutDown(void)
 	return;
 }
 
-extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, int w)
+extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, float w)
 {
 	using namespace Gdiplus;
 	GdiplusStartupInput gdiplusStartupInput;
 	GdiplusStartupOutput gdiplusStartupOutput;
 	HPEN hpn = (HPEN)SelObject(hdc, GetStockObject(BLACK_PEN));
 	HBRUSH hbr = (HBRUSH)SelObject(hdc, GetStockObject(BLACK_BRUSH));
-	LineCap lincap = LineCapSquare;
+	LineCap lincap = LineCapFlat;
 
 	if (!gdiplusToken)
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);

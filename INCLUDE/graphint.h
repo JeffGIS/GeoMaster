@@ -354,6 +354,8 @@ int GWPolyline (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
 int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc);
 int GWPolylineD (HDC hDC, HPDPOINT lpPoints, long npnts,int idesc);
 int GWPolylineShort (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
+void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, float w);
+void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb);
 void PolylineINV (HDC hDC,LPPOINT P,short n);
 BOOL ProcessPolygon (HDC hDC,BOOL ShowBorder,int PltType,HPEN hRandPen,HPEN hTempPen,int ipen);
 int DisplayScreenLineSegment (HDC hDC, HPPOINT SPoints,long n,int idesc,int w);

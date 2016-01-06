@@ -4324,6 +4324,21 @@ GSSiExitProg (244);
 #endif
 }
 
+HANDLE DPointsToPoints(HANDLE hDPoints, int np)
+{
+	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(POINT) + 4);
+	LPPOINT p = GlobalLock(hP);
+	HPDPOINT dp = GlobalLock (hDPoints);
+	for (int i = 0; i < np; i++)
+	{
+		p[i].x = IDNINT(dp[i].x);
+		p[i].y = IDNINT(dp[i].y);
+	}
+	GlobalUnlock(hDPoints);
+	GlobalUnlock(hP);
+	return hP;
+}
+
 POINT DPointToPoint (DPOINT Point)
 #if ENABLETRACE
 {GSSiEnterProg (245);

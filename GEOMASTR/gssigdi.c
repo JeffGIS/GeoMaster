@@ -22,7 +22,7 @@ void SetSavedGraphicsFid (int Type);
 void SaveTileGraphics (HFILE Fid,HDC hDC,int type,LPPOINT points,int np);
 BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
 BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
-void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, int w);
+void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, float w);
 void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp,LOGBRUSH *lb);
 
 

@@ -15,16 +15,18 @@ static	char	ShieldID[MAXSHIELDSDISPLAYED][MAX_SHIELD_ID];
 static	short	NumShieldsDisplayed=0;
 
 typedef struct	{int	NumPoints;
+				 int	startPt, endPt;
 				 int	Streets[4];
 				 short	HollowStreetWidth;
 				 short	Order;
 				 short  OneWay;
 				 COLORREF	OutlineColor;
 				 COLORREF	FillColor;
+				 char	BPType, EPType;
 				}STREETHEADER;
 typedef STREETHEADER	*LPSTREETHEADER;
 
-static	struct	{long npnts; short width, desc, OneWay, order; COLORREF color;} HollowLineHeader;          
+static	struct	{ long npnts; short width, desc, OneWay, order; COLORREF color; char BPType, EPType; } HollowLineHeader;
 
 
 int	ShowHollowStreet=1;
@@ -34,7 +36,61 @@ int	ShowHollowStreet=1;
 void LinkLabelLines (short Line1,short Line2,short Type2, short Type1);
 void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1);
 BOOL DoesSymConnectToMiddleOfAnother (HPFPOINT	pPoint,short skip,short SymNum);
-void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, int w);
+
+int DrawStreetEndPoint(HDC hDC, LPPOINT pPoints, LPSTREETHEADER pStreet, float w)
+{
+	int rtn = 0;
+	double d, az;
+	double culdsacDiameter = 85 * FTM;
+	DPOINT radiusPt;
+	HANDLE hCircle = 0;
+	HANDLE hCirclePt = 0;
+	int nCirclePts = 0;
+	LPPOINT circlePoints;
+	short ip;
+	HBRUSH hBrush=0, hOldBrush = 0;
+
+	if (!GetTypeVisibility(9))
+		return 0;
+	d = (culdsacDiameter/2) / CurView->MetersPerPixel;
+
+	if (pStreet->BPType == 'C')
+	{
+		radiusPt = PointAtDistOnPoly16(pPoints, pStreet->NumPoints, d, &az, &ip);
+		pStreet->startPt = ip;
+		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts,1.0);
+		hCirclePt = DPointsToPoints(hCircle, nCirclePts);
+		circlePoints = GlobalLock(hCirclePt);
+		hBrush = CreateSolidBrush(pStreet->FillColor);
+		hOldBrush = SelectObject(hDC, hBrush);
+		Polygon(hDC, circlePoints, nCirclePts);
+		AAPolyLine(CurView->hDC, circlePoints, nCirclePts, 0, w);
+		GlobalUnlock(hCirclePt);
+		SelectObject(hDC, hOldBrush);
+		GSSiDeleteObject(&hBrush);
+		rtn = 1;
+	}
+	if (pStreet->EPType == 'C')
+	{
+		double plen = GetPolyLength(pPoints, pStreet->NumPoints);
+		radiusPt = PointAtDistOnPoly16(pPoints, pStreet->NumPoints, plen - d, &az, &ip);
+		pStreet->endPt = ip;
+		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts, 1.0);
+		hCirclePt = DPointsToPoints(hCircle, nCirclePts);
+		circlePoints = GlobalLock(hCirclePt);
+		hBrush = CreateSolidBrush(pStreet->FillColor);
+		hOldBrush = SelectObject(hDC, hBrush);
+		Polygon(hDC, circlePoints, nCirclePts);
+		AAPolyLine(CurView->hDC, circlePoints, nCirclePts, 0, w);
+		GlobalUnlock(hCirclePt);
+		SelectObject(hDC, hOldBrush);
+		GSSiDeleteObject(&hBrush);
+		rtn = 2;
+	}
+	GSSiGlobFree(&hCircle);
+	GSSiGlobFree(&hCirclePt);
+	return rtn;
+}
 
 void ResetStreetLabels (void)
 {   
@@ -72,7 +128,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 //		return TRUE;
 	CurStreetNumbers[3] = CurState;
 	if (!CurTheme->hhLabelLines)
-		CurTheme->hhLabelLines = GSSiGlobAlloc (1729,GMEM_MOVEABLE,sizeof(HANDLE)*MAXLABELLINES);
+		CurTheme->hhLabelLines = GSSiGlobAlloc (1729,GHND,sizeof(HANDLE)*MAXLABELLINES);
 	phLabelLines = GlobalLock (CurTheme->hhLabelLines);
 	for (i=0;i<CurTheme->nLabelLines;i++)
 	{   
@@ -188,7 +244,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 	} 
 	if (ConnectedTo == -1 && CurTheme->nLabelLines < MAXLABELLINES && np < MAXPOINTSINLABEL)
 	{
-		phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(STREETHEADER) + sizeof(POINT) * np);		
+		phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc (0,GHND,sizeof(STREETHEADER) + sizeof(POINT) * np);		
 		pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[CurTheme->nLabelLines]);
 		pStreet->NumPoints = np; 
 	//	pStreets = (LPLONG)(pNumPoints+1);  
@@ -199,6 +255,8 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 		pStreet->OneWay = StreetOneWay;
 		pStreet->Order = Order;
 		pStreet->FillColor = FillColor;
+		pStreet->BPType = *StreetBPType;
+		pStreet->EPType = *StreetEPType;
 		pStreet->OutlineColor = OutlineColor;
 		_fmemcpy (pPoints,Points,np*sizeof(POINT));
 		GlobalUnlock (phLabelLines[CurTheme->nLabelLines++]);
@@ -520,6 +578,8 @@ BOOL DisplayStreetCenterlines (void)
 				if (ShowHollowStreet == 1)
 				{
 					float w = pStreet->HollowStreetWidth * DeviceToScreenFactor * OverAllStreetWidthFactor;
+					float wplusEdge;
+					int ip = 0;
 					//lb.lbColor = pStreet->OutlineColor;
 					EdgeWidth = (w / 8 + edgeWidthInc) * EdgeWidthFactor;
 					//hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, IDNINT(w + EdgeWidth * 2), &lb, 0, 0);
@@ -528,7 +588,12 @@ BOOL DisplayStreetCenterlines (void)
 					//Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
 					//SelectObject(CurView->hDC, hOldPen);
 					//GSSiDeleteObject(&hPen);
-					AAPolyLine(CurView->hDC, pPoints, pStreet->NumPoints, pStreet->OutlineColor, IDNINT(w + EdgeWidth * 2));
+					pStreet->endPt = pStreet->NumPoints;
+					wplusEdge = w + EdgeWidth * 2;
+					DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth);
+					AAPolyLine(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->OutlineColor, wplusEdge);
+					if (pStreet->startPt || pStreet->endPt)
+						DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth);
 				}
 				GlobalUnlock (phLabelLines[i]); 
 			}
@@ -542,12 +607,14 @@ BOOL DisplayStreetCenterlines (void)
 						pPoints = (LPPOINT)(pStreet + 1);
 						if (pStreet->Order == order)
 						{
+							float w = pStreet->HollowStreetWidth * DeviceToScreenFactor * OverAllStreetWidthFactor;
 							//hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth,pStreet->FillColor);  
 							//lb.lbColor = pStreet->FillColor;
 							//hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, pStreet->HollowStreetWidth * OverAllStreetWidthFactor, &lb, 0, 0);
 							//hOldPen = SelectObject(CurView->hDC, hPen);
 							//Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
-							AAPolyLine(CurView->hDC, pPoints, pStreet->NumPoints, pStreet->FillColor, pStreet->HollowStreetWidth * DeviceToScreenFactor * OverAllStreetWidthFactor);
+							//DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, w);
+							AAPolyLine(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, w);
 							//SelectObject(CurView->hDC, hOldPen);
 							//GSSiDeleteObject(&hPen);
 						}
@@ -586,7 +653,7 @@ BOOL DisplayStreetCenterlines (void)
 							pPoints[pStreet->NumPoints-1] = newpt (pPoints[pStreet->NumPoints-1],AZ,MaxWidth);
 						}
 						if (ShowHollowStreet == 1)
-							AAPolyLine(CurView->hDC, pPoints, pStreet->NumPoints, pStreet->FillColor, pStreet->HollowStreetWidth * DeviceToScreenFactor);
+							AAPolyLine(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, pStreet->HollowStreetWidth * DeviceToScreenFactor);
 
 							//Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
 						*pPoints = SaveBP;
@@ -819,7 +886,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 					short	NumNewPoints = pStreet->NumPoints - BegLine;
 					
 					pStreet->NumPoints = BegLine + 2;
-					phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(STREETHEADER) + sizeof(POINT) * NumNewPoints);		
+					phLabelLines[CurTheme->nLabelLines] = GSSiGlobAlloc (0,GHND,sizeof(STREETHEADER) + sizeof(POINT) * NumNewPoints);		
 					pStreet2 = (LPSTREETHEADER)GlobalLock (phLabelLines[CurTheme->nLabelLines]);
 					*pStreet2 = *pStreet;
 					pStreet2->NumPoints = NumNewPoints; 
@@ -1109,6 +1176,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 			   			}
 			   			else */
 						TextOffset = TextOffsetBegin * 1.5 * StreetTextAdjustment;
+						TextOffset = 0;
 	/*			   		if (abs (LogFont.lfEscapement - 900) < 450 ||
 			   				abs (LogFont.lfEscapement - 2700) < 450)
 		   					TextOffset = TextOffsetBegin * 1.7;*/  
@@ -1241,7 +1309,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 	}
 	if (Type1 == 1 && Type2 == 1)
 	{
-		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(STREETHEADER) + NewNumPoints * sizeof(POINT));	
+		hTemp = GSSiGlobAlloc (0,GHND,sizeof(STREETHEADER) + NewNumPoints * sizeof(POINT));	
 		pTempStreet = (LPSTREETHEADER)GlobalLock (hTemp);
 		*pTempStreet = *pStreet1;
 //		pTempStreets = (LPLONG) (pTempNumPoints+1);
@@ -1265,7 +1333,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 	else if (Type1 == 1 && Type2 == 2)
 	{
 		GlobalUnlock (phLabelLines[Line2]);
-    	phLabelLines[Line2] = GSSiGlobalReAlloc (0,phLabelLines[Line2] ,sizeof(STREETHEADER) + sizeof(POINT)*NewNumPoints,GMEM_MOVEABLE);
+    	phLabelLines[Line2] = GSSiGlobalReAlloc (0,phLabelLines[Line2] ,sizeof(STREETHEADER) + sizeof(POINT)*NewNumPoints,GHND);
 		pStreet2 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line2]); 
 //		pStreets2   = (LPLONG)(pNumPoints2+1);
 //		pHollowStreetWidth2 = (LPSHORT)(pStreets2+4);
@@ -1281,7 +1349,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 	else if (Type1 == 2 && Type2 == 1)
 	{
 		GlobalUnlock (phLabelLines[Line1]);
-    	phLabelLines[Line1] = GSSiGlobalReAlloc (0,phLabelLines[Line1] ,sizeof(STREETHEADER) + sizeof(POINT)*NewNumPoints,GMEM_MOVEABLE);
+    	phLabelLines[Line1] = GSSiGlobalReAlloc (0,phLabelLines[Line1] ,sizeof(STREETHEADER) + sizeof(POINT)*NewNumPoints,GHND);
 		pStreet1 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line1]); 
 	//	pStreets1   = (LPLONG)(pNumPoints1+1);
 	//	pHollowStreetWidth1 = (LPSHORT)(pStreets1+4);
@@ -1299,7 +1367,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 //		Polyline (CurView->hDC,pPoints1,*pNumPoints1);
 //		Polyline (CurView->hDC,pPoints2,*pNumPoints2);
 		GlobalUnlock (phLabelLines[Line1]);
-    	phLabelLines[Line1] = GSSiGlobalReAlloc (0,phLabelLines[Line1] ,sizeof(STREETHEADER) + sizeof(POINT)*NewNumPoints,GMEM_MOVEABLE);
+    	phLabelLines[Line1] = GSSiGlobalReAlloc (0,phLabelLines[Line1] ,sizeof(STREETHEADER) + sizeof(POINT)*NewNumPoints,GHND);
 		pStreet1 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line1]); 
 //		pStreets1   = (LPLONG)(pNumPoints1+1);
 //		pHollowStreetWidth1 = (LPSHORT)(pStreets1+4);

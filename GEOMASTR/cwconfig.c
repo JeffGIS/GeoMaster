@@ -1384,7 +1384,9 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		return WinMainGMEdit(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 	else
+	{
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
+	}
 }
 
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)

@@ -736,6 +736,7 @@ DPOINT SPointToDPoint (POINTS Point);
 DPOINT PointToDPoint (POINT Point);
 LPOINT PointToLPoint (POINT Point);
 POINT DPointToPoint (DPOINT Point); 
+HANDLE DPointsToPoints(HANDLE hDPoints, int np);
 LPOINT DPointToLPoint (LPDPOINT pPoint);
 DPOINT LPointToDPoint (LPOINT Point);
 FPOINT DPointToFPoint (DPOINT DPoint);
