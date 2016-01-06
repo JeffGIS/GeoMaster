@@ -367,6 +367,7 @@ int RectIntersect2 (LPRECT pRect,DPOINT P1, DPOINT P2, LPDPOINT IntPoints);
 int GWPolylineScreen (HDC hDC, HPFPOINT Points, long npnts,int idesc);
 int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc);
 void AddPointsToSymbolRect (HDC hDC,HPPOINT lpPoints, long npnts,int Width);
+void AddFPointsToSymbolRect(HDC	hDC, HPFPOINT lpPoints, long npnts, int Width);
 BOOL FlatEndPolyline (HDC hDC, HPFPOINT lpPoints, long npnts,int Width,COLORREF Color);
 BOOL BigPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width);
 BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width);

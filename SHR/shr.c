@@ -4417,21 +4417,42 @@ GSSiExitProg (245);
 #endif
 }
 
-void AddPointToRect (POINT Point,LPRECT pBounds)
+void AddFPointToRect (FPOINT Point,LPRECT pBounds)
 #if ENABLETRACE
 {GSSiEnterProg (246);
 #endif
 {   
-    pBounds->left = min (pBounds->left,Point.x);
-    pBounds->right = max (pBounds->right,Point.x);
-    pBounds->top = min (pBounds->top,Point.y);
-    pBounds->bottom = max (pBounds->bottom,Point.y);
+	int x = IDNINT(Point.x);
+	int y = IDNINT(Point.y);
+    pBounds->left = min (pBounds->left,x);
+    pBounds->right = max (pBounds->right,x);
+    pBounds->top = min (pBounds->top,y);
+    pBounds->bottom = max (pBounds->bottom,y);
 {
 #if ENABLETRACE
 GSSiExitProg (246);
 #endif
     return;
 }
+#if ENABLETRACE
+}
+#endif
+}
+void AddPointToRect(POINT Point, LPRECT pBounds)
+#if ENABLETRACE
+{GSSiEnterProg (246);
+#endif
+{
+	pBounds->left = min(pBounds->left, Point.x);
+	pBounds->right = max(pBounds->right, Point.x);
+	pBounds->top = min(pBounds->top, Point.y);
+	pBounds->bottom = max(pBounds->bottom, Point.y);
+	{
+#if ENABLETRACE
+		GSSiExitProg(246);
+#endif
+		return;
+	}
 #if ENABLETRACE
 }
 #endif
