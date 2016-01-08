@@ -28,7 +28,6 @@ typedef STREETHEADER	*LPSTREETHEADER;
 
 static	struct	{ long npnts; short width, desc, OneWay, order; COLORREF color; char BPType, EPType; } HollowLineHeader;
 
-
 int	ShowHollowStreet=1;
 
 #include "gmextern.h"
@@ -37,7 +36,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1);
 void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1);
 BOOL DoesSymConnectToMiddleOfAnother (HPFPOINT	pPoint,short skip,short SymNum);
 
-int DrawStreetEndPoint(HDC hDC, LPPOINT pPoints, LPSTREETHEADER pStreet, float w)
+int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float w)
 {
 	int rtn = 0;
 	double d, az;
@@ -46,7 +45,7 @@ int DrawStreetEndPoint(HDC hDC, LPPOINT pPoints, LPSTREETHEADER pStreet, float w
 	HANDLE hCircle = 0;
 	HANDLE hCirclePt = 0;
 	int nCirclePts = 0;
-	LPPOINT circlePoints;
+	LPFPOINT circlePoints;
 	short ip;
 	HBRUSH hBrush=0, hOldBrush = 0;
 
@@ -56,15 +55,15 @@ int DrawStreetEndPoint(HDC hDC, LPPOINT pPoints, LPSTREETHEADER pStreet, float w
 
 	if (pStreet->BPType == 'C')
 	{
-		radiusPt = PointAtDistOnPoly16(pPoints, pStreet->NumPoints, d, &az, &ip);
+		radiusPt = PointAtDistOnPolyF(pPoints, pStreet->NumPoints, d, &az, &ip);
 		pStreet->startPt = ip;
 		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts,1.0);
-		hCirclePt = DPointsToPoints(hCircle, nCirclePts);
+		hCirclePt = DPointsToFPoints(hCircle, nCirclePts);
 		circlePoints = GlobalLock(hCirclePt);
 		hBrush = CreateSolidBrush(pStreet->FillColor);
 		hOldBrush = SelectObject(hDC, hBrush);
-		Polygon(hDC, circlePoints, nCirclePts);
-		AAPolyLine(CurView->hDC, circlePoints, nCirclePts, 0, w);
+		PolygonF(hDC, circlePoints, nCirclePts);
+		AAPolyLineF(CurView->hDC, circlePoints, nCirclePts, 0, w);
 		GlobalUnlock(hCirclePt);
 		SelectObject(hDC, hOldBrush);
 		GSSiDeleteObject(&hBrush);
@@ -72,16 +71,16 @@ int DrawStreetEndPoint(HDC hDC, LPPOINT pPoints, LPSTREETHEADER pStreet, float w
 	}
 	if (pStreet->EPType == 'C')
 	{
-		double plen = GetPolyLength(pPoints, pStreet->NumPoints);
-		radiusPt = PointAtDistOnPoly16(pPoints, pStreet->NumPoints, plen - d, &az, &ip);
+		double plen = GetPolyLengthF(pPoints, pStreet->NumPoints);
+		radiusPt = PointAtDistOnPolyF(pPoints, pStreet->NumPoints, plen - d, &az, &ip);
 		pStreet->endPt = ip;
 		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts, 1.0);
-		hCirclePt = DPointsToPoints(hCircle, nCirclePts);
+		hCirclePt = DPointsToFPoints(hCircle, nCirclePts);
 		circlePoints = GlobalLock(hCirclePt);
 		hBrush = CreateSolidBrush(pStreet->FillColor);
 		hOldBrush = SelectObject(hDC, hBrush);
-		Polygon(hDC, circlePoints, nCirclePts);
-		AAPolyLine(CurView->hDC, circlePoints, nCirclePts, 0, w);
+		PolygonF(hDC, circlePoints, nCirclePts);
+		AAPolyLineF(CurView->hDC, circlePoints, nCirclePts, 0, w);
 		GlobalUnlock(hCirclePt);
 		SelectObject(hDC, hOldBrush);
 		GSSiDeleteObject(&hBrush);
@@ -143,7 +142,7 @@ BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORRE
 			FillColor == pStreet->FillColor && OutlineColor == pStreet->OutlineColor &&
 			pStreet->NumPoints+np < MAXPOINTSINLABEL-2)
 		{
-			if (pPoints[0].x == Points[0].x && pPoints[0].y == Points[0].y)
+			if (SameFPoint(pPoints[0],Points[0]))
 			{
 				if (ConnectedTo != -1)
 				{
@@ -168,7 +167,7 @@ BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORRE
 				ConnectedTo = i;
 				continue;
 			}
-			if (pPoints[0].x == Points[np-1].x && pPoints[0].y == Points[np-1].y)
+			if (SameFPoint(pPoints[0], Points[np - 1]))
 			{
 				if (ConnectedTo != -1)
 				{
@@ -192,7 +191,7 @@ BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORRE
 				ConnectedTo = i;
 				continue;
 			}
-			if (pPoints[(pStreet->NumPoints)-1].x == Points[0].x && pPoints[(pStreet->NumPoints)-1].y == Points[0].y)
+			if (SameFPoint(pPoints[(pStreet->NumPoints) - 1], Points[0]))
 			{
 				if (ConnectedTo != -1)
 				{
@@ -215,7 +214,7 @@ BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORRE
 				ConnectedTo = i;
 				continue;
 			}
-			if (pPoints[(pStreet->NumPoints)-1].x == Points[np-1].x && pPoints[(pStreet->NumPoints)-1].y == Points[np-1].y)
+			if (SameFPoint(pPoints[(pStreet->NumPoints) - 1], Points[np - 1]))
 			{
 				if (ConnectedTo != -1)
 				{
@@ -585,7 +584,7 @@ BOOL DisplayStreetCenterlines (void)
 					pStreet->endPt = pStreet->NumPoints;
 					wplusEdge = w + EdgeWidth * 2;
 					DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth);
-					AAPolyLine(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->OutlineColor, wplusEdge);
+					AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->OutlineColor, wplusEdge);
 					if (pStreet->startPt || pStreet->endPt)
 						DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth);
 				}
@@ -608,7 +607,7 @@ BOOL DisplayStreetCenterlines (void)
 							//hOldPen = SelectObject(CurView->hDC, hPen);
 							//Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
 							//DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, w);
-							AAPolyLine(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, w);
+							AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, w);
 							//SelectObject(CurView->hDC, hOldPen);
 							//GSSiDeleteObject(&hPen);
 						}
@@ -625,29 +624,29 @@ BOOL DisplayStreetCenterlines (void)
 					pPoints = (LPFPOINT)(pStreet+1);  
 					if (pStreet->Order == order)
 					{
-						POINT	SaveBP, SaveEP;
+						FPOINT	SaveBP, SaveEP;
 						double	AZ;
 
 						//hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth,pStreet->FillColor);  
 						//hOldPen = SelectObject (CurView->hDC,hPen); 
 						SaveBP = *pPoints;
 						SaveEP = pPoints[pStreet->NumPoints-1];
-						if (idist (*pPoints,*(pPoints+1)) < MaxWidth + 1)
-							*pPoints = MidPoint (*pPoints,*(pPoints+1));
+						if (ldistp (*pPoints,*(pPoints+1)) < MaxWidth + 1)
+							*pPoints = MidPointF (*pPoints,*(pPoints+1));
 						else
 						{
-							AZ = getaz (*pPoints,*(pPoints+1));
-							*pPoints = newpt (*pPoints,AZ,MaxWidth);
+							AZ = getazF (*pPoints,*(pPoints+1));
+							*pPoints = newptF (*pPoints,AZ,MaxWidth);
 						}
-						if (idist (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]) < MaxWidth + 1)
-							pPoints[pStreet->NumPoints-1] = MidPoint (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]);
+						if (ldistp (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]) < MaxWidth + 1)
+							pPoints[pStreet->NumPoints-1] = MidPointF (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]);
 						else
 						{
-							AZ = getaz (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]);
-							pPoints[pStreet->NumPoints-1] = newpt (pPoints[pStreet->NumPoints-1],AZ,MaxWidth);
+							AZ = getazF (pPoints[pStreet->NumPoints-1],pPoints[pStreet->NumPoints-2]);
+							pPoints[pStreet->NumPoints-1] = newptF (pPoints[pStreet->NumPoints-1],AZ,MaxWidth);
 						}
 						if (ShowHollowStreet == 1)
-							AAPolyLine(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, pStreet->HollowStreetWidth * DeviceToScreenFactor);
+							AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, pStreet->HollowStreetWidth * DeviceToScreenFactor);
 
 							//Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
 						*pPoints = SaveBP;
@@ -701,7 +700,7 @@ BOOL DisplayStreetCenterlines (void)
 					hPen = CreatePen (PS_SOLID,IDNINT(pStreet->HollowStreetWidth+EdgeWidth*2),0);  
 
 					hOldPen = SelectObject (hDC,hPen); 
-					Polyline (hDC,pPoints,pStreet->NumPoints); 
+					PolylineF (hDC,pPoints,pStreet->NumPoints); 
 					SelectObject (hDC,hOldPen);
 					GSSiDeleteObject (&hPen); 
 					GlobalUnlock (phLabelLines[i]); 
@@ -716,7 +715,7 @@ BOOL DisplayStreetCenterlines (void)
 						{
 							hPen = CreatePen(PS_SOLID, pStreet->HollowStreetWidth * DeviceToScreenFactor, RGB(255, 255, 255));
 							hOldPen = SelectObject (hDC,hPen); 
-							Polyline (hDC,pPoints,pStreet->NumPoints); 
+							PolylineF (hDC,pPoints,pStreet->NumPoints); 
 							SelectObject (hDC,hOldPen);
 							GSSiDeleteObject (&hPen); 
 						}
@@ -748,7 +747,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 //	LPLONG	pStreets;
 //	LPSHORT	pHollowStreetWidth;
 	LPSTREETHEADER	pStreet;
-	LPPOINT	pPoints;   
+	LPFPOINT	pPoints;   
 	LOGFONT	LogFont;    
 	HFONT	hFont, OldFont=0;    
 	SIZE	txSize;
@@ -864,19 +863,19 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[i]); 
 			//	pStreets   = (LPLONG)(pNumPoints+1);
 			//	pHollowStreetWidth = (LPSHORT)(pStreets+4);
-				pPoints = (LPPOINT)(pStreet+1);  
+				pPoints = (LPFPOINT)(pStreet+1);  
 	//			Polyline (CurView->hDC,pPoints,*pNumPoints);   //pPoints[1]
 				EndLine = pStreet->NumPoints-1;
 	//			ltoa (IDNINT(*pStreets * DTMContourInterval),StreetsText,10); 
-				TotLength = GetPolyLength (pPoints,pStreet->NumPoints);   
+				TotLength = GetPolyLengthF (pPoints,pStreet->NumPoints);   
 				if (TotLength > MinDistBetweenNames * 2 && CurTheme->nLabelLines < MAXLABELLINES)
 				{
-					DPOINT	p = PointAtDistOnPoly16 (pPoints,pStreet->NumPoints,MinDistBetweenNames,&AZ,&BegLine);
+					DPOINT	p = PointAtDistOnPolyF (pPoints,pStreet->NumPoints,MinDistBetweenNames,&AZ,&BegLine);
 					//LPSHORT	pNumPoints2;
 					//LPLONG	pStreets2; 
 					//LPSHORT	pHollowStreetWidth2;
 					LPSTREETHEADER	pStreet2;
-					LPPOINT	pPoints2;  
+					LPFPOINT	pPoints2;  
 					short	NumNewPoints = pStreet->NumPoints - BegLine;
 					
 					pStreet->NumPoints = BegLine + 2;
@@ -887,9 +886,9 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				//	pStreets2 = (LPLONG)(Street2+1);  
 					_fmemcpy (pStreet2->Streets,pStreet->Streets,16);   
 				//	pHollowStreetWidth2 = (LPSHORT)(pStreets2+4);   
-					pPoints2 = (LPPOINT)(pStreet2+1); 
+					pPoints2 = (LPFPOINT)(pStreet2+1); 
 					_fmemcpy (&pPoints2[1],&pPoints[BegLine+1],(NumNewPoints-1)*sizeof(FPOINT));
-					pPoints[pStreet->NumPoints-1] = *pPoints2 = DPointToPoint (p);  //pPoints[5]   pPoints2[1]
+					pPoints[pStreet->NumPoints-1] = *pPoints2 = DPointToFPoint (p);  //pPoints[5]   pPoints2[1]
 					GlobalUnlock (phLabelLines[CurTheme->nLabelLines++]);   
 				}  
 				GlobalUnlock (phLabelLines[i]);
@@ -902,11 +901,11 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[i]); 
 		//		pStreets   = (LPLONG)(pNumPoints+1);
 		//		pHollowStreetWidth = (LPSHORT)(pStreets+4);
-				pPoints = (LPPOINT)(pStreet+1);  
+				pPoints = (LPFPOINT)(pStreet+1);  
 	//			Polyline (CurView->hDC,pPoints,*pNumPoints);   //pPoints[1]
 				EndLine = pStreet->NumPoints-1;
 	//			ltoa (IDNINT(*pStreets * DTMContourInterval),StreetsText,10); 
-				TotLength = GetPolyLength (pPoints,pStreet->NumPoints); 
+				TotLength = GetPolyLengthF (pPoints,pStreet->NumPoints); 
 				NextDist = 0;
 				ipos = 0; 
 	NextSNum:
@@ -1033,8 +1032,9 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				if (NumTries > MaxTries)
 					goto NextLine;
 				Dist += IncDist; 
-				TxtPoints[0] = PointAtDistOnPoly16 (pPoints,pStreet->NumPoints,Dist,&AZ,&EndLine);
-				TxtPoints[ntxp-1] = PointAtDistOnPoly16 (pPoints,pStreet->NumPoints,Dist+CharacterSpacingFactor*twidth,&AZ,&EndLine); 
+				TxtPoints[0] = PointAtDistOnPolyF (pPoints,pStreet->NumPoints,Dist,&AZ,&EndLine);
+				TxtAZ[0] = AZ;
+				TxtPoints[ntxp-1] = PointAtDistOnPolyF (pPoints,pStreet->NumPoints,Dist+CharacterSpacingFactor*twidth,&AZ,&EndLine); 
 				if (EndLine >= pStreet->NumPoints)
 					goto NextName2;
 				DPoint1 = WinPtToBasePtD (&TxtPoints[0]);  
@@ -1055,8 +1055,9 @@ BOOL DisplayStreetLabels (BOOL Clear)
 					Dist+=IndCharWidth[k];
 					do                            //pPoints[*pNumPoints-1]
 					{   
-						Dist += IndCharWidth[k] - dinc + dtol;
-						TxtPoints[j] = PointAtDistOnPoly16 (pPoints,pStreet->NumPoints,Dist,&AZ,&BegLine); 
+						Dist += IndCharWidth[k] -dinc + dtol;
+						TxtPoints[j] = PointAtDistOnPolyF (pPoints,pStreet->NumPoints,Dist,&AZ,&BegLine); 
+						TxtAZ[j] = AZ;
 						if (BegLine >= pStreet->NumPoints) 
 						{
 							EndLine = pStreet->NumPoints-1;
@@ -1069,7 +1070,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 							EndLine = pStreet->NumPoints-1;
 							goto NextName2; 
 						} 
-					}while (dinc < IndCharWidth[k]); 
+					}while (dinc < IndCharWidth[k]);
 					{
 						POINT pt = DPointToPoint (TxtPoints[j]);
 
@@ -1078,7 +1079,8 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						if (PtInTextRect(pt))
 							goto TryAgain;
 					}
-					TxtAZ[j-1] = getazd (&TxtPoints[j-1],&TxtPoints[j]);
+					//TxtAZ[j - 1] = getazd(&TxtPoints[j - 1], &TxtPoints[j]);
+					TxtAZ[j - 1] = LTWOPI((TxtAZ[j] + TxtAZ[j - 1]) / 2);
 					if (j > 1)
 						if (fabs(DeflectionAngle (TxtAZ[j-2],TxtAZ[j-1])) > MaxD)
 							goto TryAgain;
@@ -1100,13 +1102,13 @@ BOOL DisplayStreetLabels (BOOL Clear)
 							ii=1;
 						for (k=0;k<pStreet->NumPoints;k++) 
 						{
-							if (PtInRect (&rect,pPoints[k])) //pPoints[28]
+							if (FPointInRect (&pPoints[k],&rect)) //pPoints[28]
 							{
 								if (ptin < 0)
 									ptin = k;
 								else if (ptin != k)
 								{
-									if (idist (pPoints[ptin],pPoints[k]) > TextSize)
+									if (ldistp (pPoints[ptin],pPoints[k]) > TextSize)
 									{
 										ptin = -1;
 										break;
@@ -1138,8 +1140,8 @@ BOOL DisplayStreetLabels (BOOL Clear)
 							jchar = nChar - ichar -1;
 						DPoint1 = WinPtToBasePtD (&TxtPoints[ichar]);  
 						DPoint2 = WinPtToBasePtD (&TxtPoints[ichar+1]); 
-						AddPointToRect (DPointToPoint (TxtPoints[ichar]),&txtRect);
-						AddPointToRect (DPointToPoint (TxtPoints[ichar+1]),&txtRect);
+						AddDPointToRect (TxtPoints[ichar],&txtRect);
+						AddDPointToRect (TxtPoints[ichar+1],&txtRect);
 	//					DPoint = MidPointD (DPoint1,DPoint2);
 						AZPt1 = DPoint1;
 						AZPt2 = DPoint2;
@@ -1170,14 +1172,15 @@ BOOL DisplayStreetLabels (BOOL Clear)
 			   			}
 			   			else */
 						TextOffset = TextOffsetBegin * 1.5 * StreetTextAdjustment;
-						TextOffset = 0;
+						//TextOffset = 0;
 	/*			   		if (abs (LogFont.lfEscapement - 900) < 450 ||
 			   				abs (LogFont.lfEscapement - 2700) < 450)
 		   					TextOffset = TextOffsetBegin * 1.7;*/  
 		   				ProjectBasePt (&DPoint);
 						DPoint = dnewpt(DPoint, AZ + HALFPI, (theight + TextOffset)*CurView->BaseUnitsPerPixel*CurView->LLNormFactor*StreetTextAdjustment);
-						Point = BasePtToWinPt (UnProjectBasePt (&DPoint)); 
-						AddPointToRect (Point,&txtRect);
+						DPoint = BasePtToWinPtD (UnProjectBasePt (&DPoint)); 
+						AddDPointToRect (DPoint,&txtRect);
+						Point = DPointToPoint(DPoint);
 						LogFont.lfOrientation = LogFont.lfEscapement;
 						hFont = CreateFontIndirect((LPLOGFONT)&LogFont); 
 						SelectObject(CurView->hDC,hFont);
@@ -1230,6 +1233,8 @@ BOOL DisplayStreetLabels (BOOL Clear)
 								else
 								{
 									TextOut(CurView->hDC, Point.x, Point.y, &StreetsText[jchar], 1);
+									/*RECT dbrect = { Point.x, Point.y, Point.x + 1, Point.y + 1 };
+									FillRectColor(CurView->hDC, &dbrect, RGB(255, 0, 0));*/
 									InflateRect(&txtRect, trinc, trinc);
 									AddTextRect2(&txtRect, TRUE);
 									DisplayedText = TRUE;
@@ -1277,7 +1282,7 @@ Exit:
 void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 {
 //	LPSHORT	pNumPoints1, pNumPoints2, pTempNumPoints;
-	LPPOINT	pPoints1, pPoints2, pTempPoints;  
+	LPFPOINT	pPoints1, pPoints2, pTempPoints;  
 //	LPLONG	pStreets1, pStreets2, pTempStreets; 
 	long	NewNumPoints;   
 //	LPSHORT	pHollowStreetWidth1, pHollowStreetWidth2, pTempHollowStreetWidth;
@@ -1289,11 +1294,11 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 	pStreet1 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line1]); 
 //	pStreets1   = (LPLONG)(pNumPoints1+1);
 //	pHollowStreetWidth1 = (LPSHORT)(pStreets1+4);
-	pPoints1 = (LPPOINT)(pStreet1+1);
+	pPoints1 = (LPFPOINT)(pStreet1+1);
 	pStreet2 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line2]); 
 //	pStreets2   = (LPLONG)(pNumPoints2+1);
 //	pHollowStreetWidth2 = (LPSHORT)(pStreets2+4);
-	pPoints2 = (LPPOINT)(pStreet2+1);
+	pPoints2 = (LPFPOINT)(pStreet2+1);
 	NewNumPoints = pStreet1->NumPoints + pStreet2->NumPoints;
 	if (NewNumPoints > MAXPOINTSINLABEL)
 	{
@@ -1309,7 +1314,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 //		pTempStreets = (LPLONG) (pTempNumPoints+1);
 	//	_fmemcpy (pTempStreet->Streets,pStreet1->Streets,16);	
 	//	pTempHollowStreetWidth = (LPSHORT)(pTempStreets+4);
-		pTempPoints = (LPPOINT)(pTempStreet+1);  
+		pTempPoints = (LPFPOINT)(pTempStreet+1);  
 		for (i=0,j=pStreet1->NumPoints-1;i<pStreet1->NumPoints;i++,j--)
 			pTempPoints[i] = pPoints1[j];  
 		pTempStreet->NumPoints = pStreet1->NumPoints; 
@@ -1331,7 +1336,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 		pStreet2 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line2]); 
 //		pStreets2   = (LPLONG)(pNumPoints2+1);
 //		pHollowStreetWidth2 = (LPSHORT)(pStreets2+4);
-		pPoints2 = (LPPOINT)(pStreet2+1);
+		pPoints2 = (LPFPOINT)(pStreet2+1);
 		for (i=0;i<pStreet1->NumPoints;i++)
 			pPoints2[pStreet2->NumPoints + i] = pPoints1[i];   //pPoints2[21]
 		pStreet2->NumPoints += pStreet1->NumPoints;
@@ -1347,7 +1352,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 		pStreet1 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line1]); 
 	//	pStreets1   = (LPLONG)(pNumPoints1+1);
 	//	pHollowStreetWidth1 = (LPSHORT)(pStreets1+4);
-		pPoints1 = (LPPOINT)(pStreet1+1);
+		pPoints1 = (LPFPOINT)(pStreet1+1);
 		for (i=0;i<pStreet2->NumPoints;i++)
 			pPoints1[pStreet1->NumPoints + i] = pPoints2[i];  
 		pStreet1->NumPoints += pStreet2->NumPoints;
@@ -1365,7 +1370,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1)
 		pStreet1 = (LPSTREETHEADER)GlobalLock (phLabelLines[Line1]); 
 //		pStreets1   = (LPLONG)(pNumPoints1+1);
 //		pHollowStreetWidth1 = (LPSHORT)(pStreets1+4);
-		pPoints1 = (LPPOINT)(pStreet1+1);
+		pPoints1 = (LPFPOINT)(pStreet1+1);
 		for (i=0,j=pStreet2->NumPoints-1;i<pStreet2->NumPoints;i++,j--)
 			pPoints1[pStreet1->NumPoints + i] = pPoints2[j];      //pPoints2[1]  pPoints1[*pNumPoints1-2]  pPoints1[4]   pPoints2[*pNumPoints2-1]
 		pStreet1->NumPoints += pStreet2->NumPoints;

@@ -4219,7 +4219,7 @@ int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
 	return rtn;
 }
 
-BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
+BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPFPOINT Points, int npnts,int Width)
 {
 	int		nArrows = 2;
 	COLORREF lineColor = GetGlobalLVal2("[%1WAYARROWLINECOLOR]", RGB(255,255,255));
@@ -4234,7 +4234,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 		return FALSE;
 	{
 		double	ArrowLength=Width*4;
-		double	PolyLen = GetPolyLength (Points,npnts);
+		double	PolyLen = GetPolyLengthF (Points,npnts);
 		double	GapLength = 8;
 		
 		GapLength *= gapFactor;
@@ -4265,7 +4265,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 			hOldBrush = SelectObject (hDC,hBrush);
 			hOldPen = SelectObject (hDC,hPen);
 			for (i=0;i<npnts;i++)
-				pDPoints[i] = PointToDPoint (Points[i]);
+				pDPoints[i] = FPointToDPoint (Points[i]);
 			StartArrow = GapLength;//max (0,(PolyLen - (nArrows * 2 -1)*ArrowLength)/2);
 			if (StartArrow < 0)
 			{

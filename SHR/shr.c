@@ -4332,11 +4332,20 @@ BOOL DPointInRect(LPDPOINT pt, LPRECT rect)
 		rtn = FALSE;
 	return rtn;
 }
+BOOL FPointInRect(LPFPOINT pt, LPRECT rect)
+{
+	BOOL rtn = TRUE;
+
+	if (pt->x < rect->left || pt->x > rect->right ||
+		pt->y < rect->top || pt->y > rect->bottom)
+		rtn = FALSE;
+	return rtn;
+}
 HANDLE DPointsToPoints(HANDLE hDPoints, int np)
 {
-	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(POINT) + 4);
+	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(POINT)+4);
 	LPPOINT p = GlobalLock(hP);
-	HPDPOINT dp = GlobalLock (hDPoints);
+	HPDPOINT dp = GlobalLock(hDPoints);
 	for (int i = 0; i < np; i++)
 	{
 		p[i].x = IDNINT(dp[i].x);
@@ -4347,7 +4356,22 @@ HANDLE DPointsToPoints(HANDLE hDPoints, int np)
 	return hP;
 }
 
-POINT DPointToPoint (DPOINT Point)
+HANDLE DPointsToFPoints(HANDLE hDPoints, int np)
+{
+	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(FPOINT) + 4);
+	LPFPOINT p = GlobalLock(hP);
+	HPDPOINT dp = GlobalLock(hDPoints);
+	for (int i = 0; i < np; i++)
+	{
+		p[i].x = dp[i].x;
+		p[i].y = dp[i].y;
+	}
+	GlobalUnlock(hDPoints);
+	GlobalUnlock(hP);
+	return hP;
+}
+
+POINT DPointToPoint(DPOINT Point)
 #if ENABLETRACE
 {GSSiEnterProg (245);
 #endif
@@ -4458,7 +4482,30 @@ void AddPointToRect(POINT Point, LPRECT pBounds)
 #endif
 }
 
-void AddPointToRect16 (POINT Point,LPRECT16 pBounds)
+void AddDPointToRect(DPOINT Point, LPRECT pBounds)
+#if ENABLETRACE
+{
+	GSSiEnterProg(246);
+#endif
+	{
+		int x = IDNINT(Point.x);
+		int y = IDNINT(Point.y);
+		pBounds->left = min(pBounds->left, x);
+		pBounds->right = max(pBounds->right, x);
+		pBounds->top = min (pBounds->top,y);
+		pBounds->bottom = max (pBounds->bottom,y);
+		{
+#if ENABLETRACE
+			GSSiExitProg(246);
+#endif
+			return;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+
+void AddPointToRect16(POINT Point, LPRECT16 pBounds)
 #if ENABLETRACE
 {GSSiEnterProg (246);
 #endif
@@ -11323,26 +11370,45 @@ GSSiExitProg (370);
 #endif
 }
 	
-POINT newpt (POINT OldPoint, double AZM, double DIS)
+POINT newpt(POINT OldPoint, double AZM, double DIS)
 #if ENABLETRACE
 {GSSiEnterProg (371);
 #endif
 {   POINT NewPoint;
 
-      NewPoint.x= IDNINT((OldPoint.x+DIS*cos(AZM)));
-      NewPoint.y= IDNINT((OldPoint.y+DIS*sin(AZM)));
+NewPoint.x = IDNINT((OldPoint.x + DIS*cos(AZM)));
+NewPoint.y = IDNINT((OldPoint.y + DIS*sin(AZM)));
 {
 #if ENABLETRACE
-GSSiExitProg (371);
+	GSSiExitProg (371);
 #endif
-      return (NewPoint);
+	return (NewPoint);
 }
 #if ENABLETRACE
 }
 #endif
 }
 
-POINT newptscreen (POINT OldPoint, double AZM, double DIS)
+FPOINT newptF(FPOINT OldPoint, double AZM, double DIS)
+#if ENABLETRACE
+{GSSiEnterProg (371);
+#endif
+{  FPOINT NewPoint;
+
+NewPoint.x = OldPoint.x + DIS*cos(AZM);
+NewPoint.y = OldPoint.y + DIS*sin(AZM);
+{
+#if ENABLETRACE
+	GSSiExitProg(371);
+#endif
+	return (NewPoint);
+}
+#if ENABLETRACE
+}
+#endif
+}
+
+POINT newptscreen(POINT OldPoint, double AZM, double DIS)
 #if ENABLETRACE
 {GSSiEnterProg (371);
 #endif
@@ -11361,7 +11427,25 @@ GSSiExitProg (371);
 }
 #endif
 }
-double getaz (POINT Point1, POINT Point2)
+double getaz(POINT Point1, POINT Point2)
+#if ENABLETRACE
+{GSSiEnterProg(372);
+#endif
+{   
+	double	rtn = LTWOPI(atan2(((double)Point2.y - (double)Point1.y), ((double)Point2.x - (double)Point1.x)));
+	{
+#if ENABLETRACE
+		GSSiExitProg(372);
+#endif
+		return rtn;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+
+
+double getazF (FPOINT Point1, FPOINT Point2)
 #if ENABLETRACE
 {GSSiEnterProg (372);
 #endif
@@ -11493,19 +11577,19 @@ GSSiExitProg (375);
 #endif
 }
 
-POINT MidPoint (POINT Point1, POINT Point2)
+POINT MidPoint(POINT Point1, POINT Point2)
 #if ENABLETRACE
 {GSSiEnterProg (376);
 #endif
 {   POINT point;
 
-    point.x = ((long)Point1.x + (long)Point2.x)/2;
-    point.y = ((long)Point1.y + (long)Point2.y)/2;
+point.x = ((long)Point1.x + (long)Point2.x) / 2;
+point.y = ((long)Point1.y + (long)Point2.y) / 2;
 {
 #if ENABLETRACE
-GSSiExitProg (376);
+	GSSiExitProg (376);
 #endif
-    return (point);
+	return (point);
 }
 
 #if ENABLETRACE
@@ -11513,7 +11597,27 @@ GSSiExitProg (376);
 #endif
 }
 
-DPOINT MidPointD (DPOINT Point1, DPOINT Point2)
+FPOINT MidPointF(FPOINT Point1, FPOINT Point2)
+#if ENABLETRACE
+{GSSiEnterProg (376);
+#endif
+{   FPOINT point;
+
+point.x = (Point1.x + Point2.x) / 2;
+point.y = (Point1.y + Point2.y) / 2;
+{
+#if ENABLETRACE
+	GSSiExitProg(376);
+#endif
+	return (point);
+}
+
+#if ENABLETRACE
+}
+#endif
+}
+
+DPOINT MidPointD(DPOINT Point1, DPOINT Point2)
 #if ENABLETRACE
 {GSSiEnterProg (377);
 #endif
@@ -12177,30 +12281,79 @@ GSSiExitProg (405);
 #endif
 }  
 
-BOOL SameDPoint (LPDPOINT p1, LPDPOINT p2)
+BOOL PolylineF(HDC hDC, LPFPOINT pt, int npt)
+{
+	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	LPPOINT Points = GlobalLock(hPoints);
+	BOOL rtn;
+
+	for (int i = 0; i < npt; i++)
+		Points[i] = FPointToPoint(pt[i]);
+	rtn = Polyline(hDC, Points, npt);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}
+
+BOOL PolygonF(HDC hDC, LPFPOINT pt, int npt)
+{
+	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npt * sizeof(POINT)+4);
+	LPPOINT Points = GlobalLock(hPoints);
+	BOOL rtn;
+
+	for (int i = 0; i < npt; i++)
+		Points[i] = FPointToPoint(pt[i]);
+	rtn = Polygon(hDC, Points, npt);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}
+
+BOOL SameDPoint(LPDPOINT p1, LPDPOINT p2)
 #if ENABLETRACE
 {GSSiEnterProg (406);
 #endif
 {
-    if (LDIST(p1->x,p1->y,p2->x,p2->y) <= P_TOL)
+	if (LDIST(p1->x, p1->y, p2->x, p2->y) <= P_TOL)
+	{
+#if ENABLETRACE
+		GSSiExitProg (406);
+#endif
+		return TRUE;
+	}
+	{
+#if ENABLETRACE
+		GSSiExitProg (406);
+#endif
+		return FALSE;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+
+BOOL SameFPoint(FPOINT p1,FPOINT p2)
+#if ENABLETRACE
+{GSSiEnterProg (406);
+#endif
 {
+	if (LDIST(p1.x, p1.y, p2.x,p2.y) <= P_TOL)
+	{
 #if ENABLETRACE
-GSSiExitProg (406);
+		GSSiExitProg(406);
 #endif
-    	return TRUE; 
-}
-{
+		return TRUE;
+	}
+	{
 #if ENABLETRACE
-GSSiExitProg (406);
+		GSSiExitProg(406);
 #endif
-    return FALSE;
-}
+		return FALSE;
+	}
 #if ENABLETRACE
 }
 #endif
 }
- 
-void flip (LPSTR In, short n)
+
+void flip(LPSTR In, short n)
 #if ENABLETRACE
 {GSSiEnterProg (408);
 #endif
