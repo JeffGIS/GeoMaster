@@ -760,7 +760,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 	double	MaxTextSize=GetGlobalLVal2 ("[%STREETTEXTMAXSIZE]",12)*DeviceToScreenFactor;
 	double	MinTextSize=GetGlobalLVal2 ("[%STREETTEXTMINSIZE]",5)*DeviceToScreenFactor;
 	float   OverAllStreetWidthFactor = GetGlobalDVal2("[%STREETWIDTHFACTOR2]", 1.0);
-	double	StreetTextAdjustment = GetGlobalDVal2("[%STREETTEXTVERTICALADJUSTMENT]", 0.6);
+	double	StreetTextAdjustment = GetGlobalDVal2("[%STREETTEXTVERTICALADJUSTMENT]", 0.68);
 	long	NameInc = 0, LastNameInc;//+1000000000      
 	double	StartTextSize, TextSize;
 	int		NumTries, MaxTriesB=GetGlobalLVal2 ("[%STREETNAMEMAXTRIES]",10), iTextSize;
