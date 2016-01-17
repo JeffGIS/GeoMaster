@@ -4356,7 +4356,21 @@ HANDLE DPointsToPoints(HANDLE hDPoints, int np)
 	return hP;
 }
 
-HANDLE DPointsToFPoints(HANDLE hDPoints, int np)
+HANDLE DPointsToHFPoints(LPDPOINT DPoints, int np)
+{
+	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(FPOINT)+4);
+	LPFPOINT p = GlobalLock(hP);
+	HPDPOINT dp = DPoints;
+	for (int i = 0; i < np; i++)
+	{
+		p[i].x = dp[i].x;
+		p[i].y = dp[i].y;
+	}
+	GlobalUnlock(hP);
+	return hP;
+}
+
+HANDLE HDPointsToHFPoints(HANDLE hDPoints, int np)
 {
 	HANDLE hP = GSSiGlobAlloc(1803, GMEM_MOVEABLE, np*sizeof(FPOINT) + 4);
 	LPFPOINT p = GlobalLock(hP);

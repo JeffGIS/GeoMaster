@@ -5679,6 +5679,21 @@ GSSiExitProg (989);
 		hReverse =  ReversePoints3 (npnts,lpPoints);
 		lpPoints = (HPDPOINT)GlobalLock (hReverse);
 	}
+	if (ShowLineDirection)
+	{
+		HANDLE hFPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts * sizeof(FPOINT)+4);
+		HPFPOINT FPoints = GlobalLock(hFPoints);
+		for (i = 0; i<npnts; i++)
+			FPoints[i] = BasePtToWinPtF(&lpPoints[i]);
+
+		SaveDC(hDC);
+		SetDisplayMode(hDC, GF_TEXTMODE);
+		DrawOneWayArrows(hDC, 1, FPoints, npnts, 5);
+		AAPolyLineF(hDC, FPoints, npnts, 0, 2);
+		RestoreDC(hDC, -1);
+		GSSiGlobUlFree(&hFPoints);
+		goto Exit;
+	}
 	if (StreetCenterline && SymbolIsSolidLine (idesc))
 	{   
 		short	desc=idesc;

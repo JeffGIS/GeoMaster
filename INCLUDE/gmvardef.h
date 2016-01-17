@@ -1646,6 +1646,8 @@ HBITMAP hMapServerBM = 0;
 SHOWVAL ShowVal = { 0 };
 int		expandOnly = 0;
 BOOL	useGDIPlus = FALSE;
+int		ShowLineDirection=0;
+
 int		ii;
 
 

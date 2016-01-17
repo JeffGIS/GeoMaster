@@ -58,7 +58,7 @@ int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float 
 		radiusPt = PointAtDistOnPolyF(pPoints, pStreet->NumPoints, d, &az, &ip);
 		pStreet->startPt = ip;
 		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts,1.0);
-		hCirclePt = DPointsToFPoints(hCircle, nCirclePts);
+		hCirclePt = HDPointsToHFPoints(hCircle, nCirclePts);
 		circlePoints = GlobalLock(hCirclePt);
 		hBrush = CreateSolidBrush(pStreet->FillColor);
 		hOldBrush = SelectObject(hDC, hBrush);
@@ -75,7 +75,7 @@ int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float 
 		radiusPt = PointAtDistOnPolyF(pPoints, pStreet->NumPoints, plen - d, &az, &ip);
 		pStreet->endPt = ip;
 		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts, 1.0);
-		hCirclePt = DPointsToFPoints(hCircle, nCirclePts);
+		hCirclePt = HDPointsToHFPoints(hCircle, nCirclePts);
 		circlePoints = GlobalLock(hCirclePt);
 		hBrush = CreateSolidBrush(pStreet->FillColor);
 		hOldBrush = SelectObject(hDC, hBrush);
