@@ -3436,6 +3436,9 @@ GSSiExitProg (532);
 		case 375:
 			strncpy(StreetEPType,Value,2);
 			break;
+		case 376:
+			ShowLineDirection = atoi(Value);
+			break;
 		default:
  			break;
 	}
@@ -3830,9 +3833,10 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%USEGDIPLUS", 373, FALSE);
 	AllocateTypeVar("%STREETBPTYPE", 374, FALSE);
 	AllocateTypeVar("%STREETEPTYPE", 375, FALSE);
-	AllocateTypeVar("%CURRENTIPADDRESS", 376, FALSE);
-	
-		//	AllocateTypeVar("%DL",191,FALSE);
+	AllocateTypeVar("%SHOWLINEDIRECTION", 376, FALSE);
+	AllocateTypeVar("%CURRENTIPADDRESS", 377, FALSE);
+
+//	AllocateTypeVar("%DL",191,FALSE);
 	
 {
 #if ENABLETRACE
@@ -4967,7 +4971,7 @@ GSSiExitProg (533);
 		case 375:
 			strcpy(OutStr, StreetEPType);
 			break;
-		case 376:
+		case 377:
 			strcpy(OutStr, CurrentIPAddress);
 			break;
 

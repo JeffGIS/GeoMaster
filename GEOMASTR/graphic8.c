@@ -4797,8 +4797,28 @@ GSSiExitProg (999);
 }
 #endif
 }
-                  
-double ComputeProjectedAreaAreaD (HPDPOINT lpPoints,long nPnts,LPDOUBLE pPerim)
+double GetPolyLengthF(HPFPOINT lpPoints, long nPnts)
+#if ENABLETRACE
+{GSSiEnterProg (999);
+#endif
+{
+	double Dist = 0;
+	DWORD	i;
+	HPFPOINT	lpPoints2 = lpPoints + 1;
+
+	for (i = 1; i<nPnts; i++, lpPoints++, lpPoints2++)
+		Dist += ldistp(*lpPoints, *lpPoints2);
+	{
+#if ENABLETRACE
+		GSSiExitProg(999);
+#endif
+		return Dist;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+double ComputeProjectedAreaAreaD(HPDPOINT lpPoints, long nPnts, LPDOUBLE pPerim)
 #if ENABLETRACE
 {GSSiEnterProg (1000);
 #endif

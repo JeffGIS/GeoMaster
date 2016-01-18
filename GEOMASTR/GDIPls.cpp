@@ -129,8 +129,46 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 	SelObject(hdc, hpn);
 	SelObject(hdc, hbr);
 }
+extern "C" void AAPolyLineF(HDC hdc, LPFPOINT pPoints, int np, COLORREF ColorRef, float w)
+{
+	using namespace Gdiplus;
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartupOutput gdiplusStartupOutput;
+	HPEN hpn = (HPEN)SelObject(hdc, GetStockObject(BLACK_PEN));
+	HBRUSH hbr = (HBRUSH)SelObject(hdc, GetStockObject(BLACK_BRUSH));
+	LineCap lincap = LineCapFlat;
 
-extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np,LOGPEN *lp,LOGBRUSH *lb)
+	if (!gdiplusToken)
+		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);
+	{
+
+		Gdiplus::Graphics graphic(hdc);
+		graphic.SetPageUnit(UnitPixel);
+		graphic.SetCompositingQuality(CompositingQualityHighQuality);
+		Pen pn(Color(255, GetRValue(ColorRef), GetGValue(ColorRef), GetBValue(ColorRef)), w);
+		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
+		PointF pt1;
+		PointF pt2;
+		Gdiplus::GraphicsPath pth;
+		pn.SetLineJoin(Gdiplus::LineJoin::LineJoinRound);
+		pn.SetStartCap(lincap);
+		pn.SetEndCap(lincap);
+		for (int i = 0; i < np - 1; i++)
+		{
+			pt1.X = pPoints[i].x;
+			pt1.Y = pPoints[i].y;
+			pt2.X = pPoints[i + 1].x;
+			pt2.Y = pPoints[i + 1].y;
+			pth.AddLine(pt1, pt2);
+		}
+		graphic.DrawPath(&pn, &pth);
+	}
+	SelObject(hdc, hpn);
+	SelObject(hdc, hbr);
+}
+
+extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb)
 {
 	using namespace Gdiplus;
 	GdiplusStartupInput gdiplusStartupInput;
