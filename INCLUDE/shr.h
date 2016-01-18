@@ -1041,8 +1041,9 @@ int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColo
 DWORD GM32CompressFrame (LPBITMAPINFOHEADER	lpbiIn, LPBITMAPINFOHEADER lpbiOut);
 BOOL GSSiGetGMCName (HWND hWnd,LPSTR PathName,LPSTR InitialDir,LPSTR Title,LPBOOL pStartInNewSession,LPBOOL pRetainZoom,LPBOOL pLinkZoom,LPSTR NetworkDir,LPSTR PersonalDir);
 long GSSiGetDeviceCaps(HDC hPr, int opt); 
-DWORD DrawLineWithFlatEnd (HDC hDC,DWORD npt,HPPOINT pPoints16,DWORD Width,COLORREF Color);
-DWORD GM32DrawDibOpen (void);
+DWORD DrawLineWithFlatEnd(HDC hDC, DWORD npt, HPPOINT pPoints16, DWORD Width, COLORREF Color);
+DWORD DrawLineWithFlatEndF(HDC hDC, DWORD npt, HPFPOINT pPoints16, DWORD Width, COLORREF Color);
+DWORD GM32DrawDibOpen(void);
 DWORD GM32DrawDibClose (DWORD hdd);
 HDC LargeMemDC (HDC hDC16,DWORD * MemMapWidth,DWORD * MemMapHeight,DWORD *pOldBitmap); 
 BOOL DeleteLargeDC (HDC hDC16,DWORD hOldBitmap);  

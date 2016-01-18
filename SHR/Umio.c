@@ -17,7 +17,7 @@ static	HANDLE hBGFileTranThread[MAX_THREADS]={0};
 
 static	BOOL	InProcessTCPData=FALSE;
 static	BOOL	BlockSocketInput=FALSE;
-static	char	ErrMsg[128], IPAddress[32];  
+static	char	ErrMsg[128];  
 static	BOOL	FirstSocketCall=TRUE,WinsockOpened=FALSE;
 static	SOCKET	OpenSockets[MAXOPENSOCKETS]; 
 static	HWND	OpenSockethWnd[MAXOPENSOCKETS];
@@ -1261,7 +1261,7 @@ BOOL OpenTCPIPServer (LPSTR ServerIP,USHORT port)
 	char	str[256];
 	sprintf (str,"%s : %ld",ServerIP,(long)port);
 //	MessageBox (0,str,0,MB_OK);
-	_fstrcpy (IPAddress,ServerIP); 
+	_fstrcpy(CurrentIPAddress, ServerIP);
 	ServerPort = port;
 	return TRUE;
 }
@@ -1285,7 +1285,7 @@ BOOL OpenTCPIPServer2 (HWND hWnd)
 	} 
     _fmemset ( &mySockAddr,0, sizeof(mySockAddr));
 
-    myAddr = inet_addr(IPAddress);
+	myAddr = inet_addr(CurrentIPAddress);
 
     if( (long)myAddr != INADDR_NONE)
      { /* we've got an address */
@@ -1356,7 +1356,7 @@ BOOL OpenTCPIPServer2 (HWND hWnd)
 GotID:
 	OpenSockets[i] = ServerSocket;	
 	OpenSockethWnd[i] = 0;//keeps timer from being created
-	sprintf (str,"Server opened on %s port %i",IPAddress,port);
+	sprintf(str, "Server opened on %s port %i", CurrentIPAddress, port);
 	LogServerActivity (str);
 	return TRUE;
 }
@@ -2400,7 +2400,7 @@ int UDPmain(int port)
 		}
 		_fmemset(&mySockAddr, 0, sizeof(mySockAddr));
 
-		myAddr = inet_addr(IPAddress);
+		myAddr = inet_addr(CurrentIPAddress);
 		ii = 1;
 	}
 

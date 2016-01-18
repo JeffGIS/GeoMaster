@@ -3830,8 +3830,9 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%USEGDIPLUS", 373, FALSE);
 	AllocateTypeVar("%STREETBPTYPE", 374, FALSE);
 	AllocateTypeVar("%STREETEPTYPE", 375, FALSE);
-
-//	AllocateTypeVar("%DL",191,FALSE);
+	AllocateTypeVar("%CURRENTIPADDRESS", 376, FALSE);
+	
+		//	AllocateTypeVar("%DL",191,FALSE);
 	
 {
 #if ENABLETRACE
@@ -4965,6 +4966,9 @@ GSSiExitProg (533);
 			break;
 		case 375:
 			strcpy(OutStr, StreetEPType);
+			break;
+		case 376:
+			strcpy(OutStr, CurrentIPAddress);
 			break;
 
 	}

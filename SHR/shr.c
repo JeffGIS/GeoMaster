@@ -4190,8 +4190,8 @@ POINT FPointToPoint (FPOINT point)
 {
 	POINT	Point;
 	
-	Point.x = point.x;
-	Point.y = point.y;
+	Point.x = IDNINT(point.x);
+	Point.y = IDNINT(point.y);
 {
 #if ENABLETRACE
 GSSiExitProg (242);

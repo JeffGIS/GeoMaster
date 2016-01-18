@@ -1076,6 +1076,22 @@ int Plot3PointCurve (HDC hDC,LPDPOINT pPC,LPDPOINT pPOC,LPDPOINT pPT)
 	return rtn;
 }
  
+DWORD DrawLineWithFlatEndF(HDC hDC, DWORD npt, HPFPOINT FPoints, DWORD Width, COLORREF Color)
+{
+	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npt*sizeof(POINT)+4);
+	HPPOINT	Points = (HPPOINT)GlobalLock(hPoints);
+	long	i;
+	DWORD	rtn;
+
+	for (i = 0; i < npt; i++)
+	{
+		Points[i].x = IDNINT(FPoints[i].x);
+		Points[i].y = IDNINT(FPoints[i].y);
+	}
+	rtn = DrawLineWithFlatEnd(hDC, npt, Points, Width, Color);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}
 
 DWORD DrawLineWithFlatEnd (HDC hDC,DWORD npt,HPPOINT Points,DWORD Width,COLORREF Color)
 { 

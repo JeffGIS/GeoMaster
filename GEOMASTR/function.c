@@ -2552,7 +2552,16 @@ SetVis:
 				goto RtnFalse;
 			goto RtnTrue;
 		}
-
+		case 359://$TCP(MYADDRESS)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!_fstricmp(Arg[1], "MYADDRESS"))
+			{
+				if (GetMyIPNetAddress(OutLoc))
+					goto Rtnl;
+			}
+			goto RtnFalse;
+		}
 		case 401: /* $ZOOM(HLT,hltnum,offset,fromlimits,immediate)
 						   ITEM,TAG or Refno,area offset,viewport offset,immediate,vpname(opt))	
 					 	   RECT,minx,miny,maxx,maxy)

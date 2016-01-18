@@ -423,6 +423,7 @@ extern HWND			hWndPNParms;
 extern HWND			hWndVehStatus;
 extern HWND			hWndVehTime;
 extern BOOL			ReplayTCP;
+extern char			CurrentIPAddress[32];
 extern BOOL			DebugWait;
 extern BOOL			IgnoreLbutton;
 extern BOOL			IgnoreActivate;

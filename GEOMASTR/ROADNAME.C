@@ -111,7 +111,7 @@ void ResetStreetLabels (void)
 	return;
 }
 
-BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF FillColor,COLORREF OutlineColor)        //Points[np-1]
+BOOL AddToStreetSegmentList (HPFPOINT Points, int np,int Width,int Order,COLORREF FillColor,COLORREF OutlineColor)        //Points[np-1]
 {   
 	short	ConnectedTo = -1, HowConnected;
 	short	i,j,k;   
@@ -161,7 +161,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 				_fmemmove (&pPoints[np-1],&pPoints[0],pStreet->NumPoints*sizeof(POINT)); 
 				k = np - 1;
 				for (j=0;j<np-1;j++)
-					pPoints[j] = Points[k--];       //pPoints[*pNumPoints-1]
+					pPoints[j] = FPointToPoint (Points[k--]);       //pPoints[*pNumPoints-1]
 				(pStreet->NumPoints)+=(np-1);  
 				GlobalUnlock (phLabelLines[i]);
 				HowConnected = 1;
@@ -185,7 +185,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 				pPoints = (LPPOINT)(pStreet+1); 
 				_fmemmove (&pPoints[np-1],&pPoints[0],pStreet->NumPoints*sizeof(POINT));
 				for (j=0;j<np-1;j++)
-					pPoints[j] = Points[j];
+					pPoints[j] = FPointToPoint (Points[j]);
 				(pStreet->NumPoints)+=(np-1);  
 				GlobalUnlock (phLabelLines[i]); 
 				HowConnected = 1;
@@ -208,7 +208,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 		//		pHollowStreetWidth = (LPSHORT)(pStreets+4);
 				pPoints = (LPPOINT)(pStreet+1); 
 				for (j=0;j<np-1;j++)
-					pPoints[pStreet->NumPoints+j] = Points[j+1];   //pPoints[*pNumPoints-2]
+					pPoints[pStreet->NumPoints + j] = FPointToPoint (Points[j + 1]);   //pPoints[*pNumPoints-2]
 				(pStreet->NumPoints)+=(np-1);  
 				GlobalUnlock (phLabelLines[i]); 
 				HowConnected = 2;
@@ -232,7 +232,7 @@ BOOL AddToStreetSegmentList (HPPOINT Points, int np,int Width,int Order,COLORREF
 				pPoints = (LPPOINT)(pStreet+1); 
 				k = np - 2;
 				for (j=0;j<np-1;j++)
-					pPoints[pStreet->NumPoints+j] = Points[k--];
+					pPoints[pStreet->NumPoints + j] = FPointToPoint (Points[k--]);
 				(pStreet->NumPoints)+=(np-1);  
 				GlobalUnlock (phLabelLines[i]); 
 				HowConnected = 2;
@@ -488,17 +488,17 @@ BOOL DisplayLayeredSymbols (HDC hDC,BOOL Clear)
 			PlotLinearItem (hDC,pPoints,*pNumPoints,-*pSymNum,0,0,0,WantPreSym,WantPostSym,0); //pPoints[1]  
 			if (*pIsCenterline)
 			{   
-				HPPOINT	lpPoints16;
-				HANDLE	Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)*pNumPoints+16L) * (long)sizeof(POINT));
+				HPDPOINT	lpPoints16;
+				HANDLE	Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)*pNumPoints+16L) * (long)sizeof(DPOINT));
 				short	j; 
 				BOOL	SaveUseFlatEndPolyline=UseFlatEndPolyline;
 				LPTHEME	SaveTheme = CurTheme;
 				
 				CurTheme = *pIsCenterline;
 				UseFlatEndPolyline = TRUE;
-				lpPoints16 = (HPPOINT)GlobalLock (Handle);
+				lpPoints16 = (HPDPOINT)GlobalLock (Handle);
 				for (j=0;j<*pNumPoints;j++,pPoints++)
-					lpPoints16[j] = FPointToPoint (*pPoints);   
+					lpPoints16[j] = FPointToDPoint (*pPoints);   
 			    GWPolylineScreen2 (hDC,lpPoints16,*pNumPoints,*pSymNum); 
 			    GSSiGlobUlFree (&Handle);   
 			    UseFlatEndPolyline = SaveUseFlatEndPolyline;

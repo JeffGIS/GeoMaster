@@ -790,7 +790,7 @@ WritePoly:
 				LOGBRUSH lb;
 				GetObject(hpn, sizeof(LOGPEN), &lp);
 				GetObject(hbr, sizeof(LOGBRUSH), &lb);
-				AAPolygon(hdc, apt, cpt, &lp,&lb);
+				AAPolygon(hdc, (LPPOINT)apt, cpt, &lp,&lb);
 				SelectObject(hdc, hpn);
 				SelectObject(hdc, hbr);
 			}
@@ -850,7 +850,7 @@ WritePoly:
 				LOGPEN lp;
 				GetObject(hpn, sizeof(LOGPEN), &lp);
 				if (lp.lopnStyle != PS_NULL)
-					AAPolyLine(hdc, apt, cpt, lp.lopnColor, lp.lopnWidth.x);
+					AAPolyLine(hdc, (LPPOINT)apt, cpt, lp.lopnColor, lp.lopnWidth.x);
 				SelectObject(hdc, hpn);
 			}
 			else

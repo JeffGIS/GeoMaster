@@ -257,6 +257,7 @@ HWND	hWndPNParms=0;
 HWND	hWndVehStatus=0;
 HWND	hWndVehTime=0;
 BOOL	ReplayTCP=FALSE;
+char	CurrentIPAddress[32] = { 0 };
 DLGPROC	lpfnTRAVERSE_ENTRYMsgProc;
 DLGPROC	lpfnPNPARMSMsgProc;
 short	HighlightThisItem=0;
