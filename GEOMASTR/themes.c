@@ -478,7 +478,7 @@ GSSiExitProg (1230);
 			{
 				case 2:
 		        {
-			    	FARPROC lpfnLINETYPEMsgProc; 
+			    	DLGPROC lpfnLINETYPEMsgProc; 
 			    	int		nRc,R,G,B,W;
 				    	
 					DoPaint = FALSE;  
@@ -490,7 +490,7 @@ GSSiExitProg (1230);
 						INewWidth -= 256;
 					if (INewWidth > 0)
 						INewWidth--;
-			        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
+			        lpfnLINETYPEMsgProc = MakeProcInstance((DLGPROC)LINETYPEMsgProc, hInst);
 			        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", CurView->hWnd, lpfnLINETYPEMsgProc);
 			        FreeProcInstance(lpfnLINETYPEMsgProc);
 					DoPaint=TRUE;   
@@ -1045,7 +1045,7 @@ void ThemeDisplayLegend2(short BeginOrEndDisplayPass,short FromVPID)
 				else 
 				{
 					StreetEditTimer = STREETEDITTIMERID;
-					SetTimer(hWndMain, STREETEDITTIMERID, 1, (FARPROC) 0);  
+					SetTimer(hWndMain, STREETEDITTIMERID, 1, (TIMERPROC) 0);  
 				}
 			}
 			break;
@@ -1137,7 +1137,7 @@ void ThemeDisplayLegend2(short BeginOrEndDisplayPass,short FromVPID)
 				else 
 				{
 					NetMarkTimer = NETMARKERTIMERID;
-					SetTimer(hWndMain, NETMARKERTIMERID, 1, (FARPROC) 0);  
+					SetTimer(hWndMain, NETMARKERTIMERID, 1, (TIMERPROC) 0);  
 				}
 			}
 			break;
@@ -1496,15 +1496,15 @@ Top:
 	switch (CurTheme->ID)
 	{   
 		case GF_AREA_IN_MASK_THEME:
-			nRc = DialogBox(hInst, (LPSTR)"CREATE_MASKED_AREA_THEME", hWnd, AreaInMaskThemeMsgProc);
+			nRc = DialogBox(hInst, (LPCSTR)"CREATE_MASKED_AREA_THEME", hWnd,(DLGPROC)AreaInMaskThemeMsgProc);
 			break;
 		case GF_GRAPHICS_FUNCTION_THEME:			 
 		case GF_OFFSETAREA_THEME:
 		case GF_SINGLE_VALUE_THEME:
 	         {
-	          FARPROC lpfnSV_THEME1MsgProc;
+	          DLGPROC lpfnSV_THEME1MsgProc;
 	          DoPaint = FALSE;
-	          lpfnSV_THEME1MsgProc = MakeProcInstance((FARPROC)SV_THEME1MsgProc, hInst);
+	          lpfnSV_THEME1MsgProc = MakeProcInstance((DLGPROC)SV_THEME1MsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"SV_THEME1", hWnd, lpfnSV_THEME1MsgProc);
 	          FreeProcInstance(lpfnSV_THEME1MsgProc);
 	          DoPaint = TRUE;
@@ -1516,9 +1516,9 @@ Top:
 				
 		case GF_CONNECTION_LINE_THEME:
 	         {
-	          FARPROC lpfnSV_THEME2MsgProc;
+	          DLGPROC lpfnSV_THEME2MsgProc;
 	          DoPaint = FALSE;
-	          lpfnSV_THEME2MsgProc = MakeProcInstance((FARPROC)SV_THEME2MsgProc, hInst);
+	          lpfnSV_THEME2MsgProc = MakeProcInstance((DLGPROC)SV_THEME2MsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"CONNECTION_LINE", hWnd, lpfnSV_THEME2MsgProc);
 	          FreeProcInstance(lpfnSV_THEME2MsgProc);
 	          DoPaint = TRUE;
@@ -1530,9 +1530,9 @@ Top:
 				
 		case GF_SINGLE_NONNUM_VALUE_THEME:
 	         {
-	          FARPROC lpfnSV_THEME2MsgProc;
+	          DLGPROC lpfnSV_THEME2MsgProc;
 	          DoPaint = FALSE;
-	          lpfnSV_THEME2MsgProc = MakeProcInstance((FARPROC)SV_THEME2MsgProc, hInst);
+	          lpfnSV_THEME2MsgProc = MakeProcInstance((DLGPROC)SV_THEME2MsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"SV_THEME2", hWnd, lpfnSV_THEME2MsgProc);
 	          FreeProcInstance(lpfnSV_THEME2MsgProc);
 	          DoPaint = TRUE;
@@ -1544,9 +1544,9 @@ Top:
 
 		case GF_STREET_ADDRESS_THEME:
 	         {
-	          FARPROC lpfnEDIT_ADDS_THEMEMsgProc;
+	          DLGPROC lpfnEDIT_ADDS_THEMEMsgProc;
 	          DoPaint = FALSE;
-	          lpfnEDIT_ADDS_THEMEMsgProc = MakeProcInstance((FARPROC)EDIT_ADDS_THEMEMsgProc, hInst);
+	          lpfnEDIT_ADDS_THEMEMsgProc = MakeProcInstance((DLGPROC)EDIT_ADDS_THEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"EDIT_ADDS_THEME", hWnd, lpfnEDIT_ADDS_THEMEMsgProc);
 	          FreeProcInstance(lpfnEDIT_ADDS_THEMEMsgProc);
 	          DoPaint = TRUE;
@@ -1556,16 +1556,16 @@ Top:
 		case GF_CITY_THEME:
 	         {
 	          DoPaint = FALSE;
-	          nRc = DialogBox(hInst, (LPSTR)"CITY_THEME", hWnd, (FARPROC)CITY_THEMEMsgProc);
+	          nRc = DialogBox(hInst, (LPSTR)"CITY_THEME", hWnd, (DLGPROC)CITY_THEMEMsgProc);
 	          DoPaint = TRUE;
 	         }   
 	    break;
 			         
 		case GF_TRANSFORM_THEME:
 	         {
-	          FARPROC lpfnTRANTHEMEMsgProc;
+	          DLGPROC lpfnTRANTHEMEMsgProc;
 	          DoPaint = FALSE;
-	          lpfnTRANTHEMEMsgProc = MakeProcInstance((FARPROC)TRANTHEMEMsgProc, hInst);
+	          lpfnTRANTHEMEMsgProc = MakeProcInstance((DLGPROC)TRANTHEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"TRANTHEME", hWnd, lpfnTRANTHEMEMsgProc);
 	          FreeProcInstance(lpfnTRANTHEMEMsgProc);
 	          DoPaint = TRUE;
@@ -1574,9 +1574,9 @@ Top:
 			         
 		case GF_POLYINFO_THEME:
 	         {
-	          FARPROC lpfnTRANTHEMEMsgProc;
+	          DLGPROC lpfnTRANTHEMEMsgProc;
 	          DoPaint = FALSE;
-	          lpfnTRANTHEMEMsgProc = MakeProcInstance((FARPROC)TRANTHEMEMsgProc, hInst);
+	          lpfnTRANTHEMEMsgProc = MakeProcInstance((DLGPROC)TRANTHEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"TRANTHEME", hWnd, lpfnTRANTHEMEMsgProc);
 	          FreeProcInstance(lpfnTRANTHEMEMsgProc);
 	          DoPaint = TRUE;
@@ -1585,9 +1585,9 @@ Top:
 			         
 		case GF_HOTSPOT_THEME:
 	         {
-	          FARPROC lpfnHOTSPOT_THEMEMsgProc;
+	          DLGPROC lpfnHOTSPOT_THEMEMsgProc;
 	          DoPaint = FALSE;
-	          lpfnHOTSPOT_THEMEMsgProc = MakeProcInstance((FARPROC)HOTSPOT_THEMEMsgProc, hInst);
+	          lpfnHOTSPOT_THEMEMsgProc = MakeProcInstance((DLGPROC)HOTSPOT_THEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"HOTSPOT_THEME", hWnd, lpfnHOTSPOT_THEMEMsgProc);
 	          FreeProcInstance(lpfnHOTSPOT_THEMEMsgProc);
 	          DoPaint = TRUE;
@@ -1596,9 +1596,9 @@ Top:
 			         
 		case PF_COORD_DISPLAY:
 	         {
-	          FARPROC lpfnCOORDDISPLAYMsgProc;
+	          DLGPROC lpfnCOORDDISPLAYMsgProc;
 	          DoPaint = FALSE;
-	          lpfnCOORDDISPLAYMsgProc = MakeProcInstance((FARPROC)COORDDISPLAYMsgProc, hInst);
+	          lpfnCOORDDISPLAYMsgProc = MakeProcInstance((DLGPROC)COORDDISPLAYMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"COORDDISPLAY", hWnd, lpfnCOORDDISPLAYMsgProc);
 	          FreeProcInstance(lpfnCOORDDISPLAYMsgProc);
 	          DoPaint = TRUE;
@@ -1609,10 +1609,10 @@ Top:
 	    {   
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnSTREET_TEXTMsgProc;
+			DLGPROC lpfnSTREET_TEXTMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnSTREET_TEXTMsgProc = MakeProcInstance((FARPROC)STREET_TEXTMsgProc, hInst);
+			lpfnSTREET_TEXTMsgProc = MakeProcInstance((DLGPROC)STREET_TEXTMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"STREET_TEXT", hWnd, lpfnSTREET_TEXTMsgProc);
 			FreeProcInstance(lpfnSTREET_TEXTMsgProc);
 			DoPaint = TRUE;
@@ -1623,10 +1623,10 @@ Top:
 	    {   
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnPROFILEMsgProc;
+			DLGPROC lpfnPROFILEMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnPROFILEMsgProc = MakeProcInstance((FARPROC)PROFILEMsgProc, hInst);
+			lpfnPROFILEMsgProc = MakeProcInstance((DLGPROC)PROFILEMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"PROFILE", hWnd, lpfnPROFILEMsgProc);
 			FreeProcInstance(lpfnPROFILEMsgProc);
 			DoPaint = TRUE;
@@ -1638,10 +1638,10 @@ Top:
 	    {    
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnDISTANCEMsgProc;
+			DLGPROC lpfnDISTANCEMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnDISTANCEMsgProc = MakeProcInstance((FARPROC)DISTANCEMsgProc, hInst);
+			lpfnDISTANCEMsgProc = MakeProcInstance((DLGPROC)DISTANCEMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"DISTANCE", hWnd, lpfnDISTANCEMsgProc);
 			FreeProcInstance(lpfnDISTANCEMsgProc);
 			DoPaint = TRUE;
@@ -1652,10 +1652,10 @@ Top:
 	    {    
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnCOORDGRIDMsgProc;
+			DLGPROC lpfnCOORDGRIDMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnCOORDGRIDMsgProc = MakeProcInstance((FARPROC)COORDGRIDMsgProc, hInst);
+			lpfnCOORDGRIDMsgProc = MakeProcInstance((DLGPROC)COORDGRIDMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"COORDGRID", hWnd, lpfnCOORDGRIDMsgProc);
 			FreeProcInstance(lpfnCOORDGRIDMsgProc);
 			DoPaint = TRUE;
@@ -1666,10 +1666,10 @@ Top:
 	    {    
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnDISPLAY2DMsgProc;
+			DLGPROC lpfnDISPLAY2DMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnDISPLAY2DMsgProc = MakeProcInstance((FARPROC)DISPLAY2DMsgProc, hInst);
+			lpfnDISPLAY2DMsgProc = MakeProcInstance((DLGPROC)DISPLAY2DMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"DISPLAY2D", hWnd, lpfnDISPLAY2DMsgProc);
 			FreeProcInstance(lpfnDISPLAY2DMsgProc);
 			DoPaint = TRUE;
@@ -1680,10 +1680,10 @@ Top:
 	    {    
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnTIME_DISPLAYMsgProc;
+			DLGPROC lpfnTIME_DISPLAYMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnTIME_DISPLAYMsgProc = MakeProcInstance((FARPROC)TIME_DISPLAYMsgProc, hInst);
+			lpfnTIME_DISPLAYMsgProc = MakeProcInstance((DLGPROC)TIME_DISPLAYMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"TIME_DISPLAY", hWnd, lpfnTIME_DISPLAYMsgProc);
 			FreeProcInstance(lpfnTIME_DISPLAYMsgProc);
 			DoPaint = TRUE;
@@ -1694,10 +1694,10 @@ Top:
 	    {    
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnPOINT_IN_AREAMsgProc;
+			DLGPROC lpfnPOINT_IN_AREAMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnPOINT_IN_AREAMsgProc = MakeProcInstance((FARPROC)POINT_IN_AREAMsgProc, hInst);
+			lpfnPOINT_IN_AREAMsgProc = MakeProcInstance((DLGPROC)POINT_IN_AREAMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"POINT_IN_AREA", hWnd, lpfnPOINT_IN_AREAMsgProc);
 			FreeProcInstance(lpfnPOINT_IN_AREAMsgProc);
 			DoPaint = TRUE;
@@ -1708,10 +1708,10 @@ Top:
 	    {    
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnCOMPARE_VIEWPORTSMsgProc;
+			DLGPROC lpfnCOMPARE_VIEWPORTSMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnCOMPARE_VIEWPORTSMsgProc = MakeProcInstance((FARPROC)COMPARE_VIEWPORTSMsgProc, hInst);
+			lpfnCOMPARE_VIEWPORTSMsgProc = MakeProcInstance((DLGPROC)COMPARE_VIEWPORTSMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"COMPARE_VIEWPORTS", hWnd, lpfnCOMPARE_VIEWPORTSMsgProc);
 			FreeProcInstance(lpfnCOMPARE_VIEWPORTSMsgProc);
 			DoPaint = TRUE;
@@ -1727,10 +1727,10 @@ Top:
 	    {   // dont remove without documenting why!!
 	    	LPVIEWPORT	SaveView; 
 	    	short		n,i;
-			FARPROC lpfnBOUNDS_DISPLAYMsgProc;
+			DLGPROC lpfnBOUNDS_DISPLAYMsgProc;
 			    	
 			DoPaint = FALSE;
-			lpfnBOUNDS_DISPLAYMsgProc = MakeProcInstance((FARPROC)BOUNDS_DISPLAYMsgProc, hInst);
+			lpfnBOUNDS_DISPLAYMsgProc = MakeProcInstance((DLGPROC)BOUNDS_DISPLAYMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"BOUNDS_DISPLAY", hWnd, lpfnBOUNDS_DISPLAYMsgProc);
 			FreeProcInstance(lpfnBOUNDS_DISPLAYMsgProc);
 			DoPaint = TRUE;
@@ -1739,9 +1739,9 @@ Top:
 				
 		case GF_DOCUMENTS_THEME:
 	         {
-	          FARPROC lpfnDOCUMENTSMsgProc;
+	          DLGPROC lpfnDOCUMENTSMsgProc;
 	          DoPaint = FALSE;
-	          lpfnDOCUMENTSMsgProc = MakeProcInstance((FARPROC)DOCUMENTSMsgProc, hInst);
+	          lpfnDOCUMENTSMsgProc = MakeProcInstance((DLGPROC)DOCUMENTSMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"DOCUMENTS", hWnd, lpfnDOCUMENTSMsgProc);
 	          FreeProcInstance(lpfnDOCUMENTSMsgProc);
 	          DoPaint = TRUE;
@@ -2027,8 +2027,8 @@ GSSiExitProg (1260);
 		}
 		else
 		{
-			CurTheme->InvalidDataBrush= CreatePen(PS_DASH,1,RGB(255,0,0));
-			CurTheme->NoDataBrush= CreatePen(PS_DOT,1,RGB(255,0,0));
+			CurTheme->InvalidDataBrush= (HBRUSH)CreatePen(PS_DASH,1,RGB(255,0,0));
+			CurTheme->NoDataBrush= (HBRUSH)CreatePen(PS_DOT,1,RGB(255,0,0));
 		}
 		if (!CurTheme->PCTByArea && !CurTheme->UseStoredCounts)
 		for (iclass=0;iclass<MAX_THEME_CLASSES;iclass++)

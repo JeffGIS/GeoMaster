@@ -3962,6 +3962,9 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
 	double	FAC=PIASizeFactor;   
 	short	Offset=3;
     BITMAP	bm;   
+	BOOL	saveuseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 	
 //	if (FAC > 5)
 //		ii=1;
@@ -4176,6 +4179,7 @@ Exit:
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1379);
@@ -4215,7 +4219,9 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
 	short	Offsetx=3;
     BITMAP	bm;   
 	double	PenWidth;
-	
+	BOOL	saveuseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 //	if (FAC > 5)
 //		ii=1;
 	if (nPoints < 16)
@@ -4349,6 +4355,7 @@ Exit:
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1379);
@@ -4815,7 +4822,9 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
 	HANDLE	hBits=0;
 	LPCOLORREF16	pColor16;
 	DWORD	MidPixel;
+	BOOL	saveuseGDIPlus = useGDIPlus;
 	
+	useGDIPlus = FALSE;
 //	if (FAC > 5)
 //		ii=1;
 	if (nPoints < 16)
@@ -5051,6 +5060,7 @@ Exit:
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1378);
@@ -6533,8 +6543,59 @@ GSSiExitProg (1124);
 }
 #endif
 }
+DPOINT PointAtDistOnPolyF(HPFPOINT lpPoints, long nPnts, double AtDist, LPDOUBLE pAZ, LPSHORT pLasti)
+#if ENABLETRACE
+{GSSiEnterProg (1124);
+#endif
+{
+	double Dist = 0, LastDist, AZ, dst;
+	DWORD	i;
+	HPFPOINT	lpPoints2 = lpPoints + 1;
+	FPOINT	Point;
 
-DPOINT3D PointAtDistOnPoly3D (HPDPOINT3D lpPoints,long nPnts,double AtDist,LPDOUBLE pAZ,LPLONG pEndPointNum)   
+	for (i = 1; i<nPnts; i++, lpPoints++, lpPoints2++)
+	{
+		LastDist = Dist;
+		Dist += ldistp(*lpPoints, *lpPoints2);
+		if (Dist >= AtDist)
+		{
+			AZ = getazF(*lpPoints, *lpPoints2);
+			dst = AtDist - LastDist;
+			Point = newptF(*lpPoints, AZ, dst);
+			if (pAZ)
+				*pAZ = AZ;
+			if (pLasti)
+				*pLasti = i - 1;
+			{
+#if ENABLETRACE
+				GSSiExitProg(1124);
+#endif
+				return Point;
+			}
+		}
+		Point = *lpPoints2;
+	}
+	LastDist = Dist;
+	lpPoints2--;
+	lpPoints--;
+	AZ = getazF(*lpPoints, *lpPoints2);
+	dst = AtDist - LastDist;
+	Point = newptF(*lpPoints2, AZ, dst);
+	if (pLasti)
+		*pLasti = nPnts;
+	if (pAZ)
+		*pAZ = AZ;
+	{
+#if ENABLETRACE
+		GSSiExitProg(1124);
+#endif
+		return Point;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+DPOINT3D PointAtDistOnPoly3D(HPDPOINT3D lpPoints, long nPnts, double AtDist, LPDOUBLE pAZ, LPLONG pEndPointNum)
 #if ENABLETRACE
 {GSSiEnterProg (1124);
 #endif
@@ -6890,6 +6951,16 @@ BOOL GetAreaCenters (LPSTR OutFile,int SpeedFactor,BOOL UseMask)
 		GlobalUnlock (hMaskArea);
 	return TRUE;
 }
-      
 
+void Rotate256(int irot, LPDPOINT pt)
+{
+#include "rotate256.h"
+
+	float XOUT = B1[irot] * pt->x + C1[irot] * pt->y;
+	float YOUT = B2[irot] * pt->y + C2[irot] * pt->x;
+
+	pt->x = XOUT;
+	pt->y = YOUT;
+	return;
+}
 

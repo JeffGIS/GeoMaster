@@ -3427,6 +3427,18 @@ GSSiExitProg (532);
 		case 372:
 			convertGMDUpdateCommas = atob(Value);
 			break;
+		case 373:
+			useGDIPlus = atob(Value);
+			break;
+		case 374:
+			strncpy(StreetBPType,Value,2);
+			break;
+		case 375:
+			strncpy(StreetEPType,Value,2);
+			break;
+		case 376:
+			ShowLineDirection = atoi(Value);
+			break;
 		default:
  			break;
 	}
@@ -3818,6 +3830,11 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%SHAPEREC", 370, FALSE);
 	AllocateTypeVar("%DBFREC", 371, FALSE);
 	AllocateTypeVar("%CVTGMDUPDATECOMMAS", 372, FALSE);
+	AllocateTypeVar("%USEGDIPLUS", 373, FALSE);
+	AllocateTypeVar("%STREETBPTYPE", 374, FALSE);
+	AllocateTypeVar("%STREETEPTYPE", 375, FALSE);
+	AllocateTypeVar("%SHOWLINEDIRECTION", 376, FALSE);
+	AllocateTypeVar("%CURRENTIPADDRESS", 377, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4944,6 +4961,18 @@ GSSiExitProg (533);
 			break;
 		case 372:
 			btoa(convertGMDUpdateCommas, OutStr);
+			break;
+		case 373:
+			btoa(useGDIPlus, OutStr);
+			break;
+		case 374:
+			strcpy(OutStr, StreetBPType);
+			break;
+		case 375:
+			strcpy(OutStr, StreetEPType);
+			break;
+		case 377:
+			strcpy(OutStr, CurrentIPAddress);
 			break;
 
 	}
@@ -6198,7 +6227,7 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 
 	MBHMess = Mess;
 	MBHTitle = Title;
-	rtn = DialogBox(hInst, (LPSTR)"MESSAGEBOXHALT", hWnd, MESSAGEBOXHALTMsgProc);
+	rtn = DialogBox(hInst, (LPSTR)"MESSAGEBOXHALT", hWnd,(DLGPROC) MESSAGEBOXHALTMsgProc);
 
 	return rtn;
 }
@@ -7571,9 +7600,15 @@ GSSiExitProg (573);
 			}
 			while (!SQLPtr->st)  
 			{
+NextTextRec:
 		    	SQLPtr->Offset = GSSillseek (FilePtr->Fid,0,1);  
 		    	if (!fgetstring (str,4090,FilePtr->Fid))
 		    		SQLPtr->st = 1;
+				else if (*str == '[' && *LastChr(str) == ';')
+				{
+					ProcessText(str);
+					goto NextTextRec;
+				}
 		    	else
 		    	{   
 		    		BOOL	Err;

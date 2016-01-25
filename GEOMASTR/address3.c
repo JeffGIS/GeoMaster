@@ -206,7 +206,7 @@ BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 						PostMessage(hWndDlg, WM_COMMAND, IDC_LOCADDRESS, 0);
 						break;
 					}
-					SetTimer(hWndDlg, 1, 100, (FARPROC)0);
+					SetTimer(hWndDlg, 1, 100, (TIMERPROC)0);
 				}
 				else
 				{
@@ -243,7 +243,7 @@ BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 					}
 					if (!hSubWnd)
 					{
-						hSubWnd = CreateDialog(hInst, (LPSTR)"LOC_INTERSECT1", hWndDlg, LOC_INTERSECTMsgProc);
+						hSubWnd = CreateDialog(hInst, (LPSTR)"LOC_INTERSECT1", hWndDlg,(DLGPROC) LOC_INTERSECTMsgProc);
 						SetSecondaryIntInput(GetDlgItem(hWndDlg, IDC_INPUT));
 					}
 					GetDlgItemText(hWndDlg, IDOK, txt, 4);
@@ -280,7 +280,7 @@ BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 					}
 					if (!hSubWnd)
 					{
-						hSubWnd = CreateDialog(hInst, (LPSTR)"ADDRESS3", hWndDlg, ADDRESSPIDMsgProc);
+						hSubWnd = CreateDialog(hInst, (LPSTR)"ADDRESS3", hWndDlg, (DLGPROC)ADDRESSPIDMsgProc);
 						SetSecondaryAddInput(GetDlgItem(hWndDlg, IDC_INPUT));
 					}
 					GetDlgItemText(hWndDlg, IDOK, txt, 4);
@@ -305,7 +305,7 @@ BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			{
 					if (!hSubWnd)
 					{
-						hSubWnd = CreateDialog(hInst, (LPSTR)"TAGLOC1", hWndDlg, TAGLOCMsgProc);
+						hSubWnd = CreateDialog(hInst, (LPSTR)"TAGLOC1", hWndDlg, (DLGPROC)TAGLOCMsgProc);
 						SetSecondaryTAGInput(GetDlgItem(hWndDlg, IDC_INPUT));
 					}
 					SetFocus(GetDlgItem(hWndDlg, IDC_INPUT));
@@ -325,7 +325,7 @@ BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 
 BOOL GeocodeAlltypes(HWND hWnd,LPSTR OutLoc, LPSTR Arg1)
 {
-	int nRc = DialogBox(hInst, (LPSTR)"GEOCODE_ALLTYPES", hWnd, GeocodeAlltypesMsgProc);
+	int nRc = DialogBox(hInst, (LPSTR)"GEOCODE_ALLTYPES", hWnd, (DLGPROC)GeocodeAlltypesMsgProc);
 
 	return TRUE;
 }

@@ -288,6 +288,15 @@ typedef LPOINT  			HUGE *HPLPOINT;
 typedef HANDLE				HDIB32; 
 typedef HDIB32				FAR *LPHDIB32; 
 typedef RECT				HUGE *HPRECT;
+typedef HMENU				*LPHMENU;
+typedef int NSInteger;
+typedef UINT NSUInteger;
+typedef double CGFloat;
+typedef HDC CGContextRef;
+typedef COLORREF UIColor;
+typedef char NSAttributedString;
+#define YES TRUE
+#define NO	FALSE
 
 #pragma pack(2)
 typedef struct 

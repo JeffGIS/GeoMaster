@@ -137,9 +137,9 @@ BOOL AddFieldToPointList (HWND hWnd,GWFLDINFO NewField,LPHANDLE phNewFieldValueL
 
 	if (!phNewFieldValueList)
 	{
-		FARPROC lpfnADDCBFIELDTOPOINTLISTMsgProc; 
+		DLGPROC lpfnADDCBFIELDTOPOINTLISTMsgProc; 
 	
-		lpfnADDCBFIELDTOPOINTLISTMsgProc = MakeProcInstance((FARPROC)ADDCBFIELDTOPOINTLISTMsgProc, hInst);
+		lpfnADDCBFIELDTOPOINTLISTMsgProc = MakeProcInstance((DLGPROC)ADDCBFIELDTOPOINTLISTMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"ADDCBFIELDTOPOINTLIST", hWnd, lpfnADDCBFIELDTOPOINTLISTMsgProc);
 		FreeProcInstance(lpfnADDCBFIELDTOPOINTLISTMsgProc);  
 	} 
@@ -300,7 +300,7 @@ void LoadVoterFields (HWND hWndDlg)
 
 BOOL GetUserFieldTitleAndName (HWND hWnd,LPSTR Title,LPSTR FieldName,BOOL New,LPSHORT pMaxValueLength,LPHANDLE phValueList,LPSHORT pNumValues)
 {
-	FARPROC lpfnFIELD_TITLE_AND_NAMEMsgProc; 
+	DLGPROC lpfnFIELD_TITLE_AND_NAMEMsgProc; 
 	short	nRc;
 	
 	_fstrcpy (NewUserPrompt,Title);
@@ -309,7 +309,7 @@ BOOL GetUserFieldTitleAndName (HWND hWnd,LPSTR Title,LPSTR FieldName,BOOL New,LP
 	pNewUserFieldMaxValueLength = pMaxValueLength;
 	phNewUserFieldValueList = phValueList;
 	pNewUserNumValues = pNumValues;
-	lpfnFIELD_TITLE_AND_NAMEMsgProc = MakeProcInstance((FARPROC)FIELD_TITLE_AND_NAMEMsgProc, hInst);
+	lpfnFIELD_TITLE_AND_NAMEMsgProc = MakeProcInstance((DLGPROC)FIELD_TITLE_AND_NAMEMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"FIELD_TITLE_AND_NAME", hWnd, lpfnFIELD_TITLE_AND_NAMEMsgProc);
 	FreeProcInstance(lpfnFIELD_TITLE_AND_NAMEMsgProc);   
 	if (nRc)
@@ -348,11 +348,11 @@ long GetNewVoterID (void)
 BOOL AddNewVoters (HWND hWnd)
 {
 
-	FARPROC lpfnVOTER_NEWMsgProc; 
+	DLGPROC lpfnVOTER_NEWMsgProc; 
 	short	nRc;
 	
 	EditVoterData = FALSE;			 
-	lpfnVOTER_NEWMsgProc = MakeProcInstance((FARPROC)VOTER_NEWMsgProc, hInst);
+	lpfnVOTER_NEWMsgProc = MakeProcInstance((DLGPROC)VOTER_NEWMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"VOTER_NEW", hWnd, lpfnVOTER_NEWMsgProc);
 	FreeProcInstance(lpfnVOTER_NEWMsgProc);
 	return nRc;
@@ -361,7 +361,7 @@ BOOL AddNewVoters (HWND hWnd)
 BOOL EditVoter (HWND hWnd,long VoterID,int VoterFile)
 {
 
-	FARPROC lpfnVOTER_NEWMsgProc; 
+	DLGPROC lpfnVOTER_NEWMsgProc; 
 	short	nRc;  
 	long	vid=VoterID;
 	short	vf=VoterFile;
@@ -369,7 +369,7 @@ BOOL EditVoter (HWND hWnd,long VoterID,int VoterFile)
 	EditVoterData = TRUE;	
 	CurrentVoterID = vid;
 	CurrentVoterDB = vf;		 
-	lpfnVOTER_NEWMsgProc = MakeProcInstance((FARPROC)VOTER_NEWMsgProc, hInst);
+	lpfnVOTER_NEWMsgProc = MakeProcInstance((DLGPROC)VOTER_NEWMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"VOTER_NEW", hWnd, lpfnVOTER_NEWMsgProc);
 	FreeProcInstance(lpfnVOTER_NEWMsgProc);
 	return nRc;
@@ -378,10 +378,10 @@ BOOL EditVoter (HWND hWnd,long VoterID,int VoterFile)
 BOOL DefineVoter (HWND hWnd)
 {
 
-	FARPROC lpfnVOTER_NEWMsgProc; 
+	DLGPROC lpfnVOTER_NEWMsgProc; 
 	short	nRc;
 	
-	lpfnVOTER_NEWMsgProc = MakeProcInstance((FARPROC)VOTER_DEFINE_USER_DATAMsgProc, hInst);
+	lpfnVOTER_NEWMsgProc = MakeProcInstance((DLGPROC)VOTER_DEFINE_USER_DATAMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"VOTER_NEW", hWnd, lpfnVOTER_NEWMsgProc);
 	FreeProcInstance(lpfnVOTER_NEWMsgProc);
 	return nRc;
@@ -1006,14 +1006,14 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
          		break;
          	case IDC_VOTER_NAME_SEARCH:
 			{
-	            FARPROC lpfnVOTER_NAME_LOCMsgProc;
+	            DLGPROC lpfnVOTER_NAME_LOCMsgProc;
 				
 				GetDlgItemText (hWndDlg,IDC_VOTER_FIRST_NAME,FirstName,128);	
 				GetDlgItemText (hWndDlg,IDC_VOTER_MIDDLE_NAME,MiddleName,128);	
 				GetDlgItemText (hWndDlg,IDC_VOTER_LAST_NAME,LastName,128);	
 				GetDlgItemText (hWndDlg,IDC_VOTER_ZIP,ZipCodeC,16);
 				VoterLocOpt = 0;	
-	            lpfnVOTER_NAME_LOCMsgProc = MakeProcInstance((FARPROC)VOTER_NAME_LOCMsgProc, hInst);
+	            lpfnVOTER_NAME_LOCMsgProc = MakeProcInstance((DLGPROC)VOTER_NAME_LOCMsgProc, hInst);
 	            nRc = DialogBox(hInst, (LPSTR)"VOTER_NAME_LOC", hWndDlg, lpfnVOTER_NAME_LOCMsgProc);
 	            FreeProcInstance(lpfnVOTER_NAME_LOCMsgProc); 
 	  ShowVoter:
@@ -1137,7 +1137,7 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 			{
 				char	House[18], Street[128], City[66], OutAddress[128], ZipCodeC[16], CityAbv[16], State[8];   
 				int		irc;
-                FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+                DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
                 RECT	Rect={0,0,0,0};    
                 ADDMATCH Match;
 				
@@ -1154,7 +1154,7 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					case 0: 
 						SetGlobalValueRect ("[%ADDMATCHEDITRECT]",Rect);
 						SetAddEditValues (House,Street,City,ZipCodeC,"ADDLOC","",&Match);
-						lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+						lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 						WaitCursor (1);
 						irc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT3", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
 						WaitCursor (-1);

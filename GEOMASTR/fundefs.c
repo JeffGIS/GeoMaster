@@ -81,7 +81,7 @@ int	GetFunctionID3 (LPSTR str)
 			if (!_fstrnicmp (str,"DSN",3)) return 356;
 			if (!_fstrnicmp(str, "VAR", 3)) return 357;
 			if (!_fstrnicmp(str, "TIN", 3)) return 358;
-
+			if (!_fstrnicmp(str, "TCP", 3)) return 359;
 			return 0;
 }
 int	GetFunctionID4 (LPSTR str)
@@ -215,6 +215,8 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "FIXMAP",6)) return 647;
 			if (!_fstrnicmp(str, "SQLITE", 6)) return 648;
 			if (!_fstrnicmp(str, "INLIST", 6)) return 649;
+			if (!_fstrnicmp(str, "LOWORD", 6)) return 650;
+			if (!_fstrnicmp(str, "HIWORD", 6)) return 651;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)
@@ -354,6 +356,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "HEADTOAZ", 8)) return 852;
 			if (!_fstrnicmp(str, "DATABASE", 8)) return 853;
 			if (!_fstrnicmp(str, "GMMOBILE", 8)) return 854;
+			if (!_fstrnicmp(str, "MAKELONG", 8)) return 855;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

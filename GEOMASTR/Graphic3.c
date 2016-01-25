@@ -1577,7 +1577,7 @@ BOOL DisplayZoomList (short Opt)
 #endif
 {                              
 //Opt 0 = display, 1=next, -1=prior
-	FARPROC lpfnZOOMLISTMsgProc;
+	DLGPROC lpfnZOOMLISTMsgProc;
 	short	PickFile, PickLayerID; 
 	BOOL	AddToView=FALSE; 
 	int		nRc;
@@ -1585,7 +1585,7 @@ BOOL DisplayZoomList (short Opt)
 	BOOL	SaveGetMaskArea = GetMaskArea;
 	
 	AutoZoomNext = Opt;				
-	lpfnZOOMLISTMsgProc = MakeProcInstance((FARPROC)ZOOMLISTMsgProc, hInst);
+	lpfnZOOMLISTMsgProc = MakeProcInstance((DLGPROC)ZOOMLISTMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST", hWndMain, lpfnZOOMLISTMsgProc);
 	FreeProcInstance(lpfnZOOMLISTMsgProc);   
 	if (nRc == 2)

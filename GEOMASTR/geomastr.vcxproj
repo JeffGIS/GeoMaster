@@ -62,7 +62,7 @@
     <OutDir>Release\</OutDir>
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34i</TargetName>
+    <TargetName>GeoMaster34j</TargetName>
     <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>
@@ -103,7 +103,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Geo_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -130,11 +130,11 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.9</Version>
+      <Version>34.10</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -243,8 +243,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Geo_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;NO_STRICT;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;SQLITE_ENABLE_RTREE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;SQLITE_ENABLE_RTREE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <StructMemberAlignment>2Bytes</StructMemberAlignment>
@@ -265,10 +265,10 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2012\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile />
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
@@ -408,6 +408,7 @@
     <ClCompile Include="FUNDEFS.C" />
     <ClCompile Include="..\gctpc\gctp.c" />
     <ClCompile Include="..\Proj-4\src\geocent.c" />
+    <ClCompile Include="GDIPls.cpp" />
     <ClCompile Include="GetSDChipID.c" />
     <ClCompile Include="..\GM32lib\GM32.c" />
     <ClCompile Include="GM32LIB.C" />
@@ -501,6 +502,7 @@
     <ClCompile Include="..\OFFSET\Offset.c" />
     <ClCompile Include="..\gctpc\omerfor.c" />
     <ClCompile Include="..\gctpc\omerinv.c" />
+    <ClCompile Include="NVTextDrawing.c" />
     <ClCompile Include="ORAFILE.C" />
     <ClCompile Include="..\gctpc\orthfor.c" />
     <ClCompile Include="..\gctpc\orthinv.c" />
@@ -756,12 +758,129 @@
     <ResourceCompile Include="GWCONFIG.RC" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\FileGDBAPI\2013\include\FileGDBAPI.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\FileGDBCore.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Geodatabase.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\GeodatabaseManagement.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Raster.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Row.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Table.h" />
+    <ClInclude Include="..\FileGDBAPI\2013\include\Util.h" />
     <ClInclude Include="..\INCLUDE\Bt.h" />
     <ClInclude Include="..\gctpc\cproj.h" />
     <ClInclude Include="..\INCLUDE\colorsByName.h" />
+    <ClInclude Include="..\INCLUDE\FreeImage.h" />
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
+    <ClInclude Include="..\INCLUDE\gssitype.h" />
+    <ClInclude Include="..\INCLUDE\rotate256.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\BMPImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\GeoTIFFImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\J2KImageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\j2k_types.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\JpegImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\ltic_api.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_bandSelectFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_bbbImageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_bbbImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_colorTransformer.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_coreStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_cropFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_delegates.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_dynamicRangeFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_embeddedImage.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_filtersStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_geoCoord.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_geoFileImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_geoImageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_geoMetadataStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_geometry.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_image.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_imageFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_imageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_imageStage.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_imageStageManager.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_imageStageOverrides.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_imageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_j2kStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataDatabase.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataDumper.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataRecord.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataTypes.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataUtils.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_metadataWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_mosaicFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_mrsidReadersStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_multiresFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_navigator.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_nitfStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_pixel.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_pixelLookupTable.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_rawImageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_rawImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_referenceCountedObject.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_sample.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_scene.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_sceneBuffer.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_staticZoomFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_translationFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_types.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_utils.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_version.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_viewerImageFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_watermarkFilter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lti_writersStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_base.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_cacheStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_define.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_encryptStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_fileSpec.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioBufferedStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioCallbackStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioCallbackStreamTypes.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioCStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioDynamicMemStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioFileStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioMemStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioStreamInf.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_ioSubStream.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_lib_io.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_platform.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_status.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_system.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_types.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_utilStatus.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_utilStatusData.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\lt_utilStatusStrings.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\mg2_status.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\mg3_status.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\MrSIDImageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\MrSIDImageReaderBase.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\MrSIDImageStageManager.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\MrSIDPasswordDelegate.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\NITFReaderManager.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\DataSegment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\FileHeader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\FileMetadata.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\GraphicSegment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\ImageReader.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\ImageSegment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\ImageSegmentMetadata.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\LabelSegment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\nitf_types.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\ReservedSegment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\SecurityBlock.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\SecurityMetadata.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\Segment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\TextSegment.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\TextSegmentMetadata.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\TREData.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\PNGImageWriter.h" />
+    <ClInclude Include="..\MrSid\Raster_DSDK\include\TIFFImageWriter.h" />
     <ClInclude Include="..\SQLite3\sqlite3.h" />
     <ClInclude Include="..\SQLite3\sqlite3ext.h" />
     <ClInclude Include="GMVersion.h" />
@@ -909,6 +1028,11 @@
     <Image Include="..\Citytour\zoompan8.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPI.dll" />
+    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll" />
+    <None Include="..\FreeImage\Dist\x32\FreeImage.dll" />
+    <None Include="..\MrSid\Raster_DSDK\lib\lti_dsdk_cdll_9.5.dll" />
+    <None Include="..\MrSid\Raster_DSDK\lib\tbb.dll" />
     <None Include="CUR00001.CUR" />
     <None Include="CUR00002.CUR" />
     <None Include="CURSOR5.CUR" />
@@ -935,6 +1059,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib" />
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3947,7 +3947,7 @@ BOOL DisplayLayerSymbols (HDC hDC,int level,int iparent,int type,int viewport,in
 	return TRUE;
 }
 
-HWND VisibilityControl (HWND hWnd,HWND hInst,LPSTR ConnectToVP,LPRECT pRect,double Factor,HANDLE hInit,BOOL First,BOOL Docked,BOOL CheckForDock)
+HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect,double Factor,HANDLE hInit,BOOL First,BOOL Docked,BOOL CheckForDock)
 {
 	HMENU	hMenu=0;
 	HWND	hwndTT;

@@ -1458,7 +1458,7 @@ void InitRecord (HDC hDC)
 	ItemIsBlocked=ThemePointSym=HaveVarFillColor=ItemIsHighlighted=FromStreet=ToStreet=CurStreet=HighlightThisItem=SpecialThisItem=0;
 	CurTextHeaderLoc=CurSymSizeLoc=CurSymSizeLocD=CurGCmdStringLoc=CurTextStringLoc=CurBrushLoc=CurPenColorLoc=0;
 	CurTAGLoc=CurSNamesLoc=nPoly=iPoly=HaveTXLoc=TLSet=nCurvePoints=CurMSLink=0;
-	PostTextPointer=PenFromUMList=Visible=HaveTextColor=StreetOneWay=0;  
+	PostTextPointer=PenFromUMList=Visible=HaveTextColor=StreetOneWay=*StreetBPType=*StreetEPType=0;  
 	StreetCenterline=0;
 	*CurrentPrefix = *CurrentUDI = 0; 
 	CompareDC = 0;
@@ -2199,7 +2199,7 @@ LPDEBUGARRAY	pDB=0;   */
 						}
 						if (hSavePen && hDC)
 							SelectObject(hDC, hSavePen);  
-						if (hSymbolBorderPen != HighlightBrush && hSymbolBorderPen != GetStockObject(NULL_PEN))
+						if (hSymbolBorderPen != (HPEN)HighlightBrush && hSymbolBorderPen != (HPEN)GetStockObject(NULL_PEN))
 							GSSiDeleteObject (&hSymbolBorderPen);
 					}
 					GSSiGlobUlFree (&hCoords);

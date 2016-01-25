@@ -82,7 +82,7 @@ short SelectParentSymbol (HWND hWnd,short DialogOpt,LPSTR SymName)
 	int	nRc;
 	
 	strcpy (CurSymName,SymName);
-	nRc = DialogBox(hInst, (LPSTR)"GET_PARENTSYM", hWnd, GET_PARENTSYMMsgProc);
+	nRc = DialogBox(hInst, (LPSTR)"GET_PARENTSYM", hWnd, (DLGPROC)GET_PARENTSYMMsgProc);
 	if (nRc)
 		 _fstrcpy (SymName,CurSymName);
 	return nRc;
@@ -90,7 +90,7 @@ short SelectParentSymbol (HWND hWnd,short DialogOpt,LPSTR SymName)
 
 short SelectAreaSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR SymColor,BOOL AllowAdd)
 {
-	FARPROC lpfnGET_POINTSYMMsgProc;
+	DLGPROC lpfnGET_POINTSYMMsgProc;
 	int	nRc;
 	
 	GetSymType = 3;
@@ -100,17 +100,17 @@ short SelectAreaSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR SymColor,
 		_fstrcpy (CurSymColor,SymColor);   
 	*CurSymRot=0;
 	*CurSymSize=0;
-	lpfnGET_POINTSYMMsgProc = MakeProcInstance((FARPROC)GET_POINTSYMMsgProc, hInst);
+	lpfnGET_POINTSYMMsgProc = MakeProcInstance((DLGPROC)GET_POINTSYMMsgProc, hInst);
 	switch (DialogOpt)
 	{   
 		default:
 		case 1:
-			nRc = DialogBox(hInst, (LPSTR)"GET_POINTSYM", hWnd, lpfnGET_POINTSYMMsgProc);
+			nRc = DialogBox(hInst, (LPSTR)"GET_POINTSYM", hWnd, (DLGPROC)lpfnGET_POINTSYMMsgProc);
 		break;
 		
 		case 2: 
 			*CurSymName = 0;
-			nRc = DialogBox(hInst, (LPSTR)"GET_POINTSYM2", hWnd, lpfnGET_POINTSYMMsgProc);
+			nRc = DialogBox(hInst, (LPSTR)"GET_POINTSYM2", hWnd, (DLGPROC)lpfnGET_POINTSYMMsgProc);
 			if (nRc == SHRT_MAX)
 				nRc = 0;
 		break;  
@@ -127,7 +127,7 @@ short SelectAreaSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR SymColor,
 
 short SelectLineSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR SymSize, LPSTR SymColor,BOOL AllowAdd)
 {
-	FARPROC lpfnGET_POINTSYMMsgProc;
+	DLGPROC lpfnGET_POINTSYMMsgProc;
 	int	nRc;
 				
 	GetSymType = 2;
@@ -138,7 +138,7 @@ short SelectLineSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR SymSize, 
 	if (SymSize)
 		_fstrcpy (CurSymSize,SymSize); 
 	*CurSymRot=0;
-	lpfnGET_POINTSYMMsgProc = MakeProcInstance((FARPROC)GET_POINTSYMMsgProc, hInst);
+	lpfnGET_POINTSYMMsgProc = MakeProcInstance((DLGPROC)GET_POINTSYMMsgProc, hInst);
 	switch (DialogOpt)
 	{   
 		default:
@@ -166,7 +166,7 @@ short SelectLineSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR SymSize, 
 } 
 short SelectPointSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR ParName,LPSTR SymSize, LPSTR SymRot, LPSTR SymColor,BOOL AllowAdd)
 {
-	FARPROC lpfnGET_POINTSYMMsgProc;
+	DLGPROC lpfnGET_POINTSYMMsgProc;
 	int	nRc;
 				
 	GetSymType = 1;
@@ -181,7 +181,7 @@ short SelectPointSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR ParName,
 	if (SymRot && *SymRot)
 		_fstrcpy (CurSymRot,SymRot);
 	DoPaint = FALSE; 
-	lpfnGET_POINTSYMMsgProc = MakeProcInstance((FARPROC)GET_POINTSYMMsgProc, hInst);
+	lpfnGET_POINTSYMMsgProc = MakeProcInstance((DLGPROC)GET_POINTSYMMsgProc, hInst);
 	switch (DialogOpt)
 	{   
 		default:

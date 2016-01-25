@@ -129,7 +129,7 @@ void abc4 (LPSTR cd,LPSTR Mod,LPSTR SerialNumber,LPDWORD VSN) //gets serializati
 	char	SN[12];
 	char	str[32], ProcID[128];
 	int		tot=0,i;
-	HANDLE	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
+	HKEY	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
 	int		lValue;
 	DWORD	Type;
 
@@ -372,7 +372,7 @@ BOOL ValidSerialNum (LPSTR Product,LPSTR SerialNum)
 BOOL ValidateLicense(HWND hWnd)
 { 
   BOOL	nRc=TRUE;
-  FARPROC lpfnLICENSEMsgProc;  
+  DLGPROC lpfnLICENSEMsgProc;  
   char	IniName[132], Serno[32]="", str[128];   
   
 //  DWORD TR = GetTimerResolution();
@@ -396,7 +396,7 @@ BOOL ValidateLicense(HWND hWnd)
 	return TRUE; 
   }
 //  return TRUE;
-  lpfnLICENSEMsgProc = MakeProcInstance((FARPROC)LICENSEMsgProc, hInst);
+  lpfnLICENSEMsgProc = MakeProcInstance((DLGPROC)LICENSEMsgProc, hInst);
   nRc = DialogBox(hInst, (LPSTR)"LICENSE", hWnd, lpfnLICENSEMsgProc);
   FreeProcInstance(lpfnLICENSEMsgProc); 
   

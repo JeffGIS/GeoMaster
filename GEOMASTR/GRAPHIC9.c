@@ -3099,10 +3099,10 @@ BOOL ShowFullBM(BOOL FullMenu,int rotate,int left)
 	else
 		_fstrcpy (Dialog,"FULL_BM");
      {
-      FARPROC lpfnFULLBMMsgProc;
+      DLGPROC lpfnFULLBMMsgProc;
 
-      lpfnFULLBMMsgProc = MakeProcInstance((FARPROC)FULLBMMsgProc, hInst);
-      nRc = DialogBox(hInst, Dialog, hWndMain,lpfnFULLBMMsgProc);
+      lpfnFULLBMMsgProc = MakeProcInstance((DLGPROC)FULLBMMsgProc, hInst);
+      nRc = DialogBox(hInst, Dialog, hWndMain,(DLGPROC)lpfnFULLBMMsgProc);
       FreeProcInstance(lpfnFULLBMMsgProc);
      } /*
 	fullBMLeft=0;

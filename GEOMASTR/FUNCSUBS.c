@@ -4880,7 +4880,7 @@ BOOL SplitMrSidFile (LPSTR File,LPSTR MrSidEx)
 	int		WinVer, DosVer;
 	UINT	ierr;
 	BOOL	rtn = TRUE;
-    FARPROC lpfnEnumWndProc;
+    DLGPROC lpfnEnumWndProc;
     
     //GetShortPathName (MrSidEx,256);
     if (ExistFile(MrSidEx))
@@ -4894,8 +4894,8 @@ BOOL SplitMrSidFile (LPSTR File,LPSTR MrSidEx)
 		}  
 		MrSidWnd = 0;
 		Wait (2000);
-		lpfnEnumWndProc = MakeProcInstance((FARPROC)EnumWndProc, hInst);
-		EnumWindows (lpfnEnumWndProc,0);   
+		lpfnEnumWndProc = MakeProcInstance((DLGPROC)EnumWndProc, hInst);
+		EnumWindows ((WNDENUMPROC)lpfnEnumWndProc,0);   
 		FreeProcInstance(lpfnEnumWndProc); 
 		PostMessage (MrSidWnd, WM_CLOSE, 0, 0L);
     }
@@ -5870,7 +5870,7 @@ BOOL ComposeMessage (HWND hWnd,LPSTR Title,LPSTR InMessage,LPSTR ResponseAction)
 
 	if (*InMessage)
 	{
-		if ((hWndDlg = CreateDialog(hInst, (LPSTR)"MESSAGE_INCOMING", hWnd, MESSAGE_INCOMINGMsgProc)))
+		if ((hWndDlg = CreateDialog(hInst, (LPSTR)"MESSAGE_INCOMING", hWnd,(DLGPROC) MESSAGE_INCOMINGMsgProc)))
 		{
 			SetWindowText (hWndDlg,Title);
 			REPLAC (InMessage,"\\r\\n","\r\n",strlen (InMessage));
@@ -5885,7 +5885,7 @@ BOOL ComposeMessage (HWND hWnd,LPSTR Title,LPSTR InMessage,LPSTR ResponseAction)
 	}
 	else
 	{
-		if ((hWndDlg = CreateDialog(hInst, (LPSTR)"MESSAGE_OUTGOING", hWnd, MESSAGE_OUTGOINGMsgProc)))
+		if ((hWndDlg = CreateDialog(hInst, (LPSTR)"MESSAGE_OUTGOING", hWnd, (DLGPROC)MESSAGE_OUTGOINGMsgProc)))
 		{
 			SetWindowText (hWndDlg,Title);
 			hResponse = GSSiGlobAlloc (1703,GMEM_MOVEABLE,lResponse);
@@ -7196,22 +7196,16 @@ void DisplayImageZoom (HWND hWnd,HDC hDC,int From)
 		LastImageZoomRect = wRect;
 		if (ImageZoomBorder)
 		{
-			HPEN	hPen = CreatePen (PS_SOLID,2,RGB(196,196,196));
-			HPEN	hOldPen = SelectObject (hDC,hPen);
+			HBRUSH hBrush = GetStockObject(NULL_BRUSH);
+			HBRUSH	hOldBrush = SelectObject(hDC, hBrush);
 			RECT	rect = cRect;
 
 			InflateRect (&rect,-1,-1);
 			if (ImageZoomShape == 1)
-			{
-				HBRUSH	hOldBrush = SelectObject (hDC,GetStockObject (NULL_BRUSH));
-				
 				Ellipse (hDC,1,1,w-1,h-1);
-				SelectObject (hDC,hOldBrush);
-			}
 			else
-				FrameRect (hDC,&rect,hPen);
-			SelectObject (hDC,hOldPen);
-			GSSiDeleteObject (&hPen);
+				FrameRect (hDC,&rect,hBrush);
+			SelectObject(hDC, hOldBrush);
 		}
 	}
 	return;

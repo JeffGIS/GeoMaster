@@ -31,7 +31,7 @@ static HIGHLIGHTDATA	HighlightData;
 
 		struct tm      * sunrise (double lat, double lon, int year, int month, int day);
 void DrawAlphaBlend (HWND hWnd, HDC hdcwnd);
-
+void testGDIP(HDC hdc);
 LPSTR priorchr(LPSTR pstr, char c)
 {
 	while (*pstr != c)
@@ -1367,10 +1367,10 @@ SetVis:
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 			{
-				FARPROC lpfnVISIBLEMsgProc;  
+				DLGPROC lpfnVISIBLEMsgProc;  
 				
 				Pickability = PickVis;
-				lpfnVISIBLEMsgProc = MakeProcInstance((FARPROC)VISIBLEMsgProc, hInst);
+				lpfnVISIBLEMsgProc = MakeProcInstance((DLGPROC)VISIBLEMsgProc, hInst);
 				nRc = DialogBox(hInst, "VISIBLE", CurView->hWnd, lpfnVISIBLEMsgProc);
 				FreeProcInstance(lpfnVISIBLEMsgProc);
 				if (nRc)
@@ -1515,7 +1515,7 @@ SetVis:
 			DoPaint = FALSE;      
             if (!_fstricmp (Arg[1],"WPTRAN"))
              {
-				lpfnGPSMsgProc = MakeProcInstance((FARPROC)GPSMsgProc, hInst);
+				lpfnGPSMsgProc = MakeProcInstance((DLGPROC)GPSMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"GPS",hWndMain, lpfnGPSMsgProc);
 				FreeProcInstance(lpfnGPSMsgProc);  
 			}
@@ -1540,7 +1540,7 @@ SetVis:
 			}
 			else
             {
-				lpfnGPSCONFIGMsgProc = MakeProcInstance((FARPROC)GPSCONFIGMsgProc, hInst);
+				lpfnGPSCONFIGMsgProc = MakeProcInstance((DLGPROC)GPSCONFIGMsgProc, hInst);
 				nRc = DialogBox(hInst, (LPSTR)"GPSCONFIG", hWndMain, lpfnGPSCONFIGMsgProc);
 				FreeProcInstance(lpfnGPSCONFIGMsgProc);   
 			}
@@ -2254,7 +2254,7 @@ SetVis:
 				  // $SUN(ALT,lat lon,systime)
 				  // $SUN(AZ,lat lon,systime)
 		{
-			struct tm tms;
+			//struct tm tms;
 			time_t	itime;
 			double	Altitude, Az;
 
@@ -2552,7 +2552,16 @@ SetVis:
 				goto RtnFalse;
 			goto RtnTrue;
 		}
-
+		case 359://$TCP(MYADDRESS)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!_fstricmp(Arg[1], "MYADDRESS"))
+			{
+				if (GetMyIPNetAddress(OutLoc))
+					goto Rtnl;
+			}
+			goto RtnFalse;
+		}
 		case 401: /* $ZOOM(HLT,hltnum,offset,fromlimits,immediate)
 						   ITEM,TAG or Refno,area offset,viewport offset,immediate,vpname(opt))	
 					 	   RECT,minx,miny,maxx,maxy)
@@ -3389,6 +3398,9 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
+			HDC hDC = GetDC(hWndMain);
+			SetDisplayMode(hDC, GF_TEXTMODE);
+			testGDIP(hDC);
 /*			char SSID[40];
 			char ipAddress[32];
 			GUID Guid;

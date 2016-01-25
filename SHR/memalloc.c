@@ -208,13 +208,13 @@ BOOL FAR PASCAL TRACEMEMMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lP
 
 void TraceMem (void)
 {
-	FARPROC lpfnTRACELISTMsgProc;
+	DLGPROC lpfnTRACELISTMsgProc;
 
 	if (EnableTrace<2)
 		return;
 	HaveBlockingWindow = TRUE; 
 	MemTrace = TRUE;
-	lpfnTRACELISTMsgProc = MakeProcInstance((FARPROC)TRACEMEMMsgProc, hInst);
+	lpfnTRACELISTMsgProc = MakeProcInstance((DLGPROC)TRACEMEMMsgProc, hInst);
 	DialogBox(hInst, (LPSTR)"TRACELIST", hWndMain, lpfnTRACELISTMsgProc);
 	FreeProcInstance(lpfnTRACELISTMsgProc); 
 	HaveBlockingWindow = FALSE;    

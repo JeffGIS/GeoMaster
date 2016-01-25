@@ -73,13 +73,13 @@ GSSiExitProg (871);
 }
 	while ((rtn = OkToContinue2 (ForceCheck)) == 2)
     {
-      FARPROC lpfnWAITMESSAGEMsgProc;
+      DLGPROC lpfnWAITMESSAGEMsgProc;
       short	nRc;
 	              
 	  HaltMapDisplay(FALSE,FALSE); 
 	  CloseAllRequestedFiles (FALSE);
 	  ODBCTerminate (TRUE);
-      lpfnWAITMESSAGEMsgProc = MakeProcInstance((FARPROC)WAITMESSAGEMsgProc, hInst);
+      lpfnWAITMESSAGEMsgProc = MakeProcInstance((DLGPROC)WAITMESSAGEMsgProc, hInst);
       nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, lpfnWAITMESSAGEMsgProc);
       FreeProcInstance(lpfnWAITMESSAGEMsgProc);
 	  if (!nRc)
@@ -237,7 +237,7 @@ short GetCDDriveForVolWait (LPSTR VolLabel,LPSTR Drive)
 {GSSiEnterProg (874);
 #endif
 {   
-	FARPROC lpfnWAITMESSAGEMsgProc;
+	DLGPROC lpfnWAITMESSAGEMsgProc;
 	short	nRc;
 	BOOL	SaveDP = DoPaint, SaveDH = DisableHalt;
 	
@@ -260,7 +260,7 @@ GSSiExitProg (874);
 	HaltMapDisplay(FALSE,TRUE);  
 	DoPaint = FALSE; 
 	DisableHalt = TRUE;
-	lpfnWAITMESSAGEMsgProc = MakeProcInstance((FARPROC)WAITMESSAGECDMsgProc, hInst);
+	lpfnWAITMESSAGEMsgProc = MakeProcInstance((DLGPROC)WAITMESSAGECDMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGECD", hWndMain, lpfnWAITMESSAGEMsgProc);
 	FreeProcInstance(lpfnWAITMESSAGEMsgProc);
 	DoPaint = SaveDP;
@@ -284,11 +284,11 @@ BOOL SelectDrive (int Type,LPSTR Drive)
 {GSSiEnterProg (876);
 #endif
 {
-	FARPROC	lpfnSELECTDRIVEMsgProc;
+	DLGPROC	lpfnSELECTDRIVEMsgProc;
 	short		nRc; 
     
     WantDriveType = Type;              
-	lpfnSELECTDRIVEMsgProc = MakeProcInstance((FARPROC)SELECTDRIVEMsgProc, hInst);
+	lpfnSELECTDRIVEMsgProc = MakeProcInstance((DLGPROC)SELECTDRIVEMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"SELECTDRIVE", hWndMain, lpfnSELECTDRIVEMsgProc);
 	FreeProcInstance(lpfnSELECTDRIVEMsgProc);  
     if (nRc)
@@ -4710,10 +4710,10 @@ ProcessNextLine:
 		lpAutoUpdateFieldList = 0;
 		displayRect.left = displayRect.right = 0;
 	    {
-	 	   FARPROC lpfnIDENTIFYMsgProc;
+	 	   DLGPROC lpfnIDENTIFYMsgProc;
 	         
 	        BasicDisplayItem=item; 
-		    lpfnIDENTIFYMsgProc = MakeProcInstance((FARPROC)IDENTIFYMsgProc, hInst);
+		    lpfnIDENTIFYMsgProc = MakeProcInstance((DLGPROC)IDENTIFYMsgProc, hInst);
 		    nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, lpfnIDENTIFYMsgProc);
 		    FreeProcInstance(lpfnIDENTIFYMsgProc);
 	

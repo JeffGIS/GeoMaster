@@ -65,15 +65,15 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wPara
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), TRUE);
 		}
 		hBM[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_LEFT_ARROW));
-		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR), &hBM[0]);
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR),(HBITMAP*) &hBM[0]);
 		hBM[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_RIGHT_ARROW));
-		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_NEXT), &hBM[1]);
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_NEXT), (HBITMAP*)&hBM[1]);
 		hBM[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_PLAY_START));
-		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PLAY), &hBM[2]);
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PLAY), (HBITMAP*)&hBM[2]);
 		hBM[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_PLAY_PAUSE));
-		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PAUSE), &hBM[3]);
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PAUSE), (HBITMAP*)&hBM[3]);
 		hBM[4] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CANCEL));
-		SetWindowSizeToBitmap(GetDlgItem(hWndDlg, IDCANCEL), &hBM[4]);
+		SetWindowSizeToBitmap(GetDlgItem(hWndDlg, IDCANCEL), (HBITMAP)hBM[4]);
 		SendDlgItemMessage(hWndDlg, IDC_PRIOR, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[0]);
 		SendDlgItemMessage(hWndDlg, IDC_NEXT, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[1]);
 		SendDlgItemMessage(hWndDlg, IDC_PLAY, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[2]);
@@ -331,7 +331,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 		else
 		{
 			{
-				int nRc = DialogBox(hInst, (LPSTR)"SELECTORTHOS", hWnd, SelectOrthosMESSAGEMsgProc);
+				int nRc = DialogBox(hInst, (LPSTR)"SELECTORTHOS", hWnd, (DLGPROC)SelectOrthosMESSAGEMsgProc);
 
 				if (!nRc)
 					PostMessage(hWnd, GF_CLOSE, 0, 0L);
@@ -411,7 +411,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 			}
 			if (id == 1)
 			{
-				hWndPlayer = CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, PlayOrthosMESSAGEMsgProc);
+				hWndPlayer = CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
 				AnimateWindow(hWndPlayer, 500, AW_BLEND | AW_ACTIVATE);
 				timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 1, 0);
 			}

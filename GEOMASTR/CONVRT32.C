@@ -1176,7 +1176,7 @@ void ConvertVP_V6_to_V7 (LPVIEWPORT_V7 pCurView,LPVIEWPORT_V6 pVP6)
 	pCurView->ZoomTarget = pVP6->ZoomTarget;
 	pCurView->Active = pVP6->Active;
 	pCurView->hWnd = (HWND)pVP6->hWnd;
-	pCurView->hDC = (HWND)pVP6->hDC;
+	pCurView->hDC = (HDC)pVP6->hDC;
 	pCurView->Display = pVP6->Display;
 	strncpy (pCurView->Name,pVP6->Name,sizeof(pVP6->Name));
 	pCurView->ActivateMenuID = pVP6->ActivateMenuID;
@@ -1543,18 +1543,18 @@ HOTSPOTDATA Hotspot16toHotspot32 (LPHOTSPOTDATA16 pHS16)
 
 NEWOBJECT NewObject16_to_NewObject (LPNEWOBJECT16 pNO16)
 {
-	NEWOBJECT NO;
+	NEWOBJECT NOBJ;
 	
-	NO.Handle = (HANDLE)pNO16->Handle;  
-	NO.Width = pNO16->Width;  
-	NO.Type = pNO16->Type;  
-	NO.Style = pNO16->Style;  
-	NO.ProPen = pNO16->ProPen;  
-	NO.R = pNO16->R;  
-	NO.G = pNO16->G;  
-	NO.B = pNO16->B;  
+	NOBJ.Handle = (HANDLE)pNO16->Handle;
+	NOBJ.Width = pNO16->Width;
+	NOBJ.Type = pNO16->Type;
+	NOBJ.Style = pNO16->Style;
+	NOBJ.ProPen = pNO16->ProPen;
+	NOBJ.R = pNO16->R;
+	NOBJ.G = pNO16->G;
+	NOBJ.B = pNO16->B;
 
-	return NO;
+	return NOBJ;
 }
 
 void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
@@ -2660,7 +2660,7 @@ BOOL OpenConfig (HWND hWnd,HDC hDC)
 	LPSTR	pTE, pTEend;
 	char	setTestEnv[MAX_PATH + 64] = { 0 };
 
-    if (FidConfig != HFILE_ERROR)
+	if (FidConfig != HFILE_ERROR)
 {
 #if ENABLETRACE
 GSSiExitProg (100);
@@ -3220,7 +3220,7 @@ BDOK:
         FirstSchmooze=FALSE;
         {
 #if WIN32
-          DialogBox(hInst, (LPSTR)"SCHMOOZ", hWnd, SCHMOOZMsgProc);
+			DialogBox(hInst, (LPSTR)"SCHMOOZ", hWnd, (DLGPROC)SCHMOOZMsgProc);
 #else
           FARPROC lpfnSCHMOOZMsgProc;
           lpfnSCHMOOZMsgProc = MakeProcInstance((FARPROC)SCHMOOZMsgProc, hInst);
@@ -3842,7 +3842,7 @@ Exit:
 BOOL FindConfigFile (HWND hWnd)
 {
 #if WIN32
-          DialogBox(hInst, (LPSTR)"CONFIGLIST_WIDE", hWnd, CONFIGLISTMsgProc);
+	DialogBox(hInst, (LPSTR)"CONFIGLIST_WIDE", hWnd, (DLGPROC)CONFIGLISTMsgProc);
 #else
           FARPROC lpfnCONFIGLISTMsgProc;
           lpfnCONFIGLISTMsgProc = MakeProcInstance((FARPROC)CONFIGLISTMsgProc, hInst);

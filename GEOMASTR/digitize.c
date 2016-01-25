@@ -350,7 +350,7 @@ BOOL OpenDigConnection( HWND hWnd )
 
 BOOL OpenDigControlDialog (HWND hWnd)
 {
-    FARPROC	lpfnDIGCONTROLMsgProc; 
+    DLGPROC	lpfnDIGCONTROLMsgProc; 
 
 	if (DigitizerStream < 0)
 	{
@@ -360,7 +360,7 @@ BOOL OpenDigControlDialog (HWND hWnd)
     
     if (hWndDigControl)
     	return TRUE;
-	lpfnDIGCONTROLMsgProc = MakeProcInstance((FARPROC)DIGCONTROLMsgProc, hInst);
+	lpfnDIGCONTROLMsgProc = MakeProcInstance((DLGPROC)DIGCONTROLMsgProc, hInst);
 	CreateDialog(hInst, (LPSTR)"DIGCONTROL", hWnd, lpfnDIGCONTROLMsgProc);
 	return TRUE;
 }
@@ -1819,9 +1819,9 @@ short SetNewElementValues (HWND hWnd,int Type)
 	{
 		case 1: //points
 		{
-			FARPROC lpfnNEWPOINTSETMsgProc;
+			DLGPROC lpfnNEWPOINTSETMsgProc;
 			
-			lpfnNEWPOINTSETMsgProc = MakeProcInstance((FARPROC)NEWPOINTSETMsgProc, hInst);
+			lpfnNEWPOINTSETMsgProc = MakeProcInstance((DLGPROC)NEWPOINTSETMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"NEWPOINTSET", hWnd, lpfnNEWPOINTSETMsgProc);
 			FreeProcInstance(lpfnNEWPOINTSETMsgProc);
 		}
@@ -1829,9 +1829,9 @@ short SetNewElementValues (HWND hWnd,int Type)
 		            	 
         case 2: //lines
 		{
-			FARPROC lpfnNEWLINESETMsgProc;
+			DLGPROC lpfnNEWLINESETMsgProc;
 			
-			lpfnNEWLINESETMsgProc = MakeProcInstance((FARPROC)NEWLINESETMsgProc, hInst);
+			lpfnNEWLINESETMsgProc = MakeProcInstance((DLGPROC)NEWLINESETMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"NEWLINESET", hWnd, lpfnNEWLINESETMsgProc);
 			FreeProcInstance(lpfnNEWLINESETMsgProc);
 		}
@@ -1839,9 +1839,9 @@ short SetNewElementValues (HWND hWnd,int Type)
 		            	 
         case 3:	//areas
 		{
-			FARPROC lpfnNEWAREASETMsgProc;
+			DLGPROC lpfnNEWAREASETMsgProc;
 			
-			lpfnNEWAREASETMsgProc = MakeProcInstance((FARPROC)NEWAREASETMsgProc, hInst);
+			lpfnNEWAREASETMsgProc = MakeProcInstance((DLGPROC)NEWAREASETMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"NEWAREASET", hWnd, lpfnNEWAREASETMsgProc);
 			FreeProcInstance(lpfnNEWAREASETMsgProc);
 		}

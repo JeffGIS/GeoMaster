@@ -17,7 +17,7 @@ static	HANDLE hBGFileTranThread[MAX_THREADS]={0};
 
 static	BOOL	InProcessTCPData=FALSE;
 static	BOOL	BlockSocketInput=FALSE;
-static	char	ErrMsg[128], IPAddress[32];  
+static	char	ErrMsg[128];  
 static	BOOL	FirstSocketCall=TRUE,WinsockOpened=FALSE;
 static	SOCKET	OpenSockets[MAXOPENSOCKETS]; 
 static	HWND	OpenSockethWnd[MAXOPENSOCKETS];
@@ -251,7 +251,7 @@ BOOL StartVehTimeMenu (HWND hWnd)
 {
 	if (!ReplayTCP)
 		return FALSE;
-	CreateDialog(hInst, (LPSTR)"VEHICLE_REPLAY", hWnd, VEHICLE_TIMEMsgProc);
+	CreateDialog(hInst, (LPSTR)"VEHICLE_REPLAY", hWnd,(DLGPROC) VEHICLE_TIMEMsgProc);
 	hWndVehTimer = hWndMain;
 	return TRUE;
 }
@@ -364,7 +364,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 			{
 				ClearVehicleHistory (INT_MAX);
 				RedisplayViewports (TRUE);
-				HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,max(1,ReplayDelay), (FARPROC) NULL);
+				HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,max(1,ReplayDelay), (TIMERPROC) NULL);
 			}
 			UpdateAllVehicles(TRUE);
 		}
@@ -425,7 +425,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 					if (HaveReplayTimer)
 						KillTimer (hWndVehTimer,HaveReplayTimer);
 					ReplayDelay = 1000 - ival*100;
-					HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (FARPROC) NULL);
+					HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (TIMERPROC) NULL);
 				}
 					break;
 			}
@@ -449,7 +449,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 			if (HaveReplayTimer)
 				KillTimer (hWndVehTimer,HaveReplayTimer);
 			ReplayDelay = 1000 - ival*100;
-			HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (FARPROC) NULL);
+			HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (TIMERPROC) NULL);
 			break;
 		}
 //		if (HaveReplayTimer)
@@ -497,9 +497,9 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 			  CurReplayPos = si.nTrackPos;
 			CurReplayPos = SetReplayPosition (CurReplayPos,VehReplayFid);
 			if (ReplayDelay == INT_MAX)
-				HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,1, (FARPROC) NULL);
+				HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,1, (TIMERPROC) NULL);
 			else
-				HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,max(1,ReplayDelay), (FARPROC) NULL);
+				HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,max(1,ReplayDelay), (TIMERPROC) NULL);
 			SetScrollPos((HWND)lParam, SB_CTL,CurReplayPos, TRUE);
 			return TRUE;
 			break;
@@ -513,7 +513,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 		{
 			if (HaveReplayTimer)
 				KillTimer (hWndVehTimer,HaveReplayTimer);
-			HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,1, (FARPROC) NULL);
+			HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER,1, (TIMERPROC) NULL);
 		}
 	   }
 	   break;
@@ -551,7 +551,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 					ReplayDelay = 1000 - ival*100;
 					SetDlgItemText (hWndDlg,IDC_VEHSTOPSTART,"Stop");
 					//ReplayDelay = 1000 - GetDlgItemInt (hWndDlg,IDC_REPLAYDELAY,&Err,FALSE)*10;
-					HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (FARPROC) NULL);
+					HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (TIMERPROC) NULL);
 				}
 				else
 				{
@@ -622,7 +622,7 @@ Next:
 				{
 					if (HaveReplayTimer)
 						KillTimer (hWndVehTimer,HaveReplayTimer);
-					HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (FARPROC) NULL);
+					HaveReplayTimer = SetTimer(hWndVehTimer, TCPREPLAYTIMER, max(1,ReplayDelay), (TIMERPROC) NULL);
 				}
 				else if (*ReplayHeader == 'O')
 				{
@@ -679,7 +679,7 @@ int SendTCPOutput (SOCKET sock,LPSTR pRec,int len,int flags)
 			{
 				if (HaveReplayTimer)
 					KillTimer (hWndMain,HaveReplayTimer);
-				HaveReplayTimer = SetTimer(hWndMain, TCPREPLAYTIMER, max(1,ReplayDelay), (FARPROC) NULL);
+				HaveReplayTimer = SetTimer(hWndMain, TCPREPLAYTIMER, max(1,ReplayDelay), (TIMERPROC) NULL);
 			}
 		}
 	}
@@ -936,7 +936,7 @@ GotID:
 	if (OpenSockethWnd[i] && SocketTimerDelay[i])
 	{
 		KillSocketTimer (socket);
-		SetTimer(OpenSockethWnd[i], TimerID, SocketTimerDelay[i], (FARPROC) NULL);
+		SetTimer(OpenSockethWnd[i], TimerID, SocketTimerDelay[i], (TIMERPROC) NULL);
 	}
 	return;
 }
@@ -1239,10 +1239,10 @@ short CheckForRegistrationServer (HWND hWnd,LPSTR SerialNum)
 	
 	_fstrcpy (SerialNumber,SerialNum);
 	{
-      FARPROC lpfnREGCONNECTMsgProc; 
+      DLGPROC lpfnREGCONNECTMsgProc; 
       short	nRc;
 		
-      lpfnREGCONNECTMsgProc = MakeProcInstance((FARPROC)REGCONNECTMsgProc, hInst);
+      lpfnREGCONNECTMsgProc = MakeProcInstance((DLGPROC)REGCONNECTMsgProc, hInst);
       nRc = DialogBox(hInst, (LPSTR)"REGCONNECT", hWnd, lpfnREGCONNECTMsgProc);
       FreeProcInstance(lpfnREGCONNECTMsgProc); 
       if (!nRc)
@@ -1261,7 +1261,7 @@ BOOL OpenTCPIPServer (LPSTR ServerIP,USHORT port)
 	char	str[256];
 	sprintf (str,"%s : %ld",ServerIP,(long)port);
 //	MessageBox (0,str,0,MB_OK);
-	_fstrcpy (IPAddress,ServerIP); 
+	_fstrcpy(CurrentIPAddress, ServerIP);
 	ServerPort = port;
 	return TRUE;
 }
@@ -1285,7 +1285,7 @@ BOOL OpenTCPIPServer2 (HWND hWnd)
 	} 
     _fmemset ( &mySockAddr,0, sizeof(mySockAddr));
 
-    myAddr = inet_addr(IPAddress);
+	myAddr = inet_addr(CurrentIPAddress);
 
     if( (long)myAddr != INADDR_NONE)
      { /* we've got an address */
@@ -1356,7 +1356,7 @@ BOOL OpenTCPIPServer2 (HWND hWnd)
 GotID:
 	OpenSockets[i] = ServerSocket;	
 	OpenSockethWnd[i] = 0;//keeps timer from being created
-	sprintf (str,"Server opened on %s port %i",IPAddress,port);
+	sprintf(str, "Server opened on %s port %i", CurrentIPAddress, port);
 	LogServerActivity (str);
 	return TRUE;
 }
@@ -2400,7 +2400,7 @@ int UDPmain(int port)
 		}
 		_fmemset(&mySockAddr, 0, sizeof(mySockAddr));
 
-		myAddr = inet_addr(IPAddress);
+		myAddr = inet_addr(CurrentIPAddress);
 		ii = 1;
 	}
 

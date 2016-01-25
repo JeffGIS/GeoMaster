@@ -443,16 +443,26 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	}
 		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt))
 		{
-			HANDLE hGMDB = OpenGWDatabase(ARG[4], BT_READ);
+			HANDLE hGMDB;
 			char *error = NULL;
 			BOOL primKeyIsOffset = atob(ARG[6]);
 			BOOL includesPoint = FALSE;
 			BOOL haveDateAndUCR = FALSE;
 			HFILE fid;
 			char TableName[128];
+			char DBName[256];
+			char SQL[256] = { 0 };
 			BOOL convertToLL = FALSE;
-			LPSTR llLoc;
+			LPSTR llLoc, pBar;
 
+			strcpy(DBName, ARG[4]);
+			pBar = strrchr(DBName, '|');
+			if (pBar)
+			{
+				*pBar++ = 0;
+				strcpy(SQL, pBar);
+			}
+			hGMDB = OpenGWDatabase(DBName, BT_READ);
 			strcpy(TableName, ARG[5]);
 			llLoc = strstr(TableName, "_LATLON");
 			if (llLoc)
@@ -504,7 +514,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", TableName);
 						fputstring(pCmd, fid);
 						if (haveDateAndUCR)
-							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
+							//sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
+							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id, minTime, maxTime, minUCR, maxUCR,minX, maxX, minY, maxY);", TableName);
 						else
 							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", TableName);
 						fputstring(pCmd, fid);
@@ -575,14 +586,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 						delim[0] = ',';
 					}
+					if (haveDateAndUCR)
+						sprintf(strchr(pCmd, 0), ",SUNANGLE INT");
 					if (!rtn)
 					{
 						int ifield, index;
 						int firstIndex = 1;
 						int lastIndex = lpGWDHead->NumIndex;
-
-						if (lpGWDHead->SpatialIndexType > 0)
-							lastIndex--;
 
 						if (primKeyIsOffset || nextId)
 						{
@@ -601,19 +611,22 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, fid);
 						for (index = firstIndex; index < lastIndex; index++)
 						{
-							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", TableName, index + 1, TableName, removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name));
-							for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield<lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
+							if (lpGWDHead->SpatialIndex != index)
 							{
-								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
+								sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", TableName, index + 1, TableName, removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name));
+								for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield < lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
+								{
+									sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
+								}
+								sprintf(strchr(pCmd, 0), ");");
+								fputstring(pCmd, fid);
 							}
-							sprintf(strchr(pCmd, 0), ");");
-							fputstring(pCmd, fid);
 						}
 					}
 
 					if (!rtn)
 					{
-						int pos = BT_FIRST;
+						int pos = BT_FIRST, cond = BT_ANY;
 						long Offset;
 						HANDLE hVal = GSSiGlobAlloc(1797, GMEM_MOVEABLE, 4096);
 						LPSTR val = GlobalLock(hVal);
@@ -622,18 +635,35 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						char xField[128] = { 0 };
 						char yField[128] = { 0 };
 						DPOINT pt;
+						int indx = 0;
 
 						sprintf(val, "Load table %s", ARG[4]);
 						CreateStatusWind(hWndMain, 1, val);
-						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&Offset))
+						if (*SQL)
 						{
+							LPSTR pSpace = strrchr(SQL, ' ');
+							if (!pSpace)
+								pSpace = strrchr(SQL, '>');
+							pSpace++;
+							if (*pSpace == '\'')
+								pSpace++;
+							if (*LastChr(pSpace) == '\'')
+								*LastChr(pSpace) = 0;
+							cond = BT_GE;
+							indx = 2;
+							strncpy(lpGWDHead->pKeys[indx],pSpace,abs(lpGWDHead->lKeys[indx]));
+						}
+						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
+						{
+							int id = Offset;
+							int sunAngle=0;
 							pos = BT_NEXT;
+							cond = BT_ANY;
 							FillGWDData(lpGWDHead, Offset);
 
 							if (includesPoint)
 							{
 								MNMXCORD bounds;
-								int id = Offset;
 								BOOL err;
 
 								if (nextId > 0)
@@ -696,7 +726,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 										if (pSpace)
 										{
 											int itime = atoi(++pSpace);
+											char daynight[256];
 											ftimebeg = itime / 1000 - 1;
+											sprintf(daynight, "$SUN(ALT, -93.33 45.0, %i)", itime);
+											ExpandText(daynight);
+											sunAngle = IDNINT(atof(daynight));
 											ftimeend = ftimebeg + 2;
 											pSpace = strchr(pSpace, ' ');
 											if (pSpace)
@@ -705,7 +739,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 											}
 										}
 									}
-									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx,ftimebeg,ftimeend,fUCR*10.0,fUCR*10.0);
+									/*{
+										if (pSpace)
+										{
+											int itime = atoi(pCmd);
+											ftimebeg = itime / 1000 - 1;
+											ftimeend = ftimebeg + 2;
+											fUCR = atoi(++pSpace);
+										}
+									}*/
+									//sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0);
+									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
 								}
 								else
 									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
@@ -713,7 +757,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							}
 
 							if (nextId > 0)
-								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, nextId);
+								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, id);
 							else if (primKeyIsOffset)
 								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, Offset);
 							else
@@ -765,6 +809,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								}
 								delim[0] = ',';
 							}
+							if (haveDateAndUCR)
+								sprintf(strchr(pCmd, 0), "%s%i", delim, sunAngle);
 							sprintf(strchr(pCmd, 0), ")");
 							fputstring(pCmd, fid);
 							rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
@@ -1064,7 +1110,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int keepGoing = 1;
 			int nCanCompress = 0, nTotal = 0;
 			LPSTR pSpace;
-			BOOL createFile, createTables = TRUE;
+			BOOL createFile=TRUE, createTables = TRUE;
 			int wantType = 3;
 			double coordFactor = COORDINATE_FACTOR;
 			char TableName[] = "PARCELAREA";
@@ -1979,7 +2025,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 		Fid = GSSiOpenFile(Name, 0, OF_READ);
 		if (Fid == HFILE_ERROR)
 		{
-			FARPROC lpfnSETSHAPEPARAMMsgProc;
+			DLGPROC lpfnSETSHAPEPARAMMsgProc;
 
 			_fstrcpy(LastSQLITEFile, SQLITEFileName);
 			ExpandText(LastSQLITEFile);
@@ -1987,7 +2033,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 				goto RtnFalse;
 			goto RtnTrue;
 			{
-				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((FARPROC)SETSHAPEPARAMMsgProc, hInst);
+				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
 				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
 				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
 				Fid = GSSiOpenFile(Name, 0, OF_READ);

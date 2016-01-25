@@ -2023,9 +2023,9 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                   
             case IDC_EDIT_DEST:
             {
-                  FARPROC	lpfnINTERSECT_MATCH_EDITMsgProc; 
+                  DLGPROC	lpfnINTERSECT_MATCH_EDITMsgProc; 
 
-                  lpfnINTERSECT_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)INTERSECT_MATCH_EDITMsgProc, hInst);
+                  lpfnINTERSECT_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)INTERSECT_MATCH_EDITMsgProc, hInst);
                   CreateDialog(hInst, (LPSTR)"INTERSECT_MATCH_EDIT", hWndDlg, lpfnINTERSECT_MATCH_EDITMsgProc);
 //                  nRc = DialogBox(hInst, (LPSTR)"INTERSECT_MATCH_EDIT", hWndDlg, lpfnINTERSECT_MATCH_EDITMsgProc);
 //                  FreeProcInstance(lpfnINTERSECT_MATCH_EDITMsgProc);
@@ -2475,9 +2475,9 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
                   
             case IDC_EDIT_DEST:
             {
-                  FARPROC	lpfnINTERSECT_MATCH_EDITMsgProc; 
+                  DLGPROC	lpfnINTERSECT_MATCH_EDITMsgProc; 
 
-                  lpfnINTERSECT_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)INTERSECT_MATCH_EDITMsgProc, hInst);
+                  lpfnINTERSECT_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)INTERSECT_MATCH_EDITMsgProc, hInst);
                   CreateDialog(hInst, (LPSTR)"INTERSECT_MATCH_EDIT", hWndDlg, lpfnINTERSECT_MATCH_EDITMsgProc);
 //                  nRc = DialogBox(hInst, (LPSTR)"INTERSECT_MATCH_EDIT", hWndDlg, lpfnINTERSECT_MATCH_EDITMsgProc);
 //                  FreeProcInstance(lpfnINTERSECT_MATCH_EDITMsgProc);
@@ -4033,9 +4033,9 @@ BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wP
             case IDC_DISPLAY_STREETS:
             	 if (!hWndLocStreet)
                  {
-                 	  FARPROC lpfnLOC_STREETMsgProc;
+                 	  DLGPROC lpfnLOC_STREETMsgProc;
                   
-					  lpfnLOC_STREETMsgProc = MakeProcInstance((FARPROC)LOC_STREETMsgProc, hInst);
+					  lpfnLOC_STREETMsgProc = MakeProcInstance((DLGPROC)LOC_STREETMsgProc, hInst);
 					  hWndLocStreet=CreateDialog(hInst,"LOC_STREET",hWndMain, lpfnLOC_STREETMsgProc);
                  }
 			     else
@@ -5198,7 +5198,7 @@ UpdateAddEditFile:
             
             case IDC_ORIGREC:
             {
-				 FARPROC lpfnDISPLAYRECORDMsgProc;
+				 DLGPROC lpfnDISPLAYRECORDMsgProc;
             	 LPSTR	lpEnd, lpKFN=KeyFieldName; 
             	 HANDLE	hDB=0; 
             	 FIELDINFO	FieldInfo;   
@@ -5240,7 +5240,7 @@ UpdateAddEditFile:
 				 }
 				 DRSQL = SQL;
 				 DRDataFile = IMDataFile;   	
-				 lpfnDISPLAYRECORDMsgProc = MakeProcInstance((FARPROC)DISPLAYRECORDMsgProc, hInst);
+				 lpfnDISPLAYRECORDMsgProc = MakeProcInstance((DLGPROC)DISPLAYRECORDMsgProc, hInst);
 				 nRc = DialogBox(hInst, (LPSTR)"DISPLAYRECORD", hWndDlg, lpfnDISPLAYRECORDMsgProc);
 				 FreeProcInstance(lpfnDISPLAYRECORDMsgProc);
        		}
@@ -6240,10 +6240,10 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                   
             case IDC_EDIT_DEST:
             {
-                  FARPROC	lpfnADD_MATCH_EDITMsgProc; 
+                  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 				  HWND	hdlg;
 
-                  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((FARPROC)ADD_MATCH_EDITMsgProc, hInst);
+                  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
                   hdlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
 				  PostMessage (hdlg,WM_COMMAND,IDC_ISMODELESS,0);
 //                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
@@ -6659,7 +6659,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				FileIsOpen = FALSE;
 				if (/*NumMatched != TotAddLen && */AutoEdit)
 				{
-					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndMain, ADD_MATCH_EDITMsgProc);
+					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 					PostMessage(hDlg, WM_COMMAND, IDC_ISMODELESS, 0);
 				}
 		         	//PostMessage(hWndDlg, WM_COMMAND, IDC_EDIT_DEST, 0L);

@@ -24,8 +24,8 @@ static BOOL	CreateTAGIndex=FALSE;
 static RECT	ClipRectx;   
 
 static	HHOOK	g_hook=NULL;
-
-
+void AAShutDown(void)
+;
 void BlowOut (LPSTR Message, LPSTR Title)
 #if ENABLETRACE
 {GSSiEnterProg (1);
@@ -334,7 +334,7 @@ void QuitGraphics()
 	else
 		*ExitMessage = 0;
 	LogUsageInfo (0,"");
-
+	AAShutDown();
 	InitProj4CoordConv (TRUE);
 	for (i=0;i<MAXMULTILEVELZOOM;i++)
 		GSSiDeleteObject (&hbmpMultiLevel[i]); 
@@ -680,7 +680,7 @@ GSSiExitProg (6);
         OldCursor = GSSiSetCursor (hDrawingCursor);
 		if (InfoBoxEditTimer)
 			KillTimer (hWndMain,InfoBoxEditTimer);
-        idTimer =  SetTimer(hWndMain, 1, 1, (FARPROC) 0); 
+        idTimer =  SetTimer(hWndMain, 1, 1, (TIMERPROC) 0); 
         if (!idTimer)
         	ii=1;
     }
@@ -5433,10 +5433,10 @@ BOOL LoadMapDir (HWND hWnd)
     DoPaint = FALSE;
      {
 #if WIN32
-      nRc = DialogBox(hInst, (LPSTR)"LOAD_MD", hWnd, LOADMDMsgProc);
+      nRc = DialogBox(hInst, (LPSTR)"LOAD_MD", hWnd,(DLGPROC) LOADMDMsgProc);
 #else
-      FARPROC lpfnLOADMDMsgProc;
-      lpfnLOADMDMsgProc = MakeProcInstance((FARPROC)LOADMDMsgProc, hInst);
+      DLGPROC lpfnLOADMDMsgProc;
+      lpfnLOADMDMsgProc = MakeProcInstance((DLGPROC)LOADMDMsgProc, hInst);
       nRc = DialogBox(hInst, (LPSTR)"LOAD_MD", hWnd, lpfnLOADMDMsgProc);
       FreeProcInstance(lpfnLOADMDMsgProc);
 #endif

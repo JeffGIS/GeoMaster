@@ -2995,7 +2995,7 @@ BOOL FAR PASCAL DBLOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 } 
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine) 
 {
-	HANDLE	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
+	HKEY	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
 	HKEY	hKey = HKEY_CURRENT_USER;
 	int		lValue;
 	BOOL	rtn = FALSE;
@@ -3023,7 +3023,7 @@ BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine)
 
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config)
 {
-	HANDLE	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
+	HKEY	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
 	HKEY	hKey = HKEY_CURRENT_USER;
 	DWORD	Disp;
 	int		lValue;

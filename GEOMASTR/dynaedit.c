@@ -224,7 +224,7 @@ static HWND CreateChild(HWND Parent, int Move)
 
   return CreateWindow(WC_DLGEDITCHILD,"",
       WS_CHILD|WS_BORDER| (Move?0:WS_THICKFRAME),
-      0,0,1,1, Parent, (HWND) 0, GETINSTANCE(Parent),0);
+      0,0,1,1, Parent, (HMENU) 0, GETINSTANCE(Parent),0);
  }         
 static HWND CreateToolKit(HWND Parent)
 {
@@ -294,7 +294,7 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
      GetWindowRect(Edit->Dialog,&R);
      Edit->Mask = CreateWindowEx(WS_EX_TRANSPARENT,
                   WC_DLGEDITMASK,"",WS_CHILD|WS_VISIBLE,
-                  0,0,W(R),H(R),Window,(HWND)0,
+                  0,0,W(R),H(R),Window,(HMENU)0,
                   GETINSTANCE(Window),0);
      Edit->Child = CreateChild(Window,FALSE);
      Edit->DragSel = CreateChild(Window,TRUE);          
@@ -372,7 +372,7 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
     }
     else if(Message == WM_RBUTTONDOWN || Message == WM_LBUTTONDBLCLK )
     { //I want the user to have the ability to edit the field value
-       FARPROC lpfnEditStringMsgProc,lpfnComboBoxMsgProc;
+       DLGPROC lpfnEditStringMsgProc,lpfnComboBoxMsgProc;
        int epyT, Type,CntlNum;
        if(Edit->NSelected != 1) 
            return DefWindowProc(Window,Message,Param1,Param2); 
@@ -386,7 +386,7 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
       case TYPE_CHECKBOX:
          WhatEditType = TYPE_CHECKBOX;
          GetDlgItemText(Edit->Dialog, GetDlgCtrlID(Edit->Selections[0]),EditString,128);
-         lpfnEditStringMsgProc = MakeProcInstance((FARPROC)EditStringMsgProc, GlobhInst);
+         lpfnEditStringMsgProc = MakeProcInstance((DLGPROC)EditStringMsgProc, GlobhInst);
          DialogBox(GlobhInst, (LPSTR)"TEXTSTRING", GetParent(Window), lpfnEditStringMsgProc);
          FreeProcInstance(lpfnEditStringMsgProc);
          if(EditString[0])
@@ -406,7 +406,7 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
            WhatEditType = Type;
            GetDlgItemText(Edit->Dialog, GetDlgCtrlID(Edit->Selections[0]),
                           EditString,128);
-           lpfnEditStringMsgProc = MakeProcInstance((FARPROC)EditStringMsgProc, GlobhInst);
+           lpfnEditStringMsgProc = MakeProcInstance((DLGPROC)EditStringMsgProc, GlobhInst);
          if(Type == TYPE_EDIT )
          {
            DialogBox(GlobhInst, (LPSTR)"DYNAMIC_PROPERTIES", GetParent(Window), lpfnEditStringMsgProc);
@@ -456,7 +456,7 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
            GlobalUnlock(hCurrentValues);
          }
          GlobalChange = TRUE;
-         lpfnComboBoxMsgProc = MakeProcInstance((FARPROC)ComboBoxMsgProc, GlobhInst);
+         lpfnComboBoxMsgProc = MakeProcInstance((DLGPROC)ComboBoxMsgProc, GlobhInst);
          DialogBox(GlobhInst, (LPSTR)"COMBOBOX", GetParent(Window), lpfnComboBoxMsgProc);
          FreeProcInstance(lpfnComboBoxMsgProc);
          if(cListItems)
@@ -627,9 +627,9 @@ LRESULT CALLBACK ModifyProc(HWND Window, UINT Message,
       { 
           case IDC_DIALOG_PROPERTIES:
 		{
-			FARPROC lpfnEDITDYNDIALOGMsgProc;
+			DLGPROC lpfnEDITDYNDIALOGMsgProc;
 					
-			lpfnEDITDYNDIALOGMsgProc = MakeProcInstance((FARPROC)EDITDYNDIALOGMsgProc, hInst);
+			lpfnEDITDYNDIALOGMsgProc = MakeProcInstance((DLGPROC)EDITDYNDIALOGMsgProc, hInst);
 			GlobalChange = DialogBox(hInst, (LPSTR)"EDITDYNDIALOG", Window, lpfnEDITDYNDIALOGMsgProc);
 			FreeProcInstance(lpfnEDITDYNDIALOGMsgProc);  
 			break; 
@@ -3985,9 +3985,9 @@ BOOL ProcessDynEdit (HWND hWndDlg,HWND hWndEdit,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_DYNEDIT:  
 		{
-			FARPROC lpfnEDITDYNDIALOGMsgProc;
+			DLGPROC lpfnEDITDYNDIALOGMsgProc;
 					
-			lpfnEDITDYNDIALOGMsgProc = MakeProcInstance((FARPROC)EDITDYNDIALOGMsgProc, hInst);
+			lpfnEDITDYNDIALOGMsgProc = MakeProcInstance((DLGPROC)EDITDYNDIALOGMsgProc, hInst);
 			DialogBox(hInst, (LPSTR)"EDITDYNDIALOG", hWndDlg, lpfnEDITDYNDIALOGMsgProc);
 			FreeProcInstance(lpfnEDITDYNDIALOGMsgProc);  
 			rtn = TRUE;

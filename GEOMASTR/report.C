@@ -828,7 +828,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Fac
 
 BOOL BrowseTextFile (LPSTR File, long Loc, short backlines, short forwardlines,LPSTR SearchString)
 { 
-	FARPROC lpfnBROWSETEXTMsgProc;
+	DLGPROC lpfnBROWSETEXTMsgProc;
 	int	Rtn; 
 	
 	pBrowseFile = File;
@@ -838,7 +838,7 @@ BOOL BrowseTextFile (LPSTR File, long Loc, short backlines, short forwardlines,L
 		BrowseLines = 1000;
 	BrowseBackLines = backlines;
 	BrowseSearch = SearchString;
-	lpfnBROWSETEXTMsgProc = MakeProcInstance((FARPROC)BROWSETEXTMsgProc, hInst);
+	lpfnBROWSETEXTMsgProc = MakeProcInstance((DLGPROC)BROWSETEXTMsgProc, hInst);
 	Rtn = DialogBox(hInst, (LPSTR)"BROWSE", hWndMain, lpfnBROWSETEXTMsgProc);
 	FreeProcInstance(lpfnBROWSETEXTMsgProc); 
 	return TRUE;
@@ -888,7 +888,7 @@ BOOL DisplayReportScroll (HWND hWndDlg, int ScrollCntl)
 
 BOOL DisplayScrollReport (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 {
-	FARPROC lpfnSCROLLREPORTMsgProc;
+	DLGPROC lpfnSCROLLREPORTMsgProc;
 	BOOL	Rtn=FALSE;
 	LPVIEWPORT	SaveView, SaveView2;        
 	HANDLE	hView;
@@ -907,7 +907,7 @@ BOOL DisplayScrollReport (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 	CurView->Active = TRUE;
 	CurView->ShrinkToFit=FALSE; 
 	hReportScroll = CurView->hReport;	
-	lpfnSCROLLREPORTMsgProc = MakeProcInstance((FARPROC)SCROLLREPORTMsgProc, hInst);
+	lpfnSCROLLREPORTMsgProc = MakeProcInstance((DLGPROC)SCROLLREPORTMsgProc, hInst);
 	Rtn = DialogBox(hInst, (LPSTR)"SCROLLREPORT", hWndMain, lpfnSCROLLREPORTMsgProc);
 	FreeProcInstance(lpfnSCROLLREPORTMsgProc); 
 	UnloadReport (&SaveView2->hReport); 
@@ -919,7 +919,7 @@ Exit:
 
 BOOL DisplayScrollReport2 (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 {
-	FARPROC lpfnSCROLLREPORTMsgProc;
+	DLGPROC lpfnSCROLLREPORTMsgProc;
 	BOOL	Rtn=FALSE;
 	LPVIEWPORT	SaveView, SaveView2;        
 	
@@ -955,7 +955,7 @@ BOOL DisplayScrollReport2 (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 		}
 		else
 		{	
-			lpfnSCROLLREPORTMsgProc = MakeProcInstance((FARPROC)SCROLLREPORTMsgProc2, hInst);
+			lpfnSCROLLREPORTMsgProc = MakeProcInstance((DLGPROC)SCROLLREPORTMsgProc2, hInst);
 			CreateDialog(hInst, (LPSTR)"SCROLLREPORT2", hWndMain, lpfnSCROLLREPORTMsgProc);
 		}   
 	}

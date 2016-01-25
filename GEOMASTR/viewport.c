@@ -418,11 +418,11 @@ short GetFileTypeFromName(LPSTR InName,BOOL OpenFilelist)
 
 int AddFileToViewport (LPSTR File)
 { 
-	FARPROC lpfnVPEDITMsgProc;
+	DLGPROC lpfnVPEDITMsgProc;
 	int	nRc;
 	
 	VPAutoFile = File;						
-	lpfnVPEDITMsgProc = MakeProcInstance((FARPROC)VPEDITMsgProc, hInst);
+	lpfnVPEDITMsgProc = MakeProcInstance((DLGPROC)VPEDITMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"VPEDIT", hWndMain,lpfnVPEDITMsgProc);
 	FreeProcInstance(lpfnVPEDITMsgProc); 
 	VPAutoFile = 0;
@@ -431,7 +431,7 @@ int AddFileToViewport (LPSTR File)
 
 int EditViewportAtCursor (HWND hWnd)
 { 
-	FARPROC lpfnVPEDITMsgProc;
+	DLGPROC lpfnVPEDITMsgProc;
 	int	nRc;
 	HWND	InFocus = GetParFocus();  
 	RECT	Rect;
@@ -441,7 +441,7 @@ int EditViewportAtCursor (HWND hWnd)
 	GetCursorPos (&CPoint); 
 	ScreenToClient (hWnd,&CPoint);
  	vpid = SelectViewport (CPoint,FALSE,FALSE,FALSE);
-	lpfnVPEDITMsgProc = MakeProcInstance((FARPROC)VPEDITMsgProc, hInst);
+	lpfnVPEDITMsgProc = MakeProcInstance((DLGPROC)VPEDITMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"VPEDIT", hWndMain,lpfnVPEDITMsgProc);
 	FreeProcInstance(lpfnVPEDITMsgProc); 
 	return nRc;

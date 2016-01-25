@@ -1229,7 +1229,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 #endif
 {
 	HANDLE hString, hTitle;
-	FARPROC lpfnTEXTSTRINGMsgProc;
+	DLGPROC lpfnTEXTSTRINGMsgProc;
 	int		nRc;
 	char	InitValc[64];
 	BOOL	SaveDoPaint = DoPaint;
@@ -1266,7 +1266,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 	EnableWindow (hWnd,FALSE); 
 	if (DropDown) 
 	{
-		lpfnTEXTSTRINGMsgProc = MakeProcInstance((FARPROC)TEXTSTRINGMsgProc, hInst);
+		lpfnTEXTSTRINGMsgProc = MakeProcInstance((DLGPROC)TEXTSTRINGMsgProc, hInst);
 		if (Sorted)
 			nRc = DialogBox(hInst, (LPSTR)"TEXTSTRING_SORTED", hWnd, lpfnTEXTSTRINGMsgProc); 
 		else
@@ -1281,7 +1281,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 		_fstrcpy (&Arg5[2],ListFile);
 		_fstrcpy (&Arg5[850],Title);
 		GlobalUnlock (hSelectItemsArgs);
-		lpfnTEXTSTRINGMsgProc = MakeProcInstance((FARPROC)SELECTITEMSMsgProc, hInst);
+		lpfnTEXTSTRINGMsgProc = MakeProcInstance((DLGPROC)SELECTITEMSMsgProc, hInst);
 		if (Sorted)
 			nRc = DialogBox(hInst, (LPSTR)"SELECTITEMS", hWnd, lpfnTEXTSTRINGMsgProc);
 		else
@@ -1311,7 +1311,7 @@ BOOL GetTextStringML (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR In
 #endif
 {
 	HANDLE hString, hTitle;
-	FARPROC lpfnTEXTSTRINGMsgProc;
+	DLGPROC lpfnTEXTSTRINGMsgProc;
 	int		nRc;
 	char	str[256], InitValc[64];
 	BOOL	SaveDoPaint = DoPaint;
@@ -1329,7 +1329,7 @@ BOOL GetTextStringML (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR In
 		pINITVAL=str;
 	maxTEXTSTRING=lenstring;
 	EnableWindow (hWnd,FALSE);
-	lpfnTEXTSTRINGMsgProc = MakeProcInstance((FARPROC)TEXTSTRINGMsgProc, hInst);
+	lpfnTEXTSTRINGMsgProc = MakeProcInstance((DLGPROC)TEXTSTRINGMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"TEXTSTRING_ML", hWnd, lpfnTEXTSTRINGMsgProc);
 	FreeProcInstance(lpfnTEXTSTRINGMsgProc);
 	EnableWindow (hWnd,TRUE);
@@ -1952,7 +1952,9 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
 #endif
 {   HPEN        hWidePen, hOldPen;
     short     OldMode, width=3;
-    
+	BOOL		saveuseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 	SaveDC (CurView->hDC);
 	SetDisplayMode (CurView->hDC,GF_SCREENMODE);
     if (!FileMode && Clip)
@@ -1985,6 +1987,7 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
     SetROP2(hDC,OldMode);
     DeleteObject (hWidePen);
 	RestoreDC (CurView->hDC,-1);
+	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
 GSSiExitProg (1162);

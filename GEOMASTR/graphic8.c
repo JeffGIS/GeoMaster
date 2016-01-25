@@ -176,6 +176,7 @@ HANDLE CreateCirclePoly (DPOINT CenterPt,double Radius,LPLONG pnPnts,double Vect
 	if (np > 1600)
 		np = 1600;
 	DeltaAz = TWOPI / np;
+	np++;
 	*pnPnts = np;
 	handle = GSSiGlobAlloc ( 751,GMEM_MOVEABLE,(long)sizeof(DPOINT)*np); 
 	pPoint = (HPDPOINT)GlobalLock (handle); 
@@ -2573,7 +2574,7 @@ TryAgain:
 			}
 			if (hOldPen)
 				SelectObject (hDC,hOldPen);
-			if (hPen != HighlightPen && hPen != HighlightBrush && hPen != GetStockObject(NULL_PEN) && hReturnPen != hPen)
+			if (hPen != HighlightPen && hPen != (HPEN)HighlightBrush && hPen != (HPEN)GetStockObject(NULL_PEN) && hReturnPen != hPen)
 				GSSiDeleteObject (&hPen);
 			RestoreDC (hDC,-1);
 		} 
@@ -2644,7 +2645,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 	{
 		if (HighlightWidth < 0)//shows highlighted area with border line 
 		{
-			*phPen = HighlightBrush; 
+			*phPen = (HPEN)HighlightBrush; 
 			if (phBrush && !GetTypeVisibility(11) && !GetTypeVisibility(12))
 				*phBrush = 0;
 		}
@@ -3286,7 +3287,7 @@ TryAgain:
 	}
 	if (hOldPen)
 		SelectObject (hDC,hOldPen);
-	if (hPen != HighlightPen && hPen != HighlightBrush && hPen != GetStockObject(NULL_PEN) && hReturnPen != hPen)
+	if (hPen != HighlightPen && hPen != (HPEN)HighlightBrush && hPen != (HPEN)GetStockObject(NULL_PEN) && hReturnPen != hPen)
 		GSSiDeleteObject (&hPen); 
 	if (hDC == CompareDC)
 	{
@@ -4796,8 +4797,28 @@ GSSiExitProg (999);
 }
 #endif
 }
-                  
-double ComputeProjectedAreaAreaD (HPDPOINT lpPoints,long nPnts,LPDOUBLE pPerim)
+double GetPolyLengthF(HPFPOINT lpPoints, long nPnts)
+#if ENABLETRACE
+{GSSiEnterProg (999);
+#endif
+{
+	double Dist = 0;
+	DWORD	i;
+	HPFPOINT	lpPoints2 = lpPoints + 1;
+
+	for (i = 1; i<nPnts; i++, lpPoints++, lpPoints2++)
+		Dist += ldistp(*lpPoints, *lpPoints2);
+	{
+#if ENABLETRACE
+		GSSiExitProg(999);
+#endif
+		return Dist;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+double ComputeProjectedAreaAreaD(HPDPOINT lpPoints, long nPnts, LPDOUBLE pPerim)
 #if ENABLETRACE
 {GSSiEnterProg (1000);
 #endif

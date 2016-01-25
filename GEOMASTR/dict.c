@@ -195,10 +195,10 @@ short SelectSymbol (HWND hWnd,short Type,LPSTR StartSym,short DialogOpt)
 
 short SelectFontSymbol (HWND hWnd,LPSTR FontSizeC, COLORREF *Color)
 {
-	FARPROC lpfnGET_FONTSYMMsgProc;
+	DLGPROC lpfnGET_FONTSYMMsgProc;
 	int	nRc;
 	
-	lpfnGET_FONTSYMMsgProc = MakeProcInstance((FARPROC)GET_FONTSYMMsgProc, hInst);
+	lpfnGET_FONTSYMMsgProc = MakeProcInstance((DLGPROC)GET_FONTSYMMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"GET_FONTSYM", hWnd, lpfnGET_FONTSYMMsgProc);
 	FreeProcInstance(lpfnGET_FONTSYMMsgProc); 
 	return nRc;
@@ -1401,7 +1401,7 @@ Next:
 		if (nElementsToDisplay && !ItemInList (i,nElementsToDisplay,hElementsToDisplay))
 			goto SkipElement;
 		pElement = (LPELEMENT)GlobalLock (*phElement);
-		if (hDC > (HWND)100)
+		if (hDC > (HDC)100)
 		{   
 			hBrush = 0;
 			if (pElement->Type == SVAREA)
@@ -1459,7 +1459,7 @@ Next:
 					PC = Newpt;
 			}
 			Newpt = dnewpt (TiePoint,pVector->AZM+rotation,pVector->Dist);
-			if (!hDC || hDC > (HWND)100) 
+			if (!hDC || hDC > (HDC)100) 
 				Newpt.y = TiePoint.y - (Newpt.y - TiePoint.y); 
 			Newpt.x = TiePoint.x + (Newpt.x - TiePoint.x) * Hsizefactor;
 			Newpt.y = TiePoint.y + (Newpt.y - TiePoint.y) * Vsizefactor; 
@@ -1486,7 +1486,7 @@ Next:
 		} 
 		GlobalUnlock (hCurElement); 
 		pPoint = (LPPOINT)GlobalLock (hCurElement); 
-		if (hDC > (HWND)100)// 4/20/04 && !pBounds)
+		if (hDC > (HDC)100)// 4/20/04 && !pBounds)
 		{   
 			short	Type = pElement->Type;
 			
@@ -1576,7 +1576,7 @@ Next:
 			if (pSymbolRect)
 				AddPointsToSymbolRect (hDC,pPoint,NumElementPoints,Width);
 		}
-		else if (hDC && hDC < (HWND)99) // output symbol to dxf
+		else if (hDC && hDC < (HDC)99) // output symbol to dxf
 		{   
 			switch (pElement->Type)
 			{
@@ -1621,7 +1621,7 @@ Next:
 					break; 
 			}
 		}
-		else if (hDC == (HWND)99) // output symbol to edit file
+		else if (hDC == (HDC)99) // output symbol to edit file
 		{   
 			HANDLE		hDPoint = GSSiGlobAlloc ( 458,GMEM_MOVEABLE,NumElementPoints*sizeof(DPOINT));
 			HPDPOINT	pDPoint = (HPDPOINT)GlobalLock (hDPoint);   
@@ -1673,7 +1673,7 @@ Exit:
 	GlobalUnlock (hSymbol);
 Exit2:
 	DestroySymbol (hSymbolInvis); 
-	if (hDC > (HWND)1)
+	if (hDC > (HDC)1)
 		RestoreDC (hDC,-1);
 	return hSaveScreen;
 }
@@ -3921,7 +3921,31 @@ EndSymbol:
 	return 0;
 }
 
-void AddPointsToSymbolRect (HDC	hDC,HPPOINT lpPoints, long npnts,int Width)
+void AddPointsToSymbolRectF(HDC	hDC, HPFPOINT lpPoints, long npnts, int Width)
+{
+	HANDLE handle = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(POINT) + 4);
+	HPPOINT	pPoints = (HPPOINT)GlobalLock(handle);
+
+	for (int i = 0; i < npnts; i++)
+	{
+		pPoints[i].x = IDNINT(lpPoints[i].x);
+		pPoints[i].y = IDNINT(lpPoints[i].y);
+	}
+	AddPointsToSymbolRect(hDC, pPoints, npnts, Width);
+	GSSiGlobUlFree(&handle);
+}
+void AddFPointsToSymbolRect(HDC	hDC, HPFPOINT lpPoints, long npnts, int Width)
+{
+	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts * sizeof(POINT)+4);
+	LPPOINT pPoints = GlobalLock(hPoints);
+
+	for (int i = 0; i < npnts; i++)
+		pPoints[i] = FPointToPoint(lpPoints[i]);
+	AddPointsToSymbolRect(hDC,pPoints, npnts, Width);
+	GSSiGlobUlFree(&hPoints);
+}
+
+void AddPointsToSymbolRect(HDC	hDC, HPPOINT lpPoints, long npnts, int Width)
 {
 	RECT	Rect;
 	
@@ -4025,20 +4049,35 @@ GSSiExitProg (963);
 #endif
 } 
    
-BOOL FlatEndPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width,COLORREF Color)
+BOOL FlatEndPolylineI(HDC hDC, HPPOINT lpPoints, long npnts, int Width, COLORREF Color)
+{
+	HANDLE handle = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(FPOINT)+4);
+	HPFPOINT	pPoints = (HPFPOINT)GlobalLock(handle);
+
+	for (int i = 0; i < npnts; i++)
+	{
+		pPoints[i].x = lpPoints[i].x;
+		pPoints[i].y = lpPoints[i].y;
+	}
+	BOOL rtn = FlatEndPolyline(hDC, pPoints, npnts, Width, Color);
+	GSSiGlobUlFree (&handle);
+	return rtn;
+}
+
+BOOL FlatEndPolyline (HDC hDC, HPFPOINT lpPoints, long npnts,int Width,COLORREF Color)
 #if ENABLETRACE
 {GSSiEnterProg (963);
 #endif
 {   
 	BOOL	rtn;    
-	LPPOINT	pPoints;  
+	LPFPOINT	pPoints;  
 	HANDLE	hMem;   
 	long	mxp=MaxDisplayPoints/2;
 	unsigned short	np,ii;
 	
 	if (pSymbolRect)
-		AddPointsToSymbolRect (hDC,lpPoints,npnts,Width); 
-	rtn = DrawLineWithFlatEnd (hDC,(short)min (npnts,mxp),lpPoints,Width,Color);  
+		AddPointsToSymbolRectF (hDC,lpPoints,npnts,Width); 
+	rtn = DrawLineWithFlatEndF (hDC,(short)min (npnts,mxp),lpPoints,Width,Color);  
 //	rtn = Polyline (hDC,lpPoints,(short)min (npnts,mxp));
 	if (!rtn)
 	{
@@ -4067,13 +4106,13 @@ GSSiExitProg (963);
 	while (npnts > 0)
 	{   
 		lpPoints += mxp;
-		hMem = GSSiGlobAlloc ( 760,GMEM_MOVEABLE,USHRT_MAX);
-		pPoints = (LPPOINT)GlobalLock (hMem);  
+		hMem = GSSiGlobAlloc ( 760,GMEM_MOVEABLE,USHRT_MAX*2);
+		pPoints = (LPFPOINT)GlobalLock (hMem);  
 		np = min (npnts,mxp);
-		_fmemmove (pPoints,lpPoints,np*sizeof(POINT));
+		_fmemmove (pPoints,lpPoints,np*sizeof(FPOINT));
 		if (np > 1)
 		{   
-			rtn = DrawLineWithFlatEnd (hDC,np,pPoints,Width,Color);  
+			rtn = DrawLineWithFlatEndF (hDC,np,pPoints,Width,Color);  
 //			rtn = Polyline (hDC,pPoints,np);    
 			if (!rtn)
 				ii=1;
@@ -4112,7 +4151,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 		hCPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
 		GetObject (hCPen,sizeof(LOGPEN),&lPen);
 		if (Width > 0)
-			width = IDNINT (Width);
+			width = IDNINT(Width * DeviceToScreenFactor);
 		else
 		{
 			if (PRJ_UNITS[1] == 4)
@@ -4132,7 +4171,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 		pPoints->x = IDNINT(lpPoints->x);
 		pPoints++->y = IDNINT(lpPoints++->y);
 	}
-	if (npnts > 1)
+	if (npnts > 1) 
 	{	 
 //		pPointsBeg[npnts]=pPointsBeg[npnts-2];
 		rtn = BigPolyline (hDC,pPointsBeg,npnts,0); 
@@ -4208,7 +4247,7 @@ int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
 	return rtn;
 }
 
-BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
+BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPFPOINT Points, int npnts,int Width)
 {
 	int		nArrows = 2;
 	COLORREF lineColor = GetGlobalLVal2("[%1WAYARROWLINECOLOR]", RGB(255,255,255));
@@ -4223,7 +4262,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 		return FALSE;
 	{
 		double	ArrowLength=Width*4;
-		double	PolyLen = GetPolyLength (Points,npnts);
+		double	PolyLen = GetPolyLengthF (Points,npnts);
 		double	GapLength = 8;
 		
 		GapLength *= gapFactor;
@@ -4254,7 +4293,7 @@ BOOL DrawOneWayArrows (HDC hDC, int OneWay,HPPOINT Points, int npnts,int Width)
 			hOldBrush = SelectObject (hDC,hBrush);
 			hOldPen = SelectObject (hDC,hPen);
 			for (i=0;i<npnts;i++)
-				pDPoints[i] = PointToDPoint (Points[i]);
+				pDPoints[i] = FPointToDPoint (Points[i]);
 			StartArrow = GapLength;//max (0,(PolyLen - (nArrows * 2 -1)*ArrowLength)/2);
 			if (StartArrow < 0)
 			{
@@ -4351,10 +4390,10 @@ void DisplayHollowLines (BOOL Clear)
 				GSSillseek (FidHollowLines,0,0);
 			    while (BigRead (FidHollowLines,(HPSTR)&HollowLineHeader,sizeof(HollowLineHeader)) == sizeof(HollowLineHeader))
 			    {
-				    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,HollowLineHeader.npnts*sizeof(POINT));
-				    HPPOINT	SPoints=(HPPOINT)GlobalLock (hPoints); 
+				    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,HollowLineHeader.npnts*sizeof(FPOINT));
+				    HPFPOINT	SPoints=(HPFPOINT)GlobalLock (hPoints); 
 				    
-				    BigRead (FidHollowLines,(HPSTR)SPoints,HollowLineHeader.npnts*sizeof(POINT));
+				    BigRead (FidHollowLines,(HPSTR)SPoints,HollowLineHeader.npnts*sizeof(FPOINT));
 				    Width = max(0,HollowLineHeader.width-2*DeviceToScreenFactor);
 				    if (HollowLineHeader.desc > 0 && HollowLineHeader.width > 2*DeviceToScreenFactor)
 				    {   
@@ -4363,12 +4402,12 @@ void DisplayHollowLines (BOOL Clear)
 						    if (Width > 0)
 						    {
 							    if (UseFlatEndPolyline)
-									FlatEndPolyline (CurView->hDC, SPoints, HollowLineHeader.npnts,Width,HollowLineHeader.color);  
+									FlatEndPolylineI (CurView->hDC, SPoints, HollowLineHeader.npnts,Width,HollowLineHeader.color);  
 								else
 								{
 								    hPen = CreatePen (PS_SOLID,Width,HollowLineHeader.color);  
 								    OldPen = SelectObject (CurView->hDC,hPen); 
-									BigPolyline (CurView->hDC, SPoints, HollowLineHeader.npnts,Width); 
+									BigFPolyline (CurView->hDC, SPoints, HollowLineHeader.npnts,Width); 
 								    SelectObject (CurView->hDC,OldPen);
 								    GSSiDeleteObject (&hPen); 
 								}
@@ -4391,10 +4430,10 @@ void DisplayHollowLines (BOOL Clear)
 	return;
 }  
 
-POINT RectIntersect (LPRECT pRect,POINT P1, POINT P2)
+DPOINT RectIntersect (LPRECT pRect,DPOINT P1, DPOINT P2)
 {
-	POINT IntPoint;
-	double	AZ=getaz (P1,P2); 
+	DPOINT IntPoint;
+	double	AZ=getazd (&P1,&P2); 
 	double	Intx, Inty;
 	short	ii;
 	
@@ -4432,14 +4471,14 @@ POINT RectIntersect (LPRECT pRect,POINT P1, POINT P2)
 	} 
 	ii=1;
 Exit:
-	IntPoint.x = IDNINT (Intx);
-	IntPoint.y = IDNINT (Inty);
+	IntPoint.x = Intx;
+	IntPoint.y = Inty;
 	return IntPoint;
 }
 
-int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints)
+int RectIntersect2 (LPRECT pRect,DPOINT P1, DPOINT P2, LPDPOINT IntPoints)
 {
-	double	AZ=getaz (P1,P2); 
+	double	AZ=getazd (&P1,&P2); 
 	double	Intx, Inty;
 	short	ii; 
 	int		nint=0;
@@ -4450,8 +4489,8 @@ int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints)
 		{
 			if (Inty <= pRect->bottom && Inty >= pRect->top) 
 			{
-				IntPoints[nint].x = IDNINT (Intx);
-				IntPoints[nint++].y = IDNINT (Inty); 
+				IntPoints[nint].x = Intx;
+				IntPoints[nint++].y = Inty; 
 			}
 		}
 	}
@@ -4461,8 +4500,8 @@ int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints)
 		{
 			if (Inty <= pRect->bottom && Inty >= pRect->top)
 			{
-				IntPoints[nint].x = IDNINT (Intx);
-				IntPoints[nint++].y = IDNINT (Inty); 
+				IntPoints[nint].x = Intx;
+				IntPoints[nint++].y = Inty; 
 			}
 		}
 	}
@@ -4472,8 +4511,8 @@ int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints)
 		{
 			if (Intx >= pRect->left && Intx <= pRect->right)
 			{
-				IntPoints[nint].x = IDNINT (Intx);
-				IntPoints[nint++].y = IDNINT (Inty); 
+				IntPoints[nint].x = Intx;
+				IntPoints[nint++].y = Inty;
 			}
 		}
 	}
@@ -4483,8 +4522,8 @@ int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints)
 		{
 			if (Intx >= pRect->left && Intx <= pRect->right)
 			{
-				IntPoints[nint].x = IDNINT (Intx);
-				IntPoints[nint++].y = IDNINT (Inty); 
+				IntPoints[nint].x = Intx;
+				IntPoints[nint++].y = Inty;
 			}
 		}
 	} 
@@ -4493,13 +4532,13 @@ int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints)
 	return nint;
 }
 
-int GWPolylineScreen2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
+int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc)
 {
     long	i, n=0, npm1=npnts-1; 
-    POINT	ScreenPoint,PreviousPoint;  
+    DPOINT	ScreenPoint,PreviousPoint;  
     BOOL	PrevPointIn, PointIn=FALSE;   
-    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,npnts*sizeof(POINT));
-    HPPOINT	SPoints=(HPPOINT)GlobalLock (hPoints);
+    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,npnts*sizeof(DPOINT));
+    HPDPOINT	SPoints=(HPDPOINT)GlobalLock (hPoints);
     int		rtn=0, w;
 	double	dw;
 	RECT	SaveRect = CurView->DrawRect;
@@ -4508,17 +4547,17 @@ int GWPolylineScreen2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
     	dw=(double)StreetWidth/CurView->MetersPerPixel;   
     else
     	dw=GetSymbolWidth(abs(idesc));
-    dw *= ThemeWidthFactor * StreetWidthFactor;
+	dw *= ThemeWidthFactor * StreetWidthFactor;
 	w = IDNINT (dw);
 	InflateRect (&CurView->DrawRect,w,w);
     SaveDC (hDC);
 	SetDisplayMode (hDC, GF_TEXTMODE);
    	PreviousPoint = Points[0];   
-   	PrevPointIn = PtInRect (&CurView->DrawRect,PreviousPoint);
+	PrevPointIn = DPointInRect(&PreviousPoint,&CurView->DrawRect);
     for (i=1;i<npnts;i++)
     {   
     	ScreenPoint = Points[i];
-   		PointIn = PtInRect (&CurView->DrawRect,ScreenPoint); 
+		PointIn = DPointInRect(&ScreenPoint,&CurView->DrawRect);
    		if (PrevPointIn && PointIn)
     		SPoints[n++] = PreviousPoint;
     	else if (PrevPointIn && !PointIn)   
@@ -4545,25 +4584,65 @@ int GWPolylineScreen2 (HDC hDC, HPPOINT Points, long npnts,int idesc)
 	return rtn;
 } 
 
-int GWPolylineScreen (HDC hDC, HPPOINTS Points, long npnts,int idesc)
+int GWPolylineScreen(HDC hDC, HPFPOINT Points, long npnts, int idesc)
 {
-    HANDLE	hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,npnts*sizeof(POINT));
-    HPPOINT	SPoints=(HPPOINT)GlobalLock (hPoints);
-    int		rtn;   
-    long	i;
-    
-    for (i=0;i<npnts;i++)
+	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
+	HPDPOINT	SPoints = (HPDPOINT)GlobalLock(hPoints);
+	int		rtn;
+	long	i;
+
+	for (i = 0; i<npnts; i++)
 	{
-		POINT	p=POINTStoPOINT(Points[i]);
-		ProjectFilePt (&p);
-    	SPoints[i] = FilePtToWinPt (p); 
+		DPOINT	p;
+		p.x = Points[i].x;
+		p.y = Points[i].y;
+		ProjectFilePtD(&p);
+		SPoints[i] = FilePtToBasePtD(p);
 	}
-    rtn = GWPolylineScreen2 (hDC,SPoints,npnts,idesc);
-    GSSiGlobUlFree (&hPoints);
-    return rtn;
+	rtn = GWPolylineScreen2(hDC, SPoints, npnts, idesc);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}
+int GWPolylineScreenI(HDC hDC, HPPOINT Points, long npnts, int idesc)
+{
+	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
+	HPDPOINT	SPoints = (HPDPOINT)GlobalLock(hPoints);
+	int		rtn;
+	long	i;
+
+	for (i = 0; i<npnts; i++)
+	{
+		DPOINT	p;
+		p.x = Points[i].x;
+		p.y = Points[i].y;
+		ProjectFilePtD(&p);
+		SPoints[i] = FilePtToBasePtD(p);
+	}
+	rtn = GWPolylineScreen2(hDC, SPoints, npnts, idesc);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}
+int GWPolylineScreenS(HDC hDC, HPPOINTS Points, long npnts, int idesc)
+{
+	HANDLE	hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts*sizeof(DPOINT) + 4);
+	HPDPOINT	SPoints = (HPDPOINT)GlobalLock(hPoints);
+	int		rtn;
+	long	i;
+
+	for (i = 0; i<npnts; i++)
+	{
+		DPOINT	p;
+		p.x = Points[i].x;
+		p.y = Points[i].y;
+		ProjectFilePtD(&p);
+		SPoints[i] = FilePtToBasePtD(p);
+	}
+	rtn = GWPolylineScreen2(hDC, SPoints, npnts, idesc);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
 }
 
-int DisplayScreenLineSegment (HDC hDC, HPPOINT SPoints,long n,int idesc,int w4)
+int DisplayScreenLineSegment (HDC hDC, HPFPOINT SPoints,long n,int idesc,int w4)
 {
     COLORREF	Color=RGB(255,255,255), OutlineColor=4;   
     HPEN	hPen, OldPen; 
@@ -4622,7 +4701,7 @@ int DisplayScreenLineSegment (HDC hDC, HPPOINT SPoints,long n,int idesc,int w4)
 	{
 	    hPen = CreatePen (PS_SOLID,IDNINT(w/**DeviceToScreenFactor*/),ConvertColor(OutlineColor,-1));  
 	    OldPen = SelectObject (hDC,hPen);  
-		rtn = BigPolyline (hDC, SPoints, n,w); 
+		rtn = BigFPolyline (hDC, SPoints, n,w); 
 	    SelectObject (hDC,OldPen);
 	    GSSiDeleteObject (&hPen);  
 	}
@@ -4652,13 +4731,13 @@ AddToFile:
 	    HollowLineHeader.OneWay = StreetOneWay;
 	    HollowLineHeader.color = ConvertColor(Color,-1);
 	    BigWrite (FidHollowLines,(HPSTR)&HollowLineHeader,sizeof(HollowLineHeader),-1);
-	    BigWrite (FidHollowLines,(HPSTR)SPoints,n*sizeof(POINT),-1);  
+	    BigWrite (FidHollowLines,(HPSTR)SPoints,n*sizeof(FPOINT),-1);  
 	}
 Exit:
 	return rtn;
 } 
 
-int GWPolyline3 (HDC hDC, HPPOINTS Points, long npnts,int idesc)    
+/*int GWPolyline3 (HDC hDC, HPPOINTS Points, long npnts,int idesc)    
 #if ENABLETRACE
 {GSSiEnterProg (1438);
 #endif
@@ -4691,7 +4770,7 @@ GSSiExitProg (1438);
 #if ENABLETRACE
 }
 #endif
-} 
+}*/ 
 
 int GWPolyline (HDC hDC, HPPOINTS Points, long npnts,int idesc)    
 #if ENABLETRACE
@@ -4700,7 +4779,7 @@ int GWPolyline (HDC hDC, HPPOINTS Points, long npnts,int idesc)
 {
 	int	rtn;
 
-	if (CurView->Rotation)
+	//if (CurView->Rotation)
 	{
 		HANDLE	Handle = GSSiGlobAlloc ( 756,GMEM_MOVEABLE,(long)abs(npnts)*sizeof(DPOINT));
 		HPDPOINT pPolyPointsD = (HPDPOINT) GlobalLock (Handle);
@@ -4714,8 +4793,8 @@ int GWPolyline (HDC hDC, HPPOINTS Points, long npnts,int idesc)
 		GSSiGlobUlFree (&Handle);
 		RestoreDC (hDC,-1);
 	}
-	else
-		rtn = GWPolyline3 (hDC,Points, npnts,idesc);
+	//else
+	//	rtn = GWPolyline3 (hDC,Points, npnts,idesc);
 {
 #if ENABLETRACE
 GSSiExitProg (1384);
@@ -4728,7 +4807,7 @@ GSSiExitProg (1384);
 #endif
 } 
 
-int GWPolylineShort (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc)
+/*int GWPolylineShort (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc)
 #if ENABLETRACE
 {GSSiEnterProg (984);
 #endif
@@ -4754,7 +4833,7 @@ GSSiExitProg (984);
 		
 		CurTheme = StreetCenterline;
 
-		i = GWPolylineScreen (hDC,lpPoints,abs(npnts),idesc);
+		i = GWPolylineScreenS (hDC,lpPoints,abs(npnts),idesc);
 		CurTheme = SaveTheme;
 		goto Exit;
 	}
@@ -4818,7 +4897,7 @@ GSSiExitProg (984);
 #if ENABLETRACE
 }
 #endif
-} 
+} */
 
 BOOL PointInWBoundsPTOL (HPDPOINT Point,LPMNMXCORD pWBounds)
 #if ENABLETRACE
@@ -5668,19 +5747,34 @@ GSSiExitProg (989);
 		hReverse =  ReversePoints3 (npnts,lpPoints);
 		lpPoints = (HPDPOINT)GlobalLock (hReverse);
 	}
+	if (ShowLineDirection)
+	{
+		HANDLE hFPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, npnts * sizeof(FPOINT)+4);
+		HPFPOINT FPoints = GlobalLock(hFPoints);
+		for (i = 0; i<npnts; i++)
+			FPoints[i] = BasePtToWinPtF(&lpPoints[i]);
+
+		SaveDC(hDC);
+		SetDisplayMode(hDC, GF_TEXTMODE);
+		DrawOneWayArrows(hDC, 1, FPoints, npnts, 5);
+		AAPolyLineF(hDC, FPoints, npnts, 0, 2);
+		RestoreDC(hDC, -1);
+		GSSiGlobUlFree(&hFPoints);
+		goto Exit;
+	}
 	if (StreetCenterline && SymbolIsSolidLine (idesc))
 	{   
 		short	desc=idesc;
-		HPPOINT	lpPoints16;
+		HPDPOINT	lpPoints16;
 		LPTHEME	SaveTheme = CurTheme;
 		
 		CurTheme = StreetCenterline;
 		if (ShowHollowStreet != 1)
 			desc = -desc;
-		Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(POINT));
-		lpPoints16 = (HPPOINT)GlobalLock (Handle);
+		Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(DPOINT));
+		lpPoints16 = (HPDPOINT)GlobalLock (Handle);
 		for (i=0;i<npnts;i++,lpPoints++)
-			lpPoints16[i] = BasePtToWinPt (lpPoints);   
+			lpPoints16[i] = BasePtToWinPtD (lpPoints);   
 	    rtn = GWPolylineScreen2 (hDC,lpPoints16,npnts,desc); 
 	    GSSiGlobUlFree (&Handle);
 		CurTheme = SaveTheme;
@@ -5770,16 +5864,16 @@ GSSiExitProg (989);
 	RestoreDC (hDC,-1);
 	if (StreetCenterline && (CurrentType == GF_LINE	|| CurrentType == GF_POLYLINE || CurrentType == GF_CURVE))
 	{   
-		HPPOINT	lpPoints16;
+		HPFPOINT	lpPoints16;
 		LPTHEME	SaveTheme = CurTheme;
 		
 		CurTheme = StreetCenterline;
 		
-		Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(POINT));
-		lpPoints16 = (HPPOINT)GlobalLock (Handle); 
+		Handle = GSSiGlobAlloc ( 768,GMEM_MOVEABLE,((long)npnts+16L) * (long)sizeof(FPOINT));
+		lpPoints16 = (HPFPOINT)GlobalLock (Handle); 
 		lpPoints = lpPointsIn;
 		for (i=0;i<npnts;i++,lpPoints++)
-			lpPoints16[i] = BasePtToWinPt (lpPoints);   
+			lpPoints16[i] = BasePtToWinPtF (lpPoints);   
 	    rtn = GWPolylineScreen2 (hDC,lpPoints16,npnts,-idesc); 
 	    GSSiGlobUlFree (&Handle);
 		CurTheme = SaveTheme;

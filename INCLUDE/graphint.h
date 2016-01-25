@@ -295,8 +295,8 @@ BOOL OffsetHighlightedLines (int NumPoints,HANDLE hPoints, double Dist);
 BOOL SelectAreaToOffsetFile (int Item,double Offset,HANDLE hTran);
 int CurvePoints (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINT *Points,double CurveExpansionFactor,long MaxPoints);
 int CurvePointsS (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINTS *Points,double CurveExpansionFactor,long MaxPoints);
-int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points,LPDOUBLE pBackAZ,long MaxPoints,double VectorizationFactor,short LoopFactor);
-double AreaFromPolyWithCurves (HANDLE hUnSplinedPoly,long nUnSplinedPoints,HANDLE hCurvePoints);
+int CurvePointsD(LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points, LPDOUBLE pBackAZ, long MaxPoints, double VectorizationFactor, short LoopFactor);
+double AreaFromPolyWithCurves(HANDLE hUnSplinedPoly, long nUnSplinedPoints, HANDLE hCurvePoints);
 void SetCurvPltCtol (double INCTOL);
 void CreateNewObject(int i);
 void SetClassLineType (int Desc,int Type, float Width, int Style, int ProPen, COLORREF color);
@@ -349,23 +349,26 @@ void DestroySavedGraphicsFile (int Type);
 void SetSavedGraphicsFid (int Type);
 void CreateSavedGraphicsFiles (int Type);
 void DisplaySavedGraphicsFile (HDC hDC,int Type);
-BOOL DrawOneWayArrows(HDC hDC, int OneWay, HPPOINT Points, int npnts, int Width);
+BOOL DrawOneWayArrows(HDC hDC, int OneWay, HPFPOINT Points, int npnts, int Width);
 int GWPolyline (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
 int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc);
 int GWPolylineD (HDC hDC, HPDPOINT lpPoints, long npnts,int idesc);
 int GWPolylineShort (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
+void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, float w);
+void AAPolyLineF(HDC hDC, LPFPOINT pPoints, int np, COLORREF Color, float w);
+void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb);
 void PolylineINV (HDC hDC,LPPOINT P,short n);
 BOOL ProcessPolygon (HDC hDC,BOOL ShowBorder,int PltType,HPEN hRandPen,HPEN hTempPen,int ipen);
-int DisplayScreenLineSegment (HDC hDC, HPPOINT SPoints,long n,int idesc,int w);
+int DisplayScreenLineSegment (HDC hDC, HPFPOINT SPoints,long n,int idesc,int w);
 BOOL AddToSpecialCursorList (HCURSOR hCurs);
 BOOL InSpecialCursorList (HCURSOR hCurs);
 void DisplayHollowLines (BOOL Clear);
-POINT RectIntersect (LPRECT pRect,POINT P1, POINT P2);
-int RectIntersect2 (LPRECT pRect,POINT P1, POINT P2, LPPOINT IntPoints);
-int GWPolylineScreen (HDC hDC, HPPOINTS Points, long npnts,int idesc);
-int GWPolylineScreen2 (HDC hDC, HPPOINT Points, long npnts,int idesc);
+DPOINT RectIntersect (LPRECT pRect,DPOINT P1, DPOINT P2);
+int RectIntersect2 (LPRECT pRect,DPOINT P1, DPOINT P2, LPDPOINT IntPoints);
+int GWPolylineScreen (HDC hDC, HPFPOINT Points, long npnts,int idesc);
+int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc);
 void AddPointsToSymbolRect (HDC hDC,HPPOINT lpPoints, long npnts,int Width);
-BOOL FlatEndPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width,COLORREF Color);
+BOOL FlatEndPolyline (HDC hDC, HPFPOINT lpPoints, long npnts,int Width,COLORREF Color);
 BOOL BigPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width);
 BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width);
 BOOL BigSPolyline (HDC hDC, HPPOINTS lpPoints, long npnts,int Width);
@@ -741,7 +744,7 @@ HFILE SaveHighlightListToConfig (HFILE FidConfig);
 BOOL ReadHighlightListFromConfig (HFILE *FidConfig);
 BOOL GetNextHighlightData (LPLONG pRefno,LPHIGHLIGHTDATA pHighlightData,BOOL First);
 void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore);
-HANDLE ShowPointerLine (HWND hWnd,RECT rect,POINT endpoint, POINT begpoint, BOOL *HavePL,BOOL MoveMode,int LineWidth,int Elww,int Elwh,LPRECT pClipRect);
+HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *HavePL,BOOL MoveMode,int LineWidth,int Elww,int Elwh,LPRECT pClipRect);
 void DisplayShadow (HDC hDC,LPRECT pRect,short offset);
 BOOL CreateReorgBackupFile (LPSTR PltName);
 void ApplyVPShadows (void);
@@ -1257,13 +1260,15 @@ double ConvertDist2 (double Dist,int from, int to);
 double ConvertInDist (double Dist,int opt);
 double ConvertArea (double Area,int opt);  
 double GetPolyMaxDistBetweenPoints (HPDPOINT lpPoints,long nPnts,LPLONG pMaxDistPointID);
-double GetPolyLength (HPPOINT lpPoints,long nPnts);  
-double GetPolyLengthD (HPDPOINT lpPoints,long nPnts);  
+double GetPolyLength(HPPOINT lpPoints, long nPnts);
+double GetPolyLengthF(HPFPOINT lpPoints, long nPnts);
+double GetPolyLengthD(HPDPOINT lpPoints, long nPnts);
 double GetPoly3DLength2D (HPDPOINT3D lpPoints,long nPnts); 
 HANDLE GetPolyBetweenDist (HPDPOINT lpPoints,long nPnts,double StartDSDist,double EndDist,LPINT pnPnts,BOOL ShapePointsOnly,BOOL WantOp);
 DPOINT PointAtDistOnPoly (HPDPOINT pPoly,long nPoly,double Dist,LPDOUBLE pAZ,LPLONG pEndPointNum);   
 DPOINT PointAtScreenXOnPoly (HPDPOINT lpPoints,long nPnts,double AtX);   
 DPOINT3D PointAtDistOnPoly3D (HPDPOINT3D lpPoints,long nPnts,double AtDist,LPDOUBLE pAZ,LPLONG pEndPointNum);   
+DPOINT PointAtDistOnPolyF(HPFPOINT lpPoints, long nPnts, double AtDist, LPDOUBLE pAZ, LPSHORT pLasti);
 DPOINT PointAtDistOnPoly16 (HPPOINT lpPoints,long nPnts,double AtDist,LPDOUBLE pAZ,LPSHORT pLasti);   
 long LoadStreetSegData (LPSHORT Stuff,DPOINT FirstPoint,DPOINT LastPoint,LPLONG StartRefno,BOOL UniqueRefno);
 void DisplayVirtualPrintAreas (void);
@@ -1540,7 +1545,7 @@ void DetermineVPDisplaySequence (void);
 void DetermineVPDisplaySequence2 (short ParentID, LPSHORT pNumDisplay);
 BOOL DisplaySeg (HDC *hDC,BOOL Immediate);
 short HaveMapTimer (void);
-HWND VisibilityControl (HWND hWnd,HWND hInst,LPSTR ConnectToVP,LPRECT pRect,double factor,HANDLE hInit,BOOL First,BOOL Docked,BOOL CheckForDock);
+HWND VisibilityControl(HWND hWnd, HINSTANCE hInst, LPSTR ConnectToVP, LPRECT pRect, double factor, HANDLE hInit, BOOL First, BOOL Docked, BOOL CheckForDock);
 BOOL GetVisibility (int idesc);
 BOOL ToggleVisibility (int idesc);
 BOOL GetInVisibility (int idesc);
@@ -2159,7 +2164,7 @@ BOOL SetDGNAttribute (HFILE Fid, LPSTR str, LPSTR pENum, LPSTR WantENum,LPSTR MS
 short DisplayDisconnected (HWND hWndDlg, short nlast,double MaxDist,HANDLE hIdx, HANDLE hTag,LPSTR udi);
 short GetFieldIDFromName (LPSTR IDName,LPOPENFILEDATA FilePtr,LPSTR Name);
 BOOL AddToLayeredSymbolList (HPFPOINT lpPoints,long nPnts,int idesc);
-BOOL AddToStreetSegmentList (HPPOINT Point, int np, int Width,int Order,COLORREF FillColor,COLORREF OutlineColor);
+BOOL AddToStreetSegmentList (HPFPOINT Point, int np, int Width,int Order,COLORREF FillColor,COLORREF OutlineColor);
 BOOL DisplayStreetCenterlines (void);
 BOOL DisplayStreetLabels (BOOL Clear);
 BOOL DisplayLayeredSymbols (HDC hDC,BOOL Clear);
@@ -2401,6 +2406,16 @@ LPDPOINT DecodeString(char *encodedString, int *numPoints);
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);
 
+void drawTextwithinPolygon(char *text
+	/*inContext : */, CGContextRef context
+	/*withinPolygon :*/, LPDPOINT pPoints
+	/*withNumPoints :*/, NSInteger numPoints
+	/*andNumLoops :*/, NSInteger numLoops
+	/*loopLen :*/, int* polyPartLen
+	/*withinBounds :*/, LPMNMXCORD pBounds
+	/*fontSize :*/, CGFloat fontSize
+	/*minFontSize :*/, CGFloat minFontSize
+	/*textColor :*/, UIColor * textColor);
 
  
 

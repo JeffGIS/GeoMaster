@@ -443,7 +443,7 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 					pNewPoints[nNodes++].y = row;
 				}
 				Area = ComputeAreaAreaD(pNewPoints, nNodes, 0);
-				if (fabs(Area) > 10 && nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 3)
+				if (fabs(Area) > 10 && nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 5)
 				{
 					GlobalUnlock(phNewPoints[nPoly]);
 					phNewPoints[nPoly] = GSSiGlobalReAlloc(0, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
@@ -518,7 +518,7 @@ void testConvertBitmapToPoly(LPSTR file)
 				strcpy(outFile, file);
 				REPLAC(outFile, ".bmp", "poly.bmp", MAX_PATH);
 				SaveBitmap(hBM, outFile, 0, 0);
-				if (nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 3)
+				if (nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 5)
 					nPoly++;
 			}
 		}
