@@ -1222,19 +1222,31 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 	static	projPJ	projdef[MAXUSERPROJ] = { 0 };
 
 	strcpy (OutLoc,"0");
-	if (!stricmp (Arg1,"DEFINE"))
+	if (!stricmp(Arg1, "NVPFROMPRJ"))
 	{
-		if ((id = GetTranID (Arg2)) < 0)
+		if ((id = GetTranID(Arg2)) < 0)
 		{
-			if ((id = GetTranID ("")) < 0)
+			if ((id = GetTranID("")) < 0)
 				return;
 		}
-		if (!(projdef[id] = pj_init_plus(Arg3)) )
+		if (!(projdef[id] = pj_init_plus(Arg3)))
 			return;
-		strcpy (projid[id],Arg2);
-		strcpy (OutLoc,"1");
+		strcpy(projid[id], Arg2);
+		strcpy(OutLoc, "1");
 	}
-	else if (!stricmp (Arg1,"DELETE"))
+	else if (!stricmp(Arg1, "DEFINE"))
+	{
+		if ((id = GetTranID(Arg2)) < 0)
+		{
+			if ((id = GetTranID("")) < 0)
+				return;
+		}
+		if (!(projdef[id] = pj_init_plus(Arg3)))
+			return;
+		strcpy(projid[id], Arg2);
+		strcpy(OutLoc, "1");
+	}
+	else if (!stricmp(Arg1, "DELETE"))
 	{
 		if ((id = GetTranID (Arg2)) < 0)
 			return;
