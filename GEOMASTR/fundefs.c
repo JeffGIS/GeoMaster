@@ -10,8 +10,9 @@ int	GetFunctionID1 (LPSTR str)
 			if (!_fstrnicmp (str,"Y",1)) return 104;
 			if (!_fstrnicmp (str,"C",1)) return 105;
 			if (!_fstrnicmp (str,"B",1)) return 106;
-			if (!_fstrnicmp (str,"E",1)) return 107;
-			return 0; 
+			if (!_fstrnicmp(str, "E", 1)) return 107;
+			if (!_fstrnicmp(str, "M", 1)) return 108;
+			return 0;
 }
 int	GetFunctionID2 (LPSTR str)
 {
