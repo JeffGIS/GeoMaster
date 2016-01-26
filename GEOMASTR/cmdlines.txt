@@ -1,3 +1,5 @@
+configs\basemap.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\geomas
+configs\maplegrove.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\gmmobile\metroutm
 configs\texttest2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD m:\BU_2015_11_04\GEOMas
 projects\corners\corners.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD m:\BU_2015_11_04\GEOMas
 configs\jeff\manholes.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
@@ -147,6 +149,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 

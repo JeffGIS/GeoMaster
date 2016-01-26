@@ -338,18 +338,30 @@ HANDLE	hSTR = 0;
 	    	return rtn;
 	    }
             break;
-        case SQL_DATAFILE:   
-        {
-			LPSQLDATABASE	pDB=(LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);  
-		        
-			rtn = NumSQLRows (pDB->DBHandle);
-			GlobalUnlock (FilePtr->FileHandle);
-         	GlobalUnlock (SQLPtr->OFHandle); 
-        	GlobalUnlock (hSQL);
-         	GSSiGlobUlFree (&hStr);
-	    	return rtn;
-	    }
-            break;
+		case SQL_DATAFILE:
+		{
+			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			rtn = NumSQLRows(pDB->DBHandle);
+			GlobalUnlock(FilePtr->FileHandle);
+			GlobalUnlock(SQLPtr->OFHandle);
+			GlobalUnlock(hSQL);
+			GSSiGlobUlFree(&hStr);
+			return rtn;
+		}
+			break;
+		case SLT_DATAFILE:
+		{
+			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			rtn = NumSQLRows(pDB->DBHandle);
+			GlobalUnlock(FilePtr->FileHandle);
+			GlobalUnlock(SQLPtr->OFHandle);
+			GlobalUnlock(hSQL);
+			GSSiGlobUlFree(&hStr);
+			return rtn;
+		}
+			break;
 		case IMAGE_DATAFILE:
 			rtn = 1;
 			return rtn;

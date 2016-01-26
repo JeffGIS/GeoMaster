@@ -233,6 +233,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define		FGDB_DATAFILE		20
 #define		POLY_DATAFILE		21
 #define		PN_DATAFILE			22
+#define		SLT_DATAFILE		23
 
 #define	FT_POLYGON	1
 #define FT_CIRCLE	2

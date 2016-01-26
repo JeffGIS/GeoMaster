@@ -5709,31 +5709,55 @@ GSSiExitProg (645);
         return (lpFinfo);
 }
     }
-    if (FieldType == SQL_DATAFILE)
-    {
-        LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock (TBLHandle);
-        if (icount >= pSQLDatabase->NumFields)
-        {
-			GlobalUnlock (TBLHandle);
-{
+	if (FieldType == SQL_DATAFILE)
+	{
+		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(TBLHandle);
+		if (icount >= pSQLDatabase->NumFields)
+		{
+			GlobalUnlock(TBLHandle);
+			{
 #if ENABLETRACE
-GSSiExitProg (645);
+				GSSiExitProg (645);
 #endif
-        	return (0);
-}
-        }
-        pField = &pSQLDatabase->FldInfo[0];
-        pField += icount;  
-        *lpFinfo = *pField;
-        GlobalUnlock (TBLHandle);
-{
+				return (0);
+			}
+		}
+		pField = &pSQLDatabase->FldInfo[0];
+		pField += icount;
+		*lpFinfo = *pField;
+		GlobalUnlock(TBLHandle);
+		{
 #if ENABLETRACE
-GSSiExitProg (645);
+			GSSiExitProg (645);
 #endif
-        return (lpFinfo);
-}
-    }
-    if (FieldType == FGDB_DATAFILE)
+			return (lpFinfo);
+		}
+	}
+	if (FieldType == SLT_DATAFILE)
+	{
+		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(TBLHandle);
+		if (icount >= pSQLDatabase->NumFields)
+		{
+			GlobalUnlock(TBLHandle);
+			{
+#if ENABLETRACE
+				GSSiExitProg(645);
+#endif
+				return (0);
+			}
+		}
+		pField = &pSQLDatabase->FldInfo[0];
+		pField += icount;
+		*lpFinfo = *pField;
+		GlobalUnlock(TBLHandle);
+		{
+#if ENABLETRACE
+			GSSiExitProg(645);
+#endif
+			return (lpFinfo);
+		}
+	}
+	if (FieldType == FGDB_DATAFILE)
     {
 		int FieldWidth, FieldType;
 		

@@ -4402,7 +4402,7 @@ void DisplayHollowLines (BOOL Clear)
 						    if (Width > 0)
 						    {
 							    if (UseFlatEndPolyline)
-									FlatEndPolylineI (CurView->hDC, SPoints, HollowLineHeader.npnts,Width,HollowLineHeader.color);  
+									FlatEndPolyline (CurView->hDC, SPoints, HollowLineHeader.npnts,Width,HollowLineHeader.color);  
 								else
 								{
 								    hPen = CreatePen (PS_SOLID,Width,HollowLineHeader.color);  

@@ -2391,3 +2391,59 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 	return rtn;
 }
 			*/
+HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL)
+{
+	HFILE	Fid;
+	LPSQLDATABASE	pDB;
+	HANDLE	hDB;
+	char	str[130];
+	HANDLE	hMem;
+	LPSTR	pMem;
+
+	Fid = GSSiOpenFile(Name, 0, OF_READ);
+	if (Fid == HFILE_ERROR)
+		return 0;
+	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
+	pDB = (LPSQLDATABASE)GlobalLock(hDB);
+	fgetstring(pDB->DBName, 126, Fid);
+	ReadMultiLine(Fid, pDB->Select);
+	ReadMultiLine(Fid, pDB->From);
+	//    ReadMultiLine (Fid,pDB->Where); 
+	fgetstring(str, 32, Fid);
+	while (fgetstring(str, 128, Fid))
+	{
+		int ii = sscanf(str, "%i,%i,%i,%i,%i,%i,%s",
+			&pDB->FldInfo[pDB->NumFields].type,
+			&pDB->FldInfo[pDB->NumFields].index,
+			&pDB->FldInfo[pDB->NumFields].radix,
+			&pDB->FldInfo[pDB->NumFields].scale,
+			&pDB->FldInfo[pDB->NumFields].length,
+			&pDB->FldInfo[pDB->NumFields].precision,
+			pDB->FldInfo[pDB->NumFields].name);
+		//    	_fstrcpy (pDB->FldInfo[pDB->NumFields].name,str);
+		pDB->NumFields++;
+	}
+	GSSiClose(Fid);
+	hMem = GSSiGlobAlloc(1506, GMEM_MOVEABLE, USHRT_MAX);
+	pMem = GlobalLock(hMem);
+	_fstrcpy(pMem, pDB->Select);
+	_fstrcat(pMem, pDB->From);
+	if (*SQL)
+	{
+		_fstrcat(pMem, " WHERE ");
+		_fstrcat(pMem, SQL);
+	}
+	if (!OpenDataFile(pDB->DBName, pMem, BT_READ, &pDB->DBHandle))
+	{
+		GSSiGlobUlFree(&hDB);
+		GSSiGlobUlFree(&hMem);
+		return 0;
+	}
+	GSSiGlobUlFree(&hMem);
+	GlobalUnlock(hDB);
+	return hDB;
+}
+void CloseSLTDatabase(LPHANDLE pHandle)
+{
+	return;
+}

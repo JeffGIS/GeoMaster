@@ -1340,10 +1340,11 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	//writeTestStruct();
 	//char tt[] = {FV};
 	/*char prj[1024];
-	HFILE fid = GSSiOpenFileGM("C:\\CountyData\\Cleveland\\AreaParcel_11212013\\AREAPARCEL.prj", 0, OF_READ);
+	char outprj[1024];
+	HFILE fid = GSSiOpenFile("C:\\GMMobile\\MetroUTM\\MGFire\\Water System\\wMain.prj", 0, OF_READ);
 	BigRead(fid, prj, 1023);
 	GSSiClose(fid);
-	ConvertPRJtoProj4(prj, NULL);*/
+	ConvertPRJtoProj4(prj,outprj);*/
 	_set_invalid_parameter_handler(
 		my_invalid_parameter_handler
 		);

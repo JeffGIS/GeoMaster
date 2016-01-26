@@ -289,6 +289,8 @@ void CloseVars (void);
 void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
 void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
 short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
+HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL);
+void CloseSLTDatabase(LPHANDLE pHandle);
 HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
 BOOL GetCurrentPNDBName (LPSTR Name);
