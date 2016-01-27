@@ -1224,15 +1224,25 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 	strcpy (OutLoc,"0");
 	if (!stricmp(Arg1, "NVPFROMPRJ"))
 	{
-		if ((id = GetTranID(Arg2)) < 0)
+		HFILE fid = GSSiOpenFile(Arg2, 0, OF_READ);
+		if (fid != HFILE_ERROR)
 		{
-			if ((id = GetTranID("")) < 0)
-				return;
+			int l = GSSifilelength(fid);
+			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, l + 4096 + 4);
+			LPSTR pMem = GlobalLock(hMem);
+			LPSTR pMemOut = &pMem[l + 1];
+			BigRead(fid, pMem, l);
+			GSSiClose(fid);
+			pMem[l] = 0;
+			if (!ConvertPRJtoProj4(pMem, pMemOut))
+			{
+				l = strlen(pMemOut);
+				fid = GSSiOpenFile(Arg3, 0, OF_CREATE);
+				BigWrite(fid, pMemOut, l, -1);
+				GSSiClose(fid);
+				strcpy(OutLoc, "1");
+			}
 		}
-		if (!(projdef[id] = pj_init_plus(Arg3)))
-			return;
-		strcpy(projid[id], Arg2);
-		strcpy(OutLoc, "1");
 	}
 	else if (!stricmp(Arg1, "DEFINE"))
 	{
