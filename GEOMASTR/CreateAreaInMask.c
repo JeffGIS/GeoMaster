@@ -129,7 +129,7 @@ BOOL ThemeCreateAreaInMask(int from)
 {
 	BOOL rtn = FALSE;
 	LPVIEWPORT CurViewSave = CurView;
-	static int debugref = 100107754;
+	static int debugref = 109670029;
 	if (CurTheme->TargetViewport)
 		SetViewport(CurTheme->TargetViewport);
 
@@ -339,6 +339,8 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 {
 	int i;
 	int indx;
+	COLORREF blue = 255;
+	BOOL haveBlue = FALSE;
 	for (i = 0; i < 8; i++)
 	{
 		indx = bitIndex(pbm, *prow + yoff1[i], *pcol + xoff1[i]);
@@ -348,8 +350,12 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 			(*prow) += yoff1[i];
 			return indx;
 		}
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
 	}
-	//return -1;
+	if (!haveBlue)
+		return -1;
+	haveBlue = FALSE;
 	for (i = 0; i < 16; i++)
 	{
 		indx = bitIndex(pbm, *prow + yoff2[i], *pcol + xoff2[i]);
@@ -359,8 +365,12 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 			(*prow) += yoff2[i];
 			return indx;
 		}
-
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
 	}
+	if (!haveBlue)
+		return -1;
+	haveBlue = FALSE;
 
 	for (i = 0; i < 24; i++)
 	{
@@ -371,8 +381,12 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 			(*prow) += yoff3[i];
 			return indx;
 		}
-
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
 	}
+	if (!haveBlue)
+		return -1;
+	haveBlue = FALSE;
 
 	for (i = 0; i < 32; i++)
 	{

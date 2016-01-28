@@ -1332,7 +1332,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
 	//loadColors();
 	//loadColorChart();
-	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100037700.bmp");
+	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100031654.bmp");
 
 //#define FV	$(TargetName) 
 	//UDPmain(22336);
