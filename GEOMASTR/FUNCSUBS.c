@@ -1602,8 +1602,13 @@ BOOL GetSymAttrFile(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, L
 		else
 			SymNum = GetDictSymbolNumber(SymName);
 		iParent = GetDictSymParent(SymNum);
-		sprintf(symnumC, "#%i", iParent);
-		rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+		while (iParent && !rtn)
+		{
+			sprintf(symnumC, "#%i", iParent);
+			rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+			if (!rtn)
+				iParent = GetDictSymParent(iParent);
+		}
 	}
 	if (rtn && AttrFile)
 	{
@@ -1630,8 +1635,13 @@ BOOL GetSymAttrKey(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LP
 		else
 			SymNum = GetDictSymbolNumber(SymName);
 		iParent = GetDictSymParent(SymNum);
-		sprintf(symnumC, "#%i", iParent);
-		rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+		while (iParent && !rtn)
+		{
+			sprintf(symnumC, "#%i", iParent);
+			rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+			if (!rtn)
+				iParent = GetDictSymParent(iParent);
+		}
 	}
 	if (rtn)
 	{

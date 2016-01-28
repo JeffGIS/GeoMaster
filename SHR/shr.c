@@ -11824,6 +11824,8 @@ BOOL IsInteger(LPSTR str)
 	short	lstr;
 	LPSTR	instr;
 	
+	if (!*str)
+		return FALSE;
 	while (*str == ' ')
 		str++;
 	if (*str == '-')

@@ -74,7 +74,7 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKP
 			{
 				int iarg=atoi (Arg[i]);
 
-				if (iarg <= abs (MaxArgs))
+				if (iarg > 0 && iarg <= abs(MaxArgs))
 				{
 					strcpy (Arg[iarg],pEq+1);
 					*Arg[i] = 0;

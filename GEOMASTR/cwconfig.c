@@ -30,6 +30,7 @@ LRESULT CALLBACK GetMsgProc(
   WPARAM wParam,  // removal flag
   LPARAM lParam   // address of structure with message
 );
+int FileDlgWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 static char selectedStartCmd[1024]; 
 static MSG	pmsg[100]={0};
@@ -1329,6 +1330,9 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus, mouseType;
+	HRESULT BasicFileOpen();
+
+	//BasicFileOpen();
 
 	//loadColors();
 	//loadColorChart();
@@ -2175,6 +2179,8 @@ HANDLE	hSTR;
 LPSTR	str;   
 BOOL	ClearFullDisplay=FALSE;  
 static	DWORD	LastMouselParam=0;
+
+//FileDlgWndProc(hWnd, Message, wParam,lParam);
 
 #if ENABLETRACE
 SetLastMessage(Message);

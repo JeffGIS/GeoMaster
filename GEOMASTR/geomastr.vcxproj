@@ -64,10 +64,11 @@
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34j</TargetName>
     <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
     <TargetExt>.exe</TargetExt>
+    <ExcludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(MSBuild_ExecutablePath);$(VC_LibraryPath_x86);</ExcludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='xponly|Win32'">
     <OutDir>Release\</OutDir>
@@ -107,7 +108,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <StructMemberAlignment>2Bytes</StructMemberAlignment>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -130,7 +131,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;FileGDBAPI.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.10</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -265,7 +266,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -393,6 +394,8 @@
     <ClCompile Include="EXPORT2.C" />
     <ClCompile Include="..\GM32lib\FIIO_Mem.cpp" />
     <ClCompile Include="..\SHR\FILE.C" />
+    <ClCompile Include="FileDialog.cpp" />
+    <ClCompile Include="FileDialogEventHandler.cpp" />
     <ClCompile Include="FileManager.c" />
     <ClCompile Include="FileOpenDlg.cpp" />
     <ClCompile Include="fish.c" />
@@ -503,6 +506,7 @@
     <ClCompile Include="..\gctpc\omerfor.c" />
     <ClCompile Include="..\gctpc\omerinv.c" />
     <ClCompile Include="NVTextDrawing.c" />
+    <ClCompile Include="OpenFileDlg.cpp" />
     <ClCompile Include="ORAFILE.C" />
     <ClCompile Include="..\gctpc\orthfor.c" />
     <ClCompile Include="..\gctpc\orthinv.c" />
@@ -883,6 +887,9 @@
     <ClInclude Include="..\MrSid\Raster_DSDK\include\TIFFImageWriter.h" />
     <ClInclude Include="..\SQLite3\sqlite3.h" />
     <ClInclude Include="..\SQLite3\sqlite3ext.h" />
+    <ClInclude Include="CFDResource.h" />
+    <ClInclude Include="FileDialog.h" />
+    <ClInclude Include="FileDialogEventHandler.h" />
     <ClInclude Include="GMVersion.h" />
     <ClInclude Include="GoogleDef.h" />
     <ClInclude Include="..\INCLUDE\GRAPHICS.H" />
