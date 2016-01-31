@@ -23,8 +23,11 @@
 extern HINSTANCE g_hInstance;  // Handle to application instance
 extern HWND g_hWndApp;         // HWND of the app
 
+extern "C" int FileType(LPSTR file);
 HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv); // CDialogEventHandler instance creator
+extern "C" BOOL GetGlobalCVal(LPSTR Global, LPSTR Val, LPSTR Default);
 
+static char lastExtension[64] = { 0 };
 
 //
 // This code snippet demonstrates how to work with the common file dialog interface
@@ -91,7 +94,10 @@ HRESULT CCommonFileDialog::BasicFileOpen(HWND hWnd)
                                 hr = pfd->SetDefaultExtension(L"doc");
                                 if (SUCCEEDED(hr))
                                 {
-                                    //
+									IShellItem *defFolder;
+									WCHAR f[] = L"c:\\temp";
+									hr = SHCreateItemFromParsingName(f, NULL,  IID_PPV_ARGS(&defFolder));
+									hr = pfd->SetDefaultFolder(defFolder);                                   //
                                     // Show the dialog
                                     //
                                     hr = pfd->Show(hWnd);
@@ -1101,4 +1107,224 @@ extern "C" int FileDlgWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	}
 
 	return lr;
+}
+int OldFiltersToFilterSpec(LPSTR filter, COMDLG_FILTERSPEC **filterSpec,LPSTR lastExtension,LPINT pSelectedFilter,LPWSTR defaultExtension)
+{
+	int nFilter = 0;
+	LPSTR pName, pFilter;
+
+	COMDLG_FILTERSPEC *pfs = (COMDLG_FILTERSPEC *)malloc(sizeof(COMDLG_FILTERSPEC)* 32);
+	pName = filter;
+	pFilter = strchr(pName, 0);
+	*pSelectedFilter = 0;
+	while (pName != pFilter)
+	{
+		int lwide = MultiByteToWideChar(CP_ACP, 0, pName, -1, 0,0);
+		WCHAR *pwName =(WCHAR*) malloc(lwide*sizeof(WCHAR) + 4);
+		WCHAR *pwFilter;
+		
+		pFilter++;
+		MultiByteToWideChar(CP_ACP, 0, pName, -1, pwName,lwide);
+		lwide = MultiByteToWideChar(CP_ACP, 0, pFilter, -1, 0, 0);
+		pwFilter = (WCHAR*)malloc(lwide*sizeof(WCHAR)+4);
+		MultiByteToWideChar(CP_ACP, 0, pFilter, -1, pwFilter, lwide);
+		pfs[nFilter].pszName = pwName;
+		pfs[nFilter++].pszSpec = pwFilter;
+		LPSTR pDot = strrchr(pFilter, '.');
+		if (!pDot)
+			pDot = pFilter;
+		if (!stricmp(lastExtension, pDot))
+		{
+			*pSelectedFilter = nFilter;
+		}
+		pName = strchr(pFilter, 0);
+		pName++;
+		pFilter = strchr(pName, 0);
+	}
+	*filterSpec = pfs;
+	return nFilter;
+}
+void FreeFilters(int nFilters, COMDLG_FILTERSPEC *filterSpec)
+{
+	for (int i = 0; i < nFilters; i++)
+	{
+		free((LPWSTR)filterSpec[i].pszName);
+		free((LPWSTR)filterSpec[i].pszSpec);
+	}
+	free(filterSpec);
+}
+extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save)
+{
+	WCHAR origFile[MAX_PATH + 2];
+	WCHAR initDir[MAX_PATH + 2];
+	WCHAR wTitle[MAX_PATH + 2];
+	COMDLG_FILTERSPEC *filters;
+	LPSTR pOrigFile = pFile;
+	int selectedExtension;
+	WCHAR defaultExtension[64] = { 0 };
+
+	int nFilters = OldFiltersToFilterSpec(filter, &filters,lastExtension,&selectedExtension,defaultExtension);
+	// CoCreate the File Open Dialog object.
+	IFileDialog *pfd = NULL;
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+
+	if (strrchr(pFile, '\\'))
+		pOrigFile = strrchr(pFile, '\\') + 1;
+	hr = MultiByteToWideChar(CP_ACP, 0, pOrigFile, -1, origFile, lFile);
+	hr = MultiByteToWideChar(CP_ACP, 0, InitialDirectory, -1, initDir, MAX_PATH);
+	hr = MultiByteToWideChar(CP_ACP, 0, Title, -1, wTitle, MAX_PATH);
+
+	if (save)
+		hr = CoCreateInstance(CLSID_FileSaveDialog,
+			NULL,
+			CLSCTX_INPROC_SERVER,
+			IID_PPV_ARGS(&pfd));
+	else
+		hr = CoCreateInstance(CLSID_FileOpenDialog,
+		NULL,
+		CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(&pfd));
+	if (SUCCEEDED(hr))
+	{
+		pfd->SetTitle(wTitle);
+		//CCommonFileDialog *pCommonFileDialog = (CCommonFileDialog)pfd;
+		// Create an event handling object, and hook it up to the dialog.
+		IFileDialogEvents *pfde = NULL;
+		hr = CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+		if (SUCCEEDED(hr))
+		{
+			// Hook up the event handler.
+			DWORD dwCookie;
+			hr = pfd->Advise(pfde, &dwCookie);
+			if (SUCCEEDED(hr))
+			{
+				// Set the options on the dialog.
+				DWORD dwFlags;
+
+				// Before setting, always get the options first in order 
+				// not to override existing options.
+				hr = pfd->GetOptions(&dwFlags);
+				if (SUCCEEDED(hr))
+				{
+					// In this case, get shell items only for file system items.
+					hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
+					if (SUCCEEDED(hr))
+					{
+						// Set the file types to display only. 
+						// Notice that this is a 1-based array.
+						hr = pfd->SetFileTypes(nFilters, filters);
+						if (SUCCEEDED(hr))
+						{
+							// Set the selected file type index to Word Docs for this example.
+							hr = pfd->SetFileTypeIndex(selectedExtension);
+							if (SUCCEEDED(hr))
+							{
+								// Set the default extension to be ".doc" file.
+								hr = pfd->SetDefaultExtension(defaultExtension);
+								if (SUCCEEDED(hr))
+								{
+									IShellItem *defFolder;
+									LPSTR pPlaces = (LPSTR)malloc(SHRT_MAX);
+									LPSTR pPlace = pPlaces;
+									LPSTR pNextPlace;
+									WCHAR pwPlace[MAX_PATH];
+
+									GetGlobalCVal("%PLACES", pPlaces, 0);
+									pNextPlace = strchr(pPlace, '|');
+									while (*pPlace)
+									{
+										if (pNextPlace)
+											*pNextPlace++ = 0;
+										else
+											pNextPlace = strchr(pPlace, 0);
+										hr = MultiByteToWideChar(CP_ACP, 0, pPlace, -1, pwPlace, MAX_PATH);
+										hr = SHCreateItemFromParsingName(pwPlace, NULL, IID_IShellItem, (void**)&defFolder);
+										hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
+										pPlace = pNextPlace;
+										pNextPlace = strchr(pPlace, '|');
+									}
+									free(pPlaces);
+									hr = SHCreateItemFromParsingName(initDir, NULL, IID_IShellItem ,(void**)&defFolder);
+									hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
+
+									//hr = pfd->SetFolder(defFolder);    
+									IShellItem *psiFolder;
+									PWSTR pszFolder = NULL;
+									hr = pfd->GetFolder(&psiFolder);
+									if (SUCCEEDED(hr))
+									{
+										hr = psiFolder->GetDisplayName(SIGDN_FILESYSPATH, &pszFolder);
+										if (SUCCEEDED(hr))
+										{
+											WCHAR path[MAX_PATH];
+											char  cpath[MAX_PATH];
+											wcscpy(path, pszFolder);
+											wcscat(path, L"\\");
+											wcscat(path, origFile);
+											WideCharToMultiByte(CP_ACP, 0, path, -1,cpath, MAX_PATH,0,0);
+											int itype = FileType(cpath);
+											if (itype == 1)
+											{
+												hr = pfd->SetFileName(origFile);                                   //
+											}
+										}
+									}
+									//
+									// Show the dialog
+									hr = pfd->Show(NULL);
+									if (SUCCEEDED(hr))
+									{
+										// Obtain the result once the user clicks 
+										// the 'Open' button.
+										// The result is an IShellItem object.
+										IShellItem *psiResult;
+										hr = pfd->GetResult(&psiResult);
+										if (SUCCEEDED(hr))
+										{
+											// We are just going to print out the 
+											// name of the file for sample sake.
+											PWSTR pszFilePath = NULL;
+											hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
+												&pszFilePath);
+											if (SUCCEEDED(hr))
+											{
+												hr = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, pFile, lFile, NULL, NULL) ?
+												S_OK : HRESULT_FROM_WIN32(GetLastError());
+
+												LPSTR pDot = strrchr(pFile, '.');
+												if (pDot)
+													strcpy(lastExtension, pDot);
+												else if ((pDot = strrchr(pFile, '\\')))
+													strcpy(lastExtension, ++pDot);
+												/*TaskDialog(NULL,
+													NULL,
+													L"CommonFileDialogApp",
+													pszFilePath,
+													NULL,
+													TDCBF_OK_BUTTON,
+													TD_INFORMATION_ICON,
+													NULL);
+												CoTaskMemFree(pszFilePath);*/
+											}
+											psiResult->Release();
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				// Unhook the event handler.
+				pfd->Unadvise(dwCookie);
+			}
+			pfde->Release();
+		}
+		pfd->Release();
+	}
+	FreeFilters(nFilters, filters);
+	if (hr == ERROR_CANCELLED)
+		hr = 0;
+	if (hr == S_OK)
+		hr = TRUE;
+	return hr;
 }

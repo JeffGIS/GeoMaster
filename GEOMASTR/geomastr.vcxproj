@@ -397,7 +397,6 @@
     <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="FileDialogEventHandler.cpp" />
     <ClCompile Include="FileManager.c" />
-    <ClCompile Include="FileOpenDlg.cpp" />
     <ClCompile Include="fish.c" />
     <ClCompile Include="..\solar_calculator\Version2\fk4fk5.c" />
     <ClCompile Include="..\SHR\floatap.c" />

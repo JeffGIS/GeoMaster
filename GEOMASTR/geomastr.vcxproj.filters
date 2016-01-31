@@ -1305,9 +1305,6 @@
     <ClCompile Include="OGRCoordConversion.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileOpenDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\SQLite3\shell.c">
       <Filter>Source Files</Filter>
     </ClCompile>

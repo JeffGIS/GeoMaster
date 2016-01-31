@@ -1330,9 +1330,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus, mouseType;
-	HRESULT BasicFileOpen();
 
-	//BasicFileOpen();
 
 	//loadColors();
 	//loadColorChart();

@@ -3506,9 +3506,9 @@ GSSiExitProg (1274);
 				DisplayCurveFactor = 0;
 				break;
 		}
-		GSSiDeleteObject (&CurTheme->NoDataBrush);
+	NextTheme:
+		GSSiDeleteObject(&CurTheme->NoDataBrush);
 		GSSiDeleteObject (&CurTheme->InvalidDataBrush);
-NextTheme:
 	;
 	}  
 	CurTheme = SaveTheme;
