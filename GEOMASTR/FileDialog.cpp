@@ -26,6 +26,7 @@ extern HWND g_hWndApp;         // HWND of the app
 extern "C" int FileType(LPSTR file);
 HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv); // CDialogEventHandler instance creator
 extern "C" BOOL GetGlobalCVal(LPSTR Global, LPSTR Val, LPSTR Default);
+extern "C" void SetIgnoreError(BOOL setting);
 
 static char lastExtension[64] = { 0 };
 
@@ -1271,7 +1272,9 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									}
 									//
 									// Show the dialog
+									SetIgnoreError(TRUE);
 									hr = pfd->Show(NULL);
+									SetIgnoreError(FALSE);
 									if (SUCCEEDED(hr))
 									{
 										// Obtain the result once the user clicks 
