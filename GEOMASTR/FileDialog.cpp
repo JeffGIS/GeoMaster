@@ -1154,6 +1154,13 @@ void FreeFilters(int nFilters, COMDLG_FILTERSPEC *filterSpec)
 	}
 	free(filterSpec);
 }
+BOOL Suceded(HRESULT hr,WCHAR *msg)
+{
+	if (SUCCEEDED(hr))
+		return TRUE;
+	MessageBox(0, msg,L"Failed", MB_ICONEXCLAMATION);
+	return FALSE;
+}
 extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save)
 {
 	WCHAR origFile[MAX_PATH + 2];
@@ -1185,19 +1192,19 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 		NULL,
 		CLSCTX_INPROC_SERVER,
 		IID_PPV_ARGS(&pfd));
-	if (SUCCEEDED(hr))
+	if (Suceded(hr, L"1"))
 	{
 		pfd->SetTitle(wTitle);
 		//CCommonFileDialog *pCommonFileDialog = (CCommonFileDialog)pfd;
 		// Create an event handling object, and hook it up to the dialog.
 		IFileDialogEvents *pfde = NULL;
 		hr = CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
-		if (SUCCEEDED(hr))
+		if (Suceded(hr,L"2"))
 		{
 			// Hook up the event handler.
 			DWORD dwCookie;
 			hr = pfd->Advise(pfde, &dwCookie);
-			if (SUCCEEDED(hr))
+			if (Suceded(hr, L"3"))
 			{
 				// Set the options on the dialog.
 				DWORD dwFlags;
@@ -1205,24 +1212,24 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 				// Before setting, always get the options first in order 
 				// not to override existing options.
 				hr = pfd->GetOptions(&dwFlags);
-				if (SUCCEEDED(hr))
+				if (Suceded(hr, L"4"))
 				{
 					// In this case, get shell items only for file system items.
 					hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
-					if (SUCCEEDED(hr))
+					if (Suceded(hr, L"5"))
 					{
 						// Set the file types to display only. 
 						// Notice that this is a 1-based array.
 						hr = pfd->SetFileTypes(nFilters, filters);
-						if (SUCCEEDED(hr))
+						if (Suceded(hr, L"6"))
 						{
 							// Set the selected file type index to Word Docs for this example.
 							hr = pfd->SetFileTypeIndex(selectedExtension);
-							if (SUCCEEDED(hr))
+							if (Suceded(hr, L"7"))
 							{
 								// Set the default extension to be ".doc" file.
 								hr = pfd->SetDefaultExtension(defaultExtension);
-								if (SUCCEEDED(hr))
+								if (Suceded(hr, L"8"))
 								{
 									IShellItem *defFolder;
 									LPSTR pPlaces = (LPSTR)malloc(SHRT_MAX);
@@ -1252,10 +1259,10 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									IShellItem *psiFolder;
 									PWSTR pszFolder = NULL;
 									hr = pfd->GetFolder(&psiFolder);
-									if (SUCCEEDED(hr))
+									if (Suceded(hr, L"9"))
 									{
 										hr = psiFolder->GetDisplayName(SIGDN_FILESYSPATH, &pszFolder);
-										if (SUCCEEDED(hr))
+										if (Suceded(hr, L"10"))
 										{
 											WCHAR path[MAX_PATH];
 											char  cpath[MAX_PATH];
@@ -1275,21 +1282,21 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									SetIgnoreError(TRUE);
 									hr = pfd->Show(NULL);
 									SetIgnoreError(FALSE);
-									if (SUCCEEDED(hr))
+									if (Suceded(hr, L"11"))
 									{
 										// Obtain the result once the user clicks 
 										// the 'Open' button.
 										// The result is an IShellItem object.
 										IShellItem *psiResult;
 										hr = pfd->GetResult(&psiResult);
-										if (SUCCEEDED(hr))
+										if (Suceded(hr, L"12"))
 										{
 											// We are just going to print out the 
 											// name of the file for sample sake.
 											PWSTR pszFilePath = NULL;
 											hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
 												&pszFilePath);
-											if (SUCCEEDED(hr))
+											if (Suceded(hr, L"13"))
 											{
 												hr = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, pFile, lFile, NULL, NULL) ?
 												S_OK : HRESULT_FROM_WIN32(GetLastError());
