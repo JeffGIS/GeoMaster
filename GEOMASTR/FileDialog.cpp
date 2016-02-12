@@ -1158,7 +1158,7 @@ BOOL Suceded(HRESULT hr,WCHAR *msg)
 {
 	if (SUCCEEDED(hr))
 		return TRUE;
-	MessageBox(0, msg,L"Failed", MB_ICONEXCLAMATION);
+	//MessageBox(0, msg,L"Failed", MB_ICONEXCLAMATION);
 	return FALSE;
 }
 extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save)
@@ -1253,7 +1253,8 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									}
 									free(pPlaces);
 									hr = SHCreateItemFromParsingName(initDir, NULL, IID_IShellItem ,(void**)&defFolder);
-									hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
+									if (Suceded(hr, L"8"))
+										hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
 
 									//hr = pfd->SetFolder(defFolder);    
 									IShellItem *psiFolder;

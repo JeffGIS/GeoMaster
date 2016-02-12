@@ -1679,19 +1679,24 @@ BOOL Report (LPSTR NameIN, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref
 	strcpy (Name,NameIN);
      
     SaveView = CurView; 
-    if ((pColon = _fstrchr (ViewportName,':')))
-    {
-    	*pColon++ = 0; 
-		pVP = SetVPFromName (ViewportName,&Err); 
-		if (!Err) 
+	if ((pColon = _fstrchr(ViewportName, ':')))
+	{
+		if (*(pColon + 1) != '\\')
 		{
-			ScrollRect = pVP->DrawRect;
-			ClientRectToScreenRect (CurView->hWnd,&ScrollRect);
-		}  
-    }
-    else
-    	pColon = ViewportName;
-    if (!_fstricmp (pColon,"SCROLL"))
+			*pColon++ = 0;
+			pVP = SetVPFromName(ViewportName, &Err);
+			if (!Err)
+			{
+				ScrollRect = pVP->DrawRect;
+				ClientRectToScreenRect(CurView->hWnd, &ScrollRect);
+			}
+		}
+		else
+			pColon = ViewportName;
+	}
+	else
+		pColon = ViewportName;
+	if (!_fstricmp(pColon, "SCROLL"))
     {
         DisplayScrollReport (Name,Prefix,UDI, ref);
         SetCurView ( SaveView);

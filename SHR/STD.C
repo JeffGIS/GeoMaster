@@ -63,6 +63,7 @@ long  NCHK(LPSTR name,long starting_at,long for_how_long)
    LPSTR	pEnd, pStop;
    char		ptest[100];
    
+   if (for_how_long <= 0)return 0;
    if(for_how_long > 98)return 0;
    _fstrncpy ( ptest , (char *) &name[starting_at-1] ,(size_t)(for_how_long)); 
    ptest[for_how_long]=0;
