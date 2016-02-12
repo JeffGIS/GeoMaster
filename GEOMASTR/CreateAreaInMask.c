@@ -335,7 +335,7 @@ static int findStartNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 	return -1;
 }
 
-static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
+static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits,int nNodes)
 {
 	int i;
 	int indx;
@@ -353,7 +353,7 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 		if (indx >= 0 && pbits[indx] == blue)
 			haveBlue = TRUE;
 	}
-	if (!haveBlue)
+	if (!haveBlue && nNodes < 3)
 		return -1;
 	haveBlue = FALSE;
 	for (i = 0; i < 16; i++)
@@ -368,7 +368,7 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 		if (indx >= 0 && pbits[indx] == blue)
 			haveBlue = TRUE;
 	}
-	if (!haveBlue)
+	if (!haveBlue && nNodes < 3)
 		return -1;
 	haveBlue = FALSE;
 
@@ -384,7 +384,7 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 		if (indx >= 0 && pbits[indx] == blue)
 			haveBlue = TRUE;
 	}
-	if (!haveBlue)
+	if (!haveBlue && nNodes < 3)
 		return -1;
 	haveBlue = FALSE;
 
@@ -446,11 +446,11 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 				int startrow = row, startcol = col;
 				LPDPOINT pNewPoints;
 				pbits2[indx] = blue;
-				phNewPoints[nPoly] = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(DPOINT)*MAX_NEW_POLY_POINTS);
+				phNewPoints[nPoly] = GSSiGlobAlloc(1802, GMEM_MOVEABLE, sizeof(DPOINT)*MAX_NEW_POLY_POINTS);
 				pNewPoints = GlobalLock(phNewPoints[nPoly]);
 				pNewPoints[nNodes].x = col;
 				pNewPoints[nNodes++].y = row;
-				while ((indx = findNextNode(&row, &col, &bm, pbits2)) >= 0)
+				while ((indx = findNextNode(&row, &col, &bm, pbits2,nNodes)) >= 0)
 				{
 					pbits2[indx] = blue;
 					pNewPoints[nNodes].x = col;
@@ -460,12 +460,35 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 				if (fabs(Area) > 10 && nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 5)
 				{
 					GlobalUnlock(phNewPoints[nPoly]);
-					phNewPoints[nPoly] = GSSiGlobalReAlloc(0, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
-
+					phNewPoints[nPoly] = GSSiGlobalReAlloc(1803, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
 					pnumNewPoints[nPoly++] = nNodes;
+				}
+				else if (fabs(Area) > 10 && nNodes > 2) // if the area has a tail find the intersection of the end with the start of the tail
+				{
+					int i = 1;
+					do
+					{
+						startcol = pNewPoints[i].x;
+						startrow = pNewPoints[i].y;
+						if (max(abs(startrow - row), abs(startcol - col)) < 4)
+						{
+							HANDLE hMem = GSSiGlobAlloc(1804, GMEM_MOVEABLE, (nNodes - i)*sizeof(DPOINT));
+							LPDPOINT ppt = GlobalLock(hMem);
+							pnumNewPoints[nPoly] = nNodes - i;
+							for (int j = 0; j < pnumNewPoints[nPoly]; j++)
+								ppt[j] = pNewPoints[i++];
+							GSSiGlobUlFree(&phNewPoints[nPoly]);
+							GlobalUnlock(hMem);
+							phNewPoints[nPoly++] = hMem;
+							goto NextPoly;
+						}
+						i++;
+					} while (i < nNodes - 5);
+					GSSiGlobUlFree(&phNewPoints[nPoly]);
 				}
 				else
 					GSSiGlobUlFree(&phNewPoints[nPoly]);
+NextPoly:;
 			}
 		}
 		free(pbits);
@@ -523,7 +546,7 @@ void testConvertBitmapToPoly(LPSTR file)
 				int nNodes = 0;
 				int startrow = row, startcol = col;
 				pbits2[indx] = blue;
-				while ((indx = findNextNode(&row, &col, &bm, pbits2)) >= 0)
+				while ((indx = findNextNode(&row, &col, &bm, pbits2,nNodes)) >= 0)
 				{
 					pbits2[indx] = blue;
 					nNodes++;
