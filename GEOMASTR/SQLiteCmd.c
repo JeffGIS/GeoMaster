@@ -754,13 +754,19 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (haveDateAndUCR)
 							{
 								float ftimebeg = 0, ftimeend = 0, fUCR = 0;
+								int itime = atoi(pCmd);
 								LPSTR pSpace = strchr(pCmd, ' ');
 								if (pSpace)
 								{
-									fUCR = atoi(++pSpace);
+									pSpace++;
+									if (*pSpace)
+										fUCR = atoi(pSpace);
+									else
+										fUCR = 0;
+									if (fUCR > 100)
+										fUCR = 100;
 									pSpace = strchr(pSpace, ' ');
 									{
-										int itime = atoi(++pSpace);
 										char daynight[256];
 										ftimebeg = itime / 1000 - 1;
 										sprintf(daynight, "$SUN(ALT, -93.33 45.0, %i)", itime);
