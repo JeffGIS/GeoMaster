@@ -4379,7 +4379,7 @@ FileIsInvalid:
 				    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),TotLen,choice,-1);
 				    	if (_fstrnicmp (str,"[XCMD]",6) &&
 				    	    !SendDlgItemMessage(hWndDlg,IDC_BUILDNAMESONLY,BM_GETCHECK,0,0)) 
-			    			AddFileToTransferFile(GetDlgItem(hWndDlg,IDC_STATUS2),FidTF,str,MaxLength);
+			    			AddFileToTransferFile(GetDlgItem(hWndDlg,IDC_STATUS2),FidTF,str,MaxLength,0);
 			    		else if (!_fstricmp (BuildTransferFileOption,"RUN"))
 			    			_fstrcpy (TransferFileRunCommand,&str[6]); 
 				    }

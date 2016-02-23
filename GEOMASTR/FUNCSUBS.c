@@ -430,12 +430,13 @@ Exit:
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 {
 	BOOL rtn = FALSE;
-	HFILE FidTF, fidFiles;
+	HFILE FidTF, fidFiles, fidIndex=HFILE_ERROR;
 	char filePath[MAX_PATH + 2];
+	char indexRec[MAX_PATH + 32];
 
 	if (nArgs < 3)
 		goto Exit;
-	if (!stricmp(Arg[1], "CREATE"))
+	if (!stricmp(Arg[1], "CREATE"))//$COMPRESSEDFILE(CREATE,path,filelistfile,sourcedir,outindexfile)
 	{
 		long	NextFileLoc = 0, loc=0, len;
 		long	TotLen;
@@ -445,6 +446,17 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		fidFiles = GSSiOpenFile(Arg[3], 0, OF_READ);
 		if (fidFiles == HFILE_ERROR)
 			goto Exit;
+		if (*Arg[5])
+		{
+			fidIndex = GSSiOpenFile(Arg[5], 0, OF_CREATE);
+			if (fidIndex == HFILE_ERROR)
+			{
+				GSSiClose(fidFiles);
+				goto Exit;
+			}
+			sprintf(indexRec, "FILE\tFILELOC", filePath, loc);
+			fputstring(indexRec, fidIndex);
+		}
 		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 		if (FidTF == HFILE_ERROR)
 		{
@@ -457,9 +469,15 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		while (fgetstring(filePath, MAX_PATH, fidFiles))
 		{
 			len = _fstrlen(filePath) + 1;
+			if (fidIndex != HFILE_ERROR)
+			{
+				long loc = GSSillseek(FidTF, 0, 1);
+				sprintf(indexRec, "%s\t%i", filePath, loc);
+				fputstring(indexRec, fidIndex);
+			}
 			BigWrite(FidTF, (HPSTR)&len, 4, -1);
 			BigWrite(FidTF, (HPSTR)filePath, len, -1);
-			AddFileToTransferFile(0, FidTF, filePath, MaxLength);
+			AddFileToTransferFile(0, FidTF, filePath, MaxLength,Arg[4]);
 			loc = -1;
 			BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		}
@@ -469,6 +487,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		GSSiClose(fidFiles);
 		GSSiClose(FidTF);
+		GSSiClose(fidIndex);
 		rtn = TRUE;
 	}
 Exit:
@@ -5685,7 +5704,7 @@ int GetFileChecksum (LPSTR File,int frombyte,int tobyte)
 	return checksum;
 }
 
-int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories)
+int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,BOOL nameOnly)
 {
      int	Num,i;
      char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
@@ -5704,7 +5723,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		if (OutFileFID == HFILE_ERROR)
 			goto Exit;
 		//fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tSTATUS\tLASTUPDATE\tSIZE",OutFileFID);
-		fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tCREATTIME\tLASTACCESS\tLASTWRITE\tFILELENGTH\tSTATUS",OutFileFID);
+		if (!nameOnly)
+			fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tCREATTIME\tLASTACCESS\tLASTWRITE\tFILELENGTH\tSTATUS",OutFileFID);
 	 }	
 	 else 
 	 {
@@ -5750,7 +5770,10 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		else
 			pLastDir = _fstrchr (LastDir,0);
 		//sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",str2,Name,drive,dir,pLastDir,extension,lastup,lfile);
-  		sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
+		if (nameOnly)
+			sprintf(str, "%s%s", Name, extension);
+		else
+  			sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
 		fputstring (str,OutFileFID);
 	 }  
      GSSiClose (Fid);

@@ -1408,12 +1408,12 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		} 
 		
-		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories)
+		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly)
 		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
-			n = GetFileList (Arg[1],atob(Arg[2]),Arg[3],Arg[4],atob(Arg[5]),atob (Arg[6]));
+			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), atob(Arg[7]));
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}
@@ -5037,7 +5037,7 @@ GSSiExitProg (1350);
 			goto Rtnl;
 
 		case 1412: //$COMPRESSEDFILE(CREATE,File,filelistfile)
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			rtn = CompressedFileCmd (nArgs, Arg);
 			goto Rtnrtn;
 			

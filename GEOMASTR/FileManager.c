@@ -393,7 +393,7 @@ static BOOL FMScan(HWND hWndDlg)
 	strlwr(prefix);
 	lprefix = strlen(prefix);
 	GSSiGetTempFileName(0, "gm", 0, TempFile);
-	nfiles = GetFileList(TempFile, TRUE, SearchLoc, "*.*", TRUE, FALSE);
+	nfiles = GetFileList(TempFile, TRUE, SearchLoc, "*.*", TRUE, FALSE,FALSE);
 	Fid = GSSiOpenFile(TempFile, 0, OF_READ);
 	fgetstring(entry, MAX_ENTRY - 2, Fid);
 	while (fgetstring(entry, MAX_ENTRY-2, Fid))

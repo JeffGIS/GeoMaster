@@ -441,9 +441,427 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			CloseGWDatabase(hGMDB);
 		}
 	}
+	else if (!stricmp(ARG[1], "CRIMESFROMGMD"))//$SQLITE(CRIMESFROMGMD,outfilename,new/update,gmdfile,tablename,point fields(opt),SQLiteDefFile)
+	{
+		HANDLE hGMDB = 0;
+		char *error = NULL;
+		BOOL includesPoint = FALSE;
+		BOOL haveDateAndUCR = FALSE;
+		HFILE fid;
+		HFILE fidDef = HFILE_ERROR;
+		char TableName[128];
+		char DBName[256];
+		char SQL[256] = { 0 };
+		BOOL convertToLL = FALSE;
+		LPSTR llLoc, pBar;
+		HANDLE hFldDefs = 0;
+		LPSTR fldDefs;
+
+		if (*ARG[7])
+			fidDef = GSSiOpenFile(ARG[7], 0, OF_READ);
+		strcpy(DBName, ARG[4]);
+		pBar = strrchr(DBName, '|');
+		if (pBar)
+		{
+			*pBar++ = 0;
+			strcpy(SQL, pBar);
+		}
+		hGMDB = OpenGWDatabase(DBName, BT_READ);
+		//OpenDataFile(DBName, SQL, BT_READ, &hGMDB);
+		strcpy(TableName, ARG[5]);
+		llLoc = strstr(TableName, "_LATLON");
+		if (llLoc)
+		{
+			convertToLL = TRUE;
+			*llLoc = 0;
+		}
+
+		if (*ARG[6])
+		{
+			includesPoint = TRUE;
+			if (strstr(ARG[6], "$CLK"))
+				haveDateAndUCR = TRUE;
+		}
+		if (hGMDB)
+		{
+			LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hGMDB);
+			LPGWDHEADER lpGWDOffConv = 0;
+			if (atob(ARG[3]))
+				fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
+			else
+				fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+			if (fid != HFILE_ERROR)
+			{
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
+				LPSTR  pCmd = GlobalLock(hCmd);
+				LPGWFLDINFO lpFieldInfo;
+				char delim[2] = { 0 };
+				BOOL HaveBeginDate = FALSE;
+				BOOL HaveLastChanged = FALSE;
+				BOOL HaveLastChangedID = FALSE;
+				BOOL HaveCity = FALSE;
+				BOOL HaveZipcode = FALSE;
+				int  nextId = -1;
+
+				GSSillseek(fid, 0, 2);
+				char cmd[256];
+				sprintf(cmd, "#1=INSERT INTO %s_index VALUES(", TableName);
+				//fputstring(cmd, fid);
+				sprintf(cmd, "#2=INSERT INTO %s VALUES(", TableName);
+				//fputstring(cmd, fid);
+				sprintf(pCmd, "DROP TABLE IF EXISTS %s", TableName);
+				if (fidDef == HFILE_ERROR)
+					fputstring(pCmd, fid);
+				if (includesPoint)
+				{
+					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", TableName);
+					if (fidDef == HFILE_ERROR)
+						fputstring(pCmd, fid);
+					if (haveDateAndUCR)
+						//sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
+						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id, minTime, maxTime, minUCR, maxUCR,minX, maxX, minY, maxY);", TableName);
+					else
+						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", TableName);
+					if (fidDef == HFILE_ERROR)
+						fputstring(pCmd, fid);
+					if (lpGWDHead->NumIndexFields[0] == 1)
+						strcpy(lpGWDHead->pFldInfo->Name, "id");
+				}
+
+				if (lpGWDHead->NumIndexFields[0] > 1)
+				{
+					sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,", TableName);
+					nextId = 1;
+				}
+				else
+					sprintf(pCmd, "CREATE TABLE %s (", TableName);
+
+				for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
+				{
+					if (!stricmp(lpFieldInfo->Name, "BeginDate"))//fixes mpls incident table
+					{
+						if (!HaveBeginDate)
+							strcpy(lpFieldInfo->Name, "BeginDate2");
+						HaveBeginDate = TRUE;
+					}
+					if (!stricmp(lpFieldInfo->Name, "LastChanged"))//fixes mpls incident table
+					{
+						if (!HaveLastChanged)
+							strcpy(lpFieldInfo->Name, "LastChanged2");
+						HaveLastChanged = TRUE;
+					}
+					if (!stricmp(lpFieldInfo->Name, "LastChangedID"))//fixes mpls incident table
+					{
+						if (!HaveLastChangedID)
+							strcpy(lpFieldInfo->Name, "LastChangedID2");
+						HaveLastChangedID = TRUE;
+					}
+					if (!stricmp(lpFieldInfo->Name, "City"))//fixes mpls incident table
+					{
+						if (!HaveCity)
+							strcpy(lpFieldInfo->Name, "City2");
+						HaveCity = TRUE;
+					}
+					if (!stricmp(lpFieldInfo->Name, "Zipcode"))//fixes mpls incident table
+					{
+						if (!HaveZipcode)
+							strcpy(lpFieldInfo->Name, "Zipcode2");
+						HaveZipcode = TRUE;
+					}
+					switch (lpFieldInfo->Type)
+					{
+					case BT_CHAR:
+						if (!stricmp(lpFieldInfo->Name, "Offsets") && lpFieldInfo->Len == 400)
+							sprintf(strchr(pCmd, 0), "%s'%s' BLOB(%i)", delim, removePCT(lpFieldInfo->Name), lpFieldInfo->Len);
+						else
+							sprintf(strchr(pCmd, 0), "%s'%s' CHAR(%i)", delim, removePCT(lpFieldInfo->Name), lpFieldInfo->Len);
+						break;
+					case BT_INTEGER:
+						sprintf(strchr(pCmd, 0), "%s'%s' INT", delim, removePCT(lpFieldInfo->Name));
+						break;
+					case BT_REAL:
+						sprintf(strchr(pCmd, 0), "%s'%s' REAL", delim, removePCT(lpFieldInfo->Name));
+						break;
+					default:
+						MessageBox(0, "Bad Type", 0, MB_ICONEXCLAMATION);
+						rtn = 1;
+						break;
+					}
+					delim[0] = ',';
+				}
+				if (haveDateAndUCR)
+					sprintf(strchr(pCmd, 0), ",SUNANGLE INT");
+				if (!rtn)
+				{
+					int ifield, index;
+					int firstIndex = 1;
+					int lastIndex = lpGWDHead->NumIndex;
+
+					if (nextId)
+					{
+						firstIndex = 0;
+						sprintf(strchr(pCmd, 0), ")");
+					}
+					else
+					{
+						sprintf(strchr(pCmd, 0), ",PRIMARY KEY('%s' ASC", removePCT(lpGWDHead->pFldInfo->Name));
+						for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + 1; ifield < lpGWDHead->NumIndexFields[0]; ifield++, lpFieldInfo++)
+						{
+							sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
+						}
+						sprintf(strchr(pCmd, 0), "))");
+					}
+					if (fidDef == HFILE_ERROR)
+						fputstring(pCmd, fid);
+					for (index = firstIndex; index < lastIndex; index++)
+					{
+						if (lpGWDHead->SpatialIndex != index)
+						{
+							sprintf(pCmd, "CREATE INDEX %s_Index%i ON %s ('%s' ASC", TableName, index + 1, TableName, removePCT((lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][0])->Name));
+							for (ifield = 1, lpFieldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[index][1]; ifield < lpGWDHead->NumIndexFields[index]; ifield++, lpFieldInfo++)
+							{
+								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
+							}
+							sprintf(strchr(pCmd, 0), ");");
+							if (fidDef == HFILE_ERROR)
+								fputstring(pCmd, fid);
+						}
+					}
+				}
+				if (fidDef != HFILE_ERROR)
+				{
+					int i = 0;
+					hFldDefs = GSSiGlobAlloc(1805, GMEM_MOVEABLE, SHRT_MAX + 4);
+					fldDefs = GlobalLock(hFldDefs);
+					while (i++ < 5 && fgetstring(fldDefs, SHRT_MAX, fidDef))
+					{
+						fputstring(fldDefs, fid);
+					}
+					GSSiClose(fidDef);
+				}
+				if (!rtn)
+				{
+					int pos = BT_FIRST, cond = BT_ANY;
+					long Offset;
+					HANDLE hVal = GSSiGlobAlloc(1797, GMEM_MOVEABLE, 4096);
+					LPSTR val = GlobalLock(hVal);
+					int nRecs = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
+					int nLoaded = 0;
+					char xField[128] = { 0 };
+					char yField[128] = { 0 };
+					DPOINT pt;
+					int indx = 0;
+					int wantCNUM = -1;
+
+					sprintf(val, "Load table %s", ARG[4]);
+					CreateStatusWind(hWndMain, 1, val);
+					if (*SQL)
+					{
+						LPSTR pSpace;
+						if (!strnicmp(SQL, "ControlNbr = ", 13))
+						{
+							pSpace = SQL + 13;
+							wantCNUM = atoi(pSpace);
+							cond = BT_GE;
+							indx = 0;
+							memset(lpGWDHead->pKeys[indx], 0, abs(lpGWDHead->lKeys[indx]));
+							*(LPINT)lpGWDHead->pKeys[indx] = wantCNUM;
+						}
+						else
+						{
+							pSpace = strrchr(SQL, ' ');
+							if (!pSpace)
+								pSpace = strrchr(SQL, '>');
+							pSpace++;
+							if (*pSpace == '\'')
+								pSpace++;
+							if (*LastChr(pSpace) == '\'')
+								*LastChr(pSpace) = 0;
+							cond = BT_GE;
+							indx = 2;
+							strncpy(lpGWDHead->pKeys[indx], pSpace, abs(lpGWDHead->lKeys[indx]));
+						}
+					}
+					while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
+					{
+						int id = Offset;
+						int sunAngle = 0;
+						pos = BT_NEXT;
+						cond = BT_ANY;
+
+						if (wantCNUM >= 0 && *(LPINT)lpGWDHead->pKeys[indx] != wantCNUM)
+							break;
+						FillGWDData(lpGWDHead, Offset);
+
+						if (includesPoint)
+						{
+							MNMXCORD bounds;
+							BOOL err;
+							char cCord[256];
+
+							if (nextId > 0)
+								id = nextId++;
+							else
+								id = *(LPINT)&lpGWDHead->GWDData;
+							strcpy(pCmd, ARG[6]);
+							strupr(pCmd);
+							LPSTR pX = strstr(pCmd, " [X");
+							if (pX)
+							{
+								strncpy(cCord, &pX[2], 255);
+								LPSTR pEnd = strchr(cCord, ']');
+								LPSTR pY;
+								if (pEnd)
+								{
+									*pEnd++ = 0;
+									strcpy(xField, cCord);
+									pY = strchr(pEnd, '[');
+									if (pY)
+									{
+										*pY++ = 0;
+										pEnd = strchr(pY, ']');
+										if (pEnd)
+										{
+											*pEnd = 0;
+											strcpy(yField, pY);
+										}
+									}
+								}
+							}
+							for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+							{
+								char testVar[128];
+
+								sprintf(testVar, "[%s]", lpFieldInfo->Name);
+								strupr(testVar);
+								if (strstr(pCmd, testVar))
+								{
+									GMDGetCharFieldVal(lpGWDHead, i, val);
+									REPLAC(pCmd, testVar, val, 1024);
+								}
+							}
+							ExpandText(pCmd);
+							LPSTR xy = strchr(pCmd, ' ');
+							xy = strchr(xy + 1, ' ');
+							pt = atopt(xy, &err);
+							if (convertToLL)
+								ConvertCoord(&pt, 1, 2);
+							bounds.xmn = pt.x - 0.00000001;
+							bounds.xmx = pt.x + 0.00000001;
+							bounds.ymn = pt.y - 0.00000001;
+							bounds.ymx = pt.y + 0.00000001;
+							//ConvertBounds(&bounds, 1, 2); point field must be lat lon
+							if (haveDateAndUCR)
+							{
+								float ftimebeg = 0, ftimeend = 0, fUCR = 0;
+								LPSTR pSpace = strchr(pCmd, ' ');
+								if (pSpace)
+								{
+									fUCR = atoi(++pSpace);
+									pSpace = strchr(pSpace, ' ');
+									{
+										int itime = atoi(++pSpace);
+										char daynight[256];
+										ftimebeg = itime / 1000 - 1;
+										sprintf(daynight, "$SUN(ALT, -93.33 45.0, %i)", itime);
+										ExpandText(daynight);
+										sunAngle = IDNINT(atof(daynight));
+										ftimeend = ftimebeg + 2;
+										//pSpace = strchr(pSpace, ' ');
+									}
+								}
+								//sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx, fUCR*10.0, fUCR*10.0, ftimebeg, ftimeend);
+								sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
+							}
+							else
+								sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
+							fputstring(pCmd, fid);
+						}
+
+						if (nextId > 0)
+							sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, id);
+							//sprintf(pCmd, "#2%i,", id);
+						else
+							sprintf(pCmd, "INSERT INTO %s VALUES(", TableName);
+						delim[0] = 0;
+
+						for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+						{
+							char searchStr[128];
+
+							if (!stricmp(lpFieldInfo->Name, "Offsets") && lpFieldInfo->Len == 400)
+								GMDGetCharFieldVal(lpGWDHead, -i, val);
+							else
+								GMDGetCharFieldVal(lpGWDHead, i, val);
+							if (!i && !stricmp(val, "BOB"))
+								ii = 1;
+							if (hFldDefs)
+							{
+								sprintf(searchStr, "'%s'", lpFieldInfo->Name);
+								if (!strstr(fldDefs, searchStr))
+									continue;
+							}
+							if (!stricmp(lpFieldInfo->Name, xField))
+							{
+								sprintf(strchr(pCmd, 0), "%s%f", delim, pt.x);
+							}
+							else if (!stricmp(lpFieldInfo->Name, yField))
+							{
+								sprintf(strchr(pCmd, 0), "%s%f", delim, pt.y);
+							}
+							else switch (lpFieldInfo->Type)
+							{
+							case BT_CHAR:
+								if (!stricmp(lpFieldInfo->Name, "Offsets") && lpFieldInfo->Len == 400)
+								{
+									int i;
+									LPBYTE pByte = (LPBYTE)val;
+									LPBYTE pBlob;
+
+									ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
+									pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
+
+									sprintf(strchr(pCmd, 0), "%sX'%s'", delim, pBlob);
+									free(pBlob);
+								}
+								else
+								{
+									REPLAC(val, "'", "''", 4096);
+									Truncate(val);
+									sprintf(strchr(pCmd, 0), "%s'%s'", delim, val);
+								}
+								break;
+							case BT_INTEGER:
+							case BT_REAL:
+								sprintf(strchr(pCmd, 0), "%s%s", delim, val);
+								break;
+							}
+							delim[0] = ',';
+						}
+						if (haveDateAndUCR)
+							sprintf(strchr(pCmd, 0), "%s%i", delim, sunAngle);
+						sprintf(strchr(pCmd, 0), ")");
+						fputstring(pCmd, fid);
+						rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
+					}
+					DestroyStatusWindow(0);
+					GSSiClose(fid);
+					//SQLOK(sqlite3_finalize(self.statement), "loadIntersectionTextToDatabase8");
+					GSSiGlobUlFree(&hVal);
+				}
+				GSSiGlobUlFree(&hCmd);
+			}
+			if (!rtn)
+				rtn = 1;
+			GlobalUnlock(hGMDB);
+			CloseGWDatabase(hGMDB);
+			GSSiGlobUlFree(&hFldDefs);
+		}
+	}
+
 		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt))
 		{
-			HANDLE hGMDB;
+			HANDLE hGMDB=0;
 			char *error = NULL;
 			BOOL primKeyIsOffset = atob(ARG[6]);
 			BOOL includesPoint = FALSE;
@@ -463,6 +881,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				strcpy(SQL, pBar);
 			}
 			hGMDB = OpenGWDatabase(DBName, BT_READ);
+			//OpenDataFile(DBName, SQL, BT_READ, &hGMDB);
 			strcpy(TableName, ARG[5]);
 			llLoc = strstr(TableName, "_LATLON");
 			if (llLoc)
@@ -636,22 +1055,36 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						char yField[128] = { 0 };
 						DPOINT pt;
 						int indx = 0;
+						int wantCNUM = -1;
 
 						sprintf(val, "Load table %s", ARG[4]);
 						CreateStatusWind(hWndMain, 1, val);
 						if (*SQL)
 						{
-							LPSTR pSpace = strrchr(SQL, ' ');
-							if (!pSpace)
-								pSpace = strrchr(SQL, '>');
-							pSpace++;
-							if (*pSpace == '\'')
+							LPSTR pSpace;
+							if (!strnicmp(SQL, "ControlNbr = ",13))
+							{
+								pSpace = SQL + 13;
+								wantCNUM = atoi(pSpace);
+								cond = BT_GE;
+								indx = 0;
+								memset(lpGWDHead->pKeys[indx], 0, abs(lpGWDHead->lKeys[indx]));
+								*(LPINT)lpGWDHead->pKeys[indx] = wantCNUM;
+							}
+							else
+							{
+								pSpace = strrchr(SQL, ' ');
+								if (!pSpace)
+									pSpace = strrchr(SQL, '>');
 								pSpace++;
-							if (*LastChr(pSpace) == '\'')
-								*LastChr(pSpace) = 0;
-							cond = BT_GE;
-							indx = 2;
-							strncpy(lpGWDHead->pKeys[indx],pSpace,abs(lpGWDHead->lKeys[indx]));
+								if (*pSpace == '\'')
+									pSpace++;
+								if (*LastChr(pSpace) == '\'')
+									*LastChr(pSpace) = 0;
+								cond = BT_GE;
+								indx = 2;
+								strncpy(lpGWDHead->pKeys[indx], pSpace, abs(lpGWDHead->lKeys[indx]));
+							}
 						}
 						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
 						{
@@ -659,6 +1092,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							int sunAngle=0;
 							pos = BT_NEXT;
 							cond = BT_ANY;
+
+							if (wantCNUM >= 0 && *(LPINT)lpGWDHead->pKeys[indx] != wantCNUM)
+								break;
 							FillGWDData(lpGWDHead, Offset);
 
 							if (includesPoint)
@@ -2148,6 +2584,7 @@ int TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, 
 	char Path[] = "c:\\temp\\crimes_latlon.sql";
 	sqlite3_stmt *statement;
 	MNMXCORD llBounds = *pBounds;
+	char str[4096];
 
 	pBounds = &llBounds;
 	ConvertBounds(pBounds, 1, 2);
@@ -2156,18 +2593,68 @@ int TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, 
 		return FALSE;
 	sqlite3_exec(db, "BEGIN", NULL, NULL, 0);
 	sprintf(cmd, "SELECT ControlNbr,OffenseOrder,Offense FROM OFFENSEXY,OFFENSEXY_index WHERE OFFENSEXY.id=OFFENSEXY_index.id AND \
-				 OFFENSEXY_index.minX>=%f AND OFFENSEXY_index.maxX<=%f AND OFFENSEXY_index.minY>=%f AND OFFENSEXY_index.maxY<=%f",
-		pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+				 				 OFFENSEXY_index.minX>=%f AND OFFENSEXY_index.maxX<=%f AND OFFENSEXY_index.minY>=%f AND OFFENSEXY_index.maxY<=%f",
+								 pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 	sprintf(cmd, "SELECT ControlNbr,OffenseOrder,Offense FROM OFFENSEXY,OFFENSEXY_index WHERE OFFENSEXY.id=OFFENSEXY_index.id AND OFFENSEXY_index.maxX>=%f AND OFFENSEXY_index.minX<=%f AND OFFENSEXY_index.maxY>=%f AND OFFENSEXY_index.minY<=%f AND OFFENSEXY_index.maxTime>=%f AND OFFENSEXY_index.minTime<=%f AND OFFENSEXY_index.maxUCR>=%f AND OFFENSEXY_index.minUCR<=%f",
 		pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, fromDate / 1000.0 - 1, toDate / 1000.0 + 1, fromUCR*10.0 - 1, toUCR*10.0 + 1);
 	SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "get num rows", 0);
 
 	while (sqlite3_step(statement) == SQLITE_ROW)
 	{
-		int offenseOrder = sqlite3_column_int(statement,1);
+		int offenseOrder = sqlite3_column_int(statement, 1);
 		LPSTR offense = (LPSTR)sqlite3_column_text(statement, 2);
 		long controlNbr = sqlite3_column_int(statement, 0);
 		n++;
+	}
+	sqlite3_finalize(statement);
+	HFILE fid = GSSiOpenFile("c:\\temp\\crimeup.txt", 0, OF_READ);
+	while (fgetstring(str, 4090, fid))
+	{
+		rtn = SQLOK(sqlite3_exec(db, str, NULL, NULL, 0), db, "", 0);
+	}
+	GSSiClose(fid);
+	SQLOK(sqlite3_exec(db, "ROLLBACK", NULL, NULL, 0), db, "", 0);
+	//sqlite3_exec(db, "COMMIT", NULL, NULL, 0);
+	rtn = sqlite3_close(db);
+	return n;
+
+}
+int TestSQLiteCrimeOffenseOrder(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR)
+{
+	sqlite3 *db;
+	BOOL rtn;
+	char cmd[1024];
+	int n = 0, nbad = 0, nMult = 0;
+	char Path[] = "c:\\temp\\crimes_latlon.sql";
+	sqlite3_stmt *statement;
+	MNMXCORD llBounds = *pBounds;
+	long lastcnum = 0;
+	int maxoffenseOrder = 0;
+
+	pBounds = &llBounds;
+	ConvertBounds(pBounds, 1, 2);
+	rtn = sqlite3_open(Path, &db);
+	if (rtn != SQLITE_OK)
+		return FALSE;
+	sqlite3_exec(db, "BEGIN", NULL, NULL, 0);
+	sprintf(cmd, "SELECT ControlNbr,OffenseOrder,Offense FROM OFFENSEXY ORDER BY ControlNbr, OffenseOrder");
+	SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "get num rows", 0);
+
+	while (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		int offenseOrder = sqlite3_column_int(statement, 1);
+		LPSTR offense = (LPSTR)sqlite3_column_text(statement, 2);
+		long controlNbr = sqlite3_column_int(statement, 0);
+		if (lastcnum != controlNbr)
+		{
+			lastcnum = controlNbr;
+			if (offenseOrder != 1)
+				nbad++;
+		}
+		if (offenseOrder != 1)
+			nMult++;
+		n++;
+		maxoffenseOrder = max(offenseOrder, maxoffenseOrder);
 	}
 
 	sqlite3_finalize(statement);

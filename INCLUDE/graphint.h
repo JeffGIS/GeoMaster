@@ -2334,7 +2334,7 @@ BOOL MovePointItem (long Refno,DPOINT NewPoint);
 BOOL ViewImage (HWND hWnd,LPSTR ImagePath);
 double PercentOfItemInHighlightAreas (int item);
 double PercentOfPolyInHighlightAreas (int PolyType,LPMNMXCORD pBounds,int npnts,HPDPOINT pDPoint);
-int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories);
+int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,BOOL nameOnly);
 BOOL ComposeMessage (HWND hWnd,LPSTR Title,LPSTR InMessage,LPSTR ResponseAction);
 
 
@@ -2372,7 +2372,7 @@ BOOL SetTransparency (int tranValue);
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
 BOOL RunForAll(int nArgs, LPSTR *Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
-BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength);
+BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength, LPSTR sourceDir);
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);
 int SQLiteCmd(int nArgs, LPSTR *ARG);
 HANDLE GetDistinctValues(HWND hWnd, LPSTR value, int ln, HANDLE hDB, int nStatus);
