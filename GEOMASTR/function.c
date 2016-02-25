@@ -19,6 +19,8 @@ typedef struct {HANDLE hFTP;
 				char directory[MAX_PATH];
 				char errorVarName[64];
 				int reopenAttempts;
+				WORD port;
+				BOOL passive;
 				}FTPSTRUCT;
 typedef FTPSTRUCT *LPFTPSTRUCT;
 
@@ -82,7 +84,9 @@ void ReopenFTP (LPFTPSTRUCT pFTPStruct)
 								pFTPStruct->Username,
 								pFTPStruct->Password,
 								pFTPStruct->directory,
-								pFTPStruct->errorVarName);
+								pFTPStruct->errorVarName,
+								pFTPStruct->port,
+								pFTPStruct->passive);
 	return;
 }
 
@@ -2294,7 +2298,7 @@ SetVis:
 			goto Rtnl;
 		}
 
-		case 355://$FTP(OPEN,service,username,pw,directory,errvarname)
+		case 355://$FTP(OPEN,service,username,pw,directory,errvarname,port(opt),passive(opt))
 				 //$FTP(CLOSE,handle);
 				 //$FTP(LIST,handle,wildcard,errvarname)
 				 //$FTP(GETFILE,handle,remotename,localname,replace,showStatus,errvarname)
@@ -2306,13 +2310,13 @@ SetVis:
 			HANDLE hFTPStruct;
 			LPFTPSTRUCT pFTPStruct;
 
-			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (!_fstricmp(Arg[1],"OPEN"))
 			{
 				hFTPStruct = GSSiGlobAlloc (1781,GHND,sizeof(FTPSTRUCT));
 				pFTPStruct = GlobalLock (hFTPStruct);
-				pFTPStruct->hFTP = FTPOpen (Arg[2],Arg[3],Arg[4],Arg[5],Arg[6]);
+				pFTPStruct->hFTP = FTPOpen(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], atoi(Arg[7]), atob(Arg[8]));
 				if (!pFTPStruct->hFTP)
 				{
 					GSSiGlobUlFree (&hFTPStruct);

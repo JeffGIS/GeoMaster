@@ -1357,7 +1357,7 @@ vec3 sVectorFromPoints (svec3 * p1, svec3 * p2);
 vec3 GetTriangleNormal (vec3 * vertex1,vec3 * vertex2,vec3 * vertex3);
 vec3 sGetTriangleNormal (svec3 * vertex1,svec3 * vertex2,svec3 * vertex3,double metersperpixel);
 
-HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LPCSTR directory,LPSTR errorVarName);
+HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LPCSTR directory,LPSTR errorVarName,WORD port,BOOL passive);
 BOOL FTPClose (HANDLE h);
 HANDLE ListFtpDir(HANDLE hConnection,HANDLE hFind,
 				  LPSTR pWildCard,DWORD dwFindFlags,
