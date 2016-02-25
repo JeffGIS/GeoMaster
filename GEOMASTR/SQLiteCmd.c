@@ -456,6 +456,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		LPSTR llLoc, pBar;
 		HANDLE hFldDefs = 0;
 		LPSTR fldDefs;
+		BOOL update = FALSE;
 
 		if (*ARG[7])
 			fidDef = GSSiOpenFile(ARG[7], 0, OF_READ);
@@ -486,10 +487,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		{
 			LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hGMDB);
 			LPGWDHEADER lpGWDOffConv = 0;
+			fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
 			if (atob(ARG[3]))
-				fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
-			else
-				fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+				update = TRUE;
 			if (fid != HFILE_ERROR)
 			{
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
@@ -510,19 +510,19 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				sprintf(cmd, "#2=INSERT INTO %s VALUES(", TableName);
 				//fputstring(cmd, fid);
 				sprintf(pCmd, "DROP TABLE IF EXISTS %s", TableName);
-				if (fidDef == HFILE_ERROR)
+				if (fidDef == HFILE_ERROR && !update)
 					fputstring(pCmd, fid);
 				if (includesPoint)
 				{
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", TableName);
-					if (fidDef == HFILE_ERROR)
+					if (fidDef == HFILE_ERROR && !update)
 						fputstring(pCmd, fid);
 					if (haveDateAndUCR)
 						//sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
 						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id, minTime, maxTime, minUCR, maxUCR,minX, maxX, minY, maxY);", TableName);
 					else
 						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", TableName);
-					if (fidDef == HFILE_ERROR)
+					if (fidDef == HFILE_ERROR && !update)
 						fputstring(pCmd, fid);
 					if (lpGWDHead->NumIndexFields[0] == 1)
 						strcpy(lpGWDHead->pFldInfo->Name, "id");
@@ -611,7 +611,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 						sprintf(strchr(pCmd, 0), "))");
 					}
-					if (fidDef == HFILE_ERROR)
+					if (fidDef == HFILE_ERROR && !update)
 						fputstring(pCmd, fid);
 					for (index = firstIndex; index < lastIndex; index++)
 					{
@@ -623,7 +623,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
 							}
 							sprintf(strchr(pCmd, 0), ");");
-							if (fidDef == HFILE_ERROR)
+							if (fidDef == HFILE_ERROR && !update)
 								fputstring(pCmd, fid);
 						}
 					}
@@ -635,7 +635,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					fldDefs = GlobalLock(hFldDefs);
 					while (i++ < 5 && fgetstring(fldDefs, SHRT_MAX, fidDef))
 					{
-						fputstring(fldDefs, fid);
+						if (!update)
+							fputstring(fldDefs, fid);
 					}
 					GSSiClose(fidDef);
 				}
@@ -666,6 +667,14 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							indx = 0;
 							memset(lpGWDHead->pKeys[indx], 0, abs(lpGWDHead->lKeys[indx]));
 							*(LPINT)lpGWDHead->pKeys[indx] = wantCNUM;
+						}
+						else if (!strnicmp(SQL, "LastChanged >", 13))
+						{
+							pSpace = SQL + 13;
+							cond = BT_GE;
+							indx = 2;
+							memset(lpGWDHead->pKeys[indx], 0, abs(lpGWDHead->lKeys[indx]));
+							strncpy(lpGWDHead->pKeys[indx], pSpace, abs(lpGWDHead->lKeys[indx]));
 						}
 						else
 						{
@@ -777,7 +786,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									}
 								}
 								//sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx, fUCR*10.0, fUCR*10.0, ftimebeg, ftimeend);
-								sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
+								sprintf(pCmd, "INSERT OR REPLACE INTO %s_index VALUES(%i,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
 							}
 							else
 								sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
@@ -785,10 +794,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 
 						if (nextId > 0)
-							sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, id);
+							sprintf(pCmd, "INSERT OR REPLACE INTO %s VALUES(%i,", TableName, id);
 							//sprintf(pCmd, "#2%i,", id);
 						else
-							sprintf(pCmd, "INSERT INTO %s VALUES(", TableName);
+							sprintf(pCmd, "INSERT OR REPLACE INTO %s VALUES(", TableName);
 						delim[0] = 0;
 
 						for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
