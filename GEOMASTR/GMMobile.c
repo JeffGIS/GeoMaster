@@ -218,7 +218,7 @@ int FindDupParcels(LPSTR OUTFile)
 	int nTot = BT_NUM_IN_INDEX(hHighlight);
 	int nComplete = 0;
 	int ref, offset;
-	int nDup=0;
+	int nDup=-1;
 	int baseRef=0;
 	char baseUDI[20] = { 0 };
 	HANDLE hBTDupLink;
@@ -287,14 +287,9 @@ int FindDupParcels(LPSTR OUTFile)
 	{
 		pos = BT_NEXT;
 		FillGWDData(lpGWDHead, offset);
-		if (!memcmp(&pData->NP, &lastDupData.NP, sizeof(DUPDATA) - 24))
+		if (nDup >= 0 && !memcmp(&pData->NP, &lastDupData.NP, sizeof(DUPDATA) - 24))
 		{
 			rtn++;
-			if (!nDup)
-			{
-				baseRef = lastDupData.Refno;
-				strncpy(baseUDI, pData->UDI, 20);
-			}
 			nDup++;
 			dupLink.ref = baseRef;
 			strncpy(dupLink.dupUDI, baseUDI, 20);
@@ -304,14 +299,17 @@ int FindDupParcels(LPSTR OUTFile)
 		}
 		else
 		{
-			if (baseRef)
+			if (baseRef && nDup > 0)
 			{
 				dupLink.ref = baseRef;
 				dupLink.dupNum = -nDup;
+				strncpy(dupLink.UDI, baseUDI, 20);
+				strncpy(dupLink.dupUDI, baseUDI, 20);
 				BT_PUT(hBTDupLink, (LPSTR)&baseRef, (LPSTR)&dupLink);
 				rtn++;
 			}
-			baseRef = 0;
+			baseRef = pData->Refno;
+			strncpy(baseUDI, pData->UDI, 20);
 			nDup = 0;
 		}
 		lastDupData = *pData;
