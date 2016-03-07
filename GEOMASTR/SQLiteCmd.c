@@ -318,7 +318,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				sqlite3_free(error);
 
 				if (primKeyIsOffset)
-					sprintf(pCmd, "CREATE TABLE %s (OFFSET INT PRIMARY KEY,", ARG[4]);
+					sprintf(pCmd, "CREATE TABLE %s (OFFSET INTEGER PRIMARY KEY,", ARG[4]);
 				else
 					sprintf(pCmd, "CREATE TABLE %s (", ARG[4]);
 
@@ -532,7 +532,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				if (lpGWDHead->NumIndexFields[0] > 1)
 				{
-					sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,", TableName);
+					sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
 					nextId = 1;
 				}
 				else
@@ -931,11 +931,6 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					char delim[2] = { 0 };
 					HANDLE hOffConvDB = 0;
 					HFILE  fidOffConv = HFILE_ERROR;
-					BOOL HaveBeginDate = FALSE;
-					BOOL HaveLastChanged = FALSE;
-					BOOL HaveLastChangedID = FALSE;
-					BOOL HaveCity = FALSE;
-					BOOL HaveZipcode = FALSE;
 					int  nextId = -1;
 
 					if (*ARG[8])
@@ -961,10 +956,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 
 					if (primKeyIsOffset)
-						sprintf(pCmd, "CREATE TABLE %s (OFFSET INT PRIMARY KEY,", TableName);
+						sprintf(pCmd, "CREATE TABLE %s (OFFSET INTEGER PRIMARY KEY,", TableName);
 					else if (lpGWDHead->NumIndexFields[0] > 1)
 					{
-						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,", TableName);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
 						nextId = 1;
 					}
 					else
@@ -972,36 +967,6 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 					for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
 					{
-						if (!stricmp(lpFieldInfo->Name, "BeginDate"))//fixes mpls incident table
-						{
-							if (!HaveBeginDate)
-								strcpy(lpFieldInfo->Name, "BeginDate2");
-							HaveBeginDate = TRUE;
-						}
-						if (!stricmp(lpFieldInfo->Name, "LastChanged"))//fixes mpls incident table
-						{
-							if (!HaveLastChanged)
-								strcpy(lpFieldInfo->Name, "LastChanged2");
-							HaveLastChanged = TRUE;
-						}
-						if (!stricmp(lpFieldInfo->Name, "LastChangedID"))//fixes mpls incident table
-						{
-							if (!HaveLastChangedID)
-								strcpy(lpFieldInfo->Name, "LastChangedID2");
-							HaveLastChangedID = TRUE;
-						}
-						if (!stricmp(lpFieldInfo->Name, "City"))//fixes mpls incident table
-						{
-							if (!HaveCity)
-								strcpy(lpFieldInfo->Name, "City2");
-							HaveCity = TRUE;
-						}
-						if (!stricmp(lpFieldInfo->Name, "Zipcode"))//fixes mpls incident table
-						{
-							if (!HaveZipcode)
-								strcpy(lpFieldInfo->Name, "Zipcode2");
-							HaveZipcode = TRUE;
-						}
 						switch (lpFieldInfo->Type)
 						{
 						case BT_CHAR:
@@ -1011,7 +976,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								sprintf(strchr(pCmd, 0), "%s'%s' CHAR(%i)", delim, removePCT(lpFieldInfo->Name), lpFieldInfo->Len);
 							break;
 						case BT_INTEGER:
-							sprintf(strchr(pCmd, 0), "%s'%s' INT", delim, removePCT(lpFieldInfo->Name));
+							if (!i && nextId < 0)
+								sprintf(strchr(pCmd, 0), "%s%s INTEGER PRIMARY KEY", delim, removePCT(lpFieldInfo->Name));
+							else
+								sprintf(strchr(pCmd, 0), "%s'%s' INT", delim, removePCT(lpFieldInfo->Name));
 							break;
 						case BT_REAL:
 							sprintf(strchr(pCmd, 0), "%s'%s' REAL", delim, removePCT(lpFieldInfo->Name));
@@ -1370,9 +1338,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, Fid);
 					}
 					if (*ARG[6])
-						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
 					else
-						sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
 					fputstring(pCmd, Fid);
 					if ((pSpace = strchr(ARG[5], ' ')))
 						*pSpace = 0;
@@ -1592,7 +1560,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
 						fputstring(pCmd, Fid);
 					}
-					sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,PIN,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i), Data BLOB(%i));", TableName, BLOB_MAX, BLOB_MAX * 8, BLOB_MAX);
+					sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,PIN,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i), Data BLOB(%i));", TableName, BLOB_MAX, BLOB_MAX * 8, BLOB_MAX);
 					fputstring(pCmd, Fid);
 					sprintf(pCmd, "CREATE INDEX %sPIN_Index ON %s ('PIN' ASC);", TableName);
 					fputstring(pCmd, Fid);
@@ -1787,7 +1755,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
 				fputstring(pCmd, Fid);
-				sprintf(pCmd, "CREATE TABLE %s (id INT PRIMARY KEY,%s,LONGITUDE REAL,LATITUDE REAL);", ARG[4],ARG[5]);
+				sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,LONGITUDE REAL,LATITUDE REAL);", ARG[4],ARG[5]);
 				fputstring(pCmd, Fid);
 				if ((pSpace = strchr(ARG[5], ' ')))
 					*pSpace = 0;
