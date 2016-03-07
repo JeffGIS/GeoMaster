@@ -494,6 +494,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			{
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
 				LPSTR  pCmd = GlobalLock(hCmd);
+				HANDLE hCmdIndex = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
+				LPSTR  pCmdIndex = GlobalLock(hCmdIndex);
 				LPGWFLDINFO lpFieldInfo;
 				char delim[2] = { 0 };
 				BOOL HaveBeginDate = FALSE;
@@ -786,15 +788,14 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									}
 								}
 								//sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f,%.0f,%.0f,%.0f,%.0f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx, fUCR*10.0, fUCR*10.0, ftimebeg, ftimeend);
-								sprintf(pCmd, "INSERT OR REPLACE INTO %s_index VALUES(%i,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
+								sprintf(pCmdIndex, "INSERT OR REPLACE INTO %s_index VALUES(|%i|,%.0f,%.0f,%.0f,%.0f,%.6f,%.6f,%.6f,%.6f);", TableName, id, ftimebeg, ftimeend, fUCR*10.0, fUCR*10.0, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
 							}
 							else
-								sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
-							fputstring(pCmd, fid);
+								sprintf(pCmdIndex, "INSERT INTO %s_index VALUES(|%i|,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
 						}
 
 						if (nextId > 0)
-							sprintf(pCmd, "INSERT OR REPLACE INTO %s VALUES(%i,", TableName, id);
+							sprintf(pCmd, "INSERT OR REPLACE INTO %s VALUES(|%i|,", TableName, id);
 							//sprintf(pCmd, "#2%i,", id);
 						else
 							sprintf(pCmd, "INSERT OR REPLACE INTO %s VALUES(", TableName);
@@ -857,6 +858,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							sprintf(strchr(pCmd, 0), "%s%i", delim, sunAngle);
 						sprintf(strchr(pCmd, 0), ")");
 						fputstring(pCmd, fid);
+						fputstring(pCmdIndex, fid);
 						rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
 					}
 					DestroyStatusWindow(0);
@@ -865,6 +867,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					GSSiGlobUlFree(&hVal);
 				}
 				GSSiGlobUlFree(&hCmd);
+				GSSiGlobUlFree(&hCmdIndex);
 			}
 			if (!rtn)
 				rtn = 1;
