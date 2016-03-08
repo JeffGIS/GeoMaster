@@ -327,8 +327,15 @@ GSSiExitProg (1348);
 		{
 			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR pMem = GlobalLock(hMem);
+			LPSTR pComma = strchr(Args, ',');
 
-			sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt)", Args);
+			if (pComma)
+			{
+				*pComma++ = 0;
+				sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt,%s)", Args,pComma);
+			}
+			else
+				sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt)", Args);
 			ExpandText(pMem);
 			strcpy(OutLoc, pMem);
 			GSSiGlobUlFree(&hMem);
