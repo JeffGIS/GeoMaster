@@ -49,6 +49,7 @@ void SetShowContourLines (BOOL In);
 void SetShowDepthColors (BOOL In);
 void SetHighlightDepth (int In);
 
+HANDLE countyLinkedVar = 0, countyVar = 0;
 
 HANDLE CreateVarSpace(int type)
 {
@@ -5505,11 +5506,20 @@ GSSiExitProg (542);
 #endif
 }  
 
+/*int checkcounty(int i)
+{
+	VARPNT vp = (VARPNT)glbllock(countyVar);
+	if (vp->LinkedVar[0] && vp->LinkedVar[0] != countyLinkedVar)
+		ii = 1;
+	glblUnlock(countyVar);
+	return 1;
+}*/
 BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 #if ENABLETRACE
 {GSSiEnterProg (544);
 #endif
 {
+	LPSTR   strInit = str;
 	LPSTR	BeginLoc, EndLoc,DLTDelim, LastLoc=strchr (str,0);
 	char	Delim=',',EndStr[3]; 
 	int		ivar=0, LineLen,l, EndInc; 
@@ -5530,6 +5540,8 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 	Delim = *DLTDelim; 
 	for (ivar=0;ivar<nDLTvar;ivar++)
 	{   
+//		if (DLTVar[ivar] == countyVar)
+//			ii = 1;
 		VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
 		VarPtr->Len = 0;    
 		*VarPtr->Value = 0;
@@ -5605,7 +5617,7 @@ Next:if (*str == '"')
 		GSSiGlobFree (&handle); 
 		VarPtr->ValueIsHandle = 0;
 	}
-	strncpy0 (VarPtr->Value,BeginLoc,MAXVARLEN); 
+	strncpy0 (VarPtr->Value,BeginLoc,MAXVARLEN-((ULONG)str - (ULONG)strInit)); 
 	VarPtr->Len = _fstrlen(BeginLoc); 
 	GlobalUnlock (DLTVar[ivar]);
 	if (!EndLoc || EndLoc >= LastLoc-1)
@@ -7186,6 +7198,7 @@ GSSiExitProg (570);
 	}
 	if (LinkToVar)
 	{
+		VARPNT	linkVar = GlobalLock(LinkToVar);
 		hGlobal = AllocateVar (VarName);
 		VP = (VARPNT)GlobalLock (hGlobal); 
 		l=VP->NumLinkedVars;  
@@ -7216,7 +7229,13 @@ GSSiExitProg (570);
 		}
 		VP->LinkedVar[VP->NumLinkedVars] = LinkToVar; 
 		VP->NumLinkedVars++;
+/*		if (!stricmp(VP->Name, "COUNTY"))
+		{
+			countyVar = hGlobal;
+			countyLinkedVar = LinkToVar;
+		}*/
 		GlobalUnlock (hGlobal);
+		GlobalUnlock (LinkToVar);
 {
 #if ENABLETRACE
 GSSiExitProg (570);
@@ -7605,7 +7624,7 @@ GSSiExitProg (573);
 		
     	case GMTEXT_DATAFILE: 
     	{   
-    		hStr=GSSiGlobAlloc ( 228,GMEM_MOVEABLE,4096);  
+    		hStr=GSSiGlobAlloc ( 228,GMEM_MOVEABLE,USHRT_MAX);  
     		str=GlobalLock (hStr);
 			if (NeedRead (SQLPtr)) 
 			{
@@ -7616,7 +7635,7 @@ GSSiExitProg (573);
 			{
 NextTextRec:
 		    	SQLPtr->Offset = GSSillseek (FilePtr->Fid,0,1);  
-		    	if (!fgetstring (str,4090,FilePtr->Fid))
+				if (!fgetstring(str, USHRT_MAX-4, FilePtr->Fid))
 		    		SQLPtr->st = 1;
 				else if (*str == '[' && *LastChr(str) == ';')
 				{

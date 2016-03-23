@@ -52,8 +52,8 @@
 #define		MAXREPORTFILES  16
 #define		MAXREPORTTABS   8 
 #define		MAXFIELDS       512 
-#define		MAXGLOBALS      2048
-#define		MAX_LOCAL_VARS	64
+#define		MAXGLOBALS      4096
+#define		MAX_LOCAL_VARS	128
 #define		MAX_CHANGED_GLOBALS 32
 #define		MAXFIELDINSQL   32 
 #define		MAXWHEREINCOMBO 16   

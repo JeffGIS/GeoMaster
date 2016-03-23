@@ -746,12 +746,13 @@ typedef struct
    }   LoadP;
 typedef LoadP FAR *lpLoadP;
 
+#pragma pack(2)
 typedef struct
     {   
         HANDLE  Handle;
         short   Len;     
         short   Type;
-        BYTE	ValueIsHandle;
+        short	ValueIsHandle;
         short	NumLinkedVars;  
         DWORD   changetime; 
         BOOL	ContainsGorF;
@@ -761,6 +762,7 @@ typedef struct
         HANDLE	LinkedVar[1];
     } VARINFO;
 typedef VARINFO FAR *VARPNT;     
+#pragma pack()
 
 typedef	struct
 	{	LONG	Segment;
@@ -3920,5 +3922,8 @@ typedef struct {
 typedef GWDHEADER16 FAR  *LPGWDHEADER16;   
 #pragma pack()
 int checkvp(int i);
+
+LPVOID glbllock(HANDLE hglb);
+BOOL glblUnlock(HANDLE hglb);
 
 #include "TileGraphics.h"
