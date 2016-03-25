@@ -5514,7 +5514,7 @@ GSSiExitProg (542);
 	glblUnlock(countyVar);
 	return 1;
 }*/
-BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
+BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 #if ENABLETRACE
 {GSSiEnterProg (544);
 #endif
@@ -5578,7 +5578,7 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 				EndLoc = BeginLoc + DLTLen[ivar];
 				EndChar = *EndLoc;
 				*EndLoc = '\0';
-				l = min (strlen(BeginLoc),MAXVARLEN);
+				l = min (strlen(BeginLoc),MAXLINE);
 				VarPtr->Len = min (l,DLTLen[ivar]);
 				strncpy0 (VarPtr->Value,BeginLoc,VarPtr->Len); 
 				*EndLoc = EndChar; 
@@ -5617,7 +5617,7 @@ Next:if (*str == '"')
 		GSSiGlobFree (&handle); 
 		VarPtr->ValueIsHandle = 0;
 	}
-	strncpy0 (VarPtr->Value,BeginLoc,MAXVARLEN-((ULONG)str - (ULONG)strInit)); 
+	strncpy0(VarPtr->Value, BeginLoc, MAXVARLEN-1);
 	VarPtr->Len = _fstrlen(BeginLoc); 
 	GlobalUnlock (DLTVar[ivar]);
 	if (!EndLoc || EndLoc >= LastLoc-1)
@@ -7243,7 +7243,7 @@ GSSiExitProg (570);
 		return 0; 
 }
 	}
-	if ((l=GetValFromOpenFiles (VarName,OutStr,4096))>=0)
+	if ((l=GetValFromOpenFiles (VarName,OutStr,MAXVARLEN))>=0)
 {
 #if ENABLETRACE
 GSSiExitProg (570);
@@ -7623,8 +7623,9 @@ GSSiExitProg (573);
 		break;
 		
     	case GMTEXT_DATAFILE: 
-    	{   
-    		hStr=GSSiGlobAlloc ( 228,GMEM_MOVEABLE,USHRT_MAX);  
+    	{
+#define MAXTEXTLINE	USHRT_MAX*4
+			hStr = GSSiGlobAlloc(228, GMEM_MOVEABLE, MAXTEXTLINE);
     		str=GlobalLock (hStr);
 			if (NeedRead (SQLPtr)) 
 			{
@@ -7635,7 +7636,7 @@ GSSiExitProg (573);
 			{
 NextTextRec:
 		    	SQLPtr->Offset = GSSillseek (FilePtr->Fid,0,1);  
-				if (!fgetstring(str, USHRT_MAX-4, FilePtr->Fid))
+				if (!fgetstring(str, MAXTEXTLINE - 4, FilePtr->Fid))
 		    		SQLPtr->st = 1;
 				else if (*str == '[' && *LastChr(str) == ';')
 				{
@@ -7647,7 +7648,7 @@ NextTextRec:
 		    		BOOL	Err;
 		    		
 			        SQLPtr->st = 0;  
-					GetDelimTextData(str,FilePtr->FileHandle);
+					GetDelimTextData(str, FilePtr->FileHandle, MAXTEXTLINE-4);
 				    SQLPtr->lastreadtime = NextVarTime ();
 					if (LogicPFile (SQLPtr,SQLPtr->SQL,&Err))
 						break;
@@ -8476,10 +8477,10 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
     	IDName[0]=0;  
 	if (!FilePathHandle)
 		goto GetOut; 
-	hStr=GSSiGlobAlloc ( 234,GMEM_MOVEABLE,4096+256+4096);
+	hStr=GSSiGlobAlloc ( 234,GMEM_MOVEABLE,maxlval+256+4096);
 	{
 		LPSTR		str=GlobalLock (hStr);
-		LPSTR		TempValue=str+4096;
+		LPSTR		TempValue = str + maxlval;
 		LPSTR		pSQL=TempValue+256;   
 	
 /*	if (*VarName == '%')
@@ -8738,24 +8739,24 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 						ExpandText(str);
 						loc = atol(str);
 						GSSillseek(FilePtr->Fid, loc, 0);
-						fgetstring(str, 4090, FilePtr->Fid);
-						GetDelimTextData(str, FilePtr->FileHandle);
+						fgetstring(str, maxlval, FilePtr->Fid);
+						GetDelimTextData(str, FilePtr->FileHandle, maxlval);
 						SQLPtr->st = 0;
 					}
 					else
 					{
 						GSSillseek(FilePtr->Fid, 0, 0);
 						SQLPtr->st = 0;
-						fgetstring(str, 4090, FilePtr->Fid);
+						fgetstring(str, maxlval-2, FilePtr->Fid);
 						ConvertSQLToLogicP(pSQL, SQLPtr->SQL);
 						do
 						{
 							SQLPtr->st = -999;
 							SQLPtr->Offset = GSSillseek(FilePtr->Fid, 0, 1);
-							if (!fgetstring(str, 4090, FilePtr->Fid))
+							if (!fgetstring(str, maxlval, FilePtr->Fid))
 								SQLPtr->st = 1;
 							else
-								GetDelimTextData(str, FilePtr->FileHandle);
+								GetDelimTextData(str, FilePtr->FileHandle, maxlval);
 							SQLPtr->lastreadtime = NextVarTime();
 						} while (SQLPtr->st <= 0 && !LogicPFile(SQLPtr, pSQL, &err));
 						if (SQLPtr->st == -999)
@@ -8805,7 +8806,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				fromfile = pComboField->fromfile;
 				if (fromfile < 0)
 				{
-					hStr = GSSiGlobAlloc(235, GMEM_MOVEABLE, 4096);
+					hStr = GSSiGlobAlloc(235, GMEM_MOVEABLE,maxlval);
 					pStr = GlobalLock(hStr);
 					pCFieldIndex = (LPCFIELDINDEX)GlobalLock(pComboHeader->hComputedFields);
 					if (pComboFile->Version < 2)
@@ -8887,7 +8888,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 					else
 						ReadTime = SQLPtr2->lastreadtime;
 					GlobalUnlock(pComboFile->hSQL[fromfile]);
-					st = GetValFromOpenFiles(pStr, Value, 4096);
+					st = GetValFromOpenFiles(pStr, Value, maxlval);
 					if (!fromfile)
 					{
 						USHORT	j;
@@ -9033,7 +9034,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 						_fstrcpy(Value, "0");
 						if (len)
 						{
-							HANDLE	hCensusString = GSSiGlobAlloc(237, GMEM_MOVEABLE, 4096);
+							HANDLE	hCensusString = GSSiGlobAlloc(237, GMEM_MOVEABLE, maxlval);
 							LPSTR	pComma, pEnd, pCensusString = GlobalLock(hCensusString);
 							USHORT	field = SFFieldData.Field;
 
@@ -9080,7 +9081,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				if (SQLPtr->st)
 					goto NotFound;
 				{
-					HANDLE hsql = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+					HANDLE hsql = GSSiGlobAlloc(0, GMEM_MOVEABLE, maxlval);
 					LPSTR sql = GlobalLock(hsql);
 					strcpy(sql, SQLPtr->SQL);
 					ExpandText(sql);

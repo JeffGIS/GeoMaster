@@ -177,7 +177,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				CurLoc = GSSillseek(fptr,0,1);
 				while (row++ < l && fgetstring (pData,4090,fptr))
 				{
-					GetDelimTextData(pData,hDLT);
+					GetDelimTextData(pData,hDLT,4090);
 					*pOutData = 0;
 					for (ivar=0;ivar<nDLTvar;ivar++)
 					{   

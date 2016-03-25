@@ -3484,7 +3484,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 	}
 	while (fgetstring (str,1024,Fid))
 	{
-		GetDelimTextData(str,hDLT);
+		GetDelimTextData(str,hDLT,1024);
 		_fstrcpy (Value,Cmd1);
 		ExpandText (Value);
 		PadString (Value,0,CompareLength);
@@ -3504,7 +3504,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 	}
 	while (fgetstring (str,1024,Fid))
 	{
-		GetDelimTextData(str,hDLT);
+		GetDelimTextData(str,hDLT,1024);
 		_fstrcpy (Value,Cmd2);
 		ExpandText (Value);
 		PadString (Value,0,CompareLength);
@@ -4210,7 +4210,7 @@ NextCorner:;
 	while (fgetstring (str,128,FidRun))
 	{   
 		
-    	GetDelimTextData(str,hDLT);  
+    	GetDelimTextData(str,hDLT,128);  
     	_fstrcpy (str,"[UDI]");
     	ExpandText (str);
     	BT_PUT (hBT,str,(LPSTR)&Dummy);   
@@ -5455,7 +5455,7 @@ BOOL FilterTextFile (LPSTR InFile,LPSTR OutFile,MNMXCORD Bounds)
 	{   
 		lineno++;   
 		_fstrcpy (strorig,str);
-		GetDelimTextData(str,TxtHandle);
+		GetDelimTextData(str,TxtHandle,64);
 		X = GetGlobalDVal ("[X]")*FTM;
 		Y = GetGlobalDVal ("[Y]")*FTM;
 		Z = GetGlobalDVal ("[Z]")*FTM;    

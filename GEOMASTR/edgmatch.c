@@ -43,7 +43,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
 	while (fgetstring (lpstr,1020,Fid1))
 	{
-		GetDelimTextData(lpstr,hDLT);
+		GetDelimTextData(lpstr,hDLT,1020);
 		GetGlobalCVal ("[UDI]",pCorner->ID,0);
 		pCorner->Point.x = GetGlobalDVal ("[BPX]");
 		pCorner->Point.y = GetGlobalDVal ("[BPY]");
@@ -65,7 +65,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	fputstring ("# Original Transformation Points",Fid3);	     
 	while (fgetstring (lpstr,1020,Fid1))
 	{
-		GetDelimTextData(lpstr,hDLT);
+		GetDelimTextData(lpstr,hDLT,1020);
 		Point[0].x = GetGlobalDVal ("[BPX]");
 		Point[0].y = GetGlobalDVal ("[BPY]"); 
 		Point[1] = Point[0];
@@ -116,7 +116,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 			ProcessDelimTextHeader(lpstr, 0, Fid2, &hDLT, 0, 0);
 	  		while (fgetstring (lpstr,1020,Fid2))
 	  		{
-      			GetDelimTextData(lpstr,hDLT);
+      			GetDelimTextData(lpstr,hDLT,1020);
       			GetGlobalCVal ("[FILENAME]",pFile,0);
       			if (!_fstricmp (pFile,PlotFile))
       			{   
@@ -178,7 +178,7 @@ short LoadEdgeFile (LPSTR File,LPHANDLE hEdge)
 	ProcessDelimTextHeader(lpstr, 0, Fid1, &hDLT, 0, 0);
 	while (fgetstring (lpstr,1020,Fid1))
 	{
-		GetDelimTextData(lpstr,hDLT);
+		GetDelimTextData(lpstr,hDLT,1020);
 		GetGlobalCVal ("[UDI]",pEdge->ID,0);
 		pEdge->Point[0].x = GetGlobalDVal ("[BPX]");
 		pEdge->Point[0].y = GetGlobalDVal ("[BPY]");

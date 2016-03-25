@@ -5147,7 +5147,7 @@ SelectFiles:
 	                    	while (ContinueProcessing && fgetstring (str,258,FidFileList))
 	                    	{   
 	                    		char	leaf[34]="[FILENAME]";
-							    GetDelimTextData(str,hDLT); 
+							    GetDelimTextData(str,hDLT,258); 
 							    _fstrcpy (str,"[FULLNAME]");
 							    ExpandText (str);  
 							    ExpandText (leaf);
@@ -5162,7 +5162,7 @@ SelectFiles:
 										ProcessDelimTextHeader(skipfile, 0, FidSkip, &hDLTSkip, 0, 0);
 										while (fgetstring (skipfile,MAX_PATH,FidSkip))
 										{
-											GetDelimTextData(skipfile,hDLTSkip); 
+											GetDelimTextData(skipfile,hDLTSkip,MAX_PATH); 
 											_fstrcpy (skipfile,"[SKIPNAME]");
 											ExpandText (skipfile);
 											if (!_fstricmp (skipfile,leaf))

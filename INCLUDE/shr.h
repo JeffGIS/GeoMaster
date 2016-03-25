@@ -309,7 +309,7 @@ BOOL SetGMDField (HANDLE hSQLPtr,LPSTR Name,LPSTR Value);
 HANDLE GetDBByIDName (LPSTR IDName);
 short WantGMDRecord (LPOPENFILEDATA FilePtr,LPOPENSQLDATA SQLPtr,LPVOID lpGWDHead,short cond,BOOL HaveOtherFields);
 short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT, char InDelim, LPSTR IDName);
-BOOL GetDelimTextData(LPSTR str,HANDLE hDLT);
+BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int maxline);
 BOOL GetDLTVarName (int ivar,HANDLE hDLT, LPSTR Name);
 HANDLE	GetDLTVarHandle (int ivar,HANDLE hDLT);
 BOOL UpdateGlobalFile (LPSTR RptFile,LPSTR VarName,LPSTR str);

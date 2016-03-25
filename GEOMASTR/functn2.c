@@ -708,7 +708,7 @@ GSSiExitProg (1350);
 				Arg[2]++;
 				*LastChr(Arg[2]) = 0;
 			}
-		    rtn = GetDelimTextData(Arg[2],hDLT); 
+		    rtn = GetDelimTextData(Arg[2],hDLT,4090); 
 			GSSiGlobFree (&hDLT);
 			if (rtn)
 				goto RtnTrue;
@@ -3371,7 +3371,7 @@ GSSiExitProg (1350);
 			    	if (pVarName)
 			    		SetGlobalValue3 (pVarName,Arg3,0,FALSE);
 			    	else
-			    		GetDelimTextData(Arg3,hDLT); 
+			    		GetDelimTextData(Arg3,hDLT,4090); 
 			    	_fstrcpy (Arg4,Arg2);
 		            if (pStatusText)
 					{

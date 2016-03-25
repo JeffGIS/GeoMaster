@@ -6266,7 +6266,7 @@ GetLine:  at = 1;
 		  break;
 GotLine:  GSSiClose (Fid); 
 		  SetDlgItemText(hWndDlg,IDC_DBRECORD,str);
-          GetDelimTextData(str,hDLT);     
+          GetDelimTextData(str,hDLT,1020);     
           GSSiGlobFree (&hDLT);
    		  ltoa (line+FirstMergeRecord-1,str,10);
 		  SetDlgItemText(hWndDlg,IDC_RECORD,str);
@@ -25446,7 +25446,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 					ProcessDelimTextHeader(str, 0, Fid, &hDLT, 0, 0);
 		  			while (fgetstring (str,256,Fid))
 		  			{
-						GetDelimTextData(str,hDLT);  
+						GetDelimTextData(str,hDLT,256);  
 					}
 					GSSiClose (Fid); 
 				}  

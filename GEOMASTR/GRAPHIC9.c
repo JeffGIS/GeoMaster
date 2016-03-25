@@ -2593,7 +2593,7 @@ GSSiExitProg (1056);
 		DBoundsInit (&Bounds);     
 	  	while (fgetstring (str,256,Fid2))
 	  	{
-  			GetDelimTextData(str,hDLT);
+  			GetDelimTextData(str,hDLT,256);
 			Point1.x = GetGlobalDVal ("[BPX]");
 			Point1.y = GetGlobalDVal ("[BPY]");
 			Point2.x = GetGlobalDVal ("[EPX]");

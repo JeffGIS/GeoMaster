@@ -356,7 +356,7 @@ BOOL GetMIDData(HFILE FidMID,LPSTR lpMIDstr,HANDLE hDLT)
     if (FidMID==HFILE_ERROR) return TRUE;
     if (!fgetstring(lpMIDstr,2040,FidMID))
         return TRUE; 
-    GetDelimTextData(lpMIDstr,hDLT);
+    GetDelimTextData(lpMIDstr,hDLT,2040);
     return TRUE;
 } 
 
@@ -528,7 +528,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
  	       
     while (fgetstring (str,256,Fid))
     {
-		GetDelimTextData(str,hDLT);
+		GetDelimTextData(str,hDLT,256);
 	    if ((Fid2 = GSSiOpenFile ("[FULLNAME]",&OFStruct,OF_READ)) != HFILE_ERROR)
 	    {
 			HANDLE	hSymDesc=0; 
@@ -545,7 +545,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
 			ProcessDelimTextHeader(str, NULL, Fid, &hDLT2, 0, 0);
 		    while (fgetstring (str,256,Fid2))
 		    {
-				GetDelimTextData(str,hDLT2);
+				GetDelimTextData(str,hDLT2,256);
 				pPoints[nPoints].y = GetGlobalDVal ("[X]");
 				pPoints[nPoints].x = GetGlobalDVal ("[Y]");   
 				ConvertCoord (&pPoints[nPoints],2,1);

@@ -2860,7 +2860,7 @@ BOOL PrintMerge (HWND hWnd)
 	       }
 //		   SaveDC (hPr);
   	       IsFirstRecord = record;
-           GetDelimTextData(str,hDLT);
+           GetDelimTextData(str,hDLT,sizeof(str)-2);
            record++; 
 		   AddReportToPrintList (0,0,0,0,0);
   	       GetGlobalCVal ("[%PRINTNAME]",DocName,0); 
