@@ -7207,6 +7207,7 @@ GSSiExitProg (570);
 			if (VP->LinkedVar[l] == LinkToVar)
 			{
 				GlobalUnlock (hGlobal);
+				GlobalUnlock(LinkToVar);
 {
 #if ENABLETRACE
 GSSiExitProg (570);

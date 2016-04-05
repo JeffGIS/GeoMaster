@@ -469,9 +469,9 @@ void GSSiRemoveMem (HGLOBAL hglb)
 
 HGLOBAL GSSiGLOBALFREE (HANDLE hglb)
 {   
-	HGLOBAL	rtn = GlobalFree (hglb); 
 	UINT	i; 
-	
+	HGLOBAL rtn;
+
 	if (hglb == countyLinkedVar)
 		ii = 1;
 	if (hglb == WantHandle)
@@ -495,10 +495,12 @@ HGLOBAL GSSiGLOBALFREE (HANDLE hglb)
 				ii=lockid[i];	
 			if (lockcount[i])
 				MEMERR ("Free locked handle");
+			rtn = GlobalFree(hglb);
 			return rtn;
 		} 
-	if (IgnoreLock)
-		return rtn; 
+		rtn = GlobalFree(hglb);
+		if (IgnoreLock)
+			return rtn; 
 	}
 	MEMERR ("Free invalid address");
 	return 0;
