@@ -2334,7 +2334,7 @@ if (Message == GF_MAPSERVER_REQUEST)
 		return TRUE;
 	}
 }
-if (Message == GF_PRCESSTCPCMD)
+if (Message == GF_PROCESSTCPCMD)
 {
 	if (lParam)
 	{

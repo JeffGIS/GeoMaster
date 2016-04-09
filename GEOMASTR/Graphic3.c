@@ -2502,14 +2502,14 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 					if (GetValFromOpenFiles (lpFieldInfo->name,str,MAXLINE) > 0) 
 					{
 						if (!_stricmp(str, "."))
-							ii = 1;
+							*str = 0;
 						LPSTR pDot = strrchr(str, '.');
 						if (pDot && !strcmp(pDot, ".0"))
 							*pDot = 0;
 		   				switch (pFieldTypes[i].Type)
 		   				{   
 		   					case 0:
-								if (!_stricmp(str, "."))
+								if (!*str)
 									break;
 		   						if (IsInteger(str))
 		   						{

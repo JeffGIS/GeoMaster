@@ -2293,7 +2293,8 @@ GSSiExitProg (1350);
 			LPSTR	CmdMess = GlobalLock (hCmdMess);
 
 			nArgs = GetFunArgs (Args,Arg,1,&hMem, pBrkPt, bpOffset, bpLen);
-			strcpy (CmdMess,Arg[1]);
+			if (strlen(Arg[1]) < MAX_CMDMESSAGE)
+				strcpy (CmdMess,Arg[1]);
 			GlobalUnlock (hCmdMess);
 			goto RtnTrue;
 		}

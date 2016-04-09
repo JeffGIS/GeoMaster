@@ -1,3 +1,4 @@
+configs\server.gmc /F /SERVER 8080 [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD k:\gmserver\gmserver
 configs\basemap.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\geomas
 configs\maplegrove.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\gmmobile\metroutm
 configs\texttest2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD m:\BU_2015_11_04\GEOMas
@@ -149,6 +150,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 

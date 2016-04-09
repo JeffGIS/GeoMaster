@@ -2962,7 +2962,10 @@ GSSiExitProg (532);
 			if (hCmdMess)
 			{
 				CmdMess = GlobalLock (hCmdMess);
-				_fstrcpy (CmdMess,Value);
+				if (strlen(Value) < MAX_CMDMESSAGE)
+					_fstrcpy(CmdMess, Value);
+				else
+					*CmdMess = 0;
 	       		GlobalUnlock (hCmdMess);
 	       	}
 	    }

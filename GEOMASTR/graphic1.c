@@ -161,7 +161,7 @@ BOOL InitGraphics (HWND hWnd)
 //	CreateFidDBF ();
 	InitProj4CoordConv (FALSE);
 	GoogleTilesInit ();
-	hCmdMess=GSSiGlobAlloc (  39,GHND,4096*8);  
+	hCmdMess=GSSiGlobAlloc (  39,GHND,MAX_CMDMESSAGE);  
     GetCurVal (name,sizeof(name),IDS_FILEVPOFF); 
 	LocationChoice = FillList (0,0,name,str,0);
 	LocationOffset = atof(str);

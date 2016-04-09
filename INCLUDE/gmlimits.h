@@ -63,6 +63,7 @@
 #define     MAX_GMD_INDEX_FIELDS    8   
 #define		MAX_MACRO_STACK 64
 #define		MAX_BREAKPOINTS	16
+#define		MAX_CMDMESSAGE USHRT_MAX
 
 #define		MAXSAVEDSCREENS	1024  
 #define		MAXBMPCACHE 64   

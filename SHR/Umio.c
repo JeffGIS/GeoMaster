@@ -948,6 +948,8 @@ void LogSocketError (LPSTR Error,LPSTR Input)
 	ExpandText (TimeAndDate);
 	AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\gmsocketerrors.txt",TimeAndDate);
 	AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\gmsocketerrors.txt",Error);
+	if (strlen(Input) > 1020)
+		Input[1020] = 0;
 	AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\gmsocketerrors.txt",Input);
 	return;
 }
@@ -1962,7 +1964,7 @@ Top:
 			else if (hCmdMess) 
 			{   
         		LPSTR CmdMess = GlobalLock (hCmdMess);
-        		short	lCmd = strlen (Cmd);;
+        		short	lCmd = strlen (Cmd);
         		
 				*CmdMess = 0;  
 				GlobalUnlock (hCmdMess);
@@ -1972,7 +1974,7 @@ Top:
 
 					strcpy (pCmd,Cmd);  
     				GlobalUnlock (hCmd);  
-					PostMessage(hWndMain, GF_PRCESSTCPCMD, (WPARAM)sock, (LPARAM)hCmd); 
+					PostMessage(hWndMain, GF_PROCESSTCPCMD, (WPARAM)sock, (LPARAM)hCmd); 
 				}
 			} 
 		}
@@ -1980,7 +1982,7 @@ Top:
 	if (!BlockSocketInput)
 	{
 		if (!InDisplayProcessing && LenSocketBuffer[i])
-			PostMessage(hWndMain, GF_PRCESSTCPCMD, (WPARAM)sock, 0); 
+			PostMessage(hWndMain, GF_PROCESSTCPCMD, (WPARAM)sock, 0); 
 		else
 		{
 			if (BlockVehicleDisplay > 1)
@@ -2026,7 +2028,15 @@ BOOL ProcessTCPCmd (SOCKET sock,LPSTR Cmd)
 	CmdMess = GlobalLock (hCmdMess);
 	*CmdMess = 0;
 	GlobalUnlock (hCmdMess);
-	ProcessText (Cmd); 
+	if (*Cmd == '$')
+		ProcessText (Cmd); 
+	else
+	{
+		err = closesocket(OpenSockets[i]);
+		OpenSockets[i] = INVALID_SOCKET;
+		LogSocketError("Invalid Input", Cmd);
+		return FALSE;
+	}
 	CmdMess = GlobalLock (hCmdMess); 
 	lCmd=_fstrlen(CmdMess);
 	if (!*SocketInputTerminator[i])
@@ -2209,7 +2219,10 @@ BOOL ServerFile (LPSTR Option,SOCKET socket,LPSTR ServerFile,LPSTR Arg1,LPSTR Ar
 		if (Fid == HFILE_ERROR) 
 		{
 			SegLen = 0;
-			sprintf (CmdMess,"$SERVERFILE(SEGMENT,-1,%s,%s,%lu,%i)",ServerFile,Arg1,Loc,SegLen);
+			if (strlen(ServerFile) + strlen(Arg1) < MAX_CMDMESSAGE)
+				sprintf(CmdMess, "$SERVERFILE(SEGMENT,-1,%s,%s,%lu,%i)", ServerFile, Arg1, Loc, SegLen);
+			else
+				*CmdMess = 0;
 		}   
 		else
 		{   
