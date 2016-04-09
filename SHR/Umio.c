@@ -46,7 +46,7 @@ static SOCKET	WaitForInputOnSocket = -1;
 static short	WaitForInputOnSocketStatus;    
 static char		SocketInputBuffer[MAX_SOCKET_BUFFER_SIZE+2]; 
 static int		NumBlockedSockets=0;
-static BOOL		LogSocketIO[MAXOPENSOCKETS];
+static BOOL		LogSocketIO[MAXOPENSOCKETS] = { 0 };
 static char		Cmd[4096];     
 static struct	{
 					long	ID;
