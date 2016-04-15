@@ -939,7 +939,8 @@ GSSiExitProg (1262);
 			} 
 			if (CurTheme->ID == GF_AREA_IN_MASK_THEME)
 			{
-				ThemeCreateAreaInMask(FALSE);
+				if (!ThemeCreateAreaInMask(FALSE))
+					goto RtnNoDisplay;
 				break;
 			}
 			if (CurTheme->ID == GF_HOTSPOT_THEME) 
