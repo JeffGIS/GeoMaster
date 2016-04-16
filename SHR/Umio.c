@@ -2032,8 +2032,7 @@ BOOL ProcessTCPCmd (SOCKET sock,LPSTR Cmd)
 		ProcessText (Cmd); 
 	else
 	{
-		err = closesocket(OpenSockets[i]);
-		OpenSockets[i] = INVALID_SOCKET;
+		CloseTCPIPSocket(sock, FALSE);
 		LogSocketError("Invalid Input", Cmd);
 		return FALSE;
 	}

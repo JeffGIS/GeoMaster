@@ -5532,7 +5532,13 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 	LPHANDLE	DLTVar; 
 	LPSHORT	DLTStart,DLTLen,DLTType;
 	
-	pnDLTvar = (LPSHORT)GlobalLock (hDLT); 
+	if (!hDLT)
+	{
+#if ENABLETRACE
+		GSSiExitProg(544);
+#endif
+		return FALSE;
+	}	pnDLTvar = (LPSHORT)GlobalLock(hDLT);
 	nDLTvar = abs (*pnDLTvar);  
 	DLTDelim = (LPSTR)(pnDLTvar + 1);
 	DLTVar = (LPHANDLE)(DLTDelim + 1);
