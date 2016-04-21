@@ -777,6 +777,8 @@ BOOL BlockSocketProcessing (BOOL Block)
 {
 	int	i;
 
+	if (InServerMode)
+		return FALSE;
 	if (!Block)
 	{
 		if (BlockSocketInput)
@@ -1029,9 +1031,11 @@ void LogSocketInput (int i,LPSTR Input,int len)
 		sprintf (Header,"I(%i): $CAL([%%SYS_CLOCK])|%i",i,len);
 		ExpandText (Header);
 		Input[len]=0;
-		for (i=0;i<len;i++)
+		for (i = 0; i < len; i++)
+		{
 			if (!Input[i])
 				Input[i] = '~';
+		}
 		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Header);
 		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Input);
 	}
