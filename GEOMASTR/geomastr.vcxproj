@@ -135,7 +135,7 @@
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.10</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
