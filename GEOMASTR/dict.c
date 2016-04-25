@@ -4163,7 +4163,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 			else
 				width = -Width * BaseDistToWinDist;
 		}
-		hPen = CreatePen (PS_SOLID,width,lPen.lopnColor);
+		hPen = CreatePen(PS_SOLID, width, lPen.lopnColor);
 		SelectObject (hDC,hPen);
 	}	 
 	while (np--)
@@ -5703,6 +5703,7 @@ int GWPolylineD (HDC hDC, HPDPOINT lpPoints, long npnts,int idesc)
 	static	int	debugi=10838;
 //	HPDPOINT	pSplinePoints;   
 //	double	d1,d2;
+	double saveItemSymbolWidth = ItemSymbolWidth;
 	
 	if (PickingByRefno)
 	{   
@@ -5736,6 +5737,8 @@ GSSiExitProg (989);
 		npnts = nSplinePoints;
 		lpPoints = pSplinePoints;
     }*/ 
+	if (!idesc)
+		ItemSymbolWidth = 1.0/DeviceToScreenFactor;
 	if (npnts < 0)
 	{   
 		npnts = -npnts;  
@@ -5880,6 +5883,7 @@ GSSiExitProg (989);
 	}
 	CurView->WBounds = SaveBounds;
 Exit:
+	ItemSymbolWidth = saveItemSymbolWidth;
 {
 #if ENABLETRACE
 GSSiExitProg (989);
