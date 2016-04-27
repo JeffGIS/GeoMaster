@@ -2110,7 +2110,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
      
      {	DOCINFO	DI;
      
-     	hPr = lpPDChunk->hDC;
+		hPr = hDCPrinter = lpPDChunk->hDC;
         gbUserAbort = FALSE;
         bError = FALSE;
         Printing = TRUE;
