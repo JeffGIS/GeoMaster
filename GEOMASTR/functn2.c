@@ -2185,7 +2185,7 @@ GSSiExitProg (1350);
 			
 		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach
 		{
-			nArgs = GetFunArgs (Args,Arg,-6,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,-7,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
 				goto RtnFalse;
 			ExpandText (Arg[3]);

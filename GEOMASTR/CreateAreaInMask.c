@@ -277,6 +277,18 @@ BOOL ThemeCreateAreaInMask(int from)
 					GSSiDeleteObject(&hBM);
 					GSSiGlobUlFree(&hPolyBuffer);
 					GSSiGlobFree(&hPolyPartLen);
+					nPoly = nNewPoly;
+					if (nPoly == 1)
+						nPoly = 0;
+					if (nNewPoly > 1)
+					{
+						LPINT pPolyPartLen;
+						hPolyPartLen = GSSiGlobAlloc(1780, GMEM_MOVEABLE, nNewPoly * sizeof(int)+4);
+						pPolyPartLen = (LPINT)GlobalLock(hPolyPartLen);
+						for (int i = 0; i < nNewPoly; i++)
+							pPolyPartLen[i] = numNewPoints[i];
+						GlobalUnlock(hPolyPartLen);
+					}
 					if (nNewPoly)
 					{
 						int totPoints = nNewPoly;

@@ -1331,7 +1331,6 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	//char monName[128];
 	int  monStatus, mouseType;
 
-
 	//loadColors();
 	//loadColorChart();
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100102158.bmp");
@@ -1872,6 +1871,17 @@ else if (ShowMax == 10)
 	showWindowCmd = SW_SHOWMAXIMIZED;
 	ShowWindow(hWndMain, SW_HIDE);
 	hDC = GetDC(hWndMain);
+	/*{
+		HPEN	hCPen, hPen = 0;
+
+		LOGPEN	lPen;
+		int	width;
+
+		hCPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+		GetObject(hCPen, sizeof(LOGPEN), &lPen);
+		width = 1;
+	}*/
+
 	OpenConfig(hWndMain, hDC);
 	ReleaseDC(hWndMain, hDC);
 }

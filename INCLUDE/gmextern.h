@@ -342,7 +342,7 @@ extern HDC			hdcMemMap;
 extern COLORREF			ComputePCTBKGColor;
 extern LPTHEME			ComputePCTTheme;
 extern double			CurveExpansionFactor;
-extern double			DeviceToScreenFactor;
+extern float			DeviceToScreenFactor;
 extern double			DeviceToScreenFactorMemMap;
 extern double			PenWidthFactor;
 extern short			MaxOrthoRes;

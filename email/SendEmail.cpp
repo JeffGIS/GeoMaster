@@ -50,7 +50,8 @@ extern "C" void SendEmailToJeff (LPSTR Info)
 
 extern "C" BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response)
 {
-		char	server[128], user[128], pw[64];
+	char	server[128], user[128], pw[64], Bcc[128] = { 0 };
+		char * pSC;
 		std::string	respons;
 
 		if (*To == '(')
@@ -62,6 +63,12 @@ extern "C" BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR
 				To++;
 				*pEnd = 0;
 			}
+		}
+		pSC = strchr(To, ';');
+		if (pSC)
+		{
+			*pSC++ = 0;
+			strcpy(Bcc, pSC);
 		}
 		GetGlobalCVal ("[%MAILSERVER]",server,"smtp.frontiernet.net");
 		GetGlobalCVal ("[%MAILUSER]",user,"jeffgis@frontiernet.net");
@@ -79,6 +86,8 @@ extern "C" BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR
 		}
 		if (*Attach)
 			m.attach (Attach);
+		if (*Bcc)
+			m.addrecipient(Bcc, jwsmtp::mailer::Bcc);
 		m.send(); // send the mail
 		respons = m.response();
 		strcpy (Response,respons.c_str());
