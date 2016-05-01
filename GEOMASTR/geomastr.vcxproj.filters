@@ -2244,12 +2244,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ClassDiagram1.cd" />
-    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPI.dll">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\FreeImage\Dist\x32\FreeImage.dll">
       <Filter>Source Files</Filter>
     </None>
@@ -2262,13 +2256,5 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib">
-      <Filter>Source Files</Filter>
-    </Library>
-    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib">
-      <Filter>Source Files</Filter>
-    </Library>
   </ItemGroup>
 </Project>
