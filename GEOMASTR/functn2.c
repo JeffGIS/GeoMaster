@@ -2188,8 +2188,9 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs (Args,Arg,-7,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
 				goto RtnFalse;
-			ExpandText (Arg[3]);
-			ExpandText (Arg[4]);
+			ExpandText(Arg[2]);
+			ExpandText(Arg[3]);
+			ExpandText(Arg[4]);
 			ExpandText (Arg[5]);
 			ExpandText (Arg[6]);
 			rtn = SendEmail (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6]);
