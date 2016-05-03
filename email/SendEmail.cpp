@@ -51,6 +51,7 @@ extern "C" void SendEmailToJeff (LPSTR Info)
 extern "C" BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response)
 {
 	char	server[128], user[128], pw[64], Bcc[128] = { 0 };
+	char	HTMLFile[256];
 		char * pSC;
 		std::string	respons;
 
@@ -86,6 +87,8 @@ extern "C" BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR
 		}
 		if (*Attach)
 			m.attach (Attach);
+		strcpy(HTMLFile, "c:\\temp\\emailtest\\mailer.html");
+		m.setmessageHTMLfile(HTMLFile);
 		if (*Bcc)
 			m.addrecipient(Bcc, jwsmtp::mailer::Bcc);
 		m.send(); // send the mail
