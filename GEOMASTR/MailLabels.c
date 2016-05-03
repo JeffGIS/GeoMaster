@@ -81,7 +81,7 @@ BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)//print to 5160 labels
 		int y = yInch * pixPerInchH - physOffsetY;
 		int startY = y;
 		int height = (pageHeight - y*2) / 10;
-		int width = pixPerInchW * 2.72;// (pageWidth - x * 2) / 3;
+		int width = pixPerInchW * 2.75;// (pageWidth - x * 2) / 3;
 		HFONT hFont, OldFont;
 		int PointSize = 8;
 		int FontSize = -MulDiv(PointSize, GetDeviceCaps(hDC, LOGPIXELSY), 72);
