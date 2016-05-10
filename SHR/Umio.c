@@ -12,6 +12,7 @@ typedef	char *	caddr_t;
 
 #define MAX_THREADS	256
 static	HANDLE hBGFileTranThread[MAX_THREADS]={0};
+static  char LogFile[MAX_PATH] = { 0 };
 
 #include "gmextern.h"
 
@@ -1036,14 +1037,17 @@ void LogSocketInput (int i,LPSTR Input,int len)
 			if (!Input[i])
 				Input[i] = '~';
 		}
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Header);
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Input);
+		if (!*LogFile)
+			GetGlobalCVal("%SOCKETLOGFILE", LogFile, "$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt");
+		AppendFile2 (LogFile,Header);
+		AppendFile2 (LogFile,Input);
 	}
 	return;
 }  
 
 void LogSocketOutput (int i,LPSTR Input,int len)
-{    
+{
+
 	if (LogSocketIO[i])
 	{	
 		char	Header[64];
@@ -1054,8 +1058,10 @@ void LogSocketOutput (int i,LPSTR Input,int len)
 		for (i=0;i<len;i++)
 			if (!Input[i])
 				Input[i] = '~';
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Header);
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Input); 
+		if (!*LogFile)
+			GetGlobalCVal("%SOCKETLOGFILE", LogFile, "$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt");
+		AppendFile2(LogFile, Header);
+		AppendFile2(LogFile, Input);
 	}
 	return;
 }  
