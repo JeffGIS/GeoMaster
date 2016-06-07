@@ -11,9 +11,29 @@ long GetSecondsInSample (void)
 	time_t  systime; 
 	time_t	time=TimeRangeBeg+1;
 	USHORT	i,j; 
-	double	TODFactor=1,DOWFactor=1,TotHours=0,TotDays=0,NumDaysIncluded=0;
+	double	TODFactor=1,TotHours=0,TotDays=0,NumDaysIncluded=0;
 	struct	tm	tmtime;	
-	
+
+	time = TimeRangeBeg + 1;
+	while (time < TimeRangeEnd)
+	{
+		int midDay = time + 43200;
+		if (WantYear(midDay))
+		{
+			if (WantMonth(midDay))
+			{
+				if (WantDOW(midDay))
+				{
+					TotDays++;
+					if (OtherDayFilters(midDay))
+						NumDaysIncluded++;
+				}
+			}
+		}
+
+		time += 86400;
+	}
+
 	for (i=0;i<*pNumViewports;i++)
 	{
 		if (!_fstrnicmp (pViewports[i]->Name,"Time of Day",11))
@@ -27,32 +47,99 @@ long GetSecondsInSample (void)
 					TODFactor = TotHours/pViewports[i]->pTheme->NumClass;
 			}
 		}
-		if (!_fstrnicmp (pViewports[i]->Name,"Day of Week",11))
-		{   
-
-			if (pViewports[i]->pTheme && pViewports[i]->pTheme->IsActive && pViewports[i]->pTheme->VPDisplayed)
-			{   
-				time=TimeRangeBeg+1;
-				while (time < TimeRangeEnd)
-				{    
-					systime = time;
-					tmtime = *localtime (&systime); 
-					for (j=0;j<pViewports[i]->pTheme->NumClass;j++)
-						if (!pViewports[i]->pTheme->ClassStatus[j] && tmtime.tm_wday+1 == pViewports[i]->pTheme->ClassMin[j])
-							NumDaysIncluded++; 
-					TotDays++;
-					time += 86400;
-				} 
-				if (TotDays)
-					DOWFactor = NumDaysIncluded/TotDays;
-			}
-		}
 	}
 	
-	return rtn*TODFactor*DOWFactor;
+	return rtn*TODFactor*NumDaysIncluded * 86400;
 }
+BOOL WantYear (int iMidDay)
+{
+	BOOL rtn = TRUE;
+	char str[256], midDayC[32];
+	double rval;
 
-double HotSpotMean (HANDLE hGrid,ULONG lgrid)
+	for (int i = 0; i<*pNumViewports; i++)
+	{
+		if (pViewports[i]->pTheme && pViewports[i]->pTheme->IsActive && pViewports[i]->pTheme->VPDisplayed && !_fstrnicmp(pViewports[i]->Name, "Year", 4))
+		{
+			sprintf(midDayC, "%i", iMidDay);
+			strcpy(str, pViewports[i]->pTheme->Value);
+			REPLAC(str, "[MINTIME]", midDayC, 255);
+			ExpandText(str);
+			rval = atof(str);
+			for (int j = 0; j < pViewports[i]->pTheme->NumClass; j++)
+				if (pViewports[i]->pTheme->ClassStatus[j] && rval >= pViewports[i]->pTheme->ClassMin[j] && rval <= pViewports[i]->pTheme->ClassMax[j])
+					return FALSE;
+		}
+	}
+	return rtn;
+}
+BOOL WantMonth(int iMidDay)
+{
+	BOOL rtn = TRUE;
+	char str[256], midDayC[32];
+	double rval;
+
+	for (int i = 0; i<*pNumViewports; i++)
+	{
+		if (pViewports[i]->pTheme && pViewports[i]->pTheme->IsActive && pViewports[i]->pTheme->VPDisplayed && !_fstrnicmp(pViewports[i]->Name, "Month", 11))
+		{
+			sprintf(midDayC, "%i", iMidDay);
+			strcpy(str, pViewports[i]->pTheme->Value);
+			REPLAC(str, "[MINTIME]", midDayC, 255);
+			ExpandText(str);
+			rval = atof(str);
+			for (int j = 0; j < pViewports[i]->pTheme->NumClass; j++)
+				if (pViewports[i]->pTheme->ClassStatus[j] && rval >= pViewports[i]->pTheme->ClassMin[j] && rval <= pViewports[i]->pTheme->ClassMax[j])
+					return FALSE;
+		}
+	}
+	return rtn;
+}
+BOOL WantDOW(int iMidDay)
+{
+	BOOL rtn = TRUE;
+	char str[256], midDayC[32];
+	double rval;
+
+	for (int i = 0; i<*pNumViewports; i++)
+	{
+		if (pViewports[i]->pTheme && pViewports[i]->pTheme->IsActive && pViewports[i]->pTheme->VPDisplayed && !_fstrnicmp(pViewports[i]->Name, "Day of Week", 11))
+		{
+			sprintf(midDayC, "%i", iMidDay);
+			strcpy(str, pViewports[i]->pTheme->Value);
+			REPLAC(str, "[MINTIME]", midDayC, 255);
+			ExpandText(str);
+			rval = atof(str);
+			for (int j = 0; j < pViewports[i]->pTheme->NumClass; j++)
+				if (pViewports[i]->pTheme->ClassStatus[j] && rval >= pViewports[i]->pTheme->ClassMin[j] && rval <= pViewports[i]->pTheme->ClassMax[j])
+					return FALSE;
+		}
+	}
+	return rtn;
+}
+BOOL OtherDayFilters(int iMidDay)
+{
+	BOOL rtn = TRUE;
+	char str[256], midDayC[32];
+	double rval;
+
+	for (int i = 0; i<*pNumViewports; i++)
+	{
+		if (pViewports[i]->pTheme && pViewports[i]->pTheme->IsActive && pViewports[i]->pTheme->VPDisplayed && pViewports[i]->pTheme->isDayFilter)
+		{
+			sprintf(midDayC, "%i", iMidDay);
+			strcpy(str, pViewports[i]->pTheme->Value);
+			REPLAC(str, "[MINTIME]", midDayC, 255);
+			ExpandText(str);
+			rval = atof(str);
+			for (int j = 0; j < pViewports[i]->pTheme->NumClass; j++)
+				if (pViewports[i]->pTheme->ClassStatus[j] && rval >= pViewports[i]->pTheme->ClassMin[j] && rval <= pViewports[i]->pTheme->ClassMax[j])
+					return FALSE;
+		}
+	}
+	return rtn;
+}
+double HotSpotMean(HANDLE hGrid, ULONG lgrid)
 {
 	double mean=0, n=lgrid;
 	HPLONG	pGrid=(HPLONG)GlobalLock (hGrid);

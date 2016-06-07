@@ -557,7 +557,7 @@ void FillVPBackground (void);
 void SetThemeOrder (LPVIEWPORT CurView);
 void AddThemeToVP (LPVIEWPORT CurView,LPTHEME pTheme);
 void RemoveThemeFromVP (LPVIEWPORT CurView,LPTHEME pTheme);
-BOOL ThemeNeedsDataPass (BOOL PixelThemesOnly);  
+BOOL ThemeNeedsDataPass (BOOL PixelThemesOnly,BOOL forceDataPass);  
 void DisplayDataPassMessage (void);   
 void RemoveDataPassMessage (void);
 BOOL BeginThemePCTByArea (void);

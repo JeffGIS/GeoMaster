@@ -2446,7 +2446,8 @@ typedef struct
 		short	GridID;//0=latlon,1=Google
 		short	GridZoom;
 		int		numPreloadedValues;
-		char	filler[682];
+		short	isDayFilter;
+		char	filler[680];
 	}	THEME;
 typedef THEME	FAR *LPTHEME;
 
