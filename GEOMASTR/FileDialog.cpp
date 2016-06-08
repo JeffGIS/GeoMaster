@@ -1333,9 +1333,9 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 		pfd->Release();
 	}
 	FreeFilters(nFilters, filters);
-	if (hr == ERROR_CANCELLED)
+	if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
 		hr = 0;
-	if (hr == S_OK)
+	else if (hr == HRESULT_FROM_WIN32(S_OK))
 		hr = TRUE;
 	return hr;
 }

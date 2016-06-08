@@ -155,6 +155,7 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 	 GetClientRect (hWndMain,&WindowRect);   
 	 ClientRectToScreenRect (hWnd,&WindowRect);
 	 hWindowDib32 = CopyScreenToDIB32 (&WindowRect); 
+	 SaveFullWindowBitmap(hWndMain);
 	 DoPaint = FALSE;
 	 if (AutoSave || GetSaveName2 (hWnd,CfgName,IDS_FILTERGMC,".GMC",IDS_FILEGMC))
 	 {    
@@ -5737,24 +5738,26 @@ GSSiExitProg (438);
 			FirstMemMap = TRUE;
 			
          } 
-         else
+ /*        else
 		 {
-			if (HaveSeg && DoPaint)
-	            if (NumPaint++%2) 
-	            {
-	       	         EndPaint(hWnd, &ps);
-	       	         if (DoPaint)
-	       	         {
-//				     	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
-				         PaintMap(hWnd,hDC,FALSE,&UpdateRect,0); 
-				         RedisplayLastPrompt ();
+			 if (HaveSeg && DoPaint)
+			 {
+				 if (NumPaint++ % 2)
+				 {
+					 EndPaint(hWnd, &ps);
+					 if (DoPaint)
+					 {
+						 //				     	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+						 PaintMap(hWnd, hDC, FALSE, &UpdateRect, 0);
+						 RedisplayLastPrompt();
 					 }
-				     InPaint = FALSE;
-	      	         break;  
-	
-	            }  
+					 InPaint = FALSE;
+					 break;
+
+				 }
+			 }
             
-         }
+         }*/
          /* Included in case the background is not a pure color         */
          SetBkMode(hDC, TRANSPARENT);
          
