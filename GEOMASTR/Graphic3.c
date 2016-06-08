@@ -1676,6 +1676,7 @@ BOOL Report (LPSTR NameIN, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref
     LPSTR	pColon;   
     LPVIEWPORT	pVP;
 	char	Name[MAX_PATH];
+	char	File[MAX_PATH];
 
 	strcpy (Name,NameIN);
      
@@ -1721,7 +1722,7 @@ GSSiExitProg (865);
     }
     else if (_fstrstr (pColon,".TXT"))
     {
-        ReportToFile (Name,Prefix,UDI, ref,ViewportName);
+        ReportToFile (Name,Prefix,UDI, ref,File);
         SetCurView ( SaveView);
 {
 #if ENABLETRACE
