@@ -1681,18 +1681,9 @@ BOOL Report (LPSTR NameIN, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref
 	strcpy (Name,NameIN);
      
     SaveView = CurView; 
-<<<<<<< HEAD
-	strcpy(File, ViewportName);
-    if ((pColon = _fstrchr (ViewportName,':')))
-    {
-    	*pColon++ = 0; 
-		pVP = SetVPFromName (ViewportName,&Err); 
-		if (!Err) 
-=======
 	if ((pColon = _fstrchr(ViewportName, ':')))
 	{
 		if (*(pColon + 1) != '\\')
->>>>>>> origin/HEAD
 		{
 			*pColon++ = 0;
 			pVP = SetVPFromName(ViewportName, &Err);
