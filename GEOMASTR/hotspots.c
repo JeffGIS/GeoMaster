@@ -49,7 +49,7 @@ long GetSecondsInSample (void)
 		}
 	}
 	
-	return rtn*TODFactor*NumDaysIncluded * 86400;
+	return TODFactor*NumDaysIncluded * 86400;
 }
 BOOL WantYear (int iMidDay)
 {
@@ -776,7 +776,8 @@ GSSiExitProg (1323);
 			if (factor1 && factor2)
 			while (GridSize--)
 			{ 
-				*pGrid = *pGrid/factor1 - *pGridCT++/factor2; 
+				if (*pGrid || *pGridCT)
+					*pGrid = *pGrid/factor1 - *pGridCT/factor2; 
 				if (HaveStdv)
 				{
 					if (*pGrid > 4*Stdv)
@@ -793,6 +794,7 @@ GSSiExitProg (1323);
 				CurTheme->Ymax = max (CurTheme->Ymax,*pGrid);
 				CurTheme->Ymin = min (CurTheme->Ymin,*pGrid);
 				pGrid++;
+				pGridCT++;
 			} 
 		}
 		else if (GetGlobalLVal2 ("[%HOTSPOTCOMPAREOPTION]",0) == 5)
@@ -886,6 +888,7 @@ void NormalizeHotSpotToCountPerYear (LPTHEME CurTheme)
 		pHSData->MaxGridValue = CurTheme->Ymax = gmax;  
 		CurTheme->Ymin = gmin; 
 	} 
+	pHSData->SecondsRepresented = LONG_MAX;
 	GlobalUnlock (pHSData->hGrid);
 	return;
 }
@@ -906,7 +909,7 @@ void DisplayHotSpots (void)
     
     if ((CurTheme->Ymin < 0 || CurTheme->Ymax > 0) && pHSData->GridWidth)
     {   
-    	NormalizeHotSpotToCountPerYear (CurTheme);
+    	//NormalizeHotSpotToCountPerYear (CurTheme);
     	CompareHotSpotData (pHSData);
     	SaveHotSpotSurface ();
 		SetViewport (CurTheme->TargetViewport);   
