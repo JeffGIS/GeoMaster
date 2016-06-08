@@ -4379,7 +4379,7 @@ FileIsInvalid:
 				    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),TotLen,choice,-1);
 				    	if (_fstrnicmp (str,"[XCMD]",6) &&
 				    	    !SendDlgItemMessage(hWndDlg,IDC_BUILDNAMESONLY,BM_GETCHECK,0,0)) 
-			    			AddFileToTransferFile(GetDlgItem(hWndDlg,IDC_STATUS2),FidTF,str,MaxLength);
+			    			AddFileToTransferFile(GetDlgItem(hWndDlg,IDC_STATUS2),FidTF,str,MaxLength,0);
 			    		else if (!_fstricmp (BuildTransferFileOption,"RUN"))
 			    			_fstrcpy (TransferFileRunCommand,&str[6]); 
 				    }
@@ -5147,7 +5147,7 @@ SelectFiles:
 	                    	while (ContinueProcessing && fgetstring (str,258,FidFileList))
 	                    	{   
 	                    		char	leaf[34]="[FILENAME]";
-							    GetDelimTextData(str,hDLT); 
+							    GetDelimTextData(str,hDLT,258); 
 							    _fstrcpy (str,"[FULLNAME]");
 							    ExpandText (str);  
 							    ExpandText (leaf);
@@ -5162,7 +5162,7 @@ SelectFiles:
 										ProcessDelimTextHeader(skipfile, 0, FidSkip, &hDLTSkip, 0, 0);
 										while (fgetstring (skipfile,MAX_PATH,FidSkip))
 										{
-											GetDelimTextData(skipfile,hDLTSkip); 
+											GetDelimTextData(skipfile,hDLTSkip,MAX_PATH); 
 											_fstrcpy (skipfile,"[SKIPNAME]");
 											ExpandText (skipfile);
 											if (!_fstricmp (skipfile,leaf))

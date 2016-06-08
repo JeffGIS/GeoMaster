@@ -52,8 +52,8 @@
 #define		MAXREPORTFILES  16
 #define		MAXREPORTTABS   8 
 #define		MAXFIELDS       512 
-#define		MAXGLOBALS      2048
-#define		MAX_LOCAL_VARS	64
+#define		MAXGLOBALS      4096
+#define		MAX_LOCAL_VARS	128
 #define		MAX_CHANGED_GLOBALS 32
 #define		MAXFIELDINSQL   32 
 #define		MAXWHEREINCOMBO 16   
@@ -63,6 +63,7 @@
 #define     MAX_GMD_INDEX_FIELDS    8   
 #define		MAX_MACRO_STACK 64
 #define		MAX_BREAKPOINTS	16
+#define		MAX_CMDMESSAGE USHRT_MAX
 
 #define		MAXSAVEDSCREENS	1024  
 #define		MAXBMPCACHE 64   

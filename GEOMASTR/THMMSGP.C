@@ -2414,8 +2414,9 @@ case GSSI_REINITDIALOG:
 							CurTheme->TargetViewport-1,0);
        	SendDlgItemMessage (hWndDlg,SV_DISPLAY_DIST,BM_SETCHECK,CurTheme->DisplayDistance,0L);
        	SendDlgItemMessage (hWndDlg,SV_DISPLAY_PCT,BM_SETCHECK,CurTheme->DisplayPCT,0L);
-       	SendDlgItemMessage (hWndDlg,SV_DISPLAY_COUNT,BM_SETCHECK,CurTheme->DisplayCount,0L);
-       	SendDlgItemMessage (hWndDlg,SV_APPEND_COUNT,BM_SETCHECK,CurTheme->AppendCount,0L);
+		SendDlgItemMessage(hWndDlg, SV_DISPLAY_COUNT, BM_SETCHECK, CurTheme->DisplayCount, 0L);
+		SendDlgItemMessage(hWndDlg, SV_DAY_FILTER, BM_SETCHECK, CurTheme->isDayFilter, 0L);
+		SendDlgItemMessage(hWndDlg, SV_APPEND_COUNT, BM_SETCHECK, CurTheme->AppendCount, 0L);
        	SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_SETCHECK,CurTheme->PCTByArea,0L);
        	SendDlgItemMessage (hWndDlg,SV_INVERT,BM_SETCHECK,CurTheme->InvertLegend,0L);
        	SendDlgItemMessage (hWndDlg,IDC_FILLROW,BM_SETCHECK,CurTheme->FillRow,0L);
@@ -2649,8 +2650,9 @@ GSSiExitProg (1294);
 	             //CurTheme->DisplayViewport = CurView->ID;
 	    		 SaveView = CurView;
             	 CurTheme->DisplayDistance = SendDlgItemMessage (hWndDlg,SV_DISPLAY_DIST,BM_GETCHECK,0,0L);  
-            	 CurTheme->DisplayCount = SendDlgItemMessage (hWndDlg,SV_DISPLAY_COUNT,BM_GETCHECK,0,0L);  
-            	 CurTheme->AppendCount = SendDlgItemMessage (hWndDlg,SV_APPEND_COUNT,BM_GETCHECK,0,0L);  
+				 CurTheme->DisplayCount = SendDlgItemMessage(hWndDlg, SV_DISPLAY_COUNT, BM_GETCHECK, 0, 0L);
+				 CurTheme->isDayFilter = SendDlgItemMessage(hWndDlg, SV_DAY_FILTER, BM_GETCHECK, 0, 0L);
+				 CurTheme->AppendCount = SendDlgItemMessage(hWndDlg, SV_APPEND_COUNT, BM_GETCHECK, 0, 0L);
             	 CurTheme->DisplayPCT = SendDlgItemMessage (hWndDlg,SV_DISPLAY_PCT,BM_GETCHECK,0,0L);  
             	 CurTheme->PCTByArea = SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_GETCHECK,0,0L);  
             	 CurTheme->InvertLegend = SendDlgItemMessage (hWndDlg,SV_INVERT,BM_GETCHECK,0,0L);  
@@ -2937,7 +2939,7 @@ void RemoveDataPassMessage (void)
 	return;
 }
 
-BOOL ThemeNeedsDataPass (BOOL PixelThemesOnly)
+BOOL ThemeNeedsDataPass (BOOL PixelThemesOnly,BOOL forceDataPass)
 #if ENABLETRACE
 {GSSiEnterProg (1319);
 #endif
@@ -2968,7 +2970,7 @@ GSSiExitProg (1319);
 		ComputePCTTheme = CurTheme;	                                     
 	else
 		ComputePCTTheme = 0;	                                     
-	if (!CurTheme->WantDataPass) 
+	if (!forceDataPass && !CurTheme->WantDataPass) 
 	{
 	    if (CurTheme->ID != GF_GRAPHICS_FUNCTION_THEME && CurTheme->DataFileType != MSACCESS_DATAFILE)
 	    {
@@ -2994,7 +2996,7 @@ GSSiExitProg (1319);
 		return FALSE;
 }   
 	}
-	if ((!CurTheme->Recompute && CurTheme->NumClass) && CurTheme->ID != GF_OFFSETAREA_THEME)
+	if ((!forceDataPass && !CurTheme->Recompute && CurTheme->NumClass) && CurTheme->ID != GF_OFFSETAREA_THEME)
 {
 #if ENABLETRACE
 GSSiExitProg (1319);

@@ -289,6 +289,8 @@ void CloseVars (void);
 void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
 void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
 short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
+HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL);
+void CloseSLTDatabase(LPHANDLE pHandle);
 HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
 BOOL GetCurrentPNDBName (LPSTR Name);
@@ -307,7 +309,7 @@ BOOL SetGMDField (HANDLE hSQLPtr,LPSTR Name,LPSTR Value);
 HANDLE GetDBByIDName (LPSTR IDName);
 short WantGMDRecord (LPOPENFILEDATA FilePtr,LPOPENSQLDATA SQLPtr,LPVOID lpGWDHead,short cond,BOOL HaveOtherFields);
 short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT, char InDelim, LPSTR IDName);
-BOOL GetDelimTextData(LPSTR str,HANDLE hDLT);
+BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int maxline);
 BOOL GetDLTVarName (int ivar,HANDLE hDLT, LPSTR Name);
 HANDLE	GetDLTVarHandle (int ivar,HANDLE hDLT);
 BOOL UpdateGlobalFile (LPSTR RptFile,LPSTR VarName,LPSTR str);
@@ -520,6 +522,7 @@ BOOL GSSiGetMessage(
 void SetFilterString (UINT Filter); 
 void PrintMessage (short    ViewID, LPSTR File, short record);
 void PrintMessage2 (LPSTR line1, LPSTR line2, LPSTR line3);
+HRESULT BasicFileOpen2(LPSTR pFile, int lfile, LPSTR initialDir, LPSTR filter, LPSTR Title,BOOL save);
 BOOL GetOpenFileCD (HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir);
 BOOL GetSaveFileCD (HWND hWnd, LPSTR Name, LPSTR lpInitDir);
 BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title);
@@ -1354,7 +1357,7 @@ vec3 sVectorFromPoints (svec3 * p1, svec3 * p2);
 vec3 GetTriangleNormal (vec3 * vertex1,vec3 * vertex2,vec3 * vertex3);
 vec3 sGetTriangleNormal (svec3 * vertex1,svec3 * vertex2,svec3 * vertex3,double metersperpixel);
 
-HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LPCSTR directory,LPSTR errorVarName);
+HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LPCSTR directory,LPSTR errorVarName,WORD port,BOOL passive);
 BOOL FTPClose (HANDLE h);
 HANDLE ListFtpDir(HANDLE hConnection,HANDLE hFind,
 				  LPSTR pWildCard,DWORD dwFindFlags,

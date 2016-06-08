@@ -3156,12 +3156,12 @@ BOOL    GetSaveName (HWND hWnd,LPSTR Name, UINT StringID, LPSTR Ext)
 {GSSiEnterProg (214);
 #endif
 { 
-    char    CurDir[_MAX_PATH], InitDir[_MAX_PATH], Drive[_MAX_DRIVE], Dir[_MAX_DIR];
-    short   SaveDrive; 
+    char    CurDir[_MAX_PATH+4], InitDir[_MAX_PATH+4], Drive[_MAX_DRIVE+4], Dir[_MAX_DIR+4];
+    int   SaveDrive; 
     BOOL    rtn=FALSE; 
-    short	ln; 
+    int	ln; 
     LPSTR	lpEnd;
-	char	ext[64];
+	char	ext[256];
 
 	strcpy (ext,Ext);
     
@@ -11824,6 +11824,8 @@ BOOL IsInteger(LPSTR str)
 	short	lstr;
 	LPSTR	instr;
 	
+	if (!*str)
+		return FALSE;
 	while (*str == ' ')
 		str++;
 	if (*str == '-')

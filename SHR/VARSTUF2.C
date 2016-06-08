@@ -410,7 +410,7 @@ BOOL GetTXTUniqueFieldValues (HANDLE hDB, LPSTR SQL,LPSTR FldName,short FieldLen
 			SQLPtr->st = 1;
 		else 
 		{
-			GetDelimTextData(str,FilePtr->FileHandle); 
+			GetDelimTextData(str,FilePtr->FileHandle,4090); 
 			sprintf (Value,"[%s]",FldName);
 			ExpandText (Value);
             _fstrncpy (Value2,Value,FieldLength);  

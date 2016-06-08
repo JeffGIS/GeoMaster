@@ -19,6 +19,8 @@ typedef struct {HANDLE hFTP;
 				char directory[MAX_PATH];
 				char errorVarName[64];
 				int reopenAttempts;
+				WORD port;
+				BOOL passive;
 				}FTPSTRUCT;
 typedef FTPSTRUCT *LPFTPSTRUCT;
 
@@ -82,7 +84,9 @@ void ReopenFTP (LPFTPSTRUCT pFTPStruct)
 								pFTPStruct->Username,
 								pFTPStruct->Password,
 								pFTPStruct->directory,
-								pFTPStruct->errorVarName);
+								pFTPStruct->errorVarName,
+								pFTPStruct->port,
+								pFTPStruct->passive);
 	return;
 }
 
@@ -2294,7 +2298,7 @@ SetVis:
 			goto Rtnl;
 		}
 
-		case 355://$FTP(OPEN,service,username,pw,directory,errvarname)
+		case 355://$FTP(OPEN,service,username,pw,directory,errvarname,port(opt),passive(opt))
 				 //$FTP(CLOSE,handle);
 				 //$FTP(LIST,handle,wildcard,errvarname)
 				 //$FTP(GETFILE,handle,remotename,localname,replace,showStatus,errvarname)
@@ -2306,13 +2310,13 @@ SetVis:
 			HANDLE hFTPStruct;
 			LPFTPSTRUCT pFTPStruct;
 
-			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
 
 			if (!_fstricmp(Arg[1],"OPEN"))
 			{
 				hFTPStruct = GSSiGlobAlloc (1781,GHND,sizeof(FTPSTRUCT));
 				pFTPStruct = GlobalLock (hFTPStruct);
-				pFTPStruct->hFTP = FTPOpen (Arg[2],Arg[3],Arg[4],Arg[5],Arg[6]);
+				pFTPStruct->hFTP = FTPOpen(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], atoi(Arg[7]), atob(Arg[8]));
 				if (!pFTPStruct->hFTP)
 				{
 					GSSiGlobUlFree (&hFTPStruct);
@@ -3398,17 +3402,20 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			HDC hDC = GetDC(hWndMain);
-			SetDisplayMode(hDC, GF_TEXTMODE);
-			testGDIP(hDC);
+			//HDC hDC = GetDC(hWndMain);
+			//SetDisplayMode(hDC, GF_TEXTMODE);
+			//testGDIP(hDC);
 /*			char SSID[40];
 			char ipAddress[32];
-			GUID Guid;
+			GUID Guid;*/
 			BOOL TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
-			
-			int n = TestSQLiteCrimes(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
+
+			//int n = TestSQLiteCrimes(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
+			BOOL TestSQLiteCrimeOffenseOrder(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
+
+			int n = TestSQLiteCrimeOffenseOrder(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
 			itoa(n, OutLoc, 10);
-			goto Rtnl;*/
+			goto Rtnl;
 			/*{
 #include "colorsByName.h"
 				HDC hDC = CurView->hDC;

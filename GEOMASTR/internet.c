@@ -63,15 +63,19 @@ BOOL FTPClose (HANDLE h)
 	return rtn;
 }
 
-HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LPCSTR directory,LPSTR errorVarName)
+HANDLE FTPOpen (LPCSTR lpszServerName,LPCSTR lpszUsername,LPCSTR lpszPassword,LPCSTR directory,LPSTR errorVarName,WORD port,BOOL passive)
 {
 	HINTERNET hInternet;
     INTERNET_PORT nServerPort = INTERNET_DEFAULT_FTP_PORT;
     DWORD dwService = INTERNET_SERVICE_FTP;
-    DWORD dwFlags = INTERNET_FLAG_PASSIVE;
+	DWORD dwFlags = 0;// INTERNET_FLAG_PASSIVE;
     DWORD_PTR dwContext = 0;
 	HINTERNET ic = NULL;
 
+	if (port)
+		nServerPort = port;
+	if (passive)
+		dwFlags = INTERNET_FLAG_PASSIVE;
 	hInternet = InternetOpen ("GeoMaster",INTERNET_OPEN_TYPE_DIRECT,NULL,NULL,0);
 
 	if (hInternet)

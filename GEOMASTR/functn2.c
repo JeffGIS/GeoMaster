@@ -74,7 +74,7 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKP
 			{
 				int iarg=atoi (Arg[i]);
 
-				if (iarg <= abs (MaxArgs))
+				if (iarg > 0 && iarg <= abs(MaxArgs))
 				{
 					strcpy (Arg[iarg],pEq+1);
 					*Arg[i] = 0;
@@ -708,7 +708,7 @@ GSSiExitProg (1350);
 				Arg[2]++;
 				*LastChr(Arg[2]) = 0;
 			}
-		    rtn = GetDelimTextData(Arg[2],hDLT); 
+		    rtn = GetDelimTextData(Arg[2],hDLT,4090); 
 			GSSiGlobFree (&hDLT);
 			if (rtn)
 				goto RtnTrue;
@@ -1408,12 +1408,12 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		} 
 		
-		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories)
+		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly)
 		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
-			n = GetFileList (Arg[1],atob(Arg[2]),Arg[3],Arg[4],atob(Arg[5]),atob (Arg[6]));
+			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), atob(Arg[7]));
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}
@@ -2185,11 +2185,12 @@ GSSiExitProg (1350);
 			
 		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach
 		{
-			nArgs = GetFunArgs (Args,Arg,-6,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,-7,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
 				goto RtnFalse;
-			ExpandText (Arg[3]);
-			ExpandText (Arg[4]);
+			ExpandText(Arg[2]);
+			ExpandText(Arg[3]);
+			ExpandText(Arg[4]);
 			ExpandText (Arg[5]);
 			ExpandText (Arg[6]);
 			rtn = SendEmail (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6]);
@@ -2293,7 +2294,8 @@ GSSiExitProg (1350);
 			LPSTR	CmdMess = GlobalLock (hCmdMess);
 
 			nArgs = GetFunArgs (Args,Arg,1,&hMem, pBrkPt, bpOffset, bpLen);
-			strcpy (CmdMess,Arg[1]);
+			if (strlen(Arg[1]) < MAX_CMDMESSAGE)
+				strcpy (CmdMess,Arg[1]);
 			GlobalUnlock (hCmdMess);
 			goto RtnTrue;
 		}
@@ -3371,7 +3373,7 @@ GSSiExitProg (1350);
 			    	if (pVarName)
 			    		SetGlobalValue3 (pVarName,Arg3,0,FALSE);
 			    	else
-			    		GetDelimTextData(Arg3,hDLT); 
+			    		GetDelimTextData(Arg3,hDLT,4090); 
 			    	_fstrcpy (Arg4,Arg2);
 		            if (pStatusText)
 					{
@@ -5037,7 +5039,7 @@ GSSiExitProg (1350);
 			goto Rtnl;
 
 		case 1412: //$COMPRESSEDFILE(CREATE,File,filelistfile)
-			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			rtn = CompressedFileCmd (nArgs, Arg);
 			goto Rtnrtn;
 			

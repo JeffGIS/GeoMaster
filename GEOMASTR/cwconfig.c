@@ -30,6 +30,7 @@ LRESULT CALLBACK GetMsgProc(
   WPARAM wParam,  // removal flag
   LPARAM lParam   // address of structure with message
 );
+int FileDlgWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 static char selectedStartCmd[1024]; 
 static MSG	pmsg[100]={0};
@@ -1332,18 +1333,20 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
 	//loadColors();
 	//loadColorChart();
-	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100037700.bmp");
-
+	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100102158.bmp");
+	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100031654.bmp");
+	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100100646.bmp");
 //#define FV	$(TargetName) 
 	//UDPmain(22336);
 	//GetMassShapeFiles();
 	//writeTestStruct();
 	//char tt[] = {FV};
 	/*char prj[1024];
-	HFILE fid = GSSiOpenFileGM("C:\\CountyData\\Cleveland\\AreaParcel_11212013\\AREAPARCEL.prj", 0, OF_READ);
+	char outprj[1024];
+	HFILE fid = GSSiOpenFile("C:\\GMMobile\\MetroUTM\\MGFire\\Water System\\wMain.prj", 0, OF_READ);
 	BigRead(fid, prj, 1023);
 	GSSiClose(fid);
-	ConvertPRJtoProj4(prj, NULL);*/
+	ConvertPRJtoProj4(prj,outprj);*/
 	_set_invalid_parameter_handler(
 		my_invalid_parameter_handler
 		);
@@ -1868,6 +1871,17 @@ else if (ShowMax == 10)
 	showWindowCmd = SW_SHOWMAXIMIZED;
 	ShowWindow(hWndMain, SW_HIDE);
 	hDC = GetDC(hWndMain);
+	/*{
+		HPEN	hCPen, hPen = 0;
+
+		LOGPEN	lPen;
+		int	width;
+
+		hCPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+		GetObject(hCPen, sizeof(LOGPEN), &lPen);
+		width = 1;
+	}*/
+
 	OpenConfig(hWndMain, hDC);
 	ReleaseDC(hWndMain, hDC);
 }
@@ -2175,6 +2189,8 @@ LPSTR	str;
 BOOL	ClearFullDisplay=FALSE;  
 static	DWORD	LastMouselParam=0;
 
+//FileDlgWndProc(hWnd, Message, wParam,lParam);
+
 #if ENABLETRACE
 SetLastMessage(Message);
 #endif
@@ -2328,7 +2344,7 @@ if (Message == GF_MAPSERVER_REQUEST)
 		return TRUE;
 	}
 }
-if (Message == GF_PRCESSTCPCMD)
+if (Message == GF_PROCESSTCPCMD)
 {
 	if (lParam)
 	{

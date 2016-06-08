@@ -320,6 +320,8 @@
 #define IDC_em_co_id                    365
 #define SV_SYMBOLFIELD_NAME             365
 #define SV_DISPLAY_DIST                 365
+#define SV_DISPLAY_DAYFILTER            365
+#define SV_DAY_FILTER                   365
 #define IDC_em_site_id                  366
 #define SV_COLORFIELD_NAME              366
 #define SV_TITLEFIELD_NAME              366

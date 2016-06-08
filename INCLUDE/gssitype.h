@@ -233,6 +233,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define		FGDB_DATAFILE		20
 #define		POLY_DATAFILE		21
 #define		PN_DATAFILE			22
+#define		SLT_DATAFILE		23
 
 #define	FT_POLYGON	1
 #define FT_CIRCLE	2
@@ -745,12 +746,13 @@ typedef struct
    }   LoadP;
 typedef LoadP FAR *lpLoadP;
 
+#pragma pack(2)
 typedef struct
     {   
         HANDLE  Handle;
         short   Len;     
         short   Type;
-        BYTE	ValueIsHandle;
+        short	ValueIsHandle;
         short	NumLinkedVars;  
         DWORD   changetime; 
         BOOL	ContainsGorF;
@@ -760,6 +762,7 @@ typedef struct
         HANDLE	LinkedVar[1];
     } VARINFO;
 typedef VARINFO FAR *VARPNT;     
+#pragma pack()
 
 typedef	struct
 	{	LONG	Segment;
@@ -2443,7 +2446,8 @@ typedef struct
 		short	GridID;//0=latlon,1=Google
 		short	GridZoom;
 		int		numPreloadedValues;
-		char	filler[682];
+		short	isDayFilter;
+		char	filler[680];
 	}	THEME;
 typedef THEME	FAR *LPTHEME;
 
@@ -3919,5 +3923,8 @@ typedef struct {
 typedef GWDHEADER16 FAR  *LPGWDHEADER16;   
 #pragma pack()
 int checkvp(int i);
+
+LPVOID glbllock(HANDLE hglb);
+BOOL glblUnlock(HANDLE hglb);
 
 #include "TileGraphics.h"

@@ -886,7 +886,12 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
     BOOL		First;  
     BOOL	SaveUseRefOrTAGIndex=UseRefOrTAGIndex;   
     BOOL	SaveIgnoreBounds = IgnoreBounds, SaveDisplay = Display;
-     
+	HANDLE  hSaveView = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
+	LPVIEWPORT pSaveCurView = CurView;
+	LPVIEWPORT pSaveView = GlobalLock(hSaveView);
+
+	memcpy(pSaveView, CurView, sizeof(VIEWPORT));
+
     Display = FALSE;
     if (CurView->Type ==  VPTYPE_PROFILE)
     	IgnoreBounds = TRUE;
@@ -1106,6 +1111,9 @@ Done:
     UseRefOrTAGIndex = SaveUseRefOrTAGIndex;
     IgnoreBounds = SaveIgnoreBounds;  
     Display = SaveDisplay;
+	CurView = pSaveCurView;
+	memcpy(CurView, pSaveView, sizeof(VIEWPORT));
+	GSSiGlobUlFree(&hSaveView);
     return;
 }
 
@@ -2090,9 +2098,13 @@ BOOL SetLayerSymbolsVisibility (LPSTR Name,short setopt)
 	
 	GSSiGetTempFileName (0,"gms",0,FileName); 
 	Fid = GSSiOpenFile (FileName,0,OF_CREATE);
-	for (i=0;i<CurView->NumFiles;i++)
-		if (!_fstricmp (CurView->FileID[i],Name) || !_fstricmp ("ALL",Name))
-		 	GetVisList (0,0,0,0,i+1,Fid); 
+	for (i = 0; i < CurView->NumFiles; i++)
+	{
+		strcpy(str, CurView->FileID[i]);
+		ExpandText(str);
+		if (!_fstricmp(str, Name) || !_fstricmp("ALL", Name))
+			GetVisList(0, 0, 0, 0, i + 1, Fid);
+	}
 	GSSillseek (Fid,0,0);
 	while (fgetstring (str,128,Fid))
 	{  
@@ -2112,7 +2124,7 @@ BOOL SetLayerSymbolsVisibility (LPSTR Name,short setopt)
 	GSSiClose (Fid);
 	GSSiRemove (FileName);
     Pickability = FALSE;
-    TurnOffAutoVis (TRUE);		   
+	TurnOffAutoVis (TRUE);		   
 	rtn = TRUE;
 	return rtn;
 }   

@@ -49,6 +49,7 @@ void SetShowContourLines (BOOL In);
 void SetShowDepthColors (BOOL In);
 void SetHighlightDepth (int In);
 
+HANDLE countyLinkedVar = 0, countyVar = 0;
 
 HANDLE CreateVarSpace(int type)
 {
@@ -936,9 +937,11 @@ GSSiExitProg (520);
     	Type = LISTVAR_DATAFILE;
 	else if (strstr (Name,"THEME:"))
     	Type = THEME_HLTFILE;
-    else if (_fstrstr(Name,".SQL"))
-    	Type = SQL_DATAFILE;
-    else if (_fstrstr(Name,".SHP"))
+	else if (_fstrstr(Name, ".SQL"))
+		Type = SQL_DATAFILE;
+	else if (_fstrstr(Name, ".SLT"))
+		Type = SLT_DATAFILE;
+	else if (_fstrstr(Name, ".SHP"))
     	Type = SHAPE_DATAFILE;
     else if (_fstrstr(Name,".PND"))
 	{
@@ -1036,9 +1039,13 @@ GSSiExitProg (520);
 	       	FileHandle = OpenExternalDatabase (Name);
  	    	break;  
  	    	
- 	    case SQL_DATAFILE:
- 	    	FileHandle = OpenSQLDatabase (Name,SQL);
- 	    	break;
+		case SQL_DATAFILE:
+			FileHandle = OpenSQLDatabase(Name, SQL);
+			break;
+
+		case SLT_DATAFILE:
+			FileHandle = OpenSLTDatabase(Name, SQL);
+			break;
 
 		case LISTVAR_DATAFILE:
  	    	FileHandle = OpenLISTVARDatabase (Name);
@@ -1783,14 +1790,22 @@ GSSiExitProg (524);
 			CloseComboDatabase (FilePtr->FileHandle);
  			break;
 
-        case SQL_DATAFILE:   
-        {
-			LPSQLDATABASE	pDB=(LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);  
-	        
-	        CloseDataFile (Final,&pDB->DBHandle);
-	        GSSiGlobUlFree (&FilePtr->FileHandle);
-	    }
-            break;
+		case SQL_DATAFILE:
+		{
+			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			CloseDataFile(Final, &pDB->DBHandle);
+			GSSiGlobUlFree(&FilePtr->FileHandle);
+		}
+			break;
+		case SLT_DATAFILE:
+		{
+			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			CloseSLTDatabase(&FilePtr->FileHandle);
+
+		}
+			break;
 		case FOXPRO_DATAFILE:
 	       	if (Final)
 	       	{
@@ -2947,7 +2962,10 @@ GSSiExitProg (532);
 			if (hCmdMess)
 			{
 				CmdMess = GlobalLock (hCmdMess);
-				_fstrcpy (CmdMess,Value);
+				if (strlen(Value) < MAX_CMDMESSAGE)
+					_fstrcpy(CmdMess, Value);
+				else
+					*CmdMess = 0;
 	       		GlobalUnlock (hCmdMess);
 	       	}
 	    }
@@ -5491,11 +5509,20 @@ GSSiExitProg (542);
 #endif
 }  
 
-BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
+/*int checkcounty(int i)
+{
+	VARPNT vp = (VARPNT)glbllock(countyVar);
+	if (vp->LinkedVar[0] && vp->LinkedVar[0] != countyLinkedVar)
+		ii = 1;
+	glblUnlock(countyVar);
+	return 1;
+}*/
+BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 #if ENABLETRACE
 {GSSiEnterProg (544);
 #endif
 {
+	LPSTR   strInit = str;
 	LPSTR	BeginLoc, EndLoc,DLTDelim, LastLoc=strchr (str,0);
 	char	Delim=',',EndStr[3]; 
 	int		ivar=0, LineLen,l, EndInc; 
@@ -5505,7 +5532,13 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 	LPHANDLE	DLTVar; 
 	LPSHORT	DLTStart,DLTLen,DLTType;
 	
-	pnDLTvar = (LPSHORT)GlobalLock (hDLT); 
+	if (!hDLT)
+	{
+#if ENABLETRACE
+		GSSiExitProg(544);
+#endif
+		return FALSE;
+	}	pnDLTvar = (LPSHORT)GlobalLock(hDLT);
 	nDLTvar = abs (*pnDLTvar);  
 	DLTDelim = (LPSTR)(pnDLTvar + 1);
 	DLTVar = (LPHANDLE)(DLTDelim + 1);
@@ -5516,6 +5549,8 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 	Delim = *DLTDelim; 
 	for (ivar=0;ivar<nDLTvar;ivar++)
 	{   
+//		if (DLTVar[ivar] == countyVar)
+//			ii = 1;
 		VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
 		VarPtr->Len = 0;    
 		*VarPtr->Value = 0;
@@ -5552,7 +5587,7 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT)
 				EndLoc = BeginLoc + DLTLen[ivar];
 				EndChar = *EndLoc;
 				*EndLoc = '\0';
-				l = min (strlen(BeginLoc),MAXVARLEN);
+				l = min (strlen(BeginLoc),MAXLINE);
 				VarPtr->Len = min (l,DLTLen[ivar]);
 				strncpy0 (VarPtr->Value,BeginLoc,VarPtr->Len); 
 				*EndLoc = EndChar; 
@@ -5591,7 +5626,7 @@ Next:if (*str == '"')
 		GSSiGlobFree (&handle); 
 		VarPtr->ValueIsHandle = 0;
 	}
-	strncpy0 (VarPtr->Value,BeginLoc,MAXVARLEN); 
+	strncpy0(VarPtr->Value, BeginLoc, MAXVARLEN-1);
 	VarPtr->Len = _fstrlen(BeginLoc); 
 	GlobalUnlock (DLTVar[ivar]);
 	if (!EndLoc || EndLoc >= LastLoc-1)
@@ -7172,6 +7207,7 @@ GSSiExitProg (570);
 	}
 	if (LinkToVar)
 	{
+		VARPNT	linkVar = GlobalLock(LinkToVar);
 		hGlobal = AllocateVar (VarName);
 		VP = (VARPNT)GlobalLock (hGlobal); 
 		l=VP->NumLinkedVars;  
@@ -7180,6 +7216,7 @@ GSSiExitProg (570);
 			if (VP->LinkedVar[l] == LinkToVar)
 			{
 				GlobalUnlock (hGlobal);
+				GlobalUnlock(LinkToVar);
 {
 #if ENABLETRACE
 GSSiExitProg (570);
@@ -7202,7 +7239,13 @@ GSSiExitProg (570);
 		}
 		VP->LinkedVar[VP->NumLinkedVars] = LinkToVar; 
 		VP->NumLinkedVars++;
+/*		if (!stricmp(VP->Name, "COUNTY"))
+		{
+			countyVar = hGlobal;
+			countyLinkedVar = LinkToVar;
+		}*/
 		GlobalUnlock (hGlobal);
+		GlobalUnlock (LinkToVar);
 {
 #if ENABLETRACE
 GSSiExitProg (570);
@@ -7210,7 +7253,7 @@ GSSiExitProg (570);
 		return 0; 
 }
 	}
-	if ((l=GetValFromOpenFiles (VarName,OutStr,4096))>=0)
+	if ((l=GetValFromOpenFiles (VarName,OutStr,MAXVARLEN))>=0)
 {
 #if ENABLETRACE
 GSSiExitProg (570);
@@ -7590,8 +7633,9 @@ GSSiExitProg (573);
 		break;
 		
     	case GMTEXT_DATAFILE: 
-    	{   
-    		hStr=GSSiGlobAlloc ( 228,GMEM_MOVEABLE,4096);  
+    	{
+#define MAXTEXTLINE	USHRT_MAX*4
+			hStr = GSSiGlobAlloc(228, GMEM_MOVEABLE, MAXTEXTLINE);
     		str=GlobalLock (hStr);
 			if (NeedRead (SQLPtr)) 
 			{
@@ -7602,7 +7646,7 @@ GSSiExitProg (573);
 			{
 NextTextRec:
 		    	SQLPtr->Offset = GSSillseek (FilePtr->Fid,0,1);  
-		    	if (!fgetstring (str,4090,FilePtr->Fid))
+				if (!fgetstring(str, MAXTEXTLINE - 4, FilePtr->Fid))
 		    		SQLPtr->st = 1;
 				else if (*str == '[' && *LastChr(str) == ';')
 				{
@@ -7614,7 +7658,7 @@ NextTextRec:
 		    		BOOL	Err;
 		    		
 			        SQLPtr->st = 0;  
-					GetDelimTextData(str,FilePtr->FileHandle);
+					GetDelimTextData(str, FilePtr->FileHandle, MAXTEXTLINE-4);
 				    SQLPtr->lastreadtime = NextVarTime ();
 					if (LogicPFile (SQLPtr,SQLPtr->SQL,&Err))
 						break;
@@ -7794,14 +7838,22 @@ NextTextRec:
 				SQLPtr->st = 0;
 			break;
 		
-		case SQL_DATAFILE: 
-		{   
-			LPSQLDATABASE	pSQL=(LPSQLDATABASE)GlobalLock (FilePtr->FileHandle);
-			
-			irc = FetchDBRec (pSQL->DBHandle);
-			GlobalUnlock (FilePtr->FileHandle);
+		case SLT_DATAFILE:
+		{
+			LPSQLDATABASE	pSQL = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			irc = FetchDBRec(pSQL->DBHandle);
+			GlobalUnlock(FilePtr->FileHandle);
 			goto Exit;
-		}	
+		}
+		case SQL_DATAFILE:
+		{
+			LPSQLDATABASE	pSQL = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			irc = FetchDBRec(pSQL->DBHandle);
+			GlobalUnlock(FilePtr->FileHandle);
+			goto Exit;
+		}
 		case FGDB_DATAFILE:
 		{
 		    if (NeedRead (SQLPtr))
@@ -8435,10 +8487,10 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
     	IDName[0]=0;  
 	if (!FilePathHandle)
 		goto GetOut; 
-	hStr=GSSiGlobAlloc ( 234,GMEM_MOVEABLE,4096+256+4096);
+	hStr=GSSiGlobAlloc ( 234,GMEM_MOVEABLE,maxlval+256+4096);
 	{
 		LPSTR		str=GlobalLock (hStr);
-		LPSTR		TempValue=str+4096;
+		LPSTR		TempValue = str + maxlval;
 		LPSTR		pSQL=TempValue+256;   
 	
 /*	if (*VarName == '%')
@@ -8497,597 +8549,623 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 			}
 			goto Exit;
 	GetData: 
-		    switch (FilePtr->Type)
-		    { 
-				case IMAGE_DATAFILE:
+			switch (FilePtr->Type)
+			{
+			case IMAGE_DATAFILE:
+			{
+				BITMAPINFOHEADER DibInfo;
+				DPOINT	WPoint;
+
+				GetBitmapInfoFromHandle(&DibInfo, (HDIB32)FilePtr->FileHandle);
+
+				switch (lpFieldInfo->index)
 				{
-				    BITMAPINFOHEADER DibInfo; 
-					DPOINT	WPoint;
-			
-					GetBitmapInfoFromHandle (&DibInfo,(HDIB32)FilePtr->FileHandle);
-	
+				case 0:
+					itoa(DibInfo.biWidth, Value, 10);
+					break;
+				case 1:
+					itoa(DibInfo.biHeight, Value, 10);
+					break;
+				case 2:
+					itoa(DibInfo.biBitCount, Value, 10);
+					break;
+				case 3:
+					if (GetImageCoord((HDIB32)FilePtr->FileHandle, &WPoint, 0))
+						ftoa(Value, WPoint.x);
+					else
+						strcpy(Value, "0");
+					break;
+				case 4:
+					if (GetImageCoord((HDIB32)FilePtr->FileHandle, &WPoint, 0))
+						ftoa(Value, WPoint.y);
+					else
+						strcpy(Value, "0");
+					break;
+				case 5:
+				{
+					char	DateTaken[32];
+
+					if (GetImageCoord((HDIB32)FilePtr->FileHandle, &WPoint, DateTaken))
+						strcpy(Value, DateTaken);
+					else
+						strcpy(Value, "0");
+				}
+					break;
+				default:
+					*Value = 0;
+				}
+				goto GotData;
+			}
+				break;
+
+			case HLTLIST_DATAFILE:
+			{
+				HIGHLIGHTDATA	HighlightData;
+
+				if (!BT_FIND(FilePtr->FileHandle, (LPSTR)&SQLPtr->Offset, BT_FIRST, BT_EQ, (LPSTR)&HighlightData))
+				{
 					switch (lpFieldInfo->index)
 					{
 					case 0:
-						itoa (DibInfo.biWidth,Value,10);
+						itoa(SQLPtr->Offset, Value, 10);
 						break;
 					case 1:
-						itoa (DibInfo.biHeight,Value,10);
+						itoa(HighlightData.PD.Desc, Value, 10);
 						break;
 					case 2:
-						itoa (DibInfo.biBitCount,Value,10);
+						strcpy(Value, HighlightData.PD.Prefix);
 						break;
 					case 3:
-						if (GetImageCoord ((HDIB32)FilePtr->FileHandle, &WPoint,0))
-							ftoa (Value,WPoint.x);
-						else
-							strcpy (Value,"0");
-						break;
-					case 4:
-						if (GetImageCoord ((HDIB32)FilePtr->FileHandle, &WPoint,0))
-							ftoa (Value,WPoint.y);
-						else
-							strcpy (Value,"0");
-						break;
-					case 5:
-						{
-							char	DateTaken[32];
-
-						if (GetImageCoord ((HDIB32)FilePtr->FileHandle, &WPoint,DateTaken))
-							strcpy (Value,DateTaken);
-						else
-							strcpy (Value,"0");
-						}
+						strcpy(Value, HighlightData.PD.UDI);
 						break;
 					default:
 						*Value = 0;
 					}
 					goto GotData;
 				}
+			}
 				break;
 
-				case HLTLIST_DATAFILE:
+			case THEME_HLTFILE:
+			{
+				THEMEHIGHLIGHTDATA	ThemeHighlightData;
+				THEMEHIGHLIGHTKEY	ThemeHighlightKey;
+				if (!(SQLPtr->st = BT_FIND(FilePtr->FileHandle, (LPSTR)&ThemeHighlightKey, BT_CURPOS, BT_ANY, (LPSTR)&ThemeHighlightData)))
 				{
-					HIGHLIGHTDATA	HighlightData;
-	
-					if (!BT_FIND (FilePtr->FileHandle,(LPSTR)&SQLPtr->Offset,BT_FIRST,BT_EQ,(LPSTR)&HighlightData))
+					switch (lpFieldInfo->index)
 					{
-						switch (lpFieldInfo->index)
-						{
-						case 0:
-							itoa (SQLPtr->Offset,Value,10);
-							break;
-						case 1:
-							itoa (HighlightData.PD.Desc,Value,10);
-							break;
-						case 2:
-							strcpy (Value,HighlightData.PD.Prefix);
-							break;
-						case 3:
-							strcpy (Value,HighlightData.PD.UDI);
-							break;
-						default:
-							*Value = 0;
-						}
-						goto GotData;
+					case 0:
+						itoa(ThemeHighlightKey.Refno, Value, 10);
+						break;
+					case 1:
+						itoa(ThemeHighlightData.Desc, Value, 10);
+						break;
+					case 2:
+						strcpy(Value, ThemeHighlightData.Prefix);
+						break;
+					case 3:
+						strcpy(Value, ThemeHighlightData.UDI);
+						break;
+					case 4:
+						itoa(ThemeHighlightKey.Class, Value, 10);
+						break;
+					case 5:
+						ftoa(Value, ThemeHighlightData.Point.x);
+						break;
+					case 6:
+						ftoa(Value, ThemeHighlightData.Point.y);
+						break;
+					default:
+						*Value = 0;
 					}
-				}
-				break;
-
-				case THEME_HLTFILE:
-				{
-					THEMEHIGHLIGHTDATA	ThemeHighlightData;
-					THEMEHIGHLIGHTKEY	ThemeHighlightKey;
-					if (!(SQLPtr->st=BT_FIND (FilePtr->FileHandle,(LPSTR)&ThemeHighlightKey,BT_CURPOS,BT_ANY,(LPSTR)&ThemeHighlightData)))
-					{
-						switch (lpFieldInfo->index)
-						{
-						case 0:
-							itoa (ThemeHighlightKey.Refno,Value,10);
-							break;
-						case 1:
-							itoa (ThemeHighlightData.Desc,Value,10);
-							break;
-						case 2:
-							strcpy (Value,ThemeHighlightData.Prefix);
-							break;
-						case 3:
-							strcpy (Value,ThemeHighlightData.UDI);
-							break;
-						case 4:
-							itoa (ThemeHighlightKey.Class,Value,10);
-							break;
-						case 5:
-							ftoa (Value,ThemeHighlightData.Point.x);
-							break;
-						case 6:
-							ftoa (Value,ThemeHighlightData.Point.y);
-							break;
-						default:
-							*Value = 0;
-						}
-						goto GotData;
-					}
-				}
-				break;
-
-				case DBF_DATAFILE:
-		    	case SHAPE_DATAFILE:
-				{   
-					long	LongVal;
-					double	DoubleVal; 
-					LPCSTR	pStringVal;
-					DBFHandle    pDBF;
-					LPDWORD 	 pDBFAddress = (LPDWORD)GlobalLock (FilePtr->FileHandle);
-					
-					pDBF = (DBFHandle)*pDBFAddress; 
-					GlobalUnlock (FilePtr->FileHandle);   
-					if (!_fstrnicmp (SQLPtr->SQL,"SHAPEREC =",10))
-					{
-						_fstrcpy (str,&SQLPtr->SQL[10]);
-						ExpandText (str);
-						CurrentSHPRec = atol (str);
-					}
-					else if (!_fstrnicmp(SQLPtr->SQL, "%SHAPEREC=", 10))
-					{
-						_fstrcpy(str, &SQLPtr->SQL[10]);
-						ExpandText(str);
-						CurrentSHPRec = atol(str);
-					}
-					else if (!_fstrnicmp(SQLPtr->SQL, "%SHPRECNO=", 10))
-					{
-						_fstrcpy(str, &SQLPtr->SQL[10]);
-						ExpandText(str);
-						CurrentSHPRec = atol(str);
-					}
-					else if (!_fstrnicmp(SQLPtr->SQL, "%DBFREC=", 8))
-					{
-						_fstrcpy(str, &SQLPtr->SQL[8]);
-						ExpandText(str);
-						CurrentDBFRec = atol(str);
-					}
-					if (FilePtr->Type == SHAPE_DATAFILE)
-						CurrentRec = CurrentSHPRec;
-					else
-						CurrentRec = CurrentDBFRec;
-					switch (lpFieldInfo->type)
-					{   
-						default:   
-						case BT_RIGHT_CHAR:
-						case BT_CHAR:
-							pStringVal = DBFReadStringAttribute(pDBF,CurrentRec, lpFieldInfo->index);  
-				        	if (pStringVal)
-				        		_fstrcpy (Value,pStringVal);
-			        	break;
-							        	
-			        	case BT_INTEGER:
-							LongVal = DBFReadIntegerAttribute(pDBF,CurrentRec, lpFieldInfo->index); 
-							ltoa (LongVal,Value,10);
-				     	break;
-						 			
-			 			case BT_REAL:
-							DoubleVal = DBFReadDoubleAttribute(pDBF,CurrentRec, lpFieldInfo->index);
-			 				sprintf(Value,"%.14lg",DoubleVal);
-			 			break;
-		        	} 
 					goto GotData;
-				}
-		    	break;
-
-				case LISTVAR_DATAFILE:
-				{
-					LPLISTVARDATABASE	pDB;   
-	
-				    pDB = (LPLISTVARDATABASE)GlobalLock (FilePtr->FileHandle);
-					strcpy (Value,pDB->CurRow);
-					GlobalUnlock (FilePtr->FileHandle);
-					goto GotData;
-				}
-				break;
-		    	
-		    	case GMTEXT_DATAFILE: 
-		    	{
-				    if (NeedRead (SQLPtr))
-				    {    
-				    	if (!_fstrnicmp (SQLPtr->SQL,"%RECORDOFFSET==",15))
-						{   
-							long	loc;
-							
-							_fstrcpy (str,&SQLPtr->SQL[15]);
-							ExpandText (str);
-							loc = atol (str);
-					    	GSSillseek (FilePtr->Fid,loc,0);    
-					    	fgetstring (str,4090,FilePtr->Fid);
-	                        GetDelimTextData(str,FilePtr->FileHandle); 
-	                        SQLPtr->st =0;
-	                    }
-	                    else
-	                    {
-					    	GSSillseek (FilePtr->Fid,0,0);    
-					    	SQLPtr->st =0;
-					    	fgetstring (str,4090,FilePtr->Fid);
-							ConvertSQLToLogicP (pSQL,SQLPtr->SQL);
-					    	do
-					    	{
-						    	SQLPtr->st =-999;
-					    		SQLPtr->Offset = GSSillseek (FilePtr->Fid,0,1);  
-					    		if (!fgetstring (str,4090,FilePtr->Fid))
-					    			SQLPtr->st = 1;
-					    		else
-									GetDelimTextData(str,FilePtr->FileHandle);
-							    SQLPtr->lastreadtime = NextVarTime ();
-					    	}
-					    	while (SQLPtr->st <= 0 && !LogicPFile (SQLPtr,pSQL,&err)); 
-					    	if (SQLPtr->st == -999)
-					    		SQLPtr->st = 0;
-				    	}
-				    }
-	                if (SQLPtr->st > 0)
-	                	goto NotFound; 
-	                if (WantRecOffset)
-	                	ltoa (SQLPtr->Offset,Value,10);
-	                else
-	                {
-						LPSHORT	pnDLTvar=(LPSHORT)GlobalLock (FilePtr->FileHandle);
-						short	nDLTvar=abs(*pnDLTvar); 
-						LPSTR	DLTDelim = (LPSTR)(pnDLTvar + 1);
-						LPHANDLE	DLTVar = (LPHANDLE)(DLTDelim + 1);
-						VARPNT	VarPtr; 
-						DLTVar += lpFieldInfo->index;  
-						
-						VarPtr = (VARPNT)GlobalLock (*DLTVar);
-				    	_fstrncpy(Value,VarPtr->Value,maxlval); 
-				    	GlobalUnlock (*DLTVar);
-				    	GlobalUnlock (FilePtr->FileHandle);
-				    }
-				    
-				    goto GotData;
-				}
-		    	break;
-		    	
-		    	case COMBO_DATAFILE:
-			    {   
-					LPCOMBOHEADER		pComboHeader;
-				    LPCOMBOFILE  		pComboFile; 
-	    			LPCOMBOFIELDINFO    pComboField;  
-				    LPWHEREINDEX        pWhereIndex;
-				    LPCFIELDINDEX       pCFieldIndex;  
-				    LPSTR       		pWhere, pCField, pStr,pStr2;
-				    HANDLE				hStr=0;
-	    			short	fromfile; 
-	    			DWORD	ReadTime;
-			                           
-					pComboHeader = (LPCOMBOHEADER)GlobalLock (FilePtr->FileHandle); 
-					pComboFile = (LPCOMBOFILE)GlobalLock (pComboHeader->hComboFile); 
-					CurrentComboFile = pComboFile;
-	        		pComboField = (LPCOMBOFIELDINFO)GlobalLock (pComboHeader->hComboFields); 
-	        		pComboField += ifield;
-	        		fromfile = pComboField->fromfile;
-					if (fromfile < 0)
-					{   
-						hStr = GSSiGlobAlloc ( 235,GMEM_MOVEABLE,4096);
-						pStr = GlobalLock (hStr);
-						pCFieldIndex =(LPCFIELDINDEX) GlobalLock(pComboHeader->hComputedFields);
-						if (pComboFile->Version < 2)
-						{
-							pCField = (LPSTR)pCFieldIndex + (sizeof(CFIELDINDEX) +
-		                        		pCFieldIndex->offset[pComboField->fromfileindex]);
-						}
-						else
-						{
-							LPINT	pIndex=(LPINT)pCFieldIndex;
-							LPSTR	pFieldDefs = (LPSTR)(pIndex+pComboFile->NumFields);
-
-							pCField = &pFieldDefs[pIndex[pComboField->fromfileindex]];
-						}
-		                _fstrcpy (pStr,pCField);
-		                GlobalUnlock (pComboHeader->hComputedFields); 
-		                ExpandText (pStr);
-		                _fstrcpy (Value,pStr);   
-		                GSSiGlobUlFree (&hStr);
-						GlobalUnlock (pComboHeader->hComboFields);
-						GlobalUnlock (pComboHeader->hComboFile);  
-						CurrentComboFile = 0;
-						GlobalUnlock (FilePtr->FileHandle); 
-			        	goto GotData;
-	                }
-	                else
-	                {
-		                SQLPtr2 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[fromfile]);
-		                FilePtr2 = (LPOPENFILEDATA)GlobalLock (SQLPtr2->OFHandle);
-		                pFileField = &FilePtr2->FldInfo+pComboField->fromfileindex; 
-						hStr = GSSiGlobAlloc ( 236,GMEM_MOVEABLE,1024);
-						pStr = GlobalLock (hStr);
-						pStr2 = pStr + 512;
-						sprintf (pStr,"%s.%s",SQLPtr2->IDName,pFileField->name);
-						if (fromfile > 0)
-						{   
-							pWhere = GlobalLock(pComboHeader->hWhere);
-							pWhereIndex = (LPWHEREINDEX)pWhere;  
-							pWhere += sizeof(WHEREINDEX) + pWhereIndex->offset[pComboField->WhereID];
-							if (FilePtr2->Type == UMIFS_DATAFILE || FilePtr2->Type == ORA_DATAFILE || FilePtr2->Type == GMCENSUS_DATAFILE || FilePtr2->Type == GMTEXT_DATAFILE)
-							{   
-				                {
-				                	LPOPENSQLDATA SQLPtrLink = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[fromfile-1]);
-				                	LPOPENFILEDATA FilePtrLink = (LPOPENFILEDATA)GlobalLock (SQLPtrLink->OFHandle);
-
-				                	sprintf (pStr2,"[%s]",FilePtrLink->FldInfo.name);
-				                	ExpandText (pStr2);
-				                	GlobalUnlock (SQLPtrLink->OFHandle);
-				                	GlobalUnlock (pComboFile->hSQL[fromfile-1]);
-				                }
-								_fstrcpy (pStr2,pWhere);
-								ExpandText (pStr2); 
-								ProcessFileSQL (SQLPtr2,FilePtr2,pStr2);
-			                	SQLPtr3 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[0]);
-								SQLPtr2->st = SQLPtr3->st; 
-								GlobalUnlock(pComboFile->hSQL[0]);
-								if (SQLPtr2->st > 0) 
-								{
-									GlobalUnlock (pComboHeader->hWhere);
-									GlobalUnlock (SQLPtr2->OFHandle);
-									GlobalUnlock(pComboFile->hSQL[fromfile]); 
-					                GSSiGlobUlFree (&hStr);
-									GlobalUnlock (pComboHeader->hComboFields);
-									GlobalUnlock (pComboHeader->hComboFile);
-									CurrentComboFile = 0;
-									GlobalUnlock (FilePtr->FileHandle); 
-									goto NotFound;
-								}
-								else
-									SQLPtr2->lastreadtime = 0;
-							}
-							else
-							{                                       
-								_fstrcpy (SQLPtr2->SQL,pWhere); 
-								SQLPtr2->NumGlobals = -1;
-							}
-							GlobalUnlock (pComboHeader->hWhere);
-						} 
-						else
-							ReadTime = SQLPtr2->lastreadtime;
-						GlobalUnlock(pComboFile->hSQL[fromfile]); 
-						st = GetValFromOpenFiles (pStr,Value,4096); 
-						if (!fromfile)
-						{ 
-							USHORT	j;
-							
-							for (j=1;j<pComboFile->NumFiles;j++)
-							{ 
-				                LPOPENSQLDATA SQLPtr3 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[j]);  
-				                
-				                if (SQLPtr3->lastreadtime < SQLPtr2->lastreadtime)
-				                	SQLPtr3->lastreadtime = 0;	
-				                GlobalUnlock (pComboFile->hSQL[j]);
-							}
-						}
-						GlobalUnlock (SQLPtr2->OFHandle);
-		                GSSiGlobUlFree (&hStr);
-						GlobalUnlock (pComboHeader->hComboFields);
-						GlobalUnlock (pComboHeader->hComboFile);
-						CurrentComboFile = 0;
-						GlobalUnlock (FilePtr->FileHandle); 
-			        	goto GotData;
-	                }
-					GlobalUnlock (pComboHeader->hComboFields);
-					GlobalUnlock (pComboHeader->hComboFile);
-					CurrentComboFile = 0;
-					GlobalUnlock (FilePtr->FileHandle); 
-					if (!fromfile)
-						goto Exit; 
-			    }
-		    	break;  
-		    	
-				case PN_DATAFILE:
-		    	case GMCENSUS_DATAFILE:
-				case ORA_DATAFILE:
-				case UMIFS_DATAFILE:
-				{    
-					short	FirstCond = BT_EQ;
-					
- 					lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
-					if (SQLPtr->IndexToUse < 0) goto NotFound;
-					hBT = lpGWDHead->BTHandle[SQLPtr->IndexToUse];
-				    if (!hBT) 
-		        	{ 
-		        	    GlobalUnlock (FilePtr->FileHandle); 
-		        		goto NotFound;
-		        	}
-				    
-				    if (NeedRead (SQLPtr))
-				    {   			    
-				        if (lpGWDHead->Version > 1000)
-				        {   
-						    SQLPtr->lastreadtime = NextVarTime ();
-				        	if (!LoadInternalGMD (lpGWDHead,InternalRefno))
-				        	{ 
-				        	    GlobalUnlock (FilePtr->FileHandle); 
-				        		goto NotFound;
-				        	}
-				            st = 0;  
-				           	goto Found;
-				        }
-					    if (!FetchDBRec (SQLPtr->myhandle))
-			        	{ 
-			        	    GlobalUnlock (FilePtr->FileHandle); 
-			        		goto NotFound;
-			        	} 
-			        	NumFetch++;
-				        /*SQLPtr->lastreadtime = NextVarTime ();  
-				        GWDClearSetValues (lpGWDHead);
-					    for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++) 
-					    {   
-					    	if (lpSQLField->FieldNum >= 0 && lpSQLField->OpCode == OPCODE_EQ)
-					    	{
-						    	_fstrcpy (str,lpSQLField->String);
-						    	ExpandText (str);
-						    	lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
-								SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE); 
-							} 
-						}
-						if (GWDInitUnsetKeyValues (lpGWDHead,SQLPtr->IndexToUse))
-							FirstCond = BT_GE;
-						GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0);
-						if (SQLPtr->IndexToUse) 
-							SetReadSecIndex(TRUE);
-						SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,FirstCond, (LPSTR)&SQLPtr->Offset);
-						SetReadSecIndex(FALSE); */
-					    SQLPtr->lastreadtime = NextVarTime ();
-					} 
-			        if (lpGWDHead->Version > 1000)
-                    	goto Found;
-				    if (!SQLPtr->st)
-				       	FillGWDData (lpGWDHead,SQLPtr->Offset);
-				    else
-				    {
-		        	    GlobalUnlock (FilePtr->FileHandle); 
-				    	goto NotFound;
-				    }
-	Found:			    
-	                if (WantRecOffset)
-	                	ltoa (SQLPtr->Offset,Value,10); 
-	                else
-	                {
-						lpGWFldInfo=lpGWDHead->pFldInfo + ifield;
-						switch (lpGWFldInfo->Type)
-						{   
-							default:   
-							case BT_RIGHT_CHAR:
-							case BT_CHAR:
-								{
-									int	ln=min(maxlval-1,lpGWFldInfo->Len);
-					        		
-									memmove (Value,&lpGWDHead->GWDData[lpGWFldInfo->Beg],ln);
-					        		ep = &Value[ln]; 
-									*ep ='\0';
-								}
-					        	//Truncate (Value);
-				        	break;
-								        	
-				        	case BT_INTEGER:
-				        	    if (lpGWFldInfo->Len == 2)
-				        	    	IVal= *(LPSHORT) &lpGWDHead->GWDData[lpGWFldInfo->Beg];
-				        	    else
-					     	    	IVal = *(LPLONG) &lpGWDHead->GWDData[lpGWFldInfo->Beg];
-					     	    ltoa (IVal,Value,10);
-					     	break;
-							 			
-				 			case BT_REAL:
-				 			 	if (lpGWFldInfo->Len == 4)
-				 					sprintf(Value,"%f",*(LPFLOAT)&lpGWDHead->GWDData[lpGWFldInfo->Beg]);
-				 				else
-				 					sprintf(Value,"%.14lg",*(LPDOUBLE)&lpGWDHead->GWDData[lpGWFldInfo->Beg]);
-				 			break;
-			        	} 
-			        	if (ValueInExtendedArea && FilePtr->Type == GMCENSUS_DATAFILE)
-			        	{   
-			        		long	CensusOffset = atol (Value);
-			        		
-			        		if (CensusOffset < 0) 
-			        		{
-								GlobalUnlock (FilePtr->FileHandle); 
-			        			goto NotFound; 
-			        		}
-							GSSillseek (lpGWDHead->Fid,CensusOffset,0);
-							BigRead (lpGWDHead->Fid,(HPSTR)&len,2); 
-							_fstrcpy (Value,"0");
-							if (len)
-							{   
-								HANDLE	hCensusString=GSSiGlobAlloc ( 237,GMEM_MOVEABLE,4096);
-								LPSTR	pComma, pEnd, pCensusString = GlobalLock (hCensusString);
-								USHORT	field = SFFieldData.Field;
-								
-								BigRead (lpGWDHead->Fid,pCensusString,len);	
-								pCensusString[len] = 0;  
-								ExpandCensusString (pCensusString);
-								pComma = pCensusString;
-								while (field--)
-								{
-									if (!(pComma = _fstrchr (pComma,',')))
-										break;
-									pComma++;
-								}
-								if (pComma)
-								{
-									if ((pEnd = _fstrchr (pComma,',')))
-										*pEnd = 0;
-									_fstrcpy (Value,pComma);
-								}
-								GSSiGlobUlFree (&hCensusString);
-							}
-			        	}
-			        }
-		        	GlobalUnlock (FilePtr->FileHandle);  
-		        	goto GotData;
-				}
-				break;
-				
-				case FGDB_DATAFILE:
-				{
-				    if (NeedRead (SQLPtr))
-				    {     
-					    SQLPtr->lastreadtime = NextVarTime ();
-				    	if (SQLPtr->hstmt)
-				    	{
-							FGDBCloseCursor((int)SQLPtr->hstmt);
-				        	FGDBFreeStmt((int)SQLPtr->hstmt);
-				        	SQLPtr->hstmt = 0;
-						    ClearCurVals (FilePtr);
-				        } 
-				        SQLPtr->st = 0;
-	
-				    }
-	                if (SQLPtr->st)
-	                	goto NotFound;
-					{
-						HANDLE hsql = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
-						LPSTR sql = GlobalLock (hsql);
-						strcpy (sql,SQLPtr->SQL);
-						ExpandText (sql);
-						ValC = (LPSTR) GetFGDBFieldData (FilePtr,
-														 sql,&SQLPtr->hstmt,
-	                                   		   			 lpFieldInfo, FALSE,0, &irc,FilePtr->NumFields,
-	                                   		   			 &FilePtr->FldInfo,0);
-						GSSiGlobUlFree (&hsql);
-					}
-	                if (irc)
-	                	goto NotFound;
-				    _fstrcpy(Value,ValC);
-				    goto GotData;
-				}
-				break;
-				case PGDB_DATAFILE:
-				case ODBC_DATAFILE:
-				case SQL_DATAFILE:
-				case TEXT_DATAFILE:
-				{   
-				    if (NeedRead (SQLPtr))
-				    {     
-					    SQLPtr->lastreadtime = NextVarTime ();
-				    	if (SQLPtr->hstmt)
-				    	{
-							SQLCloseCursor(SQLPtr->hstmt);
-				        	SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
-				        	SQLPtr->hstmt = 0;
-						    ClearCurVals (FilePtr);
-				        } 
-				        SQLPtr->st = 0;
-	
-				    }
-	                if (SQLPtr->st)
-	                	goto NotFound;
-					ValC = (LPSTR) GetExternalFieldData (FilePtr,
-														 SQLPtr->SQL,&SQLPtr->hstmt,
-	                                   		   			 lpFieldInfo, FALSE,0, &irc,FilePtr->NumFields,
-	                                   		   			 &FilePtr->FldInfo);
-	                if (irc)
-	                	goto NotFound;
-				    _fstrcpy(Value,ValC);
-				    goto GotData;
-				
 				}
 			}
-NotFound:	SQLPtr->st = 31;
+				break;
+
+			case DBF_DATAFILE:
+			case SHAPE_DATAFILE:
+			{
+				long	LongVal;
+				double	DoubleVal;
+				LPCSTR	pStringVal;
+				DBFHandle    pDBF;
+				LPDWORD 	 pDBFAddress = (LPDWORD)GlobalLock(FilePtr->FileHandle);
+
+				pDBF = (DBFHandle)*pDBFAddress;
+				GlobalUnlock(FilePtr->FileHandle);
+				if (!_fstrnicmp(SQLPtr->SQL, "SHAPEREC =", 10))
+				{
+					_fstrcpy(str, &SQLPtr->SQL[10]);
+					ExpandText(str);
+					CurrentSHPRec = atol(str);
+				}
+				else if (!_fstrnicmp(SQLPtr->SQL, "%SHAPEREC=", 10))
+				{
+					_fstrcpy(str, &SQLPtr->SQL[10]);
+					ExpandText(str);
+					CurrentSHPRec = atol(str);
+				}
+				else if (!_fstrnicmp(SQLPtr->SQL, "%SHPRECNO=", 10))
+				{
+					_fstrcpy(str, &SQLPtr->SQL[10]);
+					ExpandText(str);
+					CurrentSHPRec = atol(str);
+				}
+				else if (!_fstrnicmp(SQLPtr->SQL, "%DBFREC=", 8))
+				{
+					_fstrcpy(str, &SQLPtr->SQL[8]);
+					ExpandText(str);
+					CurrentDBFRec = atol(str);
+				}
+				if (FilePtr->Type == SHAPE_DATAFILE)
+					CurrentRec = CurrentSHPRec;
+				else
+					CurrentRec = CurrentDBFRec;
+				switch (lpFieldInfo->type)
+				{
+				default:
+				case BT_RIGHT_CHAR:
+				case BT_CHAR:
+					pStringVal = DBFReadStringAttribute(pDBF, CurrentRec, lpFieldInfo->index);
+					if (pStringVal)
+						_fstrcpy(Value, pStringVal);
+					break;
+
+				case BT_INTEGER:
+					LongVal = DBFReadIntegerAttribute(pDBF, CurrentRec, lpFieldInfo->index);
+					ltoa(LongVal, Value, 10);
+					break;
+
+				case BT_REAL:
+					DoubleVal = DBFReadDoubleAttribute(pDBF, CurrentRec, lpFieldInfo->index);
+					sprintf(Value, "%.14lg", DoubleVal);
+					break;
+				}
+				goto GotData;
+			}
+				break;
+
+			case LISTVAR_DATAFILE:
+			{
+				LPLISTVARDATABASE	pDB;
+
+				pDB = (LPLISTVARDATABASE)GlobalLock(FilePtr->FileHandle);
+				strcpy(Value, pDB->CurRow);
+				GlobalUnlock(FilePtr->FileHandle);
+				goto GotData;
+			}
+				break;
+
+			case GMTEXT_DATAFILE:
+			{
+				if (NeedRead(SQLPtr))
+				{
+					if (!_fstrnicmp(SQLPtr->SQL, "%RECORDOFFSET==", 15))
+					{
+						long	loc;
+
+						_fstrcpy(str, &SQLPtr->SQL[15]);
+						ExpandText(str);
+						loc = atol(str);
+						GSSillseek(FilePtr->Fid, loc, 0);
+						fgetstring(str, maxlval, FilePtr->Fid);
+						GetDelimTextData(str, FilePtr->FileHandle, maxlval);
+						SQLPtr->st = 0;
+					}
+					else
+					{
+						GSSillseek(FilePtr->Fid, 0, 0);
+						SQLPtr->st = 0;
+						fgetstring(str, maxlval-2, FilePtr->Fid);
+						ConvertSQLToLogicP(pSQL, SQLPtr->SQL);
+						do
+						{
+							SQLPtr->st = -999;
+							SQLPtr->Offset = GSSillseek(FilePtr->Fid, 0, 1);
+							if (!fgetstring(str, maxlval, FilePtr->Fid))
+								SQLPtr->st = 1;
+							else
+								GetDelimTextData(str, FilePtr->FileHandle, maxlval);
+							SQLPtr->lastreadtime = NextVarTime();
+						} while (SQLPtr->st <= 0 && !LogicPFile(SQLPtr, pSQL, &err));
+						if (SQLPtr->st == -999)
+							SQLPtr->st = 0;
+					}
+				}
+				if (SQLPtr->st > 0)
+					goto NotFound;
+				if (WantRecOffset)
+					ltoa(SQLPtr->Offset, Value, 10);
+				else
+				{
+					LPSHORT	pnDLTvar = (LPSHORT)GlobalLock(FilePtr->FileHandle);
+					short	nDLTvar = abs(*pnDLTvar);
+					LPSTR	DLTDelim = (LPSTR)(pnDLTvar + 1);
+					LPHANDLE	DLTVar = (LPHANDLE)(DLTDelim + 1);
+					VARPNT	VarPtr;
+					DLTVar += lpFieldInfo->index;
+
+					VarPtr = (VARPNT)GlobalLock(*DLTVar);
+					_fstrncpy(Value, VarPtr->Value, maxlval);
+					GlobalUnlock(*DLTVar);
+					GlobalUnlock(FilePtr->FileHandle);
+				}
+
+				goto GotData;
+			}
+				break;
+
+			case COMBO_DATAFILE:
+			{
+				LPCOMBOHEADER		pComboHeader;
+				LPCOMBOFILE  		pComboFile;
+				LPCOMBOFIELDINFO    pComboField;
+				LPWHEREINDEX        pWhereIndex;
+				LPCFIELDINDEX       pCFieldIndex;
+				LPSTR       		pWhere, pCField, pStr, pStr2;
+				HANDLE				hStr = 0;
+				short	fromfile;
+				DWORD	ReadTime;
+
+				pComboHeader = (LPCOMBOHEADER)GlobalLock(FilePtr->FileHandle);
+				pComboFile = (LPCOMBOFILE)GlobalLock(pComboHeader->hComboFile);
+				CurrentComboFile = pComboFile;
+				pComboField = (LPCOMBOFIELDINFO)GlobalLock(pComboHeader->hComboFields);
+				pComboField += ifield;
+				fromfile = pComboField->fromfile;
+				if (fromfile < 0)
+				{
+					hStr = GSSiGlobAlloc(235, GMEM_MOVEABLE,maxlval);
+					pStr = GlobalLock(hStr);
+					pCFieldIndex = (LPCFIELDINDEX)GlobalLock(pComboHeader->hComputedFields);
+					if (pComboFile->Version < 2)
+					{
+						pCField = (LPSTR)pCFieldIndex + (sizeof(CFIELDINDEX)+
+							pCFieldIndex->offset[pComboField->fromfileindex]);
+					}
+					else
+					{
+						LPINT	pIndex = (LPINT)pCFieldIndex;
+						LPSTR	pFieldDefs = (LPSTR)(pIndex + pComboFile->NumFields);
+
+						pCField = &pFieldDefs[pIndex[pComboField->fromfileindex]];
+					}
+					_fstrcpy(pStr, pCField);
+					GlobalUnlock(pComboHeader->hComputedFields);
+					ExpandText(pStr);
+					_fstrcpy(Value, pStr);
+					GSSiGlobUlFree(&hStr);
+					GlobalUnlock(pComboHeader->hComboFields);
+					GlobalUnlock(pComboHeader->hComboFile);
+					CurrentComboFile = 0;
+					GlobalUnlock(FilePtr->FileHandle);
+					goto GotData;
+				}
+				else
+				{
+					SQLPtr2 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[fromfile]);
+					FilePtr2 = (LPOPENFILEDATA)GlobalLock(SQLPtr2->OFHandle);
+					pFileField = &FilePtr2->FldInfo + pComboField->fromfileindex;
+					hStr = GSSiGlobAlloc(236, GMEM_MOVEABLE, 1024);
+					pStr = GlobalLock(hStr);
+					pStr2 = pStr + 512;
+					sprintf(pStr, "%s.%s", SQLPtr2->IDName, pFileField->name);
+					if (fromfile > 0)
+					{
+						pWhere = GlobalLock(pComboHeader->hWhere);
+						pWhereIndex = (LPWHEREINDEX)pWhere;
+						pWhere += sizeof(WHEREINDEX)+pWhereIndex->offset[pComboField->WhereID];
+						if (FilePtr2->Type == UMIFS_DATAFILE || FilePtr2->Type == ORA_DATAFILE || FilePtr2->Type == GMCENSUS_DATAFILE || FilePtr2->Type == GMTEXT_DATAFILE)
+						{
+							{
+								LPOPENSQLDATA SQLPtrLink = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[fromfile - 1]);
+								LPOPENFILEDATA FilePtrLink = (LPOPENFILEDATA)GlobalLock(SQLPtrLink->OFHandle);
+
+								sprintf(pStr2, "[%s]", FilePtrLink->FldInfo.name);
+								ExpandText(pStr2);
+								GlobalUnlock(SQLPtrLink->OFHandle);
+								GlobalUnlock(pComboFile->hSQL[fromfile - 1]);
+							}
+							_fstrcpy(pStr2, pWhere);
+							ExpandText(pStr2);
+							ProcessFileSQL(SQLPtr2, FilePtr2, pStr2);
+							SQLPtr3 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[0]);
+							SQLPtr2->st = SQLPtr3->st;
+							GlobalUnlock(pComboFile->hSQL[0]);
+							if (SQLPtr2->st > 0)
+							{
+								GlobalUnlock(pComboHeader->hWhere);
+								GlobalUnlock(SQLPtr2->OFHandle);
+								GlobalUnlock(pComboFile->hSQL[fromfile]);
+								GSSiGlobUlFree(&hStr);
+								GlobalUnlock(pComboHeader->hComboFields);
+								GlobalUnlock(pComboHeader->hComboFile);
+								CurrentComboFile = 0;
+								GlobalUnlock(FilePtr->FileHandle);
+								goto NotFound;
+							}
+							else
+								SQLPtr2->lastreadtime = 0;
+						}
+						else
+						{
+							_fstrcpy(SQLPtr2->SQL, pWhere);
+							SQLPtr2->NumGlobals = -1;
+						}
+						GlobalUnlock(pComboHeader->hWhere);
+					}
+					else
+						ReadTime = SQLPtr2->lastreadtime;
+					GlobalUnlock(pComboFile->hSQL[fromfile]);
+					st = GetValFromOpenFiles(pStr, Value, maxlval);
+					if (!fromfile)
+					{
+						USHORT	j;
+
+						for (j = 1; j < pComboFile->NumFiles; j++)
+						{
+							LPOPENSQLDATA SQLPtr3 = (LPOPENSQLDATA)GlobalLock(pComboFile->hSQL[j]);
+
+							if (SQLPtr3->lastreadtime < SQLPtr2->lastreadtime)
+								SQLPtr3->lastreadtime = 0;
+							GlobalUnlock(pComboFile->hSQL[j]);
+						}
+					}
+					GlobalUnlock(SQLPtr2->OFHandle);
+					GSSiGlobUlFree(&hStr);
+					GlobalUnlock(pComboHeader->hComboFields);
+					GlobalUnlock(pComboHeader->hComboFile);
+					CurrentComboFile = 0;
+					GlobalUnlock(FilePtr->FileHandle);
+					goto GotData;
+				}
+				GlobalUnlock(pComboHeader->hComboFields);
+				GlobalUnlock(pComboHeader->hComboFile);
+				CurrentComboFile = 0;
+				GlobalUnlock(FilePtr->FileHandle);
+				if (!fromfile)
+					goto Exit;
+			}
+				break;
+
+			case PN_DATAFILE:
+			case GMCENSUS_DATAFILE:
+			case ORA_DATAFILE:
+			case UMIFS_DATAFILE:
+			{
+				short	FirstCond = BT_EQ;
+
+				lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
+				if (SQLPtr->IndexToUse < 0) goto NotFound;
+				hBT = lpGWDHead->BTHandle[SQLPtr->IndexToUse];
+				if (!hBT)
+				{
+					GlobalUnlock(FilePtr->FileHandle);
+					goto NotFound;
+				}
+
+				if (NeedRead(SQLPtr))
+				{
+					if (lpGWDHead->Version > 1000)
+					{
+						SQLPtr->lastreadtime = NextVarTime();
+						if (!LoadInternalGMD(lpGWDHead, InternalRefno))
+						{
+							GlobalUnlock(FilePtr->FileHandle);
+							goto NotFound;
+						}
+						st = 0;
+						goto Found;
+					}
+					if (!FetchDBRec(SQLPtr->myhandle))
+					{
+						GlobalUnlock(FilePtr->FileHandle);
+						goto NotFound;
+					}
+					NumFetch++;
+					/*SQLPtr->lastreadtime = NextVarTime ();
+					GWDClearSetValues (lpGWDHead);
+					for (i=0,lpSQLField=&SQLPtr->SQLField;i<SQLPtr->NumGlobals;i++,lpSQLField++)
+					{
+					if (lpSQLField->FieldNum >= 0 && lpSQLField->OpCode == OPCODE_EQ)
+					{
+					_fstrcpy (str,lpSQLField->String);
+					ExpandText (str);
+					lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
+					SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE);
+					}
+					}
+					if (GWDInitUnsetKeyValues (lpGWDHead,SQLPtr->IndexToUse))
+					FirstCond = BT_GE;
+					GWDFormKey(lpGWDHead,SQLPtr->IndexToUse,TRUE,0);
+					if (SQLPtr->IndexToUse)
+					SetReadSecIndex(TRUE);
+					SQLPtr->st = BT_FIND (hBT,lpGWDHead->pKeys[SQLPtr->IndexToUse],BT_FIRST,FirstCond, (LPSTR)&SQLPtr->Offset);
+					SetReadSecIndex(FALSE); */
+					SQLPtr->lastreadtime = NextVarTime();
+				}
+				if (lpGWDHead->Version > 1000)
+					goto Found;
+				if (!SQLPtr->st)
+					FillGWDData(lpGWDHead, SQLPtr->Offset);
+				else
+				{
+					GlobalUnlock(FilePtr->FileHandle);
+					goto NotFound;
+				}
+			Found:
+				if (WantRecOffset)
+					ltoa(SQLPtr->Offset, Value, 10);
+				else
+				{
+					lpGWFldInfo = lpGWDHead->pFldInfo + ifield;
+					switch (lpGWFldInfo->Type)
+					{
+					default:
+					case BT_RIGHT_CHAR:
+					case BT_CHAR:
+					{
+						int	ln = min(maxlval - 1, lpGWFldInfo->Len);
+
+						memmove(Value, &lpGWDHead->GWDData[lpGWFldInfo->Beg], ln);
+						ep = &Value[ln];
+						*ep = '\0';
+					}
+						//Truncate (Value);
+						break;
+
+					case BT_INTEGER:
+						if (lpGWFldInfo->Len == 2)
+							IVal = *(LPSHORT)&lpGWDHead->GWDData[lpGWFldInfo->Beg];
+						else
+							IVal = *(LPLONG)&lpGWDHead->GWDData[lpGWFldInfo->Beg];
+						ltoa(IVal, Value, 10);
+						break;
+
+					case BT_REAL:
+						if (lpGWFldInfo->Len == 4)
+							sprintf(Value, "%f", *(LPFLOAT)&lpGWDHead->GWDData[lpGWFldInfo->Beg]);
+						else
+							sprintf(Value, "%.14lg", *(LPDOUBLE)&lpGWDHead->GWDData[lpGWFldInfo->Beg]);
+						break;
+					}
+					if (ValueInExtendedArea && FilePtr->Type == GMCENSUS_DATAFILE)
+					{
+						long	CensusOffset = atol(Value);
+
+						if (CensusOffset < 0)
+						{
+							GlobalUnlock(FilePtr->FileHandle);
+							goto NotFound;
+						}
+						GSSillseek(lpGWDHead->Fid, CensusOffset, 0);
+						BigRead(lpGWDHead->Fid, (HPSTR)&len, 2);
+						_fstrcpy(Value, "0");
+						if (len)
+						{
+							HANDLE	hCensusString = GSSiGlobAlloc(237, GMEM_MOVEABLE, maxlval);
+							LPSTR	pComma, pEnd, pCensusString = GlobalLock(hCensusString);
+							USHORT	field = SFFieldData.Field;
+
+							BigRead(lpGWDHead->Fid, pCensusString, len);
+							pCensusString[len] = 0;
+							ExpandCensusString(pCensusString);
+							pComma = pCensusString;
+							while (field--)
+							{
+								if (!(pComma = _fstrchr(pComma, ',')))
+									break;
+								pComma++;
+							}
+							if (pComma)
+							{
+								if ((pEnd = _fstrchr(pComma, ',')))
+									*pEnd = 0;
+								_fstrcpy(Value, pComma);
+							}
+							GSSiGlobUlFree(&hCensusString);
+						}
+					}
+				}
+				GlobalUnlock(FilePtr->FileHandle);
+				goto GotData;
+			}
+				break;
+
+			case FGDB_DATAFILE:
+			{
+				if (NeedRead(SQLPtr))
+				{
+					SQLPtr->lastreadtime = NextVarTime();
+					if (SQLPtr->hstmt)
+					{
+						FGDBCloseCursor((int)SQLPtr->hstmt);
+						FGDBFreeStmt((int)SQLPtr->hstmt);
+						SQLPtr->hstmt = 0;
+						ClearCurVals(FilePtr);
+					}
+					SQLPtr->st = 0;
+
+				}
+				if (SQLPtr->st)
+					goto NotFound;
+				{
+					HANDLE hsql = GSSiGlobAlloc(0, GMEM_MOVEABLE, maxlval);
+					LPSTR sql = GlobalLock(hsql);
+					strcpy(sql, SQLPtr->SQL);
+					ExpandText(sql);
+					ValC = (LPSTR)GetFGDBFieldData(FilePtr,
+						sql, &SQLPtr->hstmt,
+						lpFieldInfo, FALSE, 0, &irc, FilePtr->NumFields,
+						&FilePtr->FldInfo, 0);
+					GSSiGlobUlFree(&hsql);
+				}
+				if (irc)
+					goto NotFound;
+				_fstrcpy(Value, ValC);
+				goto GotData;
+			}
+				break;
+			case PGDB_DATAFILE:
+			case ODBC_DATAFILE:
+			case SQL_DATAFILE:
+			case TEXT_DATAFILE:
+			{
+				if (NeedRead(SQLPtr))
+				{
+					SQLPtr->lastreadtime = NextVarTime();
+					if (SQLPtr->hstmt)
+					{
+						SQLCloseCursor(SQLPtr->hstmt);
+						SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
+						SQLPtr->hstmt = 0;
+						ClearCurVals(FilePtr);
+					}
+					SQLPtr->st = 0;
+
+				}
+				if (SQLPtr->st)
+					goto NotFound;
+				ValC = (LPSTR)GetExternalFieldData(FilePtr,
+					SQLPtr->SQL, &SQLPtr->hstmt,
+					lpFieldInfo, FALSE, 0, &irc, FilePtr->NumFields,
+					&FilePtr->FldInfo);
+				if (irc)
+					goto NotFound;
+				_fstrcpy(Value, ValC);
+				goto GotData;
+
+			}
+			case SLT_DATAFILE:
+			{
+				if (NeedRead(SQLPtr))
+				{
+					SQLPtr->lastreadtime = NextVarTime();
+					if (SQLPtr->hstmt)
+					{
+						SQLCloseCursor(SQLPtr->hstmt);
+						SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
+						SQLPtr->hstmt = 0;
+						ClearCurVals(FilePtr);
+					}
+					SQLPtr->st = 0;
+
+				}
+				if (SQLPtr->st)
+					goto NotFound;
+				ValC = (LPSTR)GetExternalFieldData(FilePtr,
+					SQLPtr->SQL, &SQLPtr->hstmt,
+					lpFieldInfo, FALSE, 0, &irc, FilePtr->NumFields,
+					&FilePtr->FldInfo);
+				if (irc)
+					goto NotFound;
+				_fstrcpy(Value, ValC);
+				goto GotData;
+
+			}
+		}
+		NotFound:	SQLPtr->st = 31;
 			ExpandTextDataNotFound=TRUE;
 			*Value=0;
 Exit:		GlobalUnlock (SQLPtr->OFHandle);

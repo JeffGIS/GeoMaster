@@ -3979,7 +3979,7 @@ short FirstPixelPass (void)
 			CurView->pThemes[itheme]->VPDisplayed) 
 			{
 				CurTheme = CurView->pThemes[itheme];
-            	if (ThemeNeedsDataPass (TRUE)) 
+            	if (ThemeNeedsDataPass (TRUE,FALSE)) 
             	{   
             		CurTheme = SaveTheme;
 					return 0;

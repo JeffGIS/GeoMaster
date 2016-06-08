@@ -5,6 +5,7 @@
  
 #define	MAXPARAMLENGTH	128 
 #define MAXODBCPARMS	32
+#define MAX_OPEN_DATABASES 64
 #define STR_LEN 256+1 
 #define REM_LEN 512+1
 
@@ -24,18 +25,18 @@ static	char	SQLValOp[16];
 static UCHAR  szQual[STR_LEN+1],       szTableName[STR_LEN+1],
        szTableOwner[STR_LEN+1], szTypeName[STR_LEN+1],  
        szRemarks[REM_LEN+1];
-static short DBType[64];
-static	short OpenDBType[64];
-static short DBNamePtr[64];
-static HDBC HDBCS[64];    
-static BOOL	StandardSQL[64]; 
-static char	QuoteChar[64][2];
+static short DBType[MAX_OPEN_DATABASES];
+static	short OpenDBType[MAX_OPEN_DATABASES];
+static short DBNamePtr[MAX_OPEN_DATABASES];
+static HDBC HDBCS[MAX_OPEN_DATABASES];    
+static BOOL	StandardSQL[MAX_OPEN_DATABASES]; 
+static char	QuoteChar[MAX_OPEN_DATABASES][2];
 static HANDLE	hTableNames=0; 
 static char	CurTable[128];
-static char TableNames[64][128];
-static char	OpenDBNames[64][256];
-static HDBC OpenhDBs[64];
-static short DBOpenCount[64]; 
+static char TableNames[MAX_OPEN_DATABASES][128];
+static char	OpenDBNames[MAX_OPEN_DATABASES][256];
+static HDBC OpenhDBs[MAX_OPEN_DATABASES];
+static short DBOpenCount[MAX_OPEN_DATABASES]; 
 static	int	NumOpenDBs=0;   
 static HENV	henv=0;
 static FIELDINFO	mine;
@@ -338,18 +339,30 @@ HANDLE	hSTR = 0;
 	    	return rtn;
 	    }
             break;
-        case SQL_DATAFILE:   
-        {
-			LPSQLDATABASE	pDB=(LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);  
-		        
-			rtn = NumSQLRows (pDB->DBHandle);
-			GlobalUnlock (FilePtr->FileHandle);
-         	GlobalUnlock (SQLPtr->OFHandle); 
-        	GlobalUnlock (hSQL);
-         	GSSiGlobUlFree (&hStr);
-	    	return rtn;
-	    }
-            break;
+		case SQL_DATAFILE:
+		{
+			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			rtn = NumSQLRows(pDB->DBHandle);
+			GlobalUnlock(FilePtr->FileHandle);
+			GlobalUnlock(SQLPtr->OFHandle);
+			GlobalUnlock(hSQL);
+			GSSiGlobUlFree(&hStr);
+			return rtn;
+		}
+			break;
+		case SLT_DATAFILE:
+		{
+			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+			rtn = NumSQLRows(pDB->DBHandle);
+			GlobalUnlock(FilePtr->FileHandle);
+			GlobalUnlock(SQLPtr->OFHandle);
+			GlobalUnlock(hSQL);
+			GSSiGlobUlFree(&hStr);
+			return rtn;
+		}
+			break;
 		case IMAGE_DATAFILE:
 			rtn = 1;
 			return rtn;
@@ -1910,10 +1923,10 @@ char	additional[256]={0};
 	_getcwd (cwd,256); 
    if(first_entry)
    {
-     for (i = 0; i < 64; DBType[i] = -1, i++);
+     for (i = 0; i < MAX_OPEN_DATABASES; DBType[i] = -1, i++);
      first_entry = FALSE;
    }
-   for(i = 1; i < 64; i++)
+   for(i = 1; i < MAX_OPEN_DATABASES; i++)
    		if(DBType[i] == -1)
    			goto FoundOne; 
    MessageBox (0,"Open database limit reached",0,MB_ICONEXCLAMATION);

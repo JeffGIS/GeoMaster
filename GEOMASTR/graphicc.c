@@ -816,7 +816,7 @@ void RunTransferFileCommand (void)
 	return;
 }
 
-BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long MaxLength)
+BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long MaxLength,LPSTR sourceDir)
 {   
 	long	lRec;
     HANDLE	hRec = GSSiGlobAlloc (1550,GMEM_MOVEABLE,MaxLength);
@@ -824,12 +824,19 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
     HANDLE	hCompressedRec = GSSiGlobAlloc (1551,GMEM_MOVEABLE,MaxLength*2);
     HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
     long	CompressedLength;  
-	HFILE	Fid=GSSiOpenFile (FileToAdd,0,OF_READ);
-	long	TotLen = GSSifilelength (Fid);
+	HFILE	Fid;
+	long	TotLen;
 	BOOL	rtn = FALSE;
+	char	filePath[MAX_PATH];
 
+	if (sourceDir && *sourceDir)
+		sprintf(filePath, "%s\\%s", sourceDir, FileToAdd);
+	else
+		strcpy(filePath, FileToAdd);
+	Fid = GSSiOpenFile(filePath, 0, OF_READ);
 	if (Fid == HFILE_ERROR)
 		goto Exit;
+	TotLen = GSSifilelength(Fid);
    	if (hWndStatus)
 		PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
 	while ((lRec=BigRead (Fid,pRec,MaxLength)))

@@ -1305,9 +1305,6 @@
     <ClCompile Include="OGRCoordConversion.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileOpenDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\SQLite3\shell.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1348,6 +1345,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NVTextDrawing.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenFileDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDialogEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1766,6 +1772,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\MrSid\Raster_DSDK\include\nitf\TREData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CFDResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialogEventHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2229,12 +2244,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ClassDiagram1.cd" />
-    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPI.dll">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\FileGDBAPI\2013\bin\FileGDBAPID.dll">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\FreeImage\Dist\x32\FreeImage.dll">
       <Filter>Source Files</Filter>
     </None>
@@ -2247,13 +2256,5 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib">
-      <Filter>Source Files</Filter>
-    </Library>
-    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib">
-      <Filter>Source Files</Filter>
-    </Library>
   </ItemGroup>
 </Project>

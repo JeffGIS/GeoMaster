@@ -64,10 +64,10 @@ static	BYTE	R,G,B,W;
 
 static HANDLE	hColorsChunk=0;
 static short	ExtraOpenFlags=0;
-static char		InitialDirectory[MAX_PATH];
-static char		InitialFile[MAX_PATH]; 
+static char		InitialDirectory[MAX_PATH+2];
+static char		InitialFile[MAX_PATH+2]; 
 static char		OFTitle2[256];
-static char		Filter[256],CustomFilter[256],FileTitle[256],InitialDir[256],Title[256],DefExt[256];
+static char		Filter[256],FileTitle[256],InitialDir[256],Title[256],DefExt[256];
 static UINT		FilterStringID=IDS_FILTERSTRING;   
 static short	fsLen;
 static char		TempFile32Name[MAX_PATH]="";
@@ -640,7 +640,27 @@ BOOL GetColor (HWND hWnd,COLORREF *Color)
          
 }
 
-BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
+BOOL GetOpenFileCD(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
+{
+	BOOL rtn = FALSE;
+	if (!*Name || (*Name && *LastChr(Name) == '\\'))
+		*InitialFile = 0;
+	else
+		_fullpath(InitialFile, Name, 256);
+	if (_fullpath(InitialDirectory, lpInitDir, 256))
+		_chdir(InitialDirectory);
+	fsLen = FormatFilterString();  //Formats gszFilter with strings
+
+	if (BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE))
+	{
+		strcpy(Name, InitialFile);
+		rtn = TRUE;
+	}
+	*OFTitle = 0;
+	return rtn;
+}
+
+BOOL GetOpenFileCD_old (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 {
    /*******************************************************************
    *                                                                  *
@@ -780,8 +800,41 @@ BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title)
 	}
 	return FALSE;
 }
+BOOL GetSaveFileCD(HWND hWnd, LPSTR Name, LPSTR lpInitDir)
+{
+	BOOL	Result=FALSE;
+	char	FName[MAX_PATH];
+	char	nam[256], ext[128];
+	DWORD	ErCode;
+	BOOL	First = TRUE;
+	int st;
 
-BOOL GetSaveFileCD (HWND hWnd,LPSTR Name, LPSTR lpInitDir)
+	_splitpath(Name, NULL, NULL, nam, ext);
+	sprintf(FName, "%s%s", nam, ext);
+	if (!*Name || (*Name && *LastChr(Name) == '\\'))
+		*InitialFile = 0;
+	else
+		_fullpath(InitialFile, Name, 256);
+	_fullpath(InitialDirectory, lpInitDir, 256);
+	fsLen = FormatFilterString();  //Formats gszFilter with strings
+	_splitpath(InitialFile, NULL, NULL, nam, ext);
+	sprintf(FName, "%s%s", nam, ext);
+	_fstrcpy(InitialFile, FName);
+	st = BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE);
+	if (st)
+	{
+		_fstrcpy(Name, InitialFile);
+		GetLongPathName2(Name, MAX_PATH);
+		Result = TRUE;
+	}
+	else
+	{
+		Result = FALSE;
+	}
+	return Result;
+}
+
+BOOL GetSaveFileCD_old (HWND hWnd,LPSTR Name, LPSTR lpInitDir)
 {
    /*******************************************************************
    *                                                                  *

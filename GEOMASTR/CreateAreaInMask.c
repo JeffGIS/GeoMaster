@@ -128,8 +128,9 @@ static saveBitmap(HDC hDC, HBITMAP hBMOld)
 BOOL ThemeCreateAreaInMask(int from)
 {
 	BOOL rtn = FALSE;
+	BOOL haveOverallBounds = FALSE;
 	LPVIEWPORT CurViewSave = CurView;
-	static int debugref = 100107754;
+	static int debugref = 109670029;
 	if (CurTheme->TargetViewport)
 		SetViewport(CurTheme->TargetViewport);
 
@@ -139,7 +140,7 @@ BOOL ThemeCreateAreaInMask(int from)
 	{
 		if (HiPrecis)
 		{
-			MNMXCORD bounds, BMbounds, mareaBounds;
+			MNMXCORD bounds, BMbounds, mareaBounds, overAllBounds;
 			int width, height;
 			int maxdim = getMaxBitmapDimension(CurTheme);
 			int margin = 4;
@@ -163,125 +164,170 @@ BOOL ThemeCreateAreaInMask(int from)
 			HANDLE hNewPoints[MAX_NEW_POLYGONS];
 			int nNewPoly = 0;
 			LPDPOINT pPixelPoints;
+			BOOL haveIntersect=FALSE;
 			HFILE Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
 			
 			if (Fid != HFILE_ERROR)
 			{
 				GetPolyBoundsD2(lpDCurPoints, nPnts, &bounds, TYPE_AREA);
-				fac = BoundsWidth(&bounds) / BoundsHeight(&bounds);
-				if (fac > 1)
+				if (haveOverallBounds)
 				{
-					width = maxdim - margin*2;
-					height = width / fac;
+					if (!IntersectBounds(&overAllBounds, &bounds, 0))
+					{
+						GSSiClose(Fid);
+						goto Exit;
+					}
 				}
 				else
-				{
-					height = maxdim - margin * 2;
-					width = height * fac;
-				}
-				hDCMain = GetDC(CurView->hWnd);
-				hDC = CreateCompatibleDC(hDCMain);
-				//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
-				hBM = CreateCompatibleBitmap(hDCMain, width + margin * 2, height + margin * 2);
-				rect.left = rect.bottom = 0;
-				rect.right = width + margin * 2;
-				rect.top = height + margin * 2;
-				GetObject(hBM, sizeof(bm), (LPSTR)&bm);
-				ReleaseDC(CurView->hWnd, hDCMain);
-				hBMOld = SelectObject(hDC, hBM);
-				SetMapMode(hDC, MM_ISOTROPIC);
-				SetWindowOrgEx(hDC, 0, 0, 0);
-				SetViewportOrgEx(hDC, 0, 0, 0);
-				SetWindowExtEx(hDC, width, width, 0);
-				SetViewportExtEx(hDC, width, width, 0);
-				FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));
-				BMbounds.xmn = margin;
-				BMbounds.ymn = margin;
-				BMbounds.xmx = margin + width;
-				BMbounds.ymx = margin + height;
-				hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
-				hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
-
-				hOldBrush = SelectObject(hDC, GetStockObject(BLACK_BRUSH));
-				hOldPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
-
+					DBoundsInit(&overAllBounds);
 				while (GetAreaFromFile(Fid, &mareaBounds, &nMareaPoints, &hMareaPoints))
 				{
+					if (!haveOverallBounds)
+						AddMinMaxD(&overAllBounds, &mareaBounds);
+					GSSiGlobFree(&hMareaPoints);
 					if (IntersectBounds(&mareaBounds, &bounds, 0))
 					{
-						LPDPOINT pMareaPoints = GlobalLock(hMareaPoints);
-						hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nMareaPoints * sizeof(POINT));
-						pPoly = GlobalLock(hPoly);
-						for (i = 0; i < nMareaPoints; i++)
-							pPoly[i] = TRANDPointToPoint(&pMareaPoints[i], hTranWtoBM);
-						Polygon(hDC, pPoly, nMareaPoints);
-						GSSiGlobUlFree(&hPoly);
-						GlobalUnlock(hMareaPoints);
+						haveIntersect = TRUE;
+						if (haveOverallBounds)
+							break;
 					}
-					GSSiGlobFree(&hMareaPoints);
 				}
+				haveOverallBounds = TRUE;
 				GSSiClose(Fid);
-
-				saveBitmap(hDC, hBMOld);
-
-				SetROP2(hDC, 5);//or 10 for both
-				hBluePen = CreatePen(PS_SOLID, 1, blue);
-				hBlueBrush = CreateSolidBrush(blue);
-				SelectObject(hDC,hBlueBrush);
-				//SelectObject(hDC, hBluePen);
-				SelectObject(hDC, GetStockObject(NULL_PEN));
-				hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
-				pPoly = GlobalLock(hPoly);
-				for (i = 0; i < nPnts; i++)
-					pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);
-				Polygon(hDC, pPoly, nPnts);
-				SelectObject(hDC, hOldBrush);
-				SelectObject(hDC, hOldPen);
-				DeleteObject(hBluePen);
-				DeleteObject(hBlueBrush);
-				GSSiGlobUlFree(&hPoly);
-				saveBitmap(hDC, hBMOld);
-				SelectObject(hDC, hBMOld);
-				DeleteDC(hDC);
-				nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
-				GSSiDeleteObject(&hBM);
-				GSSiGlobUlFree(&hPolyBuffer);
-				GSSiGlobFree(&hPolyPartLen);
-				if (nNewPoly)
+				if (haveIntersect)
 				{
-					int totPoints = nNewPoly;
-					int np = 0, j;
-					for (i = 0; i < nNewPoly; i++)
-						totPoints += numNewPoints[i];
-					hPolyBuffer = GSSiGlobAlloc(1799, GMEM_MOVEABLE, sizeof(DPOINT)*totPoints + 4);
-					lpDCurPoints = GlobalLock(hPolyBuffer);
-					for (i = 0; i < nNewPoly; i++)
+					Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
+
+					fac = BoundsWidth(&bounds) / BoundsHeight(&bounds);
+					if (fac > 1)
 					{
-						if (i)
-							lpDCurPoints[np++] = lpDCurPoints[0];
-						pPixelPoints = GlobalLock(hNewPoints[i]);
-						for (j = 0; j < numNewPoints[i]; j++)
-						{
-							lpDCurPoints[np++] = TranPoint(&pPixelPoints[j], hTranBMtoW);
-						}
-						GlobalUnlock(hNewPoints[i]);
+						width = maxdim - margin * 2;
+						height = width / fac;
 					}
-					nPnts = np;
+					else
+					{
+						height = maxdim - margin * 2;
+						width = height * fac;
+					}
+					hDCMain = GetDC(CurView->hWnd);
+					hDC = CreateCompatibleDC(hDCMain);
+					//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
+					hBM = CreateCompatibleBitmap(hDCMain, width + margin * 2, height + margin * 2);
+					rect.left = rect.bottom = 0;
+					rect.right = width + margin * 2;
+					rect.top = height + margin * 2;
+					GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+					ReleaseDC(CurView->hWnd, hDCMain);
+					hBMOld = SelectObject(hDC, hBM);
+					SetMapMode(hDC, MM_ISOTROPIC);
+					SetWindowOrgEx(hDC, 0, 0, 0);
+					SetViewportOrgEx(hDC, 0, 0, 0);
+					SetWindowExtEx(hDC, width, width, 0);
+					SetViewportExtEx(hDC, width, width, 0);
+					FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));
+					BMbounds.xmn = margin;
+					BMbounds.ymn = margin;
+					BMbounds.xmx = margin + width;
+					BMbounds.ymx = margin + height;
+					hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
+					hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
+
+					hOldBrush = SelectObject(hDC, GetStockObject(BLACK_BRUSH));
+					hOldPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+
+					while (GetAreaFromFile(Fid, &mareaBounds, &nMareaPoints, &hMareaPoints))
+					{
+						if (IntersectBounds(&mareaBounds, &bounds, 0))
+						{
+							LPDPOINT pMareaPoints = GlobalLock(hMareaPoints);
+							hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nMareaPoints * sizeof(POINT));
+							pPoly = GlobalLock(hPoly);
+							for (i = 0; i < nMareaPoints; i++)
+								pPoly[i] = TRANDPointToPoint(&pMareaPoints[i], hTranWtoBM);
+							Polygon(hDC, pPoly, nMareaPoints);
+							GSSiGlobUlFree(&hPoly);
+							GlobalUnlock(hMareaPoints);
+						}
+						GSSiGlobFree(&hMareaPoints);
+					}
+					GSSiClose(Fid);
+
+					saveBitmap(hDC, hBMOld);
+
+					SetROP2(hDC, 5);//or 10 for both
+					hBluePen = CreatePen(PS_SOLID, 1, blue);
+					hBlueBrush = CreateSolidBrush(blue);
+					SelectObject(hDC, hBlueBrush);
+					//SelectObject(hDC, hBluePen);
+					SelectObject(hDC, GetStockObject(NULL_PEN));
+					hPoly = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
+					pPoly = GlobalLock(hPoly);
+					for (i = 0; i < nPnts; i++)
+						pPoly[i] = TRANDPointToPoint(&lpDCurPoints[i], hTranWtoBM);
+					Polygon(hDC, pPoly, nPnts);
+					SelectObject(hDC, hOldBrush);
+					SelectObject(hDC, hOldPen);
+					DeleteObject(hBluePen);
+					DeleteObject(hBlueBrush);
+					GSSiGlobUlFree(&hPoly);
+					saveBitmap(hDC, hBMOld);
+					SelectObject(hDC, hBMOld);
+					DeleteDC(hDC);
+					nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
+					GSSiDeleteObject(&hBM);
+					GSSiGlobUlFree(&hPolyBuffer);
+					GSSiGlobFree(&hPolyPartLen);
+					nPoly = nNewPoly;
+					if (nPoly == 1)
+						nPoly = 0;
+					if (nNewPoly > 1)
+					{
+						LPINT pPolyPartLen;
+						hPolyPartLen = GSSiGlobAlloc(1780, GMEM_MOVEABLE, nNewPoly * sizeof(int)+4);
+						pPolyPartLen = (LPINT)GlobalLock(hPolyPartLen);
+						for (int i = 0; i < nNewPoly; i++)
+							pPolyPartLen[i] = numNewPoints[i];
+						GlobalUnlock(hPolyPartLen);
+					}
+					if (nNewPoly)
+					{
+						int totPoints = nNewPoly;
+						int np = 0, j;
+						for (i = 0; i < nNewPoly; i++)
+							totPoints += numNewPoints[i];
+						hPolyBuffer = GSSiGlobAlloc(1799, GMEM_MOVEABLE, sizeof(DPOINT)*totPoints + 4);
+						lpDCurPoints = GlobalLock(hPolyBuffer);
+						for (i = 0; i < nNewPoly; i++)
+						{
+							if (i)
+								lpDCurPoints[np++] = lpDCurPoints[0];
+							pPixelPoints = GlobalLock(hNewPoints[i]);
+							for (j = 0; j < numNewPoints[i]; j++)
+							{
+								lpDCurPoints[np++] = TranPoint(&pPixelPoints[j], hTranBMtoW);
+							}
+							GlobalUnlock(hNewPoints[i]);
+						}
+						nPnts = np;
+					}
+					else
+						nPnts = 0;
+					nPolyPoints = nPnts;
+
+					for (i = 0; i < nNewPoly; i++)
+						GSSiGlobFree(&hNewPoints[i]);
+					CloseTRANS2(&hTranWtoBM);
+					CloseTRANS2(&hTranBMtoW);
+
+					//nPnts /= 2;
+					rtn = TRUE;
 				}
-				else
-					nPnts = 0;
-				nPolyPoints = nPnts;
-
-				for (i = 0; i < nNewPoly; i++)
-					GSSiGlobFree(&hNewPoints[i]);
-				CloseTRANS2(&hTranWtoBM);
-				CloseTRANS2(&hTranBMtoW);
-
-				//nPnts /= 2;
-				rtn = TRUE;
 			}
 		}
 	}
+	else
+		haveOverallBounds = FALSE;
+Exit:
 	CurView = CurViewSave;
 	return rtn;
 }
@@ -335,10 +381,12 @@ static int findStartNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 	return -1;
 }
 
-static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
+static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits,int nNodes)
 {
 	int i;
 	int indx;
+	COLORREF blue = 255;
+	BOOL haveBlue = FALSE;
 	for (i = 0; i < 8; i++)
 	{
 		indx = bitIndex(pbm, *prow + yoff1[i], *pcol + xoff1[i]);
@@ -348,8 +396,12 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 			(*prow) += yoff1[i];
 			return indx;
 		}
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
 	}
-	//return -1;
+	if (!haveBlue && nNodes < 3)
+		return -1;
+	haveBlue = FALSE;
 	for (i = 0; i < 16; i++)
 	{
 		indx = bitIndex(pbm, *prow + yoff2[i], *pcol + xoff2[i]);
@@ -359,8 +411,12 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 			(*prow) += yoff2[i];
 			return indx;
 		}
-
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
 	}
+	if (!haveBlue && nNodes < 3)
+		return -1;
+	haveBlue = FALSE;
 
 	for (i = 0; i < 24; i++)
 	{
@@ -371,8 +427,12 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits)
 			(*prow) += yoff3[i];
 			return indx;
 		}
-
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
 	}
+	if (!haveBlue && nNodes < 3)
+		return -1;
+	haveBlue = FALSE;
 
 	for (i = 0; i < 32; i++)
 	{
@@ -432,11 +492,11 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 				int startrow = row, startcol = col;
 				LPDPOINT pNewPoints;
 				pbits2[indx] = blue;
-				phNewPoints[nPoly] = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(DPOINT)*MAX_NEW_POLY_POINTS);
+				phNewPoints[nPoly] = GSSiGlobAlloc(1802, GMEM_MOVEABLE, sizeof(DPOINT)*MAX_NEW_POLY_POINTS);
 				pNewPoints = GlobalLock(phNewPoints[nPoly]);
 				pNewPoints[nNodes].x = col;
 				pNewPoints[nNodes++].y = row;
-				while ((indx = findNextNode(&row, &col, &bm, pbits2)) >= 0)
+				while ((indx = findNextNode(&row, &col, &bm, pbits2,nNodes)) >= 0)
 				{
 					pbits2[indx] = blue;
 					pNewPoints[nNodes].x = col;
@@ -446,12 +506,35 @@ static int GetNewPolygon(HBITMAP hBM,LPINT pnumNewPoints, LPHANDLE phNewPoints)
 				if (fabs(Area) > 10 && nNodes > 2 && max(abs(startrow - row), abs(startcol - col)) < 5)
 				{
 					GlobalUnlock(phNewPoints[nPoly]);
-					phNewPoints[nPoly] = GSSiGlobalReAlloc(0, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
-
+					phNewPoints[nPoly] = GSSiGlobalReAlloc(1803, phNewPoints[nPoly], nNodes*sizeof(DPOINT), GMEM_MOVEABLE);
 					pnumNewPoints[nPoly++] = nNodes;
+				}
+				else if (fabs(Area) > 10 && nNodes > 2) // if the area has a tail find the intersection of the end with the start of the tail
+				{
+					int i = 1;
+					do
+					{
+						startcol = pNewPoints[i].x;
+						startrow = pNewPoints[i].y;
+						if (max(abs(startrow - row), abs(startcol - col)) < 4)
+						{
+							HANDLE hMem = GSSiGlobAlloc(1804, GMEM_MOVEABLE, (nNodes - i)*sizeof(DPOINT));
+							LPDPOINT ppt = GlobalLock(hMem);
+							pnumNewPoints[nPoly] = nNodes - i;
+							for (int j = 0; j < pnumNewPoints[nPoly]; j++)
+								ppt[j] = pNewPoints[i++];
+							GSSiGlobUlFree(&phNewPoints[nPoly]);
+							GlobalUnlock(hMem);
+							phNewPoints[nPoly++] = hMem;
+							goto NextPoly;
+						}
+						i++;
+					} while (i < nNodes - 5);
+					GSSiGlobUlFree(&phNewPoints[nPoly]);
 				}
 				else
 					GSSiGlobUlFree(&phNewPoints[nPoly]);
+NextPoly:;
 			}
 		}
 		free(pbits);
@@ -509,7 +592,7 @@ void testConvertBitmapToPoly(LPSTR file)
 				int nNodes = 0;
 				int startrow = row, startcol = col;
 				pbits2[indx] = blue;
-				while ((indx = findNextNode(&row, &col, &bm, pbits2)) >= 0)
+				while ((indx = findNextNode(&row, &col, &bm, pbits2,nNodes)) >= 0)
 				{
 					pbits2[indx] = blue;
 					nNodes++;

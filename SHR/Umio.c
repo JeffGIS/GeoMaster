@@ -12,6 +12,7 @@ typedef	char *	caddr_t;
 
 #define MAX_THREADS	256
 static	HANDLE hBGFileTranThread[MAX_THREADS]={0};
+static  char LogFile[MAX_PATH] = { 0 };
 
 #include "gmextern.h"
 
@@ -46,7 +47,7 @@ static SOCKET	WaitForInputOnSocket = -1;
 static short	WaitForInputOnSocketStatus;    
 static char		SocketInputBuffer[MAX_SOCKET_BUFFER_SIZE+2]; 
 static int		NumBlockedSockets=0;
-static BOOL		LogSocketIO[MAXOPENSOCKETS];
+static BOOL		LogSocketIO[MAXOPENSOCKETS] = { 0 };
 static char		Cmd[4096];     
 static struct	{
 					long	ID;
@@ -777,6 +778,8 @@ BOOL BlockSocketProcessing (BOOL Block)
 {
 	int	i;
 
+	if (InServerMode)
+		return FALSE;
 	if (!Block)
 	{
 		if (BlockSocketInput)
@@ -948,6 +951,8 @@ void LogSocketError (LPSTR Error,LPSTR Input)
 	ExpandText (TimeAndDate);
 	AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\gmsocketerrors.txt",TimeAndDate);
 	AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\gmsocketerrors.txt",Error);
+	if (strlen(Input) > 1020)
+		Input[1020] = 0;
 	AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\gmsocketerrors.txt",Input);
 	return;
 }
@@ -1027,17 +1032,22 @@ void LogSocketInput (int i,LPSTR Input,int len)
 		sprintf (Header,"I(%i): $CAL([%%SYS_CLOCK])|%i",i,len);
 		ExpandText (Header);
 		Input[len]=0;
-		for (i=0;i<len;i++)
+		for (i = 0; i < len; i++)
+		{
 			if (!Input[i])
 				Input[i] = '~';
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Header);
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Input);
+		}
+		if (!*LogFile)
+			GetGlobalCVal("%SOCKETLOGFILE", LogFile, "$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt");
+		AppendFile2 (LogFile,Header);
+		AppendFile2 (LogFile,Input);
 	}
 	return;
 }  
 
 void LogSocketOutput (int i,LPSTR Input,int len)
-{    
+{
+
 	if (LogSocketIO[i])
 	{	
 		char	Header[64];
@@ -1048,8 +1058,10 @@ void LogSocketOutput (int i,LPSTR Input,int len)
 		for (i=0;i<len;i++)
 			if (!Input[i])
 				Input[i] = '~';
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Header);
-		AppendFile2 ("$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt",Input); 
+		if (!*LogFile)
+			GetGlobalCVal("%SOCKETLOGFILE", LogFile, "$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt");
+		AppendFile2(LogFile, Header);
+		AppendFile2(LogFile, Input);
 	}
 	return;
 }  
@@ -1962,7 +1974,7 @@ Top:
 			else if (hCmdMess) 
 			{   
         		LPSTR CmdMess = GlobalLock (hCmdMess);
-        		short	lCmd = strlen (Cmd);;
+        		short	lCmd = strlen (Cmd);
         		
 				*CmdMess = 0;  
 				GlobalUnlock (hCmdMess);
@@ -1972,7 +1984,7 @@ Top:
 
 					strcpy (pCmd,Cmd);  
     				GlobalUnlock (hCmd);  
-					PostMessage(hWndMain, GF_PRCESSTCPCMD, (WPARAM)sock, (LPARAM)hCmd); 
+					PostMessage(hWndMain, GF_PROCESSTCPCMD, (WPARAM)sock, (LPARAM)hCmd); 
 				}
 			} 
 		}
@@ -1980,7 +1992,7 @@ Top:
 	if (!BlockSocketInput)
 	{
 		if (!InDisplayProcessing && LenSocketBuffer[i])
-			PostMessage(hWndMain, GF_PRCESSTCPCMD, (WPARAM)sock, 0); 
+			PostMessage(hWndMain, GF_PROCESSTCPCMD, (WPARAM)sock, 0); 
 		else
 		{
 			if (BlockVehicleDisplay > 1)
@@ -2026,7 +2038,14 @@ BOOL ProcessTCPCmd (SOCKET sock,LPSTR Cmd)
 	CmdMess = GlobalLock (hCmdMess);
 	*CmdMess = 0;
 	GlobalUnlock (hCmdMess);
-	ProcessText (Cmd); 
+	if (*Cmd == '$')
+		ProcessText (Cmd); 
+	else
+	{
+		CloseTCPIPSocket(sock, FALSE);
+		LogSocketError("Invalid Input", Cmd);
+		return FALSE;
+	}
 	CmdMess = GlobalLock (hCmdMess); 
 	lCmd=_fstrlen(CmdMess);
 	if (!*SocketInputTerminator[i])
@@ -2209,7 +2228,10 @@ BOOL ServerFile (LPSTR Option,SOCKET socket,LPSTR ServerFile,LPSTR Arg1,LPSTR Ar
 		if (Fid == HFILE_ERROR) 
 		{
 			SegLen = 0;
-			sprintf (CmdMess,"$SERVERFILE(SEGMENT,-1,%s,%s,%lu,%i)",ServerFile,Arg1,Loc,SegLen);
+			if (strlen(ServerFile) + strlen(Arg1) < MAX_CMDMESSAGE)
+				sprintf(CmdMess, "$SERVERFILE(SEGMENT,-1,%s,%s,%lu,%i)", ServerFile, Arg1, Loc, SegLen);
+			else
+				*CmdMess = 0;
 		}   
 		else
 		{   

@@ -2138,7 +2138,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		    	while (fgetstring (str,128,FidFileList))
 		    	{   
 		    		char	leaf[34]="[FILENAME]";
-				    GetDelimTextData(str,hDLT); 
+				    GetDelimTextData(str,hDLT,128); 
 				    _fstrcpy (str,"[FULLNAME]");
 				    ExpandText (str);  
 				    ExpandText (leaf);
@@ -2153,7 +2153,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 							ProcessDelimTextHeader(skipfile, NULL, FidSkip, &hDLTSkip, 0, 0);
 							while (fgetstring (skipfile,128,FidSkip))
 							{
-								GetDelimTextData(skipfile,hDLTSkip); 
+								GetDelimTextData(skipfile,hDLTSkip,128); 
 								_fstrcpy (skipfile,"[SKIPNAME]");
 								ExpandText (skipfile);
 								if (!_fstricmp (skipfile,leaf))

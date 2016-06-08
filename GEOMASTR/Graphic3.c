@@ -18,6 +18,7 @@ static MUNICDATA1	MunicData1;
 static MUNICDATA2	MunicData2;
 
 
+#define MAXLINE	USHRT_MAX*4
 
 
 
@@ -1680,20 +1681,33 @@ BOOL Report (LPSTR NameIN, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref
 	strcpy (Name,NameIN);
      
     SaveView = CurView; 
+<<<<<<< HEAD
 	strcpy(File, ViewportName);
     if ((pColon = _fstrchr (ViewportName,':')))
     {
     	*pColon++ = 0; 
 		pVP = SetVPFromName (ViewportName,&Err); 
 		if (!Err) 
+=======
+	if ((pColon = _fstrchr(ViewportName, ':')))
+	{
+		if (*(pColon + 1) != '\\')
+>>>>>>> origin/HEAD
 		{
-			ScrollRect = pVP->DrawRect;
-			ClientRectToScreenRect (CurView->hWnd,&ScrollRect);
-		}  
-    }
-    else
-    	pColon = ViewportName;
-    if (!_fstricmp (pColon,"SCROLL"))
+			*pColon++ = 0;
+			pVP = SetVPFromName(ViewportName, &Err);
+			if (!Err)
+			{
+				ScrollRect = pVP->DrawRect;
+				ClientRectToScreenRect(CurView->hWnd, &ScrollRect);
+			}
+		}
+		else
+			pColon = ViewportName;
+	}
+	else
+		pColon = ViewportName;
+	if (!_fstricmp(pColon, "SCROLL"))
     {
         DisplayScrollReport (Name,Prefix,UDI, ref);
         SetCurView ( SaveView);
@@ -2413,7 +2427,7 @@ GSSiExitProg (606);
 }  
 
 short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long NumToScan)
-{   
+{ 
 	HANDLE	hSQL=0;
     LPOPENSQLDATA   SQLPtr=0;
     LPOPENFILEDATA  FilePtr;
@@ -2422,7 +2436,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	long	lval, nScanned;
 	double	dval;
     USHORT	i;
-    HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+    HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXLINE);
     LPSTR	str=GlobalLock (hStr);
     short	NumFields=0;
     BOOL	ReScan=FALSE, useFileLength=FALSE;
@@ -2495,11 +2509,19 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	   		{
 	   			if (lpFieldInfo->type == BT_CHAR || SQL_VARCHAR)
 	   			{
-					if (GetValFromOpenFiles (lpFieldInfo->name,str,4096) > 0) 
+					if (GetValFromOpenFiles (lpFieldInfo->name,str,MAXLINE) > 0) 
 					{
+						LPSTR pDot;
+						if (!_stricmp(str, "."))
+							*str = 0;
+						pDot = strrchr(str, '.');
+						if (pDot && !strcmp(pDot, ".0"))
+							*pDot = 0;
 		   				switch (pFieldTypes[i].Type)
 		   				{   
 		   					case 0:
+								if (!*str)
+									break;
 		   						if (IsInteger(str))
 		   						{
 		   							pFieldTypes[i].Type = BT_INTEGER;  
@@ -2559,12 +2581,14 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	   							break;
 	   					}
 	   				}
-   					else if (!pFieldTypes[i].Type)
-   					{
+					else if (!pFieldTypes[i].Type)
+					{
 						pFieldTypes[i].Type = BT_CHAR;
 						pFieldTypes[i].Len = 1;
 
 					}
+					else
+						ii = 1;
 	   			} 
 	   			else
 	   			{
@@ -2639,8 +2663,8 @@ long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFie
 #if ENABLETRACE
 {GSSiEnterProg (603);
 #endif
-{   
-    HANDLE      hSQL; 
+{ 
+	HANDLE      hSQL;
     LPINT       lpField, StartField, pNumFields, pNumKeyFields, pFieldID, pKeyFieldID,pFieldIDIN;
 	int			NumFieldsIN;
     short       NumFields,n, FieldID, NumKeyFields;
@@ -2680,7 +2704,7 @@ GSSiExitProg (603);
 #endif
         return FALSE;   
 }
-    hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+    hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXLINE);
     str = GlobalLock (hStr);
     if (UseHLT)
 	{
@@ -2974,7 +2998,7 @@ GSSiExitProg (603);
 			    	lpFieldInfo = &FilePtr->FldInfo + *pFieldID;  
 		    		_fstrcpy (FieldName,lpFieldInfo->name);   
 		    		FieldType = lpFieldInfo->type;
-					if (GetValFromOpenFiles (lpFieldInfo->name,str,4096) < 0)
+					if (GetValFromOpenFiles (lpFieldInfo->name,str,MAXLINE-2) < 0)
 						goto NextHlt;
 				} 
 			}
@@ -2988,7 +3012,7 @@ GSSiExitProg (603);
 					ltoa(OriginalRecordNumber, str, 10);
 				else if (GetValFromFieldValue(FieldName,hFieldTypes, hValues, str))
 					;
-				else if (GetValFromOpenFiles (FieldName,str,4096) < 0)
+				else if (GetValFromOpenFiles (FieldName,str,MAXLINE-2) < 0)
 					goto NextField;
 			} 
 			if (GMHeader == 2)

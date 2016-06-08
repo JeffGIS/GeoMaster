@@ -1,3 +1,6 @@
+configs\server.gmc /F /SERVER 8080 [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD k:\gmserver\gmserver
+configs\basemap.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\geomas
+configs\maplegrove.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\gmmobile\metroutm
 configs\texttest2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD m:\BU_2015_11_04\GEOMas
 projects\corners\corners.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD m:\BU_2015_11_04\GEOMas
 configs\jeff\manholes.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
@@ -13,7 +16,6 @@ configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD J:\ADAPedRamps\PreSurvey
 configs\jeff\basemap_good.gmc /F [%USERLEV]=2; /WD L:\geomas
 police\configs\test.gmc /F [%USERLEV]=2; /WD J:\Mpls
 police\configs\test.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
-police\configs\startup_2015.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
 configs\PedRampStatus.gmc /F /WD c:\ADAPedRamps\PreSurvey
 configs\PrelimSurvey.gmc /F /WD c:\ADAPedRamps\PreSurvey
 configs\CrystalLake2.gmc /F /WD I:\CountyData
@@ -148,6 +150,9 @@ granth.gmc /WD c:\granth
 
 
 granth
+
+
+
 
 
 

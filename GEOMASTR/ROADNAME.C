@@ -36,7 +36,7 @@ void LinkLabelLines (short Line1,short Line2,short Type2, short Type1);
 void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1);
 BOOL DoesSymConnectToMiddleOfAnother (HPFPOINT	pPoint,short skip,short SymNum);
 
-int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float w)
+int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float w,LPFPOINT pRestorePoint)
 {
 	int rtn = 0;
 	double d, az;
@@ -56,8 +56,15 @@ int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float 
 	if (pStreet->BPType == 'C')
 	{
 		radiusPt = PointAtDistOnPolyF(pPoints, pStreet->NumPoints, d, &az, &ip);
-		pStreet->startPt = ip;
-		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts,1.0);
+		if (ip < pStreet->NumPoints)
+			pStreet->startPt = ip;
+		else
+			pStreet->startPt = 0;
+		if (pRestorePoint)
+			*pRestorePoint = pPoints[pStreet->startPt];
+		pPoints[pStreet->startPt] = radiusPt;
+
+		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts, 1.0);
 		hCirclePt = HDPointsToHFPoints(hCircle, nCirclePts);
 		circlePoints = GlobalLock(hCirclePt);
 		hBrush = CreateSolidBrush(pStreet->FillColor);
@@ -73,7 +80,14 @@ int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float 
 	{
 		double plen = GetPolyLengthF(pPoints, pStreet->NumPoints);
 		radiusPt = PointAtDistOnPolyF(pPoints, pStreet->NumPoints, plen - d, &az, &ip);
-		pStreet->endPt = ip;
+		if (ip < pStreet->NumPoints - 1)
+			pStreet->endPt = ip + 1;
+		else
+			pStreet->endPt = ip;
+		if (pRestorePoint)
+			*pRestorePoint = pPoints[pStreet->endPt];
+		pPoints[pStreet->endPt] = radiusPt;
+
 		hCircle = CreateCirclePoly(radiusPt, d, &nCirclePts, 1.0);
 		hCirclePt = HDPointsToHFPoints(hCircle, nCirclePts);
 		circlePoints = GlobalLock(hCirclePt);
@@ -573,20 +587,36 @@ BOOL DisplayStreetCenterlines (void)
 					float w = pStreet->HollowStreetWidth * DeviceToScreenFactor * OverAllStreetWidthFactor;
 					float wplusEdge;
 					int ip = 0;
+					int iend;
+					FPOINT restorePoint;
 					//lb.lbColor = pStreet->OutlineColor;
 					EdgeWidth = (w / 8 + edgeWidthInc) * EdgeWidthFactor;
-					//hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, IDNINT(w + EdgeWidth * 2), &lb, 0, 0);
-
-					//hOldPen = SelectObject(CurView->hDC, hPen);
-					//Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
-					//SelectObject(CurView->hDC, hOldPen);
-					//GSSiDeleteObject(&hPen);
-					pStreet->endPt = pStreet->NumPoints;
+					pStreet->endPt = pStreet->NumPoints-1;
 					wplusEdge = w + EdgeWidth * 2;
-					DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth);
-					AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->OutlineColor, wplusEdge);
+					iend = DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth,&restorePoint);
+					AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt+1, pStreet->OutlineColor, wplusEdge);
 					if (pStreet->startPt || pStreet->endPt)
-						DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth);
+					{
+						switch (iend)
+						{
+						case 1:
+							pPoints[pStreet->startPt] = restorePoint;
+							break;
+						case 2:
+							pPoints[pStreet->endPt] = restorePoint;
+							break;
+						}
+						DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth,0);
+						/*switch (iend)
+						{
+						case 1:
+							pPoints[pStreet->startPt] = restorePoint;
+							break;
+						case 2:
+							pPoints[pStreet->endPt] = restorePoint;
+							break;
+						}*/
+					}
 				}
 				GlobalUnlock (phLabelLines[i]); 
 			}
@@ -607,7 +637,7 @@ BOOL DisplayStreetCenterlines (void)
 							//hOldPen = SelectObject(CurView->hDC, hPen);
 							//Polyline(CurView->hDC, pPoints, pStreet->NumPoints);
 							//DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, w);
-							AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, w);
+							AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt+1, pStreet->FillColor, w);
 							//SelectObject(CurView->hDC, hOldPen);
 							//GSSiDeleteObject(&hPen);
 						}

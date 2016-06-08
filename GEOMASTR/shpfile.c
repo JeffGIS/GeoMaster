@@ -2357,10 +2357,10 @@ BOOL OpenPGDBFileIndex (LPSTR DBNameIN,LPMNMXCORD WBounds)
 		_fstrcpy (str,"[PGDB.IdxGridSize]");
 		ExpandText (str);
 		PGDBGridSize = atof (str); 
-		MinGx = (WBounds->xmn / PGDBCnvFac)/PGDBGridSize;
-		MaxGx = (WBounds->xmx / PGDBCnvFac)/PGDBGridSize;
-		MinGy = (WBounds->ymn / PGDBCnvFac)/PGDBGridSize;
-		MaxGy = (WBounds->ymx / PGDBCnvFac)/PGDBGridSize;
+		MinGx = ((WBounds->xmn - PGDBGridOrigX) / PGDBCnvFac) / PGDBGridSize;
+		MaxGx = ((WBounds->xmx - PGDBGridOrigX) / PGDBCnvFac) / PGDBGridSize;
+		MinGy = ((WBounds->ymn - PGDBGridOrigY) / PGDBCnvFac) / PGDBGridSize;
+		MaxGy = ((WBounds->ymx - PGDBGridOrigY) / PGDBCnvFac) / PGDBGridSize;
 		sprintf (str,  
 					"(SELECT * FROM %s_SHAPE_Index INNER JOIN %s ON %s_SHAPE_Index.IndexedObjectID = %s.ObjectID WHERE MaxGX >= %ld AND MinGX <= %ld AND MaxGY >= %ld AND MinGY <= %ld)",
 					PGDBTable,PGDBTable,PGDBTable,PGDBTable,MinGx,MaxGx,MinGy,MaxGy);	
@@ -5722,6 +5722,7 @@ DoPoly:
 
 				NumPOC = *(LPLONG)&pRec[recloc];
 				recloc += 4;
+				if (NumPOC > 0 && NumPOC < 0)
 				for (i=0;i<NumPOC;i++)
 				{
 					POCPos[i] = *(LPLONG)&pRec[recloc];

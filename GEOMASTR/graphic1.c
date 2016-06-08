@@ -161,7 +161,7 @@ BOOL InitGraphics (HWND hWnd)
 //	CreateFidDBF ();
 	InitProj4CoordConv (FALSE);
 	GoogleTilesInit ();
-	hCmdMess=GSSiGlobAlloc (  39,GHND,4096*8);  
+	hCmdMess=GSSiGlobAlloc (  39,GHND,MAX_CMDMESSAGE);  
     GetCurVal (name,sizeof(name),IDS_FILEVPOFF); 
 	LocationChoice = FillList (0,0,name,str,0);
 	LocationOffset = atof(str);
@@ -4701,7 +4701,15 @@ void AddThemeToVP (LPVIEWPORT CurView,LPTHEME pTheme)
 		MessageBox (0,"Too many themes in viewport",0,MB_ICONEXCLAMATION);
 	else
 	{
-		CurView->pThemes[CurView->NumThemes++] = pTheme;
+		//keep hotspot themes at end of list
+		if (CurView->NumThemes && CurView->pThemes[CurView->NumThemes - 1]->ID == GF_HOTSPOT_THEME)
+		{
+			CurView->pThemes[CurView->NumThemes] = CurView->pThemes[CurView->NumThemes - 1];
+			CurView->pThemes[CurView->NumThemes - 1] = pTheme;
+			CurView->NumThemes++;
+		}
+		else
+			CurView->pThemes[CurView->NumThemes++] = pTheme;
 		if (pTheme->ID == GF_SINGLE_NONNUM_VALUE_THEME && pTheme->DisplayViewport)
 			SetThemeOrder (pViewports[pTheme->DisplayViewport-1]);
 		if (pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)
@@ -4819,7 +4827,8 @@ void ResetViewport (BOOL WantDisplayPass,BOOL FromPaintMap)
 	 LPCOORDINATEDISPLAY	CD;       
 	 long	Color; 
 	 BOOL	RegionIsNull = FALSE;
-	 
+	 BOOL	forceDataPass;
+
 	 if (!CurView)
 {
 #if ENABLETRACE
@@ -4897,11 +4906,20 @@ GSSiExitProg (56);
      CurView->WantPass[0]=FALSE;
      CurView->FirstFile = TRUE;        
      SetROP2(CurView->hDC,R2_COPYPEN);
-     for (itheme = 0;itheme<CurView->NumThemes;itheme++)         //pViewports[27]
-     {
-        CurTheme = CurView->pThemes[itheme];
-        if (ThemeNeedsDataPass (FALSE))
-		{
+	 forceDataPass = FALSE;
+	 for (itheme = 0; itheme < CurView->NumThemes; itheme++)         //pViewports[27]
+	 {
+		 CurTheme = CurView->pThemes[itheme];
+		 if (CurTheme->ID == GF_HOTSPOT_THEME &&
+			 CurTheme->IsActive &&
+			 CurTheme->VPDisplayed)
+			 forceDataPass = TRUE;
+	 }
+	 for (itheme = 0; itheme<CurView->NumThemes; itheme++)         //pViewports[27]
+	 {
+		 CurTheme = CurView->pThemes[itheme];
+		 if (ThemeNeedsDataPass(FALSE,forceDataPass))
+		 {
         	CurView->WantPass[0]=TRUE;
 			if (CurTheme->SymNum > 0)  
 			{

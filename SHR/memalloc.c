@@ -92,6 +92,8 @@ static	short	premem[MAXMEM],postmem[MAXMEM];
 static	BOOL	First=TRUE; 
 static	BYTE	Marker=170; 
 
+extern HANDLE countyLinkedVar,countyVar;
+
 int checkvp(int i);
 
 BOOL hDibIs32Bit (HANDLE hDib)
@@ -248,6 +250,19 @@ LPBTREE pBtree = GlobalLock (h);
 	return 1; 
 }
 
+LPVOID glbllock(HANDLE h)
+{
+	LPVOID	pntr = GlobalLock(h);
+	char * p = pntr;
+	p += 16;
+	pntr = p;
+	return pntr;
+}
+BOOL glblUnlock(HANDLE h)
+{
+	return GlobalUnlock(h);
+}
+
 
 LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 {
@@ -259,7 +274,13 @@ extern LPVOID debugaddress;
 /*	if (debugaddress && *(LPBYTE)debugaddress)
 		ii=1;
 	if (debugaddress && !*(LPBYTE)debugaddress)
-		ii=1;*/
+		ii=1;
+	if (countyLinkedVar && countyVar)
+	{
+		checkcounty(1);
+	}*/
+	if (!pntr)
+		ii = 1;
 	if (hglb)
 	{ 
 	if (hglb == WantHandle)
@@ -448,9 +469,11 @@ void GSSiRemoveMem (HGLOBAL hglb)
 
 HGLOBAL GSSiGLOBALFREE (HANDLE hglb)
 {   
-	HGLOBAL	rtn = GlobalFree (hglb); 
 	UINT	i; 
-	
+	HGLOBAL rtn;
+
+	if (hglb == countyLinkedVar)
+		ii = 1;
 	if (hglb == WantHandle)
 		ii=1;
 	for (i=MAXFREE-1;i>0;i--)
@@ -472,10 +495,12 @@ HGLOBAL GSSiGLOBALFREE (HANDLE hglb)
 				ii=lockid[i];	
 			if (lockcount[i])
 				MEMERR ("Free locked handle");
+			rtn = GlobalFree(hglb);
 			return rtn;
 		} 
-	if (IgnoreLock)
-		return rtn; 
+		rtn = GlobalFree(hglb);
+		if (IgnoreLock)
+			return rtn; 
 	}
 	MEMERR ("Free invalid address");
 	return 0;

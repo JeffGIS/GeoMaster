@@ -682,7 +682,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
     short		nPoly, Type, ltag;
     HANDLE		hPoints, hPartIndex, hPolyPartLen;  
     LPINT		pNumPoints;
-    long		NumPoints; 
+    long		NumPoints=0; 
     HPEN		hOldPen=0, hTempPen=0;
 	HBRUSH		hOldBrush=0, hDeletePen=0, hTempBrush=0;  
 	DPOINT		DPoint;
@@ -693,14 +693,15 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	LPDOUBLE	pOrd; 
 	long		ElemInfoLoc;
 	short		ElemType, Interp, NumParts=1; 
-	char		str[128]; 
 	long		loopfactor=1; 
 	short		ii;  
 	static		long		debugitem=287;
 	HPDGNPoint	pvertices; 
-	LPLONG		pnum_vertices;   
-	MNMXCORD	Rect;    
+	long num_vertices = 0;
+	LPLONG		pnum_vertices=&num_vertices;
+	MNMXCORD	Rect;
 	LPFLOAT		pElev;
+	int MaxMemSize = 1024 * 1024;
 
 	pElement = (LPDGNElementCore)GlobalLock (hElement);
 	if (Recno >= 0)  
@@ -818,10 +819,10 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	CurrentPen = 0; 
 //	else
 //		goto RtnFalse; 
-	if (pElement->stype == 2)
+	if (pElement->stype == DGNST_MULTIPOINT)
 	{
 		DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement;   
-		pnum_vertices = &pRec->num_vertices;
+		num_vertices = pRec->num_vertices;
 		pvertices = pRec->vertices; 
 	}
 	switch (pElement->type)
@@ -881,18 +882,50 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 					 
 					case DGNST_ARC:              
 					{
+						break;
+						int  size = sizeof(DGNElemArc);
+
 						DGNElemArc FAR	*pRec=(DGNElemArc*)pElement;
-						
-						pnum_vertices = (LPLONG)((LPSTR)pRec + sizeof (DGNElemArc));
-						pvertices = (HPDGNPoint) (pnum_vertices+1);
-						for (i=0;i<*pnum_vertices;i++)
+						DGNPoint	*pvertices;
+						DGNPoint	TestPointsDGN[5];
+						DPOINT		TestPoints[5];
+						int			MaxPoints = (MaxMemSize - size - 4) / sizeof (DGNPoint);
+						double		dlen;
+
+						DGNStrokeArc(hDGN, (DGNElemArc *)pElement, 5, TestPointsDGN);
+						for (int i = 0; i < 5; i++)
 						{
-							pPoints[NumPoints].x = pvertices[i].x;
-							pPoints[NumPoints].y = pvertices[i].y;
-							ConvertCoord(&pPoints[NumPoints],0,1);
-							if (!NumPoints || !SameDPoint (&pPoints[NumPoints-1],&pPoints[NumPoints]))
-								NumPoints++;
+							TestPoints[i].x = TestPointsDGN[i].x;
+							TestPoints[i].y = TestPointsDGN[i].y;
+							ConvertCoord(&TestPoints[i], 0, 1);
 						}
+						dlen = GetPolyLengthD(TestPoints, 5);
+						num_vertices = min(MaxPoints - 1, max(2, (int)(dlen / CurView->MetersPerPixel))) + 1;
+						num_vertices = 5;
+						pvertices = (HPDGNPoint)malloc((num_vertices + 2) * sizeof(DGNPoint));
+						DGNStrokeArc(hDGN, (DGNElemArc *)pElement, num_vertices, pvertices);
+
+						for (i = 0; i < num_vertices; i++)
+						{
+							pPoints[NumPoints + i].x = pvertices[i].x;
+							pPoints[NumPoints + i].y = pvertices[i].y;
+							ConvertCoord(&pPoints[NumPoints + i], 0, 1);
+						}
+						free(pvertices);
+						NumPoints += num_vertices;
+						/*for (i = 0; i < num_vertices; i++)
+						{
+							if (!NumPoints || !SameDPoint(&pPoints[NumPoints - 1], &pPoints[NumPoints]))
+							NumPoints++;
+						}*/
+						break;
+					/*case DGNT_CURVE:
+					{
+						DGNElemMultiPoint *pRec = (DGNElemMultiPoint *)pDGNElemCore;
+						dlen = PolyLength(pRec->num_vertices, pRec->vertices);
+						*pnum_vertices = min(MaxPoints - 1, max(2, (int)(dlen / (*pPixelSize)))) + 1;
+						DGNStrokeCurve(hDGN, (DGNElemMultiPoint *)pDGNElemCore, *pnum_vertices, pvertices);
+					}*/
 					}
 					break;
 
@@ -902,6 +935,8 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 					
 					default:
 						ii=1;
+						break;
+
 				}
 
 				if (!NumElems)
@@ -930,18 +965,47 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 		case DGNT_ELLIPSE:              
 		case DGNT_ARC:  
 		{
-			DGNElemArc FAR	*pRec=(DGNElemArc*)pElement;
-			
+			break;
     		CurrentType = GF_LINE; 
-			pnum_vertices = (LPLONG)((LPSTR)pRec + sizeof (DGNElemArc));
-			pvertices = (HPDGNPoint) (pnum_vertices+1);
+			int  size = sizeof(DGNElemArc);
+
+			hPoints = GSSiGlobAlloc(1420, GMEM_MOVEABLE, sizeof(DPOINT)*(long)USHRT_MAX);
+			//pPartIndex = (LPLONG)GlobalLock(hPartIndex);
+			//*pPartIndex = 0;
+
+			pPoints = pFirstPoint = (LPDPOINT)GlobalLock(hPoints);
+			DGNElemArc FAR	*pRec = (DGNElemArc*)pElement;
+			DGNPoint	*pvertices = (DGNPoint *)&pPoints[NumPoints];
+			DGNPoint	TestPoints[5];
+			int			MaxPoints = (MaxMemSize - size - 4) / sizeof (DGNPoint);
+			double		dlen;
+
+			{
+				DGNStrokeArc(hDGN, (DGNElemArc *)pElement, 5, TestPoints);
+				dlen = PolyLength(5, TestPoints);
+				num_vertices = min(MaxPoints - 1, max(2, (int)(dlen / CurView->MetersPerPixel))) + 1;
+				DGNStrokeArc(hDGN, (DGNElemArc *)pElement, num_vertices, pvertices);
+			}
+
+			//						pnum_vertices = (LPLONG)((LPSTR)pRec + sizeof (DGNElemArc));
+			//						pvertices = (HPDGNPoint) (pnum_vertices+1);
+			for (i = 0; i<num_vertices; i++)
+			{
+				//							pPoints[NumPoints].x = pvertices[i].x;
+				//							pPoints[NumPoints].y = pvertices[i].y;
+				ConvertCoord(&pPoints[i], 0, 1);
+				//if (!NumPoints || !SameDPoint (&pPoints[NumPoints-1],&pPoints[NumPoints]))
+				//	NumPoints++;
+			}
+
+
 			goto ProcessMultipoint;
 		}
 		case DGNT_CURVE:
 		{
 			DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement;   
     		CurrentType = GF_AREA;   
-    		pnum_vertices = &pRec->num_vertices;
+    		num_vertices = pRec->num_vertices;
     		pvertices = pRec->vertices; 
     		CurrentType = GF_LINE; 
 		}
@@ -951,7 +1015,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 			DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement;
 
     		CurrentType = GF_AREA;   
-    		pnum_vertices = &pRec->num_vertices;
+    		num_vertices = pRec->num_vertices;
     		pvertices = pRec->vertices; 
     		if (DGNFillColor < 0)
     			DGNFillColor = DGNColor;
@@ -991,7 +1055,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 			DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement;  
 			
     		CurrentType = GF_LINE;  
-    		pnum_vertices = &pRec->num_vertices;
+    		num_vertices = pRec->num_vertices;
     		pvertices = pRec->vertices; 
     	}
 ProcessMultipoint:

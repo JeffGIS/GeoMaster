@@ -835,7 +835,7 @@ NextFile:
 		while (ContinueProcessing && fgetstring (str,64,FidIn))
 		{   
 			lineno++;
-			GetDelimTextData(str,TxtHandle);
+			GetDelimTextData(str,TxtHandle,64);
 			X = GetGlobalDVal ("[X]")*FTM;
 			Y = GetGlobalDVal ("[Y]")*FTM;
 			Z = GetGlobalDVal ("[Z]")*FTM;  
@@ -893,7 +893,7 @@ NextFile:
 NextFile2:
 	while (ContinueProcessing && fgetstring (str,64,FidIn))
 	{
-		GetDelimTextData(str,TxtHandle);
+		GetDelimTextData(str, TxtHandle,64);
 		X = GetGlobalDVal ("[X]")*FTM;
 		Y = GetGlobalDVal ("[Y]")*FTM;
 		Z = GetGlobalDVal ("[Z]")*FTM; 

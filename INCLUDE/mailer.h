@@ -143,7 +143,7 @@ public:
 
    // Constants
    // in unix we have to have a named object.
-   const static enum {TO, Cc, Bcc, SMTP_PORT = 25, DNS_PORT = 53} consts;   
+   const static enum {TO, Cc, Bcc, SMTP_PORT = 25, DNS_PORT = 53} consts;   //587
 
    // what type of authentication are we using.
    // (if using authentication that is).

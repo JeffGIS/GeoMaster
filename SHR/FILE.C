@@ -73,7 +73,7 @@ enum {
  *********************************************************************/
 
 
-HANDLE ReadDIBFile(int);
+HANDLE ReadDIBFile(HFILE);
 BOOL MyRead(int, LPSTR, DWORD);
 BOOL SaveDIBFile(void);
 BOOL WriteDIB(LPSTR, HANDLE);
@@ -443,7 +443,7 @@ WORD FAR DestroyDIB(HDIB hDib)
  *
  *************************************************************************/
 
-HANDLE ReadDIBFile(int hFile)
+HANDLE ReadDIBFile(HFILE hFile)
 {
    BITMAPFILEHEADER bmfHeader;
    DWORD dwBitsSize;
@@ -457,7 +457,7 @@ HANDLE ReadDIBFile(int hFile)
     * get length of DIB in bytes for use when reading
     */
 
-   dwBitsSize = filelength(hFile);
+   dwBitsSize = GSSifilelength(hFile);
 
    // Allocate memory for header & color table.	We'll enlarge this
    // memory as needed.

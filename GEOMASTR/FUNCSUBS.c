@@ -430,12 +430,13 @@ Exit:
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 {
 	BOOL rtn = FALSE;
-	HFILE FidTF, fidFiles;
+	HFILE FidTF, fidFiles, fidIndex=HFILE_ERROR;
 	char filePath[MAX_PATH + 2];
+	char indexRec[MAX_PATH + 32];
 
 	if (nArgs < 3)
 		goto Exit;
-	if (!stricmp(Arg[1], "CREATE"))
+	if (!stricmp(Arg[1], "CREATE"))//$COMPRESSEDFILE(CREATE,path,filelistfile,sourcedir,outindexfile)
 	{
 		long	NextFileLoc = 0, loc=0, len;
 		long	TotLen;
@@ -445,6 +446,17 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		fidFiles = GSSiOpenFile(Arg[3], 0, OF_READ);
 		if (fidFiles == HFILE_ERROR)
 			goto Exit;
+		if (*Arg[5])
+		{
+			fidIndex = GSSiOpenFile(Arg[5], 0, OF_CREATE);
+			if (fidIndex == HFILE_ERROR)
+			{
+				GSSiClose(fidFiles);
+				goto Exit;
+			}
+			sprintf(indexRec, "FILE\tFILELOC", filePath, loc);
+			fputstring(indexRec, fidIndex);
+		}
 		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 		if (FidTF == HFILE_ERROR)
 		{
@@ -457,9 +469,15 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		while (fgetstring(filePath, MAX_PATH, fidFiles))
 		{
 			len = _fstrlen(filePath) + 1;
+			if (fidIndex != HFILE_ERROR)
+			{
+				long loc = GSSillseek(FidTF, 0, 1);
+				sprintf(indexRec, "%s\t%i", filePath, loc);
+				fputstring(indexRec, fidIndex);
+			}
 			BigWrite(FidTF, (HPSTR)&len, 4, -1);
 			BigWrite(FidTF, (HPSTR)filePath, len, -1);
-			AddFileToTransferFile(0, FidTF, filePath, MaxLength);
+			AddFileToTransferFile(0, FidTF, filePath, MaxLength,Arg[4]);
 			loc = -1;
 			BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		}
@@ -469,6 +487,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		GSSiClose(fidFiles);
 		GSSiClose(FidTF);
+		GSSiClose(fidIndex);
 		rtn = TRUE;
 	}
 Exit:
@@ -1222,19 +1241,41 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 	static	projPJ	projdef[MAXUSERPROJ] = { 0 };
 
 	strcpy (OutLoc,"0");
-	if (!stricmp (Arg1,"DEFINE"))
+	if (!stricmp(Arg1, "NVPFROMPRJ"))
 	{
-		if ((id = GetTranID (Arg2)) < 0)
+		HFILE fid = GSSiOpenFile(Arg2, 0, OF_READ);
+		if (fid != HFILE_ERROR)
 		{
-			if ((id = GetTranID ("")) < 0)
+			int l = GSSifilelength(fid);
+			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, l + 4096 + 4);
+			LPSTR pMem = GlobalLock(hMem);
+			LPSTR pMemOut = &pMem[l + 1];
+			BigRead(fid, pMem, l);
+			GSSiClose(fid);
+			pMem[l] = 0;
+			if (!ConvertPRJtoProj4(pMem, pMemOut))
+			{
+				l = strlen(pMemOut);
+				fid = GSSiOpenFile(Arg3, 0, OF_CREATE);
+				BigWrite(fid, pMemOut, l, -1);
+				GSSiClose(fid);
+				strcpy(OutLoc, "1");
+			}
+		}
+	}
+	else if (!stricmp(Arg1, "DEFINE"))
+	{
+		if ((id = GetTranID(Arg2)) < 0)
+		{
+			if ((id = GetTranID("")) < 0)
 				return;
 		}
-		if (!(projdef[id] = pj_init_plus(Arg3)) )
+		if (!(projdef[id] = pj_init_plus(Arg3)))
 			return;
-		strcpy (projid[id],Arg2);
-		strcpy (OutLoc,"1");
+		strcpy(projid[id], Arg2);
+		strcpy(OutLoc, "1");
 	}
-	else if (!stricmp (Arg1,"DELETE"))
+	else if (!stricmp(Arg1, "DELETE"))
 	{
 		if ((id = GetTranID (Arg2)) < 0)
 			return;
@@ -1580,8 +1621,13 @@ BOOL GetSymAttrFile(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, L
 		else
 			SymNum = GetDictSymbolNumber(SymName);
 		iParent = GetDictSymParent(SymNum);
-		sprintf(symnumC, "#%i", iParent);
-		rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+		while (iParent && !rtn)
+		{
+			sprintf(symnumC, "#%i", iParent);
+			rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+			if (!rtn)
+				iParent = GetDictSymParent(iParent);
+		}
 	}
 	if (rtn && AttrFile)
 	{
@@ -1608,8 +1654,13 @@ BOOL GetSymAttrKey(LPSTR SymName, LPSTR NewDir, BOOL AddRefno, LPSTR RefFile, LP
 		else
 			SymNum = GetDictSymbolNumber(SymName);
 		iParent = GetDictSymParent(SymNum);
-		sprintf(symnumC, "#%i", iParent);
-		rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+		while (iParent && !rtn)
+		{
+			sprintf(symnumC, "#%i", iParent);
+			rtn = GetSymAttrFile2(symnumC, NewDir, AddRefno, RefFile, OverrideAppendVal, AttrFile);
+			if (!rtn)
+				iParent = GetDictSymParent(iParent);
+		}
 	}
 	if (rtn)
 	{
@@ -3433,7 +3484,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 	}
 	while (fgetstring (str,1024,Fid))
 	{
-		GetDelimTextData(str,hDLT);
+		GetDelimTextData(str,hDLT,1024);
 		_fstrcpy (Value,Cmd1);
 		ExpandText (Value);
 		PadString (Value,0,CompareLength);
@@ -3453,7 +3504,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 	}
 	while (fgetstring (str,1024,Fid))
 	{
-		GetDelimTextData(str,hDLT);
+		GetDelimTextData(str,hDLT,1024);
 		_fstrcpy (Value,Cmd2);
 		ExpandText (Value);
 		PadString (Value,0,CompareLength);
@@ -4159,7 +4210,7 @@ NextCorner:;
 	while (fgetstring (str,128,FidRun))
 	{   
 		
-    	GetDelimTextData(str,hDLT);  
+    	GetDelimTextData(str,hDLT,128);  
     	_fstrcpy (str,"[UDI]");
     	ExpandText (str);
     	BT_PUT (hBT,str,(LPSTR)&Dummy);   
@@ -5404,7 +5455,7 @@ BOOL FilterTextFile (LPSTR InFile,LPSTR OutFile,MNMXCORD Bounds)
 	{   
 		lineno++;   
 		_fstrcpy (strorig,str);
-		GetDelimTextData(str,TxtHandle);
+		GetDelimTextData(str,TxtHandle,64);
 		X = GetGlobalDVal ("[X]")*FTM;
 		Y = GetGlobalDVal ("[Y]")*FTM;
 		Z = GetGlobalDVal ("[Z]")*FTM;    
@@ -5653,7 +5704,7 @@ int GetFileChecksum (LPSTR File,int frombyte,int tobyte)
 	return checksum;
 }
 
-int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories)
+int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,BOOL nameOnly)
 {
      int	Num,i;
      char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
@@ -5672,7 +5723,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		if (OutFileFID == HFILE_ERROR)
 			goto Exit;
 		//fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tSTATUS\tLASTUPDATE\tSIZE",OutFileFID);
-		fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tCREATTIME\tLASTACCESS\tLASTWRITE\tFILELENGTH\tSTATUS",OutFileFID);
+		if (!nameOnly)
+			fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tCREATTIME\tLASTACCESS\tLASTWRITE\tFILELENGTH\tSTATUS",OutFileFID);
 	 }	
 	 else 
 	 {
@@ -5718,7 +5770,10 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		else
 			pLastDir = _fstrchr (LastDir,0);
 		//sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",str2,Name,drive,dir,pLastDir,extension,lastup,lfile);
-  		sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
+		if (nameOnly)
+			sprintf(str, "%s%s", Name, extension);
+		else
+  			sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
 		fputstring (str,OutFileFID);
 	 }  
      GSSiClose (Fid);
