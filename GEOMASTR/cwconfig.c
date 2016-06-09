@@ -148,15 +148,17 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 {
 	 BOOL rtn=FALSE;
 	 RECT WindowRect;
+	 BOOL saveHaltPaint = HaltPaint;
 
 	 HaltMapDisplay(FALSE,TRUE);
+	 HaltPaint = TRUE;
 	 GMDestroyDIB32 (hWindowDib32);
 	 hWindowDib32 = 0;
 	 GetClientRect (hWndMain,&WindowRect);   
 	 ClientRectToScreenRect (hWnd,&WindowRect);
 	 hWindowDib32 = CopyScreenToDIB32 (&WindowRect); 
 	 SaveFullWindowBitmap(hWndMain);
-	 DoPaint = FALSE;
+	 setDoPaint( FALSE);
 	 if (AutoSave || GetSaveName2 (hWnd,CfgName,IDS_FILTERGMC,".GMC",IDS_FILEGMC))
 	 {    
  		if (GetGlobalBVal2 ("[%CFGSAVEPROMPT]",TRUE))
@@ -180,6 +182,7 @@ BOOL DoSaveConfig (HWND hWnd,BOOL AutoSave)
 	 } 
 	 GMDestroyDIB32 (hWindowDib32);
 	 hWindowDib32 = 0;
+	 HaltPaint = saveHaltPaint;
 	 return rtn;
 }
 
@@ -2691,7 +2694,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 		 str=GlobalLock (hSTR); 
     	 
 //         hw = GetDlgCtrlID(wParam); 
-         DoPaint=TRUE;    
+         setDoPaint( TRUE);    
          InHelp=TRUE;
          if (GFMenuWnd)
          {   
@@ -2844,7 +2847,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 		 	CancelWindowZoom();
 
 //         HaltMapDisplay(FALSE);
-//         DoPaint = FALSE; 
+//         setDoPaint( FALSE); 
          if (LOWORD(wParam) >= 64000) /* pickmacro*/
          {
          	int	item, irec;
@@ -2903,7 +2906,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	         	   }
 	         	}  
 	        }
-            DoPaint = TRUE;
+            setDoPaint( TRUE);
 	       	SetCurView ( SaveView);
 
          } 
@@ -2916,7 +2919,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          	phWhichCmdList = &hToolCmd;
          	ExecuteUserCmd (CmdID);   
          	GSSiGlobFree (&hToolCmd);
-         	DoPaint = TRUE;
+         	setDoPaint( TRUE);
          }
          else if (LOWORD(wParam) >= 58000) /* User commands */
          {  
@@ -2927,7 +2930,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          	phWhichCmdList = &hUserCmd;
          	ExecuteUserCmd (CmdID);
 			ReloadMainMenu ();
-         	DoPaint = TRUE;
+         	setDoPaint( TRUE);
          }
  		 else switch(LOWORD (wParam))
           {
@@ -2937,7 +2940,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 str=GlobalLock (hSTR); 
             	 
        			 HaltMapDisplay(FALSE,TRUE);
-                 DoPaint = FALSE;
+                 setDoPaint( FALSE);
 				 ButtonFuncOpt=0;
 				 strcpy (OFTitle,title4);
 		         if (GetFileName3 (hWnd,str,IDS_FILTERPLT,IDS_FILEPLT))   
@@ -2962,7 +2965,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                  	}
                   }
 
-				  DoPaint = TRUE;
+				  setDoPaint( TRUE);
 				  GSSiGlobUlFree (&hSTR);
 
             }
@@ -3347,7 +3350,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                 {
                   DLGPROC lpfnADDEDIT_HELPERMsgProc;
                   
-				  DoPaint = FALSE;
+				  setDoPaint( FALSE);
                   if (!hWndAddEditHelper)
                   { 
 					  lpfnADDEDIT_HELPERMsgProc = MakeProcInstance((DLGPROC)ADDEDIT_HELPERMsgProc, hInst);
@@ -3789,7 +3792,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 		   		 if (ScaleIsSet (TRUE))
 		   			break;
        			 HaltMapDisplay(FALSE,FALSE);
-				 DoPaint = TRUE;
+				 setDoPaint( TRUE);
 				 SetViewport(-99);
 				 SelectVisList (FALSE);
                  ZoomToBM ();
@@ -3891,7 +3894,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 }
        			 HaltMapDisplay(FALSE,FALSE);
 				 ClearFullWindowBitmap(0);
-				 DoPaint = TRUE;
+				 setDoPaint( TRUE);
                  IgnoreBounds=FALSE;  
                  if (lParam)
                  {
@@ -3905,7 +3908,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                  break;
             
             case IDM_REDISPLAYVIEWPORTS:  
-            	 DoPaint=TRUE;
+            	 setDoPaint( TRUE);
        			 HaltMapDisplay(FALSE,FALSE);
 				 ClearFullWindowBitmap(0);
 				 if (NumViewportsArray[0])
@@ -3916,7 +3919,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	           	 RedisplayViewports(FALSE);
 				 break; 
 				 
-            case IDM_REDISPLAY:  
+            case IDM_REDISPLAY: 
+				if (!DoPaint())
+					break;
 				if (lParam == 99)
 				{
 					CurView->HaveBounds = TRUE;
@@ -3931,7 +3936,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
   				 ClearFullWindowBitmap (0);
       			 if (InAccel)
        			 	ClearCurrentCD ();
-		         DoPaint = TRUE;
+		         setDoPaint( TRUE);
 			     ContinueProcessing=TRUE;
 			     if (lParam == -99)
     		        UnallocateConfig ();
@@ -4050,7 +4055,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 LPSTR	Name = GlobalLock (hSN);
 				 
        			 HaltMapDisplay(FALSE,TRUE);
-				 DoPaint = FALSE;
+				 setDoPaint( FALSE);
 				 strcpy (OFTitle,title2);
 				 if (GetFileName3(hWndMain,Name,IDS_FILTERGMC,IDS_FILEFMT))   
 				 {   
@@ -4067,7 +4072,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 LPSTR	pName=GlobalLock (hMem);
 				 
        			 HaltMapDisplay(FALSE,TRUE);
-				 DoPaint = FALSE;
+				 setDoPaint( FALSE);
 				 strcpy (OFTitle,title3);
 				 if (GetFileName3(hWndMain,pName,IDS_FILTERGMC,IDS_FILEMEN))
 				 {   
@@ -4085,7 +4090,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 LPSTR	SaveName = GlobalLock (hSN);
 				 
        			 HaltMapDisplay(FALSE,TRUE);
-				 DoPaint = FALSE;
+				 setDoPaint( FALSE);
 				 _fstrcpy (SaveName,CfgName); 
 				 strcpy (OFTitle,title1);
 				 if (GetFileName3(hWndMain,CfgName,IDS_FILTERGMC,IDS_FILEGMC))   
@@ -4170,7 +4175,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                 {
 			 		BOOL AP = SetAutoPan (FALSE);
 
-			 		DoPaint = TRUE;
+			 		setDoPaint( TRUE);
 					ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);   
 					ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
                     PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);  
@@ -4190,7 +4195,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                 {
 			 		BOOL AP = SetAutoPan (FALSE);
 
-			 		DoPaint = TRUE;
+			 		setDoPaint( TRUE);
 					ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);   
 					ExecutePointLocationMacro (UserSpecifiedBasePoint,0);
                     PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L); 
@@ -4214,7 +4219,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                 	if (LocationOffset)
                 	{
 			 			AP = SetAutoPan (FALSE);
-				 		DoPaint = TRUE;
+				 		setDoPaint( TRUE);
 						ZoomToPickedItem (0,LocationOffset,OffsetFromLimits,FALSE,FALSE);
 			 		}  
 				 	else 
@@ -4238,7 +4243,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			 	{
 			 		BOOL	AP = SetAutoPan (FALSE);
 			 		
-			 		DoPaint = TRUE;
+			 		setDoPaint( TRUE);
 					ZoomToPointAndDist (Point, LocationOffset,FALSE);
 					ExecutePointLocationMacro (Point);
                     PostMessage(hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L); 
@@ -4322,7 +4327,7 @@ DisplayParcel:
 	  				    SetViewport(*pCommandViewport);
 				    	ClearCurrentCD ();
 				 		AP = SetAutoPan (FALSE); 
-				 		DoPaint = TRUE; 
+				 		setDoPaint( TRUE); 
 				 		ClearMaskArea ();
 				 		if (LocationOffset)
 							ZoomToPointAndDist (UserSpecifiedBasePoint, LocationOffset,FALSE);
@@ -4339,7 +4344,7 @@ DisplayParcel:
                 {
                   DLGPROC lpfnLOC_STREETMsgProc;
                   
-				  DoPaint = TRUE;
+				  setDoPaint( TRUE);
                   if (!hWndLocStreet)
                   { 
 					  lpfnLOC_STREETMsgProc = MakeProcInstance((DLGPROC)LOC_STREETMsgProc, hInst);
@@ -4488,7 +4493,7 @@ DisplayParcel:
 					 } */
 					 CopyFID = GSSiOpenFile ("copylist.txt",&OFStruct,OF_CREATE);
 					 DoMapCopy = 1;
-	                 DoPaint = FALSE; 
+	                 setDoPaint( FALSE); 
 	                 DisableHalt=TRUE;
 					 SetViewport(*pCommandViewport);
 					 SaveVis = *CurVis;
@@ -4511,7 +4516,7 @@ DisplayParcel:
 					 DestroyStatusWindow(0); 
 					 GSSiRemove ("copylist.txt"); 
 					 DisableHalt=FALSE;
-					 DoPaint = TRUE;
+					 setDoPaint( TRUE);
 			     }
                	  
             	 break;
@@ -4752,7 +4757,7 @@ DisplayParcel:
             	ExpandText ("$SCREENTOCLIPBOARD()");
             	break;
             case IDM_TEST_ATTRIBUTE:
-                 DoPaint = FALSE;
+                 setDoPaint( FALSE);
 				 
                  {
 				    DLGPROC lpfnDISPLAY_GWD_DATAMsgProc;
@@ -4767,7 +4772,7 @@ DisplayParcel:
 //				    GSSiGlobFree (&hName);
                  }
 
-				  DoPaint = TRUE;
+				  setDoPaint( TRUE);
             	 break; 
             
             case IDM_CHANGE_COMBO_FILE:
@@ -4810,7 +4815,7 @@ DisplayParcel:
                  /* Place User Code to respond to the                   */
                  /* Menu Item Named "Basics" here.                      */
                  //lda addition
-         		 DoPaint=TRUE;
+         		 setDoPaint( TRUE);
 				{   
 					
 					hSTR=GSSiGlobAlloc (  19,GMEM_MOVEABLE,256);
@@ -4839,7 +4844,7 @@ DisplayParcel:
 				goto ReturnDefault;
            }
          if (!HaltPaint)
-         	DoPaint = TRUE;
+         	setDoPaint( TRUE);
          break;        /* End of WM_COMMAND                             */
     
     case WM_SETCURSOR:
@@ -4966,7 +4971,7 @@ DisplayParcel:
 	{
 		hDC = GetDC (hWnd);
 		GetClientRect (hWnd,&MoveStartRect);
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
 		hBMMove = SaveScreen (hDC,MoveStartRect);
 		ReleaseDC (hWnd,hDC);
 		DisplayAllToolbars (0);
@@ -4974,7 +4979,7 @@ DisplayParcel:
 		goto ReturnDefault;
 
 	case WM_EXITSIZEMOVE:
-		DoPaint = TRUE;
+		setDoPaint( TRUE);
 		GSSiDeleteObject (&hBMMove);
 		GetClientRect (hWnd,&MoveEndRect);
 		AdjustToolbarPositions ();
@@ -5138,7 +5143,7 @@ DisplayParcel:
          switch (wParam)
            {
             case SIZE_MINIMIZED:  
-		         DoPaint = FALSE;
+		         setDoPaint( FALSE);
 		         SaveHavePaint = HavePaint;
 		         HavePaint = FALSE;
 		         HaveSeg = FALSE; 
@@ -5192,7 +5197,7 @@ DisplayParcel:
 				static	int lastVPID=1;
             	 
 				 SetConfig (-1);
-            	 if (!*pNumViewports || NoDisplay || InImediate || !DoPaint || InTime) break; 
+            	 if (!*pNumViewports || NoDisplay || InImediate || !DoPaint() || InTime) break; 
             	 InTime = TRUE;
                	 StartTime = GetTickCount();
                  if (Counter <MaxTimePerSeg)
@@ -5615,11 +5620,13 @@ GSSiExitProg (438);
     goto ReturnDefault;
     
     case WM_SETFOCUS: 
-    {
+    if (DoPaint ())
+	{
 		RECT	Rect;
 		HDC hDC = HaveScreenBuffer (&Rect);
 
-    	DoPaint = TRUE;
+//		if (!WindowIsCovered(hWnd, 1))
+//			setDoPaint(__LINE__, __FILE__, TRUE);
 		if (hDC)
 		{
 			HDC	hDCMain = GetDC (hWnd);

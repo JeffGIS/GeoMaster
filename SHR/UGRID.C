@@ -363,7 +363,7 @@ HWND ShowGrid(HWND hWnd,LPSTR SavePosVName,LPSTR VPName){
 		}
 	}
 	CurView = SaveVP;
-	//DoPaint = TRUE;
+	//setDoPaint( TRUE);
 	//create a modal dialog box
 	//dlgproc = (DLGPROC) MakeProcInstance((FARPROC)GMNGRID1DlgProc, hInst);
 //	rc=DialogBox(hInst,"UGRID1",hWnd, dlgproc);

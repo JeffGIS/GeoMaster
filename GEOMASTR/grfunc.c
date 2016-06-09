@@ -521,7 +521,7 @@ GSSiExitProg (1338);
 						}
 					}
 				}
-				DoPaint = TRUE;
+				setDoPaint( TRUE);
 				DisableHalt = FALSE;    
 				ContinueProcessing = TRUE; 
 				ResetOriginalDrive ();

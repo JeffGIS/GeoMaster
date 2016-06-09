@@ -1232,7 +1232,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 	DLGPROC lpfnTEXTSTRINGMsgProc;
 	int		nRc;
 	char	InitValc[64];
-	BOOL	SaveDoPaint = DoPaint;
+	BOOL	SaveDoPaint = DoPaint();
 	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);  
 	LPSTR	str=GlobalLock (hStr),Arg5;
 	
@@ -1251,7 +1251,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 		GSSiGlobUlFree (&hStr);
 		return TRUE;
 	}
-	DoPaint = FALSE;
+	setDoPaint( FALSE);
 	_fstrcpy (str,String); 
 	AutoIncIntVal = AutoInc;
 	pTEXTSTRING=str;
@@ -1292,7 +1292,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 	EnableWindow (hWnd,TRUE);
 	if (nRc)
 		_fstrcpy (String,str);
-	DoPaint = SaveDoPaint; 
+	setDoPaint(  SaveDoPaint); 
 	GSSiGlobUlFree (&hStr);
 {
 #if ENABLETRACE
@@ -1314,9 +1314,9 @@ BOOL GetTextStringML (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR In
 	DLGPROC lpfnTEXTSTRINGMsgProc;
 	int		nRc;
 	char	str[256], InitValc[64];
-	BOOL	SaveDoPaint = DoPaint;
+	BOOL	SaveDoPaint = DoPaint();
 	
-	DoPaint = FALSE;
+	setDoPaint( FALSE);
 	_fstrcpy (str,String); 
 	AutoIncIntVal = 0;
 	pTEXTSTRING=str;
@@ -1335,7 +1335,7 @@ BOOL GetTextStringML (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR In
 	EnableWindow (hWnd,TRUE);
 	if (nRc)
 		_fstrcpy (String,str);
-	DoPaint = SaveDoPaint;
+	setDoPaint( SaveDoPaint);
 {
 #if ENABLETRACE
 GSSiExitProg (1153);

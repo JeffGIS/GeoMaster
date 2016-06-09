@@ -1185,7 +1185,7 @@ Redisplay:
 					  if (nRc)
 					  {  
 			 			DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID);
-						DoPaint = TRUE;      
+						setDoPaint( TRUE);      
 //						RedisplayWindow();   
 				        PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 					  }
@@ -1691,7 +1691,7 @@ GSSiExitProg (445);
 				     }
 			    	 ReorgBadRecs = 0;
 					 DisableHalt = TRUE;  
-					 DoPaint=FALSE;
+					 setDoPaint( FALSE);
 					 Processing = TRUE;
 					 ReorghWnd = hWndDlg;
 					 ReorgStatus = IDC_STATUS;
@@ -2216,11 +2216,11 @@ GSSiExitProg (838);
 				    	FARPROC lpfnLINETYPEMsgProc; 
 				    	int		nRc;
 					    	
-						DoPaint = FALSE; 
+						setDoPaint( FALSE); 
 				        lpfnLINETYPEMsgProc = MakeProcInstance((FARPROC)LINETYPEMsgProc, hInst);
 						nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWndDlg, (DLGPROC)lpfnLINETYPEMsgProc);
 				        FreeProcInstance(lpfnLINETYPEMsgProc);
-						DoPaint=TRUE;
+						setDoPaint( TRUE);
 				        if (nRc)
 					        SetClassLineType (Choice,1,NewWidth,NewStyle,NewProPen,NewColor);
 					} 
@@ -5052,7 +5052,7 @@ SelectFiles:
 					 }
 	                 DisableHalt = TRUE; 
 	                 Processing = TRUE; 
-	                 DoPaint = FALSE;
+	                 setDoPaint( FALSE);
 	                 hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
 	                 Handle = GSSiGlobAlloc (1112,GHND,Num*4);
 	                 lpItems =(LPINT) GlobalLock (Handle);
@@ -5293,7 +5293,7 @@ SelectFiles:
 	                    AVIOutClose(&hAVIFile);
 	                 }
 	                 DisableHalt = FALSE; 
-	                 DoPaint = TRUE; 
+	                 setDoPaint( TRUE); 
 	                 SetWindowText(hWndDlg,saveWT);  
 	                 CurLev++;
 	             } while (*pOrthRes && ContinueProcessing); 

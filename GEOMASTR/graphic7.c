@@ -157,7 +157,7 @@ GSSiExitProg (872);
 				return 3;
 			case 'A':
 			case 'a':
- 				DoPaint = FALSE;
+ 				setDoPaint( FALSE);
 				HaltMapDisplay(FALSE,TRUE);
 				GSSiMsgBox( GetFocus(),GMmess,"GeoMaster System Message", MB_OK|MB_ICONEXCLAMATION,0);
  				BlowOut(0,0);
@@ -183,9 +183,9 @@ GSSiExitProg (872);
 				}
     			ltoa (msg_time,str,10);
     			WritePrivateProfileString("User", "LastSysMsg",str,UserIni);
- 				DoPaint = FALSE;
+ 				setDoPaint( FALSE);
 //				GSSiMsgBox( GetFocus(),GMmess,"GeoMaster System Message", MB_OK|MB_ICONEXCLAMATION);
-				DoPaint = TRUE;
+				setDoPaint( TRUE);
 				KeepFilesOpen = SaveKFO;
 {
 #if ENABLETRACE
@@ -239,7 +239,7 @@ short GetCDDriveForVolWait (LPSTR VolLabel,LPSTR Drive)
 {   
 	DLGPROC lpfnWAITMESSAGEMsgProc;
 	short	nRc;
-	BOOL	SaveDP = DoPaint, SaveDH = DisableHalt;
+	BOOL	SaveDP = DoPaint(), SaveDH = DisableHalt;
 	
 	if (GetCDDriveForVol (VolLabel,Drive))
 {
@@ -258,12 +258,12 @@ GSSiExitProg (874);
 	sprintf (GMmess,"Please load the CD named %s",VolLabel);
 	_fstrcpy (WaitForVolLabel,VolLabel);
 	HaltMapDisplay(FALSE,TRUE);  
-	DoPaint = FALSE; 
+	setDoPaint( FALSE); 
 	DisableHalt = TRUE;
 	lpfnWAITMESSAGEMsgProc = MakeProcInstance((DLGPROC)WAITMESSAGECDMsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGECD", hWndMain, lpfnWAITMESSAGEMsgProc);
 	FreeProcInstance(lpfnWAITMESSAGEMsgProc);
-	DoPaint = SaveDP;
+	setDoPaint( SaveDP);
 	DisableHalt = SaveDH; 
 	_fstrcpy (Drive,WaitForDrive);
 {
@@ -4391,7 +4391,7 @@ GetNextLine:;
 
 	   		if (!HaveCancel)
 	   			AppendMenu (PickMenu,MF_ENABLED|MF_STRING,0,"Cancel");
-	   		DoPaint = FALSE;
+	   		setDoPaint( FALSE);
 			GetClientRect (hWnd,&Rect);
 			hScreen = SaveScreen2 (hWnd,hDC,Rect,0,0);
 	  		TrackPopupMenu (PickMenu,TPM_CENTERALIGN|TPM_VCENTERALIGN,position.x,position.y,0,hWnd,0);

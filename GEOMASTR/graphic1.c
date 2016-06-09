@@ -9,6 +9,8 @@
 #include <sys\types.h>
 #include <sys\stat.h>     
 
+static BOOL doPaint = TRUE;
+
 #define DEMODLL_API __declspec(dllimport)
 
 BOOL DEMODLL_API ToggleMenuUnderline(int i);
@@ -2393,7 +2395,7 @@ short ZoomWindow (HWND hWnd, float ZoomFactor)
 #endif
 {    double bwidth, bheight, MidX, MidY;
      
-	 DoPaint = TRUE;
+	 setDoPaint( TRUE);
      if (ZoomFactor)
 	 {
 		 CurView->Scale /= ZoomFactor;
@@ -4402,6 +4404,27 @@ void SetNewBoundsToBounds(void)
 }
 #endif
 }
+
+BOOL setDoPaint( BOOL DoPaint)
+{
+	BOOL rtn = doPaint;
+//	static BOOL check = FALSE;
+//	static int n = 0;
+//	char txt[256];
+	doPaint = DoPaint;
+/*	if (check && !doPaint)
+		ii = 1;
+	sprintf(txt, "%s %i %i %i",file,line, rtn,doPaint);
+	SetWindowText(hWndMain, txt);
+	if (DoPaint != rtn)
+		Sleep(5000);*/
+	return rtn;
+}
+BOOL DoPaint(void)
+{
+	return doPaint;
+}
+
 void PaintMap (HWND hWnd, HDC hDC,BOOL ImediateIn,LPRECT pUpdateRect,int From)
 #if ENABLETRACE
 {GSSiEnterProg (54);
@@ -4422,7 +4445,7 @@ GSSiExitProg (54);
 #endif
     	return;
 }
-    if (!DoPaint)
+    if (!DoPaint())
 {
 #if ENABLETRACE
 GSSiExitProg (54);
@@ -5448,7 +5471,7 @@ BOOL LoadMapDir (HWND hWnd)
 {
     short nRc;
        
-    DoPaint = FALSE;
+	setDoPaint(  FALSE);
      {
 #if WIN32
       nRc = DialogBox(hInst, (LPSTR)"LOAD_MD", hWnd,(DLGPROC) LOADMDMsgProc);
@@ -5783,7 +5806,7 @@ Next:
 					_fstrcat (PickName,CurEntryName);
 			}		 
 	    } 
-		ConvertNameToCDName (PickName);
+		//ConvertNameToCDName (PickName);
 
         lpSlash = _fstrrchr(PickName,'\\');
         if (!lpSlash)
@@ -6327,7 +6350,7 @@ NotIn:
             _fstrcat (PltName,CurEntryName);
          
     } 
-	ConvertNameToCDName (PltName);
+	//ConvertNameToCDName (PltName);
     if (!UseAVI && !Pick)
     {
         if (!ExistFile (PltName)) 
@@ -7356,7 +7379,7 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 
 	 DisableHalt = TRUE; 
 	 DisableMarginPan = TRUE; 
-	 DoPaint=FALSE; 
+	 setDoPaint( FALSE); 
 	 SelectVisList (FALSE);
 	 if (!SaveBuildTAGVis) 
 	 {   
@@ -7461,7 +7484,7 @@ Exit:
 	 DestroyStatusWindow(0);  
 	 DisableHalt = FALSE;  
 	 DisableMarginPan = FALSE;
-	 DoPaint=TRUE; 
+	 setDoPaint( TRUE); 
 	 InRebuildRefIndex = FALSE; 
 	 UseRefOrTAGIndex = SaveURT;
 {

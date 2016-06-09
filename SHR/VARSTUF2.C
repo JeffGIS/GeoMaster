@@ -712,8 +712,11 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
     SetGlobalValueLong ("%NUMARGS",NumArgs);
     if (*Name)
     {                                               
-    	HFILE		Fid;
+    	HFILE	Fid;
+		BOOL	saveDoPaint = DoPaint();
     	
+		//SetWindowText(hWndMain, Name);
+		//Sleep(5000);
 	    if (!_fstricmp (Name,"INLINE"))
 	    {
 			hMacro = GSSiGlobAlloc ( 245,GMEM_MOVEABLE,USHRT_MAX);
@@ -889,7 +892,7 @@ ProcessMacro:
 	    	}
 	    }
     	pMacroReturnValue = SaveRtnPointer;
-		DoPaint = TRUE;
+		setDoPaint( saveDoPaint);
     }
 Exit:
 	GSSiGlobUlFree (&hTemp);

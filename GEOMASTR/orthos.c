@@ -2083,7 +2083,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		pOrthRes = lpComma;
 		DisableHalt = TRUE; 
 		Processing = TRUE; 
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
 		_fstrcpy (ToDir,Dir);
 		ExpandText (ToDir); 
 	 	makedirectories (ToDir,TRUE,FALSE);
@@ -2265,7 +2265,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		 if (Compress)
 		    AVIOutClose(&hAVIFile);
 		 DisableHalt = FALSE; 
-		 DoPaint = TRUE; 
+		 setDoPaint( TRUE); 
 		 CurLev++;
 	} while (*pOrthRes); 
 	GSSiClose (Fid);

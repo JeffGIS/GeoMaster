@@ -301,7 +301,7 @@ BOOL CreateTAGBoxFromFile (HDC hDC,DPOINT BasePoint,LPSTR File,int item,double M
 	{
 		DLGPROC lpfnTAGEDITMsgProc;
 						
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
 		lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
 		nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWndMain, lpfnTAGEDITMsgProc);
 		FreeProcInstance(lpfnTAGEDITMsgProc);

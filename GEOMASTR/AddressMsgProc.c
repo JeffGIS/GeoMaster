@@ -5978,7 +5978,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  switch(Message)
    {
     case WM_INITDIALOG: 
-    	 DoPaint = FALSE;
+    	 setDoPaint( FALSE);
     	 RecalledName=FALSE;
     	 hWndHidden=hWndDlg; 
     	 hWndAddMatch = hWndDlg;
@@ -6106,7 +6106,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
             	 {
 	                 CloseDataFile (TRUE, &hSQL);  
 					 DestroyFieldList ();
-			    	 DoPaint = TRUE;
+			    	 setDoPaint( TRUE);
 			    	 if (*AutoExportName)
 			            EndDialog(hWndDlg, rtn);  
 			    	 else

@@ -3469,7 +3469,7 @@ void ProcessInvalidRecord (short Pcode,LPSHORT ipnt,int from)
 	{
 		case 0:
 			CloseMap (FALSE); 
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			_fstrcpy (str,PltName);
 			ExpandText (str);
 			if (FirstError)

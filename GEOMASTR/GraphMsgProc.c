@@ -752,11 +752,11 @@ GSSiExitProg (1250);
 		        {
 			    	DLGPROC lpfnACCUMPOINTOPTMsgProc; 
 				    	
-					DoPaint = FALSE; 
+					setDoPaint( FALSE); 
 			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((DLGPROC)ACCUMPOINTOPTMsgProc, hInst);
 			        DialogBox(hInst, (LPSTR)"ACCUMPOINTOPT", hWndDlg, lpfnACCUMPOINTOPTMsgProc);
 			        FreeProcInstance(lpfnACCUMPOINTOPTMsgProc);
-					DoPaint=TRUE;
+					setDoPaint( TRUE);
 				}
                 break;
                 
@@ -1720,8 +1720,8 @@ GSSiExitProg (449);
 	  	 DisableHalt = TRUE;
 	  	 SaveDisableMarginPan = DisableMarginPan;  
 	  	 DisableMarginPan = TRUE;    
-	  	 SaveDoPaint = DoPaint;
-	  	 DoPaint = FALSE;
+	  	 SaveDoPaint = DoPaint();
+	  	 setDoPaint( FALSE);
 		 GSSiGlobFree (&hAddGraphicsFun);
          GetCursorPos (&CursorLoc);
 	     SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_RESETCONTENT,0,0);
@@ -1868,14 +1868,14 @@ GSSiExitProg (449);
                  GFMenuWnd = 0;
 			  	 DisableHalt = SaveDisableHalt;  
 			  	 DisableMarginPan = SaveDisableMarginPan;  
-			  	 DoPaint = SaveDoPaint;
+			  	 setDoPaint( SaveDoPaint);
                  EndDialog(hWndDlg,FALSE);
                  break; 
                  
             case IDOK:
 			  	 DisableHalt = SaveDisableHalt;  
 			  	 DisableMarginPan = SaveDisableMarginPan;  
-			  	 DoPaint = SaveDoPaint;
+			  	 setDoPaint( SaveDoPaint);
                  GFMenuWnd = 0;
                  EndDialog(hWndDlg,FunctionSelected);
                  break;
@@ -6281,7 +6281,7 @@ GotLine:  GSSiClose (Fid);
            {
             case IDOK:   
 				 HaltMapDisplay(FALSE, FALSE);
-		         DoPaint = TRUE;
+		         setDoPaint( TRUE);
 		         if (*PMMacroFile)
 			     	ProcessMacroFile (PMMacroFile,str2,0,0);  
 			     else 
@@ -11020,7 +11020,7 @@ GSSiExitProg (1069);
 	        	break;
 	        } 
 	    } 
-	    DoPaint = FALSE;
+	    setDoPaint( FALSE);
 		GetClientRect(GetDesktopWindow(), &rect);
 		ClientRectToScreenRect (GetDesktopWindow(), &rect);
 		InflateRect (&rect,-1,-1);
@@ -11238,7 +11238,7 @@ GSSiExitProg (1069);
     			 GSSiGlobFree (&hNext);
     			 GSSiGlobFree (&hPrior);   
     			 GSSiGlobFree (&hBMP);
-				 DoPaint = TRUE;
+				 setDoPaint( TRUE);
                  EndDialog(hWndDlg, FALSE);
                  break;
 
@@ -11550,7 +11550,7 @@ GSSiExitProg (1247);
    { 
     case WM_INITDIALOG:  
     	ClearDlgPrompts (); 
-    	DoPaint = FALSE; 
+    	setDoPaint( FALSE); 
     	if (CurTheme->ID == GF_GRAPHICS_FUNCTION_THEME) 
     	{
         	SetDlgItemText (hWndDlg,SV_DATABASE_LIST,CurTheme->DataFile); 
@@ -11708,7 +11708,7 @@ GSSiExitProg (1247);
 		    	 GSSiGlobUlFree (&hSaveTheme); 
 			     SetCurView (SaveView);
                  DestroyFieldList ();
-    			 DoPaint = TRUE;
+    			 setDoPaint( TRUE);
                  EndDialog(hWndDlg, FALSE);
                  break;  
                  
@@ -11817,11 +11817,11 @@ GSSiExitProg (1247);
 		        {
 			    	DLGPROC lpfnACCUMPOINTOPTMsgProc; 
 				    	
-					DoPaint = FALSE; 
+					setDoPaint( FALSE); 
 			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((DLGPROC)ACCUMPOINTOPTMsgProc, hInst);
 			        DialogBox(hInst, (LPSTR)"ACCUMPOINTOPT", hWndDlg, lpfnACCUMPOINTOPTMsgProc);
 			        FreeProcInstance(lpfnACCUMPOINTOPTMsgProc);
-					DoPaint=TRUE;
+					setDoPaint( TRUE);
 				}
                 break;
                 
@@ -11932,7 +11932,7 @@ GSSiExitProg (1247);
 			       	 SetCurView (SaveView);
 	                 CloseThemeDataFile(TRUE);
 		    	 	 GSSiGlobFree (&hSaveTheme);
-				     DoPaint = FALSE;
+				     setDoPaint( FALSE);
 	                 EndDialog(hWndDlg, TRUE); 
 	             }
                  break;
@@ -12187,11 +12187,11 @@ BOOL LoadTheme (HWND hWnd,LPVIEWPORT pVP)
     int	nRc, i, n; 
     BOOL	rtn=FALSE;
         
-	DoPaint=FALSE;
+	setDoPaint( FALSE);
     lpfnLOADTHEMEMsgProc = MakeProcInstance((DLGPROC)LOADTHEMEMsgProc, hInst);
     nRc = DialogBox(hInst, (LPSTR)"LOADTHEME", hWnd, lpfnLOADTHEMEMsgProc);
     FreeProcInstance(lpfnLOADTHEMEMsgProc);
-    DoPaint=TRUE;
+    setDoPaint( TRUE);
     if (nRc)
     {   
     	rtn = nRc; 
@@ -12365,7 +12365,7 @@ GSSiExitProg (1247);
    { 
     case WM_INITDIALOG:  
     	ClearDlgPrompts (); 
-    	DoPaint = FALSE; 
+    	setDoPaint( FALSE); 
     	if (CurTheme->ID == GF_GRAPHICS_FUNCTION_THEME)
         	SetDlgItemText (hWndDlg,SV_DATABASE_LIST,CurTheme->DataFile);
     	hSaveTheme = GSSiGlobAlloc ( 636,GHND,sizeof(THEME));
@@ -12507,7 +12507,7 @@ GSSiExitProg (1247);
 		    	 GSSiGlobUlFree (&hSaveTheme); 
 			     SetCurView (SaveView);
                  DestroyFieldList ();
-    			 DoPaint = TRUE;
+    			 setDoPaint( TRUE);
                  EndDialog(hWndDlg, FALSE);
                  break;  
                  
@@ -12698,11 +12698,11 @@ GSSiExitProg (1247);
 		        {
 			    	DLGPROC lpfnACCUMPOINTOPTMsgProc; 
 				    	
-					DoPaint = FALSE; 
+					setDoPaint( FALSE); 
 			        lpfnACCUMPOINTOPTMsgProc = MakeProcInstance((DLGPROC)ACCUMPOINTOPTMsgProc, hInst);
 			        DialogBox(hInst, (LPSTR)"ACCUMPOINTOPT", hWndDlg, lpfnACCUMPOINTOPTMsgProc);
 			        FreeProcInstance(lpfnACCUMPOINTOPTMsgProc);
-					DoPaint=TRUE;
+					setDoPaint( TRUE);
 				}
                 break;
                 
@@ -12781,7 +12781,7 @@ GSSiExitProg (1247);
 			       	 SetCurView (SaveView);
 	                 CloseThemeDataFile(TRUE);
 		    	 	 GSSiGlobFree (&hSaveTheme);
-				     DoPaint = FALSE;
+				     setDoPaint( FALSE);
 	                 EndDialog(hWndDlg, TRUE); 
 	             }
                  break;
@@ -12892,7 +12892,7 @@ BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
     	 GlobalUnlock (hSaveView);
 		 HalfToneBegin = max (CurView->HalfTone,CurView->ConvertToGray);
     case GSSI_REINITDIALOG:  
-    	 DoPaint = FALSE;  
+    	 setDoPaint( FALSE);  
     	 if (EditView)
     	 	ii=1;  
     	 EditView = CurView; 
@@ -13708,7 +13708,7 @@ HaveEmpty:
             case IDCANCEL:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */  
-                 DoPaint = TRUE; 
+                 setDoPaint( TRUE); 
 		 		 SetConfig (EditConfig);
 		         CurView = EditView;
 		         EditView = 0; 
@@ -13819,7 +13819,7 @@ HaveEmpty:
 				 	CurView->HalfToneNewObjectStart;
 				 	_fmemset (CurView->HalfToneVisBits,0,sizeof(CurView->HalfToneVisBits));
 				 }
-				 DoPaint = TRUE;   
+				 setDoPaint( TRUE);   
                	 GSSiGlobFree (&hSaveView);
                  VPID = GetDlgItemInt (hWndDlg,IDC_VPPOS,&Valid,FALSE); 
                  if (!Valid || VPID < 1 || VPID > *pNumViewports)
@@ -26122,7 +26122,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				 CurView->FileProjectionType=0; 
 				 Processing = TRUE;
                  DisableHalt = TRUE;   
-                 DoPaint = FALSE;
+                 setDoPaint( FALSE);
                  ExpandText (PltName);
                  PltType = 2;
                  Done = FALSE;
@@ -26473,7 +26473,7 @@ SkipFirstPass:
 				 ConvertCoordClose ();
 				 ConvertCoordInit();
                  DisableHalt = FALSE; 
-                 DoPaint = TRUE;
+                 setDoPaint( TRUE);
 				 ForceRefIndex = ForceTAGIndex = FALSE;
 				 Processing = FALSE;  
 				 FileIsOpen=FALSE;

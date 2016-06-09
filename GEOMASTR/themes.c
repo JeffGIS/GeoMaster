@@ -481,7 +481,7 @@ GSSiExitProg (1230);
 			    	DLGPROC lpfnLINETYPEMsgProc; 
 			    	int		nRc,R,G,B,W;
 				    	
-					DoPaint = FALSE;  
+					setDoPaint( FALSE);  
 					SetViewport(CurTheme->TargetViewport);
 					NewColor = CurTheme->ClassColor[iclass];   
 					NewWidth = CurTheme->ClassFactor[iclass];
@@ -493,7 +493,7 @@ GSSiExitProg (1230);
 			        lpfnLINETYPEMsgProc = MakeProcInstance((DLGPROC)LINETYPEMsgProc, hInst);
 			        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", CurView->hWnd, lpfnLINETYPEMsgProc);
 			        FreeProcInstance(lpfnLINETYPEMsgProc);
-					DoPaint=TRUE;   
+					setDoPaint( TRUE);   
 					SetCurView (SaveVP);
 			        if (nRc)
 			        {
@@ -1503,11 +1503,11 @@ Top:
 		case GF_SINGLE_VALUE_THEME:
 	         {
 	          DLGPROC lpfnSV_THEME1MsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnSV_THEME1MsgProc = MakeProcInstance((DLGPROC)SV_THEME1MsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"SV_THEME1", hWnd, lpfnSV_THEME1MsgProc);
 	          FreeProcInstance(lpfnSV_THEME1MsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 			  if (nRc == 2)
 				  goto Top;
 	         }
@@ -1517,11 +1517,11 @@ Top:
 		case GF_CONNECTION_LINE_THEME:
 	         {
 	          DLGPROC lpfnSV_THEME2MsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnSV_THEME2MsgProc = MakeProcInstance((DLGPROC)SV_THEME2MsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"CONNECTION_LINE", hWnd, lpfnSV_THEME2MsgProc);
 	          FreeProcInstance(lpfnSV_THEME2MsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 			  if (nRc == 2)
 				  goto Top;
 	         }
@@ -1531,11 +1531,11 @@ Top:
 		case GF_SINGLE_NONNUM_VALUE_THEME:
 	         {
 	          DLGPROC lpfnSV_THEME2MsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnSV_THEME2MsgProc = MakeProcInstance((DLGPROC)SV_THEME2MsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"SV_THEME2", hWnd, lpfnSV_THEME2MsgProc);
 	          FreeProcInstance(lpfnSV_THEME2MsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 			  if (nRc == 2)
 				  goto Top;
 	         }
@@ -1545,63 +1545,63 @@ Top:
 		case GF_STREET_ADDRESS_THEME:
 	         {
 	          DLGPROC lpfnEDIT_ADDS_THEMEMsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnEDIT_ADDS_THEMEMsgProc = MakeProcInstance((DLGPROC)EDIT_ADDS_THEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"EDIT_ADDS_THEME", hWnd, lpfnEDIT_ADDS_THEMEMsgProc);
 	          FreeProcInstance(lpfnEDIT_ADDS_THEMEMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         }   
 	    break;
 			         
 		case GF_CITY_THEME:
 	         {
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          nRc = DialogBox(hInst, (LPSTR)"CITY_THEME", hWnd, (DLGPROC)CITY_THEMEMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         }   
 	    break;
 			         
 		case GF_TRANSFORM_THEME:
 	         {
 	          DLGPROC lpfnTRANTHEMEMsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnTRANTHEMEMsgProc = MakeProcInstance((DLGPROC)TRANTHEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"TRANTHEME", hWnd, lpfnTRANTHEMEMsgProc);
 	          FreeProcInstance(lpfnTRANTHEMEMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         } 
 	    break;  
 			         
 		case GF_POLYINFO_THEME:
 	         {
 	          DLGPROC lpfnTRANTHEMEMsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnTRANTHEMEMsgProc = MakeProcInstance((DLGPROC)TRANTHEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"TRANTHEME", hWnd, lpfnTRANTHEMEMsgProc);
 	          FreeProcInstance(lpfnTRANTHEMEMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         } 
 	    break;  
 			         
 		case GF_HOTSPOT_THEME:
 	         {
 	          DLGPROC lpfnHOTSPOT_THEMEMsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnHOTSPOT_THEMEMsgProc = MakeProcInstance((DLGPROC)HOTSPOT_THEMEMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"HOTSPOT_THEME", hWnd, lpfnHOTSPOT_THEMEMsgProc);
 	          FreeProcInstance(lpfnHOTSPOT_THEMEMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         } 
 	    break;  
 			         
 		case PF_COORD_DISPLAY:
 	         {
 	          DLGPROC lpfnCOORDDISPLAYMsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnCOORDDISPLAYMsgProc = MakeProcInstance((DLGPROC)COORDDISPLAYMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"COORDDISPLAY", hWnd, lpfnCOORDDISPLAYMsgProc);
 	          FreeProcInstance(lpfnCOORDDISPLAYMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         } 
 	    break;  
 			    
@@ -1611,11 +1611,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnSTREET_TEXTMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnSTREET_TEXTMsgProc = MakeProcInstance((DLGPROC)STREET_TEXTMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"STREET_TEXT", hWnd, lpfnSTREET_TEXTMsgProc);
 			FreeProcInstance(lpfnSTREET_TEXTMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1625,11 +1625,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnPROFILEMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnPROFILEMsgProc = MakeProcInstance((DLGPROC)PROFILEMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"PROFILE", hWnd, lpfnPROFILEMsgProc);
 			FreeProcInstance(lpfnPROFILEMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 		
@@ -1640,11 +1640,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnDISTANCEMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnDISTANCEMsgProc = MakeProcInstance((DLGPROC)DISTANCEMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"DISTANCE", hWnd, lpfnDISTANCEMsgProc);
 			FreeProcInstance(lpfnDISTANCEMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1654,11 +1654,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnCOORDGRIDMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnCOORDGRIDMsgProc = MakeProcInstance((DLGPROC)COORDGRIDMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"COORDGRID", hWnd, lpfnCOORDGRIDMsgProc);
 			FreeProcInstance(lpfnCOORDGRIDMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1668,11 +1668,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnDISPLAY2DMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnDISPLAY2DMsgProc = MakeProcInstance((DLGPROC)DISPLAY2DMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"DISPLAY2D", hWnd, lpfnDISPLAY2DMsgProc);
 			FreeProcInstance(lpfnDISPLAY2DMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1682,11 +1682,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnTIME_DISPLAYMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnTIME_DISPLAYMsgProc = MakeProcInstance((DLGPROC)TIME_DISPLAYMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"TIME_DISPLAY", hWnd, lpfnTIME_DISPLAYMsgProc);
 			FreeProcInstance(lpfnTIME_DISPLAYMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1696,11 +1696,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnPOINT_IN_AREAMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnPOINT_IN_AREAMsgProc = MakeProcInstance((DLGPROC)POINT_IN_AREAMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"POINT_IN_AREA", hWnd, lpfnPOINT_IN_AREAMsgProc);
 			FreeProcInstance(lpfnPOINT_IN_AREAMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1710,11 +1710,11 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnCOMPARE_VIEWPORTSMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnCOMPARE_VIEWPORTSMsgProc = MakeProcInstance((DLGPROC)COMPARE_VIEWPORTSMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"COMPARE_VIEWPORTS", hWnd, lpfnCOMPARE_VIEWPORTSMsgProc);
 			FreeProcInstance(lpfnCOMPARE_VIEWPORTSMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
@@ -1729,22 +1729,22 @@ Top:
 	    	short		n,i;
 			DLGPROC lpfnBOUNDS_DISPLAYMsgProc;
 			    	
-			DoPaint = FALSE;
+			setDoPaint( FALSE);
 			lpfnBOUNDS_DISPLAYMsgProc = MakeProcInstance((DLGPROC)BOUNDS_DISPLAYMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"BOUNDS_DISPLAY", hWnd, lpfnBOUNDS_DISPLAYMsgProc);
 			FreeProcInstance(lpfnBOUNDS_DISPLAYMsgProc);
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
         }  
 		break;
 				
 		case GF_DOCUMENTS_THEME:
 	         {
 	          DLGPROC lpfnDOCUMENTSMsgProc;
-	          DoPaint = FALSE;
+	          setDoPaint( FALSE);
 	          lpfnDOCUMENTSMsgProc = MakeProcInstance((DLGPROC)DOCUMENTSMsgProc, hInst);
 	          nRc = DialogBox(hInst, (LPSTR)"DOCUMENTS", hWnd, lpfnDOCUMENTSMsgProc);
 	          FreeProcInstance(lpfnDOCUMENTSMsgProc);
-	          DoPaint = TRUE;
+	          setDoPaint( TRUE);
 	         }  
 	    break;     
 				 

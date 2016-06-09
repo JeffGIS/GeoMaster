@@ -692,7 +692,7 @@ switch (Message)
 
     case WM_RBUTTONUP:
 		SetDisplayMode (hDC, GF_SCREENMODE);
-    	DoPaint = FALSE;
+    	setDoPaint( FALSE);
          {
           DLGPROC lpfnTAGEDITMsgProc;
 
@@ -706,7 +706,7 @@ switch (Message)
     	if (TAGBox.before) 
 	    	DestroySavedScreen (&TAGBox.before,0);
 		SaveFullWindowBitmap (hWndMain);
-		DoPaint = TRUE;
+		setDoPaint( TRUE);
        	break;
     default:
     	return (FALSE);
@@ -1037,14 +1037,14 @@ BOOL ShowItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         ClientToScreen (CurView->hWnd,(LPPOINT)&MousePoint);
 	    SetCursorPosGM (MousePoint.x,MousePoint.y,0);
 	    DisplayPickedItems (hWnd,NumPicked,TRUE,0,0,TRUE);
 	    DynDlgOn(TRUE);
 		ShowDynWindows ();
-		DoPaint=TRUE;
+		setDoPaint( TRUE);
 		break;
 
     default:
@@ -1093,18 +1093,18 @@ BOOL HideItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
         BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
-	        DoPaint=FALSE;
+	        setDoPaint( FALSE);
 		    AddToHighlightList (PickList[NumPicked-1].Refno,
 		    					&PickList[0],FALSE);
 		    LastPicked = PickList[NumPicked-1].Refno;
 		    CurView->CurZoomAreaRef = 0;
 		    RedisplayViewport(FALSE,FALSE);
         }
-		DoPaint=TRUE;
+		setDoPaint( TRUE);
 		break;
 
     case WM_RBUTTONUP:
@@ -1215,7 +1215,7 @@ GSSiExitProg (158);
     case WM_LBUTTONUP:
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
         BasePoint=ScreenPtToBasePt(MousePoint);
-	        DoPaint=FALSE;
+	        setDoPaint( FALSE);
         PickItems (hWnd,BasePoint);
 	case GF_USEPICKED:
 		if (Message == GF_USEPICKED)
@@ -1243,7 +1243,7 @@ GSSiExitProg (158);
 			    RedisplayViewport(FALSE,FALSE);
 	        }
         }
-		DoPaint=TRUE;
+		setDoPaint( TRUE);
 		if (Message == GF_USEPICKED)
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
 		break;
@@ -1291,11 +1291,11 @@ BOOL LineTypeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		    	DLGPROC lpfnLINETYPEMsgProc; 
 		    	int		nRc;
 			    	
-				DoPaint = FALSE; 
+				setDoPaint( FALSE); 
 		        lpfnLINETYPEMsgProc = MakeProcInstance((DLGPROC)LINETYPEMsgProc, hInst);
 		        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWnd, lpfnLINETYPEMsgProc);
 		        FreeProcInstance(lpfnLINETYPEMsgProc);
-				DoPaint=TRUE;
+				setDoPaint( TRUE);
 		        if (!nRc)
 		        {
 					PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -1334,7 +1334,7 @@ BOOL LineTypeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    	DLGPROC lpfnLINETYPEMsgProc; 
 	    	int		nRc;
 	    	
-			DoPaint = FALSE; 
+			setDoPaint( FALSE); 
 	        lpfnLINETYPEMsgProc = MakeProcInstance((DLGPROC)LINETYPEMsgProc, hInst);
 	        nRc = DialogBox(hInst, (LPSTR)"LINETYPE", hWnd, lpfnLINETYPEMsgProc);
 	        FreeProcInstance(lpfnLINETYPEMsgProc);
@@ -1349,7 +1349,7 @@ BOOL LineTypeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				ConfigChangesMade = TRUE;
 			    RedisplayViewport(FALSE,FALSE);
 	        }
-			DoPaint=TRUE;
+			setDoPaint( TRUE);
         }
 		if (Message == GF_USEPICKED)
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -1409,7 +1409,7 @@ BOOL CreateTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    else
         	BasePoint=ScreenPtToBasePt (MousePoint); 
         EnlargeScreen (0,0);
-        DoPaint=FALSE;
+        setDoPaint( FALSE);
         PickItems (hWnd,BasePoint);
         if (SelectTAGTemplate())
         
@@ -1421,7 +1421,7 @@ BOOL CreateTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	         {
 		          DLGPROC lpfnTAGEDITMsgProc;
 			
-			   	  DoPaint = FALSE;
+			   	  setDoPaint( FALSE);
 		          lpfnTAGEDITMsgProc = MakeProcInstance((DLGPROC)TAGEDITMsgProc, hInst);
 		          nRc = DialogBox(hInst, (LPSTR)"TAGEDIT", hWndMain, lpfnTAGEDITMsgProc);
 		          FreeProcInstance(lpfnTAGEDITMsgProc);
@@ -3364,13 +3364,13 @@ GSSiExitProg (104);
 }
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint); 
-	    DoPaint=FALSE; 
+	    setDoPaint( FALSE); 
 	    if (MaxPick > 1)
 	    	WantOnlyShapePoints = TRUE; 
 	    else
 	    	WantOnlyShapePoints = GetGlobalBVal2 ("[%MOVEONLYSHAPEPOINTS]",FALSE);
 	    PickItems (hWnd,BasePoint); 
-		DoPaint=TRUE; 
+		setDoPaint( TRUE); 
 		if (!NumPicked)
 		{
 			WantOnlyShapePoints = SaveWOSP;
@@ -4515,7 +4515,7 @@ BOOL EditTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Fun
 			break;
     		
     		case GF_EDIT_TEXTBOX:
-	    	DoPaint = FALSE;
+	    	setDoPaint( FALSE);
 	        {
 	          DLGPROC lpfnTAGEDITMsgProc;
 		
@@ -4535,7 +4535,7 @@ BOOL EditTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Fun
 		    	}*/
 				SaveTAG(TBNum);
 			}
-			DoPaint = TRUE;  
+			setDoPaint( TRUE);  
 			DisableMarginPan=FALSE;
 			break;
 			
@@ -4808,14 +4808,14 @@ BOOL ChangeRedefColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				NumPicked = 1;
 	        if (NumPicked > 0)
 	        {
-		        DoPaint=FALSE;
+		        setDoPaint( FALSE);
 	        	if(GetColor(hWnd,&NewColor))
 	        	{   
 //	        		AddPenRedef (PickList[NumPicked-1].ipen,NewColor);
 				    CurView->CurZoomAreaRef = 0;
 				    RedisplayViewport(FALSE,FALSE);
 		        }
-				DoPaint=TRUE;
+				setDoPaint( TRUE);
 	        }
 			if (Message == GF_USEPICKED)
 				PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -4864,7 +4864,7 @@ BOOL ChangePenColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
         PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
-	        DoPaint=FALSE;
+	        setDoPaint( FALSE);
         	if(GetColor(hWnd,&NewColor))
         	{   
 	    		_fstrcpy (PltName,EditName);
@@ -4891,7 +4891,7 @@ BOOL ChangePenColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			    CurView->CurZoomAreaRef = 0;
 			    RedisplayViewport(FALSE,FALSE);
 	        }
-			DoPaint=TRUE;
+			setDoPaint( TRUE);
         }
 		break;
 
@@ -4938,7 +4938,7 @@ BOOL ChangePenNumber (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
         PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
-	        DoPaint=FALSE; 
+	        setDoPaint( FALSE); 
 	        str[0]=0;
            	if (GetTextString (hWnd,str,sizeof(str),"Enter new pen number",0,0,0,TRUE,TRUE))
         	{   
@@ -4957,7 +4957,7 @@ BOOL ChangePenNumber (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			    CurView->CurZoomAreaRef = 0;
 			    RedisplayViewport(FALSE,FALSE);
 	        }
-			DoPaint=TRUE;
+			setDoPaint( TRUE);
         }
 		break;
 
@@ -5213,7 +5213,7 @@ GSSiExitProg (911);
 		PostMessage(hWnd, GF_CLOSE,0, 0L); 
    		EditView = 0; 
    		HaveRect = FALSE;
-		DoPaint = TRUE;      
+		setDoPaint( TRUE);      
 		DisableMarginPan = FALSE;
        	SetCurs (0,FALSE);
 		break;
@@ -5277,7 +5277,7 @@ BOOL EditViewport (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			FreeProcInstance(lpfnVPEDITMsgProc);
 			if (nRc)
 	 			DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID);
-			DoPaint = TRUE;      
+			setDoPaint( TRUE);      
 			DisableMarginPan = FALSE;
 			RedisplayWindow();   
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
@@ -5376,7 +5376,7 @@ BOOL SelectOrigOrtho (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE; 
+	    setDoPaint( FALSE); 
 	    PickOrtho=TRUE;  
 	    PickedOrthoName[0]=0;
 		UseUserPickAp =FALSE;
@@ -5386,7 +5386,7 @@ BOOL SelectOrigOrtho (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		UseUserPickAp =TRUE;  
 		MaxPick = SaveMaxPick;
 	    PickOrtho=FALSE;
-		DoPaint=TRUE; 
+		setDoPaint( TRUE); 
 		if (PickedOrthoName[0])
 		{
 			LPSTR	lpColon;
@@ -5607,9 +5607,9 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    	HaveDown = FALSE;
 	    	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	        BasePoint=ScreenPtToBasePt(MousePoint);
-		    DoPaint=FALSE;
+		    setDoPaint( FALSE);
 		    PickItems (hWnd,BasePoint); 
-		    DoPaint=TRUE;
+		    setDoPaint( TRUE);
 	        if (NumPicked > 0)
 	        {
 		      	POINT	position; 
@@ -5842,9 +5842,9 @@ BOOL DisplayDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
         BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);    
-	    DoPaint=TRUE;
+	    setDoPaint( TRUE);
         if (NumPicked > 0)
         {
 		    DisplayDocumentList (hWnd,
@@ -7154,7 +7154,7 @@ BOOL HighlightItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short F
     case WM_LBUTTONUP:
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE; 
+	    setDoPaint( FALSE); 
 	    SavePOH = PickOnlyHighlighted;
 		PickOnlyHighlighted = 0;
 	    switch (Function)
@@ -7197,7 +7197,7 @@ BOOL HighlightItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short F
 	    }
 	    if (np)
 			SetPickGlobals (np-1); 
-		DoPaint=TRUE;
+		setDoPaint( TRUE);
 		if (Message == GF_USEPICKED)
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
 		break;
@@ -7798,7 +7798,7 @@ BOOL DisplayNetInfo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
@@ -7809,7 +7809,7 @@ BOOL DisplayNetInfo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			rc=DialogBox(hInst, (LPSTR)"DISPLAYNETINFO", hWndMain, lpfnDISPLAYNETINFOMsgProc);
 			FreeProcInstance(lpfnDISPLAYNETINFOMsgProc);
     	} 
-    	DoPaint=TRUE;
+    	setDoPaint( TRUE);
        	break;
 
     case WM_KEYDOWN:
@@ -7887,9 +7887,9 @@ BOOL DisplayNetInfo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 					StreetNum = AddStreetName (snam,0,"","","","");	
 					if (!StreetNum)
 						goto NextPoint;
-				    DoPaint=FALSE;
+				    setDoPaint( FALSE);
 				    PickItems (hWnd,MPPoint); 
-				    DoPaint=TRUE;
+				    setDoPaint( TRUE);
 				    while (NumPicked--)
 				    {   
 				    	RouteRefKey.Ref = PickList[NumPicked].Refno;
@@ -8013,7 +8013,7 @@ BOOL DisplayNetMarkers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
  	    MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {      
@@ -8023,7 +8023,7 @@ BOOL DisplayNetMarkers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	    MousePoint.y = HIWORD(lParam);
 	    if (!CurView->hTranWinToBase) break;
 	    BasePoint=WinPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
@@ -8098,9 +8098,9 @@ BOOL DisplayNetMarkers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	          	_fstrcpy (str,"[beginmi]");
 	          	ExpandText (str); 
 	          	MPVal = atof (str); 
-			    DoPaint=FALSE;
+			    setDoPaint( FALSE);
 			    PickItems (hWnd,MPPoint); 
-			    DoPaint=TRUE;
+			    setDoPaint( TRUE);
 			    NumChecked = 0;
 			    while (NumPicked--)
 			    {   
@@ -8154,7 +8154,7 @@ BOOL DisplayNetMarkers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			CloseStreetNameTable ();
 */        
     	} 
-    	DoPaint=TRUE;
+    	setDoPaint( TRUE);
        	break;
 
     default:
@@ -8187,7 +8187,7 @@ BOOL DeleteNetMarker (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
 	    MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         if (NumPicked > 0)
         {
@@ -8198,7 +8198,7 @@ BOOL DeleteNetMarker (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			rc=DialogBox(hInst, (LPSTR)"DISPLAYNETINFO", hWndMain, lpfnDISPLAYNETINFOMsgProc);
 			FreeProcInstance(lpfnDISPLAYNETINFOMsgProc);
     	} 
-    	DoPaint=TRUE;
+    	setDoPaint( TRUE);
        	break;
 
     default:
@@ -9743,7 +9743,7 @@ BOOL SelectStreetLink (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	HaveDown = FALSE;
 	    MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (hWnd,BasePoint);
         if (NumPicked--)
         {   
@@ -9782,7 +9782,7 @@ BOOL SelectStreetLink (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		 	CloseNetLinkAndRef (Opened);
 	    	
     	} 
-    	DoPaint=TRUE;
+    	setDoPaint( TRUE);
        	break;
 
     default:
@@ -10277,7 +10277,7 @@ BOOL EditAddress (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		short	i,j;   
    		HCURSOR	hcurSave=0; 
 		char	OneWayTxt[3][3]={"<>","->","<-"};
-		BOOL	SaveDoPaint=DoPaint, SaveHBW=HaveBlockingWindow, RemoveStreet;
+		BOOL	SaveDoPaint=DoPaint(), SaveHBW=HaveBlockingWindow, RemoveStreet;
 
         if (!CurView->HaveEditRect)
         	break;
@@ -10286,7 +10286,7 @@ BOOL EditAddress (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	
 	
 		HaveBlockingWindow = TRUE;
-		DoPaint = FALSE; 
+		setDoPaint( FALSE); 
 		_fmemmove (&Info,&CurEditRect,CurView->EditRectInfoSize);
 		Ref = Info.Refno;
 NextRef:  
@@ -10681,7 +10681,7 @@ CancelChange:
 	    if (hDBStreetSegments)
 	    	GlobalUnlock (hDBStreetSegments);
 	    CloseStreetSegmentTable(OpenedSeg);  
-		DoPaint = SaveDoPaint;   
+		setDoPaint( SaveDoPaint);   
 		HaveBlockingWindow = SaveHBW;
 	}
     	break;  
@@ -10959,9 +10959,9 @@ BOOL LoadMarkersFromHighlight (HWND hWnd, int Message, WPARAM wParam, LPARAM lPa
             PickList[0]=HighlightData.PD;
             ProcessPickedItem (0,FALSE);    
           	MPPoint = HighlightData.PD.BeginPoint;
-		    DoPaint=FALSE;
+		    setDoPaint( FALSE);
 		    PickItems (0,MPPoint); 
-		    DoPaint=TRUE;
+		    setDoPaint( TRUE);
 		    AZ = PickList[NumPicked-1].PPAZ; 
 		    NP = NumPicked; 
 		    pRandMP = RouteAndMP;
@@ -12836,11 +12836,11 @@ BOOL HighlightByClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		} 
-		DoPaint = FALSE; 
+		setDoPaint( FALSE); 
         lpfnHIGHLIGHTCLASSMsgProc = MakeProcInstance((DLGPROC)HIGHLIGHTCLASSMsgProc, hInst);
         DialogBox(hInst, (LPSTR)"HIGHLIGHTCLASS", CurView->hWnd, lpfnHIGHLIGHTCLASSMsgProc);
         FreeProcInstance(lpfnHIGHLIGHTCLASSMsgProc);
-		DoPaint=TRUE;
+		setDoPaint( TRUE);
 	}
 		break;
 
@@ -16858,7 +16858,7 @@ BOOL DeleteItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Func
     case WM_LBUTTONUP:
     	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	    BasePoint=ScreenPtToBasePt(MousePoint);
-	    DoPaint=FALSE; 
+	    setDoPaint( FALSE); 
 	    PickItems (hWnd,BasePoint);  
 	case GF_USEPICKED:
 		if (Message == GF_USEPICKED)

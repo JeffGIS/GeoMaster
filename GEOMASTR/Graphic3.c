@@ -3727,7 +3727,7 @@ short PanWindow (HWND hWnd, int pandir)
 	double	panaz = pandir * HALFPI;
 	double	pandist;
 
-	 DoPaint = TRUE;
+	 setDoPaint( TRUE);
      bmwidth = CurView->ScreenRect.right - CurView->ScreenRect.left;
      bmheight = CurView->ScreenRect.bottom - CurView->ScreenRect.top;
 	 switch (pandir)
@@ -3813,7 +3813,7 @@ void SetBoundsRect2 (RECT Rect, HDC hDC)
 
  //checkvp(1);	
      if (!Printing && !DisableHalt)
-     	DoPaint = TRUE;
+     	setDoPaint( TRUE);
      CurrentRect = Rect; 
      if (CurView->NewBounds.xmx - CurView->NewBounds.xmn <P_TOL ||
       	 CurView->NewBounds.ymx - CurView->NewBounds.ymn <P_TOL)
@@ -4088,13 +4088,13 @@ void GMMessageBox (UINT Message, UINT Title, UINT Style)
 {   
 	char	Msg[256], Tit[128]; 
 	
-	DoPaint = FALSE;
+	setDoPaint( FALSE);
 	if (!LoadString(hInst, Message, Msg, sizeof(Msg)))
 		*Msg=0;
 	if (!LoadString(hInst, Title, Tit, sizeof(Tit)))
 		*Tit=0;
 	GSSiMsgBox (GetFocus(),Msg,Tit,Style,0); 
-	DoPaint = TRUE;
+	setDoPaint( TRUE);
 {
 #if ENABLETRACE
 GSSiExitProg (409);

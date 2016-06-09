@@ -180,7 +180,7 @@ short SelectPointSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR ParName,
 		_fstrcpy (CurSymSize,SymSize); 
 	if (SymRot && *SymRot)
 		_fstrcpy (CurSymRot,SymRot);
-	DoPaint = FALSE; 
+	setDoPaint( FALSE); 
 	lpfnGET_POINTSYMMsgProc = MakeProcInstance((DLGPROC)GET_POINTSYMMsgProc, hInst);
 	switch (DialogOpt)
 	{   
@@ -197,7 +197,7 @@ short SelectPointSymbol (HWND hWnd,short DialogOpt,LPSTR SymName, LPSTR ParName,
 		break;  
 	}
 	FreeProcInstance(lpfnGET_POINTSYMMsgProc);   
-	DoPaint = TRUE;
+	setDoPaint( TRUE);
 	if (nRc)
 	{
 		_fstrcpy (SymName,CurSymName); 

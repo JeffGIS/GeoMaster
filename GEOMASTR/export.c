@@ -1186,7 +1186,7 @@ Exit:
         GSSiMsgBox( GetFocus(), "TIGER Extract Complete to [%DL]tigerout","", MB_OK,0);
     else
         GSSiMsgBox( GetFocus(), "Extract Aborted","", MB_OK,0); 
-    DoPaint = TRUE;
+    setDoPaint( TRUE);
     return;
 } 
 

@@ -9243,7 +9243,7 @@ Open:
 			else
 			{
 				HaltMapDisplay(FALSE,FALSE); 
-				DoPaint = FALSE;
+				setDoPaint( FALSE);
 				if (GSSiMsgBox( GetFocus(),str, 0, MB_OKCANCEL|MB_ICONEXCLAMATION,0) ==  IDCANCEL)
             		BlowOut(0,0);
 			}

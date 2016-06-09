@@ -14,8 +14,8 @@ BOOL FileOnSystem (LPSTR Name)
 	
 	_fstrcpy (NewName,Name);
 	ExpandText (NewName);
-    if (ConvertNameToCDName (NewName))
-    	return TRUE;
+//    if (ConvertNameToCDName (NewName))
+//    	return TRUE;
 	return ExistFile(Name);
 } 
 
@@ -208,7 +208,7 @@ BOOL ConvertNameToCDName (LPSTR Name)
 {   
 	char	Drive[34], NewName[MAX_PATH], Mess[MAX_PATH]; 
 	short	n;
-	BOOL	SaveDP = DoPaint, SaveDH = DisableHalt;
+	BOOL	SaveDP = DoPaint (), SaveDH = DisableHalt;
 	short	Response=1;
 	LPSTR	VolLabel, FromName, pBS;
 	
@@ -216,10 +216,10 @@ BOOL ConvertNameToCDName (LPSTR Name)
 		OpenCDLookUpTable ();
 	if (hCDLookUpTable == (HANDLE)1)
 		return FALSE;
-if (hCDLookUpTable == (HANDLE)3)
+	if (hCDLookUpTable == (HANDLE)3)
 		return FALSE;
 	ExpandText (Name);  
-	DoPaint = FALSE; 
+	setDoPaint( FALSE); 
 	DisableHalt = TRUE;
 	FromName = VolLabel = GlobalLock (hCDLookUpTable);
 	while (*FromName)
@@ -243,7 +243,7 @@ if (hCDLookUpTable == (HANDLE)3)
 					_fstrcat (NewName,pBS);
 					_fstrcpy (Name,NewName);
 					GlobalUnlock (hCDLookUpTable);
-					DoPaint = SaveDP;
+					setDoPaint( SaveDP);
 					DisableHalt = SaveDH;
 					return TRUE; 
 				}
@@ -269,7 +269,7 @@ if (hCDLookUpTable == (HANDLE)3)
 	}
 Exit: 
 	GlobalUnlock (hCDLookUpTable);
-	DoPaint = SaveDP; 
+	setDoPaint( SaveDP);
 	DisableHalt = SaveDH;
 	return FALSE;
 }

@@ -2879,11 +2879,11 @@ GSSiExitProg (1314);
 #endif
 		return FALSE;
 }
-	DoPaint = FALSE; 
+	setDoPaint( FALSE); 
     lpfnDISPLAYSELECTEDCLASSESMsgProc = MakeProcInstance((DLGPROC)DISPLAYSELECTEDCLASSESMsgProc, hInst);
     DialogBox(hInst, (LPSTR)"DISPLAYSELECTEDCLASSES", CurView->hWnd, lpfnDISPLAYSELECTEDCLASSESMsgProc);
     FreeProcInstance(lpfnDISPLAYSELECTEDCLASSESMsgProc);
-	DoPaint=TRUE; 
+	setDoPaint( TRUE); 
 {
 #if ENABLETRACE
 GSSiExitProg (1314);

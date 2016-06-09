@@ -487,7 +487,7 @@ C-------------------------------        */
            
            {  
               char  mess[256];
-              DoPaint = FALSE;
+              setDoPaint( FALSE);
               sprintf (mess,"Error opening projection definition file %s",PNAME);
               MessageBox(NULL,mess,"Load Projection",MB_ICONEXCLAMATION|MB_TASKMODAL);
               return -1;

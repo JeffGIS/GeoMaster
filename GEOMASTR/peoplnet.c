@@ -479,7 +479,7 @@ TryMapAgain2:
 		CmdMess = GlobalLock (hCmdMess);
 		sprintf (CmdMess,"%.14lg;%.14lg;%.14lg;%.14lg;%.14lg",xmid,ymid,Scale,degperpixelx,degperpixely);
 		GlobalUnlock (hCmdMess);
-		DoPaint = TRUE;	 
+		setDoPaint( TRUE);	 
 		hcurSave = GSSiSetCursor(LoadCursor(NULL, IDC_WAIT)); 
 		PaintMap (CurView->hWnd,CurView->hDC,TRUE,NULL,0); 
 		if (!Attempt++ && ZOOMLevelUsed && NumStreetMidPoints < GetGlobalLVal2 ("[%MINSTREETS]",0))
@@ -546,7 +546,7 @@ TryMapAgain2:
 		SelectClipRgn (CurView->hDC,NULL);			
 		SetDisplayMode (CurView->hDC,GF_TEXTMODE);
 		hcurSave = GSSiSetCursor(LoadCursor(NULL, IDC_WAIT)); 
-		DoPaint = TRUE;	
+		setDoPaint( TRUE);	
 		if (rtn) 
 			PaintMap (CurView->hWnd,hdcMemMap,TRUE,NULL,0);  
 		MemMap = SaveMemMap;
@@ -671,7 +671,7 @@ TryMapAgain:
 		else
 			sprintf (CmdMess,"%.14lg;%.14lg;%.14lg;%.14lg;%.14lg",xmid,ymid,Scale,degperpixelx,degperpixely);
 		GlobalUnlock (hCmdMess);
-		DoPaint = TRUE;	 
+		setDoPaint( TRUE);	 
 		if (PeopleNet)
 			OpenBP = OpenBasePens (); 
 		hcurSave = GSSiSetCursor(LoadCursor(NULL, IDC_WAIT)); 

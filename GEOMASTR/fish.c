@@ -848,12 +848,12 @@ SetGPS:
 			        {
 			        	BOOL	nRc;
 			            
-			            DoPaint=FALSE;   
+			            setDoPaint( FALSE);   
 			            AllowWPSkip=FALSE;   
 						lpfnADDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)ADDWAYPOINTMsgProc, hInst);
 						nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndDlg, lpfnADDWAYPOINTMsgProc);
 						FreeProcInstance(lpfnADDWAYPOINTMsgProc);
-						DoPaint=TRUE; 
+						setDoPaint( TRUE); 
          				if (nRc)
          				{ 
 					 		SendDlgItemMessage (hWndDlg,IDC_GPSLIST,LB_DELETESTRING,Choice,(LPARAM)0); 
@@ -2744,12 +2744,12 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 			        {
 			        	BOOL	nRc;
 			            
-			            DoPaint=FALSE;      
+			            setDoPaint( FALSE);      
 			            AllowWPSkip=FALSE;   
 						lpfnADDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)ADDWAYPOINTMsgProc, hInst);
 						nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndDlg, lpfnADDWAYPOINTMsgProc);
 						FreeProcInstance(lpfnADDWAYPOINTMsgProc);
-						DoPaint=TRUE; 
+						setDoPaint( TRUE); 
          				if (nRc)
          					PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 			        }

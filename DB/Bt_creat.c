@@ -1343,7 +1343,7 @@ void BTreeErrorMessage (LPBTREE pBTree,LPSTR Mess)
 	char	str[128]="Error in BTree index:";
 	
 	_fstrcpy (str,Mess);
-	DoPaint = FALSE;
+	setDoPaint( FALSE);
 	GSSiMsgBox( GetFocus(), str,pBTree->BT_FNAME, MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL,0);
     BlowOut (0,0);
 #if ENABLETRACE

@@ -3232,11 +3232,11 @@ GSSiExitProg (1350);
         {
         	BOOL	nRc;
             
-            DoPaint=FALSE;      
+            setDoPaint( FALSE);      
 			lpfnADDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)ADDWAYPOINTMsgProc, hInst);
 			nRc = DialogBox(hInst, (LPSTR)"ADDWAYPOINT",hWndMain, lpfnADDWAYPOINTMsgProc);
 			FreeProcInstance(lpfnADDWAYPOINTMsgProc); 
-			DoPaint=TRUE;
+			setDoPaint( TRUE);
             if (nRc)
             	goto RtnTrue;
             else
@@ -3577,7 +3577,7 @@ GSSiExitProg (1350);
 			_fstrcpy (&Arg5[512],Arg[1]);
 			_fstrcpy (&Arg5[850],Arg[4]);
 			GlobalUnlock (hSelectItemsArgs);
-            DoPaint = FALSE;  
+            setDoPaint( FALSE);  
             if (atob(Arg[6]))
             {    
 				lpfnSELECTITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTITEMSMsgProc2, hInst);
@@ -3590,7 +3590,7 @@ GSSiExitProg (1350);
 				rtn = DialogBox(hInst, (LPSTR)"SELECTITEMS",hWndMain, lpfnSELECTITEMSMsgProc);
 				FreeProcInstance(lpfnSELECTITEMSMsgProc); 
 			}
-			DoPaint = TRUE;                              
+			setDoPaint( TRUE);                              
 			GSSiGlobFree (&hSelectItemsArgs);
 			itoa (rtn,OutLoc,10);
 			goto Rtnl;
@@ -4061,11 +4061,11 @@ GSSiExitProg (1350);
 
 		case 1201: //$FINDWAYPOINT ()
         {
-            DoPaint = FALSE;      
+            setDoPaint( FALSE);      
 			lpfnFINDWAYPOINTMsgProc = MakeProcInstance((DLGPROC)FINDWAYPOINTMsgProc, hInst);
 			rtn = DialogBox(hInst, (LPSTR)"FINDWAYPOINT",hWndMain, lpfnFINDWAYPOINTMsgProc);
 			FreeProcInstance(lpfnFINDWAYPOINTMsgProc); 
-			DoPaint = TRUE;
+			setDoPaint( TRUE);
             if (rtn)
             	goto RtnTrue;
             else
@@ -4672,11 +4672,11 @@ GSSiExitProg (1350);
 			_fstrcpy (&Arg1[128+1024+256+1024+256+64+64],Arg[8]);//TABS
 			_fstrcpy (&Arg1[128+1024+256+1024+256+64+64+256],Arg[9]);//RECT
 			GlobalUnlock (hSelectItemsArgs);
-            DoPaint = FALSE;      
+            setDoPaint( FALSE);      
 			lpfnSELECTDBITEMSMsgProc = MakeProcInstance((DLGPROC)SELECTDBITEMSMsgProc, hInst);
 			rtn = DialogBox(hInst, (LPSTR)"SELECTITEMS",hWndMain, lpfnSELECTDBITEMSMsgProc);
 			FreeProcInstance(lpfnSELECTDBITEMSMsgProc); 
-			DoPaint = TRUE;                              
+			setDoPaint( TRUE);                              
 			GSSiGlobFree (&hSelectItemsArgs);
             itoa (rtn,OutLoc,10);
 			goto Rtnl;

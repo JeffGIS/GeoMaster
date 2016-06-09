@@ -175,11 +175,11 @@ char	qs[2]="";
 		 lmes = SQL_MAX_MESSAGE_LENGTH-1; 
 	     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC,hstmt,cError,&ierrno,Mess,SQL_MAX_MESSAGE_LENGTH-2,&lmes);
 	     sprintf (DispStr,"%s   %s",lpsqlstr,Mess);
-	     DoPaint = FALSE;
+	     setDoPaint( FALSE);
 	     if (GSSiMsgBox(hWndMain,DispStr,"Error in SQL Query",MB_OKCANCEL|MB_ICONQUESTION,0)
 	     	 == IDCANCEL)
 	     	 HaltReport=TRUE;  
-	     DoPaint = TRUE;
+	     setDoPaint( TRUE);
 	     goto Exit;
     }  
 	if(rc != SQL_SUCCESS) goto Exit;
@@ -417,11 +417,11 @@ HANDLE	hSTR = 0;
 		 lmes = SQL_MAX_MESSAGE_LENGTH-1; 
 	     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC,hstmt,cError,&ierrno,Mess,SQL_MAX_MESSAGE_LENGTH-2,&lmes);
 	     sprintf (DispStr,"%s   %s",lpsqlstr,Mess);
-	     DoPaint = FALSE;
+	     setDoPaint( FALSE);
 	     if (GSSiMsgBox(hWndMain,DispStr,"Error in SQL Query",MB_OKCANCEL|MB_ICONQUESTION,0)
 	     	 == IDCANCEL)
 	     	 HaltReport=TRUE; 
-	     DoPaint = TRUE;
+	     setDoPaint( TRUE);
        	 GlobalUnlock (SQLPtr->OFHandle); 
        	 GlobalUnlock (hSQL); 
        	 GSSiGlobUlFree (&hSTR);
@@ -577,14 +577,14 @@ Next:
 		 lmes = SQL_MAX_MESSAGE_LENGTH-1; 
 	     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC,hstmt,cError,&ierrno,Mess,SQL_MAX_MESSAGE_LENGTH-2,&lmes);
 	     sprintf (DispStr,"%s\r\n%s",SQL,Mess); 
-	     DoPaint = FALSE;
+	     setDoPaint( FALSE);
 	     if (GSSiMsgBox(hWndMain,DispStr,"Error in SQL Execution",MB_OKCANCEL|MB_ICONQUESTION,0)
 	     	 == IDCANCEL)
 	     {
 	     	HaltReport = TRUE;
 	     	rtn=FALSE;        
 	     }
-	     DoPaint = TRUE;
+	     setDoPaint( TRUE);
 	     GSSiGlobUlFree (&hMem);
     }  
 	SQLCloseCursor(hstmt);
@@ -856,7 +856,7 @@ ErrMes:
 			     	goto EndErr;    
 			     FirstErr = FALSE;
 			     sprintf (DispStr,"Query:%s\r\nParms:%s\r\nError Num: %ld(%i)\r\nError Message:%s",sqlstr,pParms,ierrno,rcer,Mess); 
-			     DoPaint = FALSE;
+			     setDoPaint( FALSE);
 				 if (ShowSQLErrors == 1)
 				 {
 					 if (GSSiMsgBox(hWndMain, DispStr, "Error in SQL Query", MB_OKCANCEL | MB_ICONQUESTION, 0)
@@ -872,7 +872,7 @@ ErrMes:
 				 }
 			     goto NextErr;  
 		EndErr:
-			     DoPaint = TRUE;
+			     setDoPaint( TRUE);
 			     GSSiGlobUlFree (&hMem);
 			 }  
 		     GSSiGlobUlFree (&hParms);
@@ -1435,11 +1435,11 @@ ErrMes:
 		 lmes = SQL_MAX_MESSAGE_LENGTH-1; 
 	     SQLError(SQL_NULL_HENV,SQL_NULL_HDBC,hstmt,cError,&ierrno,Mess,SQL_MAX_MESSAGE_LENGTH-2,&lmes);
 	     sprintf (DispStr,"%s   %s",lpsqlstr,Mess); 
-	     DoPaint = FALSE;
+	     setDoPaint( FALSE);
 	     if (GSSiMsgBox(hWndMain,DispStr,"Error in SQL Query",MB_OKCANCEL|MB_ICONQUESTION,0)
 	     	 == IDCANCEL)
 	     	 HaltReport=TRUE;  
-	     DoPaint = TRUE;
+	     setDoPaint( TRUE);
 	     GlobalUnlock (hMem);
 	     GSSiGlobUlFree (&hMem);
 	     goto s44;
@@ -1981,10 +1981,10 @@ FoundOne:
    tnames[0] = '\0';
    lptnames = (LPSTR)tnames;
    lpcstring = (LPSTR)cstring; 
-   SaveDoPaint = DoPaint;
+   SaveDoPaint = DoPaint();
 TryAgain:
 //testvalue(1);
-   DoPaint = FALSE;  
+   setDoPaint( FALSE);  
    lpUID = _fstrstr (lpcstring,";UID=");
    if (lpUID) *lpUID=0;
    if (!AddPWtoODBCFile (lpcstring) && lpUID)
@@ -2017,7 +2017,7 @@ TryAgain:
 	  // RestoreDC(hDC, -1);
 	  // ReleaseDC(hWndMain, hDC);
    }
-   DoPaint = SaveDoPaint;
+   setDoPaint( SaveDoPaint);
 //testvalue(1);
    if(rc ==  SQL_ERROR)
    {

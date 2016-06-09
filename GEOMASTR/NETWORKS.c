@@ -275,9 +275,9 @@ BOOL DeleteHighlightedMarkers (void)
         PickList[0]=HighlightData.PD;
 //        ProcessPickedItem (0,FALSE);    
       	MPPoint = HighlightData.PD.BeginPoint;
-	    DoPaint=FALSE;
+	    setDoPaint( FALSE);
 	    PickItems (NULL,MPPoint); 
-	    DoPaint=TRUE;
+	    setDoPaint( TRUE);
 	    AZ = PickList[NumPicked-1].PPAZ; 
 	    while (NumPicked--)
 	    {   

@@ -120,13 +120,13 @@ short GSSiMessageBox (LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 #endif
 {   
 	short	rtn;  
-	BOOL	SaveDoPaint=DoPaint, SaveHBW=HaveBlockingWindow;
+	BOOL	SaveDoPaint=DoPaint(), SaveHBW=HaveBlockingWindow;
 	HANDLE	hMem = GSSiGlobAlloc ( 750,GMEM_MOVEABLE,4096);
 	LPSTR	pMess = GlobalLock (hMem);
 	LPSTR	pTitle = pMess + 2048;
 	
 	HaveBlockingWindow = TRUE;
-	DoPaint = FALSE;
+	setDoPaint( FALSE);
 	if (Mess)
 	{ 
 		_fstrcpy (pMess,Mess);
@@ -143,7 +143,7 @@ short GSSiMessageBox (LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 		pTitle = 0;
 	rtn = GSSiMsgBox (hWndMain,pMess,pTitle,icon,Position); 
 	GSSiGlobUlFree (&hMem);
-	DoPaint = SaveDoPaint;   
+	setDoPaint( SaveDoPaint);   
 	HaveBlockingWindow = SaveHBW;
 {
 #if ENABLETRACE

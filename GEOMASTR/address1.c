@@ -1537,7 +1537,7 @@ BOOL ConvertSSTV2toV3 (LPSTR File)
 	if (!GSSiRename (IndexName,OldName))
 	{    
 Mess1:  
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
     	GSSiMsgBox (GetFocus(),"Cannot convert street seg file - file exists",0,MB_ICONEXCLAMATION,0);
         BlowOut(0,0);
 	}
@@ -1578,7 +1578,7 @@ ErrOut:
     CloseGWDatabase (hDBold);   
     if (!rtn)
     {
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
     	GSSiMsgBox (GetFocus(),"Error converting street seg file - disk full",0,MB_ICONEXCLAMATION,0);
         BlowOut(0,0);
     }
@@ -1614,7 +1614,7 @@ BOOL ConvertSSTV3toV4 (LPSTR File)
 	if (!GSSiRename (IndexName,OldName))
 	{    
 Mess1:  
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
     	GSSiMsgBox (GetFocus(),"Cannot convert street seg file - file exists",0,MB_ICONEXCLAMATION,0);
         BlowOut(0,0);
 	}
@@ -1653,7 +1653,7 @@ ErrOut:
     CloseGWDatabase (hDBold);   
     if (!rtn)
     {
-		DoPaint = FALSE;
+		setDoPaint( FALSE);
     	GSSiMsgBox (GetFocus(),"Error converting street seg file - disk full",0,MB_ICONEXCLAMATION,0);
         BlowOut(0,0);
     }

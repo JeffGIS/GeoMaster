@@ -1637,7 +1637,7 @@ GSSiExitProg (399);
     	return (FALSE); 
 }
     _fstrcpy (NewName,ImageFile);
-    ConvertNameToCDName (NewName);
+    //ConvertNameToCDName (NewName);
     if (frame >= 0)
     {   
         HANDLE hDib;

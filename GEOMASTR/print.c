@@ -1315,7 +1315,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
 		ReleaseDC (hWndMain,hDC);
 	 } */   
 	 WindowColor = RGB(255,255,255);   
-     DoPaint = FALSE;   
+     setDoPaint( FALSE);   
      HaltPaint = TRUE;  
      hSaveBM = EnterBlockingWindow (hWnd);
 	 EnableWindow (hWndMain,FALSE);
@@ -1465,7 +1465,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
         lpPDChunk->hDC = 0;
         GlobalUnlock(hPDChunk);
 		HaltPaint = FALSE;
-    	DoPaint = TRUE;   
+    	setDoPaint( TRUE);   
 	 	EnableWindow (hWndMain,TRUE);
 		LeaveBlockingWindow(hSaveBM); 
 		WindowColor = SaveColor;
@@ -1984,7 +1984,7 @@ Exit2:
     if (LastPage)
     {
 		HaltPaint = FALSE;
-    	DoPaint = TRUE;   
+    	setDoPaint( TRUE);   
     }
     ShadowInc = SaveShadow;
  	WidthFactor = SaveWidthFactor;
@@ -2084,7 +2084,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
      	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
      lpPDChunk->hwndOwner = ghWnd;
      	
-//     DoPaint = FALSE; 
+//     setDoPaint( FALSE); 
 //	 EnableWindow (hWndMain,FALSE);
 	 if (!havePrintSetup && ForceOrient && !ShowVirtualPrintAreas)
 	 { 
@@ -2224,7 +2224,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     Printing = FALSE; 
     {
 		HaltPaint = FALSE;
-    	DoPaint = TRUE;   
+    	setDoPaint( TRUE);   
     }
 //	EnableWindow (hWndMain,TRUE);  
     DeviceToScreenFactor = SaveDTSF;
@@ -2284,7 +2284,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
      	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
      lpPDChunk->hwndOwner = ghWnd;
      	
-//     DoPaint = FALSE; 
+//     setDoPaint( FALSE); 
 //	 EnableWindow (hWndMain,FALSE);
 	 if (ForceOrient && !ShowVirtualPrintAreas)
 	 { 
@@ -2432,7 +2432,7 @@ NextPage:
     Printing = FALSE; 
     {
 		HaltPaint = FALSE;
-    	DoPaint = TRUE;   
+    	setDoPaint( TRUE);   
     }
 //	EnableWindow (hWndMain,TRUE);  
     DeviceToScreenFactor = SaveDTSF;
@@ -2480,7 +2480,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
      	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
      lpPDChunk->hwndOwner = ghWnd;
      	
-//     DoPaint = FALSE; 
+//     setDoPaint( FALSE); 
 	 EnableWindow (hWndMain,FALSE);
      if (PrintDlg(lpPDChunk) != 0)
      
@@ -2623,7 +2623,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
     Printing = FALSE; 
     {
 		HaltPaint = FALSE;
-    	DoPaint = TRUE;   
+    	setDoPaint( TRUE);   
     }
 	EnableWindow (hWndMain,TRUE);
     return (rtn);
@@ -2762,7 +2762,7 @@ BOOL PrintMerge (HWND hWnd)
      	
     EnableWindow (hWndMain,FALSE);  
    	WindowColor = RGB(255,255,255);   
-    DoPaint = FALSE;  
+    setDoPaint( FALSE);  
     HaltPaint = TRUE;
 	lpPDChunk->hwndOwner = ghWnd;	
 	lpPDChunk->hDC=0;
@@ -3179,7 +3179,7 @@ Exit:
     Printing = FALSE;  
     PrintMerging = FALSE;
 	HaltPaint = FALSE;
-   	DoPaint = TRUE;   
+   	setDoPaint( TRUE);   
     ShadowInc = SaveShadow;
  	WidthFactor = SaveWidthFactor;
 	EnableWindow (hWndMain,TRUE);
@@ -3326,7 +3326,7 @@ temp:
 	MemMap = TRUE;
 	*MemMapName = 0;
 	hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
-	DoPaint = TRUE;	
+	setDoPaint( TRUE);	
     SaveViewports (0);
 	GetClientRect (hWndMain,&CRect);
 	DeviceToScreenFactorMemMap = (double)MemMapWidth / (CRect.right - CRect.left);

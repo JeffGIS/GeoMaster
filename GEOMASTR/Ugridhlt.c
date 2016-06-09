@@ -764,7 +764,7 @@ int ShowHLTList(HWND hWnd,int DockingStatus){
 			hWndDlg = CreateDialog(hInst,"UGRID_HLT",hWnd, dlgproc);
 		}
 	}
-	DoPaint=TRUE;
+	setDoPaint( TRUE);
 
 	return 0;
 }

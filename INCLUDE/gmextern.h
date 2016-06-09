@@ -283,7 +283,6 @@ extern DPOINT		DispersedPointLoc;
 extern DPOINT		TravStartPoint;
 extern BOOL			ForceRefIndex;
 extern BOOL			ForceTAGIndex;
-extern BOOL			DoPaint;
 extern BOOL			HavePaint;
 extern BOOL			HaltPaint;
 extern BOOL			CreateConfig;
@@ -1781,7 +1780,9 @@ extern	BOOL	useGDIPlus;
 extern	int		ShowLineDirection;
 extern	int		ii;
 
-
+extern int nPaint;
+BOOL setDoPaint(BOOL DoPaint);
+BOOL DoPaint(void);
 
 
 

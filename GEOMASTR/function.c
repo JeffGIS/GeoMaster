@@ -1516,7 +1516,7 @@ SetVis:
 
 
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-			DoPaint = FALSE;      
+			setDoPaint( FALSE);      
             if (!_fstricmp (Arg[1],"WPTRAN"))
              {
 				lpfnGPSMsgProc = MakeProcInstance((DLGPROC)GPSMsgProc, hInst);
@@ -1548,7 +1548,7 @@ SetVis:
 				nRc = DialogBox(hInst, (LPSTR)"GPSCONFIG", hWndMain, lpfnGPSCONFIGMsgProc);
 				FreeProcInstance(lpfnGPSCONFIGMsgProc);   
 			}
-			DoPaint = TRUE; 
+			setDoPaint( TRUE); 
 				
             if (nRc)
             	goto RtnTrue;
