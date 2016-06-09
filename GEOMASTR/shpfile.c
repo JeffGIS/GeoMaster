@@ -1711,7 +1711,7 @@ BOOL ProcessSHPRecord (HDC hDC,HFILE FidSHP,long RecordNumber)
        		HaveTXLoc = TRUE;
     		CurrentType = GF_POINT; 
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
@@ -1744,7 +1744,7 @@ BOOL ProcessSHPRecord (HDC hDC,HFILE FidSHP,long RecordNumber)
 					}
 					if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 					{
-						CurPointSize = 10*DeviceToScreenFactor;
+						CurPointSize = 10*DeviceToScreenFactor();
 						iDesc = InvisiblePointSymbol;
 					}
 					if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -1753,7 +1753,7 @@ BOOL ProcessSHPRecord (HDC hDC,HFILE FidSHP,long RecordNumber)
 						{
 							iDesc = ThemePointSym;
 							if (ThemePointSize < 0)
-								size = -ThemePointSize *DeviceToScreenFactor;
+								size = -ThemePointSize *DeviceToScreenFactor();
 							else
 								size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 							size *= ThemeWidthFactor;
@@ -1971,7 +1971,7 @@ DoPoly:
 							TempLineWidth = SHPWidth; 
 							if (TempLineColor >= 0 || TempLineWidth != 0)
 							{
-								hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor),TempLineColor);
+								hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor()),TempLineColor);
 								SelectObject(hDC,hNewPen);
 							}
 	//						if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentTAG,CurrentUDI))
@@ -4414,7 +4414,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
        		HaveTXLoc = TRUE;
     		CurrentType = GF_POINT; 
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
@@ -4447,7 +4447,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 					}
 					if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 					{
-						CurPointSize = 10*DeviceToScreenFactor;
+						CurPointSize = 10*DeviceToScreenFactor();
 						iDesc = InvisiblePointSymbol;
 					}
 					if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -4456,7 +4456,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 						{
 							iDesc = ThemePointSym;
 							if (ThemePointSize < 0)
-								size = -ThemePointSize *DeviceToScreenFactor;
+								size = -ThemePointSize *DeviceToScreenFactor();
 							else
 								size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 							size *= ThemeWidthFactor;
@@ -5226,7 +5226,7 @@ badcode:
 						TempLineWidth = SHPWidth; 
 						if (TempLineColor >= 0 || TempLineWidth != 0)
 						{
-							hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor),TempLineColor);
+							hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor()),TempLineColor);
 							SelectObject(hDC,hNewPen);
 						}
 //						if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentTAG,CurrentUDI))
@@ -5563,7 +5563,7 @@ BOOL ProcessPGDBRecord (HDC hDC,long RecordNumber,int IsFGDB)
        		HaveTXLoc = TRUE;
     		CurrentType = GF_POINT; 
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
@@ -5596,7 +5596,7 @@ BOOL ProcessPGDBRecord (HDC hDC,long RecordNumber,int IsFGDB)
 					}
 					if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 					{
-						CurPointSize = 10*DeviceToScreenFactor;
+						CurPointSize = 10*DeviceToScreenFactor();
 						iDesc = InvisiblePointSymbol;
 					}
 					if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -5605,7 +5605,7 @@ BOOL ProcessPGDBRecord (HDC hDC,long RecordNumber,int IsFGDB)
 						{
 							iDesc = ThemePointSym;
 							if (ThemePointSize < 0)
-								size = -ThemePointSize *DeviceToScreenFactor;
+								size = -ThemePointSize *DeviceToScreenFactor();
 							else
 								size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 							size *= ThemeWidthFactor;
@@ -6272,7 +6272,7 @@ badcode:
 						TempLineWidth = SHPWidth; 
 						if (TempLineColor >= 0 || TempLineWidth != 0)
 						{
-							hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor),TempLineColor);
+							hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor()),TempLineColor);
 							SelectObject(hDC,hNewPen);
 						}
 //						if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentTAG,CurrentUDI))

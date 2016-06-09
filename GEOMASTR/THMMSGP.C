@@ -610,12 +610,12 @@ void DisplayCoordGridThemeLegend(short From)
     	LPDOUBLE	XTics=(LPDOUBLE)GlobalLock (hMem);
     	LPDOUBLE	YTics=XTics+256;  
     	short	nXTics=0, nYTics=0, i, j;  
-    	short	ticwidthfactor = IDNINT(DeviceToScreenFactor);
+    	short	ticwidthfactor = IDNINT(DeviceToScreenFactor());
     	
     	if (DoMinorTics)
     		ticwidthfactor = 1;
     	
-		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),0);
+		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor()),0);
 		RedPen = CreatePen (PS_SOLID,ticwidthfactor,RGB(0,0,0));
 		WhitePen = CreatePen (PS_SOLID,ticwidthfactor*3,RGB(255,255,255));
 		OldPen = SelectObject (CurView->hDC,LinePen);
@@ -634,17 +634,17 @@ void DisplayCoordGridThemeLegend(short From)
 	    Polyline (CurView->hDC,Points,5);
         
     	w = (long)CurView->ScreenRect.right - (long)CurView->ScreenRect.left;
-		h = ((long)CurView->Rect.bottom - (long)CurView->ScreenRect.bottom)/2;// - 5*DeviceToScreenFactor;
+		h = ((long)CurView->Rect.bottom - (long)CurView->ScreenRect.bottom)/2;// - 5*DeviceToScreenFactor();
 
     	Point1.x = CurView->NewBounds.xmn;
     	Point1.y = CurView->NewBounds.ymn;
     	Point2.x = CurView->NewBounds.xmx;
     	Point2.y = CurView->NewBounds.ymn;
     	Dir = 'W';
-	    Points[0].y = CurView->ScreenRect.bottom - 4 * DeviceToScreenFactor;
+	    Points[0].y = CurView->ScreenRect.bottom - 4 * DeviceToScreenFactor();
 	    Points[1].y = ((long)CurView->ScreenRect.bottom + (long)CurView->Rect.bottom)/2; 
-	    MinorPoints[0].y = CurView->ScreenRect.bottom - 1 * DeviceToScreenFactor;
-	    MinorPoints[1].y = ((long)CurView->ScreenRect.bottom + (long)CurView->Rect.bottom)/2 - 3 * DeviceToScreenFactor; 
+	    MinorPoints[0].y = CurView->ScreenRect.bottom - 1 * DeviceToScreenFactor();
+	    MinorPoints[1].y = ((long)CurView->ScreenRect.bottom + (long)CurView->Rect.bottom)/2 - 3 * DeviceToScreenFactor(); 
 	    Pass = 2;
     	
     	while (Pass--)
@@ -703,10 +703,10 @@ void DisplayCoordGridThemeLegend(short From)
 					DispText (CurView->hDC,FALSE,Points[1].x-10,Points[1].x+10, Points[1].y,0, 2,2,
 					 		  h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 			} 
-		    Points[0].y = CurView->ScreenRect.top + 4 * DeviceToScreenFactor;
+		    Points[0].y = CurView->ScreenRect.top + 4 * DeviceToScreenFactor();
 		    Points[1].y = (CurView->ScreenRect.top + CurView->Rect.top)/2; 
-		    MinorPoints[0].y = CurView->ScreenRect.top + 1 * DeviceToScreenFactor;
-		    MinorPoints[1].y = (CurView->ScreenRect.top + CurView->Rect.top)/2 + 3 * DeviceToScreenFactor; 
+		    MinorPoints[0].y = CurView->ScreenRect.top + 1 * DeviceToScreenFactor();
+		    MinorPoints[1].y = (CurView->ScreenRect.top + CurView->Rect.top)/2 + 3 * DeviceToScreenFactor(); 
 	    	Point1.x = CurView->NewBounds.xmn;
 	    	Point1.y = CurView->NewBounds.ymx;
 	    	Point2.x = CurView->NewBounds.xmx;
@@ -714,7 +714,7 @@ void DisplayCoordGridThemeLegend(short From)
 		}
 		
     	w = (long)CurView->ScreenRect.bottom - (long)CurView->ScreenRect.top;
-		h = ((long)CurView->Rect.right - (long)CurView->ScreenRect.right)/2;// - 5*DeviceToScreenFactor;
+		h = ((long)CurView->Rect.right - (long)CurView->ScreenRect.right)/2;// - 5*DeviceToScreenFactor();
 
     	Dir = 'N';    
     	Rot = HALFPI;
@@ -722,10 +722,10 @@ void DisplayCoordGridThemeLegend(short From)
     	Point1.y = CurView->NewBounds.ymn;
     	Point2.x = CurView->NewBounds.xmn;
     	Point2.y = CurView->NewBounds.ymx;
-	    Points[0].x = CurView->ScreenRect.left + 4 * DeviceToScreenFactor;
+	    Points[0].x = CurView->ScreenRect.left + 4 * DeviceToScreenFactor();
 	    Points[1].x = (CurView->ScreenRect.left + CurView->Rect.left)/2; 
-	    MinorPoints[0].x = CurView->ScreenRect.left + 1 * DeviceToScreenFactor;
-	    MinorPoints[1].x = (CurView->ScreenRect.left + CurView->Rect.left)/2 + 3 * DeviceToScreenFactor; 
+	    MinorPoints[0].x = CurView->ScreenRect.left + 1 * DeviceToScreenFactor();
+	    MinorPoints[1].x = (CurView->ScreenRect.left + CurView->Rect.left)/2 + 3 * DeviceToScreenFactor(); 
 	    Pass = 2;
     	
     	while (Pass--)
@@ -785,10 +785,10 @@ void DisplayCoordGridThemeLegend(short From)
 					 		  h,1,1,2, FALSE,Rot,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 			} 
 
-		    Points[0].x = CurView->ScreenRect.right - 4 * DeviceToScreenFactor;
+		    Points[0].x = CurView->ScreenRect.right - 4 * DeviceToScreenFactor();
 		    Points[1].x = (CurView->ScreenRect.right + CurView->Rect.right)/2; 
-		    MinorPoints[0].x = CurView->ScreenRect.right - 1 * DeviceToScreenFactor;
-		    MinorPoints[1].x = (CurView->ScreenRect.right + CurView->Rect.right)/2 - 3 * DeviceToScreenFactor; 
+		    MinorPoints[0].x = CurView->ScreenRect.right - 1 * DeviceToScreenFactor();
+		    MinorPoints[1].x = (CurView->ScreenRect.right + CurView->Rect.right)/2 - 3 * DeviceToScreenFactor(); 
 	    	Point1.x = CurView->NewBounds.xmx;
 	    	Point1.y = CurView->NewBounds.ymn;
 	    	Point2.x = CurView->NewBounds.xmx;
@@ -808,11 +808,11 @@ void DisplayCoordGridThemeLegend(short From)
 				if (PtInRect (&CurView->ScreenRect,TicPoint))
 				{   
 					Points[0] = Points[1] = TicPoint;
-					Points[0].x -= 3*DeviceToScreenFactor;
-					Points[1].x += 3*DeviceToScreenFactor;
+					Points[0].x -= 3*DeviceToScreenFactor();
+					Points[1].x += 3*DeviceToScreenFactor();
 					Points[2] = Points[3] = TicPoint;
-					Points[2].y -= 3*DeviceToScreenFactor;
-					Points[3].y += 3*DeviceToScreenFactor;
+					Points[2].y -= 3*DeviceToScreenFactor();
+					Points[3].y += 3*DeviceToScreenFactor();
 					SelectObject (CurView->hDC,WhitePen);
 				    Polyline (CurView->hDC,Points,2);
 				    Polyline (CurView->hDC,&Points[2],2);
@@ -1175,8 +1175,8 @@ GSSiExitProg (1285);
     GSSiDeleteObject(&CurView->hRgn);    
     SetTextColor (CurView->hDC,0);     
 	FillRectPoly (CurView->hDC,&CurView->ScreenRect,ConvertColor(CurView->BackGroundColor,-1));  
-	h = (((CurView->ScreenRect.bottom - CurView->ScreenRect.top) / 2)-3*DeviceToScreenFactor);
-	w = (h+4*DeviceToScreenFactor);
+	h = (((CurView->ScreenRect.bottom - CurView->ScreenRect.top) / 2)-3*DeviceToScreenFactor());
+	w = (h+4*DeviceToScreenFactor());
     SetBkMode(CurView->hDC, OPAQUE);  
     SetBkColor (CurView->hDC,CurView->BackGroundColor);
     Points[0].y = (CurView->ScreenRect.bottom + CurView->ScreenRect.top) / 2;
@@ -1204,7 +1204,7 @@ void SBHash (HDC hDC,int nbars,int left,int top,long Width,long Height)
 	SaveDC (CurView->hDC);
 	hBrush = SelectObject (hDC,GetStockObject(BLACK_BRUSH));
 	
-//	nbars *= DeviceToScreenFactor;
+//	nbars *= DeviceToScreenFactor();
 	Points[0].x = left;
 	Points[0].y = top;
 	Points[1].x = left;
@@ -1361,8 +1361,8 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
     	goto Exit;
     SetTextColor (CurView->hDC,0);     
 	FillRectPoly (CurView->hDC,&CurView->ScreenRect,ConvertColor(CurView->BackGroundColor,-1));  
-	h = (((CurView->ScreenRect.bottom - CurView->ScreenRect.top)/2)-2*DeviceToScreenFactor);
-	w = (h+4*DeviceToScreenFactor);
+	h = (((CurView->ScreenRect.bottom - CurView->ScreenRect.top)/2)-2*DeviceToScreenFactor());
+	w = (h+4*DeviceToScreenFactor());
 	if (From == 2)
 	{    
 		short	DistUnits = abs(CurTheme->ValConv);
@@ -1409,7 +1409,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		{   DPOINT	Point1,Point2; 
 			double	BaseDist,WinDist;
 		
-			LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor*3),CurTheme->ScatterColor);
+			LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor()*3),CurTheme->ScatterColor);
 			OldPen = SelectObject (CurView->hDC,LinePen);
 			Point1.x = CurView->NewBounds.xmn;
 			Point1.y = CurView->NewBounds.ymn;
@@ -1589,7 +1589,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 			Bar.top = Bar.bottom - BarHeight;    
 			xmid = Bar.left + (Bar.right - Bar.left) / 2;    
 			ymid = Bar.top  + (Bar.bottom - Bar.top) / 2;
-			LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),CurTheme->ScatterColor);
+			LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor()),CurTheme->ScatterColor);
 			OldPen = SelectObject (CurView->hDC,LinePen);
 		    Points[0].y = Bar.bottom;
 		    Points[0].x = Bar.left; 
@@ -2312,14 +2312,14 @@ void Display2DThemeLegend (short From)
 			if (CurTheme->DisplayCount)
 			{
 			    SetBkMode(CurView->hDC, TRANSPARENT);  
-				CurTheme->ClassFont2.lfHeight = -(ClassColorBox.bottom - ClassColorBox.top - 2* DeviceToScreenFactor); 
+				CurTheme->ClassFont2.lfHeight = -(ClassColorBox.bottom - ClassColorBox.top - 2* DeviceToScreenFactor()); 
 				hfont2 = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont2);
 		        hfontOld = SelectObject(CurView->hDC, hfont2);
 				sprintf (Text,"%ld",Counts[i][j]); 
 				GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
 				width = txSize.cx;
 				x = ClassColorBox.left + ((ClassColorBox.right - ClassColorBox.left) - width)/2; 
-				y = ClassColorBox.top + 1* DeviceToScreenFactor; 
+				y = ClassColorBox.top + 1* DeviceToScreenFactor(); 
 				if (cval >150)
 				    SetTextColor (CurView->hDC,0); 
 				else
@@ -2331,7 +2331,7 @@ void Display2DThemeLegend (short From)
     	}
     }
     SetTextColor (CurView->hDC,0); 
-	fHeight = 12 * DeviceToScreenFactor; 
+	fHeight = 12 * DeviceToScreenFactor(); 
 	CurTheme->ClassFont1.lfHeight = fHeight;
 	hfont = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont1);
 	hfontOld = SelectObject(CurView->hDC, hfont);

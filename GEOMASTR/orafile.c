@@ -951,7 +951,7 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
     		CurrentType = GF_POINT; 
 			OrigSize = CurPointSize;
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
@@ -986,7 +986,7 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 				HighlightPointSym=FALSE;
 				if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 				{
-					CurPointSize = 10*DeviceToScreenFactor;
+					CurPointSize = 10*DeviceToScreenFactor();
 					iDesc = InvisiblePointSymbol;
 				}
 				if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -995,7 +995,7 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 					{
 						iDesc = ThemePointSym;
 						if (ThemePointSize < 0)
-							size = -ThemePointSize *DeviceToScreenFactor;
+							size = -ThemePointSize *DeviceToScreenFactor();
 						else
 							size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 						size = min(max (size,1),MaxPointSize);
@@ -1297,7 +1297,7 @@ GetOut:
 //						TempLineWidth = SHPWidth; 
 						if (TempLineColor >= 0 || TempLineWidth != 0)
 						{
-							hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor),TempLineColor);
+							hNewPen = CreatePen (PS_SOLID,(short)IDNINT(TempLineWidth*DeviceToScreenFactor()),TempLineColor);
 							SelectObject(hDC,hNewPen);
 						}
 						pNumPoints = (LPINT)GlobalLock (hPolyPartLen);

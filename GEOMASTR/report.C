@@ -702,7 +702,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Fac
 	            RowHeight = max (RowHeight,txSize.cy); 
 				_fstrcpy (FontStr,"[%JUST]");
 				ExpandText (FontStr);
-//				w = Factor*pReport->TabLen[itab]*DeviceToScreenFactor-lt;
+//				w = Factor*pReport->TabLen[itab]*DeviceToScreenFactor()-lt;
 				w = abs(pReport->TabLen[itab])-lt;
 				if (FontStr[0]=='C') 
 				{
@@ -736,7 +736,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Fac
 	            	str[0]='\0';
 	            	Tabloc = 0; 
 	            } 
-//	            x += Factor*pReport->TabLen[itab]*DeviceToScreenFactor;
+//	            x += Factor*pReport->TabLen[itab]*DeviceToScreenFactor();
 	            x += abs(pReport->TabLen[itab]);
 	            itab++;
 			}
@@ -771,7 +771,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Fac
 			_fstrcpy (FontStr,"[%JUST]");
 			ExpandText (FontStr);
 			if (itab)
-				//w = Factor*pReport->TabLen[itab]*DeviceToScreenFactor;
+				//w = Factor*pReport->TabLen[itab]*DeviceToScreenFactor();
 				w = abs(pReport->TabLen[itab]);
 			else if (!pSizeRect)
 				w = (Rect.right - Rect.left) - Margin * 2;
@@ -1071,8 +1071,8 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 /*    	if (pReport->First)
     		LastFactor = 1;
 		for (i=0;i<pReport->NumTabs;i++)
-			pReport->TabLen[i]=(((float)pReport->TabLen[i])/LastFactor)*DeviceToScreenFactor;  
-		LastFactor = DeviceToScreenFactor; */
+			pReport->TabLen[i]=(((float)pReport->TabLen[i])/LastFactor)*DeviceToScreenFactor();  
+		LastFactor = DeviceToScreenFactor(); */
 		hRgn = CreateRectRgn (pReport->Rect.left,pReport->Rect.top,pReport->Rect.right,pReport->Rect.bottom);
 		SelectClipRgn (hDC,hRgn);
 		DeleteObject (hRgn);

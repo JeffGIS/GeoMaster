@@ -1682,7 +1682,7 @@ GSSiExitProg (1158);
 		if (OffLineWidth < 0)
 			w = IDNINT(-OffLineWidth * BaseDistToWinDist);
 		else if (OffLineWidth > 0)
-			w = IDNINT(OffLineWidth*DeviceToScreenFactor);
+			w = IDNINT(OffLineWidth*DeviceToScreenFactor());
 		else
 			w = IDNINT(Header.Offset * BaseDistToWinDist * 2);
 		OffLineColor = GetGlobalLVal2 ("[%OFFSETLINECOLOR]",RGB(255,0,0));    

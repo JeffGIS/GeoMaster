@@ -2052,7 +2052,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    HDIB		hDIB; 
    char		drive[6], dir[128], leaf[16], ext[6], File[128], SavePrintName[34]; 
    char		ReportName[128]; 
-   double	SaveDTSF = DeviceToScreenFactor;
+   double	SaveDTSF = DeviceToScreenFactor();
    RECT		SaveMainRect = MainRect, SaveRect;
    short	SaveShadow = ShadowInc;    
    short 	ForceOrient = DMORIENT_LANDSCAPE;
@@ -2227,7 +2227,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     	setDoPaint( TRUE);   
     }
 //	EnableWindow (hWndMain,TRUE);  
-    DeviceToScreenFactor = SaveDTSF;
+	setDeviceToScreenFactor(SaveDTSF);
    	MainRect = SaveMainRect;
 	ShadowInc = SaveShadow;
    	SetGlobalValue ("%PRINTNAME",SavePrintName); 
@@ -2254,7 +2254,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
    HDIB		hDIB; 
    char		drive[6], dir[128], leaf[16], ext[6], SavePrintName[34],str[514]; 
    char		ReportName[128]; 
-   double	SaveDTSF = DeviceToScreenFactor;
+   double	SaveDTSF = DeviceToScreenFactor();
    RECT		SaveMainRect = MainRect, SaveRect;
    short	SaveShadow = ShadowInc;    
    short 	ForceOrient = DMORIENT_PORTRAIT;
@@ -2435,7 +2435,7 @@ NextPage:
     	setDoPaint( TRUE);   
     }
 //	EnableWindow (hWndMain,TRUE);  
-    DeviceToScreenFactor = SaveDTSF;
+	setDeviceToScreenFactor(SaveDTSF);
    	MainRect = SaveMainRect;
 	ShadowInc = SaveShadow;
    	SetGlobalValue ("%PRINTNAME",SavePrintName); 

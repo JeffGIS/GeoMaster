@@ -3237,7 +3237,7 @@ BOOL DisplayAllVehicles2 (short nVP,LPVIEWPORT *pVP)
 						{
 							HPDPOINT	HistPoints = GlobalLock (pVehLoc->hHist);
 							LPLONG		HistTimes = (LPLONG)(HistPoints+MAX_VEHICLE_TRACK_POINTS);
-							HPEN	hPen = CreatePen (PS_SOLID,IDNINT(3*DeviceToScreenFactor),pVehLoc->TrackColor);
+							HPEN	hPen = CreatePen (PS_SOLID,IDNINT(3*DeviceToScreenFactor()),pVehLoc->TrackColor);
 							HPEN	OldPen = SelectObject (CurView->hDC,hPen); 
 							int		np,ih;
 							int		Now;
@@ -3377,7 +3377,7 @@ NextVeh:
 		
 		MidPoint = MinMaxMidPointD (&Destination);    
 		WinPoint=BasePtToWinPt (&MidPoint);
-       	DisplayPointItem (CurView->hDC,WinPoint,DestSize*DeviceToScreenFactor,0,DestinationSymbol,0);
+       	DisplayPointItem (CurView->hDC,WinPoint,DestSize*DeviceToScreenFactor(),0,DestinationSymbol,0);
 	}
 	DisplayVehicles = TRUE;
 Exit:

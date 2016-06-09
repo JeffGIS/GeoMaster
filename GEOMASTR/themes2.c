@@ -589,7 +589,7 @@ GSSiExitProg (1262);
 					{ 
 						POINT	PointLoc=BasePtToWinPt (&IntPoint);
 //                    if (HaveLinkLines (lpDCurPoints,nPnts)) lpDCurPoints[0]
-                    	DisplayPointItem (CurView->hDC,PointLoc,15*DeviceToScreenFactor,0,InvisiblePointSymbol,0);
+                    	DisplayPointItem (CurView->hDC,PointLoc,15*DeviceToScreenFactor(),0,InvisiblePointSymbol,0);
                     }
 			}
 			goto RtnNotProcessed;
@@ -2086,7 +2086,7 @@ void ShowValue (HDC hDC, BOOL Init)
 {GSSiEnterProg (1275);
 #endif
 {   
-	float	sizex = ShowValSize;// * DeviceToScreenFactor;
+	float	sizex = ShowValSize;// * DeviceToScreenFactor();
 	short	VJust=2, HJust,Weight=100;    
 	static	BOOL	First=TRUE;   
 	DWORD	TextExt;  
@@ -2158,7 +2158,7 @@ GSSiExitProg (1275);
 			GetGlobalCVal ("[%LABELFONT]",pSaveFont,0);
 			SetGlobalValue ("%LABELFONT",ShowVal.pTheme->ShowValueFont.lfFaceName);
 			OldColor = SetTextColor (hDC,ConvertColor (ShowVal.pTheme->ShowValueTextColor,ShowVal.pTheme->UseHalfTone));  
-			sizex = fabs (PixelsToTAGFontHt (&ShowVal.pTheme->ShowValueFont,3));// * DeviceToScreenFactor; 
+			sizex = fabs (PixelsToTAGFontHt (&ShowVal.pTheme->ShowValueFont,3));// * DeviceToScreenFactor(); 
 			FontPixelsToSizeFactor = sizex/max(1,abs(ShowVal.pTheme->ShowValueFont.lfHeight));  
 			Weight = ShowVal.pTheme->ShowValueFont.lfWeight;
 			if (ShowVal.pTheme->ShowValueFont.lfUnderline)
@@ -2231,7 +2231,7 @@ TryAgain:
 				UINT	i;
 				BOOL	pass=FALSE;
 				double	PolyArea, TextArea, AreaAZ=100;
-				float   tsize, mintsize=GetGlobalDVal2 ("[%MINTEXTSIZE]",0.06);//* DeviceToScreenFactor; 
+				float   tsize, mintsize=GetGlobalDVal2 ("[%MINTEXTSIZE]",0.06);//* DeviceToScreenFactor(); 
 				HPPOINT	pPoints; 
 				HPDPOINT	pAreaPoints;
 				DPOINT	MidPt;
@@ -3689,9 +3689,9 @@ GSSiExitProg (1270);
         else
         	ii=1;
         if (width >= 0)
-        	width = IDNINT(((double)(width/*+0.5*/)) * WF * DeviceToScreenFactor * PenWidthFactor); 
+        	width = IDNINT(((double)(width/*+0.5*/)) * WF * DeviceToScreenFactor() * PenWidthFactor); 
         else if (CurView->BaseUnitsPerPixel)
-        	width = IDNINT(((double)-width / CurView->BaseUnitsPerPixel)* WF * DeviceToScreenFactor * PenWidthFactor); 
+        	width = IDNINT(((double)-width / CurView->BaseUnitsPerPixel)* WF * DeviceToScreenFactor() * PenWidthFactor); 
 		if (ComputePCTTheme || !PatByte.Pattern)
 			CurTheme->ClassBrush[iclass]=CreateSolidBrush(ConvertColor(ColorWOWidth (CurTheme->ClassColor[iclass]),CurTheme->UseHalfTone));
 /*		else if (PatByte.Pattern == 1) 
@@ -4204,14 +4204,14 @@ void DisplayTimeLegend (short From)
 				if (CurTheme->DisplayCount)
 				{
 				    SetBkMode(CurView->hDC, TRANSPARENT);  
-					CurTheme->ClassFont2.lfHeight = -(ClassColorBox.bottom - ClassColorBox.top - 2* DeviceToScreenFactor); 
+					CurTheme->ClassFont2.lfHeight = -(ClassColorBox.bottom - ClassColorBox.top - 2* DeviceToScreenFactor()); 
 					hfont2 = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont2);
 			        hfontOld = SelectObject(CurView->hDC, hfont2);
 					sprintf (Text,"%ld",Counts[i][j]); 
 					GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
 					width = txSize.cx;
 					x = ClassColorBox.left + ((ClassColorBox.right - ClassColorBox.left) - width)/2; 
-					y = ClassColorBox.top + 1* DeviceToScreenFactor; 
+					y = ClassColorBox.top + 1* DeviceToScreenFactor(); 
 					if (cval >150)
 					    SetTextColor (CurView->hDC,0); 
 					else
@@ -4223,7 +4223,7 @@ void DisplayTimeLegend (short From)
 	    	}
 	    }
 	    SetTextColor (CurView->hDC,0); 
-		fHeight = 12 * DeviceToScreenFactor; 
+		fHeight = 12 * DeviceToScreenFactor(); 
 		CurTheme->ClassFont1.lfHeight = fHeight;
 		hfont = CreateFontIndirect((PLOGFONT)&CurTheme->ClassFont1);
 		hfontOld = SelectObject(CurView->hDC, hfont);

@@ -1018,7 +1018,7 @@ ProcessRec:
 			       			HaveTXLoc = TRUE;
 			    			CurrentType = GF_POINT; 
 							if (CurPointSize < 0)
-								CurPointSize = -CurPointSize * DeviceToScreenFactor;
+								CurPointSize = -CurPointSize * DeviceToScreenFactor();
 							else
 								CurPointSize /= CurView->BaseUnitsPerPixel;
 							if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
@@ -1039,7 +1039,7 @@ ProcessRec:
 								HighlightPointSym=FALSE;
 								if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 								{
-									CurPointSize = 10*DeviceToScreenFactor;
+									CurPointSize = 10*DeviceToScreenFactor();
 									iDesc = InvisiblePointSymbol;
 								}
 								if (SetDisplayChar (CurView->hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI) > 0)
@@ -1050,7 +1050,7 @@ ProcessRec:
 									{
 										iDesc = ThemePointSym;
 										if (ThemePointSize < 0)
-											size = -ThemePointSize *DeviceToScreenFactor;
+											size = -ThemePointSize *DeviceToScreenFactor();
 										else
 											size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 										size *= ThemeWidthFactor;
@@ -2268,7 +2268,7 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 			HaveTXLoc = TRUE;
 			CurrentType = GF_POINT; 
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			CurPointSize *= GraphicsPointFactor;
@@ -2290,7 +2290,7 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 				HighlightPointSym=FALSE;
 				if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 				{
-					CurPointSize = 10*DeviceToScreenFactor;
+					CurPointSize = 10*DeviceToScreenFactor();
 					iDesc = InvisiblePointSymbol;
 				}
 				if (BT_FIND (hDisplayedGMDRefs,(LPSTR)&CurrentRefno,BT_FIRST,BT_EQ,(LPSTR)&Dummy) &&
@@ -2303,7 +2303,7 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 					{
 						iDesc = ThemePointSym;
 						if (ThemePointSize < 0)
-							size = -ThemePointSize *DeviceToScreenFactor;
+							size = -ThemePointSize *DeviceToScreenFactor();
 						else
 							size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 						size *= ThemeWidthFactor;

@@ -426,8 +426,36 @@ void AdjustMainRect (HWND hWnd,HDC hDC,LPRECT Rect)
 	}
 	return;
 }
+static float deviceToScreenFactor = 1;
+double AdjustWidth(double width)
+{
+	double rtn = width;
 
- 
+	if (rtn < 0)
+	{
+		if (PRJ_UNITS[1] == 4)
+		{
+			DPOINT Pt = NewLatLong(CurView->MidPointW.y, CurView->MidPointW.x, width, HALFPI / 2);
+
+			rtn = ldistp(CurView->MidPointW, Pt)* BaseDistToWinDist;
+		}
+		else
+			rtn = -width * BaseDistToWinDist;
+	}
+	else
+		rtn *= DeviceToScreenFactor();
+	return rtn;
+}
+float DeviceToScreenFactor(void)
+{
+	return deviceToScreenFactor;
+}
+float setDeviceToScreenFactor(float v)
+{
+	float rtn = deviceToScreenFactor;
+	deviceToScreenFactor = v;
+	return rtn;
+}
 void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 #if ENABLETRACE
 {GSSiEnterProg (796);
@@ -449,13 +477,13 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 			DeviceRes = GetDeviceCaps(hDC, LOGPIXELSX);
 	} 
 	if (MemMap)
-		DeviceToScreenFactor = DeviceToScreenFactorMemMap;
+		setDeviceToScreenFactor(DeviceToScreenFactorMemMap);
 	else if (Printing && PrinterIsVirtual)
-    	DeviceToScreenFactor = (double)VirtualPrintDPI/(double)ScreenRes;
+    	setDeviceToScreenFactor((double)VirtualPrintDPI/(double)ScreenRes);
 	else if (ScreenRes)
-    	DeviceToScreenFactor = (double)DeviceRes/(double)ScreenRes;
+    	setDeviceToScreenFactor( (double)DeviceRes/(double)ScreenRes);
     else
-    	DeviceToScreenFactor = 1;
+    	setDeviceToScreenFactor(1);
 	if (RectIn) 
 	{   
 		Rect =*RectIn;  
@@ -542,7 +570,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	{   
 		RECT	SaveRect = MainRect;
 		
-		DeviceToScreenFactor *= ScreenWindowFactor;   
+		setDeviceToScreenFactor(DeviceToScreenFactor()*ScreenWindowFactor);
 		if (hWnd)
 		{
 			MainRect.left *= ScreenWindowFactor;
@@ -560,7 +588,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
     	if (*txt)
     	{
         	PromptRect = MainRect;
-        	PRHeight = DeviceToScreenFactor * GetGlobalLVal2 ("[%PRINTPROMPTHEIGHT]",12); 
+        	PRHeight = DeviceToScreenFactor() * GetGlobalLVal2 ("[%PRINTPROMPTHEIGHT]",12); 
         	PromptRect.top = PromptRect.bottom-PRHeight;
         	MainRect.bottom -= (PromptRect.bottom - PromptRect.top + 1);
     	}
@@ -608,14 +636,14 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 				if (fach > facw)
 				{
 					sw *= fach;
-					DeviceToScreenFactor *= sw / pViewportsD[0]->DesiredHeight;
+					setDeviceToScreenFactor(DeviceToScreenFactor() * sw / pViewportsD[0]->DesiredHeight);
 				}
 				else
 				{
 					sw *= facw;
-					DeviceToScreenFactor *= sw / pViewportsD[0]->DesiredWidth;
+					setDeviceToScreenFactor(DeviceToScreenFactor() * sw / pViewportsD[0]->DesiredWidth);
 				}
-				//DeviceToScreenFactor *= (double)(MainRect.right - MainRect.left)/(ScreenWindowFactor*(double)(WindRect.right - WindRect.left));
+				//DeviceToScreenFactor() *= (double)(MainRect.right - MainRect.left)/(ScreenWindowFactor*(double)(WindRect.right - WindRect.left));
 	    	}
 	    }
 	    else
@@ -3859,7 +3887,7 @@ void SimplePointer (HDC hDC, LPDPOINT p1, LPDPOINT p2,short width,short ToPointO
     P1 = BasePtToWinPt (p1);
     P2 = BasePtToWinPt (p2); 
     SetDisplayMode (hDC, GF_TEXTMODE);
-	ArrowPen = CreatePen (PS_SOLID,(short)IDNINT(width*DeviceToScreenFactor),Color);
+	ArrowPen = CreatePen (PS_SOLID,(short)IDNINT(width*DeviceToScreenFactor()),Color);
 	DrawPointerLine (hDC, P1, P2,ArrowPen,ArrowPen,TipWidth,ToPointOffset);
 	DeleteObject (ArrowPen); 
 {

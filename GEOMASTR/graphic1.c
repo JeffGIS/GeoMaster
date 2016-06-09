@@ -5032,12 +5032,12 @@ GSSiExitProg (56);
 		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect);  
         if (!CurView->FitToWindow)
         {
-            CurView->ReportFactor = DeviceToScreenFactor;
+            CurView->ReportFactor = DeviceToScreenFactor();
            // CurView->DrawRect = ReportRect; 
-		   // CurView->DrawRect.bottom *= DeviceToScreenFactor;
-			//CurView->DrawRect.top *= DeviceToScreenFactor;
-			//CurView->DrawRect.left *= DeviceToScreenFactor;
-			//CurView->DrawRect.right *= DeviceToScreenFactor;
+		   // CurView->DrawRect.bottom *= DeviceToScreenFactor();
+			//CurView->DrawRect.top *= DeviceToScreenFactor();
+			//CurView->DrawRect.left *= DeviceToScreenFactor();
+			//CurView->DrawRect.right *= DeviceToScreenFactor();
         }
         else
         { 
@@ -5084,7 +5084,7 @@ GSSiExitProg (56);
      DisplayCurrentHotspots ();
      if (!RegionIsNull && CurView->BorderPct >= 0)
      {
-         NewPen=CreatePen(PS_SOLID,(short) IDNINT (max (DeviceToScreenFactor/2,(double)((MaxDimension * 2 * CurView->BorderPct)/100))),CurView->BorderColor);
+         NewPen=CreatePen(PS_SOLID,(short) IDNINT (max (DeviceToScreenFactor()/2,(double)((MaxDimension * 2 * CurView->BorderPct)/100))),CurView->BorderColor);
 /*       OldPen = SelectObject (CurView->hDC,NewPen);
          OldBrush = SelectObject (CurView->hDC,GetStockObject(0_BRUSH)); */
          DrawRectPoly (CurView->hDC,&CurView->Rect,NewPen); 

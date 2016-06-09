@@ -1500,7 +1500,7 @@ DoPolylineD:
      			if (Mode < 0 && !PointIsVisible (CurrentDesc))
      				break; 
 				if (CurPointSize < 0)
-					CurPointSize = -CurPointSize * DeviceToScreenFactor;
+					CurPointSize = -CurPointSize * DeviceToScreenFactor();
 				else
 					CurPointSize /= CurView->BaseUnitsPerPixel;
 				CurPointSize *= FileDistToBaseDist;   

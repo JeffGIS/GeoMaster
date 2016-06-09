@@ -640,9 +640,9 @@ double GetSymbolWidth (int idesc)
 	{
 		pSymAtt = (LPSYMBOLATTRIBUTE)GlobalLock (hSymbolAttributes);    
 		if (pSymAtt[idesc-1].WidthIsMeters)
-			rtn = f * pSymAtt[idesc-1].Width/CurView->MetersPerPixel;  
+			rtn = f * AdjustWidth(-pSymAtt[idesc-1].Width);  
 		else
-			rtn = f * pSymAtt[idesc-1].Width * DeviceToScreenFactor;
+			rtn = f *  AdjustWidth(pSymAtt[idesc - 1].Width);
 		if (pSymAtt[idesc-1].Type == 1)
 			rtn /= 200;
 		GlobalUnlock (hSymbolAttributes);
@@ -4150,19 +4150,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 		
 		hCPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
 		GetObject (hCPen,sizeof(LOGPEN),&lPen);
-		if (Width > 0)
-			width = IDNINT(Width * DeviceToScreenFactor);
-		else
-		{
-			if (PRJ_UNITS[1] == 4)
-			{
-				DPOINT Pt = NewLatLong(CurView->MidPointW.y,CurView->MidPointW.x,Width,HALFPI/2); 
-
-				width = ldistp (CurView->MidPointW,Pt)* BaseDistToWinDist;
-			}
-			else
-				width = -Width * BaseDistToWinDist;
-		}
+		width = IDNINT(AdjustWidth(Width));
 		hPen = CreatePen(PS_SOLID, width, lPen.lopnColor);
 		SelectObject (hDC,hPen);
 	}	 
@@ -4394,8 +4382,8 @@ void DisplayHollowLines (BOOL Clear)
 				    HPFPOINT	SPoints=(HPFPOINT)GlobalLock (hPoints); 
 				    
 				    BigRead (FidHollowLines,(HPSTR)SPoints,HollowLineHeader.npnts*sizeof(FPOINT));
-				    Width = max(0,HollowLineHeader.width-2*DeviceToScreenFactor);
-				    if (HollowLineHeader.desc > 0 && HollowLineHeader.width > 2*DeviceToScreenFactor)
+				    Width = max(0,HollowLineHeader.width-2*DeviceToScreenFactor());
+				    if (HollowLineHeader.desc > 0 && HollowLineHeader.width > 2*DeviceToScreenFactor())
 				    {   
 				    	if (pass == SymbolInUseShieldsList (HollowLineHeader.desc))
 				    	{
@@ -4699,7 +4687,7 @@ int DisplayScreenLineSegment (HDC hDC, HPFPOINT SPoints,long n,int idesc,int w4)
 		rtn = FlatEndPolyline (hDC,SPoints,n,w,ConvertColor(OutlineColor,CurTheme->UseHalfTone));  
 	else   
 	{
-	    hPen = CreatePen (PS_SOLID,IDNINT(w/**DeviceToScreenFactor*/),ConvertColor(OutlineColor,-1));  
+	    hPen = CreatePen (PS_SOLID,IDNINT(w/**DeviceToScreenFactor()*/),ConvertColor(OutlineColor,-1));  
 	    OldPen = SelectObject (hDC,hPen);  
 		rtn = BigFPolyline (hDC, SPoints, n,w); 
 	    SelectObject (hDC,OldPen);
@@ -5281,12 +5269,12 @@ int GetLineElementWidthAndColor (LPSYMBOL lpSym,LPELEMENT pElement,LPCOLORREF pC
 				}
 			}
 			else if (ItemSymbolWidth > 0)
-				Width = ItemSymbolWidth * PenWidthFactor * DeviceToScreenFactor;
+				Width = ItemSymbolWidth * PenWidthFactor * DeviceToScreenFactor();
 			else
 				Width = -ItemSymbolWidth * BaseDistToWinDist * PenWidthFactor;
 		}
 		else
-			Width = 1;//7/1/2005 DeviceToScreenFactor;
+			Width = 1;//7/1/2005 DeviceToScreenFactor();
 		if (pElement->LineColor < -10)
 			LineColor = 0; 
 		else
@@ -5296,7 +5284,7 @@ int GetLineElementWidthAndColor (LPSYMBOL lpSym,LPELEMENT pElement,LPCOLORREF pC
 			if (HighlightWidth < 0)
 				Width = IDNINT(-HighlightWidth * BaseDistToWinDist);
 			else
-				Width = abs(HighlightWidth) * DeviceToScreenFactor; 
+				Width = abs(HighlightWidth) * DeviceToScreenFactor(); 
 			if (HighlightThisItem == 1 || !CurView)
 				LineColor = HighlightColor;
 			else   
@@ -5304,7 +5292,7 @@ int GetLineElementWidthAndColor (LPSYMBOL lpSym,LPELEMENT pElement,LPCOLORREF pC
 		}
 		else if (SpecialThisItem)
 		{
-			Width = abs(SpecialWidth) * DeviceToScreenFactor; 
+			Width = abs(SpecialWidth) * DeviceToScreenFactor(); 
 			LineColor = SpecialColor;
 		}
 		else
@@ -5316,7 +5304,7 @@ int GetLineElementWidthAndColor (LPSYMBOL lpSym,LPELEMENT pElement,LPCOLORREF pC
 				if (CurView->NewObject[iobj].Width<0)
 	        		Width = (short)IDNINT((double)-CurView->NewObject[iobj].Width / CurView->BaseUnitsPerPixel); 
 				else 
-					Width = IDNINT((CurView->NewObject[iobj].Width+1) * PenWidthFactor * DeviceToScreenFactor);
+					Width = IDNINT((CurView->NewObject[iobj].Width+1) * PenWidthFactor * DeviceToScreenFactor());
 				
 				if (CurView->NewObjectMap[lpSym->Number] < CurView->HalfToneNewObjectStart)
 					UseHalfTone = -1;
@@ -5328,7 +5316,7 @@ int GetLineElementWidthAndColor (LPSYMBOL lpSym,LPELEMENT pElement,LPCOLORREF pC
 			{    
 				LineColor = ColorWOWidth (GlobalColors[0]);  
 				if (GetWValue(GlobalColors[0]))
-					Width = IDNINT(GetWValue(GlobalColors[0]) * PenWidthFactor * DeviceToScreenFactor);
+					Width = IDNINT(GetWValue(GlobalColors[0]) * PenWidthFactor * DeviceToScreenFactor());
 			}
 			else if (TempLineColor >= 0)    
 				LineColor = TempLineColor;
@@ -5525,14 +5513,14 @@ GSSiExitProg (988);
 			if (!CurSymbol->NoSizeLimit)
 				SymFac = min (1,SymFac); 
 			if (!SymFac)
-				SymFac = DeviceToScreenFactor;
+				SymFac = DeviceToScreenFactor();
 			else
 			{ 
 				SymFac *= DevicePixelsPerInch / 96;
 			} 
 		}
 		SymFac *= LineSymbolFactor;
-		//SymFac *= DeviceToScreenFactor; 
+		//SymFac *= DeviceToScreenFactor(); 
 	}
 	else if (CurSymbol->BaseScale == 15 && CurSymbol->SizePointV[0].y - CurSymbol->SizePointV[1].y)
 		SymFac = ((Factor*FTM * CurSymbol->VSize)/fabs (CurSymbol->SizePointV[0].y - CurSymbol->SizePointV[1].y)) /DefaultSymbolFactor;
@@ -5738,7 +5726,7 @@ GSSiExitProg (989);
 		lpPoints = pSplinePoints;
     }*/ 
 	if (!idesc)
-		ItemSymbolWidth = 1.0/DeviceToScreenFactor;
+		ItemSymbolWidth = 1.0/DeviceToScreenFactor();
 	if (npnts < 0)
 	{   
 		npnts = -npnts;  

@@ -250,7 +250,7 @@ BOOL ProcessGPXRecord (HDC hDC,long RecordNumber)
        		HaveTXLoc = TRUE;
     		CurrentType = GF_POINT; 
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
@@ -283,7 +283,7 @@ BOOL ProcessGPXRecord (HDC hDC,long RecordNumber)
 					}
 					if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 					{
-						CurPointSize = 10*DeviceToScreenFactor;
+						CurPointSize = 10*DeviceToScreenFactor();
 						iDesc = InvisiblePointSymbol;
 					}
 					if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -292,7 +292,7 @@ BOOL ProcessGPXRecord (HDC hDC,long RecordNumber)
 						{
 							iDesc = ThemePointSym;
 							if (ThemePointSize < 0)
-								size = -ThemePointSize *DeviceToScreenFactor;
+								size = -ThemePointSize *DeviceToScreenFactor();
 							else
 								size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 							size *= ThemeWidthFactor;

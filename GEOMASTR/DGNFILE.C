@@ -1156,7 +1156,7 @@ DoPoly:
 						TempLineWidth = DGNWidth; 
 						if (TempLineColor >= 0 || TempLineWidth != 0)
 						{
-							hNewPen = CreatePen (lStyle,(short)IDNINT(TempLineWidth*DeviceToScreenFactor),TempLineColor);
+							hNewPen = CreatePen(lStyle, (short)IDNINT(AdjustWidth(TempLineWidth)), TempLineColor);
 							SelectObject(hDC,hNewPen);
 						}
 						if (SetDisplayChar (hDC,GF_LINE,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI) > 0)

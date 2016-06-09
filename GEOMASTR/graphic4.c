@@ -536,7 +536,7 @@ ShrinkText:
 						{  
 							COLORREF	SaveColor = SetTextColor (hDC,RGB(255,255,255));   
 							int i = 1;
-							int		iDeviceToScreenFactor = IDNINT(DeviceToScreenFactor);
+							int		iDeviceToScreenFactor = IDNINT(DeviceToScreenFactor());
 
 							while (i <= iDeviceToScreenFactor)
 							{
@@ -2795,7 +2795,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 						{   HRGN    NewRgn, OvrLapRgn; 
 						    RECT	TBRect=TextRect;
 						    
-						    //InflateRect (&TBRect,1*DeviceToScreenFactor,1*DeviceToScreenFactor); 
+						    //InflateRect (&TBRect,1*DeviceToScreenFactor(),1*DeviceToScreenFactor()); 
 						    NewRgn = CreateVPRgn (FALSE,FALSE);
 						    OvrLapRgn = CreateRectRgnIndirect (&TBRect);
 				        	CombineRgn (NewRgn,NewRgn,OvrLapRgn,RGN_DIFF);
@@ -2887,7 +2887,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 	        		HaveTXLoc = TRUE;
  		    		CurrentType = GF_POINT; 
 					if (CurPointSize < 0)
-						CurPointSize = -CurPointSize *DeviceToScreenFactor;
+						CurPointSize = -CurPointSize *DeviceToScreenFactor();
 					else
 						CurPointSize /= CurView->BaseUnitsPerPixel;
 //					CurPointSize = min(max (CurPointSize,1),MaxPointSize);
@@ -2913,7 +2913,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 						HighlightPointSym=FALSE;
 						if (!GetTypeVisibility(6)) 
 						{
-							CurPointSize = 10*DeviceToScreenFactor;
+							CurPointSize = 10*DeviceToScreenFactor();
 							iDesc = InvisiblePointSymbol;
 						}
 						if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -2922,7 +2922,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 							{
 								iDesc = ThemePointSym;
 								if (ThemePointSize < 0)
-									size = -ThemePointSize *DeviceToScreenFactor;
+									size = -ThemePointSize *DeviceToScreenFactor();
 								else
 									size = ThemePointSize / CurView->BaseUnitsPerPixel;
 								size = min(max (size,1),MaxPointSize);
@@ -2999,7 +2999,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 	        		HaveTXLoc = TRUE;
  		    		CurrentType = GF_POINT; 
 					if (CurPointSize < 0)
-						CurPointSize = -CurPointSize * DeviceToScreenFactor;
+						CurPointSize = -CurPointSize * DeviceToScreenFactor();
 					else
 						CurPointSize /= CurView->BaseUnitsPerPixel;
 //					CurPointSize = min(max (CurPointSize,1),MaxPointSize);
@@ -3026,7 +3026,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 						HighlightPointSym=FALSE;
 						if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 						{
-							CurPointSize = 10*DeviceToScreenFactor;
+							CurPointSize = 10*DeviceToScreenFactor();
 							iDesc = InvisiblePointSymbol;
 						}
 						if ((SDCrtn = SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI)) > 0)
@@ -3035,7 +3035,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 							{
 								iDesc = ThemePointSym;
 								if (ThemePointSize < 0)
-									size = -ThemePointSize *DeviceToScreenFactor;
+									size = -ThemePointSize *DeviceToScreenFactor();
 								else
 									size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 								size *= ThemeWidthFactor*GraphicsPointFactor;
@@ -3102,7 +3102,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
                     		pwidth = TempLineWidth;
 					}
                     else   
-		 				pwidth = IDNINT(WidthFactor*TempLineWidth*DeviceToScreenFactor * PenWidthFactor);  
+		 				pwidth = IDNINT(WidthFactor*TempLineWidth*DeviceToScreenFactor() * PenWidthFactor);  
 					GSSiDeleteObject (&hTempPen);
 					hTempPen = CreatePen(PS_SOLID,pwidth,ConvertColor(TempLineColor,CurrentDesc)); 
 					SaveCurrentPen = 0;
@@ -3704,7 +3704,7 @@ GSSiExitProg (690);
                     	penwidth = *PenWIDTH; 
                     else
                     	penwidth = 1;  
-		 			pwidth = IDNINT(ifac*penwidth*DeviceToScreenFactor * PenWidthFactor);  
+		 			pwidth = IDNINT(ifac*penwidth*DeviceToScreenFactor() * PenWidthFactor);  
 //		 			if (penwidth > 1)
 //		 				pwidth = max ((long)pwidth,IDNINT(penwidth)); removed 12/29/99
 					pens[ipen] =   CreatePen(PS_SOLID,pwidth,ConvertColor(Color,-1));

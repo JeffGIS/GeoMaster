@@ -1747,7 +1747,7 @@ BOOL TextOutWithShadow (HDC hDC,int x,int y,LPSTR txt,int l,int inc,COLORREF Sha
 	BOOL		rtn;
 	int	OldMode = SetBkMode (hDC,TRANSPARENT);
 
-	for (i=1;i<inc*DeviceToScreenFactor+1;i++)
+	for (i=1;i<inc*DeviceToScreenFactor()+1;i++)
 	{
 		ExtTextOut (hDC,x+i,y+i,0,0,txt,l,0);
 		ExtTextOut (hDC,x-i,y+i,0,0,txt,l,0);

@@ -164,9 +164,9 @@ GSSiExitProg (1348);
 					*tab = 0;
 					for (i=0;i<CurReport->NumTabs;i++)
 					{
-						if (CurReport->x < CurReport->TabLen[i]*DeviceToScreenFactor)
+						if (CurReport->x < CurReport->TabLen[i]*DeviceToScreenFactor())
 						{
-							CurReport->x = CurReport->TabLen[i]*DeviceToScreenFactor;
+							CurReport->x = CurReport->TabLen[i]*DeviceToScreenFactor();
 							break;
 						}
 					}

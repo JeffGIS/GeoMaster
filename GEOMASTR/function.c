@@ -935,7 +935,7 @@ GSSiExitProg (1348);
 					lline = _fstrlen (lpBeg);
 					*lpTab = '\t';
 					if (CurReport->TabLen[0])
-	                	i += (IDNINT((DBU * lline)))/(CurReport->TabLen[0]*DeviceToScreenFactor);
+	                	i += (IDNINT((DBU * lline)))/(CurReport->TabLen[0]*DeviceToScreenFactor());
 					LastTab = lpTab++;
 					i++;
 				} 
@@ -944,12 +944,12 @@ GSSiExitProg (1348);
 				{    
 					LastTab++;
 					if (CurReport->NumTabs < i)
-						CurLoc = CurReport->TabLen[0]*DeviceToScreenFactor*i;
+						CurLoc = CurReport->TabLen[0]*DeviceToScreenFactor()*i;
 					else 
 					{   
 						short	j;
 						for (j=0;j<i;j++)
-							CurLoc += CurReport->TabLen[j]*DeviceToScreenFactor;
+							CurLoc += CurReport->TabLen[j]*DeviceToScreenFactor();
 					}  
 				}	
 				lline = _fstrlen (LastTab); 
@@ -960,9 +960,9 @@ GSSiExitProg (1348);
 				{
 					i++;
 					if (CurReport->NumTabs < i)
-						Tabloc += CurReport->TabLen[0]*DeviceToScreenFactor;
+						Tabloc += CurReport->TabLen[0]*DeviceToScreenFactor();
 					else
-						Tabloc += CurReport->TabLen[min(i,CurReport->NumTabs)-1]*DeviceToScreenFactor;  
+						Tabloc += CurReport->TabLen[min(i,CurReport->NumTabs)-1]*DeviceToScreenFactor();  
 				} 
 				i--;
 				itab -= i;
@@ -973,7 +973,7 @@ GSSiExitProg (1348);
 			else 
 			{   
 				int	Tabloc, i;  
-				double factor = DeviceToScreenFactor;
+				double factor = DeviceToScreenFactor();
 				
 				if (CurReport->WantSize)
 					factor = 1.0;

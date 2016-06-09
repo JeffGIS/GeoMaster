@@ -80,7 +80,7 @@ void DisplayCurStreets (BOOL Clear,int Flash)
 				pPoints = (LPDPOINT)pPolys;
 				pPolys += sizeof(DPOINT)*nPnts;
 				{
- 					HPEN	hPen = CreatePen (PS_SOLID,IDNINT(width*DeviceToScreenFactor),color);
+ 					HPEN	hPen = CreatePen (PS_SOLID,IDNINT(AdjustWidth(width)),color);
 					HPEN	OldPen = SelectObject (CurView->hDC,hPen); 
 
 					GWPolylineD (CurView->hDC,pPoints,nPnts,0); 

@@ -3278,7 +3278,7 @@ BOOL DisplayDTMPoint (long Refno,DPOINT DPoint,double Elevation,double AZ,short 
 	CurrentType = GF_POINT;
 	CurPointSize = Size;
 	if (CurPointSize < 0)
-		CurPointSize = -CurPointSize * DeviceToScreenFactor;
+		CurPointSize = -CurPointSize * DeviceToScreenFactor();
 	else
 		CurPointSize /= CurView->BaseUnitsPerPixel;
 	if (GetTypeVisibility(TYPE_POINT))
@@ -3295,7 +3295,7 @@ BOOL DisplayDTMPoint (long Refno,DPOINT DPoint,double Elevation,double AZ,short 
 		HighlightPointSym=FALSE;
 		if (!GetTypeVisibility(6) && SymbolIsVisible (iDesc)) 
 		{
-			CurPointSize = 10*DeviceToScreenFactor;
+			CurPointSize = 10*DeviceToScreenFactor();
 			iDesc = InvisiblePointSymbol;
 		}
 		if (SetDisplayChar (CurView->hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI) > 0)
@@ -3304,7 +3304,7 @@ BOOL DisplayDTMPoint (long Refno,DPOINT DPoint,double Elevation,double AZ,short 
 			{
 				iDesc = ThemePointSym;
 				if (ThemePointSize < 0)
-					size = -ThemePointSize *DeviceToScreenFactor;
+					size = -ThemePointSize *DeviceToScreenFactor();
 				else
 					size = ThemePointSize / CurView->BaseUnitsPerPixel; 
 				size *= ThemeWidthFactor*GraphicsPointFactor;
@@ -3441,7 +3441,7 @@ void DisplayContourLabels (BOOL Clear)
 		SaveDC (CurView->hDC); 
 		InitRecord (CurView->hDC); 
 		_fmemset (&LogFont,0,sizeof(LOGFONT));
-   		LogFont.lfHeight = -(ContourTextSize+10) * DeviceToScreenFactor;
+   		LogFont.lfHeight = -(ContourTextSize+10) * DeviceToScreenFactor();
 	    _fstrcpy (LogFont.lfFaceName,"Courier New");
         _fstrcpy(LogFont.lfFaceName, "Arial Rounded MT Bold");
 		SetDisplayMode (CurView->hDC, GF_TEXTMODE);
@@ -4290,8 +4290,8 @@ BOOL SetDTMRenderAs (int Layer)
 		ContourTextColor = 0;
 		ContourTextSize = 4;  
 	} 
-	LightContourWidth *= DeviceToScreenFactor;
-	DarkContourWidth *= DeviceToScreenFactor; 
+	LightContourWidth *= DeviceToScreenFactor();
+	DarkContourWidth *= DeviceToScreenFactor(); 
 	DarkContourColor = ConvertColor (DarkContourColor,0);
 	LightContourColor = ConvertColor (LightContourColor,0);
 	ShowGridLines = GetGlobalBVal2 ("[%DTMShowGridLines]",FALSE);

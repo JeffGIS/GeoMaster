@@ -2212,7 +2212,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 			CurrentType = GF_POINT;
 			CurPointSize = SQLITEPointSize;
 			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			CurPointSize *= GraphicsPointFactor;
@@ -2235,7 +2235,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 				HighlightPointSym = FALSE;
 				if (!GetTypeVisibility(6) && SymbolIsVisible(iDesc))
 				{
-					CurPointSize = 10 * DeviceToScreenFactor;
+					CurPointSize = 10 * DeviceToScreenFactor();
 					iDesc = InvisiblePointSymbol;
 				}
 				if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
@@ -2246,7 +2246,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 					{
 						iDesc = ThemePointSym;
 						if (ThemePointSize < 0)
-							size = -ThemePointSize *DeviceToScreenFactor;
+							size = -ThemePointSize *DeviceToScreenFactor();
 						else
 							size = ThemePointSize / CurView->BaseUnitsPerPixel;
 						size *= ThemeWidthFactor;

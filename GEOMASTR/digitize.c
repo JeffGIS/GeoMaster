@@ -985,7 +985,7 @@ BOOL DisplayDistanceLine (BOOL DisplayDist)
 			
 			_fmemset (&LogFont,0,sizeof(LOGFONT));
 			_fstrcpy (LogFont.lfFaceName,"Arial"); 
-			LogFont.lfHeight = -14 *DeviceToScreenFactor; 
+			LogFont.lfHeight = -14 *DeviceToScreenFactor(); 
 			hFont = CreateFontIndirect((LPLOGFONT)&LogFont); 
 			OldFont = SelectObject (CurView->hDC,hFont);
 			GWPolygonD (CurView->hDC,pDistPoints,nPoints,1,0,0,FALSE,TRUE,0);
@@ -1126,7 +1126,7 @@ BOOL ShowTempLineType (LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
 		SetTextColor (CurView->hDC,Color);
 		SetDisplayMode (CurView->hDC, GF_TEXTMODE);
     	SetBkMode (CurView->hDC,OPAQUE);
-		hDistPen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor*width),Color);
+		hDistPen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor()*width),Color);
 		hOldPen = SelectObject (CurView->hDC,hDistPen); 
 		Points[0]=BasePtToWinPt (lpDPoint);
 		Points[1]=BasePtToWinPt (pBasePoint);

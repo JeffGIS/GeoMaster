@@ -538,7 +538,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 					}
 				}
 			} 
-			DisplayReport (hDC,TAGBox.hReport,Rect,Rect, Factor*DeviceToScreenFactor, TAGBox.Refno,&ReportRect);  
+			DisplayReport (hDC,TAGBox.hReport,Rect,Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect);  
 //			ReportRect = SizeReport (hDC,TAGBox.hReport,TAGBox.rect,TRUE);
 			TAGBox.bmWidth = max (TAGBox.bmWidth,ReportRect.right - ReportRect.left + 1);
 			TAGBox.bmHeight += ReportRect.bottom - ReportRect.top + 1;
@@ -579,8 +579,8 @@ BOOL ResetTAGBox (HDC hDC,short From)
 				{
 					if (!GetDIBDimensions(ExpLine,&height,&width))
 						goto TextOut;
-					height *= DeviceToScreenFactor;
-					width  *= DeviceToScreenFactor;
+					height *= DeviceToScreenFactor();
+					width  *= DeviceToScreenFactor();
 				}
 				height *= Factor;
 				width  *= Factor;
@@ -613,7 +613,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 	TAGBox.bmHeight += TAGBox.incy * 2;  
 	if (TAGBox.BorderStyle==4)
 	{
-		double	width = (3)*DeviceToScreenFactor*ShrinkFactor;
+		double	width = (3)*DeviceToScreenFactor()*ShrinkFactor;
 		int inc = width + BorderAdjust + TAGBox.incx;
 		TAGBox.bmWidth += inc * 2;
 		TAGBox.bmHeight += inc * 2;  
@@ -640,7 +640,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 	else if (TAGBox.CoordStyle == 1)
 		TAGBox.bmHeightD = (double)TAGBox.bmHeight / (Rect.bottom - Rect.top);
 	if (TAGBox.BorderStyle==4)
-		BorderAdjust = ShrinkFactor * DeviceToScreenFactor;
+		BorderAdjust = ShrinkFactor * DeviceToScreenFactor();
 	TAGBox.bmHeight += 2 * BorderAdjust;  
 	TAGBox.bmWidth  += 2 * BorderAdjust;
 	TAGBox.bmHeight = IDNINT (TAGBox.bmHeight * ShrinkFactor);  
@@ -803,7 +803,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	Rect.bottom = Rect.top + TAGBox.bmHeight + 2;  
 	if (TAGBox.Shadow)
 	{
-		int	inc = ShadowInc;//max((ShadowInc * (Rect.right - Rect.left)) / (CurView->ScreenRect.right - CurView->ScreenRect.left),3*DeviceToScreenFactor);
+		int	inc = ShadowInc;//max((ShadowInc * (Rect.right - Rect.left)) / (CurView->ScreenRect.right - CurView->ScreenRect.left),3*DeviceToScreenFactor());
 		Rect.bottom += inc;
 		Rect.right += inc;
 	}
@@ -874,9 +874,9 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		hOldBrush = SelectObject (hDC,hTBBrush);
 //		width = min(MainRect.right-MainRect.left,MainRect.bottom-MainRect.top) * (float)TAGBox.BorderStyle/350.0;
 		if (TAGBox.BorderStyle!=4)
-			width = (TAGBox.BorderStyle*2-1)*DeviceToScreenFactor;  
+			width = (TAGBox.BorderStyle*2-1)*DeviceToScreenFactor();  
 		else
-			width = (3)*DeviceToScreenFactor*ShrinkFactor;
+			width = (3)*DeviceToScreenFactor()*ShrinkFactor;
 		width = max (TAGBox.PLwidth,width);
 		LineWidth = width;	
 		OldPen = SelectObject (hDC,GetStockObject(NULL_PEN));
@@ -935,7 +935,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			BorderPen = CreatePen (PS_SOLID,(int)IDNINT(width),TAGBox.BorderColor);
 			SelectObject (hDC,BorderPen);
 			Rect = TAGBox.rect;
-			InflateRect (&Rect,(int)-IDNINT(width/2-1*DeviceToScreenFactor),(int)-IDNINT(width/2-1*DeviceToScreenFactor));
+			InflateRect (&Rect,(int)-IDNINT(width/2-1*DeviceToScreenFactor()),(int)-IDNINT(width/2-1*DeviceToScreenFactor()));
 			SelectObject(hDC,GetStockObject(NULL_BRUSH));
 			switch (TAGBox.Shape)
 			{
@@ -955,11 +955,11 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		{   
 			HPEN	BorderPen2,hOldPen;
 			Rect = TAGBox.rect;  
-			BorderAdjust = ShrinkFactor * DeviceToScreenFactor;
+			BorderAdjust = ShrinkFactor * DeviceToScreenFactor();
 			InflateRect (&Rect,
 			             (int) -IDNINT(width + BorderAdjust + TAGBox.incx),
 			             (int) -IDNINT(width + BorderAdjust + TAGBox.incy));
-			width = 1*DeviceToScreenFactor*ShrinkFactor;
+			width = 1*DeviceToScreenFactor()*ShrinkFactor;
 			BorderPen2 = CreatePen (PS_SOLID,(int)IDNINT(width),TAGBox.BorderColor); 
 			hOldPen = SelectObject(hDC,BorderPen2);
 			SelectObject (hDC,hOldPen);
@@ -1049,7 +1049,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 				else
 	    			Factor = 1; 
 				if (TAGBox.hReport)
-					DisplayReport (hDC,TAGBox.hReport,Rect,SaveRect, Factor*DeviceToScreenFactor, TAGBox.Refno,0);  
+					DisplayReport (hDC,TAGBox.hReport,Rect,SaveRect, Factor*DeviceToScreenFactor(), TAGBox.Refno,0);  
 		    }
 	
 		    else if (!_fstrnicmp(Line,"$BITMAP(",8))
@@ -1091,8 +1091,8 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 					{
 						if (!GetDIBDimensions(ExpLine,&height,&width))
 							goto TextOut;
-						height *= DeviceToScreenFactor;
-						width  *= DeviceToScreenFactor;
+						height *= DeviceToScreenFactor();
+						width  *= DeviceToScreenFactor();
 					}
 					height *= Factor;
 					width  *= Factor;
@@ -1244,7 +1244,7 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
 		{   HRGN    NewRgn, OvrLapRgn; 
 		    RECT	TBRect=rect;
 		    
-		    InflateRect (&TBRect,-(int)IDNINT(1*DeviceToScreenFactor+LineWidth/2),-(int)IDNINT(1*DeviceToScreenFactor+LineWidth/2)); 
+		    InflateRect (&TBRect,-(int)IDNINT(1*DeviceToScreenFactor()+LineWidth/2),-(int)IDNINT(1*DeviceToScreenFactor()+LineWidth/2)); 
 			if (!pClipRect)
 				pClipRect = &MainRect;
 		    NewRgn = CreateRectRgnIndirect (pClipRect);
@@ -1329,8 +1329,8 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
     switch (PLstyle)
     {
     	case 1:
-			hPen = CreatePen (PS_SOLID,(int)IDNINT(1*DeviceToScreenFactor),PointerColor);
-			DrawPointerLine (hDC,begpoint,endpoint,hPen,hPen,(int)IDNINT(5*DeviceToScreenFactor),0); 
+			hPen = CreatePen (PS_SOLID,(int)IDNINT(1*DeviceToScreenFactor()),PointerColor);
+			DrawPointerLine (hDC,begpoint,endpoint,hPen,hPen,(int)IDNINT(5*DeviceToScreenFactor()),0); 
 			GSSiDeleteObject (&hPen);
     		break;
     	case 3:
@@ -1384,7 +1384,7 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
 			}
 			else 
 			{
-				hPen = CreatePen (PS_SOLID,IDNINT(DeviceToScreenFactor),color);
+				hPen = CreatePen (PS_SOLID,IDNINT(DeviceToScreenFactor()),color);
 				hOldPen=SelectObject (hDC,hPen);
 			}
 			else
@@ -1554,7 +1554,7 @@ double TAGFontHtToPixels (double TAGFontHeight,short CoordStyle)
 	    	break;
 	    case 3:
 	    	iLogPixsY = GetDeviceCaps(CurView->hDC, LOGPIXELSY); 
-	    	return (TAGFontHeight * iLogPixsY*min(DeviceToScreenFactor,1));
+	    	return (TAGFontHeight * iLogPixsY*min(DeviceToScreenFactor(),1));
 	    	break;
 	    case 4:
 	    	iLogPixsY = GetDeviceCaps(CurView->hDC, LOGPIXELSY); 
@@ -1599,7 +1599,7 @@ float PixelsToTAGFontHt (LPLOGFONT lpFont,short CoordStyle)
 	    	break; 
 	    case 3:
 	    	iLogPixsY = GetDeviceCaps(CurView->hDC, LOGPIXELSY); 
-	    	return ((float) Pixels*max(1,DeviceToScreenFactor) / ((float)iLogPixsY));
+	    	return ((float) Pixels*max(1,DeviceToScreenFactor()) / ((float)iLogPixsY));
 	    	break; 
 	    
 	    case 4:

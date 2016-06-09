@@ -95,7 +95,7 @@ BOOL CreateCrossSection (short vpid,short opt) //opt=0(Clear xsection),1=draw xs
 	        {
 				CurView->Bitmap = SaveScreen2 (CurView->hWnd,CurView->hDC, CurView->Rect,CurView,&CurView->BitmapID);
 				CurView->BitmapRect = CurView->Rect;  
-				hRedPen = CreatePen (PS_SOLID,(int)(2*DeviceToScreenFactor),RGB(255,0,0));
+				hRedPen = CreatePen (PS_SOLID,(int)(2*DeviceToScreenFactor()),RGB(255,0,0));
 				hOldPen = SelectObject(CurView->hDC, hRedPen);
 				GWPolylineD (CurView->hDC,Points,2,0);  
 				SelectObject (CurView->hDC,hOldPen);   
@@ -390,8 +390,8 @@ void DisplayProfileThemeLegend(short From)
         }
         else
         	hSurf[1] = 0; 
-		h = (((CurView->DrawRect.bottom - CurView->DrawRect.top) / 2)-2*DeviceToScreenFactor);
-		w = (h+4*DeviceToScreenFactor); 
+		h = (((CurView->DrawRect.bottom - CurView->DrawRect.top) / 2)-2*DeviceToScreenFactor());
+		w = (h+4*DeviceToScreenFactor()); 
 		Seq = lpProfileData->MinSeq; 
 		if (CurView->HaveFixedProfileRoute)
 		{
@@ -504,7 +504,7 @@ EndRoute:
 			p.y = CurView->DrawRect.top;
 			Dist = ConvertDist (CurView->LastProfileDist,CurView->ProfileDistUnits);
 		    sprintf (txt,"Cross Section at %.3f",Dist); 
-		    h = 20*DeviceToScreenFactor;
+		    h = 20*DeviceToScreenFactor();
 			DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 2,3,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 		}
 	   	DBoundsInit (&Bounds);
@@ -715,7 +715,7 @@ if (isurf)
 		nGrid = IDNINT((MaxElev - MinElev) / RangeInc[IncID]);
 
 	    sprintf (txt,"%.0f",MaxElev);
-	    h = 20*DeviceToScreenFactor;
+	    h = 20*DeviceToScreenFactor();
 		TextExt = DispText (CurView->hDC,TRUE,p.x-10,p.x+10, -1,0, 2,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 		MaxXText = LOWORD(TextExt); 
 		MaxYText = HIWORD(TextExt);
@@ -849,7 +849,7 @@ if (isurf)
 		for (isurf=0;isurf<nSurf;isurf++)
 		{
 			np = 0;
-			hPen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),ProfileColor[isurf]);
+			hPen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor()),ProfileColor[isurf]);
 			hOldPen = SelectObject (CurView->hDC,hPen);      
 		    hProfile = GSSiGlobAlloc (1014,GMEM_MOVEABLE,nProfilePoints[isurf]*sizeof(POINT));
 		    pProfile = (HPPOINT)GlobalLock (hProfile);
@@ -913,7 +913,7 @@ if (isurf)
 				   	HFONT	OldFont,hFont;
 					
 					_fmemset (&LogFont,0,sizeof(LOGFONT));
-					LogFont.lfHeight = 14*DeviceToScreenFactor; 
+					LogFont.lfHeight = 14*DeviceToScreenFactor(); 
 					LogFont.lfEscapement = LogFont.lfOrientation = 900;   
 					LogFont.lfWeight = FW_BOLD;    
 					LogFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
@@ -921,7 +921,7 @@ if (isurf)
 					_fstrcpy (LogFont.lfFaceName,"Times New Roman MT Extra Bold");    //Courier Bold New
 					hFont = CreateFontIndirect((LPLOGFONT)&LogFont);
 					OldFont = SelectObject (CurView->hDC,hFont);
-					TextOut (CurView->hDC,(int)(WLine[1].x-7*DeviceToScreenFactor),WLine[1].y,txt,_fstrlen(txt));	
+					TextOut (CurView->hDC,(int)(WLine[1].x-7*DeviceToScreenFactor()),WLine[1].y,txt,_fstrlen(txt));	
 					SelectObject (CurView->hDC,OldFont);
 					DeleteObject (hFont);
 				} 
@@ -968,20 +968,20 @@ if (isurf)
 			pProfileDataRectangles = (LPPROFILEDATARECTANGLE)GlobalLock (CurView->hProfileDataRectangles);
 					
 			_fmemset (&LogFont,0,sizeof(LOGFONT));
-			LogFont.lfHeight = 13*DeviceToScreenFactor; 
+			LogFont.lfHeight = 13*DeviceToScreenFactor(); 
 			LogFont.lfWeight = FW_NORMAL;    
 			LogFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
 			LogFont.lfQuality = PROOF_QUALITY; 
 			_fstrcpy (LogFont.lfFaceName,"Times New Roman MT Extra Bold");    //Courier Bold New
 			//hFont1 = CreateFontIndirect((LPLOGFONT)&LogFont);
-			LogFontRing.lfHeight = 12*DeviceToScreenFactor; 
+			LogFontRing.lfHeight = 12*DeviceToScreenFactor(); 
 			LogFontRing.lfWeight = FW_NORMAL;    
 			LogFontRing.lfEscapement = 450;
 			LogFontRing.lfOutPrecision = OUT_DEFAULT_PRECIS;
 			LogFontRing.lfQuality = PROOF_QUALITY; 
 			_fstrcpy (LogFontRing.lfFaceName,"Times New Roman MT");    //Courier Bold New
 			hFontRing = CreateFontIndirect((LPLOGFONT)&LogFontRing);
-			LogFontSump.lfHeight = 12*DeviceToScreenFactor; 
+			LogFontSump.lfHeight = 12*DeviceToScreenFactor(); 
 			LogFontSump.lfWeight = FW_NORMAL;    
 			LogFontSump.lfOutPrecision = OUT_DEFAULT_PRECIS;
 			LogFontSump.lfQuality = PROOF_QUALITY; 
@@ -1109,7 +1109,7 @@ if (isurf)
 						RECT	bnds;
 
 						_fmemset (&LogFont,0,sizeof(LOGFONT));
-						LogFont.lfHeight = 13*DeviceToScreenFactor; 
+						LogFont.lfHeight = 13*DeviceToScreenFactor(); 
 						LogFont.lfWeight = FW_NORMAL;    
 						LogFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
 						LogFont.lfQuality = PROOF_QUALITY; 
@@ -1134,7 +1134,7 @@ if (isurf)
 						sprintf (txt,"%i\" %s",iWidth,Material);
 						bnds = GetPolyBounds (hPnts,nPnt3D);
 						xt = (bnds.left + bnds.right) / 2;
-						yt = bnds.bottom + 8*DeviceToScreenFactor + LogFont.lfHeight;
+						yt = bnds.bottom + 8*DeviceToScreenFactor() + LogFont.lfHeight;
 						OldFont = SelectObject (CurView->hDC,hFont1);
 						TextOutWithShadow (CurView->hDC,xt,yt,txt,strlen(txt),1,RGB(255,255,255));
 						SelectObject (CurView->hDC,OldFont);

@@ -1268,7 +1268,6 @@ BOOL	AZLocked=FALSE;
 BOOL	SetPickGlobalsCalled=FALSE;
 BOOL	ReorgUpdateBounds=FALSE;
 BOOL	ReorgUpdateTime=FALSE;
-float	DeviceToScreenFactor=1;
 double	DeviceToScreenFactorMemMap=1;
 BOOL	SetDimensions=FALSE;
 RECT	SetDimRect;

@@ -1209,7 +1209,7 @@ TryAgain:
 			
 //			FillRectPoly(hDC, &Rect, RGB(255,255,0));
 			LogFont.lfHeight = max (1, LogFont.lfHeight*0.85);	    
-			Rect.bottom = Rect.top-DeviceToScreenFactor;
+			Rect.bottom = Rect.top-DeviceToScreenFactor();
 			RectWidth = Rect.right - Rect.left - 2;
 			Rect.left++;
 			TextColor = SetTextColor (hDC,0); 
@@ -1342,7 +1342,7 @@ TryAgain:
 				if (!GetExtents && !UseFlag && (Shadow == 1 && !symbol || Shadow > 1))
 				{   
 					short	i, inc=max(1,(TAGBox.LogFont.lfHeight-5)/10); 
-					int		iDeviceToScreenFactor = max(1, DeviceToScreenFactor + 0.5);//IDNINT(DeviceToScreenFactor);
+					int		iDeviceToScreenFactor = max(1, DeviceToScreenFactor() + 0.5);//IDNINT(DeviceToScreenFactor());
 					
 					OldColor = SetTextColorDelayed (hDC,ConvertColor(ShadowColor,UseHalfTone),CurTheme);  
 					i = 1;

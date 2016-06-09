@@ -1501,7 +1501,7 @@ void ShowZoomArea (HDC hDC,LPDPOINT BoundsPoly,HBITMAP *SavedScreen, RECT *Saved
 #endif
 {	HPEN	hWidePen, hOldPen, hArrowPen;
 	int		BoxWidth;
-	int		BoxLineWidth=3 * DeviceToScreenFactor, ArrowLineWidth=4 * DeviceToScreenFactor;
+	int		BoxLineWidth=3 * DeviceToScreenFactor(), ArrowLineWidth=4 * DeviceToScreenFactor();
 	int		ArrowLen;
 	RECT	Rect;
 	int		i,RegionType;   

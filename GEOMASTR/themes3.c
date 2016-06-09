@@ -912,7 +912,7 @@ GSSiExitProg (1302);
 			if (ThemePointSize < 0) 
 			{
 				UseSymRect = FALSE;
-				size = -ThemePointSize *DeviceToScreenFactor;
+				size = -ThemePointSize *DeviceToScreenFactor();
 			}
 			else
 				size = ThemePointSize / CurView->BaseUnitsPerPixel;
@@ -1190,7 +1190,7 @@ Next:
 					Points[0] = CurPoint; 
 					j=NumClass; 
 					if (CurTheme->AccumPointBaseSize > 0)
-						MaxSize = CurTheme->AccumPointBaseSize*DeviceToScreenFactor;
+						MaxSize = CurTheme->AccumPointBaseSize*DeviceToScreenFactor();
 					else if (CurTheme->AccumPointBaseSize < 0)
 						MaxSize = -CurTheme->AccumPointBaseSize * BaseDistToWinDist; 
 					else

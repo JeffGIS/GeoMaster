@@ -4514,7 +4514,7 @@ SkipSegment:
 	if (pStreetData->UseFont && *pStreetData->StreetTextFont.lfFaceName)
 	{
 		SetGlobalValue("%LABELFONT",pStreetData->StreetTextFont.lfFaceName);
-		ThemeTextSize = pStreetData->StreetTextFont.lfHeight*DeviceToScreenFactor;
+		ThemeTextSize = pStreetData->StreetTextFont.lfHeight*DeviceToScreenFactor();
 		UseLayerSize = FALSE; 
 	} 
 	if (pStreetData->ScaleText)

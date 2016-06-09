@@ -274,7 +274,7 @@ void DisplayHotSpotThemeLegend(short From)
     		Points[i].x = x++;                                     
     		Points[i].y = y-((pMask[(int)(i*factor)])*hfactor);  
     	}
-		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor),0);
+		LinePen = CreatePen (PS_SOLID,(int)IDNINT(DeviceToScreenFactor()),0);
 		OldPen = SelectObject (CurView->hDC,LinePen);
 	    Polyline (CurView->hDC,Points,w);  
 		SelectObject (CurView->hDC,OldPen);

@@ -1858,7 +1858,7 @@ GSSiExitProg (973);
 	}
 	if (OffLineColor >= 0 && OffLineWidth > 0)
 	{
-		hPen = CreatePen (PS_SOLID,(short)IDNINT(OffLineWidth*DeviceToScreenFactor),OffLineColor);
+		hPen = CreatePen (PS_SOLID,(short)IDNINT(OffLineWidth*DeviceToScreenFactor()),OffLineColor);
 	    OldPen = SelectObject (CurView->hDC,hPen); 
 	    if (OutlineZoomArea && !ComputePCTTheme) 
 	    {
@@ -2730,7 +2730,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 							}
 						}
 						else if (ItemSymbolWidth > 0)
-							Width = ItemSymbolWidth * PenWidthFactor * DeviceToScreenFactor;
+							Width = ItemSymbolWidth * PenWidthFactor * DeviceToScreenFactor();
 						else
 							Width = -ItemSymbolWidth * BaseDistToWinDist * PenWidthFactor;
 
@@ -2739,9 +2739,9 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 		//				if (!hSpecialPen && (pElement->LineColorType ==  SVNULLCOLOR))
 							*phPen = GetStockObject(NULL_PEN);
 						else if (!hSpecialPen && (pElement->LineColorType == SVVARCOLOR && HaveVarFillColor))
-							*phPen = CreatePen (PS_SOLID,(int)IDNINT(Width*DeviceToScreenFactor*fac),ConvertColor(ColorWOWidth(GlobalColors[0]),desc));  
+							*phPen = CreatePen (PS_SOLID,(int)IDNINT(Width*DeviceToScreenFactor()*fac),ConvertColor(ColorWOWidth(GlobalColors[0]),desc));  
 						else if (!hSpecialPen)
-							*phPen = CreatePen (PS_SOLID,(int)IDNINT(Width*DeviceToScreenFactor*fac),ConvertColor(pElement->LineColor,desc)); 
+							*phPen = CreatePen (PS_SOLID,(int)IDNINT(Width*DeviceToScreenFactor()*fac),ConvertColor(pElement->LineColor,desc)); 
 					}
 					else if (pElement->Type == 4)
 					{
@@ -2759,9 +2759,9 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 							if (!hSpecialPen && (!ShowBorder || pElement->LineColorType ==  SVNULLCOLOR))
 								*phPen = GetStockObject(NULL_PEN);
 							else if (!hSpecialPen && (pElement->LineColorType == SVVARCOLOR && HaveVarFillColor))
-								*phPen = CreatePen (PS_SOLID,(int)IDNINT(pElement->Width*DeviceToScreenFactor*fac),ConvertColor(ColorWOWidth(GlobalColors[0]),desc));  
+								*phPen = CreatePen (PS_SOLID,(int)IDNINT(pElement->Width*DeviceToScreenFactor()*fac),ConvertColor(ColorWOWidth(GlobalColors[0]),desc));  
 							else if (!hSpecialPen)
-								*phPen = CreatePen (PS_SOLID,(int)IDNINT(max (pElement->Width,0)*DeviceToScreenFactor*fac),ConvertColor(pElement->LineColor,desc));
+								*phPen = CreatePen (PS_SOLID,(int)IDNINT(max (pElement->Width,0)*DeviceToScreenFactor()*fac),ConvertColor(pElement->LineColor,desc));
 						}
 					}
 					GlobalUnlock (*phElement);
@@ -5099,7 +5099,7 @@ BOOL ConvertPoly (LPSHORT ipnt,HANDLE hTranFrom,HANDLE hTranTo,LPSTR BeginSeg,in
 		    lpCurPoints->x = IDNINT (FilePointD.x);
 		    lpCurPoints->y = IDNINT (FilePointD.y);
 /*			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize *DeviceToScreenFactor;
+				CurPointSize = -CurPointSize *DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;*/
         }
@@ -5122,7 +5122,7 @@ BOOL ConvertPoly (LPSHORT ipnt,HANDLE hTranFrom,HANDLE hTranTo,LPSTR BeginSeg,in
     		PTRot = *pRot;
 			ConvertCoord(lpDCurPoints,From,To);
 /*			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor;
+				CurPointSize = -CurPointSize * DeviceToScreenFactor();
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel; */
         }

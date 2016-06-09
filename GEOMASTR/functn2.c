@@ -4341,7 +4341,7 @@ GSSiExitProg (1350);
 						AppendFile (PolyProbListFile,str);
 					}
 //                    if (HaveLinkLines (lpDCurPoints,nPnts)) lpDCurPoints[0]
-                   	DisplayPointItem (CurView->hDC,PointLoc,atof(Arg[3])*DeviceToScreenFactor,0,SymNum,0);
+                   	DisplayPointItem (CurView->hDC,PointLoc,atof(Arg[3])*DeviceToScreenFactor(),0,SymNum,0);
                 }
 			}
 			itoa (rtn,OutLoc,10);

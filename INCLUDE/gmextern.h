@@ -341,7 +341,6 @@ extern HDC			hdcMemMap;
 extern COLORREF			ComputePCTBKGColor;
 extern LPTHEME			ComputePCTTheme;
 extern double			CurveExpansionFactor;
-extern float			DeviceToScreenFactor;
 extern double			DeviceToScreenFactorMemMap;
 extern double			PenWidthFactor;
 extern short			MaxOrthoRes;
@@ -1783,6 +1782,10 @@ extern	int		ii;
 extern int nPaint;
 BOOL setDoPaint(BOOL DoPaint);
 BOOL DoPaint(void);
+float DeviceToScreenFactor(void);
+float setDeviceToScreenFactor(float v);
+double AdjustWidth(double width);
+
 
 
 

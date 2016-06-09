@@ -259,7 +259,7 @@ BOOL OpenBasePens(void)
 {   LOGBRUSH    NDB; 
 	COLORREF	Color;
     short i, Width; 
-    double	fac=DeviceToScreenFactor;
+    double	fac=DeviceToScreenFactor();
 	BOOL	rtn=FALSE;
     
     if (!HaveBasePens && Display)
@@ -893,7 +893,7 @@ void CreateNewObject(int i)
 {
     LOGBRUSH	NDB;
     double		WF=WidthFactor;
-    double	fac=DeviceToScreenFactor; 
+    double	fac=DeviceToScreenFactor(); 
     short	UseHalfTone=0;
     BOOL	HiPrecis2 = HiPrecis;
 
