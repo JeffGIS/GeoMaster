@@ -6901,6 +6901,12 @@ GSSiExitProg (293);
 #endif
 }
 
+void debugFile(LPSTR id, LPSTR text)
+{
+	char str[4096];
+	sprintf(str, "%s:%s", id, text);
+	AppendFile2("c:/temp/debugfile.txt", str);
+}
 void GSSiTrace (LPSTR str,short From)
 #if ENABLETRACE
 {GSSiEnterProg (294);

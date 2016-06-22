@@ -1388,6 +1388,7 @@ void AtBreakPoint(LPSTR Args,int bploc);
 void SetDebug (BOOL state);
 BOOL GetDebug (void);
 BOOL getDebugMacro(int macroID);
+void debugFile(LPSTR id, LPSTR text);
 void GetWindowsVersion(LPSTR Ver);
 int ChassisType(void); // returns -1 if error, 1 for desktop, 2 for laptop, 3 for handheld and 4 for other
 int MonitorType(int which,LPSTR monName);
