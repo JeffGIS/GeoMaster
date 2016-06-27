@@ -1801,6 +1801,7 @@ GSSiExitProg (524);
 		case SLT_DATAFILE:
 		{
 
+			ClearCurVals(FilePtr);
 			CloseSLTDatabase(&FilePtr->FileHandle);
 
 		}
