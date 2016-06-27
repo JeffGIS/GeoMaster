@@ -639,7 +639,7 @@ LPVOID GetExternalFieldData ( LPOPENFILEDATA FilePtr, LPCSTR indexIN, LPVOID *hs
                               int NumFields,LPFIELDINFO FirstField)
                                  
 {  // index[] = "pidno", keydata[] = "0102824110013" ;                            
-static char answer[4096];
+	static char answer[MAXVARLEN];
 #define MAX_COLS 5
 LPVOID lpvoid = answer;
 short   j,i, startfield, WantField; 
@@ -2115,45 +2115,44 @@ void ODBCTerminate (BOOL Quit)
     henv = 0;
 	return;
 }	
-
 /******************************************************************/
-int NumDatabaseTables( char *type, HWND  DBhandle,int itype)
+int NumDatabaseTablesODBC(char *type, HWND  DBhandle)
 {
 #define STR_RMK 254
-SDWORD cbTableQual, cbTableOwner, cbTableName, cbTableType, cbRemarks;
-UCHAR  szTableQual[STR_LEN+1],   szTableName[STR_LEN+1],
-       szTableOwner[STR_LEN+1],  szTableType[STR_LEN+1],
-       szRemarks[STR_RMK];  
-       char	Owner[64]; 
-	   char	TableTypes[34] = "'TABLE','VIEW'";
-       short	lOwner, ln; 
-       LPSTR	pTables;
-	   char buffer[1024] = { 0 };
-	   SQLSMALLINT	lbuf;
-static HSTMT hstmt;      
-		long	TotLen=0;
-HDBC hdbc;           
-RETCODE rc;
-int icount; 
-short	i;
-	
-    GSSiGlobFree (&hTableNames);
-    i=(int)DBhandle;
-    hdbc = HDBCS[i];
-    SQLAllocStmt(hdbc, &hstmt);
+	SDWORD cbTableQual, cbTableOwner, cbTableName, cbTableType, cbRemarks;
+	UCHAR  szTableQual[STR_LEN + 1], szTableName[STR_LEN + 1],
+		szTableOwner[STR_LEN + 1], szTableType[STR_LEN + 1],
+		szRemarks[STR_RMK];
+	char	Owner[64];
+	char	TableTypes[34] = "'TABLE','VIEW'";
+	short	lOwner, ln;
+	LPSTR	pTables;
+	char buffer[1024] = { 0 };
+	SQLSMALLINT	lbuf;
+	static HSTMT hstmt;
+	long	TotLen = 0;
+	HDBC hdbc;
+	RETCODE rc;
+	int icount;
+	short	i;
 
-	rc = SQLGetInfo(hdbc, SQL_DRIVER_NAME, buffer, sizeof(buffer) - 1, &lbuf);
-	rc = SQLGetInfo(hdbc, SQL_DATA_SOURCE_NAME, buffer, sizeof(buffer) - 1, &lbuf);
+	GSSiGlobFree(&hTableNames);
+	i = (int)DBhandle;
+	hdbc = HDBCS[i];
+	SQLAllocStmt(hdbc, &hstmt);
 
-//	if (itype == 4)
-//		strcpy(TableTypes, "'SYSTEM TABLE','TABLE','VIEW'");
+	rc = SQLGetInfo(hdbc, SQL_DRIVER_NAME, buffer, sizeof(buffer)-1, &lbuf);
+	rc = SQLGetInfo(hdbc, SQL_DATA_SOURCE_NAME, buffer, sizeof(buffer)-1, &lbuf);
 
-//    rc = SQLTables(hstmt,0,0,0,0,0,0,0,0); 
-	GetGlobalCVal ("[%TABLEOWNER]",Owner,0);
-	lOwner = _fstrlen (Owner);  
+	//	if (itype == 4)
+	//		strcpy(TableTypes, "'SYSTEM TABLE','TABLE','VIEW'");
+
+	//    rc = SQLTables(hstmt,0,0,0,0,0,0,0,0); 
+	GetGlobalCVal("[%TABLEOWNER]", Owner, 0);
+	lOwner = _fstrlen(Owner);
 	if (lOwner)
-    	rc = SQLTables(hstmt,0,0,Owner,lOwner,0,0,TableTypes,(short)_fstrlen(TableTypes));
-    else
+		rc = SQLTables(hstmt, 0, 0, Owner, lOwner, 0, 0, TableTypes, (short)_fstrlen(TableTypes));
+	else
 		rc = SQLTables(hstmt, 0, 0, 0, 0, 0, 0, TableTypes, (short)_fstrlen(TableTypes));
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) goto s44;
 	SQLBindCol(hstmt, 1, SQL_C_CHAR, szTableQual, STR_LEN, &cbTableQual);
@@ -2176,32 +2175,73 @@ short	i;
 		SQLBindCol(hstmt, 5, SQL_C_CHAR, szRemarks, STR_RMK, &cbRemarks);
 		rc = SQLFetch(hstmt);
 	}
-    icount = 1; 
-    hTableNames = GSSiGlobAlloc ( 165,GHND,USHRT_MAX);
-    pTables = GlobalLock (hTableNames);
-    while ((rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) && TotLen < USHRT_MAX - 256)
-    {   
-    	short	ii;
-    	if (!_fstrnicmp (szTableName,"JS",2))
-    		ii=1;
-     cbTableName = max (0,min (cbTableName,STR_LEN)); 
-     szTableName[cbTableName] = 0;
-     if (cbTableOwner > 0)
-     	sprintf (pTables,"%s.%s",szTableOwner,szTableName);   
-     else
-     	_fstrcpy(pTables, szTableName);
-     ln = _fstrlen (pTables);
-     pTables += ln + 1;
-     TotLen += ln + 1;
-     rc = SQLFetch(hstmt);
-     icount++;
-    } 
-    *pTables = 0;
-    GlobalUnlock (hTableNames);
+	icount = 1;
+	hTableNames = GSSiGlobAlloc(165, GHND, USHRT_MAX);
+	pTables = GlobalLock(hTableNames);
+	while ((rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) && TotLen < USHRT_MAX - 256)
+	{
+		short	ii;
+		if (!_fstrnicmp(szTableName, "JS", 2))
+			ii = 1;
+		cbTableName = max(0, min(cbTableName, STR_LEN));
+		szTableName[cbTableName] = 0;
+		if (cbTableOwner > 0)
+			sprintf(pTables, "%s.%s", szTableOwner, szTableName);
+		else
+			_fstrcpy(pTables, szTableName);
+		ln = _fstrlen(pTables);
+		pTables += ln + 1;
+		TotLen += ln + 1;
+		rc = SQLFetch(hstmt);
+		icount++;
+	}
+	*pTables = 0;
+	GlobalUnlock(hTableNames);
 s44:SQLCloseCursor(hstmt);
 	SQLFreeStmt(hstmt, SQL_DROP);
-	return icount-1;
-}  
+	return icount - 1;
+}
+int NumDatabaseTablesSLT(HANDLE DBhandle)
+{
+	LPSTR	pTables;
+	int icount=0;
+	short	ln;
+	sqlite3 *db;
+	sqlite3_stmt *statement;
+	LPSQLDATABASE	pDB;
+	char query[] = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name";
+
+	if (!DBhandle)
+		return 0;
+	GSSiGlobFree(&hTableNames);
+	hTableNames = GSSiGlobAlloc(165, GHND, USHRT_MAX);
+	pTables = GlobalLock(hTableNames);
+
+	pDB = (LPSQLDATABASE)GlobalLock(DBhandle);
+	db = pDB->DBHandle;
+	if (sqlite3_prepare_v2(db, query, -1, &statement, 0) == SQLITE_OK)
+	{
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 0);
+			_fstrcpy(pTables, pName);
+			ln = _fstrlen(pTables);
+			pTables += ln + 1;
+			icount++;
+		}
+		sqlite3_finalize(statement);
+	}
+	*pTables = 0;
+	GlobalUnlock(hTableNames);
+	GlobalUnlock(DBhandle);
+	return icount;
+}
+int NumDatabaseTables(char *type, HANDLE  DBhandle, int itype)
+{
+	if (itype == SLT_DATAFILE)
+		return NumDatabaseTablesSLT(DBhandle);
+	return NumDatabaseTablesODBC(type, DBhandle);
+}
 
 long FindTableName (LPSTR DBName,LPSTR TablePartialName,LPSTR OutFile)
 {   

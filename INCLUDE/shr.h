@@ -50,7 +50,6 @@
 #include "gssitype.h"
 #include "compute.h"
 #include "dibapi.h"
-#include "sqlite3.h"
 
 #define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
     GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
@@ -290,8 +289,13 @@ void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
 void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
 short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
 HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL);
+HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
 void CloseSLTDatabase(LPHANDLE pHandle);
-HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL);
+void SLTCloseCursor(LPSQLDATABASE pDB);
+LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc, LPFIELDINFO FirstField);
+int FetchSLTRec(LPSQLDATABASE pSQL);
+BOOL SLTPrepareStatement(LPSQLDATABASE pDB, LPSTR SQL);
+void CloseSLTDatabaseQuery(LPHANDLE pHandle);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
 BOOL GetCurrentPNDBName (LPSTR Name);
 BOOL GetCurrentGraphicsDBName (LPSTR Name,short Type);

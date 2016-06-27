@@ -2174,20 +2174,22 @@ GSSiExitProg (620);
 				   		MoveWindow(GetDlgItem(hWndDlg,IDC_FIELDS), Rect.left,Rect.top, 2*(Rect.right-Rect.left), Rect.bottom-Rect.top, TRUE);
          				SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_SETTABSTOPS,2,(LPARAM)&TabStops);
 					}
-				    FetchDBRec (hFLDB);
-					SQLPtr = (LPOPENSQLDATA)GlobalLock (hFLDB);
-					FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
-					lpFieldInfo = &FilePtr->FldInfo; 
-			        SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_RESETCONTENT,0,0);
+					if (FetchDBRec(hFLDB))
+					{
+						SQLPtr = (LPOPENSQLDATA)GlobalLock(hFLDB);
+						FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+						lpFieldInfo = &FilePtr->FldInfo;
+						SendDlgItemMessage(hWndDlg, IDC_FIELDS, LB_RESETCONTENT, 0, 0);
 
-					for (i=0;i<FilePtr->NumFields;i++,lpFieldInfo++) 
-					{   
-        				sprintf (pstr,"%s\t[%s]",lpFieldInfo->name,lpFieldInfo->name); 
-						ExpandText (pstr);
-						SendDlgItemMessage (hWndDlg,IDC_FIELDS,LB_ADDSTRING,0,(LPARAM)((LPSTR) pstr));
-					}   
-					GSSiGlobUlFree (&hStr);
-					GlobalUnlock (SQLPtr->OFHandle);
+						for (i = 0; i < FilePtr->NumFields; i++, lpFieldInfo++)
+						{
+							sprintf(pstr, "%s\t[%s]", lpFieldInfo->name, lpFieldInfo->name);
+							ExpandText(pstr);
+							SendDlgItemMessage(hWndDlg, IDC_FIELDS, LB_ADDSTRING, 0, (LPARAM)((LPSTR)pstr));
+						}
+						GSSiGlobUlFree(&hStr);
+						GlobalUnlock(SQLPtr->OFHandle);
+					}
 					GlobalUnlock (hFLDB);
 				  }
 				  break;

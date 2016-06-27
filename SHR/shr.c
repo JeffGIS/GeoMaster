@@ -73,7 +73,7 @@ double square(double val)
 	return val * val;
 }
 
-int SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
+BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 {
 	if (sqlReturn != SQLITE_OK)
 	{
@@ -5308,7 +5308,7 @@ BOOL GSSiRename (LPSTR FromName, LPSTR ToName)
 {GSSiEnterProg (268);
 #endif
 {   
-	int	i;
+	BOOL rtn;
 	char	str1[256],str2[256]; 
 	HFILE	Fid;
 	
@@ -5318,19 +5318,12 @@ BOOL GSSiRename (LPSTR FromName, LPSTR ToName)
 		ActuallyCloseFile (Fid);
 	_fstrcpy (str2,ToName);
 	ExpandText (str2);
-	i=GSSirenamefile (str1,str2);
-	if (!i)
+	rtn=GSSirenamefile (str1,str2);
 {
 #if ENABLETRACE
 GSSiExitProg (268);
 #endif
-		return TRUE;
-}
-{
-#if ENABLETRACE
-GSSiExitProg (268);
-#endif
-	return FALSE;
+	return rtn;
 }
 #if ENABLETRACE
 }

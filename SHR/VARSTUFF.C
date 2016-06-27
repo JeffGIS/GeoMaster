@@ -1800,7 +1800,6 @@ GSSiExitProg (524);
 			break;
 		case SLT_DATAFILE:
 		{
-			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
 			CloseSLTDatabase(&FilePtr->FileHandle);
 
@@ -7841,8 +7840,17 @@ NextTextRec:
 		case SLT_DATAFILE:
 		{
 			LPSQLDATABASE	pSQL = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
-
-			irc = FetchDBRec(pSQL->DBHandle);
+			if (NeedRead(SQLPtr))
+			{
+				SQLPtr->lastreadtime = NextVarTime();
+				SLTCloseCursor(pSQL);
+				ClearCurVals(FilePtr);
+				SLTPrepareStatement(pSQL, SQLPtr->SQL);
+			}
+			SQLPtr->st = 0;
+			if (!FetchSLTRec(pSQL))
+				SQLPtr->st = 31;
+			ClearCurVals(FilePtr);
 			GlobalUnlock(FilePtr->FileHandle);
 			goto Exit;
 		}
@@ -9142,22 +9150,14 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				if (NeedRead(SQLPtr))
 				{
 					SQLPtr->lastreadtime = NextVarTime();
-					if (SQLPtr->hstmt)
-					{
-						SQLCloseCursor(SQLPtr->hstmt);
-						SQLFreeStmt(SQLPtr->hstmt, SQL_DROP);
-						SQLPtr->hstmt = 0;
-						ClearCurVals(FilePtr);
-					}
+					SLTCloseCursor(FilePtr->FileHandle);
+					ClearCurVals(FilePtr);
 					SQLPtr->st = 0;
 
 				}
 				if (SQLPtr->st)
 					goto NotFound;
-				ValC = (LPSTR)GetExternalFieldData(FilePtr,
-					SQLPtr->SQL, &SQLPtr->hstmt,
-					lpFieldInfo, FALSE, 0, &irc, FilePtr->NumFields,
-					&FilePtr->FldInfo);
+				ValC = (LPSTR)GetSLTFieldData(FilePtr->FileHandle, SQLPtr->SQL, lpFieldInfo, FALSE, &irc,&FilePtr->FldInfo);
 				if (irc)
 					goto NotFound;
 				_fstrcpy(Value, ValC);

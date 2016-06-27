@@ -2864,59 +2864,285 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 	return rtn;
 }
 			*/
-HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL)
+HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 {
-	HFILE	Fid;
+	HANDLE	hDB;
 	LPSQLDATABASE	pDB;
+	LPSTR pTable;
+	char Name[MAX_PATH + 256];
+	int rtn;
+	sqlite3 *db;
+
+	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
+	pDB = (LPSQLDATABASE)GlobalLock(hDB);
+	strcpy(Name, NameIN);
+	if ((pTable = strrchr(Name, '(')))
+	{
+		*pTable++ = 0;
+		*LastChr(pTable) = 0;
+		strcpy(pDB->From, pTable);
+	}
+	strcpy(pDB->DBName, Name);
+	rtn = sqlite3_open(Name, &db);
+	if (rtn != SQLITE_OK)
+	{
+		GSSiGlobUlFree(&pDB);
+		return 0;
+	}
+	pDB->DBHandle = db;
+	strcpy(pDB->Where, SQL);
+	if (*pDB->From)
+	{
+		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+		if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "get db info", 0))
+		{
+			int ncols = sqlite3_column_count(pDB->statement);
+			pDB->NumFields = ncols;
+			for (int i = 0; i < ncols; i++)
+			{
+				int itype = sqlite3_column_type(pDB->statement, i);
+				int ibytes = sqlite3_column_bytes(pDB->statement, i);
+				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, i);
+				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, i);
+				int nc = 0;
+
+				LPSTR pPar = strchr(decl, '(');
+				if (pPar)
+				{
+					*pPar++ = 0;
+					nc = atoi(pPar);
+				}
+				strncpy(pDB->FldInfo[i].name, pName, sizeof(pDB->FldInfo[i].name));
+				pDB->FldInfo[i].index = i;
+
+				if (!strnicmp(decl, "INT", 3))
+				{
+					pDB->FldInfo[i].type = BT_INTEGER;
+					pDB->FldInfo[i].length = 4;
+				}
+				else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT"))
+				{
+					pDB->FldInfo[i].type = BT_REAL;
+					pDB->FldInfo[i].length = 8;
+				}
+				else if (!stricmp(decl, "BLOB"))
+				{
+					pDB->FldInfo[i].type = SQL_LONGVARBINARY;
+					pDB->FldInfo[i].length = nc;
+				}
+				else if (!stricmp(decl, "CHAR"))
+				{
+					pDB->FldInfo[i].type = BT_CHAR;
+					pDB->FldInfo[i].length = nc;
+				}
+				else
+					MessageBox(0, decl, "Invalid type",MB_OK);
+			}
+
+		}
+		sqlite3_finalize(pDB->statement);
+		if (*pDB->Where)
+			sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pDB->Where);
+		else
+			sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
+		{
+			GSSiGlobUlFree(&hDB);
+		}
+
+	}
+	if (hDB)
+		GlobalUnlock(hDB);
+	return hDB;
+}
+
+BOOL FetchSLTRec(LPSQLDATABASE pSQL)
+{
+	BOOL rtn = FALSE;
+	if (sqlite3_step(pSQL->statement) == SQLITE_ROW)
+		rtn = TRUE;
+	return rtn;
+}
+
+void SLTCloseCursor(LPSQLDATABASE pDB)
+{
+	if (pDB->statement)
+		sqlite3_finalize(pDB->statement);
+	pDB->statement = NULL;
+}
+
+BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
+{
+	sqlite3 *db;
+	BOOL rtn = FALSE;
+	db = pDB->DBHandle;
+	if (pDB->statement)
+		sqlite3_finalize(pDB->statement);
+	pDB->statement = NULL;
+	if (*SQL)
+		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, SQL);
+	else
+		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+	if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
+	{
+		rtn = TRUE;
+	}
+	return rtn;
+}
+
+LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc,LPFIELDINFO FirstField)
+{
+	static char answer[MAXVARLEN] = { 0 };
+	LPSTR lpvoid = answer;
+	LPSTR pVal = 0;
+	LPFIELDINFO field;
+	LPCURVAL	pCurVal;
+	int WantField = infield->index;
+
+	*irc = 1;
+	if (infield->hCurVal)
+	{
+		pCurVal = (LPCURVAL)GlobalLock(infield->hCurVal);
+		_fstrncpy(answer, &pCurVal->Value, pCurVal->length);
+		answer[pCurVal->length] = 0;
+		GlobalUnlock(infield->hCurVal);
+		*irc = 0;
+		return lpvoid;
+	}
+	if (hDB)
+	{
+		LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(hDB);
+		*irc = 0;
+		if (SingleVal)
+		{
+			infield->hCurVal = 0;
+			WantField = 0;
+		}
+		else
+		{
+			int cols = sqlite3_column_count(pDB->statement);
+			char zero[2] = "";
+			field = FirstField;
+			for (int i = 0; i < cols; i++,field++)
+			{
+				int l = sqlite3_column_bytes(pDB->statement, i);
+				LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, i);
+
+				if (!str)
+					str = zero;
+				pDB->FldInfo[i].length = l;
+				field->hCurVal = GSSiGlobAlloc(153, GMEM_MOVEABLE, sizeof(int)+l + 4);
+				pCurVal = (LPCURVAL)GlobalLock(field->hCurVal);
+				pCurVal->length = l;
+				if (pCurVal->length)
+					_fstrncpy(&pCurVal->Value, str, pCurVal->length);
+				GlobalUnlock(field->hCurVal);
+				if (i == WantField)
+				{
+					_fstrncpy(answer, str, (size_t)l);
+					answer[l] = 0;
+				}
+			}
+		}
+		GlobalUnlock(hDB);
+	}
+	return lpvoid;
+}
+
+void CloseSLTDatabase(LPHANDLE pHandle)
+{
+	int rtn;
+	HANDLE	hDB;
+	LPSQLDATABASE	pDB;
+
+	if (*pHandle)
+	{
+		pDB = (LPSQLDATABASE)GlobalLock(*pHandle);
+		if (*pDB->Query)
+			sqlite3_finalize(pDB->statement);
+		rtn = sqlite3_close(pDB->DBHandle);
+		GSSiGlobUlFree(pHandle);
+	}
+	return;
+}
+
+HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL)
+{
 	HANDLE	hDB;
 	char	str[130];
 	HANDLE	hMem;
 	LPSTR	pMem;
+	sqlite3 *db;
+	sqlite3_stmt *statement;
+	LPSQLDATABASE	pDB;
 
-	Fid = GSSiOpenFile(Name, 0, OF_READ);
-	if (Fid == HFILE_ERROR)
+	int rtn = sqlite3_open(Name, &db);
+	if (rtn != SQLITE_OK)
 		return 0;
 	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
-	pDB = (LPSQLDATABASE)GlobalLock(hDB);
-	fgetstring(pDB->DBName, 126, Fid);
-	ReadMultiLine(Fid, pDB->Select);
-	ReadMultiLine(Fid, pDB->From);
-	//    ReadMultiLine (Fid,pDB->Where); 
-	fgetstring(str, 32, Fid);
-	while (fgetstring(str, 128, Fid))
+	pDB = (LPSQLDATABASE)GlobalLock (hDB);
+
+	if (sqlite3_prepare_v2(db, SQL, -1, &statement, 0) == SQLITE_OK)
 	{
-		int ii = sscanf(str, "%i,%i,%i,%i,%i,%i,%s",
-			&pDB->FldInfo[pDB->NumFields].type,
-			&pDB->FldInfo[pDB->NumFields].index,
-			&pDB->FldInfo[pDB->NumFields].radix,
-			&pDB->FldInfo[pDB->NumFields].scale,
-			&pDB->FldInfo[pDB->NumFields].length,
-			&pDB->FldInfo[pDB->NumFields].precision,
-			pDB->FldInfo[pDB->NumFields].name);
-		//    	_fstrcpy (pDB->FldInfo[pDB->NumFields].name,str);
-		pDB->NumFields++;
+		int cols = sqlite3_column_count(statement);
+		for (int i = 0; i < cols; i++)
+		{
+			int itype = sqlite3_column_type(statement, i);
+			{
+				int type = BT_INTEGER;
+				
+				switch (itype)
+				{
+				case SQLITE_INTEGER:
+					break;
+				case SQLITE_FLOAT:
+					type = BT_REAL;
+					break;
+				case SQLITE_NULL:
+				case SQLITE_TEXT:
+					type = BT_CHAR;
+					break;
+				case SQLITE_BLOB:
+					break;
+				}
+			}
+			int ibytes = sqlite3_column_bytes(statement, i);
+			if (!ibytes)
+				ibytes = 4096;
+			pDB->FldInfo[pDB->NumFields].length = ibytes;
+			LPSTR pName = (LPSTR)sqlite3_column_name(statement, i);
+			if (pName)
+			{
+				strncpy(pDB->FldInfo[pDB->NumFields++].name, pName, sizeof(pDB->FldInfo[pDB->NumFields++].name));
+			}
+
+		}
 	}
-	GSSiClose(Fid);
-	hMem = GSSiGlobAlloc(1506, GMEM_MOVEABLE, USHRT_MAX);
-	pMem = GlobalLock(hMem);
-	_fstrcpy(pMem, pDB->Select);
-	_fstrcat(pMem, pDB->From);
-	if (*SQL)
-	{
-		_fstrcat(pMem, " WHERE ");
-		_fstrcat(pMem, SQL);
-	}
-	if (!OpenDataFile(pDB->DBName, pMem, BT_READ, &pDB->DBHandle))
-	{
-		GSSiGlobUlFree(&hDB);
-		GSSiGlobUlFree(&hMem);
-		return 0;
-	}
-	GSSiGlobUlFree(&hMem);
-	GlobalUnlock(hDB);
+	sqlite3_finalize(statement);
+
+/*	why not just stick "limit 0" on the end of a select statement ? int cols = sqlite3_column_count(stmt); fprintf(stdout, "%d columns\n", cols); for (int i = 0; i<cols; i++) fprintf(stdout, "%d. %s\n", i, sqlite3_column_name(stmt, i)); – Erik Aronesty May 20 '15 at 21:09  
+
+
+
+
+
+										   &pDB->FldInfo[pDB->NumFields].type,
+										   &pDB->FldInfo[pDB->NumFields].index,
+										   &pDB->FldInfo[pDB->NumFields].radix,
+										   &pDB->FldInfo[pDB->NumFields].scale,
+										   &pDB->FldInfo[pDB->NumFields].length,
+										   &pDB->FldInfo[pDB->NumFields].precision,
+										   pDB->FldInfo[pDB->NumFields].name);
+										   */
+  	GlobalUnlock (hDB);
+
+
 	return hDB;
 }
-void CloseSLTDatabase(LPHANDLE pHandle)
+void CloseSLTDatabaseQuery (LPHANDLE pHandle)
 {
+	int rtn;
+	if (*pHandle)
+		rtn = sqlite3_close(*pHandle);
 	return;
 }

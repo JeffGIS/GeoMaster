@@ -884,6 +884,7 @@
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
     <ClInclude Include="..\INCLUDE\gssitype.h" />
     <ClInclude Include="..\INCLUDE\rotate256.h" />
+    <ClInclude Include="..\INCLUDE\UMIO.H" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\BMPImageWriter.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\GeoTIFFImageWriter.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\J2KImageReader.h" />

@@ -463,14 +463,18 @@ BOOL GSSirenamefile (LPSTR OldNameIn,LPSTR NewNameIn)
 	MYPROC Proc; 
 	short	ln;
 	char	OldName[MAX_PATH], NewName[MAX_PATH];
-
+	int rtn;
 	strcpy (OldName,OldNameIn);
 	strcpy (NewName,NewNameIn);
 	ConvertToNewLocation (OldName,FALSE);
 	ConvertToNewLocation (NewName,FALSE);
 	
 //	if (!ghLib)
-   		return (!rename (OldName,NewName));
+   		rtn = rename (OldName,NewName);
+		if (!rtn)
+			return TRUE;
+		else
+			return FALSE;
 /*	Proc = (MYPROC) lpfnGetProcAddress32W( ghLib, "GM32rename" );
    	if(Proc == NULL )
    		return (!rename (OldName,NewName));

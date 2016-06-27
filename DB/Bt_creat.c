@@ -142,7 +142,7 @@ void FIND_PRIOR_BTPOS(LPBTREE pBTree);
 void UMDB_WRITE_JOURNAL (LPBTREE pBTree,BOOL INDEX);
 LPBTREE  AllocateBTMem (HGLOBAL hBTree);
 void DeallocateBTMem(LPBTREE pBTree,HGLOBAL hBTree);
-BOOL BT_ALLOCATE_BUFFERS (HGLOBAL hBTree);
+BOOL BT_ALLOCATE_BUFFERS(LPBTREE pBTree);
 LPCB FREE_BT_REC (LPBTREE pBTree,int LREC,long *LOC, int Type);
 void FREE_BT_REC_ADD (LPBTREE pBTree,int LENGTH);
 void PROPAGATE_BT_UP (LPBTREE pBTree,LPSTR KEY,LPSTR DATE);
@@ -750,11 +750,11 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
       else
            pBTree->BTID_READ = TRUE;
 
-      if (!BT_ALLOCATE_BUFFERS (hBTree))
+      if (!BT_ALLOCATE_BUFFERS (pBTree))
       	goto Error;
 
-
-      pBTree->BTID_FIRST_CALL = TRUE;
+	  pBTree->BT_BUFFERS = (LPBTBUFF1)GlobalLock(pBTree->hBT_BLOCK);
+	  pBTree->BTID_FIRST_CALL = TRUE;
       pBTree->BT_PATH_CHANGE  = TRUE;
 	  SetBTMaxKey (pBTree,BT_MAXKEY(pBTree));
 	  pBTree->BTID_CUR_BLK    = 0;
@@ -781,12 +781,11 @@ GSSiExitProg (469);
 }
 #endif
 }
-BOOL BT_ALLOCATE_BUFFERS (HGLOBAL hBTree)
+BOOL BT_ALLOCATE_BUFFERS(LPBTREE pBTree)
 #if ENABLETRACE
 {GSSiEnterProg (470);
 #endif
 {
-	LPBTREE	pBTree = GlobalLock (hBTree);
 	long	NumBTBuffers=14;
 	  
 	  if (pBTree->BT_HEAD.BT_BLKSIZE)
@@ -809,7 +808,7 @@ BOOL BT_ALLOCATE_BUFFERS (HGLOBAL hBTree)
 		  pBTree->BT_BUFF_CURINDEX->bufid = 0;
 		  pBTree->BT_BUFF_CURINDEX->bufuse = LONG_MIN;
 		  pBTree->BT_BLOCK = (LPBTBLOCK)&pBTree->BT_BUFFERS->FirstBuf;
-		  GlobalUnlock (hBTree);
+		  GlobalUnlock(pBTree->hBT_BLOCK);
 	  }
 {
 #if ENABLETRACE

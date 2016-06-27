@@ -49,7 +49,7 @@ LPFIELDINFO GetDDEExternalFieldInfo (HANDLE TBLHandle, BOOL First);
 BOOL AddToODBCParms (LPSTR Begin,LPSTR End);
 
 LPVOID GetExternalFieldData (LPOPENFILEDATA FilePtr, LPCSTR index,LPVOID *hstmt,
-							 LPFIELDINFO Field, BOOL First, short FunctionID, LPSHORT irc,
+	LPFIELDINFO Field, BOOL SingleVal, short FunctionID, LPSHORT irc,
                               int NumFields,LPFIELDINFO FirstField);
 LPVOID GetDDEExternalFieldData ( HANDLE DBhandle, LPCSTR index, LPVOID keydata,
                               LPFIELDINFO field, BOOL First, LPSHORT irc);

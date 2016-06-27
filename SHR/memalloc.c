@@ -283,10 +283,10 @@ extern LPVOID debugaddress;
 		ii = 1;
 	if (hglb)
 	{ 
-	if (hglb == WantHandle)
+		if (hglb == WantHandle)
 		ii=1;
 	for (i=0;i<MAXMEM;i++)
-		if (hmem[i] == hglb)     
+		if (hmem[i] == hglb)
 		{   
 			if (NextLockID == WantLockID)
 				ii=1;
@@ -297,6 +297,10 @@ extern LPVOID debugaddress;
 			if (!IgnoreLock && lockcount[i])// && memid[i] == wantid)
 				ii=1;
 			lockcount[i]++;
+			if (lockcount[i] > 1)
+				ii = 1;
+			if (hglb == WantHandle && lockcount[i]>1)
+				ii = 1;
 			lockid[i] = NextLockID++;
 			if (memid[i] == wantid)
 			{ 
@@ -315,7 +319,7 @@ extern LPVOID debugaddress;
 	return 0;
 }
 
-BOOL GSSiGLOBALUNLOCK (HANDLE hglb)
+BOOL GSSiGLOBALUNLOCK(HANDLE hglb)
 {
 	BOOL	rtn=GlobalUnlock (hglb);
 	UINT	i;

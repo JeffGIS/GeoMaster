@@ -183,10 +183,13 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			HFILE Fid;
 			HANDLE hBuffer;
 			LPSTR pBuffer, leafName;
+			char  DownloadFile[MAX_PATH];
 
 			if (!(leafName = strrchr (lpszRemoteFile,'/')))
 				leafName=(LPSTR)lpszRemoteFile;
-			Fid = GSSiOpenFile ((LPSTR)lpszNewFile,0,OF_CREATE);
+			sprintf(DownloadFile,"%s.download",lpszNewFile);
+
+			Fid = GSSiOpenFile((LPSTR)DownloadFile, 0, OF_CREATE);
 			if (Fid == HFILE_ERROR)
 			{
 				if (errorVarName && *errorVarName)
@@ -207,6 +210,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow (0);
 			GSSiClose (Fid);
+			GSSiRename(DownloadFile, lpszNewFile);
 			GSSiGlobUlFree (&hBuffer);
 			InternetCloseHandle (handle);
 		}

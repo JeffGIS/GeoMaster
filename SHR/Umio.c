@@ -1066,6 +1066,11 @@ void LogSocketOutput (int i,LPSTR Input,int len)
 	return;
 }  
 
+void ResetSocketLog(void)
+{
+	GetGlobalCVal("%SOCKETLOGFILE", LogFile, "$DIRPATH(ALLUSERAPPDATA,GeoMaster)\\socketlog.txt");
+}
+
 BOOL GetMyIPNetAddress (LPSTR inetAddr)
 {
 	char	HostName[128];

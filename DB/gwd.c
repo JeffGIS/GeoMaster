@@ -1311,9 +1311,32 @@ LoadFields:
 					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);
                  } 
 				 break;                 
-	             case 10:
-	             break;
-	             
+				 case 10:
+				 {
+					 if (cntlSQL)
+						 SetDlgItemText(hWndDlg, cntlSQL, "");
+					 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES_TITLE), SW_HIDE);
+					 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES), SW_HIDE);
+					 *AttDir = 0;
+					 _fstrcpy(Ext, ".SLT");
+					 _fstrcpy(ExtID, "SQLite Database");
+					 sprintf(gszFilter, "%s(*%s)|*%s|", ExtID, Ext, _fstrlwr(Ext));
+					 if (GetFileName3(hWndDlg, AttDir, 0, IDS_FILESQL))
+					 {
+						 _fstrcpy(DataFile, AttDir);
+						 SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_RESETCONTENT, 0, 0);
+						 SetDlgItemText(hWndDlg, cntlDATABASE_LIST, DataFile);
+						 *DataFileType = SLT_DATAFILE;
+						 OpenDataFile(DataFile, "", BT_READ, hThemeDB);
+						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES), SW_SHOW);
+						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES_TITLE), SW_SHOW);
+					 }
+					 SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_SETCURSEL, -1, 0);
+				 }
+					 break;
+				 case 11:
+					 break;
+
              	 default:
 	             { // user picked a ODBC Driver
 	               _fstrcpy(DataFile, "ODBC|");
@@ -1339,7 +1362,7 @@ LoadFields:
               case CBN_SELCHANGE:
               case CBN_DBLCLK:   
 	             Choice=(short)SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_GETCURSEL,0,0); 
-                 if (Choice == 10)    
+                 if (Choice == 11)    
                  {
 					SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_SETCURSEL,-1,0);                 
                  	break;
@@ -1371,9 +1394,11 @@ LoadFields:
 	                                        (LPARAM)((LPSTR) " GeoMaster terrain model"));
 	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
 	                                        (LPARAM)((LPSTR) " Shape Files (*.SHP)"));
-	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
-	                                        (LPARAM)((LPSTR) " SQL Files (*.SQL)"));
-	               SendDlgItemMessage (hWndDlg,cntlDATABASE_LIST,CB_ADDSTRING,0,
+				   SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_ADDSTRING, 0,
+											(LPARAM)((LPSTR) " SQL Files (*.SQL)"));
+				   SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_ADDSTRING, 0,
+											(LPARAM)((LPSTR) " SQLIte Files (*.SLT)"));
+				   SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_ADDSTRING, 0,
 	                                        (LPARAM)((LPSTR) "0 ----------------- ODBC Data Sources -----------------'"));
 	               rc = GetDataSource(*hThemeDB, TRUE,
 	                    names, 64, &outlen, szDescription, (SWORD) 64, &deslen); 
@@ -1433,7 +1458,7 @@ LoadFields:
                     
                    goto LoadFields; 
                 case CBN_DROPDOWN:
-                   if(!*hThemeDB|| *DataFileType != ODBC_DATAFILE) break;  
+					if (!*hThemeDB || (*DataFileType != ODBC_DATAFILE && *DataFileType != SLT_DATAFILE)) break;
                    DBHandle = GetDBHandleFromSQL (*hThemeDB);
                    lpSTRING =  GetTableName (DBHandle, TRUE,*DataFileType); // the first table name 
                    if (lpSTRING == 0) break;

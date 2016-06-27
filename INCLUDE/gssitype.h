@@ -2,7 +2,9 @@
 #include <stdlib.h>  
 #include <time.h>    
 #include <commdlg.h>
-#include <ctype.h>      
+#include <ctype.h>    
+#include "sqlite3.h"
+
 #if WIN32
 #define HUGE 
 #define _fstrncpy strncpy
@@ -634,12 +636,14 @@ typedef FIELDINFO FAR  *LPFIELDINFO;
 
 typedef struct
 	{   
-		short	NumFields;  
+		int		NumFields;  
 		HANDLE	DBHandle;
-		char	DBName[128];
+		char	DBName[MAX_PATH];
 		char	Select[8192]; 
 		char	From[1024];
-		char	Where[1024]; 
+		char	Where[4096];
+		char	Query[8192];
+		sqlite3_stmt *statement;
 		FIELDINFO	FldInfo[1];
 	}SQLDATABASE;
 typedef	SQLDATABASE FAR	*LPSQLDATABASE;

@@ -7201,6 +7201,7 @@ void EscapeFunction (BOOL DoHalt)
 	LPVIEWPORT SaveVP = CurView;
 	int	i;
 
+	ResetSocketLog();
 	MergeImageIntoViewport(0, 0, 0, 0);
 	SetConfig(1);
 	NumTAGDef = -1;  
