@@ -7853,7 +7853,7 @@ NextTextRec:
 				SQLPtr->st = 31;
 			ClearCurVals(FilePtr);
 			GlobalUnlock(FilePtr->FileHandle);
-			goto Exit;
+			break;
 		}
 		case SQL_DATAFILE:
 		{
@@ -7861,7 +7861,7 @@ NextTextRec:
 
 			irc = FetchDBRec(pSQL->DBHandle);
 			GlobalUnlock(FilePtr->FileHandle);
-			goto Exit;
+			break;
 		}
 		case FGDB_DATAFILE:
 		{

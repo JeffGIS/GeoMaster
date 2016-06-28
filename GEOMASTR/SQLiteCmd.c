@@ -2869,6 +2869,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 	HANDLE	hDB;
 	LPSQLDATABASE	pDB;
 	LPSTR pTable;
+	LPSTR pWhere;
 	char Name[MAX_PATH + 256];
 	int rtn;
 	sqlite3 *db;
@@ -2876,10 +2877,14 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock(hDB);
 	strcpy(Name, NameIN);
-	if ((pTable = strrchr(Name, '(')))
+	if (!(pTable = strrchr(Name, '(')))
+		pTable = strrchr(Name, '|');
+	if (pTable)
 	{
+		LPSTR delim = pTable;
 		*pTable++ = 0;
-		*LastChr(pTable) = 0;
+		if (*delim == '(')
+			*LastChr(pTable) = 0;
 		strcpy(pDB->From, pTable);
 	}
 	strcpy(pDB->DBName, Name);
@@ -2941,10 +2946,14 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 
 		}
 		sqlite3_finalize(pDB->statement);
-		if (*pDB->Where)
-			sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pDB->Where);
+		pWhere = malloc(4096);
+		strcpy(pWhere, pDB->Where);
+		ExpandText(pWhere);
+		if (*pWhere)
+			sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pWhere);
 		else
 			sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+		free(pWhere);
 		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
 		{
 			GSSiGlobUlFree(&hDB);
@@ -2975,14 +2984,20 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 {
 	sqlite3 *db;
 	BOOL rtn = FALSE;
+	LPSTR pWhere;
+
 	db = pDB->DBHandle;
 	if (pDB->statement)
 		sqlite3_finalize(pDB->statement);
 	pDB->statement = NULL;
-	if (*SQL)
-		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, SQL);
+	pWhere = malloc(4096);
+	strcpy(pWhere, SQL);
+	ExpandText(pWhere);
+	if (*pWhere)
+		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pWhere);
 	else
 		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+	free(pWhere);
 	if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
 	{
 		rtn = TRUE;

@@ -1331,7 +1331,8 @@ LoadFields:
 						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES), SW_SHOW);
 						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES_TITLE), SW_SHOW);
 					 }
-					 SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_SETCURSEL, -1, 0);
+					 else
+						SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_SETCURSEL, -1, 0);
 				 }
 					 break;
 				 case 11:
@@ -1422,7 +1423,7 @@ LoadFields:
               {
                case CBN_DBLCLK:
                case CBN_SELCHANGE:
-                 if(*DataFileType != ODBC_DATAFILE)
+				   if (*DataFileType != ODBC_DATAFILE && *DataFileType != SLT_DATAFILE)
                  	break;
                  if (!*hThemeDB)
                  {  
