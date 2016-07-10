@@ -25628,7 +25628,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
     static      short PMDataFileType,LocOpt=0;
     static      HANDLE  PMhDB=0;
     static      char    PMDataFile[256]; 
-    HANDLE		hMem=GSSiGlobAlloc ( 430,GMEM_MOVEABLE,4096*4);
+    HANDLE		hMem=GSSiGlobAlloc ( 430,GHND,4096*4);
     LPSTR		SymName=GlobalLock (hMem);
     LPSTR		Prefix=SymName+64, RefPrefix=Prefix+10,UDI=RefPrefix+10,UDIval= UDI+256;
     LPSTR		XCoordField=UDIval+256, YCoordField=XCoordField+256;

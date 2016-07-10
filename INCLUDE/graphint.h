@@ -1980,7 +1980,6 @@ int GetGoogleZoomForSCale (double scale);
 double GetGoogleScaleForZoom (int iZoom);
 BOOL GetGoogleZoomAndTileFromBounds (LPMNMXCORD pBoundsInBaseProjection,int StartZoom,LPINT pZoom,LPINT pTileX,LPINT pTileY,LPDOUBLE pScale,LPMNMXCORD pTileBounds);
 void LatLongToPixelXY(double latitudein, double longitudein, int levelOfDetail, int *pixelX, int *pixelY);
-void PixelXYToLatLong(int pixelX, int pixelY, int levelOfDetail, double *latitude, double *longitude);
 void PixelXYToTileXY(int pixelX, int pixelY, int *tileX, int *tileY);
 void TileXYToPixelXY(int tileX, int tileY, int *pixelX, int *pixelY);
 void TileXYToQuadKey(int tileX, int tileY, int levelOfDetail,char *quadKey,int maxLen);

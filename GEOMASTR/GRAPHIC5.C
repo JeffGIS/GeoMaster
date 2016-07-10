@@ -2166,7 +2166,7 @@ BOOL AddPointToMap (DPOINT DPoint,long NewRefno,HANDLE hTimeStamp,int idesc,doub
 	static	HANDLE	hBuf=0;
 	HPSTR	pBuf, pBufBeg, MinMaxLoc; 
 	static	long	lbuf=0, call=0;
-	char	Text[256];
+	char	Text[1024];
 	char	tag[80];
 	short	TxtType=1;  
 	POINT	Point;
