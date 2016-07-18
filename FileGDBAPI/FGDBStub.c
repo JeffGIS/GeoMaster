@@ -1,4 +1,4 @@
-#if XPVERSION
+/*#if !XPVERSION
 #include "graphint.h"
 
 int  OpenFGDB2 (LPSTR DBName,LPSTR Table,LPSTR SQL)
@@ -52,4 +52,4 @@ BOOL FGDBCheck(void)
 {
 	return FALSE;
 }
-#endif
+#endif*/
