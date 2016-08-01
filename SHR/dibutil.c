@@ -1818,7 +1818,7 @@ GSSiExitProg (392);
 
     if (!hDibInfo)
     {   
-    	GSSiMessageBox ("Error loading bitmap",Name,MB_ICONEXCLAMATION,0);
+    	GSSiMessageBox (0,"Error loading bitmap",Name,MB_ICONEXCLAMATION,0);
 {
 #if ENABLETRACE
 GSSiExitProg (392);

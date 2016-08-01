@@ -3318,7 +3318,7 @@ ReTry:
 	
     if (!hMemBitmap)
     {   
-    	GSSiMessageBox ("Unable to create memory bitmap",0,MB_ICONEXCLAMATION,0);
+    	GSSiMessageBox (0,"Unable to create memory bitmap",0,MB_ICONEXCLAMATION,0);
     	return FALSE;
     }
 	hbmpOld = SelectObject(hdcMemMap, hMemBitmap); 

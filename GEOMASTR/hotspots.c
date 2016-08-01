@@ -849,7 +849,7 @@ GSSiExitProg (1323);
 		} 
 	}
 	else
-		GSSiMessageBox ("Unable to compare hot spot surfaces due to unequal dimensions",NULL,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,"Unable to compare hot spot surfaces due to unequal dimensions",NULL,MB_ICONEXCLAMATION,0);
 	GlobalUnlock (pHSData->hGrid);
 	GSSiGlobUlFree (&pHSDataCT->hGrid); 
 	GSSiGlobUlFree (&hCompare); 

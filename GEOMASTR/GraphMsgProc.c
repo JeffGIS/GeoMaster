@@ -42,7 +42,7 @@ static char		notesFile[MAX_PATH];
 static HWND		hWndSecondaryTAGInput = 0;
 static LPSTR	captureClipboardTitle;
 static LPSTR	captureClipboardMenu;
-
+static char DMIFile[MAX_PATH];
 
 static struct {long   TLID;
      short    Type;
@@ -322,6 +322,181 @@ Exit:
 }
 
 
+BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+#define MAXIMAGES 15
+	static HBITMAP hBM[MAXIMAGES] = { 0 };
+	static HBITMAP hBMLarge = 0;
+	static HBITMAP hBMLeft = 0;
+	static HBITMAP hBMRight = 0;
+	static char selectedFile[MAX_PATH] = { 0 };
+	static int firstImage = 0;
+	static int lastImage = 0;
+	static int totImages = 0;
+
+	UINT buttons[MAXIMAGES] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6, IDC_BUTTON7, IDC_BUTTON8, IDC_BUTTON9, IDC_BUTTON10, IDC_BUTTON11, IDC_BUTTON12, IDC_BUTTON13, IDC_BUTTON14, IDC_BUTTON15 };
+	char FileName[MAX_PATH + 2];
+	RECT buttonRect;
+	int	BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+		firstImage = 0;
+		memset(hBM, 0, sizeof(hBM));
+	case GSSI_REINITDIALOG:
+	{
+		HBITMAP hOldBM;
+		int ibutton = 0;
+		*selectedFile = 0;
+		cwCenter(hWndDlg, 0);
+/*		hBMLeft = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_LEFT_ARROW));
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR), (HBITMAP*)&hBM[0]);
+		hBMRight = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_RIGHT_ARROW));
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_NEXT), (HBITMAP*)&hBM[1]);
+		*/
+
+		HFILE fid = GSSiOpenFile(DMIFile, 0, OF_READ);
+		int image = 0;
+		if (fid != HFILE_ERROR)
+		{
+			for (int i = 0; i < MAXIMAGES; i++)
+			{
+				ShowWindow(GetDlgItem(hWndDlg, buttons[i]), SW_HIDE);
+				GSSiDeleteObject(&hBM[i]);
+			}
+			totImages = 0;
+			while (fgetstring(FileName, MAX_PATH, fid))
+				totImages++;
+			GSSillseek(fid, 0, 0);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_LEFTBUTTON), (firstImage > 0));
+			EnableWindow(GetDlgItem(hWndDlg, IDC_RIGHTBUTTON), (firstImage + MAXIMAGES) < totImages);
+			while (image < firstImage && fgetstring(FileName, MAX_PATH, fid))
+				image++;
+			while (ibutton < MAXIMAGES && fgetstring(FileName, MAX_PATH, fid))
+			{
+				HDIB32 hDib32 = BMPHandleFromEXT(FileName);
+				GetClientRect(GetDlgItem(hWndDlg, buttons[ibutton]), &buttonRect);
+				HDIB32 hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTHEIGHT(&buttonRect), FILTER_CATMULLROM);
+				hBM[ibutton] = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+				hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, buttons[ibutton], BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[ibutton]);
+				DestroyDIB32(hDib32, FALSE);
+				DestroyDIB32(hDibScaled, FALSE);
+				EnableWindow(GetDlgItem(hWndDlg, buttons[ibutton]), TRUE);
+				ShowWindow(GetDlgItem(hWndDlg, buttons[ibutton]), SW_SHOW);
+				ibutton++;
+			}
+			GSSiClose(fid);
+		}
+	}
+		break; /* End of WM_INITDIALOG                                 */
+	case WM_DESTROY:
+		for (int i = 0; i < MAXIMAGES;i++)
+			GSSiDeleteObject(&hBM[i]);
+		GSSiDeleteObject(&hBMLarge);
+
+		if (FileType(DMIFile) == 1)
+			GSSiRemove(DMIFile);
+		break;
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+	{
+		UINT button = LOWORD(wParam);
+		int ibutton = -1;
+		switch (button)
+		{
+		case IDCANCEL:
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDOK:
+			EndDialog(hWndDlg, TRUE);
+			break;
+		case IDC_LARGEBUTTON:
+		{
+			char cmd[MAX_PATH * 2];
+			sprintf(cmd, "$WEB(%s)", selectedFile);
+			if (*selectedFile)
+				ProcessText(cmd);
+		}
+			break;
+		case IDC_LEFTBUTTON:
+			firstImage = max(0, firstImage - MAXIMAGES);
+			PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+			break;
+		case IDC_RIGHTBUTTON:
+			firstImage += MAXIMAGES;
+			PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+			break;
+		case IDC_BUTTON1:
+		case IDC_BUTTON2:
+		case IDC_BUTTON3:
+		case IDC_BUTTON4:
+		case IDC_BUTTON5:
+		case IDC_BUTTON6:
+		case IDC_BUTTON7:
+		case IDC_BUTTON8:
+		case IDC_BUTTON9:
+		case IDC_BUTTON10:
+		case IDC_BUTTON11:
+		case IDC_BUTTON12:
+		case IDC_BUTTON13:
+		case IDC_BUTTON14:
+		case IDC_BUTTON15:
+			for (int i = 0; i < MAXIMAGES; i++)
+				if (button == buttons[i])
+				{
+					ibutton = i;
+					break;
+				}
+			if (ibutton >= 0)
+			{
+				HFILE fid = GSSiOpenFile(DMIFile, 0, OF_READ);
+				int ifile = 0;
+				if (fid != HFILE_ERROR)
+				{
+					while (fgetstring(FileName, MAX_PATH, fid))
+					{
+						if (ifile++ == ibutton + firstImage)
+						{
+							HDIB32 hDib32 = BMPHandleFromEXT(FileName);
+							strcpy(selectedFile, FileName);
+							GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
+							HDIB32 hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTHEIGHT(&buttonRect), FILTER_CATMULLROM);
+							hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+							HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
+							GSSiDeleteObject(&hOldBM);
+							ibutton++;
+							DestroyDIB32(hDib32, FALSE);
+							DestroyDIB32(hDibScaled, FALSE);
+							EnableWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), TRUE);
+							break;
+						}
+					}
+					GSSiClose(fid);
+				}
+			}
+		}
+
+			break;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+void CallImageDisplayMultipleMsgProc(LPSTR ImageList)
+{
+	strcpy(DMIFile, ImageList);
+	int nRc = DialogBox(hInst, (LPSTR)"IMAGE_DISPLAY_MULTIPLE", hWndMain, (DLGPROC)ImageDisplayMultipleMsgProc);
+}
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 
@@ -355,7 +530,7 @@ BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	default:
 		return FALSE;
 	}
-		return TRUE;
+	return TRUE;
 }
 
 void CallTemplateMsgProc(void)
@@ -13824,7 +13999,7 @@ HaveEmpty:
                  VPID = GetDlgItemInt (hWndDlg,IDC_VPPOS,&Valid,FALSE); 
                  if (!Valid || VPID < 1 || VPID > *pNumViewports)
                  {  
-                 	GSSiMessageBox ("Invalid viewport number",0,MB_ICONEXCLAMATION,0);
+                 	GSSiMessageBox (0,"Invalid viewport number",0,MB_ICONEXCLAMATION,0);
                  	break;
                  }
                  EditView = 0;  
@@ -17910,7 +18085,7 @@ Store=TRUE;
                     if (!GetMIDData(FidMID,lpMIDstr,hDLT))
                     	goto ErrorEnd;
                     Done = GetMIFCharacteristics (FidMIF,str,&lineno); 
-					if (GSSiMessageBox("Ellipse not supported",0,MB_OKCANCEL|MB_ICONEXCLAMATION,0) ==  IDCANCEL)
+					if (GSSiMessageBox (0,"Ellipse not supported",0,MB_OKCANCEL|MB_ICONEXCLAMATION,0) ==  IDCANCEL)
 						goto ErrorEnd;
                  }                  
                  else   
@@ -23642,7 +23817,7 @@ BOOL FAR PASCAL NULLDIRMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
             	GetDlgItemText (hWndDlg,IDC_DIRNAME,str,128); 
             	if (!*str || !makedirectories (str,TRUE,FALSE))  
             	{   
-            		GSSiMessageBox ("Unable to create directory",0,MB_ICONEXCLAMATION,0);
+            		GSSiMessageBox (0,"Unable to create directory",0,MB_ICONEXCLAMATION,0);
             		break;
             	}
             	else if (wParam == IDC_TEST)
@@ -23690,21 +23865,21 @@ BOOL FAR PASCAL NULLDIRMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	            	Acc = atof (str);
 	            	if (!Acc) 
 	            	{   
-	            		GSSiMessageBox ("Accuracy not specified",0,MB_ICONEXCLAMATION,0);
+	            		GSSiMessageBox (0,"Accuracy not specified",0,MB_ICONEXCLAMATION,0);
 	            		break;
 	            	}
 	            	GetDlgItemText (hWndDlg,IDC_OVERLAP,str,128);
 	            	Ovr = atof (str);
 	            	if (!Ovr) 
 	            	{   
-	            		GSSiMessageBox ("Overlap not specified",0,MB_ICONEXCLAMATION,0);
+	            		GSSiMessageBox (0,"Overlap not specified",0,MB_ICONEXCLAMATION,0);
 	            		break;
 	            	} 
 	            	span = Acc * 60000.0;
 	            	Width = span - 2.0 * Ovr;
 	            	if (Width <= 0)
 	            	{   
-	            		GSSiMessageBox ("Invalid parameters",0,MB_ICONEXCLAMATION,0);
+	            		GSSiMessageBox (0,"Invalid parameters",0,MB_ICONEXCLAMATION,0);
 	            		break;
 	            	} 
 	            	nCols = (long)((UserBounds[1].x - UserBounds[0].x) / Width) + 1;
@@ -23717,7 +23892,7 @@ BOOL FAR PASCAL NULLDIRMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                     OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
             		if (nRows*nCols > 9999)
 	            	{   
-	            		GSSiMessageBox ("Cannot create more than 9999 tiles",0,MB_ICONEXCLAMATION,0);
+	            		GSSiMessageBox (0,"Cannot create more than 9999 tiles",0,MB_ICONEXCLAMATION,0);
 	            		break;
 	            	} 
 	            	GetDlgItemText (hWndDlg,IDC_DIRNAME,dirname,128); 

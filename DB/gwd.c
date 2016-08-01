@@ -7615,7 +7615,7 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
 				LPSTR	pMess=GlobalLock (hMem);
 		
 				sprintf (pMess,"Error in Table Definition String:Field (%s)",lpTab); 	
-				GSSiMessageBox (pMess,Name,MB_ICONEXCLAMATION,0); 
+				GSSiMessageBox (0,pMess,Name,MB_ICONEXCLAMATION,0); 
 				GSSiGlobUlFree (&hMem);
 				GSSiGlobUlFree (&hNewFields);
 			    GlobalUnlock (hDB);
@@ -8580,7 +8580,7 @@ FoundFile:
 					LPSTR	pMess=GlobalLock (hMem);
 
 					sprintf (pMess,"Error in Table Definition String:Field %i,(%s)",i,lpTab); 	
-					GSSiMessageBox (pMess,Name,MB_ICONEXCLAMATION,0); 
+					GSSiMessageBox (0,pMess,Name,MB_ICONEXCLAMATION,0); 
 					GSSiGlobUlFree (&hMem);
 					goto Exit;
 				}
@@ -8590,7 +8590,7 @@ FoundFile:
 				{    
 					 if (GWFldInfo.Len > 128)  
 					 {
-					 	GSSiMessageBox (Name,"Key field exceeds max length of 128",MB_ICONEXCLAMATION,0); 
+					 	GSSiMessageBox (0,Name,"Key field exceeds max length of 128",MB_ICONEXCLAMATION,0); 
 					 	goto Exit;
 					 }
 					 pVars->BT_VARLEN=GWFldInfo.Len;
@@ -8617,7 +8617,7 @@ FoundFile:
 				LPSTR	pMess=GlobalLock (hMem);
 
 				sprintf (pMess,"Error in Table Definition String:Field %i,(%s)",i,lpTab); 	
-				GSSiMessageBox (Name,pMess,MB_ICONEXCLAMATION,0); 
+				GSSiMessageBox (0,Name,pMess,MB_ICONEXCLAMATION,0); 
 				GSSiGlobUlFree (&hMem);
 	Exit:
 				LocalUnlock(hVars);

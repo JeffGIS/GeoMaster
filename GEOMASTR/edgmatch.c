@@ -265,7 +265,7 @@ short LoadEdgeFromCorners (LPSTR File,LPHANDLE hEdge)
 	{   
 		if (n>=4)
 		{
-			GSSiMessageBox (File,"Too many corners in file",MB_ICONEXCLAMATION,0); 
+			GSSiMessageBox (0,File,"Too many corners in file",MB_ICONEXCLAMATION,0); 
 			nEdge = 0;
 			goto Exit; 
 		}
@@ -284,7 +284,7 @@ short LoadEdgeFromCorners (LPSTR File,LPHANDLE hEdge)
     }
 	if (n!=4)
 	{
-		GSSiMessageBox (File,"Not enough corners in file",MB_ICONEXCLAMATION,0); 
+		GSSiMessageBox (0,File,"Not enough corners in file",MB_ICONEXCLAMATION,0); 
 		nEdge = 0;
 		goto Exit; 
 	} 

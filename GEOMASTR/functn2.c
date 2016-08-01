@@ -891,14 +891,14 @@ GSSiExitProg (1350);
 		            	break;
 		            	
 		            	case 1:
-		            		st = GSSiMessageBox ("Unable to connect to registration server",0,MB_OKCANCEL,0);
+		            		st = GSSiMessageBox (0,"Unable to connect to registration server",0,MB_OKCANCEL,0);
 		            		break;
 		            	
 		            	case 2:
 		            		st = IDCANCEL;
 		            		break;
 		            	case 3:
-		            		if (GSSiMessageBox ("This number already in use - use anyway?",0,MB_YESNO,0) == IDYES)
+		            		if (GSSiMessageBox (0,"This number already in use - use anyway?",0,MB_YESNO,0) == IDYES)
 		            		{
 		            			err = 0;
 		            			goto DoReg;
@@ -906,7 +906,7 @@ GSSiExitProg (1350);
 		            		st = IDCANCEL;
 		            		break;
 		            	case 4:
-		            		GSSiMessageBox ("Invalid Serial Number",0,MB_ICONEXCLAMATION,0);
+		            		GSSiMessageBox (0,"Invalid Serial Number",0,MB_ICONEXCLAMATION,0);
 		            		goto GetSno;
 		            		break;
 	            	}

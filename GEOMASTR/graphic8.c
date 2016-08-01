@@ -6,6 +6,7 @@ static BOOL	ReducePolyPnts=FALSE;
 static	HCURSOR	SpecCursors[32];
 static	UINT	nSpecialCursors=0;
 static	char	CurWinText[144];
+static messageCanceled = FALSE;
 
 double	ConvertRotation (double Rot,LPDPOINT Point,int From,int To)
 #if ENABLETRACE
@@ -114,12 +115,16 @@ GSSiExitProg (928);
 #endif
 }  
 
-short GSSiMessageBox (LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
+void GSSiMessageBoxEnable(void)
+{
+	messageCanceled = FALSE;
+}
+short GSSiMessageBox (int from,LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 #if ENABLETRACE
 {GSSiEnterProg (929);
 #endif
 {   
-	short	rtn;  
+	short	rtn=0;  
 	BOOL	SaveDoPaint=DoPaint(), SaveHBW=HaveBlockingWindow;
 	HANDLE	hMem = GSSiGlobAlloc ( 750,GMEM_MOVEABLE,4096);
 	LPSTR	pMess = GlobalLock (hMem);
@@ -141,7 +146,15 @@ short GSSiMessageBox (LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 	}
 	else
 		pTitle = 0;
-	rtn = GSSiMsgBox (hWndMain,pMess,pTitle,icon,Position); 
+	if (!messageCanceled)
+	{
+		icon = icon | MB_OKCANCEL;
+		rtn = GSSiMsgBox(hWndMain, pMess, pTitle, icon, Position);
+		if (rtn == IDCANCEL)
+		{
+			messageCanceled = TRUE;
+		}
+	}
 	GSSiGlobUlFree (&hMem);
 	setDoPaint( SaveDoPaint);   
 	HaveBlockingWindow = SaveHBW;
@@ -4499,6 +4512,38 @@ GSSiExitProg (996);
 #endif
 }
 
+mnmxCor WBoundsToFileBounds(LPMNMXCORD worldBounds)
+{
+	mnmxCor fb;
+	MNMXCORD bounds;
+	DPOINT BasePoint;
+	DPOINT FilePointD;
+
+	DBoundsInit(&bounds);
+		 
+	BasePoint.x = worldBounds->xmn;
+	BasePoint.y = worldBounds->ymn;
+	FilePointD = BasePtToFilePtD(BasePoint);
+	AddDPointToMinMax(&FilePointD, &bounds);
+	BasePoint.x = worldBounds->xmn;
+	BasePoint.y = worldBounds->ymx;
+	FilePointD = BasePtToFilePtD(BasePoint);
+	AddDPointToMinMax(&FilePointD, &bounds);
+	BasePoint.x = worldBounds->xmx;
+	BasePoint.y = worldBounds->ymx;
+	FilePointD = BasePtToFilePtD(BasePoint);
+	AddDPointToMinMax(&FilePointD, &bounds);
+	BasePoint.x = worldBounds->xmx;
+	BasePoint.y = worldBounds->ymn;
+	FilePointD = BasePtToFilePtD(BasePoint);
+	AddDPointToMinMax(&FilePointD, &bounds);
+
+	fb.xmn = max(SHRT_MIN, bounds.xmn);
+	fb.xmx = min(SHRT_MAX, bounds.xmx);
+	fb.ymn = max(SHRT_MIN, bounds.ymn);
+	fb.ymx = min(SHRT_MAX, bounds.ymx);
+	return fb;
+}
 long HighlightInArea (HWND hWnd,LPMNMXCORD pBounds,BOOL AddToList,BOOL DisplayNum,HANDLE hMask)
 #if ENABLETRACE
 {GSSiEnterProg (997);

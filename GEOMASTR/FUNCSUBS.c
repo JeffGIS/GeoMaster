@@ -2481,14 +2481,14 @@ BOOL AddIslandsToPoly (BOOL Reverse,BOOL Delete)
 		pos = BT_NEXT;
 		if (HighlightData.PD.Type != 3)
 		{
-			GSSiMessageBox ("Only polygons should be highlighted",0,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,"Only polygons should be highlighted",0,MB_ICONEXCLAMATION,0);
 			return FALSE;
 		}
 		nPoly++;
 	}
 	if (nPoly < 2) 
 	{  
-		GSSiMessageBox ("More than one polygon must be highlighted",0,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,"More than one polygon must be highlighted",0,MB_ICONEXCLAMATION,0);
 		return FALSE;
 	}
 	BT_FIND (hHighlight2,(LPSTR)&Sequence,BT_FIRST,BT_ANY,(LPSTR)&Refno);
@@ -3699,7 +3699,7 @@ BOOL CreateSportMapCD (LPSTR OrderFile,LPSTR OutDir,short AreaNum)
 	if (!Found)  
 	{   
 		CreateSportMapCMD (OutDir,CmdFile);
-		GSSiMessageBox ("End of Order","",MB_OK,0);
+		GSSiMessageBox (0,"End of Order","",MB_OK,0);
 	}
 	return TRUE;
 }
@@ -3810,7 +3810,7 @@ HDIB GetPRIMBMP (LPDPOINT pWorldPoint,LPHANDLE phTran)
 					{
 						pPRIMFiles[ifile].hDIB = (HDIB)1;   
 						pPRIMFiles[ifile].LastUsed = LONG_MAX;
-						GSSiMessageBox ("Unable to load bitmap",pPRIMFiles[ifile].Name,MB_ICONEXCLAMATION,0);
+						GSSiMessageBox (0,"Unable to load bitmap",pPRIMFiles[ifile].Name,MB_ICONEXCLAMATION,0);
 					}
 					else
 						pPRIMFiles[ifile].hTran = STRAN2 (1606,pPRIMFiles[ifile].WorldX,pPRIMFiles[ifile].WorldY,
@@ -4016,12 +4016,12 @@ BOOL LoadPRIMBounds (short idum)
 		if (RSQMIN < 0.9999)
 		{
 			sprintf (str,"Bad RSQ: %f",RSQMIN);
-			GSSiMessageBox (str,File,MB_OK,0); 
+			GSSiMessageBox (0,str,File,MB_OK,0); 
 		}
 		NumPoints=0;
 		FidAD = GSSiOpenFile (AreaDumpFile,&OFStruct,OF_READ);
 		if (FidAD == HFILE_ERROR)
-			GSSiMessageBox ("No areadump",AreaDumpFile,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,"No areadump",AreaDumpFile,MB_ICONEXCLAMATION,0);
 		else
 		{   
 			
@@ -4036,7 +4036,7 @@ BOOL LoadPRIMBounds (short idum)
 			}
 			fgetstring (str,256,FidAD); 
 			if (*str != 'E')
-				GSSiMessageBox ("Mult Areas",AreaDumpFile,MB_ICONEXCLAMATION,0); 
+				GSSiMessageBox (0,"Mult Areas",AreaDumpFile,MB_ICONEXCLAMATION,0); 
 			else
 				Maxp = max (Maxp,NumPoints);
 			GSSiClose (FidAD);
@@ -4581,7 +4581,7 @@ BOOL URTCommands (short nArgs,LPSTR *Arg)
 		if (nl)
 		{   
 			sprintf (str,"%ld of %ld reference numbers are in use\r\nDo you wish to fix them?",nl,hNum);
-			if (GSSiMessageBox (str,"Check Complete",MB_YESNO,0) == IDYES) 
+			if (GSSiMessageBox (0,str,"Check Complete",MB_YESNO,0) == IDYES) 
 			{   
 				long	StartRefno=GetGlobalLVal2 ("[%STARTREFNO]",1000000);
                 
@@ -4618,7 +4618,7 @@ BOOL URTCommands (short nArgs,LPSTR *Arg)
 		}
 		else
 		{
-			if (GSSiMessageBox ("All references are unique.\r\nDo you wish to add them to the UsedRef Table?",
+			if (GSSiMessageBox (0,"All references are unique.\r\nDo you wish to add them to the UsedRef Table?",
 								"Check Complete",MB_YESNO,0) == IDYES)
 				goto URTLoad;
 		}

@@ -1332,11 +1332,18 @@ GotCloseFilehSQL:
 				rtn = ViewImage (CurView->hWnd,Arg[2]);
 				goto Rtnrtn;
 			}
+			if (!_fstricmp(Arg[1], "MULTIPLE"))
+			{
+				CallImageDisplayMultipleMsgProc(Arg[2]);
+				rtn = TRUE;
+				goto Rtnrtn;
+			}
+
 			if ((pPar = strrchr (Arg[1],'(')))
 				*pPar = 0;
 			if (!ExistFile (Arg[1]))
 			{
-				GSSiMessageBox (Arg[1],"Unable to Access Image File",MB_ICONEXCLAMATION,0);
+				GSSiMessageBox (0,Arg[1],"Unable to Access Image File",MB_ICONEXCLAMATION,0);
 				goto RtnFalse;
 			} 
 			else
@@ -2581,7 +2588,7 @@ GotCloseFilehSQL:
 		{				
 			
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
-			if (GSSiMessageBox(Arg[1], " ", MB_YESNO, 0) == IDYES)
+			if (GSSiMessageBox (0,Arg[1], " ", MB_YESNO, 0) == IDYES)
 				goto RtnTrue;  
 			goto RtnFalse;
 		}
@@ -3485,7 +3492,7 @@ GotCloseFilehSQL:
 				sprintf (str,"%s\\ms%6.6ld",MSDir,NewNum); 
 				if (!GSSiMakeDir (str,&ErrDW))
 				{   
-					GSSiMessageBox (MSDir,"Unable to create new map set",MB_ICONEXCLAMATION,0);
+					GSSiMessageBox (0,MSDir,"Unable to create new map set",MB_ICONEXCLAMATION,0);
 					goto RtnFalse;
 				} 
 				sprintf (str,"%s\\mapsets.txt",MSDir); 
@@ -5087,7 +5094,7 @@ TestGPRtn:	if (ResetSubDL)
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!ExistFile(Arg[1]))
 			{
-				GSSiMessageBox (Arg[1],"Unable to Access Application File",MB_ICONEXCLAMATION,0);
+				GSSiMessageBox (0,Arg[1],"Unable to Access Application File",MB_ICONEXCLAMATION,0);
 				goto RtnFalse;
 			} 
 			else
@@ -5225,13 +5232,13 @@ TestGPRtn:	if (ResetSubDL)
 			switch (atoi(Arg[2])) 
 			{
 				case 1:
-					rtn = GSSiMessageBox(Arg[1],VB,MB_YESNO,Arg[3]); 
+					rtn = GSSiMessageBox (0,Arg[1],VB,MB_YESNO,Arg[3]); 
 					break;
 				case 2:
-					rtn = GSSiMessageBox(Arg[1],VB,MB_ABORTRETRYIGNORE,Arg[3]); 
+					rtn = GSSiMessageBox (0,Arg[1],VB,MB_ABORTRETRYIGNORE,Arg[3]); 
 					break;
 				default:
-					rtn = GSSiMessageBox(Arg[1],VB,MB_OK,Arg[3]); 
+					rtn = GSSiMessageBox (0,Arg[1],VB,MB_OK,Arg[3]); 
 			}
 			SetCurView ( SaveVP);
 			switch (rtn)

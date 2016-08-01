@@ -5208,7 +5208,7 @@ UpdateAddEditFile:
 					strcpy (KeyFieldName,"%RECORDOFFSET");
                  if (!OpenDataFile (IMDataFile,"",BT_READ,&hDB))
                  {
-			        GSSiMessageBox(IMDataFile,"Unable to open database", MB_ICONEXCLAMATION,0);
+			        GSSiMessageBox (0,IMDataFile,"Unable to open database", MB_ICONEXCLAMATION,0);
                  	break;
                  }
             	 lpEnd = LastChr (lpKFN);

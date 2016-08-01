@@ -986,7 +986,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 					goto HaveSym; 
 			if (NumIndexSyms >= MAXINDEXSYMBOLS-1) 
 			{
-				GSSiMessageBox ("Maximum symbols exceeded",IndexName,MB_ICONEXCLAMATION,0); 
+				GSSiMessageBox (0,"Maximum symbols exceeded",IndexName,MB_ICONEXCLAMATION,0); 
 				break;
 			}
 			IndexSyms[NumIndexSyms++] = CurrentDesc;
@@ -2214,7 +2214,7 @@ long ReadSHPHeader (HFILE FidSHP,LPMNMXCORD pMinMaxCoord,LPSTR FileName)
 		char	mess[280];
 			
 		sprintf (mess,"Shape File: %s\r\nShape file type %s not yet implemented",FileName,ShpType);
-		GSSiMessageBox (mess,0,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,mess,0,MB_ICONEXCLAMATION,0);
 		return FALSE;
 	}
 	flip ((LPSTR)&SHPHeader.FileCode,4);
@@ -2517,7 +2517,7 @@ long ReadPGDBHeader (LPSTR DBNameIN,LPMNMXCORD pMinMaxCoord)
 		char	mess[64];
 			
 		sprintf (mess,"Shape file type %s not yet implemented",ShpType);
-		GSSiMessageBox (mess,0,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,mess,0,MB_ICONEXCLAMATION,0);
 		OpenPGDB (0,0,0);
 		goto RtnFalse;
 	}
@@ -2643,7 +2643,7 @@ long ReadFGDBHeader (LPSTR DBNameIN,LPMNMXCORD pMinMaxCoord)
 		char	mess[64];
 			
 		sprintf (mess,"Shape file type %s not yet implemented",ShpType);
-		GSSiMessageBox (mess,FGDBTable,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,mess,FGDBTable,MB_ICONEXCLAMATION,0);
 		OpenPGDB (0,0,0);
 		goto RtnFalse;
 	}

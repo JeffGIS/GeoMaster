@@ -103,7 +103,7 @@ BOOL CreateGCIFile (LPSTR Name,LPBITMAPINFOHEADER lpbi, HANDLE hFile)
 	pAVIFile->hIC = ICOpen (ICTYPE_VIDEO,CompressorID,ICMODE_COMPRESS);
 	if (!pAVIFile->hIC)
 	{
-		GSSiMessageBox ("Failed to open compressor",str,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,"Failed to open compressor",str,MB_ICONEXCLAMATION,0);
 		goto Exit;
 	}
 	hHeader = GSSiGlobAlloc ( 372,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD));
@@ -113,7 +113,7 @@ BOOL CreateGCIFile (LPSTR Name,LPBITMAPINFOHEADER lpbi, HANDLE hFile)
 	if (ICRtn != ICERR_OK)
 	{   
 		GSSiGlobUlFree (&hHeader);
-		GSSiMessageBox ("Bad compressor format",str,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,"Bad compressor format",str,MB_ICONEXCLAMATION,0);
 		goto Exit;            
 	}
 	pAVIFile->GCIFid = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
@@ -493,7 +493,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 				if (FirstErr)
 				{
 					sprintf(str, "Failed to open decompressor.\r\n\r\nTo fix do the following:\r\n\topen a 'command prompt' using a rightclick\r\n\tselect, 'Run as Administrtor'\r\n\t(32bit users can skip the next step)\r\n\ttype: cd C:\\Windows\\SysWOW64\r\n - press enter\r\r\ttype : regsvr32 ir50_32.dll - press enter");
-					GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION,0);
+					GSSiMessageBox (0,str,NULL,MB_ICONEXCLAMATION,0);
 				}
 				FirstErr = FALSE;
 
@@ -569,7 +569,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 			{
 				sprintf (pMess,"%s:%ld",File,frame);        
 				AppendFile ("[%DL]abends\\ortherr.txt",pMess);
-				if (GSSiMessageBox(pMess, "Error in Ortho File", MB_OKCANCEL, 0) == IDCANCEL)
+				if (GSSiMessageBox (0,pMess, "Error in Ortho File", MB_OKCANCEL, 0) == IDCANCEL)
 					showMessage = FALSE;
 				GSSiGlobUlFree (&hMess); 
 				ContinueProcessing = FALSE;

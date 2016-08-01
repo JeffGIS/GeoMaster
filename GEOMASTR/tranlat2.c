@@ -443,7 +443,7 @@ BOOL GetQuadVolLabel (LPSTR QuadID,LPSTR VolLabel)
 	hDB = OpenGWDatabase (Name,BT_READ);   
 	if (!hDB)
 	{
-		GSSiMessageBox ("Unable to open quads.gmd",NULL,MB_ICONEXCLAMATION,0);    
+		GSSiMessageBox (0,"Unable to open quads.gmd",NULL,MB_ICONEXCLAMATION,0);    
 		return FALSE;
 	}
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
@@ -1371,7 +1371,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 									 BitsPerSample,NULL)) 
 				{   
 					GSSiClose (FidBMOrig);
-					if (GSSiMessageBox ("Failed to open Tiff file",File,MB_ICONEXCLAMATION|MB_OKCANCEL,0) ==  IDCANCEL)
+					if (GSSiMessageBox (0,"Failed to open Tiff file",File,MB_ICONEXCLAMATION|MB_OKCANCEL,0) ==  IDCANCEL)
 						goto Exit; 
 					rtn = TRUE;
 					goto Exit;

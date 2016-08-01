@@ -1540,7 +1540,7 @@ long ReadORAHeader (HFILE FidORA,LPMNMXCORD pMinMaxCoord)
 		char	mess[64];
 			
 		sprintf (mess,"Shape file type %s not yet implemented",ORAType);
-		GSSiMessageBox (mess,0,MB_ICONEXCLAMATION);
+		GSSiMessageBox (0,mess,0,MB_ICONEXCLAMATION);
 		return FALSE;
 	} */
 	if (pMinMaxCoord)
@@ -1559,7 +1559,7 @@ long ReadORAHeader (HFILE FidORA,LPMNMXCORD pMinMaxCoord)
 /*			if (!GetCellLibSymbol (&SymbolName[ibeg]))
 			{
 				sprintf (mess,"Oracle symbol %s not defined",SymbolName);
-				GSSiMessageBox (mess,0,MB_ICONEXCLAMATION);
+				GSSiMessageBox (0,mess,0,MB_ICONEXCLAMATION);
 				OracleSymbols[i] = ORADefaultSymbol;
 			} */
 				OracleSymbols[i] = ORADefaultSymbol;

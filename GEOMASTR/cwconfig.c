@@ -5887,7 +5887,7 @@ Close:   HaltMapDisplay(TRUE,FALSE);
 			{
 				char	pw[32],str[32]="";
 
-				rtn = (GSSiMessageBox ("Do you wish to save configuration changes?","Save updates",MB_ICONQUESTION|MB_YESNO,0) == IDYES);
+				rtn = (GSSiMessageBox (0,"Do you wish to save configuration changes?","Save updates",MB_ICONQUESTION|MB_YESNO,0) == IDYES);
 				if (rtn && GetGlobalCVal ("[%CFGSAVEPW]",pw,0))
 				do
 				{

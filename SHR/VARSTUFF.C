@@ -1196,7 +1196,7 @@ GSSiExitProg (520);
         	if (Fid == HFILE_ERROR) 
         	{
 				FileHandle = NULL;
-				GSSiMessageBox ("Unable to open TXT file",Name,MB_ICONEXCLAMATION,0);
+				GSSiMessageBox (0,"Unable to open TXT file",Name,MB_ICONEXCLAMATION,0);
 			}
 			else
 			{   
@@ -1221,7 +1221,7 @@ GSSiExitProg (520);
         	{
 GMTEXT_ERROR:
 				FileHandle = NULL;
-				//GSSiMessageBox ("Unable to open TXT file",Name,MB_ICONEXCLAMATION);
+				//GSSiMessageBox (0,"Unable to open TXT file",Name,MB_ICONEXCLAMATION);
 			}
 			else
 			{   
@@ -9150,11 +9150,14 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 			{
 				if (NeedRead(SQLPtr))
 				{
-					SQLPtr->lastreadtime = NextVarTime();
-					SLTCloseCursor(FilePtr->FileHandle);
+					LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+					SLTCloseCursor(pDB);
+					GlobalUnlock(FilePtr->FileHandle);
 					ClearCurVals(FilePtr);
 					SQLPtr->st = 0;
-
+					if (!FetchDBRec(SQLPtr->myhandle))
+						SQLPtr->st = 31;
+					SQLPtr->lastreadtime = NextVarTime();
 				}
 				if (SQLPtr->st)
 					goto NotFound;

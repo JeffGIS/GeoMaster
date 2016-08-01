@@ -3067,7 +3067,7 @@ SetVis:
 			if (!_fstricmp (Arg[1],Arg[2])) 
 				goto RtnTrue;
 			if (*Arg[3])
-           		GSSiMessageBox (Arg[3],0,MB_ICONEXCLAMATION,0);
+           		GSSiMessageBox (0,Arg[3],0,MB_ICONEXCLAMATION,0);
 			goto RtnFalse;
 		} 
 		

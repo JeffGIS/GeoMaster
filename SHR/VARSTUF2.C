@@ -826,7 +826,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    			if (lMacro > USHRT_MAX)
 	    			{
 	    				GSSiClose (Fid);  
-	    				GSSiMessageBox (Name,"Macro file exceeds maximum length",MB_ICONEXCLAMATION,0); 
+	    				GSSiMessageBox (0,Name,"Macro file exceeds maximum length",MB_ICONEXCLAMATION,0); 
 	    				rtn = FALSE;
 	    				goto Exit;
 	    			}

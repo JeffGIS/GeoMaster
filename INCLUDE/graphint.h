@@ -82,6 +82,8 @@
 #define		CDSize	630
 
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+void CallImageDisplayMultipleMsgProc(LPSTR ImageList);
 BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -2367,6 +2369,7 @@ void SendEmailToJeff (LPSTR Info);
 BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response);
 BOOL DisplayTransparency (void);
 BOOL SetTransparency (int tranValue);
+mnmxCor WBoundsToFileBounds(LPMNMXCORD worldBounds);
 
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);

@@ -1392,7 +1392,7 @@ BOOL ScaleIsSet (BOOL DisplayMess)
 			LPVIEWPORT	SaveVP=CurView;
 			_fstrcpy (Mess,"You cannot zoom in or out because a scale of [%SCALE] is set.\r\nDo you wish to remove the scale?");
 			ExpandText (Mess);
-			if (GSSiMessageBox (Mess,"",MB_ICONEXCLAMATION|MB_YESNO,0) == IDYES)
+			if (GSSiMessageBox (0,Mess,"",MB_ICONEXCLAMATION|MB_YESNO,0) == IDYES)
 			{   
 				CurView = SaveVP;
 				CurView->WindowZoomedToOrtho = FALSE;

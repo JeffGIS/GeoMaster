@@ -330,7 +330,7 @@ lpACounty lpCty = &ACty;
 	  F1 = GSSiOpenFile ("[%DL]county.par",&OFStruct,OF_READ);
 	  if (F1 == HFILE_ERROR) 
 	  {
-	      GSSiMessageBox("Unable to open file COUNTY.PAR",
+	      GSSiMessageBox (0,"Unable to open file COUNTY.PAR",
 	                 "ConvertCoord Error",MB_ICONINFORMATION,0);  
 	      return;
 	  } 
@@ -594,7 +594,7 @@ if( DoRead && Countyno >= 83 && Countyno <= 87)
 }
 if(Countyno < 1 || Countyno >87)
  {
-  GSSiMessageBox("Invalid County number","ConvertCoord",MB_ICONSTOP,0);
+  GSSiMessageBox (0,"Invalid County number","ConvertCoord",MB_ICONSTOP,0);
   return;
  } 
  /* WHILE RIGHT$(County$,1)=" ";

@@ -14713,7 +14713,7 @@ NextTurn:
         						  	  SegData,&TotSegs))
 	        goto NextTurn; 
 ErrOut:
-	    GSSiMessageBox ("Unable to create area",0,MB_ICONEXCLAMATION,0);
+	    GSSiMessageBox (0,"Unable to create area",0,MB_ICONEXCLAMATION,0);
         NumNewPolyPoints = 0;
 HaveClosedLoop: 
 		GSSiSetCursor (hcurSave); 
@@ -15213,7 +15213,7 @@ BOOL EdgeMatchLines (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
        	AddLBUTTON = FALSE;   
 	    if (BT_NUM_IN_INDEX (hHighlight) != 2)
         {
-        	GSSiMessageBox ("This function requires two highlighted items",0,MB_ICONEXCLAMATION,0);
+        	GSSiMessageBox (0,"This function requires two highlighted items",0,MB_ICONEXCLAMATION,0);
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
         }	
    		BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_ANY,(LPSTR)&HighlightData); 
@@ -15225,7 +15225,7 @@ BOOL EdgeMatchLines (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		GetPickName (0);   
 		if (!_fstricmp (PickName,PName1))
         {
-        	GSSiMessageBox ("This function requires two items highlighted from different files",0,MB_ICONEXCLAMATION,0);
+        	GSSiMessageBox (0,"This function requires two items highlighted from different files",0,MB_ICONEXCLAMATION,0);
 			PostMessage(hWnd, GF_CLOSE,0, 0L); 
         }	
    		break;
@@ -15731,7 +15731,7 @@ BOOL IdentifyTraverseLeg (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,s
    			return FALSE; 
 		if (TravDest != DEST_TEST)
 		{
-			GSSiMessageBox ("Traverse entry must be in test mode to use this function",0,MB_OK,0);
+			GSSiMessageBox (0,"Traverse entry must be in test mode to use this function",0,MB_OK,0);
 			return FALSE;
 		} 
        	AddLBUTTON = TRUE; 
@@ -16122,7 +16122,7 @@ BOOL RedefinePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,int 
 		if (BT_NUM_IN_INDEX (hHighlight) != 1) 
 		{  
 	ErrExit:  
-			GSSiMessageBox ("One, and only one, polyline or area must be highlighted to redefine a polyline or polygon",0,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,"One, and only one, polyline or area must be highlighted to redefine a polyline or polygon",0,MB_ICONEXCLAMATION,0);
 			return FALSE;
 		}
 		BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_ANY,(LPSTR)&HighlightData); 
@@ -16562,7 +16562,7 @@ BOOL SetViewportParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,shor
 	    		
 				if (*pNumViewports + NumNewVP > MAX_VIEWPORTS)
 				{
-                 	GSSiMessageBox ("Maximum viewports exceeded",0,MB_ICONEXCLAMATION,0);
+                 	GSSiMessageBox (0,"Maximum viewports exceeded",0,MB_ICONEXCLAMATION,0);
 					break;
 				}
 				SaveVP = LastVP = CurView;  
@@ -16914,7 +16914,7 @@ BOOL CopyPolylineWithOffset (HWND hWnd, int Message, WPARAM wParam, LPARAM lPara
 			if (BT_NUM_IN_INDEX (hHighlight) != 1) 
 			{  
 		ErrExit:  
-				GSSiMessageBox ("One, and only one, polyline or area must be highlighted to redefine a polyline or polygon",0,MB_ICONEXCLAMATION,0);
+				GSSiMessageBox (0,"One, and only one, polyline or area must be highlighted to redefine a polyline or polygon",0,MB_ICONEXCLAMATION,0);
 				return FALSE;
 			}
 			BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_ANY,(LPSTR)&HighlightData); 

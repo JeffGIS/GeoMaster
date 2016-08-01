@@ -610,7 +610,7 @@ short GPSExportRoute (HWND hWndDlg,UINT Control,UINT StatusControl,BOOL SearchAL
 		case 3000:
 			return GPSExportLSI100Route (hWndDlg,Control,StatusControl,SearchALL);
 		default:
-			GSSiMessageBox ("Route transfer not yet supported with your GPS",NULL,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,"Route transfer not yet supported with your GPS",NULL,MB_ICONEXCLAMATION,0);
 	}
 	return FALSE;
 }
@@ -1227,7 +1227,7 @@ Top:
 	nRead++; 
 	if (!_fstrstr (InPacket,"$GP"))
 		goto Top;
-	st = GSSiMessageBox ("The GPS receiver is transmitting NMEA data.\r\nPlease switch to data transfer mode.",NULL,MB_ICONEXCLAMATION|MB_OKCANCEL,0);
+	st = GSSiMessageBox (0,"The GPS receiver is transmitting NMEA data.\r\nPlease switch to data transfer mode.",NULL,MB_ICONEXCLAMATION|MB_OKCANCEL,0);
 	if (st == IDOK)
 		rtn = 1;
 	else
@@ -2118,7 +2118,7 @@ short GPSExportGarminRoute (HWND hWndDlg,UINT Control,UINT StatusControl)
 	{
 		default:  
 			sprintf (str,"GPS route format %i is not supported",RteHdrFormat);
-			GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,str,NULL,MB_ICONEXCLAMATION,0);
 			return FALSE;
 		case 200:
 			Rte = &RteD200;  
@@ -2160,7 +2160,7 @@ short GPSExportGarminRoute (HWND hWndDlg,UINT Control,UINT StatusControl)
 	{
 		default:  
 			sprintf (str,"GPS format %i is not supported",WptFormat);
-			GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,str,NULL,MB_ICONEXCLAMATION,0);
 			return FALSE;
 		case 100:
 			Wpt = (LPBYTE)&WptD100;
@@ -2437,7 +2437,7 @@ short GPSExportGarminWP (HWND hWndDlg,UINT Control,UINT StatusControl)
 	{
 		default:  
 			sprintf (str,"GPS format %i is not supported",WptFormat);
-			GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,str,NULL,MB_ICONEXCLAMATION,0);
 			return FALSE;
 		case 100:
 			Wpt = (LPBYTE)&WptD100;
@@ -2809,7 +2809,7 @@ ErMsg:
 						break;
 					default:  
 						sprintf (str,"GPS format %i is not supported",WptFormat);
-						GSSiMessageBox (str,NULL,MB_ICONEXCLAMATION,0);
+						GSSiMessageBox (0,str,NULL,MB_ICONEXCLAMATION,0);
 						return FALSE;
 					
 				}

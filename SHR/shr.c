@@ -81,7 +81,7 @@ BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 		sprintf(mess,"SQLite Error %i = %i:%s",
 			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
 
-		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+		GSSiMessageBox (0, mess, "SQLite Error", MB_ICONEXCLAMATION,0);
 	}
 
 	return sqlReturn;
@@ -2015,7 +2015,7 @@ GSSiExitProg (179);
 			goto Exit;
 		if (!copyfile (ToFile,FromFile,FALSE,0,0,0,0,0,0))   
 		{
-			GSSiMessageBox ("Backup failed on above file",FromFile,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,"Backup failed on above file",FromFile,MB_ICONEXCLAMATION,0);
 			goto Exit;                                                                 
 		}
 	} 
@@ -3408,7 +3408,7 @@ BOOL    GetFileName (HWND hWnd,LPSTR Name, int lname, UINT StringID)
     {   
     	char	str[64];
     	sprintf (str,"getcwd fails %i",errno);
-    	GSSiMessageBox (str,0,MB_ICONEXCLAMATION,0);
+    	GSSiMessageBox (0,str,0,MB_ICONEXCLAMATION,0);
     }
 //    SetWindowText (hWnd,CurDir);
     SaveDrive = _getdrive(); 
@@ -9208,7 +9208,7 @@ Open:
 		        GSSiTrace (str,0);
 		        if (!OkToContinue (TRUE))
 					BlowOut(0,0);
-		        if (GSSiMessageBox("Continue to wait?",str,
+		        if (GSSiMessageBox (0,"Continue to wait?",str,
 		            MB_YESNO|MB_ICONQUESTION|MB_TASKMODAL,0)==IDYES) 
 		            NumWait = 0;
 		        else
