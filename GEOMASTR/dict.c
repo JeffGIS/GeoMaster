@@ -640,9 +640,9 @@ double GetSymbolWidth (int idesc)
 	{
 		pSymAtt = (LPSYMBOLATTRIBUTE)GlobalLock (hSymbolAttributes);    
 		if (pSymAtt[idesc-1].WidthIsMeters)
-			rtn = f * AdjustWidth(-pSymAtt[idesc-1].Width);  
+			rtn = f * AdjustWidth(-(double)pSymAtt[idesc-1].Width);  
 		else
-			rtn = f *  AdjustWidth(pSymAtt[idesc - 1].Width);
+			rtn = f *  AdjustWidth((double)pSymAtt[idesc - 1].Width);
 		if (pSymAtt[idesc-1].Type == 1)
 			rtn /= 200;
 		GlobalUnlock (hSymbolAttributes);
