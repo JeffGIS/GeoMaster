@@ -199,7 +199,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
+		BOOL convertInsertInto = atob(ARG[5]);
 		int totLen;
+		int line = 1;
 
 		if (strstr(ARG[3], "34850-2"))
 			ii = 1;
@@ -218,9 +220,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			while (keepGoing && fgetstring(cmd, -(MAXSTR - 2), fid))
 			{
 				int err;
-				
-				//REPLAC(cmd, "/", "//", MAXSTR-2);
-				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
+				char errLoc[512];
+
+				sprintf(errLoc, "%s line %i", ARG[3], line++);
+				//REPLAC(cmd, "/", "//", MAXSTR-2)
+				if (convertInsertInto)
+					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
+				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc, &error);
 				sqlite3_free(error);
 				if (err)
 				{
