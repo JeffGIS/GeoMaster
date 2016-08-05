@@ -937,6 +937,8 @@ GSSiExitProg (520);
     	Type = LISTVAR_DATAFILE;
 	else if (strstr (Name,"THEME:"))
     	Type = THEME_HLTFILE;
+	else if (_fstrstr(Name, ".SQLITE"))
+		Type = SLT_DATAFILE;
 	else if (_fstrstr(Name, ".SQL"))
 		Type = SQL_DATAFILE;
 	else if (_fstrstr(Name, ".SLT"))
