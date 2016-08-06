@@ -470,8 +470,9 @@ BOOL GSSirenamefile (LPSTR OldNameIn,LPSTR NewNameIn)
 	ConvertToNewLocation (NewName,FALSE);
 	
 //	if (!ghLib)
-   		rtn = rename (OldName,NewName);
-		if (!rtn)
+	rtn = MoveFileEx(OldName, NewName, MOVEFILE_WRITE_THROUGH);
+  // 		rtn = rename (OldName,NewName);
+		if (rtn)
 			return TRUE;
 		else
 			return FALSE;
