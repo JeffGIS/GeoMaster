@@ -5726,7 +5726,7 @@ GSSiExitProg (989);
 		lpPoints = pSplinePoints;
     }*/ 
 	if (!idesc)
-		ItemSymbolWidth = 1.0/DeviceToScreenFactor();
+		ItemSymbolWidth = 0;
 	if (npnts < 0)
 	{   
 		npnts = -npnts;  

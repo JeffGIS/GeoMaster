@@ -3995,12 +3995,12 @@ HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc)
 {
 	HGLOBAL handle;
 	long	PrevLen;
-	char	pMess[24];
+	char	pMess[64];
 
     if (cbAlloc <= 0)
     {    
-   		ltoa ((long)cbAlloc,pMess,10);
-        BlowOut("Invalid memory allocation",pMess);
+		sprintf(pMess, "%i %i", (long)cbAlloc,From);
+        BlowOut("Invalid memory allocation in realloc",pMess);
     }
 	PrevLen = GlobalSize (hGlob);
 	TotMemAlloc -= PrevLen;
@@ -4033,7 +4033,7 @@ HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc)
 #endif
 {
 	HGLOBAL handle;
-	char	pMess[24];
+	char	pMess[64];
     short	ii;
 
 /*	if (fuAlloc == GMEM_MOVEABLE)
@@ -4046,9 +4046,9 @@ HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc)
     if (cbAlloc <= 0)
    {    
 //        GSSiMsgBox( 0, "Invalid memory allocation",0, MB_OK|MB_ICONEXCLAMATION|MB_SYSTEMMODAL);
-   		ltoa ((long)cbAlloc,pMess,10);
-        BlowOut("Invalid memory allocation",pMess);
-   }
+		sprintf(pMess, "%i %i", (long)cbAlloc, From);
+		BlowOut("Invalid memory allocation in GSSiGlobAlloc", pMess);
+	}
  //   if (cbAlloc == 2) 
  //   	ii=1;  
 //    sprintf (pMess,"Alloc %ld",(long)cbAlloc);

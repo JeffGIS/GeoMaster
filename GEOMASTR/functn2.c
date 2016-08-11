@@ -597,12 +597,15 @@ GSSiExitProg (1350);
 		case 810: //$GETCOLOR(variablename)
 		{
 			COLORREF	Color;
-			 
+			HANDLE hMem;
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!*Arg[1])
 				goto RtnFalse;
-			sprintf (lpstr,"[%s]",Arg[1]);
+			hMem = GSSiGlobAlloc(1142, GMEM_MOVEABLE, 4096);
+			lpstr = GlobalLock(hMem);
+			sprintf(lpstr, "[%s]", Arg[1]);
 			Color = GetGlobalLVal (lpstr);
+			GSSiGlobUlFree(&hMem);
 			if (GetColor(CurView->hWnd,&Color)) 
 			{
 				SetGlobalValueLong(Arg[1],Color);

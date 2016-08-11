@@ -3237,7 +3237,9 @@ BOOL DisplayAllVehicles2 (short nVP,LPVIEWPORT *pVP)
 						{
 							HPDPOINT	HistPoints = GlobalLock (pVehLoc->hHist);
 							LPLONG		HistTimes = (LPLONG)(HistPoints+MAX_VEHICLE_TRACK_POINTS);
-							HPEN	hPen = CreatePen (PS_SOLID,IDNINT(3*DeviceToScreenFactor()),pVehLoc->TrackColor);
+							int width = GetGlobalLVal2("[%VEHICLETRACKWIDTH]", 3);
+							int style = GetGlobalLVal2("[%VEHICLETRACKSTYLE]", PS_SOLID);
+							HPEN	hPen = CreatePen(style, IDNINT(width*DeviceToScreenFactor()), pVehLoc->TrackColor);
 							HPEN	OldPen = SelectObject (CurView->hDC,hPen); 
 							int		np,ih;
 							int		Now;
