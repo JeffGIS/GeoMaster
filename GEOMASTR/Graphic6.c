@@ -454,6 +454,8 @@ float setDeviceToScreenFactor(float v)
 {
 	float rtn = deviceToScreenFactor;
 	deviceToScreenFactor = v;
+	if (v != 1.0)
+		ii = 1;
 	return rtn;
 }
 void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
@@ -625,7 +627,8 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	    	}
 	    	if (!Printing)
 	    	{
-	    		RECT	WindRect;  
+				setDeviceToScreenFactor(1.0);
+	    		/*RECT	WindRect;  
 				double fach, facw,sw = GetGlobalDVal2 ("[%SCREENWIDTH]",(double)GetDeviceCaps(hDC, HORZSIZE) * MFT/100);
 					    		
 	    		GetClientRect (GetDesktopWindow(),&WindRect);  
@@ -642,7 +645,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 				{
 					sw *= facw;
 					setDeviceToScreenFactor(DeviceToScreenFactor() * sw / pViewportsD[0]->DesiredWidth);
-				}
+				}*/
 				//DeviceToScreenFactor() *= (double)(MainRect.right - MainRect.left)/(ScreenWindowFactor*(double)(WindRect.right - WindRect.left));
 	    	}
 	    }

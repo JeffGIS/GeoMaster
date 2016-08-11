@@ -5203,7 +5203,9 @@ UpdateAddEditFile:
             	 HANDLE	hDB=0; 
             	 FIELDINFO	FieldInfo;   
             	 short	DBType;
-            	 
+				 HWND KFW = GetDlgItem(hWndHidden, IDC_KEY_FIELD);
+				
+				 GetWindowText(KFW, KeyFieldName, 66);
             	 if (!GetDlgItemText (hWndHidden,IDC_KEY_FIELD,KeyFieldName,66)) 
 					strcpy (KeyFieldName,"%RECORDOFFSET");
                  if (!OpenDataFile (IMDataFile,"",BT_READ,&hDB))
@@ -5312,8 +5314,10 @@ GetNext:
 				 }
 
 	         	 //	TotRecs = BTHead.BT_NUMRECS;
+				 DoPCTPeek = (HWND)1;
 				 PctBox (GetDlgItem(hWndDlg,IDC_STATUS1),TotRecs , CurIndexRec,0);
-				 sprintf (str,"%ld remaining",TotRecs - CurIndexRec + 1);
+				 DoPCTPeek = (HWND)0;
+				 sprintf(str, "%ld remaining", TotRecs - CurIndexRec + 1);
 				 SetDlgItemText (hWndDlg,IDC_REMAINING,str);
 /*        		 if (CurEditRec)
         		 {   
@@ -5381,8 +5385,10 @@ GetNext:
         		    GlobalUnlock (hDBDest);
 				 	CloseGWDatabase (hDBDest);  
 				 	hDBDest = 0;
-				 	PctBox (GetDlgItem(hWndDlg,IDC_STATUS1), 100, 100,0);
-					SendDlgItemMessage (hWndDlg,IDC_STREET_LIST,LB_RESETCONTENT,0,0);
+					DoPCTPeek = (HWND)1;
+					PctBox(GetDlgItem(hWndDlg, IDC_STATUS1), 100, 100, 0);
+					DoPCTPeek = (HWND)0;
+					SendDlgItemMessage(hWndDlg, IDC_STREET_LIST, LB_RESETCONTENT, 0, 0);
 					SendDlgItemMessage (hWndDlg,IDC_STREET_LIST1,LB_RESETCONTENT,0,0);
 					SendDlgItemMessage (hWndDlg,IDC_STREET_LIST2,LB_RESETCONTENT,0,0);
 	        		SetDlgItemText (hWndDlg,IDC_STREET,"");
