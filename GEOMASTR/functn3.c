@@ -2698,12 +2698,10 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"ADDRESS")) 
             {
-                  DLGPROC	lpfnADDLOC_FROMADDMsgProc; 
 
-				  
-                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((DLGPROC)ADDLOC_FROMADDMsgProc, hInst);
-			      nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, lpfnADDLOC_FROMADDMsgProc);
-			      FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
+				  //CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
+				  //nRc = 1;
+				  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
                   *AutoExportName=0;
                   if (nRc)
                   	goto RtnTrue;

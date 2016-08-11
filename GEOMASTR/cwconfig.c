@@ -3317,10 +3317,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	       
             case IDM_ADDLOC_FROMADD: 
             {
-                  DLGPROC	lpfnADDLOC_FROMADDMsgProc; 
-
-                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((DLGPROC)ADDLOC_FROMADDMsgProc, hInst);
-                  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
+				  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, (DLGPROC)ADDLOC_FROMADDMsgProc);
 //                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
 //                  FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
             }

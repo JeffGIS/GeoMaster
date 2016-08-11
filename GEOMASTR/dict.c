@@ -4534,7 +4534,7 @@ int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc)
     if (StreetWidth)
     	dw=(double)StreetWidth/CurView->MetersPerPixel;   
     else
-    	dw=GetSymbolWidth(abs(idesc));
+		dw = GetSymbolWidth(abs(idesc));
 	dw *= ThemeWidthFactor * StreetWidthFactor;
 	w = IDNINT (dw);
 	InflateRect (&CurView->DrawRect,w,w);
