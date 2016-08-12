@@ -1334,6 +1334,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus, mouseType;
+	LPSTR keyloc;
 
 	//loadColors();
 	//loadColorChart();
@@ -1377,6 +1378,15 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	}
 	else
 		strncpy (cmdLine,lpszCmdLine,1024);
+	if ((keyloc = strstr(cmdLine, "KEYLOC=")))
+	{
+		*keyloc = 0;
+		keyloc += 7;
+		if (stricmp(keyloc, "03231949"))
+			return 0;
+	}
+	else
+		return 0;
 	if (*LastChr (cmdLine) != ';')
 		strcat (cmdLine," ");
 
