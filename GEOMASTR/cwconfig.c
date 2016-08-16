@@ -1335,6 +1335,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	//char monName[128];
 	int  monStatus, mouseType;
 	LPSTR keyloc;
+	BOOL haveKey = FALSE;
 
 	//loadColors();
 	//loadColorChart();
@@ -1384,9 +1385,8 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		keyloc += 7;
 		if (stricmp(keyloc, "03231949"))
 			return 0;
+		haveKey = TRUE;
 	}
-	else
-		return 0;
 	if (*LastChr (cmdLine) != ';')
 		strcat (cmdLine," ");
 
@@ -1402,6 +1402,8 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	}
 	else
 	{
+		if (!haveKey)
+			return 0;
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 }
