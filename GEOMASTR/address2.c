@@ -2442,13 +2442,14 @@ BOOL FoundUserAssignedAddress (long IHouse,LPSTR Street,long IMunic,BOOL BlockCe
 BOOL AddMapQuestMatch (HWND hWndDlg,UINT icntl,LPSTR FullAddress)
 {   
 	int	item;
-	char	str[256], Quality[32];
+	char	str[256], Quality[32], formattedAddress[256];
 	DPOINT	Point;
-	BOOL	rtn;
+	BOOL	rtn, haveVPPoints;
+
 	
-	if ((rtn=GetMapQuestLocation (FullAddress,Quality,&Point,3)))
+	if ((rtn = GetGoogleLocation(FullAddress, 1,formattedAddress, &Point, &haveVPPoints, 0, 0,0)))
 	{
-		sprintf (str,"MapQuest location\tI%10ld%20.8f%20.8f",0,Point.x,Point.y);
+		sprintf (str,"Google location:%s\tI%10ld%20.8f%20.8f",formattedAddress,0,Point.x,Point.y);
 		item=SendDlgItemMessage (hWndDlg,IDC_POSSIBLE,LB_ADDSTRING,0,(LPARAM)str);  
 		//SendDlgItemMessage (hWndDlg,IDC_POSSIBLE,LB_SETITEMDATA,item,(LPARAM)imatch); 
 	}

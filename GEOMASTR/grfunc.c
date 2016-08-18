@@ -744,7 +744,7 @@ GSSiExitProg (1341);
 			ExpandText (lpStr);
 	}
 	GSSillseek (Fid,CurLoc,0);
-   	GSSiGlobFree (&hAddGraphicsFun);
+   	GSSiGlobUlFree (&hAddGraphicsFun);
    	if (CurView) 
    		AddGraphicsFunVP = CurView->ID;
    	else

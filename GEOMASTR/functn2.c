@@ -5141,21 +5141,15 @@ GSSiExitProg (1350);
 				*DestName = 0; 
 				if (nArgs < 6)
 				{
-					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
-
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 	//                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc); 
+					rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 				}  
 				else
 				{
-					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 					  HWND	hWndDlg;
 
 					  rtn = TRUE;
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
-					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
+					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 					  PostMessage (hWndDlg,WM_COMMAND,IDC_ISMODELESS,0);
 	//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
 	//                  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);
@@ -5676,19 +5670,15 @@ GSSiExitProg (1350);
 				{
 					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 	//                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc); 
+					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 				}  
 				else
 				{
-					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 					  HWND	hWndDlg;
 
 					  rtn = TRUE;
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
-					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
+					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 					  PostMessage (hWndDlg,WM_COMMAND,IDC_ISMODELESS,0);
 	//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
 	//                  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);

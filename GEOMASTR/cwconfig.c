@@ -1800,7 +1800,8 @@ GSSiExitProg (437);
 			 WS_MAXIMIZEBOX |        /* Add maximize box            */
 			 WS_THICKFRAME |        /* thick sizeable frame        */
 			 //WS_MAXIMIZE |        /* create maximized window     */
-			 /*    WS_CLIPCHILDREN |*/         /* don't draw in child windows areas */
+			 //WS_CLIPCHILDREN |         /* don't draw in child windows areas */
+			 //WS_CLIPSIBLINGS |
 			 WS_OVERLAPPED;
 
 		 if (MapServer)
@@ -3329,9 +3330,16 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	       
             case IDM_ADDLOC_FROMADD: 
             {
-				  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, (DLGPROC)ADDLOC_FROMADDMsgProc);
-//                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
-//                  FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
+				if (*AutoExportName)
+				{
+					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, (DLGPROC)ADDLOC_FROMADDMsgProc);
+					PostMessage(hDlg, WM_COMMAND, IDC_ISMODELESS, 0);
+				}
+				else
+				{
+					nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, (DLGPROC)ADDLOC_FROMADDMsgProc);
+				}
+
             }
             	 break; 
             	       

@@ -1154,11 +1154,9 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					case 0: 
 						SetGlobalValueRect ("[%ADDMATCHEDITRECT]",Rect);
 						SetAddEditValues (House,Street,City,ZipCodeC,"ADDLOC","",&Match);
-						lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 						WaitCursor (1);
-						irc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT3", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
+						irc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT3", hWndDlg, (DLGPROC)ADD_MATCH_EDITMsgProc);
 						WaitCursor (-1);
-						FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);
 						if (irc != 1) 
 						{
 							long	Zip=atol (ZipCodeC);

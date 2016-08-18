@@ -6845,15 +6845,23 @@ GSSiExitProg (560);
 #endif
 } 
 
-BOOL GetGlobalValRaw (LPSTR VName,LPSTR Val)
+BOOL GetGlobalValRaw (LPSTR VNameIN,LPSTR Val)
 #if ENABLETRACE
 {GSSiEnterProg (561);
 #endif
 {   
 	VARPNT	VP;
 	HANDLE	handle;
+	char    VNameC[256];
+	LPSTR   VName = VNameC;
 	
 	*Val = 0;
+	strncpy0(VNameC, VNameIN,255);
+	if (*VName == '[')
+	{
+		VName++;
+		*LastChr(VName) = 0;
+	}
 	if ((handle = FindVar (VName)))
 	{
 		VP = (VARPNT)GlobalLock (handle);

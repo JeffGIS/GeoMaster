@@ -4462,7 +4462,7 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 #define lnAddEditReport 256
 #define lnAddEditUpdateMacro	256
     
-    hMem = GSSiGlobAlloc ( 576,GMEM_MOVEABLE,4096*2);
+	hMem = GSSiGlobAlloc(576, GMEM_MOVEABLE, 4096 * 2);
     str = GlobalLock (hMem);
     Street = str + lnstr;
     StreetBuf = Street + lnStreet;
@@ -4489,6 +4489,10 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
     	LPSTR	lpDot,pBadNameFile;  
     	short	width, height;
     	
+		if (GetGlobalBVal2("[%ADDEDITTESTMODE]", FALSE))
+			SetWindowText(hWndDlg, "Address Match Editor (Test Mode)");
+		else
+			SetWindowText(hWndDlg, "Address Match Editor");
 		isModeless = FALSE;
     	hMatch = 0;
    		SetViewport (*pCommandViewport);
@@ -4496,7 +4500,8 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 		OrigScale = CurView->Scale;
    		DisplayOnlyAddressesInCurrentBounds = FALSE;
     	SetFocus (GetDlgItem(hWndDlg,IDC_HOUSE));
-		if (GetGlobalCVal ("[%ADDEDITREPORT]",AddEditReport,0))
+		if (GetGlobalValRaw("%ADDEDITREPORT", AddEditReport))
+		//if (GetGlobalCVal ("[%ADDEDITREPORT]",AddEditReport,0))
 			ShowWindow (GetDlgItem (hWndDlg,IDC_REPORT),SW_SHOW);
     	TotRecs = -1; 
 		NextMatchCode=0;
@@ -4788,13 +4793,16 @@ UpdateAddEditFile:
 							 }
 							 SetGlobalValue ("%CORRECTEDADDRESS",CorrectedAddress);
 							 GWDReplaceRecord (lpGWDHead,0,IndexArray,Offset);
-							 AddToUserDefinedAddress (&ULAddKey,&pAMER->AM);
+							 if (!GetGlobalBVal2("[%ADDEDITTESTMODE]",FALSE))
+								 AddToUserDefinedAddress (&ULAddKey,&pAMER->AM);
 			    			 GlobalUnlock (hDBDest);
 							 CloseGWDatabase (hDBDest); 
 							 hDBDest = 0;
 							 NumMatched++;
-							 if (GetGlobalCVal ("[%ADDMATCHEDITUPDATEMACRO]",AddEditUpdateMacro,0))
-								 ProcessText (AddEditUpdateMacro);
+							 if (GetGlobalValRaw("%ADDMATCHEDITUPDATEMACRO", AddEditUpdateMacro))
+							 if (*AddEditUpdateMacro == '@')
+								 ExpandText(AddEditUpdateMacro);
+							 ProcessText(AddEditUpdateMacro);
 					         PostMessage(hWndDlg, WM_COMMAND, IDC_NEXT, 0L);
 					    }
 					}
@@ -5251,7 +5259,9 @@ UpdateAddEditFile:
 			case IDC_REPORT:
             	 GetDlgItemText (hWndDlg,IDC_KEY_FIELD_VALUE,KeyFieldValue,128); 
 				 SetGlobalValue ("%ORIGFILEKEY",KeyFieldValue);
-				 GetGlobalCVal ("[%ADDEDITREPORT]",AddEditReport,0);
+				 GetGlobalValRaw("[%ADDEDITREPORT]", AddEditReport);
+				 if (*AddEditReport == '@')
+					 ExpandText(AddEditReport);
 				 ProcessText (AddEditReport);
 				 break;
             
@@ -5296,7 +5306,7 @@ GetNext:
         		 		 switch (AMEKey1.MatchCode)
 						 {
         		 			case 1:
-								if (!GetGlobalCVal ("[%ADDMATCHEDITUPDATEMACRO]",AddEditUpdateMacro,0))
+								if (!GetGlobalValRaw("%ADDMATCHEDITUPDATEMACRO", AddEditUpdateMacro))
 								{
 			        		 		AMEKey1.MatchCode = 2;
 			        		 		AMEKey1.RecNum = 0;
@@ -5342,7 +5352,7 @@ GetNext:
 						switch (AMEKey1.MatchCode)
         		 	{
         		 		case 1:
-							 if (GetGlobalCVal ("[%ADDMATCHEDITUPDATEMACRO]",AddEditUpdateMacro,0))
+							if (GetGlobalValRaw("%ADDMATCHEDITUPDATEMACRO", AddEditUpdateMacro))
 							 {
 								FillGWDData (lpGWDHead,Offset);
 								pRecnum =(LPLONG)lpGWDHead->GWDData;
@@ -5958,7 +5968,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	LPSTR	Street1, Street2, OnStreet;  
 	static	BOOL	FileIsOpen=FALSE, AutoRun=FALSE, CreateNewFile=TRUE;
 	static	short	UseNetBased=1, UsePointBased=0, SelectOne=0, AddTol=0;
-
+	static  BOOL	isModeless;
  short    BRtn;
  if (Message == 273 && wParam == 1072)
 	 BRtn=1;
@@ -5984,6 +5994,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  switch(Message)
    {
     case WM_INITDIALOG: 
+		 isModeless = FALSE;
     	 setDoPaint( FALSE);
     	 RecalledName=FALSE;
     	 hWndHidden=hWndDlg; 
@@ -6028,7 +6039,11 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
          switch(LOWORD(wParam))
 
          {  
-			case IDC_SHOW:
+		 case IDC_ISMODELESS:
+			 isModeless = TRUE;
+			 break;
+
+		 case IDC_SHOW:
 		      	 PctBox (GetDlgItem(hWndDlg,IDC_STATUS1), TotAddLen, NumMatched,0);   
 		      	 SetGlobalValueLong ("%ADDMATCHATTEMPT",TotAddLen); 
 		      	 SetGlobalValueLong ("%ADDMATCHMATCHED",NumMatched); 
@@ -6037,7 +6052,15 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
             case IDCANCEL:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
-                 if (Processing)  
+				hWndAddEdit = 0;
+				if (isModeless)
+					DestroyWindow(hWndDlg);
+				else
+					EndDialog(hWndDlg, FALSE);
+				*AutoExportName = 0;
+				break;
+
+				if (Processing)
                  {
                     ContinueProcessing=FALSE;
 	                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Canceled");
@@ -6113,10 +6136,11 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	                 CloseDataFile (TRUE, &hSQL);  
 					 DestroyFieldList ();
 			    	 setDoPaint( TRUE);
-			    	 if (*AutoExportName)
-			            EndDialog(hWndDlg, rtn);  
-			    	 else
-	                 	DestroyWindow (hWndDlg);
+			    	 if (isModeless)
+						 DestroyWindow(hWndDlg);
+					 else
+						 EndDialog(hWndDlg, rtn);
+					 *AutoExportName = 0;
                  }
                     
             	 break;
@@ -6246,14 +6270,10 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                   
             case IDC_EDIT_DEST:
             {
-                  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 				  HWND	hdlg;
 
-                  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
-                  hdlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
+				  hdlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg,(DLGPROC) ADD_MATCH_EDITMsgProc);
 				  PostMessage (hdlg,WM_COMMAND,IDC_ISMODELESS,0);
-//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
-//                  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);
             }
             	 break;
 
@@ -6665,13 +6685,13 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				FileIsOpen = FALSE;
 				if (/*NumMatched != TotAddLen && */AutoEdit)
 				{
-					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
+					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT",hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 					PostMessage(hDlg, WM_COMMAND, IDC_ISMODELESS, 0);
 				}
 		         	//PostMessage(hWndDlg, WM_COMMAND, IDC_EDIT_DEST, 0L);
-				 if (*AutoExportName)
-		         	PostMessage(hWndDlg, WM_COMMAND, IDC_EXIT, 0L);
-				 else
+				// if (*AutoExportName)
+		        // 	PostMessage(hWndDlg, WM_COMMAND, IDC_EXIT, 0L);
+				// else
 	                PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); // datafile should always be open so SQL and FIELDS work
                  break;
                  
