@@ -1,3 +1,4 @@
+police\configs\weather.gmc /F /WD m:\BUPolice\Mpls
 configs\server.gmc /F /SERVER 8080 [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD k:\gmserver\gmserver
 configs\basemap.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\geomas
 configs\maplegrove.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\gmmobile\metroutm
@@ -150,6 +151,7 @@ granth.gmc /WD c:\granth
 
 
 granth
+
 
 
 
