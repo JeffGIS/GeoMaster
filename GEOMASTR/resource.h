@@ -2382,6 +2382,8 @@
 #define IDC_NEXTPASS                    1433
 #define IDC_EDLEG                       1434
 #define IDC_COMMANDVP                   1434
+#define IDC_MATCHTOZIP2                 1434
+#define IDC_UPDATE                      1434
 #define IDC_SELECTTRAV                  1435
 #define IDC_NAD27                       1435
 #define IDC_STARTPOINT                  1435

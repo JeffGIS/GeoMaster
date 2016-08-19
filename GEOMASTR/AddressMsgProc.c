@@ -4606,13 +4606,13 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  break;
 
             case IDC_HOUSE: 
-            	 if (HIWORD(wParam) == EN_CHANGE)
+       /*     	 if (HIWORD(wParam) == EN_CHANGE)
                  	goto ShowMatched;
             	 if (HIWORD(wParam) == EN_SETFOCUS)
                  {
 //                 	SelMatchOpt = SHOWHOUSES;
 //                 	SetDlgItemText (hWndDlg,IDC_SELECTMATCH,"Show Similar House Numbers");
-                 }
+                 }*/
                  break;
      
             case IDC_STREET:
@@ -4626,32 +4626,34 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                    			Skip=FALSE;
                    			break;
                    		}  */
-						ClearSpecial();
-						DBoundsInit (&DisplayBounds);
-                        GetDlgItemText (hWndDlg,LOWORD(wParam),StreetBuf,64); 
-						strcpy (CorrectedAddress,StreetBuf);
-			 	 	 	if (SeparateIntStreets (StreetBuf,Street1,Street2))
-			 	 	 	{   
-			 	 	 		ShowWindow (GetDlgItem (hWndDlg,IDC_STREET_LIST),FALSE);
-			 	 	 		ShowWindow (GetDlgItem (hWndDlg,IDC_STREET_LIST1),TRUE);
-			 	 	 		ShowWindow (GetDlgItem (hWndDlg,IDC_STREET_LIST2),TRUE);
-	                        ShowStreetMatches (Street1,hWndDlg,IDC_STREET_LIST1,&DisplayBounds);  
-	                        ShowStreetMatches (Street2,hWndDlg,IDC_STREET_LIST2,&DisplayBounds);  
-			 	 	 	}
-			 	 	 	else  
-			 	 	 	{
-			 	 	 		ShowWindow (GetDlgItem (hWndDlg,IDC_STREET_LIST),TRUE);
-			 	 	 		ShowWindow (GetDlgItem (hWndDlg,IDC_STREET_LIST1),FALSE);
-			 	 	 		ShowWindow (GetDlgItem (hWndDlg,IDC_STREET_LIST2),FALSE);
-	                        ShowStreetMatches (StreetBuf,hWndDlg,IDC_STREET_LIST,&DisplayBounds);  
-	                    }
-                        goto ShowMatched;
-
                  }
                  break;
 				 case IDC_TRYMAPQUEST:
 					 UseMapQuest = TRUE;
 					 goto ShowMatched;
+				 case IDC_UPDATE:
+				 {
+								   ClearSpecial();
+								   DBoundsInit(&DisplayBounds);
+								   GetDlgItemText(hWndDlg, LOWORD(wParam), StreetBuf, 64);
+								   strcpy(CorrectedAddress, StreetBuf);
+								   if (SeparateIntStreets(StreetBuf, Street1, Street2))
+								   {
+									   ShowWindow(GetDlgItem(hWndDlg, IDC_STREET_LIST), FALSE);
+									   ShowWindow(GetDlgItem(hWndDlg, IDC_STREET_LIST1), TRUE);
+									   ShowWindow(GetDlgItem(hWndDlg, IDC_STREET_LIST2), TRUE);
+									   ShowStreetMatches(Street1, hWndDlg, IDC_STREET_LIST1, &DisplayBounds);
+									   ShowStreetMatches(Street2, hWndDlg, IDC_STREET_LIST2, &DisplayBounds);
+								   }
+								   else
+								   {
+									   ShowWindow(GetDlgItem(hWndDlg, IDC_STREET_LIST), TRUE);
+									   ShowWindow(GetDlgItem(hWndDlg, IDC_STREET_LIST1), FALSE);
+									   ShowWindow(GetDlgItem(hWndDlg, IDC_STREET_LIST2), FALSE);
+									   ShowStreetMatches(StreetBuf, hWndDlg, IDC_STREET_LIST, &DisplayBounds);
+								   }
+								   goto ShowMatched;
+				 }
 
             case 65001:
 			case IDC_SELECTMATCH: 
