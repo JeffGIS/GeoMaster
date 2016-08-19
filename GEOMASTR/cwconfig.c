@@ -1402,8 +1402,8 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	}
 	else
 	{
-		if (!haveKey)
-			return 0;
+		//if (!haveKey)
+		//	return 0;
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 }
