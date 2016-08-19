@@ -2748,7 +2748,7 @@ GSSiExitProg (100);
 		}
         if (FidConfig == HFILE_ERROR)
         {
-            GSSiMessageBox("Configuration file not found",CfgName, MB_OK,0);
+            GSSiMessageBox (0,"Configuration file not found",CfgName, MB_OK,0);
 			GetGlobalCVal ("[%DEFAULTCONFIG]",CfgName,"basic1.gmc");
 			ShowWindow(hWndMain, SW_SHOW);
 {
@@ -2775,7 +2775,7 @@ GSSiExitProg (100);
 	ConfigVersion = Version;
     if (Signature != 28052)
     {   CloseConfig ();
-        GSSiMessageBox("This is not a valid configuration file",CfgName, MB_OK,0);
+        GSSiMessageBox (0,"This is not a valid configuration file",CfgName, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (100);
@@ -2785,7 +2785,7 @@ GSSiExitProg (100);
     } 
     if (Version < 1 || Version > CURRENT_CFG_VERSION)
     {   CloseConfig ();
-        GSSiMessageBox("This configuration file version is not recognized",CfgName, MB_OK,0);
+        GSSiMessageBox (0,"This configuration file version is not recognized",CfgName, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (100);
@@ -3207,7 +3207,7 @@ BDOK:
                 char    mess[256];
                 
                 sprintf (mess,"Failed to load menu '%s'",pStr);
-                GSSiMessageBox(mess,0, MB_OK|MB_ICONEXCLAMATION,0);
+                GSSiMessageBox (0,mess,0, MB_OK|MB_ICONEXCLAMATION,0);
             }
         }
         else if (hUserMenu && hWnd) 
@@ -3427,7 +3427,7 @@ BOOL SaveConfig (LPSTR Name,BOOL UseCompression)
     	LPSTR	str = GlobalLock (hMem);
         
         sprintf (str,"Unable to create config file: %s",Name);
-        GSSiMessageBox(str,0, MB_OK|MB_ICONEXCLAMATION,0); 
+        GSSiMessageBox (0,str,0, MB_OK|MB_ICONEXCLAMATION,0); 
         GSSiGlobUlFree (&hMem);
 {
 #if ENABLETRACE

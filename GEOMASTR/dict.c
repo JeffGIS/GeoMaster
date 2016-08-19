@@ -640,9 +640,9 @@ double GetSymbolWidth (int idesc)
 	{
 		pSymAtt = (LPSYMBOLATTRIBUTE)GlobalLock (hSymbolAttributes);    
 		if (pSymAtt[idesc-1].WidthIsMeters)
-			rtn = f * AdjustWidth(-pSymAtt[idesc-1].Width);  
+			rtn = f * AdjustWidth(-(double)pSymAtt[idesc-1].Width);  
 		else
-			rtn = f *  AdjustWidth(pSymAtt[idesc - 1].Width);
+			rtn = f *  AdjustWidth((double)pSymAtt[idesc - 1].Width);
 		if (pSymAtt[idesc-1].Type == 1)
 			rtn /= 200;
 		GlobalUnlock (hSymbolAttributes);
@@ -4534,7 +4534,7 @@ int GWPolylineScreen2 (HDC hDC, HPDPOINT Points, long npnts,int idesc)
     if (StreetWidth)
     	dw=(double)StreetWidth/CurView->MetersPerPixel;   
     else
-    	dw=GetSymbolWidth(abs(idesc));
+		dw = GetSymbolWidth(abs(idesc));
 	dw *= ThemeWidthFactor * StreetWidthFactor;
 	w = IDNINT (dw);
 	InflateRect (&CurView->DrawRect,w,w);
@@ -5726,7 +5726,7 @@ GSSiExitProg (989);
 		lpPoints = pSplinePoints;
     }*/ 
 	if (!idesc)
-		ItemSymbolWidth = 1.0/DeviceToScreenFactor();
+		ItemSymbolWidth = 0;
 	if (npnts < 0)
 	{   
 		npnts = -npnts;  

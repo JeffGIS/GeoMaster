@@ -639,7 +639,7 @@ short DisplayTIFFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAsp
     SaveDIB (hDibInfo,"c:\\test.bmp");
     if (!hDibInfo)
     {   
-    	GSSiMessageBox ("Error loading tiff file",Name,MB_ICONEXCLAMATION);
+    	GSSiMessageBox (0,"Error loading tiff file",Name,MB_ICONEXCLAMATION);
     	return FALSE;
     }
 //   if (!LoadBitMap (ImageFile, &hDibInfo, &hImage)) return FALSE;

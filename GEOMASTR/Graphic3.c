@@ -2732,7 +2732,7 @@ GSSiExitProg (603);
 		{
 			if (OutFid == HFILE_ERROR)
 			{
-	    		GSSiMessageBox (File,"Unable to create output file",MB_ICONEXCLAMATION,0);
+	    		GSSiMessageBox (0,File,"Unable to create output file",MB_ICONEXCLAMATION,0);
 	    		goto Exit;
 			} 
 		}
@@ -2881,7 +2881,7 @@ GSSiExitProg (603);
 			OutFid = HFILE_ERROR;
 			if (!CreateGWDDatabase (File,1,Compress,0,nKeyFields,lpHead))
 			{
-	    		GSSiMessageBox (File,"Unable to create output file",MB_ICONEXCLAMATION,0);
+	    		GSSiMessageBox (0,File,"Unable to create output file",MB_ICONEXCLAMATION,0);
 	    		goto Exit; 
 			}
 		}
@@ -3072,7 +3072,7 @@ NextHlt:
     }
 	if (!ContinueProcessing)
 	{
-    	GSSiMessageBox ("Operation cancelled by user","",MB_ICONEXCLAMATION,0);
+    	GSSiMessageBox (0,"Operation cancelled by user","",MB_ICONEXCLAMATION,0);
     	ContinueProcessing = TRUE; 
     	rtn = FALSE;
     }
@@ -3354,7 +3354,7 @@ GSSiExitProg (61);
     {    
         GSSiClose (FidIndex); 
         ContinueProcessing=FALSE;
-        GSSiMessageBox("This is not a valid index file",File, MB_OK,0);
+        GSSiMessageBox (0,"This is not a valid index file",File, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (61);
@@ -3367,7 +3367,7 @@ GSSiExitProg (61);
     BadMap: 
         GSSiClose (FidIndex); 
         ContinueProcessing=FALSE;
-        GSSiMessageBox("This index file version is not recognized",OFStruct.szPathName, MB_OK,0);
+        GSSiMessageBox (0,"This index file version is not recognized",OFStruct.szPathName, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (61);

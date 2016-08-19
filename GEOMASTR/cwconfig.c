@@ -1334,6 +1334,8 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	char cmdLine[1024];
 	//char monName[128];
 	int  monStatus, mouseType;
+	LPSTR keyloc;
+	BOOL haveKey = FALSE;
 
 	//loadColors();
 	//loadColorChart();
@@ -1377,6 +1379,14 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	}
 	else
 		strncpy (cmdLine,lpszCmdLine,1024);
+	if ((keyloc = strstr(cmdLine, "KEYLOC=")))
+	{
+		*keyloc = 0;
+		keyloc += 7;
+		if (stricmp(keyloc, "03231949"))
+			return 0;
+		haveKey = TRUE;
+	}
 	if (*LastChr (cmdLine) != ';')
 		strcat (cmdLine," ");
 
@@ -1392,6 +1402,8 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	}
 	else
 	{
+		if (!haveKey)
+			return 0;
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 }
@@ -1788,7 +1800,8 @@ GSSiExitProg (437);
 			 WS_MAXIMIZEBOX |        /* Add maximize box            */
 			 WS_THICKFRAME |        /* thick sizeable frame        */
 			 //WS_MAXIMIZE |        /* create maximized window     */
-			 /*    WS_CLIPCHILDREN |*/         /* don't draw in child windows areas */
+			 //WS_CLIPCHILDREN |         /* don't draw in child windows areas */
+			 //WS_CLIPSIBLINGS |
 			 WS_OVERLAPPED;
 
 		 if (MapServer)
@@ -3317,12 +3330,16 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	       
             case IDM_ADDLOC_FROMADD: 
             {
-                  DLGPROC	lpfnADDLOC_FROMADDMsgProc; 
+				if (*AutoExportName)
+				{
+					HWND hDlg = CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, (DLGPROC)ADDLOC_FROMADDMsgProc);
+					PostMessage(hDlg, WM_COMMAND, IDC_ISMODELESS, 0);
+				}
+				else
+				{
+					nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, (DLGPROC)ADDLOC_FROMADDMsgProc);
+				}
 
-                  lpfnADDLOC_FROMADDMsgProc = MakeProcInstance((DLGPROC)ADDLOC_FROMADDMsgProc, hInst);
-                  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
-//                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
-//                  FreeProcInstance(lpfnADDLOC_FROMADDMsgProc);
             }
             	 break; 
             	       
@@ -5887,7 +5904,7 @@ Close:   HaltMapDisplay(TRUE,FALSE);
 			{
 				char	pw[32],str[32]="";
 
-				rtn = (GSSiMessageBox ("Do you wish to save configuration changes?","Save updates",MB_ICONQUESTION|MB_YESNO,0) == IDYES);
+				rtn = (GSSiMessageBox (0,"Do you wish to save configuration changes?","Save updates",MB_ICONQUESTION|MB_YESNO,0) == IDYES);
 				if (rtn && GetGlobalCVal ("[%CFGSAVEPW]",pw,0))
 				do
 				{

@@ -597,12 +597,15 @@ GSSiExitProg (1350);
 		case 810: //$GETCOLOR(variablename)
 		{
 			COLORREF	Color;
-			 
+			HANDLE hMem;
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!*Arg[1])
 				goto RtnFalse;
-			sprintf (lpstr,"[%s]",Arg[1]);
+			hMem = GSSiGlobAlloc(1142, GMEM_MOVEABLE, 4096);
+			lpstr = GlobalLock(hMem);
+			sprintf(lpstr, "[%s]", Arg[1]);
 			Color = GetGlobalLVal (lpstr);
+			GSSiGlobUlFree(&hMem);
 			if (GetColor(CurView->hWnd,&Color)) 
 			{
 				SetGlobalValueLong(Arg[1],Color);
@@ -891,14 +894,14 @@ GSSiExitProg (1350);
 		            	break;
 		            	
 		            	case 1:
-		            		st = GSSiMessageBox ("Unable to connect to registration server",0,MB_OKCANCEL,0);
+		            		st = GSSiMessageBox (0,"Unable to connect to registration server",0,MB_OKCANCEL,0);
 		            		break;
 		            	
 		            	case 2:
 		            		st = IDCANCEL;
 		            		break;
 		            	case 3:
-		            		if (GSSiMessageBox ("This number already in use - use anyway?",0,MB_YESNO,0) == IDYES)
+		            		if (GSSiMessageBox (0,"This number already in use - use anyway?",0,MB_YESNO,0) == IDYES)
 		            		{
 		            			err = 0;
 		            			goto DoReg;
@@ -906,7 +909,7 @@ GSSiExitProg (1350);
 		            		st = IDCANCEL;
 		            		break;
 		            	case 4:
-		            		GSSiMessageBox ("Invalid Serial Number",0,MB_ICONEXCLAMATION,0);
+		            		GSSiMessageBox (0,"Invalid Serial Number",0,MB_ICONEXCLAMATION,0);
 		            		goto GetSno;
 		            		break;
 	            	}
@@ -5138,21 +5141,15 @@ GSSiExitProg (1350);
 				*DestName = 0; 
 				if (nArgs < 6)
 				{
-					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
-
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 	//                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc); 
+					rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 				}  
 				else
 				{
-					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 					  HWND	hWndDlg;
 
 					  rtn = TRUE;
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
-					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
+					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 					  PostMessage (hWndDlg,WM_COMMAND,IDC_ISMODELESS,0);
 	//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
 	//                  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);
@@ -5673,19 +5670,15 @@ GSSiExitProg (1350);
 				{
 					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
 	//                  CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
-					  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc); 
+					  rtn = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 				}  
 				else
 				{
-					  DLGPROC	lpfnADD_MATCH_EDITMsgProc; 
 					  HWND	hWndDlg;
 
 					  rtn = TRUE;
-					  lpfnADD_MATCH_EDITMsgProc = MakeProcInstance((DLGPROC)ADD_MATCH_EDITMsgProc, hInst);
-					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, lpfnADD_MATCH_EDITMsgProc);
+					  hWndDlg = CreateDialog(hInst, (LPSTR)"ADD_MATCH_EDIT2", hWndMain, (DLGPROC)ADD_MATCH_EDITMsgProc);
 					  PostMessage (hWndDlg,WM_COMMAND,IDC_ISMODELESS,0);
 	//                  nRc = DialogBox(hInst, (LPSTR)"ADD_MATCH_EDIT", hWndDlg, lpfnADD_MATCH_EDITMsgProc);
 	//                  FreeProcInstance(lpfnADD_MATCH_EDITMsgProc);

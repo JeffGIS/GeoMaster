@@ -937,6 +937,8 @@ GSSiExitProg (520);
     	Type = LISTVAR_DATAFILE;
 	else if (strstr (Name,"THEME:"))
     	Type = THEME_HLTFILE;
+	else if (_fstrstr(Name, ".SQLITE"))
+		Type = SLT_DATAFILE;
 	else if (_fstrstr(Name, ".SQL"))
 		Type = SQL_DATAFILE;
 	else if (_fstrstr(Name, ".SLT"))
@@ -1196,7 +1198,7 @@ GSSiExitProg (520);
         	if (Fid == HFILE_ERROR) 
         	{
 				FileHandle = NULL;
-				GSSiMessageBox ("Unable to open TXT file",Name,MB_ICONEXCLAMATION,0);
+				GSSiMessageBox (0,"Unable to open TXT file",Name,MB_ICONEXCLAMATION,0);
 			}
 			else
 			{   
@@ -1221,7 +1223,7 @@ GSSiExitProg (520);
         	{
 GMTEXT_ERROR:
 				FileHandle = NULL;
-				//GSSiMessageBox ("Unable to open TXT file",Name,MB_ICONEXCLAMATION);
+				//GSSiMessageBox (0,"Unable to open TXT file",Name,MB_ICONEXCLAMATION);
 			}
 			else
 			{   
@@ -6843,15 +6845,23 @@ GSSiExitProg (560);
 #endif
 } 
 
-BOOL GetGlobalValRaw (LPSTR VName,LPSTR Val)
+BOOL GetGlobalValRaw (LPSTR VNameIN,LPSTR Val)
 #if ENABLETRACE
 {GSSiEnterProg (561);
 #endif
 {   
 	VARPNT	VP;
 	HANDLE	handle;
+	char    VNameC[256];
+	LPSTR   VName = VNameC;
 	
 	*Val = 0;
+	strncpy0(VNameC, VNameIN,255);
+	if (*VName == '[')
+	{
+		VName++;
+		*LastChr(VName) = 0;
+	}
 	if ((handle = FindVar (VName)))
 	{
 		VP = (VARPNT)GlobalLock (handle);
@@ -9150,11 +9160,14 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 			{
 				if (NeedRead(SQLPtr))
 				{
-					SQLPtr->lastreadtime = NextVarTime();
-					SLTCloseCursor(FilePtr->FileHandle);
+					LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+					SLTCloseCursor(pDB);
+					GlobalUnlock(FilePtr->FileHandle);
 					ClearCurVals(FilePtr);
 					SQLPtr->st = 0;
-
+					if (!FetchDBRec(SQLPtr->myhandle))
+						SQLPtr->st = 31;
+					SQLPtr->lastreadtime = NextVarTime();
 				}
 				if (SQLPtr->st)
 					goto NotFound;

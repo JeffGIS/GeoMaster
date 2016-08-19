@@ -3304,7 +3304,7 @@ NextObj:;
 		}
 		if (DisplayMessage)
 		{
-			GSSiMessageBox ("Graphics Redefinition Table full for this viewport",0,MB_ICONEXCLAMATION,0);
+			GSSiMessageBox (0,"Graphics Redefinition Table full for this viewport",0,MB_ICONEXCLAMATION,0);
 			CurView->NumNewObjects--;  
 		}
 		else

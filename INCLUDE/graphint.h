@@ -82,6 +82,8 @@
 #define		CDSize	630
 
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+void CallImageDisplayMultipleMsgProc(LPSTR ImageList);
 BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -1980,7 +1982,6 @@ int GetGoogleZoomForSCale (double scale);
 double GetGoogleScaleForZoom (int iZoom);
 BOOL GetGoogleZoomAndTileFromBounds (LPMNMXCORD pBoundsInBaseProjection,int StartZoom,LPINT pZoom,LPINT pTileX,LPINT pTileY,LPDOUBLE pScale,LPMNMXCORD pTileBounds);
 void LatLongToPixelXY(double latitudein, double longitudein, int levelOfDetail, int *pixelX, int *pixelY);
-void PixelXYToLatLong(int pixelX, int pixelY, int levelOfDetail, double *latitude, double *longitude);
 void PixelXYToTileXY(int pixelX, int pixelY, int *tileX, int *tileY);
 void TileXYToPixelXY(int tileX, int tileY, int *pixelX, int *pixelY);
 void TileXYToQuadKey(int tileX, int tileY, int levelOfDetail,char *quadKey,int maxLen);
@@ -2368,6 +2369,7 @@ void SendEmailToJeff (LPSTR Info);
 BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response);
 BOOL DisplayTransparency (void);
 BOOL SetTransparency (int tranValue);
+mnmxCor WBoundsToFileBounds(LPMNMXCORD worldBounds);
 
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);

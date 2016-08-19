@@ -354,8 +354,7 @@ HANDLE	hSTR = 0;
 		case SLT_DATAFILE:
 		{
 			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
-
-			rtn = NumSQLRows(pDB->DBHandle);
+			rtn = GetSQLITENumRows(pDB->DBHandle, pDB->From);
 			GlobalUnlock(FilePtr->FileHandle);
 			GlobalUnlock(SQLPtr->OFHandle);
 			GlobalUnlock(hSQL);
@@ -1321,7 +1320,7 @@ short	lCName;
     	
 	if (!_fstrnicmp (index,"%RECNUM=",8))
 	{  
-    	GSSiMessageBox ("Cannot update using %RECNUM",0,MB_ICONEXCLAMATION,0);
+    	GSSiMessageBox (0,"Cannot update using %RECNUM",0,MB_ICONEXCLAMATION,0);
     	goto s44;
     } 
     SQLAllocStmt(hdbc, &hstmt); 
@@ -2042,7 +2041,7 @@ TryAgain:
      }
 	 if (GetGlobalBVal ("[%BLOCKODBCERROR]"))
 		 HaltReport=TRUE;  
-	 else if (GSSiMessageBox(errmess,lpcstring,MB_OKCANCEL|MB_ICONQUESTION|MB_TASKMODAL,0) == IDCANCEL)
+	 else if (GSSiMessageBox (0,errmess,lpcstring,MB_OKCANCEL|MB_ICONQUESTION|MB_TASKMODAL,0) == IDCANCEL)
 	     	 HaltReport=TRUE;  
    }  
 

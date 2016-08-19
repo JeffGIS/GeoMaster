@@ -4133,7 +4133,7 @@ DoSid:
 		    	{   
 		    		ExpandText (PltName);
 		    		if (FirstSNMess)
-				    	GSSiMessageBox ("Invalid serial number in map file",PltName,MB_ICONEXCLAMATION,0);  
+				    	GSSiMessageBox (0,"Invalid serial number in map file",PltName,MB_ICONEXCLAMATION,0);  
 				    FirstSNMess = FALSE;
 				    CloseMap(FALSE);
 				    goto RtnFalse;
@@ -4145,14 +4145,14 @@ DoSid:
 		    {   BadMap: CloseMap (FALSE); 
 		    	ExpandText (PltName);
 		        _fullpath(mess,PltName,MAX_PATH);
-				if (GSSiMessageBox("This is not a valid graphics file",mess,
+				if (GSSiMessageBox (0,"This is not a valid graphics file",mess,
 				    MB_OKCANCEL|MB_ICONEXCLAMATION,0) == IDCANCEL)
 					BlowOut(0,0);
 		        goto RtnFalse;
 		    }
 		    if (MapVersion > 9 || MapVersion == 3)
 		    {   CloseMap (FALSE);
-		        GSSiMessageBox("This graphics file version is not recognized",PltName, MB_OK,0);
+		        GSSiMessageBox (0,"This graphics file version is not recognized",PltName, MB_OK,0);
 		        goto RtnFalse;
 		    }
 		    if (MapVersion < 2) goto BadMap; 
@@ -5797,7 +5797,7 @@ void DestroySymList (LPSHORT NumSyms,LPHANDLE hSymDesc)
 
 HRGN GetVPRgn (BOOL Invert,LPRECT pClipRect)
 {   
-	HRGN	NewRgn=0, OvrLapRgn, MaskRgn, hRgn; 
+	HRGN	NewRgn=0, OvrLapRgn, MaskRgn, hRgn=0; 
     short	TypeRegion;
     
 	if (IsRectEmpty (pClipRect))
@@ -5839,12 +5839,16 @@ HRGN GetVPRgn (BOOL Invert,LPRECT pClipRect)
 		GlobalUnlock (CurView->hMaskArea);
 		return NewRgn;
 	}
-	hRgn = CreateRectRgnIndirect (pClipRect);
-	if (NewRgn) 
+	RECT intRect;
+	if (IntersectRect(&intRect,&MainRect, pClipRect))
 	{
-		int RgnType = CombineRgn (hRgn,NewRgn,hRgn,RGN_AND);  
-        DeleteObject (NewRgn); 
-    }
+		hRgn = CreateRectRgnIndirect(pClipRect);
+		if (NewRgn && hRgn)
+		{
+			int RgnType = CombineRgn(hRgn, NewRgn, hRgn, RGN_AND);
+			DeleteObject(NewRgn);
+		}
+	}
 	return hRgn;
 	
 }
@@ -7201,6 +7205,7 @@ void EscapeFunction (BOOL DoHalt)
 	LPVIEWPORT SaveVP = CurView;
 	int	i;
 
+	GSSiMessageBoxEnable();
 	ResetSocketLog();
 	MergeImageIntoViewport(0, 0, 0, 0);
 	SetConfig(1);

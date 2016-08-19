@@ -731,7 +731,7 @@ BOOL LoadERDASDem (void)
 				for (i=0;i<1024;i++)
 					if (DTMElev[i] != DTMData2[i]) 
 					{
-						GSSiMessageBox ("decompress error",0,MB_ICONEXCLAMATION,0);
+						GSSiMessageBox (0,"decompress error",0,MB_ICONEXCLAMATION,0);
 						goto Exit;        
 					} 
 				if (*pBias < LONG_MAX)
@@ -1228,7 +1228,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 					if (DTMElev[i] != DTMData2[i]) 
 					{   
 						GlobalUnlock (hRec);
-						GSSiMessageBox ("decompress error",0,MB_ICONEXCLAMATION,0);
+						GSSiMessageBox (0,"decompress error",0,MB_ICONEXCLAMATION,0);
 						goto Exit;        
 					} 
 				if (*pBias < LONG_MAX)
@@ -1498,7 +1498,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 					if (DTMElev[i] != DTMData2[i]) 
 					{   
 						GlobalUnlock (hRec);
-						GSSiMessageBox ("decompress error",0,MB_ICONEXCLAMATION,0);
+						GSSiMessageBox (0,"decompress error",0,MB_ICONEXCLAMATION,0);
 						goto Exit;        
 					} 
 				if (*pBias < LONG_MAX)

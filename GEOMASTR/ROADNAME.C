@@ -567,7 +567,7 @@ BOOL DisplayStreetCenterlines (void)
 				float w;
  				pStreet = (LPSTREETHEADER)GlobalLock (phLabelLines[i]); 
 				pPoints = (LPFPOINT)(pStreet+1);  
-				w = pStreet->HollowStreetWidth * DeviceToScreenFactor() * OverAllStreetWidthFactor;
+				w = pStreet->HollowStreetWidth * OverAllStreetWidthFactor;// *DeviceToScreenFactor();
 				MinWidth = min (MinWidth,w);
 				MaxWidth = max (MaxWidth,w);
 				EdgeWidth = (w / 8 + edgeWidthInc) * EdgeWidthFactor;
@@ -584,7 +584,7 @@ BOOL DisplayStreetCenterlines (void)
 			//	hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth+2*DeviceToScreenFactor(),pStreet->OutlineColor);  
 				if (ShowHollowStreet == 1)
 				{
-					float w = pStreet->HollowStreetWidth * DeviceToScreenFactor() * OverAllStreetWidthFactor;
+					float w = pStreet->HollowStreetWidth * OverAllStreetWidthFactor;//* DeviceToScreenFactor() ;
 					float wplusEdge;
 					int ip = 0;
 					int iend;
@@ -630,7 +630,7 @@ BOOL DisplayStreetCenterlines (void)
 						pPoints = (LPFPOINT)(pStreet + 1);
 						if (pStreet->Order == order)
 						{
-							float w = pStreet->HollowStreetWidth * DeviceToScreenFactor() * OverAllStreetWidthFactor;
+							float w = pStreet->HollowStreetWidth * OverAllStreetWidthFactor;// * DeviceToScreenFactor() ;
 							//hPen = CreatePen (PS_SOLID,pStreet->HollowStreetWidth,pStreet->FillColor);  
 							//lb.lbColor = pStreet->FillColor;
 							//hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, pStreet->HollowStreetWidth * OverAllStreetWidthFactor, &lb, 0, 0);
@@ -676,7 +676,7 @@ BOOL DisplayStreetCenterlines (void)
 							pPoints[pStreet->NumPoints-1] = newptF (pPoints[pStreet->NumPoints-1],AZ,MaxWidth);
 						}
 						if (ShowHollowStreet == 1)
-							AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, pStreet->HollowStreetWidth * DeviceToScreenFactor());
+							AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt, pStreet->FillColor, pStreet->HollowStreetWidth);// *DeviceToScreenFactor());
 
 							//Polyline (CurView->hDC,pPoints,pStreet->NumPoints); 
 						*pPoints = SaveBP;
@@ -685,7 +685,7 @@ BOOL DisplayStreetCenterlines (void)
 						//GSSiDeleteObject (&hPen); 
 						if (pStreet->OneWay)
 						{
-							int Width = max(0,min(6,IDNINT(pStreet->HollowStreetWidth-2))) * DeviceToScreenFactor();
+							int Width = max(0, min(6, IDNINT(pStreet->HollowStreetWidth - 2)));// *DeviceToScreenFactor();
 
 							DrawOneWayArrows(CurView->hDC, pStreet->OneWay, pPoints, pStreet->NumPoints, Width);
 						}
@@ -743,7 +743,7 @@ BOOL DisplayStreetCenterlines (void)
 						pPoints = (LPFPOINT)(pStreet+1);  
 						if (pStreet->Order == order)
 						{
-							hPen = CreatePen(PS_SOLID, pStreet->HollowStreetWidth * DeviceToScreenFactor(), RGB(255, 255, 255));
+							hPen = CreatePen(PS_SOLID, pStreet->HollowStreetWidth/* *DeviceToScreenFactor()*/, RGB(255, 255, 255));
 							hOldPen = SelectObject (hDC,hPen); 
 							PolylineF (hDC,pPoints,pStreet->NumPoints); 
 							SelectObject (hDC,hOldPen);
@@ -788,9 +788,9 @@ BOOL DisplayStreetLabels (BOOL Clear)
 	double	MaxDeflection=GetGlobalDVal2 ("[%STREETTEXTMAXDEFLEXTION]",HALFPI/3), MaxD;
 	double	CharacterSpacingFactor=GetGlobalDVal2 ("[%STREETTEXTSPACING]",1.05);
 	double	MaxTextSize=GetGlobalLVal2 ("[%STREETTEXTMAXSIZE]",12)*DeviceToScreenFactor();
-	double	MinTextSize=GetGlobalLVal2 ("[%STREETTEXTMINSIZE]",5)*DeviceToScreenFactor();
+	double	MinTextSize = GetGlobalLVal2("[%STREETTEXTMINSIZE]", 5)*DeviceToScreenFactor();
 	float   OverAllStreetWidthFactor = GetGlobalDVal2("[%STREETWIDTHFACTOR2]", 1.0);
-	double	StreetTextAdjustment = GetGlobalDVal2("[%STREETTEXTVERTICALADJUSTMENT]", 0.68);
+	double	StreetTextAdjustment = GetGlobalDVal2("[%STREETTEXTVERTICALADJUSTMENT]", 0.5);
 	long	NameInc = 0, LastNameInc;//+1000000000      
 	double	StartTextSize, TextSize;
 	int		NumTries, MaxTriesB=GetGlobalLVal2 ("[%STREETNAMEMAXTRIES]",10), iTextSize;
@@ -974,13 +974,13 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						txtfac = StreetTextFactor;
 				}
 				LastNameInc = NameInc;
-				TextSize = StartTextSize = min(MaxTextSize*txtfac, (pStreet->HollowStreetWidth * DeviceToScreenFactor() * OverAllStreetWidthFactor)*txtfac - 2);
+				TextSize = StartTextSize = min(MaxTextSize*txtfac, (pStreet->HollowStreetWidth * OverAllStreetWidthFactor)*txtfac - 2);
    				TextOffsetBegin = 0;
 				if (TextSize <  MinTextSize*txtfac)
 	   			{
 					TextSize = StartTextSize = MaxTextSize*txtfac;
 	   				if (ShowHollowStreet)
-						TextOffsetBegin = pStreet->HollowStreetWidth* DeviceToScreenFactor() * OverAllStreetWidthFactor + TextSize / 2 + 1;
+						TextOffsetBegin = (pStreet->HollowStreetWidth * OverAllStreetWidthFactor + TextSize + 1);
 	   				MaxD = MaxDeflection/2;
 	   			} 
 	   			else 
@@ -1048,7 +1048,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				}
 				SelectObject(CurView->hDC,OldFont);
 				GSSiDeleteObject(&hFont);
-				if ((TotLength - (pStreet->HollowStreetWidth* DeviceToScreenFactor() * OverAllStreetWidthFactor) * 2) < twidth * CharacterSpacingFactor)
+				if ((TotLength - (pStreet->HollowStreetWidth/** DeviceToScreenFactor()*/ * OverAllStreetWidthFactor) * 2) < twidth * CharacterSpacingFactor)
 				{
 	NextName2:
 					TextSize -= 2;   
@@ -1201,7 +1201,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 			   				TextOffset = TextOffsetBegin;
 			   			}
 			   			else */
-						TextOffset = TextOffsetBegin * 1.5 * StreetTextAdjustment;
+						TextOffset = TextOffsetBegin * 2.35 * StreetTextAdjustment;
 						//TextOffset = 0;
 	/*			   		if (abs (LogFont.lfEscapement - 900) < 450 ||
 			   				abs (LogFont.lfEscapement - 2700) < 450)
@@ -1218,7 +1218,7 @@ BOOL DisplayStreetLabels (BOOL Clear)
 						{   
 				    		if (symbol)
 				    		{    
-								short MinSize = max(TextSize, pStreet->HollowStreetWidth * DeviceToScreenFactor() * OverAllStreetWidthFactor * 1.25 * ShieldSizeFactor*ShieldFactor);
+								short MinSize = max(TextSize, pStreet->HollowStreetWidth/* * DeviceToScreenFactor()*/ * OverAllStreetWidthFactor * 1.25 * ShieldSizeFactor*ShieldFactor);
 				    			 
 				    			 if (!ShowHollowStreet)
 				    		 		MinSize = 0;

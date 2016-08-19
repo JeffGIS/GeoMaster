@@ -2087,7 +2087,7 @@ ErrOut:
 	GSSiClose (Fid);
 	CloseTRANS2 (&hTran);
 	sprintf (str,"Error at line %ld in toolbar file %s",line,CurView->PickMacroFile);
-	GSSiMessageBox (str,0,MB_ICONEXCLAMATION,0);
+	GSSiMessageBox (0,str,0,MB_ICONEXCLAMATION,0);
 {
 #if ENABLETRACE
 GSSiExitProg (1045);

@@ -30,7 +30,7 @@ unsigned int MapSize(int levelOfDetail);
 double GroundResolution(double latitude, int levelOfDetail);
 void LatLongToPixelXY(double latitudein, double longitudein, int levelOfDetail, int *pixelX, int *pixelY);
 void LatLongToPixelXYd(double latitudein, double longitudein, int levelOfDetail, double *pixelX, double *pixelY);
-void PixelXYToLatLong(int pixelX, int pixelY, int levelOfDetail, double *latitude, double *longitude);
+void PixelXYToLatLong(double pixelX, double pixelY, int levelOfDetail, double *latitude, double *longitude);
 void PixelXYToTileXY(int pixelX, int pixelY, int *tileX, int *tileY);
 void PixelXYToTileXYd(double pixelX, double pixelY, int *tileX, int *tileY);
 void TileXYToPixelXY(int tileX, int tileY, int *pixelX, int *pixelY);

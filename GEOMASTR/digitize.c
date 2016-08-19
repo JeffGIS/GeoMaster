@@ -380,7 +380,7 @@ UINT GetBaud (LPSTR str)
 	else if (!_fstricmp (str,"19200")) 
 		BaudRate = CBR_19200;
 	else
-		GSSiMessageBox (str,"Unsupported baud rate",MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,str,"Unsupported baud rate",MB_ICONEXCLAMATION,0);
     return BaudRate;
 }
 
@@ -1616,7 +1616,7 @@ BOOL AutoAreaID(int NumNewPolyPoints,HANDLE hNewPolyPoints,LPSTR SaveUDI)
 	    ClearHighlightList (FALSE); 
 		if (!TotNum)
 			_fstrcpy (Msg,"No points picked");
-		GSSiMessageBox (Msg,"Error in Auto Area Identifier",MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,Msg,"Error in Auto Area Identifier",MB_ICONEXCLAMATION,0);
 		return FALSE;
 	}
 	BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_ANY,(LPSTR)&HighlightData);

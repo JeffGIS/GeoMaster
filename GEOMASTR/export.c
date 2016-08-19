@@ -351,7 +351,7 @@ BOOL DecodeGMField (LPSTR FldName,LPSHORT pFldType,LPSHORT pFldLength)
 	i = NumMemMaps;
 	if (NumMemMaps >= MAXMEMMAPS)
 	{
-		GSSiMessageBox ("Memory map buffer overflow",NULL,MB_ICONEXCLAMATION);
+		GSSiMessageBox (0,"Memory map buffer overflow",NULL,MB_ICONEXCLAMATION);
 		ContinueProcessing = FALSE;
 	}
 	CurView->NewBounds.xmn = pBasePoint->x - (MemMapWidth * CurView->OrthoRes)/2;

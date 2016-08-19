@@ -1,4 +1,4 @@
-#if !XPVERSION
+#if !XPVERSION && !NVSERVER
 /**
  * Sample: ExecutingSQL
  *

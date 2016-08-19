@@ -835,7 +835,7 @@ RtnTrue:
 		            	break;
 		            	
 		            	case 1:
-		            		st = GSSiMessageBox ("[REGERRNOCONNECT]",0,MB_OKCANCEL);
+		            		st = GSSiMessageBox (0,"[REGERRNOCONNECT]",0,MB_OKCANCEL);
 		            		if (st == IDCANCEL) 
 		            			exit (1);
 		            			//BlowOut(0,0);
@@ -845,11 +845,11 @@ RtnTrue:
 		            		st = IDCANCEL;
 		            		break;
 		            	case 3:
-		            		GSSiMessageBox ("[REGERRSNINUSE]",0,MB_ICONEXCLAMATION);
+		            		GSSiMessageBox (0,"[REGERRSNINUSE]",0,MB_ICONEXCLAMATION);
 		            		st = IDCANCEL;
 		            		break;
 		            	case 4:
-		            		GSSiMessageBox ("[REGERRSNINVALID]",0,MB_ICONEXCLAMATION);
+		            		GSSiMessageBox (0,"[REGERRSNINVALID]",0,MB_ICONEXCLAMATION);
 		            		st = IDCANCEL;
 		            		break;
 	            	}

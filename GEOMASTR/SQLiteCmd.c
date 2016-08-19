@@ -199,7 +199,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
+		BOOL convertInsertInto = atob(ARG[5]);
 		int totLen;
+		int line = 1;
 
 		if (strstr(ARG[3], "34850-2"))
 			ii = 1;
@@ -218,9 +220,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			while (keepGoing && fgetstring(cmd, -(MAXSTR - 2), fid))
 			{
 				int err;
-				
-				//REPLAC(cmd, "/", "//", MAXSTR-2);
-				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db, "", &error);
+				char errLoc[512];
+
+				sprintf(errLoc, "%s line %i", ARG[3], line++);
+				//REPLAC(cmd, "/", "//", MAXSTR-2)
+				if (convertInsertInto)
+					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
+				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc, &error);
 				sqlite3_free(error);
 				if (err)
 				{
@@ -1859,6 +1865,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 		{
 			*pEnd = 0;
 			strcpy(tableName, pPar);
+			if (GSSiLength(fileName) > 0)
 			if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 			{
 				if (GetSQLITENumRows(SQLITEHandle, tableName))
@@ -2188,6 +2195,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 		char	Tag[80];
 		short	ltag;
 		short	Dummy;
+		MNMXCORD bounds;
 
 		//strcpy(Tag, SQLITETAG);
 		//ExpandText(Tag);
@@ -2216,6 +2224,9 @@ BOOL ProcessSQLITERecord(HDC hDC)
 			else
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			CurPointSize *= GraphicsPointFactor;
+			DBoundsInit(&bounds);
+			AddDPointToMinMax(lpDCurPoints, &bounds);
+			CurrentItemMinMax = WBoundsToFileBounds(&bounds);
 			if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
 			{
 				CurrentSeg = CurrentRefno;
@@ -2881,13 +2892,18 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		pTable = strrchr(Name, '|');
 	if (pTable)
 	{
-		LPSTR delim = pTable;
+		char delim = *pTable;
 		*pTable++ = 0;
-		if (*delim == '(')
+		if (delim == '(')
 			*LastChr(pTable) = 0;
 		strcpy(pDB->From, pTable);
 	}
 	strcpy(pDB->DBName, Name);
+	if (GSSiLength(pDB->DBName) <= 0)
+	{
+		GSSiGlobUlFree(&hDB);
+		return 0;
+	}
 	rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)
 	{
@@ -2968,7 +2984,8 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 BOOL FetchSLTRec(LPSQLDATABASE pSQL)
 {
 	BOOL rtn = FALSE;
-	if (sqlite3_step(pSQL->statement) == SQLITE_ROW)
+	int st = sqlite3_step(pSQL->statement);
+	if (st == SQLITE_ROW)
 		rtn = TRUE;
 	return rtn;
 }
@@ -2994,9 +3011,9 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 	strcpy(pWhere, SQL);
 	ExpandText(pWhere);
 	if (*pWhere)
-		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pWhere);
+		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s", pDB->From, pWhere);
 	else
-		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+		sprintf(pDB->Query, "SELECT * FROM '%s'", pDB->From);
 	free(pWhere);
 	if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
 	{

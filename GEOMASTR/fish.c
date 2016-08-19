@@ -2222,7 +2222,7 @@ BOOL SaveGPSList (HWND hWndDlg)
 		GSSiClose (Fid);  
 		return TRUE;
 	}                                           
-	GSSiMessageBox ("Unable to create GPS file",File,MB_ICONEXCLAMATION,0);
+	GSSiMessageBox (0,"Unable to create GPS file",File,MB_ICONEXCLAMATION,0);
 	return FALSE;
 }   
 

@@ -126,7 +126,7 @@ void LatLongToPixelXYd(double latitudein, double longitudein, int levelOfDetail,
         /// to 23 (highest detail).</param>
         /// <param name="latitude">Output parameter receiving the latitude in degrees.</param>
         /// <param name="longitude">Output parameter receiving the longitude in degrees.</param>
-void PixelXYToLatLong(int pixelX, int pixelY, int levelOfDetail, double *latitude, double *longitude)
+void PixelXYToLatLong(double pixelX, double pixelY, int levelOfDetail, double *latitude, double *longitude)
 {
     unsigned int mapSize = MapSize(levelOfDetail);
     double x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;

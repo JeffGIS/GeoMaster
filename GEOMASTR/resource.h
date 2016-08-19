@@ -3333,6 +3333,9 @@
 #define IDC_CMAP_HIGH                   2284
 #define IDC_FMCREATEEXTRACT             2285
 #define IDC_FMDEST                      2286
+#define IDC_LARGEBUTTON                 2288
+#define IDC_LEFTBUTTON                  2289
+#define IDC_RIGHTBUTTON                 2290
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3677,9 +3680,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1243
+#define _APS_NEXT_RESOURCE_VALUE        1244
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2287
+#define _APS_NEXT_CONTROL_VALUE         2291
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

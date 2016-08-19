@@ -501,7 +501,7 @@ BOOL LoadFormatCfg (LPSTR Name)
 	}
 	if (FormatVP < 0)
 	{
-		GSSiMessageBox ("No format viewport in this configuration",0,MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (0,"No format viewport in this configuration",0,MB_ICONEXCLAMATION,0);
 		return FALSE;
 	}
 	for (i=0;i<*pNumViewports;i++)

@@ -1,5 +1,8 @@
+L:\GEOMas\projects\AlleyWalls\WALLPOINTS.GMC /F [%USERLEV]=2; /WD L:\geomas
+configs\addressedit2.gmc /F [%USERLEV]=2; /WD L:\MPD\Geomaster\Mpls
 police\configs\weather.gmc /F /WD m:\BUPolice\Mpls
 configs\server.gmc /F /SERVER 8080 [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD k:\gmserver\gmserver
+vehloc7.gmc /WD c:\ep\gmavl
 configs\basemap.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\geomas
 configs\maplegrove.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD c:\gmmobile\metroutm
 configs\texttest2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD m:\BU_2015_11_04\GEOMas
@@ -46,7 +49,6 @@ configs\basic1.gmc /F [%USERLEV]=2; /WD h:\geomas
 configs\test.gmc /F [%USERLEV]=2; /WD h:\geomas
 police\configs\startup_2013.gmc /F [%USERLEV]=2; /WD c:\GMProjects\Mpls
 configs\basic1.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
-configs\addressedit.gmc /F [%USERLEV]=2; /WD j:\Mpls
 Lisa.gmc /F /WD h:\Ameritrak\GMAVLUS
 /GMEdit [%DL]police\macros\crimevis.txt /W 0 /WD L:\MPD\GeoMaster\Mpls
 /GMEdit [%DL]pikmacro\pikmacro.txt /W 0 /WD c:\geomas [%TESTDL]=[%DL]TestDirectories\test1;
@@ -123,78 +125,6 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-granth
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

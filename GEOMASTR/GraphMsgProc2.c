@@ -1792,7 +1792,7 @@ GSSiExitProg (445);
 		    	 if (ReorgBadRecs)
 		    	 {
 		    	 	sprintf (str,"%ld invalid records removed",ReorgBadRecs);
-		    	 	GSSiMessageBox (str,"Warning",MB_ICONEXCLAMATION,0);
+		    	 	GSSiMessageBox (0,str,"Warning",MB_ICONEXCLAMATION,0);
 		    	 } 
 		    	 ReorghWnd = 0; 
 		    	 DisableUndo (FALSE);
@@ -9487,7 +9487,7 @@ BOOL FAR PASCAL BTREE_REORGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 				 	
 				 	Fid = GSSiOpenFile (Name,&OFStruct,OF_READ);
 				 	if (Fid == HFILE_ERROR)
-						GSSiMessageBox ("Cannot open file",0,MB_ICONEXCLAMATION,0);
+						GSSiMessageBox (0,"Cannot open file",0,MB_ICONEXCLAMATION,0);
 					else
 					{
 				   	 	ShowWindow (GetDlgItem(hWndDlg,IDC_STATUS2),SW_SHOW);

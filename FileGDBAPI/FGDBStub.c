@@ -1,4 +1,5 @@
-#if XPVERSION
+#if XPVERSION || NVSERVER
+
 #include "graphint.h"
 
 int  OpenFGDB2 (LPSTR DBName,LPSTR Table,LPSTR SQL)

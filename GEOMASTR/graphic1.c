@@ -5544,7 +5544,7 @@ GSSiExitProg (60);
     if (Signature != 80251)
     {    
         GSSiClose (FidIndex); 
-        GSSiMessageBox("This is not a valid index file",OFStruct.szPathName, MB_OK,0);
+        GSSiMessageBox (0,"This is not a valid index file",OFStruct.szPathName, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (60);
@@ -5556,7 +5556,7 @@ GSSiExitProg (60);
     {
     BadMap:  
         GSSiClose(FidIndex);
-        GSSiMessageBox("This index file version is not recognized",Name, MB_OK,0);
+        GSSiMessageBox (0,"This index file version is not recognized",Name, MB_OK,0);
 {
 #if ENABLETRACE
 GSSiExitProg (60);

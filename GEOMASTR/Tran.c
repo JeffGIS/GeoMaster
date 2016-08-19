@@ -1497,7 +1497,7 @@ typedef TRACK	FAR	*LPTRACK;
           LP2[NLINES] = (short)IP2;  
           if (PointInfo[IP1].nlines >= MAX_LINES_AT_POINT ||  
 			  PointInfo[IP2].nlines >= MAX_LINES_AT_POINT)
-          	GSSiMessageBox ("Too many lines at one point - add more interior points",
+          	GSSiMessageBox (0,"Too many lines at one point - add more interior points",
           					"Transformation Error",MB_ICONEXCLAMATION,0);
 		  else if (NLINES < MXPF)
           {
@@ -1506,7 +1506,7 @@ typedef TRACK	FAR	*LPTRACK;
 	      }
 		  else
 		  {
-			  GSSiMessageBox("Too many points",
+			  GSSiMessageBox (0,"Too many points",
 				  "Transformation Error", MB_ICONEXCLAMATION, 0);
 		  }
 	  S200:;

@@ -1102,8 +1102,8 @@ int  WINAPI GSSiSELECTCLIPRGN(__in HDC hdc, __in_opt HRGN hrgn)
 
 	if (!InDebug)
 		return rtn;
-
-	if (rtn == ERROR)
+	return rtn;
+	if (rtn == ERROR && hrgn != 0)
 	{
 		char str[40];
 		sprintf (str,"SelectClipRgn Failed:%x",(int)hdc);

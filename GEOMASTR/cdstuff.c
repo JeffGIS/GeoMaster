@@ -79,7 +79,7 @@ Retry:
 	if (!GetVolumeLabel(FromPath,VolLabel)) 
 	{
 		sprintf (str2,"Unable to read CD in drive %s",FromPath);  
-		if (GSSiMessageBox (str2,NULL,MB_RETRYCANCEL,0) == IDRETRY)
+		if (GSSiMessageBox (0,str2,NULL,MB_RETRYCANCEL,0) == IDRETRY)
 			goto Retry;
 		return FALSE;
 	}
@@ -144,7 +144,7 @@ Retry:
 	GSSiRemove (Name);
 	GSSiSetCursor(hcurSave); 
 	sprintf (str2,"CD %s successfully registered",VolLabel);
-	GSSiMessageBox (str2,"",MB_OK,0);
+	GSSiMessageBox (0,str2,"",MB_OK,0);
 	CloseCDLookUpTable ();    
 	return TRUE;
 } 
@@ -257,7 +257,7 @@ BOOL ConvertNameToCDName (LPSTR Name)
 				}
 /*				{
 					sprintf (Mess,"Please load the CD named %s",VolLabel);
-					Response = GSSiMessageBox (Mess,"",MB_OKCANCEL);  
+					Response = GSSiMessageBox (0,Mess,"",MB_OKCANCEL);  
 					if (Response == IDCANCEL)
 						AddCDToCancelledList (VolLabel);
 				} */

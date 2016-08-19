@@ -826,7 +826,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    			if (lMacro > USHRT_MAX)
 	    			{
 	    				GSSiClose (Fid);  
-	    				GSSiMessageBox (Name,"Macro file exceeds maximum length",MB_ICONEXCLAMATION,0); 
+	    				GSSiMessageBox (0,Name,"Macro file exceeds maximum length",MB_ICONEXCLAMATION,0); 
 	    				rtn = FALSE;
 	    				goto Exit;
 	    			}
@@ -1029,12 +1029,19 @@ long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction)
 			 double pixelX, pixelY;
 
 			 if (Direction == 1)
+			 {
+				 pixelX = Point->x;
+				 pixelY = Point->y;
+				 PixelXYToLatLong(pixelX, pixelY, iLev, &Point->y, &Point->x);
 				 rtn = ConvertCoord(Point, 2, 1);
+			 }
 			 else
+			 {
 				 rtn = ConvertCoord(Point, 1, 2);
-			 LatLongToPixelXYd(Point->y, Point->x, iLev, &pixelX, &pixelY);
-			 Point->x = pixelX;
-			 Point->y = pixelY;
+				 LatLongToPixelXYd(Point->y, Point->x, iLev, &pixelX, &pixelY);
+				 Point->x = pixelX;
+				 Point->y = pixelY;
+			 }
 		 }
 		 goto Exit;
 	 }

@@ -433,7 +433,7 @@ C-------------------------------        */
            PRJ_TRAN[ID][1] = LoadTranFileWithDandT (NAME);  
            if (!PRJ_TRAN[ID][1])   
            {
-           	  GSSiMessageBox ("Error loading transformation file",NAME,MB_ICONEXCLAMATION,0);
+           	  GSSiMessageBox (0,"Error loading transformation file",NAME,MB_ICONEXCLAMATION,0);
            	  return -1;                                              
            }
        	   IS_BASE[ID]=FALSE; 
@@ -628,7 +628,7 @@ GotFirstLine:
 										  		  &XTO[NTP],
 										  		  &YTO[NTP]) != 4)
 			  {           
-	           	GSSiMessageBox ("Error loading transformation file",NAME,MB_ICONEXCLAMATION,0);
+	           	GSSiMessageBox (0,"Error loading transformation file",NAME,MB_ICONEXCLAMATION,0);
 			  	goto S190;
 			  }  
 		  }
