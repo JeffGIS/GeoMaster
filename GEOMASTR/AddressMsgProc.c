@@ -4635,7 +4635,7 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				 {
 								   ClearSpecial();
 								   DBoundsInit(&DisplayBounds);
-								   GetDlgItemText(hWndDlg, LOWORD(wParam), StreetBuf, 64);
+								   GetDlgItemText(hWndDlg, IDC_STREET, StreetBuf, 64);
 								   strcpy(CorrectedAddress, StreetBuf);
 								   if (SeparateIntStreets(StreetBuf, Street1, Street2))
 								   {
