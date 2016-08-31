@@ -5211,14 +5211,16 @@ TestGPRtn:	if (ResetSubDL)
 		 	goto RtnFalse;
 		}
 
-		case 736: // $MESSAGE(message,button opt,pos) Title is blank unless arg1 contains | to sep message from title (i.e $MESSAGE(message|title,opt)
+		case 736: // $MESSAGE(message,button opt,pos,cancelNum) Title is blank unless arg1 contains | to sep message from title (i.e $MESSAGE(message|title,opt)
 		{
 			char space[2]=" ";
 			LPSTR VB;
+			int cancelNum = 0;
 			
-			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,4,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
+			cancelNum = atoi(Arg[4]);
 			rtn = IDOK;
 			if ((VB = strrchr (Arg[1],'|')))
 				*VB++ = 0;
@@ -5232,13 +5234,13 @@ TestGPRtn:	if (ResetSubDL)
 			switch (atoi(Arg[2])) 
 			{
 				case 1:
-					rtn = GSSiMessageBox (0,Arg[1],VB,MB_YESNO,Arg[3]); 
+					rtn = GSSiMessageBox(cancelNum, Arg[1], VB, MB_YESNO, Arg[3]);
 					break;
 				case 2:
-					rtn = GSSiMessageBox (0,Arg[1],VB,MB_ABORTRETRYIGNORE,Arg[3]); 
+					rtn = GSSiMessageBox(cancelNum, Arg[1], VB, MB_ABORTRETRYIGNORE, Arg[3]);
 					break;
 				default:
-					rtn = GSSiMessageBox (0,Arg[1],VB,MB_OK,Arg[3]); 
+					rtn = GSSiMessageBox(cancelNum, Arg[1], VB, MB_OK, Arg[3]);
 			}
 			SetCurView ( SaveVP);
 			switch (rtn)
