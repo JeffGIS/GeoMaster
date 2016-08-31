@@ -135,7 +135,7 @@ short GSSiMessageBox (int from,LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 	if (Mess)
 	{ 
 		_fstrcpy (pMess,Mess);
-		ExpandText (pMess);
+		//ExpandText (pMess);
 	} 
 	else
 		pMess = 0;

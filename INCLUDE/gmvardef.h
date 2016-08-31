@@ -639,7 +639,7 @@ long	NewPrimeOffset;
 short	nRead;
 short	nBytes;
 int		PickAp=4;
-double	WidthFactor=1;  
+float	WidthFactor=1;  
 long	CurrentVoterID; 
 short	CurrentVoterDB;   
 HANDLE	hStreetPolys=0;

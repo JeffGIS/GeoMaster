@@ -573,7 +573,7 @@ extern double			WindowToFileFactor;
 extern short			QuadTypeNext;
 extern BOOL			MenuDisplayed;
 extern HPEN			CurrentPen;
-extern double			WidthFactor;
+extern float			WidthFactor;
 extern HWND			hWndMain;
 extern HWND			hWndAltAccel; 
 extern HWND			TraceWnd;

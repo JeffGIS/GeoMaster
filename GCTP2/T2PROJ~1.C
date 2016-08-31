@@ -376,7 +376,7 @@ C-------------------------------        */
          NAME[MAX_PATH],   PNAME[MAX_PATH], XYUNITS[32],ZUNITS[7];
        char str[260], Suffix[6]=".CVT"; 
        int  n=0, SETUNITS;   
-       LPSTR    lpPtr, lpCVT, pBeg;
+       LPSTR    lpPtr, lpCVT, pBeg, lpGoogle;
           
 //C---------------------
 //C   SUBROUTINE START
@@ -422,29 +422,42 @@ C-------------------------------        */
            _fstrcpy (PROJECTION_ID[ID],"BASEPROJ");
            return 0L;
        }  
-       if (_fstrstr(NAME,".CPT"))
-       {   
-       	   char	OppNAME[MAX_PATH];
-       	   
-           PRJ_TYPE[ID] = 0;
-           PRJ_UNITS[ID] = 0;
-           PRJ_BASEUNITS[ID] = 0; 
-           PRJ_TRAN[ID][2] = 0;
-           PRJ_TRAN[ID][1] = LoadTranFileWithDandT (NAME);  
-           if (!PRJ_TRAN[ID][1])   
-           {
-           	  GSSiMessageBox (0,"Error loading transformation file",NAME,MB_ICONEXCLAMATION,0);
-           	  return -1;                                              
-           }
-       	   IS_BASE[ID]=FALSE; 
-           PRJ_TYPE[ID] = 200;
-           _fstrcpy (OppNAME,"|OPP|");
-           _fstrcat (OppNAME,NAME); 
-           PRJ_TRAN[ID][2] = LoadTranFileWithDandT (OppNAME);
+	   if (_fstrstr(NAME, ".CPT"))
+	   {
+		   char	OppNAME[MAX_PATH];
 
-           return 0L;
-       } 
-       
+		   PRJ_TYPE[ID] = 0;
+		   PRJ_UNITS[ID] = 0;
+		   PRJ_BASEUNITS[ID] = 0;
+		   PRJ_TRAN[ID][2] = 0;
+		   PRJ_TRAN[ID][1] = LoadTranFileWithDandT(NAME);
+		   if (!PRJ_TRAN[ID][1])
+		   {
+			   GSSiMessageBox(0, "Error loading transformation file", NAME, MB_ICONEXCLAMATION, 0);
+			   return -1;
+		   }
+		   IS_BASE[ID] = FALSE;
+		   PRJ_TYPE[ID] = 200;
+		   _fstrcpy(OppNAME, "|OPP|");
+		   _fstrcat(OppNAME, NAME);
+		   PRJ_TRAN[ID][2] = LoadTranFileWithDandT(OppNAME);
+
+		   return 0L;
+	   }
+	   lpGoogle = strstr(NAME, "GOOGLE");
+	   if (!lpCVT && lpGoogle)
+	   {
+		   char	OppNAME[MAX_PATH];
+
+		   PRJ_TYPE[ID] = 1000 + atoi (lpGoogle+6);
+		   PRJ_UNITS[ID] = 0;
+		   PRJ_BASEUNITS[ID] = 0;
+		   PRJ_TRAN[ID][2] = 0;
+		   IS_BASE[ID] = FALSE;
+
+		   return 0L;
+	   }
+
        switch (ID)
        {
 			case 1:

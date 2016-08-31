@@ -2222,14 +2222,15 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		}  
 
-		case 935: //$FIELDDEFS(DBName,DoScan,RowsToScan)
+		case 935: //$FIELDDEFS(DBName,DoScan,RowsToScan,format)
 		{  
 			HANDLE	hFieldTypes=0;
 		    LPGWFLDINFO pFldInfo; 
 		    FIELDINFO	FldInfo;
-			
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
-			n = ScanForFieldTypes (Arg[1],&hFieldTypes,atob(Arg[2]),atol(Arg[3])); 
+			char delim[2] = { 0 };
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			int format = atoi(Arg[4]);
+			n = ScanForFieldTypes(Arg[1], &hFieldTypes, atob(Arg[2]), atol(Arg[3]));
 			if (!n)
 				goto RtnFalse;
 			pFldInfo = (LPGWFLDINFO)GlobalLock (hFieldTypes); 
@@ -2239,11 +2240,26 @@ GSSiExitProg (1350);
 				memset (&FldInfo,0,sizeof(FldInfo));
 				FldInfo.length = pFldInfo->Len;    
 				FldInfo.type = pFldInfo->Type;
-				_fstrcpy (FldInfo.name,pFldInfo->Name);
-			    CreateGMTextHeader (&FldInfo, OutLoc);
-				_fstrcpy (_fstrchr (OutLoc,0),",");
+				strncpy0 (FldInfo.name,pFldInfo->Name,32);
+				if (!strnicmp(pFldInfo->Name, "PedButton",9))
+					ii = 1;
+				switch (format)
+				{
+				case 0:
+					CreateGMTextHeader (&FldInfo, OutLoc);
+					_fstrcpy (_fstrchr (OutLoc,0),",");
+					break;
+				case 1:
+					if (pFldInfo->Type == BT_CHAR)
+						sprintf(strchr(OutLoc, 0), "%s'[%s]'", delim, pFldInfo->Name);
+					else
+						sprintf(strchr(OutLoc, 0), "%s[%s]", delim, pFldInfo->Name);
+					break;
+				}
+				delim[0] = '\t';
 			}
-			*LastChr(OutLoc) = 0;	
+			if (!format)
+				*LastChr(OutLoc) = 0;	
 			GSSiGlobUlFree (&hFieldTypes); 
 			goto Rtnl;
 		}  

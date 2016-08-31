@@ -75,7 +75,8 @@ C                                           19 = VAN DER GRINTEN I
 C                                           20 = OBLIQUE MERCATOR (HOTINE)                    
 C                                          100 = Used for plot files
 										   200 for point transformation
-										   999 for PROJ4 projection*/
+										   999 for PROJ4 projection
+										   1000 - 1021 GOOGLE at zoom PRJ_TYPE - 1000*/
 		long  PRJ_UNITS[MAX_PROJ];           //{Coordinate unit of measure code
 /*C                                           0 =  Inches
 C                                           1 =  Feet            

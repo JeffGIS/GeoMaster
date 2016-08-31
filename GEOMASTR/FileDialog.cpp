@@ -1301,7 +1301,7 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 											{
 												hr = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, pFile, lFile, NULL, NULL) ?
 												S_OK : HRESULT_FROM_WIN32(GetLastError());
-
+												CoTaskMemFree(pszFilePath);
 												LPSTR pDot = strrchr(pFile, '.');
 												if (pDot)
 													strcpy(lastExtension, pDot);

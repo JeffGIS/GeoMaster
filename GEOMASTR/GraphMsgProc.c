@@ -377,6 +377,8 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 			while (ibutton < MAXIMAGES && fgetstring(FileName, MAX_PATH, fid))
 			{
 				HDIB32 hDib32 = BMPHandleFromEXT(FileName);
+				//BOOL flip = FreeImage_FlipVertical(hDib32);
+				//flip = FreeImage_FlipHorizontal(hDib32);
 				GetClientRect(GetDlgItem(hWndDlg, buttons[ibutton]), &buttonRect);
 				HDIB32 hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTHEIGHT(&buttonRect), FILTER_CATMULLROM);
 				hBM[ibutton] = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
@@ -464,10 +466,22 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 						if (ifile++ == ibutton + firstImage)
 						{
 							HDIB32 hDib32 = BMPHandleFromEXT(FileName);
+							HDIB32 hDibScaled;
+							float imagewidth = FreeImage_GetWidth(hDib32);
+							float imageheight = FreeImage_GetHeight(hDib32);
+							float fac1, fac2, fac;
+							//BOOL flip = FreeImage_FlipVertical(hDib32);
+							//flip = FreeImage_FlipHorizontal(hDib32);
 							strcpy(selectedFile, FileName);
 							GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
-							HDIB32 hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTHEIGHT(&buttonRect), FILTER_CATMULLROM);
-							hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+							fac1 = RECTWIDTH(&buttonRect) / imagewidth;
+							fac2 = RECTHEIGHT(&buttonRect) / imageheight;
+							fac = imagewidth / imageheight;
+							if (fac1 > fac2)
+								hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTWIDTH(&buttonRect)*fac, FILTER_CATMULLROM);
+							else
+								hDibScaled = FreeImage_Rescale(hDib32, RECTHEIGHT(&buttonRect), RECTHEIGHT(&buttonRect)*fac, FILTER_CATMULLROM);
+							hBMLarge = DIB32ToBitmap(hDib32, (HPALETTE)0);
 							HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
 							GSSiDeleteObject(&hOldBM);
 							ibutton++;

@@ -2,11 +2,14 @@
 #include "gmextern.h"
 #include "shapefil.h"
 //#include "sqlite3ext.h"
+#define INDEX_TYPE_RTREE	1
+#define INDEX_TYPE_XY		2
 static	char	SQLITERefno[128] = "0";
 static	char	SQLITEx[128] = "[SQLITE.x]";
 static	char	SQLITEy[128] = "[SQLITE.y]";
 static	char	SQLITEStartTime[128] = "[SQLITE.BDate]";
 static	char	SQLITEEndTime[128] = "[SQLITE.EDate]";
+static  char	SQLITEIndexType = INDEX_TYPE_RTREE;
 static	char	SQLITESymbol[128] = "$SYMNUM(WALLPOINT)";
 static	char	SQLITESize[128] = "-10";
 static	char	SQLITETAG[128] = "CONTROLN:[SQLITE.Wall Id]", SQLITETag[128];//"CASENUM:[SQLITE.CaseNbr]";
@@ -135,18 +138,26 @@ BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName,LPMNMXCORD pfileMNMX)
 	DBoundsInit(pfileMNMX);
 	if (db)
 	{
-		sprintf(pCmd, "SELECT min(minX),max(maxX),min(minY),max(maxY) FROM %s_index", tableName);
-		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0);
-
-		if (sqlite3_step(statement) == SQLITE_ROW)
+		switch (SQLITEIndexType)
 		{
-			pfileMNMX->xmn = sqlite3_column_double  (statement, 0);
-			pfileMNMX->xmx = sqlite3_column_double(statement, 1);
-			pfileMNMX->ymn = sqlite3_column_double(statement, 2);
-			pfileMNMX->ymx = sqlite3_column_double(statement, 3);
-			rtn = TRUE;
+		case INDEX_TYPE_RTREE:
+			sprintf(pCmd, "SELECT min(minX),max(maxX),min(minY),max(maxY) FROM %s_index", tableName);
+			SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0);
+
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				pfileMNMX->xmn = sqlite3_column_double(statement, 0);
+				pfileMNMX->xmx = sqlite3_column_double(statement, 1);
+				pfileMNMX->ymn = sqlite3_column_double(statement, 2);
+				pfileMNMX->ymx = sqlite3_column_double(statement, 3);
+				rtn = TRUE;
+			}
+			SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
+			break;
+
+		case INDEX_TYPE_XY:
+			break;
 		}
-		SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -1866,57 +1877,58 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 			*pEnd = 0;
 			strcpy(tableName, pPar);
 			if (GSSiLength(fileName) > 0)
-			if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 			{
-				if (GetSQLITENumRows(SQLITEHandle, tableName))
+				rtnType = SHPT_POINT;
+				LoadSQLITEParm(fileName, rtnType, CurView->hWnd);
+				if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 				{
-					if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
+					if (GetSQLITENumRows(SQLITEHandle, tableName))
 					{
-						rtnType = SHPT_POINT;
-						LoadSQLITEParm(fileName, rtnType, CurView->hWnd);
-
-						Points[0].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
-						Points[0].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
-						Points[1].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
-						Points[1].y = ClipCoordToProjection(SQLITEFileMNMX.ymx, 2, 0, 1);
-						Points[2].x = ClipCoordToProjection(SQLITEFileMNMX.xmx, 1, 0, 1);
-						Points[2].y = ClipCoordToProjection(SQLITEFileMNMX.ymx, 2, 0, 1);
-						Points[3].x = ClipCoordToProjection(SQLITEFileMNMX.xmx, 1, 0, 1);
-						Points[3].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
-						for (i = 0; i<4; i++)
+						if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
 						{
-							if (ConvertCoord(&Points[i], 0, 1))
+							Points[0].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
+							Points[0].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
+							Points[1].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
+							Points[1].y = ClipCoordToProjection(SQLITEFileMNMX.ymx, 2, 0, 1);
+							Points[2].x = ClipCoordToProjection(SQLITEFileMNMX.xmx, 1, 0, 1);
+							Points[2].y = ClipCoordToProjection(SQLITEFileMNMX.ymx, 2, 0, 1);
+							Points[3].x = ClipCoordToProjection(SQLITEFileMNMX.xmx, 1, 0, 1);
+							Points[3].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
+							for (i = 0; i < 4; i++)
 							{
-								MessageBox(GetFocus(), "Unable to convert coordinates as specified", 0, MB_ICONQUESTION | MB_OK);
-								sqlite3_close(SQLITEHandle);
-								SQLITEHandle = 0;
-								return FALSE;
+								if (ConvertCoord(&Points[i], 0, 1))
+								{
+									MessageBox(GetFocus(), "Unable to convert coordinates as specified", 0, MB_ICONQUESTION | MB_OK);
+									sqlite3_close(SQLITEHandle);
+									SQLITEHandle = 0;
+									return FALSE;
+								}
+								AddDPointToMinMax(&Points[i], &FileMNMX);
 							}
-							AddDPointToMinMax(&Points[i], &FileMNMX);
-						}
-						if (FileMNMX.xmx - FileMNMX.xmn >
-							FileMNMX.ymx - FileMNMX.ymn)
-						{
-							MinMax.xmn = -32000;
-							MinMax.xmx = 32000;
-							MinMax.ymn = -32000 * ((FileMNMX.ymx - FileMNMX.ymn) / (FileMNMX.xmx - FileMNMX.xmn));
-							MinMax.ymx = -MinMax.ymn;
-						}
-						else
-						{
-							MinMax.ymn = -32000;
-							MinMax.ymx = 32000;
-							MinMax.xmn = -32000 * ((FileMNMX.xmx - FileMNMX.xmn) / (FileMNMX.ymx - FileMNMX.ymn));
-							MinMax.xmx = -MinMax.xmn;
-						}
-						CreateFileTran(&MinMax, &FileMNMX);
-						Bounds = CurView->WBounds;
-						ConvertBounds(&Bounds, 1, 0);
-						sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
-							Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+							if (FileMNMX.xmx - FileMNMX.xmn >
+								FileMNMX.ymx - FileMNMX.ymn)
+							{
+								MinMax.xmn = -32000;
+								MinMax.xmx = 32000;
+								MinMax.ymn = -32000 * ((FileMNMX.ymx - FileMNMX.ymn) / (FileMNMX.xmx - FileMNMX.xmn));
+								MinMax.ymx = -MinMax.ymn;
+							}
+							else
+							{
+								MinMax.ymn = -32000;
+								MinMax.ymx = 32000;
+								MinMax.xmn = -32000 * ((FileMNMX.xmx - FileMNMX.xmn) / (FileMNMX.ymx - FileMNMX.ymn));
+								MinMax.xmx = -MinMax.xmn;
+							}
+							CreateFileTran(&MinMax, &FileMNMX);
+							Bounds = CurView->WBounds;
+							ConvertBounds(&Bounds, 1, 0);
+							sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+								Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 
-						if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) != SQLITE_OK)
-							statement = NULL;
+							if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) != SQLITE_OK)
+								statement = NULL;
+						}
 					}
 				}
 			}
@@ -2926,7 +2938,6 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, i);
 				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, i);
 				int nc = 0;
-
 				LPSTR pPar = strchr(decl, '(');
 				if (pPar)
 				{
