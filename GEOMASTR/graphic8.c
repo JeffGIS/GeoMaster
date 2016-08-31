@@ -146,9 +146,15 @@ short GSSiMessageBox (int from,LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position)
 	}
 	else
 		pTitle = 0;
-	if (!messageCanceled)
+	if (!messageCanceled || !from)
 	{
-		icon = icon | MB_OKCANCEL;
+		if (from > 0)
+		{
+			if (icon == MB_YESNO)
+				icon = MB_YESNOCANCEL;
+			if (icon == MB_OK)
+				icon = MB_OKCANCEL;
+		}
 		rtn = GSSiMsgBox(hWndMain, pMess, pTitle, icon, Position);
 		if (rtn == IDCANCEL)
 		{
