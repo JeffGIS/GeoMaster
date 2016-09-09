@@ -1,3 +1,5 @@
+#ifndef gssitype_h
+#define gssitype_h
 #include "gmlimits.h"
 #include <stdlib.h>  
 #include <time.h>    
@@ -3932,3 +3934,5 @@ LPVOID glbllock(HANDLE hglb);
 BOOL glblUnlock(HANDLE hglb);
 
 #include "TileGraphics.h"
+
+#endif /* gssitype_h */

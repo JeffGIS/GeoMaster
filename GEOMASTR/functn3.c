@@ -4445,8 +4445,27 @@ GotCloseFilehSQL:
 			itoa(n, OutLoc, 10);
 			goto Rtnl;
 		}
+		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile)
+			//$NVCRIS(LOADLIST,ListFile,ToDB)
+		{
+			rtn = FALSE;
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "EXPORT"))
+			{
+				if (!stricmp(Arg[3], "BYINT"))
+					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2]);
+			}
+			if (!stricmp(Arg[1], "LOADLIST"))
+			{
+				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3]);
+			}
+			if (rtn)
+				goto RtnTrue;
+			else
+				goto RtnFalse;
+		}
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
-		{				
+		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
 
 			SaveVP = CurView;      

@@ -1,3 +1,6 @@
+#ifndef bt_h
+#define bt_h
+
 typedef	HANDLE	HGLOBAL;
 #define	MAX_BTREE_LEVELS	16
 typedef	struct {short 	BT_VARTYP, BT_VARLEN, BT_VAROFF;} BTVARDESC;
@@ -71,7 +74,7 @@ BOOL BT_OPEN_FOR_WRITE (HGLOBAL IBTID);
 //void BT_GET_DEF (HGLOBAL IBTID,LPINT DataLength,LPINT NumVar,LPBTVARDESC pVarDesc);
 HANDLE BT_FormKey(HANDLE hBT, LPSTR val);
 
-
+#endif
 
 
 

@@ -10003,7 +10003,7 @@ BOOL FAR PASCAL ZOOMLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	int		nread,ii;
 	HANDLE	hBT;
 	char	str[512]; 
-	static	char	SaveAltProj[32];
+	static	char	SaveAltProj[MAX_PATH];
 	LPSTR	lpTab;
 	int		TabStops[2]={400,500}; 
 	OFSTRUCTGM	OFStruct;
@@ -18223,7 +18223,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
     MNMXCORD	ProjBounds;
     MNMXCORD 	MinMaxCoord;
     DPOINT 		Points[4];
-	char	SaveAltProj[34];
+	char	SaveAltProj[MAX_PATH];
 	static	HANDLE	hSaveBM=0;  
 	BOOL	SaveAllowCache=AllowCache;
 	short	NewOpt;
@@ -26221,7 +26221,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  DPOINT Point;
                  BOOL   Store, Err, HiPrecis, Create, FileIsDir=FALSE, UsingHltList,Status;
                  short    Symbol=1,nr;   
-                 char	SaveAltProj[34];
+				 char	SaveAltProj[MAX_PATH];
                  COLORREF   color;      
                  LPGRCOMMAND	lpGRCommand;
                  LPSTR  lpDot, lpFld, lpSC; 
@@ -28094,6 +28094,40 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  GSSiGlobUlFree (&hTiger5);
  return TRUE;    
 }
+
+static void ConvertToShortName(LPSTR Name)
+{
+	char longNameToShortNameFile[MAX_PATH];
+	char str[1024];
+	
+	if (GetGlobalCVal("%SHPFIELDCONVERT", longNameToShortNameFile, 0))
+	{
+		HFILE fid = GSSiOpenFile(longNameToShortNameFile, 0, OF_READ);
+		if (fid != HFILE_ERROR)
+		{
+			while (fgetstring(str, 1020, fid))
+			{
+				LPSTR tab = strchr(str, '\t');
+				if (tab)
+				{
+					*tab++ = 0;
+					if (!stricmp(Name, str))
+					{
+						LPSTR NewName = tab;
+						tab = strchr(tab, '\t');
+						if (tab)
+						{
+							*tab = 0;
+							strcpy(Name, NewName);
+							break;
+						}
+					}
+				}
+			}
+			GSSiClose(fid);
+		}
+	}
+}
 BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
 	short	Version=1;
@@ -28593,7 +28627,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 						strncpy(outName, pEq,sizeof(outName)-1);
 					}
 					else
+					{
+						ConvertToShortName(Name);
 						strncpy(outName, Name, sizeof(outName)-1);
+					}
                     lpFldInfo = &FilePtrATT->FldInfo;
                     lpFldInfo += *lpItems;
 				    switch (lpFldInfo->type)

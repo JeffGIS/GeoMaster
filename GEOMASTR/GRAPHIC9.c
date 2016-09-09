@@ -2532,7 +2532,7 @@ BOOL LinfitFilePoints (LPSTR FileList,LPSTR ExclusionList,short FitType,LPSTR Fi
 	HANDLE	hDLT; 
 	short	SymNum;
 	MNMXCORD Bounds;  
-	char	SaveAltProj[64]; 
+	char	SaveAltProj[MAX_PATH];
 	double	TotDist=0, AZ1,AZ2, TotPoints=0, SumWeights=0;             
     
     _fstrcpy (PltName,OutFile); 

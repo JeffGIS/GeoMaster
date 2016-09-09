@@ -1,3 +1,5 @@
+#ifndef address_h
+#define address_h
 #define IDM_HOUSE                   2010
 #define IDM_STREET                  2020
 #define IDM_STREET_MENU             2030   
@@ -498,6 +500,7 @@ BOOL AddMapQuestMatch(HWND hWndDlg, UINT icntl, LPSTR FullAddress);
 BOOL ReverseGeocodeCommand (int nArgs,LPSTR *Arg,LPSTR OutLoc);
 BOOL GeocodeAlltypes(HWND hWnd,LPSTR OutLoc, LPSTR Arg1);
 
+#endif
 
 
 

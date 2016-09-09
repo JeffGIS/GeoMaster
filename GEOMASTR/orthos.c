@@ -1668,7 +1668,7 @@ BOOL DisplaySIDInVP32new (LPVIEWPORT pVP,LPSTR File)
     		TileBounds.ymx = TileBounds.ymn + TileHeight;
 			if (*MrSidProjection)
 			{
-				char	SaveAltProj[64];
+				char	SaveAltProj[MAX_PATH];
 				MNMXCORD	TempBounds=TileBounds;
 
 				ConvertCoordClose ();
@@ -2553,7 +2553,7 @@ GSSiExitProg (604);
 
 BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 ClipRect,LPHANDLE phTran,BOOL UseCPT)
 {
-	static	char	SaveAltProj[32];  
+	static	char	SaveAltProj[MAX_PATH];
 	DPOINT	DPoint;
     char    str[132], str2[132], str3[132],TempFile[MAX_PATH]="", ext[6]=".bmp"; 
     LPSTR   lpTXT, pDot;

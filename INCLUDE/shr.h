@@ -1,3 +1,5 @@
+#ifndef shr_h
+#define shr_h
 #include <windows.h>
 #include <winbase.h>
 #include <winnt.h> 
@@ -1412,4 +1414,4 @@ void Rotate256(int irot, LPDPOINT pt);
 
 
 
-
+#endif

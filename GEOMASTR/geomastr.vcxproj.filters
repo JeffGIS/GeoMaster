@@ -1356,6 +1356,12 @@
     <ClCompile Include="FileDialogEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CurbRamps.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RampCompliance.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -1784,6 +1790,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\INCLUDE\UMIO.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RampCompliance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RampStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MPIntersection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

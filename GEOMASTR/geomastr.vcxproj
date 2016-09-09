@@ -451,6 +451,7 @@
     <ClCompile Include="Creatcfg.c" />
     <ClCompile Include="..\SHR\CVTCOORD.C" />
     <ClCompile Include="CreateAreaInMask.c" />
+    <ClCompile Include="CurbRamps.c" />
     <ClCompile Include="cwconfig.c" />
     <ClCompile Include="..\shapelib\code\dbfopen.c" />
     <ClCompile Include="DatedDisplay.c" />
@@ -759,6 +760,7 @@
     <ClCompile Include="..\gctpc\psinv.c" />
     <ClCompile Include="quad.c" />
     <ClCompile Include="..\solar_calculator\Version2\refrac.c" />
+    <ClCompile Include="RampCompliance.c" />
     <ClCompile Include="report.C" />
     <ClCompile Include="..\gctpc\reportgc.c" />
     <ClCompile Include="ROADNAME.C" />
@@ -1003,6 +1005,9 @@
     <ClInclude Include="..\INCLUDE\PROJ.H" />
     <ClInclude Include="..\gctpc\proj.h" />
     <ClInclude Include="..\GMEdit\GMEdit\resource.h" />
+    <ClInclude Include="MPIntersection.h" />
+    <ClInclude Include="RampCompliance.h" />
+    <ClInclude Include="RampStruct.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\INCLUDE\shr.h" />
     <ClInclude Include="..\INCLUDE\TileGraphics.h" />

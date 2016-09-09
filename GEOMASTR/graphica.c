@@ -3439,7 +3439,7 @@ BOOL ConvertFileCoordinates (LPSTR Name,int From,int To,int StatusID)
 {GSSiEnterProg (1106);
 #endif
 {	                                
-	char		TranData[1024], SaveAltProj[34];
+	char		TranData[1024], SaveAltProj[MAX_PATH];
 	double 		XINCH[4],YINCH[4],XBASE[4],YBASE[4];
 	double		RSQMIN, dist1,dist2;
 	LPSTR		lpCor;

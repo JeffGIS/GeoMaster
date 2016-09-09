@@ -86,7 +86,7 @@ BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 				sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
 
 
-		GSSiMessageBox (0, mess, "SQLite Error", MB_ICONEXCLAMATION,0);
+		GSSiMessageBox (3, mess, "SQLite Error", MB_OK,0);
 	}
 
 	return sqlReturn;

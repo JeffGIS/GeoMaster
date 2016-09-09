@@ -2404,6 +2404,8 @@ BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds);
 BOOL GetSQLITERecord(LONGLONG SQLITERec);
 char *EncodeString(LPDPOINT llpoints, int numPoints);
 LPDPOINT DecodeString(char *encodedString, int *numPoints);
+BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase);
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase);
 
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);

@@ -1580,7 +1580,7 @@ GSSiExitProg (445);
 					 HFILE		FidRestart;
 					 HANDLE	hSaveVP=GSSiGlobAlloc (  24,GMEM_MOVEABLE,sizeof(VIEWPORT));
 					 LPVIEWPORT	pSaveVP=(LPVIEWPORT)GlobalLock (hSaveVP);       
-                     char	SaveAltProj[34]; 
+                     char	SaveAltProj[MAX_PATH]; 
                      BOOL	OpenedSeg=FALSE;
 
 					 TimeRangeBeg=0;
