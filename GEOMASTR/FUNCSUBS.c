@@ -6495,12 +6495,12 @@ BOOL StartBackgroundCache (void)
 	OFSTRUCTGM	OFStruct;
 	static	BOOL	firstCall=TRUE;
 
-	return TRUE;
+//	return TRUE;
 	if (!firstCall)
 		return TRUE;
 
 	firstCall = FALSE;
-	ProcessText ("[%RUNFROMCACHE]=T");
+	ProcessText ("[%RUNFROMCACHE]=F");
 	//return TRUE;
 
 	GetGlobalCVal ("[%BackgroundCacheFilelist]",BackgroundCacheFilelist,"[%DL]BackgroundCacheFilelist.txt");
@@ -6522,8 +6522,8 @@ BOOL StartBackgroundCache (void)
 		dtime = CompareFileTime (&fiList.ftLastWriteTime,&fiLastCacheCheckFile.ftLastWriteTime); 
 		_lclose (FidList);
 		_lclose (FidLastCacheCheck);
-		if (dtime < 0)
-			ProcessText ("[%RUNFROMCACHE]=T");
+		//if (dtime < 0)
+		//	ProcessText ("[%RUNFROMCACHE]=T");
 	}
 
 	MaxFileSizeToCache = -1024 * 1024;
