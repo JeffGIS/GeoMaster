@@ -3341,6 +3341,7 @@ GSSiExitProg (532);
 			ConvertToNewLocation (0,0);
 			break;
 		case 335:
+			break;//turn off until figure out why background cache was turning on
 			RunFromCache = atob (Value);
 			CloseAllRequestedFiles (FALSE);
 			if (RunFromCache)
