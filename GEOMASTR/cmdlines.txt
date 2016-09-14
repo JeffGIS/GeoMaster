@@ -1,4 +1,4 @@
-brooklynpark2.GMC /F [%USERLEV]=2; /WD c:\NVCRIS\gmavl
+configs\brooklynpark2.GMC /F [%USERLEV]=2; /WD c:\NVCRIS\gmavl
 sewer.GMC /F [%USERLEV]=2; /WD e:\gm2000
 L:\GEOMas\projects\AlleyWalls\WALLPOINTS.GMC /F [%USERLEV]=2; /WD L:\geomas
 configs\addressedit2.gmc /F [%USERLEV]=2; /WD L:\MPD\Geomaster\Mpls
@@ -127,6 +127,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 
