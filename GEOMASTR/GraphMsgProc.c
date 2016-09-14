@@ -43,6 +43,7 @@ static HWND		hWndSecondaryTAGInput = 0;
 static LPSTR	captureClipboardTitle;
 static LPSTR	captureClipboardMenu;
 static char DMIFile[MAX_PATH];
+static char DMITitle[256];
 
 static struct {long   TLID;
      short    Type;
@@ -333,8 +334,11 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 	static int firstImage = 0;
 	static int lastImage = 0;
 	static int totImages = 0;
+	char blankLine[2] = "";
 
+	LPSTR pTab;
 	UINT buttons[MAXIMAGES] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6, IDC_BUTTON7, IDC_BUTTON8, IDC_BUTTON9, IDC_BUTTON10, IDC_BUTTON11, IDC_BUTTON12, IDC_BUTTON13, IDC_BUTTON14, IDC_BUTTON15 };
+	UINT buttontext[MAXIMAGES] = { IDC_BUTTONTEXT1, IDC_BUTTONTEXT2, IDC_BUTTONTEXT3, IDC_BUTTONTEXT4, IDC_BUTTONTEXT5, IDC_BUTTONTEXT6, IDC_BUTTONTEXT7, IDC_BUTTONTEXT8, IDC_BUTTONTEXT9, IDC_BUTTONTEXT10, IDC_BUTTONTEXT11, IDC_BUTTONTEXT12, IDC_BUTTONTEXT13, IDC_BUTTONTEXT14, IDC_BUTTONTEXT15 };
 	char FileName[MAX_PATH + 2];
 	RECT buttonRect;
 	int	BRtn;
@@ -356,9 +360,10 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 		hBMRight = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_RIGHT_ARROW));
 		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_NEXT), (HBITMAP*)&hBM[1]);
 		*/
-
 		HFILE fid = GSSiOpenFile(DMIFile, 0, OF_READ);
 		int image = 0;
+		if (*DMITitle)
+			SetWindowText(GetDlgItem(hWndDlg,IDC_TITLE), DMITitle);
 		if (fid != HFILE_ERROR)
 		{
 			for (int i = 0; i < MAXIMAGES; i++)
@@ -376,6 +381,11 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				image++;
 			while (ibutton < MAXIMAGES && fgetstring(FileName, MAX_PATH, fid))
 			{
+				if ((pTab = strchr(FileName, '\t')))
+				{
+					*pTab++ = 0;
+				}
+				else pTab = blankLine;
 				HDIB32 hDib32 = BMPHandleFromEXT(FileName);
 				//BOOL flip = FreeImage_FlipVertical(hDib32);
 				//flip = FreeImage_FlipHorizontal(hDib32);
@@ -387,6 +397,8 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				DestroyDIB32(hDibScaled, FALSE);
 				EnableWindow(GetDlgItem(hWndDlg, buttons[ibutton]), TRUE);
 				ShowWindow(GetDlgItem(hWndDlg, buttons[ibutton]), SW_SHOW);
+				ShowWindow(GetDlgItem(hWndDlg, buttontext[ibutton]), SW_SHOW);
+				SetDlgItemText(hWndDlg, buttontext[ibutton], pTab);
 				ibutton++;
 			}
 			GSSiClose(fid);
@@ -463,6 +475,8 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				{
 					while (fgetstring(FileName, MAX_PATH, fid))
 					{
+						if ((pTab = strchr(FileName, '\t')))
+							*pTab++ = 0;
 						if (ifile++ == ibutton + firstImage)
 						{
 							HDIB32 hDib32 = BMPHandleFromEXT(FileName);
@@ -506,9 +520,10 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 	return TRUE;
 }
 
-void CallImageDisplayMultipleMsgProc(LPSTR ImageList)
+void CallImageDisplayMultipleMsgProc(LPSTR ImageList,LPSTR Title)
 {
 	strcpy(DMIFile, ImageList);
+	strcpy(DMITitle, Title);
 	int nRc = DialogBox(hInst, (LPSTR)"IMAGE_DISPLAY_MULTIPLE", hWndMain, (DLGPROC)ImageDisplayMultipleMsgProc);
 }
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
@@ -11469,7 +11484,8 @@ GSSiExitProg (1069);
 				 }
 				 else
 				 {
-				 	DisplayBMFileInRect (hDC,FullBM,Rect,TRUE);
+					 SetDisplayMode(hDC, GF_TEXTMODE);
+					 DisplayBMFileInRect(hDC, FullBM, Rect, TRUE);
 					SetWindowText (hWndDlg,FullBM);
 				 }
    				 ReleaseDC (hWndDlg,hDC);

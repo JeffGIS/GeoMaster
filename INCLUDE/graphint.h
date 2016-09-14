@@ -83,7 +83,7 @@
 
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
-void CallImageDisplayMultipleMsgProc(LPSTR ImageList);
+void CallImageDisplayMultipleMsgProc(LPSTR ImageList,LPSTR Title);
 BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -2406,6 +2406,9 @@ char *EncodeString(LPDPOINT llpoints, int numPoints);
 LPDPOINT DecodeString(char *encodedString, int *numPoints);
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase);
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase);
+BOOL ComplianceCodeForRamp(int intID,int rampNum,LPSTR NVCRISDataBase,int opt,LPSTR OutLoc);
+BOOL GetFromCodeText(int from, LPSTR text);
+int FormatStreets (LPSTR from, LPSTR text);
 
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);

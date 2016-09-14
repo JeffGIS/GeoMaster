@@ -1812,7 +1812,7 @@ GSSiExitProg (392);
 }
     _fstrlwr (Name);
 	SetCurImage (Name);
-    hDibInfo=LoadDIB32(Name,TRUE);
+    hDibInfo=LoadDIB32(Name,FALSE);
 	if (imageFileRotation)
 		hDibInfo = GMRotateImageClassic (hDibInfo,imageFileRotation);
 

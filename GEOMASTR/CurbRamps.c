@@ -539,6 +539,39 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 	}
 	return rtn;
 }
+
+BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int opt, LPSTR OutLoc)
+{
+	BOOL rtn = FALSE;
+	*OutLoc = 0;
+	int rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		MPINTERSECTION MPInt;
+
+		if (getMPIntersectionFromDB(intID, TRUE, &MPInt))
+		{
+			if (rampNum > 0 && rampNum < 13)
+			{
+				ToleranceValues tolerances;
+				setStandardToleranceValues(&tolerances);
+
+				RampStruct * pRamp = &MPInt.ramps[rampNum];
+				if (pRamp->rampExists)
+				{
+					LPSTR detailCode;
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+					strcpy(OutLoc, ccode);
+					free(ccode);
+					free(detailCode);
+				}
+			}
+		}
+		rc = sqlite3_close(database);
+	}
+	return rtn;
+}
+
 void MPIntersectionInit(MPINTERSECTION * mpint)
 {
 	memset(mpint, 0, sizeof(MPINTERSECTION));
@@ -708,6 +741,54 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 	}
 	*pMPInt = mpint;
 	return TRUE;
+}
+
+int FormatStreets(LPSTR from, LPSTR outtext)
+{
+	int nStreets = 0;
+	int lfrom = strlen(from);
+	int istreet = 0;
+
+	if (lfrom > 0)
+	{
+		LPSTR streets = malloc(lfrom + 8);
+		LPSTR pBar = streets;
+		LPSTR pStreet[16];
+		strcpy(streets, from);
+		pStreet[0] = streets;
+		nStreets++;
+		while ((pBar = strchr(pBar, '|')))
+		{
+			*pBar++ = 0;
+			pStreet[nStreets++] = pBar;
+		}
+		strcpy(outtext, pStreet[istreet++]);
+		while (istreet < nStreets)
+		{
+			for (int i = 0; i < istreet; i++)
+			{
+				if (!stricmp(pStreet[istreet], pStreet[i]))
+					goto skip;
+			}
+			sprintf(strchr(outtext,0), " and %s", pStreet[istreet]);
+		skip:
+			istreet++;
+		}
+		free(streets);
+	}
+	return nStreets;
+}
+BOOL GetFromCodeText(int from, LPSTR text)
+{
+	char *fromText[] = { "Home", "Ramp", "Signal", "Texture", "Obstruction", "Steep TOC", "Crack", "Curb Cut", "Bump Width", "Bump Height", "Manual Slope" };
+
+	if (from > 0 && from < 12)
+	{
+		strcpy(text, fromText[from - 1]);
+		return TRUE;
+	}
+	*text = 0;
+	return FALSE;
 }
 
 static BOOL Execute(LPSTR cmd)

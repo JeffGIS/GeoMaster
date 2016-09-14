@@ -2926,7 +2926,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 	strcpy(pDB->Where, SQL);
 	if (*pDB->From)
 	{
-		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+		sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
 		if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "get db info", 0))
 		{
 			int ncols = sqlite3_column_count(pDB->statement);
@@ -2977,11 +2977,11 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		strcpy(pWhere, pDB->Where);
 		ExpandText(pWhere);
 		if (*pWhere)
-			sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pWhere);
+			sprintf(pDB->Query, "SELECT rowid,* FROM '%s' WHERE %s;", pDB->From, pWhere);
 		else
-			sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
+			sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
 		free(pWhere);
-		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
+		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, pDB->Query, 0))
 		{
 			GSSiGlobUlFree(&hDB);
 		}
@@ -3022,9 +3022,9 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 	strcpy(pWhere, SQL);
 	ExpandText(pWhere);
 	if (*pWhere)
-		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s", pDB->From, pWhere);
+		sprintf(pDB->Query, "SELECT rowid,* FROM '%s' WHERE %s", pDB->From, pWhere);
 	else
-		sprintf(pDB->Query, "SELECT * FROM '%s'", pDB->From);
+		sprintf(pDB->Query, "SELECT rowid,* FROM '%s'", pDB->From);
 	free(pWhere);
 	if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
 	{

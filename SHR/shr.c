@@ -77,7 +77,7 @@ BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 {
 	if (sqlReturn != SQLITE_OK)
 	{
-		char mess[512];
+		char mess[4096];
 		if (*method)
 			sprintf(mess,"SQLite Error %i = %i:%s\nin:%s",
 				sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database),method);

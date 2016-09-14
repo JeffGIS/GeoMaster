@@ -730,9 +730,15 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName)
 	if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
 	{
 		// ok, let's load the file
-		FIBITMAP *dib = FreeImage_Load(fif, lpszPathName, BMP_DEFAULT);
+		UINT flag = BMP_DEFAULT;
+		FIBITMAP *dib;
+		if (fif == FIF_JPEG)
+			flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
+		dib = FreeImage_Load(fif, lpszPathName, flag);
 		rtn = (HDIB32)dib;
 		// unless a bad file format, we are done !
+		LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)dib);
+		id = 1;
 	}
 	return rtn;
 }

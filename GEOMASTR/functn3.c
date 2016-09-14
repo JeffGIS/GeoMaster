@@ -1334,7 +1334,7 @@ GotCloseFilehSQL:
 			}
 			if (!_fstricmp(Arg[1], "MULTIPLE"))
 			{
-				CallImageDisplayMultipleMsgProc(Arg[2]);
+				CallImageDisplayMultipleMsgProc(Arg[2],Arg[3]);
 				rtn = TRUE;
 				goto Rtnrtn;
 			}
@@ -4447,6 +4447,7 @@ GotCloseFilehSQL:
 		}
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile)
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
+			//$NVCRIS(COMPCODE,int,ramp,db,opt)
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
@@ -4455,10 +4456,27 @@ GotCloseFilehSQL:
 				if (!stricmp(Arg[3], "BYINT"))
 					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2]);
 			}
-			if (!stricmp(Arg[1], "LOADLIST"))
+			else if (!stricmp(Arg[1], "LOADLIST"))
 			{
 				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3]);
 			}
+			else if (!stricmp(Arg[1], "COMPCODE"))
+			{
+				rtn = ComplianceCodeForRamp(atoi(Arg[2]), atoi(Arg[3]), Arg[4], atoi(Arg[5]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "FROMCODE"))
+			{
+				rtn = GetFromCodeText(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "FORMATSTREETS"))
+			{
+				rtn = FormatStreets(Arg[2], OutLoc);
+				goto Rtnl;
+			}
+
+
 			if (rtn)
 				goto RtnTrue;
 			else
