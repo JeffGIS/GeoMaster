@@ -640,7 +640,7 @@ BOOL GetColor (HWND hWnd,COLORREF *Color)
          
 }
 
-BOOL GetOpenFileCD(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
+BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 {
 	BOOL rtn = FALSE;
 	if (!*Name || (*Name && *LastChr(Name) == '\\'))
@@ -660,7 +660,7 @@ BOOL GetOpenFileCD(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 	return rtn;
 }
 
-BOOL GetOpenFileCD_old (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
+BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 {
    /*******************************************************************
    *                                                                  *

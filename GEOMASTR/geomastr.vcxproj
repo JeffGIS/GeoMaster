@@ -205,7 +205,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;XPVERSION;NVSERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;NVSERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -609,6 +609,7 @@
     <ClCompile Include="..\OFFSET\Offset.c" />
     <ClCompile Include="..\gctpc\omerfor.c" />
     <ClCompile Include="..\gctpc\omerinv.c" />
+    <ClCompile Include="NVMetro.c" />
     <ClCompile Include="NVTextDrawing.c" />
     <ClCompile Include="OpenFileDlg.cpp" />
     <ClCompile Include="ORAFILE.C" />

@@ -2409,6 +2409,8 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase);
 BOOL ComplianceCodeForRamp(int intID,int rampNum,LPSTR NVCRISDataBase,int opt,LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
 int FormatStreets (LPSTR from, LPSTR text);
+int LoadMultPropertyDB(LPSTR INDir);
+int CreateMultValueFile(LPSTR INDir);
 
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);

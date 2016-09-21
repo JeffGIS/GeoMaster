@@ -1362,6 +1362,9 @@
     <ClCompile Include="RampCompliance.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NVMetro.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
