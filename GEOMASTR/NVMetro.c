@@ -4,8 +4,8 @@
 #include "MPIntersection.h"
 
 #define FIRSTYEAR	2004
-#define LASTYEAR	2014
-#define NYEARS	11
+#define LASTYEAR	2015
+#define NYEARS	12
 #define NUMVARS 64
 #define MAXLINELEN 2048
 
@@ -164,7 +164,7 @@ int CreateMultValueFile(LPSTR INDir)
 	short	st;
 	char inFile[MAX_PATH];
 	char indexFile[MAX_PATH];
-	int year = 2015;
+	int year = 2016;
 	HANDLE hIndex;
 	char line[1024];
 	int maxLineLen = 1020;

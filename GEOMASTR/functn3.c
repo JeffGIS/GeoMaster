@@ -4446,6 +4446,7 @@ GotCloseFilehSQL:
 			goto Rtnl;
 		}
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile)
+			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile)
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
 			//$NVCRIS(COMPCODE,int,ramp,db,opt)
 		{
@@ -4455,6 +4456,9 @@ GotCloseFilehSQL:
 			{
 				if (!stricmp(Arg[3], "BYINT"))
 					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2]);
+				else if (!stricmp(Arg[3], "BYRAMP"))
+					rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2]);
+
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))
 			{

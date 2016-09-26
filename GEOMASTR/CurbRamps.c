@@ -443,6 +443,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 			sprintf(line, "DROP TABLE IF EXISTS SORTEDFILES;CREATE TABLE SORTEDFILES (TIME INT,FILEPATH CHAR(256));");
 			if (Execute(line))
 			{
+				fgetstring(file, 258, FidList);
 				while (fgetstring(file, 258, FidList))
 				{
 					HFILE fid = GSSiOpenFile(file, 0, OF_READ);
@@ -533,6 +534,49 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 				rtn = TRUE;
 			}
 			GSSiClose(FidList);
+		}
+		rc = sqlite3_close(database);
+
+	}
+	return rtn;
+}
+BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase)
+{
+	BOOL rtn = FALSE;
+	int rc;
+	ToleranceValues tolerances;
+	setStandardToleranceValues(&tolerances);
+
+	rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (FidOut != HFILE_ERROR)
+		{
+			LPSTR rampHeader = (LPSTR)rampToTextHeader();
+			fputstring(rampHeader, FidOut);
+			LPSTR line = malloc(4096);
+			MPINTERSECTION mpInt;
+			if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+			{
+				RampStruct * pRamp = &mpInt.ramps[rampNum];
+				if (pRamp->rampExists)
+				{
+					LPSTR detailCode;
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+					LPSTR rampText = rampToText(mpInt.intID, pRamp);
+					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+					fputstring(line, FidOut);
+					free(ccode);
+					free(detailCode);
+					free(rampText);
+				}
+			}
+			else
+				ii = 1;
+			free(line);
+			GSSiClose(FidOut);
+			rtn = TRUE;
 		}
 		rc = sqlite3_close(database);
 

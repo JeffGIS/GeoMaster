@@ -2405,6 +2405,7 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec);
 char *EncodeString(LPDPOINT llpoints, int numPoints);
 LPDPOINT DecodeString(char *encodedString, int *numPoints);
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase);
+BOOL OutputRampForIntersectionAndRampnumToFile(int intNum, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase);
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase);
 BOOL ComplianceCodeForRamp(int intID,int rampNum,LPSTR NVCRISDataBase,int opt,LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
