@@ -485,7 +485,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 	return rtn;
 }
 
-BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVCRISDataBase)
+BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -516,7 +516,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 							if (pRamp->rampExists)
 							{
 								LPSTR detailCode;
-								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
 								LPSTR rampText = rampToText(mpInt.intID, pRamp);
 								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
@@ -540,7 +540,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 	}
 	return rtn;
 }
-BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase)
+BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -563,7 +563,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 				if (pRamp->rampExists)
 				{
 					LPSTR detailCode;
-					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
 					LPSTR rampText = rampToText(mpInt.intID, pRamp);
 					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 					fputstring(line, FidOut);
@@ -584,7 +584,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 	return rtn;
 }
 
-BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int opt, LPSTR OutLoc)
+BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc)
 {
 	BOOL rtn = FALSE;
 	*OutLoc = 0;
@@ -604,7 +604,7 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int opt
 				if (pRamp->rampExists)
 				{
 					LPSTR detailCode;
-					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
 					strcpy(OutLoc, ccode);
 					free(ccode);
 					free(detailCode);
