@@ -490,12 +490,9 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 							GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
 							fac1 = RECTWIDTH(&buttonRect) / imagewidth;
 							fac2 = RECTHEIGHT(&buttonRect) / imageheight;
-							fac = imagewidth / imageheight;
-							if (fac1 > fac2)
-								hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTWIDTH(&buttonRect)*fac, FILTER_CATMULLROM);
-							else
-								hDibScaled = FreeImage_Rescale(hDib32, RECTHEIGHT(&buttonRect), RECTHEIGHT(&buttonRect)*fac, FILTER_CATMULLROM);
-							hBMLarge = DIB32ToBitmap(hDib32, (HPALETTE)0);
+							fac = min(fac1, fac2);
+							hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
+							hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
 							HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
 							GSSiDeleteObject(&hOldBM);
 							ibutton++;
