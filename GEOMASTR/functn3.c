@@ -4448,7 +4448,7 @@ GotCloseFilehSQL:
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1))
 			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1))
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
-			//$NVCRIS(COMPCODE,int,ramp,db,opt)
+			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);

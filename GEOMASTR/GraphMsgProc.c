@@ -389,17 +389,26 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				HDIB32 hDib32 = BMPHandleFromEXT(FileName);
 				//BOOL flip = FreeImage_FlipVertical(hDib32);
 				//flip = FreeImage_FlipHorizontal(hDib32);
-				GetClientRect(GetDlgItem(hWndDlg, buttons[ibutton]), &buttonRect);
-				HDIB32 hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTHEIGHT(&buttonRect), FILTER_CATMULLROM);
-				hBM[ibutton] = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
-				hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, buttons[ibutton], BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[ibutton]);
-				DestroyDIB32(hDib32, FALSE);
-				DestroyDIB32(hDibScaled, FALSE);
-				EnableWindow(GetDlgItem(hWndDlg, buttons[ibutton]), TRUE);
-				ShowWindow(GetDlgItem(hWndDlg, buttons[ibutton]), SW_SHOW);
-				ShowWindow(GetDlgItem(hWndDlg, buttontext[ibutton]), SW_SHOW);
-				SetDlgItemText(hWndDlg, buttontext[ibutton], pTab);
-				ibutton++;
+				{
+					float imagewidth = FreeImage_GetWidth(hDib32);
+					float imageheight = FreeImage_GetHeight(hDib32);
+					float fac1, fac2, fac;
+					HDIB32 hDibScaled;
+					GetClientRect(GetDlgItem(hWndDlg, buttons[ibutton]), &buttonRect);
+					fac1 = RECTWIDTH(&buttonRect) / imagewidth;
+					fac2 = RECTHEIGHT(&buttonRect) / imageheight;
+					fac = min(fac1, fac2);
+					hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
+					hBM[ibutton] = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+					hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, buttons[ibutton], BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[ibutton]);
+					DestroyDIB32(hDib32, FALSE);
+					DestroyDIB32(hDibScaled, FALSE);
+					EnableWindow(GetDlgItem(hWndDlg, buttons[ibutton]), TRUE);
+					ShowWindow(GetDlgItem(hWndDlg, buttons[ibutton]), SW_SHOW);
+					ShowWindow(GetDlgItem(hWndDlg, buttontext[ibutton]), SW_SHOW);
+					SetDlgItemText(hWndDlg, buttontext[ibutton], pTab);
+					ibutton++;
+				}
 			}
 			GSSiClose(fid);
 		}
