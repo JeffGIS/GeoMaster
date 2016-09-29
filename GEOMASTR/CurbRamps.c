@@ -424,11 +424,12 @@ signal : (int)s
 	[self close : opened];
 	return array;
 }*/
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showProgress)
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
 	int rc;
+	int nTot=0, nDone = 0;
 	LPSTR line = malloc(LINELEN);
 
 	rc = sqlite3_open(DataBase, &database);
@@ -457,6 +458,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 							time = atoi(tloc + 6);
 							sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
 							Execute(line);
+							nTot++;
 						}
 						GSSiClose(fid);
 					}
@@ -466,16 +468,24 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 			GSSiClose(FidList);
 			sprintf(line, "SELECT FILEPATH FROM SORTEDFILES ORDER BY TIME ASC;");
 			sqlite3_stmt *statement = NULL;
-
+			if (showProgress)
+			{
+				CreateStatusWind(hWndMain, 1, "Loading Data");
+			}
 			if (sqlite3_prepare_v2(database,line, -1, &statement, 0) == SQLITE_OK)
 			{
 				while (sqlite3_step(statement) == SQLITE_ROW)
 				{
 					LPSTR filePath = (LPSTR) sqlite3_column_text(statement, 0);
 					BOOL st = UpdateFromFile(filePath,TRUE);
+					if (showProgress)
+						StatusWindowUpdate(0, 0, nTot, ++nDone);
+
 				}
 				sqlite3_finalize(statement);
 			}
+			if (showProgress)
+				DestroyStatusWindow(0);
 
 			free(file);
 		}

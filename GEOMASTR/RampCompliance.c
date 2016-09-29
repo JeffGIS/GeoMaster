@@ -18,7 +18,7 @@ int fixRampNum (int rampNum)
 
 static LPSTR selectCode(LPSTR codes, int whichCode)
 {
-	char code[64];
+	static char code[64];
 	strcpy(code, codes);
 
 	LPSTR pBar = strchr(code, '|');

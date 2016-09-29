@@ -2406,7 +2406,7 @@ char *EncodeString(LPDPOINT llpoints, int numPoints);
 LPDPOINT DecodeString(char *encodedString, int *numPoints);
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase,int codeSystem);
 BOOL OutputRampForIntersectionAndRampnumToFile(int intNum, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem);
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase);
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus);
 BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
 int FormatStreets (LPSTR from, LPSTR text);
