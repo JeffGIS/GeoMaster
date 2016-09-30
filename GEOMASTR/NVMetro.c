@@ -4,8 +4,8 @@
 #include "MPIntersection.h"
 
 #define FIRSTYEAR	2004
-#define LASTYEAR	2014
-#define NYEARS	11
+#define LASTYEAR	2015
+#define NYEARS	12
 #define NUMVARS 64
 #define MAXLINELEN 2048
 
@@ -18,9 +18,8 @@ static void test(LPSTR INDir);
 int LoadMultPropertyDB(LPSTR INDir)
 {
 	int rtn = 0;
-	BTVARDESC   BTVar[2];
 	HANDLE	hIndex = 0;
-	int year = 2004;
+	int year = 2016;
 	int offset;
 	short	st;
 	char inFile[MAX_PATH];
@@ -31,9 +30,10 @@ int LoadMultPropertyDB(LPSTR INDir)
 	int maxLineLen = SHRT_MAX - 2;
 	int mxlnlen = 0;
 
-	test(INDir);
-	while (year < 2016)
+	//test(INDir);
+	while (year < 2017)
 	{
+		BTVARDESC   BTVar[2];
 		BTVar[0].BT_VARTYP = BT_CHAR;
 		BTVar[0].BT_VARLEN = 17;
 		BTVar[0].BT_VAROFF = 0;
@@ -163,8 +163,10 @@ int CreateMultValueFile(LPSTR INDir)
 	int offset;
 	short	st;
 	char inFile[MAX_PATH];
+	char cvFile[MAX_PATH];
 	char indexFile[MAX_PATH];
-	int year = 2015;
+	char cvindexFile[MAX_PATH];
+	int year = 2016;
 	HANDLE hIndex;
 	char line[1024];
 	int maxLineLen = 1020;
@@ -183,6 +185,23 @@ int CreateMultValueFile(LPSTR INDir)
 	int totlnChangeValuesCompressed = 0;
 	int nRecs;
 	int iRec = 0;
+	HFILE fidChangeValues;
+	HANDLE hChangeValueIndex;
+	BOOL homestead, taxexempt;
+	typedef struct { int EMV_LAND, EMV_BLDG, EMV_TOTAL, TAX_CAPACITY, TOTAL_TAX, SPEC_ASSES;
+					}YEARLYVALUES;
+	typedef YEARLYVALUES *LPYEARLYVALUES;
+	LPYEARLYVALUES pYearly;
+	BTVARDESC   BTVar[2];
+	BTVar[0].BT_VARTYP = BT_CHAR;
+	BTVar[0].BT_VARLEN = 17;
+	BTVar[0].BT_VAROFF = 0;
+	sprintf(cvFile, "%s\\changeValues.bin", INDir);
+	fidChangeValues = GSSiOpenFile(cvFile, 0, OF_CREATE);
+	sprintf(cvindexFile, "%s\\changeValues.index", INDir);
+	BT_CREATE(cvindexFile, sizeof(offset), FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
+	hChangeValueIndex = BT_OPEN(cvindexFile, 0, BT_WRITE, 0);
+
 	for (int i = 0; i < NYEARS; i++)
 	{
 		pValues[i] = malloc(MAXLINELEN + 4);
@@ -204,7 +223,7 @@ int CreateMultValueFile(LPSTR INDir)
 			fgetstring(line, maxLineLen, fid);
 			FindAllRecords(pid);
 			//for (int ivar = 0; ivar < NUMVARS; ivar++)
-			for (int ivar = 32; ivar < 38; ivar++)
+			/*for (int ivar = 31; ivar < 39; ivar++)
 			{
 				GetVarValue(ivar, line, curValue);
 				for (int iyear = LASTYEAR; iyear>FIRSTYEAR; iyear--)
@@ -217,14 +236,47 @@ int CreateMultValueFile(LPSTR INDir)
 					}
 				}
 				sprintf(strchr(pChangeValues, 0), "%c", valuesTerminator);
+			}*/
+			lnChangeValues = 0;
+			pYearly = (LPYEARLYVALUES)pChangeValues;
+			for (int iyear = 0; iyear < NYEARS; iyear++)
+			{
+				GetVarValue(31, pValues[iyear], value);
+				homestead = atob(value);
+				GetVarValue(32, pValues[iyear], value);
+				pYearly->EMV_LAND = atoi(value);
+				GetVarValue(33, pValues[iyear], value);
+				pYearly->EMV_BLDG = atoi(value);
+				GetVarValue(34, pValues[iyear], value);
+				pYearly->EMV_TOTAL = atoi(value);
+				GetVarValue(35, pValues[iyear], value);
+				pYearly->TAX_CAPACITY = atoi(value);
+				GetVarValue(36, pValues[iyear], value);
+				pYearly->TOTAL_TAX = atoi(value);
+				GetVarValue(37, pValues[iyear], value);
+				pYearly->SPEC_ASSES = atoi(value);
+				GetVarValue(38, pValues[iyear], value);
+				taxexempt = atob(value);
+				pYearly->EMV_LAND++;
+				if (homestead) pYearly->EMV_LAND *= -1;
+				pYearly->EMV_BLDG++;
+				if (taxexempt) pYearly->EMV_BLDG *= -1;
+				pYearly++;
 			}
-			lnChangeValues = strlen(pChangeValues);
+			//lnChangeValues = strlen(pChangeValues);
+			lnChangeValues = NYEARS * sizeof(YEARLYVALUES);
+			offset = GSSillseek(fidChangeValues, 0, 1);
+			BT_PUT(hChangeValueIndex, pid, (LPSTR)&offset);
 			lnChangeValuesCompressed = CompressBinaryRecord(pChangeValues, pChangeValuesCompressed, lnChangeValues);
+			BigWrite(fidChangeValues, &lnChangeValuesCompressed, 4, -1);
+			BigWrite(fidChangeValues, pChangeValuesCompressed, lnChangeValuesCompressed, -1);
 			totlnChangeValues += lnChangeValues;
 			totlnChangeValuesCompressed += lnChangeValuesCompressed;
 		}
 	}
 	BT_CLOSE(hIndex);
+	BT_CLOSE(hChangeValueIndex);
+	GSSiClose(fidChangeValues);
 	DestroyStatusWindow(0);
 	GSSiClose(fid);
 	CloseYearFiles();
