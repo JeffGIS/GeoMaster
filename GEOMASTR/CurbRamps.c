@@ -424,11 +424,12 @@ signal : (int)s
 	[self close : opened];
 	return array;
 }*/
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showProgress)
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
 	int rc;
+	int nTot=0, nDone = 0;
 	LPSTR line = malloc(LINELEN);
 
 	rc = sqlite3_open(DataBase, &database);
@@ -443,6 +444,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 			sprintf(line, "DROP TABLE IF EXISTS SORTEDFILES;CREATE TABLE SORTEDFILES (TIME INT,FILEPATH CHAR(256));");
 			if (Execute(line))
 			{
+				fgetstring(file, 258, FidList);
 				while (fgetstring(file, 258, FidList))
 				{
 					HFILE fid = GSSiOpenFile(file, 0, OF_READ);
@@ -456,6 +458,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 							time = atoi(tloc + 6);
 							sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
 							Execute(line);
+							nTot++;
 						}
 						GSSiClose(fid);
 					}
@@ -465,16 +468,24 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 			GSSiClose(FidList);
 			sprintf(line, "SELECT FILEPATH FROM SORTEDFILES ORDER BY TIME ASC;");
 			sqlite3_stmt *statement = NULL;
-
+			if (showProgress)
+			{
+				CreateStatusWind(hWndMain, 1, "Loading Data");
+			}
 			if (sqlite3_prepare_v2(database,line, -1, &statement, 0) == SQLITE_OK)
 			{
 				while (sqlite3_step(statement) == SQLITE_ROW)
 				{
 					LPSTR filePath = (LPSTR) sqlite3_column_text(statement, 0);
 					BOOL st = UpdateFromFile(filePath,TRUE);
+					if (showProgress)
+						StatusWindowUpdate(0, 0, nTot, ++nDone);
+
 				}
 				sqlite3_finalize(statement);
 			}
+			if (showProgress)
+				DestroyStatusWindow(0);
 
 			free(file);
 		}
@@ -484,7 +495,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 	return rtn;
 }
 
-BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVCRISDataBase)
+BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -515,7 +526,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 							if (pRamp->rampExists)
 							{
 								LPSTR detailCode;
-								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
 								LPSTR rampText = rampToText(mpInt.intID, pRamp);
 								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
@@ -539,8 +550,51 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 	}
 	return rtn;
 }
+BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem)
+{
+	BOOL rtn = FALSE;
+	int rc;
+	ToleranceValues tolerances;
+	setStandardToleranceValues(&tolerances);
 
-BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int opt, LPSTR OutLoc)
+	rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (FidOut != HFILE_ERROR)
+		{
+			LPSTR rampHeader = (LPSTR)rampToTextHeader();
+			fputstring(rampHeader, FidOut);
+			LPSTR line = malloc(4096);
+			MPINTERSECTION mpInt;
+			if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+			{
+				RampStruct * pRamp = &mpInt.ramps[rampNum];
+				if (pRamp->rampExists)
+				{
+					LPSTR detailCode;
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
+					LPSTR rampText = rampToText(mpInt.intID, pRamp);
+					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+					fputstring(line, FidOut);
+					free(ccode);
+					free(detailCode);
+					free(rampText);
+				}
+			}
+			else
+				ii = 1;
+			free(line);
+			GSSiClose(FidOut);
+			rtn = TRUE;
+		}
+		rc = sqlite3_close(database);
+
+	}
+	return rtn;
+}
+
+BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc)
 {
 	BOOL rtn = FALSE;
 	*OutLoc = 0;
@@ -560,7 +614,7 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int opt
 				if (pRamp->rampExists)
 				{
 					LPSTR detailCode;
-					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
 					strcpy(OutLoc, ccode);
 					free(ccode);
 					free(detailCode);

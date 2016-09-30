@@ -6079,7 +6079,7 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
     LPOPENSQLDATA   SQLPtrTmp;
 	LPGWDHEADER lpGWDHeadTmp;
 	short	WordMax = 8; 
-	char	Field[256],Word[256];  
+	char	Field[512],Word[256];  
 	LPWORDINDEX	pRec, pRecTmp;
 	UINT	len;     
 	char	ToFileTmp[256];
@@ -6120,42 +6120,49 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
     	LPOPENSQLDATA   SQLPtr = (LPOPENSQLDATA) GlobalLock (hDB);
 	    LPOPENFILEDATA  FilePtr = (LPOPENFILEDATA) GlobalLock (SQLPtr->OFHandle);
 	    long	FileOffset=SQLPtr->Offset;
+		char Field2[512];
     	
     	GlobalUnlock (SQLPtr->OFHandle);
     	GlobalUnlock (hDB);
-		strcpy (Field,FromField);
-		ExpandText (Field); 
+		strcpy (Field2,FromField);
+		ExpandText (Field2); 
+		strncpy(Field, Field2, sizeof(Field));
 		nParts = GetNameParts (Field,pWord,WordLen,32);
 		for (iword=0;iword < nParts;iword++)
 		{   
 			if (WordLen[iword] > 1)
 			{
-				_fstrncpy (pRecTmp->Word,pWord[iword],WordMax);  
-				pRecTmp->Seq = 0;
-NextSeq:		pRecTmp->Seq--;  
-				if (-pRecTmp->Seq <= MAXWISEQ)
+				if (!isdigit((unsigned char)*pWord[iword]))
 				{
-					GWDFormKey(lpGWDHeadTmp,0,TRUE,0,0);
-					if (!BT_FIND (lpGWDHeadTmp->BTHandle[0],lpGWDHeadTmp->pKeys[0],BT_FIRST,BT_EQ, (LPSTR)&Offset))
+					_fstrncpy(pRecTmp->Word, pWord[iword], WordMax);
+					pRecTmp->Seq = 0;
+				NextSeq:		pRecTmp->Seq--;
+					if (-pRecTmp->Seq <= MAXWISEQ)
 					{
-						len=FillGWDData (lpGWDHeadTmp,Offset);
-						if (pRecTmp->nOffsets == MAXWIOFFSETS)
-			        		goto NextSeq;
-						pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
-						if (!FileOffset)
-							ii=1;
-						GWDReplaceRecord (lpGWDHeadTmp,0,0,Offset);
+						GWDFormKey(lpGWDHeadTmp, 0, TRUE, 0, 0);
+						if (!BT_FIND(lpGWDHeadTmp->BTHandle[0], lpGWDHeadTmp->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset))
+						{
+							len = FillGWDData(lpGWDHeadTmp, Offset);
+							if (pRecTmp->nOffsets == MAXWIOFFSETS)
+								goto NextSeq;
+							pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
+							if (!FileOffset)
+								ii = 1;
+							GWDReplaceRecord(lpGWDHeadTmp, 0, 0, Offset);
+						}
+						else
+						{
+							_fmemset(pRecTmp->Offsets, 0, sizeof(pRecTmp->Offsets));
+							pRecTmp->nOffsets = 0;
+							pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
+							if (!FileOffset)
+								ii = 1;
+							GWDAddRecord(lpGWDHeadTmp, 0, 0);
+						}
 					}
-					else
-					{   
-						_fmemset (pRecTmp->Offsets,0,sizeof(pRecTmp->Offsets)); 
-						pRecTmp->nOffsets = 0;
-						pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
-						if (!FileOffset)
-							ii=1;
-						GWDAddRecord (lpGWDHeadTmp,0,0);
-					} 
 				}
+				else
+					ii = 1;
 			}
 		}
 Next:
