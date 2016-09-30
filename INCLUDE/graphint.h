@@ -2412,6 +2412,7 @@ BOOL GetFromCodeText(int from, LPSTR text);
 int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir);
 int CreateMultValueFile(LPSTR INDir);
+BOOL AssignMultValues(LPSTR INDir,LPSTR UpdateFile);
 
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);

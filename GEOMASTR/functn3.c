@@ -6663,7 +6663,12 @@ HaveVP:;
 			}
 			else if (!stricmp(Arg[1], "CREATEMULTVALUES"))
 			{
-				itoa(CreateMultValueFile(Arg[2]),OutLoc,10);
+				itoa(CreateMultValueFile(Arg[2]), OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "ASSIGNMULTVALUES"))//$NVMETRO(ASSIGNMULTVALUES, [MDRIVE]\parcelfiles\textfiles, [%DL]attribut\MetroGISPropinfo.gmd)
+			{
+				rtn = AssignMultValues(Arg[2], Arg[3]);
 				goto Rtnl;
 			}
 

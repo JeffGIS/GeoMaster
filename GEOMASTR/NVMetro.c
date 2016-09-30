@@ -237,3 +237,33 @@ int CreateMultValueFile(LPSTR INDir)
 
 	return totlnChangeValuesCompressed;
 }
+BOOL AssignMultValues(LPSTR indexFile, LPSTR dataFile)
+{
+	BOOL rtn = FALSE;
+	HANDLE hIndex;
+	HFILE  fidBin;
+	char	pid[32];
+	int nRecs;
+	int iRec = 0;
+	int pos = BT_FIRST;
+	int offset;
+	char KeyString[256], UpdateString[256];
+
+	hIndex = BT_OPEN(indexFile, 0, BT_READ, 0);
+	if (!hIndex)
+		return FALSE;
+
+	CreateStatusWind(hWndMain, 1, 0);
+	nRecs = BT_NUM_IN_INDEX(hIndex);
+	while (StatusWindowUpdate(NULL, NULL, nRecs, iRec++) && !BT_FIND(hIndex, pid, pos, BT_ANY, (LPSTR)&offset))
+	{
+		pos = BT_NEXT;
+		sprintf(KeyString, "PIN=%s", pid);
+		sprintf(UpdateString, "MULTIYEAROFFSET=%i",offset);
+		rtn = UpdateGMDFile(dataFile, KeyString, UpdateString, ';', 1, FALSE);
+	}
+	BT_CLOSE(hIndex);
+	DestroyStatusWindow(0);
+
+	return rtn;
+}
