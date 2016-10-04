@@ -80,7 +80,7 @@
 #define 	MAX_CFG_SIZE		1024L*1024*5L
 
 #define		MAXWIOFFSETS	100  
-#define		MAXWISEQ		2000
+#define		MAXWISEQ		4000
 
 #define		MAX_MACRO_ARGS	16
 #define		MAXARGLENGTH	SHRT_MAX

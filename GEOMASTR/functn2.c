@@ -5241,14 +5241,23 @@ GSSiExitProg (1350);
         }  
         
 	    case 1506: //$CREATEWORDINDEX(FromFile,FromField,ToFile)
+			//$CREATEWORDINDEX(REMOVEDUPS,FromFile)
         {
-            DLGPROC	lpfnADDLOC_CREATEMsgProc; 
               
-			nArgs = GetFunArgs(Args, Arg, -3, &hMem, pBrkPt, bpOffset, bpLen);
-			if (nArgs < 3)
-				goto RtnFalse; 
-			if (CreateWordIndex (Arg[1],Arg[2],Arg[3]))
-				goto RtnTrue;
+			nArgs = GetFunArgs(Args, Arg, -4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 2)
+				goto RtnFalse;
+			ExpandText(Arg[1]);
+			ExpandText(Arg[4]);
+			if (!_fstricmp(Arg[1], "REMOVEDUPS"))
+			{
+				ExpandText(Arg[2]);
+				if (WordIndexRemoveDups(Arg[2]))
+					goto RtnTrue;
+			}
+			else 
+				if (CreateWordIndex(Arg[1], Arg[2], Arg[3], atob(Arg[4])))
+					goto RtnTrue;
 			goto RtnFalse;
         }  
         
