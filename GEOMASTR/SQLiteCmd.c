@@ -237,7 +237,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				//REPLAC(cmd, "/", "//", MAXSTR-2)
 				if (convertInsertInto)
 					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
-				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc, &error);
+				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, &error);
 				sqlite3_free(error);
 				if (err)
 				{

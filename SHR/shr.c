@@ -79,14 +79,34 @@ BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 	{
 		char mess[4096];
 		if (*method)
-			sprintf(mess,"SQLite Error %i = %i:%s\nin:%s",
-				sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database),method);
+			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
 		else
 			sprintf(mess, "SQLite Error %i = %i:%s",
-				sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
 
 
-		GSSiMessageBox (3, mess, "SQLite Error", MB_OK,0);
+		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+	}
+
+	return sqlReturn;
+}
+
+BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** error)
+{
+	if (sqlReturn != SQLITE_OK)
+	{
+		char mess[4096*4];
+		if (method && *method)
+			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
+		else
+			sprintf(mess, "SQLite Error %i = %i:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
+
+		if (cmd && *cmd)
+			sprintf(strchr(mess, 0), "\n\n%s", cmd);
+		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
 	}
 
 	return sqlReturn;

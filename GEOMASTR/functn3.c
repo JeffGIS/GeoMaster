@@ -4462,7 +4462,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))
 			{
-				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3],atob(Arg[4]));
+				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3],atob(Arg[4]),atoi(Arg[5]));
 			}
 			else if (!stricmp(Arg[1], "COMPCODE"))
 			{

@@ -210,7 +210,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow (0);
 			GSSiClose (Fid);
-			GSSiRename(DownloadFile, lpszNewFile);
+			GSSiRename(DownloadFile,(LPSTR) lpszNewFile);
 			GSSiGlobUlFree (&hBuffer);
 			InternetCloseHandle (handle);
 		}

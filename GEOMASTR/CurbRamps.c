@@ -11,7 +11,7 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt)
 void convertVersion(LPSTR str, int fromVer, int toVer);
 void convertVersion_1_to_2(LPSTR str);
 static BOOL Execute(LPSTR cmd);
-BOOL UpdateFromFile(LPSTR file, BOOL convertInsert);
+BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,int dbType);
 
 
 /*int getOffsetCoord:(MPIntersection *)mpint
@@ -424,7 +424,7 @@ signal : (int)s
 	[self close : opened];
 	return array;
 }*/
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showProgress)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showProgress,int dbType)
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
@@ -477,7 +477,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 				while (sqlite3_step(statement) == SQLITE_ROW)
 				{
 					LPSTR filePath = (LPSTR) sqlite3_column_text(statement, 0);
-					BOOL st = UpdateFromFile(filePath,TRUE);
+					BOOL st = UpdateFromFile(filePath,TRUE,dbType);
 					if (showProgress)
 						StatusWindowUpdate(0, 0, nTot, ++nDone);
 
@@ -851,7 +851,7 @@ static BOOL Execute(LPSTR cmd)
 	return rtn;
 }
 
-BOOL UpdateFromFile(LPSTR file,BOOL convertInsert)
+BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType)
 {
 	BOOL rtn = TRUE;
 	int line = 0;
@@ -869,7 +869,8 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert)
 			fromVer = atoi(vloc + 6);
 		while (rtn && fgetstring(str, maxLineLen, fid))
 		{
-			convertVersion(str, fromVer, toVer);
+			if (!dbType)
+				convertVersion(str, fromVer, toVer);
 			if (convertInsert)
 				REPLAC(str, "INSERT INTO", "INSERT OR REPLACE INTO", maxLineLen + 4090);
 			rtn = Execute(str);
