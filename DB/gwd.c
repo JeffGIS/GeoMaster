@@ -3206,7 +3206,7 @@ FoundFile:
 
 			for (idx=0;idx<lpGWDHead->NumIndex;idx++)
 			{
-				if (lpGWDHead->SpatialIndex && idx != lpGWDHead->SpatialIndex)
+				if (!lpGWDHead->SpatialIndex || idx != lpGWDHead->SpatialIndex)
 				for (ifld=0;ifld<lpGWDHead->NumIndexFields[idx];ifld++)
 				{
 					LPGWFLDINFO pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[idx][ifld];

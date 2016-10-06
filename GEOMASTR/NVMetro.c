@@ -185,6 +185,7 @@ int CreateMultValueFile(LPSTR INDir)
 	int totlnChangeValuesCompressed = 0;
 	int nRecs;
 	int iRec = 0;
+	int ival;
 	HFILE fidChangeValues;
 	HANDLE hChangeValueIndex;
 	BOOL homestead, taxexempt;
@@ -198,6 +199,12 @@ int CreateMultValueFile(LPSTR INDir)
 	BTVar[0].BT_VAROFF = 0;
 	sprintf(cvFile, "%s\\changeValues.bin", INDir);
 	fidChangeValues = GSSiOpenFile(cvFile, 0, OF_CREATE);
+	ival = NYEARS;
+	BigWrite(fidChangeValues, &ival, 4, -1);
+	ival = FIRSTYEAR;
+	BigWrite(fidChangeValues, &ival, 4, -1);
+	ival = LASTYEAR;
+	BigWrite(fidChangeValues, &ival, 4, -1);
 	sprintf(cvindexFile, "%s\\changeValues.index", INDir);
 	BT_CREATE(cvindexFile, sizeof(offset), FALSE, 1, 1, (LPBTVARDESC)BTVar, FALSE, 0, 0, FALSE);
 	hChangeValueIndex = BT_OPEN(cvindexFile, 0, BT_WRITE, 0);
