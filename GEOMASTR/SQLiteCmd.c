@@ -92,9 +92,10 @@ static LPSTR removePCT(LPSTR name)
 	*pOutChar = 0;
 	return newName;
 }
-static void ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
+static int ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 {
 	int i;
+	int ln = 0;
 
 	for (i = 0; i < 100; i++)
 	{
@@ -102,8 +103,10 @@ static void ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 		{
 			FillGWDData(lpGWDHead, pOffsets[i]);
 			pOffsets[i] = *(LPINT)&lpGWDHead->GWDData;
+			ln = max(ln, (i + 1)*sizeof(int));
 		}
 	}
+	return ln;
 }
 
 LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName)
@@ -204,13 +207,24 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			rtn = 1;
 		}
 	}
-	else if (!stricmp(ARG[1], "CMDFROMFILE"))
+	else if (!stricmp(ARG[1], "VACUUM"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		int err = SQLOK(sqlite3_exec(db, "VACUUM", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = 1;
+		}
+	}
+	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
 	{
 #define MAXSTR 1020 * 256
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
 		BOOL convertInsertInto = atob(ARG[5]);
+		BOOL skipErrors = atob(ARG[6]);
 		int totLen;
 		int line = 1;
 
@@ -235,11 +249,12 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				sprintf(errLoc, "%s line %i", ARG[3], line++);
 				//REPLAC(cmd, "/", "//", MAXSTR-2)
+				//REPLAC(cmd, "'", "''", MAXSTR - 2);
 				if (convertInsertInto)
 					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
 				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, &error);
 				sqlite3_free(error);
-				if (err)
+				if (err && !skipErrors)
 				{
 					rtn = 0;
 					break;
@@ -851,8 +866,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									LPBYTE pByte = (LPBYTE)val;
 									LPBYTE pBlob;
 
-									ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
-									pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
+									int ln = ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
+									pBlob = BytesToBlob(pByte, ln);
 
 									sprintf(strchr(pCmd, 0), "%sX'%s'", delim, pBlob);
 									free(pBlob);
@@ -1228,8 +1243,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 										LPBYTE pByte = (LPBYTE)val;
 										LPBYTE pBlob;
 										
-										ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
-										pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
+										int ln = ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
+										pBlob = BytesToBlob(pByte, ln);
 
 										sprintf(strchr(pCmd, 0), "%sX'%s'", delim,pBlob);
 										free(pBlob);
@@ -1237,6 +1252,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									else
 									{
 										REPLAC(val, "'", "''", 4096);
+										REPLAC(val, "\r", "", 4096);
+										REPLAC(val, "\n", "", 4096);
 										Truncate(val);
 										sprintf(strchr(pCmd, 0), "%s'%s'", delim, val);
 									}
@@ -2938,7 +2955,9 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, i);
 				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, i);
 				int nc = 0;
-				LPSTR pPar = strchr(decl, '(');
+				LPSTR pPar = 0;
+				if (itype != SQLITE_NULL)
+					pPar = strchr(decl, '(');
 				if (pPar)
 				{
 					*pPar++ = 0;
@@ -2947,28 +2966,31 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				strncpy(pDB->FldInfo[i].name, pName, sizeof(pDB->FldInfo[i].name));
 				pDB->FldInfo[i].index = i;
 
-				if (!strnicmp(decl, "INT", 3))
+				if (itype != SQLITE_NULL)
 				{
-					pDB->FldInfo[i].type = BT_INTEGER;
-					pDB->FldInfo[i].length = 4;
+					if (!strnicmp(decl, "INT", 3))
+					{
+						pDB->FldInfo[i].type = BT_INTEGER;
+						pDB->FldInfo[i].length = 4;
+					}
+					else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT"))
+					{
+						pDB->FldInfo[i].type = BT_REAL;
+						pDB->FldInfo[i].length = 8;
+					}
+					else if (!stricmp(decl, "BLOB"))
+					{
+						pDB->FldInfo[i].type = SQL_LONGVARBINARY;
+						pDB->FldInfo[i].length = nc;
+					}
+					else if (!stricmp(decl, "CHAR"))
+					{
+						pDB->FldInfo[i].type = BT_CHAR;
+						pDB->FldInfo[i].length = nc;
+					}
+					else
+						MessageBox(0, decl, "Invalid type", MB_OK);
 				}
-				else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT"))
-				{
-					pDB->FldInfo[i].type = BT_REAL;
-					pDB->FldInfo[i].length = 8;
-				}
-				else if (!stricmp(decl, "BLOB"))
-				{
-					pDB->FldInfo[i].type = SQL_LONGVARBINARY;
-					pDB->FldInfo[i].length = nc;
-				}
-				else if (!stricmp(decl, "CHAR"))
-				{
-					pDB->FldInfo[i].type = BT_CHAR;
-					pDB->FldInfo[i].length = nc;
-				}
-				else
-					MessageBox(0, decl, "Invalid type",MB_OK);
 			}
 
 		}
