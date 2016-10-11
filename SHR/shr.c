@@ -96,7 +96,7 @@ BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** er
 {
 	if (sqlReturn != SQLITE_OK)
 	{
-		char mess[4096*4];
+		char * mess = malloc(USHRT_MAX * 4);
 		if (method && *method)
 			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
 			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
@@ -107,6 +107,7 @@ BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** er
 		if (cmd && *cmd)
 			sprintf(strchr(mess, 0), "\n\n%s", cmd);
 		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+		free(mess);
 	}
 
 	return sqlReturn;

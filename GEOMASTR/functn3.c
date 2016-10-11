@@ -1555,11 +1555,12 @@ GotCloseFilehSQL:
 		{	   
 			HANDLE	hHlt = GSSiGlobAlloc ( 852,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 			LPHIGHLIGHTDATA	pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hHlt);
+			long	StartRef;
 
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!_fstrcmp(Arg[1], "ALL"))
 			{   
-				long	StartRef=LONG_MIN;
+				StartRef=LONG_MIN;
 				
 				while (!BT_FIND (hHighlight,(LPSTR)&StartRef,BT_FIRST,BT_GT,(LPSTR)pHighlightData))
 				{
@@ -1578,7 +1579,7 @@ GotCloseFilehSQL:
 				ExpandText (Arg[2]); 
 				if ((lpColon = _fstrchr (Arg[2],':'))) 
 				{
-					long	StartRef=LONG_MIN;
+					StartRef=LONG_MIN;
 		
 					*lpColon++=0;
 				
@@ -1602,9 +1603,13 @@ GotCloseFilehSQL:
 				else 
 				{
 					Refno = atol (Arg[2]); 
-					if (!BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_EQ,(LPSTR)pHighlightData))
-						goto HLTRemove;
-				} 
+					if (!BT_FIND(hHighlight, (LPSTR)&Refno, BT_FIRST, BT_EQ, (LPSTR)pHighlightData))
+					{
+						RemoveFromHighlightList(Refno, 1);
+						GSSiGlobUlFree(&hHlt);
+						goto RtnTrue;
+					}
+				}
 			}
 	    	GSSiGlobUlFree (&hHlt);
 			goto RtnFalse; 

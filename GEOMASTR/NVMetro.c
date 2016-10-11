@@ -14,6 +14,11 @@ static HANDLE hIndexYear[NYEARS] = { 0 };
 static HFILE fidYear[NYEARS];
 
 static void test(LPSTR INDir);
+static void test2(LPSTR INDir);
+typedef struct {
+	int EMV_LAND, EMV_BLDG, EMV_TOTAL, TAX_CAPACITY, TOTAL_TAX, SPEC_ASSES, SALE_DATE, SALE_VALUE;
+}YEARLYVALUES;
+typedef YEARLYVALUES *LPYEARLYVALUES;
 
 int LoadMultPropertyDB(LPSTR INDir)
 {
@@ -30,7 +35,7 @@ int LoadMultPropertyDB(LPSTR INDir)
 	int maxLineLen = SHRT_MAX - 2;
 	int mxlnlen = 0;
 
-	//test(INDir);
+	test2(INDir);
 	while (year < 2017)
 	{
 		BTVARDESC   BTVar[2];
@@ -90,10 +95,41 @@ static void test(LPSTR INDir)
 	nRecs = GSSifilelength(fid);
 	sprintf(indexFile, "%s\\%i.index", INDir, year);
 	hIndex = BT_OPEN(indexFile, 0, BT_READ, 0);
-	st = BT_FIND(hIndex, pid, BT_FIRST, BT_EQ,(LPSTR) &offset);
+	st = BT_FIND(hIndex, pid, BT_FIRST, BT_EQ, (LPSTR)&offset);
 
 	GSSillseek(fid, offset, 0);
 	fgetstring(line, maxLineLen, fid);
+	BT_CLOSE(hIndex);
+	GSSiClose(fid);
+	return;
+
+}
+static void test2(LPSTR INDir)
+{
+	char pid[18] = "037-070160050012";
+	int year = 2004;
+	int offset;
+	short	st;
+	char inFile[MAX_PATH];
+	char indexFile[MAX_PATH];
+	int nRecs;
+	HFILE fid;
+	HANDLE hIndex;
+	char line[USHRT_MAX];
+	int maxLineLen = USHRT_MAX - 2;
+	YEARLYVALUES yearly;
+
+	sprintf(inFile, "%s\\changeValues.bin", INDir);
+	fid = GSSiOpenFile(inFile, 0, OF_READ);
+	nRecs = GSSifilelength(fid);
+	sprintf(indexFile, "%s\\changeValues.index", INDir);
+	hIndex = BT_OPEN(indexFile, 0, BT_READ, 0);
+	st = BT_FIND(hIndex, pid, BT_FIRST, BT_EQ, (LPSTR)&offset);
+
+	GSSillseek(fid, offset, 0);
+	BigRead(fid, &yearly, sizeof(YEARLYVALUES));
+	BigRead(fid, &yearly, sizeof(YEARLYVALUES));
+	BigRead(fid, &yearly, sizeof(YEARLYVALUES));
 	BT_CLOSE(hIndex);
 	GSSiClose(fid);
 	return;
@@ -176,6 +212,7 @@ int CreateMultValueFile(LPSTR INDir)
 	char curValue[1024];
 	char value[1024];
 	LPSTR pChangeValues = malloc(USHRT_MAX);
+	LPSTR pChangeValues2 = malloc(USHRT_MAX);
 	LPSTR pChangeValuesCompressed = malloc(USHRT_MAX);
 	char valueTerminator = 1;
 	char valuesTerminator = 2;
@@ -189,10 +226,8 @@ int CreateMultValueFile(LPSTR INDir)
 	HFILE fidChangeValues;
 	HANDLE hChangeValueIndex;
 	BOOL homestead, taxexempt;
-	typedef struct { int EMV_LAND, EMV_BLDG, EMV_TOTAL, TAX_CAPACITY, TOTAL_TAX, SPEC_ASSES;
-					}YEARLYVALUES;
-	typedef YEARLYVALUES *LPYEARLYVALUES;
 	LPYEARLYVALUES pYearly;
+	LPINT pIntValues;
 	BTVARDESC   BTVar[2];
 	BTVar[0].BT_VARTYP = BT_CHAR;
 	BTVar[0].BT_VARLEN = 17;
@@ -269,12 +304,25 @@ int CreateMultValueFile(LPSTR INDir)
 				pYearly->EMV_BLDG++;
 				if (taxexempt) pYearly->EMV_BLDG *= -1;
 				pYearly++;
+				GetVarValue(53, pValues[iyear], value);
+				pYearly->SALE_DATE = atoi(value);
+				GetVarValue(54, pValues[iyear], value);
+				pYearly->SALE_VALUE = atoi(value);
 			}
 			//lnChangeValues = strlen(pChangeValues);
 			lnChangeValues = NYEARS * sizeof(YEARLYVALUES);
 			offset = GSSillseek(fidChangeValues, 0, 1);
 			BT_PUT(hChangeValueIndex, pid, (LPSTR)&offset);
-			lnChangeValuesCompressed = CompressBinaryRecord(pChangeValues, pChangeValuesCompressed, lnChangeValues);
+			LPINT pIntValuesYearly = (LPINT)pChangeValues;
+			pIntValues = (LPINT)pChangeValues2;
+			for (int i = 0; i < 10; i++, pIntValuesYearly++)
+			{
+				for (int iyear = 0; iyear < NYEARS; iyear++)
+				{
+					*pIntValues++ = pIntValuesYearly[iyear*8];
+				}
+			}
+			lnChangeValuesCompressed = CompressBinaryRecord(pChangeValues2, pChangeValuesCompressed, lnChangeValues);
 			BigWrite(fidChangeValues, &lnChangeValuesCompressed, 4, -1);
 			BigWrite(fidChangeValues, pChangeValuesCompressed, lnChangeValuesCompressed, -1);
 			totlnChangeValues += lnChangeValues;
@@ -288,6 +336,7 @@ int CreateMultValueFile(LPSTR INDir)
 	GSSiClose(fid);
 	CloseYearFiles();
 	free(pChangeValues);
+	free(pChangeValues2);
 	free(pChangeValuesCompressed);
 	for (int i = 0; i < NYEARS; i++)
 	{

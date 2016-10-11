@@ -6333,6 +6333,7 @@ Next:
 			        len=FillGWDData (lpGWDHeadTmp,Offset); 
 			        nLoaded++;
 			    }
+				MessageBox(0, lpGWDHeadTmp->pKeys[0], "Too many matches", MB_ICONEXCLAMATION);
 	        }
 	        else
 	        {

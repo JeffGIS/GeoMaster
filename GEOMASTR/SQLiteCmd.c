@@ -219,7 +219,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	}
 	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
 	{
-#define MAXSTR 1020 * 256
+#define MAXSTR 1024 * 1024 * 4
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
@@ -1316,6 +1316,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			BOOL skipQuadIndex = atob(ARG[8]);
 			BOOL skipConvert = atob(ARG[9]);
 			double coordFactor = COORDINATE_FACTOR;
+			int maxLineLen = 0;
 
 			if (skipConvert)
 				coordFactor /= 1000;
@@ -1362,30 +1363,30 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						sprintf(strchr(addFields, 0), ",%s", ARG[i]);
 					}
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s;", ARG[4]);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 
 					if (!skipQuadIndex)
 					{
 						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
-						fputstring(pCmd, Fid);
+						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 					if (*ARG[6])
 						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
 					else
 						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if ((pSpace = strchr(ARG[5], ' ')))
 						*pSpace = 0;
 					sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC);", ARG[4],ARG[5], ARG[4], ARG[5]);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if (*ARG[6])
 					{
 						if ((pSpace = strchr(ARG[6], ' ')))
 							*pSpace = 0;
 						sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC)", ARG[4], ARG[6], ARG[4], ARG[6]);
-						fputstring(pCmd, Fid);
+						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 				}
 
@@ -1444,7 +1445,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								ConvertBounds(pBounds, 1, 2);
 							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 							if (!skipQuadIndex)
-								fputstring(pCmd, Fid);
+								fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							if (nLoops > 1)
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
@@ -1531,7 +1532,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
 							}
-							fputstring(pCmd, Fid);
+							fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							free(blobPoints);
 							GSSiGlobUlFree(&hPoints);
 							GSSiGlobUlFree(&hPoly);
@@ -1545,6 +1546,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					DestroySavedPolys();
 				}
 				DestroyStatusWindow(0);
+				sprintf(pCmd, "/* maxLineLen=%i */", maxLineLen);
+				fputstring(pCmd, Fid);
 				GSSiClose(Fid);
 				GSSiGlobUlFree(&hCmd);
 			}
