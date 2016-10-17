@@ -303,11 +303,11 @@ int CreateMultValueFile(LPSTR INDir)
 				if (homestead) pYearly->EMV_LAND *= -1;
 				pYearly->EMV_BLDG++;
 				if (taxexempt) pYearly->EMV_BLDG *= -1;
-				pYearly++;
 				GetVarValue(53, pValues[iyear], value);
 				pYearly->SALE_DATE = atoi(value);
 				GetVarValue(54, pValues[iyear], value);
 				pYearly->SALE_VALUE = atoi(value);
+				pYearly++;
 			}
 			//lnChangeValues = strlen(pChangeValues);
 			lnChangeValues = NYEARS * sizeof(YEARLYVALUES);
@@ -315,7 +315,7 @@ int CreateMultValueFile(LPSTR INDir)
 			BT_PUT(hChangeValueIndex, pid, (LPSTR)&offset);
 			LPINT pIntValuesYearly = (LPINT)pChangeValues;
 			pIntValues = (LPINT)pChangeValues2;
-			for (int i = 0; i < 10; i++, pIntValuesYearly++)
+			for (int i = 0; i < 8; i++, pIntValuesYearly++)
 			{
 				for (int iyear = 0; iyear < NYEARS; iyear++)
 				{

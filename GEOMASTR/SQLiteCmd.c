@@ -2998,7 +2998,8 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 
 		}
 		sqlite3_finalize(pDB->statement);
-		pWhere = malloc(4096);
+		pDB->statement = NULL;
+/*		pWhere = malloc(4096);
 		strcpy(pWhere, pDB->Where);
 		ExpandText(pWhere);
 		if (*pWhere)
@@ -3009,7 +3010,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, pDB->Query, 0))
 		{
 			GSSiGlobUlFree(&hDB);
-		}
+		}*/
 
 	}
 	if (hDB)

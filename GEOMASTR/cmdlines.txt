@@ -1,3 +1,4 @@
+configs\loadprod.gmc /F [%USERLEV]=2; [%WT]='Create Multiple parcel values for size test' /WD K:\GMMobile\MetroUTM
 configs\2016_1.gmc /F [%USERLEV]=2; /WD K:\GMMobile\MetroUTM [%WT]='Create Multiple parcel values for size test'
 configs\brooklynpark2.GMC /F [%USERLEV]=2; /WD c:\NVCRIS\gmavl
 sewer.GMC /F [%USERLEV]=2; /WD e:\gm2000
@@ -128,6 +129,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 

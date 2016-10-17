@@ -1891,26 +1891,33 @@ SetVis:
 			ltoa (nlong,OutLoc,10);
 			goto Rtnl;  
 			
-		case 335:  //$INC(returns value + 1) 
+		case 335:  //$INC(returns value + 1 (or arg2)) 
 		{
 			static	long	NextNum=1;
-			
+			int inc = 1;
+
+			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs == 2)
+			{
+				ExpandText(Arg[2]);
+				inc = atoi(Arg[2]);
+			}
 			if (*Args == '[')
 			{
-				nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+				ExpandText(Arg[1]);
 				if (nArgs)
-					nlong = IDNINT(atof (Arg[1]))+1; 
+					nlong = IDNINT(atof (Arg[1]))+inc; 
 			}
-			else if (!*Args)
+			else if (!nArgs)
 				nlong = NextNum++;
 			else
 			{
 				char	glob[80];
 
-				sprintf (glob,"[%s]",Args);
+				sprintf (glob,"[%s]",Arg[1]);
 				nlong = GetGlobalLVal (glob);
-				nlong++;
-				SetGlobalValueLong (Args, nlong);
+				nlong += inc;
+				SetGlobalValueLong(Arg[1], nlong);
 			}
 			ltoa (nlong,OutLoc,10);
 			goto Rtnl;  
