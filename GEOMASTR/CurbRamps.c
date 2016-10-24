@@ -495,7 +495,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 	return rtn;
 }
 
-BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem)
+BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -511,7 +511,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
 			if (FidOut != HFILE_ERROR)
 			{
-				LPSTR rampHeader = (LPSTR)rampToTextHeader();
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
 				while (fgetstring(line, sizeof(line)-2, FidList))
@@ -526,7 +526,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 							if (pRamp->rampExists)
 							{
 								LPSTR detailCode;
-								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
+								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
 								LPSTR rampText = rampToText(mpInt.intID, pRamp);
 								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
@@ -550,7 +550,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 	}
 	return rtn;
 }
-BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem)
+BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -563,11 +563,21 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 	rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
-		HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		HFILE FidOut;
+		if (headerType < 0)
+		{
+			FidOut = GSSiOpenFile(OutFile, 0, OF_READWRITE);
+			GSSillseek(FidOut, 0, 2);
+		}
+		else
+			FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
 		if (FidOut != HFILE_ERROR)
 		{
-			LPSTR rampHeader = (LPSTR)rampToTextHeader();
-			fputstring(rampHeader, FidOut);
+			if (headerType >= 0)
+			{
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				fputstring(rampHeader, FidOut);
+			}
 			LPSTR line = malloc(4096);
 			MPINTERSECTION mpInt;
 			if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
@@ -576,7 +586,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 				if (pRamp->rampExists)
 				{
 					LPSTR detailCode;
-					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances,codeSystem);
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
 					LPSTR rampText = rampToText(mpInt.intID, pRamp);
 					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 					fputstring(line, FidOut);
@@ -584,6 +594,8 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 					free(detailCode);
 					free(rampText);
 				}
+				else
+					ii = 1;
 			}
 			else
 				ii = 1;

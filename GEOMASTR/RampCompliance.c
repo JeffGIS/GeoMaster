@@ -664,24 +664,49 @@ void setStandardToleranceValues(ToleranceValues *tolerances)
     return;
 }
 
-static char *textures[] = {"None", "SmoothedConcrete", "BrushedConcrete", "TintedConcrete", "TruncatedStoneDomes", "TruncatedStampedConrete", "CastironTruncatedDomes", "ExposedAggregate", "CutStone", "None", "Other"};
+static char *textures[] = {"None", "SmoothedConcrete", "BrushedConcrete", "TintedConcrete", "TruncatedStoneDomes", "TruncatedStampedConcrete", "CastironTruncatedDomes", "ExposedAggregate", "CutStone", "None", "Other"};
 
 static char *obstructions[] = {"None", "Hydrant", "Manhole", "Polebox", "Pole", "StreetManhole", "Other", "None", "None", "None", "None", "MasterNone"};
 
 static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk", "OneWayDirCurbGutter", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk"};
 
-
-char *rampToText(int intNum,RampStruct *ramp)
+int NVCTextureToCode(LPSTR texture)
+{
+	if (!strlen(texture))
+		return 0;
+	for (int i = 0; i < sizeof (textures) / 4; i++)
+	{
+		if (!stricmp(texture, textures[i]))
+			return i;
+	}
+	if (!stricmp(texture, "SmoothConcrete"))
+		return 1;
+	return 0;
+}
+int NVCObstructionToCode(LPSTR obstruction)
+{
+	if (!strlen(obstruction))
+		return 0;
+	for (int i = 0; i < sizeof (obstructions)/4; i++)
+	{
+		if (!stricmp(obstruction, obstructions[i]))
+			return i;
+	}
+	return 0;
+}
+char *rampToText(int intNum, RampStruct *ramp)
 {
     char *rampText = (char *)calloc(4480, sizeof(char));
-    
-    sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t%i\t%.8f\t%.8f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t'%s'\t%.2f\t%.2f\t%.2f",
+	char timeCompleteC[32];
+	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
+	ExpandText(timeCompleteC);
+    sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t'%s'\t%.8f\t%.8f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t'%s'\t%.2f\t%.2f\t%.2f",
             ramp->uniqueID,
 			intNum,
             ramp->rampNum,
             ramp->rampID,
             rampTypes[ramp->rampType],
-            ramp->timeComplete,
+            timeCompleteC,
 			ramp->latitude,
 			ramp->longitude,
             ramp->rampInXWalk,
@@ -726,7 +751,9 @@ char *rampToText(int intNum,RampStruct *ramp)
     return rampText;
 }
 
-const char *rampToTextHeader(void)
+const char *rampToTextHeader(int type)
 {
-    return "UniqueRampID\tIntersectionNum\tRampNum\tRampID\tRampType\tTimeComplete\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tPEDButtonHeight\tPEDButtonDistance\tSteepTopOfCurb\tLipAtFlowLine\tRampComment\tCurbCutDistance\tBumpWidth\tBumpHeight\tComplianceCodeDetail\tComplianceCodeSummary";
+	if (!type)
+		return "UniqueRampID\tIntersectionNum\tRampNum\tRampID\tRampType\tTimeComplete\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tPEDButtonHeight\tPEDButtonDistance\tSteepTopOfCurb\tLipAtFlowLine\tRampComment\tCurbCutDistance\tBumpWidth\tBumpHeight\tComplianceCodeDetail\tComplianceCodeSummary";
+	return "UniqueRampID(B4)\tIntersectionNum(B4)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tTimeComplete(C16)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(R4)\tRampDepth(R4)\tRampSlopeFront(R4)\tRampSlopeSide(R4)\tUpperLandingSlopeFront(R4)\tUpperLandingSlopeSide(R4)\tStreetLandingSlopeFront(R4)\tStreetLandingSlopeSide(R4)\tFlareLeftSlopeFront(R4)\tFlareRightSlopeFront(R4)\tSidewalkLeftSlopeFront(R4)\tSidewalkLeftSlopeSide(R4)\tSidewalkRightSlopeFront(R4)\tSidewalkRightSlopeSide(R4)\tPEDButtonHeight(R4)\tPEDButtonDistance(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tRampComment(C255)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)";
 }
