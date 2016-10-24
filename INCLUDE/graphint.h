@@ -2414,6 +2414,7 @@ int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir);
 int CreateMultValueFile(LPSTR INDir);
 BOOL AssignMultValues(LPSTR INDir,LPSTR UpdateFile);
+int fixRampNum(int rampin);
 
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);

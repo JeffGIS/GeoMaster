@@ -557,6 +557,9 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 	ToleranceValues tolerances;
 	setStandardToleranceValues(&tolerances);
 
+	rampNum = fixRampNum(rampNum);
+	if (rampNum < 0 || rampNum > 12)
+		return FALSE;
 	rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
