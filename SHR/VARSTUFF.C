@@ -7857,7 +7857,7 @@ NextTextRec:
 				SQLPtr->lastreadtime = NextVarTime();
 				SLTCloseCursor(pSQL);
 				ClearCurVals(FilePtr);
-				SLTPrepareStatement(pSQL, SQLPtr->SQL);
+				SLTPrepareStatement(pSQL, pSQL->Where);
 			}
 			SQLPtr->st = 0;
 			if (!FetchSLTRec(pSQL))

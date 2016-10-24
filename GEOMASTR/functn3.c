@@ -4456,6 +4456,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
 			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
 			//$NVCRIS(TEXTURECODE,texture)
+			//$NVCRIS(FORMATSTREETS,codedstreets)
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
