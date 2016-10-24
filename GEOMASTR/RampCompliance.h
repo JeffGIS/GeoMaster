@@ -82,7 +82,10 @@
 char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *tolerances, int codeSystem);
 void setStandardToleranceValues(ToleranceValues *tolerances);
 char *rampToText(int intNum,RampStruct *ramp);
-const char *rampToTextHeader(void);
+const char *rampToTextHeader(int type);
 int fixRampNum(int rampNum);
+int NVCTextureToCode(LPSTR texture);
+int NVCObstructionToCode(LPSTR obstruction);
+
 
 #endif /* RampCompliance_h */

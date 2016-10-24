@@ -4450,19 +4450,21 @@ GotCloseFilehSQL:
 			itoa(n, OutLoc, 10);
 			goto Rtnl;
 		}
-		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1))
-			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1))
+		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
+			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1),headertype(-1,0,1))
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
 			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
+			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
+			//$NVCRIS(TEXTURECODE,texture)
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "EXPORT"))
 			{
 				if (!stricmp(Arg[3], "BYINT"))
-					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2],atoi(Arg[6]));
+					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2], atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "BYRAMP"))
-					rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]));
+					rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]), atoi(Arg[8]));
 
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))
@@ -4485,6 +4487,18 @@ GotCloseFilehSQL:
 				goto Rtnl;
 			}
 
+			else if (!stricmp(Arg[1], "OBSTRUCTIONCODE"))
+			{
+				rtn = NVCObstructionToCode(Arg[2]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "TEXTURECODE"))
+			{
+				rtn = NVCTextureToCode(Arg[2]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
 
 			if (rtn)
 				goto RtnTrue;
