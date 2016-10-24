@@ -613,6 +613,7 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int cod
 {
 	BOOL rtn = FALSE;
 	*OutLoc = 0;
+	rampNum = fixRampNum(rampNum);
 	int rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
