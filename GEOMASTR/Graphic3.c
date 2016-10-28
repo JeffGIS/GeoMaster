@@ -1679,7 +1679,7 @@ BOOL Report (LPSTR NameIN, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref
 	char	File[MAX_PATH];
 
 	strcpy (Name,NameIN);
-     
+	strcpy(File, ViewportName);
     SaveView = CurView; 
 	if ((pColon = _fstrchr(ViewportName, ':')))
 	{
