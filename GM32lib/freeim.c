@@ -734,7 +734,7 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName)
 		FIBITMAP *dib;
 		if (fif == FIF_JPEG)
 		{
-			if (GetGlobalBVal2("%USEJPEGROTATION", TRUE))
+			if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
 				flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
 			else
 				flag = JPEG_ACCURATE;

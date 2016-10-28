@@ -805,7 +805,8 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 			ramp.bumpHeight = sqlite3_column_double(statement, i++);
 			if (ramp.bumpWidth > 0 || ramp.bumpHeight > 0)
 				ii = 1;
-			mpint.ramps[rampNum] = ramp;
+			if (mpint.timeComplete >= mpint.ramps[rampNum].timeComplete)
+				mpint.ramps[rampNum] = ramp;
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 	}

@@ -2944,7 +2944,6 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 	}
 	pDB->DBHandle = db;
 	strcpy(pDB->Where, SQL);
-	ExpandText(pDB->Where);
 	if (*pDB->From)
 	{
 		sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
