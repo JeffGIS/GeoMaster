@@ -103,6 +103,7 @@ void DestroyVarSpace(HANDLE hVarSpace)
 	if (hVarSpace == (HANDLE)-1)
 	{
 		hVarSpace = hGlobalVarSpace;
+		hGlobalVarSpace = 0;
 		HaveDL = FALSE;
 	}
 	if (hVarSpace)
@@ -6347,9 +6348,12 @@ GSSiExitProg (558);
 			}
 			InLoc++;
 			*OutLoc++ = *InLoc;
-			if (*InLoc && *InLoc != literalChar)
+			if (*InLoc)
+			{
+				if (*InLoc != literalChar)
+					FoundLit = TRUE;
 				InLoc++;
-			FoundLit = TRUE;
+			}
 		}
 		else if (*InLoc == '[')
 		{   

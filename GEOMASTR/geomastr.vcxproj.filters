@@ -2278,4 +2278,9 @@
   <ItemGroup>
     <Text Include="cmdlines.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib">
+      <Filter>Source Files</Filter>
+    </Library>
+  </ItemGroup>
 </Project>

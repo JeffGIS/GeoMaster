@@ -1411,12 +1411,16 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		} 
 		
-		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly)
+		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly(TF or 0,1,2)
 		{
+			int no;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
-			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), atob(Arg[7]));
+			no = atoi(Arg[7]);
+			if (no != 2)
+				no = atob(Arg[7]);
+			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), no);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}

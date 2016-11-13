@@ -130,7 +130,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -1176,6 +1176,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
