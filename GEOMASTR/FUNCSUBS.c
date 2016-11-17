@@ -5770,8 +5770,10 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		else
 			pLastDir = _fstrchr (LastDir,0);
 		//sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",str2,Name,drive,dir,pLastDir,extension,lastup,lfile);
-		if (nameOnly)
+		if (nameOnly == 1)
 			sprintf(str, "%s%s", Name, extension);
+		else if (nameOnly == 2)
+			sprintf(str, "%s", str2);
 		else
   			sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
 		fputstring (str,OutFileFID);

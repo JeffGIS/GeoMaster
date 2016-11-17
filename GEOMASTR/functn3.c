@@ -4452,6 +4452,8 @@ GotCloseFilehSQL:
 		}
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
 			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1),headertype(-1,0,1))
+			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1))
+			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid)1=header and streetnames and coord);
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
 			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
 			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
@@ -4466,6 +4468,10 @@ GotCloseFilehSQL:
 					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2], atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "BYRAMP"))
 					rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]), atoi(Arg[8]));
+				else if (!stricmp(Arg[3], "INT"))
+					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
+				else if (!stricmp(Arg[3], "ALL"))
+					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))
@@ -6429,7 +6435,7 @@ HaveVP:;
 						ExpandText (Arg[7]);
 						*LastChr (Arg[7]) = 0;
 					}
-					if(CreateProcess(0,Arg[3], 
+					if (CreateProcess(Arg[2], Arg[3],
 										NULL,             // Process handle not inheritable. 
 										NULL,             // Thread handle not inheritable. 
 										FALSE,            // Set handle inheritance to FALSE. 
@@ -6456,7 +6462,8 @@ HaveVP:;
 					}
 					else
 					{
-						ltoa (-((int)GetLastError ()),OutLoc,10);
+						int err = GetLastError();
+						ltoa (-err,OutLoc,10);
 					}
 				}
 				else if (!stricmp (Arg[1],"STOP"))

@@ -439,29 +439,33 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 		if (FidList != HFILE_ERROR)
 		{
 			LPSTR file = malloc(260);
+			BOOL first = TRUE;
 			Execute("BEGIN");
 
 			sprintf(line, "DROP TABLE IF EXISTS SORTEDFILES;CREATE TABLE SORTEDFILES (TIME INT,FILEPATH CHAR(256));");
 			if (Execute(line))
 			{
-				fgetstring(file, 258, FidList);
 				while (fgetstring(file, 258, FidList))
 				{
-					HFILE fid = GSSiOpenFile(file, 0, OF_READ);
-					if (fid != HFILE_ERROR)
+					if (!first || !strchr(file, '\t'))
 					{
-						int time = 0;
-						fgetstring(line, 1022, fid);
-						LPSTR tloc = strstr(line, " Time ");
-						if (tloc)
+						HFILE fid = GSSiOpenFile(file, 0, OF_READ);
+						if (fid != HFILE_ERROR)
 						{
-							time = atoi(tloc + 6);
-							sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
-							Execute(line);
-							nTot++;
+							int time = 0;
+							fgetstring(line, 1022, fid);
+							LPSTR tloc = strstr(line, " Time ");
+							if (tloc)
+							{
+								time = atoi(tloc + 6);
+								sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
+								Execute(line);
+								nTot++;
+							}
+							GSSiClose(fid);
 						}
-						GSSiClose(fid);
 					}
+					first = FALSE;
 				}
 			}
 			Execute("COMMIT");
@@ -492,6 +496,71 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 		rc = sqlite3_close(database);
 	}
 	free(line);
+	return rtn;
+}
+int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int header)
+{//opt=0 ALL opt=1 with ramps opt=2 paid only
+	//header=0 no header only int ID header=1 include header and street names and coord
+	int rtn = 0;
+	char line[2048];
+	char query[256];
+	HFILE fid;
+
+	int rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		sqlite3_stmt *statement = NULL;
+		switch (opt)
+		{
+		default:
+			sprintf(query, "SELECT DISTINCT intID FROM Intersections");
+			break;
+		case 1:
+			sprintf(query, "SELECT DISTINCT intID FROM ramps");
+			break;
+		case 2:
+			sprintf(query, "SELECT DISTINCT intID FROM ramps WHERE isComplete = 2");
+			break;
+		}
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+		fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (header)
+		{
+			sprintf(line, "IntersectionNum\tLatitude\tLongitude\tStreet Names");
+			fputstring(line, fid);
+		}
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			int intersectionID = sqlite3_column_int(statement, 0);
+			if (!header)
+			{
+				itoa(intersectionID, line, 10);
+				fputstring(line, fid);
+			}
+			else
+			{
+				char intquery[256];
+				char FormattedStreets[1024];
+				sqlite3_stmt *statement = NULL;
+				sprintf(intquery, "SELECT streetNames,latitude,longitude FROM Intersections WHERE intID=%i", intersectionID);
+				SQLOK(sqlite3_prepare_v2(database, intquery, -1, &statement, NULL), database, "get mpint", 0);
+				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					LPSTR pNames = (LPSTR)sqlite3_column_text(statement, 0);
+					double lat = sqlite3_column_double(statement, 1);
+					double lon = sqlite3_column_double(statement, 2);
+					FormatStreets(pNames,FormattedStreets);
+					sprintf(line, "%i\t%f\t%f\t%s", intersectionID, lat, lon, FormattedStreets);
+					fputstring(line, fid);
+				}
+				SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+			}
+			rtn++;
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+		rc = sqlite3_close(database);
+		GSSiClose(fid);
+	}
 	return rtn;
 }
 
@@ -547,6 +616,64 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 		}
 		rc = sqlite3_close(database);
 
+	}
+	return rtn;
+}
+
+BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+{
+	BOOL rtn = FALSE;
+	int rc;
+	ToleranceValues tolerances;
+	char tempfile[MAX_PATH];
+
+	setStandardToleranceValues(&tolerances);
+	GSSiGetTempFileName(0, "gmc", 0, tempfile);
+	if (OutputIntsWithRampsToFile(tempfile, NVCRISDataBase, 2,0))
+	{
+		HFILE FidList = GSSiOpenFile(tempfile, 0, OF_READ);
+
+		rc = sqlite3_open(NVCRISDataBase, &database);
+		if (rc == SQLITE_OK)
+		{
+			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			if (FidOut != HFILE_ERROR)
+			{
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				fputstring(rampHeader, FidOut);
+				LPSTR line = malloc(4096);
+				while (fgetstring(line, sizeof(line)-2, FidList))
+				{
+					int intID = atoi(line);
+					MPINTERSECTION mpInt;
+					if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+					{
+						for (int i = 1; i < 13; i++)
+						{
+							RampStruct * pRamp = &mpInt.ramps[i];
+							if (pRamp->rampExists)
+							{
+								LPSTR detailCode;
+								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+								LPSTR rampText = rampToText(mpInt.intID, pRamp);
+								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+								fputstring(line, FidOut);
+								free(ccode);
+								free(detailCode);
+								free(rampText);
+							}
+						}
+					}
+					else
+						ii = 1;
+				}
+				free(line);
+				GSSiClose(FidOut);
+				rtn = TRUE;
+			}
+			GSSiClose(FidList);
+		}
+		rc = sqlite3_close(database);
 	}
 	return rtn;
 }
