@@ -4277,7 +4277,6 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 	GlobalUnlock(hPolyPartLen);
 	return n;
 }
-
 BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 #if ENABLETRACE
 {GSSiEnterProg (1375);

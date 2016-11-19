@@ -252,6 +252,8 @@ static	UINT	SepCntl[16]=	{IDC_SEP1,
 
 #include "gmextern.h"     
 
+BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDATA pHighlightData, BOOL FirstRec);
+
 BOOL ExportData (HWND hWnd,short Type)
 {
     DLGPROC lpfnMIF_OUTPUTMsgProc, lpfnDXF_OUTPUTMsgProc, lpfnBMP_OUTPUTMsgProc, lpfnTXT_OUTPUTMsgProc, lpfnORACLEMsgProc;
@@ -28164,7 +28166,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     LPSTR   vbar; 
     char    txt[128], txt2[128], project[34]; 
     //BTHEAD  BTHead;
-    long    NumItems;
+    long    NumItems=0;
     static	char	Ext[6], SaveExt[8],DExt[6]; 
     static	short   Filter, FileVarID, OutVarID;  
     static	BOOL	FileIsOpen;
@@ -28229,16 +28231,13 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
          DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
 		 if ((NumItems = GetNumThinnedContourRecs ()) <= 0)
 		 {
-			 if (!hHighlight)
+			 NumItems = BT_NUM_IN_INDEX(hHighlight);
+			 if (!NumItems && !*AutoExportName)
 			 { 
-		NoItems:
-				GSSiMsgBox( GetFocus(),"No items highlighted","Error", MB_OK,0);
+				 GSSiMsgBox(GetFocus(), "No items highlighted", "Error", MB_OK, 0);
 				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
 				break;
 			 }  
-			 //GetBTHeader (hHighlight,&BTHead); 
-			 NumItems = BT_NUM_IN_INDEX (hHighlight);  
-			 if (!NumItems) goto NoItems;
 		 }
          sprintf(txt,"%ld items selected",NumItems);
          SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,txt);  
@@ -28487,6 +28486,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				HANDLE		hConPnts=0;
 				BOOL		thinnedContours=FALSE;
 				HANDLE		h10CharFieldNames = 0;
+				BOOL		useDataFile = FALSE;
+				int		fileType;
 
                 CloseDataFile (FALSE,&MIFOuthDB);  
                 GetDlgItemText (hWndDlg,IDC_SHAPETYPE,str,sizeof(str));
@@ -28499,8 +28500,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 else if (!_fstricmp (str,"Text"))    
                 	ShapeType = 6;
                 GetDlgItemText (hWndDlg,IDC_SQL,SQL,sizeof(SQL));
-                if (!OpenDataFile (MIFOutDataFile,SQL,BT_READ,&MIFOuthDB))
-                    goto Exit2;   
+                if (!(fileType = OpenDataFile (MIFOutDataFile,SQL,BT_READ,&MIFOuthDB)))
+                    goto Exit2;  
+				if (!_stricmp(SQL, "ALL ROWS"))
+					useDataFile = TRUE;
                 nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,
                                            LB_GETSELCOUNT,
                                            0,
@@ -28577,7 +28580,22 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				ContinueProcessing=TRUE;  
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
-				if ((NumItems = GetNumThinnedContourRecs ()) < 0)
+				if (fileType == GMTEXT_DATAFILE && useDataFile)
+				{
+					LPOPENSQLDATA	SQLPtr;
+					LPOPENFILEDATA	FilePtr;
+					int pos = -1;
+
+					if (MIFOuthDB)
+					{
+						SQLPtr = (LPOPENSQLDATA)GlobalLock(MIFOuthDB);
+						FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+						NumItems = GSSillseek(FilePtr->Fid, 0, 2);
+						GlobalUnlock(SQLPtr->OFHandle);
+						GlobalUnlock(MIFOuthDB);
+					}
+				}
+				else if ((NumItems = GetNumThinnedContourRecs ()) < 0)
 					NumItems = BT_NUM_IN_INDEX (hHighlight);  
 				else
 					thinnedContours = TRUE;
@@ -28665,6 +28683,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 						case SQL_UNKCHAR:
 							DBFFldType = FTString;
 							DBFLen = min(254,lpFldInfo->length);
+							if (!DBFLen)
+								DBFLen = 255;
 				            sprintf (Type,"char(%i)",DBFLen);  
 				            nDecimals = 0;
 				        break;
@@ -28763,6 +28783,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  //               while (!BT_FIND (hHighlight,(LPSTR)&iref,pos,BT_ANY,(LPSTR)&HighlightData)&&ContinueProcessing)
   				while (ContinueProcessing && 
 						   (GetNextThinnedContour (&contourElev,&nconPnts,&hConPnts) ||
+						    GetNextDataRecord(useDataFile, MIFOuthDB,&iref, &HighlightData, FirstRec) ||
 						    GetNextHighlightData (&iref,&HighlightData,FirstRec)))
                 {   
               		long	ii; 
@@ -28786,6 +28807,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     	!(PickList[0].HasText && ShapeType == 6)
                       ))
                         goto NextHlt; 
+					if (SysTypeFromPickType(PickList[0].Type) == GF_POINT && PickList[0].BeginPoint.y < 0)
+						goto NextHlt;
 				    SetConfig (PickList[0].ConfigID);
 				    SetViewport (PickList[0].ViewID);
                 	if (ShapeType == 5)
@@ -28795,7 +28818,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     CurView->PassID = 4; 
                     //WantElement = PickList[0].Element;
 					ProcessSelectedTheme = CurView->NumThemes;
-                    if (!thinnedContours)
+					if (!thinnedContours && !useDataFile)
 						ProcessPickedItem (0,-3); 
 					ProcessSelectedTheme = 0;
                     WantElement = LONG_MAX;               
@@ -29364,8 +29387,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 						 //GSSiGlobFree (&hConPnts);
 					 }
 					 else
-            			DestroySavedPolys();                    
-                    PctBox (GetDlgItem(hWndDlg,IDC_STATUS), NumItems, CurItem++,0);
+            			DestroySavedPolys();     
+					 if (fileType == GMTEXT_DATAFILE && useDataFile)
+						 CurItem = GetDBPos(MIFOuthDB);
+					PctBox(GetDlgItem(hWndDlg, IDC_STATUS), NumItems, CurItem++, 0);
 		        	if (NumDBFRecs != RecNum)  
 		        		ii=1;
                 } 
@@ -29467,6 +29492,31 @@ Exit2:
    }
  return TRUE;
 }
+
+BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDATA pHighlightData, BOOL FirstRec)
+{
+	char str[1024];
+	DPOINT pt;
+	BOOL err;
+
+	if (!useDataFile)
+		return FALSE;
+	if (!FetchDBRec(hDB))
+		return FALSE;
+	memset(pHighlightData, 0, sizeof(HIGHLIGHTDATA));
+	sprintf(str, "[FROMDB.Longitude] [FROMDB.Latitude]");
+	ExpandText(str);
+	pt = atopt(str, &err); 
+	ConvertCoord(&pt,2, 1); 
+	pHighlightData->PD.BeginPoint = pt;
+	pHighlightData->PD.Type = 1;
+	sprintf(str, "[FROMDB.UniqueRampID]");
+	ExpandText(str);
+	*piref = atoi(str);
+	return TRUE;
+
+}
+
 
 BOOL FAR PASCAL STREETSEG_FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
