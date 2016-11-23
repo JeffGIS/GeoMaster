@@ -499,7 +499,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 	return rtn;
 }
 int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int header)
-{//opt=0 ALL opt=1 with ramps opt=2 paid only
+{//opt=0 ALL opt=1 with ramps opt=2 complete opt=3 paid only
 	//header=0 no header only int ID header=1 include header and street names and coord
 	int rtn = 0;
 	char line[2048];
@@ -519,6 +519,9 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 			sprintf(query, "SELECT DISTINCT intID FROM ramps");
 			break;
 		case 2:
+			sprintf(query, "SELECT DISTINCT intID FROM ramps WHERE isComplete >= 1");
+			break;
+		case 3:
 			sprintf(query, "SELECT DISTINCT intID FROM ramps WHERE isComplete = 2");
 			break;
 		}
@@ -620,7 +623,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 	return rtn;
 }
 
-BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -629,7 +632,7 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 
 	setStandardToleranceValues(&tolerances);
 	GSSiGetTempFileName(0, "gmc", 0, tempfile);
-	if (OutputIntsWithRampsToFile(tempfile, NVCRISDataBase, 2,0))
+	if (OutputIntsWithRampsToFile(tempfile, NVCRISDataBase, completionCode+1, 0))
 	{
 		HFILE FidList = GSSiOpenFile(tempfile, 0, OF_READ);
 
@@ -766,6 +769,71 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int cod
 		}
 		rc = sqlite3_close(database);
 	}
+	return rtn;
+}
+
+int getMiddleRampIDFromRampID(int rampID)
+{
+	int rtn = 0;
+
+	switch (rampID)
+	{
+	case 1:
+	case 8:
+		rtn = 12;
+		break;
+	case 3:
+	case 2:
+		rtn = 9;
+		break;
+	case 5:
+	case 4:
+		rtn = 10;
+		break;
+	case 7:
+	case 6:
+		rtn = 11;
+		break;
+	}
+	switch (rtn)
+	{
+	case 9:
+		rtn = 23;
+		break;
+	case 10:
+		rtn = 45;
+		break;
+	case 11:
+		rtn = 67;
+		break;
+	default:
+		rtn = 81;
+		break;
+	}
+	return rtn;
+}
+
+static BOOL getCornerComment(int intID, int rampNum, LPSTR rampComment)
+{
+	BOOL rtn = FALSE;
+	int cornerID = getMiddleRampIDFromRampID(rampNum);
+	sqlite3_stmt *statement = NULL;
+	
+	*rampComment = 0;
+	LPSTR query = malloc(4096);
+	sprintf(query, "SELECT note FROM CURBRAMP_NOTES WHERE intID=%i AND corner=%i", intID,cornerID);
+
+	SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		LPSTR note = (LPSTR)sqlite3_column_text(statement,0);
+		if (note)
+			strncpy0(rampComment,note,254);
+	}
+	SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+	free(query);
+
 	return rtn;
 }
 
@@ -909,10 +977,10 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 			PixelXYToLatLong(ramp.lev21x, ramp.lev21y, 21, &ramp.latitude, &ramp.longitude);
 			ramp.rampType = sqlite3_column_int(statement, i++);
 			LPSTR comment = (LPSTR)sqlite3_column_text(statement, i++);
-			if (comment)
+			if (comment && *comment)
 				strcpy(ramp.rampComment, comment);
 			else
-				*ramp.rampComment = 0;
+				getCornerComment (intID,rampNum,ramp.rampComment);
 			ramp.awi = sqlite3_column_int(statement, i++);
 			ramp.hasLocatorTone = sqlite3_column_int(statement, i++);
 			ramp.hasInfoSign = sqlite3_column_int(statement, i++);
@@ -937,10 +1005,11 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 	}
+	free(query);
+
 	*pMPInt = mpint;
 	return TRUE;
 }
-
 int FormatStreets(LPSTR from, LPSTR outtext)
 {
 	int nStreets = 0;

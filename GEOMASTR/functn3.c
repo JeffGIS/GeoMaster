@@ -4,6 +4,7 @@
 #include "umio.h"
 #include <mmsystem.h>
 #include "gmextern.h"
+#include "RampCompliance.h"
 
 
 static	char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
@@ -4452,13 +4453,14 @@ GotCloseFilehSQL:
 		}
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
 			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1),headertype(-1,0,1))
-			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1))
+			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1),completioncode(0all,1complete,2paid)
 			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid)1=header and streetnames and coord);
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
 			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
 			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
 			//$NVCRIS(TEXTURECODE,texture)
 			//$NVCRIS(FORMATSTREETS,codedstreets)
+			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
@@ -4471,7 +4473,7 @@ GotCloseFilehSQL:
 				else if (!stricmp(Arg[3], "INT"))
 					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 				else if (!stricmp(Arg[3], "ALL"))
-					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
+					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
 
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))
@@ -4504,6 +4506,22 @@ GotCloseFilehSQL:
 			{
 				rtn = NVCTextureToCode(Arg[2]);
 				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "RAMPHEADER"))
+			{
+				const char * pHeader = rampToTextHeader(atoi(Arg[2]));
+				if (!*Arg[3])
+				{
+					strcpy(OutLoc, pHeader);
+				}
+				else
+				{
+					Fid1 = GSSiOpenFile(Arg[3], 0, OF_CREATE);
+					fputstring((LPSTR)pHeader, Fid1);
+					GSSiClose(Fid1);
+					strcpy(OutLoc, "1");
+				}
 				goto Rtnl;
 			}
 
