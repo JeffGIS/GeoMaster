@@ -28156,7 +28156,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 { 
 	short	Version=1;
     int		nItems, i;  
-    char    File[128],  ExtID[32], Name[128], str[128];
+    char    File[MAX_PATH],  ExtID[32], Name[MAX_PATH], str[256];
     LPINT   lpItems;    
     HFILE   Fid;
     OFSTRUCTGM    OFStruct;  
@@ -28327,7 +28327,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     CloseDataFile (FALSE,&MIFOuthDB);
                     Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
                     BigRead (Fid,(HPSTR)&Version,2); 
-                    BigRead (Fid,Name,sizeof(Name)); 
+                    BigRead (Fid,Name,128); 
                     SetDlgItemText (hWndDlg,IDC_MIF_FILE,Name);
                     if ((lpDot=_fstrrchr (Name,'.')))
                     {
@@ -28421,7 +28421,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                      Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
                      BigWrite (Fid,(char *)&Version,2,-1);
 	                 GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,sizeof(Name));
-	                 BigWrite (Fid,Name,sizeof(Name),-1); 
+	                 BigWrite (Fid,Name,128,-1); 
                      BigWrite (Fid,MIFOutDataFile,128,-1);
                      BigWrite (Fid,MIFOutSQL,lnMIFOutSQL,-1);
                      lpItems = (LPINT)GlobalLock(MIFOutFields);  
@@ -28454,7 +28454,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 DPOINT  CP; 
                 BOOL    First, Rtn=FALSE;
                 LPSTR	lpDot, lpName; 
-                char    SQL[256],Type[32],DBName[128],SymName[34]; 
+                char    SQL[256],Type[32],DBName[MAX_PATH],SymName[34], MIFName[MAX_PATH]; 
                 HANDLE	hOutRec = GSSiGlobAlloc ( 701,GMEM_MOVEABLE,USHRT_MAX);
                 LPSTR	OutRec = GlobalLock (hOutRec);
                 SHPPOLYHEADER   SHPPolyHeader;  
@@ -28478,7 +28478,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 static	long	debugref=1743054;
                	DBFHandle pDBF;  
                 short	iPOINTERFld,iSTYLEFld,iSEQFld,iTEXTFld,iFONTNUMFld,iFONTHEIGHTFld;  
-                char	DBFName[128];   
+                char	DBFName[256];   
                 BOOL	Missing,FirstRec=TRUE;
                 HFILE		thinnedContourFID=HFILE_ERROR;
 				float		contourElev;
@@ -28599,9 +28599,9 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 					NumItems = BT_NUM_IN_INDEX (hHighlight);  
 				else
 					thinnedContours = TRUE;
-                GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,sizeof(Name));  
-                makedirectories (Name,FALSE,FALSE);
-                FidMIF = GSSiOpenFile (Name,&OFStruct,OF_CREATE); 
+                GetDlgItemText (hWndDlg,IDC_MIF_FILE,MIFName,sizeof(MIFName));  
+                makedirectories (MIFName,FALSE,FALSE);
+                FidMIF = GSSiOpenFile (MIFName,&OFStruct,OF_CREATE); 
                 FidSHP = FidMIF;
                 GetDlgItemText (hWndDlg,IDC_MID_FILE,Name,sizeof(Name));
                 switch (EXType)
@@ -28623,7 +28623,17 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     
                     case SHP:
                         hSQL = 0;  
-                        ExpandText (Name);  
+                        ExpandText (Name);
+						if (!*Name)
+						{
+							LPSTR pDOT;
+							strcpy(Name, MIFName);
+							ExpandText(Name);
+							pDOT = strrchr(Name, '.');
+							if (!pDOT)
+								break;
+							strcpy(pDOT, ".dbf");
+						}
 	                    GSSiRemove (Name); 
 	                    _fstrcpy (DBFName,Name); 
                         pDBF = DBFCreate(Name);
@@ -28650,7 +28660,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 FilePtrATT = (LPOPENFILEDATA)GlobalLock (SQLPtrATT->OFHandle); 
                 lpItems = (LPINT)GlobalLock (MIFOutFields); 
 				h10CharFieldNames = Create10CharFieldNames(hWndDlg, IDC_FIELDS, nItems, lpItems);
-				;
+				
                 for (i=0;i<nItems;i++,lpItems++) 
                 {   
                 	DBFFieldType	DBFFldType; 

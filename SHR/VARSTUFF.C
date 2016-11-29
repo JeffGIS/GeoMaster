@@ -5373,7 +5373,15 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
 			pstr++;
 		_fstrcpy (INstr,pstr);
 		if (FidHdr != Fid)
-			GSSiClose (FidHdr);
+		{
+			GSSiClose(FidHdr);
+			if (GetGlobalBVal2("[%SKIPHEADER]", FALSE))
+			{
+				LPSTR line = malloc(USHRT_MAX);
+				fgetstring(line, USHRT_MAX - 2, Fid);
+				free(line);
+			}
+		}
 	}	                                 
 	_fstrcpy (str,INstr);
 	nDLTvar = 0; 
@@ -5558,6 +5566,7 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 		VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
 		VarPtr->Len = 0;    
 		*VarPtr->Value = 0;
+		VarPtr->Type = DLTType[ivar];
 		VarPtr->changetime = NextVarTime();
 		SetLinkedVarTime (VarPtr); 
 		if (nDLTvar == 1)
@@ -5631,7 +5640,10 @@ Next:if (*str == '"')
 		VarPtr->ValueIsHandle = 0;
 	}
 	strncpy0(VarPtr->Value, BeginLoc, MAXVARLEN-1);
-	VarPtr->Len = _fstrlen(BeginLoc); 
+	if (VarPtr->Type == BT_CHAR)
+		RemoveQuotes(VarPtr->Value);
+
+	VarPtr->Len = _fstrlen(VarPtr->Value);
 	GlobalUnlock (DLTVar[ivar]);
 	if (!EndLoc || EndLoc >= LastLoc-1)
 		goto RtnTrue;
@@ -8812,6 +8824,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 
 					VarPtr = (VARPNT)GlobalLock(*DLTVar);
 					_fstrncpy(Value, VarPtr->Value, maxlval);
+					RemoveQuotes(Value);
 					GlobalUnlock(*DLTVar);
 					GlobalUnlock(FilePtr->FileHandle);
 				}

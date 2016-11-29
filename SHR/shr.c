@@ -3841,52 +3841,102 @@ GSSiExitProg (231);
 #endif
 }  
 
-LPSTR RemoveDoubleQuotes (LPSTR str)
+LPSTR RemoveDoubleQuotes(LPSTR str)
 #if ENABLETRACE
 {GSSiEnterProg (232);
 #endif
-{        
-	LPSTR	EndChar=str;
+{
+	LPSTR	EndChar = str;
 	short	l;
-	
+
 	if (*str != '"')
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
 		return str;
-}
-	l = _fstrlen (str);
+	}
+	l = _fstrlen(str);
 	if (l < 2)
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
 		return str;
-}
-	EndChar += l-1;
+	}
+	EndChar += l - 1;
 	if (*EndChar != '"')
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
 		return str;
-}
+	}
 	l -= 2;
 	if (!l)
 		*str = 0;
 	else
 	{
-		_fmemmove (str,(LPSTR)(str+1),l);
-		EndChar = str+l;
+		_fmemmove(str, (LPSTR)(str + 1), l);
+		EndChar = str + l;
 		*EndChar = 0;
 	}
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
-	return str;
+		return str;
+	}
+#if ENABLETRACE
 }
+#endif
+}
+LPSTR RemoveQuotes(LPSTR str)
+#if ENABLETRACE
+{GSSiEnterProg (232);
+#endif
+{
+	LPSTR	EndChar = str;
+	short	l;
+
+	if (*str != '\'')
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
+	l = _fstrlen(str);
+	if (l < 2)
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
+	EndChar += l - 1;
+	if (*EndChar != '\'')
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
+	l -= 2;
+	if (!l)
+		*str = 0;
+	else
+	{
+		_fmemmove(str, (LPSTR)(str + 1), l);
+		EndChar = str + l;
+		*EndChar = 0;
+	}
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
 #if ENABLETRACE
 }
 #endif
