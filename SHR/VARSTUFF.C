@@ -5566,7 +5566,7 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 		VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
 		VarPtr->Len = 0;    
 		*VarPtr->Value = 0;
-		VarPtr->Type = DLTType[ivar];
+		VarPtr->Type = 0;
 		VarPtr->changetime = NextVarTime();
 		SetLinkedVarTime (VarPtr); 
 		if (nDLTvar == 1)

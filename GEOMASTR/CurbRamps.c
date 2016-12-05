@@ -431,14 +431,16 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 	int rc;
 	int nTot=0, nDone = 0;
 	LPSTR line = malloc(LINELEN);
+	char tempFile[MAX_PATH];
+	HFILE fidTemp;
 
+	LPSTR file = malloc(1024);
 	rc = sqlite3_open(DataBase, &database);
 	if (rc == SQLITE_OK)
 	{
 		HFILE FidList = GSSiOpenFile(List, 0, OF_READ);
 		if (FidList != HFILE_ERROR)
 		{
-			LPSTR file = malloc(260);
 			BOOL first = TRUE;
 			Execute("BEGIN");
 
@@ -470,37 +472,51 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 			}
 			Execute("COMMIT");
 			GSSiClose(FidList);
+
+			GSSiGetTempFileName(0, "txt", 0, tempFile);
+			fidTemp = GSSiOpenFile(tempFile, 0, OF_CREATE);
 			sprintf(line, "SELECT FILEPATH FROM SORTEDFILES ORDER BY TIME ASC;");
 			sqlite3_stmt *statement = NULL;
+			if (sqlite3_prepare_v2(database, line, -1, &statement, 0) == SQLITE_OK)
+			{
+				while (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					LPSTR filePath = (LPSTR)sqlite3_column_text(statement, 0);
+					fputstring(filePath, fidTemp);
+				}
+			}
+			sqlite3_finalize(statement);
+			rc = sqlite3_close(database);
+			GSSiClose(fidTemp);
+			rc = sqlite3_open(DataBase, &database);
 			if (showProgress)
 			{
 				CreateStatusWind(hWndMain, 1, "Loading Data");
 			}
-			if (sqlite3_prepare_v2(database,line, -1, &statement, 0) == SQLITE_OK)
+			fidTemp = GSSiOpenFile(tempFile, 0, OF_READ);
 			{
-				while (sqlite3_step(statement) == SQLITE_ROW)
+				while (fgetstring (file,MAX_PATH,fidTemp))
 				{
-					LPSTR filePath = (LPSTR) sqlite3_column_text(statement, 0);
-					BOOL st = UpdateFromFile(filePath,TRUE,dbType);
+					BOOL st = UpdateFromFile(file,TRUE,dbType);
 					if (showProgress)
 						StatusWindowUpdate(0, 0, nTot, ++nDone);
 
 				}
-				sqlite3_finalize(statement);
 			}
 			if (showProgress)
 				DestroyStatusWindow(0);
-
-			free(file);
+			GSSiClose(fidTemp);
+			GSSiRemove(tempFile);
 		}
 		rc = sqlite3_close(database);
 	}
 	free(line);
+	free(file);
 	return rtn;
 }
 int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int header)
 {//opt=0 ALL opt=1 with ramps opt=2 complete opt=3 paid only
-	//header=0 no header only int ID header=1 include header and street names and coord
+	//header=0 no header only int ID header=1 include header and street names and coord header=2 same with types
 	int rtn = 0;
 	char line[2048];
 	char query[256];
@@ -527,9 +543,14 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 		}
 		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
 		fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
-		if (header)
+		if (header == 1)
 		{
 			sprintf(line, "IntersectionNum\tLatitude\tLongitude\tStreet Names");
+			fputstring(line, fid);
+		}
+		else if (header == 2)
+		{
+			sprintf(line, "IntersectionNum(B4)\tLatitude(R8)\tLongitude(R8)\tStreet Names(C254)");
 			fputstring(line, fid);
 		}
 		while (sqlite3_step(statement) == SQLITE_ROW)
@@ -619,6 +640,51 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 		}
 		rc = sqlite3_close(database);
 
+	}
+	return rtn;
+}
+
+BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int header)
+{
+	BOOL rtn = FALSE;
+	char line[2048];
+	char query[256];
+	HFILE fid;
+	//locationID(C0) Name(C0) Type(C0) Category(C0) Latitude(C0) Longitude(C0) Radius(C0) Offset(C0)
+	int rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		sqlite3_stmt *statement = NULL;
+		sprintf(query, "CREATE TABLE IF NOT EXISTS PriorityLocations ('locationID' INTEGER PRIMARY KEY,'Name' CHAR(256),'Type' INT, 'Category' CHAR(32),'Latitude' DOUBLE, 'Longitude' DOUBLE, 'Radius' DOUBLE, 'Offset' INT);SELECT * FROM PriorityLocations");
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+		fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (header == 1)
+		{
+			sprintf(line, "LocationID\tName\tCategory\tLatitude\tLongitude\tRadius\tOffset");
+			fputstring(line, fid);
+		}
+		else if (header == 2)
+		{
+			sprintf(line, "LocationID(B4)\tName(C128)\tCategory(C64)\tLatitude(R8)\tLongitude(R8)\tRadius(R8)\tOffset(R8)");
+			fputstring(line, fid);
+		}
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			int plID = sqlite3_column_int(statement, 0);
+			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 1);
+			int type = sqlite3_column_int(statement, 2);
+			LPSTR category = (LPSTR)sqlite3_column_text(statement, 3);
+			double lat = sqlite3_column_double(statement, 4);
+			double lon = sqlite3_column_double(statement, 5);
+			double radius = sqlite3_column_double(statement, 6);
+			double offset = sqlite3_column_double(statement, 7);
+			sprintf(line, "%i\t%s\t%s\t%f\t%f\t%f\t%f", plID, pName, category, lat, lon, radius,offset);
+			fputstring(line, fid);
+			rtn++;
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get pl", 0);
+		rc = sqlite3_close(database);
+		GSSiClose(fid);
 	}
 	return rtn;
 }

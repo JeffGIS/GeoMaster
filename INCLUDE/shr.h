@@ -294,6 +294,7 @@ void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
 short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
 HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL);
 HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
+LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where);
 void CloseSLTDatabase(LPHANDLE pHandle);
 void SLTCloseCursor(LPSQLDATABASE pDB);
 LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc, LPFIELDINFO FirstField);

@@ -4454,7 +4454,8 @@ GotCloseFilehSQL:
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
 			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1),headertype(-1,0,1))
 			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1),completioncode(0all,1complete,2paid)
-			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid)1=header and streetnames and coord);
+			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid,1=header and streetnames and coord wo type,2=same with type);
+			//$NVCRIS(EXPORT,FromDB, PRIORITY,OUTFile,header(0=none,1=standard,2=with types));
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
 			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
 			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
@@ -4474,6 +4475,8 @@ GotCloseFilehSQL:
 					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 				else if (!stricmp(Arg[3], "ALL"))
 					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
+				else if (!stricmp(Arg[3], "PRIORITY"))
+					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
 
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))

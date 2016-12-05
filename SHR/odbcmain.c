@@ -354,7 +354,7 @@ HANDLE	hSTR = 0;
 		case SLT_DATAFILE:
 		{
 			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
-			rtn = GetSQLITENumRows(pDB->DBHandle, pDB->From);
+			rtn = GetSQLITENumRows(pDB->DBHandle, pDB->From,pDB->Where);
 			GlobalUnlock(FilePtr->FileHandle);
 			GlobalUnlock(SQLPtr->OFHandle);
 			GlobalUnlock(hSQL);

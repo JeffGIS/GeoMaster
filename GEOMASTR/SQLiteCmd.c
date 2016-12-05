@@ -109,11 +109,14 @@ static int ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 	return ln;
 }
 
-LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName)
+LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName,LPSTR where)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
-	sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
+	if (*where)
+		sprintf(pCmd, "SELECT COUNT (*) FROM %s WHERE %s", tableName,where);
+	else
+		sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
 	sqlite3_stmt *statement;
 	LONGLONG rtn=0;
 
@@ -323,10 +326,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			rtn = TRUE;
 		}
 	}
-	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(ROWS,sqlitehandle,tablename,where clause)
+	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = GetSQLITENumRows(db, ARG[3]);
+		rtn = GetSQLITENumRows(db, ARG[3],ARG[4]);
 	}
 	else if (!stricmp(ARG[1], "FROMGMD"))//$SQLITE(FROMGMD,sqlitehandle,gmdfile,tablename,primkeyisoffset)
 	{
@@ -1902,7 +1905,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 				LoadSQLITEParm(fileName, rtnType, CurView->hWnd);
 				if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 				{
-					if (GetSQLITENumRows(SQLITEHandle, tableName))
+					if (GetSQLITENumRows(SQLITEHandle, tableName,""))
 					{
 						if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
 						{
