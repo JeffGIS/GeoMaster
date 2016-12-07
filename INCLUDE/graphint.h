@@ -2367,7 +2367,7 @@ int GetAltitudeAndAzOfSun (LPDPOINT pLatLon,double Height,time_t systime,double 
 BOOL ProcessUpdateFile (HANDLE hMem);
 void BackgroundUpdateMessage (LPSTR mess);
 void SendEmailToJeff (LPSTR Info);
-BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response);
+BOOL SendEmail(LPSTR From, LPSTR To, LPSTR Subject, LPSTR Message, LPSTR Attach, LPSTR HTMLFile, LPSTR Response);
 BOOL DisplayTransparency (void);
 BOOL SetTransparency (int tranValue);
 mnmxCor WBoundsToFileBounds(LPMNMXCORD worldBounds);

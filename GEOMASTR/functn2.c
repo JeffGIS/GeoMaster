@@ -2190,7 +2190,7 @@ GSSiExitProg (1350);
 			goto RtnFalse; 
 		}
 			
-		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach
+		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach,html
 		{
 			nArgs = GetFunArgs (Args,Arg,-7,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
@@ -2200,8 +2200,8 @@ GSSiExitProg (1350);
 			ExpandText(Arg[4]);
 			ExpandText (Arg[5]);
 			ExpandText (Arg[6]);
-			rtn = SendEmail (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6]);
-			SetGlobalValue ("%EMAILRESPONSE",Arg[6]);
+			rtn = SendEmail(Arg[1], Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7]);
+			SetGlobalValue ("%EMAILRESPONSE",Arg[7]);
 			goto Rtnrtn; 
 		}
 
