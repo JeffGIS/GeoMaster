@@ -904,7 +904,7 @@ double GetAverageGreyScaleValue (HDIB32 hDib,HDIB32 hDibGS)
 
 RGBTRIPLE NewColorValue (RGBTRIPLE *pColor,double intensitychange)
 {
-	RGBTRIPLE NewColor,OldColor=*pColor;
+	RGBTRIPLE NewColor = *pColor, OldColor = *pColor;
 	UINT	nLoops=0;
 	double	ic3;
 	double	dif;
