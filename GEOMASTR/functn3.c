@@ -4533,6 +4533,21 @@ GotCloseFilehSQL:
 			else
 				goto RtnFalse;
 		}
+		case 653: //$LASZIP(GETBOUNDS,file,boundsvar)
+		{
+			rtn = FALSE;
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "GETBOUNDS"))
+			{
+				rtn = getLAZMinMax(Arg[2], &Bounds.xmn, &Bounds.xmx, &Bounds.ymn, &Bounds.ymx);
+				if (*Arg[3])
+					SetGlobalValueBounds(Arg[3], &Bounds);
+			}
+			else
+				rtn = mainlaszip(nArgs, &Arg[1]);
+			goto RtnFalse;
+		}
+
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);

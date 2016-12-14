@@ -302,6 +302,10 @@ int FetchSLTRec(LPSQLDATABASE pSQL);
 BOOL SLTPrepareStatement(LPSQLDATABASE pDB, LPSTR SQL);
 void CloseSLTDatabaseQuery(LPHANDLE pHandle);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
+BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName);
+BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds);
+MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName);
+
 BOOL GetCurrentPNDBName (LPSTR Name);
 BOOL GetCurrentGraphicsDBName (LPSTR Name,short Type);
 int GetNumDBFields (HANDLE hDB);
@@ -1414,7 +1418,7 @@ int GetWifiName(LPSTR Name);
 int GetWifiAddress(LPSTR address);
 
 void Rotate256(int irot, LPDPOINT pt);
-
-
-
+int mainlaszip(int argc, char *argv[]);
+BOOL getLAZMinMax(char * file, double * xmin, double * xmax, double * ymin, double * ymax);
+int getLAZPointsInBounds(LPLAZFILESTRUCT pFiles, int fileNum, char * file, int wantType, LPMNMXCORD pBounds, int maxPoints, LPDPOINT3D points);
 #endif

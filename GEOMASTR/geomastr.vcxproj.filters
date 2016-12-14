@@ -1365,6 +1365,12 @@
     <ClCompile Include="NVMetro.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\LAStools\LASzip\dll\laszip_dll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAStools\LASzip\example\laszipdllexample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -1802,6 +1808,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MPIntersection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAStools\LASzip\dll\laszip_dll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
