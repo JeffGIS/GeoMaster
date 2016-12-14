@@ -5083,7 +5083,7 @@ void SetGlobalValueBounds (LPSTR Name, LPMNMXCORD pBounds)
 #if ENABLETRACE
 {GSSiEnterProg (536);
 #endif
-{   char	txt[128];  
+{   char	txt[256];  
 
 	sprintf (txt,"%.14lg %.14lg %.14lg %.14lg",pBounds->xmn,pBounds->ymn,pBounds->xmx,pBounds->ymx);
 	SetGlobalValue (Name,txt);

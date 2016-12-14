@@ -219,6 +219,7 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "LOWORD", 6)) return 650;
 			if (!_fstrnicmp(str, "HIWORD", 6)) return 651;
 			if (!_fstrnicmp(str, "NVCRIS", 6)) return 652;
+			if (!_fstrnicmp(str, "LASZIP", 6)) return 653;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)

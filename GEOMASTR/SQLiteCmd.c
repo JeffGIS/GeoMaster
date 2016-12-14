@@ -220,6 +220,31 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			rtn = 1;
 		}
 	}
+	else if (!stricmp(ARG[1], "SPATIALINDEX"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		if (!stricmp(ARG[3], "CREATE"))
+		{
+			rtn = SLTSpatialIndexCreate(db, ARG[4]);
+		}
+		else if (!stricmp(ARG[3], "ADD"))//$SQLITE(SPATIALINDEX,DBHANDLE,ADD,tableName,itemnumber,itemname,bounds)
+		{
+			BOOL err;
+			LONGLONG id = _atoi64(ARG[5]);
+			MNMXCORD bounds = atobounds(ARG[7], &err);
+			if (!err)
+				rtn = SLTSpatialIndexAdd(db, ARG[4], id, ARG[6], &bounds);
+		}
+		else if (!stricmp(ARG[3], "VACUUM"))
+		{
+			int err = SQLOK(sqlite3_exec(db, "VACUUM", NULL, NULL, 0), db, "", 0);
+			if (!err)
+			{
+				rtn = 1;
+			}
+		}
+	}
 	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
 	{
 #define MAXSTR 1024 * 1024 * 4
@@ -3217,4 +3242,70 @@ void CloseSLTDatabaseQuery (LPHANDLE pHandle)
 	if (*pHandle)
 		rtn = sqlite3_close(*pHandle);
 	return;
+}
+BOOL SLTSpatialIndexCreate (sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+	char * error;
+
+	if (db)
+	{
+		sprintf(pCmd, "DROP TABLE IF EXISTS %s;DROP TABLE IF EXISTS %s_index;CREATE TABLE %s (id INTEGER PRIMARY KEY, Name CHAR(256));\
+CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);", tableName, tableName, tableName, tableName);
+				
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+
+}
+
+BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+
+	if (db)
+	{
+		sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
+			tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, tableName, id, Name);
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	return rtn;
+}
+MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	MNMXCORD Bounds;
+	int n = 0;
+	DBoundsInit(&Bounds);
+
+	if (db)
+	{
+		sprintf(pCmd, "SELECT MinX, MaxX, MinY, MaxY FROM %s_index", tableName);
+
+		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
+
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			MNMXCORD bounds;
+			bounds.xmn = sqlite3_column_double(statement, 0);
+			bounds.xmx = sqlite3_column_double(statement, 1);
+			bounds.ymn = sqlite3_column_double(statement, 2);
+			bounds.ymx = sqlite3_column_double(statement, 3);
+			n++;
+			AddMinMaxD(&Bounds, &bounds);
+		}
+		sqlite3_finalize(statement);
+	}
+	return Bounds;
 }

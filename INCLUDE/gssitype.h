@@ -6,6 +6,7 @@
 #include <commdlg.h>
 #include <ctype.h>    
 #include "sqlite3.h"
+#include "laszip_dll.h"
 
 #if WIN32
 #define HUGE 
@@ -115,6 +116,11 @@ typedef RECT16	FAR *LPRECT16;
 #define VPFILETYPE_MACRO	7
 #define VPFILETYPE_SUBVP	8
 #define VPFILETYPE_DTM	9
+
+#define DTMTYPE_NGI			1
+#define DTMTYPE_TIN_GM		2
+#define DTMTYPE_LIDAR_GM	3
+#define DTMTYPE_LIDAR_LAZ	4
 #ifdef	_WIN32_WCE
 typedef long clock_t;
 /* OpenFile() Structure */
@@ -3685,11 +3691,19 @@ typedef struct{
 								lTAddR:4;
 			}ADDRESSLENGTHS;
 typedef ADDRESSLENGTHS FAR *LPADDRESSLENGTHS;
+typedef struct {
+	char lazFiles[4][256];
+	int lazFileNums[4];
+	__int64 lastUse[4];
+	laszip_POINTER laszip_readers[4];
+}LAZFILESTRUCT;
+typedef LAZFILESTRUCT *LPLAZFILESTRUCT;
 
 typedef struct {                                        
 				HANDLE	hDB;                            //handle of file if .dtm or viewport if TIN Plt files
 				short	Type;
-				HFILE	Fid;							//1 = dtm grid, 2 = TIN plt files, 3 = Lidar points
+				HFILE	Fid;							//1 = dtm grid, 2 = TIN plt files, 3 = Lidar points, 4 = LIDAR in laz format
+				sqlite3 *db;
 				double	NULLElv;
 				double	GridSpace; 
 				short	ElevUnits; 						//0=feet,1=feet*100,2=decimeters,3=meters     
@@ -3704,6 +3718,8 @@ typedef struct {
 				long	CellID[MAXDTMCELLBUFFERS];
 				long	CellUse[MAXDTMCELLBUFFERS];  
 				char	TINIndex[256];
+				char	LAZDir[256];
+				LAZFILESTRUCT lazFiles;
 				VISLIST	VisList; //location of data for TIN surface
 				} DTMINFO;
 typedef DTMINFO	FAR	*LPDTMINFO;

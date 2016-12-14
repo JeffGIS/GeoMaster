@@ -111,7 +111,7 @@
     <EmbedManifest>true</EmbedManifest>
     <TargetName>GeoMaster34i</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;C:\GssiSourceCode\geomaster\LAStools\LASzip\dll</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -403,6 +403,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\FileGDBAPI\FGDBStub.c" />
+    <ClCompile Include="..\LAStools\LASzip\dll\laszip_dll.c" />
+    <ClCompile Include="..\LAStools\LASzip\example\laszipdllexample.cpp" />
     <ClCompile Include="..\solar_calculator\Version2\aa.c" />
     <ClCompile Include="..\Proj-4\src\aasincos.c" />
     <ClCompile Include="..\SQLite3\shell.c" />
@@ -888,6 +890,7 @@
     <ClInclude Include="..\INCLUDE\gssitype.h" />
     <ClInclude Include="..\INCLUDE\rotate256.h" />
     <ClInclude Include="..\INCLUDE\UMIO.H" />
+    <ClInclude Include="..\LAStools\LASzip\dll\laszip_dll.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\BMPImageWriter.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\GeoTIFFImageWriter.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\J2KImageReader.h" />

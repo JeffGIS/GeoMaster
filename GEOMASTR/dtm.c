@@ -1747,7 +1747,7 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 	LPDTMDATA	pDTMData;
 	static	BOOL	First=TRUE;  
 	short	Type=0;
-	char	FileName[MAX_PATH],str[MAX_PATH]; 
+	char	FileName[MAX_PATH],str[MAX_PATH], Projection[MAX_PATH]; 
 	HFILE	FidSurf;
 	
 	DTMRenderGridSpacing = GetGlobalDVal2("[%DTMGridSpacing]",-300.0);   
@@ -1771,11 +1771,13 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 	ExpandText (FileName);
 	_fstrupr (FileName);
 	if (StringEndsWith(FileName,".DTM"))
-		Type = 1;
+		Type = DTMTYPE_NGI;
 	else if (StringEndsWith(FileName,".TIN"))
-		Type = 2; 
-	else if (StringEndsWith(FileName,".LDR"))
-		Type = 3; 
+		Type = DTMTYPE_TIN_GM; 
+	else if (StringEndsWith(FileName, ".LDR"))
+		Type = DTMTYPE_LIDAR_GM;
+	else if (StringEndsWith(FileName, ".LA"))
+		Type = DTMTYPE_LIDAR_LAZ;
 	if (!Type)
 {
 																							#if ENABLETRACE
@@ -1787,7 +1789,7 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 		*pSurfType = Type;
 	switch (Type)
 	{
-		case 1:
+		case DTMTYPE_NGI:
 ReOpen:			
 		if (!(hDB = OpenGWDatabase (FileName,Mode)))
 {
@@ -1798,6 +1800,7 @@ ReOpen:
 }
 		hSurf = GSSiGlobAlloc (1097,GHND,sizeof(DTMINFO));
 		pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
+		pDTMInfo->Type = Type;
 		pDTMInfo->hDB = hDB;   
 		lpGWDHead = (LPGWDHEADER)GlobalLock (pDTMInfo->hDB); 
 		if (lpGWDHead->Version == 1)
@@ -1833,7 +1836,7 @@ ReOpen:
 		GlobalUnlock (hSurf);
 		break;
 	
-		case 2: 
+		case DTMTYPE_TIN_GM: 
 		{
 			LPVISLIST	SaveVis=CurVis; 
 			short		TinSymbol,i;
@@ -1841,7 +1844,7 @@ ReOpen:
 			
 			hSurf = GSSiGlobAlloc (1098,GHND,sizeof(DTMINFO));
 			pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
-			pDTMInfo->Type = 2; 
+			pDTMInfo->Type = Type; 
 			if (PRJ_BASEUNITS[1] == 1)
 				pDTMInfo->ElevUnits = 0;
 			else
@@ -1869,39 +1872,69 @@ ReOpen:
 			GlobalUnlock (hSurf);
 		}
 		break;
-		case 3: 
-		{   
-		    LIDARREC	LidarRec;  
-		    LIDARFILEHEADER	Header;  
-		    
-			FidSurf = GSSiOpenFile (FileName,0,OF_READ);
+		case DTMTYPE_LIDAR_GM:
+		{
+			LIDARREC	LidarRec;
+			LIDARFILEHEADER	Header;
+
+			FidSurf = GSSiOpenFile(FileName, 0, OF_READ);
 			if (FidSurf == HFILE_ERROR)
 				return FALSE;
-			hSurf = GSSiGlobAlloc (1097,GHND,sizeof(DTMINFO));  
-			BigRead (FidSurf,(HPSTR)&Header,sizeof(LIDARFILEHEADER));
-			
-			pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);   
-			pDTMInfo->Type = 3;
-			pDTMInfo->Fid= FidSurf;   
-			pDTMInfo->ElevUnits = 3; 
+			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+			BigRead(FidSurf, (HPSTR)&Header, sizeof(LIDARFILEHEADER));
+
+			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			pDTMInfo->Type = Type;
+			pDTMInfo->Fid = FidSurf;
+			pDTMInfo->ElevUnits = 3;
 			pDTMInfo->Bounds = Header.Bounds;
 			pDTMInfo->SouthWestNode.x = Header.Bounds.xmn;
-			pDTMInfo->SouthWestNode.y = Header.Bounds.ymn;  
+			pDTMInfo->SouthWestNode.y = Header.Bounds.ymn;
 			pDTMInfo->NumRows = Header.NumRows;
-			pDTMInfo->NumCols = Header.NumCols;  
+			pDTMInfo->NumCols = Header.NumCols;
 			pDTMInfo->GridSpace = Header.CellSpacing;
-			pDTMInfo->MaxDistToRawPoint = min (pDTMInfo->GridSpace,GetGlobalDVal2("[%DTMLidarMaxDistToRawPoint]",pDTMInfo->GridSpace));
-			pDTMInfo->MaxRawPointsToUse = GetGlobalLVal2("[%DTMLidarMaxPointsToUse]",16);
+			pDTMInfo->MaxDistToRawPoint = min(pDTMInfo->GridSpace, GetGlobalDVal2("[%DTMLidarMaxDistToRawPoint]", pDTMInfo->GridSpace));
+			pDTMInfo->MaxRawPointsToUse = GetGlobalLVal2("[%DTMLidarMaxPointsToUse]", 16);
 
 			pDTMInfo->NULLElv = NULLElv;
-			for (i=0;i<MAXDTMCELLBUFFERS;i++)
+			for (i = 0; i<MAXDTMCELLBUFFERS; i++)
 			{
-				pDTMInfo->CellUse[i]=LONG_MIN;
-				pDTMInfo->CellID[i]=LONG_MIN;
-		    }
-			GlobalUnlock (hSurf); 
+				pDTMInfo->CellUse[i] = LONG_MIN;
+				pDTMInfo->CellID[i] = LONG_MIN;
+			}
+			GlobalUnlock(hSurf);
 		}
-		break;
+			break;
+		case DTMTYPE_LIDAR_LAZ:
+		{
+			sqlite3 *db;
+			LPSTR pDot;
+
+			if (sqlite3_open(FileName, &db) != SQLITE_OK)
+				return FALSE;
+
+			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+
+			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			pDTMInfo->Type = Type;
+			pDTMInfo->db = db;
+			pDTMInfo->Fid = HFILE_ERROR;
+			strcpy(pDTMInfo->LAZDir, FileName);
+			pDot = strrchr(pDTMInfo->LAZDir, '\\');
+			if (pDot)
+				*pDot = 0;
+			pDTMInfo->ElevUnits = 3;
+			pDTMInfo->Bounds = SLTSpatialIndexBounds(db, "LIDAR");
+			pDTMInfo->MaxDistToRawPoint = min(pDTMInfo->GridSpace, GetGlobalDVal2("[%DTMLidarMaxDistToRawPoint]", pDTMInfo->GridSpace));
+			pDTMInfo->MaxRawPointsToUse = GetGlobalLVal2("[%DTMLidarMaxPointsToUse]", 16);
+
+			pDTMInfo->NULLElv = NULLElv;
+			sprintf(Projection, "%s\\projection.cvt", pDTMInfo->LAZDir);
+			LoadProjection(0, Projection);
+
+			GlobalUnlock(hSurf);
+		}
+			break;
 	}
 	if (hSurf) 
 	{   
@@ -1943,12 +1976,15 @@ void DTMClose (LPHANDLE pHandle)
 	if (!pHandle)
 	{
 		for (i=0;i<MAXOPENSURF;i++)
-		{   
+		{
+		
 			if (hOpenSurf[i])
 			{
 				pDTMInfo = (LPDTMINFO)GlobalLock (hOpenSurf[i]); 
-				if (pDTMInfo->Type == 3)
-					GSSiClose (pDTMInfo->Fid);
+				if (pDTMInfo->Type == DTMTYPE_LIDAR_GM)
+					GSSiClose(pDTMInfo->Fid);
+				else if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+					sqlite3_close(pDTMInfo->db);
 				else
 					CloseGWDatabase (pDTMInfo->hDB); 
 				for (j=0;j<MAXDTMCELLBUFFERS;j++)
@@ -2483,7 +2519,9 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	  }
 	  DTMPoint.x = SPX;
 	  DTMPoint.y = SPY; 
-/*	  if (DTMPoint.x == 158715.0 &&  DTMPoint.y == 55275.0)
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+		  ConvertCoord(&DTMPoint, 1, 0);
+	  /*	  if (DTMPoint.x == 158715.0 &&  DTMPoint.y == 55275.0)
 	  	  ii=1;
 	  if (DTMPoint.x == 158754.0 &&  DTMPoint.y == 55296.0)
 	  	  ii=1;  */
@@ -2492,7 +2530,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 		  if (!PointInBounds (DTMPoint,&pDTMInfo->Bounds))
 		  	goto S500;
 	  }
-	  if (pDTMInfo->Type == 2)  
+	  if (pDTMInfo->Type == DTMTYPE_TIN_GM)
 	  {
 		if (HaveLastTriangle)
 		{
@@ -2606,43 +2644,95 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 }
 	  	} 
 	  }
-	  if (pDTMInfo->Type == 3)  
-	  { 
-	  	short	nNearPoints = 0,SurroundingCellID=0; 
-	  	HANDLE	hCell;
-		LPLIDARCELL	pCell;
-		DPOINT	NearPoint[MAXNEARPOINTS];
-		double	NearDist[MAXNEARPOINTS], NearElevation[MAXNEARPOINTS];
-		double	MaxDist=DBL_MAX, d, Totd=0, Tote=0; 
-		USHORT	i;
-		
-	  	while ((hCell = GetNextLidarCell (pDTMInfo,&DTMPoint,&SurroundingCellID,&MaxDist)))
-	  	{   
-	  		pCell = (LPLIDARCELL)GlobalLock (hCell);
-	  		for (i=0;i<pCell->NumPoints;i++)
-	  		{
-	  			d = ldistppmacro (&DTMPoint,&pCell->XY[i]); 
-	  			MaxDist = AddToUsePointList (pDTMInfo,MaxDist,&nNearPoints,&d,&pCell->XY[i],&pCell->Z[i],NearDist,NearPoint,NearElevation);
-	  		}
-	  		GlobalUnlock (hCell);
-	  	}
-	  	if (nNearPoints<2)
-	  		goto S500;
-	  	MaxDist = min (MaxDist,pDTMInfo->MaxDistToRawPoint);
-	  	for (i=0;i<nNearPoints;i++)
-	  	{   
-//	  		d = sqrt (MaxDist - NearDist[i]); 
-//			d = NearDist[i]; 
-			d = (1/(NearDist[i]+0.001));
-			d *= d;
-	  		Totd += d;
-	  		Tote += NearElevation[i] * d;
-	  	}
-	  	if (!Totd)
-	  		goto S500;
-	  	ELV = Tote / Totd;
-//	  	ELV = (double)IDNINT(ELV*10)/10.0;   
-   		goto S1000;
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_GM)
+	  {
+		  short	nNearPoints = 0, SurroundingCellID = 0;
+		  HANDLE	hCell;
+		  LPLIDARCELL	pCell;
+		  DPOINT	NearPoint[MAXNEARPOINTS];
+		  double	NearDist[MAXNEARPOINTS], NearElevation[MAXNEARPOINTS];
+		  double	MaxDist = DBL_MAX, d, Totd = 0, Tote = 0;
+		  USHORT	i;
+
+		  while ((hCell = GetNextLidarCell(pDTMInfo, &DTMPoint, &SurroundingCellID, &MaxDist)))
+		  {
+			  pCell = (LPLIDARCELL)GlobalLock(hCell);
+			  for (i = 0; i<pCell->NumPoints; i++)
+			  {
+				  d = ldistppmacro(&DTMPoint, &pCell->XY[i]);
+				  MaxDist = AddToUsePointList(pDTMInfo, MaxDist, &nNearPoints, &d, &pCell->XY[i], &pCell->Z[i], NearDist, NearPoint, NearElevation);
+			  }
+			  GlobalUnlock(hCell);
+		  }
+		  if (nNearPoints<2)
+			  goto S500;
+		  MaxDist = min(MaxDist, pDTMInfo->MaxDistToRawPoint);
+		  for (i = 0; i<nNearPoints; i++)
+		  {
+			  //	  		d = sqrt (MaxDist - NearDist[i]); 
+			  //			d = NearDist[i]; 
+			  d = (1 / (NearDist[i] + 0.001));
+			  d *= d;
+			  Totd += d;
+			  Tote += NearElevation[i] * d;
+		  }
+		  if (!Totd)
+			  goto S500;
+		  ELV = Tote / Totd;
+		  goto S1000;
+	  }
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+	  {
+		  static int ncalls = 0;
+
+		  short	nNearPoints = 0, SurroundingCellID = 0;
+		  HANDLE	hCell;
+		  LPLIDARCELL	pCell;
+		  DPOINT3D	NearPoint[MAXNEARPOINTS];
+		  double	NearDist[MAXNEARPOINTS], NearElevation[MAXNEARPOINTS];
+		  double	MaxDist = DBL_MAX, d, Totd = 0, Tote = 0;
+		  USHORT	i;
+			  MNMXCORD Bounds;
+			  Bounds.xmn = DTMPoint.x - DTMRenderGridSpacing / 2;
+			  Bounds.xmx = DTMPoint.x + DTMRenderGridSpacing / 2;
+			  Bounds.ymn = DTMPoint.y - DTMRenderGridSpacing / 2;
+			  Bounds.ymx = DTMPoint.y + DTMRenderGridSpacing / 2;
+
+			  ncalls++;
+
+			  if (pDTMInfo->db)
+			  {
+				  HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+				  LPSTR  pCmd = GlobalLock(hCmd);
+				  sqlite3_stmt *statement;
+				  sprintf(pCmd, "SELECT LIDAR.id, LIDAR.Name FROM LIDAR, LIDAR_index WHERE LIDAR.id=LIDAR_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+
+				  SQLOK(sqlite3_prepare_v2(pDTMInfo->db, pCmd, -1, &statement, 0), pDTMInfo->db, "get points in bounds", 0);
+				  while (sqlite3_step(statement) == SQLITE_ROW)
+				  {
+					  int id = sqlite3_column_int(statement, 0);
+					  LPSTR LAZName = (LPSTR)sqlite3_column_text(statement, 1);
+					  char filename[MAX_PATH];
+					  sprintf(filename, "%s\\%s.laz", pDTMInfo->LAZDir, LAZName);
+
+					  nNearPoints += getLAZPointsInBounds(&pDTMInfo->lazFiles,id,filename, 2, &Bounds, MAXNEARPOINTS - nNearPoints, &NearPoint[nNearPoints]);
+				  }
+				  GSSiGlobUlFree(&hCmd);
+				  sqlite3_finalize(statement);
+			  }
+		 
+
+		  if (nNearPoints<1)
+			  goto S500;
+		  Tote = 0;
+		  for (i = 0; i<nNearPoints; i++)
+		  {
+			  Tote += NearPoint[i].z;
+		  }
+		  ELV = Tote / nNearPoints;
+		  if (ELV < 0)
+			  ELV = 0;
+		  goto S1000;
 	  }
 	  SPX -= pDTMInfo->SouthWestNode.x;
 	  SPY -= pDTMInfo->SouthWestNode.y;
@@ -3057,20 +3147,22 @@ BOOL GetNextDTMSegment (BOOL Init)
 	DPOINT	Point;   
 	HPDOUBLE	pRenderNode;   
 	UINT	i;  
-   	
    	if (!hDTM)
    		return FALSE; 
    	pDTMInfo = (LPDTMINFO)GlobalLock (hDTM);
    	if (Init)
    	{
-		if (pDTMInfo->Type < 1 && !pDTMInfo->Bounds.xmx)
+		MNMXCORD bounds = pDTMInfo->Bounds;
+		if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+			ConvertBounds(&bounds, 0, 1);
+		if (pDTMInfo->Type < 1 && !bounds.xmx)
 		{
    			DTMBounds = CurView->WBounds;
 		   	InflateBounds (&DTMBounds,pDTMInfo->GridSpace*32); 
    			DTMPoint.x = DTMBounds.xmn;
    			DTMPoint.y = DTMBounds.ymn; 
 		}
-		else if (!IntersectBounds (&CurView->WBounds,&pDTMInfo->Bounds,&DTMBounds))
+		else if (!IntersectBounds (&CurView->WBounds,&bounds,&DTMBounds))
    		{
    			DTMBounds = CurView->WBounds;
    			DTMPoint.x = DTMBounds.xmx;
