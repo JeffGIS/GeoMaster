@@ -387,8 +387,9 @@ short GetFileTypeFromName(LPSTR InName,BOOL OpenFilelist)
 		_fstrstr (Name,".SID"))
 		return 4;
 	if (_fstrstr (Name,".DTM") || 
-		_fstrstr (Name,".TIN") ||
-		_fstrstr (Name,".LDR"))
+		_fstrstr(Name, ".TIN") ||
+		_fstrstr(Name, ".LA") ||
+		_fstrstr(Name, ".LDR"))
 		return 8;
 	if (_fstrstr (Name,"FILELIST.TXT"))
 	{

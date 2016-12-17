@@ -753,7 +753,7 @@ void StatusExtraInfoUpdate(LPSTR mess)
 	return;
 }
 
-BOOL StatusWindowUpdate (LPSTR Title, LPSTR Mess, DWORD Tot, DWORD Done)
+BOOL StatusWindowUpdate(LPSTR Title, LPSTR Mess, LONGLONG Tot, LONGLONG Done)
 {   
 	char	MessText[256];
 	
@@ -780,7 +780,7 @@ BOOL StatusWindowUpdate (LPSTR Title, LPSTR Mess, DWORD Tot, DWORD Done)
 	return TRUE;
 }
 
-BOOL StatusWindowUpdate2 (LPSTR Mess, DWORD Tot, DWORD Done)
+BOOL StatusWindowUpdate2(LPSTR Mess, LONGLONG Tot, LONGLONG Done)
 { 
 	char	MessText[256];
 	if (!PrintMsgWnd)

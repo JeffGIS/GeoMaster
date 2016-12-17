@@ -68,6 +68,7 @@ extern HWND	TraceWnd2;
 
 char	CacheTitle[256];
 
+
 double square(double val)
 {
 	return val * val;
@@ -7330,7 +7331,7 @@ void dpointtoatrunc (LPSTR Value,LPDPOINT pPoint)
 	return;
 }
 
-BOOL GSSiChangeLength (HFILE Fid,long NewLength) 
+BOOL GSSiChangeLength (HFILE Fid,LONGLONG NewLength) 
 {        
 	short	st;
 	BOOL	rtn = FALSE;
@@ -7345,7 +7346,7 @@ BOOL GSSiChangeLength (HFILE Fid,long NewLength)
 			AddFileToUndoFile (0,NewLength+1,OpenFileFid[Fid]);
 		else
 			NewLength = -NewLength;
-		st = _chsize (OpenFileFid[Fid],NewLength);
+		st = _chsize_s (OpenFileFid[Fid],NewLength);
 		if (!st)
 		{
 			OpenFileLength[Fid] = NewLength;
@@ -8370,7 +8371,7 @@ Exit:
 	return TRUE;
 }
 
-BOOL PctBox (HWND hWnd, DWORD MaxLen, DWORD Done, short InFreq)
+BOOL PctBox(HWND hWnd, LONGLONG MaxLen, LONGLONG Done, short InFreq)
 #if ENABLETRACE
 {GSSiEnterProg (387);
 #endif
@@ -13042,20 +13043,13 @@ LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 		return -1;
 }
  
-DWORD GSSillseek2 (HFILE Fid, DWORD loc, int opt)
+LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt)
 {   
-	DWORD	rtnloc;
+	LONGLONG	rtnloc;
 	
 	if (OpenFileFid[Fid] == HFILE_ERROR)
 		return 0;
-	if (loc > LONG_MAX && !opt) 
-	{  
-		_lseek (OpenFileFid[Fid],LONG_MAX,opt);
-		loc -= LONG_MAX;
-		rtnloc = (DWORD)_lseek (OpenFileFid[Fid],loc,1); 
-	}
-	else
-		rtnloc = (DWORD)_lseek (OpenFileFid[Fid],loc,opt); 
+	rtnloc = _lseeki64 (OpenFileFid[Fid],loc,opt); 
 	return rtnloc;
 }
  
