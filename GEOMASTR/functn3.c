@@ -4543,6 +4543,18 @@ GotCloseFilehSQL:
 				if (*Arg[3])
 					SetGlobalValueBounds(Arg[3], &Bounds);
 			}
+			else if (!stricmp(Arg[1], "LAZTOTEXT"))//$LAZTOTEXT(infile,outfile,pointtype)
+			{
+				rtn = writeLAZFileToText(Arg[2], atoi(Arg[4]), Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CLASSIFY"))//$LAZTOTEXT(CLASSIFY,infile,outfile)
+			{
+				rtn = classifyLAZFile(Arg[2], Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
 			else
 				rtn = mainlaszip(nArgs, &Arg[1]);
 			goto RtnFalse;
@@ -5740,12 +5752,17 @@ SaveVis:
 				if (LoadAREADTM (Arg[2],Arg[3]))
 					goto RtnTrue;
 			}
-			else if (!_fstricmp (Arg[1],"LIDAR"))
+			else if (!_fstricmp(Arg[1], "LIDAR"))
 			{
-				if (LoadLIDARDTM (Arg[2],Arg[3],Arg[4]))
+				if (LoadLIDARDTM(Arg[2], Arg[3], Arg[4]))
 					goto RtnTrue;
-			} 
-			else if (!_fstricmp (Arg[1],"ERDAS"))
+			}
+			else if (!_fstricmp(Arg[1], "LIDARLAZ"))//$LOADDTM(LIDARLAZ,InDir,OutFile,pointType)
+			{
+				if (LoadLIDARDTMfromLAZ(Arg[2], Arg[3], atoi(Arg[4])))
+					goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "ERDAS"))
 			{
 				if (LoadERDASDem ())
 					goto RtnTrue;

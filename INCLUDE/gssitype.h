@@ -3702,6 +3702,7 @@ typedef LAZFILESTRUCT *LPLAZFILESTRUCT;
 typedef struct {                                        
 				HANDLE	hDB;                            //handle of file if .dtm or viewport if TIN Plt files
 				short	Type;
+				short	Version;
 				HFILE	Fid;							//1 = dtm grid, 2 = TIN plt files, 3 = Lidar points, 4 = LIDAR in laz format
 				sqlite3 *db;
 				double	NULLElv;

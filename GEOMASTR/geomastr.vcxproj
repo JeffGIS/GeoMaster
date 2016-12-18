@@ -78,7 +78,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34j</TargetName>
-    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -111,7 +111,7 @@
     <EmbedManifest>true</EmbedManifest>
     <TargetName>GeoMaster34i</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;C:\GssiSourceCode\geomaster\LAStools\LASzip\dll</IncludePath>
+    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -345,7 +345,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\dgnlib;..\sunang\ipw\h;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;SQLITE_ENABLE_RTREE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
