@@ -249,13 +249,13 @@ int AddVectoredHandlers (LPSTR UName,LPSTR Dir)
 	time (&starttime);  
 	
 	if (UName)
-		sprintf (AbendFile,"%sabends\\%s_%ld.txt",Dir,UName,starttime);
+		sprintf (AbendFile,"%sabends\\%s_%I64i.txt",Dir,UName,starttime);
 	else
 	{
      
 //    h2 = AddVectoredExceptionHandler(1,VectoredHandler2);
 //    h3 = AddVectoredExceptionHandler(0,VectoredHandler3);
-		sprintf (AbendFile,"%sabends\\beforenodeparms_%ld.txt",Dir,starttime);
+		sprintf (AbendFile,"%sabends\\beforenodeparms_%I64i.txt",Dir,starttime);
 //	strcpy (AbendFile,"[%%DL]abends.txt");
 //	ExpandText (AbendFile);
 		h1 = AddVectoredExceptionHandler(0,VectoredHandler1);
@@ -340,9 +340,9 @@ Test2()
         CheckTest("Test2d-1",e,Actual);
     }
     CheckTest("Test2d-2",e,Actual);
-    RemoveVectoredExceptionHandler(h1);
-    RemoveVectoredExceptionHandler(h2);
-    RemoveVectoredExceptionHandler(h3);
+    if (h1) RemoveVectoredExceptionHandler(h1);
+	if (h2) RemoveVectoredExceptionHandler(h2);
+	if (h3) RemoveVectoredExceptionHandler(h3);
     CheckAllClear();
 }
 

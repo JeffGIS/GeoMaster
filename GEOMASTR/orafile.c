@@ -316,7 +316,7 @@ long SortQuadLinks (HFILE FidSorted,ULONG NumRecs,USHORT XMid,HPLONG Offsets,HPQ
 			{   
 				Quads[NextQuadID].Up = UpperQuadID;
 				Quads[NextQuadID].Down[0] = -1;
-				Quads[NextQuadID].Down[2] = -1;
+				Quads[NextQuadID].Down[1] = -1;
 				Quads[UpperQuadID].Down[i] = NextQuadID++;
 			}
 		}

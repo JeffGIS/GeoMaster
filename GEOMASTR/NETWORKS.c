@@ -311,7 +311,7 @@ BOOL DeleteHighlightedMarkers (void)
 					{   
 						NetMarkersKey1.MarkerID = NetMarkersKey2.MarkerID;
 						NetMarkersKey1.Path = NetMarkersKey2.Path;
-						_fmemmove (NetMarkersKey1.Prefix,NetMarkersData2.Prefix,sizeof(NETMARKERSDATA2));
+						_fmemmove (&NetMarkersKey1.Prefix[0],&NetMarkersData2.Prefix[0],sizeof(NETMARKERSDATA2));
 						BT_DELETE (hBTNetMarkers2,(LPSTR)&NetMarkersKey2,(LPSTR)&NetMarkersData2,FALSE);
 						BT_DELETE (hBTNetMarkers1,(LPSTR)&NetMarkersKey1,(LPSTR)&NetMarkersData1,FALSE);
 					}

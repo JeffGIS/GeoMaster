@@ -151,7 +151,7 @@ static	char	ModifierID[16];
 static	int		curviewport,curlayer,cursymbol;
 static	HWND	hWndTab=0, hWndMenu=0;
 static	BOOL	CreatingParentWindow=FALSE;
-static	LPWINDOWMENUHEADER pWMH;
+static	LPWINDOWMENUHEADER pWMH=0;
 static	HANDLE	hWMH=0;
 static	LPVISLIST	SaveVis;
 static	LPVIEWPORT	SaveVP;
@@ -295,7 +295,7 @@ void DisplayTabbedMenu (HWND hWnd)
 return;
 	AppendMenu (EditMenu,MF_ENABLED|MF_STRING,IDM_SETFONTTABS,"Set tab font");
 	AppendMenu (EditMenu,MF_ENABLED|MF_STRING,IDM_TABPAD,"Set padding");
-	AppendMenu (EditMenu,MF_ENABLED|MF_STRING|pWMH->Verticle?MF_CHECKED:MF_UNCHECKED,IDM_VERTTABS,"Verticle tabs");
+	AppendMenu (EditMenu,MF_ENABLED|MF_STRING|(pWMH->Verticle?MF_CHECKED:MF_UNCHECKED),IDM_VERTTABS,"Verticle tabs");
 	AppendMenu (EditMenu,MF_ENABLED|MF_STRING,65003,"Cancel");
 	GetCursorPos (&position);
 	InTrackMenu = TRUE;
@@ -2217,8 +2217,11 @@ Exit:
 	SetConfig (SaveCfg);
 	CurView = SaveVP;
 	CurVis = SaveVis;
-	GlobalUnlock (pWMH->menuHandle[pWMH->currentMenu]);
-	GlobalUnlock (hWMH);
+	if (hWMH)
+	{
+		GlobalUnlock(pWMH->menuHandle[pWMH->currentMenu]);
+		GlobalUnlock(hWMH);
+	}
 	pAVHeader = savepAVHeader;
 	hWMH = savehWMH;
 	pWMH = savepWMH;

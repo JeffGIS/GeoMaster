@@ -4609,7 +4609,7 @@ GetTitleSize:
 	    			BMRect=ClassColorBox;
 	    			*pAt++ = 0;
 	    			if ((pCarrot = _fstrchr (CurTheme->ClassBM[iclass],'^')))
-	    				*pCarrot++;
+	    				pCarrot++;
 	    			_fstrcat (IconFile,pAt);
 	    			BMRect.bottom -= minhktsize;
 					if (pCarrot && !stricmp (pCarrot,"ESC"))

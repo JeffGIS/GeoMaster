@@ -781,7 +781,7 @@ Exit:
 																							#endif
 } 
 BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
-{
+{   
 	LPSTR InFile = Infiles;
 	LPSTR FileEnd = _fstrchr(InFile, ';'), FileEndSave;
 	char	TempFile[144] = "c:\\tempdtm.bin", str[130], mess[256];
@@ -791,28 +791,28 @@ BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
 	long	CurrentCell = -1, Cell, lineno;
 	DWORD	FileLength, NumRows, NumCols, loc, TotLen, CurLoc;
 	long	CellRow, CellCol, DataOffset, CellOffset, CellNo = 0, IndexSize;
-	HFILE	FidIn, FidOut;
+	HFILE	FidIn, FidOut;   
 	double	MinX = DBL_MAX, MaxX = -DBL_MAX, MinY = DBL_MAX, MaxY = -DBL_MAX, MinZ = DBL_MAX, MaxZ = -DBL_MAX;
 	double	FileMinX, FileMinY;
 	long	LidarDist[MAXLIDARPERREC + 1];
-	double	CellMinX, CellMinY;
+	double	CellMinX, CellMinY; 
 	int		i;
-
-	LIDARREC	LidarRec;
-	LIDARFILEHEADER	Header;
-
+     
+	LIDARREC	LidarRec = { 0 };
+    LIDARFILEHEADER	Header;
+	
 	AllowCache = FALSE;
-	UndoEnabled = FALSE;
+	UndoEnabled = FALSE; 
 	if (FileEnd)
 		*FileEnd++ = 0;
 	FileEndSave = FileEnd;
 	if (*CBounds)
-	{
-		MNMXCORD Bounds;
+	{   
+		MNMXCORD Bounds; 
 		BOOL	err;
-
+		
 		Bounds = atobounds(CBounds, &err);
-		if (err)
+		if (err) 
 		{
 			sprintf(mess, "Error in bounds:%s", CBounds);
 			MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
@@ -821,19 +821,19 @@ BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
 		MinX = Bounds.xmn;
 		MinY = Bounds.ymn;
 		MaxX = Bounds.xmx;
-		MaxY = Bounds.ymx;
+		MaxY = Bounds.ymx; 
 	}
 	else
-	{
+	{       
 		FidIn = GSSiOpenFile(InFile, 0, OF_READ);
 		TotLen = GSSillseek(FidIn, 0, 2);
 		GSSillseek(FidIn, 0, 0);
 		ProcessDelimTextHeader(str, InFile, FidIn, &TxtHandle, 0, 0);
 		CreateStatusWind(hWndMain, 1, "Getting Min/Max Values");
-	NextFile:
+NextFile:
 		lineno = 1;
 		while (ContinueProcessing && fgetstring(str, 64, FidIn))
-		{
+		{   
 			lineno++;
 			GetDelimTextData(str, TxtHandle, 64);
 			X = GetGlobalDVal("[X]")*FTM;
@@ -853,29 +853,29 @@ BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
 			}
 			CurLoc = GSSillseek(FidIn, 0, 1);
 			StatusWindowUpdate(0, 0, TotLen, CurLoc);
-		}
+	    }
 		GSSiClose(FidIn);
-		if (FileEnd)
-		{
-
+	    if (FileEnd)
+	    {
+	    	
 			FidIn = GSSiOpenFile(FileEnd, 0, OF_READ);
-			FileEnd = 0;
+	    	FileEnd = 0; 
 			TotLen = GSSillseek(FidIn, 0, 2);
 			GSSillseek(FidIn, 0, 0);
 			goto NextFile;
 		}
-		ContinueProcessing = TRUE;
+	    ContinueProcessing = TRUE;
 		DestroyStatusWindow(0);
 	}
 	FileMinX = MinX - fmod(MinX, LIDARCELLSIZE);
 	FileMinY = MinY - fmod(MinY, LIDARCELLSIZE);
 	NumCols = 1 + (MaxX - FileMinX) / LIDARCELLSIZE;
 	NumRows = 1 + (MaxY - FileMinY) / LIDARCELLSIZE;
-	if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX)
-	{
+    if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX)
+    {
 		MessageBox(0, "Lidar file size exceeds maximum", 0, MB_ICONEXCLAMATION);
-		return FALSE;
-	}
+    	return FALSE;
+    } 
 	FileLength = NumRows * NumCols * sizeof(LIDARREC);
 	CloseFidSmall();
 	FidOut = GSSiOpenFile(TempFile, 0, OF_CREATE);
@@ -903,7 +903,7 @@ NextFile2:
 		CellRow = (Y - FileMinY) / LIDARCELLSIZE;
 		if (CellCol >= 0 && CellCol < NumCols && CellRow >= 0 && CellRow < NumRows)
 		{
-			Cell = NumCols * CellRow + CellCol;
+			Cell = NumCols * CellRow + CellCol;  
 			if (Cell != CurrentCell)
 			{
 				if (CurrentCell > -1)
@@ -915,7 +915,7 @@ NextFile2:
 				loc = (DWORD)Cell * (DWORD)sizeof(LIDARREC);
 				GSSillseek2(FidOut, loc, 0);
 				BigRead(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC));
-				CurrentCell = Cell;
+				CurrentCell = Cell;  
 				CellMinX = FileMinX + CellCol * LIDARCELLSIZE;
 				CellMinY = FileMinY + CellRow * LIDARCELLSIZE;
 			}
@@ -924,17 +924,17 @@ NextFile2:
 				LidarRec.LidarPnt[LidarRec.NumPoints].xoff = IDNINT(1000 * (X - CellMinX));
 				LidarRec.LidarPnt[LidarRec.NumPoints].yoff = IDNINT(1000 * (Y - CellMinY));
 				LidarRec.LidarPnt[LidarRec.NumPoints++].Elevation = Z;
-			}
+			} 
 		}
 		CurLoc = (DWORD)GSSillseek(FidIn, 0, 1);
 		StatusWindowUpdate(0, 0, TotLen, CurLoc);
-	}
+    }  
 	GSSiClose(FidIn);
-	if (FileEnd)
-	{
-
+    if (FileEnd)
+    {
+	    	
 		FidIn = GSSiOpenFile(FileEnd, 0, OF_READ);
-		FileEnd = 0;
+    	FileEnd = 0; 
 		TotLen = GSSillseek(FidIn, 0, 2);
 		GSSillseek(FidIn, 0, 0);
 		goto NextFile2;
@@ -942,7 +942,7 @@ NextFile2:
 	loc = (DWORD)CurrentCell * (DWORD)sizeof(LIDARREC);
 	GSSillseek2(FidOut, loc, 0);
 	BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
-	ContinueProcessing = TRUE;
+    ContinueProcessing = TRUE;
 	DestroyStatusWindow(0);
 	GSSiClose(FidOut);
 	FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
@@ -955,30 +955,30 @@ NextFile2:
 		LidarDist[LidarRec.NumPoints]++;
 		CurLoc = (DWORD)GSSillseek(FidOut, 0, 1);
 		StatusWindowUpdate(0, 0, TotLen, CurLoc);
-	}
-	ContinueProcessing = TRUE;
+    }  
+    ContinueProcessing = TRUE;
 	DestroyStatusWindow(0);
 	GSSiClose(FidOut);
 	GSSiGlobFree(&TxtHandle);
 
 	for (i = 0; i<MAXLIDARPERREC + 1; i++)
-	{
+	{ 
 		sprintf(str, "%i\t%ld", i, LidarDist[i]);
 		AppendFile("c:\\lidardist.txt", str);
-	}
+	} 
 	FidIn = GSSiOpenFile(TempFile, 0, OF_READ);
 	DataOffset = sizeof(LIDARFILEHEADER) + NumRows * NumCols * 4;
 	FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
-	Header.Version = 1;
+	Header.Version = 1;  
 	Header.Bounds.xmn = FileMinX;
 	Header.Bounds.xmx = MaxX;
 	Header.Bounds.ymn = FileMinY;
-	Header.Bounds.ymx = MaxY;
+	Header.Bounds.ymx = MaxY;  
 	Header.MinElev = MinZ;
 	Header.MaxElev = MaxZ;
 	Header.NumRows = NumRows;
-	Header.NumCols = NumCols;
-	Header.CellSpacing = LIDARCELLSIZE;
+	Header.NumCols = NumCols; 
+	Header.CellSpacing = LIDARCELLSIZE; 
 	BigWrite(FidOut, (HPSTR)&Header, sizeof(LIDARFILEHEADER), -1);
 	IndexSize = NumRows * NumCols;
 	CellOffset = 0;
@@ -1242,35 +1242,35 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 			Header.NumCols = NumCols;
 			Header.CellSpacing = LIDARCELLSIZE;
 			BigWrite(FidOut, (HPSTR)&Header, sizeof(LIDARFILEHEADER), -1);
-			IndexSize = NumRows * NumCols;
-			CellOffset = 0;
-			while (IndexSize--)
+	IndexSize = NumRows * NumCols;
+	CellOffset = 0;
+	while (IndexSize--)
 				BigWrite(FidOut, (HPSTR)&CellOffset,sizeof(LONGLONG), -1);
 			TotLen = GSSillseek2(FidIn, 0, 2);
 			GSSillseek2(FidIn, 0, 0);
 			while (ContinueProcessing && BigRead(FidIn, (HPSTR)&LidarRec, sizeof(LIDARREC)))
-			{
+	{
 				if (CellNo == 3253864)
 					ii = 1;
-				if (LidarRec.NumPoints)
-				{
+		if (LidarRec.NumPoints)
+		{
 					CellOffset = GSSillseek2(FidOut, 0, 2);
 					BigWrite(FidOut, (HPSTR)&LidarRec, 2 + LidarRec.NumPoints*sizeof(LIDARPNT), -1);
 					GSSillseek2(FidOut, (LONGLONG)sizeof(LIDARFILEHEADER) + CellNo * sizeof(LONGLONG), 0);
 					BigWrite(FidOut, (HPSTR)&CellOffset, sizeof(LONGLONG), -1);
-				}
-				CellNo++;
+		}
+		CellNo++;
 				CurLoc = GSSillseek2(FidIn, 0, 1);
 				StatusWindowUpdate(0, 0, TotLen, CurLoc);
-			}
-			ContinueProcessing = TRUE;
+    }  
+    ContinueProcessing = TRUE;
 			GSSiClose(FidIn);
 			GSSiClose(FidOut);
 			DestroyStatusWindow(0);
 			GSSiRemove(TempFile);
 		}
-		return TRUE;
-	}
+	return TRUE;
+}
 	return FALSE;
 }
 
@@ -2393,7 +2393,7 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 	DTMKEY		DTMKey;
 	LPSTR		CompressedDTMData;
 	UINT		i, MinUseID;  
-	long		MinUse=LONG_MAX, Offset, IElev;
+	long		MinUse=LONG_MAX, Offset, IElev=0;
 	LPLONG		pBias;  
 	LPSUBCELLINFO	pSUBCELLInfo;
 	LPGWDHEADER	lpGWDHead;     
@@ -3784,7 +3784,7 @@ BOOL FindOpContourPoint (USHORT StartSide,LPDOUBLE pZC,LPDPOINT Point2,LPDPOINT 
 void DisplayContourLabels (BOOL Clear)
 {   
 	USHORT	i,j;
-	short	nChar, loc, StartPoint, twidth, theight, ichar, dy, ipass, ntxp, EndLine, BegLine;    
+	short	nChar, loc, StartPoint, twidth, theight, ichar, dy, ipass, ntxp, EndLine, BegLine=0;    
 	BOOL	Flip;
 	LPSHORT	pNumPoints; 
 	LPLONG	pElev;
@@ -3802,8 +3802,8 @@ void DisplayContourLabels (BOOL Clear)
 	BOOL	LightContour;
 	double	Elv;
 	HPEN	hPen;
-	POINT	TextPoint[16];
-	double	TextAZ[16];
+	POINT	TextPoint[16] = { 0 };
+	double	TextAZ[16] = { 0 };
 	char	TextChar[16];
 	int		ii;
 				

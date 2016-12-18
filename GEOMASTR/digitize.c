@@ -205,7 +205,7 @@ void StopExistingGPSInput (void)
 BOOL OpenDigConnection( HWND hWnd )
 {
    BOOL		rtn=FALSE;
-   char       DigPort[ 10 ], szTemp[ 10 ], DigName[32], DigInitString[256],Baud[32], cmd[256] ;
+   char       DigPort[ 32 ], szTemp[ 10 ], DigName[32], DigInitString[256],Baud[32], cmd[256] ;
    BOOL       fRetVal ;
    char		IniName[128]="[%DL]geomastr.ini";
    int		ii;

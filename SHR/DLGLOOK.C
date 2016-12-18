@@ -284,6 +284,7 @@ void Draw3DBorder(HDC hDC, LPRECT pRect,int inStyle, BOOL DoubleWidth)
             hLTPen = CreatePen (PS_SOLID, 1, RGB (128, 128, 128));
             hRBPen = CreatePen (PS_SOLID, 1, RGB (255, 255, 255));
             break;
+		default:
         case NO_3D:
             hLTPen = CreatePen (PS_SOLID, 1, IconBorderColor);
             hRBPen = CreatePen (PS_SOLID, 1, IconBorderColor);

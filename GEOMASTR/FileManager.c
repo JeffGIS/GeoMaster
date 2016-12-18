@@ -74,7 +74,7 @@ static void ListFMSource(HWND hWndDlg)
 
 static void AddGroup(LPSTR Name)
 {
-	int groupID;
+	int groupID=0;
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 4096);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	char *error = NULL;

@@ -1060,7 +1060,7 @@ void XLC(const double *PCX,  const double *PCY,
       
       DPOINT dp,odp;
       double  DMN2, X, Y, AZLN, AZPC, AZLNP, RAD, PTX, PTY, cgtx, cgty,
-      XL, XC, YL, YC, X0, Y0, PDMN, AZTOL,AZPT, SECT,AZP1,AZP2,AZDFCT,
+      XL, XC, YL, YC, X0, Y0, PDMN, AZTOL,AZPT, SECT=0,AZP1,AZP2,AZDFCT,
       AZDFC1, AZDFC2,AZDFT, XT, YT,DTMN1;
       short I2CODE, IRC, K, IRC1, IRC2, NW;
       BOOL cgt;
@@ -3369,7 +3369,7 @@ void  LOL8(const double *X1,   const double *Y1,
 {GSSiEnterProg (1215);
 #endif
 { 
-  double AZ, RAD, dist;
+  double AZ=0, RAD, dist=0;
       if(ITYPE == 3) goto S10;
 //C
 //C******* DETERMINE X & Y CORR. OF A NEW POINT

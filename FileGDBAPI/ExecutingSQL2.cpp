@@ -458,7 +458,7 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSize,LPHANDLE phList)
 {   
 	long	hr;
-	int		n;
+	int		n=0;
 	string undr = Under;
 	wstring	type[3]= {L"Table",L"Feature Class",L"Feature Dataset"};
 	vector<wstring> childList(5); 

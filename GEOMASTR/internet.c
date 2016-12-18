@@ -137,7 +137,7 @@ HANDLE ListFtpDir(HANDLE hConnection,HANDLE hFind,LPSTR pWildCard,
 		  return NULL;
 	  }
   }
-  else
+  else if (hFind)
   {
 	  if (!InternetFindNextFile( hFind,pdirInfo ))
 	  {

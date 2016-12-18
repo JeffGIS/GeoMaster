@@ -1627,7 +1627,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 					sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,PIN,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i), Data BLOB(%i));", TableName, BLOB_MAX, BLOB_MAX * 8, BLOB_MAX);
 					fputstring(pCmd, Fid);
-					sprintf(pCmd, "CREATE INDEX %sPIN_Index ON %s ('PIN' ASC);", TableName);
+					sprintf(pCmd, "CREATE INDEX %sPIN_Index ON %s ('PIN' ASC);", TableName, TableName);
 					fputstring(pCmd, Fid);
 				}
 
@@ -2442,7 +2442,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 	{
 		
 		char	Name[MAX_PATH], str[260], Projection[MAX_PATH + 2], Units[34];
-		char	SymName[66], cWidth[64], cRot[64], cColor[64], cIF[128];
+		char	SymName[66]="", cWidth[64]="", cRot[64]="", cColor[64]="", cIF[128]="";
 		LPSTR	pDot, pTAG, pWidth, pParm = SQLITEParms;
 		short	l;
 		int		itype;

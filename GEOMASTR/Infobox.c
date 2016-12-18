@@ -1428,6 +1428,7 @@ POINT TAGPtToWinPt (DPOINT TagPoint)
 
 	switch (TAGBox.CoordStyle)
 	{
+	default:
 		case 0:
 	    	return (BasePtToWinPt (&TagPoint));
 	    	break;
@@ -1957,7 +1958,7 @@ Restart:
 		else if (TAGBox.CoordStyle == 2 || TAGBox.CoordStyle == 4)
 			goto Next;
 	    TAGBox.before=0;
-		if (((TAGBox.CoordStyle == 2 || TAGBox.CoordStyle == 4) && From == 3) || (CurView->ID == TAGBox.ViewportID && CurViewActive()))
+		if (CurView && ((TAGBox.CoordStyle == 2 || TAGBox.CoordStyle == 4) && From == 3) || (CurView->ID == TAGBox.ViewportID && CurViewActive()))
 		{   
 			if (From && !TAGBox.CoordStyle)
 				goto Next;

@@ -266,7 +266,7 @@ BOOL glblUnlock(HANDLE h)
 
 LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 {
-	LPVOID	pntr=GlobalLock (hglb);
+	LPVOID	pntr;
 	UINT	i; 
 	HPBYTE	pstr;
 extern LPVOID debugaddress;
@@ -279,10 +279,11 @@ extern LPVOID debugaddress;
 	{
 		checkcounty(1);
 	}*/
-	if (!pntr)
-		ii = 1;
 	if (hglb)
 	{ 
+		pntr = GlobalLock(hglb);
+		if (!pntr)
+			ii = 1;
 		if (hglb == WantHandle)
 		ii=1;
 	for (i=0;i<MAXMEM;i++)

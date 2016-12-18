@@ -3396,7 +3396,7 @@ GSSiExitProg (104);
 	    SetCursorPosGM (MousePoint.x,MousePoint.y,0);
 		SavePPB = PickPointBase;
 		i = NumItems = NumPicked;
-	    while (i--)
+	    while (i > 0 && i--)
 	    {
 		    AddToHighlightList (PickList[i].Refno,&PickList[i],TRUE);
 	    	ShowPickedItem (hWndMain,i); 
@@ -10724,7 +10724,8 @@ GSSiExitProg (848);
 					VerifyAddIncrement=TRUE;
 					_fstrcpy (CStatus,"on");
 				} 
-				sprintf (mess,"Verify is now %s","",MB_OK);
+				sprintf(mess, "Verify is now %s", CStatus);
+				MessageBox(hWnd, mess, 0, MB_OK);
 			}
 {
 #if ENABLETRACE

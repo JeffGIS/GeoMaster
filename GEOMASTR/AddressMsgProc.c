@@ -1291,6 +1291,7 @@ BOOL FAR PASCAL ADDEDIT_HELPERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 						 LPSTR	pLoc,pEnd,pStreet,pMunic;
 						 HELP1KEY	Help1Key;
 
+						 *str = 0;
                          SendDlgItemMessage(hWndDlg,LOWORD(wParam),LB_GETTEXT,Choice,(DWORD)&str);
 						 pLoc = strrchr (str,'\t');
 						 *pLoc++ = 0;
@@ -1588,7 +1589,7 @@ BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  switch (HIWORD(wParam))
                  {	
                  	case EN_CHANGE:  
-                 	if (GetDlgItemText (hWndDlg,IDC_FINDSTRING,word,16))
+                 	if (GetDlgItemText (hWndDlg,IDC_FINDSTRING,word,14))
 		            	EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
 		            else
 		            	EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);
@@ -2848,7 +2849,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
     LPGWDHEADER lpGWDHead;
     HANDLE      hBT;    
     long        Offset, TotLen, lineno=0, IntID, TotAccidents, LastID; 
-    char        str[256], DestName[128], IntIDField[66]; 
+    char        str[256], DestName[256], IntIDField[66]; 
     short       st, len,ifield;
     LPOPENSQLDATA   SQLPtr;
     LPFIELDINFO lpFieldInfo; 
@@ -3482,7 +3483,7 @@ Close:
                             House = 0;
                             OddEven = 0;
                         }
-                        else if (HouseBuf[nchar-1] == '?' &
+                        else if (HouseBuf[nchar-1] == '?' &&
                                  HouseBuf[nchar-2] == '?')
                         {
                             OddEven = 3;
@@ -3514,7 +3515,7 @@ Close:
                         nchar = GetDlgItemText(hWndDlg,IDM_HOUSE,HouseBuf,16);
                         if (nchar > 0)
                         {
-                            if (!isdigit (HouseBuf[nchar-1]) &
+                            if (!isdigit (HouseBuf[nchar-1]) &&
                                  HouseBuf[nchar-1] != '?')
                             {
                                 if (HouseBuf[nchar-1]==' ')
@@ -3775,7 +3776,7 @@ BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wP
     static	HANDLE	SaveHandle;
     HANDLE		hAddDB;
     static	HANDLE	hChangeRecs=0;   
-    char	StreetBuf[42], str[256], Street1[66],Street2[66];
+    char	StreetBuf[42], str[256], Street1[256],Street2[256];
 	INTMATCHEDITKEY1	IMEKey1;  
 	static	BOOL	Skip1=FALSE, Skip2=FALSE; 
 	LPSTR	lpTAB;
@@ -5361,7 +5362,7 @@ GetNext:
 								pAMER = (LPADDMATCHEDITREC)&lpGWDHead->GWDData[lpGWDHead->pFldInfo->Len];
 								SetGlobalValueLong ("%ADDMATCHEDITKEY",*pRecnum);
 								CurEditRec = *pRecnum;
-								sprintf (CorrectedAddress,"%ld %s",pAMER->House,pAMER->Street);
+								sprintf (CorrectedAddress,"%s %s",pAMER->House,pAMER->Street);
 								SetGlobalValue ("%CORRECTEDADDRESS",CorrectedAddress);
 			    				GlobalUnlock (hDBDest);
 								CloseGWDatabase (hDBDest); 
@@ -6814,7 +6815,7 @@ BOOL FAR PASCAL ADDRESS1MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                         if (nchar > 0)
 
                         {
-                            if (!isdigit (HouseBuf[nchar-1]) &
+                            if (!isdigit (HouseBuf[nchar-1]) &&
                                  HouseBuf[nchar-1] != '?')
                             {
                                 if (HouseBuf[nchar-1]==' ')
@@ -6840,7 +6841,7 @@ BOOL FAR PASCAL ADDRESS1MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 		                            House = 0;
 		                            OddEven = 0;
 		                        }
-		                        else if (HouseBuf[nchar-1] == '?' &
+		                        else if (HouseBuf[nchar-1] == '?' &&
 		                                 HouseBuf[nchar-2] == '?')
 		                        {
 		                            OddEven = 3;
