@@ -238,6 +238,7 @@ BOOL RemoveCacheFile (LPSTR File);
 short DeleteDirAndContents (LPSTR Name);
 short IsValidDir(LPSTR Name); 
 void GSSisplitpath (LPSTR InPath,LPSTR Drive,LPSTR Dir,LPSTR Leaf,LPSTR Ext);
+LPSTR FilePart(LPSTR File, LPSTR Part);
 long SearchFilesInDir (LPSTR CurDir, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCard,int Lev,BOOL WantSub,BOOL fileNameOnly);
 long SearchDirectoriesInDir (LPSTR CurDirIN, HFILE OutFile,LPLONG TotFiles,LPSTR WildCard,int Lev);
 int WINAPI DlgDirList32 (HWND hWndDlg, LPSTR cType, int LBCNTL, int CurrentDirCNTL, UINT Flags);

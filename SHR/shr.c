@@ -5963,6 +5963,71 @@ short DeleteDirAndContents (LPSTR InName)
 	return FALSE;
 }
 
+LPSTR FilePart(LPSTR File,LPSTR Part)
+{
+	LPSTR rtn = File;
+	static char inName[_MAX_PATH];
+	static char fullName[_MAX_PATH];
+	static char drive[_MAX_DRIVE];
+	static char dir[_MAX_DIR];
+	static char name[_MAX_FNAME];
+	static char ext[_MAX_EXT];
+
+	strcpy(inName,File);
+	ExpandText(inName);
+	_fullpath(fullName, inName, sizeof(fullName));
+	_splitpath(fullName,drive,dir,name,ext);
+
+
+	if (!stricmp(Part, "ACTUAL"))
+	{
+		ConvertToNewLocation(File, FALSE);
+
+	}
+	else if (!stricmp(Part, "DRIVE"))
+		rtn = drive;
+	else if (!stricmp(Part, "DRIVEDIR"))
+	{
+		sprintf(fullName, "%s\\%s", drive, dir);
+		rtn = fullName;
+	}
+	else if (!stricmp(Part, "DIR"))
+		rtn = dir;
+	else if (!stricmp(Part, "LASTDIR"))
+	{
+		LPSTR lastdir = strrchr(dir, '\\');
+		if (lastdir)
+			rtn = ++lastdir;
+		else
+			rtn = dir;
+	}
+	else if (!stricmp(Part, "WOLASTDIR"))
+	{
+		LPSTR lastdir = strrchr(dir, '\\');
+		if (lastdir)
+			*lastdir = 0;
+		rtn = dir;
+	}
+	else if (!stricmp(Part, "NAME"))
+		rtn = name;
+	else if (!stricmp(Part, "FULLNAME"))
+		rtn = fullName;
+	else if (!stricmp(Part, "NAMEEXT"))
+	{
+		sprintf(fullName, "%s.%s", name, ext);
+		rtn = fullName;
+	}
+	else if (!stricmp(Part, "EXT"))
+		rtn = ext;
+	else if (!stricmp(Part, "WOEXT"))
+	{
+		LPSTR lastdir = strrchr(fullName, '\\');
+		if (lastdir)
+			*lastdir = 0;
+		rtn = fullName;
+	}
+	return rtn;
+}
 
 long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub,BOOL fileNameOnly)
 #if ENABLETRACE

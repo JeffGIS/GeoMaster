@@ -1098,7 +1098,8 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 		FidOut = GSSiOpenFile(TempFile, 0, OF_READWRITE);
 
 		sprintf(FileList, "%s\\filelist.txt", InDir);
-		CreateStatusWind(hWndMain, 2, "Loading Data");
+		sprintf(mess, "Loading data for %s",FilePart(OutFile,"NAME"));
+		CreateStatusWind(hWndMain, 2, mess);
 		if (OpenDataFile(FileList, "", BT_READ, &hDB))
 		{
 			int numFiles = NumSQLRows(hDB);
@@ -1225,7 +1226,8 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 				AppendFile(distFile, str);
 			}
 			DestroyStatusWindow(0);
-			CreateStatusWind(hWndMain, 1, "Creating Output File");
+			sprintf(mess, "Creating output file %s", FilePart(OutFile, "NAME"));
+			CreateStatusWind(hWndMain, 1, mess);
 			FidIn = GSSiOpenFile(TempFile, 0, OF_READ);
 			DataOffset = sizeof(LIDARFILEHEADER) + NumRows * NumCols * sizeof(LONGLONG);
 			FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
