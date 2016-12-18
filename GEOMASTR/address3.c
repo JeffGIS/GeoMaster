@@ -371,7 +371,8 @@ BOOL ReverseGeocodeCommand (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 				else
 					strcpy (OutLoc,"On:[PNDATA.STREETNAME];BetweenStreets:[PNDATA.FROMSTREET] and [PNDATA.TOSTREET];BetweenAddresses:[PNDATA.FROMADDRESSR] and [PNDATA.TOADDRESSR];InZIP:[PNDATA.ZIPR];");
 				ExpandText (OutLoc);
-				pAdd1 = strstr (OutLoc,"BetweenAddresses:") + strlen("BetweenAddresses:");
+				pAdd1 = strstr(OutLoc, "BetweenAddresses:") +strlen("BetweenAddresses:");
+#pragma warning(suppress: 6387)
 				pAdd2 = strchr (pAdd1,' ') + 5;
 				iAdd1 = atoi (pAdd1);
 				iAdd2 = atoi (pAdd2);

@@ -494,7 +494,7 @@ BOOL GetCurrentPNDBName (LPSTR Name)
 		doDelete = TRUE;
 		Name = &DefStr[512];
 	}
-   	sprintf (Name,"%s\\grt%i%i.gmd",DefStr,CurrentVersion); 
+   	sprintf (Name,"%s\\grt%i.gmd",DefStr,CurrentVersion); 
    	if (!ExistFile (Name))
    	{
 		if (doDelete)
@@ -1934,7 +1934,7 @@ BOOL LoadTAGDef (void)
 				else
 					pTAGDef = (LPTAGDEF)GlobalLock (hTAGDef); 
 				if (sscanf (line,"%s %i %i %i",
-					&pTAGDef->Prefix,&pTAGDef->Len,&pTAGDef->IncBeg,&pTAGDef->IncLen) != 4)
+					pTAGDef->Prefix,&pTAGDef->Len,&pTAGDef->IncBeg,&pTAGDef->IncLen) != 4)
 				{
 					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
 					GSSiMsgBox (GetFocus(),Mess,0,MB_ICONEXCLAMATION,0);
@@ -1944,7 +1944,7 @@ BOOL LoadTAGDef (void)
 			{   
 				lpSpace = _fstrchr (&line[1],' ');
 				if (sscanf (&line[1],"%s %i %i %i",
-					&pTAGDef->VarName[pTAGDef->NumVar],&pTAGDef->VarStart[pTAGDef->NumVar],
+					pTAGDef->VarName[pTAGDef->NumVar],&pTAGDef->VarStart[pTAGDef->NumVar],
 					&pTAGDef->VarLen[pTAGDef->NumVar]) != 3)
 				{
 					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
@@ -5627,7 +5627,7 @@ Next:if (*str == '"')
 	EndLoc = _fstrstr(str,EndStr);
 	if (EndLoc)
 		*EndLoc = '\0';
-	else if (*EndStr = '"')
+	else if (*EndStr == '"')
 	{
 		if ((EndLoc = _fstrrchr (str,'"')))
 			*EndLoc = 0;

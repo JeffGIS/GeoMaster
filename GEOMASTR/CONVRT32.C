@@ -1298,7 +1298,7 @@ void ConvertVP_V6_to_V7 (LPVIEWPORT_V7 pCurView,LPVIEWPORT_V6 pVP6)
 	strncpy (pCurView->UDI,pVP6->UDI,sizeof(pVP6->UDI));
 	pCurView->ReportRefno = pVP6->ReportRefno;
 	pCurView->ReportFactor = pVP6->ReportFactor;
-	for (i=0;i<3202;i++){
+	for (i=0;i<3201;i++){
 		pCurView->CurVisType[i] = pVP6->CurVisType[i];
 	}
 	for (i=0;i<MAX_VIEWPORT_FILES16;i++){
@@ -1331,7 +1331,7 @@ void ConvertVP_V6_to_V7 (LPVIEWPORT_V7 pCurView,LPVIEWPORT_V6 pVP6)
 	}
 	pCurView->hPenRedef = (HANDLE)pVP6->hPenRedef;
 	pCurView->NumNewObjects = pVP6->NumNewObjects;
-	for (i=0;i<3202;i++){
+	for (i=0;i<3201;i++){
 		pCurView->NewObjectMap[i] = pVP6->NewObjectMap[i];
 	}
 	for (i=0;i<MAX_NEW_OBJECTS;i++){
@@ -1468,7 +1468,7 @@ void ConvertTB_V1_to_V2 (LPTAGBOX pTB,LPTAGBOX_V1 pTB16)
 	strncpy (pTB->UDI,pTB16->UDI,sizeof(pTB16->UDI));
 	strncpy (pTB->DataFile,pTB16->DataFile,sizeof(pTB16->DataFile));
 	strncpy (pTB->SQL,pTB16->SQL,sizeof(pTB16->SQL));
-	strncpy (pTB->text,pTB16->text,sizeof(pTB16->text));
+	strncpy (pTB->text,pTB16->text,sizeof(pTB->text));
 	pTB->BlowUpBounds = pTB16->BlowUpBounds;
 	strncpy (pTB->PickMacroFile,pTB16->PickMacroFile,sizeof(pTB16->PickMacroFile));
 	return;
@@ -1852,7 +1852,7 @@ void ConvertCD_V103_to_V104 (LPCOORDINATEDISPLAY pCD,LPCOORDINATEDISPLAY_V103 pC
 	pCD->ElevCommas = pCD16->ElevCommas;
 	pCD->DisplayElevation = pCD16->DisplayElevation;
 	strncpy (pCD->ElevationID,pCD16->ElevationID,sizeof(pCD16->ElevationID));
-	strncpy (pCD->Space,pCD16->Space,sizeof(pCD16->Space));
+	strncpy (pCD->Space,pCD16->Space,sizeof(pCD->Space));
 	return;
 }
 

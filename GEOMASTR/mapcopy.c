@@ -14,7 +14,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 	LPFILEINDEX		lpFI;
 	LPFILEINDEXENTRY pEntry=&IndexEntry2;                
     LPFILEINDEX lpIndex;
-	char	CurFileName[MAX_PATH];   
+	char	CurFileName[MAX_PATH] = { 0 };
     MNMXCORD	FileBounds; 
     BOOL	CurHeaderWritten;  
 	HANDLE	hlpFI;  

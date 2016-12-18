@@ -893,7 +893,7 @@ S499:     return  -1;
                   case 6:
                   {
 //c*                 {*** found an intersection ***}
-                    lpPoly1->dis21 =  lpPoly1->x1[2] - lpPoly1->hit_x;
+                    lpPoly1->dis21 =  lpPoly1->x1[1] - lpPoly1->hit_x;
                     if(lpPoly1->dis21 == 0)goto S300 ; // adjacent area
                     if(lpPoly1->dis21 < lpPoly1->dis22)
                     { 

@@ -6839,7 +6839,7 @@ GSSiExitProg (1293);
 					OVBounds = HighlightData.PD.Rect;
 					ExpandBounds (&OVBounds,Overlap);  
 					fputstring ("PAGE_NUM,PAGE_BOUNDS,PAGE_LEFT,PAGE_TOP,PAGE_RIGHT,PAGE_BOTTOM",Fid);
-					sprintf (str,"1,%f %f %f %f,0,0,0,0",OVBounds);
+					sprintf(str, "1,%f %f %f %f,0,0,0,0", OVBounds.xmn, OVBounds.ymn, OVBounds.xmx, OVBounds.ymx);
 					fputstring (str,Fid);
 					for (iArea = 0;iArea<nAreas;iArea++)
 					{
@@ -16156,7 +16156,7 @@ GSSiExitProg (877);
 				GetVolumeLabel(DriveID,VolLabel);
 				{   
 					double FreeSpace=GetDriveFreeSpace (DriveID), mb = FreeSpace/((double)1024*(double)1024);
-	            	sprintf (str,"%c:\\\t%s\t%.1f",DriveID,VolLabel,mb); 
+	            	sprintf (str,"%c:\\\t%s\t%.1f",DriveID[0],VolLabel,mb); 
 			        SendDlgItemMessage (hWndDlg,IDC_LIST,LB_ADDSTRING,0,(LPARAM)str);
 		        } 
 		    }

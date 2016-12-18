@@ -798,7 +798,7 @@ BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
 	double	CellMinX, CellMinY; 
 	int		i;
      
-    LIDARREC	LidarRec;  
+	LIDARREC	LidarRec = { 0 };
     LIDARFILEHEADER	Header;
 	
 	AllowCache = FALSE;
@@ -2125,7 +2125,7 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 	DTMKEY		DTMKey;
 	LPSTR		CompressedDTMData;
 	UINT		i, MinUseID;  
-	long		MinUse=LONG_MAX, Offset, IElev;
+	long		MinUse=LONG_MAX, Offset, IElev=0;
 	LPLONG		pBias;  
 	LPSUBCELLINFO	pSUBCELLInfo;
 	LPGWDHEADER	lpGWDHead;     
@@ -3504,7 +3504,7 @@ BOOL FindOpContourPoint (USHORT StartSide,LPDOUBLE pZC,LPDPOINT Point2,LPDPOINT 
 void DisplayContourLabels (BOOL Clear)
 {   
 	USHORT	i,j;
-	short	nChar, loc, StartPoint, twidth, theight, ichar, dy, ipass, ntxp, EndLine, BegLine;    
+	short	nChar, loc, StartPoint, twidth, theight, ichar, dy, ipass, ntxp, EndLine, BegLine=0;    
 	BOOL	Flip;
 	LPSHORT	pNumPoints; 
 	LPLONG	pElev;
@@ -3522,8 +3522,8 @@ void DisplayContourLabels (BOOL Clear)
 	BOOL	LightContour;
 	double	Elv;
 	HPEN	hPen;
-	POINT	TextPoint[16];
-	double	TextAZ[16];
+	POINT	TextPoint[16] = { 0 };
+	double	TextAZ[16] = { 0 };
 	char	TextChar[16];
 	int		ii;
 				

@@ -2622,7 +2622,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 							PickPointItem (PointLoc,1,0,CurrentDesc);
 						}			 		    
 					} 
-					else if (Display && DescIsVisible && (!DisplaySymbol & Visible))
+					else if (Display && DescIsVisible && (!DisplaySymbol && Visible))
 					{
 						AlreadyProcessed = TRUE;
 						DisplayPointItem (hDC,WinPoint,1,PointRot/1000,CurrentDesc,&CurView->MaxSymbolWidth);

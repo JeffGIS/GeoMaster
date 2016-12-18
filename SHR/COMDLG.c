@@ -651,7 +651,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 		_chdir(InitialDirectory);
 	fsLen = FormatFilterString();  //Formats gszFilter with strings
 
-	if (BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE))
+	if (BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE) != (HRESULT)0)
 	{
 		strcpy(Name, InitialFile);
 		rtn = TRUE;
@@ -1713,7 +1713,7 @@ BOOL CALLBACK EnumChildProc2(HWND hCtrl,LONG lParam)
     long	lUserData;
     POINT	Loc; 
     RECT	Rect;
-	WINDOWPLACEMENT wp;
+	WINDOWPLACEMENT wp = { 0 };
 	UINT	CntlID;
     
     GetWindowText (hCtrl,str,200);  
@@ -2218,6 +2218,7 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
                      	VirtualPrintDPI = 300;
 					 VirtualPlotWidth = atof (CurVirtPrinter) * VirtualPrintDPI; 
 					 ByLoc = _fstrstr (CurVirtPrinter," by ");
+#pragma warning(suppress: 6387)
 					 VirtualPlotHeight = atof (ByLoc+4) * VirtualPrintDPI; 
 					 if (SendDlgItemMessage (hDlg,IDC_VPOUTPUTTOFILE,BM_GETCHECK,0,0))
 					 	GetDlgItemText (hDlg,IDC_VPOUTPUTFILE,VirtPrinterImageFile,255);  

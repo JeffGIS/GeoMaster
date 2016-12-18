@@ -1329,7 +1329,7 @@ void testConvertBitmapToPoly(LPSTR file);
 }
 */
 
-int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
+WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
 	//char monName[128];

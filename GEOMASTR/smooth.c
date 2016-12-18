@@ -335,7 +335,7 @@ void PrintResults(lpPolyPt lpPP)
       sprintf(string,"Deflection = %f\n",lpPP->azdf);
       fputs(string,MyFile);
 
-      sprintf(string,"Average Deflection = ",lpPP->AvgDeltaAzm);
+      sprintf(string,"Average Deflection = %f\n",lpPP->AvgDeltaAzm);
       fputs(string,MyFile);
       
       sprintf(string,"Weighted Average Deflection = %f\n",lpPP->WtAvgDeltaAzm);

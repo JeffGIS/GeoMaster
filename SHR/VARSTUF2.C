@@ -95,10 +95,13 @@ BOOL LoadInternalGMD (LPGWDHEADER lpGWDHead,long iref)
 				Type1.Type = 'P';  
 				if (!InGraphicsProcessor)
 				{  
-					Type1.AZM = PickList[CurrentProcessedPickedItem].BPAZ;
-					Type1.BPX = Type1.MPX = Type1.EPX = PickList[CurrentProcessedPickedItem].BeginPoint.x;
-					Type1.BPY = Type1.MPY = Type1.EPY = PickList[CurrentProcessedPickedItem].BeginPoint.y;
-					Type1.Elev = 0;
+					if (CurrentProcessedPickedItem >= 0)
+					{
+						Type1.AZM = PickList[CurrentProcessedPickedItem].BPAZ;
+						Type1.BPX = Type1.MPX = Type1.EPX = PickList[CurrentProcessedPickedItem].BeginPoint.x;
+						Type1.BPY = Type1.MPY = Type1.EPY = PickList[CurrentProcessedPickedItem].BeginPoint.y;
+						Type1.Elev = 0;
+					}
 				}
 				else
 				{

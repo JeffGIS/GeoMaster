@@ -1435,7 +1435,7 @@ return;
 BOOL LoadAbbreviations(LPSTR AddressDir)
 {    
      BOOL NABV, compass, initial_load = TRUE, FirstLine=TRUE;
-      long   STNDSP, LOC, IOFF, NUM, AR,  LM, ISTAT;
+      long   STNDSP, LOC, IOFF, NUM, AR,  LM=0, ISTAT;
       char file2[MAX_PATH];
       char VALS[88], ABREV[13],  outval[104]  ;  
       OFSTRUCTGM OF;

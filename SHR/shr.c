@@ -27,7 +27,7 @@ static	char	LastTextFile[MAX_PATH]="";
 static	HANDLE	hSavedScreens[MAXSAVEDSCREENS];
 static	short	nSavedScreens=0;      
 static	long	NextScreenID=1;
-static	USHORT	crc_table[128]={0}; 
+static	USHORT	crc_table[256]={0}; 
 static  BOOL    FirstCache = TRUE; 
 static	short	CurTraceLev=0;
 static	HANDLE	hCacheAlreadyChecked=0;
@@ -166,7 +166,7 @@ HFILE OpenFileGM(
 		return HFILE_ERROR;
 
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
-	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, MAX_PATH);
+	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
 	if (!fullPath)
 		return HFILE_ERROR;
 	ln = strlen(fullPath);
@@ -710,11 +710,11 @@ int GetJournalBlock (HFILE Fid,long StartBlock,LPLONG pnBlocksInJournal,LPLONG p
 	LPJOURNALINDEXRECORD pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
 	int	ii;
 
-if (Fid > MAXFILEHANDLES)
+if (Fid >= MAXFILEHANDLES)
 	BlowOut ("Fid > max","ERROR");
 if (!pNumIndexBlocks)
 {
-	char	mess[256];
+	char	mess[512];
 
 	sprintf (mess,"%ld:%ld %s",(int)Fid,(int)JournalFileIndex[Fid],OpenFileName[Fid]);
 	MessageBox (0,mess,0,MB_OK);
@@ -5765,7 +5765,8 @@ GSSiExitProg (274);
         i++;
     }
     GSSiClose (Fid);
-	SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
+	if (hWndDlg)
+		SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
 
     
 {
@@ -7431,7 +7432,9 @@ int ActuallyCloseFile (HFILE Fid)
 	int	rtn;
 	int	ii;
 
-	if ((UseMappedFiles && Fid < MAXFILEHANDLES) && FidIsMapped[Fid])
+	if (Fid < 0 || Fid >= MAXFILEHANDLES)
+		return 0;
+	if (UseMappedFiles && FidIsMapped[Fid])
 	{
 		BOOL st = UnmapViewOfFile(FidPtr[Fid]);
 		st = CloseHandle (FidHandle[Fid]);
@@ -8203,7 +8206,7 @@ void ShowOpenFiles (LPSTR Name,UINT Mode)
 
 int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 {
-	static	char	NewPath[MAX_PATH], DLPath[MAX_PATH];
+	static	char	NewPath[MAX_PATH] = { 0 }, DLPath[MAX_PATH];
 	static	int		lDL = 0;
 	static	BOOL	Recursive=FALSE;
 	int		st, l, ii;
@@ -12979,6 +12982,8 @@ __int64 llFileSeek (HANDLE hf, __int64 distance, DWORD MoveMethod)
 
 LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 {
+	if (Fid < 0 || Fid >= MAXFILEHANDLES)
+		return -1;
 	if (FidMemLen[Fid])
 	{   
 		switch (opt)

@@ -2016,7 +2016,7 @@ extern "C" int mainlaszip(int argc, char *argv[])
 
       if (laszip_read_point(laszip_reader))
       {
-        fprintf(stderr,"DLL ERROR: reading point %I64\n", p_count);
+        fprintf(stderr,"DLL ERROR: reading point %I64i\n", p_count);
         byebye(true, argc==1, laszip_reader);
       }
 
@@ -2024,7 +2024,7 @@ extern "C" int mainlaszip(int argc, char *argv[])
 
       if (laszip_set_point(laszip_writer, point))
       {
-        fprintf(stderr,"DLL ERROR: setting point %I64\n", p_count);
+        fprintf(stderr,"DLL ERROR: setting point %I64i\n", p_count);
         byebye(true, argc==1, laszip_writer);
       }
 
@@ -2032,14 +2032,14 @@ extern "C" int mainlaszip(int argc, char *argv[])
 
       if (laszip_write_point(laszip_writer))
       {
-        fprintf(stderr,"DLL ERROR: writing point %I64\n", p_count);
+        fprintf(stderr,"DLL ERROR: writing point %I64i\n", p_count);
         byebye(true, argc==1, laszip_writer);
       }
 
       p_count++;
     }
 
-    fprintf(stderr,"successfully read and written %I64d points\n", p_count);
+    fprintf(stderr,"successfully read and written %I64i points\n", p_count);
 
     // close the writer
 
