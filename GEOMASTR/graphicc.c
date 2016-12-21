@@ -268,7 +268,7 @@ Next3:
 Next4:
 	if (minDist < maxDist)
 	{
-		strncpy (nextIntPoint,minNextInt,12);
+		strncpy0 (nextIntPoint,minNextInt,12);
 		*startMSLink = minMSLink;
 		return TRUE;
 	}

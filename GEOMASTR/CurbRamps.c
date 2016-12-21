@@ -607,20 +607,20 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
+				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
 				while (fgetstring(line, sizeof(line)-2, FidList))
 				{
 					int intID = atoi(line);
-					MPINTERSECTION mpInt;
-					if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+					if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
 					{
 						for (int i = 1; i < 13; i++)
 						{
-							RampStruct * pRamp = &mpInt.ramps[i];
+							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
 								LPSTR detailCode;
 								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-								LPSTR rampText = rampToText(mpInt.intID, pRamp);
+								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
 								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
 								free(ccode);
@@ -633,6 +633,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 						ii = 1;
 				}
 				free(line);
+				free(pmpInt);
 				GSSiClose(FidOut);
 				rtn = TRUE;
 			}
@@ -711,20 +712,20 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
+				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
 				while (fgetstring(line, sizeof(line)-2, FidList))
 				{
 					int intID = atoi(line);
-					MPINTERSECTION mpInt;
-					if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+					if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
 					{
 						for (int i = 1; i < 13; i++)
 						{
-							RampStruct * pRamp = &mpInt.ramps[i];
+							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
 								LPSTR detailCode;
 								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-								LPSTR rampText = rampToText(mpInt.intID, pRamp);
+								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
 								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
 								free(ccode);
@@ -737,6 +738,7 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 						ii = 1;
 				}
 				free(line);
+				free(pmpInt);
 				GSSiClose(FidOut);
 				rtn = TRUE;
 			}
@@ -775,15 +777,15 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 				fputstring(rampHeader, FidOut);
 			}
 			LPSTR line = malloc(4096);
-			MPINTERSECTION mpInt;
-			if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+			MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
+			if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
 			{
-				RampStruct * pRamp = &mpInt.ramps[rampNum];
+				RampStruct * pRamp = &pmpInt->ramps[rampNum];
 				if (pRamp->rampExists)
 				{
 					LPSTR detailCode;
 					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-					LPSTR rampText = rampToText(mpInt.intID, pRamp);
+					LPSTR rampText = rampToText(pmpInt->intID, pRamp);
 					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 					fputstring(line, FidOut);
 					free(ccode);
@@ -796,6 +798,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 			else
 				ii = 1;
 			free(line);
+			free(pmpInt);
 			GSSiClose(FidOut);
 			rtn = TRUE;
 		}
@@ -813,16 +816,16 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int cod
 	int rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
-		MPINTERSECTION MPInt;
+		MPINTERSECTION *pMPInt = malloc(sizeof(MPINTERSECTION)+4);
 
-		if (getMPIntersectionFromDB(intID, TRUE, &MPInt))
+		if (getMPIntersectionFromDB(intID, TRUE, pMPInt))
 		{
 			if (rampNum > 0 && rampNum < 13)
 			{
 				ToleranceValues tolerances;
 				setStandardToleranceValues(&tolerances);
 
-				RampStruct * pRamp = &MPInt.ramps[rampNum];
+				RampStruct * pRamp = &pMPInt->ramps[rampNum];
 				if (pRamp->rampExists)
 				{
 					LPSTR detailCode;
@@ -833,6 +836,7 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int cod
 				}
 			}
 		}
+		free(pMPInt);
 		rc = sqlite3_close(database);
 	}
 	return rtn;

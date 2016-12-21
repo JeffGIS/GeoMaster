@@ -454,7 +454,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 				GSSiClose(fidFiles);
 				goto Exit;
 			}
-			sprintf(indexRec, "FILE\tFILELOC", filePath, loc);
+			sprintf(indexRec, "FILE\tFILELOC");
 			fputstring(indexRec, fidIndex);
 		}
 		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
@@ -613,14 +613,14 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 			CurLoc++;  
 		}
 	}
-	else if (!stricmp(Arg[1], "TABLES"))
+	else if (!stricmp(Arg[1], "TABLES"))//???
 	{
 		long	n = 0;
 		LPSTR	lpSTRING;
 		short	NS;
 		HANDLE	DBHandle;
 		char	TableName[128];
-		char	TablePartialName[128];
+		char	TablePartialName[128] = { 0 };
 
 		strupr(TablePartialName);
 		DBHandle = GetDBHandleFromSQL(hDB);
@@ -793,7 +793,7 @@ BOOL LinkLinesFunction (LPSTR Arg1,LPSTR Arg2,LPSTR OutLoc)
 		double	tol = atof (Arg2);
 		double	wantaz, az, daz;
 		int		havei;
-		BOOL	reverse;
+		BOOL	reverse=FALSE;
 		
 		pRawLines = (LPLINKEDLINES)GlobalLock (hRawLines);
 		nConnectedLines = 0;
@@ -968,7 +968,7 @@ int LinkPipesFunction (int iOpt,int id,double tol,LPINT pnPnts,LPDPOINT3D pPoint
 		{
 			double	wantaz, az, daz;
 			int		havei;
-			BOOL	reverse;
+			BOOL	reverse=FALSE;
 			
 			nConnectedLines = 0;
 			if (hRawLines)
@@ -1281,6 +1281,7 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 			return;
 		if (id < FIRST_USER_PROJ)
 			return;
+		id -= 8;
 		pj_free(projdef[id]);
 		*projid[id] = 0;
 		strcpy (OutLoc,"1");
@@ -1466,7 +1467,7 @@ BOOL GetSymAttrFile2 (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPS
 {
 	static	BOOL First=TRUE;
 	static	HANDLE	hSymAttrFiles=0;
-	static	char	SymAppendVar[70];
+	static	char	SymAppendVar[70] = { 0 };
 	int		len;
 	LPSTR	pSymAttrFiles;
 	LPSTR	pSC;
@@ -1948,13 +1949,16 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 	   	SetFieldValFromCharAndName(lpGWDHead,"EventDescription",(LPSTR)pLoc,FALSE);
 
 		pLoc = strstr (pRec,"<event-identifier>");
-		pLoc += strlen ("<event-identifier>");
-		pLocEnd = strstr (pLoc,"</event-identifier>");
-		*pLocEnd = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"EventIdentifier",(LPSTR)pLoc,FALSE);
-		*pLocEnd = '<';
+		if (pLoc)
+		{
+			pLoc += strlen("<event-identifier>");
+			pLocEnd = strstr(pLoc, "</event-identifier>");
+			*pLocEnd = 0;
+			SetFieldValFromCharAndName(lpGWDHead, "EventIdentifier", (LPSTR)pLoc, FALSE);
+			*pLocEnd = '<';
 
-		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
+			st = GWDReplaceRecord(lpGWDHead, 0, 0, -1);
+		}
 		//StatusWindowUpdate (0,0, (int)pEnd,(int)pFile);
 	}
     GlobalUnlock (hDB); 
@@ -2108,7 +2112,7 @@ BOOL FixBlockedRefs (LPSTR FileName)
     LPFBRD	pFBRD;
     short	pos=BT_FIRST;
     long	Tot,Num=0, nFixed=0, nNotFound=0;	
-    char	mess[128];		
+	char	mess[128] = { 0 };
     
     hDB = OpenGWDatabase (FileName,BT_READ);
     if (!hDB)
@@ -2641,7 +2645,7 @@ POINT PIAACenter(LPPIAAStruct pPIAA, LPLONG piCPDist, LPLONG pMaxn, BOOL UsePCTB
     int		x,y;
 	POINT	PIAAPoint;
 	DPOINT	DPoint;
-	long	iCPDist;
+	long	iCPDist=0;
 	HPBYTE	barray;   
 	POINT	CenterPoint={0,0};
 	
@@ -2792,7 +2796,7 @@ BOOL AreaInArea2 (LPSTR TAGOrRef,LPSTR AinAGMD,int SpeedFactor,double MinPCT,BOO
 	char	DefStr[]="BoundaryRef(B4),AreaRef(B4),FractionOfBoundary(R8),FractionOfAreaInBoundary(R8),SizeOfBoundary(R8),SizeOfArea(R8),BoundaryTAG(C42),AreaTAG(C42),NumInBoundary(B4)";
 	short	NumIndexFields=2, pos=BT_FIRST;
 	LPSTR	pColon=_fstrchr (TAGOrRef,':');
-	long	AreaRefno, BoundaryAreaRefno, Num, InRefno,nBoundaryPoints,BoundaryAreaRef,nRecs,nRecs2,Done=0,Done2;
+	long	AreaRefno, BoundaryAreaRefno, Num, InRefno,nBoundaryPoints,BoundaryAreaRef,nRecs=1,nRecs2,Done=0,Done2;
 	BOOL	st; 
 	HANDLE	hDB;
 	LPGWDHEADER lpGWDHead;
@@ -7354,17 +7358,17 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lPa
 			HMENU	hMenu=CreatePopupMenu();   
 			POINT	position;
 
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomSize==ImageZoomSizeSmall?MF_CHECKED:0|MF_STRING,65001,"Small");
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomSize==ImageZoomSizeMedium?MF_CHECKED:0|MF_STRING,65002,"Medium");
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomSize==ImageZoomSizeLarge?MF_CHECKED:0|MF_STRING,65003,"Large");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomSize==ImageZoomSizeSmall?MF_CHECKED:0)|MF_STRING,65001,"Small");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomSize==ImageZoomSizeMedium?MF_CHECKED:0)|MF_STRING,65002,"Medium");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomSize==ImageZoomSizeLarge?MF_CHECKED:0)|MF_STRING,65003,"Large");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomShape==0?MF_CHECKED:0|MF_STRING,65011,"Square");
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomShape==1?MF_CHECKED:0|MF_STRING,65012,"Round");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomShape==0?MF_CHECKED:0)|MF_STRING,65011,"Square");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomShape==1?MF_CHECKED:0)|MF_STRING,65012,"Round");
 			//AppendMenu (hMenu,MF_ENABLED|ImageZoomShape==2?MF_CHECKED:0|MF_STRING,65013,"Use Viewport Proportions");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomBorder?MF_CHECKED:0|MF_STRING,65021,"Display Border");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomBorder?MF_CHECKED:0)|MF_STRING,65021,"Display Border");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomOffset?MF_CHECKED:0|MF_STRING,65031,"Offset");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomOffset?MF_CHECKED:0)|MF_STRING,65031,"Offset");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
 			AppendMenu (hMenu,MF_ENABLED|MF_STRING,65041,"Exit");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);

@@ -4536,12 +4536,33 @@ GotCloseFilehSQL:
 		case 653: //$LASZIP(GETBOUNDS,file,boundsvar)
 		{
 			rtn = FALSE;
+
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "GETBOUNDS"))
 			{
-				rtn = getLAZMinMax(Arg[2], &Bounds.xmn, &Bounds.xmx, &Bounds.ymn, &Bounds.ymx);
+				double zmn, zmx;
+				rtn = getLAZMinMax(Arg[2], &Bounds.xmn, &Bounds.xmx, &Bounds.ymn, &Bounds.ymx, &zmn, &zmx);
 				if (*Arg[3])
 					SetGlobalValueBounds(Arg[3], &Bounds);
+			}
+			if (!stricmp(Arg[1], "GETBOUNDS3D"))
+			{
+				MNMXCORD3D Bounds3D;
+				rtn = getLAZMinMax(Arg[2], &Bounds3D.xmn, &Bounds3D.xmx, &Bounds3D.ymn, &Bounds3D.ymx, &Bounds3D.zmn, &Bounds3D.zmx);
+				if (*Arg[3])
+					SetGlobalValueBounds3D(Arg[3], &Bounds3D);
+			}
+			else if (!stricmp(Arg[1], "LAZTOTEXT"))//$LAZTOTEXT(infile,outfile,pointtype)
+			{
+				rtn = writeLAZFileToText(Arg[2], atoi(Arg[4]), Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CLASSIFY"))//$LAZTOTEXT(CLASSIFY,infile,outfile)
+			{
+				rtn = classifyLAZFile(Arg[2], Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
 			}
 			else
 				rtn = mainlaszip(nArgs, &Arg[1]);
@@ -5740,12 +5761,17 @@ SaveVis:
 				if (LoadAREADTM (Arg[2],Arg[3]))
 					goto RtnTrue;
 			}
-			else if (!_fstricmp (Arg[1],"LIDAR"))
+			else if (!_fstricmp(Arg[1], "LIDAR"))
 			{
-				if (LoadLIDARDTM (Arg[2],Arg[3],Arg[4]))
+				if (LoadLIDARDTM(Arg[2], Arg[3], Arg[4]))
 					goto RtnTrue;
-			} 
-			else if (!_fstricmp (Arg[1],"ERDAS"))
+			}
+			else if (!_fstricmp(Arg[1], "LIDARLAZ"))//$LOADDTM(LIDARLAZ,InDir,OutFile,pointType)
+			{
+				if (LoadLIDARDTMfromLAZ(Arg[2], Arg[3], atoi(Arg[4])))
+					goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "ERDAS"))
 			{
 				if (LoadERDASDem ())
 					goto RtnTrue;

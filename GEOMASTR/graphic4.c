@@ -2622,7 +2622,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 							PickPointItem (PointLoc,1,0,CurrentDesc);
 						}			 		    
 					} 
-					else if (Display && DescIsVisible && (!DisplaySymbol & Visible))
+					else if (Display && DescIsVisible && (!DisplaySymbol && Visible))
 					{
 						AlreadyProcessed = TRUE;
 						DisplayPointItem (hDC,WinPoint,1,PointRot/1000,CurrentDesc,&CurView->MaxSymbolWidth);
@@ -4557,11 +4557,16 @@ BOOL DisplayPointItem (HDC hDC,POINT WinPoint,double size, double rot, int Symbo
 	int		ii; 
 	double	height=0, width=0;
 	static	BOOL	fast=FALSE;
+	static BOOL first = TRUE;
 
 	if (fast)
 	{
+		if (first)SaveDC(hDC);
+		first = FALSE;
+		SetDisplayMode(hDC, GF_TEXTMODE);
 		SetPixel (hDC,WinPoint.x,WinPoint.y,0);
-{
+		//RestoreDC (hDC,-1);
+	{
 #if ENABLETRACE
 GSSiExitProg (705);
 #endif

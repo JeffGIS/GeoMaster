@@ -849,7 +849,7 @@ void DisplayAreaSymbol (HANDLE hSymbol, HDC hDC, int nPnts, LPPOINT Points)
 
 HDIB32 GetSymbolImage (LPSTR SymName)
 {
-	HDIB32	hDib;
+	HDIB32	hDib=0;
 	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,512);
 	LPSTR	pBS, BMPName = GlobalLock (hMem);
 		
@@ -1262,15 +1262,17 @@ HANDLE DisplayPointSymbol (HANDLE hSymbol, HDC hDC, double Vsize, double Hsize, 
 	BOOL	Invis;
 	RECT	Rect;
 	short	idesc=0,ii, htdesc=-1; 
-	int		OldRop, CurRop;
+	int		OldRop=0, CurRop;
 	HDIB32	hDib;
 
 	nExportSymElements = 0;
 	if (!hSymbol)
 		return 0;  
 	if (hDC > (HDC)100) //hDC >0 and <99 is FID - exports symbol to DXF block, 99 exports to current edit file
-		SaveDC (hDC); 
-	OldRop = SetROP2(hDC,R2_COPYPEN);
+	{
+		SaveDC(hDC);
+		OldRop = SetROP2(hDC, R2_COPYPEN);
+	}
 	lpSym = (LPSYMBOL)GlobalLock (hSymbol);  
 	idesc = lpSym->Number;
 	if (lpSym->BlockRotation && CurView)

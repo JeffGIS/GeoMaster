@@ -1540,7 +1540,7 @@ LPSTR	dir = str + 256;
 LPSTR	file = dir + 256;
 LPSTR	drive = file + 128;
 LPSTR	ext = drive + 32;
-static  char	cwd[MAX_PATH];   
+static  char	cwd[MAX_PATH] = { 0 };
 static	short	SaveDrive;
 LPSTR	pOwner, pTable;   
 short	lOwner;
@@ -2292,7 +2292,7 @@ long FindFieldName (LPSTR DBName,LPSTR FldPartialName,LPSTR OutFile)
 		LPFIELDINFO pFld; 
 		HANDLE	hDB2=0;
 		
-		sprintf (TableName,"%s|%s",DBName,lpSTRING,itype);
+		sprintf (TableName,"%s|%s",DBName,lpSTRING);
 	    if (OpenDataFile (TableName,"",BT_READ,&hDB2)) 
 	    {
 			LPFIELDINFO	lpFieldInfo;

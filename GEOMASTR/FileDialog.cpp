@@ -95,7 +95,7 @@ HRESULT CCommonFileDialog::BasicFileOpen(HWND hWnd)
                                 hr = pfd->SetDefaultExtension(L"doc");
                                 if (SUCCEEDED(hr))
                                 {
-									IShellItem *defFolder;
+									IShellItem *defFolder=0;
 									WCHAR f[] = L"c:\\temp";
 									hr = SHCreateItemFromParsingName(f, NULL,  IID_PPV_ARGS(&defFolder));
 									hr = pfd->SetDefaultFolder(defFolder);                                   //
@@ -829,10 +829,10 @@ HRESULT CCommonFileDialog::WritePropertiesWithoutUsingHandlers(HWND hWnd)
                                                                                     pwszPropertyName, 
                                                                                     wszValue);
                                                 }
-                                            }
+												PropVariantClear(&propvarValue);
+											}
 
-                                            PropVariantClear(&propvarValue);
-                                            CoTaskMemFree(pwszPropertyName);
+											CoTaskMemFree(pwszPropertyName);
                                         }
                                     }
                                 }
@@ -1263,7 +1263,7 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									if (Suceded(hr, L"9"))
 									{
 										hr = psiFolder->GetDisplayName(SIGDN_FILESYSPATH, &pszFolder);
-										if (Suceded(hr, L"10"))
+										if (Suceded(hr, L"10") && pszFolder)
 										{
 											WCHAR path[MAX_PATH];
 											char  cpath[MAX_PATH];
@@ -1297,16 +1297,16 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 											PWSTR pszFilePath = NULL;
 											hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
 												&pszFilePath);
-											if (Suceded(hr, L"13"))
+											if (Suceded(hr, L"13")&&pszFilePath)
 											{
 												hr = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, pFile, lFile, NULL, NULL) ?
 												S_OK : HRESULT_FROM_WIN32(GetLastError());
-												CoTaskMemFree(pszFilePath);
 												LPSTR pDot = strrchr(pFile, '.');
 												if (pDot)
 													strcpy(lastExtension, pDot);
 												else if ((pDot = strrchr(pFile, '\\')))
 													strcpy(lastExtension, ++pDot);
+												CoTaskMemFree(pszFilePath);
 												/*TaskDialog(NULL,
 													NULL,
 													L"CommonFileDialogApp",

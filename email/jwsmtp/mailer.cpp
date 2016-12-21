@@ -71,7 +71,7 @@ mailer::mailer(const char* TOaddress, const char* FROMaddress,
    strcpy (toAddress,TOaddress);
    setsender(FROMaddress);
    LPSTR precipBeg = (LPSTR)toAddress, precipEnd;
-   while ((precipEnd = strchr (precipBeg,',')))
+   while (precipBeg && (precipEnd = strchr(precipBeg, ',')))
    {
 	   *precipEnd++ =0;
 	   addrecipient(precipBeg);

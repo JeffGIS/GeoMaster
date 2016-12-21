@@ -2016,7 +2016,7 @@ extern "C" int mainlaszip(int argc, char *argv[])
 
       if (laszip_read_point(laszip_reader))
       {
-        fprintf(stderr,"DLL ERROR: reading point %I64\n", p_count);
+        fprintf(stderr,"DLL ERROR: reading point %I64i\n", p_count);
         byebye(true, argc==1, laszip_reader);
       }
 
@@ -2024,7 +2024,7 @@ extern "C" int mainlaszip(int argc, char *argv[])
 
       if (laszip_set_point(laszip_writer, point))
       {
-        fprintf(stderr,"DLL ERROR: setting point %I64\n", p_count);
+        fprintf(stderr,"DLL ERROR: setting point %I64i\n", p_count);
         byebye(true, argc==1, laszip_writer);
       }
 
@@ -2032,14 +2032,14 @@ extern "C" int mainlaszip(int argc, char *argv[])
 
       if (laszip_write_point(laszip_writer))
       {
-        fprintf(stderr,"DLL ERROR: writing point %I64\n", p_count);
+        fprintf(stderr,"DLL ERROR: writing point %I64i\n", p_count);
         byebye(true, argc==1, laszip_writer);
       }
 
       p_count++;
     }
 
-    fprintf(stderr,"successfully read and written %I64d points\n", p_count);
+    fprintf(stderr,"successfully read and written %I64i points\n", p_count);
 
     // close the writer
 
@@ -3144,7 +3144,7 @@ extern "C" int mainlaszip(int argc, char *argv[])
   return 0;
 }
 
-extern "C" bool getLAZMinMax(char * file, double * xmin, double * xmax, double * ymin, double * ymax)
+extern "C" bool getLAZMinMax(char * file, double * xmin, double * xmax, double * ymin, double * ymax, double * zmin, double * zmax)
 {
 	bool rtn = false;
 	laszip_header* header;
@@ -3163,6 +3163,8 @@ extern "C" bool getLAZMinMax(char * file, double * xmin, double * xmax, double *
 					*xmax = header->max_x;
 					*ymin = header->min_y;
 					*ymax = header->max_y;
+					*zmin = header->min_z;
+					*zmax = header->max_z;
 					rtn = true;
 				}
 				laszip_close_reader(laszip_reader);
@@ -3251,9 +3253,9 @@ extern "C" int getLAZPointsInBounds(LPLAZFILESTRUCT pFiles,int fileNum,char * fi
 									}
 									if (point->classification == wantType)
 									{
-										points->x = point->X * header->x_scale_factor;
-										points->y = point->Y * header->y_scale_factor;
-										points->z = point->Z * header->z_scale_factor;
+										points->x = point->X * header->x_scale_factor + header->x_offset;
+										points->y = point->Y * header->y_scale_factor + header->y_offset;
+										points->z = point->Z * header->z_scale_factor + header->z_offset;
 										points++;
 										rtn++;
 									}
@@ -3268,3 +3270,29 @@ extern "C" int getLAZPointsInBounds(LPLAZFILESTRUCT pFiles,int fileNum,char * fi
 	return rtn;
 }
 
+extern "C" int writeLAZFileToText(char * file, int wantType, char * outFile)
+{
+	int rtn = 0;
+	laszip_point* point;
+	static __int64 use = 1;
+
+	if (laszip_load_dll() != 1)
+	{
+		laszip_POINTER laszip_reader;
+		if (!laszip_create(&laszip_reader))
+		{
+			laszip_BOOL is_compressed = 0;
+			if (!laszip_open_reader(laszip_reader, file, &is_compressed))
+			{
+				laszip_get_point_pointer(laszip_reader, &point);
+				while (!laszip_read_point(laszip_reader))
+				{
+					rtn++;
+				}
+				laszip_close_reader(laszip_reader);
+			}
+			laszip_destroy(laszip_reader);
+		}
+	}
+	return rtn;
+}

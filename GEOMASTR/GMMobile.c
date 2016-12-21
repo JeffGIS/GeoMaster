@@ -292,8 +292,8 @@ int FindDupParcels(LPSTR OUTFile)
 			rtn++;
 			nDup++;
 			dupLink.ref = baseRef;
-			strncpy(dupLink.dupUDI, baseUDI, 20);
-			strncpy(dupLink.UDI, pData->UDI, 20);
+			strncpy0(dupLink.dupUDI, baseUDI, 19);
+			strncpy0(dupLink.UDI, pData->UDI, 19);
 			dupLink.dupNum = nDup;
 			BT_PUT(hBTDupLink, (LPSTR)&pData->Refno, (LPSTR)&dupLink);
 		}
@@ -303,13 +303,13 @@ int FindDupParcels(LPSTR OUTFile)
 			{
 				dupLink.ref = baseRef;
 				dupLink.dupNum = -nDup;
-				strncpy(dupLink.UDI, baseUDI, 20);
-				strncpy(dupLink.dupUDI, baseUDI, 20);
+				strncpy0(dupLink.UDI, baseUDI, 19);
+				strncpy0(dupLink.dupUDI, baseUDI, 19);
 				BT_PUT(hBTDupLink, (LPSTR)&baseRef, (LPSTR)&dupLink);
 				rtn++;
 			}
 			baseRef = pData->Refno;
-			strncpy(baseUDI, pData->UDI, 20);
+			strncpy0(baseUDI, pData->UDI, 19);
 			nDup = 0;
 		}
 		lastDupData = *pData;
@@ -317,8 +317,8 @@ int FindDupParcels(LPSTR OUTFile)
 	if (nDup && baseRef)
 	{
 		dupLink.ref = baseRef;
-		strncpy(dupLink.dupUDI, baseUDI, 20);
-		strncpy(dupLink.UDI, lastDupData.UDI, 20);
+		strncpy0(dupLink.dupUDI, baseUDI, 19);
+		strncpy0(dupLink.UDI, lastDupData.UDI, 19);
 		dupLink.dupNum = -nDup;
 		BT_PUT(hBTDupLink, (LPSTR)&baseRef, (LPSTR)&dupLink);
 	}
@@ -343,8 +343,8 @@ int FindDupParcels(LPSTR OUTFile)
 		{
 			pos = BT_NEXT;
 			pOutData->Refno = ref;
-			strncpy(pOutData->UDI, dupLink.UDI, 20);
-			strncpy(pOutData->dupUDI, dupLink.dupUDI, 20);
+			strncpy0(pOutData->UDI, dupLink.UDI, 19);
+			strncpy0(pOutData->dupUDI, dupLink.dupUDI, 19);
 			pOutData->DupRef = dupLink.ref;
 			pOutData->DupNum = dupLink.dupNum;
 			GWDAddRecord(lpGWDHead, 0, 0);

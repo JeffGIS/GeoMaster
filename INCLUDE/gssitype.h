@@ -412,6 +412,17 @@ typedef struct
 typedef MNMXCORD    FAR *LPMNMXCORD; 
 typedef MNMXCORD	HUGE *HPMNMXCORD;
 typedef struct
+{
+	double  xmn;
+	double  ymn;
+	double  zmn;
+	double  xmx;
+	double  ymx;
+	double  zmx;
+} MNMXCORD3D;
+typedef MNMXCORD3D    FAR *LPMNMXCORD3D;
+
+typedef struct
    {	short	xmn;
    		short	ymn;
    		short	xmx;
@@ -436,7 +447,7 @@ typedef struct
      } LIDARFILEHEADER;
 typedef struct
      {  
-     	short	xoff,yoff;
+     	short	xoff,yoff,intensity;
      	float	Elevation;
      } LIDARPNT;
 typedef struct
@@ -3702,6 +3713,7 @@ typedef LAZFILESTRUCT *LPLAZFILESTRUCT;
 typedef struct {                                        
 				HANDLE	hDB;                            //handle of file if .dtm or viewport if TIN Plt files
 				short	Type;
+				short	Version;
 				HFILE	Fid;							//1 = dtm grid, 2 = TIN plt files, 3 = Lidar points, 4 = LIDAR in laz format
 				sqlite3 *db;
 				double	NULLElv;

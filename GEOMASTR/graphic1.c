@@ -2450,7 +2450,7 @@ void ZoomToBM ()
 //    IncrementFile ();
     while (GetNextViewportFile (FALSE))
     {
-       if (PltType == 5 || MapFileType (CurView->lpFiles[CurView->CurFile]) == MT_SID) 
+		if (PltType == 5 || (CurView->CurFile >=0 && MapFileType(CurView->lpFiles[CurView->CurFile]) == MT_SID))
             goto GotFile;
     }   
     CurVis = SavelpVis;
@@ -3354,7 +3354,7 @@ DPOINT BasePtToWinPtD (LPDPOINT WPoint)
 #if ENABLETRACE
 {GSSiEnterProg (33);
 #endif
-{    DPOINT WinPointD, Intmod;
+{    DPOINT WinPointD = { 0 }, Intmod;
      POINT  WinPoint;
      
      if(!CurView->hTranBaseToVP) 
@@ -4342,7 +4342,7 @@ void DisplayCloseIcon (void)
 			_fstrcpy (str,CurView->VisName);
 			ExpandText (str);
 			if ((pBS = _fstrrchr (str,'\\')))
-				*pBS++;
+				pBS++;
 			else
 				pBS = str;
 			_fstrcpy(AVName,pBS);   

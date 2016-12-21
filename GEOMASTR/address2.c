@@ -470,7 +470,7 @@ BOOL ReloadStreets (HWND hWnd)
     _fstrcat (Name, "\\snunload.txt");
     if (!ExistFile (Name))
     {   
-    	sprintf (str,"Unload file %s not found",NULL,MB_ICONEXCLAMATION);
+		GSSiMsgBox(hWnd,"Unload file not found","", MB_ICONEXCLAMATION,0);
     	return FALSE;
     }
 	hcurSave = GSSiSetCursor(LoadCursor(NULL, IDC_WAIT));
@@ -2220,7 +2220,8 @@ BOOL AddUserAddress (LPSTR Address,LPSTR Munic,DPOINT Point,BOOL Unmatchable)
 	HANDLE	hMatch=0;  
 	LPSTR	Street;
 	BOOL	Opened, rtn=FALSE;
-					 	 
+		
+	*House = 0;
 	if (!OpenUserDefinedAddress (TRUE,&Opened))
 		return FALSE;
 	if (SeparateIntStreets (Address,Street1,Street2))

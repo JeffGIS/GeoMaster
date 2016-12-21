@@ -27,7 +27,7 @@ static	char	LastTextFile[MAX_PATH]="";
 static	HANDLE	hSavedScreens[MAXSAVEDSCREENS];
 static	short	nSavedScreens=0;      
 static	long	NextScreenID=1;
-static	USHORT	crc_table[128]={0}; 
+static	USHORT	crc_table[256]={0}; 
 static  BOOL    FirstCache = TRUE; 
 static	short	CurTraceLev=0;
 static	HANDLE	hCacheAlreadyChecked=0;
@@ -67,6 +67,7 @@ int ActuallyCloseFile (HFILE Fid);
 extern HWND	TraceWnd2;
 
 char	CacheTitle[256];
+
 
 double square(double val)
 {
@@ -166,7 +167,7 @@ HFILE OpenFileGM(
 		return HFILE_ERROR;
 
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
-	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, MAX_PATH);
+	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
 	if (!fullPath)
 		return HFILE_ERROR;
 	ln = strlen(fullPath);
@@ -710,11 +711,11 @@ int GetJournalBlock (HFILE Fid,long StartBlock,LPLONG pnBlocksInJournal,LPLONG p
 	LPJOURNALINDEXRECORD pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
 	int	ii;
 
-if (Fid > MAXFILEHANDLES)
+if (Fid >= MAXFILEHANDLES)
 	BlowOut ("Fid > max","ERROR");
 if (!pNumIndexBlocks)
 {
-	char	mess[256];
+	char	mess[512];
 
 	sprintf (mess,"%ld:%ld %s",(int)Fid,(int)JournalFileIndex[Fid],OpenFileName[Fid]);
 	MessageBox (0,mess,0,MB_OK);
@@ -4870,25 +4871,47 @@ GSSiExitProg (256);
 #endif
 }
 
-void DBoundsInit (LPMNMXCORD lpRect)
+void DBoundsInit(LPMNMXCORD lpRect)
 #if ENABLETRACE
 {GSSiEnterProg (257);
 #endif
 {
-    lpRect->xmn = DBL_MAX;
-    lpRect->ymn = DBL_MAX;
-    lpRect->xmx = -DBL_MAX;
-    lpRect->ymx = -DBL_MAX;
+	lpRect->xmn = DBL_MAX;
+	lpRect->ymn = DBL_MAX;
+	lpRect->xmx = -DBL_MAX;
+	lpRect->ymx = -DBL_MAX;
+	{
+#if ENABLETRACE
+		GSSiExitProg (257);
+#endif
+		return;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+void DBoundsInit3D(LPMNMXCORD3D lpRect)
+#if ENABLETRACE
 {
-#if ENABLETRACE
-GSSiExitProg (257);
+	GSSiEnterProg(257);
 #endif
-	return;
-}
+	{
+		lpRect->xmn = DBL_MAX;
+		lpRect->ymn = DBL_MAX;
+		lpRect->zmn = DBL_MAX;
+		lpRect->xmx = -DBL_MAX;
+		lpRect->ymx = -DBL_MAX;
+		lpRect->zmx = -DBL_MAX;
+		{
 #if ENABLETRACE
-}
+			GSSiExitProg(257);
 #endif
-} 
+			return;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
 
 BOOL PointInBoundsL (DPOINT Point,LPMNMXCORL pBounds)
 {
@@ -5765,7 +5788,8 @@ GSSiExitProg (274);
         i++;
     }
     GSSiClose (Fid);
-	SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
+	if (hWndDlg)
+		SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
 
     
 {
@@ -5962,6 +5986,71 @@ short DeleteDirAndContents (LPSTR InName)
 	return FALSE;
 }
 
+LPSTR FilePart(LPSTR File,LPSTR Part)
+{
+	LPSTR rtn = File;
+	static char inName[_MAX_PATH];
+	static char fullName[_MAX_PATH];
+	static char drive[_MAX_DRIVE];
+	static char dir[_MAX_DIR];
+	static char name[_MAX_FNAME];
+	static char ext[_MAX_EXT];
+
+	strcpy(inName,File);
+	ExpandText(inName);
+	_fullpath(fullName, inName, sizeof(fullName));
+	_splitpath(fullName,drive,dir,name,ext);
+
+
+	if (!stricmp(Part, "ACTUAL"))
+	{
+		ConvertToNewLocation(File, FALSE);
+
+	}
+	else if (!stricmp(Part, "DRIVE"))
+		rtn = drive;
+	else if (!stricmp(Part, "DRIVEDIR"))
+	{
+		sprintf(fullName, "%s\\%s", drive, dir);
+		rtn = fullName;
+	}
+	else if (!stricmp(Part, "DIR"))
+		rtn = dir;
+	else if (!stricmp(Part, "LASTDIR"))
+	{
+		LPSTR lastdir = strrchr(dir, '\\');
+		if (lastdir)
+			rtn = ++lastdir;
+		else
+			rtn = dir;
+	}
+	else if (!stricmp(Part, "WOLASTDIR"))
+	{
+		LPSTR lastdir = strrchr(dir, '\\');
+		if (lastdir)
+			*lastdir = 0;
+		rtn = dir;
+	}
+	else if (!stricmp(Part, "NAME"))
+		rtn = name;
+	else if (!stricmp(Part, "FULLNAME"))
+		rtn = fullName;
+	else if (!stricmp(Part, "NAMEEXT"))
+	{
+		sprintf(fullName, "%s.%s", name, ext);
+		rtn = fullName;
+	}
+	else if (!stricmp(Part, "EXT"))
+		rtn = ext;
+	else if (!stricmp(Part, "WOEXT"))
+	{
+		LPSTR lastdir = strrchr(fullName, '\\');
+		if (lastdir)
+			*lastdir = 0;
+		rtn = fullName;
+	}
+	return rtn;
+}
 
 long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub,BOOL fileNameOnly)
 #if ENABLETRACE
@@ -7191,30 +7280,54 @@ BOOL ValidBounds2 (LPMNMXCORD Bounds)
 	return TRUE;
 }
 
-MNMXCORD atobounds (LPSTR Value,LPBOOL err)
+MNMXCORD atobounds(LPSTR Value, LPBOOL err)
 #if ENABLETRACE
 {GSSiEnterProg (297);
 #endif
-{                 
+{
 	MNMXCORD	Bounds;
-	
-	if (sscanf (Value,"%Flf %Flf %Flf %Flf",&Bounds.xmn,&Bounds.ymn,&Bounds.xmx,&Bounds.ymx) != 4)  
+
+	if (sscanf(Value, "%Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.xmx, &Bounds.ymx) != 4)
 	{
-		Bounds.xmn=Bounds.ymn=Bounds.xmx=Bounds.ymx = 0;
+		Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
 		*err = TRUE;
 	}
 	else
 		*err = FALSE;
+	{
+#if ENABLETRACE
+		GSSiExitProg (297);
+#endif
+		return Bounds;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+MNMXCORD3D atobounds3D(LPSTR Value, LPBOOL err)
+#if ENABLETRACE
+{GSSiEnterProg (297);
+#endif
 {
+	MNMXCORD3D	Bounds;
+
+	if (sscanf(Value, "%Flf %Flf %Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.zmn, &Bounds.xmx, &Bounds.ymx, &Bounds.zmx) != 6)
+	{
+		Bounds.xmn = Bounds.ymn = Bounds.zmn = Bounds.xmx = Bounds.ymx = Bounds.zmx = 0;
+		*err = TRUE;
+	}
+	else
+		*err = FALSE;
+	{
 #if ENABLETRACE
-GSSiExitProg (297);
+		GSSiExitProg(297);
 #endif
-	return Bounds;
-}
+		return Bounds;
+	}
 #if ENABLETRACE
 }
 #endif
-} 
+}
 
 RECT atorect (LPSTR Value,LPBOOL pErr)
 #if ENABLETRACE
@@ -7330,7 +7443,7 @@ void dpointtoatrunc (LPSTR Value,LPDPOINT pPoint)
 	return;
 }
 
-BOOL GSSiChangeLength (HFILE Fid,long NewLength) 
+BOOL GSSiChangeLength (HFILE Fid,LONGLONG NewLength) 
 {        
 	short	st;
 	BOOL	rtn = FALSE;
@@ -7345,7 +7458,7 @@ BOOL GSSiChangeLength (HFILE Fid,long NewLength)
 			AddFileToUndoFile (0,NewLength+1,OpenFileFid[Fid]);
 		else
 			NewLength = -NewLength;
-		st = _chsize (OpenFileFid[Fid],NewLength);
+		st = _chsize_s (OpenFileFid[Fid],NewLength);
 		if (!st)
 		{
 			OpenFileLength[Fid] = NewLength;
@@ -7431,7 +7544,9 @@ int ActuallyCloseFile (HFILE Fid)
 	int	rtn;
 	int	ii;
 
-	if ((UseMappedFiles && Fid < MAXFILEHANDLES) && FidIsMapped[Fid])
+	if (Fid < 0 || Fid >= MAXFILEHANDLES)
+		return 0;
+	if (UseMappedFiles && FidIsMapped[Fid])
 	{
 		BOOL st = UnmapViewOfFile(FidPtr[Fid]);
 		st = CloseHandle (FidHandle[Fid]);
@@ -8203,7 +8318,7 @@ void ShowOpenFiles (LPSTR Name,UINT Mode)
 
 int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 {
-	static	char	NewPath[MAX_PATH], DLPath[MAX_PATH];
+	static	char	NewPath[MAX_PATH] = { 0 }, DLPath[MAX_PATH];
 	static	int		lDL = 0;
 	static	BOOL	Recursive=FALSE;
 	int		st, l, ii;
@@ -8370,7 +8485,7 @@ Exit:
 	return TRUE;
 }
 
-BOOL PctBox (HWND hWnd, DWORD MaxLen, DWORD Done, short InFreq)
+BOOL PctBox(HWND hWnd, LONGLONG MaxLen, LONGLONG Done, short InFreq)
 #if ENABLETRACE
 {GSSiEnterProg (387);
 #endif
@@ -12979,6 +13094,8 @@ __int64 llFileSeek (HANDLE hf, __int64 distance, DWORD MoveMethod)
 
 LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 {
+	if (Fid < 0 || Fid >= MAXFILEHANDLES)
+		return -1;
 	if (FidMemLen[Fid])
 	{   
 		switch (opt)
@@ -13042,20 +13159,13 @@ LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 		return -1;
 }
  
-DWORD GSSillseek2 (HFILE Fid, DWORD loc, int opt)
+LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt)
 {   
-	DWORD	rtnloc;
+	LONGLONG	rtnloc;
 	
 	if (OpenFileFid[Fid] == HFILE_ERROR)
 		return 0;
-	if (loc > LONG_MAX && !opt) 
-	{  
-		_lseek (OpenFileFid[Fid],LONG_MAX,opt);
-		loc -= LONG_MAX;
-		rtnloc = (DWORD)_lseek (OpenFileFid[Fid],loc,1); 
-	}
-	else
-		rtnloc = (DWORD)_lseek (OpenFileFid[Fid],loc,opt); 
+	rtnloc = _lseeki64 (OpenFileFid[Fid],loc,opt); 
 	return rtnloc;
 }
  

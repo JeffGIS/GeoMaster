@@ -2498,7 +2498,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 	   		lpFieldInfo = &FilePtr->FldInfo;
 	   		for (i=0;i<FilePtr->NumFields;i++,lpFieldInfo++)
 	   		{
-	   			if (lpFieldInfo->type == BT_CHAR || SQL_VARCHAR)
+				if (lpFieldInfo->type == BT_CHAR || lpFieldInfo->type == SQL_VARCHAR)
 	   			{
 					if (GetValFromOpenFiles (lpFieldInfo->name,str,MAXLINE) > 0) 
 					{
