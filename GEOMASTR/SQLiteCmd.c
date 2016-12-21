@@ -236,13 +236,22 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			if (!err)
 				rtn = SLTSpatialIndexAdd(db, ARG[4], id, ARG[6], &bounds);
 		}
-		else if (!stricmp(ARG[3], "VACUUM"))
+	}
+	else if (!stricmp(ARG[1], "SPATIALINDEX3D"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		if (!stricmp(ARG[3], "CREATE"))
 		{
-			int err = SQLOK(sqlite3_exec(db, "VACUUM", NULL, NULL, 0), db, "", 0);
+			rtn = SLTSpatialIndexCreate3D(db, ARG[4]);
+		}
+		else if (!stricmp(ARG[3], "ADD"))//$SQLITE(SPATIALINDEX,DBHANDLE,ADD,tableName,itemnumber,itemname,bounds)
+		{
+			BOOL err;
+			LONGLONG id = _atoi64(ARG[5]);
+			MNMXCORD3D bounds = atobounds3D(ARG[7], &err);
 			if (!err)
-			{
-				rtn = 1;
-			}
+				rtn = SLTSpatialIndexAdd3D(db, ARG[4], id, ARG[6], &bounds);
 		}
 	}
 	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
@@ -3243,7 +3252,7 @@ void CloseSLTDatabaseQuery (LPHANDLE pHandle)
 		rtn = sqlite3_close(*pHandle);
 	return;
 }
-BOOL SLTSpatialIndexCreate (sqlite3 *db, LPSTR tableName)
+BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
@@ -3254,8 +3263,28 @@ BOOL SLTSpatialIndexCreate (sqlite3 *db, LPSTR tableName)
 	if (db)
 	{
 		sprintf(pCmd, "DROP TABLE IF EXISTS %s;DROP TABLE IF EXISTS %s_index;CREATE TABLE %s (id INTEGER PRIMARY KEY, Name CHAR(256));\
-CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);", tableName, tableName, tableName, tableName);
-				
+					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);", tableName, tableName, tableName, tableName);
+
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+
+}
+BOOL SLTSpatialIndexCreate3D(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+	char * error;
+
+	if (db)
+	{
+		sprintf(pCmd, "DROP TABLE IF EXISTS %s;DROP TABLE IF EXISTS %s_index;CREATE TABLE %s (id INTEGER PRIMARY KEY, Name CHAR(256));\
+					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY, minZ, maxZ);", tableName, tableName, tableName, tableName);
+
 		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
 			rtn = TRUE;
 	}
@@ -3275,6 +3304,22 @@ BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, L
 	{
 		sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
 			tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, tableName, id, Name);
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	return rtn;
+}
+BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD3D pBounds)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+
+	if (db)
+	{
+		sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
+			tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, pBounds->zmn, pBounds->zmx, tableName, id, Name);
 		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
 			rtn = TRUE;
 	}
@@ -3304,6 +3349,37 @@ MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
 			bounds.ymx = sqlite3_column_double(statement, 3);
 			n++;
 			AddMinMaxD(&Bounds, &bounds);
+		}
+		sqlite3_finalize(statement);
+	}
+	return Bounds;
+}
+MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	MNMXCORD3D Bounds;
+	int n = 0;
+	DBoundsInit3D(&Bounds);
+
+	if (db)
+	{
+		sprintf(pCmd, "SELECT MinX, MaxX, MinY, MaxY, MinZ, MaxZ FROM %s_index", tableName);
+
+		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
+
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			MNMXCORD3D bounds;
+			bounds.xmn = sqlite3_column_double(statement, 0);
+			bounds.xmx = sqlite3_column_double(statement, 1);
+			bounds.ymn = sqlite3_column_double(statement, 2);
+			bounds.ymx = sqlite3_column_double(statement, 3);
+			bounds.zmn = sqlite3_column_double(statement, 4);
+			bounds.zmx = sqlite3_column_double(statement, 5);
+			n++;
+			AddMinMax3D(&Bounds, &bounds);
 		}
 		sqlite3_finalize(statement);
 	}

@@ -3144,7 +3144,7 @@ extern "C" int mainlaszip(int argc, char *argv[])
   return 0;
 }
 
-extern "C" bool getLAZMinMax(char * file, double * xmin, double * xmax, double * ymin, double * ymax)
+extern "C" bool getLAZMinMax(char * file, double * xmin, double * xmax, double * ymin, double * ymax, double * zmin, double * zmax)
 {
 	bool rtn = false;
 	laszip_header* header;
@@ -3163,6 +3163,8 @@ extern "C" bool getLAZMinMax(char * file, double * xmin, double * xmax, double *
 					*xmax = header->max_x;
 					*ymin = header->min_y;
 					*ymax = header->max_y;
+					*zmin = header->min_z;
+					*zmax = header->max_z;
 					rtn = true;
 				}
 				laszip_close_reader(laszip_reader);

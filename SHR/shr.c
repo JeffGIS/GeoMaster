@@ -4871,25 +4871,47 @@ GSSiExitProg (256);
 #endif
 }
 
-void DBoundsInit (LPMNMXCORD lpRect)
+void DBoundsInit(LPMNMXCORD lpRect)
 #if ENABLETRACE
 {GSSiEnterProg (257);
 #endif
 {
-    lpRect->xmn = DBL_MAX;
-    lpRect->ymn = DBL_MAX;
-    lpRect->xmx = -DBL_MAX;
-    lpRect->ymx = -DBL_MAX;
+	lpRect->xmn = DBL_MAX;
+	lpRect->ymn = DBL_MAX;
+	lpRect->xmx = -DBL_MAX;
+	lpRect->ymx = -DBL_MAX;
+	{
+#if ENABLETRACE
+		GSSiExitProg (257);
+#endif
+		return;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+void DBoundsInit3D(LPMNMXCORD3D lpRect)
+#if ENABLETRACE
 {
-#if ENABLETRACE
-GSSiExitProg (257);
+	GSSiEnterProg(257);
 #endif
-	return;
-}
+	{
+		lpRect->xmn = DBL_MAX;
+		lpRect->ymn = DBL_MAX;
+		lpRect->zmn = DBL_MAX;
+		lpRect->xmx = -DBL_MAX;
+		lpRect->ymx = -DBL_MAX;
+		lpRect->zmx = -DBL_MAX;
+		{
 #if ENABLETRACE
-}
+			GSSiExitProg(257);
 #endif
-} 
+			return;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
 
 BOOL PointInBoundsL (DPOINT Point,LPMNMXCORL pBounds)
 {
@@ -7258,30 +7280,54 @@ BOOL ValidBounds2 (LPMNMXCORD Bounds)
 	return TRUE;
 }
 
-MNMXCORD atobounds (LPSTR Value,LPBOOL err)
+MNMXCORD atobounds(LPSTR Value, LPBOOL err)
 #if ENABLETRACE
 {GSSiEnterProg (297);
 #endif
-{                 
+{
 	MNMXCORD	Bounds;
-	
-	if (sscanf (Value,"%Flf %Flf %Flf %Flf",&Bounds.xmn,&Bounds.ymn,&Bounds.xmx,&Bounds.ymx) != 4)  
+
+	if (sscanf(Value, "%Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.xmx, &Bounds.ymx) != 4)
 	{
-		Bounds.xmn=Bounds.ymn=Bounds.xmx=Bounds.ymx = 0;
+		Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
 		*err = TRUE;
 	}
 	else
 		*err = FALSE;
+	{
+#if ENABLETRACE
+		GSSiExitProg (297);
+#endif
+		return Bounds;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+MNMXCORD3D atobounds3D(LPSTR Value, LPBOOL err)
+#if ENABLETRACE
+{GSSiEnterProg (297);
+#endif
 {
+	MNMXCORD3D	Bounds;
+
+	if (sscanf(Value, "%Flf %Flf %Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.zmn, &Bounds.xmx, &Bounds.ymx, &Bounds.zmx) != 6)
+	{
+		Bounds.xmn = Bounds.ymn = Bounds.zmn = Bounds.xmx = Bounds.ymx = Bounds.zmx = 0;
+		*err = TRUE;
+	}
+	else
+		*err = FALSE;
+	{
 #if ENABLETRACE
-GSSiExitProg (297);
+		GSSiExitProg(297);
 #endif
-	return Bounds;
-}
+		return Bounds;
+	}
 #if ENABLETRACE
 }
 #endif
-} 
+}
 
 RECT atorect (LPSTR Value,LPBOOL pErr)
 #if ENABLETRACE

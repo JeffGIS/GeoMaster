@@ -1020,6 +1020,18 @@ MNMXCORD GetLAZIndexBounds(LPSTR LAZIndex)
 	}
 	return Bounds;
 }
+MNMXCORD3D GetLAZIndexBounds3D(LPSTR LAZIndex)
+{
+	MNMXCORD3D Bounds = { 0 };
+	sqlite3 *db;
+	int rtn = sqlite3_open(LAZIndex, &db);
+	if (rtn == SQLITE_OK)
+	{
+		Bounds = SLTSpatialIndexBounds3D(db, "LIDAR");
+		sqlite3_close(db);
+	}
+	return Bounds;
+}
 
 BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 {   
@@ -1042,6 +1054,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 	long	LidarDist[MAXLIDARPERREC+1];  
 	double	CellMinX, CellMinY; 
 	int		i;
+	MNMXCORD3D Bounds3D;
 	MNMXCORD Bounds;
     LIDARREC	LidarRec;  
     LIDARFILEHEADER	Header;
@@ -1060,7 +1073,11 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 	sprintf(Projection, "%s\\projection.cvt", InDir);
 	LoadProjection(0, Projection);
 	sprintf(InFile, "%s\\index.la", InDir);
-	Bounds = GetLAZIndexBounds(InFile);
+	Bounds3D = GetLAZIndexBounds3D(InFile);
+	Bounds.xmn = Bounds3D.xmn;
+	Bounds.xmx = Bounds3D.xmx;
+	Bounds.ymn = Bounds3D.ymn;
+	Bounds.ymx = Bounds3D.ymx;
 	ConvertBounds(&Bounds, 0, 1);
 	MinX = Bounds.xmn;
 	MinY = Bounds.ymn;
@@ -1077,7 +1094,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 		FileMinY = MinY - fmod(MinY, LIDARCELLSIZE);
 		NumCols = 1 + (MaxX - FileMinX) / LIDARCELLSIZE;
 		NumRows = 1 + (MaxY - FileMinY) / LIDARCELLSIZE;
-		if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX*32)
+		if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX*64)
 		{
 			MessageBox(0, "Lidar file size exceeds maximum", 0, MB_ICONEXCLAMATION);
 			return FALSE;
@@ -1167,6 +1184,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 									{
 										LidarRec.LidarPnt[LidarRec.NumPoints].xoff = IDNINT(1000 * (X - CellMinX));
 										LidarRec.LidarPnt[LidarRec.NumPoints].yoff = IDNINT(1000 * (Y - CellMinY));
+										LidarRec.LidarPnt[LidarRec.NumPoints].intensity = point->intensity;
 										LidarRec.LidarPnt[LidarRec.NumPoints++].Elevation = Z;
 									}
 									else
