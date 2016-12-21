@@ -131,6 +131,7 @@ GetPolylineEP:
 					if (HiPrecis)
 					{   
 						HPDPOINT	lpPoints=lpDCurPoints;
+						
 						long		nPnts=nCurPoints;
 						
 						if (hDynamicSeg)
@@ -145,7 +146,14 @@ GetPolylineEP:
 						Type1.BPY = lpPoints->y;  
 						Type1.EPX = lpDEndPoint->x;
 						Type1.EPY = lpDEndPoint->y;
-						Type1.AZM = getazd (lpPoints,lpDEndPoint);  
+						Type1.AZM = getazd (lpPoints,lpDEndPoint); 
+						if (CurrentType == GF_LINE)
+						{
+							double MPAZ;
+							DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, Dist / 2, &MPAZ, 0);
+							Type1.MPX = MidPoint.x;
+							Type1.MPY = MidPoint.y;
+						}
 						if (CurrentType == GF_CURVE)
 						{   
 							DPOINT	BP,RP; 
@@ -191,8 +199,20 @@ GetPolylineEP:
 				}  
 				else if (CurrentProcessedPickedItem >=0) 
 				{   
-					CurLength = PickList[CurrentProcessedPickedItem].Length;
+					HANDLE hPnts;
+					int nPnts;
 					Type1.Length = ConvertDist(PickList[CurrentProcessedPickedItem].Length,OutDistUnits); 
+					if (GetPolyPoints((LPPICKDATAHEADER)&PickList[CurrentProcessedPickedItem], FALSE, &nPnts, &hPnts))
+					{
+						HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPnts);
+						double MPAZ;
+						DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, PickList[CurrentProcessedPickedItem].Length / 2, &MPAZ, 0);
+						Type1.MPX = MidPoint.x;
+						Type1.MPY = MidPoint.y;
+						GSSiGlobUlFree(&hPnts);
+					}
+					CurLength = PickList[CurrentProcessedPickedItem].Length;
+
 				}
 			}
 				break;
