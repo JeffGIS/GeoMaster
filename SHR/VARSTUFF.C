@@ -5079,24 +5079,42 @@ GSSiExitProg (536);
 #endif
 } 
 
-void SetGlobalValueBounds (LPSTR Name, LPMNMXCORD pBounds)
+void SetGlobalValueBounds(LPSTR Name, LPMNMXCORD pBounds)
 #if ENABLETRACE
 {GSSiEnterProg (536);
 #endif
-{   char	txt[256];  
+{   char	txt[256];
 
-	sprintf (txt,"%.14lg %.14lg %.14lg %.14lg",pBounds->xmn,pBounds->ymn,pBounds->xmx,pBounds->ymx);
-	SetGlobalValue (Name,txt);
+sprintf(txt, "%.14lg %.14lg %.14lg %.14lg", pBounds->xmn, pBounds->ymn, pBounds->xmx, pBounds->ymx);
+SetGlobalValue(Name, txt);
 {
 #if ENABLETRACE
-GSSiExitProg (536);
+	GSSiExitProg (536);
 #endif
 	return;
 }
 #if ENABLETRACE
 }
 #endif
-} 
+}
+void SetGlobalValueBounds3D(LPSTR Name, LPMNMXCORD3D pBounds)
+#if ENABLETRACE
+{GSSiEnterProg (536);
+#endif
+{   char	txt[256];
+
+sprintf(txt, "%.14lg %.14lg %.14lg %.14lg %.14lg %.14lg", pBounds->xmn, pBounds->ymn, pBounds->zmn, pBounds->xmx, pBounds->ymx, pBounds->zmx);
+SetGlobalValue(Name, txt);
+{
+#if ENABLETRACE
+	GSSiExitProg(536);
+#endif
+	return;
+}
+#if ENABLETRACE
+}
+#endif
+}
 
 void SetGlobalValueHandle (LPSTR Name, HANDLE val)
 #if ENABLETRACE
@@ -6989,6 +7007,45 @@ GSSiExitProg (563);
 }
 #endif
 } 
+MNMXCORD3D GetGlobalBounds3DVal(LPSTR Global, LPMNMXCORD3D pDefault)
+#if ENABLETRACE
+{
+	GSSiEnterProg(563);
+#endif
+	{
+		HANDLE	hStr = GSSiGlobAlloc(221, GMEM_MOVEABLE, 256);
+		LPSTR	str = GlobalLock(hStr);
+		MNMXCORD3D	Rect;
+		BOOL	Err;
+
+		_fstrcpy(str, Global);
+		ExpandText(str);
+		if (!*str)
+		{
+			if (pDefault)
+			{
+				GSSiGlobUlFree(&hStr);
+				{
+#if ENABLETRACE
+					GSSiExitProg(563);
+#endif
+					return *pDefault;
+				}
+			}
+		}
+		Rect = atobounds3D(str, &Err);
+		GSSiGlobUlFree(&hStr);
+		{
+#if ENABLETRACE
+			GSSiExitProg(563);
+#endif
+			return Rect;
+		}
+#if ENABLETRACE
+}
+#endif
+}
+
 
 
 MNMXCORD GetGlobalBoundsVal (LPSTR Global,LPMNMXCORD pDefault) 

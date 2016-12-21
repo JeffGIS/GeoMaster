@@ -6121,21 +6121,42 @@ GSSiExitProg (190);
 #endif
 }
 
-void AddMinMaxD (LPMNMXCORD mm1, LPMNMXCORD mm2)
+void AddMinMaxD(LPMNMXCORD mm1, LPMNMXCORD mm2)
 #if ENABLETRACE
 {GSSiEnterProg (191);
 #endif
 {
-    mm1->xmn = min (mm1->xmn,mm2->xmn);
-    mm1->xmx = max (mm1->xmx,mm2->xmx);
-    mm1->ymn = min (mm1->ymn,mm2->ymn);
-    mm1->ymx = max (mm1->ymx,mm2->ymx);
-{
+	mm1->xmn = min(mm1->xmn, mm2->xmn);
+	mm1->xmx = max(mm1->xmx, mm2->xmx);
+	mm1->ymn = min(mm1->ymn, mm2->ymn);
+	mm1->ymx = max(mm1->ymx, mm2->ymx);
+	{
 #if ENABLETRACE
-GSSiExitProg (191);
+		GSSiExitProg (191);
 #endif
-    return;
+		return;
+	}
+#if ENABLETRACE
 }
+#endif
+}
+void AddMinMax3D(LPMNMXCORD3D mm1, LPMNMXCORD3D mm2)
+#if ENABLETRACE
+{GSSiEnterProg (191);
+#endif
+{
+	mm1->xmn = min(mm1->xmn, mm2->xmn);
+	mm1->xmx = max(mm1->xmx, mm2->xmx);
+	mm1->ymn = min(mm1->ymn, mm2->ymn);
+	mm1->ymx = max(mm1->ymx, mm2->ymx);
+	mm1->zmn = min(mm1->zmn, mm2->zmn);
+	mm1->zmx = max(mm1->zmx, mm2->zmx);
+	{
+#if ENABLETRACE
+		GSSiExitProg(191);
+#endif
+		return;
+	}
 #if ENABLETRACE
 }
 #endif

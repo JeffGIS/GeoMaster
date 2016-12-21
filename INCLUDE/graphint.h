@@ -1768,6 +1768,9 @@ BOOL LoadERDASDem (void);
 BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile);
 BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds);
 LoadLIDARDTMfromLAZ(LPSTR InDir, LPSTR OutFile, int wantType);
+MNMXCORD GetLAZIndexBounds(LPSTR LAZIndex);
+MNMXCORD3D GetLAZIndexBounds3D(LPSTR LAZIndex);
+
 BOOL PickThemeClass(int iclass, POINT Point);
 void DrawUnSelectedClass (int iclass,RECT ClassClrBox);
 void GetClassMinMax (int iclass,LPDOUBLE pClassMin,LPDOUBLE pClassMax);

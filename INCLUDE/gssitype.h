@@ -412,6 +412,17 @@ typedef struct
 typedef MNMXCORD    FAR *LPMNMXCORD; 
 typedef MNMXCORD	HUGE *HPMNMXCORD;
 typedef struct
+{
+	double  xmn;
+	double  ymn;
+	double  zmn;
+	double  xmx;
+	double  ymx;
+	double  zmx;
+} MNMXCORD3D;
+typedef MNMXCORD3D    FAR *LPMNMXCORD3D;
+
+typedef struct
    {	short	xmn;
    		short	ymn;
    		short	xmx;
@@ -436,7 +447,7 @@ typedef struct
      } LIDARFILEHEADER;
 typedef struct
      {  
-     	short	xoff,yoff;
+     	short	xoff,yoff,intensity;
      	float	Elevation;
      } LIDARPNT;
 typedef struct
