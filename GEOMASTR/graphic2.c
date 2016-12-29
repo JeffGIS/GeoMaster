@@ -1094,7 +1094,7 @@ void SetCoordText (LPSTR Text,LPSTR ID,DPOINT Point,LPSTR ElevationID,LPDOUBLE p
 {GSSiEnterProg (117);
 #endif
 {   
-	char	str1[64], str2[64], str3[64]="",fmt[32]="%3iD %2iM %2ldS";
+	char	str1[256], str2[256], str3[256]="",fmt[32]="%3iD %2iM %2ldS";
 	short	Deg,Min,ii;
 	double	Sec;  
 	
