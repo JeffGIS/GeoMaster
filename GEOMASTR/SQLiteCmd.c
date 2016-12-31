@@ -1353,6 +1353,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			BOOL skipQuadIndex = atob(ARG[8]);
 			BOOL skipConvert = atob(ARG[9]);
 			double coordFactor = COORDINATE_FACTOR;
+			double sqMeters;
+			double perimeter;
+			double sqMetersCVT;
+			double perimeterCVT;
 			int maxLineLen = 0;
 
 			if (skipConvert)
@@ -1379,6 +1383,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
 			else
 				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+			//SetGlobalValue("%ALT_PROJECTION", "[%DL]projections\\hencogrnd.cvt");
+			SetGlobalValue("%ALT_PROJECTION", "[%DL]projections\\statepln.cvt");
+			ConvertCoordClose();
+			ConvertCoordInit();
+
 			if (Fid != HFILE_ERROR)
 			{
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 32);
@@ -1410,9 +1419,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 					if (*ARG[6])
-						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i),Area DOUBLE,Perimeter DOUBLE);", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
 					else
-						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i),Area DOUBLE,Perimeter DOUBLE);", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
 					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if ((pSpace = strchr(ARG[5], ' ')))
 						*pSpace = 0;
@@ -1469,14 +1478,15 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						{
 							LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
 							DPOINT midPt;
-							HPDPOINT pDPoints;
+							HPDPOINT pDPoints, pPointsCVT;
 							HPPOINT  pPoints;
 							LPSTR blobPoints,blobParts;
-							HANDLE hPoints;
+							HANDLE hPoints, hPointsCVT;
 							BOOL canCompress=TRUE;
 							int  np = nPnts;
 							int  nLops;
 							double maxd = 0;
+							double diffArea, diffPerim;
 
 							if (!skipConvert)
 								ConvertBounds(pBounds, 1, 2);
@@ -1491,12 +1501,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								GlobalUnlock(hPolyPartLen);
 							}
 							pDPoints = (HPDPOINT)(pBounds + 1);
+							sqMeters = ComputeAreaAreaD(pDPoints, nPnts, &perimeter);
 							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
+							hPointsCVT = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(DPOINT));
+							pPointsCVT = GlobalLock(hPointsCVT);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;
 							for (i = 0; i < nPnts; i++)
 							{
+								pPointsCVT[i] = pDPoints[i];
+								ConvertCoord(&pPointsCVT[i], 1, 3);
 								if (!skipConvert)
 									ConvertCoord(&pDPoints[i], 1, 2);
 								pPoints[i].x = coordFactor * (pDPoints[i].x - midPt.x);
@@ -1504,6 +1519,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
 									canCompress = FALSE;
 							}
+							sqMetersCVT = ComputeAreaAreaD(pPointsCVT, nPnts, &perimeterCVT);
+							diffArea = 100 * sqMetersCVT / sqMeters;
+							diffPerim = 100 * perimeterCVT / perimeter;
+							if (diffArea > 101 || diffArea < 99 || diffPerim > 101 || diffPerim < 99)
+								ii = 1;
+							sqMeters = sqMetersCVT;
+							perimeter = perimeterCVT;
 							if (canCompress)
 							{
 								LPPOINTS pShortPoints = malloc(nPnts*sizeof(POINTS)+4);
@@ -1557,21 +1579,22 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (nLoops > 1)
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints, sqMeters, perimeter);
 								free(blobParts);
 							}
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val,addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, Arg7Val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 							}
 							fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							free(blobPoints);
 							GSSiGlobUlFree(&hPoints);
+							GSSiGlobUlFree(&hPointsCVT);
 							GSSiGlobUlFree(&hPoly);
 							GSSiGlobFree(&hPolyPartLen);
 							if (canCompress)
