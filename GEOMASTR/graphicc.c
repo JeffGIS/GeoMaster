@@ -3720,8 +3720,10 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
 			GSSiGlobUlFree (&hDibInfo);
     		_fstrcpy (pDot,".bpw");
 			GetGlobalCVal ("[%BPWUNITS]",units,0);
-			if (!stricmp (units,"FEET"))
+			if (!stricmp(units, "FEET") && PRJ_UNITS[1] == 2) //meters
 				factor = FTM;
+			else if (!stricmp(units, "METERS") && PRJ_UNITS[1] == 1) //feet
+				factor = MFT;
 		}
 		else
 			goto Exit;
@@ -3741,7 +3743,22 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     	if ((Fid = GSSiOpenFile(WorldFile,0,OF_READ)) == HFILE_ERROR)
     		goto Exit;
     	fgetstring (str,128,Fid);
-    	ScaleX = atof (str);
+		if (!stricmp(str, "FEET"))
+		{
+			if (PRJ_UNITS[1] == 2) //meters
+				factor = FTM;
+			fgetstring(str, 128, Fid);
+			ScaleX = atof(str);
+		}
+		else if (!stricmp(str, "METERS"))
+		{
+			if (PRJ_UNITS[1] == 1) //feet
+				factor = MFT;
+			fgetstring(str, 128, Fid);
+			ScaleX = atof(str);
+		}
+		else
+	    	ScaleX = atof (str);
     	fgetstring (str,128,Fid);
     	BitmapPoint.x = atof (str);
     	fgetstring (str,128,Fid);
@@ -3881,7 +3898,8 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
 ProcessImageFile:  
 		if (!InLoadBinaryFileList)
 		{
-			hCurImageMapDib = LoadDIB32 (PltName,TRUE); 
+			hCurImageMapDib = LoadDIB32(PltName, TRUE); 
+
     		if (!hCurImageMapDib)
     			goto RtnFalse;  
 		}

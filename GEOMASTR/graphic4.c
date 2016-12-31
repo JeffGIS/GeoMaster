@@ -4561,9 +4561,12 @@ BOOL DisplayPointItem (HDC hDC,POINT WinPoint,double size, double rot, int Symbo
 
 	if (fast)
 	{
-		if (first)SaveDC(hDC);
-		first = FALSE;
-		SetDisplayMode(hDC, GF_TEXTMODE);
+		//if (first)
+		{
+			SaveDC(hDC);
+			first = FALSE;
+			SetDisplayMode(hDC, GF_TEXTMODE);
+		}
 		SetPixel (hDC,WinPoint.x,WinPoint.y,0);
 		//RestoreDC (hDC,-1);
 	{

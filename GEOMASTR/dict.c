@@ -4144,18 +4144,21 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 	BOOL	rtn=1; 
 	DWORD	np=npnts;
 	HPEN	hCPen, hPen=0;
-	
+	LOGPEN	lPen;
+
+	hCPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+	GetObject(hCPen, sizeof(LOGPEN), &lPen);
 	if (Width != 0)
 	{
-		LOGPEN	lPen;
 		int	width;
 		
-		hCPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
-		GetObject (hCPen,sizeof(LOGPEN),&lPen);
 		width = IDNINT(AdjustWidth(Width));
 		hPen = CreatePen(PS_SOLID, width, lPen.lopnColor);
 		SelectObject (hDC,hPen);
-	}	 
+	}
+	else
+		SelectObject(hDC, hCPen);
+
 	while (np--)
 	{
 		pPoints->x = IDNINT(lpPoints->x);
@@ -4173,7 +4176,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 		DeleteObject (hPen);
 	}
    	//SetPixel (hDC,pPointsBeg->x,pPointsBeg->y,0);//debug
-   	//SetPixel (hDC,pPointsBeg[npnts-1].x,pPointsBeg[npnts-1].y,AutoYellow(0));
+   	SetPixel (hDC,pPointsBeg[npnts-1].x,pPointsBeg[npnts-1].y,AutoYellow(lPen.lopnColor));
 
 	GSSiGlobUlFree (&handle);
 {

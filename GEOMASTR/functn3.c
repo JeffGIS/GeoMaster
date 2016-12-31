@@ -4129,17 +4129,17 @@ GotCloseFilehSQL:
 				}
 				else if (!stricmp(Arg[1], "RESCALE"))//file,width,height,outfile,opt
 				{
-					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
 
 					if (hDIB)
 					{
-						int width = atoi (Arg[3]);
-						int height = atoi (Arg[4]);
-						HDIB32 hDibOut = FreeImage_Rescale (hDIB,width,height,FILTER_CATMULLROM);
+						int width = atoi(Arg[3]);
+						int height = atoi(Arg[4]);
+						HDIB32 hDibOut = FreeImage_Rescale(hDIB, width, height, FILTER_CATMULLROM);
 
 						if (hDibOut)
 						{
-							GMFIBMPHandleToEXT (Arg[5],hDibOut,atoi(Arg[6]));
+							GMFIBMPHandleToEXT(Arg[5], hDibOut, atoi(Arg[6]));
 							FreeImage_Unload(hDIB);
 							FreeImage_Unload(hDibOut);
 							goto RtnTrue;
@@ -4148,7 +4148,27 @@ GotCloseFilehSQL:
 					}
 					goto RtnFalse;
 				}
-				else if (!stricmp (Arg[1],"WIDTH"))//infile
+				else if (!stricmp(Arg[1], "SINGLECHANNEL"))//file,channel,outfile,opt
+				{
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
+
+					if (hDIB)
+					{
+						int ichan = atoi(Arg[3]);
+						HDIB32 hDibOut = FreeImage_GetChannel(hDIB, ichan);
+
+						if (hDibOut)
+						{
+							GMFIBMPHandleToEXT(Arg[4], hDibOut, atoi(Arg[5]));
+							FreeImage_Unload(hDIB);
+							FreeImage_Unload(hDibOut);
+							goto RtnTrue;
+						}
+						FreeImage_Unload(hDIB);
+					}
+					goto RtnFalse;
+				}
+				else if (!stricmp(Arg[1], "WIDTH"))//infile
 				{
 					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
 
