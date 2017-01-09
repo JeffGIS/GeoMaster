@@ -2421,6 +2421,7 @@ int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir);
 int CreateMultValueFile(LPSTR INDir);
 BOOL AssignMultValues(LPSTR INDir,LPSTR UpdateFile);
+int AssignLandUseCodeToParcels(LLPOINT pt, sqlite3 *_database);
 int fixRampNum(int rampin);
 
 int FindDupParcels(LPSTR DUPFile);

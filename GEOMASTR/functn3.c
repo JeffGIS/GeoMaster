@@ -6780,6 +6780,22 @@ HaveVP:;
 				rtn = AssignMultValues(Arg[2], Arg[3]);
 				goto Rtnrtn;
 			}
+			else if (!stricmp(Arg[1], "ASSIGNUSECODE"))//$NVMETRO(ASSIGNUSECODE,[DBHANDLE],[PT])
+			{
+				BOOL err;
+				DPOINT pt = atopt(Arg[3], &err);
+				LLPOINT ptll;
+
+				if (err)
+					goto RtnFalse;
+				ConvertCoord(&pt, 1, 2);
+				ptll.lat = pt.y;
+				ptll.lon = pt.x;
+				int code = AssignLandUseCodeToParcels(ptll, (sqlite3 *)atol(Arg[2]));
+				itoa(code, OutLoc, 10);
+				goto Rtnl;
+			}
+
 
 		}
 			break;
