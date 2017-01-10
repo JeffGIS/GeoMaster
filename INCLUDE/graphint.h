@@ -2381,6 +2381,7 @@ BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
 BOOL RunForAll(int nArgs, LPSTR *Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength, LPSTR sourceDir);
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);
+BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichFile, BOOL showStatus);
 int SQLiteCmd(int nArgs, LPSTR *ARG);
 HANDLE GetDistinctValues(HWND hWnd, LPSTR value, int ln, HANDLE hDB, int nStatus);
 BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPRECT pRect,LPSTR title,int textFade);

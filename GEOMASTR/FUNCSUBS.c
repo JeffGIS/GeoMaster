@@ -430,7 +430,7 @@ Exit:
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 {
 	BOOL rtn = FALSE;
-	HFILE FidTF, fidFiles, fidIndex=HFILE_ERROR;
+	HFILE FidTF, fidFiles, fidIndex = HFILE_ERROR;
 	char filePath[MAX_PATH + 2];
 	char indexRec[MAX_PATH + 32];
 
@@ -438,7 +438,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		goto Exit;
 	if (!stricmp(Arg[1], "CREATE"))//$COMPRESSEDFILE(CREATE,path,filelistfile,sourcedir,outindexfile)
 	{
-		long	NextFileLoc = 0, loc=0, len;
+		long	NextFileLoc = 0, loc = 0, len;
 		long	TotLen;
 		long	MaxLength = 8L * (long)USHRT_MAX;
 		short	Version = 101;
@@ -477,7 +477,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 			}
 			BigWrite(FidTF, (HPSTR)&len, 4, -1);
 			BigWrite(FidTF, (HPSTR)filePath, len, -1);
-			AddFileToTransferFile(0, FidTF, filePath, MaxLength,Arg[4]);
+			AddFileToTransferFile(0, FidTF, filePath, MaxLength, Arg[4]);
 			loc = -1;
 			BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		}
@@ -490,8 +490,117 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		GSSiClose(fidIndex);
 		rtn = TRUE;
 	}
-Exit:
+	else if (!stricmp(Arg[1], "EXPAND"))//$COMPRESSEDFILE(EXPAND,path,outputdir,whichfile(ALL or blank for all files))
+	{
+		rtn = DecompressGMZipFile(Arg[2], Arg[3], Arg[4], atob(Arg[5]));
+	}
+	Exit:
 	return rtn;
+}
+static int GetFileFromTransferFile(HFILE FidTF,LPSTR FileToGet,long MaxLength,_int64 totlen)
+{
+			int lRec, rtn = FALSE;
+			int	CompressedLength, LenRead = 0;
+			double curLoc;
+			HFILE Fid = GSSiOpenFile(FileToGet, 0, OF_CREATE);
+
+			if (Fid == HFILE_ERROR)
+				goto Exit;
+
+			BigRead(FidTF, (HPSTR)&CompressedLength, 4);
+			rtn = TRUE;
+			while (CompressedLength > 0)
+			{
+				LPBYTE	pCompressedRec = (LPBYTE)malloc(CompressedLength + 32);
+				LPBYTE	pRec = (LPBYTE)malloc(MaxLength * 2);
+				LenRead += CompressedLength + 4;
+				BigRead(FidTF, pCompressedRec, CompressedLength);
+				lRec = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, CompressedLength);
+				if (BigWrite(Fid, pRec, lRec, -1) != lRec)
+					rtn = FALSE;
+				BigRead(FidTF, (HPSTR)&CompressedLength, 4);
+				free(pCompressedRec);
+				free(pRec);
+				curLoc = GSSillseek(FidTF,0,1);
+				/*if (_popover)
+				{
+
+					dispatch_async(dispatch_get_main_queue(),
+						^{
+						[_popover updateProgress : curLoc / _totLen];
+					});
+
+				}*/
+			}
+
+			GSSiClose(Fid);
+
+		Exit:
+			return rtn;
+		}
+
+BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichFile,BOOL showStatus)
+{
+#define PATH_MAX MAX_PATH
+			int	len, MaxLength;
+			char File[PATH_MAX], OutFile[PATH_MAX];
+			short Version, endMarker;
+			HFILE FidTF;
+			BOOL rtn = TRUE;
+			LPSTR pBS;
+			FidTF = GSSiOpenFile(TransferFileName, 0,OF_READ);
+			long fileLen;
+			long nFilesRead = 0;
+			_int64 totLen = 0;
+
+			if (FidTF == HFILE_ERROR)
+				return FALSE;
+
+			fileLen = GSSifilelength(FidTF);
+			if (fileLen < 14)
+			{
+				rtn = FALSE;
+				goto Exit;
+			}
+			totLen = fileLen;
+
+			GSSillseek(FidTF, -4, SEEK_END);
+			BigRead(FidTF,&endMarker, sizeof(short));
+
+			if (endMarker != 32349)
+			{
+				rtn = FALSE;
+				goto Exit;
+			}
+
+			GSSillseek(FidTF, 0, SEEK_SET);
+			BigRead(FidTF, &Version, sizeof(short));
+			BigRead(FidTF, &MaxLength, sizeof(int));
+			BigRead(FidTF, &len, 4);
+
+			while (rtn && len > 0)
+			{
+				BigRead(FidTF, File, len);
+
+				if (!(pBS = strrchr(File, '\\')))
+				{
+					pBS = File;
+				}
+				else
+				{
+					pBS++;
+				}
+				sprintf(OutFile, "%s\\%s", toDirectory, pBS);
+				rtn = GetFileFromTransferFile(FidTF,OutFile,MaxLength,totLen);
+				nFilesRead++;
+				if (!rtn)
+					goto Exit;
+				BigRead(FidTF, &len, 4);
+			}
+
+		Exit:
+			GSSiClose(FidTF);
+			return rtn;
 }
 
 HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
