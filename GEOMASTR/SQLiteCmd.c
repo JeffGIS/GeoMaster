@@ -3019,7 +3019,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, i);
 				int nc = 0;
 				LPSTR pPar = 0;
-				if (itype != SQLITE_NULL)
+				//if (itype != SQLITE_NULL)
 					pPar = strchr(decl, '(');
 				if (pPar)
 				{
@@ -3029,14 +3029,14 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				strncpy(pDB->FldInfo[i].name, pName, sizeof(pDB->FldInfo[i].name));
 				pDB->FldInfo[i].index = i;
 
-				if (itype != SQLITE_NULL)
+				//if (itype != SQLITE_NULL)
 				{
 					if (!strnicmp(decl, "INT", 3))
 					{
 						pDB->FldInfo[i].type = BT_INTEGER;
 						pDB->FldInfo[i].length = 4;
 					}
-					else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT"))
+					else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT") || !stricmp(decl, "DOUBLE"))
 					{
 						pDB->FldInfo[i].type = BT_REAL;
 						pDB->FldInfo[i].length = 8;
