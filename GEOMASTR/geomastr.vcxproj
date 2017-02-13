@@ -853,6 +853,7 @@
     <ClCompile Include="..\gctpc\wviifor.c" />
     <ClCompile Include="..\gctpc\wviiinv.c" />
     <ClCompile Include="wlan.cpp" />
+    <ClCompile Include="WMS.c" />
     <ClCompile Include="XMLProcessing.c" />
     <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\yrday.c" />
     <ClCompile Include="..\solar_calculator\Version2\zatan2.c" />
@@ -1016,6 +1017,7 @@
     <ClInclude Include="..\INCLUDE\shr.h" />
     <ClInclude Include="..\INCLUDE\TileGraphics.h" />
     <ClInclude Include="..\INCLUDE\toolbar.h" />
+    <ClInclude Include="WMS.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP" />

@@ -122,7 +122,7 @@ LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName,LPSTR where)
 
 	if (db)
 	{
-		if (sqlite3_prepare_v2(db, pCmd, -1, &statement, 0) == SQLITE_OK)
+		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
 			if (sqlite3_step(statement) == SQLITE_ROW)
 			{
@@ -3132,8 +3132,9 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	if (infield->hCurVal)
 	{
 		pCurVal = (LPCURVAL)GlobalLock(infield->hCurVal);
-		_fstrncpy(answer, &pCurVal->Value, pCurVal->length);
-		answer[pCurVal->length] = 0;
+		int len = min(MAXVARLEN - 2, pCurVal->length);
+		_fstrncpy(answer, &pCurVal->Value, len);
+		answer[len] = 0;
 		GlobalUnlock(infield->hCurVal);
 		*irc = 0;
 		return lpvoid;
