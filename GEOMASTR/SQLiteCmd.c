@@ -2967,7 +2967,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 	return rtn;
 }
 			*/
-HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
+HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 {
 	HANDLE	hDB;
 	LPSQLDATABASE	pDB;
@@ -2996,7 +2996,10 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		GSSiGlobUlFree(&hDB);
 		return 0;
 	}
-	rtn = sqlite3_open(Name, &db);
+	if (Access == BT_READ)
+		rtn = sqlite3_open_v2(Name, &db, SQLITE_OPEN_READONLY, NULL);
+	else
+		rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)
 	{
 		GSSiGlobUlFree(&pDB);

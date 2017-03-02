@@ -293,7 +293,7 @@ void CloseVars (void);
 void GMDFieldTypeToSQL (LPSTR gmd,LPSTR sql);
 void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
 short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
-HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL);
+HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL, short Access);
 HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where);
 void CloseSLTDatabase(LPHANDLE pHandle);

@@ -813,7 +813,7 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int cod
 	BOOL rtn = FALSE;
 	*OutLoc = 0;
 	rampNum = fixRampNum(rampNum);
-	int rc = sqlite3_open(NVCRISDataBase, &database);
+	int rc = sqlite3_open_v2(NVCRISDataBase, &database,SQLITE_OPEN_READONLY,NULL);
 	if (rc == SQLITE_OK)
 	{
 		MPINTERSECTION *pMPInt = malloc(sizeof(MPINTERSECTION)+4);
