@@ -4115,12 +4115,14 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 	 ForceBounds = FALSE;
 				 	 SaveZooms (0);
 	             	 UnallocateConfig();
+					 setDoPaint(TRUE);
 			    	 PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
 				 } 
 				 else
 				 	_fstrcpy (CfgName,SaveName);
 				 GSSiGlobUlFree (&hSN);
-				 break; 
+				 setDoPaint(TRUE);
+				 break;
 			}  
 			
 			case IDM_LOADCONFIG:
