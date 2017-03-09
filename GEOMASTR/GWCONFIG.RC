@@ -1939,7 +1939,7 @@ FONT 10, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDCANCEL,216,4,29,14
     CTEXT           "GeoMaster version 0.47",IDC_VERSION,8,92,236,28
-    CTEXT           "Copyright (C) 2000-2008, Geographic Software Specialists, Inc.",IDC_STATIC,0,124,244,8
+    CTEXT           "Copyright (C) 2000-2017, Geographic Software Specialists, Inc.",IDC_STATIC,0,124,244,8
     ICON            "GWIZ",IDC_STATIC,4,4,20,20,NOT WS_VISIBLE
     CTEXT           " ",IDC_SERIALNUM,4,80,240,8
     CTEXT           " ",IDC_APP,0,68,244,8
@@ -8691,6 +8691,10 @@ BEGIN
         BOTTOMMARGIN, 201
     END
 
+    "ABOUT", DIALOG
+    BEGIN
+    END
+
     "TAGLOC", DIALOG
     BEGIN
     END
@@ -9197,8 +9201,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,10,158,0
- PRODUCTVERSION 34,10,158,0
+ FILEVERSION 34,10,161,0
+ PRODUCTVERSION 34,10,161,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9215,7 +9219,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34j build 158"
+            VALUE "FileVersion", "34j build 161"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"

@@ -2250,6 +2250,7 @@ int  OpenFGDB (LPSTR DBName,LPSTR Table,LPSTR SQL);
 int  OpenFGDB2 (LPSTR DBName,LPSTR Table,LPSTR SQL);
 int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSize,LPHANDLE phList);
 BOOL FGDBCheck (void);
+LPSTR FGDBVersion(void);
 BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pnRows,LPMNMXCORD pBounds);
 BOOL CloseFGDB (int iDB);
 BOOL OpenPGDBFileIndex (LPSTR DBName,LPMNMXCORD WBounds);  
