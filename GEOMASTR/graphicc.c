@@ -3251,6 +3251,44 @@ GSSiExitProg (1027);
 #endif
 } 
 
+int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
+{
+	int rtn = 0;
+	char LastUDI[66], str[256];
+	int st;
+	REFINDEXDATA RefIdxData;
+	LPREFINDEXDATA pRefIdxData=&RefIdxData;
+	TAGKEY TAGKey;
+	int pos = BT_FIRST;
+	HFILE fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+
+	if (fid != HFILE_ERROR)
+	{
+		_fstrcpy(PltName, PltFile);
+		if (OpenTAGIndex(FALSE, FALSE))
+		{
+			_fstrncpy(TAGKey.PREFIX, TagLocPrefix, 8);
+			TAGKey.Refno = LONG_MIN;
+			*LastUDI = 0;
+			while (!BT_FIND(hTAGIdx, (LPSTR)&TAGKey, pos, BT_ANY, (LPSTR)pRefIdxData))
+			{
+				char prfx[16];
+				pos = BT_NEXT;
+				strncpy0(prfx, TAGKey.PREFIX, 8);
+				if (!pRefIdxData->Deleted && (!*Prefix || !stricmp(prfx, Prefix)))
+				{
+					sprintf(str, "%s:%s", TAGKey.PREFIX, TAGKey.UDI);
+					fputstring(str, fid);
+					rtn++;
+				}
+			}
+			CloseTAGIndex();
+		}
+		GSSiClose(fid);
+	}
+	return rtn;
+}
+
 void OpenRefIndex (BOOL Delete)
 #if ENABLETRACE
 {GSSiEnterProg (1075);
