@@ -6853,8 +6853,17 @@ HaveVP:;
 				itoa(code, OutLoc, 10);
 				goto Rtnl;
 			}
-
-	
+			goto RtnFalse;
+		}
+		case 786: //$TAGDUMP(pltfile,prefix,dumpfile)
+		{
+			  int ntags=0;
+			  nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			  *OutLoc = 0;
+			  if (nArgs > 2)
+				ntags = DumpTAGsToFile(Arg[1],Arg[2],Arg[3]);
+			  itoa(ntags, OutLoc, 10);
+			  goto Rtnl;
 		}
 			break;
 		default:

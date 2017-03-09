@@ -2997,7 +2997,15 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 		return 0;
 	}
 	if (Access == BT_READ)
-		rtn = sqlite3_open_v2(Name, &db, SQLITE_OPEN_READONLY, NULL);
+	{
+		OFSTRUCTGM OFStruct;
+		HFILE fid = GSSiOpenFile(Name, &OFStruct, OF_READ);
+		GSSiClose(fid);
+		if (fid != HFILE_ERROR)
+			rtn = sqlite3_open_v2(OFStruct.szPathName, &db, SQLITE_OPEN_READONLY, NULL);
+		else
+			rtn = -1;
+	}
 	else
 		rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)

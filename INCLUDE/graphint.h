@@ -726,7 +726,8 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
 void BuildRefIndex (BOOL DeleteExistingRef,BOOL DeletedItem);
 void OpenRefIndex (BOOL Delete); 
 void OpenRefIndex2 (BOOL Delete);
-BOOL OpenTAGIndex (int Option,BOOL StoreBounds); 
+BOOL OpenTAGIndex(BOOL Delete, BOOL StoreBounds);
+int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile);
 BOOL AddToDupRefList (long Refno);
 HANDLE CreateDupRefTable (void);
 void StartFastPick (short LayerID);
