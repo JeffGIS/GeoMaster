@@ -1371,6 +1371,9 @@
     <ClCompile Include="..\LAStools\LASzip\example\laszipdllexample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WMS.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -1811,6 +1814,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\LAStools\LASzip\dll\laszip_dll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WMS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

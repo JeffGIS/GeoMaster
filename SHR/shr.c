@@ -2356,6 +2356,7 @@ int AppendFile (LPSTR InFile,LPSTR Line)
 	BOOL		SaveAllowJournal = AllowJournal;
 	char		File2[MAX_PATH];
 	LPSTR		File = File2;
+	BOOL		fileIsFID = FALSE;
 
 	strcpy (File2,InFile);
 	if (*File == '*')
@@ -2366,14 +2367,30 @@ int AppendFile (LPSTR InFile,LPSTR Line)
 	ExpandText (File);
 	if (!*File)
 		goto Exit;
-	Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);
-	if (Fid == HFILE_ERROR)
-		Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE_NODELETE);
+	if (IsInteger(File))
+	{
+		Fid = atoi(File);
+		fileIsFID = TRUE;
+	}
+	else
+	{
+		Fid = GSSiOpenFile(File, &OFStruct, OF_READWRITE);
+		if (Fid == HFILE_ERROR)
+			Fid = GSSiOpenFile(File, &OFStruct, OF_CREATE_NODELETE);
+	}
 	if (Fid == HFILE_ERROR) 
 		goto Exit;
-	rtn = GSSillseek (Fid,0,2)+1;
-	fputstring (Line,Fid);
-	GSSiClose (Fid);
+	if (fileIsFID)
+	{
+		fputstring(Line, Fid);
+		rtn = 1;
+	}
+	else
+	{
+		rtn = GSSillseek(Fid, 0, 2) + 1;
+		fputstring(Line, Fid);
+		GSSiClose(Fid);
+	}
 Exit:
 	AllowJournal = SaveAllowJournal;
 {

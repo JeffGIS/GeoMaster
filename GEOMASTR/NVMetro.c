@@ -2,6 +2,7 @@
 #include "gmextern.h"
 #include "RampCompliance.h"
 #include "MPIntersection.h"
+#define COORDINATE_FACTOR 10000000.0
 
 #define FIRSTYEAR	2004
 #define LASTYEAR	2015
@@ -374,4 +375,87 @@ BOOL AssignMultValues(LPSTR indexFile, LPSTR dataFile)
 	DestroyStatusWindow(0);
 
 	return rtn;
+}
+
+int AssignLandUseCodeToParcels(LLPOINT pt,sqlite3 *_database)
+{
+	CGFloat d, mind = DBL_MAX;
+	DPOINT p2, minpt;
+	int minref = 0;
+	int refno;
+	int npicked = 0;
+	int minLinks = 0;
+	int nLinks;
+	int code = 0;
+	int minCode = 0;
+	DPOINT BasePt;
+	LPSTR pid;
+	int numPoints, numLoops;
+	DPOINT ptd;
+	double saveP_TOL=P_TOL;
+
+	P_TOL /= 1000000;
+	
+	typedef LPPOINT LPIPOINT;
+	HANDLE _pTranLLtoView = 0;
+
+	MNMXCORD bnds;
+
+	ptd.x = pt.lon;
+	ptd.y = pt.lat;
+	bnds.xmn = bnds.xmx = pt.lon;
+	bnds.ymn = bnds.ymx = pt.lat;
+	char query[1024];
+	sprintf (query,"SELECT USECODE,BasePointX,BasePointY,NumPoints,NumLoops,PolyPartLen,Points FROM LANDUSE,LANDUSE_index WHERE LANDUSE.id=LANDUSE_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+		bnds.xmn, bnds.xmx, bnds.ymn, bnds.ymx);
+
+	sqlite3_stmt *statement = NULL;
+
+	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "",0);
+
+	while (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		code = sqlite3_column_int(statement, 0);
+		BasePt.x = sqlite3_column_double(statement, 1);
+		BasePt.y = sqlite3_column_double(statement, 2);
+		numPoints = sqlite3_column_int(statement, 3);
+		numLoops = sqlite3_column_int(statement, 4);
+		int *polyPartLen = (int *)sqlite3_column_blob(statement, 5);
+		LPIPOINT offsetPoints = (LPIPOINT)sqlite3_column_blob(statement, 6);
+		refno = sqlite3_column_int(statement, 7);
+		nLinks = sqlite3_column_int(statement, 8);
+
+		LPDPOINT llpoints = malloc(abs(numPoints) * sizeof(DPOINT)+4);
+
+		if (numPoints < 0)
+		{
+			numPoints = -numPoints;
+			LPSPOINT offsetPoints16 = (LPSPOINT)offsetPoints;
+
+			for (int i = 0; i < numPoints; i++)
+			{
+				llpoints[i].x = (BasePt.x + offsetPoints16[i].x / COORDINATE_FACTOR);
+				llpoints[i].y = (BasePt.y + offsetPoints16[i].y / COORDINATE_FACTOR);
+				//llpoints[i] = TranDPOINT(&llpoints[i], _pTranLLtoView);
+			}
+		}
+
+		else for (int i = 0; i < numPoints; i++)
+		{
+			llpoints[i].x = (BasePt.x + offsetPoints[i].x / COORDINATE_FACTOR);
+			llpoints[i].y = (BasePt.y + offsetPoints[i].y / COORDINATE_FACTOR);
+			//llpoints[i] = TranDPOINT(&llpoints[i], _pTranLLtoView);
+		}
+		if (POINT_IN_AREAD(ptd, numPoints, llpoints, numLoops, 0, 0, 0))
+		{
+			npicked++;
+			minCode = code;
+		}
+		free(llpoints);
+	}
+	P_TOL = saveP_TOL;
+	SQLOK(sqlite3_finalize(statement), _database,"",0);
+	if (npicked != 1)
+		ii = 1;
+	return minCode;
 }

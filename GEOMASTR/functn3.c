@@ -4588,7 +4588,65 @@ GotCloseFilehSQL:
 				rtn = mainlaszip(nArgs, &Arg[1]);
 			goto RtnFalse;
 		}
-
+			break;
+		case 654: //$UNIQUE(CREATE,len)
+			//$UNIQUE(ADD,handle,val)
+			//$UNIQUE(GET,handle,first,valvar,countvar)
+			//$UNIQUE(CLOSE,handle)
+		{
+			HANDLE hBT;
+			int vlen;
+			int count;
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "CREATE"))
+			{
+				vlen = atoi(Arg[2]);
+				hBT = CreateUniqueList(vlen, 0);
+				itoa((UINT)hBT, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "ADD"))
+			{
+				hBT = (HANDLE)atoi(Arg[2]);
+				vlen = GetBTKeyLen(hBT);
+				LPSTR value = malloc(vlen + 4);
+				_fstrncpy(value, Arg[3], vlen);
+				if (BT_FIND(hBT, value, BT_FIRST, BT_EQ, (LPSTR)&count))
+					count = 0;
+				count++;
+				BT_PUT(hBT, value, (LPSTR)&count);
+				free(value);
+				goto RtnTrue;
+			}
+			else if (!stricmp(Arg[1], "GET"))
+			{
+				int count;
+				hBT = (HANDLE)atoi(Arg[2]);
+				vlen = GetBTKeyLen(hBT);
+				LPSTR value = malloc(vlen + 4);
+				int pos = BT_NEXT;
+				if (atob(Arg[3]))
+					pos = BT_FIRST;
+				if (!BT_FIND(hBT, value, pos, BT_ANY, (LPSTR)&count))
+				{
+					value[vlen] = 0;
+					SetGlobalValue(Arg[4], value);
+					SetGlobalValueLong(Arg[5], count);
+					rtn = TRUE;
+				}
+				else
+					rtn = FALSE;
+				free(value);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CLOSE"))
+			{
+				hBT = (HANDLE)atoi(Arg[2]);
+				rtn = BT_CLOSEANDDELETE(&hBT);
+				goto Rtnrtn;
+			}
+		}
+			break;
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
@@ -6780,7 +6838,32 @@ HaveVP:;
 				rtn = AssignMultValues(Arg[2], Arg[3]);
 				goto Rtnrtn;
 			}
+			else if (!stricmp(Arg[1], "ASSIGNUSECODE"))//$NVMETRO(ASSIGNUSECODE,[DBHANDLE],[PT])
+			{
+				BOOL err;
+				DPOINT pt = atopt(Arg[3], &err);
+				LLPOINT ptll;
 
+				if (err)
+					goto RtnFalse;
+				ConvertCoord(&pt, 1, 2);
+				ptll.lat = pt.y;
+				ptll.lon = pt.x;
+				int code = AssignLandUseCodeToParcels(ptll, (sqlite3 *)atol(Arg[2]));
+				itoa(code, OutLoc, 10);
+				goto Rtnl;
+			}
+			goto RtnFalse;
+		}
+		case 786: //$TAGDUMP(pltfile,prefix,dumpfile)
+		{
+			  int ntags=0;
+			  nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			  *OutLoc = 0;
+			  if (nArgs > 2)
+				ntags = DumpTAGsToFile(Arg[1],Arg[2],Arg[3]);
+			  itoa(ntags, OutLoc, 10);
+			  goto Rtnl;
 		}
 			break;
 		default:

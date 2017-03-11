@@ -279,8 +279,10 @@ typedef float			 	FAR *LPFLOAT;
 typedef float   			HUGE *HPFLOAT;
 typedef double  			FAR *LPDOUBLE;
 typedef double  			HUGE *HPDOUBLE;
-typedef struct{double x,y;} DPOINT;
+typedef struct{ double x, y; } DPOINT;
 typedef DPOINT  			FAR *LPDPOINT;
+typedef struct{ double lat, lon; } LLPOINT;
+typedef LLPOINT  			FAR *LPLLPOINT;
 typedef DPOINT  			HUGE *HPDPOINT;
 typedef POINTS				*HPPOINTS;
 typedef struct{double x,y,z;} DPOINT3D;
@@ -328,7 +330,12 @@ typedef struct
     CHAR      lfFaceName[LF_FACESIZE];
 } LOGFONT16,  FAR *LPLOGFONT16;
 #pragma pack()
-
+typedef struct
+{
+	short x;
+	short y;
+}  SPOINT;
+typedef SPOINT *LPSPOINT;
 typedef struct
 {
 	short x;

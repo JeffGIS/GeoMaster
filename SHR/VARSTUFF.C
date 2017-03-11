@@ -1047,7 +1047,7 @@ GSSiExitProg (520);
 			break;
 
 		case SLT_DATAFILE:
-			FileHandle = OpenSLTDatabase(Name, SQL);
+			FileHandle = OpenSLTDatabase(Name, SQL,Access);
 			break;
 
 		case LISTVAR_DATAFILE:

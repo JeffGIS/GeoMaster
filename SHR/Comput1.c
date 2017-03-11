@@ -5231,11 +5231,11 @@ C*/
           PAX2 = lpPoint->x;
           PAY2 = lpPoint->y;
           MXX = max (PAX1,PAX2);
-          if (XP > MXX) goto S100;
+          if (XP > MXX+P_TOL) goto S100;
           MNY = min (PAY1,PAY2);
-          if (YP < MNY) goto S100;
+          if (YP < MNY-P_TOL) goto S100;
           MXY = max (PAY1,PAY2);
-          if (YP > MXY) goto S100;
+          if (YP > MXY+P_TOL) goto S100;
           A1 = LGETAZ (PAX1,PAY1,PAX2,PAY2);
           IRC = LIN_SEC (PAX1,PAY1,A1, XP, YP, A2, &INTX, &INTY);
 /*C******* IGNORE PARALLEL LINES */
@@ -5247,7 +5247,7 @@ C*/
           	*pNextXIntersect = INTX;
 			goto RtnTrue;
 		  }
-          if (INTX < XP)  goto S100;
+          if (INTX+P_TOL < XP)  goto S100;
           if (pNextXIntersect)
           	*pNextXIntersect = min (*pNextXIntersect,INTX);
           NIN++;
@@ -5291,7 +5291,7 @@ S100:     PAX1 = PAX2;
 
 
 
-      if (NEED_MID1)
+      if (NEED_MID1 && HAVE_MID1)
       {   XMID2  = XMID2_NEED;
           YMID2  = YMID2_NEED;
           XMIDMN = min (XMID1, XMID2);

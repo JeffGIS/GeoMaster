@@ -1605,6 +1605,55 @@ GSSiExitProg (1350);
 			ltoa(ulong, OutLoc, 10);
 			goto Rtnl;
 		}
+		case 856://$TEXTFILE(OPEN,pathname,READorWRITEorRorW)  returns fid
+			//$TEXTFILE(READ,fid,varname) puts text into varname returns T or F
+			//$TEXTFILE(WRITE,fid,text)
+			//$TEXTFILE(CLOSE,fid)
+		{
+			HFILE fid;
+			rtn = 0;
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "OPEN"))
+			{
+				if (*Arg[3] == 'R')
+				{
+					fid = GSSiOpenFile(Arg[2], 0, OF_READ);
+					rtn = fid;
+				}
+				else if (*Arg[3] == 'C')
+				{
+					fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+					rtn = fid;
+				}
+				else if (*Arg[3] == 'W')
+				{
+					fid = GSSiOpenFile(Arg[2], 0, OF_READWRITE);
+					rtn = fid;
+				}
+			}
+			else if (!stricmp(Arg[1], "READ"))
+			{
+				LPSTR line = malloc(MAXVARLEN);
+				fid = atoi(Arg[2]);
+				if (fgetstring(line, MAXVARLEN - 2, fid))
+				{
+					rtn = 1;
+					SetGlobalValue(Arg[3], line);
+				}
+				free(line);
+			}
+			else if (!stricmp(Arg[1], "WRITE"))
+			{
+				fid = atoi(Arg[2]);
+				rtn = fputstring(Arg[3], fid);
+			}
+			else if (!stricmp(Arg[1], "CLOSE"))
+			{
+				fid = atoi(Arg[2]);
+				rtn = !GSSiClose(fid);
+			}
+			goto Rtnrtn;
+		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);

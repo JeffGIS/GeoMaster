@@ -1704,7 +1704,7 @@ BOOL ReadBitMapHeader (HFILE Fid, LPHANDLE phDibInfo, LPLONG ImageOffset)
 {   UINT nRead;
     BITMAPFILEHEADER bmfHead;
     LPBITMAPINFO    pDibInfo;
-
+	BOOL rtn = FALSE;
     if (!Fid || Fid==HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -1714,40 +1714,44 @@ GSSiExitProg (400);
 }
 
     nRead = BigRead (Fid,(HPSTR)&bmfHead,sizeof(BITMAPFILEHEADER));
-    *phDibInfo = GSSiGlobAlloc (1402,GMEM_MOVEABLE,
-                 bmfHead.bfOffBits-sizeof(BITMAPFILEHEADER));
-    pDibInfo = (LPBITMAPINFO) GlobalLock(*phDibInfo);
+	if (bmfHead.bfType == 0x4d42)
+	{
+		*phDibInfo = GSSiGlobAlloc(1402, GMEM_MOVEABLE,
+			bmfHead.bfOffBits - sizeof(BITMAPFILEHEADER));
+		pDibInfo = (LPBITMAPINFO)GlobalLock(*phDibInfo);
 
-    nRead = BigRead (Fid,(HPSTR)pDibInfo,sizeof(BITMAPINFOHEADER));
-    if (! pDibInfo->bmiHeader.biSizeImage)
-    {
-    	long	RowLen = (long)pDibInfo->bmiHeader.biBitCount * (long)pDibInfo->bmiHeader.biWidth;
-	    if (RowLen%8)
-	    	RowLen = RowLen/8 + 1;
-	    else
-	    	RowLen = RowLen/8;
-	    if (RowLen%4)
-	    	RowLen += 4 - RowLen%4;
-	    pDibInfo->bmiHeader.biSizeImage= (long)pDibInfo->bmiHeader.biHeight * RowLen;  
+		nRead = BigRead(Fid, (HPSTR)pDibInfo, sizeof(BITMAPINFOHEADER));
+		if (!pDibInfo->bmiHeader.biSizeImage)
+		{
+			long	RowLen = (long)pDibInfo->bmiHeader.biBitCount * (long)pDibInfo->bmiHeader.biWidth;
+			if (RowLen % 8)
+				RowLen = RowLen / 8 + 1;
+			else
+				RowLen = RowLen / 8;
+			if (RowLen % 4)
+				RowLen += 4 - RowLen % 4;
+			pDibInfo->bmiHeader.biSizeImage = (long)pDibInfo->bmiHeader.biHeight * RowLen;
+		}
+		/*    if (pDibInfo->bmiHeader.biBitCount > 8)
+			{
+			pDibInfo->bmiHeader.biClrUsed=0;
+			pDibInfo->bmiHeader.biClrImportant=0;
+			} */
+		if (!pDibInfo->bmiHeader.biClrUsed)
+		{
+			if (pDibInfo->bmiHeader.biBitCount == 4) pDibInfo->bmiHeader.biClrUsed = 16;
+			if (pDibInfo->bmiHeader.biBitCount == 8) pDibInfo->bmiHeader.biClrUsed = 256;
+		}
+		nRead = BigRead(Fid, (HPSTR)pDibInfo->bmiColors, (UINT)pDibInfo->bmiHeader.biClrUsed * 4);
+		*ImageOffset = GSSillseek(Fid, 0, 1);
+		GlobalUnlock(*phDibInfo);
+		rtn = TRUE;
 	}
-/*    if (pDibInfo->bmiHeader.biBitCount > 8) 
-    {
-    	pDibInfo->bmiHeader.biClrUsed=0;
-    	pDibInfo->bmiHeader.biClrImportant=0; 
-    } */
-    if (! pDibInfo->bmiHeader.biClrUsed)
-        {
-        if (pDibInfo->bmiHeader.biBitCount==4) pDibInfo->bmiHeader.biClrUsed=16;
-        if (pDibInfo->bmiHeader.biBitCount==8) pDibInfo->bmiHeader.biClrUsed=256;
-        }
-    nRead = BigRead (Fid,(HPSTR)pDibInfo->bmiColors,(UINT)pDibInfo->bmiHeader.biClrUsed*4); 
-    *ImageOffset = GSSillseek (Fid,0,1);
-    GlobalUnlock (*phDibInfo);
 {
 #if ENABLETRACE
 GSSiExitProg (400);
 #endif
-    return (TRUE);
+    return rtn;
 }
 #if ENABLETRACE
 }

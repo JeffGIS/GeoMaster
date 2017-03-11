@@ -1858,25 +1858,28 @@ GSSiExitProg (439);
 }
  switch(Message)
    {
-    case WM_INITDIALOG:  
-         
-         GetFreeImageVersionAndCopyright (FIVersion, FICopyright);      
-         ii=MrSidVersion (MrSidVer);
-         SetDlgItemText (hWndDlg,IDC_COPYR2,FICopyright); 
-         LoadString(hInst, IDS_LIZTECH, FICopyright, sizeof(FICopyright));
-         SetDlgItemText (hWndDlg,IDC_COPYR3,FICopyright); 
-//		 GetGlobalCVal ("[%APPID]",AppName,"GeoMaster");
-//       	 SetDlgItemText (hWndDlg,IDC_APP,AppName); 
-       	 SetDlgItemText (hWndDlg,IDC_APP,MODULENAME); 
-			//ShowWindow (GetDlgItem(hWndDlg,IDC_LOGO),SW_SHOW);
-	        PostMessage(hWndDlg, WM_COMMAND, IDC_LOGO, 0L);
-         if (*SerialNumber) 
-         {
-         	sprintf (str,"Serial Number: %s",SerialNumber);
-         	SetDlgItemText (hWndDlg,IDC_SERIALNUM,str);
-         } 
-         sprintf (FICopyright,"%s\r\nFreeImage Version %s\r\nMrSID Version %s",GMVersion,FIVersion,MrSidVer);
-		 SetDlgItemText (hWndDlg,IDC_VERSION,FICopyright);	
+ case WM_INITDIALOG:
+ {
+	 LPSTR fgdbVersion = FGDBVersion();
+	 GetFreeImageVersionAndCopyright(FIVersion, FICopyright);
+	 ii = MrSidVersion(MrSidVer);
+	 SetDlgItemText(hWndDlg, IDC_COPYR2, FICopyright);
+	 LoadString(hInst, IDS_LIZTECH, FICopyright, sizeof(FICopyright));
+	 SetDlgItemText(hWndDlg, IDC_COPYR3, FICopyright);
+	 //		 GetGlobalCVal ("[%APPID]",AppName,"GeoMaster");
+	 // SetDlgItemText(hWndDlg, IDC_APP, AppName);
+	 SetDlgItemText(hWndDlg, IDC_APP, fgdbVersion);
+	 SetDlgItemText(hWndDlg, IDC_APP, MODULENAME);
+	 //ShowWindow (GetDlgItem(hWndDlg,IDC_LOGO),SW_SHOW);
+	 PostMessage(hWndDlg, WM_COMMAND, IDC_LOGO, 0L);
+	 if (*SerialNumber)
+	 {
+		 sprintf(str, "Serial Number: %s", SerialNumber);
+		 SetDlgItemText(hWndDlg, IDC_SERIALNUM, str);
+	 }
+	 sprintf(FICopyright, "%s\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, FIVersion, MrSidVer);
+	 SetDlgItemText(hWndDlg, IDC_VERSION, FICopyright);
+ }
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:

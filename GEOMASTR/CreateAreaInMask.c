@@ -227,8 +227,8 @@ BOOL ThemeCreateAreaInMask(int from)
 					FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));
 					BMbounds.xmn = margin;
 					BMbounds.ymn = margin;
-					BMbounds.xmx = margin + width;
-					BMbounds.ymx = margin + height;
+					BMbounds.xmx = margin + width -1;
+					BMbounds.ymx = margin + height -1;
 					hTranWtoBM = STRANBoundsToBounds(&bounds, &BMbounds);
 					hTranBMtoW = STRANBoundsToBounds(&BMbounds, &bounds);
 

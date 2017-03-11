@@ -2,6 +2,13 @@
 
 #include "graphint.h"
 
+LPSTR FGDBVersion(void)
+{
+	static char * version[] = { "File Geodatabase Version 0.0" };
+	return version;
+}
+
+
 int  OpenFGDB2 (LPSTR DBName,LPSTR Table,LPSTR SQL)
 {
 	MessageBox(0, "This version of GeoMaster (XP) does not support filegeodatabases", 0, MB_ICONEXCLAMATION);

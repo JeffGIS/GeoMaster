@@ -122,7 +122,7 @@ LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName,LPSTR where)
 
 	if (db)
 	{
-		if (sqlite3_prepare_v2(db, pCmd, -1, &statement, 0) == SQLITE_OK)
+		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
 			if (sqlite3_step(statement) == SQLITE_ROW)
 			{
@@ -2967,7 +2967,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 	return rtn;
 }
 			*/
-HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
+HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 {
 	HANDLE	hDB;
 	LPSQLDATABASE	pDB;
@@ -2996,7 +2996,18 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		GSSiGlobUlFree(&hDB);
 		return 0;
 	}
-	rtn = sqlite3_open(Name, &db);
+	if (Access == BT_READ)
+	{
+		OFSTRUCTGM OFStruct;
+		HFILE fid = GSSiOpenFile(Name, &OFStruct, OF_READ);
+		GSSiClose(fid);
+		if (fid != HFILE_ERROR)
+			rtn = sqlite3_open_v2(OFStruct.szPathName, &db, SQLITE_OPEN_READONLY, NULL);
+		else
+			rtn = -1;
+	}
+	else
+		rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)
 	{
 		GSSiGlobUlFree(&pDB);
@@ -3019,7 +3030,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, i);
 				int nc = 0;
 				LPSTR pPar = 0;
-				if (itype != SQLITE_NULL)
+				//if (itype != SQLITE_NULL)
 					pPar = strchr(decl, '(');
 				if (pPar)
 				{
@@ -3029,14 +3040,14 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 				strncpy(pDB->FldInfo[i].name, pName, sizeof(pDB->FldInfo[i].name));
 				pDB->FldInfo[i].index = i;
 
-				if (itype != SQLITE_NULL)
+				//if (itype != SQLITE_NULL)
 				{
 					if (!strnicmp(decl, "INT", 3))
 					{
 						pDB->FldInfo[i].type = BT_INTEGER;
 						pDB->FldInfo[i].length = 4;
 					}
-					else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT"))
+					else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT") || !stricmp(decl, "DOUBLE"))
 					{
 						pDB->FldInfo[i].type = BT_REAL;
 						pDB->FldInfo[i].length = 8;
@@ -3132,8 +3143,9 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	if (infield->hCurVal)
 	{
 		pCurVal = (LPCURVAL)GlobalLock(infield->hCurVal);
-		_fstrncpy(answer, &pCurVal->Value, pCurVal->length);
-		answer[pCurVal->length] = 0;
+		int len = min(MAXVARLEN - 2, pCurVal->length);
+		_fstrncpy(answer, &pCurVal->Value, len);
+		answer[len] = 0;
 		GlobalUnlock(infield->hCurVal);
 		*irc = 0;
 		return lpvoid;
