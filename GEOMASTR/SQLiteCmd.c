@@ -1068,7 +1068,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						int firstIndex = 1;
 						int lastIndex = lpGWDHead->NumIndex;
 
-						if (primKeyIsOffset || nextId)
+						if (primKeyIsOffset || nextId>0)
 						{
 							firstIndex = 0;
 							sprintf(strchr(pCmd, 0), ")");
