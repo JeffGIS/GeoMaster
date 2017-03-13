@@ -10150,70 +10150,73 @@ LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)//neg maxlen implie
 		  MAXLEN = -MAXLEN;
 	  }
       OLDLEN = _fstrlen (OLD);
-      NEWLEN = _fstrlen (NEW); 
-      STRLEN = _fstrlen (STRING);
-      IBEG   = STRING;
-      IDIFF  = NEWLEN - OLDLEN;
-      while (*IBEG)
-      {
-		  if (ignoreCase)
+	  if (OLDLEN)
+	  {
+		  NEWLEN = _fstrlen(NEW);
+		  STRLEN = _fstrlen(STRING);
+		  IBEG = STRING;
+		  IDIFF = NEWLEN - OLDLEN;
+		  while (*IBEG)
 		  {
-			  int lold = strlen(OLD);
-			  int lbeg = strlen(IBEG);
-			  LPSTR upOLD = malloc(lold + 4);
-			  LPSTR upBEG = malloc(lbeg + 4);
-			  LPSTR newBEG;
-			  strcpy(upOLD, OLD);
-			  strupr(upOLD);
-			  strcpy(upBEG, IBEG);
-			  strupr(upBEG);
-			  newBEG = strstr(upBEG, upOLD);
-			  if (newBEG)
+			  if (ignoreCase)
 			  {
-				  int inc = newBEG - upBEG;
-				  IBEG = IBEG + inc;
+				  int lold = strlen(OLD);
+				  int lbeg = strlen(IBEG);
+				  LPSTR upOLD = malloc(lold + 4);
+				  LPSTR upBEG = malloc(lbeg + 4);
+				  LPSTR newBEG;
+				  strcpy(upOLD, OLD);
+				  strupr(upOLD);
+				  strcpy(upBEG, IBEG);
+				  strupr(upBEG);
+				  newBEG = strstr(upBEG, upOLD);
+				  if (newBEG)
+				  {
+					  int inc = newBEG - upBEG;
+					  IBEG = IBEG + inc;
+				  }
+				  else
+					  IBEG = 0;
+				  free(upOLD);
+				  free(upBEG);
 			  }
 			  else
-				  IBEG = 0;
-			  free(upOLD);
-			  free(upBEG);
+				  IBEG = _fstrstr(IBEG, OLD);
+			  if (!IBEG) goto Exit;
+			  if (!IDIFF)
+			  {
+				  new = NEW;
+				  while (*new) *IBEG++ = *new++;
+			  }
+			  else if (IDIFF < 0)
+			  {
+				  loc = IBEG + OLDLEN;
+				  new = NEW;
+				  while (*new) *IBEG++ = *new++;
+				  new = IBEG;
+				  while (*loc) *new++ = *loc++;
+				  *new = 0;
+				  STRLEN += IDIFF;
+			  }
+			  else
+			  {
+				  CURLEN = IBEG - STRING;
+				  MOVELEN = STRLEN - CURLEN;
+				  STRLEN += IDIFF;
+				  if (STRLEN > MAXLEN)
+				  {
+					  STRLEN = MAXLEN;
+					  goto Exit;
+				  }
+				  TRAN(IBEG + OLDLEN, IBEG + NEWLEN, (size_t)MOVELEN);
+				  new = NEW;
+				  while (*new) *IBEG++ = *new++;
+			  }
 		  }
-		  else
-			IBEG    = _fstrstr(IBEG,OLD);
-          if (!IBEG) goto Exit;
-          if (!IDIFF)
-          {               
-              new = NEW;
-              while (*new) *IBEG++ = *new++;
-          }
-          else if (IDIFF < 0)
-          {
-              loc = IBEG + OLDLEN;
-              new = NEW;
-              while (*new) *IBEG++ = *new++;
-              new = IBEG;
-              while (*loc) *new++ = *loc++;
-              *new = 0;
-              STRLEN += IDIFF;
-          }
-          else
-          {   
-              CURLEN = IBEG - STRING;
-              MOVELEN = STRLEN - CURLEN;
-              STRLEN += IDIFF;
-              if (STRLEN > MAXLEN)
-              {
-                STRLEN = MAXLEN;
-                goto Exit;
-              }
-              TRAN (IBEG+OLDLEN,IBEG+NEWLEN,(size_t) MOVELEN);
-              new = NEW;
-              while (*new) *IBEG++ = *new++;
-          }
-      }
-Exit:
-      loc = STRING + STRLEN;
-      *loc = '\0';
+	  Exit:
+		  loc = STRING + STRLEN;
+		  *loc = '\0';
+	  }
 {
 #if ENABLETRACE
 GSSiExitProg (324);

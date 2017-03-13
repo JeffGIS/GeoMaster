@@ -36,7 +36,85 @@ static char		cmd[1024];
 
 #define BLOB_MAX	USHRT_MAX
 #define COORDINATE_FACTOR	10000000
+#define INPUTBUFSIZE USHRT_MAX * 32
 int i;
+
+static int maxID(sqlite3 *_database)
+{
+	int rtn = -1;
+	char query[256];
+	
+	sprintf(query, "SELECT max(id) FROM OFFENSEXY");
+
+	sqlite3_stmt *statement = NULL;
+
+	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "maxID", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		rtn = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(sqlite3_finalize(statement), _database,"maxID",0);
+	return rtn;
+}
+
+
+static int idForCnum(int cnum, int seq, sqlite3 *_database)
+{
+	int rtn = -1;
+	char query[256];
+	sprintf (query,"SELECT id FROM OFFENSEXY WHERE ControlNbr = %li AND OffenseOrder = %i", (long)cnum, seq);
+	sqlite3_stmt *statement = NULL;
+
+	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "id for cnum", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		rtn = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(sqlite3_finalize(statement), _database, "id for cnum", 0);
+	if (rtn < 0)
+	{
+		rtn = maxID(_database) + 1;
+	}
+
+	return rtn;
+}
+
+static void getIdForUpdate(LPSTR str, BOOL remove, sqlite3 *_database)
+{
+	static char fromString[32] = { 0 }, toString[32] = { 0 };
+
+	int cnum;
+	int  seq;
+
+	LPSTR pLoc = strstr(str, "OFFENSEXY VALUES(|");
+	if (pLoc)
+	{
+		pLoc += 18;
+		LPSTR pEnd = strchr(pLoc, '|');
+		if (pEnd)
+		{
+			*pEnd = 0;
+			strncpy(fromString, pLoc - 1, sizeof(fromString));
+			strcat(fromString, "|");
+			*pEnd++ = '|';
+			pLoc = pEnd + 1;
+			pEnd = strchr(pLoc, '\'');
+			*(pEnd - 1) = 0;
+			sscanf(pLoc, "%i,%i", &cnum, &seq);
+			*(pEnd - 1) = ',';
+			int idnum = cnum;
+			if (!remove)
+				idnum = idForCnum(cnum,seq,_database);
+			sprintf(toString, "%i", idnum);
+			REPLAC(str, fromString, toString, INPUTBUFSIZE);
+		}
+
+	}
+	else
+	{
+		REPLAC(str, fromString, toString, INPUTBUFSIZE);
+	}
+}
 
 static LPSTR  DPointsToBlob(HPDPOINT pPoints, int nPnts)
 {
@@ -289,6 +367,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				//REPLAC(cmd, "'", "''", MAXSTR - 2);
 				if (convertInsertInto)
 					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
+				getIdForUpdate(cmd, FALSE, db);
 				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, &error);
 				sqlite3_free(error);
 				if (err && !skipErrors)

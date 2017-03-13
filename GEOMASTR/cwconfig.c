@@ -1968,6 +1968,8 @@ nMess = -1;
 		 nMess = 0;
 	 pmsg[nMess] = msg;   // pmsg[nMess-1] pmsg[nMess-2] pmsg[nMess-3] pmsg[nMess-4] pmsg[nMess-5] 
 	 sizeof (msg);
+	 if (msg.message == SPI_SETMOUSESPEED)
+		 ii = 1;
 	 if (msg.message == WM_PRINT)
 		 ii = 1;
 	 if (msg.message == WM_PRINTCLIENT)
