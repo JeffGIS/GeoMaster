@@ -3277,7 +3277,7 @@ int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
 				strncpy0(prfx, TAGKey.PREFIX, 8);
 				if (!pRefIdxData->Deleted && (!*Prefix || !stricmp(prfx, Prefix)))
 				{
-					sprintf(str, "%s:%s", TAGKey.PREFIX, TAGKey.UDI);
+					sprintf(str, "%s:%s", prfx, TAGKey.UDI);
 					fputstring(str, fid);
 					rtn++;
 				}
