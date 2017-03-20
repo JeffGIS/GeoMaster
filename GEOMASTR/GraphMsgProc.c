@@ -18837,7 +18837,9 @@ NextFile:
 				}
                 if (!st)
                 {  
-                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
+					char mess[512];
+					sprintf(mess, "Cannot open data file:%s", Name);
+					GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
                     break;
                 }
                 SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
@@ -21914,7 +21916,9 @@ BeginLoad:
 	                 {  
 						 if (!OpenDataFile (AttImportDataFile,"MSLINK=[%MSLINK]",BT_READ,&AttImporthDB))
 						 {  
-						    MessageBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK);
+							 char mess[512];
+							 sprintf(mess, "Cannot open data file:%s", AttImportDataFile);
+							 GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 						    break;
 						 }
 					 }
@@ -26442,7 +26446,9 @@ NextPass:
 	                
 	                if (!OpenDataFile (PMDataFile,pSQL,BT_READ,&PMhDB))
 	                {  
-	                    GSSiMsgBox(GetFocus(),"Cannot open data file", PMDataFile,MB_ICONQUESTION|MB_OK,0);
+						char mess[512];
+						sprintf(mess, "Cannot open data file:%s", PMDataFile);
+						GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 	                    break;
 	                }
 	                    
@@ -30979,7 +30985,9 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 		                GetDlgItemText (hWndDlg,IDC_SQL,MIFOutSQL,lnMIFOutSQL);                
 		                if (!OpenDataFile (MIFOutDataFile,MIFOutSQL,BT_READ,&hSQL))
 		                {  
-		                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
+							char mess[512];
+							sprintf(mess, "Cannot open data file:%s", MIFOutDataFile);
+							GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 		                    break;
 		                }
 	                }

@@ -493,7 +493,9 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                 hSQL = 0;
                 if (!OpenDataFile (IMDataFile,pSQL,BT_READ,&hSQL))
                 {  
-                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
+					char mess[512];
+					sprintf(mess, "Cannot open data file:%s", IMDataFile);
+					GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
                     break;
                 }
                 
