@@ -778,6 +778,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 					}
 				}
+				//CREATE UNIQUE INDEX OFFENSEXYC_Index ON OFFENSEXY('ControlNbr', 'OffenseOrder');
+
 				if (fidDef != HFILE_ERROR)
 				{
 					int i = 0;
