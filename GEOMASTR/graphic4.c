@@ -1258,7 +1258,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	char	str[16]; 
 	BOOL	Visible=DescIsVisible;
 	HIGHLIGHTDATA	HighlightData;
-    static	long	debugrefno=100099028;    
+    static	long	debugrefno=1379;    
     short	ii;
 	static	BOOL	ShowOnlyDebugRef=FALSE;
 	static	char	debugUDI[34] = "283401320222";

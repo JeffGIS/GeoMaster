@@ -61,6 +61,8 @@
 #include "dgnlibp.h"
 #include <math.h>
 
+extern "C" double LTWOPI(double AZ1);
+
 CPL_CVSID("$Id: dgnstroke.cpp,v 1.9 2004/06/02 15:53:00 warmerda Exp $");
 
 #define DEG_TO_RAD (PI/180.0)
@@ -118,7 +120,6 @@ int DGNStrokeArc( DGNHandle hFile, DGNElemArc *psArc,
 {
     double      dfAngleStep, dfAngle;
     int         i;
-
     if( nPoints < 2 )
         return FALSE;
 
@@ -128,9 +129,8 @@ int DGNStrokeArc( DGNHandle hFile, DGNElemArc *psArc,
                   "Zero primary or secondary axis in DGNStrokeArc()." );
         return FALSE;
     }
-
     dfAngleStep = psArc->sweepang / (nPoints - 1);
-    for( i = 0; i < nPoints; i++ )
+    for( i =0; i < nPoints; i++ )
     {
         dfAngle = (psArc->startang + dfAngleStep * i) * DEG_TO_RAD;
         
@@ -141,7 +141,7 @@ int DGNStrokeArc( DGNHandle hFile, DGNElemArc *psArc,
                              &(pasPoints[i].x),
                              &(pasPoints[i].y) );
         pasPoints[i].x += psArc->origin.x;
-        pasPoints[i].y += psArc->origin.y;
+		pasPoints[i].y += psArc->origin.y;
         pasPoints[i].z = psArc->origin.z;
     }
 
