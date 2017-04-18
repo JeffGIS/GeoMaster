@@ -307,7 +307,7 @@ GSSiExitProg (1348);
 					sprintf (OutLoc,"%i/%i/%2.2i",tmtime.tm_mon+1,tmtime.tm_mday,year);
 					break;      
 				case 3: //ODBC format 1999-12-15 00:00:00.000
-					sprintf (OutLoc,"%i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i000",tmtime.tm_year+1900,tmtime.tm_mon+1,tmtime.tm_mday,
+					sprintf (OutLoc,"%i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i.000",tmtime.tm_year+1900,tmtime.tm_mon+1,tmtime.tm_mday,
 													  tmtime.tm_hour,tmtime.tm_min,tmtime.tm_sec);
 					break;
 				case 4://ORACLE day format 23-MAR-1949
@@ -333,6 +333,10 @@ GSSiExitProg (1348);
 					sprintf (OutLoc,"%2.2i-%s-%i %2.2i:%2.2i:%2.2i %s",tmtime.tm_mday,MonthAbv[tmtime.tm_mon],tmtime.tm_year+1900,
 																	   hr,tmtime.tm_min,tmtime.tm_sec,AMPM);
 				}
+					break;
+				case 8: //ODBC format w/o seconds 1999-12-15 00:00
+					sprintf(OutLoc, "%i-%2.2i-%2.2i %2.2i:%2.2i", tmtime.tm_year + 1900, tmtime.tm_mon + 1, tmtime.tm_mday,
+						tmtime.tm_hour, tmtime.tm_min);
 					break;
 			}
 

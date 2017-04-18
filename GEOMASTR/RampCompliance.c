@@ -670,6 +670,12 @@ static char *obstructions[] = {"None", "Hydrant", "Manhole", "Polebox", "Pole", 
 
 static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk", "OneWayDirCurbGutter", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk"};
 
+static char *buttontypes[] = { "None", "Small Push Button", "Large Push Button", "Touch Button", "APS Button" };
+
+static char *signaltypes[] = { "None", "Text Signal", "Symbol Signal", "With Side Timer", "With Below Timer" };
+
+static char *AWItypes[] = { "None", "Tones", "Speech" };
+
 int NVCTextureToCode(LPSTR texture)
 {
 	if (!strlen(texture))
@@ -700,53 +706,63 @@ char *rampToText(int intNum, RampStruct *ramp)
 	char timeCompleteC[32];
 	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
-    sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t'%s'\t%.8f\t%.8f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t'%s'\t%.2f\t%.2f\t%.2f",
-            ramp->uniqueID,
-			intNum,
-            ramp->rampNum,
-            ramp->rampID,
-            rampTypes[ramp->rampType],
-            timeCompleteC,
-			ramp->latitude,
-			ramp->longitude,
-            ramp->rampInXWalk,
-            textures[ramp->texture],
-            obstructions[ramp->upperLandingObstruction],
-            obstructions[ramp->lowerLandingObstruction],
-            obstructions[ramp->rampObstruction],
-            ramp->hasRampCracks,
-            ramp->hasUpperLandingCracks,
-            ramp->hasStreetLandingCracks,
-            ramp->hasLeftSidewalkCracks,
-            ramp->hasRightSidewalkCracks,
-            ramp->crackWidth.rampCrackWidth,
-            ramp->crackWidth.upperLandingCrackWidth,
-            ramp->crackWidth.streetLandingCrackWidth,
-            ramp->crackWidth.leftSidewalkCrackWidth,
-            ramp->crackWidth.rightSidewalkCrackWidth,
-            ramp->rampWidth,
-            ramp->rampDepth,
-            ramp->rampSlopeFront,
-            ramp->rampSlopeSide,
-            ramp->upperLandingSlopeFront,
-            ramp->upperLandingSlopeSide,
-            ramp->streetLandingSlopeFront,
-            ramp->streetLandingSlopeSide,
-            ramp->flareLeftSlopeFront,
-            ramp->flareRightSlopeFront,
-            ramp->swkLeftSlopeFront,
-            ramp->swkLeftSlopeSide,
-            ramp->swkRightSlopeFront,
-            ramp->swkRightSlopeSide,
-            ramp->PEDButtonHeight,
-            ramp->PEDButtonDist,
-            ramp->SteepTopOfCurb,
-            ramp->PedRampLip,
-            ramp->rampComment,
-            ramp->curbCutDistance,
-            ramp->bumpWidth,
-            ramp->bumpHeight
-            );
+	sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'",
+		ramp->uniqueID,
+		intNum,
+		ramp->rampNum,
+		ramp->rampID,
+		rampTypes[ramp->rampType],
+		ramp->yearRebuilt,
+		timeCompleteC,
+		ramp->latitude,
+		ramp->longitude,
+		ramp->rampInXWalk,
+		textures[ramp->texture],
+		obstructions[ramp->upperLandingObstruction],
+		obstructions[ramp->lowerLandingObstruction],
+		obstructions[ramp->rampObstruction],
+		ramp->hasRampCracks,
+		ramp->hasUpperLandingCracks,
+		ramp->hasStreetLandingCracks,
+		ramp->hasLeftSidewalkCracks,
+		ramp->hasRightSidewalkCracks,
+		ramp->crackWidth.rampCrackWidth,
+		ramp->crackWidth.upperLandingCrackWidth,
+		ramp->crackWidth.streetLandingCrackWidth,
+		ramp->crackWidth.leftSidewalkCrackWidth,
+		ramp->crackWidth.rightSidewalkCrackWidth,
+		ramp->rampWidth,
+		ramp->rampDepth,
+		ramp->rampSlopeFront,
+		ramp->rampSlopeSide,
+		ramp->upperLandingSlopeFront,
+		ramp->upperLandingSlopeSide,
+		ramp->streetLandingSlopeFront,
+		ramp->streetLandingSlopeSide,
+		ramp->flareLeftSlopeFront,
+		ramp->flareRightSlopeFront,
+		ramp->swkLeftSlopeFront,
+		ramp->swkLeftSlopeSide,
+		ramp->swkRightSlopeFront,
+		ramp->swkRightSlopeSide,
+		ramp->SteepTopOfCurb,
+		ramp->PedRampLip,
+		ramp->curbCutDistance,
+		ramp->bumpWidth,
+		ramp->bumpHeight,
+		signaltypes[ramp->PEDSignalType],
+		buttontypes[ramp->PEDButtonType],
+		ramp->PEDButtonHeight,
+		ramp->PEDButtonDist,
+		AWItypes[ramp->awi],
+		ramp->hasLocatorTone,
+		ramp->hasInfoSign,
+		ramp->hasBraille,
+		ramp->hasTactileArrow,
+		ramp->locatorToneVolume,
+		ramp->audibleWalkIndicationVolume,
+		ramp->rampComment
+		);
     
     return rampText;
 }
@@ -754,6 +770,6 @@ char *rampToText(int intNum, RampStruct *ramp)
 const char *rampToTextHeader(int type)
 {
 	if (!type)
-		return "UniqueRampID\tIntersectionNum\tRampNum\tRampID\tRampType\tTimeComplete\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tPEDButtonHeight\tPEDButtonDistance\tSteepTopOfCurb\tLipAtFlowLine\tRampComment\tCurbCutDistance\tBumpWidth\tBumpHeight\tComplianceCodeDetail\tComplianceCodeSummary";
-	return "UniqueRampID(B4)\tIntersectionNum(B4)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tTimeComplete(C16)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(R4)\tRampDepth(R4)\tRampSlopeFront(R4)\tRampSlopeSide(R4)\tUpperLandingSlopeFront(R4)\tUpperLandingSlopeSide(R4)\tStreetLandingSlopeFront(R4)\tStreetLandingSlopeSide(R4)\tFlareLeftSlopeFront(R4)\tFlareRightSlopeFront(R4)\tSidewalkLeftSlopeFront(R4)\tSidewalkLeftSlopeSide(R4)\tSidewalkRightSlopeFront(R4)\tSidewalkRightSlopeSide(R4)\tPEDButtonHeight(R4)\tPEDButtonDistance(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tRampComment(C255)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)";
+		return "UniqueRampID\tIntersectionNum\tRampNum\tRampID\tRampType\tYearBuilt\tTimeComplete\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tComplianceCodeDetail\tComplianceCodeSummary";
+	return "UniqueRampID(B4)\tIntersectionNum(B4)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuild(B2)\tTimeComplete(C16)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tRampDepth(B2)\tRampSlopeFront(R4)\tRampSlopeSide(R4)\tUpperLandingSlopeFront(R4)\tUpperLandingSlopeSide(R4)\tStreetLandingSlopeFront(R4)\tStreetLandingSlopeSide(R4)\tFlareLeftSlopeFront(R4)\tFlareRightSlopeFront(R4)\tSidewalkLeftSlopeFront(R4)\tSidewalkLeftSlopeSide(R4)\tSidewalkRightSlopeFront(R4)\tSidewalkRightSlopeSide(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)";
 }

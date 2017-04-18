@@ -726,7 +726,7 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 								LPSTR detailCode;
 								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
 								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
-								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+								sprintf(line, "%s\t'%s'\t'%s'", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
 								free(ccode);
 								free(detailCode);
