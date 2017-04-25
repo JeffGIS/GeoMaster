@@ -23,7 +23,7 @@ BOOL GuessProjection (HWND hWndDlg,UINT ProjCntl,UINT ProjUnits,LPMNMXCORD pFile
 	short	PCTIn[32][2], UsedUnits[32][2], CVTUnits[32], CvtID=0, UnitsID;  
 	short	nFound=0, MaxFound=0, MaxID, MaxUnits;
 	BOOL	Err;   
-	char	SaveAltProj[MAX_PATH], str[256];
+	char	SaveAltProj[MAX_PATH], str[4096];
 	DPOINT	Points[4]; 
 	LPSTR	pName;
 	HFILE	Fid; 

@@ -4,7 +4,7 @@
 
 LPSTR FGDBVersion(void)
 {
-	static char * version[] = { "File Geodatabase Version 0.0" };
+	static char version[] = { "File Geodatabase Version 0.0" };
 	return version;
 }
 

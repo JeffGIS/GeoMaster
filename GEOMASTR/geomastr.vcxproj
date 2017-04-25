@@ -90,7 +90,7 @@
     <IntDir>NVServer\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34j</TargetName>
-    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
     <CustomBuildAfterTargets />
     <TargetExt>.exe</TargetExt>
@@ -253,6 +253,7 @@
       <SwapRunFromCD>false</SwapRunFromCD>
       <SwapRunFromNET>false</SwapRunFromNET>
       <DelayLoadDLLs>gdal110.dll</DelayLoadDLLs>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <Bscmake>
       <OutputFile>.\Release/geomastr.bsc</OutputFile>
