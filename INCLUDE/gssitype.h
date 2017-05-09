@@ -669,6 +669,7 @@ typedef struct
 		char	From[1024];
 		char	Where[4096];
 		char	Query[8192];
+		BOOL	hasRowID;
 		sqlite3_stmt *statement;
 		FIELDINFO	FldInfo[1];
 	}SQLDATABASE;
