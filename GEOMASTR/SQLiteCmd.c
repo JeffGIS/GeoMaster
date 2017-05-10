@@ -1029,7 +1029,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		}
 	}
 
-		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt))
+		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt),skipFirst(opt))
 		{
 			HANDLE hGMDB=0;
 			char *error = NULL;
@@ -1042,6 +1042,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			char SQL[256] = { 0 };
 			BOOL convertToLL = FALSE;
 			LPSTR llLoc, pBar;
+			BOOL skipFirst = atob(ARG[9]);
+			int  firstField = 0;
+
+			if (skipFirst) //rowid
+				firstField = 1;
 
 			strcpy(DBName, ARG[4]);
 			pBar = strrchr(DBName, '|');
@@ -1118,7 +1123,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					else
 						sprintf(pCmd, "CREATE TABLE %s (", TableName);
 
-					for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
+					lpFieldInfo = lpGWDHead->pFldInfo;
+					if (skipFirst)
+						lpFieldInfo++;
+					for (i = firstField; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
 					{
 						switch (lpFieldInfo->Type)
 						{
@@ -1271,7 +1279,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 										}
 									}
 								}
-								for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+								lpFieldInfo = lpGWDHead->pFldInfo;
+								if (skipFirst)
+									lpFieldInfo++;
+								for (i = firstField; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
 								{
 									char testVar[128];
 
@@ -1340,7 +1351,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								sprintf(pCmd, "INSERT INTO %s VALUES(", TableName);
 							delim[0] = 0;
 
-							for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+							lpFieldInfo = lpGWDHead->pFldInfo;
+							if (skipFirst)
+								lpFieldInfo++;
+							for (i = firstField; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
 							{
 								if (!stricmp(lpFieldInfo->Name, "Offsets") && lpFieldInfo->Len == 400)
 									GMDGetCharFieldVal(lpGWDHead, -i, val);
@@ -3305,10 +3319,17 @@ void CloseSLTDatabase(LPHANDLE pHandle)
 
 	if (*pHandle)
 	{
+		LPFIELDINFO field;
 		pDB = (LPSQLDATABASE)GlobalLock(*pHandle);
 		if (*pDB->Query)
 			sqlite3_finalize(pDB->statement);
 		rtn = sqlite3_close(pDB->DBHandle);
+		field = pDB->FldInfo;
+		for (int j = 0; j < pDB->NumFields; j++, field++)
+		{
+			if (field->hCurVal)
+				GSSiGlobFree(&field->hCurVal);
+		}
 		GSSiGlobUlFree(pHandle);
 	}
 	return;

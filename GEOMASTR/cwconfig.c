@@ -1968,46 +1968,50 @@ nMess = -1;
 		 nMess = 0;
 	 pmsg[nMess] = msg;   // pmsg[nMess-1] pmsg[nMess-2] pmsg[nMess-3] pmsg[nMess-4] pmsg[nMess-5] 
 	 sizeof (msg);
-	 if (msg.message == SPI_SETMOUSESPEED)
-		 ii = 1;
-	 if (msg.message == WM_PRINT)
-		 ii = 1;
-	 if (msg.message == WM_PRINTCLIENT)
-		 ii = 1;
-	 if (msg.message == WM_CLOSE)
-		 ii = 1;
-	 if (msg.message == WM_PAINT)
-		 ii = 1;
-	 if (msg.message == WM_LBUTTONDBLCLK)
-			ii=1;
-	    if (msg.message == WM_SETFOCUS)
-			ii=1;
-	    if (msg.message == WM_MOVE)
-			ii=1;
-		if (msg.message == WM_WINDOWPOSCHANGED)
-			ii=1;
-		if (msg.message == WM_WINDOWPOSCHANGING)
-			ii=1;
-	  	if (msg.message == WM_F1DOWN)
-			ii=1;
-	  	if (msg.message == WM_SHOWWINDOW)
-			ii=1;
-		if (msg.message == WM_KEYDOWN)
-			ii = 1;
-		if (msg.message == WM_SYSKEYDOWN)
-			ii = 1;
-		if (msg.message == WM_LBUTTONDOWN )
-            ii=1;
-		if (msg.message == WM_LBUTTONUP )
-            ii=1;
-		if (msg.message == WM_CHAR) 
-			ii=1;
-		if (msg.message == WM_NOTIFY) 
-			ii=1;
-		if (msg.message == WM_TIMER) 
-			ii=1;
-		if (msg.message == WM_CHAR && msg.wParam == 9) //TAB
-			ii=1;
+
+	 switch (msg.message)
+	 {
+		 break; case SPI_SETMOUSESPEED:
+			 ii = 1;
+		 break; case WM_PRINT:
+			 ii = 1;
+		 break; case WM_PRINTCLIENT:
+			 ii = 1;
+		 break; case WM_CLOSE:
+			 ii = 1;
+		 break; case WM_PAINT:
+			 ii = 1;
+		 break; case WM_LBUTTONDBLCLK:
+			 ii = 1;
+		 break; case WM_SETFOCUS:
+			 ii = 1;
+		 break; case WM_MOVE:
+			 ii = 1;
+		 break; case WM_WINDOWPOSCHANGED:
+			 ii = 1;
+		 break; case WM_WINDOWPOSCHANGING:
+			 ii = 1;
+		 break; case WM_F1DOWN:
+			 ii = 1;
+		 break; case WM_SHOWWINDOW:
+			 ii = 1;
+		 break; case WM_KEYDOWN:
+			 ii = 1;
+		 break; case WM_SYSKEYDOWN:
+			 ii = 1;
+		 break; case WM_LBUTTONDOWN :
+			 ii = 1;
+		 break; case WM_LBUTTONUP :
+			 ii = 1;
+		 break; case WM_CHAR:
+			 ii = 1;
+		 break; case WM_NOTIFY:
+			 ii = 1;
+		 break; case WM_TIMER:
+			 ii = 1;
+	 }
+	 if (msg.message == WM_CHAR && msg.wParam == 9) //TAB
+			 ii = 1;
 #endif
 		if (msg.message == WM_CHAR && msg.wParam == 26) //CNTL/Z 
 		{
@@ -2232,40 +2236,42 @@ SetLastMessage(Message);
   
   if (Message == WM_COMMAND && LOWORD (wParam) == IDM_DISPLAY_VEHICLES)
 	  ii=1;
-  if (Message == WM_PAINT)
+  switch (Message)
+  {
+  case WM_PAINT:
 	  ii = 1;
-  if (Message == WM_ERASEBKGND)
+  break; case WM_ERASEBKGND:
 	  ii = 1;
-  if (Message == WM_TIMER)
+  break; case WM_TIMER:
 	  ii=1;
-  if (Message == WM_SIZE)
+  break; case WM_SIZE:
 	  ii=1;
-  if (Message == WM_LBUTTONDBLCLK)
+  break; case WM_LBUTTONDBLCLK:
   {
 	  ii = IsPointOnTouchScreen(hWnd,POINTStoPOINT(MAKEPOINTS(lParam)));
 
   }
-  if (Message == WM_F1DOWN)
+  break; case WM_F1DOWN:
   	ii=1;
-  if (Message == WM_SHOWWINDOW)
+  break; case WM_SHOWWINDOW:
 	ii=1;
-  if (Message == WM_MOUSEMOVE)
+  break; case WM_MOUSEMOVE:
 	 ii=1;//ClearVehicleInfoRect ();
-  if (Message == WM_CLOSE)
+  break; case WM_CLOSE:
  	ii=1;
-  if (Message == WM_LBUTTONUP)
+  break; case WM_LBUTTONUP:
  	ii=1;
-  if (Message == WM_RBUTTONUP)
+  break; case WM_RBUTTONUP:
  	ii=1;
-  if (Message == WM_LBUTTONDOWN)
+  break; case WM_LBUTTONDOWN:
  	ii=1;
-  if (Message == GF_CLOSE)
+  break; case GF_CLOSE:
  	ii=1;
-  if (Message == WM_COMMAND)
+  break; case WM_COMMAND:
  	ii=1;
-  if (Message == GF_EXECUTE)
+  break; case GF_EXECUTE:
  	ii=1;
-  if (Message == WM_NOTIFY)
+  break; case WM_NOTIFY:
   {
 	LPNMHDR pNH = (LPNMHDR)lParam;
 
@@ -2286,13 +2292,9 @@ SetLastMessage(Message);
  	ii=1;
   }
 
- if (Message == GF_DISPLAY_ALL_ORTHOS)
+ break; case GF_DISPLAY_ALL_ORTHOS:
  	ii=1;
- if (Message == GF_CLOSE)
- {
- 	if (wParam == GF_DIGITIZE_POLYLINE)
- 		ii=1;
- } 
+	 }
 #endif
  if (ProcessDataDisplayInput (hWnd,Message, wParam,lParam))
 	goto Return0;
