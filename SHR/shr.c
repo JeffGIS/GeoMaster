@@ -5346,7 +5346,8 @@ GSSiExitProg (266);
     	ii=1; 
 //    flags = GlobalFlags (*pHandle); 
 //    nLocks = flags & GMEM_LOCKCOUNT;
-//	TotMemAlloc -= GlobalSize (*pHandle);
+	unsigned int len = GlobalSize(*pHandle);
+	TotMemAlloc -= len;
     st = GlobalFree (*pHandle);
     if (st)
     	ii=1;
