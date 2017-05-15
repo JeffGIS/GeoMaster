@@ -1,17 +1,17 @@
 #include "graphint.h"
-#define MAXLABELLINES	4096  
-#define MAXPOINTSINLABEL 8160
+#define MAXLABELLINES	4096*4  
+#define MAXPOINTSINLABEL 8160*2
 
 
-#define MAXSYMBOLLINES	4096  
-#define MAXSHIELDSDISPLAYED	2730   
-#define MAX_SHIELD_ID 24
+#define MAXSYMBOLLINES	4096*4  
+#define MAXSHIELDSDISPLAYED	2730*4   
+#define MAX_SHIELD_ID 24*4
 
-static	HANDLE	hSymbolLines[MAXSYMBOLLINES];
-static	COLORREF	SymbolLineColor[MAXSYMBOLLINES];
+static	HANDLE	hSymbolLines[MAXSYMBOLLINES] = { 0 };
+static	COLORREF	SymbolLineColor[MAXSYMBOLLINES] = { 0 };
 static	USHORT	nSymbolLines=0;  
-static	POINT	ShieldDisplayPoint[MAXSHIELDSDISPLAYED];
-static	char	ShieldID[MAXSHIELDSDISPLAYED][MAX_SHIELD_ID]; 
+static	POINT	ShieldDisplayPoint[MAXSHIELDSDISPLAYED] = { 0 };
+static	char	ShieldID[MAXSHIELDSDISPLAYED][MAX_SHIELD_ID] = { 0 };
 static	short	NumShieldsDisplayed=0;
 
 typedef struct	{int	NumPoints;
@@ -1443,7 +1443,7 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 	}
 	if (Type1 == 1 && Type2 == 1)
 	{
-		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096*4);	
+		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096*16);	
 		pTempNumPoints = (LPSHORT)GlobalLock (hTemp);
 		pTempSymNum = (LPSHORT) (pTempNumPoints+1);  
 		pTempIsCenterline = (LPTHEME*)(pTempSymNum + 1);
