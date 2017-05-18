@@ -396,7 +396,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
 			{
 				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					LPSTR pName = (LPSTR)sqlite3_column_name(statement, 0);
+					LPSTR value = (LPSTR)sqlite3_column_text(statement, 0);
+					if (*ARG[4])
+						SetGlobalValue(ARG[4], value);
 					rtn = TRUE;
+				}
 				sqlite3_finalize(statement);
 			}
 		}
@@ -3162,6 +3168,11 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 							pDB->FldInfo[pDB->NumFields].length = nc;
 						}
 						else if (!stricmp(decl, "CHAR"))
+						{
+							pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+							pDB->FldInfo[pDB->NumFields].length = nc;
+						}
+						else if (!stricmp(decl, "TEXT"))
 						{
 							pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
 							pDB->FldInfo[pDB->NumFields].length = nc;
