@@ -138,7 +138,7 @@ GSSiExitProg (1333);
 }
      } 
      if (PRJ_UNITS[1] == 4)
-     	P_TOL = 0.000000001;
+     	P_TOL = 0.0000000001;
      else
      	P_TOL = 0.0001;
      _fstrcpy(Name,"latlongs");

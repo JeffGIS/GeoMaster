@@ -11,7 +11,7 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt)
 void convertVersion(LPSTR str, int fromVer, int toVer);
 void convertVersion_1_to_2(LPSTR str);
 static BOOL Execute(LPSTR cmd);
-BOOL UpdateFromFile(LPSTR file, BOOL convertInsert);
+BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,int dbType);
 
 
 /*int getOffsetCoord:(MPIntersection *)mpint
@@ -424,20 +424,24 @@ signal : (int)s
 	[self close : opened];
 	return array;
 }*/
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showProgress,int dbType)
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
 	int rc;
+	int nTot=0, nDone = 0;
 	LPSTR line = malloc(LINELEN);
+	char tempFile[MAX_PATH];
+	HFILE fidTemp;
 
+	LPSTR file = malloc(1024);
 	rc = sqlite3_open(DataBase, &database);
 	if (rc == SQLITE_OK)
 	{
 		HFILE FidList = GSSiOpenFile(List, 0, OF_READ);
 		if (FidList != HFILE_ERROR)
 		{
-			LPSTR file = malloc(260);
+			BOOL first = TRUE;
 			Execute("BEGIN");
 
 			sprintf(line, "DROP TABLE IF EXISTS SORTEDFILES;CREATE TABLE SORTEDFILES (TIME INT,FILEPATH CHAR(256));");
@@ -445,46 +449,146 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase)
 			{
 				while (fgetstring(file, 258, FidList))
 				{
-					HFILE fid = GSSiOpenFile(file, 0, OF_READ);
-					if (fid != HFILE_ERROR)
+					if (!first || !strchr(file, '\t'))
 					{
-						int time = 0;
-						fgetstring(line, 1022, fid);
-						LPSTR tloc = strstr(line, " Time ");
-						if (tloc)
+						HFILE fid = GSSiOpenFile(file, 0, OF_READ);
+						if (fid != HFILE_ERROR)
 						{
-							time = atoi(tloc + 6);
-							sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
-							Execute(line);
+							int time = 0;
+							fgetstring(line, 1022, fid);
+							LPSTR tloc = strstr(line, " Time ");
+							if (tloc)
+							{
+								time = atoi(tloc + 6);
+								sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
+								Execute(line);
+								nTot++;
+							}
+							GSSiClose(fid);
 						}
-						GSSiClose(fid);
 					}
+					first = FALSE;
 				}
 			}
 			Execute("COMMIT");
 			GSSiClose(FidList);
+
+			GSSiGetTempFileName(0, "txt", 0, tempFile);
+			fidTemp = GSSiOpenFile(tempFile, 0, OF_CREATE);
 			sprintf(line, "SELECT FILEPATH FROM SORTEDFILES ORDER BY TIME ASC;");
 			sqlite3_stmt *statement = NULL;
-
-			if (sqlite3_prepare_v2(database,line, -1, &statement, 0) == SQLITE_OK)
+			if (sqlite3_prepare_v2(database, line, -1, &statement, 0) == SQLITE_OK)
 			{
 				while (sqlite3_step(statement) == SQLITE_ROW)
 				{
-					LPSTR filePath = (LPSTR) sqlite3_column_text(statement, 0);
-					BOOL st = UpdateFromFile(filePath,TRUE);
+					LPSTR filePath = (LPSTR)sqlite3_column_text(statement, 0);
+					fputstring(filePath, fidTemp);
 				}
-				sqlite3_finalize(statement);
 			}
+			sqlite3_finalize(statement);
+			rc = sqlite3_close(database);
+			GSSiClose(fidTemp);
+			rc = sqlite3_open(DataBase, &database);
+			if (showProgress)
+			{
+				CreateStatusWind(hWndMain, 1, "Loading Data");
+			}
+			fidTemp = GSSiOpenFile(tempFile, 0, OF_READ);
+			{
+				while (fgetstring (file,MAX_PATH,fidTemp))
+				{
+					BOOL st = UpdateFromFile(file,TRUE,dbType);
+					if (showProgress)
+						StatusWindowUpdate(0, 0, nTot, ++nDone);
 
-			free(file);
+				}
+			}
+			if (showProgress)
+				DestroyStatusWindow(0);
+			GSSiClose(fidTemp);
+			GSSiRemove(tempFile);
 		}
 		rc = sqlite3_close(database);
 	}
 	free(line);
+	free(file);
+	return rtn;
+}
+int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int header)
+{//opt=0 ALL opt=1 with ramps opt=2 complete opt=3 paid only
+	//header=0 no header only int ID header=1 include header and street names and coord header=2 same with types
+	int rtn = 0;
+	char line[2048];
+	char query[256];
+	HFILE fid;
+
+	int rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		sqlite3_stmt *statement = NULL;
+		switch (opt)
+		{
+		default:
+			sprintf(query, "SELECT DISTINCT intID FROM Intersections");
+			break;
+		case 1:
+			sprintf(query, "SELECT DISTINCT intID FROM ramps");
+			break;
+		case 2:
+			sprintf(query, "SELECT DISTINCT intID FROM ramps WHERE isComplete >= 1");
+			break;
+		case 3:
+			sprintf(query, "SELECT DISTINCT intID FROM ramps WHERE isComplete = 2");
+			break;
+		}
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+		fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (header == 1)
+		{
+			sprintf(line, "IntersectionNum\tLatitude\tLongitude\tStreet Names");
+			fputstring(line, fid);
+		}
+		else if (header == 2)
+		{
+			sprintf(line, "IntersectionNum(B4)\tLatitude(R8)\tLongitude(R8)\tStreet Names(C254)");
+			fputstring(line, fid);
+		}
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			int intersectionID = sqlite3_column_int(statement, 0);
+			if (!header)
+			{
+				itoa(intersectionID, line, 10);
+				fputstring(line, fid);
+			}
+			else
+			{
+				char intquery[256];
+				char FormattedStreets[1024];
+				sqlite3_stmt *statement = NULL;
+				sprintf(intquery, "SELECT streetNames,latitude,longitude FROM Intersections WHERE intID=%i", intersectionID);
+				SQLOK(sqlite3_prepare_v2(database, intquery, -1, &statement, NULL), database, "get mpint", 0);
+				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					LPSTR pNames = (LPSTR)sqlite3_column_text(statement, 0);
+					double lat = sqlite3_column_double(statement, 1);
+					double lon = sqlite3_column_double(statement, 2);
+					FormatStreets(pNames,FormattedStreets);
+					sprintf(line, "%i\t%f\t%f\t%s", intersectionID, lat, lon, FormattedStreets);
+					fputstring(line, fid);
+				}
+				SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+			}
+			rtn++;
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+		rc = sqlite3_close(database);
+		GSSiClose(fid);
+	}
 	return rtn;
 }
 
-BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVCRISDataBase)
+BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -500,23 +604,23 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
 			if (FidOut != HFILE_ERROR)
 			{
-				LPSTR rampHeader = (LPSTR)rampToTextHeader();
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
+				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
 				while (fgetstring(line, sizeof(line)-2, FidList))
 				{
 					int intID = atoi(line);
-					MPINTERSECTION mpInt;
-					if (getMPIntersectionFromDB(intID, TRUE, &mpInt))
+					if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
 					{
 						for (int i = 1; i < 13; i++)
 						{
-							RampStruct * pRamp = &mpInt.ramps[i];
+							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
 								LPSTR detailCode;
-								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
-								LPSTR rampText = rampToText(mpInt.intID, pRamp);
+								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
 								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
 								fputstring(line, FidOut);
 								free(ccode);
@@ -529,6 +633,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 						ii = 1;
 				}
 				free(line);
+				free(pmpInt);
 				GSSiClose(FidOut);
 				rtn = TRUE;
 			}
@@ -540,35 +645,280 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile,LPSTR NVC
 	return rtn;
 }
 
-BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int opt, LPSTR OutLoc)
+BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int header)
 {
 	BOOL rtn = FALSE;
-	*OutLoc = 0;
+	char line[2048];
+	char query[256];
+	HFILE fid;
+	//locationID(C0) Name(C0) Type(C0) Category(C0) Latitude(C0) Longitude(C0) Radius(C0) Offset(C0)
 	int rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
-		MPINTERSECTION MPInt;
-
-		if (getMPIntersectionFromDB(intID, TRUE, &MPInt))
+		sqlite3_stmt *statement = NULL;
+		sprintf(query, "CREATE TABLE IF NOT EXISTS PriorityLocations ('locationID' INTEGER PRIMARY KEY,'Name' CHAR(256),'Type' INT, 'Category' CHAR(32),'Latitude' DOUBLE, 'Longitude' DOUBLE, 'Radius' DOUBLE, 'Offset' INT);SELECT * FROM PriorityLocations");
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+		fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (header == 1)
 		{
-			if (rampNum > 0 && rampNum < 13)
-			{
-				ToleranceValues tolerances;
-				setStandardToleranceValues(&tolerances);
+			sprintf(line, "LocationID\tName\tCategory\tLatitude\tLongitude\tRadius\tOffset");
+			fputstring(line, fid);
+		}
+		else if (header == 2)
+		{
+			sprintf(line, "LocationID(B4)\tName(C128)\tCategory(C64)\tLatitude(R8)\tLongitude(R8)\tRadius(R8)\tOffset(R8)");
+			fputstring(line, fid);
+		}
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			int plID = sqlite3_column_int(statement, 0);
+			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 1);
+			int type = sqlite3_column_int(statement, 2);
+			LPSTR category = (LPSTR)sqlite3_column_text(statement, 3);
+			double lat = sqlite3_column_double(statement, 4);
+			double lon = sqlite3_column_double(statement, 5);
+			double radius = sqlite3_column_double(statement, 6);
+			double offset = sqlite3_column_double(statement, 7);
+			sprintf(line, "%i\t%s\t%s\t%f\t%f\t%f\t%f", plID, pName, category, lat, lon, radius,offset);
+			fputstring(line, fid);
+			rtn++;
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get pl", 0);
+		rc = sqlite3_close(database);
+		GSSiClose(fid);
+	}
+	return rtn;
+}
 
-				RampStruct * pRamp = &MPInt.ramps[rampNum];
-				if (pRamp->rampExists)
+BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode)
+{
+	BOOL rtn = FALSE;
+	int rc;
+	ToleranceValues tolerances;
+	char tempfile[MAX_PATH];
+
+	setStandardToleranceValues(&tolerances);
+	GSSiGetTempFileName(0, "gmc", 0, tempfile);
+	if (OutputIntsWithRampsToFile(tempfile, NVCRISDataBase, completionCode+1, 0))
+	{
+		HFILE FidList = GSSiOpenFile(tempfile, 0, OF_READ);
+
+		rc = sqlite3_open(NVCRISDataBase, &database);
+		if (rc == SQLITE_OK)
+		{
+			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			if (FidOut != HFILE_ERROR)
+			{
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				fputstring(rampHeader, FidOut);
+				LPSTR line = malloc(4096);
+				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
+				while (fgetstring(line, sizeof(line)-2, FidList))
 				{
-					LPSTR detailCode;
-					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances);
-					strcpy(OutLoc, ccode);
-					free(ccode);
-					free(detailCode);
+					int intID = atoi(line);
+					if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
+					{
+						for (int i = 1; i < 13; i++)
+						{
+							RampStruct * pRamp = &pmpInt->ramps[i];
+							if (pRamp->rampExists)
+							{
+								LPSTR detailCode;
+								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
+								sprintf(line, "%s\t'%s'\t'%s'", rampText, detailCode, ccode);
+								fputstring(line, FidOut);
+								free(ccode);
+								free(detailCode);
+								free(rampText);
+							}
+						}
+					}
+					else
+						ii = 1;
 				}
+				free(line);
+				free(pmpInt);
+				GSSiClose(FidOut);
+				rtn = TRUE;
 			}
+			GSSiClose(FidList);
 		}
 		rc = sqlite3_close(database);
 	}
+	return rtn;
+}
+BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+{
+	BOOL rtn = FALSE;
+	OFSTRUCTGM OFStruct;
+	HFILE fid;
+	int rc;
+	ToleranceValues tolerances;
+	setStandardToleranceValues(&tolerances);
+
+	rampNum = fixRampNum(rampNum);
+	if (rampNum < 0 || rampNum > 12)
+		return FALSE;
+
+	fid = GSSiOpenFile(NVCRISDataBase, &OFStruct, OF_READ);
+	GSSiClose(fid);
+	if (fid != HFILE_ERROR)
+	{
+		rc = sqlite3_open_v2(OFStruct.szPathName, &database, SQLITE_OPEN_READONLY, NULL);
+		if (rc == SQLITE_OK)
+		{
+			HFILE FidOut;
+			if (headerType < 0)
+			{
+				FidOut = GSSiOpenFile(OutFile, 0, OF_READWRITE);
+				GSSillseek(FidOut, 0, 2);
+			}
+			else
+				FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			if (FidOut != HFILE_ERROR)
+			{
+				if (headerType >= 0)
+				{
+					LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+					fputstring(rampHeader, FidOut);
+				}
+				LPSTR line = malloc(4096);
+				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
+				if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
+				{
+					RampStruct * pRamp = &pmpInt->ramps[rampNum];
+					if (pRamp->rampExists)
+					{
+						LPSTR detailCode;
+						LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+						LPSTR rampText = rampToText(pmpInt->intID, pRamp);
+						sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+						fputstring(line, FidOut);
+						free(ccode);
+						free(detailCode);
+						free(rampText);
+					}
+					else
+						ii = 1;
+				}
+				else
+					ii = 1;
+				free(line);
+				free(pmpInt);
+				GSSiClose(FidOut);
+				rtn = TRUE;
+			}
+			rc = sqlite3_close(database);
+
+		}
+	}
+	return rtn;
+}
+
+BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc)
+{
+	BOOL rtn = FALSE;
+	OFSTRUCTGM OFStruct;
+
+	*OutLoc = 0;
+	rampNum = fixRampNum(rampNum);
+	HFILE fid = GSSiOpenFile(NVCRISDataBase, &OFStruct, OF_READ);
+	GSSiClose(fid);
+	if (fid != HFILE_ERROR)
+	{
+		int rc = sqlite3_open_v2(OFStruct.szPathName, &database, SQLITE_OPEN_READONLY, NULL);
+		if (rc == SQLITE_OK)
+		{
+			MPINTERSECTION *pMPInt = malloc(sizeof(MPINTERSECTION)+4);
+
+			if (getMPIntersectionFromDB(intID, TRUE, pMPInt))
+			{
+				if (rampNum > 0 && rampNum < 13)
+				{
+					ToleranceValues tolerances;
+					setStandardToleranceValues(&tolerances);
+
+					RampStruct * pRamp = &pMPInt->ramps[rampNum];
+					if (pRamp->rampExists)
+					{
+						LPSTR detailCode;
+						LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+						strcpy(OutLoc, ccode);
+						free(ccode);
+						free(detailCode);
+					}
+				}
+			}
+			free(pMPInt);
+			rc = sqlite3_close(database);
+		}
+	}
+	return rtn;
+}
+
+int getMiddleRampIDFromRampID(int rampID)
+{
+	int rtn = 0;
+
+	switch (rampID)
+	{
+	case 1:
+	case 8:
+		rtn = 12;
+		break;
+	case 3:
+	case 2:
+		rtn = 9;
+		break;
+	case 5:
+	case 4:
+		rtn = 10;
+		break;
+	case 7:
+	case 6:
+		rtn = 11;
+		break;
+	}
+	switch (rtn)
+	{
+	case 9:
+		rtn = 23;
+		break;
+	case 10:
+		rtn = 45;
+		break;
+	case 11:
+		rtn = 67;
+		break;
+	default:
+		rtn = 81;
+		break;
+	}
+	return rtn;
+}
+
+static BOOL getCornerComment(int intID, int rampNum, LPSTR rampComment)
+{
+	BOOL rtn = FALSE;
+	int cornerID = getMiddleRampIDFromRampID(rampNum);
+	sqlite3_stmt *statement = NULL;
+	
+	*rampComment = 0;
+	LPSTR query = malloc(4096);
+	sprintf(query, "SELECT note FROM CURBRAMP_NOTES WHERE intID=%i AND corner=%i", intID,cornerID);
+
+	SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		LPSTR note = (LPSTR)sqlite3_column_text(statement,0);
+		if (note)
+			strncpy0(rampComment,note,254);
+	}
+	SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+	free(query);
+
 	return rtn;
 }
 
@@ -712,10 +1062,10 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 			PixelXYToLatLong(ramp.lev21x, ramp.lev21y, 21, &ramp.latitude, &ramp.longitude);
 			ramp.rampType = sqlite3_column_int(statement, i++);
 			LPSTR comment = (LPSTR)sqlite3_column_text(statement, i++);
-			if (comment)
+			if (comment && *comment)
 				strcpy(ramp.rampComment, comment);
 			else
-				*ramp.rampComment = 0;
+				getCornerComment (intID,rampNum,ramp.rampComment);
 			ramp.awi = sqlite3_column_int(statement, i++);
 			ramp.hasLocatorTone = sqlite3_column_int(statement, i++);
 			ramp.hasInfoSign = sqlite3_column_int(statement, i++);
@@ -735,14 +1085,16 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 			ramp.bumpHeight = sqlite3_column_double(statement, i++);
 			if (ramp.bumpWidth > 0 || ramp.bumpHeight > 0)
 				ii = 1;
-			mpint.ramps[rampNum] = ramp;
+			if (mpint.timeComplete >= mpint.ramps[rampNum].timeComplete)
+				mpint.ramps[rampNum] = ramp;
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 	}
+	free(query);
+
 	*pMPInt = mpint;
 	return TRUE;
 }
-
 int FormatStreets(LPSTR from, LPSTR outtext)
 {
 	int nStreets = 0;
@@ -797,7 +1149,7 @@ static BOOL Execute(LPSTR cmd)
 	return rtn;
 }
 
-BOOL UpdateFromFile(LPSTR file,BOOL convertInsert)
+BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType)
 {
 	BOOL rtn = TRUE;
 	int line = 0;
@@ -815,7 +1167,8 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert)
 			fromVer = atoi(vloc + 6);
 		while (rtn && fgetstring(str, maxLineLen, fid))
 		{
-			convertVersion(str, fromVer, toVer);
+			if (!dbType)
+				convertVersion(str, fromVer, toVer);
 			if (convertInsert)
 				REPLAC(str, "INSERT INTO", "INSERT OR REPLACE INTO", maxLineLen + 4090);
 			rtn = Execute(str);

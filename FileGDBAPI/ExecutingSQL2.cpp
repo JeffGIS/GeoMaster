@@ -1,4 +1,5 @@
-#if !XPVERSION && !NVSERVER
+
+#if !(defined XPVERSION || defined NVSERVER)
 /**
  * Sample: ExecutingSQL
  *
@@ -202,7 +203,12 @@ extern "C" BOOL FGDBCheck(void)
 	return TRUE;
 }
 
-
+extern "C" LPSTR FGDBVersion(void)
+{
+	static char version[] = { "File Geodatabase Version 1.4" };
+	LPSTR pVer = version;
+	return pVer;
+}
 
 /*
 // Prototype for conversion functions
@@ -282,8 +288,13 @@ int OpenGDB (LPCTSTR DBName)
 		return -1;
 	string	dbname = LPCTSTR(DBName);
 	wstring wdbname (dbname.begin(),dbname.end());
-    if ((hr = OpenGeodatabase(wdbname, geodatabase[openID])) != S_OK)
-	    return -1;
+	if ((hr = OpenGeodatabase(wdbname, geodatabase[openID])) != S_OK)
+	{
+		char mess[128];
+		sprintf(mess, "Err opening File Geodatabase: %i", hr);
+		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+		return -1;
+	}
 	nod++;
 	strcpy (openGDBName[openID],fullName);
 	numOpens[openID] = 1;
@@ -458,7 +469,7 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSize,LPHANDLE phList)
 {   
 	long	hr;
-	int		n;
+	int		n=0;
 	string undr = Under;
 	wstring	type[3]= {L"Table",L"Feature Class",L"Feature Dataset"};
 	vector<wstring> childList(5); 

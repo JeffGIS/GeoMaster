@@ -27,7 +27,7 @@ static	char	LastTextFile[MAX_PATH]="";
 static	HANDLE	hSavedScreens[MAXSAVEDSCREENS];
 static	short	nSavedScreens=0;      
 static	long	NextScreenID=1;
-static	USHORT	crc_table[128]={0}; 
+static	USHORT	crc_table[256]={0}; 
 static  BOOL    FirstCache = TRUE; 
 static	short	CurTraceLev=0;
 static	HANDLE	hCacheAlreadyChecked=0;
@@ -68,6 +68,7 @@ extern HWND	TraceWnd2;
 
 char	CacheTitle[256];
 
+
 double square(double val)
 {
 	return val * val;
@@ -79,14 +80,35 @@ BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 	{
 		char mess[4096];
 		if (*method)
-			sprintf(mess,"SQLite Error %i = %i:%s\nin:%s",
-				sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database),method);
+			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
 		else
 			sprintf(mess, "SQLite Error %i = %i:%s",
-				sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
 
 
-		GSSiMessageBox (3, mess, "SQLite Error", MB_OK,0);
+		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+	}
+
+	return sqlReturn;
+}
+
+BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** error)
+{
+	if (sqlReturn != SQLITE_OK)
+	{
+		char * mess = malloc(USHRT_MAX * 4);
+		if (method && *method)
+			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
+		else
+			sprintf(mess, "SQLite Error %i = %i:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
+
+		if (cmd && *cmd)
+			sprintf(strchr(mess, 0), "\n\n%s", cmd);
+		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+		free(mess);
 	}
 
 	return sqlReturn;
@@ -145,7 +167,7 @@ HFILE OpenFileGM(
 		return HFILE_ERROR;
 
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
-	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, MAX_PATH);
+	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
 	if (!fullPath)
 		return HFILE_ERROR;
 	ln = strlen(fullPath);
@@ -689,11 +711,11 @@ int GetJournalBlock (HFILE Fid,long StartBlock,LPLONG pnBlocksInJournal,LPLONG p
 	LPJOURNALINDEXRECORD pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
 	int	ii;
 
-if (Fid > MAXFILEHANDLES)
+if (Fid >= MAXFILEHANDLES)
 	BlowOut ("Fid > max","ERROR");
 if (!pNumIndexBlocks)
 {
-	char	mess[256];
+	char	mess[512];
 
 	sprintf (mess,"%ld:%ld %s",(int)Fid,(int)JournalFileIndex[Fid],OpenFileName[Fid]);
 	MessageBox (0,mess,0,MB_OK);
@@ -2334,6 +2356,7 @@ int AppendFile (LPSTR InFile,LPSTR Line)
 	BOOL		SaveAllowJournal = AllowJournal;
 	char		File2[MAX_PATH];
 	LPSTR		File = File2;
+	BOOL		fileIsFID = FALSE;
 
 	strcpy (File2,InFile);
 	if (*File == '*')
@@ -2344,14 +2367,30 @@ int AppendFile (LPSTR InFile,LPSTR Line)
 	ExpandText (File);
 	if (!*File)
 		goto Exit;
-	Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);
-	if (Fid == HFILE_ERROR)
-		Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE_NODELETE);
+	if (IsInteger(File))
+	{
+		Fid = atoi(File);
+		fileIsFID = TRUE;
+	}
+	else
+	{
+		Fid = GSSiOpenFile(File, &OFStruct, OF_READWRITE);
+		if (Fid == HFILE_ERROR)
+			Fid = GSSiOpenFile(File, &OFStruct, OF_CREATE_NODELETE);
+	}
 	if (Fid == HFILE_ERROR) 
 		goto Exit;
-	rtn = GSSillseek (Fid,0,2)+1;
-	fputstring (Line,Fid);
-	GSSiClose (Fid);
+	if (fileIsFID)
+	{
+		fputstring(Line, Fid);
+		rtn = 1;
+	}
+	else
+	{
+		rtn = GSSillseek(Fid, 0, 2) + 1;
+		fputstring(Line, Fid);
+		GSSiClose(Fid);
+	}
 Exit:
 	AllowJournal = SaveAllowJournal;
 {
@@ -3820,52 +3859,102 @@ GSSiExitProg (231);
 #endif
 }  
 
-LPSTR RemoveDoubleQuotes (LPSTR str)
+LPSTR RemoveDoubleQuotes(LPSTR str)
 #if ENABLETRACE
 {GSSiEnterProg (232);
 #endif
-{        
-	LPSTR	EndChar=str;
+{
+	LPSTR	EndChar = str;
 	short	l;
-	
+
 	if (*str != '"')
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
 		return str;
-}
-	l = _fstrlen (str);
+	}
+	l = _fstrlen(str);
 	if (l < 2)
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
 		return str;
-}
-	EndChar += l-1;
+	}
+	EndChar += l - 1;
 	if (*EndChar != '"')
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
 		return str;
-}
+	}
 	l -= 2;
 	if (!l)
 		*str = 0;
 	else
 	{
-		_fmemmove (str,(LPSTR)(str+1),l);
-		EndChar = str+l;
+		_fmemmove(str, (LPSTR)(str + 1), l);
+		EndChar = str + l;
 		*EndChar = 0;
 	}
-{
+	{
 #if ENABLETRACE
-GSSiExitProg (232);
+		GSSiExitProg (232);
 #endif
-	return str;
+		return str;
+	}
+#if ENABLETRACE
 }
+#endif
+}
+LPSTR RemoveQuotes(LPSTR str)
+#if ENABLETRACE
+{GSSiEnterProg (232);
+#endif
+{
+	LPSTR	EndChar = str;
+	short	l;
+
+	if (*str != '\'')
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
+	l = _fstrlen(str);
+	if (l < 2)
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
+	EndChar += l - 1;
+	if (*EndChar != '\'')
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
+	l -= 2;
+	if (!l)
+		*str = 0;
+	else
+	{
+		_fmemmove(str, (LPSTR)(str + 1), l);
+		EndChar = str + l;
+		*EndChar = 0;
+	}
+	{
+#if ENABLETRACE
+		GSSiExitProg(232);
+#endif
+		return str;
+	}
 #if ENABLETRACE
 }
 #endif
@@ -4799,25 +4888,47 @@ GSSiExitProg (256);
 #endif
 }
 
-void DBoundsInit (LPMNMXCORD lpRect)
+void DBoundsInit(LPMNMXCORD lpRect)
 #if ENABLETRACE
 {GSSiEnterProg (257);
 #endif
 {
-    lpRect->xmn = DBL_MAX;
-    lpRect->ymn = DBL_MAX;
-    lpRect->xmx = -DBL_MAX;
-    lpRect->ymx = -DBL_MAX;
+	lpRect->xmn = DBL_MAX;
+	lpRect->ymn = DBL_MAX;
+	lpRect->xmx = -DBL_MAX;
+	lpRect->ymx = -DBL_MAX;
+	{
+#if ENABLETRACE
+		GSSiExitProg (257);
+#endif
+		return;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+void DBoundsInit3D(LPMNMXCORD3D lpRect)
+#if ENABLETRACE
 {
-#if ENABLETRACE
-GSSiExitProg (257);
+	GSSiEnterProg(257);
 #endif
-	return;
-}
+	{
+		lpRect->xmn = DBL_MAX;
+		lpRect->ymn = DBL_MAX;
+		lpRect->zmn = DBL_MAX;
+		lpRect->xmx = -DBL_MAX;
+		lpRect->ymx = -DBL_MAX;
+		lpRect->zmx = -DBL_MAX;
+		{
 #if ENABLETRACE
-}
+			GSSiExitProg(257);
 #endif
-} 
+			return;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
 
 BOOL PointInBoundsL (DPOINT Point,LPMNMXCORL pBounds)
 {
@@ -5235,7 +5346,8 @@ GSSiExitProg (266);
     	ii=1; 
 //    flags = GlobalFlags (*pHandle); 
 //    nLocks = flags & GMEM_LOCKCOUNT;
-//	TotMemAlloc -= GlobalSize (*pHandle);
+	unsigned int len = GlobalSize(*pHandle);
+	TotMemAlloc -= len;
     st = GlobalFree (*pHandle);
     if (st)
     	ii=1;
@@ -5694,7 +5806,8 @@ GSSiExitProg (274);
         i++;
     }
     GSSiClose (Fid);
-	SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
+	if (hWndDlg)
+		SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
 
     
 {
@@ -5891,6 +6004,71 @@ short DeleteDirAndContents (LPSTR InName)
 	return FALSE;
 }
 
+LPSTR FilePart(LPSTR File,LPSTR Part)
+{
+	LPSTR rtn = File;
+	static char inName[_MAX_PATH];
+	static char fullName[_MAX_PATH];
+	static char drive[_MAX_DRIVE];
+	static char dir[_MAX_DIR];
+	static char name[_MAX_FNAME];
+	static char ext[_MAX_EXT];
+
+	strcpy(inName,File);
+	ExpandText(inName);
+	_fullpath(fullName, inName, sizeof(fullName));
+	_splitpath(fullName,drive,dir,name,ext);
+
+
+	if (!stricmp(Part, "ACTUAL"))
+	{
+		ConvertToNewLocation(File, FALSE);
+
+	}
+	else if (!stricmp(Part, "DRIVE"))
+		rtn = drive;
+	else if (!stricmp(Part, "DRIVEDIR"))
+	{
+		sprintf(fullName, "%s\\%s", drive, dir);
+		rtn = fullName;
+	}
+	else if (!stricmp(Part, "DIR"))
+		rtn = dir;
+	else if (!stricmp(Part, "LASTDIR"))
+	{
+		LPSTR lastdir = strrchr(dir, '\\');
+		if (lastdir)
+			rtn = ++lastdir;
+		else
+			rtn = dir;
+	}
+	else if (!stricmp(Part, "WOLASTDIR"))
+	{
+		LPSTR lastdir = strrchr(dir, '\\');
+		if (lastdir)
+			*lastdir = 0;
+		rtn = dir;
+	}
+	else if (!stricmp(Part, "NAME"))
+		rtn = name;
+	else if (!stricmp(Part, "FULLNAME"))
+		rtn = fullName;
+	else if (!stricmp(Part, "NAMEEXT"))
+	{
+		sprintf(fullName, "%s.%s", name, ext);
+		rtn = fullName;
+	}
+	else if (!stricmp(Part, "EXT"))
+		rtn = ext;
+	else if (!stricmp(Part, "WOEXT"))
+	{
+		LPSTR lastdir = strrchr(fullName, '\\');
+		if (lastdir)
+			*lastdir = 0;
+		rtn = fullName;
+	}
+	return rtn;
+}
 
 long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub,BOOL fileNameOnly)
 #if ENABLETRACE
@@ -7120,30 +7298,54 @@ BOOL ValidBounds2 (LPMNMXCORD Bounds)
 	return TRUE;
 }
 
-MNMXCORD atobounds (LPSTR Value,LPBOOL err)
+MNMXCORD atobounds(LPSTR Value, LPBOOL err)
 #if ENABLETRACE
 {GSSiEnterProg (297);
 #endif
-{                 
+{
 	MNMXCORD	Bounds;
-	
-	if (sscanf (Value,"%Flf %Flf %Flf %Flf",&Bounds.xmn,&Bounds.ymn,&Bounds.xmx,&Bounds.ymx) != 4)  
+
+	if (sscanf(Value, "%Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.xmx, &Bounds.ymx) != 4)
 	{
-		Bounds.xmn=Bounds.ymn=Bounds.xmx=Bounds.ymx = 0;
+		Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
 		*err = TRUE;
 	}
 	else
 		*err = FALSE;
+	{
+#if ENABLETRACE
+		GSSiExitProg (297);
+#endif
+		return Bounds;
+	}
+#if ENABLETRACE
+}
+#endif
+}
+MNMXCORD3D atobounds3D(LPSTR Value, LPBOOL err)
+#if ENABLETRACE
+{GSSiEnterProg (297);
+#endif
 {
+	MNMXCORD3D	Bounds;
+
+	if (sscanf(Value, "%Flf %Flf %Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.zmn, &Bounds.xmx, &Bounds.ymx, &Bounds.zmx) != 6)
+	{
+		Bounds.xmn = Bounds.ymn = Bounds.zmn = Bounds.xmx = Bounds.ymx = Bounds.zmx = 0;
+		*err = TRUE;
+	}
+	else
+		*err = FALSE;
+	{
 #if ENABLETRACE
-GSSiExitProg (297);
+		GSSiExitProg(297);
 #endif
-	return Bounds;
-}
+		return Bounds;
+	}
 #if ENABLETRACE
 }
 #endif
-} 
+}
 
 RECT atorect (LPSTR Value,LPBOOL pErr)
 #if ENABLETRACE
@@ -7259,7 +7461,7 @@ void dpointtoatrunc (LPSTR Value,LPDPOINT pPoint)
 	return;
 }
 
-BOOL GSSiChangeLength (HFILE Fid,long NewLength) 
+BOOL GSSiChangeLength (HFILE Fid,LONGLONG NewLength) 
 {        
 	short	st;
 	BOOL	rtn = FALSE;
@@ -7274,7 +7476,7 @@ BOOL GSSiChangeLength (HFILE Fid,long NewLength)
 			AddFileToUndoFile (0,NewLength+1,OpenFileFid[Fid]);
 		else
 			NewLength = -NewLength;
-		st = _chsize (OpenFileFid[Fid],NewLength);
+		st = _chsize_s (OpenFileFid[Fid],NewLength);
 		if (!st)
 		{
 			OpenFileLength[Fid] = NewLength;
@@ -7360,7 +7562,9 @@ int ActuallyCloseFile (HFILE Fid)
 	int	rtn;
 	int	ii;
 
-	if ((UseMappedFiles && Fid < MAXFILEHANDLES) && FidIsMapped[Fid])
+	if (Fid < 0 || Fid >= MAXFILEHANDLES)
+		return 0;
+	if (UseMappedFiles && FidIsMapped[Fid])
 	{
 		BOOL st = UnmapViewOfFile(FidPtr[Fid]);
 		st = CloseHandle (FidHandle[Fid]);
@@ -8132,7 +8336,7 @@ void ShowOpenFiles (LPSTR Name,UINT Mode)
 
 int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 {
-	static	char	NewPath[MAX_PATH], DLPath[MAX_PATH];
+	static	char	NewPath[MAX_PATH] = { 0 }, DLPath[MAX_PATH];
 	static	int		lDL = 0;
 	static	BOOL	Recursive=FALSE;
 	int		st, l, ii;
@@ -8299,7 +8503,7 @@ Exit:
 	return TRUE;
 }
 
-BOOL PctBox (HWND hWnd, DWORD MaxLen, DWORD Done, short InFreq)
+BOOL PctBox(HWND hWnd, LONGLONG MaxLen, LONGLONG Done, short InFreq)
 #if ENABLETRACE
 {GSSiEnterProg (387);
 #endif
@@ -9947,70 +10151,73 @@ LPSTR REPLAC (LPSTR STRING, LPSTR OLD, LPSTR NEW, int MAXLEN)//neg maxlen implie
 		  MAXLEN = -MAXLEN;
 	  }
       OLDLEN = _fstrlen (OLD);
-      NEWLEN = _fstrlen (NEW); 
-      STRLEN = _fstrlen (STRING);
-      IBEG   = STRING;
-      IDIFF  = NEWLEN - OLDLEN;
-      while (*IBEG)
-      {
-		  if (ignoreCase)
+	  if (OLDLEN)
+	  {
+		  NEWLEN = _fstrlen(NEW);
+		  STRLEN = _fstrlen(STRING);
+		  IBEG = STRING;
+		  IDIFF = NEWLEN - OLDLEN;
+		  while (*IBEG)
 		  {
-			  int lold = strlen(OLD);
-			  int lbeg = strlen(IBEG);
-			  LPSTR upOLD = malloc(lold + 4);
-			  LPSTR upBEG = malloc(lbeg + 4);
-			  LPSTR newBEG;
-			  strcpy(upOLD, OLD);
-			  strupr(upOLD);
-			  strcpy(upBEG, IBEG);
-			  strupr(upBEG);
-			  newBEG = strstr(upBEG, upOLD);
-			  if (newBEG)
+			  if (ignoreCase)
 			  {
-				  int inc = newBEG - upBEG;
-				  IBEG = IBEG + inc;
+				  int lold = strlen(OLD);
+				  int lbeg = strlen(IBEG);
+				  LPSTR upOLD = malloc(lold + 4);
+				  LPSTR upBEG = malloc(lbeg + 4);
+				  LPSTR newBEG;
+				  strcpy(upOLD, OLD);
+				  strupr(upOLD);
+				  strcpy(upBEG, IBEG);
+				  strupr(upBEG);
+				  newBEG = strstr(upBEG, upOLD);
+				  if (newBEG)
+				  {
+					  int inc = newBEG - upBEG;
+					  IBEG = IBEG + inc;
+				  }
+				  else
+					  IBEG = 0;
+				  free(upOLD);
+				  free(upBEG);
 			  }
 			  else
-				  IBEG = 0;
-			  free(upOLD);
-			  free(upBEG);
+				  IBEG = _fstrstr(IBEG, OLD);
+			  if (!IBEG) goto Exit;
+			  if (!IDIFF)
+			  {
+				  new = NEW;
+				  while (*new) *IBEG++ = *new++;
+			  }
+			  else if (IDIFF < 0)
+			  {
+				  loc = IBEG + OLDLEN;
+				  new = NEW;
+				  while (*new) *IBEG++ = *new++;
+				  new = IBEG;
+				  while (*loc) *new++ = *loc++;
+				  *new = 0;
+				  STRLEN += IDIFF;
+			  }
+			  else
+			  {
+				  CURLEN = IBEG - STRING;
+				  MOVELEN = STRLEN - CURLEN;
+				  STRLEN += IDIFF;
+				  if (STRLEN > MAXLEN)
+				  {
+					  STRLEN = MAXLEN;
+					  goto Exit;
+				  }
+				  TRAN(IBEG + OLDLEN, IBEG + NEWLEN, (size_t)MOVELEN);
+				  new = NEW;
+				  while (*new) *IBEG++ = *new++;
+			  }
 		  }
-		  else
-			IBEG    = _fstrstr(IBEG,OLD);
-          if (!IBEG) goto Exit;
-          if (!IDIFF)
-          {               
-              new = NEW;
-              while (*new) *IBEG++ = *new++;
-          }
-          else if (IDIFF < 0)
-          {
-              loc = IBEG + OLDLEN;
-              new = NEW;
-              while (*new) *IBEG++ = *new++;
-              new = IBEG;
-              while (*loc) *new++ = *loc++;
-              *new = 0;
-              STRLEN += IDIFF;
-          }
-          else
-          {   
-              CURLEN = IBEG - STRING;
-              MOVELEN = STRLEN - CURLEN;
-              STRLEN += IDIFF;
-              if (STRLEN > MAXLEN)
-              {
-                STRLEN = MAXLEN;
-                goto Exit;
-              }
-              TRAN (IBEG+OLDLEN,IBEG+NEWLEN,(size_t) MOVELEN);
-              new = NEW;
-              while (*new) *IBEG++ = *new++;
-          }
-      }
-Exit:
-      loc = STRING + STRLEN;
-      *loc = '\0';
+	  Exit:
+		  loc = STRING + STRLEN;
+		  *loc = '\0';
+	  }
 {
 #if ENABLETRACE
 GSSiExitProg (324);
@@ -12908,6 +13115,8 @@ __int64 llFileSeek (HANDLE hf, __int64 distance, DWORD MoveMethod)
 
 LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 {
+	if (Fid < 0 || Fid >= MAXFILEHANDLES)
+		return -1;
 	if (FidMemLen[Fid])
 	{   
 		switch (opt)
@@ -12971,20 +13180,13 @@ LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 		return -1;
 }
  
-DWORD GSSillseek2 (HFILE Fid, DWORD loc, int opt)
+LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt)
 {   
-	DWORD	rtnloc;
+	LONGLONG	rtnloc;
 	
 	if (OpenFileFid[Fid] == HFILE_ERROR)
 		return 0;
-	if (loc > LONG_MAX && !opt) 
-	{  
-		_lseek (OpenFileFid[Fid],LONG_MAX,opt);
-		loc -= LONG_MAX;
-		rtnloc = (DWORD)_lseek (OpenFileFid[Fid],loc,1); 
-	}
-	else
-		rtnloc = (DWORD)_lseek (OpenFileFid[Fid],loc,opt); 
+	rtnloc = _lseeki64 (OpenFileFid[Fid],loc,opt); 
 	return rtnloc;
 }
  

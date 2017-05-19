@@ -268,7 +268,7 @@ Next3:
 Next4:
 	if (minDist < maxDist)
 	{
-		strncpy (nextIntPoint,minNextInt,12);
+		strncpy0 (nextIntPoint,minNextInt,12);
 		*startMSLink = minMSLink;
 		return TRUE;
 	}
@@ -3251,6 +3251,44 @@ GSSiExitProg (1027);
 #endif
 } 
 
+int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
+{
+	int rtn = 0;
+	char LastUDI[66], str[256];
+	int st;
+	REFINDEXDATA RefIdxData;
+	LPREFINDEXDATA pRefIdxData=&RefIdxData;
+	TAGKEY TAGKey;
+	int pos = BT_FIRST;
+	HFILE fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+
+	if (fid != HFILE_ERROR)
+	{
+		_fstrcpy(PltName, PltFile);
+		if (OpenTAGIndex(FALSE, FALSE))
+		{
+			_fstrncpy(TAGKey.PREFIX, TagLocPrefix, 8);
+			TAGKey.Refno = LONG_MIN;
+			*LastUDI = 0;
+			while (!BT_FIND(hTAGIdx, (LPSTR)&TAGKey, pos, BT_ANY, (LPSTR)pRefIdxData))
+			{
+				char prfx[16];
+				pos = BT_NEXT;
+				strncpy0(prfx, TAGKey.PREFIX, 8);
+				if (!pRefIdxData->Deleted && (!*Prefix || !stricmp(prfx, Prefix)))
+				{
+					sprintf(str, "%s:%s", prfx, TAGKey.UDI);
+					fputstring(str, fid);
+					rtn++;
+				}
+			}
+			CloseTAGIndex();
+		}
+		GSSiClose(fid);
+	}
+	return rtn;
+}
+
 void OpenRefIndex (BOOL Delete)
 #if ENABLETRACE
 {GSSiEnterProg (1075);
@@ -3720,8 +3758,10 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
 			GSSiGlobUlFree (&hDibInfo);
     		_fstrcpy (pDot,".bpw");
 			GetGlobalCVal ("[%BPWUNITS]",units,0);
-			if (!stricmp (units,"FEET"))
+			if (!stricmp(units, "FEET") && PRJ_UNITS[1] == 2) //meters
 				factor = FTM;
+			else if (!stricmp(units, "METERS") && PRJ_UNITS[1] == 1) //feet
+				factor = MFT;
 		}
 		else
 			goto Exit;
@@ -3741,7 +3781,22 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     	if ((Fid = GSSiOpenFile(WorldFile,0,OF_READ)) == HFILE_ERROR)
     		goto Exit;
     	fgetstring (str,128,Fid);
-    	ScaleX = atof (str);
+		if (!stricmp(str, "FEET"))
+		{
+			if (PRJ_UNITS[1] == 2) //meters
+				factor = FTM;
+			fgetstring(str, 128, Fid);
+			ScaleX = atof(str);
+		}
+		else if (!stricmp(str, "METERS"))
+		{
+			if (PRJ_UNITS[1] == 1) //feet
+				factor = MFT;
+			fgetstring(str, 128, Fid);
+			ScaleX = atof(str);
+		}
+		else
+	    	ScaleX = atof (str);
     	fgetstring (str,128,Fid);
     	BitmapPoint.x = atof (str);
     	fgetstring (str,128,Fid);
@@ -3881,7 +3936,8 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
 ProcessImageFile:  
 		if (!InLoadBinaryFileList)
 		{
-			hCurImageMapDib = LoadDIB32 (PltName,TRUE); 
+			hCurImageMapDib = LoadDIB32(PltName, TRUE); 
+
     		if (!hCurImageMapDib)
     			goto RtnFalse;  
 		}
@@ -6060,15 +6116,155 @@ GSSiExitProg (1399);
 }
 #endif
 }
+static int removeDups(int n, LPINT *pOff)
+{
+	int nNew = 0;
+	LPINT pNewOff = malloc(n * sizeof (int));
+	LPINT pOffset = *pOff;
 
-BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
+	while (n--)
+	{
+		for (int i = 0; i < nNew; i++)
+		{
+			if (pNewOff[i] == *pOffset)
+			{
+				goto next;
+			}
+		}
+		pNewOff[nNew++] = *pOffset;
+next:pOffset++;
+	}
+	free(*pOff);
+	*pOff = pNewOff;
+	return nNew;
+}
+BOOL CreateWordIndexDB(LPSTR Path)
+{
+	BOOL rtn;
+	char	DefStr[] = "Word(C8),Sequence(B2),nOffsets(B2),Offsets(C400)";
+	char	DefStrTmp[128];
+	short	NumFields = 4, NumIndexFields = 2;
+	_fstrcpy(DefStrTmp, DefStr);
+	rtn = CreateGWDDatabase(Path, 1, FALSE, NumFields, NumIndexFields, DefStrTmp);
+	return rtn;
+}
+BOOL WordIndexRemoveDups(LPSTR File)
+{
+	BOOL rtn = FALSE;
+	char key[32];
+	int lkey = 8;
+	LPOPENFILEDATA  FilePtr;
+	LPOPENSQLDATA   SQLPtr;
+	LPGWDHEADER lpGWDHead;
+	LPWORDINDEX	pRec;
+	HANDLE hDBIn = 0;
+	int nRecs, nLoaded = 0;
+	int pos = BT_FIRST;
+	int offset,len,nOffset=0,nDups=0,maxOffset,nNewOffset,totOffsets=0;
+	LPINT pOffsets;
+
+	if (OpenDataFile(File, "", BT_READ, &hDBIn))
+	{
+		char TempFile[MAX_PATH];
+		HFILE fidTemp;
+		rtn = TRUE;
+		GSSiGetTempFileName(0, "gm", 0, TempFile);
+
+		fidTemp = GSSiOpenFile(TempFile, 0, OF_CREATE);
+		SQLPtr = (LPOPENSQLDATA)GlobalLock(hDBIn);
+		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
+		pRec = (LPWORDINDEX)&lpGWDHead->GWDData;
+		nRecs = BT_NUM_IN_INDEX(lpGWDHead->BTHandle[0]);
+		nLoaded = 0;
+		CreateStatusWind(hWndMain, 1, "Remove Dups from Word Index");
+		StatusWindowUpdate(0, "Step 1", nRecs, nLoaded);
+		while (!BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&offset))
+		{
+			pos = BT_NEXT;
+			len = FillGWDData(lpGWDHead, offset);
+			if (pRec->Seq == -1)
+			{
+				if (!nOffset)
+					pOffsets = malloc(pRec->nOffsets * sizeof(int));
+				memcpy(&pOffsets[nOffset], pRec->Offsets, pRec->nOffsets*sizeof(int));
+				nOffset += pRec->nOffsets;
+				nNewOffset = removeDups(nOffset, &pOffsets);
+				totOffsets += nOffset;
+				nDups += (nOffset - nNewOffset);
+				nOffset = 0;
+				BigWrite(fidTemp, lpGWDHead->pKeys[0], lkey, -1);
+				BigWrite(fidTemp, &nNewOffset, sizeof(int), -1);
+				BigWrite(fidTemp, pOffsets, nNewOffset*sizeof(int), -1);
+				free(pOffsets);
+			}
+			else if (!nOffset)
+			{
+				maxOffset = pRec->Seq * -MAXWIOFFSETS;
+				pOffsets = malloc(maxOffset * sizeof(int));
+				memcpy(&pOffsets[nOffset], pRec->Offsets, pRec->nOffsets*sizeof(int));
+				nOffset += pRec->nOffsets;
+			}
+			else
+			{
+				memcpy(&pOffsets[nOffset], pRec->Offsets, pRec->nOffsets*sizeof(int));
+				nOffset += pRec->nOffsets;
+			}
+			StatusWindowUpdate(0, 0, nRecs, ++nLoaded);
+		}
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hDBIn);
+		CloseDataFile(TRUE, &hDBIn);
+		CreateWordIndexDB(File);
+		OpenDataFile(File, "", BT_WRITE, &hDBIn);
+		SQLPtr = (LPOPENSQLDATA)GlobalLock(hDBIn);
+		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
+		pRec = (LPWORDINDEX)&lpGWDHead->GWDData;
+		nRecs = GSSillseek(fidTemp, 0, 1);
+		nLoaded = 0;
+		GSSillseek(fidTemp, 0, 0);
+		StatusWindowUpdate(0, "Step 2", nRecs, nLoaded);
+		while (BigRead(fidTemp, key, lkey))
+		{
+			int nOffsets, nRec;
+			LPINT pOffsetsInit;
+			strncpy(pRec->Word,key,lkey);
+			BigRead(fidTemp, &nOffsets, sizeof(int));
+			pOffsets = pOffsetsInit = malloc(nOffsets * sizeof(int));
+			BigRead(fidTemp, pOffsets, nOffsets*sizeof(int));
+			nRec = (nOffsets - 1) / MAXWIOFFSETS + 1;
+			pRec->Seq = -nRec;
+			while (pRec->Seq < 0)
+			{
+				memset(pRec->Offsets, 0, sizeof(pRec->Offsets));
+				pRec->nOffsets = min(MAXWIOFFSETS, nOffsets);
+				memcpy(pRec->Offsets, pOffsets, pRec->nOffsets*sizeof(int));
+				pOffsets += pRec->nOffsets;
+				nOffsets -= pRec->nOffsets;
+				GWDAddRecord(lpGWDHead, 0, 0);
+				pRec->Seq++;
+			}
+			free(pOffsetsInit);
+			nLoaded = GSSillseek(fidTemp, 0, 1);
+			StatusWindowUpdate(0, 0, nRecs, nLoaded);
+		}
+		GSSiClose(fidTemp);
+		GSSiRemove(TempFile);
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hDBIn);
+		CloseDataFile(TRUE, &hDBIn);
+		DestroyStatusWindow(0);
+	}
+	return rtn;
+}
+BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile,BOOL Append)
 #if ENABLETRACE
 {GSSiEnterProg (1400);
 #endif
 {   
-	char	DefStr[]="Word(C8),Sequence(B2),nOffsets(B2),Offsets(C400)"; 
-	char	DefStrTmp[128];
-	short	NumFields=4, NumIndexFields=2;
 	long	Offset, nRecs, nLoaded=0;
 	BOOL	st, rtn=FALSE; 
 	HANDLE	hDB=0,hDBOut=0, hDBOutTmp=0;
@@ -6079,7 +6275,7 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
     LPOPENSQLDATA   SQLPtrTmp;
 	LPGWDHEADER lpGWDHeadTmp;
 	short	WordMax = 8; 
-	char	Field[256],Word[256];  
+	char	Field[512],Word[256];  
 	LPWORDINDEX	pRec, pRecTmp;
 	UINT	len;     
 	char	ToFileTmp[256];
@@ -6088,7 +6284,6 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
 	int		WordLen[32];
 	int		nParts, iword,ii;
 	
-	_fstrcpy (DefStrTmp,DefStr);
     if (!OpenDataFile (FromFile,"",BT_READ,&hDB))
     	goto Exit;
     _fstrcpy (ToFileTmp,ToFile); 
@@ -6096,7 +6291,7 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
     if (!pEnd)
     	pEnd = _fstrchr (ToFileTmp,0);
     _fstrcpy (pEnd,"tmp.gmd");
-	if (!CreateGWDDatabase (ToFileTmp,1,FALSE,NumFields,NumIndexFields,DefStrTmp))
+	if (!CreateWordIndexDB(ToFileTmp))
 	{
 		CloseDataFile (TRUE,&hDB); 
 		goto Exit; 
@@ -6120,42 +6315,49 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile)
     	LPOPENSQLDATA   SQLPtr = (LPOPENSQLDATA) GlobalLock (hDB);
 	    LPOPENFILEDATA  FilePtr = (LPOPENFILEDATA) GlobalLock (SQLPtr->OFHandle);
 	    long	FileOffset=SQLPtr->Offset;
+		char Field2[512];
     	
     	GlobalUnlock (SQLPtr->OFHandle);
     	GlobalUnlock (hDB);
-		strcpy (Field,FromField);
-		ExpandText (Field); 
+		strcpy (Field2,FromField);
+		ExpandText (Field2); 
+		strncpy(Field, Field2, sizeof(Field));
 		nParts = GetNameParts (Field,pWord,WordLen,32);
 		for (iword=0;iword < nParts;iword++)
 		{   
 			if (WordLen[iword] > 1)
 			{
-				_fstrncpy (pRecTmp->Word,pWord[iword],WordMax);  
-				pRecTmp->Seq = 0;
-NextSeq:		pRecTmp->Seq--;  
-				if (-pRecTmp->Seq <= MAXWISEQ)
+				if (!isdigit((unsigned char)*pWord[iword]))
 				{
-					GWDFormKey(lpGWDHeadTmp,0,TRUE,0,0);
-					if (!BT_FIND (lpGWDHeadTmp->BTHandle[0],lpGWDHeadTmp->pKeys[0],BT_FIRST,BT_EQ, (LPSTR)&Offset))
+					_fstrncpy(pRecTmp->Word, pWord[iword], WordMax);
+					pRecTmp->Seq = 0;
+				NextSeq:		pRecTmp->Seq--;
+					if (-pRecTmp->Seq <= MAXWISEQ)
 					{
-						len=FillGWDData (lpGWDHeadTmp,Offset);
-						if (pRecTmp->nOffsets == MAXWIOFFSETS)
-			        		goto NextSeq;
-						pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
-						if (!FileOffset)
-							ii=1;
-						GWDReplaceRecord (lpGWDHeadTmp,0,0,Offset);
+						GWDFormKey(lpGWDHeadTmp, 0, TRUE, 0, 0);
+						if (!BT_FIND(lpGWDHeadTmp->BTHandle[0], lpGWDHeadTmp->pKeys[0], BT_FIRST, BT_EQ, (LPSTR)&Offset))
+						{
+							len = FillGWDData(lpGWDHeadTmp, Offset);
+							if (pRecTmp->nOffsets == MAXWIOFFSETS)
+								goto NextSeq;
+							pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
+							if (!FileOffset)
+								ii = 1;
+							GWDReplaceRecord(lpGWDHeadTmp, 0, 0, Offset);
+						}
+						else
+						{
+							_fmemset(pRecTmp->Offsets, 0, sizeof(pRecTmp->Offsets));
+							pRecTmp->nOffsets = 0;
+							pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
+							if (!FileOffset)
+								ii = 1;
+							GWDAddRecord(lpGWDHeadTmp, 0, 0);
+						}
 					}
-					else
-					{   
-						_fmemset (pRecTmp->Offsets,0,sizeof(pRecTmp->Offsets)); 
-						pRecTmp->nOffsets = 0;
-						pRecTmp->Offsets[pRecTmp->nOffsets++] = FileOffset;
-						if (!FileOffset)
-							ii=1;
-						GWDAddRecord (lpGWDHeadTmp,0,0);
-					} 
 				}
+				else
+					ii = 1;
 			}
 		}
 Next:
@@ -6165,7 +6367,8 @@ Next:
 	{   
 		short	pos=BT_FIRST;
 		
-		CreateGWDDatabase (ToFile,1,FALSE,NumFields,NumIndexFields,DefStr);
+		if (!Append)
+			CreateWordIndexDB(ToFile);
 		OpenDataFile (ToFile,"",BT_WRITE,&hDBOut);
 	    SQLPtr = (LPOPENSQLDATA) GlobalLock (hDBOut);
 	    FilePtr = (LPOPENFILEDATA) GlobalLock (SQLPtr->OFHandle);
@@ -6186,6 +6389,7 @@ Next:
 			        len=FillGWDData (lpGWDHeadTmp,Offset); 
 			        nLoaded++;
 			    }
+				MessageBox(0, lpGWDHeadTmp->pKeys[0], "Too many matches", MB_ICONEXCLAMATION);
 	        }
 	        else
 	        {

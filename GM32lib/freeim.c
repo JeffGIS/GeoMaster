@@ -733,7 +733,12 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName)
 		UINT flag = BMP_DEFAULT;
 		FIBITMAP *dib;
 		if (fif == FIF_JPEG)
-			flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
+		{
+			if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
+				flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
+			else
+				flag = JPEG_ACCURATE;
+		}
 		dib = FreeImage_Load(fif, lpszPathName, flag);
 		rtn = (HDIB32)dib;
 		// unless a bad file format, we are done !

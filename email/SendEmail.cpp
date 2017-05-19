@@ -48,10 +48,9 @@ extern "C" void SendEmailToJeff (LPSTR Info)
 		ii=1;
  	}
 
-extern "C" BOOL SendEmail (LPSTR From,LPSTR To,LPSTR Subject,LPSTR Message,LPSTR Attach,LPSTR Response)
+extern "C" BOOL SendEmail(LPSTR From, LPSTR To, LPSTR Subject, LPSTR Message, LPSTR Attach, LPSTR HTMLFile, LPSTR Response)
 {
 	char	server[128], user[128], pw[64], Bcc[128] = { 0 };
-	char	HTMLFile[256] = { 0 };
 		char * pSC;
 		std::string	respons;
 

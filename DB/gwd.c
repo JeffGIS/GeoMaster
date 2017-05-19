@@ -3206,7 +3206,7 @@ FoundFile:
 
 			for (idx=0;idx<lpGWDHead->NumIndex;idx++)
 			{
-				if (lpGWDHead->SpatialIndex && idx != lpGWDHead->SpatialIndex)
+				if (!lpGWDHead->SpatialIndex || idx != lpGWDHead->SpatialIndex)
 				for (ifld=0;ifld<lpGWDHead->NumIndexFields[idx];ifld++)
 				{
 					LPGWFLDINFO pFldInfo = lpGWDHead->pFldInfo + lpGWDHead->IndexFields[idx][ifld];
@@ -6754,6 +6754,8 @@ BOOL AddCPLRecordToFreeSpace (HFILE Fid,LPCHECKPNTLOGHEADER pCheckPntLogHeader,i
 			GSSillseek (Fid,loc,0);
 			if (BigRead (Fid,&CheckPntLogRecord,sizeof(CHECKPNTLOGRECORD)-4) != sizeof(CHECKPNTLOGRECORD)-4)
 				return FALSE;
+			//if (CheckPntLogRecord.PreviousRec != Lastloc)
+			//	break;
 			if (loc + CheckPntLogRecord.Reclen == CheckPntLogRecord.NextRec)
 			{
 				GSSillseek (Fid,CheckPntLogRecord.NextRec,0);
@@ -6969,7 +6971,7 @@ BOOL GMDUpdateCheckPointLog (LPSTR FileName)
 	CHECKPNTLOGRECORD CheckPntLogRecord, CheckPntLogRecord2;
     LPGWDHEADER lpGWDHead;
 	char	CheckPntLogFileName[MAX_PATH];
-	int		i,j,ln,loc;
+	int		indx,j,ln,loc;
 	HFILE	Fid, Fid2;
 	BOOL	SaveAllowJournal = AllowJournal;
 	int		IncFirstCP=0;
@@ -6992,10 +6994,10 @@ BOOL GMDUpdateCheckPointLog (LPSTR FileName)
 			{
 				lpGWDHead = GlobalLock (hDB);
 				BigRead (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER));
-				for (i=0;i<lpGWDHead->NumIndex+1;i++)
+				for (indx=0;indx<lpGWDHead->NumIndex+1;indx++)
 				{
-					if (i)
-						Fid2 = GetBTFid (lpGWDHead->BTHandle[i-1]);
+					if (indx)
+						Fid2 = GetBTFid (lpGWDHead->BTHandle[indx-1]);
 					else
 						Fid2 = lpGWDHead->Fid;
 					if (JournalFileIndex[Fid2])
@@ -7024,29 +7026,29 @@ BOOL GMDUpdateCheckPointLog (LPSTR FileName)
 									SetBit (iblock++, pBytes,TRUE);
 							}
 						    CompressedLength = CompressBinaryRecord (pBytes,pCompressedRec,len);
-							CheckPntLogRecord.PreviousRec = CheckPntLogHeader.LastCheckPointLoc[i];
+							CheckPntLogRecord.PreviousRec = CheckPntLogHeader.LastCheckPointLoc[indx];
 							CheckPntLogRecord.Reclen = CompressedLength+sizeof(CHECKPNTLOGRECORD)-4;
 							CheckPntLogRecord.NextRec = -1;
 							if (CheckPntLogHeader.LastCheckPointID - CheckPntLogHeader.FirstCheckPointID >= CheckPntLogHeader.nCheckPoints)
 							{
-								GSSillseek (Fid,CheckPntLogHeader.FirstCheckPointLoc[i],0);
+								GSSillseek (Fid,CheckPntLogHeader.FirstCheckPointLoc[indx],0);
 								BigRead (Fid,&CheckPntLogRecord2,sizeof(CHECKPNTLOGRECORD));
-								AddCPLRecordToFreeSpace (Fid,&CheckPntLogHeader,i,CheckPntLogHeader.FirstCheckPointLoc[i]);
-								CheckPntLogHeader.FirstCheckPointLoc[i] = CheckPntLogRecord2.NextRec;
+								AddCPLRecordToFreeSpace (Fid,&CheckPntLogHeader,indx,CheckPntLogHeader.FirstCheckPointLoc[indx]);
+								CheckPntLogHeader.FirstCheckPointLoc[indx] = CheckPntLogRecord2.NextRec;
 								IncFirstCP =1;
 							}
 							loc = GetCPLNewRecordLoc (Fid,&CheckPntLogHeader,CheckPntLogRecord.Reclen);
-							if (CheckPntLogHeader.LastCheckPointLoc[i] > -1)
+							if (CheckPntLogHeader.LastCheckPointLoc[indx] > -1)
 							{
-								GSSillseek (Fid,CheckPntLogHeader.LastCheckPointLoc[i],0);
+								GSSillseek (Fid,CheckPntLogHeader.LastCheckPointLoc[indx],0);
 								BigRead (Fid,&CheckPntLogRecord2,sizeof(CHECKPNTLOGRECORD));
 								CheckPntLogRecord2.NextRec = loc;
-								GSSillseek (Fid,CheckPntLogHeader.LastCheckPointLoc[i],0);
+								GSSillseek (Fid,CheckPntLogHeader.LastCheckPointLoc[indx],0);
 								BigWrite (Fid,&CheckPntLogRecord2,sizeof(CHECKPNTLOGRECORD),-1);
 							}
 							else
-								CheckPntLogHeader.FirstCheckPointLoc[i] = loc;
-							CheckPntLogHeader.LastCheckPointLoc[i] = loc;
+								CheckPntLogHeader.FirstCheckPointLoc[indx] = loc;
+							CheckPntLogHeader.LastCheckPointLoc[indx] = loc;
 							GSSillseek (Fid,loc,0);
 							BigWrite (Fid,&CheckPntLogRecord,sizeof(CheckPntLogRecord)-4,-1);
 							BigWrite (Fid,pCompressedRec,CompressedLength,-1);

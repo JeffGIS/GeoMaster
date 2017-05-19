@@ -354,7 +354,7 @@ HANDLE	hSTR = 0;
 		case SLT_DATAFILE:
 		{
 			LPSQLDATABASE	pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
-			rtn = GetSQLITENumRows(pDB->DBHandle, pDB->From);
+			rtn = GetSQLITENumRows(pDB->DBHandle, pDB->From,pDB->Where);
 			GlobalUnlock(FilePtr->FileHandle);
 			GlobalUnlock(SQLPtr->OFHandle);
 			GlobalUnlock(hSQL);
@@ -1540,7 +1540,7 @@ LPSTR	dir = str + 256;
 LPSTR	file = dir + 256;
 LPSTR	drive = file + 128;
 LPSTR	ext = drive + 32;
-static  char	cwd[MAX_PATH];   
+static  char	cwd[MAX_PATH] = { 0 };
 static	short	SaveDrive;
 LPSTR	pOwner, pTable;   
 short	lOwner;
@@ -2292,7 +2292,7 @@ long FindFieldName (LPSTR DBName,LPSTR FldPartialName,LPSTR OutFile)
 		LPFIELDINFO pFld; 
 		HANDLE	hDB2=0;
 		
-		sprintf (TableName,"%s|%s",DBName,lpSTRING,itype);
+		sprintf (TableName,"%s|%s",DBName,lpSTRING);
 	    if (OpenDataFile (TableName,"",BT_READ,&hDB2)) 
 	    {
 			LPFIELDINFO	lpFieldInfo;

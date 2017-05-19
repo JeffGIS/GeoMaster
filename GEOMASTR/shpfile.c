@@ -130,9 +130,9 @@ int NVShapeIndexAdd(sqlite3 * db, long long SHPRecOffset, LPMNMXCORD pBounds, in
 	char cmd[256];
 	int rtn;
 	return 0;
-	sprintf(cmd, "INSERT INTO SHAPEINDEX VALUES(%li,%i)", SHPRecOffset, symnum);
+	sprintf(cmd, "INSERT INTO SHAPEINDEX VALUES(%I64i,%i)", SHPRecOffset, symnum);
 	rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
-	sprintf(cmd, "INSERT INTO SHAPEINDEX_index VALUES(%lli,%f,%f,%f,%f)", SHPRecOffset, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+	sprintf(cmd, "INSERT INTO SHAPEINDEX_index VALUES(%I64i,%f,%f,%f,%f)", SHPRecOffset, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 	rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
 	return rtn;
 }
@@ -4277,7 +4277,6 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 	GlobalUnlock(hPolyPartLen);
 	return n;
 }
-
 BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 #if ENABLETRACE
 {GSSiEnterProg (1375);

@@ -1,5 +1,8 @@
 #include "graphint.h"
-#include "dgn7.h"      
+#include "dgnlib.h"      
+//#include "dgn7.h"      
+
+typedef DGNElemCore *LPDGNElementCore;
 
 #define DGN_DESCRIPTION_NAME_LENGTH   34
 #define DGN_DESCRIPTION_DESCRIPTION_LENGTH 68
@@ -354,7 +357,7 @@ BOOL ReadNextDGNRecord (LPMNMXCORD pBounds)
 			DGNLastBounds = *pBounds;
 		}
 	} 
-	pElement = (LPDGNElementCore)GlobalLock (hElement);
+	pElement = (DGNElemCore*)GlobalLock (hElement);
 	rtn = DGNLibReadElement (hDGN,pElement,MaxDGNElementSize,&BaseDistToWinDist,&FillColor,&NumAttributes,Attributes);  
 	CurrentDGNRec = pElement->element_id;
 	GlobalUnlock (hElement);
@@ -696,7 +699,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	long		loopfactor=1; 
 	short		ii;  
 	static		long		debugitem=287;
-	HPDGNPoint	pvertices; 
+	DGNPoint*	pvertices; 
 	long num_vertices = 0;
 	LPLONG		pnum_vertices=&num_vertices;
 	MNMXCORD	Rect;
@@ -882,7 +885,6 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 					 
 					case DGNST_ARC:              
 					{
-						break;
 						int  size = sizeof(DGNElemArc);
 
 						DGNElemArc FAR	*pRec=(DGNElemArc*)pElement;
@@ -892,7 +894,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 						int			MaxPoints = (MaxMemSize - size - 4) / sizeof (DGNPoint);
 						double		dlen;
 
-						DGNStrokeArc(hDGN, (DGNElemArc *)pElement, 5, TestPointsDGN);
+					/*	DGNStrokeArc(hDGN, (DGNElemArc *)pElement, 5, TestPointsDGN);
 						for (int i = 0; i < 5; i++)
 						{
 							TestPoints[i].x = TestPointsDGN[i].x;
@@ -900,9 +902,10 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 							ConvertCoord(&TestPoints[i], 0, 1);
 						}
 						dlen = GetPolyLengthD(TestPoints, 5);
-						num_vertices = min(MaxPoints - 1, max(2, (int)(dlen / CurView->MetersPerPixel))) + 1;
+						num_vertices = min(MaxPoints - 1, max(2, (int)(dlen / CurView->MetersPerPixel))) + 1;*/
 						num_vertices = 5;
-						pvertices = (HPDGNPoint)malloc((num_vertices + 2) * sizeof(DGNPoint));
+						pvertices = (DGNPoint*)malloc((num_vertices + 2) * sizeof(DGNPoint));
+						//num_vertices = 0;
 						DGNStrokeArc(hDGN, (DGNElemArc *)pElement, num_vertices, pvertices);
 
 						for (i = 0; i < num_vertices; i++)
@@ -993,7 +996,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 			{
 				//							pPoints[NumPoints].x = pvertices[i].x;
 				//							pPoints[NumPoints].y = pvertices[i].y;
-				ConvertCoord(&pPoints[i], 0, 1);
+				ConvertCoord(&pvertices[i], 0, 1);
 				//if (!NumPoints || !SameDPoint (&pPoints[NumPoints-1],&pPoints[NumPoints]))
 				//	NumPoints++;
 			}

@@ -1411,12 +1411,16 @@ GSSiExitProg (1350);
 			goto RtnFalse;
 		} 
 		
-		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly)
+		case 845: // $FILELIST OutFile, New, SearchLoc, WildCard,SearchSubdir,WantDirectories,nameonly(TF or 0,1,2)
 		{
+			int no;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse; 
-			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), atob(Arg[7]));
+			no = atoi(Arg[7]);
+			if (no != 2)
+				no = atob(Arg[7]);
+			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), no);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}
@@ -1600,6 +1604,55 @@ GSSiExitProg (1350);
 			ulong = MAKELONG(atoi(Arg[1]), atoi(Arg[2]));
 			ltoa(ulong, OutLoc, 10);
 			goto Rtnl;
+		}
+		case 856://$TEXTFILE(OPEN,pathname,READorWRITEorRorW)  returns fid
+			//$TEXTFILE(READ,fid,varname) puts text into varname returns T or F
+			//$TEXTFILE(WRITE,fid,text)
+			//$TEXTFILE(CLOSE,fid)
+		{
+			HFILE fid;
+			rtn = 0;
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "OPEN"))
+			{
+				if (*Arg[3] == 'R')
+				{
+					fid = GSSiOpenFile(Arg[2], 0, OF_READ);
+					rtn = fid;
+				}
+				else if (*Arg[3] == 'C')
+				{
+					fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+					rtn = fid;
+				}
+				else if (*Arg[3] == 'W')
+				{
+					fid = GSSiOpenFile(Arg[2], 0, OF_READWRITE);
+					rtn = fid;
+				}
+			}
+			else if (!stricmp(Arg[1], "READ"))
+			{
+				LPSTR line = malloc(MAXVARLEN);
+				fid = atoi(Arg[2]);
+				if (fgetstring(line, MAXVARLEN - 2, fid))
+				{
+					rtn = 1;
+					SetGlobalValue(Arg[3], line);
+				}
+				free(line);
+			}
+			else if (!stricmp(Arg[1], "WRITE"))
+			{
+				fid = atoi(Arg[2]);
+				rtn = fputstring(Arg[3], fid);
+			}
+			else if (!stricmp(Arg[1], "CLOSE"))
+			{
+				fid = atoi(Arg[2]);
+				rtn = !GSSiClose(fid);
+			}
+			goto Rtnrtn;
 		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
@@ -2186,7 +2239,7 @@ GSSiExitProg (1350);
 			goto RtnFalse; 
 		}
 			
-		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach
+		case 932: //$SENDEMAIL(from,to,subject,message(or body),attach,html
 		{
 			nArgs = GetFunArgs (Args,Arg,-7,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
@@ -2196,8 +2249,8 @@ GSSiExitProg (1350);
 			ExpandText(Arg[4]);
 			ExpandText (Arg[5]);
 			ExpandText (Arg[6]);
-			rtn = SendEmail (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6]);
-			SetGlobalValue ("%EMAILRESPONSE",Arg[6]);
+			rtn = SendEmail(Arg[1], Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7]);
+			SetGlobalValue ("%EMAILRESPONSE",Arg[7]);
 			goto Rtnrtn; 
 		}
 
@@ -5241,14 +5294,23 @@ GSSiExitProg (1350);
         }  
         
 	    case 1506: //$CREATEWORDINDEX(FromFile,FromField,ToFile)
+			//$CREATEWORDINDEX(REMOVEDUPS,FromFile)
         {
-            DLGPROC	lpfnADDLOC_CREATEMsgProc; 
               
-			nArgs = GetFunArgs(Args, Arg, -3, &hMem, pBrkPt, bpOffset, bpLen);
-			if (nArgs < 3)
-				goto RtnFalse; 
-			if (CreateWordIndex (Arg[1],Arg[2],Arg[3]))
-				goto RtnTrue;
+			nArgs = GetFunArgs(Args, Arg, -4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 2)
+				goto RtnFalse;
+			ExpandText(Arg[1]);
+			ExpandText(Arg[4]);
+			if (!_fstricmp(Arg[1], "REMOVEDUPS"))
+			{
+				ExpandText(Arg[2]);
+				if (WordIndexRemoveDups(Arg[2]))
+					goto RtnTrue;
+			}
+			else 
+				if (CreateWordIndex(Arg[1], Arg[2], Arg[3], atob(Arg[4])))
+					goto RtnTrue;
 			goto RtnFalse;
         }  
         

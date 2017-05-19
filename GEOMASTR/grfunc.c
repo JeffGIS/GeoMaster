@@ -601,7 +601,7 @@ void ResetFunStack (BOOL All)
     UnlockCursor ();  
     EnlargeScreen (0,0);
     SetGlobalValue("%P","");	 
-	if (CurView->FunStackHandle)
+	if (CurView && CurView->FunStackHandle)
 	{
 		InReset = TRUE;
 	    handle = hSave = CurView->FunStackHandle;
@@ -648,7 +648,7 @@ void ResetFunStack (BOOL All)
     DisplayFunctionStack(); 
 	SetCurs (0,FALSE);
     InReset = FALSE;
-    if (CurView == CurPolyVP)
+    if (CurView && CurView == CurPolyVP)
     { 
 	   	GSSiGlobFree(&hCurPolyPoints);
 	   	nCurPolyPoints=0; 

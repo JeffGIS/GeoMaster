@@ -4,6 +4,7 @@
 #include "umio.h"
 #include <mmsystem.h>
 #include "gmextern.h"
+#include "RampCompliance.h"
 
 
 static	char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
@@ -1555,11 +1556,12 @@ GotCloseFilehSQL:
 		{	   
 			HANDLE	hHlt = GSSiGlobAlloc ( 852,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 			LPHIGHLIGHTDATA	pHighlightData = (LPHIGHLIGHTDATA)GlobalLock (hHlt);
+			long	StartRef;
 
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!_fstrcmp(Arg[1], "ALL"))
 			{   
-				long	StartRef=LONG_MIN;
+				StartRef=LONG_MIN;
 				
 				while (!BT_FIND (hHighlight,(LPSTR)&StartRef,BT_FIRST,BT_GT,(LPSTR)pHighlightData))
 				{
@@ -1578,7 +1580,7 @@ GotCloseFilehSQL:
 				ExpandText (Arg[2]); 
 				if ((lpColon = _fstrchr (Arg[2],':'))) 
 				{
-					long	StartRef=LONG_MIN;
+					StartRef=LONG_MIN;
 		
 					*lpColon++=0;
 				
@@ -1602,9 +1604,13 @@ GotCloseFilehSQL:
 				else 
 				{
 					Refno = atol (Arg[2]); 
-					if (!BT_FIND (hHighlight,(LPSTR)&Refno,BT_FIRST,BT_EQ,(LPSTR)pHighlightData))
-						goto HLTRemove;
-				} 
+					if (!BT_FIND(hHighlight, (LPSTR)&Refno, BT_FIRST, BT_EQ, (LPSTR)pHighlightData))
+					{
+						RemoveFromHighlightList(Refno, 1);
+						GSSiGlobUlFree(&hHlt);
+						goto RtnTrue;
+					}
+				}
 			}
 	    	GSSiGlobUlFree (&hHlt);
 			goto RtnFalse; 
@@ -4123,17 +4129,17 @@ GotCloseFilehSQL:
 				}
 				else if (!stricmp(Arg[1], "RESCALE"))//file,width,height,outfile,opt
 				{
-					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
 
 					if (hDIB)
 					{
-						int width = atoi (Arg[3]);
-						int height = atoi (Arg[4]);
-						HDIB32 hDibOut = FreeImage_Rescale (hDIB,width,height,FILTER_CATMULLROM);
+						int width = atoi(Arg[3]);
+						int height = atoi(Arg[4]);
+						HDIB32 hDibOut = FreeImage_Rescale(hDIB, width, height, FILTER_CATMULLROM);
 
 						if (hDibOut)
 						{
-							GMFIBMPHandleToEXT (Arg[5],hDibOut,atoi(Arg[6]));
+							GMFIBMPHandleToEXT(Arg[5], hDibOut, atoi(Arg[6]));
 							FreeImage_Unload(hDIB);
 							FreeImage_Unload(hDibOut);
 							goto RtnTrue;
@@ -4142,7 +4148,27 @@ GotCloseFilehSQL:
 					}
 					goto RtnFalse;
 				}
-				else if (!stricmp (Arg[1],"WIDTH"))//infile
+				else if (!stricmp(Arg[1], "SINGLECHANNEL"))//file,channel,outfile,opt
+				{
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
+
+					if (hDIB)
+					{
+						int ichan = atoi(Arg[3]);
+						HDIB32 hDibOut = FreeImage_GetChannel(hDIB, ichan);
+
+						if (hDibOut)
+						{
+							GMFIBMPHandleToEXT(Arg[4], hDibOut, atoi(Arg[5]));
+							FreeImage_Unload(hDIB);
+							FreeImage_Unload(hDibOut);
+							goto RtnTrue;
+						}
+						FreeImage_Unload(hDIB);
+					}
+					goto RtnFalse;
+				}
+				else if (!stricmp(Arg[1], "WIDTH"))//infile
 				{
 					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
 
@@ -4445,20 +4471,37 @@ GotCloseFilehSQL:
 			itoa(n, OutLoc, 10);
 			goto Rtnl;
 		}
-		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile)
+		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
+			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1),headertype(-1,0,1))
+			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1),completioncode(0all,1complete,2paid)
+			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid,1=header and streetnames and coord wo type,2=same with type);
+			//$NVCRIS(EXPORT,FromDB, PRIORITY,OUTFile,header(0=none,1=standard,2=with types));
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
-			//$NVCRIS(COMPCODE,int,ramp,db,opt)
+			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
+			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
+			//$NVCRIS(TEXTURECODE,texture)
+			//$NVCRIS(FORMATSTREETS,codedstreets)
+			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "EXPORT"))
 			{
 				if (!stricmp(Arg[3], "BYINT"))
-					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2]);
+					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2], atoi(Arg[6]), atoi(Arg[7]));
+				else if (!stricmp(Arg[3], "BYRAMP"))
+					rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]), atoi(Arg[8]));
+				else if (!stricmp(Arg[3], "INT"))
+					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
+				else if (!stricmp(Arg[3], "ALL"))
+					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
+				else if (!stricmp(Arg[3], "PRIORITY"))
+					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
+
 			}
 			else if (!stricmp(Arg[1], "LOADLIST"))
 			{
-				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3]);
+				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3],atob(Arg[4]),atoi(Arg[5]));
 			}
 			else if (!stricmp(Arg[1], "COMPCODE"))
 			{
@@ -4476,12 +4519,134 @@ GotCloseFilehSQL:
 				goto Rtnl;
 			}
 
+			else if (!stricmp(Arg[1], "OBSTRUCTIONCODE"))
+			{
+				rtn = NVCObstructionToCode(Arg[2]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "TEXTURECODE"))
+			{
+				rtn = NVCTextureToCode(Arg[2]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "RAMPHEADER"))
+			{
+				const char * pHeader = rampToTextHeader(atoi(Arg[2]));
+				if (!*Arg[3])
+				{
+					strcpy(OutLoc, pHeader);
+				}
+				else
+				{
+					Fid1 = GSSiOpenFile(Arg[3], 0, OF_CREATE);
+					fputstring((LPSTR)pHeader, Fid1);
+					GSSiClose(Fid1);
+					strcpy(OutLoc, "1");
+				}
+				goto Rtnl;
+			}
 
 			if (rtn)
 				goto RtnTrue;
 			else
 				goto RtnFalse;
 		}
+		case 653: //$LASZIP(GETBOUNDS,file,boundsvar)
+		{
+			rtn = FALSE;
+
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "GETBOUNDS"))
+			{
+				double zmn, zmx;
+				rtn = getLAZMinMax(Arg[2], &Bounds.xmn, &Bounds.xmx, &Bounds.ymn, &Bounds.ymx, &zmn, &zmx);
+				if (*Arg[3])
+					SetGlobalValueBounds(Arg[3], &Bounds);
+			}
+			if (!stricmp(Arg[1], "GETBOUNDS3D"))
+			{
+				MNMXCORD3D Bounds3D;
+				rtn = getLAZMinMax(Arg[2], &Bounds3D.xmn, &Bounds3D.xmx, &Bounds3D.ymn, &Bounds3D.ymx, &Bounds3D.zmn, &Bounds3D.zmx);
+				if (*Arg[3])
+					SetGlobalValueBounds3D(Arg[3], &Bounds3D);
+			}
+			else if (!stricmp(Arg[1], "LAZTOTEXT"))//$LAZTOTEXT(infile,outfile,pointtype)
+			{
+				rtn = writeLAZFileToText(Arg[2], atoi(Arg[4]), Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CLASSIFY"))//$LAZTOTEXT(CLASSIFY,infile,outfile)
+			{
+				rtn = classifyLAZFile(Arg[2], Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else
+				rtn = mainlaszip(nArgs, &Arg[1]);
+			goto RtnFalse;
+		}
+			break;
+		case 654: //$UNIQUE(CREATE,len)
+			//$UNIQUE(ADD,handle,val)
+			//$UNIQUE(GET,handle,first,valvar,countvar)
+			//$UNIQUE(CLOSE,handle)
+		{
+			HANDLE hBT;
+			int vlen;
+			int count;
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "CREATE"))
+			{
+				vlen = atoi(Arg[2]);
+				hBT = CreateUniqueList(vlen, 0);
+				itoa((UINT)hBT, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "ADD"))
+			{
+				hBT = (HANDLE)atoi(Arg[2]);
+				vlen = GetBTKeyLen(hBT);
+				LPSTR value = malloc(vlen + 4);
+				_fstrncpy(value, Arg[3], vlen);
+				if (BT_FIND(hBT, value, BT_FIRST, BT_EQ, (LPSTR)&count))
+					count = 0;
+				count++;
+				BT_PUT(hBT, value, (LPSTR)&count);
+				free(value);
+				goto RtnTrue;
+			}
+			else if (!stricmp(Arg[1], "GET"))
+			{
+				int count;
+				hBT = (HANDLE)atoi(Arg[2]);
+				vlen = GetBTKeyLen(hBT);
+				LPSTR value = malloc(vlen + 4);
+				int pos = BT_NEXT;
+				if (atob(Arg[3]))
+					pos = BT_FIRST;
+				if (!BT_FIND(hBT, value, pos, BT_ANY, (LPSTR)&count))
+				{
+					value[vlen] = 0;
+					SetGlobalValue(Arg[4], value);
+					SetGlobalValueLong(Arg[5], count);
+					rtn = TRUE;
+				}
+				else
+					rtn = FALSE;
+				free(value);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CLOSE"))
+			{
+				hBT = (HANDLE)atoi(Arg[2]);
+				rtn = BT_CLOSEANDDELETE(&hBT);
+				goto Rtnrtn;
+			}
+		}
+			break;
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
@@ -5674,12 +5839,17 @@ SaveVis:
 				if (LoadAREADTM (Arg[2],Arg[3]))
 					goto RtnTrue;
 			}
-			else if (!_fstricmp (Arg[1],"LIDAR"))
+			else if (!_fstricmp(Arg[1], "LIDAR"))
 			{
-				if (LoadLIDARDTM (Arg[2],Arg[3],Arg[4]))
+				if (LoadLIDARDTM(Arg[2], Arg[3], Arg[4]))
 					goto RtnTrue;
-			} 
-			else if (!_fstricmp (Arg[1],"ERDAS"))
+			}
+			else if (!_fstricmp(Arg[1], "LIDARLAZ"))//$LOADDTM(LIDARLAZ,InDir,OutFile,pointType)
+			{
+				if (LoadLIDARDTMfromLAZ(Arg[2], Arg[3], atoi(Arg[4])))
+					goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "ERDAS"))
 			{
 				if (LoadERDASDem ())
 					goto RtnTrue;
@@ -6405,7 +6575,7 @@ HaveVP:;
 						ExpandText (Arg[7]);
 						*LastChr (Arg[7]) = 0;
 					}
-					if(CreateProcess(0,Arg[3], 
+					if (CreateProcess(Arg[2], Arg[3],
 										NULL,             // Process handle not inheritable. 
 										NULL,             // Thread handle not inheritable. 
 										FALSE,            // Set handle inheritance to FALSE. 
@@ -6432,7 +6602,8 @@ HaveVP:;
 					}
 					else
 					{
-						ltoa (-((int)GetLastError ()),OutLoc,10);
+						int err = GetLastError();
+						ltoa (-err,OutLoc,10);
 					}
 				}
 				else if (!stricmp (Arg[1],"STOP"))
@@ -6649,7 +6820,52 @@ HaveVP:;
 			rtn = CopyDirectory(Arg[1], Arg[2], atob(Arg[3]), Arg[4]);
 			goto Rtnrtn;
 		}
+		case 785: //$NVMETRO(LOADMULTPROP
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[1], "LOADMULTPROP"))
+			{
+				itoa(LoadMultPropertyDB(Arg[2]), OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CREATEMULTVALUES"))
+			{
+				itoa(CreateMultValueFile(Arg[2]), OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "ASSIGNMULTVALUES"))//$NVMETRO(ASSIGNMULTVALUES, [MDRIVE]\parcelfiles\textfiles, [%DL]attribut\MetroGISPropinfo.gmd)
+			{
+				rtn = AssignMultValues(Arg[2], Arg[3]);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "ASSIGNUSECODE"))//$NVMETRO(ASSIGNUSECODE,[DBHANDLE],[PT])
+			{
+				BOOL err;
+				DPOINT pt = atopt(Arg[3], &err);
+				LLPOINT ptll;
 
+				if (err)
+					goto RtnFalse;
+				ConvertCoord(&pt, 1, 2);
+				ptll.lat = pt.y;
+				ptll.lon = pt.x;
+				int code = AssignLandUseCodeToParcels(ptll, (sqlite3 *)atol(Arg[2]));
+				itoa(code, OutLoc, 10);
+				goto Rtnl;
+			}
+			goto RtnFalse;
+		}
+		case 786: //$TAGDUMP(pltfile,prefix,dumpfile)
+		{
+			  int ntags=0;
+			  nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			  *OutLoc = 0;
+			  if (nArgs > 2)
+				ntags = DumpTAGsToFile(Arg[1],Arg[2],Arg[3]);
+			  itoa(ntags, OutLoc, 10);
+			  goto Rtnl;
+		}
+			break;
 		default:
 			goto Rtn0;
 	}

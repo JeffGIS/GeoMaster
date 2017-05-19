@@ -64,6 +64,17 @@ CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 	return rect;
 }
 
+RECT CGRectToRect(CGRect cgrect)
+{
+	RECT rect;
+
+	rect.left = cgrect.origin.x - cgrect.size.width / 2;
+	rect.right = rect.left + cgrect.size.width;
+	rect.top = cgrect.origin.y + cgrect.size.height / 2;
+	rect.bottom = rect.top - cgrect.size.height;
+	return rect;
+}
+
 BOOL
 __CGPointEqualToPoint(CGPoint point1, CGPoint point2)
 {
@@ -356,14 +367,15 @@ void drawTextwithinPolygon(char *text
 void drawTextInRotatedRect(char* text, CGContextRef context, CGFloat mpX, CGFloat mpY, CGFloat textWidth,
 	CGFloat textHeight, CGFloat rotateRadians, CGFloat fontSize, UIColor *textColor)
 {
-	CGRect rect = CGRectMake(0, 0, 0, 0);
+	CGRect cgrect = CGRectMake(0, 0, 0, 0);
+	RECT rect;
 	//NSAttributedString *attString = nil;
 
-	rect.size.height = (-textHeight * 1.1);
-	rect.size.width = (textWidth * 1.1);
-	rect.origin.x = (-rect.size.width / 2.0);
-	rect.origin.y = (textHeight / 2.0);
-
+	cgrect.size.height = (-textHeight * 1.1);
+	cgrect.size.width = (textWidth * 1.1);
+	cgrect.origin.x = (-cgrect.size.width / 2.0);
+	cgrect.origin.y = (textHeight / 2.0);
+	rect = CGRectToRect(cgrect);
 	CGContextSaveGState(context);
 	CGContextTranslateCTM(context, mpX, mpY);
 	CGContextRotateCTM(context, rotateRadians);

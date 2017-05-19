@@ -155,7 +155,7 @@ GSSiExitProg (1017);
      else
         NPNTS = 2;
      Dist = 0;
-     MinOffDist=999999;
+     MinOffDist=DBL_MAX;
      for (i=0;i<NPNTS-1;i++,BPOINT++,EPOINT++)
      {
          XMN = min (BPOINT->x, EPOINT->x);

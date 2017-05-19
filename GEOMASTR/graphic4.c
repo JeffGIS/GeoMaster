@@ -1258,7 +1258,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	char	str[16]; 
 	BOOL	Visible=DescIsVisible;
 	HIGHLIGHTDATA	HighlightData;
-    static	long	debugrefno=100099028;    
+    static	long	debugrefno=81000201;    
     short	ii;
 	static	BOOL	ShowOnlyDebugRef=FALSE;
 	static	char	debugUDI[34] = "283401320222";
@@ -2622,7 +2622,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 							PickPointItem (PointLoc,1,0,CurrentDesc);
 						}			 		    
 					} 
-					else if (Display && DescIsVisible && (!DisplaySymbol & Visible))
+					else if (Display && DescIsVisible && (!DisplaySymbol && Visible))
 					{
 						AlreadyProcessed = TRUE;
 						DisplayPointItem (hDC,WinPoint,1,PointRot/1000,CurrentDesc,&CurView->MaxSymbolWidth);
@@ -4557,11 +4557,19 @@ BOOL DisplayPointItem (HDC hDC,POINT WinPoint,double size, double rot, int Symbo
 	int		ii; 
 	double	height=0, width=0;
 	static	BOOL	fast=FALSE;
+	static BOOL first = TRUE;
 
 	if (fast)
 	{
+		//if (first)
+		{
+			SaveDC(hDC);
+			first = FALSE;
+			SetDisplayMode(hDC, GF_TEXTMODE);
+		}
 		SetPixel (hDC,WinPoint.x,WinPoint.y,0);
-{
+		//RestoreDC (hDC,-1);
+	{
 #if ENABLETRACE
 GSSiExitProg (705);
 #endif

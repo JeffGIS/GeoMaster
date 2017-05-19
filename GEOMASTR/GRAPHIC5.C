@@ -3235,7 +3235,7 @@ void DisplayFunctionStack(void)
  char key;     
  int	st;
     
-    if (!CurView->DisplayFunStack)
+    if (CurView && !CurView->DisplayFunStack)
     {
     	if (CurView->lpfnFUNSTACKMsgProc)
          	PostMessage(CurView->FunStackWnd, WM_CLOSE, 0, 0L);
@@ -3246,12 +3246,12 @@ GSSiExitProg (753);
         return;
 }
     }
-    if (!CurView->lpfnFUNSTACKMsgProc)
+    if (CurView && !CurView->lpfnFUNSTACKMsgProc)
     {
 		CurView->lpfnFUNSTACKMsgProc = MakeProcInstance((DLGPROC)FUNSTACKMsgProc, hInst);
 		CreateDialog(hInst, (LPSTR)"FUNSTACK", CurView->hWnd,(DLGPROC) CurView->lpfnFUNSTACKMsgProc);
 	}
-	else
+	else if (CurView)
          PostMessage(CurView->FunStackWnd, WM_COMMAND, IDOK, CurView->ID);
 	
 {

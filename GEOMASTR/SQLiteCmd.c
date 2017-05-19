@@ -36,7 +36,84 @@ static char		cmd[1024];
 
 #define BLOB_MAX	USHRT_MAX
 #define COORDINATE_FACTOR	10000000
-int i;
+#define INPUTBUFSIZE USHRT_MAX * 32
+
+static int maxID(sqlite3 *_database)
+{
+	int rtn = -1;
+	char query[256];
+	
+	sprintf(query, "SELECT max(id) FROM OFFENSEXY");
+
+	sqlite3_stmt *statement = NULL;
+
+	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "maxID", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		rtn = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(sqlite3_finalize(statement), _database,"maxID",0);
+	return rtn;
+}
+
+
+static int idForCnum(int cnum, int seq, sqlite3 *_database)
+{
+	int rtn = -1;
+	char query[256];
+	sprintf (query,"SELECT id FROM OFFENSEXY WHERE ControlNbr = %li AND OffenseOrder = %i", (long)cnum, seq);
+	sqlite3_stmt *statement = NULL;
+
+	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "id for cnum", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		rtn = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(sqlite3_finalize(statement), _database, "id for cnum", 0);
+	if (rtn < 0)
+	{
+		rtn = maxID(_database) + 1;
+	}
+
+	return rtn;
+}
+
+static void getIdForUpdate(LPSTR str, BOOL remove, sqlite3 *_database)
+{
+	static char fromString[32] = { 0 }, toString[32] = { 0 };
+
+	int cnum;
+	int  seq;
+
+	LPSTR pLoc = strstr(str, "OFFENSEXY VALUES(|");
+	if (pLoc)
+	{
+		pLoc += 18;
+		LPSTR pEnd = strchr(pLoc, '|');
+		if (pEnd)
+		{
+			*pEnd = 0;
+			strncpy(fromString, pLoc - 1, sizeof(fromString));
+			strcat(fromString, "|");
+			*pEnd++ = '|';
+			pLoc = pEnd + 1;
+			pEnd = strchr(pLoc, '\'');
+			*(pEnd - 1) = 0;
+			sscanf(pLoc, "%i,%i", &cnum, &seq);
+			*(pEnd - 1) = ',';
+			int idnum = cnum;
+			if (!remove)
+				idnum = idForCnum(cnum,seq,_database);
+			sprintf(toString, "%i", idnum);
+			REPLAC(str, fromString, toString, INPUTBUFSIZE);
+		}
+
+	}
+	else
+	{
+		REPLAC(str, fromString, toString, INPUTBUFSIZE);
+	}
+}
 
 static LPSTR  DPointsToBlob(HPDPOINT pPoints, int nPnts)
 {
@@ -92,9 +169,10 @@ static LPSTR removePCT(LPSTR name)
 	*pOutChar = 0;
 	return newName;
 }
-static void ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
+static int ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 {
 	int i;
+	int ln = 0;
 
 	for (i = 0; i < 100; i++)
 	{
@@ -102,21 +180,26 @@ static void ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 		{
 			FillGWDData(lpGWDHead, pOffsets[i]);
 			pOffsets[i] = *(LPINT)&lpGWDHead->GWDData;
+			ln = max(ln, (i + 1)*sizeof(int));
 		}
 	}
+	return ln;
 }
 
-LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName)
+LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName,LPSTR where)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
-	sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
+	if (*where)
+		sprintf(pCmd, "SELECT COUNT (*) FROM %s WHERE %s", tableName,where);
+	else
+		sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
 	sqlite3_stmt *statement;
 	LONGLONG rtn=0;
 
 	if (db)
 	{
-		if (sqlite3_prepare_v2(db, pCmd, -1, &statement, 0) == SQLITE_OK)
+		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
 			if (sqlite3_step(statement) == SQLITE_ROW)
 			{
@@ -204,13 +287,58 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			rtn = 1;
 		}
 	}
-	else if (!stricmp(ARG[1], "CMDFROMFILE"))
+	else if (!stricmp(ARG[1], "VACUUM"))
 	{
-#define MAXSTR 1020 * 256
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		int err = SQLOK(sqlite3_exec(db, "VACUUM", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = 1;
+		}
+	}
+	else if (!stricmp(ARG[1], "SPATIALINDEX"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		if (!stricmp(ARG[3], "CREATE"))
+		{
+			rtn = SLTSpatialIndexCreate(db, ARG[4]);
+		}
+		else if (!stricmp(ARG[3], "ADD"))//$SQLITE(SPATIALINDEX,DBHANDLE,ADD,tableName,itemnumber,itemname,bounds)
+		{
+			BOOL err;
+			LONGLONG id = _atoi64(ARG[5]);
+			MNMXCORD bounds = atobounds(ARG[7], &err);
+			if (!err)
+				rtn = SLTSpatialIndexAdd(db, ARG[4], id, ARG[6], &bounds);
+		}
+	}
+	else if (!stricmp(ARG[1], "SPATIALINDEX3D"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		if (!stricmp(ARG[3], "CREATE"))
+		{
+			rtn = SLTSpatialIndexCreate3D(db, ARG[4]);
+		}
+		else if (!stricmp(ARG[3], "ADD"))//$SQLITE(SPATIALINDEX,DBHANDLE,ADD,tableName,itemnumber,itemname,bounds)
+		{
+			BOOL err;
+			LONGLONG id = _atoi64(ARG[5]);
+			MNMXCORD3D bounds = atobounds3D(ARG[7], &err);
+			if (!err)
+				rtn = SLTSpatialIndexAdd3D(db, ARG[4], id, ARG[6], &bounds);
+		}
+	}
+	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
+	{
+#define MAXSTR 1024 * 1024 * 4
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
 		BOOL convertInsertInto = atob(ARG[5]);
+		BOOL skipErrors = atob(ARG[6]);
 		int totLen;
 		int line = 1;
 
@@ -235,11 +363,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				sprintf(errLoc, "%s line %i", ARG[3], line++);
 				//REPLAC(cmd, "/", "//", MAXSTR-2)
+				//REPLAC(cmd, "'", "''", MAXSTR - 2);
 				if (convertInsertInto)
 					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
-				err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc, &error);
+				getIdForUpdate(cmd, FALSE, db);
+				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, &error);
 				sqlite3_free(error);
-				if (err)
+				if (err && !skipErrors)
 				{
 					rtn = 0;
 					break;
@@ -266,7 +396,13 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
 			{
 				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					LPSTR pName = (LPSTR)sqlite3_column_name(statement, 0);
+					LPSTR value = (LPSTR)sqlite3_column_text(statement, 0);
+					if (*ARG[4])
+						SetGlobalValue(ARG[4], value);
 					rtn = TRUE;
+				}
 				sqlite3_finalize(statement);
 			}
 		}
@@ -308,10 +444,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			rtn = TRUE;
 		}
 	}
-	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(ROWS,sqlitehandle,tablename,where clause)
+	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = GetSQLITENumRows(db, ARG[3]);
+		rtn = GetSQLITENumRows(db, ARG[3],ARG[4]);
 	}
 	else if (!stricmp(ARG[1], "FROMGMD"))//$SQLITE(FROMGMD,sqlitehandle,gmdfile,tablename,primkeyisoffset)
 	{
@@ -329,6 +465,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				LPSTR  pCmd = GlobalLock(hCmd);
 				LPGWFLDINFO lpFieldInfo;
 				char delim[2] = { 0 };
+				int i;
 
 				sprintf(pCmd, "DROP TABLE IF EXISTS %s", ARG[4]);
 				rtn = SQLOK(sqlite3_exec(db, pCmd, NULL, NULL, &error), db, "$SQLITE(FROMGMD drop table", &error);
@@ -339,7 +476,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				else
 					sprintf(pCmd, "CREATE TABLE %s (", ARG[4]);
 
-				for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
+				for ( i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
 				{
 					switch (lpFieldInfo->Type)
 					{
@@ -409,6 +546,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					while (!rtn && !BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&Offset))
 					{
 						pos = BT_NEXT;
+						int i;
 						FillGWDData(lpGWDHead, Offset);
 						if (primKeyIsOffset)
 							sprintf(pCmd, "INSERT INTO %s VALUES(%i,",ARG[4],Offset);
@@ -521,6 +659,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				BOOL HaveCity = FALSE;
 				BOOL HaveZipcode = FALSE;
 				int  nextId = -1;
+				int i;
 
 				GSSillseek(fid, 0, 2);
 				char cmd[256];
@@ -647,6 +786,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						}
 					}
 				}
+				//CREATE UNIQUE INDEX OFFENSEXYC_Index ON OFFENSEXY('ControlNbr', 'OffenseOrder');
+
 				if (fidDef != HFILE_ERROR)
 				{
 					int i = 0;
@@ -851,8 +992,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									LPBYTE pByte = (LPBYTE)val;
 									LPBYTE pBlob;
 
-									ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
-									pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
+									int ln = ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
+									pBlob = BytesToBlob(pByte, ln);
 
 									sprintf(strchr(pCmd, 0), "%sX'%s'", delim, pBlob);
 									free(pBlob);
@@ -894,7 +1035,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		}
 	}
 
-		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt))
+		else if (!stricmp(ARG[1], "TEXTFROMGMD"))//$SQLITE(TEXTFROMGMD,outfilename,new,gmdfile,tablename,primkeyisoffset,point fields(opt),offsetConversionDB(opt),skipFirst(opt))
 		{
 			HANDLE hGMDB=0;
 			char *error = NULL;
@@ -907,6 +1048,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			char SQL[256] = { 0 };
 			BOOL convertToLL = FALSE;
 			LPSTR llLoc, pBar;
+			BOOL skipFirst = atob(ARG[9]);
+			int  firstField = 0;
+
+			if (skipFirst) //rowid
+				firstField = 1;
 
 			strcpy(DBName, ARG[4]);
 			pBar = strrchr(DBName, '|');
@@ -949,6 +1095,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					HANDLE hOffConvDB = 0;
 					HFILE  fidOffConv = HFILE_ERROR;
 					int  nextId = -1;
+					int i;
 
 					if (*ARG[8])
 					{
@@ -982,7 +1129,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					else
 						sprintf(pCmd, "CREATE TABLE %s (", TableName);
 
-					for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
+					lpFieldInfo = lpGWDHead->pFldInfo;
+					if (skipFirst)
+						lpFieldInfo++;
+					for (i = firstField; i<lpGWDHead->NumFields; i++, lpFieldInfo++)
 					{
 						switch (lpFieldInfo->Type)
 						{
@@ -1016,7 +1166,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						int firstIndex = 1;
 						int lastIndex = lpGWDHead->NumIndex;
 
-						if (primKeyIsOffset || nextId)
+						if (primKeyIsOffset || nextId>0)
 						{
 							firstIndex = 0;
 							sprintf(strchr(pCmd, 0), ")");
@@ -1095,6 +1245,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							int sunAngle=0;
 							pos = BT_NEXT;
 							cond = BT_ANY;
+							int i;
 
 							if (wantCNUM >= 0 && *(LPINT)lpGWDHead->pKeys[indx] != wantCNUM)
 								break;
@@ -1134,7 +1285,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 										}
 									}
 								}
-								for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+								lpFieldInfo = lpGWDHead->pFldInfo;
+								if (skipFirst)
+									lpFieldInfo++;
+								for (i = firstField; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
 								{
 									char testVar[128];
 
@@ -1203,7 +1357,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								sprintf(pCmd, "INSERT INTO %s VALUES(", TableName);
 							delim[0] = 0;
 
-							for (i = 0, lpFieldInfo = lpGWDHead->pFldInfo; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+							lpFieldInfo = lpGWDHead->pFldInfo;
+							if (skipFirst)
+								lpFieldInfo++;
+							for (i = firstField; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
 							{
 								if (!stricmp(lpFieldInfo->Name, "Offsets") && lpFieldInfo->Len == 400)
 									GMDGetCharFieldVal(lpGWDHead, -i, val);
@@ -1228,8 +1385,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 										LPBYTE pByte = (LPBYTE)val;
 										LPBYTE pBlob;
 										
-										ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
-										pBlob = BytesToBlob(pByte, lpFieldInfo->Len);
+										int ln = ConvertOffsetsToIDs((LPINT)pByte, lpGWDOffConv);
+										pBlob = BytesToBlob(pByte, ln);
 
 										sprintf(strchr(pCmd, 0), "%sX'%s'", delim,pBlob);
 										free(pBlob);
@@ -1237,6 +1394,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 									else
 									{
 										REPLAC(val, "'", "''", 4096);
+										REPLAC(val, "\r", "", 4096);
+										REPLAC(val, "\n", "", 4096);
 										Truncate(val);
 										sprintf(strchr(pCmd, 0), "%s'%s'", delim, val);
 									}
@@ -1299,6 +1458,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			BOOL skipQuadIndex = atob(ARG[8]);
 			BOOL skipConvert = atob(ARG[9]);
 			double coordFactor = COORDINATE_FACTOR;
+			double sqMeters;
+			double perimeter;
+			double sqMetersCVT;
+			double perimeterCVT;
+			int maxLineLen = 0;
 
 			if (skipConvert)
 				coordFactor /= 1000;
@@ -1324,6 +1488,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				Fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
 			else
 				Fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+			//SetGlobalValue("%ALT_PROJECTION", "[%DL]projections\\hencogrnd.cvt");
+			SetGlobalValue("%ALT_PROJECTION", "[%DL]projections\\statepln.cvt");
+			ConvertCoordClose();
+			ConvertCoordInit();
+
 			if (Fid != HFILE_ERROR)
 			{
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 32);
@@ -1345,30 +1514,30 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						sprintf(strchr(addFields, 0), ",%s", ARG[i]);
 					}
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s;", ARG[4]);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 
 					if (!skipQuadIndex)
 					{
 						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
-						fputstring(pCmd, Fid);
+						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 					if (*ARG[6])
-						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i),Area DOUBLE,Perimeter DOUBLE);", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
 					else
-						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i));", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
-					fputstring(pCmd, Fid);
+						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i),Area DOUBLE,Perimeter DOUBLE);", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if ((pSpace = strchr(ARG[5], ' ')))
 						*pSpace = 0;
 					sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC);", ARG[4],ARG[5], ARG[4], ARG[5]);
-					fputstring(pCmd, Fid);
+					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if (*ARG[6])
 					{
 						if ((pSpace = strchr(ARG[6], ' ')))
 							*pSpace = 0;
 						sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC)", ARG[4], ARG[6], ARG[4], ARG[6]);
-						fputstring(pCmd, Fid);
+						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 				}
 
@@ -1414,20 +1583,21 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						{
 							LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock(hPoly);
 							DPOINT midPt;
-							HPDPOINT pDPoints;
+							HPDPOINT pDPoints, pPointsCVT;
 							HPPOINT  pPoints;
 							LPSTR blobPoints,blobParts;
-							HANDLE hPoints;
+							HANDLE hPoints, hPointsCVT;
 							BOOL canCompress=TRUE;
 							int  np = nPnts;
 							int  nLops;
 							double maxd = 0;
+							double diffArea, diffPerim;
 
 							if (!skipConvert)
 								ConvertBounds(pBounds, 1, 2);
 							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 							if (!skipQuadIndex)
-								fputstring(pCmd, Fid);
+								fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							if (nLoops > 1)
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
@@ -1436,12 +1606,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								GlobalUnlock(hPolyPartLen);
 							}
 							pDPoints = (HPDPOINT)(pBounds + 1);
+							sqMeters = ComputeAreaAreaD(pDPoints, nPnts, &perimeter);
 							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
+							hPointsCVT = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(DPOINT));
+							pPointsCVT = GlobalLock(hPointsCVT);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;
-							for (i = 0; i < nPnts; i++)
+							for (int i = 0; i < nPnts; i++)
 							{
+								pPointsCVT[i] = pDPoints[i];
+								ConvertCoord(&pPointsCVT[i], 1, 3);
 								if (!skipConvert)
 									ConvertCoord(&pDPoints[i], 1, 2);
 								pPoints[i].x = coordFactor * (pDPoints[i].x - midPt.x);
@@ -1449,10 +1624,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
 									canCompress = FALSE;
 							}
+							sqMetersCVT = ComputeAreaAreaD(pPointsCVT, nPnts, &perimeterCVT);
+							diffArea = 100 * sqMetersCVT / sqMeters;
+							diffPerim = 100 * perimeterCVT / perimeter;
+							if (diffArea > 101 || diffArea < 99 || diffPerim > 101 || diffPerim < 99)
+								ii = 1;
+							sqMeters = sqMetersCVT;
+							perimeter = perimeterCVT;
 							if (canCompress)
 							{
 								LPPOINTS pShortPoints = malloc(nPnts*sizeof(POINTS)+4);
-								for (i = 0; i<nPnts; i++)
+								for (int i = 0; i<nPnts; i++)
 								{
 									pShortPoints[i].x = pPoints[i].x;
 									pShortPoints[i].y = pPoints[i].y;
@@ -1480,7 +1662,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								//AppendFile("c:\\temp\\compress.txt", googlestr);
 								googleln = strlen(googlestr);
 								pNewPt = DecodeString(googlestr, &nPnts);
-								for (i = 0; i < nPnts; i++)
+								for (int i = 0; i < nPnts; i++)
 								{
 									double dist = ArcDistance(pDPoints[i], pNewPt[i]);
 									if (dist > 10)
@@ -1502,21 +1684,22 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (nLoops > 1)
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s');", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints, sqMeters, perimeter);
 								free(blobParts);
 							}
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno,UDI,Arg7Val,addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, Arg7Val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s');", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 							}
-							fputstring(pCmd, Fid);
+							fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							free(blobPoints);
 							GSSiGlobUlFree(&hPoints);
+							GSSiGlobUlFree(&hPointsCVT);
 							GSSiGlobUlFree(&hPoly);
 							GSSiGlobFree(&hPolyPartLen);
 							if (canCompress)
@@ -1528,6 +1711,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					DestroySavedPolys();
 				}
 				DestroyStatusWindow(0);
+				sprintf(pCmd, "/* maxLineLen=%i */", maxLineLen);
+				fputstring(pCmd, Fid);
 				GSSiClose(Fid);
 				GSSiGlobUlFree(&hCmd);
 			}
@@ -1579,7 +1764,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 					sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,PIN,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i), Data BLOB(%i));", TableName, BLOB_MAX, BLOB_MAX * 8, BLOB_MAX);
 					fputstring(pCmd, Fid);
-					sprintf(pCmd, "CREATE INDEX %sPIN_Index ON %s ('PIN' ASC);", TableName);
+					sprintf(pCmd, "CREATE INDEX %sPIN_Index ON %s ('PIN' ASC);", TableName, TableName);
 					fputstring(pCmd, Fid);
 				}
 
@@ -1651,7 +1836,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							pPoints = GlobalLock(hPoints);
 							midPt = MinMaxMidPointD(pBounds);
 							nTotal++;
-							for (i = 0; i < nPnts; i++)
+							for (int i = 0; i < nPnts; i++)
 							{
 								//if (!skipConvert)
 									ConvertCoord(&pDPoints[i], 1, 2);
@@ -1663,7 +1848,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (canCompress)
 							{
 								LPPOINTS pShortPoints = malloc(nPnts*sizeof(POINTS) + 4);
-								for (i = 0; i<nPnts; i++)
+								for (int i = 0; i<nPnts; i++)
 								{
 									pShortPoints[i].x = pPoints[i].x;
 									pShortPoints[i].y = pPoints[i].y;
@@ -1691,7 +1876,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								//AppendFile("c:\\temp\\compress.txt", googlestr);
 								googleln = strlen(googlestr);
 								pNewPt = DecodeString(googlestr, &nPnts);
-								for (i = 0; i < nPnts; i++)
+								for (int i = 0; i < nPnts; i++)
 								{
 									double dist = ArcDistance(pDPoints[i], pNewPt[i]);
 									if (dist > 10)
@@ -1882,7 +2067,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 				LoadSQLITEParm(fileName, rtnType, CurView->hWnd);
 				if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 				{
-					if (GetSQLITENumRows(SQLITEHandle, tableName))
+					if (GetSQLITENumRows(SQLITEHandle, tableName,""))
 					{
 						if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
 						{
@@ -2394,7 +2579,7 @@ BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
 	{
 		
 		char	Name[MAX_PATH], str[260], Projection[MAX_PATH + 2], Units[34];
-		char	SymName[66], cWidth[64], cRot[64], cColor[64], cIF[128];
+		char	SymName[66]="", cWidth[64]="", cRot[64]="", cColor[64]="", cIF[128]="";
 		LPSTR	pDot, pTAG, pWidth, pParm = SQLITEParms;
 		short	l;
 		int		itype;
@@ -2887,18 +3072,20 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 	return rtn;
 }
 			*/
-HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
+HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 {
 	HANDLE	hDB;
 	LPSQLDATABASE	pDB;
 	LPSTR pTable;
 	LPSTR pWhere;
 	char Name[MAX_PATH + 256];
+	char lastName[256] = { 0 };
 	int rtn;
 	sqlite3 *db;
 
 	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock(hDB);
+	pDB->hasRowID = TRUE;
 	strcpy(Name, NameIN);
 	if (!(pTable = strrchr(Name, '(')))
 		pTable = strrchr(Name, '|');
@@ -2916,7 +3103,18 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		GSSiGlobUlFree(&hDB);
 		return 0;
 	}
-	rtn = sqlite3_open(Name, &db);
+	if (Access == BT_READ)
+	{
+		OFSTRUCTGM OFStruct;
+		HFILE fid = GSSiOpenFile(Name, &OFStruct, OF_READ);
+		GSSiClose(fid);
+		if (fid != HFILE_ERROR)
+			rtn = sqlite3_open_v2(OFStruct.szPathName, &db, SQLITE_OPEN_READONLY, NULL);
+		else
+			rtn = -1;
+	}
+	else
+		rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)
 	{
 		GSSiGlobUlFree(&pDB);
@@ -2930,50 +3128,69 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "get db info", 0))
 		{
 			int ncols = sqlite3_column_count(pDB->statement);
-			pDB->NumFields = ncols;
-			for (int i = 0; i < ncols; i++)
+			pDB->NumFields = 0;
+			for (int j = 0; j < ncols; j++)
 			{
-				int itype = sqlite3_column_type(pDB->statement, i);
-				int ibytes = sqlite3_column_bytes(pDB->statement, i);
-				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, i);
-				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, i);
-				int nc = 0;
-				LPSTR pPar = strchr(decl, '(');
-				if (pPar)
+				int itype = sqlite3_column_type(pDB->statement, j);
+				int ibytes = sqlite3_column_bytes(pDB->statement,j);
+				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement,j);
+				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement,j);
+				if (strcmp(pName, lastName))
 				{
-					*pPar++ = 0;
-					nc = atoi(pPar);
-				}
-				strncpy(pDB->FldInfo[i].name, pName, sizeof(pDB->FldInfo[i].name));
-				pDB->FldInfo[i].index = i;
+					strcpy(lastName, pName);
+					int nc = 0;
+					LPSTR pPar = 0;
+					//if (itype != SQLITE_NULL)
+					pPar = strchr(decl, '(');
+					if (pPar)
+					{
+						*pPar++ = 0;
+						nc = atoi(pPar);
+					}
+					strncpy(pDB->FldInfo[pDB->NumFields].name, pName, sizeof(pDB->FldInfo[pDB->NumFields].name));
+					pDB->FldInfo[pDB->NumFields].index = pDB->NumFields;
 
-				if (!strnicmp(decl, "INT", 3))
-				{
-					pDB->FldInfo[i].type = BT_INTEGER;
-					pDB->FldInfo[i].length = 4;
-				}
-				else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT"))
-				{
-					pDB->FldInfo[i].type = BT_REAL;
-					pDB->FldInfo[i].length = 8;
-				}
-				else if (!stricmp(decl, "BLOB"))
-				{
-					pDB->FldInfo[i].type = SQL_LONGVARBINARY;
-					pDB->FldInfo[i].length = nc;
-				}
-				else if (!stricmp(decl, "CHAR"))
-				{
-					pDB->FldInfo[i].type = BT_CHAR;
-					pDB->FldInfo[i].length = nc;
+					//if (itype != SQLITE_NULL)
+					{
+						if (!strnicmp(decl, "INT", 3))
+						{
+							pDB->FldInfo[pDB->NumFields].type = BT_INTEGER;
+							pDB->FldInfo[pDB->NumFields].length = 4;
+						}
+						else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT") || !stricmp(decl, "DOUBLE"))
+						{
+							pDB->FldInfo[pDB->NumFields].type = BT_REAL;
+							pDB->FldInfo[pDB->NumFields].length = 8;
+						}
+						else if (!stricmp(decl, "BLOB"))
+						{
+							pDB->FldInfo[pDB->NumFields].type = SQL_LONGVARBINARY;
+							pDB->FldInfo[pDB->NumFields].length = nc;
+						}
+						else if (!stricmp(decl, "CHAR"))
+						{
+							pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+							pDB->FldInfo[pDB->NumFields].length = nc;
+						}
+						else if (!stricmp(decl, "TEXT"))
+						{
+							pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+							pDB->FldInfo[pDB->NumFields].length = nc;
+						}
+						else
+							MessageBox(0, decl, "Invalid type", MB_OK);
+					}
+					pDB->NumFields++;
+
 				}
 				else
-					MessageBox(0, decl, "Invalid type",MB_OK);
+					pDB->hasRowID = FALSE;
 			}
 
 		}
 		sqlite3_finalize(pDB->statement);
-		pWhere = malloc(4096);
+		pDB->statement = NULL;
+/*		pWhere = malloc(4096);
 		strcpy(pWhere, pDB->Where);
 		ExpandText(pWhere);
 		if (*pWhere)
@@ -2984,7 +3201,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN,PSTR SQL)
 		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, pDB->Query, 0))
 		{
 			GSSiGlobUlFree(&hDB);
-		}
+		}*/
 
 	}
 	if (hDB)
@@ -3013,6 +3230,7 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 	sqlite3 *db;
 	BOOL rtn = FALSE;
 	LPSTR pWhere;
+	char getRowID[8] = { 0 };
 
 	db = pDB->DBHandle;
 	if (pDB->statement)
@@ -3021,10 +3239,12 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 	pWhere = malloc(4096);
 	strcpy(pWhere, SQL);
 	ExpandText(pWhere);
+	if (pDB->hasRowID)
+		strcpy(getRowID, "rowid,");
 	if (*pWhere)
-		sprintf(pDB->Query, "SELECT rowid,* FROM '%s' WHERE %s", pDB->From, pWhere);
+		sprintf(pDB->Query, "SELECT %s* FROM '%s' WHERE %s",getRowID, pDB->From, pWhere);
 	else
-		sprintf(pDB->Query, "SELECT rowid,* FROM '%s'", pDB->From);
+		sprintf(pDB->Query, "SELECT %s* FROM '%s'",getRowID, pDB->From);
 	free(pWhere);
 	if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
 	{
@@ -3046,8 +3266,9 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	if (infield->hCurVal)
 	{
 		pCurVal = (LPCURVAL)GlobalLock(infield->hCurVal);
-		_fstrncpy(answer, &pCurVal->Value, pCurVal->length);
-		answer[pCurVal->length] = 0;
+		int len = min(MAXVARLEN - 2, pCurVal->length);
+		_fstrncpy(answer, &pCurVal->Value, len);
+		answer[len] = 0;
 		GlobalUnlock(infield->hCurVal);
 		*irc = 0;
 		return lpvoid;
@@ -3065,15 +3286,24 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 		{
 			int cols = sqlite3_column_count(pDB->statement);
 			char zero[2] = "";
-			field = FirstField;
-			for (int i = 0; i < cols; i++,field++)
+			field = pDB->FldInfo;
+			int jstart = 0;
+			int i = 0;
+			if (cols > pDB->NumFields)
 			{
-				int l = sqlite3_column_bytes(pDB->statement, i);
-				LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, i);
+				field++;
+				jstart++;
+			}
+			for (int j = jstart; j < cols;j++, i++,field++)
+			{
+				int l = sqlite3_column_bytes(pDB->statement, j);
+				LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, j);
 
 				if (!str)
 					str = zero;
 				pDB->FldInfo[i].length = l;
+				if (field->hCurVal)
+					GSSiGlobFree(&field->hCurVal);
 				field->hCurVal = GSSiGlobAlloc(153, GMEM_MOVEABLE, sizeof(int)+l + 4);
 				pCurVal = (LPCURVAL)GlobalLock(field->hCurVal);
 				pCurVal->length = l;
@@ -3100,10 +3330,17 @@ void CloseSLTDatabase(LPHANDLE pHandle)
 
 	if (*pHandle)
 	{
+		LPFIELDINFO field;
 		pDB = (LPSQLDATABASE)GlobalLock(*pHandle);
 		if (*pDB->Query)
 			sqlite3_finalize(pDB->statement);
 		rtn = sqlite3_close(pDB->DBHandle);
+		field = pDB->FldInfo;
+		for (int j = 0; j < pDB->NumFields; j++, field++)
+		{
+			if (field->hCurVal)
+				GSSiGlobFree(&field->hCurVal);
+		}
 		GSSiGlobUlFree(pHandle);
 	}
 	return;
@@ -3188,4 +3425,137 @@ void CloseSLTDatabaseQuery (LPHANDLE pHandle)
 	if (*pHandle)
 		rtn = sqlite3_close(*pHandle);
 	return;
+}
+BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+	char * error;
+
+	if (db)
+	{
+		sprintf(pCmd, "DROP TABLE IF EXISTS %s;DROP TABLE IF EXISTS %s_index;CREATE TABLE %s (id INTEGER PRIMARY KEY, Name CHAR(256));\
+					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);", tableName, tableName, tableName, tableName);
+
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+
+}
+BOOL SLTSpatialIndexCreate3D(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+	char * error;
+
+	if (db)
+	{
+		sprintf(pCmd, "DROP TABLE IF EXISTS %s;DROP TABLE IF EXISTS %s_index;CREATE TABLE %s (id INTEGER PRIMARY KEY, Name CHAR(256));\
+					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY, minZ, maxZ);", tableName, tableName, tableName, tableName);
+
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+
+}
+
+BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+
+	if (db)
+	{
+		sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
+			tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, tableName, id, Name);
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	return rtn;
+}
+BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD3D pBounds)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	BOOL rtn = FALSE;
+
+	if (db)
+	{
+		sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
+			tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, pBounds->zmn, pBounds->zmx, tableName, id, Name);
+		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+			rtn = TRUE;
+	}
+	return rtn;
+}
+MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	MNMXCORD Bounds;
+	int n = 0;
+	DBoundsInit(&Bounds);
+
+	if (db)
+	{
+		sprintf(pCmd, "SELECT MinX, MaxX, MinY, MaxY FROM %s_index", tableName);
+
+		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
+
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			MNMXCORD bounds;
+			bounds.xmn = sqlite3_column_double(statement, 0);
+			bounds.xmx = sqlite3_column_double(statement, 1);
+			bounds.ymn = sqlite3_column_double(statement, 2);
+			bounds.ymx = sqlite3_column_double(statement, 3);
+			n++;
+			AddMinMaxD(&Bounds, &bounds);
+		}
+		sqlite3_finalize(statement);
+	}
+	return Bounds;
+}
+MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	MNMXCORD3D Bounds;
+	int n = 0;
+	DBoundsInit3D(&Bounds);
+
+	if (db)
+	{
+		sprintf(pCmd, "SELECT MinX, MaxX, MinY, MaxY, MinZ, MaxZ FROM %s_index", tableName);
+
+		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
+
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			MNMXCORD3D bounds;
+			bounds.xmn = sqlite3_column_double(statement, 0);
+			bounds.xmx = sqlite3_column_double(statement, 1);
+			bounds.ymn = sqlite3_column_double(statement, 2);
+			bounds.ymx = sqlite3_column_double(statement, 3);
+			bounds.zmn = sqlite3_column_double(statement, 4);
+			bounds.zmx = sqlite3_column_double(statement, 5);
+			n++;
+			AddMinMax3D(&Bounds, &bounds);
+		}
+		sqlite3_finalize(statement);
+	}
+	return Bounds;
 }

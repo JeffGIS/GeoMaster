@@ -849,7 +849,7 @@ void DisplayAreaSymbol (HANDLE hSymbol, HDC hDC, int nPnts, LPPOINT Points)
 
 HDIB32 GetSymbolImage (LPSTR SymName)
 {
-	HDIB32	hDib;
+	HDIB32	hDib=0;
 	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,512);
 	LPSTR	pBS, BMPName = GlobalLock (hMem);
 		
@@ -904,7 +904,7 @@ double GetAverageGreyScaleValue (HDIB32 hDib,HDIB32 hDibGS)
 
 RGBTRIPLE NewColorValue (RGBTRIPLE *pColor,double intensitychange)
 {
-	RGBTRIPLE NewColor,OldColor=*pColor;
+	RGBTRIPLE NewColor = *pColor, OldColor = *pColor;
 	UINT	nLoops=0;
 	double	ic3;
 	double	dif;
@@ -1262,15 +1262,17 @@ HANDLE DisplayPointSymbol (HANDLE hSymbol, HDC hDC, double Vsize, double Hsize, 
 	BOOL	Invis;
 	RECT	Rect;
 	short	idesc=0,ii, htdesc=-1; 
-	int		OldRop, CurRop;
+	int		OldRop=0, CurRop;
 	HDIB32	hDib;
 
 	nExportSymElements = 0;
 	if (!hSymbol)
 		return 0;  
 	if (hDC > (HDC)100) //hDC >0 and <99 is FID - exports symbol to DXF block, 99 exports to current edit file
-		SaveDC (hDC); 
-	OldRop = SetROP2(hDC,R2_COPYPEN);
+	{
+		SaveDC(hDC);
+		OldRop = SetROP2(hDC, R2_COPYPEN);
+	}
 	lpSym = (LPSYMBOL)GlobalLock (hSymbol);  
 	idesc = lpSym->Number;
 	if (lpSym->BlockRotation && CurView)
@@ -4142,18 +4144,21 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 	BOOL	rtn=1; 
 	DWORD	np=npnts;
 	HPEN	hCPen, hPen=0;
-	
+	LOGPEN	lPen;
+
+	hCPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+	GetObject(hCPen, sizeof(LOGPEN), &lPen);
 	if (Width != 0)
 	{
-		LOGPEN	lPen;
 		int	width;
 		
-		hCPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
-		GetObject (hCPen,sizeof(LOGPEN),&lPen);
 		width = IDNINT(AdjustWidth(Width));
 		hPen = CreatePen(PS_SOLID, width, lPen.lopnColor);
 		SelectObject (hDC,hPen);
-	}	 
+	}
+	else
+		SelectObject(hDC, hCPen);
+
 	while (np--)
 	{
 		pPoints->x = IDNINT(lpPoints->x);
@@ -4171,7 +4176,7 @@ BOOL BigFPolyline (HDC hDC, HPDPOINT lpPoints, long npnts,double Width)
 		DeleteObject (hPen);
 	}
    	//SetPixel (hDC,pPointsBeg->x,pPointsBeg->y,0);//debug
-   	//SetPixel (hDC,pPointsBeg[npnts-1].x,pPointsBeg[npnts-1].y,AutoYellow(0));
+   	SetPixel (hDC,pPointsBeg[npnts-1].x,pPointsBeg[npnts-1].y,AutoYellow(lPen.lopnColor));
 
 	GSSiGlobUlFree (&handle);
 {

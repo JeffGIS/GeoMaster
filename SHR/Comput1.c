@@ -1060,7 +1060,7 @@ void XLC(const double *PCX,  const double *PCY,
       
       DPOINT dp,odp;
       double  DMN2, X, Y, AZLN, AZPC, AZLNP, RAD, PTX, PTY, cgtx, cgty,
-      XL, XC, YL, YC, X0, Y0, PDMN, AZTOL,AZPT, SECT,AZP1,AZP2,AZDFCT,
+      XL, XC, YL, YC, X0, Y0, PDMN, AZTOL,AZPT, SECT=0,AZP1,AZP2,AZDFCT,
       AZDFC1, AZDFC2,AZDFT, XT, YT,DTMN1;
       short I2CODE, IRC, K, IRC1, IRC2, NW;
       BOOL cgt;
@@ -3369,7 +3369,7 @@ void  LOL8(const double *X1,   const double *Y1,
 {GSSiEnterProg (1215);
 #endif
 { 
-  double AZ, RAD, dist;
+  double AZ=0, RAD, dist=0;
       if(ITYPE == 3) goto S10;
 //C
 //C******* DETERMINE X & Y CORR. OF A NEW POINT
@@ -5239,11 +5239,11 @@ C*/
           PAX2 = lpPoint->x;
           PAY2 = lpPoint->y;
           MXX = max (PAX1,PAX2);
-          if (XP > MXX) goto S100;
+          if (XP > MXX+P_TOL) goto S100;
           MNY = min (PAY1,PAY2);
-          if (YP < MNY) goto S100;
+          if (YP < MNY-P_TOL) goto S100;
           MXY = max (PAY1,PAY2);
-          if (YP > MXY) goto S100;
+          if (YP > MXY+P_TOL) goto S100;
           A1 = LGETAZ (PAX1,PAY1,PAX2,PAY2);
           IRC = LIN_SEC (PAX1,PAY1,A1, XP, YP, A2, &INTX, &INTY);
 /*C******* IGNORE PARALLEL LINES */
@@ -5255,7 +5255,7 @@ C*/
           	*pNextXIntersect = INTX;
 			goto RtnTrue;
 		  }
-          if (INTX < XP)  goto S100;
+          if (INTX+P_TOL < XP)  goto S100;
           if (pNextXIntersect)
           	*pNextXIntersect = min (*pNextXIntersect,INTX);
           NIN++;
@@ -5299,7 +5299,7 @@ S100:     PAX1 = PAX2;
 
 
 
-      if (NEED_MID1)
+      if (NEED_MID1 && HAVE_MID1)
       {   XMID2  = XMID2_NEED;
           YMID2  = YMID2_NEED;
           XMIDMN = min (XMID1, XMID2);
@@ -6129,21 +6129,42 @@ GSSiExitProg (190);
 #endif
 }
 
-void AddMinMaxD (LPMNMXCORD mm1, LPMNMXCORD mm2)
+void AddMinMaxD(LPMNMXCORD mm1, LPMNMXCORD mm2)
 #if ENABLETRACE
 {GSSiEnterProg (191);
 #endif
 {
-    mm1->xmn = min (mm1->xmn,mm2->xmn);
-    mm1->xmx = max (mm1->xmx,mm2->xmx);
-    mm1->ymn = min (mm1->ymn,mm2->ymn);
-    mm1->ymx = max (mm1->ymx,mm2->ymx);
-{
+	mm1->xmn = min(mm1->xmn, mm2->xmn);
+	mm1->xmx = max(mm1->xmx, mm2->xmx);
+	mm1->ymn = min(mm1->ymn, mm2->ymn);
+	mm1->ymx = max(mm1->ymx, mm2->ymx);
+	{
 #if ENABLETRACE
-GSSiExitProg (191);
+		GSSiExitProg (191);
 #endif
-    return;
+		return;
+	}
+#if ENABLETRACE
 }
+#endif
+}
+void AddMinMax3D(LPMNMXCORD3D mm1, LPMNMXCORD3D mm2)
+#if ENABLETRACE
+{GSSiEnterProg (191);
+#endif
+{
+	mm1->xmn = min(mm1->xmn, mm2->xmn);
+	mm1->xmx = max(mm1->xmx, mm2->xmx);
+	mm1->ymn = min(mm1->ymn, mm2->ymn);
+	mm1->ymx = max(mm1->ymx, mm2->ymx);
+	mm1->zmn = min(mm1->zmn, mm2->zmn);
+	mm1->zmx = max(mm1->zmx, mm2->zmx);
+	{
+#if ENABLETRACE
+		GSSiExitProg(191);
+#endif
+		return;
+	}
 #if ENABLETRACE
 }
 #endif

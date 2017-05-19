@@ -4,6 +4,7 @@
 static	short	NumRawPointsToUse=4;
 
 #include "gmextern.h"
+#include "laszip_dll.h"
 
 static	HANDLE	hOpenSurf[MAXOPENSURF]; 
 static	long	NextDTMUse=LONG_MIN;
@@ -779,26 +780,25 @@ Exit:
 																							}
 																							#endif
 } 
-
-BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
+BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
 {   
 	LPSTR InFile = Infiles;
-	LPSTR FileEnd = _fstrchr (InFile,';'),FileEndSave;
-	char	TempFile[144]="c:\\tempdtm.bin", str[130], mess[256];  
-	HANDLE	TxtHandle=0;
-	double	X,Y,Z;    
-	long	IX,IY,IZ; 
-	long	CurrentCell=-1, Cell, lineno;
-	DWORD	FileLength,NumRows,NumCols, loc, TotLen, CurLoc; 
-	long	CellRow, CellCol, DataOffset, CellOffset, CellNo=0, IndexSize;
+	LPSTR FileEnd = _fstrchr(InFile, ';'), FileEndSave;
+	char	TempFile[144] = "c:\\tempdtm.bin", str[130], mess[256];
+	HANDLE	TxtHandle = 0;
+	double	X, Y, Z;
+	long	IX, IY, IZ;
+	long	CurrentCell = -1, Cell, lineno;
+	DWORD	FileLength, NumRows, NumCols, loc, TotLen, CurLoc;
+	long	CellRow, CellCol, DataOffset, CellOffset, CellNo = 0, IndexSize;
 	HFILE	FidIn, FidOut;   
-	double	MinX=DBL_MAX, MaxX=-DBL_MAX,MinY=DBL_MAX, MaxY=-DBL_MAX,MinZ=DBL_MAX, MaxZ=-DBL_MAX;   
+	double	MinX = DBL_MAX, MaxX = -DBL_MAX, MinY = DBL_MAX, MaxY = -DBL_MAX, MinZ = DBL_MAX, MaxZ = -DBL_MAX;
 	double	FileMinX, FileMinY;
-	long	LidarDist[MAXLIDARPERREC+1];  
+	long	LidarDist[MAXLIDARPERREC + 1];
 	double	CellMinX, CellMinY; 
 	int		i;
      
-    LIDARREC	LidarRec;  
+	LIDARREC	LidarRec = { 0 };
     LIDARFILEHEADER	Header;
 	
 	AllowCache = FALSE;
@@ -811,11 +811,11 @@ BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
 		MNMXCORD Bounds; 
 		BOOL	err;
 		
-		Bounds = atobounds (CBounds,&err);
+		Bounds = atobounds(CBounds, &err);
 		if (err) 
 		{
-			sprintf (mess,"Error in bounds:%s",CBounds);
-			MessageBox (0,mess,0,MB_ICONEXCLAMATION);
+			sprintf(mess, "Error in bounds:%s", CBounds);
+			MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 			return FALSE;
 		}
 		MinX = Bounds.xmn;
@@ -825,82 +825,82 @@ BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
 	}
 	else
 	{       
-		FidIn = GSSiOpenFile (InFile,0,OF_READ); 
-		TotLen = GSSillseek (FidIn,0,2);
-		GSSillseek (FidIn,0,0);
+		FidIn = GSSiOpenFile(InFile, 0, OF_READ);
+		TotLen = GSSillseek(FidIn, 0, 2);
+		GSSillseek(FidIn, 0, 0);
 		ProcessDelimTextHeader(str, InFile, FidIn, &TxtHandle, 0, 0);
-		CreateStatusWind (hWndMain,1,"Getting Min/Max Values"); 
+		CreateStatusWind(hWndMain, 1, "Getting Min/Max Values");
 NextFile:
 		lineno = 1;
-		while (ContinueProcessing && fgetstring (str,64,FidIn))
+		while (ContinueProcessing && fgetstring(str, 64, FidIn))
 		{   
 			lineno++;
-			GetDelimTextData(str,TxtHandle,64);
-			X = GetGlobalDVal ("[X]")*FTM;
-			Y = GetGlobalDVal ("[Y]")*FTM;
-			Z = GetGlobalDVal ("[Z]")*FTM;  
+			GetDelimTextData(str, TxtHandle, 64);
+			X = GetGlobalDVal("[X]")*FTM;
+			Y = GetGlobalDVal("[Y]")*FTM;
+			Z = GetGlobalDVal("[Z]")*FTM;
 			if (X < 10)
 			{
-				sprintf (mess,"Invalid X at line %ld:%s",lineno,str);
-				MessageBox (0,mess,0,MB_ICONEXCLAMATION);
+				sprintf(mess, "Invalid X at line %ld:%s", lineno, str);
+				MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 			}
 			else
 			{
-				MinX = min (MinX,X);
-				MaxX = max (MaxX,X);
-				MinY = min (MinY,Y);
-				MaxY = max (MaxY,Y);
+				MinX = min(MinX, X);
+				MaxX = max(MaxX, X);
+				MinY = min(MinY, Y);
+				MaxY = max(MaxY, Y);
 			}
-			CurLoc = GSSillseek (FidIn,0,1);
-			StatusWindowUpdate (0,0, TotLen, CurLoc); 
+			CurLoc = GSSillseek(FidIn, 0, 1);
+			StatusWindowUpdate(0, 0, TotLen, CurLoc);
 	    }
-	    GSSiClose (FidIn);
+		GSSiClose(FidIn);
 	    if (FileEnd)
 	    {
 	    	
-	    	FidIn = GSSiOpenFile (FileEnd,0,OF_READ);
+			FidIn = GSSiOpenFile(FileEnd, 0, OF_READ);
 	    	FileEnd = 0; 
-			TotLen = GSSillseek (FidIn,0,2); 
-			GSSillseek (FidIn,0,0);
+			TotLen = GSSillseek(FidIn, 0, 2);
+			GSSillseek(FidIn, 0, 0);
 			goto NextFile;
 		}
 	    ContinueProcessing = TRUE;
-		DestroyStatusWindow (0);
+		DestroyStatusWindow(0);
 	}
-    FileMinX = MinX - fmod (MinX,LIDARCELLSIZE);
-    FileMinY = MinY - fmod (MinY,LIDARCELLSIZE); 
-    NumCols = 1+(MaxX - FileMinX) / LIDARCELLSIZE;
-    NumRows = 1+(MaxY - FileMinY) / LIDARCELLSIZE;
+	FileMinX = MinX - fmod(MinX, LIDARCELLSIZE);
+	FileMinY = MinY - fmod(MinY, LIDARCELLSIZE);
+	NumCols = 1 + (MaxX - FileMinX) / LIDARCELLSIZE;
+	NumRows = 1 + (MaxY - FileMinY) / LIDARCELLSIZE;
     if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX)
     {
-    	MessageBox (0,"Lidar file size exceeds maximum",0,MB_ICONEXCLAMATION);
+		MessageBox(0, "Lidar file size exceeds maximum", 0, MB_ICONEXCLAMATION);
     	return FALSE;
     } 
-    FileLength = NumRows * NumCols * sizeof (LIDARREC);
-   	CloseFidSmall ();
-	FidOut = GSSiOpenFile (TempFile,0,OF_CREATE);
-    GSSiChangeLength (FidOut,FileLength);
-    GSSiClose (FidOut);
-    CreateFidSmall ();
-	FidOut = GSSiOpenFile (TempFile,0,OF_READWRITE);
-	FidIn = GSSiOpenFile (InFile,0,OF_READ); 
-	CreateStatusWind (hWndMain,1,"Loading Data");
-	TotLen = (DWORD)GSSillseek (FidIn,0,2);
-	GSSillseek (FidIn,0,0);
-	GSSiGlobFree (&TxtHandle);  
+	FileLength = NumRows * NumCols * sizeof(LIDARREC);
+	CloseFidSmall();
+	FidOut = GSSiOpenFile(TempFile, 0, OF_CREATE);
+	GSSiChangeLength(FidOut, FileLength);
+	GSSiClose(FidOut);
+	CreateFidSmall();
+	FidOut = GSSiOpenFile(TempFile, 0, OF_READWRITE);
+	FidIn = GSSiOpenFile(InFile, 0, OF_READ);
+	CreateStatusWind(hWndMain, 1, "Loading Data");
+	TotLen = (DWORD)GSSillseek(FidIn, 0, 2);
+	GSSillseek(FidIn, 0, 0);
+	GSSiGlobFree(&TxtHandle);
 	ProcessDelimTextHeader(str, InFile, FidIn, &TxtHandle, 0, 0);
 	FileEnd = FileEndSave;
 NextFile2:
-	while (ContinueProcessing && fgetstring (str,64,FidIn))
+	while (ContinueProcessing && fgetstring(str, 64, FidIn))
 	{
-		GetDelimTextData(str, TxtHandle,64);
-		X = GetGlobalDVal ("[X]")*FTM;
-		Y = GetGlobalDVal ("[Y]")*FTM;
-		Z = GetGlobalDVal ("[Z]")*FTM; 
-		MinZ = min (MinZ,Z);
-		MaxZ = max (MaxZ,Z);
-		CellCol = (X - FileMinX)/LIDARCELLSIZE;
-		CellRow = (Y - FileMinY)/LIDARCELLSIZE; 
+		GetDelimTextData(str, TxtHandle, 64);
+		X = GetGlobalDVal("[X]")*FTM;
+		Y = GetGlobalDVal("[Y]")*FTM;
+		Z = GetGlobalDVal("[Z]")*FTM;
+		MinZ = min(MinZ, Z);
+		MaxZ = max(MaxZ, Z);
+		CellCol = (X - FileMinX) / LIDARCELLSIZE;
+		CellRow = (Y - FileMinY) / LIDARCELLSIZE;
 		if (CellCol >= 0 && CellCol < NumCols && CellRow >= 0 && CellRow < NumRows)
 		{
 			Cell = NumCols * CellRow + CellCol;  
@@ -909,65 +909,66 @@ NextFile2:
 				if (CurrentCell > -1)
 				{
 					loc = (DWORD)CurrentCell * (DWORD)sizeof(LIDARREC);
-					GSSillseek2 (FidOut,loc,0);
-					BigWrite (FidOut,(HPSTR)&LidarRec,sizeof(LIDARREC),-1);
+					GSSillseek2(FidOut, loc, 0);
+					BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
 				}
 				loc = (DWORD)Cell * (DWORD)sizeof(LIDARREC);
-				GSSillseek2 (FidOut,loc,0);
-				BigRead (FidOut,(HPSTR)&LidarRec,sizeof(LIDARREC));
+				GSSillseek2(FidOut, loc, 0);
+				BigRead(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC));
 				CurrentCell = Cell;  
 				CellMinX = FileMinX + CellCol * LIDARCELLSIZE;
 				CellMinY = FileMinY + CellRow * LIDARCELLSIZE;
 			}
 			if (LidarRec.NumPoints < MAXLIDARPERREC)
 			{
-				LidarRec.LidarPnt[LidarRec.NumPoints].xoff = IDNINT (1000*(X - CellMinX));
-				LidarRec.LidarPnt[LidarRec.NumPoints].yoff = IDNINT (1000*(Y - CellMinY));
+				LidarRec.LidarPnt[LidarRec.NumPoints].xoff = IDNINT(1000 * (X - CellMinX));
+				LidarRec.LidarPnt[LidarRec.NumPoints].yoff = IDNINT(1000 * (Y - CellMinY));
 				LidarRec.LidarPnt[LidarRec.NumPoints++].Elevation = Z;
 			} 
 		}
-		CurLoc = (DWORD)GSSillseek (FidIn,0,1);
-		StatusWindowUpdate (0,0, TotLen, CurLoc); 
+		CurLoc = (DWORD)GSSillseek(FidIn, 0, 1);
+		StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
-    GSSiClose (FidIn); 
+	GSSiClose(FidIn);
     if (FileEnd)
     {
 	    	
-    	FidIn = GSSiOpenFile (FileEnd,0,OF_READ);
+		FidIn = GSSiOpenFile(FileEnd, 0, OF_READ);
     	FileEnd = 0; 
-		TotLen = GSSillseek (FidIn,0,2); 
-		GSSillseek (FidIn,0,0);
+		TotLen = GSSillseek(FidIn, 0, 2);
+		GSSillseek(FidIn, 0, 0);
 		goto NextFile2;
 	}
 	loc = (DWORD)CurrentCell * (DWORD)sizeof(LIDARREC);
-	GSSillseek2 (FidOut,loc,0);
-	BigWrite (FidOut,(HPSTR)&LidarRec,sizeof(LIDARREC),-1);
+	GSSillseek2(FidOut, loc, 0);
+	BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
     ContinueProcessing = TRUE;
-	DestroyStatusWindow (0);
-    GSSiClose (FidOut);
-	FidOut = GSSiOpenFile (TempFile,0,OF_READ);
-    _fmemset (LidarDist,0,sizeof(LidarDist));
-	CreateStatusWind (hWndMain,1,"Building Distribution"); 
-	TotLen = (DWORD)GSSillseek (FidOut,0,2);
-	GSSillseek (FidOut,0,0);
-	while (ContinueProcessing && BigRead (FidOut,(HPSTR)&LidarRec,sizeof(LIDARREC)))
+	DestroyStatusWindow(0);
+	GSSiClose(FidOut);
+	FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
+	_fmemset(LidarDist, 0, sizeof(LidarDist));
+	CreateStatusWind(hWndMain, 1, "Building Distribution");
+	TotLen = (DWORD)GSSillseek(FidOut, 0, 2);
+	GSSillseek(FidOut, 0, 0);
+	while (ContinueProcessing && BigRead(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC)))
 	{
 		LidarDist[LidarRec.NumPoints]++;
-		CurLoc = (DWORD)GSSillseek (FidOut,0,1);
-		StatusWindowUpdate (0,0, TotLen, CurLoc); 
+		CurLoc = (DWORD)GSSillseek(FidOut, 0, 1);
+		StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
     ContinueProcessing = TRUE;
-	DestroyStatusWindow (0);
-    GSSiClose (FidOut);
-	GSSiGlobFree (&TxtHandle);  
-	for (i=0;i<MAXLIDARPERREC+1;i++)
+	DestroyStatusWindow(0);
+	GSSiClose(FidOut);
+	GSSiGlobFree(&TxtHandle);
+
+	for (i = 0; i<MAXLIDARPERREC + 1; i++)
 	{ 
-		sprintf (str,"%i\t%ld",i,LidarDist[i]);
-		AppendFile ("c:\\lidardist.txt",str);
+		sprintf(str, "%i\t%ld", i, LidarDist[i]);
+		AppendFile("c:\\lidardist.txt", str);
 	} 
-	FidIn = GSSiOpenFile (TempFile,0,OF_READ);
-	DataOffset = sizeof (LIDARFILEHEADER) + NumRows * NumCols * 4;
-	FidOut = GSSiOpenFile (OutFile,0,OF_CREATE);
+	FidIn = GSSiOpenFile(TempFile, 0, OF_READ);
+	DataOffset = sizeof(LIDARFILEHEADER) + NumRows * NumCols * 4;
+	FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
 	Header.Version = 1;  
 	Header.Bounds.xmn = FileMinX;
 	Header.Bounds.xmx = MaxX;
@@ -978,33 +979,317 @@ NextFile2:
 	Header.NumRows = NumRows;
 	Header.NumCols = NumCols; 
 	Header.CellSpacing = LIDARCELLSIZE; 
-	BigWrite (FidOut,(HPSTR)&Header,sizeof(LIDARFILEHEADER),-1);  
+	BigWrite(FidOut, (HPSTR)&Header, sizeof(LIDARFILEHEADER), -1);
 	IndexSize = NumRows * NumCols;
 	CellOffset = 0;
 	while (IndexSize--)
-		BigWrite (FidOut,(HPSTR)&CellOffset,4,-1);
-	CreateStatusWind (hWndMain,1,"Creating Output File"); 
-	TotLen = (DWORD)GSSillseek (FidIn,0,2);
-	GSSillseek (FidIn,0,0);	
-	while (ContinueProcessing && BigRead (FidIn,(HPSTR)&LidarRec,sizeof(LIDARREC)))
+		BigWrite(FidOut, (HPSTR)&CellOffset, 4, -1);
+	CreateStatusWind(hWndMain, 1, "Creating Output File");
+	TotLen = (DWORD)GSSillseek(FidIn, 0, 2);
+	GSSillseek(FidIn, 0, 0);
+	while (ContinueProcessing && BigRead(FidIn, (HPSTR)&LidarRec, sizeof(LIDARREC)))
 	{
 		if (LidarRec.NumPoints)
 		{
-			CellOffset = GSSillseek (FidOut,0,2); 
-			BigWrite (FidOut,(HPSTR)&LidarRec,2+LidarRec.NumPoints*sizeof(LIDARPNT),-1);
-			GSSillseek (FidOut,(long)sizeof (LIDARFILEHEADER)+CellNo*4,0);
-			BigWrite (FidOut,(HPSTR)&CellOffset,4,-1);
+			CellOffset = GSSillseek(FidOut, 0, 2);
+			BigWrite(FidOut, (HPSTR)&LidarRec, 2 + LidarRec.NumPoints*sizeof(LIDARPNT), -1);
+			GSSillseek(FidOut, (long)sizeof(LIDARFILEHEADER) + CellNo * 4, 0);
+			BigWrite(FidOut, (HPSTR)&CellOffset, 4, -1);
 		}
 		CellNo++;
-		CurLoc = (DWORD)GSSillseek (FidIn,0,1);
-		StatusWindowUpdate (0,0, TotLen, CurLoc); 
+		CurLoc = (DWORD)GSSillseek(FidIn, 0, 1);
+		StatusWindowUpdate(0, 0, TotLen, CurLoc);
+	}
+	ContinueProcessing = TRUE;
+	GSSiClose(FidIn);
+	GSSiClose(FidOut);
+	DestroyStatusWindow(0);
+	GSSiRemove(TempFile);
+	return TRUE;
+}
+
+MNMXCORD GetLAZIndexBounds(LPSTR LAZIndex)
+{
+	MNMXCORD Bounds = { 0 };
+	sqlite3 *db;
+	int rtn = sqlite3_open(LAZIndex, &db);
+	if (rtn == SQLITE_OK)
+	{
+		Bounds = SLTSpatialIndexBounds(db, "LIDAR");
+		sqlite3_close(db);
+	}
+	return Bounds;
+}
+MNMXCORD3D GetLAZIndexBounds3D(LPSTR LAZIndex)
+{
+	MNMXCORD3D Bounds = { 0 };
+	sqlite3 *db;
+	int rtn = sqlite3_open(LAZIndex, &db);
+	if (rtn == SQLITE_OK)
+	{
+		Bounds = SLTSpatialIndexBounds3D(db, "LIDAR");
+		sqlite3_close(db);
+	}
+	return Bounds;
+}
+
+BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
+{   
+	char	FileList[MAX_PATH], InFile[MAX_PATH];
+	char	TempFile[MAX_PATH] = "c:\\temp\\tempdtm.bin";
+	char	Projection[MAX_PATH];
+	char	distFile[MAX_PATH];
+	char	str[130], mess[256];  
+	HANDLE	TxtHandle=0;
+	double	X,Y,Z;    
+	//LONGLONG IX,IY,IZ; 
+	LONGLONG CurrentCell=-1, Cell;
+	LONGLONG FileLength, NumRows, NumCols, loc;
+	LONGLONG TotLen, CurLoc;
+	LONGLONG CellRow, CellCol, DataOffset,  CellNo=0, IndexSize;
+	LONGLONG CellOffset;
+	HFILE	FidIn, FidOut;   
+	double	MinX=DBL_MAX, MaxX=-DBL_MAX,MinY=DBL_MAX, MaxY=-DBL_MAX,MinZ=DBL_MAX, MaxZ=-DBL_MAX;   
+	double	FileMinX, FileMinY;
+	long	LidarDist[MAXLIDARPERREC+1];  
+	double	CellMinX, CellMinY; 
+	int		i;
+	MNMXCORD3D Bounds3D;
+	MNMXCORD Bounds;
+    LIDARREC	LidarRec;  
+    LIDARFILEHEADER	Header;
+	HANDLE hDB = 0;
+	laszip_point_struct* point;
+	LONGLONG numMissingPoints = 0;
+	LONGLONG totNumMissingPoints = 0;
+
+	if (laszip_load_dll() == 1)
+		return FALSE;
+
+	AllowCache = FALSE;
+	UndoEnabled = FALSE; 
+
+	sprintf(distFile, "%s\\distribution.txt", InDir);
+	sprintf(Projection, "%s\\projection.cvt", InDir);
+	LoadProjection(0, Projection);
+	sprintf(InFile, "%s\\index.la", InDir);
+	Bounds3D = GetLAZIndexBounds3D(InFile);
+	Bounds.xmn = Bounds3D.xmn;
+	Bounds.xmx = Bounds3D.xmx;
+	Bounds.ymn = Bounds3D.ymn;
+	Bounds.ymx = Bounds3D.ymx;
+	ConvertBounds(&Bounds, 0, 1);
+	MinX = Bounds.xmn;
+	MinY = Bounds.ymn;
+	MaxX = Bounds.xmx;
+	MaxY = Bounds.ymx;
+
+	if (MaxX > MinX)
+	{
+		int blockSize = 1024 * 1024;
+		LONGLONG totWritten = 0;
+		LPSTR zeros = malloc(blockSize);
+		memset(zeros, 0, blockSize);
+		FileMinX = MinX - fmod(MinX, LIDARCELLSIZE);
+		FileMinY = MinY - fmod(MinY, LIDARCELLSIZE);
+		NumCols = 1 + (MaxX - FileMinX) / LIDARCELLSIZE;
+		NumRows = 1 + (MaxY - FileMinY) / LIDARCELLSIZE;
+		if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX*64)
+		{
+			MessageBox(0, "Lidar file size exceeds maximum", 0, MB_ICONEXCLAMATION);
+			return FALSE;
+		}
+		FileLength = NumRows * NumCols * sizeof(LIDARREC);
+		CreateStatusWind(hWndMain, 1, "Initializing Temp File");
+		FidOut = GSSiOpenFile(TempFile, 0, OF_CREATE);
+		while (totWritten < FileLength)
+		{
+			int len = min(FileLength-totWritten, blockSize);
+			len = BigWrite (FidOut, zeros, len,-1);
+			totWritten += len;
+			StatusWindowUpdate(0, 0, FileLength, totWritten);
+		}
+		free(zeros);
+		GSSiClose(FidOut);
+		DestroyStatusWindow(0);
+		FidOut = GSSiOpenFile(TempFile, 0, OF_READWRITE);
+
+		sprintf(FileList, "%s\\filelist.txt", InDir);
+		sprintf(mess, "Loading data for %s",FilePart(OutFile,"NAME"));
+		CreateStatusWind(hWndMain, 2, mess);
+		if (OpenDataFile(FileList, "", BT_READ, &hDB))
+		{
+			int numFiles = NumSQLRows(hDB);
+			int CurFile = 0;
+			char File[MAX_PATH] = "[FULLNAME]";
+			char FileName[MAX_PATH] = "[FILENAME]";
+			BOOL haveFile = FetchDBRec(hDB);
+
+			ExpandText(File);
+			ExpandText(FileName);
+			while (StatusWindowUpdate(0, FileName, numFiles, CurFile++) && haveFile)
+			{
+				laszip_POINTER laszip_reader;
+				if (!laszip_create(&laszip_reader))
+				{
+					laszip_BOOL is_compressed = 0;
+					if (!laszip_open_reader(laszip_reader, File, &is_compressed))
+					{
+						laszip_I64 totPnts;
+						laszip_header_struct* header;
+
+						if (!laszip_get_header_pointer(laszip_reader, &header))
+							totPnts = header->number_of_point_records;
+						laszip_get_point_pointer(laszip_reader, &point);
+						CurLoc = 0;
+						while (StatusWindowUpdate2(0, totPnts, CurLoc) && CurLoc < totPnts && !laszip_read_point(laszip_reader))
+						{
+							if (point->classification == wantType)
+							{
+								DPOINT pt;
+								int st;
+
+								pt.x = point->X * header->x_scale_factor + header->x_offset;
+								pt.y = point->Y * header->y_scale_factor + header->y_offset;
+								st = ConvertCoord(&pt, 0, 1);
+								if (st != 0)
+									ii = 1;
+								X = pt.x;
+								Y = pt.y;
+								Z = point->Z * header->z_scale_factor;
+								MinZ = min(MinZ, Z);
+								MaxZ = max(MaxZ, Z);
+								CellCol = (X - FileMinX) / LIDARCELLSIZE;
+								CellRow = (Y - FileMinY) / LIDARCELLSIZE;
+								if (CellCol >= 0 && CellCol < NumCols && CellRow >= 0 && CellRow < NumRows)
+								{
+									Cell = NumCols * CellRow + CellCol;
+									if (Cell != CurrentCell)
+									{
+										if (CurrentCell > -1)
+										{
+											loc = (LONGLONG)CurrentCell * (LONGLONG)sizeof(LIDARREC);
+											GSSillseek2(FidOut, loc, 0);
+											BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
+										}
+										numMissingPoints = 0;
+										loc = (LONGLONG)Cell * (LONGLONG)sizeof(LIDARREC);
+										GSSillseek2(FidOut, loc, 0);
+										BigRead(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC));
+										CurrentCell = Cell;
+										CellMinX = FileMinX + CellCol * LIDARCELLSIZE;
+										CellMinY = FileMinY + CellRow * LIDARCELLSIZE;
+									}
+									if (LidarRec.NumPoints < MAXLIDARPERREC)
+									{
+										LidarRec.LidarPnt[LidarRec.NumPoints].xoff = IDNINT(1000 * (X - CellMinX));
+										LidarRec.LidarPnt[LidarRec.NumPoints].yoff = IDNINT(1000 * (Y - CellMinY));
+										LidarRec.LidarPnt[LidarRec.NumPoints].intensity = point->intensity;
+										LidarRec.LidarPnt[LidarRec.NumPoints++].Elevation = Z;
+									}
+									else
+									{
+										numMissingPoints++;
+										totNumMissingPoints++;
+									}
+								}
+								else
+									ii = 1;
+							}
+							CurLoc++;
+						}
+					}
+					laszip_close_reader(laszip_reader);
+				}
+				laszip_destroy(laszip_reader);
+				haveFile = FetchDBRec(hDB);
+				if (haveFile)
+				{
+					strcpy(File,"[FULLNAME]");
+					strcpy(FileName,"[FILENAME]");
+					ExpandText(File);
+					ExpandText(FileName);
+				}
+			}
+			CloseDataFile(TRUE, &hDB);
+			loc = (LONGLONG)CurrentCell * (DWORD)sizeof(LIDARREC);
+			GSSillseek2(FidOut, loc, 0);
+			BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
+			ContinueProcessing = TRUE;
+			DestroyStatusWindow(0);
+			GSSiClose(FidOut);
+			FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
+			_fmemset(LidarDist, 0, sizeof(LidarDist));
+			CreateStatusWind(hWndMain, 1, "Building Distribution");
+			TotLen = GSSillseek2(FidOut, 0, 2);
+			GSSillseek2(FidOut, 0, 0);
+			while (ContinueProcessing && BigRead(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC)))
+			{
+				LidarDist[LidarRec.NumPoints]++;
+				CurLoc = GSSillseek2(FidOut, 0, 1);
+				StatusWindowUpdate(0, 0, TotLen, CurLoc);
+			}
+			ContinueProcessing = TRUE;
+			DestroyStatusWindow(0);
+			CreateStatusWind(hWndMain, 1, "Writing Distribution");
+			GSSiClose(FidOut);
+			GSSiGlobFree(&TxtHandle);
+			GSSiRemove(distFile);
+			
+			sprintf(str, "Missed points:%I64i", totNumMissingPoints);
+			AppendFile(distFile, str);
+			for (i = 0; i < MAXLIDARPERREC + 1; i++)
+			{
+				sprintf(str, "%i\t%ld", i, LidarDist[i]);
+				AppendFile(distFile, str);
+			}
+			DestroyStatusWindow(0);
+			sprintf(mess, "Creating output file %s", FilePart(OutFile, "NAME"));
+			CreateStatusWind(hWndMain, 1, mess);
+			FidIn = GSSiOpenFile(TempFile, 0, OF_READ);
+			DataOffset = sizeof(LIDARFILEHEADER) + NumRows * NumCols * sizeof(LONGLONG);
+			FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			Header.Version = 2;
+			Header.Bounds.xmn = FileMinX;
+			Header.Bounds.xmx = MaxX;
+			Header.Bounds.ymn = FileMinY;
+			Header.Bounds.ymx = MaxY;
+			Header.MinElev = MinZ;
+			Header.MaxElev = MaxZ;
+			Header.NumRows = NumRows;
+			Header.NumCols = NumCols;
+			Header.CellSpacing = LIDARCELLSIZE;
+			BigWrite(FidOut, (HPSTR)&Header, sizeof(LIDARFILEHEADER), -1);
+	IndexSize = NumRows * NumCols;
+	CellOffset = 0;
+	while (IndexSize--)
+				BigWrite(FidOut, (HPSTR)&CellOffset,sizeof(LONGLONG), -1);
+			TotLen = GSSillseek2(FidIn, 0, 2);
+			GSSillseek2(FidIn, 0, 0);
+			while (ContinueProcessing && BigRead(FidIn, (HPSTR)&LidarRec, sizeof(LIDARREC)))
+	{
+				if (CellNo == 3253864)
+					ii = 1;
+		if (LidarRec.NumPoints)
+		{
+					CellOffset = GSSillseek2(FidOut, 0, 2);
+					BigWrite(FidOut, (HPSTR)&LidarRec, 2 + LidarRec.NumPoints*sizeof(LIDARPNT), -1);
+					GSSillseek2(FidOut, (LONGLONG)sizeof(LIDARFILEHEADER) + CellNo * sizeof(LONGLONG), 0);
+					BigWrite(FidOut, (HPSTR)&CellOffset, sizeof(LONGLONG), -1);
+		}
+		CellNo++;
+				CurLoc = GSSillseek2(FidIn, 0, 1);
+				StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
     ContinueProcessing = TRUE;
-    GSSiClose (FidIn);
-    GSSiClose (FidOut);
-	DestroyStatusWindow (0);  
-	GSSiRemove (TempFile);
+			GSSiClose(FidIn);
+			GSSiClose(FidOut);
+			DestroyStatusWindow(0);
+			GSSiRemove(TempFile);
+		}
 	return TRUE;
+}
+	return FALSE;
 }
 
 BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
@@ -1747,7 +2032,7 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 	LPDTMDATA	pDTMData;
 	static	BOOL	First=TRUE;  
 	short	Type=0;
-	char	FileName[MAX_PATH],str[MAX_PATH]; 
+	char	FileName[MAX_PATH],str[MAX_PATH], Projection[MAX_PATH]; 
 	HFILE	FidSurf;
 	
 	DTMRenderGridSpacing = GetGlobalDVal2("[%DTMGridSpacing]",-300.0);   
@@ -1771,11 +2056,13 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 	ExpandText (FileName);
 	_fstrupr (FileName);
 	if (StringEndsWith(FileName,".DTM"))
-		Type = 1;
+		Type = DTMTYPE_NGI;
 	else if (StringEndsWith(FileName,".TIN"))
-		Type = 2; 
-	else if (StringEndsWith(FileName,".LDR"))
-		Type = 3; 
+		Type = DTMTYPE_TIN_GM; 
+	else if (StringEndsWith(FileName, ".LDR"))
+		Type = DTMTYPE_LIDAR_GM;
+	else if (StringEndsWith(FileName, ".LA"))
+		Type = DTMTYPE_LIDAR_LAZ;
 	if (!Type)
 {
 																							#if ENABLETRACE
@@ -1787,7 +2074,7 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 		*pSurfType = Type;
 	switch (Type)
 	{
-		case 1:
+		case DTMTYPE_NGI:
 ReOpen:			
 		if (!(hDB = OpenGWDatabase (FileName,Mode)))
 {
@@ -1798,6 +2085,7 @@ ReOpen:
 }
 		hSurf = GSSiGlobAlloc (1097,GHND,sizeof(DTMINFO));
 		pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
+		pDTMInfo->Type = Type;
 		pDTMInfo->hDB = hDB;   
 		lpGWDHead = (LPGWDHEADER)GlobalLock (pDTMInfo->hDB); 
 		if (lpGWDHead->Version == 1)
@@ -1833,7 +2121,7 @@ ReOpen:
 		GlobalUnlock (hSurf);
 		break;
 	
-		case 2: 
+		case DTMTYPE_TIN_GM: 
 		{
 			LPVISLIST	SaveVis=CurVis; 
 			short		TinSymbol,i;
@@ -1841,7 +2129,7 @@ ReOpen:
 			
 			hSurf = GSSiGlobAlloc (1098,GHND,sizeof(DTMINFO));
 			pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
-			pDTMInfo->Type = 2; 
+			pDTMInfo->Type = Type; 
 			if (PRJ_BASEUNITS[1] == 1)
 				pDTMInfo->ElevUnits = 0;
 			else
@@ -1869,39 +2157,70 @@ ReOpen:
 			GlobalUnlock (hSurf);
 		}
 		break;
-		case 3: 
-		{   
-		    LIDARREC	LidarRec;  
-		    LIDARFILEHEADER	Header;  
-		    
-			FidSurf = GSSiOpenFile (FileName,0,OF_READ);
+		case DTMTYPE_LIDAR_GM:
+		{
+			LIDARREC	LidarRec;
+			LIDARFILEHEADER	Header;
+
+			FidSurf = GSSiOpenFile(FileName, 0, OF_READ);
 			if (FidSurf == HFILE_ERROR)
 				return FALSE;
-			hSurf = GSSiGlobAlloc (1097,GHND,sizeof(DTMINFO));  
-			BigRead (FidSurf,(HPSTR)&Header,sizeof(LIDARFILEHEADER));
-			
-			pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);   
-			pDTMInfo->Type = 3;
-			pDTMInfo->Fid= FidSurf;   
-			pDTMInfo->ElevUnits = 3; 
+			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+			BigRead(FidSurf, (HPSTR)&Header, sizeof(LIDARFILEHEADER));
+
+			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			pDTMInfo->Type = Type;
+			pDTMInfo->Version = Header.Version;
+			pDTMInfo->Fid = FidSurf;
+			pDTMInfo->ElevUnits = 3;
 			pDTMInfo->Bounds = Header.Bounds;
 			pDTMInfo->SouthWestNode.x = Header.Bounds.xmn;
-			pDTMInfo->SouthWestNode.y = Header.Bounds.ymn;  
+			pDTMInfo->SouthWestNode.y = Header.Bounds.ymn;
 			pDTMInfo->NumRows = Header.NumRows;
-			pDTMInfo->NumCols = Header.NumCols;  
+			pDTMInfo->NumCols = Header.NumCols;
 			pDTMInfo->GridSpace = Header.CellSpacing;
-			pDTMInfo->MaxDistToRawPoint = min (pDTMInfo->GridSpace,GetGlobalDVal2("[%DTMLidarMaxDistToRawPoint]",pDTMInfo->GridSpace));
-			pDTMInfo->MaxRawPointsToUse = GetGlobalLVal2("[%DTMLidarMaxPointsToUse]",16);
+			pDTMInfo->MaxDistToRawPoint = min(pDTMInfo->GridSpace, GetGlobalDVal2("[%DTMLidarMaxDistToRawPoint]", pDTMInfo->GridSpace));
+			pDTMInfo->MaxRawPointsToUse = GetGlobalLVal2("[%DTMLidarMaxPointsToUse]", 16);
 
 			pDTMInfo->NULLElv = NULLElv;
-			for (i=0;i<MAXDTMCELLBUFFERS;i++)
+			for (i = 0; i<MAXDTMCELLBUFFERS; i++)
 			{
-				pDTMInfo->CellUse[i]=LONG_MIN;
-				pDTMInfo->CellID[i]=LONG_MIN;
-		    }
-			GlobalUnlock (hSurf); 
+				pDTMInfo->CellUse[i] = LONG_MIN;
+				pDTMInfo->CellID[i] = LONG_MIN;
+			}
+			GlobalUnlock(hSurf);
 		}
-		break;
+			break;
+		case DTMTYPE_LIDAR_LAZ:
+		{
+			sqlite3 *db;
+			LPSTR pDot;
+
+			if (sqlite3_open(FileName, &db) != SQLITE_OK)
+				return FALSE;
+
+			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+
+			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			pDTMInfo->Type = Type;
+			pDTMInfo->db = db;
+			pDTMInfo->Fid = HFILE_ERROR;
+			strcpy(pDTMInfo->LAZDir, FileName);
+			pDot = strrchr(pDTMInfo->LAZDir, '\\');
+			if (pDot)
+				*pDot = 0;
+			pDTMInfo->ElevUnits = 3;
+			pDTMInfo->Bounds = SLTSpatialIndexBounds(db, "LIDAR");
+			pDTMInfo->MaxDistToRawPoint = min(pDTMInfo->GridSpace, GetGlobalDVal2("[%DTMLidarMaxDistToRawPoint]", pDTMInfo->GridSpace));
+			pDTMInfo->MaxRawPointsToUse = GetGlobalLVal2("[%DTMLidarMaxPointsToUse]", 16);
+
+			pDTMInfo->NULLElv = NULLElv;
+			sprintf(Projection, "%s\\projection.cvt", pDTMInfo->LAZDir);
+			LoadProjection(0, Projection);
+
+			GlobalUnlock(hSurf);
+		}
+			break;
 	}
 	if (hSurf) 
 	{   
@@ -1943,12 +2262,15 @@ void DTMClose (LPHANDLE pHandle)
 	if (!pHandle)
 	{
 		for (i=0;i<MAXOPENSURF;i++)
-		{   
+		{
+		
 			if (hOpenSurf[i])
 			{
 				pDTMInfo = (LPDTMINFO)GlobalLock (hOpenSurf[i]); 
-				if (pDTMInfo->Type == 3)
-					GSSiClose (pDTMInfo->Fid);
+				if (pDTMInfo->Type == DTMTYPE_LIDAR_GM)
+					GSSiClose(pDTMInfo->Fid);
+				else if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+					sqlite3_close(pDTMInfo->db);
 				else
 					CloseGWDatabase (pDTMInfo->hDB); 
 				for (j=0;j<MAXDTMCELLBUFFERS;j++)
@@ -2089,7 +2411,7 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 	DTMKEY		DTMKey;
 	LPSTR		CompressedDTMData;
 	UINT		i, MinUseID;  
-	long		MinUse=LONG_MAX, Offset, IElev;
+	long		MinUse=LONG_MAX, Offset, IElev=0;
 	LPLONG		pBias;  
 	LPSUBCELLINFO	pSUBCELLInfo;
 	LPGWDHEADER	lpGWDHead;     
@@ -2180,13 +2502,23 @@ BOOL GetLIDARCell (long CellID,LPHANDLE phCell,LPDTMINFO pDTMInfo)
 { 
 	LPLIDARCELL	pCell;  
 	LIDARREC	LidarRec; 
-	long	CellOffset;
+	long	CellOffset4;
+	LONGLONG CellOffset;
 	double	CellMinX, CellMinY; 
 	long	CellRow, CellCol; 
 	USHORT	ip;
 	
-	GSSillseek (pDTMInfo->Fid,(long)sizeof (LIDARFILEHEADER)+CellID*4,0);
-	BigRead (pDTMInfo->Fid,(HPSTR)&CellOffset,4); 
+	if (pDTMInfo->Version > 1)
+	{
+		GSSillseek2(pDTMInfo->Fid, (long)sizeof(LIDARFILEHEADER) + CellID * 8, 0);
+		BigRead(pDTMInfo->Fid, (HPSTR)&CellOffset, 8);
+	}
+	else
+	{
+		GSSillseek(pDTMInfo->Fid, (long)sizeof(LIDARFILEHEADER) + CellID * 4, 0);
+		BigRead(pDTMInfo->Fid, (HPSTR)&CellOffset4, 4);
+		CellOffset = CellOffset4;
+	}
 	if (CellOffset)
 	{
 		if (*phCell < (HANDLE)2)
@@ -2194,7 +2526,7 @@ BOOL GetLIDARCell (long CellID,LPHANDLE phCell,LPDTMINFO pDTMInfo)
 		pCell = (LPLIDARCELL)GlobalLock (*phCell);   
 		CellRow = CellID / pDTMInfo->NumCols;
 		CellCol = CellID % pDTMInfo->NumCols;
-		GSSillseek (pDTMInfo->Fid,CellOffset,0);
+		GSSillseek2 (pDTMInfo->Fid,CellOffset,0);
 		BigRead (pDTMInfo->Fid,(HPSTR)&LidarRec,sizeof(LIDARREC));  
 		pCell->NumPoints = LidarRec.NumPoints; 
 		CellMinX = pDTMInfo->SouthWestNode.x + (CellCol * pDTMInfo->GridSpace);
@@ -2483,7 +2815,9 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	  }
 	  DTMPoint.x = SPX;
 	  DTMPoint.y = SPY; 
-/*	  if (DTMPoint.x == 158715.0 &&  DTMPoint.y == 55275.0)
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+		  ConvertCoord(&DTMPoint, 1, 0);
+	  /*	  if (DTMPoint.x == 158715.0 &&  DTMPoint.y == 55275.0)
 	  	  ii=1;
 	  if (DTMPoint.x == 158754.0 &&  DTMPoint.y == 55296.0)
 	  	  ii=1;  */
@@ -2492,7 +2826,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 		  if (!PointInBounds (DTMPoint,&pDTMInfo->Bounds))
 		  	goto S500;
 	  }
-	  if (pDTMInfo->Type == 2)  
+	  if (pDTMInfo->Type == DTMTYPE_TIN_GM)
 	  {
 		if (HaveLastTriangle)
 		{
@@ -2606,43 +2940,97 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 }
 	  	} 
 	  }
-	  if (pDTMInfo->Type == 3)  
-	  { 
-	  	short	nNearPoints = 0,SurroundingCellID=0; 
-	  	HANDLE	hCell;
-		LPLIDARCELL	pCell;
-		DPOINT	NearPoint[MAXNEARPOINTS];
-		double	NearDist[MAXNEARPOINTS], NearElevation[MAXNEARPOINTS];
-		double	MaxDist=DBL_MAX, d, Totd=0, Tote=0; 
-		USHORT	i;
-		
-	  	while ((hCell = GetNextLidarCell (pDTMInfo,&DTMPoint,&SurroundingCellID,&MaxDist)))
-	  	{   
-	  		pCell = (LPLIDARCELL)GlobalLock (hCell);
-	  		for (i=0;i<pCell->NumPoints;i++)
-	  		{
-	  			d = ldistppmacro (&DTMPoint,&pCell->XY[i]); 
-	  			MaxDist = AddToUsePointList (pDTMInfo,MaxDist,&nNearPoints,&d,&pCell->XY[i],&pCell->Z[i],NearDist,NearPoint,NearElevation);
-	  		}
-	  		GlobalUnlock (hCell);
-	  	}
-	  	if (nNearPoints<2)
-	  		goto S500;
-	  	MaxDist = min (MaxDist,pDTMInfo->MaxDistToRawPoint);
-	  	for (i=0;i<nNearPoints;i++)
-	  	{   
-//	  		d = sqrt (MaxDist - NearDist[i]); 
-//			d = NearDist[i]; 
-			d = (1/(NearDist[i]+0.001));
-			d *= d;
-	  		Totd += d;
-	  		Tote += NearElevation[i] * d;
-	  	}
-	  	if (!Totd)
-	  		goto S500;
-	  	ELV = Tote / Totd;
-//	  	ELV = (double)IDNINT(ELV*10)/10.0;   
-   		goto S1000;
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_GM)
+	  {
+		  short	nNearPoints = 0, SurroundingCellID = 0;
+		  HANDLE	hCell;
+		  LPLIDARCELL	pCell;
+		  DPOINT	NearPoint[MAXNEARPOINTS];
+		  double	NearDist[MAXNEARPOINTS], NearElevation[MAXNEARPOINTS];
+		  double	MaxDist = DBL_MAX, d, Totd = 0, Tote = 0;
+		  USHORT	i;
+
+		  //DTMPoint.x = 162624.78067899420;
+		  //DTMPoint.y = 43932.072766805089;
+		  while ((hCell = GetNextLidarCell(pDTMInfo, &DTMPoint, &SurroundingCellID, &MaxDist)))
+		  {
+			  pCell = (LPLIDARCELL)GlobalLock(hCell);
+			  for (i = 0; i<pCell->NumPoints; i++)
+			  {
+				  d = ldistppmacro(&DTMPoint, &pCell->XY[i]);
+				  MaxDist = AddToUsePointList(pDTMInfo, MaxDist, &nNearPoints, &d, &pCell->XY[i], &pCell->Z[i], NearDist, NearPoint, NearElevation);
+			  }
+			  GlobalUnlock(hCell);
+		  }
+		  if (nNearPoints<2)
+			  goto S500;
+		  MaxDist = min(MaxDist, pDTMInfo->MaxDistToRawPoint);
+		  for (i = 0; i<nNearPoints; i++)
+		  {
+			  //	  		d = sqrt (MaxDist - NearDist[i]); 
+			  //			d = NearDist[i]; 
+			  d = (1 / (NearDist[i] + 0.001));
+			  d *= d;
+			  Totd += d;
+			  Tote += NearElevation[i] * d;
+		  }
+		  if (!Totd)
+			  goto S500;
+		  ELV = Tote / Totd;
+		  goto S1000;
+	  }
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+	  {
+		  static int ncalls = 0;
+
+		  short	nNearPoints = 0, SurroundingCellID = 0;
+		  HANDLE	hCell;
+		  LPLIDARCELL	pCell;
+		  DPOINT3D	NearPoint[MAXNEARPOINTS];
+		  double	NearDist[MAXNEARPOINTS], NearElevation[MAXNEARPOINTS];
+		  double	MaxDist = DBL_MAX, d, Totd = 0, Tote = 0;
+		  USHORT	i;
+			  MNMXCORD Bounds;
+			  Bounds.xmn = DTMPoint.x - DTMRenderGridSpacing / 2;
+			  Bounds.xmx = DTMPoint.x + DTMRenderGridSpacing / 2;
+			  Bounds.ymn = DTMPoint.y - DTMRenderGridSpacing / 2;
+			  Bounds.ymx = DTMPoint.y + DTMRenderGridSpacing / 2;
+
+			  ncalls++;
+
+			  if (pDTMInfo->db)
+			  {
+				  HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, 1024);
+				  LPSTR  pCmd = GlobalLock(hCmd);
+				  sqlite3_stmt *statement;
+				  sprintf(pCmd, "SELECT LIDAR.id, LIDAR.Name FROM LIDAR, LIDAR_index WHERE LIDAR.id=LIDAR_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+
+				  SQLOK(sqlite3_prepare_v2(pDTMInfo->db, pCmd, -1, &statement, 0), pDTMInfo->db, "get points in bounds", 0);
+				  while (sqlite3_step(statement) == SQLITE_ROW)
+				  {
+					  int id = sqlite3_column_int(statement, 0);
+					  LPSTR LAZName = (LPSTR)sqlite3_column_text(statement, 1);
+					  char filename[MAX_PATH];
+					  sprintf(filename, "%s\\%s.laz", pDTMInfo->LAZDir, LAZName);
+
+					  nNearPoints += getLAZPointsInBounds(&pDTMInfo->lazFiles,id,filename, 2, &Bounds, MAXNEARPOINTS - nNearPoints, &NearPoint[nNearPoints]);
+				  }
+				  GSSiGlobUlFree(&hCmd);
+				  sqlite3_finalize(statement);
+			  }
+		 
+
+		  if (nNearPoints<1)
+			  goto S500;
+		  Tote = 0;
+		  for (i = 0; i<nNearPoints; i++)
+		  {
+			  Tote += NearPoint[i].z;
+		  }
+		  ELV = Tote / nNearPoints;
+		  if (ELV < 0)
+			  ELV = 0;
+		  goto S1000;
 	  }
 	  SPX -= pDTMInfo->SouthWestNode.x;
 	  SPY -= pDTMInfo->SouthWestNode.y;
@@ -3057,20 +3445,22 @@ BOOL GetNextDTMSegment (BOOL Init)
 	DPOINT	Point;   
 	HPDOUBLE	pRenderNode;   
 	UINT	i;  
-   	
    	if (!hDTM)
    		return FALSE; 
    	pDTMInfo = (LPDTMINFO)GlobalLock (hDTM);
    	if (Init)
    	{
-		if (pDTMInfo->Type < 1 && !pDTMInfo->Bounds.xmx)
+		MNMXCORD bounds = pDTMInfo->Bounds;
+		if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+			ConvertBounds(&bounds, 0, 1);
+		if (pDTMInfo->Type < 1 && !bounds.xmx)
 		{
    			DTMBounds = CurView->WBounds;
 		   	InflateBounds (&DTMBounds,pDTMInfo->GridSpace*32); 
    			DTMPoint.x = DTMBounds.xmn;
    			DTMPoint.y = DTMBounds.ymn; 
 		}
-		else if (!IntersectBounds (&CurView->WBounds,&pDTMInfo->Bounds,&DTMBounds))
+		else if (!IntersectBounds (&CurView->WBounds,&bounds,&DTMBounds))
    		{
    			DTMBounds = CurView->WBounds;
    			DTMPoint.x = DTMBounds.xmx;
@@ -3412,7 +3802,7 @@ BOOL FindOpContourPoint (USHORT StartSide,LPDOUBLE pZC,LPDPOINT Point2,LPDPOINT 
 void DisplayContourLabels (BOOL Clear)
 {   
 	USHORT	i,j;
-	short	nChar, loc, StartPoint, twidth, theight, ichar, dy, ipass, ntxp, EndLine, BegLine;    
+	short	nChar, loc, StartPoint, twidth, theight, ichar, dy, ipass, ntxp, EndLine, BegLine=0;    
 	BOOL	Flip;
 	LPSHORT	pNumPoints; 
 	LPLONG	pElev;
@@ -3430,8 +3820,8 @@ void DisplayContourLabels (BOOL Clear)
 	BOOL	LightContour;
 	double	Elv;
 	HPEN	hPen;
-	POINT	TextPoint[16];
-	double	TextAZ[16];
+	POINT	TextPoint[16] = { 0 };
+	double	TextAZ[16] = { 0 };
 	char	TextChar[16];
 	int		ii;
 				
@@ -4082,7 +4472,7 @@ BOOL DisplayDTMSegment (void)
 					for (ip=0;ip<pCell->NumPoints;ip++)
 					{   
 						Refno++;  
-						DisplayDTMPoint (Refno,pCell->XY[ip],pCell->Z[ip]*MFT,0,DTMPointSymbol,pDTMInfo->GridSpace/100,pDTMInfo);
+						DisplayDTMPoint (Refno,pCell->XY[ip],pCell->Z[ip]*MFT,0,DTMPointSymbol,pDTMInfo->GridSpace/200,pDTMInfo);
 					}
 					GlobalUnlock (DTMCellHandle);
 				}
@@ -4794,6 +5184,50 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 			GSSiGlobUlFree (&hMem);
 		}
 		DTMClose (&hSurf);
+	}
+	return rtn;
+}
+int classifyLAZFile(char * file, char * outFile)
+{
+	int rtn = 0;
+	int totals[19] = { 0 };
+	HFILE fid;
+	char txt[256];
+	char description[19][40] = { "Never classified", "Unassigned", "Ground", "Low Vegetation", "Medium Vegetation", "High Vegetation", "Building", "Low Point", "Reserved", "Water", "Rail", "Road Surface", "Reserved","Wire - Guard(Shield)","Wire - Conductor(Phase)","Transmission Tower","Wire - Structure Connector(Insulator)","Bridge Deck","High Noise" };
+		
+
+			
+	laszip_point_struct* point;
+	static __int64 use = 1;
+
+	if (laszip_load_dll() != 1)
+	{
+		laszip_POINTER laszip_reader;
+		if (!laszip_create(&laszip_reader))
+		{
+			laszip_BOOL is_compressed = 0;
+			if (!laszip_open_reader(laszip_reader, file, &is_compressed))
+			{
+				laszip_header_struct* header;
+				laszip_get_header_pointer(laszip_reader, &header);
+				laszip_get_point_pointer(laszip_reader, &point);
+				while (!laszip_read_point(laszip_reader) && rtn < header->number_of_point_records)
+				{
+					rtn++;
+					if (point->classification >= 0 && point->classification <= 18)
+						totals[point->classification]++;
+				}
+				laszip_close_reader(laszip_reader);
+				fid = GSSiOpenFile(outFile, 0, OF_CREATE);
+				for (int i = 0; i < 19; i++)
+				{
+					sprintf(txt, "%i\t%i\t%s", i, totals[i], description[i]);
+					fputstring(txt, fid);
+				}
+				GSSiClose(fid);
+			}
+			laszip_destroy(laszip_reader);
+		}
 	}
 	return rtn;
 }

@@ -731,6 +731,7 @@ typedef struct {
 #define DGNT_3DSURFACE_HEADER         18
 #define DGNT_3DSOLID_HEADER           19
 #define DGNT_BSPLINE_POLE             21
+#define DGNT_BSPLINE              21
 #define DGNT_POINT_STRING             22
 #define DGNT_BSPLINE_SURFACE_HEADER   24
 #define DGNT_BSPLINE_SURFACE_BOUNDARY 25

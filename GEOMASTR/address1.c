@@ -579,7 +579,7 @@ short DisplayStreets (HWND hDlg,LONG House, int OddEven, LPSTR InName,int nchar,
     char	str[128], NetAdd[128],MunName[64],MunAbv[32];
     SEGMAXKEY	SegMaxKey;
     short	NumMatch;
-	LPADDMATCH	pMatch;  
+	LPADDMATCH	pMatch=0;  
 	LPSTREETNAMETABLE	lpSNT;   
 	LPSTR	lpTrueName;
 	BOOL	GetNext = TRUE; 
@@ -733,6 +733,7 @@ short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT E
     _fstrcpy (str,InName);
     _fstrupr (str);    
     _fstrncpy (MatchName,str,32);
+	MatchName[32] = 0;
     if (FindOpt) 
     {   
     	short	lstr = _fstrlen (str);
@@ -1335,15 +1336,15 @@ BOOL CreateStreetNameTable (LPSTR Dir)
                  
      NumVars = 1;
             
-     hVars = LocalAlloc (LHND,NumVars * sizeof(BTVARDESC));
-     pVars =(LPBTVARDESC) LocalLock(hVars);
+     hVars = GlobalAlloc (LHND,NumVars * sizeof(BTVARDESC));
+     pVars =(LPBTVARDESC) GlobalLock(hVars);
             
      pVars->BT_VARLEN=4;
      pVars->BT_VARTYP=BT_INTEGER;
      pVars->BT_VAROFF=0;
      BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
-     LocalUnlock(hVars);
-     LocalFree(hVars); 
+     GlobalUnlock(hVars);
+     GlobalFree(hVars); 
      GSSiClose (FidData);
                  
      hDB = OpenGWDatabase (File,BT_WRITE);
@@ -2836,8 +2837,9 @@ BOOL GetTrueStreetName (long SNum, LPSTR TrueName, long State,int index)
     LPSTR		lpAND,pSpace;
 	BOOL		FieldInc=0;
 	
-	if (TrueName)
-		*TrueName = 0;
+	if (!TrueName)
+		return FALSE;
+	*TrueName = 0;
 	if (SNum >= 1000000000) 
 	{
 		SNum -= 1000000000;

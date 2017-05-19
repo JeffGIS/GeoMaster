@@ -6,6 +6,7 @@
 #include <commdlg.h>
 #include <ctype.h>    
 #include "sqlite3.h"
+#include "laszip_dll.h"
 
 #if WIN32
 #define HUGE 
@@ -115,6 +116,11 @@ typedef RECT16	FAR *LPRECT16;
 #define VPFILETYPE_MACRO	7
 #define VPFILETYPE_SUBVP	8
 #define VPFILETYPE_DTM	9
+
+#define DTMTYPE_NGI			1
+#define DTMTYPE_TIN_GM		2
+#define DTMTYPE_LIDAR_GM	3
+#define DTMTYPE_LIDAR_LAZ	4
 #ifdef	_WIN32_WCE
 typedef long clock_t;
 /* OpenFile() Structure */
@@ -273,8 +279,10 @@ typedef float			 	FAR *LPFLOAT;
 typedef float   			HUGE *HPFLOAT;
 typedef double  			FAR *LPDOUBLE;
 typedef double  			HUGE *HPDOUBLE;
-typedef struct{double x,y;} DPOINT;
+typedef struct{ double x, y; } DPOINT;
 typedef DPOINT  			FAR *LPDPOINT;
+typedef struct{ double lat, lon; } LLPOINT;
+typedef LLPOINT  			FAR *LPLLPOINT;
 typedef DPOINT  			HUGE *HPDPOINT;
 typedef POINTS				*HPPOINTS;
 typedef struct{double x,y,z;} DPOINT3D;
@@ -322,7 +330,12 @@ typedef struct
     CHAR      lfFaceName[LF_FACESIZE];
 } LOGFONT16,  FAR *LPLOGFONT16;
 #pragma pack()
-
+typedef struct
+{
+	short x;
+	short y;
+}  SPOINT;
+typedef SPOINT *LPSPOINT;
 typedef struct
 {
 	short x;
@@ -406,6 +419,17 @@ typedef struct
 typedef MNMXCORD    FAR *LPMNMXCORD; 
 typedef MNMXCORD	HUGE *HPMNMXCORD;
 typedef struct
+{
+	double  xmn;
+	double  ymn;
+	double  zmn;
+	double  xmx;
+	double  ymx;
+	double  zmx;
+} MNMXCORD3D;
+typedef MNMXCORD3D    FAR *LPMNMXCORD3D;
+
+typedef struct
    {	short	xmn;
    		short	ymn;
    		short	xmx;
@@ -430,7 +454,7 @@ typedef struct
      } LIDARFILEHEADER;
 typedef struct
      {  
-     	short	xoff,yoff;
+     	short	xoff,yoff,intensity;
      	float	Elevation;
      } LIDARPNT;
 typedef struct
@@ -645,6 +669,7 @@ typedef struct
 		char	From[1024];
 		char	Where[4096];
 		char	Query[8192];
+		BOOL	hasRowID;
 		sqlite3_stmt *statement;
 		FIELDINFO	FldInfo[1];
 	}SQLDATABASE;
@@ -3685,11 +3710,20 @@ typedef struct{
 								lTAddR:4;
 			}ADDRESSLENGTHS;
 typedef ADDRESSLENGTHS FAR *LPADDRESSLENGTHS;
+typedef struct {
+	char lazFiles[4][256];
+	int lazFileNums[4];
+	__int64 lastUse[4];
+	laszip_POINTER laszip_readers[4];
+}LAZFILESTRUCT;
+typedef LAZFILESTRUCT *LPLAZFILESTRUCT;
 
 typedef struct {                                        
 				HANDLE	hDB;                            //handle of file if .dtm or viewport if TIN Plt files
 				short	Type;
-				HFILE	Fid;							//1 = dtm grid, 2 = TIN plt files, 3 = Lidar points
+				short	Version;
+				HFILE	Fid;							//1 = dtm grid, 2 = TIN plt files, 3 = Lidar points, 4 = LIDAR in laz format
+				sqlite3 *db;
 				double	NULLElv;
 				double	GridSpace; 
 				short	ElevUnits; 						//0=feet,1=feet*100,2=decimeters,3=meters     
@@ -3704,6 +3738,8 @@ typedef struct {
 				long	CellID[MAXDTMCELLBUFFERS];
 				long	CellUse[MAXDTMCELLBUFFERS];  
 				char	TINIndex[256];
+				char	LAZDir[256];
+				LAZFILESTRUCT lazFiles;
 				VISLIST	VisList; //location of data for TIN surface
 				} DTMINFO;
 typedef DTMINFO	FAR	*LPDTMINFO;

@@ -135,9 +135,9 @@ DWORD DGN7ReadElement( DGNHandle hDGN,LPSTR pMem,DWORD MaxMemSize,double * pPixe
 				case DGNT_ELLIPSE:
 				case DGNT_ARC:
 					{
-						DGNStrokeArc( hDGN,(DGNElemArc *)pDGNElemCore,5,TestPoints);
-						dlen = PolyLength (5,TestPoints);
-						*pnum_vertices = min (MaxPoints-1,max (2,(int)(dlen/(*pPixelSize)))) + 1;
+						//DGNStrokeArc( hDGN,(DGNElemArc *)pDGNElemCore,5,TestPoints);
+						//dlen = PolyLength (5,TestPoints);
+						*pnum_vertices = 7;// min(MaxPoints - 1, max(2, (int)(dlen / (*pPixelSize)))) + 1;
 						DGNStrokeArc( hDGN,(DGNElemArc *)pDGNElemCore,*pnum_vertices,pvertices);
 					}
 					break;

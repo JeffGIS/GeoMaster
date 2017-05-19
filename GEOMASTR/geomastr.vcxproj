@@ -78,7 +78,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34j</TargetName>
-    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
@@ -90,7 +90,7 @@
     <IntDir>NVServer\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34j</TargetName>
-    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
     <CustomBuildAfterTargets />
     <TargetExt>.exe</TargetExt>
@@ -111,7 +111,7 @@
     <EmbedManifest>true</EmbedManifest>
     <TargetName>GeoMaster34i</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include</IncludePath>
+    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -130,8 +130,8 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -205,7 +205,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;XPVERSION;NVSERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;NVSERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -241,7 +241,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Release/$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\Release/$(TargetName).map</MapFileName>
+      <MapFileName>.\NVServer/$(TargetName).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <HeapReserveSize>32000000</HeapReserveSize>
       <StackReserveSize>4000000</StackReserveSize>
@@ -253,6 +253,7 @@
       <SwapRunFromCD>false</SwapRunFromCD>
       <SwapRunFromNET>false</SwapRunFromNET>
       <DelayLoadDLLs>gdal110.dll</DelayLoadDLLs>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <Bscmake>
       <OutputFile>.\Release/geomastr.bsc</OutputFile>
@@ -345,7 +346,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\dgnlib;..\sunang\ipw\h;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;SQLITE_ENABLE_RTREE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -403,6 +404,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\FileGDBAPI\FGDBStub.c" />
+    <ClCompile Include="..\LAStools\LASzip\dll\laszip_dll.c" />
+    <ClCompile Include="..\LAStools\LASzip\example\laszipdllexample.cpp" />
     <ClCompile Include="..\solar_calculator\Version2\aa.c" />
     <ClCompile Include="..\Proj-4\src\aasincos.c" />
     <ClCompile Include="..\SQLite3\shell.c" />
@@ -609,6 +612,7 @@
     <ClCompile Include="..\OFFSET\Offset.c" />
     <ClCompile Include="..\gctpc\omerfor.c" />
     <ClCompile Include="..\gctpc\omerinv.c" />
+    <ClCompile Include="NVMetro.c" />
     <ClCompile Include="NVTextDrawing.c" />
     <ClCompile Include="OpenFileDlg.cpp" />
     <ClCompile Include="ORAFILE.C" />
@@ -850,6 +854,7 @@
     <ClCompile Include="..\gctpc\wviifor.c" />
     <ClCompile Include="..\gctpc\wviiinv.c" />
     <ClCompile Include="wlan.cpp" />
+    <ClCompile Include="WMS.c" />
     <ClCompile Include="XMLProcessing.c" />
     <ClCompile Include="..\sunang\ipw\src\lib\libipw\sunang\yrday.c" />
     <ClCompile Include="..\solar_calculator\Version2\zatan2.c" />
@@ -887,6 +892,7 @@
     <ClInclude Include="..\INCLUDE\gssitype.h" />
     <ClInclude Include="..\INCLUDE\rotate256.h" />
     <ClInclude Include="..\INCLUDE\UMIO.H" />
+    <ClInclude Include="..\LAStools\LASzip\dll\laszip_dll.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\BMPImageWriter.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\GeoTIFFImageWriter.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\J2KImageReader.h" />
@@ -1012,6 +1018,7 @@
     <ClInclude Include="..\INCLUDE\shr.h" />
     <ClInclude Include="..\INCLUDE\TileGraphics.h" />
     <ClInclude Include="..\INCLUDE\toolbar.h" />
+    <ClInclude Include="WMS.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Citytour\ALIGN_BO.BMP" />
@@ -1175,6 +1182,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

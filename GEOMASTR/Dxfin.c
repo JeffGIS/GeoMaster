@@ -2067,8 +2067,8 @@ T1000:   if(*IST == -2) *IST = 0  ; //{ condition internal to this routine }
 		lpDxf2GM->NV = 0;
         if(*CONTINUE_POLY)    
         {
-         lpDxf2GM->XY[1][1] = lpDxf2GM->XY[1][1000];
-         lpDxf2GM->XY[2][1] = lpDxf2GM->XY[2][1000];
+         lpDxf2GM->XY[1][1] = lpDxf2GM->XY[1][999];
+         lpDxf2GM->XY[2][1] = lpDxf2GM->XY[2][999];
          lpDxf2GM->NV = 1;
          *CONTINUE_POLY = FALSE;
         }

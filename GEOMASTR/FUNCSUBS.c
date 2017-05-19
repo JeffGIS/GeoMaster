@@ -430,7 +430,7 @@ Exit:
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 {
 	BOOL rtn = FALSE;
-	HFILE FidTF, fidFiles, fidIndex=HFILE_ERROR;
+	HFILE FidTF, fidFiles, fidIndex = HFILE_ERROR;
 	char filePath[MAX_PATH + 2];
 	char indexRec[MAX_PATH + 32];
 
@@ -438,7 +438,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		goto Exit;
 	if (!stricmp(Arg[1], "CREATE"))//$COMPRESSEDFILE(CREATE,path,filelistfile,sourcedir,outindexfile)
 	{
-		long	NextFileLoc = 0, loc=0, len;
+		long	NextFileLoc = 0, loc = 0, len;
 		long	TotLen;
 		long	MaxLength = 8L * (long)USHRT_MAX;
 		short	Version = 101;
@@ -454,7 +454,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 				GSSiClose(fidFiles);
 				goto Exit;
 			}
-			sprintf(indexRec, "FILE\tFILELOC", filePath, loc);
+			sprintf(indexRec, "FILE\tFILELOC");
 			fputstring(indexRec, fidIndex);
 		}
 		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
@@ -477,7 +477,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 			}
 			BigWrite(FidTF, (HPSTR)&len, 4, -1);
 			BigWrite(FidTF, (HPSTR)filePath, len, -1);
-			AddFileToTransferFile(0, FidTF, filePath, MaxLength,Arg[4]);
+			AddFileToTransferFile(0, FidTF, filePath, MaxLength, Arg[4]);
 			loc = -1;
 			BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		}
@@ -490,8 +490,117 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		GSSiClose(fidIndex);
 		rtn = TRUE;
 	}
-Exit:
+	else if (!stricmp(Arg[1], "EXPAND"))//$COMPRESSEDFILE(EXPAND,path,outputdir,whichfile(ALL or blank for all files))
+	{
+		rtn = DecompressGMZipFile(Arg[2], Arg[3], Arg[4], atob(Arg[5]));
+	}
+	Exit:
 	return rtn;
+}
+static int GetFileFromTransferFile(HFILE FidTF,LPSTR FileToGet,long MaxLength,_int64 totlen)
+{
+			int lRec, rtn = FALSE;
+			int	CompressedLength, LenRead = 0;
+			double curLoc;
+			HFILE Fid = GSSiOpenFile(FileToGet, 0, OF_CREATE);
+
+			if (Fid == HFILE_ERROR)
+				goto Exit;
+
+			BigRead(FidTF, (HPSTR)&CompressedLength, 4);
+			rtn = TRUE;
+			while (CompressedLength > 0)
+			{
+				LPBYTE	pCompressedRec = (LPBYTE)malloc(CompressedLength + 32);
+				LPBYTE	pRec = (LPBYTE)malloc(MaxLength * 2);
+				LenRead += CompressedLength + 4;
+				BigRead(FidTF, pCompressedRec, CompressedLength);
+				lRec = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, CompressedLength);
+				if (BigWrite(Fid, pRec, lRec, -1) != lRec)
+					rtn = FALSE;
+				BigRead(FidTF, (HPSTR)&CompressedLength, 4);
+				free(pCompressedRec);
+				free(pRec);
+				curLoc = GSSillseek(FidTF,0,1);
+				/*if (_popover)
+				{
+
+					dispatch_async(dispatch_get_main_queue(),
+						^{
+						[_popover updateProgress : curLoc / _totLen];
+					});
+
+				}*/
+			}
+
+			GSSiClose(Fid);
+
+		Exit:
+			return rtn;
+		}
+
+BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichFile,BOOL showStatus)
+{
+#define PATH_MAX MAX_PATH
+			int	len, MaxLength;
+			char File[PATH_MAX], OutFile[PATH_MAX];
+			short Version, endMarker;
+			HFILE FidTF;
+			BOOL rtn = TRUE;
+			LPSTR pBS;
+			FidTF = GSSiOpenFile(TransferFileName, 0,OF_READ);
+			long fileLen;
+			long nFilesRead = 0;
+			_int64 totLen = 0;
+
+			if (FidTF == HFILE_ERROR)
+				return FALSE;
+
+			fileLen = GSSifilelength(FidTF);
+			if (fileLen < 14)
+			{
+				rtn = FALSE;
+				goto Exit;
+			}
+			totLen = fileLen;
+
+			GSSillseek(FidTF, -4, SEEK_END);
+			BigRead(FidTF,&endMarker, sizeof(short));
+
+			if (endMarker != 32349)
+			{
+				rtn = FALSE;
+				goto Exit;
+			}
+
+			GSSillseek(FidTF, 0, SEEK_SET);
+			BigRead(FidTF, &Version, sizeof(short));
+			BigRead(FidTF, &MaxLength, sizeof(int));
+			BigRead(FidTF, &len, 4);
+
+			while (rtn && len > 0)
+			{
+				BigRead(FidTF, File, len);
+
+				if (!(pBS = strrchr(File, '\\')))
+				{
+					pBS = File;
+				}
+				else
+				{
+					pBS++;
+				}
+				sprintf(OutFile, "%s\\%s", toDirectory, pBS);
+				rtn = GetFileFromTransferFile(FidTF,OutFile,MaxLength,totLen);
+				nFilesRead++;
+				if (!rtn)
+					goto Exit;
+				BigRead(FidTF, &len, 4);
+			}
+
+		Exit:
+			GSSiClose(FidTF);
+			return rtn;
 }
 
 HANDLE GetDistinctValues (HWND hWnd,LPSTR valueIn,int ln,HANDLE hDB,int nStatus)
@@ -613,14 +722,14 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 			CurLoc++;  
 		}
 	}
-	else if (!stricmp(Arg[1], "TABLES"))
+	else if (!stricmp(Arg[1], "TABLES"))//???
 	{
 		long	n = 0;
 		LPSTR	lpSTRING;
 		short	NS;
 		HANDLE	DBHandle;
 		char	TableName[128];
-		char	TablePartialName[128];
+		char	TablePartialName[128] = { 0 };
 
 		strupr(TablePartialName);
 		DBHandle = GetDBHandleFromSQL(hDB);
@@ -793,7 +902,7 @@ BOOL LinkLinesFunction (LPSTR Arg1,LPSTR Arg2,LPSTR OutLoc)
 		double	tol = atof (Arg2);
 		double	wantaz, az, daz;
 		int		havei;
-		BOOL	reverse;
+		BOOL	reverse=FALSE;
 		
 		pRawLines = (LPLINKEDLINES)GlobalLock (hRawLines);
 		nConnectedLines = 0;
@@ -968,7 +1077,7 @@ int LinkPipesFunction (int iOpt,int id,double tol,LPINT pnPnts,LPDPOINT3D pPoint
 		{
 			double	wantaz, az, daz;
 			int		havei;
-			BOOL	reverse;
+			BOOL	reverse=FALSE;
 			
 			nConnectedLines = 0;
 			if (hRawLines)
@@ -1281,6 +1390,7 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 			return;
 		if (id < FIRST_USER_PROJ)
 			return;
+		id -= 8;
 		pj_free(projdef[id]);
 		*projid[id] = 0;
 		strcpy (OutLoc,"1");
@@ -1466,7 +1576,7 @@ BOOL GetSymAttrFile2 (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPS
 {
 	static	BOOL First=TRUE;
 	static	HANDLE	hSymAttrFiles=0;
-	static	char	SymAppendVar[70];
+	static	char	SymAppendVar[70] = { 0 };
 	int		len;
 	LPSTR	pSymAttrFiles;
 	LPSTR	pSC;
@@ -1948,13 +2058,16 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 	   	SetFieldValFromCharAndName(lpGWDHead,"EventDescription",(LPSTR)pLoc,FALSE);
 
 		pLoc = strstr (pRec,"<event-identifier>");
-		pLoc += strlen ("<event-identifier>");
-		pLocEnd = strstr (pLoc,"</event-identifier>");
-		*pLocEnd = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"EventIdentifier",(LPSTR)pLoc,FALSE);
-		*pLocEnd = '<';
+		if (pLoc)
+		{
+			pLoc += strlen("<event-identifier>");
+			pLocEnd = strstr(pLoc, "</event-identifier>");
+			*pLocEnd = 0;
+			SetFieldValFromCharAndName(lpGWDHead, "EventIdentifier", (LPSTR)pLoc, FALSE);
+			*pLocEnd = '<';
 
-		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
+			st = GWDReplaceRecord(lpGWDHead, 0, 0, -1);
+		}
 		//StatusWindowUpdate (0,0, (int)pEnd,(int)pFile);
 	}
     GlobalUnlock (hDB); 
@@ -2108,7 +2221,7 @@ BOOL FixBlockedRefs (LPSTR FileName)
     LPFBRD	pFBRD;
     short	pos=BT_FIRST;
     long	Tot,Num=0, nFixed=0, nNotFound=0;	
-    char	mess[128];		
+	char	mess[128] = { 0 };
     
     hDB = OpenGWDatabase (FileName,BT_READ);
     if (!hDB)
@@ -2641,7 +2754,7 @@ POINT PIAACenter(LPPIAAStruct pPIAA, LPLONG piCPDist, LPLONG pMaxn, BOOL UsePCTB
     int		x,y;
 	POINT	PIAAPoint;
 	DPOINT	DPoint;
-	long	iCPDist;
+	long	iCPDist=0;
 	HPBYTE	barray;   
 	POINT	CenterPoint={0,0};
 	
@@ -2792,7 +2905,7 @@ BOOL AreaInArea2 (LPSTR TAGOrRef,LPSTR AinAGMD,int SpeedFactor,double MinPCT,BOO
 	char	DefStr[]="BoundaryRef(B4),AreaRef(B4),FractionOfBoundary(R8),FractionOfAreaInBoundary(R8),SizeOfBoundary(R8),SizeOfArea(R8),BoundaryTAG(C42),AreaTAG(C42),NumInBoundary(B4)";
 	short	NumIndexFields=2, pos=BT_FIRST;
 	LPSTR	pColon=_fstrchr (TAGOrRef,':');
-	long	AreaRefno, BoundaryAreaRefno, Num, InRefno,nBoundaryPoints,BoundaryAreaRef,nRecs,nRecs2,Done=0,Done2;
+	long	AreaRefno, BoundaryAreaRefno, Num, InRefno,nBoundaryPoints,BoundaryAreaRef,nRecs=1,nRecs2,Done=0,Done2;
 	BOOL	st; 
 	HANDLE	hDB;
 	LPGWDHEADER lpGWDHead;
@@ -5770,8 +5883,10 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 		else
 			pLastDir = _fstrchr (LastDir,0);
 		//sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",str2,Name,drive,dir,pLastDir,extension,lastup,lfile);
-		if (nameOnly)
+		if (nameOnly == 1)
 			sprintf(str, "%s%s", Name, extension);
+		else if (nameOnly == 2)
+			sprintf(str, "%s", str2);
 		else
   			sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
 		fputstring (str,OutFileFID);
@@ -7352,17 +7467,17 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lPa
 			HMENU	hMenu=CreatePopupMenu();   
 			POINT	position;
 
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomSize==ImageZoomSizeSmall?MF_CHECKED:0|MF_STRING,65001,"Small");
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomSize==ImageZoomSizeMedium?MF_CHECKED:0|MF_STRING,65002,"Medium");
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomSize==ImageZoomSizeLarge?MF_CHECKED:0|MF_STRING,65003,"Large");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomSize==ImageZoomSizeSmall?MF_CHECKED:0)|MF_STRING,65001,"Small");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomSize==ImageZoomSizeMedium?MF_CHECKED:0)|MF_STRING,65002,"Medium");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomSize==ImageZoomSizeLarge?MF_CHECKED:0)|MF_STRING,65003,"Large");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomShape==0?MF_CHECKED:0|MF_STRING,65011,"Square");
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomShape==1?MF_CHECKED:0|MF_STRING,65012,"Round");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomShape==0?MF_CHECKED:0)|MF_STRING,65011,"Square");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomShape==1?MF_CHECKED:0)|MF_STRING,65012,"Round");
 			//AppendMenu (hMenu,MF_ENABLED|ImageZoomShape==2?MF_CHECKED:0|MF_STRING,65013,"Use Viewport Proportions");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomBorder?MF_CHECKED:0|MF_STRING,65021,"Display Border");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomBorder?MF_CHECKED:0)|MF_STRING,65021,"Display Border");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
-			AppendMenu (hMenu,MF_ENABLED|ImageZoomOffset?MF_CHECKED:0|MF_STRING,65031,"Offset");
+			AppendMenu (hMenu,MF_ENABLED|(ImageZoomOffset?MF_CHECKED:0)|MF_STRING,65031,"Offset");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);
 			AppendMenu (hMenu,MF_ENABLED|MF_STRING,65041,"Exit");
 			AppendMenu (hMenu, MF_SEPARATOR, 0,0);

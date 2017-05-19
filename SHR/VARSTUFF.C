@@ -103,6 +103,7 @@ void DestroyVarSpace(HANDLE hVarSpace)
 	if (hVarSpace == (HANDLE)-1)
 	{
 		hVarSpace = hGlobalVarSpace;
+		hGlobalVarSpace = 0;
 		HaveDL = FALSE;
 	}
 	if (hVarSpace)
@@ -493,7 +494,7 @@ BOOL GetCurrentPNDBName (LPSTR Name)
 		doDelete = TRUE;
 		Name = &DefStr[512];
 	}
-   	sprintf (Name,"%s\\grt%i%i.gmd",DefStr,CurrentVersion); 
+   	sprintf (Name,"%s\\grt%i.gmd",DefStr,CurrentVersion); 
    	if (!ExistFile (Name))
    	{
 		if (doDelete)
@@ -966,7 +967,7 @@ GSSiExitProg (520);
     	Type =GMTEXT_DATAFILE;
     else if (_fstrstr(Name,".HLT"))
     	Type =HLTLIST_DATAFILE;
-    else if (_fstrstr(Name,".DTM") || _fstrstr(Name,".LDR") || _fstrstr(Name,"INDEX.TIN"))
+	else if (_fstrstr(Name, ".DTM") || _fstrstr(Name, ".LDR") || _fstrstr(Name, "INDEX.TIN") || _fstrstr(Name, "INDEX.LA"))
     	Type =DTM_DATAFILE;
     else if (_fstrstr(Name,".BMP") || _fstrstr(Name,".JPG") || _fstrstr(Name,".TIF"))
     	Type =IMAGE_DATAFILE;
@@ -1046,7 +1047,7 @@ GSSiExitProg (520);
 			break;
 
 		case SLT_DATAFILE:
-			FileHandle = OpenSLTDatabase(Name, SQL);
+			FileHandle = OpenSLTDatabase(Name, SQL,Access);
 			break;
 
 		case LISTVAR_DATAFILE:
@@ -1933,7 +1934,7 @@ BOOL LoadTAGDef (void)
 				else
 					pTAGDef = (LPTAGDEF)GlobalLock (hTAGDef); 
 				if (sscanf (line,"%s %i %i %i",
-					&pTAGDef->Prefix,&pTAGDef->Len,&pTAGDef->IncBeg,&pTAGDef->IncLen) != 4)
+					pTAGDef->Prefix,&pTAGDef->Len,&pTAGDef->IncBeg,&pTAGDef->IncLen) != 4)
 				{
 					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
 					GSSiMsgBox (GetFocus(),Mess,0,MB_ICONEXCLAMATION,0);
@@ -1943,7 +1944,7 @@ BOOL LoadTAGDef (void)
 			{   
 				lpSpace = _fstrchr (&line[1],' ');
 				if (sscanf (&line[1],"%s %i %i %i",
-					&pTAGDef->VarName[pTAGDef->NumVar],&pTAGDef->VarStart[pTAGDef->NumVar],
+					pTAGDef->VarName[pTAGDef->NumVar],&pTAGDef->VarStart[pTAGDef->NumVar],
 					&pTAGDef->VarLen[pTAGDef->NumVar]) != 3)
 				{
 					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
@@ -5079,24 +5080,42 @@ GSSiExitProg (536);
 #endif
 } 
 
-void SetGlobalValueBounds (LPSTR Name, LPMNMXCORD pBounds)
+void SetGlobalValueBounds(LPSTR Name, LPMNMXCORD pBounds)
 #if ENABLETRACE
 {GSSiEnterProg (536);
 #endif
-{   char	txt[128];  
+{   char	txt[256];
 
-	sprintf (txt,"%.14lg %.14lg %.14lg %.14lg",pBounds->xmn,pBounds->ymn,pBounds->xmx,pBounds->ymx);
-	SetGlobalValue (Name,txt);
+sprintf(txt, "%.14lg %.14lg %.14lg %.14lg", pBounds->xmn, pBounds->ymn, pBounds->xmx, pBounds->ymx);
+SetGlobalValue(Name, txt);
 {
 #if ENABLETRACE
-GSSiExitProg (536);
+	GSSiExitProg (536);
 #endif
 	return;
 }
 #if ENABLETRACE
 }
 #endif
-} 
+}
+void SetGlobalValueBounds3D(LPSTR Name, LPMNMXCORD3D pBounds)
+#if ENABLETRACE
+{GSSiEnterProg (536);
+#endif
+{   char	txt[256];
+
+sprintf(txt, "%.14lg %.14lg %.14lg %.14lg %.14lg %.14lg", pBounds->xmn, pBounds->ymn, pBounds->zmn, pBounds->xmx, pBounds->ymx, pBounds->zmx);
+SetGlobalValue(Name, txt);
+{
+#if ENABLETRACE
+	GSSiExitProg(536);
+#endif
+	return;
+}
+#if ENABLETRACE
+}
+#endif
+}
 
 void SetGlobalValueHandle (LPSTR Name, HANDLE val)
 #if ENABLETRACE
@@ -5373,7 +5392,15 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
 			pstr++;
 		_fstrcpy (INstr,pstr);
 		if (FidHdr != Fid)
-			GSSiClose (FidHdr);
+		{
+			GSSiClose(FidHdr);
+			if (GetGlobalBVal2("[%SKIPHEADER]", FALSE))
+			{
+				LPSTR line = malloc(USHRT_MAX);
+				fgetstring(line, USHRT_MAX - 2, Fid);
+				free(line);
+			}
+		}
 	}	                                 
 	_fstrcpy (str,INstr);
 	nDLTvar = 0; 
@@ -5558,6 +5585,7 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 		VarPtr = (VARPNT)GlobalLock (DLTVar[ivar]);
 		VarPtr->Len = 0;    
 		*VarPtr->Value = 0;
+		VarPtr->Type = 0;
 		VarPtr->changetime = NextVarTime();
 		SetLinkedVarTime (VarPtr); 
 		if (nDLTvar == 1)
@@ -5618,7 +5646,7 @@ Next:if (*str == '"')
 	EndLoc = _fstrstr(str,EndStr);
 	if (EndLoc)
 		*EndLoc = '\0';
-	else if (*EndStr = '"')
+	else if (*EndStr == '"')
 	{
 		if ((EndLoc = _fstrrchr (str,'"')))
 			*EndLoc = 0;
@@ -5631,7 +5659,10 @@ Next:if (*str == '"')
 		VarPtr->ValueIsHandle = 0;
 	}
 	strncpy0(VarPtr->Value, BeginLoc, MAXVARLEN-1);
-	VarPtr->Len = _fstrlen(BeginLoc); 
+	if (VarPtr->Type == BT_CHAR)
+		RemoveQuotes(VarPtr->Value);
+
+	VarPtr->Len = _fstrlen(VarPtr->Value);
 	GlobalUnlock (DLTVar[ivar]);
 	if (!EndLoc || EndLoc >= LastLoc-1)
 		goto RtnTrue;
@@ -6348,9 +6379,12 @@ GSSiExitProg (558);
 			}
 			InLoc++;
 			*OutLoc++ = *InLoc;
-			if (*InLoc && *InLoc != literalChar)
+			if (*InLoc)
+			{
+				if (*InLoc != literalChar)
+					FoundLit = TRUE;
 				InLoc++;
-			FoundLit = TRUE;
+			}
 		}
 		else if (*InLoc == '[')
 		{   
@@ -6974,6 +7008,45 @@ GSSiExitProg (563);
 }
 #endif
 } 
+MNMXCORD3D GetGlobalBounds3DVal(LPSTR Global, LPMNMXCORD3D pDefault)
+#if ENABLETRACE
+{
+	GSSiEnterProg(563);
+#endif
+	{
+		HANDLE	hStr = GSSiGlobAlloc(221, GMEM_MOVEABLE, 256);
+		LPSTR	str = GlobalLock(hStr);
+		MNMXCORD3D	Rect;
+		BOOL	Err;
+
+		_fstrcpy(str, Global);
+		ExpandText(str);
+		if (!*str)
+		{
+			if (pDefault)
+			{
+				GSSiGlobUlFree(&hStr);
+				{
+#if ENABLETRACE
+					GSSiExitProg(563);
+#endif
+					return *pDefault;
+				}
+			}
+		}
+		Rect = atobounds3D(str, &Err);
+		GSSiGlobUlFree(&hStr);
+		{
+#if ENABLETRACE
+			GSSiExitProg(563);
+#endif
+			return Rect;
+		}
+#if ENABLETRACE
+}
+#endif
+}
+
 
 
 MNMXCORD GetGlobalBoundsVal (LPSTR Global,LPMNMXCORD pDefault) 
@@ -7858,7 +7931,7 @@ NextTextRec:
 				SQLPtr->lastreadtime = NextVarTime();
 				SLTCloseCursor(pSQL);
 				ClearCurVals(FilePtr);
-				SLTPrepareStatement(pSQL, SQLPtr->SQL);
+				SLTPrepareStatement(pSQL, pSQL->Where);
 			}
 			SQLPtr->st = 0;
 			if (!FetchSLTRec(pSQL))
@@ -8809,6 +8882,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 
 					VarPtr = (VARPNT)GlobalLock(*DLTVar);
 					_fstrncpy(Value, VarPtr->Value, maxlval);
+					RemoveQuotes(Value);
 					GlobalUnlock(*DLTVar);
 					GlobalUnlock(FilePtr->FileHandle);
 				}

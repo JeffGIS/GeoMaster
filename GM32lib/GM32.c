@@ -612,7 +612,7 @@ BOOL	GetSDChipSerialNumber (LPSTR Drive)
 
                 // Fill the STORAGE_IDENTIFICATION structure with the flash card info 
                 if(DeviceIoControl(hCard, IOCTL_DISK_GET_STORAGEID, (LPVOID)NULL, 0, 
-                                                     si, BBUF_LENGTH, &dwNumReturned, NULL) == FALSE) 
+					si, sizeof(STORAGE_IDENTIFICATION), &dwNumReturned, NULL) == FALSE)
                 { 
                         err = GetLastError(); 
                         res = FALSE; 

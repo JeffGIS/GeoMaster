@@ -1,6 +1,13 @@
-#if XPVERSION || NVSERVER
+#if defined XPVERSION || defined NVSERVER
 
 #include "graphint.h"
+
+LPSTR FGDBVersion(void)
+{
+	static char version[] = { "File Geodatabase Version 0.0" };
+	return version;
+}
+
 
 int  OpenFGDB2 (LPSTR DBName,LPSTR Table,LPSTR SQL)
 {

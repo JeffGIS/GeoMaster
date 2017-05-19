@@ -1635,7 +1635,7 @@ BOOL FAR PASCAL ADDCBFIELDTOPOINTLISTMsgProc(HWND hWndDlg, int Message, WPARAM w
 	         		
 	         		if (NextID)
 	         		{
-					    sprintf (str,"MENUITEM \"%s\",\"[%C]=$MACRO([%DL]macros\\setpointlayer.txt,%i);\"",LayerText,NextID);
+					    sprintf (str,"MENUITEM \"%s\",\"[%%C]=$MACRO([%DL]macros\\setpointlayer.txt,%i);\"",LayerText,NextID);
 						Insert (0,0,str);
 						Insert ("END",File,0);
 					} 

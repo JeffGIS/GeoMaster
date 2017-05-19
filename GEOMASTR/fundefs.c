@@ -219,6 +219,8 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "LOWORD", 6)) return 650;
 			if (!_fstrnicmp(str, "HIWORD", 6)) return 651;
 			if (!_fstrnicmp(str, "NVCRIS", 6)) return 652;
+			if (!_fstrnicmp(str, "LASZIP", 6)) return 653;
+			if (!_fstrnicmp(str, "UNIQUE", 6)) return 654;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)
@@ -299,6 +301,8 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "ADDRESS", 7)) return 782;
 			if (!_fstrnicmp(str, "TESTENV", 7)) return 783;
 			if (!_fstrnicmp(str, "COPYDIR", 7)) return 784;
+			if (!_fstrnicmp(str, "NVMETRO", 7)) return 785;
+			if (!_fstrnicmp(str, "TAGDUMP", 7)) return 786;
 
 			return 0;
 }
@@ -359,6 +363,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "DATABASE", 8)) return 853;
 			if (!_fstrnicmp(str, "GMMOBILE", 8)) return 854;
 			if (!_fstrnicmp(str, "MAKELONG", 8)) return 855;
+			if (!_fstrnicmp(str, "TEXTFILE", 8)) return 856;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

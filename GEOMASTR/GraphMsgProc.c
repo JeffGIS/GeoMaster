@@ -252,6 +252,8 @@ static	UINT	SepCntl[16]=	{IDC_SEP1,
 
 #include "gmextern.h"     
 
+BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDATA pHighlightData, BOOL FirstRec);
+
 BOOL ExportData (HWND hWnd,short Type)
 {
     DLGPROC lpfnMIF_OUTPUTMsgProc, lpfnDXF_OUTPUTMsgProc, lpfnBMP_OUTPUTMsgProc, lpfnTXT_OUTPUTMsgProc, lpfnORACLEMsgProc;
@@ -389,17 +391,26 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				HDIB32 hDib32 = BMPHandleFromEXT(FileName);
 				//BOOL flip = FreeImage_FlipVertical(hDib32);
 				//flip = FreeImage_FlipHorizontal(hDib32);
-				GetClientRect(GetDlgItem(hWndDlg, buttons[ibutton]), &buttonRect);
-				HDIB32 hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTHEIGHT(&buttonRect), FILTER_CATMULLROM);
-				hBM[ibutton] = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
-				hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, buttons[ibutton], BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[ibutton]);
-				DestroyDIB32(hDib32, FALSE);
-				DestroyDIB32(hDibScaled, FALSE);
-				EnableWindow(GetDlgItem(hWndDlg, buttons[ibutton]), TRUE);
-				ShowWindow(GetDlgItem(hWndDlg, buttons[ibutton]), SW_SHOW);
-				ShowWindow(GetDlgItem(hWndDlg, buttontext[ibutton]), SW_SHOW);
-				SetDlgItemText(hWndDlg, buttontext[ibutton], pTab);
-				ibutton++;
+				{
+					float imagewidth = FreeImage_GetWidth(hDib32);
+					float imageheight = FreeImage_GetHeight(hDib32);
+					float fac1, fac2, fac;
+					HDIB32 hDibScaled;
+					GetClientRect(GetDlgItem(hWndDlg, buttons[ibutton]), &buttonRect);
+					fac1 = RECTWIDTH(&buttonRect) / imagewidth;
+					fac2 = RECTHEIGHT(&buttonRect) / imageheight;
+					fac = min(fac1, fac2);
+					hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
+					hBM[ibutton] = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+					hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, buttons[ibutton], BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[ibutton]);
+					DestroyDIB32(hDib32, FALSE);
+					DestroyDIB32(hDibScaled, FALSE);
+					EnableWindow(GetDlgItem(hWndDlg, buttons[ibutton]), TRUE);
+					ShowWindow(GetDlgItem(hWndDlg, buttons[ibutton]), SW_SHOW);
+					ShowWindow(GetDlgItem(hWndDlg, buttontext[ibutton]), SW_SHOW);
+					SetDlgItemText(hWndDlg, buttontext[ibutton], pTab);
+					ibutton++;
+				}
 			}
 			GSSiClose(fid);
 		}
@@ -490,12 +501,9 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 							GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
 							fac1 = RECTWIDTH(&buttonRect) / imagewidth;
 							fac2 = RECTHEIGHT(&buttonRect) / imageheight;
-							fac = imagewidth / imageheight;
-							if (fac1 > fac2)
-								hDibScaled = FreeImage_Rescale(hDib32, RECTWIDTH(&buttonRect), RECTWIDTH(&buttonRect)*fac, FILTER_CATMULLROM);
-							else
-								hDibScaled = FreeImage_Rescale(hDib32, RECTHEIGHT(&buttonRect), RECTHEIGHT(&buttonRect)*fac, FILTER_CATMULLROM);
-							hBMLarge = DIB32ToBitmap(hDib32, (HPALETTE)0);
+							fac = min(fac1, fac2);
+							hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
+							hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
 							HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
 							GSSiDeleteObject(&hOldBM);
 							ibutton++;
@@ -6831,7 +6839,7 @@ GSSiExitProg (1293);
 					OVBounds = HighlightData.PD.Rect;
 					ExpandBounds (&OVBounds,Overlap);  
 					fputstring ("PAGE_NUM,PAGE_BOUNDS,PAGE_LEFT,PAGE_TOP,PAGE_RIGHT,PAGE_BOTTOM",Fid);
-					sprintf (str,"1,%f %f %f %f,0,0,0,0",OVBounds);
+					sprintf(str, "1,%f %f %f %f,0,0,0,0", OVBounds.xmn, OVBounds.ymn, OVBounds.xmx, OVBounds.ymx);
 					fputstring (str,Fid);
 					for (iArea = 0;iArea<nAreas;iArea++)
 					{
@@ -16148,7 +16156,7 @@ GSSiExitProg (877);
 				GetVolumeLabel(DriveID,VolLabel);
 				{   
 					double FreeSpace=GetDriveFreeSpace (DriveID), mb = FreeSpace/((double)1024*(double)1024);
-	            	sprintf (str,"%c:\\\t%s\t%.1f",DriveID,VolLabel,mb); 
+	            	sprintf (str,"%c:\\\t%s\t%.1f",DriveID[0],VolLabel,mb); 
 			        SendDlgItemMessage (hWndDlg,IDC_LIST,LB_ADDSTRING,0,(LPARAM)str);
 		        } 
 		    }
@@ -18829,7 +18837,9 @@ NextFile:
 				}
                 if (!st)
                 {  
-                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
+					char mess[512];
+					sprintf(mess, "Cannot open data file:%s", Name);
+					GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
                     break;
                 }
                 SQLPtr = (LPOPENSQLDATA)GlobalLock (hSQL);
@@ -21906,7 +21916,9 @@ BeginLoad:
 	                 {  
 						 if (!OpenDataFile (AttImportDataFile,"MSLINK=[%MSLINK]",BT_READ,&AttImporthDB))
 						 {  
-						    MessageBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK);
+							 char mess[512];
+							 sprintf(mess, "Cannot open data file:%s", AttImportDataFile);
+							 GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 						    break;
 						 }
 					 }
@@ -26434,7 +26446,9 @@ NextPass:
 	                
 	                if (!OpenDataFile (PMDataFile,pSQL,BT_READ,&PMhDB))
 	                {  
-	                    GSSiMsgBox(GetFocus(),"Cannot open data file", PMDataFile,MB_ICONQUESTION|MB_OK,0);
+						char mess[512];
+						sprintf(mess, "Cannot open data file:%s", PMDataFile);
+						GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 	                    break;
 	                }
 	                    
@@ -28148,7 +28162,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 { 
 	short	Version=1;
     int		nItems, i;  
-    char    File[128],  ExtID[32], Name[128], str[128];
+    char    File[MAX_PATH],  ExtID[32], Name[MAX_PATH], str[256];
     LPINT   lpItems;    
     HFILE   Fid;
     OFSTRUCTGM    OFStruct;  
@@ -28158,7 +28172,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     LPSTR   vbar; 
     char    txt[128], txt2[128], project[34]; 
     //BTHEAD  BTHead;
-    long    NumItems;
+    long    NumItems=0;
     static	char	Ext[6], SaveExt[8],DExt[6]; 
     static	short   Filter, FileVarID, OutVarID;  
     static	BOOL	FileIsOpen;
@@ -28223,16 +28237,13 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
          DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
 		 if ((NumItems = GetNumThinnedContourRecs ()) <= 0)
 		 {
-			 if (!hHighlight)
+			 NumItems = BT_NUM_IN_INDEX(hHighlight);
+			 if (!NumItems && !*AutoExportName)
 			 { 
-		NoItems:
-				GSSiMsgBox( GetFocus(),"No items highlighted","Error", MB_OK,0);
+				 GSSiMsgBox(GetFocus(), "No items highlighted", "Error", MB_OK, 0);
 				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
 				break;
 			 }  
-			 //GetBTHeader (hHighlight,&BTHead); 
-			 NumItems = BT_NUM_IN_INDEX (hHighlight);  
-			 if (!NumItems) goto NoItems;
 		 }
          sprintf(txt,"%ld items selected",NumItems);
          SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,txt);  
@@ -28322,7 +28333,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     CloseDataFile (FALSE,&MIFOuthDB);
                     Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
                     BigRead (Fid,(HPSTR)&Version,2); 
-                    BigRead (Fid,Name,sizeof(Name)); 
+                    BigRead (Fid,Name,128); 
                     SetDlgItemText (hWndDlg,IDC_MIF_FILE,Name);
                     if ((lpDot=_fstrrchr (Name,'.')))
                     {
@@ -28416,7 +28427,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                      Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
                      BigWrite (Fid,(char *)&Version,2,-1);
 	                 GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,sizeof(Name));
-	                 BigWrite (Fid,Name,sizeof(Name),-1); 
+	                 BigWrite (Fid,Name,128,-1); 
                      BigWrite (Fid,MIFOutDataFile,128,-1);
                      BigWrite (Fid,MIFOutSQL,lnMIFOutSQL,-1);
                      lpItems = (LPINT)GlobalLock(MIFOutFields);  
@@ -28449,7 +28460,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 DPOINT  CP; 
                 BOOL    First, Rtn=FALSE;
                 LPSTR	lpDot, lpName; 
-                char    SQL[256],Type[32],DBName[128],SymName[34]; 
+                char    SQL[256],Type[32],DBName[MAX_PATH],SymName[34], MIFName[MAX_PATH]; 
                 HANDLE	hOutRec = GSSiGlobAlloc ( 701,GMEM_MOVEABLE,USHRT_MAX);
                 LPSTR	OutRec = GlobalLock (hOutRec);
                 SHPPOLYHEADER   SHPPolyHeader;  
@@ -28473,7 +28484,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 static	long	debugref=1743054;
                	DBFHandle pDBF;  
                 short	iPOINTERFld,iSTYLEFld,iSEQFld,iTEXTFld,iFONTNUMFld,iFONTHEIGHTFld;  
-                char	DBFName[128];   
+                char	DBFName[256];   
                 BOOL	Missing,FirstRec=TRUE;
                 HFILE		thinnedContourFID=HFILE_ERROR;
 				float		contourElev;
@@ -28481,6 +28492,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				HANDLE		hConPnts=0;
 				BOOL		thinnedContours=FALSE;
 				HANDLE		h10CharFieldNames = 0;
+				BOOL		useDataFile = FALSE;
+				int		fileType;
 
                 CloseDataFile (FALSE,&MIFOuthDB);  
                 GetDlgItemText (hWndDlg,IDC_SHAPETYPE,str,sizeof(str));
@@ -28493,8 +28506,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 else if (!_fstricmp (str,"Text"))    
                 	ShapeType = 6;
                 GetDlgItemText (hWndDlg,IDC_SQL,SQL,sizeof(SQL));
-                if (!OpenDataFile (MIFOutDataFile,SQL,BT_READ,&MIFOuthDB))
-                    goto Exit2;   
+                if (!(fileType = OpenDataFile (MIFOutDataFile,SQL,BT_READ,&MIFOuthDB)))
+                    goto Exit2;  
+				if (!_stricmp(SQL, "ALL ROWS"))
+					useDataFile = TRUE;
                 nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,
                                            LB_GETSELCOUNT,
                                            0,
@@ -28571,13 +28586,28 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				ContinueProcessing=TRUE;  
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
-				if ((NumItems = GetNumThinnedContourRecs ()) < 0)
+				if (fileType == GMTEXT_DATAFILE && useDataFile)
+				{
+					LPOPENSQLDATA	SQLPtr;
+					LPOPENFILEDATA	FilePtr;
+					int pos = -1;
+
+					if (MIFOuthDB)
+					{
+						SQLPtr = (LPOPENSQLDATA)GlobalLock(MIFOuthDB);
+						FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+						NumItems = GSSillseek(FilePtr->Fid, 0, 2);
+						GlobalUnlock(SQLPtr->OFHandle);
+						GlobalUnlock(MIFOuthDB);
+					}
+				}
+				else if ((NumItems = GetNumThinnedContourRecs ()) < 0)
 					NumItems = BT_NUM_IN_INDEX (hHighlight);  
 				else
 					thinnedContours = TRUE;
-                GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,sizeof(Name));  
-                makedirectories (Name,FALSE,FALSE);
-                FidMIF = GSSiOpenFile (Name,&OFStruct,OF_CREATE); 
+                GetDlgItemText (hWndDlg,IDC_MIF_FILE,MIFName,sizeof(MIFName));  
+                makedirectories (MIFName,FALSE,FALSE);
+                FidMIF = GSSiOpenFile (MIFName,&OFStruct,OF_CREATE); 
                 FidSHP = FidMIF;
                 GetDlgItemText (hWndDlg,IDC_MID_FILE,Name,sizeof(Name));
                 switch (EXType)
@@ -28599,7 +28629,17 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     
                     case SHP:
                         hSQL = 0;  
-                        ExpandText (Name);  
+                        ExpandText (Name);
+						if (!*Name)
+						{
+							LPSTR pDOT;
+							strcpy(Name, MIFName);
+							ExpandText(Name);
+							pDOT = strrchr(Name, '.');
+							if (!pDOT)
+								break;
+							strcpy(pDOT, ".dbf");
+						}
 	                    GSSiRemove (Name); 
 	                    _fstrcpy (DBFName,Name); 
                         pDBF = DBFCreate(Name);
@@ -28626,7 +28666,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 FilePtrATT = (LPOPENFILEDATA)GlobalLock (SQLPtrATT->OFHandle); 
                 lpItems = (LPINT)GlobalLock (MIFOutFields); 
 				h10CharFieldNames = Create10CharFieldNames(hWndDlg, IDC_FIELDS, nItems, lpItems);
-				;
+				
                 for (i=0;i<nItems;i++,lpItems++) 
                 {   
                 	DBFFieldType	DBFFldType; 
@@ -28659,6 +28699,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 						case SQL_UNKCHAR:
 							DBFFldType = FTString;
 							DBFLen = min(254,lpFldInfo->length);
+							if (!DBFLen)
+								DBFLen = 255;
 				            sprintf (Type,"char(%i)",DBFLen);  
 				            nDecimals = 0;
 				        break;
@@ -28757,6 +28799,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  //               while (!BT_FIND (hHighlight,(LPSTR)&iref,pos,BT_ANY,(LPSTR)&HighlightData)&&ContinueProcessing)
   				while (ContinueProcessing && 
 						   (GetNextThinnedContour (&contourElev,&nconPnts,&hConPnts) ||
+						    GetNextDataRecord(useDataFile, MIFOuthDB,&iref, &HighlightData, FirstRec) ||
 						    GetNextHighlightData (&iref,&HighlightData,FirstRec)))
                 {   
               		long	ii; 
@@ -28780,6 +28823,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     	!(PickList[0].HasText && ShapeType == 6)
                       ))
                         goto NextHlt; 
+					if (SysTypeFromPickType(PickList[0].Type) == GF_POINT && PickList[0].BeginPoint.y < 0)
+						goto NextHlt;
 				    SetConfig (PickList[0].ConfigID);
 				    SetViewport (PickList[0].ViewID);
                 	if (ShapeType == 5)
@@ -28789,7 +28834,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     CurView->PassID = 4; 
                     //WantElement = PickList[0].Element;
 					ProcessSelectedTheme = CurView->NumThemes;
-                    if (!thinnedContours)
+					if (!thinnedContours && !useDataFile)
 						ProcessPickedItem (0,-3); 
 					ProcessSelectedTheme = 0;
                     WantElement = LONG_MAX;               
@@ -29358,8 +29403,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 						 //GSSiGlobFree (&hConPnts);
 					 }
 					 else
-            			DestroySavedPolys();                    
-                    PctBox (GetDlgItem(hWndDlg,IDC_STATUS), NumItems, CurItem++,0);
+            			DestroySavedPolys();     
+					 if (fileType == GMTEXT_DATAFILE && useDataFile)
+						 CurItem = GetDBPos(MIFOuthDB);
+					PctBox(GetDlgItem(hWndDlg, IDC_STATUS), NumItems, CurItem++, 0);
 		        	if (NumDBFRecs != RecNum)  
 		        		ii=1;
                 } 
@@ -29461,6 +29508,31 @@ Exit2:
    }
  return TRUE;
 }
+
+BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDATA pHighlightData, BOOL FirstRec)
+{
+	char str[1024];
+	DPOINT pt;
+	BOOL err;
+
+	if (!useDataFile)
+		return FALSE;
+	if (!FetchDBRec(hDB))
+		return FALSE;
+	memset(pHighlightData, 0, sizeof(HIGHLIGHTDATA));
+	sprintf(str, "[FROMDB.Longitude] [FROMDB.Latitude]");
+	ExpandText(str);
+	pt = atopt(str, &err); 
+	ConvertCoord(&pt,2, 1); 
+	pHighlightData->PD.BeginPoint = pt;
+	pHighlightData->PD.Type = 1;
+	sprintf(str, "[FROMDB.UniqueRampID]");
+	ExpandText(str);
+	*piref = atoi(str);
+	return TRUE;
+
+}
+
 
 BOOL FAR PASCAL STREETSEG_FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
@@ -30913,7 +30985,9 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 		                GetDlgItemText (hWndDlg,IDC_SQL,MIFOutSQL,lnMIFOutSQL);                
 		                if (!OpenDataFile (MIFOutDataFile,MIFOutSQL,BT_READ,&hSQL))
 		                {  
-		                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
+							char mess[512];
+							sprintf(mess, "Cannot open data file:%s", MIFOutDataFile);
+							GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 		                    break;
 		                }
 	                }

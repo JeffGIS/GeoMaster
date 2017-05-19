@@ -499,7 +499,7 @@ C-------------------------------        */
            if(lpFile1 == HFILE_ERROR)
            
            {  
-              char  mess[256];
+              char  mess[1024];
               setDoPaint( FALSE);
               sprintf (mess,"Error opening projection definition file %s",PNAME);
               MessageBox(NULL,mess,"Load Projection",MB_ICONEXCLAMATION|MB_TASKMODAL);
