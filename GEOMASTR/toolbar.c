@@ -3185,7 +3185,7 @@ HBITMAP GetToolBitmap (LPSTR BMPath)
 		if (hDib32)    
 		{
 			int	nBits = FreeImage_GetBPP (hDib32);
-			if (nBits > 8)
+			if (nBits > 0)
 			{
 				HDIB32	hDib24 = FreeImage_ConvertTo24Bits (hDib32);
 				hDib8 = QuantizeDib (hDib24,FIQ_NNQUANT);
