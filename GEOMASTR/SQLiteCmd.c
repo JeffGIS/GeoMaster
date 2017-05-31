@@ -1050,6 +1050,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			LPSTR llLoc, pBar;
 			BOOL skipFirst = atob(ARG[9]);
 			int  firstField = 0;
+			char testCondition[256] = { 0 };
+			BOOL haveUniqueID = FALSE;
 
 			if (skipFirst) //rowid
 				firstField = 1;
@@ -1120,11 +1122,15 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 
 					if (primKeyIsOffset)
+					{
 						sprintf(pCmd, "CREATE TABLE %s (OFFSET INTEGER PRIMARY KEY,", TableName);
+						haveUniqueID = TRUE;
+					}
 					else if (lpGWDHead->NumIndexFields[0] > 1)
 					{
 						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
 						nextId = 1;
+						haveUniqueID = TRUE;
 					}
 					else
 						sprintf(pCmd, "CREATE TABLE %s (", TableName);
@@ -1144,7 +1150,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							break;
 						case BT_INTEGER:
 							if (!i && nextId < 0)
+							{
 								sprintf(strchr(pCmd, 0), "%s%s INTEGER PRIMARY KEY", delim, removePCT(lpFieldInfo->Name));
+								haveUniqueID = TRUE;
+							}
 							else
 								sprintf(strchr(pCmd, 0), "%s'%s' INT", delim, removePCT(lpFieldInfo->Name));
 							break;
@@ -1166,7 +1175,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						int firstIndex = 1;
 						int lastIndex = lpGWDHead->NumIndex;
 
-						if (primKeyIsOffset || nextId>0)
+						if (primKeyIsOffset || nextId>0 || haveUniqueID)
 						{
 							firstIndex = 0;
 							sprintf(strchr(pCmd, 0), ")");
@@ -1229,17 +1238,22 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								pSpace = strrchr(SQL, ' ');
 								if (!pSpace)
 									pSpace = strrchr(SQL, '>');
-								pSpace++;
-								if (*pSpace == '\'')
+								if (pSpace)
+								{
 									pSpace++;
-								if (*LastChr(pSpace) == '\'')
-									*LastChr(pSpace) = 0;
-								cond = BT_GE;
-								indx = 2;
-								strncpy(lpGWDHead->pKeys[indx], pSpace, abs(lpGWDHead->lKeys[indx]));
+									if (*pSpace == '\'')
+										pSpace++;
+									if (*LastChr(pSpace) == '\'')
+										*LastChr(pSpace) = 0;
+									cond = BT_GE;
+									indx = 2;
+									strncpy(lpGWDHead->pKeys[indx], pSpace, abs(lpGWDHead->lKeys[indx]));
+								}
+								else
+									strcpy(testCondition, SQL);
 							}
 						}
-						while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
+						while (!rtn && StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded) && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
 						{
 							int id = Offset;
 							int sunAngle=0;
@@ -1250,6 +1264,34 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							if (wantCNUM >= 0 && *(LPINT)lpGWDHead->pKeys[indx] != wantCNUM)
 								break;
 							FillGWDData(lpGWDHead, Offset);
+							if (*testCondition)
+							{
+								char exp[512];
+								char testfield[64];
+								BOOL err;
+								LPSTR pEq = strchr(testCondition, '=');
+								if (pEq)
+								{
+									*pEq = 0;
+									strcpy(testfield, testCondition);
+									*pEq = '=';
+									
+									lpFieldInfo = lpGWDHead->pFldInfo;
+									if (skipFirst)
+										lpFieldInfo++;
+									for (i = firstField; i < lpGWDHead->NumFields; i++, lpFieldInfo++)
+									{
+										if (!stricmp(lpFieldInfo->Name, testfield))
+										{
+											GMDGetCharFieldVal(lpGWDHead, i, exp);
+											break;
+										}
+									}
+									sprintf(strchr(exp, 0), "%s", pEq);
+									if (!LogicP(exp, &err))
+										continue;
+								}
+							}
 
 							if (includesPoint)
 							{
@@ -1411,7 +1453,6 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 								sprintf(strchr(pCmd, 0), "%s%i", delim, sunAngle);
 							sprintf(strchr(pCmd, 0), ")");
 							fputstring(pCmd, fid);
-							rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
 						}
 						DestroyStatusWindow(0);
 						GSSiClose(fid);
