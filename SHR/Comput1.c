@@ -4823,6 +4823,7 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
 	LPCOLORREF16	pColor16;
 	DWORD	MidPixel;
 	BOOL	saveuseGDIPlus = useGDIPlus;
+	HWND	hWnd = hWndMain;
 	
 	useGDIPlus = FALSE;
 //	if (FAC > 5)
@@ -4863,8 +4864,15 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
 	Width  = dWidth - 1;
 	Factor = Width / (Bounds.xmx - Bounds.xmn); 
 	Height = Factor * (Bounds.ymx - Bounds.ymn);
-	hDCMain = GetDC (hWndMain);
+	hDCMain = GetDC (hWnd);
     hDC = CreateCompatibleDC(hDCMain); 
+
+	if (!hDC)
+	{
+		ReleaseDC(hWnd, hDCMain);
+		goto Exit;
+	}
+
     Height *= PIASizeFactor;
     Width *= PIASizeFactor;
 	if (Height < 5 || Width < 5)

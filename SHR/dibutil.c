@@ -661,6 +661,7 @@ HBITMAP FAR DIB32ToBitmap(HDIB32 hDIB32, HPALETTE hPal)
    HBITMAP hBitmap;            // handle to device-dependent bitmap
    HDC hDC;                    // handle to DC
    HPALETTE hOldPal = NULL;    // handle to a palette
+   UINT colorType = DIB_RGB_COLORS;
 
    /* if invalid handle, return NULL */
 
@@ -686,9 +687,11 @@ HBITMAP FAR DIB32ToBitmap(HDIB32 hDIB32, HPALETTE hPal)
       hOldPal = SelectPalette(hDC, hPal, FALSE);
    RealizePalette(hDC);
 
+   if (lpDIBHdr->biBitCount == 8)
+	   colorType = DIB_PAL_COLORS;
    /* create bitmap from DIB info. and bits */
    hBitmap = CreateDIBitmap(hDC, lpDIBHdr, CBM_INIT,
-                lpDIBBits, (LPBITMAPINFO)lpDIBHdr, DIB_RGB_COLORS);
+                lpDIBBits, (LPBITMAPINFO)lpDIBHdr, colorType);
 
    /* restore previous palette */
    if (hOldPal)

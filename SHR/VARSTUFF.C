@@ -3093,6 +3093,7 @@ GSSiExitProg (532);
         	ShowVirtualPrintAreas = atob (Value);
         	break;
         case 237:
+
         	BufferedScreen = atob (Value); 
 			if (InServerMode)
 				BufferedScreen = FALSE;
