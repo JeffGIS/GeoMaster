@@ -4051,7 +4051,7 @@ SetVis:
 				goto Rtnl;
 		}
 			break;
-		case 433: //AREA(DUMP,FILE,OPT)
+		case 433: //$AREA(DUMP,FILE,OPT)
 		{
 #define COORDINATEMULTIPLIER	10000000
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
@@ -4060,6 +4060,7 @@ SetVis:
 			{
 				HANDLE hPoly = 0;
 				HANDLE hPolyPartLen = 0;
+				int nPnts;
 				int nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&PickList[0], &nPnts, &hPoly, &hPolyPartLen);
 				if (nLoops)
 				{
