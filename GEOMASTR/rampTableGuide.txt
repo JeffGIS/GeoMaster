@@ -1,0 +1,58 @@
+Table Header Name	Shapefile Name	Description
+UniqueRampID	UniqRampID	Unique identifier for each ramp
+IntersectionNum	IntNum	Intersection number in NVCRIS project
+RampNum	RampNum	Ramp number within intersection
+RampID	RampID	Location of ramp at corner
+RampType	RampType	Type of ramp from standardized list of ramp types
+YearBuilt	YearBuilt	Year ramp built
+TimeComplete	TimeComp	Time ramp was completed in NVCRIS Detail, in seconds since Jan 1, 1970
+Latitude	Lat	Latitude from ramp coordinates
+Longitude	Lon	Longitude from ramp coordinates
+RampInXWalk	InXWalk	Is ramp located within bounds of the crosswalk
+Texture	Texture	Material of ramp from standardized list of materials, including detectable warning types
+UpperLandingObstruction	UpLndObst	Obstruction in upper landing
+StreetLandingObstruction	StLndObst	Obstruction in street landing
+RampObstruction	RampObst	Obstruction in Ramp
+HasRampCracks	RampCrack	Crack(s) present in ramp
+HasUpperLandingCracks	UpLndCrack	Crack(s) present in upper landing
+HasStreetLandingCracks	StLndCrack	Crack(s) present in street landing
+HasLeftSidewalkCracks	LSdwkCrack	Crack(s) present in left sidewalk
+HasRightSidewalkCracks	RSdwkCrack	Crack(s) present in right sidewalk
+RampCrackWidth	RampCkWth	Width of widest ramp crack (in inches)
+UpperLandingCrackWidth	UpLndCkWth	Width of widest upper landing crack (in inches)
+StreetLandingCrackWidth	StLndCkWth	Width of widest street landing crack (in inches)
+LeftSidewalkCrackWidth	LSdwkCkWth	Width of widest left sidewalk crack (in inches)
+RightSidewalkCrackWidth	RSdwkCkWth	Width of widest right sidewalk crack (in inches)
+RampWidth	RampWidth	Width of ramp at curb line (in inches)
+RampDepth	RampDepth	Depth of upper landing (in inches)
+RampSlopeFront	RampFront	Running slope of ramp at midline
+RampSlopeSide	RampSide	Side slope of ramp
+UpperLandingSlopeFront	UpLndFront	Running slope of upper landing
+UpperLandingSlopeSide	UpLndSide	Side slope of upper landing
+StreetLandingSlopeFront	StLndFront	Running slope of street landing
+StreetLandingSlopeSide	StLndSide	Side slope of street landing
+FlareLeftSlopeFront	LFlarFront	Running slope of left flare at curb line
+FlareRightSlopeFront	RFlarFront	Running slope of right flare at curb line
+SidewalkLeftSlopeFront	LSdwkFront	Running slope of left sidewalk
+SidewalkLeftSlopeSide	LSdwkSide	Side slope of left sidewalk
+SidewalkRightSlopeFront	RSdwkFront	Running slope of right sidewalk
+SidewalkRightSlopeSide	RSdwkSide	Side slope of right sidewalk
+SteepTopOfCurb	TopOfCurb	Sudden level change at top of curb (in inches)
+LipAtFlowLine	Lip	Sudden level change at lip at flow line (in inches)
+CurbCutDistance	CurbDist	Distance from center bump to curb cut (in inches)
+BumpWidth	BumpWidth	Width of center bump at highest point (in inches)
+BumpHeight	BumpHeight	Height of center bump (in inches)
+PEDSignalType SignalType Type of pedestrian signal
+PEDButtonType ButtonType Type of pedestrial button
+PEDButtonHeight	PedBHeight	Height of pedestrian signal button above landing (in inches)
+PEDButtonDistance	PedBDist	Distance of pedestrian signal button from landing (in inches)
+PEDButtonAWIType	AWIType	Type of Audible Walk Indicator
+PEDButtonHasLocatorTone	HasLocTone	PED button has locator tone
+PEDButtonHasInfoSign	HasInfoSign	PED button has information sign
+PEDButtonHasBraille	HasBraille	PED button has sign in braille
+PEDButtonHasTactileArrow	TactArrow	PED button has tactile arrow
+PEDButtonLocatorToneVolume	LocToneVol	PED button locator tone volume
+PEDButtonAWIVolume	AWIWalkVol	PED button walk indication volume
+RampComment	Comment	Text entered by user as comment on ramp
+ComplianceCodeDetail	CCDetail	Includes all detail compliance codes
+ComplianceCodeSummary	CCSummary	Includes all summary compliance codes

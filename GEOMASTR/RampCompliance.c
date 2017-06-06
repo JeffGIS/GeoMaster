@@ -704,7 +704,7 @@ char *rampToText(int intNum, RampStruct *ramp)
 {
     char *rampText = (char *)calloc(4480, sizeof(char));
 	char timeCompleteC[32];
-	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
+	sprintf(timeCompleteC, "$CAL(%i,8)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
 	sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'",
 		ramp->uniqueID,
