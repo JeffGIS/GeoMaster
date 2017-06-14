@@ -1,4 +1,7 @@
 configs\jeff\testdgn.GMC /F /WD L:\geomas
+[%DL]configs\basic1.GMC /F /WD j:\gmserver\gmserver
+[%DL]RequestData.GMC /F /WD j:\gmserver\gmserver [REQUESTID]=1497386530;
+configs\basic1.gmc /F /WD c:\geomas [%USERLEV]=2;[%IGNORESYSMSG]=T;
 projects\corners\curbramps.gmc /F /WD L:\geomas
 police\configs\startup_2017.gmc /F /WD L:\mpd\geomaster\mpls [%USERLEV]=2;[SERVER]=F;[%RUNFROMCACHE]=F;[%IGNORESYSMSG]=T;
 configs\loadprod.gmc /F [%USERLEV]=2; [%WT]='Create Multiple parcel values for size test' /WD K:\GMMobile\MetroUTM
@@ -132,6 +135,10 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
+
 
 
 

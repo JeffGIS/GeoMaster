@@ -668,7 +668,28 @@ static char *textures[] = {"None", "SmoothedConcrete", "BrushedConcrete", "Tinte
 
 static char *obstructions[] = {"None", "Hydrant", "Manhole", "Polebox", "Pole", "StreetManhole", "Other", "None", "None", "None", "None", "MasterNone"};
 
-static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk", "OneWayDirCurbGutter", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk"};
+static char *rampTypes[] = { "Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk","OneWayPerp", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "OneWayDirCurbGutter", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk" };
+/*
+typedef enum {
+	RampTypePerp,
+	RampTypePerpNonWalk,
+	RampTypeCombPerpWalk,
+	RampTypeCombPerpNonWalk,
+	RampTypeOneWayPerp,
+	RampTypeOneWayDirBlendTrans,
+	RampTypeParallel,
+	RampTypeDepressedCorner,
+	RampTypeFan,
+	RampTypeBuiltUp,
+	RampTypeDiagonal,
+	RampTypeOneWayDirCurbGutter,
+	RampTypeCombLeftWalk = 101,//left side of RampTypeCombPerpWalk
+	RampTypeCombRightWalk = 102,//right side of RampTypeCombPerpWalk
+	RampTypeCombLeftNonWalk = 103,//left side of RampTypeCombPerpNonWalk
+	RampTypeCombRightNonWalk = 104,//right side of RampTypeCombPerpNonWalk
+	rampTypeCount //always last item
+} RampType;
+*/
 
 static char *buttontypes[] = { "None", "Small Push Button", "Large Push Button", "Touch Button", "APS Button" };
 
@@ -704,14 +725,18 @@ char *rampToText(int intNum, RampStruct *ramp)
 {
     char *rampText = (char *)calloc(4480, sizeof(char));
 	char timeCompleteC[32];
+	int rtype = ramp->rampType;
+	if (rtype > 11)
+		rtype = 11 + (rtype - 100);
 	sprintf(timeCompleteC, "$CAL(%i,8)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
+
 	sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'",
 		ramp->uniqueID,
 		intNum,
 		ramp->rampNum,
 		ramp->rampID,
-		rampTypes[ramp->rampType],
+		rampTypes[rtype],
 		ramp->yearRebuilt,
 		timeCompleteC,
 		ramp->latitude,

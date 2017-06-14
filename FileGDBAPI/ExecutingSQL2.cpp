@@ -1,5 +1,5 @@
 
-#if !(defined XPVERSION || defined NVSERVER)
+#if !((defined XPVERSION) || (defined NVSERVER))
 /**
  * Sample: ExecutingSQL
  *

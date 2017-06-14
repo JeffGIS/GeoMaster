@@ -1,4 +1,4 @@
-#if defined XPVERSION || defined NVSERVER
+#if (defined XPVERSION) || (defined NVSERVER)
 
 #include "graphint.h"
 
