@@ -206,7 +206,7 @@ BOOL ImportSSURGOTables (LPSTR CompFile,LPSTR CompGMD)
 					vloc = muid;
 				} 
 				Truncate (vloc); 
-				if (!SetFieldValFromCharAndName(lpGWDHead,*loc,vloc,FALSE))
+				if (!SetFieldValFromCharAndName(lpGWDHead, *loc, vloc, FALSE, TRUE))
 				{
 					MessageBox (GetFocus(),*loc,"Error loading field",MB_ICONEXCLAMATION);
 					GlobalUnlock (hLoc);

@@ -1609,6 +1609,7 @@ GSSiExitProg (1350);
 			//$TEXTFILE(READ,fid,varname) puts text into varname returns T or F
 			//$TEXTFILE(WRITE,fid,text)
 			//$TEXTFILE(CLOSE,fid)
+			//$TEXTFILE(REPLACE,file,fromtext,totext)
 		{
 			HFILE fid;
 			rtn = 0;
@@ -1651,6 +1652,27 @@ GSSiExitProg (1350);
 			{
 				fid = atoi(Arg[2]);
 				rtn = !GSSiClose(fid);
+			}
+			else if (!stricmp(Arg[1], "REPLACE"))
+			{
+				fid = GSSiOpenFile(Arg[2], 0, OF_READ);
+				if (fid != HFILE_ERROR)
+				{
+					int size = GSSifilelength(fid);
+					int maxmem = size * 2 + 128;
+					LPSTR mem = malloc(maxmem);
+					LPSTR end = mem + size;
+					BigRead(fid, mem, size);
+					*end = 0;
+					REPLAC(mem,Arg[3], Arg[4],maxmem);
+					size = strlen(mem);
+					GSSiClose(fid);
+					fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
+					BigWrite(fid, mem, size, -1);
+					GSSiClose(fid);
+					free(mem);
+					rtn = 1;
+				}
 			}
 			goto Rtnrtn;
 		}

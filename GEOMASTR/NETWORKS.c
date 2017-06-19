@@ -2304,10 +2304,10 @@ Exit:
 		nSegs--;
 	for (i=0;i<nSegs;i++)
 	{   
-		SetFieldValFromCharAndName(lpGWDHead,"SegRefno",(LPSTR)&pSegs[i].Refno,TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"Value",Value,FALSE);
-		SetFieldValFromCharAndName(lpGWDHead,"PCTFrom",(LPSTR)&Zero,TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"PCTTo",(LPSTR)&One,TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "SegRefno", (LPSTR)&pSegs[i].Refno, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "Value", Value, FALSE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "PCTFrom", (LPSTR)&Zero, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "PCTTo", (LPSTR)&One, TRUE, TRUE);
 		GWDAddRecord (lpGWDHead,0,NULL);      
 	}
 	GlobalUnlock (hDBDestSegs); 

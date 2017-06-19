@@ -657,7 +657,7 @@ BOOL ImportAttributes (HANDLE hSQL)
 				lpTAB++;
 			else
 				lpTAB = lpEnd;
-		    SetFieldValFromCharAndName(lpGWDHead,pTemp,lpTAB,FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, pTemp, lpTAB, FALSE, TRUE);
 		}
     	lpStr = _fstrchr (lpStr,0);
 	}

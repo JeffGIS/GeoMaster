@@ -1739,7 +1739,7 @@ GSSiExitProg (620);
 						FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
 						lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle);
 		    			SetFieldToMinVal (lpGWDHead,0);
-				 		SetFieldValFromCharAndName(lpGWDHead,"TABLE",WantTableName,FALSE);
+						SetFieldValFromCharAndName(lpGWDHead, "TABLE", WantTableName, FALSE, TRUE);
 			            GWDFormKey(lpGWDHead,2,TRUE,0,0);
 			            ltab = _fstrlen (WantTableName); 
 						while (!BT_FIND (lpGWDHead->BTHandle[2],lpGWDHead->pKeys[2],pos,cond, (LPSTR)&Offset))

@@ -1224,17 +1224,17 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				SetFieldValFromDlgItem (lpGWDHead,hWndDlg,IDC_VOTER_CELL_PHONE,"CellPhone");  
 				SetFieldValFromDlgItem (lpGWDHead,hWndDlg,IDC_VOTER_EMAIL,"Email");  
 				SetFieldValFromDlgItem (lpGWDHead,hWndDlg,IDC_VOTER_GENDER,"Gender");  
-				SetFieldValFromCharAndName(lpGWDHead,"LocationCode",(LPSTR)&LocationCode,TRUE);  
+				SetFieldValFromCharAndName(lpGWDHead, "LocationCode", (LPSTR)&LocationCode, TRUE, TRUE);
 				if (LocationCode)
 					lPoint = DPointToLPoint (&NewCoord);
-				SetFieldValFromCharAndName(lpGWDHead,"XCOR",(LPSTR)&lPoint.x,TRUE);
-				SetFieldValFromCharAndName(lpGWDHead,"YCOR",(LPSTR)&lPoint.y,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "XCOR", (LPSTR)&lPoint.x, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "YCOR", (LPSTR)&lPoint.y, TRUE, TRUE);
 				for (i=0;i<NumUserCheckbox;i++)
 				{   
 					*str = 0;
 					if (SendDlgItemMessage (hWndDlg,USERCBCNTL[i],BM_GETCHECK,0,0))
 						_fstrcpy (str,"1");
-					SetFieldValFromCharAndName(lpGWDHead,UserCheckboxFieldName[i],str,FALSE);
+					SetFieldValFromCharAndName(lpGWDHead, UserCheckboxFieldName[i], str, FALSE, TRUE);
 				}
 				for (i=0;i<NumUserLists;i++)
 				{   
@@ -1245,7 +1245,7 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					SetFieldValFromDlgItem (lpGWDHead,hWndDlg,USERTXCNTL[i],UserTextboxFieldName[i]); 
 				}
 				time (&Time);
-				SetFieldValFromCharAndName(lpGWDHead,"TimeStamp",(LPSTR)&Time,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "TimeStamp", (LPSTR)&Time, TRUE, TRUE);
 				GWDReplaceRecord (lpGWDHead,0,0,-1);
         		GlobalUnlock (FilePtr->FileHandle); 
            		GlobalUnlock (SQLPtr->OFHandle);

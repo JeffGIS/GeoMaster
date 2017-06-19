@@ -1059,7 +1059,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			lkey--;
 			lpGWDHead = (LPGWDHEADER)GlobalLock (hFunDefDB); 
 			pFunDefs = (LPFUNDEFS)&lpGWDHead->GWDData;
-			SetFieldValFromCharAndName(lpGWDHead,"NameAndArgs",(LPSTR)&wantKey[keypos],TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "NameAndArgs", (LPSTR)&wantKey[keypos], TRUE, TRUE);
 			GWDFormKey(lpGWDHead,0,TRUE,0,0);
 			while (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_GE, (LPSTR)&Offset))
 			{

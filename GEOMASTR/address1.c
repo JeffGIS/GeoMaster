@@ -592,9 +592,9 @@ short DisplayStreets (HWND hDlg,LONG House, int OddEven, LPSTR InName,int nchar,
     lpSNT = (LPSTREETNAMETABLE)&lpGWDHead->GWDData;
     hBT = lpGWDHead->BTHandle[Index];
     lpGWFldInfo=lpGWDHead->pFldInfo; 
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,"0",FALSE,FALSE); 
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, "0", FALSE, FALSE, TRUE);
     lpGWFldInfo+=Index;     
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,InName,FALSE,FALSE); 
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, InName, FALSE, FALSE, TRUE);
     GWDFormKey(lpGWDHead,Index,TRUE,0,0);
     pos = BT_FIRST;
     cond = BT_GE;
@@ -607,7 +607,7 @@ short DisplayStreets (HWND hDlg,LONG House, int OddEven, LPSTR InName,int nchar,
     	FillGWDData (lpGWDHead,Offset);
     	pSNum = (LPLONG)&lpGWDHead->GWDData;
     	NumMatch = 0; 
-		MatchAddress2 (1,*pSNum,House,0,0,FALSE,&NumMatch,&hMatch,FALSE,TRUE);
+		MatchAddress2(1, *pSNum, House, 0, 0, FALSE, &NumMatch, &hMatch, FALSE, TRUE);
 		if (hMatch)
 			pMatch = (LPADDMATCH)GlobalLock (hMatch);
 		while (NumMatch--)
@@ -745,9 +745,9 @@ short DisplayStreetsINT (HWND hDlg,USHORT iMenu, LPSTR InName,short nchar,UINT E
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDBStreetNames); 
     hBT = lpGWDHead->BTHandle[Index];
     lpGWFldInfo=lpGWDHead->pFldInfo; 
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,"0",FALSE,FALSE); 
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, "0", FALSE, FALSE, TRUE);
     lpGWFldInfo+=Index; 
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE,FALSE); 
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, str, FALSE, FALSE, TRUE);
     GWDFormKey(lpGWDHead,Index,TRUE,0,0);   
     lpSNT = (LPSTREETNAMETABLE)&lpGWDHead->GWDData;
     pos = BT_FIRST;
@@ -2783,14 +2783,14 @@ long GetStreetNumFromName (LPSTR Name,short Index, short FirstOrNext, LPSTR True
     hBT = lpGWDHead->BTHandle[Index];
     ifield = Index + 1;
     lpGWFldInfo=lpGWDHead->pFldInfo; 
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,"0",FALSE,FALSE);
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, "0", FALSE, FALSE, TRUE);
     lpGWFldInfo+=Index;   
     if (!_fstricmp (Name,"##COUNT##"))  
     {
     	SNum = BT_NUM_IN_INDEX (lpGWDHead->BTHandle[Index]);
     	goto NotFound;
     } 
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,Name,FALSE,FALSE); 
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, Name, FALSE, FALSE, TRUE);
     GWDFormKey(lpGWDHead,Index,TRUE,0,0);
     if (FirstOrNext == BT_FIRST)
     {
@@ -2889,7 +2889,7 @@ BOOL GetTrueStreetName (long SNum, LPSTR TrueName, long State,int index)
     hBT = lpGWDHead->BTHandle[Index];
     ifield = 0;
     lpGWFldInfo=lpGWDHead->pFldInfo; 
-    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,"0",FALSE,FALSE);
+	SetFieldValFromChar(lpGWDHead, lpGWFldInfo, "0", FALSE, FALSE, TRUE);
     lpGWFldInfo+=Index;     
     SetFieldValFromLong(lpGWDHead,lpGWFldInfo,SNum); 
     GWDFormKey(lpGWDHead,Index,TRUE,0,0);

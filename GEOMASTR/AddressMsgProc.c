@@ -241,7 +241,7 @@ short DisplayStreetsPIDFromStreetNum (HWND hDlg,LONG HouseMin, LONG HouseMax, sh
 FirstAdd:
     SetFieldValFromLong(lpGWDHeadPID,&HNField,HouseMin);
     if (ZIPField.Name[0])
-    	SetFieldValFromChar(lpGWDHeadPID,&ZIPField,"",FALSE,FALSE); 
+		SetFieldValFromChar(lpGWDHeadPID, &ZIPField, "", FALSE, FALSE, TRUE);
     GWDFormKey(lpGWDHeadPID,StreetNumIndex,TRUE,0,0);
     stName = BT_FIND (lpGWDHeadPID->BTHandle[StreetNumIndex],lpGWDHeadPID->pKeys[StreetNumIndex],
                               pos,BT_GE,(LPSTR)&Offset);   
@@ -334,12 +334,12 @@ short DisplayStreetsPID (HWND hDlg,LONG HouseMin, LONG HouseMax, short OddEven, 
     LastStreet[0]='\0';
     lpGWDHeadPID = (LPGWDHEADER) GlobalLock (hPIDAddDB); 
     _fmemset (lpGWDHeadPID->pKeys[PIDAddIndex],0,lpGWDHeadPID->lKeys[PIDAddIndex]);
-    SetFieldValFromChar(lpGWDHeadPID,&SNField,InName,FALSE,FALSE); 
+	SetFieldValFromChar(lpGWDHeadPID, &SNField, InName, FALSE, FALSE, TRUE);
     pos = BT_FIRST; 
 FirstAdd:
     SetFieldValFromLong(lpGWDHeadPID,&HNField,HouseMin);
     if (ZIPField.Name[0])
-    	SetFieldValFromChar(lpGWDHeadPID,&ZIPField,"",FALSE,FALSE); 
+		SetFieldValFromChar(lpGWDHeadPID, &ZIPField, "", FALSE, FALSE, TRUE);
     GWDFormKey(lpGWDHeadPID,PIDAddIndex,TRUE,0,0);
     _fmemmove (AddText,lpGWDHeadPID->pKeys[PIDAddIndex],32);
     stName = BT_FIND (lpGWDHeadPID->BTHandle[PIDAddIndex],lpGWDHeadPID->pKeys[PIDAddIndex],
@@ -356,7 +356,7 @@ FirstAdd:
             ihouse = IDNINT(rval);
             if (ihouse < HouseMin)
             {
-                SetFieldValFromChar(lpGWDHeadPID,&SNField,lpGWDHeadPID->pKeys[PIDAddIndex],TRUE,FALSE); 
+				SetFieldValFromChar(lpGWDHeadPID, &SNField, lpGWDHeadPID->pKeys[PIDAddIndex], TRUE, FALSE, TRUE);
                 pos = BT_FIRST;
                 goto FirstAdd;
             }
@@ -2207,11 +2207,11 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	 			 _fstrncpy (pIMER->StreetB,Street2,MAXSTREETNAMELEN);
 		 		 pIMER->IM.MatchCode = match; 
 		 		 GetDlgItemText (hWndDlg,IDC_SYMBOL,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"Symbol",str,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "Symbol", str, FALSE, TRUE);
 		 		 GetDlgItemText (hWndDlg,IDC_FROMDATE,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"FromDate",str,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "FromDate", str, FALSE, TRUE);
 		 		 GetDlgItemText (hWndDlg,IDC_TODATE,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"ToDate",str,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "ToDate", str, FALSE, TRUE);
 				 GWDAddRecord (lpGWDHead,0,IndexArray);
                  lineno++; 
                  PctBox (GetDlgItem(hWndDlg,IDC_STATUS1), TotAddLen, NumMatched,0);
@@ -2650,7 +2650,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
                  ExpandText (COrigKey); 
                  if (!_fstricmp (COrigKey,"SD-A-5"))
                  	ii=1;
-				 SetFieldValFromCharAndName(lpGWDHead ,"OriginalKey",COrigKey,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "OriginalKey", COrigKey, FALSE, TRUE);
                  SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,COrigKey);
                	 MunicNumFrom = MunicNumTo = GetMunicFromName (City);    
 				 match1 = INT_MATCH (OnStreet,FromStreet,City,0,MOPT,&hMatch1,&OnStreetNum1,&FromStreetNum,&MunicNumFrom); 
@@ -2782,11 +2782,11 @@ pIMER->NumSegsFound=0;
 		 		 pIMER->IM.MatchCodeFrom = match1; 
 		 		 pIMER->IM.MatchCodeTo = match2; 
 		 		 GetDlgItemText (hWndDlg,IDC_SYMBOL,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"Symbol",str,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "Symbol", str, FALSE, TRUE);
 		 		 GetDlgItemText (hWndDlg,IDC_FROMDATE,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"FromDate",str,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "FromDate", str, FALSE, TRUE);
 		 		 GetDlgItemText (hWndDlg,IDC_TODATE,str,250);
-		 		 SetFieldValFromCharAndName(lpGWDHead,"ToDate",str,FALSE);
+				 SetFieldValFromCharAndName(lpGWDHead, "ToDate", str, FALSE, TRUE);
 				 GWDAddRecord (lpGWDHead,0,IndexArray);
                  lineno++; 
                  PctBox (GetDlgItem(hWndDlg,IDC_STATUS1), TotAddLen, NumMatched,0);
@@ -6536,8 +6536,8 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				}
 				else
 					ExpandText(str);
-				SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[0], str, FALSE, FALSE);
-				SetFieldValFromCharAndName(lpGWDHead, "OriginalFileKey", str, FALSE);
+				SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[0], str, FALSE, FALSE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "OriginalFileKey", str, FALSE, TRUE);
 				//                _fstrncpy (pAMER->OrigKey,str,OrigKeyLen);
 				if (match > 1)
 				{
@@ -6626,21 +6626,21 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				}
 				GSSiGlobFree(&hMatch);
 				GetDlgItemText(hWndDlg, IDC_SYMBOL, str, 250);
-				SetFieldValFromCharAndName(lpGWDHead, "Symbol", str, FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "Symbol", str, FALSE, TRUE);
 				GetDlgItemText(hWndDlg, IDC_FROMDATE, str, 250);
 				ExpandText(str);
 				FromDate = max(0, atoi(str));
 				pAMER->FromDate = FromDate;
-				SetFieldValFromCharAndName(lpGWDHead, "FromDateC", str, FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "FromDateC", str, FALSE, TRUE);
 				GetDlgItemText(hWndDlg, IDC_TODATE, str, 250);
 				ExpandText(str);
 				ToDate = max(FromDate, atoi(str));
 				pAMER->ToDate = ToDate;
-				SetFieldValFromCharAndName(lpGWDHead, "ToDateC", str, FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "ToDateC", str, FALSE, TRUE);
 				lpGWDHead->MinTime = min(lpGWDHead->MinTime, FromDate);
 				lpGWDHead->MaxTime = max(lpGWDHead->MaxTime, ToDate);
 				GetDlgItemText(hWndDlg, IDC_NOTE, str, 250);
-				SetFieldValFromCharAndName(lpGWDHead, "Note", str, FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "Note", str, FALSE, TRUE);
 				GWDAddRecord(lpGWDHead, 0, 0);//IndexArray);
 				//                 sprintf (str,"%ld %ld",TotLen, NumMatched); 
 				//                 SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,str);

@@ -1892,11 +1892,11 @@ BOOL XMLToGMD1 (LPSTR XMLFile,LPSTR GMDFile)
 				Flow = atoi (pLoc+6);
 			if ((pLoc = strstr (pRec,"<speed>")))
 				Speed = atoi (pLoc+7);
-	   		SetFieldValFromCharAndName(lpGWDHead,"StationID",(LPSTR)&StationID,TRUE);
-			SetFieldValFromCharAndName(lpGWDHead,"Volume",(LPSTR)&Volume,TRUE);
-			SetFieldValFromCharAndName(lpGWDHead,"Occupancy",(LPSTR)&Occupancy,TRUE);
-			SetFieldValFromCharAndName(lpGWDHead,"Flow",(LPSTR)&Flow,TRUE);
-			SetFieldValFromCharAndName(lpGWDHead,"Speed",(LPSTR)&Speed,TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "StationID", (LPSTR)&StationID, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "Volume", (LPSTR)&Volume, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "Occupancy", (LPSTR)&Occupancy, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "Flow", (LPSTR)&Flow, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "Speed", (LPSTR)&Speed, TRUE, TRUE);
 			st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 		}
 		//StatusWindowUpdate (0,0, (int)pEnd,(int)pFile);
@@ -1966,21 +1966,21 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 		WPoint.x = Lon;
 		WPoint.y = Lat;
 		ConvertCoord(&WPoint,2,1);
-		SetFieldValFromCharAndName(lpGWDHead,"X",(LPSTR)&WPoint.x,TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"Y",(LPSTR)&WPoint.y,TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "X", (LPSTR)&WPoint.x, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "Y", (LPSTR)&WPoint.y, TRUE, TRUE);
 
 		pLoc = strstr (pRec,"<event-identifier>");
 		pLoc += strlen ("<event-identifier>");
 		pLocEnd = strstr (pLoc,"</event-identifier>");
 		*pLocEnd = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"EventIdentifier",(LPSTR)pLoc,FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "EventIdentifier", (LPSTR)pLoc, FALSE, TRUE);
 		*pLocEnd = '<';
 
 		pLoc = strstr (pRec,"<event-message-time-stamp>");
 		pLoc += strlen ("<event-message-time-stamp>");
 		pLocEnd = strstr (pLoc,"</event-message-time-stamp>");
 		*pLocEnd = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"EventMessageTimeStamp",(LPSTR)pLoc,FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "EventMessageTimeStamp", (LPSTR)pLoc, FALSE, TRUE);
 		*pLocEnd = '<';
 
 		pLoc = strstr (pRec,"<key-phrase>");
@@ -1996,7 +1996,7 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 		*pLocEnd = ':';
 		pLocEnd = strstr (pLoc,SubKey);
 		*pLocEnd = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"KeyPhrase",(LPSTR)pLoc,FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "KeyPhrase", (LPSTR)pLoc, FALSE, TRUE);
 
 		pLoc = strstr (pRec,"<eventType>");
 		pLoc += strlen ("<eventType>");
@@ -2011,7 +2011,7 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 		*pLocEnd = ':';
 		pLocEnd = strstr (pLoc,SubKey);
 		*pLocEnd = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"EventType",(LPSTR)pLoc,FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "EventType", (LPSTR)pLoc, FALSE, TRUE);
 
 		if ((pLoc = strstr (pRec,"<event-description>")))
 		{
@@ -2041,21 +2041,21 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 					if ((pQuote = strchr (pWeb,'"')))
 						*pQuote = 0;
 				}
-			   	SetFieldValFromCharAndName(lpGWDHead,"WEB",(LPSTR)pWeb,FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "WEB", (LPSTR)pWeb, FALSE, TRUE);
 			}
 			else
-			   	SetFieldValFromCharAndName(lpGWDHead,"WEB","",FALSE);
+				SetFieldValFromCharAndName(lpGWDHead, "WEB", "", FALSE, TRUE);
 		}
 		else
 			pLoc = nulval;
 		if (strlen (pLoc) > 255)
 		{
-	   		SetFieldValFromCharAndName(lpGWDHead,"EventDescription2",(LPSTR)&pLoc[255],FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "EventDescription2", (LPSTR)&pLoc[255], FALSE, TRUE);
 			pLoc[255] = 0;
 		}
 		else
-	   		SetFieldValFromCharAndName(lpGWDHead,"EventDescription2","",FALSE);
-	   	SetFieldValFromCharAndName(lpGWDHead,"EventDescription",(LPSTR)pLoc,FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "EventDescription2", "", FALSE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "EventDescription", (LPSTR)pLoc, FALSE, TRUE);
 
 		pLoc = strstr (pRec,"<event-identifier>");
 		if (pLoc)
@@ -2063,7 +2063,7 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 			pLoc += strlen("<event-identifier>");
 			pLocEnd = strstr(pLoc, "</event-identifier>");
 			*pLocEnd = 0;
-			SetFieldValFromCharAndName(lpGWDHead, "EventIdentifier", (LPSTR)pLoc, FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "EventIdentifier", (LPSTR)pLoc, FALSE, TRUE);
 			*pLocEnd = '<';
 
 			st = GWDReplaceRecord(lpGWDHead, 0, 0, -1);
@@ -2313,16 +2313,16 @@ BOOL ProcessBlockedRefsFile (LPSTR OutFileName)
 			sprintf (BlockedTAG,"%s:%s",CurrentPrefix,CurrentUDI);
 		else
 			*BlockedTAG = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"BlockedRef",(LPSTR)&Refno,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockedType",(LPSTR)&RefType,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockedSymNum",(LPSTR)&RefDesc,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockedTAG",(LPSTR)BlockedTAG,FALSE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockingLayer",(LPSTR)&BlockingLayer,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockingType",(LPSTR)&BlockingType,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockingSymNum",(LPSTR)&BlockingDesc,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockingRefDeleted",(LPSTR)&BlockingRefDeleted,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockingFile",(LPSTR)BlockingFile,FALSE);
-	    SetFieldValFromCharAndName(lpGWDHead,"BlockingTAG",(LPSTR)BlockingTAG,FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockedRef", (LPSTR)&Refno, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockedType", (LPSTR)&RefType, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockedSymNum", (LPSTR)&RefDesc, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockedTAG", (LPSTR)BlockedTAG, FALSE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockingLayer", (LPSTR)&BlockingLayer, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockingType", (LPSTR)&BlockingType, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockingSymNum", (LPSTR)&BlockingDesc, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockingRefDeleted", (LPSTR)&BlockingRefDeleted, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockingFile", (LPSTR)BlockingFile, FALSE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "BlockingTAG", (LPSTR)BlockingTAG, FALSE, TRUE);
 		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 		StatusWindowUpdate (0,0, Tot,GSSillseek (Fid2,0,1));
 	}
@@ -3027,15 +3027,15 @@ NextArea:
 				TotSizeInBounds += SizeInBounds;
 	      		GSSiGlobUlFree (&hAccelerator);
 				GSSiGlobUlFree (&hPnts);
-			   	SetFieldValFromCharAndName(lpGWDHead,"BoundaryRef",(LPSTR)&BoundaryAreaRef,TRUE);
-			   	SetFieldValFromCharAndName(lpGWDHead,"AreaRef",(LPSTR)&AreaRefno,TRUE);
-			    SetFieldValFromCharAndName(lpGWDHead,"AreaTAG",(LPSTR)AreaTAG,FALSE);
-			    SetFieldValFromCharAndName(lpGWDHead,"BoundaryTAG",(LPSTR)BoundaryAreaTAG,FALSE);
-			    SetFieldValFromCharAndName(lpGWDHead,"NumInBoundary",(LPSTR)&Num,TRUE);
-			   	SetFieldValFromCharAndName(lpGWDHead,"FractionOfBoundary",(LPSTR)&FractionOfBounds,TRUE);
-			   	SetFieldValFromCharAndName(lpGWDHead,"FractionOfAreaInBoundary",(LPSTR)&FractionInBounds,TRUE);
-			   	SetFieldValFromCharAndName(lpGWDHead,"SizeOfBoundary",(LPSTR)&BoundaryAreaSize,TRUE);
-			   	SetFieldValFromCharAndName(lpGWDHead,"SizeOfArea",(LPSTR)&AreaSize,TRUE);  
+				SetFieldValFromCharAndName(lpGWDHead, "BoundaryRef", (LPSTR)&BoundaryAreaRef, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "AreaRef", (LPSTR)&AreaRefno, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "AreaTAG", (LPSTR)AreaTAG, FALSE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "BoundaryTAG", (LPSTR)BoundaryAreaTAG, FALSE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "NumInBoundary", (LPSTR)&Num, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "FractionOfBoundary", (LPSTR)&FractionOfBounds, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "FractionOfAreaInBoundary", (LPSTR)&FractionInBounds, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "SizeOfBoundary", (LPSTR)&BoundaryAreaSize, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "SizeOfArea", (LPSTR)&AreaSize, TRUE, TRUE);
 			   	if (FractionInBounds * 100 >= MinPCT)
 					st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 			} 
@@ -3043,20 +3043,20 @@ NextArea:
 		StatusWindowUpdate2 (AreaTAG,nRecs2, ++Done2);
 //		StatusWindowUpdate (0,0, nRecs, NumRecs++);  
 	}
-   	SetFieldValFromCharAndName(lpGWDHead,"BoundaryRef",(LPSTR)&BoundaryAreaRef,TRUE);  
+	SetFieldValFromCharAndName(lpGWDHead, "BoundaryRef", (LPSTR)&BoundaryAreaRef, TRUE, TRUE);
    	AreaRefno = 0;
-   	SetFieldValFromCharAndName(lpGWDHead,"AreaRef",(LPSTR)&AreaRefno,TRUE);   
+	SetFieldValFromCharAndName(lpGWDHead, "AreaRef", (LPSTR)&AreaRefno, TRUE, TRUE);
    	*AreaTAG = 0;
-    SetFieldValFromCharAndName(lpGWDHead,"AreaTAG",(LPSTR)AreaTAG,FALSE);
-    SetFieldValFromCharAndName(lpGWDHead,"BoundaryTAG",(LPSTR)BoundaryAreaTAG,FALSE);
-    SetFieldValFromCharAndName(lpGWDHead,"NumInBoundary",(LPSTR)&Num,TRUE); 
+	SetFieldValFromCharAndName(lpGWDHead, "AreaTAG", (LPSTR)AreaTAG, FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BoundaryTAG", (LPSTR)BoundaryAreaTAG, FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "NumInBoundary", (LPSTR)&Num, TRUE, TRUE);
     FractionOfBounds = 1.0 - (TotSizeInBounds/BoundaryAreaSize);
-   	SetFieldValFromCharAndName(lpGWDHead,"FractionOfBoundary",(LPSTR)&FractionOfBounds,TRUE); 
+	SetFieldValFromCharAndName(lpGWDHead, "FractionOfBoundary", (LPSTR)&FractionOfBounds, TRUE, TRUE);
    	FractionInBounds = 0;
-   	SetFieldValFromCharAndName(lpGWDHead,"FractionOfAreaInBoundary",(LPSTR)&FractionInBounds,TRUE);
-   	SetFieldValFromCharAndName(lpGWDHead,"SizeOfBoundary",(LPSTR)&BoundaryAreaSize,TRUE); 
+	SetFieldValFromCharAndName(lpGWDHead, "FractionOfAreaInBoundary", (LPSTR)&FractionInBounds, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "SizeOfBoundary", (LPSTR)&BoundaryAreaSize, TRUE, TRUE);
    	AreaSize = BoundaryAreaSize - TotSizeInBounds;
-   	SetFieldValFromCharAndName(lpGWDHead,"SizeOfArea",(LPSTR)&AreaSize,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "SizeOfArea", (LPSTR)&AreaSize, TRUE, TRUE);
 	if (IncludeBoundaries)
 		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
     GlobalUnlock (hDB); 
@@ -3235,12 +3235,12 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 	     	Truncate (TRACT);
 	     	PadString (TRACT,'0',6);
 	     	sprintf (BlkGrpKey,"%2.2ld%3.3ld%s%c",STATE,COUNTY,TRACT,BLKGRP);  
-			SetFieldValFromCharAndName(lpGWDHead,"LOGRECNO",(LPSTR)&LOGRECNO,TRUE);
-			SetFieldValFromCharAndName(lpGWDHead,"BLKGRPID",(LPSTR)BlkGrpKey,TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "LOGRECNO", (LPSTR)&LOGRECNO, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "BLKGRPID", (LPSTR)BlkGrpKey, TRUE, TRUE);
 			for (i=0;i<76;i++)
 			{
 		    	sprintf (Name,"OFFSET%2.2i",i+1);
-				SetFieldValFromCharAndName(lpGWDHead,Name,(LPSTR)&M1,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, Name, (LPSTR)&M1, TRUE, TRUE);
 			}
 			GWDAddRecord (lpGWDHead,0,0); 
 			default:
@@ -3294,7 +3294,7 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 				BigWrite (lpGWDHead->Fid,(HPSTR)&lentxt,2,-1);
 				if (lentxt)
 					BigWrite (lpGWDHead->Fid,(HPSTR)comma,lentxt,-1); 
-				SetFieldValFromCharAndName(lpGWDHead,Name,(LPSTR)&CurOff,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, Name, (LPSTR)&CurOff, TRUE, TRUE);
 				GWDReplaceRecord (lpGWDHead,len,0,Offset);  
      		}
 			StatusWindowUpdate2 (0,TotLen,GSSillseek (Fid,0,1));  
@@ -3463,12 +3463,12 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
 	     	Truncate (BLOCK);
 	     	PadString (BLOCK,'0',4); 
 	     	sprintf (BlkGrpKey,"%2.2ld%3.3ld%s%s",STATE,COUNTY,TRACT,BLOCK);  
-			SetFieldValFromCharAndName(lpGWDHead,"LOGRECNO",(LPSTR)&LOGRECNO,TRUE);
-			SetFieldValFromCharAndName(lpGWDHead,"BLOCKID",(LPSTR)BlkGrpKey,TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "LOGRECNO", (LPSTR)&LOGRECNO, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "BLOCKID", (LPSTR)BlkGrpKey, TRUE, TRUE);
 			for (i=0;i<39;i++)
 			{
 		    	sprintf (Name,"OFFSET%2.2i",i+1);
-				SetFieldValFromCharAndName(lpGWDHead,Name,(LPSTR)&M1,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, Name, (LPSTR)&M1, TRUE, TRUE);
 			}
 			GWDAddRecord (lpGWDHead,0,0); 
 			default:
@@ -3523,7 +3523,7 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
 				BigWrite (lpGWDHead->Fid,(HPSTR)&lentxt,2,-1);
 				if (lentxt)
 					BigWrite (lpGWDHead->Fid,(HPSTR)comma,lentxt,-1);
-				SetFieldValFromCharAndName(lpGWDHead,Name,(LPSTR)&CurOff,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, Name, (LPSTR)&CurOff, TRUE, TRUE);
 				GWDReplaceRecord (lpGWDHead,len,0,Offset);  
      		}
 			StatusWindowUpdate2 (0,TotLen,GSSillseek (Fid,0,1));  
@@ -4905,56 +4905,56 @@ BOOL CreateAdjoiningAreasFile (LPSTR OutFileName)
 		double	Height=pAreas[iArea].ymx - pAreas[iArea].ymn;
 		DPOINT	Point; 
 		
-	   	SetFieldValFromCharAndName(lpGWDHead,"AreaUDI",(LPSTR)&pAreaUDIs[iArea*32],FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "AreaUDI", (LPSTR)&pAreaUDIs[iArea * 32], FALSE, TRUE);
 		Point = MinMaxMidPointD (&pAreas[iArea]);
 		Point.x -= Width;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);
 		if (jArea)
-	   		SetFieldValFromCharAndName(lpGWDHead,"LeftAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE);  
+			SetFieldValFromCharAndName(lpGWDHead, "LeftAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 	   	else
-	   		SetFieldValFromCharAndName(lpGWDHead,"LeftAreaUDI",(LPSTR)"",FALSE);  
+			SetFieldValFromCharAndName(lpGWDHead, "LeftAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.y += Height;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);  
 		if (jArea)
-		   	SetFieldValFromCharAndName(lpGWDHead,"UpperLeftAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE);  
+			SetFieldValFromCharAndName(lpGWDHead, "UpperLeftAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 		else
-		   	SetFieldValFromCharAndName(lpGWDHead,"UpperLeftAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "UpperLeftAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.x += Width;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);   
 		if (jArea)
-		   	SetFieldValFromCharAndName(lpGWDHead,"UpperAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "UpperAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 		else
-		   	SetFieldValFromCharAndName(lpGWDHead,"UpperAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "UpperAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.x += Width;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);
 		if (jArea)
-		   	SetFieldValFromCharAndName(lpGWDHead,"UpperRightAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE); 
+			SetFieldValFromCharAndName(lpGWDHead, "UpperRightAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 		else
-		   	SetFieldValFromCharAndName(lpGWDHead,"UpperRightAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "UpperRightAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.y -= Height;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);
 		if (jArea)
-	   		SetFieldValFromCharAndName(lpGWDHead,"RightAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "RightAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 	   	else
-	   		SetFieldValFromCharAndName(lpGWDHead,"RightAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "RightAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.y -= Height;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);
 		if (jArea)
-	   		SetFieldValFromCharAndName(lpGWDHead,"LowerRightAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE); 
+			SetFieldValFromCharAndName(lpGWDHead, "LowerRightAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 	   	else
-	   		SetFieldValFromCharAndName(lpGWDHead,"LowerRightAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "LowerRightAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.x -= Width;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas); 
 		if (jArea)
-	   		SetFieldValFromCharAndName(lpGWDHead,"LowerAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "LowerAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 	   	else
-	   		SetFieldValFromCharAndName(lpGWDHead,"LowerAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "LowerAreaUDI", (LPSTR)"", FALSE, TRUE);
 		Point.x -= Width;
 		jArea = FindAdjoiningArea (Point,nAreas,pAreas);
 		if (jArea)
-	   		SetFieldValFromCharAndName(lpGWDHead,"LowerLeftAreaUDI",(LPSTR)&pAreaUDIs[(jArea-2)*32],FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "LowerLeftAreaUDI", (LPSTR)&pAreaUDIs[(jArea - 2) * 32], FALSE, TRUE);
 	   	else
-	   		SetFieldValFromCharAndName(lpGWDHead,"LowerLeftAreaUDI",(LPSTR)"",FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "LowerLeftAreaUDI", (LPSTR)"", FALSE, TRUE);
 		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 	}
     GlobalUnlock (hDB); 

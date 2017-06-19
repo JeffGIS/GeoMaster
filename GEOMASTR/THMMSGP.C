@@ -108,10 +108,10 @@ BOOL SetThemeQuan (LPTHEME pTheme,LPSTR FileName)
 		double	TotArea=0;
 		short	ClassPlus1 = i+1;
 
-		SetFieldValFromCharAndName(lpGWDHead,"ClassNum",(LPSTR)&ClassPlus1,TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"ClassID",(LPSTR)&pTheme->ClassBM[i],TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"ClassColor",(LPSTR)&pTheme->ClassColor[i],TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"ClassCount",(LPSTR)&pTheme->ClassCount[i],TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "ClassNum", (LPSTR)&ClassPlus1, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "ClassID", (LPSTR)&pTheme->ClassBM[i], TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "ClassColor", (LPSTR)&pTheme->ClassColor[i], TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "ClassCount", (LPSTR)&pTheme->ClassCount[i], TRUE, TRUE);
 		ThemeHighlightKey.Class = i;
 		ThemeHighlightKey.Refno = LONG_MIN;
 		if (BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,BT_FIRST,BT_GE,(LPSTR)&ThemeHighlightData))
@@ -157,8 +157,8 @@ BOOL SetThemeQuan (LPTHEME pTheme,LPSTR FileName)
 		}
 		Acres = ConvertArea (TotArea,6);
 		Feet = ConvertDist (TotLength,1);
-		SetFieldValFromCharAndName(lpGWDHead,"Feet",(LPSTR)&TotLength,TRUE);
-		SetFieldValFromCharAndName(lpGWDHead,"Acres",(LPSTR)&Acres,TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "Feet", (LPSTR)&TotLength, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "Acres", (LPSTR)&Acres, TRUE, TRUE);
 		GWDAddRecord (lpGWDHead,0,0);
 	}
 	GlobalUnlock (hDB);
@@ -1128,11 +1128,11 @@ GSSiExitProg (1284);
 	lpGWDHead = (LPGWDHEADER)GlobalLock (pStreetData->hListDB); 
 	pRefno = (LPLONG)&lpGWDHead->GWDData;
 	*pRefno = Refno;
-	SetFieldValFromCharAndName(lpGWDHead,"Symbol","",FALSE);
-	SetFieldValFromCharAndName(lpGWDHead,"Prefix",CurrentPrefix,FALSE);
-	SetFieldValFromCharAndName(lpGWDHead,"UDI",CurrentUDI,FALSE); 
+	SetFieldValFromCharAndName(lpGWDHead, "Symbol", "", FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "Prefix", CurrentPrefix, FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "UDI", CurrentUDI, FALSE, TRUE);
 	_fstrcpy (str,pStreetData->ListData);
-	SetFieldValFromCharAndName(lpGWDHead,"ListData",str,FALSE);
+	SetFieldValFromCharAndName(lpGWDHead, "ListData", str, FALSE, TRUE);
 	GWDAddRecord (lpGWDHead,0,0);      
 	GlobalUnlock (pStreetData->hListDB); 
 {
