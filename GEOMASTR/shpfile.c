@@ -6,6 +6,7 @@
 #define MAXINDEXSYMBOLS	3200
 #define MAXPOC	4096
 #define MAXFGDBLEVS	8
+#define MAX_CHILD_LENGTH 128
 
 static	struct {float fcontour;
 			float size;
@@ -2849,12 +2850,12 @@ void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
 	UINT	i;
 	int	lnLev1 = strlen (Under);
 
-	Num = FGDBGetChildList (hDB,Under,3,66,&hList);
+	Num = FGDBGetChildList (hDB,Under,3,MAX_CHILD_LENGTH,&hList);
 	if (Num)
 	{
 		LPSTR	pList = GlobalLock (hList);
 
-		for (i=0;i<Num;i++,pList += 66)
+		for (i = 0; i<Num; i++, pList += MAX_CHILD_LENGTH)
 		{
 			int inc = *pList == '\\';
 
@@ -2866,14 +2867,14 @@ void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
 		}
 		GSSiGlobUlFree (&hList);
 	}
-	Num = FGDBGetChildList (hDB,Under,2,66,&hList);
+	Num = FGDBGetChildList(hDB, Under, 2, MAX_CHILD_LENGTH, &hList);
 	if (Num)
 	{
 		LPSTR	pList = GlobalLock (hList);
 
 		memset (tabs,' ',sizeof(tabs));
 		tabs[iLev*6] = 0;
-		for (i=0;i<Num;i++,pList += 66)
+		for (i = 0; i<Num; i++, pList += MAX_CHILD_LENGTH)
 		{
 			int		type=0, nrows=0;
 			int inc = *(pList+lnLev1) == '\\';

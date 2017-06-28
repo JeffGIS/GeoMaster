@@ -224,7 +224,13 @@ return temp;
 
 */
 
-
+string ws2s(const std::wstring& w)
+{
+	string result;
+	for (char x : w)
+		result += x;
+	return result;
+}
 std::string WStringToString(const std::wstring& s)
 {
 	wchar_t *wstr = new wchar_t [s.length()+1];
@@ -247,7 +253,24 @@ delete []wstr;
 delete []cstr;
 return str; 
 }
+wstring utf8toUtf16(const string & str)
+{
+	if (str.empty())
+		return wstring();
 
+	size_t charsNeeded = ::MultiByteToWideChar(CP_UTF8, 0,
+		str.data(), (int)str.size(), NULL, 0);
+	if (charsNeeded == 0)
+		throw runtime_error("Failed converting UTF-8 string to UTF-16");
+
+	vector<wchar_t> buffer(charsNeeded);
+	int charsConverted = ::MultiByteToWideChar(CP_UTF8, 0,
+		str.data(), (int)str.size(), &buffer[0], buffer.size());
+	if (charsConverted == 0)
+		throw runtime_error("Failed converting UTF-8 string to UTF-16");
+
+	return wstring(&buffer[0], charsConverted);
+}
 /*int StringToWString(std::wstring &ws, const std::string &s)
 {
     std::wstring; wsTmp(s.begin(), s.end());
@@ -470,17 +493,18 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 {   
 	long	hr;
 	int		n=0;
-	string undr = Under;
+	wstring undr;
 	wstring	type[3]= {L"Table",L"Feature Class",L"Feature Dataset"};
-	vector<wstring> childList(5); 
-	wstring	under (undr.begin(),undr.end());
+	vector<wstring> childList; 
+	//wstring	under (undr.begin(),undr.end());
 	
 	
 	if (iDB < 1)
 		return 0;
 	if (Type < 1 || Type > 3)
 		return 0;
-	hr = geodatabase[openGDBid[iDB-1]].GetChildDatasets(under, type[Type-1], childList);
+	undr = utf8toUtf16(Under);
+	hr = geodatabase[openGDBid[iDB-1]].GetChildDatasets(undr, type[Type-1], childList);
 	if (!hr)
 	{
 		n = childList.size();
@@ -489,10 +513,14 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 			LPSTR pList;
 			int	i;
 
-			*phList = GSSiGlobAlloc (0,GMEM_MOVEABLE,n*MaxElementSize+32);
+			*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
 			pList = (LPSTR)GlobalLock (*phList);
-			for (i=0;i<n;i++,pList+=MaxElementSize)
-				strcpy (pList,WStringToString(childList[i]).c_str());
+			for (i = 0; i < n; i++, pList += MaxElementSize)
+			{
+				string s = ws2s(childList[i]);
+				strcpy(pList, s.c_str());
+			}
+				//strcpy (pList,WStringToString(childList[i]).c_str());
 
 			GlobalUnlock (*phList);
 		}
