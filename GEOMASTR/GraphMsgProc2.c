@@ -603,10 +603,10 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  {
 				     lpGWDHead = (LPGWDHEADER)GlobalLock (hDBDest); 
 				     lpGWFldInfo=lpGWDHead->pFldInfo; 
-				     SetFieldValFromChar(lpGWDHead,lpGWFldInfo++,cStreetName,FALSE,FALSE);
+					 SetFieldValFromChar(lpGWDHead, lpGWFldInfo++, cStreetName, FALSE, FALSE, TRUE);
 				     SetFieldValFromLong(lpGWDHead,lpGWFldInfo++,HNum);
-				     SetFieldValFromChar(lpGWDHead,lpGWFldInfo++,cZIPCode,FALSE,FALSE);
-				     SetFieldValFromChar(lpGWDHead,lpGWFldInfo++,cUDIValue,FALSE,FALSE);
+					 SetFieldValFromChar(lpGWDHead, lpGWFldInfo++, cZIPCode, FALSE, FALSE, TRUE);
+					 SetFieldValFromChar(lpGWDHead, lpGWFldInfo++, cUDIValue, FALSE, FALSE, TRUE);
 					 STNDST(cStreetName, _fstrlen(cStreetName),STDNAMv,NRONAMv,NMONLYv,
 							     SANSCHv,NANDCHv,NCMPNMv,ORIGNMv,SANSCPv,SANSCSv,0,0,0,0);   
 					 StreetNum = GetStreetNumFromName (STDNAMv,2,BT_FIRST,str);  
@@ -621,7 +621,7 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 	                 {
 		                 GetDlgItemText (hWndDlg,IDC_ADDITIONAL_FIELD,cAdditionalValue,sizeof(cAdditionalValue)); 
 	                     ExpandText (cAdditionalValue);  
-					     SetFieldValFromChar(lpGWDHead,lpGWFldInfo,cAdditionalValue,FALSE,FALSE);
+						 SetFieldValFromChar(lpGWDHead, lpGWFldInfo, cAdditionalValue, FALSE, FALSE, TRUE);
 	                 }
 					 GWDFormKey(lpGWDHead,0,FALSE,0,0);
 					 if (BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ,(LPSTR)&Offset))
@@ -6469,9 +6469,9 @@ BOOL FAR PASCAL TRAVERSE_ENTRYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				    lpGWFldInfo++;     
 			    	n=0;//GetDlgItemText (hWndDlg,IDC_UDI,CurUDI,33);  
 	    	 		GetDlgItemText (hWndDlg,IDC_TAPREFIX,CurTAG,9);  
-	    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CurTAG,FALSE,FALSE); 
+					SetFieldValFromChar(lpGWDHead, lpGWFldInfo, CurTAG, FALSE, FALSE, TRUE);
 				    lpGWFldInfo++;     
-	    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,"",FALSE,FALSE); 
+					SetFieldValFromChar(lpGWDHead, lpGWFldInfo, "", FALSE, FALSE, TRUE);
 	    			GWDFormKey(lpGWDHead,1,TRUE,0,0);
 			        SendDlgItemMessage (hWndDlg,IDC_UDI,CB_RESETCONTENT,0,0);
 	    			st = BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],BT_FIRST,BT_GE, (LPSTR)&Offset);
@@ -6527,9 +6527,9 @@ BOOL FAR PASCAL TRAVERSE_ENTRYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
 			    lpGWFldInfo=lpGWDHead->pFldInfo; 
 			    lpGWFldInfo++;     
-    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CurTAG,FALSE,FALSE); 
+				SetFieldValFromChar(lpGWDHead, lpGWFldInfo, CurTAG, FALSE, FALSE, TRUE);
 			    lpGWFldInfo++;     
-    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CurUDI,FALSE,FALSE); 
+				SetFieldValFromChar(lpGWDHead, lpGWFldInfo, CurUDI, FALSE, FALSE, TRUE);
     			GWDFormKey(lpGWDHead,1,TRUE,0,0);
     			if (!BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],BT_FIRST,BT_EQ, (LPSTR)&Offset))
 				{   
@@ -6547,11 +6547,11 @@ BOOL FAR PASCAL TRAVERSE_ENTRYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				pTravIDData->ID = CurTravID;
 			    lpGWFldInfo=lpGWDHead->pFldInfo; 
 			    lpGWFldInfo++;     
-    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CurTAG,FALSE,FALSE); 
+				SetFieldValFromChar(lpGWDHead, lpGWFldInfo, CurTAG, FALSE, FALSE, TRUE);
 			    lpGWFldInfo++;     
-    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CurUDI,FALSE,FALSE); 
+				SetFieldValFromChar(lpGWDHead, lpGWFldInfo, CurUDI, FALSE, FALSE, TRUE);
 			    lpGWFldInfo++;     
-    			SetFieldValFromChar(lpGWDHead,lpGWFldInfo,SymName,FALSE,FALSE); 
+				SetFieldValFromChar(lpGWDHead, lpGWFldInfo, SymName, FALSE, FALSE, TRUE);
 				GWDReplaceRecord (lpGWDHead,0,0,-1);
 				GlobalUnlock (hDB);  
 				CloseGWDatabase (hDB);   

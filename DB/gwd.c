@@ -1504,10 +1504,10 @@ BOOL SetFieldValFromDlgItem (LPGWDHEADER lpGWDHead,HWND hWndDlg,UINT icntl,LPSTR
 	
 	*str = 0;
 	GetDlgItemText (hWndDlg,icntl,str,256);
-	return SetFieldValFromCharAndName(lpGWDHead,FieldName,str,FALSE);
+	return SetFieldValFromCharAndName(lpGWDHead, FieldName, str, FALSE, TRUE);
 }
   
-BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldNameIn,LPSTR CharVal,BOOL BinMode)
+BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldNameIn,LPSTR CharVal,BOOL BinMode,BOOL ExpandValue)
 #if ENABLETRACE
 {GSSiEnterProg (621);
 #endif
@@ -1536,7 +1536,7 @@ BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldNameIn,LPSTR Ch
 #if ENABLETRACE
 GSSiExitProg (621);
 #endif
-			return SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CharVal,BinMode,IncValue);
+			return SetFieldValFromChar(lpGWDHead,lpGWFldInfo,CharVal,BinMode,IncValue,ExpandValue);
 } 
 		}
 	} 
@@ -1552,7 +1552,7 @@ GSSiExitProg (621);
 #endif
 }
 
-BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,LPSTR InCharVal,BOOL BinMode,BOOL IncrementValue)
+BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,LPSTR InCharVal,BOOL BinMode,BOOL IncrementValue,BOOL ExpandValue)
 #if ENABLETRACE
 {GSSiEnterProg (622);
 #endif
@@ -1570,7 +1570,8 @@ BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,LPSTR InC
     else
     {
 	    _fstrcpy (CharVal,InCharVal);
-	    ExpandText (CharVal); 
+	    if (ExpandValue)
+			ExpandText (CharVal); 
 	    ln = _fstrlen (CharVal);
     }
     lpGWFldInfo->HasValue = 1;
@@ -3217,7 +3218,7 @@ FoundFile:
 			}
 
 
-    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+			if (!SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE))
     		{
     			if (!Truncate)
     				goto Exit;
@@ -3294,7 +3295,7 @@ NextRec:
 									}
 								}
 								sprintf (Value,"[%s.%s]",SQLPtr->IDName,lpFieldInfo->name);
-						    	SetFieldValFromCharAndName(lpGWDHead,lpFieldInfo->name,Value,FALSE);
+								SetFieldValFromCharAndName(lpGWDHead, lpFieldInfo->name, Value, FALSE, TRUE);
 SkipField:;
 							} 
 							GlobalUnlock (SQLPtr->OFHandle);
@@ -3321,7 +3322,7 @@ SkipField:;
 				Value = pEQ;
 				if ((pComma = MatchLev (Value,';')))
 					*pComma++ = 0;
-	    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+	    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE,TRUE))
 	    		{
 	    			if (!Truncate)
 	    				goto Exit;
@@ -3477,7 +3478,7 @@ FoundFile:
 				Value = pEQ;
 				if ((pComma = MatchLev (Value,';')))
 					*pComma++ = 0;
-	    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+				if (!SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE))
 	    			goto Exit;
 			}
 		}
@@ -3618,7 +3619,7 @@ FoundFile:
 			Value = pEQ;
 			if ((pComma = MatchLev (Value,';')))
 				*pComma++ = 0;
-    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+			if (!SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE, TRUE))
     			goto Exit;
 		} 
 		else
@@ -3639,7 +3640,7 @@ FoundFile:
 				Value = pEQ;
 				if ((pComma = MatchLev (Value,';')))
 					*pComma++ = 0;
-	    		if (!SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE))
+				if (!SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE))
 	    			goto Exit;
 			}
 			else
@@ -4354,7 +4355,7 @@ Display:
 						  *str = 0;
 						  if (!GetTextString (hWndDlg,str,256,lpGWFldInfo->Name,NULL,NULL,0,TRUE,TRUE))
 						  	break; 
-		  		 		  SetFieldValFromCharAndName(lpGWDHead,lpGWFldInfo->Name,str,FALSE);
+						  SetFieldValFromCharAndName(lpGWDHead, lpGWFldInfo->Name, str, FALSE, TRUE);
 		  		 	  }
 	                  GWDFormKey(lpGWDHead,CurrentIndex,TRUE,0,0);
 	                  st = BT_FIND (lpGWDHead->BTHandle[CurrentIndex],lpGWDHead->pKeys[CurrentIndex],BT_FIRST,BT_GE, (LPSTR)&SQLPtr->Offset);
@@ -7375,17 +7376,17 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 					{
 						GMDGetCharFieldVal (lpGWDHead1,i,Val1);
 						if (i < lpGWDHead1->NumIndexFields[0])
-						   SetFieldValFromCharAndName(lpGWDHead,lpGWFldInfo->Name,Val1,FALSE);
+							SetFieldValFromCharAndName(lpGWDHead, lpGWFldInfo->Name, Val1, FALSE, TRUE);
                 		if (GWDGetFieldInfoFromName (hDB2,lpGWFldInfo->Name, &FieldInfo,&index))
 						{
 							GMDGetCharFieldVal (lpGWDHead2,index,Val2);
 							if (strcmp (Val1,Val2))
 							{
-						 	   SetFieldValFromCharAndName(lpGWDHead,"FieldName",lpGWFldInfo->Name,FALSE);
-						 	   SetFieldValFromCharAndName(lpGWDHead,"Value1",Val1,FALSE);
-						 	   SetFieldValFromCharAndName(lpGWDHead,"Value2",Val2,FALSE);
-							   NumDiffs++;
-						       GWDAddRecord (lpGWDHead,0,NULL);
+								SetFieldValFromCharAndName(lpGWDHead, "FieldName", lpGWFldInfo->Name, FALSE, TRUE);
+								SetFieldValFromCharAndName(lpGWDHead, "Value1", Val1, FALSE, TRUE);
+								SetFieldValFromCharAndName(lpGWDHead, "Value2", Val2, FALSE, TRUE);
+							    NumDiffs++;
+						        GWDAddRecord (lpGWDHead,0,NULL);
 							}
 						}
 					}
@@ -7683,7 +7684,7 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
         		_fstrcpy (setclause,pStr);
         		GlobalUnlock (hSetClause[i]);
         		ExpandText (setclause);
-				SetFieldValFromCharAndName(lpGWDHeadNew,NewFieldInfo[i].Name,setclause,FALSE);
+				SetFieldValFromCharAndName(lpGWDHeadNew, NewFieldInfo[i].Name, setclause, FALSE, TRUE);
         	}
         }  
         GWDAddRecord (lpGWDHeadNew,0,NULL);

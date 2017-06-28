@@ -171,8 +171,8 @@ BOOL GetNearestUnusedSegment (int onStreetNum,LPSTR nextIntPoint,HFILE outFid,LP
 	nextIntPoint[12] = 0;
 	ExtractInterleavedCoord (nextIntPoint,&x,&y);
 
-	SetFieldValFromCharAndName(lpGWDHead,"ONSTREETNUM",(LPSTR)&onStreetNum,TRUE);
-	SetFieldValFromCharAndName(lpGWDHead,"BPITCOORD",(LPSTR)nextIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "ONSTREETNUM", (LPSTR)&onStreetNum, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BPITCOORD", (LPSTR)nextIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,3,TRUE,0,0);
 	if (!BT_FIND (lpGWDHead->BTHandle[3],lpGWDHead->pKeys[3],BT_FIRST,BT_GE, (LPSTR)&Offset))
 	{
@@ -193,8 +193,8 @@ BOOL GetNearestUnusedSegment (int onStreetNum,LPSTR nextIntPoint,HFILE outFid,LP
 		}
 	}
 Next1:
-	SetFieldValFromCharAndName(lpGWDHead,"ONSTREETNUM",(LPSTR)&onStreetNum,TRUE);
-	SetFieldValFromCharAndName(lpGWDHead,"BPITCOORD",(LPSTR)nextIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "ONSTREETNUM", (LPSTR)&onStreetNum, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BPITCOORD", (LPSTR)nextIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,3,TRUE,0,0);
 	if (!BT_FIND (lpGWDHead->BTHandle[3],lpGWDHead->pKeys[3],BT_FIRST,BT_GE, (LPSTR)&Offset))
 	{
@@ -218,8 +218,8 @@ Next1:
 		}
 	}
 Next2:
-	SetFieldValFromCharAndName(lpGWDHead,"ONSTREETNUM",(LPSTR)&onStreetNum,TRUE);
-	SetFieldValFromCharAndName(lpGWDHead,"EPITCOORD",(LPSTR)nextIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "ONSTREETNUM", (LPSTR)&onStreetNum, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "EPITCOORD", (LPSTR)nextIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,4,TRUE,0,0);
 	if (!BT_FIND (lpGWDHead->BTHandle[4],lpGWDHead->pKeys[4],BT_FIRST,BT_GE, (LPSTR)&Offset))
 	{
@@ -241,8 +241,8 @@ Next2:
 		}
 	}
 Next3:
-	SetFieldValFromCharAndName(lpGWDHead,"ONSTREETNUM",(LPSTR)&onStreetNum,TRUE);
-	SetFieldValFromCharAndName(lpGWDHead,"EPITCOORD",(LPSTR)nextIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "ONSTREETNUM", (LPSTR)&onStreetNum, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "EPITCOORD", (LPSTR)nextIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,3,TRUE,0,0);
 	if (!BT_FIND (lpGWDHead->BTHandle[4],lpGWDHead->pKeys[4],BT_FIRST,BT_GE, (LPSTR)&Offset))
 	{
@@ -299,7 +299,7 @@ int TraceStreetLink (int recordNum,int onStreetNum,int startMSLink,LPSTR nextInt
 	fputstring (str,outFid);
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
 	pStreetSegs = (LPSTREETSEGS)&lpGWDHead->GWDData;
-	SetFieldValFromCharAndName(lpGWDHead,"MSLNK",(LPSTR)&startMSLink,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "MSLNK", (LPSTR)&startMSLink, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,0,TRUE,0,0);
 	if (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ, (LPSTR)&Offset))
 	{
@@ -314,8 +314,8 @@ int TraceStreetLink (int recordNum,int onStreetNum,int startMSLink,LPSTR nextInt
 	memmove (nextIntPoint,nextIntPointIn,12);
 NextSeg:
 	nMatch = 0;
-	SetFieldValFromCharAndName(lpGWDHead,"ONSTREETNUM",(LPSTR)&onStreetNum,TRUE);
-	SetFieldValFromCharAndName(lpGWDHead,"BPITCOORD",nextIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "ONSTREETNUM", (LPSTR)&onStreetNum, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BPITCOORD", nextIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,3,TRUE,0,0);
 	pos = BT_FIRST;
 	while (!BT_FIND (lpGWDHead->BTHandle[3],lpGWDHead->pKeys[3],pos,cond, (LPSTR)&Offset))
@@ -330,8 +330,8 @@ NextSeg:
 			memmove (nextIntPoints[nMatch++],pStreetSegs->EPITCOORD,12);
 		}
 	}
-	SetFieldValFromCharAndName(lpGWDHead,"ONSTREETNUM",(LPSTR)&onStreetNum,TRUE);
-	SetFieldValFromCharAndName(lpGWDHead,"EPITCOORD",nextIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "ONSTREETNUM", (LPSTR)&onStreetNum, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "EPITCOORD", nextIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,4,TRUE,0,0);
 	pos = BT_FIRST;
 	while (!BT_FIND (lpGWDHead->BTHandle[4],lpGWDHead->pKeys[4],pos,cond, (LPSTR)&Offset))
@@ -404,7 +404,7 @@ Top:
 		return 0; 
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
 	pStreetSegs = (LPSTREETSEGS)&lpGWDHead->GWDData;
-	SetFieldValFromCharAndName(lpGWDHead,"BPX",(LPSTR)&startx,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BPX", (LPSTR)&startx, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,5,TRUE,0,0); 
 	while (!BT_FIND (lpGWDHead->BTHandle[5],lpGWDHead->pKeys[5],pos,cond, (LPSTR)&Offset))
 	{ 
@@ -423,7 +423,7 @@ Top:
 		}
 	}
 
-	SetFieldValFromCharAndName(lpGWDHead,"EPX",(LPSTR)&startx,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "EPX", (LPSTR)&startx, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,6,TRUE,0,0); 
 	while (!BT_FIND (lpGWDHead->BTHandle[6],lpGWDHead->pKeys[6],pos,cond, (LPSTR)&Offset))
 	{  
@@ -481,7 +481,7 @@ int GetStreetSegsBetweenPoints (LPSTR OutFile,LPSTR cRecordNum,LPSTR cFound,LPST
 
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
 	pStreetSegs = (LPSTREETSEGS)&lpGWDHead->GWDData;
-	SetFieldValFromCharAndName(lpGWDHead,"BPITCOORD",fromIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BPITCOORD", fromIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,1,TRUE,0,0); 
 	while (!BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],pos,cond, (LPSTR)&Offset))
 	{  
@@ -503,7 +503,7 @@ int GetStreetSegsBetweenPoints (LPSTR OutFile,LPSTR cRecordNum,LPSTR cFound,LPST
 		else
 			break;
 	}
-	SetFieldValFromCharAndName(lpGWDHead,"EPITCOORD",fromIntPoint,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "EPITCOORD", fromIntPoint, TRUE, TRUE);
 	GWDFormKey(lpGWDHead,2,TRUE,0,0); 
 	pos = BT_FIRST;
 	while (!BT_FIND (lpGWDHead->BTHandle[2],lpGWDHead->pKeys[2],pos,cond, (LPSTR)&Offset))
@@ -966,9 +966,9 @@ BOOL ProcessDisplayMacro (HFILE Fid,int Opt)
 		    if (pos == BT_FIRST)
 		    {   
 		    	nFound=0;
-		 		SetFieldValFromCharAndName(lpGWDHead,"AREAREF",(LPSTR)&WantArea,TRUE);
-		 		SetFieldValFromCharAndName(lpGWDHead,"TIME",(LPSTR)&TimeRangeBeg,TRUE);
-		 		SetFieldValFromCharAndName(lpGWDHead,"SYMNUM",(LPSTR)&Zero,TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "AREAREF", (LPSTR)&WantArea, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "TIME", (LPSTR)&TimeRangeBeg, TRUE, TRUE);
+				SetFieldValFromCharAndName(lpGWDHead, "SYMNUM", (LPSTR)&Zero, TRUE, TRUE);
 	            GWDFormKey(lpGWDHead,1,TRUE,0,0); 
 	        }
 			if (!BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],pos,cond, (LPSTR)&Offset))

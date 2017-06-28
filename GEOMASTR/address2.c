@@ -904,9 +904,9 @@ BOOL MatchAddress3 (int MatchCode,long StreetNum,long House,long ZIP,long OrigZI
 		lpGWDHead = (LPGWDHEADER) GlobalLock (hPIDAddDB); 
 		if (ZIP)
 		{
-			SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[lpGWDHead->IndexFields[1][0]],(LPSTR)&ZIP,TRUE,FALSE); 
-			SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[lpGWDHead->IndexFields[1][1]],(LPSTR)&StreetNum,TRUE,FALSE); 
-			SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[lpGWDHead->IndexFields[1][2]],(LPSTR)&House,TRUE,FALSE); 
+			SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[lpGWDHead->IndexFields[1][0]], (LPSTR)&ZIP, TRUE, FALSE, TRUE);
+			SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[lpGWDHead->IndexFields[1][1]], (LPSTR)&StreetNum, TRUE, FALSE, TRUE);
+			SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[lpGWDHead->IndexFields[1][2]], (LPSTR)&House, TRUE, FALSE, TRUE);
 //		SetFieldToMinVal(lpGWDHead,lpGWDHead->IndexFields[1][3]);
 			GWDFormKey(lpGWDHead,1,TRUE,0,0);
 			index=1;
@@ -916,9 +916,9 @@ BOOL MatchAddress3 (int MatchCode,long StreetNum,long House,long ZIP,long OrigZI
 		{
 			if (lpGWDHead->NumIndex < 3)
 				goto SkipPointBased;
-			SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[lpGWDHead->IndexFields[2][0]],(LPSTR)&StreetNum,TRUE,FALSE); 
-			SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[lpGWDHead->IndexFields[2][1]],(LPSTR)&House,TRUE,FALSE); 
-			SetFieldValFromChar(lpGWDHead,&lpGWDHead->pFldInfo[lpGWDHead->IndexFields[2][2]],(LPSTR)&ZIP,TRUE,FALSE); 
+			SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[lpGWDHead->IndexFields[2][0]], (LPSTR)&StreetNum, TRUE, FALSE, TRUE);
+			SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[lpGWDHead->IndexFields[2][1]], (LPSTR)&House, TRUE, FALSE, TRUE);
+			SetFieldValFromChar(lpGWDHead, &lpGWDHead->pFldInfo[lpGWDHead->IndexFields[2][2]], (LPSTR)&ZIP, TRUE, FALSE, TRUE);
 		    GWDFormKey(lpGWDHead,2,TRUE,0,0);
 			index=2;
 			st = BT_FIND (lpGWDHead->BTHandle[index],lpGWDHead->pKeys[index],BT_FIRST,BT_GE, (LPSTR)&Offset);
@@ -1519,7 +1519,7 @@ BOOL RemoveNonNetworkedStreets (void)
     lpGWFldInfo=lpGWDHead->pFldInfo; 
 	while (fgetstring (str,128,Fid))
     {
-	    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE,FALSE); 
+		SetFieldValFromChar(lpGWDHead, lpGWFldInfo, str, FALSE, FALSE, TRUE);
 	    GWDFormKey(lpGWDHead,0,TRUE,0,0);
 		if (!BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],BT_FIRST,BT_EQ, (LPSTR)&Offset))
 			GWDDeleteRecord (lpGWDHead,Offset);

@@ -25283,7 +25283,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			    		LastFile = 0;
 					    lpGWFldInfo=lpGWDHead->pFldInfo;  
 					    lpGWFldInfo++;
-					    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,WantCD,FALSE,FALSE); 
+						SetFieldValFromChar(lpGWDHead, lpGWFldInfo, WantCD, FALSE, FALSE, TRUE);
 					    GWDFormKey(lpGWDHead,1,TRUE,0,0);
 					    while (!BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],pos,cond, (LPSTR)&Offset))
 					    {   
@@ -25380,7 +25380,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			    		cond = BT_GE;
 					    lpGWFldInfo=lpGWDHead->pFldInfo;  
 					    lpGWFldInfo ++;
-					    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,WantCD,FALSE,FALSE); 
+						SetFieldValFromChar(lpGWDHead, lpGWFldInfo, WantCD, FALSE, FALSE, TRUE);
 					    GWDFormKey(lpGWDHead,1,TRUE,0,0);
 					    while (ContinueProcessing && !BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],pos,cond, (LPSTR)&Offset))
 					    {   
@@ -25570,7 +25570,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 			    		LastFile = 0;
 					    lpGWFldInfo=lpGWDHead->pFldInfo;  
 					    lpGWFldInfo++;
-					    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,WantCD,FALSE,FALSE); 
+						SetFieldValFromChar(lpGWDHead, lpGWFldInfo, WantCD, FALSE, FALSE, TRUE);
 					    GWDFormKey(lpGWDHead,1,TRUE,0,0);
 					    while (!BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],pos,cond, (LPSTR)&Offset))
 					    {   
@@ -25683,7 +25683,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 			    		cond = BT_GE;
 					    lpGWFldInfo=lpGWDHead->pFldInfo;  
 					    lpGWFldInfo ++;
-					    SetFieldValFromChar(lpGWDHead,lpGWFldInfo,WantCD,FALSE,FALSE); 
+						SetFieldValFromChar(lpGWDHead, lpGWFldInfo, WantCD, FALSE, FALSE, TRUE);
 					    GWDFormKey(lpGWDHead,1,TRUE,0,0);
 					    while (!BT_FIND (lpGWDHead->BTHandle[1],lpGWDHead->pKeys[1],pos,cond, (LPSTR)&Offset))
 					    {   

@@ -3008,7 +3008,7 @@ GSSiExitProg (603);
 			} 
 			if (GMHeader == 2)
 			{
-		 		 SetFieldValFromCharAndName(lpGWDHead,FieldName,str,FALSE);
+		 		 SetFieldValFromCharAndName(lpGWDHead,FieldName,str,FALSE,FALSE);
 			}
 			else
 			{

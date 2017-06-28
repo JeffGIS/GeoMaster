@@ -10,8 +10,8 @@ long OutputToFile(LPSTR OutFile, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE h
 double GetNumericFieldData (HANDLE hDB,LPFIELDINFO lpField, int FunctionID,int MultiValOption,LPSTR CmdString, long iref, int Type,LPSHORT irc,LPSTR DataFileID);
 int GetCharFieldData (HANDLE hSQL,LPFIELDINFO lpField, long iref,short FunctionID,LPSTR CmdString, LPSTR Value,int maxLen,LPSTR DataFileID,int combineOption);
 BOOL SetFieldValFromDlgItem (LPGWDHEADER lpGWDHead,HWND hWndDlg,UINT icntl,LPSTR FieldName);
-BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpField,LPSTR CharVal,BOOL BinMode,BOOL IncrementValue);
-BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldName,LPSTR CharVal,BOOL BinMode);
+BOOL SetFieldValFromChar(LPGWDHEADER lpGWDHead, LPGWFLDINFO lpField, LPSTR CharVal, BOOL BinMode, BOOL IncrementValue, BOOL ExpandValue);
+BOOL SetFieldValFromCharAndName(LPGWDHEADER lpGWDHead,LPSTR FieldName,LPSTR CharVal,BOOL BinMode,BOOL ExpandValue);
 BOOL SetFieldValFromLong(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,long LVal);
 BOOL SetFieldValFromReal(LPGWDHEADER lpGWDHead,LPGWFLDINFO lpGWFldInfo,double LVal);
 BOOL GetFieldMinValue (LPGWFLDINFO lpGWFldInfo,LPVOID lpVal);

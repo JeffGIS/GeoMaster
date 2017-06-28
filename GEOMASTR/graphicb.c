@@ -1024,7 +1024,7 @@ GSSiExitProg (1149);
     	return (FALSE);
 }
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
-    SetFieldValFromCharAndName(lpGWDHead,"BoundaryRef",(LPSTR)&AreaRef,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BoundaryRef", (LPSTR)&AreaRef, TRUE, TRUE);
 	if (Num)
 	{
 		BT_FIND (hHighlight,(LPSTR)&InRefno,BT_FIRST,BT_ANY,(LPSTR)&HighlightData);
@@ -1036,10 +1036,10 @@ GSSiExitProg (1149);
 		InRefno = 0;
 		*InTAG = 0;
 	}
-   	SetFieldValFromCharAndName(lpGWDHead,"InRef",(LPSTR)&InRefno,TRUE);
-    SetFieldValFromCharAndName(lpGWDHead,"InTAG",(LPSTR)InTAG,FALSE);
-    SetFieldValFromCharAndName(lpGWDHead,"BoundaryTAG",(LPSTR)BoundaryTAG,FALSE);
-    SetFieldValFromCharAndName(lpGWDHead,"NumInBoundary",(LPSTR)&Num,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "InRef", (LPSTR)&InRefno, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "InTAG", (LPSTR)InTAG, FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BoundaryTAG", (LPSTR)BoundaryTAG, FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "NumInBoundary", (LPSTR)&Num, TRUE, TRUE);
 	st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
     GlobalUnlock (hDB); 
     CloseGWDatabase (hDB); 
@@ -1163,9 +1163,9 @@ BOOL ThemeInArea (LPSTR TAGOrRef,LPSTR ThemeVPName,LPSTR TinAGMD,double MinPCT,l
     if (!hDB)
     	goto Exit;
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
-    SetFieldValFromCharAndName(lpGWDHead,"BoundaryRef",(LPSTR)&AreaRef,TRUE);
-    SetFieldValFromCharAndName(lpGWDHead,"BoundaryTAG",(LPSTR)BoundaryTAG,FALSE);
-    SetFieldValFromCharAndName(lpGWDHead,"NumClassInBoundary",(LPSTR)&ThemeVP->pTheme->NumClass,TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BoundaryRef", (LPSTR)&AreaRef, TRUE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "BoundaryTAG", (LPSTR)BoundaryTAG, FALSE, TRUE);
+	SetFieldValFromCharAndName(lpGWDHead, "NumClassInBoundary", (LPSTR)&ThemeVP->pTheme->NumClass, TRUE, TRUE);
    	TotCount = CurTheme->NumNonMask;  
 	for (i=0;i<ThemeVP->pTheme->NumClass;i++) 
 		CountInAllClasses += CurTheme->ClassCount[i];
@@ -1180,15 +1180,15 @@ BOOL ThemeInArea (LPSTR TAGOrRef,LPSTR ThemeVPName,LPSTR TinAGMD,double MinPCT,l
 		for (i=0;i<ThemeVP->pTheme->NumClass;i++)
 		{   
 			ClassNo = i+1;
-		   	SetFieldValFromCharAndName(lpGWDHead,"InClassNum",(LPSTR)&ClassNo,TRUE);
-		    SetFieldValFromCharAndName(lpGWDHead,"InClassDesc",(LPSTR)ThemeVP->pTheme->ClassBM[i],FALSE);
+			SetFieldValFromCharAndName(lpGWDHead, "InClassNum", (LPSTR)&ClassNo, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "InClassDesc", (LPSTR)ThemeVP->pTheme->ClassBM[i], FALSE, TRUE);
 			if (!TotCount)
 				PCT = 0;
 			else
 				PCT = CurTheme->ClassCount[i] / TotCount; 
 			PCT *= -1;
-		   	SetFieldValFromCharAndName(lpGWDHead,"PCT",(LPSTR)&PCT,TRUE); 
-		   	SetFieldValFromCharAndName(lpGWDHead,"PCTInNoClass",(LPSTR)&PCTInNoClass,TRUE); 
+			SetFieldValFromCharAndName(lpGWDHead, "PCT", (LPSTR)&PCT, TRUE, TRUE);
+			SetFieldValFromCharAndName(lpGWDHead, "PCTInNoClass", (LPSTR)&PCTInNoClass, TRUE, TRUE);
 		   	if (fabs (PCT) > MinPCT)
 				st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 		}
@@ -1197,12 +1197,12 @@ BOOL ThemeInArea (LPSTR TAGOrRef,LPSTR ThemeVPName,LPSTR TinAGMD,double MinPCT,l
 	{
 		PCT = 0; 
 		ClassNo=0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"PCT",(LPSTR)&PCT,TRUE);
-	   	SetFieldValFromCharAndName(lpGWDHead,"PCTInNoClass",(LPSTR)&PCTInNoClass,TRUE); 
+		SetFieldValFromCharAndName(lpGWDHead, "PCT", (LPSTR)&PCT, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "PCTInNoClass", (LPSTR)&PCTInNoClass, TRUE, TRUE);
 		InRefno = 0;
 		*InTAG = 0;
-	   	SetFieldValFromCharAndName(lpGWDHead,"InClassNum",(LPSTR)&ClassNo,TRUE);
-	    SetFieldValFromCharAndName(lpGWDHead,"InClassDesc",(LPSTR)"",FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, "InClassNum", (LPSTR)&ClassNo, TRUE, TRUE);
+		SetFieldValFromCharAndName(lpGWDHead, "InClassDesc", (LPSTR)"", FALSE, TRUE);
 		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 	}
     GlobalUnlock (hDB); 
@@ -5781,7 +5781,7 @@ FoundPart:							;
 									//	IDLen += lpGWDHeadProperty->pFldInfo[lpGWDHeadProperty->IndexFields[IDIndex][i]].Len;
 									//_fstrncpy (lpGWDHeadProperty->pKeys[IDIndex],WantStr2,IDLen);
 					        		GetGlobalCVal ("[%PROPERTYINDEXFIELD]",propindexfld,"[PID]");
-							 		SetFieldValFromCharAndName(lpGWDHeadProperty,propindexfld,(LPSTR)WantStr2,FALSE);
+									SetFieldValFromCharAndName(lpGWDHeadProperty, propindexfld, (LPSTR)WantStr2, FALSE, TRUE);
 									GWDFormKey(lpGWDHeadProperty,IDIndex,TRUE,0,0);
 
 		        					while (GetNext && !BT_FIND (lpGWDHeadProperty->BTHandle[IDIndex],lpGWDHeadProperty->pKeys[IDIndex],pos,cond,(LPSTR)&Offset))
@@ -6284,7 +6284,7 @@ FoundPart:							;
 									//	IDLen += lpGWDHeadProperty->pFldInfo[lpGWDHeadProperty->IndexFields[IDIndex][i]].Len;
 									//_fstrncpy (lpGWDHeadProperty->pKeys[IDIndex],WantStr2,IDLen);
 					        		GetGlobalCVal ("[%PROPERTYINDEXFIELD]",propindexfld,"[PID]");
-							 		SetFieldValFromCharAndName(lpGWDHeadProperty,propindexfld,(LPSTR)WantStr2,FALSE);
+									SetFieldValFromCharAndName(lpGWDHeadProperty, propindexfld, (LPSTR)WantStr2, FALSE, TRUE);
 									GWDFormKey(lpGWDHeadProperty,IDIndex,TRUE,0,0);
 
 		        					while (GetNext && !BT_FIND (lpGWDHeadProperty->BTHandle[IDIndex],lpGWDHeadProperty->pKeys[IDIndex],pos,cond,(LPSTR)&Offset))

@@ -1217,11 +1217,17 @@ BOOL GetFieldTypeAndLenFromChar (LPSTR str,LPGWFLDINFO pGWFldInfo,LPHANDLE phSet
 	{
 		if (!_fstrncmp (pPar,")=",2))
 		{
+			LPSTR pEnd;
 			pPar+=2;
+			pEnd = MatchLev(pPar, ',');
+			if (pEnd)
+				*pEnd = 0;
 			*phSetClause = GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
 			pSetClause = GlobalLock (*phSetClause);
 			_fstrcpy (pSetClause,pPar);
 			GlobalUnlock (*phSetClause);
+			if (pEnd)
+				*pEnd = ',';
 		}
 	}
 			

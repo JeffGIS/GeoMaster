@@ -7817,7 +7817,7 @@ NextTextRec:
 					    		_fstrcpy (str,lpSQLField->String);
 					    		ExpandText (str);
 					    		lpGWFldInfo=lpGWDHead->pFldInfo + lpSQLField->FieldNum;
-								SetFieldValFromChar(lpGWDHead,lpGWFldInfo,str,FALSE,FALSE);
+								SetFieldValFromChar(lpGWDHead, lpGWFldInfo, str, FALSE, FALSE, TRUE);
 								for (j=0;j<n;j++)
 									if (lpSQLField->FieldNum == lpGWDHead->IndexFields[SQLPtr->IndexToUse][j] && 
 				    					(lpSQLField->OpCode == OPCODE_EQ || lpSQLField->OpCode == OPCODE_GE || lpSQLField->OpCode == OPCODE_GT))
@@ -8297,7 +8297,7 @@ BOOL SetGMDField (HANDLE hSQLPtr,LPSTR Name,LPSTR Value)
 	else if (FilePtr->Type == UMIFS_DATAFILE || FilePtr->Type == ORA_DATAFILE)
 	{ 
 		lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
-	    SetFieldValFromCharAndName(lpGWDHead,Name,Value,FALSE);
+		SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE);
 		GlobalUnlock (FilePtr->FileHandle); 
 	}
 	else if (FilePtr->Type == ODBC_DATAFILE || FilePtr->Type == DBF_DATAFILE || FilePtr->Type == TEXT_DATAFILE)
