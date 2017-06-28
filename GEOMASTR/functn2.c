@@ -1606,7 +1606,7 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		}
 		case 856://$TEXTFILE(OPEN,pathname,READorWRITEorRorW)  returns fid
-			//$TEXTFILE(READ,fid,varname) puts text into varname returns T or F
+			//$TEXTFILE(READ,fid,varname,at(opt)) puts text into varname returns T or F
 			//$TEXTFILE(WRITE,fid,text)
 			//$TEXTFILE(CLOSE,fid)
 			//$TEXTFILE(REPLACE,file,fromtext,totext)
@@ -1619,24 +1619,35 @@ GSSiExitProg (1350);
 				if (*Arg[3] == 'R')
 				{
 					fid = GSSiOpenFile(Arg[2], 0, OF_READ);
-					rtn = fid;
 				}
 				else if (*Arg[3] == 'C')
 				{
 					fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
-					rtn = fid;
 				}
 				else if (*Arg[3] == 'W')
 				{
 					fid = GSSiOpenFile(Arg[2], 0, OF_READWRITE);
-					rtn = fid;
 				}
+				ltoa(fid, OutLoc, 10);
+				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "READ"))
 			{
 				LPSTR line = malloc(MAXVARLEN);
 				fid = atoi(Arg[2]);
-				if (fgetstring(line, MAXVARLEN - 2, fid))
+				if (*Arg[4])
+				{
+					while (fgetstring(line, MAXVARLEN - 2, fid))
+					{
+						if (strstr(line, Arg[4]))
+						{
+							rtn = 1;
+							SetGlobalValue(Arg[3], line);
+							break;
+						}
+					}
+				}
+				else if (fgetstring(line, MAXVARLEN - 2, fid))
 				{
 					rtn = 1;
 					SetGlobalValue(Arg[3], line);
