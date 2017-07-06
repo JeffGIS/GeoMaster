@@ -3619,7 +3619,7 @@ FoundFile:
 			Value = pEQ;
 			if ((pComma = MatchLev (Value,';')))
 				*pComma++ = 0;
-			if (!SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE, TRUE))
+			if (!SetFieldValFromCharAndName(lpGWDHead, Name, Value, FALSE, TRUE))
     			goto Exit;
 		} 
 		else

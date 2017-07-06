@@ -25,7 +25,7 @@
 #pragma once
 
 #include "FileGDBCore.h"
-//#include "GeodatabaseManagement.h"
+#include "GeodatabaseManagement.h"
 #include "Geodatabase.h"
 #include "Table.h"
 #include "Row.h"
