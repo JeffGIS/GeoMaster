@@ -2701,7 +2701,7 @@ int charLevel(LPSTR pchar, LPSTR inStr)
 				Literal = FALSE;
 			else
 			{
-				if (*inStr == '@')
+				if (*inStr == literalChar)
 					Literal = TRUE;
 				else if (lev)
 				{
@@ -2759,7 +2759,7 @@ LPSTR MatchLev (LPSTR InStr, char MatchChar)
             Literal = FALSE;
         else
         {
-            if (*InStr == '@')
+            if (*InStr == literalChar)
                 Literal = TRUE;
             else if (*InStr == MatchChar && !lev)
 {

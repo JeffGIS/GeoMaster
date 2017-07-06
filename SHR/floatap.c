@@ -96,39 +96,43 @@ BOOL LogicPBP(LPSTR INEXPR, LPBOOL IRC, LPBREAKPOINT pBrkPt, int bpOffset, int b
 // find first value 
 	pVal1Begin = pVal1End = 0; 
 NextVal1: 
-	if (!Literal) 
-    switch (*INPUT)
-    {   
-    	case 0:
-    		if (!pVal1Begin)
-    		{
-    			rtn = 0;
-    			goto Exit;
-    		} 
-    		if (pVal1End)
-    			*pVal1End = 0; 
-    		rtn = ComputeLogValue (pVal1Begin,NULL,0,IRC);
-    		goto Exit; 
-    	case '@':
-    		Literal = TRUE;
-    		goto Next1;
-    	case '!':
-			if (!strcspn (INPUT+1,"=<>"))
+	if (!Literal)
+	{
+		if (*INPUT == literalChar)
+		{
+			Literal = TRUE;
+			goto Next1;
+		}
+		switch (*INPUT)
+		{
+		case 0:
+			if (!pVal1Begin)
+			{
+				rtn = 0;
+				goto Exit;
+			}
+			if (pVal1End)
+				*pVal1End = 0;
+			rtn = ComputeLogValue(pVal1Begin, NULL, 0, IRC);
+			goto Exit;
+		case '!':
+			if (!strcspn(INPUT + 1, "=<>"))
 				break;
 			if (!pVal1Begin)
 				pVal1Begin = INPUT;
-    		goto Next1;
-    	case '[':
+			goto Next1;
+		case '[':
 			if (!pVal1Begin)
 				pVal1Begin = INPUT;
-    		InBrackets++;
-    		goto Next1;
-    	case ']':
-    		InBrackets--; 
-    		goto Next1;  
-    	default:
-    		break;
-    }
+			InBrackets++;
+			goto Next1;
+		case ']':
+			InBrackets--;
+			goto Next1;
+		default:
+			break;
+		}
+	}
 	if (!InBrackets)  
 	{
 		if (Literal)
@@ -198,40 +202,44 @@ GetSecondValue:
 NextOp:
 	pVal2End = 0; 
 NextVal2:
-	if (!Literal)  
-    switch (*INPUT)
-    {   
-    	case 0:
-    		if (!pVal2Begin) 
-    			pVal2Begin = NullVal;
-/*    		{
-    			*IRC = 3;
-    			goto Exit;
-    		}*/
-    		if (pVal1End) 
+	if (!Literal)
+	{
+		if (*INPUT == literalChar)
+		{
+			Literal = TRUE;
+			goto Next2;
+		}
+		switch (*INPUT)
+		{
+		case 0:
+			if (!pVal2Begin)
+				pVal2Begin = NullVal;
+			/*    		{
+							*IRC = 3;
+							goto Exit;
+							}*/
+			if (pVal1End)
 				*pVal1End = 0;
-    		rtn = ComputeLogValue (pVal1Begin,pVal2Begin,OpCode,IRC);
-    		goto Exit;
-    	case '@':
-    		Literal = TRUE;
-    		goto Next2;
-    	case '!':
-			if (!strcspn (INPUT+1,"=<>"))
+			rtn = ComputeLogValue(pVal1Begin, pVal2Begin, OpCode, IRC);
+			goto Exit;
+		case '!':
+			if (!strcspn(INPUT + 1, "=<>"))
 				break;
 			if (!pVal2Begin)
 				pVal2Begin = INPUT;
-    		goto Next2;
-    	case '[':
+			goto Next2;
+		case '[':
 			if (!pVal2Begin)
 				pVal2Begin = INPUT;
-    		InBrackets++;
-    		goto Next2;
-    	case ']':
-    		InBrackets--; 
-    		goto Next2;  
-    	default:
-    		break;
-    }
+			InBrackets++;
+			goto Next2;
+		case ']':
+			InBrackets--;
+			goto Next2;
+		default:
+			break;
+		}
+	}
     if (!InBrackets)
     {
     	if (Literal)

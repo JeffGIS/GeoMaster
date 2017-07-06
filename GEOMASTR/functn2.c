@@ -9,6 +9,47 @@
 
 static	char	PolyProbListFile[MAX_PATH];
 
+LPSTR GetBeginString(LPSTR pFile, LPSTR pAt, LPSTR beginStr, LPSTR containStr, LPSTR endStr)
+{
+	LPSTR pos = pAt;
+	int lb = strlen(beginStr);
+	int lc = strlen(containStr);
+	int le = strlen(endStr);
+
+	while (pos > pFile)
+	{
+		pos--;
+		if (!strncmp(pos, containStr, lc))
+			return 0;
+		if (!strncmp(pos, endStr, le))
+			return 0;
+		if (!strncmp(pos, beginStr, lb))
+			return pos;
+	}
+	return 0;
+}
+
+LPSTR GetEndString(LPSTR pAt, LPSTR beginStr, LPSTR containStr, LPSTR endStr)
+{
+	LPSTR pos = pAt;
+	int lb = strlen(beginStr);
+	int lc = strlen(containStr);
+	int le = strlen(endStr);
+
+	while (pos)
+	{
+		pos++;
+		if (!strncmp(pos, containStr, lc))
+			return 0;
+		if (!strncmp(pos, beginStr, lb))
+			return 0;
+		if (!strncmp(pos, endStr, le))
+			return pos;
+	}
+	return 0;
+}
+
+
 short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1349);
@@ -65,7 +106,7 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKP
 		if (pEq)
 		{
 			*pEq = 0;
-			if (pEq > Arg[i] && *(pEq-1) == '@')
+			if (pEq > Arg[i] && *(pEq-1) == literalChar)
 			{
 				pAt = pEq - 1;
 				*pAt = 0;
@@ -83,14 +124,14 @@ short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKP
 				{
 					*pEq = '=';
 					if (pAt)
-						*pAt = '@';
+						*pAt = literalChar;
 				}
 			}
 			else
 			{
 				*pEq = '=';
 				if (pAt)
-					*pAt = '@';
+					*pAt = literalChar;
 			}
 		}
 	}
@@ -1613,7 +1654,7 @@ GSSiExitProg (1350);
 		{
 			HFILE fid;
 			rtn = 0;
-			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "OPEN"))
 			{
 				if (*Arg[3] == 'R')
@@ -1631,11 +1672,12 @@ GSSiExitProg (1350);
 				ltoa(fid, OutLoc, 10);
 				goto Rtnl;
 			}
-			else if (!stricmp(Arg[1], "READ"))
+			else if (!stricmp(Arg[1], "READ"))	//if just arg4 search for next line with arg4 string
+												//if arg4,5 and 6 search for string begining with arg4 containing arg5 and ending with arg6, if arg7 it indicates which instance
 			{
 				LPSTR line = malloc(MAXVARLEN);
 				fid = atoi(Arg[2]);
-				if (*Arg[4])
+				if (*Arg[4] && !*Arg[5])
 				{
 					while (fgetstring(line, MAXVARLEN - 2, fid))
 					{
@@ -1646,6 +1688,46 @@ GSSiExitProg (1350);
 							break;
 						}
 					}
+				}
+				else if (*Arg[4] && *Arg[5]  && *Arg[6])
+				{
+					int which = max (1,atoi(Arg[7]));
+					int whichat = 0;
+					GSSillseek(fid, 0, SEEK_SET);
+					int lFile = GSSifilelength(fid);
+					HANDLE hFile = GSSiGlobAlloc(0, GMEM_MOVEABLE, lFile+4);
+					LPSTR pFile = GlobalLock(hFile);
+					LPSTR pAt = pFile, pBeg, pEnd;
+					LPSTR pStart = pFile;
+					int len = 0;
+					while (fgetstring(pAt, lFile - len, fid))
+					{
+						int l = strlen(pAt);
+						pAt += l;
+						len += l;
+					}
+					while (whichat < which)
+					{
+						pAt = strstr(pStart, Arg[5]);
+						if (!pAt)
+						{
+							GSSiGlobUlFree(&hFile);
+							goto RtnFalse;
+						}
+						pStart = pAt + 1;
+						pBeg = GetBeginString(pFile, pAt, Arg[4], Arg[5], Arg[6]);
+						if (pBeg)
+						{
+							pEnd = GetEndString(pAt, Arg[4], Arg[5], Arg[6]);
+							if (pEnd)
+								whichat++;
+						}
+					}
+					*pEnd = 0;
+					pBeg++;
+					SetGlobalValue(Arg[3], pBeg);
+					GSSiGlobUlFree(&hFile);
+					goto RtnTrue;
 				}
 				else if (fgetstring(line, MAXVARLEN - 2, fid))
 				{
