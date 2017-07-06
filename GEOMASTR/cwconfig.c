@@ -20,6 +20,8 @@ BOOL InDebug=FALSE;
 void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);
 
+BOOL CreatePrintBitmap(HWND hWnd);
+
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int PASCAL WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 LONG FAR PASCAL WndProcGMEdit(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
@@ -1336,7 +1338,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	int  monStatus, mouseType;
 	LPSTR keyloc;
 	BOOL haveKey = FALSE;
-
+	CreatePrintBitmap(0);
 	//loadColors();
 	//loadColorChart();
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100102158.bmp");
@@ -1844,8 +1846,12 @@ GSSiExitProg (437);
 		return IDS_ERR_CREATE_WINDOW;
 }
    }
-   else
-   		OpenTCPIPServer2 (hWndMain);
+ else
+ {
+	 CreatePrintBitmap(hWndMain);
+
+	 OpenTCPIPServer2(hWndMain);
+ }
    PromptFocus = hWndMain;
     {
     	static	FirstAct=TRUE;

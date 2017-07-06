@@ -971,7 +971,12 @@ extern char	CustomHeight[16],CustomWidth[16];
 				BITMAP	bm;
 
 		    	PageWidth = GetDeviceCaps(p->hDC, HORZRES);
-		    	PageHeight = GetDeviceCaps(p->hDC, VERTRES);
+				PageHeight = GetDeviceCaps(p->hDC, VERTRES);
+				{
+					char mes[128];
+					sprintf(mes, "%i %i", PageWidth, PageHeight);
+					MessageBox(0, mes, 0, MB_OK);
+				}
 				hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
 				if (hBitmap)
 				{
@@ -1047,6 +1052,26 @@ extern char	CustomHeight[16],CustomWidth[16];
    	}
 } 
 
+BOOL CreatePrintBitmap(HWND hWnd)
+{
+		int	PageWidth=5100, PageHeight=3300;
+		HDC	hDCMain = GetDC(0);
+		BITMAP	bm;
+		BOOL rtn = FALSE;
+
+		{
+			char mes[128];
+			sprintf(mes, "%i %i %i %i", PageWidth, PageHeight, MaxMemAlloc, TotMemAlloc);
+			MessageBox(0, mes, 0, MB_OK);
+		}
+		hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
+		if (hBitmap)
+		{
+			rtn = TRUE;
+		}
+		ReleaseDC(0, hDCMain);
+		return rtn;
+}
 int Plot3PointCurve (HDC hDC,LPDPOINT pPC,LPDPOINT pPOC,LPDPOINT pPT)
 {
 	MNMXCORD MinMaxD;  
