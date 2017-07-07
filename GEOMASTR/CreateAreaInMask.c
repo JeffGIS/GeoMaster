@@ -130,7 +130,7 @@ BOOL ThemeCreateAreaInMask(int from)
 	BOOL rtn = FALSE;
 	BOOL haveOverallBounds = FALSE;
 	LPVIEWPORT CurViewSave = CurView;
-	static int debugref = 109670029;
+	static int debugref = 100095547;
 	if (CurTheme->TargetViewport)
 		SetViewport(CurTheme->TargetViewport);
 
@@ -443,6 +443,23 @@ static int findNextNode(LPINT prow, LPINT pcol, BITMAP *pbm, LPCOLORREF pbits,in
 			(*prow) += yoff4[i];
 			return indx;
 		}
+		if (indx >= 0 && pbits[indx] == blue)
+			haveBlue = TRUE;
+
+	}
+	if (!haveBlue && nNodes < 3)
+		return -1;
+	haveBlue = FALSE;
+
+	for (i = 0; i < 40; i++)
+	{
+		indx = bitIndex(pbm, *prow + yoff5[i], *pcol + xoff5[i]);
+		if (indx >= 0 && !pbits[indx])
+		{
+			(*pcol) += xoff5[i];
+			(*prow) += yoff5[i];
+			return indx;
+		}
 
 	}
 
@@ -558,9 +575,13 @@ void testConvertBitmapToPoly(LPSTR file)
 	int nPoly = 0;
 	if (hDib32)
 	{
+		int numNewPoints[MAX_NEW_POLYGONS];
+		HANDLE hNewPoints[MAX_NEW_POLYGONS];
 		HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
 		DestroyDIB32(hDib32, FALSE);
-		GetObject(hBM,sizeof(BITMAP) , &bm);
+		int nNewPoly = GetNewPolygon(hBM, numNewPoints, hNewPoints);
+
+/*		GetObject(hBM,sizeof(BITMAP) , &bm);
 		bmsize = bm.bmHeight * bm.bmWidthBytes;
 		pbits = (LPCOLORREF)malloc(bmsize);
 		pbits2 = (LPCOLORREF)malloc(bmsize);
@@ -606,7 +627,7 @@ void testConvertBitmapToPoly(LPSTR file)
 			}
 		}
 		free(pbits);
-		free(pbits2);
+		free(pbits2);*/
 	}
 }
 

@@ -378,8 +378,8 @@
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>.\Debug/$(TargetName).map</MapFileName>
       <SubSystem>Windows</SubSystem>
-      <HeapReserveSize>128000000</HeapReserveSize>
-      <StackReserveSize>128000000</StackReserveSize>
+      <HeapReserveSize>64000000</HeapReserveSize>
+      <StackReserveSize>4000000</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -390,7 +390,8 @@
       <AdditionalOptions>
       </AdditionalOptions>
       <DelayLoadDLLs>gdal110.dll</DelayLoadDLLs>
-      <HeapCommitSize>128000000</HeapCommitSize>
+      <HeapCommitSize>
+      </HeapCommitSize>
     </Link>
     <Bscmake>
       <OutputFile>.\Debug/geomastr.bsc</OutputFile>

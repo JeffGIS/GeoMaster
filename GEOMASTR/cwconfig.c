@@ -1343,7 +1343,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	//loadColorChart();
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100102158.bmp");
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100031654.bmp");
-	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100100646.bmp");
+	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100095547.bmp");
 //#define FV	$(TargetName) 
 	//UDPmain(22336);
 	//GetMassShapeFiles();

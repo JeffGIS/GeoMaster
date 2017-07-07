@@ -1054,7 +1054,8 @@ extern char	CustomHeight[16],CustomWidth[16];
 
 BOOL CreatePrintBitmap(HWND hWnd)
 {
-		int	PageWidth=5100, PageHeight=3300;
+	return FALSE;
+		int	PageWidth=5100, PageHeight=33000;
 		HDC	hDCMain = GetDC(0);
 		BITMAP	bm;
 		BOOL rtn = FALSE;
