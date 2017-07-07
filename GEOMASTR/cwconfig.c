@@ -1968,7 +1968,7 @@ else if (MapServer)
 nMess = -1;
  while(hWndMain && GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
    {    
-#if	_DEBUG
+#ifndef	NDEBUG
 	 nMess++;
 	 if (nMess > 99)
 		 nMess = 0;
@@ -2153,7 +2153,7 @@ GSSiExitProg (437);
 #endif
 //	 exit:
  CoUninitialize();
-#if _DEBUG
+#ifndef NDEBUG
 	_CrtDumpMemoryLeaks();
 #endif
 return msg.wParam;
@@ -2238,7 +2238,7 @@ SetLastMessage(Message);
   	GPSInputWnd = (HWND)lParam;
   if (Message == GF_CONNECT_PROCESS)
 	  AddConnectedProcess ((HWND)wParam,lParam);
-#if	_DEBUG
+#ifndef	NDEBUG
   
   if (Message == WM_COMMAND && LOWORD (wParam) == IDM_DISPLAY_VEHICLES)
 	  ii=1;
@@ -2466,7 +2466,7 @@ if (Message == WM_LBUTTONDOWN)
 	IgnoreLbutton = FALSE;
  if (Printing || Processing)
 	goto ReturnDefault;
-#if	_DEBUG
+#ifndef	NDEBUG
  if (Message == WM_COMMAND)
  	ii=1; 
  if (Message == WM_SYSCOMMAND)
