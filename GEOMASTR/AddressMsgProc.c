@@ -5357,6 +5357,7 @@ GetNext:
 						switch (AMEKey1.MatchCode)
         		 	{
         		 		case 1:
+						case 2:
 							if (GetGlobalValRaw("%ADDMATCHEDITUPDATEMACRO", AddEditUpdateMacro))
 							 {
 								FillGWDData (lpGWDHead,Offset);
@@ -5374,12 +5375,18 @@ GetNext:
 								CurEditRec++;
 							    goto GetNext;
 							 }
-							 else
-							 {
-		        		 		AMEKey1.MatchCode = 2;
-			        		 	AMEKey1.RecNum = 0;
-			        		 	st = BT_FIND (lpGWDHead->BTHandle[1],(LPSTR)&AMEKey1,BT_FIRST,BT_GT,(LPSTR)&Offset); 
-							 }
+							else if (AMEKey1.MatchCode == 1)
+							{
+								AMEKey1.MatchCode = 2;
+								AMEKey1.RecNum = 0;
+								st = BT_FIND(lpGWDHead->BTHandle[1], (LPSTR)&AMEKey1, BT_FIRST, BT_GT, (LPSTR)&Offset);
+							}
+							else if (AMEKey1.MatchCode == 2)
+							{
+								AMEKey1.MatchCode = 3;
+								AMEKey1.RecNum = 0;
+								st = BT_FIND(lpGWDHead->BTHandle[1], (LPSTR)&AMEKey1, BT_FIRST, BT_GT, (LPSTR)&Offset);
+							}
 							//st = 1;
         		 		break;
         		 		default:

@@ -5673,15 +5673,19 @@ GSSiExitProg (438);
 		    RestoreDC (hDCMain,-1);  
 		    ReleaseDC (hWnd,hDCMain);
 		}
-		else    
+		else if (hWnd == hWndMain)
 			RestoreFullWindowBitmap ();
 		UpdateVehicleStatusDlg ();		     
 	}
     goto ReturnDefault;
     
     case WM_KILLFOCUS:
-		if (!WindowIsCovered(hWnd, 1) && !MemMap || !InDisplayProcessing)
- 			SaveFullWindowBitmap ((HWND)-1);
+		goto ReturnDefault;
+		if (hWnd == hWndMain)
+		{
+			if (!WindowIsCovered(hWnd, 1) && !MemMap && !InDisplayProcessing)
+				SaveFullWindowBitmap((HWND)-1);
+		}
 		goto ReturnDefault;
     
 	case WM_PRINT:

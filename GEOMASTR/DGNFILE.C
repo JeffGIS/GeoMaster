@@ -697,8 +697,8 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	long		ElemInfoLoc;
 	short		ElemType, Interp, NumParts=1; 
 	long		loopfactor=1; 
-	short		ii;  
-	static		long		debugitem=287;
+	static		int		jj=0;  
+	static		long		debugitem=1365;
 	DGNPoint*	pvertices; 
 	long num_vertices = 0;
 	LPLONG		pnum_vertices=&num_vertices;
@@ -717,10 +717,11 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	ItemSeg = CurrentDGNRec;  
 	if (ForceRefIndex || ForceTAGIndex)
     	StatusWindowUpdate2 (0,CurPltFileLen,CurrentDGNRec); 
-	if (ItemSeg == debugitem)
-		ii=1; 
-	if (pElement->stype == DGNST_COLORTABLE)
-		ii=1;
+	if (ItemSeg != debugitem && jj)
+	{
+		GlobalUnlock(hElement);
+		return;
+	}
 	switch (pElement->type)
 	{
 		case 33: //??
@@ -893,7 +894,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 						DPOINT		TestPoints[5];
 						int			MaxPoints = (MaxMemSize - size - 4) / sizeof (DGNPoint);
 						double		dlen;
-
+						static int displayArc = 1;
 					/*	DGNStrokeArc(hDGN, (DGNElemArc *)pElement, 5, TestPointsDGN);
 						for (int i = 0; i < 5; i++)
 						{
@@ -907,6 +908,9 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 						pvertices = (DGNPoint*)malloc((num_vertices + 2) * sizeof(DGNPoint));
 						//num_vertices = 0;
 						DGNStrokeArc(hDGN, (DGNElemArc *)pElement, num_vertices, pvertices);
+						
+						if (!displayArc)
+							num_vertices = 0;
 
 						for (i = 0; i < num_vertices; i++)
 						{

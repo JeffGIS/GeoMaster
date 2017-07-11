@@ -1486,7 +1486,14 @@ BOOL SaveFullWindowBitmap (HWND hWnd)
 	LPVIEWPORT	SaveVP=CurView;
 	
 	if ((int)hFullWindowBitMap == -1)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1157);
+#endif
+		ii = 1;
 		return FALSE;
+	}
+
 	if (hWnd == (HWND)-1)
 	{
 		if (hFullWindowBitMap)
@@ -1528,6 +1535,7 @@ GSSiExitProg (1157);
 		NormalRect (&FullWindowBitMapRect); 
 		hFullWindowBitMap = SaveScreen (hDC, FullWindowBitMapRect);
 		ReleaseDC(hWnd, hDC);
+		//SaveBitmap(hFullWindowBitMap, "c:\\temp\\test.bmp", 0, 0);
 		/*{
 			char txt[128];
 			static int ncalls = 1;
