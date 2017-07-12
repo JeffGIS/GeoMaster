@@ -861,9 +861,9 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	        hPolyPartLen = GSSiGlobAlloc (1419,GMEM_MOVEABLE,sizeof(USHORT)*(nPoly+1));
 			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(long)USHRT_MAX); 
 	        pPartIndex = (LPLONG)GlobalLock (hPartIndex);
-	        *pPartIndex = 0; 
+	        *pPartIndex = 0;
 
-            pPoints = pFirstPoint = (LPDPOINT)GlobalLock (hPoints); 
+			pPoints = pFirstPoint = (LPDPOINT)GlobalLock (hPoints); 
 			while (ReadNextDGNRecord (0))
 			{   
 				NumElems--;  
@@ -871,8 +871,8 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 				{
 					case DGNST_MULTIPOINT:
 					{
-						DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement;  
-						
+						DGNElemMultiPoint FAR	*pRec=(DGNElemMultiPoint*)pElement; 
+
 						for (i=0;i<pRec->num_vertices;i++)
 						{
 							pPoints[NumPoints].x = pRec->vertices[i].x;
@@ -906,7 +906,18 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 						num_vertices = min(MaxPoints - 1, max(2, (int)(dlen / CurView->MetersPerPixel))) + 1;*/
 						num_vertices = 5;
 						pvertices = (DGNPoint*)malloc((num_vertices + 2) * sizeof(DGNPoint));
-						//num_vertices = 0;
+
+						//convert quaternion to counter-clockwise rotation in degrees on z axis.
+						double w = (pRec->quat[0] / (double)INT_MAX);
+						double x = (pRec->quat[1] / (double)INT_MAX);
+						double y = (pRec->quat[2] / (double)INT_MAX);
+						double z = (pRec->quat[3] / (double)INT_MAX);
+
+						double t0 = (2.0 * ((w * z) + (x * y)));
+						double t1 = (1.0 - (2.0 * ((y * y) + (z * z))));
+						double rotation = (atan2(t0, t1) * RADtoDEG);
+						pRec->rotation = -rotation;
+						
 						DGNStrokeArc(hDGN, (DGNElemArc *)pElement, num_vertices, pvertices);
 						
 						if (!displayArc)

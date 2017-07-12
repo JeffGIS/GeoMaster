@@ -177,3 +177,5 @@ Desktop.ini
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
+/GEOMASTR/geomastr.VC.VC.opendb
+/GEOMASTR/geomastr.VC.db
