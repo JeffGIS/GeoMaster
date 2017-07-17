@@ -3120,6 +3120,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	LPSTR pTable;
 	LPSTR pWhere;
 	char Name[MAX_PATH + 256];
+	char JName[MAX_PATH + 256];
 	char lastName[256] = { 0 };
 	int rtn;
 	sqlite3 *db;
@@ -3144,7 +3145,8 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 		GSSiGlobUlFree(&hDB);
 		return 0;
 	}
-	if (Access == BT_READ)
+	sprintf(JName, "%s-journal", Name);
+	if (!ExistFile(JName) && Access == BT_READ)
 	{
 		OFSTRUCTGM OFStruct;
 		HFILE fid = GSSiOpenFile(Name, &OFStruct, OF_READ);
