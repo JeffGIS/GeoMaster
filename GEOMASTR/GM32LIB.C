@@ -972,11 +972,11 @@ extern char	CustomHeight[16],CustomWidth[16];
 
 		    	PageWidth = GetDeviceCaps(p->hDC, HORZRES);
 				PageHeight = GetDeviceCaps(p->hDC, VERTRES);
-				{
+/*				{
 					char mes[128];
 					sprintf(mes, "%i %i", PageWidth, PageHeight);
 					MessageBox(0, mes, 0, MB_OK);
-				}
+				}*/
 				hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
 				if (hBitmap)
 				{

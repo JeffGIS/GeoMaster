@@ -720,7 +720,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 	if (ItemSeg != debugitem && jj)
 	{
 		GlobalUnlock(hElement);
-		return;
+		return FALSE;
 	}
 	switch (pElement->type)
 	{
