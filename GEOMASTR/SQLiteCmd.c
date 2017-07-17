@@ -32,11 +32,62 @@ static LONGLONG	NextSQLITERec = 0, SQLITEBaseRefno = 0;
 static MNMXCORD SQLITEFileMNMX;
 static sqlite3_stmt *statement = NULL;
 static char		cmd[1024];
-
+static char		SQLiteErrorFile[MAX_PATH] = "";
 
 #define BLOB_MAX	USHRT_MAX
 #define COORDINATE_FACTOR	10000000
 #define INPUTBUFSIZE USHRT_MAX * 32
+
+void SetSQLiteErrFile(LPSTR errFile)
+{
+	if (errFile)
+		strcpy(SQLiteErrorFile, errFile);
+	else
+		*SQLiteErrorFile = 0;
+}
+
+BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
+{
+	if (sqlReturn != SQLITE_OK)
+	{
+		char mess[4096];
+		if (*method)
+			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
+		else
+			sprintf(mess, "SQLite Error %i = %i:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
+
+		if (*SQLiteErrorFile)
+			AppendFile(SQLiteErrorFile, mess);
+		else
+			GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+	}
+
+	return sqlReturn;
+}
+
+BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** error)
+{
+	if (sqlReturn != SQLITE_OK)
+	{
+		char * mess = malloc(USHRT_MAX * 4);
+		if (method && *method)
+			sprintf(mess, "SQLite Error %i = %i:%s\nin:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database), method);
+		else
+			sprintf(mess, "SQLite Error %i = %i:%s",
+			sqlReturn, sqlite3_errcode(database), sqlite3_errmsg(database));
+
+		if (cmd && *cmd)
+			sprintf(strchr(mess, 0), "\n\n%s", cmd);
+		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+		free(mess);
+	}
+
+	return sqlReturn;
+}
+
 
 static int maxID(sqlite3 *_database)
 {

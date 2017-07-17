@@ -10,8 +10,8 @@ static sqlite3 *database = NULL;
 BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt);
 void convertVersion(LPSTR str, int fromVer, int toVer);
 void convertVersion_1_to_2(LPSTR str);
-static BOOL Execute(LPSTR cmd);
-BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,int dbType);
+static BOOL Execute(LPSTR cmd,LPSTR errFile);
+BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,int dbType,LPSTR errFile);
 
 
 /*int getOffsetCoord:(MPIntersection *)mpint
@@ -424,7 +424,7 @@ signal : (int)s
 	[self close : opened];
 	return array;
 }*/
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showProgress,int dbType)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showProgress, int dbType, BOOL convertInsert,LPSTR errFile)
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
@@ -442,10 +442,10 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 		if (FidList != HFILE_ERROR)
 		{
 			BOOL first = TRUE;
-			Execute("BEGIN");
+			Execute("BEGIN",0);
 
 			sprintf(line, "DROP TABLE IF EXISTS SORTEDFILES;CREATE TABLE SORTEDFILES (TIME INT,FILEPATH CHAR(256));");
-			if (Execute(line))
+			if (Execute(line,0))
 			{
 				while (fgetstring(file, 258, FidList))
 				{
@@ -461,7 +461,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 							{
 								time = atoi(tloc + 6);
 								sprintf(line, "INSERT INTO SORTEDFILES VALUES(%i,'%s');", time, file);
-								Execute(line);
+								Execute(line,0);
 								nTot++;
 							}
 							GSSiClose(fid);
@@ -470,7 +470,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 					first = FALSE;
 				}
 			}
-			Execute("COMMIT");
+			Execute("COMMIT",0);
 			GSSiClose(FidList);
 
 			GSSiGetTempFileName(0, "txt", 0, tempFile);
@@ -497,7 +497,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List,LPSTR DataBase,BOOL showP
 			{
 				while (fgetstring (file,MAX_PATH,fidTemp))
 				{
-					BOOL st = UpdateFromFile(file,TRUE,dbType);
+					BOOL st = UpdateFromFile(file,convertInsert,dbType,errFile);
 					if (showProgress)
 						StatusWindowUpdate(0, 0, nTot, ++nDone);
 
@@ -1143,13 +1143,16 @@ BOOL GetFromCodeText(int from, LPSTR text)
 	return FALSE;
 }
 
-static BOOL Execute(LPSTR cmd)
+static BOOL Execute(LPSTR cmd,LPSTR errFile)
 {
+	SetSQLiteErrFile(errFile);
 	BOOL rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+	SetSQLiteErrFile("");
+
 	return rtn;
 }
 
-BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType)
+BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType,LPSTR errFile)
 {
 	BOOL rtn = TRUE;
 	int line = 0;
@@ -1157,7 +1160,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType)
 	int totLen = GSSifilelength(fid);
 	int maxLineLen = totLen + 2;
 	LPSTR str = malloc(totLen + 4096);
-	int err = Execute("BEGIN");
+	int err = Execute("BEGIN", errFile);
 	if (fgetstring(str, maxLineLen, fid))
 	{
 		int fromVer = atoi(CURRENT_INTERSECTION_VERSION);
@@ -1171,7 +1174,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType)
 				convertVersion(str, fromVer, toVer);
 			if (convertInsert)
 				REPLAC(str, "INSERT INTO", "INSERT OR REPLACE INTO", maxLineLen + 4090);
-			rtn = Execute(str);
+			rtn = Execute(str, errFile);
 			line++;
 		}
 	}
@@ -1181,13 +1184,16 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType)
 		LPSTR filename = strrchr(file, '\\');
 		if (!filename)
 			filename = file;
-		err = Execute("ROLLBACK");
+		err = Execute("ROLLBACK", errFile);
 		LPSTR mess = malloc(USHRT_MAX);
 		sprintf(mess, " in file %s at line %i\n%s", filename, line, str);
-		GSSiMessageBox(2, mess, "Data load failure", MB_ICONEXCLAMATION, 0);
+		if (*errFile)
+			AppendFile(errFile, mess);
+		else
+			GSSiMessageBox(2, mess, "Data load failure", MB_ICONEXCLAMATION, 0);
 	}
 	else
-		err = Execute("COMMIT");
+		err = Execute("COMMIT", errFile);
 	free(str);
 	return rtn;
 }

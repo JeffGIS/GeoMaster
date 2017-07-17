@@ -4499,9 +4499,9 @@ GotCloseFilehSQL:
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
 
 			}
-			else if (!stricmp(Arg[1], "LOADLIST"))
+			else if (!stricmp(Arg[1], "LOADLIST"))//LOADLIST,fromListFile,toDB,showProgress,dbType,convertInsert,errFile(opt))
 			{
-				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3],atob(Arg[4]),atoi(Arg[5]));
+				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3], atob(Arg[4]), atoi(Arg[5]), atob(Arg[6]),Arg[7]);
 			}
 			else if (!stricmp(Arg[1], "COMPCODE"))
 			{
