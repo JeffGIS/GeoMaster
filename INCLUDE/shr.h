@@ -147,6 +147,7 @@ void ShowHideChildren(HWND hWndPar, UINT fun);
 
 int SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error);
 BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** error);
+void SetSQLiteErrFile(LPSTR errFile);
 
 HBITMAP GetToolBitmap (LPSTR BMPath);
 BOOL WaitForProcessToEnd (DWORD pID,LPINT pMaxWait);

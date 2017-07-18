@@ -2417,7 +2417,7 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 BOOL OutputRampForIntersectionAndRampnumToFile(int intNum, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType);
 BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode);
 BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType);
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType);
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile);
 BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
 int FormatStreets (LPSTR from, LPSTR text);
