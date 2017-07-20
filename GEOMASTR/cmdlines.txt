@@ -1,5 +1,6 @@
 configs\basemap.GMC /F /WD L:\geomas
 configs\jeff\testdgn.GMC /F /WD L:\geomas
+/GMEdit [%DL]macros\contactreport.txt /WD c:\NVCRIS\gmavl
 [%DL]configs\basic1.GMC /F /WD j:\gmserver\gmserver
 [%DL]RequestData.GMC /F /WD j:\gmserver\gmserver [REQUESTID]=1497386530;
 configs\basic1.GMC /F /WD c:\NVCRIS\gmavl
@@ -137,6 +138,8 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
 
 
 
