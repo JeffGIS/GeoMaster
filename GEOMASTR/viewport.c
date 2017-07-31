@@ -377,8 +377,9 @@ short GetFileTypeFromName(LPSTR InName,BOOL OpenFilelist)
 		_fstrstr (Name,".MDB") ||
 		_fstrstr (Name,".GDB") ||
 		_fstrstr (Name,".ORA") ||
-		_fstrstr (Name,".DGN") ||
-		_fstrstr (Name,".COM"))
+		_fstrstr(Name, ".DGN") ||
+		_fstrstr(Name, ".DGN8") ||
+		_fstrstr(Name, ".COM"))
 		return 1;
 	if (_fstrstr (Name,".BMP") || 
 		_fstrstr (Name,".PCX") ||

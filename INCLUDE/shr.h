@@ -90,7 +90,6 @@
 typedef struct {double a,b,c,d,e,f,xc,yc;} TRN; 
 typedef TRN FAR *LPTRN;
 
-#define	MAXFILEHANDLES	950  
 #define JOURNAL_BLOCK_SIZE	1024	
 
 #define  CFTCM   2.83170164938e-2

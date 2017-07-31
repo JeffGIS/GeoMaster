@@ -1,3 +1,4 @@
+#define		MAXFILEHANDLES		950  
 #define		MAXFONTS			16
 #define		MAXPICKITEMS		32
 #define		MAX_FUNCTION_STACK	16
