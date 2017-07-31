@@ -465,6 +465,7 @@
     <ClCompile Include="..\solar_calculator\Version2\deflec.c" />
     <ClCompile Include="..\solar_calculator\Version2\deltat.c" />
     <ClCompile Include="dgn7functions.c" />
+    <ClCompile Include="DGN8File.cpp" />
     <ClCompile Include="DGNFILE.C" />
     <ClCompile Include="..\dgnlib\dgnfloat.cpp" />
     <ClCompile Include="..\dgnlib\dgnhelp.cpp" />

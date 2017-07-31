@@ -162,6 +162,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define HFILE_FGDB	-5
 #define HFILE_KML	-6
 #define HFILE_SQLITE	-7
+#define HFILE_DGN8	-8
 
 #define SYMTYPEPARENT	0
 #define SYMTYPEPOINT	1
@@ -206,6 +207,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define MT_FILE_GEO_DB	14 
 #define MT_KML	15
 #define MT_SQLITE 16
+#define MT_DGN8	17
 
 
 

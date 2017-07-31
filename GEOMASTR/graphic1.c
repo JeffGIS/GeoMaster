@@ -1418,10 +1418,15 @@ Next:
 		goto RtnTrue;
 	}
 	else if (MapType == MT_DGN7)
-    {
-		ProcessDGNRecord (*hDC,-1); 
+	{
+		ProcessDGNRecord(*hDC, -1);
 		goto RtnTrue;
-    }
+	}
+	else if (MapType == MT_DGN8)
+	{
+		ProcessDGN8Record(*hDC, -1);
+		goto RtnTrue;
+	}
 	else if (MapType == MT_GPX)
     {
 		ProcessGPXRecord (*hDC,-1); 
@@ -4070,10 +4075,17 @@ void ShowPickedItem (HWND hWnd, int InItem)
 	}	
 	else if (MapType == MT_DGN7)
 	{
-	    if (SavePassID)
-			CurView->PassID=4;
-    	CurrentDGNRec = PickList[Item].Segment;
-    	GetDGNRecordBounds (CurrentDGNRec,&Rect);
+		if (SavePassID)
+			CurView->PassID = 4;
+		CurrentDGNRec = PickList[Item].Segment;
+		GetDGNRecordBounds(CurrentDGNRec, &Rect);
+	}
+	else if (MapType == MT_DGN8)
+	{
+		if (SavePassID)
+			CurView->PassID = 4;
+		CurrentDGNRec = PickList[Item].Segment;
+		GetDGN8RecordBounds(CurrentDGNRec, &Rect);
 	}
 	else if (MapType == MT_GPX)
 	{
@@ -4152,11 +4164,17 @@ void ShowPickedItem (HWND hWnd, int InItem)
 				ProcessSQLITERecord(CurView->hDC);
 		}
 		else if (MapType == MT_DGN7)
-		{   
-		    if (SavePassID)
-				CurView->PassID = 4; 
-			ProcessDGNRecord (CurView->hDC,CurrentDGNRec); 
-	    }
+		{
+			if (SavePassID)
+				CurView->PassID = 4;
+			ProcessDGNRecord(CurView->hDC, CurrentDGNRec);
+		}
+		else if (MapType == MT_DGN8)
+		{
+			if (SavePassID)
+				CurView->PassID = 4;
+			ProcessDGN8Record(CurView->hDC, CurrentDGNRec);
+		}
 		else if (MapType == MT_GPX)
 		{   
 		    if (SavePassID)
@@ -5754,8 +5772,9 @@ GSSiExitProg (65);
 	        case MT_PLT:
 	        case MT_ORA:
 			case MT_GMD:
-	        case MT_DGN7:  
-	        case MT_PERSONAL_GEO_DB:
+			case MT_DGN7:
+			case MT_DGN8:
+			case MT_PERSONAL_GEO_DB:
 	        case MT_FILE_GEO_DB:
 	        case MT_SHP:
 			case MT_GPX:
@@ -6136,8 +6155,9 @@ GSSiExitProg (66);
 	        case MT_ORA:
 			case MT_GMD:
 	        case MT_SID:
-	        case MT_DGN7: 
-	        case MT_SHP:
+			case MT_DGN7:
+			case MT_DGN8:
+			case MT_SHP:
 			case MT_IMAGE:
 			case MT_GPX:
 			case MT_PERSONAL_GEO_DB:
@@ -6937,7 +6957,8 @@ MakeBin:
         		if (!GetMapIndexBounds (lpEntry->Name,&lpEntry->MinMax))
 			    	lpEntry->MinMax = NullMinMax;
 			    break;
-			case MT_DGN7: 
+			case MT_DGN7:
+			case MT_DGN8:
 			case MT_ORA:
 			case MT_GMD:
 			case MT_SHP:  

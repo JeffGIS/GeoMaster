@@ -4052,13 +4052,18 @@ ProcessImageFile:
 		if (pPar)
     		*pPar = '(';
 	}
-    if (MapType == MT_DGN7)
-    {
-    	GSSiClose (FidMap);
-    	FidMap = HFILE_ERROR;
-//    	Fid = GSSiOpenFileMem (PltName);
-    } 
-    if (MapType == MT_IMAGE)
+	if (MapType == MT_DGN8)
+	{
+		GSSiClose(FidMap);
+		FidMap = HFILE_ERROR;
+	}
+	if (MapType == MT_DGN7)
+	{
+		GSSiClose(FidMap);
+		FidMap = HFILE_ERROR;
+		//    	Fid = GSSiOpenFileMem (PltName);
+	}
+	if (MapType == MT_IMAGE)
     {
     	GSSiClose (FidMap);
     	FidMap = HFILE_ERROR;
@@ -4652,58 +4657,111 @@ DoSid:
 		}
 			break;
 		case MT_DGN7: //DGN file  
-		{   
-			
-			CloseTRANS2 (&hTranFileToBase); 
-			CloseTRANS2 (&hTranBaseToFile);  
-			CloseTRANS2 (&hTranFileToVP); 
-			if (!(OpenDGNFile (PltName,&CurView->FileMNMX)))
+		{
+
+			CloseTRANS2(&hTranFileToBase);
+			CloseTRANS2(&hTranBaseToFile);
+			CloseTRANS2(&hTranFileToVP);
+			if (!(OpenDGNFile(PltName, &CurView->FileMNMX)))
 			{
-		    	goto RtnFalse;
-		    } 
-		    FidMap = HFILE_DGN;
-			LoadDGNParm (PltName); 
-			Points[0].x = CurView->FileMNMX.xmn;   
-			Points[0].y = CurView->FileMNMX.ymn;   
-			Points[1].x = CurView->FileMNMX.xmn;   
-			Points[1].y = CurView->FileMNMX.ymx;   
-			Points[2].x = CurView->FileMNMX.xmx;   
-			Points[2].y = CurView->FileMNMX.ymx;   
-			Points[3].x = CurView->FileMNMX.xmx;   
-			Points[3].y = CurView->FileMNMX.ymn; 
-			DBoundsInit (&CurView->FileMNMX);  
-			Dist1 = ldistp (Points[0],Points[2]);
-			for (i=0;i<4;i++)
-			{
-				if (ConvertCoord(&Points[i],0,1))
-				{   
-				    MessageBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK);
-				    goto RtnFalse;
-				}
-				AddDPointToMinMax (&Points[i],&CurView->FileMNMX); 
+				goto RtnFalse;
 			}
-			Dist2 = ldistp (Points[0],Points[2]); 
-			NonPltFileDistToBaseDist = Dist2/Dist1;
+			FidMap = HFILE_DGN;
+			LoadDGNParm(PltName);
+			Points[0].x = CurView->FileMNMX.xmn;
+			Points[0].y = CurView->FileMNMX.ymn;
+			Points[1].x = CurView->FileMNMX.xmn;
+			Points[1].y = CurView->FileMNMX.ymx;
+			Points[2].x = CurView->FileMNMX.xmx;
+			Points[2].y = CurView->FileMNMX.ymx;
+			Points[3].x = CurView->FileMNMX.xmx;
+			Points[3].y = CurView->FileMNMX.ymn;
+			DBoundsInit(&CurView->FileMNMX);
+			Dist1 = ldistp(Points[0], Points[2]);
+			for (i = 0; i<4; i++)
+			{
+				if (ConvertCoord(&Points[i], 0, 1))
+				{
+					MessageBox(GetFocus(), "Unable to convert coordinates as specified", 0, MB_ICONQUESTION | MB_OK);
+					goto RtnFalse;
+				}
+				AddDPointToMinMax(&Points[i], &CurView->FileMNMX);
+			}
+			Dist2 = ldistp(Points[0], Points[2]);
+			NonPltFileDistToBaseDist = Dist2 / Dist1;
 			if (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn >
 				CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)
 			{
 				MinMax.xmn = -32000;
 				MinMax.xmx = 32000;
-				MinMax.ymn = -32000 * ((CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)/(CurView->FileMNMX.xmx - CurView->FileMNMX.xmn));
+				MinMax.ymn = -32000 * ((CurView->FileMNMX.ymx - CurView->FileMNMX.ymn) / (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn));
 				MinMax.ymx = -MinMax.ymn;
-			} 
+			}
 			else
 			{
 				MinMax.ymn = -32000;
 				MinMax.ymx = 32000;
-				MinMax.xmn = -32000 * ((CurView->FileMNMX.xmx - CurView->FileMNMX.xmn)/(CurView->FileMNMX.ymx - CurView->FileMNMX.ymn));
+				MinMax.xmn = -32000 * ((CurView->FileMNMX.xmx - CurView->FileMNMX.xmn) / (CurView->FileMNMX.ymx - CurView->FileMNMX.ymn));
 				MinMax.xmx = -MinMax.xmn;
-			} 
-			CreateFileTran (&MinMax,&CurView->FileMNMX); 
-//			NextSHPRec = 0;
-//			OpenSHPFileIndex (PltName); 
-        }
-        break;
+			}
+			CreateFileTran(&MinMax, &CurView->FileMNMX);
+			//			NextSHPRec = 0;
+			//			OpenSHPFileIndex (PltName); 
+		}
+			break;
+		case MT_DGN8:   
+		{
+
+			CloseTRANS2(&hTranFileToBase);
+			CloseTRANS2(&hTranBaseToFile);
+			CloseTRANS2(&hTranFileToVP);
+			if (!(OpenDGN8File(PltName, &CurView->FileMNMX)))
+			{
+				goto RtnFalse;
+			}
+			FidMap = HFILE_DGN;
+			LoadDGNParm(PltName);
+			Points[0].x = CurView->FileMNMX.xmn;
+			Points[0].y = CurView->FileMNMX.ymn;
+			Points[1].x = CurView->FileMNMX.xmn;
+			Points[1].y = CurView->FileMNMX.ymx;
+			Points[2].x = CurView->FileMNMX.xmx;
+			Points[2].y = CurView->FileMNMX.ymx;
+			Points[3].x = CurView->FileMNMX.xmx;
+			Points[3].y = CurView->FileMNMX.ymn;
+			DBoundsInit(&CurView->FileMNMX);
+			Dist1 = ldistp(Points[0], Points[2]);
+			for (i = 0; i<4; i++)
+			{
+				if (ConvertCoord(&Points[i], 0, 1))
+				{
+					MessageBox(GetFocus(), "Unable to convert coordinates as specified", 0, MB_ICONQUESTION | MB_OK);
+					goto RtnFalse;
+				}
+				AddDPointToMinMax(&Points[i], &CurView->FileMNMX);
+			}
+			Dist2 = ldistp(Points[0], Points[2]);
+			NonPltFileDistToBaseDist = Dist2 / Dist1;
+			if (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn >
+				CurView->FileMNMX.ymx - CurView->FileMNMX.ymn)
+			{
+				MinMax.xmn = -32000;
+				MinMax.xmx = 32000;
+				MinMax.ymn = -32000 * ((CurView->FileMNMX.ymx - CurView->FileMNMX.ymn) / (CurView->FileMNMX.xmx - CurView->FileMNMX.xmn));
+				MinMax.ymx = -MinMax.ymn;
+			}
+			else
+			{
+				MinMax.ymn = -32000;
+				MinMax.ymx = 32000;
+				MinMax.xmn = -32000 * ((CurView->FileMNMX.xmx - CurView->FileMNMX.xmn) / (CurView->FileMNMX.ymx - CurView->FileMNMX.ymn));
+				MinMax.xmx = -MinMax.xmn;
+			}
+			CreateFileTran(&MinMax, &CurView->FileMNMX);
+			//			NextSHPRec = 0;
+			//			OpenSHPFileIndex (PltName); 
+		}
+			break;
 		case MT_GPX: //GPX file  
 		{   
 			
@@ -4897,10 +4955,13 @@ S100:
         	case MT_SHP:
         		CurPltFileLen = GSSillseek (FidMap,0,2);
         		break;
-        	case MT_DGN7:
-        		CurPltFileLen = DGNNumElements;
-        		break;
-        	case MT_GPX:
+			case MT_DGN7:
+				CurPltFileLen = DGNNumElements;
+				break;
+			case MT_DGN8:
+				CurPltFileLen = DGN8NumElements;
+				break;
+			case MT_GPX:
         		CurGPXFileLen = GPXNumElements;
         		break;
         	case MT_KML:
@@ -5085,9 +5146,11 @@ void CloseMap (BOOL Update)
 		CloseSQLITEMapFile();
 	else if (MapType == MT_ORA)
 		OpenORAFileIndex (HFILE_ERROR,0);
-	else if (MapType == MT_DGN7)  
-		CloseDGNFile ();
-	else if (MapType == MT_GPX)  
+	else if (MapType == MT_DGN7)
+		CloseDGNFile();
+	else if (MapType == MT_DGN8)
+		CloseDGN8File();
+	else if (MapType == MT_GPX)
 		CloseGPXFile (&hGPX);
 	else if (MapType == MT_KML)  
 		CloseKMLFile (&hKML);

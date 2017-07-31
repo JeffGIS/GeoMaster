@@ -257,7 +257,7 @@ ShrinkText:
 		LogFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
 		LogFont.lfQuality = PROOF_QUALITY; 
 		_fstrcpy (LogFont.lfFaceName,FontNames[pGRTextHeader->FontNum]); 
-		if (EmbeddedColor < 0 && MapType != MT_DGN7 && !HaveTextColor)
+		if (EmbeddedColor < 0 && MapType != MT_DGN7 && MapType != MT_DGN8 && !HaveTextColor)
 			EmbeddedColor = FontColors[pGRTextHeader->FontNum];
 		LogFont.lfWidth = abs (LogFont.lfHeight) * FontWidthFactor[pGRTextHeader->FontNum]; 
 	    if (hDC && LogFont.lfHeight && Display && !(Pick || hExportText))
@@ -4079,10 +4079,16 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	}
 	else if (MapType == MT_DGN7)
 	{
-	    CurView->PassID=4;
-    	CurrentDGNRec = PickList[Item].Segment;
-    	GetDGNRecordBounds (CurrentDGNRec,&PickList[Item].Rect);
-	}	
+		CurView->PassID = 4;
+		CurrentDGNRec = PickList[Item].Segment;
+		GetDGNRecordBounds(CurrentDGNRec, &PickList[Item].Rect);
+	}
+	else if (MapType == MT_DGN8)
+	{
+		CurView->PassID = 4;
+		CurrentDGN8Rec = PickList[Item].Segment;
+		GetDGN8RecordBounds(CurrentDGNRec, &PickList[Item].Rect);
+	}
 	else if (MapType == MT_GPX)
 	{
 		CurView->PassID=4;
@@ -4222,8 +4228,11 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 			ProcessSQLITERecord(hDC);
 			break;
 		case MT_DGN7:
-			ProcessDGNRecord (hDC,CurrentDGNRec);
-		break;
+			ProcessDGNRecord(hDC, CurrentDGNRec);
+			break;
+		case MT_DGN8:
+			ProcessDGN8Record(hDC, CurrentDGNRec);
+			break;
 		case MT_GPX:
 			ProcessGPXRecord (hDC,CurrentGPXRec);
 			break;

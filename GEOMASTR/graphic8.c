@@ -2671,7 +2671,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
     }
     else
     {   
-    	if (UseDGNColors && MapType == MT_DGN7)
+		if (UseDGNColors && (MapType == MT_DGN7 || MapType == MT_DGN8))
     	{
 			if (phBrush && !hTempBrush && !HaveVarFillColor)
 			{
