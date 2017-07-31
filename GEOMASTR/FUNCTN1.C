@@ -1099,6 +1099,8 @@ GSSiExitProg (1348);
 				if (Err)
 					goto RtnFalse;
 				CurView->Active = TRUE; 
+				if (CurView->pTheme)
+					CurView->pTheme->IsActive = TRUE;
 				if (CurView->TagPoint.x < 1000)
 					CurView->TagPoint.x += 1000;
 				SetCurView ( SaveVP);
@@ -1108,7 +1110,9 @@ GSSiExitProg (1348);
 				if (Err)
 					goto RtnFalse;
 				CurView->Active = !CurView->Active;
-				SetCurView ( SaveVP);
+				if (CurView->pTheme)
+					CurView->pTheme->IsActive = CurView->Active;
+				SetCurView(SaveVP);
 			}
 			else if (!Err && !_fstrcmp (Arg[1],"HIDE"))
 			{

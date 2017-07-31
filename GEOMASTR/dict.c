@@ -1518,6 +1518,14 @@ Next:
 						LPPOINT pPointScreen;
 						if ((hDib = GetSymbolImage (lpSym->Name)))
 						{ 
+							if (CurView->ConvertToGray)
+							{
+								HDIB32	hDibGray = FreeImage_ConvertToGreyscale (hDib);
+								HDIB32  hDib32 = FreeImage_ConvertTo32Bits(hDibGray);
+								DestroyDIB32(hDib, FALSE);
+								DestroyDIB32(hDibGray, FALSE);
+								hDib = hDib32;
+							}
 							if (hPnt)
 							{
 								HRGN hRgn, hNewRgn;
