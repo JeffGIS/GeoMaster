@@ -302,22 +302,42 @@ GSSiExitProg (694);
 	}
 	else if (MapType == MT_DGN7)
 	{
-	    CurView->PassID=4;
-    	CurrentDGNRec = PickList[Item].Segment;
-    	rtn = GetDGNRecordBounds (CurrentDGNRec,lpRect);
+		CurView->PassID = 4;
+		CurrentDGNRec = PickList[Item].Segment;
+		rtn = GetDGNRecordBounds(CurrentDGNRec, lpRect);
 		SavePick = Pick;
-		Pick=FALSE; 
+		Pick = FALSE;
 		IgnoreBounds = TRUE;
-		ItemIsDeleted = FALSE; 
+		ItemIsDeleted = FALSE;
 		SaveDisplay = Display;
-		Display = FALSE; 
+		Display = FALSE;
 		ProcessThemes = FALSE;
-		ProcessDGNRecord (CurView->hDC,CurrentDGNRec); 
-	    ProcessThemes = SavePT;    
-	    Display = SaveDisplay;  
-	    Pick = SavePick;
-		ProcessSingleItem=HaveFirstHeader=FALSE;
-	    IgnoreBounds = FALSE;  
+		ProcessDGNRecord(CurView->hDC, CurrentDGNRec);
+		ProcessThemes = SavePT;
+		Display = SaveDisplay;
+		Pick = SavePick;
+		ProcessSingleItem = HaveFirstHeader = FALSE;
+		IgnoreBounds = FALSE;
+		goto Exit;
+	}
+	else if (MapType == MT_DGN8)
+	{
+		CurView->PassID = 4;
+		CurrentDGN8Rec = PickList[Item].Segment;
+		rtn = GetDGN8RecordBounds(CurrentDGNRec, lpRect);
+		SavePick = Pick;
+		Pick = FALSE;
+		IgnoreBounds = TRUE;
+		ItemIsDeleted = FALSE;
+		SaveDisplay = Display;
+		Display = FALSE;
+		ProcessThemes = FALSE;
+		ProcessDGN8Record(CurView->hDC, CurrentDGNRec);
+		ProcessThemes = SavePT;
+		Display = SaveDisplay;
+		Pick = SavePick;
+		ProcessSingleItem = HaveFirstHeader = FALSE;
+		IgnoreBounds = FALSE;
 		goto Exit;
 	}
 	else if (MapType == MT_GPX)

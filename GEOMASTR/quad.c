@@ -328,10 +328,14 @@ BOOL FindNextSegment (void)
 			goto RtnFalse;
 
 		case MT_DGN7:
-    		if (ReadNextDGNRecord (&CurView->WBounds))
-	    		goto RtnTrue; 
-    		goto RtnFalse;
-		case MT_GPX: 
+			if (ReadNextDGNRecord(&CurView->WBounds))
+				goto RtnTrue;
+			goto RtnFalse;
+		case MT_DGN8:
+			if (ReadNextDGN8Record(&CurView->WBounds))
+				goto RtnTrue;
+			goto RtnFalse;
+		case MT_GPX:
 			if (GetNextGPXSegment (FALSE))
 				goto RtnTrue;  
 			goto RtnFalse;

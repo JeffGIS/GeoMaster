@@ -148,8 +148,9 @@ BOOL FileIsVisible (LPSTR FileName)
 			}
 			break;
 			
-        case MT_DGN7:
-        case MT_GPX:
+		case MT_DGN7:
+		case MT_DGN8:
+		case MT_GPX:
 		    
 	    default:
 	    	rtn = TRUE;
@@ -1036,25 +1037,43 @@ FromPltFile:
 	        	}
 	        	break;
 	        	
-	        	case MT_DGN7:
-	        	{
-					if (OpenMap ((HWND)1,0)) 
-					{   
+				case MT_DGN7:
+				{
+					if (OpenMap((HWND)1, 0))
+					{
 						DGNVisSetFromIndex = FALSE;
-						SetDGNVis (hWndDlg,DlgItemSym, DlgItemPar,FidSymList);
-		            	CloseMap (FALSE); 
-		            	if (DGNVisSetFromIndex && CurView->FileType[CurView->CurFile] == 4 && CurView->hlpIndex[CurView->CurFile])
-		            	{
-		            		LPFILEINDEX lpIndex = (LPFILEINDEX)GlobalLock(CurView->hlpIndex[CurView->CurFile]);
-                            
-    						lpIndex->FileInIndex = (long)lpIndex->NumFiles;
-                            GlobalUnlock(CurView->hlpIndex[CurView->CurFile]); 
-                        }
-		            }
-	        	}
-	        	break;
-	        	
-	        	default:
+						SetDGNVis(hWndDlg, DlgItemSym, DlgItemPar, FidSymList);
+						CloseMap(FALSE);
+						if (DGNVisSetFromIndex && CurView->FileType[CurView->CurFile] == 4 && CurView->hlpIndex[CurView->CurFile])
+						{
+							LPFILEINDEX lpIndex = (LPFILEINDEX)GlobalLock(CurView->hlpIndex[CurView->CurFile]);
+
+							lpIndex->FileInIndex = (long)lpIndex->NumFiles;
+							GlobalUnlock(CurView->hlpIndex[CurView->CurFile]);
+						}
+					}
+				}
+					break;
+
+				case MT_DGN8:
+				{
+					if (OpenMap((HWND)1, 0))
+					{
+						DGNVisSetFromIndex = FALSE;
+						SetDGNVis(hWndDlg, DlgItemSym, DlgItemPar, FidSymList);
+						CloseMap(FALSE);
+						if (DGNVisSetFromIndex && CurView->FileType[CurView->CurFile] == 4 && CurView->hlpIndex[CurView->CurFile])
+						{
+							LPFILEINDEX lpIndex = (LPFILEINDEX)GlobalLock(CurView->hlpIndex[CurView->CurFile]);
+
+							lpIndex->FileInIndex = (long)lpIndex->NumFiles;
+							GlobalUnlock(CurView->hlpIndex[CurView->CurFile]);
+						}
+					}
+				}
+					break;
+
+				default:
 	        	{
 		            CloseMap (FALSE);
 		            FidMap = GSSiOpenFile (PltName,0,OF_READ); 

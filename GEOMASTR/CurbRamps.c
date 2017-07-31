@@ -1161,6 +1161,9 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType,LPSTR errFile)
 	int maxLineLen = totLen + 2;
 	LPSTR str = malloc(totLen + 4096);
 	int err = Execute("BEGIN", errFile);
+	LPSTR filename = strrchr(file, '\\');
+	if (!filename)
+		filename = file;
 	if (fgetstring(str, maxLineLen, fid))
 	{
 		int fromVer = atoi(CURRENT_INTERSECTION_VERSION);
@@ -1168,29 +1171,36 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType,LPSTR errFile)
 		LPSTR vloc = strstr(str, "DBVer ");
 		if (vloc)
 			fromVer = atoi(vloc + 6);
+		line++;
 		while (rtn && fgetstring(str, maxLineLen, fid))
 		{
+			line++;
 			if (!dbType)
 				convertVersion(str, fromVer, toVer);
 			if (convertInsert)
 				REPLAC(str, "INSERT INTO", "INSERT OR REPLACE INTO", maxLineLen + 4090);
 			rtn = Execute(str, errFile);
-			line++;
+			if (!rtn && *errFile)
+			{
+				LPSTR mess = malloc(USHRT_MAX);
+				sprintf(mess, " in file %s at line %i\r\n%s", filename, line, str);
+				AppendFile(errFile, mess);
+				free(mess);
+				rtn = TRUE;
+			}
 		}
 	}
 	GSSiClose(fid);
-	if (!rtn) //file has to be edited on server (by GSSi) before more data can be loaded
+	if (!rtn && !*errFile) //file has to be edited on server (by GSSi) before more data can be loaded
 	{
-		LPSTR filename = strrchr(file, '\\');
-		if (!filename)
-			filename = file;
 		err = Execute("ROLLBACK", errFile);
 		LPSTR mess = malloc(USHRT_MAX);
-		sprintf(mess, " in file %s at line %i\n%s", filename, line, str);
+		sprintf(mess, " in file %s at line %i\r\n%s", filename, line, str);
 		if (*errFile)
 			AppendFile(errFile, mess);
 		else
 			GSSiMessageBox(2, mess, "Data load failure", MB_ICONEXCLAMATION, 0);
+		free(mess);
 	}
 	else
 		err = Execute("COMMIT", errFile);

@@ -723,10 +723,10 @@ int NVCObstructionToCode(LPSTR obstruction)
 }
 char *rampToText(int intNum, RampStruct *ramp)
 {
-    char *rampText = (char *)calloc(4480, sizeof(char));
+    char *rampText = (char *)calloc(4480*2, sizeof(char));
 	char timeCompleteC[32];
 	int rtype = ramp->rampType;
-	if (rtype > 11)
+	if (rtype > 100)
 		rtype = 11 + (rtype - 100);
 	sprintf(timeCompleteC, "$CAL(%i,8)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
