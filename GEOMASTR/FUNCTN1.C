@@ -862,12 +862,17 @@ GSSiExitProg (1348);
 						}
 					}
 				}
-				else if (!_fstricmp (Arg[3],"RBUT"))
+				else if (!_fstricmp(Arg[3], "RBUT"))
 				{
-					_fstrncpy (CurView->RButFunction,Arg[4],128);
-					goto RtnTrue; 
+					_fstrncpy(CurView->RButFunction, Arg[4], 128);
+					goto RtnTrue;
 				}
-				else if (!_fstricmp (Arg[3],"DIALOGINIT"))
+				else if (!_fstricmp(Arg[3], "STARTUP"))
+				{
+					CurView->StartupFunction = GetGFCmdID(Arg[4]);
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "DIALOGINIT"))
 				{
 					_fstrncpy (CurView->DlgInitCmd,Arg[4],256);
 					goto RtnTrue; 

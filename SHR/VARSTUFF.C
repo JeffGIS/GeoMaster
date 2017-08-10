@@ -7862,6 +7862,7 @@ NextTextRec:
 			else if (lpGWDHead->Version > 1000)
 			{   
 		        GlobalUnlock (FilePtr->FileHandle); 
+				irc = 0;
 			    goto Exit;
 			}
 			else 
