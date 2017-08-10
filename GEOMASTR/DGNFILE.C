@@ -508,7 +508,7 @@ BOOL SetDGNVis (HWND hWndDlg, int DlgItemSym, int DlgItemPar,HFILE FidSymList)
     Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
 	while (ReadNextDGNRecord (&Bounds))
 	{   
-		if (pElement->level > 1)                        
+		if (pElement->level > 0)                        
 			if (!*DGNDesc[pElement->level].description) 
 			{ 
 				sprintf (DGNDesc[pElement->level].description,"Level %i",(int)pElement->level);
@@ -760,6 +760,9 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 			LPDGN_Level_Names	pln=(LPDGN_Level_Names)((LPSTR)pElement + plnoff);  
 			switch (pElement->level)
 			{
+				case 0:
+				break;
+
 				case 6:
 				if (WantDGNDesc)
 				{

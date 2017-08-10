@@ -1,5 +1,5 @@
+configs\basic1.gmc /F /WD j:\bu_2017_06_20\geomas [%USERLEV]=2;[%IGNORESYSMSG]=T;
 configs\basemap.GMC /F /WD L:\geomas
-configs\streetwidthdisplay.GMC /F /WD L:\geomas
 configs\jeff\testdgn.GMC /F /WD L:\geomas
 [%DL]configs\basic1.GMC /F /WD j:\gmserver\gmserver
 [%DL]RequestData.GMC /F /WD j:\gmserver\gmserver [REQUESTID]=1497386530;
