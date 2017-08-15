@@ -467,7 +467,7 @@ BOOL GetFieldIDsFromNames(LPSTR DBName, LPHANDLE phFieldIDs, LPHANDLE phFieldTyp
     LPOPENFILEDATA  FilePtr;
     LPOPENSQLDATA   SQLPtr=0;
     LPFIELDINFO lpFieldInfo;
-    LPGWFLDINFO pFieldTypes;    
+    LPGWFLDINFO pFieldTypes=0;    
     BOOL		rtn=FALSE;    
     LPINT		pFieldID,pNumFields;
     short		ifield;  
