@@ -460,16 +460,26 @@ GSSiExitProg (1348);
 				{
 					if (CurView->pTheme)
 					{
-						if (!_fstricmp (Arg[3],"CONTENTS"))
-						{   
-							rtn = SetThemeContents (CurView->pTheme,Arg[4]);   
+						if (!_fstricmp(Arg[3], "SHOWTEXT"))
+						{
+							CurView->pTheme->ShowValue = atob(Arg[4]);
+							rtn = TRUE;
+						}
+						if (!_fstricmp(Arg[3], "DELAYTEXT"))
+						{
+							CurView->pTheme->DelayTextDisplay = atob(Arg[4]);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "CONTENTS"))
+						{
+							rtn = SetThemeContents(CurView->pTheme, Arg[4]);
 							if (CurView->pTheme->hVisList)
 							{
-								GSSiGlobFree (&CurView->pTheme->hVisList);
-								CurView->pTheme->hVisList = ReadVisList (&CurView->pTheme->Contents[1]);  
+								GSSiGlobFree(&CurView->pTheme->hVisList);
+								CurView->pTheme->hVisList = ReadVisList(&CurView->pTheme->Contents[1]);
 							}
-						} 
-						else if (!_fstricmp (Arg[3],"SETCOLOR"))
+						}
+						else if (!_fstricmp(Arg[3], "SETCOLOR"))
 						{
 							CurView->pTheme->NotSetColor = !atob (Arg[4]);
 							rtn = TRUE;
