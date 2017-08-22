@@ -234,7 +234,7 @@ GSSiExitProg (515);
 	
 	while (fgetstring (str,1024,Fid)) 
 	{
-		if (lpEq = _fstrchr(str,'='))
+		if ((lpEq = _fstrchr(str,'=')))
 		{
 			*lpEq=0;
 			if (!_fstricmp(VarName,str))
@@ -300,7 +300,7 @@ GSSiExitProg (516);
 	
 	while (fgetstring (str,256,Fid)) 
 	{
-		if (lpComma = _fstrchr(str,','))
+		if ((lpComma = _fstrchr(str,',')))
 		{
 			*lpComma++=0;
 			if (!_fstricmp(RunID,str))

@@ -586,7 +586,7 @@ Exit:
     {
     	GSSiGlobFree (phFieldIDs);
 		if (phFieldTypes)
-			GSSiGlobFree (*phFieldTypes); 
+			GSSiGlobFree (phFieldTypes); 
 	}
 	GSSiGlobUlFree (&hMem);
 	return rtn;

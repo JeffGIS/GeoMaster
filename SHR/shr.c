@@ -2711,7 +2711,7 @@ LPSTR MatchLev (LPSTR InStr, char MatchChar)
 {
     short lev=0;
     BOOL    Literal=FALSE; 
-    char	BegLev,EndLev;
+    char	BegLev=0,EndLev=0;
     
     while (*InStr)
     {    
