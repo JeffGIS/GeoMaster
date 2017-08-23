@@ -4323,6 +4323,11 @@ void SetThemeSortOrder (void)
 	return;
 }
 
+void ProcessDisplayPassEndMacro(void)
+{
+	return;
+}
+
 void DisplaySVThemeLegend(short From)
 #if ENABLETRACE
 {GSSiEnterProg (169);
@@ -4367,6 +4372,7 @@ void DisplaySVThemeLegend(short From)
     
     if (From == 4)
 	{
+		ProcessDisplayPassEndMacro();
     	DrawDelayedText ();
 		DisplayShowValInfobox ();
 	}

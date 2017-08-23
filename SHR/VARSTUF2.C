@@ -147,7 +147,7 @@ GetPolylineEP:
 						Type1.EPX = lpDEndPoint->x;
 						Type1.EPY = lpDEndPoint->y;
 						Type1.AZM = getazd (lpPoints,lpDEndPoint); 
-						if (CurrentType == GF_LINE)
+						if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
 						{
 							double MPAZ;
 							DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, Dist / 2, &MPAZ, 0);

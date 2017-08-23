@@ -2480,7 +2480,10 @@ typedef struct
 		short	GridZoom;
 		int		numPreloadedValues;
 		short	isDayFilter;
-		char	filler[680];
+		char	BeginDisplayMacro[256];
+		char	EndDisplayMacro[256];
+		char	filler[168];
+
 	}	THEME;
 typedef THEME	FAR *LPTHEME;
 
