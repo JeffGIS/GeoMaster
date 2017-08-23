@@ -6640,18 +6640,24 @@ GSSiExitProg (558);
 			else
 			{
 				InLoc = FirstNonBlank(InLoc);
-				if (!_fstrncmp (InLoc,"ELSE",4))
+
+				if (!_fstrncmp(InLoc, "ELSE", 4))
 				{
 					InLoc += 4;
 					pELSE = InLoc;
 					l = pEndIF - InLoc;
 					if (l)
 					{
-						
 						int lELSEBP = 0;
 
-						_fstrncpy (OutLoc,pELSE,(size_t)l);
-						OutLoc[l]=0;
+						if (*pELSE == '{')
+						{
+							LPSTR pEnd = MatchLev((pELSE + 1), '}');
+							if (pEnd)
+								l = pEnd - ++pELSE;
+						}
+						_fstrncpy(OutLoc, pELSE, (size_t)l);
+						OutLoc[l] = 0;
 						if (pBrkPt)
 						{
 							elseBpOffset = bpOffset + (int)(pELSE - startLoc);
@@ -6661,9 +6667,9 @@ GSSiExitProg (558);
 							ExpandTextDB(OutLoc, pBrkPt, elseBpOffset, bpLen);
 						else
 							ExpandText(OutLoc);
-						OutLoc = _fstrchr (OutLoc,0);
+						OutLoc = _fstrchr(OutLoc, 0);
 					}
-				}	
+				}
 				if (*pEndIF == ';')
 					InLoc = pEndIF + 1;
 				else
