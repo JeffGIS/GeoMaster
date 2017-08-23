@@ -778,8 +778,10 @@ GSSiExitProg (1250);
 		 SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_ADDSTRING,0,(LPARAM)((LPSTR)"All Classes")); 
 		 SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_ADDSTRING,0,(LPARAM)((LPSTR)"Combined Classes")); 
 		 SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_SETCURSEL,CurTheme->MultiValOption,0); 
-		 SetDlgItemText (hWndDlg,IDC_DATADISPLAYMACRO,CurTheme->DataDisplayMacro);
-		 EnableWindow (GetDlgItem(hWndDlg,IDC_DATADISPLAYMACRO),SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_GETCHECK,0,0L));
+		 SetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro);
+		 SetDlgItemText(hWndDlg, IDC_ENDDISPLAYMACRO, CurTheme->EndDisplayMacro);
+		 SetDlgItemText(hWndDlg, IDC_DATADISPLAYMACRO, CurTheme->DataDisplayMacro);
+		 EnableWindow(GetDlgItem(hWndDlg, IDC_DATADISPLAYMACRO), SendDlgItemMessage(hWndDlg, SV_DISPLAY_VALUE, BM_GETCHECK, 0, 0L));
 		 EnableWindow (GetDlgItem(hWndDlg,IDC_DDMACRO_HEADER),SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_GETCHECK,0,0L));
          if (ThemeEditStartCmd)
 	         PostMessage(hWndDlg, WM_COMMAND, ThemeEditStartCmd, 0L);
@@ -1022,8 +1024,10 @@ GSSiExitProg (1250);
             	 	CurTheme->DispersePoints = 2;
 
 		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
-				 GetDlgItemText (hWndDlg,IDC_DATADISPLAYMACRO,CurTheme->DataDisplayMacro,sizeof(CurTheme->DataDisplayMacro));
-		       	 CurTheme->NumDesiredClass = atoi (str);
+				 GetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro, sizeof(CurTheme->BeginDisplayMacro));
+				 GetDlgItemText(hWndDlg, IDC_ENDDISPLAYMACRO, CurTheme->EndDisplayMacro, sizeof(CurTheme->EndDisplayMacro));
+				 GetDlgItemText(hWndDlg, IDC_DATADISPLAYMACRO, CurTheme->DataDisplayMacro, sizeof(CurTheme->DataDisplayMacro));
+				 CurTheme->NumDesiredClass = atoi(str);
 				 CurTheme->NumClass = CurTheme->NumDesiredClass;    
 		       	 if (str[0]) CurTheme->YLimit = atof (str); 
 		       	 if (wParam == IDC_SAVE_THEME)

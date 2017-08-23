@@ -4323,8 +4323,30 @@ void SetThemeSortOrder (void)
 	return;
 }
 
+void ProcessDisplayPassBeginMacro(void)
+{
+	if (*CurTheme->BeginDisplayMacro)
+	{
+		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		LPSTR pMem = GlobalLock(hMem);
+
+		strcpy(pMem, CurTheme->BeginDisplayMacro);
+		ExpandText(pMem);
+		GSSiGlobUlFree(&hMem);
+	}
+	return;
+}
 void ProcessDisplayPassEndMacro(void)
 {
+	if (*CurTheme->EndDisplayMacro)
+	{
+		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		LPSTR pMem = GlobalLock(hMem);
+
+		strcpy(pMem, CurTheme->EndDisplayMacro);
+		ExpandText(pMem);
+		GSSiGlobUlFree(&hMem);
+	}
 	return;
 }
 
@@ -4370,6 +4392,10 @@ void DisplaySVThemeLegend(short From)
 	char	IconFile[MAX_PATH];
 	char	CheckMarkSymbol[32]="check1.bmp";
     
+	if (From == 0)
+	{
+		ProcessDisplayPassBeginMacro();
+	}
     if (From == 4)
 	{
 		ProcessDisplayPassEndMacro();

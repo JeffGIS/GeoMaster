@@ -3107,9 +3107,14 @@
 #define IDC_DATADISPLAYMACRO            2053
 #define IDC_DDMACRO_HEADER              2054
 #define IDC_VEHDISPLAY_AVAILABLE        2055
+#define IDC_DDMACRO_HEADER2             2055
 #define IDC_VEHICLEINFO                 2056
+#define IDC_BEGINDISPLAYMACRO           2056
 #define IDC_CVALUE                      2057
+#define IDC_DDMACRO_HEADER3             2057
 #define IDC_CVALUE2                     2058
+#define IDC_DATADISPLAYMACRO3           2058
+#define IDC_ENDDISPLAYMACRO             2058
 #define IDC_FLASHVEHICLE                2059
 #define IDC_UPLOADFENCES                2060
 #define IDC_UPLOADSTATUS                2061
