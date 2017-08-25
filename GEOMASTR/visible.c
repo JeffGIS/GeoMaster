@@ -1060,7 +1060,7 @@ FromPltFile:
 					if (OpenMap((HWND)1, 0))
 					{
 						DGNVisSetFromIndex = FALSE;
-						SetDGNVis(hWndDlg, DlgItemSym, DlgItemPar, FidSymList);
+						SetDGN8Vis(hWndDlg, DlgItemSym, DlgItemPar, FidSymList);
 						CloseMap(FALSE);
 						if (DGNVisSetFromIndex && CurView->FileType[CurView->CurFile] == 4 && CurView->hlpIndex[CurView->CurFile])
 						{
