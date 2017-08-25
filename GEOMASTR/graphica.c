@@ -2160,7 +2160,7 @@ short MapFileType (LPSTR InName)
 		return MT_GPX;
 	if (!_fstricmp (&Name[l-4],".KML"))
 		return MT_KML;
-	if (!_fstricmp(&Name[l - 4], ".DGN8") || !_fstricmp(&Name[l - 4], ".COM8"))
+	if (!_fstricmp(&Name[l - 5], ".DGN8") || !_fstricmp(&Name[l - 4], ".COM5"))
 		return MT_DGN8;
 	if (!_fstricmp(&Name[l - 4], ".DGN") || !_fstricmp(&Name[l - 4], ".COM"))
 		return MT_DGN7;
