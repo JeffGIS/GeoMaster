@@ -303,6 +303,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "COPYDIR", 7)) return 784;
 			if (!_fstrnicmp(str, "NVMETRO", 7)) return 785;
 			if (!_fstrnicmp(str, "TAGDUMP", 7)) return 786;
+			if (!_fstrnicmp(str, "DIMLINE", 7)) return 787;
 
 			return 0;
 }

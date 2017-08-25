@@ -502,11 +502,13 @@ BOOL PtInBounds (POINT SegPoint);
 void DisplayBMThemeLegend(void);
 void DrawPointerLine (HDC hDC,POINT beginpoint,POINT endpoint,HPEN LinePen, HPEN TipPen,
 					  int TipWidth,int ToPointOffset);
+void DrawDimensionLine(HDC hDC, POINT begpoint, POINT endpoint, HPEN LinePen, HPEN TipPen, int TipWidth, int textOpt);
 UINT AddNewPoint (DPOINT Point,BOOL Display,LPSTR FileToEdit);
 UINT AddNewPoly (short Type,int pnPnts,HANDLE hPoints,BOOL Display);
 BOOL AdjustCurLoc (LPHANDLE phCmdStr);
 short IsGFCmd (LPSTR str,LPCMDSTRING pCmdStr);
 void SimplePointer (HDC hDC, LPDPOINT p1, LPDPOINT p2,short width,short ToPointOffset,short TipWidth,COLORREF Color);
+void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color);
 void LinkScatterPointToMap (int X,int Y,DPOINT MapPoint,BOOL clip);
 BOOL CurrentMidPoint (int Type,double Just,LPFLOAT MidPointAZ,LPFLOAT Length,LPSHORT Height,BOOL Clip, LPMNMXCORL pMinMax,LPPOINT pPoint,LPDPOINT pWPoint,LPSHORT pNum,short From,LPDOUBLE pWantDist,BOOL RotateToScreen);
 BOOL CurrentMidPointArea (LPFLOAT MidPointAZ,LPFLOAT Length,BOOL Clip, LPMNMXCORL pMinMax,LPPOINT pPoint,LPSHORT pNum,short From);

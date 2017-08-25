@@ -3879,28 +3879,76 @@ GSSiExitProg (824);
 #endif
 }
 
-void SimplePointer (HDC hDC, LPDPOINT p1, LPDPOINT p2,short width,short ToPointOffset,short TipWidth,COLORREF Color)
+void SimplePointer(HDC hDC, LPDPOINT p1, LPDPOINT p2, short width, short ToPointOffset, short TipWidth, COLORREF Color)
 #if ENABLETRACE
 {GSSiEnterProg (825);
 #endif
-{     
-	POINT	P1, P2;
-	HPEN	ArrowPen; 
-	
-    P1 = BasePtToWinPt (p1);
-    P2 = BasePtToWinPt (p2); 
-    SetDisplayMode (hDC, GF_TEXTMODE);
-	ArrowPen = CreatePen (PS_SOLID,(short)IDNINT(width*DeviceToScreenFactor()),Color);
-	DrawPointerLine (hDC, P1, P2,ArrowPen,ArrowPen,TipWidth,ToPointOffset);
-	DeleteObject (ArrowPen); 
 {
+	POINT	P1, P2;
+	HPEN	ArrowPen;
+
+	P1 = BasePtToWinPt(p1);
+	P2 = BasePtToWinPt(p2);
+	SetDisplayMode(hDC, GF_TEXTMODE);
+	ArrowPen = CreatePen(PS_SOLID, (short)IDNINT(width*DeviceToScreenFactor()), Color);
+	DrawPointerLine(hDC, P1, P2, ArrowPen, ArrowPen, TipWidth, ToPointOffset);
+	DeleteObject(ArrowPen);
+	{
 #if ENABLETRACE
-GSSiExitProg (825);
+		GSSiExitProg (825);
 #endif
-	return;
-}
+		return;
+	}
 #if ENABLETRACE
 }
+#endif
+}
+void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color)
+#if ENABLETRACE
+{
+	GSSiEnterProg(825);
+#endif
+	{
+		POINT	P1, P2, P;
+		HPEN	ArrowPen;
+		int		width = 2;
+		int		TipWidth = 2;
+		int		ToPointOffset = 10;
+		double	dist = ldistpp(p1, p2);
+		double	az = LTWOPI(getazd(p1, p2) + HALFPI);
+		int h;
+		DPOINT p;
+		char	txt[64];
+		int		oldBKMode;
+
+		p.x = (p1->x + p2->x) / 2;
+		p.y = (p1->y + p2->y) / 2;
+		dist = ConvertDist(dist, 1);
+		P1 = BasePtToWinPt(p1);
+		P2 = BasePtToWinPt(p2);
+		P = BasePtToWinPt(&p);
+		SetDisplayMode(hDC, GF_TEXTMODE);
+		oldBKMode = SetBkMode(hDC, OPAQUE);
+		ArrowPen = CreatePen(PS_SOLID, (short)IDNINT(width*DeviceToScreenFactor()), Color);
+		DrawDimensionLine(hDC, P1, P2, ArrowPen, ArrowPen,10,0);
+	/*	DWORD DispText(HDC hDC, BOOL GetExtents, int left, int right, int y, int symsize, int hJust, int vJust, double InSize, double SymbolSizeFactor, double SymbolTextFactor,
+			int InWeight, BOOL Italic, double AZIN, LPSTR InText, int shield, BOOL TestRect,
+			BOOL Shadow, COLORREF ShadowColor,long RemoveColor,long nPnts,HANDLE hAreaPoints,HANDLE hAreaAccelerator,
+			int nPoly,HANDLE hPolyPartLen,short UseHalfTone,LPSTR ActualText,short MinSize,LPTHEME CurTheme,LPRECT pTextRect,LPRECT pFullRect,LPRECT pFlagRect)
+			*/
+		sprintf(txt, "%.1f feet", dist);
+		h = 18 * DeviceToScreenFactor();
+		DispText(hDC, FALSE, P.x, P.x,P.y, 0, 2, 2, h, 1, 1, 2, FALSE, az, txt, 0, FALSE, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		SetBkMode(hDC, oldBKMode);
+		DeleteObject(ArrowPen);
+		{
+#if ENABLETRACE
+			GSSiExitProg(825);
+#endif
+			return;
+		}
+#if ENABLETRACE
+	}
 #endif
 }
 

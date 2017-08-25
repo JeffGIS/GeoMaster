@@ -1270,45 +1270,82 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
 	return hPointer;
 }
 
-void DrawPointerLine (HDC hDC,POINT begpoint,POINT endpoint,HPEN LinePen, HPEN TipPen,
-					  int TipWidth,int ToPointOffset)
-{   POINT	Points[3];
+void DrawPointerLine(HDC hDC, POINT begpoint, POINT endpoint, HPEN LinePen, HPEN TipPen,
+	int TipWidth, int ToPointOffset)
+{
+	POINT	Points[3];
 	HPEN	hOldPen;
-	HBRUSH	OldBrush, hBrush;  
+	HBRUSH	OldBrush, hBrush;
 	HBITMAP	hbmp;
-	double	az,len;  
-	short	OldMode=0;
+	double	az, len;
+	short	OldMode = 0;
 
-	az = getaz (endpoint,begpoint);
-	len = idist (begpoint,endpoint);
+	az = getaz(endpoint, begpoint);
+	len = idist(begpoint, endpoint);
 	if (TipWidth < 0)
-		TipWidth = IDNINT(((double)-TipWidth/100)*len);
+		TipWidth = IDNINT(((double)-TipWidth / 100)*len);
 	else
-		TipWidth = min (len,TipWidth);
+		TipWidth = min(len, TipWidth);
 	if (ToPointOffset < 0)
 	{
-		endpoint = newpt(begpoint,az+PY,-ToPointOffset);
-		TipWidth = -ToPointOffset/5;
+		endpoint = newpt(begpoint, az + PY, -ToPointOffset);
+		TipWidth = -ToPointOffset / 5;
 	}
 	else if (ToPointOffset)
 	{
 		if (len <= ToPointOffset)
-			return; 
-		endpoint = newpt(begpoint,az+PY,len-ToPointOffset);
+			return;
+		endpoint = newpt(begpoint, az + PY, len - ToPointOffset);
 	}
-	hOldPen = SelectObject (hDC,LinePen);    
-	Points[0].x=begpoint.x;
-	Points[0].y=begpoint.y;
-	Points[1].x=endpoint.x;
-	Points[1].y=endpoint.y;
-	Polyline (hDC,(LPPOINT)Points,2); 
+	hOldPen = SelectObject(hDC, LinePen);
+	Points[0].x = begpoint.x;
+	Points[0].y = begpoint.y;
+	Points[1].x = endpoint.x;
+	Points[1].y = endpoint.y;
+	Polyline(hDC, (LPPOINT)Points, 2);
 	if (LinePen != TipPen)
-		SelectObject (hDC,TipPen);
-	Points[0]=newpt(endpoint,az+HALFPI/2,TipWidth);
-	Points[2]=newpt(endpoint,az-HALFPI/2,TipWidth);
-	Polyline (hDC,(LPPOINT)Points,3);    
-	
-	SelectObject (hDC,hOldPen);
+		SelectObject(hDC, TipPen);
+	Points[0] = newpt(endpoint, az + HALFPI / 2, TipWidth);
+	Points[2] = newpt(endpoint, az - HALFPI / 2, TipWidth);
+	Polyline(hDC, (LPPOINT)Points, 3);
+
+	SelectObject(hDC, hOldPen);
+	return;
+}
+void DrawDimensionLine(HDC hDC, POINT begpoint, POINT endpoint, HPEN LinePen, HPEN TipPen,	int TipWidth, int textOpt)
+{
+	POINT	Points[3];
+	HPEN	hOldPen;
+	HBRUSH	OldBrush, hBrush;
+	HBITMAP	hbmp;
+	double	az, len;
+	short	OldMode = 0;
+
+	az = getaz(endpoint, begpoint);
+	len = idist(begpoint, endpoint);
+	if (TipWidth < 0)
+		TipWidth = IDNINT(((double)-TipWidth / 100)*len);
+	else
+		TipWidth = min(len, TipWidth);
+	hOldPen = SelectObject(hDC, LinePen);
+	Points[0].x = begpoint.x;
+	Points[0].y = begpoint.y;
+	Points[1].x = endpoint.x;
+	Points[1].y = endpoint.y;
+	Polyline(hDC, (LPPOINT)Points, 2);
+	if (LinePen != TipPen)
+		SelectObject(hDC, TipPen);
+	Points[0] = newpt(endpoint, az + HALFPI / 2, TipWidth);
+	Points[2] = newpt(endpoint, az - HALFPI / 2, TipWidth);
+	Polyline(hDC, (LPPOINT)Points, 3);
+
+	Points[0] = newpt(begpoint, az + 3 *HALFPI / 2, TipWidth);
+	Points[1].x = begpoint.x;
+	Points[1].y = begpoint.y;
+	Points[2] = newpt(begpoint, az - 3 * HALFPI / 2, TipWidth);
+	Polyline(hDC, (LPPOINT)Points, 3);
+
+	SelectObject(hDC, hOldPen);
 	return;
 }
 

@@ -4392,7 +4392,7 @@ void DisplaySVThemeLegend(short From)
 	char	IconFile[MAX_PATH];
 	char	CheckMarkSymbol[32]="check1.bmp";
     
-	if (From == 0)
+	if (From == 1)
 	{
 		ProcessDisplayPassBeginMacro();
 	}
