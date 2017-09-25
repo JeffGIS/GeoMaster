@@ -3920,6 +3920,7 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color
 		DPOINT p;
 		char	txt[64];
 		int		oldBKMode;
+		COLORREF oldTextColor;
 
 		p.x = (p1->x + p2->x) / 2;
 		p.y = (p1->y + p2->y) / 2;
@@ -3929,6 +3930,7 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color
 		P = BasePtToWinPt(&p);
 		SetDisplayMode(hDC, GF_TEXTMODE);
 		oldBKMode = SetBkMode(hDC, OPAQUE);
+		oldTextColor = SetTextColor(hDC, Color);
 		ArrowPen = CreatePen(PS_SOLID, (short)IDNINT(width*DeviceToScreenFactor()), Color);
 		DrawDimensionLine(hDC, P1, P2, ArrowPen, ArrowPen,10,0);
 	/*	DWORD DispText(HDC hDC, BOOL GetExtents, int left, int right, int y, int symsize, int hJust, int vJust, double InSize, double SymbolSizeFactor, double SymbolTextFactor,
@@ -3940,6 +3942,7 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color
 		h = 18 * DeviceToScreenFactor();
 		DispText(hDC, FALSE, P.x, P.x,P.y, 0, 2, 2, h, 1, 1, 2, FALSE, az, txt, 0, FALSE, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		SetBkMode(hDC, oldBKMode);
+		SetTextColor (hDC,oldTextColor);
 		DeleteObject(ArrowPen);
 		{
 #if ENABLETRACE
