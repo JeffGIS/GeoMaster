@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\Teigha\Trial\Core\Extensions\alloc\OdAllocOp.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\Teigha\Trial\Dgn\Examples\ExDgnDump\ExDgnDump.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\Teigha\Trial\Dgn\Examples\ExDgnDump\ExDgnDumpElements.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\..\..\..\Teigha\Trial\Dgn\Examples\ExDgnDump\ExDgnDump.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{F6CFAC30-DE58-4360-926A-CA86A8BE4F9E}</ProjectGUID>
+    <SccProjectName />
+    <SccLocalPath />
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>ExDgnDump</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <UseOfAtl>false</UseOfAtl>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Teigha\Trial\exe\vc14dll\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ExDgnDump.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ExDgnDump</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</EmbedManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Teigha\Trial\Core\Include;C:\Teigha\Trial\Dgn\include;C:\Teigha\Trial\Dgn\include\DgModelerGeometry;C:\Teigha\Trial\Dgn\include\PSToolkit;C:\Teigha\Trial\Dgn\Examples\ExDgnDump\..\..\source\Common;C:\Teigha\Trial\Dgn\Examples\ExDgnDump\..\..\source\FileIO;C:\Teigha\Trial\Dgn\Examples\ExDgnDump\..\..\source\Design;C:\Teigha\Trial\Dgn\Examples\ExDgnDump\..\..\source\Elements;C:\Teigha\Trial\Dgn\Examples\ExDgnDump;C:\Teigha\Trial\Core\Extensions\ExServices;C:\Teigha\Trial\Dgn\Extensions\ExServices;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4996;4131;4244;4127</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;_CRT_SECURE_NO_DEPRECATE;WIN32;_WIN32;_WINDOWS;_CRT_NOFORCE_MANIFEST;_STL_NOFORCE_MANIFEST; NDEBUG;ODA_LICENSING_ENABLED;_CRTDBG_MAP_ALLOC;_SISL_IMPL_;_TOOLKIT_IN_DLL_;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <AssemblerListingLocation>Release</AssemblerListingLocation>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;_CRT_SECURE_NO_DEPRECATE;WIN32;_WIN32;_WINDOWS;_CRT_NOFORCE_MANIFEST;_STL_NOFORCE_MANIFEST; NDEBUG;ODA_LICENSING_ENABLED;_CRTDBG_MAP_ALLOC;_SISL_IMPL_;_TOOLKIT_IN_DLL_;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\..\Core\Include;..\..\..\..\..\Dgn\include;..\..\..\..\..\Dgn\include\DgModelerGeometry;..\..\..\..\..\Dgn\include\PSToolkit;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\Common;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\FileIO;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\Design;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\Elements;..\..\..\..\..\Dgn\Examples\ExDgnDump;..\..\..\..\..\Core\Extensions\ExServices;..\..\..\..\..\Dgn\Extensions\ExServices;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>..\..\..\..\..\Core\Include;..\..\..\..\..\Dgn\include;..\..\..\..\..\Dgn\include\DgModelerGeometry;..\..\..\..\..\Dgn\include\PSToolkit;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\Common;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\FileIO;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\Design;..\..\..\..\..\Dgn\Examples\ExDgnDump\..\..\source\Elements;..\..\..\..\..\Dgn\Examples\ExDgnDump;..\..\..\..\..\Core\Extensions\ExServices;..\..\..\..\..\Dgn\Extensions\ExServices;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;C:\Teigha\Trial\lib\vc14dll\TG_ExamplesCommon.lib;C:\Teigha\Trial\lib\vc14dll\TD_ExamplesCommon.lib;C:\Teigha\Trial\lib\vc14dll\TG_Db.lib;C:\Teigha\Trial\lib\vc14dll\TD_DbRoot.lib;C:\Teigha\Trial\lib\vc14dll\TD_Ge.lib;C:\Teigha\Trial\lib\vc14dll\TD_Root.lib;C:\Teigha\Trial\lib\vc14dll\sisl.lib;C:\Teigha\Trial\lib\vc14dll\TD_Alloc.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\..\exe\vc14dll;..\..\..\..\..\lib\vc14dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>ExDgnDump.lib</ImportLibrary>
+      <StackReserveSize>10000000</StackReserveSize>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <Version>
+      </Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
