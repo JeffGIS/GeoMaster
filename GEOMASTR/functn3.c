@@ -357,7 +357,7 @@ GSSiExitProg (1348);
 				rtn = SetThemeQuan (CurView->pTheme,Arg[3]);
 				goto Rtnrtn;
 			}
-			else if (!_fstrcmp (Arg[1],"SET")) 
+			else if (!_fstrcmp (Arg[1],"SET")) //$THEME(SET,ViewportName(opt):config(1 or 2))
 			{   
 				SetCurView ( SetVPFromName (Arg[2],&Err));
 				if (!Err && CurView->pTheme)
@@ -481,10 +481,25 @@ GSSiExitProg (1348);
 						}
 						else if (!_fstricmp(Arg[3], "SETCOLOR"))
 						{
-							CurView->pTheme->NotSetColor = !atob (Arg[4]);
+							CurView->pTheme->NotSetColor = !atob(Arg[4]);
 							rtn = TRUE;
 						}
-						else if (!_fstricmp (Arg[3],"MISSOPT"))
+						else if (!_fstricmp(Arg[3], "DATABASE"))
+						{
+							strncpy0 (CurView->pTheme->DataFile,Arg[4],MAX_PATH-1);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "SQL"))
+						{
+							strncpy0(CurView->pTheme->SQL, Arg[4], 255);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "TITLE"))
+						{
+							strncpy0(CurView->pTheme->Title, Arg[4], sizeof(CurView->pTheme->Title)-1);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "MISSOPT"))
 						{
 							CurView->pTheme->MissOpt = atoi (Arg[4]);
 							rtn = TRUE;

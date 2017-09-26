@@ -657,6 +657,9 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		HFILE fidDef = HFILE_ERROR;
 		char TableName[128];
 		char DBName[256];
+		char fromFile[256] = { 0 };
+		HFILE fromFileFid = HFILE_ERROR;
+		char fromFileRec[36];
 		char SQL[256] = { 0 };
 		BOOL convertToLL = FALSE;
 		LPSTR llLoc, pBar;
@@ -879,6 +882,21 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							memset(lpGWDHead->pKeys[indx], 0, abs(lpGWDHead->lKeys[indx]));
 							*(LPINT)lpGWDHead->pKeys[indx] = wantCNUM;
 						}
+						else if (!strnicmp(SQL, "FILE=", 5))
+						{
+							pSpace = SQL + 5;
+							strcpy(fromFile, pSpace);
+							pos = BT_FIRST;
+							cond = BT_GE;
+							indx = 0;
+							memset(lpGWDHead->pKeys[indx], 0, abs(lpGWDHead->lKeys[indx]));
+							fromFileFid = GSSiOpenFile(fromFile, 0, OF_READ);
+							if (fromFileFid == HFILE_ERROR)
+								return 0;
+							fgetstring(fromFileRec, 32, fromFileFid);
+							wantCNUM = 0;
+							*(LPINT)lpGWDHead->pKeys[indx] = wantCNUM;
+						}
 						else if (!strnicmp(SQL, "LastChanged >", 13))
 						{
 							pSpace = SQL + 13;
@@ -902,6 +920,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							strncpy(lpGWDHead->pKeys[indx], pSpace, abs(lpGWDHead->lKeys[indx]));
 						}
 					}
+NextCrimeRec:
 					while (!rtn && !BT_FIND(lpGWDHead->BTHandle[indx], lpGWDHead->pKeys[indx], pos, cond, (LPSTR)&Offset))
 					{
 						int id = Offset;
@@ -1069,6 +1088,21 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						fputstring(pCmd, fid);
 						fputstring(pCmdIndex, fid);
 						rtn = !StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
+					}
+					if (fromFileFid != HFILE_ERROR)
+					{
+						if (fgetstring(fromFileRec, 32, fromFileFid))
+						{
+							LPINT pCnum = (LPINT)lpGWDHead->pKeys[indx];
+							wantCNUM = atoi(fromFileRec);
+							*pCnum++ = wantCNUM;
+							LPSHORT pOrder = (LPSHORT)pCnum;
+							*pOrder = 1;
+							pos = BT_FIRST;
+							cond = BT_GE;
+							goto NextCrimeRec;
+						}
+						GSSiClose(fromFileFid);
 					}
 					DestroyStatusWindow(0);
 					GSSiClose(fid);
