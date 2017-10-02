@@ -1183,6 +1183,7 @@ NextCrimeRec:
 					HFILE  fidOffConv = HFILE_ERROR;
 					int  nextId = -1;
 					int i;
+					BOOL changeFirstFieldToID = FALSE;
 
 					if (*ARG[8])
 					{
@@ -1202,8 +1203,11 @@ NextCrimeRec:
 						else
 							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", TableName);
 						fputstring(pCmd, fid);
-						if (lpGWDHead->NumIndexFields[0]==1)
+						if (lpGWDHead->NumIndexFields[0] == 1 && lpGWDHead->pFldInfo->Type == BT_INTEGER && lpGWDHead->pFldInfo->Len == 4)
+						{
 							strcpy(lpGWDHead->pFldInfo->Name, "id");
+							changeFirstFieldToID = TRUE;
+						}
 					}
 
 					if (primKeyIsOffset)
@@ -1211,7 +1215,7 @@ NextCrimeRec:
 						sprintf(pCmd, "CREATE TABLE %s (OFFSET INTEGER PRIMARY KEY,", TableName);
 						haveUniqueID = TRUE;
 					}
-					else if (lpGWDHead->NumIndexFields[0] > 1)
+					else if (lpGWDHead->NumIndexFields[0] > 1 || (includesPoint && !changeFirstFieldToID))
 					{
 						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
 						nextId = 1;
