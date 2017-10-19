@@ -739,8 +739,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 				if (lpGWDHead->NumIndexFields[0] > 1)
 				{
-					sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
-					nextId = 1;
+					//sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
+					sprintf(pCmd, "CREATE TABLE %s (", TableName);
+					//nextId = 1;
+					nextId = 0;
 				}
 				else
 					sprintf(pCmd, "CREATE TABLE %s (", TableName);
@@ -1179,9 +1181,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 					}
 					else if (lpGWDHead->NumIndexFields[0] > 1)
 					{
-						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
-						nextId = 1;
-						haveUniqueID = TRUE;
+						//sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,", TableName);
+						//nextId = 1;
+						sprintf(pCmd, "CREATE TABLE %s (", TableName);
+						nextId = 0;
+						//haveUniqueID = TRUE;
 					}
 					else
 						sprintf(pCmd, "CREATE TABLE %s (", TableName);
@@ -1443,7 +1447,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 							}
 
 							if (nextId > 0)
-								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, id);
+								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, nextId++);
 							else if (primKeyIsOffset)
 								sprintf(pCmd, "INSERT INTO %s VALUES(%i,", TableName, Offset);
 							else
