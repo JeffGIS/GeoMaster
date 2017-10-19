@@ -69,7 +69,10 @@ BOOL LoadInternalGMD (LPGWDHEADER lpGWDHead,long iref)
 		if (InGraphicsProcessor)
 			Type1.MSLink = CurMSLink;
 		else
+		{
+			CurrentProcessedPickedItem = 0;
 			Type1.MSLink = PickList[0].MSLink;
+		}
 		_fstrncpy (Type1.prefix,CurrentPrefix,MAX_PREFIX_LEN); 
 		_fstrncpy (Type1.udi,CurrentUDI,MAX_UDI_LEN);
 		Type1.Layer = FileNum;
@@ -207,12 +210,15 @@ GetPolylineEP:
 						HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPnts);
 						double MPAZ;
 						DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, PickList[CurrentProcessedPickedItem].Length / 2, &MPAZ, 0);
-						Type1.MPX = MidPoint.x;
-						Type1.MPY = MidPoint.y;
+						Type1.MPX = MP.x = MidPoint.x;
+						Type1.MPY = MP.y = MidPoint.y;
 						GSSiGlobUlFree(&hPnts);
 					}
 					CurLength = PickList[CurrentProcessedPickedItem].Length;
 
+				}
+				else
+				{
 				}
 			}
 				break;

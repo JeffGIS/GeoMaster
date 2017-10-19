@@ -357,11 +357,18 @@ BOOL AssignMultValues(LPSTR indexFile, LPSTR dataFile)
 	int pos = BT_FIRST;
 	int offset;
 	char KeyString[256], UpdateString[256];
+	char datfile[300];
+	HANDLE hDB = 0;
 
 	hIndex = BT_OPEN(indexFile, 0, BT_READ, 0);
 	if (!hIndex)
 		return FALSE;
-
+	sprintf(datfile, "DF=%s", dataFile);
+	if (!OpenDataFile(datfile, "", BT_WRITE, &hDB))
+	{
+		BT_CLOSE(hIndex);
+		return FALSE;
+	}
 	CreateStatusWind(hWndMain, 1, 0);
 	nRecs = BT_NUM_IN_INDEX(hIndex);
 	while (StatusWindowUpdate(NULL, NULL, nRecs, iRec++) && !BT_FIND(hIndex, pid, pos, BT_ANY, (LPSTR)&offset))
@@ -369,8 +376,9 @@ BOOL AssignMultValues(LPSTR indexFile, LPSTR dataFile)
 		pos = BT_NEXT;
 		sprintf(KeyString, "PIN=%s", pid);
 		sprintf(UpdateString, "MULTIYEAROFFSET=%i",offset);
-		rtn = UpdateGMDFile(dataFile, KeyString, UpdateString, ';', 1, FALSE);
+		rtn = UpdateGMDFile("DF", KeyString, UpdateString, ';', 1, FALSE);
 	}
+	CloseDataFile(FALSE, &hDB);
 	BT_CLOSE(hIndex);
 	DestroyStatusWindow(0);
 
