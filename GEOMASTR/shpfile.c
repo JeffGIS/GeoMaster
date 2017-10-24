@@ -1517,8 +1517,8 @@ BOOL ReadFGDBRecordHeader (LPMNMXCORD pMinMaxCoord)
 	switch(rectype)
 	{
 		default:
-			ii=1;
-			break;
+//			ii=1;
+//			break;
 		case shapePolylineZ:
 		case SHPT_POLYGON:
 		case SHPT_POLYGONZ:
@@ -1593,7 +1593,8 @@ BOOL ReadFGDBRecordHeader (LPMNMXCORD pMinMaxCoord)
 				case SHPT_POLYGON_WITHCURVES:
 					break;
 				default:
-					return FALSE;
+					break;
+//					return FALSE;
 			} 
 			if (!SHPPolyHeader.NumPoints)
 				return FALSE;

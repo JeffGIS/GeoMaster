@@ -919,13 +919,15 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 						{
 							int numCurves;
 							byte *curves;
+							int curveType;
 
 							row[iDB].GetGeometry(mpShapebuf);
 							mpShapebuf.GetNumCurves(numCurves);
 							mpShapebuf.GetCurves(curves);
 							for (int i = 0; i < numCurves; i++)
-							{
-								//curveType = curves[i].GetCurveType;
+							{								
+								curveType = curves[i];
+								ii = 1;
 							}
 
 						}
