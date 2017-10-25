@@ -1736,21 +1736,23 @@ GSSiExitProg (971);
 		return CreateSolidBrush(color);
 }
 	}
-    else if (PatByte.Pattern < 5)
-    {   
+	else if (PatByte.Pattern < 5)
+	{
 		HBITMAP hbmp;
 		if (PatByte.Pattern == 1)
-			hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(IDB_94PCT)); 
+			hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(IDB_94PCT));
 		else
-			hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[PatByte.Pattern-1]));  
+			hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[PatByte.Pattern - 1]));
 		if (!hbmp)
-		{   
+		{
 			PatByte.Pattern = 0;
 			goto Top;
-		}  
+		}
 		brush = CreatePatternBrush(hbmp);
-        DeleteObject (hbmp); 
-    }
+		DeleteObject(hbmp);
+	}
+	else if (PatByte.Pattern == 5)
+		brush = GetStockObject(HOLLOW_BRUSH);
     if (hDC && brush)
     {   
     	int	MaskOpt=R2_MASKPEN; //use R2_MERGEPEN with 50%BW bitmap for halftone filter
@@ -3150,8 +3152,26 @@ GSSiExitProg (991);
 					if (DoFill && nPoly < 2)
 						i = Polyline (hDC,lpNewPoints,np); 
 				}
-				else if (DoFill) 
-					i = Polygon (hDC,lpNewPoints,np); 
+				else if (DoFill)
+				{
+					HBRUSH	hBrush = GetCurrentObject(hDC, OBJ_BRUSH); 
+					LOGBRUSH LogBrush;
+					int ln = GetObject(hBrush, sizeof(LOGBRUSH), &LogBrush);
+
+					switch (LogBrush.lbHatch)
+					{
+					case BS_HATCHED:
+						ii = 1;
+						break;
+					case BS_PATTERN:
+						ii = 1;
+						break;
+					case BS_HOLLOW:
+						ii = 1;
+						break;
+					}
+					i = Polygon(hDC, lpNewPoints, np);
+				}
 				if (DisplayAreaPoints)
 				{   
 					for (i=0;i<npnts;i++)
