@@ -210,7 +210,7 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			}
 			if (lb->lbStyle == BS_PATTERN)
 			{
-				SolidBrush hbr(Color(128, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				SolidBrush hbr(Color(lb->lbHatch, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&hbr, &pth);
 			}
 			else

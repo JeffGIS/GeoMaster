@@ -806,7 +806,17 @@ WritePoly:
 			}
 		}
 		else
+		{
+			HBRUSH	hBrush = GetCurrentObject(hdc, OBJ_BRUSH);
+			if (hBrush == GetStockObject(HOLLOW_BRUSH))
+			{
+				//SetDCPenColor(hdc, RGB(255, 0, 0));
+				//HPEN hpn = SelectObject(hdc, GetStockObject(DC_PEN));
+				return Polyline(hdc, apt, cpt);
+				//SelectObject(hdc, hpn);
+			}
 			return Polygon(hdc, apt, cpt);
+		}
 	}
 	return FALSE;
 }

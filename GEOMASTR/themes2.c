@@ -3993,7 +3993,7 @@ SetArea:
 		PatByt = GetWValue (CurTheme->ClassColor[iclass]); 
 		_fmemmove (&PatByte,&PatByt,1);
 	    SetROP2(CurView->hDC,DisplayRasterOpt);
-		if (PatByte.Pattern)
+		if (PatByte.Pattern && PatByte.Pattern < 5)
 		{
 		    SetTextColor (CurView->hDC,ColorWOWidth (CurTheme->ClassColor[iclass]));     
 		    SetBkColor (CurView->hDC,RGB(255,255,255));

@@ -1696,7 +1696,9 @@ GSSiExitProg (1158);
 		OffLineColor = GetGlobalLVal2 ("[%OFFSETLINECOLOR]",RGB(255,0,0));    
 		if (OffLineColor >= 0)
 		{
-			HBITMAP		hbmp = LoadBitmap(hInst,MAKEINTRESOURCE(PatBMP[1]));
+			HBITMAP		hbmp = 128;
+			if (!useGDIPlus)
+				hbmp  =LoadBitmap(hInst,MAKEINTRESOURCE(PatBMP[1]));
 			LOGBRUSH	lb;
 			int			OldMode = SetROP2(CurView->hDC,R2_MERGEPEN);  
 			int			OldTextColor = SetTextColor (CurView->hDC,OffLineColor);     
