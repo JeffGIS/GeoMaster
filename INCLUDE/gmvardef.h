@@ -1647,7 +1647,7 @@ char	MapserverFile[MAX_PATH] = { 0 };
 HBITMAP hMapServerBM = 0;
 SHOWVAL ShowVal = { 0 };
 int		expandOnly = 0;
-BOOL	useGDIPlus = FALSE;
+BOOL	useGDIPlus = TRUE;
 int		ShowLineDirection=0;
 
 int		ii;
