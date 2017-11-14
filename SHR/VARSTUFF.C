@@ -3056,6 +3056,9 @@ GSSiExitProg (532);
         	_fstrcpy (MaskAreaFile,Value); 
         	DeleteAllVPRegions ();
         	break;
+		case 222://for debugging  when wish to set in macro
+			BackgroundTask = atob(Value);
+			break;
         case 223:
         	HltAutoClear = atob (Value);
         	break;
@@ -3462,6 +3465,22 @@ GSSiExitProg (532);
 		case 376:
 			ShowLineDirection = atoi(Value);
 			break;
+		case 378:
+		{
+			UINT opt2 = _O_CREAT | _O_RDWR | _O_BINARY;
+			UINT pmode = _S_IREAD | _S_IWRITE;
+			if (*Value)
+			{
+				fidLogFileUse = CreateFile(Value, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+			}
+			else
+			{
+				if (fidLogFileUse != INVALID_HANDLE_VALUE)
+					CloseHandle(fidLogFileUse);
+				fidLogFileUse = INVALID_HANDLE_VALUE;
+			}
+		}
+			break;
 		default:
  			break;
 	}
@@ -3858,6 +3877,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%STREETEPTYPE", 375, FALSE);
 	AllocateTypeVar("%SHOWLINEDIRECTION", 376, FALSE);
 	AllocateTypeVar("%CURRENTIPADDRESS", 377, FALSE);
+	AllocateTypeVar("%FILEUSAGEFILE", 378, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	

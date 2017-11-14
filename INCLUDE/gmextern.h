@@ -1553,6 +1553,7 @@ extern int			FidMemLen[MAXFILEHANDLES];
 extern long			OpenFileLength[MAXFILEHANDLES];
 extern HANDLE			hFilesWithJournals;
 extern int			lFilesWithJournals;
+extern HANDLE		fidLogFileUse;
 extern struct tm	tmtime;//sharewithvarstuffso%DATE%TIMEsetfromlast$CLKor$CALcall;
 extern LPVIEWPORT			FAR *pViewports;
 extern LPVIEWPORT			FAR	*pViewportsD;     
