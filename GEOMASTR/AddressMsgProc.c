@@ -6268,8 +6268,12 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                     *pSQL = 0;
                  hSQL = 0; 
                  ExpandText (pSQL);
-                 if (!OpenDataFile (IMDataFile,pSQL,BT_READ,&hSQL))
-                    GSSiMsgBox(GetFocus(),"Cannot open data file", 0,MB_ICONQUESTION|MB_OK,0);
+				 if (!OpenDataFile(IMDataFile, pSQL, BT_READ, &hSQL))
+				 {
+					 char mess[512];
+					 sprintf("Cannot open data file\n%s", IMDataFile);
+					 GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
+				 }
                  PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
             }
            		 break;

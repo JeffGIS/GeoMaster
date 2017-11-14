@@ -728,7 +728,7 @@ char *rampToText(int intNum, RampStruct *ramp)
 	int rtype = ramp->rampType;
 	if (rtype > 100)
 		rtype = 11 + (rtype - 100);
-	sprintf(timeCompleteC, "$CAL(%i,8)", ramp->timeComplete);
+	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
 
 	sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'",

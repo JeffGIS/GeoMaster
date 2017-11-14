@@ -263,7 +263,7 @@ wstring utf8toUtf16(const string & str)
 	if (charsNeeded == 0)
 		throw runtime_error("Failed converting UTF-8 string to UTF-16");
 
-	vector<wchar_t> buffer(charsNeeded);
+	std::vector<wchar_t> buffer(charsNeeded+1);
 	int charsConverted = ::MultiByteToWideChar(CP_UTF8, 0,
 		str.data(), (int)str.size(), &buffer[0], buffer.size());
 	if (charsConverted == 0)
@@ -495,7 +495,7 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 	int		n=0;
 	wstring undr;
 	wstring	type[3]= {L"Table",L"Feature Class",L"Feature Dataset"};
-	vector<wstring> childList; 
+	std::vector<wstring> childList; 
 	//wstring	under (undr.begin(),undr.end());
 	
 	
@@ -510,15 +510,20 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 		n = childList.size();
 		if (n)
 		{
-			LPSTR pList;
+			LPSTR pList=0;
 			int	i;
 
 			*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
 			pList = (LPSTR)GlobalLock (*phList);
 			for (i = 0; i < n; i++, pList += MaxElementSize)
 			{
-				string s = ws2s(childList[i]);
-				strcpy(pList, s.c_str());
+				//char tmp[1024] = { 0 };
+				//string s = ws2s(childList[i]);
+				string s = WStringToString(childList[i]);
+
+				//strcpy(tmp, s.c_str());
+				//strncpy0(pList, tmp, MaxElementSize - 1);
+				strncpy0(pList, (LPSTR)s.c_str(), MaxElementSize - 1);
 			}
 				//strcpy (pList,WStringToString(childList[i]).c_str());
 
