@@ -8932,5 +8932,17 @@ BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			}
 		}
 	}
+	else if (!stricmp(Arg[1], "OFFSET"))
+	{
+		long off = -1;
+		HANDLE	hSQLPtr = GetDBByIDName(Arg[2]);
+		if (hSQLPtr)
+		{
+			LPOPENSQLDATA SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQLPtr);
+			off = SQLPtr->Offset;
+			GlobalUnlock(hSQLPtr);
+		}
+		itoa(off, OutLoc, 10);
+	}
 	return rtn;
 }

@@ -4131,7 +4131,7 @@ SetVis:
 			}
 			goto Rtnl;
 		}
-		case 436: /* FILE(val) */
+		case 436: //$FILE(val)
 		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
