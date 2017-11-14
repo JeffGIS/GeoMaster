@@ -730,7 +730,26 @@ char *rampToText(int intNum, RampStruct *ramp)
 		rtype = 11 + (rtype - 100);
 	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
-
+	if (rtype < 0 || rtype > 15)
+		rtype = 0;
+	if (ramp->upperLandingObstruction < 0 || ramp->upperLandingObstruction > obstructions_max)
+		ramp->upperLandingObstruction = 0;
+	if (ramp->lowerLandingObstruction < 0 || ramp->lowerLandingObstruction > obstructions_max)
+		ramp->lowerLandingObstruction = 0;
+	if (ramp->rampObstruction < 0 || ramp->rampObstruction > obstructions_max)
+		ramp->rampObstruction = 0;
+	if (ramp->PEDSignalType < 0 || ramp->PEDSignalType > NVSignalTypeCount)
+		ramp->PEDSignalType = 0;
+	if (ramp->PEDButtonType < 0 || ramp->PEDButtonType > NVButtonTypeCount)
+		ramp->PEDButtonType = 0;
+	if (ramp->awi <= 0 || ramp->awi > AudibleWalkIndicationCount)
+	{
+		ramp->awi = 0;
+		ramp->locatorToneVolume = 0;
+		ramp->audibleWalkIndicationVolume = 0;
+	}
+	ramp->locatorToneVolume = max(ramp->locatorToneVolume,0);
+	ramp->audibleWalkIndicationVolume = max(ramp->audibleWalkIndicationVolume, 0);
 	sprintf(rampText, "%i\t%i\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'",
 		ramp->uniqueID,
 		intNum,

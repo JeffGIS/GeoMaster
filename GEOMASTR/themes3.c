@@ -2157,7 +2157,7 @@ GSSiExitProg (620);
 				break;
 			
 			  case IDC_SHOWDATA:
-				  {
+			  {
 					  HANDLE	hStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096*2);
 					  LPSTR pstr=GlobalLock (hStr);
 
@@ -2187,11 +2187,11 @@ GSSiExitProg (620);
 							ExpandText(pstr);
 							SendDlgItemMessage(hWndDlg, IDC_FIELDS, LB_ADDSTRING, 0, (LPARAM)((LPSTR)pstr));
 						}
-						GSSiGlobUlFree(&hStr);
 						GlobalUnlock(SQLPtr->OFHandle);
+						GlobalUnlock(hFLDB);
 					}
-					GlobalUnlock (hFLDB);
-				  }
+					GSSiGlobUlFree(&hStr);
+			  }
 				  break;
 
 			  case IDC_RAWMODE:	

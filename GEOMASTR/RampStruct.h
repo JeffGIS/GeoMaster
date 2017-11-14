@@ -26,7 +26,8 @@ enum obstructions {
     streetmanhole=5,
     otherob=6,
     none=10,
-    masterNone=11
+    masterNone=11,
+	obstructions_max=12,
 };
 
 typedef enum {
@@ -53,13 +54,15 @@ typedef enum {
     NVSignalTypeText,
     NVSignalTypeSymbol,
     NVSignalTypeSideTimer,
-    NVSignalTypeBelowTimer
+    NVSignalTypeBelowTimer,
+	NVSignalTypeCount,
 } NVSignalType;
 
 typedef enum {
     AudibleWalkIndicationNone,
     AudibleWalkIndicationTones,
     AudibleWalkIndicationSpeechMessage,
+	AudibleWalkIndicationCount,
 } AudibleWalkIndication;
 
 typedef enum {
@@ -68,6 +71,7 @@ typedef enum {
     NVButtonTypeLargePush,
     NVButtonTypeTouch,
     NVButtonTypeAPS,
+	NVButtonTypeCount,
 } NVButtonType;
 
 typedef struct CrackWidth {
