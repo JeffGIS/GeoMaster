@@ -7961,7 +7961,12 @@ long BigRead (HFILE Fid,LPVOID pBuf,long isize)
 	if (JournalFileFid[Fid] != HFILE_ERROR)
 		rtn = ReadWithJournal (Fid,pBuf,isize);
 	else
-		rtn = _read (OpenFileFid[Fid],pBuf,isize);
+	{
+		if (OpenFileFid[Fid] < 0)
+			MessageBox(0, "Attemp to read invalid file id", 0, MB_ICONEXCLAMATION);
+		else
+			rtn = _read(OpenFileFid[Fid], pBuf, isize);
+	}
 	NumFidRead += isize;
 Exit:
 {
@@ -9031,6 +9036,14 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 	GSSiTrace(Name, 0);
 
 	ConvertToNewLocation (Name,TRUE);
+	if (fidLogFileUse != INVALID_HANDLE_VALUE)
+	{
+		char entry[512];
+		DWORD dwBytesWritten;
+
+		sprintf(entry, "%s\t%i\r\n", Name, (int)Mode);
+		WriteFile(fidLogFileUse, entry, strlen(entry), &dwBytesWritten, NULL);
+	}
 	if (Mode == OF_CREATE && _fstrlen (Name) < 3)
 		ii=1;
 	if (*Name == 'l' || *Name == 'L')

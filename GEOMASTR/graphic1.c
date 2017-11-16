@@ -558,6 +558,9 @@ void QuitGraphics()
 	RegisterBgUpdateClass(TRUE);
 	RegisterImageZoomClass(TRUE);
 	FGDBCheck ();
+	if (fidLogFileUse != INVALID_HANDLE_VALUE)
+		CloseHandle(fidLogFileUse);
+
 
 #if CHECKMEM
 	TrackObject (0,-100); 

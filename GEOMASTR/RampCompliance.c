@@ -728,7 +728,7 @@ char *rampToText(int intNum, RampStruct *ramp)
 	int rtype = ramp->rampType;
 	if (rtype > 100)
 		rtype = 11 + (rtype - 100);
-	sprintf(timeCompleteC, "$CAL(%i,8)", ramp->timeComplete);
+	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
 	if (rtype < 0 || rtype > 15)
 		rtype = 0;

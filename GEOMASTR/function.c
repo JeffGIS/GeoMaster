@@ -306,7 +306,7 @@ GSSiExitProg (1348);
 					year = tmtime.tm_year + 1900;
 					sprintf (OutLoc,"%i/%i/%2.2i",tmtime.tm_mon+1,tmtime.tm_mday,year);
 					break;      
-				case 3: //ODBC format 1999-12-15 00:00:00.000
+				case 8: //ODBC format 1999-12-15 00:00:00.000
 					sprintf (OutLoc,"%i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i.000",tmtime.tm_year+1900,tmtime.tm_mon+1,tmtime.tm_mday,
 													  tmtime.tm_hour,tmtime.tm_min,tmtime.tm_sec);
 					break;
@@ -334,7 +334,7 @@ GSSiExitProg (1348);
 																	   hr,tmtime.tm_min,tmtime.tm_sec,AMPM);
 				}
 					break;
-				case 8: //ODBC format w/o seconds 1999-12-15 00:00
+				case 3: //ODBC format w/o seconds 1999-12-15 00:00
 					sprintf(OutLoc, "%i-%2.2i-%2.2i %2.2i:%2.2i", tmtime.tm_year + 1900, tmtime.tm_mon + 1, tmtime.tm_mday,
 						tmtime.tm_hour, tmtime.tm_min);
 					break;
@@ -4131,7 +4131,7 @@ SetVis:
 			}
 			goto Rtnl;
 		}
-		case 436: /* FILE(val) */
+		case 436: //$FILE(val)
 		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
