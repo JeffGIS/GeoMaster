@@ -1073,8 +1073,9 @@ double FltAP (LPSTR INEXPR,LPBOOL IRC)
 { 
 // IRC (0=success, 1 = invalid flt value, 2 = error in paren matching, 3 = invalid statement, 4 = devide by 0)  
     LPSTR	pLchr, pVal1Begin, pVal1End, pVal2Begin, pVal2End, pEnd; 
-    HANDLE	hInput=GSSiGlobAlloc ( 748,GMEM_MOVEABLE,1024);
+    HANDLE	hInput=GSSiGlobAlloc ( 748,GMEM_MOVEABLE,4096);
     LPSTR	INPUT = GlobalLock (hInput); 
+	LPSTR	pEndOfFunction=0;
     char	OpCode, OpCodeNext=0;  
     double	rtn=0, Value1, Value2;  
     short	InBrackets=0;
@@ -1097,7 +1098,21 @@ double FltAP (LPSTR INEXPR,LPBOOL IRC)
 // find first value 
 	pVal1Begin = pVal1End = 0; 
 NextVal1:
-    switch (*INPUT)
+	if ((pEndOfFunction = EndOfFunction(INPUT)))
+	{
+		int lrem = strlen(pEndOfFunction) - 1;
+		pEndOfFunction++;
+		HANDLE hMemRem = GSSiGlobAlloc(1806, GHND, lrem + 2);
+		LPSTR pRem = GlobalLock(hMemRem);
+		strcpy(pRem, pEndOfFunction);
+		*pEndOfFunction = 0;
+		ExpandText(INPUT);
+		pVal1Begin = INPUT;
+		INPUT = strchr(INPUT, 0);
+		strcat(INPUT, pRem);
+		GSSiGlobUlFree(&hMemRem);
+	}
+	switch (*INPUT)
     {   
     	case 0:
     		if (!pVal1Begin)
@@ -1202,7 +1217,21 @@ GetSecondVal:
 NextOp:
 	pVal2End = 0; 
 NextVal2:  
-    switch (*INPUT)
+	if ((pEndOfFunction = EndOfFunction(INPUT)))
+	{
+		int lrem = strlen(pEndOfFunction) - 1;
+		pEndOfFunction++;
+		HANDLE hMemRem = GSSiGlobAlloc(1806, GHND, lrem + 2);
+		LPSTR pRem = GlobalLock(hMemRem);
+		strcpy(pRem, pEndOfFunction);
+		*pEndOfFunction = 0;
+		ExpandText(INPUT);
+		pVal2Begin = INPUT;
+		INPUT = strchr(INPUT, 0);
+		strcat(INPUT, pRem);
+		GSSiGlobUlFree(&hMemRem);
+	}
+	switch (*INPUT)
     {   
     	case 0:
     		if (!pVal2Begin)
