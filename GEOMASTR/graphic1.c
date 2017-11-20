@@ -585,6 +585,8 @@ void SetCurView (LPVIEWPORT pVP)
 {   
 	short	ii;
 	
+	if (pVP != CurView)
+		ii = 1;
 	CurView = pVP; 
 	if (!CurView)
 	{
