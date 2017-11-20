@@ -862,6 +862,7 @@ BOOL SameDPoint (LPDPOINT p1, LPDPOINT p2);
 BOOL SameFPoint(FPOINT p1, FPOINT p2);
 BOOL PolylineF(HDC hDC, LPFPOINT pt, int np);
 BOOL PolygonF(HDC hDC, LPFPOINT pt, int np);
+LPSTR EndOfFunction(LPSTR str);
 int	GetFunctionID(LPSTR str, LPSTR ParenLoc);
 int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);

@@ -384,7 +384,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	}
 	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
 	{
-#define MAXSTR 1024 * 1024 * 4
+#define MAXSTR 1024 * 1024 * 16
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
@@ -1629,7 +1629,7 @@ NextCrimeRec:
 
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 32);
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*2);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				GSSillseek(Fid, 0, 2);
@@ -3391,7 +3391,7 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 
 LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc,LPFIELDINFO FirstField)
 {
-	static char answer[MAXVARLEN] = { 0 };
+	static char answer[MAXVARLEN+2] = { 0 };
 	LPSTR lpvoid = answer;
 	LPSTR pVal = 0;
 	LPFIELDINFO field;
@@ -3448,8 +3448,9 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 				GlobalUnlock(field->hCurVal);
 				if (i == WantField)
 				{
-					_fstrncpy(answer, str, (size_t)l);
-					answer[l] = 0;
+					int i = min(MAXVARLEN, l);
+					_fstrncpy(answer, str, i);
+					answer[i] = 0;
 				}
 			}
 		}
