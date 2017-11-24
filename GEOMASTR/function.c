@@ -631,9 +631,14 @@ GSSiExitProg (1348);
 			}   
 			if (!_fstrcmp(Arg[1],"VIEWPORT"))
 			{
+				int saveType;
 				SetCurView ( SetVPFromName (Arg[2],&Err));
+				saveType = CurView->Type;
+				if (CurView->Type == SUBVIEWPORT)
+					CurView->Type = PLANVIEWPORT;
 				nlong = HighlightInArea (CurView->hWnd,&CurView->WBounds,TRUE,TRUE,0);
 				ltoa (nlong,OutLoc,10); 
+				CurView->Type = saveType;
 				CurView = SaveVP; 
 				goto Rtnl;
 			} 

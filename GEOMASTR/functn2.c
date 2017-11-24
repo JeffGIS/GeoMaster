@@ -3541,6 +3541,7 @@ GSSiExitProg (1350);
 			IgnoreSelectVP = TRUE;    
 			CurLoc = 0;
 		    fgetstring (Arg3,4090,Fid);
+			SetGlobalValue("%TEXTFILEHEADER", Arg3);
 			if (!pVarName)
 				while (*LastChr(Arg3) == ';')
 				{
@@ -3554,7 +3555,9 @@ GSSiExitProg (1350);
 		    else
 		    	hDLT = 0;
 			while (ContinueProcessing  && fgetstring (Arg3,4090,Fid))
-			{   
+			{ 
+				SetGlobalValue("%TEXTFILELINE", Arg3);
+
 				if (ProcessLine < 0 || AtLine == ProcessLine)
 				{
 			    	if (pVarName)

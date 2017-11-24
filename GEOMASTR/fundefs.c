@@ -645,6 +645,24 @@ int	GetFunctionID26 (LPSTR str)
 			return 0; 
 }			
 
+LPSTR EndOfFunction(LPSTR str)
+{
+	LPSTR rtn = 0;
+	if (*str == '$')
+	{
+		LPSTR ParenLoc = strchr(str, '(');
+		if (ParenLoc)
+		{
+			int id = GetFunctionID(str, ParenLoc);
+			if (id > 0)
+			{
+				rtn = MatchLev(ParenLoc+1, ')');
+			}
+		}
+	}
+
+	return rtn;
+}
 
 int	GetFunctionID (LPSTR str, LPSTR ParenLoc)
 #if ENABLETRACE
