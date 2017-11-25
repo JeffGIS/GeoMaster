@@ -1909,11 +1909,19 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
     BITMAPINFOHEADER DibInfo;  
     double	Factor=1; 
     short	ii;
+	BOOL deleteImage = FALSE;
     
 	destH = 0;
     if (!hDib)
 		goto Exit;
 	GetBitmapInfoFromHandle (&DibInfo,hDib);
+	/*if (DibInfo.biBitCount != 32)
+	{
+		hDib = FreeImage_ConvertTo32Bits(hDib);
+		GetBitmapInfoFromHandle(&DibInfo, hDib);
+
+		deleteImage = TRUE;
+	}*/
 	if (MaintainAspect == 2)
 	{
 		POINT	Center = RectMid (&Rect);
@@ -1953,6 +1961,8 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
     GlobalUnlock (hDibInfo);
     GlobalFree (hImage);
     GlobalFree (hDibInfo);*/
+	if (deleteImage)
+		GMDestroyDIB32(hDib);
 
 Exit:
 {

@@ -1869,7 +1869,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 	int		w=22;
 
 	strcpy (FileName,"[%DL]icons\\zoomwin_tp.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,FALSE)))
+	if ((hDib32 = LoadDIB32 (FileName,24)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.right--;
@@ -1884,7 +1884,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		strcpy (FileName,"[%DL]icons\\find_tp.bmp");
 	else
 		strcpy (FileName,"[%DL]icons\\pan.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,FALSE)))
+	if ((hDib32 = LoadDIB32 (FileName,24)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.left++;
@@ -1896,7 +1896,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		DestroyDIB32(hDib32,FALSE);
 	}
 	strcpy (FileName,"[%DL]icons\\cancelnew_tp.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,FALSE)))
+	if ((hDib32 = LoadDIB32 (FileName,24)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.right--;
@@ -1908,7 +1908,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		DestroyDIB32(hDib32,FALSE);
 	}
 	strcpy (FileName,"[%DL]icons\\list_tp.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,FALSE)))
+	if ((hDib32 = LoadDIB32 (FileName,24)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.left++;
@@ -1986,8 +1986,8 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 	}*/
 	hBM = LoadBitmap (hInst,"PANZOOMROT");
 
-//	DisplayBMFileInRect (hDC,"[%DL]icons\\zoompan8.bmp",rect,2);
-	DisplayBitmapInRect (hDC,rect,hBM,2,SRCCOPY);
+	DisplayBMFileInRect (hDC,"[%DL]icons\\zoompan8.bmp",rect,2);
+//	DisplayBitmapInRect (hDC,rect,hBM,2,SRCCOPY);
 	DeleteObject (hBM);
     SetTextColor(hDC, RGB(0,0,128));
 	DisplayZoomInOut (hWnd,hDC,0,0);
@@ -2975,14 +2975,14 @@ BOOL RegisterPanZoomRotClass(void)
 
     if (Called) return TRUE;
     Called = TRUE;
-    wc.style = CS_OWNDC|CS_DBLCLKS|CS_SAVEBITS;
+	wc.style = CS_OWNDC | CS_DBLCLKS | CS_SAVEBITS;
     wc.lpfnWndProc = (WNDPROC)PanZoomRotWndProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = hInst;
     wc.hIcon = NULL;
     wc.hCursor = LoadCursor(NULL, IDC_HAND);
-    wc.hbrBackground = 0;
+    wc.hbrBackground = GetStockObject (WHITE_BRUSH);
     wc.lpszMenuName =  NULL;
     wc.lpszClassName = "PanZoomRotWndClass";
 
@@ -2993,6 +2993,7 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
 {
 	RECT	Rect;
 	int		Id;
+	BOOL	st;
 
 	if (!hWnd)
 	{
@@ -3043,10 +3044,10 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
 
 	}
 	RegisterPanZoomRotClass();
-    if (!(hwndPanZoomRot = CreateWindowEx(WS_EX_TOOLWINDOW,
+	if (!(hwndPanZoomRot = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_LAYERED,
 	    "PanZoomRotWndClass",
 	    "PanZoomRot",
-	    WS_VISIBLE|WS_POPUP|WS_CLIPCHILDREN,  
+		WS_VISIBLE | WS_POPUP | WS_CLIPCHILDREN ,
 	    Center.x-65, Center.y-65, 131, 131, 
 	    hWnd,	/* parent */
 	    0,	/* no menu */
@@ -3055,6 +3056,8 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
     {
 		return FALSE;
     }
+	st = SetLayeredWindowAttributes(hwndPanZoomRot, RGB(255, 255, 255), 0, LWA_COLORKEY);
+	DWORD err = GetLastError();
 	Id = LoadToolbar (hwndPanZoomRot,"","ZOOM",0,1,"0 0",TRUE,FALSE,0,0,0);
 	DisplayAllToolbars (2);
 
@@ -3185,12 +3188,13 @@ HBITMAP GetToolBitmap (LPSTR BMPath)
 		if (hDib32)    
 		{
 			int	nBits = FreeImage_GetBPP (hDib32);
-			if (nBits > 0)
+			if (nBits > 0 && nBits != 24)
 			{
 				HDIB32	hDib24 = FreeImage_ConvertTo24Bits (hDib32);
-				hDib8 = QuantizeDib (hDib24,FIQ_NNQUANT);
+				//hDib8 = QuantizeDib (hDib24,FIQ_NNQUANT);
 				DestroyDIB32(hDib32,FALSE);
-				GMDestroyDIB32(hDib24);
+				hDib8 = hDib24;
+				//GMDestroyDIB32(hDib24);
 			}
 			else
 				hDib8 = hDib32;
@@ -3306,7 +3310,7 @@ int SetBitmapHeightToButton(HWND hWndBtn, HBITMAP *hBM, int iHeight)
 		HBITMAP	hBMOld2 = SelectObject(hDC2, hBM2);
 		HBITMAP	hBMOld3 = SelectObject(hDC3, *hBM);
 
-		SetStretchBltMode(hDC2, COLORONCOLOR);
+		SetStretchBltMode(hDC2, HALFTONE);// COLORONCOLOR);
 
 		rc = StretchBlt(hDC2, 0, 0, Width, iHeight,
 			hDC3, 0, 0, bm.bmWidth, bm.bmHeight,

@@ -200,8 +200,13 @@ extern BOOL	AllowCache;
     if (l>4 && !_fstricmp (&lpFileName[l-3],"sbm"))
     	_fstrcpy (&lpFileName[l-3],"bmp");*/
 	ConvertFileNameToCacheFileName (lpFileName);
-	if ((hDIB = GetBMPFromCache32 (lpFileName)))
-   		return hDIB;
+	if ((hDIB = GetBMPFromCache32(lpFileName)))
+	{
+		if (hDIB && AdjustColorsToVP == 24)
+			hDIB = FreeImage_ConvertTo24Bits(hDIB);
+
+		return hDIB;
+	}
    
 	//SetCursor(LoadCursor(NULL, IDC_WAIT));
 	hDIB = BMPHandleFromEXT(lpFileName);
@@ -218,8 +223,12 @@ extern BOOL	AllowCache;
 		AddBMPToCache32 (lpFileName,hDIB);
 	}
    //SetCursor(LoadCursor(NULL, IDC_ARROW)); 
-   if (hDIB && AdjustColorsToVP)
-   {
+	if (hDIB && AdjustColorsToVP==24)
+	{
+		hDIB = FreeImage_ConvertTo24Bits(hDIB);
+	}
+	else if (hDIB && AdjustColorsToVP)
+	{
    	   char	str[32];
    	   LPSTR	pSpace;
 	   	   

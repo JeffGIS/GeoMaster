@@ -10411,8 +10411,11 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	else
 		pSaveScreen->ID = 0;
 	pSaveScreen->hWnd = hWnd;
-	GetClientRect(hWnd, &winRect);
-	IntersectRect(&Rect, &Rect, &winRect);
+	if (hWnd != (HWND)-1)
+	{
+		GetClientRect(hWnd, &winRect);
+		IntersectRect(&Rect, &Rect, &winRect);
+	}
 	pSaveScreen->Rect = Rect;
 	pSaveScreen->hBM = SaveScreen (hDC,Rect);
 	if (dbug)

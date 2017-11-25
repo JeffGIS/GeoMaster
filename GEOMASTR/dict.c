@@ -5979,7 +5979,7 @@ BOOL DisplaySymInRect2 (HDC hDC,HANDLE hSymbol,RECT Rect,short nElement,HANDLE h
     		if (!CurSymbol->InVisible && CurSymbol->NumElements)
     		{   
     			HPEN	hPen=0,hOldPen;
-    			HBRUSH	hBrush=0,hOldBrush;
+				HBRUSH	hBrush = 0, hOldBrush = GetStockObject(BLACK_BRUSH);
 				int		BorderSymNum;
     			
 /*    			LPELEMENT pElement = (LPELEMENT)GlobalLock (CurSymbol->hElement);
