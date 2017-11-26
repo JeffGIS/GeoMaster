@@ -29,7 +29,7 @@ int main_dbfinfo( int argc, char ** argv )
     DBFHandle	hDBF;
     int		*panWidth, i, iRecord;
     char	szFormat[32], szField[1024];
-    char	ftype[15], cTitle[32], nTitle[32];
+    char	ftype[25], cTitle[32], nTitle[32];
     int		nWidth, nDecimals;
     int		cnWidth, cnDecimals;
     DBFHandle	cDBF;
