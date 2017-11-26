@@ -98,8 +98,8 @@ BOOL GetShapeBounds(LPSTR file, LPMNMXCORD pbounds)
 		SHPGetInfo(hSHP, &nEntities, &nShapeType, minBounds, maxBounds);
 		SHPClose(hSHP);
 		DBoundsInit(pbounds);
-		AddDPointToMinMax(minBounds, (LPDPOINT)pbounds);
-		AddDPointToMinMax(maxBounds, (LPDPOINT)pbounds);
+		AddDPointToMinMax((LPDPOINT)minBounds, pbounds);
+		AddDPointToMinMax((LPDPOINT)maxBounds, pbounds);
 		rtn = TRUE;
 	}
 
