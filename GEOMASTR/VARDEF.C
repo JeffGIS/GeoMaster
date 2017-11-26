@@ -16,7 +16,7 @@ HANDLE	JournalFileIndex[MAXFILEHANDLES];
 BYTE	JournalIsCompleteFile[MAXFILEHANDLES];
 HANDLE	hFilesWithJournals=0;
 int		lFilesWithJournals=0;
-HANDLE	fidLogFileUse = HFILE_ERROR;
+HANDLE	fidLogFileUse = (HANDLE)HFILE_ERROR;
 short	HltFetchPos=BT_FIRST;
 short	HltFetchSort=0;
 double	CurrentAZ=HALFPI;

@@ -1,7 +1,9 @@
 
 
 #define UNICODE
+#ifndef STRICT
 #define STRICT
+#endif
 
 #include <windows.h>
 #include <gdiplus.h>

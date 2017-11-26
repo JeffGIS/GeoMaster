@@ -6,7 +6,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //
 #define UNICODE
+#ifndef STRICT
 #define STRICT
+#endif
 
 
 #include "FileDialog.h"             // for CCommonFileDialog class

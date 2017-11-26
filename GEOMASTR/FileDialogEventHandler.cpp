@@ -7,7 +7,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //
 #define UNICODE
+#ifndef STRICT
 #define STRICT
+#endif
 
 
 #include "FileDialogEventHandler.h" // for CDialogEventHandler class

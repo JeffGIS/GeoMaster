@@ -126,4 +126,5 @@ int main_shpdata( int argc, char ** argv )
     DBFClose( old_DBF );
 
     printf ("\n");
+	return 0;
 }

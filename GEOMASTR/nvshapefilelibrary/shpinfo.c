@@ -110,4 +110,5 @@ int main_shpinfo( int argc, char ** argv )
 
 
     SHPClose( hSHP );
+	return 0;
 }

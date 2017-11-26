@@ -257,6 +257,7 @@ int main_shptreedump( int argc, char ** argv )
 #endif
 
    exitApp(__func__);
+   return 0;
 }
 
 /************************************************************************/

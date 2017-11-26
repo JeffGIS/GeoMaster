@@ -331,6 +331,7 @@ main_shpdxf (int argc, char **argv)
     SHPClose (shp);
     DBFClose (dbf);
     fclose (dxf);
+	return 0;
 }
 
 

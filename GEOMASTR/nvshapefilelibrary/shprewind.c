@@ -113,4 +113,5 @@ int main_shprewind( int argc, char ** argv )
     printf( "%d objects rewound.\n", nInvalidCount );
 
    exitApp(__func__);
+   return 0;
 }

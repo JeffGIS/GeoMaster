@@ -120,4 +120,5 @@ int main_shpwkb( int argc, char ** argv )
     if ( wkb_file )  fclose ( wkb_file );
 
     printf ("\n");
+	return 0;
 }

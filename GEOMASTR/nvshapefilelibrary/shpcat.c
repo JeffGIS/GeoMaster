@@ -97,4 +97,5 @@ int main_shpcat( int argc, char ** argv )
     SHPClose( cSHP );
 
    exitApp(__func__);
+   return 0;
 }

@@ -306,4 +306,5 @@ int main_shptest( int argc, char ** argv )
 #endif
 
    exitApp(__func__);
+   return 0;
 }

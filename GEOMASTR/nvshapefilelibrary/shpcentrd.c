@@ -156,4 +156,5 @@ int main_shpcentrd( int argc, char ** argv )
     DBFClose( old_DBF );
     DBFClose( new_DBF );
     printf ("\n");
+	return 0;
 }

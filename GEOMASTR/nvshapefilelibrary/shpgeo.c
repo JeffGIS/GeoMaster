@@ -72,6 +72,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "shapefil.h"
 
 #ifndef NAN
@@ -902,8 +903,8 @@ PT*	SHPPointsinPoly_2d ( SHPObject *psCShape ) {
    int		cRing;
    SHPObject	*psO, *psInt, *CLine;
    double	*CLx, *CLy;
-   int		*CLstt, *CLst, nPIP, ring, rMpart, ring_vtx, ring_nVertices;
-   double	rLen, rLenMax;
+   int		*CLstt, *CLst, nPIP=0, ring, rMpart, ring_vtx, ring_nVertices;
+   double	rLen=0, rLenMax=0;
 
    if ( !(SHPDimension (psCShape->nSHPType) & SHPD_AREA) )  
       return ( NULL );
