@@ -341,7 +341,7 @@ int DGNStrokeCurve( DGNHandle hFile, DGNElemMultiPoint *psCurve,
 /*      test mainline                                                   */
 /************************************************************************/
 #ifdef notdef
-int main( int argc, char ** argv )
+int main_dgnstroke( int argc, char ** argv )
 
 {
     if( argc != 5 )

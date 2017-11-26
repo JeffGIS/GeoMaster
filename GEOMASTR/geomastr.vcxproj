@@ -157,7 +157,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;filegdbapiD.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;filegdbapiD.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.10</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -369,7 +369,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -617,6 +617,33 @@
     <ClCompile Include="..\gctpc\omerfor.c" />
     <ClCompile Include="..\gctpc\omerinv.c" />
     <ClCompile Include="NVMetro.c" />
+    <ClCompile Include="nvshapefilelibrary\csv2shp.c" />
+    <ClCompile Include="nvshapefilelibrary\dbfadd.c" />
+    <ClCompile Include="nvshapefilelibrary\dbfcat.c" />
+    <ClCompile Include="nvshapefilelibrary\dbfcreate.c" />
+    <ClCompile Include="nvshapefilelibrary\dbfdump.c" />
+    <ClCompile Include="nvshapefilelibrary\dbfinfo.c" />
+    <ClCompile Include="nvshapefilelibrary\ExitApp.c" />
+    <ClCompile Include="nvshapefilelibrary\safileio.c" />
+    <ClCompile Include="nvshapefilelibrary\shpadd.c" />
+    <ClCompile Include="nvshapefilelibrary\shpcat.c" />
+    <ClCompile Include="nvshapefilelibrary\shpcentrd.c" />
+    <ClCompile Include="nvshapefilelibrary\shpcreate.c" />
+    <ClCompile Include="nvshapefilelibrary\shpdata.c" />
+    <ClCompile Include="nvshapefilelibrary\shpdump.c" />
+    <ClCompile Include="nvshapefilelibrary\shpdxf.c" />
+    <ClCompile Include="nvshapefilelibrary\shpfix.c" />
+    <ClCompile Include="nvshapefilelibrary\shpgeo.c" />
+    <ClCompile Include="nvshapefilelibrary\shpinfo.c" />
+    <ClCompile Include="nvshapefilelibrary\shpopen.c" />
+    <ClCompile Include="nvshapefilelibrary\shpproj.c" />
+    <ClCompile Include="nvshapefilelibrary\shprewind.c" />
+    <ClCompile Include="nvshapefilelibrary\shpsort.c" />
+    <ClCompile Include="nvshapefilelibrary\shptest.c" />
+    <ClCompile Include="nvshapefilelibrary\shptree.c" />
+    <ClCompile Include="nvshapefilelibrary\shptreedump.c" />
+    <ClCompile Include="nvshapefilelibrary\shputils.c" />
+    <ClCompile Include="nvshapefilelibrary\shpwkb.c" />
     <ClCompile Include="NVTextDrawing.c" />
     <ClCompile Include="OpenFileDlg.cpp" />
     <ClCompile Include="ORAFILE.C" />
@@ -786,7 +813,7 @@
     <ClCompile Include="..\solar_calculator\Version2\sidrlt.c" />
     <ClCompile Include="..\gctpc\sinfor.c" />
     <ClCompile Include="..\gctpc\sininv.c" />
-    <ClCompile Include="shpproj.c" />
+    <ClCompile Include="shp_projection.c" />
     <ClCompile Include="smooth.c" />
     <ClCompile Include="..\gctpc\somfor.c" />
     <ClCompile Include="..\gctpc\sominv.c" />
@@ -1016,6 +1043,11 @@
     <ClInclude Include="..\gctpc\proj.h" />
     <ClInclude Include="..\GMEdit\GMEdit\resource.h" />
     <ClInclude Include="MPIntersection.h" />
+    <ClInclude Include="nvshapefilelibrary\ExitApp.h" />
+    <ClInclude Include="nvshapefilelibrary\my_nan.h" />
+    <ClInclude Include="nvshapefilelibrary\proj_api.h" />
+    <ClInclude Include="nvshapefilelibrary\shapefil.h" />
+    <ClInclude Include="nvshapefilelibrary\shpgeo.h" />
     <ClInclude Include="RampCompliance.h" />
     <ClInclude Include="RampStruct.h" />
     <ClInclude Include="resource.h" />

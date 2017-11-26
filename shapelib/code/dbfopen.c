@@ -312,7 +312,7 @@ DBFOpen( const char * pszFilename, const char * pszAccess )
     int			nFields, nHeadLen, nRecLen, iField, i;
     char		*pszBasename, *pszFullname; 
     char	Name[256];   
-    UINT	Mode; 
+	UINT	Mode = OF_READ;
     
     _fstrcpy (Name,pszFilename);
     ExpandText (Name);
@@ -325,12 +325,10 @@ DBFOpen( const char * pszFilename, const char * pszAccess )
         && strcmp(pszAccess,"r+b") != 0 )
         return( NULL );
 
-    if( strcmp(pszAccess,"r") == 0 )
-//        pszAccess = "rb";   
+	if (!strcmp(pszAccess, "r") || !strcmp(pszAccess, "rb"))
 		Mode = OF_READ;
  
-    if( strcmp(pszAccess,"r+") == 0 )
-//        pszAccess = "rb+"; 
+	if (!strcmp(pszAccess, "r+") || !strcmp(pszAccess, "rb+"))
 		Mode = OF_READWRITE;
 
 /* -------------------------------------------------------------------- */
@@ -834,7 +832,7 @@ static void *DBFReadAttribute(DBFHandle psDBF, long hEntity, int iField,
 /************************************************************************/
 
 long SHPAPI_CALL
-DBFReadIntegerAttribute( DBFHandle psDBF, long iRecord, int iField )
+DBFReadIntegerAttribute( DBFHandle psDBF, int iRecord, int iField )
 
 {
     double	*pdValue;
@@ -854,7 +852,7 @@ DBFReadIntegerAttribute( DBFHandle psDBF, long iRecord, int iField )
 /************************************************************************/
 
 double SHPAPI_CALL
-DBFReadDoubleAttribute( DBFHandle psDBF, long iRecord, int iField )
+DBFReadDoubleAttribute( DBFHandle psDBF, int iRecord, int iField )
 
 {
     double	*pdValue;
@@ -874,7 +872,7 @@ DBFReadDoubleAttribute( DBFHandle psDBF, long iRecord, int iField )
 /************************************************************************/
 
 const char SHPAPI_CALL1(*)
-DBFReadStringAttribute( DBFHandle psDBF, long iRecord, int iField )
+DBFReadStringAttribute( DBFHandle psDBF, int iRecord, int iField )
 
 {
     return( (const char *) DBFReadAttribute( psDBF, iRecord, iField, 'C' ) );
@@ -887,7 +885,7 @@ DBFReadStringAttribute( DBFHandle psDBF, long iRecord, int iField )
 /************************************************************************/
 
 const char SHPAPI_CALL1(*)
-DBFReadLogicalAttribute( DBFHandle psDBF, long iRecord, int iField )
+DBFReadLogicalAttribute( DBFHandle psDBF, int iRecord, int iField )
 
 {
     return( (const char *) DBFReadAttribute( psDBF, iRecord, iField, 'L' ) );
@@ -902,7 +900,7 @@ DBFReadLogicalAttribute( DBFHandle psDBF, long iRecord, int iField )
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFIsAttributeNULL( DBFHandle psDBF, long iRecord, int iField )
+DBFIsAttributeNULL( DBFHandle psDBF, int iRecord, int iField )
 
 {
     const char	*pszValue;
@@ -1183,7 +1181,7 @@ static int DBFWriteAttribute(DBFHandle psDBF, long hEntity, int iField,
 /*      as is to the field position in the record.                      */
 /************************************************************************/
 
-int DBFWriteAttributeDirectly(DBFHandle psDBF, long hEntity, int iField,
+int DBFWriteAttributeDirectly(DBFHandle psDBF, int hEntity, int iField,
                               void * pValue )
 
 {
@@ -1262,7 +1260,7 @@ int DBFWriteAttributeDirectly(DBFHandle psDBF, long hEntity, int iField,
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFWriteDoubleAttribute( DBFHandle psDBF, long iRecord, int iField,
+DBFWriteDoubleAttribute( DBFHandle psDBF, int iRecord, int iField,
                          double dValue )
 
 {
@@ -1276,8 +1274,8 @@ DBFWriteDoubleAttribute( DBFHandle psDBF, long iRecord, int iField,
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFWriteIntegerAttribute( DBFHandle psDBF, long iRecord, int iField,
-                          long nValue )
+DBFWriteIntegerAttribute( DBFHandle psDBF, int iRecord, int iField,
+                          int nValue )
 
 {
     double	dValue = nValue;
@@ -1292,7 +1290,7 @@ DBFWriteIntegerAttribute( DBFHandle psDBF, long iRecord, int iField,
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFWriteStringAttribute( DBFHandle psDBF, long iRecord, int iField,
+DBFWriteStringAttribute( DBFHandle psDBF, int iRecord, int iField,
                          const char * pszValue )
 
 {
@@ -1306,7 +1304,7 @@ DBFWriteStringAttribute( DBFHandle psDBF, long iRecord, int iField,
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFWriteNULLAttribute( DBFHandle psDBF, long iRecord, int iField )
+DBFWriteNULLAttribute( DBFHandle psDBF, int iRecord, int iField )
 
 {
     return( DBFWriteAttribute( psDBF, iRecord, iField, NULL ) );
@@ -1319,7 +1317,7 @@ DBFWriteNULLAttribute( DBFHandle psDBF, long iRecord, int iField )
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFWriteLogicalAttribute( DBFHandle psDBF, long iRecord, int iField,
+DBFWriteLogicalAttribute( DBFHandle psDBF, int iRecord, int iField,
 		       const char lValue)
 
 {
@@ -1333,7 +1331,7 @@ DBFWriteLogicalAttribute( DBFHandle psDBF, long iRecord, int iField,
 /************************************************************************/
 
 int SHPAPI_CALL
-DBFWriteTuple(DBFHandle psDBF, long hEntity, void * pRawTuple )
+DBFWriteTuple(DBFHandle psDBF, int hEntity, void * pRawTuple )
 
 {
     long	       	nRecordOffset, i;
@@ -1397,7 +1395,7 @@ DBFWriteTuple(DBFHandle psDBF, long hEntity, void * pRawTuple )
 /************************************************************************/
 
 const char SHPAPI_CALL1(*)
-DBFReadTuple(DBFHandle psDBF, long hEntity )
+DBFReadTuple(DBFHandle psDBF, int hEntity )
 
 {
     long       	nRecordOffset;

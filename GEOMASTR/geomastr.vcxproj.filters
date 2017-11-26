@@ -1299,9 +1299,6 @@
     <ClCompile Include="DatedDisplay.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shpproj.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OGRCoordConversion.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1375,6 +1372,90 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DGN8File.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\csv2shp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\dbfadd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\dbfcat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\dbfcreate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\dbfdump.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\dbfinfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\ExitApp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\safileio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpadd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpcat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpcentrd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpcreate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpdata.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpdump.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpdxf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpfix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpgeo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpinfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpopen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpproj.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shprewind.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpsort.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shptest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shptree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shptreedump.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shputils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nvshapefilelibrary\shpwkb.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shp_projection.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1820,6 +1901,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WMS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nvshapefilelibrary\ExitApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nvshapefilelibrary\my_nan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nvshapefilelibrary\proj_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nvshapefilelibrary\shapefil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nvshapefilelibrary\shpgeo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2234,6 +2234,9 @@ int GetStateFromLatLon (int lat, int lon,LPINT StateOrProvinceArray,LPINT TZArra
 int GetPNAreaID (DPOINT Pt,LPSTR DataFile);
 BOOL LoadSHPParm (LPSTR SHPFilePathName,long Type,HWND hWnd); 
 int SHPOpenPrj(LPSTR ShpFileName,int projectionID);
+int TransformSHP(int argc, char ** argv);
+int TransformShapeFile(LPSTR InFile, LPSTR OutFile, LPSTR InPrj, LPSTR OutPrj);
+BOOL GetShapeBounds(LPSTR file, LPMNMXCORD pbounds);
 long ReadSHPHeader(HFILE FidSHP, LPMNMXCORD pMinMaxCoord, LPSTR FileName);
 BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid);
 long GetSHPRecordOffset (long record,BOOL UseBounds);

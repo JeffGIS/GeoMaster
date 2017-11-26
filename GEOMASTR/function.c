@@ -2582,6 +2582,27 @@ SetVis:
 			}
 			goto RtnFalse;
 		}
+		case 360://$SHP(TRANSFORM)
+		{
+			nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!_fstricmp(Arg[1], "TRANSFORM"))
+			{
+				if (TransformShapeFile(Arg[2], Arg[3], Arg[4], Arg[5]))
+					goto RtnTrue;
+			}
+			if (!_fstricmp(Arg[1], "BOUNDS"))
+			{
+				MNMXCORD bounds;
+				if (GetShapeBounds(Arg[2], &bounds))
+				{
+					boundstoa(OutLoc, &bounds);
+					goto Rtnl;
+				}
+			}
+
+			goto RtnFalse;
+		}
+
 		case 401: /* $ZOOM(HLT,hltnum,offset,fromlimits,immediate)
 						   ITEM,TAG or Refno,area offset,viewport offset,immediate,vpname(opt))	
 					 	   RECT,minx,miny,maxx,maxy)
