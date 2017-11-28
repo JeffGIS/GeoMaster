@@ -111,7 +111,7 @@
     <EmbedManifest>true</EmbedManifest>
     <TargetName>GeoMaster34i</TargetName>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
+    <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;..\LAStools\LASzip\dll;..\gdal-2.2.3\gcore;..\gdal-2.2.3\ogr</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

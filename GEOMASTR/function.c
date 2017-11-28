@@ -4165,7 +4165,41 @@ SetVis:
 			FILEFunctions(nArgs, Arg, OutLoc);
 			goto Rtnl;
 		}
-
+		case 437: //$GDAL(OPEN,file)
+		{
+#define CPL_RESTRICT
+#include "gdal.h"
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			GDALDatasetH  hDataset;
+		   GDALAllRegister();
+		   hDataset = GDALOpen(Arg[2], GA_ReadOnly);
+		   if (hDataset != NULL)
+		   {
+			   char mess[1024];
+			   GDALDriverH   hDriver;
+			   double        adfGeoTransform[6];
+			   hDriver = GDALGetDatasetDriver(hDataset);
+			   sprintf(mess,"Driver: %s/%s\n",
+				   GDALGetDriverShortName(hDriver),
+				   GDALGetDriverLongName(hDriver));
+			   sprintf(mess, "Size is %dx%dx%d\n",
+				   GDALGetRasterXSize(hDataset),
+				   GDALGetRasterYSize(hDataset),
+				   GDALGetRasterCount(hDataset));
+			   if (GDALGetProjectionRef(hDataset) != NULL)
+				   sprintf(mess, "Projection is `%s'\n", GDALGetProjectionRef(hDataset));
+			   if (GDALGetGeoTransform(hDataset, adfGeoTransform) == CE_None)
+			   {
+				   sprintf(mess, "Origin = (%.6f,%.6f)\n",
+					   adfGeoTransform[0], adfGeoTransform[3]);
+				   sprintf(mess, "Pixel Size = (%.6f,%.6f)\n",
+					   adfGeoTransform[1], adfGeoTransform[5]);
+			   }
+			   GDALClose(hDataset);
+			   goto RtnTrue;
+		   }
+		   goto RtnFalse;
+		}
 
 		default:
 			goto Rtn0;

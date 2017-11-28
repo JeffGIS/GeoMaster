@@ -121,6 +121,7 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp(str, "TRAN", 4)) return 434;
 			if (!_fstrnicmp(str, "WIFI", 4)) return 435;
 			if (!_fstrnicmp(str, "FILE", 4)) return 436;
+			if (!_fstrnicmp(str, "GDAL", 4)) return 437;
 			return 0;
 }
 int	GetFunctionID5 (LPSTR str)
