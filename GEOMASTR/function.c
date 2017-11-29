@@ -4168,6 +4168,7 @@ SetVis:
 		case 437: //$GDAL(OPEN,file)
 		{
 #define CPL_RESTRICT
+#include "cpl_vsi.h"
 #include "gdal.h"
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			GDALDatasetH  hDataset;
@@ -4195,7 +4196,38 @@ SetVis:
 				   sprintf(mess, "Pixel Size = (%.6f,%.6f)\n",
 					   adfGeoTransform[1], adfGeoTransform[5]);
 			   }
+
+			   GDALRasterBandH hBand;
+			   int             nBlockXSize, nBlockYSize;
+			   int             bGotMin, bGotMax;
+			   double          adfMinMax[2];
+			   hBand = GDALGetRasterBand(hDataset, 1);
+			   GDALGetBlockSize(hBand, &nBlockXSize, &nBlockYSize);
+			   sprintf(mess, "Block=%dx%d Type=%s, ColorInterp=%s\n",
+				   nBlockXSize, nBlockYSize,
+				   GDALGetDataTypeName(GDALGetRasterDataType(hBand)),
+				   GDALGetColorInterpretationName(
+				   GDALGetRasterColorInterpretation(hBand)));
+			   adfMinMax[0] = GDALGetRasterMinimum(hBand, &bGotMin);
+			   adfMinMax[1] = GDALGetRasterMaximum(hBand, &bGotMax);
+			   if (!(bGotMin && bGotMax))
+				   GDALComputeRasterMinMax(hBand, TRUE, adfMinMax);
+			   sprintf(mess, "Min=%.3fd, Max=%.3f\n", adfMinMax[0], adfMinMax[1]);
+			   if (GDALGetOverviewCount(hBand) > 0)
+				   sprintf(mess, "Band has %d overviews.\n", GDALGetOverviewCount(hBand));
+			   if (GDALGetRasterColorTable(hBand) != NULL)
+				   sprintf(mess, "Band has a color table with %d entries.\n",
+				   GDALGetColorEntryCount(
+				   GDALGetRasterColorTable(hBand)));
+
+			   float *pafScanline;
+			   int   nXSize = GDALGetRasterBandXSize(hBand);
+			   pafScanline = (float *)CPLMalloc(sizeof(float)*nXSize);
+			   GDALRasterIO(hBand, GF_Read, 0, 0, nXSize, 1,
+				   pafScanline, nXSize, 1, GDT_Float32,
+				   0, 0);
 			   GDALClose(hDataset);
+			   VSIFree(pafScanline);
 			   goto RtnTrue;
 		   }
 		   goto RtnFalse;
