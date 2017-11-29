@@ -4,6 +4,8 @@
 
 extern BOOL useGDIPlus;
 
+#define GetIValue(rgb)      (LOBYTE((rgb)>>24))
+
 typedef struct{ float x, y; }  FPOINT;
 typedef FPOINT			*LPFPOINT;
 
@@ -1057,9 +1059,11 @@ HBRUSH  WINAPI GSSiCREATEPATTERNBRUSH(HBITMAP bitmap)
 HBRUSH  WINAPI GSSiCREATEBRUSHINDIRECT(LOGBRUSH FAR* logbrush)
 {
 	HBRUSH	rtn = CreateBrushIndirect (logbrush);
-	
+	int ii = 0;
 	if (!InDebug)
 		return rtn;
+	if (logbrush->lbStyle != BS_HATCHED)
+		ii = 1;
 	if (!rtn)
 		MEMERR ("CreateBrushIndirect Failed");
 	else

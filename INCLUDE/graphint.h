@@ -81,6 +81,9 @@
 
 #define		CDSize	630
 
+
+#define GetIValue(rgb)      (LOBYTE((rgb)>>24))
+
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 void CallImageDisplayMultipleMsgProc(LPSTR ImageList,LPSTR Title);

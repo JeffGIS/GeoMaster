@@ -3,7 +3,7 @@
 #include "graphint.h"
 #include <sys\stat.h>         
 struct _stati64	OpenConfigStat;    
-UINT	PatBMP[5]={IDB_94PCT,IDB_50PCT,IDB_25PCT,IDB_06PCT,IDB_00PCT};
+HBITMAP hPatBMP[5] = { 0 };
 HFILE	OpenFileFid[MAXFILEHANDLES]; 
 UINT	OpenFileCallID[MAXFILEHANDLES];
 short	OpenFileUndoFileID[MAXFILEHANDLES];

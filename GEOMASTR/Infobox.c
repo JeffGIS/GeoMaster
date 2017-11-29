@@ -861,6 +861,10 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			hTBBrush = CreateGMBrush (TAGBox.BGcolor,-2,hDC);
 			//OldMode = SetROP2 (hDC,R2_COPYPEN);
 		}
+		else if (useGDIPlus)
+		{
+
+		}
 		else
 		{
 			hBM = LoadBitmap(hInst,"TRANBM");

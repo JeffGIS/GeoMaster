@@ -144,6 +144,20 @@ LRESULT CALLBACK CBTProc(int nCode,
 	return 0;
 }
 
+void PATBMPDef (BOOL clear)
+{
+	UINT	PatBMP[5] = { IDB_94PCT, IDB_50PCT, IDB_25PCT, IDB_06PCT, IDB_00PCT };
+
+	int i;
+	for (i = 0; i < 5; i++)
+	{
+		if (clear)
+			DeleteObject(hPatBMP[i]);
+		else
+			hPatBMP[i] = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[i]));
+	}
+}
+
 BOOL InitGraphics (HWND hWnd)
 #if ENABLETRACE
 {GSSiEnterProg (2);
@@ -152,6 +166,7 @@ BOOL InitGraphics (HWND hWnd)
 	char	str[256], name[MAX_PATH];
 	short	l, OffsetChoice,i;
 
+	PATBMPDef(FALSE);
 	SetSavedGraphicsFid (0);
 	//_controlfp (,); controls floating point exceptions
     for (i=0;i<MAXMULTILEVELZOOM;i++)
@@ -310,6 +325,7 @@ void QuitGraphics()
 	MergeImageIntoViewport(0, 0, 0, 0);
 
 	ProcessText ("$LINKLINES(CLEAR)");
+	PATBMPDef(TRUE);
 
 	if (g_hook)
 		UnhookWindowsHookEx (g_hook);

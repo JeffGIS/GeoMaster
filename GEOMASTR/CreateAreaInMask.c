@@ -131,6 +131,9 @@ BOOL ThemeCreateAreaInMask(int from)
 	BOOL haveOverallBounds = FALSE;
 	LPVIEWPORT CurViewSave = CurView;
 	static int debugref = 100095547;
+	BOOL saveUseGDIPlus = useGDIPlus;
+	useGDIPlus = FALSE;
+
 	if (CurTheme->TargetViewport)
 		SetViewport(CurTheme->TargetViewport);
 
@@ -329,6 +332,7 @@ BOOL ThemeCreateAreaInMask(int from)
 		haveOverallBounds = FALSE;
 Exit:
 	CurView = CurViewSave;
+	useGDIPlus = saveUseGDIPlus;
 	return rtn;
 }
 

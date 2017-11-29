@@ -638,7 +638,6 @@ extern BOOL			HaveBlockingWindow;
 extern BOOL			EnableTrace;
 extern short			StretchMode;
 extern DWORD			App;
-extern UINT			PatBMP[5];
 extern BOOL			HaveReports;
 extern BOOL			IgnoreLock;
 extern short			RealView;
@@ -1780,6 +1779,7 @@ extern	SHOWVAL ShowVal;
 extern	int		expandOnly;
 extern	BOOL	useGDIPlus;
 extern	int		ShowLineDirection;
+extern HBITMAP hPatBMP[5];
 extern	int		ii;
 
 extern int nPaint;
@@ -1788,7 +1788,6 @@ BOOL DoPaint(void);
 float DeviceToScreenFactor(void);
 float setDeviceToScreenFactor(float v);
 double AdjustWidth(double width);
-
 
 
 

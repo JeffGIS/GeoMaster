@@ -1918,9 +1918,9 @@ HBRUSH CreatePatBrush (HDC hDC, COLORREF color, LPPATBYTE pPatByte)
     } */
 	else if (!pPatByte->Transparent)
 	{
-		hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[pPatByte->Pattern-1]));  
+		hbmp = hPatBMP[pPatByte->Pattern-1];  
 		hbrush = CreatePatternBrush(hbmp); 
-		DeleteObject (hbmp); 
+		//DeleteObject (hbmp); 
 		if (hDC)
 		{
 		    SetTextColor (hDC,color);     
@@ -1929,13 +1929,10 @@ HBRUSH CreatePatBrush (HDC hDC, COLORREF color, LPPATBYTE pPatByte)
 	}
 	else 
 	{
-		if (pPatByte->Pattern == 1)
-			hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(IDB_94PCT)); 
-		else
-			hbmp = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[pPatByte->Pattern-1]));  
-		hbrush = CreatePatternBrush(hbmp); 
-		DeleteObject (hbmp); 
-		if (hDC)
+		hbmp = hPatBMP[pPatByte->Pattern - 1];
+		hbrush = CreatePatternBrush(hbmp);
+		//DeleteObject (hbmp); 
+		if (hDC && !useGDIPlus)
 		{
 		    SetTextColor (hDC,color);     
 		    SetBkColor (hDC,RGB(255,255,255));

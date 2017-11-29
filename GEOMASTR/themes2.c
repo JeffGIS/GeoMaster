@@ -3616,6 +3616,17 @@ GSSiExitProg (1274);
 #endif
 } 
 
+COLORREF RGBI(int r, int g, int b, int i)
+{
+	BYTE v[4];
+	v[0] = r;
+	v[1] = g;
+	v[2] = b;
+	v[3] = i;
+	COLORREF *prtn = v;
+	COLORREF rtn = *prtn;
+	return rtn;
+}
 void CreateThemePens (LPTHEME CurTheme,BOOL AlwaysCreate)
 #if ENABLETRACE
 {GSSiEnterProg (1270);
@@ -3694,23 +3705,40 @@ GSSiExitProg (1270);
         	width = IDNINT(((double)-width / CurView->BaseUnitsPerPixel)* WF * DeviceToScreenFactor() * PenWidthFactor); 
 		if (ComputePCTTheme || !PatByte.Pattern)
 			CurTheme->ClassBrush[iclass]=CreateSolidBrush(ConvertColor(ColorWOWidth (CurTheme->ClassColor[iclass]),CurTheme->UseHalfTone));
-/*		else if (PatByte.Pattern == 1) 
+		else if (PatByte.Pattern < 5) 
 		{ 
-		    LOGBRUSH	NDB;   
-				    
-			NDB.lbStyle = BS_HATCHED;
-			NDB.lbColor = ColorWOWidth (CurTheme->ClassColor[iclass]);
-			NDB.lbHatch	= HS_DIAGCROSS;
-			CurTheme->ClassBrush[iclass] = CreateBrushIndirect(&NDB);
-	    	SetBkMode (CurView->hDC,TRANSPARENT); 
-        } */
+			LOGBRUSH	lb;
+			lb.lbStyle = BS_SOLID;
+			lb.lbColor = ColorWOWidth(CurTheme->ClassColor[iclass]);
+			lb.lbHatch = (ULONG_PTR)hPatBMP[PatByte.Pattern - 1];
+
+			
+			int r = GetRValue(lb.lbColor);
+			int g = GetGValue(lb.lbColor);
+			int b = GetBValue(lb.lbColor);
+			lb.lbColor = RGBI(r, g, b, 50);
+			r = GetRValue(lb.lbColor);
+			g = GetGValue(lb.lbColor);
+			b = GetBValue(lb.lbColor);
+			int intensity = GetIValue(lb.lbColor);
+
+			CurTheme->ClassBrush[iclass] = CreateBrushIndirect(&lb);
+			GetObject(CurTheme->ClassBrush[iclass], sizeof(LOGBRUSH), &lb);
+			r = GetRValue(lb.lbColor);
+			g = GetGValue(lb.lbColor);
+			b = GetBValue(lb.lbColor);
+			intensity = GetIValue(lb.lbColor);
+
+			if (!useGDIPlus)
+	    		SetBkMode (CurView->hDC,TRANSPARENT); 
+        }
         else if (PatByte.Pattern == 5)
 			CurTheme->ClassBrush[iclass] = GetStockObject (NULL_BRUSH);
 		else
         {   
-			HBITMAP hbmp = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(PatBMP[PatByte.Pattern-1]));  
+			HBITMAP hbmp = hPatBMP[PatByte.Pattern-1];  
 			CurTheme->ClassBrush[iclass] = CreatePatternBrush(hbmp);
-	        DeleteObject (hbmp); 
+	       // DeleteObject (hbmp); 
         }
 		CurTheme->ClassPen[iclass]= CreatePen(PS_SOLID,width,ConvertColor(color,CurTheme->UseHalfTone));
 	} 

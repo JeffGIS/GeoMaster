@@ -10,6 +10,10 @@
 #include <math.h>
 #include <stdio.h>
 #include "gssitype.h"     
+
+#define GetIValue(rgb)      (LOBYTE((rgb)>>24))
+
+extern "C" COLORREF RGBI(int r, int g, int b, int i);
 extern "C" HGDIOBJ SelObject(HDC hdc, HGDIOBJ hobj);
 extern "C" int CurvePointsD(LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points, LPDOUBLE pBackAZ, long MaxPoints, double VectorizationFactor, short LoopFactor);
 static ULONG_PTR           gdiplusToken=0;
@@ -172,6 +176,8 @@ extern "C" void AAPolyLineF(HDC hdc, LPFPOINT pPoints, int np, COLORREF ColorRef
 
 extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb)
 {
+	extern HBITMAP hPatBMP[5];
+
 	using namespace Gdiplus;
 	GdiplusStartupInput gdiplusStartupInput;
 	GdiplusStartupOutput gdiplusStartupOutput;
@@ -212,12 +218,20 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			}
 			if (lb->lbStyle == BS_PATTERN)
 			{
-				SolidBrush hbr(Color(lb->lbHatch, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				int pct[5] = { 94, 50, 25, 6, 0 };
+				int ibmp = 0;
+				for (int i = 0; i < 5; i++)
+				{
+					if (lb->lbHatch == (ULONG_PTR)hPatBMP[i])
+						ibmp = i;
+				}
+				int transparency = (pct[ibmp] * 255) / 100;
+				SolidBrush hbr(Color(transparency, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&hbr, &pth);
 			}
 			else
 			{
-				SolidBrush sbr(Color(255, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				SolidBrush sbr(Color(GetIValue(lb->lbColor), GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&sbr, &pth);
 			}
 		}
