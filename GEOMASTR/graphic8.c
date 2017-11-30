@@ -1711,6 +1711,24 @@ GSSiExitProg (970);
 #endif
 }
 
+HBRUSH CreateTransparentBrush(int itrans, COLORREF color)
+{
+	HBRUSH brush;
+	LOGBRUSH	lb;
+	int pct[5] = { 94, 50, 25, 6, 0 };
+	int transparency = (pct[itrans] * 255) / 100;
+
+	int r = GetRValue(color);
+	int g = GetGValue(color);
+	int b = GetBValue(color);
+	lb.lbColor = RGBI(r, g, b, transparency);
+
+	lb.lbStyle = BS_SOLID;
+	lb.lbHatch = 0;
+	brush = CreateBrushIndirect(&lb);
+	return brush;
+}
+
 HBRUSH CreateGMBrush (COLORREF GMColor,int UseHalfTone,HDC hDC)
 #if ENABLETRACE
 {GSSiEnterProg (971);
@@ -1740,11 +1758,7 @@ GSSiExitProg (971);
 	{
 		if (useGDIPlus)
 		{
-			LOGBRUSH	lb;
-			lb.lbStyle = BS_PATTERN;
-			lb.lbColor = color;
-			lb.lbHatch = hPatBMP[PatByte.Pattern - 1];
-			brush = CreateBrushIndirect(&lb);
+			brush = CreateTransparentBrush(PatByte.Pattern, color);
 		}
 		else
 		{

@@ -79,6 +79,8 @@ static	short	SGid;
 #define SG_SETWORLDTRANSFORM	16
 #define SG_LOGBRUSH			17
 #define SG_POLYGON			18
+#define SG_FILLRECT			19
+#define SG_FRAMERECT		20
 
 typedef struct {int Style;
 				int	Width;
@@ -722,6 +724,32 @@ BOOL	WINAPI GSSiBitBlt( __in HDC hdc, __in int x, __in int y, __in int cx, __in 
 	return BitBlt(hdc, x, y, cx, cy,  hdcSrc, x1, y1, rop);
 }
 
+int WINAPI GSSiFillRect(_In_ HDC hdc, _In_ CONST RECT *lprc, _In_ HBRUSH hbr)
+{
+	if (useGDIPlus)
+	{
+		if (GetObject(hbr, 0, 0) == sizeof (LOGBRUSH))
+		{
+			LOGBRUSH lb;
+			POINT apt[4];
+			apt[0] = (POINT){ lprc->left, lprc->bottom };
+			apt[1] = (POINT){ lprc->left, lprc->top };
+			apt[2] = (POINT){ lprc->right, lprc->top };
+			apt[3] = (POINT){ lprc->right, lprc->bottom };
+			int cpt = 4;
+			GetObject(hbr, sizeof(LOGBRUSH), &lb);
+			AAPolygon(hdc, (LPPOINT)apt, cpt, 0, &lb);
+			SelectObject(hdc, hbr);
+			return 1;
+		}
+	}
+	return FillRect(hdc, lprc, hbr);
+}
+
+int WINAPI GSSiFrameRect(_In_ HDC hDC, _In_ CONST RECT *lprc, _In_ HBRUSH hbr)
+{
+	return FrameRect(hDC, lprc, hbr);
+}
 
 BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt)
 {

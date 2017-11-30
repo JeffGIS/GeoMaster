@@ -964,7 +964,7 @@ extern char	CustomHeight[16],CustomWidth[16];
 		    	IgnoreLock = FALSE;
 		    	xPage = GetDeviceCaps(p->hDC, HORZRES);
 			 }
-			 if (PrinterDC && (App == 1 || strstr (PrinterName,"PDF") || GetGlobalBVal2 ("[%PRINTTOBITMAP]",FALSE)))
+			 if (PrinterDC && !useGDIPlus && (App == 1 || strstr (PrinterName,"PDF") || GetGlobalBVal2 ("[%PRINTTOBITMAP]",FALSE)))
 			 {
 				int	PageWidth, PageHeight;
 				HDC	hDCMain = GetDC (hWndMain);

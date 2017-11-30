@@ -2439,6 +2439,7 @@ int CreateMultValueFile(LPSTR INDir);
 BOOL AssignMultValues(LPSTR INDir,LPSTR UpdateFile);
 int AssignLandUseCodeToParcels(LLPOINT pt, sqlite3 *_database);
 int fixRampNum(int rampin);
+HBRUSH CreateTransparentBrush(int itrans, COLORREF color);
 
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);

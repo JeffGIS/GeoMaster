@@ -3623,7 +3623,7 @@ COLORREF RGBI(int r, int g, int b, int i)
 	v[1] = g;
 	v[2] = b;
 	v[3] = i;
-	COLORREF *prtn = v;
+	COLORREF *prtn = (COLORREF*)v;
 	COLORREF rtn = *prtn;
 	return rtn;
 }
@@ -3650,6 +3650,8 @@ GSSiExitProg (1270);
     	WF = 1;
     else
     	WF = WidthFactor;
+
+
 	for (iclass=0;iclass<CurTheme->NumDesiredClass;iclass++)
 	{   
 		COLORREF	color; 
@@ -3705,41 +3707,16 @@ GSSiExitProg (1270);
         	width = IDNINT(((double)-width / CurView->BaseUnitsPerPixel)* WF * DeviceToScreenFactor() * PenWidthFactor); 
 		if (ComputePCTTheme || !PatByte.Pattern)
 			CurTheme->ClassBrush[iclass]=CreateSolidBrush(ConvertColor(ColorWOWidth (CurTheme->ClassColor[iclass]),CurTheme->UseHalfTone));
-		else if (PatByte.Pattern < 5) 
-		{ 
-			LOGBRUSH	lb;
-			lb.lbStyle = BS_SOLID;
-			lb.lbColor = ColorWOWidth(CurTheme->ClassColor[iclass]);
-			lb.lbHatch = (ULONG_PTR)hPatBMP[PatByte.Pattern - 1];
-
-			
-			int r = GetRValue(lb.lbColor);
-			int g = GetGValue(lb.lbColor);
-			int b = GetBValue(lb.lbColor);
-			lb.lbColor = RGBI(r, g, b, 50);
-			r = GetRValue(lb.lbColor);
-			g = GetGValue(lb.lbColor);
-			b = GetBValue(lb.lbColor);
-			int intensity = GetIValue(lb.lbColor);
-
-			CurTheme->ClassBrush[iclass] = CreateBrushIndirect(&lb);
-			GetObject(CurTheme->ClassBrush[iclass], sizeof(LOGBRUSH), &lb);
-			r = GetRValue(lb.lbColor);
-			g = GetGValue(lb.lbColor);
-			b = GetBValue(lb.lbColor);
-			intensity = GetIValue(lb.lbColor);
-
-			if (!useGDIPlus)
-	    		SetBkMode (CurView->hDC,TRANSPARENT); 
-        }
-        else if (PatByte.Pattern == 5)
-			CurTheme->ClassBrush[iclass] = GetStockObject (NULL_BRUSH);
+		else if (PatByte.Pattern == 5)
+			CurTheme->ClassBrush[iclass] = GetStockObject(NULL_BRUSH);
+		else if (useGDIPlus)
+			CurTheme->ClassBrush[iclass] = CreateTransparentBrush(PatByte.Pattern - 1, color);
 		else
-        {   
-			HBITMAP hbmp = hPatBMP[PatByte.Pattern-1];  
+		{
+			HBITMAP hbmp = hPatBMP[PatByte.Pattern - 1];
 			CurTheme->ClassBrush[iclass] = CreatePatternBrush(hbmp);
-	       // DeleteObject (hbmp); 
-        }
+			//DeleteObject(hbmp);
+		}
 		CurTheme->ClassPen[iclass]= CreatePen(PS_SOLID,width,ConvertColor(color,CurTheme->UseHalfTone));
 	} 
 	SetCurView (SaveVP);     

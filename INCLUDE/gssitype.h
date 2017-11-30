@@ -3874,6 +3874,11 @@ int  WINAPI GSSiSELECTCLIPRGN(__in HDC hdc, __in_opt HRGN hrgn);
 BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
 #define Polyline GSSiPolyline
 BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
+#define FillRect GSSiFillRect
+int WINAPI GSSiFillRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
+#define FrameRect GSSiFrameRect
+int WINAPI GSSiFrameRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
+
 #define SetTextColor GSSiSetTextColor
 COLORREF WINAPI GSSiSetTextColor(__in HDC hdc, __in COLORREF color);
 #define StretchBlt GSSiStretchBlt

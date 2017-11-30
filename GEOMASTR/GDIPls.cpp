@@ -193,11 +193,6 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 		graphic.SetPageUnit(UnitPixel);
 		graphic.SetCompositingQuality(CompositingQualityHighQuality);
 
-		Pen pn(Color(255, GetRValue(lp->lopnColor), GetGValue(lp->lopnColor), GetBValue(lp->lopnColor)), lp->lopnWidth.x);
-		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
-		pn.SetLineJoin(Gdiplus::LineJoin::LineJoinRound);
-		pn.SetStartCap(lincap);
-		pn.SetEndCap(lincap);
 		PointF pt1;
 		PointF pt2;
 		Gdiplus::GraphicsPath pth;
@@ -218,25 +213,25 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			}
 			if (lb->lbStyle == BS_PATTERN)
 			{
-				int pct[5] = { 94, 50, 25, 6, 0 };
-				int ibmp = 0;
-				for (int i = 0; i < 5; i++)
-				{
-					if (lb->lbHatch == (ULONG_PTR)hPatBMP[i])
-						ibmp = i;
-				}
-				int transparency = (pct[ibmp] * 255) / 100;
-				SolidBrush hbr(Color(transparency, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
-				graphic.FillPath(&hbr, &pth);
 			}
 			else
 			{
-				SolidBrush sbr(Color(GetIValue(lb->lbColor), GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				int intensity = GetIValue(lb->lbColor);
+				if (!intensity)
+					intensity = 255;
+				SolidBrush sbr(Color(intensity, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&sbr, &pth);
 			}
 		}
-		if (lp->lopnStyle != PS_NULL)
+		if (lp && lp->lopnStyle != PS_NULL)
+		{
+			Pen pn(Color(255, GetRValue(lp->lopnColor), GetGValue(lp->lopnColor), GetBValue(lp->lopnColor)), lp->lopnWidth.x);
+			graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+			pn.SetLineJoin(Gdiplus::LineJoin::LineJoinRound);
+			pn.SetStartCap(lincap);
+			pn.SetEndCap(lincap);
 			graphic.DrawPath(&pn, &pth);
+		}
 	}
 	SelObject(hdc, hpn);
 	SelObject(hdc, hbr);
