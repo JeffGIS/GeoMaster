@@ -1014,7 +1014,7 @@ BOOL ProcessDGNRecord (HDC hDC,long Recno)
 			{
 				//							pPoints[NumPoints].x = pvertices[i].x;
 				//							pPoints[NumPoints].y = pvertices[i].y;
-				ConvertCoord(&pvertices[i], 0, 1);
+				ConvertCoord((LPDPOINT)&pvertices[i], 0, 1);
 				//if (!NumPoints || !SameDPoint (&pPoints[NumPoints-1],&pPoints[NumPoints]))
 				//	NumPoints++;
 			}
