@@ -824,9 +824,16 @@ WritePoly:
 				LOGBRUSH lb;
 				GetObject(hpn, sizeof(LOGPEN), &lp);
 				GetObject(hbr, sizeof(LOGBRUSH), &lb);
+				if (lb.lbStyle == BS_HATCHED)
+				{
+					SelectObject(hdc, hpn);
+					SelectObject(hdc, hbr);
+					return Polygon(hdc, apt, cpt);
+				}
 				AAPolygon(hdc, (LPPOINT)apt, cpt, &lp,&lb);
 				SelectObject(hdc, hpn);
 				SelectObject(hdc, hbr);
+				return TRUE;
 			}
 			else
 			{

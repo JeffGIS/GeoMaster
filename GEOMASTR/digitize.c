@@ -1054,7 +1054,9 @@ void NotPolyline (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR Bot
 void NotPolylineScreen (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText)
 {   
 	short	OldMode;
-	
+	BOOL saveUseGDIPlus = useGDIPlus;
+
+	useGDIPlus = FALSE;
 	SaveDC (hDC);
 	SetDisplayMode (hDC, GF_SCREENMODE);
   	SelectClipRgn (hDC,0);
@@ -1066,6 +1068,7 @@ void NotPolylineScreen (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPS
 	}
 	FirstMoveSinceRedraw=FALSE;
 	RestoreDC (hDC,-1);
+	useGDIPlus = saveUseGDIPlus;
 	return;
 }
 

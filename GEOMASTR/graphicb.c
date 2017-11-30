@@ -1756,7 +1756,7 @@ GSSiExitProg (1158);
 				else
 					i=Polyline (CurView->hDC,lpPoly,Header.np);
 			}
-	        DeleteObject (hbmp); 
+	       // DeleteObject (hbmp); 
 		    SelectObject (CurView->hDC,OldPen);
 		    DeleteObject (hPen);
 			SetROP2(CurView->hDC,OldMode);
