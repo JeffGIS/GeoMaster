@@ -2928,6 +2928,7 @@ Exit:
 
 	if (Final)
 		ResetShowOnlyVis ();
+	useGDIPlus = FALSE;
 {
 #if ENABLETRACE
 GSSiExitProg (440);

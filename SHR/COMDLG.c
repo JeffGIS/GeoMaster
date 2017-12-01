@@ -2537,7 +2537,7 @@ BOOL FAR PASCAL AbortProc ( HDC hPrinterDC, short nCode )
     while (!gbUserAbort && GSSiPeekMessage(&msg, NULL, 0, 0, TRUE)) 
     {
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+		SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
         if (!IsDialogMessage(ghPrintingDlg, &msg)) {
             TranslateMessage(&msg);

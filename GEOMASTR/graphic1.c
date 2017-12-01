@@ -2259,7 +2259,7 @@ void ImediateProcessing (BOOL Imediate,BOOL Final)
                     while (DoPeek && Continue && GSSiPeekMessage(&msg, hWndMain, 0, WM_COMMAND, PM_REMOVE))
                     {   
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+						SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
 
                     	switch (msg.message)
@@ -4503,7 +4503,8 @@ GSSiExitProg (54);
 GSSiExitProg (54);
 #endif
     	return;  
-}    
+}  
+	useGDIPlus = wantGDIPlus;
 	if (MemMap && From != 1)
 		SetConfig (1);
 	else
@@ -7236,6 +7237,7 @@ void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
     short	ii;  
                         
 //    DisplayFinOpt = 0;  
+	useGDIPlus = FALSE;
 	KillTimer(hWndMain, 1);
 	TrapKillTimer = FALSE;
     if (DisableHalt)

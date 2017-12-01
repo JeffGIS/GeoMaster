@@ -97,7 +97,7 @@ GSSiExitProg (697);
 	while (GSSiPeekMessage(&msg,0,WM_MOUSEMOVE,WM_MOUSEMOVE,PM_REMOVE))
 	{
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+		SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
 		
 	    if (msg.message == WM_MOUSEMOVE)

@@ -1759,6 +1759,7 @@ S10:
 				   }
 				   DisplayViewID = 0; 
 				   LastVP = 0;
+				   useGDIPlus = wantGDIPlus;
 				   while (!gbUserAbort && DisplayViewID<NumViewportsToDisplay)
 				   {
 				   		SetCurView (pViewportsD[DisplayViewID]);
@@ -2023,7 +2024,7 @@ BOOL CheckPrintAbort (HDC hPr)
         if (!IsDialogMessage(ghPrintingDlg, &msg))
         {
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+			SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
             TranslateMessage(&msg);
             DispatchMessage(&msg);

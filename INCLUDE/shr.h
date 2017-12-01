@@ -157,7 +157,7 @@ __int64 FileTimeToint64(FILETIME ft);
 long Time64toTime32 (time_t time64);
 int	GSSiEnterProg (int progid);
 int	GSSiExitProg (int progid);
-int SetLastMessage (long mes);
+int SetLastMessage (long mes,WPARAM wparam);
 int checkcpl (int i);
 int abcd (int i);
 BOOL ValidateLicense(HWND hWnd);

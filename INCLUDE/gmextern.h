@@ -1778,6 +1778,7 @@ extern  HBITMAP hMapServerBM;
 extern	SHOWVAL ShowVal;
 extern	int		expandOnly;
 extern	BOOL	useGDIPlus;
+extern	BOOL	wantGDIPlus;
 extern	int		ShowLineDirection;
 extern HBITMAP hPatBMP[5];
 extern	int		ii;

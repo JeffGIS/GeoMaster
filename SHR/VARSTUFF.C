@@ -3454,7 +3454,7 @@ GSSiExitProg (532);
 			convertGMDUpdateCommas = atob(Value);
 			break;
 		case 373:
-			useGDIPlus = atob(Value);
+			wantGDIPlus = atob(Value);
 			break;
 		case 374:
 			strncpy(StreetBPType,Value,2);
@@ -5006,7 +5006,7 @@ GSSiExitProg (533);
 			btoa(convertGMDUpdateCommas, OutStr);
 			break;
 		case 373:
-			btoa(useGDIPlus, OutStr);
+			btoa(wantGDIPlus, OutStr);
 			break;
 		case 374:
 			strcpy(OutStr, StreetBPType);

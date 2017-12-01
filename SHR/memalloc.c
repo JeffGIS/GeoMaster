@@ -35,6 +35,16 @@ extern	BOOL	EnableTrace;
 extern	HWND	TraceWnd,TraceWnd2;
 void GetProgName (short i, LPSTR Name);
 
+#define OFS_MAXPATHNAMEGM 256
+typedef struct _OFSTRUCTGM {
+	BYTE cBytes;
+	BYTE fFixedDisk;
+	WORD nErrCode;
+	WORD Reserved1;
+	WORD Reserved2;
+	CHAR szPathName[OFS_MAXPATHNAMEGM];
+} OFSTRUCTGM, *LPOFSTRUCTGM, *POFSTRUCTGM;
+
 #define MAXPROG	4096     
 #define MAXLEVEL	512   
 static	BOOL	MemTrace=FALSE;
@@ -994,9 +1004,48 @@ int	GSSiExitProg (int progid)
 	return 0;
 } 
 
-int SetLastMessage (long mes)
+int SetLastMessage (long mes, WPARAM wParam)
 {
+#define MAXMESS	32
+	static int numMess = 0;
+	static messageList[MAXMESS] = { 0 };
+	static wparamList[MAXMESS] = { 0 };
+	memmove(&messageList[1], &messageList[0], sizeof(int)*(MAXMESS - 1));
+	memmove(&wparamList[1], &wparamList[0], sizeof(int)*(MAXMESS - 1));
+	messageList[0] = mes;
+	wparamList[0] = wParam;
 	LastMessage = mes;
+	if (mes == WM_IME_NOTIFY)
+	{
+		switch (wParam)
+		{
+		case IMN_CLOSESTATUSWINDOW:
+			ii = 1;
+			break;
+		case IMN_OPENSTATUSWINDOW:
+			ii = 1;
+			break;
+		default:
+			ii = 1;
+			break;
+		}
+	}
+	if (mes == WM_IME_SETCONTEXT)
+	{
+		switch (wParam)
+		{
+		case 0:
+			ii = 1;
+			break;
+		case 1:
+			ii = 1;
+			break;
+		default:
+			ii = 1;
+			break;
+		}
+	}
+
 	return 0;
 }
 #else

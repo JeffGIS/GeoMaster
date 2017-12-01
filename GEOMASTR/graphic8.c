@@ -4513,7 +4513,7 @@ BOOL ContinuePickingInArea (BOOL Display)
 	while (GSSiPeekMessage(&msg,0,0,0,PM_REMOVE))
 	{
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+		SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
 		if (msg.message == WM_PAINT)
 		{

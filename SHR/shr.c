@@ -8519,7 +8519,7 @@ GSSiExitProg (387);
 while (DoPCTPeek != (HWND)1 && GSSiPeekMessage(&msg,DoPCTPeek,0,0,PM_REMOVE))
 {
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+	SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
 /*  if (msg.message == WM_QUIT)
   	retrn FALSE;
@@ -12047,7 +12047,7 @@ BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
  while (GSSiPeekMessage(&msg,0,0,0,PM_NOREMOVE))
  {
 																							#if ENABLETRACE
-																							SetLastMessage(-1*(long)msg.message);
+	 SetLastMessage(-1 * (long)msg.message, msg.wParam);
 																							#endif
 	if (msg.message == WM_QUIT)
 {
@@ -12122,7 +12122,7 @@ BOOL WaitForKeystroke (BOOL UseGetMessage)
  while (GetOrPeekMessage(&msg,0,0,0,PM_REMOVE,UseGetMessage))
  {
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+	 SetLastMessage(-1 * (long)msg.message, msg.wParam);
 #endif
 	if (msg.message == WM_QUIT)
 {

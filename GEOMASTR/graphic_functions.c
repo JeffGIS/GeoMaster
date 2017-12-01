@@ -6570,6 +6570,19 @@ BOOL CreateHLTArea (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     		HPDPOINT	lpDPoints;
     		
     		lpDPoints = (HPDPOINT)GlobalLock (hNewPolyPoints);
+			if (!SameDPoint(lpDPoints, &lpDPoints[NumNewPolyPoints - 1]))
+			{
+				HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, (NumNewPolyPoints+1) * sizeof(DPOINT));
+				LPDPOINT pPt = GlobalLock(hPoints);
+				for (int i = 0; i < NumNewPolyPoints; i++)
+				{
+					pPt[i] = lpDPoints[i];
+				}
+				pPt[NumNewPolyPoints++] = lpDPoints[0];
+				GSSiGlobUlFree(&hNewPolyPoints);
+				hNewPolyPoints = hPoints;
+				lpDPoints = pPt;
+			}
 			AddAreaToOffsetFile (0,3,NumNewPolyPoints, lpDPoints,1,0,0);
         	GSSiGlobUlFree(&hNewPolyPoints);
         	NumNewPolyPoints=0;

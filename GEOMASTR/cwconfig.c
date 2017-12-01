@@ -21,6 +21,7 @@ void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);
 
 BOOL CreatePrintBitmap(HWND hWnd);
+int SetLastMessage(long mes, WPARAM wParam);
 
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int PASCAL WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
@@ -1816,7 +1817,7 @@ GSSiExitProg (437);
 			 pAppName = mapServerAppName;
 		 }
 
-		 hWndMain = CreateWindow(
+		 hWndMain = CreateWindowEx(WS_EX_APPWINDOW,
 			 szAppName,               /* Window class name           */
 			 pAppName,             /* Window's title              */
 			 style,
@@ -1977,7 +1978,7 @@ nMess = -1;
 
 	 switch (msg.message)
 	 {
-		 break; case SPI_SETMOUSESPEED:
+		 case SPI_SETMOUSESPEED:
 			 ii = 1;
 		 break; case WM_PRINT:
 			 ii = 1;
@@ -2001,6 +2002,8 @@ nMess = -1;
 			 ii = 1;
 		 break; case WM_SHOWWINDOW:
 			 ii = 1;
+		 break; case WM_IME_SETCONTEXT:
+			 ii = 1;
 		 break; case WM_KEYDOWN:
 			 ii = 1;
 		 break; case WM_SYSKEYDOWN:
@@ -2015,6 +2018,7 @@ nMess = -1;
 			 ii = 1;
 		 break; case WM_TIMER:
 			 ii = 1;
+			 break;
 	 }
 	 if (msg.message == WM_CHAR && msg.wParam == 9) //TAB
 			 ii = 1;
@@ -2221,7 +2225,7 @@ static	DWORD	LastMouselParam=0;
 //FileDlgWndProc(hWnd, Message, wParam,lParam);
 
 #if ENABLETRACE
-SetLastMessage(Message);
+SetLastMessage(Message,wParam);
 #endif
 /*  if (BackgroundTask && HaveWMCreate)
   {
@@ -2261,6 +2265,8 @@ SetLastMessage(Message);
   	ii=1;
   break; case WM_SHOWWINDOW:
 	ii=1;
+  break; case  WM_IME_SETCONTEXT:
+	ii = 1;
   break; case WM_MOUSEMOVE:
 	 ii=1;//ClearVehicleInfoRect ();
   break; case WM_CLOSE:
@@ -5155,19 +5161,34 @@ DisplayParcel:
 			}
 			goto ReturnDefault;
 		}
+	case WM_IME_NOTIFY:
+		goto ReturnDefault;
+		break;
 	case WM_SHOWWINDOW:
 		if (wParam)
 		{
-			if (hFullWindowBitMap && !IgnoreActivate) 
-				RestoreFullWindowBitmap ();		
-				UpdateVehicleStatusDlg ();
-				DisplayAllToolbars (4);
+			if (hFullWindowBitMap && !IgnoreActivate)
+				RestoreFullWindowBitmap();
+			UpdateVehicleStatusDlg();
+			DisplayAllToolbars(4);
 		}
 		else
-			SaveFullWindowBitmap (hWndMain);
+			SaveFullWindowBitmap(hWndMain);
 
 		goto ReturnDefault;
-    case WM_SIZE:     /*  code for sizing client area                   */  
+	case WM_IME_SETCONTEXT:
+		if (!wParam)
+		{
+			if (hFullWindowBitMap && !IgnoreActivate)
+				RestoreFullWindowBitmap();
+			UpdateVehicleStatusDlg();
+			DisplayAllToolbars(4);
+		}
+		else
+			SaveFullWindowBitmap(hWndMain);
+
+		goto ReturnDefault;
+	case WM_SIZE:     /*  code for sizing client area                   */
     	 ConfigDisplayRect.left = ConfigDisplayRect.right = 0;
          switch (wParam)
            {

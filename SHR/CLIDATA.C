@@ -616,7 +616,7 @@ void WaitForAck (HWND hwndClientDDE)
 //		      sprintf (str,"%ld %ld",(long)msg.hwnd,(long)msg.message);
 //		      GSSiTrace (str);
 #if ENABLETRACE
-SetLastMessage(-1*(long)msg.message);
+SetLastMessage(-1*(long)msg.message,msg.wParam);
 #endif
 		      if (msg.hwnd == hwndClientDDE ||
 		      	  msg.message == WM_PAINT ||
