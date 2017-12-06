@@ -57,7 +57,7 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
 
 			if (PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION)
 				id = GOOGLEMAPSPROJECTION;
-			IRC = pj_transform(PRJ_PROJ4DEF[ID_FROM], PRJ_PROJ4DEF[2], 1, 1, X, Y, NULL);
+			IRC = pj_transform(PRJ_PROJ4DEF[ID_FROM], PRJ_PROJ4DEF[2], 1, 1, X, Y, NULL,NULL);
 			if (IRC)
            		return IRC;                   
 			*X *= RAD_TO_DEG;
@@ -115,7 +115,7 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
            		return IRC;                   
 			*X *= DEG_TO_RAD;
 			*Y *= DEG_TO_RAD;
-			IRC = pj_transform(PRJ_PROJ4DEF[2], PRJ_PROJ4DEF[ID_TO], 1, 1, X, Y, NULL);
+			IRC = pj_transform(PRJ_PROJ4DEF[2], PRJ_PROJ4DEF[ID_TO], 1, 1, X, Y, NULL,NULL);
 			if (IRC)
            		return IRC;                   
 		}

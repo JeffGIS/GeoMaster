@@ -685,7 +685,7 @@ char    SHPAPI_CALL
 
 const char SHPAPI_CALL1(*)
       DBFGetCodePage(DBFHandle psDBF );
-int TransformSHP( int argc, char ** argv );
+int TransformSHP( int argc, char ** argv, double * pOutFactor );
 
 #ifdef __cplusplus
 }

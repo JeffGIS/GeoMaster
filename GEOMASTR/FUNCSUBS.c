@@ -1293,15 +1293,27 @@ int GetGoogleZoomForSCale (double scale)
 	return MAXGZOOMS;
 }
 
-int GetTranID (LPSTR cid)
+int GetTranID(LPSTR cid)
 {
 	int	id;
 	int ib = 0;
 
 	if (*cid)
 		ib = FIRST_USER_PROJ;
-	for (id = ib;id < MAX_PROJ;id++)
-		if (!stricmp (projid[id],cid))
+	for (id = ib; id < MAX_PROJ; id++)
+		if (!stricmp(projid[id], cid))
+			return id;
+
+	return -1;
+}
+int GetNextUserTranID(void)
+{
+	int	id;
+	int ib = 0;
+
+	ib = FIRST_USER_PROJ;
+	for (id = ib; id < MAX_PROJ; id++)
+		if (!*projid[id])
 			return id;
 
 	return -1;
@@ -1348,6 +1360,7 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 	int		rc, id;
 	char	str[512];
 	static	projPJ	projdef[MAXUSERPROJ] = { 0 };
+	static  double  projFactor[MAXUSERPROJ];
 
 	strcpy (OutLoc,"0");
 	if (!stricmp(Arg1, "NVPFROMPRJ"))
@@ -1374,12 +1387,24 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 	}
 	else if (!stricmp(Arg1, "DEFINE"))
 	{
+		LPSTR def = Arg3;
+		BOOL doFree = FALSE;
+		double factor=1.0;
 		if ((id = GetTranID(Arg2)) < 0)
 		{
-			if ((id = GetTranID("")) < 0)
+			if ((id = GetNextUserTranID()) < 0)
 				return;
 		}
-		if (!(projdef[id] = pj_init_plus(Arg3)))
+		if (IsProjectionFile(Arg3))
+		{
+			def = SHPGetNVP(Arg3, &factor);
+			doFree = TRUE;
+		}
+
+		projdef[id] = pj_init_plus(def);
+		projFactor[id] = factor;
+		if (doFree) free(def);
+		if (!projdef[id])
 			return;
 		strcpy(projid[id], Arg2);
 		strcpy(OutLoc, "1");
@@ -1411,8 +1436,8 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 		newpoint1.y *= DEG_TO_RAD;
 		newpoint2.x *= DEG_TO_RAD;
 		newpoint2.y *= DEG_TO_RAD;
-		rc = pj_transform(projdef[0],projdef[id], 1, 1, &newpoint1.x, &newpoint1.y, NULL );
-		rc = pj_transform(projdef[0],projdef[id], 1, 1, &newpoint2.x, &newpoint2.y, NULL );
+		rc = pj_transform(projdef[0],projdef[id], 1, 1, &newpoint1.x, &newpoint1.y, NULL, &projFactor[id] );
+		rc = pj_transform(projdef[0], projdef[id], 1, 1, &newpoint2.x, &newpoint2.y, NULL, &projFactor[id]);
 		az = getazd (&newpoint1,&newpoint2);
 		ftoa (OutLoc,az*RAD_TO_DEG);
 	}
@@ -1432,8 +1457,8 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 		newpoint1.y *= DEG_TO_RAD;
 		newpoint2.x *= DEG_TO_RAD;
 		newpoint2.y *= DEG_TO_RAD;
-		rc = pj_transform(projdef[0],projdef[id], 1, 1, &newpoint1.x, &newpoint1.y, NULL );
-		rc = pj_transform(projdef[0],projdef[id], 1, 1, &newpoint2.x, &newpoint2.y, NULL );
+		rc = pj_transform(projdef[0], projdef[id], 1, 1, &newpoint1.x, &newpoint1.y, NULL,&projFactor[id]);
+		rc = pj_transform(projdef[0], projdef[id], 1, 1, &newpoint2.x, &newpoint2.y, NULL, &projFactor[id]);
 		scale = ldistp (newpoint1,newpoint2)/dist;
 		ftoa (OutLoc,scale);
 	}
@@ -1448,7 +1473,7 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 			return;
 		if ((id2 = GetTranID (Arg4)) < 0)
 			return;
-		rc = pj_transform(projdef[id1],projdef[id2], 1, 1, &wpoint.x, &wpoint.y, NULL );
+		rc = pj_transform(projdef[id1], projdef[id2], 1, 1, &wpoint.x, &wpoint.y, NULL, &projFactor[id2]);
 		if (!rc)
 			dpointtoa (OutLoc,&wpoint);
 	}

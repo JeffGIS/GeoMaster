@@ -3445,7 +3445,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 	 char originalName[MAX_PATH];
 
 	 Opened = FALSE;
-	 SHPIndexType = 1;
+	 SHPIndexType = SHP_INDEX_SIMPLE;
 	 GetSHPName(str);
 	 strcpy(originalName, str);
 	 SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
@@ -3515,9 +3515,9 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 	 else if (PRJ_UNITS[1] == 2)
 		 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
 	 SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
-	 SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == 0, 0L);
-	 SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == 1, 0L);
-	 SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == 2, 0L);
+	 SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+	 SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+	 SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
 	 GetSHPName(str);
 	 if (IsPGDB)
 		 SHPType = ReadPGDBHeader(str, &Bounds);
@@ -3719,9 +3719,9 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
    				 	}
    				 	if (fgetstring (str,128,Fid))
    				 		SHPIndexType = atoi (str);
-   				 	SendDlgItemMessage (hWndDlg,IDC_INDEXSTANDARD,BM_SETCHECK,SHPIndexType == 0,0L);
-   				 	SendDlgItemMessage (hWndDlg,IDC_INDEXSIMPLE,BM_SETCHECK,SHPIndexType == 1,0L);
-   				 	SendDlgItemMessage (hWndDlg,IDC_INDEXQUAD,BM_SETCHECK,SHPIndexType == 2,0L);
+					SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+					SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+					SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
    
    				 	while (fgetstring (str,256,Fid))
    				 	{
@@ -3978,11 +3978,11 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 		 			GetDlgItemText (hWndDlg,IDC_UDI,_fstrchr(str,0),sizeof(str)-_fstrlen(str)-1); 
 		 		} 
 			 	fputstring (str,Fid);  
-			 	SHPIndexType = 0;
+				SHPIndexType = SHP_INDEX_STANDARD;
 			 	if (SendDlgItemMessage (hWndDlg,IDC_INDEXSIMPLE,BM_GETCHECK,0,0))
-                	SHPIndexType = 1;
+					SHPIndexType = SHP_INDEX_SIMPLE;
 			 	else if (SendDlgItemMessage (hWndDlg,IDC_INDEXQUAD,BM_GETCHECK,0,0))
-                	SHPIndexType =2;
+					SHPIndexType = SHP_INDEX_QUAD;
 		 		itoa (SHPIndexType,str,10);  
 			 	fputstring (str,Fid); 
 			 	i = 0;

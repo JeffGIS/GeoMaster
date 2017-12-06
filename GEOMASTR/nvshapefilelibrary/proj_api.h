@@ -77,7 +77,7 @@ projXY pj_fwd(projLP, projPJ);
 projLP pj_inv(projXY, projPJ);
 
 int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
-                  double *x, double *y, double *z );
+                  double *x, double *y, double *z, double *outFactor );
 int pj_datum_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                         double *x, double *y, double *z );
 int pj_geocentric_to_geodetic( double a, double es,

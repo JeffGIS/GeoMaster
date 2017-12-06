@@ -4,20 +4,34 @@
 #include "shapefil.h"
 #include "shpgeo.h"
 
-LPSTR SHPGetNVP(LPSTR ShpFileName)
+LPSTR SHPGetNVP(LPSTR ShpFileName,LPDOUBLE pFactor)
 {
-	char	prjFileName[MAX_PATH] = "";
+	char	prjFileName[MAX_PATH+12] = "";
 	LPSTR	pDot;
 	HFILE	fid;
 	LPSTR	rtn = 0;
+	int		outUnits = 0;
+#define OUMETERS	1
+#define OUFEET		2
 
+	if (pFactor)
+		*pFactor = 1.0;
 	if (!GetGlobalLVal2("[%USEOSRLIB]", FALSE))
 		return 0;
 
-	strcpy(prjFileName, ShpFileName);
+	strncpy0(prjFileName, ShpFileName,MAX_PATH+10);
 	ExpandText(prjFileName);
 	if ((pDot = strrchr(prjFileName, '.')))
 	{
+		LPSTR pParen = strrchr(pDot, '(');
+		if (pParen)
+		{
+			*pParen++ = 0;
+			if (!strnicmp(pParen, "METERS", 6))
+				outUnits = OUMETERS;
+			else if (!strnicmp(pParen, "FEET", 4))
+				outUnits = OUFEET;
+		}
 		strcpy(pDot, ".prj");
 		fid = GSSiOpenFile(prjFileName, 0, OF_READ);
 		if (fid != HFILE_ERROR)
@@ -36,6 +50,22 @@ LPSTR SHPGetNVP(LPSTR ShpFileName)
 				int ln = strlen (proj4def);
 				rtn = malloc(ln + 4);
 				strcpy(rtn, proj4def);
+				if (strstr(rtn, "units=us-ft"))
+				{
+					if (outUnits == OUMETERS)
+					{
+						if (pFactor)
+							*pFactor = FTM;
+					}
+				}
+				else
+				{
+					if (outUnits == OUFEET)
+					{
+						if (pFactor)
+							*pFactor = MFT;
+					}
+				}
 			}
 			GSSiGlobUlFree(&hDef);
 			GSSiGlobUlFree(&hMem);
@@ -46,7 +76,8 @@ LPSTR SHPGetNVP(LPSTR ShpFileName)
 int SHPOpenPrj(LPSTR ShpFileName, int projectionID)
 {
 	int rtn = 0;
-	LPSTR nvp = SHPGetNVP(ShpFileName);
+	double factor;
+	LPSTR nvp = SHPGetNVP(ShpFileName,&factor);
 	if (nvp)
 	{
 		LoadProjection(projectionID, nvp);
@@ -56,29 +87,82 @@ int SHPOpenPrj(LPSTR ShpFileName, int projectionID)
 	return rtn;
 }
 
+BOOL IsProjectionFile(LPSTR File)
+{
+	char file[MAX_PATH + 12];
+	strncpy0(file, File, MAX_PATH);
+	LPSTR pDot = strrchr(file, '.');
+	if (pDot)
+	{
+		LPSTR pParen = strrchr(pDot, '(');
+		if (pParen)
+			*pParen = 0;
+		if (!stricmp(pDot, ".prj"))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+static LPSTR GetProjectionFile(LPSTR File)
+{
+	static char file[MAX_PATH + 12];
+	LPSTR rtn = file;
+	strncpy0(file, File, MAX_PATH + 10);
+	LPSTR pDot = strrchr(file, '.');
+	if (pDot)
+	{
+		LPSTR pParen = strrchr(pDot, '(');
+		if (pParen)
+			*pParen = 0;
+	}
+	return rtn;
+}
+
 int TransformShapeFile(LPSTR InFile, LPSTR OutFile, LPSTR InPrj, LPSTR OutPrj)
 {
 	int rtn = 0;
+	BOOL isPrjFile = FALSE;
 	char * args[5];
+	double inFactor, outFactor;
 	char inprj_utm[] = { "+proj=utm +zone=15 +datum=NAD83 +units=m +no_defs" };
 	char inprj_hc[] = { "+proj=lcc +lat_1=45.13333333 +lat_2=44.88333333 +lat_0=44.79111111 +lon_0=-93.38333333 +x_0=152400.3048006096 +y_0=30480.06096012192 +a=6378418.941 +b=6357033.31 +units=us-ft +no_defs" };
 	LPSTR nvp = malloc(4096);
 	char outprj[] = "+proj=latlong +datum=WGS84";
 	args[1] = (char *)InFile;
 	args[2] = OutFile;
-	nvp = SHPGetNVP(InFile);
+	nvp = SHPGetNVP(InFile,&inFactor);
 	if (nvp)
 		args[3] = nvp;
 	else if (InPrj && *InPrj)
 		args[3] = InPrj;
 	else
 		args[3] = inprj_utm;
-	if (OutPrj && *OutPrj)
+
+	if (IsProjectionFile(OutPrj))
+	{
+		args[4] = SHPGetNVP(OutPrj,&outFactor);
+		isPrjFile = TRUE;
+	}
+	else if (OutPrj && *OutPrj)
 		args[4] = OutPrj;
 	else
 		args[4] = outprj;
-	makedirectories(OutFile, FALSE, FALSE);
-	rtn = TransformSHP(5, args);
+	if (args[4])
+	{
+		makedirectories(OutFile, FALSE, FALSE);
+		rtn = TransformSHP(5, args, &outFactor);
+		if (rtn && isPrjFile)
+		{
+			char PrjFile[MAX_PATH + 1];
+			strncpy0(PrjFile, OutFile, MAX_PATH);
+			LPSTR pDot = strrchr(PrjFile, '.');
+			if (pDot)
+			{
+				strcpy(pDot, ".prj");
+				CopyFile(GetProjectionFile(OutPrj), PrjFile, FALSE);
+			}
+		}
+	}
 	if (nvp)
 		free(nvp);
 	return rtn;

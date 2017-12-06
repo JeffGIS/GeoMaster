@@ -105,7 +105,7 @@ typedef struct { int		cParts;
 
 extern char * asFileName ( const char *fil, char *ext );
 extern int 	SHPProject ( SHPObject *psCShape, 
-                             projPJ inproj, projPJ outproj );
+                             projPJ inproj, projPJ outproj, double * outFactor );
 extern projPJ 	SHPSetProjection ( int param_cnt, char **params );
 extern int 	SHPFreeProjection ( projPJ p);
 

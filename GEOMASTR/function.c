@@ -2588,7 +2588,9 @@ SetVis:
 			if (!_fstricmp(Arg[1], "TRANSFORM"))
 			{
 				if (TransformShapeFile(Arg[2], Arg[3], Arg[4], Arg[5]))
+				{
 					goto RtnTrue;
+				}
 			}
 			if (!_fstricmp(Arg[1], "BOUNDS"))
 			{

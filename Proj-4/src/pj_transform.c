@@ -81,7 +81,7 @@ static const int transient_error[45] = {
 /************************************************************************/
 
 int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
-                  double *x, double *y, double *z )
+                  double *x, double *y, double *z , double *outFactor)
 
 {
     long      i;
@@ -281,6 +281,17 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 x[point_offset*i] -= PI;
         }
     }
+	if (outFactor && *outFactor != 1.0)
+	{
+		for (i = 0; i < point_count; i++)
+		{
+			if (x[point_offset*i] != HUGE_VAL)
+			{
+				x[point_offset*i] *= *outFactor;
+				y[point_offset*i] *= *outFactor;
+			}
+		}
+	}
 
     return 0;
 }

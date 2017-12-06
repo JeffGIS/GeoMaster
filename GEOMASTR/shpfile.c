@@ -85,6 +85,10 @@ static DPOINT			POCCoord[MAXPOC];
 static long				POCFlag[MAXPOC] = { 0 };
 static int				NumPOC;
 static HFILE			thinnedConFid=HFILE_ERROR;
+static sqlite3			*SHPIndexHandle = 0;
+static sqlite3_stmt		*SHPstatement = 0;
+
+
 #include "gmextern.h"
 #include <sys\types.h>
 #include <sys\stat.h>         
@@ -117,7 +121,7 @@ sqlite3 * NVShapeIndexCreate(LPSTR IndexNameIN)
 		if (rtn == SQLITE_OK)
 		{
 			rtn = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
-			sprintf(cmd, "CREATE TABLE SHAPEINDEX (OFFSET INT PRIMARY KEY, SymNum INT);");
+			sprintf(cmd, "CREATE TABLE SHAPEINDEX (RECNUM INT PRIMARY KEY, SymNum INT, offset INT);");
 			rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
 			sprintf(cmd, "CREATE VIRTUAL TABLE SHAPEINDEX_index USING rtree(id,minX, maxX, minY, maxY);");
 			rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
@@ -126,14 +130,14 @@ sqlite3 * NVShapeIndexCreate(LPSTR IndexNameIN)
 	return db;
 }
 
-int NVShapeIndexAdd(sqlite3 * db, long long SHPRecOffset, LPMNMXCORD pBounds, int symnum)
+int NVShapeIndexAdd(sqlite3 * db, long long RECNUM, long long SHPRecOffset, LPMNMXCORD pBounds, int symnum)
 {
 	char cmd[256];
 	int rtn;
 	return 0;
-	sprintf(cmd, "INSERT INTO SHAPEINDEX VALUES(%I64i,%i)", SHPRecOffset, symnum);
+	sprintf(cmd, "INSERT INTO SHAPEINDEX VALUES(%I64i,%i,%I64i)", RECNUM, symnum, SHPRecOffset);
 	rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
-	sprintf(cmd, "INSERT INTO SHAPEINDEX_index VALUES(%I64i,%f,%f,%f,%f)", SHPRecOffset, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+	sprintf(cmd, "INSERT INTO SHAPEINDEX_index VALUES(%I64i,%f,%f,%f,%f)", RECNUM, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 	rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
 	return rtn;
 }
@@ -500,7 +504,6 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		PRJ_UNITS[0] = 4;
 	SHPBaseRefno = 0; 
 	*SHPRefno = 0;
-	SHPIndexType = 1;
 	_fstrcpy (Name,SHPFileName); 
 	ExpandText (Name);
 	l = _fstrlen (Name);
@@ -564,11 +567,12 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		HaveIndexParmFile = TRUE;
     GSSifstat (Fid,&statParmFile);
     SHPParmTime = statParmFile.st_mtime;
-	fgetstring (Projection,MAX_PATH,Fid); 
-	if (!havePrj)
+	fgetstring (Projection,MAX_PATH,Fid);
+	if (*Projection)
+		LoadProjection(0, Projection);
+	else if (!havePrj)
 	{
-		if (!*Projection)
-			GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+		GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
 		LoadProjection(0, Projection);
 	}
 	SHPProjectionIsBase = IS_BASE[0];
@@ -591,7 +595,7 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		SHPBaseRefno = atol (SHPRefno);
 	fgetstring (SHPTAG,99,Fid); 
 	fgetstring (str,32,Fid); 
-	SHPIndexType = atoi (str);
+	//SHPIndexType = atoi (str);
 	_fmemset (SHPParms,0,sizeof(SHPParms));
 	while (fgetstring (str,256,Fid))
 	{   
@@ -961,7 +965,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	DisableHalt = TRUE;
 	CreateStatusWind (CurView->hWnd,1,"Creating GeoMaster Shape File Index");      
 	DisableHalt = FALSE;
-	SHPIndexType = 0;  
+	SHPIndexType = SHP_INDEX_STANDARD;
 	CurView->PassID = 4;
 	FidIdx = GSSiOpenFile (IndexName,0,OF_CREATE);
 	db = NVShapeIndexCreate(IndexName);
@@ -1001,7 +1005,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 			IndexRecord.Offset = -1;
 		}
 		BigWrite (FidIdx,(HPSTR)&IndexRecord,sizeof(IndexRecord),-1); 
-		NVShapeIndexAdd(db, SHPRecOffset, &Bounds, IndexRecord.SymNum);
+		NVShapeIndexAdd(db, CurrentSHPRec,SHPRecOffset, &Bounds, IndexRecord.SymNum);
 //		ltoa (CurrentSHPRec,txt,10);
 		if (!(pName = strrchr (SHPFileName,'\\')))
 			pName = SHPFileName;
@@ -1026,21 +1030,57 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	return FidIdx;
 }
 
-BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid)
+int GetSHPIndexType(LPSTR Name)
+{
+#define DEFAULT_SHP_INDEX_TYPE	SHP_INDEX_SLT
+	char name[MAX_PATH+1];
+	strncpy0(name, Name,MAX_PATH);
+	int type = SHP_INDEX_STANDARD;
+	LPSTR pDot = strrchr(name, '.');
+	if (pDot)
+	{
+		strcpy(pDot, ".nvi");
+		if (GSSiLength(name)>0)
+			type = SHP_INDEX_SLT;
+		else
+		{
+			strcpy(pDot, ".gsi");
+			if (GSSiLength(name) > 0)
+				type = SHP_INDEX_SIMPLE;
+			else
+				type = DEFAULT_SHP_INDEX_TYPE;
+		}
+	}
+	return type;
+}
+
+BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 { 
 	char	Name[MAX_PATH];  
 	LPSTR	pDot; 
 	short	Version;   
 	short	ii;
-	
+	BOOL haveSLTIndex = FALSE;
+
 	if (!SHPFileName)
 	{
 		if (SHPIDXFid != HFILE_ERROR)
-			GSSiClose (SHPIDXFid); 
-		SHPIDXFid = HFILE_ERROR; 
-		GSSiGlobFree (&hSHPIndexBlocks);
-		GetSHPRecordOffset (-1,FALSE);
-		CloseDataFile (TRUE,&hSHPDBF);
+			GSSiClose(SHPIDXFid);
+		SHPIDXFid = HFILE_ERROR;
+		GSSiGlobFree(&hSHPIndexBlocks);
+		GetSHPRecordOffset(-1, FALSE);
+		CloseDataFile(TRUE, &hSHPDBF);
+		if (SHPIndexType == SHP_INDEX_SLT)
+		{
+			if (SHPstatement)
+			{
+				sqlite3_finalize(SHPstatement);
+				SHPstatement = 0;
+			}
+			if (SHPIndexHandle)
+				sqlite3_close(SHPIndexHandle);
+			SHPIndexHandle = 0;
+		}
 		return TRUE;
 	} 
 	_fstrcpy (Name,SHPFileName);
@@ -1059,7 +1099,8 @@ BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid)
 		OpenDataFile (Name,"",BT_READ,&hSHPDBF); 
 		CurrentSHPRec = SaveSHPRec;
 	}
-	if (SHPIndexType == 1)
+	SHPIndexType = GetSHPIndexType(LastSHPFile);
+	if (SHPIndexType == SHP_INDEX_SIMPLE)
 	{ 
 		HFILE	TMPFid;
 		
@@ -1129,6 +1170,75 @@ BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid)
 			GSSillseek (SHPIDXFid,2,0);
 		}
 	}
+	else if (SHPIndexType == SHP_INDEX_SLT)
+	{
+		HFILE	TMPFid;
+		OFSTRUCTGM OFStruct;
+
+		_fstrcpy(Name, SHPFileName);
+		ExpandText(Name);
+		pDot = _fstrrchr(Name, '.');
+		if (!pDot)
+			return FALSE;
+		_fstrcpy(pDot, ".nvi");
+		TMPFid = GSSiOpenFile(Name, &OFStruct, OF_READ);
+		if (TMPFid == HFILE_ERROR)
+			haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
+		else
+		{
+			struct _stati64 stat;
+			long	IndexTime;
+			double	dtime;
+
+			GSSifstat(TMPFid, &stat);
+			IndexTime = stat.st_mtime;
+			dtime = difftime(stat.st_mtime, SHPParmTime);
+			if (dtime < 0)
+			{
+				GSSiClose(TMPFid);
+				GSSiRemove(Name);
+				haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
+			}
+			else
+			{
+				BOOL DoClose = TRUE;
+
+				if (haveSLTIndex)
+					SHPFid = GSSiOpenFile(SHPFileName, 0, OF_READ);
+				else
+					DoClose = FALSE;
+
+				ii = GSSifstat(SHPFid, &stat);
+				dtime = difftime(stat.st_mtime, IndexTime);
+				if (DoClose)
+					GSSiClose(SHPFid);
+				if (dtime > 0)
+				{
+					GSSiClose(TMPFid);
+					haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
+				}
+				else
+					haveSLTIndex = TRUE;
+			}
+		}
+		GSSiClose(SHPIDXFid);
+		GetSHPRecordOffset(-1, FALSE);
+		if (TMPFid == HFILE_ERROR)
+			return FALSE;
+		SHPIDXFid = TMPFid;
+	}
+	if (haveSLTIndex)
+	{
+		LONGLONG numRows=0;
+		if (sqlite3_open(Name, &SHPIndexHandle) == SQLITE_OK)
+		{
+			if ((numRows = GetSQLITENumRows(SHPIndexHandle, "SHP", "")))
+			{
+				if (numRows != NumSHPRecs)
+					ii = 1;
+			}
+		}
+	}
 	return TRUE;
 } 
 
@@ -1154,7 +1264,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 	} 
 	if (record > NumSHPRecs-1)
 		return -1;
-	if (!SHPProjectionIsBase)
+	if (!SHPProjectionIsBase && SHPIndexType != SHP_INDEX_SLT)
 		UseBounds = FALSE;
 	if (record == 8190)
 		ii=1; 
@@ -1168,7 +1278,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 	ItemSeg = record;  
 	switch (SHPIndexType)
 	{
-		case 0: 
+	case SHP_INDEX_STANDARD:
 //			MessageBox (0,"case 0","",MB_OK);
 			loc = 100 + record * 8; 
 			if (!hOffsets || loc < FirstLoc || loc > LastLoc)
@@ -1201,7 +1311,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 				rtn = -2;
 			return rtn;   
 		
-		case 1:
+	case SHP_INDEX_SIMPLE:
 			if (!hBlocks)
 			{   
 				ii=GSSillseek (SHPIDXFid,-2,2);
@@ -1288,6 +1398,39 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 				loc = -2;
 			return loc;
 			
+		case SHP_INDEX_SLT:
+		{
+			loc = -1;
+			LONGLONG rtn = 0;
+			int symnum = 0;
+
+			if (SHPIndexHandle)
+			{
+				if (!SHPstatement)
+				{
+					char cmd[256];
+					if (UseBounds)
+						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", CurView->WBounds.xmn, CurView->WBounds.xmx, CurView->WBounds.ymn, CurView->WBounds.ymx);
+					else
+						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP WHERE RECNUM = %i", record);
+					if (!SQLOK(sqlite3_prepare_v2(SHPIndexHandle, cmd, -1, &SHPstatement, 0), SHPIndexHandle, "get record offset", 0) == SQLITE_OK)
+						return loc;
+				}
+				if (sqlite3_step(SHPstatement) == SQLITE_ROW)
+				{
+					CurrentSHPRec = sqlite3_column_int(SHPstatement, 0);
+					ItemSeg = CurrentSHPRec;
+					symnum = sqlite3_column_int(SHPstatement, 1);
+					loc = sqlite3_column_int(SHPstatement, 2);
+				}
+				if (!UseBounds || loc < 0)
+				{
+					sqlite3_finalize(SHPstatement);
+					SHPstatement = 0;
+				}
+			}
+			return loc;
+		}
 		default:
 			return 0;
 	}

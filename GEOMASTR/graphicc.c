@@ -1162,9 +1162,9 @@ BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		 else if (PRJ_UNITS[1] == 2)
  		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)1,(LPARAM)0); 
  		 SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj"); 
-		 SendDlgItemMessage (hWndDlg,IDC_INDEXSTANDARD,BM_SETCHECK,SHPIndexType == 0,0L);
-		 SendDlgItemMessage (hWndDlg,IDC_INDEXSIMPLE,BM_SETCHECK,SHPIndexType == 1,0L);
-		 SendDlgItemMessage (hWndDlg,IDC_INDEXQUAD,BM_SETCHECK,SHPIndexType == 2,0L);  
+		 SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+		 SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+		 SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
     	 GetGMDName (str);
 		 if (GMDHandle)
 		 {

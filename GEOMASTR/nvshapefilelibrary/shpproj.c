@@ -60,8 +60,88 @@
 #include <stdarg.h>
 #include "shapefil.h"
 #include "shpgeo.h"
+#include "shr.h"
+#include "gmextern.h"
+#include "sqlite3.h"
 
-int TransformSHP( int argc, char ** argv )
+LPSTR ShapeFileIndexName(LPSTR shapeFileName)
+{
+	static char indexFile[MAX_PATH];
+	LPSTR indxName = indexFile;
+	strcpy(indexFile, shapeFileName);
+	LPSTR pDot = strrchr(indexFile, '.');
+	if (pDot)
+		strcpy(pDot, ".nvi");
+	else
+		*indxName = 0;
+	return indxName;
+}
+BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
+{
+	BOOL rtn = FALSE;
+	int ii = 0;
+	char cmd[1024];
+	LPSTR indexName = ShapeFileIndexName(shapeFileName);
+	sqlite3* database;
+	SHPHandle	hSHP = SHPOpen(shapeFileName, "rb");
+	SHPIndexType = SHP_INDEX_STANDARD;
+	if (hSHP && GSSiLength(indexName) <= 0)
+	{
+		rtn = TRUE;
+		BOOL isOpen = !SQLOK(sqlite3_open(indexName, &database), 0,"create shp index",0);
+		FileAlreadyNotFound(indexName, 3, 0);
+		SLT_StartTrans(database);
+
+		strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INT PRIMARY KEY,symnum INT,offset INT);");
+		SLT_Execute(cmd, database);
+		CreateStatusWind(0, 1, "Create Shapefile Index");
+			
+		for (int irec = 0; irec < hSHP->nRecords; irec++)
+		{
+			if (!StatusWindowUpdate(0, "", hSHP->nRecords, irec))
+			{
+				rtn = FALSE;
+				break;
+			}
+
+			int Offset = hSHP->panRecOffset[irec];
+			MNMXCORD Bounds;
+			SetSHPParms(irec);
+			int SymNum = CurrentDesc;
+
+			SHPObject *psCShape = SHPReadObject(hSHP, irec);
+			if (psCShape)
+			{
+				if (psCShape->nVertices > 0)
+				{
+					MNMXCORD SHPBounds;
+					SHPBounds.xmn = psCShape->dfXMin;
+					SHPBounds.xmx = psCShape->dfXMax;
+					SHPBounds.ymn = psCShape->dfYMin;
+					SHPBounds.ymx = psCShape->dfYMax;
+					sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i, %i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum, Offset);
+					SLT_Execute(cmd, database);
+					SHPDestroyObject(psCShape);
+				}
+				else
+					ii++;
+			}
+			else
+				ii++;
+		}
+
+		if (rtn)
+			SLT_EndTrans(database);
+		SQLOK(sqlite3_close(database), 0, "create shp index", 0);
+		DestroyStatusWindow(0);
+	}
+
+	if (hSHP)
+		SHPClose(hSHP);
+	return rtn;
+}
+
+int TransformSHP( int argc, char ** argv ,double * pOutFactor)
 {
     SHPHandle	old_SHP, new_SHP;
     DBFHandle   old_DBF, new_DBF;
@@ -82,7 +162,10 @@ int TransformSHP( int argc, char ** argv )
     double	apeture[4];
     int		inarg=3, outarg=4;
     char	*DBFRow = NULL;
+	double	outFactor = 1.0;
 
+	if (pOutFactor)
+		outFactor = *pOutFactor;
 /* for testing only 
     char	*in_args[] = { "init=nad83:1002", "units=us-ft" };
     char	*out_args[] = { "proj=utm", "zone=16", "units=m" };
@@ -155,14 +238,15 @@ int TransformSHP( int argc, char ** argv )
     }
 
     DBFRow = (char *) malloc ( (old_DBF->nRecordLength) + 15 );
-     
+	CreateStatusWind(0, 1,"Transform Shapefile");
     for( i = 0; i < nEntities; i++ )
     {
         int		j;
-        
+		if (!StatusWindowUpdate(0, "", nEntities, i))
+			break;
         psCShape = SHPReadObject ( old_SHP, i );
         
-        SHPProject (psCShape, orig_prj, new_prj );
+        SHPProject (psCShape, orig_prj, new_prj,&outFactor );
         
         SHPWriteObject ( new_SHP, -1, psCShape );
         SHPDestroyObject ( psCShape );
@@ -171,7 +255,7 @@ int TransformSHP( int argc, char ** argv )
         DBFWriteTuple ( new_DBF, new_DBF->nRecords, DBFRow );
         
     }
-
+	DestroyStatusWindow(0);
     SHPFreeProjection ( orig_prj );
     SHPFreeProjection ( new_prj );
 

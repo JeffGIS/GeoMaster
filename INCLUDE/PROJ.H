@@ -91,6 +91,7 @@ C                                           5 =  Packed dms */
 		HANDLE  PRJ_TRAN[MAX_PROJ][3]={0,0,0,0,0,0,0,0,0,0,0,0} ;
 		projPJ	PRJ_PROJ4DEF[MAX_PROJ]={0};
 		char	projid[MAX_PROJ][MAX_PROJ]={0};
+		double PRJ_OUTFACTOR[MAX_PROJ]={1.0};
 
 
 #else
@@ -112,6 +113,7 @@ extern      char       PROJECTION_UNITS[MAX_PROJ][8];  //{Unit of measure Englis
 extern      HANDLE     PRJ_TRAN[MAX_PROJ][3] ; 
 extern		projPJ	   PRJ_PROJ4DEF[MAX_PROJ];
 extern		char	   projid[MAX_PROJ][32];
+extern		double	   PRJ_OUTFACTOR[MAX_PROJ];
 
 #endif     
 

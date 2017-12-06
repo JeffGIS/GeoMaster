@@ -3981,4 +3981,9 @@ BOOL glblUnlock(HANDLE hglb);
 
 #include "TileGraphics.h"
 
+#define SHP_INDEX_STANDARD	0
+#define SHP_INDEX_SIMPLE	1
+#define SHP_INDEX_QUAD		2
+#define SHP_INDEX_SLT		3
+
 #endif /* gssitype_h */

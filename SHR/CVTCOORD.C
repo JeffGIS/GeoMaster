@@ -289,7 +289,7 @@ long ok;
 		 }
 		 if (PRJ_TYPE[to] == PROJ4PROJECTION)
 		 {
-			 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[to], 1, 1, &DPoint->x, &DPoint->y, NULL);
+			 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[to], 1, 1, &DPoint->x, &DPoint->y, NULL,&PRJ_OUTFACTOR[to]);
 			 {
 #if ENABLETRACE
 				 GSSiExitProg(1335);
@@ -297,7 +297,7 @@ long ok;
 				 return ok;//unable to properly open the files   
 			 }
 		 }
-		 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL);
+		 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL,NULL);
 		 DPoint->x *= RAD_TO_DEG;
 		 DPoint->y *= RAD_TO_DEG;
 		 from = 2;
@@ -378,7 +378,7 @@ Exit:
 	 {
 		 DPoint->x *= DEG_TO_RAD;
 		 DPoint->y *= DEG_TO_RAD;
-		 ok = pj_transform(PRJ_PROJ4DEF[LATLONPROJECTION], PRJ_PROJ4DEF[saveto], 1, 1, &DPoint->x, &DPoint->y, NULL);
+		 ok = pj_transform(PRJ_PROJ4DEF[LATLONPROJECTION], PRJ_PROJ4DEF[saveto], 1, 1, &DPoint->x, &DPoint->y, NULL, &PRJ_OUTFACTOR[saveto]);
 	 }
      *DPoint = TranPoint (DPoint,hTranRotation);
      

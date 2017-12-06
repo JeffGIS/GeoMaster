@@ -1,4 +1,5 @@
 #include "GMVersion.h"
+#include "gssitype.h"
 //char	GMVersion[36]="GeoMaster version 34f (build 6)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
@@ -1526,7 +1527,7 @@ short	NumSavePaletteColors;
 BOOL	HaveSavePalette=FALSE;
 long	SHPColor=-1;
 short	SHPWidth=0;
-short	SHPIndexType=1;  
+short	SHPIndexType = SHP_INDEX_SIMPLE;
 long	TotFiles;
 HANDLE	hDir=0; 
 char	MFExt[8]; 

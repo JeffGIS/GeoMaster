@@ -18812,7 +18812,7 @@ NextFile:
 				 else
 				 {
 					 //if (!OpenSHPFile (Name))
-					 SHPIndexType = 0;  
+					 SHPIndexType = SHP_INDEX_STANDARD;
 	                 FidSHP=GSSiOpenFile (Name,&OFStruct,OF_READ);
 	                 if (FidSHP == HFILE_ERROR)  
 					 {  
@@ -18972,7 +18972,7 @@ NextFile:
 				 }
 				 else
 				 {
-					 SHPIndexType = 0;  
+					 SHPIndexType = SHP_INDEX_STANDARD;
 					 SHPRecOffset = GetSHPRecordOffset (CurrentSHPRec,FALSE);
     				 if (SHPRecOffset < 0)
 		   		 		goto NextLine;

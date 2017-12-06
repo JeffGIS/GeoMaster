@@ -16,7 +16,6 @@
 #include <process.h>
 
 BOOL InDebug=FALSE;
-
 void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);
 
@@ -5177,16 +5176,18 @@ DisplayParcel:
 
 		goto ReturnDefault;
 	case WM_IME_SETCONTEXT:
-		if (!wParam)
+		if (HavePaint)
 		{
-			if (hFullWindowBitMap && !IgnoreActivate)
-				RestoreFullWindowBitmap();
-			UpdateVehicleStatusDlg();
-			DisplayAllToolbars(4);
+			if (!wParam)
+			{
+				if (hFullWindowBitMap && !IgnoreActivate)
+					RestoreFullWindowBitmap();
+				UpdateVehicleStatusDlg();
+				DisplayAllToolbars(4);
+			}
+			else
+				SaveFullWindowBitmap(hWndMain);
 		}
-		else
-			SaveFullWindowBitmap(hWndMain);
-
 		goto ReturnDefault;
 	case WM_SIZE:     /*  code for sizing client area                   */
     	 ConfigDisplayRect.left = ConfigDisplayRect.right = 0;

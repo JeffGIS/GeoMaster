@@ -163,7 +163,7 @@ static void * SfRealloc( void * pMem, int nNewSize )
  * act as a wrapper to protect against library changes in PROJ
  * 
  * **************************************************************************/ 
-int SHPProject ( SHPObject *psCShape, projPJ inproj, projPJ outproj ) {
+int SHPProject ( SHPObject *psCShape, projPJ inproj, projPJ outproj, double *pOutFactor) {
 #ifdef	PROJ4
 
     int    j;
@@ -176,7 +176,7 @@ int SHPProject ( SHPObject *psCShape, projPJ inproj, projPJ outproj ) {
     }   
 
     pj_transform(inproj, outproj, psCShape->nVertices, 0, psCShape->padfX,
-                 psCShape->padfY, NULL);
+                 psCShape->padfY, NULL, pOutFactor);
 
     if ( pj_is_latlong(outproj) ) {
         for(j=0; j < psCShape->nVertices; j++) {

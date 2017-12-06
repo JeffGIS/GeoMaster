@@ -107,7 +107,58 @@ static int maxID(sqlite3 *_database)
 	return rtn;
 }
 
-
+BOOL SLT_StartTrans(sqlite3* db)
+{
+	BOOL rtn = FALSE;
+	if (db)
+	{
+		int err = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = TRUE;
+		}
+	}
+	return rtn;
+}
+BOOL SLT_EndTrans(sqlite3* db)
+{
+	BOOL rtn = FALSE;
+	if (db)
+	{
+		int err = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = TRUE;
+		}
+	}
+	return rtn;
+}
+BOOL SLT_Execute(LPSTR cmd,sqlite3* db)
+{
+	BOOL rtn = FALSE;
+	if (db)
+	{
+		int err = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = TRUE;
+		}
+	}
+	return rtn;
+}
+BOOL SLT_Vacuum(sqlite3* db)
+{
+	BOOL rtn = FALSE;
+	if (db)
+	{
+		int err = SQLOK(sqlite3_exec(db, "VACUUM", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = TRUE;
+		}
+	}
+	return rtn;
+}
 static int idForCnum(int cnum, int seq, sqlite3 *_database)
 {
 	int rtn = -1;
@@ -3267,9 +3318,12 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 			pDB->NumFields = 0;
 			for (int j = 0; j < ncols; j++)
 			{
+				char nulltype[2] = { "" };
 				int itype = sqlite3_column_type(pDB->statement, j);
 				int ibytes = sqlite3_column_bytes(pDB->statement,j);
 				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement,j);
+				if (!decl)
+					decl = nulltype;
 				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement,j);
 				if (strcmp(pName, lastName))
 				{
