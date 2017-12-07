@@ -3322,9 +3322,9 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 				int itype = sqlite3_column_type(pDB->statement, j);
 				int ibytes = sqlite3_column_bytes(pDB->statement,j);
 				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement,j);
+				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement,j);
 				if (!decl)
 					decl = nulltype;
-				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement,j);
 				if (strcmp(pName, lastName))
 				{
 					strcpy(lastName, pName);
