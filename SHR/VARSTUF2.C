@@ -152,6 +152,23 @@ GetPolylineEP:
 						Type1.AZM = getazd (lpPoints,lpDEndPoint); 
 						if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
 						{
+						/*	if (useOnlyOnscreenPoly)
+							{
+								{
+									DPOINT ScreenPoints[4];p
+									DirPoints[0] = PointToDPoint(RectMid(&CurView->ScreenRect));
+									DirPoints[1] = dnewpt(DirPoints[0], PanAZ, 5000);
+
+									RectToDPoints(&CurView->ScreenRect, ScreenPoints);
+									ScreenPoints[4] = ScreenPoints[0];
+									n = IntersectPolys2(2, DirPoints,
+										5, ScreenPoints,
+										0, IntDist, &IntPoint, &InAZ,
+										OutAZ, OutReverse, WhichPoly, FALSE);
+									ScreenPt = DPointToPoint(IntPoint);
+									CurView->MidPointW = ScreenPtToBasePt(ScreenPt);
+
+							}*/
 							double MPAZ;
 							DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, Dist / 2, &MPAZ, 0);
 							Type1.MPX = MidPoint.x;
