@@ -841,6 +841,7 @@ extern short			ProcessGCmdStrings;
 extern BOOL			InGRCmd;
 extern BOOL			InGRFCmd;
 extern BOOL			InGraphicsProcessor;
+extern BOOL			useOnlyOnscreenPoly;
 extern long			TotHLTPoints;
 extern int			StreetOneWay;
 extern long			FromStreet;

@@ -1052,6 +1052,7 @@ short	CurrentTextBaseType;
 short	CurrentDesc;  
 short	CenterVP=0;
 BOOL	InGraphicsProcessor=FALSE;
+BOOL	useOnlyOnscreenPoly = FALSE;
 DPOINT	CLocPoint;
 DPOINT	CurBP;
 DPOINT	CurMP;

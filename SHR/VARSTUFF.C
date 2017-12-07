@@ -3481,6 +3481,9 @@ GSSiExitProg (532);
 			}
 		}
 			break;
+		case 379:
+			useOnlyOnscreenPoly = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -3878,6 +3881,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%SHOWLINEDIRECTION", 376, FALSE);
 	AllocateTypeVar("%CURRENTIPADDRESS", 377, FALSE);
 	AllocateTypeVar("%FILEUSAGEFILE", 378, FALSE);
+	AllocateTypeVar("%USEONSCREENPOLY", 379, FALSE);
+	
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5016,6 +5021,9 @@ GSSiExitProg (533);
 			break;
 		case 377:
 			strcpy(OutStr, CurrentIPAddress);
+			break;
+		case 379:
+			btoa(useOnlyOnscreenPoly, OutStr);
 			break;
 
 	}

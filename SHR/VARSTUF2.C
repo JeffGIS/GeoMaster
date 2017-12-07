@@ -121,7 +121,9 @@ BOOL LoadInternalGMD (LPGWDHEADER lpGWDHead,long iref)
 				HPPOINTS	lpEndPoint;  
 				HPDPOINT	lpDEndPoint;
 				double	Dist=0;
-				
+				double MPAZ;
+				DPOINT	MidPoint;
+
 				Type1.Type = 'L'; 
 				Type1.MPX = 0;
 				Type1.MPX = 0;
@@ -152,27 +154,57 @@ GetPolylineEP:
 						Type1.AZM = getazd (lpPoints,lpDEndPoint); 
 						if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
 						{
-						/*	if (useOnlyOnscreenPoly)
+							if (useOnlyOnscreenPoly)
 							{
-								{
-									DPOINT ScreenPoints[4];p
-									DirPoints[0] = PointToDPoint(RectMid(&CurView->ScreenRect));
-									DirPoints[1] = dnewpt(DirPoints[0], PanAZ, 5000);
+									DPOINT ScreenPoints[5];
+									double ScreenAZ[5];
+									DPOINT IntPoint;
+									double	IntDist[3], InAZ, OutAZ[3];
+									short	WhichPoly[3];
+									BOOL	OutReverse[3];
+									double  SegDist[16];
 
-									RectToDPoints(&CurView->ScreenRect, ScreenPoints);
+									int n=1;
+									double startDist = 0;
+									int nDist = 0;
+
+									Type1.MPX = -1;
+									Type1.MPY = -1;
+
+									if (PointInWBounds(lpPoints))
+										SegDist[nDist++] = 0;
+
+									BoundsToPoints(&CurView->WBounds, ScreenPoints,ScreenAZ);
 									ScreenPoints[4] = ScreenPoints[0];
-									n = IntersectPolys2(2, DirPoints,
-										5, ScreenPoints,
-										0, IntDist, &IntPoint, &InAZ,
-										OutAZ, OutReverse, WhichPoly, FALSE);
-									ScreenPt = DPointToPoint(IntPoint);
-									CurView->MidPointW = ScreenPtToBasePt(ScreenPt);
 
-							}*/
-							double MPAZ;
-							DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, Dist / 2, &MPAZ, 0);
-							Type1.MPX = MidPoint.x;
-							Type1.MPY = MidPoint.y;
+									while (n)
+									{
+										n = IntersectPolys2(nPnts, lpPoints,
+											5, ScreenPoints,
+											startDist, IntDist, &IntPoint, &InAZ,
+											OutAZ, OutReverse, WhichPoly, TRUE);
+										if (n)
+										{
+											SegDist[nDist++] = IntDist[0];
+											startDist = IntDist[0];
+										}
+									}
+									if (PointInWBounds(&lpPoints[nPnts-1]))
+										SegDist[nDist++] = Dist;
+									if (nDist > 1)
+									{
+										double MPDist = (SegDist[0] + SegDist[1]) / 2.0;
+										MidPoint = PointAtDistOnPoly(lpPoints, nPnts, MPDist, &MPAZ, 0);
+										Type1.MPX = MidPoint.x;
+										Type1.MPY = MidPoint.y;
+									}
+							}
+							else
+							{
+								MidPoint = PointAtDistOnPoly(lpPoints, nPnts, Dist / 2, &MPAZ, 0);
+								Type1.MPX = MidPoint.x;
+								Type1.MPY = MidPoint.y;
+							}
 						}
 						if (CurrentType == GF_CURVE)
 						{   

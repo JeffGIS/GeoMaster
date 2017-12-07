@@ -1816,6 +1816,7 @@ GSSiExitProg (1350);
 				HaltMapDisplay(FALSE,FALSE);
 				ii=1;
 				ClearFullWindowBitmap(CurView->hWnd);
+				setDoPaint(TRUE);
 				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 			}
 			if (hWndPNParms)
