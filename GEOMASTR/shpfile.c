@@ -1060,6 +1060,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 	LPSTR	pDot; 
 	short	Version;   
 	short	ii;
+	BOOL	rtn = TRUE;
 	BOOL haveSLTIndex = FALSE;
 
 	if (!SHPFileName)
@@ -1232,14 +1233,16 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 		LONGLONG numRows=0;
 		if (sqlite3_open(Name, &SHPIndexHandle) == SQLITE_OK)
 		{
-			if ((numRows = GetSQLITENumRows(SHPIndexHandle, "SHP", "")))
+			/*if ((numRows = GetSQLITENumRows(SHPIndexHandle, "SHP", "")))
 			{
-				if (numRows != NumSHPRecs)
-					ii = 1;
-			}
+			if (numRows != NumSHPRecs)
+			ii = 1;
+			}*/
 		}
+		else
+			rtn = FALSE;
 	}
-	return TRUE;
+	return rtn;
 } 
 
 long GetSHPRecordOffset (long record,BOOL UseBounds)

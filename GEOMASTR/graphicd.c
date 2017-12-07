@@ -646,7 +646,7 @@ GSSiExitProg (75);
     }
     NumRandomColors = max (min (NumRandomColors,257),3);
     SaveRandomAreasAreTransparent = RandomAreasAreTransparent;  
-    RandomAreasAreTransparent = FALSE;
+   // RandomAreasAreTransparent = FALSE;
     if (!hRandBrushes)
     { 
     	First = FALSE;
@@ -2928,7 +2928,8 @@ Exit:
 
 	if (Final)
 		ResetShowOnlyVis ();
-	useGDIPlus = FALSE;
+	if (ConfigLevel)
+		useGDIPlus = FALSE;
 {
 #if ENABLETRACE
 GSSiExitProg (440);
