@@ -1963,17 +1963,17 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
 	BOOL		saveuseGDIPlus = useGDIPlus;
 
 	useGDIPlus = FALSE;
-	SaveDC (CurView->hDC);
-	SetDisplayMode (CurView->hDC,GF_SCREENMODE);
+	SaveDC (hDC);
+	SetDisplayMode (hDC,GF_SCREENMODE);
     if (!FileMode && Clip)
     {
 	    GSSiDeleteObject(&CurView->hRgn);
         CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-        SelectClipRgn (CurView->hDC,CurView->hRgn);
+        SelectClipRgn (hDC,CurView->hRgn);
         GSSiDeleteObject(&CurView->hRgn);
     }  
     else
-    	SelectClipRgn (CurView->hDC,0);
+    	SelectClipRgn (hDC,0);
     if (Function == GF_ZOOM_VARRECT)
     	width = 0;
     hWidePen = CreatePen (PS_SOLID,width,RGB(0,0,0));
@@ -1994,7 +1994,7 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
     SelectObject (hDC,hOldPen);
     SetROP2(hDC,OldMode);
     DeleteObject (hWidePen);
-	RestoreDC (CurView->hDC,-1);
+	RestoreDC (hDC,-1);
 	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE

@@ -483,8 +483,10 @@ GSSiExitProg (1161);
                 /*OldCursor = SetCursor (hCursor);*/
                 LastPoint = NewPoint;
             }
-            ShowZoomBox (CurView->hDC,StartPoint,LastPoint,&HaveBox,Clip,Function);
-            if (Message == WM_LBUTTONUP)
+			hDC = GetDC(hWnd);
+			ShowZoomBox(hDC, StartPoint, LastPoint, &HaveBox, Clip, Function);
+			ReleaseDC(hWnd, hDC);
+			if (Message == WM_LBUTTONUP)
             {  
 				RECT	Rect;
 				DPOINT	DPoints[4];
@@ -524,7 +526,9 @@ GSSiExitProg (1161);
 	case GF_REDRAW:
 		ii=1;
 		HaveBox = FALSE;
-        ShowZoomBox (CurView->hDC,StartPoint,LastPoint,&HaveBox,Clip,Function);
+		hDC = GetDC(hWnd);
+		ShowZoomBox(hDC, StartPoint, LastPoint, &HaveBox, Clip, Function);
+		ReleaseDC(hWnd, hDC);
 		break;
     case GF_CANCEL:
         ZoomBoxRect.xmn=2;

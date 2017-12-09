@@ -2136,6 +2136,7 @@ GSSiExitProg (18);
 		InLinkedList (-1);
     if (Imediate < 2)
 		HaltMapDisplay(FALSE,FALSE);
+	useGDIPlus = wantGDIPlus;
     ContinueProcessing=TRUE;
     GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
     NumViewportsToDisplay = *pNumViewports;
