@@ -460,7 +460,7 @@ long	CurKMLFileLen;
 long	nPltBytesRead=0;
 short	NumRandomColors;
 HANDLE	hRandBrushes=0;   
-BOOL	RandomAreasAreTransparent=TRUE;
+int	RandomAreasAreTransparent=3;
 DPOINT	PickedPointLoc;
 HANDLE	hAVIFile=0;
 BOOL	FoundInvalidRec=FALSE;   

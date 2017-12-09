@@ -970,7 +970,8 @@ ProcessMacro:
 	    	}
 	    }
     	pMacroReturnValue = SaveRtnPointer;
-		setDoPaint( saveDoPaint);
+		if (saveDoPaint)
+			setDoPaint( saveDoPaint);
     }
 Exit:
 	GSSiGlobUlFree (&hTemp);

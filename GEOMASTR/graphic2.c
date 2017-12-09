@@ -623,6 +623,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 						    CurView = SaveView;
 							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
+							setDoPaint(TRUE);
 							PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 						}
 						else
@@ -646,6 +647,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 						    CurView = SaveView;
 							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
+							setDoPaint(TRUE);
 							PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 						}
 						else
@@ -671,7 +673,10 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 			        		CurView->DisableZoomMacro = !CurView->DisableZoomMacro; 
 			        		DisplayCloseIcon ();
 							if (!CurView->DisableZoomMacro)
+							{
+								setDoPaint(TRUE);
 								PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
+							}
 						    CurView = SaveView;
 							HaltMapDisplay(FALSE, FALSE);
 							IgnoreLbutton = TRUE;  
@@ -684,6 +689,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 		        			if (SelectZoomMacro (hWndMain))
 		        			{
 		        				CurView->DisableZoomMacro = FALSE;
+								setDoPaint(TRUE);
 								PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L); 
 							}
 		        		}

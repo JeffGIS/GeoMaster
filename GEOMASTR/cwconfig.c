@@ -4078,6 +4078,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 			case IDM_USEFULLSCREEN: 
 				 pViewportsD[0]->ShowFullScreen = TRUE;
 				 UseFullScreen (hWnd,0);
+				 setDoPaint(TRUE);
 			 	 PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
 				 break;
 				 
@@ -4091,8 +4092,11 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 strcpy (OFTitle,title2);
 				 if (GetFileName3(hWndMain,Name,IDS_FILTERGMC,IDS_FILEFMT))   
 				 {   
-				 	 if (LoadFormatCfg (Name))
-			    	 	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+					 if (LoadFormatCfg(Name))
+					 {
+						 setDoPaint(TRUE);
+						 PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+					 }
 				 } 
 				 GSSiGlobUlFree (&hSN);
 			}
@@ -4492,8 +4496,11 @@ DisplayParcel:
                   lpfnVIEWPORTSMsgProc = MakeProcInstance((DLGPROC)VIEWPORTSMsgProc, hInst);
                   nRc = DialogBox(hInst, (LPSTR)"VIEWPORTS", hWnd, lpfnVIEWPORTSMsgProc);
                   FreeProcInstance(lpfnVIEWPORTSMsgProc);
-                  if (nRc)
-                  	PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				  if (nRc)
+				  {
+					  setDoPaint(TRUE);
+					  PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+				  }
                  }
                  break;  
                  
@@ -5018,9 +5025,12 @@ DisplayParcel:
 		GetClientRect (hWnd,&MoveEndRect);
 		AdjustToolbarPositions ();
 		DisplayAllToolbars (3);
-		if ((MoveStartRect.right  - MoveStartRect.left) != (MoveEndRect.right - MoveEndRect.left) ||
-			(MoveStartRect.bottom - MoveStartRect.top)  != (MoveEndRect.bottom - MoveEndRect.top))
+		if ((MoveStartRect.right - MoveStartRect.left) != (MoveEndRect.right - MoveEndRect.left) ||
+			(MoveStartRect.bottom - MoveStartRect.top) != (MoveEndRect.bottom - MoveEndRect.top))
+		{
+			setDoPaint(TRUE);
 			PostMessage(hWnd, WM_COMMAND, IDM_REDISPLAY, 0L);
+		}
 		goto ReturnDefault;
 
 	case WM_MOVE:
@@ -5206,6 +5216,7 @@ DisplayParcel:
                  break;
 			case SIZE_MAXIMIZED:
 				AdjustToolbarPositions();
+				setDoPaint(TRUE);
 				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 				break;
             case SIZE_RESTORED:  

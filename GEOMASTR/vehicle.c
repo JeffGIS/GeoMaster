@@ -4893,6 +4893,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
          {
             case IDCANCEL: 
                DestroyWindow (hWndDlg);
+			   setDoPaint(TRUE);
 			   PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
             break; 
             

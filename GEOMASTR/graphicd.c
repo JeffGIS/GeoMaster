@@ -601,7 +601,7 @@ void CreateRandomBrushes (LPVIEWPORT pVP,short UseHalfTone)
     double	RedFactor = min (1.0,GetGlobalDVal2("[%RANDREDFACTOR]",1.0));
     double	GreenFactor = min (1.0,GetGlobalDVal2("[%RANDGREENFACTOR]",1.0));
     double	BlueFactor = min (1.0,GetGlobalDVal2("[%RANDBLUEFACTOR]",1.0));
-    BOOL	SaveRandomAreasAreTransparent;   
+    int	SaveRandomAreasAreTransparent;   
     
     if (!CurVis)
 {
@@ -676,13 +676,8 @@ GSSiExitProg (75);
 		    *pRandBrush++ = (HBRUSH)CreatePen (PS_SOLID,0,Color); 
 			if (SolidAreas && GetBit (7,(LPSTR)&CurVis->WantType[7]))
 			{
-				PATBYTE		PatByte;      
-	
-				PatByte.Transparent = 1;  
-				PatByte.BGOpt = 0;
-				PatByte.Pattern = 2; 
 				if (RandomAreasAreTransparent)
-					*pRandBrush = CreatePatBrush (0, Color, &PatByte);
+					*pRandBrush = CreateTransparentBrush(RandomAreasAreTransparent, Color);
 				else
 					*pRandBrush = CreateSolidBrush(Color);
 			} 
@@ -2928,7 +2923,7 @@ Exit:
 
 	if (Final)
 		ResetShowOnlyVis ();
-	if (ConfigLevel)
+	if (CurrentConfig)
 		useGDIPlus = FALSE;
 {
 #if ENABLETRACE

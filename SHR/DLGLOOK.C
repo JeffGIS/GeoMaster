@@ -340,7 +340,7 @@ static
 LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
     WORD wParam, LONG lParam, int UpOrDown)
     {
-    WNDPROC lpOrgProc;
+    WNDPROC lpOrgProc=0;
     LONG    lRtn = 0; 
     UINT	Prompt;
 
@@ -548,7 +548,7 @@ BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam)
 {
     char    str[100];
     long	lUserData;
-
+	return TRUE;
     GetClassName (hCtrl, str, sizeof (str));
     if (_fstrcmp (str, "Edit") == 0)
         SubclassControl(hCtrl, Draw3DDown);

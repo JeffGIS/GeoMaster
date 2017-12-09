@@ -1508,7 +1508,7 @@ extern short			NumRandomColors;
 extern short			BitmapSizeOpt; 
 extern short			BitmapFormatOpt;
 extern HANDLE			hRandBrushes;  
-extern BOOL			RandomAreasAreTransparent;
+extern int			RandomAreasAreTransparent;
 extern HMENU			hViewportsMenu;
 extern short			NumMenuMask;
 extern HANDLE			hMenuMask;

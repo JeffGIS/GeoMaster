@@ -5033,6 +5033,7 @@ void RedisplayWindow (void)
 {GSSiEnterProg (917);
 #endif
 {
+	setDoPaint(TRUE);
 	PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 {
 #if ENABLETRACE

@@ -3169,7 +3169,7 @@ GSSiExitProg (532);
 			UseTestChar = atob (Value);
 			break;    
 		case 262:
-			RandomAreasAreTransparent = atob (Value);
+			RandomAreasAreTransparent = atoi (Value);
 			break;
  		case 263:
 			DisplayShields = atob (Value);
@@ -4756,7 +4756,7 @@ GSSiExitProg (533);
         		ftoa (OutStr,CurView->ZMScale);
         	break;    
         case 262:
-        	btoa (RandomAreasAreTransparent,OutStr);
+        	itoa (RandomAreasAreTransparent,OutStr,10);
         	break;
         case 263:
         	btoa (DisplayShields,OutStr);

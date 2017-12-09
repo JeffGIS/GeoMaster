@@ -4159,6 +4159,7 @@ HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect
 		if (SeeIfToolbarShouldBeDocked (ToolbarWindow[ToolbarID],&pt))
 			AdjustToolbarPositions ();
 	}
+	setDoPaint(TRUE);
 	PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 	return hWndMenu;
 }

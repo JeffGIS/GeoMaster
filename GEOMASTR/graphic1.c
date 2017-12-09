@@ -2245,6 +2245,7 @@ void ImediateProcessing (BOOL Imediate,BOOL Final)
         BOOL		SaveInDisplayProcessing = InDisplayProcessing;
 		LPVIEWPORT	SaveVP = CurView;
 
+		useGDIPlus = wantGDIPlus;
 		InDisplayProcessing=TRUE;
         Continue=TRUE; 
         InImediate = TRUE;
@@ -7237,7 +7238,6 @@ void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
     short	ii;  
                         
 //    DisplayFinOpt = 0;  
-	useGDIPlus = FALSE;
 	KillTimer(hWndMain, 1);
 	TrapKillTimer = FALSE;
     if (DisableHalt)
@@ -7261,6 +7261,7 @@ GSSiExitProg (86);
     	lastcycle = DisplayCycle;
     } */
 //    CloseSymDict(); 
+	useGDIPlus = FALSE;
 	NotifyFunction((LPVIEWPORT)-1, GF_HALTDISPLAY);
 
     DisplayHollowLines (TRUE);  

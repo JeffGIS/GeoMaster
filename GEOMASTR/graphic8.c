@@ -1716,7 +1716,7 @@ HBRUSH CreateTransparentBrush(int itrans, COLORREF color)
 	HBRUSH brush;
 	LOGBRUSH	lb;
 	int pct[5] = { 94, 50, 25, 6, 0 };
-	int transparency = (pct[itrans] * 255) / 100;
+	int transparency = (pct[max(0,min(4,itrans-1))] * 255) / 100;
 
 	int r = GetRValue(color);
 	int g = GetGValue(color);

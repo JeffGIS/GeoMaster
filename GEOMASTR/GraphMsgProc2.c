@@ -10180,6 +10180,7 @@ BOOL FAR PASCAL VEHICLEDEFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				SetGlobalValue("%AVLFOLLOW",pVehLoc->Desc);  
 				GlobalUnlock (hVehicle[iveh]); 
                 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L); 
+				setDoPaint(TRUE);
 				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
               	break;
 
