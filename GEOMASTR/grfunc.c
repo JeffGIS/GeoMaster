@@ -904,8 +904,14 @@ BOOL SetGFThemeState (LPTHEME pTheme,LPSTR Title,LPSTR CommandLine)
 	LPTHEME	SaveCurTheme = CurTheme;
 	
 	CurTheme = pTheme;
-	_fstrcpy (CurTheme->Title,Title);
-	_fstrcpy (CurTheme->SQL,CommandLine); 
+	if (*CurTheme->Title == '[')
+		SetGlobalValue("%GFTHEMETITLE", Title);
+	else
+		strcpy (CurTheme->Title,Title);
+	if (*CurTheme->Title == '[')
+		SetGlobalValue("%GFTHEMEFUNFILE", CommandLine);
+	else
+		strcpy(CurTheme->SQL, CommandLine);
 	SetConfig (CurTheme->Config);
 	ThemeDisplayLegend2(3,0); 
 	SetConfig (SaveConfig);  

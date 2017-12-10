@@ -1781,6 +1781,7 @@ extern	int		expandOnly;
 extern	BOOL	useGDIPlus;
 extern	BOOL	wantGDIPlus;
 extern	int		ShowLineDirection;
+extern  COLORREF lastPickedColor;
 extern HBITMAP hPatBMP[5];
 extern	int		ii;
 

@@ -1510,6 +1510,7 @@ void GetClassOrder (short NumClass,LPLONG ClassCounts,LPSHORT Order);
 double DispersePointSize (double InSize, long Count);
 void SetFieldCorrectionOpts (HWND hWndDlg,int Type);
 void CreateThemePens (LPTHEME CurTheme,BOOL AlwaysCreate);
+COLORREF RGBI(int r, int g, int b, int i);
 void DestroyThemePens (LPTHEME CurTheme); 
 BOOL SelectTAGTemplate (void);
 LPTHEME CreateNewTheme (int Choice);

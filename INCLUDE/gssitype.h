@@ -2593,7 +2593,7 @@ typedef BOUNDSDISPLAY FAR  *LPBOUNDSDISPLAY;
 typedef struct
 	{	HANDLE		Handle;  
 		float		Width;
-		unsigned	char	Type:2;   //if Type = 0 Width = text factor
+		unsigned	char	Type:2;   //if Type = 0 Width = text factor, if type = 3 Width = transparency
 		unsigned	char	Style:3; 
 		unsigned	char	ProPen:3;
 		unsigned	char	R,G,B;

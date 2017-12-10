@@ -1652,7 +1652,7 @@ int		expandOnly = 0;
 BOOL	useGDIPlus = FALSE;
 BOOL	wantGDIPlus = TRUE;
 int		ShowLineDirection = 0;
-
+COLORREF lastPickedColor = 0;
 int		ii;
 
 

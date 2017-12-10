@@ -548,7 +548,6 @@ int	PickItems2 (HWND hWnd,DPOINT InPickPointBase,BOOL QuitOnMouseMove,BOOL Reset
 	long		NextRef=LONG_MIN;
     BOOL		SavePrint=Printing;
 	BOOL		SaveDisplay = Display;
-
 	Display = FALSE;
     
 /*    char	str[128];
@@ -556,7 +555,14 @@ int	PickItems2 (HWND hWnd,DPOINT InPickPointBase,BOOL QuitOnMouseMove,BOOL Reset
     sprintf (str,"Pick %i",np++);
     SetWindowText (hWndMain,str);*/
 
-PickPointBase = InPickPointBase;
+	PickPointBase = InPickPointBase;
+	if (hWnd)
+	{
+		HDC hDC = GetDC(hWnd);
+		POINT WindowPoint = BasePtToWinPt(&PickPointBase);
+		lastPickedColor = GetPixel(hDC, WindowPoint.x, WindowPoint.y);
+		ReleaseDC(hWnd, hDC);
+	}
 	SetGlobalValueReal ("%PICK_POINT_X",PickPointBase.x);
 	SetGlobalValueReal ("%PICK_POINT_Y",PickPointBase.y); 
 	CurPickPoint = PickPointBase;   

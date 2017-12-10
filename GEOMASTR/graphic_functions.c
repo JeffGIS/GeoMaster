@@ -1147,7 +1147,7 @@ BOOL ColorClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Func
  POINT	MousePoint;
  DPOINT	BasePoint;
  BOOL	Cancel;
- COLORREF	NewColor;
+ COLORREF	NewColor=lastPickedColor;
  short	idesc, newob;
  
  if (Message == WM_LBUTTONDOWN || Message == GF_INIT)

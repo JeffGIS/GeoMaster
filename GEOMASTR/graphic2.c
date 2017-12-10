@@ -2227,21 +2227,27 @@ GSSiExitProg (133);
 				PATBYTE		PatByte;  
 				
 				_fmemmove (&PatByte,&PatByt,1);
-				if (PatByte.Pattern)
+				if (PatByte.Pattern && !useGDIPlus)
 				{
 				    SetBkColor (CurView->hDC,RGB(255,255,255));
 				    if (PatByte.Transparent)
 						SetROP2(CurView->hDC,R2_MASKPEN);
-			    } 
+					GlobalColors[0] = RGB(pObj->R, pObj->G, pObj->B);
+				}
+				else
+					GlobalColors[0] = RGBI(pObj->R, pObj->G, pObj->B, pObj->Width);
    			}
-   			GlobalColors[0]=RGB(pObj->R,
-   								pObj->G,
-   								pObj->B);
-   			if (pObj->Width < 0)
-   				ItemSymbolWidth = -(pObj->Width);
-   			else 
-   				ItemSymbolWidth = (pObj->Width+1);
-			SetTextColor (hDC,ConvertColor(RGB(pObj->R,pObj->G,pObj->B),UseHalfTone));
+			else
+			{
+				GlobalColors[0] = RGB(pObj->R,
+					pObj->G,
+					pObj->B);
+				if (pObj->Width < 0)
+					ItemSymbolWidth = -(pObj->Width);
+				else
+					ItemSymbolWidth = (pObj->Width + 1);
+				SetTextColor(hDC, ConvertColor(RGB(pObj->R, pObj->G, pObj->B), UseHalfTone));
+			}
    		}
    	}
     else 
