@@ -1739,6 +1739,7 @@ Next:
 	   			SetCurs (0,FALSE);
    				break; 
    			case GF_AUTO_IDENTIFY:
+				ii = 1;
    			case GF_AUTOPICK:
 			case GF_AUTOPICK_NOZOOM:
    				CurrentPrompt = PRMT_AUTOPICK;
@@ -2511,8 +2512,27 @@ NoBox:
 	    	if (HaveTimer)
 	    		KillTimer (hWnd,GF_PAN_ZOOM_TARGET);
 	    	HaveTimer = FALSE; 
-	    	if (!InDisplayProcessing)
-				HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)GetGlobalLVal2 ("[%AUTOPICKDELAY]",200), (TIMERPROC) 0);
+			if (!InDisplayProcessing)
+			{
+				if (Function == GF_AUTO_IDENTIFY)
+				{
+					char AutoIDPickList[MAX_PATH];
+					if (GetGlobalCVal("[%AUTOIDPICKABILITY]", AutoIDPickList, 0))
+					{
+						HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAX_PATH * 2);
+						LPSTR pMem = GlobalLock(hMem);
+						GSSiGetTempFileName(0, "gmp", 0, (LPSTR)CurView->PickabilityRestoreFile);
+						sprintf(pMem, "$SAVEPIK(%s,,%s)", CurView->PickabilityRestoreFile, CurView->Name);
+						ProcessText(pMem);
+						sprintf(pMem, "$LOADPIK(%s,%s)", AutoIDPickList, CurView->Name);
+						ProcessText(pMem);
+						GSSiGlobUlFree(&hMem);
+					}
+					else
+						*CurView->PickabilityRestoreFile = 0;
+				}
+				HaveTimer = SetTimer(hWnd, GF_PAN_ZOOM_TARGET, (UINT)GetGlobalLVal2("[%AUTOPICKDELAY]", 200), (TIMERPROC)0);
+			}
         }
 	}
 		BlockSocketProcessing (FALSE);
@@ -2672,6 +2692,16 @@ DoPick:
 				StopAtFirstInPickMacro = FALSE;
 			}
 			MaxPick = SaveMaxPick; 
+			if (GSSiLength(CurView->PickabilityRestoreFile) > 0)
+			{
+				HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAX_PATH * 2);
+				LPSTR pMem = GlobalLock(hMem);
+				sprintf(pMem, "$LOADPIK(%s,%s)", CurView->PickabilityRestoreFile, CurView->Name);
+				ProcessText(pMem);
+				GSSiGlobUlFree(&hMem);
+				GSSiRemove(CurView->PickabilityRestoreFile);
+				*CurView->PickabilityRestoreFile = 0;
+			}
 		}
 		else if (Function == GF_TOOLBAR)
 		{

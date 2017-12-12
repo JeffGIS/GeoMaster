@@ -4826,9 +4826,21 @@ GSSiExitProg (55);
 #endif
 }    
 
+COLORREF  Convert0TransToOpaque(COLORREF color)
+{
+	int r = GetRValue(color);
+	int g = GetGValue(color);
+	int b = GetBValue(color);
+	int i = GetIValue(color);
+	if (!i)
+		i = 256;
+	color = RGBI(r, g, b, i);
+	return color;
+}
+
 void FillVPBackground (void)
 {   
-	 COLORREF Color = CurView->BackGroundColor;
+	 COLORREF Color = Convert0TransToOpaque (CurView->BackGroundColor);
 	 
 	 if (ComputePCTTheme)
 	 {

@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include "gssitype.h"     
 
+extern  "C" int defaultAreaTransparency;
+
 #define GetIValue(rgb)      (LOBYTE((rgb)>>24))
 
 extern "C" COLORREF RGBI(int r, int g, int b, int i);
@@ -218,7 +220,7 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			{
 				int intensity = GetIValue(lb->lbColor);
 				if (!intensity)
-					intensity = 255;
+					intensity = defaultAreaTransparency;
 				SolidBrush sbr(Color(intensity, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&sbr, &pth);
 			}

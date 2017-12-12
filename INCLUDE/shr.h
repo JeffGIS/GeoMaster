@@ -875,6 +875,7 @@ int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 COLORREF ColorWOWidth(COLORREF InColor);
 COLORREF ColorWithWidth (COLORREF Color,int Width);
+COLORREF  Convert0TransToOpaque(COLORREF color);
 double FltAP (LPSTR INEXPR,LPBOOL IRC);
 BOOL LogicP (LPSTR INEXPR,LPBOOL IRC);
 BOOL LogicPBP(LPSTR INEXPR, LPBOOL IRC, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);

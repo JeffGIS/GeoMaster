@@ -3484,6 +3484,9 @@ GSSiExitProg (532);
 		case 379:
 			useOnlyOnscreenPoly = atob(Value);
 			break;
+		case 380:
+			defaultAreaTransparency = IDNINT((atof(Value)*255)/100.0);
+			break;
 		default:
  			break;
 	}
@@ -3882,7 +3885,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CURRENTIPADDRESS", 377, FALSE);
 	AllocateTypeVar("%FILEUSAGEFILE", 378, FALSE);
 	AllocateTypeVar("%USEONSCREENPOLY", 379, FALSE);
-	
+	AllocateTypeVar("%AREATRANSPARENCY", 380, FALSE);
+
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5025,7 +5029,9 @@ GSSiExitProg (533);
 		case 379:
 			btoa(useOnlyOnscreenPoly, OutStr);
 			break;
-
+		case 380:
+			ltoa(IDNINT(100* (defaultAreaTransparency/255.0)), OutStr, 10);
+			break;
 	}
 	GlobalUnlock (hGlobal);
 {

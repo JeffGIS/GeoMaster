@@ -592,11 +592,18 @@ typedef	struct	{
 typedef	PENDESC	FAR	*LPPENDESC; 
 
 typedef struct {
-		unsigned short	Transparent	:1;
-		unsigned short	BGOpt		:1;
-		unsigned short	Pattern		:6;
-		} PATBYTE; 
+	unsigned short	Transparent : 1;
+	unsigned short	BGOpt : 1;
+	unsigned short	Pattern : 5;
+	unsigned short	notUsingPattern : 1;
+} PATBYTE;
 typedef PATBYTE	FAR	*LPPATBYTE;
+
+typedef struct {
+	unsigned short	Transparency : 7;
+	unsigned short	notUsingPattern : 1;
+} TRANSBYTE;
+typedef TRANSBYTE	FAR	*LPTRANSBYTE;
 
 typedef struct {
 		unsigned short	r	:5;
@@ -3038,11 +3045,13 @@ typedef struct
 		HRGN	hTransparentNullRgn;
 		int		transparencyBitmapWidth, transparencyBitmapHeight;
 		unsigned short WantDisplayHighlight:1,
-					   unused:15;
+									 unused:15;
+		char PickabilityRestoreFile[MAX_PATH];
 		char	GrowSpace[2898-16*MAXPROFILEROUTES-2*sizeof(short)-2*sizeof(HANDLE)
 						  -sizeof(HANDLE)-sizeof(int)-sizeof(COLORREF)
 						  -sizeof(int)-2*sizeof(HBITMAP)-2*sizeof(HDC)
-						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)];
+						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)
+						  -MAX_PATH];
         char		EndOfViewport;     
         
 	}	VIEWPORT;

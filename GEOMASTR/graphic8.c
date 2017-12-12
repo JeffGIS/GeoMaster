@@ -1729,6 +1729,21 @@ HBRUSH CreateTransparentBrush(int itrans, COLORREF color)
 	return brush;
 }
 
+COLORREF ColorWithTransparency(COLORREF color, int transparency)
+{
+	COLORREF rtn = color;
+
+	if (transparency)
+	{
+		int r = GetRValue(color);
+		int g = GetGValue(color);
+		int b = GetBValue(color);
+		transparency = min(255, transparency);
+		color = RGBI(r, g, b, transparency);
+	}
+	return rtn;
+}
+
 HBRUSH CreateGMBrush (COLORREF GMColor,int UseHalfTone,HDC hDC)
 #if ENABLETRACE
 {GSSiEnterProg (971);
@@ -1743,10 +1758,17 @@ HBRUSH CreateGMBrush (COLORREF GMColor,int UseHalfTone,HDC hDC)
 	_fmemmove (&PatByte,&PatByt,1); 
 Top:
 	color = ConvertColor(ColorWOWidth (GMColor),UseHalfTone);  
-	if (!PatByte.Pattern)
+	if (!PatByte.Pattern || PatByte.notUsingPattern)
 	{
 		if (hDC)
 			SetROP2(hDC,DisplayRasterOpt);
+		if (PatByte.notUsingPattern)
+		{
+			LPTRANSBYTE ptb = (LPTRANSBYTE)&PatByte;
+
+			color = ColorWithTransparency(color,ptb->Transparency*2);
+		}
+
 {
 #if ENABLETRACE
 GSSiExitProg (971);
@@ -2315,11 +2337,12 @@ short FillRectPoly(HDC hDC, LPRECT Rect, COLORREF Color)
     Points[2].x = Rect->right;
     Points[2].y = Rect->top;
     Points[3].x = Rect->right;
-    Points[3].y = Rect->bottom;  
-    if (brush)
-    	i = Polygon (hDC,Points,4);  
+	Points[3].y = Rect->bottom;
+	Points[4] = Points[0];
+	if (brush)
+    	i = Polygon (hDC,Points,5);  
     else
-    	i = Polyline (hDC,Points,4);  
+    	i = Polyline (hDC,Points,5);  
     if (CurBrush)
 	    SelectObject (hDC,CurBrush);
 	if (CurPen)                         

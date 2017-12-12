@@ -1378,11 +1378,12 @@ BOOL ProcessGraphicsFunction4 (short Function,
 	    case GF_PICK_IMAGE:
 	    	 return (PickImage (hWnd,Message,wParam,lParam));
 	    	 break;  
-	    case GF_TOOLBAR:
+		case GF_AUTO_IDENTIFY:
+			ii = 1;
+		case GF_TOOLBAR:
 	    case GF_RUN_CLASS_MACRO:
 		case GF_AUTOPICK: 
 		case GF_AUTOPICK_NOZOOM:
-		case GF_AUTO_IDENTIFY:    
 		case GF_ONEPICK:
 		case GF_RUN_COORDDISPLAY_MACRO:
 		case GF_RUN_DISTDISPLAY_MACRO:
