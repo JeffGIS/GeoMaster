@@ -2931,6 +2931,7 @@ GotCloseFilehSQL:
 					// $BOUNDS(MAX,BOUNDS) returns max point 
 				    // $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
 					// $BOUNDS(LAYER,layer name,vpname)
+					// $BOUNDS(DISPLAY,BOUNDS,COLOR);
 		{				
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
@@ -2941,16 +2942,28 @@ GotCloseFilehSQL:
 				boundstoa (OutLoc,&Bounds); 
 				goto Rtnl;
 			} 
-			else if (!_fstricmp (Arg[1],"INBOUNDS"))
-			{   
+			else if (!_fstricmp(Arg[1], "INBOUNDS"))
+			{
 				MNMXCORD	Bounds2;
 
-				Bounds = atobounds (Arg[2],&Err);
-				Bounds2 = atobounds (Arg[3],&Err);
-				rtn = BoundsInBounds (&Bounds,&Bounds2,atoi(Arg[4]));
+				Bounds = atobounds(Arg[2], &Err);
+				Bounds2 = atobounds(Arg[3], &Err);
+				rtn = BoundsInBounds(&Bounds, &Bounds2, atoi(Arg[4]));
 				goto Rtnrtn;
-			} 
-			else if (!_fstricmp (Arg[1],"VIEWPORT"))
+			}
+			else if (!_fstricmp(Arg[1], "DISPLAY"))
+			{
+				HANDLE hPoints = GSSiGlobAlloc(1225, GMEM_MOVEABLE, 4 * sizeof(DPOINT));
+				LPDPOINT pPoint = (HPDPOINT)GlobalLock(hPoints);
+				Bounds = atobounds(Arg[2], &Err);
+				DisplayFileBounds(Bounds);
+				/*BoundsToPoints(&Bounds, pPoint, 0);
+				SelectObject(CurView->hDC, GetStockObject(GRAY_BRUSH));
+				GMPolygon(CurView->hDC, pPoint, 4);
+				GSSiGlobUlFree(&hPoints);*/
+				goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "VIEWPORT"))
 			{   
 				SetCurView ( SetVPFromName (Arg[2],&Err));  
 				boundstoa (OutLoc,&CurView->WBounds);
