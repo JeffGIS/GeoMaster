@@ -2624,7 +2624,8 @@ SetVis:
 			}
 			else if (!_fstricmp(Arg[1],"SCALE"))
 			{   
-				if (SetScale (Arg[2]))
+				SetCurView(SetVPFromName(Arg[3], &Err));
+				if (SetScale(Arg[2]))
 					goto RtnTrue;
 				goto RtnFalse;
 			}

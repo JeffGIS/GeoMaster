@@ -6904,16 +6904,17 @@ HaveVP:;
 			  goto Rtnl;
 		}
 			break;
-		case 787: // $DIMLINE(x1,y1,x2,y2,opt,color,ViewPort)
+		case 787: // $DIMLINE(x1,y1,x2,y2,opt,color,units,format,ViewPort)
 		{	
 			LPSTR	lpEnd;
 			DPOINT	p1, p2;
 			int opt;
 			COLORREF color;
+			int units;
 
 			if (!CurView)
 				goto RtnFalse;
-			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 4)
 				goto RtnFalse;
 			p1.x = atof(Arg[1]);
@@ -6922,8 +6923,9 @@ HaveVP:;
 			p2.y = atof(Arg[4]);
 			opt = atoi(Arg[5]);
 			color = (COLORREF)atoi(Arg[6]);
-			SetCurView(SetVPFromName(Arg[7], &Err));
-			DimensionLine(CurView->hDC, &p1, &p2, opt, color);
+			units = atoi(Arg[7]);
+			SetCurView(SetVPFromName(Arg[9], &Err));
+			DimensionLine(CurView->hDC, &p1, &p2, opt, color,units,Arg[8]);
 			goto RtnTrue;
 		}
 

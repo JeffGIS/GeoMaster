@@ -5890,40 +5890,40 @@ double CourseOverGroundBase (LPDPOINT pPt1, LPDPOINT pPt2)
 	return cog;
 }
 
-double ConvertDist (double Dist,int opt)
+double ConvertDist (double Dist,int outUnits)
 {   
 //char	DistUnitOpts[5][12]={"FEET","METERS","YARDS","MILES","KILOMETERS"};
 	extern  long  PRJ_UNITS[MAX_PROJ];
 	switch (PRJ_UNITS[1])
 	{
-		case 1:
-			switch (opt)
+	case PRJ_UNITS_FEET:
+		switch (outUnits)
 			{
-				case 1:
+			case IU_FEET:
 					return (Dist);
-				case 2:
+			case IU_METERS:
 					return Dist * FTM;
-				case 4:
+			case IU_MILES:
 					return (Dist) / 5280.0;
-				case 3:
+			case IU_YARDS:
 					return (Dist) / 3.0;
-				case 5:
+			case IU_KILOMETERS:
 					return Dist/1000 * FTM;
 			} 
 			break;
-		case 2:
-		case 4:
-			switch (opt)
+		case PRJ_UNITS_METERS:
+		case PRJ_UNITS_LATLON:
+			switch (outUnits)
 			{
-				case 1:
+				case IU_FEET:
 					return (Dist * MFT);
-				case 2:
+				case IU_METERS:
 					return Dist;
-				case 4:
+				case IU_MILES:
 					return (Dist * MFT) / 5280.0;
-				case 3:
+				case IU_YARDS:
 					return (Dist * MFT) / 3.0;
-				case 5:
+				case IU_KILOMETERS:
 					return Dist / 1000;
 			} 
 			break;
@@ -5935,7 +5935,7 @@ double ConvertInDist (double Dist,int opt)
 {   
 //char	DistUnitOpts[5][12]={"FEET","METERS","YARDS","MILES","KILOMETERS"};
 	extern  long  PRJ_UNITS[MAX_PROJ];
-	if (PRJ_UNITS[1] == 2) //meters
+	if (PRJ_UNITS[1] == PRJ_UNITS_METERS) //meters
 	switch (opt)
 	{
 		case 1:
@@ -5949,7 +5949,7 @@ double ConvertInDist (double Dist,int opt)
 		case 5:
 			return Dist*1000;
 	}
-	if (PRJ_UNITS[1] == 1)//feet
+	if (PRJ_UNITS[1] == PRJ_UNITS_FEET)//feet
 	switch (opt)
 	{
 		case 1:
@@ -5963,7 +5963,7 @@ double ConvertInDist (double Dist,int opt)
 		case 5:
 			return Dist * MFT * 1000;
 	}
-	if (PRJ_UNITS[1] == 4)//latlon
+	if (PRJ_UNITS[1] == PRJ_UNITS_LATLON)//latlon
 	{
 		DPOINT newPt;
 		DPOINT zpt={0,0};
