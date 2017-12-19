@@ -6,6 +6,12 @@ C*
 C*****************************************************
 C   */
 #include <proj_api.h>
+
+#ifndef PROJ_H
+#define PROJ_H
+enum INUNITS { IU_FEET = 1, IU_METERS = 2, IU_YARDS = 3, IU_MILES = 4, IU_KILOMETERS = 5 };
+#endif
+
 #define MAXGZOOMS	21
 #define MAX_PROJ	16
 #define FIRST_USER_PROJ	8
@@ -13,7 +19,9 @@ C   */
 #define GOOGLEMAPSPROJECTION 5
 #define SphericalMercatorPROJECTION	-1
 #define PROJ4PROJECTION	999
-
+#define PRJ_UNITS_FEET	1
+#define PRJ_UNITS_METERS	2
+#define PRJ_UNITS_LATLON	4
 #ifdef  PROJECTION_INCLUDE
 
 

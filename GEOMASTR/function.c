@@ -2624,7 +2624,8 @@ SetVis:
 			}
 			else if (!_fstricmp(Arg[1],"SCALE"))
 			{   
-				if (SetScale (Arg[2]))
+				SetCurView(SetVPFromName(Arg[3], &Err));
+				if (SetScale(Arg[2]))
 					goto RtnTrue;
 				goto RtnFalse;
 			}
@@ -4174,62 +4175,82 @@ SetVis:
 #include "gdal.h"
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			GDALDatasetH  hDataset;
-		   GDALAllRegister();
+			double        adfGeoTransform[6];
+			GDALAllRegister();
+			MNMXCORD bounds;
 		   hDataset = GDALOpen(Arg[2], GA_ReadOnly);
 		   if (hDataset != NULL)
 		   {
-			   char mess[1024];
-			   GDALDriverH   hDriver;
-			   double        adfGeoTransform[6];
-			   hDriver = GDALGetDatasetDriver(hDataset);
-			   sprintf(mess,"Driver: %s/%s\n",
-				   GDALGetDriverShortName(hDriver),
-				   GDALGetDriverLongName(hDriver));
-			   sprintf(mess, "Size is %dx%dx%d\n",
-				   GDALGetRasterXSize(hDataset),
-				   GDALGetRasterYSize(hDataset),
-				   GDALGetRasterCount(hDataset));
-			   if (GDALGetProjectionRef(hDataset) != NULL)
-				   sprintf(mess, "Projection is `%s'\n", GDALGetProjectionRef(hDataset));
-			   if (GDALGetGeoTransform(hDataset, adfGeoTransform) == CE_None)
+			   if (!stricmp(Arg[1], "BOUNDS"))
 			   {
-				   sprintf(mess, "Origin = (%.6f,%.6f)\n",
-					   adfGeoTransform[0], adfGeoTransform[3]);
-				   sprintf(mess, "Pixel Size = (%.6f,%.6f)\n",
-					   adfGeoTransform[1], adfGeoTransform[5]);
+				   int xSize = GDALGetRasterXSize(hDataset);
+				   int ySize = GDALGetRasterYSize(hDataset);
+				   int rasterCount = GDALGetRasterCount(hDataset);
+				   if (GDALGetGeoTransform(hDataset, adfGeoTransform) == CE_None)
+				   {
+					   bounds.xmn = adfGeoTransform[0];
+					   bounds.ymn = adfGeoTransform[3];
+					   bounds.xmx = bounds.xmn + xSize - 1;
+					   bounds.ymx = bounds.ymn + ySize - 1;
+					   boundstoa(OutLoc, &bounds);
+					   GDALClose(hDataset);
+					   goto Rtnl;
+				   }
 			   }
+			   else
+			   {
+				   char mess[1024];
+				   GDALDriverH   hDriver;
+				   hDriver = GDALGetDatasetDriver(hDataset);
+				   sprintf(mess, "Driver: %s/%s\n",
+					   GDALGetDriverShortName(hDriver),
+					   GDALGetDriverLongName(hDriver));
+				   sprintf(mess, "Size is %dx%dx%d\n",
+					   GDALGetRasterXSize(hDataset),
+					   GDALGetRasterYSize(hDataset),
+					   GDALGetRasterCount(hDataset));
+				   if (GDALGetProjectionRef(hDataset) != NULL)
+					   sprintf(mess, "Projection is `%s'\n", GDALGetProjectionRef(hDataset));
+				   if (GDALGetGeoTransform(hDataset, adfGeoTransform) == CE_None)
+				   {
+					   sprintf(mess, "Origin = (%.6f,%.6f)\n",
+						   adfGeoTransform[0], adfGeoTransform[3]);
+					   sprintf(mess, "Pixel Size = (%.6f,%.6f)\n",
+						   adfGeoTransform[1], adfGeoTransform[5]);
+				   }
 
-			   GDALRasterBandH hBand;
-			   int             nBlockXSize, nBlockYSize;
-			   int             bGotMin, bGotMax;
-			   double          adfMinMax[2];
-			   hBand = GDALGetRasterBand(hDataset, 1);
-			   GDALGetBlockSize(hBand, &nBlockXSize, &nBlockYSize);
-			   sprintf(mess, "Block=%dx%d Type=%s, ColorInterp=%s\n",
-				   nBlockXSize, nBlockYSize,
-				   GDALGetDataTypeName(GDALGetRasterDataType(hBand)),
-				   GDALGetColorInterpretationName(
-				   GDALGetRasterColorInterpretation(hBand)));
-			   adfMinMax[0] = GDALGetRasterMinimum(hBand, &bGotMin);
-			   adfMinMax[1] = GDALGetRasterMaximum(hBand, &bGotMax);
-			   if (!(bGotMin && bGotMax))
-				   GDALComputeRasterMinMax(hBand, TRUE, adfMinMax);
-			   sprintf(mess, "Min=%.3fd, Max=%.3f\n", adfMinMax[0], adfMinMax[1]);
-			   if (GDALGetOverviewCount(hBand) > 0)
-				   sprintf(mess, "Band has %d overviews.\n", GDALGetOverviewCount(hBand));
-			   if (GDALGetRasterColorTable(hBand) != NULL)
-				   sprintf(mess, "Band has a color table with %d entries.\n",
-				   GDALGetColorEntryCount(
-				   GDALGetRasterColorTable(hBand)));
+				   GDALRasterBandH hBand;
+				   int             nBlockXSize, nBlockYSize;
+				   int             bGotMin, bGotMax;
+				   double          adfMinMax[2];
+				   hBand = GDALGetRasterBand(hDataset, 1);
+				   GDALGetBlockSize(hBand, &nBlockXSize, &nBlockYSize);
+				   sprintf(mess, "Block=%dx%d Type=%s, ColorInterp=%s\n",
+					   nBlockXSize, nBlockYSize,
+					   GDALGetDataTypeName(GDALGetRasterDataType(hBand)),
+					   GDALGetColorInterpretationName(
+					   GDALGetRasterColorInterpretation(hBand)));
+				   adfMinMax[0] = GDALGetRasterMinimum(hBand, &bGotMin);
+				   adfMinMax[1] = GDALGetRasterMaximum(hBand, &bGotMax);
+				   if (!(bGotMin && bGotMax))
+					   GDALComputeRasterMinMax(hBand, TRUE, adfMinMax);
+				   sprintf(mess, "Min=%.3fd, Max=%.3f\n", adfMinMax[0], adfMinMax[1]);
+				   if (GDALGetOverviewCount(hBand) > 0)
+					   sprintf(mess, "Band has %d overviews.\n", GDALGetOverviewCount(hBand));
+				   if (GDALGetRasterColorTable(hBand) != NULL)
+					   sprintf(mess, "Band has a color table with %d entries.\n",
+					   GDALGetColorEntryCount(
+					   GDALGetRasterColorTable(hBand)));
 
-			   float *pafScanline;
-			   int   nXSize = GDALGetRasterBandXSize(hBand);
-			   pafScanline = (float *)CPLMalloc(sizeof(float)*nXSize);
-			   GDALRasterIO(hBand, GF_Read, 0, 0, nXSize, 1,
-				   pafScanline, nXSize, 1, GDT_Float32,
-				   0, 0);
+				   float *pafScanline;
+				   int   nXSize = GDALGetRasterBandXSize(hBand);
+				   pafScanline = (float *)CPLMalloc(sizeof(float)*nXSize);
+				   GDALRasterIO(hBand, GF_Read, 0, 0, nXSize, 1,
+					   pafScanline, nXSize, 1, GDT_Float32,
+					   0, 0);
+				   VSIFree(pafScanline);
+			   }
 			   GDALClose(hDataset);
-			   VSIFree(pafScanline);
 			   goto RtnTrue;
 		   }
 		   goto RtnFalse;

@@ -3903,7 +3903,17 @@ void SimplePointer(HDC hDC, LPDPOINT p1, LPDPOINT p2, short width, short ToPoint
 }
 #endif
 }
-void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color)
+
+double RotateTextForEasyRead(double TXRot)
+{
+	if (TXRot > HALFPI && TXRot < 3 * HALFPI)
+	{
+		TXRot = LTWOPI(TXRot + PY);
+	}
+	return TXRot;
+}
+
+void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color, int units, LPSTR format)
 #if ENABLETRACE
 {
 	GSSiEnterProg(825);
@@ -3915,16 +3925,23 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color
 		int		TipWidth = 2;
 		int		ToPointOffset = 10;
 		double	dist = ldistpp(p1, p2);
-		double	az = LTWOPI(getazd(p1, p2) + HALFPI);
+		double	az = LTWOPI(getazd(p1, p2));// +HALFPI);
 		int h;
 		DPOINT p;
 		char	txt[64];
 		int		oldBKMode;
 		COLORREF oldTextColor;
+		char defaultformat[] = "%.1f";
 
+		az = RotateTextForEasyRead(az);
+		units = max(1, units);
+		if (!format || !*format)
+			format = defaultformat;
+		if (p1->x < 0 || p2->x < 0)
+			return;
 		p.x = (p1->x + p2->x) / 2;
 		p.y = (p1->y + p2->y) / 2;
-		dist = ConvertDist(dist, 1);
+		dist = ConvertDist(dist, units);
 		P1 = BasePtToWinPt(p1);
 		P2 = BasePtToWinPt(p2);
 		P = BasePtToWinPt(&p);
@@ -3938,7 +3955,7 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt,  COLORREF Color
 			BOOL Shadow, COLORREF ShadowColor,long RemoveColor,long nPnts,HANDLE hAreaPoints,HANDLE hAreaAccelerator,
 			int nPoly,HANDLE hPolyPartLen,short UseHalfTone,LPSTR ActualText,short MinSize,LPTHEME CurTheme,LPRECT pTextRect,LPRECT pFullRect,LPRECT pFlagRect)
 			*/
-		sprintf(txt, "%.1f feet", dist);
+		sprintf(txt, format, dist);
 		h = 18 * DeviceToScreenFactor();
 		DispText(hDC, FALSE, P.x, P.x,P.y, 0, 2, 2, h, 1, 1, 2, FALSE, az, txt, 0, FALSE, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		SetBkMode(hDC, oldBKMode);

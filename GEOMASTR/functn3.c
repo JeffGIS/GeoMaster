@@ -2931,6 +2931,7 @@ GotCloseFilehSQL:
 					// $BOUNDS(MAX,BOUNDS) returns max point 
 				    // $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
 					// $BOUNDS(LAYER,layer name,vpname)
+					// $BOUNDS(DISPLAY,BOUNDS,COLOR);
 		{				
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
@@ -2941,16 +2942,28 @@ GotCloseFilehSQL:
 				boundstoa (OutLoc,&Bounds); 
 				goto Rtnl;
 			} 
-			else if (!_fstricmp (Arg[1],"INBOUNDS"))
-			{   
+			else if (!_fstricmp(Arg[1], "INBOUNDS"))
+			{
 				MNMXCORD	Bounds2;
 
-				Bounds = atobounds (Arg[2],&Err);
-				Bounds2 = atobounds (Arg[3],&Err);
-				rtn = BoundsInBounds (&Bounds,&Bounds2,atoi(Arg[4]));
+				Bounds = atobounds(Arg[2], &Err);
+				Bounds2 = atobounds(Arg[3], &Err);
+				rtn = BoundsInBounds(&Bounds, &Bounds2, atoi(Arg[4]));
 				goto Rtnrtn;
-			} 
-			else if (!_fstricmp (Arg[1],"VIEWPORT"))
+			}
+			else if (!_fstricmp(Arg[1], "DISPLAY"))
+			{
+				HANDLE hPoints = GSSiGlobAlloc(1225, GMEM_MOVEABLE, 4 * sizeof(DPOINT));
+				LPDPOINT pPoint = (HPDPOINT)GlobalLock(hPoints);
+				Bounds = atobounds(Arg[2], &Err);
+				DisplayFileBounds(Bounds);
+				/*BoundsToPoints(&Bounds, pPoint, 0);
+				SelectObject(CurView->hDC, GetStockObject(GRAY_BRUSH));
+				GMPolygon(CurView->hDC, pPoint, 4);
+				GSSiGlobUlFree(&hPoints);*/
+				goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "VIEWPORT"))
 			{   
 				SetCurView ( SetVPFromName (Arg[2],&Err));  
 				boundstoa (OutLoc,&CurView->WBounds);
@@ -6891,16 +6904,17 @@ HaveVP:;
 			  goto Rtnl;
 		}
 			break;
-		case 787: // $DIMLINE(x1,y1,x2,y2,opt,color,ViewPort)
+		case 787: // $DIMLINE(x1,y1,x2,y2,opt,color,units,format,ViewPort)
 		{	
 			LPSTR	lpEnd;
 			DPOINT	p1, p2;
 			int opt;
 			COLORREF color;
+			int units;
 
 			if (!CurView)
 				goto RtnFalse;
-			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 4)
 				goto RtnFalse;
 			p1.x = atof(Arg[1]);
@@ -6909,8 +6923,9 @@ HaveVP:;
 			p2.y = atof(Arg[4]);
 			opt = atoi(Arg[5]);
 			color = (COLORREF)atoi(Arg[6]);
-			SetCurView(SetVPFromName(Arg[7], &Err));
-			DimensionLine(CurView->hDC, &p1, &p2, opt, color);
+			units = atoi(Arg[7]);
+			SetCurView(SetVPFromName(Arg[9], &Err));
+			DimensionLine(CurView->hDC, &p1, &p2, opt, color,units,Arg[8]);
 			goto RtnTrue;
 		}
 
