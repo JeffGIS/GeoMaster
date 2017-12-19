@@ -8758,7 +8758,7 @@ BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 	long	CurLoc = 0;
 	BOOL	rtn;
 	BOOL	CancelCacheCopy=FALSE;
-	char	FromFile[MAX_PATH], ToFile[MAX_PATH];
+	char	FromFile[MAX_PATH*4], ToFile[MAX_PATH];
 
 	strcpy(FromFile, FromFileIN);
 	strcpy(ToFile, ToFileIN);
