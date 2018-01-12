@@ -197,6 +197,7 @@ GetPolylineEP:
 										MidPoint = PointAtDistOnPoly(lpPoints, nPnts, MPDist, &MPAZ, 0);
 										Type1.MPX = MidPoint.x;
 										Type1.MPY = MidPoint.y;
+										Type1.AZM = MPAZ;
 									}
 							}
 							else

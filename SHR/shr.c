@@ -13012,10 +13012,16 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
 	if (opt == 1)
 	{
 		OSVERSIONINFOEX verinfo;
-	
+		BOOL isWOW64;
+		HANDLE hProcess = GetCurrentProcess();
+
+		if (!IsWow64Process(hProcess, &isWOW64))
+			isWOW64 = FALSE;
+
 		verinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 		GetVersionEx((LPOSVERSIONINFO)&verinfo);
-		if (verinfo.dwMajorVersion > 5) //dont care if covered if Vista or higher
+	//	if (verinfo.dwMajorVersion > 5) //dont care if covered if Vista or higher
+		if (isWOW64)
 			return FALSE;
 		GetClientRect (hWnd,&rMyRect); 
 		Point1.x = rMyRect.left;
@@ -13051,7 +13057,7 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
        *  call MessageBeep(). This intersection is an area of this
        *  application's window that is not visible.
        */ 
-        Owner = GetWindow(hNextWnd, GW_OWNER);
+		Owner = 0;// GetWindow(hNextWnd, GW_OWNER);
     	if (!IsRectEmpty(&rOtherRect) && IsWindowVisible(hNextWnd) &&
            	IntersectRect(&rDestRect, &rMyRect, &rOtherRect) &&
            	((Owner != hWnd) || (opt == 1 && !WindowBelongsToViewport (hWnd))))
