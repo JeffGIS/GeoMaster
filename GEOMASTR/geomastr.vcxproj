@@ -89,7 +89,7 @@
     <OutDir>NVServer\</OutDir>
     <IntDir>NVServer\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>GeoMaster34j</TargetName>
+    <TargetName>GeoMaster34k</TargetName>
     <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
     <CustomBuildAfterTargets />
@@ -232,9 +232,9 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>NVServer\$(TargetName)$(TargetExtension).exe</OutputFile>
-      <Version>34.10</Version>
+      <Version>34.11</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>

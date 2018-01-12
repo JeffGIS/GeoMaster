@@ -1,4 +1,6 @@
 data\gamedata\minnesota.gmc /F /WD K:\gmmobile\metroUTM
+[%DL]basic1.GMC /WD c:\gmserver\gmserver
+[%DL]RequestData.GMC /F [REQUESTID]=1515163911; /WD c:\gmserver\gmserver
 configs\SpecialAssessments\CreateMap.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD L:\GEOMas
 configs\basic1.gmc /F /WD j:\bu_2017_06_20\geomas [%USERLEV]=2;[%IGNORESYSMSG]=T;
 configs\basemap.GMC /F /WD L:\geomas
@@ -140,6 +142,9 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
 
 
 
