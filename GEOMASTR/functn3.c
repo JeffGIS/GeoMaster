@@ -575,12 +575,27 @@ GSSiExitProg (1348);
 							CurView->pTheme->FlipLegend = atob (Arg[4]);
 							rtn = TRUE;
 						}
-						else if (!_fstricmp (Arg[3],"FACTOR"))
+						else if (!_fstricmp(Arg[3], "FACTOR"))
 						{
-							CurView->pTheme->FactorLegend = atob (Arg[4]);
+							CurView->pTheme->FactorLegend = atob(Arg[4]);
 							rtn = TRUE;
 						}
-						else if (!_fstricmp (Arg[3],"DEPTHOPTIONS"))
+						else if (!_fstricmp(Arg[3], "BEGINDISPLAYMACRO"))
+						{
+							strncpy0(CurView->pTheme->BeginDisplayMacro, Arg[4], sizeof(CurView->pTheme->BeginDisplayMacro) - 1);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "ENDDISPLAYMACRO"))
+						{
+							strncpy0(CurView->pTheme->EndDisplayMacro, Arg[4], sizeof(CurView->pTheme->EndDisplayMacro) - 1);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "GRAPHICSDISPLAYMACRO"))
+						{
+							strncpy0(CurView->pTheme->GraphicsAttributesMacro, Arg[4], sizeof(CurView->pTheme->GraphicsAttributesMacro) - 1);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "DEPTHOPTIONS"))
 						{   
 							rtn=FALSE;
 							if (CurView->pTheme)

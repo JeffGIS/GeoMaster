@@ -3810,7 +3810,7 @@ GSSiExitProg (1272);
 #endif
 }
 
-void SetThemeElementCharacteristics (UINT iclass) 
+void SetThemeElementCharacteristics (int iclass) 
 #if ENABLETRACE
 {GSSiEnterProg (1228);
 #endif
@@ -3818,7 +3818,8 @@ void SetThemeElementCharacteristics (UINT iclass)
 	BYTE		PatByt;
 	PATBYTE		PatByte;
 	HDC			SavDC = CurView->hDC;
-	
+	BOOL		fromLegend = FALSE;
+
 	if (!Display)
 {
 #if ENABLETRACE
@@ -3826,6 +3827,11 @@ GSSiExitProg (1228);
 #endif
 		return;
 }
+	if (iclass < 0)
+	{
+		iclass = -iclass - 1;
+		fromLegend = TRUE;
+	}
 	if (CurTheme->ID == GF_CONNECTION_LINE_THEME)
 	{
 		if (CurrentType == GF_POINT)
@@ -3886,6 +3892,9 @@ GSSiExitProg (1228);
 				ThemePointUseHalfTone = CurTheme->UseHalfTone; 
 				SetTextColor (CurView->hDC,CurTheme->ClassColor[iclass]);
 			} 
+			if (!fromLegend)
+				ProcessGraphicsAttributeMacro();
+
 			break;
 		case THEMEDATATYPE_LINE: 
 			if (CurrentType != GF_LINE && CurrentType != GF_POLYLINE && CurrentType != GF_CURVE)
@@ -3936,7 +3945,8 @@ SetLine:
 		ThemePointColor = GlobalColors[0]=CurTheme->ClassColor[iclass]; 
 		ThemePointUseHalfTone = CurTheme->UseHalfTone; 
 		SetTextColor (CurView->hDC,CurTheme->ClassColor[iclass]);
-		ProcessText (CurTheme->GraphicsAttributesMacro);
+		if (!fromLegend)
+			ProcessGraphicsAttributeMacro();
 		CurThemeClass = iclass;
 	}
 	if (CurTheme->ClassFactor[iclass] > 0)  
@@ -4005,7 +4015,8 @@ SetArea:
 		    if (PatByte.Transparent)
 				SetROP2(CurView->hDC,R2_MASKPEN);
 	    } 
-		ProcessText (CurTheme->GraphicsAttributesMacro);
+		if (!fromLegend)
+			ProcessGraphicsAttributeMacro();
 	}
 	CurView->hDC = SavDC;
 {
@@ -4349,6 +4360,20 @@ void ProcessDisplayPassEndMacro(void)
 		LPSTR pMem = GlobalLock(hMem);
 
 		strcpy(pMem, CurTheme->EndDisplayMacro);
+		ExpandText(pMem);
+		GSSiGlobUlFree(&hMem);
+	}
+	return;
+}
+
+void ProcessGraphicsAttributeMacro(void)
+{
+	if (*CurTheme->GraphicsAttributesMacro)
+	{
+		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		LPSTR pMem = GlobalLock(hMem);
+
+		strcpy(pMem, CurTheme->GraphicsAttributesMacro);
 		ExpandText(pMem);
 		GSSiGlobUlFree(&hMem);
 	}
@@ -4737,7 +4762,7 @@ GetTitleSize:
 				else
 					CurrentType = GF_AREA;
 			    nPoly = 0;
-				SetThemeElementCharacteristics (iclass);
+				SetThemeElementCharacteristics (-(iclass+1));
 				DisplaySymInRect (CurView->hDC,symnum,ClassColorBox,LineSymFactor,TRUE);   
 				*CurSymbolFont[0] = 0;
 			} 
