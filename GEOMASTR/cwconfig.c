@@ -5641,10 +5641,10 @@ GSSiExitProg (438);
     {
     	short	ii;   
     	HMENU	hMenu=GetMenu(hWnd);
-    	HaltMapDisplay (TRUE,TRUE); 
     	if (!hUserMenu && hMenu)
     	{
-	    	if (hHighlight)
+			HaltMapDisplay(TRUE, TRUE);
+			if (hHighlight)
 				EnableMenuItem(hMenu, IDM_Z_HLTLIMITS, MF_BYCOMMAND | MF_ENABLED);
 			else
 				EnableMenuItem(hMenu, IDM_Z_HLTLIMITS, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);

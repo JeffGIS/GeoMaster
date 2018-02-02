@@ -1809,6 +1809,15 @@ S10:
 								   while (DisplaySeg (&hPr,FALSE) && CheckPrintAbort (hPr) && CurView); 
 								   if (gbUserAbort)
 						       			HaltMapDisplay (FALSE,FALSE);
+								   else
+								   {
+									   if (CurView->WantDisplayHighlight)
+									   {
+										   int StartHLTRef = LONG_MIN;
+										   DisplayHLTData(&StartHLTRef);
+									   }
+
+								   }
 							   }
 						   }
 					     }
