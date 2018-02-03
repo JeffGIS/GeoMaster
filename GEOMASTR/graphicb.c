@@ -5378,7 +5378,7 @@ NextOff:
 
 BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
-	int		Trigger=3;
+	int		Trigger=2;
 	BOOL	HaveWildcard;
 	char	str[1024], teststr[1024],lastowner[4096];
 	static	char Wildcard[128]="";
@@ -6405,7 +6405,7 @@ FoundPart:							;
 
 BOOL FAR PASCAL OWNERLOCMsgProc4(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
-	int		Trigger=3;
+	int		Trigger=2;
 	BOOL	HaveWildcard;
 	char	str[1024], teststr[1024],lastowner[4096];
 	static	char Wildcard[128]="";
