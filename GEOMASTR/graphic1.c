@@ -5339,7 +5339,8 @@ NextFile:
     {   
     	USHORT	i;
     	
-		CurView->WantDisplayHighlight = FALSE;
+		if (!Printing)
+			CurView->WantDisplayHighlight = FALSE;
 		DisplayTAGs2 (CurView->hDC,1,0);    
 	    _fmemset (CurView->MaxFileDisplayedPointWidth,0,sizeof(CurView->MaxFileDisplayedPointWidth)); 
 /*		{
