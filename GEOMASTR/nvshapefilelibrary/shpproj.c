@@ -92,7 +92,7 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
 		FileAlreadyNotFound(indexName, 3, 0);
 		SLT_StartTrans(database);
 
-		strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INT PRIMARY KEY,symnum INT,offset INT);");
+		strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,offset INT);");
 		SLT_Execute(cmd, database);
 		CreateStatusWind(0, 1, "Create Shapefile Index");
 			

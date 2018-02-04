@@ -1265,10 +1265,10 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 		NumIndexSyms = 0;
 		return -1; 
 	} 
-	if (record > NumSHPRecs-1)
-		return -1;
 	if (!SHPProjectionIsBase && SHPIndexType != SHP_INDEX_SLT)
 		UseBounds = FALSE;
+	if (!UseBounds && record > NumSHPRecs - 1)
+		return -1;
 	if (record == 8190)
 		ii=1; 
 	if (CurView->PassID && CurView->PassID < 4)
@@ -1406,12 +1406,15 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 			loc = -1;
 			LONGLONG rtn = 0;
 			int symnum = 0;
+			static int nread = 0;
 
 			if (SHPIndexHandle)
 			{
 				if (!SHPstatement)
 				{
 					char cmd[256];
+					LONGLONG count = GetSQLITENumRows(SHPIndexHandle, "SHP", "");
+					nread = 0;
 					if (UseBounds)
 						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", CurView->WBounds.xmn, CurView->WBounds.xmx, CurView->WBounds.ymn, CurView->WBounds.ymx);
 					else
@@ -1425,6 +1428,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 					ItemSeg = CurrentSHPRec;
 					symnum = sqlite3_column_int(SHPstatement, 1);
 					loc = sqlite3_column_int(SHPstatement, 2);
+					nread++;
 				}
 				if (!UseBounds || loc < 0)
 				{
