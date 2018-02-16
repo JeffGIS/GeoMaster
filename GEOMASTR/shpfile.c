@@ -1413,7 +1413,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 				if (!SHPstatement)
 				{
 					char cmd[256];
-					LONGLONG count = GetSQLITENumRows(SHPIndexHandle, "SHP", "");
+					//LONGLONG count = GetSQLITENumRows(SHPIndexHandle, "SHP", "");
 					nread = 0;
 					if (UseBounds)
 						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", CurView->WBounds.xmn, CurView->WBounds.xmx, CurView->WBounds.ymn, CurView->WBounds.ymx);
