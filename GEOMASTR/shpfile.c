@@ -568,12 +568,15 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
     GSSifstat (Fid,&statParmFile);
     SHPParmTime = statParmFile.st_mtime;
 	fgetstring (Projection,MAX_PATH,Fid);
-	if (*Projection)
-		LoadProjection(0, Projection);
-	else if (!havePrj)
+	if (!havePrj)
 	{
-		GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
-		LoadProjection(0, Projection);
+		if (*Projection)
+			LoadProjection(0, Projection);
+		else
+		{
+			GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+			LoadProjection(0, Projection);
+		}
 	}
 	SHPProjectionIsBase = IS_BASE[0];
 	fgetstring (Units,32,Fid);
@@ -1416,7 +1419,12 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 					//LONGLONG count = GetSQLITENumRows(SHPIndexHandle, "SHP", "");
 					nread = 0;
 					if (UseBounds)
-						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", CurView->WBounds.xmn, CurView->WBounds.xmx, CurView->WBounds.ymn, CurView->WBounds.ymx);
+					{
+						MNMXCORD shpBounds = CurView->WBounds;
+						
+						ConvertBounds(&shpBounds, 1, 0);
+						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", shpBounds.xmn, shpBounds.xmx, shpBounds.ymn, shpBounds.ymx);
+					}
 					else
 						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP WHERE RECNUM = %i", record);
 					if (!SQLOK(sqlite3_prepare_v2(SHPIndexHandle, cmd, -1, &SHPstatement, 0), SHPIndexHandle, "get record offset", 0) == SQLITE_OK)

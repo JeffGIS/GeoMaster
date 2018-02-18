@@ -146,6 +146,8 @@ BOOL GuessShapeProjection (LPSTR Name,HWND hWnd,UINT ProjCntl,UINT ProjUnits,BOO
 	SHPHEADER	SHPHeader;
 	HFILE		FidSHP;
 	MNMXCORD	SHPBounds;
+	double		factor;
+	LPSTR		nvp = 0;
 	
 	switch (MapFileType (Name))
 	{
@@ -156,6 +158,12 @@ BOOL GuessShapeProjection (LPSTR Name,HWND hWnd,UINT ProjCntl,UINT ProjUnits,BOO
 			BigRead (FidSHP,(HPSTR)&SHPHeader,(UINT)sizeof(SHPHeader));
 			GSSiClose (FidSHP);      
 			SHPBounds = *(LPMNMXCORD)&SHPHeader.Xmin;
+			nvp = SHPGetNVP(Name, &factor);
+			if (nvp)
+			{
+				free(nvp);
+				return TRUE;
+			}
 		break;
 		
 		case MT_PERSONAL_GEO_DB: 
