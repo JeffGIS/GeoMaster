@@ -22,8 +22,7 @@
 #include <shlwapi.h>                // for PathAppendW
 #include <shlobj.h>                 // for KNOWNFOLDERID_Pictures
 
-extern HINSTANCE g_hInstance;  // Handle to application instance
-extern HWND g_hWndApp;         // HWND of the app
+extern "C" BOOL inOpenFileDialog;
 
 extern "C" int FileType(LPSTR file);
 HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv); // CDialogEventHandler instance creator
@@ -39,6 +38,7 @@ HRESULT CCommonFileDialog::BasicFileOpen(HWND hWnd)
 {
     IFileDialog *pfd = NULL;
 
+	inOpenFileDialog = TRUE;
     //
     // CoCreate the File Open Dialog object
     //
@@ -1175,9 +1175,11 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 
 	int nFilters = OldFiltersToFilterSpec(filter, &filters,lastExtension,&selectedExtension,defaultExtension);
 	// CoCreate the File Open Dialog object.
-	IFileDialog *pfd = NULL;
-	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-
+	IFileDialog2 *pfd = NULL;
+	//HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	HRESULT hr;// = CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+	
+	inOpenFileDialog = TRUE;
 	if (strrchr(pFile, '\\'))
 		pOrigFile = strrchr(pFile, '\\') + 1;
 	hr = MultiByteToWideChar(CP_ACP, 0, pOrigFile, -1, origFile, lFile);
@@ -1260,7 +1262,7 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 
 									//hr = pfd->SetFolder(defFolder);    
 									IShellItem *psiFolder;
-									PWSTR pszFolder = NULL;
+									LPWSTR pszFolder = NULL;
 									hr = pfd->GetFolder(&psiFolder);
 									if (Suceded(hr, L"9"))
 									{
@@ -1296,7 +1298,7 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 										{
 											// We are just going to print out the 
 											// name of the file for sample sake.
-											PWSTR pszFilePath = NULL;
+											LPWSTR pszFilePath = NULL;
 											hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
 												&pszFilePath);
 											if (Suceded(hr, L"13")&&pszFilePath)
@@ -1339,5 +1341,7 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 		hr = 0;
 	else if (hr == HRESULT_FROM_WIN32(S_OK))
 		hr = TRUE;
+//	CoUninitialize();
+	inOpenFileDialog = FALSE;
 	return hr;
 }

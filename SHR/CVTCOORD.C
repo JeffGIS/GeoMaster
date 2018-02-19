@@ -291,6 +291,12 @@ long ok;
 		 {
 			 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[to], 1, 1, &DPoint->x, &DPoint->y, NULL,&PRJ_OUTFACTOR[to]);
 			 {
+				 if (pj_is_latlong(PRJ_PROJ4DEF[to]))
+				 {
+					 DPoint->x *= RAD_TO_DEG;
+					 DPoint->y *= RAD_TO_DEG;
+				 }
+
 #if ENABLETRACE
 				 GSSiExitProg(1335);
 #endif

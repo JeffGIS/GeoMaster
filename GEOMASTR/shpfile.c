@@ -1179,6 +1179,10 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 		HFILE	TMPFid;
 		OFSTRUCTGM OFStruct;
 
+		if (SHPIndexHandle)
+			sqlite3_close(SHPIndexHandle);
+		SHPIndexHandle = 0;
+
 		_fstrcpy(Name, SHPFileName);
 		ExpandText(Name);
 		pDot = _fstrrchr(Name, '.');
