@@ -1457,7 +1457,8 @@ KeepLooking:
 					else
 						ShowVal.AZ = -LTWOPI(CurView->Rotation);
 					SetShowValPoly (iref,FALSE);
-					strncpy0 (ShowVal.Text, Value, sizeof(ShowVal.Text)-1);
+					if (!*ShowVal.Text)
+						strncpy0 (ShowVal.Text, Value, sizeof(ShowVal.Text)-1);
 				}
 			} 
 			strncpy0(CurTheme->CurValue, Value,sizeof(CurTheme->CurValue)-1);
