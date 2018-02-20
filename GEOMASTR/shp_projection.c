@@ -123,7 +123,7 @@ int TransformShapeFile(LPSTR InFile, LPSTR OutFile, LPSTR InPrj, LPSTR OutPrj)
 	int rtn = 0;
 	BOOL isPrjFile = FALSE;
 	char * args[5];
-	double inFactor, outFactor;
+	double inFactor=1, outFactor=1;
 	char inprj_utm[] = { "+proj=utm +zone=15 +datum=NAD83 +units=m +no_defs" };
 	char inprj_hc[] = { "+proj=lcc +lat_1=45.13333333 +lat_2=44.88333333 +lat_0=44.79111111 +lon_0=-93.38333333 +x_0=152400.3048006096 +y_0=30480.06096012192 +a=6378418.941 +b=6357033.31 +units=us-ft +no_defs" };
 	LPSTR nvp = malloc(4096);
@@ -138,7 +138,11 @@ int TransformShapeFile(LPSTR InFile, LPSTR OutFile, LPSTR InPrj, LPSTR OutPrj)
 	else
 		args[3] = inprj_utm;
 
-	if (IsProjectionFile(OutPrj))
+	if (!stricmp(OutPrj, "GOOGLEMAPS"))
+	{
+		args[4] = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs";
+	}
+	else if (IsProjectionFile(OutPrj))
 	{
 		args[4] = SHPGetNVP(OutPrj,&outFactor);
 		isPrjFile = TRUE;

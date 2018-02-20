@@ -1419,7 +1419,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 			{
 				if (!SHPstatement)
 				{
-					char cmd[256];
+					char cmd[1024];
 					//LONGLONG count = GetSQLITENumRows(SHPIndexHandle, "SHP", "");
 					nread = 0;
 					if (UseBounds)
