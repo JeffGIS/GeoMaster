@@ -99,7 +99,7 @@ C                                           5 =  Packed dms */
 		HANDLE  PRJ_TRAN[MAX_PROJ][3]={0,0,0,0,0,0,0,0,0,0,0,0} ;
 		projPJ	PRJ_PROJ4DEF[MAX_PROJ]={0};
 		char	projid[MAX_PROJ][MAX_PROJ]={0};
-		double PRJ_OUTFACTOR[MAX_PROJ]={1.0};
+		double PRJ_OUTFACTOR[MAX_PROJ]={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 
 
 #else

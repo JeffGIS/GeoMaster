@@ -16,6 +16,8 @@
 #include <process.h>
 
 BOOL InDebug=FALSE;
+BOOL inOpenFileDialog=FALSE;
+
 void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);
 
@@ -1359,7 +1361,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		my_invalid_parameter_handler
 		);
 
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	numMonitors = GetNumMonitors();
 	typeChassis = ChassisType();
 	//mouseType = MouseType();
@@ -5573,22 +5575,25 @@ LoadGFMenu:
 					{
 						if (hfWnd != hWnd)
 						{
-							if (GetToolbarIDFromWnd (hfWnd) < 0)
+							if (!inOpenFileDialog)
 							{
-	    						if (!WindowIsCovered (hWnd,2))
+								if (GetToolbarIDFromWnd(hfWnd) < 0)
 								{
-									DisplayVPDialogs (FALSE);
-									//DisplayAllToolbars (5);
-	    							SetFocus (hWnd);
+									if (!WindowIsCovered(hWnd, 2))
+									{
+										DisplayVPDialogs(FALSE);
+										//DisplayAllToolbars (5);
+										SetFocus(hWnd);
+									}
+									else
+									{
+										DisplayAllToolbars(1);
+										SetFocus(hWnd);
+									}
 								}
 								else
-								{
-									DisplayAllToolbars (1);
-	    							SetFocus (hWnd);
-								}
+									SetFocus(hWnd);
 							}
-							else
-								SetFocus (hWnd);
 						}
 					}
 					GSSiSetCursor (hCursor);

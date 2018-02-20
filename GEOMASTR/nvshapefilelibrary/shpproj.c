@@ -84,7 +84,7 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
 	LPSTR indexName = ShapeFileIndexName(shapeFileName);
 	sqlite3* database;
 	SHPHandle	hSHP = SHPOpen(shapeFileName, "rb");
-	SHPIndexType = SHP_INDEX_STANDARD;
+	SHPIndexType = SHP_INDEX_SLT;
 	if (hSHP && GSSiLength(indexName) <= 0)
 	{
 		rtn = TRUE;

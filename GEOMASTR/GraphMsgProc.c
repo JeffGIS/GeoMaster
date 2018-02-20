@@ -16472,7 +16472,7 @@ BOOL FAR PASCAL STREET_TEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 {	
 	int	IDC_FieldName=SV_FIELD_NAME; 
 	BOOL	True=TRUE, Err; 
-	short	show;   
+	short	show=SW_HIDE;   
 	COLORREF	Color;
 
  int	BRtn;

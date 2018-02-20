@@ -189,3 +189,93 @@ BOOL GetShapeBounds(LPSTR file, LPMNMXCORD pbounds)
 
 	return rtn;
 }
+BOOL GetShapeType(LPSTR file, int * ptype)
+{
+	BOOL rtn = FALSE;
+	SHPHandle	hSHP;
+	int		nShapeType, nEntities;
+	double	minBounds[4], maxBounds[4];
+
+	hSHP = SHPOpen(file, "rb");
+	if (hSHP)
+	{
+		SHPGetInfo(hSHP, &nEntities, &nShapeType, minBounds, maxBounds);
+		SHPClose(hSHP);
+		rtn = TRUE;
+		*ptype = nShapeType;
+	}
+
+	return rtn;
+}
+BOOL GetShapeNumRecs(LPSTR file, int * nrecs)
+{
+	BOOL rtn = FALSE;
+	SHPHandle	hSHP;
+	int		nShapeType, nEntities;
+	double	minBounds[4], maxBounds[4];
+
+	hSHP = SHPOpen(file, "rb");
+	if (hSHP)
+	{
+		SHPGetInfo(hSHP, &nEntities, &nShapeType, minBounds, maxBounds);
+		SHPClose(hSHP);
+		rtn = TRUE;
+		*nrecs = nEntities;
+	}
+
+	return rtn;
+}
+BOOL CopySHPParm(LPSTR fromfile, LPSTR tofile, int startref)
+{
+	BOOL rtn = FALSE;
+	char fromFile[MAX_PATH];
+	char toFile[MAX_PATH];
+	char line[MAX_PATH + 2];
+	LPSTR pDot;
+	HFILE Fid, FidTo;
+
+	strcpy(fromFile, fromfile);
+	strcpy(toFile, tofile);
+
+	pDot = strrchr(fromFile, '.');
+	if (!pDot)
+		pDot = strchr(fromFile, 0);
+	strcpy(pDot, ".gsp");
+	pDot = strrchr(toFile, '.');
+	if (!pDot)
+		pDot = strchr(toFile, 0);
+	strcpy(pDot, ".gsp");
+	Fid = GSSiOpenFile(fromFile, 0, OF_READ);
+	if (Fid != HFILE_ERROR)
+	{
+		FidTo = GSSiOpenFile(toFile, 0, OF_CREATE);
+		if (FidTo != HFILE_ERROR)
+		{
+			fgetstring(line, MAX_PATH, Fid);//projection
+			fputstring(line, FidTo);
+			fgetstring(line, 32, Fid);//units
+			fputstring(line, FidTo);
+			fgetstring(line, MAX_PATH, Fid);//refno
+			itoa(startref, line, 10);
+			fputstring(line, FidTo);
+			fgetstring(line, 32, Fid);//TAG
+			fputstring(line, FidTo);
+			fgetstring(line, 32, Fid);//indextype (not used)
+			fputstring(line, FidTo);
+			while (fgetstring(line, 256, Fid))
+			{
+				if (*line == '#')
+					break;
+				fputstring(line, FidTo);
+			}
+			if (fgetstring(line, 256, Fid)) //begin date
+				fputstring(line, FidTo);
+			if (fgetstring(line, 256, Fid)) //end date
+				fputstring(line, FidTo);
+			GSSiClose(FidTo);
+		}
+		GSSiClose(Fid);
+	}
+
+	return rtn;
+}

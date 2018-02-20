@@ -145,6 +145,8 @@ typedef struct RampStruct {
     float curbCutDistance;
     float bumpWidth;
     float bumpHeight;
+	int	 dwWidth;
+	int	 dwDepth;
 } RampStruct;
 
 typedef struct ToleranceValues {
