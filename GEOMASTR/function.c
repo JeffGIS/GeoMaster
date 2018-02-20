@@ -2602,6 +2602,35 @@ SetVis:
 				}
 			}
 
+			if (!_fstricmp(Arg[1], "TYPE"))
+			{
+				int type;
+				if (GetShapeType(Arg[2], &type))
+				{
+					itoa(type,OutLoc,10);
+					goto Rtnl;
+				}
+			}
+
+			if (!_fstricmp(Arg[1], "NUMRECS"))
+			{
+				int numrecs;
+				if (GetShapeNumRecs(Arg[2], &numrecs))
+				{
+					itoa(numrecs, OutLoc, 10);
+					goto Rtnl;
+				}
+			}
+
+			if (!_fstricmp(Arg[1], "PARMCOPY"))//$SHP(PARMCOPY,fromfile,tofile,startref)
+			{
+				int startref = atoi(Arg[4]);
+				if (CopySHPParm(Arg[2],Arg[3],startref))
+				{
+					goto RtnTrue;
+				}
+			}
+
 			goto RtnFalse;
 		}
 
