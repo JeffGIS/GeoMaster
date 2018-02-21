@@ -3047,11 +3047,13 @@ typedef struct
 		unsigned short WantDisplayHighlight:1,
 									 unused:15;
 		char PickabilityRestoreFile[MAX_PATH];
+		BOOL UseGoogleZooms;
+		short GoogleZoom;
 		char	GrowSpace[2898-16*MAXPROFILEROUTES-2*sizeof(short)-2*sizeof(HANDLE)
 						  -sizeof(HANDLE)-sizeof(int)-sizeof(COLORREF)
 						  -sizeof(int)-2*sizeof(HBITMAP)-2*sizeof(HDC)
 						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)
-						  -MAX_PATH];
+						  -MAX_PATH-sizeof(BOOL)-sizeof(short)];
         char		EndOfViewport;     
         
 	}	VIEWPORT;

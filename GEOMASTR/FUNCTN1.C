@@ -641,12 +641,17 @@ GSSiExitProg (1348);
 						}
 					}
 				}
-				else if (!_fstricmp (Arg[3],"GRAY"))
+				else if (!_fstricmp(Arg[3], "GOOGLEZOOM"))
+				{
+					itoa (CurView->GoogleZoom,OutLoc,10);
+					goto Rtnl;
+				}
+				else if (!_fstricmp(Arg[3], "GRAY"))
 				{
 					rtn = CurView->ConvertToGray;
-					goto Rtnrtn; 
+					goto Rtnrtn;
 				}
-				else if (!_fstricmp (Arg[3],"NUMBER"))
+				else if (!_fstricmp(Arg[3], "NUMBER"))
 				{
 					itoa (CurView->ID,OutLoc,10);
 					goto Rtnl; 
@@ -754,9 +759,13 @@ GSSiExitProg (1348);
 			{  
 				if (Err)
 					goto RtnFalse;
-				if (!_fstricmp (Arg[3],"PROFILEROUTE"))
+				if (!_fstricmp(Arg[3], "USEGOOGLEZOOMS"))
 				{
-					HANDLE	hPoints;
+					CurView->UseGoogleZooms = atob(Arg[4]);
+				}
+				else if (!_fstricmp(Arg[3], "PROFILEROUTE"))
+				{
+						HANDLE	hPoints;
 					int nPoints = GetPointsFromList (Arg[4],&hPoints);
 
 					CurView->nProfileRoute[0] = 0;

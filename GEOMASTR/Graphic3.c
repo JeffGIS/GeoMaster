@@ -1242,6 +1242,30 @@ BOOL ZoomToPointAndScaleOnlyIfDifferent (DPOINT MidPointW,double Scale,BOOL Imed
 	return TRUE;
 }
 
+double SetToGoogleScale(DPOINT wPoint,double Scale, BOOL UseGoogleZooms)
+{
+	double minDiff, diff;
+	double nearScale, testScale;
+	if (!UseGoogleZooms)
+		return Scale;
+	ConvertCoord(&wPoint, 1, 2);
+	nearScale = GroundResolution(wPoint.y, 0)/2;
+	minDiff = fabs(Scale - nearScale);
+	CurView->GoogleZoom = 0;
+	for (int izoom = 1; izoom < 22;izoom++)
+	{
+		testScale = GroundResolution(wPoint.y, izoom)/2;
+		diff = fabs(Scale - testScale);
+		if (diff < minDiff)
+		{
+			nearScale = testScale;
+			minDiff = diff;
+			CurView->GoogleZoom = izoom;
+		}
+	}
+	return nearScale;
+}
+
 void ZoomToPointAndScale (DPOINT MidPointW,double Scale,BOOL Imediate)
 #if ENABLETRACE
 {GSSiEnterProg (661);
@@ -1257,7 +1281,7 @@ void ZoomToPointAndScale (DPOINT MidPointW,double Scale,BOOL Imediate)
     if (Scale < GetGlobalDVal2 ("[%MINSCALE]",0))
     	Scale = GetGlobalDVal2 ("[%MINSCALE]",0);
 	if (!ScaleIsSet(FALSE))
-		CurView->Scale = Scale;
+		CurView->Scale = SetToGoogleScale (MidPointW,Scale,CurView->UseGoogleZooms);
 	CurView->MidPointW = MidPointW;
 	CurView->HaveBounds = TRUE;
 	CurView->WindowIsZoomed = TRUE;

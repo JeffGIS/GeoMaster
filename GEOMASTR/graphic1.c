@@ -6120,14 +6120,14 @@ GSSiExitProg (66);
          {
 			 ProcessGlobal ("[%LAYERINIT]");
 	         _fstrcpy (Mess,PltName);
-			 strupr (Mess);
+			 ExpandText(Mess);
+			 strupr(Mess);
 			 if ((pPar = strstr (Mess,".GMD(")))
 				 *(pPar+4) = 0;
 			 if ((pPar = strstr (Mess,".MDB(")))
 				 *(pPar+4) = 0;
 			 if ((pPar = strstr (Mess,".GDB(")))
 				 *(pPar+4) = 0;
-	         ExpandText (Mess); 
 			 if (*Mess)
 			 {
 				 char	temp[MAX_PATH];
