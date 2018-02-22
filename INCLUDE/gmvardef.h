@@ -1654,6 +1654,8 @@ BOOL	wantGDIPlus = TRUE;
 int		ShowLineDirection = 0;
 COLORREF lastPickedColor = 0;
 int		defaultAreaTransparency = 255;
+int		GoogleScale = 1;
+int		GoogleZoom = 21;
 int		ii;
 
 

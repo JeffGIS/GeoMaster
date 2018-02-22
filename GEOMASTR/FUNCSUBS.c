@@ -1285,12 +1285,23 @@ double GetGoogleScaleForZoom (int iZoom)
 int GetGoogleZoomForSCale (double scale)
 {
 	int iZoom;
-
-	for (iZoom = 1;iZoom<MAXGZOOMS;iZoom++)
-		if (gTileScale[iZoom] < scale)
-			return iZoom;
-
-	return MAXGZOOMS;
+	int nearZoom;
+	double minDiff, diff;
+	double nearScale, testScale;
+	nearScale = gTileScale[1];
+	minDiff = fabs(scale - nearScale);
+	for (int izoom = 1; izoom <= MAXGZOOMS; izoom++)
+	{
+		testScale = gTileScale[izoom];
+		diff = fabs(scale - testScale);
+		if (diff < minDiff)
+		{
+			nearScale = testScale;
+			minDiff = diff;
+			nearZoom = izoom;
+		}
+	}
+	return nearZoom;
 }
 
 int GetTranID(LPSTR cid)

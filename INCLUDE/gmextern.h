@@ -1783,6 +1783,9 @@ extern	BOOL	wantGDIPlus;
 extern	int		ShowLineDirection;
 extern  COLORREF lastPickedColor;
 extern	int		defaultAreaTransparency;
+extern  int		GoogleScale;
+extern	int		GoogleZoom;
+
 extern HBITMAP hPatBMP[5];
 extern	int		ii;
 
