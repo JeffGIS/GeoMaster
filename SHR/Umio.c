@@ -206,7 +206,16 @@ void LogServerActivity (LPSTR Mess)
 //	InvalidateRect (hWndMain,0,TRUE);
 	return;
 }
+void RepaintServerInfo(void)
+{
+	HDC hDCScreen = GetDC(hWndMain);
+	RECT rect;
 
+	GetClientRect(hWndMain, &rect);
+	PaintServerInfo(hDCScreen, &rect);
+	ReleaseDC(hWndMain, hDCScreen);
+	return;
+}
 BOOL GetReplayHeader (void)
 {
 	 if (FidReplay == HFILE_ERROR || !fgetstring (ReplayHeader,127,FidReplay))

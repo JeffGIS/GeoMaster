@@ -32,6 +32,7 @@ void DisplayLenSocketBuffer (int i);
 int GetSocketID (SOCKET sock);
 BOOL GetMyIPNetAddress (LPSTR inetAddr);
 BOOL PaintServerInfo (HDC hDC,LPRECT pRect); 
+void RepaintServerInfo(void);
 SOCKET connectToServer ( char *serverName, u_short port,BOOL UpdateServerOpen, LPINT perr );
 BOOL ReadNTBlock (SOCKET sock,LPSTR pBuf,long lBuf);
 BOOL SendNTBlock (SOCKET sock,LPSTR pBuf,long lBuf);
