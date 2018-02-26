@@ -1454,6 +1454,7 @@ GSSiExitProg (1156);
 
 BOOL RestoreFullWindowBitmap (void)   
 { 
+	BOOL rtn = FALSE;
 	if (hFullWindowBitMap && (int)hFullWindowBitMap != -1)
 	{
 		HDC	hDC = GetDC (hWndMain);
@@ -1469,11 +1470,11 @@ BOOL RestoreFullWindowBitmap (void)
 		BackgroundUpdateMessage ("!REDISPLAY!");
 		RestoreDC (hDC,-1);
 		GdiFlush ();
-		return TRUE;
+		rtn = TRUE;
 	}
-	else
-		return FALSE;
-}  
+	RepaintServerInfo();
+	return rtn;
+}
 
 
 BOOL SaveFullWindowBitmap (HWND hWnd)

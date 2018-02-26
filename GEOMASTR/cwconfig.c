@@ -5102,6 +5102,9 @@ DisplayParcel:
 				UpdateVehicleStatusDlg ();
 				DisplayAllToolbars (4);
 			}
+			else
+				RepaintServerInfo();
+
 			break;
 		}
 		goto ReturnDefault;
