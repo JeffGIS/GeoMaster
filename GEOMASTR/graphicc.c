@@ -2,6 +2,7 @@
 #include "extrndb.h"
  
 #include "gmextern.h"
+#include <commctrl.h>
 
 
 static	TAGKEY TAGKey;
@@ -3839,6 +3840,82 @@ void ExpandPltName (LPSTR PltName)
 	strcat (PltName,Where);
 	return;
 }
+LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+{
+	if (Message == WM_PAINT)
+	{
+		int FontSize = 24;
+		PAINTSTRUCT ps;
+		HDC hDC = BeginPaint (hWnd,&ps);
+		char message[] = "Getting map from Google";
+		SetTextColor(hDC, 0);
+		HFONT hFont = CreateFont(FontSize, 0, 0, 0, FW_NORMAL,
+			0, 0, 0, 0, 0, 0, 0, 0, "Arial");
+		HFONT hOldFont = SelectObject(hDC, hFont);
+
+		int dt =DrawText(hDC, message, strlen(message), &ps.rcPaint, DT_SINGLELINE | DT_BOTTOM |DT_CENTER);
+		SelectObject(hDC, hOldFont);
+		DeleteObject(hFont);
+		EndPaint(hWnd, &ps);
+	}
+	return DefWindowProc(hWnd, Message, wParam, lParam);
+
+}
+
+BOOL RegisterPopupMessageClass(BOOL UnRegister)
+{
+	WNDCLASS  wc;
+	static	Called = FALSE;
+
+	if (UnRegister)
+	{
+		if (Called)
+		{
+			UnregisterClass("PopupMessageWindowClass", hInst);
+			Called = FALSE;
+		}
+		return TRUE;
+	}
+	if (Called) return TRUE;
+	Called = TRUE;
+	wc.style = CS_HREDRAW | CS_DROPSHADOW;
+	wc.lpfnWndProc = (WNDPROC)PopupMessageWndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = hInst;
+	wc.hIcon = NULL;
+	wc.hCursor = NULL;
+	wc.hbrBackground = GetStockObject(WHITE_BRUSH);
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = "PopupMessageWindowClass";
+
+	return (RegisterClass(&wc));
+}
+
+HWND CreateGoogleMessage(PTSTR pszText)
+{
+	RegisterPopupMessageClass(FALSE);
+
+	int width = 300;
+	int height = 30;
+	int x, y;
+	x = CurView->ScreenRect.left + (RECTWIDTH(&CurView->ScreenRect) - width) / 2;
+	y = CurView->ScreenRect.top + (RECTHEIGHT(&CurView->ScreenRect) - height) / 2;
+
+	HWND hwndTip = CreateWindowEx(WS_EX_TOPMOST, "PopupMessageWindowClass", "PopupMessage",WS_BORDER|WS_VISIBLE|WS_POPUP,
+		x,y,width,height,
+		hWndMain, NULL,
+		hInst, NULL);
+
+	if (!hwndTip)
+	{
+		return (HWND)NULL;
+	}
+	//InvalidateRect(hwndTip, 0, FALSE);
+	UpdateWindow(hwndTip);
+
+	return hwndTip;
+}
 
 BOOL GetGoogleMapFile(int type)
 {
@@ -3871,8 +3948,19 @@ BOOL GetGoogleMapFile(int type)
 	}
 	if (!sameImage)
 	{
+		int attempts = 0;
+#define MAX_ATTEMPTS	3
+		HWND hMess = CreateGoogleMessage("");
 		RemoveBMPFromCache32(CurView->CurrentGoogleImage);
+		TryAgain:
 		rtn = URLToFile(cmd, CurView->CurrentGoogleImage);
+		if (!rtn)
+		{
+			if (attempts++ < MAX_ATTEMPTS)
+				goto TryAgain;
+			MessageBox(0, "Google map failed",0, MB_ICONEXCLAMATION);
+		}
+		DestroyWindow(hMess);
 		CurView->CurrentGoogleZoom = GoogleZoom;
 		CurView->CurrentGoogleScale = GoogleScale;
 		CurView->CurrentGoogleCenter.x = pixelx;
