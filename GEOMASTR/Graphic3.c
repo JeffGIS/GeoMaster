@@ -1242,14 +1242,63 @@ BOOL ZoomToPointAndScaleOnlyIfDifferent (DPOINT MidPointW,double Scale,BOOL Imed
 	return TRUE;
 }
 
+int GetNearestZoomForSCale(double scale, double *gTileScale)
+{
+	int iZoom;
+	int nearZoom;
+	double minDiff, diff;
+	double nearScale, testScale;
+	nearScale = gTileScale[1];
+	minDiff = fabs(scale - nearScale);
+	for (int izoom = 1; izoom <= MAXGZOOMS; izoom++)
+	{
+		testScale = gTileScale[izoom];
+		diff = fabs(scale - testScale);
+		if (diff < minDiff)
+		{
+			nearScale = testScale;
+			minDiff = diff;
+			nearZoom = izoom;
+		}
+	}
+	return nearZoom;
+}
+
 double SetToGoogleScale(double Scale, BOOL UseGoogleZooms)
 {
 	double nearScale;
+	DPOINT vpMidPointLL, ScreenPoints[4];
+	double GoogleScales[22];
+	int width, height;
 
 	if (!UseGoogleZooms)
 		return Scale;
-	CurView->GoogleZoom = GetGoogleZoomForSCale(Scale*GoogleScale);
-	nearScale = GetGoogleScaleForZoom(CurView->GoogleZoom)/GoogleScale;
+
+	RectToDPoints(&CurView->ScreenRect, ScreenPoints);
+
+	vpMidPointLL = MinMaxMidPointD(&CurView->WBounds);
+	ConvertCoord(&vpMidPointLL, 1, 2);
+	width = RECTWIDTH(&CurView->ScreenRect) / GoogleScale;
+	height = RECTHEIGHT(&CurView->ScreenRect) / GoogleScale;
+
+	for (int izoom = 1; izoom < 22; izoom++)
+	{
+		DPOINT midPoint, midPointPixel;
+		DPOINT lowerLeftPoint, upperRightPoint;
+
+		LatLongToPixelXYd(vpMidPointLL.y, vpMidPointLL.x, izoom, &midPointPixel.x, &midPointPixel.y);
+		lowerLeftPoint = (DPOINT) { midPointPixel.x - width / 2, midPointPixel.y - height / 2 };
+		upperRightPoint = (DPOINT) { midPointPixel.x + width / 2, midPointPixel.y + height / 2 };
+		PixelXYToLatLong(lowerLeftPoint.x, lowerLeftPoint.y, izoom, &lowerLeftPoint.y, &lowerLeftPoint.x);
+		PixelXYToLatLong(upperRightPoint.x, upperRightPoint.y, izoom, &upperRightPoint.y, &upperRightPoint.x);
+		ConvertCoord(&upperRightPoint, 2, 1);
+		ConvertCoord(&lowerLeftPoint, 2, 1);
+		GoogleScales[izoom] = ldistp(lowerLeftPoint, upperRightPoint) / ldistp(ScreenPoints[0], ScreenPoints[2]);
+	}
+
+	GoogleZoom = GetNearestZoomForSCale(Scale,GoogleScales);
+	CurView->GoogleZoom = GoogleZoom;
+	nearScale = GoogleScales[GoogleZoom];
 	return nearScale;
 }
 
