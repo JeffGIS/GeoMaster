@@ -13526,6 +13526,7 @@ HaveEmpty:
 	                   case CBN_SELCHANGE:  
 	                   		Choice = SendDlgItemMessage (hWndDlg,IDC_PATH_TYPE,CB_GETCURSEL,0,0);
 	         		  		ShowWindow (GetDlgItem(hWndDlg,IDC_STRETCHIMAGE),Choice == 4);
+							SendDlgItemMessage(hWndDlg, IDC_STRETCHIMAGE, BM_SETCHECK, CurView->StretchImage[EditLayer], 0L);
 							if (Choice == 8)
 							{
 								ShowWindow (GetDlgItem(hWndDlg,IDC_RENDER_TITLE),TRUE);
