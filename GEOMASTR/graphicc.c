@@ -3845,6 +3845,8 @@ BOOL GetGoogleMapFile(int type)
 	BOOL rtn = FALSE;
 	char cmd[1024];
 	DPOINT centerLL = MinMaxMidPointD (&CurView->WBounds);
+	BOOL sameImage;
+	int pixelx, pixely;
 
 	ConvertCoord(&centerLL, 1, 2);
 	sprintf (cmd, "http://maps.googleapis.com/maps/api/staticmap?size=640x640&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=hybrid",centerLL.y,centerLL.x,GoogleZoom,GoogleScale);
@@ -3861,12 +3863,20 @@ BOOL GetGoogleMapFile(int type)
 		CurView->CurrentGoogleZoom = -1;
 		CurView->CurrentGoogleScale = -1;
 	}
-	if (GoogleZoom != CurView->CurrentGoogleZoom || GoogleScale != CurView->CurrentGoogleScale)
+	sameImage = (GoogleZoom == CurView->CurrentGoogleZoom && GoogleScale == CurView->CurrentGoogleScale);
+	if (sameImage)
+	{
+		LatLongToPixelXY(centerLL.y, centerLL.x, GoogleZoom, &pixelx, &pixely);
+		sameImage = (pixelx == CurView->CurrentGoogleCenter.x && pixely == CurView->CurrentGoogleCenter.y);
+	}
+	if (!sameImage)
 	{
 		RemoveBMPFromCache32(CurView->CurrentGoogleImage);
 		rtn = URLToFile(cmd, CurView->CurrentGoogleImage);
 		CurView->CurrentGoogleZoom = GoogleZoom;
 		CurView->CurrentGoogleScale = GoogleScale;
+		CurView->CurrentGoogleCenter.x = pixelx;
+		CurView->CurrentGoogleCenter.y = pixely;
 	}
 	else
 		rtn = TRUE;

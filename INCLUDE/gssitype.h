@@ -3056,13 +3056,13 @@ typedef struct
 		short	CurrentGoogleZoom;
 		short	CurrentGoogleType;
 		short	CurrentGoogleScale;
-		DPOINT  CurrentGoogleCenter;
+		POINT   CurrentGoogleCenter;
 		char	GrowSpace[2898-16*MAXPROFILEROUTES-2*sizeof(short)-2*sizeof(HANDLE)
 						  -sizeof(HANDLE)-sizeof(int)-sizeof(COLORREF)
 						  -sizeof(int)-2*sizeof(HBITMAP)-2*sizeof(HDC)
 						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)
 						  -MAX_PATH-sizeof(BOOL)-sizeof(short)
-						  -MAX_PATH - 3*sizeof(short)-sizeof(DPOINT)];
+						  -MAX_PATH - 3*sizeof(short)-sizeof(POINT)];
         char		EndOfViewport;     
         
 	}	VIEWPORT;

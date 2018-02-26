@@ -1264,14 +1264,31 @@ int GetNearestZoomForSCale(double scale, double *gTileScale)
 	return nearZoom;
 }
 
-double SetToGoogleScale(double Scale, BOOL UseGoogleZooms)
+BOOL SetUseGoogleZooms(void)
+{
+	for (int ifile = 0; ifile < CurView->NumFiles; ifile++)
+	{
+		if (CurVis && CurVis->FileIsVisible[ifile])
+		{
+			char fileName[1024];
+			strcpy(fileName, CurView->lpFiles[ifile]);
+			ExpandText(fileName);
+			if (!strnicmp(fileName, "GOOGLE.", 7))
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+double SetToGoogleScale(double Scale)
 {
 	double nearScale;
 	DPOINT vpMidPointLL, ScreenPoints[4];
 	double GoogleScales[22];
 	int width, height;
 
-	if (!UseGoogleZooms)
+	CurView->UseGoogleZooms = SetUseGoogleZooms();
+	if (!CurView->UseGoogleZooms)
 		return Scale;
 
 	RectToDPoints(&CurView->ScreenRect, ScreenPoints);
@@ -1317,7 +1334,7 @@ void ZoomToPointAndScale (DPOINT MidPointW,double Scale,BOOL Imediate)
     if (Scale < GetGlobalDVal2 ("[%MINSCALE]",0))
     	Scale = GetGlobalDVal2 ("[%MINSCALE]",0);
 	if (!ScaleIsSet(FALSE))
-		CurView->Scale = SetToGoogleScale (Scale,CurView->UseGoogleZooms);
+		CurView->Scale = SetToGoogleScale (Scale);
 	CurView->MidPointW = MidPointW;
 	CurView->HaveBounds = TRUE;
 	CurView->WindowIsZoomed = TRUE;
