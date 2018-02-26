@@ -3120,7 +3120,7 @@ GSSiExitProg (100);
             pViewportsD[iv] = pViewportsD[CurView->ZoomTarget-1];
             pViewportsD[CurView->ZoomTarget-1]=CurView;
         } 
-
+		*CurView->CurrentGoogleImage = 0;
 //          AddActivateSwitch();
 // 		sprintf (str,"VP %i %i %i",CurView->ID,CurView->NumPickList,CurView->NumFiles);
 //		MessageBox (0,str,0,MB_OK);

@@ -3840,6 +3840,40 @@ void ExpandPltName (LPSTR PltName)
 	return;
 }
 
+BOOL GetGoogleMapFile(int type)
+{
+	BOOL rtn = FALSE;
+	char cmd[1024];
+	DPOINT centerLL = MinMaxMidPointD (&CurView->WBounds);
+
+	ConvertCoord(&centerLL, 1, 2);
+	sprintf (cmd, "http://maps.googleapis.com/maps/api/staticmap?size=640x640&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=hybrid",centerLL.y,centerLL.x,GoogleZoom,GoogleScale);
+	ExpandText(cmd);
+	if (!*CurView->CurrentGoogleImage)
+	{
+		char TempDir[MAX_PATH];
+		LPSTR pDot;
+
+		GetTempPath(MAX_PATH, TempDir);
+		rtn = GetTempFileName(TempDir, "ggl", 0, CurView->CurrentGoogleImage);
+		pDot = strrchr(CurView->CurrentGoogleImage,'.');
+		strcpy(pDot, ".jpg");
+		CurView->CurrentGoogleZoom = -1;
+		CurView->CurrentGoogleScale = -1;
+	}
+	if (GoogleZoom != CurView->CurrentGoogleZoom || GoogleScale != CurView->CurrentGoogleScale)
+	{
+		RemoveBMPFromCache32(CurView->CurrentGoogleImage);
+		rtn = URLToFile(cmd, CurView->CurrentGoogleImage);
+		CurView->CurrentGoogleZoom = GoogleZoom;
+		CurView->CurrentGoogleScale = GoogleScale;
+	}
+	else
+		rtn = TRUE;
+	
+	return rtn;
+}
+
 BOOL OpenMap (HWND hWnd, HDC hDC)
 #if ENABLETRACE
 {GSSiEnterProg (1073);
@@ -3926,20 +3960,32 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
     if (DoTime)
     	starttime=GetTickCount();
 //    DescScan (-3,0); 
-    if (PltType == 3)
-    {   
-	    if (MapFileType (PltName) == MT_SID)  
-	    {
-	        MapType = MT_IMAGE;
-	    	goto DoSid;
-	    } 
-ProcessImageFile:  
+ProcessImageFile:
+	if (PltType == 3)
+    {
+		int mft = MapFileType(PltName);
+		switch (mft)
+		{
+			case MT_SID:
+			{
+				MapType = MT_IMAGE;
+				goto DoSid;
+			}
+			case MT_GOOGLE_ROADS:
+			case MT_GOOGLE_AERIAL:
+			case MT_GOOGLE_HYBRID:
+			{
+				if (!GetGoogleMapFile(mft))
+					goto RtnFalse;
+				strcpy(PltName, CurView->CurrentGoogleImage);
+			}
+		}
 		if (!InLoadBinaryFileList)
 		{
 			hCurImageMapDib = LoadDIB32(PltName, TRUE); 
 
     		if (!hCurImageMapDib)
-    			goto RtnFalse;  
+    			goto RtnFalse;
 		}
 		else
 			ii=1;

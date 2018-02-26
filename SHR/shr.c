@@ -6737,7 +6737,9 @@ BOOL ExistFile(LPSTR Name)
     short   i;    
 	BOOL	rtn=FALSE;
     
-	if (RunFromCache)
+	if (!strnicmp("GOOGLE.",Name,7))
+		rtn = TRUE;
+	else if (RunFromCache)
 	{
 		char nameTemp[MAX_PATH];
 

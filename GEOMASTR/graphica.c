@@ -2166,8 +2166,14 @@ short MapFileType (LPSTR InName)
 		return MT_DGN7;
 	if (!_fstricmp(&Name[l - 4], ".TXT"))
 		return MT_MACRO; 
-	if (!_fstricmp (&Name[l-4],".BMP") || !_fstricmp (&Name[l-4],".JPG") || !_fstricmp (&Name[l-4],".TIF") || !_fstricmp (&Name[l-4],".PCX"))
-		return MT_IMAGE; 
+	if (!_fstricmp(&Name[l - 4], ".BMP") || !_fstricmp(&Name[l - 4], ".JPG") || !_fstricmp(&Name[l - 4], ".TIF") || !_fstricmp(&Name[l - 4], ".PCX"))
+		return MT_IMAGE;
+	if (!_fstricmp(&Name[l - 4], ".GG1"))
+		return MT_GOOGLE_ROADS;
+	if (!_fstricmp(&Name[l - 4], ".GG2"))
+		return MT_GOOGLE_AERIAL;
+	if (!_fstricmp(&Name[l - 4], ".GG3"))
+		return MT_GOOGLE_HYBRID;
 	if (!_fstricmp(&Name[l - 4], ".DTM") || !_fstricmp(&Name[l - 4], ".LDR") || !_fstricmp(&Name[l - 4], ".TIN") || !_fstricmp(&Name[l - 3], ".LA"))
 		return MT_DTM; 
 	if (!_fstrnicmp (pBS,"INDEX",5))
