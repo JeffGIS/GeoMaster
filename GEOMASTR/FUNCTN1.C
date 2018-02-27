@@ -641,9 +641,14 @@ GSSiExitProg (1348);
 						}
 					}
 				}
+				else if (!_fstricmp(Arg[3], "HAVEORTHOS"))
+				{
+					btoa(CurView->HaveOrthos, OutLoc);
+					goto Rtnl;
+				}
 				else if (!_fstricmp(Arg[3], "GOOGLEZOOM"))
 				{
-					itoa (CurView->GoogleZoom,OutLoc,10);
+					itoa(CurView->GoogleZoom, OutLoc, 10);
 					goto Rtnl;
 				}
 				else if (!_fstricmp(Arg[3], "GRAY"))
