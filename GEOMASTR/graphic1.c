@@ -4892,6 +4892,27 @@ void CloseVPDialog ()
 	return;
 }
 
+BOOL SetHaveOrthos(void)
+{
+	BOOL rtn = FALSE;
+
+	for (int ifile = 0; ifile < CurView->NumFiles; ifile++)
+	{
+		if (CurView->FileType[ifile] == 5)
+		{
+			if (CurVis && CurVis->FileIsVisible[ifile] && CurVis->WantType[5])
+			{
+				char fileName[1024];
+				strcpy(fileName, CurView->lpFiles[ifile]);
+				ExpandText(fileName);
+				if (FileType(fileName))
+					return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
 void ResetViewport (BOOL WantDisplayPass,BOOL FromPaintMap)
 #if ENABLETRACE
 {GSSiEnterProg (56);
@@ -4926,7 +4947,7 @@ GSSiExitProg (56);
 	 }   
 	 *MaskAreaFile = 0;
      GSSiDeleteObject(&CurView->hRgn);
-	 CurView->HaveOrthos = FALSE;
+	 CurView->HaveOrthos = SetHaveOrthos ();
 	 SetThemeOrder (CurView);
  	 CloseEditRect(CurView); 
  	 RemoveInfoBoxRectForVP(CurView->ID);

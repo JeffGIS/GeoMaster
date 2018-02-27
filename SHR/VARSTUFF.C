@@ -3502,6 +3502,12 @@ GSSiExitProg (532);
 			if (GoogleMapType < 1 || GoogleMapType > 4)
 				GoogleMapType = 1;
 			break;
+		case 384:
+			if (CurTheme)
+			{
+				CurTheme->NotSetColor = !atob(Value);
+			}
+			break;
 		default:
  			break;
 	}
@@ -3904,6 +3910,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%GOOGLESCALE", 381, TRUE);
 	AllocateTypeVar("%GOOGLEZOOM", 382, TRUE);
 	AllocateTypeVar("%GOOGLEMAPTYPE", 383, TRUE);
+	AllocateTypeVar("%SETCOLOR", 384, TRUE);
 
 
 //	AllocateTypeVar("%DL",191,FALSE);

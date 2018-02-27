@@ -1932,7 +1932,7 @@ void ThemeBeginDisplayPass(BOOL PixelThemesOnly,short FromVPID)
 
 	if (GetGlobalBVal2 ("[%ONEPASS]",FALSE))
 		CurView->PassID = 5;
-    CurView->HaveOrthos = FALSE;
+	CurView->HaveOrthos = SetHaveOrthos();
 	SetTransparency (-1);
     if (DisplayCycle != LastDisplayCycle)
     {

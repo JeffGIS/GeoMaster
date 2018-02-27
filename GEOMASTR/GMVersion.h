@@ -1,1 +1,1 @@
-char	GMVersion[36] = "GeoMaster version 34k (build 107)";
+char	GMVersion[36] = "GeoMaster version 34k (build 108)";
