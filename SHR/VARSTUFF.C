@@ -3497,6 +3497,11 @@ GSSiExitProg (532);
 			if (GoogleZoom < 1 || GoogleZoom > 21)
 				GoogleZoom = 21;
 			break;
+		case 383:
+			GoogleMapType = atoi(Value);
+			if (GoogleMapType < 1 || GoogleMapType > 4)
+				GoogleMapType = 1;
+			break;
 		default:
  			break;
 	}
@@ -3896,8 +3901,9 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%FILEUSAGEFILE", 378, FALSE);
 	AllocateTypeVar("%USEONSCREENPOLY", 379, FALSE);
 	AllocateTypeVar("%AREATRANSPARENCY", 380, FALSE);
-	AllocateTypeVar("%GOOGLESCALE", 381, FALSE);
-	AllocateTypeVar("%GOOGLEZOOM", 382, FALSE);
+	AllocateTypeVar("%GOOGLESCALE", 381, TRUE);
+	AllocateTypeVar("%GOOGLEZOOM", 382, TRUE);
+	AllocateTypeVar("%GOOGLEMAPTYPE", 383, TRUE);
 
 
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5049,6 +5055,9 @@ GSSiExitProg (533);
 			break;
 		case 382:
 			ltoa(GoogleZoom, OutStr, 10);
+			break;
+		case 383:
+			ltoa(GoogleMapType, OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);

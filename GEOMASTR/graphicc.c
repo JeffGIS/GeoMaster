@@ -3897,7 +3897,7 @@ HWND CreateGoogleMessage(PTSTR pszText)
 	RegisterPopupMessageClass(FALSE);
 
 	int width = 300;
-	int height = 30;
+	int height = 26;
 	int x, y;
 	x = CurView->ScreenRect.left + (RECTWIDTH(&CurView->ScreenRect) - width) / 2;
 	y = CurView->ScreenRect.top + (RECTHEIGHT(&CurView->ScreenRect) - height) / 2;
@@ -3924,9 +3924,22 @@ BOOL GetGoogleMapFile(int type)
 	DPOINT centerLL = MinMaxMidPointD (&CurView->WBounds);
 	BOOL sameImage;
 	int pixelx, pixely;
+	char mapType[16]="roadmap";
 
+	switch (type)
+	{
+	case MT_GOOGLE_SATELLITE:
+		strcpy(mapType, "satellite");
+		break;
+	case MT_GOOGLE_TERRAIN:
+		strcpy(mapType, "terrain");
+		break;
+	case MT_GOOGLE_HYBRID:
+		strcpy(mapType, "hybrid");
+		break;
+	}
 	ConvertCoord(&centerLL, 1, 2);
-	sprintf (cmd, "http://maps.googleapis.com/maps/api/staticmap?size=640x640&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=hybrid",centerLL.y,centerLL.x,GoogleZoom,GoogleScale);
+	sprintf (cmd, "http://maps.googleapis.com/maps/api/staticmap?size=640x640&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=%s",centerLL.y,centerLL.x,GoogleZoom,GoogleScale,mapType);
 	ExpandText(cmd);
 	if (!*CurView->CurrentGoogleImage)
 	{
@@ -3940,7 +3953,7 @@ BOOL GetGoogleMapFile(int type)
 		CurView->CurrentGoogleZoom = -1;
 		CurView->CurrentGoogleScale = -1;
 	}
-	sameImage = (GoogleZoom == CurView->CurrentGoogleZoom && GoogleScale == CurView->CurrentGoogleScale);
+	sameImage = (GoogleZoom == CurView->CurrentGoogleZoom && GoogleScale == CurView->CurrentGoogleScale && type == CurView->CurrentGoogleMapType);
 	if (sameImage)
 	{
 		LatLongToPixelXY(centerLL.y, centerLL.x, GoogleZoom, &pixelx, &pixely);
@@ -3963,6 +3976,7 @@ BOOL GetGoogleMapFile(int type)
 		DestroyWindow(hMess);
 		CurView->CurrentGoogleZoom = GoogleZoom;
 		CurView->CurrentGoogleScale = GoogleScale;
+		CurView->CurrentGoogleMapType = type;
 		CurView->CurrentGoogleCenter.x = pixelx;
 		CurView->CurrentGoogleCenter.y = pixely;
 	}
@@ -4069,8 +4083,9 @@ ProcessImageFile:
 				MapType = MT_IMAGE;
 				goto DoSid;
 			}
-			case MT_GOOGLE_ROADS:
-			case MT_GOOGLE_AERIAL:
+			case MT_GOOGLE_ROADMAP:
+			case MT_GOOGLE_SATELLITE:
+			case MT_GOOGLE_TERRAIN:
 			case MT_GOOGLE_HYBRID:
 			{
 				if (!GetGoogleMapFile(mft))

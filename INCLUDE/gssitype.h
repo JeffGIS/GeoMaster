@@ -208,9 +208,10 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define MT_KML	15
 #define MT_SQLITE 16
 #define MT_DGN8	17
-#define MT_GOOGLE_ROADS 18
-#define MT_GOOGLE_AERIAL 19
-#define MT_GOOGLE_HYBRID 20
+#define MT_GOOGLE_ROADMAP 18
+#define MT_GOOGLE_SATELLITE 19
+#define MT_GOOGLE_TERRAIN 20
+#define MT_GOOGLE_HYBRID 21
 
 
 
@@ -3056,13 +3057,14 @@ typedef struct
 		short	CurrentGoogleZoom;
 		short	CurrentGoogleType;
 		short	CurrentGoogleScale;
+		short	CurrentGoogleMapType;
 		POINT   CurrentGoogleCenter;
 		char	GrowSpace[2898-16*MAXPROFILEROUTES-2*sizeof(short)-2*sizeof(HANDLE)
 						  -sizeof(HANDLE)-sizeof(int)-sizeof(COLORREF)
 						  -sizeof(int)-2*sizeof(HBITMAP)-2*sizeof(HDC)
 						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)
 						  -MAX_PATH-sizeof(BOOL)-sizeof(short)
-						  -MAX_PATH - 3*sizeof(short)-sizeof(POINT)];
+						  -MAX_PATH - 4*sizeof(short)-sizeof(POINT)];
         char		EndOfViewport;     
         
 	}	VIEWPORT;
