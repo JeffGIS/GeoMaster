@@ -426,6 +426,58 @@ signal : (int)s
 	[self close : opened];
 	return array;
 }*/
+BOOL UpdatePictureID(LPSTR PathName, int oldSequence, int newSequence)
+{
+	BOOL rtn = FALSE;
+	char NewFile[MAX_PATH];
+	LPSTR pDot;
+	HFILE FidOld, FidNew;
+#define MAX_LINE_LEN	8000
+	char line[MAX_LINE_LEN + 4];
+	char searchfor[] = "INSERT OR REPLACE INTO CURBRAMP_PICTURES VALUES(";
+	int ln = strlen(searchfor);
+
+	strcpy(NewFile, PathName);
+	pDot = strrchr(NewFile, '.');
+	if (!pDot || stricmp(pDot, ".sql"))
+		return FALSE;
+	strcpy(pDot, ".new");
+	FidOld = GSSiOpenFile(PathName, 0, OF_READ);
+	if (FidOld == HFILE_ERROR)
+		return FALSE;
+	FidNew = GSSiOpenFile(NewFile, 0, OF_CREATE);
+	while (fgetstring(line, MAX_LINE_LEN, FidOld))
+	{
+		if (!strnicmp(line, searchfor,ln))
+		{
+			char newline[MAX_LINE_LEN];
+			LPSTR pLoc = line;
+			LPSTR pComma;
+			int pictID;
+
+			pLoc += ln;
+			pComma = strchr(pLoc, ',');
+			*pComma++ = 0;
+			pictID = atoi(pLoc);
+			pictID /= 100;
+			pictID *= 100;
+			pictID += newSequence;
+			pComma = strchr(pComma, ',');
+			*pComma++ = 0;
+			sprintf(newline, "%s%i,%i,%s", searchfor, pictID, newSequence,pComma);
+
+			fputstring(newline, FidNew);
+		}
+		else
+			fputstring(line, FidNew);
+	}
+	GSSiClose(FidOld);
+	GSSiClose(FidNew);
+	GSSiRemove(PathName);
+	rtn = GSSiRename(NewFile, PathName);
+	return rtn;
+}
+
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showProgress, int dbType, BOOL convertInsert,LPSTR errFile)
 {
 #define LINELEN	USHRT_MAX
