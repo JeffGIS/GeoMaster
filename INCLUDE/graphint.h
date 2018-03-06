@@ -2451,7 +2451,7 @@ int AssignLandUseCodeToParcels(LLPOINT pt, sqlite3 *_database);
 int fixRampNum(int rampin);
 HBRUSH CreateTransparentBrush(int itrans, COLORREF color);
 BOOL SetHaveOrthos(void);
-
+BOOL UpdatePictureID(LPSTR PathName,int oldSequence,int newSequence);
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);
 

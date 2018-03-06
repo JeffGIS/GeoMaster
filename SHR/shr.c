@@ -5386,7 +5386,7 @@ BOOL GSSiRename (LPSTR FromName, LPSTR ToName)
 #endif
 {   
 	BOOL rtn;
-	char	str1[256],str2[256]; 
+	char	str1[MAX_PATH],str2[MAX_PATH]; 
 	HFILE	Fid;
 	
 	_fstrcpy (str1,FromName);
