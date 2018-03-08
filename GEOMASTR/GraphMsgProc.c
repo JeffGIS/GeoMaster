@@ -2762,7 +2762,7 @@ GSSiExitProg (1240);
        	 SetDlgItemText (hWndDlg,IDC_ID3,CD->LineID[2]);
        	 SetDlgItemText (hWndDlg,IDC_ID4,CD->LineID[3]);
        	 SetDlgItemText (hWndDlg,IDC_ELEVATIONID,CD->ElevationID);
-         _fstrcpy (str,"[%DL]projections\\*.CVT");
+         _fstrcpy (str,"[%DL]projections\\*.*");
 		 ExpandText(str);
 		 usedProjectionDir = DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
 		 if (!usedProjectionDir)
@@ -25908,7 +25908,8 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
+         _fstrcpy (str,"[%%DL]projections\\*.*");
+		 ExpandText(str);
          DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
 		 if (PRJ_UNITS[1] == 1)
  		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)0,(LPARAM)0); 
@@ -26292,6 +26293,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  }
                  else 
                  {
+					 char file[MAX_PATH];
                     GetDlgItemText (hWndDlg,IDC_XFIELD,XCoordField,256);
                     GetDlgItemText (hWndDlg,IDC_YFIELD,YCoordField,256); 
                     if (!*XCoordField ||!*YCoordField)
@@ -26304,9 +26306,8 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                         GSSiMsgBox(GetFocus(),"No input projection set", 0,MB_ICONEXCLAMATION|MB_OK,0);
                         break;
                     }
-                    if ((lpDot=_fstrrchr(curproject,'.')))
-                        *lpDot = 0;  
-                    SetGlobalValue("%ALT_PROJECTION",curproject);
+					sprintf(file, "[%DL]projections\\%s", curproject);
+                    SetGlobalValue("%ALT_PROJECTION",file);
 				    ConvertCoordClose ();
 				    ConvertCoordInit();
                     GetDlgItemText (hWndDlg,IDC_UNITS,curunits,lncurunits);
@@ -28238,7 +28239,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
+         _fstrcpy (str,"[%%DL]projections\\*.*");
+		 ExpandText(str);
          DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
 		 if ((NumItems = GetNumThinnedContourRecs ()) <= 0)
 		 {
@@ -28530,9 +28532,9 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     GSSiMsgBox(GetFocus(),"No output projection set", 0,MB_ICONEXCLAMATION|MB_OK,0);
                     goto Exit;
                 }
-                if ((lpDot=_fstrrchr(project,'.')))
-                    *lpDot = 0;
-                SetGlobalValue("%ALT_PROJECTION",project);
+				char file[MAX_PATH];
+				sprintf(file, "[%%DL]projections\\%s", project);
+                SetGlobalValue("%ALT_PROJECTION",file);
 			    ConvertCoordClose ();
 				ConvertCoordInit();
                 GetDlgItemText (hWndDlg,IDC_UNITS,str,sizeof(str));
@@ -29528,7 +29530,7 @@ BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDAT
 	sprintf(str, "[FROMDB.Longitude] [FROMDB.Latitude]");
 	ExpandText(str);
 	pt = atopt(str, &err); 
-	ConvertCoord(&pt,2, 1); 
+	ConvertCoord(&pt,3, 1); 
 	pHighlightData->PD.BeginPoint = pt;
 	pHighlightData->PD.Type = 1;
 	sprintf(str, "[FROMDB.UniqueRampID]");

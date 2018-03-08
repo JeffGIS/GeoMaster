@@ -13,7 +13,7 @@ void convertVersion_1_to_2(LPSTR str);
 void convertVersion_2_to_3(LPSTR str);
 
 static BOOL Execute(LPSTR cmd,LPSTR errFile);
-BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,int dbType,LPSTR errFile);
+BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile);
 
 
 /*int getOffsetCoord:(MPIntersection *)mpint
@@ -478,7 +478,7 @@ BOOL UpdatePictureID(LPSTR PathName, int oldSequence, int newSequence)
 	return rtn;
 }
 
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showProgress, int dbType, BOOL convertInsert,LPSTR errFile)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showProgress, int dbType, BOOL convertInsert,LPSTR errFile,BOOL addFileID)
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
@@ -551,7 +551,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 			{
 				while (fgetstring (file,MAX_PATH,fidTemp))
 				{
-					BOOL st = UpdateFromFile(file,convertInsert,dbType,errFile);
+					BOOL st = UpdateFromFile(file,convertInsert,addFileID,dbType,errFile);
 					if (showProgress)
 						StatusWindowUpdate(0, 0, nTot, ++nDone);
 
@@ -1139,6 +1139,8 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 			ramp.bumpHeight = sqlite3_column_double(statement, i++);
 			ramp.dwWidth = sqlite3_column_double(statement, i++);
 			ramp.dwDepth = sqlite3_column_double(statement, i++);
+			LPSTR fileID = (LPSTR)sqlite3_column_text(statement, i++);
+			strncpy0(ramp.fileID, fileID, sizeof(ramp.fileID) - 1);
 
 			if (ramp.bumpWidth > 0 || ramp.bumpHeight > 0)
 				ii = 1;
@@ -1209,10 +1211,24 @@ static BOOL Execute(LPSTR cmd,LPSTR errFile)
 	return rtn;
 }
 
-BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType,LPSTR errFile)
+BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile)
 {
 	BOOL rtn = TRUE;
 	int line = 0;
+	char fileID[32] = { "" };
+	char searchFor[] = "CREATE TABLE IF NOT EXISTS Ramps (";
+	char searchFor2[] = "INSERT OR REPLACE INTO Ramps VALUES(";
+	int lenSearch = strlen(searchFor);
+	int lenSearch2 = strlen(searchFor2);
+	LPSTR pBS = strrchr(file, '\\');
+	if (pBS)
+	{
+		LPSTR pDot;
+		strcpy(fileID, ++pBS);
+		pDot = strrchr(fileID, '.');
+		if (pDot)
+			*pDot = 0;
+	}
 	HFILE fid = GSSiOpenFile(file, 0, OF_READ);
 	int totLen = GSSifilelength(fid);
 	int maxLineLen = totLen + 2;
@@ -1234,6 +1250,21 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,int dbType,LPSTR errFile)
 			line++;
 			if (!dbType)
 				convertVersion(str, fromVer, toVer);
+			if (insertFileID)
+			{
+				if (!strnicmp(str, searchFor, lenSearch))
+				{
+					REPLAC(str, "PRIMARY KEY", "FromFileID CHAR(12), PRIMARY KEY", maxLineLen);
+				}
+				else if (!strnicmp(str, searchFor2, lenSearch2))
+				{
+					LPSTR pLoc = strchr(str,0);
+
+					pLoc -= 2;
+					if (*pLoc == ')')
+						sprintf(pLoc, ",'%s');", fileID);
+				}
+			}
 			if (convertInsert)
 				REPLAC(str, "INSERT INTO", "INSERT OR REPLACE INTO", maxLineLen + 4090);
 			rtn = Execute(str, errFile);

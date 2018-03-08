@@ -126,4 +126,6 @@ extern		double	   PRJ_OUTFACTOR[MAX_PROJ];
 #endif     
 
 void FreePROJ(int id);
+LPSTR SHPGetNVP(LPSTR ShpFileName, LPDOUBLE pFactor);
+BOOL IsProjectionFile(LPSTR File);
 

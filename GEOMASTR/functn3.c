@@ -4537,7 +4537,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 		{
 			rtn = FALSE;
-			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "EXPORT"))
 			{
 				if (!stricmp(Arg[3], "BYINT"))
@@ -4556,9 +4556,9 @@ GotCloseFilehSQL:
 			{
 				rtn = UpdatePictureID(Arg[2], atoi(Arg[3]), atoi(Arg[4]));
 			}
-			else if (!stricmp(Arg[1], "LOADLIST"))//LOADLIST,fromListFile,toDB,showProgress,dbType,convertInsert,errFile(opt))
+			else if (!stricmp(Arg[1], "LOADLIST"))//LOADLIST,fromListFile,toDB,showProgress,dbType,convertInsert,errFile(opt),addFileID)
 			{
-				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3], atob(Arg[4]), atoi(Arg[5]), atob(Arg[6]), Arg[7]);
+				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3], atob(Arg[4]), atoi(Arg[5]), atob(Arg[6]), Arg[7], atob(Arg[8]));
 			}
 			else if (!stricmp(Arg[1], "COMPCODE"))
 			{

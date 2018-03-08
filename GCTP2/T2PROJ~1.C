@@ -326,7 +326,7 @@ S99:    return 0;
 
 }
 
-long    LoadProjection (long ID,LPSTR INNAME) 
+long    LoadProjection (long ID,LPSTR InName) 
 {
 
 /*C
@@ -376,11 +376,14 @@ C-------------------------------        */
          NAME[MAX_PATH],   PNAME[MAX_PATH], XYUNITS[32],ZUNITS[7];
        char str[260], Suffix[6]=".CVT"; 
        int  n=0, SETUNITS;   
+	   char INNAME[MAX_PATH * 4];
        LPSTR    lpPtr, lpCVT, pBeg, lpGoogle;
           
+	   strcpy(INNAME, InName);
 //C---------------------
 //C   SUBROUTINE START
 //C---------------------
+	   Top:
 	   if (*INNAME == '+')
 	   {
 		   if (PRJ_PROJ4DEF[ID])
@@ -396,6 +399,14 @@ C-------------------------------        */
 		   PRJ_ZONE[ID] = PRJ_ZONE[1];
 		   return 0;
 	   }
+	   else if (IsProjectionFile(INNAME))
+	   {
+		   LPSTR def = SHPGetNVP(INNAME,0);
+		   strcpy(INNAME, def);
+		   free(def);
+		   goto Top;
+	   }
+
        _fstrcpy(NAME,INNAME); 
 	   ExpandText (NAME);
        _fstrupr (NAME);   

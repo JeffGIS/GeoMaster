@@ -1986,8 +1986,6 @@ BOOL ConvertTextPointers (HWND hWnd);
 BOOL AddIslandsToPoly (BOOL Reverse,BOOL Delete);
 void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc);
 void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5, LPSTR Arg6,LPSTR OutLoc);
-LPSTR SHPGetNVP(LPSTR ShpFileName, LPDOUBLE pFactor);
-BOOL IsProjectionFile(LPSTR File);
 BOOL InitCoordConv (BOOL Delete);
 BOOL LinkLinesFunction (LPSTR Arg1,LPSTR Arg2,LPSTR OutLoc);
 int LinkPipesFunction (int iOpt,int id,double tol,LPINT pnPnts,LPDPOINT3D pPoints3D,LPINT pPipeSize,LPSTR pMaterial);
@@ -2440,7 +2438,7 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 BOOL OutputRampForIntersectionAndRampnumToFile(int intNum, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType);
 BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode);
 BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType);
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile);
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile,BOOL AddFileID);
 BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
 int FormatStreets (LPSTR from, LPSTR text);

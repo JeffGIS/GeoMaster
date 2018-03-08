@@ -4976,7 +4976,9 @@ GSSiExitProg (56);
      		CD=(LPCOORDINATEDISPLAY)CurView->pTheme;
      		if (*CD->AltCVTFile)
      		{
-                SetGlobalValue("%ALT_PROJECTION",CD->AltCVTFile);
+				char file[MAX_PATH];
+				sprintf(file, "[%%DL]PROJECTIONS\\%s", CD->AltCVTFile);
+                SetGlobalValue("%ALT_PROJECTION",file);
 			    ConvertCoordClose ();
 				ConvertCoordInit(); 
 			} 
