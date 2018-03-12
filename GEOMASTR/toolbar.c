@@ -1585,7 +1585,7 @@ BOOL AdjustToolbarPositions (void)
 		if (!NumViewportsArray[0])
 		{
 			ClearFullWindowBitmap (0);
-			FillRect (hDCMain,&mainRect,GetStockObject (LTGRAY_BRUSH));
+			FillRect (hDCMain,&mainRect,GetStockObject (WHITE_BRUSH));
 		}
 		ReleaseDC (hWndMain,hDCMain);
     	SetConfig (1);
@@ -1954,7 +1954,7 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 	HFONT	hFont = CreateFont(10,0, 0, 0, FW_BOLD, 
     				0, 0, 0, 0, 0, 0, 0, 0,"Arial");   
 	HFONT	OldFont;
-	HBITMAP	hBM;
+	//HBITMAP	hBM;
 	double	az;
 	BOOL	gotDC=FALSE;
 	RECT	rect;
@@ -1973,8 +1973,8 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 		GetClientRect (hWnd,&rect);
 
 	SaveDC (hDC);
-	SetDCBrushColor (hDC,RGB(0,255,0));
-	FillRect (hDC,&rect,GetStockObject(DC_BRUSH));//LTGRAY_BRUSH));
+	//SetDCBrushColor (hDC,RGB(0,255,0));
+	FillRect (hDC,&rect,GetStockObject(WHITE_BRUSH));//LTGRAY_BRUSH));
 	OldFont  = SelectObject (hDC,hFont);
 /*			{
 		HDIB32	hDib32 = LoadDIB32 ("..\\icons\\zoompan.bmp");
@@ -1984,11 +1984,11 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 		DestroyDIB32(hDib8,FALSE);
 		DestroyDIB32(hDib32,FALSE);
 	}*/
-	hBM = LoadBitmap (hInst,"PANZOOMROT");
+	//hBM = LoadBitmap (hInst,"PANZOOMROT");
 
 	DisplayBMFileInRect (hDC,"[%DL]icons\\zoompan8.bmp",rect,2);
 //	DisplayBitmapInRect (hDC,rect,hBM,2,SRCCOPY);
-	DeleteObject (hBM);
+//	DeleteObject (hBM);
     SetTextColor(hDC, RGB(0,0,128));
 	DisplayZoomInOut (hWnd,hDC,0,0);
 	DisplayZoomInOut (hWnd,hDC,1,0);
@@ -2225,7 +2225,7 @@ extern	BOOL	InDebug;
 			hBMBuf = CreateCompatibleBitmap (hDC,w,h);
 			hOldBMBuf = SelectObject (hDCBuf,hBMBuf);
 			ReleaseDC (hWndMain,hDCMain);
-			FillRect (hDCBuf,&PZClientRect,GetStockObject (LTGRAY_BRUSH));
+			FillRect (hDCBuf,&PZClientRect,GetStockObject (WHITE_BRUSH));
 		}
 		if (hDCBuf)
 		{
@@ -2257,18 +2257,28 @@ extern	BOOL	InDebug;
 			hbitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &pvBits, NULL, 0x0);
 			if (hbitmap)
 			{
+				POINT midpoint = { widthPZ / 2, heightPZ / 2 }, p;
+				double radius = widthPZ / 2;
 				hbmold = SelectObject(hdc, hbitmap);
 				BitBlt (hdc,0,0,widthPZ,heightPZ,hDCBuf,xoff,yoff,SRCCOPY);
-				for (ir=0,pBits=pvBits,pmaskBits=maskBits[0];ir<heightPZ;ir++)
-					for (ic=0;ic<widthPZ;ic++,pBits++,pmaskBits++)
+				for (ir = 0, pBits = pvBits, pmaskBits = maskBits[0]; ir < heightPZ; ir++)
+				{
+					for (ic = 0; ic < widthPZ; ic++, pBits++, pmaskBits++)
 					{
-						pBits->rgbReserved = max (BlendFactor,*pmaskBits);
-						fAlphaFactor = (float)pBits->rgbReserved / (float)0xff; 
+						p.x = ic;
+						p.y = ir;
+						if (idist(midpoint, p) <= radius)
+						{
 
-						pBits->rgbBlue *= fAlphaFactor; 
-						pBits->rgbRed *= fAlphaFactor; 
-						pBits->rgbGreen *= fAlphaFactor; 
+							pBits->rgbReserved = max(BlendFactor, *pmaskBits);
+							fAlphaFactor = (float)pBits->rgbReserved / (float)0xff;
+
+							pBits->rgbBlue *= fAlphaFactor;
+							pBits->rgbRed *= fAlphaFactor;
+							pBits->rgbGreen *= fAlphaFactor;
+						}
 					}
+				}
 				bf.BlendOp = AC_SRC_OVER;
 				bf.BlendFlags = 0;
 				bf.AlphaFormat = AC_SRC_ALPHA;
@@ -3057,8 +3067,7 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
 		return FALSE;
     }
 	st = SetLayeredWindowAttributes(hwndPanZoomRot, RGB(255, 255, 255), 0, LWA_COLORKEY);
-	DWORD err = GetLastError();
-	Id = LoadToolbar (hwndPanZoomRot,"","ZOOM",0,1,"0 0",TRUE,FALSE,0,0,0);
+	Id = LoadToolbar(hwndPanZoomRot, "", "ZOOM", 0, 1, "0 0", TRUE, FALSE, 0, 0, 0);
 	DisplayAllToolbars (2);
 
 	return TRUE;
@@ -3418,7 +3427,7 @@ int AddButtonToToolbar2 (int ToolbarID,HWND hWndDlg,LPSTR BMPath,LPSTR ButtonTex
 			ReleaseDC(hWndMain, hDC);
 			hBMPtemp = SelectObject(hDCtemp, hBM);
 			hOldFont = SelectObject(hDCtemp, hFont);
-			FillRect(hDCtemp, &rect, GetStockObject(LTGRAY_BRUSH));
+			FillRect(hDCtemp, &rect, GetStockObject(WHITE_BRUSH));
 			SetBkMode(hDCtemp,TRANSPARENT);
 			TextOut(hDCtemp, 3, 3, ButtonText, ln);
 			SelectObject(hDCtemp, hOldFont);
