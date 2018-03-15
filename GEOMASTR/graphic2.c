@@ -2226,7 +2226,7 @@ GSSiExitProg (133);
 				BYTE		PatByt = pObj->Width;
 				PATBYTE		PatByte;  
 				
-				_fmemmove (&PatByte,&PatByt,1);
+				_fmemmove (&PatByte,&PatByt,sizeof(PATBYTE));
 				if (PatByte.Pattern && !useGDIPlus)
 				{
 				    SetBkColor (CurView->hDC,RGB(255,255,255));

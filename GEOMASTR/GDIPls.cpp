@@ -12,6 +12,7 @@
 #include "gssitype.h"     
 
 extern  "C" int defaultAreaTransparency;
+extern  "C" int defaultLineTransparency;
 
 #define GetIValue(rgb)      (LOBYTE((rgb)>>24))
 
@@ -111,11 +112,14 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 	if (!gdiplusToken)
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);
 	{
+		int intensity = GetIValue(ColorRef);
+		if (!intensity)
+			intensity = defaultLineTransparency;
 
 		Gdiplus::Graphics graphic(hdc);
 		graphic.SetPageUnit(UnitPixel);
 		graphic.SetCompositingQuality(CompositingQualityHighQuality);
-		Pen pn(Color(255, GetRValue(ColorRef), GetGValue(ColorRef), GetBValue(ColorRef)), w);
+		Pen pn(Color(intensity, GetRValue(ColorRef), GetGValue(ColorRef), GetBValue(ColorRef)), w);
 		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
 		PointF pt1;

@@ -3508,6 +3508,9 @@ GSSiExitProg (532);
 				CurTheme->NotSetColor = !atob(Value);
 			}
 			break;
+		case 385:
+			defaultLineTransparency = IDNINT((atof(Value) * 255) / 100.0);
+			break;
 		default:
  			break;
 	}
@@ -3911,7 +3914,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%GOOGLEZOOM", 382, TRUE);
 	AllocateTypeVar("%GOOGLEMAPTYPE", 383, TRUE);
 	AllocateTypeVar("%SETCOLOR", 384, TRUE);
-
+	AllocateTypeVar("%LINETRANSPARENCY", 385, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5065,6 +5068,9 @@ GSSiExitProg (533);
 			break;
 		case 383:
 			ltoa(GoogleMapType, OutStr, 10);
+			break;
+		case 385:
+			ltoa(IDNINT(100 * (defaultLineTransparency / 255.0)), OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);

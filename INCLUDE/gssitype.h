@@ -595,19 +595,23 @@ typedef	struct	{
 				}	PENDESC;
 typedef	PENDESC	FAR	*LPPENDESC; 
 
+#pragma pack(1)
+
 typedef struct {
-	unsigned short	Transparent : 1;
-	unsigned short	BGOpt : 1;
-	unsigned short	Pattern : 5;
-	unsigned short	notUsingPattern : 1;
+	unsigned char	Transparent : 1;
+	unsigned char	BGOpt : 1;
+	unsigned char	Pattern : 5;
+	unsigned char	notUsingPattern : 1;
 } PATBYTE;
 typedef PATBYTE	FAR	*LPPATBYTE;
 
 typedef struct {
-	unsigned short	Transparency : 7;
-	unsigned short	notUsingPattern : 1;
+	unsigned char	Transparency : 7;
+	unsigned char	notUsingPattern : 1;
 } TRANSBYTE;
 typedef TRANSBYTE	FAR	*LPTRANSBYTE;
+
+#pragma pack(2)
 
 typedef struct {
 		unsigned short	r	:5;

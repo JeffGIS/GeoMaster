@@ -525,7 +525,10 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 		}
 		break;
 	case GF_CLOSE:
-		DestroyWindow(hWndPlayer);
+		if (hWndPlayer)
+		{
+			DestroyWindow(hWndPlayer);
+		}
 		KillTimer(hWnd, timerID);
 		ClearFullWindowBitmap(0);
 		if ((int)saveFWBM != -1)
