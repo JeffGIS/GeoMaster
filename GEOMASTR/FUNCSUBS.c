@@ -7147,7 +7147,7 @@ LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lPar
 					DrawText (hDC,BUMessage[1],strlen(BUMessage[1]),&rect,DT_RIGHT);
 					rect.left -= 300;
 					rect.right -= 100;
-					FillRect (hDC,&rect,GetStockObject (LTGRAY_BRUSH));
+					FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));//(LTGRAY_BRUSH));
 					DrawText (hDC,BUMessage[0],strlen(BUMessage[0]),&rect,DT_LEFT);
 					SelectObject (hDC,hOldFont);
 					GSSiDeleteObject (&hFont);
@@ -7160,7 +7160,7 @@ LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lPar
 				HDC hDC=GetDC (hWnd);
 
 				GetClientRect (hWnd,&rect);
-				FillRect (hDC,&rect,GetStockObject (LTGRAY_BRUSH));
+				FillRect(hDC, &rect, GetStockObject(WHITE_BRUSH));//(LTGRAY_BRUSH));
 				ReleaseDC (hWnd,hDC);
 			}
 			return 1;
