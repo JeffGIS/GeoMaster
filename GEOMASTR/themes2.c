@@ -104,22 +104,25 @@ BOOL SwitchThemeSHPFile (void)
 	HANDLE	hMem=0; 
 	LPSTR	pDot=0;  
 	long	SaveCSR;
+	char DataFile[MAX_PATH];
 	
 	if (!CurTheme)
 		return FALSE;
-	if (strstr (CurTheme->DataFile,".GDB("))
+	strcpy(DataFile, CurTheme->DataFile);
+	ExpandText(DataFile);
+	if (strstr (DataFile,".GDB("))
 		CurTheme->DataFileType = FGDB_DATAFILE;
-	if (strstr (CurTheme->DataFile,".MDB("))
+	if (strstr (DataFile,".MDB("))
 		CurTheme->DataFileType = PGDB_DATAFILE;
 	if (CurTheme->DataFileType != SHAPE_DATAFILE &&
 		CurTheme->DataFileType != ORA_DATAFILE &&
 		CurTheme->DataFileType != PGDB_DATAFILE &&
 		CurTheme->DataFileType != FGDB_DATAFILE)// &&
-		//!_fstrchr(&CurTheme->DataFile[1],'['))
+		//!_fstrchr(&DataFile[1],'['))
 		return FALSE;
-	if (strstr (CurTheme->DataFile,"graphics.gmd"))
+	if (strstr (DataFile,"graphics.gmd"))
 		return FALSE;
-	if (strstr (CurTheme->DataFile,"graphic2.gmd"))
+	if (strstr (DataFile,"graphic2.gmd"))
 		return FALSE;
 	hMem = GSSiGlobAlloc (1523,GMEM_MOVEABLE,1024);
 	CurShpFile = GlobalLock (hMem);
@@ -137,8 +140,7 @@ BOOL SwitchThemeSHPFile (void)
 	{
 		LPSTR	eqLoc;
 
-		_fstrcpy (CurShpFile,CurTheme->DataFile);
-		ExpandText (CurShpFile);
+		_fstrcpy (CurShpFile,DataFile);
 		if (strncmp (CurShpFile,"ODBC|",5) &&
 			(eqLoc = strchr (CurShpFile,'=')))
 			CurShpFile = eqLoc+1;
@@ -168,12 +170,10 @@ BOOL SwitchThemeSHPFile (void)
 		}
 		CloseThemeDataFile(TRUE);
 	}
-	_fstrcpy (SaveThemeDataFile,CurTheme->DataFile);
-	_fstrcpy (CurTheme->DataFile,CurShpFile); 
+	SubstituteDL(CurShpFile, FALSE);
 	SaveCSR = CurrentSHPRec;
-	OpenThemeDataFile (); 
+	OpenThemeDataFile(CurShpFile);
 	CurrentSHPRec = SaveCSR;
-	_fstrcpy (CurTheme->DataFile,SaveThemeDataFile); 
 Exit:  
 	GSSiGlobUlFree (&hMem);
 	return rtn;

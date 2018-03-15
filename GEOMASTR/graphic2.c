@@ -3093,7 +3093,7 @@ void UpdateClassValueList()
 	
 	if (!CurTheme->hThemeDB) 
 	{
-		if (!OpenThemeDataFile ())
+		if (!OpenThemeDataFile(CurTheme->DataFile))
 {
 #if ENABLETRACE
 GSSiExitProg (147);

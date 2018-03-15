@@ -939,7 +939,7 @@ GSSiExitProg (1250);
 						LPOPENSQLDATA	SQLPtr;
 						LPHANDLE	lpFileHandle;    
 						
-						if (!OpenThemeDataFile())
+						if (!OpenThemeDataFile(CurTheme->DataFile))
 							break;
 						SQLPtr = (LPOPENSQLDATA)GlobalLock(CurTheme->hThemeDB);
 						FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
@@ -16614,7 +16614,7 @@ GSSiExitProg (1276);
 			    LPSTR	lpEQ;  
 			    char	FieldName[128];
             	
-				OpenThemeDataFile ();  
+				OpenThemeDataFile(CurTheme->DataFile);
             	pStreetData->ShowAllElements = SendDlgItemMessage (hWndDlg,IDC_SHOW_ALLELEM,BM_GETCHECK,0,0L);  
             	pStreetData->UseFont = SendDlgItemMessage (hWndDlg,IDC_USEFONT,BM_GETCHECK,0,0L);  
             	pStreetData->IgnoreShields = !SendDlgItemMessage (hWndDlg,IDC_USESHIELDS,BM_GETCHECK,0,0L);  

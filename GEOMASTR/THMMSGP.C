@@ -2974,7 +2974,7 @@ GSSiExitProg (1319);
 	{
 	    if (CurTheme->ID != GF_GRAPHICS_FUNCTION_THEME && CurTheme->DataFileType != MSACCESS_DATAFILE)
 	    {
-	    	OpenThemeDataFile ();
+			OpenThemeDataFile(CurTheme->DataFile);
             if (CurTheme->hThemeDB && GetDBType (CurTheme->hThemeDB) != GMTEXT_DATAFILE)
             	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
 			if (CurTheme->SymNum > 0)
@@ -3098,7 +3098,7 @@ GSSiExitProg (1319);
 		CurTheme->Ymin = 0;
 		CurTheme->Ymax = 0;
 		SetupHotSpotMask (pHSData->MaskWidth,pHSData->hMask,pHSData->DecayOpt);  
-    	OpenThemeDataFile ();
+		OpenThemeDataFile(CurTheme->DataFile);
 		SetCurView (SaveVP);
 	}
 	else if (CurTheme->ID == GF_OFFSETAREA_THEME)
@@ -3108,7 +3108,7 @@ GSSiExitProg (1319);
 		GSSiGetTempFileName (0,"gmt",0,(LPSTR)CurTheme->ScatterFile);
 		CurTheme->FidAreas = GSSiOpenFile (CurTheme->ScatterFile,NULL,OF_CREATE);
 		CurTheme->NumAreas = 0;
-	   	OpenThemeDataFile ();
+		OpenThemeDataFile(CurTheme->DataFile);
 	}
 	else
 	{
@@ -3133,7 +3133,7 @@ GSSiExitProg (1319);
 		}
 	    if (CurTheme->DataFileType != MSACCESS_DATAFILE)
 	    {
-	    	OpenThemeDataFile ();
+			OpenThemeDataFile(CurTheme->DataFile);
             if (CurTheme->hThemeDB && GetDBType (CurTheme->hThemeDB) != GMTEXT_DATAFILE)
             	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
 	    }

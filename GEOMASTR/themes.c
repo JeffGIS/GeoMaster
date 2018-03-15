@@ -1804,7 +1804,7 @@ GSSiExitProg (1256);
 
 
    
-BOOL OpenThemeDataFile ()
+BOOL OpenThemeDataFile (LPSTR DataFile)
 #if ENABLETRACE
 {GSSiEnterProg (1258);
 #endif
@@ -1821,16 +1821,16 @@ GSSiExitProg (1258);
     	return(TRUE); 
 }
 
-  	_fstrcpy (ThemeDB,CurTheme->DataFile);  
+  	_fstrcpy (ThemeDB,DataFile);  
 	if (StringEndsWith (ThemeDB,".ORA"))
 		CurTheme->DataFileType = ORA_DATAFILE;
 	SetCurView (pViewports[CurTheme->DisplayViewport-1]); 
 	strncpy0 (CurTheme->DataFileID,CurView->Name,32);
 	CurView = SaveVP;
-	if (*CurTheme->DataFile && (!strchr (CurTheme->DataFile,'=') || !strnicmp (CurTheme->DataFile,"ODBC|",5)))
-		sprintf (Name,"%s=%s",CurTheme->DataFileID,CurTheme->DataFile);
+	if (*DataFile && (!strchr (DataFile,'=') || !strnicmp (DataFile,"ODBC|",5)))
+		sprintf (Name,"%s=%s",CurTheme->DataFileID,DataFile);
 	else
-		strcpy (Name,CurTheme->DataFile);
+		strcpy (Name,DataFile);
   	//CurTheme->Statement = 0;
 	rtn = OpenDataFile (Name,CurTheme->SQL,BT_READ,&CurTheme->hThemeDB);
 {
@@ -2080,7 +2080,7 @@ GSSiExitProg (1260);
                 }
 			    if (pStreetData->NameSource)
 			    {
-			    	OpenThemeDataFile ();
+					OpenThemeDataFile(CurTheme->DataFile);
 			
 					GSSiGetTempFileName (0,"gma",0,(LPSTR)pStreetData->NameFile1);
 					GSSiGetTempFileName (0,"gmb",0,(LPSTR)pStreetData->NameFile2); 
@@ -2126,7 +2126,7 @@ GSSiExitProg (1260);
 				BTVARDESC	BTVar[3];
 				int	i;
 			
-			    OpenThemeDataFile ();
+				OpenThemeDataFile(CurTheme->DataFile);
 				CurTheme->CityUniqueInc = 0;
 				if (CurTheme->CompareAttributes)//auto max pop option
 					CurTheme->MaxCityPopOnScreen = 0;
@@ -2183,7 +2183,7 @@ GSSiExitProg (1260);
 			case GF_TWO_VALUE_THEME: 
 				OpenThemeHighlightFile (BT_WRITE);
 				OpenPointDispersionFile (BT_WRITE);
-			    OpenThemeDataFile ();
+				OpenThemeDataFile(CurTheme->DataFile);
                 if (CurTheme->hThemeDB && GetDBType (CurTheme->hThemeDB) != GMTEXT_DATAFILE)
 	            	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
 			    break;  
@@ -2244,7 +2244,7 @@ GSSiExitProg (1260);
 				{
 					OpenThemeHighlightFile (BT_WRITE);
 					OpenPointDispersionFile (BT_WRITE);
-				    OpenThemeDataFile ();
+					OpenThemeDataFile(CurTheme->DataFile);
 	                if (CurTheme->hThemeDB && GetDBType (CurTheme->hThemeDB) != GMTEXT_DATAFILE)
 		            	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
 				}

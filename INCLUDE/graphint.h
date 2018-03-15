@@ -392,7 +392,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 				  HFILE	FidIndex, short SizeOpt,LPSTR cOrthRes,BOOL UsesTimes,
 				  LPLONG pLastHeaderOffset,LPBOOL CurHeaderWritten,LPMNMXCORD pFileBounds,BOOL UseCPT,BOOL UseExCmp);
 BOOL LoadMapDir (HWND hWnd);
-BOOL OpenThemeDataFile (void);
+BOOL OpenThemeDataFile (LPSTR DataFile);
 BOOL CloseThemeDataFile (BOOL Final);
 //BOOL WriteSavedItems (HANDLE hSaveList);
 double PointInPickArea (POINT	Point);
