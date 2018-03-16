@@ -2765,7 +2765,7 @@ GSSiExitProg (100);
     SetGlobalValue ("%CONFIG",Cfg);
     SetCurVal (FullPath,IDS_FILEGMC);
     lenCfg = GSSillseek (FidConfig,0,2);
-    GSSillseek(FidConfig,lenCfg-6,0);
+    ii = GSSillseek(FidConfig,lenCfg-6,0);
 
     GSSilread (FidConfig,&ConfigDesc,2);
     GSSilread (FidConfig,&Signature,2);
@@ -3666,6 +3666,7 @@ GSSiExitProg (101);
 		hWindowDIB = WriteDIBToMem (hWindowDib32,CfgImageFormat,Flags,&CfgImageLen);
 	 	BigWrite (FidConfig,(HPSTR)&CfgImageLen,4,-1); 
 	 	pCfgImage = GlobalLock (hWindowDIB); 
+		ii = GSSillseek(FidConfig, 0, 1);
 	 	BigWrite (FidConfig,(HPSTR)pCfgImage,CfgImageLen,-1); 
 	 	BigWrite (FidConfig,(HPSTR)&CfgDescLoc,4,-1); 
 	 	BigWrite (FidConfig,(HPSTR)&CfgImageLoc,4,-1); 
@@ -3678,7 +3679,7 @@ GSSiExitProg (101);
 	hWindowDib32 = 0;
     if (UseCompression)
     	FidConfig = CompressConfig (FidConfig,Name);   
-    BigWrite (FidConfig,(HPSTR)&ConfigDesc,2,-1);
+    BigWrite (FidConfig,(HPSTR)&ConfigDesc,sizeof(ConfigDesc),-1);
     BigWrite (FidConfig,(HPSTR)&Signature,2,-1);
     BigWrite (FidConfig,(HPSTR)&Version,2,-1);
     GSSiClose (FidConfig);  
