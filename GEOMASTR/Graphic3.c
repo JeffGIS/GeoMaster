@@ -2057,7 +2057,8 @@ BOOL GetVisBounds2 (LPMNMXCORD	pBounds,HDC hDC)
 	BOOL	rtn=FALSE;   
 	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
 	LPSTR	str=GlobalLock (hMem);
-	
+	int		MapType;
+
 	SelectVisList (FALSE); 
 	if (!CurVis)
 		goto Exit;		
@@ -2070,6 +2071,13 @@ BOOL GetVisBounds2 (LPMNMXCORD	pBounds,HDC hDC)
 	     	goto NextFile; 
 	     if (!AutoTypeConvert ())
 	     	goto NextFile;
+		 MapType = MapFileType(CurView->lpFiles[CurView->CurFile]);
+		 if (MapType == MT_GOOGLE_ROADMAP ||
+			 MapType == MT_GOOGLE_SATELLITE ||
+			 MapType == MT_GOOGLE_TERRAIN ||
+			 MapType == MT_GOOGLE_HYBRID)
+			 goto NextFile;
+
     	 PltType = CurView->FileType[CurView->CurFile];
 		 if (PltType<4)
 		 {

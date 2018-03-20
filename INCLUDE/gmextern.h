@@ -1327,6 +1327,7 @@ extern LPSTR			lpUpdateFieldList;
 extern LPSTR			lpAutoUpdateFieldList;
 extern LPSTR			lpBasicTitle;
 extern RECT			displayRect;
+extern BOOL			showOnlyData;
 extern int			fullBMLeft;
 extern HWND			hWndFullBM;
 extern LPSTR			lpSQLFieldList;

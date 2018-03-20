@@ -1123,12 +1123,11 @@ BOOL DisplayTransparentBitmap (HDC hDC,HDIB32 hDib,POINT Point,int width,LPRECT 
 	return TRUE;
 }
 
-BOOL DisplayTransparentBitmapInRect (HDC hDC,HDIB32 hDib,LPRECT pRect)
+BOOL DisplayTransparentBitmapInRect(HDC hDC, HDIB32 hDib, LPRECT pRect, BOOL MaintainAspect)
 {
 	HBITMAP hBMMask, hBMColor, hBMOld;
 	BITMAP	bm;
 	HDC		hDCMem;
-	int		destw, desth, destx, desty;
 	POINT	pt;
 	int		OldMode=0;
 	BITMAPINFOHEADER	lpbi,lpbim;
@@ -1140,6 +1139,8 @@ BOOL DisplayTransparentBitmapInRect (HDC hDC,HDIB32 hDib,LPRECT pRect)
 	COLORREF	nColor;
 	RGBTRIPLE	NewColor;
 	COLORREF	OldColor;
+	BITMAPINFOHEADER DibInfo;
+	RECT Rect = *pRect;
 
 //	GetColor (hWndMain,&nColor);
 //	NewColor = RGBQUADFromCOLORREF (nColor);
@@ -1152,12 +1153,19 @@ BOOL DisplayTransparentBitmapInRect (HDC hDC,HDIB32 hDib,LPRECT pRect)
 //    pImage = FreeImage_GetBits(hDib);
 	hBMColor = DIB32ToBitmap(hDib,(HPALETTE)0);
 	GetObject(hBMColor, sizeof(bm), (LPSTR)&bm);
+	GetBitmapInfoFromHandle(&DibInfo, hDib);
 
 	hBMMask = CreateBitmapMask(hBMColor,RGB(255,255,255));
-	destw = RECTWIDTH (pRect);
-	desth = RECTHEIGHT (pRect);
-	destx = pRect->left;
-	desty = pRect->top;
+	if (MaintainAspect)
+		ComputeBMLoc(*pRect, (LPBITMAPINFO)&DibInfo, MaintainAspect);
+	else
+	{
+		destX = (int)Rect.left;
+		destY = (int)Rect.top;
+		destW = (int)(Rect.right - Rect.left + 1);
+		destH = (int)(Rect.bottom - Rect.top + 1);
+	}
+
 	ii=1;
 	if (Printing && ii)
 	{
@@ -1198,15 +1206,15 @@ BOOL DisplayTransparentBitmapInRect (HDC hDC,HDIB32 hDib,LPRECT pRect)
 //destw =lpbim->biWidth; desth= lpbim->biHeight;
 //for (i=0;i<16;i++)
 {
-		rtn=StretchDIBitsFromHandle (hDC,destx,desty,//-i*(5+desth),
-	                   destw, desth,
+		rtn=StretchDIBitsFromHandle (hDC,destX,destY,//-i*(5+desth),
+	                   destW, destH,
 	                   0,0,
 	                   lpbim.biWidth, lpbim.biHeight,
 	                   hDibMask,
 	                  (UINT)DIB_RGB_COLORS,
 	                  (DWORD) SRCAND,1);
-		rtn=StretchDIBitsFromHandle (hDC,destx,desty,//-i*(5+desth),
-	                   destw, desth,
+		rtn=StretchDIBitsFromHandle (hDC,destX,destY,//-i*(5+desth),
+	                   destW, destH,
 	                   0,0,
 	                   lpbim.biWidth, lpbim.biHeight,
 	                   hDib8,
@@ -1230,13 +1238,13 @@ BOOL DisplayTransparentBitmapInRect (HDC hDC,HDIB32 hDib,LPRECT pRect)
 			OldMode = SetStretchBltMode(hDC,HALFTONE); 
 			SetBrushOrgEx (hDC,0,0,&pt);
 			OldColor = SetTextColor (hDC,0);
-			StretchBlt(hDC, destx, desty,destw,desth, hDCMem, 0, 0,bm.bmWidth, bm.bmHeight,  SRCAND);
+			StretchBlt(hDC, destX, destY,destW,destH, hDCMem, 0, 0,bm.bmWidth, bm.bmHeight,  SRCAND);
 			SelectObject(hDCMem, hBMColor);
 			if (OldColor != CLR_INVALID)
 				SetTextColor (hDC,OldColor);
 			RasterOpt = SRCPAINT;
 		}
-		StretchBlt(hDC, destx, desty,destw,desth, hDCMem, 0, 0,bm.bmWidth, bm.bmHeight,  RasterOpt);
+		StretchBlt(hDC, destX, destY,destW,destH, hDCMem, 0, 0,bm.bmWidth, bm.bmHeight,  RasterOpt);
 		//BitBlt(hDC, 0, bm.bmHeight, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCPAINT);
 		SelectObject (hDCMem,hBMOld);
 		DeleteDC (hDCMem);

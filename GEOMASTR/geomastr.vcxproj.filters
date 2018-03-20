@@ -2310,6 +2310,18 @@
     <Image Include="..\CITYTOUR\CANCELOLD.BMP">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\CITYTOUR\BITMAP22.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\Users\Jeff Smith\Dropbox\LogosAndIcons\33070_TRANSPARENT\33070_TRANSPARENT.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\BITMAP24.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\CITYTOUR\BITMAP25.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="CUR00001.CUR">

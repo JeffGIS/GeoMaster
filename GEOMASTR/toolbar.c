@@ -1714,7 +1714,7 @@ void DisplayJoyStick (HDC hDC,POINT Point)
 //	hRgn = CreateEllipticRgn(rect.left,rect.top,rect.right,rect.bottom);
 //	ii=SelectClipRgn (hDC,hRgn);
 	hDIB = BitmapToDIB32 (hBM);
-	DisplayTransparentBitmapInRect (hDC,hDIB, &rect);
+	DisplayTransparentBitmapInRect (hDC,hDIB, &rect,FALSE);
 	DestroyDIB32 (hDIB,TRUE); 
 //	DisplayBitmapInRect (hDC,rect,hBM,2,SRCCOPY);
 //	SelectClipRgn (hDC,0);
@@ -1877,7 +1877,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		rect.left = rect.right -w;
 		rect.top = rect.bottom -w;
 		winzoomRect = rect;
-		DisplayTransparentBitmapInRect  (hDC,hDib32,&rect);
+		DisplayTransparentBitmapInRect  (hDC,hDib32,&rect,FALSE);
 		DestroyDIB32(hDib32,FALSE);
 	}
 	if (ExistFile ("[%DL]menus\\findmenu.txt"))
@@ -1892,7 +1892,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		rect.right = rect.left +w;
 		rect.top = rect.bottom -w;
 		findRect = rect;
-		DisplayTransparentBitmapInRect  (hDC,hDib32,&rect);
+		DisplayTransparentBitmapInRect(hDC, hDib32, &rect, FALSE);
 		DestroyDIB32(hDib32,FALSE);
 	}
 	strcpy (FileName,"[%DL]icons\\cancelnew_tp.bmp");
@@ -1904,7 +1904,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		rect.left = rect.right -w;
 		rect.bottom = rect.top +w;
 		cancelRect = rect;
-		DisplayTransparentBitmapInRect  (hDC,hDib32,&rect);
+		DisplayTransparentBitmapInRect(hDC, hDib32, &rect, FALSE);
 		DestroyDIB32(hDib32,FALSE);
 	}
 	strcpy (FileName,"[%DL]icons\\list_tp.bmp");
@@ -1916,7 +1916,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		rect.right = rect.left +w;
 		rect.bottom = rect.top +w;
 		listRect = rect;
-		DisplayTransparentBitmapInRect  (hDC,hDib32,&rect);
+		DisplayTransparentBitmapInRect(hDC, hDib32, &rect, FALSE);
 		DestroyDIB32(hDib32,FALSE);
 	}
 	return;
@@ -2999,7 +2999,7 @@ BOOL RegisterPanZoomRotClass(void)
     return (RegisterClass(&wc));
 }
 
-BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
+BOOL CreatePanZoomRotTool(HWND hWnd, POINT Center, BOOL adjustToWindow)
 {
 	RECT	Rect;
 	int		Id;
@@ -3014,44 +3014,47 @@ BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center)
 	}
 	if (hWndPZR)
 		return FALSE;
-	GetClientRect (hWnd,&Rect);
-	if (!PtInRect (&Rect,Center))
+	if (adjustToWindow)
 	{
-		POINT	Points[4];
-		UINT	i, Mini=0;
-		double	MinDist, d;
-
-		RectToPoints (&Rect,Points);
-		MinDist = idist (Center,Points[0]);
-		for (i=1;i<4;i++)
+		GetClientRect(hWnd, &Rect);
+		if (!PtInRect(&Rect, Center))
 		{
-			d = idist (Center,Points[i]);
-			if (d < MinDist)
+			POINT	Points[4];
+			UINT	i, Mini = 0;
+			double	MinDist, d;
+
+			RectToPoints(&Rect, Points);
+			MinDist = idist(Center, Points[0]);
+			for (i = 1; i < 4; i++)
 			{
-				MinDist = d;
-				Mini = i;
+				d = idist(Center, Points[i]);
+				if (d < MinDist)
+				{
+					MinDist = d;
+					Mini = i;
+				}
 			}
-		}
-		switch (Mini)
-		{
-		case 1:
-			Center.x = Rect.left + 75;
-			Center.y = Rect.top  + 75;
-			break;
-		case 2:
-			Center.x = Rect.right - 75;
-			Center.y = Rect.top  + 75;
-			break;
-		case 3:
-			Center.x = Rect.right - 75;
-			Center.y = Rect.bottom  - 75;
-			break;
-		case 0:
-			Center.x = Rect.left + 75;
-			Center.y = Rect.bottom - 75;
-			break;
-		}
+			switch (Mini)
+			{
+			case 1:
+				Center.x = Rect.left + 75;
+				Center.y = Rect.top + 75;
+				break;
+			case 2:
+				Center.x = Rect.right - 75;
+				Center.y = Rect.top + 75;
+				break;
+			case 3:
+				Center.x = Rect.right - 75;
+				Center.y = Rect.bottom - 75;
+				break;
+			case 0:
+				Center.x = Rect.left + 75;
+				Center.y = Rect.bottom - 75;
+				break;
+			}
 
+		}
 	}
 	RegisterPanZoomRotClass();
 	if (!(hwndPanZoomRot = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_LAYERED,
@@ -5445,7 +5448,7 @@ void SaveToolbarsInConfig (HFILE Fid)
 void LoadToolbarsInConfig (HFILE Fid)
 {
 	int		nToolbar, iType, iFloat,i, npr, h;
-	RECT	rect;
+	RECT	rect, windowRect;
 	char	path[MAX_PATH];
 	char	cmd[1024];
 	POINT	pt;
@@ -5453,6 +5456,7 @@ void LoadToolbarsInConfig (HFILE Fid)
 	SetViewport (0);
 	DisplayToolbars = FALSE;
 	GSSilread (Fid,&nToolbar,4);
+	GetWindowRect(hWndMain, &windowRect);
 
 	GSSilread (Fid,&ToolbarWidthTop,4);
 	GSSilread (Fid,&ToolbarWidthBottom,4);
@@ -5468,7 +5472,7 @@ void LoadToolbarsInConfig (HFILE Fid)
 		GSSilread (Fid,&rect,sizeof(RECT));
 		GSSilread (Fid,path,MAX_PATH);
 
-		//ClientRectToScreenRect (hWndMain,&rect);
+		ClientRectToScreenRect (hWndMain,&rect);
 
 		switch (iType)
 		{
@@ -5483,7 +5487,7 @@ void LoadToolbarsInConfig (HFILE Fid)
 			{
 				POINT pt=RectMid (&rect);
 
-				sprintf (cmd,"$DIALOG(LOAD,PANZOOMROTATE,%i %i)",pt.x,pt.y);
+				sprintf (cmd,"$DIALOG(LOAD,PANZOOMROTATE,%i %i,F)",pt.x,pt.y);
 				ProcessText (cmd);
 			}
 			break;

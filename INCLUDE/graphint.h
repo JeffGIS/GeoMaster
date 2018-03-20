@@ -1346,7 +1346,7 @@ BOOL AddTurnData (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Fun
 BOOL OrthoFilterFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function);
 BOOL AdjustBitmapColors (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function);
 BOOL DisplayTransparentBitmap (HDC hDC,HDIB32 hDib,POINT Point,int width,LPRECT pBounds,LPCOLORREF pNewColor);
-BOOL DisplayTransparentBitmapInRect (HDC hDC,HDIB32 hDib,LPRECT pRect);
+BOOL DisplayTransparentBitmapInRect(HDC hDC, HDIB32 hDib, LPRECT pRect, BOOL MaintainAspect);
 long GetPickItemPoints (short item, BOOL Reverse, HPDPOINT *pPoints);
 HANDLE	GetConnectedItems (BOOL Closed, LPINT pNumPoints);
 BOOL ConvertDIBToPallete (LPHDIB32 lphDIB,short BitCount);
@@ -1859,7 +1859,7 @@ BOOL ConvertCDV101To102 (HFILE Fid,LPCOORDINATEDISPLAY CD);
 BOOL ConvertCDV102To103 (HFILE Fid,LPCOORDINATEDISPLAY CD);
 BOOL RemoveLinkLines (void); 
 //BOOL AdjustPolygons (short Opt);
-BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center);
+BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center,BOOL adjustToWindow);
 BOOL LoadGFFile (HWND hWndDlg,LPSTR Infile,short opt,BOOL Float);
 BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt);
 BOOL SetGFThemeState (LPTHEME CurTheme,LPSTR Title,LPSTR CommandLine);

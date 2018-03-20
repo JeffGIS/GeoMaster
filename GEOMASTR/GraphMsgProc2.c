@@ -1844,7 +1844,7 @@ BOOL FAR PASCAL ABOUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lP
 #endif
 { 
 	char	str[256], cUID[32], FIVersion[128], FICopyright[1024], MrSidVer[256];	
-	HBITMAP	hBmp; 
+	HBITMAP	hBmp=0; 
 	HWND	hWnd;
 	HDC		hDC; 
 	RECT	Rect; 
@@ -1892,36 +1892,46 @@ GSSiExitProg (439);
     case WM_COMMAND:
          switch(LOWORD(wParam))
          {  
-         	case IDC_LOGO:
-         		if ((hBmp = LoadBitmap (hInst,AppName)))
-         		{
-					HDIB32 hDIB = BitmapToDIB32 (hBmp);
-					POINT	mp;
-					BITMAPINFOHEADER	lpbi;
-					RECT	BMRect;
+		 case IDC_LOGO:
+		 {
+			 HDIB32 hDIB = 0;
+			 char BMPath[MAX_PATH];
+			 sprintf(BMPath, "[%%DL]icons\\%s.bmp", AppName);
+			 if (ExistFile(BMPath))
+			 {
+				 hDIB = LoadDIB(BMPath);
+			 }
+			 else if ((hBmp = LoadBitmap(hInst, AppName)))
+			 {
+				 hDIB = BitmapToDIB32(hBmp);
+			 }
+				 POINT	mp;
+				 BITMAPINFOHEADER	lpbi;
+				 RECT	BMRect;
 
-					GetBitmapInfoFromHandle (&lpbi,hDIB);
-		 			DeleteObject (hBmp);
-					BMRect.left = BMRect.top = 0;
-					BMRect.right = lpbi.biWidth;
-					BMRect.bottom = lpbi.biHeight;
-					hWnd = GetDlgItem (hWndDlg,IDC_LOGO);
-					GetWindowRect (hWnd,&Rect);
-					ScreenRectToClientRect (hWndDlg,&Rect);
-					AdjustRectToRect (&BMRect,&Rect);
-					
-					hDC = GetDC (hWndDlg); 
-					SetDisplayMode (hDC, GF_SCREENMODE); 
-			        /*SetWindowOrgEx  ( hDC, 0, 0,0 );
-			        SetViewportOrgEx( hDC, 0, 0,0 );    
-				    SetMapMode    ( hDC, MM_TEXT );*/
-				    SelectClipRgn (hDC,0);
-				//	FillRect (hDC,&Rect,GetStockObject(LTGRAY_BRUSH ));
-				//	DisplayBMInRect2 (hDC,hDIB, Rect,0,0,0,0);
-					DisplayTransparentBitmapInRect (hDC,hDIB, &Rect);
-					ReleaseDC (hWnd,hDC);    
-					DestroyDIB32 (hDIB,TRUE); 
-		         }
+				 GetBitmapInfoFromHandle(&lpbi, hDIB);
+				 if (hBmp)
+					 DeleteObject(hBmp);
+				 BMRect.left = BMRect.top = 0;
+				 BMRect.right = lpbi.biWidth;
+				 BMRect.bottom = lpbi.biHeight;
+				 hWnd = GetDlgItem(hWndDlg, IDC_LOGO);
+				 GetWindowRect(hWnd, &Rect);
+				 ScreenRectToClientRect(hWndDlg, &Rect);
+				 //AdjustRectToRect(&BMRect, &Rect);
+
+				 hDC = GetDC(hWndDlg);
+				 SetDisplayMode(hDC, GF_SCREENMODE);
+				 /*SetWindowOrgEx  ( hDC, 0, 0,0 );
+				 SetViewportOrgEx( hDC, 0, 0,0 );
+				 SetMapMode    ( hDC, MM_TEXT );*/
+				 SelectClipRgn(hDC, 0);
+				 //	FillRect (hDC,&Rect,GetStockObject(LTGRAY_BRUSH ));
+				 //	DisplayBMInRect2 (hDC,hDIB, Rect,0,0,0,0);
+				 DisplayTransparentBitmapInRect(hDC, hDIB, &Rect,TRUE);
+				 ReleaseDC(hWnd, hDC);
+				 DestroyDIB(hDIB);
+			 }
          		break;
          		
             case IDCANCEL: 

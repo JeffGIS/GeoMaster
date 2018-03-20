@@ -228,6 +228,7 @@ LPSTR	lpAutoUpdateFieldList=0;
 LPSTR	lpSQLFieldList=0;
 LPSTR	lpBasicTitle=0;
 RECT	displayRect;
+BOOL	showOnlyData;
 int		fullBMLeft=0;
 HWND	hWndFullBM=0;
 HWND	DebugInfoWnd;

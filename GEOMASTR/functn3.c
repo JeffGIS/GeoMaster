@@ -1707,7 +1707,7 @@ GotCloseFilehSQL:
 		
 		case 524: //$BASIC(file,sql,updatefieldlist,title,autoupdate,sqlfieldlist,displayrect)
 		{
-			nArgs = GetFunArgs (Args,Arg,7,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			lpDB = Arg[1];
@@ -1719,6 +1719,7 @@ GotCloseFilehSQL:
 			if (*Arg[6])
 				lpSQLFieldList = Arg[6];
 			displayRect = atorect (Arg[7],&Err);
+			showOnlyData = atob(Arg[8]);
 		    {
 		 	   DLGPROC lpfnIDENTIFYMsgProc;
 		         
@@ -2388,12 +2389,12 @@ GotCloseFilehSQL:
 		    if (!stricmp (Arg[1],"LOAD"))
 			{
 				if (!stricmp (Arg[2],"PANZOOMROTATE"))
-		 			CreatePanZoomRotTool (CurView->hWnd,atopt16 (Arg[3],0));
+		 			CreatePanZoomRotTool (hWndMain,atopt16 (Arg[3],0),atob (Arg[4]));
 			}
 		    else if (!stricmp (Arg[1],"REMOVE"))
 			{
 				if (!stricmp (Arg[2],"PANZOOMROTATE"))
-		 			CreatePanZoomRotTool (0,atopt16 (Arg[3],0));
+		 			CreatePanZoomRotTool (0,atopt16 (Arg[3],0),FALSE);
 			}
 		    else if (!_fstricmp (Arg[1],"STORMPIPE"))
             {

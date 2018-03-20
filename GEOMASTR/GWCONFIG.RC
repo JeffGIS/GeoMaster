@@ -8521,6 +8521,10 @@ IDB_PLAY_START          BITMAP                  "..\\CITYTOUR\\BMP00028.BMP"
 IDB_PLAY_PAUSE          BITMAP                  "..\\CITYTOUR\\PLAY_STA.BMP"
 IDB_BITMAP21            BITMAP                  "..\\CITYTOUR\\BMP00029.BMP"
 IDB_CANCEL              BITMAP                  "..\\CITYTOUR\\CANCELOLD.BMP"
+IDB_BITMAP22            BITMAP                  "..\\CITYTOUR\\BITMAP22.BMP"
+IDB_BITMAP23            BITMAP                  "C:\\Users\\Jeff Smith\\Dropbox\\LogosAndIcons\\33070_TRANSPARENT\\33070_TRANSPARENT.bmp"
+IDB_BITMAP24            BITMAP                  "..\\CITYTOUR\\BITMAP24.BMP"
+IDB_BITMAP25            BITMAP                  "..\\CITYTOUR\\BITMAP25.BMP"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -8652,6 +8656,10 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO
 BEGIN
+    "IDENTIFY", DIALOG
+    BEGIN
+    END
+
     "RBUTOPS", DIALOG
     BEGIN
     END
@@ -9214,8 +9222,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,11,111,0
- PRODUCTVERSION 34,11,111,0
+ FILEVERSION 34,11,112,0
+ PRODUCTVERSION 34,11,112,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9232,7 +9240,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34k build 111"
+            VALUE "FileVersion", "34k build 112"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"

@@ -1057,6 +1057,7 @@
     <ClInclude Include="WMS.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\Users\Jeff Smith\Dropbox\LogosAndIcons\33070_TRANSPARENT\33070_TRANSPARENT.bmp" />
     <Image Include="..\Citytour\ALIGN_BO.BMP" />
     <Image Include="..\Citytour\ALIGN_HO.BMP" />
     <Image Include="..\Citytour\ALIGN_LE.BMP" />
@@ -1064,6 +1065,9 @@
     <Image Include="..\Citytour\ALIGN_TO.BMP" />
     <Image Include="..\Citytour\ALIGN_VE.BMP" />
     <Image Include="..\Citytour\ARROWQ~1.BMP" />
+    <Image Include="..\CITYTOUR\BITMAP22.BMP" />
+    <Image Include="..\CITYTOUR\BITMAP24.BMP" />
+    <Image Include="..\CITYTOUR\BITMAP25.BMP" />
     <Image Include="..\CITYTOUR\BMP00028.BMP" />
     <Image Include="..\CITYTOUR\BMP00029.BMP" />
     <Image Include="..\CITYTOUR\BMP00030.BMP" />

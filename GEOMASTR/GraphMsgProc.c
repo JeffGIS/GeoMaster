@@ -1568,7 +1568,7 @@ GSSiExitProg (454);
     	 hSaveBM = EnterBlockingWindow (hWndDlg);
     	 hWndBasic = hWndDlg;
 		 if (IsRectEmpty (&displayRect))
-         cwCenter(hWndDlg, 0);
+			cwCenter(hWndDlg, 0);
 		 else
 		 {
 			 RECT mro, mr, r1, r2, r3, r4, r5;
@@ -1590,13 +1590,30 @@ GSSiExitProg (454);
 			 MoveWindow (GetDlgItem(hWndDlg,IDENTIFY_PRIOR),RECTWIDTH(&mr)-(mro.right-r2.right)-RECTWIDTH(&r2),r2.top,RECTWIDTH(&r2),RECTHEIGHT(&r2),FALSE);
 			 MoveWindow (GetDlgItem(hWndDlg,IDC_PHOTO1),RECTWIDTH(&mr)-(mro.right-r3.right)-RECTWIDTH(&r3),r3.top,RECTWIDTH(&r3),RECTHEIGHT(&r3),FALSE);
 			 MoveWindow (GetDlgItem(hWndDlg,IDC_NOTES),RECTWIDTH(&mr)-(mro.right-r5.right)-RECTWIDTH(&r5),r5.top,RECTWIDTH(&r5),RECTHEIGHT(&r5),FALSE);
-			 MoveWindow (GetDlgItem(hWndDlg,IDENTIFY_DATA),0,r4.top,RECTWIDTH(&mr),RECTHEIGHT(&mr)-r4.top,FALSE);
+			 if (showOnlyData)
+				 MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, 0, RECTWIDTH(&mr), RECTHEIGHT(&mr), FALSE);
+			 else
+				 MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, r4.top, RECTWIDTH(&mr), RECTHEIGHT(&mr) - r4.top, FALSE);
 		 }
          /* initialize working variables                                */
 		 strcpy (DBName,lpDB);
          item = BasicDisplayItem; 
 		 if (lpBasicTitle)
 			 SetWindowText (hWndDlg,lpBasicTitle);
+		 if (showOnlyData)
+		 {
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE0), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE1), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE2), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE3), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE4), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_SQL), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDC_NOTES), SW_HIDE);
+			 ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE);
+		 }
          RecNo=0;
 Show:    
 		 if (item >= 0 && ShowItem)
@@ -1691,14 +1708,24 @@ Show:
            	{
 	           	RecNo=1;
 	       		BasicDataDisplay (DBName,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,120);
-				SetPhotoAndNotesFiles (hWndDlg,IDENTIFY_DATA,IDC_PHOTO1,IDC_PHOTO2,IDC_NOTES,photoFile1,photoFile2,notesFile);
+				if (!showOnlyData)
+				{
+					BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 120);
+					SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
+				}
+				else
+					BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, 0,0, RecNo, Refno, lpSQL, 120);
+
        		}
        		CloseMap(FALSE);
 		 }
         else
            	ShowWindow (GetDlgItem(hWndDlg,IDENTIFY_DATA),SW_HIDE);
-         sprintf(str, "%d of %d Item(s) picked", item,NumPicked );
-         SetDlgItemText (hWndDlg,IDENTIFY_LINE4,str);
+		 if (item >= 0)
+		 {
+			 sprintf(str, "%d of %d Item(s) picked", item, NumPicked);
+			 SetDlgItemText(hWndDlg, IDENTIFY_LINE4, str);
+		 }
          hWnd = GetDlgItem (hWndDlg,IDENTIFY_NEXT);
 /*         hWnd = GetDlgItem (hWndDlg,IDENTIFY_PREV);
          if (item>0) EnableWindow (hWnd,HaveImage);*/
