@@ -1994,6 +1994,7 @@ void AddjustSphericalMercatorBounds (LPMNMXCORD pBounds);
 double GetGoogleTileBoundsFromPointAndZoom (int GZoom,DPOINT GPoint,LPMNMXCORD pBounds,LPINT pgRow,LPINT pgCol,LPINT pGoogleRow);
 int GetGoogleZoomForSCale (double scale);
 double GetGoogleScaleForZoom (int iZoom);
+void SetGoogleMapDimensions(LPVIEWPORT pVP);
 BOOL GetGoogleZoomAndTileFromBounds (LPMNMXCORD pBoundsInBaseProjection,int StartZoom,LPINT pZoom,LPINT pTileX,LPINT pTileY,LPDOUBLE pScale,LPMNMXCORD pTileBounds);
 void LatLongToPixelXY(double latitudein, double longitudein, int levelOfDetail, int *pixelX, int *pixelY);
 void PixelXYToTileXY(int pixelX, int pixelY, int *tileX, int *tileY);

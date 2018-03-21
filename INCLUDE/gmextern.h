@@ -1787,6 +1787,7 @@ extern	int		defaultAreaTransparency;
 extern	int		defaultLineTransparency;
 extern  int		GoogleScale;
 extern	int		GoogleZoom;
+extern  int		GoogleMapWidth, GoogleMapHeight;
 extern  int		GoogleMapType;
 
 extern HBITMAP hPatBMP[5];

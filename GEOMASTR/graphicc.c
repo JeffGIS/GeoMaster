@@ -3926,6 +3926,7 @@ BOOL GetGoogleMapFile(int type)
 	int pixelx, pixely;
 	char mapType[16]="roadmap";
 
+	SetGoogleMapDimensions(CurView);
 	switch (type)
 	{
 	case MT_GOOGLE_SATELLITE:
@@ -3939,7 +3940,7 @@ BOOL GetGoogleMapFile(int type)
 		break;
 	}
 	ConvertCoord(&centerLL, 1, 2);
-	sprintf (cmd, "http://maps.googleapis.com/maps/api/staticmap?size=640x640&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=%s",centerLL.y,centerLL.x,GoogleZoom,GoogleScale,mapType);
+	sprintf (cmd, "http://maps.googleapis.com/maps/api/staticmap?size=%ix%i&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=%s",GoogleMapWidth,GoogleMapHeight,centerLL.y,centerLL.x,GoogleZoom,GoogleScale,mapType);
 	ExpandText(cmd);
 	if (!*CurView->CurrentGoogleImage)
 	{

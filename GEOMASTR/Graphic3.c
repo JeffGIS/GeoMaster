@@ -1264,7 +1264,7 @@ int GetNearestZoomForSCale(double scale, double *gTileScale)
 	return nearZoom;
 }
 
-BOOL SetUseGoogleZooms(void)
+static BOOL SetUseGoogleZooms(void)
 {
 	for (int ifile = 0; ifile < CurView->NumFiles; ifile++)
 	{
@@ -1280,7 +1280,26 @@ BOOL SetUseGoogleZooms(void)
 	return FALSE;
 }
 
-double SetToGoogleScale(double Scale)
+void SetGoogleMapDimensions(LPVIEWPORT pVP)
+{
+	double w = RECTWIDTH(&pVP->DrawRect), h = RECTHEIGHT(&pVP->DrawRect);
+	if (w && h)
+	{
+		if (w > h)
+		{
+			GoogleMapWidth = 640;
+			GoogleMapHeight = IDNINT((640 * h) / w);
+		}
+		else
+		{
+			GoogleMapHeight = 640;
+			GoogleMapWidth = IDNINT((640 * w) / h);
+		}
+	}
+	return;
+}
+
+static double SetToGoogleScale(double Scale)
 {
 	double nearScale;
 	DPOINT vpMidPointLL, ScreenPoints[4];
@@ -1295,8 +1314,9 @@ double SetToGoogleScale(double Scale)
 
 	vpMidPointLL = MinMaxMidPointD(&CurView->WBounds);
 	ConvertCoord(&vpMidPointLL, 1, 2);
-	width = RECTWIDTH(&CurView->ScreenRect) / GoogleScale;
-	height = RECTHEIGHT(&CurView->ScreenRect) / GoogleScale;
+	SetGoogleMapDimensions(CurView);
+	width = GoogleMapWidth;// RECTWIDTH(&CurView->ScreenRect) / GoogleScale;
+	height = GoogleMapHeight;// RECTHEIGHT(&CurView->ScreenRect) / GoogleScale;
 
 	for (int izoom = 1; izoom < 22; izoom++)
 	{
