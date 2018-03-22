@@ -6647,15 +6647,19 @@ HaveVP:;
 						BOOL TimedOut;
 						int	 MaxWait = atol (Arg[6]);
 
-						WaitForInputIdle (pi.hProcess,INFINITE);
-						ltoa ((long)pi.hProcess,OutLoc,10);
-						if (atob (Arg[5]))
+						if (MaxWait >= 0)
 						{
-							while (WaitForProcessToEnd (pi.dwProcessId,&MaxWait));
-							if (MaxWait)
-								goto RtnTrue;
-							else
-								goto RtnFalse;
+							WaitForInputIdle(pi.hProcess, INFINITE);
+							ltoa((long)pi.hProcess, OutLoc, 10);
+
+							if (atob(Arg[5]))
+							{
+								while (WaitForProcessToEnd(pi.dwProcessId, &MaxWait));
+								if (MaxWait)
+									goto RtnTrue;
+								else
+									goto RtnFalse;
+							}
 						}
 					}
 					else
