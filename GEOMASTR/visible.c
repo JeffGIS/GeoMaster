@@ -32,6 +32,7 @@ BOOL FileIsVisible (LPSTR FileName)
 	HFILE	Fid;   
 	BOOL	rtn=TRUE;
 	long	ORAHeaderType;
+	char	tableName[128] = { 0 };
 	
 	switch (MapFileType (FileName))
 	{
@@ -57,7 +58,7 @@ BOOL FileIsVisible (LPSTR FileName)
 		case MT_SQLITE:
 			if ((SHPType = OpenSQLITEMapFile(FileName,0)))
 			{
-				if (LoadSQLITEParm(FileName, SHPType, CurView->hWnd))
+				if (LoadSQLITEParm(FileName, tableName,SHPType, CurView->hWnd))
 					rtn = IsSQLITEFileVisible();
 				CloseSQLITEMapFile();
 			}

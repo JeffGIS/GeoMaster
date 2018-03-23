@@ -307,6 +307,8 @@ int FetchSLTRec(LPSQLDATABASE pSQL);
 BOOL SLTPrepareStatement(LPSQLDATABASE pDB, LPSTR SQL);
 void CloseSLTDatabaseQuery(LPHANDLE pHandle);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
+BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName);
+BOOL SLTSpatialIndexExists(sqlite3 *db, LPSTR tableName);
 BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName);
 BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds);
 BOOL SLTSpatialIndexCreate3D(sqlite3 *db, LPSTR tableName);

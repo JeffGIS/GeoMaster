@@ -46,6 +46,7 @@ void SetSQLiteErrFile(LPSTR errFile)
 		*SQLiteErrorFile = 0;
 }
 
+
 BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 {
 	if (sqlReturn != SQLITE_OK)
@@ -2249,11 +2250,16 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 			if (GSSiLength(fileName) > 0)
 			{
 				rtnType = SHPT_POINT;
-				LoadSQLITEParm(fileName, rtnType, CurView->hWnd);
+				rtnType = LoadSQLITEParm(fileName, tableName, rtnType, CurView->hWnd);
 				if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 				{
 					if (GetSQLITENumRows(SQLITEHandle, tableName,""))
 					{
+						if (!SLTSpatialIndexExists(SQLITEHandle, tableName))
+						{
+							SLTSpatialIndexCreate(SQLITEHandle,tableName);
+
+						}
 						if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
 						{
 							Points[0].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
@@ -2756,7 +2762,7 @@ BOOL IsSQLITEFileVisible(void)
 	}*/
 	return TRUE;
 }
-BOOL LoadSQLITEParm(LPSTR SQLITEFileName, long Type, HWND hWnd)
+int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 #if ENABLETRACE
 {
 	GSSiEnterProg(1374);
@@ -3617,6 +3623,39 @@ void CloseSLTDatabaseQuery (LPHANDLE pHandle)
 		rtn = sqlite3_close(*pHandle);
 	return;
 }
+
+BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName)
+{
+	BOOL rtn = FALSE;
+	sqlite3_stmt *statement;
+
+	if (db)
+	{
+		char cmd[256];
+		sprintf(cmd, "SELECT name FROM sqlite_master WHERE name = '%s'", tableName);
+
+		SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "table exists", 0);
+
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			LPSTR pName = sqlite3_column_text(statement, 0);
+			rtn = TRUE;
+		}
+		sqlite3_finalize(statement);
+	}
+	return rtn;
+}
+
+BOOL SLTSpatialIndexExists(sqlite3 *db, LPSTR tableName)
+{
+	BOOL rtn = FALSE;
+	char indexName[256];
+
+	sprintf(indexName, "%s_index", tableName);
+	rtn = DoesSLTTableExist(db, indexName);
+	return rtn;
+}
+
 BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
