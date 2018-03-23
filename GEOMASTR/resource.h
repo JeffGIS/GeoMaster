@@ -270,8 +270,10 @@
 #define SV_CB_MANUAL                    335
 #define IDC_COORD_XTITLE5               335
 #define IDC_COORD_XTITLE4               336
+#define IDC_COORD_XTITLE6               336
 #define SV_CB_ZEROBASED                 337
 #define IDC_REF_UDI_TITLE               337
+#define IDC_COORD_XTITLE7               337
 #define SV_DISPLAY_DATAPOINTS           338
 #define SV_CB_RECOMPUTE                 339
 #define SV_TARGET                       340
@@ -3362,6 +3364,8 @@
 #define IDC_LARGEBUTTON                 2288
 #define IDC_LEFTBUTTON                  2289
 #define IDC_RIGHTBUTTON                 2290
+#define IDC_XCOORDFIELD                 2291
+#define IDC_YCOORDFIELD                 2292
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3708,7 +3712,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1248
 #define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2291
+#define _APS_NEXT_CONTROL_VALUE         2293
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

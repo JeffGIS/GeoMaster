@@ -3432,605 +3432,1180 @@ BOOL FillSymbolListFromVariable (HWND hWndDlg,UINT idc_SYMBOL_LIST,UINT idc_SQL_
 
 
 BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
-{ 
-	char	SymName[66], str[260], GSPName[256], cIF[128], UDI[66], SymStuff[256]; 
-	static  char cpWidth[64]={0},clWidth[64]={0},cWidth[64], cRot[64]={0},cColor[64]={0};
-	static	char projection[MAX_PATH]={0}, units[64]={0};
-	short	i, Choice, rtn; 
-	LPSTR	pDOT;  
-	HFILE	Fid;  
-	MNMXCORD	Bounds;  
-	static	short	CurProj=-1,CurUnits=-1;
-	static	BOOL	IsPGDB, IsFGDB; 
-   	static	BOOL	Opened;
+{
+	char	SymName[66], str[260], GSPName[256], cIF[128], UDI[66], SymStuff[256];
+	static  char cpWidth[64] = { 0 }, clWidth[64] = { 0 }, cWidth[64], cRot[64] = { 0 }, cColor[64] = { 0 };
+	static	char projection[MAX_PATH] = { 0 }, units[64] = { 0 };
+	short	i, Choice, rtn;
+	LPSTR	pDOT;
+	HFILE	Fid;
+	MNMXCORD	Bounds;
+	static	short	CurProj = -1, CurUnits = -1;
+	static	BOOL	IsPGDB, IsFGDB;
+	static	BOOL	Opened;
 	long	ii;
 
- short    BRtn;
- if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
- 	return (BRtn);
- switch(Message)
-   {
- case WM_INITDIALOG:
- {
-	 char originalName[MAX_PATH];
+	short    BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+	{
+						  char originalName[MAX_PATH];
 
-	 Opened = FALSE;
-	 SHPIndexType = SHP_INDEX_SIMPLE;
-	 GetSHPName(str);
-	 strcpy(originalName, str);
-	 SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
-	 _fstrcpy(GSPName, str);
-	 IsPGDB = FALSE;
-	 IsFGDB = FALSE;
-	 *PGDBTable = 0;
-	 if ((pDOT = _fstrrchr(GSPName, '.')))
-	 {
-		 if (!_fstrnicmp(pDOT, ".mdb", 4))
-		 {
-			 if (*(pDOT + 4) != '(')
-				 return FALSE;
-			 IsPGDB = TRUE;
-			 _fstrcpy(PGDBTable, pDOT + 5);
-			 *LastChr(PGDBTable) = 0;
-			 *pDOT = 0;
-			 sprintf(str, "%s_%s.gsp", GSPName, PGDBTable);
-			 _fstrcpy(GSPName, str);
-		 }
-		 else if (!_fstrnicmp(pDOT, ".gdb", 4))
-		 {
-			 char fgdbPath[MAX_PATH];
+						  Opened = FALSE;
+						  SHPIndexType = SHP_INDEX_SIMPLE;
+						  GetSHPName(str);
+						  strcpy(originalName, str);
+						  SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
+						  _fstrcpy(GSPName, str);
+						  IsPGDB = FALSE;
+						  IsFGDB = FALSE;
+						  *PGDBTable = 0;
+						  if ((pDOT = _fstrrchr(GSPName, '.')))
+						  {
+							  if (!_fstrnicmp(pDOT, ".mdb", 4))
+							  {
+								  if (*(pDOT + 4) != '(')
+									  return FALSE;
+								  IsPGDB = TRUE;
+								  _fstrcpy(PGDBTable, pDOT + 5);
+								  *LastChr(PGDBTable) = 0;
+								  *pDOT = 0;
+								  sprintf(str, "%s_%s.gsp", GSPName, PGDBTable);
+								  _fstrcpy(GSPName, str);
+							  }
+							  else if (!_fstrnicmp(pDOT, ".gdb", 4))
+							  {
+								  char fgdbPath[MAX_PATH];
 
-			 if (*(pDOT + 4) != '(')
-				 return FALSE;
-			 IsFGDB = TRUE;
-			 _fstrcpy(FGDBTable, pDOT + 5);
-			 *LastChr(FGDBTable) = 0;
-			 *pDOT = 0;
-			 sprintf(fgdbPath, "%s.gdb", GSPName);
-			 sprintf(str, "%s_%s.gsp", GSPName, FGDBTable);
-			 _fstrcpy(GSPName, str);
-			 OpenFGDB(fgdbPath, FGDBTable, "");
-			 hSHPDBF = FGDBHandle;
-			 Opened = TRUE;
-		 }
-		 else
-			 _fstrcpy(pDOT, ".gsp");
-	 }
-	 else
-		 break;
-	 SetCurVal(GSPName, IDS_FILEGSP);
-	 LoadTAGDef();
-	 if (NumTAGDef)
-	 {
-		 LPTAGDEF    lpTAGDef;
+								  if (*(pDOT + 4) != '(')
+									  return FALSE;
+								  IsFGDB = TRUE;
+								  _fstrcpy(FGDBTable, pDOT + 5);
+								  *LastChr(FGDBTable) = 0;
+								  *pDOT = 0;
+								  sprintf(fgdbPath, "%s.gdb", GSPName);
+								  sprintf(str, "%s_%s.gsp", GSPName, FGDBTable);
+								  _fstrcpy(GSPName, str);
+								  OpenFGDB(fgdbPath, FGDBTable, "");
+								  hSHPDBF = FGDBHandle;
+								  Opened = TRUE;
+							  }
+							  else
+								  _fstrcpy(pDOT, ".gsp");
+						  }
+						  else
+							  break;
+						  SetCurVal(GSPName, IDS_FILEGSP);
+						  LoadTAGDef();
+						  if (NumTAGDef)
+						  {
+							  LPTAGDEF    lpTAGDef;
 
-		 lpTAGDef = (LPTAGDEF)GlobalLock(hTAGDef);
-		 for (i = 0; i < NumTAGDef; i++, lpTAGDef++)
-		 {
-			 SendDlgItemMessage(hWndDlg, IDC_TAPREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
-			 SendDlgItemMessage(hWndDlg, IDC_REF_PREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
-		 }
-		 GlobalUnlock(hTAGDef);
-	 }
-	 EnableWindow(GetDlgItem(hWndDlg, IDC_SAADD), TRUE);
-	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Feet");
-	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Meters");
-	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees");
-	 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees * 1000000");
-	 FillProjectionList(hWndDlg, IDC_PROJECTION, &CurProj, IDC_UNITS, &CurUnits);
-	 //         _fstrcpy (str,"*.CVT");
-	 //         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
-	 if (PRJ_UNITS[1] == 1)
-		 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
-	 else if (PRJ_UNITS[1] == 2)
-		 SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
-	 SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
-	 SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
-	 SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
-	 SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
-	 GetSHPName(str);
-	 if (IsPGDB)
-		 SHPType = ReadPGDBHeader(str, &Bounds);
-	 else if (IsFGDB)
-		 SHPType = ReadFGDBHeader(str, &Bounds);
-	 else
-	 {
-		 Fid = GSSiOpenFile(str, 0, OF_READ);
-		 if (Fid == HFILE_ERROR)
-			 goto LoadGSP;
-		 SHPType = ReadSHPHeader(Fid, &Bounds, str);
-		 GSSiClose(Fid);
-	 }
-	 ii = SHPType;
-	 SetDlgItemText(hWndDlg, IDC_SHPMINX, ftoa(str, Bounds.xmn));
-	 SetDlgItemText(hWndDlg, IDC_SHPMAXX, ftoa(str, Bounds.xmx));
-	 SetDlgItemText(hWndDlg, IDC_SHPMINY, ftoa(str, Bounds.ymn));
-	 SetDlgItemText(hWndDlg, IDC_SHPMAXY, ftoa(str, Bounds.ymx));
-	 goto LoadGSP;
- }
-         break; /* End of WM_INITDIALOG                                 */
+							  lpTAGDef = (LPTAGDEF)GlobalLock(hTAGDef);
+							  for (i = 0; i < NumTAGDef; i++, lpTAGDef++)
+							  {
+								  SendDlgItemMessage(hWndDlg, IDC_TAPREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+								  SendDlgItemMessage(hWndDlg, IDC_REF_PREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+							  }
+							  GlobalUnlock(hTAGDef);
+						  }
+						  EnableWindow(GetDlgItem(hWndDlg, IDC_SAADD), TRUE);
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Feet");
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Meters");
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees");
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees * 1000000");
+						  FillProjectionList(hWndDlg, IDC_PROJECTION, &CurProj, IDC_UNITS, &CurUnits);
+						  //         _fstrcpy (str,"*.CVT");
+						  //         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
+						  if (PRJ_UNITS[1] == 1)
+							  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+						  else if (PRJ_UNITS[1] == 2)
+							  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
+						  SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
+						  SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+						  SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+						  SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
+						  GetSHPName(str);
+						  if (IsPGDB)
+							  SHPType = ReadPGDBHeader(str, &Bounds);
+						  else if (IsFGDB)
+							  SHPType = ReadFGDBHeader(str, &Bounds);
+						  else
+						  {
+							  Fid = GSSiOpenFile(str, 0, OF_READ);
+							  if (Fid == HFILE_ERROR)
+								  goto LoadGSP;
+							  SHPType = ReadSHPHeader(Fid, &Bounds, str);
+							  GSSiClose(Fid);
+						  }
+						  ii = SHPType;
+						  SetDlgItemText(hWndDlg, IDC_SHPMINX, ftoa(str, Bounds.xmn));
+						  SetDlgItemText(hWndDlg, IDC_SHPMAXX, ftoa(str, Bounds.xmx));
+						  SetDlgItemText(hWndDlg, IDC_SHPMINY, ftoa(str, Bounds.ymn));
+						  SetDlgItemText(hWndDlg, IDC_SHPMAXY, ftoa(str, Bounds.ymx));
+						  goto LoadGSP;
+	}
+		break; /* End of WM_INITDIALOG                                 */
 
-    case WM_COMMAND:
+	case WM_COMMAND:
 
-         switch(LOWORD(wParam))
+		switch (LOWORD(wParam))
 
-         {  
-            case IDC_SHOW_FIELDS: 
-            {
-            	 
-            	if (!hSHPDBF)
-            	{   
-            		char	DBFName[256];
-            		
-			    	GetSHPName (str);
-			    	if (IsPGDB)
+		{
+		case IDC_SHOW_FIELDS:
+		{
+
+								if (!hSHPDBF)
+								{
+									char	DBFName[256];
+
+									GetSHPName(str);
+									if (IsPGDB)
+									{
+										OpenPGDBFileIndex(str, 0);
+										SetPGDB_SQL("");
+									}
+									else
+									{
+										sprintf(DBFName, "SHP=%s", str);
+										OpenDataFile(DBFName, "", BT_READ, &hSHPDBF);
+									}
+									Opened = TRUE;
+								}
+
+								DisplayFieldList(hWndDlg, hSHPDBF, 0, 0, 0);
+		}
+			break;
+
+		case IDC_COPYFROM:
+			*GSPName = 0;
+			if (!GetFileName3(hWndDlg, GSPName, IDS_FILTERGSP, IDS_FILEGSP))
+				break;
+		LoadGSP:
+			SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_RESETCONTENT, 0, 0);
+			SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_RESETCONTENT, 0, 0);
+			{
+				HFILE	Fid = GSSiOpenFile(GSPName, 0, OF_READ);
+				short	SymNum = 0;
+
+				if (Fid == HFILE_ERROR)
+				{
+					short	type;
+
+					GetDlgItemText(hWndDlg, IDC_SHAPEFILE, str, 256);
+					if (!*projection)
 					{
-		 				OpenPGDBFileIndex (str,0);
-						SetPGDB_SQL ("");
+						GuessShapeProjection(str, hWndDlg, IDC_PROJECTION, IDC_UNITS, TRUE);
 					}
-		 			else
-                    {
-						sprintf (DBFName,"SHP=%s",str);
-						OpenDataFile (DBFName,"",BT_READ,&hSHPDBF);
-					}
-					Opened = TRUE; 
-				}
-
-            	DisplayFieldList (hWndDlg,hSHPDBF,0,0,0); 
-            }	
-                 break;
-                      
-            case IDC_COPYFROM: 
-                 *GSPName=0;
-                 if (!GetFileName3 (hWndDlg,GSPName,IDS_FILTERGSP,IDS_FILEGSP))
-                 	break;
-   LoadGSP:
-				 SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_RESETCONTENT,0,0);
-				 SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_RESETCONTENT,0,0);
-  				 {
-   				 	HFILE	Fid = GSSiOpenFile (GSPName,0,OF_READ); 
-   				 	short	SymNum=0;
-   				 	
-   				 	if (Fid == HFILE_ERROR)  
-   				 	{   
-   				 		short	type;
-   				 		
-				    	GetDlgItemText (hWndDlg,IDC_SHAPEFILE,str,256);
-						if (!*projection)
-						{
-		            		GuessShapeProjection (str,hWndDlg,IDC_PROJECTION,IDC_UNITS,TRUE);
-						}
-						else
-						{
-							HFILE	Fid2;
-							
-							strcpy (str,projection);
-							ExpandText (str);
-							Fid2 = GSSiOpenFile (str,0,OF_READ);
-							if (Fid2 != HFILE_ERROR)
-							{   
-								fgetstring (str,250,Fid2);
-								SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,-1,(LPARAM)(str+1));
-								GSSiClose (Fid2);
-							}
-   				 			if (*units)
-			         			SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,-1,(LPARAM)units);
-						}
-						if (!*cRot)
-							strcpy (cRot,"0D");
-						if (!cColor)
-							strcpy (cColor,"-1");
-
-						switch (SHPType)
-						{
-							case SHPT_POINT:
-							case SHPT_POINTZ:
-								GetGlobalCVal ("[%DEFAULTPOINTSYMBOL]",SymName,"SQUARE"); 
-								if (!*cpWidth)
-									strcpy (cpWidth,"-1"); 
-								type = 1;
-							break; 
-							case SHPT_ARC:
-							case SHPT_ARCZ:
-								GetGlobalCVal ("[%DEFAULTLINESYMBOL]",SymName,"PEN1"); 
-								if (!*clWidth)
-									strcpy (clWidth,"-1"); 
-								type = 2;
-								break;
-							case 4:
-	                 		case SHPT_TEXT:
-							case SHPT_POLYGON:
-							case SHPT_POLYGONZ:
-								GetGlobalCVal ("[%DEFAULTAREASYMBOL]",SymName,"PARCEL"); 
-								if (!*cWidth)
-									strcpy (cWidth,"-1"); 
-								type = 3;
-							break; 
-						} 
-						if (*PGDBTable)
-						{
-							sprintf (SymName,"%s,PAR=NEW",PGDBTable); 
-							SymNum = GetOrCreateSym (hWndDlg,SymName,0,0,GetGlobalLVal2 ("[%ALLOWSYMBOLCREATION]",0),type);  
-							_fstrcpy (SymName,PGDBTable);
-						}
-						else if (*FGDBTable)
-						{
-							sprintf (SymName,"%s,PAR=NEW",FGDBTable); 
-							SymNum = GetOrCreateSym (hWndDlg,SymName,0,0,GetGlobalLVal2 ("[%ALLOWSYMBOLCREATION]",0),type);  
-							_fstrcpy (SymName,FGDBTable);
-						}
-						else
-						{
-							char	fname[80];
-
-							_splitpath (GSPName,0,0,fname,0);
-							sprintf (SymName,"%s,PAR=NEW",fname); 
-							SymNum = GetOrCreateSym (hWndDlg,SymName,0,0,GetGlobalLVal2 ("[%ALLOWSYMBOLCREATION]",0),type);  
-							_fstrcpy (SymName,fname);
-						}
-						if (!SymNum) 
-						{
-			                 *cWidth = 0;
-			                 *cRot = 0;
-			                 *cColor = 0; 
-			                 rtn = 0;
-			                 switch (SHPType)
-			                 {
-			                 	case SHPT_POINT:
-			                 	case SHPT_POINTZ:
-									rtn = SelectPointSymbol (hWndDlg,1,SymName,"All",cWidth,cRot,cColor,TRUE);
-									break; 
-								case SHPT_ARC:
-								case SHPT_ARCZ:
-			                 		rtn = SelectLineSymbol (hWndDlg,1,SymName,cWidth, cColor,TRUE);
-			                 		break;  
-			                 	case 4:
-				                case SHPT_TEXT:
-								case SHPT_POLYGON:
-								case SHPT_POLYGONZ:
-			                 		rtn = SelectAreaSymbol (hWndDlg,1,SymName, cColor,TRUE);
-			                 		break; 
-			                 }  
-			            }
-						else
-							GetDictSymName (SymNum,SymName);
-	                 	sprintf (SymStuff,"%s;%s;%s;%s",SymName,cWidth,cRot,cColor);
-	                 	SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_ADDSTRING,0,(LPARAM)SymStuff);
-	                	SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_ADDSTRING,0,(LPARAM)"ALL ROWS");
-   				 		break; 
-   				 	}
-   				 	if (fgetstring (str,128,Fid))
+					else
 					{
 						HFILE	Fid2;
-						
-						ExpandText (str);
-						Fid2 = GSSiOpenFile (str,0,OF_READ);
+
+						strcpy(str, projection);
+						ExpandText(str);
+						Fid2 = GSSiOpenFile(str, 0, OF_READ);
 						if (Fid2 != HFILE_ERROR)
-						{   
-							fgetstring (str,250,Fid2);
-							SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,-1,(LPARAM)(str+1));
-							GSSiClose (Fid2);
+						{
+							fgetstring(str, 250, Fid2);
+							SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, -1, (LPARAM)(str + 1));
+							GSSiClose(Fid2);
 						}
+						if (*units)
+							SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SELECTSTRING, -1, (LPARAM)units);
 					}
-   				 	if (fgetstring (str,128,Fid))
-			         	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,-1,(LPARAM)str);
-   				 	if (fgetstring (str,128,Fid))
-   				 		SetDlgItemText (hWndDlg,IDC_STARTNO,str);   
-   				 	if (fgetstring (str,128,Fid))
-   				 	{   
-   				 		LPSTR	pSC = _fstrchr (str,':');
-   				 		
-   				 		if (pSC)
-   				 		{
-   				 			*pSC++ = 0;
-   				 			SetDlgItemText (hWndDlg,IDC_UDI,pSC);
-   				 		}
-   				 		SetDlgItemText (hWndDlg,IDC_TAPREFIX,str); 
-   				 	}
-   				 	if (fgetstring (str,128,Fid))
-   				 		SHPIndexType = atoi (str);
-					SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
-					SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
-					SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
-   
-   				 	while (fgetstring (str,256,Fid))
-   				 	{
-						if (*str == '#')
-							break;
-						DecodeSHPParam (str,SymName,cIF,cColor,cWidth,cRot);
-	                 	sprintf (str,"%s;%s;%s;%s",SymName,cWidth,cRot,cColor);
-		                SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_ADDSTRING,0,(LPARAM)str); 
-		                if (*cIF)
-		                	SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_ADDSTRING,0,(LPARAM)cIF);
-		                else
-		                	SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_ADDSTRING,0,(LPARAM)"ALL ROWS");
-   				 	} 
-					if (fgetstring (str,256,Fid))
-	                	SetDlgItemText (hWndDlg,IDC_BEGINDATE,str);
-					if (fgetstring (str,256,Fid))
-	                	SetDlgItemText (hWndDlg,IDC_ENDDATE,str);
-   				 	GSSiClose (Fid);
-   				 }
-   				 		   
-                 break;
-            
-            case IDC_ASSIGNCVT:
-		    	GetDlgItemText (hWndDlg,IDC_SHAPEFILE,str,128);
-            	GuessShapeProjection (str,hWndDlg,IDC_PROJECTION,IDC_UNITS,FALSE);
-            break;
-            
-            case IDC_SAADD:      
-            {    
-                 HANDLE hMem;
-                 LPSTR  lpStr, lpWhere;   
-                 
-            	if (!hSHPDBF)
-            	{   
-            		char	DBFName[256];
-            		
-			    	GetSHPName (str);
-			    	if (IsPGDB)
+					if (!*cRot)
+						strcpy(cRot, "0D");
+					if (!cColor)
+						strcpy(cColor, "-1");
+
+					switch (SHPType)
 					{
-		 				OpenPGDBFileIndex (str,0);
-						SetPGDB_SQL ("");
-					}
-		 			else
-                    {
-						sprintf (DBFName,"SHP=%s",str);
-						OpenDataFile (DBFName,"",BT_READ,&hSHPDBF);
-					}
-					Opened = TRUE; 
-				}
-                 *SymName = 0;
-                 *cWidth = 0;
-                 *cRot = 0;
-                 *cColor = 0; 
-                 rtn = 0;
-                 switch (SHPType)
-                 {
-                 	case SHPT_POINT:
-                 	case SHPT_POINTZ:
-						rtn = SelectPointSymbol (hWndDlg,1,SymName,"All",cWidth,cRot,cColor,FALSE);
-						break; 
+					case SHPT_POINT:
+					case SHPT_POINTZ:
+						GetGlobalCVal("[%DEFAULTPOINTSYMBOL]", SymName, "SQUARE");
+						if (!*cpWidth)
+							strcpy(cpWidth, "-1");
+						type = 1;
+						break;
 					case SHPT_ARC:
 					case SHPT_ARCZ:
-                 		rtn = SelectLineSymbol (hWndDlg,1,SymName,cWidth, cColor,FALSE);
-                 		break;  
-                 	case 4:
-	                case SHPT_TEXT:
+						GetGlobalCVal("[%DEFAULTLINESYMBOL]", SymName, "PEN1");
+						if (!*clWidth)
+							strcpy(clWidth, "-1");
+						type = 2;
+						break;
+					case 4:
+					case SHPT_TEXT:
 					case SHPT_POLYGON:
 					case SHPT_POLYGONZ:
-                 		rtn = SelectAreaSymbol (hWndDlg,1,SymName, cColor,FALSE);
-                 		break; 
-                 }
-                 if (!rtn)
-                 	break;
-                 hMem = GSSiGlobAlloc (1421,GHND,4096);
-                 lpStr = GlobalLock (hMem);
-                 if (GetSQLWhereClause (hWndDlg, hSHPDBF, lpStr))
-                 {  
-                 	sprintf (str,"%s;%s;%s;%s",SymName,cWidth,cRot,cColor);
-	                SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_ADDSTRING,0,(LPARAM)str);
-	                SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_ADDSTRING,0,(LPARAM)lpStr);
-                 }
-                 GSSiGlobUlFree (&hMem);
-                 break;
-            }    
-            case IDC_SQL_LIST:  
-            case IDC_SYMBOL_LIST:
-			{   
-				WPARAM	OtherParam;
-				
-				switch(HIWORD(wParam))
-			    {
-			     case LBN_DBLCLK:
-			          PostMessage(hWndDlg, WM_COMMAND, IDC_SAMODIFY, 0L); 
-			          break;
-			     case LBN_SELCHANGE:
-			          Choice=SendDlgItemMessage(hWndDlg,LOWORD(wParam),LB_GETCURSEL,0,0);
-			          if (LOWORD(wParam) == IDC_SQL_LIST)
-			          	OtherParam = IDC_SYMBOL_LIST;
-			          else
-			          	OtherParam = IDC_SQL_LIST; 
-			 		  SendDlgItemMessage(hWndDlg,OtherParam,LB_SETCURSEL,Choice,0);
-				 	  EnableWindow (GetDlgItem(hWndDlg,IDC_SADELETE),TRUE);
-				 	  EnableWindow (GetDlgItem(hWndDlg,IDC_SAMODIFY),TRUE);
-				 	  break; 
-			    }
-			}
-				 break;
-            case IDC_SADELETE:
-		         Choice=max(SendDlgItemMessage(hWndDlg,IDC_SYMBOL_LIST,LB_GETCURSEL,0,0),
-							SendDlgItemMessage(hWndDlg,IDC_SQL_LIST,LB_GETCURSEL,0,0));
-	             SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_DELETESTRING,Choice,0);
-               	 SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_DELETESTRING,Choice,0);
-                 break;
-            
-            case IDC_SAMODIFY:
-		         if ((Choice=SendDlgItemMessage(hWndDlg,IDC_SYMBOL_LIST,LB_GETCURSEL,0,0)) >= 0)
-		         {
-	                 SendDlgItemMessage(hWndDlg,IDC_SYMBOL_LIST,LB_GETTEXT,Choice,(DWORD)SymStuff);
-	                 SetSymParms (SymStuff,SymName,cWidth,cRot,cColor);            
-	                 rtn = 0;
-	                 switch (SHPType)
-	                 {  
-	                 	case SHPT_POINT:
-	                 	case SHPT_POINTZ:
-							rtn = SelectPointSymbol (hWndDlg,1,SymName,"All",cWidth,cRot,cColor,FALSE);
-							break; 
+						GetGlobalCVal("[%DEFAULTAREASYMBOL]", SymName, "PARCEL");
+						if (!*cWidth)
+							strcpy(cWidth, "-1");
+						type = 3;
+						break;
+					}
+					if (*PGDBTable)
+					{
+						sprintf(SymName, "%s,PAR=NEW", PGDBTable);
+						SymNum = GetOrCreateSym(hWndDlg, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), type);
+						_fstrcpy(SymName, PGDBTable);
+					}
+					else if (*FGDBTable)
+					{
+						sprintf(SymName, "%s,PAR=NEW", FGDBTable);
+						SymNum = GetOrCreateSym(hWndDlg, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), type);
+						_fstrcpy(SymName, FGDBTable);
+					}
+					else
+					{
+						char	fname[80];
+
+						_splitpath(GSPName, 0, 0, fname, 0);
+						sprintf(SymName, "%s,PAR=NEW", fname);
+						SymNum = GetOrCreateSym(hWndDlg, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), type);
+						_fstrcpy(SymName, fname);
+					}
+					if (!SymNum)
+					{
+						*cWidth = 0;
+						*cRot = 0;
+						*cColor = 0;
+						rtn = 0;
+						switch (SHPType)
+						{
+						case SHPT_POINT:
+						case SHPT_POINTZ:
+							rtn = SelectPointSymbol(hWndDlg, 1, SymName, "All", cWidth, cRot, cColor, TRUE);
+							break;
 						case SHPT_ARC:
-						case SHPT_ARCZ:  
-						case SHPT_ARCM:
-	                 		rtn = SelectLineSymbol (hWndDlg,1,SymName,cWidth, cColor,FALSE);
-	                 		break; 
-	                 	case 4:
-	                 	case SHPT_TEXT:
+						case SHPT_ARCZ:
+							rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, TRUE);
+							break;
+						case 4:
+						case SHPT_TEXT:
 						case SHPT_POLYGON:
 						case SHPT_POLYGONZ:
-	                 		rtn = SelectAreaSymbol (hWndDlg,1,SymName, cColor,FALSE);
-	                 		break; 
-	                 } 
-	                 if (!rtn)
-	                 	break;
-					 if (*SymName == '[')
-						 FillSymbolListFromVariable (hWndDlg,IDC_SYMBOL_LIST,IDC_SQL_LIST,SymName,cWidth,cRot,cColor,hSHPDBF);
-					 else
-					 {
-						 SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_DELETESTRING,Choice,0);
-                 		 sprintf (SymStuff,"%s;%s;%s;%s",SymName,cWidth,cRot,cColor);
-						 SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_INSERTSTRING,Choice,(LPARAM)SymStuff);
-					 }
-		         }
-		         else
-		         if ((Choice=SendDlgItemMessage(hWndDlg,IDC_SQL_LIST,LB_GETCURSEL,0,0)) >= 0)
-		         {   
-		         	 HANDLE	hMem;
-		         	 LPSTR	lpStr;
-		         	 
-	                 hMem = GSSiGlobAlloc (1422,GHND,4096);
-	                 lpStr = GlobalLock (hMem);
-                	 SendDlgItemMessage(hWndDlg,IDC_SQL_LIST,LB_GETTEXT,Choice,(DWORD)lpStr); 
-            		if (!hSHPDBF)
-            		{   
-            			char	DBFName[256];
-            			
-			    		GetSHPName (str);
-			    		if (IsPGDB)
-						{
-		 					OpenPGDBFileIndex (str,0);
-							SetPGDB_SQL ("");
+							rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, TRUE);
+							break;
 						}
-		 				else
-						{
-							sprintf (DBFName,"SHP=%s",str);
-							OpenDataFile (DBFName,"",BT_READ,&hSHPDBF);
-						}
-						Opened = TRUE; 
 					}
-	                 if (GetSQLWhereClause (hWndDlg, hSHPDBF, lpStr))
-	                 {
-	                 	SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_DELETESTRING,Choice,0);
-		                SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_INSERTSTRING,Choice,(LPARAM)lpStr);
-	                 }
-	                 GSSiGlobUlFree (&hMem);
-		         }
-		         
-                 break;
-            
-            case IDCANCEL:   
-            	SetGlobalValueBool ("%AUTOSHPPARM",FALSE);
-            	if (Opened) 
-            	{
-					if (IsPGDB)
-						OpenPGDB(0, 0, 0);
-					else if (IsFGDB)
-						OpenFGDB(0, 0, 0);
 					else
-						CloseDataFile (TRUE,&hSHPDBF); 
-					DestroyFieldList();
-					hSHPDBF = 0;
-				}
-	            EndDialog(hWndDlg,FALSE);  
-				break;
-				 
-            case IDOK: 
-				GetSHPName (str); 
-				_fstrcpy (GSPName,str);
-		        if ((pDOT = _fstrrchr (GSPName,'.')))
-		        {
-		        	if (!_fstrnicmp (pDOT,".mdb",4))
-		        	{
-		        		if (*(pDOT+4) != '(')
-		        			break; 
-		        		IsPGDB = TRUE;
-		        		_fstrcpy (PGDBTable,pDOT+5);
-		        		*LastChr (PGDBTable) = 0; 
-		        		*pDOT = 0;
-		        		sprintf (str,"%s_%s.gsp",GSPName,PGDBTable);
-				        _fstrcpy (GSPName,str);
-		        	}
-		        	else if (!_fstrnicmp (pDOT,".gdb",4))
-		        	{
-		        		if (*(pDOT+4) != '(')
-		        			break; 
-		        		IsFGDB = TRUE;
-		        		_fstrcpy (FGDBTable,pDOT+5);
-		        		*LastChr (FGDBTable) = 0; 
-		        		*pDOT = 0;
-		        		sprintf (str,"%s_%s.gsp",GSPName,FGDBTable);
-				        _fstrcpy (GSPName,str);
-		        	}
-		        	else
-		        		_fstrcpy (pDOT,".gsp");
-		        }
-		        else
-		        	break;
-				Fid = GSSiOpenFile (GSPName,0,OF_CREATE);
-				if (Fid == HFILE_ERROR)
-				{   
-					MessageBox (hWndDlg,GSPName,"Unable to create file",MB_ICONEXCLAMATION);
+						GetDictSymName(SymNum, SymName);
+					sprintf(SymStuff, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_ADDSTRING, 0, (LPARAM)SymStuff);
+					SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)"ALL ROWS");
 					break;
-				} 
-		 		//GetDlgItemText (hWndDlg,IDC_PROJECTION,str,sizeof(str)-1);  
-		 		GetProjectionFile (hWndDlg,IDC_PROJECTION,str);
-		        SubstituteDL (str,TRUE);
-				//ExpandText (str);
-				strcpy (projection,str);
-			 	fputstring (str,Fid); 
-		 		GetDlgItemText (hWndDlg,IDC_UNITS,str,sizeof(str)-1);  
-				strcpy (units,str);
-			 	fputstring (str,Fid); 
-		 		GetDlgItemText (hWndDlg,IDC_STARTNO,str,sizeof(str)-1);  
-			 	fputstring (str,Fid); 
-		 		if (GetDlgItemText (hWndDlg,IDC_TAPREFIX,str,sizeof(str)-1))
-		 		{
-		 			_fstrcat (str,":");
-		 			GetDlgItemText (hWndDlg,IDC_UDI,_fstrchr(str,0),sizeof(str)-_fstrlen(str)-1); 
-		 		} 
-			 	fputstring (str,Fid);  
-				SHPIndexType = SHP_INDEX_STANDARD;
-			 	if (SendDlgItemMessage (hWndDlg,IDC_INDEXSIMPLE,BM_GETCHECK,0,0))
-					SHPIndexType = SHP_INDEX_SIMPLE;
-			 	else if (SendDlgItemMessage (hWndDlg,IDC_INDEXQUAD,BM_GETCHECK,0,0))
-					SHPIndexType = SHP_INDEX_QUAD;
-		 		itoa (SHPIndexType,str,10);  
-			 	fputstring (str,Fid); 
-			 	i = 0;
-			 	while (SendDlgItemMessage (hWndDlg,IDC_SYMBOL_LIST,LB_GETTEXT,i,(LPARAM)str) != LB_ERR)
-			 	{
-	                SetSymParms (str,SymName,cWidth,cRot,cColor);            
-	                SendDlgItemMessage (hWndDlg,IDC_SQL_LIST,LB_GETTEXT,i++,(LPARAM)cIF); 
-	                if (!_fstrcmp (cIF,"ALL ROWS"))
-	                	*cIF = 0; 
-	                sprintf (str,"%s;%s;%s;%s;%s",SymName,cIF,cColor,cWidth,cRot);
-				 	fputstring (str,Fid); 
-			 	}
-			 	fputstring ("#ENDOFLIST",Fid);  
-		 		GetDlgItemText (hWndDlg,IDC_BEGINDATE,str,sizeof(str)-1);  
-			 	fputstring (str,Fid); 
-		 		GetDlgItemText (hWndDlg,IDC_ENDDATE,str,sizeof(str)-1);  
-			 	fputstring (str,Fid); 
-				GSSiClose (Fid);
-            	if (Opened) 
-            	{
-					if (IsPGDB)
-						OpenPGDB(0, 0, 0);
-					else if (IsFGDB)
-						OpenFGDB(0, 0, 0);
-					else
-						CloseDataFile(TRUE, &hSHPDBF);
-					DestroyFieldList();
-					hSHPDBF = 0;
 				}
-	            EndDialog(hWndDlg,TRUE);  
-				break;
-          }
-          break;
+				if (fgetstring(str, 128, Fid))
+				{
+					HFILE	Fid2;
 
-    default: 
-        return FALSE;
-   }
- return TRUE;    
+					ExpandText(str);
+					Fid2 = GSSiOpenFile(str, 0, OF_READ);
+					if (Fid2 != HFILE_ERROR)
+					{
+						fgetstring(str, 250, Fid2);
+						SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, -1, (LPARAM)(str + 1));
+						GSSiClose(Fid2);
+					}
+				}
+				if (fgetstring(str, 128, Fid))
+					SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SELECTSTRING, -1, (LPARAM)str);
+				if (fgetstring(str, 128, Fid))
+					SetDlgItemText(hWndDlg, IDC_STARTNO, str);
+				if (fgetstring(str, 128, Fid))
+				{
+					LPSTR	pSC = _fstrchr(str, ':');
+
+					if (pSC)
+					{
+						*pSC++ = 0;
+						SetDlgItemText(hWndDlg, IDC_UDI, pSC);
+					}
+					SetDlgItemText(hWndDlg, IDC_TAPREFIX, str);
+				}
+				if (fgetstring(str, 128, Fid))
+					SHPIndexType = atoi(str);
+				SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+				SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+				SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
+
+				while (fgetstring(str, 256, Fid))
+				{
+					if (*str == '#')
+						break;
+					DecodeSHPParam(str, SymName, cIF, cColor, cWidth, cRot);
+					sprintf(str, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_ADDSTRING, 0, (LPARAM)str);
+					if (*cIF)
+						SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)cIF);
+					else
+						SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)"ALL ROWS");
+				}
+				if (fgetstring(str, 256, Fid))
+					SetDlgItemText(hWndDlg, IDC_BEGINDATE, str);
+				if (fgetstring(str, 256, Fid))
+					SetDlgItemText(hWndDlg, IDC_ENDDATE, str);
+				GSSiClose(Fid);
+			}
+
+			break;
+
+		case IDC_ASSIGNCVT:
+			GetDlgItemText(hWndDlg, IDC_SHAPEFILE, str, 128);
+			GuessShapeProjection(str, hWndDlg, IDC_PROJECTION, IDC_UNITS, FALSE);
+			break;
+
+		case IDC_SAADD:
+		{
+						  HANDLE hMem;
+						  LPSTR  lpStr, lpWhere;
+
+						  if (!hSHPDBF)
+						  {
+							  char	DBFName[256];
+
+							  GetSHPName(str);
+							  if (IsPGDB)
+							  {
+								  OpenPGDBFileIndex(str, 0);
+								  SetPGDB_SQL("");
+							  }
+							  else
+							  {
+								  sprintf(DBFName, "SHP=%s", str);
+								  OpenDataFile(DBFName, "", BT_READ, &hSHPDBF);
+							  }
+							  Opened = TRUE;
+						  }
+						  *SymName = 0;
+						  *cWidth = 0;
+						  *cRot = 0;
+						  *cColor = 0;
+						  rtn = 0;
+						  switch (SHPType)
+						  {
+						  case SHPT_POINT:
+						  case SHPT_POINTZ:
+							  rtn = SelectPointSymbol(hWndDlg, 1, SymName, "All", cWidth, cRot, cColor, FALSE);
+							  break;
+						  case SHPT_ARC:
+						  case SHPT_ARCZ:
+							  rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, FALSE);
+							  break;
+						  case 4:
+						  case SHPT_TEXT:
+						  case SHPT_POLYGON:
+						  case SHPT_POLYGONZ:
+							  rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
+							  break;
+						  }
+						  if (!rtn)
+							  break;
+						  hMem = GSSiGlobAlloc(1421, GHND, 4096);
+						  lpStr = GlobalLock(hMem);
+						  if (GetSQLWhereClause(hWndDlg, hSHPDBF, lpStr))
+						  {
+							  sprintf(str, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+							  SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_ADDSTRING, 0, (LPARAM)str);
+							  SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)lpStr);
+						  }
+						  GSSiGlobUlFree(&hMem);
+						  break;
+		}
+		case IDC_SQL_LIST:
+		case IDC_SYMBOL_LIST:
+		{
+								WPARAM	OtherParam;
+
+								switch (HIWORD(wParam))
+								{
+								case LBN_DBLCLK:
+									PostMessage(hWndDlg, WM_COMMAND, IDC_SAMODIFY, 0L);
+									break;
+								case LBN_SELCHANGE:
+									Choice = SendDlgItemMessage(hWndDlg, LOWORD(wParam), LB_GETCURSEL, 0, 0);
+									if (LOWORD(wParam) == IDC_SQL_LIST)
+										OtherParam = IDC_SYMBOL_LIST;
+									else
+										OtherParam = IDC_SQL_LIST;
+									SendDlgItemMessage(hWndDlg, OtherParam, LB_SETCURSEL, Choice, 0);
+									EnableWindow(GetDlgItem(hWndDlg, IDC_SADELETE), TRUE);
+									EnableWindow(GetDlgItem(hWndDlg, IDC_SAMODIFY), TRUE);
+									break;
+								}
+		}
+			break;
+		case IDC_SADELETE:
+			Choice = max(SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETCURSEL, 0, 0),
+				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETCURSEL, 0, 0));
+			SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_DELETESTRING, Choice, 0);
+			SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_DELETESTRING, Choice, 0);
+			break;
+
+		case IDC_SAMODIFY:
+			if ((Choice = SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETCURSEL, 0, 0)) >= 0)
+			{
+				SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETTEXT, Choice, (DWORD)SymStuff);
+				SetSymParms(SymStuff, SymName, cWidth, cRot, cColor);
+				rtn = 0;
+				switch (SHPType)
+				{
+				case SHPT_POINT:
+				case SHPT_POINTZ:
+					rtn = SelectPointSymbol(hWndDlg, 1, SymName, "All", cWidth, cRot, cColor, FALSE);
+					break;
+				case SHPT_ARC:
+				case SHPT_ARCZ:
+				case SHPT_ARCM:
+					rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, FALSE);
+					break;
+				case 4:
+				case SHPT_TEXT:
+				case SHPT_POLYGON:
+				case SHPT_POLYGONZ:
+					rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
+					break;
+				}
+				if (!rtn)
+					break;
+				if (*SymName == '[')
+					FillSymbolListFromVariable(hWndDlg, IDC_SYMBOL_LIST, IDC_SQL_LIST, SymName, cWidth, cRot, cColor, hSHPDBF);
+				else
+				{
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_DELETESTRING, Choice, 0);
+					sprintf(SymStuff, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_INSERTSTRING, Choice, (LPARAM)SymStuff);
+				}
+			}
+			else
+			if ((Choice = SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETCURSEL, 0, 0)) >= 0)
+			{
+				HANDLE	hMem;
+				LPSTR	lpStr;
+
+				hMem = GSSiGlobAlloc(1422, GHND, 4096);
+				lpStr = GlobalLock(hMem);
+				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETTEXT, Choice, (DWORD)lpStr);
+				if (!hSHPDBF)
+				{
+					char	DBFName[256];
+
+					GetSHPName(str);
+					if (IsPGDB)
+					{
+						OpenPGDBFileIndex(str, 0);
+						SetPGDB_SQL("");
+					}
+					else
+					{
+						sprintf(DBFName, "SHP=%s", str);
+						OpenDataFile(DBFName, "", BT_READ, &hSHPDBF);
+					}
+					Opened = TRUE;
+				}
+				if (GetSQLWhereClause(hWndDlg, hSHPDBF, lpStr))
+				{
+					SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_DELETESTRING, Choice, 0);
+					SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_INSERTSTRING, Choice, (LPARAM)lpStr);
+				}
+				GSSiGlobUlFree(&hMem);
+			}
+
+			break;
+
+		case IDCANCEL:
+			SetGlobalValueBool("%AUTOSHPPARM", FALSE);
+			if (Opened)
+			{
+				if (IsPGDB)
+					OpenPGDB(0, 0, 0);
+				else if (IsFGDB)
+					OpenFGDB(0, 0, 0);
+				else
+					CloseDataFile(TRUE, &hSHPDBF);
+				DestroyFieldList();
+				hSHPDBF = 0;
+			}
+			EndDialog(hWndDlg, FALSE);
+			break;
+
+		case IDOK:
+			GetSHPName(str);
+			_fstrcpy(GSPName, str);
+			if ((pDOT = _fstrrchr(GSPName, '.')))
+			{
+				if (!_fstrnicmp(pDOT, ".mdb", 4))
+				{
+					if (*(pDOT + 4) != '(')
+						break;
+					IsPGDB = TRUE;
+					_fstrcpy(PGDBTable, pDOT + 5);
+					*LastChr(PGDBTable) = 0;
+					*pDOT = 0;
+					sprintf(str, "%s_%s.gsp", GSPName, PGDBTable);
+					_fstrcpy(GSPName, str);
+				}
+				else if (!_fstrnicmp(pDOT, ".gdb", 4))
+				{
+					if (*(pDOT + 4) != '(')
+						break;
+					IsFGDB = TRUE;
+					_fstrcpy(FGDBTable, pDOT + 5);
+					*LastChr(FGDBTable) = 0;
+					*pDOT = 0;
+					sprintf(str, "%s_%s.gsp", GSPName, FGDBTable);
+					_fstrcpy(GSPName, str);
+				}
+				else
+					_fstrcpy(pDOT, ".gsp");
+			}
+			else
+				break;
+			Fid = GSSiOpenFile(GSPName, 0, OF_CREATE);
+			if (Fid == HFILE_ERROR)
+			{
+				MessageBox(hWndDlg, GSPName, "Unable to create file", MB_ICONEXCLAMATION);
+				break;
+			}
+			//GetDlgItemText (hWndDlg,IDC_PROJECTION,str,sizeof(str)-1);  
+			GetProjectionFile(hWndDlg, IDC_PROJECTION, str);
+			SubstituteDL(str, TRUE);
+			//ExpandText (str);
+			strcpy(projection, str);
+			fputstring(str, Fid);
+			GetDlgItemText(hWndDlg, IDC_UNITS, str, sizeof(str)-1);
+			strcpy(units, str);
+			fputstring(str, Fid);
+			GetDlgItemText(hWndDlg, IDC_STARTNO, str, sizeof(str)-1);
+			fputstring(str, Fid);
+			if (GetDlgItemText(hWndDlg, IDC_TAPREFIX, str, sizeof(str)-1))
+			{
+				_fstrcat(str, ":");
+				GetDlgItemText(hWndDlg, IDC_UDI, _fstrchr(str, 0), sizeof(str)-_fstrlen(str) - 1);
+			}
+			fputstring(str, Fid);
+			SHPIndexType = SHP_INDEX_STANDARD;
+			if (SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_GETCHECK, 0, 0))
+				SHPIndexType = SHP_INDEX_SIMPLE;
+			else if (SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_GETCHECK, 0, 0))
+				SHPIndexType = SHP_INDEX_QUAD;
+			itoa(SHPIndexType, str, 10);
+			fputstring(str, Fid);
+			i = 0;
+			while (SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETTEXT, i, (LPARAM)str) != LB_ERR)
+			{
+				SetSymParms(str, SymName, cWidth, cRot, cColor);
+				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETTEXT, i++, (LPARAM)cIF);
+				if (!_fstrcmp(cIF, "ALL ROWS"))
+					*cIF = 0;
+				sprintf(str, "%s;%s;%s;%s;%s", SymName, cIF, cColor, cWidth, cRot);
+				fputstring(str, Fid);
+			}
+			fputstring("#ENDOFLIST", Fid);
+			GetDlgItemText(hWndDlg, IDC_BEGINDATE, str, sizeof(str)-1);
+			fputstring(str, Fid);
+			GetDlgItemText(hWndDlg, IDC_ENDDATE, str, sizeof(str)-1);
+			fputstring(str, Fid);
+			GSSiClose(Fid);
+			if (Opened)
+			{
+				if (IsPGDB)
+					OpenPGDB(0, 0, 0);
+				else if (IsFGDB)
+					OpenFGDB(0, 0, 0);
+				else
+					CloseDataFile(TRUE, &hSHPDBF);
+				DestroyFieldList();
+				hSHPDBF = 0;
+			}
+			EndDialog(hWndDlg, TRUE);
+			break;
+		}
+		break;
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+	char	SymName[66], str[260], GSPName[256], cIF[128], UDI[66], SymStuff[256];
+	static  char cpWidth[64] = { 0 }, clWidth[64] = { 0 }, cWidth[64], cRot[64] = { 0 }, cColor[64] = { 0 };
+	static	char projection[MAX_PATH] = { 0 }, units[64] = { 0 };
+	short	i, Choice, rtn;
+	LPSTR	pDOT;
+	HFILE	Fid;
+	MNMXCORD	Bounds;
+	static	short	CurProj = -1, CurUnits = -1;
+	static	BOOL	IsPGDB, IsFGDB;
+	static	BOOL	Opened;
+	long	ii;
+
+	short    BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+	{
+						  char originalName[MAX_PATH];
+
+						  Opened = FALSE;
+						  SHPIndexType = SHP_INDEX_SIMPLE;
+						  GetSLTName(str);
+						  strcpy(originalName, str);
+						  SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
+						  _fstrcpy(GSPName, str);
+						  IsPGDB = FALSE;
+						  IsFGDB = FALSE;
+						  *PGDBTable = 0;
+						  if ((pDOT = _fstrrchr(GSPName, '.')))
+						  {
+							  if (!_fstrnicmp(pDOT, ".mdb", 4))
+							  {
+								  if (*(pDOT + 4) != '(')
+									  return FALSE;
+								  IsPGDB = TRUE;
+								  _fstrcpy(PGDBTable, pDOT + 5);
+								  *LastChr(PGDBTable) = 0;
+								  *pDOT = 0;
+								  sprintf(str, "%s_%s.gsp", GSPName, PGDBTable);
+								  _fstrcpy(GSPName, str);
+							  }
+							  else if (!_fstrnicmp(pDOT, ".gdb", 4))
+							  {
+								  char fgdbPath[MAX_PATH];
+
+								  if (*(pDOT + 4) != '(')
+									  return FALSE;
+								  IsFGDB = TRUE;
+								  _fstrcpy(FGDBTable, pDOT + 5);
+								  *LastChr(FGDBTable) = 0;
+								  *pDOT = 0;
+								  sprintf(fgdbPath, "%s.gdb", GSPName);
+								  sprintf(str, "%s_%s.gsp", GSPName, FGDBTable);
+								  _fstrcpy(GSPName, str);
+								  OpenFGDB(fgdbPath, FGDBTable, "");
+								  hSHPDBF = FGDBHandle;
+								  Opened = TRUE;
+							  }
+							  else
+								  _fstrcpy(pDOT, ".gsp");
+						  }
+						  else
+							  break;
+						  SetCurVal(GSPName, IDS_FILEGSP);
+						  LoadTAGDef();
+						  if (NumTAGDef)
+						  {
+							  LPTAGDEF    lpTAGDef;
+
+							  lpTAGDef = (LPTAGDEF)GlobalLock(hTAGDef);
+							  for (i = 0; i < NumTAGDef; i++, lpTAGDef++)
+							  {
+								  SendDlgItemMessage(hWndDlg, IDC_TAPREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+								  SendDlgItemMessage(hWndDlg, IDC_REF_PREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+							  }
+							  GlobalUnlock(hTAGDef);
+						  }
+						  EnableWindow(GetDlgItem(hWndDlg, IDC_SAADD), TRUE);
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Feet");
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Meters");
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees");
+						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees * 1000000");
+						  FillProjectionList(hWndDlg, IDC_PROJECTION, &CurProj, IDC_UNITS, &CurUnits);
+						  //         _fstrcpy (str,"*.CVT");
+						  //         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
+						  if (PRJ_UNITS[1] == 1)
+							  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+						  else if (PRJ_UNITS[1] == 2)
+							  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
+						  SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
+						  SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+						  SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+						  SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
+						  GetSHPName(str);
+						  if (IsPGDB)
+							  SHPType = ReadPGDBHeader(str, &Bounds);
+						  else if (IsFGDB)
+							  SHPType = ReadFGDBHeader(str, &Bounds);
+						  else
+						  {
+							  Fid = GSSiOpenFile(str, 0, OF_READ);
+							  if (Fid == HFILE_ERROR)
+								  goto LoadGSP;
+							  SHPType = ReadSHPHeader(Fid, &Bounds, str);
+							  GSSiClose(Fid);
+						  }
+						  ii = SHPType;
+						  SetDlgItemText(hWndDlg, IDC_SHPMINX, ftoa(str, Bounds.xmn));
+						  SetDlgItemText(hWndDlg, IDC_SHPMAXX, ftoa(str, Bounds.xmx));
+						  SetDlgItemText(hWndDlg, IDC_SHPMINY, ftoa(str, Bounds.ymn));
+						  SetDlgItemText(hWndDlg, IDC_SHPMAXY, ftoa(str, Bounds.ymx));
+						  goto LoadGSP;
+	}
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_COMMAND:
+
+		switch (LOWORD(wParam))
+
+		{
+		case IDC_SHOW_FIELDS:
+		{
+
+								if (!hSHPDBF)
+								{
+									char	DBName[256];
+									LPSTR	pTable;
+
+									GetSLTName(str);
+									pTable = strrchr(str, '_');
+									if (pTable)
+									{
+										LPSTR pDot = strrchr(str, '.');
+										if (pDot)
+										{
+											*pDot = 0;
+											*pTable++ = 0;
+											sprintf(DBName, "SLT=%s.slt(%s)", str, pTable);
+											OpenDataFile(DBName, "", BT_READ, &hSHPDBF);
+										}
+									}
+									Opened = TRUE;
+								}
+
+								DisplayFieldList(hWndDlg, hSHPDBF, 0, 0, 0);
+		}
+			break;
+
+		case IDC_COPYFROM:
+			*GSPName = 0;
+			if (!GetFileName3(hWndDlg, GSPName, IDS_FILTERGSP, IDS_FILEGSP))
+				break;
+		LoadGSP:
+			SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_RESETCONTENT, 0, 0);
+			SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_RESETCONTENT, 0, 0);
+			{
+				HFILE	Fid = GSSiOpenFile(GSPName, 0, OF_READ);
+				short	SymNum = 0;
+
+				if (Fid == HFILE_ERROR)
+				{
+					short	type;
+
+					GetDlgItemText(hWndDlg, IDC_SHAPEFILE, str, 256);
+					if (!*projection)
+					{
+						GuessShapeProjection(str, hWndDlg, IDC_PROJECTION, IDC_UNITS, TRUE);
+					}
+					else
+					{
+						HFILE	Fid2;
+
+						strcpy(str, projection);
+						ExpandText(str);
+						Fid2 = GSSiOpenFile(str, 0, OF_READ);
+						if (Fid2 != HFILE_ERROR)
+						{
+							fgetstring(str, 250, Fid2);
+							SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, -1, (LPARAM)(str + 1));
+							GSSiClose(Fid2);
+						}
+						if (*units)
+							SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SELECTSTRING, -1, (LPARAM)units);
+					}
+					if (!*cRot)
+						strcpy(cRot, "0D");
+					if (!cColor)
+						strcpy(cColor, "-1");
+
+					switch (SHPType)
+					{
+					case SHPT_POINT:
+					case SHPT_POINTZ:
+						GetGlobalCVal("[%DEFAULTPOINTSYMBOL]", SymName, "SQUARE");
+						if (!*cpWidth)
+							strcpy(cpWidth, "-1");
+						type = 1;
+						break;
+					case SHPT_ARC:
+					case SHPT_ARCZ:
+						GetGlobalCVal("[%DEFAULTLINESYMBOL]", SymName, "PEN1");
+						if (!*clWidth)
+							strcpy(clWidth, "-1");
+						type = 2;
+						break;
+					case 4:
+					case SHPT_TEXT:
+					case SHPT_POLYGON:
+					case SHPT_POLYGONZ:
+						GetGlobalCVal("[%DEFAULTAREASYMBOL]", SymName, "PARCEL");
+						if (!*cWidth)
+							strcpy(cWidth, "-1");
+						type = 3;
+						break;
+					}
+					if (*PGDBTable)
+					{
+						sprintf(SymName, "%s,PAR=NEW", PGDBTable);
+						SymNum = GetOrCreateSym(hWndDlg, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), type);
+						_fstrcpy(SymName, PGDBTable);
+					}
+					else if (*FGDBTable)
+					{
+						sprintf(SymName, "%s,PAR=NEW", FGDBTable);
+						SymNum = GetOrCreateSym(hWndDlg, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), type);
+						_fstrcpy(SymName, FGDBTable);
+					}
+					else
+					{
+						char	fname[80];
+
+						_splitpath(GSPName, 0, 0, fname, 0);
+						sprintf(SymName, "%s,PAR=NEW", fname);
+						SymNum = GetOrCreateSym(hWndDlg, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), type);
+						_fstrcpy(SymName, fname);
+					}
+					if (!SymNum)
+					{
+						*cWidth = 0;
+						*cRot = 0;
+						*cColor = 0;
+						rtn = 0;
+						switch (SHPType)
+						{
+						case SHPT_POINT:
+						case SHPT_POINTZ:
+							rtn = SelectPointSymbol(hWndDlg, 1, SymName, "All", cWidth, cRot, cColor, TRUE);
+							break;
+						case SHPT_ARC:
+						case SHPT_ARCZ:
+							rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, TRUE);
+							break;
+						case 4:
+						case SHPT_TEXT:
+						case SHPT_POLYGON:
+						case SHPT_POLYGONZ:
+							rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, TRUE);
+							break;
+						}
+					}
+					else
+						GetDictSymName(SymNum, SymName);
+					sprintf(SymStuff, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_ADDSTRING, 0, (LPARAM)SymStuff);
+					SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)"ALL ROWS");
+					break;
+				}
+				if (fgetstring(str, 128, Fid))
+				{
+					HFILE	Fid2;
+
+					ExpandText(str);
+					Fid2 = GSSiOpenFile(str, 0, OF_READ);
+					if (Fid2 != HFILE_ERROR)
+					{
+						fgetstring(str, 250, Fid2);
+						SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, -1, (LPARAM)(str + 1));
+						GSSiClose(Fid2);
+					}
+				}
+				if (fgetstring(str, 128, Fid))
+					SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SELECTSTRING, -1, (LPARAM)str);
+				if (fgetstring(str, 128, Fid))
+					SetDlgItemText(hWndDlg, IDC_STARTNO, str);
+				if (fgetstring(str, 128, Fid))
+				{
+					LPSTR	pSC = _fstrchr(str, ':');
+
+					if (pSC)
+					{
+						*pSC++ = 0;
+						SetDlgItemText(hWndDlg, IDC_UDI, pSC);
+					}
+					SetDlgItemText(hWndDlg, IDC_TAPREFIX, str);
+				}
+				if (fgetstring(str, 128, Fid))
+					SHPIndexType = atoi(str);
+				SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+				SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+				SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
+
+				while (fgetstring(str, 256, Fid))
+				{
+					if (*str == '#')
+						break;
+					DecodeSHPParam(str, SymName, cIF, cColor, cWidth, cRot);
+					sprintf(str, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_ADDSTRING, 0, (LPARAM)str);
+					if (*cIF)
+						SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)cIF);
+					else
+						SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)"ALL ROWS");
+				}
+				if (fgetstring(str, 256, Fid))
+					SetDlgItemText(hWndDlg, IDC_BEGINDATE, str);
+				if (fgetstring(str, 256, Fid))
+					SetDlgItemText(hWndDlg, IDC_ENDDATE, str);
+				GSSiClose(Fid);
+			}
+
+			break;
+
+		case IDC_ASSIGNCVT:
+			GetDlgItemText(hWndDlg, IDC_SHAPEFILE, str, 128);
+			GuessShapeProjection(str, hWndDlg, IDC_PROJECTION, IDC_UNITS, FALSE);
+			break;
+
+		case IDC_SAADD:
+		{
+						  HANDLE hMem;
+						  LPSTR  lpStr, lpWhere;
+
+						  if (!hSHPDBF)
+						  {
+							  char	DBFName[256];
+
+							  GetSHPName(str);
+							  if (IsPGDB)
+							  {
+								  OpenPGDBFileIndex(str, 0);
+								  SetPGDB_SQL("");
+							  }
+							  else
+							  {
+								  sprintf(DBFName, "SHP=%s", str);
+								  OpenDataFile(DBFName, "", BT_READ, &hSHPDBF);
+							  }
+							  Opened = TRUE;
+						  }
+						  *SymName = 0;
+						  *cWidth = 0;
+						  *cRot = 0;
+						  *cColor = 0;
+						  rtn = 0;
+						  switch (SHPType)
+						  {
+						  case SHPT_POINT:
+						  case SHPT_POINTZ:
+							  rtn = SelectPointSymbol(hWndDlg, 1, SymName, "All", cWidth, cRot, cColor, FALSE);
+							  break;
+						  case SHPT_ARC:
+						  case SHPT_ARCZ:
+							  rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, FALSE);
+							  break;
+						  case 4:
+						  case SHPT_TEXT:
+						  case SHPT_POLYGON:
+						  case SHPT_POLYGONZ:
+							  rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
+							  break;
+						  }
+						  if (!rtn)
+							  break;
+						  hMem = GSSiGlobAlloc(1421, GHND, 4096);
+						  lpStr = GlobalLock(hMem);
+						  if (GetSQLWhereClause(hWndDlg, hSHPDBF, lpStr))
+						  {
+							  sprintf(str, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+							  SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_ADDSTRING, 0, (LPARAM)str);
+							  SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_ADDSTRING, 0, (LPARAM)lpStr);
+						  }
+						  GSSiGlobUlFree(&hMem);
+						  break;
+		}
+		case IDC_SQL_LIST:
+		case IDC_SYMBOL_LIST:
+		{
+								WPARAM	OtherParam;
+
+								switch (HIWORD(wParam))
+								{
+								case LBN_DBLCLK:
+									PostMessage(hWndDlg, WM_COMMAND, IDC_SAMODIFY, 0L);
+									break;
+								case LBN_SELCHANGE:
+									Choice = SendDlgItemMessage(hWndDlg, LOWORD(wParam), LB_GETCURSEL, 0, 0);
+									if (LOWORD(wParam) == IDC_SQL_LIST)
+										OtherParam = IDC_SYMBOL_LIST;
+									else
+										OtherParam = IDC_SQL_LIST;
+									SendDlgItemMessage(hWndDlg, OtherParam, LB_SETCURSEL, Choice, 0);
+									EnableWindow(GetDlgItem(hWndDlg, IDC_SADELETE), TRUE);
+									EnableWindow(GetDlgItem(hWndDlg, IDC_SAMODIFY), TRUE);
+									break;
+								}
+		}
+			break;
+		case IDC_SADELETE:
+			Choice = max(SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETCURSEL, 0, 0),
+				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETCURSEL, 0, 0));
+			SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_DELETESTRING, Choice, 0);
+			SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_DELETESTRING, Choice, 0);
+			break;
+
+		case IDC_SAMODIFY:
+			if ((Choice = SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETCURSEL, 0, 0)) >= 0)
+			{
+				SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETTEXT, Choice, (DWORD)SymStuff);
+				SetSymParms(SymStuff, SymName, cWidth, cRot, cColor);
+				rtn = 0;
+				switch (SHPType)
+				{
+				case SHPT_POINT:
+				case SHPT_POINTZ:
+					rtn = SelectPointSymbol(hWndDlg, 1, SymName, "All", cWidth, cRot, cColor, FALSE);
+					break;
+				case SHPT_ARC:
+				case SHPT_ARCZ:
+				case SHPT_ARCM:
+					rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, FALSE);
+					break;
+				case 4:
+				case SHPT_TEXT:
+				case SHPT_POLYGON:
+				case SHPT_POLYGONZ:
+					rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
+					break;
+				}
+				if (!rtn)
+					break;
+				if (*SymName == '[')
+					FillSymbolListFromVariable(hWndDlg, IDC_SYMBOL_LIST, IDC_SQL_LIST, SymName, cWidth, cRot, cColor, hSHPDBF);
+				else
+				{
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_DELETESTRING, Choice, 0);
+					sprintf(SymStuff, "%s;%s;%s;%s", SymName, cWidth, cRot, cColor);
+					SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_INSERTSTRING, Choice, (LPARAM)SymStuff);
+				}
+			}
+			else
+			if ((Choice = SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETCURSEL, 0, 0)) >= 0)
+			{
+				HANDLE	hMem;
+				LPSTR	lpStr;
+
+				hMem = GSSiGlobAlloc(1422, GHND, 4096);
+				lpStr = GlobalLock(hMem);
+				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETTEXT, Choice, (DWORD)lpStr);
+				if (!hSHPDBF)
+				{
+					char	DBFName[256];
+
+					GetSHPName(str);
+					if (IsPGDB)
+					{
+						OpenPGDBFileIndex(str, 0);
+						SetPGDB_SQL("");
+					}
+					else
+					{
+						sprintf(DBFName, "SHP=%s", str);
+						OpenDataFile(DBFName, "", BT_READ, &hSHPDBF);
+					}
+					Opened = TRUE;
+				}
+				if (GetSQLWhereClause(hWndDlg, hSHPDBF, lpStr))
+				{
+					SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_DELETESTRING, Choice, 0);
+					SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_INSERTSTRING, Choice, (LPARAM)lpStr);
+				}
+				GSSiGlobUlFree(&hMem);
+			}
+
+			break;
+
+		case IDCANCEL:
+			SetGlobalValueBool("%AUTOSHPPARM", FALSE);
+			if (Opened)
+			{
+				if (IsPGDB)
+					OpenPGDB(0, 0, 0);
+				else if (IsFGDB)
+					OpenFGDB(0, 0, 0);
+				else
+					CloseDataFile(TRUE, &hSHPDBF);
+				DestroyFieldList();
+				hSHPDBF = 0;
+			}
+			EndDialog(hWndDlg, FALSE);
+			break;
+
+		case IDOK:
+			GetSLTName(GSPName);
+			Fid = GSSiOpenFile(GSPName, 0, OF_CREATE);
+			if (Fid == HFILE_ERROR)
+			{
+				MessageBox(hWndDlg, GSPName, "Unable to create file", MB_ICONEXCLAMATION);
+				break;
+			}
+			//GetDlgItemText (hWndDlg,IDC_PROJECTION,str,sizeof(str)-1);  
+			GetProjectionFile(hWndDlg, IDC_PROJECTION, str);
+			SubstituteDL(str, TRUE);
+			//ExpandText (str);
+			strcpy(projection, str);
+			fputstring(str, Fid);
+			GetDlgItemText(hWndDlg, IDC_UNITS, str, sizeof(str)-1);
+			strcpy(units, str);
+			fputstring(str, Fid);
+			GetDlgItemText(hWndDlg, IDC_STARTNO, str, sizeof(str)-1);
+			fputstring(str, Fid);
+			if (GetDlgItemText(hWndDlg, IDC_TAPREFIX, str, sizeof(str)-1))
+			{
+				_fstrcat(str, ":");
+				GetDlgItemText(hWndDlg, IDC_UDI, _fstrchr(str, 0), sizeof(str)-_fstrlen(str) - 1);
+			}
+			fputstring(str, Fid);
+			SHPIndexType = SHP_INDEX_STANDARD;
+			if (SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_GETCHECK, 0, 0))
+				SHPIndexType = SHP_INDEX_SIMPLE;
+			else if (SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_GETCHECK, 0, 0))
+				SHPIndexType = SHP_INDEX_QUAD;
+			itoa(SHPIndexType, str, 10);
+			fputstring(str, Fid);
+			i = 0;
+			while (SendDlgItemMessage(hWndDlg, IDC_SYMBOL_LIST, LB_GETTEXT, i, (LPARAM)str) != LB_ERR)
+			{
+				SetSymParms(str, SymName, cWidth, cRot, cColor);
+				SendDlgItemMessage(hWndDlg, IDC_SQL_LIST, LB_GETTEXT, i++, (LPARAM)cIF);
+				if (!_fstrcmp(cIF, "ALL ROWS"))
+					*cIF = 0;
+				sprintf(str, "%s;%s;%s;%s;%s", SymName, cIF, cColor, cWidth, cRot);
+				fputstring(str, Fid);
+			}
+			fputstring("#ENDOFLIST", Fid);
+			GetDlgItemText(hWndDlg, IDC_BEGINDATE, str, sizeof(str)-1);
+			fputstring(str, Fid);
+			GetDlgItemText(hWndDlg, IDC_ENDDATE, str, sizeof(str)-1);
+			fputstring(str, Fid);
+			GSSiClose(Fid);
+			if (Opened)
+			{
+				if (IsPGDB)
+					OpenPGDB(0, 0, 0);
+				else if (IsFGDB)
+					OpenFGDB(0, 0, 0);
+				else
+					CloseDataFile(TRUE, &hSHPDBF);
+				DestroyFieldList();
+				hSHPDBF = 0;
+			}
+			EndDialog(hWndDlg, TRUE);
+			break;
+		}
+		break;
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
 }
 
 BOOL FAR PASCAL CONFIGLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)

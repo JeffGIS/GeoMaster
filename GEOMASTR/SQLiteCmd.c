@@ -2762,13 +2762,19 @@ BOOL IsSQLITEFileVisible(void)
 	}*/
 	return TRUE;
 }
+void GetSLTName(LPSTR name)
+{
+	strcpy(name, LastSQLITEFile);
+	SubstituteDL(name, FALSE);
+	return;
+}
 int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 #if ENABLETRACE
 {
 	GSSiEnterProg(1374);
 #endif
 	{
-		
+		char	DBName[MAX_PATH];
 		char	Name[MAX_PATH], str[260], Projection[MAX_PATH + 2], Units[34];
 		char	SymName[66]="", cWidth[64]="", cRot[64]="", cColor[64]="", cIF[128]="";
 		LPSTR	pDot, pTAG, pWidth, pParm = SQLITEParms;
@@ -2784,6 +2790,8 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 			HaveIndexParmFile = FALSE;
 			goto RtnTrue;
 		}
+		strcpy(DBName, SQLITEFileName);
+		ExpandText(DBName);
 		*SQLITEBeginDate = 0;
 		*SQLITEEndDate = 0;
 		SQLITEParmTime = 0;
@@ -2838,25 +2846,30 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 			PRJ_UNITS[0] = 4;
 		SQLITEBaseRefno = 0;
 		*SQLITERefno = 0;
-		strcpy(Name, SQLITEFileName);
-		pDot = _fstrrchr(Name, '.');
+		pDot = _fstrrchr(DBName, '.');
 		if (!pDot)
 			goto RtnFalse;
-		_fstrcpy(pDot, ".slp");
+		*pDot = 0;
+		sprintf(Name, "%s_%s.slp", DBName, tableName);
 		Fid = GSSiOpenFile(Name, 0, OF_READ);
 		if (Fid == HFILE_ERROR)
 		{
 			DLGPROC lpfnSETSHAPEPARAMMsgProc;
 
-			_fstrcpy(LastSQLITEFile, SQLITEFileName);
+			_fstrcpy(LastSQLITEFile, Name);
 			ExpandText(LastSQLITEFile);
 			if (!Type || !GetGlobalBVal2("[%AUTOSQLITEPARM]", TRUE))
 				goto RtnFalse;
-			goto RtnTrue;
+			else
 			{
-				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
-				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
-				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
+				DLGPROC	lpfnSQLITEPOINTMsgProc;
+
+				lpfnSQLITEPOINTMsgProc = MakeProcInstance((DLGPROC)SETSQLITEPOINTMsgProc, hInst);
+				int nRc = DialogBox(hInst, (LPSTR)"SETSQLITEPOINTPARAM", hWnd, lpfnSQLITEPOINTMsgProc);
+				FreeProcInstance(lpfnSQLITEPOINTMsgProc);
+//				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
+//				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
+//				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
 				Fid = GSSiOpenFile(Name, 0, OF_READ);
 				if (Fid == HFILE_ERROR)
 					goto RtnFalse;
@@ -3666,8 +3679,8 @@ BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 
 	if (db)
 	{
-		sprintf(pCmd, "DROP TABLE IF EXISTS %s;DROP TABLE IF EXISTS %s_index;CREATE TABLE %s (id INTEGER PRIMARY KEY, Name CHAR(256));\
-					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);", tableName, tableName, tableName, tableName);
+		sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;\
+					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);",tableName, tableName);
 
 		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
 			rtn = TRUE;

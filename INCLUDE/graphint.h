@@ -212,6 +212,7 @@ BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 BOOL FAR PASCAL COPYLINEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL CmpImageMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL CONFIGLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -2303,6 +2304,7 @@ BOOL OpenSHPFile (LPSTR SHPFileName);
 void CloseSHPFile (void);
 void GetSHPName (LPSTR Name);
 void GetORAName (LPSTR Name);
+void GetSLTName(LPSTR name);
 long ORATypeFromName (LPSTR Name);
 BOOL SetORAVis (HWND hWndDlg,int DlgItemSym, int DlgItemPar,HFILE FidSymList);
 short OpenORAFileIndex (HFILE FidORAFile,LPSTR ORAFileName);
