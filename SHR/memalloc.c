@@ -289,6 +289,7 @@ extern LPVOID debugaddress;
 	{
 		checkcounty(1);
 	}*/
+//checklastbox(1);
 	if (hglb)
 	{ 
 		pntr = GlobalLock(hglb);

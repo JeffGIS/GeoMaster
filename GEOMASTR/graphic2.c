@@ -588,7 +588,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
     {   
     	short	iview, InfoBoxID, VPID, endvp=0;
 		
-		if (!InDisplayProcessing && CurView)
+		if (!InDisplayProcessing && CurView &&  hLastBox)
 		{
 			RestoreScreen2 (CurView->hDC, hLastBox,0,FALSE);
 			DestroySavedScreen (&hLastBox,0);

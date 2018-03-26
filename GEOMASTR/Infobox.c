@@ -157,7 +157,9 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	DoNotMove = FALSE;
+	BOOL	SaveContinueProcessing = ContinueProcessing;
 
+	ContinueProcessing = TRUE;
 	if (DisplayInRect == (LPRECT)1)
 	{
 		DoNotMove = TRUE;
@@ -200,7 +202,7 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 		BlockText (hDC,TAGBox.text,sizeof(TAGBox.text),1.5);
 		TAGBox.center.y+=(0.5-TAGBox.center.y)*0.12;
 		TAGBox.center.x+=(0.5-TAGBox.center.x)*0.1;
-		TAGBox.PLwidth = 3;
+		TAGBox.PLwidth = 2;
 	}
 
 	if (ResetTAGBox (hDC,1)) 
@@ -246,6 +248,8 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 	UnloadReport (&TAGBox.hReport); 
     TAGBox = SaveTAGBox;
 	GSSiGlobUlFree (&hStr);
+	ContinueProcessing = SaveContinueProcessing;
+
 	return rtn;
 }
 
@@ -716,6 +720,9 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	double	RoundingFactors[5]={2000,20,10,5,1};
 	double	RoundingFactor;
 	LPRECT	pRect=0;
+	BOOL	saveuseGDIPlus = useGDIPlus;
+	BOOL	SaveContinueProcessing = ContinueProcessing;
+
 
 	RoundingFactor = RoundingFactors[TAGBox.Shape]/2;
 
@@ -728,7 +735,9 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		if (CurView->DisplayInParent && CurView->Parent)            	
 			 SetViewport(CurView->Parent);  
 	} 
-	SaveDC (hDC);
+	useGDIPlus = TRUE;
+	ContinueProcessing = TRUE;
+	SaveDC(hDC);
 	SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
 	Line = GlobalLock (hMEM);
 	ExpLine = Line + 1024;
@@ -1220,6 +1229,9 @@ Exit:
 		UnloadReport (&TAGBox.hReport);
 	if (!Restore)
 		SaveFullWindowBitmap (hWnd);
+	useGDIPlus = saveuseGDIPlus;
+	ContinueProcessing = SaveContinueProcessing;
+
 	return;
 
 }

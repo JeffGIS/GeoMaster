@@ -10494,6 +10494,8 @@ void RestoreScreen2 (HDC hDC, HANDLE hSavedScreen,long ID,BOOL Clip)
     HBITMAP hbmPrev;
     short       i;
     
+	if (!hSavedScreen)
+		return;
     if (!ScreenIsRegistered(hSavedScreen,ID))
 {
 #if ENABLETRACE
@@ -12740,6 +12742,8 @@ void ClearFullWindowBitmap (HWND hWnd)
 		GSSiDeleteObject (&hFullWindowBitMap);
 		GdiFlush ();
 		RedisplayLastPrompt (); 
+		NotifyFunction((LPVIEWPORT)-1, GF_REDRAW);
+
 	}
 {
 #if ENABLETRACE

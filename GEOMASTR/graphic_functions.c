@@ -10,8 +10,19 @@ static HANDLE	hLastHLT=0;
 static	double	FactorInc=0.0005;;  
 static	nBMPColors;
 static	COLORREF	FromColor[16],ToColor[16];
+static HANDLE checklb = 0;
 
-
+int setlastbox(HANDLE lb)
+{
+	checklb = lb;
+	return 0;
+}
+int checklastbox(int i)
+{
+	if (hLastBox != checklb)
+		ii = 1;
+	return 1;
+}
 BOOL GFFunctionTemplate(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
 {
 	static	BOOL	Inited = FALSE;
@@ -2388,13 +2399,15 @@ NoBox:
 		GSSiGlobFree (&hCmd);
     	if (hLastBox && LastBoxVP == CurView) 
     	{   
-    		if (Message != GF_REDRAW && Message != GF_CLEAR)
+			if (Message != GF_REDRAW && Message != GF_CLEAR)
     		{
 	    		hDC=GetDC(hWnd);
 	    		RestoreScreen2 (hDC, hLastBox,0,FALSE);
 	    		ReleaseDC (hWnd,hDC);
-	    	}
-    		DestroySavedScreen (&hLastBox,0);  
+				DestroySavedScreen(&hLastBox, 0);
+			}
+			else
+    			DestroySavedScreen (&hLastBox,0);  
     		GSSiGlobFree (&hLastCmd);
     	}  
 		if (hLastHLT)
@@ -2722,8 +2735,10 @@ DoPick:
 			{
 				if (hLastBox)
 				{
-					RestoreScreen2 (CurView->hDC, hLastBox,0,FALSE);
+					hDC = GetDC(hWnd);
+					RestoreScreen2(hDC, hLastBox, 0, FALSE);
 					DestroySavedScreen (&hLastBox,0);
+					ReleaseDC(hWnd, hDC);
 				}
 			}
 			LastClass = PickList[0].Refno;
@@ -2940,9 +2955,10 @@ NextPickItem:
 						else
 						{
 							RECT	ScreenRect;
+							HDC		hDC;
 
 							GetWindowRect (hWndMain,&ScreenRect);
-							YellowTextBox (hWnd,pTxt,pt,&LastBoxRect,(LPRECT)1,FALSE,0); 
+							YellowTextBox(hWnd, pTxt, pt, &LastBoxRect, (LPRECT)1, FALSE, 0);
 							IntersectRect (&SelectedItemRect,&SelectedItemRect,&LastBoxRect);
 							w = LastBoxRect.right - LastBoxRect.left;
 							h = LastBoxRect.bottom - LastBoxRect.top;
@@ -2974,7 +2990,11 @@ NextPickItem:
 								LastBoxRect.top = max (LastBoxRect.top -  h * move,ScreenRect.top);
 								LastBoxRect.bottom = LastBoxRect.top + h;
 							}
-							hLastBox = YellowTextBox (hWnd,pTxt,pt,0,&LastBoxRect,FALSE,4);  
+							hDC = GetDC(hWnd);
+							ClearMeterPrompts(hDC);
+							ReleaseDC(hWnd, hDC);
+							hLastBox = YellowTextBox(hWnd, pTxt, pt, 0, &LastBoxRect, FALSE, 4);
+							setlastbox(hLastBox);
 							LastBoxVP = CurView;
 			    			LastVP = SetLastVP (LastBoxVP);
 						}
