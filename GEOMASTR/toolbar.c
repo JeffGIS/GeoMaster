@@ -2361,6 +2361,8 @@ LONG FAR PASCAL PanZoomRotWndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM 
  int		n;
  POINT	ScreenPt;
  int	ToolbarID = GetToolbarIDFromWnd (hWnd);
+ static BOOL AllowRotate = TRUE;
+ static int	PANDIST = 53;
 
 
  if (Message != WM_CREATE)
@@ -2379,6 +2381,9 @@ HRGN	hRgn;
 			RECT	Rect;
 
 			PZR_VP = CurView;
+			AllowRotate = GetGlobalBVal2("[%ALLOWPZROTATE]", TRUE);
+			if (!AllowRotate)
+				PANDIST = 64;
 /*			hCoords = CreateCirclePoly (WindowCenter,Radius,&nPnts,1);
 			DPolyToPPoly (&nPnts, hCoords,0);
 			Points = (HPDPOINT)GlobalLock (hCoords);
@@ -2568,7 +2573,7 @@ HRGN	hRgn;
 			PostMessage (hWndMain,WM_COMMAND,IDM_Z_IN,MAX_VIEWPORTS+1);
 		else if (JumpIO == 1)
 			PostMessage (hWndMain,WM_COMMAND,IDM_Z_OUT,MAX_VIEWPORTS+1);
-		else if (dist > 53)
+		else if (AllowRotate && dist > 53)
 		{
 			CurView->Rotation += (az+HALFPI);
 			CurView->Rotation = LTWOPI (CurView->Rotation);
@@ -2638,6 +2643,8 @@ HRGN	hRgn;
 		SetSysMess (0);
 	case WM_MOUSEMOVE:
 		ToolbarID = GetToolbarIDFromWnd (hWndPZR);
+		if (!AllowRotate)
+			RotDIR = 0;
 		if (ignoreMM)
 		{
 			ignoreMM = FALSE;
@@ -2782,60 +2789,63 @@ CursorMove:
 				else
 					SetSysMess ("Click here to zoom out");
 			}
-			else if (az2 > 4.6 && az2 < 4.8 && dist > 53 && dist < 62)
+			else if (AllowRotate)
 			{
-				DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
-				RotDIR = 1;
-				DisplayCompassDir (hDC,RotDIR,PZRMidPoint,Rotation);
-				SetSysMess ("Click here to rotate map to North");
-			}
-			else if ((az2 > 6.2 || az2 < 0.1) && dist > 53 && dist < 62)
-			{
-				DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
-				RotDIR = 2;
-				DisplayCompassDir (hDC,RotDIR,PZRMidPoint,Rotation);
-				SetSysMess ("Click here to rotate map to East");
-			}
-			else if (az2 > 1.48 && az2 < 1.79 && dist > 53 && dist < 62)
-			{
-				DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
-				RotDIR = 4;
-				DisplayCompassDir (hDC,RotDIR,PZRMidPoint,Rotation);
-				SetSysMess ("Click here to rotate map to South");
-			}
-			else if (az2 > 3 && az2 < 3.2 && dist > 53 && dist < 62)
-			{
-				DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
-				RotDIR = 3;
-				DisplayCompassDir (hDC,RotDIR,PZRMidPoint,Rotation);
-				SetSysMess ("Click here to rotate map to West");
-			}
-			else if (dist > 53 && dist < 65)
-			{
-				DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
-				//DisplayPanZoomRot (hWnd,0,&rect);
-				hPen = CreatePen(PS_SOLID,(int)1,RGB(160,0,0));
-				OldPen = SelectObject (hDC,hPen);
-				hBrush = CreateSolidBrush (RGB(160,0,0));
-				OldBrush = SelectObject (hDC,hBrush);
-				radius = (rect.right - rect.left)/2 + 2;
-				Points[0] = newpt (PZRMidPoint,az,radius-12);
-				Points[1] = newpt (PZRMidPoint,az,radius-1);
-				Points[2] = newpt (PZRMidPoint,az,radius-6);
-				Points[3] = newpt (Points[2],az-HALFPI,3);
-				Points[4] = newpt (Points[2],az+HALFPI,3);
-				Points[5] = Points[1];
-				Points[6] = Points[3];
-				Polyline (hDC,Points,7);
-				Polygon (hDC,&Points[3],4);
-				SelectObject (hDC,OldPen);
-				DeleteObject (hPen);
-				SelectObject (hDC,OldBrush);
-				DeleteObject (hBrush);
-				AZToBear (TWOPI-az,PreDir,DegC,MinC,SecC,PostDir); 
-				sprintf (BearingC,"%s %s %s %s %s",PreDir,DegC,MinC,SecC,PostDir);
-				sprintf (str,"Click here to rotate map to %s",BearingC);
-				SetSysMess (str);
+				if (az2 > 4.6 && az2 < 4.8 && dist > 53 && dist < 62)
+				{
+					DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
+					RotDIR = 1;
+					DisplayCompassDir(hDC, RotDIR, PZRMidPoint, Rotation);
+					SetSysMess("Click here to rotate map to North");
+				}
+				else if ((az2 > 6.2 || az2 < 0.1) && dist > 53 && dist < 62)
+				{
+					DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
+					RotDIR = 2;
+					DisplayCompassDir(hDC, RotDIR, PZRMidPoint, Rotation);
+					SetSysMess("Click here to rotate map to East");
+				}
+				else if (az2 > 1.48 && az2 < 1.79 && dist > 53 && dist < 62)
+				{
+					DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
+					RotDIR = 4;
+					DisplayCompassDir(hDC, RotDIR, PZRMidPoint, Rotation);
+					SetSysMess("Click here to rotate map to South");
+				}
+				else if (az2 > 3 && az2 < 3.2 && dist > 53 && dist < 62)
+				{
+					DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
+					RotDIR = 3;
+					DisplayCompassDir(hDC, RotDIR, PZRMidPoint, Rotation);
+					SetSysMess("Click here to rotate map to West");
+				}
+				else if (dist > 53 && dist < 65)
+				{
+					DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
+					//DisplayPanZoomRot (hWnd,0,&rect);
+					hPen = CreatePen(PS_SOLID, (int)1, RGB(160, 0, 0));
+					OldPen = SelectObject(hDC, hPen);
+					hBrush = CreateSolidBrush(RGB(160, 0, 0));
+					OldBrush = SelectObject(hDC, hBrush);
+					radius = (rect.right - rect.left) / 2 + 2;
+					Points[0] = newpt(PZRMidPoint, az, radius - 12);
+					Points[1] = newpt(PZRMidPoint, az, radius - 1);
+					Points[2] = newpt(PZRMidPoint, az, radius - 6);
+					Points[3] = newpt(Points[2], az - HALFPI, 3);
+					Points[4] = newpt(Points[2], az + HALFPI, 3);
+					Points[5] = Points[1];
+					Points[6] = Points[3];
+					Polyline(hDC, Points, 7);
+					Polygon(hDC, &Points[3], 4);
+					SelectObject(hDC, OldPen);
+					DeleteObject(hPen);
+					SelectObject(hDC, OldBrush);
+					DeleteObject(hBrush);
+					AZToBear(TWOPI - az, PreDir, DegC, MinC, SecC, PostDir);
+					sprintf(BearingC, "%s %s %s %s %s", PreDir, DegC, MinC, SecC, PostDir);
+					sprintf(str, "Click here to rotate map to %s", BearingC);
+					SetSysMess(str);
+				}
 			}
 			else if (iColor == VHMoveColor || iColor == RED)
 			{
@@ -2859,7 +2869,7 @@ CursorMove:
 					strcpy (str,"Click here to pan 1/2 screen left");
 				SetSysMess (str);
 			}
-			else if (dist > 34 && dist < 53 && iColor != DKRED)
+			else if (dist > 34 && dist < PANDIST && iColor != DKRED)
 			{
 				HBRUSH	hBrush = CreateSolidBrush (RED2);
 				HBRUSH	OldBrush = SelectObject (hDC,hBrush);

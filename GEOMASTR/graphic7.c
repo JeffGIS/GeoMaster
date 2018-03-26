@@ -4369,8 +4369,8 @@ GetNextLine:;
 	    {   
 			if (NumAction)
 				AppendMenu (PickMenu,MF_POPUP,(UINT)Menus[imenu-1],txt);
-			else
-				AppendMenu (PickMenu,MF_ENABLED|MF_STRING,0,txt);
+			//else
+			//	AppendMenu (PickMenu,MF_ENABLED|MF_STRING,0,txt);
 		}
 		NumAction = 0;
 		if (TopOnlyOpt)

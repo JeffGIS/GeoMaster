@@ -460,12 +460,22 @@ GSSiExitProg (1348);
 				{
 					if (CurView->pTheme)
 					{
-						if (!_fstricmp(Arg[3], "SHOWTEXT"))
+						if (!_fstricmp(Arg[3], "TITLEPCT"))
+						{
+							CurView->pTheme->TitleHeight = atoi(Arg[4]);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "SYMBOLPCT"))
+						{
+							CurView->pTheme->ColorsWidth = atoi(Arg[4]);
+							rtn = TRUE;
+						}
+						else if (!_fstricmp(Arg[3], "SHOWTEXT"))
 						{
 							CurView->pTheme->ShowValue = atob(Arg[4]);
 							rtn = TRUE;
 						}
-						if (!_fstricmp(Arg[3], "DELAYTEXT"))
+						else if (!_fstricmp(Arg[3], "DELAYTEXT"))
 						{
 							CurView->pTheme->DelayTextDisplay = atob(Arg[4]);
 							rtn = TRUE;
@@ -615,7 +625,22 @@ GSSiExitProg (1348);
 				{
 					if (CurView->pTheme)
 					{
-						if (!_fstricmp (Arg[3],"MISSOPT"))
+						if (!_fstricmp(Arg[3], "TITLEPCT"))
+						{
+							itoa(CurView->pTheme->TitleHeight, OutLoc, 10);
+							goto Rtnl;
+						}
+						else if (!_fstricmp(Arg[3], "SYMBOLPCT"))
+						{
+							itoa(CurView->pTheme->ColorsWidth, OutLoc, 10);
+							goto Rtnl;
+						}
+						else if (!_fstricmp(Arg[3], "TITLE"))
+						{
+							strcpy(OutLoc, CurView->pTheme->Title);
+							goto Rtnl;
+						}
+						else if (!_fstricmp(Arg[3], "MISSOPT"))
 						{
 							itoa (CurView->pTheme->MissOpt,OutLoc,10);
 							goto Rtnl;

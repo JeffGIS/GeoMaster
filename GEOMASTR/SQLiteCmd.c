@@ -3651,7 +3651,7 @@ BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName)
 
 		if (sqlite3_step(statement) == SQLITE_ROW)
 		{
-			LPSTR pName = sqlite3_column_text(statement, 0);
+			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 0);
 			rtn = TRUE;
 		}
 		sqlite3_finalize(statement);

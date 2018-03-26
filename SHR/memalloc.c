@@ -885,9 +885,9 @@ int	GSSiEnterProg (int progid)
 			}
 			if (EnableTrace>1)
 			{
-				FARPROC lpfnTRACELISTMsgProc;
+				DLGPROC lpfnTRACELISTMsgProc;
 				HaveBlockingWindow = TRUE;
-				lpfnTRACELISTMsgProc = MakeProcInstance((FARPROC)TRACELISTMsgProc, hInst);
+				lpfnTRACELISTMsgProc = MakeProcInstance((DLGPROC)TRACELISTMsgProc, hInst);
 				DialogBox(hInst, (LPSTR)"TRACELIST", hWndMain, lpfnTRACELISTMsgProc);
 				FreeProcInstance(lpfnTRACELISTMsgProc); 
 				HaveBlockingWindow = FALSE;
