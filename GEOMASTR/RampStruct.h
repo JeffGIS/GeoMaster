@@ -15,7 +15,9 @@ enum textures {
     castironTruncatedDomes=6,
     exposedAggregate=7,
     cutStone=8,
-    other=10
+    other=10,
+    castInPlacePanels=11,
+    linearGrooves=12
 };
 
 enum obstructions {
@@ -27,7 +29,11 @@ enum obstructions {
     otherob=6,
     none=10,
     masterNone=11,
-	obstructions_max=12,
+    sdwkClearWidth=21,
+    sdwkProtrudingObject=22,
+    sdwkVerticalClearance=23,
+    sdwkUndergroundUtility=24,
+	obstructions_max
 };
 
 typedef enum {
@@ -35,19 +41,22 @@ typedef enum {
     RampTypePerpNonWalk,
     RampTypeCombPerpWalk,
     RampTypeCombPerpNonWalk,
-    RampTypeOneWayDirCurbGutter,
+    RampTypeOneWayPerp,
     RampTypeOneWayDirBlendTrans,
     RampTypeParallel,
     RampTypeDepressedCorner,
     RampTypeFan,
     RampTypeBuiltUp,
     RampTypeDiagonal,
-    RampTypeCombLeftWalk,//left side of RampTypeCombPerpWalk
-    RampTypeCombRightWalk,//right side of RampTypeCombPerpWalk
-    RampTypeCombLeftNonWalk,//left side of RampTypeCombPerpNonWalk
-    RampTypeCombRightNonWalk,//right side of RampTypeCombPerpNonWalk
+    RampTypeOneWayDirCurbGutter,
+    RampTypeCombLeftWalk=101,//left side of RampTypeCombPerpWalk
+    RampTypeCombRightWalk=102,//right side of RampTypeCombPerpWalk
+    RampTypeCombLeftNonWalk=103,//left side of RampTypeCombPerpNonWalk
+    RampTypeCombRightNonWalk=104,//right side of RampTypeCombPerpNonWalk
     rampTypeCount //always last item
 } RampType;
+
+#define lastSelectableRampType RampTypeOneWayDirCurbGutter
 
 typedef enum {
     NVSignalTypeNone,
@@ -73,6 +82,11 @@ typedef enum {
     NVButtonTypeAPS,
 	NVButtonTypeCount,
 } NVButtonType;
+
+typedef enum {
+    DetectableWarningShapeRectangular=1,
+    DetectableWarningShapeRadial=2,
+} DetectableWarningShape;
 
 typedef struct CrackWidth {
     float rampCrackWidth;
@@ -107,6 +121,8 @@ typedef struct RampStruct {
     CrackWidth crackWidth;
     int detectableWarningDepth;
     float domeSpacing, spaceBetweenDomes, domeBaseWidth, domeCapWidth;//these are for detectable warnings
+    DetectableWarningShape dwShape;//these are for detectable warnings
+    int dwMinOffset, dwMaxOffset, dwWidth, dwDepth;//these are for detectable warnings
     int streetLandingDepth, leftXWalkSideWidth, rightXWalkSideWidth;//these are for diagonal ramp type
     int rampWidth, rampDepth;
     float rampSlopeFront;
@@ -145,8 +161,6 @@ typedef struct RampStruct {
     float curbCutDistance;
     float bumpWidth;
     float bumpHeight;
-	int	 dwWidth;
-	int	 dwDepth;
 	char fileID[12];
 } RampStruct;
 

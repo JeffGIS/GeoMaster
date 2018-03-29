@@ -51,8 +51,11 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     {
         if (ramp->texture < truncatedStoneDomes || ramp->texture > castironTruncatedDomes)
         {
-			basic = strcat(basic, selectCode(DetectableWarning, codeSystem));
-			detail = strcat(detail, selectCode(DetectableWarning, codeSystem));
+            if (ramp->texture != castInPlacePanels)
+            {
+				basic = strcat(basic, selectCode(DetectableWarning, codeSystem));
+				detail = strcat(detail, selectCode(DetectableWarning, codeSystem));
+            }
         }
     }
     
@@ -315,29 +318,60 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     //sidewalk left slopes (5,2)
     value = fabsf(ramp->swkLeftSlopeFront);
     
-    if (value > (CV5 + tolerances->cv5) && value < 9990.0)
+    if (ramp->rampType == RampTypeParallel)
     {
-        if (flagged < 2)
+        if (value > (CV8 + tolerances->cv8) && value < 9990.0)
         {
-            if (flagged == 1)
-                basic[strlen(basic) - 1] = '\0';
+            if (flagged < 2)
+            {
+                if (flagged == 1)
+                    basic[strlen(basic) - 1] = '\0';
+                
+                basic = strcat(basic, SlopeMajor);
+                flagged = 2;
+            }
             
-			basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
-            flagged = 2;
+            detail = strcat(detail, SwkLeftFrontMajor);
         }
         
-		detail = strcat(detail, selectCode(SwkLeftFrontMajor, codeSystem));
+        else if (value > CV8 && value < 9990.0)
+        {
+            if (flagged < 1)
+            {
+                basic = strcat(basic, SlopeMinor);
+                flagged = 1;
+            }
+            
+            detail = strcat(detail, SwkLeftFrontMinor);
+        }
     }
     
-    else if (value > CV5 && value < 9990.0)
+    else
     {
-        if (flagged < 1)
-        {
-			basic = strcat(basic, selectCode(SlopeMinor, codeSystem));
-            flagged = 1;
-        }
+	    if (value > (CV5 + tolerances->cv5) && value < 9990.0)
+	    {
+	        if (flagged < 2)
+	        {
+	            if (flagged == 1)
+	                basic[strlen(basic) - 1] = '\0';
+            
+				basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
+	            flagged = 2;
+	        }
         
-		detail = strcat(detail, selectCode(SwkLeftFrontMinor, codeSystem));
+			detail = strcat(detail, selectCode(SwkLeftFrontMajor, codeSystem));
+	    }
+    
+        else if (value > CV5 && value < 9990.0)
+    	{
+	        if (flagged < 1)
+        	{
+				basic = strcat(basic, selectCode(SlopeMinor, codeSystem));
+	            flagged = 1;
+        	}
+        
+			detail = strcat(detail, selectCode(SwkLeftFrontMinor, codeSystem));
+		}
     }
     
     value = fabsf(ramp->swkLeftSlopeSide);
@@ -370,16 +404,18 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     //sidewalk right slopes (5,2)
     value = fabsf(ramp->swkRightSlopeFront);
     
-    if (value > (CV5 + tolerances->cv5) && value < 9990.0)
+    if (ramp->rampType == RampTypeParallel)
     {
-        if (flagged < 2)
+        if (value > (CV5 + tolerances->cv5) && value < 9990.0)
         {
-            if (flagged == 1)
-                basic[strlen(basic) - 1] = '\0';
+            if (flagged < 2)
+            {
+               if (flagged == 1)
+                   basic[strlen(basic) - 1] = '\0';
             
-			basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
-            flagged = 2;
-        }
+			    basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
+                flagged = 2;
+            }
         
 		detail = strcat(detail, selectCode(SwkRightFrontMajor, codeSystem));
     }
@@ -393,8 +429,36 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
         }
         
 		detail = strcat(detail, selectCode(SwkRightFrontMinor, codeSystem));
+        }
     }
     
+    else
+    {
+        if (value > (CV8 + tolerances->cv8) && value < 9990.0)
+        {
+            if (flagged < 2)
+            {
+                if (flagged == 1)
+                    basic[strlen(basic) - 1] = '\0';
+                
+                basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
+                flagged = 2;
+            }
+            
+            detail = strcat(detail, selectCode(SwkRightFrontMajor, codeSystem));
+        }
+        
+        else if (value > CV5 && value < 9990.0)
+        {
+            if (flagged < 1)
+            {
+                basic = strcat(basic, selectCode(SlopeMinor, codeSystem));
+                flagged = 1;
+            }
+            
+            detail = strcat(detail, selectCode(SwkRightFrontMinor, codeSystem));
+        }
+    }    
     value = fabsf(ramp->swkRightSlopeSide);
     
     if (value > (CV2 + tolerances->cv2) && value < 9990.0)
@@ -665,37 +729,11 @@ void setStandardToleranceValues(ToleranceValues *tolerances)
 }
 
 static char *textures[] = {"None", "SmoothedConcrete", "BrushedConcrete", "TintedConcrete", "TruncatedStoneDomes", "TruncatedStampedConcrete", "CastironTruncatedDomes", "ExposedAggregate", "CutStone", "None", "Other","CastInPlacePanels","LinearGrove"};
-
 static char *obstructions[] = {"None", "Hydrant", "Manhole", "Polebox", "Pole", "StreetManhole", "Other", "None", "None", "None", "None", "MasterNone","","","","","","","","","","SDWKClearWidth","SDWKProtudingObject","SDWKVerticalClearance","SDWKUndergroundUtility"};
-
-static char *rampTypes[] = { "Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk","OneWayPerp", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "OneWayDirCurbGutter", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk" };
-/*
-typedef enum {
-	RampTypePerp,
-	RampTypePerpNonWalk,
-	RampTypeCombPerpWalk,
-	RampTypeCombPerpNonWalk,
-	RampTypeOneWayPerp,
-	RampTypeOneWayDirBlendTrans,
-	RampTypeParallel,
-	RampTypeDepressedCorner,
-	RampTypeFan,
-	RampTypeBuiltUp,
-	RampTypeDiagonal,
-	RampTypeOneWayDirCurbGutter,
-	RampTypeCombLeftWalk = 101,//left side of RampTypeCombPerpWalk
-	RampTypeCombRightWalk = 102,//right side of RampTypeCombPerpWalk
-	RampTypeCombLeftNonWalk = 103,//left side of RampTypeCombPerpNonWalk
-	RampTypeCombRightNonWalk = 104,//right side of RampTypeCombPerpNonWalk
-	rampTypeCount //always last item
-} RampType;
-*/
-
-static char *buttontypes[] = { "None", "Small Push Button", "Large Push Button", "Touch Button", "APS Button" };
-
-static char *signaltypes[] = { "None", "Text Signal", "Symbol Signal", "With Side Timer", "With Below Timer" };
-
-static char *AWItypes[] = { "None", "Tones", "Speech" };
+static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk", "OneWayPerp", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "OneWayDirCurbGutter", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk"};
+static char *AWITypes[] = {"None", "Tones", "SpeechMessage"};
+static char *buttonTypes[] = {"None", "SmallPush", "LargePush", "Touch", "APS"};
+static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer"};
 
 int NVCTextureToCode(LPSTR texture)
 {
@@ -732,17 +770,17 @@ char *rampToText(int intNum, RampStruct *ramp)
 	ExpandText(timeCompleteC);
 	if (rtype < 0 || rtype > 15)
 		rtype = 0;
-	if (ramp->upperLandingObstruction < 0 || ramp->upperLandingObstruction > obstructions_max)
+	if (ramp->upperLandingObstruction < 0 || ramp->upperLandingObstruction >= obstructions_max)
 		ramp->upperLandingObstruction = 0;
-	if (ramp->lowerLandingObstruction < 0 || ramp->lowerLandingObstruction > obstructions_max)
+	if (ramp->lowerLandingObstruction < 0 || ramp->lowerLandingObstruction >= obstructions_max)
 		ramp->lowerLandingObstruction = 0;
-	if (ramp->rampObstruction < 0 || ramp->rampObstruction > obstructions_max)
+	if (ramp->rampObstruction < 0 || ramp->rampObstruction >= obstructions_max)
 		ramp->rampObstruction = 0;
-	if (ramp->PEDSignalType < 0 || ramp->PEDSignalType > NVSignalTypeCount)
+	if (ramp->PEDSignalType < 0 || ramp->PEDSignalType >= NVSignalTypeCount)
 		ramp->PEDSignalType = 0;
-	if (ramp->PEDButtonType < 0 || ramp->PEDButtonType > NVButtonTypeCount)
+	if (ramp->PEDButtonType < 0 || ramp->PEDButtonType >= NVButtonTypeCount)
 		ramp->PEDButtonType = 0;
-	if (ramp->awi <= 0 || ramp->awi > AudibleWalkIndicationCount)
+	if (ramp->awi <= 0 || ramp->awi >= AudibleWalkIndicationCount)
 	{
 		ramp->awi = 0;
 		ramp->locatorToneVolume = 0;
@@ -796,11 +834,11 @@ char *rampToText(int intNum, RampStruct *ramp)
 		ramp->bumpHeight,
 		ramp->dwWidth,
 		ramp->dwDepth,
-		signaltypes[ramp->PEDSignalType],
-		buttontypes[ramp->PEDButtonType],
+		signalTypes[ramp->PEDSignalType],
+		buttonTypes[ramp->PEDButtonType],
 		ramp->PEDButtonHeight,
 		ramp->PEDButtonDist,
-		AWItypes[ramp->awi],
+		AWITypes[ramp->awi],
 		ramp->hasLocatorTone,
 		ramp->hasInfoSign,
 		ramp->hasBraille,
