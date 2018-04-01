@@ -2218,6 +2218,7 @@ POINT GetGridPoint (int GridCellID);
 BOOL GetGridDef (LPSTR GridName);
 int DGridCellID (LPDPOINT pPoint);
 BOOL HaveNonBKColor (LPRECT rect,HDIB32 hDib32);
+double GetPCTColorInBitmapWithMask(HDIB32 hBitmap, HDIB32 hMask, COLORREF color, COLORREF maskColor);
 
 //BOOL AddTransCanadaDesignatonToStreetName (short State);
 void InitTileGraphics (HFILE Fid);

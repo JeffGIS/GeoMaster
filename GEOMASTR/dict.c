@@ -902,6 +902,67 @@ double GetAverageGreyScaleValue (HDIB32 hDib,HDIB32 hDibGS)
 	return Value;
 }
 
+double GetPCTColorInBitmapWithMask(HDIB32 hBitmap, HDIB32 hMask, COLORREF color, COLORREF maskColor)
+{
+	UINT	nrow = FreeImage_GetHeight(hBitmap);
+	UINT	ncol = FreeImage_GetWidth(hBitmap);
+	int		bpp  = FreeImage_GetBPP(hBitmap);
+	LPBYTE	pBitmap, pMask;
+	int		totMaskPixels = 0;
+	int		totColorPixels = 0;
+	double  rtn=-3;
+
+	if (FreeImage_GetWidth(hMask) != ncol ||
+		FreeImage_GetHeight(hMask) != nrow)
+		return -1;
+
+	if (FreeImage_GetBPP(hMask) != bpp)
+		return -2;
+
+	if (bpp == 24)
+	{
+		for (int irow = 0; irow < nrow; irow++)
+		{
+			RGBTRIPLE * pBitmap = (RGBTRIPLE	*)FreeImage_GetScanLine(hBitmap, irow);
+			RGBTRIPLE * pMask = (RGBTRIPLE	*)FreeImage_GetScanLine(hMask, irow);
+			for (int icol = 0; icol < ncol; icol++, pBitmap++, pMask++)
+			{
+				COLORREF bitmapColor = RGBTRIPLEToCOLORREF(*pBitmap);
+				COLORREF mColor = RGBTRIPLEToCOLORREF(*pMask);
+				if (mColor == maskColor)
+				{
+					totMaskPixels++;
+					if (bitmapColor == color)
+						totColorPixels++;
+				}
+			}
+		}
+		rtn = (double)totColorPixels / (double)totMaskPixels;
+	}
+	else if (bpp == 32)
+	{
+		for (int irow = 0; irow < nrow; irow++)
+		{
+			RGBQUAD * pBitmap = (RGBQUAD	*)FreeImage_GetScanLine(hBitmap, irow);
+			RGBQUAD * pMask = (RGBQUAD	*)FreeImage_GetScanLine(hMask, irow);
+			for (int icol = 0; icol < ncol; icol++, pBitmap++, pMask++)
+			{
+				COLORREF bitmapColor = RGBQUADToCOLORREF(*pBitmap);
+				COLORREF mColor = RGBQUADToCOLORREF(*pMask);
+				if (mColor == maskColor)
+				{
+					totMaskPixels++;
+					if (bitmapColor == color)
+						totColorPixels++;
+				}
+			}
+		}
+		rtn = (double)totColorPixels / (double)totMaskPixels;
+
+	}
+	return rtn;
+}
+
 RGBTRIPLE NewColorValue (RGBTRIPLE *pColor,double intensitychange)
 {
 	RGBTRIPLE NewColor = *pColor, OldColor = *pColor;
@@ -6013,7 +6074,8 @@ BOOL DisplaySymInRect2 (HDC hDC,HANDLE hSymbol,RECT Rect,short nElement,HANDLE h
 					SelectObject (hDC,hOldPen); 
 				if (hPen != GetStockObject (NULL_PEN))
 					GSSiDeleteObject (&hPen);
-				GSSiDeleteObject (&hBrush);
+				if (hBrush != GetStockObject(NULL_BRUSH))
+					GSSiDeleteObject (&hBrush);
 				if (BorderSymNum)
  	    		{
 	    			double SaveDefaultSymbolFactor = DefaultSymbolFactor;

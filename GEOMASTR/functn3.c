@@ -4259,19 +4259,34 @@ GotCloseFilehSQL:
 						goto Rtnl;
 					}
 				}
-				else if (!stricmp (Arg[1],"HEIGHT"))//infile
+				else if (!stricmp(Arg[1], "HEIGHT"))//infile
 				{
-					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
 
 					if (hDIB)
 					{
-						int height = FreeImage_GetHeight (hDIB);
+						int height = FreeImage_GetHeight(hDIB);
 						FreeImage_Unload(hDIB);
-						itoa (height,OutLoc,10);
+						itoa(height, OutLoc, 10);
 						goto Rtnl;
 					}
 				}
-				else if (!stricmp (Arg[1],"THUMBNAIL"))//infile,maxwidth,outfile,opt
+				else if (!stricmp(Arg[1], "PCTCOLOR"))//$BITMAP(PCTCOLOR,bitmappath,color,maskpath,maskcolor)
+				{
+					HDIB32 hDIB = BMPHandleFromEXT(Arg[2]);
+					COLORREF bmColor = atoi(Arg[3]);
+					strcpy(OutLoc, "-5");
+					if (hDIB)
+					{
+						HDIB32 hDIBMask = BMPHandleFromEXT(Arg[4]);
+						COLORREF maskColor = atoi(Arg[5]);
+						double pct = GetPCTColorInBitmapWithMask(hDIB, hDIBMask, bmColor, maskColor);
+						ftoa(OutLoc, pct);
+						goto Rtnl;
+					}
+					goto Rtnl;
+				}
+				else if (!stricmp(Arg[1], "THUMBNAIL"))//infile,maxwidth,outfile,opt
 				{
 					HDIB32 hDIB = BMPHandleFromEXT (Arg[2]); 
 
