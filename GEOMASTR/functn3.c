@@ -4279,11 +4279,24 @@ GotCloseFilehSQL:
 					if (hDIB)
 					{
 						HDIB32 hDIBMask = BMPHandleFromEXT(Arg[4]);
-						COLORREF maskColor = atoi(Arg[5]);
-						double pct = GetPCTColorInBitmapWithMask(hDIB, hDIBMask, bmColor, maskColor);
-						ftoa(OutLoc, pct);
+						if (hDIBMask)
+						{
+							COLORREF maskColor = atoi(Arg[5]);
+							double pct = GetPCTColorInBitmapWithMask(hDIB, hDIBMask, bmColor, maskColor);
+							FreeImage_Unload(hDIBMask);
+							ftoa(OutLoc, pct);
+						}
+						FreeImage_Unload(hDIB);
 						goto Rtnl;
 					}
+
+					goto Rtnl;
+				}
+
+				else if (!stricmp(Arg[1], "OVERLAP"))//$BITMAP(OVERLAP,outpath,inpaths(sep by ;),color)
+				{
+					int rtn = CreateOverlapMap(Arg[2], Arg[3], atoi(Arg[4]));
+					itoa(rtn, OutLoc, 10);
 					goto Rtnl;
 				}
 				else if (!stricmp(Arg[1], "THUMBNAIL"))//infile,maxwidth,outfile,opt

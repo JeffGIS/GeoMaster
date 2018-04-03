@@ -2025,7 +2025,7 @@ GSSiExitProg (1260);
 			CurTheme->NoDataBrush = CreatePatternBrush (hBM);
 			i=DeleteObject (hBM);
 		}
-		else
+		else if (CurTheme->ID != GF_COMPARE_VIEWPORTS_THEME)
 		{
 			CurTheme->InvalidDataBrush= (HBRUSH)CreatePen(PS_DASH,1,RGB(255,0,0));
 			CurTheme->NoDataBrush= (HBRUSH)CreatePen(PS_DOT,1,RGB(255,0,0));

@@ -1789,6 +1789,7 @@ extern  int		GoogleScale;
 extern	int		GoogleZoom;
 extern  int		GoogleMapWidth, GoogleMapHeight;
 extern  int		GoogleMapType;
+extern  BOOL	AllAreasArePositive;
 
 extern HBITMAP hPatBMP[5];
 extern	int		ii;

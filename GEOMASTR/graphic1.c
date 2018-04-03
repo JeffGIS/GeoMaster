@@ -7315,7 +7315,7 @@ GSSiExitProg (86);
     	if (pViewports[iview])
     	{
 	        SetCurView ( pViewports[iview]); 
-	        if (CurView->NumFiles)
+	        //if (CurView->NumFiles)
 	        {
 	            if (CurView->PassID == 0)
 	                ThemeEndDataPass(FALSE);

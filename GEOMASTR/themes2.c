@@ -3391,6 +3391,8 @@ BOOL ThemeEndDisplayPass(BOOL CloseAll,BOOL PixelThemesOnly,BOOL FromHalt)
 {	int	itheme, iclass,ii; 
     LPTHEME SaveTheme=CurTheme, CacheDisplayTheme=0;
      
+	if (CurTheme->ID == GF_COMPARE_VIEWPORTS_THEME)
+		ii = 1;
 	SetTransparency (0);
                     
 	for (itheme=0;itheme<CurView->NumThemes;itheme++)

@@ -902,6 +902,98 @@ double GetAverageGreyScaleValue (HDIB32 hDib,HDIB32 hDibGS)
 	return Value;
 }
 
+int CreateOverlapMap(LPSTR OutImage, LPSTR InImages, COLORREF color)
+{
+	int rtn = 1;
+	HDIB32 hOutBM;
+	HDIB32 hInBM[32];
+	RGBQUAD * pBitmap[32];
+	int nInBM = 0;
+	LPSTR pSC = strchr(InImages, ';');
+	UINT	nrow, ncol;
+
+	while (*InImages)
+	{
+		if (*pSC)
+			*pSC++ = 0;
+		hInBM[nInBM] = BMPHandleFromEXT(InImages);
+		if (!hInBM[nInBM])
+		{
+			rtn = -(nInBM + 1);
+			goto Exit;
+		}
+		nInBM++;
+		InImages = pSC;
+		pSC = strchr(InImages, ';');
+		if (!pSC)
+			pSC = strchr(InImages, 0);
+	}
+	if (nInBM > 1)
+	{
+		nrow = FreeImage_GetHeight(hInBM[0]);
+		ncol = FreeImage_GetWidth(hInBM[0]);
+		int		bpp = FreeImage_GetBPP(hInBM[0]);
+		for (int i = 0; i < nInBM; i++)
+		{
+			if (nrow != FreeImage_GetHeight(hInBM[i]))
+			{
+				rtn = -(i + 101);
+			}
+			if (ncol != FreeImage_GetWidth(hInBM[i]))
+			{
+				rtn = -(i + 201);
+			}
+			if (bpp != FreeImage_GetBPP(hInBM[i]))
+			{
+				rtn = -(i + 301);
+			}
+		}
+	}
+	else
+		rtn = -1000;
+	if (rtn == 1)
+	{
+		hOutBM = FreeImage_Clone(hInBM[0]);
+	}
+	RGBQUAD blackval = { 0 };
+	RGBQUAD whiteval;
+	whiteval.rgbBlue = 255;
+	whiteval.rgbGreen = 255;
+	whiteval.rgbRed = 255;
+
+	for (int irow = 0; irow < nrow; irow++)
+	{
+		int i;
+		for (i = 0; i < nInBM; i++)
+		{
+			pBitmap[i] = (RGBQUAD	*)FreeImage_GetScanLine(hInBM[i], irow);
+		}
+		for (int icol = 0; icol < ncol; icol++)
+		{
+			int nHits = 0;
+			for (i = 0; i < nInBM; i++)
+			{
+				COLORREF bitmapColor = RGBQUADToCOLORREF(*pBitmap[i]);
+				if (bitmapColor == color)
+					nHits++;
+			}
+			for (i = 0; i < nInBM; i++)
+				pBitmap[i]++;
+			if (nHits > 1)
+				FreeImage_SetPixelColor(hOutBM, icol, irow, &blackval);
+			else
+				FreeImage_SetPixelColor(hOutBM, icol, irow, &whiteval);
+		}
+	}
+	if (!GMFIBMPHandleToEXT(OutImage, hOutBM, 0))
+		rtn = -2000;
+	FreeImage_Unload(hOutBM);
+Exit:	
+	for (int i = 0; i < nInBM;i++)
+		FreeImage_Unload(hInBM[i]);
+
+	return rtn;
+}
 double GetPCTColorInBitmapWithMask(HDIB32 hBitmap, HDIB32 hMask, COLORREF color, COLORREF maskColor)
 {
 	UINT	nrow = FreeImage_GetHeight(hBitmap);

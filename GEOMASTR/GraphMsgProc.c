@@ -5584,7 +5584,15 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
 		 		 break;
 		 		 
             case IDOK:
-            	 if (!Pickability && CurVis)
+				if (CurView && Pickability && !strnicmp(CurView->PickName, "FROM CMD", 8))
+				{
+					*CurView->PickName = 0;
+				}
+				if (CurView && !Pickability && !strnicmp(CurView->VisName, "FROM CMD", 8))
+				{
+					*CurView->VisName = 0;
+				}
+				if (!Pickability && CurVis)
             	 {  
             	 	*CurView->CurVisibilityID = 0;
             	 	CurVis->WantType[7]=0;

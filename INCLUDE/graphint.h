@@ -711,6 +711,7 @@ short ClassMacro (POINT MousePoint,short opt,LPHANDLE hBox,LPVIEWPORT *ppVP,LPHA
 short CoordDisplayMacro (POINT MousePoint);
 short DistDisplayMacro (POINT MousePoint);
 short LegendMacro (POINT MousePoint);
+double AdjustHltArea(double area);
 void AdjustMainRectVirtualPrinter (LPRECT Rect,short VirtualPage,LPSHORT pIrow,LPSHORT pIcol);
 void AdjustSubTraverse (HWND hWndDlg,UINT IDCTRAVLIST,int From,int Increment);
 void AdjustBoundsToMainClipRect (LPMNMXCORL pBounds);
@@ -2219,6 +2220,7 @@ BOOL GetGridDef (LPSTR GridName);
 int DGridCellID (LPDPOINT pPoint);
 BOOL HaveNonBKColor (LPRECT rect,HDIB32 hDib32);
 double GetPCTColorInBitmapWithMask(HDIB32 hBitmap, HDIB32 hMask, COLORREF color, COLORREF maskColor);
+int CreateOverlapMap(LPSTR OutImage, LPSTR InImages, COLORREF color);
 
 //BOOL AddTransCanadaDesignatonToStreetName (short State);
 void InitTileGraphics (HFILE Fid);

@@ -521,7 +521,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				TrackObjCount[i] = NextObjectCount++; 
 				if (TrackObjCount[i] == 9401 || TrackObjCount[i] == 9611)
 					ii=1;
-				if (i==49 && Type == 8)
+				if (i==10)// && Type == 8)
 					ii=1;
 				return;
 			}

@@ -8,7 +8,7 @@ static BOOL	TrackOutsideVP=FALSE;
 static BOOL	HltDupRefs=FALSE;
 static BOOL	MoveShapePoints=FALSE;
 static LPVOID	PassiveFunPTR[32];
-static char	HighlightFile[144]="",HighlightFile2[144]="";  
+static char	HighlightFile[MAX_PATH]="",HighlightFile2[MAX_PATH]="";  
 static DPOINT	LastDPoint;
 static POINT	LastPoint;
 #define MAX_PICK_BOX 32
@@ -2463,6 +2463,13 @@ GSSiExitProg (136);
 #endif
 }
 
+double AdjustHltArea(double area)
+{
+	if (AllAreasArePositive)
+		return fabs(area);
+	return area;
+}
+
 BOOL OpenHighlightList(LPSTR Name1, LPSTR Name2)
 #if ENABLETRACE
 {GSSiEnterProg (137);
@@ -2554,7 +2561,7 @@ GSSiExitProg (137);
 		if (pPickData->Type == 3)
 		{    
 			TotHLTPerim+=pPickData->Length;
-			TotHLTArea+=pPickData->Area;  
+			TotHLTArea += AdjustHltArea(pPickData->Area);
 		}
 		else 
 			TotHLTLength+=pPickData->Length;
@@ -2674,7 +2681,7 @@ Next:
 	if (pHighlightData->PD.Type == 3)
 	{    
 		TotHLTPerim+=pHighlightData->PD.Length;
-		TotHLTArea+=pHighlightData->PD.Area;  
+		TotHLTArea += AdjustHltArea(pHighlightData->PD.Area);
 	}
 	else 
 		TotHLTLength+=pHighlightData->PD.Length;
@@ -2716,7 +2723,7 @@ void AddToHighlightListSeq (long Refno,LPPICKDATA pPickData,long Sequence,BOOL S
 	if (pPickData->Type == 3)
 	{    
 		TotHLTPerim+=pPickData->Length;
-		TotHLTArea+=pPickData->Area;  
+		TotHLTArea+=AdjustHltArea (pPickData->Area);  
 	}
 	else
 		TotHLTLength+=pPickData->Length;
@@ -2759,7 +2766,7 @@ void RemoveFromHighlightList (long Refno,int mode)
 			if (pPickData->Type == 3)
 			{    
 				TotHLTPerim-=pPickData->Length;
-				TotHLTArea-=pPickData->Area;  
+				TotHLTArea-= AdjustHltArea (pPickData->Area);  
 			}
 			else
 				TotHLTLength-=pPickData->Length;

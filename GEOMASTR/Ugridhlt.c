@@ -1487,26 +1487,30 @@ RedrawTable:
 									break;
 								}
 								SetAreaPrecision(hwnd, (short)GetGlobalLVal2("[%AREAPRECISION]", 0));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_AREAPRECISION_WHOLENUMBERS:
 								AreaPrecision = 0;
+								SetGlobalValueLong("%AREAPRECISION", AreaPrecision);
+
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_AREAPRECISION_01:
 								AreaPrecision = 1;
+								SetGlobalValueLong("%AREAPRECISION", AreaPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_AREAPRECISION_001:
@@ -1516,77 +1520,84 @@ RedrawTable:
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_AREAPRECISION_0001:
 								AreaPrecision = 3;
+								SetGlobalValueLong("%AREAPRECISION", AreaPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_AREAPRECISION_00001:
 								AreaPrecision = 4;
+								SetGlobalValueLong("%AREAPRECISION", AreaPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_AREAPRECISION_00001, MF_BYCOMMAND | MF_CHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS:
 								LinPrecision = 0;
+								SetGlobalValueLong("%DISTANCEPRECISION", LinPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_LINEARPRECISION_01:
 								LinPrecision = 1;
+								SetGlobalValueLong("%DISTANCEPRECISION", LinPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_LINEARPRECISION_001:
 								LinPrecision = 2;
+								SetGlobalValueLong("%DISTANCEPRECISION", LinPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_LINEARPRECISION_0001:
 								LinPrecision = 3;
+								SetGlobalValueLong("%DISTANCEPRECISION", LinPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_CHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_UNCHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_OPTIONS_LINEARPRECISION_00001:
 								LinPrecision = 4;
+								SetGlobalValueLong("%DISTANCEPRECISION", LinPrecision);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_WHOLENUMBERS, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_01, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_0001, MF_BYCOMMAND | MF_UNCHECKED);
 								CheckMenuItem(GetMenu(hwnd), ID_OPTIONS_LINEARPRECISION_00001, MF_BYCOMMAND | MF_CHECKED);
-								TB_RedrawTable(GetDlgItem(hwnd, IDC_UGTABLE));
+								TB_RedrawTable(hwnd);
 								return 0;
 
 							case ID_GOTO_TOP:{

@@ -1021,12 +1021,28 @@ GSSiExitProg (1348);
 					_fstrcpy (CurView->MeterInit,Arg[4]);
 					goto RtnTrue;
 				}
-				else if (!_fstricmp (Arg[3],"SELECTINIT"))
+				else if (!_fstricmp(Arg[3], "SELECTINIT"))
 				{
-					_fstrcpy (CurView->RButPickInit,Arg[4]);
+					_fstrcpy(CurView->RButPickInit, Arg[4]);
 					goto RtnTrue;
 				}
-				
+				else if (!_fstricmp(Arg[3], "VISFROMCMD"))
+				{
+					if (atob(Arg[4]))
+						strcpy(CurView->VisName, "FROM CMD");
+					else
+						*CurView->VisName = 0;
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "PIKFROMCMD"))
+				{
+					if (atob(Arg[4]))
+						strcpy(CurView->PickName, "FROM CMD");
+					else
+						*CurView->PickName = 0;
+					goto RtnTrue;
+				}
+
 				goto RtnFalse;
 			} 
 			else if (!_fstrcmp (Arg[1],"AREA"))
