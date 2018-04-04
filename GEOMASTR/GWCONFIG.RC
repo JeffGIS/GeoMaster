@@ -8577,6 +8577,7 @@ IDB_CANCEL              BITMAP                  "..\\CITYTOUR\\CANCELOLD.BMP"
 IDB_BITMAP22            BITMAP                  "..\\CITYTOUR\\BITMAP22.BMP"
 IDB_BITMAP24            BITMAP                  "..\\CITYTOUR\\BITMAP24.BMP"
 IDB_BITMAP25            BITMAP                  "..\\CITYTOUR\\BITMAP25.BMP"
+NEWVISIONGIS            BITMAP                  "..\\CITYTOUR\\NewVisionGIS.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

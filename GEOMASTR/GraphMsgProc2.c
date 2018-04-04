@@ -1896,15 +1896,21 @@ GSSiExitProg (439);
 		 {
 			 HDIB32 hDIB = 0;
 			 char BMPath[MAX_PATH];
-			 sprintf(BMPath, "[%%DL]icons\\%s.bmp", AppName);
+			 char UCAPPNAME[32];
+			 strcpy(UCAPPNAME, AppName);
+			 strupr(UCAPPNAME);
+			 //strcpy(UCAPPNAME, "PANZOOMROT");
+			 sprintf(BMPath, "[%%DL]icons\\%s.png", AppName);
+			 ExpandText(BMPath);
 			 if (ExistFile(BMPath))
 			 {
-				 hDIB = LoadDIB(BMPath);
+				 hDIB = LoadDIB32(BMPath,FALSE);
 			 }
-			 else if ((hBmp = LoadBitmap(hInst, AppName)))
+			 else if ((hBmp = LoadBitmap(hInst, UCAPPNAME)))
 			 {
 				 hDIB = BitmapToDIB32(hBmp);
 			 }
+			 {
 				 POINT	mp;
 				 BITMAPINFOHEADER	lpbi;
 				 RECT	BMRect;
@@ -1928,9 +1934,10 @@ GSSiExitProg (439);
 				 SelectClipRgn(hDC, 0);
 				 //	FillRect (hDC,&Rect,GetStockObject(LTGRAY_BRUSH ));
 				 //	DisplayBMInRect2 (hDC,hDIB, Rect,0,0,0,0);
-				 DisplayTransparentBitmapInRect(hDC, hDIB, &Rect,TRUE);
+				 DisplayTransparentBitmapInRect(hDC, hDIB, &Rect, TRUE);
 				 ReleaseDC(hWnd, hDC);
-				 DestroyDIB(hDIB);
+				// DestroyDIB(hDIB);
+			 }
 			 }
          		break;
          		

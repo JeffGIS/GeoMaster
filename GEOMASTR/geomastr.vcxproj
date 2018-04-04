@@ -1070,6 +1070,7 @@
     <Image Include="..\CITYTOUR\BMP00028.BMP" />
     <Image Include="..\CITYTOUR\BMP00029.BMP" />
     <Image Include="..\CITYTOUR\CANCELOLD.BMP" />
+    <Image Include="..\citytour\NewVisionGIS.bmp" />
     <Image Include="..\CITYTOUR\PLAY_STA.BMP" />
     <Image Include="ASSOC.ICO" />
     <Image Include="..\Citytour\BITMAP11.BMP" />

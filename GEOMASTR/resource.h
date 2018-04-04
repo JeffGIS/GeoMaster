@@ -2156,6 +2156,8 @@
 #define IDC_ALSQL                       1247
 #define IDB_BITMAP25                    1247
 #define IDC_ALDEST_FILE                 1248
+#define IDB_BITMAP26                    1248
+#define NEWVISIONGIS                    1248
 #define IDC_FROMYEAR                    1249
 #define IDC_FROMMONTH                   1250
 #define IDC_TOMONTH                     1251
@@ -3710,7 +3712,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1248
+#define _APS_NEXT_RESOURCE_VALUE        1249
 #define _APS_NEXT_COMMAND_VALUE         1242
 #define _APS_NEXT_CONTROL_VALUE         2293
 #define _APS_NEXT_SYMED_VALUE           1036

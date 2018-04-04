@@ -92,7 +92,8 @@ static		char		CfgNameIn[MAX_PATH]="";
 //			char MODULEIDSTRING[6] = "2301", MODULENAME[32]="GeoMaster"; DWORD	App=0; short TrialDays=15; char DefaultArgs[]="BASIC1.GMC";char ApName[]="GeoMaster";
 //			char MODULEIDSTRING[6] = "2401", MODULENAME[32] = "GeoMaster"; DWORD	App = 0; short TrialDays = 15; char DefaultArgs[] = "BASIC1.GMC"; char ApName[] = "GeoMaster"; BOOL	CheckForLicense = FALSE;
 
-			char MODULEIDSTRING[6] = "2401", MODULENAME[32]="NewVision GIS"; DWORD	App=0; short TrialDays=15; char DefaultArgs[]="BASIC1.GMC"; char ApName[]="PCViewer";BOOL	CheckForLicense=FALSE;
+//char MODULEIDSTRING[6] = "2401", MODULENAME[32] = "NewVision GIS"; DWORD	App = 0; short TrialDays = 15; char DefaultArgs[] = "BASIC1.GMC"; char ApName[] = "PCViewer"; BOOL	CheckForLicense = FALSE;
+char MODULEIDSTRING[6] = "2401", MODULENAME[32] = "NewVision GIS"; DWORD	App = 0; short TrialDays = 15; char DefaultArgs[] = "BASIC1.GMC"; char ApName[] = "NewVisionGIS"; BOOL	CheckForLicense = FALSE;
 //			char MODULEIDSTRING[6] = "2501", MODULENAME[32]="CrimeMaster"; DWORD	App=3; short TrialDays=15; char DefaultArgs[]="BASIC1.GMC"; char ApName[]="CrimeMaster";BOOL	CheckForLicense=FALSE;
 //			char MODULEIDSTRING[6] = "2302", MODULENAME[32]="LakeMaster MN/WI"; DWORD	App=1;short TrialDays=30;char DefaultArgs[]="LKMASTER.GMC /NOMENU"; char ApName[]="LakeMaster";
 //			char MODULEIDSTRING[6] = "2601", MODULENAME[32]="SportMap Minnesota";DWORD App=2; short TrialDays=30;char DefaultArgs[]="SPORTMAP.GMC /NOMENU";char ApName[]="SportMap";

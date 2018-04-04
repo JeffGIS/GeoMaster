@@ -147,6 +147,12 @@ HDIB FAR LoadDIB(LPSTR lpFileName)
 		AddBMPToCache(lpFileName, hDIB);
 		goto Exit;
 	}
+	if (lName > 4 && !_fstricmp(&lpFileName[lName - 4], ".png"))
+	{
+		hDIB = BMPFromEXT(lpFileName);
+		AddBMPToCache(lpFileName, hDIB);
+		goto Exit;
+	}
 	if ((hFile = GSSiOpenFile(lpFileName, &ofs, OF_READ)) != -1)
    {
       hDIB = ReadDIBFile(hFile);
