@@ -1980,10 +1980,13 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 					COLORREF	SaveColor1=GetPixel (CurView->hDC,Rect1.left,Rect1.top);
 					COLORREF	SaveColor2=GetPixel (CurView->hDC,Rect1.left+1,Rect1.top);
 					COLORREF	SaveColor3=GetPixel (CurView->hDC,Rect1.left+2,Rect1.top);
+					RGBQUAD	DeleteColor_rgbq = RGBQUADFromCOLORREF(DeleteColor);
+					RGBQUAD	AddColor_rgbq    = RGBQUADFromCOLORREF(AddColor);
+					RGBQUAD	ChangeColor_rgbq = RGBQUADFromCOLORREF(ChangeColor);
 					HDC		hDCMem;
 					int		bytesperpixel,ii;
 					LPUSHORT	p2_1,p2_2,p2_3;
-					LPLONG		p4_1,p4_2,p4_3;
+					RGBQUAD *	p4_1,*p4_2,*p4_3;
 
 					SetPixel (CurView->hDC,Rect1.left,Rect1.top,DeleteColor);
 					SetPixel (CurView->hDC,Rect1.left+1,Rect1.top,AddColor);
@@ -2009,10 +2012,7 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 						BkColor = *p2_1;
 						break;
 					case 4:
-						p4_1 = (LPLONG)(pBits + (Rect1.top * bm.bmWidthBytes + Rect1.left * bytesperpixel));
-						DeleteColor = *p4_1++;
-						AddColor = *p4_1++;
-						BkColor = *p4_1;
+						BkColor = CurView->BackGroundColor;
 						break;
 					}
 					SetPixel (CurView->hDC,Rect1.left,Rect1.top,SaveColor1);
@@ -2047,9 +2047,9 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 							p2_3 = (LPUSHORT)(pBits + (y3 * bm.bmWidthBytes + x3 * bytesperpixel));
 							break;
 						case 4:
-							p4_1 = (LPLONG)(pBits + (y1 * bm.bmWidthBytes + x1 * bytesperpixel));
-							p4_2 = (LPLONG)(pBits + (y2 * bm.bmWidthBytes + x2 * bytesperpixel));
-							p4_3 = (LPLONG)(pBits + (y3 * bm.bmWidthBytes + x3 * bytesperpixel));
+							p4_1 = (RGBQUAD*)(pBits + (y1 * bm.bmWidthBytes + x1 * bytesperpixel));
+							p4_2 = (RGBQUAD*)(pBits + (y2 * bm.bmWidthBytes + x2 * bytesperpixel));
+							p4_3 = (RGBQUAD*)(pBits + (y3 * bm.bmWidthBytes + x3 * bytesperpixel));
 							break;
 						}
 						while (x1 <= Rect1.right)
@@ -2071,18 +2071,22 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 								p2_3++;
 								break;
 							case 4:
-								if (*p4_1 != *p4_2)
+							{
+								COLORREF c1 = RGBQUADToCOLORREF(*p4_1);
+								COLORREF c2 = RGBQUADToCOLORREF(*p4_2);
+								if (c1 != c2)
 								{
-									if (*p4_1 == BkColor)
-										*p4_3 = DeleteColor;
-									else if (*p4_2 == BkColor)
-										*p4_3 = AddColor; 
+									if (c1 == BkColor)
+										*p4_3 = DeleteColor_rgbq;
+									else if (c2 == BkColor)
+										*p4_3 = AddColor_rgbq;
 									else
-										*p4_3 = ChangeColor; 
+										*p4_3 = ChangeColor_rgbq;
 								}
 								p4_1++;
 								p4_2++;
 								p4_3++;
+							}
 								break;
 							}
 							x1++;
