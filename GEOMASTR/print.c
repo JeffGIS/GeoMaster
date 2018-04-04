@@ -3350,7 +3350,7 @@ temp:
 	{
 		DeviceToScreenFactorMemMap = 1;
 		PrinterWidth = sw;
-		PrinterHeight = (sw * (CRect.bottom - CRect.top))/(CRect.right - CRect.left);
+		PrinterHeight = sw * WtoHFactor;// (sw * (CRect.bottom - CRect.top)) / (CRect.right - CRect.left);
 	}
 	CreateStatusWind (hWndMain,-1,"Creating Export File");
 	Printing = FALSE;
