@@ -3940,7 +3940,7 @@ BOOL GetGoogleMapFile(int type)
 		break;
 	}
 	ConvertCoord(&centerLL, 1, 2);
-	sprintf(cmd, "http://maps.googleapis.com/maps/api/staticmap?size=%ix%i&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=%s&key=%s", GoogleMapWidth, GoogleMapHeight, centerLL.y, centerLL.x, GoogleZoom, GoogleScale, mapType, GOOGLE_SERVER_KEY);
+	sprintf(cmd, "https://maps.googleapis.com/maps/api/staticmap?size=%ix%i&center=%f@,%f&sensor=false&zoom=%i&scale=%i&maptype=%s&key=%s", GoogleMapWidth, GoogleMapHeight, centerLL.y, centerLL.x, GoogleZoom, GoogleScale, mapType, GOOGLE_SERVER_KEY);
 	ExpandText(cmd);
 	if (!*CurView->CurrentGoogleImage)
 	{

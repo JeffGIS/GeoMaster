@@ -1473,6 +1473,7 @@ BOOL LoadInfoBox (LPSTR File,LPTAGBOX pTagBox);
 //BOOL ChangeFileSymName (LPSTR FromName,LPSTR ToName); 
 BOOL RunHltMacro (LPSTR Macro,long StatusInit,LPSTR Title);
 BOOL ExecutePointLocationMacro (DPOINT DPoint,LPSTR locatedTo);
+BOOL ExecuteLocationFailedMacro(LPSTR locatedTo, LPSTR errorMess);
 BOOL ExecuteItemLocationMacro (short Item);
 void LogItemLengthError (long LastItemLen,long LastItemLenActual);
 void SavePreVehicleVPDisplay (void);

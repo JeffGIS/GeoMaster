@@ -5272,6 +5272,7 @@ GSSiExitProg (1350);
         }  
         
         case 1503: //$GETADDRESSCOORD (House,Street,City,ZIP,OUTVARNAME,outmacro)
+				   //$GETADDRESSCOORD (GOOGLE,full address)
 		{   
 			 
 			nArgs = GetFunArgs(Args, Arg, -9, &hMem, pBrkPt, bpOffset, bpLen);
@@ -5311,9 +5312,14 @@ GSSiExitProg (1350);
 				rtn = atoi(Arg[3]);
 				if (!rtn)
 					rtn = 3;
-				if ((rtn = GetGoogleLocation(Arg[2],1,Arg[7],&CurrentPoint,&haveVPPoints,vpPoints,Arg[8],Arg[9])))
+				if ((rtn = GetGoogleLocation(Arg[2],1,Arg[7],&CurrentPoint,&haveVPPoints,vpPoints,Arg[8],Arg[9])) > 0)
 				{
 					ExecutePointLocationMacro(CurrentPoint,Arg[7]);
+				}
+				else
+				{
+					REPLAC(Arg[2], ",", "@,",1024);
+					ExecuteLocationFailedMacro(Arg[2],Arg[7]);
 				}
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;

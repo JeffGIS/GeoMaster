@@ -4063,6 +4063,8 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 		strcpy(formattedAddress, formattedadd);
 		nResults++;
 	}
+	if (!nResults)
+		strcpy(formattedAddress, status_text);
 	rtn = nResults;
 Exit:
 	json_decref(root);
@@ -4074,17 +4076,22 @@ int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch,LPSTR formattedAddress,
 //returns num matches found, -1 if request fails, -2 if unable to convert coord.
 {
 	int		rtn = 0;
-	char	CMD[512], fmt[] = "http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true";
+	//char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true&key=%s";
+	char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true";
 	char	TempFile[MAX_PATH], FullAddress[256];
 
 	strcpy(FullAddress, FullAddressIN);
 	REPLAC(FullAddress, "&", "AND", 256);
 	REPLAC(FullAddress, "/", " AND ", 256);
 	REPLAC(FullAddress, " ", "+", 256);
-	sprintf (CMD,fmt, FullAddress);
-	rtn = decodeGoogleLocation(CMD, pLocPoint, pHaveVPPoints,pVPPoints, formattedAddress,locType,types);
-	if (ConvertCoord(pLocPoint, 2, 1))
-		rtn = -2;
+	//sprintf(CMD, fmt, FullAddress, GOOGLE_SERVER_KEY);
+	sprintf(CMD, fmt, FullAddress);
+	rtn = decodeGoogleLocation(CMD, pLocPoint, pHaveVPPoints, pVPPoints, formattedAddress, locType, types);
+	if (rtn > 0)
+	{
+		if (ConvertCoord(pLocPoint, 2, 1))
+			rtn = -2;
+	}
 	return rtn;
 }
 

@@ -2078,29 +2078,59 @@ GSSiExitProg (977);
 #endif
 }
 
-BOOL ExecutePointLocationMacro (DPOINT DPoint,LPSTR locatedTo)
+BOOL ExecutePointLocationMacro(DPOINT DPoint, LPSTR locatedTo)
 #if ENABLETRACE
-{GSSiEnterProg (978);
-#endif
-{   
-    char	File[MAX_PATH];
-    BOOL	rtn=FALSE;
-	                  
-	CurrentPoint = DPoint;
-	if (GetGlobalCVal ("[%PLMACRO]",File,0))
-		rtn = ProcessMacroFile (File,0,0,0);
 {
-#if ENABLETRACE
-GSSiExitProg (978);
+	GSSiEnterProg(978);
 #endif
-	return rtn;
-}
-#if ENABLETRACE
-}
-#endif
-} 
+	{
+		char	File[MAX_PATH];
+		BOOL	rtn = FALSE;
 
-BOOL ExecuteItemLocationMacro (short Item)
+		CurrentPoint = DPoint;
+		if (GetGlobalCVal("[%PLMACRO]", File, 0))
+			rtn = ProcessMacroFile(File, 0, 0, 0);
+		{
+#if ENABLETRACE
+			GSSiExitProg(978);
+#endif
+			return rtn;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+
+BOOL ExecuteLocationFailedMacro(LPSTR locatedTo,LPSTR errorMess)
+#if ENABLETRACE
+{
+	GSSiEnterProg(978);
+#endif
+	{
+		HANDLE hStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		LPSTR  pStr = GlobalLock(hStr);
+		char   file[MAX_PATH];
+		BOOL	rtn = FALSE;
+
+		if (GetGlobalCVal("[%PLFMACRO]", file, 0))
+		{
+			rtn = TRUE;
+			sprintf(pStr, "$MACRO(%s,%s,%s)", file, locatedTo,errorMess);
+			ProcessText(pStr);
+		}
+		GSSiGlobUlFree(&hStr);
+		{
+#if ENABLETRACE
+			GSSiExitProg(978);
+#endif
+			return rtn;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+
+BOOL ExecuteItemLocationMacro(short Item)
 #if ENABLETRACE
 {GSSiEnterProg (978);
 #endif
