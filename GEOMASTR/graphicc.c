@@ -3950,7 +3950,7 @@ BOOL GetGoogleMapFile(int type)
 		GetTempPath(MAX_PATH, TempDir);
 		rtn = GetTempFileName(TempDir, "ggl", 0, CurView->CurrentGoogleImage);
 		pDot = strrchr(CurView->CurrentGoogleImage,'.');
-		strcpy(pDot, ".jpg");
+		strcpy(pDot, ".png");
 		CurView->CurrentGoogleZoom = -1;
 		CurView->CurrentGoogleScale = -1;
 	}
@@ -4092,6 +4092,7 @@ ProcessImageFile:
 				if (!GetGoogleMapFile(mft))
 					goto RtnFalse;
 				strcpy(PltName, CurView->CurrentGoogleImage);
+				CurView->FileTransparency[CurView->CurFile] = GetGlobalLVal2("[%GOOGLEGRAY]", 0);
 			}
 		}
 		if (!InLoadBinaryFileList)

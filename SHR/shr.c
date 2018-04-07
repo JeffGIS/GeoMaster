@@ -13012,7 +13012,6 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
 	RECT	rMyRect, rOtherRect, rDestRect;  
 	HWND	hPrevWnd, hNextWnd; 
 	POINT	Point1, Point2;  
-	HWND	Owner;
 	short	ii;
 	
 	if (opt == 1)
@@ -13062,17 +13061,24 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
        *  with the rectangle of the application's window. If it does,
        *  call MessageBeep(). This intersection is an area of this
        *  application's window that is not visible.
-       */ 
-		Owner = 0;// GetWindow(hNextWnd, GW_OWNER);
-    	if (!IsRectEmpty(&rOtherRect) && IsWindowVisible(hNextWnd) &&
-           	IntersectRect(&rDestRect, &rMyRect, &rOtherRect) &&
-           	((Owner != hWnd) || (opt == 1 && !WindowBelongsToViewport (hWnd))))
-{
+       */
+		if (!IsRectEmpty(&rOtherRect) && IsWindowVisible(hNextWnd))
+		{
+			HWND Owner = GetWindow(hNextWnd, GW_OWNER);
+			if (IntersectRect(&rDestRect, &rMyRect, &rOtherRect))
+			{
+				char txt[128];
+				GetWindowText(hNextWnd, txt,120);
+				BOOL wbtv = WindowBelongsToViewport(hWnd);
+				if ((Owner != hWnd) || (opt == 1 && !wbtv))
+				{
 #if ENABLETRACE
-GSSiExitProg (424);
+					GSSiExitProg(424);
 #endif
-			return TRUE;
-}
+					return TRUE;
+				}
+			}
+		}
 	}
 {
 #if ENABLETRACE

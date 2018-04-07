@@ -1956,7 +1956,7 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
                        0,0, 
                        DibInfo.biWidth,DibInfo.biHeight,
                        hDib,ColorOpt,SRCCOPY,
-                       Factor);
+					   Factor);
 /*  GlobalUnlock (hImage);
     GlobalUnlock (hDibInfo);
     GlobalFree (hImage);

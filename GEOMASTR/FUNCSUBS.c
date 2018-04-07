@@ -7195,7 +7195,7 @@ BOOL RegisterBgUpdateClass(BOOL UnRegister)
 	}
     if (Called) return TRUE;
     Called = TRUE;
-    wc.style = 0;//CS_OWNDC;
+    wc.style = CS_OWNDC;
     wc.lpfnWndProc = (WNDPROC)BGUpdateWndProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;

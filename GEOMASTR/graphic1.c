@@ -1084,16 +1084,17 @@ DisplayImage:
 				SelectClipRgn (CurView->hDC,CurView->hRgn);
 				GSSiDeleteObject(&CurView->hRgn);
 			    if (CurView->StretchImage[CurView->CurFile] == 1)
-			    {
+					DisplayBMFileInVP32(CurView->hDC, PltName, 0, TRUE, CurView->FileTransparency[CurView->CurFile]);//CurView->Rotation);		        	
+				/*{
 				    hDib32 = LoadDIB32(PltName,TRUE); 
 				    if (_fstrstr (PltName,"LOGO"))
 				    	ii=1;
 					SetDisplayMode (*hDC, GF_SCREENMODE); 
 					DisplayBMInRect32 (CurView->hDC,hDib32,CurView->ScreenRect,TRUE);
 					DestroyDIB32(hDib32,FALSE);
-				}
+				}*/
 				else
-					DisplayBMFileInVP32 (CurView->hDC, PltName,0,FALSE);//CurView->Rotation);		        	
+					DisplayBMFileInVP32 (CurView->hDC, PltName,0,FALSE,0);//CurView->Rotation);		        	
 //            	DisplayBMFileInRect (CurView->hDC,PltName,CurView->DrawRect,TRUE); 
             }
         	else if (strstr(PltName,".SID"))
@@ -4463,6 +4464,10 @@ BOOL setDoPaint( BOOL DoPaint)
 }
 BOOL DoPaint(void)
 {
+	if (!doPaint)
+		ii = 1;
+	if (InDisplayProcessing)
+		ii = 1;
 	return doPaint;
 }
 
@@ -7298,6 +7303,8 @@ GSSiExitProg (86);
     	lastcycle = DisplayCycle;
     } */
 //    CloseSymDict(); 
+	if (InDisplayProcessing == 1)
+		ii = 1;
 	useGDIPlus = FALSE;
 	NotifyFunction((LPVIEWPORT)-1, GF_HALTDISPLAY);
 
@@ -7616,4 +7623,65 @@ BOOL DisplayVPDialogs (BOOL Reposition)
 		rtn = TRUE;
 	}
 	return rtn;
+}
+BOOL VPIsCovered(LPVIEWPORT pVP)
+#if ENABLETRACE
+{
+	GSSiEnterProg(424);
+#endif
+	{
+		RECT	rMyRect, rOtherRect, rDestRect;
+		HWND	hPrevWnd, hNextWnd;
+		POINT	Point1, Point2;
+		HWND	Owner;
+		HWND	hWnd = hWndMain;
+
+		rMyRect = pVP->ScreenRect;
+		Point1.x = rMyRect.left;
+		Point1.y = rMyRect.top;
+		Point2.x = rMyRect.right;
+		Point2.y = rMyRect.bottom;
+		ClientToScreen(hWnd, &Point1);
+		ClientToScreen(hWnd, &Point2);
+		rMyRect.left = Point1.x;
+		rMyRect.top = Point1.y;
+		rMyRect.right = Point2.x;
+		rMyRect.bottom = Point2.y;
+		/*  Start from the current window and use the GetWindow()
+		*  function to move through the previous window handles.
+		*/
+		for (hPrevWnd = hWnd;
+			(hNextWnd = GetWindow(hPrevWnd, GW_HWNDPREV)) != NULL;
+			hPrevWnd = hNextWnd)
+		{
+			/*  Get the window rectangle dimensions of the window that
+			*  is higher Z-Order than the application's window.
+			*/
+			GetWindowRect(hNextWnd, &rOtherRect);
+			FixRect(&rOtherRect);
+			/*  Check to see if this window is visible and if intersects
+			*  with the rectangle of the application's window. If it does,
+			*  call MessageBeep(). This intersection is an area of this
+			*  application's window that is not visible.
+			*/
+			Owner = 0;// GetWindow(hNextWnd, GW_OWNER);
+			if (!IsRectEmpty(&rOtherRect) && IsWindowVisible(hNextWnd) &&
+				IntersectRect(&rDestRect, &rMyRect, &rOtherRect) &&
+				((Owner != hWnd) || (!WindowBelongsToViewport(hWnd))))
+			{
+#if ENABLETRACE
+				GSSiExitProg(424);
+#endif
+				return TRUE;
+			}
+		}
+{
+#if ENABLETRACE
+	GSSiExitProg(424);
+#endif
+	return FALSE;
+}
+#if ENABLETRACE
+	}
+#endif
 }

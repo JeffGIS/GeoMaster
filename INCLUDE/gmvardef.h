@@ -171,6 +171,7 @@ DPOINT	UserSpecifiedBasePoint;
 BOOL	StopAtInt=TRUE;
 BOOL	IgnoreLbutton=TRUE;
 BOOL	IgnoreActivate=FALSE;
+BOOL	inDisplayAllToobars = FALSE;
 BOOL	LogOn=FALSE;
 short	DisplayFiles=FALSE;
 BOOL	ReorgFile=FALSE; 

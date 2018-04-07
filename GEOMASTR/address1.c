@@ -4076,16 +4076,16 @@ int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch,LPSTR formattedAddress,
 //returns num matches found, -1 if request fails, -2 if unable to convert coord.
 {
 	int		rtn = 0;
-	//char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true&key=%s";
-	char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true";
+	char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true&key=%s";
+	//char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true";
 	char	TempFile[MAX_PATH], FullAddress[256];
 
 	strcpy(FullAddress, FullAddressIN);
 	REPLAC(FullAddress, "&", "AND", 256);
 	REPLAC(FullAddress, "/", " AND ", 256);
 	REPLAC(FullAddress, " ", "+", 256);
-	//sprintf(CMD, fmt, FullAddress, GOOGLE_SERVER_KEY);
-	sprintf(CMD, fmt, FullAddress);
+	sprintf(CMD, fmt, FullAddress, GOOGLE_SERVER_KEY);
+	//sprintf(CMD, fmt, FullAddress);
 	rtn = decodeGoogleLocation(CMD, pLocPoint, pHaveVPPoints, pVPPoints, formattedAddress, locType, types);
 	if (rtn > 0)
 	{

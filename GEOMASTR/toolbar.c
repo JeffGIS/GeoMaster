@@ -478,6 +478,7 @@ void DisplayAllToolbars (int Opt)
 	IgnoreWPC = TRUE;
 //	DisplayPZRotImage (CheckCursorPos);
 //	DisplayFloatMenu (CheckCursorPos);
+	inDisplayAllToobars = TRUE;
 	if (Opt)
 		for (i=0;i<nToolbars;i++)
 		{
@@ -501,6 +502,7 @@ void DisplayAllToolbars (int Opt)
 		}
 	IgnoreActivate = FALSE;
 	IgnoreWPC = FALSE;
+	inDisplayAllToobars = FALSE;
 	return;
 }
 
@@ -2111,6 +2113,10 @@ void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect)
 
 	hSavePZRScreen2 = SaveScreen2 ((HWND)-1,hDC,rect,0,0);
 	DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
+	int ToolbarID = GetToolbarIDFromWnd(hWndPZR);
+	if (ToolbarID >= 0)
+		DisplayMenuStatus[ToolbarID] = DMS_NORMAL;
+
 	if (gotDC)
 		ReleaseDC (hWnd,hDC);
 	return;
@@ -2184,7 +2190,7 @@ extern	BOOL	InDebug;
 	hBMPZOld = SelectObject (hDC,hBMPZ);
 	if (Which == 2)
 		RestoreScreen2 (hDC, hSavePZRScreen2,0,FALSE);
-	else if (!ToolbarFloating[ToolbarID] || PtInRect (&PZClientRect,pt))
+	else if (Which < 3 && !ToolbarFloating[ToolbarID] || PtInRect (&PZClientRect,pt))
 		RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
 	else
 	{
@@ -2455,6 +2461,10 @@ HRGN	hRgn;
 		WheelZoom (zDelta,0,1);		
 		break;
 	}
+	case GSSi_DimMenu:
+		DisplayPZRotImage(3);
+		break;
+
 
 	case WM_TIMER:
 		switch (wParam)

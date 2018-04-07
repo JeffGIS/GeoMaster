@@ -562,9 +562,9 @@ GSSiExitProg (1161);
 		SetCurs (IDc_SIZE,FALSE);
         DownLoc = lParam;
         hDC = GetDC (hWnd);
-		HaveBox = FALSE;
+		//HaveBox = FALSE;
         ShowZoomBox (hDC,StartPoint,LastPoint,&HaveBox,Clip,Function);
-		HaveBox = FALSE;
+		//HaveBox = FALSE;
         ReleaseDC (hWnd,hDC);
         break;
     case WM_RBUTTONUP:
@@ -573,9 +573,9 @@ GSSiExitProg (1161);
         SetPrompt (CurrentPrompt,TRUE);
 		SetCurs (IDc_SIZENWSE,FALSE);
 		hDC = GetDC (hWnd);
-		HaveBox = FALSE;
+		//HaveBox = FALSE;
         ShowZoomBox (hDC,StartPoint,LastPoint,&HaveBox,Clip,Function);
-		HaveBox = FALSE;
+		//HaveBox = FALSE;
         ReleaseDC (hWnd,hDC);
         if (lParam == DownLoc)
 {

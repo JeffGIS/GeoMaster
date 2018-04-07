@@ -288,6 +288,7 @@ BOOL RegisterBgUpdateClass(BOOL UnRegister);
 BOOL RegisterImageZoomClass(BOOL UnRegister);
 BOOL CreateImageZoomWindow (int VPID);
 BOOL DisplayVPDialogs (BOOL Reposition);
+BOOL VPIsCovered(LPVIEWPORT pVP);
 BOOL StartVehInfoMenu (LPVIEWPORT pVP);
 BOOL SetVehicleInfo (LPSTR info,LPSTR VehID,BOOL ForceDisplay);
 BOOL DisplayVehicleInfo (LPSTR VehID,BOOL Force);

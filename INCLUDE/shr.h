@@ -619,7 +619,7 @@ short  DisplayPCXFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAs
 BOOL  DisplayBMInRect2 (HDC hDC, HANDLE hBM, RECT Rect, double Factor,double VPct, double HPct,LPRECT pOutRect);
 int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect);
 int  DisplayBMInRect32_2 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect,DWORD RasterOpt);
-BOOL DisplayBMFileInVP32(HDC hDC, LPSTR BMFile, double RotationAZ, BOOL fitToVP);
+BOOL DisplayBMFileInVP32(HDC hDC, LPSTR BMFile, double RotationAZ, BOOL fitToVP,int fixedTransparent);
 BOOL DisplaySIDInVP32 (LPVIEWPORT pVP,LPSTR BMFile);
 //BOOL CheckBoardBMInRect (HDC hDC,LPSTR ImageFile1, LPSTR ImageFile2,RECT Rect, BOOL MaintainAspect);
 void CenterRectOnPoint(LPRECT pRect,POINT center);
@@ -969,6 +969,7 @@ BOOL CDInCancelledList (LPSTR CD);
 void AddCDToCancelledList (LPSTR CD);
 short OkToContinue (BOOL ForceCheck);
 BOOL WindowIsCovered (HWND hWnd,short opt);
+void FixRect(LPRECT pRect);
 double GetDriveSize (char Drive);
 long GetProcessorID (void);
 BOOL NormalRect (LPRECT Rect); 

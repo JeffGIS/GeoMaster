@@ -425,6 +425,7 @@ extern char			CurrentIPAddress[32];
 extern BOOL			DebugWait;
 extern BOOL			IgnoreLbutton;
 extern BOOL			IgnoreActivate;
+extern BOOL			inDisplayAllToobars;
 extern long			PenCOLOR[8];
 extern short			PenWIDTH[8];
 extern long			MinFileTime;

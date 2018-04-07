@@ -781,7 +781,7 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
 	return (TRUE);
 }
 
-BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
+BOOL DisplayBMFileInVP32(HDC hDC, LPSTR BMFile, double RotationAZ, BOOL fitToVP, int fixedTransparent)
 {
 //    BITMAPFILEHEADER bmfHead;
 	BITMAPINFOHEADER	DibInfo;
@@ -803,10 +803,12 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 	short	rop=0;   
 	double	Res=1;
 	HDIB32 hDib=LoadDIB32 (BMFile,TRUE); 
+	HDIB32 hDib32bit;
 	MNMXCORD	BitmapBounds,WBounds;
 	char	TranFile[MAX_PATH];
 	LPSTR	pDot;
-    
+	
+
 	strcpy (TranFile,BMFile);
 	if ((pDot = strrchr (TranFile,'.')))
 	{
@@ -816,6 +818,18 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 	}
     if (!hDib)
     	return FALSE; 
+	if (fixedTransparent < 0)
+	{
+		hDib32bit = FreeImage_ConvertToGreyscale(hDib);
+		DestroyDIB32(hDib, FALSE);
+		hDib = hDib32bit;
+	}
+	if (fixedTransparent)
+	{
+		hDib32bit = FreeImage_ConvertTo32Bits(hDib);
+		DestroyDIB32(hDib, FALSE);
+		hDib = hDib32bit;
+	}
     if (RotationAZ)
     {   
    		HDIB32	hDibRotated = GMRotateImageClassic (hDib,RotationAZ*DEGRAD);
@@ -1009,10 +1023,20 @@ BOOL DisplayBMFileInVP32 (HDC hDC,LPSTR BMFile,double RotationAZ,BOOL fitToVP)
 				}
 			}
 			hbmold = SelectObject(hdc, hbitmap);
-			bf.BlendOp = AC_SRC_OVER;
-			bf.BlendFlags = 0;
-			bf.AlphaFormat = AC_SRC_ALPHA;
-			bf.SourceConstantAlpha =  0xFF;//AlphaBlendFactor;///
+			if (fixedTransparent)
+			{
+				bf.BlendOp = AC_SRC_OVER;
+				bf.BlendFlags = 0;
+				bf.AlphaFormat = 0;
+				bf.SourceConstantAlpha = abs (fixedTransparent);
+			}
+			else
+			{
+				bf.BlendOp = AC_SRC_OVER;
+				bf.BlendFlags = 0;
+				bf.AlphaFormat = AC_SRC_ALPHA;
+				bf.SourceConstantAlpha = 0xFF;//AlphaBlendFactor;///
+			}
 			AlphaBlend(hDC,0,0,vpwidth,vpheight, 
 						hdc,0,0,pDibInfo->biWidth,pDibInfo->biHeight,bf);
 			SelectObject (hdc,hbmold);

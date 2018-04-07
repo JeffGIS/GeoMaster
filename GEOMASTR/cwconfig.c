@@ -2187,8 +2187,9 @@ LONG FAR PASCAL WndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 {
 	if (isGMEdit)
 		return WndProcGMEdit(hWnd,Message,wParam,lParam);
-	else
+	else if (!inDisplayAllToobars)
 		return WndProcGeoMaster(hWnd,Message,wParam,lParam);
+	return 0;
 }
 
 LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
@@ -2511,6 +2512,11 @@ if (Message == WM_MOUSEMOVE)
 	}
 	else if (lParam == LastMouselParam) 
 		goto ReturnDefault;
+	if (GetFocus() != hWndMain)
+	{
+		if (!WindowIsCovered(hWndMain, 2))
+			SetFocus(hWndMain);
+	}
 	LastMouselParam = lParam; 
 }
 if (Message == WM_CLOSE)
@@ -5204,7 +5210,7 @@ DisplayParcel:
 				UpdateVehicleStatusDlg();
 				DisplayAllToolbars(4);
 			}
-			else
+			else if (!InDisplayProcessing)
 				SaveFullWindowBitmap(hWndMain);
 		}
 		goto ReturnDefault;
@@ -5717,6 +5723,7 @@ GSSiExitProg (438);
 		           hDC, 0,0,  SRCCOPY);
 		    RestoreDC (hDCMain,-1);  
 		    ReleaseDC (hWnd,hDCMain);
+			GdiFlush();
 		}
 		else if (hWnd == hWndMain)
 			RestoreFullWindowBitmap ();
@@ -5725,7 +5732,7 @@ GSSiExitProg (438);
     goto ReturnDefault;
     
     case WM_KILLFOCUS:
-		goto ReturnDefault;
+		//goto ReturnDefault;
 		if (hWnd == hWndMain)
 		{
 			if (!WindowIsCovered(hWnd, 1) && !MemMap && !InDisplayProcessing)
