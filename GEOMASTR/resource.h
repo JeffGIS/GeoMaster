@@ -1722,6 +1722,8 @@
 #define IDC_MSLINK_LIST                 1064
 #define IDC_CLASSHLTLISTSORTED          1064
 #define IDC_GF_VEHLIST                  1064
+#define IDC_LIST3                       1064
+#define IDC_ZOOMLISTCONTENTS            1064
 #define IDM_L_PARCEL                    1065
 #define IDC_ADVANCED_OPTS2              1065
 #define IDC_GF_STOPS                    1065
@@ -2144,6 +2146,7 @@
 #define IDC_TIMELISTS                   1241
 #define IDC_TIME_TO                     1241
 #define IDM_FILE_SAVEAS                 1241
+#define IDM_ZOOM_ZOOMLISTS              1242
 #define IDC_STARTTIME                   1243
 #define IDC_ENDTIME                     1244
 #define IDC_AUTOCREATENEWSYMS           1244
@@ -3368,6 +3371,10 @@
 #define IDC_RIGHTBUTTON                 2290
 #define IDC_XCOORDFIELD                 2291
 #define IDC_YCOORDFIELD                 2292
+#define ID_SHARELISTS                   2293
+#define ID_SYNCLISTS                    2294
+#define IDC_ZOOMLISTS                   2295
+#define ID_NEWZOOMLIST                  2296
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3712,9 +3719,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1249
-#define _APS_NEXT_COMMAND_VALUE         1242
-#define _APS_NEXT_CONTROL_VALUE         2293
+#define _APS_NEXT_RESOURCE_VALUE        1250
+#define _APS_NEXT_COMMAND_VALUE         1243
+#define _APS_NEXT_CONTROL_VALUE         2296
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

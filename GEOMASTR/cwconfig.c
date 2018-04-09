@@ -4191,11 +4191,15 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 //                  LoadInfo();
 				 break;
 			     
-			case IDM_ZOOM_LIST: 
-				 DisplayZoomList (FALSE);
-				 break;
-				 
-            case IDM_SAVE_ZOOM:
+			case IDM_ZOOM_LIST:
+				DisplayZoomList(FALSE);
+				break;
+
+			case IDM_ZOOM_ZOOMLISTS:
+				DisplayZoomList2(FALSE);
+				break;
+
+			case IDM_SAVE_ZOOM:
                  {
                   DLGPROC lpfnSAVEZOOMMsgProc;
 

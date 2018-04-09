@@ -4310,7 +4310,14 @@ Top:
 							NumAction++; 
 							TotAction++;
 						} 
-						else if (_fstricmp(lpAction,"NULL"))
+						else if (!_fstricmp(lpAction, "SEPARATOR"))
+						{
+							if (UseMenus)
+							{
+								AppendMenu(Menus[imenu - 1], MF_SEPARATOR, 0,0);
+							}
+						}
+						else if (_fstricmp(lpAction, "NULL"))
                         {   
                         	HANDLE	hTxt=GSSiGlobAlloc ( 671,GMEM_MOVEABLE,2048);
                         	LPSTR	pTxt=GlobalLock (hTxt);

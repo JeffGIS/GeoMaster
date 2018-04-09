@@ -1695,98 +1695,118 @@ GSSiExitProg (669);
 
 
     
-BOOL DisplayZoomList (short Opt)
+BOOL DisplayZoomList(short Opt)
 #if ENABLETRACE
-{GSSiEnterProg (672);
+{
+	GSSiEnterProg(672);
 #endif
-{                              
-//Opt 0 = display, 1=next, -1=prior
+	{
+		//Opt 0 = display, 1=next, -1=prior
+		DLGPROC lpfnZOOMLISTMsgProc;
+		short	PickFile, PickLayerID;
+		BOOL	AddToView = FALSE;
+		int		nRc;
+		DWORD lParam;
+		BOOL	SaveGetMaskArea = GetMaskArea;
+
+		AutoZoomNext = Opt;
+		lpfnZOOMLISTMsgProc = MakeProcInstance((DLGPROC)ZOOMLISTMsgProc, hInst);
+		nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST", hWndMain, lpfnZOOMLISTMsgProc);
+		FreeProcInstance(lpfnZOOMLISTMsgProc);
+		if (nRc == 2)
+		{
+			AddToView = TRUE;
+			nRc = 1;
+		}
+		if (nRc == 1)
+		{
+			ClearCurrentCD();
+			SetViewport(*pCommandViewport);
+			if (ZoomRef == -1)
+			{
+				CurView->CurZoomAreaRef = 0;
+				ZoomToRect(CurView->NewBounds, FALSE);
+				/*						if (CurView->OrthoRes >=0 || !CurView->WindowZoomedToOrtho)
+				CurView->WindowZoomedToOrtho = FALSE;
+				DisplayCycle++;
+				SetBounds (CurView->hWnd,CurView->hDC);
+				DisplayCycle--;
+				RedisplayViewport(FALSE,FALSE);
+				CurView->WindowIsZoomed = TRUE; */
+				GetMaskArea = SaveGetMaskArea;
+				{
+#if ENABLETRACE
+					GSSiExitProg(672);
+#endif
+					return TRUE;
+				}
+			}
+			if (!(PickLayerID = GetGlobalLVal("[%PICKLAYERID]")))
+				PickFile = -1;
+			else
+				PickFile = GetPickFile(PickLayerID);
+			if (ZoomRef == LONG_MIN)
+			{
+				if (PickByRefno(ZoomRef, ZoomPrefix, ZoomUDI, PickFile))
+				{
+					SetMaskArea(NumPicked - 1, 0, 1);
+					SelectAreaToOffsetFile(NumPicked - 1, 0, 0);
+					ZoomToPickedItem(0, 100, TRUE, FALSE, AddToView);
+				}
+				else
+					GSSiMsgBox(GetFocus(), "Unable to find zoom area",
+					"Error", MB_OK | MB_ICONEXCLAMATION, 0);
+			}
+			else
+			{
+				if (PickByRefno(ZoomRef, 0, 0, PickFile))
+				{
+					SetMaskArea(NumPicked - 1, 0, 1);
+					SelectAreaToOffsetFile(NumPicked - 1, 0, 0);
+					ZoomToPickedItem(0, 100, TRUE, FALSE, AddToView);
+				}
+				else
+					GSSiMsgBox(GetFocus(), "Unable to find zoom area",
+					"Error", MB_OK | MB_ICONEXCLAMATION, 0);
+			}
+		}
+		else if (nRc)
+		{
+			lParam = (long)nRc + LONG_MAX;
+			PostMessage(hWndMain, WM_COMMAND, IDM_PROCESSTEXT, lParam);
+		}
+		GetMaskArea = SaveGetMaskArea;
+		{
+#if ENABLETRACE
+			GSSiExitProg(672);
+#endif
+			return TRUE;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+
+BOOL DisplayZoomList2(short Opt)
+{
+	//Opt 0 = display, 1=next, -1=prior
 	DLGPROC lpfnZOOMLISTMsgProc;
-	short	PickFile, PickLayerID; 
-	BOOL	AddToView=FALSE; 
+	short	PickFile, PickLayerID;
+	BOOL	AddToView = FALSE;
 	int		nRc;
 	DWORD lParam;
 	BOOL	SaveGetMaskArea = GetMaskArea;
-	
-	AutoZoomNext = Opt;				
-	lpfnZOOMLISTMsgProc = MakeProcInstance((DLGPROC)ZOOMLISTMsgProc, hInst);
-	nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST", hWndMain, lpfnZOOMLISTMsgProc);
-	FreeProcInstance(lpfnZOOMLISTMsgProc);   
-	if (nRc == 2)
+
+	AutoZoomNext = Opt;
+	lpfnZOOMLISTMsgProc = MakeProcInstance((DLGPROC)ZOOMLIST2MsgProc, hInst);
+	nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST2", hWndMain, lpfnZOOMLISTMsgProc);
+	FreeProcInstance(lpfnZOOMLISTMsgProc);
+	if (nRc == 1)
 	{
-		AddToView = TRUE;
-		nRc = 1;
+		ProcessZoomListCommand();
 	}
-	if (nRc==1)
-	{   
-		ClearCurrentCD ();
-		SetViewport(*pCommandViewport);
-	    if (ZoomRef == -1)
-		{   
-		    CurView->CurZoomAreaRef = 0;
-			ZoomToRect (CurView->NewBounds,FALSE);
-	/*						if (CurView->OrthoRes >=0 || !CurView->WindowZoomedToOrtho)
-		    	CurView->WindowZoomedToOrtho = FALSE;
-		    DisplayCycle++;
-		    SetBounds (CurView->hWnd,CurView->hDC);
-		    DisplayCycle--;
-		    RedisplayViewport(FALSE,FALSE);
-			CurView->WindowIsZoomed = TRUE; */
-			GetMaskArea = SaveGetMaskArea;
-{
-#if ENABLETRACE
-GSSiExitProg (672);
-#endif
-			return TRUE;
+	return nRc;
 }
-		} 
-		if (!(PickLayerID = GetGlobalLVal ("[%PICKLAYERID]")))
-			PickFile = -1; 
-		else
-			PickFile = GetPickFile (PickLayerID);
-		if (ZoomRef == LONG_MIN)
-		{
-			if (PickByRefno(ZoomRef,ZoomPrefix,ZoomUDI,PickFile))
-			{
-				SetMaskArea(NumPicked-1,0,1);
-				SelectAreaToOffsetFile(NumPicked - 1, 0, 0);
-	    		ZoomToPickedItem(0,100,TRUE,FALSE,AddToView);
-	    	}
-	    	else
-		      	GSSiMsgBox( GetFocus(),"Unable to find zoom area",
-	    			 	    "Error", MB_OK|MB_ICONEXCLAMATION,0);
-		}
-		else
-		{
-			if (PickByRefno(ZoomRef,0,0,PickFile))
-			{
-				SetMaskArea(NumPicked-1,0,1);
-				SelectAreaToOffsetFile(NumPicked - 1, 0, 0);
-	    		ZoomToPickedItem(0,100,TRUE,FALSE,AddToView);
-	    	}
-	    	else
-		      	GSSiMsgBox( GetFocus(),"Unable to find zoom area",
-	    			 	    "Error", MB_OK|MB_ICONEXCLAMATION,0);
-		}
-	}
-	else if (nRc) 
-	{    
-		lParam = (long)nRc + LONG_MAX;
-	    PostMessage(hWndMain, WM_COMMAND, IDM_PROCESSTEXT, lParam);
-	}  
-	GetMaskArea = SaveGetMaskArea;
-{
-#if ENABLETRACE
-GSSiExitProg (672);
-#endif
-	return TRUE;
-}
-#if ENABLETRACE
-}
-#endif
-} 
-
-
 
 BOOL Report (LPSTR NameIN, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref,BOOL LoadOnly,BOOL FitToVP)
 #if ENABLETRACE

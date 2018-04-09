@@ -42,8 +42,9 @@ static char		notesFile[MAX_PATH];
 static HWND		hWndSecondaryTAGInput = 0;
 static LPSTR	captureClipboardTitle;
 static LPSTR	captureClipboardMenu;
-static char DMIFile[MAX_PATH];
-static char DMITitle[256];
+static char		DMIFile[MAX_PATH];
+static char		DMITitle[256];
+static char		zoomListCmd[1024] = { 0 };
 
 static struct {long   TLID;
      short    Type;
@@ -10404,7 +10405,240 @@ GSSiExitProg (656);
 #endif
 }
 
-  
+BOOL ZoomToNextItemInCurrentList(void)
+{
+	BOOL rtn = FALSE;
+
+	return rtn;
+}
+BOOL ProcessZoomListCommand(void)
+{
+	ProcessText(zoomListCmd);
+	return TRUE;
+}
+void CenterWindowInVP(HWND hWnd, LPVIEWPORT pVP)
+{
+	POINT pt;
+	int iwidth, iheight;
+	BOOL err;
+	RECT windowRect;
+
+	if (!pVP)
+		pVP = SetVPFromName("Primary Viewport", &err);
+	if (pVP)
+	{
+		GetWindowRect(hWnd, &windowRect);
+		pt = RectMid(&pVP->ScreenRect);
+		iwidth = RECTWIDTH(&windowRect);
+		iheight = RECTHEIGHT(&windowRect);
+		pt.x -= iwidth / 2;
+		pt.y -= iheight / 2;
+		MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
+	}
+
+	return;
+}
+
+BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+	int	BRtn;
+	LPSTR pDot;
+	LPSTR pTab;
+	HFILE Fid;
+	char filelist[MAX_PATH];
+	char line[1026];
+	char ZoomlistDir[MAX_PATH] = "[%DL]ZoomLists";
+	char listFile[MAX_PATH];
+	static int	 currentListLoc = 0;
+
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+	{
+		int	 TabStops[2] = { 1400, 1500 };
+
+		CenterWindowInVP(hWndDlg, 0);
+		currentListLoc = 0;
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_RESETCONTENT, 0, 0);
+		GSSiGetTempFileName(0, "gm", 0, filelist);
+		pDot = strrchr(filelist, '.');
+		if (pDot)
+		{
+			strcpy(pDot, ".txt");
+		}
+		int nFiles = GetFileList(filelist, TRUE, ZoomlistDir, "*.txt", FALSE, FALSE, TRUE);
+		if (nFiles > 0)
+		{
+
+			Fid = GSSiOpenFile(filelist, 0, OF_READ);
+			while (fgetstring(line, 1024, Fid))
+			{
+				if (*LastChr(line) == ';')
+					ProcessText(line);
+				else
+				{
+					pDot = strrchr(line, '.');
+					if (pDot)
+						*pDot = 0;
+					SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
+				}
+			}
+			GSSiClose(Fid);
+		}
+		else
+			*CurrentZoomList = 0;
+	}
+
+	case GSSI_REINITDIALOG:
+	{
+
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_RESETCONTENT, 0, 0);
+		EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+		if (*CurrentZoomList)
+		{
+			int loc = 0;
+			char list[MAX_PATH];
+
+			while (SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, loc, (LPARAM)list) != LB_ERR)
+			{
+				if (!stricmp(CurrentZoomList, list))
+				{
+					currentListLoc = loc;
+					break;
+				}
+				loc++;
+			}
+		}
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_SETCURSEL, currentListLoc, 0);
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
+		sprintf(listFile, "%s\\%s.txt", ZoomlistDir, CurrentZoomList);
+		Fid = GSSiOpenFile(listFile, 0, OF_READ);
+		if (Fid != HFILE_ERROR)
+		{
+			while (fgetstring(line, 1024, Fid))
+			{
+				if (*LastChr(line) == ';')
+					ProcessText(line);
+				else
+				{
+					REPLAC(line, "|", "\t", 1024);
+					SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
+				}
+			}
+			GSSiClose(Fid);
+		}
+	}
+
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+			case IDCANCEL:
+				EndDialog(hWndDlg, FALSE);
+				break;
+			case IDOK:
+			{
+				int	 currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETCURSEL, 0, 0);
+				char zoomto[MAX_PATH];
+				SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETTEXT, currentListLoc, (LPARAM)zoomto);
+				pTab = strchr(zoomto, '\t');
+				if (pTab++)
+				{
+					if (*pTab == '(')
+					{
+						DPOINT	MinPoint, MaxPoint;
+						LPSTR	lpEnd = _fstrchr(pTab, ')');
+						MNMXCORD Bounds, totBounds;
+						double boundsOffset = GetGlobalDVal2("[%DEFAULTZOOMOFFSET]", 100);
+						int np;
+
+						DBoundsInit(&totBounds);
+						pTab++;
+						if (lpEnd)
+							*lpEnd = 0;
+
+						np = sscanf(pTab, "%Flf %Flf %Flf %Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
+						if (np < 2)
+							np = sscanf(pTab, "%Flf,%Flf,%Flf,%Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
+						if (np == 2 ||
+							(MinPoint.x >= MaxPoint.x || MinPoint.y >= MaxPoint.y))
+						{
+							Bounds.xmn = MinPoint.x;
+							Bounds.ymn = MinPoint.y;
+							Bounds.xmx = MinPoint.x;
+							Bounds.ymx = MinPoint.y;
+							ConvertBounds(&Bounds, 3, 1);
+							ExpandBounds(&Bounds, boundsOffset);
+						}
+						else
+						{
+							Bounds.xmn = MinPoint.x;
+							Bounds.ymn = MinPoint.y;
+							Bounds.xmx = MaxPoint.x;
+							Bounds.ymx = MaxPoint.y;
+							ConvertBounds(&Bounds, 3, 1);
+						}
+
+						AddMinMaxD(&totBounds, &Bounds);
+						sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
+					}
+
+				}
+				EndDialog(hWndDlg, TRUE);
+			}
+				break;
+			case IDC_ZOOMLISTS:
+			{
+				switch (HIWORD(wParam))
+				{
+					case LBN_DBLCLK:
+						IgnoreLbutton = TRUE;
+						break;
+					case LBN_SELCHANGE:
+					{
+						int	 currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETCURSEL, 0, 0);
+						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
+						PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+						break;
+					}
+				}
+			}
+				break;
+			case IDC_ZOOMLISTCONTENTS:
+			{
+				switch (HIWORD(wParam))
+				{
+					case LBN_DBLCLK:
+						IgnoreLbutton = TRUE;
+						break;
+					case LBN_SELCHANGE:
+					{
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+						break;
+					}
+					break;
+				}
+
+			}
+				break;    /* End of WM_COMMAND                                 */
+		}
+
+		default:
+			return FALSE;
+	}
+	return TRUE;
+}
+
+
 BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[1026], AltFunFile[MAX_PATH];   

@@ -1662,6 +1662,7 @@ int		GoogleZoom = 21;
 int		GoogleMapType=1;
 int		GoogleMapWidth=640, GoogleMapHeight=640;
 BOOL	AllAreasArePositive = TRUE;
+char	CurrentZoomList[MAX_PATH] = { 0 };
 int		ii;
 
 

@@ -3511,6 +3511,9 @@ GSSiExitProg (532);
 		case 385:
 			defaultLineTransparency = IDNINT((atof(Value) * 255) / 100.0);
 			break;
+		case 386:
+			strcpy(CurrentZoomList, Value);
+			break;
 		default:
  			break;
 	}
@@ -3915,6 +3918,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%GOOGLEMAPTYPE", 383, TRUE);
 	AllocateTypeVar("%SETCOLOR", 384, TRUE);
 	AllocateTypeVar("%LINETRANSPARENCY", 385, FALSE);
+	AllocateTypeVar("%CURRENTZOOMLIST", 386, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5071,6 +5075,9 @@ GSSiExitProg (533);
 			break;
 		case 385:
 			ltoa(IDNINT(100 * (defaultLineTransparency / 255.0)), OutStr, 10);
+			break;
+		case 386:
+			strcpy(OutStr, CurrentZoomList);
 			break;
 	}
 	GlobalUnlock (hGlobal);
