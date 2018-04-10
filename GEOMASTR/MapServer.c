@@ -92,7 +92,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 
 		Wait (1000);
 
-		if (!WaitForInputIdle(pi.hProcess, 15000))
+		if (!WaitForInputIdle(pi.hProcess, 18000))
 		{
 			hWndServer = MapServerWnd[serverID] = FindWindowByProcessID(ProcessID, "");
 		}
