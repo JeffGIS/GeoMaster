@@ -9539,8 +9539,6 @@ BOOL FAR PASCAL HIGHLIGHTCLASSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  short	i, iclass, ntab;  
  int		TabStops[2]={138,1110};  
  static	LPTHEME	SaveTheme;
- THEMEHIGHLIGHTKEY	ThemeHighlightKey;
- THEMEHIGHLIGHTDATA	ThemeHighlightData;
 
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
 {
@@ -9559,203 +9557,220 @@ GSSiExitProg (1299);
 		for (iclass=0;iclass<CurTheme->NumClass;iclass++) 
 		{   
 			sprintf (str,"%s\t%ld",CurTheme->ClassBM[iclass],CurTheme->ClassCount[iclass]);
-			SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_ADDSTRING,0,(LPARAM)((LPSTR)str)); 
+SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)str));
 		}
-		if (CurTheme->NumMissing || CurTheme->NumInvalid)  
+		if (CurTheme->NumMissing || CurTheme->NumInvalid)
 		{
-			if (CurTheme->NumMissing) 
+			if (CurTheme->NumMissing)
 			{
-				sprintf (str,"- Missing -\t%ld",CurTheme->NumMissing);
-				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_ADDSTRING,0,(LPARAM)((LPSTR)str)); 
-			} 
-			else 
-				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_ADDSTRING,0,(LPARAM)((LPSTR)""));  
+				sprintf(str, "- Missing -\t%ld", CurTheme->NumMissing);
+				SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)str));
+			}
+			else
+				SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)""));
 			if (CurTheme->NumInvalid)
 			{
-				sprintf (str,"- Invalid -\t%ld",CurTheme->NumInvalid);
-				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_ADDSTRING,0,(LPARAM)((LPSTR)str)); 
-			} 
+				sprintf(str, "- Invalid -\t%ld", CurTheme->NumInvalid);
+				SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)str));
+			}
 		}
-		SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,TRUE,(LPARAM)DefaultHltClass);
-		 break; /* End of WM_INITDIALOG                                 */
+		SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_SETSEL, TRUE, (LPARAM)DefaultHltClass);
+		break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
-         /* Closing the Dialog behaves the same as Cancel               */
-         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-         break; /* End of WM_CLOSE                                      */
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
 
-    case WM_COMMAND:
-         switch(LOWORD(wParam))
-           {
-            case IDCANCEL:
-                 /* Ignore data values entered into the controls        */
-                 /* and dismiss the dialog window returning FALSE       */
-                 EndDialog(hWndDlg, FALSE);
-                 break; 
-            
-            case IDC_CLEARHLTLIST:
-            	 ClearHighlightList(FALSE); 
-            	 break;      
-            case IDC_CANCEL:
-            	 ContinueProcessing = FALSE;
-            	 break;
-            case IDC_UNHLT:
-            case IDOK:
-            {   
-            	BOOL SavePick;
-            	short	nItems, SaveNThemes;  
-            	HANDLE	hItems;
-            	LPINT	pItems; 
-            	LPVIEWPORT	SaveView; 
-            	long	TotItems, CurLoc=0;  
-            	HANDLE	hPoly;
-            	long	nPnts;
-				PICKDATA	PD;
-            	
-				nItems=SendDlgItemMessage(hWndDlg,IDC_CLASSHLTLIST,LB_GETSELCOUNT,0,0); 
-				if (!nItems) break;   
-				if (!OpenThemeHighlightFile (BT_READ)) break;
-					
-				hItems=GSSiGlobAlloc (1019,GHND,nItems*4);
-				pItems=  (LPINT) GlobalLock(hItems);
-				SendDlgItemMessage(hWndDlg,IDC_CLASSHLTLIST,LB_GETSELITEMS,nItems,(LPARAM)pItems); 
-				PickingByRefno=TRUE; 
-				SavePick = Pick;   
-				SaveView = CurView; 
-				SetCurView (pViewports[CurTheme->TargetViewport-1]);
-				Pick = FALSE; 
-				TotItems = 0;
-				for (i=0;i<nItems;i++,pItems++) 
-				{
-					if (*pItems == CurTheme->NumClass)
-						TotItems += CurTheme->NumMissing;
-					else if (*pItems > CurTheme->NumClass)
-						TotItems += CurTheme->NumInvalid;
-					else
-						TotItems += CurTheme->ClassCount[*pItems];
-				} 
-				GlobalUnlock (hItems);
-				pItems=  (LPINT) GlobalLock(hItems);   
-				EnableWindow (GetDlgItem(hWndDlg,IDC_CANCEL),TRUE);
-				EnableWindow (GetDlgItem(hWndDlg,IDC_UNHLT),FALSE);
-				EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE);
-				EnableWindow (GetDlgItem(hWndDlg,IDC_CLEARHLTLIST),FALSE);
-				EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);
-				for (i=0;i<nItems;i++,pItems++)
-				{   
-					short	WantClass = *pItems;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			/* Ignore data values entered into the controls        */
+			/* and dismiss the dialog window returning FALSE       */
+			EndDialog(hWndDlg, FALSE);
+			break;
 
-					if (*pItems == CurTheme->NumClass)
-						WantClass = -1;
-					if (*pItems > CurTheme->NumClass)
-						WantClass = -2;
-					ThemeHighlightKey.Class = WantClass;
-					ThemeHighlightKey.Refno = LONG_MIN;
-					if (BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,BT_FIRST,BT_GE,(LPSTR)&ThemeHighlightData))
-						ThemeHighlightKey.Class=-10;
-					while (ContinueProcessing && ThemeHighlightKey.Class == WantClass)
-					{   
-						if (wParam == IDC_UNHLT)
-							RemoveFromHighlightList (ThemeHighlightKey.Refno,0);
-						else
-						{   
-							_fmemset (&PickList[0],0,sizeof(PICKDATA));
-						    PickList[0].ViewID = CurView->ID;
-							PickList[0].ConfigID = CurrentConfig;
-							PickList[0].FileNum = ThemeHighlightData.FileNum;  
-							PickList[0].SubFile = ThemeHighlightData.SubFile;
-							PickList[0].FileInIndex = ThemeHighlightData.FileInIndex;
-							PickList[0].Segment = ThemeHighlightData.Segment;
-							PickList[0].Refno = ThemeHighlightKey.Refno;
-							PickList[0].Desc = ThemeHighlightData.Desc;
-							PickList[0].Offset = ThemeHighlightData.Offset; 
-							PickList[0].Element = ThemeHighlightData.Element; 
-							PickList[0].Length = ThemeHighlightData.Length; 
-							PickList[0].Area = ThemeHighlightData.Area; 
-							PickList[0].Rect = ThemeHighlightData.Bounds; 
-							strcpy (PickList[0].UDI,ThemeHighlightData.UDI);
-							strcpy (PickList[0].Prefix,ThemeHighlightData.Prefix);
-							SaveNThemes = CurView->NumThemes;
-							CurView->NumThemes = 0;
-							PD = PickList[0];
-							ProcessPickedItem (0,FALSE); 
-							PickList[0] = PD;
-							PickList[0].HiPrecis = PolyIsHiPrecis;
-							CurTheme = SaveTheme;
-							CurView->NumThemes = SaveNThemes; 
-							PickList[0].Type = 2; 
-							if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE) 
-							{
-								PickList[0].Type = 2; 
-								if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))  
-								{   
-									HPDPOINT lpPoints=(HPDPOINT)GlobalLock (hPoly);
-									
-									PickList[0].Length = GetPolyLengthD (lpPoints,nPnts);
-		                            GSSiGlobUlFree (&hPoly);
-								}
-							}
-							else if (CurrentType == GF_AREA) 
-							{
-								PickList[0].Type = 3; 
-								if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))  
-								{   
-									HPDPOINT lpPoints=(HPDPOINT)GlobalLock (hPoly);
-									
-									PickList[0].Area = ComputeProjectedAreaAreaD (lpPoints,nPnts,&PickList[0].Length);
-		                            GSSiGlobUlFree (&hPoly);
-								}
-							}
-							else if (CurrentType == GF_POINT)
-								PickList[0].Type = 1; 
-							else if (CurrentType == GF_TEXT)
-								PickList[0].Type = 4;  
-							PickList[0].Desc = CurrentDesc;   
-							PickList[0].MSLink = CurMSLink;
-							_fstrcpy (PickList[0].Prefix,CurrentPrefix);
-							_fstrcpy (PickList[0].UDI,CurrentUDI);
-			     			AddToHighlightList (ThemeHighlightKey.Refno,&PickList[0],TRUE); 
-				     	}
-						if (BT_FIND (CurTheme->hHighlightFile,(LPSTR)&ThemeHighlightKey,BT_NEXT,BT_ANY,(LPSTR)&ThemeHighlightData))
-							ThemeHighlightKey.Class=-10;
-	                    PctBox (GetDlgItem(hWndDlg,IDC_STATUS), TotItems, CurLoc++,0);
-					}
-				} 
-				ContinueProcessing = TRUE;
-				EnableWindow (GetDlgItem(hWndDlg,IDC_CANCEL),FALSE);
-				EnableWindow (GetDlgItem(hWndDlg,IDC_UNHLT),TRUE);
-				EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);
-				EnableWindow (GetDlgItem(hWndDlg,IDC_CLEARHLTLIST),TRUE);
-				EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE);
-	            PctBox (GetDlgItem(hWndDlg,IDC_STATUS), TotItems, TotItems,0);
-				GSSiGlobUlFree (&hItems);
-				PickingByRefno=FALSE;
-				Pick = SavePick;  
-				SetCurView (SaveView);
-            }
-                break;
+		case IDC_CLEARHLTLIST:
+			ClearHighlightList(FALSE);
+			break;
+		case IDC_CANCEL:
+			ContinueProcessing = FALSE;
+			break;
+		case IDC_UNHLT:
+		case IDOK:
+		{
+			short	nItems, SaveNThemes;
+			HANDLE	hItems;
+			LPINT	pItems;
 
-           }
-         break;    /* End of WM_COMMAND                                 */
+			nItems = SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_GETSELCOUNT, 0, 0);
+			if (!nItems) break;
 
-    default:
-{
+			EnableWindow(GetDlgItem(hWndDlg, IDC_CANCEL), TRUE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_UNHLT), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_CLEARHLTLIST), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), FALSE);
+
+			hItems = GSSiGlobAlloc(1019, GHND, nItems * 4);
+			pItems = (LPINT)GlobalLock(hItems);
+			SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_GETSELITEMS, nItems, (LPARAM)pItems);
+			GlobalUnlock(hItems);
+			HighlightFromTheme(CurView, CurTheme, nItems, hItems, GetDlgItem(hWndDlg, IDC_STATUS), wParam == IDC_UNHLT, TRUE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_CANCEL), FALSE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_UNHLT), TRUE);
+			EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_CLEARHLTLIST), TRUE);
+			EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), TRUE);
+			GSSiGlobFree(&hItems);
+		}
+			break;
+
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+	{
 #if ENABLETRACE
-GSSiExitProg (1299);
+		GSSiExitProg (1299);
 #endif
-        return FALSE;
-}
+		return FALSE;
+	}
    }
 {
 #if ENABLETRACE
-GSSiExitProg (1299);
+	GSSiExitProg (1299);
 #endif
- return TRUE;
+	return TRUE;
 }
 #if ENABLETRACE
 }
 #endif
-} 
+}
+int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, HWND hWndPct,BOOL UnHighlight,BOOL ComputeAreaAndLength)
+{
+	BOOL SavePick;
+	LPVIEWPORT	SaveView;
+	long	TotItems=0, CurLoc = 0;
+	LPINT	pItems;
+	int i;
+	HANDLE	hPoly;
+	long	nPnts;
+	int SaveNThemes;
+	LPTHEME	SaveTheme=pTheme;
+	PICKDATA	PD;
+	THEMEHIGHLIGHTKEY	ThemeHighlightKey;
+	THEMEHIGHLIGHTDATA	ThemeHighlightData;
+
+	if (OpenThemeHighlightFile(BT_READ))
+	{
+		PickingByRefno = TRUE;
+		SavePick = Pick;
+		SaveView = pVP;
+		SetCurView(pViewports[CurTheme->TargetViewport - 1]);
+		Pick = FALSE;
+		pItems = (LPINT)GlobalLock(hItems);
+		for (i = 0; i<nItems; i++, pItems++)
+		{
+			if (*pItems == CurTheme->NumClass)
+				TotItems += CurTheme->NumMissing;
+			else if (*pItems > CurTheme->NumClass)
+				TotItems += CurTheme->NumInvalid;
+			else
+				TotItems += CurTheme->ClassCount[*pItems];
+		}
+		GlobalUnlock(hItems);
+		pItems = (LPINT)GlobalLock(hItems);
+		for (i = 0; i<nItems; i++, pItems++)
+		{
+			short	WantClass = *pItems;
+
+			if (*pItems == CurTheme->NumClass)
+				WantClass = -1;
+			if (*pItems > CurTheme->NumClass)
+				WantClass = -2;
+			ThemeHighlightKey.Class = WantClass;
+			ThemeHighlightKey.Refno = LONG_MIN;
+			if (BT_FIND(CurTheme->hHighlightFile, (LPSTR)&ThemeHighlightKey, BT_FIRST, BT_GE, (LPSTR)&ThemeHighlightData))
+				ThemeHighlightKey.Class = -10;
+			while (ContinueProcessing && ThemeHighlightKey.Class == WantClass)
+			{
+				if (UnHighlight)
+					RemoveFromHighlightList(ThemeHighlightKey.Refno, 0);
+				else
+				{
+					_fmemset(&PickList[0], 0, sizeof(PICKDATA));
+					PickList[0].ViewID = CurView->ID;
+					PickList[0].ConfigID = CurrentConfig;
+					PickList[0].FileNum = ThemeHighlightData.FileNum;
+					PickList[0].SubFile = ThemeHighlightData.SubFile;
+					PickList[0].FileInIndex = ThemeHighlightData.FileInIndex;
+					PickList[0].Segment = ThemeHighlightData.Segment;
+					PickList[0].Refno = ThemeHighlightKey.Refno;
+					PickList[0].Desc = ThemeHighlightData.Desc;
+					PickList[0].Offset = ThemeHighlightData.Offset;
+					PickList[0].Element = ThemeHighlightData.Element;
+					PickList[0].Length = ThemeHighlightData.Length;
+					PickList[0].Area = ThemeHighlightData.Area;
+					PickList[0].Rect = ThemeHighlightData.Bounds;
+					strcpy(PickList[0].UDI, ThemeHighlightData.UDI);
+					strcpy(PickList[0].Prefix, ThemeHighlightData.Prefix);
+					SaveNThemes = CurView->NumThemes;
+					CurView->NumThemes = 0;
+					PD = PickList[0];
+					ProcessPickedItem(0, FALSE);
+					PickList[0] = PD;
+					PickList[0].HiPrecis = PolyIsHiPrecis;
+					CurTheme = SaveTheme;
+					CurView->NumThemes = SaveNThemes;
+					PickList[0].Type = 2;
+					if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
+					{
+						PickList[0].Type = 2;
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+						{
+							HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
+
+							PickList[0].Length = GetPolyLengthD(lpPoints, nPnts);
+							GSSiGlobUlFree(&hPoly);
+						}
+					}
+					else if (CurrentType == GF_AREA)
+					{
+						PickList[0].Type = 3;
+						if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+						{
+							HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
+
+							PickList[0].Area = ComputeProjectedAreaAreaD(lpPoints, nPnts, &PickList[0].Length);
+							GSSiGlobUlFree(&hPoly);
+						}
+					}
+					else if (CurrentType == GF_POINT)
+						PickList[0].Type = 1;
+					else if (CurrentType == GF_TEXT)
+						PickList[0].Type = 4;
+					PickList[0].Desc = CurrentDesc;
+					PickList[0].MSLink = CurMSLink;
+					_fstrcpy(PickList[0].Prefix, CurrentPrefix);
+					_fstrcpy(PickList[0].UDI, CurrentUDI);
+					AddToHighlightList(ThemeHighlightKey.Refno, &PickList[0], TRUE);
+				}
+				if (BT_FIND(CurTheme->hHighlightFile, (LPSTR)&ThemeHighlightKey, BT_NEXT, BT_ANY, (LPSTR)&ThemeHighlightData))
+					ThemeHighlightKey.Class = -10;
+				PctBox(hWndPct, TotItems, ++CurLoc, 0);
+			}
+		}
+		GlobalUnlock(hItems);
+		PickingByRefno = FALSE;
+		Pick = SavePick;
+		SetCurView(SaveView);
+	}
+	ContinueProcessing = TRUE;
+	return TotItems;
+}
+
 BOOL FAR PASCAL DISPLAYSELECTEDCLASSESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1300);
