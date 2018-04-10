@@ -2148,9 +2148,11 @@
 #define IDM_FILE_SAVEAS                 1241
 #define IDM_ZOOM_ZOOMLISTS              1242
 #define IDC_STARTTIME                   1243
+#define ID_ZOOM_SAVETOCURRENTZOOMLIST   1243
 #define IDC_ENDTIME                     1244
 #define IDC_AUTOCREATENEWSYMS           1244
 #define IDB_BITMAP22                    1244
+#define IDM_ZOOM_SAVE2                  1244
 #define AL_DATABASE_LIST                1245
 #define IDC_SINGLEPASS                  1245
 #define IDB_BITMAP23                    1245
@@ -3720,7 +3722,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1250
-#define _APS_NEXT_COMMAND_VALUE         1243
+#define _APS_NEXT_COMMAND_VALUE         1245
 #define _APS_NEXT_CONTROL_VALUE         2296
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif

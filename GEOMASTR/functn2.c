@@ -795,17 +795,51 @@ GSSiExitProg (1350);
 		break;
 		
 		case 818: // $ZOOMLIST(SELECT or NEXT or PRIOR)
+				  // $ZOOMLIST(ADD,POINTorBOUNDS,Name,pointorbounds)
 		{	 
 			
-			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
-			if (!_fstricmp(Arg[1], "NEXT"))
-				n=1;
-			else if (!_fstricmp (Arg[1],"PRIOR"))
-				n=-1;
-			else if (!_fstricmp (Arg[1],"FIRST"))
-				n=0;
-			if (DisplayZoomList (n))
-				goto RtnTrue;
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs == 1)
+			{
+				if (!_fstricmp(Arg[1], "NEXT"))
+					n = 1;
+				else if (!_fstricmp(Arg[1], "PRIOR"))
+					n = -1;
+				else if (!_fstricmp(Arg[1], "FIRST"))
+					n = 0;
+				if (DisplayZoomList(n))
+					goto RtnTrue;
+			}
+			else
+			{
+				MNMXCORD bounds;
+
+				if (!_fstricmp(Arg[1], "ADD"))
+				{
+					if (!_fstricmp(Arg[2], "POINT"))
+					{
+						DPOINT pt = atopt(Arg[4], &Err);
+						if (!Err)
+						{
+							bounds.xmn = pt.x;
+							bounds.xmx = pt.x;
+							bounds.ymn = pt.y;
+							bounds.ymx = pt.y;
+							SaveZoomToCurrentList(&bounds, Arg[3]);
+							goto RtnTrue;
+						}
+					}
+					else if (!_fstricmp(Arg[2], "BOUNDS"))
+					{
+						bounds = atobounds(Arg[4], &Err);
+						if (!Err)
+						{
+							SaveZoomToCurrentList(&bounds, Arg[3]);
+							goto RtnTrue;
+						}
+					}
+				}
+			}
 			goto RtnFalse;
 			
 		}  

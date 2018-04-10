@@ -4208,7 +4208,17 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                   FreeProcInstance(lpfnSAVEZOOMMsgProc);
                  }
             	 break;
-            
+			case IDM_ZOOM_SAVE2:
+			{
+				BOOL err;
+				LPVIEWPORT pVP = SetVPFromName("Primary Viewport", &err);
+				if (!err)
+				{
+
+					SaveZoomToCurrentList(&pVP->WBounds, 0);
+				}
+			}
+				break;
             case IDM_L_PARCEL:
                  /* Place User Code to respond to the                   */
                  /* Menu Item Named "Parcel" here.                      */

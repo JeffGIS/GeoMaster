@@ -5,6 +5,8 @@
 #include <sqlext.h>     
 #include <commctrl.h>          
 
+#define ZOOMLISTDIR "[%DL]ZoomLists"
+
 static BOOL	WantPalleteOrthos=FALSE;
 static BOOL LoadBMPShowMess;
 static short	DTMSettingLayerNum;
@@ -10405,6 +10407,64 @@ GSSiExitProg (656);
 #endif
 }
 
+BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds, LPSTR Name)
+{
+	BOOL rtn = FALSE;
+	char listFile[MAX_PATH];
+	char name[256] = { 0 };
+	char str[512];
+	HFILE Fid;
+
+	if (!Name)
+	{
+		if (!GetTextString(GetFocus(), name, 250, 0, "", 0, 0, 1, 0))
+		{
+			return FALSE;
+		}
+	}
+	else
+		strncpy0(name, Name, 250);
+	sprintf(listFile, "%s\\%s.txt", ZOOMLISTDIR, CurrentZoomList);
+	Fid = GSSiOpenFile(listFile, 0, OF_READWRITE);
+	if (Fid != HFILE_ERROR)
+	{
+		sprintf(str, "%s|(%f %f %f %f)", name, pBounds->xmn, pBounds->ymn, pBounds->xmx, pBounds->ymx);
+		GSSillseek(Fid, 0, 2);
+		fputstring(str, Fid);
+		rtn = TRUE;
+		GSSiClose(Fid);
+	}
+	return rtn;
+}
+BOOL CreateNewZoomList(LPSTR Name)
+{
+	BOOL rtn = FALSE;
+	char listFile[MAX_PATH];
+	char name[256] = { 0 };
+	char str[512];
+	HFILE Fid;
+
+	if (!Name)
+	{
+		if (!GetTextString(GetFocus(), name, 250,"Enter List Name:", "", 0, 0, 1, 0))
+		{
+			return FALSE;
+		}
+	}
+	else
+		strncpy0(name, Name, 250);
+	strcpy(CurrentZoomList, name);
+	sprintf(listFile, "%s\\%s.txt", ZOOMLISTDIR, CurrentZoomList);
+	Fid = GSSiOpenFile(listFile, 0, OF_CREATE);
+	if (Fid != HFILE_ERROR)
+	{
+		strcpy(str, "[%DEFAULTZOOMOFFSET]=00000100.0;[%NEXTZOOMRECORD]=0000000000;");
+		fputstring(str, Fid);
+		rtn = TRUE;
+		GSSiClose(Fid);
+	}
+	return rtn;
+}
 BOOL ZoomToNextItemInCurrentList(void)
 {
 	BOOL rtn = FALSE;
@@ -10447,20 +10507,21 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	HFILE Fid;
 	char filelist[MAX_PATH];
 	char line[1026];
-	char ZoomlistDir[MAX_PATH] = "[%DL]ZoomLists";
+	char ZoomlistDir[MAX_PATH] = ZOOMLISTDIR;
 	char listFile[MAX_PATH];
 	static int	 currentListLoc = 0;
+	int	 TabStops[2] = { 1400, 1500 };
+	int nrecs = 0;
 
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
 		return (BRtn);
 	switch (Message)
 	{
 	case WM_INITDIALOG:
-	{
-		int	 TabStops[2] = { 1400, 1500 };
 
 		CenterWindowInVP(hWndDlg, 0);
 		currentListLoc = 0;
+	case GSSI_REINITDIALOG:
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_RESETCONTENT, 0, 0);
 		GSSiGetTempFileName(0, "gm", 0, filelist);
@@ -10490,13 +10551,8 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		}
 		else
 			*CurrentZoomList = 0;
-	}
-
-	case GSSI_REINITDIALOG:
-	{
 
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_RESETCONTENT, 0, 0);
-		EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
 		if (*CurrentZoomList)
 		{
 			int loc = 0;
@@ -10524,13 +10580,17 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					ProcessText(line);
 				else
 				{
+					nrecs++;
 					REPLAC(line, "|", "\t", 1024);
 					SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
 				}
 			}
 			GSSiClose(Fid);
 		}
-	}
+		if (nrecs)
+			EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+		else
+			EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
 
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -10542,58 +10602,72 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
+		case ID_NEWZOOMLIST:
+			if (CreateNewZoomList(0))
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+				break;
 			case IDCANCEL:
 				EndDialog(hWndDlg, FALSE);
 				break;
 			case IDOK:
 			{
-				int	 currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETCURSEL, 0, 0);
-				char zoomto[MAX_PATH];
-				SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETTEXT, currentListLoc, (LPARAM)zoomto);
-				pTab = strchr(zoomto, '\t');
-				if (pTab++)
+				int rtn = 0;
+				HANDLE hItems = 0;
+				int nItems = GetLBSelectedItems(hWndDlg, IDC_ZOOMLISTCONTENTS, &hItems);
+				MNMXCORD Bounds, totBounds;
+				if (nItems)
 				{
-					if (*pTab == '(')
+					DBoundsInit(&totBounds);
+
+					LPINT pItems = (LPINT)GlobalLock(hItems);
+					for (int i = 0; i < nItems; i++)
 					{
-						DPOINT	MinPoint, MaxPoint;
-						LPSTR	lpEnd = _fstrchr(pTab, ')');
-						MNMXCORD Bounds, totBounds;
-						double boundsOffset = GetGlobalDVal2("[%DEFAULTZOOMOFFSET]", 100);
-						int np;
-
-						DBoundsInit(&totBounds);
-						pTab++;
-						if (lpEnd)
-							*lpEnd = 0;
-
-						np = sscanf(pTab, "%Flf %Flf %Flf %Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
-						if (np < 2)
-							np = sscanf(pTab, "%Flf,%Flf,%Flf,%Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
-						if (np == 2 ||
-							(MinPoint.x >= MaxPoint.x || MinPoint.y >= MaxPoint.y))
+						char zoomto[MAX_PATH];
+						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETTEXT, pItems[i], (LPARAM)zoomto);
+						pTab = strchr(zoomto, '\t');
+						if (pTab++)
 						{
-							Bounds.xmn = MinPoint.x;
-							Bounds.ymn = MinPoint.y;
-							Bounds.xmx = MinPoint.x;
-							Bounds.ymx = MinPoint.y;
-							ConvertBounds(&Bounds, 3, 1);
-							ExpandBounds(&Bounds, boundsOffset);
-						}
-						else
-						{
-							Bounds.xmn = MinPoint.x;
-							Bounds.ymn = MinPoint.y;
-							Bounds.xmx = MaxPoint.x;
-							Bounds.ymx = MaxPoint.y;
-							ConvertBounds(&Bounds, 3, 1);
-						}
+							if (*pTab == '(')
+							{
+								DPOINT	MinPoint, MaxPoint;
+								LPSTR	lpEnd = _fstrchr(pTab, ')');
+								double boundsOffset = GetGlobalDVal2("[%DEFAULTZOOMOFFSET]", 100);
+								int np;
 
-						AddMinMaxD(&totBounds, &Bounds);
-						sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
+								pTab++;
+								if (lpEnd)
+									*lpEnd = 0;
+
+								np = sscanf(pTab, "%Flf %Flf %Flf %Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
+								if (np < 2)
+									np = sscanf(pTab, "%Flf,%Flf,%Flf,%Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
+								if (np == 2 ||
+									(MinPoint.x >= MaxPoint.x || MinPoint.y >= MaxPoint.y))
+								{
+									Bounds.xmn = MinPoint.x;
+									Bounds.ymn = MinPoint.y;
+									Bounds.xmx = MinPoint.x;
+									Bounds.ymx = MinPoint.y;
+									ConvertBounds(&Bounds, 3, 1);
+									ExpandBounds(&Bounds, boundsOffset);
+								}
+								else
+								{
+									Bounds.xmn = MinPoint.x;
+									Bounds.ymn = MinPoint.y;
+									Bounds.xmx = MaxPoint.x;
+									Bounds.ymx = MaxPoint.y;
+									ConvertBounds(&Bounds, 3, 1);
+								}
+								AddMinMaxD(&totBounds, &Bounds);
+							}
+						}
 					}
-
+					GSSiGlobUlFree(&hItems);
+					rtn = 1;
+					sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
 				}
-				EndDialog(hWndDlg, TRUE);
+				EndDialog(hWndDlg, rtn);
 			}
 				break;
 			case IDC_ZOOMLISTS:
@@ -10619,6 +10693,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				{
 					case LBN_DBLCLK:
 						IgnoreLbutton = TRUE;
+						PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 						break;
 					case LBN_SELCHANGE:
 					{

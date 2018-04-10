@@ -119,6 +119,7 @@ BEGIN
         MENUITEM "&Save Current Zoom",          IDM_SAVE_ZOOM
         MENUITEM "Center on Cursor",            IDM_Z_CENTER
         MENUITEM "Zoom Lists",                  IDM_ZOOM_ZOOMLISTS
+        MENUITEM "Save to Current Zoom List",   IDM_ZOOM_SAVE2
     END
     POPUP "&Highlight"
     BEGIN
@@ -9306,8 +9307,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,11,115,0
- PRODUCTVERSION 34,11,115,0
+ FILEVERSION 34,11,116,0
+ PRODUCTVERSION 34,11,116,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9324,7 +9325,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34k build 115"
+            VALUE "FileVersion", "34k build 116"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"

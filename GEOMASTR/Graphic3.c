@@ -1801,6 +1801,7 @@ BOOL DisplayZoomList2(short Opt)
 	lpfnZOOMLISTMsgProc = MakeProcInstance((DLGPROC)ZOOMLIST2MsgProc, hInst);
 	nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST2", hWndMain, lpfnZOOMLISTMsgProc);
 	FreeProcInstance(lpfnZOOMLISTMsgProc);
+	ReloadMainMenu();
 	if (nRc == 1)
 	{
 		ProcessZoomListCommand();
