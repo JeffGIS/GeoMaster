@@ -9653,7 +9653,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 	BOOL SavePick;
 	LPVIEWPORT	SaveView;
 	long	TotItems=0, CurLoc = 0;
-	LPINT	pItems;
+	LPINT	pItems=0;
 	int i;
 	HANDLE	hPoly;
 	long	nPnts;
@@ -9670,26 +9670,35 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 		SaveView = pVP;
 		SetCurView(pViewports[CurTheme->TargetViewport - 1]);
 		Pick = FALSE;
-		pItems = (LPINT)GlobalLock(hItems);
-		for (i = 0; i<nItems; i++, pItems++)
+		if (hItems)
 		{
-			if (*pItems == CurTheme->NumClass)
-				TotItems += CurTheme->NumMissing;
-			else if (*pItems > CurTheme->NumClass)
-				TotItems += CurTheme->NumInvalid;
-			else
-				TotItems += CurTheme->ClassCount[*pItems];
+			pItems = (LPINT)GlobalLock(hItems);
+			for (i = 0; i<nItems; i++, pItems++)
+			{
+				if (*pItems == CurTheme->NumClass)
+					TotItems += CurTheme->NumMissing;
+				else if (*pItems > CurTheme->NumClass)
+					TotItems += CurTheme->NumInvalid;
+				else
+					TotItems += CurTheme->ClassCount[*pItems];
+			}
+			GlobalUnlock(hItems);
+			pItems = (LPINT)GlobalLock(hItems);
 		}
-		GlobalUnlock(hItems);
-		pItems = (LPINT)GlobalLock(hItems);
+		else
+			nItems = CurTheme->NumClass;
 		for (i = 0; i<nItems; i++, pItems++)
 		{
-			short	WantClass = *pItems;
+			short	WantClass = i;
 
-			if (*pItems == CurTheme->NumClass)
-				WantClass = -1;
-			if (*pItems > CurTheme->NumClass)
-				WantClass = -2;
+			if (hItems)
+			{
+				WantClass = *pItems;
+				if (*pItems == CurTheme->NumClass)
+					WantClass = -1;
+				if (*pItems > CurTheme->NumClass)
+					WantClass = -2;
+			}
 			ThemeHighlightKey.Class = WantClass;
 			ThemeHighlightKey.Refno = LONG_MIN;
 			if (BT_FIND(CurTheme->hHighlightFile, (LPSTR)&ThemeHighlightKey, BT_FIRST, BT_GE, (LPSTR)&ThemeHighlightData))
@@ -9759,10 +9768,12 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 				}
 				if (BT_FIND(CurTheme->hHighlightFile, (LPSTR)&ThemeHighlightKey, BT_NEXT, BT_ANY, (LPSTR)&ThemeHighlightData))
 					ThemeHighlightKey.Class = -10;
-				PctBox(hWndPct, TotItems, ++CurLoc, 0);
+				if (hWndPct)
+					PctBox(hWndPct, TotItems, ++CurLoc, 0);
 			}
 		}
-		GlobalUnlock(hItems);
+		if (hItems)
+			GlobalUnlock(hItems);
 		PickingByRefno = FALSE;
 		Pick = SavePick;
 		SetCurView(SaveView);

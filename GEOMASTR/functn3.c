@@ -245,6 +245,8 @@ GSSiExitProg (1348);
 						or	(GEOCENTER,GET,vp name,class)
 						or	(CLASSCOUNT,SET,vp name,class,count)
 						or	(SHOWCLASSMEMBERS,vp name,classno,POINT or FLASH,fromPt,ALL or STEP,macro)
+						or	(HIGHLIGHT,TorFhighlight/unhighlight,vp name,class(optional 0 for all, -1 for selected classes),TF-computeAreaAndLength
+
 						*/
 		{	 
 			int		nRc; 
@@ -266,6 +268,21 @@ GSSiExitProg (1348);
 				else
 					rtn = FALSE;   
 				SetCurView ( SaveVP);
+				goto Rtnrtn;
+			}
+			else if (!_fstrcmp(Arg[1], "HIGHLIGHT"))
+			{
+				SetCurView(SetVPFromName(Arg[3], &Err));
+				if (!Err && CurView->pTheme)
+				{
+					BOOL UnHighlight = atob(Arg[2]);
+					int  class = atoi(Arg[3]);
+					BOOL ComputeAreaAndLength = atob(Arg[5]);
+					int nHlt = HighlightFromTheme(CurView, CurView->pTheme, 0,0,0, UnHighlight, ComputeAreaAndLength);
+				}
+				else
+					rtn = FALSE;
+				SetCurView(SaveVP);
 				goto Rtnrtn;
 			}
 			else if (!_fstrcmp(Arg[1], "GEOCENTER"))
