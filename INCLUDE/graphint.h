@@ -1831,7 +1831,7 @@ BOOL CopySelectedRecords (LPSTR File,BOOL ShowStatus,BOOL AssignNewRefs,HANDLE h
 BOOL SetVisibilityFromTheme (LPSTR PathName,LPSTR SymPrefix,short setopt);  
 BOOL GetSymListFromTheme (LPSTR Name,LPSTR SymList,int maxlen);
 BOOL ItemInPickMacro (int Item);
-BOOL SelectThemeClasses (short iclass);
+BOOL SelectThemeClasses (short iclass,BOOL select);
 //short AutoIncType (LPSTR Prefix);
 BOOL AutoIncTAG (LPSTR Prefix, LPSTR UDI,double IncVal);
 BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt);

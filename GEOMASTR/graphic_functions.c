@@ -15685,7 +15685,7 @@ BOOL SelectByClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP: 
     {
     	
-    	SelectThemeClasses (-1);
+    	SelectThemeClasses (-1,0);
 	}
 		break;
 

@@ -239,6 +239,8 @@ GSSiExitProg (1348);
 						or	(SETVAL,vp name,varname,value)
 						or	(GETVAL,vp name,varname,value)
 						or	(QUAN,VPName,filename)
+						or  (SELECTCLASS,VPName) to display selection dialog
+						or  (SELECTCLASS,VPName,class,TorF) if class is 0 all classes set
 						or	(GETCLASSVALS,vp name,
 						or	(GETCLASS,vp name,value,activeclassesonly)
 						or	(GEOCENTER,DISPLAY,vp name)
@@ -272,18 +274,18 @@ GSSiExitProg (1348);
 			}
 			else if (!_fstrcmp(Arg[1], "HIGHLIGHT"))
 			{
+				int nHlt = 0;
 				SetCurView(SetVPFromName(Arg[3], &Err));
 				if (!Err && CurView->pTheme)
 				{
-					BOOL UnHighlight = atob(Arg[2]);
+					BOOL UnHighlight = !atob(Arg[2]);
 					int  class = atoi(Arg[3]);
 					BOOL ComputeAreaAndLength = atob(Arg[5]);
-					int nHlt = HighlightFromTheme(CurView, CurView->pTheme, 0,0,0, UnHighlight, ComputeAreaAndLength);
+					nHlt = HighlightFromTheme(CurView, CurView->pTheme, 0,0,0, UnHighlight, ComputeAreaAndLength);
 				}
-				else
-					rtn = FALSE;
 				SetCurView(SaveVP);
-				goto Rtnrtn;
+				itoa(nHlt, OutLoc, 10);
+				goto Rtnl;
 			}
 			else if (!_fstrcmp(Arg[1], "GEOCENTER"))
 			{
@@ -362,10 +364,16 @@ GSSiExitProg (1348);
 			else if (!_fstrcmp (Arg[1],"SELECTCLASS")) 
 			{   
 				SetCurView ( SetVPFromName (Arg[2],&Err));
-				if (SelectThemeClasses (-1))
-					rtn = TRUE;
+				if (nArgs == 2)
+				{
+					rtn = SelectThemeClasses(-1,0);
+				}
 				else
-					rtn = FALSE;
+				{
+					BOOL Select = atob(Arg[4]);
+					int iclass = atoi(Arg[3]);
+					rtn = SelectThemeClasses(iclass,Select);
+				}
 				goto Rtnrtn;
 			}
 			else if (!_fstrcmp (Arg[1],"QUAN")) 

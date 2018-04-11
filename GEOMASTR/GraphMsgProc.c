@@ -9652,17 +9652,19 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 {
 	BOOL SavePick;
 	LPVIEWPORT	SaveView;
-	long	TotItems=0, CurLoc = 0;
+	long	TotItems=0, CurLoc = 0, numAdded = 0;
 	LPINT	pItems=0;
 	int i;
 	HANDLE	hPoly;
 	long	nPnts;
 	int SaveNThemes;
-	LPTHEME	SaveTheme=pTheme;
+	LPTHEME	SaveCurTheme = CurTheme;
+	LPTHEME	SaveTheme = pTheme;
 	PICKDATA	PD;
 	THEMEHIGHLIGHTKEY	ThemeHighlightKey;
 	THEMEHIGHLIGHTDATA	ThemeHighlightData;
 
+	CurTheme = pTheme;
 	if (OpenThemeHighlightFile(BT_READ))
 	{
 		PickingByRefno = TRUE;
@@ -9705,6 +9707,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 				ThemeHighlightKey.Class = -10;
 			while (ContinueProcessing && ThemeHighlightKey.Class == WantClass)
 			{
+				numAdded++;
 				if (UnHighlight)
 					RemoveFromHighlightList(ThemeHighlightKey.Refno, 0);
 				else
@@ -9778,8 +9781,9 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 		Pick = SavePick;
 		SetCurView(SaveView);
 	}
+	CurTheme = SaveCurTheme;
 	ContinueProcessing = TRUE;
-	return TotItems;
+	return numAdded;
 }
 
 BOOL FAR PASCAL DISPLAYSELECTEDCLASSESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
@@ -13722,19 +13726,19 @@ HaveEmpty:
            		goto Display;
            	
            	case IDC_EDITPM:
-           		GMEdit (0,CurView->PickMacroFile);
+				GMEdit(0, EditView->PickMacroFile);
 				break;
 					
            	case IDC_REMOVETHEME: 
             	if (MessageBox(hWndDlg,"Are you sure you wish to remove this Theme?",
 								"Verify Delete",MB_YESNO) == IDYES)
            		{
-					LPTHEME	CurTheme = CurView->pTheme;
-		    		LPVIEWPORT	SaveView = CurView;
+					LPTHEME	CurTheme = EditView->pTheme;
+					LPVIEWPORT	SaveView = EditView;
 		    		if (SetViewport (CurTheme->TargetViewport))
 						RemoveThemeFromVP (CurView,CurTheme);
 		    		SetCurView (SaveView);
-	   	    		CloseObject (CurView->pTheme);
+					CloseObject(EditView->pTheme);
            			CurView->pTheme = 0;
 			    	EnableWindow (GetDlgItem(hWndDlg,IDC_EDITTHEME),FALSE);
 			    	EnableWindow (GetDlgItem(hWndDlg,IDC_REMOVETHEME),FALSE);
