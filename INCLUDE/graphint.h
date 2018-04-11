@@ -131,6 +131,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 BOOL ZoomToNextItemInCurrentList(void);
 BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds,LPSTR Name);
 BOOL ProcessZoomListCommand(void);
+BOOL CreateNewZoomList(HWND hWndDlg, LPSTR Name);
 int HighlightFromTheme(LPVIEWPORT CurView, LPTHEME CurTheme, int nItems, HANDLE hItems, HWND hWndPct, BOOL UnHighlight, BOOL ComputeAreaAndLength);
 BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);

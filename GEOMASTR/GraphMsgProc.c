@@ -5,7 +5,7 @@
 #include <sqlext.h>     
 #include <commctrl.h>          
 
-#define ZOOMLISTDIR "[%DL]ZoomLists"
+#define ZOOMLISTDIR "[%ZOOMLISTDIR]"
 
 static BOOL	WantPalleteOrthos=FALSE;
 static BOOL LoadBMPShowMess;
@@ -9726,6 +9726,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 					PickList[0].Length = ThemeHighlightData.Length;
 					PickList[0].Area = ThemeHighlightData.Area;
 					PickList[0].Rect = ThemeHighlightData.Bounds;
+					PickList[0].BeginPoint = PickList[0].PickedPoint = ThemeHighlightData.Point;
 					strcpy(PickList[0].UDI, ThemeHighlightData.UDI);
 					strcpy(PickList[0].Prefix, ThemeHighlightData.Prefix);
 					SaveNThemes = CurView->NumThemes;
@@ -10466,7 +10467,7 @@ BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds, LPSTR Name)
 	}
 	return rtn;
 }
-BOOL CreateNewZoomList(LPSTR Name)
+BOOL CreateNewZoomList(HWND hWndDlg,LPSTR Name)
 {
 	BOOL rtn = FALSE;
 	char listFile[MAX_PATH];
@@ -10474,9 +10475,11 @@ BOOL CreateNewZoomList(LPSTR Name)
 	char str[512];
 	HFILE Fid;
 
+	if (!hWndDlg)
+		hWndDlg = GetFocus();
 	if (!Name)
 	{
-		if (!GetTextString(GetFocus(), name, 250,"Enter List Name:", "", 0, 0, 1, 0))
+		if (!GetTextString(hWndDlg, name, 250,"Enter List Name:", "", 0, 0, 1, 0))
 		{
 			return FALSE;
 		}
@@ -10495,6 +10498,64 @@ BOOL CreateNewZoomList(LPSTR Name)
 	}
 	return rtn;
 }
+
+BOOL ClearCurrentZoomList(HWND hWndDlg)
+{
+	BOOL rtn = FALSE;
+	char str[1024];
+	sprintf(str, "Are you sure you wish to clear '%s' ?", CurrentZoomList);
+	if (MessageBox(hWndDlg, str,
+		"Verify Clear", MB_YESNO) == IDYES)
+	{
+		CreateNewZoomList(hWndDlg, CurrentZoomList);
+		rtn = TRUE;
+	}
+	return rtn;
+}
+BOOL DeleteCurrentZoomList(HWND hWndDlg)
+{
+	BOOL rtn = FALSE;
+	char str[1024];
+	sprintf(str, "Are you sure you wish to delete '%s' ?", CurrentZoomList);
+	if (MessageBox(hWndDlg, str,
+		"Verify Delete", MB_YESNO) == IDYES)
+	{
+		sprintf(str, "%s\\%s.txt", ZOOMLISTDIR, CurrentZoomList);
+		HFILE Fid = GSSiOpenFile(str, 0, OF_DELETE);
+		*CurrentZoomList = 0;
+		rtn = TRUE;
+	}
+	return rtn;
+}
+BOOL ShareCurrentZoomList(HWND hWndDlg)
+{
+	BOOL rtn = FALSE;
+	char str[1024];
+	sprintf(str, "Are you sure you wish to share '%s' ?", CurrentZoomList);
+	if (MessageBox(hWndDlg, str,
+		"Verify Share", MB_YESNO) == IDYES)
+	{
+		sprintf(str, "$M(ShareZoomList,%s)", CurrentZoomList);
+		ExpandText(str);
+		rtn = atob(str);;
+	}
+	return rtn;
+}
+BOOL SyncZoomLists(HWND hWndDlg)
+{
+	BOOL rtn = FALSE;
+	char str[1024];
+	sprintf(str, "Are you sure you wish to sync with server");
+	if (MessageBox(hWndDlg, str,
+		"Verify Sync", MB_YESNO) == IDYES)
+	{
+		sprintf(str, "$M(SyncZoomLists)");
+		ExpandText(str);
+		rtn = atob(str);;
+	}
+	return rtn;
+}
+
 BOOL ZoomToNextItemInCurrentList(void)
 {
 	BOOL rtn = FALSE;
@@ -10552,6 +10613,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		CenterWindowInVP(hWndDlg, 0);
 		currentListLoc = 0;
 	case GSSI_REINITDIALOG:
+		SetDlgItemText(hWndDlg, IDOK, "Exit");
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_RESETCONTENT, 0, 0);
 		GSSiGetTempFileName(0, "gm", 0, filelist);
@@ -10617,11 +10679,6 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 			}
 			GSSiClose(Fid);
 		}
-		if (nrecs)
-			EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
-		else
-			EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
-
 		break; /* End of WM_INITDIALOG                                 */
 
 	case WM_CLOSE:
@@ -10633,10 +10690,42 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		switch (LOWORD(wParam))
 		{
 		case ID_NEWZOOMLIST:
-			if (CreateNewZoomList(0))
+			if (CreateNewZoomList(hWndDlg,0))
 				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
-				break;
-			case IDCANCEL:
+			break;
+		case ID_CLEARLIST:
+		{
+			if (ClearCurrentZoomList(hWndDlg))
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+		}
+			break;
+		case ID_DELETELIST:
+			if (DeleteCurrentZoomList(hWndDlg))
+			{
+				int numLists = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETCOUNT, 0, 0) - 1;
+				if (numLists <= 0)
+				{
+					CreateNewZoomList(hWndDlg, "Miscellaneous");
+					currentListLoc = 0;
+				}
+				else if (currentListLoc >= numLists)
+					currentListLoc = 0;
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+			}
+			break;
+		case ID_SHARELIST:
+		{
+			if (ShareCurrentZoomList(hWndDlg))
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+		}
+			break;
+		case ID_SYNCLISTS:
+		{
+			if (SyncZoomLists(hWndDlg))
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+		}
+			break;
+		case IDCANCEL:
 				EndDialog(hWndDlg, FALSE);
 				break;
 			case IDOK:
@@ -10645,6 +10734,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				HANDLE hItems = 0;
 				int nItems = GetLBSelectedItems(hWndDlg, IDC_ZOOMLISTCONTENTS, &hItems);
 				MNMXCORD Bounds, totBounds;
+				*zoomListCmd = 0;
 				if (nItems)
 				{
 					DBoundsInit(&totBounds);
@@ -10727,7 +10817,13 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 						break;
 					case LBN_SELCHANGE:
 					{
-						EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+						int nItems = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETSELCOUNT, 0, 0);
+						if (nItems)
+							SetDlgItemText(hWndDlg, IDOK, "Zoom");
+
+						else
+							SetDlgItemText(hWndDlg, IDOK, "Exit");
+
 						break;
 					}
 					break;

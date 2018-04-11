@@ -796,6 +796,7 @@ GSSiExitProg (1350);
 		
 		case 818: // $ZOOMLIST(SELECT or NEXT or PRIOR)
 				  // $ZOOMLIST(ADD,POINTorBOUNDS,Name,pointorbounds)
+				  // $ZOOMLIST(CREATE,pathname);
 		{	 
 			
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
@@ -838,6 +839,11 @@ GSSiExitProg (1350);
 							goto RtnTrue;
 						}
 					}
+				}
+				else if (!_fstricmp(Arg[1], "CREATE"))
+				{
+					rtn = CreateNewZoomList(hWndMain, Arg[2]);
+					goto Rtnrtn;
 				}
 			}
 			goto RtnFalse;
