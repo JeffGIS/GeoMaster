@@ -794,7 +794,7 @@ GSSiExitProg (1350);
 		}  
 		break;
 		
-		case 818: // $ZOOMLIST(SELECT or NEXT or PRIOR)
+		case 818: // $ZOOMLIST(SELECT or FIRST or NEXT or PRIOR)
 				  // $ZOOMLIST(ADD,POINTorBOUNDS,Name,pointorbounds)
 				  // $ZOOMLIST(CREATE,pathname);
 		{	 

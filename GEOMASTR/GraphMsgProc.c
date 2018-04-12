@@ -47,6 +47,9 @@ static LPSTR	captureClipboardMenu;
 static char		DMIFile[MAX_PATH];
 static char		DMITitle[256];
 static char		zoomListCmd[1024] = { 0 };
+static int		currentListLoc = 0;
+static int		currentListnRecs = 0;
+static int		currentLocInList = 0;
 
 static struct {long   TLID;
      short    Type;
@@ -10600,7 +10603,6 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	char line[1026];
 	char ZoomlistDir[MAX_PATH] = ZOOMLISTDIR;
 	char listFile[MAX_PATH];
-	static int	 currentListLoc = 0;
 	int	 TabStops[2] = { 1400, 1500 };
 	int nrecs = 0;
 
@@ -10678,7 +10680,19 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				}
 			}
 			GSSiClose(Fid);
+			currentListnRecs = nrecs;
 		}
+		if (AutoZoomNext && currentLocInList >= 0)
+		{
+			if (AutoZoomNext + currentLocInList < 0)
+			{
+				strcpy(zoomListCmd, "$MESSAGE(Reached beginning of list);");
+				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			}
+			else
+				PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+		}
+
 		break; /* End of WM_INITDIALOG                                 */
 
 	case WM_CLOSE:
@@ -10728,22 +10742,41 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		case IDCANCEL:
 				EndDialog(hWndDlg, FALSE);
 				break;
-			case IDOK:
+		case IDOK:
+		{
+			int rtn = 0;
+			HANDLE hItems = 0;
+			int nItems;
+			MNMXCORD Bounds, totBounds;
+			*zoomListCmd = 0;
+			if (AutoZoomNext)
 			{
-				int rtn = 0;
-				HANDLE hItems = 0;
-				int nItems = GetLBSelectedItems(hWndDlg, IDC_ZOOMLISTCONTENTS, &hItems);
-				MNMXCORD Bounds, totBounds;
-				*zoomListCmd = 0;
-				if (nItems)
-				{
-					DBoundsInit(&totBounds);
+				nItems = 1;
+				hItems = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(int) + 4);
+				LPINT pItems = (LPINT)GlobalLock(hItems);
+				*pItems = currentLocInList + AutoZoomNext;
+				GlobalUnlock(hItems);
+			}
+			else
+				nItems = GetLBSelectedItems(hWndDlg, IDC_ZOOMLISTCONTENTS, &hItems);
+			if (nItems)
+			{
+				DBoundsInit(&totBounds);
 
-					LPINT pItems = (LPINT)GlobalLock(hItems);
-					for (int i = 0; i < nItems; i++)
+				LPINT pItems = (LPINT)GlobalLock(hItems);
+				rtn = 1;
+				for (int i = 0; i < nItems; i++)
+				{
+					char zoomto[MAX_PATH];
+					currentLocInList = pItems[i];
+					if (SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETTEXT, pItems[i], (LPARAM)zoomto) == LB_ERR)
 					{
-						char zoomto[MAX_PATH];
-						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETTEXT, pItems[i], (LPARAM)zoomto);
+						strcpy(zoomListCmd, "$MESSAGE(Reached end of list);");
+						rtn = 0;
+						break;
+					}
+					else
+					{
 						pTab = strchr(zoomto, '\t');
 						if (pTab++)
 						{
@@ -10783,12 +10816,14 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 							}
 						}
 					}
-					GSSiGlobUlFree(&hItems);
-					rtn = 1;
-					sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
 				}
-				EndDialog(hWndDlg, rtn);
+				GSSiGlobUlFree(&hItems);
+				if (rtn)
+					sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
 			}
+			EndDialog(hWndDlg, rtn);
+		}
+			
 				break;
 			case IDC_ZOOMLISTS:
 			{
@@ -10799,7 +10834,8 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 						break;
 					case LBN_SELCHANGE:
 					{
-						int	 currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETCURSEL, 0, 0);
+						currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETCURSEL, 0, 0);
+						currentLocInList = 0;
 						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
 						PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
 						break;
