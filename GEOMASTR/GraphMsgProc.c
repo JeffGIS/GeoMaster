@@ -10714,9 +10714,13 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		}
 		else
 		{
-			SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETSEL, TRUE, currentLocInList);
-			SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTOPINDEX, currentLocInList,0);
-			SetDlgItemText(hWndDlg, IDOK, "Zoom");
+			if (currentLocInList >= 0)
+			{
+				SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETSEL, TRUE, currentLocInList);
+				SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTOPINDEX, currentLocInList, 0);
+			}
+			if (currentListnRecs > 0)
+				SetDlgItemText(hWndDlg, IDOK, "Zoom");
 		}
 
 		*CurrentZoomListEntry = 0;
