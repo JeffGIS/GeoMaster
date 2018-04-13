@@ -4482,6 +4482,7 @@ void DisplaySVThemeLegend(short From)
     if (CurTheme->ClassFont1.lfHeight)  
     	fontfactor = (double)CurTheme->ClassFont2.lfHeight/(double)CurTheme->ClassFont1.lfHeight;
     TotCount = 0;
+	SetThemeColorsFromScheme();
 	for (iclass=0;iclass<CurTheme->NumClass;iclass++) 
 	{
 		MaxCount = max (MaxCount,CurTheme->ClassCount[iclass]);

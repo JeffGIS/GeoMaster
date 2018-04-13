@@ -1028,6 +1028,8 @@ GSSiExitProg (1250);
             	 	CurTheme->DispersePoints = 1;
             	 if (SendDlgItemMessage (hWndDlg,SV_ACCUMULATE,BM_GETCHECK,0,0L))
             	 	CurTheme->DispersePoints = 2;
+				 CurTheme->ColorScheme = SendDlgItemMessage(hWndDlg, SV_COLOR_SCHEME, LB_GETCURSEL, 0, 0);
+				 SetThemeColorsFromScheme();
 
 		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
 				 GetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro, sizeof(CurTheme->BeginDisplayMacro));
@@ -9815,6 +9817,8 @@ GSSiExitProg (1300);
         cwCenter(hWndDlg, 0);  
 	   	
 	   	Sorted=FALSE;
+		if (CurTheme->SortOption == 1)
+			Sorted = TRUE;
 	   	ShowWindow (GetDlgItem(hWndDlg,IDC_CLASSHLTLISTSORTED),SW_HIDE);
        	SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLISTSORTED,LB_SETTABSTOPS,2,(LPARAM)&TabStops); 
         
@@ -9828,7 +9832,11 @@ GSSiExitProg (1300);
 			if (!CurTheme->ClassStatus[iclass])
 				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLISTSORTED,LB_SETSEL,TRUE,(LPARAM)Choice);
 		 }
-		 break; /* End of WM_INITDIALOG                                 */
+		ShowWindow(GetDlgItem(hWndDlg, IDC_CLASSHLTLIST), !Sorted);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_CLASSHLTLISTSORTED), Sorted);
+		SendDlgItemMessage(hWndDlg, IDC_SORT, BM_SETCHECK, Sorted, 0);
+
+		break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
@@ -9839,9 +9847,9 @@ GSSiExitProg (1300);
          switch(LOWORD(wParam))
            {
            	case IDC_SORT: 
-           		Sorted = TRUE;
-			   	ShowWindow (GetDlgItem(hWndDlg,IDC_CLASSHLTLIST),SW_HIDE);
-	   			ShowWindow (GetDlgItem(hWndDlg,IDC_CLASSHLTLISTSORTED),SW_SHOW);
+				Sorted = SendDlgItemMessage(hWndDlg, IDC_SORT, BM_GETCHECK, 0, 0);
+			   	ShowWindow (GetDlgItem(hWndDlg,IDC_CLASSHLTLIST),!Sorted);
+	   			ShowWindow (GetDlgItem(hWndDlg,IDC_CLASSHLTLISTSORTED),Sorted);
            	break;
             case IDCANCEL:
                  /* Ignore data values entered into the controls        */
@@ -10705,7 +10713,11 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 		}
 		else
+		{
 			SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETSEL, TRUE, currentLocInList);
+			SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTOPINDEX, currentLocInList,0);
+			SetDlgItemText(hWndDlg, IDOK, "Zoom");
+		}
 
 		*CurrentZoomListEntry = 0;
 		if (AutoZoomNext == -2)
