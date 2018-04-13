@@ -808,6 +808,10 @@ GSSiExitProg (1350);
 					n = -1;
 				else if (!_fstricmp(Arg[1], "FIRST"))
 					n = 0;
+				else if (!_fstricmp(Arg[1], "REMOVE"))
+					n = -2;
+				else
+					goto RtnFalse;
 				if (DisplayZoomList(n))
 					goto RtnTrue;
 			}

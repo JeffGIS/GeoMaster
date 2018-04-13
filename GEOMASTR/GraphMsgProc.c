@@ -10605,6 +10605,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	char listFile[MAX_PATH];
 	int	 TabStops[2] = { 1400, 1500 };
 	int nrecs = 0;
+	int fileLoc;
 
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
 		return (BRtn);
@@ -10666,6 +10667,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
 		sprintf(listFile, "%s\\%s.txt", ZoomlistDir, CurrentZoomList);
 		Fid = GSSiOpenFile(listFile, 0, OF_READ);
+		fileLoc = 0;
 		if (Fid != HFILE_ERROR)
 		{
 			while (fgetstring(line, 1024, Fid))
@@ -10674,15 +10676,25 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					ProcessText(line);
 				else
 				{
-					nrecs++;
-					REPLAC(line, "|", "\t", 1024);
-					SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
+					LPSTR pBar = strrchr(line, '|');
+					if (pBar && *(pBar+1)=='(')
+					{
+						int item;
+						nrecs++;
+						*pBar = '\t';
+						item = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
+						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETITEMDATA, (WPARAM)item, (LPARAM)fileLoc);
+					}
 				}
+				fileLoc = GSSillseek(Fid, 0, 1);
 			}
 			GSSiClose(Fid);
 			currentListnRecs = nrecs;
+			currentLocInList = min(currentLocInList, nrecs - 1);
+			EnableWindow(GetDlgItem(hWndDlg, ID_DELETEITEMS),nrecs);
+
 		}
-		if (AutoZoomNext && currentLocInList >= 0)
+		if (AutoZoomNext && AutoZoomNext > -2 && currentLocInList >= 0)
 		{
 			if (AutoZoomNext + currentLocInList < 0)
 			{
@@ -10692,6 +10704,12 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 			else
 				PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 		}
+		else
+			SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETSEL, TRUE, currentLocInList);
+
+		*CurrentZoomListEntry = 0;
+		if (AutoZoomNext == -2)
+			PostMessage(hWndDlg, WM_COMMAND, ID_DELETEITEMS, 0L);
 
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -10764,7 +10782,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				DBoundsInit(&totBounds);
 
 				LPINT pItems = (LPINT)GlobalLock(hItems);
-				rtn = 1;
+				rtn = 0;
 				for (int i = 0; i < nItems; i++)
 				{
 					char zoomto[MAX_PATH];
@@ -10772,14 +10790,16 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					if (SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETTEXT, pItems[i], (LPARAM)zoomto) == LB_ERR)
 					{
 						strcpy(zoomListCmd, "$MESSAGE(Reached end of list);");
-						rtn = 0;
 						break;
 					}
 					else
 					{
 						pTab = strchr(zoomto, '\t');
-						if (pTab++)
+						if (pTab)
 						{
+							*pTab++ = 0;
+							strcpy(CurrentZoomListEntry, zoomto);
+							
 							if (*pTab == '(')
 							{
 								DPOINT	MinPoint, MaxPoint;
@@ -10813,6 +10833,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 									ConvertBounds(&Bounds, 3, 1);
 								}
 								AddMinMaxD(&totBounds, &Bounds);
+								rtn = 1;
 							}
 						}
 					}
@@ -10825,49 +10846,92 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		}
 			
 				break;
-			case IDC_ZOOMLISTS:
+		case ID_DELETEITEMS:
+		{
+			HANDLE hItems = 0;
+			int nItems;
+			*zoomListCmd = 0;
+			nItems = GetLBSelectedItems(hWndDlg, IDC_ZOOMLISTCONTENTS, &hItems);
+			if (nItems)
 			{
-				switch (HIWORD(wParam))
+				LPINT pItem = GlobalLock(hItems);
+				sprintf(listFile, "%s\\%s.txt", ZoomlistDir, CurrentZoomList);
+				Fid = GSSiOpenFile(listFile, 0, OF_READWRITE);
+
+				for (int i = 0; i < nItems; i++)
 				{
-					case LBN_DBLCLK:
-						IgnoreLbutton = TRUE;
-						break;
-					case LBN_SELCHANGE:
+					LPSTR pBar;
+					int fileLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS,LB_GETITEMDATA, *pItem, (LPARAM)0);
+					pItem++;
+					GSSillseek(Fid, fileLoc,0);
+					fgetstring(line, 1020, Fid);
+					pBar = strrchr(line, '|');
+					if (pBar)
 					{
-						currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETCURSEL, 0, 0);
-						currentLocInList = 0;
-						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
-						PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
-						break;
+						int inc = pBar - line;
+						GSSillseek(Fid, fileLoc + inc +1, 0);
+						char x = 'X';
+						BigWrite(Fid, &x, 1, -1);
 					}
 				}
+				GSSiClose(Fid);
+				GlobalUnlock(hItems);
 			}
+			GSSiGlobFree(&hItems);
+			if (AutoZoomNext)
+				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			else
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+		}
 				break;
-			case IDC_ZOOMLISTCONTENTS:
+
+		case IDC_ZOOMLISTS:
+		{
+			switch (HIWORD(wParam))
 			{
-				switch (HIWORD(wParam))
+				case LBN_DBLCLK:
+					IgnoreLbutton = TRUE;
+					break;
+				case LBN_SELCHANGE:
 				{
-					case LBN_DBLCLK:
-						IgnoreLbutton = TRUE;
-						PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
-						break;
-					case LBN_SELCHANGE:
+					currentListLoc = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETCURSEL, 0, 0);
+					currentLocInList = 0;
+					SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
+					PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+					break;
+				}
+			}
+		}
+		break;
+		case IDC_ZOOMLISTCONTENTS:
+		{
+			switch (HIWORD(wParam))
+			{
+				case LBN_DBLCLK:
+					IgnoreLbutton = TRUE;
+					PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+					break;
+				case LBN_SELCHANGE:
+				{
+					int nItems = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETSELCOUNT, 0, 0);
+					if (nItems)
 					{
-						int nItems = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_GETSELCOUNT, 0, 0);
-						if (nItems)
-							SetDlgItemText(hWndDlg, IDOK, "Zoom");
-
-						else
-							SetDlgItemText(hWndDlg, IDOK, "Exit");
-
-						break;
+						SetDlgItemText(hWndDlg, IDOK, "Zoom");
+						EnableWindow(GetDlgItem(hWndDlg, ID_DELETEITEMS), TRUE);
+					}
+					else
+					{
+						SetDlgItemText(hWndDlg, IDOK, "Exit");
+						EnableWindow(GetDlgItem(hWndDlg, ID_DELETEITEMS), FALSE);
 					}
 					break;
 				}
-
+				break;
 			}
-				break;    /* End of WM_COMMAND                                 */
+
 		}
+			break;    /* End of WM_COMMAND                                 */
+	}
 
 		default:
 			return FALSE;
