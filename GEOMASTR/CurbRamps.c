@@ -11,9 +11,10 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt)
 void convertVersion(LPSTR str, int fromVer, int toVer);
 void convertVersion_1_to_2(LPSTR str);
 void convertVersion_2_to_3(LPSTR str);
+BOOL createIntersectionsTable(BOOL dropExistingTables);
 
 static BOOL Execute(LPSTR cmd,LPSTR errFile);
-BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile);
+BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors);
 
 
 /*int getOffsetCoord:(MPIntersection *)mpint
@@ -483,7 +484,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
 	int rc;
-	int nTot=0, nDone = 0;
+	int nTot=0, nDone = 0, totErrors = 0;
 	LPSTR line = malloc(LINELEN);
 	char tempFile[MAX_PATH];
 	HFILE fidTemp;
@@ -551,9 +552,13 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 			{
 				while (fgetstring (file,MAX_PATH,fidTemp))
 				{
-					BOOL st = UpdateFromFile(file,convertInsert,addFileID,dbType,errFile);
+					BOOL st = UpdateFromFile(file, convertInsert, addFileID, dbType, errFile,&totErrors);
 					if (showProgress)
-						StatusWindowUpdate(0, 0, nTot, ++nDone);
+					{
+						char mess[128];
+						sprintf(mess, "%i errors", totErrors);
+						StatusWindowUpdate(0, mess, nTot, ++nDone);
+					}
 
 				}
 			}
@@ -1211,7 +1216,7 @@ static BOOL Execute(LPSTR cmd,LPSTR errFile)
 	return rtn;
 }
 
-BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile)
+BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors)
 {
 	BOOL rtn = TRUE;
 	int line = 0;
@@ -1275,6 +1280,8 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 				AppendFile(errFile, mess);
 				free(mess);
 				rtn = TRUE;
+				if (ptotErrors)
+					*(ptotErrors)++;
 			}
 		}
 	}
@@ -1416,3 +1423,252 @@ void convertVersion_2_to_3(LPSTR str)
 	}
 	return rtn;
 }*/
+BOOL NVCreateDB(LPSTR path,BOOL Delete)
+{
+	BOOL rc;
+	
+	int type = FileType(path);
+
+	if (type && !Delete)
+		return FALSE;
+	else if (type)
+		GSSiRemove(path);
+	else
+	{
+		HFILE fid = GSSiOpenFile(path, 0, OF_CREATE);
+		GSSiClose(fid);
+		GSSiRemove(path);
+	}
+
+	rc = sqlite3_open(path, &database);
+	createIntersectionsTable(TRUE);
+	rc = sqlite3_close(database);
+	return rc;
+}
+BOOL executeCmd(LPSTR cmd)
+{
+	return  Execute(cmd,0);
+}
+BOOL createIntersectionsTable(BOOL dropExistingTables)
+{
+	BOOL rtn = NO;
+
+	char dropcmd[] = "DROP TABLE IF EXISTS Intersections;DROP TABLE IF EXISTS Intersections_index;DROP TABLE IF EXISTS Ramps;DROP TABLE IF EXISTS VERSION;DROP TABLE IF EXISTS CURBRAMP_UPDATES;DROP TABLE IF EXISTS CURBRAMP_PICTURES;DROP TABLE IF EXISTS CURBRAMP_NOTES;DROP TABLE IF EXISTS CURBRAMP_STANDARD_TEXT";
+
+	if (dropExistingTables)
+	{
+		rtn = executeCmd(dropcmd);
+
+	}
+	char cmd[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_UPDATES ('iPad' INTEGER PRIMARY KEY,'LastDataUpdate' INT,'LastPictUpdate' INT)";
+	rtn = executeCmd(cmd);
+	//create intersection table
+	char createcmd[4096];
+	
+sprintf(createcmd, "CREATE TABLE IF NOT EXISTS VERSION (vid INTEGER PRIMARY KEY,VersionID CHAR(6));\
+INSERT OR REPLACE INTO VERSION VALUES(1,'%s');\
+CREATE TABLE IF NOT EXISTS Intersections (\
+intID INTEGER PRIMARY KEY,\
+lastUpdateTime INTEGER,\
+status INTEGER,\
+assignedToPrelim INTEGER,\
+assignedToDetail INTEGER,\
+intX INTEGER,\
+intY INTEGER,\
+rotation INTEGER,\
+ramp1 INTEGER,\
+ramp2 INTEGER,\
+ramp3 INTEGER,\
+ramp4 INTEGER,\
+ramp5 INTEGER,\
+ramp6 INTEGER,\
+ramp7 INTEGER,\
+ramp8 INTEGER,\
+ramp81 INTEGER,\
+ramp23 INTEGER,\
+ramp45 INTEGER,\
+ramp67 INTEGER,\
+xWalkA INTEGER,\
+xWalkB INTEGER,\
+xWalkC INTEGER,\
+xWalkD INTEGER,\
+signal81 INTEGER,\
+signal23 INTEGER,\
+signal45 INTEGER,\
+signal67 INTEGER,\
+nStreets INTEGER,\
+streetNames CHAR(512),\
+streetAZMs CHAR(128),\
+latitude REAL,\
+longitude REAL,\
+intersectionComment CHAR(256),\
+doLater INTEGER,\
+zoomLevel INTEGER);\
+CREATE VIRTUAL TABLE IF NOT EXISTS Intersections_index USING rtree(id,minX, maxX, minY, maxY);", CURRENT_INTERSECTION_VERSION);
+
+rtn = executeCmd(createcmd);
+//create ramp table
+char	createcmd2[] = "CREATE TABLE IF NOT EXISTS Ramps (\
+intID INT,\
+rampNum INT,\
+rampID CHAR(16),\
+yearRebuilt INT,\
+timeComplete INT,\
+rampExists INT,\
+isComplete INT,\
+approximateHeading REAL,\
+adjustedRot INT,\
+rampInXWalk INT,\
+xWalkisComplete INT,\
+signalisComplete INT,\
+texture INT,\
+upperLandingObstruction INT,\
+lowerLandingObstruction INT,\
+rampObstruction INT,\
+hasRampCracks INT,\
+hasUpperLandingCracks INT,\
+hasStreetLandingCracks INT,\
+rampWidth INT,\
+rampDepth INT,\
+rampSlopeFront REAL,\
+rampSlopeSide REAL,\
+rampSlopeHeading REAL,\
+upperLandingSlopeFront REAL,\
+upperLandingSlopeSide REAL,\
+upperLandingSlopeHeading REAL,\
+streetLandingSlopeFront REAL,\
+streetLandingSlopeSide REAL,\
+streetLandingSlopeHeading REAL,\
+flareLeftSlopeFront REAL,\
+flareLeftSlopeSide REAL,\
+flareLeftSlopeHeading REAL,\
+flareRightSlopeFront REAL,\
+flareRightSlopeSide REAL,\
+flareRightSlopeHeading REAL,\
+swkLeftSlopeFront REAL,\
+swkLeftSlopeSide REAL,\
+swkLeftSlopeHeading REAL,\
+swkRightSlopeFront REAL,\
+swkRightSlopeSide REAL,\
+swkRightSlopeHeading REAL,\
+PEDSignalType INT,\
+PEDButtonType INT,\
+PEDButtonHeight INT,\
+PEDButtonDist INT,\
+SteepTopOfCurb REAL,\
+PedRampLip REAL,\
+lev21x INT, lev21y INT,\
+rampType INT,\
+rampComment CHAR(256),\
+pedButtonAudibleWalkIndicationType INT,\
+pedButtonHasLocatorTone INT,\
+pedButtonHasInfoSign INT,\
+pedButtonHasBraille INT,\
+pedButtonHasTactileArrow INT,\
+pedButtonLocatorToneVolume INT,\
+pedButtonAudibleWalkIndicationVolume INT,\
+rampCrackWidth REAL,\
+upperLandingCrackWidth REAL,\
+streetLandingCrackWidth REAL,\
+leftSidewalkCrackWidth REAL,\
+rightSidewalkCrackWidth REAL,\
+curbCutDist REAL,\
+bumpWidth REAL,\
+bumpHeight REAL,\
+detectableWidth INT,\
+detectableDepth INT,\
+FromFileID CHAR(12), PRIMARY KEY (intID,rampNum ASC));";
+rtn = executeCmd(createcmd2);
+
+char createcmd3[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_PICTURES ('id' INTEGER PRIMARY KEY,'iPadNum' INT,'pictNum' INT,'intID' INT,'rampNum' INT, 'type' INT, 'heading' INT, 'latitude' REAL, 'longitude' REAL, 'time' INT)";
+rtn = executeCmd(createcmd3);
+char createcmd4[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_NOTES ('id' INTEGER PRIMARY KEY,'intID' INT,'corner' INT,'rampID' INT,'type' INT, 'note' CHAR(4096))";
+rtn = executeCmd(createcmd4);
+char createcmd5[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_STANDARD_TEXT ('textID' INTEGER PRIMARY KEY,'type' INT,'text' CHAR(4096))";
+rtn = executeCmd(createcmd5);
+	return rtn;
+}
+/*
+-(BOOL)adjustToLatestVersion
+{
+	BOOL rtn = TRUE;
+
+	int currentVersion = [self datasetVersion];
+	int latestVersion = atoi(CURRENT_INTERSECTION_VERSION);
+
+	for (int version = currentVersion; version < latestVersion; version++)
+	{
+		switch (version)
+		{
+		case 2://convert version 2 to version 3
+		{
+			BOOL st = TRUE;
+			rtn = FALSE;
+			[self startTransaction];
+			NSString * cmd = @"";
+			cmd = @"ALTER TABLE Ramps ADD COLUMN detectableWidth INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN detectableDepth INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = [NSString stringWithFormat : @"UPDATE Version SET VersionID = '%s' WHERE vid = 1;", CURRENT_INTERSECTION_VERSION];
+			st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			if (st)
+			{
+				[self commitTransaction];
+				rtn = TRUE;
+			}
+			else
+				[self cancelTransaction];
+		}
+			break;
+		case 1://convert version 1 to version 2
+		{
+			BOOL st = TRUE;
+			rtn = FALSE;
+			[self startTransaction];
+			NSString * cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonAudibleWalkIndicationType INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonHasLocatorTone INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonHasInfoSign INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonHasBraille INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonHasTactileArrow INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonLocatorToneVolume INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN pedButtonAudibleWalkIndicationVolume INT;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN rampCrackWidth REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN upperLandingCrackWidth REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN streetLandingCrackWidth REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN leftSidewalkCrackWidth REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN rightSidewalkCrackWidth REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN curbCutDist REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN bumpWidth REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = @"ALTER TABLE Ramps ADD COLUMN bumpHeight REAL;";
+			if (st) st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			cmd = [NSString stringWithFormat : @"UPDATE Version SET VersionID = '%s' WHERE vid = 1;", CURRENT_INTERSECTION_VERSION];
+			st = [self executeCmd : cmd.UTF8String sendToServer : NO from : 0];
+			if (st)
+			{
+				[self commitTransaction];
+				rtn = TRUE;
+			}
+			else
+				[self cancelTransaction];
+		}
+			break;
+		}
+	}
+	return rtn;
+}
+*/

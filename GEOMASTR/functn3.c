@@ -4614,6 +4614,8 @@ GotCloseFilehSQL:
 			//$NVCRIS(TEXTURECODE,texture)
 			//$NVCRIS(FORMATSTREETS,codedstreets)
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
+			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
+
 		{
 			rtn = FALSE;
 			nArgs = GetFunArgs(Args, Arg, 10, &hMem, pBrkPt, bpOffset, bpLen);
@@ -4664,6 +4666,12 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "TEXTURECODE"))
 			{
 				rtn = NVCTextureToCode(Arg[2]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CREATEDATABASE"))
+			{
+				rtn = NVCreateDB(Arg[2],atob(Arg[3]));
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}

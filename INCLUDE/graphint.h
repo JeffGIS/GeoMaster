@@ -2456,6 +2456,7 @@ BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile,BOOL AddFileID);
 BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
+BOOL NVCreateDB(LPSTR path, BOOL Delete);
 int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir);
 int CreateMultValueFile(LPSTR INDir);
