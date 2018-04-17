@@ -46,6 +46,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	PROCESS_INFORMATION pi;
 	DWORD	CRFlags = 0;
 	char	cmd[1024];
+	char	startDir[MAX_PATH]="[%DL]";
 	HWND	hWndServer = 0;
 	int		serverID;
 	LPSTR	pDot;
@@ -62,7 +63,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	si.dwFlags = STARTF_FORCEONFEEDBACK | STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_HIDE;
 	CRFlags = DETACHED_PROCESS | BELOW_NORMAL_PRIORITY_CLASS;
-	sprintf (cmd,"MapServer %s", config);
+	sprintf(cmd, "MapServer %s",config);
 	GSSiGetTempFileName(0, "gms", 0, (LPSTR)MapServerFile[serverID]);
 	pDot = strchr(MapServerFile[serverID], '.');
 	if (pDot)
@@ -75,6 +76,10 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 		sprintf(strchr(cmd, 0), " %s", command);
 	if (*TestFileLocation)
 		sprintf(strchr(cmd, 0), " [%%TESTDL]=%s;", TestFileLocation);
+	ExpandText(startDir);
+	if (*LastChr(startDir) == '\\')
+		*LastChr(startDir) = 0;
+	ExpandText(cmd);
 	if (CreateProcess(modulePath, cmd,
 		NULL,             // Process handle not inheritable. 
 		NULL,             // Thread handle not inheritable. 
