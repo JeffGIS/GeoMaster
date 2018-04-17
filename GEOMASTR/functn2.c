@@ -2653,6 +2653,10 @@ GSSiExitProg (1350);
 			}
 			goto RtnFalse;
 		}
+		case 948: //$MAPSERVER(TEST
+			PostMessage(hWndMain, GF_MAPSERVER_REQUEST, (WPARAM)hWndMain, 1);
+			goto RtnTrue;
+			break;
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 

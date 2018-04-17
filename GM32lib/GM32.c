@@ -24,7 +24,6 @@
 //#include <projects.h>
 #include "gm32lib.h"
 
-HWND	hWndMain;
 
 LPSTR	GetPacket (void);
 BOOL SendPacketP (LPSTR pPacket);

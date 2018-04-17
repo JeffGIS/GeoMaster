@@ -418,6 +418,7 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp (str,"LINKLINES",9)) return 945; 
 			if (!_fstrnicmp(str, "CLEARFILE",9)) return 946;
 			if (!_fstrnicmp(str, "CLIPBOARD", 9)) return 947;
+			if (!_fstrnicmp(str, "MAPSERVER", 9)) return 948;
 			return 0;
 }
 int	GetFunctionID10 (LPSTR str)
