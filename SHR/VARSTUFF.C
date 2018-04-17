@@ -3919,6 +3919,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%SETCOLOR", 384, TRUE);
 	AllocateTypeVar("%LINETRANSPARENCY", 385, FALSE);
 	AllocateTypeVar("%CURRENTZOOMLIST", 386, FALSE);
+	AllocateTypeVar("%CURRENTZOOMLISTITEM", 387, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5078,6 +5079,9 @@ GSSiExitProg (533);
 			break;
 		case 386:
 			strcpy(OutStr, CurrentZoomList);
+			break;
+		case 387:
+			strcpy(OutStr, CurrentZoomListEntry);
 			break;
 	}
 	GlobalUnlock (hGlobal);

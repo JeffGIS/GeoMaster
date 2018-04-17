@@ -3761,7 +3761,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 else if (LOWORD(wParam) == IDM_Z_OUT)
             	 	ZoomFactor = 0.5;
        			 HaltMapDisplay(FALSE,FALSE);
-    			 if (SetZoomVP (lParam))
+				 if (!InAccel || SetZoomVP(lParam))
 					 Point = CurView->MidPointW;
 				 else
     			 {

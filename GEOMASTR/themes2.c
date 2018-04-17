@@ -2851,7 +2851,7 @@ GSSiExitProg (1331);
 
 
 
-BOOL SelectThemeClasses (short iclass) 
+BOOL SelectThemeClasses (short iclass,BOOL select) 
 #if ENABLETRACE
 {GSSiEnterProg (1314);
 #endif
@@ -2873,18 +2873,23 @@ GSSiExitProg (1314);
 #endif
 		return FALSE;
 }
-	if (iclass >= 0) //eventually used to specify class
-{
-#if ENABLETRACE
-GSSiExitProg (1314);
-#endif
-		return FALSE;
-}
-	setDoPaint( FALSE); 
-    lpfnDISPLAYSELECTEDCLASSESMsgProc = MakeProcInstance((DLGPROC)DISPLAYSELECTEDCLASSESMsgProc, hInst);
-    DialogBox(hInst, (LPSTR)"DISPLAYSELECTEDCLASSES", CurView->hWnd, lpfnDISPLAYSELECTEDCLASSESMsgProc);
-    FreeProcInstance(lpfnDISPLAYSELECTEDCLASSESMsgProc);
-	setDoPaint( TRUE); 
+	if (!iclass) //select all
+	{
+		for (iclass = 0; iclass < CurTheme->NumClass;iclass++)
+			CurTheme->ClassStatus[iclass] = !select;
+	}
+	else if (iclass > 0)
+	{
+		CurTheme->ClassStatus[iclass-1] = !select;
+	}
+	else
+	{
+		setDoPaint(FALSE);
+		lpfnDISPLAYSELECTEDCLASSESMsgProc = MakeProcInstance((DLGPROC)DISPLAYSELECTEDCLASSESMsgProc, hInst);
+		DialogBox(hInst, (LPSTR)"DISPLAYSELECTEDCLASSES", CurView->hWnd, lpfnDISPLAYSELECTEDCLASSESMsgProc);
+		FreeProcInstance(lpfnDISPLAYSELECTEDCLASSESMsgProc);
+		setDoPaint(TRUE);
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (1314);
@@ -4477,6 +4482,7 @@ void DisplaySVThemeLegend(short From)
     if (CurTheme->ClassFont1.lfHeight)  
     	fontfactor = (double)CurTheme->ClassFont2.lfHeight/(double)CurTheme->ClassFont1.lfHeight;
     TotCount = 0;
+	SetThemeColorsFromScheme();
 	for (iclass=0;iclass<CurTheme->NumClass;iclass++) 
 	{
 		MaxCount = max (MaxCount,CurTheme->ClassCount[iclass]);
@@ -4769,8 +4775,6 @@ GetTitleSize:
 				DisplaySymInRect (CurView->hDC,symnum,ClassColorBox,LineSymFactor,TRUE);   
 				*CurSymbolFont[0] = 0;
 			} 
-			if (CurTheme->ClassStatus[iclass])  
-				DrawUnSelectedClass (iclass,ClassColorBox);
 		}
 		if (!CurTheme->CompressNullClasses || !CurTheme->HideNullClasses || CurTheme->ClassCount[iclass]>0) 
 			usedclass += classinc;
@@ -5057,8 +5061,16 @@ TooSmall:	fHeight *= 0.80;
 
 	} 
 
-	for (iclass=0;iclass<CurTheme->NumClass;iclass++)  //give theme editing functions correct final location
+	for (iclass = 0; iclass < CurTheme->NumClass; iclass++)  //give theme editing functions correct final location
+	{
 		CurTheme->ClassClrBox[iclass] = UsedBox[iclass];
+		if (CurTheme->ClassStatus[iclass])
+		{
+			ClassColorBox = CurTheme->ClassClrBox[iclass];
+			ClassColorBox.right += MaxTextWidth;
+			DrawUnSelectedClass(iclass, ClassColorBox);
+		}
+	}
 
 
 	if (hfontOld && hfont &&(hfontOld == hfont))

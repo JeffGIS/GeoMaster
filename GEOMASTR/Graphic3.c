@@ -1695,7 +1695,7 @@ GSSiExitProg (669);
 
 
     
-BOOL DisplayZoomList(short Opt)
+BOOL DisplayZoomListOld(short Opt)
 #if ENABLETRACE
 {
 	GSSiEnterProg(672);
@@ -1786,6 +1786,21 @@ BOOL DisplayZoomList(short Opt)
 	}
 #endif
 }
+BOOL DisplayZoomList(short Opt)
+{
+	BOOL rtn = FALSE;
+	int which = GetGlobalLVal2("[%USEZOOMLIST]", 1);
+	switch (which)
+	{
+	case 1:
+		rtn = DisplayZoomListOld(Opt);
+		break;
+	case 2:
+		rtn = DisplayZoomList2(Opt);
+		break;
+	}
+	return rtn;
+}
 
 BOOL DisplayZoomList2(short Opt)
 {
@@ -1802,7 +1817,7 @@ BOOL DisplayZoomList2(short Opt)
 	nRc = DialogBox(hInst, (LPSTR)"ZOOMLIST2", hWndMain, lpfnZOOMLISTMsgProc);
 	FreeProcInstance(lpfnZOOMLISTMsgProc);
 	ReloadMainMenu();
-	if (nRc == 1)
+	if (nRc >= 0)
 	{
 		ProcessZoomListCommand();
 	}

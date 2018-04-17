@@ -4,17 +4,30 @@
 #ifndef RampCompliance_h
 #define RampCompliance_h
 
+#if WIN32
 #include "graphint.h"   
 #include "gmextern.h"
 #include "RampStruct.h"
 #include "MPIntersection.h"
+#else
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "RampStruct.h"
+
+#define max(a,b)    (((a) > (b)) ? (a) : (b))
+#define min(a,b)    (((a) < (b)) ? (a) : (b))
+typedef char * LPSTR;
+
+LPSTR ExpandText(LPSTR InText);
+#endif
 
 //definitions for critical values
 #define CVButtonHeight 42.0
 #define CVDimensions 48.0
-#define CV2 100 / 48.0
+#define CV2 2.1
 #define CV5 5.0
-#define CV8 100.0 / 12.0
+#define CV8 8.3
 #define CV10 10.0
 #define CVNone -9999.0
 

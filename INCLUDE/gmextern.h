@@ -1792,6 +1792,7 @@ extern  int		GoogleMapWidth, GoogleMapHeight;
 extern  int		GoogleMapType;
 extern  BOOL	AllAreasArePositive;
 extern	char	CurrentZoomList[MAX_PATH];
+extern	char	CurrentZoomListEntry[256];
 
 extern HBITMAP hPatBMP[5];
 extern	int		ii;

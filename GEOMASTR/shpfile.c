@@ -1223,6 +1223,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 				if (dtime > 0)
 				{
 					GSSiClose(TMPFid);
+					GSSiRemove(Name);
 					haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
 				}
 				else
@@ -1425,7 +1426,7 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 					if (UseBounds)
 					{
 						MNMXCORD shpBounds = CurView->WBounds;
-						
+
 						ConvertBounds(&shpBounds, 1, 0);
 						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", shpBounds.xmn, shpBounds.xmx, shpBounds.ymn, shpBounds.ymx);
 					}
@@ -1448,6 +1449,8 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 					SHPstatement = 0;
 				}
 			}
+			else
+				ii = 1;
 			return loc;
 		}
 		default:

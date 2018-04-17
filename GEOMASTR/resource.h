@@ -3374,9 +3374,13 @@
 #define IDC_XCOORDFIELD                 2291
 #define IDC_YCOORDFIELD                 2292
 #define ID_SHARELISTS                   2293
+#define ID_SHARELIST                    2293
 #define ID_SYNCLISTS                    2294
 #define IDC_ZOOMLISTS                   2295
 #define ID_NEWZOOMLIST                  2296
+#define ID_DELETEITEMS                  2297
+#define ID_CLEARLIST                    2298
+#define ID_DELETELIST                   2299
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037

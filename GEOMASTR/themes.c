@@ -1392,6 +1392,22 @@ GSSiExitProg (1246);
 #endif
 }  
 
+void SetThemeColorGradient(void)
+{
+	int H1 = 50, H2 = 220;
+	int L1 = 50, L2 = 220;
+	int S1 = 50, S2 = 220;
+	for (int i = 0; i < CurTheme->NumClass; i++)
+	{
+		int H, L, S;
+		H = H1 + i * (H2 - H1) / CurTheme->NumClass;
+		L = L1 + i * (L2 - L1) / CurTheme->NumClass;
+		S = S1 + i * (S2 - S1) / CurTheme->NumClass;
+		CurTheme->ClassColor[CurTheme->SortOrder[i]] = ColorHLSToRGB(H, L, S);
+	}
+	return;
+}
+
 BOOL SetThemeColorsFromScheme (void)
 {   
 	int	R1,R2,G1,G2,B1,B2;
@@ -1404,7 +1420,8 @@ BOOL SetThemeColorsFromScheme (void)
 		return FALSE; 
 	if (CurTheme->ColorScheme == 5)
 	{
-		R1 = GetRValue (StartColor[1]);
+		SetThemeColorGradient();
+/*		R1 = GetRValue (StartColor[1]);
 		R2 = GetRValue (EndColor[4]);
 		G1 = GetGValue (StartColor[1]);
 		G2 = GetGValue (EndColor[4]);
@@ -1417,6 +1434,16 @@ BOOL SetThemeColorsFromScheme (void)
 			B = B1 + (i * (B2 - B1))/CurTheme->NumClass;
 			CurTheme->ClassColor[i] = RGB(R,G,B);   
 		} 
+		COLORREF c1 = 0, c2 = RGB(255, 255, 255);
+		unsigned int diff = (c2 - c1) / (CurTheme->NumClass+1);
+		c1 += diff / 2;
+		for (i = 0; i < CurTheme->NumClass; i++)
+		{
+			CurTheme->ClassColor[i] = c1;
+			c1 += diff;
+		}
+		*/
+
 	}
 	else
 	{

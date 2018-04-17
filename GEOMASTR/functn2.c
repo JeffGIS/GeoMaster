@@ -794,8 +794,9 @@ GSSiExitProg (1350);
 		}  
 		break;
 		
-		case 818: // $ZOOMLIST(SELECT or NEXT or PRIOR)
+		case 818: // $ZOOMLIST(SELECT or FIRST or NEXT or PRIOR)
 				  // $ZOOMLIST(ADD,POINTorBOUNDS,Name,pointorbounds)
+				  // $ZOOMLIST(CREATE,pathname);
 		{	 
 			
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
@@ -807,6 +808,10 @@ GSSiExitProg (1350);
 					n = -1;
 				else if (!_fstricmp(Arg[1], "FIRST"))
 					n = 0;
+				else if (!_fstricmp(Arg[1], "REMOVE"))
+					n = -2;
+				else
+					goto RtnFalse;
 				if (DisplayZoomList(n))
 					goto RtnTrue;
 			}
@@ -838,6 +843,11 @@ GSSiExitProg (1350);
 							goto RtnTrue;
 						}
 					}
+				}
+				else if (!_fstricmp(Arg[1], "CREATE"))
+				{
+					rtn = CreateNewZoomList(hWndMain, Arg[2]);
+					goto Rtnrtn;
 				}
 			}
 			goto RtnFalse;

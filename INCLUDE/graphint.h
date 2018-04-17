@@ -131,6 +131,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 BOOL ZoomToNextItemInCurrentList(void);
 BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds,LPSTR Name);
 BOOL ProcessZoomListCommand(void);
+BOOL CreateNewZoomList(HWND hWndDlg, LPSTR Name);
 int HighlightFromTheme(LPVIEWPORT CurView, LPTHEME CurTheme, int nItems, HANDLE hItems, HWND hWndPct, BOOL UnHighlight, BOOL ComputeAreaAndLength);
 BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -1831,7 +1832,7 @@ BOOL CopySelectedRecords (LPSTR File,BOOL ShowStatus,BOOL AssignNewRefs,HANDLE h
 BOOL SetVisibilityFromTheme (LPSTR PathName,LPSTR SymPrefix,short setopt);  
 BOOL GetSymListFromTheme (LPSTR Name,LPSTR SymList,int maxlen);
 BOOL ItemInPickMacro (int Item);
-BOOL SelectThemeClasses (short iclass);
+BOOL SelectThemeClasses (short iclass,BOOL select);
 //short AutoIncType (LPSTR Prefix);
 BOOL AutoIncTAG (LPSTR Prefix, LPSTR UDI,double IncVal);
 BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt);
@@ -2455,6 +2456,7 @@ BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile,BOOL AddFileID);
 BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
+BOOL NVCreateDB(LPSTR path, BOOL Delete);
 int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir);
 int CreateMultValueFile(LPSTR INDir);

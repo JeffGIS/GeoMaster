@@ -1,19 +1,33 @@
 //  RampCompliance.c
 //  CCodeLibrary
+#if WIN32
+#define strcasecmp	stricmp
+#endif
 
 #include "RampCompliance.h"
 
-int fixRampNum (int rampNum)
+int fixRampNum(int rampNum)
 {
-	if (rampNum == 23)
-		return 9;
-	if (rampNum == 45)
-		return 10;
-	if (rampNum == 67)
-		return 11;
-	if (rampNum == 81)
-		return 12;
-	return rampNum;
+    int rtn = rampNum;
+    
+    switch (rampNum)
+    {
+        case 23:
+            rtn = 9;
+            break;
+        case 45:
+            rtn = 10;
+            break;
+        case 67:
+            rtn = 11;
+            break;
+        case 81:
+            rtn = 12;
+            break;
+        default:break;
+    }
+    
+    return rtn;
 }
 
 static LPSTR selectCode(LPSTR codes, int whichCode)
@@ -30,6 +44,16 @@ static LPSTR selectCode(LPSTR codes, int whichCode)
 		return pBar;
 	return code;
 }
+
+double roundToTenth(double value)
+{
+    value *= 10;
+    value += 0.5;
+    value = floor(value);
+    value /= 10;
+    return value;
+}
+
 char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *tolerances,int codeSystem)
 {
     char *basic = (char *)calloc(16, sizeof(char));
@@ -107,6 +131,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     //ramp slopes (8,2)
     float value = fabsf(ramp->rampSlopeFront);
+    value = roundToTenth(value);
     
     if (value > (CV8 + tolerances->cv8) && value < 9990.0)
     {
@@ -123,6 +148,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     }
     
     value = fabsf(ramp->rampSlopeSide);
+    value = roundToTenth(value);
     
     if (value > (CV2 + tolerances->cv2) && value < 9990.0)
     {
@@ -151,6 +177,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     //upper landing slopes (2,2)
     value = fabsf(ramp->upperLandingSlopeFront);
+    value = roundToTenth(value);
     
     if (value > (CV2 + tolerances->cv2) && value < 9990.0)
     {
@@ -178,6 +205,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     }
     
     value = fabsf(ramp->upperLandingSlopeSide);
+    value = roundToTenth(value);
     
     if (value > (CV2 + tolerances->cv2) && value < 9990.0)
     {
@@ -206,6 +234,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     //street landing slopes (5,5)
     value = fabsf(ramp->streetLandingSlopeFront);
+    value = roundToTenth(value);
     
     if (value > (CV5 + tolerances->cv5) && value < 9990.0)
     {
@@ -233,6 +262,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     }
     
     value = fabsf(ramp->streetLandingSlopeSide);
+    value = roundToTenth(value);
     
     if (value > (CV5 + tolerances->cv5) && value < 9990.0)
     {
@@ -261,6 +291,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 
     //flare left slopes (10)
     value = fabsf(ramp->flareLeftSlopeFront);
+    value = roundToTenth(value);
     
     if (value > (CV10 + tolerances->cv10) && value < 9990.0)
     {
@@ -289,6 +320,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 
     //flare right slopes (10)
     value = fabsf(ramp->flareRightSlopeFront);
+    value = roundToTenth(value);
     
     if (value > (CV10 + tolerances->cv10) && value < 9990.0)
     {
@@ -317,6 +349,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     //sidewalk left slopes (5,2)
     value = fabsf(ramp->swkLeftSlopeFront);
+    value = roundToTenth(value);
     
     if (ramp->rampType == RampTypeParallel)
     {
@@ -375,6 +408,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     }
     
     value = fabsf(ramp->swkLeftSlopeSide);
+    value = roundToTenth(value);
     
     if (value > (CV2 + tolerances->cv2) && value < 9990.0)
     {
@@ -403,6 +437,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     //sidewalk right slopes (5,2)
     value = fabsf(ramp->swkRightSlopeFront);
+    value = roundToTenth(value);
     
     if (ramp->rampType == RampTypeParallel)
     {
@@ -459,7 +494,9 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             detail = strcat(detail, selectCode(SwkRightFrontMinor, codeSystem));
         }
     }    
+    
     value = fabsf(ramp->swkRightSlopeSide);
+    value = roundToTenth(value);
     
     if (value > (CV2 + tolerances->cv2) && value < 9990.0)
     {
@@ -741,10 +778,10 @@ int NVCTextureToCode(LPSTR texture)
 		return 0;
 	for (int i = 0; i < sizeof (textures) / 4; i++)
 	{
-		if (!stricmp(texture, textures[i]))
+		if (!strcasecmp(texture, textures[i]))
 			return i;
 	}
-	if (!stricmp(texture, "SmoothConcrete"))
+	if (!strcasecmp(texture, "SmoothConcrete"))
 		return 1;
 	return 0;
 }
@@ -754,11 +791,12 @@ int NVCObstructionToCode(LPSTR obstruction)
 		return 0;
 	for (int i = 0; i < sizeof (obstructions)/4; i++)
 	{
-		if (!stricmp(obstruction, obstructions[i]))
+		if (!strcasecmp(obstruction, obstructions[i]))
 			return i;
 	}
 	return 0;
 }
+
 char *rampToText(int intNum, RampStruct *ramp)
 {
     char *rampText = (char *)calloc(4480*2, sizeof(char));
