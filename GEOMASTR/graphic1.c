@@ -2239,7 +2239,7 @@ void ImediateProcessing (BOOL Imediate,BOOL Final)
 {GSSiEnterProg (19);
 #endif
 {
-    BOOL    Continue,DoPeek=TRUE;
+    BOOL    Continue,DoPeek=!MapServer;
     
     if (Imediate)       
     {

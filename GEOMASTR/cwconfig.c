@@ -713,6 +713,8 @@ GSSiExitProg (436);
 		 AllowCache = FALSE;
 		 NoAccel = TRUE;
 		 NoMenu = TRUE;
+		 wantGDIPlus = FALSE;
+
 	 }
  }
  if (_fstrstr(CmdLine, " /RESET "))
@@ -1344,6 +1346,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	LPSTR keyloc;
 	BOOL haveKey = FALSE;
 	CreatePrintBitmap(0);
+//	MessageBox(0, lpszCmdLine, 0, MB_OK);
 	//loadColors();
 	//loadColorChart();
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100102158.bmp");
@@ -1510,7 +1513,7 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
  //RecoverBadFile ();
  //int	t=IDNINT(atof("1E+08"));
 
-//MessageBox (0,"In GeoMaster","",MB_OK);
+  //MessageBox (0,lpszCmdLine,"In GeoMaster",MB_OK);
 
 #if CHECKMEM
 	InDebug=TRUE;
@@ -1961,6 +1964,7 @@ else if (MapServer)
 			PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_READY, (WPARAM)hWndMain, MapserverVPID);
 			MoveWindow(hWndMain, 0, 0, mapServerWidth, mapServerHeight, TRUE);
 			//PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 99L);
+			  //MessageBox(0, "Mapserver Open", "", MB_OK);
 			SetTimer(hWndMain, SUICIDE_TIMER, 2000, 0);
 		}
 		else
@@ -2357,7 +2361,7 @@ if (Message == GF_MAPSERVER_REQUEST)
 {
 	HFILE Fid;
 	OFSTRUCTGM OFStruct;
-	//MessageBox(hWnd, "Got request", "", MB_OK);
+	 //MessageBox(hWnd, "Got request", "", MB_OK);
 
 	MapserverRequestID = LOWORD(lParam);
 	MapserverVPID = HIWORD(lParam);
@@ -2371,7 +2375,7 @@ if (Message == GF_MAPSERVER_REQUEST)
 		_llseek(Fid, 0, 0);
 		_lread(Fid, cmd,ln);
 		_lclose(Fid);
-		//MessageBox(hWnd, cmd, "", MB_OK);
+		MessageBox(hWnd, cmd, "", MB_OK);
 		ProcessText (cmd);
 		free(cmd);
 	}
@@ -5457,10 +5461,18 @@ DisplayParcel:
           	 	 break;
 			
 			case SUICIDE_TIMER:
-				if (MapServerCalledFromWnd && !WindowExists(MapServerCalledFromWnd))
-				{
-					PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);//allows imediate processing to terminate 
-				}
+			{
+								  static BOOL test = TRUE;
+								  if (test)
+								  {
+									  test = FALSE;
+									  ProcessText("$MAPSERVER(TEST)");
+								  }
+								  if (MapServerCalledFromWnd && !WindowExists(MapServerCalledFromWnd))
+								  {
+									  PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);//allows imediate processing to terminate 
+								  }
+			}
 				break;
 
 			case GF_WHEELZOOM: //WheelZoom Timer
