@@ -9322,7 +9322,10 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 					&FilePtr->FldInfo);
 				if (irc)
 					goto NotFound;
-				_fstrcpy(Value, ValC);
+				if (!strlen(ValC) && lpFieldInfo->type == SQL_NUMERIC)
+					strcpy(Value, "0.0");
+				else
+					strcpy(Value, ValC);
 				goto GotData;
 
 			}

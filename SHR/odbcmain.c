@@ -1,6 +1,7 @@
 
 #include "graphint.h"  
 #include "extrndb.h"   
+#include <sql.h>
 #include <sqlext.h>
  
 #define	MAXPARAMLENGTH	128 
