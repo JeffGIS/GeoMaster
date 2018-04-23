@@ -2858,14 +2858,18 @@ BOOL SaveMapServerFile(void)
 			HBITMAP hBM = SelectObject(CurView->hDC, hMapServerBM);
 			HDIB32 hDIB32;
 			int	   lbitmap;
-			char mess[128];
 
-			GetObject(hBM, sizeof(BITMAP), &bm);
-			sprintf(mess, "bitmap %i %i %i %i", bm.bmHeight, bm.bmWidth, (int)CurView->hDC, (int)hDCScreenBuffer);
-			MessageBox(0, mess, "", MB_OK);
+			if (dbug)
+			{
+				char mess[128];
+				GetObject(hBM, sizeof(BITMAP), &bm);
+				sprintf(mess, "bitmap %i %i %i %i %i %i",CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel,(int)CurView->hDC, (int)hDCScreenBuffer);
+				MessageBox(0, mess, "", MB_OK);
+			}
 			hDIB32 = BitmapToDIB32(hBM);
 			strcpy(MapServerOutputBitmapFile, MapserverFile);
-			SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
+			if (dbug)
+				SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
 
 			SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
 			GMDestroyDIB32(hDIB32);

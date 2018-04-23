@@ -156,12 +156,20 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 		CurrentBufferRect.left=CurrentBufferRect.right=CurrentBufferRect.top=CurrentBufferRect.bottom=0;
 		hDCScreenBuffer = CreateCompatibleDC(hDCMain);    
 	}
-	if (!IsIconic (hWndMain) && !EqualRect (&Rect,&CurrentBufferRect))
+	if (MapServer || (!IsIconic (hWndMain) && !EqualRect (&Rect,&CurrentBufferRect)))
 	{
+		BITMAP bm;
 		CurrentBufferRect = Rect;
 		hBitmapScreenBuffer = CreateCompatibleBitmap (hDCMain,RECTWIDTH(&CurrentBufferRect),   
 															  RECTHEIGHT(&CurrentBufferRect)); 
-		hbmpOld = SelectObject (hDCScreenBuffer,hBitmapScreenBuffer);
+		if (dbug)
+		{
+			char mess[128];
+			GetObject(hBitmapScreenBuffer, sizeof(BITMAP), &bm);
+			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, hDCMain,(int)hDCScreenBuffer);
+			MessageBox(0, mess, "", MB_OK);
+		}
+		hbmpOld = SelectObject(hDCScreenBuffer, hBitmapScreenBuffer);
 		if (hbmpOrig)
 			GSSiDeleteObject (&hbmpOld);
 		else
@@ -178,7 +186,7 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
     	//ShowWindow (hWndMain,SW_HIDE);//SHOWMINIMIZED); 
     }
 	if (MapServer)
-		ReleaseDC(hWndMain, hDCMain);
+		ReleaseDC(NULL, hDCMain);
 	else
 	    ReleaseDC (hWndMain,hDCMain); 
 	return hDCScreenBuffer;

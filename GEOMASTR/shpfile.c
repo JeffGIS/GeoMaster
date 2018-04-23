@@ -4869,13 +4869,13 @@ DoPoly:
 				for (i=0;i<NumPoints;i++)
 				{
 char	str[32]="";
-if (dbug)
+/*if (dbug)
 {
 	DisplayMarkers = TRUE;
 	itoa(i, str, 10);
 	SetTextColor(CurView->hDC, RGB(255, 0, 0));
 	DisplayMarker(pPoints[i], 2, str, 0.16, 0, RGB(255, 0, 0), FALSE, FALSE, NULL, NULL, 0, 0, 0);
-}
+}*/
 
 				/*	if (i >= totpChk + *pNumPointsChk)
 					{
@@ -4911,12 +4911,12 @@ if (dbug)
 								ii=1;
 							}
 							NumPointsOrig = NumPoints2;
-							if (dbug)
+							/*if (dbug)
 							{
 								itoa(ipoc, str, 10);
 								SetTextColor(CurView->hDC, 0);
 								DisplayMarker(POC, 2, str, 0.16, 0, 0, FALSE, FALSE, NULL, NULL, 0, 0, 0);
-							}
+							}*/
 							if (!Display || FastMapCopy)
 								CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurveChordDist,1);
 							else

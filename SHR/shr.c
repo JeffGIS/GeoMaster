@@ -10420,11 +10420,11 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	}
 	pSaveScreen->Rect = Rect;
 	pSaveScreen->hBM = SaveScreen (hDC,Rect);
-	if (dbug)
+	/*if (dbug)
 	{
 		HDIB hDib=BitmapToDIB (pSaveScreen->hBM, 0,0);
 		SaveDIB (hDib,"c:\\temp\\temp.bmp");
-	}
+	}*/
 	if (!pSaveScreen->hBM)
 		GSSiGlobUlFree (&handle);
 	else

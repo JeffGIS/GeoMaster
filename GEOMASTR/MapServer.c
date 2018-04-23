@@ -60,9 +60,9 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
-	si.dwFlags = STARTF_FORCEONFEEDBACK;// | STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE;
-	CRFlags = DETACHED_PROCESS;
+	si.dwFlags =  STARTF_FORCEONFEEDBACK | STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_SHOWNORMAL;
+	CRFlags = DETACHED_PROCESS;// | STARTF_USESIZE | STARTF_USEPOSITION;
 	sprintf(cmd, "MapServer %s",config);
 	GSSiGetTempFileName(0, "gms", 0, (LPSTR)MapServerFile[serverID]);
 	pDot = strchr(MapServerFile[serverID], '.');
@@ -71,7 +71,13 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	sprintf(strchr(cmd, 0), " /MAPSERVER %i '%s'", (int)hWnd,MapServerFile[serverID]);
 
 	if (pRect)
+	{
+		si.dwX = pRect->left;
+		si.dwY = pRect->top;
+		si.dwXSize = RECTWIDTH(pRect);
+		si.dwYSize = RECTHEIGHT(pRect);
 		sprintf(strchr(cmd, 0), " /RECT %i %i %i %i", pRect->left, pRect->top, pRect->right, pRect->bottom);
+	}
 	if (command && *command)
 		sprintf(strchr(cmd, 0), " %s", command);
 	if (*TestFileLocation)
@@ -334,9 +340,8 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFa
 			}*/
 			if (!first)
 			{
-				if (dbug)
-				BitBlt(hDC,rect.left, rect.top, w, h,
-					TransparentDC, rect.left, rect.top, SRCCOPY);
+				//if (dbug)
+				//	BitBlt(hDC,rect.left, rect.top, w, h,TransparentDC, rect.left, rect.top, SRCCOPY);
 				BitBlt(tempDC, 0,0, w, h,
 					saveDC,0,0, SRCCOPY);
 				AlphaBlend(tempDC, 0,0, w, h,
@@ -371,9 +376,8 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFa
 					inc = -3;
 					minTrans = textFade;
 					FillRect(TransparentDC, &rect, GetStockObject (BLACK_BRUSH));
-					if (dbug)
-						BitBlt(hDC, rect.left, rect.top, w, h,
-						TransparentDC, rect.left, rect.top, SRCCOPY);
+					//if (dbug)
+					//	BitBlt(hDC, rect.left, rect.top, w, h,TransparentDC, rect.left, rect.top, SRCCOPY);
 					/*hNewBitmap = SelectObject(TransparentDC, hBMOrig);
 					GetObject(hNewBitmap, sizeof(bm), (LPSTR)&bm);
 					if (bm.bmBitsPixel == 32)
@@ -390,9 +394,8 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFa
 					SetBkColor(TransparentDC, 0);
 					DrawText(TransparentDC, title, -1, &textRect, DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
 					SelectObject(TransparentDC,OldFont);
-					if (dbug)
-						BitBlt(hDC, rect.left, rect.top, w, h,
-						TransparentDC, rect.left, rect.top, SRCCOPY);
+					//if (dbug)
+					//	BitBlt(hDC, rect.left, rect.top, w, h,TransparentDC, rect.left, rect.top, SRCCOPY);
 
 
 					hNewBitmap = SelectObject(TransparentDC, hBMOrig);
@@ -424,9 +427,8 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFa
 						bf.AlphaFormat =  AC_SRC_ALPHA;
 					}
 					hBMOrig = SelectObject(TransparentDC, hNewBitmap);
-					if (dbug)
-						BitBlt(hDC, rect.left, rect.top, w, h,
-						TransparentDC, rect.left, rect.top, SRCCOPY);
+					//if (dbug)
+					//	BitBlt(hDC, rect.left, rect.top, w, h,TransparentDC, rect.left, rect.top, SRCCOPY);
 				}
 			}
 			else

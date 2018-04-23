@@ -1295,11 +1295,11 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	}
     if (CurrentRefno == debugrefno)
 	   	ii=1;
-	else if (dbug)
+/*	else if (dbug)
 	{
 		Visible = FALSE;
 		goto Exit;
-	}
+	}*/
 /*if (CurrentRefno != 11687)
 	{
 		Visible = FALSE;

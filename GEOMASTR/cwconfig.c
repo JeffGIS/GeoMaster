@@ -1822,6 +1822,12 @@ GSSiExitProg (437);
 			 winw = 100;
 			 winh = 100;
 			 pAppName = mapServerAppName;
+			 if (dbug)
+			 {
+				 char mess[128];
+				 sprintf(mess, "winxywh %i %i %i %i", winx, winy, winw, winh);
+				 MessageBox(0, mess, "", MB_OK);
+			 }
 		 }
 
 		 hWndMain = CreateWindowEx(WS_EX_APPWINDOW,
@@ -2375,7 +2381,8 @@ if (Message == GF_MAPSERVER_REQUEST)
 		_llseek(Fid, 0, 0);
 		_lread(Fid, cmd,ln);
 		_lclose(Fid);
-		MessageBox(hWnd, cmd, "", MB_OK);
+		if (dbug)
+			MessageBox(hWnd, cmd, "", MB_OK);
 		ProcessText (cmd);
 		free(cmd);
 	}
