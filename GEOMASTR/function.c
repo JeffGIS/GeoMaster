@@ -1295,7 +1295,7 @@ TryDDEInitAgain:
 		
 		case 319:  //$RAW(global name - not in brackets) gets raw global value
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-			ExpandGlobalRaw (Arg[1],atob(Arg[2]),OutLoc,2048);
+			ExpandGlobalRaw (Arg[1],atob(Arg[2]),OutLoc,4096);
 			goto Rtnl;
 			
 		case 320: // $WEB(web address) executes app associated with file

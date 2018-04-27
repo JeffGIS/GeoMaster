@@ -883,7 +883,7 @@ ErrMes:
 		if (!UseRecNum)    
     		rc = SQLFetch(*hstmt);  
     		
-	    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
+		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && FilePtr->NumFields > 0)
 			goto s44;
 		if (rc == SQL_SUCCESS_WITH_INFO)
 			ii=1;
@@ -2096,7 +2096,7 @@ s44:  SQLDisconnect(hdbc);
 
 void ODBCTerminate (BOOL Quit)
 {   
-	if (!Quit && !GetGlobalBVal ("[%CLOSEODBC]"))
+	if (!Quit && !GetGlobalBVal2 ("[%CLOSEODBC]",FALSE))
 		return;
     while (NumOpenDBs--)
     { 

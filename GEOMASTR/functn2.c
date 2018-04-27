@@ -1696,12 +1696,12 @@ GSSiExitProg (1350);
 			//$TEXTFILE(CLOSE,fid)
 			//$TEXTFILE(REPLACE,file,fromtext,totext)
 		{
-			HFILE fid;
+			HFILE fid=-1;
 			rtn = 0;
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "OPEN"))
 			{
-				if (*Arg[3] == 'R')
+				if (*Arg[3] == 'R' ||!*Arg[3])
 				{
 					fid = GSSiOpenFile(Arg[2], 0, OF_READ);
 				}
@@ -1728,7 +1728,7 @@ GSSiExitProg (1350);
 						if (strstr(line, Arg[4]))
 						{
 							rtn = 1;
-							SetGlobalValue(Arg[3], line);
+							SetGlobalValue4(Arg[3], line, TRUE, 0, 0, 0);
 							break;
 						}
 					}
@@ -1776,7 +1776,7 @@ GSSiExitProg (1350);
 				else if (fgetstring(line, MAXVARLEN - 2, fid))
 				{
 					rtn = 1;
-					SetGlobalValue(Arg[3], line);
+					SetGlobalValue4(Arg[3], line,TRUE,0,0,0);
 				}
 				free(line);
 			}
