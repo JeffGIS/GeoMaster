@@ -34,6 +34,11 @@ BOOL FileIsVisible (LPSTR FileName)
 	long	ORAHeaderType;
 	char	tableName[128] = { 0 };
 	
+	if (!FileType(FileName))
+	{
+		rtn = FALSE;
+	}
+	else
 	switch (MapFileType (FileName))
 	{
 		case MT_INDEX:

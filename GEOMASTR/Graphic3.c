@@ -3146,6 +3146,7 @@ GSSiExitProg (603);
 							phValues++;
 						pValues = GlobalLock(*phValues);
 						strcpy(str, pValues);
+						ExpandText(str);
 						GlobalUnlock(*phValues);
 						GlobalUnlock(hValues);
 					}
