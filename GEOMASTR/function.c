@@ -3354,6 +3354,26 @@ SetVis:
 				SetPickGlobals (n-1);
 				goto RtnTrue;
 			}
+			else if (!stricmp(Arg[1], "REFNO"))//$PICK(REFNO,refno,file,vp)sets pick globals for item
+			{
+				short	pickfile = atoi (Arg[3]);
+				SetCurView(SetVPFromName(Arg[4], &Err));
+				pickfile += CurView->ID * 256;
+				if ((lpColon = _fstrchr(Arg[2], ':')))
+					*lpColon++ = 0;
+				else
+				{
+					Refno = atol(Arg[2]);
+					Arg[2] = 0;
+				}
+				if (PickByRefno(Refno, Arg[2], lpColon, pickfile))
+				{
+					SetPickGlobals(0);
+					goto RtnTrue;
+				}
+				goto RtnFalse;
+			}
+
 			else if (!stricmp (Arg[1],"ITEM"))//$PICK(ITEM,refno or tag,point,vp) picks nearest point on item to point
 											  //$PICK(ITEM,refno or tag) sets pick globals for item
 			{

@@ -5876,15 +5876,43 @@ GSSiExitProg (1350);
 				goto RtnTrue;
 			goto RtnFalse;
         }  
-	    case 1804: //$GETNEARESTINTCOORD(x,y,streetnum,nchar,filename)
-        {
-              
+		case 1804: //$GETNEARESTINTCOORD(x,y,streetnum,nchar,filename)
+		{
+
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
-			if (GetNearestIntPoint(Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],OutLoc))
+			if (GetNearestIntPoint(Arg[1], Arg[2], Arg[3], Arg[4], Arg[5], OutLoc))
 				goto Rtnl;
 			goto RtnFalse;
-        }  
-        case 1901: //$CONVERTTEXTPOINTERS ()
+		}
+		case 1805: //$GETPERPPOINTONPOLY(pickitemnum,pt,az)
+		{
+			int np;
+			HANDLE hPoly;
+			DPOINT pt;
+			int item;
+			LPDPOINT pPoints;
+			DPOINT IntPoint;
+			BOOL err;
+			double OffDist, PolyDist;
+
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			item = atoi(Arg[1]);
+			pt = atopt(Arg[2], &err);
+			if (!err)
+			if (GetPolyPoints((LPPICKDATAHEADER)&PickList[item], FALSE, &np, &hPoly))
+			{
+				pPoints = GlobalLock(hPoly);
+				if (GetPerpendicularOffsetToPoly(&pt, np, pPoints, &IntPoint, &OffDist, &PolyDist, 0))
+				{
+					dpointtoa(OutLoc, &IntPoint);
+					GSSiGlobUlFree(&hPoly);
+					goto Rtnl;
+				}
+				GSSiGlobUlFree(&hPoly);
+			}
+			goto RtnFalse;
+		}
+		case 1901: //$CONVERTTEXTPOINTERS ()
         {   
 			hMem = GSSiGlobAlloc (1232,GMEM_MOVEABLE,3*2048);
 			Arg1 = GlobalLock(hMem); 

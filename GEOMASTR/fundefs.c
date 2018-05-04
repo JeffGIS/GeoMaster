@@ -621,8 +621,9 @@ int	GetFunctionID18 (LPSTR str)
 			if (!_fstrnicmp (str,"LOADBLOCKINGPOINTS",18)) return 1801; 
 			if (!_fstrnicmp (str,"NEWELEMENTSETTINGS",18)) return 1802; 
 			if (!_fstrnicmp (str,"ADJOININGAREASFILE",18)) return 1803; 
-			if (!_fstrnicmp (str,"GETNEARESTINTCOORD",18)) return 1804; 
-			
+			if (!_fstrnicmp(str, "GETNEARESTINTCOORD", 18)) return 1804;
+			if (!_fstrnicmp(str, "GETPERPPOINTONPOLY", 18)) return 1805;
+
 			return 0; 
 }			
 
