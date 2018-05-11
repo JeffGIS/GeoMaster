@@ -3344,8 +3344,10 @@ void EndProcessingThemeLegends (void)
 			{
 				CurTheme=CurView->pTheme;
 				if ((CurTheme->ID == PF_COORD_DISPLAY || CurTheme->IsActive) &&
-				    CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
-				    ThemeDisplayLegend(4,SaveView->ID);
+					CurTheme->ID != GF_BOUNDS_DISPLAY_THEME)
+				{
+					ThemeDisplayLegend(4, SaveView->ID);
+				}
 			}
 		}
 	}
@@ -4437,7 +4439,10 @@ void DisplaySVThemeLegend(short From)
     if (From == 4)
 	{
 		ProcessDisplayPassEndMacro();
-    	DrawDelayedText ();
+		if (DrawDelayedText())
+		{
+
+		}
 		DisplayShowValInfobox ();
 	}
     if (!CurTheme->AddCommas)//UseCheckmark)

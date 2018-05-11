@@ -619,6 +619,7 @@ BOOL MoveTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
  POINT	CenterPoint;
  static	BOOL	HaveDown=FALSE;   
  static	short	InitVPID;
+ static BOOL	savewantGDIPlus;
 
 hDC = CurView->hDC;
 switch (Message)
@@ -636,6 +637,9 @@ switch (Message)
        	HaveDown=TRUE;
 		ClientToScreen (hWnd,(LPPOINT)&CenterPoint);
     	SetCursorPosGM (CenterPoint.x,CenterPoint.y,0); 
+		savewantGDIPlus = wantGDIPlus;
+		useGDIPlus = wantGDIPlus = FALSE;
+
    		break;
     
     case WM_PAINT:
@@ -703,6 +707,7 @@ switch (Message)
 		DisableMarginPan=FALSE;  
 		DoSave = FALSE;
 		SetViewport (InitVPID);
+		wantGDIPlus = savewantGDIPlus;
         return FALSE;
 
     case WM_RBUTTONUP:

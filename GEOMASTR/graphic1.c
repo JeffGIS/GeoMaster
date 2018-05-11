@@ -5111,7 +5111,7 @@ GSSiExitProg (56);
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
 //        ReportRect = SizeReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->FitToWindow);
-		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect);  
+		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect);  
         if (!CurView->FitToWindow)
         {
             CurView->ReportFactor = DeviceToScreenFactor();
@@ -5263,7 +5263,7 @@ NextView:
         SetGlobalValue ("%PREFIX",CurView->Prefix); 
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
-        DisplayReport (hDC,CurView->hReport,CurView->DrawRect,CurView->DrawRect,
+        DisplayReport (hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect,
                        CurView->ReportFactor,CurView->ReportRefno,0);
         DisplayViewID++; 
         goto Start;
@@ -5441,8 +5441,6 @@ NoFile:
 //	        HalfToneViewport ();
 	    }
         ThemeDisplayLegend(3,CurView->ID); 
-        if (Display && !Pick)
-	        DisplayTAGs(hDC);
 /*        if (CurView->Type == 7 && !(CurView->ID == *pCommandViewport))
         {    
 			DestroySavedScreen (&CurView->Bitmap,CurView->BitmapID);
@@ -5460,7 +5458,9 @@ NoFile:
     		DisplayHLTData (&StartHLTRef);
 		}
 		DisplayCloseIcon ();
-        if (!Printing)
+		//if (Display && !Pick)
+		//	DisplayTAGs(hDC);
+		if (!Printing)
         {  
 			CurView->CurDataRectID = -1;
 	       	RedrawActiveFunctions(GF_REDRAW);  

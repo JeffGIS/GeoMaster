@@ -7672,3 +7672,78 @@ void EscapeFunction (BOOL DoHalt)
 
 	return;
 }
+
+BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int right, _In_ int bottom, _In_ int width, _In_ int height)
+{
+	BOOL rtn = FALSE;
+	int np = 0, n;
+	DPOINT PC, POC, PT, RP;
+	double radius;
+	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(POINT)* 4096);
+	LPPOINT pPoints = GlobalLock(hPoints);
+	LPPOINT pPnts = pPoints;
+	int t = top;
+	int flipy = 0;
+
+	if (top < bottom)
+	{
+		//flipy = bottom - top;
+		top = bottom;
+		bottom = t;
+	}
+	width = min(width, (right - left) / 2);
+	height = min(height, (top - bottom) / 2);
+	width = height = min(width, height);
+	radius = (width + height) / 2.0;
+	PC.x = right;
+	PC.y = top - height;
+	RP.x = right - width;
+	RP.y = top - height;
+	POC = dnewpt(RP, PY / 4, radius);
+	PT.x = right - width;
+	PT.y = top;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = left + width;
+	PC.y = top;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = PC.x;
+	RP.y = top - height;
+	POC = dnewpt(RP, 3 * PY / 4, radius);
+	PT.x = left;
+	PT.y = RP.y;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = left;
+	PC.y = bottom + height;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = left + width;
+	RP.y = PC.y;
+	POC = dnewpt(RP, 5 * PY / 4, radius);
+	PT.x = RP.x;
+	PT.y = bottom;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = right - width;
+	PC.y = bottom;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = PC.x;
+	RP.y = bottom + height;
+	POC = dnewpt(RP, 7 * PY / 4, radius);
+	PT.x = right;
+	PT.y = RP.y;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+	*pPoints = *pPnts;
+	np++;
+	if (flipy)
+	{
+		for (int i = 0; i < np; i++)
+			pPnts[i].y += flipy;
+	}
+	Polygon(hdc, pPnts, np);
+	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}

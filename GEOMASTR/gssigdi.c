@@ -750,7 +750,6 @@ int WINAPI GSSiFrameRect(_In_ HDC hDC, _In_ CONST RECT *lprc, _In_ HBRUSH hbr)
 {
 	return FrameRect(hDC, lprc, hbr);
 }
-
 BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt)
 {
 	if (FidSTG != HFILE_ERROR)

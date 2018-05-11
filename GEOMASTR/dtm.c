@@ -2862,6 +2862,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
   		  	GSSiDeleteObject(&CurView->hRgn);
 	    	*pSaveVP = *CurView; 
 			SaveDC (CurView->hDC); 
+			CurView->NumNewObjects = 0;
 	    	CurView->NumFiles=1;    
 	    	CurView->SubFile = 0;
 	    	CurView->NumThemes=0;

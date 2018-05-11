@@ -147,10 +147,12 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 	if (!BufferedScreen)
 		return hDC;    
 	if (MapServer)
-		hDCMain = GetDC(hWndMain);
+	{
+		hWnd = GetDesktopWindow();
+		hDCMain = GetDC(hWnd);
+	}
 	else
 		hDCMain = GetDC(hWndMain);
-	GetClientRect (hWnd,&Rect);  
 	if (!hDCScreenBuffer)
 	{
 		CurrentBufferRect.left=CurrentBufferRect.right=CurrentBufferRect.top=CurrentBufferRect.bottom=0;
@@ -165,8 +167,14 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 		if (dbug)
 		{
 			char mess[128];
+			HBITMAP hcbm = CreateCompatibleBitmap(hDCMain, 10, 10);
+			sprintf(mess, "%i %i %i %i", Rect.left, Rect.top, Rect.right, Rect.bottom);
+			MessageBox(0, mess, "", MB_OK);
+			GetObject(hcbm, sizeof(BITMAP), &bm);
+			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, hDCMain, (int)hDCScreenBuffer);
+			MessageBox(0, mess, "", MB_OK);
 			GetObject(hBitmapScreenBuffer, sizeof(BITMAP), &bm);
-			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, hDCMain,(int)hDCScreenBuffer);
+			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, hDCMain, (int)hDCScreenBuffer);
 			MessageBox(0, mess, "", MB_OK);
 		}
 		hbmpOld = SelectObject(hDCScreenBuffer, hBitmapScreenBuffer);
@@ -186,7 +194,7 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
     	//ShowWindow (hWndMain,SW_HIDE);//SHOWMINIMIZED); 
     }
 	if (MapServer)
-		ReleaseDC(NULL, hDCMain);
+		ReleaseDC(hWnd, hDCMain);
 	else
 	    ReleaseDC (hWndMain,hDCMain); 
 	return hDCScreenBuffer;

@@ -3898,6 +3898,8 @@ BOOL GSSiDELETEOBJCT (HGDIOBJ hobj);
 HGDIOBJ GSSiSELECTOBJECT (HDC hdc,HGDIOBJ hobj);
 #define SelectClipRgn GSSiSELECTCLIPRGN
 int  WINAPI GSSiSELECTCLIPRGN(__in HDC hdc, __in_opt HRGN hrgn);
+#define RoundRect GSSiRoundRect
+BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int right, _In_ int bottom, _In_ int width, _In_ int height);
 #define Polygon GSSiPolygon
 BOOL  WINAPI GSSiPolygon(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt);
 #define Polyline GSSiPolyline

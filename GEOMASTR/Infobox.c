@@ -542,7 +542,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 					}
 				}
 			} 
-			DisplayReport (hDC,TAGBox.hReport,Rect,Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect);  
+			DisplayReport (hDC,TAGBox.hReport,Rect,&Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect);  
 //			ReportRect = SizeReport (hDC,TAGBox.hReport,TAGBox.rect,TRUE);
 			TAGBox.bmWidth = max (TAGBox.bmWidth,ReportRect.right - ReportRect.left + 1);
 			TAGBox.bmHeight += ReportRect.bottom - ReportRect.top + 1;
@@ -735,7 +735,8 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		if (CurView->DisplayInParent && CurView->Parent)            	
 			 SetViewport(CurView->Parent);  
 	} 
-	useGDIPlus = TRUE;
+	if (!MoveMode)
+		useGDIPlus = TRUE;
 	ContinueProcessing = TRUE;
 	SaveDC(hDC);
 	SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
@@ -1062,7 +1063,12 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 				else
 	    			Factor = 1; 
 				if (TAGBox.hReport)
-					DisplayReport (hDC,TAGBox.hReport,Rect,SaveRect, Factor*DeviceToScreenFactor(), TAGBox.Refno,0);  
+				{
+					LPRECT pClipRect = &SaveRect;
+					if (!TAGBox.CoordStyle)
+						pClipRect = 0;
+					DisplayReport(hDC, TAGBox.hReport, Rect, pClipRect, Factor*DeviceToScreenFactor(), TAGBox.Refno, 0);
+				}
 		    }
 	
 		    else if (!_fstrnicmp(Line,"$BITMAP(",8))

@@ -553,7 +553,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
     return;
 }
 
-BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Factor, long Refno,LPRECT pSizeRect)
+BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect)
 {
 	LPREPORT	pReport=(LPREPORT)GlobalLock (hReport);
 	int			irow, itab, MaxRowLen=0, ReportHeight=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
@@ -600,7 +600,8 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Fac
 	hStr = GSSiGlobAlloc ( 731,GMEM_MOVEABLE,4096);
 	str = GlobalLock (hStr);
 	SetDisplayMode (hDC, GF_TEXTMODE);    
-	SelectClipRgn (hDC,0);
+	if (pClipRect)
+		SelectClipRgn (hDC,0);
 	pReport = (LPREPORT)GlobalLock (hReport);
 	if (pSizeRect)
 	{
@@ -631,13 +632,17 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, RECT ClipRect,double Fac
 		pRows = (LPLONG)GlobalLock (pReport->hRows); 
 		pFirstRow = (LPSTR) (pRows + pReport->NumRows); 
 		if (Printing)
-			hRgn = 0;
-		else
 		{
-			hRgn = CreateRectRgn (ClipRect.left,ClipRect.top,ClipRect.right,ClipRect.bottom);
+			hRgn = 0;
+			SelectClipRgn(hDC, hRgn);
 		}
-		SelectClipRgn (hDC,hRgn);
-		GSSiDeleteObject(&hRgn);
+		else if (pClipRect)
+		{
+			RECT ClipRect = *pClipRect;
+			hRgn = CreateRectRgn (ClipRect.left,ClipRect.top,ClipRect.right,ClipRect.bottom);
+			SelectClipRgn(hDC, hRgn);
+			GSSiDeleteObject(&hRgn);
+		}
 	//SelectClipRgn (hDC,0);//tempdebug
 		y = Rect.top + Margin;	
 		for (irow = 0;irow<pReport->NumRows;irow++)

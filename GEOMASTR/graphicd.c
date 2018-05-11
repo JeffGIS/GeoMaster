@@ -2770,6 +2770,16 @@ GSSiExitProg (440);
 	if (Final)
 	{
 		ApplyVPShadows ();
+		if (Display && !Pick)
+		{
+			for (int iv = 0; iv < *pNumViewports; iv++)
+			{
+				SetViewport(iv + 1);
+				DisplayTAGs(CurView->hDC);
+			}
+		}
+		SetCurView(SaveVP);
+
 //		ApplyVPHalfTone (); 
 	}
     First = FALSE;

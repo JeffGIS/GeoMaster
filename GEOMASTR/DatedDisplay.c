@@ -389,7 +389,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 
 	case  GF_MAPSERVER_READY:
 		serverIsReady = TRUE;
-		hBackGroundServer = wParam;
+		hBackGroundServer = (HWND)wParam;
 		break;
 
 	case GF_MAPSERVER_FAILED:
