@@ -1729,6 +1729,23 @@ HBRUSH CreateTransparentBrush(int itrans, COLORREF color)
 	return brush;
 }
 
+HPEN CreateTransparentPen(int itrans, int width, COLORREF color)
+{
+	LOGBRUSH lb = { 0 };
+	DWORD style = 0;
+	int pct[5] = { 94, 50, 25, 6, 0 };
+	int transparency = (pct[max(0, min(4, itrans - 1))] * 255) / 100;
+	int r = GetRValue(color);
+	int g = GetGValue(color);
+	int b = GetBValue(color);
+	lb.lbColor = RGBI(r, g, b, transparency);
+
+	lb.lbStyle = BS_SOLID;
+	HPEN hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, width, &lb, 0, 0);
+
+	return hPen;
+}
+
 COLORREF ColorWithTransparency(COLORREF color, int transparency)
 {
 	COLORREF rtn = color;

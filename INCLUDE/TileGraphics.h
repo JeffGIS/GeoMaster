@@ -1,19 +1,19 @@
 #define TGPOLYGON	0
 #define TGPOLYLINE	1
 
+typedef struct{unsigned char x,y;}	BPOINT;
+typedef struct{char x:4,y:4;}CPOINT;
+typedef BPOINT				*LPBPOINT;
+typedef CPOINT				*LPCPOINT;
 #ifdef HBIRD
 typedef struct{short x,y;} POINTS;
 typedef POINTS *LPPOINTS;
 typedef struct{int x,y;} POINT;
 typedef POINT *LPPOINT;
+BPOINT POINTtoBPOINT(POINT p);
+POINT BPOINTtoPOINT(BPOINT p);
 #endif
-typedef struct{unsigned char x,y;}	BPOINT;
-typedef struct{char x:4,y:4;}CPOINT;
-typedef BPOINT				*LPBPOINT;
-typedef CPOINT				*LPCPOINT;
 
-//BPOINT POINTtoBPOINT (POINT p);
-//POINT BPOINTtoPOINT (BPOINT p);
 
 
 typedef	struct {

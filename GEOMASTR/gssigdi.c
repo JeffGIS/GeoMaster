@@ -2,12 +2,34 @@
 #include <limits.h>
 #include "TileGraphics.h"
 
-extern BOOL useGDIPlus;
+HBRUSH CreateTransparentBrush(int itrans, COLORREF color);
+HPEN CreateTransparentPen(int itrans, int width, COLORREF color);
 
+extern BOOL useGDIPlus;
+static int ii = 0;
 #define GetIValue(rgb)      (LOBYTE((rgb)>>24))
 
 typedef struct{ float x, y; }  FPOINT;
 typedef FPOINT			*LPFPOINT;
+#pragma pack(1)
+
+typedef struct {
+	unsigned char	Transparent : 1;
+	unsigned char	BGOpt : 1;
+	unsigned char	Pattern : 5;
+	unsigned char	notUsingPattern : 1;
+} PATBYTE;
+typedef PATBYTE	FAR	*LPPATBYTE;
+
+typedef struct {
+	unsigned char	Transparency : 7;
+	unsigned char	notUsingPattern : 1;
+} TRANSBYTE;
+typedef TRANSBYTE	FAR	*LPTRANSBYTE;
+
+#pragma pack()
+
+#define GetWValue(rgb)  ((BYTE)((rgb)>>24))
 
 BOOL GetSystemErrMessage(DWORD errorcode, LPSTR Mess);
 HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc);
@@ -58,7 +80,7 @@ extern HFILE SavedGraphicsFid;
 
 #define	MAXLAST	1024    
 #define MAXTRACK	4096
-#define MAXTRACKTYPE	18
+#define MAXTRACKTYPE	19
 
 static	short	SGid;
 #define SG_POLYLINE			1
@@ -108,14 +130,14 @@ static	BOOL	FirstTrack=TRUE;
 static	char	TrackTypeName[MAXTRACKTYPE][20] = {"Pen","Solid Brush","Hatch Brush","Pat Brush","Ind Brush","Load Bitmap",
 													"Create Font","Create FontInd","Create RectRgn","Create RectRgnInd",
 													"Create PolygonRgn","Create Bitmap","Create CompatBitmap","Create DIBitmap",
-													"Create Palette","Create EllipticRgn","Create DIBSection","CreateRoundRectRgn"};
+													"Create Palette","Create EllipticRgn","Create DIBSection","CreateRoundRectRgn","CreateExtPen"};
 static	int		CurSGFType=0;
 static	HFILE	SavedGraphicsFids[7];
 static	char	SavedGraphicsFileName[7][MAX_PATH];
 static	HDC		hDCSG=0;
 static	short	ln2;
 static	LOGPEN	LogPen, CurLogPen[7];
-static	EXTLOGPEN	ExtLogPen;
+static	EXTLOGPEN	ExtLogPen = { 0 };
 static	LOGBRUSH	LogBrush, CurLogBrush[7];
 static	HPEN	CurPen[7];
 static	HBRUSH	CurBrush[7];
@@ -270,18 +292,23 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 					DeleteObject (hBrush2);
 				break;
 			case SG_EXTLOGPEN:
-				BigRead (Fid,&ln2,2);
-				BigRead (Fid,&ExtLogPen,ln2);
+			{
+				LOGBRUSH lb = { 0 };
+				BigRead(Fid, &ln2, 2);
+				BigRead(Fid, &ExtLogPen, ln2);
+				lb.lbColor = ExtLogPen.elpColor;
+				lb.lbStyle = ExtLogPen.elpBrushStyle;
 				hPen = ExtCreatePen(ExtLogPen.elpPenStyle,
-									ExtLogPen.elpWidth,
-									&LogBrush,
-									ExtLogPen.elpNumEntries,
-									ExtLogPen.elpStyleEntry);
-				hPen2 = SelectObject (hDC,hPen);
+					ExtLogPen.elpWidth,
+					&lb,
+					0,
+					0);
+				hPen2 = SelectObject(hDC, hPen);
 				if (!hRestorePen)
 					hRestorePen = hPen2;
 				else
-					DeleteObject (hPen2);
+					DeleteObject(hPen2);
+			}
 				break;
 			case SG_SETTEXTCOLOR:
 				BigRead (Fid,&color,sizeof(COLORREF));
@@ -895,12 +922,21 @@ WritePoly:
 		if (useGDIPlus)
 		{
 			HPEN hpn = SelectObject(hdc,GetStockObject(BLACK_PEN));
-			if (GetObject(hpn, 0, 0) == sizeof (LOGPEN))
+			int ln = GetObject(hpn, 0, 0);
+			if (ln == sizeof (LOGPEN))
 			{
 				LOGPEN lp;
 				GetObject(hpn, sizeof(LOGPEN), &lp);
 				if (lp.lopnStyle != PS_NULL)
 					AAPolyLine(hdc, (LPPOINT)apt, cpt, lp.lopnColor, lp.lopnWidth.x);
+				SelectObject(hdc, hpn);
+			}
+			else if (ln == 24)
+			{
+				EXTLOGPEN lp;
+				GetObject(hpn, sizeof(EXTLOGPEN), &lp);
+				if (lp.elpPenStyle != PS_NULL)
+					AAPolyLine(hdc, (LPPOINT)apt, cpt, lp.elpColor, lp.elpWidth);
 				SelectObject(hdc, hpn);
 			}
 			else
@@ -1007,24 +1043,39 @@ HGDIOBJ GSSiSELECTOBJECT (HDC hdc,HGDIOBJ hobj)
 }
 HPEN    WINAPI GSSiCREATEPEN (int style, int width, COLORREF color)
 {
-	HPEN	rtn = CreatePen (style,width,color);
-
-/*	if (SavedGraphicsFid != HFILE_ERROR)
+	HPEN	rtn;
+	int intensity = GetIValue(color);
+	if (intensity != 0)
 	{
-		SGid = SG_CREATEPEN;
-		CreatePenStruct.Style = style;
-		CreatePenStruct.Width = width;
-		CreatePenStruct.Color = color;
-		BigWrite (SavedGraphicsFid,&SGid,2);
-		BigWrite (SavedGraphicsFid,&CreatePenStruct,sizeof(CreatePenStruct));
-		return rtn;
-	}*/
-	if (!InDebug)
-		return rtn;
-	if (!rtn)
-		MEMERR ("CreatePen Failed");
+		ii = 1;
+		BYTE		PatByt;
+		PATBYTE		PatByte;
+		HANDLE		hSaveBM;
+
+		PatByt = GetWValue(color);
+		memmove(&PatByte, &PatByt, 1);
+		rtn = CreateTransparentPen(PatByte.Pattern, width, color);
+	}
 	else
-		TrackObject (rtn,1);
+	{
+		rtn = CreatePen(style, width, color);
+		/*	if (SavedGraphicsFid != HFILE_ERROR)
+			{
+			SGid = SG_CREATEPEN;
+			CreatePenStruct.Style = style;
+			CreatePenStruct.Width = width;
+			CreatePenStruct.Color = color;
+			BigWrite (SavedGraphicsFid,&SGid,2);
+			BigWrite (SavedGraphicsFid,&CreatePenStruct,sizeof(CreatePenStruct));
+			return rtn;
+			}*/
+		if (!InDebug)
+			return rtn;
+		if (!rtn)
+			MEMERR("CreatePen Failed");
+		else
+			TrackObject(rtn, 1);
+	}
 	return rtn;
 }
 
@@ -1034,6 +1085,7 @@ HPEN WINAPI GSSiEXTCREATEPEN( DWORD iPenStyle,
                                     DWORD cStyle,
                                     DWORD *pstyle)
 {
+
 	HPEN	rtn = ExtCreatePen (iPenStyle,cWidth,plbrush,cStyle,pstyle);
 	
 	if (!InDebug)
@@ -1046,7 +1098,7 @@ HPEN WINAPI GSSiEXTCREATEPEN( DWORD iPenStyle,
 		MEMERR ("ExtCreatePen Failed");
 	}
 	else
-		TrackObject (rtn,1);
+		TrackObject (rtn,19);
 	return rtn;
 }
 
