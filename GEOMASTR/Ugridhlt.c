@@ -202,6 +202,9 @@ int TB_Subclass (HWND hWndDlg,UINT message,WPARAM wParam,LPARAM lParam)
 
 				case IDC_UGTABLE:
 				{
+					int icmd = HIWORD(wParam);
+					if (icmd == TB_GOTOROW)
+						ii = 1;
 					switch (HIWORD(wParam))
 					{
 						case TB_SETCOLWIDTH:
@@ -991,7 +994,11 @@ RedrawTable:
 							case IDC_UGTABLE:{
 
 												 //find the message sent (ti->msg)
-												 switch ((HIWORD(wParam))){
+								int icmd = HIWORD(wParam);
+								if (icmd == TB_GOTOROW)
+									ii = 1;
+												 switch (icmd)
+												 {
 												 case LBN_DBLCLK:
 													 PostMessage(hwnd, WM_COMMAND, ID_ZOOM_CURRENTITEM, 0L);
 													 break;
@@ -1163,7 +1170,8 @@ RedrawTable:
 																	   //ti->backcolor=GetSysColor(COLOR_HIGHLIGHT);
 																	   return 0;
 												 }
-
+												 case TB_GOTOROW:
+													 ti->row = lParam;
 												 case TBN_ROWCHANGE:
 												 {
 																	   long	RecNum = ti->row - startdata + 1;
@@ -1175,7 +1183,11 @@ RedrawTable:
 																		   SendDlgItemMessage(hwnd, IDC_UGTABLE, TB_SETHIGHLIGHT, FALSE, 0);
 																	   CurRow = ti->row;
 																	   if (InFlash && CurRow >= startdata - 1)
+																	   {
+																		   SendDlgItemMessage(hwnd, IDC_UGTABLE, LB_SETSEL, FALSE, -1);
+																		   SendDlgItemMessage(hwnd, IDC_UGTABLE, LB_SETSEL, TRUE, CurRow);
 																		   PostMessage(hwnd, WM_COMMAND, ID_FLASH_CURRENTITEM, 0L);
+																	   }
 																	   else if (ti->wParam & CONTROLKEY)
 																	   {
 																		   LastRecNum = RecNum;
@@ -1276,7 +1288,7 @@ RedrawTable:
 																	   return 1;
 												 }
 												 }
-												 return 1;
+												 return 0;
 							}
 							case IDC_UGTABLEHDG:{
 													ii = HIWORD(wParam);
@@ -1801,7 +1813,7 @@ RedrawTable:
 							{   
 								HighlightColor = FlashColor[i%NumFlash];
 					    		ShowPickedItem (CurView->hWnd,0); 
-					    		Sleep (30);
+								Wait2(30);
 					    	}  
 					    	PatternBrush = SavePatternBrush;
 							HighlightColor = SaveHC;
@@ -1810,8 +1822,13 @@ RedrawTable:
 					} 
 					if (SetNewBounds)
                     	PostMessage(CurView->hWnd, WM_COMMAND, IDM_Z_REDRAW, 0L);
-					if (CurRow < (nRow-1) && InFlash)
-						SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,CurRow+1); 
+					if (CurRow < (nRow - 1) && InFlash)
+					{
+						//SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,CurRow+1); 
+						DWORD wParam = MAKEWPARAM(IDC_UGTABLE, TB_GOTOROW);
+
+						PostMessage(hwnd, WM_COMMAND, wParam, CurRow + 1);
+					}
 					else
 						InFlash = FALSE;
 					return 0;
@@ -1826,7 +1843,11 @@ RedrawTable:
 						CurRow = startdata-1;
 					else
 						CurRow = startdata;
-					SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,CurRow);
+					//SendDlgItemMessage(hwnd,IDC_UGTABLE,TB_GOTOROW,0,CurRow);
+					DWORD wParam = MAKEWPARAM(IDC_UGTABLE, TB_GOTOROW);
+
+					PostMessage(hwnd, WM_COMMAND, wParam, CurRow);
+
                 	return 0;
                 	
                 case ID_FLASH_STARTINGATCURRENTITEM: 
