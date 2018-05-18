@@ -5,6 +5,7 @@
 #include <sys\types.h>
 #include <sys\stat.h>         
 
+BOOL maxIntensity = FALSE;
 static	char	Value[512], KeyVal[512], VarVal[1024], MinClassValue[512];
 static THEMEHIGHLIGHTKEY	ThemeHighlightKey;
 static THEMEHIGHLIGHTDATA	ThemeHighlightData;
@@ -3670,7 +3671,8 @@ GSSiExitProg (1270);
 		PATBYTE		PatByte;
 				
     	width = PatByt = GetWValue (CurTheme->ClassColor[iclass]); 
-    	if (CurTheme->DataType != 2)
+		_fmemmove(&PatByte, &PatByt, 1);
+		if (CurTheme->DataType != 2)
     		width = 0; 
     	else if (CurTheme->ClassFactor[iclass] > 0)
     		width = CurTheme->ClassFactor[iclass];
@@ -3700,7 +3702,6 @@ GSSiExitProg (1270);
 			else
 				width = -CurTheme->AbsLineWidth[iclass] * BaseDistToWinDist;
 		}
-    	_fmemmove (&PatByte,&PatByt,1);
     	color = ColorWOWidth (CurTheme->ClassColor[iclass]);
         if (!width)
         {  
@@ -3720,7 +3721,7 @@ GSSiExitProg (1270);
 		else if (PatByte.Pattern == 5)
 			CurTheme->ClassBrush[iclass] = GetStockObject(NULL_BRUSH);
 		else if (useGDIPlus)
-			CurTheme->ClassBrush[iclass] = CreateTransparentBrush(PatByte.Pattern - 1, color);
+			CurTheme->ClassBrush[iclass] = CreateTransparentBrush(PatByte.Pattern, color);
 		else
 		{
 			HBITMAP hbmp = hPatBMP[PatByte.Pattern - 1];
@@ -4756,10 +4757,13 @@ GetTitleSize:
     					SelectObject (CurView->hDC,OldBrush); 
     					SelectObject (CurView->hDC,OldPen); 
 		    		}
-		    		else
-		    		{
-						FillRect (CurView->hDC,&FactoredRect,CurTheme->ClassBrush[iclass]);
-						FrameRect (CurView->hDC,&FactoredRect,GetStockObject(BLACK_BRUSH));
+					else
+					{
+						if (Printing)
+							maxIntensity = TRUE; //PDF plots dont handle transparency well
+						FillRect(CurView->hDC, &FactoredRect, CurTheme->ClassBrush[iclass]);
+						FrameRect(CurView->hDC, &FactoredRect, GetStockObject(BLACK_BRUSH));
+						maxIntensity = FALSE;
 					}  
 				}
 			}

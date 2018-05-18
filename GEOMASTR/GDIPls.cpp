@@ -182,7 +182,6 @@ extern "C" void AAPolyLineF(HDC hdc, LPFPOINT pPoints, int np, COLORREF ColorRef
 
 extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb)
 {
-	extern HBITMAP hPatBMP[5];
 
 	using namespace Gdiplus;
 	GdiplusStartupInput gdiplusStartupInput;
@@ -222,11 +221,15 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			}
 			else
 			{
+				extern BOOL maxIntensity;
 				int intensity = GetIValue(lb->lbColor);
 				if (!intensity)
 					intensity = defaultAreaTransparency;
+				if (maxIntensity)
+					intensity = 255;
 				SolidBrush sbr(Color(intensity, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&sbr, &pth);
+				graphic.Flush();
 			}
 		}
 		if (lp && lp->lopnStyle != PS_NULL)
