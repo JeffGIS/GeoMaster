@@ -1873,9 +1873,12 @@ BOOL ProcessGraphicsFunction4 (short Function,
 		case GF_MOVE_OFFSETLINE:
 			 return (MoveOffsetLine (hWnd,Message,wParam,lParam,Function));
 			 break;
-	    case GF_IMAGEZOOM:
-	    	 return (ImageZoom (hWnd,Message,wParam,lParam)); 
-             break;
+		case GF_IMAGEZOOM:
+			return (ImageZoom(hWnd, Message, wParam, lParam));
+			break;
+		case GF_SCREENZOOM:
+			return (ScreenZoom(hWnd, Message, wParam, lParam));
+			break;
 		case GF_DISPLAY_DATED_ORTHOS:
 			return (DisplayDatedOrthos(hWnd, Message, wParam, lParam, Function));
 			break;

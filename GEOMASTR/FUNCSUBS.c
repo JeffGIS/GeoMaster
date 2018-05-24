@@ -11,6 +11,7 @@
 #define BGUPDATEWINDOWCLASS	"BGUpdateWindowClass"
 #define IMAGEZOOMWINDOWCLASS	"ImageZoomWindowClass"
 
+static int imageZoomFrom;
 
 typedef struct	{ 
 					DPOINT	AvePoint,
@@ -64,7 +65,7 @@ static	HBITMAP	hBMImageZoom=0,hOldBMImageZoom;
 static	int		ImageZoomSize=300,ImageZoomSizeSmall=150,ImageZoomSizeMedium=300,ImageZoomSizeLarge=450;
 static	int		ImageZoomHeight=300,ImageZoomWidth=300;
 static	HDIB32	hDibImageZoom=0;
-static	int		ImageZoomShape=0;
+static	int		ImageZoomShape=1;
 static	int		ImageZoomBorder=1;
 static	int		ImageZoomOffset=1;
 static	int		ImageZoomXoff=0,ImageZoomYoff=0;
@@ -7383,7 +7384,7 @@ void DisplayImageZoom (HWND hWnd,HDC hDC,int From)
 		ReleaseDC (hWnd,hDC);
 		LastImageZoomRect.left = LastImageZoomRect.right;
 	}
-	else if (From == 2)
+	else if (From == 2 || From == 3)
 	{
 		w = RECTWIDTH(&cRect);
 		h = RECTHEIGHT(&cRect);
@@ -7392,8 +7393,13 @@ void DisplayImageZoom (HWND hWnd,HDC hDC,int From)
 		centerPoint.y -= ImageZoomYoff;
 		//SetViewport (ImageZoomVP);
 		ScreenToClient (CurView->hWnd,&centerPoint);
-		wPoint = ScreenPtToBasePt (centerPoint);
-		fPoint = BasePtToFilePtD (wPoint);
+		if (From == 2)
+		{
+			wPoint = ScreenPtToBasePt(centerPoint);
+			fPoint = BasePtToFilePtD(wPoint);
+		}
+		else
+			fPoint = PointToDPoint (centerPoint);
 		//BitBlt (hDC,0,0,w,h,
 		//		hDCImageZoom,fPoint.x-w/2,ImageZoomHeight-(fPoint.y+h/2),SRCCOPY);
    		if (!StretchDIBitsFromHandle (hDC,0,0,w,h,fPoint.x-w/2,(fPoint.y-h/2),w,h,hDibImageZoom,(UINT)DIB_RGB_COLORS,SRCCOPY,1))
@@ -7404,14 +7410,19 @@ void DisplayImageZoom (HWND hWnd,HDC hDC,int From)
 		{
 			HBRUSH hBrush = GetStockObject(NULL_BRUSH);
 			HBRUSH	hOldBrush = SelectObject(hDC, hBrush);
+			HPEN hPen = CreatePen(PS_SOLID, 2, 0);
+			HPEN hOldPen = SelectObject(hDC, hPen);
+				 
 			RECT	rect = cRect;
 
 			InflateRect (&rect,-1,-1);
 			if (ImageZoomShape == 1)
-				Ellipse (hDC,1,1,w-1,h-1);
+				Ellipse(hDC, 1, 1, w - 1, h - 1);
 			else
-				FrameRect (hDC,&rect,hBrush);
+				Rectangle(hDC, rect.left, rect.top, rect.right, rect.bottom);
 			SelectObject(hDC, hOldBrush);
+			SelectObject(hDC, hOldPen);
+			DeleteObject(hPen);
 		}
 	}
 	return;
@@ -7423,7 +7434,7 @@ void SetImageZoomSize (HWND hWnd,int size)
 	RECT	wRect;
 	POINT	pt;
 
-	ShowWindow (hWnd,SW_HIDE);
+	ShowWindow(hWnd, SW_HIDE);
 	if (size)
 		ImageZoomSize = size;
 
@@ -7578,7 +7589,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lPa
 
 			_fmemset(&ps, 0x00, sizeof(PAINTSTRUCT));
             hDC = BeginPaint(hWnd, &ps);
-			DisplayImageZoom (hWnd,hDC,2);
+			DisplayImageZoom(hWnd, hDC, imageZoomFrom);
             EndPaint(hWnd, &ps);
 		}
 			return 0;
@@ -7601,7 +7612,7 @@ LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lPa
 				GetWindowRect (hWnd,&newRect);
 				if (n++ == 100)
 					n = 0;
-				DisplayImageZoom (hWnd,hDC,2);
+				DisplayImageZoom (hWnd,hDC,imageZoomFrom);
 				ReleaseDC (hWnd,hDC);
 			}
 
@@ -7694,6 +7705,27 @@ BOOL CreateImageZoomWindow (int VPID)
 	BOOL	On=TRUE;
 	MNMXCORD	BitmapBounds,WBounds;
 
+	if (hWndImageZoom)
+		DestroyWindow(hWndImageZoom);
+
+	if (VPID < 0)
+	{
+		HBITMAP hBitmap;
+		BITMAPINFOHEADER DibInfo = { 0 };
+		RECT clientRect;
+
+		GetClientRect(CurView->hWnd, &clientRect);
+		ImageZoomVP = -VPID;
+		SetViewport(ImageZoomVP);
+		hBitmap = SaveScreen(CurView->hDC,clientRect);
+		hDibImageZoom = BitmapToDIB32(hBitmap);
+		if (!GetBitmapInfoFromHandle(&DibInfo, hDibImageZoom))
+			return FALSE;
+		BitmapBounds.xmn = BitmapBounds.ymn = 0;
+		BitmapBounds.xmx = DibInfo.biWidth - 1;
+		BitmapBounds.ymx = DibInfo.biHeight - 1;
+		goto HaveImage;
+	}
 	ImageZoomVP = VPID;
 	SetViewport (ImageZoomVP);
 	for (i=0;i<CurView->NumFiles;i++)
@@ -7742,6 +7774,7 @@ BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
    {
    	case GF_INIT:
        	AddLBUTTON = FALSE;
+		imageZoomFrom = 2;
 		CreateImageZoomWindow (CurView->ID);
    		break;
     
@@ -7760,7 +7793,12 @@ BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 		else
 			CreateImageZoomWindow (CurView->ID);
 		break;
-		
+	
+	case GF_EXIT_VIEWPORT:
+		if (hWndImageZoom)
+			DestroyWindow(hWndImageZoom);
+		break;
+
     case WM_MOUSEMOVE:
     {
 		POINT mousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
@@ -7793,6 +7831,66 @@ BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     }
     return (TRUE);
 } 
+
+BOOL ScreenZoom(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+{
+
+	switch (Message)
+	{
+	case GF_INIT:
+		AddLBUTTON = FALSE;
+		imageZoomFrom = 3;
+		CreateImageZoomWindow(-CurView->ID);
+		break;
+
+	case WM_LBUTTONDOWN:
+		break;
+	case WM_LBUTTONUP:
+		if (hWndImageZoom)
+			PostMessage(hWndImageZoom, Message, wParam, lParam);
+		break;
+
+	case WM_RBUTTONUP:
+		if (wParam)
+			return FALSE;
+		if (hWndImageZoom)
+			DestroyWindow(hWndImageZoom);
+		else
+			CreateImageZoomWindow(CurView->ID);
+		break;
+
+	case WM_MOUSEMOVE:
+	{
+						 POINT mousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
+						 POINT screenPoint = mousePoint;
+
+						 if (hWndImageZoom && PtInRect(&CurView->ScreenRect, mousePoint))
+						 {
+							 RECT	wRect;
+							 int	x, y, w, h;
+
+							 ClientToScreen(hWnd, &screenPoint);
+							 GetWindowRect(hWndImageZoom, &wRect);
+							 w = RECTWIDTH(&wRect);
+							 h = RECTHEIGHT(&wRect);
+							 SetImageZoomOffset();
+							 x = (screenPoint.x + ImageZoomXoff) - w / 2;
+							 y = (screenPoint.y + ImageZoomYoff) - h / 2;
+							 //	MoveWindow (hWndImageZoom,x,y,w,h,FALSE);
+							 SetWindowPos(hWndImageZoom, 0, x, y, w, h, SWP_NOZORDER | SWP_NOOWNERZORDER);
+							 ShowWindow(hWndImageZoom, SW_SHOW);
+						 }
+						 else if (hWndImageZoom)
+							 ShowWindow(hWndImageZoom, SW_HIDE);
+
+	}
+		break;
+
+	default:
+		return (FALSE);
+	}
+	return (TRUE);
+}
 
 BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors)
 {
