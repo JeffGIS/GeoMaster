@@ -3929,7 +3929,7 @@ double RotateTextForEasyRead(double TXRot)
 	return TXRot;
 }
 
-void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color, int units, LPSTR format)
+void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color, int units, LPSTR format, double txtsize)
 #if ENABLETRACE
 {
 	GSSiEnterProg(825);
@@ -3941,6 +3941,7 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color,
 		int		TipWidth = 2;
 		int		ToPointOffset = 10;
 		double	dist = ldistpp(p1, p2);
+		double  textsize = 18;
 		double	az = LTWOPI(getazd(p1, p2));// +HALFPI);
 		int h;
 		DPOINT p;
@@ -3949,6 +3950,8 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color,
 		COLORREF oldTextColor;
 		char defaultformat[] = "%.1f";
 
+		if (txtsize > 0)
+			textsize = txtsize;
 		az = RotateTextForEasyRead(az);
 		units = max(1, units);
 		if (!format || !*format)
@@ -3972,7 +3975,7 @@ void DimensionLine(HDC hDC, LPDPOINT p1, LPDPOINT p2, short opt, COLORREF Color,
 			int nPoly,HANDLE hPolyPartLen,short UseHalfTone,LPSTR ActualText,short MinSize,LPTHEME CurTheme,LPRECT pTextRect,LPRECT pFullRect,LPRECT pFlagRect)
 			*/
 		sprintf(txt, format, dist);
-		h = 18 * DeviceToScreenFactor();
+		h = textsize * DeviceToScreenFactor();
 		DispText(hDC, FALSE, P.x, P.x,P.y, 0, 2, 2, h, 1, 1, 2, FALSE, az, txt, 0, FALSE, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		SetBkMode(hDC, oldBKMode);
 		SetTextColor (hDC,oldTextColor);

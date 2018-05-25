@@ -7014,13 +7014,14 @@ HaveVP:;
 			  goto Rtnl;
 		}
 			break;
-		case 787: // $DIMLINE(x1,y1,x2,y2,opt,color,units,format,ViewPort)
+		case 787: // $DIMLINE(x1,y1,x2,y2,opt,color,units,format,ViewPort,txtsize)
 		{	
 			LPSTR	lpEnd;
 			DPOINT	p1, p2;
 			int opt;
 			COLORREF color;
 			int units;
+			double txtsize;
 
 			if (!CurView)
 				goto RtnFalse;
@@ -7035,7 +7036,8 @@ HaveVP:;
 			color = (COLORREF)atoi(Arg[6]);
 			units = atoi(Arg[7]);
 			SetCurView(SetVPFromName(Arg[9], &Err));
-			DimensionLine(CurView->hDC, &p1, &p2, opt, color,units,Arg[8]);
+			txtsize = atof(Arg[10]);
+			DimensionLine(CurView->hDC, &p1, &p2, opt, color,units,Arg[8],txtsize);
 			goto RtnTrue;
 		}
 

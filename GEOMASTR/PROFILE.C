@@ -3,6 +3,7 @@
 #include "gmextern.h"
 
 BOOL InProfile=FALSE;
+static	LPVIEWPORT	LastProfileLocVP = 0;
 
  
 void SmoothProfile (HPDPOINT pProfile,long np)
@@ -1205,14 +1206,18 @@ GSSiExitProg (1288);
 }
 #endif
 }
-
+void ResetProfileVP(LPVIEWPORT pVp)
+{
+	if (LastProfileLocVP == pVp)
+		LastProfileLocVP = NULL;
+	DisplayProfileLink(0);
+}
 BOOL DisplayProfileLoc (LPPOINT pWinPoint,LPDPOINT BasePoint,LPVIEWPORT pVP,BOOL LoadConfig)
 #if ENABLETRACE
 {GSSiEnterProg (1316);
 #endif
 {   
 	static	POINT	LastLine[2];
-	static	LPVIEWPORT	LastVP=0; 
 	LPVIEWPORT	SaveVP=CurView;  
 	short	OldMode; 
 	HPEN	hPen, hOldPen;  
@@ -1220,7 +1225,7 @@ BOOL DisplayProfileLoc (LPPOINT pWinPoint,LPDPOINT BasePoint,LPVIEWPORT pVP,BOOL
 	
 	if (LoadConfig) 
 	{
-		LastVP = NULL;
+		LastProfileLocVP = NULL;
 {
 #if ENABLETRACE
 GSSiExitProg (1316);
@@ -1228,12 +1233,12 @@ GSSiExitProg (1316);
 		return FALSE;
 }
 	}
-	if (LastVP)
+	if (LastProfileLocVP)
 	{ 
 		SaveDC (CurView->hDC);
 	    SetDisplayMode (CurView->hDC,GF_SCREENMODE);
 	    SelectClipRgn (CurView->hDC,0);
-		SetCurView (LastVP);
+		SetCurView(LastProfileLocVP);
 		OldMode = SetROP2(CurView->hDC,R2_NOT);
 		hPen = CreatePen (PS_SOLID,0,RGB(255,0,0));
 		hOldPen = SelectObject (CurView->hDC,hPen);
@@ -1247,7 +1252,7 @@ GSSiExitProg (1316);
 	if (!pVP) 
 	{   
 		DisplayProfileInfo (NULL,LastLine[0]);
-		LastVP = NULL;
+		LastProfileLocVP = NULL;
 {
 #if ENABLETRACE
 GSSiExitProg (1316);
@@ -1255,10 +1260,10 @@ GSSiExitProg (1316);
 		return FALSE;
 }
 	}
-	LastVP = pVP;
+	LastProfileLocVP = pVP;
 	if (BasePoint->x < 0)
 	{
-		LastVP = 0;
+		LastProfileLocVP = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (1316);
@@ -1275,7 +1280,7 @@ GSSiExitProg (1316);
 //		if (BasePoint->x > LastDist)  
 		if (pWinPoint->x < pVP->ProfileRect.left || pWinPoint->x > pVP->ProfileRect.right)
 		{
-			LastVP = 0;
+			LastProfileLocVP = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (1316);
@@ -1323,6 +1328,7 @@ BOOL DisplayProfileLink (LPDPOINT pWinBasePoint)
 	POINT	WinPoint;
 	LPTHEME	pTheme;
 	BOOL	rtn=TRUE;
+	BOOL	doZoom = FALSE;
 	
 	if (!pWinBasePoint) 
 	{
@@ -1360,7 +1366,8 @@ Show:
 	SetViewport (pTheme->DisplayViewport);
 	LastVP = CurView;
 	WinPoint = BasePtToScreenPt (pWinBasePoint);
-	if ((WinPoint.x < CurView->ScreenRect.left || WinPoint.x > CurView->ScreenRect.right) && GetGlobalBVal2 ("[%AUTOPROFILEPAN]",TRUE))
+	if ((WinPoint.x < CurView->ScreenRect.left || WinPoint.x > CurView->ScreenRect.right) && GetGlobalBVal2("[%AUTOPROFILEPAN]", TRUE))
+		doZoom = TRUE;
 	{
 		DPOINT	MidPoint=*pWinBasePoint;
 		DPOINT	CurMidPoint = MinMaxMidPointD (&CurView->WBounds);
@@ -1401,10 +1408,17 @@ Show:
 					if (IntersectPolys1 (GF_LINE,GF_AREA,2,ProfPoints,0,nPnts,pPolyPoints,0,0,&ProfPoints[1],&IntPoint,&D1,&D2,0))
 					{
 						Points[1] = IntPoint;
+						if (Points[0].y < CurView->WBounds.ymn || Points[0].y > CurView->WBounds.ymx ||
+							Points[1].y < CurView->WBounds.ymn || Points[1].y > CurView->WBounds.ymx)
+							doZoom = TRUE;
 						MidPoint = MidPointD (Points[0],Points[1]);
 						d = ldistp (Points[0],Points[1]);
 						if (d > 0)
+						{
 							Scale = 1.5 * d / (CurView->ScreenRect.bottom - CurView->ScreenRect.top);
+							if (Scale < CurView->Scale * 0.67)
+								doZoom = TRUE;
+						}
 					}
 				}
 				GSSiGlobUlFree (&hPoly);
@@ -1412,9 +1426,13 @@ Show:
 		}
 		SaveInShowZoomArea = InShowZoomArea;
 		InShowZoomArea = TRUE;
-		ZoomToPointAndScale (MidPoint,Scale,TRUE);
+		if (doZoom)
+		{
+			ZoomToPointAndScale(MidPoint, Scale, TRUE);
+			LastProfileLocVP = 0;
+			rtn = FALSE;
+		}
 		InShowZoomArea = SaveInShowZoomArea;
-		rtn = FALSE;
 	}
 	SaveDC (CurView->hDC); 
     SetDisplayMode (CurView->hDC,GF_SCREENMODE);

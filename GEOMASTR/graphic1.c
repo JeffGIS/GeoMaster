@@ -1083,6 +1083,7 @@ DisplayImage:
 				CurView->hRgn = CreateVPRgn(FALSE,FALSE);
 				SelectClipRgn (CurView->hDC,CurView->hRgn);
 				GSSiDeleteObject(&CurView->hRgn);
+				ResetProfileVP(CurView);
 			    if (CurView->StretchImage[CurView->CurFile] == 1)
 					DisplayBMFileInVP32(CurView->hDC, PltName, 0, TRUE, CurView->FileTransparency[CurView->CurFile]);//CurView->Rotation);		        	
 				/*{
@@ -5197,6 +5198,7 @@ GSSiExitProg (56);
          SetCurView ( SaveVP);
      } 
      ProcessVPPixelThemes (); 
+	 ResetProfileVP(CurView);
 	 OpenVPDialog ();
 	 if (CurView->hWndDlg)
 	 {
