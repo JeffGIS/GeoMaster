@@ -1114,7 +1114,19 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 	s10:
 			loc++;
 			iend = strcspn (&pFile[loc],",)};!\r\n\t");
-			if (!strnicmp (&pFile[loc+iend],";DBQ=",5))
+			if (!strnicmp(&pFile[loc + iend], ")", 1))
+			{
+				int i = loc + iend;
+				while (i-- > loc)
+				{
+					if (pFile[i] == '(')
+					{
+						iend++;
+						break;
+					}
+				}				
+			}
+			if (!strnicmp(&pFile[loc + iend], ";DBQ=", 5))
 				iend += 5 + strcspn (&pFile[loc+iend+5],",);!\r\n");
 			strncpy0 (testFile,&pFile[loc],min(sizeof(testFile)-1,iend));
 		}

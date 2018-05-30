@@ -587,6 +587,7 @@ BOOL LoadFormatCfg (LPSTR Name);
 BOOL SetupViewports (HWND hWnd, HDC hDC, short CurParent,RECT rect,int Band);
 short SetupViewport (RECT rect,BOOL ShrinkToFit,int band);
 BOOL GetNextViewportFile (BOOL VisScan);
+int SelectVPClipRgn(HRGN hrgn);
 void CloseConfig (void);
 void SaveWindowPos (HFILE Fid);
 BOOL SaveAllSizes (HFILE Fid);

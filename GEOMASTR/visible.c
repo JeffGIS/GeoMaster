@@ -33,13 +33,15 @@ BOOL FileIsVisible (LPSTR FileName)
 	BOOL	rtn=TRUE;
 	long	ORAHeaderType;
 	char	tableName[128] = { 0 };
-	
-	if (!FileType(FileName))
+	int		mft = MapFileType(FileName);
+
+	if ((mft != MT_GOOGLE_ROADMAP && mft != MT_GOOGLE_SATELLITE && mft != MT_GOOGLE_TERRAIN && mft != MT_GOOGLE_HYBRID)
+		&& !FileType(FileName))
 	{
 		rtn = FALSE;
 	}
 	else
-	switch (MapFileType (FileName))
+	switch (mft)
 	{
 		case MT_INDEX:
 	        rtn = MapIndexVisible (FileName);

@@ -143,9 +143,10 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 		}
 		return 0;
 	}
-		
+
 	if (!BufferedScreen)
 		return hDC;    
+	GetClientRect(hWnd, &Rect);
 	if (MapServer)
 	{
 		hWnd = GetDesktopWindow();

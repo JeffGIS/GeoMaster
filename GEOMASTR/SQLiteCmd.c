@@ -498,6 +498,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		{
 			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
 			{
+				if (!*ARG[4])
+					rtn = TRUE;
 				if (sqlite3_step(statement) == SQLITE_ROW)
 				{
 					LPSTR pName = (LPSTR)sqlite3_column_name(statement, 0);

@@ -6291,6 +6291,9 @@ GSSiExitProg (11);
 #if ENABLETRACE
 GSSiExitProg (11);
 #endif
+//int RegionType = SelectVPClipRgn(NewRgn);
+//if (RegionType != 2)
+//		ii = 1;
     return(NewRgn);
 }
 #if ENABLETRACE
