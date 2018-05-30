@@ -4615,6 +4615,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(FORMATSTREETS,codedstreets)
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
+			//$NVCRIS(RAMPOFFSETCOORD,intPoint21,rampPoint21)
 
 		{
 			rtn = FALSE;
@@ -4671,7 +4672,16 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[1], "CREATEDATABASE"))
 			{
-				rtn = NVCreateDB(Arg[2],atob(Arg[3]));
+				rtn = NVCreateDB(Arg[2], atob(Arg[3]));
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "RAMPOFFSETCOORD"))
+			{
+				BOOL err;
+				POINT int21 = atopt16(Arg[2], &err);
+				POINT ramp21 = atopt16(Arg[3],&err);
+				rtn = getRampOffsetCoord(ramp21,int21);
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
@@ -5740,13 +5750,13 @@ SaveVis:
 					Point = atopt (Arg[4],&Err); 
 					Point.x = ConvertDist2 (Point.x,n1,n2); 
 					Point.y = ConvertDist2 (Point.y,n1,n2); 
-					sprintf (OutLoc,"%f %f",Point.x,Point.y);
+					sprintf (OutLoc,"%lf %lf",Point.x,Point.y);
 				}
 				else
 				{
 					InVal = atof (Arg[4]);
 					OutVal = ConvertDist2 (InVal,n1,n2); 
-					sprintf (OutLoc,"%f",OutVal); 
+					sprintf (OutLoc,"%lf",OutVal); 
 				}
  
 			}

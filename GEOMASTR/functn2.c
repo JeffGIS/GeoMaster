@@ -1984,7 +1984,7 @@ GSSiExitProg (1350);
 				else if (*Arg[2] == 'Y' || *Arg[2] == 'y') 
 					sprintf (OutLoc,"%f",pPoint[nlong-1].y);
 				else
-					sprintf (OutLoc,"%f %f",pPoint[nlong-1].x,pPoint[nlong-1].y);
+					sprintf (OutLoc,"%lf %lf",pPoint[nlong-1].x,pPoint[nlong-1].y);
 			}
 			else
 			{
@@ -4576,7 +4576,7 @@ GSSiExitProg (1350);
 					{
 						char	str[80];
 
-						sprintf (str,"%ld,%i,%f %f",CurrentRefno,rtn,IntPoint.x,IntPoint.y);
+						sprintf (str,"%ld,%i,%lf %lf",CurrentRefno,rtn,IntPoint.x,IntPoint.y);
 						AppendFile (PolyProbListFile,str);
 					}
 //                    if (HaveLinkLines (lpDCurPoints,nPnts)) lpDCurPoints[0]

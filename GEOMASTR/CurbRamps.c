@@ -1672,3 +1672,314 @@ rtn = executeCmd(createcmd5);
 	return rtn;
 }
 */
+int getRampOffsetCoord(POINT ramp21,POINT int21)
+{
+	int offCoord = 0;
+
+	short offx = (ramp21.x - int21.x);
+	short offy = (ramp21.y - int21.y);
+
+	offCoord = (int)MAKELONG(offx, offy);
+	return offCoord;
+}
+/*
+-(int)getRampCoord:(MPIntersection *)mpint
+ramp : (int)r
+{
+	int icoord = 0;
+	MPRamp *ramp = mpint.ramps[r];
+
+	if (ramp.rampExists)
+	{
+		icoord = [self getOffsetCoord : mpint
+		x : ramp.lev21x
+		y : ramp.lev21y];
+	}
+
+	return icoord;
+
+}
+
+-(void)setRampCoord:(MPIntersection *)mpint
+ramp : (int)r
+   from : (sqlite3_stmt *)statement
+{
+	int icol = (8 + (r - 1));
+	int icoord = sqlite3_column_int(statement, icol);
+
+	short offsetx = LOWORD(icoord);
+	short offsety = HIWORD(icoord);
+	MPRamp *ramp = mpint.ramps[r];
+	int lev21x = (mpint.lev21x + offsetx);
+	int lev21y = (mpint.lev21y + offsety);
+
+	if (icoord)
+	{
+		ramp.lev21x = lev21x;
+		ramp.lev21y = lev21y;
+		ramp.rampExists = YES;
+		ramp.isComplete = NO;
+	}
+
+	else
+	{
+		ramp.rampExists = NO;
+		ramp.isComplete = YES;
+	}
+}
+
+-(int)getXWalkCoord:(MPIntersection *)mpint
+xWalk : (char)xw
+{
+	int icoord = 0;
+
+	switch (xw)
+	{
+	case 'A':
+		if (mpint.xWalkAExists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.xWalkAlev21x
+			y : mpint.xWalkAlev21y];
+		}
+
+		break;
+
+	case 'B':
+		if (mpint.xWalkBExists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.xWalkBlev21x
+			y : mpint.xWalkBlev21y];
+		}
+
+		break;
+
+	case 'C':
+		if (mpint.xWalkCExists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.xWalkClev21x
+			y : mpint.xWalkClev21y];
+		}
+
+		break;
+
+	case 'D':
+		if (mpint.xWalkDExists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.xWalkDlev21x
+			y : mpint.xWalkDlev21y];
+		}
+
+		break;
+	}
+
+	return icoord;
+}
+
+-(void)setXWalkCoord:(MPIntersection *)mpint
+xWalk : (char)xw
+	from : (sqlite3_stmt *)statement
+{
+	int icol = (20 + (xw - 'A'));
+	int icoord = sqlite3_column_int(statement, icol);
+
+	short offsetx = LOWORD(icoord);
+	short offsety = HIWORD(icoord);
+
+	switch (xw)
+	{
+	case 'A':
+		if (icoord)
+		{
+			mpint.xWalkAlev21x = mpint.lev21x + offsetx;
+			mpint.xWalkAlev21y = mpint.lev21y + offsety;
+			mpint.xWalkAExists = YES;
+		}
+
+		else
+			mpint.xWalkAExists = NO;
+
+		break;
+
+	case 'B':
+		if (icoord)
+		{
+			mpint.xWalkBlev21x = mpint.lev21x + offsetx;
+			mpint.xWalkBlev21y = mpint.lev21y + offsety;
+			mpint.xWalkBExists = YES;
+		}
+
+		else
+			mpint.xWalkBExists = NO;
+
+		break;
+
+	case 'C':
+		if (icoord)
+		{
+			mpint.xWalkClev21x = mpint.lev21x + offsetx;
+			mpint.xWalkClev21y = mpint.lev21y + offsety;
+			mpint.xWalkCExists = YES;
+		}
+
+		else
+			mpint.xWalkCExists = NO;
+
+		break;
+
+	case 'D':
+		if (icoord)
+		{
+			mpint.xWalkDlev21x = mpint.lev21x + offsetx;
+			mpint.xWalkDlev21y = mpint.lev21y + offsety;
+			mpint.xWalkDExists = YES;
+		}
+
+		else
+
+			mpint.xWalkDExists = NO;
+		break;
+	}
+}
+
+-(int)getSignalCoord:(MPIntersection*)mpint
+signal : (int)sig
+{
+	int icoord = 0;
+
+	switch (sig)
+	{
+	case 81:
+		if (mpint.signal81Exists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.signal81lev21x
+			y : mpint.signal81lev21y];
+		}
+
+		break;
+
+	case 23:
+		if (mpint.signal23Exists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.signal23lev21x
+			y : mpint.signal23lev21y];
+		}
+
+		break;
+
+	case 45:
+		if (mpint.signal45Exists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.signal45lev21x
+			y : mpint.signal45lev21y];
+		}
+
+		break;
+
+	case 67:
+		if (mpint.signal67Exists)
+		{
+			icoord = [self getOffsetCoord : mpint
+			x : mpint.signal67lev21x
+			y : mpint.signal67lev21y];
+		}
+
+		break;
+	}
+
+	return icoord;
+}
+
+-(void)setSignalCoord:(MPIntersection *)mpint
+signal : (int)s
+	 from : (sqlite3_stmt *)statement
+{
+	int icol = 24;
+
+	switch (s)
+	{
+	case 81:
+		break;
+
+	case 23:
+		icol++;
+		break;
+
+	case 45:
+		icol += 2;
+		break;
+
+	case 67:
+		icol += 3;
+		break;
+	}
+
+	int icoord = sqlite3_column_int(statement, icol);
+
+	short offsetx = LOWORD(icoord);
+	short offsety = HIWORD(icoord);
+
+	switch (s)
+	{
+	case 81:
+		if (icoord)
+		{
+			mpint.signal81lev21x = mpint.lev21x + offsetx;
+			mpint.signal81lev21y = mpint.lev21y + offsety;
+			mpint.signal81Exists = YES;
+		}
+
+		else
+			mpint.signal81Exists = NO;
+
+		break;
+
+	case 23:
+		if (icoord)
+		{
+			mpint.signal23lev21x = mpint.lev21x + offsetx;
+			mpint.signal23lev21y = mpint.lev21y + offsety;
+			mpint.signal23Exists = YES;
+		}
+
+		else
+			mpint.signal23Exists = NO;
+
+		break;
+
+	case 45:
+		if (icoord)
+		{
+			mpint.signal45lev21x = mpint.lev21x + offsetx;
+			mpint.signal45lev21y = mpint.lev21y + offsety;
+			mpint.signal45Exists = YES;
+		}
+
+		else
+			mpint.signal45Exists = NO;
+
+		break;
+
+	case 67:
+		if (icoord)
+		{
+			mpint.signal67lev21x = mpint.lev21x + offsetx;
+			mpint.signal67lev21y = mpint.lev21y + offsety;
+			mpint.signal67Exists = YES;
+		}
+
+		else
+			mpint.signal67Exists = NO;
+
+		break;
+	}
+}
+
+*/
+

@@ -7219,17 +7219,23 @@ POINT atopt16 (LPSTR Value,LPBOOL pErr)
 #if ENABLETRACE
 {GSSiEnterProg (296);
 #endif
-{                 
+{           
 	POINT	Point;
+	DPOINT	DPoint;
 	
-	if (sscanf (Value,"%i %i",&Point.x,&Point.y) != 2)
+	if (sscanf (Value,"%lf %lf",&DPoint.x,&DPoint.y) != 2)
 	{
 		if (pErr)
 			*pErr = TRUE;
 		Point.x = Point.y = 0;
 	}
-	else if (pErr)
-		*pErr = FALSE;
+	else
+	{
+		Point.x = IDNINT(DPoint.x);
+		Point.y = IDNINT(DPoint.y);
+		if (pErr)
+			*pErr = FALSE;
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (296);
