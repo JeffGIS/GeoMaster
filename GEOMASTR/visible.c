@@ -35,7 +35,8 @@ BOOL FileIsVisible (LPSTR FileName)
 	char	tableName[128] = { 0 };
 	int		mft = MapFileType(FileName);
 
-	if ((mft != MT_GOOGLE_ROADMAP && mft != MT_GOOGLE_SATELLITE && mft != MT_GOOGLE_TERRAIN && mft != MT_GOOGLE_HYBRID)
+	if ((mft != MT_GOOGLE_ROADMAP && mft != MT_GOOGLE_SATELLITE && mft != MT_GOOGLE_TERRAIN && mft != MT_GOOGLE_HYBRID &&
+		 mft != MT_SQLITE)
 		&& !FileType(FileName))
 	{
 		rtn = FALSE;

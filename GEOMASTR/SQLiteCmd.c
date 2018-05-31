@@ -2251,8 +2251,9 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 			strcpy(tableName, pPar);
 			if (GSSiLength(fileName) > 0)
 			{
+				int st;
 				rtnType = SHPT_POINT;
-				rtnType = LoadSQLITEParm(fileName, tableName, rtnType, CurView->hWnd);
+				st = LoadSQLITEParm(fileName, tableName, rtnType, CurView->hWnd);
 				if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
 				{
 					if (GetSQLITENumRows(SQLITEHandle, tableName,""))
@@ -2860,8 +2861,8 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 
 			_fstrcpy(LastSQLITEFile, Name);
 			ExpandText(LastSQLITEFile);
-			if (!Type || !GetGlobalBVal2("[%AUTOSQLITEPARM]", TRUE))
-				goto RtnFalse;
+			if (!Type || GetGlobalBVal2("[%AUTOSQLITEPARM]", TRUE))
+				goto RtnTrue;
 			else
 			{
 				DLGPROC	lpfnSQLITEPOINTMsgProc;
