@@ -4638,9 +4638,9 @@ GotCloseFilehSQL:
 			{
 				rtn = UpdatePictureID(Arg[2], atoi(Arg[3]), atoi(Arg[4]));
 			}
-			else if (!stricmp(Arg[1], "LOADLIST"))//LOADLIST,fromListFile,toDB,showProgress,dbType,convertInsert,errFile(opt),addFileID)
+			else if (!stricmp(Arg[1], "LOADLIST"))//LOADLIST,fromListFile,toDB,showProgress,dbType,convertInsert,errFile(opt),addFileID,checkPointOpt(0=none,1=yes,2=only if no errors)
 			{
-				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3], atob(Arg[4]), atoi(Arg[5]), atob(Arg[6]), Arg[7], atob(Arg[8]));
+				rtn = LoadFilesInListInChronologicalSequence(Arg[2], Arg[3], atob(Arg[4]), atoi(Arg[5]), atob(Arg[6]), Arg[7], atob(Arg[8]), atoi(Arg[9]));
 			}
 			else if (!stricmp(Arg[1], "COMPCODE"))
 			{

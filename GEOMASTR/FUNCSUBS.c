@@ -5858,7 +5858,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 {
      int	Num,i;
      char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
-     LPSTR	lpBrack; 
+	 char	GMDFile[MAX_PATH]="";
+     LPSTR	lpBrack, lpDot; 
      HFILE	OutFileFID, Fid;  
      long	TotFiles=0;
      HCURSOR	hcurSave; 
@@ -5867,21 +5868,39 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
      
 	 if (!OutFile || !*OutFile) //just return num hits
 		 OutFileFID = HFILE_ERROR;
-	 else if (New || !ExistFile (OutFile))
+	 else
 	 {
-		OutFileFID = GSSiOpenFile (OutFile,0,OF_CREATE);
-		if (OutFileFID == HFILE_ERROR)
-			goto Exit;
-		//fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tSTATUS\tLASTUPDATE\tSIZE",OutFileFID);
-		if (!nameOnly)
-			fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tCREATTIME\tLASTACCESS\tLASTWRITE\tFILELENGTH\tSTATUS",OutFileFID);
-	 }	
-	 else 
-	 {
-		OutFileFID = GSSiOpenFile (OutFile,0,OF_READWRITE);
-		if (OutFileFID == HFILE_ERROR)
-			goto Exit;
-		GSSillseek (OutFileFID,0,2); 
+		 LPSTR  pDot = strrchr(OutFile, '.');
+		 if (!stricmp(pDot, ".gmd"))
+		 {
+			 char	DefStr[] = "FULLNAME(C255)\tFILENAME(C128)\tDRIVE(C8)\tDIRECTORY(C255)\tLASTDIR(C255)\tDRIVEDIR(C255)\tEXTENSION(C16)\tCREATTIME(B4)\tLASTACCESS(B4)\tLASTWRITE(B4)\tFILELENGTH(B4)\tSTATUS(B4)";
+			 strcpy(GMDFile, OutFile);
+			 GSSiGetTempFileName(0, "gm", 0, OutFile);
+			 pDot = strrchr(OutFile, '.');
+			 strcpy(pDot, ".txt");
+			 OutFileFID = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			 nameOnly = 0;
+			 if (OutFileFID == HFILE_ERROR)
+				 goto Exit;
+
+			 fputstring(DefStr, OutFileFID);
+		 }
+		 else if (New || !ExistFile(OutFile))
+		 {
+			 OutFileFID = GSSiOpenFile(OutFile, 0, OF_CREATE);
+			 if (OutFileFID == HFILE_ERROR)
+				 goto Exit;
+			 //fputstring ("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tSTATUS\tLASTUPDATE\tSIZE",OutFileFID);
+			 if (!nameOnly)
+				 fputstring("FULLNAME\tFILENAME\tDRIVE\tDIRECTORY\tLASTDIR\tDRIVEDIR\tEXTENSION\tCREATTIME\tLASTACCESS\tLASTWRITE\tFILELENGTH\tSTATUS", OutFileFID);
+		 }
+		 else
+		 {
+			 OutFileFID = GSSiOpenFile(OutFile, 0, OF_READWRITE);
+			 if (OutFileFID == HFILE_ERROR)
+				 goto Exit;
+			 GSSillseek(OutFileFID, 0, 2);
+		 }
 	 }
 	 GSSiGetTempFileName(0,"gm",0,TempName);
  	 Fid =	GSSiOpenFile (TempName,0,OF_CREATE);
@@ -5926,11 +5945,20 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			sprintf(str, "%s", str2);
 		else
   			sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
+		if (*GMDFile)
+			strlwr(str);
 		fputstring (str,OutFileFID);
 	 }  
      GSSiClose (Fid);
 	 GSSiClose (OutFileFID);
      GSSiRemove (TempName);
+	 if (*GMDFile)
+	 {
+		 char cmd[1024];
+		 sprintf(cmd, "$GMDIMPORT(%s,N,%s,,FILENAME)", GMDFile, OutFile);
+		 ExpandText(cmd);
+		 GSSiRemove(OutFile);
+	 }
 Exit:
 	 GSSiGlobUlFree (&hStr);
 	 return TotFiles;

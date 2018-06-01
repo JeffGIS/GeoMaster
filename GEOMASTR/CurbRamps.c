@@ -14,7 +14,7 @@ void convertVersion_2_to_3(LPSTR str);
 BOOL createIntersectionsTable(BOOL dropExistingTables);
 
 static BOOL Execute(LPSTR cmd,LPSTR errFile);
-BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors);
+BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors,int checkPointOpt);
 
 
 /*int getOffsetCoord:(MPIntersection *)mpint
@@ -479,7 +479,7 @@ BOOL UpdatePictureID(LPSTR PathName, int oldSequence, int newSequence)
 	return rtn;
 }
 
-BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showProgress, int dbType, BOOL convertInsert,LPSTR errFile,BOOL addFileID)
+BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showProgress, int dbType, BOOL convertInsert,LPSTR errFile,BOOL addFileID,int checkPointOpt )
 {
 #define LINELEN	USHRT_MAX
 	BOOL rtn = FALSE;
@@ -548,11 +548,13 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 			{
 				CreateStatusWind(hWndMain, 1, "Loading Data");
 			}
+			if (checkPointOpt)
+				Execute("BEGIN", 0);
 			fidTemp = GSSiOpenFile(tempFile, 0, OF_READ);
 			{
 				while (fgetstring (file,MAX_PATH,fidTemp))
 				{
-					BOOL st = UpdateFromFile(file, convertInsert, addFileID, dbType, errFile,&totErrors);
+					BOOL st = UpdateFromFile(file, convertInsert, addFileID, dbType, errFile,&totErrors,checkPointOpt);
 					if (showProgress)
 					{
 						char mess[128];
@@ -567,6 +569,8 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 			GSSiClose(fidTemp);
 			GSSiRemove(tempFile);
 		}
+		if (checkPointOpt)
+			Execute("COMMIT", 0);
 		rc = sqlite3_close(database);
 	}
 	free(line);
@@ -1216,7 +1220,7 @@ static BOOL Execute(LPSTR cmd,LPSTR errFile)
 	return rtn;
 }
 
-BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors)
+BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors,int checkPointOpt)
 {
 	BOOL rtn = TRUE;
 	int line = 0;
@@ -1238,10 +1242,12 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 	int totLen = GSSifilelength(fid);
 	int maxLineLen = totLen + 2;
 	LPSTR str = malloc(totLen + 4096);
-	int err = Execute("BEGIN", errFile);
+	int err;
 	LPSTR filename = strrchr(file, '\\');
 	if (!filename)
 		filename = file;
+	if (!checkPointOpt)
+		err = Execute("BEGIN", errFile);
 	if (fgetstring(str, maxLineLen, fid))
 	{
 		int fromVer = atoi(CURRENT_INTERSECTION_VERSION);
@@ -1286,7 +1292,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 		}
 	}
 	GSSiClose(fid);
-	if (!rtn && !*errFile) //file has to be edited on server (by GSSi) before more data can be loaded
+	if (!rtn && !*errFile && !checkPointOpt) //file has to be edited on server (by GSSi) before more data can be loaded
 	{
 		err = Execute("ROLLBACK", errFile);
 		LPSTR mess = malloc(USHRT_MAX);
@@ -1297,7 +1303,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 			GSSiMessageBox(2, mess, "Data load failure", MB_ICONEXCLAMATION, 0);
 		free(mess);
 	}
-	else
+	else if (!checkPointOpt)
 		err = Execute("COMMIT", errFile);
 	free(str);
 	return rtn;
