@@ -1508,7 +1508,8 @@ CREATE VIRTUAL TABLE IF NOT EXISTS Intersections_index USING rtree(id,minX, maxX
 
 rtn = executeCmd(createcmd);
 //create ramp table
-char	createcmd2[] = "CREATE TABLE IF NOT EXISTS Ramps (\
+char	createcmd2[] = "CREATE VIRTUAL TABLE IF NOT EXISTS Ramps_index USING rtree(id,minX, maxX, minY, maxY);\
+CREATE TABLE IF NOT EXISTS Ramps (\
 intID INT,\
 rampNum INT,\
 rampID CHAR(16),\
