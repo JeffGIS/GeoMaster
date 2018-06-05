@@ -3491,19 +3491,26 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			//HDC hDC = GetDC(hWndMain);
+			HDC hDC = GetDC(hWndMain);
+			int iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
+			int pageWidth = GetDeviceCaps(hDC, HORZRES);
+			double pageSize = GetDeviceCaps(hDC, HORZSIZE) * 0.0393701;
+			double scale = (double)pageWidth / (double)pageSize;
+			ReleaseDC(hWndMain, hDC);
+			ftoa(OutLoc, scale);
 			//SetDisplayMode(hDC, GF_TEXTMODE);
 			//testGDIP(hDC);
 /*			char SSID[40];
 			char ipAddress[32];
 			GUID Guid;*/
-			BOOL TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
+			//BOOL TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
 
 			//int n = TestSQLiteCrimes(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
-			BOOL TestSQLiteCrimeOffenseOrder(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
+			//BOOL TestSQLiteCrimeOffenseOrder(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, int toUCR);
 
-			int n = TestSQLiteCrimeOffenseOrder(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
-			itoa(n, OutLoc, 10);
+			//int n = TestSQLiteCrimeOffenseOrder(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
+
+			//itoa(n, OutLoc, 10);
 			goto Rtnl;
 			/*{
 #include "colorsByName.h"

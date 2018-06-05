@@ -3922,6 +3922,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%LINETRANSPARENCY", 385, FALSE);
 	AllocateTypeVar("%CURRENTZOOMLIST", 386, FALSE);
 	AllocateTypeVar("%CURRENTZOOMLISTITEM", 387, FALSE);
+	AllocateTypeVar("%HORZRES", 388, FALSE);
+	AllocateTypeVar("%HORZSIZE", 389, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5084,6 +5086,12 @@ GSSiExitProg (533);
 			break;
 		case 387:
 			strcpy(OutStr, CurrentZoomListEntry);
+			break;
+		case 388:
+			itoa(GetDeviceCaps(CurView->hDC, HORZRES), OutStr, 10);
+			break;
+		case 389:
+			itoa(GetDeviceCaps(CurView->hDC, HORZSIZE), OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);
