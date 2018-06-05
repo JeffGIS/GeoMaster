@@ -600,6 +600,7 @@
     <ClCompile Include="..\GM32lib\mrsid.c" />
     <ClCompile Include="..\SHR\MS_MAPL.C" />
     <ClCompile Include="MapServer.c" />
+    <ClCompile Include="MonitorSize.c" />
     <ClCompile Include="MSPFence.c" />
     <ClCompile Include="..\Proj-4\src\nad_cvt.c" />
     <ClCompile Include="..\Proj-4\src\nad_init.c" />

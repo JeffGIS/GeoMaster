@@ -5091,7 +5091,7 @@ GSSiExitProg (533);
 			itoa(GetDeviceCaps(CurView->hDC, HORZRES), OutStr, 10);
 			break;
 		case 389:
-			itoa(GetDeviceCaps(CurView->hDC, HORZSIZE), OutStr, 10);
+			sprintf(OutStr, "%.2f", MonitorWidthInInches(0));
 			break;
 	}
 	GlobalUnlock (hGlobal);
@@ -10600,4 +10600,35 @@ BOOL GetUpdateFieldValue (HWND hWndDlg,LPSTR SetFieldName,LPSTR NewValue)
 			ploc++;
 	}
 	return FALSE;
+}
+
+/* Get the window width */
+int getww_(void)
+{
+	CONSOLE_FONT_INFO info;
+	GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &info);
+	return info.dwFontSize.X;
+}
+
+/* Get the window height */
+int getwh_(void)
+{
+	CONSOLE_FONT_INFO info;
+	GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &info);
+	return info.dwFontSize.Y;
+}
+
+int getww(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	int ret;
+	ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	return csbi.dwSize.X;
+}
+int getwh(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	int ret;
+	ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	return csbi.dwSize.Y;
 }

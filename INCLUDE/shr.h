@@ -1447,4 +1447,9 @@ int getLAZPointsInBounds(LPLAZFILESTRUCT pFiles, int fileNum, char * file, int w
 int writeLAZFileToText(char * file, int wantType, char * outFile);
 int classifyLAZFile(char * file, char * outFile);
 
+int getww_(void);
+int getwh_(void);
+double MonitorWidthInInches(int monitor);
+double MonitorHeightInInches(int monitor);
+
 #endif
