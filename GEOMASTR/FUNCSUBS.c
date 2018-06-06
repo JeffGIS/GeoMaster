@@ -1489,6 +1489,14 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 		if (!rc)
 			dpointtoa (OutLoc,&wpoint);
 	}
+	else if (!stricmp(Arg1, "GUESS"))
+	{
+		BOOL err;
+		MNMXCORD bounds = atobounds(Arg3,&err);
+		char projection[256];
+		int num = GuessProjection2(Arg2, &bounds,-1,projection);
+		strcpy(OutLoc, projection);
+	}
 	else if (!stricmp (Arg1,"CONVERSIONGRID"))
 	{
 		MNMXCORD	bounds;

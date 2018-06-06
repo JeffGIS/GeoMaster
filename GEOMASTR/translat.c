@@ -17,129 +17,211 @@ static	struct	{
 			long	OPLong, OPLat;
 		}	IntersectData;
 
-BOOL GuessProjection (HWND hWndDlg,UINT ProjCntl,UINT ProjUnits,LPMNMXCORD pFileBounds,BOOL UseFirst)
+BOOL GuessProjection(HWND hWndDlg, UINT ProjCntl, UINT ProjUnits, LPMNMXCORD pFileBounds, BOOL UseFirst)
 {
 	MNMXCORD	BoundsInt, FileBoundsCVT, ProjBounds;
-	short	PCTIn[32][2], UsedUnits[32][2], CVTUnits[32], CvtID=0, UnitsID;  
-	short	nFound=0, MaxFound=0, MaxID, MaxUnits;
-	BOOL	Err;   
+	short	PCTIn[32][2], UsedUnits[32][2], CVTUnits[32], CvtID = 0, UnitsID;
+	short	nFound = 0, MaxFound = 0, MaxID, MaxUnits;
+	BOOL	Err;
 	char	SaveAltProj[MAX_PATH], str[4096];
-	DPOINT	Points[4]; 
+	DPOINT	Points[4];
 	LPSTR	pName;
-	HFILE	Fid; 
+	HFILE	Fid;
 	int		CurProj;
 	long	Loc;
 	short	i;
 	char	File[MAX_PATH];
 
- 	if (!hProjectionFile)
- 		return FALSE;
- 	pName=GlobalLock (hProjectionFile);
- 	Fid = GSSiOpenFile (pName,0,OF_READ);
- 	GlobalUnlock (hProjectionFile);
- 	if (Fid == HFILE_ERROR)
- 		return FALSE;
-	GetGlobalCVal ("[%ALT_PROJECTION]",SaveAltProj,0);
-	GetGlobalCVal ("[%PROJECTBOUNDS]",str,0);
-	ProjBounds = atobounds (str,&Err);
-	if (!ValidBounds (&ProjBounds))
+	if (!hProjectionFile)
 		return FALSE;
-	 
-	while (SendDlgItemMessage (hWndDlg,ProjCntl,CB_GETLBTEXT,(WPARAM)CvtID,(LPARAM)str) != CB_ERR)
-	{   
-		Loc = SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_GETITEMDATA,(WPARAM)CvtID,(LPARAM)0);  
+	pName = GlobalLock(hProjectionFile);
+	Fid = GSSiOpenFile(pName, 0, OF_READ);
+	GlobalUnlock(hProjectionFile);
+	if (Fid == HFILE_ERROR)
+		return FALSE;
+	GetGlobalCVal("[%ALT_PROJECTION]", SaveAltProj, 0);
+	GetGlobalCVal("[%PROJECTBOUNDS]", str, 0);
+	ProjBounds = atobounds(str, &Err);
+	if (!ValidBounds(&ProjBounds))
+		return FALSE;
+
+	while (SendDlgItemMessage(hWndDlg, ProjCntl, CB_GETLBTEXT, (WPARAM)CvtID, (LPARAM)str) != CB_ERR)
+	{
+		Loc = SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_GETITEMDATA, (WPARAM)CvtID, (LPARAM)0);
 		if (Loc < 0)
-			_fstrcpy (str,"[%DL]baseproj.cvt");
+			_fstrcpy(str, "[%DL]baseproj.cvt");
 		else
 		{
- 			GSSillseek (Fid,Loc,0);
-			fgetstring (str,250,Fid);
+			GSSillseek(Fid, Loc, 0);
+			fgetstring(str, 250, Fid);
 		}
-		SetGlobalValue("%ALT_PROJECTION",str);
+		SetGlobalValue("%ALT_PROJECTION", str);
 		PCTIn[CvtID][0] = 0;
-		PCTIn[CvtID][1] = 0;  
+		PCTIn[CvtID][1] = 0;
 		UnitsID = 0;
-		ConvertCoordClose ();
+		ConvertCoordClose();
 		ConvertCoordInit();
-		if (PRJ_UNITS[3] == 1 || PRJ_UNITS[3] == 2)  
+		if (PRJ_UNITS[3] == 1 || PRJ_UNITS[3] == 2)
 			CVTUnits[CvtID] = 1;
 		else
 			CVTUnits[CvtID] = PRJ_UNITS[3];
-BeginUnits:
-		PRJ_UNITS[3] = CVTUnits[CvtID];  
-		UsedUnits[CvtID][UnitsID] = PRJ_UNITS[3]-1;
-		DBoundsInit (&FileBoundsCVT);
-		Points[0].x = pFileBounds->xmn;   
-		Points[0].y = pFileBounds->ymn;   
-		Points[1].x = pFileBounds->xmn;   
-		Points[1].y = pFileBounds->ymx;   
-		Points[2].x = pFileBounds->xmx;   
-		Points[2].y = pFileBounds->ymx;   
-		Points[3].x = pFileBounds->xmx;   
-		Points[3].y = pFileBounds->ymn;   
-		for (i=0;i<4;i++)
+	BeginUnits:
+		PRJ_UNITS[3] = CVTUnits[CvtID];
+		UsedUnits[CvtID][UnitsID] = PRJ_UNITS[3] - 1;
+		DBoundsInit(&FileBoundsCVT);
+		Points[0].x = pFileBounds->xmn;
+		Points[0].y = pFileBounds->ymn;
+		Points[1].x = pFileBounds->xmn;
+		Points[1].y = pFileBounds->ymx;
+		Points[2].x = pFileBounds->xmx;
+		Points[2].y = pFileBounds->ymx;
+		Points[3].x = pFileBounds->xmx;
+		Points[3].y = pFileBounds->ymn;
+		for (i = 0; i<4; i++)
 		{
-			if (ConvertCoord(&Points[i],3,1))
-			{   
-			    goto NextUnits;
+			if (ConvertCoord(&Points[i], 3, 1))
+			{
+				goto NextUnits;
 			}
-			AddDPointToMinMax (&Points[i],&FileBoundsCVT); 
-		} 
-		if (IntersectBounds (&ProjBounds,&FileBoundsCVT,&BoundsInt)) 
+			AddDPointToMinMax(&Points[i], &FileBoundsCVT);
+		}
+		if (IntersectBounds(&ProjBounds, &FileBoundsCVT, &BoundsInt))
 		{
-			PCTIn[CvtID][UnitsID] = IDNINT(10000 * BoundsArea(&BoundsInt) / BoundsArea(&FileBoundsCVT));  
+			PCTIn[CvtID][UnitsID] = IDNINT(10000 * BoundsArea(&BoundsInt) / BoundsArea(&FileBoundsCVT));
 			if (PCTIn[CvtID][UnitsID])
-			{  
+			{
 				if (PCTIn[CvtID][UnitsID] > MaxFound)
 				{
-					MaxFound = PCTIn[CvtID][UnitsID]; 
+					MaxFound = PCTIn[CvtID][UnitsID];
 					MaxID = CvtID;
 					MaxUnits = UnitsID;
 				}
 				nFound++;
 			}
 		}
-NextUnits:
+	NextUnits:
 		if (CVTUnits[CvtID] == 1)
 		{
-			CVTUnits[CvtID]++;  
+			CVTUnits[CvtID]++;
 			UnitsID++;
 			goto BeginUnits;
 		}
 		CvtID++;
-		} 
-		GSSiClose (Fid);
+	}
+	GSSiClose(Fid);
 
-		if (UseFirst)
-			nFound = min (nFound,1);
-		switch (nFound)
-		{	         
-		case 1:
-			SendDlgItemMessage (hWndDlg,ProjCntl,CB_SETCURSEL,(WPARAM)MaxID,(LPARAM)0); 
-			SendDlgItemMessage (hWndDlg,ProjUnits,CB_SETCURSEL,(WPARAM)min(2,UsedUnits[MaxID][MaxUnits]),(LPARAM)0); 
+	if (UseFirst)
+		nFound = min(nFound, 1);
+	switch (nFound)
+	{
+	case 1:
+		SendDlgItemMessage(hWndDlg, ProjCntl, CB_SETCURSEL, (WPARAM)MaxID, (LPARAM)0);
+		SendDlgItemMessage(hWndDlg, ProjUnits, CB_SETCURSEL, (WPARAM)min(2, UsedUnits[MaxID][MaxUnits]), (LPARAM)0);
 		break;
-		case 0:
-			GSSiMsgBox (hWndDlg,"None of the supplied projections fit this data","",MB_ICONEXCLAMATION,0);
+	case 0:
+		GSSiMsgBox(hWndDlg, "None of the supplied projections fit this data", "", MB_ICONEXCLAMATION, 0);
 		break;
-		default:
-		{   
-			char	PrjName[64], UnitsName[64];
-			short	i,j;
-			char	UnitsNames[4][8]={"Feet","Meters","Degrees","Degrees"};			 		 		
-			*str = 0;
-			for (i=0;i<CvtID;i++)
-				for (j=0;j<2;j++)
-					if (PCTIn[i][j])
-					{   
-						SendDlgItemMessage (hWndDlg,ProjCntl,CB_GETLBTEXT,(WPARAM)i,(LPARAM)PrjName);
-						sprintf (_fstrchr(str,0),"%s - %s (%.0f percent)\r\n",PrjName,UnitsNames[UsedUnits[i][j]],(double)PCTIn[i][j]/100);
-					}
-			GSSiMsgBox (hWndDlg,str,"Multiple projections fit this data",MB_ICONEXCLAMATION,0); 
-		}
-	} 
-	SetGlobalValue("%ALT_PROJECTION",SaveAltProj);
+	default:
+	{
+			   char	PrjName[64], UnitsName[64];
+			   short	i, j;
+			   char	UnitsNames[4][8] = { "Feet", "Meters", "Degrees", "Degrees" };
+			   *str = 0;
+			   for (i = 0; i<CvtID; i++)
+			   for (j = 0; j<2; j++)
+			   if (PCTIn[i][j])
+			   {
+				   SendDlgItemMessage(hWndDlg, ProjCntl, CB_GETLBTEXT, (WPARAM)i, (LPARAM)PrjName);
+				   sprintf(_fstrchr(str, 0), "%s - %s (%.0f percent)\r\n", PrjName, UnitsNames[UsedUnits[i][j]], (double)PCTIn[i][j] / 100);
+			   }
+			   GSSiMsgBox(hWndDlg, str, "Multiple projections fit this data", MB_ICONEXCLAMATION, 0);
+	}
+	}
+	SetGlobalValue("%ALT_PROJECTION", SaveAltProj);
 	return TRUE;
-}  
+}
+int GuessProjection2(LPSTR fileOfProjections,LPMNMXCORD pFileBounds, int useThisOne,LPSTR ChosenProjection)
+{
+	MNMXCORD	BoundsInt, FileBoundsCVT, ProjBounds;
+	short	PCTIn[32][2], UsedUnits[32][2], CVTUnits[32], CvtID = 0, UnitsID;
+	short	nFound = 0, MaxFound = 0, MaxID, MaxUnits;
+	BOOL	Err;
+	char	SaveAltProj[MAX_PATH], str[4096];
+	DPOINT	Points[4];
+	LPSTR	pName;
+	HFILE	Fid;
+	int		CurProj;
+	long	Loc;
+	short	i;
+	char	File[MAX_PATH];
+
+	GetGlobalCVal("[%ALT_PROJECTION]", SaveAltProj, 0);
+	GetGlobalCVal("[%PROJECTBOUNDS]", str, 0);
+	ProjBounds = atobounds(str, &Err);
+	if (!ValidBounds(&ProjBounds))
+		return FALSE;
+	Fid = GSSiOpenFile(fileOfProjections, 0, OF_READ);
+	if (Fid != HFILE_ERROR)
+	while (fgetstring (str,255,Fid))
+	{
+		SetGlobalValue("%ALT_PROJECTION", str);
+		PCTIn[CvtID][0] = 0;
+		PCTIn[CvtID][1] = 0;
+		UnitsID = 0;
+		ConvertCoordClose();
+		ConvertCoordInit();
+		if (PRJ_UNITS[3] == 1 || PRJ_UNITS[3] == 2)
+			CVTUnits[CvtID] = 1;
+		else
+			CVTUnits[CvtID] = PRJ_UNITS[3];
+	BeginUnits:
+		PRJ_UNITS[3] = CVTUnits[CvtID];
+		UsedUnits[CvtID][UnitsID] = PRJ_UNITS[3] - 1;
+		DBoundsInit(&FileBoundsCVT);
+		Points[0].x = pFileBounds->xmn;
+		Points[0].y = pFileBounds->ymn;
+		Points[1].x = pFileBounds->xmn;
+		Points[1].y = pFileBounds->ymx;
+		Points[2].x = pFileBounds->xmx;
+		Points[2].y = pFileBounds->ymx;
+		Points[3].x = pFileBounds->xmx;
+		Points[3].y = pFileBounds->ymn;
+		for (i = 0; i<4; i++)
+		{
+			if (ConvertCoord(&Points[i], 3, 1))
+			{
+				goto NextUnits;
+			}
+			AddDPointToMinMax(&Points[i], &FileBoundsCVT);
+		}
+		if (IntersectBounds(&ProjBounds, &FileBoundsCVT, &BoundsInt))
+		{
+			PCTIn[CvtID][UnitsID] = IDNINT(10000 * BoundsArea(&BoundsInt) / BoundsArea(&FileBoundsCVT));
+			if (PCTIn[CvtID][UnitsID])
+			{
+				if (PCTIn[CvtID][UnitsID] > MaxFound)
+				{
+					MaxFound = PCTIn[CvtID][UnitsID];
+					MaxID = CvtID;
+					MaxUnits = UnitsID;
+				}
+				nFound++;
+			}
+		}
+	NextUnits:
+		if (CVTUnits[CvtID] == 1)
+		{
+			CVTUnits[CvtID]++;
+			UnitsID++;
+			goto BeginUnits;
+		}
+		CvtID++;
+	}
+	GSSiClose(Fid);
+
+	SetGlobalValue("%ALT_PROJECTION", SaveAltProj);
+	return TRUE;
+}
 
 BOOL GuessShapeProjection (LPSTR Name,HWND hWnd,UINT ProjCntl,UINT ProjUnits,BOOL UseFirst)
 {

@@ -3301,6 +3301,7 @@ GSSiExitProg (1350);
 					//$PROJECTION(SCALE,projid,point)
 					//$PROJECTION(CONVERT,point,fromid,toid)
 					//$PROJECTION(CONVERSIONGRID,bounds,accuracy,outfile,projidfrm(opt),projidto(opt))
+					//$PROJECTION(GUESS,fileOfProjections,bounds)
         {
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 
