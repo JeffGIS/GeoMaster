@@ -2272,7 +2272,7 @@ GSSiExitProg (532);
 				HaveStates[CurState]=TRUE;
 			break;
 		case 4:
-			ShowScale = atob (Value);
+			ShowScale = atoi (Value);
 			break;     
 		case 5:
 			if (!CurVis)
@@ -3924,6 +3924,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CURRENTZOOMLISTITEM", 387, FALSE);
 	AllocateTypeVar("%HORZRES", 388, FALSE);
 	AllocateTypeVar("%HORZSIZE", 389, FALSE);
+	AllocateTypeVar("%VPID", 390, FALSE);
+	AllocateTypeVar("%VPNAME", 391, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4004,10 +4006,7 @@ GSSiExitProg (533);
 			sprintf (OutStr,"%2.2i",CurState);
            	break;
 		case 4:  
-			if (ShowScale)
-				_fstrcpy (OutStr,"T");
-			else
-				_fstrcpy (OutStr,"F");
+			ltoa(ShowScale, OutStr, 10);
            	break;
 		case 6:
 			btoa (DoGraphics,OutStr);
@@ -5092,6 +5091,21 @@ GSSiExitProg (533);
 			break;
 		case 389:
 			sprintf(OutStr, "%.2f", MonitorWidthInInches(0));
+			break;
+		case 390:
+		{
+			int id = 0;
+			if (CurView)
+				id = CurView->ID;
+			sprintf(OutStr, "%i", id);
+		}
+			break;
+		case 391:
+		{
+			*OutStr = 0;
+			if (CurView)
+				strcpy(OutStr, CurView->Name);
+		}
 			break;
 	}
 	GlobalUnlock (hGlobal);
