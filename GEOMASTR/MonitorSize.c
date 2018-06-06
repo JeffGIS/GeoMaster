@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <WinUser.h>
 #include <setupapi.h>
 #include <stdio.h>
 #include <wchar.h>
@@ -183,4 +184,17 @@ double MonitorHeightInInches(int monitor)
 	double width = displayInfos[monitor].physicalHeight_mm / MMPERINCH;
 	free(displayInfos);
 	return width;
+}
+
+double GetScreenPixelsPerInch(void)
+{
+	HWND hWnd = GetDesktopWindow();
+	RECT rect;
+
+	GetWindowRect(hWnd, &rect);
+	int windowWidth = rect.right - rect.left;
+
+	double screenWidth = MonitorWidthInInches(0);
+	double ppi = windowWidth / screenWidth;
+	return ppi;
 }

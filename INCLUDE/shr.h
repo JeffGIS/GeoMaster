@@ -1451,5 +1451,5 @@ int getww_(void);
 int getwh_(void);
 double MonitorWidthInInches(int monitor);
 double MonitorHeightInInches(int monitor);
-
+double GetScreenPixelsPerInch(void);
 #endif
