@@ -2272,7 +2272,7 @@ GSSiExitProg (532);
 				HaveStates[CurState]=TRUE;
 			break;
 		case 4:
-			ShowScale = atob (Value);
+			ShowScale = atoi (Value);
 			break;     
 		case 5:
 			if (!CurVis)
@@ -3924,6 +3924,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CURRENTZOOMLISTITEM", 387, FALSE);
 	AllocateTypeVar("%HORZRES", 388, FALSE);
 	AllocateTypeVar("%HORZSIZE", 389, FALSE);
+	AllocateTypeVar("%VPID", 390, FALSE);
+	AllocateTypeVar("%VPNAME", 391, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -4004,10 +4006,7 @@ GSSiExitProg (533);
 			sprintf (OutStr,"%2.2i",CurState);
            	break;
 		case 4:  
-			if (ShowScale)
-				_fstrcpy (OutStr,"T");
-			else
-				_fstrcpy (OutStr,"F");
+			ltoa(ShowScale, OutStr, 10);
            	break;
 		case 6:
 			btoa (DoGraphics,OutStr);
@@ -5091,7 +5090,22 @@ GSSiExitProg (533);
 			itoa(GetDeviceCaps(CurView->hDC, HORZRES), OutStr, 10);
 			break;
 		case 389:
-			itoa(GetDeviceCaps(CurView->hDC, HORZSIZE), OutStr, 10);
+			sprintf(OutStr, "%.2f", MonitorWidthInInches(0));
+			break;
+		case 390:
+		{
+			int id = 0;
+			if (CurView)
+				id = CurView->ID;
+			sprintf(OutStr, "%i", id);
+		}
+			break;
+		case 391:
+		{
+			*OutStr = 0;
+			if (CurView)
+				strcpy(OutStr, CurView->Name);
+		}
 			break;
 	}
 	GlobalUnlock (hGlobal);
@@ -10267,7 +10281,7 @@ double GetViewportScale (HDC hDC)
 #endif
 {                
 	double scale, WDist, IDist, BaseScale;
-	int	iLogPixsX;   
+	double	iLogPixsX;   
 	DPOINT	p1,p2; 
 	long	OrthRes[10]={1,4,16,16,16,16,16,16,16,16}; 
 	int		numOrthoLevs=3;
@@ -10284,14 +10298,10 @@ GSSiExitProg (596);
 		return 0;
 }
 	iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
-	if (!iLogPixsX)
-{
-#if ENABLETRACE
-GSSiExitProg (596);
-#endif
-		return 0;   
-}
-	IDist = (double)(CurView->DrawRect.right - CurView->DrawRect.left)/(double)iLogPixsX;
+
+	iLogPixsX = GetScreenPixelsPerInch();
+	IDist = (double)(CurView->DrawRect.right - CurView->DrawRect.left) / (double)iLogPixsX;
+
     if (!IDist)  
 {
 #if ENABLETRACE
@@ -10600,4 +10610,35 @@ BOOL GetUpdateFieldValue (HWND hWndDlg,LPSTR SetFieldName,LPSTR NewValue)
 			ploc++;
 	}
 	return FALSE;
+}
+
+/* Get the window width */
+int getww_(void)
+{
+	CONSOLE_FONT_INFO info;
+	GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &info);
+	return info.dwFontSize.X;
+}
+
+/* Get the window height */
+int getwh_(void)
+{
+	CONSOLE_FONT_INFO info;
+	GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &info);
+	return info.dwFontSize.Y;
+}
+
+int getww(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	int ret;
+	ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	return csbi.dwSize.X;
+}
+int getwh(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	int ret;
+	ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	return csbi.dwSize.Y;
 }

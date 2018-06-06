@@ -5704,7 +5704,7 @@ void ProcessZoomMacroFile(HDC hDC)
 	if (!hDC)
 		goto Exit;
 	CurView->ZMScale = GetViewportScale (hDC); 
-	if (ShowScale)
+	if (ShowScale == CurView->ID)
 	{
 		sprintf (str,"%lf",CurView->ZMScale);
 		SetWindowText (hWndMain,str);

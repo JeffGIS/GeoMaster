@@ -1011,7 +1011,7 @@ extern double			AddressTextSize;
 extern short			PickOnlyHighlighted;
 extern double			SmallFontLargeFontFactor;
 extern short			WantLayer;
-extern BOOL			ShowScale;
+extern int			ShowScale;
 extern BOOL			PickNET;
 extern HANDLE			hSavePoly;
 extern int			WantSegmentID;
