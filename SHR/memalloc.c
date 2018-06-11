@@ -124,7 +124,7 @@ BOOL hDibIs32Bit (HANDLE hDib)
 void MEMERR (LPSTR Mess) 
 {   
 	static	BOOL	ShowMess=TRUE;
-	
+	int findMEMERR = 0;
 //	DebugBreak ();
 	HaveBlockingWindow = TRUE;
 	if (ShowMess)

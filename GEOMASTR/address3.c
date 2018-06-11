@@ -1890,11 +1890,11 @@ BOOL GetFieldInfoFromName (HANDLE hDB,LPSTR FldName,LPSTR pFldType,LPSHORT pFldL
 	*pFldType = 'C';
 	if (*FldName == '[' && *LastChr (FldName) == ']')
 	{
-    	_fstrcpy (FieldInfo.name,&FldName[1]);
+    	strncpy (FieldInfo.name,&FldName[1],sizeof(FieldInfo.name)-1);
     	*LastChr (FieldInfo.name) = 0;
     }
     else
-    	_fstrcpy (FieldInfo.name,FldName);
+    	strncpy (FieldInfo.name,FldName,sizeof(FieldInfo.name)-1);
 	if (GetDBFieldInfo (&FieldInfo,hDB))
 	{   
 		*pFldLen = FieldInfo.length;

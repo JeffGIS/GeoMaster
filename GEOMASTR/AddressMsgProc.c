@@ -135,6 +135,8 @@ ErrOut: GSSiClose(Fid);
     }
     GSSiMsgBox( GetFocus(), "No index containing %STREET_NAME and %HOUSE_NUM",
                "Cannot open address location database", MB_OK,0);
+	GlobalUnlock(hPIDAddDBSQL);
+
     goto ErrOut;
 GetStreetNumIndex: 
     for (index=0;index<lpGWDHead->NumIndex;index++)
@@ -6271,7 +6273,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				 if (!OpenDataFile(IMDataFile, pSQL, BT_READ, &hSQL))
 				 {
 					 char mess[512];
-					 sprintf("Cannot open data file\n%s", IMDataFile);
+					 sprintf(mess,"Cannot open data file\n%s", IMDataFile);
 					 GSSiMsgBox(GetFocus(), mess, 0, MB_ICONQUESTION | MB_OK, 0);
 				 }
                  PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 

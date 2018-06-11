@@ -1095,9 +1095,9 @@ long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction)
 	 if (!stricmp(CvtFile, "GOOGLE" ))
 	 {
 		 if (Direction == 1)
-			 rtn = ConvertCoord(Point, 2, 0);
+			 rtn = ConvertCoord(Point, GOOGLEMAPSPROJECTION, 1);
 		 else
-			 rtn = ConvertCoord(Point, 0, 2);
+			 rtn = ConvertCoord(Point, 1, GOOGLEMAPSPROJECTION);
 
 		 goto Exit;
 	 }
