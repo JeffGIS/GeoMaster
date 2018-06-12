@@ -1,3 +1,4 @@
+[%DL]configs\basic1.gmc /F /WD o:\BUpolice\mpls
 [%DL]projects\AlleyWalls\WallPoints.GMC /F @[CURLEFTMENU]@=AlleyWallFiles; /WD l:\geomas
 /GMEdit [%DL]projects\corners\macros\LoadIntersectionsToSLT.txt /WD o:\bu_2018_02_28\geomas
 data\gamedata\minnesota.gmc /F /WD K:\gmmobile\metroUTM
@@ -148,6 +149,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 
