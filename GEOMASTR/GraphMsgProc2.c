@@ -1720,7 +1720,7 @@ GSSiExitProg (445);
 	            	 if (SendDlgItemMessage (hWndDlg,IDC_REBUILD_QUAD,BM_GETCHECK,0,0))
 	            	 {   
 	            	 	 LPSTR	pFile;
-	            	 	 
+						 BOOL	saveRedisplayOnly = RedisplayOnly;
 				    	 SetDlgItemText (hWndDlg,IDC_MESS,"Rebuild Quad Trees"); 
 				         ClearAllBounds();
 						 SetViewport(*pCommandViewport);
@@ -1731,7 +1731,9 @@ GSSiExitProg (445);
 						 GlobalUnlock (hNewQuadFile);
 						 Display=FALSE;		                  
 					     CurView->CurZoomAreaRef = 0;
+						 RedisplayOnly = FALSE;
 						 RedisplayViewport(TRUE,TRUE);
+						 RedisplayOnly = saveRedisplayOnly;
 					 	 Display=TRUE;		                  
 						 GSSiClose (NewQuadFID); 
 					 	 pFile = GlobalLock (hNewQuadFile);
