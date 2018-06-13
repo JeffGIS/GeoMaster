@@ -1225,9 +1225,11 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 	BOOL rtn = TRUE;
 	int line = 0;
 	char fileID[32] = { "" };
-	char searchFor[] = "CREATE TABLE IF NOT EXISTS Ramps (";
+	char searchFor[] = "CREATE TABLE";
+	char searchFor1[] = "DROP TABLE";
 	char searchFor2[] = "INSERT OR REPLACE INTO Ramps VALUES(";
 	int lenSearch = strlen(searchFor);
+	int lenSearch1 = strlen(searchFor1);
 	int lenSearch2 = strlen(searchFor2);
 	LPSTR pBS = strrchr(file, '\\');
 	if (pBS)
@@ -1265,7 +1267,11 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 			{
 				if (!strnicmp(str, searchFor, lenSearch))
 				{
-					REPLAC(str, "PRIMARY KEY", "FromFileID CHAR(12), PRIMARY KEY", maxLineLen);
+					*str = 0;
+				}
+				else if (!strnicmp(str, searchFor1, lenSearch1))
+				{
+					*str = 0;
 				}
 				else if (!strnicmp(str, searchFor2, lenSearch2))
 				{
@@ -1593,6 +1599,9 @@ char createcmd4[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_NOTES ('id' INTEGER PRI
 rtn = executeCmd(createcmd4);
 char createcmd5[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_STANDARD_TEXT ('textID' INTEGER PRIMARY KEY,'type' INT,'text' CHAR(4096))";
 rtn = executeCmd(createcmd5);
+char createcmd6[] = "CREATE TABLE IF NOT EXISTS PriorityLocations ('locationID' INTEGER PRIMARY KEY,'Name' CHAR(256),'Type' INT, 'Category' CHAR(32),'Latitude' DOUBLE, 'Longitude' DOUBLE, 'Radius' DOUBLE, 'Offset' INT);";
+rtn = executeCmd(createcmd6);
+
 	return rtn;
 }
 /*
