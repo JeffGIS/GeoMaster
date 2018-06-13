@@ -30,8 +30,10 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	char	Winver[64];
 	char	spaces[2]="";
 	
+	//MessageBox(0, "In Abend Writer", 0, MB_OK);
 	if (!LogUsage || InPrintDriver || ignoreError)
 		return;
+	ignoreError = TRUE; //limits to one time
 	if (!Message)
 		Message = spaces;
 	if (!Title)

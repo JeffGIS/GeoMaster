@@ -2795,13 +2795,14 @@ GotCloseFilehSQL:
             }
             else if (!_fstricmp (Arg[1],"ADDRESS")) 
             {
-
-				 HWND hDlg =  CreateDialog(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
-				  PostMessage(hDlg, WM_COMMAND, IDC_ISMODELESS, 0);
+				BOOL sm = SetModeless(TRUE);
+				 HWND hDlg =  DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
+				 SetModeless(sm);
 				  //                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
 				  nRc = 1;
 				  //nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
                   //*AutoExportName=0;
+
                   if (nRc)
                   	goto RtnTrue;
                   else

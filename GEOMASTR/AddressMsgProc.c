@@ -46,6 +46,7 @@ static UINT		intMatchList;
 static HWND		intMatchWnd;
 static UINT		addMatchList;
 static HWND		addMatchWnd;
+static  BOOL	isModeless=FALSE;
 
 void AddAddMatch(HWND hWndDlg, LPSTR str);
 
@@ -4380,6 +4381,13 @@ BOOL AddressTestPlot (LPSTR File)
 	return TRUE;
 }
 
+BOOL SetModeless(BOOL set)
+{
+	BOOL rtn = isModeless;
+	isModeless = set;
+	return rtn;
+}
+
 BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
     
@@ -4435,7 +4443,6 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	static	short	NextMatchCode=0, SelMatchOpt = SELMATCH;     
 	UINT	EntryControls[3]={IDC_HOUSE,IDC_STREET,IDC_ZIP}; 
 	short	nRc;
-	static	BOOL	isModeless;
 	static	DOUBLE	OrigScale;
 	static	DPOINT	OrigMidPointW;
 	static	DPOINT	UserLocatedFromPoint;
@@ -4498,7 +4505,6 @@ BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 			SetWindowText(hWndDlg, "Address Match Editor (Test Mode)");
 		else
 			SetWindowText(hWndDlg, "Address Match Editor");
-		isModeless = FALSE;
     	hMatch = 0;
    		SetViewport (*pCommandViewport);
 		OrigMidPointW = CurView->MidPointW;
@@ -5982,7 +5988,6 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	LPSTR	Street1, Street2, OnStreet;  
 	static	BOOL	FileIsOpen=FALSE, AutoRun=FALSE, CreateNewFile=TRUE;
 	static	short	UseNetBased=1, UsePointBased=0, SelectOne=0, AddTol=0;
-	static  BOOL	isModeless;
  short    BRtn;
  if (Message == 273 && wParam == 1072)
 	 BRtn=1;
@@ -6008,7 +6013,6 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  switch(Message)
    {
     case WM_INITDIALOG: 
-		 isModeless = FALSE;
     	 setDoPaint( FALSE);
     	 RecalledName=FALSE;
     	 hWndHidden=hWndDlg; 
@@ -6067,10 +6071,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
 				hWndAddEdit = 0;
-				if (isModeless)
-					DestroyWindow(hWndDlg);
-				else
-					EndDialog(hWndDlg, FALSE);
+				EndDialog(hWndDlg, FALSE);
 				*AutoExportName = 0;
 				break;
 
@@ -6150,10 +6151,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	                 CloseDataFile (TRUE, &hSQL);  
 					 DestroyFieldList ();
 			    	 setDoPaint( TRUE);
-			    	 if (isModeless)
-						 DestroyWindow(hWndDlg);
-					 else
-						 EndDialog(hWndDlg, rtn);
+					 EndDialog(hWndDlg, rtn);
 					 *AutoExportName = 0;
                  }
                     
@@ -6710,8 +6708,11 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				// if (*AutoExportName)
 		        // 	PostMessage(hWndDlg, WM_COMMAND, IDC_EXIT, 0L);
 				// else
-	                PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); // datafile should always be open so SQL and FIELDS work
-                 break;
+				if (isModeless)
+					PostMessage(hWndDlg, WM_COMMAND, MAKEWPARAM(IDC_EXIT,0), 0L); 
+				else
+					PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); // datafile should always be open so SQL and FIELDS work
+				break;
                  
             }   
           }

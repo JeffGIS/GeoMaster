@@ -349,6 +349,7 @@ BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 BOOL FAR PASCAL LOCATEPIDMsgProc(HWND, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL SetModeless(BOOL set);
 
 BOOL OpenPointAddressTable (BOOL Update);
 void ClosePointAddressTable (void);
