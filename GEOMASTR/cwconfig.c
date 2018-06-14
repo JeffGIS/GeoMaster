@@ -16,7 +16,6 @@
 #include <process.h>
 
 BOOL InDebug=FALSE;
-BOOL inOpenFileDialog=FALSE;
 
 void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);

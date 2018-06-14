@@ -31,7 +31,7 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	char	spaces[2]="";
 	
 	//MessageBox(0, "In Abend Writer", 0, MB_OK);
-	if (!LogUsage || InPrintDriver || ignoreError)
+	if (!LogUsage || InPrintDriver || inOpenFileDialog || ignoreError)
 		return;
 	ignoreError = TRUE; //limits to one time
 	if (!Message)

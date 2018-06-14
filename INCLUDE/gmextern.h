@@ -258,6 +258,7 @@ extern long			NumScreensDisplayed;
 extern HANDLE			hEndDisplayCommand;
 extern BOOL			LogUsage;   
 extern BOOL			InPrintDriver;  
+extern BOOL			inOpenFileDialog;
 extern BOOL			DisplayIsSavedImage;
 extern double			LocationOffset;
 extern double			OffsetLineOffset;
