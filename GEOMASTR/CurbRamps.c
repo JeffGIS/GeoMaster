@@ -7,7 +7,7 @@
 
 static sqlite3 *database = NULL;
 
-BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt);
+int getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt);
 void convertVersion(LPSTR str, int fromVer, int toVer);
 void convertVersion_1_to_2(LPSTR str);
 void convertVersion_2_to_3(LPSTR str);
@@ -651,6 +651,7 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 	return rtn;
 }
 
+
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
 {
 	BOOL rtn = FALSE;
@@ -757,6 +758,9 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 {
 	BOOL rtn = FALSE;
 	int rc;
+	int n = 0;
+	int totRamps = 0;
+	int nIntsNoRamps = 0;
 	ToleranceValues tolerances;
 	char tempfile[MAX_PATH];
 
@@ -776,11 +780,13 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
 				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
-				while (fgetstring(line, sizeof(line)-2, FidList))
+				while (fgetstring(line, 4094, FidList))
 				{
 					int intID = atoi(line);
-					if (getMPIntersectionFromDB(intID, TRUE, pmpInt))
+					int nRamps = getMPIntersectionFromDB(intID, TRUE, pmpInt);
+					if (nRamps > 0)
 					{
+						totRamps += nRamps;
 						for (int i = 1; i < 13; i++)
 						{
 							RampStruct * pRamp = &pmpInt->ramps[i];
@@ -794,11 +800,12 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 								free(ccode);
 								free(detailCode);
 								free(rampText);
+								n++;
 							}
 						}
 					}
 					else
-						ii = 1;
+						nIntsNoRamps++;
 				}
 				free(line);
 				free(pmpInt);
@@ -806,6 +813,7 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 				rtn = TRUE;
 			}
 			GSSiClose(FidList);
+			GSSiRemove(tempfile);
 		}
 		rc = sqlite3_close(database);
 	}
@@ -989,8 +997,9 @@ void MPIntersectionInit(MPINTERSECTION * mpint)
 {
 	memset(mpint, 0, sizeof(MPINTERSECTION));
 }
-BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
+int getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 {
+	int nRamps = 0;
 	MPINTERSECTION mpint;
 	MPIntersectionInit(&mpint);
 	sqlite3_stmt *statement = NULL;
@@ -1053,8 +1062,8 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		[self setSignalCoord : mpint signal : 45 from : statement];
 		[self setSignalCoord : mpint signal : 67 from : statement];
 		[mpint setRampsXWalkAndSignal];*/
+		nRamps = -1;
 	}
-
 	SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 	if (wantRamps && haveIntersection)
 	{
@@ -1062,6 +1071,8 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
 		while (sqlite3_step(statement) == SQLITE_ROW)
 		{
+			if (nRamps == -1)
+				nRamps = 0;
 			int i = 0;
 			int uniqueID = sqlite3_column_int(statement, i++);
 			int intersectionID = sqlite3_column_int(statement, i++);
@@ -1149,19 +1160,25 @@ BOOL getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 			ramp.dwWidth = sqlite3_column_double(statement, i++);
 			ramp.dwDepth = sqlite3_column_double(statement, i++);
 			LPSTR fileID = (LPSTR)sqlite3_column_text(statement, i++);
-			strncpy0(ramp.fileID, fileID, sizeof(ramp.fileID) - 1);
+			if (fileID)
+				strncpy0(ramp.fileID, fileID, sizeof(ramp.fileID) - 1);
 
 			if (ramp.bumpWidth > 0 || ramp.bumpHeight > 0)
 				ii = 1;
 			if (mpint.timeComplete >= mpint.ramps[rampNum].timeComplete)
 				mpint.ramps[rampNum] = ramp;
+			nRamps++;
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 	}
 	free(query);
 
 	*pMPInt = mpint;
-	return TRUE;
+	if (nRamps < 1)
+	{
+		ii = 1;
+	}
+	return nRamps;
 }
 int FormatStreets(LPSTR from, LPSTR outtext)
 {
