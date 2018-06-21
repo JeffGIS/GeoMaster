@@ -3975,11 +3975,14 @@ BOOL GetGoogleMapFile(int type)
 			MessageBox(0, "Google map failed",0, MB_ICONEXCLAMATION);
 		}
 		DestroyWindow(hMess);
-		CurView->CurrentGoogleZoom = GoogleZoom;
-		CurView->CurrentGoogleScale = GoogleScale;
-		CurView->CurrentGoogleMapType = type;
-		CurView->CurrentGoogleCenter.x = pixelx;
-		CurView->CurrentGoogleCenter.y = pixely;
+		if (CurView)
+		{
+			CurView->CurrentGoogleZoom = GoogleZoom;
+			CurView->CurrentGoogleScale = GoogleScale;
+			CurView->CurrentGoogleMapType = type;
+			CurView->CurrentGoogleCenter.x = pixelx;
+			CurView->CurrentGoogleCenter.y = pixely;
+		}
 	}
 	else
 		rtn = TRUE;

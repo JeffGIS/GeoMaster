@@ -4483,9 +4483,10 @@ void PaintMap (HWND hWnd, HDC hDC,BOOL ImediateIn,LPRECT pUpdateRect,int From)
     RECT	IntRect, rect;   
 	int		i;
     
+
     NumScreensDisplayed++;
 // 3/27/06    if (DisableHalt)    
-if (InDisplayProcessing)
+if (InDisplayProcessing || skipPaint-- > 0)
 {
 #if ENABLETRACE
 GSSiExitProg (54);

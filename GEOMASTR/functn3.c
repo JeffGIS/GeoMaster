@@ -1777,6 +1777,7 @@ GotCloseFilehSQL:
 			    lpfnIDENTIFYMsgProc = MakeProcInstance((DLGPROC)IDENTIFYMsgProc, hInst);
 			    nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, lpfnIDENTIFYMsgProc);
 			    FreeProcInstance(lpfnIDENTIFYMsgProc);
+				skipPaint = 1;
 		    }
 			lpUpdateFieldList = 0;
 			lpAutoUpdateFieldList = 0;
@@ -4617,6 +4618,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
 			//$NVCRIS(RAMPOFFSETCOORD,intPoint21,rampPoint21)
+			//$NVCRIS(FIXRAMPNUM,rampnum)
 
 		{
 			rtn = FALSE;
@@ -4633,7 +4635,7 @@ GotCloseFilehSQL:
 					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "PRIORITY"))
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
-
+			
 			}
 			else if (!stricmp(Arg[1], "UPDATEPICTID"))//$NVCRIS(UPDATEPICTID,sqlfile,oldsequence,newsequence)
 			{
@@ -4674,6 +4676,12 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "CREATEDATABASE"))
 			{
 				rtn = NVCreateDB(Arg[2], atob(Arg[3]));
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "FIXRAMPNUM"))
+			{
+				rtn = fixRampNum(atoi(Arg[2]));
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}

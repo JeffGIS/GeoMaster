@@ -539,6 +539,7 @@ void CallImageDisplayMultipleMsgProc(LPSTR ImageList,LPSTR Title)
 	strcpy(DMIFile, ImageList);
 	strcpy(DMITitle, Title);
 	int nRc = DialogBox(hInst, (LPSTR)"IMAGE_DISPLAY_MULTIPLE", hWndMain, (DLGPROC)ImageDisplayMultipleMsgProc);
+	skipPaint = 1;
 }
 BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {

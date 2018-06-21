@@ -1188,13 +1188,13 @@ int FormatStreets(LPSTR from, LPSTR outtext)
 
 	if (lfrom > 0)
 	{
-		LPSTR streets = malloc(lfrom + 8);
+		LPSTR streets = malloc(lfrom + 32);
 		LPSTR pBar = streets;
 		LPSTR pStreet[16];
 		strcpy(streets, from);
 		pStreet[0] = streets;
 		nStreets++;
-		while ((pBar = strchr(pBar, '|')))
+		while ((pBar = strchr(pBar, '|')) && nStreets < 4)
 		{
 			*pBar++ = 0;
 			pStreet[nStreets++] = pBar;
@@ -1618,6 +1618,9 @@ char createcmd5[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_STANDARD_TEXT ('textID'
 rtn = executeCmd(createcmd5);
 char createcmd6[] = "CREATE TABLE IF NOT EXISTS PriorityLocations ('locationID' INTEGER PRIMARY KEY,'Name' CHAR(256),'Type' INT, 'Category' CHAR(32),'Latitude' DOUBLE, 'Longitude' DOUBLE, 'Radius' DOUBLE, 'Offset' INT);";
 rtn = executeCmd(createcmd6);
+char createcmd7[] = "CREATE INDEX rampsIntersectionIndex ON ramps (intID);CREATE INDEX picturesIntersectionIndex ON CURBRAMP_PICTURES (intID);";
+rtn = executeCmd(createcmd7);
+
 
 	return rtn;
 }

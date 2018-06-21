@@ -346,6 +346,7 @@ extern double			DeviceToScreenFactorMemMap;
 extern double			PenWidthFactor;
 extern short			MaxOrthoRes;
 extern BOOL			InDisplayProcessing;
+extern int			skipPaint;
 extern BOOL			BlockVehicleDisplay;
 extern BOOL			VehicleStatusChanged;
 extern BOOL			InVehicleDisplay;

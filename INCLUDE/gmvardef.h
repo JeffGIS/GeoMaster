@@ -124,6 +124,7 @@ SAVEDIMAGEDATA	SavedImageData[MAXSAVEDIMAGES];
 BOOL	AutoReg;
 BOOL	AutoHighlight=FALSE;
 BOOL	InDisplayProcessing=FALSE;
+int		skipPaint = 0;
 BOOL	HavePendingDisplay=FALSE;
 BOOL	BlockVehicleDisplay=FALSE;
 BOOL	VehicleStatusChanged=TRUE;
