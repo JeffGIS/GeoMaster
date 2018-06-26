@@ -5739,6 +5739,18 @@ BOOL GetDelimTextData(LPSTR str,HANDLE hDLT,int MAXLINE)
 	}	 
 Next:if (*str == '"')
 	{
+		LPSTR endLoc = strchr(str, Delim);
+		if (endLoc)
+		{
+			if (endLoc != str + 1 && *(endLoc - 1) != '"')
+				goto Next2;
+		}
+		else
+		{
+			LPSTR lastChr = strchr(str, 0) - 1;
+			if (*lastChr != '"')
+				goto Next2;
+		}
 		str++;
 		EndStr[0] = '"';
 		EndStr[1] = Delim;
@@ -5747,6 +5759,7 @@ Next:if (*str == '"')
 	}
 	else 
 	{
+Next2:
 		EndStr[0] = Delim;
 		EndStr[1] = 0;
 		EndInc = 0;

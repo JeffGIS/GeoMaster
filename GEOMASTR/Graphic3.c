@@ -2816,7 +2816,34 @@ BOOL GetValFromFieldValue(LPSTR FieldName,HANDLE hFieldTypes, HANDLE hValues, LP
 	GlobalUnlock(hFieldTypes);
 	return rtn;
 }
-
+void RemoveQuoteQuote(LPSTR str)
+{
+	LPSTR ploc = str;
+	LPSTR ploc2 = str;
+	BOOL lastAquot = FALSE;
+	char quot = '\'';
+	if (!strchr(str, quot))
+		return;
+	while (*ploc)
+	{
+		if (*ploc == quot)
+		{
+			if (!lastAquot)
+			{
+				*ploc2++ = *ploc;
+				lastAquot = TRUE;
+			}
+			lastAquot = FALSE;
+		}
+		else
+		{
+			*ploc2++ = *ploc;
+			lastAquot = FALSE;
+		}
+		ploc++;
+	}
+	return;
+}
 long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFieldsIN, HANDLE hKeyFields, HANDLE hFieldTypes, HANDLE hValues, BOOL UseHLT, BOOL OutToScreen, int GMHeader, BOOL Compress, BOOL ScanForFieldTypes, long NumToScan, HWND StatusWnd, HWND hWndDlg, BOOL tabDlm)
 #if ENABLETRACE
 {GSSiEnterProg (603);
@@ -3181,6 +3208,7 @@ GSSiExitProg (603);
 			else
 			{
 	            Truncate (str);
+				RemoveQuoteQuote(str);
 	            if (*lpRec)
 	            	_fstrcat (lpRec,dlm);
 				if (!tabDlm &&

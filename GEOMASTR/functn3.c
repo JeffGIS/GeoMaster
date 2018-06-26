@@ -2797,10 +2797,9 @@ GotCloseFilehSQL:
             else if (!_fstricmp (Arg[1],"ADDRESS")) 
             {
 				BOOL sm = SetModeless(TRUE);
-				 HWND hDlg =  DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
+				 nRc =  DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
 				 SetModeless(sm);
 				  //                  nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWnd, lpfnADDLOC_FROMADDMsgProc);
-				  nRc = 1;
 				  //nRc = DialogBox(hInst, (LPSTR)"ADDLOC_FROMADD", hWndMain, (DLGPROC)ADDLOC_FROMADDMsgProc);
                   //*AutoExportName=0;
 
