@@ -204,8 +204,11 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			while (rtn && Done < Tot &&	StatusWindowUpdate (leafName,0,Tot,Done))
 			{
 				rtn = InternetReadFile(handle,pBuffer,dwNumberOfBytesToRead,&numBytesRead);
-				Done += numBytesRead;
-				BigWrite (Fid,pBuffer,numBytesRead,-1);
+				if (rtn)
+				{
+					Done += numBytesRead;
+					BigWrite (Fid,pBuffer,numBytesRead,-1);
+				}
 			};
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow (0);
