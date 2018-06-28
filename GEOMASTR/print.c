@@ -2245,7 +2245,216 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     return (rtn);
 
 }     
+/*BOOL PrintCurbRamp (HWND hWnd, int intersectionID, int rampNum)
+{
+	HDC hPr;
+	RECT	Rect;
+	short xPage, yPage, x = 10, y = 10;
+	WORD wSize;
+	BOOL bError;
+	//   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
+	HBRUSH	BkBrush;
+	BOOL		rtn = TRUE;
+	LPVIEWPORT	lpSaveView;
+	int		iview, i, n, nrow, ncol, irow, icol, height, width, margin = 4, page = 1;
+	LPSTR	lpchr;
+	MSG		msg;
+	HWND		DTW;
+	RECT		BandRect, SubRect;
+	HDIB		hDIB;
+	char		drive[6], dir[128], leaf[16], ext[6], SavePrintName[34], str[514];
+	char		ReportName[128];
+	double	SaveDTSF = DeviceToScreenFactor();
+	RECT		SaveMainRect = MainRect, SaveRect;
+	short	SaveShadow = ShadowInc;
+	short 	ForceOrient = DMORIENT_PORTRAIT;
+	LPDEVMODE pDevMode;
+	HFILE	Fid;
+	SIZE		txSize;
+	int		Tabs[32], Margin = 120;
+	double	Factor;
+	HFONT	hFont, hFontBold, OldFont;
+	char		Header[514];
+	short	FontSize = 8, LineInc, BottomOfPage;
+	HWND		ghWnd;
 
+	GetGlobalCVal("[%PRINTNAME]", SavePrintName, 0);
+
+	ghWnd = hWnd;
+	hWnd = NULL;
+
+	wSize = sizeof(PRINTDLG);
+	if (!hPDChunk)
+	{
+		if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
+			return(MemError());
+		InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
+	}
+	else
+		lpPDChunk = (LPPRINTDLG)GlobalLock(hPDChunk);
+	lpPDChunk->hwndOwner = ghWnd;
+
+	//     setDoPaint( FALSE); 
+	//	 EnableWindow (hWndMain,FALSE);
+	if (ForceOrient && !ShowVirtualPrintAreas)
+	{
+		DWORD	SaveFlags = lpPDChunk->Flags;
+
+		lpPDChunk->Flags = PD_RETURNDEFAULT;
+		GSSiPrintDlg(lpPDChunk, 0, 0, 0);
+		lpPDChunk->Flags = SaveFlags;
+		if (lpPDChunk->hDevMode)
+		{
+			IgnoreLock = TRUE;
+			pDevMode = (LPDEVMODE)GlobalLock(lpPDChunk->hDevMode);
+			pDevMode->dmOrientation = ForceOrient;
+			pDevMode->dmFields = pDevMode->dmFields | DM_ORIENTATION;
+			GlobalUnlock(lpPDChunk->hDevMode);
+			IgnoreLock = FALSE;
+		}
+	}
+
+	if (GSSiPrintDlg(lpPDChunk, 0, 0, 0) != 0)
+
+	{
+		DOCINFO	DI;
+
+		hPr = lpPDChunk->hDC;
+		gbUserAbort = FALSE;
+		bError = FALSE;
+		Printing = TRUE;
+		lpfnPrintDlgProc = MakeProcInstance(PrintDlgProc, ghInst);
+		ghPrintingDlg = CreateDialog(ghInst, "PRINTING", ghWnd,
+			lpfnPrintDlgProc);
+		GetGlobalCVal("[%PRINTNAME]", LeafName, 0);
+		if (!*LeafName)
+			GSSisplitpath(CfgName, 0, 0, LeafName, 0);
+		DI.cbSize = sizeof(DOCINFO);
+		DI.lpszDocName = LeafName;
+		DI.lpszOutput = NULL;
+
+		lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
+		SetAbortProc(hPr, lpfnAbortProc);
+		if (StartDoc(hPr, &DI) > 0)
+		{
+			int dpi = GetDeviceCaps(hPr, LOGPIXELSX);
+			int	nCopies = lpPDChunk->nCopies;
+
+			Escape(hPr, SETCOPYCOUNT, sizeof(int), (LPCSTR)&nCopies, &nCopies);
+			xPage = GetDeviceCaps(hPr, HORZRES);
+			yPage = GetDeviceCaps(hPr, VERTRES);
+			Rect.left = 0;
+			Rect.top = 0;
+			Rect.bottom = yPage - 1;
+			Rect.right = xPage - 1;
+			SaveRect = Rect;
+			SetMainRect(0, hPr, &Rect, 3);
+			yPage = Rect.bottom;
+			IgnoreLock = TRUE;
+			{
+				double fwidth = (double)((long)(100 * (double)Rect.right / (double)dpi)) / 100;
+				double fheight = (double)((long)(100 * (double)Rect.bottom / (double)dpi)) / 100;
+				LPDEVNAMES pdn = (LPDEVNAMES)GlobalLock(lpPDChunk->hDevNames);
+				LPSTR	PrinterName = (LPSTR)pdn + pdn->wDeviceOffset;
+				DoShrinkOrtho = GetGlobalBVal2("[%SHRINKORTHOS]", FALSE);
+				if (!_fstricmp(PrinterName, "Acrobat PDFWriter"))
+					DoShrinkOrtho = FALSE;
+				sprintf(str, "Printer:%s\r\ndpi:%i  width:%.2f  height:%.2f", PrinterName, dpi, fwidth, fheight);
+				GlobalUnlock(lpPDChunk->hDevNames);
+				SetDlgItemText(ghPrintingDlg, IDC_PRINTERINFO, str);
+				PrinterWidth = fwidth;
+				PrinterHeight = fheight;
+			}
+			IgnoreLock = FALSE;
+			Rect = SaveRect;
+			SetMainRect(0, hPr, &Rect, 3);
+			Factor = (double)(Rect.right - Rect.left - Margin) / (double)TabsIn[nTabs - 1];
+			BottomOfPage = Rect.bottom - Margin;
+			for (i = 0; i<nTabs; i++)
+				Tabs[i] = TabsIn[i] * Factor;
+			Tabs[nTabs - 1] *= 2;
+			hFontBold = CreateFont((int)IDNINT(FontSize*Factor*1.4), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Arial Black");
+			hFont = CreateFont((int)IDNINT(FontSize*Factor), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
+			OldFont = SelectObject(hPr, hFontBold);
+			Fid = GSSiOpenFile(File, 0, OF_READ);
+			fgetstring(Header, 512, Fid);
+			GetTextExtentPoint32(hPr, Header, _fstrlen(Header), &txSize);
+			LineInc = txSize.cy;
+		NextPage:
+			SelectObject(hPr, hFontBold);
+			StartPage(hPr);
+			sprintf(str, "Page %i", page++);
+			TextOut(hPr, 0, Rect.bottom - LineInc, str, _fstrlen(str));
+			y = Margin * 2;
+			TabbedTextOut(hPr, Margin, y, Header, _fstrlen(Header), nTabs, Tabs, Margin);
+			y += LineInc * 2;
+			SelectObject(hPr, hFont);
+			while (fgetstring(str, 512, Fid))
+			{
+				TabbedTextOut(hPr, Margin, y, str, _fstrlen(str), nTabs, Tabs, Margin);
+				GetTextExtentPoint32(hPr, str, _fstrlen(str), &txSize);
+				y += txSize.cy;
+				if (y > BottomOfPage)
+				{
+					EndPage(hPr);
+					goto NextPage;
+				}
+			}
+			GSSiClose(Fid);
+			SelectObject(hPr, OldFont);
+			DeleteObject(hFont);
+			DeleteObject(hFontBold);
+
+			EndDoc(hPr);
+			DeleteDC(lpPDChunk->hDC);
+		}
+		else
+			bError = TRUE;
+		//	    EnableWindow (hWndMain,TRUE);
+		if (!gbUserAbort)
+		{
+			DestroyWindow(ghPrintingDlg);
+			ghPrintingDlg = NULL;
+		}
+		if (bError)
+			MessageBox(ghWnd, "Error while printing", szAppName, MB_OK);
+		else
+		{
+			if (gbUserAbort)
+			{
+				MessageBox(ghWnd, "Printing Aborted", "", MB_OK);
+				if (PrintMsgWnd)
+				{
+					DestroyWindow(PrintMsgWnd);
+					ghPrintingDlg = NULL;
+				}
+			}
+		}
+		FreeProcInstance(lpfnAbortProc);
+		FreeProcInstance(lpfnPrintDlgProc);
+		lpfnAbortProc = 0;
+		lpfnPrintDlgProc = 0;
+	}
+	else
+	{
+		ProcessCDError(CommDlgExtendedError());
+	}
+	GlobalUnlock(hPDChunk);
+	Printing = FALSE;
+	{
+		HaltPaint = FALSE;
+		setDoPaint(TRUE);
+	}
+	//	EnableWindow (hWndMain,TRUE);  
+	setDeviceToScreenFactor(SaveDTSF);
+	MainRect = SaveMainRect;
+	ShadowInc = SaveShadow;
+	SetGlobalValue("%PRINTNAME", SavePrintName);
+
+	return (rtn);
+
+}
+*/
 BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
 {	HDC hPr;
     RECT	Rect;
