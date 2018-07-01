@@ -2891,6 +2891,8 @@ GSSiExitProg (1314);
 		FreeProcInstance(lpfnDISPLAYSELECTEDCLASSESMsgProc);
 		setDoPaint(TRUE);
 	}
+	ClearSecondsInSample();
+
 {
 #if ENABLETRACE
 GSSiExitProg (1314);

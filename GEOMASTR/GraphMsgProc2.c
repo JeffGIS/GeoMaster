@@ -10303,7 +10303,7 @@ SetCalendar:
 						tmtime = *localtime (&t); 
 						tmtime.tm_mday = LastDayOfMonth(Begtime); 
 						tmtime.tm_isdst = -1;
-			    		TimeRangeBeg = mktime (&tmtime); 
+			    		SetTimeRangeBeg(mktime (&tmtime)); 
 		       	 		sprintf (str,"%2.2i",tmtime.tm_mday);
 		       	 		SetDlgItemText (hWndDlg,IDC_FROMDAY,str);
 	    	 		}
@@ -10393,8 +10393,9 @@ SetCalendar:
          		time (&systime);
 				tmtime = *localtime (&systime);  
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = TimeRangeEnd = mktime (&tmtime);  
-       	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+				SetTimeRangeBeg(mktime(&tmtime));
+				TimeRangeEnd = TimeRangeBeg;
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
          		break;
          		
          	case IDC_DATE_YESTERDAY:  
@@ -10402,8 +10403,9 @@ SetCalendar:
          		systime -= (60L * 60L * 24L);
 				tmtime = *localtime (&systime);  
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = TimeRangeEnd = mktime (&tmtime);  
-       	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+				SetTimeRangeBeg(mktime(&tmtime));
+				TimeRangeEnd = TimeRangeBeg;
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
          		break;
          		
          	case IDC_DATE_THISMONTH:  
@@ -10411,8 +10413,8 @@ SetCalendar:
 				tmtime = *localtime (&systime); 
 				tmtime.tm_mday = 1; 
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = mktime (&tmtime); 
-/*				tmtime.tm_mday = LastDayOfMonth(TimeRangeBeg); 
+				SetTimeRangeBeg(mktime(&tmtime));
+				/*				tmtime.tm_mday = LastDayOfMonth(TimeRangeBeg);
 	    		TimeRangeEnd = mktime (&tmtime);*/ 
        	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
          		break;
@@ -10426,8 +10428,8 @@ SetCalendar:
 				tmtime = *localtime (&systime); 
 				tmtime.tm_mday = 1; 
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = mktime (&tmtime); 
-				tmtime.tm_mday = LastDayOfMonth(TimeRangeBeg); 
+				SetTimeRangeBeg(mktime(&tmtime));
+				tmtime.tm_mday = LastDayOfMonth(TimeRangeBeg);
 	    		TimeRangeEnd = mktime (&tmtime); 
        	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
          		break;
@@ -10438,8 +10440,8 @@ SetCalendar:
 				tmtime.tm_mon = 0; 
 				tmtime.tm_mday = 1; 
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = mktime (&tmtime); 
-/*				tmtime.tm_mon = 11; 
+				SetTimeRangeBeg(mktime(&tmtime));
+				/*				tmtime.tm_mon = 11;
 	    		TimeRangeEnd = mktime (&tmtime); 
 				tmtime.tm_mday = LastDayOfMonth(TimeRangeEnd); 
 	    		TimeRangeEnd = mktime (&tmtime);*/ 
@@ -10457,8 +10459,8 @@ SetCalendar:
 				tmtime.tm_mon = 0; 
 				tmtime.tm_mday = 1; 
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = mktime (&tmtime); 
-				tmtime.tm_mon = 11; 
+				SetTimeRangeBeg(mktime(&tmtime));
+				tmtime.tm_mon = 11;
 	    		TimeRangeEnd = mktime (&tmtime); 
 				tmtime.tm_mday = LastDayOfMonth(TimeRangeEnd); 
 	    		TimeRangeEnd = mktime (&tmtime); 
@@ -10472,8 +10474,8 @@ SetCalendar:
 				tmtime.tm_year--; 
 				tmtime.tm_isdst = -1;
          		systime = mktime (&tmtime) + (60L * 60L * 24L); 
-	    		TimeRangeBeg = mktime (&tmtime); 
-       	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
+				SetTimeRangeBeg(mktime(&tmtime));
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
          		break;
          		
          	case IDC_DATE_THISWEEK:  
@@ -10481,8 +10483,8 @@ SetCalendar:
 				tmtime = *localtime (&systime); 
 				tmtime.tm_isdst = -1;
 				tmtime.tm_mday -= tmtime.tm_wday; 
-	    		TimeRangeBeg = mktime (&tmtime); 
-/*				tmtime.tm_mday += 6; 
+				SetTimeRangeBeg(mktime(&tmtime));
+				/*				tmtime.tm_mday += 6;
 	    		TimeRangeEnd = mktime (&tmtime); */
        	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
          		break;
@@ -10493,8 +10495,8 @@ SetCalendar:
 				tmtime = *localtime (&systime); 
 				tmtime.tm_mday -= tmtime.tm_wday; 
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = mktime (&tmtime); 
-				tmtime.tm_mday += 6; 
+				SetTimeRangeBeg(mktime(&tmtime));
+				tmtime.tm_mday += 6;
 				tmtime.tm_isdst = -1;
 	    		TimeRangeEnd = mktime (&tmtime); 
        	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
@@ -10505,8 +10507,8 @@ SetCalendar:
          		systime -= (60L * 60L * 24L * 6L);
 				tmtime = *localtime (&systime); 
 				tmtime.tm_isdst = -1;
-	    		TimeRangeBeg = mktime (&tmtime); 
-				tmtime.tm_mday += 6; 
+				SetTimeRangeBeg(mktime(&tmtime));
+				tmtime.tm_mday += 6;
 				tmtime.tm_isdst = -1;
 	    		TimeRangeEnd = mktime (&tmtime); 
        	 		PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
@@ -10601,7 +10603,7 @@ SetCalendar:
             break;      
             
             case IDC_REMOVE_DATE:
-            	TimeRangeBeg = 0;
+            	SetTimeRangeBeg (0);
             	TimeRangeEnd = LONG_MAX;
 				MonthBeg = SysMonthFromSymTime (TimeRangeBeg);
 				MonthEnd = SysMonthFromSymTime (TimeRangeEnd);
@@ -10617,7 +10619,7 @@ SetCalendar:
              		break; 
              	sprintf (str,"$CLK(%s-%s-%s 00:00,1)",year,month,day); 
              	ExpandText (str);
-             	TimeRangeBeg = atol (str);
+             	SetTimeRangeBeg (atol (str));
              	if (!GetDlgItemText (hWndDlg,IDC_TOYEAR,year,5))
              		break;
              	if (!GetDlgItemText (hWndDlg,IDC_TOMONTH,month,3))

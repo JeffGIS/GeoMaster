@@ -4,6 +4,13 @@ static HOTSPOTDATA	HSData;
 static LPHOTSPOTDATA	pHSData=&HSData;
  
 #include "gmextern.h"
+static BOOL haveSecondsInSample = FALSE;
+static int  secondsInSample;
+
+void ClearSecondsInSample(void)
+{
+	haveSecondsInSample = FALSE;
+}
 
 long GetSecondsInSample (void)
 {
@@ -14,6 +21,8 @@ long GetSecondsInSample (void)
 	double	TODFactor=1,TotHours=0,TotDays=0,NumDaysIncluded=0;
 	struct	tm	tmtime;	
 
+	if (haveSecondsInSample)
+		return secondsInSample;
 	time = TimeRangeBeg + 1;
 	while (time < TimeRangeEnd)
 	{
@@ -48,8 +57,9 @@ long GetSecondsInSample (void)
 			}
 		}
 	}
-	
-	return TODFactor*NumDaysIncluded * 86400;
+	secondsInSample = TODFactor*NumDaysIncluded * 86400;
+	haveSecondsInSample = TRUE;
+	return secondsInSample;
 }
 BOOL WantYear (int iMidDay)
 {

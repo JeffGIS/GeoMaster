@@ -2744,7 +2744,7 @@ GSSiExitProg (532);
 			break;
 		
 		case 138:
-			TimeRangeBeg = atol (Value); 
+			SetTimeRangeBeg(atol (Value)); 
 			MonthBeg = SysMonthFromSymTime (TimeRangeBeg);
 			break;
 		
@@ -3522,6 +3522,10 @@ GSSiExitProg (532);
 		case 386:
 			strcpy(CurrentZoomList, Value);
 			break;
+		case 392:
+			MinTimeRangeBeg = atoi(Value);
+			SetTimeRangeBeg(TimeRangeBeg);
+			break;
 		default:
  			break;
 	}
@@ -3932,6 +3936,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%HORZSIZE", 389, FALSE);
 	AllocateTypeVar("%VPID", 390, FALSE);
 	AllocateTypeVar("%VPNAME", 391, FALSE);
+	AllocateTypeVar("%MINTIMERANGEBEGIN", 392, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5112,6 +5117,9 @@ GSSiExitProg (533);
 			if (CurView)
 				strcpy(OutStr, CurView->Name);
 		}
+			break;
+		case 392:
+			ltoa(MinTimeRangeBeg, OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);
@@ -10660,4 +10668,11 @@ int getwh(void)
 	int ret;
 	ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	return csbi.dwSize.Y;
+}
+
+int SetTimeRangeBeg(int time)
+{
+	TimeRangeBeg = max(MinTimeRangeBeg, time);
+	ClearSecondsInSample();
+	return TimeRangeBeg;
 }
