@@ -687,6 +687,8 @@ typedef struct
 		char	Where[4096];
 		char	Query[8192];
 		BOOL	hasRowID;
+		int		xLoc, yLoc;
+		unsigned int numRetreived;
 		sqlite3_stmt *statement;
 		FIELDINFO	FldInfo[1];
 	}SQLDATABASE;

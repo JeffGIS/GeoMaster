@@ -801,7 +801,7 @@ short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB)
 {GSSiEnterProg (520);
 #endif
 { 
-	short	i, NumFields,Type, l, nf; 
+	short	i, NumFields=0,Type, l, nf; 
 	LPSTR	pTable=0,pEnd;
 	LPOPENFILEDATA	FilePtr;
 	LPOPENSQLDATA	SQLPtr;
@@ -1246,31 +1246,16 @@ GMTEXT_ERROR:
     if(!FileHandle)
     	goto RtnFalse;
     	            
-    NumFields = 0;  
-    hFields = GSSiGlobAlloc (1752,GMEM_MOVEABLE,MAXFIELDS*sizeof(FIELDINFO));
-    lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);  
-    index = 0;
-	lpFieldInfo = GetFieldInfo (FileHandle,TRUE,Type,&HaveNonStandardFields);
-	while (lpFieldInfo)
-	{   
-		lpFieldInfo->index = index++; 
-		lpFieldInfo->hCurVal = 0;
-		*lpFieldInfoSave++ = *lpFieldInfo;
-		NumFields++;
-		lpFieldInfo = GetFieldInfo (FileHandle,FALSE,Type,&HaveNonStandardFields); 
-		if (index >= MAXFIELDS)
-			break;
-	}
-	GlobalUnlock(hFields);
+	NumFields = GetFieldDefs(FileHandle, Type, &hFields,&HaveNonStandardFields);
     if (!NumFields && pTable) 
     {
     	GSSiGlobFree (&hFields);
     	goto RtnFalse;	
     }
-AllocFilePtr: 
+
 	nf = NumFields;
-	if (!nf)
-		nf = 255;
+	if (!nf || Type == SLT_DATAFILE)
+		nf = MAXFIELDS;
     handle = GSSiGlobAlloc (1753,GHND,sizeof(OPENFILEDATA)+nf*sizeof(FIELDINFO));
     FilePtr = (LPOPENFILEDATA)GlobalLock (handle);
     FilePtr->myhandle = handle;  
@@ -1382,6 +1367,27 @@ GSSiExitProg (520);
 }
 #endif
 } 
+
+int GetFieldDefs(HANDLE FileHandle, int Type,LPHANDLE phFields, LPBOOL pHaveNonStandardFields)
+{
+	int NumFields = 0;
+	*phFields = GSSiGlobAlloc(1752, GMEM_MOVEABLE, MAXFIELDS*sizeof(FIELDINFO));
+	LPFIELDINFO lpFieldInfoSave = (LPFIELDINFO)GlobalLock(*phFields);
+	int index = 0;
+	LPFIELDINFO lpFieldInfo = GetFieldInfo(FileHandle, TRUE, Type, pHaveNonStandardFields);
+	while (lpFieldInfo)
+	{
+		lpFieldInfo->index = index++;
+		lpFieldInfo->hCurVal = 0;
+		*lpFieldInfoSave++ = *lpFieldInfo;
+		NumFields++;
+		lpFieldInfo = GetFieldInfo(FileHandle, FALSE, Type, pHaveNonStandardFields);
+		if (index >= MAXFIELDS)
+			break;
+	}
+	GlobalUnlock(*phFields);
+	return NumFields;
+}
 
 void ExpandSYMATTRKEY(LPSTR str)
 {
@@ -8060,7 +8066,7 @@ NextTextRec:
 				SQLPtr->lastreadtime = NextVarTime();
 				SLTCloseCursor(pSQL);
 				ClearCurVals(FilePtr);
-				SLTPrepareStatement(pSQL, pSQL->Where);
+				SLTPrepareStatement(hSQLPtr, pSQL->Where);
 			}
 			SQLPtr->st = 0;
 			if (!FetchSLTRec(pSQL))

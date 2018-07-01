@@ -27,16 +27,19 @@ static BOOL		SQLITEProjectionIsBase;
 static char		SQLITEParms[4096] = "";
 static char		LastSQLITEFile[MAX_PATH] = "";
 static char		SQLITEWhere[256];
-static sqlite3	*SQLITEHandle=0;
+static HANDLE	SQLITEHandle = 0;
+//static sqlite3	*SQLITEHandle=0;
 static LONGLONG	NextSQLITERec = 0, SQLITEBaseRefno = 0;
 static MNMXCORD SQLITEFileMNMX;
-static sqlite3_stmt *statement = NULL;
+//static sqlite3_stmt *statement = NULL;
 static char		cmd[1024];
 static char		SQLiteErrorFile[MAX_PATH] = "";
 
 #define BLOB_MAX	USHRT_MAX
 #define COORDINATE_FACTOR	10000000
 #define INPUTBUFSIZE USHRT_MAX * 32
+
+int query_rtree_bbox(sqlite3 *db_handle, const char *rtree_name, LPMNMXCORD pBounds);
 
 void SetSQLiteErrFile(LPSTR errFile)
 {
@@ -327,18 +330,8 @@ BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName,LPMNMXCORD pfileMNMX)
 		switch (SQLITEIndexType)
 		{
 		case INDEX_TYPE_RTREE:
-			sprintf(pCmd, "SELECT min(minX),max(maxX),min(minY),max(maxY) FROM %s_index", tableName);
-			SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0);
+			rtn = query_rtree_bbox(db, tableName, pfileMNMX);
 
-			if (sqlite3_step(statement) == SQLITE_ROW)
-			{
-				pfileMNMX->xmn = sqlite3_column_double(statement, 0);
-				pfileMNMX->xmx = sqlite3_column_double(statement, 1);
-				pfileMNMX->ymn = sqlite3_column_double(statement, 2);
-				pfileMNMX->ymx = sqlite3_column_double(statement, 3);
-				rtn = TRUE;
-			}
-			SQLOK(sqlite3_finalize(statement), db, "get num rows", NULL);
 			break;
 
 		case INDEX_TYPE_XY:
@@ -2233,7 +2226,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 	DPOINT		Points[4];
 	int rtnType = 0;
 	LPSTR pPar, pEnd;
-	char fileName[MAX_PATH], tableName[100];
+	char fileName[MAX_PATH], tableName[100], Query[1024];
 
 	DBoundsInit(&FileMNMX);
 	CloseTRANS2(&hTranFileToBase);
@@ -2254,16 +2247,20 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 				int st;
 				rtnType = SHPT_POINT;
 				st = LoadSQLITEParm(fileName, tableName, rtnType, CurView->hWnd);
-				if (sqlite3_open(fileName, &SQLITEHandle) == SQLITE_OK)
+				if (OpenDataFile(FileNameIN, "", BT_READ, &SQLITEHandle))
 				{
-					if (GetSQLITENumRows(SQLITEHandle, tableName,""))
+					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+					LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+					LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+					if (GetSQLITENumRows(pSQLDatabase->DBHandle, tableName, ""))
 					{
-						if (!SLTSpatialIndexExists(SQLITEHandle, tableName))
+						if (!SLTSpatialIndexExists(pSQLDatabase->DBHandle, tableName))
 						{
-							SLTSpatialIndexCreate(SQLITEHandle,tableName);
+							SLTSpatialIndexCreate(pSQLDatabase->DBHandle, tableName);
 
 						}
-						if (GetSQLITEBounds(SQLITEHandle, tableName, &SQLITEFileMNMX))
+						if (GetSQLITEBounds(pSQLDatabase->DBHandle, tableName, &SQLITEFileMNMX))
 						{
 							Points[0].x = ClipCoordToProjection(SQLITEFileMNMX.xmn, 1, 0, 1);
 							Points[0].y = ClipCoordToProjection(SQLITEFileMNMX.ymn, 2, 0, 1);
@@ -2302,13 +2299,31 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 							CreateFileTran(&MinMax, &FileMNMX);
 							Bounds = CurView->WBounds;
 							ConvertBounds(&Bounds, 1, 0);
-							sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
-								Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
-
-							if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) != SQLITE_OK)
-								statement = NULL;
+							if (!stricmp(tableName, "ALLEYWALLS_NEW"))
+							{
+								sprintf(Query, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+							}
+							else
+							{
+								sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", tableName, tableName, tableName, tableName,
+									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+							}
+							GlobalUnlock(FilePtr->FileHandle);
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(SQLITEHandle);
+							CloseDataFile(TRUE, &SQLITEHandle);
+							OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
+							if (!SLTPrepare(SQLITEHandle))
+								pSQLDatabase->statement = NULL;
+							SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+							FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+							pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 						}
 					}
+					GlobalUnlock(FilePtr->FileHandle);
+					GlobalUnlock(SQLPtr->OFHandle);
+					GlobalUnlock(SQLITEHandle);
 				}
 			}
 		}
@@ -2321,31 +2336,41 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds)
 {
 	BOOL rtn = FALSE;
-	sprintf(cmd, "SELECT LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld",Recno);
-	
-	if (statement)
-		sqlite3_finalize(statement);
-	statement = 0;
-	if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) == SQLITE_OK)
+	if (SQLITEHandle)
 	{
-		int st = sqlite3_step(statement);
+		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-		if (st == SQLITE_ROW)
+		sprintf(cmd, "SELECT LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", Recno);
+
+		if (pSQLDatabase->statement)
+			sqlite3_finalize(pSQLDatabase->statement);
+		pSQLDatabase->statement = 0;
+		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) == SQLITE_OK)
 		{
-			DPOINT BasePt;
+			int st = sqlite3_step(pSQLDatabase->statement);
 
-			BasePt.x = sqlite3_column_double(statement, 0);
-			BasePt.y = sqlite3_column_double(statement, 1);
-			ConvertCoord(&BasePt, 0, 1);
-			pBounds->xmn = BasePt.x - 1;
-			pBounds->ymn = BasePt.y - 1;
-			pBounds->xmx = BasePt.x + 1;
-			pBounds->ymx = BasePt.y + 1;
-			rtn = TRUE;
+			if (st == SQLITE_ROW)
+			{
+				DPOINT BasePt;
+
+				BasePt.x = sqlite3_column_double(pSQLDatabase->statement, 0);
+				BasePt.y = sqlite3_column_double(pSQLDatabase->statement, 1);
+				ConvertCoord(&BasePt, 0, 1);
+				pBounds->xmn = BasePt.x - 1;
+				pBounds->ymn = BasePt.y - 1;
+				pBounds->xmx = BasePt.x + 1;
+				pBounds->ymx = BasePt.y + 1;
+				rtn = TRUE;
+			}
+			sqlite3_finalize(pSQLDatabase->statement);
 		}
-		sqlite3_finalize(statement);
+		pSQLDatabase->statement = NULL;
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(SQLITEHandle);
 	}
-	statement = NULL;
 	return rtn;
 }
 
@@ -2353,21 +2378,31 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 {
 	BOOL rtn = FALSE;
 
-	sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", SQLITERec);
-
-	if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &statement, 0) != SQLITE_OK)
-		statement = NULL;
-	else
+	if (SQLITEHandle)
 	{
-		int st = sqlite3_step(statement);
+		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-		if (st == SQLITE_ROW)
-			rtn = TRUE;
+		sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", SQLITERec);
+
+		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) != SQLITE_OK)
+			pSQLDatabase->statement = NULL;
 		else
 		{
-			sqlite3_finalize(statement);
-			statement = 0;
+			int st = sqlite3_step(pSQLDatabase->statement);
+
+			if (st == SQLITE_ROW)
+				rtn = TRUE;
+			else
+			{
+				sqlite3_finalize(pSQLDatabase->statement);
+				pSQLDatabase->statement = 0;
+			}
 		}
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(SQLITEHandle);
 	}
 	return rtn;
 }
@@ -2378,11 +2413,7 @@ void CloseSQLITEMapFile(void)
 	OpenSHPFileIndex(0, HFILE_ERROR);*/
 	if (SQLITEHandle)
 	{
-		if (statement)
-			sqlite3_finalize(statement);
-		statement = 0;
-		sqlite3_close(SQLITEHandle);
-		SQLITEHandle = 0;
+		CloseDataFile(TRUE, &SQLITEHandle);
 	}
 	return;
 }
@@ -2413,7 +2444,7 @@ BOOL SetSQLITEParms(void)
 	strcpy(str, SQLITESize);
 	ExpandText(str);
 	SQLITEPointSize = atol(str);
-	SetUseOnlyOneDBHandle(hSHPDBF);
+	SetUseOnlyOneDBHandle(SQLITEHandle);
 	pTAG = SQLITETAG;
 	if (*pTAG && (pC = _fstrchr(pTAG, ':')))
 	{
@@ -2434,7 +2465,7 @@ BOOL SetSQLITEParms(void)
 	}
 	if (HaveSQLITESym < 0)
 	{
-/*		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
 		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 
 		pDesc = SQLITEParms;
@@ -2486,7 +2517,7 @@ BOOL SetSQLITEParms(void)
 		else
 			SQLITEPointSize = 0;
 		GlobalUnlock(SQLPtr->OFHandle);
-		GlobalUnlock(SQLITEHandle);*/
+		GlobalUnlock(SQLITEHandle);
 	}
 	else
 		CurrentDesc = HaveSQLITESym;
@@ -2524,189 +2555,211 @@ BOOL ProcessSQLITERecord(HDC hDC)
 
 	//	if (CurView->DisplayInParent && CurView->Parent)            	
 	//		SetViewport(CurView->Parent);
-	if (CurView->PassID == 2 || !SQLITEHandle)
-		goto RtnFalse;
-	InitRecord(hDC);
-	SetSQLITEParms();
-	strcpy(str, SQLITESymbol);
-	ExpandText(str);
-	CurrentDesc = atol(str);
-	if (!GetVisibility(CurrentDesc))
-		goto RtnFalse;
-	if (*SQLITEWhere)
+	if (CurView->PassID != 2 && SQLITEHandle)
 	{
-		BOOL irc;
-
-		if (!LogicP(SQLITEWhere, &irc))
+		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+		InitRecord(hDC);
+		SetSQLITEParms();
+		if (!GetVisibility(CurrentDesc))
 			goto RtnFalse;
-	}
-	BasePt.x = sqlite3_column_double(statement, 2);
-	BasePt.y = sqlite3_column_double(statement, 3);
-	rtn = TRUE;
-	/*	SQLPtr = (LPOPENSQLDATA)GlobalLock(GMDHandle);
-	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
-	lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
-	FillGWDData(lpGWDHead, Offset);
-	switch (lpGWDHead->SpatialIndexType)
-	{
-	case 1:
-	case 2:
+		if (*SQLITEWhere)
+		{
+			BOOL irc;
+
+			if (!LogicP(SQLITEWhere, &irc))
+				goto RtnFalse;
+		}
+		BasePt.x = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->xLoc);
+		BasePt.y = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->yLoc);
+		rtn = TRUE;
+		/*	SQLPtr = (LPOPENSQLDATA)GlobalLock(GMDHandle);
+		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
+		FillGWDData(lpGWDHead, Offset);
+		switch (lpGWDHead->SpatialIndexType)
+		{
+		case 1:
+		case 2:
 		GRStartTime = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->FromDateField);
 		GREndTime = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->ToDateField);
 		GMDPoint.x = GMDGetRealFieldVal(lpGWDHead, lpGWDHead->XField);
 		GMDPoint.y = GMDGetRealFieldVal(lpGWDHead, lpGWDHead->YField);
 		break;
-	}
-	GlobalUnlock(FilePtr->FileHandle);
-	GlobalUnlock(SQLPtr->OFHandle);
-	GlobalUnlock(GMDHandle);
-	if (WantGMDNegGrid)
-	{
+		}
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(GMDHandle);
+		if (WantGMDNegGrid)
+		{
 		if (!GMDPoint.x)
 		{
-			SelectClipRgn(CurView->hDC, 0);
-			GMDPoint = SubVPMidPointWorld;
+		SelectClipRgn(CurView->hDC, 0);
+		GMDPoint = SubVPMidPointWorld;
 		}
 		else
-			goto RtnFalse;
-	}*/
-	ConvertCoord(&BasePt, 0, 1);
-	InGraphicsProcessor = TRUE;
-	ShowValue(hDC, FALSE);
-	CurrentRefno = sqlite3_column_int(statement, 0);
-	ItemSeg = CurrentSQLITERec = CurrentRefno;
-	strcpy(str, SQLITERefno);
-	ExpandText(str);
-	SQLITEBaseRefno = atol(str);
-	CurrentRefno += SQLITEBaseRefno;
-	PTRot = 0;
-	if (PointInWBounds(&BasePt))// && GRStartTime >= TimeRangeBeg && SQLITEStartTime < TimeRangeEnd)
-	{
-		LPSTR	pTag;
-		char	Tag[80];
-		short	ltag;
-		short	Dummy;
-		MNMXCORD bounds;
-
-		//strcpy(Tag, SQLITETAG);
-		//ExpandText(Tag);
-
-		pTag = (LPSTR)sqlite3_column_text(statement, 1);
-		sprintf (Tag,"ALLYWALL:%s", pTag);
-		SetSymNum(CurrentDesc);
-		ltag = _fstrlen(Tag);
-		if (ProcessRefAndTAG(TRUE, Tag, ltag))
+		goto RtnFalse;
+		}*/
+		ConvertCoord(&BasePt, 0, 1);
+		InGraphicsProcessor = TRUE;
+		ShowValue(hDC, FALSE);
+		CurrentRefno = sqlite3_column_int(pSQLDatabase->statement, 0);
+		ItemSeg = CurrentSQLITERec = CurrentRefno;
+		strcpy(str, SQLITERefno);
+		ExpandText(str);
+		SQLITEBaseRefno = atol(str);
+		CurrentRefno += SQLITEBaseRefno;
+		PTRot = 0;
+		if (PointInWBounds(&BasePt))// && GRStartTime >= TimeRangeBeg && SQLITEStartTime < TimeRangeEnd)
 		{
-			HiPrecis = TRUE;
-			lpDCurPoints = &BasePt;
-			CurrentPoint = CurPointLocD = BasePt;
-			ItemSeg = CurrentSQLITERec;
-			LastElementBeginPoint = LastElementEndPoint = BasePt;
-			nPnts = nCurPoints = 1;
-			CurPointLoc = BasePtToWinPt(lpDCurPoints);
-			if (PointIsBlocked(&CurPointLocD, CurrentDesc))
-				goto RtnFalse;
-			InGraphicsProcessor = TRUE;
-			HaveTXLoc = TRUE;
-			CurrentType = GF_POINT;
-			CurPointSize = SQLITEPointSize;
-			if (CurPointSize < 0)
-				CurPointSize = -CurPointSize * DeviceToScreenFactor();
-			else
-				CurPointSize /= CurView->BaseUnitsPerPixel;
-			CurPointSize *= GraphicsPointFactor;
-			DBoundsInit(&bounds);
-			AddDPointToMinMax(lpDCurPoints, &bounds);
-			CurrentItemMinMax = WBoundsToFileBounds(&bounds);
-			if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
-			{
-				CurrentSeg = CurrentRefno;
-				PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
-			}
-			else if (GetTypeVisibility(TYPE_POINT))
-			{
-				short	iDesc = CurrentDesc;
+			LPSTR	pTag;
+			char	Tag[80];
+			short	ltag;
+			short	Dummy;
+			MNMXCORD bounds;
 
-				if (CurrentDesc > 0 && CurrentDesc < 3201)
-				{
-					if (TSize)
-						CurView->CurVisType[CurrentDesc] = 5;
-					else
-						CurView->CurVisType[CurrentDesc] = 4;
-				}
-				HighlightPointSym = FALSE;
-				if (!GetTypeVisibility(6) && SymbolIsVisible(iDesc))
-				{
-					CurPointSize = 10 * DeviceToScreenFactor();
-					iDesc = InvisiblePointSymbol;
-				}
-				if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
-				{
-					double	size;
+			//strcpy(Tag, SQLITETAG);
+			//ExpandText(Tag);
 
-					if (ThemePointSym)
+			pTag = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, 1);
+			sprintf(Tag, "ALLYWALL:%s", pTag);
+			SetSymNum(CurrentDesc);
+			ltag = _fstrlen(Tag);
+			if (ProcessRefAndTAG(TRUE, Tag, ltag))
+			{
+				HiPrecis = TRUE;
+				lpDCurPoints = &BasePt;
+				CurrentPoint = CurPointLocD = BasePt;
+				ItemSeg = CurrentSQLITERec;
+				LastElementBeginPoint = LastElementEndPoint = BasePt;
+				nPnts = nCurPoints = 1;
+				CurPointLoc = BasePtToWinPt(lpDCurPoints);
+				if (PointIsBlocked(&CurPointLocD, CurrentDesc))
+					goto RtnFalse;
+				InGraphicsProcessor = TRUE;
+				HaveTXLoc = TRUE;
+				CurrentType = GF_POINT;
+				CurPointSize = SQLITEPointSize;
+				if (CurPointSize < 0)
+					CurPointSize = -CurPointSize * DeviceToScreenFactor();
+				else
+					CurPointSize /= CurView->BaseUnitsPerPixel;
+				CurPointSize *= GraphicsPointFactor;
+				DBoundsInit(&bounds);
+				AddDPointToMinMax(lpDCurPoints, &bounds);
+				CurrentItemMinMax = WBoundsToFileBounds(&bounds);
+				if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
+				{
+					CurrentSeg = CurrentRefno;
+					PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
+				}
+				else if (GetTypeVisibility(TYPE_POINT))
+				{
+					short	iDesc = CurrentDesc;
+
+					if (CurrentDesc > 0 && CurrentDesc < 3201)
 					{
-						iDesc = ThemePointSym;
-						if (ThemePointSize < 0)
-							size = -ThemePointSize *DeviceToScreenFactor();
+						if (TSize)
+							CurView->CurVisType[CurrentDesc] = 5;
 						else
-							size = ThemePointSize / CurView->BaseUnitsPerPixel;
-						size *= ThemeWidthFactor;
-						size = min(max(size*GraphicsPointFactor, 1), MaxPointSize);
+							CurView->CurVisType[CurrentDesc] = 4;
 					}
-					else if (ItemSymbolWidth > 0)
-						size = ItemSymbolWidth * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
-					else if (ItemSymbolWidth < 0)
-						size = -ItemSymbolWidth * BaseDistToWinDist * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
-					else
-						size = CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
-					if (iDesc < 0)
+					HighlightPointSym = FALSE;
+					if (!GetTypeVisibility(6) && SymbolIsVisible(iDesc))
 					{
-						COLORREF	OldColor;
-
-						if (ThemePointColor > -1)
-							OldColor = SetTextColor(CurView->hDC, ConvertColor(ThemePointColor, ThemePointUseHalfTone));
-						DisplayCharAtLoc(CurView->hDC, CurPointLoc, (short)IDNINT(size), -iDesc);
-						if (ThemePointColor > -1)
-							SetTextColor(CurView->hDC, OldColor);
+						CurPointSize = 10 * DeviceToScreenFactor();
+						iDesc = InvisiblePointSymbol;
 					}
-					else
+					if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
 					{
-						long	DisplayedWidth = 0;
+						double	size;
 
-						DisplayPointItem(CurView->hDC, CurPointLoc, size, PTRot, iDesc, &DisplayedWidth);
-						CurView->MaxSymbolWidth = max(CurView->MaxSymbolWidth, DisplayedWidth);
-						CurView->MaxFileDisplayedPointWidth[FileNum] = max(CurView->MaxFileDisplayedPointWidth[FileNum], (DisplayedWidth / FileDistToWinDist) - (((long)CurrentItemMinMax.xmx) - CurrentItemMinMax.xmn));
+						if (ThemePointSym)
+						{
+							iDesc = ThemePointSym;
+							if (ThemePointSize < 0)
+								size = -ThemePointSize *DeviceToScreenFactor();
+							else
+								size = ThemePointSize / CurView->BaseUnitsPerPixel;
+							size *= ThemeWidthFactor;
+							size = min(max(size*GraphicsPointFactor, 1), MaxPointSize);
+						}
+						else if (ItemSymbolWidth > 0)
+							size = ItemSymbolWidth * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+						else if (ItemSymbolWidth < 0)
+							size = -ItemSymbolWidth * BaseDistToWinDist * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+						else
+							size = CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
+						if (iDesc < 0)
+						{
+							COLORREF	OldColor;
+
+							if (ThemePointColor > -1)
+								OldColor = SetTextColor(CurView->hDC, ConvertColor(ThemePointColor, ThemePointUseHalfTone));
+							DisplayCharAtLoc(CurView->hDC, CurPointLoc, (short)IDNINT(size), -iDesc);
+							if (ThemePointColor > -1)
+								SetTextColor(CurView->hDC, OldColor);
+						}
+						else
+						{
+							long	DisplayedWidth = 0;
+
+							DisplayPointItem(CurView->hDC, CurPointLoc, size, PTRot, iDesc, &DisplayedWidth);
+							CurView->MaxSymbolWidth = max(CurView->MaxSymbolWidth, DisplayedWidth);
+							CurView->MaxFileDisplayedPointWidth[FileNum] = max(CurView->MaxFileDisplayedPointWidth[FileNum], (DisplayedWidth / FileDistToWinDist) - (((long)CurrentItemMinMax.xmx) - CurrentItemMinMax.xmn));
+						}
+						DBoundsInit(&RecordBounds);
+						AddDPointToMinMax(lpDCurPoints, &RecordBounds);
+						InflateBounds(&RecordBounds, size);
+						GetFileMinMax(&CurrentItemMinMax, &RecordBounds);
 					}
-					DBoundsInit(&RecordBounds);
-					AddDPointToMinMax(lpDCurPoints, &RecordBounds);
-					InflateBounds(&RecordBounds, size);
-					GetFileMinMax(&CurrentItemMinMax, &RecordBounds);
 				}
+				InGraphicsProcessor = FALSE;
+				TXLoc = CurPointLocD;
+				HaveTXLoc = 1;
 			}
-			InGraphicsProcessor = FALSE;
-			TXLoc = CurPointLocD;
-			HaveTXLoc = 1;
 		}
+		ShowValue(hDC, FALSE);
+	RtnFalse:
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(SQLITEHandle);
 	}
-	ShowValue(hDC, FALSE);
-RtnFalse:
 	CurView = SaveVP;
 	InGraphicsProcessor = FALSE;
 	return rtn;
 }
 BOOL GetNextSQLITERecord(LPMNMXCORD pBounds)
 {
-	char *error = NULL;
-	int rtn = sqlite3_step(statement);
+	BOOL rtn = FALSE;
+	if (SQLITEHandle)
+	{
+		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+		char *error = NULL;
+		int ierr = sqlite3_step(pSQLDatabase->statement);
 
-	if (rtn == SQLITE_ROW)
-		return TRUE;
-	if (rtn == SQLITE_DONE)
-		return FALSE;
-	SQLOK(rtn, SQLITEHandle,"", &error);
-	sqlite3_free(error);
-	return FALSE;
+		if (ierr == SQLITE_ROW)
+		{
+			rtn = TRUE;
+			pSQLDatabase->numRetreived++;
+		}
+		else if (ierr == SQLITE_DONE)
+		{
+			rtn = FALSE;
+		}
+		else
+		{
+			SQLOK(ierr, pSQLDatabase->DBHandle, "", &error);
+			sqlite3_free(error);
+		}
+		GlobalUnlock(FilePtr->FileHandle);
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(SQLITEHandle);
+	}
+	return rtn;
 /*	if (!hDGN)
 		return FALSE;
 	if (pBounds)
@@ -2906,8 +2959,6 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 		else
 			SQLITEBaseRefno = atol(SQLITERefno);
 		fgetstring(SQLITETAG, 99, Fid);
-		fgetstring(str, 32, Fid);
-		SHPIndexType = atoi(str);
 		_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
 		while (fgetstring(str, 256, Fid))
 		{
@@ -3287,13 +3338,14 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	LPSTR pWhere;
 	char Name[MAX_PATH + 256];
 	char JName[MAX_PATH + 256];
-	char lastName[256] = { 0 };
 	int rtn;
 	sqlite3 *db;
 
 	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock(hDB);
 	pDB->hasRowID = TRUE;
+	pDB->xLoc = -1;
+	pDB->yLoc = -1;
 	strcpy(Name, NameIN);
 	if (!(pTable = strrchr(Name, '(')))
 		pTable = strrchr(Name, '|');
@@ -3333,75 +3385,8 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	strcpy(pDB->Where, SQL);
 	if (*pDB->From)
 	{
-		sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
-		if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "get db info", 0))
-		{
-			int ncols = sqlite3_column_count(pDB->statement);
-			pDB->NumFields = 0;
-			for (int j = 0; j < ncols; j++)
-			{
-				char nulltype[2] = { "" };
-				int itype = sqlite3_column_type(pDB->statement, j);
-				int ibytes = sqlite3_column_bytes(pDB->statement,j);
-				LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement,j);
-				LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement,j);
-				if (!decl)
-					decl = nulltype;
-				if (strcmp(pName, lastName))
-				{
-					strcpy(lastName, pName);
-					int nc = 0;
-					LPSTR pPar = 0;
-					//if (itype != SQLITE_NULL)
-					pPar = strchr(decl, '(');
-					if (pPar)
-					{
-						*pPar++ = 0;
-						nc = atoi(pPar);
-					}
-					strncpy(pDB->FldInfo[pDB->NumFields].name, pName, sizeof(pDB->FldInfo[pDB->NumFields].name));
-					pDB->FldInfo[pDB->NumFields].index = pDB->NumFields;
-
-					//if (itype != SQLITE_NULL)
-					{
-						if (!strnicmp(decl, "INT", 3))
-						{
-							pDB->FldInfo[pDB->NumFields].type = BT_INTEGER;
-							pDB->FldInfo[pDB->NumFields].length = 4;
-						}
-						else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT") || !stricmp(decl, "DOUBLE"))
-						{
-							pDB->FldInfo[pDB->NumFields].type = BT_REAL;
-							pDB->FldInfo[pDB->NumFields].length = 8;
-						}
-						else if (!stricmp(decl, "BLOB"))
-						{
-							pDB->FldInfo[pDB->NumFields].type = SQL_LONGVARBINARY;
-							pDB->FldInfo[pDB->NumFields].length = nc;
-						}
-						else if (!stricmp(decl, "CHAR"))
-						{
-							pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
-							pDB->FldInfo[pDB->NumFields].length = nc;
-						}
-						else if (!stricmp(decl, "TEXT"))
-						{
-							pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
-							pDB->FldInfo[pDB->NumFields].length = nc;
-						}
-						else
-							MessageBox(0, decl, "Invalid type", MB_OK);
-					}
-					pDB->NumFields++;
-
-				}
-				else
-					pDB->hasRowID = FALSE;
-			}
-
-		}
-		sqlite3_finalize(pDB->statement);
-		pDB->statement = NULL;
+		//sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
+		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
 /*		pWhere = malloc(4096);
 		strcpy(pWhere, pDB->Where);
 		ExpandText(pWhere);
@@ -3426,7 +3411,10 @@ BOOL FetchSLTRec(LPSQLDATABASE pSQL)
 	BOOL rtn = FALSE;
 	int st = sqlite3_step(pSQL->statement);
 	if (st == SQLITE_ROW)
+	{
 		rtn = TRUE;
+		pSQL->numRetreived++;
+	}
 	return rtn;
 }
 
@@ -3437,12 +3425,118 @@ void SLTCloseCursor(LPSQLDATABASE pDB)
 	pDB->statement = NULL;
 }
 
-BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
+BOOL SLTPrepare(HANDLE SQLITEHandle)
+{
+	BOOL rtn = FALSE;
+	char lastName[256] = { 0 };
+	LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+	LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+	LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+
+
+	pDB->NumFields = 0;
+	pDB->numRetreived = 0;
+	if (!SQLOK(sqlite3_prepare_v2(pDB->DBHandle, pDB->Query, -1, &pDB->statement, 0), pDB->DBHandle, "prepare", 0))
+	{
+		int ncols = sqlite3_column_count(pDB->statement);
+		rtn = TRUE;
+		for (int j = 0; j < ncols; j++)
+		{
+			char nulltype[2] = { "" };
+			int itype = sqlite3_column_type(pDB->statement, j);
+			int ibytes = sqlite3_column_bytes(pDB->statement, j);
+			LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, j);
+			LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, j);
+			if (!stricmp(pName, "X"))
+				pDB->xLoc = j;
+
+			if (!stricmp(pName, "Y"))
+				pDB->yLoc = j;
+
+			if (!decl)
+				decl = nulltype;
+			if (strcmp(pName, lastName))
+			{
+				strcpy(lastName, pName);
+				int nc = 0;
+				LPSTR pPar = 0;
+				//if (itype != SQLITE_NULL)
+				pPar = strchr(decl, '(');
+				if (pPar)
+				{
+					*pPar++ = 0;
+					nc = atoi(pPar);
+				}
+				strncpy(pDB->FldInfo[pDB->NumFields].name, pName, sizeof(pDB->FldInfo[pDB->NumFields].name));
+				pDB->FldInfo[pDB->NumFields].index = pDB->NumFields;
+
+				//if (itype != SQLITE_NULL)
+				pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+				{
+					if (!strnicmp(decl, "INT", 3))
+					{
+						pDB->FldInfo[pDB->NumFields].type = BT_INTEGER;
+						pDB->FldInfo[pDB->NumFields].length = 4;
+					}
+					else if (!stricmp(decl, "REAL") || !stricmp(decl, "FLOAT") || !stricmp(decl, "DOUBLE"))
+					{
+						pDB->FldInfo[pDB->NumFields].type = BT_REAL;
+						pDB->FldInfo[pDB->NumFields].length = 8;
+					}
+					else if (!stricmp(decl, "BLOB"))
+					{
+						pDB->FldInfo[pDB->NumFields].type = SQL_LONGVARBINARY;
+						pDB->FldInfo[pDB->NumFields].length = nc;
+					}
+					else if (!stricmp(decl, "CHAR"))
+					{
+						pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+						pDB->FldInfo[pDB->NumFields].length = nc;
+					}
+					else if (!stricmp(decl, "TEXT"))
+					{
+						pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+						pDB->FldInfo[pDB->NumFields].length = nc;
+					}
+					//else
+					//	MessageBox(0, decl, "Invalid type", MB_OK);
+				}
+				pDB->NumFields++;
+
+			}
+			else
+				pDB->hasRowID = FALSE;
+		}
+
+	}
+	HANDLE hFields=0;
+	BOOL HaveNonStandardFields;
+	int NumFields = GetFieldDefs(FilePtr->FileHandle, FilePtr->Type, &hFields, &HaveNonStandardFields);
+
+	FilePtr->NumFields = NumFields;
+	LPFIELDINFO lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);
+	LPFIELDINFO lpFieldInfo = &FilePtr->FldInfo;
+	if (NumFields)
+		for (int i = 0; i<NumFields; i++, lpFieldInfoSave++, lpFieldInfo++)
+			*lpFieldInfo = *lpFieldInfoSave;
+
+	GSSiGlobUlFree(&hFields);
+	GlobalUnlock(FilePtr->FileHandle);
+	GlobalUnlock(SQLPtr->OFHandle);
+	GlobalUnlock(SQLITEHandle);
+
+	return rtn;
+}
+
+BOOL SLTPrepareStatement(HANDLE SQLITEHandle, LPSTR SQL)
 {
 	sqlite3 *db;
 	BOOL rtn = FALSE;
 	LPSTR pWhere;
 	char getRowID[8] = { 0 };
+	LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+	LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+	LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
 	db = pDB->DBHandle;
 	if (pDB->statement)
@@ -3453,15 +3547,23 @@ BOOL SLTPrepareStatement(LPSQLDATABASE	pDB, LPSTR SQL)
 	ExpandText(pWhere);
 	if (pDB->hasRowID)
 		strcpy(getRowID, "rowid,");
-	if (*pWhere)
+	if (!strnicmp(pWhere, "SELECT ", 7))
+	{
+		strcpy(pDB->Query, pWhere);
+		ExpandText(pDB->Query);
+	}
+	else if (*pWhere)
 		sprintf(pDB->Query, "SELECT %s* FROM '%s' WHERE %s",getRowID, pDB->From, pWhere);
 	else
 		sprintf(pDB->Query, "SELECT %s* FROM '%s'",getRowID, pDB->From);
 	free(pWhere);
-	if (!SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, "prepare", 0))
+	if (SLTPrepare(SQLITEHandle))
 	{
 		rtn = TRUE;
 	}
+	GlobalUnlock(FilePtr->FileHandle);
+	GlobalUnlock(SQLPtr->OFHandle);
+	GlobalUnlock(SQLITEHandle);
 	return rtn;
 }
 

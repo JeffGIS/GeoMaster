@@ -4786,7 +4786,7 @@ DoSid:
 			}
         }
         break;
-		case MT_SQLITE: //GMD Point file  
+		case MT_SQLITE: 
 		{
 			int iType;
 			CloseTRANS2(&hTranFileToBase);
