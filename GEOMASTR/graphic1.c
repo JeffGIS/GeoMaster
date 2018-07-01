@@ -3862,6 +3862,8 @@ Loop:
      
      if (!FileMode)
      	WidthFactor /= CurView->FileFactor;
+	 if (WidthFactor < 0 || WidthFactor > 1000)
+		 WidthFactor = 1;
      CurView->wOrigX = (short)CurView->Bounds.xmn;
      CurView->wOrigY = (short)CurView->Bounds.ymx;
      CurView->wExtX = (short)iscale;

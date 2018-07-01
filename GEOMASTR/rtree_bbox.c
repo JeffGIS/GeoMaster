@@ -56,17 +56,13 @@ rtree_bbox_callback (sqlite3_rtree_query_info * info)
     double miny;
     double maxy;
     struct bbox_rtree *data = (struct bbox_rtree *) (info->pContext);
-    if (info->nCoord != 4)
-	{
-	/* invalid RTree; not 2D */
-		goto end;
-	}
+	int coordInc = info->nCoord - 4;
 
 /* fetching the Node's BBOX */
-    minx = info->aCoord[0];
-    maxx = info->aCoord[1];
-    miny = info->aCoord[2];
-    maxy = info->aCoord[3];
+	minx = info->aCoord[0 + coordInc];
+	maxx = info->aCoord[1 + coordInc];
+	miny = info->aCoord[2 + coordInc];
+	maxy = info->aCoord[3 + coordInc];
 	
 /* updating the Full Extent BBOX */
 	if (data->valid == 0)
