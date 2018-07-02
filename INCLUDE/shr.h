@@ -307,6 +307,8 @@ HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where);
 void CloseSLTDatabase(LPHANDLE pHandle);
 void SLTCloseCursor(LPSQLDATABASE pDB);
+BOOL SQLITEPrepare(LPSQLDATABASE pDB);
+BOOL SLTPrepare(HANDLE SQLITEHandle);
 int GetFieldDefs(HANDLE FileHandle, int Type, LPHANDLE phFields, LPBOOL pHaveNonStandardFields);
 LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc, LPFIELDINFO FirstField);
 int FetchSLTRec(LPSQLDATABASE pSQL);

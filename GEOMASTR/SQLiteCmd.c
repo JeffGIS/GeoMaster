@@ -2306,7 +2306,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 							}
 							else
 							{
-								sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", tableName, tableName, tableName, tableName,
+								sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND maxTime >= %i AND minTime <= %i AND maxUCR >= %i AND minUCR <= %i AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", tableName, tableName, tableName, tableName, TimeRangeBeg, TimeRangeEnd, GMDMinCode, GMDMaxCode,
 									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 							}
 							GlobalUnlock(FilePtr->FileHandle);
@@ -2314,9 +2314,11 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 							GlobalUnlock(SQLITEHandle);
 							CloseDataFile(TRUE, &SQLITEHandle);
 							OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
-							if (!SLTPrepare(SQLITEHandle))
-								pSQLDatabase->statement = NULL;
+							SLTPrepare(SQLITEHandle);
 							SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+							SQLPtr->lastreadtime = INT_MAX;
+							SQLPtr->NumGlobals = 0;
+							SQLPtr->st = 0;
 							FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 							pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 						}
@@ -3383,23 +3385,33 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	}
 	pDB->DBHandle = db;
 	strcpy(pDB->Where, SQL);
-	if (*pDB->From)
+	if (!*pDB->Where && *pDB->From)
 	{
 		//sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
 		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
-/*		pWhere = malloc(4096);
-		strcpy(pWhere, pDB->Where);
-		ExpandText(pWhere);
-		if (*pWhere)
-			sprintf(pDB->Query, "SELECT rowid,* FROM '%s' WHERE %s;", pDB->From, pWhere);
-		else
-			sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
-		free(pWhere);
-		if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, pDB->Query, 0))
-		{
-			GSSiGlobUlFree(&hDB);
-		}*/
+		/*		pWhere = malloc(4096);
+				strcpy(pWhere, pDB->Where);
+				ExpandText(pWhere);
+				if (*pWhere)
+				sprintf(pDB->Query, "SELECT rowid,* FROM '%s' WHERE %s;", pDB->From, pWhere);
+				else
+				sprintf(pDB->Query, "SELECT rowid,* FROM '%s';", pDB->From);
+				free(pWhere);
+				if (SQLOK(sqlite3_prepare_v2(db, pDB->Query, -1, &pDB->statement, 0), db, pDB->Query, 0))
+				{
+				GSSiGlobUlFree(&hDB);
+				}*/
 
+	}
+	else if (!strnicmp(pDB->Where, "SELECT ", 7))
+	{
+		strcpy(pDB->Query, pDB->Where);
+		ExpandText(pDB->Query);
+	}
+	else if (*pDB->Where && *pDB->From)
+	{
+		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pDB->Where);
+		SQLITEPrepare(pDB);
 	}
 	if (hDB)
 		GlobalUnlock(hDB);
@@ -3424,15 +3436,10 @@ void SLTCloseCursor(LPSQLDATABASE pDB)
 		sqlite3_finalize(pDB->statement);
 	pDB->statement = NULL;
 }
-
-BOOL SLTPrepare(HANDLE SQLITEHandle)
+BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 {
 	BOOL rtn = FALSE;
 	char lastName[256] = { 0 };
-	LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
-	LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
-	LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
-
 
 	pDB->NumFields = 0;
 	pDB->numRetreived = 0;
@@ -3509,18 +3516,34 @@ BOOL SLTPrepare(HANDLE SQLITEHandle)
 		}
 
 	}
-	HANDLE hFields=0;
-	BOOL HaveNonStandardFields;
-	int NumFields = GetFieldDefs(FilePtr->FileHandle, FilePtr->Type, &hFields, &HaveNonStandardFields);
+	else
+		pDB->statement = NULL;
 
-	FilePtr->NumFields = NumFields;
-	LPFIELDINFO lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);
-	LPFIELDINFO lpFieldInfo = &FilePtr->FldInfo;
-	if (NumFields)
-		for (int i = 0; i<NumFields; i++, lpFieldInfoSave++, lpFieldInfo++)
-			*lpFieldInfo = *lpFieldInfoSave;
+	return rtn;
+}
+BOOL SLTPrepare(HANDLE SQLITEHandle)
+{
+	BOOL rtn = FALSE;
+	LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+	LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+	LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-	GSSiGlobUlFree(&hFields);
+	if (SQLITEPrepare(pDB))
+	{
+		HANDLE hFields = 0;
+		BOOL HaveNonStandardFields;
+		int NumFields = GetFieldDefs(FilePtr->FileHandle, FilePtr->Type, &hFields, &HaveNonStandardFields);
+
+		FilePtr->NumFields = NumFields;
+		LPFIELDINFO lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);
+		LPFIELDINFO lpFieldInfo = &FilePtr->FldInfo;
+		if (NumFields)
+			for (int i = 0; i < NumFields; i++, lpFieldInfoSave++, lpFieldInfo++)
+				*lpFieldInfo = *lpFieldInfoSave;
+
+		GSSiGlobUlFree(&hFields);
+		rtn = TRUE;
+	}
 	GlobalUnlock(FilePtr->FileHandle);
 	GlobalUnlock(SQLPtr->OFHandle);
 	GlobalUnlock(SQLITEHandle);
