@@ -10,7 +10,8 @@ static	char	SQLITEy[128] = "[SQLITE.y]";
 static	char	SQLITEStartTime[128] = "[SQLITE.BDate]";
 static	char	SQLITEEndTime[128] = "[SQLITE.EDate]";
 static  char	SQLITEIndexType = INDEX_TYPE_RTREE;
-static	char	SQLITESymbol[128] = "$SYMNUM(WALLPOINT)";
+static	int		SQLITESymbols[128];
+static	int		nSQLITESymbols = 0;
 static	char	SQLITESize[128] = "-10";
 static	char	SQLITETAG[128] = "CONTROLN:[SQLITE.Wall Id]", SQLITETag[128];//"CASENUM:[SQLITE.CaseNbr]";
 static	int		SQLITEXIndex = 1, SQLITEYIndex = 2;
@@ -2425,10 +2426,8 @@ BOOL SetSQLITEVis(HWND hWndDlg, int DlgItemSym, int DlgItemPar, HFILE FidSymList
 	char	str[128];
 	short	idesc;
 
-	strcpy(str, SQLITESymbol);
-	ExpandText(str);
-	idesc = atol(str);
-	AddSymToList(hWndDlg, DlgItemSym, DlgItemPar, idesc, FidSymList);
+	for (int i = 0; i < nSQLITESymbols;i++)
+		AddSymToList(hWndDlg, DlgItemSym, DlgItemPar, SQLITESymbols[i], FidSymList);
 	return TRUE;
 }
 BOOL SetSQLITEParms(void)
@@ -2861,6 +2860,7 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 		case SHPT_POINT:
 		case SHPT_POINTZ:
 			GetGlobalCVal("[%DefaultSQLITEPointSymbol]", SQLITEParms, "CIRCLE");
+			strcpy(SymName, SQLITEParms);
 			pWidth = _fstrchr(SQLITEParms, 0) + 4;
 			GetGlobalCVal("[%DefaultSQLITEPointSize]", pWidth, "-5");
 			break;
@@ -2872,6 +2872,7 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 			//case shapePolylineZM:
 		case shapePolylineZ:
 			GetGlobalCVal("[%DefaultSQLITELineSymbol]", SQLITEParms, "PEN1");
+			strcpy(SymName, SQLITEParms);
 			break;
 
 		case 4://personalgeodb area type???
@@ -2884,8 +2885,11 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 			//case shapePolygonZM:
 			//case shapePolygonZ:
 			GetGlobalCVal("[%DefaultSQLITEAreaSymbol]", SQLITEParms, "PARCEL");
+			strcpy(SymName, SQLITEParms);
 			break;
 		}
+		nSQLITESymbols = 1;
+		SQLITESymbols[0] = GetDictSymbolNumber(SymName);
 		if (!SQLITEOpenPrj(SQLITEFileName, 0))
 		{
 			GetGlobalCVal("[%DefaultSQLITEProjection]", Projection, "LATLONG");
@@ -2962,11 +2966,13 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 			SQLITEBaseRefno = atol(SQLITERefno);
 		fgetstring(SQLITETAG, 99, Fid);
 		_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
+		nSQLITESymbols = 0;
 		while (fgetstring(str, 256, Fid))
 		{
 			if (*str == '#')
 				break;
 			DecodeSHPParam(str, SymName, cIF, cColor, cWidth, cRot);
+			SQLITESymbols[nSQLITESymbols++] = GetDictSymbolNumber(SymName);
 			_fstrcpy(pParm, SymName);
 			l = _fstrlen(SymName);
 			pParm += l + 1;
