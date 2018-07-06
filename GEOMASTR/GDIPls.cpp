@@ -209,6 +209,12 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			pt2.Y = pPoints[i + 1].y;
 			pth.AddLine(pt1, pt2);
 		}
+		if (np && (pt2.X != pPoints[0].x || pt2.Y != pPoints[0].y))
+		{
+			pt1.X = pPoints[0].x;
+			pt1.Y = pPoints[0].y;
+			pth.AddLine(pt2, pt1);
+		}
 		if (lb->lbStyle != BS_NULL)
 		{
 			if (lb->lbStyle == BS_HATCHED)

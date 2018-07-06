@@ -2283,6 +2283,7 @@ SetVis:
 			
 			Point = atopt (Arg[2],&Err);
 			itime = atol (Arg[3]);
+			itime = max(0, itime);
 			if (!stricmp (Arg[1],"ALT"))
 			{
 				GetAltitudeAndAzOfSun (&Point,0,itime,&Altitude,&Az);

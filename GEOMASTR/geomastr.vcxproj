@@ -809,6 +809,7 @@
     <ClCompile Include="..\solar_calculator\Version2\sat404.c" />
     <ClCompile Include="..\email\SendEmail.cpp" />
     <ClCompile Include="..\SHR\serio.c" />
+    <ClCompile Include="rtree_bbox.c" />
     <ClCompile Include="SHPFILE.C" />
     <ClCompile Include="..\SHR\shr.c" />
     <ClCompile Include="..\solar_calculator\Version2\sidrlt.c" />

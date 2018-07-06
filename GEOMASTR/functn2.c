@@ -3539,14 +3539,17 @@ GSSiExitProg (1350);
 				goto RtnFalse;
 		} 
 		
-		case 1108: //$RUNTEXTFILE (pathname!statuswindtitle!statuslooptext,command)   or
+		case 1108: //$RUNTEXTFILE (pathname!statuswindtitle!statuslooptext#maxloops,command)   or
 				   //$RUNTEXTFILE (pathname(lineno),command) runs only single line    or
 				   //$RUNTEXTFILE (VARNAME=pathname,command) reads textfile without field header line, sets entire line to VARNAME
         {   
         	LPSTR pStatusText, pLoopText=0, pLineNo, pFileName, pVarName=0;
         	long	ProcessLine = -1, AtLine=0;
 			static	int istatus=0;
-        	
+			LPSTR	pMax;
+			int		maxLinesToProcess = -1;
+			int		nLinesProcessed = 0;
+
 			if (!(ParLoc = MatchLev (Args,','))) goto Rtn0;
 			hMem = GSSiGlobAlloc(1200, GMEM_MOVEABLE, MAXARGLENGTH * 2 + 4096 + 1024);
 			Arg1 = GlobalLock(hMem);
@@ -3556,6 +3559,11 @@ GSSiExitProg (1350);
 			_fstrcpy (Arg2,(LPSTR)(ParLoc+1));
 			*ParLoc = '\0';
 			_fstrcpy (Arg1,Args);
+			if ((pMax = strrchr(Arg1, '#')))
+			{
+				*pMax++ = 0;
+				maxLinesToProcess = atoi(pMax);
+			}
 			ExpandTextDB(Arg1,pBrkPt, bpOffset, bpLen);
 			bpOffset += strlen(Args) + 1;
 			if (!(pEnd = strchr (Arg1,'.')))
@@ -3604,8 +3612,9 @@ GSSiExitProg (1350);
 				ProcessDelimTextHeader(Arg3, pFileName, Fid, &hDLT, 0, 0);
 		    else
 		    	hDLT = 0;
-			while (ContinueProcessing  && fgetstring (Arg3,4090,Fid))
+			while (ContinueProcessing  && nLinesProcessed != maxLinesToProcess && fgetstring(Arg3, 4090, Fid))
 			{ 
+				nLinesProcessed++;
 				SetGlobalValue("%TEXTFILELINE", Arg3);
 
 				if (ProcessLine < 0 || AtLine == ProcessLine)

@@ -4,6 +4,7 @@ HANDLE OpenGWDatabase (LPSTR Name, short Mode);
 BOOL GMDSwitchToMemFile (HANDLE hDB,int MaxMemMain,int MaxMemIndex);
 void CloseGWDatabase (HANDLE DBHandle);
 BOOL BasicDataDisplay (LPSTR DBName,HWND hWndDlg,short dlgitem,short nextbutton,short priorbutton,long RecNum, long iref, LPSTR pSQL,int maxline);
+BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR pSQL, int maxline, int FontSize, int maxFontSize, RECT rect, LPSTR title);
 BOOL GetFieldIDsFromNames (LPSTR DBName,LPHANDLE phFieldIDs,LPHANDLE phFieldTypes,LPSTR FieldList,LPHANDLE phValues);
 short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldIDs,BOOL DoScan,long NumToScan);
 long OutputToFile(LPSTR OutFile, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFields, HANDLE hKeyFields, HANDLE hFieldTypes,HANDLE hValues, BOOL UseHLT, BOOL OutToScreen, int GMHeader, BOOL Compress, BOOL ScanForFieldTypes, long NumToScan, HWND StatusWnd, HWND hWndDlg, BOOL tabDlm);

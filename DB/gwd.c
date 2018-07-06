@@ -2351,6 +2351,119 @@ GSSiExitProg (629);
 #endif
 }
 
+BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR pSQL, int maxline,int FontSize,int maxFontSize, RECT rect, LPSTR title)
+#if ENABLETRACE
+{
+	GSSiEnterProg(630);
+#endif
+	{
+		HANDLE      hSQL;
+		double      rtn;
+		char        str[300], DBName[MAX_PATH];
+		short       ifield, l;
+		LPOPENSQLDATA   SQLPtr;
+		LPFIELDINFO lpFieldInfo;
+		HANDLE      SaveHandle;
+		LPOPENFILEDATA  FilePtr;
+		LPSTR		str2;
+		HANDLE		hStr = 0;
+		long SaveSHPRec = CurrentSHPRec;
+		HFONT hFont, hFontBold, hOldFont;
+		double fontFactor = 1;
+		int  Tabs[2] = { 150, 300 };
+
+		strcpy(DBName, DBNameIN);
+		rtn = FALSE;
+		hSQL = 0;
+		if (!OpenDataFile(DBName, pSQL, BT_READ, &hSQL))
+		{
+#if ENABLETRACE
+			GSSiExitProg(630);
+#endif
+			return FALSE;
+		}
+		hFontBold = CreateFont((int)IDNINT(FontSize*fontFactor*1.4), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+		hFont = CreateFont((int)IDNINT(FontSize*fontFactor), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+
+		CurrentSHPRec = SaveSHPRec;
+		SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQL);
+		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		lpFieldInfo = &FilePtr->FldInfo;
+		hStr = GSSiGlobAlloc(270, GMEM_MOVEABLE, 4096);
+		str2 = GlobalLock(hStr);
+		for (ifield = 0; ifield<FilePtr->NumFields; ifield++, lpFieldInfo++)
+		{
+			BOOL    First = TRUE;
+
+		Display:
+			sprintf(str, "%s\t", lpFieldInfo->name);
+			if ((l = GetValFromOpenFiles(lpFieldInfo->name, str2, 4096))<0)
+			{
+				char str[] = "Data record not found";
+				TextOut(hDC, 0,0,str , _fstrlen(str));
+
+				goto NotFound;
+			}
+			else if (First && RecNum>1 && !ifield)
+			{
+				long    irec;
+
+				for (irec = 1; irec<RecNum; irec++)
+					FetchDBRec(hSQL);
+				First = FALSE;
+				goto Display;
+			}
+			else
+			{
+				LPSTR	str3 = str2;
+				char	c;
+
+				l = max(l, 1);
+				while (l > 0)
+				{
+					LPSTR	pEnd = _fstrchr(str, 0), pCR;
+					short	n = min(l, maxline);
+					short	orign = n;
+
+					_fstrncpy(pEnd, str3, n);
+					if (n < l)
+					{
+						while (n && pEnd[n - 1] != ' ')
+							n--;
+						if (!n)
+							n = orign;
+					}
+					pEnd[n] = 0;
+					if ((pCR = _fstrchr(pEnd, '\r')))
+					{
+						*pCR = 0;
+						n = _fstrlen(pEnd) + 2;
+					}
+					l -= n;
+					str3 += n;
+					TabbedTextOut(hDC, rect.left, rect.top, str, _fstrlen(str),1, Tabs, rect.left);
+					_fstrcpy(str, "\t");
+				}
+			}
+			First = FALSE;
+		}
+		rtn = TRUE;
+	NotFound:
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hSQL);
+		CloseDataFile(TRUE, &hSQL);
+		GSSiGlobUlFree(&hStr);
+		{
+#if ENABLETRACE
+			GSSiExitProg(630);
+#endif
+			return (int)(rtn);
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+
 BOOL BasicDataDisplay (LPSTR DBNameIN,HWND hWndDlg,short dlgitem,short nextbutton,short priorbutton,long RecNum, long iref, LPSTR pSQL,int maxline)
 #if ENABLETRACE
 {GSSiEnterProg (630);

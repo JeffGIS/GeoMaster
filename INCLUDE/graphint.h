@@ -2121,6 +2121,7 @@ int GuessProjection2(LPSTR fileOfProjections, LPMNMXCORD pFileBounds, int useThi
 BOOL SwitchThemeSHPFile(void);
 BOOL ConvertWaypointGMD (HWND hWnd);
 long GetSecondsInSample (void);
+void ClearSecondsInSample(void);
 long GetHotSpotValue (DPOINT Point);
 long ClearGMTempFiles (void);
 BOOL CopyTextFile (LPSTR ToFike,LPSTR FromFile,LPSTR Opt,LPSTR Value);

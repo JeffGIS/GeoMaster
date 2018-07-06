@@ -825,6 +825,7 @@ double	ThemeTextSizeFactor=1;
 double	ThemePointSizeFactor=1;
 long	TimeRangeBeg=0;
 long	TimeRangeEnd=LONG_MAX;
+long	MinTimeRangeBeg = 0;
 int		MonthBeg=0;
 int		MonthEnd=SHRT_MAX;
 int		GMDMinCode=0;

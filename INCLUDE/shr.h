@@ -307,9 +307,12 @@ HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where);
 void CloseSLTDatabase(LPHANDLE pHandle);
 void SLTCloseCursor(LPSQLDATABASE pDB);
+BOOL SQLITEPrepare(LPSQLDATABASE pDB);
+BOOL SLTPrepare(HANDLE SQLITEHandle);
+int GetFieldDefs(HANDLE FileHandle, int Type, LPHANDLE phFields, LPBOOL pHaveNonStandardFields);
 LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc, LPFIELDINFO FirstField);
 int FetchSLTRec(LPSQLDATABASE pSQL);
-BOOL SLTPrepareStatement(LPSQLDATABASE pDB, LPSTR SQL);
+BOOL SLTPrepareStatement(HANDLE hDB, LPSTR SQL);
 void CloseSLTDatabaseQuery(LPHANDLE pHandle);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
 BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName);
@@ -321,6 +324,7 @@ BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name,
 MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName);
 MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName);
 void DecodeSHPParam(LPSTR str, LPSTR cDesc, LPSTR cIF, LPSTR cColor, LPSTR cWidth, LPSTR cRot);
+int SetTimeRangeBeg(int time);
 
 BOOL GetCurrentPNDBName (LPSTR Name);
 BOOL GetCurrentGraphicsDBName (LPSTR Name,short Type);
