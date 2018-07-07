@@ -8846,6 +8846,57 @@ GSSiExitProg (1051);
 #endif
 }
 
+BOOL PointFromDMS(LPSTR DMSPoint, LPDPOINT pPoint)
+{
+	BOOL rtn = FALSE;
+	DPOINT point;
+	int DDeg, DMin;
+	float Sec;
+	char str[128];
+	int n;
+	LPSTR pNorth;
+	LPSTR pEast;
+	int northSign = 1;
+	int eastSign = 1;
+
+	strcpy(str, DMSPoint);
+	pNorth = strstr(str, " N");
+	if (!pNorth)
+	{
+		pNorth = strstr(str, " S");
+		if (pNorth)
+			northSign = -1;
+	}
+	pEast = strstr(str, " E");
+	if (!pEast)
+	{
+		pEast = strstr(str, " W");
+		if (pEast)
+			eastSign = -1;
+	}
+	if (pEast)
+		*pEast = 0;
+	if (pNorth)
+	{
+		*pNorth++ = 0;
+		pNorth++;
+		n = sscanf(str, "%i %i' %f""", &DDeg, &DMin, &Sec);
+		if (n == 3)
+		{
+			point.y = northSign * (DDeg + DMin / 60E0 + Sec / 3600E0);
+			n = sscanf(pNorth, "%i %i' %f""", &DDeg, &DMin, &Sec);
+			if (n == 3)
+			{
+				point.x = eastSign * (DDeg + DMin / 60E0 + Sec / 3600E0);
+				ConvertCoord(&point, 2, 1);
+				*pPoint = point;
+				rtn = TRUE;
+			}
+		}
+	}
+	return rtn;
+}
+
 BOOL FAR PASCAL SETTAGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (831);

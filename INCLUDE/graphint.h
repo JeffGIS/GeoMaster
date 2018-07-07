@@ -1789,6 +1789,7 @@ BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds);
 BOOL LoadLIDARDTMfromLAZ(LPSTR InDir, LPSTR OutFile, int wantType);
 MNMXCORD GetLAZIndexBounds(LPSTR LAZIndex);
 MNMXCORD3D GetLAZIndexBounds3D(LPSTR LAZIndex);
+BOOL PointFromDMS(LPSTR DMSPoint, LPDPOINT pPoint);
 
 BOOL PickThemeClass(int iclass, POINT Point);
 void DrawUnSelectedClass (int iclass,RECT ClassClrBox);

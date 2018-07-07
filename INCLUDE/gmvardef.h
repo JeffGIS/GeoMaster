@@ -1531,7 +1531,7 @@ short	NumColorChanges=0;
 short	NumSavePaletteColors; 
 BOOL	HaveSavePalette=FALSE;
 long	SHPColor=-1;
-short	SHPWidth=0;
+float	SHPWidth=0;
 short	SHPIndexType = SHP_INDEX_SIMPLE;
 long	TotFiles;
 HANDLE	hDir=0; 

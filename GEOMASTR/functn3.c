@@ -5229,6 +5229,18 @@ GotCloseFilehSQL:
 			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
+			if (!stricmp(Arg[1], "DMS"))
+			{
+				strcpy(OutLoc, "Invalid Projection File");
+				if (CvtDir == 1)
+				{
+					DPOINT point;
+					if (PointFromDMS(Arg[2],&point))
+						dpointtoa(OutLoc, &point);
+				}
+				goto Rtnl;
+			}
+
 		    nPoints = GetPointsFromList (Arg[2],&hPoints);  
 		    *OutLoc = 0;
 		    if (!hPoints)
