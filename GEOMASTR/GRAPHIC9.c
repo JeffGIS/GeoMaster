@@ -312,7 +312,7 @@ GSSiExitProg (1076);
 }   
 	BT_CLOSE (hTAGIdx);
 	hTAGIdx = 0;
-	if (PltType < 4 || MapFileType (PltName) == MT_PLT)
+	if (PltType < 4 || MapFileType(PltName, 0, 0) == MT_PLT)
 	{
 		_fstrcpy (TAGIndexFile,PltName);  
 		ExpandText (TAGIndexFile);
@@ -1858,7 +1858,7 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
     	hCurView = GSSiGlobAlloc (0,GHND,sizeof(VIEWPORT));
     	CurView = (LPVIEWPORT)GlobalLock (hCurView);
     }
-	ft = MapFileType(File);
+	ft = MapFileType(File, 0, 0);
 	if (ft != MT_FILE_GEO_DB && FileType(File) == 2)
     {   
     	HANDLE	handle, hMem = GSSiGlobAlloc ( 972,GMEM_MOVEABLE,256);

@@ -1031,7 +1031,7 @@ GSSiExitProg (12);
 	        		goto Next;
 				GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 				CurView->HaveOrthos = TRUE; 
-				if (MapFileType (PltName) == MT_SID)
+				if (MapFileType(PltName, 0, 0) == MT_SID)
 					DisplaySIDInVP32 (CurView,PltName);
         		else if (_fstrstr(PltName,".BMP") || _fstrstr(PltName,".JPG") || _fstrstr(PltName,".PNG") || _fstrstr(PltName,".GIF")|| _fstrstr(PltName,".TIF")|| _fstrstr(PltName,".PCX") || !_fstrnicmp (PltName,"http:",5))
 					goto DisplayImage;
@@ -2472,7 +2472,7 @@ void ZoomToBM ()
     CurView->WindowZoomedToOrtho = TRUE;
     for (i=0;i<CurView->NumFiles;i++)
     {
-        if (CurView->FileType[i]!=5 && MapFileType (CurView->lpFiles[i]) != MT_SID) 
+		if (CurView->FileType[i] != 5 && MapFileType(CurView->lpFiles[i], 0, 0) != MT_SID)
             CurVis->FileIsVisible[i]=FALSE;
     }
     CurView->PassID = 1;
@@ -2480,7 +2480,7 @@ void ZoomToBM ()
 //    IncrementFile ();
     while (GetNextViewportFile (FALSE))
     {
-		if (PltType == 5 || (CurView->CurFile >=0 && MapFileType(CurView->lpFiles[CurView->CurFile]) == MT_SID))
+		if (PltType == 5 || (CurView->CurFile >= 0 && MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0) == MT_SID))
             goto GotFile;
     }   
     CurVis = SavelpVis;
@@ -5829,7 +5829,7 @@ GSSiExitProg (65);
 	        }
         }
         
-    	switch (MapFileType (CurView->lpFiles[CurView->CurFile]))
+		switch (MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0))
     	{
     		case MT_INDEX:
 		        if (!(CurView->hlpIndex[CurView->CurFile]=
@@ -5931,7 +5931,7 @@ Exit:
     CurView->PassID = SavePass;
     SetCurView ( SaveView); 
     IgnoreBounds = SaveIgnoreBounds; 
-    MapType = MapFileType (PickName);
+	MapType = MapFileType(PickName, 0, 0);
 {
 #if ENABLETRACE
 GSSiExitProg (65);
@@ -6186,7 +6186,7 @@ GSSiExitProg (66);
         
     if (!CurView->hlpIndex[CurView->CurFile]) 
     {   
-    	switch (MapFileType (CurView->lpFiles[CurView->CurFile]))
+		switch (MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0))
     	{
     		case MT_INDEX:
 		        if ((!VisScan && !MapIndexVisible (CurView->lpFiles[CurView->CurFile])) ||
@@ -6451,7 +6451,7 @@ NotIn:
     }
 
     PltType = CurView->FileType[CurView->CurFile];
-    if (PltType == 4 || PltType == 9 || (PltType == 5 && MapFileType (PltName) == MT_SID))
+	if (PltType == 4 || PltType == 9 || (PltType == 5 && MapFileType(PltName, 0, 0) == MT_SID))
     	goto Exit;  
     if (UseAVI) 
     {   
@@ -6762,7 +6762,7 @@ GSSiExitProg (68);
     	goto NextFile;
     if (CurVis->FileIsVisible[CurView->CurFile]==2 && CurView->PassID == 2)
     	goto NextFile;
-    if ((CurView->FileType[CurView->CurFile]!=3 && CurView->FileType[CurView->CurFile]!=5 && MapFileType (CurView->lpFiles[CurView->CurFile]) != MT_SID)&& CurView->PassID ==1)
+	if ((CurView->FileType[CurView->CurFile] != 3 && CurView->FileType[CurView->CurFile] != 5 && MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0) != MT_SID) && CurView->PassID == 1)
         goto NextFile;
     if (CurView->FileType[CurView->CurFile]==5 && (!CurVis->WantType[5] || ForceTAGIndex || ForceRefIndex || ReorgFile))
         goto NextFile;
@@ -7021,7 +7021,7 @@ MakeBin:
 			*pPar = 0;
         _fstrcpy (lpEntry->Name,str);
 		lpEntry->StartRefno = StartRef;
-        switch (MapFileType (lpEntry->Name))
+		switch (MapFileType(lpEntry->Name, 0, 0))
         {
         	case MT_INDEX:
         		if (!GetMapIndexBounds (lpEntry->Name,&lpEntry->MinMax))

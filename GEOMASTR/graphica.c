@@ -2108,22 +2108,36 @@ short LayerFileType (short Layer)
 	
 	if (Layer <= 0)
 		return 0; 
-	return MapFileType (CurView->lpFiles[Layer-1]);
+	return MapFileType(CurView->lpFiles[Layer - 1], 0, 0);
 }
 
-short MapFileType (LPSTR InName)
+short MapFileType (LPSTR InName,LPSTR fileName, LPSTR tableName)
 {   
 	char	Name[256];  
 	short	l; 
-	LPSTR	pBS, pPar, pDot;
+	LPSTR	pBS, pPar, pParClose, pDot;
 	
+	if (fileName)
+		*fileName = 0;
+	if (tableName)
+		*tableName = 0;
 	_fstrcpy (Name,InName);
 	ExpandText (Name);
 	_fstrupr (Name);
 	if ((pDot = strrchr (Name,'.')))
 	{
-		if ((pPar = _fstrrchr (pDot,'(')))
-			*pPar = 0; 
+		if ((pPar = _fstrrchr(pDot, '(')))
+		{
+			*pPar++ = 0;
+			if ((pParClose = strrchr(pPar, ')')))
+			{
+				*pParClose = 0;
+				if (tableName)
+					strcpy(tableName, pPar);
+			}
+		}
+		if (fileName)
+			strcpy(fileName, Name);
 	}
 	else
 		pDot = Name;

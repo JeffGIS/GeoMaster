@@ -3350,7 +3350,7 @@ GSSiExitProg (1076);
 	BT_CLOSE (hRefIdx);
 	hRefIdx = 0;
 	
-	if (PltType != 4 &&(PltType < 4 || MapFileType (PltName) == MT_PLT))
+	if (PltType != 4 && (PltType < 4 || MapFileType(PltName, 0, 0) == MT_PLT))
 	{
 		_fstrcpy (RefIndexFile,PltName); 
 		ExpandText (RefIndexFile); 
@@ -4030,7 +4030,7 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
     CloseBasePens(OpenMapOpenBP);   
 	OpenMapOpenBP = FALSE;
 	ExpandPltName (PltName);
-    MapType = MapFileType (PltName);
+	MapType = MapFileType(PltName, 0, 0);
 	SetGlobalValue("%MAPFILE", PltName);
 	switch (MapType)
 	{
@@ -4079,7 +4079,7 @@ BOOL OpenMap (HWND hWnd, HDC hDC)
 ProcessImageFile:
 	if (PltType == 3)
     {
-		int mft = MapFileType(PltName);
+		int mft = MapFileType(PltName, 0, 0);
 		switch (mft)
 		{
 			case MT_SID:
@@ -4205,7 +4205,7 @@ ProcessImageFile:
     		*pPar = '(';
 		if (FidMap == HFILE_ERROR) 
 			goto RtnFalse;
-	    MapType = MapFileType (OFStructOpenMap.szPathName);
+		MapType = MapFileType(OFStructOpenMap.szPathName, 0, 0);
 	}
 	else
 	{

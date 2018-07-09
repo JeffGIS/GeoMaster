@@ -33,11 +33,12 @@ BOOL FileIsVisible (LPSTR FileName)
 	BOOL	rtn=TRUE;
 	long	ORAHeaderType;
 	char	tableName[128] = { 0 };
-	int		mft = MapFileType(FileName);
+	char	filePath[MAX_PATH];
+	int		mft = MapFileType(FileName,filePath,tableName);
 
 	if ((mft != MT_GOOGLE_ROADMAP && mft != MT_GOOGLE_SATELLITE && mft != MT_GOOGLE_TERRAIN && mft != MT_GOOGLE_HYBRID &&
 		 mft != MT_SQLITE)
-		&& !FileType(FileName))
+		&& !FileType(filePath))
 	{
 		rtn = FALSE;
 	}
@@ -959,7 +960,7 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
 FromPltFile:
         if (PltType < 5)
         {   
-        	switch (MapFileType (PltName))
+			switch (MapFileType(PltName, 0, 0))
         	{   
          		case MT_SHP:
 	        	{    

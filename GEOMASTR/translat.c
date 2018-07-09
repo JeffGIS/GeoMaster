@@ -231,7 +231,7 @@ BOOL GuessShapeProjection (LPSTR Name,HWND hWnd,UINT ProjCntl,UINT ProjUnits,BOO
 	double		factor;
 	LPSTR		nvp = 0;
 	
-	switch (MapFileType (Name))
+	switch (MapFileType(Name, 0, 0))
 	{
 		case MT_SHP:
 			FidSHP=GSSiOpenFile (Name,0,OF_READ);

@@ -5007,7 +5007,7 @@ DisplayParcel:
     	 	if (FileType (pFile) == 1)
     	 	{
 	    	 	SubstituteDL (pFile,FALSE);
-				if (MapFileType (pFile) == MT_IMAGE)
+				if (MapFileType (pFile,0,0) == MT_IMAGE)
 				{
 					DPOINT Point;
 					HDIB32 hDib = LoadDIB32 (pFile,FALSE); 
