@@ -1662,7 +1662,7 @@ extern	short	NumColorChanges;
 extern	short	NumSavePaletteColors; 
 extern	BOOL	HaveSavePalette;
 extern	long	SHPColor;
-extern	short	SHPWidth;
+extern	float	SHPWidth;
 extern	short	SHPIndexType;  
 extern	long	TotFiles;
 extern	HANDLE	hDir;

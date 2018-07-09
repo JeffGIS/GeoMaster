@@ -154,6 +154,7 @@ BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** er
 void SetSQLiteErrFile(LPSTR errFile);
 BOOL SLT_StartTrans(sqlite3* db);
 BOOL SLT_EndTrans(sqlite3* db);
+BOOL SLT_AbortTrans(sqlite3* db);
 BOOL SLT_Vacuum(sqlite3* db);
 BOOL SLT_Execute(LPSTR cmd, sqlite3* db);
 
@@ -305,6 +306,7 @@ short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
 HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL, short Access);
 HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where);
+LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where);
 void CloseSLTDatabase(LPHANDLE pHandle);
 void SLTCloseCursor(LPSQLDATABASE pDB);
 BOOL SQLITEPrepare(LPSQLDATABASE pDB);

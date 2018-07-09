@@ -98,7 +98,7 @@ static int maxID(sqlite3 *_database)
 {
 	int rtn = -1;
 	char query[256];
-	
+
 	sprintf(query, "SELECT max(id) FROM OFFENSEXY");
 
 	sqlite3_stmt *statement = NULL;
@@ -108,7 +108,24 @@ static int maxID(sqlite3 *_database)
 	{
 		rtn = sqlite3_column_int(statement, 0);
 	}
-	SQLOK(sqlite3_finalize(statement), _database,"maxID",0);
+	SQLOK(sqlite3_finalize(statement), _database, "maxID", 0);
+	return rtn;
+}
+static int maxIDFrom(sqlite3 *_database, LPSTR table)
+{
+	int rtn = -1;
+	char query[256];
+
+	sprintf(query, "SELECT max(id) FROM %s",table);
+
+	sqlite3_stmt *statement = NULL;
+
+	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "maxID", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		rtn = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(sqlite3_finalize(statement), _database, "maxID", 0);
 	return rtn;
 }
 
@@ -138,7 +155,20 @@ BOOL SLT_EndTrans(sqlite3* db)
 	}
 	return rtn;
 }
-BOOL SLT_Execute(LPSTR cmd,sqlite3* db)
+BOOL SLT_AbortTrans(sqlite3* db)
+{
+	BOOL rtn = FALSE;
+	if (db)
+	{
+		int err = SQLOK(sqlite3_exec(db, "ROLLBACK", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = TRUE;
+		}
+	}
+	return rtn;
+}
+BOOL SLT_Execute(LPSTR cmd, sqlite3* db)
 {
 	BOOL rtn = FALSE;
 	if (db)
@@ -293,16 +323,16 @@ static int ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 	return ln;
 }
 
-LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName,LPSTR where)
+LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	if (*where)
-		sprintf(pCmd, "SELECT COUNT (*) FROM %s WHERE %s", tableName,where);
+		sprintf(pCmd, "SELECT COUNT (*) FROM %s WHERE %s", tableName, where);
 	else
 		sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
 	sqlite3_stmt *statement;
-	LONGLONG rtn=0;
+	LONGLONG rtn = 0;
 
 	if (db)
 	{
@@ -318,7 +348,30 @@ LONGLONG GetSQLITENumRows(sqlite3 *db,LPSTR tableName,LPSTR where)
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
 }
-BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName,LPMNMXCORD pfileMNMX)
+LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	LONGLONG rtn = -1;
+	if (*where)
+		sprintf(pCmd, "SELECT rowid FROM %s WHERE %s", tableName, where);
+
+	if (db)
+	{
+		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
+		{
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				rtn = sqlite3_column_int(statement, 0);
+			}
+		}
+		sqlite3_finalize(statement);
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+}
+BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName, LPMNMXCORD pfileMNMX)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
@@ -379,6 +432,16 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		char *error = NULL;
 		db = (sqlite3*)atoi(ARG[2]);
 		int err = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+		if (!err)
+		{
+			rtn = 1;
+		}
+	}
+	else if (!stricmp(ARG[1], "ABORTTRANS"))
+	{
+		char *error = NULL;
+		db = (sqlite3*)atoi(ARG[2]);
+		int err = SQLOK(sqlite3_exec(db, "ROLLBACK", NULL, NULL, 0), db, "", 0);
 		if (!err)
 		{
 			rtn = 1;
@@ -546,7 +609,17 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = GetSQLITENumRows(db, ARG[3],ARG[4]);
+		rtn = GetSQLITENumRows(db, ARG[3], ARG[4]);
+	}
+	else if (!stricmp(ARG[1], "MAXID"))//$SQLITE(MAXID,sqlitehandle,tablename)
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = maxIDFrom(db, ARG[3]);
+	}
+	else if (!stricmp(ARG[1], "GETID"))//$SQLITE(GETID,sqlitehandle,tablename,where clause)
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = GetSQLITERowID(db, ARG[3], ARG[4]);
 	}
 	else if (!stricmp(ARG[1], "FROMGMD"))//$SQLITE(FROMGMD,sqlitehandle,gmdfile,tablename,primkeyisoffset)
 	{
@@ -3417,6 +3490,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	else if (*pDB->Where && *pDB->From)
 	{
 		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pDB->Where);
+		ExpandText(pDB->Query);
 		SQLITEPrepare(pDB);
 	}
 	if (hDB)
