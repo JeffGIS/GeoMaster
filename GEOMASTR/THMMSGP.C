@@ -1281,7 +1281,7 @@ void DisplayNorthArrowLegend (int From)
 			int		RegionType;
 
 			strcpy (File,CurView->lpFiles[0]);
-			if (MapFileType (File) == MT_IMAGE)
+			if (MapFileType(File, 0, 0) == MT_IMAGE)
 			{
 				HDIB32	hDib = LoadDIB32 (File,TRUE);
 				MNMXCORD	BitmapBounds, SaveBounds;

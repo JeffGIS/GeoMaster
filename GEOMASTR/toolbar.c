@@ -4051,14 +4051,16 @@ TryAgain:
 		ClientToScreen (hWndMain,(LPPOINT)&pt);
 		if (ToolbarFloating[ToolbarID])
 		{
+			w = MaxToolbarX + winc + 1;
+			h = (MaxButtonBitmapHeight[ToolbarID] + 8)*(nToolbarRow++ - 1) + 2 * (FirstButtonBitmapHeight[ToolbarID] + 2) + hinc;
 			hWDP = DeferWindowPos (hWDP,hWndDlg,0,pt.x,pt.y,
 				   MaxToolbarX+winc+1,
 				   (MaxButtonBitmapHeight[ToolbarID]+8)*(nToolbarRow++ - 1) +2*(FirstButtonBitmapHeight[ToolbarID]+2)+hinc,SWP_NOZORDER);
 		}
 		else
 		{
-			int w = MaxToolbarX + winc + 1;
-			int h = (MaxButtonBitmapHeight[ToolbarID] + 8)*nToolbarRow + FirstButtonBitmapHeight[ToolbarID] + 4 + hinc + winc;
+			w = MaxToolbarX + winc + 1;
+			h = (MaxButtonBitmapHeight[ToolbarID] + 8)*nToolbarRow + FirstButtonBitmapHeight[ToolbarID] + 4 + hinc + winc;
 			nToolbarRow++;
 			hWDP = DeferWindowPos (hWDP,hWndDlg,0,pt.x,pt.y, w, h,SWP_NOZORDER);
 		}
@@ -4066,7 +4068,11 @@ TryAgain:
 		if (CreateConfigs[ToolbarID])
 		{
 			EndDeferWindowPos(hWDP);
-			GetWindowRect (hWndDlg,&ToolbarRect[ToolbarID]);
+			ToolbarRect[ToolbarID].left = pt.x;
+			ToolbarRect[ToolbarID].top = pt.y;
+			ToolbarRect[ToolbarID].right = pt.x + w;
+			ToolbarRect[ToolbarID].bottom = pt.y + h;
+
 			ToolbarConfigs[ToolbarID][iConfig].cx = RECTWIDTH (&ToolbarRect[ToolbarID]);
 			ToolbarConfigs[ToolbarID][iConfig].cy = RECTHEIGHT (&ToolbarRect[ToolbarID]);
 			if (!iConfig++)

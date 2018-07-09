@@ -2127,7 +2127,7 @@ BOOL GetVisBounds2 (LPMNMXCORD	pBounds,HDC hDC)
 	     	goto NextFile; 
 	     if (!AutoTypeConvert ())
 	     	goto NextFile;
-		 MapType = MapFileType(CurView->lpFiles[CurView->CurFile]);
+		 MapType = MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0);
 		 if (MapType == MT_GOOGLE_ROADMAP ||
 			 MapType == MT_GOOGLE_SATELLITE ||
 			 MapType == MT_GOOGLE_TERRAIN ||
@@ -3720,7 +3720,7 @@ Next:
     { 
 NotFound:
         *pHandle = 0;  
-	   	if (MapFileType (CurIndex.FileName) == MT_DTM)
+		if (MapFileType(CurIndex.FileName, 0, 0) == MT_DTM)
 			DisplayContourLabels (FALSE);
 		LoadIndexParm (0); 
         if (FidIndex) 
@@ -3794,7 +3794,7 @@ void CloseMapIndex (LPSTR Name,HANDLE hlpFI, BOOL Write,BOOL CloseParmFiles)
     long    ii;
     LPFILEINDEX lpFI; 
     
-   	if (MapFileType (Name) == MT_DTM)
+	if (MapFileType(Name, 0, 0) == MT_DTM)
 		DisplayContourLabels (FALSE);
 	if (CloseParmFiles)
 		LoadIndexParm (0); 

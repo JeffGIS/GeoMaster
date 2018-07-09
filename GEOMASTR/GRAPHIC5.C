@@ -2027,7 +2027,7 @@ BOOL DeletePickedItem (int Item,short OldType,short NewType)
 	if (PickList[Item].ViewID)
 	{
 		GetPickName (Item);   
-		if (MapFileType (PickName) != MT_PLT)
+		if (MapFileType(PickName, 0, 0) != MT_PLT)
 			goto Exit;
 		FidDel = GSSiOpenFile (PickName,(LPOFSTRUCTGM)&OFStruct,OF_READWRITE);  
 		Opened = TRUE;
