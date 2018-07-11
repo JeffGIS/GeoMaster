@@ -2696,8 +2696,10 @@ BOOL ProcessSQLITERecord(HDC hDC)
 			//strcpy(Tag, SQLITETAG);
 			//ExpandText(Tag);
 
-			pTag = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, 1);
-			sprintf(Tag, "ALLYWALL:%s", pTag);
+			//pTag = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, 1);
+			//sprintf(Tag, "ALLYWALL:%s", pTag);
+			strcpy(Tag, SQLITETAG);
+			ExpandText(Tag);
 			SetSymNum(CurrentDesc);
 			ltag = _fstrlen(Tag);
 			if (ProcessRefAndTAG(TRUE, Tag, ltag))
@@ -2709,7 +2711,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 				LastElementBeginPoint = LastElementEndPoint = BasePt;
 				nPnts = nCurPoints = 1;
 				CurPointLoc = BasePtToWinPt(lpDCurPoints);
-				if (PointIsBlocked(&CurPointLocD, CurrentDesc))
+				if (PointIsBlocked(&CurPointLocD, CurrentDesc) ||!PointInMaskAreaWinCoordD(&CurPointLocD))
 					goto RtnFalse;
 				InGraphicsProcessor = TRUE;
 				HaveTXLoc = TRUE;
