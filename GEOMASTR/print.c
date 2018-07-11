@@ -2245,7 +2245,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     return (rtn);
 
 }     
-BOOL PrintCurbRamp (int intersectionID, int rampNum)
+BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 {
 	HDC hPr;
 	RECT	Rect;
@@ -2267,7 +2267,7 @@ BOOL PrintCurbRamp (int intersectionID, int rampNum)
 	double	SaveDTSF = DeviceToScreenFactor();
 	RECT		SaveMainRect = MainRect, SaveRect;
 	short	SaveShadow = ShadowInc;
-	short 	ForceOrient = DMORIENT_PORTRAIT;
+	short 	ForceOrient = DMORIENT_LANDSCAPE;
 	LPDEVMODE pDevMode;
 	HFILE	Fid;
 	SIZE		txSize;
@@ -2374,9 +2374,23 @@ BOOL PrintCurbRamp (int intersectionID, int rampNum)
 			hFontBold = CreateFont((int)IDNINT(FontSize*Factor*1.4), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Arial Black");
 			hFont = CreateFont((int)IDNINT(FontSize*Factor), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
 			OldFont = SelectObject(hPr, hFontBold);
-			//Fid = GSSiOpenFile(File, 0, OF_READ);
-			fgetstring(Header, 512, Fid);
-			GetTextExtentPoint32(hPr, Header, _fstrlen(Header), &txSize);
+			StartPage(hPr);
+
+			char title[256]="";
+			int maxline = 256, FontSize = 10, maxFontSize = 15;
+			{
+				char tempFile[MAX_PATH];
+				LPSTR pDot;
+				GSSiGetTempFileName(0, "NVC", 0, tempFile);
+				pDot = strrchr(tempFile, '.');
+				if (pDot)
+					strcpy(pDot, ".txt");
+				if (OutputRampForIntersectionAndRampnumToFile(intersectionID, rampNum, tempFile, fromDB, 1,0))
+				{
+					BasicDataDisplayToDC(tempFile, hPr, 0, 0, "", maxline, FontSize, maxFontSize, Rect, title);
+				};
+			}
+			/*GetTextExtentPoint32(hPr, Header, _fstrlen(Header), &txSize);
 			LineInc = txSize.cy;
 		NextPage:
 			SelectObject(hPr, hFontBold);
@@ -2399,6 +2413,7 @@ BOOL PrintCurbRamp (int intersectionID, int rampNum)
 				}
 			}
 			GSSiClose(Fid);
+			*/
 			SelectObject(hPr, OldFont);
 			DeleteObject(hFont);
 			DeleteObject(hFontBold);

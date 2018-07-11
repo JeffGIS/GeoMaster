@@ -2371,6 +2371,9 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 		HFONT hFont, hFontBold, hOldFont;
 		double fontFactor = 1;
 		int  Tabs[2] = { 150, 300 };
+		int margin = 20;
+		int lineInc = margin;
+		int lineHeight = 16;
 
 		strcpy(DBName, DBNameIN);
 		rtn = FALSE;
@@ -2441,9 +2444,10 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 					}
 					l -= n;
 					str3 += n;
-					TabbedTextOut(hDC, rect.left, rect.top, str, _fstrlen(str),1, Tabs, rect.left);
+					TabbedTextOut(hDC, rect.left, rect.top+lineInc, str, _fstrlen(str),1, Tabs, rect.left);
 					_fstrcpy(str, "\t");
 				}
+				lineInc += lineHeight;
 			}
 			First = FALSE;
 		}

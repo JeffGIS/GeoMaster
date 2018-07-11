@@ -1019,7 +1019,7 @@ BOOL ExecuteUserCmd (int CmdID);
 BOOL PrintImage (HWND hWnd,LPSTR Name,int option);
 BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT Tabs);
 BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup);
-BOOL PrintCurbRamp(int intersectionID, int rampNum);
+BOOL PrintCurbRamp(LPSTR fromDB,int intersectionID, int rampNum);
 BOOL SaveZooms (LPMNMXCORD pBounds);
 void TransferSavedZoom (void); 
 void DestroySavedZooms (void);
