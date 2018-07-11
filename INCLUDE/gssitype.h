@@ -251,6 +251,8 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define		PN_DATAFILE			22
 #define		SLT_DATAFILE		23
 
+#define MAXTEXTLINE	USHRT_MAX*4
+
 #define	FT_POLYGON	1
 #define FT_CIRCLE	2
 #define FT_ROUTE	3
@@ -759,6 +761,9 @@ typedef struct
         short	Unique;
         short   NumGlobals;
 		short	singleValID;
+		sqlite3* TextFileIndex;
+		sqlite3_stmt *statement;
+		char	TextFileIndexName[512];
         SQLFIELD    SQLField; 
     }OPENSQLDATA; 
 typedef OPENSQLDATA FAR *LPOPENSQLDATA;    

@@ -1788,7 +1788,7 @@ LPDEBUGARRAY	pDB=0;   */
 
    	if (ShowRefno)
    		SetWindowText (hWndMain,"Enter PGR");
-    if (DoTime)
+   // if (DoTime)
     	starttime=GetTickCount();   
     if (!LenSeg)
     	LenSeg = INT_MAX;
@@ -1802,8 +1802,14 @@ LPDEBUGARRAY	pDB=0;   */
 		if (StartElement > 0)
 			ipnt += StartElement;
 		StartElement = -1;
-        while (((LPSTR)ipnt - BeginSeg) <= LenSeg && *ipnt != 0)
+        while (((LPSTR)ipnt - BeginSeg) <= LenSeg && *ipnt != 0 && ContinueProcessing)
         {   
+			DWORD ptime = GetTickCount();
+			if (ptime - starttime > 1000)
+			{
+				starttime = ptime;
+				ContinueProcessing = CheckForContinue(FALSE, 0);
+			}
 //        	if (DoTime)
 //        		starttime2=GetTickCount();
 //        	starttime2 = clock();  this call alone slows system by 150%     

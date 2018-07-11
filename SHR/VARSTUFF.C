@@ -1332,16 +1332,55 @@ ProcessSQL:
 	ProcessFileSQL (SQLPtr,FilePtr,SQL); 
 	if (Type == SQL_DATAFILE)
 	{
-		LPSQLDATABASE	pDB = GlobalLock (FilePtr->FileHandle);
-		LPOPENSQLDATA	SQLPtr2 = GlobalLock (pDB->DBHandle);
-		
+		LPSQLDATABASE	pDB = GlobalLock(FilePtr->FileHandle);
+		LPOPENSQLDATA	SQLPtr2 = GlobalLock(pDB->DBHandle);
+
 		SQLPtr2->MacroID = -1;
-		itoa ((int)SQLPtr->myhandle,SQLPtr->myhandleC,16);
-		strcpy (SQLPtr2->IDName,SQLPtr->myhandleC);
-		GlobalUnlock (pDB->DBHandle);
-		GlobalUnlock (FilePtr->FileHandle);
+		itoa((int)SQLPtr->myhandle, SQLPtr->myhandleC, 16);
+		strcpy(SQLPtr2->IDName, SQLPtr->myhandleC);
+		GlobalUnlock(pDB->DBHandle);
+		GlobalUnlock(FilePtr->FileHandle);
 	}
-    if (RetrieveFields)
+	else if (Type == GMTEXT_DATAFILE)
+	{
+		LPSQLFIELD pSQLField = &SQLPtr->SQLField;
+		LPSTR pIndexFields = malloc(1024);
+		LPSTR pIndexName = malloc(1024);
+		*pIndexFields = 0;
+		for (int i = 0; i < SQLPtr->NumGlobals; i++, pSQLField++)
+		{
+			if (pSQLField->OpCode == OPCODE_EQ)
+			{
+				if (pSQLField->FieldNum >= 0 && pSQLField->FieldNum < FilePtr->NumFields)
+				{
+					LPFIELDINFO pField = &FilePtr->FldInfo + pSQLField->FieldNum;
+					strcat(pIndexFields, pField->name);
+					strcat(pIndexFields, "+");
+				}
+			}
+		}
+		if (*pIndexFields)
+		{
+			LPSTR pIndexFilePath = malloc(MAX_PATH + 8);
+			strcpy(pIndexFilePath, Name);
+			strcat(pIndexFilePath, ".index");
+			strcpy(pIndexName, pIndexFields);
+			strcat(pIndexName, "index");
+			ReplaceChar(pIndexName, '+','_');
+			strcpy(SQLPtr->TextFileIndexName, pIndexName);
+			int rtn = sqlite3_open(pIndexFilePath,&SQLPtr->TextFileIndex);
+			if (rtn == SQLITE_OK)
+			{
+				BOOL st = DoesSLTTableExist(SQLPtr->TextFileIndex, pIndexName);
+				if (!st)
+					CreateTextIndexTable(SQLPtr->TextFileIndex, pIndexFields, FilePtr);
+			}
+			free(pIndexFilePath);
+		}
+		free(pIndexName);
+		free(pIndexFields);
+	}
+	if (RetrieveFields)
 		SQLPtr->IndexToUse = -1;
     GlobalUnlock (SQLPtr->myhandle);  
     GlobalUnlock (FilePtr->myhandle);  
@@ -1756,6 +1795,17 @@ GSSiExitProg (524);
 
 		case GMTEXT_DATAFILE:
 			GSSiClose (FilePtr->Fid);  
+			if (SQLPtr->TextFileIndex)
+			{
+				if (SQLPtr->statement)
+				{
+					sqlite3_finalize(SQLPtr->statement);
+					SQLPtr->statement = NULL;
+				}
+				sqlite3_close(SQLPtr->TextFileIndex);
+				SQLPtr->TextFileIndex = NULL;
+			}
+
 			GSSiGlobFree (&FilePtr->FileHandle);
 			break; 
 
@@ -5610,6 +5660,7 @@ Next:if (*str == '"')
 		strcpy (varname,BeginLoc);
 	REPLAC (varname,"[","(",128);
 	REPLAC (varname,"]",")",128);
+	Truncate(varname);
 	DLTVar[(*nDLTvar)++] = AllocateVar(varname);  
 	if (Done)
 	{   
@@ -7771,6 +7822,7 @@ int GetDBPos(HANDLE hSQLPtr)
 	}
 	return pos;
 }
+
 BOOL FetchDBRec (HANDLE hSQLPtr)
 #if ENABLETRACE
 {GSSiEnterProg (573);
@@ -7861,13 +7913,13 @@ GSSiExitProg (573);
 		
     	case GMTEXT_DATAFILE: 
     	{
-#define MAXTEXTLINE	USHRT_MAX*4
 			hStr = GSSiGlobAlloc(228, GMEM_MOVEABLE, MAXTEXTLINE);
     		str=GlobalLock (hStr);
 			if (NeedRead (SQLPtr)) 
 			{
-				GSSillseek (FilePtr->Fid,FilePtr->FirstLineOffset,0);  
-				SQLPtr->st = 0;
+				SQLPtr->st = GetTextFileStartFromIndex (FilePtr,SQLPtr);
+				if (!SQLPtr->st)
+					GSSillseek(FilePtr->Fid, FilePtr->FirstLineOffset, 0);
 			}
 			while (!SQLPtr->st)  
 			{

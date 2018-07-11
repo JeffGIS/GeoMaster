@@ -2245,7 +2245,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     return (rtn);
 
 }     
-/*BOOL PrintCurbRamp (HWND hWnd, int intersectionID, int rampNum)
+BOOL PrintCurbRamp (int intersectionID, int rampNum)
 {
 	HDC hPr;
 	RECT	Rect;
@@ -2271,17 +2271,15 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 	LPDEVMODE pDevMode;
 	HFILE	Fid;
 	SIZE		txSize;
-	int		Tabs[32], Margin = 120;
+	int		Tabs[2], nTabs = 1,Margin = 120;
 	double	Factor;
 	HFONT	hFont, hFontBold, OldFont;
 	char		Header[514];
 	short	FontSize = 8, LineInc, BottomOfPage;
-	HWND		ghWnd;
+	HWND		ghWnd=hWndMain;
 
 	GetGlobalCVal("[%PRINTNAME]", SavePrintName, 0);
 
-	ghWnd = hWnd;
-	hWnd = NULL;
 
 	wSize = sizeof(PRINTDLG);
 	if (!hPDChunk)
@@ -2368,15 +2366,15 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 			IgnoreLock = FALSE;
 			Rect = SaveRect;
 			SetMainRect(0, hPr, &Rect, 3);
-			Factor = (double)(Rect.right - Rect.left - Margin) / (double)TabsIn[nTabs - 1];
+			Factor = (double)(Rect.right - Rect.left - Margin) / (double)Tabs[nTabs - 1];
 			BottomOfPage = Rect.bottom - Margin;
 			for (i = 0; i<nTabs; i++)
-				Tabs[i] = TabsIn[i] * Factor;
+				Tabs[i] = Tabs[i] * Factor;
 			Tabs[nTabs - 1] *= 2;
 			hFontBold = CreateFont((int)IDNINT(FontSize*Factor*1.4), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Arial Black");
 			hFont = CreateFont((int)IDNINT(FontSize*Factor), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
 			OldFont = SelectObject(hPr, hFontBold);
-			Fid = GSSiOpenFile(File, 0, OF_READ);
+			//Fid = GSSiOpenFile(File, 0, OF_READ);
 			fgetstring(Header, 512, Fid);
 			GetTextExtentPoint32(hPr, Header, _fstrlen(Header), &txSize);
 			LineInc = txSize.cy;
@@ -2454,7 +2452,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 	return (rtn);
 
 }
-*/
+
 BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
 {	HDC hPr;
     RECT	Rect;

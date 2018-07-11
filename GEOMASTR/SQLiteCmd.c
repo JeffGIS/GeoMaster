@@ -3867,6 +3867,208 @@ BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName)
 	return rtn;
 }
 
+static char QuoteValue(LPOPENFILEDATA FilePtr, LPSTR pName)
+{
+	char q = 0;
+	LPFIELDINFO	pFieldInfo = &FilePtr->FldInfo;
+	for (int i = 0; i < FilePtr->NumFields; i++, pFieldInfo++)
+	{
+		if (!stricmp(pName, pFieldInfo->name))
+		{
+			if (pFieldInfo->type == BT_CHAR)
+				q = 0x27;
+			break;
+		}
+	}
+	return q;
+}
+static void AddFieldType(LPSTR pCmd, LPSTR pName, LPOPENFILEDATA FilePtr,LPINT pNameIndex,LPSTR quote)
+{
+	LPFIELDINFO	pFieldInfo = &FilePtr->FldInfo;
+
+	*quote = 0;
+	for (int i = 0; i < FilePtr->NumFields; i++, pFieldInfo++)
+	{
+		if (!stricmp(pName, pFieldInfo->name))
+		{
+			switch (pFieldInfo->type)
+			{
+			case BT_CHAR:
+			{
+				int l = pFieldInfo->length ? pFieldInfo->length : 255;
+				sprintf(strchr(pCmd, 0), " CHAR(%i)", l);
+				*quote = 0x27;
+			}
+				break;
+			case BT_INT2:
+			case BT_INT4:
+			case BT_INTEGER:
+				strcat(pCmd, " INT8");
+				break;
+			case BT_REAL:
+			case BT_REAL4:
+			case BT_REAL8:
+				strcat(pCmd, " DOUBLE");
+				break;
+			}
+			*pNameIndex = i;
+			return;
+		}
+	}
+	return;
+}
+BOOL CreateTextIndexTable(sqlite3 *db, LPSTR pIndexName, LPOPENFILEDATA FilePtr)
+{
+	BOOL rtn = FALSE;
+	LPSTR pCmd = malloc(4096);
+#define MAXVAL	4096
+	LPSTR Value = malloc(MAXVAL);
+	LPSTR pName = pIndexName;
+	char delim[2] = { 0 };
+	int	 nameIndex[32];
+	char	Quotes[32];
+	LPSTR pQuote = Quotes;
+	LPINT pnameIndex = nameIndex;
+	int nNames = 0;
+
+	SLT_StartTrans(db);
+
+	sprintf(pCmd, "CREATE TABLE %s",pIndexName);
+	ReplaceChar(pCmd, '+', '_');
+	strcat(pCmd, "index (");
+	while (*pName)
+	{
+		strcat(pCmd, delim);
+		strcpy(delim, ",");
+		LPSTR pEnd = strchr(pName, '+');
+		*pEnd = 0;
+		strcat(pCmd, pName);
+		AddFieldType(pCmd, pName, FilePtr,pnameIndex,pQuote);
+		nNames++;
+		pQuote++;
+		*pEnd++ = '+';
+		pName = pEnd;
+	}
+	*delim = 0;
+	strcat(pCmd, ",Offset INT8, PRIMARY KEY (");
+	pName = pIndexName;
+	while (*pName)
+	{
+		strcat(pCmd, delim);
+		strcpy(delim, ",");
+		LPSTR pEnd = strchr(pName, '+');
+		*pEnd = 0;
+		strcat(pCmd, pName);
+		*pEnd++ = '+';
+		pName = pEnd;
+	}
+
+	strcat(pCmd, ", Offset));");
+	SLT_Execute(pCmd, db);
+
+	GSSillseek(FilePtr->Fid, FilePtr->FirstLineOffset, 0);
+	int st = 0;
+	LPSTR str = malloc(MAXTEXTLINE);
+	int Offset;
+
+	while (!st)
+	{
+	NextTextRec:
+		Offset = GSSillseek(FilePtr->Fid, 0, 1);
+		if (!fgetstring(str, MAXTEXTLINE - 4, FilePtr->Fid))
+			st = 1;
+		else if (*str == '[' && *LastChr(str) == ';')
+		{
+			ProcessText(str);
+			goto NextTextRec;
+		}
+		else
+		{
+			BOOL Err;
+			char quote[2] = " ";
+			sprintf(pCmd, "INSERT INTO %sindex VALUES(", pIndexName);
+			ReplaceChar(pCmd, '+', '_');
+			st = 0;
+			GetDelimTextData(str, FilePtr->FileHandle, MAXTEXTLINE - 4);
+			*delim = 0;
+			LPSHORT	pnDLTvar = (LPSHORT)GlobalLock(FilePtr->FileHandle);
+			short	nDLTvar = abs(*pnDLTvar);
+			LPSTR	DLTDelim = (LPSTR)(pnDLTvar + 1);
+			LPHANDLE	DLTVar = (LPHANDLE)(DLTDelim + 1);
+			VARPNT	VarPtr;
+			for (int i = 0; i < nNames; i++)
+			{
+				strcat(pCmd, delim);
+				strcpy(delim, ",");
+				VarPtr = (VARPNT)GlobalLock(DLTVar[nameIndex[i]]);
+				strncpy0(Value, VarPtr->Value, MAXVAL-1);
+				RemoveQuotes(Value);
+				*quote = Quotes[i];
+				sprintf(strchr(pCmd, 0), "%s%s%s", quote, Value, quote);
+				GlobalUnlock(*DLTVar);
+				GlobalUnlock(FilePtr->FileHandle);
+			}
+			sprintf (strchr(pCmd,0), ",%i);", Offset);
+			SLT_Execute(pCmd, db);
+		}
+	}
+	SLT_EndTrans(db);
+	free(str);
+	free(pCmd);
+	free(Value);
+
+	return rtn;
+}
+
+int GetTextFileStartFromIndex(LPOPENFILEDATA FilePtr, LPOPENSQLDATA SQLPtr)
+{
+	int rtn = 0;
+	char and[6] = "";
+	if (SQLPtr->TextFileIndex)
+	{
+		if (!SQLPtr->statement)
+		{
+			LPSTR pCmd = malloc(4096);
+			sprintf(pCmd, "SELECT Offset FROM %s WHERE ", SQLPtr->TextFileIndexName);
+			LPSQLFIELD pSQLField = &SQLPtr->SQLField;
+			LPSTR pIndexFields = malloc(1024);
+			LPSTR pIndexName = malloc(1024);
+			*pIndexFields = 0;
+			for (int i = 0; i < SQLPtr->NumGlobals; i++, pSQLField++)
+			{
+				if (pSQLField->FieldNum >= 0 && pSQLField->FieldNum < FilePtr->NumFields)
+				{
+					char quote[2] = " ";
+					LPFIELDINFO pField = &FilePtr->FldInfo + pSQLField->FieldNum;
+					quote[0] = QuoteValue(FilePtr, pField->name);
+					sprintf(strchr(pCmd, 0), "%s%s=%s%s%s", and, pField->name, quote, pSQLField->String, quote);
+					strcpy(and, " AND ");
+				}
+			}
+			//sprintf(pCmd, "SELECT Offset,Station FROM %s", SQLPtr->TextFileIndexName);
+			ExpandText(pCmd);
+			SQLOK(sqlite3_prepare_v2(SQLPtr->TextFileIndex, pCmd, -1, &SQLPtr->statement, 0), SQLPtr->TextFileIndex, "Text Search", 0);
+			free(pCmd);
+		}
+		if (SQLPtr->statement)
+		{
+			if (sqlite3_step(SQLPtr->statement) == SQLITE_ROW)
+			{
+				FilePtr->FirstLineOffset = sqlite3_column_int(SQLPtr->statement, 0);
+				//LPSTR stat = sqlite3_column_text(SQLPtr->statement, 1);
+				rtn = 0;
+			}
+			else
+			{
+				sqlite3_finalize(SQLPtr->statement);
+				SQLPtr->statement = NULL;
+				rtn = 1;
+			}
+		}
+	}
+	return rtn;
+}
+
 BOOL SLTSpatialIndexExists(sqlite3 *db, LPSTR tableName)
 {
 	BOOL rtn = FALSE;

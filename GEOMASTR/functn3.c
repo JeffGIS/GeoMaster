@@ -4618,6 +4618,8 @@ GotCloseFilehSQL:
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
 			//$NVCRIS(RAMPOFFSETCOORD,intPoint21,rampPoint21)
 			//$NVCRIS(FIXRAMPNUM,rampnum)
+			//$NVCRIS(PRINTRAMP,intnum,rampnum)
+			//$NVCRIS(PRINTRAMPLIST,listpath)
 
 		{
 			rtn = FALSE;
@@ -4681,6 +4683,14 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "FIXRAMPNUM"))
 			{
 				rtn = fixRampNum(atoi(Arg[2]));
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "PRINTRAMP"))
+			{
+				int intnum = atoi(Arg[2]);
+				int rampnum = atoi(Arg[3]);
+				rtn = PrintCurbRamp(intnum,rampnum);
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
