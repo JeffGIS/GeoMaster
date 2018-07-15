@@ -4620,6 +4620,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(FIXRAMPNUM,rampnum)
 			//$NVCRIS(PRINTRAMP,FromDB,intnum,rampnum)
 			//$NVCRIS(PRINTRAMPLIST,FromDB,listpath)
+			//$NVCRIS(STREETNAMES,FromDB,intnum)
 
 		{
 			rtn = FALSE;
@@ -4690,8 +4691,14 @@ GotCloseFilehSQL:
 			{
 				int intnum = atoi(Arg[3]);
 				int rampnum = atoi(Arg[4]);
-				rtn = PrintCurbRamp(Arg[2],intnum, rampnum);
+				rtn = PrintCurbRamp(Arg[2], intnum, rampnum);
 				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "STREETNAMES"))
+			{
+				int intnum = atoi(Arg[3]);
+				GetIntersectionStreetNames(Arg[2], intnum, OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "RAMPOFFSETCOORD"))

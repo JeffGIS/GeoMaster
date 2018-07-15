@@ -651,6 +651,24 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 	return rtn;
 }
 
+BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc)
+{
+	BOOL rtn = FALSE;
+	int rc;
+
+	*OutLoc = 0;
+	rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
+		rtn = getMPIntersectionFromDB(intnum, FALSE, pmpInt);
+		if (rtn)
+			strcpy(OutLoc, pmpInt->name);
+		free(pmpInt);
+		sqlite3_close(database);
+	}
+	return rtn;
+}
 
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
 {
@@ -993,6 +1011,42 @@ static BOOL getCornerComment(int intID, int rampNum, LPSTR rampComment)
 	return rtn;
 }
 
+BOOL RampIDFromRampNum(int rampNum,LPSTR rampID)
+{
+	BOOL rtn = FALSE;
+	int i = fixRampNum (rampNum);
+
+	*rampID = 0;
+	
+	switch (i)
+	{
+	default:
+	if (i % 2)
+		sprintf (rampID,"%i(Left)", i);
+
+	else
+		sprintf(rampID, "%i(Right)", i);
+	break;
+
+	case 9:
+		sprintf(rampID, "23 (Middle)");
+	break;
+
+	case 10:
+		sprintf(rampID, "45 (Middle)");
+	break;
+
+	case 11:
+		sprintf(rampID, "67 (Middle)");
+	break;
+
+	case 12:
+		sprintf(rampID, "81 (Middle)");
+	break;
+	}
+	return rtn;
+}
+
 void MPIntersectionInit(MPINTERSECTION * mpint)
 {
 	memset(mpint, 0, sizeof(MPINTERSECTION));
@@ -1034,8 +1088,10 @@ int getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		//int nStreets = sqlite3_column_int(statement, 27);
 		streets = (LPSTR)sqlite3_column_text(statement, 29);
 		if (streets)
-			strcpy(streetString, streets);
+			//strcpy(streetString, streets);
+			FormatStreets(streets, streetString);
 		//ReplaceChar(streetString, '|', '\n');
+		strncpy0(mpint.name, streetString, sizeof(mpint.name) - 1);
 		comment = (LPSTR)sqlite3_column_text(statement, 33);
 		if (comment)
 			strcpy(mpint.intersectionComment, comment);

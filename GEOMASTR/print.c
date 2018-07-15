@@ -2245,6 +2245,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     return (rtn);
 
 }     
+
 BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 {
 	HDC hPr;
@@ -2271,12 +2272,14 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 	LPDEVMODE pDevMode;
 	HFILE	Fid;
 	SIZE		txSize;
-	int		Tabs[2], nTabs = 1,Margin = 120;
 	double	Factor;
 	HFONT	hFont, hFontBold, OldFont;
-	char		Header[514];
-	short	FontSize = 8, LineInc, BottomOfPage;
+	char	Header[514];
+	char	StreetNames[512];
+	int	FontSize = 36, LineInc, BottomOfPage;
 	HWND		ghWnd=hWndMain;
+	char ImageList[MAX_PATH] = "F:\\PCViewer\\PCViewer\\BreaCA\\PhotoSample1.txt";
+	RECT ImageRects[8];
 
 	GetGlobalCVal("[%PRINTNAME]", SavePrintName, 0);
 
@@ -2316,6 +2319,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 
 	{
 		DOCINFO	DI;
+		int ifontsize;
 
 		hPr = lpPDChunk->hDC;
 		gbUserAbort = FALSE;
@@ -2366,18 +2370,49 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 			IgnoreLock = FALSE;
 			Rect = SaveRect;
 			SetMainRect(0, hPr, &Rect, 3);
-			Factor = (double)(Rect.right - Rect.left - Margin) / (double)Tabs[nTabs - 1];
-			BottomOfPage = Rect.bottom - Margin;
-			for (i = 0; i<nTabs; i++)
-				Tabs[i] = Tabs[i] * Factor;
-			Tabs[nTabs - 1] *= 2;
-			hFontBold = CreateFont((int)IDNINT(FontSize*Factor*1.4), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Arial Black");
-			hFont = CreateFont((int)IDNINT(FontSize*Factor), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
+			margin = RECTWIDTH(&Rect) * 2.0 / 100.0;
+			Factor =  (double)(Rect.right - Rect.left - margin) /4000.0;
+			Rect.top += margin;
+			Rect.left += margin;
+			Rect.right -= margin;
+			Rect.bottom -= margin;
+			BottomOfPage = Rect.bottom;
+			ifontsize = IDNINT(FontSize*Factor);
+			hFontBold = CreateFont(IDNINT(ifontsize*1.2*2), 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
+			hFont = CreateFont((int)IDNINT(ifontsize), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Verdana");
 			OldFont = SelectObject(hPr, hFontBold);
 			StartPage(hPr);
 
+			Rect.top += RECTHEIGHT(&Rect) * 1.0 / 100.0;
+			GetIntersectionStreetNames(fromDB, intersectionID, StreetNames);
 			char title[256]="";
-			int maxline = 256, FontSize = 10, maxFontSize = 15;
+			char rampID[64];
+			RampIDFromRampNum(rampNum, rampID);
+			sprintf(title, "Intersection %i\n%s\nRamp %s", intersectionID, StreetNames, rampID);
+			int  titleHeight = DrawText(hPr, title, -1, &Rect, DT_CENTER | DT_TOP);
+			Rect.top += titleHeight;
+			ImageRects[0] = Rect;
+			ImageRects[0].bottom = ImageRects[0].top + RECTHEIGHT(&Rect) / 4;
+			ImageRects[0].left += RECTWIDTH(&Rect) / 2;
+			ImageRects[0].right = ImageRects[0].left + RECTWIDTH(&Rect) / 4;
+			ImageRects[1] = ImageRects[0];
+			ImageRects[1].left = ImageRects[0].right;
+			ImageRects[1].right += RECTWIDTH(&ImageRects[0]);
+			ImageRects[2] = ImageRects[0];
+			ImageRects[3] = ImageRects[1];
+			ImageRects[2].top += RECTHEIGHT(&ImageRects[0]);
+			ImageRects[3].top += RECTHEIGHT(&ImageRects[0]);
+			ImageRects[2].bottom += RECTHEIGHT(&ImageRects[0]);
+			ImageRects[3].bottom += RECTHEIGHT(&ImageRects[0]);
+			for (int i = 4; i < 8; i++)
+			{
+				ImageRects[i] = ImageRects[i - 4];
+				ImageRects[i].top += RECTHEIGHT(&Rect) / 2;
+				ImageRects[i].bottom += RECTHEIGHT(&Rect) / 2;
+			}
+			for (int i = 0; i < 8; i++)
+				ImageRects[i] = FactorRect(&ImageRects[i], 92.0 / 100.0);
+			int maxline = 48, FontSize = 10, maxFontSize = 15;
 			{
 				char tempFile[MAX_PATH];
 				LPSTR pDot;
@@ -2387,8 +2422,32 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 					strcpy(pDot, ".txt");
 				if (OutputRampForIntersectionAndRampnumToFile(intersectionID, rampNum, tempFile, fromDB, 1,0))
 				{
-					BasicDataDisplayToDC(tempFile, hPr, 0, 0, "", maxline, FontSize, maxFontSize, Rect, title);
+					BasicDataDisplayToDC(tempFile, hPr, 0, 0, "", maxline,ifontsize, ifontsize*1.5, Rect, title);
 				};
+			}
+			char ImageFile[MAX_PATH + 64];
+			HFILE fid = GSSiOpenFile(ImageList, 0, OF_READ);
+			int iImage = 0;
+
+			if (fid != HFILE_ERROR)
+			{
+				SelectObject(hPr, hFont);
+				while (iImage < 8 && fgetstring(ImageFile, MAX_PATH + 62, fid))
+				{
+					RECT labelRect;
+
+					LPSTR pTab = strchr(ImageFile, '\t');
+					if (pTab)
+					{
+						*pTab++ = 0;
+						DisplayBMFileInRect(hPr, ImageFile, ImageRects[iImage], TRUE);
+						labelRect = ImageRects[iImage++];
+						labelRect.top = labelRect.bottom + 2;
+						labelRect.bottom += ifontsize * 2;
+						DrawText(hPr, pTab, -1, &labelRect, DT_CENTER | DT_TOP);
+					}
+				}
+				GSSiClose(fid);
 			}
 			/*GetTextExtentPoint32(hPr, Header, _fstrlen(Header), &txSize);
 			LineInc = txSize.cy;

@@ -2370,10 +2370,11 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 		long SaveSHPRec = CurrentSHPRec;
 		HFONT hFont, hFontBold, hOldFont;
 		double fontFactor = 1;
-		int  Tabs[2] = { 150, 300 };
-		int margin = 20;
+		int  Tabs[2] = { RECTWIDTH(&rect) / 4.5, RECTWIDTH(&rect) / 2 };
+		int margin = 5.0/100.0 * RECTWIDTH (&rect);
 		int lineInc = margin;
 		int lineHeight = 16;
+		int nRows;
 
 		strcpy(DBName, DBNameIN);
 		rtn = FALSE;
@@ -2385,13 +2386,14 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 #endif
 			return FALSE;
 		}
-		hFontBold = CreateFont((int)IDNINT(FontSize*fontFactor*1.4), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
-		hFont = CreateFont((int)IDNINT(FontSize*fontFactor), 0, 0, 0, FW_THIN, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
-
 		CurrentSHPRec = SaveSHPRec;
 		SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQL);
 		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 		lpFieldInfo = &FilePtr->FldInfo;
+		fontFactor = (double)RECTHEIGHT (&rect)/(FilePtr->NumFields * FontSize*1.2 + margin*2);
+		hFontBold = CreateFont((int)IDNINT(FontSize*fontFactor*1.2), 0, 0, 0, FW_BLACK, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+		hFont = CreateFont((int)IDNINT(FontSize*fontFactor), 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, "Courier New");
+		lineHeight = IDNINT(FontSize*fontFactor*1.2);
 		hStr = GSSiGlobAlloc(270, GMEM_MOVEABLE, 4096);
 		str2 = GlobalLock(hStr);
 		for (ifield = 0; ifield<FilePtr->NumFields; ifield++, lpFieldInfo++)
@@ -2421,6 +2423,11 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 				LPSTR	str3 = str2;
 				char	c;
 
+				if (strstr(lpFieldInfo->name, "Slope"))
+				{
+					double slope = atof(str2);
+					sprintf(str2, "%.1f", fabs(slope));
+				}
 				l = max(l, 1);
 				while (l > 0)
 				{
@@ -2444,10 +2451,28 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 					}
 					l -= n;
 					str3 += n;
-					TabbedTextOut(hDC, rect.left, rect.top+lineInc, str, _fstrlen(str),1, Tabs, rect.left);
-					_fstrcpy(str, "\t");
+					{
+						LPSTR pTab = strchr(str, '\t');
+						if (pTab)
+						{
+							*pTab++ = 0;
+							if (strlen(str) > 0)
+							{
+								hOldFont = SelectObject(hDC, hFontBold);
+								TabbedTextOut(hDC, rect.left + margin, rect.top + lineInc, str, strlen(str), 1, Tabs, rect.left);
+							}
+							hOldFont = SelectObject(hDC, hFont);
+							TabbedTextOut(hDC, Tabs[0], rect.top + lineInc, pTab, strlen(pTab), 1, Tabs, rect.left);
+						}
+						else
+						{
+							ii = 1;
+						}
+						SelectObject(hDC, hOldFont);
+						_fstrcpy(str, "\t");
+						lineInc += lineHeight;
+					}
 				}
-				lineInc += lineHeight;
 			}
 			First = FALSE;
 		}
@@ -2456,6 +2481,8 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 		GlobalUnlock(SQLPtr->OFHandle);
 		GlobalUnlock(hSQL);
 		CloseDataFile(TRUE, &hSQL);
+		DeleteObject(hFont);
+		DeleteObject(hFontBold);
 		GSSiGlobUlFree(&hStr);
 		{
 #if ENABLETRACE
