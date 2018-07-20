@@ -2375,7 +2375,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 							ConvertBounds(&Bounds, 1, 0);
 							if (!stricmp(tableName, "ALLEYWALLS_NEW"))
 							{
-								sprintf(Query, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+								sprintf(Query, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
 									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 							}
 							else
@@ -2460,7 +2460,7 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-		sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, [Wall Id],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", SQLITERec);
+		sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", SQLITERec);
 
 		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) != SQLITE_OK)
 			pSQLDatabase->statement = NULL;
