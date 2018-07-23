@@ -2375,7 +2375,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 							ConvertBounds(&Bounds, 1, 0);
 							if (!stricmp(tableName, "ALLEYWALLS_NEW"))
 							{
-								sprintf(Query, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+								sprintf(Query, "SELECT ALLEYWALLS_NEW.id, @[Wall Id@],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
 									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 							}
 							else
@@ -3536,10 +3536,10 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 			int ibytes = sqlite3_column_bytes(pDB->statement, j);
 			LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, j);
 			LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, j);
-			if (!stricmp(pName, "X"))
+			if (!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE"))
 				pDB->xLoc = j;
 
-			if (!stricmp(pName, "Y"))
+			if (!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE"))
 				pDB->yLoc = j;
 
 			if (!decl)
