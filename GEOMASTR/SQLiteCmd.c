@@ -323,6 +323,31 @@ static int ConvertOffsetsToIDs(LPINT pOffsets, LPGWDHEADER lpGWDHead)
 	return ln;
 }
 
+double GetSQLITESumCol(sqlite3 *db, LPSTR tableName,LPSTR Column, LPSTR where)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	if (*where)
+		sprintf(pCmd, "SELECT SUM (%s) FROM %s WHERE %s", tableName, Column, where);
+	else
+		sprintf(pCmd, "SELECT SUM (%s) FROM %s", tableName, Column);
+	sqlite3_stmt *statement;
+	double rtn = 0;
+
+	if (db)
+	{
+		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
+		{
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				rtn = sqlite3_column_double(statement, 0);
+			}
+		}
+		sqlite3_finalize(statement);
+	}
+	GSSiGlobUlFree(&hCmd);
+	return rtn;
+}
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
@@ -610,6 +635,11 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
 		rtn = GetSQLITENumRows(db, ARG[3], ARG[4]);
+	}
+	else if (!stricmp(ARG[1], "SUMCOL"))//$SQLITE(NUMROWS,sqlitehandle,tablename,column,where clause)
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = GetSQLITESumCol(db, ARG[3], ARG[4], ARG[5]);
 	}
 	else if (!stricmp(ARG[1], "MAXID"))//$SQLITE(MAXID,sqlitehandle,tablename)
 	{

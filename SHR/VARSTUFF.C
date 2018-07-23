@@ -1384,6 +1384,9 @@ ProcessSQL:
 		SQLPtr->IndexToUse = -1;
     GlobalUnlock (SQLPtr->myhandle);  
     GlobalUnlock (FilePtr->myhandle);  
+	if (Type  == SLT_DATAFILE)
+		SLTPrepare(handle);
+
     *hDB = handle;
     AddToOpenFileList(handle); 
 RtnTrue:  

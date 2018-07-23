@@ -389,13 +389,19 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				image++;
 			while (ibutton < MAXIMAGES && fgetstring(FileName, MAX_PATH, fid))
 			{
+				BOOL doFlip = FALSE;
 				if ((pTab = strchr(FileName, '\t')))
 				{
 					*pTab++ = 0;
+					if (!strnicmp(pTab, "Ground",6))
+						doFlip = TRUE;
 				}
 				else pTab = blankLine;
 				HDIB32 hDib32 = BMPHandleFromEXT(FileName);
-				//BOOL flip = FreeImage_FlipVertical(hDib32);
+				if (doFlip)
+				{
+					BOOL flip = FreeImage_FlipVertical(hDib32);
+				}
 				//flip = FreeImage_FlipHorizontal(hDib32);
 				{
 					float imagewidth = FreeImage_GetWidth(hDib32);
@@ -488,16 +494,26 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 			{
 				HFILE fid = GSSiOpenFile(DMIFile, 0, OF_READ);
 				int ifile = 0;
+				BOOL doFlip = FALSE;
 				if (fid != HFILE_ERROR)
 				{
 					while (fgetstring(FileName, MAX_PATH, fid))
 					{
 						if ((pTab = strchr(FileName, '\t')))
+						{
 							*pTab++ = 0;
+						
+							if (!strnicmp(pTab, "Ground", 6))
+								doFlip = TRUE;
+						}
 						if (ifile++ == ibutton + firstImage)
 						{
 							HDIB32 hDib32 = BMPHandleFromEXT(FileName);
 							HDIB32 hDibScaled;
+							if (doFlip)
+							{
+								BOOL flip = FreeImage_FlipVertical(hDib32);
+							}
 							float imagewidth = FreeImage_GetWidth(hDib32);
 							float imageheight = FreeImage_GetHeight(hDib32);
 							float fac1, fac2, fac;
@@ -26893,7 +26909,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                         GSSiMsgBox(GetFocus(),"No input projection set", 0,MB_ICONEXCLAMATION|MB_OK,0);
                         break;
                     }
-					sprintf(file, "[%DL]projections\\%s", curproject);
+					sprintf(file, "[%%DL]projections\\%s", curproject);
                     SetGlobalValue("%ALT_PROJECTION",file);
 				    ConvertCoordClose ();
 				    ConvertCoordInit();

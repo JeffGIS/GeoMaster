@@ -305,6 +305,7 @@ void SQLFieldTypeToGMD (LPSTR sql,LPSTR gmd);
 short OpenDataFile (LPSTR InName, LPSTR SQL, short Access, HANDLE *hDB);
 HANDLE	OpenSLTDatabase(LPSTR Name, LPSTR SQL, short Access);
 HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL);
+double GetSQLITESumCol(sqlite3 *db, LPSTR tableName, LPSTR Column,LPSTR where);
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where);
 LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where);
 void CloseSLTDatabase(LPHANDLE pHandle);

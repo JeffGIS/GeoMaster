@@ -9,7 +9,7 @@
 #define lnCurHelpTopic 256
 #define lngszFilter 512
 #define lngszBuffer 256
-#define lncurproject 34
+#define lncurproject 256
 #define lncurunits 34  
 #define lnHLTOutSQL 256
 #define lnUGridPickMacro 256
