@@ -550,6 +550,8 @@ void TrackObject (HGDIOBJ hObj,short Type)
 					ii=1;
 				if (i==10)// && Type == 8)
 					ii=1;
+				if (Type == 4)
+					ii = 1;
 				return;
 			}
 		} 
