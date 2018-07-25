@@ -695,7 +695,7 @@ HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL)
     fgetstring (str,32,Fid);
     while (fgetstring (str,128,Fid))
     {   
-		int ii=sscanf (str,"%i,%i,%i,%i,%i,%i,%s",
+		int nf=sscanf (str,"%i,%i,%i,%i,%i,%i,%s",
 										   &pDB->FldInfo[pDB->NumFields].type,
 										   &pDB->FldInfo[pDB->NumFields].index,
 										   &pDB->FldInfo[pDB->NumFields].radix,
@@ -704,6 +704,11 @@ HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL)
 										   &pDB->FldInfo[pDB->NumFields].precision,
 										   pDB->FldInfo[pDB->NumFields].name);
 //    	_fstrcpy (pDB->FldInfo[pDB->NumFields].name,str);
+		if (nf != 7)
+		{
+			GSSiClose(Fid);
+			return 0;
+		}
     	pDB->NumFields++;
     }
 	GSSiClose (Fid);  

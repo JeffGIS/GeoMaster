@@ -1153,7 +1153,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			int itype = OpenDataFile (testFile,"",OF_READ,&hDB);
 
 			if (itype == GMTEXT_DATAFILE ||
-				!itype && StrStrI (testFile,".txt"))
+				!itype && (StrStrI(testFile, ".txt") || StrStrI(testFile, ".sql")))
 			{
 				if (hDB && GSSiLength (pBeg) > MAX_FILE_SIZE)
 					sprintf (str,"|$EDITFILE(%s)",pBeg);
