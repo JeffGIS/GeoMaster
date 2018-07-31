@@ -3,6 +3,7 @@
 #include <setupapi.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <physicalmonitorenumerationapi.h>
 //#include <cfgmgr32.h>   // for MAX_DEVICE_ID_LEN
 #define MAX_DEVICE_ID_LEN 200
 //#pragma comment(lib, "setupapi.lib")
@@ -167,12 +168,16 @@ int main(int argc, char *argv[]) {
 }
 */
 
-double MonitorWidthInInches(int monitor)
+double MonitorWidthInInches(LPSTR displayName)
 {
-	int                size;
-	struct DisplayInfo *displayInfos = getDisplayInfos(&size);
-
-	double width = displayInfos[monitor].physicalWidth_mm / MMPERINCH;
+	int                nDisplays;
+	struct DisplayInfo *displayInfos = getDisplayInfos(&nDisplays);
+	double width = 0;
+	for (int i = 0; i < nDisplays; i++)
+	{
+		if (!stricmp(displayName, displayInfos[i].name))
+			width = displayInfos[i].physicalWidth_mm / MMPERINCH;
+	}
 	free(displayInfos);
 	return width;
 }
@@ -190,11 +195,38 @@ double GetScreenPixelsPerInch(void)
 {
 	HWND hWnd = GetDesktopWindow();
 	RECT rect;
+	char displayName[32];
+	double screenWidth = 10;
 
 	GetWindowRect(hWnd, &rect);
 	int windowWidth = rect.right - rect.left;
 
-	double screenWidth = MonitorWidthInInches(0);
+	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	if (hMonitor)
+	{
+		DWORD nPhysicalMonitors;
+		LPPHYSICAL_MONITOR pPhysicalMonitors = NULL;
+
+		// Get the number of physical monitors.
+		BOOL bSuccess = GetNumberOfPhysicalMonitorsFromHMONITOR(
+			hMonitor,
+			&nPhysicalMonitors
+			);
+		if (bSuccess)
+		{
+			pPhysicalMonitors = (LPPHYSICAL_MONITOR)malloc(nPhysicalMonitors* sizeof(PHYSICAL_MONITOR));
+			bSuccess = GetPhysicalMonitorsFromHMONITOR(hMonitor, nPhysicalMonitors, pPhysicalMonitors);
+
+			// Use the monitor handles (not shown).
+			wcstombs(displayName, pPhysicalMonitors[0].szPhysicalMonitorDescription, 20);
+
+			bSuccess = DestroyPhysicalMonitors(nPhysicalMonitors, pPhysicalMonitors);
+			free(pPhysicalMonitors);
+			double width = MonitorWidthInInches(displayName);
+			if (width)
+				screenWidth = width;
+		}
+	}
 	double ppi = windowWidth / screenWidth;
 	return ppi;
 }

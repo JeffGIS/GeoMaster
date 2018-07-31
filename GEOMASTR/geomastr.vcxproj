@@ -232,7 +232,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>NVServer\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.11</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -369,7 +369,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2013\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
