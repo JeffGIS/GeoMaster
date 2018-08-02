@@ -2129,7 +2129,14 @@ GSSiExitProg (1275);
 		return;   
 }
 	}
-	Truncate (ShowVal.Text); 
+	if (!*pNumViewports)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1275);
+#endif
+		return;
+	}
+	Truncate(ShowVal.Text);
 	if (!ShowVal.Text[0])
 {
 #if ENABLETRACE

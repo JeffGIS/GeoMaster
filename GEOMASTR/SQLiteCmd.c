@@ -348,27 +348,46 @@ double GetSQLITESumCol(sqlite3 *db, LPSTR tableName,LPSTR Column, LPSTR where)
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
 }
-LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where)
+LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where, LONGLONG limit)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
-	if (*where)
-		sprintf(pCmd, "SELECT COUNT (*) FROM %s WHERE %s", tableName, where);
-	else
-		sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
 	sqlite3_stmt *statement;
 	LONGLONG rtn = 0;
+
+	if (limit)
+	{
+		if (*where)
+			sprintf(pCmd, "SELECT rowid FROM %s WHERE %s LIMIT %li", tableName, where, limit);
+		else
+			sprintf(pCmd, "SELECT rowid FROM %s LIMIT %li", tableName,limit);
+	}
+	else
+	{
+		if (*where)
+			sprintf(pCmd, "SELECT COUNT (*) FROM %s WHERE %s", tableName, where);
+		else
+			sprintf(pCmd, "SELECT COUNT (*) FROM %s", tableName);
+	}
 
 	if (db)
 	{
 		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
-			if (sqlite3_step(statement) == SQLITE_ROW)
+			if (limit)
 			{
-				rtn = sqlite3_column_int(statement, 0);
+				while (sqlite3_step(statement) == SQLITE_ROW)
+					rtn++;
+			}		
+			else
+			{
+				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					rtn = sqlite3_column_int(statement, 0);
+				}
 			}
+			sqlite3_finalize(statement);
 		}
-		sqlite3_finalize(statement);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -634,7 +653,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = GetSQLITENumRows(db, ARG[3], ARG[4]);
+		rtn = GetSQLITENumRows(db, ARG[3], ARG[4],0);
 	}
 	else if (!stricmp(ARG[1], "SUMCOL"))//$SQLITE(NUMROWS,sqlitehandle,tablename,column,where clause)
 	{
@@ -2357,7 +2376,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 					LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 					LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-					if (GetSQLITENumRows(pSQLDatabase->DBHandle, tableName, ""))
+					if (GetSQLITENumRows(pSQLDatabase->DBHandle, tableName, "",1))
 					{
 						if (!SLTSpatialIndexExists(pSQLDatabase->DBHandle, tableName))
 						{

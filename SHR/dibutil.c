@@ -2295,7 +2295,7 @@ void AdjustDIBColors (HANDLE hDib)
 #endif
 {
 
-    RGBTRIPLE	color;
+	RGBTRIPLE	color = { 0 };
 	COLORREF	cref;
     BYTE HUGE *startrow; 
     BYTE	*startimage;
