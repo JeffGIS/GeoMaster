@@ -4660,6 +4660,9 @@ GSSiExitProg (533);
 			break;     
         case 188:
         	_fstrcpy (OutStr,GMVersion);
+#if S_VERSION
+			strcat(OutStr, "_s");
+#endif
         	break;
         case 189:
         	ltoa ((long)NumSymbols,OutStr,10);

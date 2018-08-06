@@ -1881,7 +1881,11 @@ GSSiExitProg (439);
 		 sprintf(str, "Serial Number: %s", SerialNumber);
 		 SetDlgItemText(hWndDlg, IDC_SERIALNUM, str);
 	 }
+#if S_VERSION
+	 sprintf(FICopyright, "%s_s\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, FIVersion, MrSidVer);
+#else
 	 sprintf(FICopyright, "%s\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, FIVersion, MrSidVer);
+#endif
 	 SetDlgItemText(hWndDlg, IDC_VERSION, FICopyright);
  }
          break; /* End of WM_INITDIALOG                                 */
