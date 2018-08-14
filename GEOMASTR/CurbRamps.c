@@ -619,30 +619,33 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 		while (sqlite3_step(statement) == SQLITE_ROW)
 		{
 			int intersectionID = sqlite3_column_int(statement, 0);
-			if (!header)
+			if (intersectionID > 0)
 			{
-				itoa(intersectionID, line, 10);
-				fputstring(line, fid);
-			}
-			else
-			{
-				char intquery[256];
-				char FormattedStreets[1024];
-				sqlite3_stmt *statement = NULL;
-				sprintf(intquery, "SELECT streetNames,latitude,longitude FROM Intersections WHERE intID=%i", intersectionID);
-				SQLOK(sqlite3_prepare_v2(database, intquery, -1, &statement, NULL), database, "get mpint", 0);
-				if (sqlite3_step(statement) == SQLITE_ROW)
+				if (!header)
 				{
-					LPSTR pNames = (LPSTR)sqlite3_column_text(statement, 0);
-					double lat = sqlite3_column_double(statement, 1);
-					double lon = sqlite3_column_double(statement, 2);
-					FormatStreets(pNames,FormattedStreets);
-					sprintf(line, "%i\t%f\t%f\t%s", intersectionID, lat, lon, FormattedStreets);
+					itoa(intersectionID, line, 10);
 					fputstring(line, fid);
 				}
-				SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+				else
+				{
+					char intquery[256];
+					char FormattedStreets[1024];
+					sqlite3_stmt *statement = NULL;
+					sprintf(intquery, "SELECT streetNames,latitude,longitude FROM Intersections WHERE intID=%i", intersectionID);
+					SQLOK(sqlite3_prepare_v2(database, intquery, -1, &statement, NULL), database, "get mpint", 0);
+					if (sqlite3_step(statement) == SQLITE_ROW)
+					{
+						LPSTR pNames = (LPSTR)sqlite3_column_text(statement, 0);
+						double lat = sqlite3_column_double(statement, 1);
+						double lon = sqlite3_column_double(statement, 2);
+						FormatStreets(pNames, FormattedStreets);
+						sprintf(line, "%i\t%f\t%f\t%s", intersectionID, lat, lon, FormattedStreets);
+						fputstring(line, fid);
+					}
+					SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+				}
+				rtn++;
 			}
-			rtn++;
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 		rc = sqlite3_close(database);
@@ -1221,7 +1224,7 @@ int getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 
 			if (ramp.bumpWidth > 0 || ramp.bumpHeight > 0)
 				ii = 1;
-			if (mpint.timeComplete >= mpint.ramps[rampNum].timeComplete)
+//			if (mpint.timeComplete >= mpint.ramps[rampNum].timeComplete)
 				mpint.ramps[rampNum] = ramp;
 			nRamps++;
 		}
