@@ -799,11 +799,14 @@ int NVCObstructionToCode(LPSTR obstruction)
 
 char *rampToText(int intNum, RampStruct *ramp)
 {
+	int minTime = 1338526800;
     char *rampText = (char *)calloc(4480*2, sizeof(char));
 	char timeCompleteC[32];
 	int rtype = ramp->rampType;
 	if (rtype > 100)
 		rtype = 11 + (rtype - 100);
+	if (ramp->timeComplete < minTime)
+		ramp->timeComplete = minTime;
 	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
 	if (rtype < 0 || rtype > 15)
