@@ -64,7 +64,7 @@ short OkToContinue (BOOL ForceCheck)
 {   
 	short	rtn;
 	
-	if (RunFromCache || GetGlobalBVal2 ("[%IGNORESYSMSG]",FALSE))
+	if (Printing || RunFromCache || GetGlobalBVal2 ("[%IGNORESYSMSG]",FALSE))
 {
 #if ENABLETRACE
 GSSiExitProg (871);

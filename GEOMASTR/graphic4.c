@@ -3014,7 +3014,7 @@ ProcessPolyLine:    nCurPoints = nPnts;
 					{
 						AlreadyProcessed=TRUE;
 						if (SetDisplayChar (hDC,GF_POINT,CurrentRefno,CurrentDesc,CurrentPrefix,CurrentUDI))
-							PickPointItemD (lpDCurPoints,(CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel,PTRot,CurrentDesc);			 		    
+							PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
 					} 
 					else if (DescIsVisible && Visible && GetTypeVisibility(TYPE_POINT))
 					{   

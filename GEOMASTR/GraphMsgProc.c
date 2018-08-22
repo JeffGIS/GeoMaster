@@ -9875,20 +9875,31 @@ GSSiExitProg (1300);
                  break; 
             
             case IDC_SELALL:
-				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,TRUE,(LPARAM)-1); 
+				if (Sorted)
+					SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLISTSORTED, LB_SETSEL, TRUE, (LPARAM)-1);
+				else
+					SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_SETSEL, TRUE, (LPARAM)-1);
 				break;
 				
             case IDC_CLEAR:
-				SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,FALSE,(LPARAM)-1); 
+				if (Sorted)
+					SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLISTSORTED, LB_SETSEL, FALSE, (LPARAM)-1);
+				else
+					SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_SETSEL, FALSE, (LPARAM)-1);
 				break;
 				
-            case IDC_INVERT:
-				for (i=0;i<CurTheme->NumClass;i++) 
-				{   
-					BOOL IsSelected = SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_GETSEL,i,0);
-					
-					SendDlgItemMessage (hWndDlg,IDC_CLASSHLTLIST,LB_SETSEL,!IsSelected,(LPARAM)i);
-				} 
+			case IDC_INVERT:
+			{
+				UINT list = IDC_CLASSHLTLIST;
+				if (Sorted)
+					list = IDC_CLASSHLTLISTSORTED;
+				for (i = 0; i < CurTheme->NumClass; i++)
+				{
+					BOOL IsSelected = SendDlgItemMessage(hWndDlg, list, LB_GETSEL, i, 0);
+
+					SendDlgItemMessage(hWndDlg, list, LB_SETSEL, !IsSelected, (LPARAM)i);
+				}
+			}
 				break;
 				
             case IDOK:

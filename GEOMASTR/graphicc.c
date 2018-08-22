@@ -1024,7 +1024,7 @@ ProcessRec:
 								CurPointSize /= CurView->BaseUnitsPerPixel;
 							if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
 							{
-								PickPointItemD (lpDCurPoints,(CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel,PTRot,CurrentDesc);			 		    
+								PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
 							} 
 							else if (GetTypeVisibility(TYPE_POINT))
 							{   
@@ -2275,7 +2275,7 @@ BOOL ProcessGMDRecord (HDC hDC, HANDLE hDB,long Offset)
 			CurPointSize *= GraphicsPointFactor;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
 			{
-				PickPointItemD (lpDCurPoints,(CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel,PTRot,CurrentDesc);			 		    
+				PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
 			} 
 			else if (GetTypeVisibility(TYPE_POINT))
 			{   

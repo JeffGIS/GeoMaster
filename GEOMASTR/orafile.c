@@ -956,7 +956,7 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
 			{
-				PickPointItemD (lpDCurPoints,(CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel,PTRot,CurrentDesc);			 		    
+				PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
 			} 
 			else if (CopyRec)
 			{   

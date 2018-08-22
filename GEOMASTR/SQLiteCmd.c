@@ -2777,7 +2777,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 				if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
 				{
 					CurrentSeg = CurrentRefno;
-					PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
+					PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
 				}
 				else if (GetTypeVisibility(TYPE_POINT))
 				{

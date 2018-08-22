@@ -3986,7 +3986,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%GOOGLESCALE", 381, TRUE);
 	AllocateTypeVar("%GOOGLEZOOM", 382, TRUE);
 	AllocateTypeVar("%GOOGLEMAPTYPE", 383, TRUE);
-	AllocateTypeVar("%SETCOLOR", 384, TRUE);
+	AllocateTypeVar("%SETCOLOR", 384, FALSE);
 	AllocateTypeVar("%LINETRANSPARENCY", 385, FALSE);
 	AllocateTypeVar("%CURRENTZOOMLIST", 386, FALSE);
 	AllocateTypeVar("%CURRENTZOOMLISTITEM", 387, FALSE);
