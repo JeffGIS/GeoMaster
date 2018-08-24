@@ -2423,6 +2423,7 @@ mnmxCor WBoundsToFileBounds(LPMNMXCORD worldBounds);
 
 BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine);
 BOOL createDSN (LPSTR dsnName,BOOL localMachine,LPSTR type,LPSTR config);
+BOOL deleteDSN(LPSTR dsnName);
 BOOL RunForAll(int nArgs, LPSTR *Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 BOOL AddFileToTransferFile(HWND hWndStatus, HFILE FidTF, LPSTR FileToAdd, long MaxLength, LPSTR sourceDir);
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg);

@@ -3046,30 +3046,60 @@ BOOL FAR PASCAL DBLOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
    }
  return TRUE;
 } 
-BOOL doesDSNExist (LPSTR dsnName,BOOL localMachine) 
+BOOL doesDSNExist(LPSTR dsnName, BOOL localMachine)
 {
-	HKEY	hKeyhw,hKeyd,hKeys,hKeycp,hKeyz;
+	HKEY	hKeyhw, hKeyd, hKeys, hKeycp, hKeyz;
 	HKEY	hKey = HKEY_CURRENT_USER;
 	int		lValue;
 	BOOL	rtn = FALSE;
 	if (localMachine)
 		hKey = HKEY_LOCAL_MACHINE;
-	if (RegOpenKeyEx (hKey,"SOFTWARE",0,KEY_READ,&hKeyhw) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(hKey, "SOFTWARE", 0, KEY_READ, &hKeyhw) == ERROR_SUCCESS)
 	{
-		if (RegOpenKeyEx (hKeyhw,"ODBC",0,KEY_READ,&hKeyd) == ERROR_SUCCESS)
+		if (RegOpenKeyEx(hKeyhw, "ODBC", 0, KEY_READ, &hKeyd) == ERROR_SUCCESS)
 		{
-			if (RegOpenKeyEx (hKeyd,"ODBC.ini",0,KEY_READ,&hKeys) == ERROR_SUCCESS)
+			if (RegOpenKeyEx(hKeyd, "ODBC.ini", 0, KEY_READ, &hKeys) == ERROR_SUCCESS)
 			{
-				if (RegOpenKeyEx (hKeys,dsnName,0,KEY_READ,&hKeycp) == ERROR_SUCCESS)
+				if (RegOpenKeyEx(hKeys, dsnName, 0, KEY_READ, &hKeycp) == ERROR_SUCCESS)
 				{
-					RegCloseKey (hKeycp);
+					RegCloseKey(hKeycp);
 					rtn = TRUE;
 				}
-				RegCloseKey (hKeys);
+				RegCloseKey(hKeys);
 			}
-			RegCloseKey (hKeyd);
+			RegCloseKey(hKeyd);
 		}
-		RegCloseKey (hKeyhw);
+		RegCloseKey(hKeyhw);
+	}
+	return rtn;
+}
+BOOL deleteDSN(LPSTR dsnName)
+{
+	HKEY	hKeyhw, hKeyd, hKeys, hKeycp, hKeyz;
+	HKEY	hKey = HKEY_CURRENT_USER;
+	int		lValue;
+	BOOL	rtn = FALSE;
+	
+	if (RegOpenKeyEx(hKey, "SOFTWARE", 0, KEY_READ, &hKeyhw) == ERROR_SUCCESS)
+	{
+		if (RegOpenKeyEx(hKeyhw, "ODBC", 0, KEY_READ, &hKeyd) == ERROR_SUCCESS)
+		{
+			if (RegOpenKeyEx(hKeyd, "ODBC.ini", 0, KEY_READ, &hKeys) == ERROR_SUCCESS)
+			{
+				if (RegOpenKeyEx(hKeys, dsnName, 0, KEY_READ, &hKeycp) == ERROR_SUCCESS)
+				{
+					RegCloseKey(hKeycp);
+					rtn = RegDeleteKeyExA(hKeys, dsnName, KEY_WOW64_32KEY, 0);
+					if (rtn != ERROR_SUCCESS)
+						rtn = RegDeleteKeyExA(hKeys, dsnName, KEY_WOW64_64KEY, 0);
+					if (rtn == ERROR_SUCCESS)
+						rtn = TRUE;
+				}
+				RegCloseKey(hKeys);
+			}
+			RegCloseKey(hKeyd);
+		}
+		RegCloseKey(hKeyhw);
 	}
 	return rtn;
 }

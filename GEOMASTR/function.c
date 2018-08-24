@@ -2550,9 +2550,14 @@ SetVis:
 				if (doesDSNExist (Arg[2],atob(Arg[3])))
 					goto RtnTrue;
 			}
-			if (!stricmp (Arg[1],"CREATE"))//$DSN(CREATE,name,F,SQL Server,config)
+			if (!stricmp(Arg[1], "CREATE"))//$DSN(CREATE,name,F,SQL Server,config)
 			{
-				if (createDSN (Arg[2],atob(Arg[3]),Arg[4],Arg[5]))
+				if (createDSN(Arg[2], atob(Arg[3]), Arg[4], Arg[5]))
+					goto RtnTrue;
+			}
+			if (!stricmp(Arg[1], "DELETE"))//$DSN(DELETE,name)
+			{
+				if (deleteDSN(Arg[2]))
 					goto RtnTrue;
 			}
 			goto RtnFalse;
