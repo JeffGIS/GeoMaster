@@ -162,7 +162,8 @@ BOOL SetContinueProcessing(BOOL set)
 {
 	BOOL rtn = ContinueProcessing;
 	ContinueProcessing = set;
-
+	if (MemMap && !set)
+		ii = 1;
 	return rtn;
 }
 BOOL InitGraphics (HWND hWnd)
@@ -2255,6 +2256,8 @@ void ImediateProcessing (BOOL Imediate,BOOL Final)
         BOOL		SaveInDisplayProcessing = InDisplayProcessing;
 		LPVIEWPORT	SaveVP = CurView;
 
+		if (MemMap)
+			DoPeek = FALSE;
 		useGDIPlus = wantGDIPlus;
 		InDisplayProcessing=TRUE;
         Continue=TRUE; 

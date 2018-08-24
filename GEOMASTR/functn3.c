@@ -2964,7 +2964,7 @@ GotCloseFilehSQL:
 			DebugReturn(Arg[1]);
 			if (pMacroReturnValue)
 				_fstrncpy(pMacroReturnValue, Arg[1], MAXARGLENGTH);
-			SetContinueProcessing(FALSE);
+			ContinueProcessing = FALSE;
             goto RtnTrue;
 		}
 		
