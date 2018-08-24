@@ -2873,7 +2873,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
      	 if (!CurrentConfig)
     	 	SetConfig (1);
         if (!DisableHalt)
-         	ContinueProcessing = TRUE; 
+         	SetContinueProcessing ( TRUE); 
          WantVP = LOWORD(lParam);
          if (WantVP > 0 && WantVP <= *pNumViewports) 
          	SetViewport(WantVP);
@@ -5573,7 +5573,7 @@ LoadGFMenu:
                 {
                 	LPSTR	pCmd=GlobalLock (hAddGraphicsFun); 
                 	
-                	ContinueProcessing = TRUE;
+                	SetContinueProcessing ( TRUE);
 					if (wParam & MK_LBUTTON)
 //       	       	    if (wParam == (MK_LBUTTON|MK_RBUTTON))
                 		HaveCurrentLBUTTON=TRUE;

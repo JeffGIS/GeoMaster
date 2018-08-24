@@ -1018,7 +1018,7 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 		if (!ContinueProcessing)
 			break;
 	} 
-	ContinueProcessing = TRUE;  
+	SetContinueProcessing ( TRUE);  
 	BigWrite (FidIdx,(HPSTR)IndexSyms,NumIndexSyms*2,-1);
 	BigWrite (FidIdx,(HPSTR)&NumIndexSyms,2,-1);
 	GSSillseek (FidIdx,10,0);

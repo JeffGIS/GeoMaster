@@ -808,7 +808,7 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 	CloseDataFile (TRUE, &hDB);   
 	IgnoreSelectVP = FALSE;
 	rtn = ContinueProcessing;
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	if (pStatusText)
 		switch (istatus)
 		{
@@ -2924,7 +2924,7 @@ NextLoop:
 								
 		}
 		if (UsePCTBox)
-			ContinueProcessing = StatusWindowUpdate2 (0,pPIAA->Height,jy); 
+			SetContinueProcessing(StatusWindowUpdate2(0, pPIAA->Height, jy));
 	} 
 Exit:
 	if (piCPDist)
@@ -3118,7 +3118,7 @@ NextArea:
 	}
 Exit:
 	DestroyStatusWindow(0);  
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	PIASizeFactor = SavePIASizeFactor;
 	PIAWidthFactor = SavePIAWidthFactor;
 	if (hTempHlt)
@@ -3349,7 +3349,7 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 			break;
      } 
 //     GSSiClose (FidTxt);
-     ContinueProcessing = TRUE; 
+     SetContinueProcessing ( TRUE); 
      BT_CLOSEANDDELETE (&lpGWDHead->BTHandle[1]);
 	 lpGWDHead->NumIndex=1;
      GlobalUnlock (hDB);
@@ -3578,7 +3578,7 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
      		break;
      } 
 //     GSSiClose (FidTxt);
-     ContinueProcessing = TRUE; 
+     SetContinueProcessing ( TRUE); 
      BT_CLOSEANDDELETE (&lpGWDHead->BTHandle[1]);
 	 lpGWDHead->NumIndex=1;
      GlobalUnlock (hDB);
@@ -4535,7 +4535,7 @@ NextCorner:;
     DestroySymList (&NumSyms,&hSymDesc);   */
 Exit:
 	BT_CLOSEANDDELETE (&hBT); 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	for (ifile =0;ifile<nPRIMFiles;ifile++)
 	{
 		if (pPRIMFiles[ifile].hDIB>(HDIB)1);
@@ -4655,7 +4655,7 @@ BOOL SplitXFERFile (LPSTR Name,LPSTR Dir,short nPieces)
 		fputstring (line,Fid2);
 		StatusWindowUpdate2 ("",TotLen,loc);  
 	}
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiClose (Fid);
 	GSSiClose (Fid2);
 	DestroyStatusWindow(0);  
@@ -5624,7 +5624,7 @@ BOOL FilterTextFile (LPSTR InFile,LPSTR OutFile,MNMXCORD Bounds)
 		CurLoc = GSSillseek (FidIn,0,1);
 		StatusWindowUpdate (0,0, TotLen, CurLoc); 
     }  
-    ContinueProcessing = TRUE; 
+    SetContinueProcessing ( TRUE); 
     GSSiClose (FidIn);   
     GSSiClose (FidOut);   
     GSSiGlobFree (&TxtHandle);

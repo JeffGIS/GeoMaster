@@ -3649,7 +3649,7 @@ GSSiExitProg (1350);
             }
             IgnoreSelectVP = FALSE;
             rtn = ContinueProcessing;
-            ContinueProcessing = TRUE;
+            SetContinueProcessing ( TRUE);
 			GSSiGlobFree (&hDLT);
             GSSiClose (Fid);
             if (pStatusText)

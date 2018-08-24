@@ -1294,7 +1294,7 @@ GetCoord:
 	}
 	if (!GetSegCoorByPct (GotSeg.Segid,PCT,&CLPoint,&AZ,&Length,FALSE))
 	{
-//		ContinueProcessing = FALSE;  ?????
+//		SetContinueProcessing (FALSE);  ?????
 		rtn = FALSE; 
 		goto Exit;
 	}
@@ -2568,7 +2568,7 @@ BOOL OpenZIPBounds (LPBOOL pOpened)
 		}
 		StatusWindowUpdate (NULL,NULL, TotLen, ++CurLoc);
     } 
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	CloseNetIntersect (Opened); 
 	CloseStreetSegmentTable(OpenedSeg); 
 	BT_CLOSE (hZIPBounds);

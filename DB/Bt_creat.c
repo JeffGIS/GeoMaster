@@ -3293,7 +3293,7 @@ GSSiExitProg (511);
 	else
 		GSSiRemove (NewName); 
 	rtn = ContinueProcessing;
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 {
 #if ENABLETRACE
 GSSiExitProg (511);

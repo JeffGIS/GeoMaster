@@ -495,7 +495,7 @@ BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt)
 		}
     }
     rtn = ContinueProcessing;
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
     GSSiClose (FidTIN);
 	GSSiGlobFree (&hPoints);
     CloseMap(TRUE);  

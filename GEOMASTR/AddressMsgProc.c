@@ -1270,7 +1270,7 @@ BOOL FAR PASCAL ADDEDIT_HELPERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				//	StatusWindowUpdate (NULL,mess, nRecs, NumRecs);
         		}  
 				DestroyStatusWindow(0);  
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
         		GSSiClose (FidOut);
         		sprintf (str,"%ld records (summarizing %ld unmatched records) dumped to %s",NumRecs,TotRecs,OFStruct.szPathName); 
         		SetDlgItemText (hWndDlg,IDC_MESS,str);
@@ -4185,7 +4185,7 @@ BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wP
             	 break;  
             	 
             case IDC_CANCEL:	
-            	 ContinueProcessing = FALSE;
+            	 SetContinueProcessing (FALSE);
             	 break;
             	 
             case IDC_APPLY_CHANGES:
@@ -4238,7 +4238,7 @@ BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wP
                 CloseDataFile (TRUE, &hSQL);  
                 CloseDataFile (TRUE, &hDB);  
 		 		EnableWindow (GetDlgItem(hWndDlg,IDC_CANCEL),FALSE);  
-                ContinueProcessing = TRUE;
+                SetContinueProcessing ( TRUE);
             } 
                 break;
                 
@@ -6368,7 +6368,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				HANDLE	hKeyFields;
 				LPSTR	pPar;
 
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 				HaltMapDisplay(FALSE, TRUE);
 				CloseAllRequestedFiles(FALSE);
 				GetDlgItemText(hWndDlg, SV_DATABASE_LIST, IMDataFile, lnIMDataFile);
@@ -6661,7 +6661,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 
 			EndFile:
 				rtn = ContinueProcessing;
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 				EndFastPick();
 				SetGlobalValueLong("%NUMMATCH", NumMatched);
 				SetGlobalValueLong("%NUMNOMATCH", NumNoMatch);
@@ -6688,13 +6688,13 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 				CloseUserDefinedAddress(OpenedUAA);
 				CloseAddressFilesPID();
 				DisableHalt = FALSE;
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 				HaltMapDisplay(FALSE,TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDC_EDIT_DEST), TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDC_EDIT_HELPER), TRUE);
 			Reset:
 				Processing = FALSE;
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDC_EXIT), TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
 				EnableWindow(GetDlgItem(hWndDlg, IDCANCEL), FALSE);

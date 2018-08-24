@@ -4248,7 +4248,7 @@ BOOL CreateGWDIndex (HANDLE hDB, LPSTR Name, short CreateIndex)
 		DestroyStatusWindow(0);  
     } 
     rtn = ContinueProcessing;
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
     BT_SET_TIME_STAMP (lpGWDHead->BTHandle[CreateIndex], lpGWDHead->TimeStamp);
     BT_CLOSE (lpGWDHead->BTHandle[CreateIndex]);   
     lpGWDHead->BTHandle[CreateIndex] = BT_OPEN (str, lpGWDHead->TimeStamp, BT_WRITE, 0);
@@ -4832,7 +4832,7 @@ Display2:
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_SHOW);   
                   Processing = TRUE;
 				  OutputToFile (pFile,TRUE,pName, str, hItems,NULL,0,0,FALSE,FALSE,GMHeader,FALSE,FALSE,0,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg,TRUE);
-				  ContinueProcessing = TRUE; 
+				  SetContinueProcessing ( TRUE); 
 				  Processing = FALSE;
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_HIDE);
 				  GSSiSetCursor (hcurSave); 
@@ -4890,7 +4890,7 @@ Display2:
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_SHOW);   
                   Processing = TRUE;
 				  OutputToFile (pFile,TRUE,pName, str, hItems,NULL,0,0,FALSE,FALSE,GMHeader,FALSE,FALSE,0,GetDlgItem(hWndDlg,IDC_STATUS),hWndDlg,TRUE);
-				  ContinueProcessing = TRUE; 
+				  SetContinueProcessing ( TRUE); 
 				  Processing = FALSE;
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELEXPORT),SW_HIDE);
 				  GSSiSetCursor (hcurSave); 
@@ -4901,7 +4901,7 @@ Display2:
               }
               
               case IDC_CANCELEXPORT:
-              		ContinueProcessing = FALSE;
+              		SetContinueProcessing (FALSE);
               		break;
               			  
               case IDC_CREATE_REPORT: 
@@ -5372,7 +5372,7 @@ BOOL GMDGetFileMinMax (LPSTR FileName,LPMNMXCORD pBounds,LPINT pMinTime,LPINT pM
 		lpGWDHead = GlobalLock (hDB);
 		CreateStatusWind (hWndMain,1,"Getting File MinMax"); 
 		nRecs = BT_NUM_IN_INDEX (lpGWDHead->BTHandle[0]);
-		while ((ContinueProcessing = StatusWindowUpdate (NULL,NULL, nRecs, ++nLoaded)) && !BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],pos,BT_ANY, (LPSTR)&Offset))
+		while ((ContinueProcessing= StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded)) && !BT_FIND(lpGWDHead->BTHandle[0], lpGWDHead->pKeys[0], pos, BT_ANY, (LPSTR)&Offset))
 		{   
     		pos = BT_NEXT;
 			len = FillGWDData (lpGWDHead,Offset);
@@ -7832,7 +7832,7 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
         	}
         }  
         GWDAddRecord (lpGWDHeadNew,0,NULL);
-		ContinueProcessing = StatusWindowUpdate (NULL,NULL, nRecs, ++nLoaded);
+		SetContinueProcessing(StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded));
     }
 	GlobalUnlock (FilePtr->FileHandle); 
 	GlobalUnlock (SQLPtr->OFHandle);
@@ -7854,13 +7854,13 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
 			StatusWindowUpdate ("Restructure Index",IndexName, nRecs, 0);
 			if (!ReorgBTree (IndexName, GetDlgItem(PrintMsgWnd,PRINT_VIEW)))
 			{
-				ContinueProcessing = FALSE;
+				SetContinueProcessing (FALSE);
 				break;
 			}
 		}
 	}  
 	rtn = ContinueProcessing;
-    ContinueProcessing = TRUE;  
+    SetContinueProcessing ( TRUE);  
     if (rtn && Verify)
     {   
     	hDB = OpenGWDatabase (Name,BT_WRITE);
@@ -7873,19 +7873,19 @@ BOOL GMDReorg (LPSTR Name,int IndexToReorgOn,BOOL Compress,BOOL Verify,HWND hWnd
 	    while (ContinueProcessing && !BT_FIND (lpGWDHead->BTHandle[0],lpGWDHead->pKeys[0],pos,BT_ANY,(LPSTR)&Offset)) 
 	    {
 	    	if (BT_FIND (lpGWDHeadNew->BTHandle[0],lpGWDHeadNew->pKeys[0],pos,BT_ANY,(LPSTR)&Offset2))
-	    		ContinueProcessing = FALSE;
+	    		SetContinueProcessing (FALSE);
 	    	else
 	    	{  
 	            FillGWDData (lpGWDHead,Offset);
 		        FillGWDData (lpGWDHeadNew,Offset2);
                 if (_fmemcmp (&lpGWDHead->GWDData,&lpGWDHeadNew->GWDData,(size_t)lpGWDHead->Reclen))
-                	ContinueProcessing = FALSE;
+                	SetContinueProcessing (FALSE);
 	    	} 
 	    	pos = BT_NEXT;
 			StatusWindowUpdate (NULL,NULL, nRecs, ++nLoaded);
 	    }
 	    rtn = ContinueProcessing;
-	    ContinueProcessing = TRUE;  
+	    SetContinueProcessing ( TRUE);  
 	    GlobalUnlock (hDB);
 	    GlobalUnlock (hDBNew);
 		CloseGWDatabase (hDB); 

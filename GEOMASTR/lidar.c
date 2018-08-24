@@ -217,7 +217,7 @@ NextFile:
 			GSSillseek (FidIn,0,0);
 			goto NextFile;
 		}
-	    ContinueProcessing = TRUE;
+	    SetContinueProcessing ( TRUE);
 		DestroyStatusWindow (0);
 	}
     FileMinX = MinX - fmod (MinX,LIDARCELLSIZE);
@@ -295,7 +295,7 @@ NextFile2:
 	loc = (DWORD)CurrentCell * (DWORD)sizeof(LIDARREC);
 	GSSillseek2 (FidOut,loc,0);
 	BigWrite (FidOut,(HPSTR)&LidarRec,sizeof(LIDARREC),-1);
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow (0);
     GSSiClose (FidOut);
 	FidOut = GSSiOpenFile (TempFile,0,OF_READ);
@@ -309,7 +309,7 @@ NextFile2:
 		CurLoc = (DWORD)GSSillseek (FidOut,0,1);
 		StatusWindowUpdate (0,0, TotLen, CurLoc); 
     }  
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow (0);
     GSSiClose (FidOut);
 	GSSiGlobFree (&TxtHandle);  
@@ -352,7 +352,7 @@ NextFile2:
 		CurLoc = (DWORD)GSSillseek (FidIn,0,1);
 		StatusWindowUpdate (0,0, TotLen, CurLoc); 
     }  
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
     GSSiClose (FidIn);
     GSSiClose (FidOut);
 	DestroyStatusWindow (0);  

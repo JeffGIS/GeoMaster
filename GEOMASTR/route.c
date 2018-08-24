@@ -549,7 +549,7 @@ BOOL IDPolygons (void)
 NextRec:	StatusWindowUpdate (0,0, nRecs, ++nLoaded);
 	} 
     rtn = ContinueProcessing;    
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	UseUserPickAp =TRUE;
 	MaxPick=SaveMaxPick;
 	GlobalUnlock (hDBPolyID);  
@@ -1228,7 +1228,7 @@ if (iSplitLine == 1 && iCon == 5)
 		}*/
 	} 
     rtn = ContinueProcessing;    
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow (0);
 Exit:
 	GSSiGlobUlFree (&hSLRef);
@@ -1518,7 +1518,7 @@ BOOL SplitHighlightedPolys (int MaxPolyPoints)
 		StatusWindowUpdate (0,0, nRecs, ++nLoaded);
 	} 
     rtn = ContinueProcessing;    
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow (0);
 Exit:
 	CurView = SaveVP;
@@ -1925,7 +1925,7 @@ BOOL HighlightSequentialItems (HWND hWnd, int Message, WPARAM wParam, LPARAM lPa
 	   	}
     	if (BT_FIND (hBTNext,(LPSTR)&NextKey,BT_FIRST,BT_ANY,(LPSTR)&NextData))
     		NextKey.Cost = INFINITE_COST; 
-    	while (NextKey.Cost < MaxCost && (ContinueProcessing = CheckForContinue (TRUE,0)))   
+    	while (NextKey.Cost < MaxCost && (SetContinueProcessing ( CheckForContinue (TRUE,0))))   
     	{   
     		SaveNextKey = NextKey;
     		SaveNextData = NextData;

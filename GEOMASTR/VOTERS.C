@@ -757,7 +757,7 @@ BOOL FAR PASCAL VOTER_NAME_LOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 						        				DisplayedVoterIDs[NumDisplayedVoterIDs++] = VoterID;
 							 				if ((idx=SendDlgItemMessage (hWndDlg,IDC_VOTERLIST,LB_ADDSTRING,0,(LPARAM)str)) ==
 							 					LB_ERRSPACE) 
-							 					ContinueProcessing = FALSE;
+							 					SetContinueProcessing (FALSE);
 							 				else
 							 				{   
 							 					nFound++;
@@ -795,7 +795,7 @@ BOOL FAR PASCAL VOTER_NAME_LOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 						        SendDlgItemMessage (hWndDlg,IDC_VOTERLIST,LB_SETCURSEL,(WPARAM)0,(LPARAM)0); 
 			        			EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);  
 			        		}
-			        		ContinueProcessing = TRUE;
+			        		SetContinueProcessing ( TRUE);
 			        		SetDlgItemText (hWndDlg,IDC_VOTLOCMESSAGE,str);
                          }  
                          InDisplay = FALSE;
@@ -851,7 +851,7 @@ BOOL FAR PASCAL VOTER_NAME_LOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  if (GetNext)
                  {
                  	GetNext = FALSE;
-                 	ContinueProcessing = FALSE;  
+                 	SetContinueProcessing (FALSE);  
                  }
                  else 
                  {

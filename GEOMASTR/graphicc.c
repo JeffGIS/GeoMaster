@@ -2548,7 +2548,7 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 			if (!ContinueProcessing)
 			{
 				rc = 0;
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 			}
 		}
 		CloseTAGIndex ();
@@ -6591,7 +6591,7 @@ BOOL CreateWordIndex (LPSTR FromFile,LPSTR FromField,LPSTR ToFile,BOOL Append)
 			}
 		}
 Next:
-		ContinueProcessing = StatusWindowUpdate (0,0, nRecs, ++nLoaded);
+		SetContinueProcessing(StatusWindowUpdate(0, 0, nRecs, ++nLoaded));
 	}
 	if (ContinueProcessing)
 	{   
@@ -6634,7 +6634,7 @@ Next:
 		GlobalUnlock (hDBOut);
 		CloseDataFile (TRUE,&hDBOut); 
 	}
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0); 
 	GlobalUnlock (FilePtrTmp->FileHandle);  
 	GlobalUnlock (SQLPtrTmp->OFHandle);

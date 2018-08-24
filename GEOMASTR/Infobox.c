@@ -159,7 +159,7 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 	BOOL	DoNotMove = FALSE;
 	BOOL	SaveContinueProcessing = ContinueProcessing;
 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	if (DisplayInRect == (LPRECT)1)
 	{
 		DoNotMove = TRUE;
@@ -248,7 +248,7 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 	UnloadReport (&TAGBox.hReport); 
     TAGBox = SaveTAGBox;
 	GSSiGlobUlFree (&hStr);
-	ContinueProcessing = SaveContinueProcessing;
+	SetContinueProcessing ( SaveContinueProcessing);
 
 	return rtn;
 }
@@ -737,7 +737,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	} 
 	if (!MoveMode)
 		useGDIPlus = TRUE;
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	SaveDC(hDC);
 	SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
 	Line = GlobalLock (hMEM);
@@ -1236,7 +1236,7 @@ Exit:
 	if (!Restore)
 		SaveFullWindowBitmap (hWnd);
 	useGDIPlus = saveuseGDIPlus;
-	ContinueProcessing = SaveContinueProcessing;
+	SetContinueProcessing ( SaveContinueProcessing);
 
 	return;
 

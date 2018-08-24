@@ -13665,7 +13665,7 @@ BOOL RotateSymbols (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short F
 	    } 
 	    UpdateItem = 0;  
 	    
-	    ContinueProcessing = TRUE; 
+	    SetContinueProcessing ( TRUE); 
 	    CloseChronoIndex ();
 		if (ShowStatus)
 			DestroyStatusWindow (0);

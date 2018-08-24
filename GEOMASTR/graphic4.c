@@ -1808,7 +1808,7 @@ LPDEBUGARRAY	pDB=0;   */
 			if (ptime - starttime > 1000)
 			{
 				starttime = ptime;
-				ContinueProcessing = CheckForContinue(FALSE, 0);
+				SetContinueProcessing(CheckForContinue(FALSE, 0));
 			}
 //        	if (DoTime)
 //        		starttime2=GetTickCount();

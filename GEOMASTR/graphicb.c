@@ -860,7 +860,7 @@ BOOL CopyHighlightedRecords (BOOL DeleteFromSource,BOOL ShowStatus,BOOL AssignNe
     hTranReorg = 0;
 	ConvertCurvesToPolylines = ConvertCurves; 
 	rtn = ContinueProcessing;
-    ContinueProcessing = TRUE; 
+    SetContinueProcessing ( TRUE); 
     CloseChronoIndex ();
 	if (ShowStatus)
 		DestroyStatusWindow (0);
@@ -939,14 +939,14 @@ BOOL CopySelectedRecords (LPSTR File,BOOL ShowStatus,BOOL AssignNewRefs,HANDLE h
 			GSSiGlobFree (&hUpdateBuf);
 		}
 		if (ShowStatus)
-			ContinueProcessing = StatusWindowUpdate ("","Copying Map Data", TotLen, GSSillseek (Fid,0,1));
+			SetContinueProcessing(StatusWindowUpdate("", "Copying Map Data", TotLen, GSSillseek(Fid, 0, 1)));
     } 
 	UpdateRecordCopy (2);
     hTranReorg = 0;
 	GSSiClose (Fid);
 	ConvertCurvesToPolylines = ConvertCurves; 
 	rtn = ContinueProcessing;
-    ContinueProcessing = TRUE; 
+    SetContinueProcessing ( TRUE); 
 	Processing = FALSE;
     CloseChronoIndex ();
 	if (ShowStatus)
@@ -3085,7 +3085,7 @@ SkipUpdate:
 	}
 	if (Opt > 0 && Opt!=5)
 		DestroyStatusWindow(0); 
-	ContinueProcessing = TRUE;   
+	SetContinueProcessing ( TRUE);   
 {
 #if ENABLETRACE
 GSSiExitProg (1176);

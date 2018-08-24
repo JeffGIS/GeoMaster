@@ -2901,7 +2901,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 				break;
 		}
 		DestroyStatusWindow(0);  
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		GlobalUnlock (hDB);
 	    CloseGWDatabase (hDB);   
 		GlobalUnlock (hDBOut);

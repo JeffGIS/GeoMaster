@@ -3738,7 +3738,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  CloseTRANS2 (&hTranFile);
                  ContentsOnly = FALSE;
                  DisableHalt = TRUE;  
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
                 // got = GetDlgItemText (hWndDlg,IDC_TEXT_SCALE,string,96);
                  DXFTextScale = 1;//atol(string);
                 // GetDlgItemText (hWndDlg,IDC_DXF_X_OFFSET,LAYER,22);
@@ -3930,7 +3930,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
         		 GSSiGlobFree (&hDXFLayers);
               }  
                  DisableHalt = FALSE;  
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
              	 if (*AutoExportName)
              	 {
 					DestroyAdvancedOpts ();

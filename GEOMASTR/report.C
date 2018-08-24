@@ -1381,7 +1381,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, L
 		    	break;
 		    case IDC_SCROLLBOX: 
 		    {
-                ContinueProcessing = TRUE;
+                SetContinueProcessing ( TRUE);
                 switch(HIWORD(wParam))
                 {    
                      case LBN_DBLCLK:
@@ -1478,7 +1478,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
          switch(LOWORD(wParam))
          {  
             case IDC_CANCEL: 
-		    	ContinueProcessing = FALSE;
+		    	SetContinueProcessing (FALSE);
 		    	break;	 
 		    case IDM_EXIT:
                 GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
@@ -1583,7 +1583,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 			NextLine:;
 			
 				 }
-				 ContinueProcessing = TRUE;
+				 SetContinueProcessing ( TRUE);
 				 GSSiClose (Fid); 
 				 GSSiGlobUlFree (&hSTR);
 				 if (nLines) 

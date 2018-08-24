@@ -491,7 +491,7 @@ End:
 		rtn = BMPToEXT32 (hDIB,ImageFile,Flag);
 		WaitCursor (-1);
 	}
-	ContinueProcessing = TRUE;    
+	SetContinueProcessing ( TRUE);    
 	DestroyStatusWindow (0);
 	GMDestroyDIB32 (hDIB);
 Exit:

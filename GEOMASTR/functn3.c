@@ -2964,7 +2964,7 @@ GotCloseFilehSQL:
 			DebugReturn(Arg[1]);
 			if (pMacroReturnValue)
 				_fstrncpy(pMacroReturnValue, Arg[1], MAXARGLENGTH);
-			ContinueProcessing = FALSE;
+			SetContinueProcessing(FALSE);
             goto RtnTrue;
 		}
 		
@@ -3722,7 +3722,7 @@ GotCloseFilehSQL:
 		    i = FilePtr->FileHandle;    
             GlobalUnlock (SQLPtr->OFHandle);
             GlobalUnlock (hDB);
-			ContinueProcessing = ExternalSQLDirect (i,Arg2); */
+			SetContinueProcessing ( ExternalSQLDirect (i,Arg2); */
             if (nArgs > 2)
             {
 		        while (ContinueProcessing && FetchDBRec (hDB))
@@ -3740,7 +3740,7 @@ GotCloseFilehSQL:
 	        	if (ContinueProcessing)
 	        		nRecs = 1;
 	        }
-            ContinueProcessing = TRUE;
+            SetContinueProcessing(TRUE);
 			CloseDataFile (FALSE,&hDB);
             if (pStatusText)
 				DestroyStatusWindow(0); 
@@ -3846,7 +3846,7 @@ GotCloseFilehSQL:
 			}
 			if (ContinueProcessing)
 				goto RtnTrue;
-			ContinueProcessing = TRUE;
+			SetContinueProcessing ( TRUE);
 			goto RtnFalse;
 		}
   
@@ -5185,7 +5185,7 @@ GotCloseFilehSQL:
 					_fstrcpy (OutLoc,lpstr2);
 				else
 					*OutLoc = 0;
-				ContinueProcessing = FALSE;  
+				SetContinueProcessing (FALSE);  
            		PostMessage(hWndMain, GF_CLEAR_FUN_STACK, 0, 0L);
 			}
 			GSSiGlobUlFree (&hMem2); 
@@ -5364,7 +5364,7 @@ TestGPRtn:	if (ResetSubDL)
 				_fstrcpy (OutLoc,str); 
 			else
 			{
-				ContinueProcessing = FALSE;  
+				SetContinueProcessing (FALSE);  
            		PostMessage(hWndMain, GF_CLEAR_FUN_STACK, 0, 0L);
            		*OutLoc = 0;
 			}
@@ -5650,7 +5650,7 @@ TestGPRtn:	if (ResetSubDL)
 				case IDNO:
 					goto RtnFalse;
 				case IDABORT:
-					ContinueProcessing = FALSE;
+					SetContinueProcessing (FALSE);
 			}
 			goto RtnTrue;  
 		}

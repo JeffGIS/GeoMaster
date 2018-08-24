@@ -1110,7 +1110,7 @@ BOOL BuildSegMaxIndex (HWND hWnd)
 	    }
 		StatusWindowUpdate (0,0, nRecs, ++nLoaded);
     }
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
     BT_CLOSE (hSegMax);  
     hSegMax = 0;
     GlobalUnlock (hDBStreetSegments);

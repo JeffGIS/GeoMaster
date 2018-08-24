@@ -143,6 +143,8 @@ typedef struct _OFSTRUCTGM {
 	CHAR szPathName[OFS_MAXPATHNAMEGM];
 } OFSTRUCTGM, *LPOFSTRUCTGM, *POFSTRUCTGM;
 
+BOOL SetContinueProcessing(BOOL set);
+
 HWND WindowExists(HWND hWnd);
 HWND FindWindowByName (LPSTR WindowName);
 HWND GetTopParent(HWND	hWnd);

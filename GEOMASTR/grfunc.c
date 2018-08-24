@@ -523,7 +523,7 @@ GSSiExitProg (1338);
 				}
 				setDoPaint( TRUE);
 				DisableHalt = FALSE;    
-				ContinueProcessing = TRUE; 
+				SetContinueProcessing ( TRUE); 
 				ResetOriginalDrive ();
             	SetGlobalValue ("%NEXTCVAL",""); 
             	HaltMapDisplay (TRUE,TRUE);
@@ -1150,7 +1150,7 @@ GSSiExitProg (1347);
 			if (!ContinueProcessing)
 			{
 		     	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L); 
-		     	ContinueProcessing = TRUE;
+		     	SetContinueProcessing ( TRUE);
 				GSSiClose (Fid);
 				GSSiGlobUlFree (&hStr);
 {

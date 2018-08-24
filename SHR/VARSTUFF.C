@@ -2523,7 +2523,7 @@ GSSiExitProg (532);
 			if (!atob (Value))
 			{   
 				ProcessErrorString ();
-				ContinueProcessing = FALSE; 
+				SetContinueProcessing (FALSE); 
 			}
 					    
    			break;
@@ -6876,7 +6876,7 @@ GSSiExitProg (558);
 			IfOK = TRUE;
 	IfError:
 			if (ContinueProcessing)
-				ContinueProcessing = IfOK;
+				SetContinueProcessing ( IfOK);
 			if (!ContinueProcessing)
 				ii=1;
 		}
@@ -8082,7 +8082,7 @@ NextTextRec:
 				{
 					if (!CheckForContinue(TRUE,0))
 					{
-						ContinueProcessing = FALSE;
+						SetContinueProcessing (FALSE);
 				     	HaltReport=TRUE;  
 						MessageBox (0,"Search cancelled",0,MB_OK);
 						break;

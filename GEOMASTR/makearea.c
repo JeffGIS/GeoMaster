@@ -747,7 +747,7 @@ NextRec:
    			pRC->ConnectStatus = SetConStat (3);
 			GWDReplaceRecord (lpGWDHead,len,0,Offset);
 		}
-		ContinueProcessing = StatusWindowUpdate (0,0, nRecs, ++nLoaded);
+		SetContinueProcessing ( StatusWindowUpdate (0,0, nRecs, ++nLoaded));
    	}
 
 	UseUserPickAp =TRUE;
@@ -866,13 +866,13 @@ NextRec:
 							}
 						}
 		            }
-					ContinueProcessing = StatusWindowUpdate2 (0, NumLines, il);
+					SetContinueProcessing ( StatusWindowUpdate2 (0, NumLines, il));
 					if (!ContinueProcessing)
 						break;
 				}
 		        GSSiGlobUlFree (&hLineInt);
 		    } 
-			ContinueProcessing = StatusWindowUpdate (0,0, nBlocks, ++nLoaded);
+			SetContinueProcessing ( StatusWindowUpdate (0,0, nBlocks, ++nLoaded));
 			if (!ContinueProcessing)
 				break;
 	  	}
@@ -882,7 +882,7 @@ NextRec:
 		
 	CloseRefConnectFile ();
 	DestroyStatusWindow(0); 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	return TRUE;
 }
 
@@ -1086,7 +1086,7 @@ NextItem:
 	CloseRefConnectFile ();
     SetGlobalValueLong ("%NumRemoved",NumRemoved);
 	DestroyStatusWindow(0);  
-	ContinueProcessing = TRUE; 
+	SetContinueProcessing ( TRUE); 
 	return TRUE;
 }
 
@@ -2085,7 +2085,7 @@ NoMoreExclusions:
 			GSSiGlobFree (&hLoopPoints[NumLoops]);
 		StatusWindowUpdate (0,0, nRecs, ++nLoaded);
 	}
-	ContinueProcessing = TRUE; 
+	SetContinueProcessing ( TRUE); 
 		
 	{   
 		HANDLE	hSymDesc=0;

@@ -863,7 +863,7 @@ ErrMes:
 						 == IDCANCEL)
 					 {
 						 HaltReport = TRUE;
-						 ContinueProcessing = FALSE;
+						 SetContinueProcessing (FALSE);
 					 }
 				 }
 				 else if (*SQLErrorLog)
@@ -1458,7 +1458,7 @@ s44: if (hstmt)
 	 	SQLFreeStmt(hstmt, SQL_CLOSE);
 	 }
 	if (HaltReport)
-		ContinueProcessing = FALSE;
+		SetContinueProcessing (FALSE);
 	GSSiGlobUlFree (&hstr);
     return FALSE;
 }   

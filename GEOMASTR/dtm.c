@@ -761,7 +761,7 @@ Exit:
     BigWrite (lpGWDHead->Fid,(HPSTR)&DTMData,length,-1);   
     DTMKeyl = LONG_MAX;
 	BT_PUT (lpGWDHead->BTHandle[0],(LPSTR)&DTMKeyl,(LPSTR)&Offset); 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiClose (Fid);   
 	DestroyStatusWindow (0);
 	GlobalUnlock (hDB);
@@ -864,7 +864,7 @@ NextFile:
 			GSSillseek(FidIn, 0, 0);
 			goto NextFile;
 		}
-	    ContinueProcessing = TRUE;
+	    SetContinueProcessing ( TRUE);
 		DestroyStatusWindow(0);
 	}
 	FileMinX = MinX - fmod(MinX, LIDARCELLSIZE);
@@ -942,7 +942,7 @@ NextFile2:
 	loc = (DWORD)CurrentCell * (DWORD)sizeof(LIDARREC);
 	GSSillseek2(FidOut, loc, 0);
 	BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0);
 	GSSiClose(FidOut);
 	FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
@@ -956,7 +956,7 @@ NextFile2:
 		CurLoc = (DWORD)GSSillseek(FidOut, 0, 1);
 		StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0);
 	GSSiClose(FidOut);
 	GSSiGlobFree(&TxtHandle);
@@ -1000,7 +1000,7 @@ NextFile2:
 		CurLoc = (DWORD)GSSillseek(FidIn, 0, 1);
 		StatusWindowUpdate(0, 0, TotLen, CurLoc);
 	}
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiClose(FidIn);
 	GSSiClose(FidOut);
 	DestroyStatusWindow(0);
@@ -1215,7 +1215,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 			loc = (LONGLONG)CurrentCell * (DWORD)sizeof(LIDARREC);
 			GSSillseek2(FidOut, loc, 0);
 			BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
-			ContinueProcessing = TRUE;
+			SetContinueProcessing ( TRUE);
 			DestroyStatusWindow(0);
 			GSSiClose(FidOut);
 			FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
@@ -1229,7 +1229,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 				CurLoc = GSSillseek2(FidOut, 0, 1);
 				StatusWindowUpdate(0, 0, TotLen, CurLoc);
 			}
-			ContinueProcessing = TRUE;
+			SetContinueProcessing ( TRUE);
 			DestroyStatusWindow(0);
 			CreateStatusWind(hWndMain, 1, "Writing Distribution");
 			GSSiClose(FidOut);
@@ -1281,7 +1281,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 				CurLoc = GSSillseek2(FidIn, 0, 1);
 				StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
 			GSSiClose(FidIn);
 			GSSiClose(FidOut);
 			DestroyStatusWindow(0);
@@ -1542,7 +1542,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
     DTMKeyl = LONG_MAX;
 	BT_PUT (lpGWDHead->BTHandle[0],(LPSTR)&DTMKeyl,(LPSTR)&Offset); 
 Exit: 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiClose (Fid);   
 	DestroyStatusWindow (0);
 	GSSiGlobUlFree (&hRec);  
@@ -1812,7 +1812,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
     DTMKeyl = LONG_MAX;
 	BT_PUT (lpGWDHead->BTHandle[0],(LPSTR)&DTMKeyl,(LPSTR)&Offset); 
 Exit: 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiClose (Fid);   
 	DestroyStatusWindow (0);
 	GSSiGlobUlFree (&hRec);  
@@ -2010,7 +2010,7 @@ BOOL ConvertDTMv1Tov2 (LPSTR FileName)
 	    BigWrite (lpGWDHead->Fid,(HPSTR)&SUBCELLInfo,sizeof(SUBCELLINFO),-1);
 		StatusWindowUpdate (0,0, nRecs, ++nLoaded);
 	} 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
     lpGWDHead->Version = 2;
 	GlobalUnlock (hDB);
 	CloseGWDatabase (hDB); 
@@ -3406,7 +3406,7 @@ long GetDTMHoles (LPSTR DTMName, LPSTR OutFile)
 	DTMClose (&hSurf); 
 	GSSiClose (OutFid);
 	DestroyStatusWindow(0);  
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 {
 																							#if ENABLETRACE
 																							GSSiExitProg (1368);
@@ -5118,7 +5118,7 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 			BP = BeginPoint;
 			CreateStatusWind (hWndMain,1,"Exporting Elevation Data");
 			Row = nRow;
-			while ((ContinueProcessing = StatusWindowUpdate (0,0,NumItems, ++CurItem))&& Row--)
+			while ((SetContinueProcessing(StatusWindowUpdate(0, 0, NumItems, ++CurItem))) && Row--)
 			{
     			BP.x = BeginPoint.x;
     			Col = nCol;
@@ -5179,7 +5179,7 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 			else
 			{
 				GSSiClose (Fid);   
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 				GSSiRemove (OutFile);
 			}
 			GSSiGlobUlFree (&hMem);

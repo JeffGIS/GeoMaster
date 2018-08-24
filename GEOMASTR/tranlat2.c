@@ -1855,21 +1855,21 @@ ProcessBitmap:
                      {
                         MessageBox(0,"Error writing output file - disk may be full or compressor missing",
                                      AVIFile,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
-                     	ContinueProcessing = FALSE;
+                     	SetContinueProcessing (FALSE);
                      	goto Exit;
                      }
                      if (st == -1)
                      {
                         MessageBox(0,"Error writing output file - maximum file size exceeded",
                                      AVIFile,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
-                     	ContinueProcessing = FALSE;
+                     	SetContinueProcessing (FALSE);
                      	goto Exit;
                      }
                      if (st == -2)
                      {
                         MessageBox(0,"Error writing output file - exit program and retry using external compression",
                                      AVIFile,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
-                     	ContinueProcessing = FALSE;
+                     	SetContinueProcessing (FALSE);
                      	goto Exit;
                      }
                   }

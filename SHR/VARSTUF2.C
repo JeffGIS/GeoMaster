@@ -965,7 +965,7 @@ ProcessMacro:
 	    			rtn = atob (pMacroReturnValue);
 	    			if (RtnVal)        
 	    				_fstrcpy (RtnVal,pMacroReturnValue);
-	    			ContinueProcessing = TRUE;
+	    			SetContinueProcessing ( TRUE);
 	    		}
 	    		*pMacro = 0; 
 	    	}

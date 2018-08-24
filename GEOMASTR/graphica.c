@@ -2699,7 +2699,7 @@ InsertIfResult:
 		    	GSSiGlobFree (&pCmdStr->hError);
 	    		GSSiGlobUlFree (&CurView->FunStackHandle);
 	    		CurView->FunStackHandle = hLast;
-	    		ContinueProcessing = TRUE; 
+	    		SetContinueProcessing ( TRUE); 
 				GSSiGlobFree (&hEmbeddedGFCommand);
     			goto NextCmd;
     		}

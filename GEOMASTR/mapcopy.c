@@ -233,7 +233,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 		StatusWindowUpdate (NULL,FromFileName, TotCopyLen, GSSillseek (CopyFID,0,1));
 	}
 Exit: 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiClose (CopyFID);
 	
 	return TRUE;

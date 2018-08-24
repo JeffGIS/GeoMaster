@@ -158,6 +158,13 @@ void PATBMPDef (BOOL clear)
 	}
 }
 
+BOOL SetContinueProcessing(BOOL set)
+{
+	BOOL rtn = ContinueProcessing;
+	ContinueProcessing = set;
+
+	return rtn;
+}
 BOOL InitGraphics (HWND hWnd)
 #if ENABLETRACE
 {GSSiEnterProg (2);
@@ -1042,7 +1049,7 @@ GSSiExitProg (12);
 					{
 						DisplayOrthoPhoto();
 						if (!(n++ % 16))
-							ContinueProcessing = CheckForContinue(FALSE, 0);
+							SetContinueProcessing(CheckForContinue(FALSE, 0));
 
 					} while (ContinueProcessing && GetNextOrthoTileFromIndex());
 					ii = 1;
@@ -1523,7 +1530,7 @@ Next:
 		    ipnt = (LPSHORT)LPpltBuf;
 			if (!(nContinues++ % 16))
 			{
-				ContinueProcessing = CheckForContinue(FALSE,0);
+				SetContinueProcessing(CheckForContinue(FALSE, 0));
 			}
         }
 		if (FastMapCopy)
@@ -4506,7 +4513,7 @@ GSSiExitProg (54);
 	if (IsRectEmpty (&ClientRectStart))
 		ClientRectStart = ClientRect;
 
-    if (!PeopleNet) 
+    if (!PeopleNet && !MemMap) 
     	HaltMapDisplay(FALSE,FALSE); 
     if (!OpenConfig(hWnd,hDC))
 {
@@ -7285,6 +7292,8 @@ void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
     short	ii;  
                         
 //    DisplayFinOpt = 0;  
+	if (MemMap)
+		ii = 1;
 	KillTimer(hWndMain, 1);
 	TrapKillTimer = FALSE;
     if (DisableHalt)
@@ -7504,7 +7513,7 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 	 DoMapCopy = 0; 
 	 if (!ContinueProcessing)
 	 {  
-	 	ContinueProcessing = TRUE;
+	 	SetContinueProcessing ( TRUE);
 	 	goto Exit;
 	 }  
 //	 NumCopyFiles *= 2;

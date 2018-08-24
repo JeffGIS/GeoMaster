@@ -493,7 +493,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
          {  
          	case IDC_EXIT:  
          		Processing = FALSE;
-             	ContinueProcessing = TRUE; 
+             	SetContinueProcessing ( TRUE); 
              	DestroyAdvancedOpts();
 				DestroyFieldList ();
              	ForceRefIndex = ForceTAGIndex = FALSE;

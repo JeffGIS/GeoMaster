@@ -565,7 +565,7 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 //				 FreeProcInstance((DLGPROC)ADDWAYPOINTMsgProc);
                  GSSiEndDialog(hWndDlg, FALSE,hSaveBM); 
                  if (AllowWPSkip)
-                 	ContinueProcessing = FALSE;
+                 	SetContinueProcessing (FALSE);
                  break; 
                  
 /*            case IDC_UPDATECOORD:
@@ -736,7 +736,7 @@ SetGPS:
 
     case WM_COMMAND: 
     	 if (wParam == IDC_CANCELTRAN)
-    	 	ContinueProcessing = FALSE;
+    	 	SetContinueProcessing (FALSE);
     	 if (!InTran)
          switch(LOWORD(wParam))
            {
@@ -1428,7 +1428,7 @@ BOOL FAR PASCAL GPSCONFIGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				}
 		GotGPS:  
 				Processing = FALSE;
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 				GPSTimeOut=SaveTO; 
 				GSSiSetCursor (hcurSave); 
 			}
@@ -1458,7 +1458,7 @@ BOOL FAR PASCAL GPSCONFIGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
             	 
             case IDCANCEL:  
             	if (Processing)
-            		ContinueProcessing = FALSE;
+            		SetContinueProcessing (FALSE);
             	else
 	                EndDialog(hWndDlg, FALSE);
                 break; 
@@ -2085,7 +2085,7 @@ short GPSLoadToDB (HWND hWndDlg, UINT Control)
 		HaveWPInit = TRUE;
 		ExpandText (str);
 		if (*str != '1')
-			ContinueProcessing = FALSE;
+			SetContinueProcessing (FALSE);
 	}
 
 	while (ContinueProcessing && n--)
@@ -2160,7 +2160,7 @@ short GPSLoadToDB (HWND hWndDlg, UINT Control)
 				nNotLoaded++;  
 		}
 	}
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	GSSiGlobUlFree (&hItems);
 	if (LoadWPAsRoute)
 	{  

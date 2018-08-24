@@ -2839,7 +2839,7 @@ ErMsg:
 				break;
 		}
 	} 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete"); 
 	GSSiGlobUlFree (&hWPMem);
 //	SetCursor (hcurSave);
@@ -2931,7 +2931,7 @@ Top:
         PctBox (GetDlgItem(hWndDlg,StatusControl),nRecs,++nSearched,-1);
 	} 
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	SetCursor (hcurSave);
 	return TRUE;
 }  
@@ -3357,7 +3357,7 @@ Next:
 		} 
 	} 
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	SetCursor (hcurSave);
 	return TRUE;
 } 
@@ -3601,7 +3601,7 @@ Top:
 		} 
 	} 
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	SetCursor (hcurSave);
 	return TRUE;
 } 
@@ -3765,7 +3765,7 @@ ErMsg:
 				break;
 		}
 	} 
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	GSSiSetCursor (hcurSave);
 	return TRUE;
 } 
@@ -3856,7 +3856,7 @@ BOOL FAR PASCAL LOWRANCESCANMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LON
 				rtn = ContinueProcessing; 
 				Processing = FALSE;	
 				SetDlgItemText (hWndDlg,IDC_STATUS,"Transfer complete");
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 			//	SetCursor (hcurSave);
 			}  
             EndDialog(hWndDlg, rtn); 
@@ -3914,7 +3914,7 @@ BOOL FAR PASCAL LOWRANCESCANMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LON
 				rtn = ContinueProcessing; 
 				Processing = FALSE;	
 				SetDlgItemText (hWndDlg,IDC_STATUS,"All waypoints deleted");
-				ContinueProcessing = TRUE;
+				SetContinueProcessing ( TRUE);
 			//	SetCursor (hcurSave);
 			}  
             EndDialog(hWndDlg, rtn); 
@@ -3926,7 +3926,7 @@ BOOL FAR PASCAL LOWRANCESCANMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LON
             	if (Processing)
             	{
 					Processing = FALSE;	
-            		ContinueProcessing = FALSE; 
+            		SetContinueProcessing (FALSE); 
             	}
             	else
 	                EndDialog(hWndDlg, FALSE);
@@ -4078,7 +4078,7 @@ BOOL GPSImportUSRWP (HWND hWndDlg,UINT Control,UINT StatusControl)
  	i=BigRead (Fid,(HPSTR)&NumTrails,sizeof(NumTrails));
 	GSSiClose (Fid);
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	return TRUE;
 }  
 
@@ -4344,7 +4344,7 @@ BOOL GPSImportGPXWP (HWND hWndDlg,UINT Control,UINT StatusControl)
  	i=BigRead (Fid,(HPSTR)&NumTrails,sizeof(NumTrails));
 	GSSiClose (Fid);
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	return TRUE;
 }  
 

@@ -6971,7 +6971,7 @@ BOOL GetAreaCenters (LPSTR OutFile,int SpeedFactor,BOOL UseMask)
 		}
 		StatusWindowUpdate (0,0, nRecs, NumRecs++);
 	}
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0);  
 	GSSiClose (Fid);   
 	BT_CLOSEANDDELETE (&hBTTemp);  

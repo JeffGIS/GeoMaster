@@ -2370,7 +2370,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		GSSiClose (FidSyms);
 	}
 	Processing = FALSE;
-	ContinueProcessing = TRUE;  
+	SetContinueProcessing ( TRUE);  
                  
 	return TRUE;
 }

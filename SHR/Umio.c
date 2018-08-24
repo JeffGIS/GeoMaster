@@ -2030,7 +2030,7 @@ GSSiExitProg (1399);
 }
 RtnFalse:  
 	
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	InProcessTCPData = FALSE;
 {
 #if ENABLETRACE

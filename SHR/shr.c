@@ -7082,11 +7082,11 @@ GSSiExitProg (294);
     { 
 		int saveTraceOn = TraceOn;
 		BOOL saveContinueProcessing = ContinueProcessing;
-		ContinueProcessing = 1;
+		SetContinueProcessing ( 1);
 		TraceOn = 0;
 		GetGlobalCVal("[%TRACEFILE]",txt,"c:\\temp\\trace.txt");
 		TraceOn = saveTraceOn;
-		ContinueProcessing = saveContinueProcessing;
+		SetContinueProcessing ( saveContinueProcessing);
         _fullpath(TraceFile,txt,256);
         TraceFid = OpenFileGM (TraceFile,pOFStruct,OF_READWRITE); 
         if (TraceTrace)
@@ -9004,7 +9004,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 	int		nAccessErrors=0;
 	int		Err;
 	
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	if (Mode == (OF_CREATE | OF_READWRITE))
 		Mode = OF_CREATE;
 	if (Mode == OF_EXIST)
@@ -9490,7 +9490,7 @@ Exit:
 		NumNullOpen++;
 	else if (Mode != OF_EXIST)
 		NumFileOpen++;
-	ContinueProcessing = SaveContinueProcessing;
+	SetContinueProcessing ( SaveContinueProcessing);
 {
 #if ENABLETRACE
 GSSiExitProg (307);
@@ -13280,7 +13280,7 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 		OFSTRUCTGM	OFStruct;
 		BOOL		SaveCP = ContinueProcessing;
 
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 
 		GetGlobalCVal ("[%BACKGROUNDLOGFILE]",File,"bkglog.txt");
 		//GetShortPathName2 (File,128);
@@ -13302,7 +13302,7 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 			_lclose (Fid);  
 		}
 		free (Title);
-		ContinueProcessing = SaveCP;
+		SetContinueProcessing ( SaveCP);
 		return 0;
 	}
 	else 

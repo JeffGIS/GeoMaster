@@ -657,7 +657,7 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
         Reset:    
         		 Processing = FALSE;
                  DisableHalt = FALSE;
-        		 ContinueProcessing = TRUE;
+        		 SetContinueProcessing ( TRUE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
@@ -763,7 +763,7 @@ GSSiExitProg (441);
 		
 			case IDC_CANCELIMAGES:
 				EscapeFunction (TRUE);
-				ContinueProcessing = FALSE;
+				SetContinueProcessing (FALSE);
 		    	EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE);  
 				break;
 			case IDC_SAVEPOS:
@@ -840,7 +840,7 @@ GSSiExitProg (441);
 					ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELIMAGES),SW_SHOW);
 		    	 	EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);  
 					CreateAllSizes (hWndDlg);
-					ContinueProcessing = TRUE;
+					SetContinueProcessing ( TRUE);
 		    	 	EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE);  
 					ShowWindow (GetDlgItem(hWndDlg,IDC_PROGRESS),SW_HIDE);
 					ShowWindow (GetDlgItem(hWndDlg,IDC_CANCELIMAGES),SW_HIDE);
@@ -1788,7 +1788,7 @@ GSSiExitProg (445);
 			 		 CloseStreetSegmentTable(OpenedSeg); 
 			 		 AddStreetNums=FALSE;
 			 		 ConvertTAGValues = 0; 
-			 		 ContinueProcessing = TRUE;
+			 		 SetContinueProcessing ( TRUE);
 			     } 
         		 IgnoreBounds = FALSE;
 		    	 _fstrcpy (str,"[%INVALIDRECORDOPT]=2");
@@ -3330,7 +3330,7 @@ Exit2:
 				CloseTRANS2 (&hTranExport[1]);
 				GSSiGlobUlFree(&hOutRec);
                 DisableHalt = FALSE;  
-                ContinueProcessing = TRUE;   
+                SetContinueProcessing ( TRUE);   
                 Processing = FALSE;
                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
@@ -4995,7 +4995,7 @@ FileIsInvalid:
 				    GSSiClose (FidTF); 
 				    if (!ContinueProcessing)
 				    {
-				    	ContinueProcessing = TRUE; 
+				    	SetContinueProcessing ( TRUE); 
 				    	SetDlgItemText (hWndDlg,IDC_MESSAGE,"Build cancelled by user");
 				    	break;
 				    }
@@ -5006,7 +5006,7 @@ FileIsInvalid:
             	 
             case IDCANCEL:  
             	if (Processing)
-            		ContinueProcessing = FALSE;
+            		SetContinueProcessing (FALSE);
             	else
 	                GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
                 break; 
@@ -5147,7 +5147,7 @@ FileIsInvalid:
 		    	 GSSiClose (FidTF);
 			     if (!ContinueProcessing)
 			     {
-			    	ContinueProcessing = TRUE; 
+			    	SetContinueProcessing ( TRUE); 
 			    	SetDlgItemText (hWndDlg,IDC_MESSAGE,"Load cancelled by user");
 			    	break;
 			     }
@@ -5158,7 +5158,7 @@ FileIsInvalid:
             	 
             case IDCANCEL:  
             	if (Processing)
-            		ContinueProcessing = FALSE;
+            		SetContinueProcessing (FALSE);
             	else
 	                GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
                 break; 
@@ -5438,7 +5438,7 @@ SelectFiles:
                  
             case IDC_EXIT:
                  GSSiEndDialog(hWndDlg, ContinueProcessing,hSaveBM); 
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
                  break;
                  
             case LMD_TYPE_MAP:
@@ -5575,7 +5575,7 @@ SelectFiles:
 				HFILE	FidAutoFileList = HFILE_ERROR;  
 				BOOL	UseExCmp=TRUE;
 
-                ContinueProcessing = TRUE;  
+                SetContinueProcessing ( TRUE);  
                 AddBMPToCache (0,(HANDLE)1);
                 Processing = TRUE;
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE);
@@ -5990,7 +5990,7 @@ SelectFiles:
                   	SetDlgItemText(hWndDlg,IDC_LOAD_MESSAGE,"Index created"); 
                  else
                   	SetDlgItemText(hWndDlg,IDC_LOAD_MESSAGE,"Index creation cancelled");
-                 ContinueProcessing = TRUE;  
+                 SetContinueProcessing ( TRUE);  
                  SetGlobalValue ("%TFWUNITS",SaveTFWUnits);
 				 AllowBMPCaching = SaveBMPCache;
                  break;      
@@ -6405,7 +6405,7 @@ SetType:
 			   	 _chdir (CurDir);
            	  	 _chdrive (SaveDrive);  
                  EndDialog(hWndDlg, FALSE); 
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
                  break;
                  
 
@@ -10121,7 +10121,7 @@ BOOL FAR PASCAL BTREE_REORGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
          		 break;   
          	
          	case IDC_CAN:
-         		 ContinueProcessing = FALSE;
+         		 SetContinueProcessing (FALSE);
          		 break;
          		 	 
             case IDOK: 
@@ -10172,7 +10172,7 @@ BOOL FAR PASCAL BTREE_REORGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 				 if (!ContinueProcessing)
 				 {  
 				 	SetDlgItemText (hWndDlg,IDC_MESS2,"Cancelled by user");
-				 	ContinueProcessing = TRUE;
+				 	SetContinueProcessing ( TRUE);
 				 }
          		 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);
          		 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE);
@@ -11199,7 +11199,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
             case IDCANCEL:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
-                 ContinueProcessing = FALSE;
+                 SetContinueProcessing (FALSE);
                  break;
                  
             case IDC_LOCATE_DESTMAP: 
@@ -11654,7 +11654,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 DecompClose();
             	
             	Processing = FALSE;
-            	ContinueProcessing = TRUE;
+            	SetContinueProcessing ( TRUE);
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);  
@@ -11741,7 +11741,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
             case IDC_EXIT:     
 				CloseOrthos(TRUE);
 				 SetViewport(*pCommandViewport);
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
 		         FastOrthos = SaveFastOrthos;
 				 SetGlobalValueLong ("%ORTHO_BUFFERS",SaveMaxOrtho);
         		 _chdir (OriginalDir);
@@ -12433,7 +12433,7 @@ Exit:
 				CloseTRANS2 (&hTranExport[1]);
                 GSSiGlobUlFree (&hOutRec);
                 DisableHalt = FALSE;  
-                ContinueProcessing = TRUE;   
+                SetContinueProcessing ( TRUE);   
                 Processing = FALSE;
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
@@ -13568,7 +13568,7 @@ Exit:
 				CloseTRANS2 (&hTranExport[1]);
                 GSSiGlobUlFree (&hOutRec);
                 DisableHalt = FALSE;  
-                ContinueProcessing = TRUE;   
+                SetContinueProcessing ( TRUE);   
                 Processing = FALSE;
 				DGNWriteGeoMaster (TmpName);
                 if (*AutoExportName)
@@ -15406,7 +15406,7 @@ Exit2:
 
                 GSSiGlobFree (&hExportText);  
                 GSSiGlobFree (&hExportTextPointer);  
-                ContinueProcessing = TRUE;   
+                SetContinueProcessing ( TRUE);   
                 Processing = FALSE;
                 GetDlgItemText (hWndDlg,IDC_MID_FILE,Name,sizeof(Name));
                 ExpandText (Name);

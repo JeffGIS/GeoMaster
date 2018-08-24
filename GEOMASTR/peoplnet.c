@@ -3052,7 +3052,7 @@ GSSiExitProg (1426);
 		}
 	}
 Exit:
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	GSSiGlobUlFree (&hCellPoint);
 	GSSiGlobUlFree (&hCellPoint16);
 	GSSiClose (FidOut);
@@ -3326,7 +3326,7 @@ HaveState:;
 		}
 	}
 Exit:
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	GSSiGlobUlFree (&hCellPoint);
 	GSSiGlobUlFree (&hCellPoint16);
 	GSSiGlobUlFree (&hCompressedCell);

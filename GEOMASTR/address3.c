@@ -2325,7 +2325,7 @@ BOOL SaveStreetPolys (void)
 		}
 		StatusWindowUpdate (NULL,NULL, TotRecs, NumLoaded++);
 	} 
-	ContinueProcessing = TRUE; 
+	SetContinueProcessing ( TRUE); 
 	DestroyStatusWindow(0);  
 	GSSiClose (Fid);
 	BT_CLOSE (hBT);

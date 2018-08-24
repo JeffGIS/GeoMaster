@@ -2162,7 +2162,7 @@ BOOL OpenSymDict (int Mode)
 		MessageBox (0,"You do not have permission to update the symbol dictionary",0,MB_ICONEXCLAMATION);
 		return FALSE;
 	}
-    ContinueProcessing = TRUE;
+    SetContinueProcessing ( TRUE);
     CloseSymDict();  
     *LastSymName=0;                  
     SymDictOpenMode = Mode;
@@ -2263,7 +2263,7 @@ Start:
 	    GSSilread (FidSD,pSymIndex,NumSymbols*sizeof(long));
 	    GlobalUnlock (hSymIndex);
     } 
-	ContinueProcessing = SaveCP;  
+	SetContinueProcessing ( SaveCP);  
 	if (NumSymbols && !hSymbolAttributes)
 	{
 		hSymbolAttributes = GSSiGlobAlloc ( 466,GHND,NumSymbols*sizeof(SYMBOLATTRIBUTE));
@@ -3440,7 +3440,7 @@ SkipStdSyms:
 			DestroyStatusWindow(0);  
 		}
 	}
-	ContinueProcessing = TRUE;	
+	SetContinueProcessing ( TRUE);	
  	hSym = AllocateNewSymbol ();
 	CurSymbol = (LPSYMBOL)GlobalLock (hSym);
 	_fstrcpy (CurSymbol->Name,"PROPERTY");
@@ -3502,7 +3502,7 @@ BOOL SetPointSize (LPDOUBLE pSize, LPSTR NewPointSize)
 		_fstrcpy (txt,"2P");
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 Top:
@@ -3550,7 +3550,7 @@ BOOL SetPointRot (LPDOUBLE pRot, LPSTR NewSymRot)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	} 
 	pEnd = LastChr(txt);
@@ -3579,7 +3579,7 @@ BOOL SetPointColor (long *pColor, LPSTR NewSymColor)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pColor = atol(txt);
@@ -3597,7 +3597,7 @@ BOOL SetLineWidth (LPFLOAT pWidth, LPSTR NewLineWidth)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pWidth = atof(txt);
@@ -3614,7 +3614,7 @@ BOOL SetRouteWidth (LPDOUBLE pWidth, LPSTR NewLineWidth)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pWidth = atof(txt);
@@ -3632,7 +3632,7 @@ BOOL SetAreaColor (long *pColor,LPSTR NewAreaColor)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pColor = atol(txt);
@@ -3650,7 +3650,7 @@ BOOL SetLineColor (long *pColor,LPSTR NewLineColor)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pColor = atol(txt);
@@ -3668,7 +3668,7 @@ BOOL SetLineSymbol (LPSHORT	pSym,LPSTR cSym)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pSym = GetDictSymbolNumber(txt);   
@@ -3696,7 +3696,7 @@ BOOL SetAreaSymbol (LPSHORT	pSym,LPSTR cSym)
 	ExpandText (txt);
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pSym = GetDictSymbolNumber(txt);
@@ -3722,7 +3722,7 @@ BOOL SetPointSymbol (LPSHORT	pSym,LPSTR cSym)
 	ExpandText (txt);  
 	if (!ContinueProcessing)
 	{
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		return FALSE;
 	}
 	*pSym = GetDictSymbolNumber(txt);

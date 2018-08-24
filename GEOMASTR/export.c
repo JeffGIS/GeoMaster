@@ -302,7 +302,7 @@ BOOL RemoveLinkLines (void)
 		StatusWindowUpdate (NULL,NULL, NumItems,Done++);
 	}
 	DestroyStatusWindow(0); 
-	ContinueProcessing = TRUE;   
+	SetContinueProcessing ( TRUE);   
 	return TRUE;
 } 
 
@@ -352,7 +352,7 @@ BOOL DecodeGMField (LPSTR FldName,LPSHORT pFldType,LPSHORT pFldLength)
 	if (NumMemMaps >= MAXMEMMAPS)
 	{
 		GSSiMessageBox (0,"Memory map buffer overflow",NULL,MB_ICONEXCLAMATION);
-		ContinueProcessing = FALSE;
+		SetContinueProcessing (FALSE);
 	}
 	CurView->NewBounds.xmn = pBasePoint->x - (MemMapWidth * CurView->OrthoRes)/2;
 	CurView->NewBounds.xmx = pBasePoint->x + (MemMapWidth * CurView->OrthoRes)/2;

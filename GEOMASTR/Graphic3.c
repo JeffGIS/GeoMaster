@@ -2767,7 +2767,7 @@ short ScanForFieldTypes (LPSTR DBName,LPHANDLE phFieldTypes,BOOL DoScan,long Num
 			FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
 			goto Top;  
 		}
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 		DestroyStatusWindow(0); 
 	}
 	else
@@ -3122,7 +3122,7 @@ GSSiExitProg (603);
 	    	//sprintf (str,"%ld records written",AtRec);
 	    	//SetWindowText (StatusWnd,str);
 			if (StatusWnd == (HWND)1)
-				ContinueProcessing = StatusWindowUpdate (0,str, TotRecs,AtRec);
+				SetContinueProcessing(StatusWindowUpdate(0, str, TotRecs, AtRec));
 			else     		
 	        	PctBox (StatusWnd,TotRecs,AtRec,-1); 
 	    }
@@ -3269,7 +3269,7 @@ NextHlt:
 	if (!ContinueProcessing)
 	{
     	GSSiMessageBox (0,"Operation cancelled by user","",MB_ICONEXCLAMATION,0);
-    	ContinueProcessing = TRUE; 
+    	SetContinueProcessing ( TRUE); 
     	rtn = FALSE;
     }
     if (IndexFid != HFILE_ERROR)

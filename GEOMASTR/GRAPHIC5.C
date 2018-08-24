@@ -489,7 +489,7 @@ BOOL SetNewMacro (short Type)
 	if (!ContinueProcessing)
 	{
 		rtn = FALSE; 
-		ContinueProcessing = TRUE;
+		SetContinueProcessing ( TRUE);
 	}
 	GSSiGlobUlFree (&hGRCmd); 
 	SetCurView ( SaveVP);
@@ -538,7 +538,7 @@ BOOL SetNewStuff (short Type,LPHANDLE hStuff)
 	pStuffL = pStuff++;
 	pCmd = (LPSTR)pStuff;
 	_fstrcpy (pCmd,pGRCmd);  
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 //	ExpandText (pCmd);        
 	if (!ContinueProcessing) 
 	{
@@ -926,7 +926,7 @@ BOOL SetNewTime (short Type,LPHANDLE hTimeStamp)
 			GSSiGlobFree (hTimeStamp);
 	}
 	rtn = ContinueProcessing;
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 {
 #if ENABLETRACE
 GSSiExitProg (735);

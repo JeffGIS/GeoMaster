@@ -9617,7 +9617,7 @@ SendDlgItemMessage(hWndDlg, IDC_CLASSHLTLIST, LB_ADDSTRING, 0, (LPARAM)((LPSTR)s
 			ClearHighlightList(FALSE);
 			break;
 		case IDC_CANCEL:
-			ContinueProcessing = FALSE;
+			SetContinueProcessing (FALSE);
 			break;
 		case IDC_UNHLT:
 		case IDOK:
@@ -9805,7 +9805,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 		SetCurView(SaveView);
 	}
 	CurTheme = SaveCurTheme;
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	return numAdded;
 }
 
@@ -18152,7 +18152,7 @@ GSSiExitProg (1280);
                  break;
             
             case IDC_CANCELLOAD:
-            	 ContinueProcessing = FALSE;
+            	 SetContinueProcessing (FALSE);
             	 break;
             	 
             case IDOK: 
@@ -18813,7 +18813,7 @@ EndFiles:
                  DisableHalt = FALSE;
                  ForceRefIndex = ForceTAGIndex = FALSE; 
                  Processing = FALSE;
-                 ContinueProcessing = TRUE;  
+                 SetContinueProcessing ( TRUE);  
 				 DestroyFieldList (); 
 				 DestroyAdvancedOpts();
 				 GSSiGlobFree (&hDLT);
@@ -19309,7 +19309,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
              	 	GlobalUnlock (hImportPreSet);
              	 	if (!ContinueProcessing)
              	 	{   	
-             	 	    ContinueProcessing = TRUE;
+             	 	    SetContinueProcessing ( TRUE);
 	                    GSSiMsgBox(GetFocus(),"Pre-processing Failed", 0,MB_ICONEXCLAMATION|MB_OK,0);
              	 		break;
              	 	}
@@ -19554,7 +19554,7 @@ NextFile:
                  SaveFPT = CurView->FileProjectionType; 
 				 CurView->FileProjectionType=0;
                  DisableHalt = TRUE;  
-                 ContinueProcessing = TRUE;   
+                 SetContinueProcessing ( TRUE);   
                  Processing = TRUE;    
                                         
                  NewRefno=0;  
@@ -20203,7 +20203,7 @@ NextFile:
 				 CloseGSStreetNames();
                  DisableHalt = FALSE;
          	 	 Processing = FALSE;
-             	 ContinueProcessing = TRUE; 
+             	 SetContinueProcessing ( TRUE); 
 				 if (!IsPGDB)
 				 {
 					// CloseSHPFile ();
@@ -20632,7 +20632,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  SaveFPT = CurView->FileProjectionType; 
 				 CurView->FileProjectionType=0;
                  DisableHalt = TRUE;  
-                 ContinueProcessing = TRUE;   
+                 SetContinueProcessing ( TRUE);   
                  Processing = TRUE;
                                         
                  NewRefno=0;  
@@ -20859,7 +20859,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 				 CloseMap(TRUE);
                  DisableHalt = FALSE;
          	 	 Processing = FALSE;
-             	 ContinueProcessing = TRUE; 
+             	 SetContinueProcessing ( TRUE); 
                  CurView->FileProjectionType = SaveFPT; 
                  DisableHalt = FALSE;  
                  CloseTRANS2 (&hTranFile);
@@ -21237,7 +21237,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  SaveFPT = CurView->FileProjectionType; 
 				 CurView->FileProjectionType=0;
                  DisableHalt = TRUE;  
-                 ContinueProcessing = TRUE;   
+                 SetContinueProcessing ( TRUE);   
                  Processing = TRUE;
                                         
                  NewRefno=0;  
@@ -21585,7 +21585,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				 CloseMap(TRUE);
                  DisableHalt = FALSE;
          	 	 Processing = FALSE;
-             	 ContinueProcessing = TRUE; 
+             	 SetContinueProcessing ( TRUE); 
                  CurView->FileProjectionType = SaveFPT; 
                  DisableHalt = FALSE;  
    				 GSSiClose (FidSHP);
@@ -22236,12 +22236,12 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 						else
 							isym=SelectLineSymbol (hWndDlg,1,pSym,CSize,CColor,TRUE); 
 						if (!isym)
-							ContinueProcessing = FALSE;
+							SetContinueProcessing (FALSE);
 					}
 				 }
 	             GSSiClose (FidDSC);
 				 GSSiGlobFree (&hLayerSym);  
-				 ContinueProcessing = TRUE;
+				 SetContinueProcessing ( TRUE);
 	        }
             	 break;
             	 
@@ -22646,7 +22646,7 @@ BeginLoad:
 				 }
 				 
                  DisableHalt = TRUE;  
-                 ContinueProcessing = TRUE;   
+                 SetContinueProcessing ( TRUE);   
                  Processing = TRUE;
                                         
                  NewRefno=0;  
@@ -23848,7 +23848,7 @@ DoLine:
 	                	SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,str); 
 	                } 
 				 }
-             	 ContinueProcessing = TRUE; 
+             	 SetContinueProcessing ( TRUE); 
                  break;
                  
             }   
@@ -25215,7 +25215,7 @@ NextLine:
                  DisableHalt = FALSE;
                  Processing = FALSE; 
                  ForceRefIndex = ForceTAGIndex = FALSE;
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
                  CurView->FileProjectionType = SaveFPT;  
                  GSSiGlobUlFree (&hItems);
 		         ConvertCoordClose ();  
@@ -25753,7 +25753,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  DisableHalt = FALSE;
                  Processing = FALSE; 
                  ForceRefIndex = ForceTAGIndex = FALSE;
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
                  CurView->FileProjectionType = SaveFPT;  
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE);
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);
@@ -26009,7 +26009,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 					    	if (_fstrnicmp (WantCD,pCDData->GSSiCD,6)) 
 					    		break;
 					        {   
-					        	ContinueProcessing = GetQuadVolLabel (pCDData->QuadID,VolLabel);
+								SetContinueProcessing(GetQuadVolLabel(pCDData->QuadID, VolLabel));
 						    	Truncate (VolLabel);
 					        	iDOQ=0;
 							    while (SendDlgItemMessage(hWndDlg,IDC_DOQLIST,LB_GETTEXT,iDOQ++,(DWORD)str)>=0) 
@@ -26029,7 +26029,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			                }
 				NextVol:;  
 						} 
-						ContinueProcessing = TRUE;
+						SetContinueProcessing ( TRUE);
 					}
 				}
 				GlobalUnlock (hDB);
@@ -27421,7 +27421,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  else
                  {
                     EndDialog(hWndDlg, FALSE); 
-                    ContinueProcessing = TRUE;
+                    SetContinueProcessing ( TRUE);
                  }
                  break;
                  
@@ -27997,7 +27997,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  CurView->FileProjectionType = SaveFPT;
                  Processing = FALSE;
                  EndDialog(hWndDlg, ContinueProcessing); 
-                 ContinueProcessing = TRUE;  
+                 SetContinueProcessing ( TRUE);  
                  break;
                  
             }   
@@ -28724,7 +28724,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
         EndState:
                  EndDialog(hWndDlg, TRUE); 
                  Processing = FALSE;
-                 ContinueProcessing = TRUE;
+                 SetContinueProcessing ( TRUE);
                  DisableHalt = FALSE;
                  CurView->FileProjectionType = SaveFPT; 
                  break;
@@ -30091,7 +30091,7 @@ Exit2:
 				GSSiGlobFree(&MIFOutFields);
                 GSSiGlobUlFree (&hOutRec); 
                 DisableHalt = FALSE;  
-                ContinueProcessing = TRUE;   
+                SetContinueProcessing ( TRUE);   
                 Processing = FALSE;
                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
@@ -31257,7 +31257,7 @@ Exit2:
 				CloseTRANS2 (&hTranExport[1]);
 				GSSiGlobFree(&hOutRec);
                 DisableHalt = FALSE;  
-                ContinueProcessing = TRUE;   
+                SetContinueProcessing ( TRUE);   
                 Processing = FALSE;
                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
@@ -31440,7 +31440,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	            case IDC_EXIT:     
 	                 CloseDataFile (TRUE, &hSQL);  
 					 DestroyFieldList ();
-	                 ContinueProcessing = TRUE;
+	                 SetContinueProcessing ( TRUE);
 	                 EndDialog(hWndDlg, TRUE);  
 					 PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 	                 break;
@@ -31733,7 +31733,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				    FidDisplay = HFILE_ERROR;
 				    GSSiGlobUlFree (&hStr);
 	                Processing = FALSE; 
-	                ContinueProcessing = TRUE; 
+	                SetContinueProcessing ( TRUE); 
 	                EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
 	                EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);  
 	                SetDlgItemText (hWndDlg,IDC_MESSAGE,"Extract complete");

@@ -1842,7 +1842,7 @@ ii=1;
 	} 
 	GSSiGlobFree (&hPIAAccelerator);
 	*pRes = Res;
-	ContinueProcessing = TRUE;
+	SetContinueProcessing ( TRUE);
 	if (DisplayStatus)
 		DestroyStatusWindow(0);  
 	GlobalUnlock (hBMPNew);

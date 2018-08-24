@@ -573,7 +573,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 				if (GSSiMessageBox (0,pMess, "Error in Ortho File", MB_OKCANCEL, 0) == IDCANCEL)
 					showMessage = FALSE;
 				GSSiGlobUlFree (&hMess); 
-				ContinueProcessing = FALSE;
+				SetContinueProcessing (FALSE);
 			}
 			return FALSE;
 		}
