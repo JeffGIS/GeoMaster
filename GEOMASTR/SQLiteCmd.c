@@ -17,7 +17,7 @@ static	char	SQLITETAG[128] = "CONTROLN:[SQLITE.Wall Id]", SQLITETag[128];//"CASE
 static	int		SQLITEXIndex = 1, SQLITEYIndex = 2;
 static	int		SQLITEXField = 7, SQLITEYField = 8;
 static	DPOINT	SQLITEPoint;
-static	int		SQLITEPointSize;
+static	double	SQLITEPointSize;
 static	long	SQLITEColor = -1;
 static char		SQLITEBeginDate[256];
 static char		SQLITEEndDate[256];
@@ -2623,7 +2623,7 @@ BOOL SetSQLITEParms(void)
 		{
 			_fstrcpy(str, pWidth);
 			ExpandText(str);
-			SQLITEPointSize = atol(str);
+			SQLITEPointSize = atof(str);
 			switch (*LastChr(str))
 			{
 			case 'P':

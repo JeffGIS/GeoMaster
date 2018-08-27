@@ -894,7 +894,7 @@ BOOL SetSHPParms (long RecordNumber)
 		{
 			_fstrcpy (str,pWidth);
 			ExpandText (str);
-			SHPWidth = atol (str);
+			SHPWidth = atof (str);
 			if (SHPWidth == -1)
 				SHPWidth = GetSymbolWidth (CurrentDesc);
 			switch (*LastChr (str)) 
