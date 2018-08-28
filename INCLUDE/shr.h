@@ -978,6 +978,7 @@ void ClearCurrentCD (void);
 BOOL CDInCancelledList (LPSTR CD);
 void AddCDToCancelledList (LPSTR CD);
 short OkToContinue (BOOL ForceCheck);
+BOOL Is64BitMachine(void);
 BOOL WindowIsCovered (HWND hWnd,short opt);
 void FixRect(LPRECT pRect);
 double GetDriveSize (char Drive);

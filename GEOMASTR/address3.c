@@ -687,6 +687,7 @@ BOOL DrawDelayedText (void)
   		}	 
   	}
   	CloseAndDeleteFile (&CurTheme->FidDelayedText);
+	ShowBufferedScreen(TRUE, TRUE, 0, 0);
     return TRUE;
 }
 

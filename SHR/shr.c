@@ -13010,6 +13010,16 @@ BOOL WindowBelongsToViewport (HWND hWnd)
 	return FALSE;
 }
 
+BOOL Is64BitMachine(void)
+{
+	BOOL isWOW64=TRUE;
+	HANDLE hProcess = GetCurrentProcess();
+
+	if (!IsWow64Process(hProcess, &isWOW64))
+		isWOW64 = FALSE;
+	return isWOW64;
+}
+
 BOOL WindowIsCovered (HWND hWnd,short opt)
 #if ENABLETRACE
 {GSSiEnterProg (424);

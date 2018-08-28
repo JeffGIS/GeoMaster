@@ -288,6 +288,14 @@ void LogUsageInfo (int From,LPSTR mess)
 		time_t	systime; 
 		RECT	WindRect,ClientRect;  
 		BOOL	SaveAllowCache = AllowCache;
+		BOOL	is64Bit = Is64BitMachine();
+		char	winVersion[256];
+
+		GetWindowsVersion(winVersion);
+		if (is64Bit)
+			strcat(winVersion, "-64");
+		else
+			strcat(winVersion, "-32");
 
 		AllowCache = FALSE;
 		systime=time(&systime);
@@ -302,9 +310,9 @@ void LogUsageInfo (int From,LPSTR mess)
 		GetClientRect (hWndMain,&ClientRect);
 		ShareEnabled = TRUE;
 		if (!ExistFile ("[%%DL]usage.txt"))
-			AppendFile ("[%%DL]usage.txt","DATE\tUSER\tNODE\tMINUTES\tSCREENS\tVERSION\tNTEMP\tWL\tWT\tWR\tWB\tCL\tCT\tCR\tCB\tCLB\tCTB\tCRB\tCBB");
+			AppendFile ("[%%DL]usage.txt","DATE\tUSER\tNODE\tWINDOWSVER\tMINUTES\tSCREENS\tVERSION\tNTEMP\tWL\tWT\tWR\tWB\tCL\tCT\tCR\tCB\tCLB\tCTB\tCRB\tCBB");
 
-		sprintf (str,"%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",DateTime,UserName,NodeName,Minutes,NumScreensDisplayed,GMVersion,nTempFilesCleared,nCheckPointUpdateBlocks,
+		sprintf (str,"%s\t%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",DateTime,UserName,NodeName,winVersion,Minutes,NumScreensDisplayed,GMVersion,nTempFilesCleared,nCheckPointUpdateBlocks,
 																			  		 WindRect.left,WindRect.top,WindRect.right,WindRect.bottom,
 																					 ClientRect.left,ClientRect.top,ClientRect.right,ClientRect.bottom,
 																					 ClientRectStart.left,ClientRectStart.top,ClientRectStart.right,ClientRectStart.bottom);
