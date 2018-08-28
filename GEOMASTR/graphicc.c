@@ -4282,8 +4282,6 @@ DoSid:
 			GetGlobalCVal ("[%LAYER_PROJECTION]",MrSidProjection,0);
 			if (*MrSidProjection && !InLoadBinaryFileList)
 			{
-				char	SaveAltProj[MAX_PATH];
-
 				ConvertCoordClose ();
 				LoadProjection(0,MrSidProjection); 
 				ConvertRectCoord (&CurView->FileMNMX,&MrSidBounds,0,1);

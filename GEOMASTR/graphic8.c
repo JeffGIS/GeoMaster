@@ -1063,7 +1063,7 @@ GSSiExitProg (950);
 	{ 
 		DPoint.x = FileBounds->xmn;
 		DPoint.y = FileBounds->ymn;
-		if (ConvertCoord(&DPoint, 3, 1))
+		if (ConvertCoord(&DPoint, 0, 1))
 		{
 #if ENABLETRACE
 			GSSiExitProg (950);
@@ -1073,7 +1073,7 @@ GSSiExitProg (950);
 		AddDPointToMinMax(&DPoint, &newBounds);
 		DPoint.x = FileBounds->xmn;
 		DPoint.y = FileBounds->ymx;
-		if (ConvertCoord(&DPoint, 3, 1))
+		if (ConvertCoord(&DPoint, 0, 1))
 		{
 #if ENABLETRACE
 			GSSiExitProg (950);
@@ -1083,7 +1083,7 @@ GSSiExitProg (950);
 		AddDPointToMinMax(&DPoint, &newBounds);
 		DPoint.x = FileBounds->xmx;
 		DPoint.y = FileBounds->ymn;
-		if (ConvertCoord(&DPoint, 3, 1))
+		if (ConvertCoord(&DPoint, 0, 1))
 		{
 #if ENABLETRACE
 			GSSiExitProg(950);
@@ -1093,7 +1093,7 @@ GSSiExitProg (950);
 		AddDPointToMinMax(&DPoint, &newBounds);
 		DPoint.x = FileBounds->xmx;
 		DPoint.y = FileBounds->ymx;
-		if (ConvertCoord (&DPoint,3,1))
+		if (ConvertCoord (&DPoint,0,1))
 {
 #if ENABLETRACE
 GSSiExitProg (950);

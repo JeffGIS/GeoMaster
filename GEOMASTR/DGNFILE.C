@@ -152,7 +152,7 @@ BOOL LoadDGNParm (LPSTR DGNFileName)
 {
 	char	Name[256], str[260], Projection[34], Units[34];
 //	char	SymName[66], cWidth[64],cRot[64],cColor[64], cIF[128];
-	LPSTR	pDot, pTAG,pWidth, pTAB, pParm=DGNParms; 
+	LPSTR	pDot, pTAG,pWidth, pTAB, pParm=DGNParms, pBS; 
 	short	l; 
 	BOOL	FileIsIndex, Err=FALSE, rtn=FALSE; 
 	HFILE	Fid;
@@ -175,28 +175,35 @@ BOOL LoadDGNParm (LPSTR DGNFileName)
     	return TRUE; 
     }
     NumDGNTags = 0;
-	GetGlobalCVal ("[%DefaultDGNProjection]",Projection,"BASEPROJ"); 
-	LoadProjection(0,Projection); 
-	GetGlobalCVal ("[%DefaultDGNUnits]",Units,"FEET"); 
-	if (!_fstricmp (Units,"FEET"))
-		PRJ_UNITS[0] = 1;
-	else if (!_fstricmp (Units,"METERS"))
-		PRJ_UNITS[0] = 2; 
-	else
-		PRJ_UNITS[0] = 4;
 	_fstrcpy (Name,DGNFileName); 
 	ExpandText (Name); 
 	l = _fstrlen (Name);
-	if (l > 4 && !_fstricmp (&Name[l-5],"INDEX"))
+	pBS = strrchr(Name, '\\');
+	if (l > 4 && !_fstricmp(&Name[l - 5], "INDEX"))
 	{
-		HaveIndexParmFile = FALSE; 
-		FileIsIndex = TRUE; 
+		HaveIndexParmFile = FALSE;
+		FileIsIndex = TRUE;
 		pDot = &Name[l];
 	}
-	else  
+	else if (pBS && !strnicmp (++pBS,"INDEX",5))
+	{
+		HaveIndexParmFile = FALSE;
+		FileIsIndex = TRUE;
+		pDot = strchr(pBS, 0);
+	}
+	else
 	{
 		FileIsIndex = FALSE;
 		pDot = _fstrrchr (Name,'.');   
+		GetGlobalCVal("[%DefaultDGNProjection]", Projection, "BASEPROJ");
+		LoadProjection(0, Projection);
+		GetGlobalCVal("[%DefaultDGNUnits]", Units, "FEET");
+		if (!_fstricmp(Units, "FEET"))
+			PRJ_UNITS[0] = 1;
+		else if (!_fstricmp(Units, "METERS"))
+			PRJ_UNITS[0] = 2;
+		else
+			PRJ_UNITS[0] = 4;
 	}
 	if (!pDot)
 		goto Exit;

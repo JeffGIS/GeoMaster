@@ -34,6 +34,7 @@ static	ULONG	NumFetch=0;
 static	LPSTR	MBHMess, MBHTitle;
 static	HWND	dlgListWnd = 0;
 static	UINT	dlgListList;
+static  char	altprojection[256] = { 0 };
 
 extern char	VirtPrinterImageFile[256];
 
@@ -2644,6 +2645,10 @@ GSSiExitProg (532);
         	
 		case 98:
 			PickAllPieces = atob (Value);
+			break;
+
+		case 99:
+			strncpy0(altprojection, Value, 255);
 			break;
 
 		case 100:

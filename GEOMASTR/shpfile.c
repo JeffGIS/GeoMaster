@@ -431,7 +431,7 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 {   
 	char	Name[MAX_PATH], str[260], Projection[MAX_PATH+2], Units[34];
 	char	SymName[66], cWidth[64],cRot[64],cColor[64], cIF[128];
-	LPSTR	pDot, pTAG,pWidth, pParm=SHPParms;  
+	LPSTR	pDot, pTAG,pWidth, pParm=SHPParms, pBS;  
 	short	l;
 	int		itype;
 	HFILE	Fid; 
@@ -484,34 +484,23 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 			GetGlobalCVal ("[%DefaultShapeAreaSymbol]",SHPParms,"PARCEL"); 
 		break;
 	}
-	if (!SHPOpenPrj(SHPFileName, 0))
-	{
-		GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
-		LoadProjection(0, Projection);
-	}
-	else
-		havePrj = TRUE;
-	GetGlobalCVal ("[%DefaultShapeUnits]",Units,"FEET"); 
-	PGDBCnvFac=1;
-	if (!_fstricmp (Units,"FEET"))
-	{
-		PRJ_UNITS[0] = 1;
-		PGDBCnvFac=FTM;
-	}
-	else if (!_fstricmp (Units,"METERS"))
-		PRJ_UNITS[0] = 2;
-	else
-		PRJ_UNITS[0] = 4;
 	SHPBaseRefno = 0; 
 	*SHPRefno = 0;
 	_fstrcpy (Name,SHPFileName); 
 	ExpandText (Name);
 	l = _fstrlen (Name);
-	if (l > 4 && !_fstricmp (&Name[l-5],"INDEX"))
+	pBS = strrchr(Name, '\\');
+	if (l > 4 && !_fstricmp(&Name[l - 5], "INDEX"))
 	{
 		HaveIndexParmFile = FALSE; 
 		FileIsIndex = TRUE; 
 		pDot = &Name[l];
+	}
+	else if (pBS && !strnicmp(++pBS, "INDEX", 5))
+	{
+		HaveIndexParmFile = FALSE;
+		FileIsIndex = TRUE;
+		pDot = strchr(pBS, 0);
 	}
 	else  
 	{
@@ -565,6 +554,27 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 	}
 	if (FileIsIndex)
 		HaveIndexParmFile = TRUE;
+	else
+	{
+		if (!SHPOpenPrj(SHPFileName, 0))
+		{
+			GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+			LoadProjection(0, Projection);
+		}
+		else
+			havePrj = TRUE;
+		GetGlobalCVal("[%DefaultShapeUnits]", Units, "FEET");
+		PGDBCnvFac = 1;
+		if (!_fstricmp(Units, "FEET"))
+		{
+			PRJ_UNITS[0] = 1;
+			PGDBCnvFac = FTM;
+		}
+		else if (!_fstricmp(Units, "METERS"))
+			PRJ_UNITS[0] = 2;
+		else
+			PRJ_UNITS[0] = 4;
+	}
     GSSifstat (Fid,&statParmFile);
     SHPParmTime = statParmFile.st_mtime;
 	fgetstring (Projection,MAX_PATH,Fid);

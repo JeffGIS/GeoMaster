@@ -6688,8 +6688,9 @@ Start:
 	            if (*str) 
 	            {
 		    		ConvertCoordClose ();
-   				    SetGlobalValue ("%ALT_PROJECTION",str); 
 				    ConvertLayer = CurView->CurFile;
+					LoadProjection(0, str);
+
 				}
 	            else
 	            	ConvertLayer = -1;
@@ -6703,8 +6704,8 @@ Start:
 	            if (*str) 
 	            {
 		    		ConvertCoordClose ();
-   				    SetGlobalValue ("%ALT_PROJECTION",str); 
 				    ConvertLayer = CurView->CurFile;
+					LoadProjection(0, str);
 				}
 	            else
 	            	ConvertLayer = -1;

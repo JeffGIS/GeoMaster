@@ -378,7 +378,10 @@ C-------------------------------        */
        int  n=0, SETUNITS;   
 	   char INNAME[MAX_PATH * 4];
        LPSTR    lpPtr, lpCVT, pBeg, lpGoogle;
-          
+      
+	   if (!ID)
+		   ii = 1;
+
 	   strcpy(INNAME, InName);
 //C---------------------
 //C   SUBROUTINE START

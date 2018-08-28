@@ -160,9 +160,10 @@ GSSiExitProg (1333);
      ID = 3; 
      _fstrcpy(Name,"[%ALT_PROJECTION]");
      ExpandText (Name);
-     if (!Name[0] || Name[0] == '[') 
-	     _fstrcpy(Name, "baseproj");
-     
+	 if (!Name[0] || Name[0] == '[')
+		 _fstrcpy(Name, "baseproj");
+	 else
+		 ii = 1;
      ok = LoadProjection(ID,Name);
      if (ok != 0)
      {         
