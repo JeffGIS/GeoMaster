@@ -9954,7 +9954,8 @@ Top:
 	goto Top;
 }
 
-void  STRIPR_old(LPSTR stuff, short *NLEN,LPSTR out_with,  short llen) //strips leading characters??
+
+void  STRIPR_old(LPSTR stuff, int *NLEN,LPSTR out_with, int llen) //strips leading characters??
 #if ENABLETRACE
 {GSSiEnterProg (320);
 #endif

@@ -408,6 +408,7 @@ void RestoreScreenRect (HDC hDC, HBITMAP hSavedBM, RECT Rect, RECT NewRect);
 void TRAN (void *source, void *dest, size_t count);
 long  NCHK(LPSTR NAME,  long i,  long PART_LN);
 void  STRIPR(LPSTR NAME, int *NLEN,LPSTR out_with,  int llen); 
+void  STRIPR_old(LPSTR stuff, int *NLEN, LPSTR out_with, int llen);//strips leading characters??
 long  IREAD (LPSTR NAME, long NUMDIG,long *IRC);  
 BOOL IWRITE (long ival,LPSTR str ,short len);  
 BOOL IWRITEZ (long ival,LPSTR str ,short len);
