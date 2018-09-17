@@ -1730,19 +1730,31 @@ GotCloseFilehSQL:
 			SubstituteDL (OutLoc,TRUE);
 			goto Rtnl;
 		
-		case 522: //$STRIP(string,char(opt-default is space)  
+		case 522: //$STRIP(string,char(opt-default is space,leading only)  
 		{
 			char	StripChr=' ';
 			int	ln=2048;
 
-			nArgs = GetFunArgs (Args,Arg,2,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse; 
 			_fstrcpy (OutLoc,Arg[1]);
-			if (nArgs == 2)
-				STRIPR (OutLoc,&ln, Arg[2], strlen(Arg[2]));
+			if (atob(Arg[3]))
+			{
+				char c = *Arg[2];
+				LPSTR pResult = Arg[1];
+				while (*pResult && *pResult == c)
+					pResult++;
+				strcpy(OutLoc, pResult);
+			}
 			else
-				Strip (OutLoc,StripChr);
+			{
+
+				if (nArgs == 2)
+					STRIPR(OutLoc, &ln, Arg[2], strlen(Arg[2]));
+				else
+					Strip(OutLoc, StripChr);
+			}
 			goto Rtnl;
 		}
 		case 523: //$ISHLT(refno) return highlight status
