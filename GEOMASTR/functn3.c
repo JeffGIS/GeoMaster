@@ -4826,6 +4826,14 @@ GotCloseFilehSQL:
 			}
 		}
 			break;
+		case 655: // $PROMPT(prompt text);
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+
+			DisplayPromptText(0, Arg[1]);
+			goto RtnTrue;
+		}
+
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);

@@ -3421,6 +3421,53 @@ GSSiExitProg (1350);
 			PrintMailLabels (nArgs, Arg, OutLoc);
 			goto Rtnl;
 		}
+		case 1042://$SAVESCREEN(TOHANDLE)
+			//$SAVESCREEN(TOFILE,hDIB,path)
+			//$SAVESCREEN(UNLOAD,hDIB)
+		{
+			HBITMAP	hBitmap;
+			HDIB32 hDib32;
+			RECT	ScreenRect;
+			HWND	hWnd = GetDesktopWindow();
+			HDC		hDC;
+
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "TOHANDLE"))
+			{
+				hDC = GetWindowDC(hWnd);
+				//SaveDC(hDC);
+				//SetDisplayMode(hDC, GF_TEXTMODE);
+				GetClientRect(hWndMain, &ScreenRect);
+				ClientRectToScreenRect(hWndMain, &ScreenRect);
+				hBitmap = SaveScreen(hDC, ScreenRect);
+				hDib32 = BitmapToDIB32(hBitmap);
+				ltoa((long)hDib32, OutLoc, 10);
+				DeleteObject(hBitmap);
+				//RestoreDC(hDC,-1);
+				ReleaseDC(hWnd, hDC);
+				goto Rtnl;
+			}
+			if (!stricmp(Arg[1], "TOFILE"))
+			{
+				HDIB32 hDib24;
+				hDib32 = (HDIB32)atol(Arg[2]);
+				hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+				rtn = GM32SaveDIB(hDib24, Arg[3], -1, 0);
+				FreeImage_Unload(hDib24);
+				goto Rtnrtn;
+			}
+			if (!stricmp(Arg[1], "UNLOAD"))
+			{
+				hDib32 = (HDIB32)atol(Arg[2]);
+				FreeImage_Unload(hDib32);
+				goto RtnTrue;
+			}
+			
+
+		}
+
 
 		case 1101: //$DUMPGLOBALS(pathname)
 			dumpvars (Args);
@@ -4307,7 +4354,6 @@ GSSiExitProg (1350);
 			GMFileManager(Arg[1]);
 			goto RtnTrue;
 		}
-
 		case 1201: //$FINDWAYPOINT ()
         {
             setDoPaint( FALSE);      

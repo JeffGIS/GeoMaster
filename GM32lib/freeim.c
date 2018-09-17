@@ -368,10 +368,10 @@ WORD GM32SaveDIB (HDIB32 hDIB,LPSTR OutFileIN,long Format,DWORD Flag)
 
 	if (hDIB)
 	{
-//		rtn = GMFIBMPHandleToEXT (OutFile,(DWORD)dib,Flag);
-		strcpy (OutFile,OutFileIN);
-		ExpandText (OutFile);
-		rtn = GenericWriter(dib,OutFile,Flag);
+		strcpy(OutFile, OutFileIN);
+		ExpandText(OutFile);
+		rtn = GMFIBMPHandleToEXT(OutFile, (DWORD)hDIB, Flag);
+//		rtn = GenericWriter(dib,OutFile,Flag);
 
 	}
 	return (WORD)rtn;

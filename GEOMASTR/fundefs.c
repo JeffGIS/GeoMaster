@@ -223,6 +223,7 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "NVCRIS", 6)) return 652;
 			if (!_fstrnicmp(str, "LASZIP", 6)) return 653;
 			if (!_fstrnicmp(str, "UNIQUE", 6)) return 654;
+			if (!_fstrnicmp(str, "PROMPT", 6)) return 655;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)
@@ -464,6 +465,7 @@ int	GetFunctionID10 (LPSTR str)
 			if (!_fstrnicmp(str, "SYMATTRKEY", 10)) return 1039;
 			if (!_fstrnicmp(str, "PARCELTRAN", 10)) return 1040;
 			if (!_fstrnicmp(str, "MAILLABELS", 10)) return 1041;
+			if (!_fstrnicmp(str, "SAVESCREEN", 10)) return 1042;
 			return 0;
 }
 int	GetFunctionID11 (LPSTR str)
