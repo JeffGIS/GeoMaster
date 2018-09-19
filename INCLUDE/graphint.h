@@ -1680,6 +1680,7 @@ BOOL SetAreaColor (long *pColor,LPSTR NewAreaColor);
 BOOL ProcessImportFilter (void); 
 short GetBaseRecordType (short Type);
 short GetHighlightType (short Type);
+BOOL TypeIsPolyline(short Type);
 BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT Point); 
 BOOL AddRouteToGPSList (long RouteRef);
 BOOL GetLowranceWPList (BOOL Delete);

@@ -2373,6 +2373,25 @@ GSSiExitProg (903);
 #endif
 }
 
+BOOL TypeIsPolyline(short Type)
+{
+	BOOL rtn = FALSE;
+	switch (Type)
+	{
+	case GF_LINE:
+	case GF_CURVE:
+	case GF_POLYLINE:
+	case 2:
+	case 4:
+	case 5:
+		rtn = TRUE;
+		break;
+	}
+		
+	return rtn;
+}
+
+
 short GetHighlightType (short Type)
 #if ENABLETRACE
 {GSSiEnterProg (903);
@@ -4288,10 +4307,17 @@ Top:
 				ExpandText (text);
 				if (*text == '-')
 				{
-					if (_fstricmp (&text[1],PickList[item].Prefix))
+					if (_fstricmp(&text[1], PickList[item].Prefix))
 						WantThisItem = FALSE;
 					else
 						WantThisItem = TRUE;
+				}
+				else if (*text == '|')
+				{
+					if (!strnicmp(&text[1], "POLYLINE|", 9) && TypeIsPolyline(PickList[item].Type))
+						WantThisItem = TRUE;
+					else
+						WantThisItem = FALSE;
 				}
 				else
 					WantThisItem =  NameInSymList (text,nNames,pNames) || (*PickList[item].Prefix != '%' && !_fstricmp(text,"ALL"));
