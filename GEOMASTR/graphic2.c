@@ -2581,6 +2581,24 @@ GSSiExitProg (137);
 #endif
 } 
 
+BOOL RefnoInHighlightList(long Refno)
+{
+	HIGHLIGHTDATA	HighlightData;
+	BOOL opened = FALSE;
+
+	if (!hHighlight)
+	{
+		OpenHighlightList(0, 0);
+		opened = TRUE;
+	}
+	int st = BT_FIND(hHighlight, (LPSTR)&Refno, BT_FIRST, BT_EQ, (LPSTR)&HighlightData);
+	if (opened)
+		CloseHighlightList();
+	if (!st)
+		return TRUE;
+	return FALSE;
+}
+
 int AddToHighlightList (long Refno,LPPICKDATA pPickData,BOOL Show)
 //return 0 if not added, 1 if added and not already in and 2 if already in
 #if ENABLETRACE
