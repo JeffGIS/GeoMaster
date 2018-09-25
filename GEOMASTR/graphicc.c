@@ -5379,6 +5379,7 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 	HPDPOINT pPolyPoints,lpDPoint;
 	BOOL	rtn=FALSE; 
 	short	SavePass;
+	int		nPolys, iPoly;
     LPVISLIST	SaveVis = CurVis;
 	HANDLE		hVisList=GSSiGlobAlloc ( 964,GHND,sizeof(VISLIST));
 	
@@ -5402,33 +5403,41 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 		CurView->PassID = SavePass; 
 		ProcessSelectedTheme = 0;       		
 		DeleteTheme (pTheme); 
-		GetSavedPolys ();
-		if (hSavePoly)
-		{   LPMNMXCORD lpRect;
-			HPDPOINT	lpDpoint;
-	    		    
-            *pnPnts = nSavePoly; 
-            lpRect = (LPMNMXCORD) GlobalLock (hSavePoly);
-            lpRect++;
-            lpDpoint = (LPDPOINT) lpRect;  
-            *pHandle = GSSiGlobAlloc ( 623,GMEM_MOVEABLE,(nSavePoly+1)*sizeof(DPOINT));
-            pPolyPoints = (HPDPOINT)GlobalLock (*pHandle);
-            hmemmove ((HPSTR)pPolyPoints,(HPSTR)lpDpoint,nSavePoly*sizeof(DPOINT));
-            if (PickList[0].Type == 3 && *pnPnts > 2 && ldistp (pPolyPoints[0],pPolyPoints[nSavePoly-1]) > P_TOL)
-            {   
-            	(*pnPnts)++;
-            	pPolyPoints[nSavePoly] = pPolyPoints[0];
-            }   
-            GlobalUnlock (*pHandle); 
-            GlobalUnlock (hSavePoly);
-			DestroySavedPolys ();  
-			if (Reverse)
-				*pHandle = ReversePoints (*pnPnts,*pHandle);
-            rtn = TRUE;
-        }
-        else
-			rtn = FALSE;
-	} 
+		nPolys = NumSavedPolys;
+		iPoly = 0;
+		while (GetSavedPolys())
+		{
+			if (hSavePoly)
+			{
+				LPMNMXCORD lpRect;
+				HPDPOINT	lpDpoint;
+
+				lpRect = (LPMNMXCORD)GlobalLock(hSavePoly);
+				lpRect++;
+				lpDpoint = (LPDPOINT)lpRect;
+				if (*pnPnts)
+				{
+					*pHandle = GSSiGlobalReAlloc(623, *pHandle, (nSavePoly+*pnPnts+1)*sizeof(DPOINT), GMEM_MOVEABLE);
+				}
+				else
+					*pHandle = GSSiGlobAlloc(623, GMEM_MOVEABLE, (nSavePoly + 1)*sizeof(DPOINT));
+				pPolyPoints = (HPDPOINT)GlobalLock(*pHandle);
+				hmemmove((HPSTR)&pPolyPoints[*pnPnts], (HPSTR)lpDpoint, nSavePoly*sizeof(DPOINT));
+				*pnPnts += nSavePoly;
+				iPoly++;
+				if (iPoly == nPoly && PickList[0].Type == 3 && *pnPnts > 2 && ldistp(pPolyPoints[0], pPolyPoints[nSavePoly - 1]) > P_TOL)
+				{
+					(*pnPnts)++;
+					pPolyPoints[nSavePoly] = pPolyPoints[0];
+				}
+				GlobalUnlock(*pHandle);
+				GlobalUnlock(hSavePoly);
+				rtn = TRUE;
+			}
+		}
+		if (rtn && Reverse)
+			*pHandle = ReversePoints(*pnPnts, *pHandle);
+	}
 	CurTheme = SaveTheme;
 	CurVis = SaveVis;
 	GSSiGlobUlFree (&hVisList);	
@@ -5592,7 +5601,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 	HPDPOINT pPolyPoints,lpDPoint;  
 	LPINT	pPolyParts;
 	short	SavePass; 
-	int		nLoops=0, nParts; 
+	int		nLoops = 0;
 	int		nPParts;    
 	BOOL	FirstLoop = TRUE;
 	
@@ -5601,7 +5610,6 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 	*(LPPICKDATAHEADER)&PickList[0] = *PickData;
 	if (PickList[0].Type == 2 || PickList[0].Type == 3 || PickList[0].Type == 5)
 	{   
-		GSSiGlobFree(&hSavePolyElev);
 		SetConfig(PickList[0].ConfigID);
 	    SetViewport (PickList[0].ViewID);
 		pTheme = AddTheme (GF_SAVEPOLYPARTS_THEME); 
@@ -5612,7 +5620,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 		CurView->PassID = SavePass; 
 		ProcessSelectedTheme = 0;       		
 		DeleteTheme (pTheme); 
-		while ((nParts = GetSavedPolys()))
+		while (GetSavedPolys())
 		{
 			int nPntsLast = *pnPnts;
 
@@ -5627,11 +5635,10 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 					pPolyParts = (LPINT)GlobalLock(hSavePolyParts);
 					if (FirstLoop)
 					{
-						*phPoints = hSavePoly;
+						*phPoints = GSSiGlobalCopy (1808,hSavePoly);
 						nLoops = *pPolyParts++;
-						*phPolyPartLen = hSavePolyParts;
 						GlobalUnlock(hSavePolyParts);
-						hSavePolyParts = 0;
+						*phPolyPartLen = GSSiGlobalCopy (1809,hSavePolyParts);
 					}
 					else
 					{
@@ -5641,7 +5648,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 				else
 				{
 					if (FirstLoop)
-						*phPoints = hSavePoly;
+						*phPoints = GSSiGlobalCopy(1810, hSavePoly);
 					else
 					{
 						LPDPOINT pPoints1, pPoints2;
@@ -5655,7 +5662,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 						AddMinMaxD (pBounds1,pBounds2);
 						pPoints2 = (LPDPOINT)(pBounds2 + 1);
 						memmove(pPoints1, pPoints2, nSavePoly*sizeof(DPOINT));
-						GSSiGlobUlFree(&hSavePoly);
+						GlobalUnlock (hSavePoly);
 						GlobalUnlock(*phPoints);
 						if (*phPolyPartLen)
 						{
@@ -5677,9 +5684,8 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 					}
 					nLoops++;
 				}
-				hSavePoly = 0;
 			}
-			GSSiGlobFree(&hSavePolyElev);
+			GlobalUnlock (hSavePolyElev);
 			FirstLoop = FALSE;
 		}
 	} 

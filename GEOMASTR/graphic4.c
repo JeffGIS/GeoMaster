@@ -5024,9 +5024,10 @@ short GetSavedPolys (void)
 	LPSAVEPOLY pSavedPolys;
 	short	rtn;
     
-    GSSiGlobFree (&hSavePoly);  
+/*    GSSiGlobFree (&hSavePoly);  
     GSSiGlobFree (&hSavePolyElev);  
     GSSiGlobFree (&hSavePolyParts);
+	*/
     if (!hSavedPolys)
 {
 #if ENABLETRACE
@@ -5072,10 +5073,12 @@ void DestroySavedPolys (void)
 {   
 	LPSAVEPOLY pSavedPolys;
 	
-    GSSiGlobFree (&hSavePoly);  
+/*    GSSiGlobFree (&hSavePoly);  
     GSSiGlobFree (&hSavePolyParts);
     GSSiGlobFree (&hSavePolyElev);
-    if (hSavedPolys)
+	*/
+	CurSavedPoly = 0;
+	if (hSavedPolys)
     {
 	    while (CurSavedPoly < NumSavedPolys)
 	    {

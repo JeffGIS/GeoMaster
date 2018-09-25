@@ -1323,11 +1323,15 @@ BOOL SplitPoly (short Item, LPLONG pNewRef1, LPLONG pNewRef2)
 				}  
 				lpDpoint++;
 	        }
-	        GSSiGlobUlFree (&hSavePoly);
+			GlobalUnlock(hSavePoly);
 	        GlobalUnlock (hSeg2);
+			DestroySavedPolys();
 	    } 
-	    else
+		else
+		{
+			DestroySavedPolys();
 	    	return FALSE;
+		}
 	}
 	else
 		return FALSE; 

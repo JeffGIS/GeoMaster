@@ -3988,30 +3988,38 @@ short AddPolySymbolToProfile (int idesc,short type,HPDPOINT PolyPoints,long nPnt
 					  		if (!GetProfileElevAndSlope (dist,hCurProfile,nCurProfile,&elev,&slope,DBL_MAX))
 					  			goto Next;	
 					  	}
-					  	pProfileSymbols = (LPPROFILESYMBOLS)GlobalLock (hProfileSymbols);
-					  	pProfileSymbols[*pNumProfileSymbols].Point.x = dist;
-					  	pProfileSymbols[*pNumProfileSymbols].SurfElev = elev;
-					  	pProfileSymbols[*pNumProfileSymbols].Size = 0;
-					  	if (idesc == GetDictSymbolNumber ("ISD"))
-					  	{
-					  		double	e1, e2;
-					  		char	str1[32], str2[32];
-					  		
-					  		GetValFromOpenFiles ("INVERT_IN_NGVD29",str1,32);
-					  		GetValFromOpenFiles ("INVERT_OUT_NGVD29",str2,32);    
-					  		
-					  		if (*str1 && *str2)
-					  		{
-					  			e1 = atof (str1) * FTM;
-					  			e2 = atof (str2) * FTM;
-					  			elev =  e1 + (e2 - e1) * (dFromFirstPoly / dPoly);
-					  			GetValFromOpenFiles ("DIAMETER_INCH",str2,32);
-					  			pProfileSymbols[*pNumProfileSymbols].Size = (atof (str2) / 12) * FTM;
-					  			idesc = -idesc;  
-					  		}
-					  	}
-					  	pProfileSymbols[*pNumProfileSymbols].Point.y = elev;
-					  	pProfileSymbols[(*pNumProfileSymbols)++].idesc = idesc;
+						pProfileSymbols = (LPPROFILESYMBOLS)GlobalLock(hProfileSymbols);
+						for (int isym = 0; isym < *pNumProfileSymbols; isym++)
+							if (CurrentRefno == pProfileSymbols[isym].refno)
+								goto SkipSym;
+
+						{
+							pProfileSymbols[*pNumProfileSymbols].Point.x = dist;
+							pProfileSymbols[*pNumProfileSymbols].SurfElev = elev;
+							pProfileSymbols[*pNumProfileSymbols].Size = 0;
+							if (idesc == GetDictSymbolNumber("ISD"))
+							{
+								double	e1, e2;
+								char	str1[32], str2[32];
+
+								GetValFromOpenFiles("INVERT_IN_NGVD29", str1, 32);
+								GetValFromOpenFiles("INVERT_OUT_NGVD29", str2, 32);
+
+								if (*str1 && *str2)
+								{
+									e1 = atof(str1) * FTM;
+									e2 = atof(str2) * FTM;
+									elev = e1 + (e2 - e1) * (dFromFirstPoly / dPoly);
+									GetValFromOpenFiles("DIAMETER_INCH", str2, 32);
+									pProfileSymbols[*pNumProfileSymbols].Size = (atof(str2) / 12) * FTM;
+									idesc = -idesc;
+								}
+							}
+							pProfileSymbols[*pNumProfileSymbols].Point.y = elev;
+							pProfileSymbols[*pNumProfileSymbols].refno = CurrentRefno;
+							pProfileSymbols[(*pNumProfileSymbols)++].idesc = idesc;
+						}
+						SkipSym:
 				  		GlobalUnlock (hProfileSymbols);
 				  	}
 			  	}

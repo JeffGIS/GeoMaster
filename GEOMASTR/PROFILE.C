@@ -324,7 +324,7 @@ void DisplayProfileThemeLegend(short From)
 	HIGHLIGHTDATA	HighlightData,HighlightData1;
 	long	Seq, Refno; 
 	short	pos=BT_FIRST, cond=BT_EQ, IncID;
-	double	LenRoute, IncDist, Dist, ElevRange, MinElev, MaxElev, MinDist,d; 
+	double	LenRoute, IncDist, Dist, ElevRange, MinElev, MaxElev, MidElev, MinDist,d; 
 	MNMXCORD Bounds; 
 	DPOINT	Point, OpenEnd, Point1, Point2;
 	long	i=0, nGrid;  
@@ -341,7 +341,7 @@ void DisplayProfileThemeLegend(short From)
    	char	SurfName[MAX_PATH];  
    	double	GridSpace,PixelsPerElevUnit=1,PixelsPerDistUnit=1,SymMarkerHeight,GridInc; 
    	COLORREF	ProfileColor[2]={0,RGB(0,255,0)}; 
-   	COLORREF	PipeBrushColor=RGB(0,0,255), PipePenColor=0, MHColor=RGB(255,0,0),SymMarkerColor=RGB(0,255,0);
+   	COLORREF	PipeBrushColor=RGB(0,0,255), PipePenColor=0, MHColor=RGB(255,0,0),SymMarkerColor=RGB(64,64,64);
 	LPPROFILESYMBOLS	pProfileSymbols;
 	USHORT	iProfileSym;
    	HANDLE	hDB=0;  
@@ -714,7 +714,7 @@ if (isurf)
 	   	Bounds.ymx = MaxElev * FTM; 
 	   	IncID = i;
 		nGrid = IDNINT((MaxElev - MinElev) / RangeInc[IncID]);
-
+		MidElev = (MaxElev + MinElev) / 2;
 	    sprintf (txt,"%.0f",MaxElev);
 	    h = 20*DeviceToScreenFactor();
 		TextExt = DispText (CurView->hDC,TRUE,p.x-10,p.x+10, -1,0, 2,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
@@ -894,6 +894,9 @@ if (isurf)
 	    GSSiDeleteObject(&CurView->hRgn);    
 		if (hProfileSymbols)
 		{
+			BOOL saveUseGDIPlus = useGDIPlus;
+
+			useGDIPlus = FALSE;
 			pProfileSymbols = (LPPROFILESYMBOLS)GlobalLock (hProfileSymbols); 
 			for (iProfileSym=0;iProfileSym<NumProfileSymbols;iProfileSym++,pProfileSymbols++)
 			{   
@@ -901,9 +904,12 @@ if (isurf)
 				
 				DPoint.y = pProfileSymbols->SurfElev;
 				WLine[0] = TRANDPointToPoint (&DPoint,hTran); 
-				DPoint.y += SymMarkerHeight;
-				WLine[1] = TRANDPointToPoint (&DPoint,hTran);
-				hPen = CreatePen (PS_SOLID,0,SymMarkerColor);
+				if (pProfileSymbols->SurfElev <= MidElev*FTM)
+					DPoint.y += SymMarkerHeight;
+				else
+					DPoint.y -= SymMarkerHeight;
+				WLine[1] = TRANDPointToPoint(&DPoint, hTran);
+				hPen = CreatePen(PS_SOLID, DeviceToScreenFactor(), SymMarkerColor);
 				hOldPen = SelectObject (CurView->hDC,hPen);      
 		    	Polyline (CurView->hDC,WLine,2);
 				SelectObject (CurView->hDC,hOldPen); 
@@ -912,17 +918,24 @@ if (isurf)
 				{   
 					LOGFONT	LogFont;    
 				   	HFONT	OldFont,hFont;
+					SIZE	txSize;
 					
 					_fmemset (&LogFont,0,sizeof(LOGFONT));
-					LogFont.lfHeight = 14*DeviceToScreenFactor(); 
+					LogFont.lfHeight = 11*DeviceToScreenFactor(); 
 					LogFont.lfEscapement = LogFont.lfOrientation = 900;   
-					LogFont.lfWeight = FW_BOLD;    
+					LogFont.lfWeight = FW_MEDIUM;
 					LogFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
 					LogFont.lfQuality = PROOF_QUALITY; 
-					_fstrcpy (LogFont.lfFaceName,"Times New Roman MT Extra Bold");    //Courier Bold New
+					_fstrcpy (LogFont.lfFaceName,"Times New Roman");    //Courier Bold New
 					hFont = CreateFontIndirect((LPLOGFONT)&LogFont);
 					OldFont = SelectObject (CurView->hDC,hFont);
-					TextOut (CurView->hDC,(int)(WLine[1].x-7*DeviceToScreenFactor()),WLine[1].y,txt,_fstrlen(txt));	
+					GetTextExtentPoint32(CurView->hDC, txt, _fstrlen(txt), &txSize);
+					if (pProfileSymbols->SurfElev > MidElev*FTM)
+						WLine[1].y += txSize.cx + 2;
+					else
+						WLine[1].y -= 2;
+					WLine[1].x -= txSize.cy/2 * DeviceToScreenFactor();
+					TextOut (CurView->hDC,WLine[1].x,WLine[1].y,txt,_fstrlen(txt));	
 					SelectObject (CurView->hDC,OldFont);
 					DeleteObject (hFont);
 				} 
@@ -942,6 +955,7 @@ if (isurf)
 				}
 			}
 			GSSiGlobUlFree (&hProfileSymbols);
+			useGDIPlus = saveUseGDIPlus;
 		}
 		if (hDB)
 		{
@@ -1166,21 +1180,21 @@ if (isurf)
 	    CloseTRANS2 (&CurView->hTranVPToScreen);
 	    CloseTRANS2 (&CurView->hTranScreenToVP);
 	    SetTextColor (CurView->hDC,0); 
-	    p.y = ProfileRect.bottom;
+	    p.y = ProfileRect.bottom+2;
 	    sprintf (txt,"%.0f",MaxElev);
 		GetTextExtentPoint32 (CurView->hDC,txt,_fstrlen(txt),&txSize);
 	    sprintf (txt,"%.0f",MinElev);
 		twidth = txSize.cx+2; 
-	    p.x = min (CurView->ScreenRect.right-twidth,ProfileRect.right) + 2;
-		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 1,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
-	    p.x = max (CurView->ScreenRect.left+twidth,ProfileRect.left) - 2;
-		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 4,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
-	    p.y = ProfileRect.top;
+	    p.x = min (CurView->ScreenRect.right-twidth/2,ProfileRect.right) + 2;
+		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 1,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+	    p.x = max (CurView->ScreenRect.left+twidth/2,ProfileRect.left) - 2;
+		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 4,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+	    p.y = ProfileRect.top+2;
 	    sprintf (txt,"%.0f",MaxElev);
-	    p.x = min (CurView->ScreenRect.right-twidth,ProfileRect.right) + 2;
-		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 1,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
-	    p.x = max (CurView->ScreenRect.left+twidth,ProfileRect.left) - 2;
-		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 4,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+	    p.x = min (CurView->ScreenRect.right-twidth/2,ProfileRect.right) + 2;
+		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 1,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+	    p.x = max (CurView->ScreenRect.left+twidth/2,ProfileRect.left) - 2;
+		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 4,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 	    
 	    
 	    CurView->hFileTransIn = STRANRectToBounds (&ProfileRect,&Bounds); 

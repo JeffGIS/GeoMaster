@@ -4001,8 +4001,10 @@ void ShowPickedItem (HWND hWnd, int InItem)
     short		iLen, Item, SavePassID=CurView->PassID;     
     MNMXCORD	Rect;
     char		str[64];
+	BOOL		saveUseGDIPlus = useGDIPlus;
 
-   
+	useGDIPlus = wantGDIPlus;
+
     Item = max (InItem,0);                     
     SaveView = CurView;
 	SetConfig (PickList[Item].ConfigID);
@@ -4255,7 +4257,9 @@ void ShowPickedItem (HWND hWnd, int InItem)
     }
     GSSiGlobUlFree (&hpltBuf);
     hpltBuf=0; 
+	DisplaySavedGraphicsFile(CurView->hDC, 7);
 Exit:
+	useGDIPlus = saveUseGDIPlus;
 	SaveFullWindowBitmap (hWndMain); 
     CurView->PassID = SavePassID;
     if (SaveVis)

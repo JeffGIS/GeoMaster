@@ -2859,7 +2859,7 @@ BOOL GetRadialProfiles (DPOINT Point,LPDOUBLE pStartElev,short SurfSym,short nRa
                 lpDpoint = (LPDPOINT) lpRect;
                 while (nPnts--)
                 	lpDpoint++;
-                GSSiGlobUlFree (&hSavePoly);
+				GlobalUnlock(hSavePoly);
              }
          }
     }

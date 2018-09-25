@@ -228,6 +228,7 @@ int FillRectColor (HDC hDC,LPRECT Rect,COLORREF Color);
 BOOL LoadGlobalInit (LPSTR File,BOOL First);
 HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc);
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc);
+HGLOBAL GSSiGlobalCopy(USHORT From, HGLOBAL hGlob);
 void GSSiGlobFree (LPHANDLE pHandle); 
 void GSSiGlobUlFree (LPHANDLE pHandle);    
 void SECLIN8(const double *X1,const double *Y1,const double *A1,const double *X2,

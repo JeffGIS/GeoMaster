@@ -1134,7 +1134,7 @@ void TIGEROut(void)
                     }
                     ConvertCoord (lpDpoints, 1,2); 
                     ToPoint = *lpDpoints;
-	                GSSiGlobUlFree (&hSavePoly);
+	                GlobalUnlock (hSavePoly);
                 }
                 sprintf (str,"%10ld%9ld%10ld%9ld",
                         IDNINT(FromPoint.x*1000000), 

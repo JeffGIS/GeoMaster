@@ -947,10 +947,13 @@ TryAgain:
    	case 2:
    		ymove = Theight/2;
    		break;
-   	case 3:
-   		ymove = -max (0,symsize)/2;
-   		break;    
-   	}
+	case 3:
+		ymove = -max(0, symsize) / 2;
+		break;
+	case 4:
+		ymove = -Theight / 2;
+		break;
+   }
    	
     if (hAreaPoints)
     {    

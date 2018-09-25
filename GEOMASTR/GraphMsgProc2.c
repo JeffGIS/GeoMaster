@@ -11495,8 +11495,9 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 									pPolyParts++; 
 								}
 		                    } 
-	                       	GSSiGlobUlFree (&hSavePolyParts);
-			                GSSiGlobUlFree (&hSavePoly);
+							GlobalUnlock (hSavePolyParts);
+							GlobalUnlock (hSavePoly);
+							DestroySavedPolys();
 	                        GSSiGlobUlFree (&hCurvePoints);
 	                        GSSiGlobUlFree (&hUnSplinedPoly);
 	                    }
@@ -12195,6 +12196,7 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 		                            DXFOutPolyline (&DXFHandle,SymName,FidMIF,nSavePoly,lpDpoint,Width);
 	                        	    GlobalUnlock (hSavePoly);
 	                        	}
+								DestroySavedPolys();
                             }
                         break;  
                         
