@@ -3473,8 +3473,8 @@ GSSiExitProg (1330);
 			            lpDpoint += (*pPolyParts+1);
 			            pPolyParts++;
 			        }
-		            GSSiGlobUlFree (&hSavePoly);
-		            GSSiGlobUlFree (&hSavePolyParts);
+		            GlobalUnlock (hSavePoly);
+					GlobalUnlock (hSavePolyParts);
 		        } 
 		        DestroySavedPolys ();
 			}

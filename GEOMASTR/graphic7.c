@@ -2387,7 +2387,22 @@ BOOL TypeIsPolyline(short Type)
 		rtn = TRUE;
 		break;
 	}
-		
+
+	return rtn;
+}
+
+BOOL TypeIsPolygon(short Type)
+{
+	BOOL rtn = FALSE;
+	switch (Type)
+	{
+	case 3:
+	case GF_AREA:
+		Type = 3;
+		rtn = TRUE;
+		break;
+	}
+
 	return rtn;
 }
 
@@ -4315,6 +4330,10 @@ Top:
 				else if (*text == '|')
 				{
 					if (!strnicmp(&text[1], "POLYLINE|", 9) && TypeIsPolyline(PickList[item].Type))
+						WantThisItem = TRUE;
+					else if (!strnicmp(&text[1], "POLYGON|", 9) && TypeIsPolygon(PickList[item].Type))
+						WantThisItem = TRUE;
+					else if (!strnicmp(&text[1], "HIGHLIGHTED|", 9) && RefnoInHighlightList(PickList[item].Refno))
 						WantThisItem = TRUE;
 					else
 						WantThisItem = FALSE;

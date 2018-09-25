@@ -490,7 +490,7 @@ GSSiExitProg (1262);
 
 		case GF_PROFILE_THEME: 
 			lpProfileData = (LPPROFILETHEMEDATA)&CurTheme->ClassBM; 
-			if (Type == GF_LINE || Type == GF_POLYLINE || Type == GF_CURVE)
+			if (Type == GF_LINE || Type == GF_POLYLINE || Type == GF_CURVE || Type == GF_AREA)
 			{   
 				HANDLE	hHLT=GSSiGlobAlloc (1325,GMEM_MOVEABLE,sizeof(HIGHLIGHTDATA));
 				LPHIGHLIGHTDATA	pHighlightData=(LPHIGHLIGHTDATA)GlobalLock (hHLT);

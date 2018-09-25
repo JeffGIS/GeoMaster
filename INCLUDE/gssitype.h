@@ -2685,6 +2685,7 @@ typedef struct {DPOINT	Point;
 				short	idesc;//neg symbols indicates elev comes from item, not surface
 				float	SurfElev;  
 				float	Size;
+				long	refno;
 			   }PROFILESYMBOLS;
 typedef PROFILESYMBOLS	FAR	*LPPROFILESYMBOLS;
 

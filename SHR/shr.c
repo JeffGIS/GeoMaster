@@ -4037,6 +4037,18 @@ GSSiExitProg (237);
 #endif
 }
 
+HGLOBAL GSSiGlobalCopy(USHORT From, HGLOBAL hGlob)
+{
+	long len = GlobalSize(hGlob);
+	HGLOBAL rtn = GSSiGlobAlloc(From, GMEM_MOVEABLE, len);
+	LPBYTE pFrom = GlobalLock(hGlob);
+	LPBYTE pTo = GlobalLock(rtn);
+	memmove(pTo, pFrom, len);
+	GlobalUnlock(hGlob);
+	GlobalUnlock(rtn);
+	return rtn;
+}
+
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc)
 #if ENABLETRACE
 {GSSiEnterProg (1398);

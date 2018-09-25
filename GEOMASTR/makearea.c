@@ -1221,7 +1221,7 @@ GotSym:
 					NumPoints++;
 	            }
 	        }
-            GSSiGlobUlFree (&hSavePoly);
+			GlobalUnlock(hSavePoly);
          } 
          DestroySavedPolys ();
 	}
@@ -2314,7 +2314,7 @@ LPOINT AddNode (int InOut,int AtEnd,DPOINT ConnectPointBase,long LinkRef,LPREFCO
 	            	Point1 = *lpDpoint;
 	            }
 	           	NodesKey.AZ = getazd (&Point1,&Point2);
-	            GSSiGlobUlFree (&hSavePoly);
+				GlobalUnlock(hSavePoly);
 	         } 
 	    }
 	}

@@ -1893,8 +1893,9 @@ BOOL ProcessSHPRecord (HDC hDC,HFILE FidSHP,long RecordNumber)
 				CurPointSize /= CurView->BaseUnitsPerPixel;
 			if ((Pick||PickingByRefno) && GetTypeVisibility(TYPE_POINT))
 			{
-				PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
-			} 
+				if (SetDisplayChar(hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
+					PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
+			}
 			else if (GetTypeVisibility(TYPE_POINT))
 			{   
 				short	iDesc=CurrentDesc;

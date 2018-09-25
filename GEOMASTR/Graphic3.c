@@ -1046,7 +1046,7 @@ void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BO
 {GSSiEnterProg (659);
 #endif
 {   MNMXCORD Rect;
-	long	npnts;
+	long	nPnts;
 	HANDLE	hPnts;
 	DPOINT	ScreenPoint;
 	HPDPOINT	BasePt;
@@ -4593,7 +4593,7 @@ long GetPickItemPoints (short item, BOOL Reverse, HPDPOINT *pPoints)
 					(*pPoints)++; 
 	            }
 	        }
-		  	GSSiGlobUlFree (&hSavePoly);
+			GlobalUnlock(hSavePoly);
          } 
 	}
 	else if (Reverse)

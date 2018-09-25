@@ -8008,7 +8008,7 @@ int FAR PASCAL NEWSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 					    		if (PickList[0].Type >= 2)
 					    		{   
 									int	nPnts;
-									HANDLE	hPoly;
+									HANDLE	hPoly=0;
 									LPDPOINT	lpDpoint;
 
 									if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,FALSE,&nPnts,&hPoly))
@@ -8073,7 +8073,7 @@ int FAR PASCAL NEWSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 											pElement->Width = 0;
 											pElement->Style = 0;
 											GlobalUnlock (*phElement);
-											GSSiGlobUlFree (&hSavePoly);
+											GSSiGlobUlFree (&hPoly);
 										}
 									}  
 								 }
@@ -19919,8 +19919,8 @@ NextFile:
 								                    }
 								                    GlobalUnlock (hhPoly);
 								                    GlobalUnlock (hNumPoints); 
-							                       	GSSiGlobUlFree (&hSavePolyParts);
-									                GSSiGlobUlFree (&hSavePoly);
+													GlobalUnlock(hSavePolyParts);
+													GlobalUnlock(hSavePoly);
 							                    }
 							                }
 										}
@@ -29677,8 +29677,9 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                                     break;
                             } 
                             GSSiGlobFree (&hIndex);
-                            GSSiGlobFree (&hSavePolyParts);
-			                GSSiGlobUlFree (&hSavePoly);
+							GlobalUnlock(hSavePolyParts);
+							GlobalUnlock(hSavePoly);
+							DestroySavedPolys();
                          }
                          else
                          	goto NextHlt;

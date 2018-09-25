@@ -119,7 +119,8 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 		Gdiplus::Graphics graphic(hdc);
 		graphic.SetPageUnit(UnitPixel);
 		graphic.SetCompositingQuality(CompositingQualityHighQuality);
-		Pen pn(Color(intensity, GetRValue(ColorRef), GetGValue(ColorRef), GetBValue(ColorRef)), w);
+		int r = GetRValue(ColorRef), g = GetGValue(ColorRef), b = GetBValue(ColorRef);
+		Pen pn(Color(intensity, r,g,b), w);
 		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
 		PointF pt1;
@@ -219,10 +220,10 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 		{
 			if (lb->lbStyle == BS_HATCHED)
 			{
-				HatchBrush hbr((HatchStyle)lb->lbHatch, Color(255, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
+				HatchBrush hbr((HatchStyle)lb->lbHatch, Color(255, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)), Color(64, GetRValue(lb->lbColor), GetGValue(lb->lbColor), GetBValue(lb->lbColor)));
 				graphic.FillPath(&hbr, &pth);
 			}
-			if (lb->lbStyle == BS_PATTERN)
+			else if (lb->lbStyle == BS_PATTERN)
 			{
 			}
 			else

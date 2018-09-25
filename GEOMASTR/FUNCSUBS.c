@@ -2731,8 +2731,8 @@ BOOL AddIslandsToPoly (BOOL Reverse,BOOL Delete)
 		        if (i)
    	            	lpDpoint++;
 	        }
-            GSSiGlobUlFree (&hSavePoly);
-            GSSiGlobUlFree (&hSavePolyParts);
+            GlobalUnlock (hSavePoly);
+			GlobalUnlock(hSavePolyParts);
         } 
         DestroySavedPolys (); 
         if (Delete && pos != BT_FIRST)

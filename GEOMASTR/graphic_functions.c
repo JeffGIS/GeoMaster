@@ -7263,6 +7263,7 @@ BOOL HighlightItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short F
 			    rtn = GF_INCREASE_SUCCESS_COUNT;
 			}
 			SaveNP = NumPicked;
+			Display = TRUE;
 	    	ShowPickedItem (hWndMain,NumPicked); 
 	    	NumPicked = SaveNP;
 			CurView->PassID = SavePass;

@@ -3904,7 +3904,7 @@ long OutputHLTAreas (int HLTOUTFormat,LPSTR HLTOutPath)
                 	fputstring (txt,FidOut);
                 }  
                 fputstring ("END",FidOut);
-                GSSiGlobUlFree (&hSavePoly);
+				GlobalUnlock(hSavePoly);
              }
          }
     }

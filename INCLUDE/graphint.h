@@ -753,6 +753,7 @@ int  AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDI, 
 BOOL DeleteFromTAGList (LPSTR Prefix,LPSTR UDI,long Refno);
 void CloseRefIndex (BOOL ForceClose);
 BOOL ChangePickedItemRefno (short item, long NewRefno);
+BOOL RefnoInHighlightList(long Refno);
 int AddToHighlightList (long Refno,LPPICKDATA pPickData, BOOL Show);
 void AddToHighlightListSeq (long Refno,LPPICKDATA pPickData,long Sequence,BOOL Show);
 void RemoveFromHighlightList (long Refno,int mode);
@@ -1681,6 +1682,7 @@ BOOL ProcessImportFilter (void);
 short GetBaseRecordType (short Type);
 short GetHighlightType (short Type);
 BOOL TypeIsPolyline(short Type);
+BOOL TypeIsPolygon(short Type);
 BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT Point); 
 BOOL AddRouteToGPSList (long RouteRef);
 BOOL GetLowranceWPList (BOOL Delete);

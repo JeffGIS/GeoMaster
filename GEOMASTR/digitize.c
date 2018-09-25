@@ -421,7 +421,7 @@ DPOINT	UpperLeftCorner (short item)
         	if (lpDpoint->x < midx)
         		leftPoint[nleft++] = *lpDpoint;
         }
-	  	GSSiGlobUlFree (&hSavePoly); 
+	  	GlobalUnlock (hSavePoly); 
 	  	if (nleft == 2)
 	  	{
 	  		if (leftPoint[0].y > leftPoint[1].y)
