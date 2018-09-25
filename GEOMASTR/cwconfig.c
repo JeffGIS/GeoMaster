@@ -2859,7 +2859,11 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          break;
    
 	case GF_PROCESS_CONNECTED_CMD:
-		ProcessConnectedCommand (wParam);
+		ProcessConnectedCommand(wParam);
+		break;
+
+	case PROCESS_COMMAND_MACRO:
+		ProcessText(CommandMacro);
 		break;
 
 	case GF_END_PROCESS:

@@ -4317,6 +4317,15 @@ SetVis:
 		   }
 		   goto RtnFalse;
 		}
+		case 438: //$POST(Macro)
+		{
+			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			strcpy(CommandMacro, Arg[1]);
+			PostMessage(hWndMain, PROCESS_COMMAND_MACRO,0, 0L);
+			goto RtnTrue;
+		}
 
 		default:
 			goto Rtn0;

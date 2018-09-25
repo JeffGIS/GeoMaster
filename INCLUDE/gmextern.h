@@ -140,6 +140,7 @@ extern HANDLE		hGMDKeyList;
 extern int			GMDKeyListPos;
 extern BOOL			WantGMDNegGrid;
 extern char			GMDWhere[256];
+extern char			CommandMacro[1024];
 extern BOOL			NoDisplay;
 extern HANDLE			hReorgParms;
 extern HANDLE			hTranBaseToFileReorg;

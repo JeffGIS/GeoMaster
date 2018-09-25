@@ -240,6 +240,7 @@ HCURSOR	OldCursor;
 BOOL	HaveSeg=FALSE;
 HANDLE	hAddGraphicsFun=0;
 HANDLE	hAddGraphicsFun2=0;
+char	CommandMacro[1024];
 short	AddGraphicsFunVP=0;
 short	SaveDrive;
 short	OriginalDrive;

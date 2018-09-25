@@ -1539,7 +1539,7 @@ Next:
 		    ipnt = (LPSHORT)LPpltBuf;
 			if (!(nContinues++ % 16))
 			{
-				SetContinueProcessing(CheckForContinue(FALSE, 0));
+				SetContinueProcessing(CheckForContinue(TRUE, 0));
 			}
         }
 		if (FastMapCopy)
