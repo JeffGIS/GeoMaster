@@ -467,6 +467,7 @@ int	GetFunctionID10 (LPSTR str)
 			if (!_fstrnicmp(str, "PARCELTRAN", 10)) return 1040;
 			if (!_fstrnicmp(str, "MAILLABELS", 10)) return 1041;
 			if (!_fstrnicmp(str, "SAVESCREEN", 10)) return 1042;
+			if (!_fstrnicmp(str, "GMDOCUMENT", 10)) return 1043;
 			return 0;
 }
 int	GetFunctionID11 (LPSTR str)

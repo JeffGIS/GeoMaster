@@ -2116,6 +2116,7 @@ DWORD DGNLibGetElementExtents (HANDLE hDGN,LPMNMXCORD pBounds);
 DWORD DGNGetNumElements (HANDLE hDGN);
 void CloseAllRequestedDGNFiles (void);
 DWORD DGN7Rewind (HANDLE hDGN);
+BOOL GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc);
 BOOL FindBasinsAroundPoints (LPSTR DTMName,short nPoints, LPDPOINT StartPoints);
 TRIANGLEID GetAdjoiningTriangleID (TRIANGLEID FromTriID,short iside,LPSHORT pConnectsToSide);
 BOOL GetTriCoords (TRIANGLEID TriID,LPDPOINT TriPoints);

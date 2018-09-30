@@ -3468,6 +3468,14 @@ GSSiExitProg (1350);
 
 		}
 
+		case 1043:	//$GMDOCUMENT
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			GMDocument(nArgs, Arg, OutLoc);
+			goto Rtnl;
+		}
 
 		case 1101: //$DUMPGLOBALS(pathname)
 			dumpvars (Args);
@@ -6095,7 +6103,54 @@ GSSiExitProg (1350);
 #if ENABLETRACE
 }
 #endif
-}  
+}
+int WhichCursor(HCURSOR hcurs)
+{
+	int i = 0;
 
-		
-			
+	HCURSOR cursors[] = { LoadCursor(0, IDC_ARROW), LoadCursor(0, IDC_IBEAM, IDC_WAIT, IDC_CROSS, IDC_UPARROW, IDC_SIZE, IDC_ICON, IDC_SIZENWSE, IDC_SIZENESW, IDC_SIZEWE, IDC_SIZENS, IDC_SIZEALL, IDC_NO, IDC_WAIT, hLockedCursor, hPickAPCursor, hPickNearCursor, hDigCursor, hWaitCursor, hDrawingCursor, IDc_SIZENWSE, IDc_SIZE, IDc_SIZEWE, IDc_SIZENS, IDc_SIZENESW };
+
+	return i;
+}
+
+BOOL GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
+{
+	BOOL rtn = FALSE;
+
+	HBITMAP	hBitmap;
+	HDIB32 hDib32;
+	HDIB32 hDib24;
+	RECT	ScreenRect;
+	HWND	hWnd = GetDesktopWindow();
+	HDC		hDC;
+
+	if (!stricmp(Arg[1], "CAPSCREEN"))
+	{
+		hDC = GetWindowDC(hWnd);
+		GetClientRect(hWndMain, &ScreenRect);
+		ClientRectToScreenRect(hWndMain, &ScreenRect);
+		hBitmap = SaveScreen(hDC, ScreenRect);
+		hDib32 = BitmapToDIB32(hBitmap);
+		DeleteObject(hBitmap);
+		ReleaseDC(hWnd, hDC);
+		hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+		rtn = GM32SaveDIB(hDib24, Arg[2], -1, 0);
+		FreeImage_Unload(hDib24);
+		FreeImage_Unload(hDib32);
+		rtn = TRUE;
+	}
+	if (!stricmp(Arg[1], "CAPCURSOR"))
+	{
+		POINT pt;
+		CURSORINFO cursInfo;
+		ICONINFOEX iconInfo;
+
+		GetCursorPos(&pt);
+		cursInfo.cbSize = sizeof(CURSORINFO);
+		iconInfo.cbSize = sizeof(ICONINFOEX);
+		GetCursorInfo(&cursInfo);
+		GetIconInfoEx(cursInfo.hCursor, &iconInfo);
+		rtn = TRUE;
+	}
+	return rtn;
+}
