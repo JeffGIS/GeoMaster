@@ -2128,7 +2128,7 @@ DoCmd:
 			if (wParam == MK_CONTROL)
 			{
 				char file[MAX_PATH];
-				sprintf(file, "%s\\%s.txt", "[%DL]fundir", CurTheme->SQL);
+				sprintf(file, "'%s\\%s.txt'", "[%DL]fundir", CurTheme->SQL);
 				GMEdit(CurView->hWnd,file);
 			}
 			else

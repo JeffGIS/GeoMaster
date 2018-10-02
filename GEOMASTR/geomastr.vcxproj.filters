@@ -1464,6 +1464,9 @@
     <ClCompile Include="rtree_bbox.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GMDoc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">

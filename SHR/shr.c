@@ -8822,7 +8822,14 @@ BOOL CopyFileToCache (LPSTR ToFileIN, LPSTR FromFileIN)
 BOOL EditLastTextFile (void)
 {
 	if (*LastTextFile)
-		GMEdit (hWndMain,LastTextFile); 
+	{
+		char file[MAX_PATH];
+		if (*LastTextFile == '\'')
+			strcpy(file, LastTextFile);
+		else
+			sprintf(file, "'%s'", LastTextFile);
+		GMEdit(hWndMain, file);
+	}
 	return TRUE;
 }
 BOOL GetProdNameFromTestName(LPSTR testDir, LPSTR toName, LPSTR fileName)

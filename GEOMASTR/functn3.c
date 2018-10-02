@@ -4518,10 +4518,10 @@ GotCloseFilehSQL:
 
 			goto RtnFalse;
 		}
-		case 646: //$GMEDIT(file,TorF(create if new))
+		case 646: //$GMEDIT(file,TorF(create if new),TorF(save position))
 		{
 			LPSTR pcmd;
-			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!ExistFile(Arg[1]))
 			{
 				if (atob(Arg[2]))
@@ -4533,7 +4533,7 @@ GotCloseFilehSQL:
 					goto RtnFalse;
 			}
 			pcmd = malloc(MAX_PATH * 2);
-			sprintf(pcmd, "$SESSION(CREATE,GMEdit /GMEdit %s)", Arg[1]);
+			sprintf(pcmd, "$SESSION(CREATE,GMEdit /GMEdit '%s' %s)", Arg[1],atob(Arg[3]));
 			ExpandText(pcmd);
 			free(pcmd);
 			goto RtnTrue;

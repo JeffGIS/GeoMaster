@@ -6106,29 +6106,45 @@ GSSiExitProg (1350);
 }
 int WhichCursor(HCURSOR hcurs)
 {
-	int i = 0;
+	int rtn = 0;
 
-	HCURSOR cursors[] = { LoadCursor(0, IDC_ARROW), LoadCursor(0, IDC_IBEAM, IDC_WAIT, IDC_CROSS, IDC_UPARROW, IDC_SIZE, IDC_ICON, IDC_SIZENWSE, IDC_SIZENESW, IDC_SIZEWE, IDC_SIZENS, IDC_SIZEALL, IDC_NO, IDC_WAIT, hLockedCursor, hPickAPCursor, hPickNearCursor, hDigCursor, hWaitCursor, hDrawingCursor, IDc_SIZENWSE, IDc_SIZE, IDc_SIZEWE, IDc_SIZENS, IDc_SIZENESW };
+	HCURSOR cursors[] = { LoadCursor(0, IDC_ARROW), LoadCursor(hInst, MAKEINTRESOURCE(IDC_CENTERPOINT_CURSOR)), LoadCursor(0, IDC_IBEAM), LoadCursor(0, IDC_WAIT), LoadCursor(0, IDC_CROSS), LoadCursor(0, IDC_UPARROW), LoadCursor(0, IDC_SIZENWSE), LoadCursor(0, IDC_SIZENESW), LoadCursor(0, IDC_SIZEWE), LoadCursor(0, IDC_SIZENS), LoadCursor(0, IDC_SIZEALL), LoadCursor(0, IDC_NO), LoadCursor(0, IDC_WAIT),
+		LoadCursor(hInst, "ZOOMIN"), LoadCursor(hInst, "ZOOMOUT"), LoadCursor(hInst, "TOGGLEVIS"), LoadCursor(hInst, "SETTAG"), LoadCursor(hInst, "HANDMOVE1"), LoadCursor(hInst, "HANDMOVE2"), LoadCursor(hInst, "MOVE_CURSOR"), LoadCursor(hInst, "WINZOOM"), LoadCursor(hInst, "SHOW"), LoadCursor(hInst, "CURSOR_LOCKED"), LoadCursor(hInst, "PICK_CURSOR_AP"), LoadCursor(hInst, "PICK_CURSOR_NEAR"), LoadCursor(hInst, "DRAWING"),
+		hLockedCursor, hPickAPCursor, hPickNearCursor, hDigCursor, hWaitCursor, hDrawingCursor, IDc_SIZENWSE, IDc_SIZE, IDc_SIZEWE, IDc_SIZENS, IDc_SIZENESW };
 
-	return i;
+	for (int i = 0; i < (sizeof(cursors) / sizeof(HCURSOR)); i++)
+	{
+		if (hcurs == cursors[i])
+			return i + 1;
+	}
+	return rtn;
 }
 
-BOOL GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
+HWND GetTargetWindow(void)
 {
-	BOOL rtn = FALSE;
+	HWND hWnd = 0;
+	HFILE fid = GSSiOpenFile("c:\\temp\\targetwindow.bin", 0, OF_READ);
+	BigRead(fid, &hWnd, sizeof(HWND));
+	GSSiClose(fid);
+	return hWnd;
+}
+int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
+{
+	int rtn = FALSE;
 
 	HBITMAP	hBitmap;
 	HDIB32 hDib32;
 	HDIB32 hDib24;
 	RECT	ScreenRect;
 	HWND	hWnd = GetDesktopWindow();
+	HWND	hWndTarget = GetTargetWindow();
 	HDC		hDC;
 
 	if (!stricmp(Arg[1], "CAPSCREEN"))
 	{
 		hDC = GetWindowDC(hWnd);
-		GetClientRect(hWndMain, &ScreenRect);
-		ClientRectToScreenRect(hWndMain, &ScreenRect);
+		GetClientRect(hWndTarget, &ScreenRect);
+		ClientRectToScreenRect(hWndTarget, &ScreenRect);
 		hBitmap = SaveScreen(hDC, ScreenRect);
 		hDib32 = BitmapToDIB32(hBitmap);
 		DeleteObject(hBitmap);
@@ -6144,13 +6160,15 @@ BOOL GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		POINT pt;
 		CURSORINFO cursInfo;
 		ICONINFOEX iconInfo;
+		int iCursor;
 
 		GetCursorPos(&pt);
 		cursInfo.cbSize = sizeof(CURSORINFO);
 		iconInfo.cbSize = sizeof(ICONINFOEX);
 		GetCursorInfo(&cursInfo);
-		GetIconInfoEx(cursInfo.hCursor, &iconInfo);
-		rtn = TRUE;
+		iCursor = WhichCursor (cursInfo.hCursor);
+		rtn = iCursor;
 	}
+	ltoa(rtn, OutLoc, 10);
 	return rtn;
 }

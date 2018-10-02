@@ -1518,7 +1518,7 @@ Next:
 		ItemAddedToHLT = FALSE;
 		HLTGraphicsPos = 0;
 		nContinues = 1;
-		while (FidMap != HFILE_ERROR && ContinueProcessing && ProcessGraphicsRec(*hDC, ipnt, LPpltBuf, nRead))
+		while (FidMap != HFILE_ERROR && ContinueProcessing && CurView && ProcessGraphicsRec(*hDC, ipnt, LPpltBuf, nRead))
         {
 			BOOL quitProcessing;
 		    GSSiGlobUlFree (&hpltBuf);

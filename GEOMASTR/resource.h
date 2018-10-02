@@ -2156,8 +2156,11 @@
 #define AL_DATABASE_LIST                1245
 #define IDC_SINGLEPASS                  1245
 #define IDB_BITMAP23                    1245
+#define ID_ACCELERATOR1234              1245
 #define AL_TABLE_NAMES                  1246
 #define IDB_BITMAP24                    1246
+#define ID_ACCELERATOR1246              1246
+#define ID_ACCELERATORGO                1246
 #define IDC_ALSQL                       1247
 #define IDB_BITMAP25                    1247
 #define IDC_ALDEST_FILE                 1248
@@ -2165,7 +2168,9 @@
 #define NEWVISIONGIS                    1248
 #define IDC_FROMYEAR                    1249
 #define IDC_FROMMONTH                   1250
+#define IDC_GMDOC                       1250
 #define IDC_TOMONTH                     1251
+#define IDR_GMDOC                       1251
 #define IDC_FROMDAY                     1252
 #define IDC_TODAY                       1253
 #define IDC_FROMDATETEXT                1254
@@ -3725,8 +3730,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1250
-#define _APS_NEXT_COMMAND_VALUE         1245
+#define _APS_NEXT_RESOURCE_VALUE        1252
+#define _APS_NEXT_COMMAND_VALUE         1248
 #define _APS_NEXT_CONTROL_VALUE         2296
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif

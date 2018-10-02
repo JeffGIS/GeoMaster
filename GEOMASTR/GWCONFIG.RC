@@ -580,7 +580,7 @@ IDC_GMEDIT MENU
 BEGIN
     POPUP "File"
     BEGIN
-        MENUITEM "Save",                        IDM_FILE_SAVE, GRAYED
+        MENUITEM "Save",                        IDM_FILE_SAVE
         MENUITEM "Save As",                     IDM_FILE_SAVEAS
         MENUITEM SEPARATOR
         MENUITEM "Exit",                        IDM_FILE_EXIT
@@ -592,6 +592,7 @@ BEGIN
         MENUITEM "About",                       1231
     END
 END
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -8719,6 +8720,12 @@ BEGIN
     VK_F7,          IDM_ALTACCELF7,         VIRTKEY, NOINVERT
     VK_F8,          IDM_ALTACCELF8,         VIRTKEY, NOINVERT
     VK_F9,          IDM_ALTACCELF9,         VIRTKEY, NOINVERT
+END
+
+IDR_GMDOC ACCELERATORS
+BEGIN
+    VK_RETURN,      ID_ACCELERATOR1234,     VIRTKEY, NOINVERT
+    "g",            ID_ACCELERATORGO,       ASCII,  NOINVERT
 END
 
 

@@ -26,8 +26,8 @@
 // Global Variables:
 extern HINSTANCE hInst;								// current instance
 
-static TCHAR szTitle[]="GMEdit";					// The title bar text
-static TCHAR szWindowClass[]="GMEditor";		// the main window class name
+static TCHAR szTitle[] = "GMEdit";					// The title bar text
+static TCHAR szWindowClass[] = "GMEditor";		// the main window class name
 
 #define MAX_FILE_SIZE	1024*1024*4
 
@@ -72,6 +72,7 @@ static	BOOL	standAlone = FALSE;
 static	char	currentBreakpoint[32]={0};
 static  HWND	hWndGMEditReturn = 0;
 static	int		breakAtLoc = -1;
+static	BOOL	SavePosition = FALSE;
 
 
 static HANDLE hFunDefDB=0;
@@ -81,6 +82,22 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstanceGM(HINSTANCE hInst, int i);
 LRESULT CALLBACK	WndProcGMEdit(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	AboutGMEdit(HWND, UINT, WPARAM, LPARAM);
+
+
+void SaveGMEditPosition(LPSTR file, RECT rect)
+{
+	char PositionFile[MAX_PATH];
+	HFILE fid;
+	char	cpos[64];
+
+	strcpy(PositionFile, file);
+	strcat(PositionFile, ".pos");
+	fid = GSSiOpenFile(PositionFile, 0, OF_CREATE);
+	recttoa(cpos, rect);
+	fputstring(cpos, fid);
+	GSSiClose(fid);
+	return;
+}
 
 void GMEditSetFile (LPSTR file,LPSTR bpid,int bploc)
 {
@@ -146,6 +163,7 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	HACCEL hAccelTable;
 	SIZE size;
 	LPSTR pFile = strstr(lpCmdLine, "/GMEdit ");
+	LPSTR pEndFile = strchr(pFile, 0);
 	LPSTR pWnd = strstr(lpCmdLine, "/W ");
 	//createFunIDFile ();
 
@@ -165,7 +183,20 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	{
 		LPSTR pFS;
 
-		strcpy (fileToEdit,pFile+8);
+		pFile += 8;
+		if (*pFile == '\'')
+		{
+			pFile++;
+			pEndFile = strrchr(pFile, '\'');
+			if (pEndFile)
+				*pEndFile++ = 0;
+		}
+		else
+			pEndFile = strchr(pFile, ' ');
+		if (pEndFile && *pEndFile)
+			*pEndFile++ = 0;
+		SavePosition = atob(pEndFile);
+		strcpy (fileToEdit,pFile);
 		ExpandText (fileToEdit);
 		if ((pFS = strchr (fileToEdit,'/')))
 			*pFS++ = 0;
@@ -1601,6 +1632,14 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			}
 			changesMade = FALSE;
 		}
+		if (SavePosition)
+		{
+			RECT windowRect;
+			RECT clientRect;
+			GetWindowRect(hWnd, &windowRect);
+			GetClientRect(hWnd, &clientRect);
+			SaveGMEditPosition(fileToEdit, windowRect);
+		}
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	
 	case WM_TIMER:
@@ -2131,11 +2170,7 @@ case WM_HSCROLL:
 	}
 	return 0;
 
-
-
 }
-
-
 
 // Message handler for about box.
 INT_PTR CALLBACK AboutGMEdit(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -2156,3 +2191,5 @@ INT_PTR CALLBACK AboutGMEdit(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	}
 	return (INT_PTR)FALSE;
 }
+
+

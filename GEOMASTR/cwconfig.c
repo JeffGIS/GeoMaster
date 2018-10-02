@@ -25,7 +25,9 @@ int SetLastMessage(long mes, WPARAM wParam);
 
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int PASCAL WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
+int PASCAL WinMainGMDoc(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 LONG FAR PASCAL WndProcGMEdit(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGMDoc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 int ConvertPRJtoProj4(char *in, char * out);
 LRESULT CALLBACK GetMsgProc(
@@ -719,7 +721,7 @@ GSSiExitProg (436);
  if (_fstrstr(CmdLine, " /RESET "))
  	DoReset = TRUE;  
 // 	MessageBox (0,CmdLine,0,MB_OK);
- if ((lpStart = _fstrstr(CmdLine," /SERVER ")))
+ if ((lpStart = _fstrstr(CmdLine, " /SERVER ")))
  {
  	MemMap=TRUE;  
 	NoMenu = FALSE;// TRUE;
@@ -1401,13 +1403,21 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 
 	CreateVarSpace(VARSPACE_GLOBAL);
 
-	if (strstr (cmdLine,"/GMEdit"))
+	if (strstr(cmdLine, "/GMEdit"))
 	{
 		isGMEdit = TRUE;
-		CreateBigMem ();
+		CreateBigMem();
 		AllowCache = FALSE;
-		ProcessCommandLine ("");
+		ProcessCommandLine("");
 		return WinMainGMEdit(hInstance, hPrevInstance, cmdLine, nCmdShow);
+	}
+	else if (strstr(cmdLine, "/GMDoc"))
+	{
+		isGMEdit = TRUE;
+		CreateBigMem();
+		AllowCache = FALSE;
+		ProcessCommandLine("");
+		return WinMainGMDoc(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 	else
 	{
@@ -1864,6 +1874,13 @@ GSSiExitProg (437);
 	 CreatePrintBitmap(hWndMain);
 
 	 OpenTCPIPServer2(hWndMain);
+	 if (_fstrstr(lpszCmdLine, " /TARGET "))
+	 {
+		 HFILE fid = GSSiOpenFile("c:\\temp\\targetwindow.bin", 0, OF_CREATE);
+		 BigWrite(fid, &hWndMain, sizeof(HWND), -1);
+		 GSSiClose(fid);
+	 }
+
  }
    PromptFocus = hWndMain;
     {
@@ -3432,7 +3449,12 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 				 {
 					if (GetDebug () && *LastPMFile)
 					{
-						GMEdit (hWndMain,LastPMFile); 
+						char file[MAX_PATH];
+						if (*LastPMFile == '\'')
+							strcpy(file, LastPMFile);
+						else
+							sprintf(file, "'%s'", LastPMFile);
+						GMEdit(hWndMain, file);
 					}
 				 	break;  
 				 }
