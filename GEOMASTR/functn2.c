@@ -6139,6 +6139,9 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	HWND	hWnd = GetDesktopWindow();
 	HWND	hWndTarget = GetTargetWindow();
 	HDC		hDC;
+	time_t	systime;
+
+	time(&systime);
 
 	if (!stricmp(Arg[1], "CAPSCREEN"))
 	{

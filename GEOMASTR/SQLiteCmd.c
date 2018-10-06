@@ -445,7 +445,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	int rtn = 0;
 	sqlite3 *db;
 
-	if (!stricmp(ARG[1], "OPEN"))
+	if (!stricmp(ARG[1], "OPEN"))//$SQLITE(OPEN,path,varnameforhandle)
 	{
 		rtn = sqlite3_open(ARG[2], &db);
 		if (rtn == SQLITE_OK)

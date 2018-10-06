@@ -162,6 +162,8 @@ typedef struct RampStruct {
     float bumpWidth;
     float bumpHeight;
 	char fileID[12];
+	int cornerID;
+	int retired;
 } RampStruct;
 
 typedef struct ToleranceValues {

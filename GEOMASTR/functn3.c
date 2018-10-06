@@ -4628,6 +4628,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(FORMATSTREETS,codedstreets)
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
+			//$NVCRIS(OPEN,path,createifnotexists,varname)
 			//$NVCRIS(RAMPOFFSETCOORD,intPoint21,rampPoint21)
 			//$NVCRIS(FIXRAMPNUM,rampnum)
 			//$NVCRIS(PRINTRAMP,FromDB,intnum,rampnum)
@@ -4692,6 +4693,16 @@ GotCloseFilehSQL:
 				rtn = NVCreateDB(Arg[2], atob(Arg[3]));
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "OPEN"))
+			{
+				rtn = NVOpenDB(Arg[2], atob(Arg[3]), Arg[4]);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CLOSE"))
+			{
+				rtn = NVCloseDB(atol(Arg[2]));
+				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "FIXRAMPNUM"))
 			{
