@@ -5434,9 +5434,9 @@ GSSiExitProg (923);
 			{
 				HPDPOINT	pRoute=(HPDPOINT)GlobalLock (SaveVP->hProfileRoute[0]);
 				
-				if (SaveVP->pTheme && SaveVP->pTheme->ProfileAlignmentOption)
-		   			WinBasePoint = PointAtScreenXOnPoly (pRoute,SaveVP->nProfileRoute[0],BasePoint.x);
-				else
+/*				if (SaveVP->pTheme && SaveVP->pTheme->ProfileAlignmentOption)
+					WinBasePoint = PointAtScreenXOnPoly(pRoute, SaveVP->nProfileRoute[0], BasePoint.x,&SaveVP->LastProfileAZ);
+				else*/
 		   			WinBasePoint = PointAtDistOnPoly (pRoute,SaveVP->nProfileRoute[0],BasePoint.x,&SaveVP->LastProfileAZ,0);
 		   		SaveVP->LastProfileDist = BasePoint.x;  
 		   		SaveVP->LastProfilePoint = WinBasePoint;

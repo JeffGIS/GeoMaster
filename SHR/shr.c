@@ -5008,27 +5008,48 @@ GSSiExitProg (259);
 #endif
 }
 
-void AdjustRectToRect (LPRECT pRectToAdjust,LPRECT pRect)
+void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect)
 {
-	double	wf,hf,f;
-	POINT	mp = RectMid (pRectToAdjust);
+	double	wf, hf, f;
+	POINT	mp = RectMid(pRectToAdjust);
 
-	wf = (double)RECTWIDTH (pRectToAdjust) / (double)RECTWIDTH (pRect);
-	hf = (double)RECTHEIGHT (pRectToAdjust) / (double)RECTHEIGHT (pRect);
-	f  = (double)RECTWIDTH (pRect) / (double)RECTHEIGHT (pRect);
+	wf = (double)RECTWIDTH(pRectToAdjust) / (double)RECTWIDTH(pRect);
+	hf = (double)RECTHEIGHT(pRectToAdjust) / (double)RECTHEIGHT(pRect);
+	f = (double)RECTWIDTH(pRect) / (double)RECTHEIGHT(pRect);
 
-	if (RECTWIDTH (pRectToAdjust) * hf > RECTWIDTH (pRect))
+	if (RECTWIDTH(pRectToAdjust) * hf > RECTWIDTH(pRect))
 	{
-		pRectToAdjust->top = mp.y - (f * RECTHEIGHT(pRectToAdjust))/2;
-		pRectToAdjust->bottom = mp.y + (f * RECTHEIGHT(pRectToAdjust))/2;
+		pRectToAdjust->top = mp.y - (f * RECTHEIGHT(pRectToAdjust)) / 2;
+		pRectToAdjust->bottom = mp.y + (f * RECTHEIGHT(pRectToAdjust)) / 2;
 	}
 	else
 	{
-		pRectToAdjust->left = mp.x - (RECTWIDTH(pRectToAdjust)/f)/2;
-		pRectToAdjust->right = mp.x + (RECTWIDTH(pRectToAdjust)/f)/2;
+		pRectToAdjust->left = mp.x - (RECTWIDTH(pRectToAdjust) / f) / 2;
+		pRectToAdjust->right = mp.x + (RECTWIDTH(pRectToAdjust) / f) / 2;
 	}
 
 	return;
+}
+double AdjustRectToRectFactor(LPRECT pRectToAdjust, LPRECT pRect)
+{
+	double rtn = 1;
+	double	wf, hf, f;
+	POINT	mp = RectMid(pRectToAdjust);
+
+	wf = (double)RECTWIDTH(pRectToAdjust) / (double)RECTWIDTH(pRect);
+	hf = (double)RECTHEIGHT(pRectToAdjust) / (double)RECTHEIGHT(pRect);
+	f = (double)RECTWIDTH(pRect) / (double)RECTHEIGHT(pRect);
+
+	if (RECTWIDTH(pRect) * hf > RECTWIDTH(pRectToAdjust))
+	{
+		rtn = wf;
+	}
+	else
+	{
+		rtn = hf;
+	}
+
+	return rtn;
 }
 
 void AdjustBounds (LPMNMXCORD Bounds, double AdjustX, double AdjustY)
@@ -10544,8 +10565,8 @@ GSSiExitProg (332);
 	if (ID && pSaveScreen->ID != ID)
 		goto Exit;
     SaveDC (hDC);
-//	SetDisplayMode (hDC, GF_SCREENMODE); 
- 	SetGraphicsMode(hDC, GM_COMPATIBLE);
+	SetDisplayMode (hDC, GF_SCREENMODE); 
+// 	SetGraphicsMode(hDC, GM_COMPATIBLE);
     SetMapMode    ( hDC, MM_TEXT );
     SetWindowOrgEx  ( hDC, 0, 0,0 );
     SetViewportOrgEx( hDC, 0, 0,0 );

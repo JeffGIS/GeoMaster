@@ -84,7 +84,7 @@ BOOL CreateCrossSection (short vpid,short opt) //opt=0(Clear xsection),1=draw xs
 			SetViewport (CurView->pTheme->TargetViewport);
 			RemoveLinkedCursors ();
 			SaveDC (CurView->hDC);
-			SetDisplayMode (CurView->hDC, GF_TEXTMODE);  
+			SetDisplayMode (CurView->hDC, GF_SCREENMODE);  
 		    GSSiDeleteObject(&CurView->hRgn);
 		    CurView->hRgn = CreateVPRgn(FALSE,FALSE);
 		    SelectClipRgn (CurView->hDC,CurView->hRgn);
@@ -119,9 +119,9 @@ BOOL CreateNextCrossSection (int Direction)
 		HPDPOINT	pRoute=(HPDPOINT)GlobalLock (CurView->hProfileRouteSave);
 		double		Dist = CurView->LastProfileDist + Direction * CurView->pTheme->CrossSectionSpacing;
 	
-		if (Dist < 0 || Dist > GetPolyLengthD (pRoute,CurView->nProfileRouteSave))
+		if (Dist < 0 || Dist > GetPolyLengthD (pRoute,CurView->nProfileRoutePointsSave))
 			goto Exit;			
-		CurView->LastProfilePoint = PointAtDistOnPoly (pRoute,CurView->nProfileRouteSave,Dist,&CurView->LastProfileAZ,NULL);
+		CurView->LastProfilePoint = PointAtDistOnPoly (pRoute,CurView->nProfileRoutePointsSave,Dist,&CurView->LastProfileAZ,NULL);
 		CurView->LastProfileDist = Dist;  
 		rtn = TRUE;  
 Exit:
@@ -316,7 +316,7 @@ void DisplayProfileThemeLegend(short From)
 	HPEN	OldPen, LinePen;  
 	HBRUSH	hOldBrush, hBrush;
 	HANDLE	hProfile, hProfileD[2]={0,0}, hPolyPoints, hRoute, hSurf[2], hTran;
-	long	nPolyPoints=0, nProfilePoints[2]={256,256}, nRoute=0, nptosmooth;
+	long	nPolyPoints=0, nProfilePoints[2]={256,256}, nRoutePoints=0, nptosmooth;
 	int		nRoutes, iRoute=0;
 	HPDPOINT	pProfileD, pBeginSmooth,pPoly, pRoute, pRouteSave;
 	HPPOINT     pProfile;
@@ -370,12 +370,13 @@ void DisplayProfileThemeLegend(short From)
 	lpProfileData = (LPPROFILETHEMEDATA)&CurTheme->ClassBM;    
 	SaveDC (CurView->hDC);
 	SetDisplayMode (CurView->hDC, GF_TEXTMODE);  
-    GSSiDeleteObject(&CurView->hRgn);
-    CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-    SelectClipRgn (CurView->hDC,CurView->hRgn);
-    GSSiDeleteObject(&CurView->hRgn);    
     SetTextColor (CurView->hDC,0);     
-	FillRectPoly (CurView->hDC,&CurView->Rect,ConvertColor(CurView->BackGroundColor,-1));  
+	SelectClipRgn(CurView->hDC, CurView->hRgn);
+	FillRectPoly(CurView->hDC, &CurView->Rect, ConvertColor(CurView->BackGroundColor, -1));
+	CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+	GSSiDeleteObject(&CurView->hRgn);
+	SelectClipRgn(CurView->hDC, CurView->hRgn);
+	GSSiDeleteObject(&CurView->hRgn);
 	if (CurView->HaveFixedProfileRoute || (hHighlight && lpProfileData->MinSeq <= lpProfileData->MaxSeq))
 	{
         hSurf[0] = DTMOpen (SurfName,DBL_MAX,BT_READ,&SurfType[0]);
@@ -398,7 +399,7 @@ void DisplayProfileThemeLegend(short From)
 		{
 			nRoutes = CurView->nProfileRoutes;
 			hRoute = CurView->hProfileRoute[0];
-			nRoute = CurView->nProfileRoute[0];
+			nRoutePoints = CurView->nProfileRoute[0];
 		   	pRoute = (HPDPOINT)GlobalLock (hRoute);
 		}
 	   	else if (CurView->ProfileInCrossSection)  
@@ -407,7 +408,7 @@ void DisplayProfileThemeLegend(short From)
 		   	pRoute = (HPDPOINT)GlobalLock (hRoute);
 	   		pRoute[0] = CurView->ProfileCrossSection[0];
 	   		pRoute[1] = CurView->ProfileCrossSection[1];  
-	   		nRoute = 2;
+	   		nRoutePoints = 2;
 			AlignWithRoute = FALSE;
 	   	}
 	   	else 
@@ -443,7 +444,7 @@ void DisplayProfileThemeLegend(short From)
 				   		{
 					   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
 					   		while (nPolyPoints--)
-					   			pRoute[nRoute++] = *pPoly++;
+					   			pRoute[nRoutePoints++] = *pPoly++;
 				   			GSSiGlobUlFree (&hPolyPoints);
 				   		} 
 			   			HaveOpenEnd = TRUE;
@@ -465,7 +466,7 @@ void DisplayProfileThemeLegend(short From)
 			   		{
 				   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
 				   		while (nPolyPoints--)
-				   			pRoute[nRoute++] = *pPoly++;
+				   			pRoute[nRoutePoints++] = *pPoly++;
 			   			GSSiGlobUlFree (&hPolyPoints); 
 			   		}
 		   		} 
@@ -475,23 +476,37 @@ void DisplayProfileThemeLegend(short From)
 		   			i++;
 		   		}
 	   		} while (Seq < lpProfileData->MaxSeq);
-		    GSSiGlobFree (&CurView->hProfileRouteSave);
-		    CurView->hProfileRouteSave = GSSiGlobAlloc (1012,GMEM_MOVEABLE,(long)nRoute*sizeof(DPOINT)); 
-		    CurView->nProfileRouteSave = nRoute;
+			Reverse = FALSE;
+			{
+				LPVIEWPORT	SaveVP = CurView;
+				POINT ScreenPoint1, ScreenPoint2;
+				SetViewport(CurView->pTheme->TargetViewport);
+				ScreenPoint1 = BasePtToScreenPt(&pRoute[0]);
+				ScreenPoint2 = BasePtToScreenPt(&pRoute[nRoutePoints - 1]);
+				CurView = SaveVP;
+				if (ScreenPoint1.x > ScreenPoint2.x)
+					Reverse = TRUE;
+			}
+			CurView->nProfileRoutes = nRoutes;
+			GSSiGlobFree(&CurView->hProfileRouteSave);
+		    CurView->hProfileRouteSave = GSSiGlobAlloc (1012,GMEM_MOVEABLE,(long)nRoutePoints*sizeof(DPOINT)); 
+		    CurView->nProfileRoutePointsSave = nRoutePoints;
 		   	GlobalUnlock (hRoute); 
-		   	pRoute = (HPDPOINT)GlobalLock (hRoute);
+			if (Reverse)
+				hRoute = ReversePoints(nRoutePoints, hRoute);
+			pRoute = (HPDPOINT)GlobalLock(hRoute);
 		   	pRouteSave = (HPDPOINT)GlobalLock (CurView->hProfileRouteSave);  
-		   	hmemmove ((HPSTR)pRouteSave,(HPSTR)pRoute,nRoute*sizeof(DPOINT));
+		   	hmemmove ((HPSTR)pRouteSave,(HPSTR)pRoute,nRoutePoints*sizeof(DPOINT));
 		   	GlobalUnlock (CurView->hProfileRouteSave);
 	   	}
 EndRoute: 
-		if (nRoute < 2 || !GridSpace) 
+		if (nRoutePoints < 2 || !GridSpace) 
 		{
 			DTMClose (&hSurf[0]);
 			DTMClose (&hSurf[1]);
 			goto Exit;
 		}
-		LenRoute = GetPolyLengthD (pRoute,nRoute);  
+		LenRoute = GetPolyLengthD (pRoute,nRoutePoints);  
 		if (!(CurView->ProfileDistUnits = GetScaleBarUnits (CurTheme->TargetViewport)))
 		{
 			if (LenRoute < 2000)
@@ -519,11 +534,11 @@ EndRoute:
 				hProfileD[isurf] = GSSiGlobAlloc (1013,GMEM_MOVEABLE,(long)MAXPROFILEPOINTS*sizeof(DPOINT));
 			   	pProfileD = (HPDPOINT)GlobalLock (hProfileD[isurf]);
 			   	Dist = 0; 
-		   		Point = PointAtDistOnPoly (pRoute,nRoute,Dist,NULL,NULL);   
+		   		Point = PointAtDistOnPoly (pRoute,nRoutePoints,Dist,NULL,NULL);   
 		   		pProfileD->x = Dist;
 		   		pProfileD++->y = NGIELV_bci (Point,hSurf[isurf],1);
 		   		Dist = LenRoute;
-		   		Point = PointAtDistOnPoly (pRoute,nRoute,Dist,NULL,NULL);   
+		   		Point = PointAtDistOnPoly (pRoute,nRoutePoints,Dist,NULL,NULL);   
 		   		pProfileD->x = Dist;
 		   		pProfileD->y = NGIELV_bci (Point,hSurf[isurf],1);
 		   		GlobalUnlock (hProfileD[isurf]);  
@@ -547,7 +562,7 @@ EndRoute:
 					MNMXCORD	PolyBounds;
 					LPDTMINFO	pDTMInfo=(LPDTMINFO)GlobalLock (hSurf[isurf]); 
 					
-					GetPolyBoundsD (hRoute,nRoute,&PolyBounds,TYPE_POLYLINE); 
+					GetPolyBoundsD (hRoute,nRoutePoints,&PolyBounds,TYPE_POLYLINE); 
 					ExpandBounds (&PolyBounds,1);
 					SaveVP = CurView;
 					SetConfig (1);
@@ -579,7 +594,7 @@ EndRoute:
 					strncpy0 (SaveCRU,CurrentUDI,MAX_UDI_LEN);
 					SaveHP	= HiPrecis; 
 					SaveCRType = CurrentType;      
-					nProfileRoute = nRoute;
+					nProfileRoute = nRoutePoints;
 					hProfileRoute = hRoute;
 					HighlightInArea (CurView->hWnd,&PolyBounds,TRUE,TRUE,0);
 					lpDCurPoints = SaveCurPoints; 
@@ -626,39 +641,67 @@ EndRoute:
 			}
 			else
 			{
+				LPVIEWPORT pSaveVP = CurView;
+				BOOL	haveInPoint = FALSE;
+				BOOL	pointIsIn = FALSE;
+				int		lastInPoint = 0;
+				int		numProfilePoints = 0;
+
+				if (!AlignWithRoute)
+					haveInPoint = TRUE;
 				hProfileD[isurf] = GSSiGlobAlloc (1013,GMEM_MOVEABLE,(long)nProfilePoints[isurf]*sizeof(DPOINT));
 			   	pProfileD = (HPDPOINT)GlobalLock (hProfileD[isurf]); 
 			   	Dist = 0; 
 			   	nptosmooth = 0;
 			   	pBeginSmooth = pProfileD;
-			   	for (i=0;i<nProfilePoints[isurf];i++)
+				SetViewport(CurView->pTheme->TargetViewport);
+				for (i = 0; i<nProfilePoints[isurf]; i++)
 			   	{   
-			   		Point = PointAtDistOnPoly (pRoute,nRoute,Dist,NULL,NULL);   
-			   		pProfileD->x = Dist;
-			   		pProfileD->y = NGIELV_bci (Point,hSurf[isurf],1);
-if (isurf)
-	pProfileD->y -= (42/12.0) / 3.2808333;
-			   		if (pProfileD->y < DBL_MAX)
-			   		{  
-						AddDPointToMinMax (pProfileD,&Bounds);  
-						nptosmooth++;
+			   		Point = PointAtDistOnPoly (pRoute,nRoutePoints,Dist,NULL,NULL);   
+					ScreenPoint = BasePtToScreenPt(&Point);
+					if (PtInRect(&CurView->ScreenRect, ScreenPoint))
+					{
+						haveInPoint = TRUE;
+						pointIsIn = TRUE;
+						lastInPoint = numProfilePoints;
 					}
 					else
-					{   
-						if (Bounds.xmn > pProfileD->x)
-							Bounds.xmn = pProfileD->x;
-						if (Bounds.xmx < pProfileD->x)
-							Bounds.xmx = pProfileD->x;
+						pointIsIn = FALSE;
+					if (haveInPoint)
+					{
+						pProfileD->x = Dist;
+			   			pProfileD->y = NGIELV_bci (Point,hSurf[isurf],1);
+if (isurf)
+	pProfileD->y -= (42/12.0) / 3.2808333;
+						if (pProfileD->y < DBL_MAX && (!AlignWithRoute || haveInPoint))
+			   			{  
+							if (!AlignWithRoute || pointIsIn)
+								AddDPointToMinMax (pProfileD,&Bounds);  
+							nptosmooth++;
+						}
+						else
+						{   
+							if (Bounds.xmn > pProfileD->x)
+								Bounds.xmn = pProfileD->x;
+							if (Bounds.xmx < pProfileD->x)
+								Bounds.xmx = pProfileD->x;
 							
-						SmoothProfile (pBeginSmooth,nptosmooth); 
-						nptosmooth = 0;
-						pBeginSmooth = pProfileD + 1;
-					}  
-			   		pProfileD++;
-			   		Dist += IncDist;
-			   	}  
+							SmoothProfile (pBeginSmooth,nptosmooth); 
+							nptosmooth = 0;
+							pBeginSmooth = pProfileD + 1;
+						}  
+						pProfileD++;
+						numProfilePoints++;
+					}
+					Dist += IncDist;
+				}
+				CurView = pSaveVP;
 				SmoothProfile (pBeginSmooth,nptosmooth); 
 			   	GlobalUnlock (hProfileD[isurf]);  
+				if (AlignWithRoute)
+				{
+					nProfilePoints[isurf] = lastInPoint;
+				}
 //				if (!CheckForContinue (TRUE))
 //					break;
 		   	}
@@ -669,9 +712,9 @@ if (isurf)
 		{
 			MNMXCORD	PolyBounds;
 					
-			GetPolyBoundsD (hRoute,nRoute,&PolyBounds,TYPE_POLYLINE); 
+			GetPolyBoundsD (hRoute,nRoutePoints,&PolyBounds,TYPE_POLYLINE); 
 			ExpandBounds (&PolyBounds,1);
-			nProfileRoute = nRoute;
+			nProfileRoute = nRoutePoints;
 			hProfileRoute = hRoute;  
 			hCurProfile = hProfileD[0];
 			nCurProfile = nProfilePoints[0];
@@ -723,19 +766,23 @@ if (isurf)
 		if (AlignWithRoute)
 		{
 			LPVIEWPORT	SaveVP=CurView;
+			pRoute = (HPDPOINT)GlobalLock(hRoute);
 
 			SetViewport (CurView->pTheme->TargetViewport);
 			RectInit (&ProfileRect);
-			for (i=0;i<nRoute;i++)
+			pProfileD = (HPDPOINT)GlobalLock(hProfileD[0]);
+			for (i = 0; i<nProfilePoints[0]; i++)
 			{
-				ScreenPoint = BasePtToScreenPt (&pRoute[i]);
+				DPOINT Point = PointAtDistOnPoly(pRoute, nRoutePoints, pProfileD[i].x, NULL, NULL);
+				ScreenPoint = BasePtToScreenPt(&Point);
 				AddPointToRect (ScreenPoint,&ProfileRect);
 			}
+			GlobalUnlock(hProfileD[0]);
 			CurView = SaveVP;
 			ProfileRect.bottom = CurView->ScreenRect.bottom;
 			ProfileRect.top = CurView->ScreenRect.top;
-			Bounds.xmn = ProfileRect.left;
-			Bounds.xmx = ProfileRect.right;
+			//Bounds.xmn = ProfileRect.left;
+			//Bounds.xmx = ProfileRect.right;
 			InflateRect (&ProfileRect,0,-(MaxYText+4));
 			if (VertScaleFactor)
 			{
@@ -745,6 +792,7 @@ if (isurf)
 				Bounds.ymx = MidElev + (((ProfileRect.bottom - ProfileRect.top)/2)/PixelsPerDistUnit)/VertScaleFactor;
 				Bounds.ymn = MidElev - (((ProfileRect.bottom - ProfileRect.top)/2)/PixelsPerDistUnit)/VertScaleFactor;
 			}
+			GlobalUnlock(hRoute);
 		}
 		else
 		{
@@ -787,12 +835,9 @@ if (isurf)
 		Dist = 0;
 		if (AlignWithRoute)
 		{
-			LPVIEWPORT	SaveVP=CurView;
-
-			SetViewport (CurView->pTheme->TargetViewport);
-		   	Point = PointAtDistOnPoly (pRoute,nRoute,Dist,NULL,NULL);   
-			Point1 = BasePtToScreenPtD (&Point);
-			CurView = SaveVP;
+			pProfileD = (HPDPOINT)GlobalLock(hProfileD[0]);
+			Point1.x = Dist = pProfileD->x;
+			GlobalUnlock(hProfileD[0]);
 		}
 		else
 			Point1.x = Dist;
@@ -816,16 +861,16 @@ if (isurf)
 				DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 2,3,h*0.8,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 		    }
 		    Dist += ConvertInDist (GridInc,CurView->ProfileDistUnits);
-			if (AlignWithRoute)
+/*			if (AlignWithRoute)
 			{
 				LPVIEWPORT	SaveVP=CurView;
 
 				SetViewport (CurView->pTheme->TargetViewport);
-		   		Point = PointAtDistOnPoly (pRoute,nRoute,Dist,NULL,NULL);   
+		   		Point = PointAtDistOnPoly (pRoute,nRoutePoints,Dist,NULL,NULL);   
 				Point1 = BasePtToScreenPtD (&Point);
 				CurView = SaveVP;
 			}
-			else
+			else*/
 				Point1.x = Dist;
 		    Point2.x = Point1.x;
 			Point1.y = Bounds.ymn;
@@ -861,16 +906,16 @@ if (isurf)
 		   		{ 
 					DPOINT	ProfPoint = pProfileD[i], WPoint, ScreenPointD;
 
-					if (AlignWithRoute)
+/*					if (AlignWithRoute)
 					{
 						LPVIEWPORT	SaveVP=CurView;
 
 						SetViewport (CurView->pTheme->TargetViewport);
-				  		WPoint = PointAtDistOnPoly (pRoute,nRoute,ProfPoint.x,NULL,NULL); 
+				  		WPoint = PointAtDistOnPoly (pRoute,nRoutePoints,ProfPoint.x,NULL,NULL); 
 						ScreenPointD = BasePtToScreenPtD (&WPoint);
 						ProfPoint.x = ScreenPointD.x;
 						CurView = SaveVP;
-		 			}
+		 			}*/
 			     	pProfile[np++] = TRANDPointToPoint (&ProfPoint,hTran);  
 			    }
 			    else if (np > 1)
@@ -1026,7 +1071,7 @@ if (isurf)
 							az = getazd (&DPoint2,&DPoint1);
 							DPoint3 = dnewpt (DPoint1,az-HALFPI,ProfileDistConv(pData->Width/2,HorToVertFactor,az));
 							DLine[0].y = DPoint3.y;
-							if (!GetProfileX (&DPoint,nRoute,pRoute,&PointOnRoute,&OffDist,&PolyDist))
+							if (!GetProfileX (&DPoint,nRoutePoints,pRoute,&PointOnRoute,&OffDist,&PolyDist))
 								break;
 							DLine[0].x = PolyDist; 
 							WLine[0] = TRANDPointToPoint (&DLine[0],hTran);
@@ -1039,7 +1084,7 @@ if (isurf)
 							az = getazd (&DPoint2,&DPoint1);
 							DPoint3 = dnewpt (DPoint2,az-HALFPI,ProfileDistConv(pData->Width/2,HorToVertFactor,az));
 							DLine[1].y = DPoint3.y;
-							if (!GetProfileX (&DPoint,nRoute,pRoute,&PointOnRoute,&OffDist,&PolyDist))
+							if (!GetProfileX (&DPoint,nRoutePoints,pRoute,&PointOnRoute,&OffDist,&PolyDist))
 								break;
 							DLine[1].x = PolyDist; 
 							WLine[1] = TRANDPointToPoint (&DLine[1],hTran);
@@ -1072,7 +1117,7 @@ if (isurf)
 								break;
 							DPoint.x = pData->BPX;
 							DPoint.y = pData->BPY;
-							if (!GetProfileX (&DPoint,nRoute,pRoute,&PointOnRoute,&OffDist,&PolyDist))
+							if (!GetProfileX (&DPoint,nRoutePoints,pRoute,&PointOnRoute,&OffDist,&PolyDist))
 								break;
 							if (OffDist > maxOffset)
 								break;
@@ -1186,6 +1231,8 @@ if (isurf)
 	    sprintf (txt,"%.0f",MinElev);
 		twidth = txSize.cx+2; 
 	    p.x = min (CurView->ScreenRect.right-twidth/2,ProfileRect.right) + 2;
+		SaveDC(CurView->hDC);
+		SelectClipRgn(CurView->hDC, CurView->hRgn);
 		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 1,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 	    p.x = max (CurView->ScreenRect.left+twidth/2,ProfileRect.left) - 2;
 		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 4,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
@@ -1195,13 +1242,13 @@ if (isurf)
 		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 1,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 	    p.x = max (CurView->ScreenRect.left+twidth/2,ProfileRect.left) - 2;
 		DispText (CurView->hDC,FALSE,p.x,p.x, p.y,0, 4,1,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+		RestoreDC(CurView->hDC, -1);
 	    
-	    
-	    CurView->hFileTransIn = STRANRectToBounds (&ProfileRect,&Bounds); 
+	   // CurView->hFileTransIn = STRANRectToBounds (&ProfileRect,&Bounds); 
 	    if (hRoute != CurView->hProfileRoute[iRoute])
 			GSSiGlobFree (&CurView->hProfileRoute[iRoute]);
 	    CurView->hProfileRoute[iRoute] = hRoute;  
-	    CurView->nProfileRoute[iRoute] = nRoute;
+	    CurView->nProfileRoute[iRoute] = nRoutePoints;
 	} 
 	else
 		CurView->LinkedTo = 0; 

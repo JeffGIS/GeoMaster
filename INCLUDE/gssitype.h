@@ -2799,12 +2799,22 @@ typedef struct
      } SAVEDIMAGEDATA;
 typedef SAVEDIMAGEDATA    *LPSAVEDIMAGEDATA;
   
+#define VIEWPORT_TYPE_FORMAT 0
+#define VIEWPORT_TYPE_PLAN 1
+#define VIEWPORT_TYPE_PROFILE 2
+#define VIEWPORT_TYPE_CONTAINER 3
+#define VIEWPORT_TYPE_3D 4
+#define VIEWPORT_TYPE_MENU 5
+#define VIEWPORT_TYPE_LEGEND 6
+#define VIEWPORT_TYPE_GLOBAL 7
+#define VIEWPORT_TYPE_LEGENDIMAGE 8
+#define VIEWPORT_TYPE_SUBVIEWPORT 9
 typedef struct
 {
 		short		ID,  
 					Version,
 					Parent,
-					Type,			/* 0 = Format, 1 = Plan, 2 = Profile, 3 = Cross Section,
+					Type,			/* 0 = Format, 1 = Plan, 2 = Profile, 3 = Container Viewport,
 									   4 = 3D,   5 = Menu,    6 = Legend Viewport, 7= Global View, 8=LegendImage,9=SubViewport		 */
 					ZoomTarget;     /* For type 7 only. Indicates which viewport is
 									   zoomed/panned when zoom/pan commands entered in this
@@ -2946,7 +2956,7 @@ typedef struct
 		DPOINT		LastProfilePoint;    
 		DPOINT		ProfileCrossSection[2]; 
 		HANDLE		hProfileRouteSave;
-		long		nProfileRouteSave;
+		long		nProfileRoutePointsSave;
 		float		NewObjectTextFactor[MAX_NEW_OBJECTS];
 		RGBTRIPLE	NewObjectTextColor[MAX_NEW_OBJECTS];
 		BYTE		NewObjectSetTextColor[MAX_NEW_OBJECTS];

@@ -6140,38 +6140,70 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	HWND	hWndTarget = GetTargetWindow();
 	HDC		hDC;
 	time_t	systime;
+	char	line[1024];
+	char	DocDir[MAX_PATH];
+	char	ParmFile[MAX_PATH];
+	HFILE	fid;
 
 	time(&systime);
+	sprintf(DocDir, "[%%DL]GMDocumenter\\%s", Arg[2]);
+	ExpandText(DocDir);
 
-	if (!stricmp(Arg[1], "CAPSCREEN"))
+	if (!stricmp(Arg[1], "CLEAR"))
 	{
-		hDC = GetWindowDC(hWnd);
-		GetClientRect(hWndTarget, &ScreenRect);
-		ClientRectToScreenRect(hWndTarget, &ScreenRect);
-		hBitmap = SaveScreen(hDC, ScreenRect);
-		hDib32 = BitmapToDIB32(hBitmap);
-		DeleteObject(hBitmap);
-		ReleaseDC(hWnd, hDC);
-		hDib24 = FreeImage_ConvertTo24Bits(hDib32);
-		rtn = GM32SaveDIB(hDib24, Arg[2], -1, 0);
-		FreeImage_Unload(hDib24);
-		FreeImage_Unload(hDib32);
-		rtn = TRUE;
+		rtn = DeleteDirAndContents(DocDir);
 	}
-	if (!stricmp(Arg[1], "CAPCURSOR"))
+	else
 	{
-		POINT pt;
-		CURSORINFO cursInfo;
-		ICONINFOEX iconInfo;
-		int iCursor;
+		sprintf(ParmFile, "%s\\%i.txt",DocDir, systime);
+		fid = GSSiOpenFile(ParmFile, 0, OF_CREATE);
+		if (!stricmp(Arg[1], "CAPSCREEN"))
+		{
+			char capScreenFile[MAX_PATH];
 
-		GetCursorPos(&pt);
-		cursInfo.cbSize = sizeof(CURSORINFO);
-		iconInfo.cbSize = sizeof(ICONINFOEX);
-		GetCursorInfo(&cursInfo);
-		iCursor = WhichCursor (cursInfo.hCursor);
-		rtn = iCursor;
+			sprintf(capScreenFile, "%s\\%i.png", DocDir, systime);
+			ExpandText(capScreenFile);
+			hDC = GetWindowDC(hWnd);
+			GetClientRect(hWndTarget, &ScreenRect);
+			ClientRectToScreenRect(hWndTarget, &ScreenRect);
+			hBitmap = SaveScreen(hDC, ScreenRect);
+			hDib32 = BitmapToDIB32(hBitmap);
+			DeleteObject(hBitmap);
+			ReleaseDC(hWnd, hDC);
+			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
+			sprintf(line, "CAPSCREEN");
+			fputstring(line, fid);
+			sprintf(line, "%i.png", systime);
+			fputstring(line, fid);
+			recttoa(line, ScreenRect);
+			fputstring(line, fid);
+			FreeImage_Unload(hDib24);
+			FreeImage_Unload(hDib32);
+			rtn = TRUE;
+		}
+		if (!stricmp(Arg[1], "CAPCURSOR"))
+		{
+			POINT pt;
+			CURSORINFO cursInfo;
+			ICONINFOEX iconInfo;
+			int iCursor;
+
+			GetCursorPos(&pt);
+			cursInfo.cbSize = sizeof(CURSORINFO);
+			iconInfo.cbSize = sizeof(ICONINFOEX);
+			GetCursorInfo(&cursInfo);
+			iCursor = WhichCursor(cursInfo.hCursor);
+			sprintf(line, "CAPCURSOR");
+			fputstring(line, fid);
+			pttoa(line, pt);
+			fputstring(line, fid);
+			itoa(iCursor, line,10);
+			fputstring(line, fid);
+			rtn = iCursor;
+		}
+		GSSiClose(fid);
 	}
-	ltoa(rtn, OutLoc, 10);
+	ltoa(systime, OutLoc, 10);
 	return rtn;
 }

@@ -6723,7 +6723,7 @@ GSSiExitProg (1124);
 #endif
 }
 
-DPOINT PointAtScreenXOnPoly (HPDPOINT lpPoints,long nPnts,double AtX)   
+DPOINT PointAtScreenXOnPoly (HPDPOINT lpPoints,long nPnts,double AtX,LPDOUBLE pAZ)   
 #if ENABLETRACE
 {GSSiEnterProg (1124);
 #endif
@@ -6744,7 +6744,10 @@ DPOINT PointAtScreenXOnPoly (HPDPOINT lpPoints,long nPnts,double AtX)
 			if (Point2.x - Point1.x != 0)
 				pct = (AtX - Point1.x)/(Point2.x - Point1.x);
 			Point.x = BasePt1.x + pct * (BasePt2.x - BasePt1.x); 
-			Point.y = BasePt1.y + pct * (BasePt2.y - BasePt1.y); 
+			Point.y = BasePt1.y + pct * (BasePt2.y - BasePt1.y);
+			AZ = getazd(&BasePt1, &BasePt2);
+			if (pAZ)
+				*pAZ = AZ;
 {
 #if ENABLETRACE
 GSSiExitProg (1124);

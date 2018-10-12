@@ -2172,6 +2172,7 @@
 #define IDC_TOMONTH                     1251
 #define IDR_GMDOC                       1251
 #define IDC_FROMDAY                     1252
+#define IDD_GMDOCHELP                   1252
 #define IDC_TODAY                       1253
 #define IDC_FROMDATETEXT                1254
 #define IDC_TODATETEXT                  1255
@@ -3385,7 +3386,9 @@
 #define ID_NEWZOOMLIST                  2296
 #define ID_DELETEITEMS                  2297
 #define ID_CLEARLIST                    2298
+#define IDC_GMDOCTEXT                   2298
 #define ID_DELETELIST                   2299
+#define IDC_CHECK_DONOTSHOW             2299
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3730,9 +3733,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1252
+#define _APS_NEXT_RESOURCE_VALUE        1253
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2296
+#define _APS_NEXT_CONTROL_VALUE         2300
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

@@ -4694,6 +4694,7 @@ long HighlightInArea (HWND hWnd,LPMNMXCORD pBounds,BOOL AddToList,BOOL DisplayNu
 	BOOL	SaveDH = DisableHalt;
 	double	Offset;
 
+	SaveDC(CurView->hDC);
 	DisableHalt = TRUE;
 	NumRecordsProcessed=0;
 	if (DisplayNum)
@@ -4811,6 +4812,7 @@ Exit:
 	CurView->HaveBounds = SaveHaveBounds;
 	SetDisplayMode (CurView->hDC,GF_TEXTMODE);
 	SelectClipRgn (CurView->hDC,0);
+	RestoreDC(CurView->hDC, -1);
 	CurVis = SaveVis;
 	if (DisplayNum)
 	{

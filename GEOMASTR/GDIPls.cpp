@@ -108,7 +108,7 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 	HPEN hpn = (HPEN)SelObject(hdc, GetStockObject(BLACK_PEN));
 	HBRUSH hbr = (HBRUSH)SelObject(hdc, GetStockObject(BLACK_BRUSH));
 	LineCap lincap = LineCapFlat;
-
+	lincap = LineCapRound;
 	if (!gdiplusToken)
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);
 	{
@@ -150,7 +150,7 @@ extern "C" void AAPolyLineF(HDC hdc, LPFPOINT pPoints, int np, COLORREF ColorRef
 	HPEN hpn = (HPEN)SelObject(hdc, GetStockObject(BLACK_PEN));
 	HBRUSH hbr = (HBRUSH)SelObject(hdc, GetStockObject(BLACK_BRUSH));
 	LineCap lincap = LineCapFlat;
-
+	lincap = LineCapRound;
 	if (!gdiplusToken)
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);
 	{

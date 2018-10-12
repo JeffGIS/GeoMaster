@@ -215,7 +215,7 @@ int nCwRegisterClasses(LPSTR Menu)
  _fmemset(&wndclass, 0x00, sizeof(WNDCLASS));
 
   /* load WNDCLASS with window's characteristics                         */
- wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_CLASSDC | CS_DBLCLKS | CS_OWNDC;
+ wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_DBLCLKS | CS_OWNDC;
  wndclass.lpfnWndProc = (WNDPROC)WndProc;
  /* Extra storage for Class and Window objects                          */
  wndclass.cbClsExtra = 0;
@@ -938,7 +938,18 @@ void ExpandDL (void)
 //	GetLongPathName (str,256);
 	SetGlobalValue ("%DL",str);
 	SetGlobalValue ("%DATA_LOC",str);
-	strcat (str,"geomastr.ini");
+	strcpy(str, "[%USERDIR]");
+	ExpandText(str);
+	if (*str && FileType(str) == 2)
+	{
+		strcpy(str, "[%USERDIR]geomastr.ini");
+		ExpandText(str);
+	}
+	else
+	{
+		GetGlobalCVal("[%DL]", str, 0);
+		strcat(str, "geomastr.ini");
+	}
 	strcpy (GMIni,str);
 	return;
 }
@@ -1417,7 +1428,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		CreateBigMem();
 		AllowCache = FALSE;
 		ProcessCommandLine("");
-		return WinMainGMDoc(hInstance, hPrevInstance, cmdLine, nCmdShow);
+		return WinMainGMDoc(hInstance, hPrevInstance, cmdLine, SW_MAXIMIZE);
 	}
 	else
 	{

@@ -2907,11 +2907,11 @@ void AdjustBoundsAndDrawRectToRotation (void)
 	HANDLE	hTran;
 	double	Scale;
 
-	CloseTRANS2 (&CurView->hTranScreenToVP);
+	if (!CurView)
+		return;
+	CloseTRANS2(&CurView->hTranScreenToVP);
 	CloseTRANS2 (&CurView->hTranVPToScreen);
 	CurView->DrawRect = CurView->ScreenRect;
-	if (!CurView || !CurView->Rotation)
-		return;
 
 	Point  = RectMid (&CurView->ScreenRect);
 	Point1 = PointToDPoint (Point);
@@ -3134,29 +3134,41 @@ DPOINT ScreenPtToBasePt (POINT Point)
 {
     DPOINT WinPointD, WorldPoint;
      
-     if(!CurView->hTranBaseToVP)
-     {
-     	if (!CurView->pTheme || CurView->pTheme->ID != GF_PROFILE_THEME) 
-			CreateBaseToVPTran (CurView->DrawRect);
-	 }
-     WinPointD = EnlargedPoint (Point);
-	 WinPointD = TranPoint (&WinPointD,CurView->hTranScreenToVP);
-	 WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
-	 return WorldPoint;
+	if (!CurView->pTheme)
+		CreateBaseToVPTran(CurView->DrawRect);
+	else if (CurView->pTheme->ID != GF_PROFILE_THEME)
+		CreateBaseToVPTran(CurView->DrawRect);
+	else
+	{
+		CloseTRANS2(&CurView->hTranVPToBase);
+		CloseTRANS2(&CurView->hTranBaseToVP);
+		CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
+		CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
+	}
+	WinPointD = EnlargedPoint(Point);
+	WinPointD = TranPoint (&WinPointD,CurView->hTranScreenToVP);
+	WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
+	return WorldPoint;
 }
 
 DPOINT ScreenPtDToBasePt (DPOINT WinPointD)
 {
     DPOINT WorldPoint;
      
-     if(!CurView->hTranBaseToVP)
-     {
-     	if (!CurView->pTheme || CurView->pTheme->ID != GF_PROFILE_THEME) 
-			CreateBaseToVPTran (CurView->DrawRect);
-	 }
-	 WinPointD = TranPoint (&WinPointD,CurView->hTranScreenToVP);
-	 WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
-	 return WorldPoint;
+	if (!CurView->pTheme)
+		CreateBaseToVPTran(CurView->DrawRect);
+	else if (CurView->pTheme->ID != GF_PROFILE_THEME)
+		CreateBaseToVPTran(CurView->DrawRect);
+	else
+	{
+		CloseTRANS2(&CurView->hTranVPToBase);
+		CloseTRANS2(&CurView->hTranBaseToVP);
+		CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
+		CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
+	}
+	WinPointD = TranPoint(&WinPointD, CurView->hTranScreenToVP);
+	WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
+	return WorldPoint;
 }
 
 DPOINT WinPtToBasePt (POINT Point)
@@ -3167,8 +3179,17 @@ DPOINT WinPtToBasePt (POINT Point)
      
      if(!CurView->hTranBaseToVP)
      {
-     	if (!CurView->pTheme || CurView->pTheme->ID != GF_PROFILE_THEME) 
+     	if (!CurView->pTheme) 
 			CreateBaseToVPTran (CurView->DrawRect);
+		else if (CurView->pTheme->ID != GF_PROFILE_THEME)
+			CreateBaseToVPTran(CurView->DrawRect);
+		else
+		{
+			CloseTRANS2(&CurView->hTranVPToBase);
+			CloseTRANS2(&CurView->hTranBaseToVP);
+			CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
+			CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
+		}
 	 }
      WinPointD = EnlargedPoint (Point);
      TRANS2 (WinPointD.x,WinPointD.y,&WorldPoint.x,&WorldPoint.y,CurView->hTranVPToBase);

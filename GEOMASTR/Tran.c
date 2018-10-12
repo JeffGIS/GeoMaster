@@ -1079,6 +1079,13 @@ void TRANS2 (double XIN,double YIN, LPDOUBLE XOUT,LPDOUBLE YOUT, HANDLE hlpTran)
 	  Point.x = XIN;
 	  Point.y = YIN;	
       TranPtr = (LPTRANDATA)GlobalLock(hlpTran); 
+	  if (!TranPtr)
+	  {
+		  *XOUT = XIN;
+		  *YOUT = YIN;
+		  goto Exit2;
+	  }
+
 	  if (!strncmp((LPSTR)TranPtr, "PARCELTRAN", 10))
 	  {
 		  TranToParcelPoints(&XIN, &YIN, XOUT, YOUT, (LPPARCELTRAN)TranPtr);

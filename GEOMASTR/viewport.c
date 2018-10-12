@@ -12,7 +12,7 @@ HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal);
 
 static	HWND hWndConnected[MAX_CONNECTED_PROCESSES];
 static	int	 NumConnectedProcesses = 0;
-static	char VPCTypes[][24]={"Format","Plan View","Profile View","-not yet implemented-","-not yet implemented-","Menu","Legend Viewport","Index","Legend Image","Sub Viewport"};
+static	char VPCTypes[][24]={"Format","Plan View","Profile View","Container View","-not yet implemented-","Menu","Legend Viewport","Index","Legend Image","Sub Viewport"};
 
 
 #include "gmextern.h"

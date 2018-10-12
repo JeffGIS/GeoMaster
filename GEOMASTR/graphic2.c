@@ -796,40 +796,44 @@ GSSiExitProg (114);
     CursorPoint = POINTStoPOINT(MAKEPOINTS(lParam));
 	iview = *pNumViewports;
     while (iview--)
-    {   SetCurView ( pViewportsD[iview]); 
-        if ((HaveVP <= 0 || !CurView->Type) && CurViewActive())
-        {
-        	if (PtInRect (&CurView->ScreenRect,CursorPoint))
-	        {   
-	        	if (CurView->hTranVPToBase) 
-	        	{
-					DPOINT	Point = PointToDPoint (CursorPoint);
-
-					if (CurView->hTranScreenToVP)
-						Point = TranPoint (&Point,CurView->hTranScreenToVP);
-				    BasePoint = WinPtToBasePtD (&Point);
-				    DisplayCoordinate (&BasePoint,CursorPoint);
-				    if (CurView->Type) 
-				    {
-				    	HaveVP = 1;
-				    	break;
-				    }
-				    else
-				    	HaveVP = -1;
-			    }
-			    else if (CurView->hProfileElev)
-			    {   
-					BasePoint = WinPtToBasePt (CursorPoint); 
-					if (TranFilePoint (1,&BasePoint) != 2) 
+    {
+		SetCurView ( pViewportsD[iview]); 
+		if (CurView->Type != VIEWPORT_TYPE_CONTAINER && CurView->Type != VIEWPORT_TYPE_FORMAT)
+		{
+			if ((HaveVP <= 0 || !CurView->Type) && CurViewActive())
+			{
+				if (PtInRect(&CurView->ScreenRect, CursorPoint))
+				{
+					if (CurView->nProfileRoutes)
 					{
-						if (DisplayProfileInfo (&BasePoint, CursorPoint))
-							goto Exit; 
+						BasePoint = WinPtToBasePt(CursorPoint);
+						//if (TranFilePoint (1,&BasePoint) != 2) 
+						{
+							if (DisplayProfileInfo(&BasePoint, CursorPoint))
+								goto Exit;
+						}
 					}
-			    }
-			    else
-			    	break;
-	        }
-	    }
+					else if (CurView->hTranVPToBase)
+					{
+						DPOINT	Point = PointToDPoint(CursorPoint);
+
+						if (CurView->hTranScreenToVP)
+							Point = TranPoint(&Point, CurView->hTranScreenToVP);
+						BasePoint = WinPtToBasePtD(&Point);
+						DisplayCoordinate(&BasePoint, CursorPoint);
+						if (CurView->Type)
+						{
+							HaveVP = 1;
+							break;
+						}
+						else
+							HaveVP = -1;
+					}
+					else
+						break;
+				}
+			}
+		}
     }
     if (!HaveVP) 
     	DisplayCoordinate (0,CursorPoint);

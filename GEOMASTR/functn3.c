@@ -1331,6 +1331,8 @@ GotCloseFilehSQL:
 		case 511: // $IMAGE(image file pathname)  
 				  // $IMAGE(WINDOW,image file name)
 				  // $IMAGE(SPLIT,imagefile,outdir,outtype,width,height)
+				  // $IMAGE(WIDTH,imageFile);
+				  // $IMAGE(HEIGHT,imageFile);
 		{				
 			
 			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
@@ -1358,8 +1360,27 @@ GotCloseFilehSQL:
 				goto Rtnrtn;
 			}
 
-
-			if (!_fstricmp (Arg[1],"WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))
+			if (!_fstricmp(Arg[1], "WIDTH"))
+			{
+				int width = 0;
+				HDIB32	hDib32 = LoadDIB32(Arg[2], FALSE);
+				if (hDib32)
+					width = FreeImage_GetWidth(hDib32);
+				ltoa(width, OutLoc, 10);
+				DestroyDIB32(hDib32, FALSE);
+				goto Rtnl;
+			}
+			if (!_fstricmp(Arg[1], "HEIGHT"))
+			{
+				int height = 0;
+				HDIB32	hDib32 = LoadDIB32(Arg[2], FALSE);
+				if (hDib32)
+					height = FreeImage_GetHeight(hDib32);
+				ltoa(height, OutLoc, 10);
+				DestroyDIB32(hDib32, FALSE);
+				goto Rtnl;
+			}
+			if (!_fstricmp(Arg[1], "WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))
 			{
 			    HDIB32	hDib32 = LoadDIB32(Arg[2],FALSE);
 				RECT	WindowRect;

@@ -61,8 +61,8 @@
 #define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
     GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
 
-#define RECTWIDTH(lpRect)     ((lpRect)->right - (lpRect)->left)
-#define RECTHEIGHT(lpRect)    ((lpRect)->bottom - (lpRect)->top)
+#define RECTWIDTH(lpRect)     abs(((lpRect)->right - (lpRect)->left))
+#define RECTHEIGHT(lpRect)    abs(((lpRect)->bottom - (lpRect)->top))
 
 #define	OF_CREATE_NODELETE	0x1111      
 
@@ -741,6 +741,7 @@ BOOL DisplayTextFileInRect (HDC hDC,LPRECT Rect,LPSTR Name);
 LPSTR UpcaseFirst (LPSTR s);
 LPSTR OneSpace (LPSTR Arg1); 
 LPSTR strncpy0(LPSTR Buff,LPSTR str, size_t n);
+void ExpandDL(void);
 void SetFocusAndCursor (HWND hWnd);
 BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR ListFile,LPSTR InitVal,long AutoInc,BOOL DrowDown,BOOL Sorted); 
 BOOL GetTextStringML (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR InitVal);
@@ -832,6 +833,7 @@ void ExpandMinMaxL (LPMNMXCORL Bounds, long Adjust);
 void TranBounds(HANDLE TranID, LPMNMXCORD pBounds);
 void ConvertBounds(LPMNMXCORD pBounds, int from, int to);
 void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect);
+double AdjustRectToRectFactor(LPRECT pRectToAdjust, LPRECT pRect);
 void DebugShowLine (LPDPOINT p1,LPDPOINT p2);
 double MinAngleToTheRight (double AZ1,double AZ2);
 short GetValListFieldLen (LPFIELDINFO pField);

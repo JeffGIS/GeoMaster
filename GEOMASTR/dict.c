@@ -1117,7 +1117,7 @@ HDIB32 ChangeBitmapColor (HDIB32 hDib,RGBTRIPLE *pNewColor)
 	return hDibNewColor;
 }
 
-BOOL DisplayTransparentBitmap (HDC hDC,HDIB32 hDib,POINT Point,int width,LPRECT pBounds,LPCOLORREF pNewColor)
+BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, int width, LPRECT pBounds, LPCOLORREF pNewColor, LPCOLORREF pTranColor)
 {
 	HBITMAP hBMMask, hBMColor, hBMOld;
 	BITMAP	bm;
@@ -1135,31 +1135,39 @@ BOOL DisplayTransparentBitmap (HDC hDC,HDIB32 hDib,POINT Point,int width,LPRECT 
 	RGBTRIPLE	NewColor;
 	COLORREF	OldColor;
 	COLORREF	TranColor = RGB(255,255,255);
-	int nTranColors = FreeImage_GetTransparencyCount (hDib);
-	BOOL	isTransparent = FreeImage_IsTransparent (hDib);
-	int	iTran = FreeImage_GetTransparentIndex (hDib);
+	int nTranColors = FreeImage_GetTransparencyCount (*hDib);
+	BOOL	isTransparent = FreeImage_IsTransparent (*hDib);
 
 //	GetColor (hWndMain,&nColor);
 //	NewColor = RGBQUADFromCOLORREF (nColor);
-	if (iTran >= 0)
+	if (isTransparent)
 	{
-		RGBQUAD *pal = FreeImage_GetPalette(hDib);
-		TranColor = COLORREFFromRGBQUAD (pal[iTran]);
+		int	iTran = FreeImage_GetTransparentIndex(*hDib);
+		if (iTran >= 0)
+		{
+			RGBQUAD *pal = FreeImage_GetPalette(*hDib);
+			TranColor = COLORREFFromRGBQUAD(pal[iTran]);
+		}
 	}
 	if (pNewColor)
 		NewColor = RGBTRIPLEFromCOLORREF (*pNewColor);
-
-	GetBitmapInfoFromHandle (&lpbi,hDib);
+	if (pTranColor)
+		TranColor = *pTranColor;
+	GetBitmapInfoFromHandle (&lpbi,*hDib);
 //    lpbi = (LPBITMAPINFOHEADER)GetDibHeader (hDib);
-	if (lpbi.biBitCount > 8)
-		ColorType = DIB_RGB_COLORS;
+	if (lpbi.biBitCount != 24)
+	{
+		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(*hDib);
+		FreeImage_Unload(*hDib);
+		*hDib = hDib24;
+	}
 //    pImage = FindDIBBits ((LPSTR)lpbi);
 //    pImage = FreeImage_GetBits(hDib);
-	hBMColor = DIB32ToBitmap(hDib,(HPALETTE)0);
+	hBMColor = DIB32ToBitmap(*hDib,(HPALETTE)0);
 	GetObject(hBMColor, sizeof(bm), (LPSTR)&bm);
 	if (pNewColor)
 	{
-		HDIB32 hDibNewColor = ChangeBitmapColor (hDib,&NewColor);
+		HDIB32 hDibNewColor = ChangeBitmapColor (*hDib,&NewColor);
 
 		DeleteObject (hBMColor);
 		hBMColor = DIB32ToBitmap(hDibNewColor,(HPALETTE)0);
@@ -1191,7 +1199,7 @@ BOOL DisplayTransparentBitmap (HDC hDC,HDIB32 hDib,POINT Point,int width,LPRECT 
 	if (Printing && ii)
 	{
 //		HDIB32	hDibMask = BitmapToDIB32 (hBMMask);
-		HDIB32	hDib24 = FreeImage_ConvertTo24Bits (hDib);
+		HDIB32	hDib24 = FreeImage_ConvertTo24Bits (*hDib);
 		HDIB32	hDib8 = FreeImage_ColorQuantize (hDib24,FIQ_NNQUANT);
 //		HDIB32	hDibInvert = FreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
 		HDIB32	hDibMask = FreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
@@ -1542,9 +1550,10 @@ Next:
 		if ((hDib = GetSymbolImage (lpSym->Name)))
 		{
 			if (lpSym->BaseScale == 15)
-				DisplayTransparentBitmap (hDC,hDib,*pTiePoint,0,pBounds,0);
+				DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,pBounds,0,0);
 			else
-				DisplayTransparentBitmap (hDC,hDib,*pTiePoint,IDNINT(Hsize*lpSym->HSize),pBounds,0);
+				DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,IDNINT(Hsize*lpSym->HSize),pBounds,0,0);
+			DestroyDIB32(hDib, FALSE);
 		}
 	}
 	for (i=0,phElement=&lpSym->hElement;i<lpSym->NumElements;i++,phElement++)
@@ -1720,9 +1729,9 @@ Next:
 							else
 							{
 								if (pElement->FillColorType == SVVARCOLOR && HaveVarFillColor)
-									DisplayTransparentBitmap (hDC,hDib,*pTiePoint,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,&GlobalColors[0]);
+									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,&GlobalColors[0],0);
 								else
-									DisplayTransparentBitmap (hDC,hDib,*pTiePoint,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,0);
+									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,0,0);
 							}
 							DestroyDIB32(hDib,FALSE);
 						}

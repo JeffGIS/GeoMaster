@@ -13,7 +13,8 @@ static HANDLE hThread = 0;
 static	HFONT	hFont;
 static	HFONT	hOldFont;
 static	BOOL	changesMade;
-static	char	fileToEdit[MAX_PATH] = "";
+static	char	GMDocFile[MAX_PATH] = "";
+static  char	GMDocDir[MAX_PATH];
 static	HANDLE	hFile = 0;
 static	int		lFile;
 static	LPSTR	pFile;
@@ -30,12 +31,17 @@ static	BOOL	displayOnlyCurrentLine = FALSE;
 static	int		currentLine = 0;
 static	HWND	hWndGMDocReturn = 0;
 static	BOOL	RestartFromLastPos = FALSE;
+static  int		DocPos = 0;
+static	int		FadeSpeed = 10;
+static	int		timerValue = 100;
+static	int		saveTimerValue = 0;
 
 void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs);
 
 INT_PTR CALLBACK	AboutGMDoc(HWND, UINT, WPARAM, LPARAM);
 ATOM MyRegisterClassGMDoc(HINSTANCE hInstance);
 LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+void DisplayDocImage(LPSTR ImagePath, RECT rect, int Fade, BOOL Transparent, COLORREF TranColor);
 
 // Message handler for about box.
 INT_PTR CALLBACK AboutGMDoc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -44,13 +50,37 @@ INT_PTR CALLBACK AboutGMDoc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 	switch (message)
 	{
 	case WM_INITDIALOG:
+	{
+		char	value[128];
+		char ImagePath[MAX_PATH] = "[%DL]GMDocumenter\\GMDocHelp.png";
+		ExpandText(ImagePath);
+		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+		HBITMAP hBitmap = DIB32ToBitmap(hDib32, (HPALETTE)0);
+		DestroyDIB32(hDib32, FALSE);
+
+		cwCenter(hDlg, 0);
+
+		SendDlgItemMessage(hDlg, IDC_GMDOCTEXT, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+		ii = GetPrivateProfileString("User", "DontShowGMDocHelpAtStartup", "0", value, sizeof(value), GMIni);
+		SendDlgItemMessage(hDlg, IDC_CHECK_DONOTSHOW, BM_SETCHECK, !atob(value), 0);
+	}
 		return (INT_PTR)TRUE;
 
+	case WM_DESTROY:
+		break;
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
 		{
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
+		}
+		if (LOWORD(wParam) == IDC_CHECK_DONOTSHOW)
+		{
+			if (SendDlgItemMessage(hDlg, IDC_CHECK_DONOTSHOW, BM_GETCHECK, 0, 0L))
+				ii = WritePrivateProfileString("User", "DontShowGMDocHelpAtStartup", "1", GMIni);
+			else
+				ii = WritePrivateProfileString("User", "DontShowGMDocHelpAtStartup", "0", GMIni);
+
 		}
 		break;
 	}
@@ -69,6 +99,7 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 	LPSTR pFile = strstr(lpCmdLine, "/GMDoc ");
 	LPSTR pEndFile = strchr(pFile, 0);
 	LPSTR pWnd = strstr(lpCmdLine, "/W ");
+	ExpandDL();
 	if (pWnd)
 	{
 		*pWnd = 0;
@@ -80,7 +111,7 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 	{
 		LPSTR pFS;
 
-		pFile += 8;
+		pFile += 7;
 		if (*pFile == '\'')
 		{
 			pFile++;
@@ -93,11 +124,12 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 		if (pEndFile && *pEndFile)
 			*pEndFile++ = 0;
 		RestartFromLastPos = atob(pEndFile);
-		strcpy(fileToEdit, pFile);
-		ExpandText(fileToEdit);
-		if ((pFS = strchr(fileToEdit, '/')))
+		strcpy(GMDocDir, pFile);
+		ExpandText(GMDocDir);
+		if ((pFS = strchr(GMDocDir, '/')))
 			*pFS++ = 0;
-		Truncate(fileToEdit);
+		Truncate(GMDocDir);
+		sprintf(GMDocFile,"%s\\filelist.csv", GMDocDir);
 	}
 
 
@@ -188,7 +220,7 @@ BOOL InitInstanceGMDoc(HINSTANCE hInstance, int nCmdShow)
 
 	hInst = hInstance; // Store instance handle in our global variable
 
-	hWnd = CreateWindow(szWindowClassGMDoc, szTitleGMDoc, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
+	hWnd = CreateWindow(szWindowClassGMDoc, szTitleGMDoc, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL | CS_OWNDC,
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
 	if (!hWnd)
@@ -202,6 +234,99 @@ BOOL InitInstanceGMDoc(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
+void DoDelay(int seconds)
+{
+	Wait(seconds * 1000);
+	return;
+}
+BOOL ProcessGMDocItem(HWND hWnd)
+{
+	BOOL rtn = FALSE;
+	char	itemName[66];
+	char	itemFile[MAX_PATH];
+	char	line[1024];
+	char	imageName[34];
+	char	imagePath[MAX_PATH];
+	int		item = 0;
+	HFILE fidList = GSSiOpenFile(GMDocFile, 0, OF_READ);
+	HFILE fidItem;
+	RECT	clientRect;
+	BOOL	Err;
+	int		fadeIn, delay;
+
+	if (fidList == HFILE_ERROR)
+		return FALSE;
+	GetClientRect(hWndMain, &clientRect);
+	while (item < DocPos && fgetstring(itemName, 64, fidList))
+	{
+		item++;
+	}
+	GSSiClose(fidList);
+	if (item < DocPos)
+		return rtn;
+	rtn = TRUE;
+	strcpy(itemFile, GMDocFile);
+	LPSTR pEndDir = strrchr(itemFile, '\\') + 1;
+	*pEndDir = 0;
+	strcpy(imagePath, itemFile);
+	strcat(itemFile, itemName);
+	fidItem = GSSiOpenFile(itemFile, 0, OF_READ);
+	fgetstring(line, 1022, fidItem);
+	if (!stricmp(line, "CAPSCREEN"))
+	{
+		RECT ImageRect;
+		int	 transparent;
+		COLORREF tranColor = 0;
+		fgetstring(imageName, 32, fidItem);
+		if (!strnicmp(imageName, "Icons\\", 6))
+		{
+			LPSTR pEnd;
+			strcpy(imagePath, GMDocDir);
+			pEnd = strrchr(imagePath, '\\');
+			*++pEnd = 0;
+		}
+		strcat(imagePath, imageName);
+		ExpandText(imagePath);
+		fgetstring(line, 64, fidItem);
+		ImageRect = atorect(line, &Err);
+		if (IsRectEmpty(&ImageRect))
+		{
+			int width = 0;
+			int height = 0;
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			if (hDib32)
+			{
+				width = FreeImage_GetWidth(hDib32);
+				height = FreeImage_GetHeight(hDib32);
+				DestroyDIB32(hDib32, FALSE);
+				ImageRect.right = ImageRect.left + width;
+				ImageRect.bottom = ImageRect.top + height;
+			}
+		}
+		fgetstring(line, 64, fidItem);
+		fadeIn = atoi(line);
+		fgetstring(line, 64, fidItem);
+		delay = atoi(line);
+		fgetstring(line, 64, fidItem);
+		transparent = atoi(line);
+		fgetstring(line, 64, fidItem);
+		ExpandText(line);
+		tranColor = atoi(line);
+		KillTimer(hWnd, 1);
+		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent,tranColor);
+		HDC hDC = GetDC(hWndMain);
+
+		FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
+		ReleaseDC(hWndMain, hDC);
+
+		timerValue = delay * 1000;
+		SetTimer(hWnd, 1,timerValue, 0);
+	}
+	GSSiClose(fidItem);
+	DocPos++;
+	return rtn;
+
+}
 LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
@@ -243,6 +368,9 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	switch (message)
 	{
 	case WM_CREATE:
+	{
+		char value[128];
+
 		if (!hWndMain)
 		{
 			hWndMain = hWnd;
@@ -269,13 +397,14 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		// lowercase letters and 12 uppercase letters.) 
 		xClientMax = 48 * xChar + 12 * xUpper;
 		haveFile = FALSE;
-		if (*fileToEdit)
+		if (*GMDocFile)
 		{
-			HFILE fid = GSSiOpenFile(fileToEdit, 0, OF_READ);
+			HFILE fid = GSSiOpenFile(GMDocFile, 0, OF_READ);
 
 			if (fid != HFILE_ERROR)
 			{
 				haveFile = TRUE;
+				DocPos = 1;
 				GSSiClose(fid);
 			}
 		}
@@ -283,10 +412,15 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		SelectObject(hdc, hOldFont);
 		ReleaseDC(hWnd, hdc);
 		GetWindowRect(hWnd, &rect);
+		ii = GetPrivateProfileString("User", "DontShowGMDocHelpAtStartup", "0", value, sizeof(value), GMIni);
+		if (!atob(value))
+			PostMessage(hWnd, WM_COMMAND, IDM_ABOUT, 0);
 		InvalidateRect(hWnd, 0, TRUE);
-
+	}
 		return 0;
 	case WM_DESTROY:
+		KillTimer(hWnd, 1);
+		continueBackgroundMerge = FALSE;
 		GSSiDeleteObject(&hFont);
 		AutoInsertClose();
 		if (standAlone)
@@ -301,14 +435,16 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		return DefWindowProc(hWnd, message, wParam, lParam);
 
 	case WM_TIMER:
-		ShowWindow(hWnd, SW_SHOW);
-		KillTimer(hWnd, 1);
-		ii = 1;
+		if (!ProcessGMDocItem(hWnd))
+			PostMessage(hWnd, WM_CLOSE, 0, 0);
 		break;
 	case WM_PAINT:
+		KillTimer(hWnd, 1);
 		hdc = BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);
 		DrawMenuBar(hWnd);
+		DocPos = max(1, DocPos - 1);
+		SetTimer(hWnd, 1, timerValue, 0);
 		break;
 
 	case WM_CHAR:
@@ -329,6 +465,15 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			break;
 		case VK_RETURN:
 			InvalidateRect(hWnd, 0, TRUE);
+			break;
+		case 'b':
+		case 'B':
+			DocPos = 0;
+			InvalidateRect(hWnd, 0, TRUE);
+			break;
+		case 'h':
+		case 'H':
+			PostMessage(hWnd, WM_COMMAND, IDM_ABOUT, 0);
 			break;
 		}
 		break;
@@ -357,9 +502,6 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			break;
 		case VK_DOWN:
 			break;
-			//case 27: //ESC
-			//    PostMessage(hWnd, GF_CLOSE, 0,0L); 
-			//    return TRUE;
 		}
 		break;
 	case WM_RBUTTONDOWN:
@@ -546,7 +688,14 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			GMEditSaveUpdates(hWnd);
 			break;
 		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX_GMEDIT), hWnd, AboutGMDoc);
+		{
+			KillTimer(hWnd, 1);
+			saveTimerValue = timerValue;
+			timerValue = -1;
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_GMDOCHELP), hWnd, AboutGMDoc);
+			timerValue = saveTimerValue;
+			InvalidateRect(hWnd, 0, TRUE);
+		}
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -565,19 +714,43 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 }
 
-void DisplayDocImage(LPSTR ImagePath, RECT rect)
+void DisplayDocImage(LPSTR ImagePath, RECT rect, int fade, BOOL Transparent,COLORREF TranColor)
 {
-	HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
-
-
-	if (hDib32)
+	if (Transparent)
 	{
-		HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
+		HDC hDC = GetDC(hWndMain);
+		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+		POINT tiePoint = { rect.left + RECTWIDTH(&rect) / 2, rect.top + RECTHEIGHT(&rect) / 2 };
+		DisplayTransparentBitmap(hDC, &hDib32, tiePoint, 0, &rect, 0, &TranColor);
+		//DisplayTransparentBitmapInRect(hDC, hDib32, &rect, TRUE);
 		DestroyDIB32(hDib32, FALSE);
-		//timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), timeBetweenDates, 0);
-		MergeDocImageIntoViewport(hBM, &rect, "", 0);
+		ReleaseDC(hWndMain, hDC);
 	}
-	//		timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 1, 0);		}
+	else if (!fade)
+	{
+		HDC hDC = GetDC(hWndMain);
+
+		DisplayBMFileInRect(hDC, ImagePath, rect, 1);
+		ReleaseDC(hWndMain, hDC);
+	}
+	else
+	{
+		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+
+		FadeSpeed = fade;
+		if (hDib32)
+		{
+			BITMAP bm;
+			HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
+			GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+
+			DestroyDIB32(hDib32, FALSE);
+			DestroyDIB32(hDib24, FALSE);
+			//timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), timeBetweenDates, 0);
+			MergeDocImageIntoViewport(hBM, &rect, "", 0);
+		}
+	}
 }
 
 
@@ -614,7 +787,7 @@ BOOL MergeDocImageIntoViewport(HBITMAP hNewBitmap, LPRECT pRect, LPSTR title, in
 	strcpy(arg3, title);
 	itoa(textFade, arg4, 10);
 
-	GlobalUnlock(hArgs);
+	GlobalUnlock (hArgs);
 	continueBackgroundMerge = 1;
 
 	hThread = (HANDLE)_beginthread(BackgroundMergeDocImageIntoViewport, 0, &hArgs);
@@ -635,8 +808,7 @@ void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs)
 	textFade = atoi(arg4);
 
 
-	GlobalUnlock(*phArgs);
-	GSSiGlobFree(phArgs);
+	GSSiGlobUlFree(phArgs);
 	MergeDocImageIntoViewport2(hNewBitmap, rect, title, textFade);
 	return;
 }
@@ -660,7 +832,7 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 		int h;
 		BITMAP bm;
 		HBITMAP hbm = 0, hBMSave = 0;
-		HBITMAP hBMOrig, hBMTemp, hBMTempOld;
+		HBITMAP hBMOrig=0, hBMTemp=0, hBMTempOld=0;
 		RECT	rect2, textRect;
 		HFONT	OldFont;
 		int		oldMode;
@@ -687,7 +859,7 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 		bf.BlendFlags = 0;
 		bf.SourceConstantAlpha = (0xff * transParency) / 100;  // half of 0xff = 50% transparency 
 		bf.AlphaFormat = 0;// AC_SRC_ALPHA;   // use source alpha  
-		SaveDC(hDC);
+		//SaveDC(hDC);
 		SetGraphicsMode(hDC, GM_COMPATIBLE);
 		SetMapMode(hDC, MM_TEXT);
 		SetWindowOrgEx(hDC, 0, 0, 0);
@@ -720,14 +892,14 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 
 				for (icol = firstCol; icol<min(bm.bmWidth, rect.right); icol++)
 				{
-					if (pclr->rgbBlue == 0 && pclr->rgbGreen == 0 && pclr->rgbRed == 0)
+					if (pclr->rgbBlue == 255 && pclr->rgbGreen == 255 && pclr->rgbRed == 255)
 						pclr->rgbReserved = 0;
 					else
 						pclr->rgbReserved = 255;
 					pclr++;
 				}
 			}
-			//SetBitmapBits(hNewBitmap, lenBits, pBits);
+			SetBitmapBits(hNewBitmap, lenBits, pBits);
 			free(pBits);
 		}
 		hBMOrig = SelectObject(TransparentDC, hNewBitmap);
@@ -850,14 +1022,14 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 				}
 			}
 			else
-				Sleep(15);
+				Sleep(FadeSpeed);
 		}
 		/*			{
 		HBITMAP hbm = SaveScreen (hDC,rect);
 		SaveBitmap (hbm,"c:\\temp\\blendpost.bmp",0,0);
 		GSSiDeleteObject (&hbm);
 		}*/
-		RestoreDC(hDC, -1);
+		//RestoreDC(hDC, -1);
 		SelectObject(TransparentDC, hBMOrig);
 		SelectObject(tempDC, hBMTempOld);
 		DeleteDC(tempDC);

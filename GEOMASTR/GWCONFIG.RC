@@ -594,7 +594,6 @@ BEGIN
 END
 
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // RCDATA
@@ -8448,6 +8447,17 @@ BEGIN
     DEFPUSHBUTTON   "Delete List",ID_DELETELIST,135,145,50,14
 END
 
+IDD_GMDOCHELP DIALOGEX 0, 0, 399, 233
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "GMDocument Help"
+FONT 10, "Microsoft Sans Serif", 700, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Exit",IDOK,342,211,50,14
+    CONTROL         "Do not display this help at startup again",IDC_CHECK_DONOTSHOW,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,216,152,10
+    CONTROL         "",IDC_GMDOCTEXT,"Static",SS_BITMAP | SS_CENTERIMAGE | SS_REALSIZEIMAGE,7,7,385,200
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -9306,6 +9316,14 @@ BEGIN
         RIGHTMARGIN, 426
         TOPMARGIN, 7
         BOTTOMMARGIN, 176
+    END
+
+    IDD_GMDOCHELP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 392
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
     END
 END
 #endif    // APSTUDIO_INVOKED
