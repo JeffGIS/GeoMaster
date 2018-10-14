@@ -1041,11 +1041,61 @@ GSSiExitProg (657);
 #endif
 }
 
+void ZoomToPolyPoints(HANDLE hPnts, int nPnts, double Offset, BOOL Immediate)
+{
+	MNMXCORD Rect;
+	DPOINT	ScreenPoint;
+	HPDPOINT	BasePt;
+	int		ScreenWidth, ScreenHeight, i;
+	double	AreaWidth, AreaHeight;
+	BOOL	UseWidth = TRUE;
+	double	Scale;
+	DPOINT	MidPoint, Point[2];
+
+	DBoundsInit(&Rect);
+	BasePt = GlobalLock(hPnts);
+	for (i = 0; i<nPnts; i++)
+	{
+		ScreenPoint = BasePtToScreenPtD(&BasePt[i]);
+		AddDPointToMinMax(&ScreenPoint, &Rect);
+	}
+	GlobalUnlock(hPnts);
+	ScreenWidth = CurView->ScreenRect.right - CurView->ScreenRect.left;
+	ScreenHeight = CurView->ScreenRect.bottom - CurView->ScreenRect.top;
+	AreaWidth = Rect.xmx - Rect.xmn;
+	AreaHeight = Rect.ymx - Rect.ymn;
+	if (AreaWidth / ScreenWidth < AreaHeight / ScreenHeight)
+		UseWidth = FALSE;
+	if (UseWidth)
+	{
+		Point[0].x = Rect.xmn;
+		Point[0].y = Rect.ymn;
+		Point[1].x = Rect.xmx;
+		Point[1].y = Rect.ymn;
+		Point[0] = ScreenPtDToBasePt(Point[0]);
+		Point[1] = ScreenPtDToBasePt(Point[1]);
+		Scale = (Offset * 2 + ldistp(Point[0], Point[1])) / ScreenWidth;
+	}
+	else
+	{
+		Point[0].x = Rect.xmn;
+		Point[0].y = Rect.ymn;
+		Point[1].x = Rect.xmn;
+		Point[1].y = Rect.ymx;
+		Point[0] = ScreenPtDToBasePt(Point[0]);
+		Point[1] = ScreenPtDToBasePt(Point[1]);
+		Scale = (Offset * 2 + ldistp(Point[0], Point[1])) / ScreenHeight;
+	}
+	MidPoint = MinMaxMidPointD(&Rect);
+	MidPoint = ScreenPtDToBasePt(MidPoint);
+	ZoomToPointAndScale(MidPoint, Scale, Immediate);
+}
 void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BOOL AddToView)
 #if ENABLETRACE
 {GSSiEnterProg (659);
 #endif
-{   MNMXCORD Rect;
+{
+	MNMXCORD Rect;
 	long	nPnts;
 	HANDLE	hPnts;
 	DPOINT	ScreenPoint;
@@ -1062,43 +1112,9 @@ void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BO
 	{
 		if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[Item],FALSE,&nPnts,&hPnts))
 			goto UseRect;
-		DBoundsInit (&Rect);
-		BasePt = GlobalLock (hPnts);
-		for (i=0;i<nPnts;i++)
-		{
-			ScreenPoint = BasePtToScreenPtD (&BasePt[i]);
-			AddDPointToMinMax (&ScreenPoint,&Rect);
-		}
-		GSSiGlobUlFree (&hPnts);
-		ScreenWidth = CurView->ScreenRect.right - CurView->ScreenRect.left;
-		ScreenHeight = CurView->ScreenRect.bottom - CurView->ScreenRect.top;
-		AreaWidth = Rect.xmx - Rect.xmn;
-		AreaHeight = Rect.ymx - Rect.ymn;
-		if (AreaWidth / ScreenWidth < AreaHeight / ScreenHeight)
-			UseWidth = FALSE;
-		if (UseWidth)
-		{
-			Point[0].x = Rect.xmn;
-			Point[0].y = Rect.ymn;
-			Point[1].x = Rect.xmx;
-			Point[1].y = Rect.ymn;
-			Point[0] = ScreenPtDToBasePt (Point[0]);
-			Point[1] = ScreenPtDToBasePt (Point[1]);
-			Scale = (Offset * 2 + ldistp (Point[0],Point[1])) / ScreenWidth;
-		}
-		else
-		{
-			Point[0].x = Rect.xmn;
-			Point[0].y = Rect.ymn;
-			Point[1].x = Rect.xmn;
-			Point[1].y = Rect.ymx;
-			Point[0] = ScreenPtDToBasePt (Point[0]);
-			Point[1] = ScreenPtDToBasePt (Point[1]);
-			Scale = (Offset*2 + ldistp (Point[0],Point[1])) / ScreenHeight;
-		}
-   		CurView->CurZoomAreaRef = PickList[Item].Refno;
-		MidPoint = MinMaxMidPointD (&PickList[Item].Rect);
-		ZoomToPointAndScale (MidPoint,Scale,Immediate);
+		CurView->CurZoomAreaRef = PickList[Item].Refno;
+		ZoomToPolyPoints(hPnts, nPnts, Offset,Immediate);
+		GSSiGlobFree(&hPnts);
 	}
 	else
 	{

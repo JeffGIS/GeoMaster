@@ -529,6 +529,8 @@ void SmoothProfile (HPDPOINT pProfile,long np);
 HANDLE OpenProfileDataFile (LPMNMXCORD Bounds);
 BOOL CreateCrossSection (short vpid,short opt);
 BOOL CreateNextCrossSection (int Direction);
+BOOL ZoomToProfile(LPVIEWPORT pVP);
+void ZoomToPolyPoints(HANDLE hPnts, int nPnts, double Offset, BOOL Immediate);
 void DisplayCurrentHotspots (void);
 void DisplayStreetText(void);
 BOOL DisplayStreetAddresses(BOOL Init);

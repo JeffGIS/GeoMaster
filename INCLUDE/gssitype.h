@@ -2504,7 +2504,8 @@ typedef struct
 		short	isDayFilter;
 		char	BeginDisplayMacro[256];
 		char	EndDisplayMacro[256];
-		char	filler[168];
+		int		ProfileSmoothOption;
+		char	filler[168-sizeof(int)];
 
 	}	THEME;
 typedef THEME	FAR *LPTHEME;

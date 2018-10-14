@@ -17546,6 +17546,7 @@ GSSiExitProg (1279);
          ftoa (str,CurTheme->CrossSectionWidth[1]*MFT);
     	 SetDlgItemText (hWndDlg,IDC_XSECTWRIGHT,str); 
     	 SetDlgItemText (hWndDlg,IDC_PROFILE_UNITS,"Feet");
+		 SetDlgItemInt(hWndDlg, IDC_PROFILESMOOTH, CurTheme->ProfileSmoothOption,FALSE);
        	 SendDlgItemMessage (hWndDlg,IDC_ALIGNPROFILE,BM_SETCHECK,CurTheme->ProfileAlignmentOption,0L);
 		 break; /* End of WM_INITDIALOG                                 */
 
@@ -17591,8 +17592,9 @@ GSSiExitProg (1279);
 				CurTheme->CrossSectionWidth[0] = atof (str) * FTM;
 				GetDlgItemText (hWndDlg,IDC_XSECTWRIGHT,str,32);
 				CurTheme->CrossSectionWidth[1] = atof (str) * FTM;
-            	CurTheme->ProfileAlignmentOption = SendDlgItemMessage (hWndDlg,IDC_ALIGNPROFILE,BM_GETCHECK,0,0L);  
-               	EndDialog(hWndDlg, TRUE);
+				CurTheme->ProfileAlignmentOption = SendDlgItemMessage(hWndDlg, IDC_ALIGNPROFILE, BM_GETCHECK, 0, 0L);
+				CurTheme->ProfileSmoothOption = GetDlgItemInt(hWndDlg, IDC_PROFILESMOOTH,0,FALSE);
+				EndDialog(hWndDlg, TRUE);
             }
                 break; 
 

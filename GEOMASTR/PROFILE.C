@@ -8,7 +8,7 @@ static	LPVIEWPORT	LastProfileLocVP = 0;
  
 void SmoothProfile (HPDPOINT pProfile,long np)
 {   
-	long	n=GetGlobalLVal2 ("[%PROFILESMOOTHOPT]",0);
+	long	n = max(0, CurTheme->ProfileSmoothOption);
 	long	i,j;
 	double	y, w,totw; 
 	
@@ -110,6 +110,45 @@ BOOL CreateCrossSection (short vpid,short opt) //opt=0(Clear xsection),1=draw xs
 	return TRUE;
 } 
 
+BOOL ZoomToProfile(LPVIEWPORT pVP)
+{
+	char cmd[256];
+	DPOINT BP, EP;
+	BOOL rtn = FALSE;
+
+	if (pVP->ProfileInCrossSection)
+	{
+		HANDLE hPnts = GSSiGlobAlloc(1811,GMEM_MOVEABLE, 2 * sizeof(DPOINT));
+		LPDPOINT pPoints = GlobalLock(hPnts);
+
+		BP = pVP->ProfileCrossSection[0];
+		EP = pVP->ProfileCrossSection[1];
+		pPoints[0] = BP;
+		pPoints[1] = EP;
+		sprintf(cmd, "$VP(SETVAL,Primary Viewport,ROTATION,$MACRO([%%DL]macros\\rotatetohorv.txt,$AZM(%f %f,%f %f),H))", BP.x, BP.y, EP.x, EP.y);
+		ProcessText(cmd);
+		CurView = pViewports[0];
+		ZoomToPolyPoints(hPnts,2, 0, TRUE);
+		GSSiGlobUlFree(&hPnts);
+		CurView = pVP;
+		rtn = TRUE;
+	}
+	else if (pVP->hProfileRoute[0])
+	{
+		HPDPOINT	pRoute = (HPDPOINT)GlobalLock(pVP->hProfileRoute[0]);
+		int nRoutePoints = pVP->nProfileRoute[0];
+		BP = pRoute[0];
+		EP = pRoute[nRoutePoints - 1];
+		GlobalUnlock(pVP->hProfileRoute[0]);
+		sprintf(cmd, "$VP(SETVAL,Primary Viewport,ROTATION,$MACRO([%%DL]macros\\rotatetohorv.txt,$AZM(%f %f,%f %f),H))", BP.x, BP.y, EP.x, EP.y);
+		ProcessText(cmd);
+		CurView = pViewports[0];
+		ZoomToPolyPoints(pVP->hProfileRoute[0], pVP->nProfileRoute[0], 0, TRUE);
+		CurView = pVP;
+		rtn = TRUE;
+	}
+	return rtn;
+}
 BOOL CreateNextCrossSection (int Direction)
 {   
 	BOOL		rtn=FALSE;
