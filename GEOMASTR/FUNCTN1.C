@@ -758,6 +758,16 @@ GSSiExitProg (1348);
 						}
 					} 
 				}
+				else if (!_fstricmp(Arg[3], "ROTATION"))
+				{
+					_fstrupr(Arg[4]);
+					if (*Arg[4] == 'D')
+						ftoa(OutLoc, CurView->Rotation*RADtoDEG);
+					else
+						ftoa(OutLoc, CurView->Rotation);
+					goto Rtnl;
+				}
+
 				goto RtnFalse;
 			}
 			else if (!_fstrcmp (Arg[1],"SETVAL"))
@@ -958,10 +968,10 @@ GSSiExitProg (1348);
 					if (*LastChr (Arg[4]) == 'D')
 					{
 						*LastChr (Arg[4]) = 0;
-						CurView->Rotation = atof (Arg[4]) * RADDEG; 
+						CurView->Rotation = LTWOPI (atof (Arg[4]) * RADDEG); 
 					}
 					else
-						CurView->Rotation = atof (Arg[4]); 
+						CurView->Rotation = LTWOPI(atof(Arg[4]));
 					SetVPRotation (CurView->Rotation);
 					goto RtnTrue; 
 				}

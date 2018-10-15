@@ -5362,7 +5362,7 @@ void SetCursorPosGM (int x,int y,BOOL DisplayLinkedOnly)
 	RECT	Rect, NewRect;
 	short	xat,yat; 
 	static	short	lastx=SHRT_MAX, lasty=SHRT_MAX;
-	short	LinkedCursorWidth=8;    
+	short	LinkedCursorWidth=12;    
 	HPEN	hPen,hOldPen, hPen2;
 	BOOL	AlignWithRoute=FALSE, ShowCurs;
 
@@ -5450,21 +5450,21 @@ GSSiExitProg (923);
 		}
 		ShowCurs = DisplayProfileLink (&WinBasePoint);
 		WinPoint = BasePtToScreenPt (&WinBasePoint); 
-		Rect.left = max (0,WinPoint.x-LinkedCursorWidth-2);
-		Rect.right = WinPoint.x+LinkedCursorWidth+2;
-		Rect.top = max(0,WinPoint.y-LinkedCursorWidth-2);
-		Rect.bottom = WinPoint.y+LinkedCursorWidth+2;
+		Rect.left = max (0,WinPoint.x-LinkedCursorWidth-3);
+		Rect.right = WinPoint.x+LinkedCursorWidth+3;
+		Rect.top = max(0,WinPoint.y-LinkedCursorWidth-3);
+		Rect.bottom = WinPoint.y+LinkedCursorWidth+3;
 		if (ShowCurs && IntersectRect (&NewRect,&Rect,&CurView->ScreenRect))
 		{   
 			CurView->LastCursorPos = WinPoint;
 			CurView->LinkedCursorHandle = SaveScreen2 (CurView->hWnd,CurView->hDC,Rect,CurView,0);
-		    hPen = CreatePen(PS_SOLID,3,0);
+		    hPen = CreatePen(PS_SOLID,5,0);
 		    hOldPen = SelectObject (CurView->hDC,hPen);
 			MoveToEx (CurView->hDC,WinPoint.x,WinPoint.y-LinkedCursorWidth,0);
 			LineTo (CurView->hDC,WinPoint.x,WinPoint.y+LinkedCursorWidth);
 			MoveToEx (CurView->hDC,WinPoint.x-LinkedCursorWidth,WinPoint.y,0);
 			LineTo (CurView->hDC,WinPoint.x+LinkedCursorWidth,WinPoint.y);
-		    hPen2 = CreatePen(PS_SOLID,1,RGB(255,255,255));
+		    hPen2 = CreatePen(PS_SOLID,3,RGB(255,255,0));
 		    SelectObject (CurView->hDC,hPen2);
 			DeleteObject (hPen);
 			MoveToEx (CurView->hDC,WinPoint.x,WinPoint.y-LinkedCursorWidth,0);

@@ -2689,7 +2689,22 @@ if (!DisableMarginPan &&
 			}
 
 				break;
-			default:  
+			case 'a':
+			case 'A':
+			{
+				LPVIEWPORT	SaveVP = CurView;
+
+				CurView = pViewports[vpid - 1];
+				if (CurTheme->ProfileAlignmentOption)
+					CurTheme->ProfileAlignmentOption = 0;
+				else
+					CurTheme->ProfileAlignmentOption = 1;
+				ZoomToProfile(CurView);
+				CurView = SaveVP;
+			}
+
+				break;
+			default:
 				goto KeepGoing;
 		}
 {
