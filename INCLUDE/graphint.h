@@ -1286,7 +1286,8 @@ double GetPolyMaxDistBetweenPoints (HPDPOINT lpPoints,long nPnts,LPLONG pMaxDist
 double GetPolyLength(HPPOINT lpPoints, long nPnts);
 double GetPolyLengthF(HPFPOINT lpPoints, long nPnts);
 double GetPolyLengthD(HPDPOINT lpPoints, long nPnts);
-double GetPoly3DLength2D (HPDPOINT3D lpPoints,long nPnts); 
+double GetPolyLengthDH(HANDLE hPoints, long nPnts);
+double GetPoly3DLength2D(HPDPOINT3D lpPoints, long nPnts);
 HANDLE GetPolyBetweenDist (HPDPOINT lpPoints,long nPnts,double StartDSDist,double EndDist,LPINT pnPnts,BOOL ShapePointsOnly,BOOL WantOp);
 DPOINT PointAtDistOnPoly (HPDPOINT pPoly,long nPoly,double Dist,LPDOUBLE pAZ,LPLONG pEndPointNum);   
 DPOINT PointAtScreenXOnPoly(HPDPOINT lpPoints, long nPnts, double AtX, LPDOUBLE pAZ);

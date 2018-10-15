@@ -4948,7 +4948,14 @@ GSSiExitProg (999);
 }
 #endif
 }
-                  
+double GetPolyLengthDH(HANDLE hPoints, long nPnts)
+{
+	HPDPOINT lpPoints = GlobalLock(hPoints);
+	double dist = GetPolyLengthD(lpPoints, nPnts);
+	GlobalUnlock(hPoints);
+	return dist;
+}
+
 double GetPolyLength (HPPOINT lpPoints,long nPnts)
 #if ENABLETRACE
 {GSSiEnterProg (999);

@@ -1041,7 +1041,7 @@ GSSiExitProg (657);
 #endif
 }
 
-void ZoomToPolyPoints(HANDLE hPnts, int nPnts, double Offset, BOOL Immediate)
+void ZoomToPolyPoints(HANDLE hPnts, int nPnts, double OffsetPct, BOOL Immediate)
 {
 	MNMXCORD Rect;
 	DPOINT	ScreenPoint;
@@ -1074,7 +1074,7 @@ void ZoomToPolyPoints(HANDLE hPnts, int nPnts, double Offset, BOOL Immediate)
 		Point[1].y = Rect.ymn;
 		Point[0] = ScreenPtDToBasePt(Point[0]);
 		Point[1] = ScreenPtDToBasePt(Point[1]);
-		Scale = (Offset * 2 + ldistp(Point[0], Point[1])) / ScreenWidth;
+		Scale = ((1 + OffsetPct*2) * ldistp(Point[0], Point[1])) / ScreenWidth;
 	}
 	else
 	{
@@ -1084,7 +1084,7 @@ void ZoomToPolyPoints(HANDLE hPnts, int nPnts, double Offset, BOOL Immediate)
 		Point[1].y = Rect.ymx;
 		Point[0] = ScreenPtDToBasePt(Point[0]);
 		Point[1] = ScreenPtDToBasePt(Point[1]);
-		Scale = (Offset * 2 + ldistp(Point[0], Point[1])) / ScreenHeight;
+		Scale = ((1 + OffsetPct*2) * ldistp(Point[0], Point[1])) / ScreenHeight;
 	}
 	MidPoint = MinMaxMidPointD(&Rect);
 	MidPoint = ScreenPtDToBasePt(MidPoint);
@@ -1103,7 +1103,7 @@ void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BO
 	int		ScreenWidth, ScreenHeight, i;
 	double	AreaWidth, AreaHeight;
 	BOOL	UseWidth=TRUE;
-	double	Scale;
+	double	Scale, OffsetPct;
 	DPOINT	MidPoint, Point[2];
     
 	if (Item > MAXPICKITEMS)
@@ -1113,7 +1113,9 @@ void ZoomToPickedItem (int Item, double Offset,BOOL FromLimits,BOOL Immediate,BO
 		if (!GetPolyPoints ((LPPICKDATAHEADER)&PickList[Item],FALSE,&nPnts,&hPnts))
 			goto UseRect;
 		CurView->CurZoomAreaRef = PickList[Item].Refno;
-		ZoomToPolyPoints(hPnts, nPnts, Offset,Immediate);
+		Rect = PickList[Item].Rect;
+		OffsetPct = Offset / max(BoundsWidth(&Rect), BoundsHeight(&Rect));
+		ZoomToPolyPoints(hPnts, nPnts, OffsetPct, Immediate);
 		GSSiGlobFree(&hPnts);
 	}
 	else

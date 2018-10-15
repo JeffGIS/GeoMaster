@@ -115,6 +115,7 @@ BOOL ZoomToProfile(LPVIEWPORT pVP)
 	char cmd[256];
 	DPOINT BP, EP;
 	BOOL rtn = FALSE;
+	double dist;
 
 	if (pVP->ProfileInCrossSection)
 	{
@@ -125,11 +126,13 @@ BOOL ZoomToProfile(LPVIEWPORT pVP)
 		EP = pVP->ProfileCrossSection[1];
 		pPoints[0] = BP;
 		pPoints[1] = EP;
+		dist = GetPolyLengthD(pPoints, 2);
+		GlobalUnlock(hPnts);
 		sprintf(cmd, "$VP(SETVAL,Primary Viewport,ROTATION,$MACRO([%%DL]macros\\rotatetohorv.txt,$AZM(%f %f,%f %f),H))", BP.x, BP.y, EP.x, EP.y);
 		ProcessText(cmd);
-		CurView = pViewports[0];
-		ZoomToPolyPoints(hPnts,2, 0, TRUE);
-		GSSiGlobUlFree(&hPnts);
+		CurView = pViewports[0];		
+		ZoomToPolyPoints(hPnts, 2,  0.02, TRUE);
+		GSSiGlobFree(&hPnts);
 		CurView = pVP;
 		rtn = TRUE;
 	}
@@ -137,13 +140,14 @@ BOOL ZoomToProfile(LPVIEWPORT pVP)
 	{
 		HPDPOINT	pRoute = (HPDPOINT)GlobalLock(pVP->hProfileRoute[0]);
 		int nRoutePoints = pVP->nProfileRoute[0];
+		dist = GetPolyLengthD(pRoute, nRoutePoints);
 		BP = pRoute[0];
 		EP = pRoute[nRoutePoints - 1];
 		GlobalUnlock(pVP->hProfileRoute[0]);
 		sprintf(cmd, "$VP(SETVAL,Primary Viewport,ROTATION,$MACRO([%%DL]macros\\rotatetohorv.txt,$AZM(%f %f,%f %f),H))", BP.x, BP.y, EP.x, EP.y);
 		ProcessText(cmd);
 		CurView = pViewports[0];
-		ZoomToPolyPoints(pVP->hProfileRoute[0], pVP->nProfileRoute[0], 0, TRUE);
+		ZoomToPolyPoints(pVP->hProfileRoute[0], pVP->nProfileRoute[0], 0.02, TRUE);
 		CurView = pVP;
 		rtn = TRUE;
 	}
@@ -741,6 +745,7 @@ if (isurf)
 				{
 					nProfilePoints[isurf] = lastInPoint;
 				}
+				LenRoute = GetPolyLengthDH(hProfileD[isurf], nProfilePoints[isurf]);
 //				if (!CheckForContinue (TRUE))
 //					break;
 		   	}
