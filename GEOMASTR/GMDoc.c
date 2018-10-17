@@ -35,6 +35,8 @@ static  int		DocPos = 0;
 static	int		FadeSpeed = 10;
 static	int		timerValue = 100;
 static	int		saveTimerValue = 0;
+static	BOOL	inManualMode = TRUE;
+static	BOOL	productionMode = FALSE;
 
 void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs);
 
@@ -99,6 +101,11 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 	LPSTR pFile = strstr(lpCmdLine, "/GMDoc ");
 	LPSTR pEndFile = strchr(pFile, 0);
 	LPSTR pWnd = strstr(lpCmdLine, "/W ");
+	LPSTR pMode = strstr(lpCmdLine, "/PROD");
+	if (pMode)
+	{
+		productionMode = TRUE;
+	}
 	ExpandDL();
 	if (pWnd)
 	{
@@ -125,10 +132,14 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 			*pEndFile++ = 0;
 		RestartFromLastPos = atob(pEndFile);
 		strcpy(GMDocDir, pFile);
-		ExpandText(GMDocDir);
 		if ((pFS = strchr(GMDocDir, '/')))
 			*pFS++ = 0;
 		Truncate(GMDocDir);
+		if (productionMode)
+			strcat(GMDocDir, "\\composited");
+		else
+			strcat(GMDocDir, "\\raw");
+		ExpandText(GMDocDir);
 		sprintf(GMDocFile,"%s\\filelist.csv", GMDocDir);
 	}
 
@@ -253,6 +264,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	RECT	clientRect;
 	BOOL	Err;
 	int		fadeIn, delay;
+	int		icursor=0;
 
 	if (fidList == HFILE_ERROR)
 		return FALSE;
@@ -313,14 +325,211 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		ExpandText(line);
 		tranColor = atoi(line);
 		KillTimer(hWnd, 1);
-		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent,tranColor);
+		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent, tranColor);
 		HDC hDC = GetDC(hWndMain);
 
-		FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
+		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
 		ReleaseDC(hWndMain, hDC);
 
 		timerValue = delay * 1000;
-		SetTimer(hWnd, 1,timerValue, 0);
+		if (!inManualMode)
+			SetTimer(hWnd, 1, timerValue, 0);
+	}
+	else if (!stricmp(line, "CAPSCRIPT"))
+	{
+		RECT ImageRect;
+		int	 transparent;
+		COLORREF tranColor = 0;
+
+		fgetstring(line, 64, fidItem);
+		ImageRect = atorect(line, &Err);
+		fgetstring(imageName, 32, fidItem);
+		{
+			LPSTR pEnd;
+			strcpy(imagePath, GMDocDir);
+			pEnd = strrchr(imagePath, '\\');
+			*++pEnd = 0;
+		}
+		strcat(imagePath, "scripts\\");
+		strcat(imagePath, imageName);
+		ExpandText(imagePath);
+		if (IsRectEmpty(&ImageRect))
+		{
+			int width = 0;
+			int height = 0;
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			if (hDib32)
+			{
+				width = FreeImage_GetWidth(hDib32);
+				height = FreeImage_GetHeight(hDib32);
+				DestroyDIB32(hDib32, FALSE);
+				ImageRect.right = ImageRect.left + width;
+				ImageRect.bottom = ImageRect.top + height;
+			}
+		}
+		fgetstring(line, 64, fidItem);
+		fadeIn = atoi(line);
+		fgetstring(line, 64, fidItem);
+		delay = atoi(line);
+		fgetstring(line, 64, fidItem);
+		transparent = atoi(line);
+		fgetstring(line, 64, fidItem);
+		ExpandText(line);
+		tranColor = atoi(line);
+		KillTimer(hWnd, 1);
+		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent, tranColor);
+		HDC hDC = GetDC(hWndMain);
+
+		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
+		ReleaseDC(hWndMain, hDC);
+
+		timerValue = delay * 1000;
+		if (!inManualMode)
+			SetTimer(hWnd, 1, timerValue, 0);
+	}
+	else if (!stricmp(line, "CAPRIGHTCLICK") || !stricmp(line, "CAPLEFTCLICK"))
+	{
+		RECT ImageRect;
+		int	 transparent;
+		COLORREF tranColor = 0;
+		char offsetC[32];
+		LPSTR pOffset;
+		int offsetX = 0, offsetY = 0;
+
+		fgetstring(line, 64, fidItem);
+		ImageRect = atorect(line, &Err);
+		fgetstring(line, 64, fidItem);
+		icursor = atoi(line);
+		fgetstring(imageName, 32, fidItem);
+		{
+			LPSTR pEnd;
+			strcpy(imagePath, GMDocDir);
+			pEnd = strrchr(imagePath, '\\');
+			*pEnd = 0;
+			pEnd = strrchr(imagePath, '\\');
+			*pEnd = 0;
+		}
+		strcat(imagePath, "\\icons\\");
+		strcat(imagePath, imageName);
+		ExpandText(imagePath);
+		pOffset = strchr(imageName, '_');
+		if (pOffset)
+		{
+			pOffset++;
+			strcpy(offsetC, pOffset);
+			pOffset = strchr(offsetC, '_');
+			if (pOffset)
+				*pOffset++ = 0;
+			offsetX = atoi(offsetC);
+			offsetY = atoi(pOffset);
+		}
+		ImageRect.left -= offsetX;
+		ImageRect.top -= offsetY;
+		if (IsRectEmpty(&ImageRect))
+		{
+			int width = 0;
+			int height = 0;
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			if (hDib32)
+			{
+				width = FreeImage_GetWidth(hDib32);
+				height = FreeImage_GetHeight(hDib32);
+				DestroyDIB32(hDib32, FALSE);
+				ImageRect.right = ImageRect.left + width;
+				ImageRect.bottom = ImageRect.top + height;
+			}
+		}
+		fgetstring(line, 64, fidItem);
+		fadeIn = atoi(line);
+		fgetstring(line, 64, fidItem);
+		delay = atoi(line);
+		fgetstring(line, 64, fidItem);
+		transparent = 1;
+		if (!fgetstring(line, 64, fidItem))
+			strcpy(line, "$RGB(255,255,255)");
+		ExpandText(line);
+		tranColor = atoi(line);
+		KillTimer(hWnd, 1);
+		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent, tranColor);
+		HDC hDC = GetDC(hWndMain);
+
+		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
+		ReleaseDC(hWndMain, hDC);
+
+		timerValue = delay * 1000;
+		if (!inManualMode)
+			SetTimer(hWnd, 1, timerValue, 0);
+	}
+	else if (!stricmp(line, "POINTER"))
+	{
+		RECT ImageRect;
+		int	 transparent;
+		COLORREF tranColor = 0;
+		char offsetC[32];
+		LPSTR pOffset;
+		int offsetX = 0, offsetY = 0;
+
+		fgetstring(line, 64, fidItem);
+		ImageRect = atorect(line, &Err);
+		fgetstring(imageName, 32, fidItem);
+		{
+			LPSTR pEnd;
+			strcpy(imagePath, GMDocDir);
+			pEnd = strrchr(imagePath, '\\');
+			*pEnd = 0;
+			pEnd = strrchr(imagePath, '\\');
+			*pEnd = 0;
+		}
+		strcat(imagePath, "\\icons\\");
+		strcat(imagePath, imageName);
+		ExpandText(imagePath);
+		pOffset = strchr(imageName, '_');
+		if (pOffset)
+		{
+			pOffset++;
+			strcpy(offsetC, pOffset);
+			pOffset = strchr(offsetC, '_');
+			if (pOffset)
+				*pOffset++ = 0;
+			offsetX = atoi(offsetC);
+			offsetY = atoi(pOffset);
+		}
+		ImageRect.left -= offsetX;
+		ImageRect.top -= offsetY;
+		if (IsRectEmpty(&ImageRect))
+		{
+			int width = 0;
+			int height = 0;
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			if (hDib32)
+			{
+				width = FreeImage_GetWidth(hDib32);
+				height = FreeImage_GetHeight(hDib32);
+				DestroyDIB32(hDib32, FALSE);
+				ImageRect.right = ImageRect.left + width;
+				ImageRect.bottom = ImageRect.top + height;
+			}
+		}
+		fgetstring(line, 64, fidItem);
+		fadeIn = atoi(line);
+		fgetstring(line, 64, fidItem);
+		delay = atoi(line);
+		fgetstring(line, 64, fidItem);
+		transparent = 1;
+		if (!fgetstring(line, 64, fidItem))
+			strcpy(line, "$RGB(255,255,255)");
+		ExpandText(line);
+		tranColor = atoi(line);
+		KillTimer(hWnd, 1);
+		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent, tranColor);
+		HDC hDC = GetDC(hWndMain);
+
+		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
+		ReleaseDC(hWndMain, hDC);
+
+		timerValue = delay * 1000;
+		if (!inManualMode)
+			SetTimer(hWnd, 1, timerValue, 0);
 	}
 	GSSiClose(fidItem);
 	DocPos++;
@@ -435,6 +644,8 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		return DefWindowProc(hWnd, message, wParam, lParam);
 
 	case WM_TIMER:
+		if (inManualMode)
+			KillTimer(hWnd, 1);
 		if (!ProcessGMDocItem(hWnd))
 			PostMessage(hWnd, WM_CLOSE, 0, 0);
 		break;
@@ -474,6 +685,11 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		case 'h':
 		case 'H':
 			PostMessage(hWnd, WM_COMMAND, IDM_ABOUT, 0);
+		case 'n':
+		case 'N':
+		case '>':
+			SetTimer(hWnd, 1, 50, 0);
+
 			break;
 		}
 		break;

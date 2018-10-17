@@ -66,6 +66,57 @@ void SetImageFileRotation (int r)
 	return;
 }
 
+BOOL SetIconColors(LPSTR BitmapPath, COLORREF *colors, int ncolors)
+{
+	int height, width;
+	RGBQUAD white;
+	HDIB32 hDIB = BMPHandleFromEXT(BitmapPath);
+	if (!hDIB)
+		return FALSE;
+	ncolors++;
+	white.rgbRed = 255;
+	white.rgbGreen = 255;
+	white.rgbBlue = 255;
+	white.rgbReserved = 0;
+	RGBQUAD *rgbcolors = malloc(ncolors * sizeof(RGBQUAD)+4);
+	double *dist = malloc(ncolors * sizeof(double)+4);
+
+	rgbcolors[0] = white;
+	for (int i = 1; i < ncolors;i++)
+		rgbcolors[i] = RGBQUADFromCOLORREF(colors[i-1]);
+	GetDIBDimensionsFromHandle(hDIB, &height, &width);
+	for (int row = 0; row < height; row++)
+	{
+		ii = 1;
+		for (int col = 0; col < width; col++)
+		{
+			RGBQUAD	c;
+
+			FreeImage_GetPixelColor(hDIB, col, row, &c);
+			for (int i = 0; i < ncolors; i++)
+			{
+				dist[i] = RGBQUADDist(c, rgbcolors[i]);
+			}
+			int mini = 0;
+			double mindist = dist[0];
+			for (int i = 1; i < ncolors;i++)
+			{
+				if (dist[i] < mindist)
+				{
+					mindist = dist[i];
+					mini = i;
+				}
+			}
+			FreeImage_SetPixelColor(hDIB, col, row, &rgbcolors[mini]);
+
+		}
+	}
+	free(rgbcolors);
+	free(dist);
+	SaveDIB32(hDIB, BitmapPath, -1, 0);
+	DestroyDIB32(hDIB, TRUE);
+}
+
 HBITMAP CreateBitmapMask(HBITMAP hbmColour, COLORREF crTransparent)
 {
     HDC hdcMem, hdcMem2;

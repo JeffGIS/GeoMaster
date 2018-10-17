@@ -427,7 +427,7 @@ RGBQUAD RGBQUADFromCOLORREF (COLORREF Color)
 	c.rgbBlue = GetBValue (Color);
 	c.rgbRed = GetRValue (Color);
 	c.rgbGreen = GetGValue (Color);
-	c.rgbReserved = 0;
+	c.rgbReserved = 255;
 	return c;
 }
 

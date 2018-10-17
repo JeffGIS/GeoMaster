@@ -1343,6 +1343,13 @@ GotCloseFilehSQL:
 
 				goto RtnTrue;
 			}
+			if (!_fstricmp(Arg[1], "SETICONCOLORS"))
+			{
+				COLORREF colors[2] = { RGB(255, 0, 0), RGB(0, 0, 0) };
+				rtn = SetIconColors(Arg[2], colors, 2);
+				goto Rtnrtn;
+			}
+			
 			if (!_fstricmp(Arg[1], "SCREEN"))
 			{
 				_fstrcpy(FullBM, Arg[2]);

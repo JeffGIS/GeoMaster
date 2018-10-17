@@ -6139,13 +6139,13 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	HWND	hWnd = GetDesktopWindow();
 	HWND	hWndTarget = GetTargetWindow();
 	HDC		hDC;
-	time_t	systime;
+	time_t	systim;
 	char	line[1024];
 	char	DocDir[MAX_PATH];
 	char	ParmFile[MAX_PATH];
 	HFILE	fid;
 
-	time(&systime);
+	time(&systim);
 	sprintf(DocDir, "[%%DL]GMDocumenter\\%s", Arg[2]);
 	ExpandText(DocDir);
 
@@ -6155,13 +6155,16 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	}
 	else
 	{
-		sprintf(ParmFile, "%s\\%i.txt",DocDir, systime);
+		char stepType[32];
+		int  t = (int)systim;
+		strcpy(stepType, Arg[1]);
+		sprintf(ParmFile, "%s\\%li_%s.txt", DocDir, t, stepType);
 		fid = GSSiOpenFile(ParmFile, 0, OF_CREATE);
 		if (!stricmp(Arg[1], "CAPSCREEN"))
 		{
 			char capScreenFile[MAX_PATH];
 
-			sprintf(capScreenFile, "%s\\%i.png", DocDir, systime);
+			sprintf(capScreenFile, "%s\\%i.png", DocDir, systim);
 			ExpandText(capScreenFile);
 			hDC = GetWindowDC(hWnd);
 			GetClientRect(hWndTarget, &ScreenRect);
@@ -6171,10 +6174,10 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			DeleteObject(hBitmap);
 			ReleaseDC(hWnd, hDC);
 			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
-			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
+			rtn = GM32SaveDIB(hDib24, capScreenFile,-1,0);
 			sprintf(line, "CAPSCREEN");
 			fputstring(line, fid);
-			sprintf(line, "%i.png", systime);
+			sprintf(line, "%i.png", systim);
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);
@@ -6198,12 +6201,102 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			pttoa(line, pt);
 			fputstring(line, fid);
-			itoa(iCursor, line,10);
+			itoa(iCursor, line, 10);
 			fputstring(line, fid);
+			rtn = iCursor;
+		}
+		if (!stricmp(Arg[1], "CAPSCRIPT"))
+		{
+			POINT pt;
+			CURSORINFO cursInfo;
+			ICONINFOEX iconInfo;
+			int iCursor;
+
+			GetCursorPos(&pt);
+			cursInfo.cbSize = sizeof(CURSORINFO);
+			iconInfo.cbSize = sizeof(ICONINFOEX);
+			GetCursorInfo(&cursInfo);
+			iCursor = WhichCursor(cursInfo.hCursor);
+			sprintf(line, "CAPSCRIPT");
+			fputstring(line, fid);
+			pttoa(line, pt);
+			fputstring(line, fid);
+			fputstring("scriptname.png", fid);
+			rtn = iCursor;
+		}
+		if (!stricmp(Arg[1], "CAPRIGHTCLICK"))
+		{
+			POINT pt;
+			CURSORINFO cursInfo;
+			ICONINFOEX iconInfo;
+			int iCursor;
+
+			GetCursorPos(&pt);
+			cursInfo.cbSize = sizeof(CURSORINFO);
+			iconInfo.cbSize = sizeof(ICONINFOEX);
+			GetCursorInfo(&cursInfo);
+			iCursor = WhichCursor(cursInfo.hCursor);
+			sprintf(line, "CAPRIGHTCLICK");
+			fputstring(line, fid);
+			pttoa(line, pt);
+			fputstring(line, fid);
+			itoa(iCursor, line, 10);
+			fputstring(line, fid);
+			fputstring("rightclick_454_152.png", fid);
+			rtn = iCursor;
+		}
+		if (!stricmp(Arg[1], "CAPLEFTCLICK"))
+		{
+			POINT pt;
+			CURSORINFO cursInfo;
+			ICONINFOEX iconInfo;
+			int iCursor;
+
+			GetCursorPos(&pt);
+			cursInfo.cbSize = sizeof(CURSORINFO);
+			iconInfo.cbSize = sizeof(ICONINFOEX);
+			GetCursorInfo(&cursInfo);
+			iCursor = WhichCursor(cursInfo.hCursor);
+			sprintf(line, "CAPLEFTCLICK");
+			fputstring(line, fid);
+			pttoa(line, pt);
+			fputstring(line, fid);
+			itoa(iCursor, line, 10);
+			fputstring(line, fid);
+			fputstring("LeftClick_177_43.png", fid);
+			rtn = iCursor;
+		}
+		if (!strnicmp(Arg[1], "CAPKEYSTROKE",12))
+		{
+			POINT pt;
+			CURSORINFO cursInfo;
+			ICONINFOEX iconInfo;
+			int iCursor;
+			LPSTR pChar = strchr(Arg[1], '-');
+			char key[2] = { 0 };
+
+			if (pChar)
+			{
+				pChar++;
+				key[0] = *pChar;
+			}
+			GetCursorPos(&pt);
+			cursInfo.cbSize = sizeof(CURSORINFO);
+			iconInfo.cbSize = sizeof(ICONINFOEX);
+			GetCursorInfo(&cursInfo);
+			iCursor = WhichCursor(cursInfo.hCursor);
+			sprintf(line, "CAPKEYSTROKE");
+			fputstring(line, fid);
+			pttoa(line, pt);
+			fputstring(line, fid);
+			itoa(iCursor, line, 10);
+			fputstring(line, fid);
+			fputstring(key, fid);
+			fputstring("KeyStroke_490_152-152_15.png", fid);
 			rtn = iCursor;
 		}
 		GSSiClose(fid);
 	}
-	ltoa(systime, OutLoc, 10);
+	ltoa(systim, OutLoc, 10);
 	return rtn;
 }

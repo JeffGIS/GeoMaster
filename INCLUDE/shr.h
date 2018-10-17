@@ -496,6 +496,7 @@ HANDLE LoadTranFileWithDandT (LPSTR Name);
 long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction);
 DWORD ConvertGeodeticToMGRS (LPDOUBLE pLat,LPDOUBLE pLon,DWORD Precision,LPSTR MGRS);
 DWORD ConvertMGRSToGeodetic (LPDOUBLE pLat,LPDOUBLE pLon,LPSTR MGRS);
+BOOL SetIconColors(LPSTR BitmapPath, COLORREF *colors, int ncolors);
 
 short LINSEC (double X1IN,double Y1IN,double A1,double X2IN,double Y2IN,
             double A2,double *X3,double *Y3);

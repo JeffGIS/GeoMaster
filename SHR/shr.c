@@ -7355,10 +7355,10 @@ RECT atorect (LPSTR Value,LPBOOL pErr)
 {                 
 	RECT	Rect;
 	
-	if (sscanf (Value,"%i %i %i %i",&Rect.left,&Rect.top,&Rect.right,&Rect.bottom) != 4) 
+	Rect.left = Rect.right = Rect.bottom = Rect.top = 0;
+	if (sscanf(Value, "%i %i %i %i", &Rect.left, &Rect.top, &Rect.right, &Rect.bottom) != 4)
 	{	
 		*pErr = TRUE;
-		Rect.left = Rect.right = Rect.bottom = Rect.top = 0;
 	}
 	else
 		*pErr = FALSE;

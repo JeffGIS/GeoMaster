@@ -2676,7 +2676,7 @@ if (!DisableMarginPan &&
 				break;
 			case 'h':
 			case 'H':
-				MessageBox(0, "The following keys can be used to invoke options in the Profile Viewport:\n\n\tS\tSettings Screen\n\tC\tCross Section Mode\n\tP\tProfile Mode\n\t+\tNext Cross Section\n\t-\tPrevious Cross Section\n\tV\tVisibility of Data in Profile or Cross Section Mode\n\tH\tDisplay this Help Screen", "Profile Option Keys", MB_OK);
+				MessageBox(0, "The following keys can be used to invoke options in the Profile Viewport:\n\n\tS\tSettings Screen\n\tC\tCross Section Mode\n\tP\tProfile Mode\n\t+\tNext Cross Section\n\t-\tPrevious Cross Section\n\tV\tVisibility of Data in Profile or Cross Section Mode\n\tA\tAlign Plan and Profile\n\tZ\tZoom to Profile Limits\n\tH\tDisplay this Help Screen", "Profile Option Keys", MB_OK);
 				break;
 			case 'z':
 			case 'Z':
