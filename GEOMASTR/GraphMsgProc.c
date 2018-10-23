@@ -425,6 +425,8 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				}
 			}
 			GSSiClose(fid);
+			if (ibutton)
+				PostMessage(hWndDlg, WM_COMMAND, IDC_BUTTON1, 0L);
 		}
 	}
 		break; /* End of WM_INITDIALOG                                 */

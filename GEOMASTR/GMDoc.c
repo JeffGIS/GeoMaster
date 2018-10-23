@@ -265,6 +265,10 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	BOOL	Err;
 	int		fadeIn, delay;
 	int		icursor=0;
+	BOOL	first = TRUE;
+	static RECT OriginalRect;
+	RECT	CurrentRect;
+	static	HANDLE hTran = 0;
 
 	if (fidList == HFILE_ERROR)
 		return FALSE;
@@ -275,7 +279,11 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	}
 	GSSiClose(fidList);
 	if (item < DocPos)
+	{
+		CloseTRANS2(&hTran);
+		first = TRUE;
 		return rtn;
+	}
 	rtn = TRUE;
 	strcpy(itemFile, GMDocFile);
 	LPSTR pEndDir = strrchr(itemFile, '\\') + 1;
@@ -325,6 +333,15 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		ExpandText(line);
 		tranColor = atoi(line);
 		KillTimer(hWnd, 1);
+		if (first)
+		{
+			OriginalRect = ImageRect;
+			GetClientRect(hWnd, &CurrentRect);
+			hTran = STRANRect (&OriginalRect,&CurrentRect);
+			first = FALSE;
+		}
+		TRANRect(&ImageRect,hTran);
+
 		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent, tranColor);
 		HDC hDC = GetDC(hWndMain);
 
@@ -367,6 +384,8 @@ BOOL ProcessGMDocItem(HWND hWnd)
 				ImageRect.bottom = ImageRect.top + height;
 			}
 		}
+		TRANRect(&ImageRect, hTran);
+
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -423,8 +442,10 @@ BOOL ProcessGMDocItem(HWND hWnd)
 			offsetX = atoi(offsetC);
 			offsetY = atoi(pOffset);
 		}
-		ImageRect.left -= offsetX;
-		ImageRect.top -= offsetY;
+		DPOINT pt = { offsetX, offsetY };
+		pt = TranPoint(&pt, hTran);
+		//offsetX = pt.x;
+		//offsetY = pt.y;
 		if (IsRectEmpty(&ImageRect))
 		{
 			int width = 0;
@@ -439,6 +460,9 @@ BOOL ProcessGMDocItem(HWND hWnd)
 				ImageRect.bottom = ImageRect.top + height;
 			}
 		}
+		//TRANRect(&ImageRect, hTran);
+		ImageRect.left -= offsetX;
+		ImageRect.top -= offsetY;
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -510,6 +534,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 				ImageRect.bottom = ImageRect.top + height;
 			}
 		}
+		TRANRect(&ImageRect, hTran);
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
 		fgetstring(line, 64, fidItem);
