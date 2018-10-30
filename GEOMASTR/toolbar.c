@@ -5433,17 +5433,20 @@ void DrawAlphaBlend (HWND hWnd, HDC hdcwnd)
 
 void SaveToolbarsInConfig (HFILE Fid)
 {
- 	short	Version=1, id=OB_TOOLBARS; 
+ 	short	Version=2, id=OB_TOOLBARS; 
     int		i;
 	long	loc, loc2,Length=0;
 	RECT	rect;
 	char	path[MAX_PATH];
-    
+	RECT	WindowRect;
+
+	GetWindowRect(hWndMain, &WindowRect);
  	BigWrite (Fid,(HPSTR)&id,2,-1);  
  	BigWrite (Fid,(HPSTR)&Version,2,-1);
  	BigWrite (Fid,(HPSTR)&Version,2,-1); 
 	loc = GSSillseek (Fid,0,1);
 	BigWrite (Fid,(HPSTR)&Length,4,-1);
+	BigWrite(Fid, &WindowRect, sizeof(RECT), -1);
 	BigWrite (Fid,(HPSTR)&nToolbars,4,-1);Length+=4;
 	
 	BigWrite (Fid,(HPSTR)&ToolbarWidthTop,4,-1);Length+=4;
@@ -5471,19 +5474,21 @@ void SaveToolbarsInConfig (HFILE Fid)
 	return;
 }
 
-void LoadToolbarsInConfig (HFILE Fid)
+void LoadToolbarsInConfig (HFILE Fid,RECT OriginalWindowRect)
 {
 	int		nToolbar, iType, iFloat,i, npr, h;
 	RECT	rect, windowRect;
 	char	path[MAX_PATH];
 	char	cmd[1024];
 	POINT	pt;
-
+	HANDLE	hTranRect;
 	SetViewport (0);
 	DisplayToolbars = FALSE;
 	GSSilread (Fid,&nToolbar,4);
 	GetWindowRect(hWndMain, &windowRect);
-
+	if (IsRectEmpty(&OriginalWindowRect))
+		OriginalWindowRect = windowRect;
+	hTranRect = STRANRect(&OriginalWindowRect, &windowRect);
 	GSSilread (Fid,&ToolbarWidthTop,4);
 	GSSilread (Fid,&ToolbarWidthBottom,4);
 	GSSilread (Fid,&ToolbarWidthLeft,4);
@@ -5496,6 +5501,7 @@ void LoadToolbarsInConfig (HFILE Fid)
 		GSSilread (Fid,&npr,4);
 		GSSilread (Fid,&h,4);
 		GSSilread (Fid,&rect,sizeof(RECT));
+		TRANRect(&rect, hTranRect);
 		GSSilread (Fid,path,MAX_PATH);
 
 		ClientRectToScreenRect (hWndMain,&rect);
@@ -5526,6 +5532,7 @@ void LoadToolbarsInConfig (HFILE Fid)
 	}
 	DisplayToolbars = TRUE;
 	AdjustToolbarPositions ();
+	CloseTRANS2(&hTranRect);
 	return;
 
 }

@@ -1435,12 +1435,15 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
     	case OB_TOOLBARS:
     	{   
     		long	Length;
-    		
+			RECT OriginalWindowRect = { 0 };
+
 			GSSilread (*Fid,&ObjectID,2);
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Version,2);
 			GSSilread (*Fid,&Length,4);
-			LoadToolbarsInConfig (*Fid);
+			if (Version > 1)
+				GSSilread(*Fid, &OriginalWindowRect, sizeof(RECT));
+			LoadToolbarsInConfig (*Fid,OriginalWindowRect);
 			goto RtnTrue;
 		}  
 			

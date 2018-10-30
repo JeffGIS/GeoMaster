@@ -1951,8 +1951,8 @@ void SaveMenusInConfig (HFILE Fid,short opt);
 void EmbedMenusInConfig (HFILE Fid, LPSTR TempName);
 BOOL LoadMenuConfig (LPSTR Name,long Offset,HFILE OpenFid,short Version);
 void SaveToolbarsInConfig (HFILE Fid);
-void LoadToolbarsInConfig (HFILE Fid);
-BOOL ScaleIsSet (BOOL DisplayMess);
+void LoadToolbarsInConfig(HFILE Fid, RECT OriginalWindowRect);
+BOOL ScaleIsSet(BOOL DisplayMess);
 double atobasedist (LPSTR Dist,LPBOOL perr);
 USHORT GroupPoints (LPSTR InFile,LPSTR SQL,LPSTR idfieldname,LPSTR xfieldname,LPSTR yfieldname,LPSTR keyfieldname,
 				  double MinDist,double MaxDist,double GroupDist,long MaxPoints,LPSTR BoundsFile,LPSTR PointToBoundsFile);

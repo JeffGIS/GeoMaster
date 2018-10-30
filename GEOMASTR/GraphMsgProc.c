@@ -330,24 +330,47 @@ Exit:
     return nRc;
 }
 
+HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName)
+{
+	HDIB32 hDib32 = BMPHandleFromEXT(FileName);
+	HDIB32 hDibScaled;
+	HBITMAP hBMLarge = 0;
+	float imagewidth = FreeImage_GetWidth(hDib32);
+	float imageheight = FreeImage_GetHeight(hDib32);
+	float fac1, fac2, fac;
+	RECT buttonRect;
+	//BOOL flip = FreeImage_FlipVertical(hDib32);
+	//flip = FreeImage_FlipHorizontal(hDib32);
+	GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
+	fac1 = RECTWIDTH(&buttonRect) / imagewidth;
+	fac2 = RECTHEIGHT(&buttonRect) / imageheight;
+	fac = min(fac1, fac2);
+	hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
+	hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+	HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
+	GSSiDeleteObject(&hOldBM);
+	DestroyDIB32(hDib32, FALSE);
+	DestroyDIB32(hDibScaled, FALSE);
+	EnableWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), TRUE);
+	return hBMLarge;
+}
 
 BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 #define MAXIMAGES 15
 	static HBITMAP hBM[MAXIMAGES] = { 0 };
-	static HBITMAP hBMLarge = 0;
 	static HBITMAP hBMLeft = 0;
 	static HBITMAP hBMRight = 0;
-	static char selectedFile[MAX_PATH] = { 0 };
 	static int firstImage = 0;
 	static int lastImage = 0;
 	static int totImages = 0;
+	static HBITMAP hBMLarge = 0;
 	char blankLine[2] = "";
 
 	LPSTR pTab;
 	UINT buttons[MAXIMAGES] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6, IDC_BUTTON7, IDC_BUTTON8, IDC_BUTTON9, IDC_BUTTON10, IDC_BUTTON11, IDC_BUTTON12, IDC_BUTTON13, IDC_BUTTON14, IDC_BUTTON15 };
 	UINT buttontext[MAXIMAGES] = { IDC_BUTTONTEXT1, IDC_BUTTONTEXT2, IDC_BUTTONTEXT3, IDC_BUTTONTEXT4, IDC_BUTTONTEXT5, IDC_BUTTONTEXT6, IDC_BUTTONTEXT7, IDC_BUTTONTEXT8, IDC_BUTTONTEXT9, IDC_BUTTONTEXT10, IDC_BUTTONTEXT11, IDC_BUTTONTEXT12, IDC_BUTTONTEXT13, IDC_BUTTONTEXT14, IDC_BUTTONTEXT15 };
-	char FileName[MAX_PATH + 2];
+	static char FileName[MAX_PATH + 2] = { 0 };;
 	RECT buttonRect;
 	int	BRtn;
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
@@ -361,7 +384,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 	{
 		HBITMAP hOldBM;
 		int ibutton = 0;
-		*selectedFile = 0;
+		*FileName = 0;
 		cwCenter(hWndDlg, 0);
 /*		hBMLeft = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_LEFT_ARROW));
 		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR), (HBITMAP*)&hBM[0]);
@@ -433,10 +456,11 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 	case WM_DESTROY:
 		for (int i = 0; i < MAXIMAGES;i++)
 			GSSiDeleteObject(&hBM[i]);
-		GSSiDeleteObject(&hBMLarge);
 
 		if (FileType(DMIFile) == 1)
 			GSSiRemove(DMIFile);
+		GSSiDeleteObject(&hBMLarge);
+
 		break;
 	case WM_CLOSE:
 		/* Closing the Dialog behaves the same as Cancel               */
@@ -455,11 +479,56 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 		case IDOK:
 			EndDialog(hWndDlg, TRUE);
 			break;
+		case IDC_IMAGE_FLIP:
+		{
+			HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+			if (hDIB)
+			{
+				if (FreeImage_FlipVertical(hDIB))
+				{
+					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+				}
+				FreeImage_Unload(hDIB);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			}
+		}
+			break;
+		case IDC_IMAGE_ROTATE_CLOCKWISE:
+		{
+			HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+			if (hDIB)
+			{
+				if (FreeImage_RotateClassic(hDIB,90))
+				{
+					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+				}
+				FreeImage_Unload(hDIB);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			}
+		}
+			break;
+		case IDC_IMAGE_ROTATE_COUNTERCLOCKWISE:
+		{
+			HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+			if (hDIB)
+			{
+				if (FreeImage_RotateClassic(hDIB, 270))
+				{
+					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+				}
+				FreeImage_Unload(hDIB);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			}
+		}
+			break;
 		case IDC_LARGEBUTTON:
 		{
 			char cmd[MAX_PATH * 2];
-			sprintf(cmd, "$WEB(%s)", selectedFile);
-			if (*selectedFile)
+			sprintf(cmd, "$WEB(%s)", FileName);
+			if (*FileName)
 				ProcessText(cmd);
 		}
 			break;
@@ -510,30 +579,8 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 						}
 						if (ifile++ == ibutton + firstImage)
 						{
-							HDIB32 hDib32 = BMPHandleFromEXT(FileName);
-							HDIB32 hDibScaled;
-							if (doFlip)
-							{
-								BOOL flip = FreeImage_FlipVertical(hDib32);
-							}
-							float imagewidth = FreeImage_GetWidth(hDib32);
-							float imageheight = FreeImage_GetHeight(hDib32);
-							float fac1, fac2, fac;
-							//BOOL flip = FreeImage_FlipVertical(hDib32);
-							//flip = FreeImage_FlipHorizontal(hDib32);
-							strcpy(selectedFile, FileName);
-							GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
-							fac1 = RECTWIDTH(&buttonRect) / imagewidth;
-							fac2 = RECTHEIGHT(&buttonRect) / imageheight;
-							fac = min(fac1, fac2);
-							hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
-							hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
-							HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
-							GSSiDeleteObject(&hOldBM);
+							hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
 							ibutton++;
-							DestroyDIB32(hDib32, FALSE);
-							DestroyDIB32(hDibScaled, FALSE);
-							EnableWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), TRUE);
 							break;
 						}
 					}
@@ -10489,7 +10536,7 @@ BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds, LPSTR Name)
 
 	if (!Name)
 	{
-		if (!GetTextString(GetFocus(), name, 250, 0, "", 0, 0, 1, 0))
+		if (!GetTextString(GetFocus(), name, 250, "Enter ZOOM Identifier", "", 0, 0, 1, 0))
 		{
 			return FALSE;
 		}

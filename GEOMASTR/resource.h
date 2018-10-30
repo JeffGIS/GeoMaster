@@ -3389,6 +3389,10 @@
 #define IDC_GMDOCTEXT                   2298
 #define ID_DELETELIST                   2299
 #define IDC_CHECK_DONOTSHOW             2299
+#define IDC_IMAGE_FLIP                  2300
+#define IDC_IMAGE_ROTATE_CLOCKWISE      2301
+#define IDC_IMAGE_ROTATE_CLOCKWISE2     2302
+#define IDC_IMAGE_ROTATE_COUNTERCLOCKWISE 2302
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3735,7 +3739,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1253
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2300
+#define _APS_NEXT_CONTROL_VALUE         2301
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

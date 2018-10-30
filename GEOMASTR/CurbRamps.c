@@ -1277,7 +1277,7 @@ int FormatStreets(LPSTR from, LPSTR outtext)
 }
 BOOL GetFromCodeText(int from, LPSTR text)
 {
-	char *fromText[] = { "Home", "Ramp", "Signal", "Texture", "Obstruction", "Steep TOC", "Crack", "Curb Cut", "Bump Width", "Bump Height", "Manual Slope","","","","","","","Ground Front","Ground Back","" };
+	char *fromText[] = { "Ramp", "Ramp", "Signal", "Texture", "Obstruction", "Steep TOC", "Crack", "Curb Cut", "Bump Width", "Bump Height", "Manual Slope","","","","","","","Ground Front","Ground Back","" };
 
 	if (from > 0 && from < 20)
 	{
