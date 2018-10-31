@@ -2321,7 +2321,7 @@ int SetCharsFromTheme (HDC hDC, int Type, long iref, int desc, LPSTR TAG, LPSTR 
 	BOOL	DynSegDone=FALSE;
     short	FromTheme = 0, ToTheme = CurView->NumThemes;
     
-    if (Highlight || !ProcessThemes)
+    if (Highlight || !ProcessThemes || !CurView)
 {
 #if ENABLETRACE
 GSSiExitProg (134);

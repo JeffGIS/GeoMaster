@@ -2657,6 +2657,35 @@ GSSiExitProg (1350);
 			PostMessage(hWndMain, GF_MAPSERVER_REQUEST, (WPARAM)hWndMain, 1);
 			goto RtnTrue;
 			break;
+		case 949: //$CASECOUNT(CAPTURE,title,menu)
+		{
+			int n = 0;
+			BOOL wantUpper = TRUE;
+			LPSTR pC;
+
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 2)
+				goto RtnFalse;
+			pC = Arg[1];
+			if (*Arg[2] != 'U')
+				wantUpper = FALSE;
+			while (*pC)
+			{
+				if (isupper(*pC))
+				{
+					if (wantUpper)
+						n++;
+				}
+				else
+				{
+					if (!wantUpper)
+						n++;
+				}
+				pC++;
+			}
+			itoa(n, OutLoc, 10);
+			goto Rtnl;
+		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 
