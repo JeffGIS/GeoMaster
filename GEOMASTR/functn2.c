@@ -2905,8 +2905,6 @@ GSSiExitProg (1350);
 		}
 
 		case 1009: // $PRINTMERGE(DataFile,MacroFile,YorNTest)
-		//locates(using searchString) all indexes and global.ini in FromPath and copies to ToPath
-		//updates ToPath\filelist.txt and updates [CDLIST] in geomastr.ini
 		{    
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			_fstrcpy (PMDataFile,Arg[1]);
