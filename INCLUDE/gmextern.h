@@ -580,6 +580,7 @@ extern BOOL			MenuDisplayed;
 extern HPEN			CurrentPen;
 extern float			WidthFactor;
 extern HWND			hWndMain;
+extern HFILE		LogMSGFile;
 extern HWND			hWndAltAccel; 
 extern HWND			TraceWnd;
 extern HWND			PromptFocus;

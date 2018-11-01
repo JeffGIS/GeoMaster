@@ -7643,6 +7643,13 @@ void EscapeFunction (BOOL DoHalt)
 	LPVIEWPORT SaveVP = CurView;
 	int	i;
 
+	if (LogMSGFile != HFILE_ERROR)
+	{
+		GSSiClose(LogMSGFile);
+		LogMSGFile = GSSiOpenFile("c:\\temp\\msglog.txt", 0, OF_WRITE);
+	}
+
+
 	GSSiMessageBoxEnable();
 	ResetSocketLog();
 	MergeImageIntoViewport(0, 0, 0, 0);

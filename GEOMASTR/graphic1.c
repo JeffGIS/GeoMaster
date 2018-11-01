@@ -338,6 +338,11 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 
+	if (LogMSGFile != HFILE_ERROR)
+	{
+		GSSiClose(LogMSGFile);
+	}
+
 	MergeImageIntoViewport(0, 0, 0, 0);
 	RegisterPopupMessageClass(TRUE);
 	ProcessText ("$LINKLINES(CLEAR)");

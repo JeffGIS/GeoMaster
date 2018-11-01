@@ -248,6 +248,7 @@ long	FirstMergeRecord;
 long	LastMergeRecord;
 short	RedrawAfterOK=1;
 HWND	hWndMain=0;  
+HFILE	LogMSGFile = HFILE_ERROR;
 HWND	hWndAltAccel=0;
 HWND	TraceWnd=0;
 HWND	PromptFocus;

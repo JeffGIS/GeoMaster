@@ -115,6 +115,7 @@ BOOL SetIconColors(LPSTR BitmapPath, COLORREF *colors, int ncolors)
 	free(dist);
 	SaveDIB32(hDIB, BitmapPath, -1, 0);
 	DestroyDIB32(hDIB, TRUE);
+	return TRUE;
 }
 
 HBITMAP CreateBitmapMask(HBITMAP hbmColour, COLORREF crTransparent)

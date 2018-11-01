@@ -590,10 +590,15 @@ GSSiExitProg (436);
  			*lpStart = ' ';
  	}
  }
-	 
- if ((lpStart = _fstrstr(CmdLine," /BACK ")))
+
+ if ((lpStart = _fstrstr(CmdLine, " /LOGMSG ")))
  {
- 	lpStart += 7;
+	 lpStart += 9;
+	 LogMSGFile = GSSiOpenFile("c:\\temp\\msglog.txt", 0, OF_CREATE);
+ }
+ if ((lpStart = _fstrstr(CmdLine, " /BACK ")))
+ {
+    lpStart += 7;
  	if ((lpNext = _fstrchr (lpStart,' ')))
  	{
  		*lpNext++ = 0;  
@@ -2011,6 +2016,11 @@ else if (MapServer)
 nMess = -1;
  while(hWndMain && GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
    {    
+	 if (LogMSGFile != HFILE_ERROR)
+	 {
+		 char text[128];
+		 sprintf (text,"%i\t%i\t%i\t%i",(int)msg.hwnd,msg.message,msg.lParam,msg.wParam);
+		 fputstring (text,LogMSGFile);	 }
 #ifndef	NDEBUG
 	 nMess++;
 	 if (nMess > 99)
