@@ -657,10 +657,11 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc)
 {
 	BOOL rtn = FALSE;
-	int rc;
+	int rc = SQLITE_OK;
 
 	*OutLoc = 0;
-	rc = sqlite3_open(NVCRISDataBase, &database);
+	if (*NVCRISDataBase)
+		rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
 		MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
@@ -668,7 +669,8 @@ BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc)
 		if (rtn)
 			strcpy(OutLoc, pmpInt->name);
 		free(pmpInt);
-		sqlite3_close(database);
+		if (*NVCRISDataBase)
+			sqlite3_close(database);
 	}
 	return rtn;
 }
@@ -1088,16 +1090,16 @@ int getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		PixelXYToLatLong(mpint.lev21x, mpint.lev21y, 21, &lat, &lon);
 		mpint.lat = lat;
 		mpint.lon = lon;
-		//int nStreets = sqlite3_column_int(statement, 27);
+		int nStreets = sqlite3_column_int(statement, 28);
 		streets = (LPSTR)sqlite3_column_text(statement, 29);
-		if (streets)
+		if (streets && nStreets)
 			//strcpy(streetString, streets);
 			FormatStreets(streets, streetString);
 		//ReplaceChar(streetString, '|', '\n');
 		strncpy0(mpint.name, streetString, sizeof(mpint.name) - 1);
 		comment = (LPSTR)sqlite3_column_text(statement, 33);
-		if (comment)
-			strcpy(mpint.intersectionComment, comment);
+		if (comment && *comment)
+			strncpy0(mpint.intersectionComment, comment, sizeof(mpint.intersectionComment) - 1);
 		mpint.doLater = sqlite3_column_int(statement, 34);
 		mpint.zoomLevel = sqlite3_column_int(statement, 35);
 		/*[self setRampCoord : mpint ramp : 1 from : statement];
@@ -1473,7 +1475,7 @@ BOOL adjustToLatestVersion(void)
 				rtn = FALSE;
 				SLT_StartTrans(database);
 				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN FromFileID CHAR(12);");
-				if (st) st = executeCmd(cmd);
+				if (st) st = sqlite3_exec(database, cmd, 0, 0, 0);
 				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN CornerID INT;");
 				st = executeCmd(cmd);
 				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN Retired INT;");
