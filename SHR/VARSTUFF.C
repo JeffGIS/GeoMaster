@@ -3500,7 +3500,7 @@ GSSiExitProg (532);
 		case 364:
 		{
 			int maxc = atoi (Value);
-			AddBMPToCache32 (0,(HDIB32)maxc);
+			SetMaxBMP32Cache(maxc);
 		}
  			break;
 		case 365:

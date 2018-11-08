@@ -232,7 +232,7 @@ extern BOOL	AllowCache;
 	{
 		if (AdjustColorsToVP)
 			hDIB = AdjustDIB32Colors (hDIB); 
-		AddBMPToCache32 (lpFileName,hDIB);
+		AddBMPToCache32 (lpFileName,&hDIB);
 	}
    //SetCursor(LoadCursor(NULL, IDC_ARROW)); 
 	if (hDIB && AdjustColorsToVP==24)

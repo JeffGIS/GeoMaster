@@ -60,6 +60,16 @@ static	ULONG		BMPLastUse32[MAXBMPCACHE], BMPNextUse32=0;
 static	int			imageFileRotation=0;
 static	int			maxBMP32Cache = MAXBMPCACHE;
 
+void SetMaxBMP32Cache(int n)
+{
+	if (n < 0)
+	{
+		AllowCache = FALSE;
+		AllowBMPCaching = FALSE;
+	}
+	else
+		maxBMP32Cache = n;
+}
 void SetImageFileRotation (int r)
 {
 	imageFileRotation = r;
@@ -1575,7 +1585,7 @@ BOOL RemoveBMPFromCache32 (LPSTR Name)
     return FALSE;
 }
 
-void AddBMPToCache32 (LPSTR Name,HDIB32 hBMP)
+void AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 {   
 	ULONG	MinUse=ULONG_MAX;
 	USHORT	Mini, i;
@@ -1591,17 +1601,10 @@ void AddBMPToCache32 (LPSTR Name,HDIB32 hBMP)
 				*BMPNames32[i] = 0;
 			}
 		FirstBMPCache32 = TRUE; 
-		if ((int)hBMP < 0)  
-		{
-			AllowCache = FALSE;
-	        AllowBMPCaching = FALSE; 
-	    }
-		if ((int)hBMP > 0)
-			maxBMP32Cache = (int)hBMP;
 		return;
 	}
 	
-	if (!hBMP)
+	if (!*hBMP)
 		return;  
 	
 	if (!AllowBMPCaching)
@@ -1613,12 +1616,18 @@ void AddBMPToCache32 (LPSTR Name,HDIB32 hBMP)
 		for (i=0;i<MAXBMPCACHE;i++)
 			*BMPNames32[i] = 0;  
 	}
+	if (FreeImage_GetBPP(*hBMP) != 24)
+	{
+		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(*hBMP);
+		FreeImage_Unload(*hBMP);
+		*hBMP = hDib24;
+	}
 	for (i=0;i<maxBMP32Cache;i++)  
 	{
 		if (!*BMPNames32[i]) 
 		{   
 			BMPLastUse32[i] = BMPNextUse++;
-			BMPHandles32[i] = hBMP;
+			BMPHandles32[i] = *hBMP;
 			_fstrcpy (BMPNames32[i],Name);
 			return;
 		}
@@ -1630,7 +1639,7 @@ void AddBMPToCache32 (LPSTR Name,HDIB32 hBMP)
 	}
 	DestroyDIB32  (BMPHandles32[Mini],TRUE); 
 	BMPLastUse32[Mini] = BMPNextUse32++;
-	BMPHandles32[Mini] = hBMP;
+	BMPHandles32[Mini] =*hBMP;
 	_fstrcpy (BMPNames32[Mini],Name);
 	return;
 }
