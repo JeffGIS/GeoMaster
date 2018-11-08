@@ -150,6 +150,7 @@ static	short	nInRow[MAXTBROWS];
 
 static	BYTE	maskBits[131][131]={0};
 
+static BOOL waitForUpButton = FALSE;
 
 
 extern	int	AlphaBlendFactor;
@@ -2300,6 +2301,8 @@ extern	BOOL	InDebug;
 					DeleteDC (hDCBuf);
 					GSSiDeleteObject (&hBMBuf);
 				}
+				if (waitForUpButton)
+					ii = 1;
 			}
 			else if (hdc)
 				DeleteDC (hdc);
@@ -2369,12 +2372,14 @@ LONG FAR PASCAL PanZoomRotWndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM 
  int	ToolbarID = GetToolbarIDFromWnd (hWnd);
  static BOOL AllowRotate = TRUE;
  static int	PANDIST = 53;
-
+ 
 
  if (Message != WM_CREATE)
 	 CurView = PZR_VP;
  if (!CurrentConfig)
 	 SetConfig (1);
+ if (Message == WM_LBUTTONDOWN)
+	 ii = 1;
  switch (Message)
    { 
     case WM_CREATE:
@@ -2387,6 +2392,7 @@ HRGN	hRgn;
 			RECT	Rect;
 
 			PZR_VP = CurView;
+			waitForUpButton = FALSE;
 			AllowRotate = GetGlobalBVal2("[%ALLOWPZROTATE]", TRUE);
 			if (!AllowRotate)
 				PANDIST = 64;
@@ -2463,6 +2469,9 @@ HRGN	hRgn;
 	}
 	case GSSi_DimMenu:
 		DisplayPZRotImage(3);
+		if (!waitForUpButton)
+			iColor = VHMoveColor;
+	
 		break;
 
 
@@ -2502,6 +2511,7 @@ HRGN	hRgn;
 		ShowWindow (hWnd,SW_HIDE);
 		break;
 	case WM_LBUTTONUP:
+		waitForUpButton = FALSE;
 		hDC = GetDC (hWnd);
 		KillTimer (hWnd,TimerID);
     	CursorPoint = POINTStoPOINT(MAKEPOINTS(lParam));
@@ -2596,8 +2606,7 @@ HRGN	hRgn;
 			HBRUSH	hBrush = CreateSolidBrush (RED);
 			HBRUSH	hOldBrush = SelectObject (hDC,hBrush);
 
-			rc = ExtFloodFill (hDC,CursorPoint.x,CursorPoint.y,DKRED,FLOODFILLSURFACE);
-
+			rc = ExtFloodFill(hDC, CursorPoint.x, CursorPoint.y, DKRED, FLOODFILLSURFACE);
 			SelectObject (hDC,hOldBrush);
 			GSSiDeleteObject (&hBrush);
 			iColor = RED;
@@ -2620,6 +2629,7 @@ HRGN	hRgn;
 		int	ToolbarID = GetToolbarIDFromWnd (hWndPZR);
 		hDC = GetDC (hWnd);
 		HaveTrackMouseEvent = FALSE;
+		waitForUpButton = FALSE;
 		KillTimer (hWnd,TimerID);
 		ReleaseDC (hWnd,hDC);
 		DisplayPZRotImage (1);
@@ -2651,10 +2661,35 @@ HRGN	hRgn;
 	case WM_LBUTTONDOWN:
 	    HaltMapDisplay (FALSE,TRUE);
 		SetSysMess (0);
+		//CursorPoint = POINTStoPOINT(MAKEPOINTS(lParam));
+		if (iColor == DKRED)
+		{
+			ii = 1;
+		}
+		if (iColor == RED)
+		{
+			DisplayPZRotImage(3);
+			{
+				hDC = GetDC(hWnd);
+				HBRUSH	hBrush = CreateSolidBrush(DKRED);
+				HBRUSH	hOldBrush = SelectObject(hDC, hBrush);
+
+				rc = ExtFloodFill(hDC, CursorPoint.x, CursorPoint.y, VHMoveColor, FLOODFILLSURFACE);
+				waitForUpButton = TRUE;
+				iColor = DKRED;
+				SelectObject(hDC, hOldBrush);
+				GSSiDeleteObject(&hBrush);
+				ReleaseDC(hWnd, hDC);
+			}
+		}
+		if (waitForUpButton)
+			break;
 	case WM_MOUSEMOVE:
 		ToolbarID = GetToolbarIDFromWnd (hWndPZR);
 		if (!AllowRotate)
 			RotDIR = 0;
+		if (waitForUpButton)
+			break;
 		if (ignoreMM)
 		{
 			ignoreMM = FALSE;
@@ -2743,8 +2778,10 @@ CursorMove:
 			if (iColor != DKRED && iColor != RED)
 			{
 				DisplayPZRotImage(1);//RestoreScreen2 (hDC, hSavePZRScreen,0,FALSE);
-				iColor = GetPixel (hDC,CursorPoint.x,CursorPoint.y);
+				iColor = GetPixel(hDC, CursorPoint.x, CursorPoint.y);
 			}
+			else if (wParam == MK_LBUTTON)
+				break;
 //			sprintf (str,"%f, %f, %i, %i, %i",dist,az2,iColor,CursorPoint.x,CursorPoint.y);
 //			SetWindowText (hWndMain,str);
 			InJoyStick = FALSE;
@@ -2864,10 +2901,14 @@ CursorMove:
 				{
 					HBRUSH	hBrush = CreateSolidBrush (RED);
 					HBRUSH	hOldBrush = SelectObject (hDC,hBrush);
-					
-					rc = ExtFloodFill (hDC,CursorPoint.x,CursorPoint.y,VHMoveColor,FLOODFILLSURFACE);
+					int r = GetRValue(VHMoveColor);
+					int g = GetGValue(VHMoveColor);
+					int b = GetBValue(VHMoveColor);
+
+					rc = ExtFloodFill(hDC, CursorPoint.x, CursorPoint.y, VHMoveColor, FLOODFILLSURFACE);
 					SelectObject (hDC,hOldBrush);
 					GSSiDeleteObject (&hBrush);
+					iColor = RED;
 				}
 				if (CursorPoint.y < 50)
 					strcpy (str,"Click here to pan 1/2 screen up");

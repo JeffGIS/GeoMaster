@@ -4000,6 +4000,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%VPID", 390, FALSE);
 	AllocateTypeVar("%VPNAME", 391, FALSE);
 	AllocateTypeVar("%MINTIMERANGEBEGIN", 392, FALSE);
+	AllocateTypeVar("%IS64BIT", 393, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5186,6 +5187,9 @@ GSSiExitProg (533);
 			break;
 		case 392:
 			ltoa(MinTimeRangeBeg, OutStr, 10);
+			break;
+		case 393:
+			btoa(Is64BitMachine(), OutStr);
 			break;
 	}
 	GlobalUnlock (hGlobal);
