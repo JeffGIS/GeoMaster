@@ -3589,6 +3589,9 @@ GSSiExitProg (532);
 			MinTimeRangeBeg = atoi(Value);
 			SetTimeRangeBeg(TimeRangeBeg);
 			break;
+		case 394:
+			adjustIntensity = atof(Value);
+			break;
 		default:
  			break;
 	}
@@ -4001,6 +4004,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%VPNAME", 391, FALSE);
 	AllocateTypeVar("%MINTIMERANGEBEGIN", 392, FALSE);
 	AllocateTypeVar("%IS64BIT", 393, FALSE);
+	AllocateTypeVar("%ADJUSTINTENSITY", 394, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5190,6 +5194,9 @@ GSSiExitProg (533);
 			break;
 		case 393:
 			btoa(Is64BitMachine(), OutStr);
+			break;
+		case 394:
+			ftoa(OutStr,adjustIntensity);
 			break;
 	}
 	GlobalUnlock (hGlobal);

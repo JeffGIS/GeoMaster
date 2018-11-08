@@ -1,3 +1,4 @@
+configs\large.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD g:\pcviewer
 /GMDoc [%DL]GMDocumenter\Profile1 /WD f:\bu_2018_02_28\geomas
 configs\northfield.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD e:\pcviewer
 configs\basemap_new2.gmc /WD e:\bu_2018_02_28\geomas
@@ -157,6 +158,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 

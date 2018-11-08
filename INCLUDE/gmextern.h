@@ -1791,6 +1791,7 @@ extern	int		ShowLineDirection;
 extern  COLORREF lastPickedColor;
 extern	int		defaultAreaTransparency;
 extern	int		defaultLineTransparency;
+extern  double  adjustIntensity;
 extern  int		GoogleScale;
 extern	int		GoogleZoom;
 extern  int		GoogleMapWidth, GoogleMapHeight;

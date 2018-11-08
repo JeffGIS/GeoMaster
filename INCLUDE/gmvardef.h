@@ -1661,6 +1661,7 @@ int		ShowLineDirection = 0;
 COLORREF lastPickedColor = 0;
 int		defaultAreaTransparency = 255;
 int		defaultLineTransparency = 255;
+double  adjustIntensity = 1.5;
 int		GoogleScale = 1;
 int		GoogleZoom = 21;
 int		GoogleMapType=1;

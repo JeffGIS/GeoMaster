@@ -13,6 +13,7 @@
 
 extern  "C" int defaultAreaTransparency;
 extern  "C" int defaultLineTransparency;
+extern  "C" double adjustIntensity;
 
 #define GetIValue(rgb)      (LOBYTE((rgb)>>24))
 
@@ -113,6 +114,8 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);
 	{
 		int intensity = GetIValue(ColorRef);
+		intensity *= adjustIntensity;
+		intensity = max(0, min(255, intensity));
 		if (!intensity)
 			intensity = defaultLineTransparency;
 
@@ -230,6 +233,9 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			{
 				extern BOOL maxIntensity;
 				int intensity = GetIValue(lb->lbColor);
+				intensity *= adjustIntensity;
+				intensity = max(0, min(255, intensity));
+
 				if (!intensity)
 					intensity = defaultAreaTransparency;
 				if (maxIntensity)
