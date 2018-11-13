@@ -42,6 +42,7 @@ ASSOCIATE               ICON                    "..\\GEOMASTR\\ASSOC.ICO"
 LIGHTBULB_32            ICON                    "..\\GEOMASTR\\ICON6.ICO"
 IDI_GMEDIT_SMALL        ICON                    "..\\GEOMASTR\\ICON7.ICO"
 IDI_GMEDIT_LARGE        ICON                    "..\\GEOMASTR\\ICON8.ICO"
+GMDOC                   ICON                    "..\\GEOMASTR\\GWIZ1.ICO"
 
 /////////////////////////////////////////////////////////////////////////////
 //

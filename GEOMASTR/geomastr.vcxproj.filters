@@ -2328,6 +2328,9 @@
     <Image Include="..\citytour\NewVisionGIS.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="GWIZ1.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="CUR00001.CUR">

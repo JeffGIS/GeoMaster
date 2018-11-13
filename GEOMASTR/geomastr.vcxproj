@@ -1135,6 +1135,7 @@
     <Image Include="..\GMEdit\GMEdit\gmedit_icon2.ico" />
     <Image Include="..\Citytour\GMLOGOW.BMP" />
     <Image Include="..\Citytour\GREEN_BI.BMP" />
+    <Image Include="GWIZ1.ICO" />
     <Image Include="HLP-DWN.BMP" />
     <Image Include="HLP-UP.BMP" />
     <Image Include="HOME.ICO" />
