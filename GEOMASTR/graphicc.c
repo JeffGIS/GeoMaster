@@ -5685,8 +5685,6 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 					nLoops++;
 				}
 			}
-			if (hSavePolyElev)
-				GlobalUnlock (hSavePolyElev);
 			FirstLoop = FALSE;
 		}
 	} 

@@ -408,15 +408,16 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	}
 	else if (!stricmp(line, "CAPRIGHTCLICK") || !stricmp(line, "CAPLEFTCLICK"))
 	{
-		RECT ImageRect;
+		RECT ImageRect = { 0 };
 		int	 transparent;
 		COLORREF tranColor = 0;
 		char offsetC[32];
 		LPSTR pOffset;
 		int offsetX = 0, offsetY = 0;
+		DPOINT pointTo;
 
 		fgetstring(line, 64, fidItem);
-		ImageRect = atorect(line, &Err);
+		pointTo = atopt(line, &Err);
 		fgetstring(line, 64, fidItem);
 		icursor = atoi(line);
 		fgetstring(imageName, 32, fidItem);
@@ -443,7 +444,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 			offsetY = atoi(pOffset);
 		}
 		DPOINT pt = { offsetX, offsetY };
-		pt = TranPoint(&pt, hTran);
+		pointTo = TranPoint(&pointTo, hTran);
 		//offsetX = pt.x;
 		//offsetY = pt.y;
 		if (IsRectEmpty(&ImageRect))
@@ -456,13 +457,13 @@ BOOL ProcessGMDocItem(HWND hWnd)
 				width = FreeImage_GetWidth(hDib32);
 				height = FreeImage_GetHeight(hDib32);
 				DestroyDIB32(hDib32, FALSE);
+				ImageRect.left = pointTo.x - offsetX;
+				ImageRect.top = pointTo.y - offsetY;
 				ImageRect.right = ImageRect.left + width;
 				ImageRect.bottom = ImageRect.top + height;
 			}
 		}
 		//TRANRect(&ImageRect, hTran);
-		ImageRect.left -= offsetX;
-		ImageRect.top -= offsetY;
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -738,6 +739,7 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		case VK_LEFT:
 			break;
 		case VK_RIGHT:
+			SetTimer(hWnd, 1, 50, 0);
 			break;
 		case VK_UP:
 			break;

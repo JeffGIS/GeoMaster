@@ -5077,6 +5077,8 @@ void DestroySavedPolys (void)
     GSSiGlobFree (&hSavePolyParts);
     GSSiGlobFree (&hSavePolyElev);
 	*/
+	hSavePolyParts = 0;
+	hSavePolyElev = 0;
 	CurSavedPoly = 0;
 	if (hSavedPolys)
     {
