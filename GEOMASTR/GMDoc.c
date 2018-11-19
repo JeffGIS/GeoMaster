@@ -37,6 +37,7 @@ static	int		timerValue = 100;
 static	int		saveTimerValue = 0;
 static	BOOL	inManualMode = TRUE;
 static	BOOL	productionMode = FALSE;
+static	char	windowTitle[128] = { 0 };
 
 void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs);
 
@@ -116,7 +117,7 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 	}
 	if (pFile)
 	{
-		LPSTR pFS;
+		LPSTR pFS, pDocFileName;
 
 		pFile += 7;
 		if (*pFile == '\'')
@@ -135,6 +136,12 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 		if ((pFS = strchr(GMDocDir, '/')))
 			*pFS++ = 0;
 		Truncate(GMDocDir);
+		pDocFileName = strrchr(GMDocDir, '\\');
+		if (!pDocFileName)
+			pDocFileName = GMDocDir;
+		else
+			pDocFileName++;
+		sprintf(windowTitle, "GMDocumenter:%s", pDocFileName);
 		if (productionMode)
 			strcat(GMDocDir, "\\composited");
 		else
@@ -210,7 +217,7 @@ ATOM MyRegisterClassGMDoc(HINSTANCE hInstance)
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_GMDOC);
 	wcex.lpszClassName = szWindowClassGMDoc;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_GMEDIT_SMALL));
+	wcex.hIconSm = LoadIcon(hInstance, "GMDOC");
 
 	return RegisterClassEx(&wcex);
 }
@@ -241,6 +248,8 @@ BOOL InitInstanceGMDoc(HINSTANCE hInstance, int nCmdShow)
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
+	SetWindowText(hWnd, windowTitle);
+
 
 	return TRUE;
 }
@@ -264,12 +273,16 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	RECT	clientRect;
 	BOOL	Err;
 	int		fadeIn, delay;
+	int		defaultFadeIn = 30;
+
 	int		icursor=0;
 	BOOL	first = TRUE;
 	static RECT OriginalRect;
 	RECT	CurrentRect;
 	static	HANDLE hTran = 0;
 
+	if (!productionMode)
+		defaultFadeIn = 0;
 	if (fidList == HFILE_ERROR)
 		return FALSE;
 	GetClientRect(hWndMain, &clientRect);
@@ -292,7 +305,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	strcat(itemFile, itemName);
 	fidItem = GSSiOpenFile(itemFile, 0, OF_READ);
 	fgetstring(line, 1022, fidItem);
-	if (!stricmp(line, "CAPSCREEN"))
+	if (!stricmp(line, "CAPSCREEN") || !stricmp(line, "CAPWINDOW"))
 	{
 		RECT ImageRect;
 		int	 transparent;
@@ -325,6 +338,8 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		}
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
+		if (!fadeIn)
+			fadeIn = defaultFadeIn;
 		fgetstring(line, 64, fidItem);
 		delay = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -341,7 +356,6 @@ BOOL ProcessGMDocItem(HWND hWnd)
 			first = FALSE;
 		}
 		TRANRect(&ImageRect,hTran);
-
 		DisplayDocImage(imagePath, ImageRect, fadeIn, transparent, tranColor);
 		HDC hDC = GetDC(hWndMain);
 
@@ -388,6 +402,8 @@ BOOL ProcessGMDocItem(HWND hWnd)
 
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
+		if (!fadeIn)
+			fadeIn = defaultFadeIn;
 		fgetstring(line, 64, fidItem);
 		delay = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -466,6 +482,8 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		//TRANRect(&ImageRect, hTran);
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
+		if (!fadeIn)
+			fadeIn = defaultFadeIn;
 		fgetstring(line, 64, fidItem);
 		delay = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -538,6 +556,8 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		TRANRect(&ImageRect, hTran);
 		fgetstring(line, 64, fidItem);
 		fadeIn = atoi(line);
+		if (!fadeIn)
+			fadeIn = defaultFadeIn;
 		fgetstring(line, 64, fidItem);
 		delay = atoi(line);
 		fgetstring(line, 64, fidItem);
@@ -963,9 +983,11 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int fade, BOOL Transparent,COLO
 	{
 		HDC hDC = GetDC(hWndMain);
 		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
 		POINT tiePoint = { rect.left + RECTWIDTH(&rect) / 2, rect.top + RECTHEIGHT(&rect) / 2 };
-		DisplayTransparentBitmap(hDC, &hDib32, tiePoint, 0, &rect, 0, &TranColor);
+		DisplayTransparentBitmap(hDC, &hDib24, tiePoint, 0, &rect, 0, &TranColor);
 		//DisplayTransparentBitmapInRect(hDC, hDib32, &rect, TRUE);
+		DestroyDIB32(hDib24, FALSE);
 		DestroyDIB32(hDib32, FALSE);
 		ReleaseDC(hWndMain, hDC);
 	}
@@ -985,7 +1007,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int fade, BOOL Transparent,COLO
 		{
 			BITMAP bm;
 			HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
-			HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
+			HBITMAP hBM = DIB32ToBitmap(hDib24, (HPALETTE)0);
 			GetObject(hBM, sizeof(bm), (LPSTR)&bm);
 
 			DestroyDIB32(hDib32, FALSE);
@@ -1153,6 +1175,7 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 		DrawText(TransparentDC, title, -1, &textRect, DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
 		SelectObject(TransparentDC, OldFont);
 		SetBkMode(TransparentDC, OPAQUE);
+		SetLastError(0);
 		if (blt)
 		{
 			if (!BitBlt(hDC, rect.left, rect.top, w, h,
@@ -1177,19 +1200,19 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 				//	BitBlt(hDC,rect.left, rect.top, w, h,TransparentDC, rect.left, rect.top, SRCCOPY);
 				BitBlt(tempDC, 0, 0, w, h,
 					saveDC, 0, 0, SRCCOPY);
-				AlphaBlend(tempDC, 0, 0, w, h,
+				rtn = AlphaBlend(tempDC, 0, 0, w, h,
 					TransparentDC,
 					0, 0,
-					w, h,
+					bm.bmWidth, bm.bmHeight,
 					bf);
 				BitBlt(hDC, rect.left, rect.top, w, h,
 					tempDC, 0, 0, SRCCOPY);
 			}
 			else
-				AlphaBlend(hDC, rect.left, rect.top, w, h,
+				rtn = AlphaBlend(hDC, rect.left, rect.top, w, h,
 				TransparentDC,
 				0, 0,
-				w, h,
+				bm.bmWidth, bm.bmHeight,
 				bf);
 			/*{
 			int er = GetLastError();
@@ -1197,6 +1220,10 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 			GetSystemErrMessage(er, message);
 			rtn = FALSE;
 			}*/
+			if (rtn)
+				ii = 1;
+			else
+				ii = GetLastError();;
 			transParency += inc;
 			if (transParency >= 100)
 			{

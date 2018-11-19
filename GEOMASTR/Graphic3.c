@@ -1192,9 +1192,9 @@ GSSiExitProg (660);
 	}
 	ZoomToRect (Bounds,Imediate);
 */
-BOOL SetScaleAndMidpointFromBounds(LPVIEWPORT CurView)
+BOOL SetScaleAndMidpointFromBounds_x(LPVIEWPORT CurView)
 {
-	DPOINT		BoundsPoints[4], MidPoint, Point;
+	DPOINT		RectPoints[4], BoundsPoints[4], MidPoint, Point;
 	MNMXCORD	Bounds;
 	UINT		i;
 	DOUBLE		f;
@@ -1202,6 +1202,7 @@ BOOL SetScaleAndMidpointFromBounds(LPVIEWPORT CurView)
 
 	DBoundsInit(&Bounds);
 	BoundsToPoints(&CurView->NewBounds, BoundsPoints, 0);
+	RectToDPoints(&CurView->ScreenRect, RectPoints);
 
 	CurView->MidPointW = MinMaxMidPointD(&CurView->NewBounds);
 	for (i = 0; i<4; i++)
@@ -1214,13 +1215,15 @@ BOOL SetScaleAndMidpointFromBounds(LPVIEWPORT CurView)
 	rect.right = Bounds.xmx;
 	rect.bottom = Bounds.ymn;
 	f = AdjustRectToRectFactor(&CurView->ScreenRect,&rect);
+	CurView->Scale = max(ldistp(BoundsPoints[0], BoundsPoints[1]) / ldistp(RectPoints[0], RectPoints[1]),
+		ldistp(BoundsPoints[1], BoundsPoints[2]) / ldistp(RectPoints[1], RectPoints[2]));
 	CurView->Scale /= f;
 	CurView->LastWidth = CurView->ScreenRect.right - CurView->ScreenRect.left;
 	CurView->LastHeight = CurView->ScreenRect.bottom - CurView->ScreenRect.top;
 	return TRUE;
 }
 
-BOOL SetScaleAndMidpointFromBounds_old (LPVIEWPORT CurView)
+BOOL SetScaleAndMidpointFromBounds (LPVIEWPORT CurView)
 {
 	MNMXCORD	Bounds;
 	DPOINT	RectPoints[4], BoundsPoints[4];

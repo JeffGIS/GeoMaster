@@ -61,8 +61,8 @@
 #define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
     GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
 
-#define RECTWIDTH(lpRect)     abs(((lpRect)->right - (lpRect)->left))
-#define RECTHEIGHT(lpRect)    abs(((lpRect)->bottom - (lpRect)->top))
+#define RECTWIDTH(lpRect)     abs(((lpRect)->right - (lpRect)->left))+1
+#define RECTHEIGHT(lpRect)    abs(((lpRect)->bottom - (lpRect)->top))+1
 
 #define	OF_CREATE_NODELETE	0x1111      
 
@@ -383,6 +383,7 @@ BOOL SetGlobalFromTextBox (HWND hWndDlg,UINT Control,LPSTR VarName,BOOL ConvertR
 void SetVarChangeTimes (short opt);
 HANDLE GetOpenHandleFromID (LPSTR ID,int WantType);
 void CheckOpenDataFiles (void);
+BOOL GetDatabaseRecord(LPSTR DBID, LPSTR OutLoc);
 int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval);
 void SetDLGList (HWND hWndDlg,UINT dlgList);
 void SetUseOnlyOneDBHandle (HANDLE handle);

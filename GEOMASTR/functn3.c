@@ -6930,6 +6930,17 @@ HaveVP:;
 					ExpandText(startIn);
 					if (!*startIn)
 						pstartIn = NULL;
+					if (strstr(Arg[2], "/GMDoc"))
+					{
+						char gmdocEx[MAX_PATH];
+						LPSTR pDot;
+						strcpy(gmdocEx, modulePath);
+						pDot = strrchr(gmdocEx, '.');
+						strcpy(pDot, "_gmdoc.exe");
+						//if (!FileType(gmdocEx))
+							CopyFile(modulePath, gmdocEx,FALSE);
+						strcpy(modulePath, gmdocEx);
+					}
 					if(CreateProcess(modulePath,Arg[2], 
 										NULL,             // Process handle not inheritable. 
 										NULL,             // Thread handle not inheritable. 

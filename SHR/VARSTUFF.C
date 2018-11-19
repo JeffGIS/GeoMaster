@@ -8729,6 +8729,43 @@ short GetDlgListVal (LPSTR VarName,LPSTR Value)
 	return ln;
 }
 
+BOOL GetDatabaseRecord(LPSTR DBID, LPSTR OutLoc)
+{
+	BOOL rtn = FALSE;
+	int isql;
+	LPHANDLE	lpFileHandle;
+	LPFILEPATH  FilePathPtr;
+	LPOPENSQLDATA	SQLPtr;
+	LPSQLFIELD	lpSQLField;
+	char		IDName[34];
+	*OutLoc = 0;
+
+	if (FilePathHandle)
+	{
+		LPFILEPATH  FilePathPtr = (LPFILEPATH)GlobalLock(FilePathHandle);
+
+		isql = FilePathPtr->NumFiles;
+		while (isql--)
+		{
+			lpFileHandle = &FilePathPtr->FileHandle;
+			lpFileHandle += isql;
+			if (*lpFileHandle)
+			{
+				SQLPtr = (LPOPENSQLDATA)GlobalLock(*lpFileHandle);
+				if (!stricmp(IDName, SQLPtr->IDName) && *SQLPtr->myhandleC)
+				{
+					strcpy(IDName, SQLPtr->myhandleC);
+					GlobalUnlock(*lpFileHandle);
+					break;
+				}
+				GlobalUnlock(*lpFileHandle);
+			}
+		}
+		GlobalUnlock(FilePathHandle);
+	}
+
+	return rtn;
+}
 int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 #if ENABLETRACE
 {GSSiEnterProg (578);

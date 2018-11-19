@@ -1622,7 +1622,7 @@ GSSiExitProg (1350);
 				else if (!stricmp(Arg[1], "NAME"))
 					strcpy(OutLoc, name);
 				else if (!stricmp(Arg[1], "NAMEEXT"))
-					sprintf(OutLoc, "%s.%s", name,ext);
+					sprintf(OutLoc, "%s.%s", name, ext);
 				else if (!stricmp(Arg[1], "EXT"))
 					strcpy(OutLoc, ext);
 				else if (!stricmp(Arg[1], "WOEXT"))
@@ -1661,8 +1661,15 @@ GSSiExitProg (1350);
 		case 853://$DATABASE()
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-			GetFGDBTable(hWndMain, Arg[1]);
-			strcpy(OutLoc, Arg[1]);
+			if (!stricmp(Arg[1], "RECORD"))//$DATABASE(RECORD,DBID) outputs record in text format
+			{
+				GetDatabaseRecord(Arg[2], OutLoc);
+			}
+			else
+			{
+				GetFGDBTable(hWndMain, Arg[1]);
+				strcpy(OutLoc, Arg[1]);
+			}
 			goto Rtnl;
 		}
 		case 854://$GMMOBILE(DUPREFS)
@@ -6187,7 +6194,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		strcpy(stepType, Arg[1]);
 		sprintf(ParmFile, "%s\\%li_%s.txt", DocDir, t, stepType);
 		fid = GSSiOpenFile(ParmFile, 0, OF_CREATE);
-		if (!stricmp(Arg[1], "CAPSCREEN"))
+		if (!stricmp(Arg[1], "CAPWINDOW"))
 		{
 			char capScreenFile[MAX_PATH];
 
@@ -6201,7 +6208,31 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			DeleteObject(hBitmap);
 			ReleaseDC(hWnd, hDC);
 			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
-			rtn = GM32SaveDIB(hDib24, capScreenFile,-1,0);
+			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
+			sprintf(line, "CAPWINDOW");
+			fputstring(line, fid);
+			sprintf(line, "%i.png", systim);
+			fputstring(line, fid);
+			recttoa(line, ScreenRect);
+			fputstring(line, fid);
+			FreeImage_Unload(hDib24);
+			FreeImage_Unload(hDib32);
+			rtn = TRUE;
+		}
+		if (!stricmp(Arg[1], "CAPSCREEN"))
+		{
+			char capScreenFile[MAX_PATH];
+
+			sprintf(capScreenFile, "%s\\%i.png", DocDir, systim);
+			ExpandText(capScreenFile);
+			hDC = GetWindowDC(hWnd);
+			GetClientRect(hWnd, &ScreenRect);
+			hBitmap = SaveScreen(hDC, ScreenRect);
+			hDib32 = BitmapToDIB32(hBitmap);
+			DeleteObject(hBitmap);
+			ReleaseDC(hWnd, hDC);
+			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPSCREEN");
 			fputstring(line, fid);
 			sprintf(line, "%i.png", systim);

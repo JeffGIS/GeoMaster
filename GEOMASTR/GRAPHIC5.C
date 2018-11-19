@@ -5720,6 +5720,7 @@ void ProcessZoomMacroFile(HDC hDC)
 	Fid=GSSiOpenFile(CurView->VisName,0,OF_READ);
 	if (Fid==HFILE_ERROR)
 		goto Exit;   
+	AddToMacroStack(2, 0, CurView->VisName, 0, 0);
 	ProcessZoomMacroFile2 (hDC,Fid);
 	GSSiClose (Fid);
 Exit: 
