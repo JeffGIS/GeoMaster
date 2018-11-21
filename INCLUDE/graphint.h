@@ -1361,7 +1361,7 @@ double CvtDist (double Dist,short FromUnits,short ToUnits);
 BOOL AddTurnData (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
 BOOL OrthoFilterFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function);
 BOOL AdjustBitmapColors (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function);
-BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, int width, LPRECT pBounds, LPCOLORREF pNewColor, LPCOLORREF pTranColor);
+BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT tiePointVP,LPPOINT ptiePointBM, int width, LPRECT pBounds, LPCOLORREF pNewColor, LPCOLORREF pTranColor);
 BOOL DisplayTransparentBitmapInRect(HDC hDC, HDIB32 hDib, LPRECT pRect, BOOL MaintainAspect);
 long GetPickItemPoints (short item, BOOL Reverse, HPDPOINT *pPoints);
 HANDLE	GetConnectedItems (BOOL Closed, LPINT pNumPoints);

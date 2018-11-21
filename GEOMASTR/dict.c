@@ -1117,7 +1117,7 @@ HDIB32 ChangeBitmapColor (HDIB32 hDib,RGBTRIPLE *pNewColor)
 	return hDibNewColor;
 }
 
-BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, int width, LPRECT pBounds, LPCOLORREF pNewColor, LPCOLORREF pTranColor)
+BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, LPPOINT ptiePointBM,int width, LPRECT pBounds, LPCOLORREF pNewColor, LPCOLORREF pTranColor)
 {
 	HBITMAP hBMMask, hBMColor, hBMOld;
 	BITMAP	bm;
@@ -1179,8 +1179,16 @@ BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, int width, LPR
 		width = bm.bmWidth;
 	destw = width;
 	desth = (width * bm.bmHeight)/bm.bmWidth;
-	destx = Point.x - destw/2;
-	desty = Point.y - desth/2;
+	if (ptiePointBM)
+	{
+		destx = Point.x - ptiePointBM->x;
+		desty = Point.y - ptiePointBM->y;
+	}
+	else
+	{
+		destx = Point.x -destw / 2;
+		desty = Point.y -desth / 2;
+	}
 	if (pBounds)
 	{
 		POINT p;
@@ -1550,9 +1558,9 @@ Next:
 		if ((hDib = GetSymbolImage (lpSym->Name)))
 		{
 			if (lpSym->BaseScale == 15)
-				DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,pBounds,0,0);
+				DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,0,pBounds,0,0);
 			else
-				DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,IDNINT(Hsize*lpSym->HSize),pBounds,0,0);
+				DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,IDNINT(Hsize*lpSym->HSize),pBounds,0,0);
 			DestroyDIB32(hDib, FALSE);
 		}
 	}
@@ -1729,9 +1737,9 @@ Next:
 							else
 							{
 								if (pElement->FillColorType == SVVARCOLOR && HaveVarFillColor)
-									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,&GlobalColors[0],0);
+									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,&GlobalColors[0],0);
 								else
-									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,0,0);
+									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,0,0);
 							}
 							DestroyDIB32(hDib,FALSE);
 						}

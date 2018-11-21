@@ -6169,7 +6169,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	HBITMAP	hBitmap;
 	HDIB32 hDib32;
 	HDIB32 hDib24;
-	RECT	ScreenRect;
+	RECT	ScreenRect, WindowRect;
 	HWND	hWnd = GetDesktopWindow();
 	HWND	hWndTarget = GetTargetWindow();
 	HDC		hDC;
@@ -6180,7 +6180,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 	HFILE	fid;
 
 	time(&systim);
-	sprintf(DocDir, "[%%DL]GMDocumenter\\%s", Arg[2]);
+	sprintf(DocDir, "[%%DL]GMDocumenter\\%s", Arg[3]);
 	ExpandText(DocDir);
 
 	if (!stricmp(Arg[1], "CLEAR"))
@@ -6201,8 +6201,10 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			sprintf(capScreenFile, "%s\\%i.png", DocDir, systim);
 			ExpandText(capScreenFile);
 			hDC = GetWindowDC(hWnd);
+			GetWindowRect(hWndTarget,&WindowRect);
 			GetClientRect(hWndTarget, &ScreenRect);
 			ClientRectToScreenRect(hWndTarget, &ScreenRect);
+			ScreenRect.top -= ScreenRect.top / 2;
 			hBitmap = SaveScreen(hDC, ScreenRect);
 			hDib32 = BitmapToDIB32(hBitmap);
 			DeleteObject(hBitmap);
@@ -6300,7 +6302,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			itoa(iCursor, line, 10);
 			fputstring(line, fid);
-			fputstring("rightclick_454_152.png", fid);
+			fputstring("rightclicking_140_116.png", fid);
 			rtn = iCursor;
 		}
 		if (!stricmp(Arg[1], "CAPLEFTCLICK"))
@@ -6321,10 +6323,47 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			itoa(iCursor, line, 10);
 			fputstring(line, fid);
-			fputstring("LeftClick_177_43.png", fid);
+			fputstring("LeftClicking_483_36.png", fid);
 			rtn = iCursor;
 		}
-		if (!strnicmp(Arg[1], "CAPKEYSTROKE",12))
+		if (!stricmp(Arg[1], "CAPPOINTER"))
+		{
+			POINT pt;
+			CURSORINFO cursInfo;
+			ICONINFOEX iconInfo;
+			int iCursor;
+			int which = atoi(Arg[2]);
+
+			GetCursorPos(&pt);
+			cursInfo.cbSize = sizeof(CURSORINFO);
+			iconInfo.cbSize = sizeof(ICONINFOEX);
+			GetCursorInfo(&cursInfo);
+			iCursor = WhichCursor(cursInfo.hCursor);
+			sprintf(line, "CAPPOINTER");
+			fputstring(line, fid);
+			pttoa(line, pt);
+			fputstring(line, fid);
+			itoa(iCursor, line, 10);
+			fputstring(line, fid);
+			switch (which)
+			{
+			default:
+			case 1:
+				fputstring("Pointer_136_3.png", fid);
+				break;
+			case 2:
+				fputstring("Pointer_3_2.png", fid);
+				break;
+			case 3:
+				fputstring("Pointer_4_134.png", fid);
+				break;
+			case 4:
+				fputstring("Pointer_135_135.png", fid);
+				break;
+			}
+			rtn = iCursor;
+		}
+		if (!strnicmp(Arg[1], "CAPKEYSTROKE", 12))
 		{
 			POINT pt;
 			CURSORINFO cursInfo;
