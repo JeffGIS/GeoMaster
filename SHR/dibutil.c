@@ -2004,8 +2004,8 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
     { 
         destX = (int)Rect.left;
         destY = (int)Rect.top;
-        destW = (int)(Rect.right - Rect.left + 1);
-        destH = (int)(Rect.bottom - Rect.top + 1);
+        destW = (int)(Rect.right - Rect.left);
+        destH = (int)(Rect.bottom - Rect.top);
     }
     SetStretchBltMode(hDC, StretchMode); 
 /*    if (pDibInfo->biClrUsed)

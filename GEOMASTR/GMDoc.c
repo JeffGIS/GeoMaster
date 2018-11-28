@@ -45,7 +45,7 @@ void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs);
 INT_PTR CALLBACK	AboutGMDoc(HWND, UINT, WPARAM, LPARAM);
 ATOM MyRegisterClassGMDoc(HINSTANCE hInstance);
 LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-void DisplayDocImage(LPSTR ImagePath, RECT rect, POINT tiePoint,int Fade, BOOL Transparent, COLORREF TranColor);
+void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen,POINT tiePoint,int Fade, BOOL Transparent, COLORREF TranColor);
 
 // Message handler for about box.
 INT_PTR CALLBACK AboutGMDoc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -276,12 +276,14 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	int		defaultFadeIn = 30;
 
 	int		icursor=0;
-	BOOL	first = TRUE;
+	static BOOL	first = TRUE;
 	static RECT OriginalRect;
 	RECT	CurrentRect;
 	static	HANDLE hTran = 0;
 	static  int YDiff;
 	POINT	tiePoint = { 0, 0 };
+	char type[128];
+	static int  windowOrScreen = 1;
 
 	if (!productionMode)
 		defaultFadeIn = 0;
@@ -307,6 +309,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	strcat(itemFile, itemName);
 	fidItem = GSSiOpenFile(itemFile, 0, OF_READ);
 	fgetstring(line, 1022, fidItem);
+	strcpy(type, line);
 	if (!stricmp(line, "CAPSCREEN") || !stricmp(line, "CAPWINDOW"))
 	{
 		RECT ImageRect;
@@ -352,24 +355,30 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		KillTimer(hWnd, 1);
 		if (first)
 		{
+			CloseTRANS2(&hTran);
 			OriginalRect = ImageRect;
-			GetClientRect(hWnd, &CurrentRect);
+			if (!stricmp(type, "CAPWINDOW"))
+			{
+				GetClientRect(hWnd, &CurrentRect);
+				windowOrScreen = 1;
+			}
+			else
+			{
+				HWND hWndDeskTop = GetDesktopWindow();
+				GetWindowRect(hWndDeskTop, &CurrentRect);
+				windowOrScreen = 2;
+			}
 			YDiff = OriginalRect.top;;
 			//CurrentRect.top -= OriginalRect.top;
 			OriginalRect.bottom -= OriginalRect.top;
 			OriginalRect.top = 0;
 			hTran = STRANRect(&OriginalRect, &CurrentRect);
-			first = FALSE;
+			//first = FALSE;
 		}
 		ImageRect.top -= YDiff;
 		ImageRect.bottom -= YDiff;
 		TRANRect(&ImageRect,hTran);
-		DisplayDocImage(imagePath, ImageRect, tiePoint,fadeIn, transparent, tranColor);
-		HDC hDC = GetDC(hWndMain);
-
-		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
-		ReleaseDC(hWndMain, hDC);
-
+		DisplayDocImage(imagePath, ImageRect, windowOrScreen, tiePoint, fadeIn, transparent, tranColor);
 		timerValue = delay * 1000;
 		if (!inManualMode)
 			SetTimer(hWnd, 1, timerValue, 0);
@@ -422,7 +431,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		ExpandText(line);
 		tranColor = atoi(line);
 		KillTimer(hWnd, 1);
-		DisplayDocImage(imagePath, ImageRect, tiePoint, fadeIn, transparent, tranColor);
+		DisplayDocImage(imagePath, ImageRect, windowOrScreen,tiePoint, fadeIn, transparent, tranColor);
 		HDC hDC = GetDC(hWndMain);
 
 		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
@@ -505,7 +514,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		ExpandText(line);
 		tranColor = atoi(line);
 		KillTimer(hWnd, 1);
-		DisplayDocImage(imagePath, ImageRect, tiePoint, fadeIn, transparent, tranColor);
+		DisplayDocImage(imagePath, ImageRect, windowOrScreen, tiePoint, fadeIn, transparent, tranColor);
 		HDC hDC = GetDC(hWndMain);
 
 		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
@@ -526,6 +535,8 @@ BOOL ProcessGMDocItem(HWND hWnd)
 
 		fgetstring(line, 64, fidItem);
 		ImageRect = atorect(line, &Err);
+		fgetstring(line, 64, fidItem);
+		icursor = atoi(line);
 		fgetstring(imageName, 32, fidItem);
 		{
 			LPSTR pEnd;
@@ -581,7 +592,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		ExpandText(line);
 		tranColor = atoi(line);
 		KillTimer(hWnd, 1);
-		DisplayDocImage(imagePath, ImageRect, tiePoint, fadeIn, transparent, tranColor);
+		DisplayDocImage(imagePath, ImageRect, windowOrScreen, tiePoint, fadeIn, transparent, tranColor);
 		HDC hDC = GetDC(hWndMain);
 
 		//FrameRect(hDC, &ImageRect, GetStockObject(BLACK_BRUSH));
@@ -750,10 +761,30 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			DocPos = 0;
 			InvalidateRect(hWnd, 0, TRUE);
 			break;
+		case 'l':
+		case 'L':
+		{
+			char txt[1024];
+			HFILE fid = GSSiOpenFile(GMDocFile, 0, OF_READ);
+			int n = 0;
+			while (fgetstring(txt, 1022, fid))
+				n++;
+			GSSiClose(fid);
+			DocPos = n;
+			InvalidateRect(hWnd, 0, TRUE);
+		}
+			break;
 		case 'e':
 		{
 			char cmd[512];
 			sprintf(cmd, "$EDITFILE(%s)", itemFile);
+			ProcessText(cmd);
+		}
+			break;
+		case 'E':
+		{
+			char cmd[512];
+			sprintf(cmd, "$EDITFILE(%s)", GMDocFile);
 			ProcessText(cmd);
 		}
 			break;
@@ -1009,11 +1040,17 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 }
 
-void DisplayDocImage(LPSTR ImagePath, RECT rect, POINT tiePointBM,int fade, BOOL Transparent,COLORREF TranColor)
+void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen, POINT tiePointBM, int fade, BOOL Transparent, COLORREF TranColor)
 {
+	HWND hWnd = hWndMain;
+	HDC hDC;
+	
+	if (windowOrScreen == 2)
+		hWnd = GetDesktopWindow();
+
+	hDC = GetDC(hWnd);
 	if (Transparent)
 	{
-		HDC hDC = GetDC(hWndMain);
 		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
 		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
 		POINT tiePointVP = { rect.left , rect.top};
@@ -1021,14 +1058,11 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, POINT tiePointBM,int fade, BOOL
 		//DisplayTransparentBitmapInRect(hDC, hDib32, &rect, TRUE);
 		DestroyDIB32(hDib24, FALSE);
 		DestroyDIB32(hDib32, FALSE);
-		ReleaseDC(hWndMain, hDC);
 	}
 	else if (!fade)
 	{
-		HDC hDC = GetDC(hWndMain);
 
 		DisplayBMFileInRect(hDC, ImagePath, rect, FALSE);
-		ReleaseDC(hWndMain, hDC);
 	}
 	else
 	{
@@ -1048,6 +1082,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, POINT tiePointBM,int fade, BOOL
 			MergeDocImageIntoViewport(hBM, &rect, "", 0);
 		}
 	}
+	ReleaseDC(hWndMain, hDC);
 }
 
 
