@@ -1797,6 +1797,7 @@ extern	int		GoogleZoom;
 extern  int		GoogleMapWidth, GoogleMapHeight;
 extern  int		GoogleMapType;
 extern  BOOL	AllAreasArePositive;
+extern	BOOL	useTextFileSQLiteIndex;
 extern	char	CurrentZoomList[MAX_PATH];
 extern	char	CurrentZoomListEntry[256];
 

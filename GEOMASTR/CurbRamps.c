@@ -8,9 +8,10 @@
 static sqlite3 *database = NULL;
 
 int getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt);
-void convertVersion(LPSTR str, int fromVer, int toVer);
+void convertVersion(LPSTR str, int fromVer, int toVer,LPSTR fileID);
 void convertVersion_1_to_2(LPSTR str);
 void convertVersion_2_to_3(LPSTR str);
+void convertVersion_3_to_4(LPSTR str, LPSTR fileID);
 BOOL createIntersectionsTable(BOOL dropExistingTables);
 
 static BOOL Execute(LPSTR cmd,LPSTR errFile);
@@ -1341,8 +1342,8 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 		{
 			line++;
 			if (!dbType)
-				convertVersion(str, fromVer, toVer);
-			if (insertFileID)
+				convertVersion(str, fromVer, toVer,fileID);
+			if (insertFileID && toVer < 4)
 			{
 				if (!strnicmp(str, searchFor, lenSearch))
 				{
@@ -1394,7 +1395,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 	return rtn;
 }
 
-void convertVersion(LPSTR str, int fromVer, int toVer)
+void convertVersion(LPSTR str, int fromVer, int toVer,LPSTR fileID)
 {
 	int version = fromVer;
 
@@ -1407,6 +1408,9 @@ void convertVersion(LPSTR str, int fromVer, int toVer)
 			break;
 		case 2:
 			convertVersion_2_to_3(str);
+			break;
+		case 3:
+			convertVersion_3_to_4(str,fileID);
 			break;
 		}
 	}
@@ -1429,6 +1433,24 @@ void convertVersion_2_to_3(LPSTR str)
 	{
 		LPSTR pEnd = strrchr(ploc, ')');
 		sprintf(pEnd, ",0,0);");
+	}
+}
+
+void convertVersion_3_to_4(LPSTR str,LPSTR fileID)
+{
+	char searchStr[] = "INSERT OR REPLACE INTO Ramps VALUES(";
+	LPSTR ploc = strstr(str,searchStr);
+	if (ploc)
+	{
+		LPSTR pid = ploc + strlen(searchStr);
+		LPSTR prn = strchr(pid, ',');
+		if (prn)
+		{
+			int rampNum = atoi(++prn);
+			int cornerID = getMiddleRampIDFromRampID(rampNum);
+			LPSTR pEnd = strrchr(ploc, ')');
+			sprintf(pEnd, ",'%s',%i,0);", fileID, cornerID);
+		}
 	}
 }
 
@@ -1754,7 +1776,7 @@ detectableWidth INT,\
 detectableDepth INT,\
 FromFileID CHAR(12),\
 CornerID INT,\
-Retired INT, PRIMARY KEY (intID,rampNum ASC));";
+Retired INT, PRIMARY KEY (intID,rampNum,Retired ASC));";
 rtn = executeCmd(createcmd2);
 
 char createcmd3[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_PICTURES ('id' INTEGER PRIMARY KEY,'iPadNum' INT,'pictNum' INT,'intID' INT,'rampNum' INT, 'type' INT, 'heading' INT, 'latitude' REAL, 'longitude' REAL, 'time' INT)";

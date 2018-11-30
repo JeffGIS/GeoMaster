@@ -1667,6 +1667,7 @@ int		GoogleZoom = 21;
 int		GoogleMapType=1;
 int		GoogleMapWidth=640, GoogleMapHeight=640;
 BOOL	AllAreasArePositive = TRUE;
+BOOL	useTextFileSQLiteIndex = FALSE;
 char	CurrentZoomList[MAX_PATH] = { 0 };
 char	CurrentZoomListEntry[256] = { 0 };
 int		ii;

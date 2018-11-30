@@ -4056,10 +4056,10 @@ BOOL CreateTextIndexTable(sqlite3 *db, LPSTR pIndexName, LPOPENFILEDATA FilePtr)
 				RemoveQuotes(Value);
 				*quote = Quotes[i];
 				sprintf(strchr(pCmd, 0), "%s%s%s", quote, Value, quote);
-				GlobalUnlock(*DLTVar);
-				GlobalUnlock(FilePtr->FileHandle);
+				GlobalUnlock(DLTVar[nameIndex[i]]);
 			}
-			sprintf (strchr(pCmd,0), ",%i);", Offset);
+			GlobalUnlock(FilePtr->FileHandle);
+			sprintf(strchr(pCmd, 0), ",%i);", Offset);
 			SLT_Execute(pCmd, db);
 		}
 	}

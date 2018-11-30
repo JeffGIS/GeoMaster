@@ -4657,6 +4657,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
 			//$NVCRIS(OPEN,path,createifnotexists,varname)
+			//$NVCRIS(CLOSE,handle)
 			//$NVCRIS(RAMPOFFSETCOORD,intPoint21,rampPoint21)
 			//$NVCRIS(FIXRAMPNUM,rampnum)
 			//$NVCRIS(PRINTRAMP,FromDB,intnum,rampnum)

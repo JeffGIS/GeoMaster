@@ -1365,7 +1365,7 @@ ProcessSQL:
 				}
 			}
 		}
-		if (*pIndexFields)
+		if (*pIndexFields && useTextFileSQLiteIndex)
 		{
 			LPSTR pIndexFilePath = malloc(MAX_PATH + 8);
 			strcpy(pIndexFilePath, Name);
@@ -3592,6 +3592,9 @@ GSSiExitProg (532);
 		case 394:
 			adjustIntensity = atof(Value);
 			break;
+		case 395:
+			useTextFileSQLiteIndex = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -4005,6 +4008,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%MINTIMERANGEBEGIN", 392, FALSE);
 	AllocateTypeVar("%IS64BIT", 393, FALSE);
 	AllocateTypeVar("%ADJUSTINTENSITY", 394, FALSE);
+	AllocateTypeVar("%USETEXTFILEINDEX", 395, FALSE);
+
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5197,6 +5202,9 @@ GSSiExitProg (533);
 			break;
 		case 394:
 			ftoa(OutStr,adjustIntensity);
+			break;
+		case 395:
+			btoa(useTextFileSQLiteIndex, OutStr);
 			break;
 	}
 	GlobalUnlock (hGlobal);
