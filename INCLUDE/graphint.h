@@ -2474,6 +2474,7 @@ int getRampOffsetCoord(POINT ramp21, POINT int21);
 BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
 BOOL NVCreateDB(LPSTR path, BOOL Delete);
+BOOL NVCopyDB(LPSTR fromPath, LPSTR toPath);
 int NVCloseDB(long handle);
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle);
 int FormatStreets (LPSTR from, LPSTR text);

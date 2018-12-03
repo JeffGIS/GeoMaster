@@ -1581,9 +1581,50 @@ BOOL adjustToLatestVersion(void)
 	return rtn;
 }
 
+BOOL NVCopyDB(LPSTR fromPath, LPSTR toPath)
+{
+	BOOL rc,rtn = FALSE;
+	sqlite3 *database = NULL;
+	char cmd[512];
+
+
+	rc = sqlite3_open(fromPath, &database);
+	if (!rc)
+	{
+		sprintf(cmd, "ATTACH DATABASE '%s' AS new_db;", toPath);
+		rc = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+		if (rc)
+		{
+			sprintf(cmd, "INSERT INTO new_db.CURBRAMP_NOTES SELECT * FROM CURBRAMP_NOTES;");
+			rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+			sprintf(cmd, "INSERT INTO new_db.CURBRAMP_PICTURES SELECT * FROM CURBRAMP_PICTURES;");
+			if (rtn)
+				rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+			sprintf(cmd, "INSERT INTO new_db.CURBRAMP_STANDARD_TEXT SELECT * FROM CURBRAMP_STANDARD_TEXT;");
+			if (rtn)
+				rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+			sprintf(cmd, "INSERT INTO new_db.CURBRAMP_UPDATES SELECT * FROM CURBRAMP_UPDATES;");
+			if (rtn)
+				rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+			sprintf(cmd, "INSERT INTO new_db.Intersections SELECT * FROM Intersections;");
+			if (rtn)
+				rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+			sprintf(cmd, "INSERT INTO new_db.RAMPS SELECT * FROM RAMPS;");
+			if (rtn)
+				rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+			sprintf(cmd, "INSERT INTO new_db.PriorityLocations SELECT * FROM PriorityLocations;");
+			if (rtn)
+				rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+		}
+		rc = sqlite3_close(database);
+	}
+	return rtn;
+}
+
 BOOL NVCreateDB(LPSTR path,BOOL Delete)
 {
 	BOOL rc;
+	BOOL rtn = FALSE;
 	
 	int type = FileType(path);
 
@@ -1599,9 +1640,10 @@ BOOL NVCreateDB(LPSTR path,BOOL Delete)
 	}
 
 	rc = sqlite3_open(path, &database);
-	createIntersectionsTable(TRUE);
+	if (!rc)
+		rtn = createIntersectionsTable(TRUE);
 	rc = sqlite3_close(database);
-	return rc;
+	return rtn;
 }
 
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle)

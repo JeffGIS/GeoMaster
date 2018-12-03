@@ -4723,6 +4723,16 @@ GotCloseFilehSQL:
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "COPYDATABASE"))//$NVCRIS(COPYDATABASE,fromdb,todb
+			{
+				rtn = NVCreateDB(Arg[3],TRUE);
+				if (rtn)
+				{
+					rtn = NVCopyDB(Arg[2], Arg[3]);
+				}
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[1], "OPEN"))
 			{
 				rtn = NVOpenDB(Arg[2], atob(Arg[3]), Arg[4]);
