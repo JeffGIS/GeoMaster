@@ -2320,6 +2320,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 	{
 		DOCINFO	DI;
 		int ifontsize;
+		int altIntNum;
 
 		hPr = lpPDChunk->hDC;
 		gbUserAbort = FALSE;
@@ -2384,7 +2385,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 			StartPage(hPr);
 
 			Rect.top += RECTHEIGHT(&Rect) * 1.0 / 100.0;
-			GetIntersectionStreetNames(fromDB, intersectionID, StreetNames);
+			GetIntersectionStreetNames(fromDB, intersectionID, StreetNames,&altIntNum);
 			char title[256]="";
 			char rampID[64];
 			RampIDFromRampNum(rampNum, rampID);

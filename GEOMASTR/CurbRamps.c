@@ -13,10 +13,14 @@ void convertVersion_1_to_2(LPSTR str);
 void convertVersion_2_to_3(LPSTR str);
 void convertVersion_3_to_4(LPSTR str, LPSTR fileID);
 BOOL createIntersectionsTable(BOOL dropExistingTables);
+int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement);
 
 static BOOL Execute(LPSTR cmd,LPSTR errFile);
 BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors,int checkPointOpt);
 
+typedef struct {
+	int intID, rampNum, retired;
+} RAMPID;
 
 /*int getOffsetCoord:(MPIntersection *)mpint
 x : (int)x
@@ -655,7 +659,7 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 	return rtn;
 }
 
-BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc)
+BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc,LPINT pAltIntNum)
 {
 	BOOL rtn = FALSE;
 	int rc = SQLITE_OK;
@@ -670,6 +674,10 @@ BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc)
 		if (rtn)
 			strcpy(OutLoc, pmpInt->name);
 		free(pmpInt);
+		if (pAltIntNum)
+		{
+			*pAltIntNum = GetAlternateIntersectionNum(intnum);
+		}
 		if (*NVCRISDataBase)
 			sqlite3_close(database);
 	}
@@ -726,6 +734,106 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 				rtn = TRUE;
 			}
 			GSSiClose(FidList);
+		}
+		rc = sqlite3_close(database);
+
+	}
+	return rtn;
+}
+int getAllRampIDs (LPSTR OutFile)
+{
+	int nRamps = 0;
+	MPINTERSECTION mpint;
+	sqlite3_stmt *statement = NULL;
+	LPSTR query = malloc(4096);
+	RAMPID rampID;
+
+	HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (FidOut != HFILE_ERROR)
+	{
+		sprintf(query, "SELECT intID,rampNum,Retired FROM Ramps WHERE rampExists > 0");
+
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			rampID.intID = sqlite3_column_int(statement, 0);
+			rampID.rampNum = sqlite3_column_int(statement, 1);
+			rampID.retired = sqlite3_column_int(statement, 2);
+			BigWrite(FidOut, &rampID, sizeof(RAMPID), -1);
+			nRamps++;
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+		GSSiClose(FidOut);
+	}
+	free(query);
+
+	return nRamps;
+}
+BOOL getRampFromDB(RAMPID * pRampID, RampStruct * pRamp)
+{
+	BOOL rtn = FALSE;
+	char query[1024];
+	sqlite3_stmt *statement = NULL;
+
+	sprintf(query, "SELECT rowid,* FROM Ramps WHERE intID=%i AND rampNum = %i AND retired = %i", pRampID->intID, pRampID->rampNum,pRampID->retired);
+	SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		int rampNum = GetRampData(pRamp, statement);
+		rtn = TRUE;
+	}
+	SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+
+	return rtn;
+}
+BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+{
+	BOOL rtn = FALSE;
+	char line[4096 * 2];
+	int rc;
+	ToleranceValues tolerances;
+	setStandardToleranceValues(&tolerances);
+
+	rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (FidOut != HFILE_ERROR)
+		{
+			char tempRampIDs[MAX_PATH];
+			GSSiGetTempFileName(0, "gmc", 0, tempRampIDs);
+
+			int nRamps = getAllRampIDs(tempRampIDs);
+			HFILE FidList = GSSiOpenFile(tempRampIDs, 0, OF_READ);
+			if (FidList != HFILE_ERROR)
+			{
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				fputstring(rampHeader, FidOut);
+				RAMPID rampID;
+				while (BigRead(FidList, &rampID, sizeof(RAMPID)))
+				{
+					RampStruct ramp = { 0 };
+					RampStruct * pRamp = &ramp;
+					if (getRampFromDB(&rampID,pRamp))
+					{
+						if (pRamp->rampExists)
+						{
+							LPSTR detailCode;
+							LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+							LPSTR rampText = rampToText(rampID.intID, pRamp);
+							sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+							fputstring(line, FidOut);
+							free(ccode);
+							free(detailCode);
+							free(rampText);
+						}
+					}
+				}
+				GSSiClose(FidList);
+			}
+			GSSiClose(FidOut);
+			rtn = TRUE;
 		}
 		rc = sqlite3_close(database);
 
@@ -1133,102 +1241,12 @@ int getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
 		while (sqlite3_step(statement) == SQLITE_ROW)
 		{
+			RampStruct ramp = { 0 };
 			if (nRamps == -1)
 				nRamps = 0;
-			int i = 0;
-			int uniqueID = sqlite3_column_int(statement, i++);
-			int intersectionID = sqlite3_column_int(statement, i++);
-			int rampNum = sqlite3_column_int(statement, i++);
-			rampNum = fixRampNum(rampNum);
-			RampStruct ramp = { 0 };
-
-			ramp.uniqueID = uniqueID;
-
-			ramp.rampNum = rampNum;
-			LPSTR rampID = (LPSTR)sqlite3_column_text(statement, i++);
-			strncpy0(ramp.rampID, rampID,sizeof(ramp.rampID)-1);
-			Strip(ramp.rampID, ' ');
-			ramp.yearRebuilt = sqlite3_column_int(statement, i++);
-			ramp.timeComplete = sqlite3_column_int(statement, i++);
-			ramp.rampExists = sqlite3_column_int(statement, i++);
-			ramp.isComplete = sqlite3_column_int(statement, i++);
-			ramp.approximateHeading = sqlite3_column_double(statement, i++);
-			ramp.adjustedRot = sqlite3_column_int(statement, i++);
-			ramp.rampInXWalk = sqlite3_column_int(statement, i++);
-			ramp.xWalkisComplete = sqlite3_column_int(statement, i++);
-			ramp.signalisComplete = sqlite3_column_int(statement, i++);
-			ramp.texture = sqlite3_column_int(statement, i++);
-			ramp.upperLandingObstruction = sqlite3_column_int(statement, i++);
-			ramp.lowerLandingObstruction = sqlite3_column_int(statement, i++);
-			ramp.rampObstruction = sqlite3_column_int(statement, i++);
-			ramp.hasRampCracks = sqlite3_column_int(statement, i++);
-			ramp.hasUpperLandingCracks = sqlite3_column_int(statement, i++);
-			ramp.hasStreetLandingCracks = sqlite3_column_int(statement, i++);
-			ramp.rampWidth = sqlite3_column_int(statement, i++);
-			ramp.rampDepth = sqlite3_column_int(statement, i++);
-			ramp.rampSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.rampSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.rampSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.upperLandingSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.upperLandingSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.upperLandingSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.streetLandingSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.streetLandingSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.streetLandingSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.flareLeftSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.flareLeftSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.flareLeftSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.flareRightSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.flareRightSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.flareRightSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.swkLeftSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.swkLeftSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.swkLeftSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.swkRightSlopeFront = sqlite3_column_double(statement, i++);
-			ramp.swkRightSlopeSide = sqlite3_column_double(statement, i++);
-			ramp.swkRightSlopeHeading = sqlite3_column_double(statement, i++);
-			ramp.PEDSignalType = sqlite3_column_int(statement, i++);
-			ramp.PEDButtonType = sqlite3_column_int(statement, i++);
-			ramp.PEDButtonHeight = sqlite3_column_int(statement, i++);
-			ramp.PEDButtonDist = sqlite3_column_int(statement, i++);
-			ramp.SteepTopOfCurb = sqlite3_column_double(statement, i++);
-			ramp.PedRampLip = sqlite3_column_double(statement, i++);
-			ramp.lev21x = sqlite3_column_int(statement, i++);
-			ramp.lev21y = sqlite3_column_int(statement, i++);
-			PixelXYToLatLong(ramp.lev21x, ramp.lev21y, 21, &ramp.latitude, &ramp.longitude);
-			ramp.rampType = sqlite3_column_int(statement, i++);
-			LPSTR comment = (LPSTR)sqlite3_column_text(statement, i++);
-			if (comment && *comment)
-				strcpy(ramp.rampComment, comment);
-			else
-				getCornerComment (intID,rampNum,ramp.rampComment);
-			ramp.awi = sqlite3_column_int(statement, i++);
-			ramp.hasLocatorTone = sqlite3_column_int(statement, i++);
-			ramp.hasInfoSign = sqlite3_column_int(statement, i++);
-			ramp.hasBraille = sqlite3_column_int(statement, i++);
-			ramp.hasTactileArrow = sqlite3_column_int(statement, i++);
-			ramp.locatorToneVolume = sqlite3_column_int(statement, i++);
-			ramp.audibleWalkIndicationVolume = sqlite3_column_int(statement, i++);
-			CrackWidth cw;
-			cw.rampCrackWidth = sqlite3_column_double(statement, i++);
-			cw.upperLandingCrackWidth = sqlite3_column_double(statement, i++);
-			cw.streetLandingCrackWidth = sqlite3_column_double(statement, i++);
-			cw.leftSidewalkCrackWidth = sqlite3_column_double(statement, i++);
-			cw.rightSidewalkCrackWidth = sqlite3_column_double(statement, i++);
-			ramp.crackWidth = cw;
-			ramp.curbCutDistance = sqlite3_column_double(statement, i++);
-			ramp.bumpWidth = sqlite3_column_double(statement, i++);
-			ramp.bumpHeight = sqlite3_column_double(statement, i++);
-			ramp.dwWidth = sqlite3_column_double(statement, i++);
-			ramp.dwDepth = sqlite3_column_double(statement, i++);
-			LPSTR fileID = (LPSTR)sqlite3_column_text(statement, i++);
-			if (fileID)
-				strncpy0(ramp.fileID, fileID, sizeof(ramp.fileID) - 1);
-			ramp.cornerID = sqlite3_column_int(statement, i++);
-			ramp.retired = sqlite3_column_int(statement, i++);
-			if (ramp.bumpWidth > 0 || ramp.bumpHeight > 0)
-				ii = 1;
+			int rampNum = GetRampData(&ramp, statement);
 //			if (mpint.timeComplete >= mpint.ramps[rampNum].timeComplete)
+			if (rampNum > 0 && rampNum < 13)
 				mpint.ramps[rampNum] = ramp;
 			nRamps++;
 		}
@@ -1242,6 +1260,122 @@ int getMPIntersectionFromDB(int intID, BOOL wantRamps,MPINTERSECTION * pMPInt)
 		ii = 1;
 	}
 	return nRamps;
+}
+
+int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
+{
+	int i = 0;
+	int uniqueID = sqlite3_column_int(statement, i++);
+	int intersectionID = sqlite3_column_int(statement, i++);
+	int rampNum = sqlite3_column_int(statement, i++);
+	rampNum = fixRampNum(rampNum);
+
+	pRamp->uniqueID = uniqueID;
+
+	pRamp->rampNum = rampNum;
+	LPSTR rampID = (LPSTR)sqlite3_column_text(statement, i++);
+	strncpy0(pRamp->rampID, rampID, sizeof(pRamp->rampID) - 1);
+	Strip(pRamp->rampID, ' ');
+	pRamp->yearRebuilt = sqlite3_column_int(statement, i++);
+	pRamp->timeComplete = sqlite3_column_int(statement, i++);
+	pRamp->rampExists = sqlite3_column_int(statement, i++);
+	pRamp->isComplete = sqlite3_column_int(statement, i++);
+	pRamp->approximateHeading = sqlite3_column_double(statement, i++);
+	pRamp->adjustedRot = sqlite3_column_int(statement, i++);
+	pRamp->rampInXWalk = sqlite3_column_int(statement, i++);
+	pRamp->xWalkisComplete = sqlite3_column_int(statement, i++);
+	pRamp->signalisComplete = sqlite3_column_int(statement, i++);
+	pRamp->texture = sqlite3_column_int(statement, i++);
+	pRamp->upperLandingObstruction = sqlite3_column_int(statement, i++);
+	pRamp->lowerLandingObstruction = sqlite3_column_int(statement, i++);
+	pRamp->rampObstruction = sqlite3_column_int(statement, i++);
+	pRamp->hasRampCracks = sqlite3_column_int(statement, i++);
+	pRamp->hasUpperLandingCracks = sqlite3_column_int(statement, i++);
+	pRamp->hasStreetLandingCracks = sqlite3_column_int(statement, i++);
+	pRamp->rampWidth = sqlite3_column_int(statement, i++);
+	pRamp->rampDepth = sqlite3_column_int(statement, i++);
+	pRamp->rampSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->rampSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->rampSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->upperLandingSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->upperLandingSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->upperLandingSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->streetLandingSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->streetLandingSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->streetLandingSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->flareLeftSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->flareLeftSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->flareLeftSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->flareRightSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->flareRightSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->flareRightSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->swkLeftSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->swkLeftSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->swkLeftSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->swkRightSlopeFront = sqlite3_column_double(statement, i++);
+	pRamp->swkRightSlopeSide = sqlite3_column_double(statement, i++);
+	pRamp->swkRightSlopeHeading = sqlite3_column_double(statement, i++);
+	pRamp->PEDSignalType = sqlite3_column_int(statement, i++);
+	pRamp->PEDButtonType = sqlite3_column_int(statement, i++);
+	pRamp->PEDButtonHeight = sqlite3_column_int(statement, i++);
+	pRamp->PEDButtonDist = sqlite3_column_int(statement, i++);
+	pRamp->SteepTopOfCurb = sqlite3_column_double(statement, i++);
+	pRamp->PedRampLip = sqlite3_column_double(statement, i++);
+	pRamp->lev21x = sqlite3_column_int(statement, i++);
+	pRamp->lev21y = sqlite3_column_int(statement, i++);
+	PixelXYToLatLong(pRamp->lev21x, pRamp->lev21y, 21, &pRamp->latitude, &pRamp->longitude);
+	pRamp->rampType = sqlite3_column_int(statement, i++);
+	LPSTR comment = (LPSTR)sqlite3_column_text(statement, i++);
+	if (comment && *comment)
+		strcpy(pRamp->rampComment, comment);
+	else
+		getCornerComment(intersectionID, rampNum, pRamp->rampComment);
+	pRamp->awi = sqlite3_column_int(statement, i++);
+	pRamp->hasLocatorTone = sqlite3_column_int(statement, i++);
+	pRamp->hasInfoSign = sqlite3_column_int(statement, i++);
+	pRamp->hasBraille = sqlite3_column_int(statement, i++);
+	pRamp->hasTactileArrow = sqlite3_column_int(statement, i++);
+	pRamp->locatorToneVolume = sqlite3_column_int(statement, i++);
+	pRamp->audibleWalkIndicationVolume = sqlite3_column_int(statement, i++);
+	CrackWidth cw;
+	cw.rampCrackWidth = sqlite3_column_double(statement, i++);
+	cw.upperLandingCrackWidth = sqlite3_column_double(statement, i++);
+	cw.streetLandingCrackWidth = sqlite3_column_double(statement, i++);
+	cw.leftSidewalkCrackWidth = sqlite3_column_double(statement, i++);
+	cw.rightSidewalkCrackWidth = sqlite3_column_double(statement, i++);
+	pRamp->crackWidth = cw;
+	pRamp->curbCutDistance = sqlite3_column_double(statement, i++);
+	pRamp->bumpWidth = sqlite3_column_double(statement, i++);
+	pRamp->bumpHeight = sqlite3_column_double(statement, i++);
+	pRamp->dwWidth = sqlite3_column_double(statement, i++);
+	pRamp->dwDepth = sqlite3_column_double(statement, i++);
+	LPSTR fileID = (LPSTR)sqlite3_column_text(statement, i++);
+	if (fileID)
+		strncpy0(pRamp->fileID, fileID, sizeof(pRamp->fileID) - 1);
+	pRamp->cornerID = sqlite3_column_int(statement, i++);
+	pRamp->retired = sqlite3_column_int(statement, i++);
+	if (pRamp->bumpWidth > 0 || pRamp->bumpHeight > 0)
+		ii = 1;
+	return rampNum;
+
+}
+int GetAlternateIntersectionNum(int intID)
+{
+	sqlite3_stmt *statement = NULL;
+	int altInt = -1;
+	LPSTR query = malloc(4096);
+	sprintf(query, "SELECT TrafficIntID FROM IntersectionXRef WHERE NVCRISIntID=%i", intID);
+
+	SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get altint", 0);
+
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		altInt = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(sqlite3_finalize(statement), database, "get altint", 0);
+	free(query);
+
+	return altInt;
 }
 int FormatStreets(LPSTR from, LPSTR outtext)
 {

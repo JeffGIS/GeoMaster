@@ -4676,7 +4676,8 @@ GotCloseFilehSQL:
 				else if (!stricmp(Arg[3], "INT"))
 					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 				else if (!stricmp(Arg[3], "ALL"))
-					rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
+					rtn = OutputAllRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
+					//rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "PRIORITY"))
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
 			
@@ -4760,7 +4761,7 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "STREETNAMES"))
 			{
 				int intnum = atoi(Arg[3]);
-				GetIntersectionStreetNames(Arg[2], intnum, OutLoc);
+				GetIntersectionStreetNames(Arg[2], intnum, OutLoc,0);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "RAMPOFFSETCOORD"))

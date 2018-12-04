@@ -3836,7 +3836,9 @@ BOOL SetFileBounds ()
      else
      	WidthFactor = dist2/dist1;
 //     if (Pick) rturn(TRUE);
-     
+	 if (isnan (WidthFactor) || WidthFactor < 0 || WidthFactor > 1000)
+		 WidthFactor = 1;
+
      Point.x = WinRect.left;
      Point.y = WinRect.bottom;
      DPoint = WinPtToBasePt (Point);
