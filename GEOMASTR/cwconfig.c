@@ -5864,8 +5864,8 @@ GSSiExitProg (438);
     {
     	 RECT	UpdateRect;
 		 HDC	hDCScreen;
-		// if (!RunFromCache)
-		//	 StartBackgroundCache ();
+		 if (!RunFromCache && wantBackgroundCache)
+			 StartBackgroundCache ();
 
 //         GSSiTrace ("Enter WM_PAINT");
          if (InPaint || Printing || idTimer || InDisplayProcessing==1)

@@ -1771,6 +1771,7 @@ extern	char	CachePathnameTo[MAX_PATH];
 extern	char	OriginalDL[MAX_PATH];
 extern	BOOL	RunFromCache;
 extern	HANDLE	hCacheThread;
+extern	BOOL	wantBackgroundCache;
 extern	BOOL	ContinueBackgroundCache;
 extern  BOOL	InOpenMap;
 extern	HWND	hWndBGUpdateMsg;

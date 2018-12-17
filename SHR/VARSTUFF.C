@@ -3595,6 +3595,14 @@ GSSiExitProg (532);
 		case 395:
 			useTextFileSQLiteIndex = atob(Value);
 			break;
+		case 396:
+		{
+			char testFile[MAX_PATH] = "[%DL]global.ini";
+			ExpandText(testFile);
+			if (!IsLocalFile(testFile))
+				wantBackgroundCache = atob(Value);
+		}
+			break;
 		default:
  			break;
 	}
@@ -4009,6 +4017,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%IS64BIT", 393, FALSE);
 	AllocateTypeVar("%ADJUSTINTENSITY", 394, FALSE);
 	AllocateTypeVar("%USETEXTFILEINDEX", 395, FALSE);
+	AllocateTypeVar("%WANTBACKGROUNDCACHE", 396, FALSE);
 
 
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5205,6 +5214,9 @@ GSSiExitProg (533);
 			break;
 		case 395:
 			btoa(useTextFileSQLiteIndex, OutStr);
+			break;
+		case 396:
+			btoa(wantBackgroundCache, OutStr);
 			break;
 	}
 	GlobalUnlock (hGlobal);

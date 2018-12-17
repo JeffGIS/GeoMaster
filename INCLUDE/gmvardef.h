@@ -1642,6 +1642,7 @@ char	OriginalDL[MAX_PATH]="";
 BOOL	RunFromCache=FALSE;
 HANDLE	hCacheThread=0;
 BOOL	ContinueBackgroundCache=TRUE;
+BOOL	wantBackgroundCache = FALSE;
 BOOL	InOpenMap=FALSE;
 HWND	hWndBGUpdateMsg=0;
 BOOL	AllowingSocketConnections=TRUE;

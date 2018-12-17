@@ -4676,7 +4676,7 @@ GotCloseFilehSQL:
 				else if (!stricmp(Arg[3], "INT"))
 					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 				else if (!stricmp(Arg[3], "ALL"))
-					rtn = OutputAllRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
+					rtn = OutputAllRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 					//rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "PRIORITY"))
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
