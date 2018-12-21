@@ -451,7 +451,15 @@ void ClearToolbarTrackEvents (HWND hWnd)
 		}
 	}
 	if (hWnd)
-		SetFocus (hWnd);
+	{
+		POINT pt;
+		RECT rect;
+
+		GetCursorPos(&pt);
+		GetWindowRect(hWnd, &rect);
+		if (PtInRect(&rect, pt))
+			SetFocus(hWnd);
+	}
 	return;
 }
 
@@ -2372,16 +2380,38 @@ LONG FAR PASCAL PanZoomRotWndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM 
  int	ToolbarID = GetToolbarIDFromWnd (hWnd);
  static BOOL AllowRotate = TRUE;
  static int	PANDIST = 53;
+ LRESULT rtn = 0;
  
 
  if (Message != WM_CREATE)
 	 CurView = PZR_VP;
  if (!CurrentConfig)
 	 SetConfig (1);
+ if (Message == WM_SETFOCUS)
+	 ii = 1;
+
  if (Message == WM_LBUTTONDOWN)
 	 ii = 1;
  switch (Message)
    { 
+	 case WM_SETFOCUS:
+	 {
+		 POINT pt;
+		 RECT rect;
+
+		 GetCursorPos(&pt);
+		 GetWindowRect(hWnd, &rect);
+		 if (!PtInRect(&rect, pt))
+		 {
+			 if (wParam)
+				 SetFocus(wParam);
+		 }
+		 rtn = DefWindowProc(hWnd, Message, wParam, lParam);
+	 }
+	 break;
+	 case WM_CAPTURECHANGED:
+		 ii = 1;
+		 break;
     case WM_CREATE:
 		{
 			HANDLE	hCoords;
@@ -3030,13 +3060,11 @@ CursorMove:
          /* For any message for which you don't specifically provide a  */
          /* service routine, you should return the message to Windows   */
          /* for default message processing.                             */
-		 SetConfig (SaveConfig);
-		 CurView = SaveVP;
-         return DefWindowProc(hWnd, Message, wParam, lParam);
+         rtn = DefWindowProc(hWnd, Message, wParam, lParam);
    } 
    SetConfig (SaveConfig);
    CurView = SaveVP;
- return 0L;
+	return rtn;
 }     /* End of WndProc                                         */
 
 BOOL RegisterPanZoomRotClass(void)
@@ -3789,7 +3817,10 @@ BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lP
 	int		ToolbarID=-1;
 
 	if (Message == WM_NOTIFY)
-		ii=1;
+		ii = 1;
+
+	if (Message == WM_SETFOCUS)
+		ii = 1;
 
 	if (ID > -1)
 	{

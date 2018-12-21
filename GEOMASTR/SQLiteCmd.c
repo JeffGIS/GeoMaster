@@ -458,6 +458,71 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 	return rtn;
 }
 
+int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile)
+{
+	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR  pCmd = GlobalLock(hCmd);
+	sqlite3_stmt *statement;
+	HANDLE hOutstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+	LPSTR outstr = GlobalLock(hOutstr);
+	int rtn = -1;
+	HFILE Fid;
+
+	Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (Fid != HFILE_ERROR)
+	{
+		if (*fieldsIN == '(')
+		{
+			LPSTR pEnd;
+			strcpy(outstr, &fieldsIN[1]);
+			pEnd = strrchr(outstr, ')');
+			if (pEnd)
+				*pEnd = 0;
+		}
+		else
+			strcpy(outstr, fieldsIN);
+		if (*where)
+			sprintf(pCmd, "SELECT %s FROM %s WHERE %s", outstr, tableName, where);
+		else
+			sprintf(pCmd, "SELECT %s FROM %s", outstr, tableName);
+		if (db)
+		{
+			if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
+			{
+				int numcol = sqlite3_column_count(statement);
+				char delim[2] = { 0 };
+				*outstr = 0;
+				for (int i = 0; i < numcol; i++)
+				{
+					LPSTR colname = (LPSTR)sqlite3_column_name(statement, i);
+					sprintf(strchr(outstr, 0), "%s%s", delim, colname);
+					*delim = '\t';
+				}
+				fputstring(outstr, Fid);
+				rtn = 0;
+				while (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					char delim[2] = { 0 };
+					*outstr = 0;
+					rtn++;
+					for (int i = 0; i < numcol; i++)
+					{
+						LPSTR txt = (LPSTR)sqlite3_column_text(statement, i);
+						sprintf(strchr(outstr, 0), "%s%s", delim, txt);
+						*delim = '\t';
+					}
+					fputstring(outstr, Fid);
+				}
+			}
+			sqlite3_finalize(statement);
+		}
+		GSSiClose(Fid);
+	}
+	GSSiGlobUlFree(&hCmd);
+	GSSiGlobUlFree(&hOutstr);
+	return rtn;
+}
+
 LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where)
 {
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
@@ -719,7 +784,12 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	else if (!stricmp(ARG[1], "DISTINCT"))//$SQLITE(DISTINCT,sqlitehandle,tablename,fields,where clause,outfile)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = GetSQLITEDistinct(db, ARG[3], ARG[4], ARG[5],ARG[6]);
+		rtn = GetSQLITEDistinct(db, ARG[3], ARG[4], ARG[5], ARG[6]);
+	}
+	else if (!stricmp(ARG[1], "QUERY"))//$SQLITE(QUERY,sqlitehandle,tablename,fields,where clause,outfile)
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = SQLITEQuery(db, ARG[3], ARG[4], ARG[5], ARG[6]);
 	}
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{
