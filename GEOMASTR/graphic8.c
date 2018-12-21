@@ -2106,7 +2106,13 @@ BOOL ExecutePointLocationMacro(DPOINT DPoint, LPSTR locatedTo)
 
 		CurrentPoint = DPoint;
 		if (GetGlobalCVal("[%PLMACRO]", File, 0))
-			rtn = ProcessMacroFile(File, 0, 0, 0);
+		{
+			char cmd[1024];
+			sprintf(cmd, "$MACRO(%s,(%s))", File, locatedTo);
+			ExpandText(cmd);
+			rtn = atoi(cmd);
+		}
+		//	rtn = ProcessMacroFile(File, 0, 0, 0);
 		{
 #if ENABLETRACE
 			GSSiExitProg(978);
