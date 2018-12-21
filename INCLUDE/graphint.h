@@ -2467,6 +2467,7 @@ BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc, 
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType);
 int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int header);
 BOOL OutputRampForIntersectionAndRampnumToFile(int intNum, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType);
+BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType);
 BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode);
 BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType);
 BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType);

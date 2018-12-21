@@ -777,6 +777,13 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	int		atLoc;
 	BOOL	loadOnly = FALSE;
 
+	if (editMacro)
+	{
+		sprintf(str, "$SESSION(CREATE, GMEdit /GMEdit %s)", Name);
+		ProcessText(str);
+		GSSiGlobUlFree(&hSTR);
+		return TRUE;
+	}
 	if (NumArgs < 0)
 	{
 		loadOnly = TRUE;

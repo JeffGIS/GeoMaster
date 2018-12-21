@@ -1773,6 +1773,7 @@ extern	BOOL	RunFromCache;
 extern	HANDLE	hCacheThread;
 extern	BOOL	wantBackgroundCache;
 extern	BOOL	ContinueBackgroundCache;
+extern	BOOL	editMacro;
 extern  BOOL	InOpenMap;
 extern	HWND	hWndBGUpdateMsg;
 extern	BOOL	AllowingSocketConnections;

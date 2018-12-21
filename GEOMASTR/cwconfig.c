@@ -1425,6 +1425,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		CreateBigMem();
 		AllowCache = FALSE;
 		ProcessCommandLine("");
+		editMacro = TRUE;
 		return WinMainGMEdit(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 	else if (strstr(cmdLine, "/GMDoc"))
@@ -1439,6 +1440,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	{
 		//if (!haveKey)
 		//	return 0;
+		editMacro = FALSE;
 		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
 	}
 }

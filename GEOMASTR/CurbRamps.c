@@ -3,7 +3,7 @@
 #include "RampCompliance.h"
 #include "MPIntersection.h"
 
-#define CURRENT_INTERSECTION_VERSION "4.0"
+#define CURRENT_INTERSECTION_VERSION "5.0"
 
 static sqlite3 *database = NULL;
 
@@ -740,6 +740,52 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 	}
 	return rtn;
 }
+BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+{
+	BOOL rtn = FALSE;
+	char line[4096 * 2];
+	int rc;
+	ToleranceValues tolerances;
+	setStandardToleranceValues(&tolerances);
+
+	rc = sqlite3_open(NVCRISDataBase, &database);
+	if (rc == SQLITE_OK)
+	{
+		HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (FidOut != HFILE_ERROR)
+		{
+			char tempRampIDs[MAX_PATH];
+			LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+			fputstring(rampHeader, FidOut);
+			RAMPID rampID;
+			rampID.intID = intNum;
+			rampID.rampNum = rampNum;
+			rampID.retired = retired;
+			RampStruct ramp = { 0 };
+			RampStruct * pRamp = &ramp;
+			if (getRampFromDB(&rampID, pRamp))
+			{
+				if (pRamp->rampExists)
+				{
+					LPSTR detailCode;
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
+					LPSTR rampText = rampToText(rampID.intID, pRamp);
+					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+					fputstring(line, FidOut);
+					free(ccode);
+					free(detailCode);
+					free(rampText);
+				}
+			}
+			GSSiClose(FidOut);
+			rtn = TRUE;
+		}
+		rc = sqlite3_close(database);
+
+	}
+	return rtn;
+}
+
 int getAllRampIDs (LPSTR OutFile)
 {
 	int nRamps = 0;
@@ -1062,7 +1108,7 @@ BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int cod
 
 int getMiddleRampIDFromRampID(int rampID)
 {
-	int rtn = 0;
+	int rtn = rampID;
 
 	switch (rampID)
 	{
@@ -1086,17 +1132,23 @@ int getMiddleRampIDFromRampID(int rampID)
 	switch (rtn)
 	{
 	case 9:
+	case 23:
 		rtn = 23;
 		break;
 	case 10:
+	case 45:
 		rtn = 45;
 		break;
 	case 11:
+	case 67:
 		rtn = 67;
 		break;
-	default:
+	case 12:
+	case 81:
 		rtn = 81;
 		break;
+	default:
+		rtn = 0;
 	}
 	return rtn;
 }
@@ -1568,12 +1620,21 @@ void convertVersion_2_to_3(LPSTR str)
 		LPSTR pEnd = strrchr(ploc, ')');
 		sprintf(pEnd, ",0,0);");
 	}
+	else
+	{
+		ploc = strstr(str, "INSERT INTO RAMPS VALUES(");
+		if (ploc)
+		{
+			LPSTR pEnd = strrchr(ploc, ')');
+			sprintf(pEnd, ",0,0);");
+		}
+	}
 }
 
-void convertVersion_3_to_4(LPSTR str,LPSTR fileID)
+void convertVersion_3_to_4(LPSTR str, LPSTR fileID)
 {
 	char searchStr[] = "INSERT OR REPLACE INTO Ramps VALUES(";
-	LPSTR ploc = strstr(str,searchStr);
+	LPSTR ploc = strstr(str, searchStr);
 	if (ploc)
 	{
 		LPSTR pid = ploc + strlen(searchStr);
@@ -1581,13 +1642,43 @@ void convertVersion_3_to_4(LPSTR str,LPSTR fileID)
 		if (prn)
 		{
 			int rampNum = atoi(++prn);
+			if (rampNum > 12)
+			{
+				char rampNumC[4];
+				rampNum = fixRampNum(rampNum);
+				sprintf(rampNumC, "%2i", rampNum);
+				memmove(prn, rampNumC, 2);
+			}
 			int cornerID = getMiddleRampIDFromRampID(rampNum);
 			LPSTR pEnd = strrchr(ploc, ')');
 			sprintf(pEnd, ",'%s',%i,0);", fileID, cornerID);
 		}
 	}
+	else
+	{
+		char searchStr[] = "INSERT INTO RAMPS VALUES(";
+		ploc = strstr(str, searchStr);
+		if (ploc)
+		{
+			LPSTR pid = ploc + strlen(searchStr);
+			LPSTR prn = strchr(pid, ',');
+			if (prn)
+			{
+				int rampNum = atoi(++prn);
+				if (rampNum > 12)
+				{
+					char rampNumC[4];
+					rampNum = fixRampNum(rampNum);
+					sprintf(rampNumC, "%2i", rampNum);
+					memmove(prn, rampNumC, 2);
+				}
+				int cornerID = getMiddleRampIDFromRampID(rampNum);
+				LPSTR pEnd = strrchr(ploc, ')');
+				sprintf(pEnd, ",'%s',%i,0);", fileID, cornerID);
+			}
+		}
+	}
 }
-
 int getDatasetVersion(void)
 {
 	int rtn = -1;
@@ -1612,7 +1703,7 @@ int getDatasetVersion(void)
 	return rtn;
 }
 
-BOOL adjustToLatestVersion(void)
+BOOL adjustToLatestVersion(LPSTR fromPath)
 {
 	BOOL rtn = FALSE;
 	if (!database)
@@ -1625,6 +1716,66 @@ BOOL adjustToLatestVersion(void)
 	{
 		switch (version)
 		{
+			case 4://convert version 4 to version 5
+			{
+				char toPath[MAX_PATH];
+				BOOL st = TRUE;
+				sprintf (toPath,"%s.new", fromPath);
+				st = sqlite3_close(database);
+				st = NVCreateDB(toPath, TRUE);
+				NVCopyDB(fromPath, toPath);
+				st = !sqlite3_open(toPath, &database);
+				if (st)
+				{
+					SLT_StartTrans(database);
+					strcpy(cmd, "UPDATE Ramps SET rampNum = 9 WHERE rampNum = 23");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET rampNum = 10 WHERE rampNum = 45");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET rampNum = 11 WHERE rampNum = 67");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET rampNum = 12 WHERE rampNum = 81");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 1");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 2");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 3");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 45 WHERE rampNum = 4");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 45 WHERE rampNum = 5");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 67 WHERE rampNum = 6");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 67 WHERE rampNum = 7");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 8");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 9  OR rampNum = 23");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 45 WHERE rampNum = 10 OR rampNum = 45");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 67 WHERE rampNum = 11 OR rampNum = 67");
+					if (st) st = executeCmd(cmd);
+					strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 12 OR rampNum = 81");
+					if (st) st = executeCmd(cmd);
+					if (st)
+						SLT_EndTrans(database);
+					else
+						SLT_AbortTrans(database);
+					sqlite3_close(database);
+					if (st)
+					{
+						GSSiRemove(fromPath);
+						GSSiRename(toPath, fromPath);
+						st = !sqlite3_open(fromPath, &database);
+
+					}
+				}
+				rtn = st;
+			}
+			break;
 			case 3://convert version 3 to version 4
 			{
 				BOOL st = TRUE;
@@ -1635,6 +1786,39 @@ BOOL adjustToLatestVersion(void)
 				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN CornerID INT;");
 				st = executeCmd(cmd);
 				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN Retired INT;");
+				if (st) st = executeCmd(cmd);
+/*				strcpy(cmd, "UPDATE Ramps SET rampNum = 9 WHERE rampNum = 23");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET rampNum = 10 WHERE rampNum = 45");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET rampNum = 11 WHERE rampNum = 67");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET rampNum = 12 WHERE rampNum = 81");
+				if (st) st = executeCmd(cmd);
+				*/
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 1");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 2");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 3");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 45 WHERE rampNum = 4");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 45 WHERE rampNum = 5");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 67 WHERE rampNum = 6");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 67 WHERE rampNum = 7");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 8");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 9  OR rampNum = 23");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 45 WHERE rampNum = 10 OR rampNum = 45");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 67 WHERE rampNum = 11 OR rampNum = 67");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 12 OR rampNum = 81");
 				if (st) st = executeCmd(cmd);
 				sprintf(cmd, "UPDATE Version SET VersionID = '%0.1f' WHERE vid = 1;", (double)(version + 1));
 				if (st) st = executeCmd(cmd);
@@ -1797,7 +1981,7 @@ int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle)
 		if (rtn == SQLITE_OK)
 		{
 			SetGlobalValueLong(varnameforhandle, (UINT)database);
-			rtn = adjustToLatestVersion();
+			rtn = adjustToLatestVersion(path);
 		}
 	}
 	return rtn;

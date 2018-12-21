@@ -1445,7 +1445,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	static HMENU hMenu=0;
 	int loc;
 
-
+	editMacro = TRUE;
 	if (message == 	uFindReplaceMsg)
 	{ 
 		LPFINDREPLACE lpfr;

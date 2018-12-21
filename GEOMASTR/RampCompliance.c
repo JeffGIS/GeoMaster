@@ -767,7 +767,7 @@ void setStandardToleranceValues(ToleranceValues *tolerances)
 
 static char *textures[] = {"None", "SmoothedConcrete", "BrushedConcrete", "TintedConcrete", "TruncatedStoneDomes", "TruncatedStampedConcrete", "CastironTruncatedDomes", "ExposedAggregate", "CutStone", "None", "Other","CastInPlacePanels","LinearGroove"};
 static char *obstructions[] = {"None", "Hydrant", "Manhole", "Polebox", "Pole", "StreetManhole", "Other", "None", "None", "None", "None", "MasterNone","","","","","","","","","","SDWKClearWidth","SDWKProtudingObject","SDWKVerticalClearance","SDWKUndergroundUtility"};
-static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk", "OneWayPerp", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "OneWayDirCurbGutter", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk"};
+static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonWalk", "OneWayPerp", "OneWayDirBlendTrans", "Parallel", "DepressedCorner", "Fan", "BuiltUp", "Diagonal", "OneWayDirCurbGutter","NoRamp", "CombLeftWalk", "CombRightWalk", "CombLeftNonWalk", "CombRightNonWalk"};
 static char *AWITypes[] = {"None", "Tones", "SpeechMessage"};
 static char *buttonTypes[] = {"None", "SmallPush", "LargePush", "Touch", "APS"};
 static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer"};
@@ -806,12 +806,12 @@ char *rampToText(int intNum, RampStruct *ramp)
 	char timeCompleteC[32];
 	int rtype = ramp->rampType;
 	if (rtype > 100)
-		rtype = 11 + (rtype - 100);
+		rtype = 12 + (rtype - 100);
 	if (ramp->timeComplete < minTime)
 		ramp->timeComplete = minTime;
 	sprintf(timeCompleteC, "$CAL(%i,3)", ramp->timeComplete);
 	ExpandText(timeCompleteC);
-	if (rtype < 0 || rtype > 15)
+	if (rtype < 0 || rtype > 16)
 		rtype = 0;
 	if (ramp->upperLandingObstruction < 0 || ramp->upperLandingObstruction >= obstructions_max)
 		ramp->upperLandingObstruction = 0;

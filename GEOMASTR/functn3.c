@@ -4672,7 +4672,9 @@ GotCloseFilehSQL:
 				if (!stricmp(Arg[3], "BYINT"))
 					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2], atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "BYRAMP"))
-					rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]), atoi(Arg[8]));
+					rtn = OutputRampToFile(atoi(Arg[4]), atoi(Arg[5]), atoi(Arg[6]), Arg[7], Arg[2], atoi(Arg[8]), atoi(Arg[9]));
+
+					//rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]), atoi(Arg[8]));
 				else if (!stricmp(Arg[3], "INT"))
 					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 				else if (!stricmp(Arg[3], "ALL"))
@@ -4747,6 +4749,12 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "FIXRAMPNUM"))
 			{
 				rtn = fixRampNum(atoi(Arg[2]));
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "GETCORNER"))
+			{
+				rtn = getMiddleRampIDFromRampID(atoi(Arg[2]));
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
