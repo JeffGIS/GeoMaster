@@ -460,15 +460,17 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 
 int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile)
 {
+#define NO_FILE	(HFILE_ERROR - 1)
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	HANDLE hOutstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR outstr = GlobalLock(hOutstr);
 	int rtn = -1;
-	HFILE Fid;
+	HFILE Fid=NO_FILE;
 
-	Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (*OutFile)
+		Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
 	if (Fid != HFILE_ERROR)
 	{
 		if (*fieldsIN == '(')
@@ -498,7 +500,8 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 					sprintf(strchr(outstr, 0), "%s%s", delim, colname);
 					*delim = '\t';
 				}
-				fputstring(outstr, Fid);
+				if (Fid != NO_FILE)
+					fputstring(outstr, Fid);
 				rtn = 0;
 				while (sqlite3_step(statement) == SQLITE_ROW)
 				{
@@ -511,12 +514,14 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 						sprintf(strchr(outstr, 0), "%s%s", delim, txt);
 						*delim = '\t';
 					}
-					fputstring(outstr, Fid);
+					if (Fid != NO_FILE)
+						fputstring(outstr, Fid);
 				}
 			}
 			sqlite3_finalize(statement);
 		}
-		GSSiClose(Fid);
+		if (Fid != NO_FILE)
+			GSSiClose(Fid);
 	}
 	GSSiGlobUlFree(&hCmd);
 	GSSiGlobUlFree(&hOutstr);

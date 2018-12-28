@@ -2473,7 +2473,7 @@ BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, i
 BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType);
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile,BOOL AddFileID,int checkPointOpt);
 int getRampOffsetCoord(POINT ramp21, POINT int21);
-BOOL ComplianceCodeForRamp(int intID, int rampNum, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
+BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL GetFromCodeText(int from, LPSTR text);
 BOOL NVCreateDB(LPSTR path, BOOL Delete);
 BOOL NVCopyDB(LPSTR fromPath, LPSTR toPath);
