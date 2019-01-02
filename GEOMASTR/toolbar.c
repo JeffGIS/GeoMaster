@@ -2404,7 +2404,7 @@ LONG FAR PASCAL PanZoomRotWndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM 
 		 if (!PtInRect(&rect, pt))
 		 {
 			 if (wParam)
-				 SetFocus(wParam);
+				 SetFocus((HWND)wParam);
 		 }
 		 rtn = DefWindowProc(hWnd, Message, wParam, lParam);
 	 }

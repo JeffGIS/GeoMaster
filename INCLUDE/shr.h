@@ -313,7 +313,7 @@ double GetSQLITESumCol(sqlite3 *db, LPSTR tableName, LPSTR Column,LPSTR where);
 LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where,LONGLONG limit);
 LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where);
 int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fields, LPSTR where, LPSTR OutFile);
-int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile);
+int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile,LPSTR orderBy);
 void CloseSLTDatabase(LPHANDLE pHandle);
 void SLTCloseCursor(LPSQLDATABASE pDB);
 BOOL SQLITEPrepare(LPSQLDATABASE pDB);
