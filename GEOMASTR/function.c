@@ -1109,7 +1109,7 @@ GSSiExitProg (1348);
 								ExpandText (ExpArgs);
 								sprintf (str,"Error in: %s\r\n%s",Args,ExpArgs);
 								strcpy (OutLoc,"0");
-								MessageBox (0,str,err,MB_ICONEXCLAMATION);
+								MessageBox (hWndMain,str,err,MB_ICONEXCLAMATION);
 								GSSiGlobUlFree (&hstr);
 							}
 							break;

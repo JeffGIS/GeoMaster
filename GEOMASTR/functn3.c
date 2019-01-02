@@ -4645,12 +4645,12 @@ GotCloseFilehSQL:
 			goto Rtnl;
 		}
 		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
-			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum, OUTFile,codesystem(0,1),headertype(-1,0,1))
+			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum,retired, OUTFile,codesystem(0,1),headertype(-1,0,1))
 			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1),completioncode(0all,1complete,2paid)
 			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid,1=header and streetnames and coord wo type,2=same with type);
 			//$NVCRIS(EXPORT,FromDB, PRIORITY,OUTFile,header(0=none,1=standard,2=with types));
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
-			//$NVCRIS(COMPCODE,int,ramp,db,codesystem(0,1))
+			//$NVCRIS(COMPCODE,int,ramp,retired,db,codesystem(0,1))
 			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
 			//$NVCRIS(TEXTURECODE,texture)
 			//$NVCRIS(FORMATSTREETS,codedstreets)
@@ -4694,7 +4694,7 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[1], "COMPCODE"))
 			{
-				rtn = ComplianceCodeForRamp(atoi(Arg[2]), atoi(Arg[3]), Arg[4], atoi(Arg[5]), OutLoc);
+				rtn = ComplianceCodeForRamp(atoi(Arg[2]), atoi(Arg[3]), atob(Arg[4]), Arg[5], atoi(Arg[6]), OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "FROMCODE"))

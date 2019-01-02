@@ -458,17 +458,19 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 	return rtn;
 }
 
-int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile)
+int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile, LPSTR orderBy)
 {
+#define NO_FILE	(HFILE_ERROR - 1)
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR  pCmd = GlobalLock(hCmd);
 	sqlite3_stmt *statement;
 	HANDLE hOutstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
 	LPSTR outstr = GlobalLock(hOutstr);
 	int rtn = -1;
-	HFILE Fid;
+	HFILE Fid=NO_FILE;
 
-	Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (*OutFile)
+		Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
 	if (Fid != HFILE_ERROR)
 	{
 		if (*fieldsIN == '(')
@@ -485,6 +487,8 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 			sprintf(pCmd, "SELECT %s FROM %s WHERE %s", outstr, tableName, where);
 		else
 			sprintf(pCmd, "SELECT %s FROM %s", outstr, tableName);
+		if (*orderBy)
+			sprintf(strchr(pCmd, 0), " ORDER BY %s", orderBy);
 		if (db)
 		{
 			if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
@@ -498,7 +502,8 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 					sprintf(strchr(outstr, 0), "%s%s", delim, colname);
 					*delim = '\t';
 				}
-				fputstring(outstr, Fid);
+				if (Fid != NO_FILE)
+					fputstring(outstr, Fid);
 				rtn = 0;
 				while (sqlite3_step(statement) == SQLITE_ROW)
 				{
@@ -511,12 +516,14 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 						sprintf(strchr(outstr, 0), "%s%s", delim, txt);
 						*delim = '\t';
 					}
-					fputstring(outstr, Fid);
+					if (Fid != NO_FILE)
+						fputstring(outstr, Fid);
 				}
 			}
 			sqlite3_finalize(statement);
 		}
-		GSSiClose(Fid);
+		if (Fid != NO_FILE)
+			GSSiClose(Fid);
 	}
 	GSSiGlobUlFree(&hCmd);
 	GSSiGlobUlFree(&hOutstr);
@@ -721,7 +728,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			GSSiClose(fid);
 		}
 	}
-	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd)
+	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd)-single command only - no ; separator
 	{
 		db = (sqlite3*)atoi(ARG[2]);
 		sqlite3_stmt *statement;
@@ -786,10 +793,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		rtn = GetSQLITEDistinct(db, ARG[3], ARG[4], ARG[5], ARG[6]);
 	}
-	else if (!stricmp(ARG[1], "QUERY"))//$SQLITE(QUERY,sqlitehandle,tablename,fields,where clause,outfile)
+	else if (!stricmp(ARG[1], "QUERY"))//$SQLITE(QUERY,sqlitehandle,tablename,fields,where clause,outfile(opt),orderby(opt))
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = SQLITEQuery(db, ARG[3], ARG[4], ARG[5], ARG[6]);
+		rtn = SQLITEQuery(db, ARG[3], ARG[4], ARG[5], ARG[6], ARG[7]);
 	}
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{

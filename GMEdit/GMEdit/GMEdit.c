@@ -1445,7 +1445,6 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	static HMENU hMenu=0;
 	int loc;
 
-	editMacro = TRUE;
 	if (message == 	uFindReplaceMsg)
 	{ 
 		LPFINDREPLACE lpfr;
@@ -1509,7 +1508,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	switch (message)
 	{
     case WM_CREATE: 
-        if (!hWndMain)
+		editMacro = TRUE;
+		if (!hWndMain)
 		{
 			hWndMain = hWnd;
 			CDInit (hWnd, hInst); /* Initialize Common Dialogs */     
@@ -1591,7 +1591,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		}
         return 0; 
 	 case WM_DESTROY:
-		if (changesMade)
+		 editMacro = FALSE;
+		 if (changesMade)
 		{
 			int st;
 
