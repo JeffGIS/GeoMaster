@@ -4022,46 +4022,56 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 
 	status = json_object_get(root, "status");
 	status_text = json_string_value(status);
-	results = json_object_get(root, "results");
-	if (!json_is_array(results))
+	if (!stricmp(status_text, "OK"))
 	{
-		fprintf(stderr, "error: results is not an array\n");
-		goto Exit;
-	}
-
-	for (i = 0; i < json_array_size(results); i++)
-	{
-		json_t *result, *formatted_address, *message, *geometry, *location, *lat, *lng;
-		const char *message_text, *formattedadd;
-
-		result = json_array_get(results, i);
-		if (!json_is_object(result))
+		results = json_object_get(root, "results");
+		if (!json_is_array(results))
 		{
-			fprintf(stderr, "error: result %d is not an object\n", i + 1);
+			fprintf(stderr, "error: results is not an array\n");
 			goto Exit;
 		}
 
-		formatted_address = json_object_get(result, "formatted_address");
-		if (!json_is_string(formatted_address))
+		for (i = 0; i < json_array_size(results); i++)
 		{
-			fprintf(stderr, "error: formatted_address %d: id is not a string\n", i + 1);
-			goto Exit;
-		}
+			json_t *result, *formatted_address, *message, *geometry, *location, *location_type, *lat, *lng;
+			const char *message_text, *formattedadd, *locationtype;
 
-		geometry = json_object_get(result, "geometry");
-		if (!json_is_object(geometry))
-		{
-			fprintf(stderr, "error: geometry %d: message is not an object\n", i + 1);
-			goto Exit;
+			result = json_array_get(results, i);
+			if (!json_is_object(result))
+			{
+				fprintf(stderr, "error: result %d is not an object\n", i + 1);
+				goto Exit;
+			}
+
+			formatted_address = json_object_get(result, "formatted_address");
+			if (!json_is_string(formatted_address))
+			{
+				fprintf(stderr, "error: formatted_address %d: id is not a string\n", i + 1);
+				goto Exit;
+			}
+
+			geometry = json_object_get(result, "geometry");
+			if (!json_is_object(geometry))
+			{
+				fprintf(stderr, "error: geometry %d: message is not an object\n", i + 1);
+				goto Exit;
+			}
+			location = json_object_get(geometry, "location");
+			location_type = json_object_get(geometry, "location_type");
+			lat = json_object_get(location, "lat");
+			lng = json_object_get(location, "lng");
+			formattedadd = json_string_value(formatted_address);
+			locationtype = json_string_value(location_type);
+			if (stricmp(locationtype, "APPROXIMATE") &&
+				stricmp(locationtype, "GEOMETRIC_CENTER"))
+			{
+				strcpy(formattedAddress, formattedadd);
+				strcpy(locType, locationtype);
+				pLocPoint->y = json_real_value(lat);
+				pLocPoint->x = json_real_value(lng);
+				nResults++;
+			}
 		}
-		location = json_object_get(geometry, "location");
-		lat = json_object_get(location, "lat");
-		lng = json_object_get(location, "lng");
-		pLocPoint->y = json_real_value(lat);
-		pLocPoint->x = json_real_value(lng);
-		formattedadd = json_string_value(formatted_address);
-		strcpy(formattedAddress, formattedadd);
-		nResults++;
 	}
 	if (!nResults)
 		strcpy(formattedAddress, status_text);
@@ -4076,7 +4086,7 @@ int GetGoogleLocation(LPSTR FullAddressIN, int wantMatch,LPSTR formattedAddress,
 //returns num matches found, -1 if request fails, -2 if unable to convert coord.
 {
 	int		rtn = 0;
-	char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true&key=%s";
+	char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false&key=%s";
 	//char	CMD[512], fmt[] = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true";
 	char	TempFile[MAX_PATH], FullAddress[256];
 
