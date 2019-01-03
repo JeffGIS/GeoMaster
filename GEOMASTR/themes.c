@@ -1989,6 +1989,9 @@ GSSiExitProg (1260);
 	for (itheme=0;itheme<CurView->NumThemes;itheme++)
 	{
 		CurTheme=CurView->pThemes[itheme];
+		GSSiDeleteObject(&CurTheme->NoDataBrush);
+		GSSiDeleteObject(&CurTheme->InvalidDataBrush);
+
 		if (!CurTheme->IsActive ||
 		    !CurTheme->VPDisplayed ||
 		    CurTheme->ID == GF_BOUNDS_DISPLAY_THEME ||

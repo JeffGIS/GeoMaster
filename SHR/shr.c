@@ -2037,8 +2037,11 @@ void GSSiDeleteObject (HGDIOBJ *handle)
 		*handle = 0;
 	}
 #else
-	if (*handle)
-		DeleteObject (*handle);
+if (*handle)
+{
+	if (!DeleteObject (*handle))
+		ii=1;
+}
 	*handle = 0;
 #endif
 {

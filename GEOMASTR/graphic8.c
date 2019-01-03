@@ -2755,11 +2755,12 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 	double	Width=1;
 	
 	
-	*phPen = 0;
+	GSSiDeleteObject(phPen);
+
 	if (pBorderSymbolNum)
 		*pBorderSymbolNum = 0;
-	if (phBrush)
-		*phBrush = 0;
+	GSSiDeleteObject(phBrush);
+
     if (ItemIsHighlighted)
 	{
 		if (HighlightWidth < 0)//shows highlighted area with border line 
@@ -2815,13 +2816,15 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 						{
 							if (!pSym->InVisible && (!(pElement->FillColorType == SVVARCOLOR) || (!hTempBrush && !HaveVarFillColor)))
 							{
+								GSSiDeleteObject(phBrush);
     							*phBrush = CreateGMBrush (pElement->FillColor,desc,hDC); 
     							if (!*phBrush)
     								rtn=TRUE;
     						}
 							else if ((pElement->FillColorType == SVVARCOLOR) && HaveVarFillColor)
 							{
-    							*phBrush = CreateGMBrush (GlobalColors[0],desc,hDC); 
+								GSSiDeleteObject(phBrush);
+								*phBrush = CreateGMBrush(GlobalColors[0], desc, hDC);
     							if (!*phBrush)
     								rtn=TRUE;
     						}
@@ -2853,14 +2856,24 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 						else
 							Width = -ItemSymbolWidth * BaseDistToWinDist * PenWidthFactor;
 
-						if (!hSpecialPen && (!ShowBorder || pElement->LineColorType ==  SVNULLCOLOR))
-		//5/18/06 always show border if defined in dict				if (!hSpecialPen && (!ShowBorder || pElement->LineColor ==  SVNULLCOLOR))   
-		//				if (!hSpecialPen && (pElement->LineColorType ==  SVNULLCOLOR))
+						if (!hSpecialPen && (!ShowBorder || pElement->LineColorType == SVNULLCOLOR))
+						{
+							GSSiDeleteObject(phPen);
+
+							//5/18/06 always show border if defined in dict				if (!hSpecialPen && (!ShowBorder || pElement->LineColor ==  SVNULLCOLOR))   
+							//				if (!hSpecialPen && (pElement->LineColorType ==  SVNULLCOLOR))
 							*phPen = GetStockObject(NULL_PEN);
+						}
 						else if (!hSpecialPen && (pElement->LineColorType == SVVARCOLOR && HaveVarFillColor))
-							*phPen = CreatePen (PS_SOLID,(int)IDNINT(Width*DeviceToScreenFactor()*fac),ConvertColor(ColorWOWidth(GlobalColors[0]),desc));  
+						{
+							GSSiDeleteObject(phPen);
+							*phPen = CreatePen(PS_SOLID, (int)IDNINT(Width*DeviceToScreenFactor()*fac), ConvertColor(ColorWOWidth(GlobalColors[0]), desc));
+						}
 						else if (!hSpecialPen)
-							*phPen = CreatePen (PS_SOLID,(int)IDNINT(Width*DeviceToScreenFactor()*fac),ConvertColor(pElement->LineColor,desc)); 
+						{
+							GSSiDeleteObject(phPen);
+							*phPen = CreatePen(PS_SOLID, (int)IDNINT(Width*DeviceToScreenFactor()*fac), ConvertColor(pElement->LineColor, desc));
+						}
 					}
 					else if (pElement->Type == 4)
 					{
@@ -2868,6 +2881,7 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 							GSSiDeleteObject (phPen);
 						if (pElement->Width < 0 && pBorderSymbolNum)
 						{
+							GSSiDeleteObject(phPen);
 							*phPen = GetStockObject(NULL_PEN);
 							*pBorderSymbolNum = -pElement->Width;
 							if (pElement->Reverse)
@@ -2875,12 +2889,21 @@ BOOL SetAreaPenAndBrush (HDC hDC,LPSYMBOL pSym,int desc,BOOL ItemIsHighlighted,B
 						}
 						else
 						{
-							if (!hSpecialPen && (!ShowBorder || pElement->LineColorType ==  SVNULLCOLOR))
+							if (!hSpecialPen && (!ShowBorder || pElement->LineColorType == SVNULLCOLOR))
+							{
+								GSSiDeleteObject(phPen);
 								*phPen = GetStockObject(NULL_PEN);
+							}
 							else if (!hSpecialPen && (pElement->LineColorType == SVVARCOLOR && HaveVarFillColor))
-								*phPen = CreatePen (PS_SOLID,(int)IDNINT(pElement->Width*DeviceToScreenFactor()*fac),ConvertColor(ColorWOWidth(GlobalColors[0]),desc));  
+							{
+								GSSiDeleteObject(phPen);
+								*phPen = CreatePen(PS_SOLID, (int)IDNINT(pElement->Width*DeviceToScreenFactor()*fac), ConvertColor(ColorWOWidth(GlobalColors[0]), desc));
+							}
 							else if (!hSpecialPen)
-								*phPen = CreatePen (PS_SOLID,(int)IDNINT(max (pElement->Width,0)*DeviceToScreenFactor()*fac),ConvertColor(pElement->LineColor,desc));
+							{
+								GSSiDeleteObject(phPen);
+								*phPen = CreatePen(PS_SOLID, (int)IDNINT(max(pElement->Width, 0)*DeviceToScreenFactor()*fac), ConvertColor(pElement->LineColor, desc));
+							}
 						}
 					}
 					GlobalUnlock (*phElement);
@@ -3252,9 +3275,9 @@ GSSiExitProg (991);
 				}
 				else if (DoFill)
 				{
-					HBRUSH	hBrush = GetCurrentObject(hDC, OBJ_BRUSH); 
+					HBRUSH	hBrush2 = GetCurrentObject(hDC, OBJ_BRUSH); 
 					LOGBRUSH LogBrush;
-					int ln = GetObject(hBrush, sizeof(LOGBRUSH), &LogBrush);
+					int ln = GetObject(hBrush2, sizeof(LOGBRUSH), &LogBrush);
 
 					switch (LogBrush.lbHatch)
 					{

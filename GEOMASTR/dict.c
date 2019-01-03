@@ -4058,12 +4058,12 @@ NextVector:;
 			{
 				SelectObject (hDC,hCurPen); 
 				if (hPen != GetStockObject(NULL_PEN))
-					DeleteObject (hPen);   
+					GSSiDeleteObject(&hPen);
 			}
 			if (hBrush)	
 			{	
 				SelectObject (hDC,hCurBrush);
-				DeleteObject (hBrush);  
+				GSSiDeleteObject(&hBrush);
 			}
 SkipElement:				
 			GlobalUnlock (*phElement); 

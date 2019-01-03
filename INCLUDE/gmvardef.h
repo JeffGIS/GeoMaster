@@ -683,7 +683,7 @@ HANDLE	hShields=0;
 HBRUSH	hRedBrush;
 HBRUSH	hGreenBrush;
 HBRUSH	hBlueBrush;
-HBRUSH	HighlightBrush;  
+HBRUSH	HighlightBrush=0;  
 LPRECT	pSymbolRect=NULL;
 BOOL	InPan=FALSE;
 BOOL	ClearHighlightedAreaSpace=FALSE; 
