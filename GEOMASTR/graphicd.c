@@ -298,7 +298,8 @@ BOOL OpenBasePens(void)
         	pens[0] =   CreatePen(PS_SOLID,(int)IDNINT(WidthFactor*Width),Color);
         else   
         	pens[0] =   CreatePen(PS_SOLID,Width,Color);   
-        if (HighlightWidth < 0)
+		GSSiDeleteObject(&HighlightBrush);
+		if (HighlightWidth < 0)
 	        HighlightBrush =  (HBRUSH) CreatePen(PS_SOLID,
     	                       (int) labs(IDNINT(HighlightWidth*fac * PenWidthFactor)),
         	                   HighlightColor);

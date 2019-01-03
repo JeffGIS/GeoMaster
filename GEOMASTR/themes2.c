@@ -3530,7 +3530,6 @@ GSSiExitProg (1274);
 	NextTheme:
 		GSSiDeleteObject(&CurTheme->NoDataBrush);
 		GSSiDeleteObject (&CurTheme->InvalidDataBrush);
-	;
 	}  
 	CurTheme = SaveTheme;
 {

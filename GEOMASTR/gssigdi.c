@@ -7,6 +7,8 @@ HPEN CreateTransparentPen(int itrans, int width, COLORREF color);
 
 extern BOOL useGDIPlus;
 static int ii = 0;
+static int n4 = 0;
+
 #define GetIValue(rgb)      (LOBYTE((rgb)>>24))
 
 typedef struct{ float x, y; }  FPOINT;
@@ -504,7 +506,7 @@ void SetSavedGraphicsFid (int Type)
 
 void TrackObject (HGDIOBJ hObj,short Type)
 {   
-	unsigned short	i,ii;
+	unsigned short	i;
 	
 	if (!InDebug)
 		return;
@@ -546,12 +548,12 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				TrackObj[i] = hObj;
 				TrackObjType[i] = Type; 
 				TrackObjCount[i] = NextObjectCount++; 
-				if (TrackObjCount[i] == 9401 || TrackObjCount[i] == 9611)
+				if (TrackObjCount[i] == 4021 || TrackObjCount[i] ==4037)
 					ii=1;
 				if (i==10)// && Type == 8)
 					ii=1;
-				if (Type == 4)
-					ii = 1;
+				if (Type == 5)
+					n4++;;
 				return;
 			}
 		} 
