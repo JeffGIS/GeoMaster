@@ -77,6 +77,22 @@ public:
    /**
     * constructor
     *
+    * TBD
+    *
+    * @param  pixel           the pixel to copy
+    * @param  bandSelection   the band to choose (if NULL use the first numBands)
+    * @param  numBands        the length of bandSeclection
+    * @param  colorSpace
+    */
+   LTIPixel(const LTIPixel &pixel,
+            const lt_uint16 *bandSelection,
+            lt_uint16 numBands,
+            LTIColorSpace colorSpace);
+
+
+   /**
+    * constructor
+    *
     * This constructor creates an LTIPixel object made up of the
     * given sample types.  If the colorspace given is LTI_COLORSPACE_INVALID,
     * then the function will attempt to infer the colorspace from the
@@ -477,6 +493,9 @@ public:
     * sample's actual datatype.
     */
    void setSampleValuesFromDouble(double value);
+   void setNonAlphaSampleValuesFromDouble(double value);
+   void setSampleValuesFromPixel(const LTIPixel &src);
+   void setNonAlphaSampleValuesFromPixel(const LTIPixel &src);
 
 #ifndef DEPRECATE_PIXEL_HELPERS
    /**

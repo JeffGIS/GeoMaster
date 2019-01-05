@@ -79,6 +79,18 @@ public:
    lt_uint16 getNumBands() const;
 
    /**
+   * get number of bands without alpha
+   *
+   * This function returns the number of bands (colors) in the image.  This
+   * value is closely related to the colorspace of the image.
+   *
+   * This function is equivalent to getPixelProps().getNumBands().
+   *
+   * @return the number of bands in the image
+   */
+   lt_uint16 getNumBandsWithoutAlpha() const;
+
+   /**
     * get colorspace
     *
     * This function returns the colorspace of the image, e.g. RGB or greyscale.
@@ -253,7 +265,21 @@ public:
     * @return          a bitfield itemizing the encoding modifications
     */
    virtual lt_uint32 getModifications(const LTIScene &scene) const = 0;
-   
+
+
+   /**
+    * extract the metadata associated with the image of the given type
+    *
+    * This function returns XMP or EXIF metadata as a blob.
+    *
+    * @param type    type of metadata to extract (xmp|exif)
+    * @param stream  output stream containing the asked for metadata.  
+    *                   The caller must delete the returned stream.
+    * @return        status code indicating success or failure
+    */
+   virtual LT_STATUS getMetadataBlob(const char *type, LTIOStreamInf *&stream) const = 0;
+
+
    /**
     * get the nominal size of the image, not considering the alpha band
     *

@@ -147,6 +147,7 @@ public:
    virtual LTIOStreamInf* duplicate();
    virtual LT_STATUS getLastError() const;
    virtual const char* getID() const;
+   virtual char *readString(int delimiter);
  
 protected:
    /**   extend size of data buffer if required */

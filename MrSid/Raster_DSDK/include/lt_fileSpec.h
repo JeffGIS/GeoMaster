@@ -1,4 +1,3 @@
-/* $Id$ */
 /* //////////////////////////////////////////////////////////////////////////
 //                                                                         //
 // This code is Copyright (c) 2004 LizardTech, Inc, 1008 Western Avenue,   //
@@ -25,6 +24,13 @@ LT_BEGIN_NAMESPACE(LizardTech)
 #define LT_UTIL_MAX_PATH _MAX_PATH
 #else
 #define LT_UTIL_MAX_PATH 2048
+#endif
+
+#if defined(LT_OS_WIN) && !defined(_NATIVE_WCHAR_T_DEFINED) && !defined (SWIG)
+// Work within projects whether using native wchar_t or not ("/Zc:wchar_t-").
+#define WCHAR_INTERNAL __wchar_t
+#else
+#define WCHAR_INTERNAL wchar_t
 #endif
 
 /**
@@ -79,11 +85,11 @@ public:
     * @note See native constructor for arguments
     * @note On Win32 wchar_t is a UTF16 string. On unix it is UTF32
     */
-   explicit LTFileSpec(const wchar_t *p1);
-   LTFileSpec(const wchar_t *p1, const wchar_t *p2);
-   LTFileSpec(const wchar_t *p1, const wchar_t *p2, const wchar_t *p3);
+   explicit LTFileSpec(const WCHAR_INTERNAL *p1);
+   LTFileSpec(const WCHAR_INTERNAL *p1, const WCHAR_INTERNAL *p2);
+   LTFileSpec(const WCHAR_INTERNAL *p1, const WCHAR_INTERNAL *p2, const WCHAR_INTERNAL *p3);
    
-#ifndef LT_OS_WIN
+#ifndef SWIG
    /**
     * UTF16 constructor
     * @note See native constructor for arguments
@@ -104,11 +110,11 @@ public:
    LTFileSpec(const LTFileSpec &p1, const LTFileSpec &p2, const char *p3,
               EncodingType encoding);
 #endif
-   LTFileSpec(const LTFileSpec &p1, const wchar_t *p2);
-   LTFileSpec(const LTFileSpec &p1, const wchar_t *p2, const wchar_t *p3);
-   LTFileSpec(const LTFileSpec &p1, const LTFileSpec &p2, const wchar_t *p3);
+   LTFileSpec(const LTFileSpec &p1, const WCHAR_INTERNAL *p2);
+   LTFileSpec(const LTFileSpec &p1, const WCHAR_INTERNAL *p2, const WCHAR_INTERNAL *p3);
+   LTFileSpec(const LTFileSpec &p1, const LTFileSpec &p2, const WCHAR_INTERNAL *p3);
 
-#ifndef LT_OS_WIN
+#ifndef SWIG
    LTFileSpec(const LTFileSpec &p1, const lt_uint16 *p2);
    LTFileSpec(const LTFileSpec &p1, const lt_uint16 *p2, const lt_uint16 *p3);
    LTFileSpec(const LTFileSpec &p1, const LTFileSpec &p2, const lt_uint16 *p3);
@@ -153,7 +159,8 @@ public:
     * @note On Win32 this returns a 16bit UTF16 string. 
     * @note On Unix this returns a 32bit UTF32 string.
     */
-   const wchar_t *w_str(void) const;
+   const WCHAR_INTERNAL *w_str(void) const;
+
    /**
     * Return the parent directory
     *
@@ -238,14 +245,14 @@ protected:
    size_t getPrefixLength(void) const;
 private:
    // using a utf8 string to hold the path because it is the easiest
-   // to play with (we can look for bSlashs and not have to worry 
-   // about lead btyes.
+   // to play with (null and backslash searching, no lead bytes).
    char *m_path8;
    mutable char *m_pathA;     // this will be updated in n_str()
-   mutable wchar_t *m_pathW;  // this will be updated in w_str()
+   mutable WCHAR_INTERNAL *m_pathW;  // this will be updated in w_str()
 
 };
 
 LT_END_NAMESPACE(LizardTech)
 
+#undef WCHAR_INTERNAL
 #endif // LT_FILESPEC_H

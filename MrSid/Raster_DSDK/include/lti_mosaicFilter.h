@@ -108,12 +108,13 @@ public:
    LT_STATUS getDimsAtMag(double mag,
                           lt_uint32 &width,
                           lt_uint32 &height) const;
+   lt_uint32 getModifications(const LTIScene &scene) const;
+   LT_STATUS getMetadataBlob(const char *type, LTIOStreamInf *&stream) const;
 
    // LTIImageStage
    lt_int64 getEncodingCost(const LTIScene& scene) const;
    bool getReaderScene(const LTIScene &decodeScene,
                        LTIScene &readerScene) const;
-   virtual lt_uint32 getModifications(const LTIScene &scene) const;
    LTIMaskSource *getMask() const;
    bool getPipelineInfo(LTIPipelineInfo info) const;
 
@@ -143,6 +144,8 @@ public:
     * Get the fill method.  See setResampleMethod().
     */
    LTIResampleMethod getResampleMethod(void) const;
+
+   void setResamplePixelCenter(bool usePixelCenter);
    
    // for LizardTech internal use only
    bool getReaderScene(lt_uint32 child,
@@ -228,6 +231,7 @@ private:
    double m_fuzzyThreshold;
    AlphaMode m_alphaMode;
    LTIResampleMethod m_resampleMethod;
+   bool m_usePixelCenter;
    double m_magSnapThreshold;
    bool m_deleteImages;
 
@@ -245,7 +249,7 @@ private:
 class LTIPipelineBuilder
 {
 public:
-   virtual LT_STATUS buildPipeline(lt_uint32 tileId,
+   virtual LT_STATUS buildPipeline(lt_uint32 imageNumber,
                                    LTIImageStage *&pipeline) = 0;
 };
 

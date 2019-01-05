@@ -52,6 +52,14 @@ LT_STATUSSTRING_ADD(LTI_STS_Metadata_CorruptFile, "the metadata is corrupt")
 #define LTI_STS_Metadata_UnsupportedVersion                 50511
 LT_STATUSSTRING_ADD(LTI_STS_Metadata_UnsupportedVersion, "metadata version unsupported")
 
+
+#define LTI_STS_Metadata_BadTIFFIFDRead                     50512
+LT_STATUSSTRING_ADD(LTI_STS_Metadata_BadTIFFIFDRead, "bad IFD read")
+
+#define LTI_STS_Metadata_BadTIFFIFDWrite                    50513
+LT_STATUSSTRING_ADD(LTI_STS_Metadata_BadTIFFIFDWrite, "bad IFD write")
+
+
 #define LTI_STS_Metadata_Max                                50599
 LT_STATUSSTRING_ADD(LTI_STS_Metadata_Max, "lt_lib_mrsid_metadata max")
 

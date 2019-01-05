@@ -99,6 +99,7 @@ public:
     * @param resampleMethod resampling method See LTIResampleMethod
     */
    LT_STATUS setResampleMethod(LTIResampleMethod resampleMethod);
+   LT_STATUS setResamplePixelCenter(bool usePixelCenter);
 
    void setMagSnapThreshold(double threshold);
 
@@ -113,8 +114,8 @@ public:
    static double magForIcon(lt_uint32 width, lt_uint32 height,
                             lt_uint32 iconSize);
 
-   static LT_STATUS push(LTIImageStage *&pipeline, const LTIScene &dstScene);
-   static LT_STATUS push(LTIImageStage *&pipeline, double mag);
+   static LT_STATUS push(LTIImageStage *&pipeline, const LTIScene &dstScene, LTIResampleMethod method = LTI_RESAMPLE_NEAREST);
+   static LT_STATUS push(LTIImageStage *&pipeline, double mag, LTIResampleMethod method = LTI_RESAMPLE_NEAREST);
 
 protected:
    LT_STATUS decodeBegin(const LTIPixel &pixelProps,
@@ -170,11 +171,11 @@ private:
    lt_int32 m_childStrip;
    lt_int32 m_myStrip;
 
-   lt_uint32 m_cacheStripHeight;
    StripCache *m_stripCache0;
    StripCache *m_stripCache1;
 
    LTIResampler *m_resampler;
+   bool m_usePixelCenter;
 };
 
 

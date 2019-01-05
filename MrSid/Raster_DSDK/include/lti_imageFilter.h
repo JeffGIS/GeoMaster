@@ -48,6 +48,9 @@ public:
    double getMinMagnification() const;
    double getMaxMagnification() const;
    bool isSelective() const;
+   lt_uint32 getModifications(const LTIScene &scene) const;
+   LT_STATUS getMetadataBlob(const char *type, LTIOStreamInf *&stream) const;
+
 
 
    // LTIImageStage
@@ -60,7 +63,6 @@ public:
    lt_int64 getEncodingCost(const LTIScene& scene) const;
    bool getReaderScene(const LTIScene &decodeScene,
                        LTIScene &readerScene) const;
-   virtual lt_uint32 getModifications(const LTIScene &scene) const;
 
    LT_STATUS overrideBackgroundPixel(const LTIPixel *backgroundPixel);
    LT_STATUS overrideNoDataPixel(const LTIPixel *nodataPixel);

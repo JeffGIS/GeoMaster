@@ -134,4 +134,9 @@ LT_STATUSSTRING_ADD(LT_STS_UTIL_LocaleNotSet, "locale could not be set")
 #define LT_STS_UTIL_ThreadAlreadyRunning                    3110
 LT_STATUSSTRING_ADD(LT_STS_UTIL_ThreadAlreadyRunning,      "thread is already running")
 
+
+#define LT_STS_ForkError                                    3111
+LT_STATUSSTRING_ADD(LT_STS_ForkError,                     "could not start child process")
+
+
 #endif // LT_UTILSTATUS_H

@@ -132,13 +132,13 @@ public:
    const lt_uint8* getPadValue() const;
 
    // not for public use
-   lt_uint32 getBlockOffset(lt_uint32 index) const;
+   lt_uint64 getBlockOffset(lt_uint32 index) const;
 
    // not for public use
-   lt_uint32 getNextBlockOffset(lt_uint32 index) const;
+   lt_uint64 getNextBlockOffset(lt_uint32 index) const;
 
    // not for public use
-   bool isPaddedBlock(lt_uint32 index) const;
+   bool isMaskedBlock(lt_uint32 index) const;
 
    // not for public use
    LT_STATUS isSupported() const;
@@ -216,11 +216,11 @@ private:
    lt_uint16 m_TPXCDLNTH;
    lt_uint8* m_TPXCD;
    int m_TPXCDlen;
-   lt_uint32* m_BMRBND;
+   lt_uint64* m_BMRBND;
    lt_uint32* m_TMRBND;
 
    // geo stuff
-   double* m_geoPoints; // ulx,uly , urx,ury , lrx,lry , llx,lly
+   double *m_geoPoints; // ul(lat,lon), ur(lat,lon), lr(lat,lon), ll(lat,lon)
    int m_zone;
    bool m_igeoloValid;
 

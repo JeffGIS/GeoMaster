@@ -37,7 +37,7 @@
 #define LT_PLATFORM_H
 
 /* Check Compiler */
-#if (defined(__GNUC__) || defined(__GNUG__)) && (3 <= __GNUC__ && __GNUC__ <= 4)
+#if (defined(__GNUC__) || defined(__GNUG__)) && (3 <= __GNUC__ && __GNUC__ <= 5)
    #define LT_COMPILER_GNU 1
 
    #if defined(__GNUC__)
@@ -49,8 +49,10 @@
 
    #if(__GNUC__ == 3)
       #define LT_COMPILER_GCC3 1
-   #else
+   #elif(__GNUC__ == 4)
       #define LT_COMPILER_GCC4 1
+   #else
+      #define LT_COMPILER_GCC5 1
    #endif
 
    #define LT_DEPRECATED(NEW) __attribute__ ((__deprecated__))
@@ -67,7 +69,7 @@
 
    #define LT_DEPRECATED(NEW)
 
-#elif defined(_MSC_VER) &&  (1300 <= _MSC_VER && _MSC_VER <= 1900)  
+#elif defined(_MSC_VER) &&  (1300 <= _MSC_VER && _MSC_VER <= 1916)  
    #define LT_COMPILER_MS 1
    #if _MSC_VER < 1400
       #define LT_COMPILER_MS7 1
@@ -81,8 +83,10 @@
       #define LT_COMPILER_MS11 1
    #elif _MSC_VER < 1900
       #define LT_COMPILER_MS12 1
-   #else
+   #elif _MSC_VER < 1910
       #define LT_COMPILER_MS14 1
+   #else
+      #define LT_COMPILER_MS17 1
    #endif
 
    #if !defined(_CRT_SECURE_NO_DEPRECATE) && _MSC_VER >= 1400
@@ -127,7 +131,7 @@
 #elif defined(ARM) || defined(_ARM_) || defined(__arm__)
    #define LT_ARCH_ARM 1
    #define LT_LITTLE_ENDIAN
-#elif defined(__arm64) || defined(__arm64__)
+#elif defined(__arm64) || defined(__arm64__) || defined (__ARM_NEON)
    #define LT_ARCH_ARM64 1
    #define LT_LITTLE_ENDIAN
 #elif defined(__MIPSEL__)

@@ -200,6 +200,19 @@ public:
    LTIGeoCoord getGeoCoordForScene(const LTIScene &scene) const;
 
    /**
+   * get the coordinate information for a given offset and scale
+   *
+   * Return a LTIGeoCoord object for the center of the upper-left
+   *  pixel of the given scene.
+   *
+   * @param xMag
+   * @param yMag
+   * @return a LTIGeoCoord object
+   */
+   LTIGeoCoord scaleGeoCoord(double xMag, double yMag) const;
+
+
+   /**
     * set the upper-left X position
     *
     * Sets the upper-left X position.

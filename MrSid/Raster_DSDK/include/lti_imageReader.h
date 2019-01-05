@@ -50,15 +50,17 @@ public:
                           lt_uint32& width,
                           lt_uint32& height) const;
 
-   virtual LTIMaskSource *getMask() const;
-   virtual bool getPipelineInfo(LTIPipelineInfo info) const;
+   lt_uint32 getModifications(const LTIScene &scene) const;
+   LT_STATUS getMetadataBlob(const char *type, LTIOStreamInf *&stream) const;
+
 
    // LTIImageStage
+   LTIMaskSource *getMask() const;
+   bool getPipelineInfo(LTIPipelineInfo info) const;
 
    lt_int64 getEncodingCost(const LTIScene& scene) const;
    bool getReaderScene(const LTIScene &decodeScene,
                        LTIScene &readerScene) const;
-   virtual lt_uint32 getModifications(const LTIScene &scene) const;
 
    // override too support ImageReaders that don't support band selection
    LT_STATUS readBegin(const LTIPixel &pixelProps, const LTIScene &fullScene);

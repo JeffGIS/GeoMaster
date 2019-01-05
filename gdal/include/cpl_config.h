@@ -17,7 +17,7 @@
 #if defined(_MSC_VER) && (_MSC_VER < 1500)
 #  define vsnprintf _vsnprintf
 #endif
-#define snprintf _snprintf
+//#define snprintf _snprintf
 
 #define HAVE_GETCWD 1
 /* gmt_notunix.h from GMT project also redefines getcwd. See #3138 */

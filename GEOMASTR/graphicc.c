@@ -3955,9 +3955,9 @@ BOOL GetGoogleMapFile(int type)
 		CurView->CurrentGoogleScale = -1;
 	}
 	sameImage = (GoogleZoom == CurView->CurrentGoogleZoom && GoogleScale == CurView->CurrentGoogleScale && type == CurView->CurrentGoogleMapType);
+	LatLongToPixelXY(centerLL.y, centerLL.x, GoogleZoom, &pixelx, &pixely);
 	if (sameImage)
 	{
-		LatLongToPixelXY(centerLL.y, centerLL.x, GoogleZoom, &pixelx, &pixely);
 		sameImage = (pixelx == CurView->CurrentGoogleCenter.x && pixely == CurView->CurrentGoogleCenter.y);
 	}
 	if (!sameImage)

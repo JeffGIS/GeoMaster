@@ -15,6 +15,7 @@
 
 // lt_lib_mrsid_core
 #include "lti_types.h"
+#include "lti_pixel.h"
 
 LT_BEGIN_NAMESPACE(LizardTech)
 
@@ -246,11 +247,26 @@ public:
 
    LT_STATUS overrideBackgroundPixel(const LTIPixel *backgroundPixel)
    {
-      return setBackgroundPixel(backgroundPixel);
+      if (backgroundPixel != NULL)
+      {
+         LTIPixel mergedPixel(this->getPixelProps());
+         mergedPixel.setNonAlphaSampleValuesFromPixel(*backgroundPixel);
+         return setBackgroundPixel(&mergedPixel);
+      }
+      else
+         return setBackgroundPixel(NULL);
    }
+   
    LT_STATUS overrideNoDataPixel(const LTIPixel *nodataPixel)
    {
-      return setNoDataPixel(nodataPixel);
+      if (nodataPixel != NULL)
+      {
+         LTIPixel mergedPixel(this->getPixelProps());
+         mergedPixel.setNonAlphaSampleValuesFromPixel(*nodataPixel);
+         return setNoDataPixel(&mergedPixel);
+      }
+      else
+         return setNoDataPixel(NULL);
    }
 };
 

@@ -198,6 +198,12 @@ public:
 
    //@}
 
+
+   /**
+    * @brief   read a delimiter-terminated string
+    * @retval  returns NULL on failure
+    */
+   virtual char *readString(int delimiter = '\0');
 };
 
 

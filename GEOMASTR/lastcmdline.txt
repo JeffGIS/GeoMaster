@@ -1,0 +1,2 @@
+configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
+e:\pcviewer

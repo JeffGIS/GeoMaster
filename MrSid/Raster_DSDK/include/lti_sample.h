@@ -215,9 +215,13 @@ public:
    float getValueFloat32() const;
    double getValueFloat64() const;
 
-   void setValueFromDouble(double);
+   LT_STATUS setValueFromDouble(double);
    double getValueAsDouble() const;
    /*@}*/
+
+protected:
+   friend class LTIPixel;
+   void setColor(LTIColor color);
 
 private:
    union ValueType

@@ -133,6 +133,11 @@ public:
    lt_int32 getChildYPosAtMag(double mag) const;
    // for LizardTech internal use only
    bool getChildScene(const LTIScene &parentScene, LTIScene &childScene) const;
+
+
+   static LT_STATUS push(LTIImageStage *&pipeline, LTIScene &scene,
+                         const LTIPixel *backgroundPixel = NULL);
+
 protected:
    LT_STATUS decodeBegin(const LTIPixel &pixelProps,
                          const LTIScene &fullScene);

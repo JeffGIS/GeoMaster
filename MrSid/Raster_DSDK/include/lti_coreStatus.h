@@ -43,6 +43,8 @@ LT_STATUSSTRING_ADD(LTI_STS_Core_InternalError, "internal error")
 #define LTI_STS_Core_AllocFailed                   50008
 LT_STATUSSTRING_ADD(LTI_STS_Core_AllocFailed, "memory allocation failed")
 
+#define LTI_STS_Core_StripSizeOverflow             50009
+LT_STATUSSTRING_ADD(LTI_STS_Core_StripSizeOverflow, "strip cannot be allocated on this architecture")
 
 #define LTI_STS_Core_WorldFileNameError            50010    // NIT: add filename string
 LT_STATUSSTRING_ADD(LTI_STS_Core_WorldFileNameError, "error in world file name")
@@ -102,56 +104,59 @@ LT_STATUSSTRING_ADD(LTI_STS_Core_MetadataOrdinalityMismatch, "unexpected number 
 #define LTI_STS_Core_MetadataUnsupportedValue      50030
 LT_STATUSSTRING_ADD(LTI_STS_Core_MetadataUnsupportedValue, "metadata key cannot support this value")
 
-#define LT_STS_Core_BBBImageDimsIncorrect            50100
+#define LT_STS_Core_BBBImageDimsIncorrect          50100
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBImageDimsIncorrect, "incorrect BBB image dimensions")
 
-#define LT_STS_Core_BBBDomainBitsIncorrect           50101
+#define LT_STS_Core_BBBDomainBitsIncorrect         50101
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBDomainBitsIncorrect, "incorrect BBB domain bits")
 
-#define LT_STS_Core_BBBWordLength                    50102
+#define LT_STS_Core_BBBWordLength                  50102
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBWordLength, "incorrect BBB word length")
 
-#define LT_STS_Core_BBBNot1Or3Banded                 50103
+#define LT_STS_Core_BBBNot1Or3Banded               50103
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBNot1Or3Banded, "BBB image not 1 or 3 bands")
 
-#define LT_STS_Core_BBBUnknownLayout                 50104
+#define LT_STS_Core_BBBUnknownLayout               50104
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBUnknownLayout, "unknown BBB image layout")
 
-#define LT_STS_Core_BBBUnknownByteOrder              50105
+#define LT_STS_Core_BBBUnknownByteOrder            50105
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBUnknownByteOrder, "incorrect BBB byte order")
 
-#define LT_STS_Core_BBBMissingNBANDS                 50106
+#define LT_STS_Core_BBBMissingNBANDS               50106
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBMissingNBANDS, "BBB missing NBANDS")
 
-#define LT_STS_Core_BBBMissingNCOLS                  50107
+#define LT_STS_Core_BBBMissingNCOLS                50107
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBMissingNCOLS, "BBB missing NCOLS")
 
-#define LT_STS_Core_BBBMissingNROWS                  50108
+#define LT_STS_Core_BBBMissingNROWS                50108
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBMissingNROWS, "BBB missing NROWS")
 
-#define LT_STS_Core_BBBBadFormat                     50109
+#define LT_STS_Core_BBBBadFormat                   50109
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBBadFormat, "invalid BBB header format")
 
-#define LT_STS_Core_BBBInvalidLayout                 50110
+#define LT_STS_Core_BBBInvalidLayout               50110
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBInvalidLayout, "BBB incorrect layout")
 
-#define LT_STS_Core_BBBBadColorSpace                 50111
+#define LT_STS_Core_BBBBadColorSpace               50111
 LT_STATUSSTRING_ADD(LT_STS_Core_BBBBadColorSpace, "BBB bad colorspace")
 
-#define LT_STS_Core_AOINotRectangular                50112
+#define LT_STS_Core_AOINotRectangular              50112
 LT_STATUSSTRING_ADD(LT_STS_Core_AOINotRectangular, "area of interest (AOI) not rectangular")
 
-#define LTI_STS_Core_UnsupMaskDataType              50113
+#define LTI_STS_Core_UnsupMaskDataType             50113
 LT_STATUSSTRING_ADD(LTI_STS_Core_UnsupMaskDataType, "unsupported datatype in shape mask")
 
-#define LTI_STS_Core_SVDMaxIterations               50114
+#define LTI_STS_Core_SVDMaxIterations              50114
 LT_STATUSSTRING_ADD(LTI_STS_Core_SVDMaxIterations, "SVD took too many iterations")
 
-#define LTI_STS_Core_IntegerOverflow                50115
+#define LTI_STS_Core_IntegerOverflow               50115
 LT_STATUSSTRING_ADD(LTI_STS_Core_IntegerOverflow, "integer overflow")
 
+#define LTI_STS_Core_DatatypeOutOfRange            50117
+LT_STATUSSTRING_ADD(LTI_STS_Core_DatatypeOutOfRange, "datatype overflow")
+
 #define LTI_STS_Core_Max                           50199
-LT_STATUSSTRING_ADD(LTI_STS_Core_Base, "lt_lib_mrsid_core max")
+LT_STATUSSTRING_ADD(LTI_STS_Core_Max, "lt_lib_mrsid_core max")
 
 
 #endif // LTI_CORESTATUS_H

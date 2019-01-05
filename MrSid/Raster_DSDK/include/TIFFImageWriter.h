@@ -75,10 +75,15 @@ public:
    LT_STATUS writeStrip(LTISceneBuffer& stripBuffer, const LTIScene& stripScene);
    LT_STATUS writeEnd();
 
+
+   void setEndian(LTIEndian value);
+
 private:
    static LT_STATUS getLibtiffError(void);
 
    struct tiff *m_tiff;
+   LTIEndian m_endian;
+
    bool m_writeResolution;
    bool m_writeGeoTIFF;
    bool m_allowBigTIFF;

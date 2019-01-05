@@ -205,7 +205,6 @@ public:
                                        lt_uint32 height,
                                        lt_uint32 iconsize);
 
-#if 0
    /**
     * get the magnification needed to scale an image to a given icon size
     *
@@ -219,7 +218,6 @@ public:
                                lt_uint32 iconsize);
 
    static double getMaxMag(lt_uint32 width, lt_uint32 height);
-#endif
 
    /**
     * get dimensions at an octave

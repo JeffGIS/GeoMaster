@@ -16,15 +16,6 @@
 // lt_lib_base
 #include "lt_base.h"
 
-// system
-#include <stdlib.h>
-
-
-#if defined(LT_COMPILER_MS)
-   #pragma warning(push,4) 
-#endif
-
-
 LT_BEGIN_NAMESPACE(LizardTech)
 
 class LTFileSpec;
@@ -69,7 +60,6 @@ int i;
 LTUtilStatusData::popBegin(sts);
 // parse string for code sts to determine needed data items...
 LTUtilStatusData::popString(str);
-LTUtilStatusData::popInt32(i);
 LTUtilStatusData::popEnd();
 ...
 
@@ -142,13 +132,11 @@ public:
    // remove the current error frame, if any (this is like doing the pop
    // begin/end sequence, if there is an active frame)
    static void clear();
+
+   class ErrorState;
 };
 
 
 LT_END_NAMESPACE(LizardTech)
-
-#if defined(LT_COMPILER_MS)
-   #pragma warning(pop) 
-#endif
 
 #endif // LT_UTILSTATUSDATA_H
