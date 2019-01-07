@@ -3428,7 +3428,7 @@ GotCloseFilehSQL:
 			AZ = atof(Arg[1]);
 			if (AZ > HALFPI && AZ < HALFPI*3)
 				AZ = LTWOPI (AZ+PY);
-			sprintf (OutLoc,"%Flf",AZ); 
+			sprintf (OutLoc,"%f",AZ); 
 			goto Rtnl;  
 		}
 
@@ -4561,7 +4561,7 @@ GotCloseFilehSQL:
 					goto RtnFalse;
 			}
 			pcmd = malloc(MAX_PATH * 2);
-			sprintf(pcmd, "$SESSION(CREATE,GMEdit /GMEdit '%s' %s)", Arg[1],atob(Arg[3]));
+			sprintf(pcmd, "$SESSION(CREATE,GMEdit /GMEdit '%s' %i)", Arg[1],atob(Arg[3]));
 			ExpandText(pcmd);
 			free(pcmd);
 			goto RtnTrue;

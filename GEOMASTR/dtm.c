@@ -1426,7 +1426,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	CreateStatusWind (hWndMain,1,0);
 	pRec=GlobalLock (hRec); 
 	fgetstring (pRec,128,Fid);
-	if (sscanf (pRec,"%ld %ld %Flf %ld %i %Flf %Flf",&nRows,&nCols,&DTMData.GridSpace,&VoidVal,&nCharPerCell,&DTMData.SouthWestNode.x,&Maxy) != 7)  
+	if (sscanf (pRec,"%ld %ld %lf %ld %hi %lf %lf",&nRows,&nCols,&DTMData.GridSpace,&VoidVal,&nCharPerCell,&DTMData.SouthWestNode.x,&Maxy) != 7)  
 		goto Exit;
 	GlobalUnlock (hRec);
 	DTMData.Bounds.ymn = Maxy - (long)(nRows-1) * DTMData.GridSpace; 
@@ -1696,7 +1696,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	CreateStatusWind (hWndMain,1,0);
 	pRec=GlobalLock (hRec); 
 	fgetstring (pRec,128,Fid);
-	if (sscanf (pRec,"%ld %ld %Flf %ld %i %Flf %Flf",&nRows,&nCols,&DTMData.GridSpace,&VoidVal,&nCharPerCell,&DTMData.SouthWestNode.x,&Maxy) != 7)  
+	if (sscanf (pRec,"%ld %ld %lf %ld %hi %lf %lf",&nRows,&nCols,&DTMData.GridSpace,&VoidVal,&nCharPerCell,&DTMData.SouthWestNode.x,&Maxy) != 7)  
 		goto Exit;
 	GlobalUnlock (hRec);
 	DTMData.Bounds.ymn = Maxy - (long)(nRows-1) * DTMData.GridSpace; 

@@ -1445,7 +1445,7 @@ ProcessBitmap:
 			    else if (PRJ_UNITS[3] == 2 && PRJ_UNITS[1] == 1)
 			    	conversion = MFT; */
 		    	fgetstring (str,128,FidClip);
-			    n=sscanf (str,"%Flf %Flf %Flf %Flf",&minx, &miny,&maxx, &maxy);
+			    n=sscanf (str,"%lf %lf %lf %lf",&minx, &miny,&maxx, &maxy);
 	    		GSSiClose (FidClip);
 			    WX[0] = WX[1] = BoundSP.xmn*conversion;
 			    WX[2] = WX[3] = BoundSP.xmn*conversion + (pDibInfo->bmiHeader.biWidth-1) * fabs (Resolution);  

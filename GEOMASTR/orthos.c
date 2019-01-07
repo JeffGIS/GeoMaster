@@ -2410,7 +2410,7 @@ BOOL TransformImage (LPSTR TIFFile,LPSTR TranFile,LPSTR BMPFile,LPSTR BPWFile,LP
 		if (FidArea != HFILE_ERROR)
 		{   
 			while (fgetstring (str,128,FidArea))
-				if (sscanf (str,"%Flf %Flf",&AreaPoints[nAreaPts].x,&AreaPoints[nAreaPts].y) == 2)
+				if (sscanf (str,"%lf %lf",&AreaPoints[nAreaPts].x,&AreaPoints[nAreaPts].y) == 2)
 					nAreaPts++;  
 			GSSiClose (FidArea);
 

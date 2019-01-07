@@ -14,7 +14,7 @@
 #define SWKRIGHT 7
 #define HEADINGERRORDIF 75
 
-typedef enum CrackType
+enum CrackType
 {
     CrackTypeRamp,
     CrackTypeUpperLanding,
@@ -23,14 +23,14 @@ typedef enum CrackType
     CrackTypeRightSidewalk
 };
 
-typedef enum MiddleMeasurement
+enum MiddleMeasurement
 {
     MiddleMeasurementNone,
     MiddleMeasurementCurbCutDistance,
     MiddleMeasurementBumpWidth,
     MiddleMeasurementBumpHeight
 };
-typedef enum IntersectionStatus
+enum IntersectionStatus
 {
 	InitialStatus,
 		ComplexStatus,

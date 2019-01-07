@@ -6372,7 +6372,7 @@ int GSSiGetTempFileName (BYTE Drive,LPSTR Pre,UINT Uniquex,LPSTR Name)
 BOOL GetTempDir (LPSTR Dir)
 {   
 	LPSTR	pBS;
-	static	time_t	StartTime=0;
+	static	__time32_t	StartTime=0;
 	static	char TempDir[MAX_PATH];
 	int		n=0;
 	BOOL	rtn;
@@ -6388,7 +6388,7 @@ BOOL GetTempDir (LPSTR Dir)
 		strcpy (Dir,TempDir);
 		return TRUE;
 	}
-	time (&StartTime);
+	_time32 (&StartTime);
 	do
 	{
 		GetTempPath (MAX_PATH,TempDir);
@@ -7233,7 +7233,7 @@ DPOINT atopt (LPSTR Value,LPBOOL pErr)
 {                 
 	DPOINT	DPoint;
 	
-	if (sscanf (Value,"%Flf %Flf",&DPoint.x,&DPoint.y) != 2)
+	if (sscanf (Value,"%lf %lf",&DPoint.x,&DPoint.y) != 2)
 	{
 		*pErr = TRUE;
 		DPoint.x = DPoint.y = 0;
@@ -7309,7 +7309,7 @@ MNMXCORD atobounds(LPSTR Value, LPBOOL err)
 {
 	MNMXCORD	Bounds;
 
-	if (sscanf(Value, "%Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.xmx, &Bounds.ymx) != 4)
+	if (sscanf(Value, "%lf %lf %lf %lf", &Bounds.xmn, &Bounds.ymn, &Bounds.xmx, &Bounds.ymx) != 4)
 	{
 		Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
 		*err = TRUE;
@@ -7333,7 +7333,7 @@ MNMXCORD3D atobounds3D(LPSTR Value, LPBOOL err)
 {
 	MNMXCORD3D	Bounds;
 
-	if (sscanf(Value, "%Flf %Flf %Flf %Flf %Flf %Flf", &Bounds.xmn, &Bounds.ymn, &Bounds.zmn, &Bounds.xmx, &Bounds.ymx, &Bounds.zmx) != 6)
+	if (sscanf(Value, "%lf %lf %lf %lf %lf %lf", &Bounds.xmn, &Bounds.ymn, &Bounds.zmn, &Bounds.xmx, &Bounds.ymx, &Bounds.zmx) != 6)
 	{
 		Bounds.xmn = Bounds.ymn = Bounds.zmn = Bounds.xmx = Bounds.ymx = Bounds.zmx = 0;
 		*err = TRUE;
@@ -8606,7 +8606,7 @@ GSSiExitProg (387);
  if (ShowText)
  {
 	 if (ShowNums)
-	     sprintf(Text, "%.1f%% (%lu of %lu)",PCTDone,Done,MaxLen);
+	     sprintf(Text, "%.1f%% (%llu of %llu)",PCTDone,Done,MaxLen);
 	 else
 	     sprintf(Text, "%.2f%%",PCTDone);
 	 if (hWnd == LasthWnd && !_fstrcmp (Text,LastText))

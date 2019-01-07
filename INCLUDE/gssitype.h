@@ -1245,7 +1245,7 @@ typedef struct {char	ID[32],
 				long	SaveScreenID[MAX_VIEWPORTS];
 				HANDLE	hSaveScreen[MAX_VIEWPORTS];
 				DPOINT	Loc[MAXVEHLOC];         
-				time_t	LocTime[MAXVEHLOC]; 
+				__time32_t	LocTime[MAXVEHLOC]; 
 				short	Speeds[MAXVEHLOC];
 				short	Heading[MAXVEHLOC]; 
 				short	Status;

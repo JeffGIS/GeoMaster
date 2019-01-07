@@ -15,13 +15,13 @@
 
 #include "gmextern.h"
 
-typedef struct CITEM
+struct CITEM
 {
     char szItem[ITEM_MAX_SIZE+1];
     char szValue[VALUE_MAX_SIZE+1];
 };
 
-typedef struct CONV
+struct CONV
 {
     BOOL  bInTerminate;
     enum PENDINGACK ePendingAck;

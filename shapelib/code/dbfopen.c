@@ -831,7 +831,7 @@ static void *DBFReadAttribute(DBFHandle psDBF, long hEntity, int iField,
 /*      Read an integer attribute.                                      */
 /************************************************************************/
 
-long SHPAPI_CALL
+int SHPAPI_CALL
 DBFReadIntegerAttribute( DBFHandle psDBF, int iRecord, int iField )
 
 {

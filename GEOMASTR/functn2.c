@@ -329,7 +329,7 @@ GSSiExitProg (1350);
 				AddSpace=FALSE;
 			while (fgetstring (str,128,Fid))
 			{
-				if (sscanf (str,"%Flf %Flf %Flf %Flf",&fromX,&fromY,&toX,&toY)==4)
+				if (sscanf (str,"%lf %lf %lf %lf",&fromX,&fromY,&toX,&toY)==4)
 				{   
 					switch (*Arg[5])
 					{
@@ -365,7 +365,7 @@ GSSiExitProg (1350);
 				{   
 					if (ipt == minpt)
 					{  
-						sscanf (str,"%Flf %Flf %Flf %Flf",&fromX,&fromY,&toX,&toY);
+						sscanf (str,"%lf %lf %lf %lf",&fromX,&fromY,&toX,&toY);
 						if (AddSpace)					
 							sprintf (str,"#%.14lg %.14lg %.14lg %.14lg",fromX,fromY,toX,toY); 
 						else
@@ -445,7 +445,7 @@ GSSiExitProg (1350);
 				{
 					if (ipt == WantPt)
 					{
-						if (sscanf (str,"%Flf %Flf",&Point.x,&Point.y)==2) 
+						if (sscanf (str,"%lf %lf",&Point.x,&Point.y)==2) 
 							rtn = TRUE;
 						break;
 					}
@@ -513,7 +513,7 @@ GSSiExitProg (1350);
 				    		if ((lpBAR = _fstrrchr (str,'|')))
 				    		{   
 				    			lpBAR++;
-								if (sscanf (lpBAR,"%Flf %Flf",&CLocPoint.x,&CLocPoint.y) == 2)
+								if (sscanf (lpBAR,"%lf %lf",&CLocPoint.x,&CLocPoint.y) == 2)
 								{	
 									GSSiGlobUlFree (&hTemp);
 					              	ZoomToPointAndDist (CLocPoint,LocationOffset,FALSE);
@@ -664,7 +664,7 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-			if (sscanf (Arg[1],"%Flf %Flf",&Point.x,&Point.y) != 2)
+			if (sscanf (Arg[1],"%lf %lf",&Point.x,&Point.y) != 2)
 				goto RtnFalse;
 
 			if (AddNewPoint(Point,atob(Arg[2]),Arg[3])>0) 
@@ -2782,7 +2782,7 @@ GSSiExitProg (1350);
 			short	opt;
 						
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
-			if (sscanf(Arg[1], "%Flf %Flf %Flf %Flf", &Bounds.xmn,
+			if (sscanf(Arg[1], "%lf %lf %lf %lf", &Bounds.xmn,
 										  		   &Bounds.ymn,
 										  		   &Bounds.xmx,
 										  		   &Bounds.ymx) != 4)
@@ -2828,7 +2828,7 @@ GSSiExitProg (1350);
 				default:
 					goto RtnFalse;
 			}
-			sprintf (OutLoc,"%Flf %Flf",Point.x,Point.y); 
+			sprintf (OutLoc,"%f %f",Point.x,Point.y); 
 			l = _fstrlen (OutLoc);  
 		    goto Rtnl;
 		}  
@@ -3542,7 +3542,7 @@ GSSiExitProg (1350);
 			GSSiGlobUlFree (&hSaveVis);
 			if (!rtn)
 				goto RtnFalse; 
-			sprintf (OutLoc,"%Flf %Flf %Flf %Flf",Bounds.xmn,Bounds.ymn,Bounds.xmx,Bounds.ymx);
+			sprintf (OutLoc,"%f %f %f %f",Bounds.xmn,Bounds.ymn,Bounds.xmx,Bounds.ymx);
 			l = _fstrlen (OutLoc);  
 		    goto Rtnl;
 		}
@@ -4859,7 +4859,7 @@ GSSiExitProg (1350);
 				goto RtnFalse;
 			if (!ExistFile (Arg[1]))
             	goto RtnFalse;
-			if (sscanf (Arg[2],"%Flf %Flf %Flf %Flf",&Bounds.xmn,&Bounds.ymn,
+			if (sscanf (Arg[2],"%lf %lf %lf %lf",&Bounds.xmn,&Bounds.ymn,
 											  	   &Bounds.xmx,&Bounds.ymx) != 4)
 				goto RtnFalse;
 			if (sscanf (Arg[3],"%i %i %i %i",&Rect.left,&Rect.bottom,
@@ -6198,7 +6198,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		{
 			char capScreenFile[MAX_PATH];
 
-			sprintf(capScreenFile, "%s\\%i.png", DocDir, systim);
+			sprintf(capScreenFile, "%s\\%lli.png", DocDir, systim);
 			ExpandText(capScreenFile);
 			hDC = GetWindowDC(hWnd);
 			GetWindowRect(hWndTarget,&WindowRect);
@@ -6213,7 +6213,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPWINDOW");
 			fputstring(line, fid);
-			sprintf(line, "%i.png", systim);
+			sprintf(line, "%lli.png", systim);
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);
@@ -6225,7 +6225,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		{
 			char capScreenFile[MAX_PATH];
 
-			sprintf(capScreenFile, "%s\\%i.png", DocDir, systim);
+			sprintf(capScreenFile, "%s\\%lli.png", DocDir, systim);
 			ExpandText(capScreenFile);
 			hDC = GetWindowDC(hWnd);
 			GetClientRect(hWnd, &ScreenRect);
@@ -6237,7 +6237,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPSCREEN");
 			fputstring(line, fid);
-			sprintf(line, "%i.png", systim);
+			sprintf(line, "%lli.png", systim);
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);

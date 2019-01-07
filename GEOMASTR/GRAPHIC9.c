@@ -1655,7 +1655,7 @@ void DisplayTransformThemeLegend(short From)
 			{
 				if (N != GetBest) 
 				{
-					if (sscanf (str,"%Flf %Flf %Flf %Flf",XFROM,YFROM,XTO,YTO) == 4) 
+					if (sscanf (str,"%lf %lf %lf %lf",XFROM,YFROM,XTO,YTO) == 4) 
 					{
 					    XFROM++;
 					    YFROM++;

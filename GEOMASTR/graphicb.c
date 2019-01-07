@@ -2451,7 +2451,7 @@ GSSiExitProg (1170);
 	pBlockingPoints = (LPBLOCKINGPOINT)GlobalLock (hBlockingPoints);
 	while (fgetstring (str,128,Fid)) 
 	{   
-		if (sscanf (str,"%Flf %Flf %Flf",&pBlockingPoints->Point.x,&pBlockingPoints->Point.y,&pBlockingPoints->Dist) != 3)
+		if (sscanf (str,"%lf %lf %lf",&pBlockingPoints->Point.x,&pBlockingPoints->Point.y,&pBlockingPoints->Dist) != 3)
 			rtn = FALSE;
 		nBlockingPoints++;
 	}

@@ -645,12 +645,12 @@ GotFirstLine:
         	goto S190;
         while(fgetstring (str,256,lpFile1))
         {
-		  if (sscanf (str,"%Flf %Flf %Flf %Flf",&XFROM[NTP], 
+		  if (sscanf (str,"%lf %lf %lf %lf",&XFROM[NTP], 
 									  		  &YFROM[NTP],
 									  		  &XTO[NTP],
 									  		  &YTO[NTP]) != 4)
 		  {
-			  if (sscanf (str,"%Flf, %Flf, %Flf, %Flf",&XFROM[NTP], 
+			  if (sscanf (str,"%lf, %lf, %lf, %lf",&XFROM[NTP], 
 										  		  &YFROM[NTP],
 										  		  &XTO[NTP],
 										  		  &YTO[NTP]) != 4)

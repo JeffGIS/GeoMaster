@@ -3833,7 +3833,7 @@ BOOL CreateSportMapCD (LPSTR OrderFile,LPSTR OutDir,short AreaNum)
 				pVal = DType;
 				*++pVal = 0;
 				SetGlobalValue ("%RES",DType);
-				sscanf (pTAB,"%ld\t%ld\t%Flf %Flf %Flf %Flf",&SQMiles,&MB,&Bounds.xmn,&Bounds.ymn,&Bounds.xmx,&Bounds.ymx);
+				sscanf (pTAB,"%ld\t%ld\t%lf %lf %lf %lf",&SQMiles,&MB,&Bounds.xmn,&Bounds.ymn,&Bounds.xmx,&Bounds.ymx);
 				Width = sqrt (SQMiles);  
 				Width *= (5280 * FTM); 
 				Width *= GetGlobalDVal2 ("[SPMINC]",1.0);
@@ -4144,9 +4144,9 @@ BOOL LoadPRIMBounds (short idum)
 /*		fgetstring (str,256,Fid);
 		fgetstring (str,256,Fid);
 		fgetstring (str,256,Fid);
-		sscanf (str,"%Flf %Flf",&Bounds.xmn,&Bounds.ymn);
+		sscanf (str,"%f %f",&Bounds.xmn,&Bounds.ymn);
 		fgetstring (str,256,Fid);
-		sscanf (str,"%Flf %Flf",&Bounds.xmx,&Bounds.ymx);
+		sscanf (str,"%f %f",&Bounds.xmx,&Bounds.ymx);
 		fgetstring (str,256,Fid); 
 		n = atol (str); 
 		i = 0;
@@ -4156,7 +4156,7 @@ BOOL LoadPRIMBounds (short idum)
 			{   
 				if (*str != '#')
 				{
-					if (sscanf (str,"%Flf %Flf %Flf %Flf",&XFROM[i],&YFROM[i],&XTO[i],&YTO[i]) == 4)
+					if (sscanf (str,"%f %f %f %f",&XFROM[i],&YFROM[i],&XTO[i],&YTO[i]) == 4)
 						i++; 
 				}
 			}
@@ -4166,7 +4166,7 @@ BOOL LoadPRIMBounds (short idum)
 		{   
 			if (*str != '#')
 			{
-				if (sscanf (str,"%Flf %Flf %Flf %Flf",&XFROM[i],&YFROM[i],&XTO[i],&YTO[i]) == 4)
+				if (sscanf (str,"%lf %lf %lf %lf",&XFROM[i],&YFROM[i],&XTO[i],&YTO[i]) == 4)
 					i++; 
 			}
 		} 
@@ -4188,7 +4188,7 @@ BOOL LoadPRIMBounds (short idum)
 			while (*str && *str != 'E')
 			{   
 				
-				ii = sscanf (str,"%Flf %Flf",&pPointsBMP[NumPoints].x,&pPointsBMP[NumPoints].y);
+				ii = sscanf (str,"%lf %lf",&pPointsBMP[NumPoints].x,&pPointsBMP[NumPoints].y);
 				NumPoints++;
 				fgetstring (str,256,FidAD);
 			}
@@ -4246,7 +4246,7 @@ BOOL LoadPRIMBounds (short idum)
 		{   
 			if (*str != '#')
 			{
-				if (sscanf (str,"%Flf %Flf %Flf %Flf",&pPRIMFiles[ifile].BMPX[pPRIMFiles[ifile].nTranPoints],
+				if (sscanf (str,"%lf %lf %lf %lf",&pPRIMFiles[ifile].BMPX[pPRIMFiles[ifile].nTranPoints],
 				                                      &pPRIMFiles[ifile].BMPY[pPRIMFiles[ifile].nTranPoints],
 				                                      &pPRIMFiles[ifile].WorldX[pPRIMFiles[ifile].nTranPoints],
 				                                      &pPRIMFiles[ifile].WorldY[pPRIMFiles[ifile].nTranPoints]) == 4)
@@ -4890,7 +4890,7 @@ BOOL PickNearestCPTFile (DPOINT Point,LPSTR Filelist,LPSTR IgnoreName,double Max
 					if (!*str || *str == '#')
 						goto Next;
 					ExpandText (str);
-					if (sscanf (str,"%Flf %Flf %Flf %Flf",&From.x,&From.y,&To.x,&To.y) == 4)
+					if (sscanf (str,"%lf %lf %lf %lf",&From.x,&From.y,&To.x,&To.y) == 4)
 					{
 						if (ldistp (Point,To) < MaxDist)
 						{
@@ -6294,7 +6294,7 @@ Next:
 						if (TotRead)
 						{
 							SubstituteDL (FromFileIN,FALSE);
-							sprintf (str,"%s\t%s\t%ld",FromFileIN,DataLocDir,TotRead);
+							sprintf (str,"%s\t%s\t%lld",FromFileIN,DataLocDir,TotRead);
 							sprintf (RestartFile,"%sRestartCache.txt",CacheDir);
 							FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_CREATE);
 							_lwrite (FidRestart,str,600);

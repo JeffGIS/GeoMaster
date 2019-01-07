@@ -854,7 +854,7 @@ short LoadTranFilePoints (LPSTR Name,LPDOUBLE XFROM, LPDOUBLE YFROM, LPDOUBLE XT
 		return 0;
 	while (fgetstring (str,256,Fid))
 	{ 
-		if (sscanf (str,"%Flf %Flf %Flf %Flf",XFROM++,YFROM++,XTO++,YTO++) == 4)
+		if (sscanf (str,"%lf %lf %lf %lf",XFROM++,YFROM++,XTO++,YTO++) == 4)
 			N++;
 		else
 			goto Exit;

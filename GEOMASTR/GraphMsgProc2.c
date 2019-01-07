@@ -3125,7 +3125,7 @@ BOOL FAR PASCAL DTMTOTEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 /*                FidTemp = GSSiOpenFile ("[%DL]attribut\\hpelev.txt",&OFStruct,OF_READ);
                 while (fgetstring (str,200,FidTemp))
                 {
-                	sscanf (str,"%Flf %Flf %Flf",&HPElev,&Point.y,&Point.x); 
+                	sscanf (str,"%f %f %f",&HPElev,&Point.y,&Point.x); 
                 	ConvertCoord(&Point,3,1); 
                 	Elv = NGIELV (Point,hSurf,0); 
                 	maxdif = max (maxdif,fabs(Elv - HPElev));
@@ -7793,7 +7793,7 @@ BOOL FAR PASCAL PNPARMSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 			case IDC_MAKETEXT: 
 				GetDlgItemText (hWndDlg,IDC_LONGITUDE,longitude,32);
 				GetDlgItemText (hWndDlg,IDC_LATITUDE,latitude,32);
-				sprintf (txt,"$TCPSEND([SOCKET],$STR([%%PNFORMAT]=11111111111;[%C]=$WHEREAT(%s,%s)))",longitude,latitude);
+				sprintf (txt,"$TCPSEND([SOCKET],$STR([%%PNFORMAT]=11111111111;[%%C]=$WHEREAT(%s,%s)))",longitude,latitude);
 				SetGlobalValueBool ("SHOWRESULT",TRUE);
 				ExpandText (txt);
 				break; 
@@ -10747,7 +10747,8 @@ BOOL FAR PASCAL VEHICLEDEFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 			GetColorName (pVehLoc->Color,ColorName);  
 			if (pVehLoc->nLoc) 
 			{
-				_fstrcpy (CTime,ctime (&pVehLoc->LocTime[pVehLoc->nLoc-1]));  
+				time_t t = pVehLoc->LocTime[pVehLoc->nLoc - 1];
+				_fstrcpy (CTime,ctime (&t));  
 				pBS = _fstrchr (CTime,'\n');
 				*pBS = 0;
 			}

@@ -94,12 +94,6 @@ __CGSizeEqualToSize(CGSize size1, CGSize size2)
 
 /* Rectangles. */
 
-typedef struct CGRect {
-	CGPoint origin;
-	CGSize size;
-};
-//typedef struct CGRect CGRect;
-
 
 void drawTextInRotatedRect(char* text, CGContextRef context, CGFloat mpX, CGFloat mpY, CGFloat textWidth,
 	CGFloat textHeight, CGFloat rotateRadians, CGFloat fontSize, UIColor *textColor);

@@ -1803,7 +1803,7 @@ BOOL ProcessUpdateServerRequest (SOCKET sock,int ln,LPSTR SocketInputBuffer)
 	GSSillseek (FidNetTransfer,0,0);
 	BigWrite (FidNetTransfer,&lenFile,sizeof(LONGLONG),-1);
 	GSSiClose (FidNetTransfer);
-	sprintf (msg,"OK:%s|%i",netTransferFile,lenFile);
+	sprintf (msg,"OK:%s|%lli",netTransferFile,lenFile);
 	lnMsg = strlen (msg) + 1;
 	if (send (sock,(LPSTR)&lnMsg,4,0) == 4)
 	{

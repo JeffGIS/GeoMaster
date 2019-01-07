@@ -543,7 +543,7 @@ BOOL DecodeTravLegData (long TravID,int LegNum,LPTRAVLEGDATA pLegData,LPSTR str,
 			_fstrcpy (pLegData->Parameters,pParm);   
 			if (!pPoints)
 				break;
-			sscanf (pParm,"%Flf %Flf",&pPoints->x,&pPoints->y); 
+			sscanf (pParm,"%lf %lf",&pPoints->x,&pPoints->y); 
 			pPoints[2]=pPoints[0];
 			break; 
 		case 2://not used
@@ -1014,11 +1014,11 @@ BOOL SaveTravTransformation (HANDLE hPoints,HANDLE hSnapStatus,long nPoints)
 	{
 		if (SnapCoord[i].x < DBL_MAX)
 		{
-			sprintf (str,"%Flf %Flf %Flf %Flf",Point[i].x,Point[i].y,SnapCoord[i].x,SnapCoord[i].y);
+			sprintf (str,"%lf %lf %lf %lf",Point[i].x,Point[i].y,SnapCoord[i].x,SnapCoord[i].y);
 			HaveAdjust = TRUE;
 		}
 		else
-			sprintf (str,"%Flf %Flf %Flf %Flf",Point[i].x,Point[i].y,Point[i].x,Point[i].y); 
+			sprintf (str,"%lf %lf %lf %lf",Point[i].x,Point[i].y,Point[i].x,Point[i].y); 
 		fputstring (str,Fid);
 	} 
 	GlobalUnlock (hPoints);

@@ -872,7 +872,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                          if (!(lpTAB = _fstrchr (str,'\t')))
                          	break;
                          lpTAB++;
-                         sscanf (lpTAB,"%Flf,%Flf",&UserSpecifiedBasePoint.x,&UserSpecifiedBasePoint.y);
+                         sscanf (lpTAB,"%lf,%lf",&UserSpecifiedBasePoint.x,&UserSpecifiedBasePoint.y);
 						 CurrentPoint = UserSpecifiedBasePoint;
 						 CloseStreetNameTable ();
 						 CloseNetIntersect (Opened);

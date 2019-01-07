@@ -1663,7 +1663,7 @@ HWND hwndCurrent, hwndStart;
                 {
                   fgetstring(buffer,196,Fid);
                 }//ok should have the next box.
-                if(8!=sscanf(buffer,"%64s%64s%d%d%d%d%d%d",str1,
+                if(8!=sscanf(buffer,"%64s%64s%hd%hd%hd%hd%hd%hd",str1,
                 str2,&wX,&wY,&wCX,&wCY,&wLength,&wPosition))
                 {
                   break;
@@ -1901,7 +1901,7 @@ GLOBALHANDLE ReadDialogDef(char *filename)
 		Fid = GSSiOpenFile (filename,0,OF_READ); 
 		fgetstring (buffer,199,Fid);
 		//fgets(buffer,199,file);
-		if(12 != sscanf(buffer,"%12s%80s%d%d%d%d%d%d%d%d%d%80s",str1,str2,&BorderOption,&CloseOnSave,&SaveOnClose,&wX,&wY,&wCX,&wCY,&wLength,&wItemCount,DataFile))
+		if(12 != sscanf(buffer,"%12s%80s%hd%d%hd%hd%hd%hd%hd%hd%hd%80s",str1,str2,&BorderOption,&CloseOnSave,&SaveOnClose,&wX,&wY,&wCX,&wCY,&wLength,&wItemCount,DataFile))
 			break;
 		hInfo=GSSiGlobAlloc ( 525,GHND, sizeof(DlgInfo)+((2*wItemCount-1)*sizeof(DlgItemInfo)));
 		lpInfo=(LPDLGINFO)GlobalLock(hInfo);
@@ -1949,7 +1949,7 @@ GLOBALHANDLE ReadDialogDef(char *filename)
 						break;
 				}
 			}  
-			if(8!=sscanf(buffer,"%80s%80s%d%d%d%d%d%d",str1,str2,&wX,&wY,&wCX,&wCY,&wLength,&wPosition))
+			if(8!=sscanf(buffer,"%80s%80s%hd%hd%hd%hd%hd%hd",str1,str2,&wX,&wY,&wCX,&wCY,&wLength,&wPosition))
 			{
 				i--;
 				continue;

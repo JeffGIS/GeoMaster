@@ -696,7 +696,7 @@ HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL)
     fgetstring (str,32,Fid);
     while (fgetstring (str,128,Fid))
     {   
-		int nf=sscanf (str,"%i,%i,%i,%i,%i,%i,%s",
+		int nf=sscanf (str,"%hi,%hi,%hi,%hi,%i,%i,%s",
 										   &pDB->FldInfo[pDB->NumFields].type,
 										   &pDB->FldInfo[pDB->NumFields].index,
 										   &pDB->FldInfo[pDB->NumFields].radix,
@@ -1998,7 +1998,7 @@ BOOL LoadTAGDef (void)
 					pTAGDef++;
 				else
 					pTAGDef = (LPTAGDEF)GlobalLock (hTAGDef); 
-				if (sscanf (line,"%s %i %i %i",
+				if (sscanf (line,"%s %hi %hi %hi",
 					pTAGDef->Prefix,&pTAGDef->Len,&pTAGDef->IncBeg,&pTAGDef->IncLen) != 4)
 				{
 					sprintf (Mess,"Invalid line number %i in TAG definition file\r\n%s",lineno,line);
@@ -2008,7 +2008,7 @@ BOOL LoadTAGDef (void)
 			else
 			{   
 				lpSpace = _fstrchr (&line[1],' ');
-				if (sscanf (&line[1],"%s %i %i %i",
+				if (sscanf (&line[1],"%s %hi %hi",
 					pTAGDef->VarName[pTAGDef->NumVar],&pTAGDef->VarStart[pTAGDef->NumVar],
 					&pTAGDef->VarLen[pTAGDef->NumVar]) != 3)
 				{
@@ -2532,7 +2532,7 @@ GSSiExitProg (532);
 		case 78:
 			
 			Index = min (Index,32);
-			n = sscanf (Value,"%Flf %Flf",&UserPoints[Index].x,&UserPoints[Index].y);  
+			n = sscanf (Value,"%lf %lf",&UserPoints[Index].x,&UserPoints[Index].y);  
 			break;
 			
 		case 79: /*%BOUNDS*/ 
@@ -2542,10 +2542,10 @@ GSSiExitProg (532);
 				case 1:
 				case 2:
 					Index = max (1,min (Index,2));
-					sscanf (Value,"%Flf %Flf",&UserBounds[Index-1].x,&UserBounds[Index-1].y);
+					sscanf (Value,"%lf %lf",&UserBounds[Index-1].x,&UserBounds[Index-1].y);
 				break;
 				case 0:
-					sscanf (Value,"%Flf %Flf %Flf %Flf",&UserBounds[0].x,&UserBounds[0].y,&UserBounds[1].x,&UserBounds[1].y);
+					sscanf (Value,"%lf %lf %lf %lf",&UserBounds[0].x,&UserBounds[0].y,&UserBounds[1].x,&UserBounds[1].y);
 				break;
 			}
 		break;
@@ -2554,16 +2554,16 @@ GSSiExitProg (532);
 			{   
 				default:
 				case 0:
-					sscanf (Value,"%Flf %Flf %Flf %Flf",&CurView->WBounds.xmn, 
+					sscanf (Value,"%lf %lf %lf %lf",&CurView->WBounds.xmn, 
 												  		&CurView->WBounds.ymn,
 												  		&CurView->WBounds.xmx,
 												  		&CurView->WBounds.ymx);  
 				break;
 				case 1:
-					sscanf (Value,"%Flf %Flf",&CurView->WBounds.xmn,&CurView->WBounds.ymn);
+					sscanf (Value,"%lf %lf",&CurView->WBounds.xmn,&CurView->WBounds.ymn);
 				break;
 				case 2:
-					sscanf (Value,"%Flf %Flf",&CurView->WBounds.xmx,&CurView->WBounds.ymx);
+					sscanf (Value,"%lf %lf",&CurView->WBounds.xmx,&CurView->WBounds.ymx);
 				break; 
 			}
 		CurView->HaveBounds=TRUE;
@@ -7433,7 +7433,7 @@ GSSiExitProg (567);
 	}
 	else
 	{
-		if (sscanf (str,"%Flf %Flf",&DPoint.x,&DPoint.y) != 2)
+		if (sscanf (str,"%lf %lf",&DPoint.x,&DPoint.y) != 2)
 		{
 			DPoint.x = 0;
 			DPoint.y = 0;

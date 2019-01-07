@@ -322,7 +322,7 @@ int DGNWriteGeoMaster (LPSTR Infile)
 				for (i=0;i<nPnts;i++)
 				{
 					fgetstring (str,128,Fid);line++;
-					sscanf (str,"%Flf %Flf",&asPoints[i].x,&asPoints[i].y);
+					sscanf (str,"%lf %lf",&asPoints[i].x,&asPoints[i].y);
 					asPoints[i].z = 0;
 				}
 				if (Type == -3)
@@ -348,7 +348,7 @@ FoundSym:
 //			fgetstring (str,128,Fid);line++;
 //			break;
 			fgetstring (str,128,Fid);line++;
-			sscanf (str,"%Flf %Flf %Flf",&PointLoc.x,&PointLoc.y,&Rotation);
+			sscanf (str,"%lf %lf %lf",&PointLoc.x,&PointLoc.y,&Rotation);
 			PointLoc.z = 0;
 			if (!NumSymElem[isym])
 				break;
@@ -385,7 +385,7 @@ Temp:
 					for (i=0;i<nPnts;i++)
 					{
 						fgetstring (str,128,Fid);line++;
-						sscanf (str,"%Flf %Flf",&asPoints[i].x,&asPoints[i].y);
+						sscanf (str,"%lf %lf",&asPoints[i].x,&asPoints[i].y);
 						asPoints[i].z = 0;
 					}
 					if (nPnts > 2)
@@ -424,7 +424,7 @@ Temp:
 						for (i=0;i<np;i++)
 						{
 							fgetstring (str,128,Fid);line++;
-							sscanf (str,"%Flf %Flf",&asPoints[i+ib].x,&asPoints[i+ib].y);
+							sscanf (str,"%lf %lf",&asPoints[i+ib].x,&asPoints[i+ib].y);
 							asPoints[i+ib].z = 0;
 						}
 						if (np+ib > 2)
@@ -464,7 +464,7 @@ Temp:
 			for (i=0;i<nPnts;i++)
 			{
 				fgetstring (str,128,Fid);line++;
-				sscanf (str,"%Flf %Flf",&asPoints[i].x,&asPoints[i].y);
+				sscanf (str,"%lf %lf",&asPoints[i].x,&asPoints[i].y);
 				asPoints[i].z = 0;
 			}
 			LineType = DGNT_SHAPE;
@@ -494,7 +494,7 @@ Temp:
 			DPOINT	RP;
 
 			fgetstring (str,256,Fid);line++;
-			sscanf (str,"%Flf %Flf %Flf %Flf %Flf %Flf",&RP.x,&RP.y,&Radius,&LengthInDegrees,&BackAZ,&ForAZ);
+			sscanf (str,"%lf %lf %lf %lf %lf %lf",&RP.x,&RP.y,&Radius,&LengthInDegrees,&BackAZ,&ForAZ);
 			psMembers[nAreaElements] = DGNCreateArcElem2D( hNewDGN, DGNT_ARC, 
 										 RP.x,RP.y, Radius, Radius, 
 										 0,BackAZ,-LengthInDegrees);
@@ -524,7 +524,7 @@ Temp:
 			while (nText--)
 			{
 				fgetstring (str,128,Fid);line++;
-				sscanf (str,"%Flf %Flf %i %Flf %Flf",&OrigX,&OrigY,&Font,&Height,&Rotation);
+				sscanf (str,"%lf %lf %i %lf %lf",&OrigX,&OrigY,&Font,&Height,&Rotation);
 				//DGNInverseTransformPoint( psDGN, &sOrigin );
 
 				fgetstring (str,512,Fid);line++;

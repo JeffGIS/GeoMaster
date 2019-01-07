@@ -2851,7 +2851,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 						GotOne = TRUE;
 						pTAB = _fstrchr (pTAB,' ');
 						pTAB++; 
-						sscanf (pTAB,"%Flf %Flf",&DPoint.x,&DPoint.y);
+						sscanf (pTAB,"%lf %lf",&DPoint.x,&DPoint.y);
 						ConvertCoord (&DPoint,2,1);
 						AddDPointToMinMax (&DPoint,(LPMNMXCORD)UserBounds);
 					}

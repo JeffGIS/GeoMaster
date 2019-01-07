@@ -172,10 +172,10 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 			sprintf(mess, "%i %i %i %i", Rect.left, Rect.top, Rect.right, Rect.bottom);
 			MessageBox(0, mess, "", MB_OK);
 			GetObject(hcbm, sizeof(BITMAP), &bm);
-			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, hDCMain, (int)hDCScreenBuffer);
+			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, (int)hDCMain, (int)hDCScreenBuffer);
 			MessageBox(0, mess, "", MB_OK);
 			GetObject(hBitmapScreenBuffer, sizeof(BITMAP), &bm);
-			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, hDCMain, (int)hDCScreenBuffer);
+			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, (int)hDCMain, (int)hDCScreenBuffer);
 			MessageBox(0, mess, "", MB_OK);
 		}
 		hbmpOld = SelectObject(hDCScreenBuffer, hBitmapScreenBuffer);

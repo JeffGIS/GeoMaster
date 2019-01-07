@@ -583,7 +583,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 					*lpEndPar = 0;
 					if (!GetEdgePoints (EdgeID,EdgePoints,nEdge,hEdge))
 						goto Exit;
-					sscanf (str,"%Flf %Flf %Flf %Flf",&Points[0].x, &Points[0].y,
+					sscanf (str,"%lf %lf %lf %lf",&Points[0].x, &Points[0].y,
 											  		  &Points[1].x, &Points[1].y);
 					MatchKey.Dist = ldistp (EdgePoints[0],Points[1]);
 					_fstrncpy (MatchKey.ID,EdgeID,4); 
@@ -614,9 +614,9 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 			GSSillseek (Fid2,MatchData.TranDataLoc,0);
 			fgetstring (str,200,Fid2);
 			len = _fstrlen (str); 
-			sscanf (str,"%Flf %Flf %Flf %Flf %s",&Points[0].x, &Points[0].y,
+			sscanf (str,"%lf %lf %lf %lf %s",&Points[0].x, &Points[0].y,
 											  &Points[1].x, &Points[1].y,id);
-			sprintf (str,"%f %f %f %f %s",Points[0].x,Points[0].y,NewPoint.x,NewPoint.y, id);  
+			sprintf (str,"%lf %lf %lf %lf %s",Points[0].x,Points[0].y,NewPoint.x,NewPoint.y, id);  
 			GSSillseek (Fid2,MatchData.TranDataLoc,0);
 			BigWrite (Fid2,(HPSTR)str,(UINT)len,-1);
 			GSSiClose (Fid2);
@@ -626,9 +626,9 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 			GSSillseek (Fid2,MatchDataLast.TranDataLoc,0);
 			fgetstring (str,200,Fid2); 
 			len = _fstrlen (str); 
-			sscanf (str,"%Flf %Flf %Flf %Flf %s",&Points[0].x, &Points[0].y,
+			sscanf (str,"%lf %lf %lf %lf %7s",&Points[0].x, &Points[0].y,
 											  &Points[1].x, &Points[1].y,id);
-			sprintf (str,"%f %f %f %f %s",Points[0].x,Points[0].y,NewPoint.x,NewPoint.y, id);  
+			sprintf (str,"%lf %lf %lf %lf %s",Points[0].x,Points[0].y,NewPoint.x,NewPoint.y, id);  
 			GSSillseek (Fid2,MatchDataLast.TranDataLoc,0);
 			BigWrite (Fid2,(HPSTR)str,(UINT)len,-1);
 			GSSiClose (Fid2);

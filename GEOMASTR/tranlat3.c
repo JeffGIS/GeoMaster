@@ -452,7 +452,7 @@ BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt)
 	StatusWindowUpdate (OFStruct.szPathName,"Scanning for Min/Max",TotLen,0);
     while (fgetstring (str,256,FidTIN) && ContinueProcessing) 
     { 
-    	n = sscanf (str,"%ld %Flf %Flf %Flf",PointID,&Point.x,&Point.y,&Elev);
+    	n = sscanf (str,"%ld %lf %lf %lf",PointID,&Point.x,&Point.y,&Elev);
     	Point.x *= FTM;
     	Point.y *= FTM;
     	AddDPointToMinMax (&Point,&Bounds);
@@ -471,7 +471,7 @@ BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt)
 		        
 		pPoints = (HPDPOINT3D)GlobalLock (hPoints); 
 		pPoints += NumPoints; 
-    	n = sscanf (str,"%ld %Flf %Flf %Flf",&PointID[NumPoints],&pPoints->x,&pPoints->y,&pPoints->z);     
+    	n = sscanf (str,"%ld %lf %lf %lf",&PointID[NumPoints],&pPoints->x,&pPoints->y,&pPoints->z);     
     	if (PointID[NumPoints] != 13 && PointID[NumPoints] != 14)
     		continue;
     	pPoints->x *= FTM;

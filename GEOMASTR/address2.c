@@ -2372,7 +2372,7 @@ Errmes:
 	{
 		char	UpdatesDir[MAX_PATH];
 		LPSTR	pBS;
-		time_t	iTime = time(0);
+		__time32_t	iTime = _time32(0);
 		long	ln;
 		HFILE	Fid;
 

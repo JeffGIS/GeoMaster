@@ -2814,7 +2814,7 @@ short IsGFCmd (LPSTR str,LPCMDSTRING pCmdStr)
 				pCmdStr->AddLBUTTON = 2;
 			else
 			{    
-				if (sscanf (pParen,"%Flf %Flf",&CommandPoint.x,&CommandPoint.y) != 2)
+				if (sscanf (pParen,"%lf %lf",&CommandPoint.x,&CommandPoint.y) != 2)
 					pCmdStr->CommandLimit = atoi (pParen);
 				else
 				{

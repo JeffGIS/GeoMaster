@@ -659,7 +659,7 @@ GSSiExitProg (1262);
 						*pBar++ = 0;
 						pStreetData->ShadowColor = atol (pBar);
 					}
-					if (sscanf (pMem,"%ld %i",&Color,&W) == 1)
+					if (sscanf (pMem,"%ld %hi",&Color,&W) == 1)
 						W = 0;
 					R = GetRValue(Color);
 					G = GetGValue(Color);

@@ -4773,7 +4773,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 	LPSTR	pLoc, pEnd;
 	LPVEHLOCATION	pVehLoc;
 	char	str[256], fromtime[32],totime[32],day[32];
-	time_t	systime;
+	__time32_t	systime;
 	int		ntab, TabStops[5]={30,130,158,212,1350},ii,w,h;
 	static	char	CurrentShape[16]="Circle";
 	static	COLORREF	CurrentColor=RGB(255,0,0);
@@ -4816,7 +4816,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 		 //SendDlgItemMessage (hWndDlg,IDC_VHSHAPE,CB_ADDSTRING,0,(LPARAM)((LPSTR)"Triangle"));
 		 SendDlgItemMessage (hWndDlg,IDC_VHSHAPE,CB_ADDSTRING,0,(LPARAM)((LPSTR)"Star"));
 		 SetDlgItemText (hWndDlg,IDC_VHSHAPE,CurrentShape);
-		 time (&systime);
+		 _time32 (&systime);
 		 sprintf (str,"$CAL(%i,3)",systime);
 		 ExpandText (str);
 		 if ((pLoc = strchr (str,' ')))
@@ -5102,7 +5102,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 			 		SetViewport (*pCommandViewport);
 					Choice = 0;
 					//strcpy (TempName,"c:\\map.txt");
-					time (&systime);
+					_time32 (&systime);
 					sprintf (PltName,"[%%VEHHISTDIR]\\%s_%ld.plt",vehid,systime);
 					sprintf (DataFile,"[%%VEHHISTDIR]\\%s_%ld.txt",vehid,systime);
 					FidTemp = GSSiOpenFile (DataFile,0,OF_CREATE);

@@ -358,9 +358,9 @@ LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where, LONGLONG li
 	if (limit)
 	{
 		if (*where)
-			sprintf(pCmd, "SELECT rowid FROM %s WHERE %s LIMIT %li", tableName, where, limit);
+			sprintf(pCmd, "SELECT rowid FROM %s WHERE %s LIMIT %lli", tableName, where, limit);
 		else
-			sprintf(pCmd, "SELECT rowid FROM %s LIMIT %li", tableName,limit);
+			sprintf(pCmd, "SELECT rowid FROM %s LIMIT %lli", tableName,limit);
 	}
 	else
 	{
@@ -2615,7 +2615,7 @@ BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds)
 		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-		sprintf(cmd, "SELECT LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", Recno);
+		sprintf(cmd, "SELECT LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%lld", Recno);
 
 		if (pSQLDatabase->statement)
 			sqlite3_finalize(pSQLDatabase->statement);
@@ -2657,7 +2657,7 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-		sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%ld", SQLITERec);
+		sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%lld", SQLITERec);
 
 		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) != SQLITE_OK)
 			pSQLDatabase->statement = NULL;

@@ -1358,7 +1358,9 @@ void testConvertBitmapToPoly(LPSTR file);
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
-	//char monName[128];
+	//strcpy(cmdLine, "0123456789012");
+	//char monName[12];
+	//sscanf(cmdLine, "%11s",monName );
 	int  monStatus, mouseType;
 	LPSTR keyloc;
 	BOOL haveKey = FALSE;

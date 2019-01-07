@@ -531,19 +531,19 @@ HANDLE LoadTranFile (LPSTR Name,int dir,int InType,LPSHORT pNumPoints,LPDOUBLE p
 		}
 		if (*str == 'L' || *str == 'l') 
 		{
-			if (sscanf (str,"%c %Flf %Flf %Flf %Flf",&Marker,&TranLimits.xmn,&TranLimits.ymn,
+			if (sscanf (str,"%c %lf %lf %lf %lf",&Marker,&TranLimits.xmn,&TranLimits.ymn,
 											  &TranLimits.xmx,&TranLimits.ymx) == 5)
 				HaveLimits = TRUE;
 		}	
 		else if (*str == 'B' || *str == 'b') 
 		{
-			sscanf (str,"%c %Flf %Flf %Flf %Flf",&Marker,&TranBounds.xmn,&TranBounds.ymn,
+			sscanf (str,"%c %lf %lf %lf %lf",&Marker,&TranBounds.xmn,&TranBounds.ymn,
 											  &TranBounds.xmx,&TranBounds.ymx);
 			HaveBounds = TRUE;
 		}
 		else if (N<MAXTRANPOINTS)
 		{
-			if (sscanf (str,"%Flf %Flf %Flf %Flf",XFROM++,YFROM++,XTO++,YTO++) == 4)
+			if (sscanf (str,"%lf %lf %lf %lf",XFROM++,YFROM++,XTO++,YTO++) == 4)
 			N++;
 		}
 		else
@@ -762,7 +762,7 @@ MNMXCORD GetTranFileBounds (LPSTR Name,LPSTR Direction)
 	{ 
 		if (!*str || *str == '#')
 			continue;
-		if (sscanf (str,"%Flf %Flf %Flf %Flf",&Point[0].x,&Point[0].y,&Point[1].x,&Point[1].y) == 4) 
+		if (sscanf (str,"%lf %lf %lf %lf",&Point[0].x,&Point[0].y,&Point[1].x,&Point[1].y) == 4) 
 			AddDPointToMinMax (&Point[dir],&Bounds);
 	}  
 	GSSiClose (Fid);

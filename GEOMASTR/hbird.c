@@ -3751,186 +3751,6 @@ float GetDirectedElev (UINT iDir,int iFactor,LPPOINT pt,LPINT aWeight,LPINT dWei
 	return elv;
 }
 
-BOOL CreateTileDepthPixels (LPSTR Directory,int iLevel,int tileX,int tileY)
-{
-	BOOL rtn=FALSE;
-	UINT irow, icol, iDir;
-	POINT pt, pt2;
-	DPOINT	dpt;
-	int	iFactor = 1, worldCoordFactor, worldX, worldY;
-	int aWeight[8], totaWeight, dWeight[8], totdWeight, totWeight;
-#define GRIDWIDTH	257
-	short	ptElev[GRIDWIDTH][GRIDWIDTH];
-	BYTE	ptElev8[GRIDWIDTH][GRIDWIDTH];
-	float rElev[8];
-	double rElv, pixelElev;
-	char pathName[MAX_PATH];
-	HFILE	Fid;
-	MNMXCORD	bounds=wtrbounds;
-	BOOL	haveData=FALSE;
-	int		minWeight;
-	int		zeroDist;
-	float minElev;
-		static int wantrow=58, wantcol=7;
-
-	if (iLevel == 16 && tileX == 15695 && tileY == 23610)
-		ii=1;
-//	else
-//		return FALSE;
-	bounds.xmn -= ixbase0;
-	bounds.ymn -= iybase0;
-	bounds.xmx -= ixbase0;
-	bounds.ymx -= iybase0;
-
-	sprintf (pathName,"%s\\%i\\%i\\%i.bin",Directory,iLevel,tileX,tileY);
-	if (iLevel < maxDTLev)
-		iFactor = pow(2,maxDTLev-iLevel);
-
-	TileXYToPixelXY(tileX,tileY,&worldX,&worldY);
-	worldX *= iFactor;
-	worldY *= iFactor;
-
-	zeroDist = iFactor * 1.5;
-	for (irow = 0;irow < GRIDWIDTH;irow++)
-	{
-		if (irow >= 251)
-			ii=1;
-		pt.y = worldY + irow * iFactor;
-		for (icol = 0;icol < GRIDWIDTH;icol++)
-		{
-			if (irow == wantrow && icol == wantcol)
-				ii=1;
-			pt.x = worldX + icol * iFactor;
-			totaWeight = 0;
-			totdWeight = 0;
-			pt2.x = pt.x - ixbase0;
-			pt2.y = pt.y - iybase0;
-			dpt = PointToDPoint (pt2);
-			if (!DPointInBounds (&dpt,&bounds))
-				ptElev[irow][icol] = -1;
-			else
-			{
-				int nOut=0;
-
-				for (iDir = 0;iDir < 8; iDir++)
-				{
-					if (iDir == 4)
-					{
-						POINT p = TranPoint16 (pt2,hTran45);
-						pt2.x = p.x - ixbase45;
-						pt2.y = p.y - iybase45;
-					}
-					rElev[iDir] = GetDirectedElev (iDir+1,zeroDist,&pt2,&aWeight[iDir],&dWeight[iDir]);
-					if (rElev[iDir] < 0)
-					{
-						nOut++;
-						aWeight[iDir] = 0;
-						rElev[iDir] = 0;
-						if (nOut > 2)
-						{
-							ptElev[irow][icol] = -1;
-							goto NextCol;
-						}
-					}
-					else if (dWeight[iDir] < zeroDist)
-					{
-						ptElev[irow][icol] = IDNINT (TRIANGLE_DEPTH_MULTIPLIER * rElev[iDir]);
-						haveData = TRUE;
-						goto NextCol;
-					}
-					totaWeight += aWeight[iDir];
-					totdWeight += dWeight[iDir];
-				}
-				minWeight = 9999;
-				for (iDir = 0;iDir < 8; iDir++)
-				{
-					if (dWeight[iDir] < minWeight)
-					{
-						minWeight = dWeight[iDir];
-						minElev = rElev[iDir];
-					}
-				}
-				if (minWeight < iFactor)
-				{
-					ptElev[irow][icol] = IDNINT (TRIANGLE_DEPTH_MULTIPLIER * minElev);
-					haveData = TRUE;
-					goto NextCol;
-				}
-				rElv = 0;
-				totWeight = 0;
-				for (iDir = 0;iDir < 8; iDir++)
-				{
-					int weight = aWeight[iDir] * (totdWeight - dWeight[iDir]);
-
-					if (rElev[iDir] < 0)
-					{
-						ptElev[irow][icol] = -1;
-						goto NextCol;
-					}
-					rElv += (double)rElev[iDir] * weight;
-					totWeight += weight;
-				}
-				pixelElev = (rElv* TRIANGLE_DEPTH_MULTIPLIER) / totWeight;
-				ptElev[irow][icol] = IDNINT (pixelElev);
-				if ((ptElev[irow][icol] %(8*TRIANGLE_DEPTH_MULTIPLIER)) == 0)
-				{
-					if (pixelElev < ptElev[irow][icol])
-						ptElev[irow][icol]--;
-					else
-						ptElev[irow][icol]++;
-				}
-
-				haveData = TRUE;
-			}
-NextCol:;
-		}
-	}
-	if (haveData)
-	{
-		Fid = GSSiOpenFile (pathName,0,OF_CREATE);
-		if (Fid != HFILE_ERROR)
-		{
-			short minElev = SHRT_MAX;
-			short maxElev = SHRT_MIN;
-			int	i,j,baseElev;
-			
-			for (i=0;i<GRIDWIDTH;i++)
-				for (j=0;j<GRIDWIDTH;j++)
-				{
-					if (ptElev[i][j] > -1)
-					{
-						minElev = min (minElev,ptElev[i][j]);
-						maxElev = max (maxElev,ptElev[i][j]);
-					}
-				}
-
-			if (maxElev - minElev < 255)
-			{
-				baseElev = minElev;
-				BigWrite (Fid,&baseElev,sizeof(int),-1);
-				for (i=0;i<GRIDWIDTH;i++)
-					for (j=0;j<GRIDWIDTH;j++)
-					{
-						if (ptElev[i][j] > -1)
-							ptElev8[i][j] = ptElev[i][j] - baseElev;
-						else
-							ptElev8[i][j] = 255;
-					}
-
-				BigWrite (Fid,ptElev8,sizeof(ptElev8),-1);
-			}
-			else
-			{
-				baseElev = -99999;
-				BigWrite (Fid,&baseElev,sizeof(int),-1);
-				BigWrite (Fid,ptElev,sizeof(ptElev),-1);
-			}
-			GSSiClose (Fid);
-			rtn = TRUE;
-		}
-	}
-	return rtn;
-}
 
  void setscreenpixel (POINT screenpt,COLORREF color)
  {
@@ -4073,4 +3893,185 @@ void WriteParamToErrorLog (void)
 
 void WriteInformationToErrorLog (void)
 {
+}
+
+BOOL CreateTileDepthPixels(LPSTR Directory, int iLevel, int tileX, int tileY)
+{
+	BOOL rtn = FALSE;
+	/*UINT irow, icol, iDir;
+	POINT pt, pt2;
+	DPOINT	dpt;
+	int	iFactor = 1, worldCoordFactor, worldX, worldY;
+	int aWeight[8], totaWeight, dWeight[8], totdWeight, totWeight;
+#define GRIDWIDTH	257
+	short	ptElev[GRIDWIDTH][GRIDWIDTH];
+	BYTE	ptElev8[GRIDWIDTH][GRIDWIDTH];
+	float rElev[8];
+	double rElv, pixelElev;
+	char pathName[MAX_PATH];
+	HFILE	Fid;
+	MNMXCORD	bounds = wtrbounds;
+	BOOL	haveData = FALSE;
+	int		minWeight;
+	int		zeroDist;
+	float minElev;
+	static int wantrow = 58, wantcol = 7;
+
+	if (iLevel == 16 && tileX == 15695 && tileY == 23610)
+		ii = 1;
+	//	else
+	//		return FALSE;
+	bounds.xmn -= ixbase0;
+	bounds.ymn -= iybase0;
+	bounds.xmx -= ixbase0;
+	bounds.ymx -= iybase0;
+
+	sprintf(pathName, "%s\\%i\\%i\\%i.bin", Directory, iLevel, tileX, tileY);
+	if (iLevel < maxDTLev)
+		iFactor = pow(2, maxDTLev - iLevel);
+
+	TileXYToPixelXY(tileX, tileY, &worldX, &worldY);
+	worldX *= iFactor;
+	worldY *= iFactor;
+
+	zeroDist = iFactor * 1.5;
+	for (irow = 0; irow < GRIDWIDTH; irow++)
+	{
+		if (irow >= 251)
+			ii = 1;
+		pt.y = worldY + irow * iFactor;
+		for (icol = 0; icol < GRIDWIDTH; icol++)
+		{
+			if (irow == wantrow && icol == wantcol)
+				ii = 1;
+			pt.x = worldX + icol * iFactor;
+			totaWeight = 0;
+			totdWeight = 0;
+			pt2.x = pt.x - ixbase0;
+			pt2.y = pt.y - iybase0;
+			dpt = PointToDPoint(pt2);
+			if (!DPointInBounds(&dpt, &bounds))
+				ptElev[irow][icol] = -1;
+			else
+			{
+				int nOut = 0;
+
+				for (iDir = 0; iDir < 8; iDir++)
+				{
+					if (iDir == 4)
+					{
+						POINT p = TranPoint16(pt2, hTran45);
+						pt2.x = p.x - ixbase45;
+						pt2.y = p.y - iybase45;
+					}
+					rElev[iDir] = GetDirectedElev(iDir + 1, zeroDist, &pt2, &aWeight[iDir], &dWeight[iDir]);
+					if (rElev[iDir] < 0)
+					{
+						nOut++;
+						aWeight[iDir] = 0;
+						rElev[iDir] = 0;
+						if (nOut > 2)
+						{
+							ptElev[irow][icol] = -1;
+							goto NextCol;
+						}
+					}
+					else if (dWeight[iDir] < zeroDist)
+					{
+						ptElev[irow][icol] = IDNINT(TRIANGLE_DEPTH_MULTIPLIER * rElev[iDir]);
+						haveData = TRUE;
+						goto NextCol;
+					}
+					totaWeight += aWeight[iDir];
+					totdWeight += dWeight[iDir];
+				}
+				minWeight = 9999;
+				for (iDir = 0; iDir < 8; iDir++)
+				{
+					if (dWeight[iDir] < minWeight)
+					{
+						minWeight = dWeight[iDir];
+						minElev = rElev[iDir];
+					}
+				}
+				if (minWeight < iFactor)
+				{
+					ptElev[irow][icol] = IDNINT(TRIANGLE_DEPTH_MULTIPLIER * minElev);
+					haveData = TRUE;
+					goto NextCol;
+				}
+				rElv = 0;
+				totWeight = 0;
+				for (iDir = 0; iDir < 8; iDir++)
+				{
+					int weight = aWeight[iDir] * (totdWeight - dWeight[iDir]);
+
+					if (rElev[iDir] < 0)
+					{
+						ptElev[irow][icol] = -1;
+						goto NextCol;
+					}
+					rElv += (double)rElev[iDir] * weight;
+					totWeight += weight;
+				}
+				pixelElev = (rElv* TRIANGLE_DEPTH_MULTIPLIER) / totWeight;
+				ptElev[irow][icol] = IDNINT(pixelElev);
+				if ((ptElev[irow][icol] % (8 * TRIANGLE_DEPTH_MULTIPLIER)) == 0)
+				{
+					if (pixelElev < ptElev[irow][icol])
+						ptElev[irow][icol]--;
+					else
+						ptElev[irow][icol]++;
+				}
+
+				haveData = TRUE;
+			}
+		NextCol:;
+		}
+	}
+	if (haveData)
+	{
+		Fid = GSSiOpenFile(pathName, 0, OF_CREATE);
+		if (Fid != HFILE_ERROR)
+		{
+			short minElev = SHRT_MAX;
+			short maxElev = SHRT_MIN;
+			int	i, j, baseElev;
+
+			for (i = 0; i < GRIDWIDTH; i++)
+				for (j = 0; j < GRIDWIDTH; j++)
+				{
+					if (ptElev[i][j] > -1)
+					{
+						minElev = min(minElev, ptElev[i][j]);
+						maxElev = max(maxElev, ptElev[i][j]);
+					}
+				}
+
+			if (maxElev - minElev < 255)
+			{
+				baseElev = minElev;
+				BigWrite(Fid, &baseElev, sizeof(int), -1);
+				for (i = 0; i < GRIDWIDTH; i++)
+					for (j = 0; j < GRIDWIDTH; j++)
+					{
+						if (ptElev[i][j] > -1)
+							ptElev8[i][j] = ptElev[i][j] - baseElev;
+						else
+							ptElev8[i][j] = 255;
+					}
+
+				BigWrite(Fid, ptElev8, sizeof(ptElev8), -1);
+			}
+			else
+			{
+				baseElev = -99999;
+				BigWrite(Fid, &baseElev, sizeof(int), -1);
+				BigWrite(Fid, ptElev, sizeof(ptElev), -1);
+			}
+			GSSiClose(Fid);
+			rtn = TRUE;
+		}
+	}*/
+	return rtn;
 }

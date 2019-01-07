@@ -6952,7 +6952,7 @@ GSSiExitProg (1293);
 					OVBounds = HighlightData.PD.Rect;
 					ExpandBounds (&OVBounds,Overlap);  
 					fputstring ("PAGE_NUM,PAGE_BOUNDS,PAGE_LEFT,PAGE_TOP,PAGE_RIGHT,PAGE_BOTTOM",Fid);
-					sprintf(str, "1,%f %f %f %f,0,0,0,0", OVBounds.xmn, OVBounds.ymn, OVBounds.xmx, OVBounds.ymx);
+					sprintf(str, "1,%lf %lf %lf %lf,0,0,0,0", OVBounds.xmn, OVBounds.ymn, OVBounds.xmx, OVBounds.ymx);
 					fputstring (str,Fid);
 					for (iArea = 0;iArea<nAreas;iArea++)
 					{
@@ -6972,7 +6972,7 @@ GSSiExitProg (1293);
 						bottom = FindAdjoiningArea (Point,nAreas,pAreas);
 						OVBounds = pAreas[iArea];
 						ExpandBounds (&OVBounds,Overlap);  
-						sprintf (str,"%ld,%f %f %f %f,%ld,%ld,%ld,%ld",iArea+2,OVBounds,left,top,right,bottom);
+						sprintf (str,"%ld,%lf %lf %lf %lf,%ld,%ld,%ld,%ld",iArea+2, OVBounds.xmn, OVBounds.ymn, OVBounds.xmx, OVBounds.ymx,left,top,right,bottom);
 						fputstring (str,Fid);
 					}  
 					GSSiClose (Fid);
@@ -10443,9 +10443,9 @@ OpenEr:			sprintf (mess,"Unable to open zoom list file: %s",lpTab);
 	 		            	*lpEnd = 0;
 		 		        SetGlobalValue ("%ZOOM_AREA_BOUNDS",lpTab); 
 	 		            
-						if (sscanf (lpTab,"%Flf,%Flf,%Flf,%Flf",&MinPoint.x,&MinPoint.y,&MaxPoint.x,&MaxPoint.y) != 4)
+						if (sscanf (lpTab,"%lf,%lf,%lf,%lf",&MinPoint.x,&MinPoint.y,&MaxPoint.x,&MaxPoint.y) != 4)
 						{
-							if (sscanf (lpTab,"%Flf %Flf %Flf %Flf",&MinPoint.x,&MinPoint.y,&MaxPoint.x,&MaxPoint.y) != 4)
+							if (sscanf (lpTab,"%lf %lf %lf %lf",&MinPoint.x,&MinPoint.y,&MaxPoint.x,&MaxPoint.y) != 4)
 								break;    
 						}
 	 		         	if (MinPoint.x>=MaxPoint.x || MinPoint.y >= MaxPoint.y) break;
@@ -10904,9 +10904,9 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 								if (lpEnd)
 									*lpEnd = 0;
 
-								np = sscanf(pTab, "%Flf %Flf %Flf %Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
+								np = sscanf(pTab, "%lf %lf %lf %lf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
 								if (np < 2)
-									np = sscanf(pTab, "%Flf,%Flf,%Flf,%Flf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
+									np = sscanf(pTab, "%lf,%lf,%lf,%lf", &MinPoint.x, &MinPoint.y, &MaxPoint.x, &MaxPoint.y);
 								if (np == 2 ||
 									(MinPoint.x >= MaxPoint.x || MinPoint.y >= MaxPoint.y))
 								{
@@ -16562,7 +16562,7 @@ GSSiExitProg (914);
 			         if (lpTAB)
 			         {  
 			         	lpTAB++;
-			         	if (sscanf (lpTAB,"%Flf %Flf",&CLocPoint.x,&CLocPoint.y) == 2)
+			         	if (sscanf (lpTAB,"%lf %lf",&CLocPoint.x,&CLocPoint.y) == 2)
 			         	{
 			         		n = SendDlgItemMessage (hWndDlg,IDC_COORD_LIST,LB_GETCURSEL,(WPARAM)0,(LPARAM)0); 
 			         		SetGlobalValueLong (lpCLGlob,n);
@@ -18736,7 +18736,7 @@ Store=TRUE;
 	                lpGRText->ltext += lpGRText->ltext % 2;
                     if (!fgetstring(str,256,FidMIF))
                     	goto ErrorEnd;
-	                i = sscanf (str,"%Flf %Flf %Flf %Flf",&DPoints[0].x,&DPoints[0].y,&DPoints[1].x,&DPoints[1].y);
+	                i = sscanf (str,"%lf %lf %lf %lf",&DPoints[0].x,&DPoints[0].y,&DPoints[1].x,&DPoints[1].y);
 	                if (i != 4)   
 	                	goto ErrorEnd; 
 	                DPoint = MidPointD (DPoints[0],DPoints[1]); 
@@ -20699,7 +20699,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  	goto EndFile;
                  itemno++;   
                  ReplaceChar (str,'D','E'); 
-                 n = sscanf (str,"%ld %Flf %Flf",&ID,&CenPt.x,&CenPt.y);
+                 n = sscanf (str,"%ld %lf %lf",&ID,&CenPt.x,&CenPt.y);
                  
                  if (hAttFile)
                  {
@@ -20797,7 +20797,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  		goto NextGENLink;
 	                }
 	                ReplaceChar (str,'D','E'); 
-                 	n = sscanf (str,"%Flf %Flf",&pPoints->x,&pPoints->y);
+                 	n = sscanf (str,"%lf %lf",&pPoints->x,&pPoints->y);
                  	if (n != 2)
 	               		goto ErrorEnd;
                  	(*pNumPoints)++;
@@ -21328,7 +21328,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                 	{   
 	                 		case 'L': 
 	                 		case 'C':
-				                n = sscanf (&str[1],"%Flf %Flf",&pDPoints->x,&pDPoints->y);
+				                n = sscanf (&str[1],"%lf %lf",&pDPoints->x,&pDPoints->y);
 				                if (n != 2)
 				                	goto ErrorEnd; 
 				                ConvertAndTranCoord (pDPoints++,hTranFile); 
@@ -21402,7 +21402,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                	if (*str != 'C')
 	                		goto ErrorEnd;
 	                	pDPoints = (HPDPOINT)GlobalLock (hPoly);
-		                n = sscanf (&str[1],"%Flf %Flf %Flf %Flf",&pDPoints[0].x,&pDPoints[0].y,
+		                n = sscanf (&str[1],"%lf %lf %lf %lf",&pDPoints[0].x,&pDPoints[0].y,
 		                										  &pDPoints[1].x,&pDPoints[1].y);
 		                if (n != 4)
 		                {
@@ -21561,7 +21561,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                	if (*str != 'C')
 	                		goto ErrorEnd;
 	                	pDPoints = (HPDPOINT)GlobalLock (hPoly);
-		                n = sscanf (&str[1],"%Flf %Flf %Flf %Flf %Flf %Flf",&pDPoints[0].x,&pDPoints[0].y,
+		                n = sscanf (&str[1],"%lf %lf %lf %lf %lf %lf",&pDPoints[0].x,&pDPoints[0].y,
 		                										  			&pDPoints[1].x,&pDPoints[1].y,
 		                										  			&pDPoints[2].x,&pDPoints[2].y);
 		                if (n != 6)
@@ -21589,7 +21589,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	                	if (*str != 'C')
 	                		goto ErrorEnd;
 	                	pDPoints = (HPDPOINT)GlobalLock (hPoly);
-		                n = sscanf (&str[1],"%Flf %Flf %Flf",&pDPoints[0].x,&pDPoints[0].y,
+		                n = sscanf (&str[1],"%lf %lf %lf",&pDPoints[0].x,&pDPoints[0].y,
 		                									 &AZ);
 		                if (n != 3)
 		                {
@@ -22661,7 +22661,7 @@ BeginLoad:
                  
                  if (!Scan)
                  {
-			         n = sscanf (&str[14],"%Flf %Flf %Flf %Flf",&MinMaxCoord.xmn,&MinMaxCoord.ymn,&MinMaxCoord.xmx,&MinMaxCoord.ymx);
+			         n = sscanf (&str[14],"%lf %lf %lf %lf",&MinMaxCoord.xmn,&MinMaxCoord.ymn,&MinMaxCoord.xmx,&MinMaxCoord.ymx);
 	                 ConvertAndTranCoord ((HPDPOINT)&MinMaxCoord.xmn,hTranFile); 
 	                 ConvertAndTranCoord ((HPDPOINT)&MinMaxCoord.xmx,hTranFile); 
 	                 if (SendDlgItemMessage (hWndDlg,IDC_NEWMAP,BM_GETCHECK,0,0)) 
@@ -31892,7 +31892,7 @@ $DIALOGITEM(%i,%i,SETTEXT,[DAT.EXTERNALDATASITE]);\
 $DIALOGITEM(%i,%i,SETTEXT,[DAT.NOTES]);\
 $DIALOGITEM(%i,%i,SETTEXT,[DAT.DISCLAIMER]);$CLOSE(DAT););",
 						  captureClipboardTitle, 
-						  &parcelDataStatus, &otherDataStatus, &mapStatus,
+						  parcelDataStatus, otherDataStatus, mapStatus,
 						  (UINT)hWndDlg, IDC_CONTACT,
 						  (UINT)hWndDlg, IDC_COST,
 						  (UINT)hWndDlg, IDC_MAPSITE,
