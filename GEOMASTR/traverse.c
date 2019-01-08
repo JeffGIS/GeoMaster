@@ -522,7 +522,7 @@ BOOL EncodeTravLegData (LPTRAVLEGDATA pLegData,LPSTR str)
 BOOL DecodeTravLegData (long TravID,int LegNum,LPTRAVLEGDATA pLegData,LPSTR str,LPDPOINT pPoints,LPDOUBLE pDist)
 {   
 	LPSTR	pParm,pEnd,pTAB; 
-	double	Dist, AZ,Radius, ArcDist, TanDist, ChordDist, Angle, TanAZ, RPAZ, CrdAZ;   
+	double	Dist=0, AZ,Radius, ArcDist, TanDist, ChordDist, Angle, TanAZ, RPAZ, CrdAZ;   
 	DPOINT	RP; 
 	short	Dir,DistOpt,BearOpt;  
 	LPSTR	pEQ;

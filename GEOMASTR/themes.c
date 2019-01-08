@@ -1509,7 +1509,7 @@ short EditTheme (HWND hWnd,UINT StartCmd)
 #if ENABLETRACE
 {GSSiEnterProg (1251);
 #endif
-{	short nRc;
+{	short nRc=TRUE;
     
     if (!CurTheme)
 {

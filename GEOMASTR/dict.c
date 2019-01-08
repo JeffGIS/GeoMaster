@@ -383,7 +383,7 @@ int CopyParentFromDict (LPSTR FromDict,LPSTR ParName,LPSTR NewParent,LPSTR NewPa
 	BOOL	rtn=0;
 	char	SaveDict[MAX_PATH]; 
 	int		i, ParentSym=0,NewParSymNum;
-	short	nChildren;
+	short	nChildren=0;
 	HANDLE	hSym=0, hChildren=0; 
 	char	PName[66];
 	
@@ -906,12 +906,12 @@ double GetAverageGreyScaleValue (HDIB32 hDib,HDIB32 hDibGS)
 int CreateOverlapMap(LPSTR OutImage, LPSTR InImages, COLORREF color)
 {
 	int rtn = 1;
-	HDIB32 hOutBM;
+	HDIB32 hOutBM=0;
 	HDIB32 hInBM[32];
 	RGBQUAD * pBitmap[32];
 	int nInBM = 0;
 	LPSTR pSC = strchr(InImages, ';');
-	UINT	nrow, ncol;
+	UINT	nrow=0, ncol=0;
 
 	while (*InImages)
 	{
@@ -980,15 +980,19 @@ int CreateOverlapMap(LPSTR OutImage, LPSTR InImages, COLORREF color)
 			}
 			for (i = 0; i < nInBM; i++)
 				pBitmap[i]++;
-			if (nHits > 1)
-				FreeImage_SetPixelColor(hOutBM, icol, irow, &blackval);
-			else
-				FreeImage_SetPixelColor(hOutBM, icol, irow, &whiteval);
+			if (hOutBM)
+			{
+				if (nHits > 1)
+					FreeImage_SetPixelColor(hOutBM, icol, irow, &blackval);
+				else
+					FreeImage_SetPixelColor(hOutBM, icol, irow, &whiteval);
+			}
 		}
 	}
 	if (!GMFIBMPHandleToEXT(OutImage, hOutBM, 0))
 		rtn = -2000;
-	FreeImage_Unload(hOutBM);
+	if (hOutBM)
+		FreeImage_Unload(hOutBM);
 Exit:	
 	for (int i = 0; i < nInBM;i++)
 		FreeImage_Unload(hInBM[i]);
@@ -6588,6 +6592,7 @@ FPOINT BasePtToWinPtF (LPDPOINT WPoint)
 			PPoint = *WPoint;
 		    TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP); 
 			break;
+		default:
      	case 0:
      		TRANS2 (WPoint->x,WPoint->y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP);
      		break;

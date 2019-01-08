@@ -2321,7 +2321,7 @@ void ZoomConnectedProcesses (BOOL Remove)
 	int	i;
 	HFILE	Fid;
 	static	UINT	ID=0;
-	static	char	ConFile[MAX_PATH];
+	static	char	ConFile[MAX_PATH] = { 0 };
 	char	TempDir[MAX_PATH];
 	char	Cmd[256];
 	OFSTRUCTGM	OFStruct;

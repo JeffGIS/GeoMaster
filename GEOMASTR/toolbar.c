@@ -773,7 +773,7 @@ void SetToolbarDockingStatus (int ToolbarID,int Status,int Width)
 
 	if (Status >= 400)
 	{
-		i = Status - 400;
+		i = min (MAX_TOOLBARS-1,Status - 400);
 		for (j=nToolbarsBottom;j>i;j--)
 			ToolbarsBottom[j] = ToolbarsBottom[j-1];
 		ToolbarsBottom[i] = ToolbarID;
@@ -782,7 +782,7 @@ void SetToolbarDockingStatus (int ToolbarID,int Status,int Width)
 	}
 	else if (Status >= 300)
 	{
-		i = Status - 300;
+		i = min(MAX_TOOLBARS - 1,Status - 300);
 		for (j=nToolbarsTop;j>i;j--)
 			ToolbarsTop[j] = ToolbarsTop[j-1];
 		ToolbarsTop[i] = ToolbarID;
@@ -791,7 +791,7 @@ void SetToolbarDockingStatus (int ToolbarID,int Status,int Width)
 	}
 	else if (Status >= 200)
 	{
-		i = Status - 200;
+		i = min(MAX_TOOLBARS - 1,Status - 200);
 		for (j=nToolbarsRight;j>i;j--)
 			ToolbarsRight[j] = ToolbarsRight[j-1];
 		ToolbarsRight[i] = ToolbarID;
@@ -800,7 +800,7 @@ void SetToolbarDockingStatus (int ToolbarID,int Status,int Width)
 	}
 	else if (Status >= 100)
 	{
-		i = Status - 100;
+		i = min(MAX_TOOLBARS - 1,Status - 100);
 		for (j=nToolbarsLeft;j>i;j--)
 			ToolbarsLeft[j] = ToolbarsLeft[j-1];
 		ToolbarsLeft[i] = ToolbarID;

@@ -1408,6 +1408,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	}
 	else
 		strncpy (cmdLine,lpszCmdLine,1024);
+	cmdLine[1023] = 0;
 	if ((keyloc = strstr(cmdLine, "KEYLOC=")))
 	{
 		*keyloc = 0;

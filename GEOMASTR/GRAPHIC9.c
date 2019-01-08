@@ -580,8 +580,7 @@ GSSiExitProg (1029);
 		p.x = MinMax->xmx;
 		p.y = MinMax->ymx;
 	} 
-	else if (pPoint->x > MinMax->xmx &&
-		pPoint->y < MinMax->ymn) 
+	else
 	{   
 		p.x = MinMax->xmx;
 		p.y = MinMax->ymn;
@@ -666,8 +665,7 @@ GSSiExitProg (1029);
 		p.x = MinMax->xmx;
 		p.y = MinMax->ymx;
 	} 
-	else if (pPoint->x > MinMax->xmx &&
-		pPoint->y < MinMax->ymn) 
+	else
 	{   
 		p.x = MinMax->xmx;
 		p.y = MinMax->ymn;
@@ -2333,7 +2331,7 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
 	long	TotFiles=0, Loc;    
 	int		Item;
 	LPSTR	pName;
-	char	defaultProj[256]="";
+	char	defaultProj[256] = { 0 };
 
     if (!hProjectionFile)
     {

@@ -66,7 +66,7 @@ INT_PTR CALLBACK AboutGMDoc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 
 		SendDlgItemMessage(hDlg, IDC_GMDOCTEXT, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 		ii = GetPrivateProfileString("User", "DontShowGMDocHelpAtStartup", "0", value, sizeof(value), GMIni);
-		SendDlgItemMessage(hDlg, IDC_CHECK_DONOTSHOW, BM_SETCHECK, !atob(value), 0);
+		SendDlgItemMessage(hDlg, IDC_CHECK_DONOTSHOW, BM_SETCHECK, atob(value), 0);
 	}
 		return (INT_PTR)TRUE;
 

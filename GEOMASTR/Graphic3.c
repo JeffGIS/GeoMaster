@@ -40,6 +40,8 @@ BOOL PickCurve (HPDPOINT lpPointsIn,long nPnts,LPDPOINT PC,LPDPOINT POC, LPDPOIN
 	short	st;
 	long	FromPtID;
 
+	if (nPnts < 1)
+		return FALSE;
 	if (PickNET)
 	{
 		if (!RefInNet (CurrentRefno))
@@ -2901,7 +2903,7 @@ long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFie
 	HANDLE      hSQL;
     LPINT       lpField, StartField, pNumFields, pNumKeyFields, pFieldID, pKeyFieldID,pFieldIDIN;
 	int			NumFieldsIN;
-    short       NumFields,n, FieldID, NumKeyFields;
+    short       NumFields=0,n, FieldID, NumKeyFields;
     long        rtn=0, TotRecs=0, AtRec=0;
     LPSTR		str;
     HANDLE		hStr;
@@ -2913,7 +2915,7 @@ long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFie
     HANDLE      SaveHandle, hRec=0, hHead=0;
     HFILE       OutFid=HFILE_ERROR, IndexFid=HFILE_ERROR;     
     long        iref, nRecs, Recloc,maxrowlen;
-	LPGWDHEADER lpGWDHead;
+	LPGWDHEADER lpGWDHead=0;
 	HANDLE  hDB=0;  
 	HANDLE		hFields=0, hMyFields=0;
     extern  HANDLE  hHighlight; 
@@ -3237,7 +3239,7 @@ GSSiExitProg (603);
 						goto NextHlt;
 				} 
 			}
-			else
+			else if (lpGWDHead)
         	{
 		    	LPGWFLDINFO pFieldInfo = lpGWDHead->pFldInfo + ifield;  
 
@@ -3412,7 +3414,7 @@ NextPixel:;
 double CompareFillPatternSignatures (LPFILLSIGNATURE pSign1,LPFILLSIGNATURE pSign2)
 {
 	double val=0, d, mind;  
-	short	i,j, minj;
+	short	i,j, minj=0;
 	
 	for (i=0;i<pSign1->nColors;i++)
 	{

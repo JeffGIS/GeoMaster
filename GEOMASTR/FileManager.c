@@ -659,6 +659,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 				}
 				if (n == 1)
 				{
+					txt[0] = 0;
 					SendDlgItemMessage(hWndDlg, IDC_FMFILELIST, LB_GETTEXT, *pItem++, (DWORD)txt);
 					if ((pTab = strrchr(txt, '\t')))
 						*pTab++ = 0;
@@ -790,6 +791,8 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 					SendDlgItemMessage(hWndDlg, IDC_FMFILELIST, LB_GETTEXT, *pItem++, (DWORD)txt);
 					if ((pTab = strrchr(txt, '\t')))
 						*pTab++ = 0;
+					else
+						pTab = txt;
 					lastUpdateTime = atoi(pTab);
 					pTab = strchr(pTab, ' ');
 					fileSize = atoi(pTab);

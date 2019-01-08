@@ -1344,7 +1344,7 @@ BOOL FAR PASCAL GPSCONFIGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				if (OpenGarminUSB (Identity))
 				{   
 					_fstrcpy (Port,"USB");
-                	sprintf (str,"Found %s on USB",Identity,Port);
+                	sprintf (str,"Found %s on USB",Identity);
                 	SetDlgItemText (hWndDlg,IDC_SEARCHMESS,str); 
 					CloseGarminUSB (0);
 			    	if (SendDlgItemMessage (hWndDlg,IDC_GPSMODEL,CB_SELECTSTRING,-1,(LPARAM)Identity) == CB_ERR)

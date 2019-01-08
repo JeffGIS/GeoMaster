@@ -5592,7 +5592,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
     BOOL		UseBAR=FALSE, UseFile=FALSE;  
     short		ii, MaxHeight=0;
 	int			MaxLen=16, NumItems=0;
-    RECT		Rect;
+	RECT		Rect = { 0 };
     
     if (!hWndDlg)
     	*DefaultVal = '\0';

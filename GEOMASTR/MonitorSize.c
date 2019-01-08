@@ -76,7 +76,7 @@ int GetSizeForDevID(const wchar_t *TargetDevID, short *WidthMm, short *HeightMm)
 		if (SetupDiEnumDeviceInfo(devInfo, i, &devInfoData)) {
 			WCHAR Instance[MAX_DEVICE_ID_LEN];
 			HKEY hEDIDRegKey;
-			SetupDiGetDeviceInstanceIdW(devInfo, &devInfoData, Instance, MAX_PATH, NULL);
+			SetupDiGetDeviceInstanceIdW(devInfo, &devInfoData, Instance,sizeof(Instance), NULL);
 
 			if (wcsstr(Instance, TargetDevID) == 0)
 				continue;

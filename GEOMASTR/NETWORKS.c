@@ -2748,7 +2748,7 @@ void DumpIntersectionStreets (LPSTR Name,BOOL EliminateDuplicateStreets)
 	BOOL	OpenedInt, OpenedSeg;
 	long	LastInt=LONG_MAX;
 	short	pos=BT_FIRST;
-	int		nStreets, i, j;
+	int		nStreets=0, i, j;
 	OFSTRUCTGM	OFStruct;
 	HFILE	Fid;
 	long	StreetNums[16]; 

@@ -705,7 +705,7 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 							_fstrcpy (str,CurView->VisName);
 							ExpandText (str);
 							if ((pBS = _fstrrchr (str,'\\')))
-								*pBS++;
+								*pBS++ = 0;
 							else
 								pBS = str;
 							_fstrcpy(AVName,pBS);   

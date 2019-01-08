@@ -853,7 +853,7 @@ BOOL BrowseTextFile (LPSTR File, long Loc, short backlines, short forwardlines,L
 
 BOOL ProcessMacroReport (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 {
-	int	Rtn;
+	int	Rtn=TRUE;
 	LPVIEWPORT	SaveView, SaveView2;        
 	HANDLE	hView;
 	
@@ -874,7 +874,7 @@ BOOL ProcessMacroReport (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref)
 	CurView->Active = TRUE;
 	CurView->ShrinkToFit=FALSE; 
 	hReportScroll = CurView->hReport;	
-	DisplayReportScroll (0,0);
+	Rtn = DisplayReportScroll (0,0);
 	UnloadReport (&SaveView2->hReport); 
 Exit:
 	GSSiGlobUlFree (&hView);

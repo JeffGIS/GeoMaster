@@ -870,7 +870,7 @@ BOOL ProcessORARecord (HDC hDC,HFILE FidORA,long RecordNumber)
 //	double		DBOrd[50];
 	int			nOrdPerPoint=3;
 	BOOL		ThreeD=TRUE;
-	int			SDCrtn;
+	int			SDCrtn=0;
 	double		OrigSize;
 
 #define	POINT	1

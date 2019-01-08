@@ -1,2 +1,2 @@
-configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
-e:\pcviewer
+configs\basemap_new2.gmc 
+f:\bu_2018_02_28\geomas

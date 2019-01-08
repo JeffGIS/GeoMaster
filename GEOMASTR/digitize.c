@@ -1209,7 +1209,7 @@ UINT AddNewPoly (short Type,int nPnts,HANDLE hPoints,BOOL Display)
 	BOOL		Redefine; 
 	UINT		rtn=0;
 	COLORREF	color;
-	LPSTR		pStuff; 
+	LPSTR		pStuff=0; 
 	HANDLE		hStuff=0,hText=0, hTime=0, hTextTPL=0, hBuf=0;   
 	long		lBuf=0;
 	COLORREF	NewLineColor, NewAreaColor;
@@ -1499,7 +1499,7 @@ BOOL PickColor (POINT MousePoint,COLORREF Color,LPPOINT pSnapPoint, BOOL RemoveT
 // Opt=0	find nearest black pixel within Pickap
 // Opt=1	find nearest black edge pixel within Pickap using CurrentAZ as current direction
 // Opt=2	find nearest black midpoint withing Pickap using CurrentAZ as current direction
-	POINT	Point, minpoint;
+	POINT	Point, minpoint = { 0,0 };
 	double	dist, AZ, mindist = DBL_MAX, LineWidth = GetGlobalDVal2 ("[%BLACKLINEWIDTH]",2)/2 * BaseDistToWinDist;
 	short	Pickap = SetPickAp(0)+2;
 	short	x,y;

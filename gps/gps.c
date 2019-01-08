@@ -4093,7 +4093,7 @@ short GPSExportUSRWP (HWND hWndDlg,UINT Control,UINT StatusControl)
 	LPINT	lpItems,lpWPNums; 
 	LPSTR	pLat,pLon, pTAB, pOpts, pSym, pDesc, pRef;
 	double	lat,lon;
-	int		n, nItems;    
+	int		n, nItems=0;    
 	BOOL	Err;
 	long	nRecs, nLoaded=0; 
 	LPBYTE	Wpt_ident, Wpt_cmnt=0, Wpt_smbl, Wpt_attr=0; 

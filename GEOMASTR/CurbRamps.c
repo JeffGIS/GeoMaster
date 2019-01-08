@@ -1558,7 +1558,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 				free(mess);
 				rtn = TRUE;
 				if (ptotErrors)
-					*(ptotErrors)++;
+					*ptotErrors = *ptotErrors + 1;
 			}
 		}
 	}

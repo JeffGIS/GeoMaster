@@ -6749,7 +6749,7 @@ BOOL FAR PASCAL ADDRESS1MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
  BOOL translated;
  BOOL FAR *p_translated = &translated;
  char StreetBuf[32];
- char HouseBuf[16];
+ char HouseBuf[32];
  char str[128], TrueStreet[66];
  short  Choice, irc;  
  long	HouseNum, ZIP;

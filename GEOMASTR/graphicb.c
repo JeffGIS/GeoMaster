@@ -4502,6 +4502,8 @@ long GetPointGroups (long NumPoints,HPDPOINT Points,double MaxGroupDist,LPHANDLE
 	HANDLE	hPrevPt=GSSiGlobAlloc (1269,GHND,sizeof(long)*(NumPoints+1));
 	HPLONG	PrevPT=(HPLONG)GlobalLock (hPrevPt);
 	
+	if (NumPoints < 1)
+		return 0;
 	GSSiGetTempFileName (0,"gm",0,TempName); 
 			
 	BTVar[0].BT_VARTYP=BT_REAL;

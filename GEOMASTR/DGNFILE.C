@@ -581,7 +581,7 @@ BOOL SetDGNParms ()
 	LPSTR	pDesc, pTAG, pClause, pC, pColor, pWidth, pRot; 
 	short	rc;
 	char	str[256], SymName[66];  
-	short	ii,i,j,k,itype;
+	short	ii,i,j,k=0,itype;
     
 	pElement = (LPDGNElementCore)GlobalLock (hElement);
 	CurPointSize = 1;

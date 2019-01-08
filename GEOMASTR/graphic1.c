@@ -4018,7 +4018,7 @@ void ShowPickedItem (HWND hWnd, int InItem)
 #if ENABLETRACE
 {GSSiEnterProg (49);
 #endif
-{   LPSHORT       ipnt, EndItem;
+{   LPSHORT       ipnt=0, EndItem;
     HANDLE      hpltBuf=0;
     LPSTR       LPpltBuf;
     LPITEM      ItemHeader;
@@ -5737,7 +5737,7 @@ BOOL GetPickName (int Item)
     HANDLE	hBinFileList;
     BOOL    SaveIgnoreBounds;
     short     ifile, SaveCurFile=CurView->CurFile;
-    char    SubFileName[MAX_PATH], OrigFile[MAX_PATH]="",CurEntryName[MAX_PATH];
+	char    SubFileName[MAX_PATH], OrigFile[MAX_PATH] = { 0 }, CurEntryName[MAX_PATH];
     short       NumFiles;
     LPSHORT      lpNumFiles;       
     LPFILELISTENTRY lpEntry;
@@ -6856,7 +6856,7 @@ GSSiExitProg (68);
 		 CurView->FileType[CurView->CurFile]!=6)
 	{   
 		LPSTR	pMDB=0, pGDB=0, pSLT; 
-		BOOL	st;
+		BOOL	st = FALSE;
 		
 		pGMD = 0;
 		if ((pGDB = _fstrstr (str,".GDB("))) 
@@ -7217,7 +7217,7 @@ void SetClassColor (int i,int type, COLORREF color)
 {GSSiEnterProg (82);
 #endif
 {   
-    short Style;
+    short Style = PS_SOLID;
     
     if (i>=MAX_NEW_OBJECTS)
 {

@@ -4197,7 +4197,7 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
 #endif
 {
     DWORD   i; 
-    HDC		hDC,hDCMain;
+    HDC		hDC=0,hDCMain;
     HBITMAP	hBM=0, hBMOld=0; 
     double	Factor; 
     UINT	Height,Width,irow,icol;
@@ -4351,7 +4351,8 @@ HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, in
 	hPIAA = GSSiGlobalReAlloc (0,hPIAA,sizeof(PIAAStruct)+loc*2,GMEM_MOVEABLE);
 Exit:
     GSSiGlobUlFree (&hPoint);  
-    DeleteDC(hDC);
+    if (hDC)
+		DeleteDC(hDC);
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
     GSSiDeleteObject(&hBM);   
@@ -6632,7 +6633,7 @@ DPOINT3D PointAtDistOnPoly3D(HPDPOINT3D lpPoints, long nPnts, double AtDist, LPD
 	double Dist=0, LastDist, AZ=0, dst;
 	DWORD	i; 
 	HPDPOINT3D	lpPoints2=lpPoints+1; 
-	DPOINT3D	Point; 
+	DPOINT3D	Point = *lpPoints;
 	DPOINT		Point2D;
 	
 	for (i=1;i<nPnts;i++,lpPoints++,lpPoints2++)

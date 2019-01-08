@@ -1792,7 +1792,7 @@ BOOL ComputeThemePCTByArea (BOOL CloseAll)
 {   
 	COLORREF	Color;   
 	UINT	x,y,iclass;
-   	HCURSOR	hcurSave; 
+   	HCURSOR	hcurSave=0; 
 	 
 	if (!CurTheme)
 {
@@ -1870,7 +1870,7 @@ GSSiExitProg (1291);
 	for (iclass=0;iclass<MAX_THEME_CLASSES;iclass++) 
 		CurTheme->ClassColor[iclass] = SaveClassColor[iclass]; 
 	SaveColorsInUse = FALSE; 
-	if (!PrintMsgWnd)
+	if (!PrintMsgWnd && hcurSave)
 	{
 		GSSiSetCursor(hcurSave);
 	}	

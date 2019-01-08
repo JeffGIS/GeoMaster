@@ -740,7 +740,7 @@ DWORD DispText (HDC hDC,BOOL GetExtents,int left, int right, int y, int symsize,
 	double	Size; 
 	short	symbol=0; 
 	static	BOOL	First=TRUE;   
-	double	PixelSize;    
+	double	PixelSize=0;    
 	BOOL	UseFlag = FALSE;
 	int		PoleLength = 12;
 	int		TextFlagWidth, TextFlagHeight;

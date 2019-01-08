@@ -758,7 +758,7 @@ int GetFenceCoord (LPSTR Account,LPSTR FenceName)
 	HIGHLIGHTDATA	HighlightData;
 	long	Refno, npnts=0;
 	HANDLE	hPoly;
-	int		Layer, nAreas, err;
+	int		Layer, nAreas, err=0;
 	HPDPOINT	pPoly;
 
     ClearHighlightList (FALSE);  

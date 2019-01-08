@@ -51,7 +51,7 @@ typedef POINT *LPPOINT;
 typedef int    *LPBOOL;
 typedef int * LPINT;
 typedef short * LPSHORT;
-typedef char *LPSTR;
+//typedef char *LPSTR;
 typedef LPSTR HPSTR;
 #define TRUE 1
 #define FALSE 0

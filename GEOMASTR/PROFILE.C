@@ -804,7 +804,7 @@ if (isurf)
 		MidElev = (MaxElev + MinElev) / 2;
 	    sprintf (txt,"%.0f",MaxElev);
 	    h = 20*DeviceToScreenFactor();
-		TextExt = DispText (CurView->hDC,TRUE,p.x-10,p.x+10, -1,0, 2,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
+		TextExt = DispText (CurView->hDC,TRUE,0,0, -1,0, 2,2,h,1,1,2, FALSE,0,txt,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0);
 		MaxXText = LOWORD(TextExt); 
 		MaxYText = HIWORD(TextExt);
 		if (AlignWithRoute)

@@ -2466,7 +2466,7 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 						}
 						else
 						{
-							ii = 1;
+							hOldFont = SelectObject(hDC, hFont);
 						}
 						SelectObject(hDC, hOldFont);
 						_fstrcpy(str, "\t");
@@ -2732,7 +2732,7 @@ double GetNumericFieldData (HANDLE hSQL,LPFIELDINFO lpField, int FunctionID,int 
     HANDLE      hBT, hDB;
     long        Offset; 
     BOOL		HaveData=FALSE;
-    double      rtn, Sum=0, MinMax, Minv, Maxv;                  
+    double      rtn, Sum=0, MinMax=0, Minv=0, Maxv=0;                  
     HANDLE		hMem = GSSiGlobAlloc ( 271,GMEM_MOVEABLE,4096);
     LPSTR		str=GlobalLock (hMem);
     short         st, i, len;

@@ -1223,12 +1223,12 @@ GSSiExitProg (479);
           pBTree->BT_HEAD.BT_FIRST_POS = 0; 
           pBTree->BT_PATH_CHANGE = TRUE;  
 		  pBTree->BT_BUFF_INDEX->usedbufs = 1;
-          if (!GSSiChangeLength (pBTree->BtFid,pBTree->BT_HEAD.BT_HEADLEN + pBTree->BT_HEAD.BT_LENGTH + 32))
+          if (!GSSiChangeLength (pBTree->BtFid, (LONGLONG)pBTree->BT_HEAD.BT_HEADLEN + pBTree->BT_HEAD.BT_LENGTH + 32))
           {
           	GSSiClose (pBTree->BtFid);
           	CloseFidSmall ();
           	pBTree->BtFid = GSSiOpenFile (pBTree->BT_FNAME,0,OF_READWRITE);
-          	if (!GSSiChangeLength (pBTree->BtFid,pBTree->BT_HEAD.BT_HEADLEN + pBTree->BT_HEAD.BT_LENGTH + 32))
+          	if (!GSSiChangeLength (pBTree->BtFid, (LONGLONG)pBTree->BT_HEAD.BT_HEADLEN + pBTree->BT_HEAD.BT_LENGTH + 32))
           		ii=1;
           	GSSiClose (pBTree->BtFid);
           	CreateFidSmall ();
@@ -1462,7 +1462,7 @@ int BT_FIND_internal (LPBTREE pBTree,LPSTR KEY,int POSITION,int COND,LPSTR DATA,
 #if ENABLETRACE
 {GSSiEnterProg (487);
 #endif
-{	int 	BTST, Compare;
+{	int 	BTST=0, Compare;
 	BOOL    BACKWARDS, BEFORE_FIRST=FALSE, FIRST_CALL;  
 	BOOL	CheckSecIndexEQ = FALSE;
 	long	DOWN; 
@@ -1884,7 +1884,7 @@ void BT_GET_BLOCK(LPBTREE pBTree)
 #endif
 {     int	inc;
 	  long	OldestUse,ii;
-	  int	OldestBuf;
+	  int	OldestBuf=0;
 	  int	i;
 	  BOOL	CheckPtr=FALSE;
 
@@ -2503,7 +2503,7 @@ LPCB FREE_BT_REC (LPBTREE pBTree,int LREC,long *LOC, int Type)
 #if ENABLETRACE
 {GSSiEnterProg (502);
 #endif
-{ 	  long		I, LAST_BLOCK;
+{ 	  long		I, LAST_BLOCK=-1;
 	  int		LAST, NEXT, LENS;
 	  LPCB		pFREE_BT_REC;
 
@@ -2550,7 +2550,7 @@ S10:      if (I < 0) goto S100;
 
 S100: pBTree->POS.POSA = GetBT_HEAD_FirstFreeBlock(pBTree,Type-1)*pBTree->BT_HEAD.BT_BLKSIZE;
       BT_GET_BLOCK(pBTree);
-      if (pBTree->BT_BLOCK->BT_FSPACE_BEG >= 0 && pBTree->BT_BLOCK_NUM != LAST_BLOCK)
+      if (pBTree->BT_BLOCK->BT_FSPACE_BEG >= 0 && pBTree->BT_BLOCK_NUM != LAST_BLOCK && Type == pBTree->BT_BLOCK->Type)
 		  goto S5;
       /* Create new block */
       pBTree->BT_HEAD.BT_MAX_BLOCK++;
@@ -3493,6 +3493,8 @@ HANDLE BT_FormKey(HANDLE hKeyList, LPSTR val)
 	HANDLE hKey = 0;
 	LPSTR loc,nxtLoc=val;
 	LPSTR pKey;
+	char czero[2] = "0";
+	char cnull[2] = { 0 };
 
 	if (GetBTHeader(hKeyList, &btHead))
 	{
@@ -3503,9 +3505,14 @@ HANDLE BT_FormKey(HANDLE hKeyList, LPSTR val)
 		for (i = 0; i < btHead.BT_NVARS; i++, pFldInfo++)
 		{
 			loc = nxtLoc;
-			nxtLoc = strchr(loc, ';');
-			if (nxtLoc)
-				*nxtLoc++ = 0;
+			if (loc)
+			{
+				nxtLoc = strchr(loc, ';');
+				if (nxtLoc)
+					*nxtLoc++ = 0;
+			}
+			else
+				loc = czero;
 			switch (pFldInfo->BT_VARTYP)
 			{
 			case BT_INTEGER:
@@ -3527,9 +3534,9 @@ HANDLE BT_FormKey(HANDLE hKeyList, LPSTR val)
 				break;
 
 			default:
-				_fmemmove(pKey, loc, pFldInfo->BT_VARLEN);
-				break;
 			case BT_CHAR:
+				if (!loc)
+					loc = cnull;
 				_fstrncpy(pKey,loc, pFldInfo->BT_VARLEN);
 				break;
 			}

@@ -2553,7 +2553,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
    LPDEVMODE pDevMode;   
    HFILE	Fid; 
    SIZE		txSize;  
-   int		Tabs[32], Margin=120;   
+   int		Tabs[32] = { 0 }, Margin = 120;
    double	Factor; 
    HFONT	hFont, hFontBold, OldFont;
    char		Header[514]; 

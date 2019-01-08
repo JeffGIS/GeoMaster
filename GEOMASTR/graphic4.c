@@ -1799,10 +1799,10 @@ LPDEBUGARRAY	pDB=0;   */
         if (!SelectObject(hDC, CurrentPen))
         	ii=1;
 	} */  
-		if (StartElement > 0)
+		if (ipnt && StartElement > 0)
 			ipnt += StartElement;
 		StartElement = -1;
-        while (((LPSTR)ipnt - BeginSeg) <= LenSeg && *ipnt != 0 && ContinueProcessing)
+        while (ipnt && ((LPSTR)ipnt - BeginSeg) <= LenSeg && *ipnt != 0 && ContinueProcessing)
         {   
 			DWORD ptime = GetTickCount();
 			if (ptime - starttime > 1000)
@@ -4667,6 +4667,14 @@ BOOL PickPolyline (HPPOINTS lpPointsIn,long nPnts, int PolyID,short InType,LPFLO
 	LPMNMXCORL	pBounds;
 	long	FromPtID=-1;
 	
+	if (nPnts < 1)
+	{
+#if ENABLETRACE
+		GSSiExitProg(706);
+#endif
+		return FALSE;
+	}
+
 	if (PinA)       
 	{
 		MinMaxInitL (&Bounds);

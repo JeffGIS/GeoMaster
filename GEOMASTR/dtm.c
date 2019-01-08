@@ -795,7 +795,7 @@ BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
 	double	MinX = DBL_MAX, MaxX = -DBL_MAX, MinY = DBL_MAX, MaxY = -DBL_MAX, MinZ = DBL_MAX, MaxZ = -DBL_MAX;
 	double	FileMinX, FileMinY;
 	long	LidarDist[MAXLIDARPERREC + 1];
-	double	CellMinX, CellMinY; 
+	double	CellMinX=0, CellMinY=0; 
 	int		i;
      
 	LIDARREC	LidarRec = { 0 };

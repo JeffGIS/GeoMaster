@@ -635,7 +635,7 @@ BOOL ImportAttributes (HANDLE hSQL)
     if (!hAttImport)
     	return TRUE;
    	lpVersion = (LPSHORT)GlobalLock (hAttImport);
-	*lpVersion++; 
+	*lpVersion++=0; 
 	lpLength = lpVersion++; 
 	lpStr = (LPSTR)lpVersion;
 	lpStr = _fstrchr (lpStr,0);
@@ -679,7 +679,7 @@ BOOL OpenImportAttributesFile (LPHANDLE phDB)
     if (!hAttImport)
     	return TRUE;
    	lpVersion = (LPSHORT)GlobalLock (hAttImport);
-	*lpVersion++; 
+	*lpVersion++=0; 
 	lpLength = lpVersion++; 
 	lpStr = (LPSTR)lpVersion;
     _fstrcpy (AttImportDataFile,lpStr);

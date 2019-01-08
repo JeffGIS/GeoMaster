@@ -447,7 +447,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 	static	BIHEADER	biHeadOut;
 	BIHEADER	biHeadIn; 
 	LPBIHEADER	lpbiHeadIn;
-	LPBITMAPINFOHEADER  lpbi; 
+	LPBITMAPINFOHEADER  lpbi=0; 
 	BITMAPINFOHEADER  	bi;
 	LPSTR		lpDIBBits;
 	char		Name[MAX_PATH], str[512];   

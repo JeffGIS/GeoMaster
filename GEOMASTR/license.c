@@ -373,7 +373,7 @@ BOOL ValidateLicense(HWND hWnd)
 { 
   BOOL	nRc=TRUE;
   DLGPROC lpfnLICENSEMsgProc;  
-  char	IniName[132], Serno[32]="", str[128];   
+  char	IniName[MAX_PATH], Serno[32]="", str[128];   
   
 //  DWORD TR = GetTimerResolution();
   

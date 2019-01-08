@@ -911,7 +911,7 @@ BOOL LinkLinesFunction (LPSTR Arg1,LPSTR Arg2,LPSTR OutLoc)
 		{
 			double	minx = DBL_MAX;
 			double	mindaz = DBL_MAX;
-			int		mini;
+			int		mini=0;
 
 			//find leftmost endpoint
 			for (i=0;i<nRawLines;i++)
@@ -3702,7 +3702,7 @@ Exit:
 BOOL CreateSportMapCMD (LPSTR FromPath,LPSTR CmdFile)
 { 
 	char	Name[144], Name2[144],str2[150], CDName[32], OrigCDName[8],str[255]; 
-	short	DType, Res, AreaNum;
+	short	DType, Res=0, AreaNum;
 	HFILE	Fid,Fid2;  
 	long	TotFiles=0;   
 	OFSTRUCTGM	OFStruct;
@@ -4624,9 +4624,9 @@ Exit:
 BOOL SplitXFERFile (LPSTR Name,LPSTR Dir,short nPieces)
 { 
 	OFSTRUCTGM	OFStruct;
-	HFILE		Fid, Fid2;
+	HFILE		Fid, Fid2=HFILE_ERROR;
 	char		NewName[128], line[1030];
-	long		TotLen, PieceEnd=-1, loc;
+	long		TotLen, PieceEnd=-1, loc=0;
 	short		PieceNum=0;
 	
 	if ((Fid = GSSiOpenFile (Name,&OFStruct,OF_READ)) == HFILE_ERROR)
@@ -5331,7 +5331,7 @@ BOOL GetNearestPointFromTable (LPSTR NPTable,LPDPOINT pPoint,int idesc,LPDPOINT 
 	NPHEADER	Header, FirstHeader;
 	DUPDATA		DupData, NearestDup;
 	double		dist, NearestDist = DBL_MAX;
-	int			st, stfirst, NearestRef;
+	int			st, stfirst, NearestRef=0;
 	HANDLE		hBT;
 
 	hBT = BT_OPEN (NPTable, 0, BT_READ, 0);  
@@ -5866,7 +5866,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 {
      int	Num,i;
      char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
-	 char	GMDFile[MAX_PATH]="";
+	 char	GMDFile[MAX_PATH] = { 0 };
      LPSTR	lpBrack, lpDot; 
      HFILE	OutFileFID, Fid;  
      long	TotFiles=0;

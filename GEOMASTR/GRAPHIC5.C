@@ -2156,7 +2156,7 @@ BOOL AddPointToMap (DPOINT DPoint,long NewRefno,HANDLE hTimeStamp,int idesc,doub
 	DPOINT	pt1, pt2;
 	static	mnmxCor		MinMax;
 	mnmxCor	PtMinMax; 
-	long	Offset, CurRecLenLoc, loc, endsegloc, PenColor, StartTime, EndTime, lBufBeg;      
+	long	Offset, CurRecLenLoc, loc=0, endsegloc, PenColor, StartTime, EndTime, lBufBeg;      
 	static	long	lastloc,iii=-1;
 	short		CurRecLen, ltag;  
 	long	TextColor=0;
@@ -2645,9 +2645,11 @@ GSSiExitProg (740);
 	else
 		GlobalUnlock (hBuf);
     
-	CurrentItem = loc - CurrentSeg -2;    
-	ItemSeg = CurrentSeg;
-	    
+	if (loc)
+	{
+		CurrentItem = loc - CurrentSeg - 2;
+		ItemSeg = CurrentSeg;
+	}
    	FileInIndex=0;
    	CurrentRefno=NewRefno;
 	BuildTAGIndex (Prefix,UDI,0,NewRefno,FALSE);
