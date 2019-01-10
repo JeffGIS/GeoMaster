@@ -16,6 +16,8 @@ typedef struct {
 }VARSPACE;
 typedef VARSPACE *LPVARSPACE;
 
+static  HANDLE hMemRaw[32];
+static  int nRaw = 0;
 static	LPVARSPACE pVarSpace = 0;
 static	HANDLE hGlobalVarSpace = 0;
 static	HANDLE hLocalVarSpace = 0;
@@ -37,6 +39,8 @@ static	UINT	dlgListList;
 static  char	altprojection[256] = { 0 };
 
 extern char	VirtPrinterImageFile[256];
+
+LPSTR ExpandTextDB2(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 
   typedef struct {
   			double r1, r2;
@@ -4018,6 +4022,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%ADJUSTINTENSITY", 394, FALSE);
 	AllocateTypeVar("%USETEXTFILEINDEX", 395, FALSE);
 	AllocateTypeVar("%WANTBACKGROUNDCACHE", 396, FALSE);
+	AllocateTypeVar("%USERINIFILE", 397, FALSE);
 
 
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5217,6 +5222,9 @@ GSSiExitProg (533);
 			break;
 		case 396:
 			btoa(wantBackgroundCache, OutStr);
+			break;
+		case 397:
+			strcpy(OutStr, GMIni);
 			break;
 	}
 	GlobalUnlock (hGlobal);
@@ -6535,7 +6543,93 @@ UINT MessageBoxHalt (HWND hWnd,LPSTR Mess,LPSTR Title,UINT Flags)
 
 	return rtn;
 }
-LPSTR ExpandTextDB (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
+
+void RemoveChar(LPSTR txt, char rc)
+{
+	LPSTR outText = txt;
+	while (*txt)
+	{
+		if (*txt != rc)
+		{
+			*outText++ = *txt;
+		}
+		txt++;
+	}
+	*outText = 0;
+}
+
+BOOL GetRawInput(LPSTR id, LPSTR OutLoc, int maxLen)
+{
+	int iRaw = atoi(&id[1]);
+
+	if (iRaw >= nRaw)
+		return FALSE;
+	LPSTR pRaw = GlobalLock(hMemRaw[iRaw]);
+	char  rawID[8];
+	int lRaw = strlen(pRaw);
+
+	if (lRaw >= maxLen)
+		pRaw[maxLen - 1] = 0;
+	strcpy(OutLoc, pRaw);
+	GlobalUnlock(hMemRaw[iRaw]);
+	return TRUE;
+}
+LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
+{
+	BOOL inRawInput = FALSE;
+	LPSTR pPos;
+	LPSTR pBeg = InText;
+	LPSTR pEnd = strchr(pBeg, rawInputChar);
+	if (!pEnd)
+		return ExpandTextDB2(InText, pBrkPt, bpOffset, bpLen);
+
+//	int lIn = strlen(InText);
+//	HANDLE hInput = GSSiGlobAlloc(0, GMEM_MOVEABLE, l + 2);
+//	LPSTR  pInput = GlobalLock(hInput);
+	HANDLE hMem = GSSiGlobAlloc (0, GMEM_MOVEABLE, USHRT_MAX);
+	
+	nRaw = 0;
+	LPSTR pMem = GlobalLock(hMem);
+	
+	*pEnd++ = 0;
+	strcpy(pMem, pBeg);
+	pPos = strchr(pMem, 0);
+	pBeg = pEnd;
+	inRawInput = TRUE;
+	while (*pBeg)
+	{
+		pEnd = strchr(pBeg, rawInputChar);
+		if (!pEnd)
+			pEnd = strchr(pBeg, 0);
+		else
+			*pEnd++ = 0;
+		if (inRawInput)
+		{
+			LPSTR pRaw;
+			int l = pEnd - pBeg;
+			hMemRaw[nRaw] = GSSiGlobAlloc(0, GMEM_MOVEABLE, l + 2);
+			pRaw = GlobalLock(hMemRaw[nRaw]);
+			strcpy(pRaw, pBeg);
+			GlobalUnlock(hMemRaw[nRaw]);
+			sprintf(pPos, "$RAW(#%i)", nRaw++);
+		}
+		else
+			strcpy(pPos, pBeg);
+		pPos = strchr(pPos, 0);
+		inRawInput = !inRawInput;
+		pBeg = pEnd;
+	}
+	ExpandTextDB2(pMem, pBrkPt, bpOffset, bpLen);
+	for (int i = 0; i < nRaw; i++)
+	{
+		GSSiGlobFree(&hMemRaw[i]);
+	}
+	strcpy(InText, pMem);
+	GSSiGlobUlFree(&hMem);
+	return InText;
+}
+
+LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (558);
 #endif
@@ -6547,7 +6641,8 @@ LPSTR ExpandTextDB (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 	BOOL	FoundLit=FALSE, SaveIE=InExpand, ExpandTrace=FALSE;
 	int		loopBPOffset=0, whileBpOffset=0;
 	int		elseBpOffset=0, thenBpOffset=0;
-	
+
+
 	InExpand = TRUE;
 	if (TraceOn)
 	{   

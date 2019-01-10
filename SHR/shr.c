@@ -2715,9 +2715,20 @@ LPSTR MatchLev (LPSTR InStr, char MatchChar)
     short lev=0;
     BOOL    Literal=FALSE; 
     char	BegLev=0,EndLev=0;
+	char	rawInputChar = '`';
     
     while (*InStr)
-    {    
+    {  
+		if (*InStr == rawInputChar)
+		{
+			LPSTR pBeg = InStr + 1;
+			LPSTR pEnd = strchr(pBeg, rawInputChar);
+			if (pEnd)
+				InStr = pEnd + 1;
+			else
+				InStr = strchr(InStr, 0);
+			continue;
+		}
         if (Literal)
             Literal = FALSE;
         else

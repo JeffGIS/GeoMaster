@@ -142,7 +142,12 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 			pDocFileName = GMDocDir;
 		else
 			pDocFileName++;
-		sprintf(windowTitle, "GMDocumenter:%s", pDocFileName);
+		LPSTR pDesc = strchr(pDocFileName,':');
+		if (pDesc)
+			*pDesc++ = 0;
+		else
+			pDesc = pDocFileName;
+		sprintf(windowTitle, "GMInstructor:%s", pDesc);
 		if (productionMode)
 			strcat(GMDocDir, "\\composited");
 		else
@@ -167,7 +172,7 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		if (!hAccelTable || !TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			//if (!IsDialogMessage(ghFindReplaceDlg, &msg))
 			{
@@ -204,7 +209,7 @@ int APIENTRY WinMainGMDoc(HINSTANCE hInstance,
 //
 ATOM MyRegisterClassGMDoc(HINSTANCE hInstance)
 {
-	WNDCLASSEX wcex;
+	WNDCLASSEX wcex = { 0 };
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
@@ -214,7 +219,7 @@ ATOM MyRegisterClassGMDoc(HINSTANCE hInstance)
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(hInstance,"GMDOC");
-	wcex.hCursor = 0;
+	wcex.hCursor = LoadCursor(0, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = 0;
 	wcex.lpszClassName = szWindowClassGMDoc;
@@ -238,9 +243,28 @@ BOOL InitInstanceGMDoc(HINSTANCE hInstance, int nCmdShow)
 	HWND hWnd;
 
 	hInst = hInstance; // Store instance handle in our global variable
+	char value[128];
+	int winx, winy, winw, winh;
+	GetPrivateProfileString("User", "LastWindowPos", "0", value, sizeof(value), GMIni);
+	if (strlen(value) == 1)
+	{
+		winw = CW_USEDEFAULT;
+		winh = 0;
+		winx = CW_USEDEFAULT;
+		winy = 0;
+	}
+	else
+	{
+		BOOL err;
+		RECT rect = atorect(value, &err);
+		winx = rect.left;
+		winy = rect.top;
+		winw = RECTWIDTH(&rect);
+		winh = RECTHEIGHT(&rect);
+	}
 
 	hWnd = CreateWindow(szWindowClassGMDoc, szTitleGMDoc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | CS_OWNDC,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+		winx, winy, winw, winh, NULL, NULL, hInstance, NULL);
 
 	if (!hWnd)
 	{
@@ -248,7 +272,7 @@ BOOL InitInstanceGMDoc(HINSTANCE hInstance, int nCmdShow)
 	}
 
 	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	//UpdateWindow(hWnd);
 	SetWindowText(hWnd, windowTitle);
 
 
@@ -710,7 +734,6 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			PostQuitMessage(0);
 		}
 		break;
-
 	case WM_CLOSE:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 
@@ -841,16 +864,16 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_SIZE:
 		GetWindowRect(hWnd, &rect);
 		return DefWindowProc(hWnd, message, wParam, lParam);
-	case WM_SETFOCUS:
+	/*case WM_SETFOCUS:
 
 		// Create a solid black caret. 
-		CreateCaret(hWnd, (HBITMAP)NULL, cursorWidth, cursorHeight);
+		//CreateCaret(hWnd, (HBITMAP)NULL, cursorWidth, cursorHeight);
 
 		// Adjust the caret position, in client coordinates. 
-		SetCaretPos(insertPoint.x, insertPoint.y);
+		//SetCaretPos(insertPoint.x, insertPoint.y);
 
 		// Display the caret. 
-		ShowCaret(hWnd);
+		//(hWnd);
 
 		break;
 	case WM_KILLFOCUS:
@@ -859,7 +882,7 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		DestroyCaret();
 
-		break;
+		break;*/
 	case WM_HSCROLL:
 		// Get all the vertial scroll bar information.
 		si.cbSize = sizeof (si);
@@ -914,27 +937,7 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		return 0;
 	case WM_MOUSEWHEEL:
-	{
-		int		fwKeys = LOWORD(wParam);    // key flags
-		int		oldPos;
-		short	zDelta = (short)HIWORD(wParam);    // wheel rotation
-
-		currentLine = -1;
-		si.cbSize = sizeof (si);
-		si.fMask = SIF_ALL;
-		GetScrollInfo(hWnd, SB_VERT, &si);
-		oldPos = si.nPos;
-		if (zDelta < 0)
-			si.nPos += 1;
-		else
-			si.nPos -= 1;
-		si.fMask = SIF_POS;
-		SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
-		GetScrollInfo(hWnd, SB_VERT, &si);
-		if (si.nPos != oldPos)
-			InvalidateRect(hWnd, 0, TRUE);
-		break;
-	}
+	break;
 	case WM_VSCROLL:
 		// Get all the vertial scroll bar information.
 		currentLine = -1;
@@ -1002,6 +1005,7 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 		return 0;
 
 	case WM_COMMAND:
+	{
 		wmId = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
 		// Parse the menu selections:
@@ -1022,16 +1026,16 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			timerValue = saveTimerValue;
 			InvalidateRect(hWnd, 0, TRUE);
 		}
-			break;
+		break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
-			break;
 			break;
 
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 			break;
 		}
+	}
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -1276,11 +1280,14 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 					tempDC, 0, 0, SRCCOPY);
 			}
 			else
+			{
 				rtn = AlphaBlend(hDC, rect.left, rect.top, w, h,
-				TransparentDC,
-				0, 0,
-				bm.bmWidth, bm.bmHeight,
-				bf);
+					TransparentDC,
+					0, 0,
+					bm.bmWidth, bm.bmHeight,
+					bf);
+
+			}
 			/*{
 			int er = GetLastError();
 			char message[256];
@@ -1294,7 +1301,7 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 			transParency += inc;
 			if (transParency >= 100)
 			{
-				if (first)
+				if (first && !first)
 				{
 					OldFont = SelectObject(TransparentDC, hFont);
 

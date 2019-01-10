@@ -34,15 +34,25 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON6               ICON                    "..\\GEOMASTR\\ICO00001.ICO"
+
 GWIZ                    ICON                    "..\\GEOMASTR\\EARTH.ICO"
+
 PHONE1                  ICON                    "..\\GEOMASTR\\ICON1.ICO"
+
 PEOPLE                  ICON                    "..\\GEOMASTR\\NAMES.ICO"
+
 HOME                    ICON                    "..\\GEOMASTR\\HOME.ICO"
+
 ASSOCIATE               ICON                    "..\\GEOMASTR\\ASSOC.ICO"
+
 LIGHTBULB_32            ICON                    "..\\GEOMASTR\\ICON6.ICO"
+
 IDI_GMEDIT_SMALL        ICON                    "..\\GEOMASTR\\ICON7.ICO"
+
 IDI_GMEDIT_LARGE        ICON                    "..\\GEOMASTR\\ICON8.ICO"
+
 GMDOC                   ICON                    "..\\GEOMASTR\\GWIZ1.ICO"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -8075,18 +8085,18 @@ BEGIN
     PUSHBUTTON      "Add File",IDC_DBADDFILE,57,7,50,14
 END
 
-SELECTGMSTARTCMD DIALOGEX 0, 0, 684, 307
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | DS_CENTERMOUSE | WS_POPUP
+SELECTGMSTARTCMD DIALOGEX 0, 0, 685, 308
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,7,286,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,627,286,50,14
-    EDITTEXT        IDC_COMMAND,58,15,619,14,ES_AUTOHSCROLL
-    LISTBOX         IDC_LIST1,7,51,670,230,LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,7,287,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,628,287,50,14
+    EDITTEXT        IDC_COMMAND,59,15,619,14,ES_AUTOHSCROLL
+    LISTBOX         IDC_LIST1,7,51,671,230,LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Command:",IDC_STATIC,16,17,41,12
     PUSHBUTTON      "Directory:",IDC_BUTTON1,7,31,48,14
-    EDITTEXT        IDC_DIRECTORY,58,31,619,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Edit",IDC_EDIT,540,286,50,14
+    EDITTEXT        IDC_DIRECTORY,59,31,619,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Edit",IDC_EDIT,540,287,50,14
 END
 
 LOC_INTERSECT1 DIALOGEX 0, 0, 266, 183
@@ -8497,123 +8507,241 @@ END
 //
 
 IDB_BITMAP2             BITMAP                  "..\\GEOMASTR\\BITMAP2.BMP"
+
 TRANBM                  BITMAP                  "..\\GEOMASTR\\TRANBM.BMP"
+
 BACKGROUND_1            BITMAP                  "..\\CITYTOUR\\PAT2.BMP"
+
 IDB_BITMAP3             BITMAP                  "..\\GEOMASTR\\BITMAP3.BMP"
+
 BLUE_BITMAP_DOWN        BITMAP                  "..\\CITYTOUR\\BLUE_BIT.BMP"
+
 BLUE_BITMAP_UP          BITMAP                  "..\\CITYTOUR\\GREEN_BI.BMP"
+
 IDB_BITMAP4             BITMAP                  "..\\CITYTOUR\\BITMAP2.BMP"
+
 IDB_BITMAP5             BITMAP                  "..\\CITYTOUR\\BITMAP4.BMP"
+
 IDB_DOWN_ARROW          BITMAP                  "..\\CITYTOUR\\UP_ARROW.BMP"
+
 IDB_DOWN_ARROW2         BITMAP                  "..\\CITYTOUR\\DOWN_ARR.BMP"
+
 IDB_DOWN_ARROW3         BITMAP                  "..\\CITYTOUR\\BMP00002.BMP"
+
 IDB_DOWN_ARROW4         BITMAP                  "..\\CITYTOUR\\BMP00006.BMP"
+
 IDB_LEFT_ARROW          BITMAP                  "..\\CITYTOUR\\BMP00001.BMP"
+
 IDB_LEFT_ARROW1         BITMAP                  "..\\CITYTOUR\\LEFT_ARR.BMP"
+
 IDB_LEFT_ARROW2         BITMAP                  "..\\CITYTOUR\\BMP00003.BMP"
+
 IDB_RIGHT_ARROW         BITMAP                  "..\\CITYTOUR\\RIGHT_AR.BMP"
+
 IDB_RIGHT_ARROW1        BITMAP                  "..\\CITYTOUR\\BMP00008.BMP"
+
 IDB_RIGHT_ARROW2        BITMAP                  "..\\CITYTOUR\\BMP00004.BMP"
+
 IDB_UP_ARROW            BITMAP                  "..\\CITYTOUR\\BITMAP3.BMP"
+
 IDB_UP_ARROW3           BITMAP                  "..\\CITYTOUR\\BMP00005.BMP"
+
 IDB_UP_ARROW4           BITMAP                  "..\\CITYTOUR\\BMP00007.BMP"
+
 ALIGN_BOTTOM            BITMAP                  "..\\CITYTOUR\\ALIGN_BO.BMP"
+
 ALIGN_BOTTOM_DOWN       BITMAP                  "..\\CITYTOUR\\BMP00012.BMP"
+
 ALIGN_HORIZ             BITMAP                  "..\\CITYTOUR\\ALIGN_HO.BMP"
+
 ALIGN_HORIZ_DOWN        BITMAP                  "..\\CITYTOUR\\BMP00013.BMP"
+
 ALIGN_LEFT              BITMAP                  "..\\CITYTOUR\\ALIGN_LE.BMP"
+
 ALIGN_LEFT_DOWN         BITMAP                  "..\\CITYTOUR\\BMP00010.BMP"
+
 ALIGN_RIGHT             BITMAP                  "..\\CITYTOUR\\ALIGN_RI.BMP"
+
 ALIGN_RIGHT_DOWN        BITMAP                  "..\\CITYTOUR\\BMP00009.BMP"
+
 ALIGN_TOP               BITMAP                  "..\\CITYTOUR\\ALIGN_TO.BMP"
+
 ALIGN_TOP_DOWN          BITMAP                  "..\\CITYTOUR\\BMP00011.BMP"
+
 ALIGN_VERTICAL          BITMAP                  "..\\CITYTOUR\\ALIGN_VE.BMP"
+
 ALIGN_VERTICAL_DOWN     BITMAP                  "..\\CITYTOUR\\BMP00014.BMP"
+
 CHECKBOX                BITMAP                  "..\\CITYTOUR\\TUCHECK.BMP"
+
 CHECKBOX_DOWN           BITMAP                  "..\\CITYTOUR\\TDCHECK.BMP"
+
 COMBO_DOWN              BITMAP                  "TDCOMBO.BMP"
+
 COMBO_UP                BITMAP                  "TUCOMBO.BMP"
+
 EDIT_DOWN               BITMAP                  "TDEDIT.BMP"
+
 EDIT_UP                 BITMAP                  "TUEDIT.BMP"
+
 GROUP_DOWN              BITMAP                  "..\\CITYTOUR\\TDGROUP.BMP"
+
 GROUP_UP                BITMAP                  "..\\CITYTOUR\\TUGROUP.BMP"
+
 HELP_DOWN               BITMAP                  "HLP-DWN.BMP"
+
 HELP_UP                 BITMAP                  "HLP-UP.BMP"
+
 HSPACE_DOWN             BITMAP                  "..\\CITYTOUR\\TDFRAME.BMP"
+
 HSPACE_UP               BITMAP                  "..\\CITYTOUR\\TUFRAME.BMP"
+
 LIST_DOWN               BITMAP                  "..\\CITYTOUR\\TDLIST.BMP"
+
 LIST_UP                 BITMAP                  "..\\CITYTOUR\\TULIST.BMP"
+
 PENCIL_DOWN             BITMAP                  "..\\CITYTOUR\\TDICON.BMP"
+
 PENCIL_UP               BITMAP                  "..\\CITYTOUR\\TUICON.BMP"
+
 POINTER_DOWN            BITMAP                  "..\\CITYTOUR\\TDPOINTR.BMP"
+
 POINTER_UP              BITMAP                  "..\\CITYTOUR\\TUPOINTR.BMP"
+
 PUSH_BUTTON_DOWN        BITMAP                  "..\\CITYTOUR\\TDPUSH.BMP"
+
 PUSH_BUTTON_UP          BITMAP                  "..\\CITYTOUR\\TUPUSH.BMP"
+
 RADIO_DOWN              BITMAP                  "..\\CITYTOUR\\BITMAP_R.BMP"
+
 RADIO_UP                BITMAP                  "..\\CITYTOUR\\TURADIO.BMP"
+
 RECTANGLE_DOWN          BITMAP                  "..\\CITYTOUR\\TDRECT.BMP"
+
 RECTANGLE_UP            BITMAP                  "..\\CITYTOUR\\TURECT.BMP"
+
 STANDARD_HEIGHT         BITMAP                  "..\\CITYTOUR\\STANDARD.BMP"
+
 STANDARD_HEIGHT_DOWN    BITMAP                  "..\\CITYTOUR\\BMP00015.BMP"
+
 STANDARD_WIDTH          BITMAP                  "..\\CITYTOUR\\BMP00016.BMP"
+
 STANDARD_WIDTH_DOWN     BITMAP                  "..\\CITYTOUR\\BMP00017.BMP"
+
 STATIC_DOWN             BITMAP                  "..\\CITYTOUR\\STATIC_D.BMP"
+
 STATIC_UP               BITMAP                  "..\\CITYTOUR\\STATIC_U.BMP"
+
 VSPACE_DOWN             BITMAP                  "..\\CITYTOUR\\NUMERIC_.BMP"
+
 VSPACE_UP               BITMAP                  "..\\CITYTOUR\\BMP00018.BMP"
+
 PICKCURS                BITMAP                  "..\\CITYTOUR\\PICKCURS.BMP"
+
 IDB_50PCT               BITMAP                  "..\\CITYTOUR\\MONO1.BMP"
+
 IDB_25PCT               BITMAP                  "..\\CITYTOUR\\MONO2.BMP"
+
 IDB_06PCT               BITMAP                  "..\\CITYTOUR\\MONO3.BMP"
+
 IDB_MONO4               BITMAP                  "..\\CITYTOUR\\MONO4.BMP"
+
 IDB_00PCT               BITMAP                  "..\\CITYTOUR\\MONO5.BMP"
+
 IDB_BITMAP6             BITMAP                  "..\\CITYTOUR\\LABEL.BMP"
+
 IDB_BITMAP7             BITMAP                  "..\\CITYTOUR\\SYMBOL.BMP"
+
 IDB_BITMAP8             BITMAP                  "..\\CITYTOUR\\TOOLBAR1.BMP"
+
 IDB_BITMAP9             BITMAP                  "..\\CITYTOUR\\BITMAP9.BMP"
+
 LAKEMASTER              BITMAP                  "..\\CITYTOUR\\S_TEMP.BMP"
+
 SPORTMAP                BITMAP                  "..\\CITYTOUR\\SPORTMAP.BMP"
+
 IDB_BITMAP10            BITMAP                  "..\\CITYTOUR\\ARROWQ~1.BMP"
+
 IDB_BITMAP11            BITMAP                  "..\\CITYTOUR\\BITMAP11.BMP"
+
 IDB_MONO6               BITMAP                  "..\\CITYTOUR\\MONO6.BMP"
+
 IDB_MONO7               BITMAP                  "..\\CITYTOUR\\MONO7.BMP"
+
 IDB_BITMAP12            BITMAP                  "..\\CITYTOUR\\PHONE1.BMP"
+
 IDB_BITMAP13            BITMAP                  "..\\CITYTOUR\\BITMAP13.BMP"
+
 IDB_BITMAP14            BITMAP                  "..\\CITYTOUR\\BITMAP14.BMP"
+
 IDB_BITMAP15            BITMAP                  "..\\CITYTOUR\\BITMAP15.BMP"
+
 IDB_BITMAP16            BITMAP                  "..\\CITYTOUR\\BITMAP16.BMP"
+
 GEOMASTER               BITMAP                  "..\\CITYTOUR\\GMLOGOW.BMP"
+
 CHECKED                 BITMAP                  "..\\CITYTOUR\\BITMAP17.BMP"
+
 UNCHECKED               BITMAP                  "..\\CITYTOUR\\CHECKED1.BMP"
+
 IDR_TOOLBAR1            BITMAP                  "..\\CITYTOUR\\BMP00019.BMP"
+
 IDB_BITMAP17            BITMAP                  "..\\CITYTOUR\\BMP00020.BMP"
+
 PANZOOMROT              BITMAP                  "..\\CITYTOUR\\zoompan24.bmp"
+
 JOYSTICK                BITMAP                  "..\\CITYTOUR\\BITMAP18.BMP"
+
 PROJECTWISE             BITMAP                  "..\\CITYTOUR\\BMP00021.BMP"
+
 IDB_BITMAP18            BITMAP                  "..\\CITYTOUR\\buoy_green.bmp"
+
 IDB_PENTEST             BITMAP                  "..\\CITYTOUR\\BITMAP19.BMP"
+
 LIGHTBULB               BITMAP                  "..\\CITYTOUR\\BMP00022.BMP"
+
 MEASURINGTAPE           BITMAP                  "..\\CITYTOUR\\CRAYONS.BMP"
+
 CRAYONS                 BITMAP                  "..\\CITYTOUR\\BMP00023.BMP"
+
 DICE                    BITMAP                  "..\\CITYTOUR\\BMP00024.BMP"
+
 IDB_75PCT               BITMAP                  "..\\CITYTOUR\\BMP25PCT.BMP"
+
 IDB_94PCT               BITMAP                  "..\\CITYTOUR\\BMP06PCT.BMP"
+
 IDB_98PCT               BITMAP                  "..\\CITYTOUR\\BMP02PCT.BMP"
+
 CRIMEMASTER             BITMAP                  "..\\CITYTOUR\\GEOMASTE.BMP"
+
 IDB_BITMAP19            BITMAP                  "..\\citytour\\BMP00025.BMP"
+
 IDB_BITMAP20            BITMAP                  "..\\CITYTOUR\\BITMAP20.BMP"
+
 IDB_DOWN_ARROW5         BITMAP                  "..\\CITYTOUR\\BMP00026.BMP"
+
 IDB_UNDOCKTOOL_HOR      BITMAP                  "..\\CITYTOUR\\BMP00027.BMP"
+
 IDB_UNDOCKTOOL_VERT     BITMAP                  "..\\CITYTOUR\\UNLOCKTO.BMP"
+
 PANZOOMROT24            BITMAP                  "..\\CITYTOUR\\BITMAP21.BMP"
+
 IDB_PLAY_START          BITMAP                  "..\\CITYTOUR\\BMP00028.BMP"
+
 IDB_PLAY_PAUSE          BITMAP                  "..\\CITYTOUR\\PLAY_STA.BMP"
+
 IDB_BITMAP21            BITMAP                  "..\\CITYTOUR\\BMP00029.BMP"
+
 IDB_CANCEL              BITMAP                  "..\\CITYTOUR\\CANCELOLD.BMP"
+
 IDB_BITMAP22            BITMAP                  "..\\CITYTOUR\\BITMAP22.BMP"
+
 IDB_BITMAP24            BITMAP                  "..\\CITYTOUR\\BITMAP24.BMP"
+
 IDB_BITMAP25            BITMAP                  "..\\CITYTOUR\\BITMAP25.BMP"
+
 NEWVISIONGIS            BITMAP                  "..\\CITYTOUR\\NewVisionGIS.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -8621,26 +8749,47 @@ NEWVISIONGIS            BITMAP                  "..\\CITYTOUR\\NewVisionGIS.bmp"
 //
 
 MOVE_CURSOR             CURSOR                  "..\\GEOMASTR\\LARROWS.CUR"
+
 PICK_CURSOR_AP          CURSOR                  "..\\GEOMASTR\\PICK_CUR.CUR"
+
 CURSOR_LOCKED           CURSOR                  "..\\GEOMASTR\\CURSOR_L.CUR"
+
 PICK_CURSOR_NEAR        CURSOR                  "..\\GEOMASTR\\CUR00001.CUR"
+
 DIGITIZE_CURSOR         CURSOR                  "..\\GEOMASTR\\DIGITIZE.CUR"
+
 LABEL_CURSOR            CURSOR                  "..\\GEOMASTR\\LABEL_CU.CUR"
+
 SYMBOL_CURSOR           CURSOR                  "..\\GEOMASTR\\SYMBOL_C.CUR"
+
 RULER_CURSOR            CURSOR                  "..\\GEOMASTR\\MEASURE_.CUR"
+
 WAYPOINT_CURSOR         CURSOR                  "..\\GEOMASTR\\WAYPOINT.CUR"
+
 WAYPOINT_CURSOR_SM      CURSOR                  "..\\GEOMASTR\\CUR00002.CUR"
+
 ZOOMOUT                 CURSOR                  "..\\GEOMASTR\\MAGNIFY.CUR"
+
 ZOOMIN                  CURSOR                  "..\\GEOMASTR\\ZOOMIN.CUR"
+
 HANDMOVE1               CURSOR                  "..\\GEOMASTR\\HMOVE.CUR"
+
 HANDMOVE2               CURSOR                  "..\\GEOMASTR\\HANDMOVE.CUR"
+
 SHOW                    CURSOR                  "..\\GEOMASTR\\SHOW.CUR"
+
 DRAWING                 CURSOR                  "..\\GEOMASTR\\DRAWING.CUR"
+
 TOGGLEVIS               CURSOR                  "..\\GEOMASTR\\TOGGLEVI.CUR"
+
 SETTAG                  CURSOR                  "..\\GEOMASTR\\SETTAG.CUR"
+
 IDC_CENTERPOINT_CURSOR  CURSOR                  "..\\GEOMASTR\\CURSOR5.CUR"
+
 IDC_CURSOR6             CURSOR                  "..\\GEOMASTR\\CURSOR6.CUR"
+
 WINZOOM                 CURSOR                  "..\\GEOMASTR\\CURSOR7.CUR"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -9232,9 +9381,9 @@ BEGIN
     "SELECTGMSTARTCMD", DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 677
+        RIGHTMARGIN, 678
         TOPMARGIN, 7
-        BOTTOMMARGIN, 300
+        BOTTOMMARGIN, 301
     END
 
     "LOC_INTERSECT1", DIALOG
@@ -9381,6 +9530,17 @@ END
 IDR_TOOLBAR1 TOOLBAR 153, 15
 BEGIN
     BUTTON      ID_BUTTON1203
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+SELECTGMSTARTCMD AFX_DIALOG_LAYOUT
+BEGIN
+    0
 END
 
 

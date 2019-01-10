@@ -792,6 +792,7 @@ extern POINT			CurEndPoint;
 extern HANDLE			hCurPolyPoints;
 extern char			MoveHorzVert;
 extern char			literalChar;
+extern char			rawInputChar;
 extern LPVIEWPORT			CurPolyVP;
 extern long			nCurPolyPoints;
 extern float			MaxPointSize;
@@ -1802,6 +1803,7 @@ extern  BOOL	AllAreasArePositive;
 extern	BOOL	useTextFileSQLiteIndex;
 extern	char	CurrentZoomList[MAX_PATH];
 extern	char	CurrentZoomListEntry[256];
+extern  RECT	MonitorRectangle[MAX_MONITORS];
 
 extern HBITMAP hPatBMP[5];
 extern	int		ii;

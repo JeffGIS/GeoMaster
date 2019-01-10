@@ -308,6 +308,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "NVMETRO", 7)) return 785;
 			if (!_fstrnicmp(str, "TAGDUMP", 7)) return 786;
 			if (!_fstrnicmp(str, "DIMLINE", 7)) return 787;
+			if (!_fstrnicmp(str, "MONITOR", 7)) return 788;
 
 			return 0;
 }
@@ -422,6 +423,7 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp(str, "CLIPBOARD", 9)) return 947;
 			if (!_fstrnicmp(str, "MAPSERVER", 9)) return 948;
 			if (!_fstrnicmp(str, "CASECOUNT", 9)) return 949;
+			if (!_fstrnicmp(str, "APPENDRAW", 9)) return 950;
 			return 0;
 }
 int	GetFunctionID10 (LPSTR str)

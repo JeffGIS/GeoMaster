@@ -2693,6 +2693,20 @@ GSSiExitProg (1350);
 			itoa(n, OutLoc, 10);
 			goto Rtnl;
 		}
+		case 950: // $APPENDRAW(file,line)
+		{
+
+			nArgs = GetFunArgs(Args, Arg, -2, &hMem, pBrkPt, bpOffset, bpLen);
+			ExpandText(Arg[1]);
+			if (nArgs < 3)
+				i = AppendFile(Arg[1], Arg[2]);
+			else
+				i = AppendFile2(Arg[1], Arg[2]);
+			itoa(i, OutLoc, 10);
+			goto Rtnl;
+		}
+
+
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 

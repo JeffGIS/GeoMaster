@@ -28,6 +28,25 @@ typedef struct {
 }WINPROCESSANDTHREAD;
 typedef WINPROCESSANDTHREAD *LPWINPROCESSANDTHREAD;
 
+int GetCurrentMonitor(void)
+{
+	int rtn = 1;
+	RECT rect, outRect;
+
+	if (numMonitors > 1)
+	{
+		GetWindowRect(hWndMain, &rect);
+		InflateRect(&rect, -32, -32);
+		if (!IntersectRect(&outRect, &MonitorRectangle[0], &rect))
+			rtn = 2;
+	}
+	return rtn;
+}
+void MoveToMonitor(int imon)
+{
+	if (imon < numMonitors)
+		MoveWindow(hWndMain, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
+}
 BOOL CALLBACK WEEnumWndProc(HWND hCtrl, LONG lParam)
 {
 	if (hCtrl == wantWnd)
@@ -7177,6 +7196,40 @@ HaveVP:;
 			DimensionLine(CurView->hDC, &p1, &p2, opt, color,units,Arg[8],txtsize);
 			goto RtnTrue;
 		}
+		case 788: //$MONITOR(COUNT)
+				  //$MONITOR(CURRENT)
+			      //$MONITOR(MOVE,id)
+		{
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (!stricmp(Arg[1], "COUNT"))
+			{
+				itoa(numMonitors, OutLoc, 10);
+			}
+			else if (!stricmp(Arg[1], "CURRENT"))
+			{
+				itoa(GetCurrentMonitor(), OutLoc, 10);
+			}
+			else if (!stricmp(Arg[1], "SWITCH"))
+			{
+				int iMon = GetCurrentMonitor();
+				if (iMon == 1)
+					iMon = 2;
+				else
+					iMon = 1;
+				MoveToMonitor(iMon-1);
+				strcpy(OutLoc, "1");
+			}
+			else if (!stricmp(Arg[1],"MOVETO"))
+			{
+				int iMon = atoi(Arg[2]);
+				iMon = max(0, iMon - 1);
+				MoveToMonitor(iMon);
+				strcpy(OutLoc, "1");
+			}
+			goto Rtnl;
+		}
+		break;
 
 		default:
 			goto Rtn0;

@@ -328,6 +328,15 @@ void LogUsageInfo (int From,LPSTR mess)
 	return;
 }
 
+void SaveWindowPosition(void)
+{
+	RECT rect;
+	char txt[128];
+
+	GetWindowRect(hWndMain, &rect);
+	recttoa(txt, rect);
+	WritePrivateProfileString("User", "LastWindowPos", txt, GMIni);
+}
 void QuitGraphics()
 #if ENABLETRACE
 {GSSiEnterProg (3);
@@ -337,7 +346,8 @@ void QuitGraphics()
 	LPSTR	pFile,pMessage; 
 	char	str[256],ExitMessage[256];
 	short	i; 
-
+	
+	SaveWindowPosition();
 	if (LogMSGFile != HFILE_ERROR)
 	{
 		GSSiClose(LogMSGFile);

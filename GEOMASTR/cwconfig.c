@@ -1354,7 +1354,67 @@ void testConvertBitmapToPoly(LPSTR file);
 	GSSiClose(fidOut);
 }
 */
+LONG FAR PASCAL WndProcTemp(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+{
+	return DefWindowProc(hWnd, Message, wParam, lParam);
+}
 
+ATOM RegisterTempWindowClass(LPSTR className, HINSTANCE hInst)
+{
+	ATOM rtn;
+	HBITMAP hBmp;
+	WNDCLASS   wndclass;    /* struct to define a window class             */
+	_fmemset(&wndclass, 0x00, sizeof(WNDCLASS));
+
+	/* load WNDCLASS with window's characteristics                         */
+	wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_BYTEALIGNCLIENT | CS_DBLCLKS | CS_OWNDC;
+	wndclass.lpfnWndProc = (WNDPROC)WndProcTemp;
+	wndclass.cbClsExtra = 0;
+	wndclass.cbWndExtra = 0;
+	wndclass.hInstance = hInst;
+	wndclass.hIcon = 0;
+	wndclass.hCursor = NULL;
+	wndclass.hbrBackground = NULL;
+	wndclass.lpszMenuName = 0; 
+	wndclass.lpszClassName = className; /* Class Name is App Name */
+	rtn = RegisterClassA(&wndclass);
+	return rtn;
+}
+void GetMonitorRectangles(int nMon,HINSTANCE hInst)
+{
+	GetWindowRect(GetDesktopWindow(), &MonitorRectangle[0]);
+	if (nMon < 1)
+		return;
+	char className[] = "TempWindowClass";
+	ATOM classAtom = RegisterTempWindowClass(className,hInst);
+	DWORD style = WS_CAPTION |        /* Title and Min/Max           */
+		WS_SYSMENU |        /* Add system menu box         */
+		WS_MINIMIZEBOX |        /* Add minimize box            */
+		WS_MAXIMIZEBOX |        /* Add maximize box            */
+		WS_THICKFRAME |        /* thick sizeable frame        */
+		WS_OVERLAPPED;
+	int inc = -32;
+	for (int iMon = 0; iMon < nMon; iMon++)
+	{
+		int winx = MonitorRectangle[max(0,iMon-1)].right + inc, winy = MonitorRectangle[max(0,iMon - 1)].top + abs(inc), winw=16, winh=16;
+		inc = 32;
+		HWND hWnd = CreateWindowEx(WS_EX_APPWINDOW,
+			className,               /* Window class name           */
+			className,             /* Window's title              */
+			style,
+			winx, winy, winw, winh,
+			0,                    /* Parent window's handle      */
+			0,                    /* Default to Class Menu       */
+			hInst,                   /* Instance of window          */
+			0);                   /* Create struct for WM_CREATE */
+		GetWindowRect(hWnd, &MonitorRectangle[iMon]);
+		ShowWindow(hWnd, SW_MAXIMIZE);
+		GetWindowRect(hWnd, &MonitorRectangle[iMon]);
+		DestroyWindow(hWnd);
+	}
+	UnregisterClass(className, hInst);
+	return;
+}
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	char cmdLine[1024];
@@ -1388,6 +1448,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	numMonitors = GetNumMonitors();
+	GetMonitorRectangles(numMonitors, hInstance);
 	typeChassis = ChassisType();
 	//mouseType = MouseType();
 	if (typeChassis == 3)
@@ -1758,77 +1819,89 @@ GSSiExitProg (437);
 
 	 switch (ShowMax)
 	 {
-		case 0:
- 			winx=0;
- 			winy=0;
- 			winw=600;
- 			winh=300;
-		break;
-		case 1://MINT
-			winx = DeskRectC.left;
-			winy = DeskRectC.top;
-			winw = RECTWIDTH (&DeskRectC);
-			winh = RECTHEIGHT (&DeskRectC)/2;
-			break;
-		case 2://MINB
-			winx = DeskRectC.left;
-			winy = RECTHEIGHT (&DeskRectC)/2;
-			winw = RECTWIDTH (&DeskRectC);
-			winh = RECTHEIGHT (&DeskRectC)/2;
-			break;
-		case 3://MINL
-			winx = DeskRectC.left;
-			winy = DeskRectC.top;
-			winw = RECTWIDTH (&DeskRectC)/2;
-			winh = RECTHEIGHT (&DeskRectC);
-			break;
-		case 4://MINR
-			winx = RECTWIDTH (&DeskRectC)/2;
-			winy = DeskRectC.top;
-			winw = RECTWIDTH (&DeskRectC)/2;
-			winh = RECTHEIGHT (&DeskRectC);
-			break;
-		case 5://MINTL
-			winx = DeskRectC.left;
-			winy = DeskRectC.top;
-			winw = RECTWIDTH (&DeskRectC)/2;
-			winh = RECTHEIGHT (&DeskRectC)/2;
-			break;
-		case 6://MINTR
-			winx = RECTWIDTH (&DeskRectC)/2;
-			winy = DeskRectC.top;
-			winw = RECTWIDTH (&DeskRectC)/2;
-			winh = RECTHEIGHT (&DeskRectC)/2;
-			break;
-		case 7://MINBL
-			winx = DeskRectC.left;
-			winy = RECTHEIGHT (&DeskRectC)/2;
-			winw = RECTWIDTH (&DeskRectC)/2;
-			winh = RECTHEIGHT (&DeskRectC)/2;
-			break;
-		case 8://MINBR
-			winx = RECTWIDTH (&DeskRectC)/2;
-			winy = RECTHEIGHT (&DeskRectC)/2;
-			winw = RECTWIDTH (&DeskRectC)/2;
-			winh = RECTHEIGHT (&DeskRectC)/2;
-			break;
-		case 9://RECT
- 			winx = customRect.left;
-			winy = customRect.top;
-			winw = RECTWIDTH (&customRect);
-			winh = RECTHEIGHT (&customRect);
-			break;
-//if (GetGlobalBVal2 ("[%DualScreen]",FALSE))
-		default:
-		 winw = CW_USEDEFAULT;
-		 winh = 0;
-		 winx = CW_USEDEFAULT;
+	 case 0:
+		 winx = 0;
 		 winy = 0;
-//			winx = DeskRectC.left;
-//			winy = DeskRectC.top;
-//			winw = RECTWIDTH (&DeskRectC);
-//			winh = RECTHEIGHT (&DeskRectC);
-}
+		 winw = 600;
+		 winh = 300;
+		 break;
+	 case 1://MINT
+		 winx = DeskRectC.left;
+		 winy = DeskRectC.top;
+		 winw = RECTWIDTH(&DeskRectC);
+		 winh = RECTHEIGHT(&DeskRectC) / 2;
+		 break;
+	 case 2://MINB
+		 winx = DeskRectC.left;
+		 winy = RECTHEIGHT(&DeskRectC) / 2;
+		 winw = RECTWIDTH(&DeskRectC);
+		 winh = RECTHEIGHT(&DeskRectC) / 2;
+		 break;
+	 case 3://MINL
+		 winx = DeskRectC.left;
+		 winy = DeskRectC.top;
+		 winw = RECTWIDTH(&DeskRectC) / 2;
+		 winh = RECTHEIGHT(&DeskRectC);
+		 break;
+	 case 4://MINR
+		 winx = RECTWIDTH(&DeskRectC) / 2;
+		 winy = DeskRectC.top;
+		 winw = RECTWIDTH(&DeskRectC) / 2;
+		 winh = RECTHEIGHT(&DeskRectC);
+		 break;
+	 case 5://MINTL
+		 winx = DeskRectC.left;
+		 winy = DeskRectC.top;
+		 winw = RECTWIDTH(&DeskRectC) / 2;
+		 winh = RECTHEIGHT(&DeskRectC) / 2;
+		 break;
+	 case 6://MINTR
+		 winx = RECTWIDTH(&DeskRectC) / 2;
+		 winy = DeskRectC.top;
+		 winw = RECTWIDTH(&DeskRectC) / 2;
+		 winh = RECTHEIGHT(&DeskRectC) / 2;
+		 break;
+	 case 7://MINBL
+		 winx = DeskRectC.left;
+		 winy = RECTHEIGHT(&DeskRectC) / 2;
+		 winw = RECTWIDTH(&DeskRectC) / 2;
+		 winh = RECTHEIGHT(&DeskRectC) / 2;
+		 break;
+	 case 8://MINBR
+		 winx = RECTWIDTH(&DeskRectC) / 2;
+		 winy = RECTHEIGHT(&DeskRectC) / 2;
+		 winw = RECTWIDTH(&DeskRectC) / 2;
+		 winh = RECTHEIGHT(&DeskRectC) / 2;
+		 break;
+	 case 9://RECT
+		 winx = customRect.left;
+		 winy = customRect.top;
+		 winw = RECTWIDTH(&customRect);
+		 winh = RECTHEIGHT(&customRect);
+		 break;
+		 //if (GetGlobalBVal2 ("[%DualScreen]",FALSE))
+	 default:
+		 {
+			 char value[128];
+			 GetPrivateProfileString("User", "LastWindowPos", "0", value, sizeof(value), GMIni);
+			 if (strlen(value) == 1)
+			 {
+				 winw = CW_USEDEFAULT;
+				 winh = 0;
+				 winx = CW_USEDEFAULT;
+				 winy = 0;
+			 }
+			 else
+			 {
+				 BOOL err;
+				 RECT rect = atorect(value, &err);
+				 winx = rect.left;
+				 winy = rect.top;
+				 winw = RECTWIDTH (&rect);
+				 winh = RECTHEIGHT (&rect);
+			 }
+		}
+	 }
  /* create application's Main window                                    */
 	 {
 		 char mapServerAppName[] = { "GeoMaster MapServer" };
