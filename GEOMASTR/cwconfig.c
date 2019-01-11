@@ -2411,7 +2411,8 @@ SetLastMessage(Message,wParam);
   break; case GF_CLOSE:
  	ii=1;
   break; case WM_COMMAND:
- 	ii=1;
+	  if (dbug)
+ 		ii=1;
   break; case GF_EXECUTE:
  	ii=1;
   break; case WM_NOTIFY:
@@ -3021,8 +3022,10 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          
      	 if (!CurrentConfig)
     	 	SetConfig (1);
-        if (!DisableHalt)
-         	SetContinueProcessing ( TRUE); 
+		 if (!DisableHalt)
+			 SetContinueProcessing(TRUE);
+		 else
+			 ii = 0;
          WantVP = LOWORD(lParam);
          if (WantVP > 0 && WantVP <= *pNumViewports) 
          	SetViewport(WantVP);
@@ -3117,7 +3120,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          	if (!CmdID) goto DisplayParcel; 
          	phWhichCmdList = &hToolCmd;
          	ExecuteUserCmd (CmdID);   
-         	GSSiGlobFree (&hToolCmd);
+         	//GSSiGlobFree (&hToolCmd);
          	setDoPaint( TRUE);
          }
          else if (LOWORD(wParam) >= 58000) /* User commands */

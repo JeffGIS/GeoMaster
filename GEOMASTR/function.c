@@ -106,7 +106,7 @@ int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	RECT	Rect; 
 	MNMXCORD	Bounds,Bounds2; 
 	MNMXCORL	GridBounds;
-	long	hNum, Refno,ii, nlong;
+	long	hNum, Refno, nlong;
 	LPSTR	lpColon;
 	time_t	systime; 
 	BOOL	TORF, rtn, Err, PickVis;  
@@ -3324,7 +3324,8 @@ SetVis:
 				MenuDisplayed = FALSE;
 				goto RtnTrue;
 			}
-			goto RtnFalse;
+			else
+				goto RtnFalse;
 		} 
 		
 		case 417:  //$HOUR(returns hour of day (0-23) from system time)
