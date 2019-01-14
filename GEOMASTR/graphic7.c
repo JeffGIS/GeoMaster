@@ -4221,8 +4221,8 @@ GSSiExitProg (908);
 			sprintf (str,"Edit Menu");
 			AppendMenu (PickMenu,MF_ENABLED|MF_STRING,IDM_PROCESSTEXT,str);
 		}
+		Menus[0] = PickMenu;
 	}
-	Menus[0]=PickMenu; 
 	while (item--)	
 	{  
 		char	GlobFile[MAX_PATH];
