@@ -488,6 +488,7 @@ void DisplayAllToolbars (int Opt)
 //	DisplayPZRotImage (CheckCursorPos);
 //	DisplayFloatMenu (CheckCursorPos);
 	inDisplayAllToobars = TRUE;
+	HWND hWndFocus = GetFocus();
 	if (Opt)
 		for (i=0;i<nToolbars;i++)
 		{
@@ -512,6 +513,7 @@ void DisplayAllToolbars (int Opt)
 	IgnoreActivate = FALSE;
 	IgnoreWPC = FALSE;
 	inDisplayAllToobars = FALSE;
+	SetFocus(hWndFocus);
 	return;
 }
 

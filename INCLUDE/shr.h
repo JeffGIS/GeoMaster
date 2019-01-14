@@ -61,8 +61,8 @@
 #define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
     GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
 
-#define RECTWIDTH(lpRect)     (abs(((lpRect)->right - (lpRect)->left))+1)
-#define RECTHEIGHT(lpRect)    (abs(((lpRect)->bottom - (lpRect)->top))+1)
+#define RECTWIDTH(lpRect)     (abs(((lpRect)->right - (lpRect)->left))+0)
+#define RECTHEIGHT(lpRect)    (abs(((lpRect)->bottom - (lpRect)->top))+0)
 
 #define	OF_CREATE_NODELETE	0x1111      
 

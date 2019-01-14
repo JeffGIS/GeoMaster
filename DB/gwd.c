@@ -4327,6 +4327,8 @@ BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam
 	static	char	CurrentDBName[256];
  
  short    BRtn;
+ if (Message == WM_SETFOCUS)
+	 ii = 1;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
 {
 #if ENABLETRACE
@@ -4968,7 +4970,8 @@ RtnFalse:
 #if ENABLETRACE
 GSSiExitProg (642);
 #endif
-        return FALSE;
+return FALSE;
+	return DefWindowProc(hWndDlg, Message, wParam, lParam);
 }
    }
  GSSiGlobUlFree (&hMem);
