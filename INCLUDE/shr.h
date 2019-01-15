@@ -261,6 +261,7 @@ int GetPathType(LPSTR InName);
 int GetPathType2(LPSTR InName);
 short FileType(LPSTR Name);
 short FileType_old(LPSTR Name);
+int showmessage(int line,char* file,int x);
 BOOL IsLocalFile(LPSTR Name);
 HANDLE GetFilesToClose (HANDLE hSQL);
 BOOL DeleteFilesInList (HANDLE hList);

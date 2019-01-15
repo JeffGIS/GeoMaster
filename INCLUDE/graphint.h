@@ -1081,6 +1081,7 @@ int AddButtonToToolbar (HWND hWndDlg,LPSTR BMPath,LPSTR ButtonText,int filepos,L
 int AddButtonToCMDMenu (HWND hWndDlg,LPSTR BMPath,LPSTR ButtonText,int filepos);
 int RedisplayButtonToCMDMenu(HWND hWndDlg, LPSTR BMPath, LPSTR ButtonText, int filepos);
 void DisplayAllToolbars(int Opt);
+void MoveToolbarsToMonitor(int fromMon, int toMon);
 BOOL SetToolbarHoverCmd(int toolbarId,LPSTR cmd);
 int GetToolbarIDFromId(int Id);
 HWND CursorInVisMenuWnd (POINT pt);

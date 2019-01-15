@@ -42,10 +42,16 @@ int GetCurrentMonitor(void)
 	}
 	return rtn;
 }
-void MoveToMonitor(int imon)
+void MoveToMonitor(int imon,int fromMon)
 {
-	if (imon < numMonitors)
-		MoveWindow(hWndMain, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
+	if (fromMon != imon)
+	{
+		if (imon < numMonitors)
+		{
+			MoveWindow(hWndMain, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
+			MoveToolbarsToMonitor(fromMon, imon);
+		}
+	}
 }
 BOOL CALLBACK WEEnumWndProc(HWND hCtrl, LONG lParam)
 {
@@ -7212,19 +7218,21 @@ HaveVP:;
 			}
 			else if (!stricmp(Arg[1], "SWITCH"))
 			{
-				int iMon = GetCurrentMonitor();
+				int fromMon = GetCurrentMonitor();
+				int iMon = fromMon;
 				if (iMon == 1)
 					iMon = 2;
 				else
 					iMon = 1;
-				MoveToMonitor(iMon-1);
+				MoveToMonitor(iMon-1,fromMon-1);
 				strcpy(OutLoc, "1");
 			}
 			else if (!stricmp(Arg[1],"MOVETO"))
 			{
 				int iMon = atoi(Arg[2]);
+				int fromMon = GetCurrentMonitor();
 				iMon = max(0, iMon - 1);
-				MoveToMonitor(iMon);
+				MoveToMonitor(iMon,fromMon);
 				strcpy(OutLoc, "1");
 			}
 			goto Rtnl;

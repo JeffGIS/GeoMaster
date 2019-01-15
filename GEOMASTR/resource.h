@@ -3731,6 +3731,7 @@
 #define IDB_PLAY_PAUSE                  9059
 #define IDB_RIGHT_ARROW3                9060
 #define IDB_CANCEL                      9060
+#define IDC_SETFOCUS					9061
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

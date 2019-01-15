@@ -662,6 +662,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 
 BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 {
+	//return GetOpenFileCD_new(hWnd,  Name,  lname, lpInitDir);
    /*******************************************************************
    *                                                                  *
    *                    FILEOPEN/FILESAVE VARIABLES                   *
@@ -718,7 +719,9 @@ BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 				lpFOChunk->of.Flags = lpFOChunk->of.Flags |OFN_ENABLETEMPLATE;
 			}
 			SetIgnoreError (TRUE);
-         	st = GetOpenFileName(&(lpFOChunk->of));  
+			inOpenFileDialog = TRUE;
+         	st = GetOpenFileName(&(lpFOChunk->of)); 
+			inOpenFileDialog = FALSE;
  			SetIgnoreError (FALSE);
         }
          if (st)

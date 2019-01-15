@@ -665,6 +665,7 @@ RGBQUAD	rgb;
 HWND	hWndBasic=0;  
 HWND	hWndAddMatch=0;
 HWND	hWndAddEdit=0;
+HWND	hWndZoomList = 0;
 HWND	hWndVehHist=0;
 HPEN	h0Pen;
 HPEN	hRedPen; 

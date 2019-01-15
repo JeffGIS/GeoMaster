@@ -17,6 +17,22 @@ extern char	CacheTitle[256];
 BOOL GMDKeyListAdd(LPSTR key);
 BOOL GMDCreateKeyList(LPSTR FileName);
 
+
+int showmessage(int line, char* file,int message)
+{
+
+#ifdef CHECKMEM
+	char msg[1024];
+	static int n = 0;
+	sprintf(msg, "Message %d: %s:%d %d\n" , n++, file, line,message);
+	OutputDebugStringA(msg);
+	return 1;
+#else
+	return 0;
+#endif
+}
+
+
 HANDLE GetFilesToClose (HANDLE hSQL)
 {
 	HANDLE hList=0;
@@ -4299,6 +4315,7 @@ BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam
 {GSSiEnterProg (642);
 #endif
 { 
+	BOOL	rtn = FALSE;
     static  LPSTR   pName=0;
     static  HANDLE hDB=0;
     LPGWFLDINFO lpGWFldInfo;
@@ -4326,6 +4343,8 @@ BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam
 	static	HANDLE hNameLocal=0;  
 	static	char	CurrentDBName[256];
  
+	if (inOpenFileDialog)
+		return FALSE;
  short    BRtn;
  if (Message == WM_SETFOCUS)
 	 ii = 1;
@@ -4416,6 +4435,7 @@ Display:
 	         }
 			 GlobalUnlock (hDB);
          } 
+		 rtn = TRUE;
          break; /* End of WM_INITDIALOG                                 */
     case WM_DESTROY:
          CloseDataFile (TRUE, &hSQL); 
@@ -4424,8 +4444,10 @@ Display:
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		 rtn = TRUE;
          break; /* End of WM_CLOSE                                      */
-
+	case WM_SETFOCUS:
+		break;
     case WM_COMMAND:
 #if WIN32
         switch(LOWORD(wParam))
@@ -4522,6 +4544,7 @@ Display:
 				          PostMessage(hWndDlg, WM_COMMAND, IDC_FIRST, 0L);
 			 		  }
               	  } 
+				  rtn = TRUE;
               	  break;
               	  
               case IDC_PRIOR:
@@ -4540,7 +4563,8 @@ Display:
 				  }
                   goto Display;
 
-              case IDC_CREATENEWTABLE:  
+              case IDC_CREATENEWTABLE: 
+				  rtn = TRUE;
 				nItems = GetLBSelectedItems (hWndDlg,IDC_FieldName,&hItems);
 				if (!nItems)
 				{
@@ -4565,6 +4589,7 @@ Display:
               	break;
               	
               case IDC_SHOWTYPE:
+				  rtn = TRUE;
 			    SendDlgItemMessage (hWndDlg,IDC_FieldName,LB_RESETCONTENT,0,0);  
                 if (!hSQL)
                 	break;
@@ -4591,6 +4616,7 @@ Display:
               	break;
               	
               case IDOK: //next
+				  rtn = TRUE;
 				  switch (DataFileType)
 				  {
 				  default:
@@ -4599,6 +4625,7 @@ Display:
 				  }
               
               case IDC_FIRST:
+				  rtn = TRUE;
          		  if (DataFileType == 1)
 				  {              
 		    	      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB); 
@@ -4646,6 +4673,7 @@ Display2:
                   
                   
               case IDC_LAST:
+				  rtn = TRUE;
 				  if (DataFileType == DBF_DATAFILE)
 				  {
 					CurrentDBFRec = NumDBFRecs-2;
@@ -4665,6 +4693,7 @@ Display2:
                   goto Display; 
                   
               case IDCANCEL: 
+				  rtn = TRUE;
                   if (Processing)
                   {
                     ContinueProcessing=FALSE;   
@@ -4675,6 +4704,7 @@ Display2:
                   break; 
                   
               case IDC_CHANGE_FIELD_NAME: 
+				  rtn = TRUE;
                   Choice=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,
                                             LB_GETCURSEL,0,0);
                   if (Choice<0)
@@ -4699,7 +4729,8 @@ Display2:
                   GWFLDINFO NewField;
                   long  loc;
                    
-                  GetDlgItemText(hWndDlg,IDC_NEW_FIELD_NAME,str,34);
+				  rtn = TRUE;
+				  GetDlgItemText(hWndDlg,IDC_NEW_FIELD_NAME,str,34);
                   if (!_fstrlen(str)) break;
                   Choice=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,
                                             LB_GETCURSEL,0,0);
@@ -4744,18 +4775,21 @@ Display2:
               }
                   
               case IDC_NEW_FIELD_CANCEL:
-                  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_NAME),SW_HIDE);
+				  rtn = TRUE;
+				  ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_NAME),SW_HIDE);
                   ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_CANCEL),SW_HIDE);
                   ShowWindow (GetDlgItem(hWndDlg,IDC_NEW_FIELD_COMMIT),SW_HIDE);
                   ShowWindow (GetDlgItem(hWndDlg,IDC_CHANGE_FIELD_NAME),SW_SHOW);
                   break; 
               case IDC_EDIT_DIALOG_SCREEN: 
-                  EditDynamicDialog (hWndDlg, 0,"",NULL);
+				  rtn = TRUE;
+				  EditDynamicDialog (hWndDlg, 0,"",NULL);
                  break;
               case IDC_CREATE_DIALOG_SCREEN: 
               {
                   
-                  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0); 
+				  rtn = TRUE;
+				  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0);
                   if (!nItems)
                   {
                      GSSiMsgBox(GetFocus(),"No fields selected",
@@ -4782,6 +4816,7 @@ Display2:
               }     
             //  case IDC_DUMP_FIELDS:     
               case IDC_CLOSE_DYNDLG:
+				  rtn = TRUE;
 #if WIN32
                   DestroyWindow((HWND)lParam);
 #else
@@ -4799,7 +4834,8 @@ Display2:
                   LPSTR	pFile=GlobalLock (hFile); 
                   BOOL	GMHeader=FALSE;
                   
-                  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0); 
+				  rtn = TRUE;
+				  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0);
                   if (!nItems)
                   {
                      GSSiGlobUlFree (&hFile); 
@@ -4846,7 +4882,8 @@ Display2:
               
               case IDC_DUMPTOGMD:
               {
-                  int   nItems, type;
+				  rtn = TRUE;
+				  int   nItems, type;
                   LPINT lpItems;
                   HANDLE hItems;
                   HANDLE	hFile=GSSiGlobAlloc ( 279,GHND,256);
@@ -4903,7 +4940,8 @@ Display2:
               }
               
               case IDC_CANCELEXPORT:
-              		SetContinueProcessing (FALSE);
+				  rtn = TRUE;
+				  SetContinueProcessing (FALSE);
               		break;
               			  
               case IDC_CREATE_REPORT: 
@@ -4912,7 +4950,8 @@ Display2:
                   LPINT lpItems;
                   HANDLE hItems;
                   
-                  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0); 
+				  rtn = TRUE;
+				  nItems=(short)SendDlgItemMessage(hWndDlg,IDC_FieldName,LB_GETSELCOUNT,0,0);
                   if (!nItems)
                   {
                      GSSiMsgBox(GetFocus(),"No fields selected",
@@ -4942,7 +4981,8 @@ Display2:
                 //  LPGWDHEADER   lpGWDHead;
                 //  LPGWFLDINFO   pFldInfo;
                                       
-                  CloseDataFile (TRUE, &hSQL);
+				  rtn = TRUE;
+				  CloseDataFile (TRUE, &hSQL);
                    
                  {
                     DLGPROC lpfnGWD_INDEXESMsgProc;
@@ -4959,6 +4999,8 @@ Display2:
                   break;
             }
             break;
+			  default:
+				  rtn = FALSE;
 
            }
          break;    /* End of WM_COMMAND                                 */
@@ -4970,7 +5012,7 @@ RtnFalse:
 #if ENABLETRACE
 GSSiExitProg (642);
 #endif
-return FALSE;
+//showmessage(__LINE__, __FILE__,Message);
 	return DefWindowProc(hWndDlg, Message, wParam, lParam);
 }
    }
@@ -4979,7 +5021,10 @@ return FALSE;
 #if ENABLETRACE
 GSSiExitProg (642);
 #endif
- return TRUE;
+if (!rtn)
+return  DefWindowProc(hWndDlg, Message, wParam, lParam);
+else
+return TRUE;
 }
 #if ENABLETRACE
 }

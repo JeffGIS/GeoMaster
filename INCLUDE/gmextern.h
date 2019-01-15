@@ -1052,6 +1052,7 @@ extern RGBQUAD			rgb;
 extern HWND			hWndBasic; 
 extern HWND			hWndAddMatch;
 extern HWND			hWndAddEdit;
+extern HWND			hWndZoomList;
 extern HWND			hWndVehHist;
 extern long			BinSize;
 extern short			OrthoAdjustVP;

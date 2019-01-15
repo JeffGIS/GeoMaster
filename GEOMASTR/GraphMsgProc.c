@@ -10667,7 +10667,9 @@ void CenterWindowInVP(HWND hWnd, LPVIEWPORT pVP)
 	if (pVP)
 	{
 		GetWindowRect(hWnd, &windowRect);
-		pt = RectMid(&pVP->ScreenRect);
+		RECT vpWindowRect= pVP->ScreenRect;
+		ClientRectToScreenRect(hWndMain, &vpWindowRect);
+		pt = RectMid(&vpWindowRect);
 		iwidth = RECTWIDTH(&windowRect);
 		iheight = RECTHEIGHT(&windowRect);
 		pt.x -= iwidth / 2;
@@ -10692,6 +10694,9 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	int nrecs = 0;
 	int fileLoc;
 
+#ifdef CHECKMEM
+	showmessage(__LINE__, __FILE__, Message);
+#endif
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
 		return (BRtn);
 	switch (Message)
@@ -10700,6 +10705,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 
 		CenterWindowInVP(hWndDlg, 0);
 		currentListLoc = 0;
+		hWndZoomList = hWndDlg;
 	case GSSI_REINITDIALOG:
 		SetDlgItemText(hWndDlg, IDOK, "Exit");
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
@@ -10806,9 +10812,15 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 
 		break; /* End of WM_INITDIALOG                                 */
 
+	case WM_DESTROY:
+			hWndZoomList = 0;
+			//SendMessage(hWndMain, WM_COMMAND, IDC_SETFOCUS, 0);
+			return  DefWindowProc(hWndDlg, Message, wParam, lParam);
+			break;
 	case WM_CLOSE:
 		/* Closing the Dialog behaves the same as Cancel               */
 		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		return TRUE;
 		break; /* End of WM_CLOSE                                      */
 
 	case WM_COMMAND:
@@ -10851,7 +10863,8 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		}
 			break;
 		case IDCANCEL:
-				EndDialog(hWndDlg, FALSE);
+				EndDialog(hWndDlg, TRUE);
+				return TRUE;
 				break;
 		case IDOK:
 		{
@@ -11027,7 +11040,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	}
 
 		default:
-			return FALSE;
+			return  DefWindowProc(hWndDlg, Message, wParam, lParam);
 	}
 	return TRUE;
 }

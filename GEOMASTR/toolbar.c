@@ -462,7 +462,23 @@ void ClearToolbarTrackEvents (HWND hWnd)
 	}
 	return;
 }
-
+void MoveToolbarsToMonitor(int fromMon, int toMon)
+{
+	RECT tbRect;
+	HANDLE hTran = STRANRect(&MonitorRectangle[fromMon], &MonitorRectangle[toMon]);
+	for (int i = 0; i < nToolbars; i++)
+	{
+		GetWindowRect(ToolbarWindow[i], &tbRect);
+		if (RectInRect(&MonitorRectangle[fromMon], &tbRect))
+		{
+			RECT origRect = tbRect;
+			TRANRect(&tbRect, hTran);
+			MoveWindow(ToolbarWindow[i], tbRect.left, tbRect.top, RECTWIDTH(&origRect), RECTHEIGHT(&origRect), TRUE);
+			GetWindowRect(ToolbarWindow[i], &ToolbarRect[i]);
+		}
+	}
+	CloseTRANS2(&hTran);
+}
 void DisplayAllToolbars (int Opt)
 {
 	int	i;
@@ -2483,9 +2499,19 @@ HRGN	hRgn;
 		}
 		break;
     case WM_MOVE:     /*  code for moving the window                    */
-         break;
+	{
+		int xPos = (int)(short)LOWORD(lParam);   // horizontal position 
+		int yPos = (int)(short)HIWORD(lParam);   // vertical position
+		ii = 1;
+	}
+		break;
     
     case WM_SIZE:     /*  code for sizing client area                   */
+	{
+		int w = (int)(short)LOWORD(lParam);   // horizontal position 
+		int h = (int)(short)HIWORD(lParam);   // vertical position
+		ii = 1;
+	}
          break;       /* End of WM_SIZE                                 */
 	
 	case WM_LBUTTONDBLCLK:
@@ -3066,6 +3092,8 @@ CursorMove:
    } 
    SetConfig (SaveConfig);
    CurView = SaveVP;
+   if (!rtn)
+	   rtn = DefWindowProc(hWnd, Message, wParam, lParam);
 	return rtn;
 }     /* End of WndProc                                         */
 

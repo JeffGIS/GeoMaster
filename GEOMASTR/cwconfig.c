@@ -2166,12 +2166,19 @@ nMess = -1;
 			ii=1; 
 		}
 		if (hWndAddEdit)
-		{	   
+		{
 			if (IsDialogMessage(hWndAddEdit, &msg))
 			{
-        		continue; 
-        	} 
-        }
+				continue;
+			}
+		}
+		if (hWndZoomList)
+		{
+			if (IsDialogMessage(hWndZoomList, &msg))
+			{
+				continue;
+			}
+		}
 		if (hWndVehHist)
 		{	   
 			if (IsDialogMessage(hWndVehHist, &msg))
@@ -2355,6 +2362,9 @@ static	DWORD	LastMouselParam=0;
 
 //FileDlgWndProc(hWnd, Message, wParam,lParam);
 
+#ifdef CHECKMEM
+//showmessage(__LINE__, __FILE__, Message);
+#endif
 #if ENABLETRACE
 SetLastMessage(Message,wParam);
 #endif
@@ -3136,6 +3146,9 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
          }
  		 else switch(LOWORD (wParam))
           {
+		 case IDC_SETFOCUS:
+			 SetFocus(hWnd);
+			 break;
             case IDM_VIEW:
             {
 				 hSTR=GSSiGlobAlloc (   7,GMEM_MOVEABLE,1024);
