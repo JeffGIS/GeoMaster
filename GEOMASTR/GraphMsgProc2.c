@@ -15681,7 +15681,7 @@ BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
   WORD		GeneratedInc;  
   static	POINT	CursorLoc;
   static	long	FileLength;
-  
+  BOOL		rtn = FALSE;
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
 {
@@ -15793,11 +15793,13 @@ GSSiExitProg (1151);
          		SetFocusAndCursor (GetDlgItem(hWndDlg,IDC_STRING));
          	SetDlgItemText(hWndDlg,IDC_STRING,pINITVAL);
          }
+		 rtn = TRUE;
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		 rtn = TRUE;
          break; /* End of WM_CLOSE                                      */
 
     case WM_COMMAND:
@@ -15875,7 +15877,7 @@ GSSiExitProg (1151);
 		         			_fstrcpy (pINITVAL,pTEXTSTRING);
 		         } 
                  GSSiEndDialog(hWndDlg,TRUE,hSaveBM); 
-               	 SetCursorPos (CursorLoc.x,CursorLoc.y);
+               	 //SetCursorPos (CursorLoc.x,CursorLoc.y);
 
               break;   
               
@@ -15883,23 +15885,22 @@ GSSiExitProg (1151);
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
-               	 SetCursorPos (CursorLoc.x,CursorLoc.y);
+               	 //SetCursorPos (CursorLoc.x,CursorLoc.y);
                  break;
            }
+		 rtn = TRUE;
          break;    /* End of WM_COMMAND                                 */
 
     default:
-{
-#if ENABLETRACE
-GSSiExitProg (1151);
-#endif
-        return FALSE;
-}
+		rtn = FALSE;
+		break;
    }
 {
 #if ENABLETRACE
 GSSiExitProg (1151);
 #endif
+if (!rtn)
+	return DefWindowProc(hWndDlg, Message, wParam, lParam);
  return TRUE;
 }
 #if ENABLETRACE

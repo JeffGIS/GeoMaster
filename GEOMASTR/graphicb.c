@@ -1290,6 +1290,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 	}	
 	FreeProcInstance(lpfnTEXTSTRINGMsgProc);  
 	EnableWindow (hWnd,TRUE);
+	SetFocus(hWnd);
 	if (nRc)
 		_fstrcpy (String,str);
 	setDoPaint(  SaveDoPaint); 

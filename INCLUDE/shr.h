@@ -728,6 +728,7 @@ int GetOpenFileChecksum2 (HFILE Fid,int frombyte,int tobyte);
 int GetOpenFileChecksum (HFILE Fid,int frombyte,int tobyte);
 int GetFileChecksum (LPSTR File,int frombyte,int tobyte);
 BYTE ComputeCheckSum (LPBYTE rec,DWORD l);
+HWND GetParentFocus(void);
 int	GSSiRemove (LPSTR Name);
 int GSSiRemoveAndClear (LPSTR Name);
 int GSSiRemove2 (LPSTR Name);

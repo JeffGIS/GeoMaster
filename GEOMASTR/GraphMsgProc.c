@@ -1617,7 +1617,6 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	LPGWDHEADER	lpGWDHead;
 	HANDLE		hBT;
 	long		Offset; 
-	BOOL		rtn;
 	int			st, i, len;  
 	LPSTR		lpTab;
 	int			Choice;  
@@ -1627,6 +1626,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	char	SetFieldName[128];
 	char	NewValue[1024];
 	char	cmd[1024];
+	BOOL	rtn = FALSE;
 
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
@@ -1638,6 +1638,16 @@ GSSiExitProg (454);
 }
  switch(Message)
    {
+ case WM_PAINT:
+ {
+	 PAINTSTRUCT ps;
+	 RECT rc;
+	 HDC hdc = BeginPaint(hWndDlg, &ps);
+	 GetClientRect(hWndDlg, &rc);
+	 FillRect(hdc, &rc, GetStockObject(WHITE_BRUSH));	 
+	 EndPaint(hWndDlg, &ps);
+ }
+ break;
     case WM_INITDIALOG:   
     	 hSaveBM = EnterBlockingWindow (hWndDlg);
     	 hWndBasic = hWndDlg;
@@ -1645,10 +1655,16 @@ GSSiExitProg (454);
 			cwCenter(hWndDlg, 0);
 		 else
 		 {
-			 RECT mro, mr, r1, r2, r3, r4, r5;
+			 RECT mro, mr, r0, r1, r2, r3, r4, r5, wr,cr,crwr;
 
+			 GetWindowRect(hWndDlg, &wr);
+			 GetClientRect(hWndDlg, &cr);
+			 crwr = cr;
+			 ClientRectToScreenRect(hWndDlg, &crwr);
 			 GetClientRect (hWndDlg,&mro);
-			 GetWindowRect (GetDlgItem(hWndDlg,IDENTIFY_NEXT),&r1);
+			 GetWindowRect(GetDlgItem(hWndDlg, IDCANCEL), &r0);
+			 ScreenRectToClientRect(hWndDlg, &r0);
+			 GetWindowRect(GetDlgItem(hWndDlg, IDENTIFY_NEXT), &r1);
 			 ScreenRectToClientRect (hWndDlg,&r1);
 			 GetWindowRect (GetDlgItem(hWndDlg,IDENTIFY_PRIOR),&r2);
 			 ScreenRectToClientRect (hWndDlg,&r2);
@@ -1660,12 +1676,13 @@ GSSiExitProg (454);
 			 ScreenRectToClientRect (hWndDlg,&r5);
 			 MoveWindow (hWndDlg,displayRect.left,displayRect.top,displayRect.right,displayRect.bottom,FALSE);
 			 GetClientRect (hWndDlg,&mr);
-			 MoveWindow (GetDlgItem(hWndDlg,IDENTIFY_NEXT),RECTWIDTH(&mr)-(mro.right-r1.right)-RECTWIDTH(&r1),r1.top,RECTWIDTH(&r1),RECTHEIGHT(&r1),FALSE);
+			 MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), RECTWIDTH(&mr) - (mro.right - r0.right) - RECTWIDTH(&r0), 0, RECTWIDTH(&r0), RECTHEIGHT(&r0), FALSE);
+			 MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), RECTWIDTH(&mr) - (mro.right - r1.right) - RECTWIDTH(&r1), r1.top, RECTWIDTH(&r1), RECTHEIGHT(&r1), FALSE);
 			 MoveWindow (GetDlgItem(hWndDlg,IDENTIFY_PRIOR),RECTWIDTH(&mr)-(mro.right-r2.right)-RECTWIDTH(&r2),r2.top,RECTWIDTH(&r2),RECTHEIGHT(&r2),FALSE);
 			 MoveWindow (GetDlgItem(hWndDlg,IDC_PHOTO1),RECTWIDTH(&mr)-(mro.right-r3.right)-RECTWIDTH(&r3),r3.top,RECTWIDTH(&r3),RECTHEIGHT(&r3),FALSE);
 			 MoveWindow (GetDlgItem(hWndDlg,IDC_NOTES),RECTWIDTH(&mr)-(mro.right-r5.right)-RECTWIDTH(&r5),r5.top,RECTWIDTH(&r5),RECTHEIGHT(&r5),FALSE);
 			 if (showOnlyData)
-				 MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, 0, RECTWIDTH(&mr), RECTHEIGHT(&mr), FALSE);
+				 MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0)+4, RECTWIDTH(&mr), RECTHEIGHT(&mr), FALSE);
 			 else
 				 MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, r4.top, RECTWIDTH(&mr), RECTHEIGHT(&mr) - r4.top, FALSE);
 		 }
@@ -1686,7 +1703,7 @@ GSSiExitProg (454);
 			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), SW_HIDE);
 			 ShowWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), SW_HIDE);
 			 ShowWindow(GetDlgItem(hWndDlg, IDC_NOTES), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE);
+			// ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE); 
 		 }
          RecNo=0;
 Show:    
@@ -1803,15 +1820,17 @@ Show:
          hWnd = GetDlgItem (hWndDlg,IDENTIFY_NEXT);
 /*         hWnd = GetDlgItem (hWndDlg,IDENTIFY_PREV);
          if (item>0) EnableWindow (hWnd,HaveImage);*/
-
+		 rtn = TRUE;
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		 rtn = TRUE;
          break; /* End of WM_CLOSE                                      */
 
     case WM_COMMAND:
+		rtn = TRUE;
          switch(LOWORD(wParam))
            {
 			case IDC_PHOTO1:
@@ -1838,7 +1857,7 @@ Show:
                  hWndBasic = 0;
  				 sprintf (cmd,"$IMAGE()");
 				 ExpandText (cmd);
-	             GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
+	             GSSiEndDialog(hWndDlg, TRUE,hSaveBM);
                  break; 
                  
             case IDENTIFY_DATA:
@@ -1885,10 +1904,10 @@ Show:
 								int				Type = FilePtr->Type;  
 
 								if (UpdateType == 1)
-						   			rtn = GetTextString (hWndDlg,NewValue,1024,str,0,0,0,TRUE,TRUE);
+						   			st = GetTextString (hWndDlg,NewValue,1024,str,0,0,0,TRUE,TRUE);
 								else
-									rtn = GetUpdateFieldValue (hWndDlg,SetFieldName,NewValue);
-								if (rtn)
+									st = GetUpdateFieldValue (hWndDlg,SetFieldName,NewValue);
+								if (st)
 								{
 									sprintf (str2,"%s=%s",SetFieldName,NewValue);
 									*(lpTab-1)='\t';
@@ -1954,25 +1973,26 @@ Show:
 							 }
 						 }
 		         		 break;
+						 default:
+							 rtn = FALSE;
 		         	}
 		        break;
-
+				default:
+					rtn = FALSE;
            }
          break;    /* End of WM_COMMAND                                 */
 
     default:
-{
-#if ENABLETRACE
-GSSiExitProg (454);
-#endif
-        return FALSE;
-}
+		break;
+
    }
 {
 #if ENABLETRACE
 GSSiExitProg (454);
 #endif
- return TRUE;
+	if (!rtn)
+		return DefWindowProc(hWndDlg, Message, wParam, lParam);
+	return TRUE;
 }
 #if ENABLETRACE
 }
@@ -9869,6 +9889,7 @@ BOOL FAR PASCAL DISPLAYSELECTEDCLASSESMsgProc(HWND hWndDlg, int Message, WPARAM 
  short	i, iclass, Choice;   
  int		TabStops[2]={2000,3000};  
  static	BOOL	Sorted=FALSE;
+ BOOL rtn = FALSE;
  
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
 {
@@ -9901,15 +9922,17 @@ GSSiExitProg (1300);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_CLASSHLTLIST), !Sorted);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_CLASSHLTLISTSORTED), Sorted);
 		SendDlgItemMessage(hWndDlg, IDC_SORT, BM_SETCHECK, Sorted, 0);
-
+		rtn = TRUE;
 		break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
          /* Closing the Dialog behaves the same as Cancel               */
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		 rtn = TRUE;
          break; /* End of WM_CLOSE                                      */
 
     case WM_COMMAND:
+		rtn = TRUE;
          switch(LOWORD(wParam))
            {
            	case IDC_SORT: 
@@ -10003,18 +10026,15 @@ GSSiExitProg (1300);
          break;    /* End of WM_COMMAND                                 */
 
     default:
-{
-#if ENABLETRACE
-GSSiExitProg (1300);
-#endif
-        return FALSE;
-}
+		break;
    }
 {
 #if ENABLETRACE
 GSSiExitProg (1300);
 #endif
- return TRUE;
+	if (!rtn)
+		return DefWindowProc(hWndDlg, Message, wParam, lParam);
+	return TRUE;
 }
 #if ENABLETRACE
 }

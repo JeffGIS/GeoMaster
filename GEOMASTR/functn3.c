@@ -5251,14 +5251,14 @@ GotCloseFilehSQL:
 			if (FunID == 728)
 			{
 				long	AutoInc = atol (Arg[3]);
-				rtn = GetTextString (GetFocus(),lpstr,2048,Arg[1],0,lpstr2,AutoInc,DropDown,Sorted);
+				rtn = GetTextString (GetParentFocus(),lpstr,2048,Arg[1],0,lpstr2,AutoInc,DropDown,Sorted);
 				 
 			}
 			else if (FunID == 904)
-	   	  		rtn = GetTextStringML (GetFocus(),lpstr,2048,Arg[1],lpstr2);
+	   	  		rtn = GetTextStringML (GetParentFocus(),lpstr,2048,Arg[1],lpstr2);
 			else if (FunID == 641)
 			{
-	   	  		rtn = GetTextString (GetFocus(),lpstr,2048,Arg[1],"",lpstr2,0,1,0);
+	   	  		rtn = GetTextString (GetParentFocus(),lpstr,2048,Arg[1],"",lpstr2,0,1,0);
 				if (rtn)
 					strcpy (OutLoc,lpstr);
 				else if (*Arg[4])
@@ -5269,7 +5269,7 @@ GotCloseFilehSQL:
 				goto Rtnl;
 			}
 			else
-	   	  		rtn = GetTextString (GetFocus(),lpstr,2048,Arg[1],Arg[3],lpstr2,0,DropDown,Sorted);
+	   	  		rtn = GetTextString (GetParentFocus(),lpstr,2048,Arg[1],Arg[3],lpstr2,0,DropDown,Sorted);
 	   	  	if (rtn)
 	   	  	{
 				l = _fstrlen(lpstr);

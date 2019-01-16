@@ -5406,6 +5406,14 @@ GSSiExitProg (267);
 #endif
 }
 
+HWND GetParentFocus(void)
+{
+	HWND rtn = GetFocus();;
+
+	if (!IsChild(hWndMain, rtn))
+		rtn = hWndMain;
+	return rtn;
+}
 int GSSiRemove (LPSTR Name)
 {
 	OFSTRUCTGM	OFStruct;
