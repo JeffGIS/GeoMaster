@@ -98,7 +98,11 @@ char *rampToText(int intNum,RampStruct *ramp);
 const char *rampToTextHeader(int type);
 int fixRampNum(int rampNum);
 int NVCTextureToCode(LPSTR texture);
+void GetTextureList(LPSTR OutLoc);
 int NVCObstructionToCode(LPSTR obstruction);
+void GetObstructionList(LPSTR OutLoc);
+void GetRampTypesList(LPSTR OutLoc);
+int NVCRampTypesToCode(LPSTR obstruction);
 
 
 #endif /* RampCompliance_h */

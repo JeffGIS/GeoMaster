@@ -5074,6 +5074,7 @@ FileIsInvalid:
 		 NextFileLoc = 10;
 		 while (NextFileLoc > 0)
 		 {
+			int iPos;
 		 	GSSillseek (FidTF,NextFileLoc,0); 
 	     	BigRead (FidTF,(HPSTR)&len,4);
 	     	BigRead (FidTF,(HPSTR)File,len);
@@ -5082,7 +5083,7 @@ FileIsInvalid:
 	     		EndOfFile = NextFileLoc - 1;
 	     	else
 	     		EndOfFile = FileLength - 4;
-			SendDlgItemMessage (hWndDlg,IDC_XFERFILELISTS,LB_ADDSTRING,0,(LPARAM)File);
+			iPos = SendDlgItemMessage (hWndDlg,IDC_XFERFILELISTS,LB_ADDSTRING,0,(LPARAM)File);
     	 	n++;
     	 }
     	 GSSiClose (FidTF);  
@@ -5109,7 +5110,13 @@ FileIsInvalid:
             {   
 				 long	NextFileLoc=0, loc, len, FileLength, EndOfFile, MaxLength,LenToRead;      
 				 short	Version;
-				  
+				 int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
+				 char	SelectedFile[MAX_PATH];
+
+				 if (nSelected >= 0)
+					 SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
+
+
 				 FidTF=GSSiOpenFile (TransferFileName,0,OF_READ);
 				 FileLength = GSSifilelength (FidTF);
 				 NextFileLoc = 10;
@@ -5123,6 +5130,8 @@ FileIsInvalid:
 			     	BigRead (FidTF,(HPSTR)&len,4);
 			     	BigRead (FidTF,(HPSTR)File,len);
 			     	BigRead (FidTF,(HPSTR)&NextFileLoc,4);
+					if (nSelected>= 0  && stricmp(File, SelectedFile))
+						continue;
 			     	if (NextFileLoc > 0)
 			     		EndOfFile = NextFileLoc - 1;
 			     	else
@@ -15683,6 +15692,7 @@ BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
   static	long	FileLength;
   BOOL		rtn = FALSE;
  int	BRtn;
+ BOOL		centerOnCursor = TRUE;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
 {
 #if ENABLETRACE
@@ -15702,9 +15712,11 @@ GSSiExitProg (1151);
          	cwCenter(hWndDlg, SHRT_MAX);   
          	BringWindowToTop(hWndDlg);
          }
-         else
-         	cwCenter(hWndDlg,0);//-2);   
-         GetCursorPos (&CursorLoc);
+		 else if (centerOnCursor)
+			 cwCenter(hWndDlg, -2);   
+		 else
+			cwCenter(hWndDlg, 0);//-2);   
+		 GetCursorPos (&CursorLoc);
          SetWindowText (hWndDlg,pTEXTSTRINGTITLE); 
          if (pTEXTSTRINGLIST && *pTEXTSTRINGLIST)   
          {  
@@ -15899,9 +15911,8 @@ GSSiExitProg (1151);
 #if ENABLETRACE
 GSSiExitProg (1151);
 #endif
-if (!rtn)
-	return DefWindowProc(hWndDlg, Message, wParam, lParam);
- return TRUE;
+
+	return rtn;
 }
 #if ENABLETRACE
 }

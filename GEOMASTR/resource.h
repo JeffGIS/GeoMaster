@@ -3275,6 +3275,8 @@
 #define IDC_ALTF9                       2195
 #define IDC_NOTESHEADER                 2195
 #define IDC_ALTF1NAME9                  2196
+#define IDC_PHOTO3                      2196
+#define IDC_SAVEANDEXIT                 2196
 #define IDB_DISPLAYVALUE1               2197
 #define IDB_VALUETODISPLAY1             2198
 #define IDC_ALTF10                      2199
@@ -3731,14 +3733,14 @@
 #define IDB_PLAY_PAUSE                  9059
 #define IDB_RIGHT_ARROW3                9060
 #define IDB_CANCEL                      9060
-#define IDC_SETFOCUS					9061
+#define IDC_SETFOCUS                    9061
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1253
+#define _APS_NEXT_RESOURCE_VALUE        1257
 #define _APS_NEXT_COMMAND_VALUE         1248
 #define _APS_NEXT_CONTROL_VALUE         2301
 #define _APS_NEXT_SYMED_VALUE           1036

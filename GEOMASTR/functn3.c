@@ -1822,6 +1822,7 @@ GotCloseFilehSQL:
 		
 		case 524: //$BASIC(file,sql,updatefieldlist,title,autoupdate,sqlfieldlist,displayrect)
 		{
+			BOOL haveRectGlobal = FALSE;
 			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
@@ -1834,6 +1835,11 @@ GotCloseFilehSQL:
 			if (*Arg[6])
 				lpSQLFieldList = Arg[6];
 			displayRect = atorect (Arg[7],&Err);
+			if (Err && *Arg[7])
+			{
+				displayRect = GetGlobalRectVal(Arg[7], 0);
+				haveRectGlobal = TRUE;
+			}
 			showOnlyData = atob(Arg[8]);
 		    {
 		 	   DLGPROC lpfnIDENTIFYMsgProc;
@@ -1843,6 +1849,8 @@ GotCloseFilehSQL:
 			    nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, lpfnIDENTIFYMsgProc);
 			    FreeProcInstance(lpfnIDENTIFYMsgProc);
 				skipPaint = 1;
+				if (haveRectGlobal)
+					SetGlobalValueRect(Arg[7], displayRect);
 		    }
 			lpUpdateFieldList = 0;
 			lpAutoUpdateFieldList = 0;
@@ -3869,6 +3877,7 @@ GotCloseFilehSQL:
 					//$STATUS(Destroy)
 		{
 			int	nlines=1;
+			static HWND MessageWindow = 0;
 
 			nArgs = GetFunArgs (Args,Arg,4,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
@@ -3906,6 +3915,13 @@ GotCloseFilehSQL:
 					nlong = atol (Arg[3]);
 					StatusWindowUpdate2 (Arg[4],hNum,nlong);
 					break; 
+				case 'M':
+					if (MessageWindow)
+						DestroyWindow(MessageWindow);
+					MessageWindow = 0;
+					if (*Arg[2])
+						MessageWindow = CreateGoogleMessage(Arg[2]);
+					break;
 				default:
 					goto RtnFalse;
 			}
@@ -4745,6 +4761,22 @@ GotCloseFilehSQL:
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "TEXTURELIST"))
+			{
+				GetTextureList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "OBSTRUCTIONLIST"))
+			{
+				GetObstructionList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "RAMPTYPELIST"))
+			{
+				GetRampTypesList(OutLoc);
+				goto Rtnl;
+			}
+
 			else if (!stricmp(Arg[1], "CREATEDATABASE"))
 			{
 				rtn = NVCreateDB(Arg[2], atob(Arg[3]));

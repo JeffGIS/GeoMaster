@@ -2043,6 +2043,7 @@ BOOL WordIndexRemoveDups(LPSTR File);
 short LayerFileType (short Layer);
 short MapFileType(LPSTR InName, LPSTR fileName, LPSTR tableName);
 BOOL RefConnectTableCreate(LPMNMXCORD pBounds);
+HWND CreateGoogleMessage(PTSTR pszText);
 BOOL FixRefConnect (void);
 LPOINT AddRefToLink (LPREFCONNECT pRC,BOOL Reverse,LPLONG pNumLinkPoints,LPHANDLE phLinkPoints);
 BOOL AddLinkToFile (HFILE Fid,LPREFCONNECT pRC,LPLONG pNumLinkPoints,LPHANDLE phLinkPoints);

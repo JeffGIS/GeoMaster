@@ -586,7 +586,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	if (!stricmp(ARG[1], "OPEN"))//$SQLITE(OPEN,path,varnameforhandle)
 	{
 		rtn = sqlite3_open(ARG[2], &db);
-		if (rtn == SQLITE_OK)
+		if (rtn == SQLITE_OK && *ARG[3])
 		{
 			SetGlobalValueLong(ARG[3], (UINT)db);
 			rtn = 1;

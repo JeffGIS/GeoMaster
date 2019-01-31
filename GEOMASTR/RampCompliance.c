@@ -772,6 +772,19 @@ static char *AWITypes[] = {"None", "Tones", "SpeechMessage"};
 static char *buttonTypes[] = {"None", "SmallPush", "LargePush", "Touch", "APS"};
 static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer"};
 
+void GetTextureList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(textures) / 4; i++)
+	{
+		if (i && (!*textures[i] || !stricmp(textures[i], "None")))
+			continue;
+		sprintf (strchr(OutLoc,0), "%s%s",delim,textures[i]);
+		*delim = ',';
+	}
+	return;
+}
 int NVCTextureToCode(LPSTR texture)
 {
 	if (!strlen(texture))
@@ -785,6 +798,19 @@ int NVCTextureToCode(LPSTR texture)
 		return 1;
 	return 0;
 }
+void GetObstructionList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(obstructions) / 4; i++)
+	{
+		if (i && (!*obstructions[i] || !stricmp(obstructions[i], "None")))
+			continue;
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, obstructions[i]);
+		*delim = ',';
+	}
+	return;
+}
 int NVCObstructionToCode(LPSTR obstruction)
 {
 	if (!strlen(obstruction))
@@ -795,6 +821,38 @@ int NVCObstructionToCode(LPSTR obstruction)
 			return i;
 	}
 	return 0;
+}
+void GetRampTypesList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(rampTypes) / 4; i++)
+	{
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, rampTypes[i]);
+		*delim = ',';
+	}
+	return;
+}
+int NVCRampTypeToCode(LPSTR rampType)
+{
+	int rtn = 0;
+	if (!strlen(rampType))
+		return 0;
+	for (int i = 0; i < sizeof(rampTypes) / 4; i++)
+	{
+		if (!strcasecmp(rampType, rampTypes[i]))
+			rtn = i;
+	}
+	if (rtn > 12)
+		rtn = 100 + rtn - 12;
+	return rtn;
+}
+
+static char YorN(int i)
+{
+	if (i)
+		return 'Y';
+	return 'N';
 }
 
 char *rampToText(int intNum, RampStruct *ramp)
@@ -832,7 +890,8 @@ char *rampToText(int intNum, RampStruct *ramp)
 	ramp->locatorToneVolume = max(ramp->locatorToneVolume,0);
 	ramp->audibleWalkIndicationVolume = max(ramp->audibleWalkIndicationVolume, 0);
 	GetIntersectionStreetNames("", intNum, intStreets,&altIntNum);
-	sprintf(rampText, "%i\t%i\t%i\t%s\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%i\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%c",
+	sprintf(rampText,
+	"%i\t%i\t%i\t%s\t%i\t'%s'\t'%s'\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%c\t%c\t%c\t%c\t%c\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%c",
 		ramp->uniqueID,
 		intNum, altIntNum,
 		intStreets,
@@ -848,11 +907,11 @@ char *rampToText(int intNum, RampStruct *ramp)
 		obstructions[ramp->upperLandingObstruction],
 		obstructions[ramp->lowerLandingObstruction],
 		obstructions[ramp->rampObstruction],
-		ramp->hasRampCracks,
-		ramp->hasUpperLandingCracks,
-		ramp->hasStreetLandingCracks,
-		ramp->hasLeftSidewalkCracks,
-		ramp->hasRightSidewalkCracks,
+		YorN(ramp->hasRampCracks),
+		YorN(ramp->hasUpperLandingCracks),
+		YorN(ramp->hasStreetLandingCracks),
+		YorN(ramp->hasLeftSidewalkCracks),
+		YorN(ramp->hasRightSidewalkCracks),
 		ramp->crackWidth.rampCrackWidth,
 		ramp->crackWidth.upperLandingCrackWidth,
 		ramp->crackWidth.streetLandingCrackWidth,

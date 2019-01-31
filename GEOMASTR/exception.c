@@ -69,6 +69,12 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	AppendFile2 (AbendFile,msg);
 	sprintf (msg,"MemInUse:%ld MaxMem: %ld",TotMemAlloc,MaxMemAlloc);
 	AppendFile2 (AbendFile,msg);
+
+	char DriveID[6] = "C:\\";
+	double FreeSpace = GetDriveFreeSpace(DriveID), mb = FreeSpace / ((double)1024 * (double)1024);
+	sprintf(msg, "C Drive free space (MB):%.0f",mb);
+	AppendFile2(AbendFile, msg);
+
 	sprintf (msg,"Last opened file:%s\r\nLast accessed file:%s",LastF,LastAF);
 	AppendFile2 (AbendFile,msg);
 	sprintf (msg,"PickMFile:%s",PickMFile);

@@ -2511,6 +2511,13 @@ BOOL BasicDataDisplayToDC(LPSTR DBNameIN, HDC hDC, long RecNum, long iref, LPSTR
 #endif
 }
 
+char canEditField(LPSTR FieldName)
+{
+	char rtn = ' ';
+	if (GetUpdateFieldType(FieldName))
+		rtn = '*';
+	return rtn;
+}
 BOOL BasicDataDisplay (LPSTR DBNameIN,HWND hWndDlg,short dlgitem,short nextbutton,short priorbutton,long RecNum, long iref, LPSTR pSQL,int maxline)
 #if ENABLETRACE
 {GSSiEnterProg (630);
@@ -2550,7 +2557,7 @@ GSSiExitProg (630);
         BOOL    First=TRUE;
 
 Display:        
-        sprintf (str,"%s\t",lpFieldInfo->name);
+        sprintf (str,"%s\t %c\t",lpFieldInfo->name,canEditField(lpFieldInfo->name));
         if ((l=GetValFromOpenFiles (lpFieldInfo->name,str2,4096))<0) 
         {
             SetDlgItemText(hWndDlg,IDENTIFY_LINE2,"Data record not found");
@@ -4447,6 +4454,7 @@ Display:
 		 rtn = TRUE;
          break; /* End of WM_CLOSE                                      */
 	case WM_SETFOCUS:
+		rtn = FALSE;
 		break;
     case WM_COMMAND:
 #if WIN32
@@ -4669,6 +4677,7 @@ Display2:
 						//EnableWindow(GetDlgItem(hWndDlg,IDC_FIRST),FALSE);
 					 }
 			      } 
+				  rtn = TRUE;
 			      break;
                   
                   
@@ -5013,7 +5022,7 @@ RtnFalse:
 GSSiExitProg (642);
 #endif
 //showmessage(__LINE__, __FILE__,Message);
-	return DefWindowProc(hWndDlg, Message, wParam, lParam);
+	return rtn;
 }
    }
  GSSiGlobUlFree (&hMem);
@@ -5021,10 +5030,8 @@ GSSiExitProg (642);
 #if ENABLETRACE
 GSSiExitProg (642);
 #endif
-if (!rtn)
-return  DefWindowProc(hWndDlg, Message, wParam, lParam);
-else
-return TRUE;
+
+return  rtn;
 }
 #if ENABLETRACE
 }

@@ -7310,8 +7310,15 @@ RECT GetGlobalRectVal (LPSTR Global,LPRECT pDefault)
 	RECT	Rect,RectReverse;
 	BOOL	Err;
 	
-	_fstrcpy (str,Global);
-	ExpandText (str);   
+	if (*Global != '[')
+	{
+		*str = '[';
+		_fstrcpy(&str[1], Global);
+		_fstrcat(str, "]");
+	}
+	else
+		_fstrcpy(str, Global);
+	ExpandText(str);
 	if (!*str)
 	{   
 		if (pDefault)

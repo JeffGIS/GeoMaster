@@ -3844,16 +3844,25 @@ LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG 
 {
 	if (Message == WM_PAINT)
 	{
-		int FontSize = 24;
+		SIZE size;
+		char text[256];
+		RECT rect;
+
+		int FontSize = 36;
 		PAINTSTRUCT ps;
+		int nc = GetWindowText(hWnd, text, 255);
 		HDC hDC = BeginPaint (hWnd,&ps);
 		char message[] = "Getting map from Google";
 		SetTextColor(hDC, 0);
-		HFONT hFont = CreateFont(FontSize, 0, 0, 0, FW_NORMAL,
-			0, 0, 0, 0, 0, 0, 0, 0, "Arial");
+		HFONT hFont = CreateFont(FontSize, 0, 0, 0, FW_BOLD,
+			0, 0, 0, 0, 0, 0, 0, 0, "Sans-Serif");
 		HFONT hOldFont = SelectObject(hDC, hFont);
-
-		int dt =DrawText(hDC, message, strlen(message), &ps.rcPaint, DT_SINGLELINE | DT_BOTTOM |DT_CENTER);
+		if (!*text)
+			strcpy(text, message);
+		//GetTextExtentPoint32(hDC, text, strlen(text), &size);
+		//GetWindowRect(hWnd, &rect);
+		//SetWindowPos(hWnd, NULL, rect.left, rect.top, size.cx, size.cy, 0);
+		int dt =DrawText(hDC, text, strlen(text), &ps.rcPaint, DT_SINGLELINE | DT_BOTTOM |DT_CENTER);
 		SelectObject(hDC, hOldFont);
 		DeleteObject(hFont);
 		EndPaint(hWnd, &ps);
@@ -3897,8 +3906,12 @@ HWND CreateGoogleMessage(PTSTR pszText)
 	RegisterPopupMessageClass(FALSE);
 
 	int width = 300;
-	int height = 26;
+	int height = 38;
 	int x, y;
+	if (pszText && *pszText)
+	{
+		width = strlen(pszText) * 40;
+	}
 	x = CurView->ScreenRect.left + (RECTWIDTH(&CurView->ScreenRect) - width) / 2;
 	y = CurView->ScreenRect.top + (RECTHEIGHT(&CurView->ScreenRect) - height) / 2;
 
@@ -3912,6 +3925,8 @@ HWND CreateGoogleMessage(PTSTR pszText)
 		return (HWND)NULL;
 	}
 	//InvalidateRect(hwndTip, 0, FALSE);
+	if (pszText && *pszText)
+		SetWindowText(hwndTip, pszText);
 	UpdateWindow(hwndTip);
 
 	return hwndTip;
@@ -3964,7 +3979,7 @@ BOOL GetGoogleMapFile(int type)
 	{
 		int attempts = 0;
 #define MAX_ATTEMPTS	3
-		HWND hMess = CreateGoogleMessage("");
+		HWND hMess = CreateGoogleMessage("Getting Map from Google");
 		RemoveBMPFromCache32(CurView->CurrentGoogleImage);
 		TryAgain:
 		rtn = URLToFile(cmd, CurView->CurrentGoogleImage);
