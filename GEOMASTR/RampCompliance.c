@@ -848,6 +848,71 @@ int NVCRampTypeToCode(LPSTR rampType)
 	return rtn;
 }
 
+static BOOL NameEndsWith(LPSTR Name, LPSTR text)
+{
+	BOOL rtn = FALSE;
+	int lName = strlen(Name);
+	int lText = strlen(text);
+
+	if (lName >= lText)
+	{
+		if (!stricmp(&Name[lName - lText], text))
+			rtn = TRUE;
+	}
+
+	return rtn;
+}
+BOOL GetRampCodeForValue(LPSTR VarName, LPSTR VarValue, LPSTR ErrorVarName, LPSTR OutLoc)
+{
+	int rtn = 0;
+	int iCode;
+	char mess[256];
+
+	if (!stricmp(VarName, "RampType"))
+	{
+		iCode = NVCRampTypeToCode(VarValue);
+		itoa(iCode, OutLoc, 10);
+	}
+	else if (!stricmp(VarName, "RampWidth") || !stricmp(VarName, "RampDepth"))
+	{
+		if (IsInteger(VarValue))
+			strcpy(OutLoc, VarValue);
+		else
+		{
+			sprintf(mess, "Error: Non integer value '%s' for field '%s'", VarValue, VarName);
+			MessageBox(0, mess, "Input Error", MB_ICONEXCLAMATION);
+			SetGlobalValueLong(ErrorVarName, 1);
+		}
+	}
+	else if (NameEndsWith(VarName, "CrackWidth"))
+	{
+		if (IsReal(VarValue))
+			strcpy(OutLoc, VarValue);
+		else
+		{
+			sprintf(mess, "Error: Non numeric value '%s' for field '%s'", VarValue, VarName);
+			MessageBox(0, mess, "Input Error", MB_ICONEXCLAMATION);
+			SetGlobalValueLong(ErrorVarName, 1);
+		}
+	}
+	else if (NameEndsWith(VarName, "Obstruction"))
+	{
+		iCode = NVCObstructionToCode(VarValue);
+		itoa(iCode, OutLoc, 10);
+	}
+	else if (NameEndsWith(VarName, "Cracks"))
+	{
+		iCode = 0;
+		if (atob(VarValue))
+			iCode = 1;
+		itoa(iCode, OutLoc, 10);
+	}
+	else
+		strcpy(OutLoc, VarValue);
+	rtn = strlen(OutLoc);
+	return rtn;
+}
+
 static char YorN(int i)
 {
 	if (i)

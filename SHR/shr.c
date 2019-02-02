@@ -12956,10 +12956,11 @@ void GSSiEndDialog(HWND hWndDlg,BOOL rtn,HANDLE hSavedScreen)
 
 	EndDialog(hWndDlg,rtn);
 	RestoreScreen2 (hDC,hSavedScreen,0,FALSE); 
+	LeaveBlockingWindow(hSavedScreen);
 	if (hSavedScreen)
 	{
 		SaveFullWindowBitmap (hWndMain);
-		DestroySavedScreen (&hSavedScreen,0);
+		//DestroySavedScreen (&hSavedScreen,0);
 	}
 	HaveBlockingWindow = FALSE;
 	IgnoreLbutton = TRUE;  

@@ -3393,8 +3393,14 @@
 #define IDC_CHECK_DONOTSHOW             2299
 #define IDC_IMAGE_FLIP                  2300
 #define IDC_IMAGE_ROTATE_CLOCKWISE      2301
+#define IDC_DATAFILESTOUPLOAD           2301
 #define IDC_IMAGE_ROTATE_CLOCKWISE2     2302
 #define IDC_IMAGE_ROTATE_COUNTERCLOCKWISE 2302
+#define IDC_DATAFILESTODOWNLOAD         2302
+#define IDC_PICTURESTODOWNLOAD          2303
+#define IDC_DOWNLOADPICTS               2304
+#define IDC_DOWNLOADDATA                2305
+#define IDC_PROGRESS1                   2306
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3740,9 +3746,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1257
+#define _APS_NEXT_RESOURCE_VALUE        1259
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2301
+#define _APS_NEXT_CONTROL_VALUE         2307
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

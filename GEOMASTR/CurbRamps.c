@@ -1394,6 +1394,15 @@ int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
 	cw.streetLandingCrackWidth = sqlite3_column_double(statement, i++);
 	cw.leftSidewalkCrackWidth = sqlite3_column_double(statement, i++);
 	cw.rightSidewalkCrackWidth = sqlite3_column_double(statement, i++);
+	if (!pRamp->hasRampCracks && cw.rampCrackWidth > 0)
+		pRamp->hasRampCracks = 1;
+	if (!pRamp->hasUpperLandingCracks && cw.upperLandingCrackWidth > 0)
+		pRamp->hasUpperLandingCracks = 1;
+	if (!pRamp->hasStreetLandingCracks && cw.streetLandingCrackWidth > 0)
+		pRamp->hasStreetLandingCracks = 1;
+
+	pRamp->hasLeftSidewalkCracks = cw.leftSidewalkCrackWidth > 0;
+	pRamp->hasRightSidewalkCracks = cw.rightSidewalkCrackWidth > 0;
 	pRamp->crackWidth = cw;
 	pRamp->curbCutDistance = sqlite3_column_double(statement, i++);
 	pRamp->bumpWidth = sqlite3_column_double(statement, i++);

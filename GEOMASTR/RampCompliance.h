@@ -102,7 +102,8 @@ void GetTextureList(LPSTR OutLoc);
 int NVCObstructionToCode(LPSTR obstruction);
 void GetObstructionList(LPSTR OutLoc);
 void GetRampTypesList(LPSTR OutLoc);
-int NVCRampTypesToCode(LPSTR obstruction);
+int NVCRampTypeToCode(LPSTR obstruction);
+BOOL GetRampCodeForValue(LPSTR VarName,LPSTR VarValue,LPSTR OutLoc,LPSTR ErrorVarName);
 
 
 #endif /* RampCompliance_h */

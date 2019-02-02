@@ -689,7 +689,6 @@ END
 
 IDENTIFY DIALOGEX 6, 18, 469, 347
 STYLE DS_SETFONT | DS_SETFOREGROUND | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
-EXSTYLE WS_EX_PALETTEWINDOW
 CAPTION "Item Identification"
 FONT 10, "Lucida Sans Typewriter", 400, 0, 0x0
 BEGIN
@@ -8474,6 +8473,22 @@ BEGIN
     CONTROL         "",IDC_GMDOCTEXT,"Static",SS_BITMAP | SS_CENTERIMAGE | SS_REALSIZEIMAGE,7,7,385,200
 END
 
+SYNCHRONIZE_DATA DIALOGEX 0, 0, 172, 173
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Synchronize Data"
+FONT 16, "Microsoft Sans Serif", 700, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Exit",IDOK,7,7,50,14
+    LTEXT           "Data Files to be Uploaded:       3",IDC_DATAFILESTOUPLOAD,7,81,114,12
+    LTEXT           "Data Files to be Downloaded:   7",IDC_DATAFILESTODOWNLOAD,7,51,114,12
+    LTEXT           "Pictures to be Downloaded:      5",IDC_PICTURESTODOWNLOAD,7,66,114,12
+    CONTROL         "",IDC_DOWNLOADDATA,"Button",BS_AUTORADIOBUTTON,141,50,16,10
+    CONTROL         "",IDC_DOWNLOADPICTS,"Button",BS_AUTORADIOBUTTON,141,64,16,10
+    PUSHBUTTON      "Synchronize",IDC_BUTTON1,56,107,50,14
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,7,145,158,14
+    CTEXT           "Static",IDC_STATIC,101,7,64,14,SS_CENTERIMAGE
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -9504,6 +9519,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 226
     END
+
+    "SYNCHRONIZE_DATA", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 165
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 166
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -9514,8 +9537,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,12,102,0
- PRODUCTVERSION 34,12,102,0
+ FILEVERSION 34,12,103,0
+ PRODUCTVERSION 34,12,103,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9532,7 +9555,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34l build 102"
+            VALUE "FileVersion", "34l build 103"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"
@@ -9615,6 +9638,11 @@ BEGIN
 END
 
 XFERFILELOAD AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+SYNCHRONIZE_DATA AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

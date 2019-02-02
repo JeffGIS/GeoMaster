@@ -1848,6 +1848,7 @@ GotCloseFilehSQL:
 			    lpfnIDENTIFYMsgProc = MakeProcInstance((DLGPROC)IDENTIFYMsgProc, hInst);
 			    nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, lpfnIDENTIFYMsgProc);
 			    FreeProcInstance(lpfnIDENTIFYMsgProc);
+				
 				skipPaint = 1;
 				if (haveRectGlobal)
 					SetGlobalValueRect(Arg[7], displayRect);
@@ -4694,6 +4695,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(COMPCODE,int,ramp,retired,db,codesystem(0,1))
 			//$NVCRIS(OBSTRUCTIONCODE,obstruction)
 			//$NVCRIS(TEXTURECODE,texture)
+			//$NVCRIS(CODEFORVALUE,varname,varvalue)
 			//$NVCRIS(FORMATSTREETS,codedstreets)
 			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
@@ -4774,6 +4776,11 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "RAMPTYPELIST"))
 			{
 				GetRampTypesList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CODEFORVALUE"))
+			{
+				GetRampCodeForValue(Arg[2], Arg[3], Arg[4], OutLoc);
 				goto Rtnl;
 			}
 

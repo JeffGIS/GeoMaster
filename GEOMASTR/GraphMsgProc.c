@@ -1661,7 +1661,7 @@ static BOOL RunIdentifyUpdateMacro(HWND hWndDlg, LPSTR macro, LPSTR lpDB, LPSTR 
 		if (pDot)
 			strcpy(pDot,".txt");
 		Fid = GSSiOpenFile(TempFile, 0, OF_CREATE);
-		fputstring("VARNAME\tVARNVALUE", Fid);
+		fputstring("VARNAME\tVARVALUE", Fid);
 		while (st != LB_ERR)
 		{
 			LPSTR pVarName=cmd, pVarValue, pUpdate;
@@ -1943,10 +1943,13 @@ Show:
                  break; 
 			case IDC_SAVEANDEXIT:
 			{
-				RunIdentifyUpdateMacro(hWndDlg,lpAutoUpdateFieldList,lpDB,lpSQL);
-				hWndBasic = 0;
-				GetWindowRect(hWndDlg, &displayRect);
-				GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+				
+				if (RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
+				{
+					hWndBasic = 0;
+					GetWindowRect(hWndDlg, &displayRect);
+					GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+				}
 			}
 				break;
             case IDENTIFY_DATA:

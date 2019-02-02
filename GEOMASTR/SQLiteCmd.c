@@ -728,7 +728,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			GSSiClose(fid);
 		}
 	}
-	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd)-single command only - no ; separator
+	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd,OutputVarName(opt))-single command only - no ; separator
 	{
 		db = (sqlite3*)atoi(ARG[2]);
 		sqlite3_stmt *statement;
