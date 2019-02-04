@@ -4023,6 +4023,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%USETEXTFILEINDEX", 395, FALSE);
 	AllocateTypeVar("%WANTBACKGROUNDCACHE", 396, FALSE);
 	AllocateTypeVar("%USERINIFILE", 397, FALSE);
+	AllocateTypeVar("%DLSERIALNUMBER", 398, FALSE);
 
 
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5226,6 +5227,17 @@ GSSiExitProg (533);
 		case 397:
 			strcpy(OutStr, GMIni);
 			break;
+		case 398:
+		{
+			char drive[38] = "[%DL]";
+			ExpandText(drive);
+			LPSTR pBS = strchr (drive,'\\');
+			if (pBS)
+				*(++pBS) = 0;
+			DWORD Serno = GetDriveSerialNumber(drive);
+			sprintf(OutStr, "%ld", Serno);
+		}
+		break;
 	}
 	GlobalUnlock (hGlobal);
 {
