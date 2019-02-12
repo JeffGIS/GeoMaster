@@ -3401,6 +3401,9 @@
 #define IDC_DOWNLOADPICTS               2304
 #define IDC_DOWNLOADDATA                2305
 #define IDC_PROGRESS1                   2306
+#define IDC_SYNCHRONIZE                 2307
+#define IDC_CONNECT_LABEL               2308
+#define IDC_CONNECT                     2309
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3748,7 +3751,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1259
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2307
+#define _APS_NEXT_CONTROL_VALUE         2310
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

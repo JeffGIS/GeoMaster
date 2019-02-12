@@ -4410,6 +4410,14 @@ GSSiExitProg (1350);
 			GMFileManager(Arg[1]);
 			goto RtnTrue;
 		}
+		case 1140://$SYNCHRONIZE()
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 0)
+				goto RtnFalse;
+			CallSynchronizeMsgProc();
+			goto RtnTrue;
+		}
 		case 1201: //$FINDWAYPOINT ()
         {
             setDoPaint( FALSE);      

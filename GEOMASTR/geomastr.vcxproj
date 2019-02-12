@@ -92,7 +92,7 @@
     <LinkIncremental>false</LinkIncremental>
     <TargetName>GeoMaster34l_s</TargetName>
     <IncludePath>$(IncludePath);..\SQLite3;..\gdal\include;..\LAStools\LASzip\dll</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
     <CustomBuildAfterTargets />
     <TargetExt>.exe</TargetExt>
     <ExcludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(MSBuild_ExecutablePath);$(VC_LibraryPath_x86);</ExcludePath>
@@ -241,9 +241,9 @@
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\Release/$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\NVServer/$(TargetName).map</MapFileName>
+      <MapFileName>$(OutDir)$(TargetName).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <HeapReserveSize>32000000</HeapReserveSize>
       <StackReserveSize>4000000</StackReserveSize>
@@ -834,6 +834,7 @@
     <ClCompile Include="..\GCTP2\T2PROJ~1.C" />
     <ClCompile Include="OGRCoordConversion.c" />
     <ClCompile Include="SQLiteCmd.c" />
+    <ClCompile Include="Synchronize.c" />
     <ClCompile Include="tabbed.c" />
     <ClCompile Include="..\solar_calculator\Version2\tdb.c" />
     <ClCompile Include="..\libbci-1.1.0\tdspl.c" />
@@ -1037,6 +1038,7 @@
     <ClInclude Include="..\SQLite3\sqlite3.h" />
     <ClInclude Include="..\SQLite3\sqlite3ext.h" />
     <ClInclude Include="CFDResource.h" />
+    <ClInclude Include="CRAPI.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="FileDialogEventHandler.h" />
     <ClInclude Include="GMVersion.h" />

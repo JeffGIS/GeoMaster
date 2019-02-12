@@ -4069,8 +4069,16 @@ GotCloseFilehSQL:
 				if (hWnd)
 					SetWindowText (hWnd,Arg[3]);
 			}
-			else if (!stricmp (Arg[2],"COMMAND"))
+			else if (!stricmp(Arg[2], "COMMAND"))
 				SendMessage(hWnd, WM_COMMAND, atol(Arg[3]), 0L);
+			else if (!stricmp(Arg[2], "MESSAGE"))
+			{
+				HANDLE hMessage = GSSiGlobAlloc(0, GMEM_MOVEABLE, strlen(Arg[3]) + 4);
+				LPSTR pMessage = GlobalLock(hMessage);
+				strcpy(pMessage, Arg[3]);
+				GlobalUnlock(hMessage);
+				PostMessage(hWnd, GSSI_WINDOW_MESSAGE, (WPARAM)hMessage, 0);
+			}
 			else if (!stricmp(Arg[2], "POSITION"))
 			{
 				int x = atoi(Arg[3]);

@@ -1467,6 +1467,9 @@
     <ClCompile Include="GMDoc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Synchronize.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -1925,6 +1928,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="nvshapefilelibrary\shpgeo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

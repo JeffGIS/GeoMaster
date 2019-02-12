@@ -3,6 +3,7 @@
 #include "extrndb.h" 
 #include "std.h"          
 #include "gps.h"
+#include "CRAPI.h"
 
 #include "gmextern.h"
 
@@ -347,6 +348,7 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 	
+	CRAPI_Destroy();
 	SaveWindowPosition();
 	if (LogMSGFile != HFILE_ERROR)
 	{

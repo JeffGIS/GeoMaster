@@ -646,7 +646,6 @@ void CallTemplateMsgProc(void)
 {
 	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, (DLGPROC)TemplateMsgProc);
 }
-
 BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 
