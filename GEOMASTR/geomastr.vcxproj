@@ -1039,6 +1039,7 @@
     <ClInclude Include="..\SQLite3\sqlite3ext.h" />
     <ClInclude Include="CFDResource.h" />
     <ClInclude Include="CRAPI.h" />
+    <ClInclude Include="CurbRamps.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="FileDialogEventHandler.h" />
     <ClInclude Include="GMVersion.h" />

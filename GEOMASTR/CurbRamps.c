@@ -1,10 +1,11 @@
 #include "graphint.h"   
 #include "gmextern.h"
-#include "RampCompliance.h"
-#include "MPIntersection.h"
+#include "CRAPI.h"
+#include "CurbRamps.h"
 
 #define CURRENT_INTERSECTION_VERSION "5.0"
 
+static BOOL _ignoreErrorLog = FALSE;
 static sqlite3 *database = NULL;
 
 int getMPIntersectionFromDB(int intID, BOOL wantRamps, MPINTERSECTION * pMPInt);
@@ -1713,7 +1714,7 @@ int getDatasetVersion(void)
 
 BOOL adjustToLatestVersion(LPSTR fromPath)
 {
-	BOOL rtn = FALSE;
+	BOOL rtn = TRUE;
 	if (!database)
 		return FALSE;
 	int currentVersion = getDatasetVersion();
@@ -1778,7 +1779,6 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 						GSSiRemove(fromPath);
 						GSSiRename(toPath, fromPath);
 						st = !sqlite3_open(fromPath, &database);
-
 					}
 				}
 				rtn = st;
@@ -1833,6 +1833,7 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 				if (st)
 				{
 					SLT_EndTrans(database);
+					rtn = TRUE;
 				}
 				else
 					SLT_AbortTrans(database);
@@ -1852,6 +1853,7 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 				if (st)
 				{
 					SLT_EndTrans(database);
+					rtn = TRUE;
 				}
 				else
 					SLT_AbortTrans(database);
@@ -1897,6 +1899,7 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 				if (st)
 				{
 					SLT_EndTrans(database);
+					rtn = TRUE;
 				}
 				else
 					SLT_AbortTrans(database);
@@ -1984,11 +1987,16 @@ int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle)
 		}
 	}
 	else
+		rtn = TRUE;
+	if (rtn)
 	{
 		rtn = sqlite3_open(path, &database);
 		if (rtn == SQLITE_OK)
 		{
-			SetGlobalValueLong(varnameforhandle, (UINT)database);
+			CRAPI_Init();
+			strcpy(CRAPI->sharedInstance.currentCurbRampDB, path);
+			if (varnameforhandle && *varnameforhandle)
+				SetGlobalValueLong(varnameforhandle, (UINT)database);
 			rtn = adjustToLatestVersion(path);
 		}
 	}
@@ -2005,6 +2013,11 @@ int NVCloseDB(long handle)
 		rtn = sqlite3_close(db);
 		if (db == database)
 			database = 0;
+	}
+	else
+	{
+		rtn = sqlite3_close(database);
+		database = 0;
 	}
 	return rtn;
 }
@@ -2556,3 +2569,415 @@ signal : (int)s
 
 */
 
+LPSTRD getSendToServerFile(int databaseID, int iPad)
+{
+	int pictNum;
+	int currentFileNum = getLastDataUpdateNumber (databaseID,iPad, &pictNum);
+
+	LPSTRD file = malloc(MAX_PATH);
+	sprintf (file,"%s/%i_%i.sql",CRAPI_sharedInstance_sharedOutputDirectory("CurbRamps"), iPad, currentFileNum);
+	return file;
+}
+
+BOOL executeAndSendCmd (int databaseID, LPSTR cmd,BOOL sendToServer)
+{
+
+	BOOL rtn = Execute(cmd, CRAPI->sharedInstance.errFile);
+	if (rtn && sendToServer)
+	{
+		int iPad = CRAPI->sharedInstance.currentiPadWithinManager;
+		LPSTRD sendToServerFile = getSendToServerFile (databaseID, iPad);
+
+
+		if (!FileType (sendToServerFile))
+		{
+			char versions[256];
+			__time32_t iTime;
+			_time32(&iTime);
+
+			sprintf (versions,"/*ApVer %s DBVer %s Time %i*/", appAndVersion(), CURRENT_INTERSECTION_VERSION, iTime);
+
+			rtn = appendStringToFile(versions, sendToServerFile);
+		}
+
+		rtn = appendStringToFile(cmd, sendToServerFile);
+		free(sendToServerFile);
+	}
+	else if (sendToServer)
+	{
+		LPSTRD logmsg = malloc(sizeof(cmd) + 16);
+		sprintf(logmsg, "COMMAND:%s", cmd);
+		logToErrorFile (logmsg);
+		free(logmsg);
+	}
+
+	return rtn;
+}
+int SQLitePrepare(sqlite3 *db,            /* Database handle */
+	const char *zSql,       /* SQL statement, UTF-8 encoded */
+	int nByte,              /* Maximum length of zSql in bytes. */
+	sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+	const char **pzTail     /* OUT: Pointer to unused portion of zSql */)
+
+{
+	int rtn = sqlite3_prepare_v2(db, zSql, nByte, ppStmt, pzTail);
+	int qlen = (int)strlen(zSql);
+	//if (pdb->lastQuery)
+	//	free(pdb->lastQuery);
+	//pdb->lastQuery = malloc(qlen + 4);
+	//strcpy(pdb->lastQuery, zSql);
+	return rtn;
+}
+int SQLiteFinalize(sqlite3_stmt *pStmt)
+{
+	int rtn = sqlite3_finalize(pStmt);
+	//    if (lastQuery)
+	//        free (lastQuery);
+	//    lastQuery = 0;
+	return rtn;
+}
+int SQLiteExec(
+	sqlite3 *db,                                  /* An open database */
+	const char *sql,                           /* SQL to be evaluated */
+	int(*callback)(void*, int, char**, char**),  /* Callback function */
+	void * arg,                                    /* 1st argument to callback */
+	char **errmsg                              /* Error msg written here */)
+{
+	int qlen = (int)strlen(sql);
+//	if (pdb->lastQuery)
+//		free(pdb->lastQuery);
+//	pdb->lastQuery = malloc(qlen + 4);
+//	strcpy(pdb->lastQuery, sql);
+	return sqlite3_exec(db, sql, callback, arg, errmsg);
+}
+
+int getLastDataUpdateNumber(int databaseID,int iPad,int *pictNum)
+{
+	int lastNum = 0;
+	int lastPictNum = 0;
+	BOOL opened = openDatabaseID(databaseID);
+	char cmd[256];
+	sprintf (cmd,"SELECT LastDataUpdate, LastPictUpdate FROM CURBRAMP_UPDATES WHERE iPad = %i",iPad);
+	sqlite3_stmt *statement;
+
+	SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0), database,"getLastDataUpdateNumber", 0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		lastNum = sqlite3_column_int(statement, 0);
+		lastPictNum = sqlite3_column_int(statement, 1);
+	}
+	SQLOK(SQLiteFinalize(statement), database, "getLastDataUpdateNumber", 0);
+	if (!lastNum)
+	{
+		lastNum = 1;
+		sprintf(cmd, "INSERT OR REPLACE INTO CURBRAMP_UPDATES VALUES(%i, 1, 0); ",iPad);
+		executeAndSendCmd(databaseID, cmd, NO);
+	}
+	closeDatabaseID(databaseID,opened);
+	*pictNum = lastPictNum;
+	return lastNum;
+}
+
+BOOL openDatabaseID(int databaseID)
+{
+	if (database)
+		return FALSE;
+	return NVOpenDB(CRAPI->sharedInstance.currentCurbRampDB, FALSE, 0);
+}
+
+void closeDatabaseID(int databaseID, BOOL opened)
+{
+	if (opened && database)
+		NVCloseDB(0);
+}
+BOOL setLastDataAndPictUpdateNums(int databaseID, int lastNum,int pictNum,int iPad)
+{
+	BOOL opened = openDatabaseID(databaseID);
+	char cmd[256];
+	sprintf (cmd,"INSERT OR REPLACE INTO CURBRAMP_UPDATES VALUES(%i, %i, %i); ",iPad,lastNum,pictNum);
+	BOOL rtn = executeAndSendCmd(databaseID, cmd, NO);
+	closeDatabaseID(databaseID, opened);
+	return rtn;
+}
+BOOL setLastDataUpdateNum (int databaseID, int lastNum,int iPad)
+{
+	BOOL rtn = FALSE;
+	BOOL opened = openDatabaseID(databaseID);
+	char cmd[256];
+	sprintf (cmd,"SELECT * FROM CURBRAMP_UPDATES WHERE iPad = %i",iPad);
+	sqlite3_stmt *statement;
+
+	SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0),database,"setLastDataUpdateNum",0);
+	BOOL haveRecord = (sqlite3_step(statement) == SQLITE_ROW);
+	SQLOK(SQLiteFinalize(statement), database, "setLastDataUpdateNum", 0);
+
+	if (!haveRecord)
+	{
+		sprintf (cmd, "INSERT OR REPLACE INTO CURBRAMP_UPDATES VALUES(%i, 1, 0);",iPad);
+		rtn = executeAndSendCmd(databaseID, cmd, NO);
+	}
+	sprintf (cmd,"UPDATE CURBRAMP_UPDATES SET LastDataUpdate = %i WHERE iPad = %i",lastNum,iPad);
+	rtn = executeAndSendCmd(databaseID, cmd, NO);
+	closeDatabaseID(databaseID, opened);
+	return rtn;
+}
+
+BOOL setLastPictUpdateNum(int databaseID, int lastNum,int iPad)
+{
+	BOOL rtn = FALSE;
+	BOOL opened = openDatabaseID(databaseID);
+	char cmd[256];
+	sprintf (cmd,"SELECT * FROM CURBRAMP_UPDATES WHERE iPad = %i",iPad);
+	sqlite3_stmt *statement;
+
+	SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0), database,"setLastPictUpdateNum",0);
+	BOOL haveRecord = (sqlite3_step(statement) == SQLITE_ROW);
+	SQLOK(SQLiteFinalize(statement),database,"setLastPictUpdateNum",0);
+
+	if (!haveRecord)
+	{
+		sprintf (cmd ,"INSERT OR REPLACE INTO CURBRAMP_UPDATES VALUES(%i, 1, 0); ",iPad);
+		rtn = executeAndSendCmd(databaseID, cmd, NO);
+	}
+	sprintf (cmd ,"UPDATE CURBRAMP_UPDATES SET LastPictUpdate = %i WHERE iPad = %i",lastNum,iPad);
+	rtn = executeAndSendCmd(databaseID, cmd, NO);
+	closeDatabaseID(databaseID, opened);
+	return rtn;
+}
+
+int getLastPictUpdateNumber (int databaseID, int iPad)
+{
+	int LastNum = 0;
+	BOOL opened = openDatabaseID(databaseID);
+	char query[256];
+	sprintf (query,"SELECT LastPictUpdate FROM CURBRAMP_UPDATES WHERE iPad = %i",iPad);
+	sqlite3_stmt *statement;
+
+	SQLOK( SQLitePrepare(database, query, -1, &statement, 0), database,"getLastPictUpdateNumber",0);
+	if (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		LastNum = sqlite3_column_int(statement, 0);
+	}
+	SQLOK(SQLiteFinalize(statement), database, "getLastPictUpdateNumber", 0);
+	closeDatabaseID(databaseID, opened);
+	return LastNum;
+}
+
+int incrementLastDataFileNum (int databaseID)
+{
+	int pictNum;
+	int iPad = CRAPI->sharedInstance.currentiPadWithinManager;
+	int lastNum = getLastDataUpdateNumber(databaseID,iPad,&pictNum);
+	int nextNum = max(1, lastNum);
+	LPSTRD file = outputDataFile (databaseID,nextNum,iPad);
+
+	int fileSize = GSSiLength(file);
+	while (fileSize > 0)
+	{
+		nextNum++;
+		free(file);
+		file = outputDataFile(databaseID,nextNum, iPad);
+		fileSize = GSSiLength(file);
+	}
+	if (nextNum > lastNum)
+		setLastDataUpdateNum(databaseID,nextNum, iPad);
+	if (nextNum - lastNum > 1)
+	{
+		char logmess[32];
+		strcpy(logmess, "Curbramp data file num error");
+		logToErrorFile(logmess);
+	}
+	return nextNum;
+}
+/*{
+	int pictNum;
+	int iPad = CRAPI.sharedInstance.currentiPadWithinManager;
+	int lastNum = [self getLastDataUpdateNumber : iPad
+		lastPictNum : &pictNum];
+	int nextNum = max(1, lastNum);
+	NSString* file = [self outputDataFile : nextNum iPad : iPad];
+
+	int fileSize = (int)[NSFileManager.defaultManager attributesOfItemAtPath : file
+		error : nil].fileSize;
+	while (fileSize > 0)
+	{
+		nextNum++;
+		file = [self outputDataFile : nextNum iPad : iPad];
+		fileSize = (int)[NSFileManager.defaultManager attributesOfItemAtPath : file
+			error : nil].fileSize;
+	}
+	if (nextNum > lastNum)
+		[self setLastDataUpdateNum : nextNum pictNum : pictNum foriPad : iPad];
+	if (nextNum - lastNum > 1)
+	{
+		NSString *logmess = @"Curbramp data file num error";
+			[CRAPI.sharedInstance logToErrorFile : logmess];
+	}
+	return nextNum;
+}*/
+
+
+int incrementLastDataFileNumber(int databaseID)
+{
+	return incrementLastDataFileNum(databaseID);
+}
+int incrementLastPictFileNumber(int databaseID)
+{
+	return incrementLastPictFileNum(databaseID);
+}
+int incrementLastPictFileNum (int databaseID)
+{
+	int iPad = CRAPI->sharedInstance.currentiPadWithinManager;
+	int lastNum = getLastPictUpdateNumber(databaseID,iPad);
+	LPSTR file = outputDataFile(databaseID,lastNum, iPad);
+
+	int fileSize = GSSiLength(file);
+	if (fileSize > 0)
+	{
+		setLastPictUpdateNum(databaseID,++lastNum,iPad);
+	}
+	return lastNum;
+}
+LPSTRD outputDataFile(int databaseID,int fileNum,int iPad)
+{
+	LPSTRD file = malloc(MAX_PATH);
+	sprintf (file,"%s\\%i_%i.sql",CRAPI_sharedInstance_sharedOutputDirectory("CurbRamps"), iPad, fileNum);
+	return file;
+}
+
+LPSTRD outputPictFile(int databaseID,int fileNum,int iPad)
+{
+	LPSTRD file = malloc(MAX_PATH);
+	sprintf (file,"%s\\i_%i.jpg", CRAPI_sharedInstance_sharedOutputDirectory("CurbRamps"), iPad, fileNum);
+	return file;
+}
+
+BOOL appendStringToFile(LPSTR str, LPSTR filePath)
+{
+	return AppendFile(filePath, str);
+}
+LPSTRD stringByDeletingLastPathComponent(LPSTR path)
+{
+	LPSTRD rtn = malloc(MAX_PATH);
+	LPSTR last = strrchr(path, '\\');
+	if (!last)
+		last = strrchr(path, '/');
+	if (last)
+	{
+		char save = *last;
+		*last = 0;
+		strcpy(rtn, last);
+		*last = save;
+	}
+	else
+		strcpy(rtn, path);
+	return rtn;
+}
+LPSTRD lastPathComponent(LPSTR path)
+{
+	LPSTRD rtn = malloc(MAX_PATH);
+	LPSTR last = strrchr(path, '\\');
+	if (!last)
+		last = strrchr(path, '/');
+	if (last)
+	{
+		last++;
+		strcpy(rtn, last);
+	}
+	else
+		strcpy(rtn, path);
+
+	return rtn;
+
+}
+
+LPSTRD errorLogPath (void)
+{
+	LPSTRD path = malloc(MAX_PATH);
+	sprintf (path,"%s/%s", CRAPI->sharedInstance.sharedFilePath, "NVErrorLog.txt");
+	return path;
+}
+void logToErrorFileIgnore(BOOL ignore)
+{
+	_ignoreErrorLog = ignore;
+}
+LPSTRD CRAPI_sharedInstance_errorLogPath(void)
+{
+	return errorLogPath();
+}
+BOOL CRAPI_sharedInstance_haveErrorLog(void)
+{
+	BOOL rtn = FALSE;
+	LPSTRD logPath = errorLogPath();
+	int fileSize = GSSiLength(logPath);
+	if (fileSize > 0)
+		rtn = TRUE;
+	free(logPath);
+	return rtn;
+}
+
+void logToErrorFilewithHeader ( LPSTR error,LPSTR header)
+{
+	LPSTR mess = malloc(strlen(error) + strlen(header) + 32);
+	sprintf (mess,"%s:%s",header, error);
+	logToErrorFile(mess);
+	free(mess);
+}
+
+void NSLog(LPSTR fmt, LPSTR str)
+{
+	LPSTR mess = malloc(strlen(str) * 2 + 32);
+
+	sprintf(mess, fmt, str);
+	free(mess);
+}
+LPSTR timeStamp(void)
+{
+	static char ts[64];
+	LPSTR rtn = ts;
+
+	strcpy(ts, "$CAL([%SYS_CLOCK],3)");
+	ExpandText(ts);
+	return rtn;
+}
+void logToErrorFile (LPSTR error)
+{
+	if (_ignoreErrorLog)
+		return;
+	LPSTRD errorFile = errorLogPath();
+	LPSTRD idString = malloc(1024);
+	sprintf (idString,"%s %i %i %s %i %i %i %i",
+		timeStamp(),
+		CRAPI->sharedInstance.currentModule,
+		CRAPI->sharedInstance.currentSubModule,
+		CRAPI->sharedInstance.appVersionBuild,
+		CRAPI->sharedInstance.GSSiPadNumber,
+		CRAPI->sharedInstance.currentManageriPad,
+		CRAPI->sharedInstance.currentiPadWithinManager,
+		CRAPI->sharedInstance.currentGeoid);
+	NSLog("%s", error);
+	appendStringToFile (idString, errorFile);
+	appendStringToFile (error, errorFile);
+	free(errorFile);
+	free(idString);
+}
+
+void clearErrorFile (void)
+{
+	LPSTRD errorFile = errorLogPath();
+	GSSiRemove(errorFile);
+	free(errorFile);
+}
+
+BOOL PushFileToServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, BOOL deleteWhenDone, BOOL appendTempExtension, HWND *popoverView, LPSTR title,double showAfter)
+{
+	BOOL rtn = FALSE;
+
+	return rtn;
+}
+BOOL GetFileFromServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, HWND *popoverView, LPSTR title, double showAfter)
+{
+	BOOL rtn = FALSE;
+
+	return rtn;
+}

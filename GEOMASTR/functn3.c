@@ -5,6 +5,9 @@
 #include <mmsystem.h>
 #include "gmextern.h"
 #include "RampCompliance.h"
+#include "CurbRamps.h"
+#include "CRAPI.h"
+
 
 
 static	char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
@@ -4808,6 +4811,12 @@ GotCloseFilehSQL:
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "INIT"))
+			{
+				CRAPI_Init();
+				rtn = CRAPI->sharedInstance.GSSiPadNumber < 0 ? FALSE : TRUE;
+				goto Rtnrtn;
+			}
 			else if (!stricmp(Arg[1], "OPEN"))
 			{
 				rtn = NVOpenDB(Arg[2], atob(Arg[3]), Arg[4]);
@@ -4816,6 +4825,16 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "CLOSE"))
 			{
 				rtn = NVCloseDB(atol(Arg[2]));
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "EXECUTE"))
+			{
+				rtn = executeAndSendCmd(DATABASEID_CURBRAMPS, Arg[3], FALSE);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "EXECUTEANDSEND"))
+			{
+				rtn = executeAndSendCmd(DATABASEID_CURBRAMPS, Arg[3], TRUE);
 				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "FIXRAMPNUM"))

@@ -2,6 +2,7 @@
 #include "gmextern.h"    
 #include "resource.h"
 #include "CRAPI.h"
+#include "CurbRamps.h"
 
 static char  Winver[32];
 static BOOL _didConnect;
@@ -12,16 +13,68 @@ static char _minPrelimVersion[64];
 static char _minDetailVersion[64];
 static char _minAlleyVersion[64];
 static UINT iTimer = 0;
-
-void connectButtonTapped(void);
-
+static int  _downFiles;
+static int  _downPix;
+static int  _totFilesToProcess;
+static int  _uploadedFiles;
+static int  _origUpFiles;
+static int  _processedFiles;
+static int  _lastFileNumToUpload;
+static int  _nextFileNumToUpload;
+static int  _upFiles;
+static int  _lastPictNumToUpload;
+static int  _nextPictNumToUpload;
+static int  _upPix;
+static int  _myiPad;
+static int  _numiPadsInMsg;
+static LPSTR _uploadStatusMsg = 0;
+static int	_databaseID = DATABASEID_CURBRAMPS;
+static BOOL _useMasterID = FALSE;
+static int  _process;
+static BOOL _uploadPix = FALSE;
+static BOOL _downloadData = TRUE;
+static BOOL _downloadPix = FALSE;
+static int _downloadiPad;
+static int _dataType;
+static int _lastUploadFileSize;
+static LPSTRD _filePath = 0;
+static HWND _popoverView = 0;
+static int _nextFileNumToDownload;
+static int _lastFileNumToDownload;
+static BOOL _first = TRUE;
 
 #define DOWNLOAD_DATABASE_FUNCTION 3
 #define FTP_CATCHUP_DELAY 0.5
 #define UPLOAD_STATUS_VERSION 1
 #define MAX_ATTEMPS 3
 
+#define UPLOAD_DATA_PROCESS 1
+#define UPLOAD_PICT_PROCESS 2
+#define DOWNLOAD_DATA_PROCESS 3
+#define DOWNLOAD_PICT_PROCESS 4
+#define UPLOAD_ERROR_FILE 5
+#define CONNECT_PROCESS 6
+#define DOWNLOAD_DATABASE_PROCESS 7
+
+
 CRAPi *CRAPI=NULL;
+
+void setDatabaseIDToDB(_databaseID);
+void startSync(HWND hWndDlg);
+void updateLabels(HWND hWndDlg);
+void updateOverallProgress(HWND hWndDlg,double pct);
+void uploadNextFile(HWND hWndDlg);
+void doUploadNextFile(HWND hWndDlg);
+int nextiPadToDownload(int currentiPad);
+void downloadNextFile(HWND hWndDlg);
+void doDownloadNextFile(HWND hWndDlg);
+void setDownloadFilesFor(int iPad);
+void PopoverHide(HWND hWnd);
+
+BOOL getUseMasterID(void)
+{
+	return _useMasterID;
+}
 
 BOOL isGSSiDevice(void)
 {
@@ -74,7 +127,14 @@ CRAPi* CRAPI_Init(void)
 		CRAPI = calloc(1, sizeof(CRAPi));
 		CRAPI->haveInit = TRUE;
 		CRAPI->sharedInstance.serverToUse = 3;
+		CRAPI->sharedInstance.currentModule = GEOMASTER_MODULE;
+		CRAPI->sharedInstance.currentSubModule = 0;
 		CRAPI->sharedInstance.placesArray = NSArray_Init(0);
+		strcpy(CRAPI->sharedInstance.sharedFilePath, "[%DL][NVCITY]\\NVCRISDOWNLOADS\\sharedFilePath");
+		ExpandText(CRAPI->sharedInstance.sharedFilePath);
+		strcpy(CRAPI->sharedInstance.appVersionBuild, appAndVersion());
+		CRAPI->sharedInstance.GSSiPadNumber = -1;
+		CRAPI_sharedInstance_processPlaces();
 	}
 	CRAPI->sharedInstance.hideConnectButton = 1;
 	return CRAPI;
@@ -282,7 +342,7 @@ BOOL UserDefaults_defaults_saveString(LPSTR string, LPSTR key)
 	return rtn;
 }
 
-LPSTR UserDefaults_defaults_stringForKey(LPSTR key)
+LPSTRD UserDefaults_defaults_stringForKey(LPSTR key)
 {
 	LPSTR str = calloc(1, 1024);
 	int nchr = GetPrivateProfileString("CRAPI", key, "", str, 1024, GMIni);
@@ -360,14 +420,14 @@ LPSTR textInsideParentheses(LPSTR string)
 void saveiPadIDs (void)
 {
 	char key[128];
-	sprintf (key,"ManagerForGeoid:%i", CRAPI->sharedInstance.currentGeoidValue);
+	sprintf (key,"ManagerForGeoid:%i", CRAPI->sharedInstance.currentGeoid);
 	UserDefaults_defaults_saveInteger(CRAPI->sharedInstance.currentManageriPad, key);
 
-	sprintf (key,"iPadWithinManagerForGeoid:%i", CRAPI->sharedInstance.currentGeoidValue);
+	sprintf (key,"iPadWithinManagerForGeoid:%i", CRAPI->sharedInstance.currentGeoid);
 
 	UserDefaults_defaults_saveInteger(CRAPI->sharedInstance.currentiPadWithinManager, key);
 
-	sprintf (key,"totiPadWithinManagerForGeoid:%i", CRAPI->sharedInstance.currentGeoidValue);
+	sprintf (key,"totiPadWithinManagerForGeoid:%i", CRAPI->sharedInstance.currentGeoid);
 
 	UserDefaults_defaults_saveInteger(CRAPI->sharedInstance.totiPadWithinManager, key);
 
@@ -391,9 +451,9 @@ void loadiPadParametersForGeoid (int geoid)
 
 void setCurrentGeoid(int geoid)
 {
-	if (geoid != CRAPI->sharedInstance.currentGeoidValue)
+	if (geoid != CRAPI->sharedInstance.currentGeoid)
 	{
-		CRAPI->sharedInstance.currentGeoidValue = geoid;
+		CRAPI->sharedInstance.currentGeoid = geoid;
 		loadiPadParametersForGeoid(geoid);
 		if (CRAPI->sharedInstance.currentManageriPad == 0)
 		{
@@ -403,8 +463,8 @@ void setCurrentGeoid(int geoid)
 			saveiPadIDs();
 		}
 		/*
-		_outputDirectory = [NSString stringWithFormat : @"%@/%i / ADAFiles", _documentsDirectory, _currentGeoidValue];
-			_imageDirectory = [NSString stringWithFormat : @"%@/%i / IntersectionImages", UserDefaults.defaults.sharedFilePath, _currentGeoidValue];
+		_outputDirectory = [NSString stringWithFormat : @"%@/%i / ADAFiles", _documentsDirectory, _currentGeoid];
+			_imageDirectory = [NSString stringWithFormat : @"%@/%i / IntersectionImages", UserDefaults.defaults.sharedFilePath, _currentGeoid];
 			_deviceListsKey = [NSString stringWithFormat : @"iPads:%i", CRAPI->sharedInstance.currentGeoid];
 
 			[NSFileManager.defaultManager createDirectoryAtPath : _outputDirectory
@@ -421,10 +481,23 @@ void setCurrentGeoid(int geoid)
 		*/
 	}
 }
+LPSTR CRAPI_sharedInstance_sharedOutputDirectory(LPSTR subDir)
+{
+	static char outdir[MAX_PATH];
+
+	sprintf (outdir,"%s\\OutputFiles\\%s\\%i\\%i", CRAPI->sharedInstance.sharedFilePath, subDir, CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid);
+
+	if (!makedirectories(outdir, TRUE, FALSE))
+	{
+		GSSiMessageBox(0, outdir, "Unable to create output directory", MB_ICONEXCLAMATION, 0);
+	}
+
+	return outdir;
+}
 
 BOOL  CRAPI_sharedInstance_processPlaces (void)
 {
-	LPSTR message = UserDefaults_defaults_stringForKey("PlacesString");
+	LPSTRD message = UserDefaults_defaults_stringForKey("PlacesString");
 
 	CRAPI->sharedInstance.placesArray = NSArray_Init(CRAPI->sharedInstance.placesArray);
 	if (!message)
@@ -503,7 +576,7 @@ BOOL CRAPI_sharedInstance_processPlacesArray (int row)
 		for (int i = 0; i < CRAPI->sharedInstance.placesArray->count; i++)
 		{
 			CityOrOrganizationData c = CRAPI->sharedInstance.placesArray->item[i];
-			if (c->number == CRAPI->sharedInstance.currentGeoidValue)
+			if (c->number == CRAPI->sharedInstance.currentGeoid)
 			{
 				haveCity = TRUE;
 				break;
@@ -528,7 +601,7 @@ BOOL CRAPI_sharedInstance_processPlacesArray (int row)
 	CRAPI->sharedInstance.currentCityNameAndState = addSpaceAfterComma(c->name);
 	setCurrentGeoid (c->number);
 
-	UserDefaults_defaults_saveInteger(CRAPI->sharedInstance.currentGeoidValue,"CurrentGeoid");
+	UserDefaults_defaults_saveInteger(CRAPI->sharedInstance.currentGeoid,"CurrentGeoid");
 
 	CRAPI->sharedInstance.currentManageriPad = (int)c->managerNumber;
 	CRAPI->sharedInstance.currentiPadWithinManager = (int)c->withinManager;
@@ -541,7 +614,7 @@ BOOL CRAPI_sharedInstance_processPlacesArray (int row)
 	return TRUE;
 }
 
-void setDatabaseIDToDB (void)
+void setDatabaseIDToDB (int databaseID)
 {
 /*	int geoid = CRAPI->sharedInstance.currentGeoid;
 
@@ -566,6 +639,8 @@ void setDatabaseIDToDB (void)
 	}
 
 	[self updateConnectLabel];*/
+
+	incrementLastDataFileNum(databaseID);
 }
 
 
@@ -840,7 +915,7 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			}
 			if (CRAPI->sharedInstance.placesArray->count < 2 ||
 				(int)CRAPI->sharedInstance.placesArray->count <= _selectedRow ||
-				CRAPI->sharedInstance.currentGeoidValue == 0)
+				CRAPI->sharedInstance.currentGeoid == 0)
 			{
 				_selectedRow = 0;
 				UserDefaults_defaults_saveInteger(_selectedRow, "SelectedRow");
@@ -848,7 +923,7 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 
 			CRAPI_sharedInstance_setGeoIDForCurrentApp ();
 			rtn = CRAPI_sharedInstance_processPlacesArray (_selectedRow);
-			setDatabaseIDToDB();
+			setDatabaseIDToDB(_databaseID);
 
 			sprintf(message, "Synchronize Data for\n%s",
 				CRAPI->sharedInstance.currentCityNameAndState);
@@ -857,16 +932,70 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			UpdateConnectLabel(hWndDlg);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_CONNECT), CRAPI->sharedInstance.hideConnectButton ? SW_HIDE : SW_SHOW);
 			sprintf(mes, "@$M(GetUploadStatus,%i,%i,%i,%i)",
-				CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoidValue,
+				CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid,
 				CRAPI->sharedInstance.totiPadWithinManager, UPLOAD_STATUS_VERSION);
 			currentMessage = GMSMessageGetUploadStatus;
 			SendMessageToServer(hWndDlg, mes);
 
 			break;
 		case GMSMessageGetUploadStatus:
-			if (strstr(message, "InvalidVersion"))
-				ii = 1;
-			break;
+		{
+			_uploadStatusMsg = string_Copy(message);
+			// NSString *edit = [_uploadStatusMsg stringByReplacingOccurrencesOfString:@"3-5" withString:@"1-5"];
+			// _uploadStatusMsg = edit;
+			_numiPadsInMsg = atoi(_uploadStatusMsg) + 1;
+			_myiPad = CRAPI->sharedInstance.currentiPadWithinManager;
+
+			/*if (_justDownloadedNewDatabase)
+			{
+				NSArray * ar = [_uploadStatusMsg componentsSeparatedByString : @"|"];
+					for (int i = 0; i < _numiPadsInMsg; i++)
+					{
+						NSString * vals = ar[i + 1];
+						NSArray<NSString *> * ivals = [vals componentsSeparatedByString : @"-"];
+							int dataNum = (int)ivals[0].integerValue;
+						int pictNum = (int)ivals[1].integerValue;
+						if (i == _myiPad)
+						{
+							dataNum = 1;
+							pictNum = 0;
+						}
+						[_databaseID setLastDataUpdateNum : dataNum
+							pictNum : pictNum
+							foriPad : i];
+					}
+				_justDownloadedNewDatabase = FALSE;
+			}*/
+			int pictNum = 0;
+			int lastNum = getLastDataUpdateNumber(_databaseID, _myiPad, &pictNum);
+			if (_myiPad > 0 || getUseMasterID())
+			{
+				EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), TRUE);
+				SetWindowText(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), "Synchronize");
+			}
+
+
+			_lastFileNumToUpload = lastNum - 1; //last num will always be non-existent file since incrementLastDataFileNum called at start of sync
+
+			_nextFileNumToUpload = (getDataNumFromServerMsg(_myiPad,NO)+ 1);
+			if (_nextFileNumToUpload > 0)
+				_upFiles = (_lastFileNumToUpload - _nextFileNumToUpload + 1);
+
+			lastNum = pictNum;
+			_lastPictNumToUpload = lastNum;
+
+			_nextPictNumToUpload = (getDataNumFromServerMsg(_myiPad, YES) + 1);
+
+			if (_nextPictNumToUpload > 0)
+				_upPix = (_lastPictNumToUpload - _nextPictNumToUpload + 1);
+
+			getDownloadCounts(NO);
+			updateLabels(hWndDlg);
+			updateOverallProgress(hWndDlg,0);
+			//if (_autoSync)
+			//	startSync(hWndDlg);
+		}
+		break;
 		GSSiGlobUlFree(&hMessage);
 		}
 	}
@@ -917,4 +1046,409 @@ void CallSynchronizeMsgProc(void)
 {
 	int nRc = DialogBox(hInst, (LPSTR)"SYNCHRONIZE_DATA", hWndMain, (DLGPROC)SynchronizeMsgProc);
 }
+int getDataNumFromServerMsg (int iPad,BOOL wantPict)
+{
+	int dataNum = -4;
 
+	if (strlen (_uploadStatusMsg) < 5)
+		return -3;
+
+	if (iPad > _numiPadsInMsg)
+		return -2;
+
+	LPSTR pMsg = malloc(strlen(_uploadStatusMsg) + 4);
+	strcpy(pMsg, _uploadStatusMsg);
+	LPSTR pPipe = strchr(pMsg, '|');
+	int i = 0;
+
+	while (pPipe)
+	{
+		pPipe++;
+
+		if (i++ == iPad)
+		{
+			if (wantPict)
+			{
+				pPipe = strchr(pPipe, '-');
+
+				if (!pPipe)
+					break;
+
+				pPipe++;
+			}
+
+			dataNum = atoi(pPipe);
+			break;
+		}
+
+		pPipe = strchr(pPipe, '|');
+	}
+
+	free(pMsg);
+	return dataNum;
+}
+
+void getDownloadCounts(BOOL loading)
+{
+	_downFiles = _downPix = 0;
+	_totFilesToProcess = _origUpFiles;
+	_processedFiles = 0;
+	for (int iPad = 0; iPad <= _numiPadsInMsg; iPad++)
+	{
+		if (iPad != _myiPad)
+		{
+			int lastPictIHave;
+
+			int lastDataIHave = getLastDataUpdateNumber(_databaseID, iPad, &lastPictIHave);
+
+
+			int lastDataFileOnServer = getDataNumFromServerMsg(iPad,NO);
+
+			int lastPictFileOnServer = getDataNumFromServerMsg(iPad, YES);
+
+			_downFiles += max(0, lastDataFileOnServer - lastDataIHave);
+			if (!loading || CRAPI->sharedInstance.downloadData)
+				_totFilesToProcess += max(0, lastDataFileOnServer - lastDataIHave);
+			if (!loading || CRAPI->sharedInstance.downloadPix)
+			{
+				_downPix += max(0, lastPictFileOnServer - lastPictIHave);
+				_totFilesToProcess += max(0, lastPictFileOnServer - lastPictIHave);
+			}
+		}
+	}
+}
+
+void updateLabels(HWND hWndDlg)
+{
+	if (_first)
+	{
+		_first = NO;
+		if (_upFiles < 0 || _upPix < 0 || _downFiles < 0 || _downPix < 0)
+		{
+			LPSTRD msg = malloc(1024);
+			sprintf (msg,"Negative numbers in sync : %i %i %i %i",_upFiles,_upPix,_downFiles,_downPix);
+			if (getUseMasterID())
+			{
+				_upFiles = 0;
+			}
+			else
+				logToErrorFile(msg);
+		}
+	}
+	char label[256];
+	sprintf(label, "Data Files to be Uploaded : %i", _upFiles);
+	SetWindowText(GetDlgItem(hWndDlg, IDC_DATAFILESTOUPLOAD), label);
+	sprintf(label, "Data Files to be Downloaded : %i", _downFiles);
+	SetWindowText(GetDlgItem(hWndDlg, IDC_DATAFILESTODOWNLOAD), label);
+	sprintf(label, "Pictures to be Downloaded : %i", _downPix);
+	SetWindowText(GetDlgItem(hWndDlg, IDC_PICTURESTODOWNLOAD), label);
+
+}
+void updateOverallProgress(HWND hWndDlg, double pct)
+{
+
+}
+void startSync (HWND hWndDlg)
+{
+	_autoSync = FALSE;
+	_process = UPLOAD_DATA_PROCESS;
+	_uploadedFiles = 0;
+	_origUpFiles = _upFiles + _upPix;
+	getDownloadCounts(YES);
+	updateLabels(hWndDlg);
+	uploadNextFile(hWndDlg);
+}
+void syncButtonTapped (HWND hWndDlg)
+{
+	EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), FALSE);
+	CRAPI->sharedInstance.refreshMap = YES;
+
+	if (CRAPI_sharedInstance_haveErrorLog())
+	{
+		_process = UPLOAD_ERROR_FILE;
+		LPSTRD errorFile = CRAPI_sharedInstance_errorLogPath();
+		LPSTRD errorFileName = malloc(MAX_PATH);
+		HWND popoverView = 0;
+		int dataType = FTPErrorFile;
+		__time32_t time;
+		int iTime = _time32(&time);
+		double showAfter = 0.5;
+		BOOL deleteWhenDone = NO;
+		LPSTRD fromDir = stringByDeletingLastPathComponent(errorFile);
+		LPSTRD fromFile = lastPathComponent(errorFile);
+		char toDir[] = "NVCRISData/ErrorFiles";
+		char title[] = "Upload Error File";
+		sprintf (errorFileName,"%i_%i.txt",CRAPI->sharedInstance.GSSiPadNumber,iTime);
+		BOOL appendTempExtension = NO;
+		PushFileToServer(fromFile, errorFileName, fromDir, toDir, deleteWhenDone, appendTempExtension, &popoverView,title, showAfter);
+		free(errorFile);
+		free(errorFileName);
+		free(fromDir);
+		free(fromFile);
+	}
+	else
+		startSync(hWndDlg);
+}
+
+void uploadNextFile (HWND hWndDlg)
+{
+	doUploadNextFile(hWndDlg);
+}
+
+void doUploadNextFile (HWND hWndDlg)
+{
+Top:
+	if (_nextFileNumToUpload > _lastFileNumToUpload)
+	{
+		if (_process == UPLOAD_DATA_PROCESS)
+		{
+			int pictNum = 0;
+			_process = UPLOAD_PICT_PROCESS;
+
+			if (_uploadPix)
+			{
+				/*_myiPad = CRAPI.sharedInstance.currentiPadWithinManager;
+
+				int lastNum = [_databaseID getLastDataUpdateNumber : _myiPad
+					lastPictNum : &pictNum];
+
+				lastNum = pictNum;
+				_lastFileNumToUpload = lastNum;
+
+				_nextFileNumToUpload = ([self getDataNumFromServerMsg : _myiPad
+					wantPictNum : YES] + 1);
+
+				if (_nextFileNumToUpload > 0)
+					_upPix = (_lastFileNumToUpload - _nextFileNumToUpload + 1);
+
+				[self updateLabels];
+				*/
+				goto Top;
+			}
+		}
+
+		_process = DOWNLOAD_DATA_PROCESS;
+		_downloadiPad = nextiPadToDownload(-1);
+
+		if (_downloadiPad > -1)
+		{
+			setDownloadFilesFor(_downloadiPad);
+			downloadNextFile(hWndDlg);
+		}
+		SetWindowText(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), "Complete");
+		EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), FALSE);
+
+		return;
+	}
+
+	if (_process == UPLOAD_DATA_PROCESS)
+	{
+		GSSiFree(&_filePath);
+		_filePath = outputDataFile (_databaseID,_nextFileNumToUpload, _myiPad);
+	}
+
+	/*else if (_process == UPLOAD_PICT_PROCESS)
+	{
+		_filePath = [_databaseID outputPictFile : _nextFileNumToUpload
+			iPad : _myiPad];
+
+		[_popoverView showAfter : 0.5
+			withTitle : @"Upload Picture"];
+	}*/
+	else
+	{
+		MessageBox(hWndDlg, "Invalid process", 0, MB_ICONEXCLAMATION);
+		//[CRAPI.sharedInstance logToErrorFile : [NSString stringWithFormat : @"Invalid process : %i in upload %i %i",_process,_nextFileNumToUpload,_myiPad]];
+			return;
+	}
+	int fileSize = GSSiLength(_filePath);
+
+	if (!fileSize)
+	{
+/*		if ([[_filePath pathExtension] isEqualToString:@"jpg"])
+		{
+			NSError *error = nil;
+
+			NSString *defaultPath = [NSBundle.mainBundle pathForResource : @"deletedImage"
+				ofType : @"jpg"];
+			[NSFileManager.defaultManager copyItemAtPath : defaultPath toPath : _filePath error : &error];
+			if (error)
+			{
+				NSLog(@"Copy deletedImage.jpg ERROR : %@", error.localizedDescription);
+				[CRAPI.sharedInstance logToErrorFile : [NSString stringWithFormat : @"Copy deletedImage to %@:%@",[_filePath lastPathComponent], error.localizedDescription]
+					withHeader : @"Copy empty image"];
+
+			}
+
+		}
+		else
+		{
+			NSString * emptyFileMessage = @"/*This file is empty* / ";
+				[emptyFileMessage writeToFile : _filePath atomically : YES encoding : NSUTF8StringEncoding error : nil];
+		}
+		[CRAPI.sharedInstance logToErrorFile : [_filePath lastPathComponent]
+			withHeader : @"Writing empty file"];*/
+		MessageBox(hWndDlg, _filePath, "Empty File", MB_ICONEXCLAMATION);
+	}
+
+	if (_process == UPLOAD_DATA_PROCESS)
+		_dataType = FTPData;
+	else
+		_dataType = FTPDataPhoto;
+
+	LPSTRD toDir = malloc(MAX_PATH);
+	sprintf (toDir,"NVCRISData/%i/%i",CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid);
+	_lastUploadFileSize = GSSiLength(_filePath);
+	LPSTRD fromDir = stringByDeletingLastPathComponent(_filePath);
+	LPSTRD fromFile = lastPathComponent(_filePath);
+	char title[] = "Upload Data File";
+	BOOL deleteWhenDone = FALSE;
+	BOOL appendTempExtension = YES;
+	PushFileToServer(fromFile, fromFile, fromDir, toDir, deleteWhenDone, appendTempExtension, &_popoverView,title, 0.5);
+	free(fromDir);
+	free(toDir);
+	free(fromFile);
+}
+int nextiPadToDownload(int currentiPad)
+{
+	currentiPad++;
+
+	if (currentiPad == _myiPad && !getUseMasterID())
+		currentiPad++;
+
+	if (currentiPad > _numiPadsInMsg)
+		return -1;
+
+	return currentiPad;
+}
+void downloadNextFile (HWND hWndDlg)
+{
+	if (_process == DOWNLOAD_DATA_PROCESS && !_downloadData)
+		_process = DOWNLOAD_PICT_PROCESS;
+
+	if (_process == DOWNLOAD_PICT_PROCESS && !_downloadPix)
+	{
+		SetWindowText(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), "Complete");
+		EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), FALSE);
+		PopoverHide(_popoverView);
+		return;
+	}
+
+	doDownloadNextFile(hWndDlg);
+}
+
+
+void doDownloadNextFile(HWND hWndDlg)
+{
+Top:
+	if (_nextFileNumToDownload > _lastFileNumToDownload)
+	{
+		_downloadiPad = nextiPadToDownload (_downloadiPad);
+
+		if (_downloadiPad < 0)
+		{
+			if (_process == DOWNLOAD_DATA_PROCESS)
+			{
+				_process = DOWNLOAD_PICT_PROCESS;
+				if (!_downloadPix)
+					goto Done;
+				_downloadiPad = nextiPadToDownload(0);
+
+				if (_downloadiPad > -1)
+				{
+					setDownloadFilesFor(_downloadiPad);
+					goto Top;
+				}
+				else
+					goto Done;
+			}
+			else
+			{
+			Done:
+				SetWindowText(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), "Complete");
+				EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), FALSE);
+				PopoverHide(_popoverView);
+				return;
+			}
+		}
+
+		else
+		{
+			setDownloadFilesFor(_downloadiPad);
+			goto Top;
+		}
+	}
+
+	if (_process == DOWNLOAD_DATA_PROCESS)
+	{
+		_filePath = outputDataFile(_databaseID, _nextFileNumToDownload, _myiPad);
+	}
+
+	else if (_process == DOWNLOAD_PICT_PROCESS)
+	{
+		_filePath = outputPictFile(_databaseID, _nextFileNumToDownload, _myiPad);
+	}
+	else
+	{
+		LPSTRD mess = malloc(1024);
+		sprintf (mess, "Invalid process : %i in download %i %i", _process, _nextFileNumToDownload, _downloadiPad);
+		logToErrorFile(mess);
+		free(mess);
+		return;
+	}
+
+
+	LPSTRD fromDir = malloc(MAX_PATH);
+	LPSTRD toDir = stringByDeletingLastPathComponent(_filePath);
+	LPSTRD fromFile = lastPathComponent(_filePath);
+	LPSTRD title = malloc(1024);
+	sprintf (fromDir,"NVCRISData/%i/%i",CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid);
+	if (_process == DOWNLOAD_DATA_PROCESS)
+	{
+		_dataType = FTPData;
+		sprintf(title, "Download Data\n%s", fromFile);
+	}
+	else
+	{
+		_dataType = FTPDataPhoto;
+		sprintf (title,"Download Photo\n%s",fromFile);
+	}
+	GetFileFromServer(fromFile,fromFile, fromDir, toDir,&_popoverView, title, 0.5);
+
+}
+void setDownloadFilesFor(int iPad)
+{
+	int lastPictIHave = 0, fileSize = 0;
+
+	int lastDataIHave = getLastDataUpdateNumber (_databaseID ,iPad, &lastPictIHave);
+	int lastDataFileOnServer = getDataNumFromServerMsg(iPad,NO);
+
+	int lastPictFileOnServer = getDataNumFromServerMsg(iPad, YES);
+	if (_process == DOWNLOAD_DATA_PROCESS)
+	{
+		_nextFileNumToDownload = lastDataIHave + 1;
+		_lastFileNumToDownload = lastDataFileOnServer;
+	}
+	else
+	{
+		_nextFileNumToDownload = lastPictIHave + 1;
+		_lastFileNumToDownload = lastPictFileOnServer;
+	}
+}
+
+void GSSiFree(LPSTR *str)
+{
+	if (str)
+	{
+		if (*str)
+		{
+			free(*str);
+			*str = 0;
+		}
+	}
+}
+
+void PopoverHide(HWND hWnd)
+{
+	return;
+}

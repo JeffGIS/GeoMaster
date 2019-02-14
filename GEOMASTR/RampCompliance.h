@@ -106,4 +106,5 @@ int NVCRampTypeToCode(LPSTR obstruction);
 BOOL GetRampCodeForValue(LPSTR VarName,LPSTR VarValue,LPSTR OutLoc,LPSTR ErrorVarName);
 
 
+
 #endif /* RampCompliance_h */

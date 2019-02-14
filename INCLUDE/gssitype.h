@@ -266,6 +266,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 /* Handle to a DIB */
 #define HDIB HANDLE
 
+typedef LPSTR				LPSTRD; //malloc-ed which must be freed
 typedef signed long 		SLONG;
 typedef signed short		SSHORT;
 typedef unsigned long		ULONG;

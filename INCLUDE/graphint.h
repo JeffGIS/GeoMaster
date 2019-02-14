@@ -2508,6 +2508,7 @@ void drawTextwithinPolygon(char *text
 	/*textColor :*/, UIColor * textColor);
 
  
+LPSTR appAndVersion(void);
 
 
 
