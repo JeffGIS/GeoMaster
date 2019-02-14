@@ -7,23 +7,6 @@
 
 #include "gmextern.h"
 
-typedef struct {HANDLE hFTP;
-				HANDLE hFind;
-				char fileName[MAX_PATH];
-				DWORD fileSize;
-				DWORD lastUpdateTime;
-				BOOL  isDirectory;
-				char ServerName[MAX_PATH];
-				char Username[64];
-				char Password[32];
-				char directory[MAX_PATH];
-				char errorVarName[64];
-				int reopenAttempts;
-				WORD port;
-				BOOL passive;
-				}FTPSTRUCT;
-typedef FTPSTRUCT *LPFTPSTRUCT;
-
 static	char	MonthAbv[12][4]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 static short	nSetVals=0;
 static UINT	lSetVals=0;

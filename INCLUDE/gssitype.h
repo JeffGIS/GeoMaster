@@ -3879,6 +3879,26 @@ typedef	struct {POINT Point;
 		char	Text[1024];} SHOWVAL;
 typedef SHOWVAL *LPSHOWVAL;
 
+typedef struct {
+	HANDLE hFTP;
+	HANDLE hFind;
+	char fileName[MAX_PATH];
+	DWORD fileSize;
+	DWORD lastUpdateTime;
+	BOOL  isDirectory;
+	char ServerName[MAX_PATH];
+	char Username[64];
+	char Password[32];
+	char directory[MAX_PATH];
+	char errorVarName[64];
+	int reopenAttempts;
+	WORD port;
+	BOOL passive;
+}FTPSTRUCT;
+typedef FTPSTRUCT *LPFTPSTRUCT;
+
+
+
 void SetOldStructSizes (void);
 
 #define ExtCreatePen GSSiEXTCREATEPEN

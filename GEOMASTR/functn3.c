@@ -4794,7 +4794,15 @@ GotCloseFilehSQL:
 				GetRampCodeForValue(Arg[2], Arg[3], Arg[4], OutLoc);
 				goto Rtnl;
 			}
-
+			else if (!stricmp(Arg[1], "FIXVARNAME"))
+			{
+				if (!stricmp(Arg[2], "streetlandingobstruction"))
+					strcpy(OutLoc, "lowerlandingobstruction");
+				else
+					strcpy(OutLoc, Arg[2]);
+				goto Rtnl;
+			}
+			
 			else if (!stricmp(Arg[1], "CREATEDATABASE"))
 			{
 				rtn = NVCreateDB(Arg[2], atob(Arg[3]));

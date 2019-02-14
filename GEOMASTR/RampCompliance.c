@@ -873,6 +873,11 @@ BOOL GetRampCodeForValue(LPSTR VarName, LPSTR VarValue, LPSTR ErrorVarName, LPST
 		iCode = NVCRampTypeToCode(VarValue);
 		itoa(iCode, OutLoc, 10);
 	}
+	else if (!stricmp(VarName, "Texture"))
+	{
+		iCode = NVCTextureToCode(VarValue);
+		itoa(iCode, OutLoc, 10);
+	}
 	else if (!stricmp(VarName, "RampWidth") || !stricmp(VarName, "RampDepth"))
 	{
 		if (IsInteger(VarValue))

@@ -93,7 +93,7 @@ typedef struct {
 	CRAPIDATA sharedInstance;
 }CRAPi;
 
-LPSTR string_Copy(LPSTR str);
+LPSTRD string_Copy(LPSTR str);
 
 NSArray NSArray_Init(NSArray existingArray);
 void NSArray_Destroy(NSArray *parray);
@@ -101,9 +101,9 @@ void NSArray_Destroy(NSArray *parray);
 void NSArray_addObject(NSArray array, LPVOID pItem);
 NSArray componentsSeparatedByString(LPSTR str, LPSTR sepstr);
 BOOL NSArray_removeObjectAtIndex(NSArray placearray, int index);
-LPSTR textAfterFirstChar(LPSTR string, char c);
-LPSTR textBeforeLastChar(LPSTR string, char c);
-LPSTR textAfterLastChar(LPSTR string, char c);
+LPSTRD textAfterFirstChar(LPSTR string, char c);
+LPSTRD textBeforeLastChar(LPSTR string, char c);
+LPSTRD textAfterLastChar(LPSTR string, char c);
 
 BOOL CRAPI_sharedInstance_processPlacesArray(int row);
 

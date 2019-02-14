@@ -2605,7 +2605,7 @@ BOOL executeAndSendCmd (int databaseID, LPSTR cmd,BOOL sendToServer)
 	}
 	else if (sendToServer)
 	{
-		LPSTRD logmsg = malloc(sizeof(cmd) + 16);
+		LPSTRD logmsg = malloc(strlen(cmd) + 16);
 		sprintf(logmsg, "COMMAND:%s", cmd);
 		logToErrorFile (logmsg);
 		free(logmsg);
@@ -2866,7 +2866,7 @@ LPSTRD stringByDeletingLastPathComponent(LPSTR path)
 	{
 		char save = *last;
 		*last = 0;
-		strcpy(rtn, last);
+		strcpy(rtn, path);
 		*last = save;
 	}
 	else
@@ -2969,15 +2969,69 @@ void clearErrorFile (void)
 	free(errorFile);
 }
 
-BOOL PushFileToServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, BOOL deleteWhenDone, BOOL appendTempExtension, HWND *popoverView, LPSTR title,double showAfter)
+BOOL PushFileToServer(LPSTR fromFileName, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, BOOL deleteWhenDone, BOOL appendTempExtension, HWND *popoverView, LPSTR title,double showAfter,LPSTR errorVar)
+{
+	BOOL rtn = FALSE;
+	HANDLE hFTPStruct = OpenServerFTP(toDir, 3, errorVar);
+	char localFile[MAX_PATH];
+
+	if (hFTPStruct)
+	{
+		LPFTPSTRUCT pFTPStruct = GlobalLock(hFTPStruct);
+		sprintf(localFile, "%s\\%s", fromDir, fromFileName);
+
+		rtn = FTPPutFile(pFTPStruct->hFTP,toFileName,localFile, TRUE, TRUE, errorVar);
+		GlobalUnlock(hFTPStruct);
+
+		CloseServerFTP(hFTPStruct);
+	}
+	return rtn;
+}
+
+BOOL GetFileFromServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, HWND *popoverView, LPSTR title, double showAfter, LPSTR errorVar)
 {
 	BOOL rtn = FALSE;
 
 	return rtn;
 }
-BOOL GetFileFromServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, HWND *popoverView, LPSTR title, double showAfter)
+HANDLE OpenServerFTP (LPSTR serverDir, int serverNumber, LPSTR errorVar)
+{
+	HANDLE hFTPStruct = GSSiGlobAlloc(1781, GHND, sizeof(FTPSTRUCT));
+	LPFTPSTRUCT pFTPStruct = GlobalLock(hFTPStruct);
+	char server[32];
+	char loginID[] = "GSSiProfessionalServer";
+	char pswd[] = "GSSi";
+	sprintf(server, "www.gssiserver%i.com", serverNumber);
+	pFTPStruct->hFTP = FTPOpen(server, loginID, pswd, serverDir, errorVar, 0, TRUE);
+	if (!pFTPStruct->hFTP)
+	{
+		GSSiGlobUlFree(&hFTPStruct);
+	}
+	else
+	{
+		pFTPStruct->reopenAttempts = 1;
+		strcpy(pFTPStruct->ServerName,server);
+		strcpy(pFTPStruct->Username, loginID);
+		strcpy(pFTPStruct->Password, pswd);
+		strcpy(pFTPStruct->directory,serverDir);
+		GlobalUnlock(hFTPStruct);
+	}
+	return hFTPStruct;
+}
+
+BOOL CloseServerFTP (HANDLE hFTPStruct)
 {
 	BOOL rtn = FALSE;
-
+	if (hFTPStruct)
+	{
+		SIZE_T l = GlobalSize(hFTPStruct);
+		if (l > 0)
+		{
+			LPFTPSTRUCT pFTPStruct = GlobalLock(hFTPStruct);
+			rtn = FTPClose(pFTPStruct->hFTP);
+			GSSiGlobUlFree(&hFTPStruct);
+		}
+	}
 	return rtn;
 }
+

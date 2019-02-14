@@ -130,11 +130,12 @@ CRAPi* CRAPI_Init(void)
 		CRAPI->sharedInstance.currentModule = GEOMASTER_MODULE;
 		CRAPI->sharedInstance.currentSubModule = 0;
 		CRAPI->sharedInstance.placesArray = NSArray_Init(0);
-		strcpy(CRAPI->sharedInstance.sharedFilePath, "[%DL][NVCITY]\\NVCRISDOWNLOADS\\sharedFilePath");
+		strcpy(CRAPI->sharedInstance.sharedFilePath, "[%DL][NVCITY]\\sharedFilePath");
 		ExpandText(CRAPI->sharedInstance.sharedFilePath);
 		strcpy(CRAPI->sharedInstance.appVersionBuild, appAndVersion());
 		CRAPI->sharedInstance.GSSiPadNumber = -1;
 		CRAPI_sharedInstance_processPlaces();
+		CRAPI_sharedInstance_setGeoIDForCurrentApp();
 	}
 	CRAPI->sharedInstance.hideConnectButton = 1;
 	return CRAPI;
@@ -149,7 +150,7 @@ void CRAPI_Destroy(void)
 	CRAPI = 0;
 }
 
-LPSTR string_Copy(LPSTR str)
+LPSTRD string_Copy(LPSTR str)
 {
 	int l = strlen(str);
 	LPSTR rtn = malloc(l + 1);
@@ -162,7 +163,7 @@ CityOrOrganizationData CityOrOrganizationData_init(void)
 	return c;
 }
 
-LPSTR textAfterFirstChar(LPSTR string, char c)
+LPSTRD textAfterFirstChar(LPSTR string, char c)
 {
 	if (!string)
 		return 0;
@@ -180,7 +181,7 @@ LPSTR textAfterFirstChar(LPSTR string, char c)
 	return rtn;
 }
 
-LPSTR textAfterLastChar(LPSTR string, char c)
+LPSTRD textAfterLastChar(LPSTR string, char c)
 {
 	if (!string)
 		return 0;
@@ -198,7 +199,7 @@ LPSTR textAfterLastChar(LPSTR string, char c)
 	return rtn;
 }
 
-LPSTR textBeforeLastChar(LPSTR string, char c)
+LPSTRD textBeforeLastChar(LPSTR string, char c)
 {
 	if (!string)
 		return 0;
@@ -407,7 +408,7 @@ LPSTR textInsideParentheses(LPSTR string)
 
 			if (pEnd)
 			{
-				l = pEnd - pStart + 1;
+				l = pEnd - pStart;
 				rtn = malloc(l + 1);
 				strncpy0(rtn, pStart, l);
 			}
@@ -515,19 +516,21 @@ BOOL  CRAPI_sharedInstance_processPlaces (void)
 	for (int i=0;i<placearray->count;i++)
 	{
 		LPSTR instr = placearray->item[i];
-		LPSTR str = textBeforeLastChar(instr, '*');
-		LPSTR controlStr = textAfterLastChar(instr, '*');
+		LPSTRD str = textBeforeLastChar(instr, '*');
+		LPSTRD controlStr = textAfterLastChar(instr, '*');
 		CityOrOrganizationData c = CityOrOrganizationData_init();
 		c->controlledInterface = ControlChar(controlStr, 1);
 		c->allowSidewalk = ControlChar(controlStr, 2);
 		strcpy(c->fullDescription,str);
 		c->name = textInsideParentheses(str);
 		c->number = integerValue(textBeforeFirstChar(str,'('));
-		LPSTR manager = textAfterLastChar(str,')');
+		LPSTRD manager = textAfterLastChar(str,')');
 		c->managerNumber = integerValue(textBeforeFirstChar(manager, '-'));
 		c->withinManager = integerValue(textAfterFirstChar(manager, '-'));
 		c->totWithinManager = integerValue(textAfterString(manager, "of"));
 		free(manager);
+		free(str);
+		free(controlStr);
 		c->GSSiPadNumber = CRAPI->sharedInstance.GSSiPadNumber;
 		NSArray_addObject (CRAPI->sharedInstance.placesArray, c);
 	}
@@ -781,7 +784,7 @@ LPSTR vendorUUIDString(void)
 
 	DWORD Serno = GM32GetNodeInfo(NodeName, UserName, Winver);
 	
-	sprintf(UUIDString, "PCIb-%31.31ld", Serno);
+	sprintf(UUIDString, "PCIc-%31.31ld", Serno);
 	return rtn;
 }
 
@@ -1026,6 +1029,9 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			SendMessageToServer(hWndDlg, mes);
 		}
 		break;
+		case IDC_SYNCHRONIZE:
+			startSync(hWndDlg);
+		break;
 
 		}
 		break;    /* End of WM_COMMAND                                 */
@@ -1180,11 +1186,19 @@ void syncButtonTapped (HWND hWndDlg)
 		char title[] = "Upload Error File";
 		sprintf (errorFileName,"%i_%i.txt",CRAPI->sharedInstance.GSSiPadNumber,iTime);
 		BOOL appendTempExtension = NO;
-		PushFileToServer(fromFile, errorFileName, fromDir, toDir, deleteWhenDone, appendTempExtension, &popoverView,title, showAfter);
+		BOOL st = PushFileToServer(fromFile, errorFileName, fromDir, toDir, deleteWhenDone, appendTempExtension, &popoverView,title, showAfter,"FTPPushError");
 		free(errorFile);
 		free(errorFileName);
 		free(fromDir);
 		free(fromFile);
+		if (!st)
+		{
+			LPSTRD mess = malloc(4096);
+			strcpy(mess, "[FTPPushError]");
+			ExpandText(mess);
+			MessageBox(hWndDlg, mess, "Unable to send file to server", MB_ICONEXCLAMATION);
+			free(mess);
+		}
 	}
 	else
 		startSync(hWndDlg);
@@ -1301,13 +1315,23 @@ Top:
 	_lastUploadFileSize = GSSiLength(_filePath);
 	LPSTRD fromDir = stringByDeletingLastPathComponent(_filePath);
 	LPSTRD fromFile = lastPathComponent(_filePath);
-	char title[] = "Upload Data File";
+	char title[128];
+	sprintf(title,"Upload Data File:%s", fromFile);
 	BOOL deleteWhenDone = FALSE;
 	BOOL appendTempExtension = YES;
-	PushFileToServer(fromFile, fromFile, fromDir, toDir, deleteWhenDone, appendTempExtension, &_popoverView,title, 0.5);
+	BOOL st = PushFileToServer(fromFile, fromFile, fromDir, toDir, deleteWhenDone, appendTempExtension, &_popoverView,title, 0.5,"FTPPushError");
 	free(fromDir);
 	free(toDir);
 	free(fromFile);
+	if (!st)
+	{
+		LPSTRD mess = malloc(4096);
+		strcpy(mess,"[FTPPushError]");
+		ExpandText(mess);
+		MessageBox(hWndDlg, mess, "Unable to send file to server", MB_ICONEXCLAMATION);
+		free(mess);
+	}
+
 }
 int nextiPadToDownload(int currentiPad)
 {
@@ -1413,7 +1437,15 @@ Top:
 		_dataType = FTPDataPhoto;
 		sprintf (title,"Download Photo\n%s",fromFile);
 	}
-	GetFileFromServer(fromFile,fromFile, fromDir, toDir,&_popoverView, title, 0.5);
+	BOOL st = GetFileFromServer(fromFile,fromFile, fromDir, toDir,&_popoverView, title, 0.5,"FTPPullError");
+	if (!st)
+	{
+		LPSTRD mess = malloc(4096);
+		strcpy(mess, "[FTPPullError]");
+		ExpandText(mess);
+		MessageBox(hWndDlg, mess, "Unable to send file to server", MB_ICONEXCLAMATION);
+		free(mess);
+	}
 
 }
 void setDownloadFilesFor(int iPad)
