@@ -164,6 +164,9 @@ typedef struct RampStruct {
 	char fileID[12];
 	int cornerID;
 	int retired;
+	char rampStatus[256];
+	int rampCode;
+	int proximityCode;
 } RampStruct;
 
 typedef struct ToleranceValues {

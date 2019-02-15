@@ -3,7 +3,7 @@
 #include "CRAPI.h"
 #include "CurbRamps.h"
 
-#define CURRENT_INTERSECTION_VERSION "5.0"
+#define CURRENT_INTERSECTION_VERSION "6.0"
 
 static BOOL _ignoreErrorLog = FALSE;
 static sqlite3 *database = NULL;
@@ -13,6 +13,8 @@ void convertVersion(LPSTR str, int fromVer, int toVer,LPSTR fileID);
 void convertVersion_1_to_2(LPSTR str);
 void convertVersion_2_to_3(LPSTR str);
 void convertVersion_3_to_4(LPSTR str, LPSTR fileID);
+void convertVersion_4_to_5(LPSTR str, LPSTR fileID);
+void convertVersion_5_to_6(LPSTR str, LPSTR fileID);
 BOOL createIntersectionsTable(BOOL dropExistingTables);
 int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement);
 
@@ -1415,6 +1417,11 @@ int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
 		strncpy0(pRamp->fileID, fileID, sizeof(pRamp->fileID) - 1);
 	pRamp->cornerID = sqlite3_column_int(statement, i++);
 	pRamp->retired = sqlite3_column_int(statement, i++);
+	LPSTR rampStatus = (LPSTR)sqlite3_column_text(statement, i++);
+	if (rampStatus)
+		strncpy0(pRamp->rampStatus, rampStatus, sizeof(pRamp->rampStatus) - 1);
+	pRamp->rampCode = sqlite3_column_int(statement, i++);
+	pRamp->proximityCode = sqlite3_column_int(statement, i++);
 	if (pRamp->bumpWidth > 0 || pRamp->bumpHeight > 0)
 		ii = 1;
 	return rampNum;
@@ -1605,7 +1612,13 @@ void convertVersion(LPSTR str, int fromVer, int toVer,LPSTR fileID)
 			convertVersion_2_to_3(str);
 			break;
 		case 3:
-			convertVersion_3_to_4(str,fileID);
+			convertVersion_3_to_4(str, fileID);
+			break;
+		case 4:
+			convertVersion_4_to_5(str, fileID);
+			break;
+		case 5:
+			convertVersion_5_to_6(str, fileID);
 			break;
 		}
 	}
@@ -1688,6 +1701,22 @@ void convertVersion_3_to_4(LPSTR str, LPSTR fileID)
 		}
 	}
 }
+void convertVersion_4_to_5(LPSTR str, LPSTR fileID)
+{
+
+}
+void convertVersion_5_to_6(LPSTR str, LPSTR fileID)
+{
+	{
+		LPSTR ploc = strstr(str, "INSERT OR REPLACE INTO Ramps VALUES(");
+		if (ploc)
+		{
+			LPSTR pEnd = strrchr(ploc, ')');
+			sprintf(pEnd, ",'',0,0);");
+		}
+	}
+}
+
 int getDatasetVersion(void)
 {
 	int rtn = -1;
@@ -1725,6 +1754,31 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 	{
 		switch (version)
 		{
+			case 5://convert version 5 to version 6
+			{
+				BOOL st = TRUE;
+				rtn = FALSE;
+				SLT_StartTrans(database);
+				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampStatus CHAR(256);");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampScore INT;");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN ProximityScore INT;");
+				if (st) st = executeCmd(cmd);
+				sprintf(cmd, "UPDATE Version SET VersionID = '%0.1f' WHERE vid = 1;", (double)(version + 1));
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET RampStatus = '', RampScore = 0, ProximityScore = 0");
+				if (st) st = executeCmd(cmd);
+				if (st)
+				{
+					SLT_EndTrans(database);
+					rtn = TRUE;
+				}
+				else
+					SLT_AbortTrans(database);
+			}
+			break;
+
 			case 4://convert version 4 to version 5
 			{
 				char toPath[MAX_PATH];
@@ -2157,7 +2211,11 @@ detectableWidth INT,\
 detectableDepth INT,\
 FromFileID CHAR(12),\
 CornerID INT,\
-Retired INT, PRIMARY KEY (intID,rampNum,Retired ASC));";
+Retired INT,\
+RampStatus CHAR(256),\
+RampCode INT,\
+ProximityCode INT, \
+PRIMARY KEY (intID,rampNum,Retired ASC));";
 rtn = executeCmd(createcmd2);
 
 char createcmd3[] = "CREATE TABLE IF NOT EXISTS CURBRAMP_PICTURES ('id' INTEGER PRIMARY KEY,'iPadNum' INT,'pictNum' INT,'intID' INT,'rampNum' INT, 'type' INT, 'heading' INT, 'latitude' REAL, 'longitude' REAL, 'time' INT)";
@@ -2699,6 +2757,60 @@ BOOL setLastDataAndPictUpdateNums(int databaseID, int lastNum,int pictNum,int iP
 	closeDatabaseID(databaseID, opened);
 	return rtn;
 }
+
+BOOL loadUpdate(int databaseID, LPSTR file)
+{
+		BOOL rtn = TRUE;
+		char fileID[32] = "";
+		BOOL opened = openDatabaseID(databaseID);
+		int line = 0;
+		HFILE fid = GSSiOpenFile(file, 0, OF_READ);
+		int totLen = GSSifilelength(fid);
+		int maxLineLen = totLen + 2;
+		LPSTR str = malloc(totLen + 4096);
+		LPSTR pBS = strrchr(file, '\\');
+		if (pBS)
+		{
+			LPSTR pDot;
+			strcpy(fileID, ++pBS);
+			pDot = strrchr(fileID, '.');
+			if (pDot)
+				*pDot = 0;
+		}
+
+		SLT_StartTrans(database);
+		if (fgetstring(str, maxLineLen, fid))
+		{
+			int fromVer = atoi(CURRENT_INTERSECTION_VERSION);
+			int toVer = atoi(CURRENT_INTERSECTION_VERSION);
+			LPSTR vloc = strstr(str, "DBVer ");
+			if (vloc)
+				fromVer = atoi(vloc + 6);
+			while (rtn && fgetstring(str, maxLineLen, fid))
+			{
+				convertVersion(str, fromVer, toVer,fileID);
+				rtn = executeAndSendCmd(databaseID, str, NO);
+				line++;
+			}
+		}
+		GSSiClose(fid);
+		if (!rtn) //file has to be edited on server (by GSSi) before more data can be loaded
+		{
+			SLT_AbortTrans(database);
+			LPSTRD header = malloc(1024);
+			LPSTRD name = lastPathComponent(file);
+			sprintf (header,"Data load failure in file %s at line %i",name,line);
+			logToErrorFileWithHeader(str, header);
+			free(header);
+			free(name);
+		}
+		else
+			SLT_EndTrans(database);
+		free(str);
+		closeDatabaseID(databaseID, opened);
+		return rtn;
+}
+
 BOOL setLastDataUpdateNum (int databaseID, int lastNum,int iPad)
 {
 	BOOL rtn = FALSE;
@@ -2961,6 +3073,13 @@ void logToErrorFile (LPSTR error)
 	free(errorFile);
 	free(idString);
 }
+void logToErrorFileWithHeader (LPSTR error,LPSTR header)
+{
+	LPSTRD mess = malloc(strlen(error) + strlen(header) + 32);
+	sprintf (mess,"%s:%s",header, error);
+	logToErrorFile(mess);
+	free(mess);
+}
 
 void clearErrorFile (void)
 {
@@ -2979,9 +3098,15 @@ BOOL PushFileToServer(LPSTR fromFileName, LPSTR toFileName, LPSTR fromDir, LPSTR
 	{
 		LPFTPSTRUCT pFTPStruct = GlobalLock(hFTPStruct);
 		sprintf(localFile, "%s\\%s", fromDir, fromFileName);
+		LPSTRD toFile = malloc(MAX_PATH);
 
-		rtn = FTPPutFile(pFTPStruct->hFTP,toFileName,localFile, TRUE, TRUE, errorVar);
+		if (appendTempExtension)
+			sprintf(toFile, "%s.upload", toFileName);
+		else
+			strcpy(toFile, toFileName);
+		rtn = FTPPutFile(pFTPStruct->hFTP,toFile,localFile, TRUE, TRUE, errorVar);
 		GlobalUnlock(hFTPStruct);
+		free(toFile);
 
 		CloseServerFTP(hFTPStruct);
 	}
@@ -2991,7 +3116,21 @@ BOOL PushFileToServer(LPSTR fromFileName, LPSTR toFileName, LPSTR fromDir, LPSTR
 BOOL GetFileFromServer(LPSTR fromFile, LPSTR toFileName, LPSTR fromDir, LPSTR toDir, HWND *popoverView, LPSTR title, double showAfter, LPSTR errorVar)
 {
 	BOOL rtn = FALSE;
+	HANDLE hFTPStruct = OpenServerFTP(fromDir, 3, errorVar);
+	char localFile[MAX_PATH];
 
+	if (hFTPStruct)
+	{
+		LPFTPSTRUCT pFTPStruct = GlobalLock(hFTPStruct);
+		sprintf(localFile, "%s\\%s", toDir, toFileName);
+		LPSTRD toFile = malloc(MAX_PATH);
+
+		rtn = FTPGetFile(pFTPStruct->hFTP, fromFile, localFile, TRUE, TRUE, errorVar);
+		GlobalUnlock(hFTPStruct);
+		free(toFile);
+
+		CloseServerFTP(hFTPStruct);
+	}
 	return rtn;
 }
 HANDLE OpenServerFTP (LPSTR serverDir, int serverNumber, LPSTR errorVar)

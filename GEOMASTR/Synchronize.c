@@ -42,6 +42,11 @@ static HWND _popoverView = 0;
 static int _nextFileNumToDownload;
 static int _lastFileNumToDownload;
 static BOOL _first = TRUE;
+static double _sendDataStartTime;
+static int currentMessage = GMSMessageDefault;
+static char _errorFileName[MAX_PATH];
+static int _numAttemps = 0;
+static BOOL _justDownloadedNewDatabase = FALSE;
 
 #define DOWNLOAD_DATABASE_FUNCTION 3
 #define FTP_CATCHUP_DELAY 0.5
@@ -70,7 +75,18 @@ void downloadNextFile(HWND hWndDlg);
 void doDownloadNextFile(HWND hWndDlg);
 void setDownloadFilesFor(int iPad);
 void PopoverHide(HWND hWnd);
+void PopoverShow(HWND hWnd, double after,LPSTR msg, LPSTR OKButtonText);
+void FTPPushDidComplete(HWND hWndDlg, FTPDataType dataType, FTPStatus status, LPSTR statusString, LPSTR path);
+void FTPPullDidComplete(HWND hWndDlg, FTPDataType dataType, FTPStatus status, LPSTR statusString, LPSTR file, LPSTR dir);
 
+double currentTime(void)
+{
+	__time32_t now;
+
+	now = _time32(&now);
+	double dnow = now;
+	return dnow;
+}
 BOOL getUseMasterID(void)
 {
 	return _useMasterID;
@@ -837,9 +853,66 @@ BOOL SendMessageToServer(HWND hWnd, LPSTR message)
 
 	return rtn;
 }
+void GMServerSendMessage (HWND hWndDlg,int messageID)
+{
+	char mes[1024] = { 0 };
+	//_serverOpen = YES;
+
+		switch (messageID)
+		{
+		case GMSMessageOpenConnect:
+			//SetUseDemoID(NO);
+			sprintf(mes, "@$M(GetCitiesForiPad,%s@,,%s)", deviceInfo(), appAndVersion());
+			break;
+		case GMSMessageCancelConnect:
+			sprintf(mes, "@$M(RemoveNearbyiPad,%s,0 0)", vendorUUIDString());
+			break;
+		case GMSMessageSetNearby:
+			sprintf(mes, "@$M(SetNearbyiPad,%s,%s,0 0)", vendorUUIDString(), NodeName);
+			break;
+		case GMSMessageCheckNearby:
+			sprintf(mes, "@$M(CheckNearbyiPad,%s)", vendorUUIDString());
+			break;
+		case GMSMessageGetUploadStatus:
+			sprintf(mes, "@$M(GetUploadStatus,%i,%i,%i,%i)",
+				CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid,
+				CRAPI->sharedInstance.totiPadWithinManager, UPLOAD_STATUS_VERSION);
+			break;
+
+		case GMSMessageFileUploaded:
+			if (_process == UPLOAD_ERROR_FILE)
+			{
+				sprintf(mes, "@$M(UploadErrors,%s)", _errorFileName);
+			}
+			else if (_process == UPLOAD_DATA_PROCESS)
+			{
+#define AVERAGE_UPLOAD_SPEED 25000.0
+				__time32_t t;
+				double now = _time32(&t);
+				double timePassed = fmax(0.01, (now - _sendDataStartTime) - 1);
+				double uploadSpeed = _lastUploadFileSize / timePassed;
+				double speedFactor = min(5, max(1.0, AVERAGE_UPLOAD_SPEED / uploadSpeed));
+				int interval = speedFactor * (FTP_CATCHUP_DELAY * (1 + _lastUploadFileSize / 500000.0));
+				Sleep( interval);
+				sprintf (mes,"@$M(UploadCompleteData,%i,%i,%i,%i,%i)",CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid,
+					CRAPI->sharedInstance.currentiPadWithinManager, _nextFileNumToUpload, _lastUploadFileSize);
+			}
+			else
+			{
+				Sleep (FTP_CATCHUP_DELAY * 2);
+				sprintf (mes,"@$M(UploadCompletePict,%i,%i,%i,%i,%i)",	CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid,
+					CRAPI->sharedInstance.currentiPadWithinManager, _nextFileNumToUpload, _lastUploadFileSize);
+			}
+
+			break;
+		}
+		currentMessage = messageID;
+		if (*mes)
+			SendMessageToServer(hWndDlg, mes);
+}
+
 BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
-	static int currentMessage = GMSMessageDefault;
 	char mes[1024];
 	int	BRtn;
 	BOOL rtn;
@@ -848,11 +921,11 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	switch (Message)
 	{
 	case WM_INITDIALOG:
+		currentMessage = GMSMessageDefault;
+
 		CRAPI = CRAPI_Init();
 		cwCenter(hWndDlg, 0);
-		sprintf(mes, "@$M(GetCitiesForiPad,%s@,,%s)", deviceInfo(), appAndVersion());
-		currentMessage = GMSMessageOpenConnect;
-		SendMessageToServer(hWndDlg, mes);
+		GMServerSendMessage(hWndDlg,GMSMessageOpenConnect);
 		break; /* End of WM_INITDIALOG                                 */
 
 	case WM_CLOSE:
@@ -866,6 +939,42 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		LPSTR message = GlobalLock(hMessage);
 		switch (currentMessage)
 		{
+		case GMSMessageFileUploaded:
+			if (_process == UPLOAD_ERROR_FILE)
+			{
+				clearErrorFile();
+				startSync(hWndDlg);
+			}
+			else if (!stricmp (message,"OK"))
+			{
+				_nextFileNumToUpload++;
+				_uploadedFiles++;
+				_processedFiles++;
+				if (_totFilesToProcess)
+					updateOverallProgress (hWndDlg, (float)_processedFiles / _totFilesToProcess);
+
+				if (_process == UPLOAD_DATA_PROCESS)
+					_upFiles--;
+				else
+					_upPix--;
+				updateLabels(hWndDlg);
+				uploadNextFile(hWndDlg);
+			}
+			else if (!strnicmp(message, "ERR1",4) &&
+				_numAttemps++ < MAX_ATTEMPS)
+			{
+				Sleep( 2.0*_numAttemps);
+				GMServerSendMessage(hWndDlg, GMSMessageFileUploaded);
+			}
+			else
+			{
+				LPSTRD title = malloc(strlen(message) + 64);
+				sprintf (title,"Upload Size / Rename Error : %s",message);
+				PopoverShow (_popoverView,0.1,title,"OK");
+				logToErrorFile (title);
+				free(title);
+			}
+			break;
 		case GMSMessageCancelConnect:
 			currentMessage = GMSMessageDefault;
 			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
@@ -934,11 +1043,7 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			SetWindowText(GetDlgItem(hWndDlg, IDC_TITLE), message);
 			UpdateConnectLabel(hWndDlg);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_CONNECT), CRAPI->sharedInstance.hideConnectButton ? SW_HIDE : SW_SHOW);
-			sprintf(mes, "@$M(GetUploadStatus,%i,%i,%i,%i)",
-				CRAPI->sharedInstance.currentManageriPad, CRAPI->sharedInstance.currentGeoid,
-				CRAPI->sharedInstance.totiPadWithinManager, UPLOAD_STATUS_VERSION);
-			currentMessage = GMSMessageGetUploadStatus;
-			SendMessageToServer(hWndDlg, mes);
+			GMServerSendMessage(hWndDlg, GMSMessageGetUploadStatus);
 
 			break;
 		case GMSMessageGetUploadStatus:
@@ -1014,9 +1119,7 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			iTimer = 0;
 			if (currentMessage == GMSMessageSetNearby || currentMessage == GMSMessageCheckNearby)
 			{
-				sprintf(mes, "@$M(RemoveNearbyiPad,%s,0 0)", vendorUUIDString());
-				currentMessage = GMSMessageCancelConnect;
-				SendMessageToServer(hWndDlg, mes);
+				GMServerSendMessage(hWndDlg, GMSMessageCancelConnect);
 			}
 			else
 				EndDialog(hWndDlg, FALSE);
@@ -1024,9 +1127,7 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		case IDC_CONNECT:
 
 		{
-			sprintf(mes, "@$M(SetNearbyiPad,%s,%s,0 0)", vendorUUIDString(), NodeName);
-			currentMessage = GMSMessageSetNearby;
-			SendMessageToServer(hWndDlg, mes);
+			GMServerSendMessage(hWndDlg, GMSMessageSetNearby);
 		}
 		break;
 		case IDC_SYNCHRONIZE:
@@ -1037,9 +1138,7 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		break;    /* End of WM_COMMAND                                 */
 case WM_TIMER:
 {
-	sprintf(mes, "@$M(CheckNearbyiPad,%s)", vendorUUIDString());
-	currentMessage = GMSMessageCheckNearby;
-	SendMessageToServer(hWndDlg, mes);
+	GMServerSendMessage(hWndDlg, GMSMessageCheckNearby);
 
 }
 	default:
@@ -1173,7 +1272,6 @@ void syncButtonTapped (HWND hWndDlg)
 	{
 		_process = UPLOAD_ERROR_FILE;
 		LPSTRD errorFile = CRAPI_sharedInstance_errorLogPath();
-		LPSTRD errorFileName = malloc(MAX_PATH);
 		HWND popoverView = 0;
 		int dataType = FTPErrorFile;
 		__time32_t time;
@@ -1184,11 +1282,10 @@ void syncButtonTapped (HWND hWndDlg)
 		LPSTRD fromFile = lastPathComponent(errorFile);
 		char toDir[] = "NVCRISData/ErrorFiles";
 		char title[] = "Upload Error File";
-		sprintf (errorFileName,"%i_%i.txt",CRAPI->sharedInstance.GSSiPadNumber,iTime);
+		sprintf (_errorFileName,"%i_%i.txt",CRAPI->sharedInstance.GSSiPadNumber,iTime);
 		BOOL appendTempExtension = NO;
-		BOOL st = PushFileToServer(fromFile, errorFileName, fromDir, toDir, deleteWhenDone, appendTempExtension, &popoverView,title, showAfter,"FTPPushError");
+		BOOL st = PushFileToServer(fromFile, _errorFileName, fromDir, toDir, deleteWhenDone, appendTempExtension, &popoverView,title, showAfter,"FTPPushError");
 		free(errorFile);
-		free(errorFileName);
 		free(fromDir);
 		free(fromFile);
 		if (!st)
@@ -1306,7 +1403,10 @@ Top:
 	}
 
 	if (_process == UPLOAD_DATA_PROCESS)
+	{
 		_dataType = FTPData;
+		_sendDataStartTime = currentTime();
+	}
 	else
 		_dataType = FTPDataPhoto;
 
@@ -1322,17 +1422,180 @@ Top:
 	BOOL st = PushFileToServer(fromFile, fromFile, fromDir, toDir, deleteWhenDone, appendTempExtension, &_popoverView,title, 0.5,"FTPPushError");
 	free(fromDir);
 	free(toDir);
-	free(fromFile);
 	if (!st)
 	{
 		LPSTRD mess = malloc(4096);
 		strcpy(mess,"[FTPPushError]");
 		ExpandText(mess);
-		MessageBox(hWndDlg, mess, "Unable to send file to server", MB_ICONEXCLAMATION);
+		FTPPushDidComplete(hWndDlg, _dataType, st, mess, fromFile);
 		free(mess);
 	}
+	else
+		FTPPushDidComplete(hWndDlg, _dataType, st, "", fromFile);
+	free(fromFile);
+
 
 }
+void FTPPushDidComplete(HWND hWndDlg, FTPDataType dataType, FTPStatus status, LPSTR statusString, LPSTR path)
+{
+	if (status == FTPStatusOK)
+	{
+		PopoverHide(_popoverView);
+		_numAttemps = 0;
+		if (dataType != FTPDatabase)
+			GMServerSendMessage(hWndDlg, GMSMessageFileUploaded);
+	}
+
+	else
+	{
+		LPSTRD msg = malloc(4096);
+		sprintf(msg, "Unable to send file to server\n%s\n%s", statusString, path);
+		logToErrorFile(msg);
+		PopoverShow(_popoverView, 0, msg, "OK");
+		free(msg);
+	}
+
+	//NSLog(@"FTP push completed : %@", statusString);
+}
+
+void FTPPullDidComplete(HWND hWndDlg, FTPDataType dataType, FTPStatus status, LPSTR statusString, LPSTR file,LPSTR dir)
+{
+	char path[MAX_PATH];
+	sprintf(path, "%s\\%s", dir, file);
+	if (status == FTPStatusOK || status == FTPStatusFileExists)
+	{
+		if (_process == DOWNLOAD_DATA_PROCESS)
+		{
+			if (loadUpdate(_databaseID, path))
+			{
+				setLastDataUpdateNum (_databaseID,_nextFileNumToDownload,_downloadiPad);
+			}
+			else
+			{
+				LPSTRD msg = malloc(1024);
+				LPSTRD name = lastPathComponent(path);
+				sprintf (msg,"Data load failed\n%@",name);
+				MessageBox(0, msg, 0, MB_ICONEXCLAMATION);
+				logToErrorFile(msg);
+				free(msg);
+				free(name);
+				return;
+			}
+		}
+
+		else if (_process == DOWNLOAD_PICT_PROCESS)
+		{
+			 setLastPictUpdateNum(_databaseID, _nextFileNumToDownload, _downloadiPad);
+		}
+		else if (_process == DOWNLOAD_DATABASE_PROCESS)
+		{
+			_justDownloadedNewDatabase = TRUE;
+			PopoverHide(_popoverView);
+			GMServerSendMessage(hWndDlg,GMSMessageGetUploadStatus);
+			return;
+		}
+		_nextFileNumToDownload++;
+
+		if (_process == DOWNLOAD_DATA_PROCESS)
+			_downFiles--;
+		else
+			_downPix--;
+
+		_processedFiles++;
+
+		if (_totFilesToProcess)
+			updateOverallProgress(hWndDlg, (float)_processedFiles / _totFilesToProcess);
+
+		updateLabels(hWndDlg);
+		downloadNextFile(hWndDlg);
+	}
+	else
+	{
+		LPSTRD msg = malloc(4096);
+		sprintf(msg, "Unable to get file from server\n%s\n%s", statusString, file);
+		logToErrorFile(msg);
+		PopoverShow(_popoverView, 0, msg, "OK");
+		free(msg);
+	}
+
+	//NSLog(@"FTP push completed : %@", statusString);
+}
+
+/*
+-(void)FTPdidComplete:(FTPDataType)dataType
+withStatus : (FTPStatus)status
+	andStatusString : (NSString *)statusString
+	filePath : (NSString *)path
+{
+
+	if (status == FTPStatusOK || status == FTPStatusFileExists)
+	{
+		{
+			if (_process == DOWNLOAD_DATA_PROCESS)
+			{
+				if ([self loadUpdate : path])
+				{
+					[_databaseID setLastDataUpdateNum : _nextFileNumToDownload
+						foriPad : _downloadiPad];
+				}
+
+				else
+				{
+					NSString *msg = [NSString stringWithFormat : @"Data load failed\n%@",[path lastPathComponent]];
+					_popoverView.title = msg;
+					[CRAPI.sharedInstance logToErrorFile : msg];
+					return;
+				}
+			}
+
+			else if (_process == DOWNLOAD_PICT_PROCESS)
+			{
+				[_databaseID setLastPictUpdateNum : _nextFileNumToDownload
+					foriPad : _downloadiPad];
+			}
+			else if (_process == DOWNLOAD_DATABASE_PROCESS)
+			{
+				_justDownloadedNewDatabase = TRUE;
+				[_popoverView hide];
+				[self sendGMServerMessage : GMSMessageGetUploadStatus];
+				return;
+			}
+			_nextFileNumToDownload++;
+
+			if (_process == DOWNLOAD_DATA_PROCESS)
+
+				_downFiles--;
+			else
+				_downPix--;
+
+			_processedFiles++;
+
+			if (_totFilesToProcess)
+				[self updateOverallProgress : (float)_processedFiles / _totFilesToProcess];
+
+			[self updateLabels];
+			[self downloadNextFile];
+		}
+	}
+
+	else
+	{
+		NSString * msg = [NSString stringWithFormat : @"%@\n%@",statusString, [path lastPathComponent]];
+		_popoverView.title = msg;
+		[CRAPI.sharedInstance logToErrorFile : msg];
+		if (_showErrorPopover)
+		{
+			[_popoverView setCancelButtonTitle : @"OK"];
+			[_popoverView show];
+		}
+	}
+}
+
+-(BOOL)loadUpdate:(NSString*)path
+{
+	return[_databaseID updateFromFile : path];
+}
+*/
 int nextiPadToDownload(int currentiPad)
 {
 	currentiPad++;
@@ -1438,14 +1701,19 @@ Top:
 		sprintf (title,"Download Photo\n%s",fromFile);
 	}
 	BOOL st = GetFileFromServer(fromFile,fromFile, fromDir, toDir,&_popoverView, title, 0.5,"FTPPullError");
+	free(fromDir);
 	if (!st)
 	{
 		LPSTRD mess = malloc(4096);
 		strcpy(mess, "[FTPPullError]");
 		ExpandText(mess);
-		MessageBox(hWndDlg, mess, "Unable to send file to server", MB_ICONEXCLAMATION);
+		FTPPullDidComplete(hWndDlg, _dataType, st, mess, fromFile,toDir);
 		free(mess);
 	}
+	else
+		FTPPullDidComplete(hWndDlg, _dataType, st, "", fromFile,toDir);
+	free(toDir);
+	free(fromFile);
 
 }
 void setDownloadFilesFor(int iPad)
@@ -1483,4 +1751,9 @@ void GSSiFree(LPSTR *str)
 void PopoverHide(HWND hWnd)
 {
 	return;
+}
+
+void PopoverShow(HWND hWnd, double after, LPSTR msg, LPSTR OKButtonText)
+{
+
 }

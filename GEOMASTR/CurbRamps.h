@@ -7,39 +7,13 @@
 #define DATABASEID_CURBRAMPS	1
 #define DATABASEID_ALLEYWALLS	2
 
-enum FTPDataType
-{
-	FTPDataPlat,
-	FTPDataPDF,
-	FTPDataJPG,
-	FTPDataCrimes,
-	FTPDataOther,
-	GetDatabaseSettingProperty,
-	GetDatabaseSettingTiles,
-	GetDatabaseSettingParcels,
-	GetDatabaseSettingAreas,
-	GetDatabaseSettingSewer,
-	GetDatabaseSettingPlan,
-	GetDatabaseSettingCensus,
-	GetDatabaseSettingAlleyWall,
-	GetDatabaseSettingAlleyWallNew,
-	GetDatabaseSettingCurbRamp,
-	GetDatabaseSettingCrimes,
-	GetDatabaseSettingMapleGrove,
-	GetDatabaseSettingHunting,
-	GetDatabaseSettingNVMetro,
-	FTPDataPhoto,
-	FTPData,
-	FTPDatabase,
-	FTPErrorFile,
-};
-
-
 LPSTRD getSendToServerFile(int databaseID, int iPad);
 BOOL executeAndSendCmd(int databaseID, LPSTR cmd, BOOL sendToServer);
 
 BOOL openDatabaseID(int databaseID);
 void closeDatabaseID(int databaseID, BOOL opened);
+
+BOOL loadUpdate(int databaseID, LPSTR path);
 
 int getLastDataUpdateNumber(int databaseID, int iPad, int *pictNum);
 BOOL setLastDataAndPictUpdateNums(int databaseID, int lastNum, int pictNum, int iPad);
@@ -54,6 +28,7 @@ LPSTRD outputDataFile(int databaseID, int fileNum, int iPad);
 LPSTRD outputPictFile(int databaseID, int fileNum, int iPad);
 
 void logToErrorFile(LPSTR error);
+void logToErrorFileWithHeader(LPSTR error, LPSTR header);
 void logToErrorFileIgnore(BOOL ignore);
 void clearErrorFile(void);
 LPSTR timeStamp(void);

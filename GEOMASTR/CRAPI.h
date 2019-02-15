@@ -41,6 +41,51 @@ enum HardCodedConfigs
 		HCConfigFacilities,
 		NUMHardCodedConfigs
 };
+
+enum FTPDataType
+{
+	FTPDataPlat,
+		FTPDataPDF,
+		FTPDataJPG,
+		FTPDataCrimes,
+		FTPDataOther,
+		GetDatabaseSettingProperty,
+		GetDatabaseSettingTiles,
+		GetDatabaseSettingParcels,
+		GetDatabaseSettingAreas,
+		GetDatabaseSettingSewer,
+		GetDatabaseSettingPlan,
+		GetDatabaseSettingCensus,
+		GetDatabaseSettingAlleyWall,
+		GetDatabaseSettingAlleyWallNew,
+		GetDatabaseSettingCurbRamp,
+		GetDatabaseSettingCrimes,
+		GetDatabaseSettingMapleGrove,
+		GetDatabaseSettingHunting,
+		GetDatabaseSettingNVMetro,
+		FTPDataPhoto,
+		FTPData,
+		FTPDatabase,
+		FTPErrorFile,
+};
+typedef int FTPDataType;
+
+enum FTPStatus
+{
+	FTPStatusDefault,
+		FTPStatusOK,
+		FTPStatusStop,
+		FTPStatusCancel,
+		FTPStatusFileWriteError,
+		FTPStatusConnectionFailed,
+		FTPStatusConnectionFailedTryingSecondary,
+		FTPStatusFailedToUnzip,
+		FTPStatusFileExists,
+		FTPStatusUserCancel,
+		FTPStatusBusy,
+};
+typedef int FTPStatus;
+
 typedef struct {
 	int count;
 	LPVOID item[1];
