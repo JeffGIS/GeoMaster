@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "CRAPI.h"
 #include "CurbRamps.h"
+#include "Commctrl.h"
 
 static char  Winver[32];
 static BOOL _didConnect;
@@ -31,9 +32,6 @@ static LPSTR _uploadStatusMsg = 0;
 static int	_databaseID = DATABASEID_CURBRAMPS;
 static BOOL _useMasterID = FALSE;
 static int  _process;
-static BOOL _uploadPix = FALSE;
-static BOOL _downloadData = TRUE;
-static BOOL _downloadPix = FALSE;
 static int _downloadiPad;
 static int _dataType;
 static int _lastUploadFileSize;
@@ -78,6 +76,7 @@ void PopoverHide(HWND hWnd);
 void PopoverShow(HWND hWnd, double after,LPSTR msg, LPSTR OKButtonText);
 void FTPPushDidComplete(HWND hWndDlg, FTPDataType dataType, FTPStatus status, LPSTR statusString, LPSTR path);
 void FTPPullDidComplete(HWND hWndDlg, FTPDataType dataType, FTPStatus status, LPSTR statusString, LPSTR file, LPSTR dir);
+void syncButtonTapped(HWND hWndDlg);
 
 double currentTime(void)
 {
@@ -146,12 +145,15 @@ CRAPi* CRAPI_Init(void)
 		CRAPI->sharedInstance.currentModule = GEOMASTER_MODULE;
 		CRAPI->sharedInstance.currentSubModule = 0;
 		CRAPI->sharedInstance.placesArray = NSArray_Init(0);
-		strcpy(CRAPI->sharedInstance.sharedFilePath, "[%DL][NVCITY]\\sharedFilePath");
+		strcpy(CRAPI->sharedInstance.sharedFilePath, "[%DL][NVCITY]\\sharedFiles");
 		ExpandText(CRAPI->sharedInstance.sharedFilePath);
 		strcpy(CRAPI->sharedInstance.appVersionBuild, appAndVersion());
 		CRAPI->sharedInstance.GSSiPadNumber = -1;
 		CRAPI_sharedInstance_processPlaces();
 		CRAPI_sharedInstance_setGeoIDForCurrentApp();
+		CRAPI->sharedInstance.downloadData = TRUE;
+		CRAPI->sharedInstance.downloadPix = FALSE;
+		CRAPI->sharedInstance.uploadPix = FALSE;
 	}
 	CRAPI->sharedInstance.hideConnectButton = 1;
 	return CRAPI;
@@ -676,10 +678,6 @@ BOOL CRAPI_sharedInstance_setGeoIDForCurrentApp(void)
 	{
 		MessageBox(0, "NVMobile-Alleywalls does not set place and manager", 0, MB_ICONEXCLAMATION);
 	}
-	else if (!rtn)
-	{
-		MessageBox(0, "NVMobile-CurbRamps does not set place and manager", 0, MB_ICONEXCLAMATION);
-	}
 	return rtn;
 }
 
@@ -798,9 +796,11 @@ LPSTR vendorUUIDString(void)
 	static char UUIDString[40];
 	LPSTR rtn = UUIDString;
 
-	DWORD Serno = GM32GetNodeInfo(NodeName, UserName, Winver);
-	
-	sprintf(UUIDString, "PCIc-%31.31ld", Serno);
+	strcpy(UUIDString, "[%DLSERIALNUMBER]");
+	ExpandText(UUIDString);
+	DWORD Serno = atol(UUIDString);
+
+	sprintf(UUIDString, "PCDRIVE-%28.28ld", Serno);
 	return rtn;
 }
 
@@ -808,7 +808,7 @@ LPSTR deviceInfo(void)
 {
 	static char dinfo[256];
 	int floatSize = sizeof(CGFloat);
-	DWORD Serno = GM32GetNodeInfo(NodeName, UserName, Winver);
+	GM32GetNodeInfo(NodeName, UserName, Winver);
 	int bitMachine = 32;
 	strcpy(dinfo, "[%DL]");
 	ExpandText(dinfo);
@@ -925,6 +925,9 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 
 		CRAPI = CRAPI_Init();
 		cwCenter(hWndDlg, 0);
+		SendDlgItemMessage(hWndDlg, IDC_DOWNLOADDATA, BM_SETCHECK, CRAPI->sharedInstance.downloadData, 0);
+		SendDlgItemMessage(hWndDlg, IDC_DOWNLOADPICTS, BM_SETCHECK, CRAPI->sharedInstance.downloadPix, 0);
+
 		GMServerSendMessage(hWndDlg,GMSMessageOpenConnect);
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -1100,6 +1103,12 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			getDownloadCounts(NO);
 			updateLabels(hWndDlg);
 			updateOverallProgress(hWndDlg,0);
+			if (!_totFilesToProcess)
+			{
+				SetWindowText(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), "Complete");
+				EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), FALSE);
+			}
+
 			//if (_autoSync)
 			//	startSync(hWndDlg);
 		}
@@ -1131,16 +1140,30 @@ BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		}
 		break;
 		case IDC_SYNCHRONIZE:
-			startSync(hWndDlg);
-		break;
+			syncButtonTapped(hWndDlg);
 
+		break;
+		case IDC_DOWNLOADDATA:
+		{
+			int st = SendDlgItemMessage(hWndDlg, IDC_DOWNLOADDATA, BM_GETCHECK, 0, 0);
+			SendDlgItemMessage(hWndDlg, IDC_DOWNLOADDATA, BM_SETCHECK, !st, 0);
+			CRAPI->sharedInstance.downloadData = !st;
+		}
+		break;
+		case IDC_DOWNLOADPICTS:
+		{
+			int st = SendDlgItemMessage(hWndDlg, IDC_DOWNLOADPICTS, BM_GETCHECK, 0, 0);
+			SendDlgItemMessage(hWndDlg, IDC_DOWNLOADPICTS, BM_SETCHECK, !st, 0);
+			CRAPI->sharedInstance.downloadPix = !st;
+		}
+		break;
 		}
 		break;    /* End of WM_COMMAND                                 */
-case WM_TIMER:
-{
-	GMServerSendMessage(hWndDlg, GMSMessageCheckNearby);
+	case WM_TIMER:
+	{
+		GMServerSendMessage(hWndDlg, GMSMessageCheckNearby);
 
-}
+	}
 	default:
 		return FALSE;
 	}
@@ -1196,7 +1219,7 @@ int getDataNumFromServerMsg (int iPad,BOOL wantPict)
 void getDownloadCounts(BOOL loading)
 {
 	_downFiles = _downPix = 0;
-	_totFilesToProcess = _origUpFiles;
+	_totFilesToProcess = _upFiles;
 	_processedFiles = 0;
 	for (int iPad = 0; iPad <= _numiPadsInMsg; iPad++)
 	{
@@ -1251,7 +1274,14 @@ void updateLabels(HWND hWndDlg)
 }
 void updateOverallProgress(HWND hWndDlg, double pct)
 {
+	HWND hWndPB = GetDlgItem(hWndDlg, IDC_PROGRESS1);
+	int iLowLim = 0, iHighLim = 100;
+	int iPos = IDNINT(100 * pct);
 
+	if (pct < 0)
+		SendMessage(hWndPB, PBM_SETRANGE32, (WPARAM)(int)iLowLim, (LPARAM)(int)iHighLim);
+	else
+		SendMessage(hWndPB, PBM_SETPOS, (WPARAM)(int)iPos, 0);
 }
 void startSync (HWND hWndDlg)
 {
@@ -1293,12 +1323,13 @@ void syncButtonTapped (HWND hWndDlg)
 			LPSTRD mess = malloc(4096);
 			strcpy(mess, "[FTPPushError]");
 			ExpandText(mess);
-			MessageBox(hWndDlg, mess, "Unable to send file to server", MB_ICONEXCLAMATION);
+			MessageBox(hWndDlg, mess, "Unable to send error file to server", MB_ICONEXCLAMATION);
 			free(mess);
+			return;
 		}
+		clearErrorFile();
 	}
-	else
-		startSync(hWndDlg);
+	startSync(hWndDlg);
 }
 
 void uploadNextFile (HWND hWndDlg)
@@ -1316,7 +1347,7 @@ Top:
 			int pictNum = 0;
 			_process = UPLOAD_PICT_PROCESS;
 
-			if (_uploadPix)
+			if (CRAPI->sharedInstance.uploadPix)
 			{
 				/*_myiPad = CRAPI.sharedInstance.currentiPadWithinManager;
 
@@ -1610,10 +1641,10 @@ int nextiPadToDownload(int currentiPad)
 }
 void downloadNextFile (HWND hWndDlg)
 {
-	if (_process == DOWNLOAD_DATA_PROCESS && !_downloadData)
+	if (_process == DOWNLOAD_DATA_PROCESS && !CRAPI->sharedInstance.downloadData)
 		_process = DOWNLOAD_PICT_PROCESS;
 
-	if (_process == DOWNLOAD_PICT_PROCESS && !_downloadPix)
+	if (_process == DOWNLOAD_PICT_PROCESS && !CRAPI->sharedInstance.downloadPix)
 	{
 		SetWindowText(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), "Complete");
 		EnableWindow(GetDlgItem(hWndDlg, IDC_SYNCHRONIZE), FALSE);
@@ -1637,7 +1668,7 @@ Top:
 			if (_process == DOWNLOAD_DATA_PROCESS)
 			{
 				_process = DOWNLOAD_PICT_PROCESS;
-				if (!_downloadPix)
+				if (!CRAPI->sharedInstance.downloadPix)
 					goto Done;
 				_downloadiPad = nextiPadToDownload(0);
 
@@ -1668,12 +1699,12 @@ Top:
 
 	if (_process == DOWNLOAD_DATA_PROCESS)
 	{
-		_filePath = outputDataFile(_databaseID, _nextFileNumToDownload, _myiPad);
+		_filePath = outputDataFile(_databaseID, _nextFileNumToDownload, _downloadiPad);
 	}
 
 	else if (_process == DOWNLOAD_PICT_PROCESS)
 	{
-		_filePath = outputPictFile(_databaseID, _nextFileNumToDownload, _myiPad);
+		_filePath = outputPictFile(_databaseID, _nextFileNumToDownload, _downloadiPad);
 	}
 	else
 	{

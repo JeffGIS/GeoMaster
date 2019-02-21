@@ -128,6 +128,7 @@ typedef struct {
 	NSArray placesArray;
 	BOOL downloadData;
 	BOOL downloadPix;
+	BOOL uploadPix;
 	BOOL refreshMap;
 	char sharedFilePath[MAX_PATH];
 	char errFile[MAX_PATH];

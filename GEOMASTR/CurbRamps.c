@@ -691,8 +691,6 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 {
 	BOOL rtn = FALSE;
 	int rc;
-	ToleranceValues tolerances;
-	setStandardToleranceValues(&tolerances);
 
 	rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
@@ -717,13 +715,9 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
-								LPSTR detailCode;
-								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
-								sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+								LPSTR rampText = rampToText(intID, pRamp, codeSystem);
+								sprintf(line, "%s", rampText);
 								fputstring(line, FidOut);
-								free(ccode);
-								free(detailCode);
 								free(rampText);
 							}
 						}
@@ -754,12 +748,23 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 	rc = sqlite3_open(NVCRISDataBase, &database);
 	if (rc == SQLITE_OK)
 	{
-		HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		HFILE FidOut;
+		
+		if (headerType >= 0)
+			FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		else
+		{
+			FidOut = GSSiOpenFile(OutFile, 0, OF_READWRITE);
+			GSSillseek(FidOut,0,2);
+		}
 		if (FidOut != HFILE_ERROR)
 		{
 			char tempRampIDs[MAX_PATH];
-			LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
-			fputstring(rampHeader, FidOut);
+			if (headerType >= 0)
+			{
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				fputstring(rampHeader, FidOut);
+			}
 			RAMPID rampID;
 			rampID.intID = intNum;
 			rampID.rampNum = rampNum;
@@ -770,13 +775,9 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 			{
 				if (pRamp->rampExists)
 				{
-					LPSTR detailCode;
-					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-					LPSTR rampText = rampToText(rampID.intID, pRamp);
-					sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+					LPSTR rampText = rampToText(intNum, pRamp, codeSystem);
+					sprintf(line, "%s", rampText);
 					fputstring(line, FidOut);
-					free(ccode);
-					free(detailCode);
 					free(rampText);
 				}
 			}
@@ -868,13 +869,9 @@ BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, i
 					{
 						if (pRamp->rampExists)
 						{
-							LPSTR detailCode;
-							LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-							LPSTR rampText = rampToText(rampID.intID, pRamp);
-							sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+							LPSTR rampText = rampToText(rampID.intID, pRamp, codeSystem);
+							sprintf(line, "%s", rampText);
 							fputstring(line, FidOut);
-							free(ccode);
-							free(detailCode);
 							free(rampText);
 						}
 					}
@@ -973,13 +970,9 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
-								LPSTR detailCode;
-								LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-								LPSTR rampText = rampToText(pmpInt->intID, pRamp);
-								sprintf(line, "%s\t'%s'\t'%s'", rampText, detailCode, ccode);
+								LPSTR rampText = rampToText(pmpInt->intID, pRamp, codeSystem);
+								sprintf(line, "%s", rampText);
 								fputstring(line, FidOut);
-								free(ccode);
-								free(detailCode);
 								free(rampText);
 								n++;
 							}
@@ -1042,13 +1035,9 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 					RampStruct * pRamp = &pmpInt->ramps[rampNum];
 					if (pRamp->rampExists)
 					{
-						LPSTR detailCode;
-						LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, codeSystem);
-						LPSTR rampText = rampToText(pmpInt->intID, pRamp);
-						sprintf(line, "%s\t%s\t%s", rampText, detailCode, ccode);
+						LPSTR rampText = rampToText(pmpInt->intID, pRamp, codeSystem);
+						sprintf(line, "%s", rampText);
 						fputstring(line, FidOut);
-						free(ccode);
-						free(detailCode);
 						free(rampText);
 					}
 					else
@@ -2727,8 +2716,9 @@ int getLastDataUpdateNumber(int databaseID,int iPad,int *pictNum)
 	SQLOK(SQLiteFinalize(statement), database, "getLastDataUpdateNumber", 0);
 	if (!lastNum)
 	{
-		lastNum = 1;
-		sprintf(cmd, "INSERT OR REPLACE INTO CURBRAMP_UPDATES VALUES(%i, 1, 0); ",iPad);
+		if (iPad == CRAPI->sharedInstance.currentiPadWithinManager)
+			lastNum = 1;
+		sprintf(cmd, "INSERT OR REPLACE INTO CURBRAMP_UPDATES VALUES(%i, %i, 0); ",iPad,lastNum);
 		executeAndSendCmd(databaseID, cmd, NO);
 	}
 	closeDatabaseID(databaseID,opened);
@@ -3006,7 +2996,7 @@ LPSTRD lastPathComponent(LPSTR path)
 LPSTRD errorLogPath (void)
 {
 	LPSTRD path = malloc(MAX_PATH);
-	sprintf (path,"%s/%s", CRAPI->sharedInstance.sharedFilePath, "NVErrorLog.txt");
+	sprintf (path,"%s\\%s", CRAPI->sharedInstance.sharedFilePath, "NVErrorLog.txt");
 	return path;
 }
 void logToErrorFileIgnore(BOOL ignore)

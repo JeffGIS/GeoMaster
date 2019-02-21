@@ -925,7 +925,7 @@ static char YorN(int i)
 	return 'N';
 }
 
-char *rampToText(int intNum, RampStruct *ramp)
+char *rampToText(int intNum, RampStruct *ramp, int codeSystem)
 {
 	int minTime = 1338526800;
 	int altIntNum;
@@ -960,8 +960,14 @@ char *rampToText(int intNum, RampStruct *ramp)
 	ramp->locatorToneVolume = max(ramp->locatorToneVolume,0);
 	ramp->audibleWalkIndicationVolume = max(ramp->audibleWalkIndicationVolume, 0);
 	GetIntersectionStreetNames("", intNum, intStreets,&altIntNum);
+
+	ToleranceValues tolerances;
+	setStandardToleranceValues(&tolerances);
+	LPSTR detailCode;
+	LPSTR ccode = rampComplianceCode(ramp, &detailCode, &tolerances, codeSystem);
+
 	sprintf(rampText,
-		"%i\t%i\t%i\t%s\t%i\t'%s'\t'%s'\t%i\t'%s'\t%i\t%i\t'%s'\t%.10f\t%.10f\t%i\t'%s'\t'%s'\t'%s'\t'%s'\t%c\t%c\t%c\t%c\t%c\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t'%s'\t'%s'\t%i\t%i\t'%s'\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t'%s'\t'%s'\t%i\t%c",
+		"%i\t%i\t%i\t%s\t%i\t%s\t%s\t%i\t%s\t%i\t%i\t%c\t%s\t%s\t%s\t%.10f\t%.10f\t%i\t%s\t%s\t%s\t%s\t%c\t%c\t%c\t%c\t%c\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%s\t%s\t%i\t%i\t%s\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%s\t%s\t%i",
 		ramp->uniqueID,
 		intNum, altIntNum,
 		intStreets,
@@ -972,6 +978,9 @@ char *rampToText(int intNum, RampStruct *ramp)
 		ramp->rampStatus,
 		ramp->rampCode,
 		ramp->proximityCode,
+		ramp->retired ? 'Y' : 'N',
+		detailCode,
+		ccode,
 		timeCompleteC,
 		ramp->latitude,
 		ramp->longitude,
@@ -992,18 +1001,18 @@ char *rampToText(int intNum, RampStruct *ramp)
 		ramp->crackWidth.rightSidewalkCrackWidth,
 		ramp->rampWidth,
 		ramp->rampDepth,
-		ramp->rampSlopeFront,
-		ramp->rampSlopeSide,
-		ramp->upperLandingSlopeFront,
-		ramp->upperLandingSlopeSide,
-		ramp->streetLandingSlopeFront,
-		ramp->streetLandingSlopeSide,
-		ramp->flareLeftSlopeFront,
-		ramp->flareRightSlopeFront,
-		ramp->swkLeftSlopeFront,
-		ramp->swkLeftSlopeSide,
-		ramp->swkRightSlopeFront,
-		ramp->swkRightSlopeSide,
+		fabs (ramp->rampSlopeFront),
+		fabs(ramp->rampSlopeSide),
+		fabs(ramp->upperLandingSlopeFront),
+		fabs(ramp->upperLandingSlopeSide),
+		fabs(ramp->streetLandingSlopeFront),
+		fabs(ramp->streetLandingSlopeSide),
+		fabs(ramp->flareLeftSlopeFront),
+		fabs(ramp->flareRightSlopeFront),
+		fabs(ramp->swkLeftSlopeFront),
+		fabs(ramp->swkLeftSlopeSide),
+		fabs(ramp->swkRightSlopeFront),
+		fabs(ramp->swkRightSlopeSide),
 		ramp->SteepTopOfCurb,
 		ramp->PedRampLip,
 		ramp->curbCutDistance,
@@ -1024,16 +1033,17 @@ char *rampToText(int intNum, RampStruct *ramp)
 		ramp->audibleWalkIndicationVolume,
 		ramp->rampComment,
 		ramp->fileID,
-		ramp->cornerID,
-		ramp->retired ? 'Y' : 'N'
+		ramp->cornerID		
 		);
-    
+	free(ccode);
+	free(detailCode);
+
     return rampText;
 }
 
 const char *rampToTextHeader(int type)
 {
 	if (!type)
-		return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tRampStatus\tRampCode\tProximityCode\tTimeComplete\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID\tRetired\tComplianceCodeDetail\tComplianceCodeSummary";
-	return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tRampStatus(C256)\tRampCode(B2)\tProximityCode(B2)\tTimeComplete(C16)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tRampDepth(B2)\tRampSlopeFront(R4)\tRampSlopeSide(R4)\tUpperLandingSlopeFront(R4)\tUpperLandingSlopeSide(R4)\tStreetLandingSlopeFront(R4)\tStreetLandingSlopeSide(R4)\tFlareLeftSlopeFront(R4)\tFlareRightSlopeFront(R4)\tSidewalkLeftSlopeFront(R4)\tSidewalkLeftSlopeSide(R4)\tSidewalkRightSlopeFront(R4)\tSidewalkRightSlopeSide(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID\tRetired\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)";
+		return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tRampStatus\tRampCode\tProximityCode\tRetired\tComplianceCodeDetail\tComplianceCodeSummary\tTimeComplete\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID";
+	return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tRampStatus(C256)\tRampCode(B2)\tProximityCode(B2)\tRetired(C1)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)\tTimeComplete(C16)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tRampDepth(B2)\tRampSlopeFront(R4)\tRampSlopeSide(R4)\tUpperLandingSlopeFront(R4)\tUpperLandingSlopeSide(R4)\tStreetLandingSlopeFront(R4)\tStreetLandingSlopeSide(R4)\tFlareLeftSlopeFront(R4)\tFlareRightSlopeFront(R4)\tSidewalkLeftSlopeFront(R4)\tSidewalkLeftSlopeSide(R4)\tSidewalkRightSlopeFront(R4)\tSidewalkRightSlopeSide(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID";
 }

@@ -171,6 +171,11 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 	
 	if (showStatus)
 	{
+		LPSTR leafName;
+		if (!(leafName = strrchr(lpszRemoteFile, '/')))
+			leafName = (LPSTR)lpszRemoteFile;
+		CreateStatusWind(0, 1, leafName);
+
 		HANDLE handle = FtpOpenFile (hConnect,lpszRemoteFile,GENERIC_READ,FTP_TRANSFER_TYPE_BINARY,0);
 		if (handle)
 		{
@@ -182,11 +187,9 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			DWORD numBytesRead;
 			HFILE Fid;
 			HANDLE hBuffer;
-			LPSTR pBuffer, leafName;
+			LPSTR pBuffer;
 			char  DownloadFile[MAX_PATH];
 
-			if (!(leafName = strrchr (lpszRemoteFile,'/')))
-				leafName=(LPSTR)lpszRemoteFile;
 			sprintf(DownloadFile,"%s.download",lpszNewFile);
 
 			Fid = GSSiOpenFile((LPSTR)DownloadFile, 0, OF_CREATE);
@@ -195,12 +198,12 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 				if (errorVarName && *errorVarName)
 					SetGlobalValue (errorVarName,"Unable to create output file"); 
 				InternetCloseHandle (handle);
+				DestroyStatusWindow(0);
 				return FALSE;
 			}
 			hBuffer = GSSiGlobAlloc (0,GMEM_MOVEABLE,dwNumberOfBytesToRead+32);
 			pBuffer = GlobalLock (hBuffer);
 			rtn = TRUE;
-			CreateStatusWind (0,1,leafName);
 			while (rtn && Done < Tot &&	StatusWindowUpdate (leafName,0,Tot,Done))
 			{
 				rtn = InternetReadFile(handle,pBuffer,dwNumberOfBytesToRead,&numBytesRead);
@@ -213,6 +216,8 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow (0);
 			GSSiClose (Fid);
+			if (replace && FileType((LPSTR)lpszNewFile) == 1)
+				GSSiRemove((LPSTR)lpszNewFile);
 			GSSiRename(DownloadFile,(LPSTR) lpszNewFile);
 			GSSiGlobUlFree (&hBuffer);
 			InternetCloseHandle (handle);

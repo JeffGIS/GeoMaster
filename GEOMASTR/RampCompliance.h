@@ -94,7 +94,7 @@ LPSTR ExpandText(LPSTR InText);
 
 char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *tolerances, int codeSystem);
 void setStandardToleranceValues(ToleranceValues *tolerances);
-char *rampToText(int intNum,RampStruct *ramp);
+char *rampToText(int intNum,RampStruct *ramp, int codeSystem);
 const char *rampToTextHeader(int type);
 int fixRampNum(int rampNum);
 int NVCTextureToCode(LPSTR texture);
