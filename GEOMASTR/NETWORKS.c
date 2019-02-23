@@ -983,7 +983,8 @@ BOOL SaveRouteNextFile (HANDLE hBTNext,LPSTR Name)
     GWDHEADER GWDHead; 
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
-    short       FidData,ibeg,NumVars;
+    short       ibeg,NumVars;
+	HFILE FidData;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128];
@@ -1102,7 +1103,7 @@ BOOL SaveRouteNextFile (HANDLE hBTNext,LPSTR Name)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	                 
 	hDB = OpenGWDatabase (Name,BT_WRITE);
 	if (!hDB)
@@ -1141,7 +1142,8 @@ BOOL SaveRouteAtFile (HANDLE hBTAt,LPSTR Name)
     GWDHEADER GWDHead; 
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
-    short       FidData,ibeg,NumVars;
+    short       ibeg,NumVars;
+	HFILE FidData;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128];
@@ -1278,7 +1280,7 @@ BOOL SaveRouteAtFile (HANDLE hBTAt,LPSTR Name)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	                 
 	hDB = OpenGWDatabase (Name,BT_WRITE);
 	if (!hDB)
@@ -1321,7 +1323,8 @@ BOOL SaveIntersectFile (LPSTR Name)
     GWDHEADER GWDHead; 
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
-    short       FidData,ibeg,NumVars, NumSegs;
+    short       ibeg,NumVars, NumSegs;
+	HFILE FidData;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128];
@@ -1399,7 +1402,7 @@ BOOL SaveIntersectFile (LPSTR Name)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	                 
 	hDB = OpenGWDatabase (Name,BT_WRITE);
 	if (!hDB)
@@ -1683,7 +1686,7 @@ NotBad:
 		n++; 
 	}
 	fclose(Fid);
-	GSSiClose (FidBadMP); 
+	GSSiClose2 (&FidBadMP); 
 	CloseNetVideoIndex (Opened);
 	CloseStreetNameTable ();
 	return TRUE;
@@ -1881,9 +1884,9 @@ Step2:
 Exit: 
     CloseNetLinkAndRef (Opened1);
 	CloseNetMarkers (Opened2); 
-	GSSiClose (FidMissMark);   
-	GSSiClose (FidEndPoint);  
-	GSSiClose (FidDupName);
+	GSSiClose2 (&FidMissMark);   
+	GSSiClose2 (&FidEndPoint);  
+	GSSiClose2 (&FidDupName);
 	GSSiSetCursor (hcurSave);   
 	return rtn;
 } 
@@ -1967,7 +1970,7 @@ NextInt:
 		sprintf (str,"%ld,%f,%f,%i",NetIntAT,NetIntRefDataAt.Coord.x,NetIntRefDataAt.Coord.y,NumSegs);
 		fputstring (str,FidOut);
 	}
-	GSSiClose (FidOut);  
+	GSSiClose2 (&FidOut);  
 	CloseNetIntersect (Opened);
 	GSSiSetCursor (hcurSave); 
 	DestroyStatusWindow (0);
@@ -2488,8 +2491,8 @@ NextRef:
 	}
 	CloseNetLinkAndRef (Opened1); 
 	CloseNetIntersect (Opened2);
-    GSSiClose (FidIntMark);
-    GSSiClose (FidBadInt);
+    GSSiClose2 (&FidIntMark);
+    GSSiClose2 (&FidBadInt);
 	GSSiSetCursor (hcurSave);   
     return TRUE;
 }	
@@ -2826,7 +2829,7 @@ void DumpIntersectionStreets (LPSTR Name,BOOL EliminateDuplicateStreets)
 	}
 	CloseNetIntersect (OpenedInt);
 	CloseStreetSegmentTable (OpenedSeg); 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiSetCursor (hcurSave); 
 	sprintf (str,"Intersections have been dumped to %s",OFStruct.szPathName);  
 	MessageBox (GetFocus(),str,"",MB_OK);

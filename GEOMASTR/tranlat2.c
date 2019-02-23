@@ -83,7 +83,8 @@ BOOL WriteQuadFile (LPQUADDATA pQuadDataIn)
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;   
     long	Offset;
-    short       FidData,ibeg,NumVars, NumSegs;
+    short       ibeg,NumVars, NumSegs;
+	HFILE FidData;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
     char	PrimeIndex[128], Name[128];
@@ -326,7 +327,7 @@ BOOL WriteQuadFile (LPQUADDATA pQuadDataIn)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	                 
 	hDB = OpenGWDatabase (Name,BT_WRITE);
 	if (!hDB) return (FALSE);
@@ -477,12 +478,13 @@ BOOL MarkQuadData (LPSTR Name,LPSTR Quad, LPSTR CDName, short FileNum)
 	    GWDHEADER GWDHead; 
 	    LPGWDHEADER lpGWDHead;
 	    HANDLE  hVars;
-	    short       FidData,NumVars, NumSegs;
+	    short       NumVars, NumSegs;
 	    OFSTRUCTGM    OFStruct;
 	    GWFLDINFO FldInfo;    
 	    char	PrimeIndex[128];
 	    LPSTR	lpDot;  
 		short	ibeg=0;
+		HFILE FidData;
         
         _fstrcpy (PrimeIndex,Name);
 	    lpDot = _fstrrchr (PrimeIndex,'.');  
@@ -562,7 +564,7 @@ BOOL MarkQuadData (LPSTR Name,LPSTR Quad, LPSTR CDName, short FileNum)
 		BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 		LocalUnlock(hVars);
 		LocalFree(hVars); 
-		GSSiClose (FidData);
+		GSSiClose2 (&FidData);
 		                 
 		hDB = OpenGWDatabase (Name,BT_WRITE);
 		if (!hDB) return (FALSE);
@@ -1105,7 +1107,7 @@ BOOL GetDOQCoord (LPSTR Name,LPMNMXCORD pBounds, LPDOUBLE pResolution,LPRECT32 C
 	
 RtnFalse:  
 	if (*Fid != HFILE_ERROR)
-		GSSiClose (*Fid);
+		GSSiClose2 (Fid);
 	GSSiGlobUlFree (&hTxt);
 	return FALSE;
 }
@@ -1370,7 +1372,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 									 &SamplesPerPixel,&PlanarConfig,&TIFFCompression,
 									 BitsPerSample,NULL)) 
 				{   
-					GSSiClose (FidBMOrig);
+					GSSiClose2 (&FidBMOrig);
 					if (GSSiMessageBox (0,"Failed to open Tiff file",File,MB_ICONEXCLAMATION|MB_OKCANCEL,0) ==  IDCANCEL)
 						goto Exit; 
 					rtn = TRUE;
@@ -1380,7 +1382,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 	            pDibInfo = (LPBITMAPINFO)GlobalLock (hDibInfo); 
 	            if (pDibInfo->bmiHeader.biBitCount == 1)
 	            {   
-	            	GSSiClose (FidBMOrig); 
+	            	GSSiClose2 (&FidBMOrig); 
 	            	FidBMOrig = HFILE_ERROR;
 					GlobalUnlock (hDibInfo);
 	            	ImageOffset = 0;   
@@ -1446,7 +1448,7 @@ ProcessBitmap:
 			    	conversion = MFT; */
 		    	fgetstring (str,128,FidClip);
 			    n=sscanf (str,"%lf %lf %lf %lf",&minx, &miny,&maxx, &maxy);
-	    		GSSiClose (FidClip);
+	    		GSSiClose2 (&FidClip);
 			    WX[0] = WX[1] = BoundSP.xmn*conversion;
 			    WX[2] = WX[3] = BoundSP.xmn*conversion + (pDibInfo->bmiHeader.biWidth-1) * fabs (Resolution);  
 			    if (Resolution < 0)
@@ -1805,8 +1807,8 @@ ProcessBitmap:
 
 							sprintf(mess, "Error writing %ld bytes to bitmap on chan %i - disk may be full", (long)OutLen, FidBM);
 							MessageBox(GetFocus(), mess, OFStruct.szPathName, MB_OK | MB_ICONQUESTION | MB_TASKMODAL);
-							GSSiClose(FidBM);
-							GSSiClose(FidBMOrig);
+							GSSiClose2 (&FidBM);
+							GSSiClose2 (&FidBMOrig);
 							GSSiGlobUlFree(&h0s);
 							GSSiGlobUlFree(&hRow);
 							GSSiGlobUlFree(&hOutRow);
@@ -1822,7 +1824,7 @@ ProcessBitmap:
 							BigWrite(FidBM, p0s, width - rowlen, -1);
 						CheckForContinue(TRUE,0);
 					}
-					GSSiClose(FidBM);
+					GSSiClose2 (&FidBM);
 				}
                   if (AviOut)
                   {  
@@ -1949,7 +1951,7 @@ Exit:
             FreeRowBuffers (&hRowBufs,height);
             GSSiGlobFree (&hAllRows); 
             if (FidBMOrig != HFILE_ERROR)
-            	GSSiClose (FidBMOrig); 
+            	GSSiClose2 (&FidBMOrig); 
 			if (hDibFactored)
 				FreeImage_Unload(hDibFactored);
 
@@ -2074,7 +2076,7 @@ BOOL ConvertUsingSymlist (LPSTR SymName,short SymType)
 			}
 		}		
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 

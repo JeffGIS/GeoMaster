@@ -1746,7 +1746,7 @@ GSSiExitProg (399);
             if (pDibInfo->bmiHeader.biBitCount==4) pDibInfo->bmiHeader.biClrUsed=16;
             if (pDibInfo->bmiHeader.biBitCount==8) pDibInfo->bmiHeader.biClrUsed=256;
             }
-        GSSiClose (Fid); 
+        GSSiClose2 (&Fid); 
         if (!hDibIs32Bit (*phDib))
         	GlobalUnlock ((HANDLE)*phDib);
     } */   
@@ -1847,7 +1847,7 @@ GSSiExitProg (400);
 	DibInfo.bmiHeader.biHeight = abs (DibInfo.bmiHeader.biHeight);
 	GSSillseek (Fid,loc,0);
 	BigWrite (Fid,(HPSTR)&DibInfo,sizeof(BITMAPINFOHEADER),-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (400);
@@ -2788,12 +2788,12 @@ BOOL GetBMPBounds (LPSTR PathName,LPMNMXCORD pBitmapBounds,LPMNMXCORD pWBounds)
     		WorldPoint.x = atof (str);
     		fgetstring (str,128,Fid);
     		WorldPoint.y = atof (str);
-    		GSSiClose (Fid);
+    		GSSiClose2 (&Fid);
     		pWBounds->ymx = WorldPoint.y;
     		pWBounds->xmn = WorldPoint.x;  
     		pWBounds->xmx = WorldPoint.x + ScaleX * (DibInfo.biWidth-1);
     		pWBounds->ymn = WorldPoint.y + ScaleY * (abs(DibInfo.biHeight)-1); 
-	    	GSSiClose (FidIn);
+	    	GSSiClose2 (&FidIn);
 			GSSiGlobUlFree (&hDibInfo);
     		return TRUE;
 		}
@@ -2802,7 +2802,7 @@ Exit:
    	pWBounds->xmn = pWBounds->ymn = 0;
    	pWBounds->ymx = abs(DibInfo.biHeight)-1;
    	pWBounds->xmx = DibInfo.biWidth-1;
-	GSSiClose (FidIn);
+	GSSiClose2 (&FidIn);
  	GSSiGlobUlFree (&hDibInfo);
     return TRUE;
 } 
@@ -2908,13 +2908,13 @@ BOOL SplitBitmap (LPSTR Infile,int numRows,int numCols,LPSTR OutDir,LPSTR OutExt
 			}
 			for (iCol=0;iCol<numCols;iCol++)
 			{
-				GSSiClose (FidOut[iCol]);
+				GSSiClose2 (&FidOut[iCol]);
 			}
 		}
 	}
 Exit:
 	DestroyStatusWindow(0);  
-	GSSiClose (FidIn);  
+	GSSiClose2 (&FidIn);  
 	GSSiGlobUlFree (&hDibInfo);
 	GSSiGlobUlFree (&hRow);
 

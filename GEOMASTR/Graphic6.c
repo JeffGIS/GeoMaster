@@ -2402,7 +2402,7 @@ GSSiExitProg (811);
     Version = 0;
     BigWrite (ReorgfileFID,(HPSTR)&Version,2,-1);
 
-	GSSiClose (ReorgfileFID);  
+	GSSiClose2 (&ReorgfileFID);  
 	ReorgfileFID = HFILE_ERROR;   
 	GSSiGlobFree (&hReorgBuf); 
 	
@@ -2412,7 +2412,7 @@ GSSiExitProg (811);
 	ExpandText (OldName);
 	GSSiRemove (OldName);
 	GSSiRename  (ReorgName,OldName);                      
-	GSSiClose (ReorgDescFile); 
+	GSSiClose2 (&ReorgDescFile); 
 	pFile = GlobalLock (hReorgDescFile);
 	GSSiRemove (pFile);
 	  
@@ -2539,7 +2539,7 @@ NextRec:
 			PctBox (GetDlgItem(ReorghWnd,ReorgStatus), TotLen, loc,0);
         } 
 	    GSSiGlobUlFree (&hBuf); 
-        GSSiClose (NewQuadFID);   
+        GSSiClose2 (&NewQuadFID);   
 	    MinMaxLoc = GSSillseek(FidMap,(LONG)-(2+12),2); 
 	    if (ReorgUpdateBounds)
 		{
@@ -2775,10 +2775,10 @@ GSSiExitProg (813);
 			pbuf = GlobalLock (hbuf);
 			if (BigWrite (NewQuadFID,pbuf,lbuf,-1) != lbuf)
 			{   
-				GSSiClose (NewQuadFID);
+				GSSiClose2 (&NewQuadFID);
 				NewQuadFID = 0;  
 				ReorgFile = FALSE;
-				GSSiClose (ReorgFile);
+				GSSiClose2 (&ReorgFile);
 				HaltMapDisplay(FALSE,FALSE);
 				GSSiMsgBox( hWndMain, "Error writing TEMP file - probably due to full disk","Reorg Aborted", MB_ICONEXCLAMATION,0);
 			}

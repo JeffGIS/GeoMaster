@@ -413,7 +413,7 @@ BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle)
 		sprintf(toPath, "%s%s", toDir, &fromPath[ldir]);
 		GSSiCopyFile(fromPath, toPath, FALSE);
 	}
-	GSSiClose(Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove(TempName);
 	if (*statusTitle)
 		DestroyStatusWindow(0);

@@ -142,7 +142,7 @@ GSSillseek(ptr,ind * 108, 0);
 BigRead(ptr,(HPSTR)pname,32);
 BigRead(ptr,(HPSTR)&id,sizeof(long));
 BigRead(ptr,(HPSTR)table,sizeof(double)*9);
-GSSiClose(ptr);
+GSSiClose2 (&ptr);
   
 if (id <= 0)
      {

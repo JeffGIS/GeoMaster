@@ -651,7 +651,7 @@ BOOL LoadERDASDem (void)
 	 lpDot = _fstrrchr (File,'.');
 	 _fstrcpy (lpDot,".in1");	
 	 BT_CREATE (File, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 	 _fstrcpy (lpDot,".dtm");	
 
      hDB = OpenGWDatabase (File,BT_WRITE);
@@ -762,7 +762,7 @@ Exit:
     DTMKeyl = LONG_MAX;
 	BT_PUT (lpGWDHead->BTHandle[0],(LPSTR)&DTMKeyl,(LPSTR)&Offset); 
 	SetContinueProcessing ( TRUE);
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	DestroyStatusWindow (0);
 	GlobalUnlock (hDB);
     CloseGWDatabase (hDB); 
@@ -854,7 +854,7 @@ NextFile:
 			CurLoc = GSSillseek(FidIn, 0, 1);
 			StatusWindowUpdate(0, 0, TotLen, CurLoc);
 	    }
-		GSSiClose(FidIn);
+		GSSiClose2 (&FidIn);
 	    if (FileEnd)
 	    {
 	    	
@@ -880,7 +880,7 @@ NextFile:
 	CloseFidSmall();
 	FidOut = GSSiOpenFile(TempFile, 0, OF_CREATE);
 	GSSiChangeLength(FidOut, FileLength);
-	GSSiClose(FidOut);
+	GSSiClose2 (&FidOut);
 	CreateFidSmall();
 	FidOut = GSSiOpenFile(TempFile, 0, OF_READWRITE);
 	FidIn = GSSiOpenFile(InFile, 0, OF_READ);
@@ -929,7 +929,7 @@ NextFile2:
 		CurLoc = (DWORD)GSSillseek(FidIn, 0, 1);
 		StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
-	GSSiClose(FidIn);
+	GSSiClose2 (&FidIn);
     if (FileEnd)
     {
 	    	
@@ -944,7 +944,7 @@ NextFile2:
 	BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
     SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0);
-	GSSiClose(FidOut);
+	GSSiClose2 (&FidOut);
 	FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
 	_fmemset(LidarDist, 0, sizeof(LidarDist));
 	CreateStatusWind(hWndMain, 1, "Building Distribution");
@@ -958,7 +958,7 @@ NextFile2:
     }  
     SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0);
-	GSSiClose(FidOut);
+	GSSiClose2 (&FidOut);
 	GSSiGlobFree(&TxtHandle);
 
 	for (i = 0; i<MAXLIDARPERREC + 1; i++)
@@ -1001,8 +1001,8 @@ NextFile2:
 		StatusWindowUpdate(0, 0, TotLen, CurLoc);
 	}
 	SetContinueProcessing ( TRUE);
-	GSSiClose(FidIn);
-	GSSiClose(FidOut);
+	GSSiClose2 (&FidIn);
+	GSSiClose2 (&FidOut);
 	DestroyStatusWindow(0);
 	GSSiRemove(TempFile);
 	return TRUE;
@@ -1110,7 +1110,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 			StatusWindowUpdate(0, 0, FileLength, totWritten);
 		}
 		free(zeros);
-		GSSiClose(FidOut);
+		GSSiClose2 (&FidOut);
 		DestroyStatusWindow(0);
 		FidOut = GSSiOpenFile(TempFile, 0, OF_READWRITE);
 
@@ -1217,7 +1217,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 			BigWrite(FidOut, (HPSTR)&LidarRec, sizeof(LIDARREC), -1);
 			SetContinueProcessing ( TRUE);
 			DestroyStatusWindow(0);
-			GSSiClose(FidOut);
+			GSSiClose2 (&FidOut);
 			FidOut = GSSiOpenFile(TempFile, 0, OF_READ);
 			_fmemset(LidarDist, 0, sizeof(LidarDist));
 			CreateStatusWind(hWndMain, 1, "Building Distribution");
@@ -1232,7 +1232,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 			SetContinueProcessing ( TRUE);
 			DestroyStatusWindow(0);
 			CreateStatusWind(hWndMain, 1, "Writing Distribution");
-			GSSiClose(FidOut);
+			GSSiClose2 (&FidOut);
 			GSSiGlobFree(&TxtHandle);
 			GSSiRemove(distFile);
 			
@@ -1282,8 +1282,8 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 				StatusWindowUpdate(0, 0, TotLen, CurLoc);
     }  
     SetContinueProcessing ( TRUE);
-			GSSiClose(FidIn);
-			GSSiClose(FidOut);
+			GSSiClose2 (&FidIn);
+			GSSiClose2 (&FidOut);
 			DestroyStatusWindow(0);
 			GSSiRemove(TempFile);
 		}
@@ -1404,7 +1404,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	 lpDot = _fstrrchr (OutFile,'.');
 	 _fstrcpy (lpDot,".in1");	
 	 BT_CREATE (OutFile, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 	 _fstrcpy (lpDot,".dtm");	
 
      hDB = OpenGWDatabase (OutFile,BT_WRITE);
@@ -1543,7 +1543,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	BT_PUT (lpGWDHead->BTHandle[0],(LPSTR)&DTMKeyl,(LPSTR)&Offset); 
 Exit: 
 	SetContinueProcessing ( TRUE);
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	DestroyStatusWindow (0);
 	GSSiGlobUlFree (&hRec);  
 	GlobalUnlock (hDB);
@@ -1674,7 +1674,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	 lpDot = _fstrrchr (OutFile,'.');
 	 _fstrcpy (lpDot,".in1");	
 	 BT_CREATE (OutFile, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 	 _fstrcpy (lpDot,".dtm");	
 
      hDB = OpenGWDatabase (OutFile,BT_WRITE);
@@ -1813,7 +1813,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	BT_PUT (lpGWDHead->BTHandle[0],(LPSTR)&DTMKeyl,(LPSTR)&Offset); 
 Exit: 
 	SetContinueProcessing ( TRUE);
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	DestroyStatusWindow (0);
 	GSSiGlobUlFree (&hRec);  
 	GlobalUnlock (hDB);
@@ -2268,7 +2268,7 @@ void DTMClose (LPHANDLE pHandle)
 			{
 				pDTMInfo = (LPDTMINFO)GlobalLock (hOpenSurf[i]); 
 				if (pDTMInfo->Type == DTMTYPE_LIDAR_GM)
-					GSSiClose(pDTMInfo->Fid);
+					GSSiClose2 (&pDTMInfo->Fid);
 				else if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
 					sqlite3_close(pDTMInfo->db);
 				else
@@ -2290,7 +2290,7 @@ void DTMClose (LPHANDLE pHandle)
 				if (pDTMInfo->Type == 3)
 				{   
 					short	ii;
-					GSSiClose (pDTMInfo->Fid); 
+					GSSiClose2 (&pDTMInfo->Fid); 
 					if (pDTMInfo->Fid == 35)
 						ii=1;
 				}
@@ -3404,7 +3404,7 @@ long GetDTMHoles (LPSTR DTMName, LPSTR OutFile)
 	} 
 	GlobalUnlock (pDTMInfo->hDB);   
 	DTMClose (&hSurf); 
-	GSSiClose (OutFid);
+	GSSiClose2 (&OutFid);
 	DestroyStatusWindow(0);  
 	SetContinueProcessing ( TRUE);
 {
@@ -5174,11 +5174,11 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 					}
 				}
 				rtn = TRUE;
-				GSSiClose (Fid);   
+				GSSiClose2 (&Fid);   
 			}
 			else
 			{
-				GSSiClose (Fid);   
+				GSSiClose2 (&Fid);   
 				SetContinueProcessing ( TRUE);
 				GSSiRemove (OutFile);
 			}
@@ -5225,7 +5225,7 @@ int classifyLAZFile(char * file, char * outFile)
 					sprintf(txt, "%i\t%i\t%s", i, totals[i], description[i]);
 					fputstring(txt, fid);
 				}
-				GSSiClose(fid);
+				GSSiClose2 (&fid);
 			}
 			laszip_destroy(laszip_reader);
 		}

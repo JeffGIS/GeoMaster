@@ -60,7 +60,7 @@ BOOL SaveAreasToFile(LPSTR FileName)
 				}
 			}
 		}
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 		rtn = TRUE;
 	}
 	return rtn;
@@ -177,7 +177,7 @@ BOOL ThemeCreateAreaInMask(int from)
 				{
 					if (!IntersectBounds(&overAllBounds, &bounds, 0))
 					{
-						GSSiClose(Fid);
+						GSSiClose2 (&Fid);
 						goto Exit;
 					}
 				}
@@ -196,7 +196,7 @@ BOOL ThemeCreateAreaInMask(int from)
 					}
 				}
 				haveOverallBounds = TRUE;
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 				if (haveIntersect)
 				{
 					Fid = GSSiOpenFile(CurTheme->DataFile, 0, OF_READ);
@@ -253,7 +253,7 @@ BOOL ThemeCreateAreaInMask(int from)
 						}
 						GSSiGlobFree(&hMareaPoints);
 					}
-					GSSiClose(Fid);
+					GSSiClose2 (&Fid);
 
 					saveBitmap(hDC, hBMOld);
 

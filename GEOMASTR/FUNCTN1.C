@@ -617,7 +617,7 @@ GSSiExitProg (1348);
 							wpt = BasePtToGoogleTilePt (&wpt,level);
 							sprintf (OutLoc,"%i %i %.14lg %.14lg",pt.x-rect.left,pt.y-rect.top,wpt.x,wpt.y); 
 							fputstring (OutLoc,fidOut);
-							GSSiClose (fidOut);
+							GSSiClose2 (&fidOut);
 						}
 						break;
 					}

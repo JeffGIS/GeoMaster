@@ -1752,7 +1752,7 @@ BOOL AddPWtoODBCFile (LPSTR lpcstring)
 					SetODBCPassword2 (pSpace);  
 				}
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			_fstrcpy (CurODBCFile,SaveCurODBCFile);
 		    if (!hODBCPW)
 		    	return FALSE;

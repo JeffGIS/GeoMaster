@@ -510,7 +510,7 @@ BOOL CreateVirtualPlotIndex (LPSTR VirtPlotDir,LPSTR ImageFile)
 	GSSiGetTempFileName(0,"gma",0,TempName);
 	Fid =	GSSiOpenFile (TempName,0,OF_CREATE);
 	SearchFilesInDir (VirtPlotDir,VirtFmt , Fid,&TotFiles,VirtFmt2,1,TRUE,TRUE);     
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CreateMapIndex (VirtPlotDir,TempName,4,FALSE,"","",FALSE,1,0,0,0,FALSE);
 	GSSiRemove (TempName); 
 	if (*ImageFile)
@@ -994,7 +994,7 @@ BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, int message, WPARAM wParam, LP
 		 BigRead (Fid,pMem,len);
 		 strcpy(pMem+len,"END-OF-FILE|END-OF-FILE|END-OF-FILE|END-OF-FILE|END-OF-FILE|END-OF-FILE|");
 		 GlobalUnlock (hMem);
-		 GSSiClose (Fid);
+		 GSSiClose2 (&Fid);
 		 SetDlgItemText (hWndDlg,IDC_CL,"0");
 		 cwCenter(hWndDlg, 0);
 		 HaveInit = TRUE;
@@ -1096,7 +1096,7 @@ BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, int message, WPARAM wParam, LP
 					{
 						fputstring (str,Fid);
 					}
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 				}
             break;  
 			
@@ -1929,7 +1929,7 @@ Exit:	   VirtualPrinterFactor=1;
 			           		sprintf (PPCmd,"%s\\printsetup.bin",VirtPlotDir); 
 			           		FidPS = GSSiOpenFile (PPCmd,0,OF_CREATE);
 			           		SavePrintSetupData (FidPS,PrinterResolution);                  
-			           		GSSiClose (FidPS);
+			           		GSSiClose2 (&FidPS);
 					   		sprintf (OutFile,"%s\\Overview%s",VirtPlotDir,VirtFmt);   
 	//				   		SaveBitmap (hOverViewBitmap,OutFile,FIF_TIFF,TIFF_ADOBE_DEFLATE); 
 					   		sprintf (OutFile,"%s\\Overview%s",VirtPlotDir,".tif");  
@@ -2448,7 +2448,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 						DrawText(hPr, pTab, -1, &labelRect, DT_CENTER | DT_TOP);
 					}
 				}
-				GSSiClose(fid);
+				GSSiClose2 (&fid);
 			}
 			/*GetTextExtentPoint32(hPr, Header, _fstrlen(Header), &txSize);
 			LineInc = txSize.cy;
@@ -2472,7 +2472,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 					goto NextPage;
 				}
 			}
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 			*/
 			SelectObject(hPr, OldFont);
 			DeleteObject(hFont);
@@ -2681,7 +2681,7 @@ NextPage:
 					goto NextPage;
 				}
 		   }
-		   GSSiClose (Fid);
+		   GSSiClose2 (&Fid);
 		   SelectObject (hPr,OldFont);
 		   DeleteObject (hFont);
 		   DeleteObject (hFontBold);
@@ -3032,7 +3032,7 @@ BOOL PrintMerge (HWND hWnd)
 		ExpandText (str);             
 	  	if (!fgetstring (str,1024,FidPM))
 	  	{
-	  		GSSiClose (FidPM);
+	  		GSSiClose2 (&FidPM);
 	  		return FALSE;
 	  	}
     }
@@ -3427,7 +3427,7 @@ BOOL PrintMerge (HWND hWnd)
 		   	}
 		}
 Exit:
-	   GSSiClose (FidPM);
+	   GSSiClose2 (&FidPM);
 	   GSSiGlobFree (&hDLT);
        GSSiDeleteDC(lpPDChunk->hDC,IsVirtPrinter);  
        lpPDChunk->hDC = 0;
@@ -4019,7 +4019,7 @@ void DisplayVirtualPrintAreas (void)
 			fputstring (str,Fid);
 		}
 	}
-	GSSiClose (Fid);                                                        
+	GSSiClose2 (&Fid);                                                        
     RestoreDC (CurView->hDC,-1);
 	return;
 }
@@ -4124,7 +4124,7 @@ BOOL FAR PASCAL VIRTUAL_PRINTER_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM 
             	 GSSillseek (Fid,0,2);
             	 sprintf (CurVirtPrinter,"%.2f inches wide by %.2f inches high (%i dpi)",Width,Height,VirtualPrintDPI);
             	 fputstring (CurVirtPrinter,Fid);  
-            	 GSSiClose (Fid);
+            	 GSSiClose2 (&Fid);
                  EndDialog(hWndDlg, TRUE); 
             }
          		 break;

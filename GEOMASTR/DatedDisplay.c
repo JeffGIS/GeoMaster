@@ -210,7 +210,7 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_ADDSTRING, 0, (LPARAM)str);
 			}
 		}
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 		for (i = 0; i < nDatesSelected; i++)
 		{
 			int item = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_FINDSTRING, -1, (LPARAM)orthoTitles[i]);

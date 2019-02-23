@@ -6977,7 +6977,7 @@ BOOL GetAreaCenters (LPSTR OutFile,int SpeedFactor,BOOL UseMask)
 	}
 	SetContinueProcessing ( TRUE);
 	DestroyStatusWindow(0);  
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	BT_CLOSEANDDELETE (&hBTTemp);  
 	PIASizeFactor = SavePIASizeFactor;
 	if (UseMask && hMaskArea)

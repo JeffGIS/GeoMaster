@@ -846,7 +846,7 @@ GSSiExitProg (1348);
 							}
 						}
 					}
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 				}
 				GSSiGlobUlFree (&hKey);
 				SetCurView ( SaveVP);
@@ -913,7 +913,7 @@ GSSiExitProg (1348);
 				ReadObject (&Fid,TRUE,&CurView->pTheme,0); 
 	            CurView->pTheme->DisplayViewport = CurView->ID; 
 	            CurView->pTheme->IsActive = TRUE;
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				SetCurView ( SaveVP);
 				goto RtnTrue;
 			}
@@ -1349,7 +1349,7 @@ GotCloseFilehSQL:
 						*pTAB = 0;
 					ProcessMacroFile (pSTR,OutLoc,&hMacroArgs,NumArgs);
 				}
-				GSSiClose (Fid);			
+				GSSiClose2 (&Fid);			
 				GSSiRemove (pName);
 			}
 			GSSiGlobFree (&hMacroArgs);
@@ -2037,12 +2037,12 @@ GotCloseFilehSQL:
 						strcpy (pDot,".gfb");
 						Fid2 = GSSiOpenFile (Arg[2],0,OF_CREATE);
 						BigWrite (Fid2,pFileDCmp,lFileDCmp,-1);
-						GSSiClose (Fid2);
+						GSSiClose2 (&Fid2);
 						GSSiGlobUlFree (&hFileCmp);
 						GSSiGlobUlFree (&hFileDCmp);
 						rtn = TRUE;
 					}
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 				}
 				goto Rtnrtn;
 			}
@@ -2303,7 +2303,7 @@ GotCloseFilehSQL:
 					}
 					st = BT_FIND (hDupRef2,(LPSTR)&Refno,BT_NEXT,BT_ANY,(LPSTR)&Dummy);
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				BT_CLOSEANDDELETE (&hDupRef);
 				BT_CLOSEANDDELETE (&hDupRef2);
 				goto RtnTrue;
@@ -3510,7 +3510,7 @@ GotCloseFilehSQL:
 							pLoc += l;
 						}
 						
-						GSSiClose(Fid);
+						GSSiClose2 (&Fid);
 						ExpandText(pFile);
 						strcpy(OutLoc, pFile);
 						GSSiGlobUlFree(&hFile);
@@ -3610,7 +3610,7 @@ GotCloseFilehSQL:
 			{
 				rtn = ReadBitMapHeader (Fid,&hDibInfo, &ImageOffset);
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			if (rtn)
 			{    
 				LPBITMAPINFO    pDibInfo=(LPBITMAPINFO)GlobalLock (hDibInfo);
@@ -4608,7 +4608,7 @@ GotCloseFilehSQL:
 				if (atob(Arg[2]))
 				{
 					HFILE fid = GSSiOpenFile(Arg[1], 0, OF_CREATE);
-					GSSiClose(fid);
+					GSSiClose2 (&fid);
 				}
 				else
 					goto RtnFalse;
@@ -4891,7 +4891,7 @@ GotCloseFilehSQL:
 				{
 					Fid1 = GSSiOpenFile(Arg[3], 0, OF_CREATE);
 					fputstring((LPSTR)pHeader, Fid1);
-					GSSiClose(Fid1);
+					GSSiClose2 (&Fid1);
 					strcpy(OutLoc, "1");
 				}
 				goto Rtnl;
@@ -5101,7 +5101,7 @@ GotCloseFilehSQL:
 						BigWrite (Fid,(HPSTR)pNumSavedViews,len,-1);
 						GlobalUnlock (hSavedZooms);
 					}
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					EscapeFunction (TRUE);
 					if ((pBS1 = strrchr (Arg[6],'\\')))
 						*pBS1 = 0;
@@ -5485,7 +5485,7 @@ GotCloseFilehSQL:
 				*OutLoc = 0;
 				if (Fid != HFILE_ERROR)
 					strcpy (OutLoc,OFStruct.szPathName);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				goto Rtnl;
 			}
 			hTemp = GSSiGlobAlloc ( 888,GHND,256);
@@ -6277,7 +6277,7 @@ SaveVis:
 							fputstring (str,fidOut);
 						}
 					}
-					GSSiClose (fidOut);
+					GSSiClose2 (&fidOut);
 				}
 				itoa (n,OutLoc,10);
 				goto Rtnl;
@@ -6315,7 +6315,7 @@ SaveVis:
 
 						}
 					}
-					GSSiClose (fidOut);
+					GSSiClose2 (&fidOut);
 				}
 				itoa (n,OutLoc,10);
 				goto Rtnl;
@@ -6897,7 +6897,7 @@ HaveVP:;
 			FastMapCopyHltOnly = FALSE;
 			SetWindowText (CurView->hWnd,Arg[5]);
 			FastMapCopy = FALSE;
-			GSSiClose (FastMapCopyFid);
+			GSSiClose2 (&FastMapCopyFid);
 			if (!*Arg[1])
 				CopySelectedRecords (Arg[6],TRUE,FALSE,0,FALSE);
 			goto RtnTrue;

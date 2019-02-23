@@ -385,7 +385,7 @@ DBFOpen( const char * pszFilename, const char * pszAccess )
     if( BigRead (psDBF->Fid, pabyBuf, 32* 1) != 32 )
     {
 //        fclose( psDBF->fp ); 
-		GSSiClose (psDBF->Fid);
+		GSSiClose2 (&psDBF->Fid);
         free( pabyBuf );
         free( psDBF );
         return NULL;
@@ -414,7 +414,7 @@ DBFOpen( const char * pszFilename, const char * pszAccess )
     if( BigRead (psDBF->Fid, pabyBuf, nHeadLen-32* 1) != nHeadLen-32 )
     {
 //        fclose( psDBF->fp ); 
-		GSSiClose (psDBF->Fid);
+		GSSiClose2 (&psDBF->Fid);
         free( pabyBuf );
         free( psDBF );
         return NULL;
@@ -502,7 +502,7 @@ DBFClose(DBFHandle psDBF)
 /*      Close, and free resources.                                      */
 /* -------------------------------------------------------------------- */
 //    fclose( psDBF->fp );  
-	GSSiClose (psDBF->Fid);
+	GSSiClose2 (&psDBF->Fid);
 //	if (psDBF->UseSmall)
 //		CreateFIDDBF ();
 

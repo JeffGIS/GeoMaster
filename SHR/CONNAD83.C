@@ -621,7 +621,7 @@ if(Countyno < 1 || Countyno >87)
  Southsp  = lpCty->Southsps;
  Zone     = lpCty->Zones;
  if (DoRead)
- 	GSSiClose (F1);
+ 	GSSiClose2 (&F1);
  Beta = South;
  ldaDegToRad();
  Southrad = Drad;

@@ -2906,7 +2906,7 @@ HGLOBAL PolyBTInit (short lrec,short nkeyfld,short fldtyp[8],short fldlen[8])
 	    BigWrite (Fid,(HPSTR)&datlen,2,-1); 
 	    BigWrite (Fid,(HPSTR)&nidx,2,-1);
 	    BigWrite (Fid,(HPSTR)lpBTDesc,nidx*sizeof(BTVARDESC),-1);
-	    GSSiClose (Fid); 
+	    GSSiClose2 (&Fid); 
 	   } 
 	  }*/
 	  

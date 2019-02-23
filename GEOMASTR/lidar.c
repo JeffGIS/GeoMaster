@@ -86,7 +86,7 @@ BOOL ReadLidarHeader (LPSTR FileName)
 
 		}
 	}
-	GSSiClose (fid);
+	GSSiClose2 (&fid);
 	return TRUE;
 }
 
@@ -151,7 +151,7 @@ BOOL LoadLIDARDTMFromLAS (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds)
 				*pCurUnits = UnitsFromText (&str[1]);
 			}
 	        Item = SendDlgItemMessage (hWndDlg,cntl,CB_SETITEMDATA,(WPARAM)Item,(LPARAM)Loc);
-        	GSSiClose (Fid2);
+        	GSSiClose2 (&Fid2);
         }
         Loc = GSSillseek (Fid,0,1);
 	} while (fgetstring (Name,250,Fid));
@@ -207,7 +207,7 @@ NextFile:
 			CurLoc = GSSillseek (FidIn,0,1);
 			StatusWindowUpdate (0,0, TotLen, CurLoc); 
 	    }
-	    GSSiClose (FidIn);
+	    GSSiClose2 (&FidIn);
 	    if (FileEnd)
 	    {
 	    	
@@ -233,7 +233,7 @@ NextFile:
    	CloseFidSmall ();
 	FidOut = GSSiOpenFile (TempFile,0,OF_CREATE);
     GSSiChangeLength (FidOut,FileLength);
-    GSSiClose (FidOut);
+    GSSiClose2 (&FidOut);
     CreateFidSmall ();
 	FidOut = GSSiOpenFile (TempFile,0,OF_READWRITE);
 	FidIn = GSSiOpenFile (InFile,0,OF_READ); 
@@ -282,7 +282,7 @@ NextFile2:
 		CurLoc = (DWORD)GSSillseek (FidIn,0,1);
 		StatusWindowUpdate (0,0, TotLen, CurLoc); 
     }  
-    GSSiClose (FidIn); 
+    GSSiClose2 (&FidIn); 
     if (FileEnd)
     {
 	    	
@@ -297,7 +297,7 @@ NextFile2:
 	BigWrite (FidOut,(HPSTR)&LidarRec,sizeof(LIDARREC),-1);
     SetContinueProcessing ( TRUE);
 	DestroyStatusWindow (0);
-    GSSiClose (FidOut);
+    GSSiClose2 (&FidOut);
 	FidOut = GSSiOpenFile (TempFile,0,OF_READ);
     _fmemset (LidarDist,0,sizeof(LidarDist));
 	CreateStatusWind (hWndMain,1,"Building Distribution"); 
@@ -311,7 +311,7 @@ NextFile2:
     }  
     SetContinueProcessing ( TRUE);
 	DestroyStatusWindow (0);
-    GSSiClose (FidOut);
+    GSSiClose2 (&FidOut);
 	GSSiGlobFree (&TxtHandle);  
 	for (i=0;i<MAXLIDARPERREC+1;i++)
 	{ 
@@ -353,8 +353,8 @@ NextFile2:
 		StatusWindowUpdate (0,0, TotLen, CurLoc); 
     }  
     SetContinueProcessing ( TRUE);
-    GSSiClose (FidIn);
-    GSSiClose (FidOut);
+    GSSiClose2 (&FidIn);
+    GSSiClose2 (&FidOut);
 	DestroyStatusWindow (0);  
 	GSSiRemove (TempFile);*/
 	return TRUE;

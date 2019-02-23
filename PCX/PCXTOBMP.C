@@ -117,7 +117,7 @@ HANDLE  BMPFromPCX (LPSTR ImageFile)
 		}
 	}
 	GSSiGlobUlFree (&hFileBuf);
-	GSSiClose (FidPCX); 
+	GSSiClose2 (&FidPCX); 
 	return hBits;
 }
 

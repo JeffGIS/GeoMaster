@@ -156,7 +156,7 @@ HDIB FAR LoadDIB(LPSTR lpFileName)
 	if ((hFile = GSSiOpenFile(lpFileName, &ofs, OF_READ)) != -1)
    {
       hDIB = ReadDIBFile(hFile);
-      GSSiClose(hFile);     
+      GSSiClose2 (&hFile);     
       AddBMPToCache (lpFileName,hDIB);
       goto Exit;
    }
@@ -398,7 +398,7 @@ WORD FAR SaveDIB(HDIB hDib, LPSTR lpFileName)
 //   dwError = MyWrite(fh, (LPSTR)lpBI, dwDIBSize);
    dwError = BigWrite(fh, (LPSTR)lpBI, dwDIBSize,-1);
    GlobalUnlock(hDib);
-   GSSiClose(fh);
+   GSSiClose2 (&fh);
 
    if (dwError == 0)
      return ERR_OPEN; // oops, something happened in the write

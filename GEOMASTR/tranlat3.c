@@ -140,7 +140,7 @@ BOOL ImportSSURGOTables (LPSTR CompFile,LPSTR CompGMD)
 			goto Exit;
 		}
 		fgetstring (str,4090,Fid); 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		lpTAB = str;
 		while ((lpTAB = _fstrchr (lpTAB,',')))
 		{
@@ -220,7 +220,7 @@ NextLine:
 		GlobalUnlock (hLoc);
 		GWDAddRecord (lpGWDHead,0,NULL);
 	} 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	rtn = TRUE;
 Exit: 
 	if (hDB)
@@ -496,7 +496,7 @@ BOOL LoadTIN (LPSTR FromFile, LPSTR ToPlt)
     }
     rtn = ContinueProcessing;
     SetContinueProcessing ( TRUE);
-    GSSiClose (FidTIN);
+    GSSiClose2 (&FidTIN);
 	GSSiGlobFree (&hPoints);
     CloseMap(TRUE);  
 	AddSymToMap (NumSyms,hSymDesc,0,NULL); 
@@ -551,7 +551,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
 				ConvertCoord (&pPoints[nPoints],2,1);
 				nPoints++;
 		    }
-		    GSSiClose (Fid2); 
+		    GSSiClose2 (&Fid2); 
 		    GlobalUnlock (hPoints);
 			AddToSymList (SymNum,&NumSyms,&hSymDesc); 
 			Refno = GetNewRefno(PltName,NULL,NULL,NULL,NULL);  
@@ -572,7 +572,7 @@ BOOL CreateVideoPolys (LPSTR InFile,LPSTR PltFile)
 		    DestroySymList (&NumSyms,&hSymDesc);
 		}
     } 
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     return TRUE;
 }
   

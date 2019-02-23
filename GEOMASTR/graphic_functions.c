@@ -5713,7 +5713,7 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 						      	AppendMenu (TextMenu,MF_ENABLED|MF_STRING,rec,str); 
 						}
 					}
-					GSSiClose(FidNoteType);
+					GSSiClose2 (&FidNoteType);
 					      	    
 			      	AppendMenu (EditMenu,MF_ENABLED|MF_STRING,LDM_CANCEL,IADDR("Cancel",1));
 			      	if (GetMenuItemCount (TextMenu)) 
@@ -5779,7 +5779,7 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 						}
 					}
 				}
-				GSSiClose(FidNoteType);
+				GSSiClose2 (&FidNoteType);
 			}
     	 }
     	 else
@@ -5850,7 +5850,7 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 					OFSTRUCTGM	OFStruct;
 	        	 	
 	        	 	InfoID = GSSiOpenFile(str,&OFStruct,OF_CREATE);
-	        	 	GSSiClose(InfoID);
+	        	 	GSSiClose2 (&InfoID);
 	        	 } 
 	        	 _fstrcat (Editor," ");
 	        	 _fstrcat (Editor,str);
@@ -7844,7 +7844,7 @@ Exit:
 		if (FidChain != HFILE_ERROR)
 		{
 			DestroyStatusWindow (0);
-			GSSiClose (FidChain);
+			GSSiClose2 (&FidChain);
 	        FidChain = HFILE_ERROR; 
 		}
         PostMessage(hWnd, GF_CLOSE,0, 0L);
@@ -8666,7 +8666,7 @@ GSSiExitProg (975);
 					BigRead (Fid,(HPSTR)&ls,2); 
 					if (ID == 40 && ls == lGCmdString)
 						BigWrite (Fid,pString,lGCmdString,-1);
-					GSSiClose (Fid);  
+					GSSiClose2 (&Fid);  
 					rtn = GF_INCREASE_SUCCESS_COUNT; 
 				}
 			}
@@ -10907,7 +10907,7 @@ BOOL AddSegStreetName (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 							BigRead (Fid,(HPSTR)&ID,2);
 							if (ID == 10)
 								BigWrite (Fid,(HPSTR)&pSegdata->StreetNum,16,-1);
-							GSSiClose (Fid);
+							GSSiClose2 (&Fid);
 						}
 			        	DisableHalt = SaveDisableHalt;
 			       	}
@@ -11368,7 +11368,7 @@ ClearEnd:
     	FidTran = GSSiOpenFile (FullName,&OFStruct,OF_CREATE); 
      	hTran = STRAN2 (1626,XPic,YPic,XBase,YBase,nPnts,&RSQMIN,1,0);    
      	WriteTranData (FidTran,hTran);
-    	GSSiClose (FidTran);
+    	GSSiClose2 (&FidTran);
      	GSSiGlobUlFree (&hTran);
      	sprintf (mess,"Transformation set with %i control points - RSQ = %f",nPnts,RSQMIN);
      	MessageBox (GetFocus(),mess," ",MB_OK);   
@@ -11436,7 +11436,7 @@ BOOL TrackPhotoLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     	_fstrcat (FullName,"\\tran");
     	FidTran = GSSiOpenFile (FullName,&OFStruct,OF_READ); 
     	hTran = ReadTranData (FidTran);   
-    	GSSiClose (FidTran);
+    	GSSiClose2 (&FidTran);
      	break;
 	}    
     case WM_LBUTTONUP:
@@ -11880,7 +11880,7 @@ GSSiExitProg (879);
 							BigRead (Fid,(HPSTR)&GRTextHeader,sizeof(GRTEXTHEADER)); 
 							if (ID == 19)
 								BigWrite (Fid,(HPSTR)NewText,lTextString,-1);
-							GSSiClose (Fid);
+							GSSiClose2 (&Fid);
 						}
 						ProcessPickedItem (Item,0);        		
 					}
@@ -12028,7 +12028,7 @@ BOOL EditTextMultiple (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 								BigRead (Fid,(HPSTR)&GRTextHeader,sizeof(GRTEXTHEADER)); 
 								if (ID == 19)
 									BigWrite (Fid,(HPSTR)ChangeCommand,lTextString,-1);
-								GSSiClose (Fid);
+								GSSiClose2 (&Fid);
 							}
 						}
 					}
@@ -12274,7 +12274,7 @@ GSSiExitProg (843);
 							str[GRTextHeader.lText] = 0;
 						}
 					}
-					GSSiClose (Fid);  
+					GSSiClose2 (&Fid);  
 					if (Function == GF_SET_TEXT_GLOBALS)
 					{   
 						double	THeight;
@@ -12337,7 +12337,7 @@ GSSiExitProg (843);
 						GSSillseek (Fid,CurTextHeaderLoc+2,0);
 						BigWrite (Fid,(HPSTR)&GRTextHeaderOld,sizeof(GRTEXTHEADER),-1); 
 					}
-					GSSiClose (Fid);  
+					GSSiClose2 (&Fid);  
 				}
 			}
 	       	else
@@ -13860,7 +13860,7 @@ GSSiExitProg (1052);
 					GSSillseek (Fid,Loc+2,0);
 					BigWrite (Fid,(HPSTR)&OldSize,sizeof(OldSize),-1);
 				}
-				GSSiClose (Fid);  
+				GSSiClose2 (&Fid);  
 				rtn = GF_INCREASE_SUCCESS_COUNT; 
 			}
         	DisableHalt = SaveDisableHalt;
@@ -14313,7 +14313,7 @@ HavePoint:
 							GSSillseek (FidMap,Loc+2+8+8,0);
 							BigWrite (FidMap,(HPSTR)&NewPointD,sizeof(NewPointD),-1);
 						}
-						GSSiClose (FidMap); 
+						GSSiClose2 (&FidMap); 
 					}
 				}
 		       	else
@@ -15037,7 +15037,7 @@ HaveClass:
 							PadString (str,' ',13);
 							BigWrite (Fid,str,13,-1);
 						}
-						GSSiClose (Fid);
+						GSSiClose2 (&Fid);
 					}
 				}
 				else if (*CurTheme->SymbolFont[0])
@@ -15498,7 +15498,7 @@ GSSiExitProg (1110);
 					GSSillseek (Fid,Loc+18,0);
 					BigWrite (Fid,(HPSTR)&BasePoint,sizeof(BasePoint),-1);
 				}
-				GSSiClose (Fid);  
+				GSSiClose2 (&Fid);  
 				rtn = GF_INCREASE_SUCCESS_COUNT; 
 			}
         	DisableHalt = SaveDisableHalt; 
@@ -15618,7 +15618,7 @@ GSSiExitProg (1110);
 					GSSillseek (Fid,Loc+18,0);
 					BigWrite (Fid,(HPSTR)&BasePoint,sizeof(BasePoint),-1);
 				}
-				GSSiClose (Fid);  
+				GSSiClose2 (&Fid);  
 				rtn = GF_INCREASE_SUCCESS_COUNT; 
 			}
         	DisableHalt = SaveDisableHalt; 
@@ -15914,7 +15914,7 @@ GSSiExitProg (1053);
 						GSSillseek (Fid,2,1);
 						BigRead (Fid,(HPSTR)&NewColor,4);
 					}
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					
 					if (GetColor (hWnd,&NewColor))
 						HaveNewSettings = TRUE;
@@ -15946,7 +15946,7 @@ GSSiExitProg (1053);
 					GSSillseek (Fid,Loc+4,0); 
 					BigWrite (Fid,(HPSTR)&NewColor,4,-1);
 				}
-				GSSiClose (Fid);  
+				GSSiClose2 (&Fid);  
 				ProcessPickedItem (Item,TRUE);        		
 				rtn = GF_INCREASE_SUCCESS_COUNT; 
 			}
@@ -15971,7 +15971,7 @@ GSSiExitProg (1053);
 					{
 						BigRead (Fid,(HPSTR)&NewColor,4);
 					}
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					
 					if (GetColor (hWnd,&NewColor))
 						HaveNewSettings = TRUE;
@@ -16002,7 +16002,7 @@ GSSiExitProg (1053);
 				{   
 					BigWrite (Fid,(HPSTR)&NewColor,4,-1);
 				}
-				GSSiClose (Fid);  
+				GSSiClose2 (&Fid);  
 				rtn = GF_INCREASE_SUCCESS_COUNT; 
 			}
         	DisableHalt = SaveDisableHalt;
@@ -17132,7 +17132,7 @@ BOOL EditCityLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 			GSSillseek (Cities4FID,EditLoc,0); 
 			EditData.LatLong = BasePt;
 			BigWrite (Cities4FID,(HPSTR)&EditData,sizeof(EditData),-1);
-			GSSiClose (Cities4FID); 
+			GSSiClose2 (&Cities4FID); 
 			sprintf (str,"%s has been updated",EditData.Name);
 			GSSiMsgBox (hWnd,str,"",MB_OK,0);
 			EditLoc = -1;
@@ -17155,7 +17155,7 @@ BOOL EditCityLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				} 
 				Loc = GSSillseek (Cities4FID,0,1);
 			} 
-			GSSiClose (Cities4FID); 
+			GSSiClose2 (&Cities4FID); 
 			sprintf (str,"Select new location for %s",EditData.Name);
 			GSSiMsgBox (hWnd,str,"",MB_OK,0);
 		}

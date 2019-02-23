@@ -416,7 +416,7 @@ DLGPROC	lpfnADDWAYPOINTMsgProc;
 DLGPROC	lpfnFINDWAYPOINTMsgProc;
 DLGPROC	lpfnGPSMsgProc;
 DLGPROC	lpfnGPSCONFIGMsgProc;
-short	ScrollRptCntl;
+int	ScrollRptCntl;
 HANDLE	hReportScroll=0;
 BOOL	InGRCmd=FALSE;  
 BOOL	InGRFCmd=FALSE;

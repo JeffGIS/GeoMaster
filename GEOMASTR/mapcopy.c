@@ -82,9 +82,9 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 				GSSillseek (FidIndex,FirstHeaderOffset,0);
 				BigWrite (FidIndex,(HPSTR)lpFI,STOREDINDEXLENGTH,-1);
 				GSSiGlobUlFree (&hlpFI);
-				GSSiClose (GCIFid); 
+				GSSiClose2 (&GCIFid); 
 				GCIFid = HFILE_ERROR;
-				GSSiClose (FidIndex);
+				GSSiClose2 (&FidIndex);
 			}
 			if (!_fstricmp (FileName,"-DONE-"))
 				goto Exit;
@@ -141,7 +141,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 				BigWrite (GCIFid,(HPSTR)&lhead,2,-1);
 				BigRead (FromFid,(HPSTR)biHead,lhead);
 				BigWrite (GCIFid,(HPSTR)biHead,lhead,-1);
-	            GSSiClose (FromFid);
+	            GSSiClose2 (&FromFid);
 				hlpFI = GSSiGlobAlloc(1743,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
 				lpFI = (LPFILEINDEX) GlobalLock(hlpFI);    
 				lpFI->CurrentEntry=(FILEINDEXENTRY *) &lpFI->FirstIndex;
@@ -173,7 +173,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
             NextLen = (ULONG)Frame + (ULONG)lRec + (ULONG)1024;  
             if (NextLen > (ULONG)LONG_MAX)
             { 
-				GSSiClose (FromFid);
+				GSSiClose2 (&FromFid);
                 MessageBox(0,"Maximum file size exceeded",
                            0,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
 				return FALSE;
@@ -186,7 +186,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
             lpFI->Length += pEntry->Len;
             if (lpFI->Length >(USHRT_MAX - sizeof(FILEINDEXENTRY)))
             { 
-				GSSiClose (FromFid); 
+				GSSiClose2 (&FromFid); 
                 MessageBox(0,"Too many files in index - create sub indexes",
                            0,MB_OK|MB_ICONQUESTION|MB_TASKMODAL);
                 return FALSE;
@@ -199,7 +199,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 			pData = GlobalLock (hData);
 			BigRead (FromFid,pData,lRec); 
 			BigWrite (GCIFid,(HPSTR)pData,lRec,-1);
-			GSSiClose (FromFid); 
+			GSSiClose2 (&FromFid); 
             GSSiGlobUlFree (&hData);      
                   
             AddMinMaxD (&FileBounds,&lpFI->Bounds); 
@@ -234,7 +234,7 @@ BOOL CopyMapFile (LPSTR Name, LPSTR FromName,long Offset,FILEINDEXENTRY CurFileI
 	}
 Exit: 
 	SetContinueProcessing ( TRUE);
-	GSSiClose (CopyFID);
+	GSSiClose2 (&CopyFID);
 	
 	return TRUE;
 } 

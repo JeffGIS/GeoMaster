@@ -1345,7 +1345,7 @@ BOOL CreateStreetNameTable (LPSTR Dir)
      BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
      GlobalUnlock(hVars);
      GlobalFree(hVars); 
-     GSSiClose (FidData);
+     GSSiClose2 (&FidData);
                  
      hDB = OpenGWDatabase (File,BT_WRITE);
      if (!hDB) return (FALSE);
@@ -2157,7 +2157,7 @@ BOOL CreateStreetSegmentTable (LPSTR File)
 	 BT_CREATE (FileIn1, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
      LocalUnlock(hVars);
      LocalFree(hVars);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
      return TRUE;
 } 
 
@@ -2414,7 +2414,7 @@ BOOL CreateINT_MATCHTable (LPSTR File,LPSTR BadNames,short OrigKeyLen)
 	 BT_CREATE (FileIn1, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
      LocalUnlock(hVars);
      LocalFree(hVars);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 
      hDB = OpenGWDatabase (File,BT_WRITE);
      if (!hDB) return (FALSE);
@@ -2734,7 +2734,7 @@ BOOL CreateADD_MATCHTable (LPSTR File,LPSTR BadNames,LPSTR KeyDef,short AddUDILe
 	 BT_CREATE (FileIn1, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
      LocalUnlock(hVars);
      LocalFree(hVars);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 
      hDB = OpenGWDatabase (File,BT_WRITE);
      if (!hDB) return (FALSE);
@@ -3929,7 +3929,7 @@ int GetMapQuestLocation(LPSTR FullAddressIN, LPSTR Quality, LPDPOINT pPoint, int
 				LPSTR	ql, pEnd, plat, plng;
 
 				BigRead(Fid, pFile, lFile);
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 				ql = strstr(pFile, "\"geocodeQuality\":\"");
 				if (ql)
 				{

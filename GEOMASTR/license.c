@@ -73,7 +73,7 @@ BOOL abc6 (DWORD time) //checks all sources of time for consistency
 			if (Fid != HFILE_ERROR)
 			{
 				BigRead (Fid,&time2,4);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				if (time != time2)
 					return FALSE;
 				else
@@ -106,7 +106,7 @@ BOOL abc7 (DWORD time) //creates mult sources of time
 			if (Fid != HFILE_ERROR)
 			{
 				BigWrite (Fid,&time,4,-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				if (!SetFileAttributes(Path,FILE_ATTRIBUTE_HIDDEN))
 					ii=1;
 			}
@@ -686,7 +686,7 @@ ReCheck:
 			            	if (Fid != HFILE_ERROR)
 			            	{
 			            		fgetstring (str,100,Fid);
-			            		GSSiClose (Fid);
+			            		GSSiClose2 (&Fid);
 			            		if (EnterAccessCode (hWndDlg,str))  
 			            		{
 		        					GSSiMsgBox (hWndDlg,"Thank you for registering","",MB_OK,0);

@@ -77,7 +77,7 @@ int	Insert (LPSTR Opt,LPSTR File,LPSTR Text)
 		fputstring (str,NewFid);
 		while (fgetstring (str,255,OldFid))
 			fputstring (str,NewFid); 
-		GSSiClose (OldFid);
+		GSSiClose2 (&OldFid);
 		GSSillseek (NewFid,0,0);
 		OldFid = GSSiOpenFile (File,0,OF_CREATE);
 		if (OldFid == HFILE_ERROR)
@@ -165,7 +165,7 @@ void SaveVoterFieldDefs (void)
 			sprintf (str,"%s\t%s",UserCheckboxTitle[i],UserCheckboxFieldName[i]);
 			fputstring (str,Fid);
 		} 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	if (NumUserLists)
 	{
@@ -179,7 +179,7 @@ void SaveVoterFieldDefs (void)
 				fputstring (pValue,Fid);  
 			GlobalUnlock (UserListValues[i]);
 		} 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	
 	if (NumUserTextbox)
@@ -190,7 +190,7 @@ void SaveVoterFieldDefs (void)
 			sprintf (str,"%s\t%s\t%i",UserTextboxTitle[i],UserTextboxFieldName[i],UserTextboxMaxValueLength[i]);
 			fputstring (str,Fid);
 		} 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	
 }
@@ -220,7 +220,7 @@ void LoadVoterFields (HWND hWndDlg)
 					_fstrcpy (UserCheckboxFieldName[NumUserCheckbox++],pTAB); 
 				}
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
 		Fid = GSSiOpenFile ("[%DL]catalog\\lists.txt",0,OF_READ);  
 		if (Fid != HFILE_ERROR)
@@ -249,7 +249,7 @@ void LoadVoterFields (HWND hWndDlg)
 					_fstrcpy (UserListFieldName[NumUserLists++],pTAB); 
 				}
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
 		Fid = GSSiOpenFile ("[%DL]catalog\\textbox.txt",0,OF_READ);  
 		if (Fid != HFILE_ERROR)
@@ -268,7 +268,7 @@ void LoadVoterFields (HWND hWndDlg)
 					_fstrcpy (UserTextboxFieldName[NumUserTextbox++],pTAB); 
 				}
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
 	}
 	for (i=0;i<NumUserCheckbox;i++)

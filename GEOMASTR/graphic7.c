@@ -148,7 +148,7 @@ GSSiExitProg (872);
 		l=BigRead (Fid,GMmess,sizeof(GMmess)-1); 
 		GMmess[l]= 0;
 		ii=GSSifstat (Fid,&statmsg);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		switch (*type)
 		{    
 			case 'U':
@@ -331,7 +331,7 @@ BOOL EditSym (short Item,short NewDesc)
 					BigRead (Fid,(HPSTR)&ID,2);
 					if (ID == 8)
 						BigWrite (Fid,(HPSTR)&NewDesc,2,-1);
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					if (!GetSymbolName (NewDesc,SymName,0,2,0))
 					{   
 						HANDLE	hSymDesc=0;
@@ -407,7 +407,7 @@ BOOL EditTAG (short Item,LPSTR NewTAGVal)
 					GSSillseek (Fid,4,1);
 					BigWrite (Fid,(HPSTR)NewTAG,CurlTAG,-1);
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			} 
 			SaveFTI = ForceTAGIndex;
 			ForceTAGIndex = ForceRefIndex = TRUE;
@@ -2023,13 +2023,13 @@ GSSiExitProg (901);
 		    CloseThemeDataFile (TRUE);
 			if (CurTheme->ID == GF_OFFSETAREA_THEME)
 			{
-				GSSiClose (CurTheme->FidAreas);
+				GSSiClose2 (&CurTheme->FidAreas);
 				CurTheme->FidAreas = HFILE_ERROR;
 				GSSiRemoveAndClear (CurTheme->ScatterFile); 
 			}
 			if (CurTheme->ID == GF_POINT_IN_AREA_THEME)
 			{
-				GSSiClose (CurTheme->FidAreas);
+				GSSiClose2 (&CurTheme->FidAreas);
 				CurTheme->FidAreas = HFILE_ERROR;
 				GSSiRemoveAndClear (CurTheme->ScatterFile); 
 			    if (ExistFile (CurTheme->DataFile))
@@ -4415,7 +4415,7 @@ GetNextLine:;
 		}
 		if (FidLast != HFILE_ERROR)
 		{
-			GSSiClose (FidPM);
+			GSSiClose2 (&FidPM);
 			FidPM = FidLast; 
 			FidLast = HFILE_ERROR;
 			goto Top;
@@ -4432,7 +4432,7 @@ GetNextLine:;
 			item=0;
 		GSSiGlobUlFree (&hNames);
 	} 
-	GSSiClose (FidPM);
+	GSSiClose2 (&FidPM);
 	if (UseMenus && ((!SingleOpt && TotAction == 1) || (!hWnd && TotAction)))
 		ProcessPickedItems (hWndMain,SingleItem,SingleRec);
 	else if (hWnd && UseMenus)
@@ -4577,7 +4577,7 @@ GSSiExitProg (909);
 GetNextLine:;			 
 	}  
 Exit:
-	GSSiClose (FidPM);
+	GSSiClose2 (&FidPM);
 	GSSiGlobUlFree (&hStr);
 	GSSiGlobUlFree (&hNames); 
 	CurView = SaveVP;
@@ -4681,14 +4681,14 @@ NextLine:
     	}
     	else if (FidLast != HFILE_ERROR)
     	{   
-    		GSSiClose (Fid);
+    		GSSiClose2 (&Fid);
     		Fid = FidLast;
     		FidLast = HFILE_ERROR;
 			goto NextLine;
     	}
     	else
     	{
-    		GSSiClose (Fid);
+    		GSSiClose2 (&Fid);
     		goto RtnFalse;
     	}
     } 
@@ -4716,9 +4716,9 @@ ProcessNextLine:
 	CurLoc = GSSillseek (Fid,0,1);
 	if (!fgetstring (NextLine,1020,Fid))
 		NextLine[0]=0;
-	GSSiClose (Fid);  
+	GSSiClose2 (&Fid);  
 	if (FidLast != HFILE_ERROR)
-		GSSiClose (FidLast);
+		GSSiClose2 (&FidLast);
 	if (*str=='+')
 	{
 		lpAction=str;

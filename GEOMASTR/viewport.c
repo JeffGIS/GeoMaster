@@ -60,7 +60,7 @@ GSSiExitProg (1003);
 }
     
 BadFile:
-    GSSiClose (Fid); 
+    GSSiClose2 (&Fid); 
     *pVersion = 0;
 {
 #if ENABLETRACE
@@ -89,7 +89,7 @@ GSSiExitProg (1004);
 #endif
 		return 0;
 }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (1004);
@@ -403,7 +403,7 @@ short GetFileTypeFromName(LPSTR InName,BOOL OpenFilelist)
 				return 0;
 			if (fgetstring (Name,255,Fid))
 				rtn = GetFileTypeFromName(Name,TRUE); 
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			return rtn;
 		}
 		else
@@ -931,7 +931,7 @@ HFILE CompressConfig (HFILE Fid,LPSTR Name)
 	GSSillseek (Fid,0,0);
 	BigRead (Fid,pTemp,ln);
     CompressedLength = CompressBinaryRecord (pTemp,pCompressedRec,ln); 
-    GSSiClose (Fid);  
+    GSSiClose2 (&Fid);  
     Fid = GSSiOpenFile (Name,0,OF_CREATE);
 	BigWrite (Fid,pCompressedRec,CompressedLength,-1);
 	BigWrite (Fid,&ln,4,-1);
@@ -1002,7 +1002,7 @@ void EmbedMenusInConfig (HFILE Fid, LPSTR TempName)
 			BigWrite(Fid, pTemp, Length, -1);
 			GSSiGlobUlFree(&hTemp);
 		}
-		GSSiClose(FidTemp);
+		GSSiClose2 (&FidTemp);
 	}
 	else
 		ii=1;
@@ -1141,8 +1141,8 @@ BOOL CreateAllSizes (HWND hWndDlg)
 	}
 	GSSillseek (FidTemp,hdrloc,0);
 	BigWrite (FidTemp,(HPSTR)SavedImageData,NumSavedImages*sizeof(SAVEDIMAGEDATA),-1); 
-	GSSiClose (FidTemp);
-	GSSiClose (Fid);
+	GSSiClose2 (&FidTemp);
+	GSSiClose2 (&Fid);
 	DeleteDC (hdcMemMap);
 	hdcMemMap = 0;
 	BufferedScreen = SaveBufferedScreen;
@@ -1193,7 +1193,7 @@ void CloseConfig ()
 {GSSiEnterProg (102);
 #endif
 {
-   	GSSiClose (FidConfig);
+   	GSSiClose2 (&FidConfig);
     FidConfig = HFILE_ERROR;
 {
 #if ENABLETRACE

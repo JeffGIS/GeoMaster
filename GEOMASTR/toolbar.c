@@ -4975,7 +4975,7 @@ BOOL GetFileNameFromLink (LPSTR FileName)
 	{
 		Fid = GSSiOpenFile (FileName,0,OF_READ);
 		fgetstring (FileName,MAX_PATH,Fid);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		rtn = TRUE;
 	}
 	return rtn;
@@ -5098,7 +5098,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 						strcpy (pDot,".glk");
 						Fid = GSSiOpenFile (LinkFile,0,OF_CREATE);
 						fputstring (pFile,Fid);
-						GSSiClose (Fid);
+						GSSiClose2 (&Fid);
 					}
 					else
 					{
@@ -5159,11 +5159,11 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 		GSSiGetTempFileName (0,"gt",0,ListFile); 
 		Fid = GSSiOpenFile (ListFile,0,OF_CREATE);   
 		SearchFilesInDir (PictViewerDir, "", Fid,&n,"*.*",-1,TRUE,TRUE);   
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		Fid = GSSiOpenFile (ListFile,0,OF_READ);  
 		while (fgetstring (str,250,Fid))
            	SendDlgItemMessage (hWndDlg,IDC_PICTLIST,LB_ADDSTRING,0,(LPARAM)str);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiRemove (ListFile);
 		CurFile = 0;
         PostMessage(hWndDlg, WM_COMMAND, IDC_SHOWCURFILE, 0L);
@@ -5267,7 +5267,7 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 								strcpy (pDot,".glk");
 								Fid = GSSiOpenFile (LinkFile,0,OF_CREATE);
 								fputstring (str,Fid);
-								GSSiClose (Fid);
+								GSSiClose2 (&Fid);
 							}
 							else
 							{

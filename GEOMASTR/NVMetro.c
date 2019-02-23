@@ -67,7 +67,7 @@ int LoadMultPropertyDB(LPSTR INDir)
 				offset = GSSillseek(fid, 0, 1);
 			}
 		}
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 		BT_CLOSE(hIndex);
 		DestroyStatusWindow(0);
 		year++;
@@ -101,7 +101,7 @@ static void test(LPSTR INDir)
 	GSSillseek(fid, offset, 0);
 	fgetstring(line, maxLineLen, fid);
 	BT_CLOSE(hIndex);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	return;
 
 }
@@ -132,7 +132,7 @@ static void test2(LPSTR INDir)
 	BigRead(fid, &yearly, sizeof(YEARLYVALUES));
 	BigRead(fid, &yearly, sizeof(YEARLYVALUES));
 	BT_CLOSE(hIndex);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	return;
 
 }
@@ -191,7 +191,7 @@ void CloseYearFiles(void)
 	for (int i = 0; i < NYEARS; i++)
 	{
 		BT_CLOSE(hIndexYear[i]);
-		GSSiClose(fidYear[i]);
+		GSSiClose2 (&fidYear[i]);
 	}
 }
 int CreateMultValueFile(LPSTR INDir)
@@ -332,9 +332,9 @@ int CreateMultValueFile(LPSTR INDir)
 	}
 	BT_CLOSE(hIndex);
 	BT_CLOSE(hChangeValueIndex);
-	GSSiClose(fidChangeValues);
+	GSSiClose2 (&fidChangeValues);
 	DestroyStatusWindow(0);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	CloseYearFiles();
 	free(pChangeValues);
 	free(pChangeValues2);

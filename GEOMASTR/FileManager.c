@@ -280,7 +280,7 @@ static BOOL FMRollBack(HWND hWnd)
 		sqlite3_free(error);
 		if (!rtn)
 		{
-			GSSiClose(fidDeleteList);
+			GSSiClose2 (&fidDeleteList);
 			fidDeleteList = GSSiOpenFile(deleteFile, 0, OF_CREATE);
 			rtn = TRUE;
 			SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), db, "Start transaction", &error);
@@ -318,7 +318,7 @@ static BOOL FMCommit(void)
 				GSSiRemove(pCmd);
 			}
 		}
-		GSSiClose(fidDeleteList);
+		GSSiClose2 (&fidDeleteList);
 		fidDeleteList = GSSiOpenFile(deleteFile, 0, OF_CREATE);
 		rtn = TRUE;
 		SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &error), db, "Start transaction", &error);
@@ -353,7 +353,7 @@ static BOOL CreateFMExtract(HWND hWndDlg)
 			curPos = GSSillseek(fidIncludedFiles, 0, 1);
 		}
 		DestroyStatusWindow(0);
-		GSSiClose(fidIncludedFiles);
+		GSSiClose2 (&fidIncludedFiles);
 	}
 
 	return rtn;
@@ -444,7 +444,7 @@ static BOOL FMScan(HWND hWndDlg)
 			}
 		}
 	}
-	GSSiClose(Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove(TempFile);
 	itoa(IDNINT(totLen / (1024.0*1024.0)), CtotSize, 10);
 	AddCommas(CtotSize);
@@ -455,7 +455,7 @@ static BOOL FMScan(HWND hWndDlg)
 	WaitCursor(-1);
 	if (fidIncludedFiles != HFILE_ERROR)
 	{
-		GSSiClose(fidIncludedFiles);
+		GSSiClose2 (&fidIncludedFiles);
 		EnableWindow(GetDlgItem(hWndDlg, IDC_FMCREATEEXTRACT),TRUE);
 	}
 	else
@@ -615,7 +615,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			if (FMRollBack(hWndDlg))
 			{
 				FMClose();
-				GSSiClose(fidDeleteList);
+				GSSiClose2 (&fidDeleteList);
 				GSSiRemove(deleteFile);
 				EndDialog(hWndDlg, FALSE);
 			}
@@ -623,7 +623,7 @@ BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		case IDOK:
 			FMCommit();
 			FMClose();
-			GSSiClose(fidDeleteList);
+			GSSiClose2 (&fidDeleteList);
 			GSSiRemove(deleteFile);
 			EndDialog(hWndDlg, TRUE);
 			break;

@@ -238,7 +238,7 @@ long ClearGMTempFiles (void)
 
 	//SearchFilesInDir (str, "", Fid,&n,"*",1,TRUE);   
 	SearchDirectoriesInDir (str,Fid,&n,"*",-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CurTime = GetLastFileWriteTime (ListFile,&TimeDiff);
 	Fid = GSSiOpenFile (ListFile,0,OF_READ);  
 /*	{
@@ -264,7 +264,7 @@ long ClearGMTempFiles (void)
 			}
 		}	
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove (ListFile);
 	return n;
 }
@@ -352,7 +352,7 @@ void QuitGraphics()
 	SaveWindowPosition();
 	if (LogMSGFile != HFILE_ERROR)
 	{
-		GSSiClose(LogMSGFile);
+		GSSiClose2 (&LogMSGFile);
 	}
 
 	MergeImageIntoViewport(0, 0, 0, 0);
@@ -466,7 +466,7 @@ void QuitGraphics()
 	GSSiGlobFree (&hCmdMess);
 	ClearFullWindowBitmap (0);
 	if (FidBlockedRefs != HFILE_ERROR)
-		GSSiClose (FidBlockedRefs); 
+		GSSiClose2 (&FidBlockedRefs); 
 	if (hBlockedRefFile)
 	{    
 		pFile = GlobalLock (hBlockedRefFile);
@@ -985,7 +985,7 @@ GSSiExitProg (12);
 			    GSSillseek (Fid,CurOrtho->Frame,0);
 			    BigRead (Fid,(HPSTR)&lRec,4); 
 			    TotCopySize += lRec;
-			    GSSiClose (Fid);  
+			    GSSiClose2 (&Fid);  
 			    GlobalUnlock (hOrthos);
 			}
 			else 
@@ -993,7 +993,7 @@ GSSiExitProg (12);
 			    Fid = GSSiOpenFile (PltName,&OFStruct,OF_READ);
 			    lRec = GSSillseek (Fid,0,2);
 			    TotCopySize += lRec;
-			    GSSiClose (Fid);
+			    GSSiClose2 (&Fid);
 			}
        }
         goto Next;
@@ -4013,7 +4013,7 @@ GSSiExitProg (48);
 #endif
 		return (FALSE);
 }
-    GSSiClose (FidMap);
+    GSSiClose2 (&FidMap);
     FidMap = HFILE_ERROR;
 {
 #if ENABLETRACE
@@ -5693,7 +5693,7 @@ GSSiExitProg (60);
     BigRead (FidIndex,(HPSTR)&Version,2);
     if (Signature != 80251)
     {    
-        GSSiClose (FidIndex); 
+        GSSiClose2 (&FidIndex); 
         GSSiMessageBox (0,"This is not a valid index file",OFStruct.szPathName, MB_OK,0);
 {
 #if ENABLETRACE
@@ -5705,7 +5705,7 @@ GSSiExitProg (60);
     if (Version > 2)
     {
     BadMap:  
-        GSSiClose(FidIndex);
+        GSSiClose2 (&FidIndex);
         GSSiMessageBox (0,"This index file version is not recognized",Name, MB_OK,0);
 {
 #if ENABLETRACE
@@ -5717,14 +5717,14 @@ GSSiExitProg (60);
     if (Version < 1) goto BadMap; 
     if (Version == 1)
     {
-        GSSiClose(FidIndex);
+        GSSiClose2 (&FidIndex);
         ConvertIndexV1ToV2(Name); 
         goto Start;
     }
         
     GSSillseek(FidIndex,0,0);
     BigRead (FidIndex,(HPSTR)FileBounds,sizeof(MNMXCORD));
-    GSSiClose (FidIndex); 
+    GSSiClose2 (&FidIndex); 
 {
 #if ENABLETRACE
 GSSiExitProg (60);
@@ -5869,12 +5869,12 @@ GSSiExitProg (65);
 	            {
 	                if (!fgetstring(SubFileName,254,FidSub))
 	                {
-	                    GSSiClose (FidSub);
+	                    GSSiClose2 (&FidSub);
 	                    goto RtnFalse;
 	                }
 	                ifile++;
 	            }
-	            GSSiClose (FidSub);
+	            GSSiClose2 (&FidSub);
 				if ((pTAB = strrchr (SubFileName,'\t')))
 				{
 					*pTAB++ = 0;
@@ -6370,7 +6370,7 @@ Next:
             FidIndex = GSSiOpenFile(lpIndex->FileName,&OFStruct,OF_READWRITE);
             GSSillseek (FidIndex,lpIndex->FirstIndexFileOffset,0);
             BigWrite (FidIndex,&lpIndex->FirstIndex,(size_t)lpIndex->Length,-1);
-            GSSiClose (FidIndex);
+            GSSiClose2 (&FidIndex);
         } 
         if (!(lpIndex=GetNextIndexHeader(&CurView->hlpIndex[CurView->CurFile],TRUE)))
         {   
@@ -6612,7 +6612,7 @@ DisplayFile:
         }
         FidRestart = GSSiOpenFile ("restart.txt",&OFStruct,OF_CREATE);
         fputstring (PltName,FidRestart);
-        GSSiClose (FidRestart);
+        GSSiClose2 (&FidRestart);
     } */
 {
 #if ENABLETRACE
@@ -7049,10 +7049,10 @@ GSSiExitProg (70);
     dtime = difftime (stattxt.st_mtime,statbin.st_mtime); 
     if (dtime<0 && statbin.st_size) 
     {
-        GSSiClose (FidTxt);
+        GSSiClose2 (&FidTxt);
         goto GetBin;
     }
-    GSSiClose (FidBin); 
+    GSSiClose2 (&FidBin); 
     
 MakeBin:
 	Display = FALSE;
@@ -7132,7 +7132,7 @@ MakeBin:
     } 
 	InLoadBinaryFileList = FALSE;
 	Display = SaveDisplay;
-    GSSiClose (FidTxt); 
+    GSSiClose2 (&FidTxt); 
     GlobalUnlock (hBinFileList);  
     lpNumFiles = (LPSHORT)GlobalLock (hBinFileList);
     lpEntry = (LPFILELISTENTRY)lpNumFiles; 
@@ -7150,7 +7150,7 @@ GSSiExitProg (70);
 	}
     BigWrite (FidBin,(HPSTR)&Marker,2,-1); 
     BigWrite (FidBin,(HPSTR)lpNumFiles,len,-1); 
-    GSSiClose (FidBin);
+    GSSiClose2 (&FidBin);
     GSSiGlobUlFree (&hBinFileList);
     FidBin = GSSiOpenFile (BinFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
     ii=GSSifstat (FidBin,&statbin);
@@ -7159,7 +7159,7 @@ GetBin:
     BigRead (FidBin,(HPSTR)&First2Bytes,2);
 	if (First2Bytes != Marker)
 	{
-	    GSSiClose (FidBin); 
+	    GSSiClose2 (&FidBin); 
 	    FidTxt = GSSiOpenFile (TextFile,(LPOFSTRUCTGM)&OFStruct,OF_READ);
 		goto MakeBin;
 	}
@@ -7167,7 +7167,7 @@ GetBin:
     lpNumFiles = (LPSHORT)GlobalLock (hBinFileList);
     BigRead (FidBin,(HPSTR)lpNumFiles,(int)statbin.st_size-2);
     GlobalUnlock (hBinFileList);
-    GSSiClose (FidBin);   
+    GSSiClose2 (&FidBin);   
 {
 #if ENABLETRACE
 GSSiExitProg (70);

@@ -89,7 +89,7 @@ BOOL LoadAccountRoutes (int iaccount)
 							}
 						}
 
-						GSSiClose (Fid);
+						GSSiClose2 (&Fid);
 					}
 					memmove ((LPDPOINT)(pFenceHeader+1),pPoly,npnts * sizeof(DPOINT));
 					GlobalUnlock (phRoutes[NumAccountRoutes[iaccount]]);
@@ -231,7 +231,7 @@ $FENCE(Check:1234,43.45672,-93.212344);
 			}
 			sprintf (strchr(CmdMess,0),">Fence:%s,%s,%s,%s,%f,%c,%i;\r\n",Account,pName,IncExc,ActInAct,Offset,Units,Critical);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	strcat (CmdMess,">FenceListEnd;\r\n");
 	GlobalUnlock (hCmdMess);
@@ -256,7 +256,7 @@ BOOL GetFenceDefs (LPSTR Account)
 
 		Fid = GSSiOpenFile (FileName,0,OF_READ);
 		BigRead (Fid,pFile,lFile);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		CloseAllRequestedFiles(FALSE);  
 		err = send (CurrentServerSocket,pFile,lFile,0); 
 		GSSiGlobUlFree (&hFile);
@@ -321,7 +321,7 @@ $FENCE(Check:1234,43.45672,-93.212344);
 		}
 		memcpy (CmdMess,pListBeg,curlen);
 		GSSiGlobUlFree (&hList);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	strcat (CmdMess,">FenceLinkEnd;\r\n");
 	GlobalUnlock (hCmdMess);
@@ -355,7 +355,7 @@ BOOL GetFenceStops (LPSTR Account,LPSTR Type)
 		}
 		memcpy (CmdMess,pListBeg,curlen);
 		GSSiGlobUlFree (&hList);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	strcat (CmdMess,">RouteStopsEnd;\r\n");
 	GlobalUnlock (hCmdMess);
@@ -422,7 +422,7 @@ BOOL ActivateFence (LPSTR Account,LPSTR Name,BOOL AorD)
 				pLoc = strstr (pLoc,".plt");
 			}
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiGlobUlFree (&handle);
 	}
 	if (AorD)
@@ -459,7 +459,7 @@ BOOL LoadAccountVehicleLinkList (int iaccount)
 			curlen = (int)pList - (int)pListBeg;
 		}
 		GlobalUnlock (hVehicleLinkList[iaccount]);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		rtn = TRUE;
 	}
 	else
@@ -623,7 +623,7 @@ BOOL CheckFence (LPSTR Account,LPSTR ID,LPSTR VehID,double x,double y)
 
 		Fid = GSSiOpenFile (Filelist,0,OF_READ);
 		BigRead (Fid,pStr,len);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		pStr[len] = 0;
 		strlwr (pStr);
 		while (pLoc)
@@ -838,7 +838,7 @@ BOOL TCPGetFile (SOCKET socket,LPSTR ToPath,LPSTR FromPath,BOOL Delete)
 			WSASetLastError (0);
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -897,7 +897,7 @@ BOOL TCPSaveFile (LPSTR ToPath,int FileLength)
 		if (rtn)
 			BigWrite (Fid,pFileb,FileLength,-1);
 		GSSiGlobUlFree (&hFile);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	st = send (CurrentServerSocket,(LPSTR)&totread,4,0);
 	if (st == SOCKET_ERROR)
@@ -943,7 +943,7 @@ BOOL TCPSendFile (LPSTR FromPath,int BlockSize,BOOL Delete)
 			totlen += lnsent;
 			GSSillseek (Fid,totlen,0);//allows for lnsent to be less than ln
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		if (Delete)
 			GSSiRemove (FromPath);
 	}
@@ -1028,13 +1028,13 @@ int UploadFence (LPSTR Account,LPSTR FileLength,LPSTR FileLengthCmp)
 		sprintf (FenceBackupFile,"[%%DL]fences\\%s.gfc",Account);
 		Fid = GSSiOpenFile (FenceBackupFile,0,OF_CREATE);
 		BigWrite (Fid,pFileCmp,lFileCmp,-1);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		if (len == lFile)
 		{
 			sprintf (FenceBackupFile,"[%%DL]fences\\%s.gfb",Account);
 			Fid = GSSiOpenFile (FenceBackupFile,0,OF_CREATE);
 			BigWrite (Fid,pFile,len,-1);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			st = send (CurrentServerSocket,"OK2",4,0);
 		}
 		else
@@ -1199,7 +1199,7 @@ int UploadFenceLinks (LPSTR Account)
 		{
 			pBuffer = GlobalLock (hBuffer);
 			BigWrite (Fid,pBuffer,lBuffer,-1);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GlobalUnlock (hBuffer);
 		}
 		GSSiGlobFree (&hBuffer);
@@ -1282,7 +1282,7 @@ int UploadRouteStops (LPSTR Account)
 		{
 			pBuffer = GlobalLock (hBuffer);
 			BigWrite (Fid,pBuffer,lBuffer,-1);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GlobalUnlock (hBuffer);
 		}
 		GSSiGlobFree (&hBuffer);

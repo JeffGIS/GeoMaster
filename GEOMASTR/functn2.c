@@ -354,8 +354,8 @@ GSSiExitProg (1350);
 				fputstring (str,Fid2);
 				ipt++;
 			} 
-			GSSiClose (Fid);  
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid);  
+			GSSiClose2 (&Fid2);
 			if (ipt >= 0)
 			{
 				Fid = GSSiOpenFile (Arg[1],0,OF_CREATE);
@@ -388,8 +388,8 @@ GSSiExitProg (1350);
 					ipt++;
 					fputstring (str,Fid);
 				}
-				GSSiClose (Fid);  
-				GSSiClose (Fid2); 
+				GSSiClose2 (&Fid);  
+				GSSiClose2 (&Fid2); 
 				rtn=TRUE;
 			}
 			GSSiRemove (TmpName); 
@@ -452,7 +452,7 @@ GSSiExitProg (1350);
 					ipt++; 
 				}
 			}
-			GSSiClose (Fid);	
+			GSSiClose2 (&Fid);	
 			GlobalUnlock (hTemp);
 			GSSiGlobUlFree (&hTemp);		
 			if (rtn)
@@ -508,7 +508,7 @@ GSSiExitProg (1350);
 				    {   
 				    	if (RecNum == WantRec)
 				    	{   
-				    		GSSiClose (Fid);
+				    		GSSiClose2 (&Fid);
 			         		SetGlobalValueLong (lpCLGlob,WantRec);
 				    		if ((lpBAR = _fstrrchr (str,'|')))
 				    		{   
@@ -526,7 +526,7 @@ GSSiExitProg (1350);
 						}
 				    	RecNum++;
 				    }  
-				    GSSiClose (Fid);
+				    GSSiClose2 (&Fid);
 					GSSiGlobUlFree (&hTemp);
 					goto RtnFalse;
             	
@@ -771,7 +771,7 @@ GSSiExitProg (1350);
 			{
 	        	while (fgetstring (Arg[1],2040,Fid))
 		   			nlong++; 
-		   		GSSiClose (Fid);
+		   		GSSiClose2 (&Fid);
 		   	}
 			ltoa (nlong,OutLoc,10);  
 		    goto Rtnl;
@@ -937,7 +937,7 @@ GSSiExitProg (1350);
 				HFILE Fid = GSSiOpenFile (Arg[1],0,OF_READ);
 
 				if (Fid != HFILE_ERROR)
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 				nlong = FileType_old (Arg[1]);
 			}
 			else
@@ -1026,7 +1026,7 @@ GSSiExitProg (1350);
 				{   
 					while (LineNo < nlong && fgetstring (OutLoc,1024,Fid1))
 						LineNo++; 
-					GSSiClose (Fid1);
+					GSSiClose2 (&Fid1);
 				} 
 			}
 			goto Rtnl;
@@ -1327,7 +1327,7 @@ GSSiExitProg (1350);
 						BigWrite (FidOut,&FileBounds,sizeof(FileBounds),-1);
 						Subfile++;
 					}
-					GSSiClose (FidOut);
+					GSSiClose2 (&FidOut);
 					Level /= 2;
 				}
 				Subfile='A';
@@ -1341,7 +1341,7 @@ GSSiExitProg (1350);
 					BigWrite (FidOut,&FileBounds,sizeof(FileBounds),-1);
 					Subfile++;
 				}
-				GSSiClose (FidOut);
+				GSSiClose2 (&FidOut);
 				GSSiGlobUlFree (&hFiles);
 				goto RtnTrue;
 			}
@@ -1386,7 +1386,7 @@ GSSiExitProg (1350);
 				setupdata.MapPrefix_SufFile_dek[3] = atoi(Arg[8]);
 				BigWrite (Fid,&setupdata,sizeof(SETUPDATA),-1);
 				BigWrite (Fid,&version,1,-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				goto RtnTrue;
 			}
 			else if (!stricmp (Arg[1],"EXPORTGRIDDEF"))
@@ -1457,7 +1457,7 @@ GSSiExitProg (1350);
 				pDataInit = GlobalLock (hPNGrid);
 				Fid = GSSiOpenFile (Arg[2],0,OF_READ);
 				BigRead (Fid,pDataInit,ld);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				GetStateFromLatLonInit (pDataInit);
 			}
 			else if (!stricmp (Arg[1],"DISPLAY"))
@@ -1795,7 +1795,7 @@ GSSiExitProg (1350);
 			else if (!stricmp(Arg[1], "CLOSE"))
 			{
 				fid = atoi(Arg[2]);
-				rtn = !GSSiClose(fid);
+				rtn = !GSSiClose2 (&fid);
 			}
 			else if (!stricmp(Arg[1], "REPLACE"))
 			{
@@ -1810,10 +1810,10 @@ GSSiExitProg (1350);
 					*end = 0;
 					REPLAC(mem,Arg[3], Arg[4],maxmem);
 					size = strlen(mem);
-					GSSiClose(fid);
+					GSSiClose2 (&fid);
 					fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 					BigWrite(fid, mem, size, -1);
-					GSSiClose(fid);
+					GSSiClose2 (&fid);
 					free(mem);
 					rtn = 1;
 				}
@@ -2139,8 +2139,8 @@ GSSiExitProg (1350);
 						fgetstring(pLine, 4090, Fid);
 						fputstring(pLine, Fid2);
 					}
-					GSSiClose(Fid2);
-					GSSiClose(Fid);
+					GSSiClose2 (&Fid2);
+					GSSiClose2 (&Fid);
 					Fid = HFILE_ERROR;
 					GSSiRemove(Arg[3]);
 					GSSiRename(sortedFile, Arg[3]);
@@ -2148,7 +2148,7 @@ GSSiExitProg (1350);
 					GSSiGlobUlFree(&hLine);
 					GSSiGlobUlFree(&hTmp);
 				}
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 			}
 			ltoa (nlong,OutLoc,10);
 			goto Rtnl; 
@@ -2266,8 +2266,8 @@ GSSiExitProg (1350);
 				sprintf (_fstrchr(Arg[3],0),"%c%ld",Delim,id++);
 				fputstring (Arg[3],Fid2);
 			}
-	        GSSiClose (Fid); 
-	        GSSiClose (Fid2);
+	        GSSiClose2 (&Fid); 
+	        GSSiClose2 (&Fid2);
 			goto RtnTrue;
 		} 
 		
@@ -2640,7 +2640,7 @@ GSSiExitProg (1350);
 			Fid = GSSiOpenFile (Arg[1],0,OF_CREATE);
 			if (Fid != HFILE_ERROR)
 			{
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				rtn = TRUE;
 			}
 			else
@@ -2854,13 +2854,13 @@ GSSiExitProg (1350);
 			{
            		Fid = GSSiOpenFile (Arg[2],0,OF_READ);
            		rtn = ReadPrintSetupData (Fid);                  
-           		GSSiClose (Fid);
+           		GSSiClose2 (&Fid);
 			}
 			else if (!_fstricmp (Arg[1],"SAVE"))
 			{
            		Fid = GSSiOpenFile (Arg[2],0,OF_CREATE);
            		SavePrintSetupData (Fid,0);                  
-           		GSSiClose (Fid);  
+           		GSSiClose2 (&Fid);  
            		rtn = TRUE;
 			}
           	else
@@ -2999,8 +2999,8 @@ GSSiExitProg (1350);
 			fputstring (Arg[3],Fid2); 
 			while (fgetstring (lpstr,1024,Fid))
 				fputstring (lpstr,Fid2);
-	        GSSiClose (Fid); 
-	        GSSiClose (Fid2);
+	        GSSiClose2 (&Fid); 
+	        GSSiClose2 (&Fid2);
 	        GSSiRemove (Arg[1]);
 	        GSSiRename (pFile,Arg[1]);
 			goto RtnTrue;
@@ -3041,7 +3041,7 @@ GSSiExitProg (1350);
 			Fid = GSSiOpenFile(Arg[1], 0, OF_CREATE);
 			if (Fid == HFILE_ERROR) 
 				goto RtnFalse;
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
           	goto RtnTrue;  
           	
 		case 1016: // $WINTOWORLD(point,vpname)
@@ -3600,7 +3600,7 @@ GSSiExitProg (1350);
 				WriteTranData (Fid,hTran);
 				CloseTRANS2 (&hTran); 
 				BigWrite (Fid,(HPSTR)&Tran2Offset,4,-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				goto RtnTrue;
 			}
 			else
@@ -3754,7 +3754,7 @@ GSSiExitProg (1350);
             rtn = ContinueProcessing;
             SetContinueProcessing ( TRUE);
 			GSSiGlobFree (&hDLT);
-            GSSiClose (Fid);
+            GSSiClose2 (&Fid);
             if (pStatusText)
 				switch (istatus)
 			{
@@ -3821,7 +3821,7 @@ GSSiExitProg (1350);
 					fputstring (str,Fid);				
 	NextTranPoint:;
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				goto RtnTrue;
 			}
 
@@ -4032,7 +4032,7 @@ GSSiExitProg (1350);
 		        else
 		        	pFile = GlobalLock (hBlockedRefFile);
 				if (FidBlockedRefs != HFILE_ERROR)
-					GSSiClose (FidBlockedRefs);  
+					GSSiClose2 (&FidBlockedRefs);  
 		        FidBlockedRefs = GSSiOpenFile (pFile,0,OF_CREATE);
 				GlobalUnlock (hBlockedRefFile); 
 				goto RtnTrue;
@@ -4789,7 +4789,7 @@ GSSiExitProg (1350);
 			else if (!stricmp (Arg[1],"CLOSE"))
 			{
 				if (SaveContours (-2,0,""))
-				/*GSSiClose (fidSaveContours);
+				/*GSSiClose2 (&fidSaveContours);
 				fidSaveContours = HFILE_ERROR;*/
 					goto RtnTrue;
 			}
@@ -5360,7 +5360,7 @@ GSSiExitProg (1350);
 					}
 					GSSiGlobUlFree (&hMem);
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			}
 			goto Rtnl;
 		
@@ -5393,7 +5393,7 @@ GSSiExitProg (1350);
 					GSSiGlobUlFree (&hMem);
 					rtn = TRUE;
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			}
 			goto Rtnl;
 
@@ -5673,7 +5673,7 @@ GSSiExitProg (1350);
 			Fid2 = GSSiOpenFile(Arg[1], 0, OF_CREATE);
 			if (Fid2 == HFILE_ERROR)
 			{
-				GSSiClose(Fid1);
+				GSSiClose2 (&Fid1);
 				goto RtnFalse;
 			}
 			while (fgetstring(line, 4090, Fid1))
@@ -5699,8 +5699,8 @@ GSSiExitProg (1350);
 				} while (pEnd);
 				fputstring(line, Fid2);
 			}
-			GSSiClose(Fid1);
-			GSSiClose(Fid2);
+			GSSiClose2 (&Fid1);
+			GSSiClose2 (&Fid2);
 			goto RtnTrue;
 		}
 		case 1601: //$CREATESPORTMAPCD(orderfile,outdir) 
@@ -5867,10 +5867,10 @@ GSSiExitProg (1350);
 				{
 					while ((ln = BigRead (Fid2,pBuf,lBuf)) > 0)
 						BigWrite (Fid1,pBuf,ln,-1);
-					GSSiClose (Fid2);
+					GSSiClose2 (&Fid2);
 					itoa (loc,OutLoc,10);
 				}
-				GSSiClose (Fid1);
+				GSSiClose2 (&Fid1);
 				GSSiGlobUlFree (&hBuf);
 			}
 			goto Rtnl;
@@ -6181,7 +6181,7 @@ HWND GetTargetWindow(void)
 	HWND hWnd = 0;
 	HFILE fid = GSSiOpenFile("c:\\temp\\targetwindow.bin", 0, OF_READ);
 	BigRead(fid, &hWnd, sizeof(HWND));
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	return hWnd;
 }
 int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
@@ -6414,7 +6414,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring("KeyStroke_490_152-152_15.png", fid);
 			rtn = iCursor;
 		}
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 	}
 	ltoa(systim, OutLoc, 10);
 	return rtn;

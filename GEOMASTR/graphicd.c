@@ -460,7 +460,7 @@ HANDLE LoadColorMap (LPSTR Name,LPSHORT pnPalColors)
 	for (i=0;i<256;i++)
 		pMapColors[i] = RGBQUADFromCOLORREF (MapColors[i]);
 	GlobalUnlock (hMapColors);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return hMapColors;
 }
      
@@ -539,7 +539,7 @@ BOOL CreateColorMap (LPSTR Name)
 		idesc = atoi (pSpace);
 		AddSymbolColorsToMap (idesc,&NumMapColors,hMapColors);
 	}
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid2);
 	GSSiRemove (TempFile);  
 	OpenShields	 ();
 	if (hShields)
@@ -571,7 +571,7 @@ BOOL CreateColorMap (LPSTR Name)
 	BigWrite (Fid,(HPSTR)&NumMapColors,2,-1);
 	BigWrite (Fid,(HPSTR)pMapColors,256*sizeof(COLORREF),-1); 
 	GSSiGlobUlFree (&hMapColors);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -1137,7 +1137,7 @@ BOOL SaveMemMap (void)
 				BigRead (FidMM,pMem,sizeMM);
 				loc = GSSillseek2 (FidBIN,0,2);
 				BigWrite (FidBIN,pMem,sizeMM,-1);
-				GSSiClose (FidBIN);  
+				GSSiClose2 (&FidBIN);  
 				GSSiGlobUlFree (&hMem);
 				pMAPFILE->ID = MemMapID;   
 				pMAPFILE->SubDir = MemMapSubDir;
@@ -1157,7 +1157,7 @@ BOOL SaveMemMap (void)
 			GlobalUnlock (hDB);
 		    CloseGWDatabase (hDB);   
 		}
-		GSSiClose (FidMM);
+		GSSiClose2 (&FidMM);
 	}	
 	GMDestroyDIB32 (hDib8);
 	NumRequests++;
@@ -1208,7 +1208,7 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 						if (FidOut != HFILE_ERROR)
 						{
 							BigWrite (FidOut,pMem,pMAPFILE->Size,-1);
-							GSSiClose (FidOut);  
+							GSSiClose2 (&FidOut);  
 							AddBMPToCache32 (0,0);
 							rtn=TRUE;
 	//            			GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
@@ -1253,7 +1253,7 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 							memmove (pMem2,pMemCmp,lbin);
 							lMemDeCmp = DeCompressByteArray (pMem2,pMemCmp,lbin);
 							BigWrite (FidOut,pMemCmp,lMemDeCmp,-1);
-							GSSiClose (FidOut);  
+							GSSiClose2 (&FidOut);  
 							free (pMem2);//GSSiGlobUlFree (&hMem2);
 						//	GSSiGlobUlFree (&hMemCmp);
 							free (pMemCmp);
@@ -1261,7 +1261,7 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 						}
 						break;
 					}
-					GSSiClose (FidBIN);  
+					GSSiClose2 (&FidBIN);  
 					GSSiGlobUlFree (&hMem);
 				}
 			} 
@@ -1366,7 +1366,7 @@ BOOL SaveLayerDefFile (LPSTR OutFile,BOOL isFTCChip)
 	//nGrids -= 2;
 	BigWrite (FidOut,&nGrids,4,-1);
 Exit:
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	return rtn;
 }
 
@@ -1435,7 +1435,7 @@ BOOL MapImageExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID,LPM
 				AddMinMaxL (pFileBounds,&CellBounds);
 				if (CurSubDir != pMAPFILE->SubDir)
 				{
-					GSSiClose (FidBIN);
+					GSSiClose2 (&FidBIN);
 					sprintf (pDot,"%i.bin",pMAPFILE->SubDir);
 					FidBIN=GSSiOpenFile (MapImageFile,0,OF_READ);
 					CurSubDir = pMAPFILE->SubDir;
@@ -1465,7 +1465,7 @@ BOOL MapImageExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID,LPM
 			}
 			BigWrite (FidOut,&BlockTerminator,8,-1);
 		}
-		GSSiClose (FidLev);
+		GSSiClose2 (&FidLev);
 		do
 		{
 			lev1 = nIndexLevs % 2;
@@ -1492,8 +1492,8 @@ BOOL MapImageExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID,LPM
 			IndexRec.GridCellID = 0;
 			IndexRec.loc = -1;
 			BigWrite (FidOut,&IndexRec,8,-1); //marks end of index
-			GSSiClose (FidLev);
-			GSSiClose (FidLev2);
+			GSSiClose2 (&FidLev);
+			GSSiClose2 (&FidLev2);
 		} while (IndexLen > NumPerIndexRec); 
 
 		Header.TileWidth = GridPixelWidth/4;
@@ -1503,8 +1503,8 @@ BOOL MapImageExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID,LPM
 		Header.FirstIndexLoc = FirstIndex;
 		Header.NumRecs = nOutRecs;
 		BigWrite (FidOut,&Header,sizeof(Header),-1);
-		GSSiClose (FidOut);
-		GSSiClose (FidBIN);  
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&FidBIN);  
 		GlobalUnlock (hDB);
 	    CloseGWDatabase (hDB);  
 		GSSiRemove (TempFile[0]);
@@ -1540,7 +1540,7 @@ BOOL MapExtractExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID)
 	itoa (GridID*10,GridName,10);
 	if (!GetGridDef (GridName))
 	{
-	    GSSiClose (FidBIN); 
+	    GSSiClose2 (&FidBIN); 
 		return FALSE;
 	}
 
@@ -1615,7 +1615,7 @@ BOOL MapExtractExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID)
 			}
 			BigWrite (FidOut,&BlockTerminator,8,-1);
 		}
-		GSSiClose (FidLev);
+		GSSiClose2 (&FidLev);
 		do
 		{
 			lev1 = nIndexLevs % 2;
@@ -1642,8 +1642,8 @@ BOOL MapExtractExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID)
 			IndexRec.GridCellID = 0;
 			IndexRec.loc = -1;
 			BigWrite (FidOut,&IndexRec,8,-1); //marks end of index
-			GSSiClose (FidLev);
-			GSSiClose (FidLev2);
+			GSSiClose2 (&FidLev);
+			GSSiClose2 (&FidLev2);
 		} while (IndexLen > NumPerIndexRec); 
 
 		Header.TileWidth = GridPixelWidth/4;
@@ -1653,8 +1653,8 @@ BOOL MapExtractExport (LPSTR MapImageFile,LPSTR Type,LPSTR OutFile,long GridID)
 		Header.FirstIndexLoc = FirstIndex;
 		Header.NumRecs = nOutRecs;
 		BigWrite (FidOut,&Header,sizeof(Header),-1);
-		GSSiClose (FidOut);
-	    GSSiClose (FidBIN); 
+		GSSiClose2 (&FidOut);
+	    GSSiClose2 (&FidBIN); 
 		GSSiRemove (TempFile[0]);
 		GSSiRemove (TempFile[1]);
 		BT_CLOSEANDDELETE (&hBT);
@@ -1730,7 +1730,7 @@ Next:
 				GSSillseek (FidIndex,IndexRecordBlock[Curlev][Levpos[Curlev++]].loc,SEEK_SET);
 				goto Next;
 			}
-			GSSiClose (FidIndex);
+			GSSiClose2 (&FidIndex);
 		}
 		if (FileHeader.NumRecs != nfound)
 			ii=1;
@@ -1804,7 +1804,7 @@ BOOL CreateSymlistFile (LPSTR OutFile)
 		}
 
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 
 	Fid = GSSiOpenFile ("[%DL]\\symdump_compact.txt",0,OF_READ);
 	if (Fid == HFILE_ERROR)
@@ -1848,14 +1848,14 @@ BOOL CreateSymlistFile (LPSTR OutFile)
 			}
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	Fid = GSSiOpenFile (OutFile,0,OF_CREATE);
 	maxsym = min (maxsym,minsym+2499);
 	nsym = maxsym - minsym + 1;
 	BigWrite (Fid,&minsym,2,-1);
 	BigWrite (Fid,&maxsym,2,-1);
 	BigWrite (Fid,SymDepth,nsym*2,-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -1930,7 +1930,7 @@ BOOL CreateSymlistFile2 (LPSTR OutFile)
 
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	nsym = maxsym - minsym + 1;
 	for (i=0;i<min(2500,nsym);i++)
 	{
@@ -1959,7 +1959,7 @@ BOOL CreateSymlistFile2 (LPSTR OutFile)
 	BigWrite (Fid,&maxsym,2,-1);
 	BigWrite (Fid,SymDepth,(nsym)*4,-1);
 	BigWrite (Fid,&zeroSym,2,-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -2085,7 +2085,7 @@ WriteRec:
 CloseIt:
 		DestroyStatusWindow(0);  
 		BigWrite (FidOut,&BlockTerminator,8,-1);
-		GSSiClose (FidLev);
+		GSSiClose2 (&FidLev);
 		do
 		{
 			lev1 = nIndexLevs % 2;
@@ -2112,8 +2112,8 @@ CloseIt:
 			IndexRec.GridCellID = 0;
 			IndexRec.loc = -1;
 			BigWrite (FidOut,&IndexRec,8,-1); //marks end of index
-			GSSiClose (FidLev);
-			GSSiClose (FidLev2);
+			GSSiClose2 (&FidLev);
+			GSSiClose2 (&FidLev2);
 		} while (IndexLen > NumPerIndexRec); 
 
 		Header.GridID = GridID/10;
@@ -2122,8 +2122,8 @@ CloseIt:
 		Header.FirstIndexLoc = FirstIndex;
 		Header.NumRecs = nOutRecs;
 		BigWrite (FidOut,&Header,sizeof(Header),-1);
-		GSSiClose (FidOut);
-		GSSiClose (FidBIN);  
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&FidBIN);  
 		GlobalUnlock (hDB);
 	    CloseGWDatabase (hDB);  
 		GSSiRemove (TempFile[0]);
@@ -2209,7 +2209,7 @@ BOOL MapTextExport (LPSTR TextFile,LPSTR Type,LPSTR OutFile)
 		}
 CloseIt:
 		BigWrite (FidOut,&BlockTerminator,8,-1);
-		GSSiClose (FidLev);
+		GSSiClose2 (&FidLev);
 		do
 		{
 			lev1 = nIndexLevs % 2;
@@ -2236,8 +2236,8 @@ CloseIt:
 			IndexRec.GridCellID = 0;
 			IndexRec.loc = -1;
 			BigWrite (FidOut,&IndexRec,8,-1); //marks end of index
-			GSSiClose (FidLev);
-			GSSiClose (FidLev2);
+			GSSiClose2 (&FidLev);
+			GSSiClose2 (&FidLev2);
 		} while (IndexLen > NumPerIndexRec); 
 
 		Header.GridID = 0;
@@ -2246,9 +2246,9 @@ CloseIt:
 		Header.FirstIndexLoc = FirstIndex;
 		Header.NumRecs = nOutRecs;
 		BigWrite (FidOut,&Header,sizeof(Header),-1);
-		GSSiClose (FidOut);
-		GSSiClose (FidBIN);  
-		GSSiClose (Fid);  
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&FidBIN);  
+		GSSiClose2 (&Fid);  
 		GSSiRemove (TempFile[0]);
 		GSSiRemove (TempFile[1]);
 		rtn = TRUE;
@@ -2356,7 +2356,7 @@ WriteRec:
 		}
 CloseIt:
 		BigWrite (FidOut,&BlockTerminator,8,-1);
-		GSSiClose (FidLev);
+		GSSiClose2 (&FidLev);
 		do
 		{
 			lev1 = nIndexLevs % 2;
@@ -2383,8 +2383,8 @@ CloseIt:
 			IndexRec.GridCellID = 0;
 			IndexRec.loc = -1;
 			BigWrite (FidOut,&IndexRec,8,-1); //marks end of index
-			GSSiClose (FidLev);
-			GSSiClose (FidLev2);
+			GSSiClose2 (&FidLev);
+			GSSiClose2 (&FidLev2);
 		} while (IndexLen > NumPerIndexRec); 
 
 		Header.GridID = GridID/10;
@@ -2393,8 +2393,8 @@ CloseIt:
 		Header.FirstIndexLoc = FirstIndex;
 		Header.NumRecs = nOutRecs;
 		BigWrite (FidOut,&Header,sizeof(Header),-1);
-		GSSiClose (FidOut);
-		GSSiClose (FidBIN);  
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&FidBIN);  
 		GlobalUnlock (hDB);
 	    CloseGWDatabase (hDB);  
 		GSSiRemove (TempFile[0]);
@@ -2523,7 +2523,7 @@ WriteRec:
 		}
 CloseIt:
 		BigWrite (FidOut,&BlockTerminator,8,-1);
-		GSSiClose (FidLev);
+		GSSiClose2 (&FidLev);
 		do
 		{
 			lev1 = nIndexLevs % 2;
@@ -2550,8 +2550,8 @@ CloseIt:
 			IndexRec.GridCellID = 0;
 			IndexRec.loc = -1;
 			BigWrite (FidOut,&IndexRec,8,-1); //marks end of index
-			GSSiClose (FidLev);
-			GSSiClose (FidLev2);
+			GSSiClose2 (&FidLev);
+			GSSiClose2 (&FidLev2);
 		} while (IndexLen > NumPerIndexRec); 
 
 		Header.GridID = GridID;
@@ -2561,8 +2561,8 @@ CloseIt:
 		Header.FirstIndexLoc = FirstIndex;
 		Header.NumRecs = nOutRecs;
 		BigWrite (FidOut,&Header,sizeof(Header),-1);
-		GSSiClose (FidOut);
-		GSSiClose (FidBIN);  
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&FidBIN);  
 		GlobalUnlock (hDB);
 	    CloseGWDatabase (hDB);  
 		GSSiRemove (TempFile[0]);

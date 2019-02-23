@@ -158,7 +158,7 @@ static void dumpTranPoints(int npnts1, LPDPOINT poly1,LPINT pMatchedOldToNew, HA
 			sprintf(str, "%f\t%f\t%i", pt.x, pt.y, pMatchedOldToNew[i]);
 			fputstring(str, fid);
 		}
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 	}
 	return;
 }

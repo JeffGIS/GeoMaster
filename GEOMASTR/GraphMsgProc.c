@@ -447,7 +447,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					ibutton++;
 				}
 			}
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 			if (ibutton)
 				PostMessage(hWndDlg, WM_COMMAND, IDC_BUTTON1, 0L);
 		}
@@ -584,7 +584,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 							break;
 						}
 					}
-					GSSiClose(fid);
+					GSSiClose2 (&fid);
 				}
 			}
 		}
@@ -1590,7 +1590,7 @@ void SetPhotoAndNotesFiles (HWND hWndDlg,UINT dlgList,UINT ibtnPHOTO1,UINT ibtnP
 			LPSTR ptxt = GlobalLock (htxt);
 			
 			BigRead (Fid,ptxt,ln);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			ptxt[ln]=0;
    			ShowWindow (GetDlgItem(hWndDlg,ibtnNOTES),SW_SHOW);
 			SetWindowText (GetDlgItem(hWndDlg,ibtnNOTES),ptxt);
@@ -1682,7 +1682,7 @@ static BOOL RunIdentifyUpdateMacro(HWND hWndDlg, LPSTR macro, LPSTR lpDB, LPSTR 
 				}
 			}
 		}
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 		sprintf(cmd, "$MACRO(%s,%s,%s)", pMacro,title,TempFile);
 		if (pEndMacro)
 			*pEndMacro = ')';
@@ -5599,7 +5599,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
             	 	 	
             	 	 	GSSillseek (Fid,-104,2);
             	 	 	BigRead (Fid,desc,100);
-            	 	 	GSSiClose (Fid);
+            	 	 	GSSiClose2 (&Fid);
             	 	 }
             	 	 else
             	 	 	*desc = 0;
@@ -5617,7 +5617,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
             	 	 	while (SendDlgItemMessage(hWndDlg,SYM_VIS_LB,LB_GETTEXT,i++,(LPARAM)str) !=
             	 	 			LB_ERR)
             	 	 		fputstring (str,Fid);
-            	 	 	GSSiClose (Fid);
+            	 	 	GSSiClose2 (&Fid);
 						break;
 					 }
             	 	 if (_fstrstr (SaveName,"%symdic.vis"))
@@ -6269,7 +6269,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
 					 BigWrite (Fid,(HPSTR)desc,100,-1);
 					 BigWrite (Fid,(HPSTR)&Signature,2,-1);   
 					 BigWrite (Fid,(HPSTR)&Version,2,-1);
-            	 	 GSSiClose (Fid);
+            	 	 GSSiClose2 (&Fid);
             	 	 CurVis = SaveVis;
 
             	 }
@@ -6491,7 +6491,7 @@ GSSiExitProg (446);
 			  		 MaxLineLen = max (MaxLineLen,_fstrlen (str));
 		 			 SendDlgItemMessage (hWndDlg,IDC_RECORD_LIST,LB_ADDSTRING,0,(LPARAM)str); 
 				 }
-				 GSSiClose (Fid);
+				 GSSiClose2 (&Fid);
 				 GSSiGlobUlFree (&hMEM); 
 		         GSSiGlobFree (&hDLT);
 						 
@@ -6710,9 +6710,9 @@ GetLine:  at = 1;
 			  }
 			  line--;  
 		  }
-		  GSSiClose (Fid);
+		  GSSiClose2 (&Fid);
 		  break;
-GotLine:  GSSiClose (Fid); 
+GotLine:  GSSiClose2 (&Fid); 
 		  SetDlgItemText(hWndDlg,IDC_DBRECORD,str);
           GetDelimTextData(str,hDLT,1020);     
           GSSiGlobFree (&hDLT);
@@ -7098,7 +7098,7 @@ GSSiExitProg (1293);
 						sprintf (str,"%ld,%lf %lf %lf %lf,%ld,%ld,%ld,%ld",iArea+2, OVBounds.xmn, OVBounds.ymn, OVBounds.xmx, OVBounds.ymx,left,top,right,bottom);
 						fputstring (str,Fid);
 					}  
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					sprintf (mess,"%ld pages created",nAreas);
 					SetDlgItemText (hWndDlg,IDC_MESSAGE,mess);
 				} 
@@ -10185,7 +10185,7 @@ Open:	SendDlgItemMessage (hWndDlg,IDC_ZOOMS_CB,CB_RESETCONTENT,0,0);
 	    		break;
 	    	goto Open;
 	   	} 
-	   	GSSiClose (Fid);
+	   	GSSiClose2 (&Fid);
 		Fid = GSSiOpenFile (File,&OFStruct,OF_READWRITE);
 	    if (Fid == HFILE_ERROR)
 	    {  
@@ -10206,7 +10206,7 @@ Open:	SendDlgItemMessage (hWndDlg,IDC_ZOOMS_CB,CB_RESETCONTENT,0,0);
 			}
         	Recnum++;
         }
-	    GSSiClose(Fid); 
+	    GSSiClose2 (&Fid); 
         break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
@@ -10264,8 +10264,8 @@ Open:	SendDlgItemMessage (hWndDlg,IDC_ZOOMS_CB,CB_RESETCONTENT,0,0);
 		         }
 		         if (!Found)
 					fputstring(NewStr,FidOut);
-			     GSSiClose(Fid); 
-		 		 GSSiClose(FidOut);
+			     GSSiClose2 (&Fid); 
+		 		 GSSiClose2 (&FidOut);
 		 		 copyfile (File,TempFile,FALSE,0,0,0,0,0,0);
 				 FidOut = GSSiRemove (TempFile);
 	             EndDialog(hWndDlg, TRUE);  
@@ -10365,7 +10365,7 @@ GSSiExitProg (656);
 			REPLAC (str,"|","\t",256);
 		 	SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREA_TYPES,LB_ADDSTRING,(WPARAM)0,(LPARAM) str); 
 		} 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		if (CurrentZoomListType>=0) 
 		{
 			SendDlgItemMessage (hWndDlg,IDC_ZOOM_AREA_TYPES,LB_SETCURSEL,CurrentZoomListType,0);		  
@@ -10461,7 +10461,7 @@ OpenEr:			sprintf (mess,"Unable to open zoom list file: %s",lpTab);
 				else
 					CurrentZoomArea = -1;
 			}	  
-			GSSiClose (Fid);   
+			GSSiClose2 (&Fid);   
 	        AltProjLocked=TRUE;
 			SetFocus (GetDlgItem(hWndDlg,IDC_ZOOM_AREAS));   
 			if (AutoZoomNext && CurrentZoomArea >= 0)
@@ -10536,7 +10536,7 @@ OpenEr:			sprintf (mess,"Unable to open zoom list file: %s",lpTab);
 					 	goto OpenEr;
 					 GSSillseek (Fid,Loc,0);
 					 fgetstring (str,500,Fid);  
-					 GSSiClose (Fid);
+					 GSSiClose2 (&Fid);
 	 		         if (!(lpTab = _fstrrchr(str,'|')))
 	 		         	break;
 	 		         *lpTab++=0; 
@@ -10673,7 +10673,7 @@ BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds, LPSTR Name)
 		GSSillseek(Fid, 0, 2);
 		fputstring(str, Fid);
 		rtn = TRUE;
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	}
 	return rtn;
 }
@@ -10704,7 +10704,7 @@ BOOL CreateNewZoomList(HWND hWndDlg,LPSTR Name)
 		strcpy(str, "[%DEFAULTZOOMOFFSET]=00000100.0;[%NEXTZOOMRECORD]=0000000000;");
 		fputstring(str, Fid);
 		rtn = TRUE;
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	}
 	return rtn;
 }
@@ -10855,7 +10855,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
 				}
 			}
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 		}
 		else
 			*CurrentZoomList = 0;
@@ -10901,7 +10901,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 				}
 				fileLoc = GSSillseek(Fid, 0, 1);
 			}
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 			currentListnRecs = nrecs;
 			currentLocInList = min(currentLocInList, nrecs - 1);
 			EnableWindow(GetDlgItem(hWndDlg, ID_DELETEITEMS),nrecs);
@@ -11102,7 +11102,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 						BigWrite(Fid, &x, 1, -1);
 					}
 				}
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 				GlobalUnlock(hItems);
 			}
 			GSSiGlobFree(&hItems);
@@ -11202,7 +11202,7 @@ BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 						i++;
 					}
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			}
 		}
     		
@@ -11299,7 +11299,7 @@ BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 						}
 					}
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			}
 		
 		 DestroyWindow (hWndDlg);
@@ -11353,7 +11353,7 @@ BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	   				BigWrite (Fid,(HPSTR)&LegendBounds[i],sizeof(MNMXCORD),-1);
 	   				BigWrite (Fid,(HPSTR)&LegendSignature[i],sizeof(FILLSIGNATURE),-1); 
 	   			}
-	   			GSSiClose (Fid); 
+	   			GSSiClose2 (&Fid); 
 	   			nLegends = 0;
 				DestroyWindow(hWndDlg); 
          		FreeProcInstance(lpfnLEGENDEDITMsgProc);
@@ -11800,7 +11800,7 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
             	 	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
 					l = GSSifilelength (Fid);
 					ReadTAGBOX (Fid,l,&TAGBox);
-            	 	GSSiClose (Fid);
+            	 	GSSiClose2 (&Fid);
             	 	TAGBox.TAGPoint = ConvertTAGDPoint (SaveTAGPoint,OldCoordStyle,TAGBox.CoordStyle); 
             	 	TAGBox.center = ConvertTAGDPoint (SaveTAGCenter,OldCoordStyle,TAGBox.CoordStyle); 
 				    TAGBox.TXheight = -fabs(TAGBox.TXheight);
@@ -11921,7 +11921,7 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
    	 	 		 { 
 	            	Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
 	            	BigWrite (Fid,(HPSTR)&TAGBox,sizeof(TAGBOX),-1);
-	                GSSiClose (Fid); 
+	                GSSiClose2 (&Fid); 
 	             }
 	             else 
 	             {  
@@ -13096,7 +13096,7 @@ GSSiExitProg (1257);
 				 		  		    Choice,(DWORD)&Name);
 				 Fid = GSSiOpenFile (Name,0,OF_READ); 
 				 ReadObject (&Fid,TRUE,&NewTheme,0); 
-				 GSSiClose (Fid);
+				 GSSiClose2 (&Fid);
 				 SetDlgItemText (hWndDlg,IDC_TITLE,NewTheme->Title);
 	             NewTheme->DisplayViewport = CurView->ID;
 				 if (NewTheme->TargetViewport <= *pNumViewports)
@@ -13136,7 +13136,7 @@ GSSiExitProg (1257);
 					 		  		    Choice,(DWORD)&Name);
 					 Fid = GSSiOpenFile (Name,0,OF_READ); 
 					 ReadObject (&Fid,TRUE,&NewTheme,0); 
-					 GSSiClose (Fid);
+					 GSSiClose2 (&Fid);
 		             NewTheme->DisplayViewport = DVP;
 				 	 if (NewTheme->TargetViewport > *pNumViewports) 
 				 	 	NewTheme->TargetViewport = 1; 
@@ -15556,7 +15556,7 @@ Update:
 	                 	}
 	                 }
 	                 CurTheme->NumDesiredClass = ClassNo; 
-					 GSSiClose (Fid);
+					 GSSiClose2 (&Fid);
 					 SetWindowText (GetDlgItem(hWndDlg,IDC_PRINTCLASSDEF),"Dump to File"); 
             	 }
             	 else
@@ -15596,7 +15596,7 @@ Update:
 						         		  	      index++,(LPARAM)((LPSTR)&str[1])) != LB_ERR)
 							fputstring (str,Fid);
 					 }
-					 GSSiClose (Fid);
+					 GSSiClose2 (&Fid);
 					 EditTextFile (0,DumpFileName); 
 					 SetWindowText (GetDlgItem(hWndDlg,IDC_PRINTCLASSDEF),"Reload File"); 
 				 }  
@@ -16340,7 +16340,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 		         		{
 		         			FileListLoc = 0;
 		         			SubFile = 0; 
-		         			GSSiClose (FidFL);
+		         			GSSiClose2 (&FidFL);
 		         			goto NextFile;
 		         		} 
 		         	}     
@@ -17177,7 +17177,7 @@ BOOL FAR PASCAL DOCUMENTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 					SendDlgItemMessage (hWndDlg,IDC_DOC_FILES,LB_ADDSTRING,0,(LPARAM)str);
 				}
 			} 
-			GSSiClose (FidNoteType); 
+			GSSiClose2 (&FidNoteType); 
 			
 		}
 		if (hDesiredDocs)
@@ -18180,7 +18180,7 @@ GSSiExitProg (1280);
 							EnableWindow (GetDlgItem(hWndDlg,IDC_SHOW_FIELDS),TRUE);
                         }
                      }
-                     GSSiClose (FidMIF); 
+                     GSSiClose2 (&FidMIF); 
                  }
             }  
             GSSiSetCursor (OldCursor);     
@@ -18227,7 +18227,7 @@ GSSiExitProg (1280);
                  WriteAdvancedOpts (FidSave);
                  _fmemset (txt,0,254);
                  BigWrite (FidSave,(HPSTR)txt,256,-1); //spacer for future options
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
                     
             	 break;
@@ -18272,7 +18272,7 @@ GSSiExitProg (1280);
 	             BigRead (FidSave,(HPSTR)&NewOpt,2);
 	             SendDlgItemMessage (hWndDlg,IDC_DIRECTORY,BM_SETCHECK,NewOpt,0);
 			     while (ReadObject (&FidSave, FALSE,0,0));
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
 				 PostMessage(hWndDlg, WM_COMMAND, IDC_SET_SOURCE, 0L);
                  FileIsOpen = TRUE;
                	 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
@@ -18967,11 +18967,11 @@ Store=TRUE;
                      Pass=1;
                      goto NextPass;
                  }
-//GSSiClose(FidTIGER1);
-//GSSiClose(FidTIGER2); 
-                 GSSiClose (FidMIF); 
+//GSSiClose2 (&FidTIGER1);
+//GSSiClose2 (&FidTIGER2); 
+                 GSSiClose2 (&FidMIF); 
                  if (FidMID!=HFILE_ERROR)
-                    GSSiClose (FidMID);
+                    GSSiClose2 (&FidMID);
                  GSSiGlobUlFree (&hStr); 
                  GlobalUnlock (hMIDstr);
                  GSSiGlobUlFree (&hMIDstr);
@@ -19270,7 +19270,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 					BigRead (FidSHP,(HPSTR)&SHPHeader,(UINT)sizeof(SHPHeader));
 					flip ((LPSTR)&SHPHeader.FileCode,4);
 					flip ((LPSTR)&SHPHeader.FileLength,4); 
-					GSSiClose (FidSHP); 
+					GSSiClose2 (&FidSHP); 
 					OldCursor = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
                 
 					_fstrcpy (str,LoadName);
@@ -19362,7 +19362,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  _fmemset (str,0,256);
                  ii=BigWrite (FidSave,(HPSTR)str,236,-1); //spacer for future options
                  WriteAdvancedOpts (FidSave);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
                     
             	 break;
@@ -19441,7 +19441,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	                 ii=BigRead (FidSave,str,236);
 			     }
 			     while (ReadObject (&FidSave, FALSE,0,0));
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
 				 PostMessage(hWndDlg, WM_COMMAND, IDC_SET_SOURCE, 0L);
                  FileIsOpen = TRUE;
                	 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
@@ -20393,7 +20393,7 @@ NextFile:
 				 if (!IsPGDB)
 				 {
 					// CloseSHPFile ();
-   					GSSiClose (FidSHP);
+   					GSSiClose2 (&FidSHP);
 					OpenSHPFileIndex (0,HFILE_ERROR);
 				 }
    				 if (FileIsDir)
@@ -20635,7 +20635,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  _fmemset (str,0,sizeof(str));
                  ii=BigWrite (FidSave,(HPSTR)str,sizeof(str),-1); //spacer for future options
                  WriteAdvancedOpts (FidSave);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
                     
             	 break;
@@ -20689,7 +20689,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	                 ii=BigRead (FidSave,str,sizeof(str));
 			     }
 			     while (ReadObject (&FidSave, FALSE,0,0));
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
 				 PostMessage(hWndDlg, WM_COMMAND, IDC_SET_SOURCE, 0L);
                  FileIsOpen = TRUE;
                	 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
@@ -21049,7 +21049,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  CurView->FileProjectionType = SaveFPT; 
                  DisableHalt = FALSE;  
                  CloseTRANS2 (&hTranFile);
-   				 GSSiClose (FidSHP);
+   				 GSSiClose2 (&FidSHP);
    				 if (FileIsDir) 
 			 	 	AddSymToDir (PltName,NumSyms,hSymDesc,0,0);  
 			 	 else
@@ -21058,7 +21058,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  CloseRefIndex(TRUE);           
              	 ForceRefIndex = ForceTAGIndex = FALSE; 
              	 if (hAttFile)
-             	 	GSSiClose (FidAtt);
+             	 	GSSiClose2 (&FidAtt);
              	 if (*AutoExportName) 
              	 {
              	 	GSSiGlobFree (&hAttFile);
@@ -21227,7 +21227,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  BigWrite (FidSave,(HPSTR)Name,32,-1);
                  GetDlgItemText (hWndDlg,IDC_SYMFAC,Name,128);
                  BigWrite (FidSave,(HPSTR)Name,32,-1);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
                     
             	 break;
@@ -21263,7 +21263,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  SetDlgItemText (hWndDlg,IDC_TFAC,Name);
                  BigRead (FidSave,Name,32);
                  SetDlgItemText (hWndDlg,IDC_SYMFAC,Name);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
 		         PostMessage(hWndDlg, WM_COMMAND, IDC_PLC, 0L);
             }
            		 break;
@@ -21774,7 +21774,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
              	 SetContinueProcessing ( TRUE); 
                  CurView->FileProjectionType = SaveFPT; 
                  DisableHalt = FALSE;  
-   				 GSSiClose (FidSHP);
+   				 GSSiClose2 (&FidSHP);
 		 	 	 AddSymToMap (NumSyms,hSymDesc,0,0); 
                  DestroySymList (&NumSyms,&hSymDesc);
                  CloseRefIndex(TRUE);           
@@ -22009,7 +22009,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
               	 while (SendDlgItemMessage(hWndDlg,IDC_DGNFONTS,LB_GETTEXT,item++,(DWORD)str) != LB_ERR)
               	 	fputstring (str,FidSave); 
                  WriteAdvancedOpts (FidSave);                
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
                     
             	 break;
@@ -22080,7 +22080,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 					SendDlgItemMessage (hWndDlg,IDC_DGNFONTS,LB_ADDSTRING,0,(LPARAM)((LPSTR)str));
 				 }
 			     while (ReadObject (&FidSave, FALSE,0,0)); 
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
                  PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
             }
            		 break;
@@ -22288,7 +22288,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	             item=0;  
               	 while (SendDlgItemMessage(hWndDlg,IDC_DGNFONTS,LB_GETTEXT,item++,(DWORD)str) != LB_ERR)
               	 	fputstring (str,FidDSC); 
-              	 GSSiClose (FidDSC); 
+              	 GSSiClose2 (&FidDSC); 
 				 SymConvTableChanged = FALSE;  
             }
               	 break;
@@ -22425,7 +22425,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 							SetContinueProcessing (FALSE);
 					}
 				 }
-	             GSSiClose (FidDSC);
+	             GSSiClose2 (&FidDSC);
 				 GSSiGlobFree (&hLayerSym);  
 				 SetContinueProcessing ( TRUE);
 	        }
@@ -22592,12 +22592,12 @@ BeginLoad:
                 	GSSillseek (FidFileList,FileListLoc,0);
                 	if (!fgetstring (Name,128,FidFileList))
                 	{
-                		GSSiClose (FidFileList); 
+                		GSSiClose2 (&FidFileList); 
                 		FileListLoc = 0;
                 		goto EndOfFilelist;
                 	} 
                 	FileListLoc = GSSillseek (FidFileList,0,1);       
-                	GSSiClose (FidFileList);
+                	GSSiClose2 (&FidFileList);
 					_splitpath (Name,0,0,str,0); 
 					SetGlobalValue("%SOURCENAME",str);   
 	                PctBox (GetDlgItem(hWndDlg,IDC_STATUS2), TotFLLen, FileListLoc,0);
@@ -24009,7 +24009,7 @@ DoLine:
          	 	 Processing = FALSE;
                  CurView->FileProjectionType = SaveFPT; 
                  DisableHalt = FALSE;  
-   				 GSSiClose (FidSHP);
+   				 GSSiClose2 (&FidSHP);
 		 	 	 AddSymToMap (NumSyms,hSymDesc,0,0); 
                  DestroySymList (&NumSyms,&hSymDesc);
                  CloseRefIndex(TRUE);           
@@ -24599,7 +24599,7 @@ NextLine:
                     lineno = 0;
                     goto NextPass;
                  }
-                 GSSiClose (FidBNA);  
+                 GSSiClose2 (&FidBNA);  
 				 CloseMap(TRUE);
                  if (hCounties)
                     GSSiGlobUlFree (&hCounties);
@@ -24907,7 +24907,7 @@ BOOL FAR PASCAL LOADFLOODMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
                      		sprintf (str,"%s\\%s",CurDir,file); 
                      		Fid = GSSiOpenFile (str,&OFStruct,OF_READ); 
                      		fgetstring (str,128,Fid);
-                     		GSSiClose (Fid); 
+                     		GSSiClose2 (&Fid); 
                      		str[59]=0;
                      		sprintf (CurDir,"%s\t%s",file,str);
                      		SendDlgItemMessage (hWndDlg,IDC_COUNTY_LIST,LB_DELETESTRING,index,0);	
@@ -25173,7 +25173,7 @@ NextFile:
                  fputstring ("1.0",FidCvt);
                  for (i=0;i<14;i++)
                 	fputstring ("0.0",FidCvt);
-                 GSSiClose (FidCvt);   
+                 GSSiClose2 (&FidCvt);   
 		         ConvertCoordClose (); 
                  _fstrcpy (SaveAlt,"[%ALT_PROJECTION]");
                  ExpandText (SaveAlt);
@@ -25391,7 +25391,7 @@ NextLine:
         EndFile: 
                  CloseMap (TRUE);
                  CloseRefIndex(TRUE);           
-                 GSSiClose (FidBNA);  
+                 GSSiClose2 (&FidBNA);  
 				 GSSiGlobUlFree (&hLineIndex);
                  DestroySymList (&NumSyms,&hSymDesc);
                  
@@ -25533,7 +25533,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                   	break; 
             Next:;
                      }
-	                 GSSiClose (FidList); 
+	                 GSSiClose2 (&FidList); 
 	                 sprintf (FileName,"%s\\comp",DirName);
 	                 FidAtt = GSSiOpenFile (FileName,&OFStruct,OF_READ);
 	                 if (FidAtt == HFILE_ERROR)
@@ -25554,7 +25554,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 		                 GSSiGlobUlFree (&hSTR);
 		             }
 	                 STSSAID[5]=0;
-	                 GSSiClose (FidAtt);
+	                 GSSiClose2 (&FidAtt);
 					 sprintf (str,"%ld soil files to be loaded",TotFiles);
                 	 SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,str);
                  	 EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);
@@ -25688,7 +25688,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 		                	GlobalUnlock (hMinorVals);
 	                 	}
 	                 } 
-	                 GSSiClose (FidAtt); 
+	                 GSSiClose2 (&FidAtt); 
 	                 _splitpath (Name,drive,dir,name,ext);
 	                 sprintf (PltName,"%s\\%7s%c.plt",DestDir,&name[1],ext[1]);
 	                 ExpandText (PltName);
@@ -25713,7 +25713,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 fputstring ("1.0",FidCvt);
 	                 for (i=0;i<14;i++)
 	                	fputstring ("0.0",FidCvt);
-	                 GSSiClose (FidCvt);   
+	                 GSSiClose2 (&FidCvt);   
 			         ConvertCoordClose (); 
 	                 _fstrcpy (SaveAlt,"[%ALT_PROJECTION]");
 	                 ExpandText (SaveAlt);
@@ -25915,7 +25915,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	        EndFile: 
 	                 CloseMap (TRUE);
 	                 CloseRefIndex(TRUE);           
-	                 GSSiClose (FidBNA);  
+	                 GSSiClose2 (&FidBNA);  
 					 GSSiGlobUlFree (&hLineIndex); 
 					 GSSiGlobUlFree (&hMinorCodes);
 					 GSSiGlobUlFree (&hMinorVals);
@@ -26136,7 +26136,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 						}
 					}
 				}  
-				GSSiClose (OutFid);
+				GSSiClose2 (&OutFid);
 				GlobalUnlock (hDB);
 			    CloseGWDatabase (hDB); 
 			    GSSiSetCursor (hcurSave);
@@ -26423,7 +26423,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 						}
 					}
 				}  
-				GSSiClose (OutFid);
+				GSSiClose2 (&OutFid);
 				GlobalUnlock (hDB);
 			    CloseGWDatabase (hDB); 
 			    GSSiSetCursor (hcurSave);
@@ -26470,7 +26470,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam
 		  			{
 						GetDelimTextData(str,hDLT,256);  
 					}
-					GSSiClose (Fid); 
+					GSSiClose2 (&Fid); 
 				}  
                 SendDlgItemMessage (hWndDlg,IDC_DOQLIST,LB_RESETCONTENT,0,0);
                 GetDlgItemText (hWndDlg,IDC_QUAD_FILE,str,128);
@@ -26961,7 +26961,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                 	BigWrite (FidSave,(HPSTR)str,256,-1);
                  }
                  WriteAdvancedOpts (FidSave);                
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
                     
             	 break;
@@ -27037,7 +27037,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  }                
 			     while (ReadObject (&FidSave, FALSE,0,0)); 
 	ExitPMRecall:
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
                  FileIsOpen = TRUE;
                  PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
             }
@@ -27728,7 +27728,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
         		 {
         		 	if (!fgetstring (Name,128,FidFileList))
         		 	{
-        		 		GSSiClose (FidFileList);
+        		 		GSSiClose2 (&FidFileList);
         		 		goto Done;
         		 	} 
         		 	CurLocFL = GSSillseek (FidFileList,0,1);
@@ -27788,7 +27788,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                    lpCFCC+=3;
 	                 }
 	                 GlobalUnlock (hCFCC);
-	                 GSSiClose (FidCFCC);     
+	                 GSSiClose2 (&FidCFCC);     
 	             }    
                  
                  hShapes = GSSiGlobAlloc ( 436,GHND,(long)USHRT_MAX*4);
@@ -27811,7 +27811,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  FidTIGER5=GSSiOpenFile(Name,&OFStruct,OF_READ);
                  if (FidTIGER5==HFILE_ERROR)  
                  { 
-                    GSSiClose (FidTIGER4); 
+                    GSSiClose2 (&FidTIGER4); 
                     goto NoFile4; 
                  }
                  
@@ -27853,7 +27853,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                         BT_PUT (hBTNames2,(LPSTR)&FeatID,(LPSTR)&Names2Data);
                     }  
                  }
-                 GSSiClose (FidTIGER5);
+                 GSSiClose2 (&FidTIGER5);
                  while (fgetstring((char *)&Tiger4,sizeof(TIGER4)-2,FidTIGER4))
                  {
                     Names1Key.TLID = ldread (Tiger4.TLID,10);
@@ -27875,7 +27875,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     }
     NextTIGER4:; 
                  }
-                 GSSiClose (FidTIGER4); 
+                 GSSiClose2 (&FidTIGER4); 
                  BT_CLOSE (hBTNames2); 
                  GSSiRemove ("tempnam2.btr");
     NoFile4:
@@ -28147,8 +28147,8 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                      }
                  }
 				 CloseMap(TRUE);
-                 GSSiClose (FidTIGER1); 
-                 GSSiClose (FidTIGER2);
+                 GSSiClose2 (&FidTIGER1); 
+                 GSSiClose2 (&FidTIGER2);
                  BT_CLOSE (hBTNames1); 
                  GSSiRemove ("tempnam1.btr");
                  CloseGSStreetNames();
@@ -28172,7 +28172,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     	CloseStreetSegmentTable (OpenedSeg);
                     	break;
                     default:                    
-                        GSSiClose (FidTiger1Out);
+                        GSSiClose2 (&FidTiger1Out);
                         BT_CLOSE (hBTTiger1Out);
                         break;
                  }           
@@ -28322,23 +28322,23 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                 FidStateLev = GSSiOpenFile ("[STATEDIR]layer1\\global.ini",&OFStruct,OF_CREATE); 
                 sprintf (str,"[%%STATE]=%i",State);
                 fputstring (str,FidStateLev);
-                GSSiClose (FidStateLev);
+                GSSiClose2 (&FidStateLev);
                 FidStateLev = GSSiOpenFile ("[STATEDIR]layer2\\global.ini",&OFStruct,OF_CREATE); 
                 fputstring (str,FidStateLev);
-                GSSiClose (FidStateLev);  
+                GSSiClose2 (&FidStateLev);  
                 if (SendDlgItemMessage (hWndDlg,IDC_HIPRECISIONPN,BM_GETCHECK,0,0)) 
                 	HiPrecis = TRUE;
 //                 CreateStnameFilesUpdate (); 
 				if (!ExistFile ("[STATEDIR]statelev"))
 				{
 	                FidStateLev = GSSiOpenFile ("[STATEDIR]statelev",&OFStruct,OF_CREATE);
-	                GSSiClose (FidStateLev);
+	                GSSiClose2 (&FidStateLev);
 	                BTVar[0].BT_VARTYP=BT_INTEGER;
 	                BTVar[0].BT_VARLEN=4;
 	                BTVar[0].BT_VAROFF=0;
 	                BT_CREATE ("[STATEDIR]tiger1.btr", 4, FALSE, 1, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
 	                FidTiger1Out = GSSiOpenFile ("[STATEDIR]tiger1.dat",&OFStruct,OF_CREATE);
-	                GSSiClose (FidTiger1Out);
+	                GSSiClose2 (&FidTiger1Out);
 	                HaveFiles = FALSE;  
 	             }
 	             else
@@ -28400,8 +28400,8 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
         NextLine1:
                  if (!fgetstring((LPSTR)Tiger1,sizeof(TIGER1)-2,FidTIGER1) || !ContinueProcessing) 
                  {
-                    GSSiClose (FidTIGER1);
-                    GSSiClose (FidTiger1Out);
+                    GSSiClose2 (&FidTIGER1);
+                    GSSiClose2 (&FidTiger1Out);
                     BT_CLOSE (hBTTiger1Out);
                     goto NextFile1;      
                  }  
@@ -28545,7 +28545,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  FidTIGER5=GSSiOpenFile (Name,&OFStruct,OF_READ);
                  if (FidTIGER5 ==  HFILE_ERROR)  
                  { 
-                    GSSiClose (FidTIGER4); 
+                    GSSiClose2 (&FidTIGER4); 
                     goto NoFile4; 
                  }
                  
@@ -28571,7 +28571,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                         BT_PUT (hBTNames2,(LPSTR)&FeatID,(LPSTR)&Names2Data);
                     }  
                  }
-                 GSSiClose (FidTIGER5);
+                 GSSiClose2 (&FidTIGER5);
                  while (fgetstring((LPSTR)Tiger4,sizeof(TIGER4)-2,FidTIGER4))
                  {
                     Names1Key.TLID = ldread (Tiger4->TLID,10);
@@ -28595,7 +28595,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                     }
     NextTIGER4:; 
                  }
-                 GSSiClose (FidTIGER4); 
+                 GSSiClose2 (&FidTIGER4); 
                  BT_CLOSE (hBTNames2); 
     NoFile4:
                  OpenSymDict (OF_READWRITE);     
@@ -28647,7 +28647,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                         lpCFCC+=3;
                     }
                     GlobalUnlock (hCFCC);
-                    GSSiClose (FidCFCC);    
+                    GSSiClose2 (&FidCFCC);    
 
                     sprintf (PltName,"%slayer%i\\tg%2.2i%3.3i%i.plt",Dir,Layer,State,County,Layer);
                     
@@ -28876,23 +28876,23 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  	goto NextPass; 
         EndLayers: 
                  DestroySymList (&NumSyms,&hSymDesc);
-                 GSSiClose (FidStateLev); 
+                 GSSiClose2 (&FidStateLev); 
                  FidStateLev = GSSiOpenFile ("[STATEDIR]statelev",&OFStruct,OF_READWRITE);
                  GSSillseek (FidStateLev,0,2);
                  FidStateLev2 = GSSiOpenFile ("[STATEDIR]statetmp",&OFStruct,OF_READ);
                  while (ContinueProcessing && (BigRead (FidStateLev2,(char *)&StateLev,sizeof(StateLev))==sizeof(StateLev) ))
                         BigWrite (FidStateLev,(char *)&StateLev,sizeof(StateLev),-1);
-                 GSSiClose (FidStateLev);
-                 GSSiClose (FidStateLev2);
+                 GSSiClose2 (&FidStateLev);
+                 GSSiClose2 (&FidStateLev2);
                  GSSiRemove ("[STATEDIR]statetmp");
-//               GSSiClose (FidTiger1Out);
+//               GSSiClose2 (&FidTiger1Out);
 //               BT_CLOSE (hBTTiger1Out);
 				 CloseMap(TRUE);
                  BT_CLOSE (hBTNames1);
                  CloseGSStreetNames();
                  GetTLIDShapePoints (-2,&NumShapes,lpShapes,FidTIGER2);
-                 GSSiClose (FidTIGER1); 
-                 GSSiClose (FidTIGER2);
+                 GSSiClose2 (&FidTIGER1); 
+                 GSSiClose2 (&FidTIGER2);
                  CloseSymDict();    
                  GSSiGlobUlFree (&hShapes);              
                  if (hIntersect)
@@ -28900,7 +28900,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  if (ContinueProcessing)
                  	goto NextFile;
             Exit: 
-                 GSSiClose (FidFileList);  
+                 GSSiClose2 (&FidFileList);  
 				 _fstrcpy (str,"[STATEDIR]intersec.btr"); 
 				 ExpandText (str);
 				 if (ContinueProcessing)
@@ -28960,7 +28960,7 @@ static void ConvertToShortName(LPSTR Name)
 					}
 				}
 			}
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 		}
 	}
 }
@@ -29165,7 +29165,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				     SendDlgItemMessage(hWndDlg,IDC_UNITS,CB_SETCURSEL,UnitsOpt,0);
 				     if (BigRead (Fid,str,128) == 128)
 	                 	SetDlgItemText (hWndDlg,IDC_TRANFILE,str);
-                     GSSiClose (Fid); 
+                     GSSiClose2 (&Fid); 
                      lpID = _fstrstr (MIFOutDataFile,";UID="); 
                      lpPW = _fstrstr (MIFOutDataFile,";PWD="); 
                      if (lpID && lpPW)
@@ -29248,7 +29248,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 BigWrite (Fid,(HPSTR)&UnitsOpt,2,-1); 
 	                 GetDlgItemText (hWndDlg,IDC_TRANFILE,str,128);
 	                 BigWrite (Fid,str,128,-1);
-                    GSSiClose (Fid);
+                    GSSiClose2 (&Fid);
                  }
                  break; 
 
@@ -30242,7 +30242,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 {   
                 	case TXT:
                     case MIF:
-                        GSSiClose (FidMID);
+                        GSSiClose2 (&FidMID);
                         break;
                     case SHP: 
                         SHPHeader.FileLength = GSSillseek (FidSHP,0,2); 
@@ -30254,7 +30254,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                         flip ((LPSTR)&SHPHeader.FileCode,4);
                         flip ((LPSTR)&SHPHeader.FileLength,4);  
                         BigWrite (FidSHP,(char *)&SHPHeader,sizeof(SHPHeader),-1);  
-                        GSSiClose (FidSHP);    
+                        GSSiClose2 (&FidSHP);    
                         
                         SHPHeader.FileLength = GSSillseek (FidSHPIdx,0,2); 
                         SHPHeader.FileLength /= 2; 
@@ -30265,7 +30265,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                         flip ((LPSTR)&SHPHeader.FileCode,4);
                         flip ((LPSTR)&SHPHeader.FileLength,4);  
                         BigWrite (FidSHPIdx,(char *)&SHPHeader,sizeof(SHPHeader),-1);  
-                        GSSiClose (FidSHPIdx);    
+                        GSSiClose2 (&FidSHPIdx);    
                		    DBFClose(pDBF);
                         
                         break;
@@ -31385,7 +31385,7 @@ INSERT INTO SDO_GEOM_METADATA (TABLE_NAME, COLUMN_NAME, DIMINFO)
 				fputstring (OutRec,FidMID);  
                 _fstrcpy (_fstrrchr (str,','),")");
 				fputstring (str,FidMIF);
-                GSSiClose (FidMID);  
+                GSSiClose2 (&FidMID);  
 				fputstring ("BEGINDATA",FidMIF);
                 SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,"Creating extract file");
                 pos = BT_FIRST;
@@ -31436,7 +31436,7 @@ INSERT INTO SDO_GEOM_METADATA (TABLE_NAME, COLUMN_NAME, DIMINFO)
                 } 
                 PctBox (GetDlgItem(hWndDlg,IDC_STATUS), NumItems, CurItem++,0);
 		        SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,"Extract finished"); 
-                GSSiClose (FidMIF);   
+                GSSiClose2 (&FidMIF);   
 Exit:
 Exit2:          
 				DTMClose (&hSurf);
@@ -31685,7 +31685,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 SetDlgItemText (hWndDlg,IDC_FILTER,str);
 	                 BigRead (FidSave,str,1024);
 	//                 SetDlgItemText (hWndDlg,IDC_OUTLINE4,str);
-	                 GSSiClose (FidSave);
+	                 GSSiClose2 (&FidSave);
 	                 FileIsOpen = TRUE;
 	               	 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
 	            }
@@ -31726,7 +31726,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                 BigWrite (FidSave,str,1024,-1);
 	                 _fmemset (str,0,1024);
 	                 BigWrite (FidSave,str,1024,-1); //spacer for future options
-	                 GSSiClose (FidSave);
+	                 GSSiClose2 (&FidSave);
 	            } 
 				
 	            case IDC_OPEN_DB:
@@ -31916,7 +31916,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 						nCurPolyPoints = 0;
 	                    PctBox (GetDlgItem(hWndDlg,IDC_STATUS), NumItems, ++CurItem,0);
 				    }
-				    GSSiClose (FidDisplay);
+				    GSSiClose2 (&FidDisplay);
 				    FidDisplay = HFILE_ERROR;
 				    GSSiGlobUlFree (&hStr);
 	                Processing = FALSE; 

@@ -1446,7 +1446,7 @@ BOOL SplitGridFile (LPSTR INFile,LPSTR OutFile,int nLevels)
 			fputstring (str,FidOut);
 		}
 		BT_CLOSEANDDELETE (ph1);
-		GSSiClose (FidOut);
+		GSSiClose2 (&FidOut);
 	}
 	GSSiGlobUlFree (&hLev[nLevels-1]);
 	return TRUE;
@@ -1695,7 +1695,7 @@ BOOL CreateGoogleMapTiles (LPSTR InFile,int MaxZoom,LPMNMXCORD pBounds)
 		sprintf (str,"%i\t%i\t%i\t%f %f %f %f",-key.zm,key.y,key.x,bounds.xmn,bounds.ymn,bounds.xmx,bounds.ymx);
 		fputstring (str,fidOut);
 	}
-	GSSiClose (fidOut);
+	GSSiClose2 (&fidOut);
 	BT_CLOSEANDDELETE (&hBT2);  
 	GMDestroyDIB32 (hDib32);
 
@@ -1903,7 +1903,7 @@ BOOL CreateAreaGridFromGrid (LPSTR InFile,LPSTR SymName,LPSTR Prefix,int MaxZoom
 //			if (UseStatusWnd)
 //				StatusWindowUpdate (0,0, nRecs, Done);
 		}                                     
-		GSSiClose (Fid); 
+		GSSiClose2 (&Fid); 
 		RestoreDC (CurView->hDC,-1);
 		GMDestroyDIB32 (hDib32);
 	}
@@ -2285,7 +2285,7 @@ GSSiExitProg (1093);
                 GSSillseek(FidMap,UsedDescOffset,0);
                 ProcessPrimarySeg (0,-Desc,0,FALSE,0,HFILE_ERROR); 
             }
-            GSSiClose (FidMap); 
+            GSSiClose2 (&FidMap); 
         }
         FidMap = HFILE_ERROR;
 	    DuplicateDescClose(); 
@@ -4093,8 +4093,8 @@ Exit:
     Index.EndOffset = CurOffset;
     GSSillseek (FidIndexNew,FirstIndexLoc,0);
     BigWrite (FidIndexNew,(char *)&Index,STOREDINDEXLENGTH,-1);
-    GSSiClose (FidIndexNew);
-    GSSiClose (FidIndex);
+    GSSiClose2 (&FidIndexNew);
+    GSSiClose2 (&FidIndex);
     _fstrcpy (OldName,Name);
     _fstrcat (OldName,".v01");   
     GSSiRemove (OldName);
@@ -4463,7 +4463,8 @@ BOOL CreateQuantitiesFile (LPSTR InName,BOOL LoadFromHLT,LPSTR ThemeVPName)
 	GWDHEADER	GWDHead32;
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
-    short       FidData,ibeg,NumVars,i;
+	HFILE       FidData;
+	short ibeg,NumVars,i;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	PrimeIndex[MAX_PATH], Name[MAX_PATH], SymName[66], ThemeID[80];
@@ -4559,7 +4560,7 @@ LPQUANTITIES	pQuan;
 	BT_CREATE (PrimeIndex, 4, FALSE, NumVars, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	hDB = OpenGWDatabase (Name,BT_WRITE); 
 	CloseGWDatabase (hDB); 
 	if (!LoadFromHLT)

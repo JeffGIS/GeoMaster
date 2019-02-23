@@ -452,7 +452,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 			fidIndex = GSSiOpenFile(Arg[5], 0, OF_CREATE);
 			if (fidIndex == HFILE_ERROR)
 			{
-				GSSiClose(fidFiles);
+				GSSiClose2 (&fidFiles);
 				goto Exit;
 			}
 			sprintf(indexRec, "FILE\tFILELOC");
@@ -461,7 +461,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 		if (FidTF == HFILE_ERROR)
 		{
-			GSSiClose(fidFiles);
+			GSSiClose2 (&fidFiles);
 			goto Exit;
 		}
 
@@ -486,9 +486,9 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
 		loc = 32349;
 		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
-		GSSiClose(fidFiles);
-		GSSiClose(FidTF);
-		GSSiClose(fidIndex);
+		GSSiClose2 (&fidFiles);
+		GSSiClose2 (&FidTF);
+		GSSiClose2 (&fidIndex);
 		rtn = TRUE;
 	}
 	else if (!stricmp(Arg[1], "EXPAND"))//$COMPRESSEDFILE(EXPAND,path,outputdir,whichfile(ALL or blank for all files))
@@ -534,7 +534,7 @@ static int GetFileFromTransferFile(HFILE FidTF,LPSTR FileToGet,long MaxLength,_i
 				}*/
 			}
 
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 
 		Exit:
 			return rtn;
@@ -600,7 +600,7 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 			}
 
 		Exit:
-			GSSiClose(FidTF);
+			GSSiClose2 (&FidTF);
 			return rtn;
 }
 
@@ -1385,14 +1385,14 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 			LPSTR pMem = GlobalLock(hMem);
 			LPSTR pMemOut = &pMem[l + 1];
 			BigRead(fid, pMem, l);
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 			pMem[l] = 0;
 			if (!ConvertPRJtoProj4(pMem, pMemOut))
 			{
 				l = strlen(pMemOut);
 				fid = GSSiOpenFile(Arg3, 0, OF_CREATE);
 				BigWrite(fid, pMemOut, l, -1);
-				GSSiClose(fid);
+				GSSiClose2 (&fid);
 				strcpy(OutLoc, "1");
 			}
 		}
@@ -1603,14 +1603,14 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 				PadString (str,' ',maxStrLen);
 				fputstring (str,FidOut);
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GSSiRemove (tempFile);
-			GSSiClose (FidOut);
+			GSSiClose2 (&FidOut);
 			return;
 NextGrids:
 			nrow++;
 			ncol++;
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
 		ii = 1;
 	}
@@ -1676,7 +1676,7 @@ BOOL GetSymAttrFile2 (LPSTR SymName,LPSTR NewDir,BOOL AddRefno,LPSTR RefFile,LPS
 				}
 			}
 			pSymAttrFiles[l] = 0;
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GlobalUnlock (hSymAttrFiles);
 		}
 	}
@@ -1900,7 +1900,7 @@ BOOL XMLToGMD1 (LPSTR XMLFile,LPSTR GMDFile)
 		return FALSE;
 	if (!CreateGWDDatabase (GMDFile,1,FALSE,NumFields,NumIndexFields,DefStr))
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		goto Exit;
 	}
 	l = GSSifilelength (Fid);
@@ -1908,7 +1908,7 @@ BOOL XMLToGMD1 (LPSTR XMLFile,LPSTR GMDFile)
 	pFile = GlobalLock (hMem);
 	pEnd = pFile + l;
 	BigRead (Fid,pFile,l);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 				
     hDB = OpenGWDatabase (GMDFile,BT_WRITE);
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
@@ -1974,7 +1974,7 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 		return FALSE;
 	if (!CreateGWDDatabase (GMDFile,1,FALSE,NumFields,NumIndexFields,DefStr))
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		goto Exit;
 	}
 	l = GSSifilelength (Fid);
@@ -1982,7 +1982,7 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile)
 	pFile = GlobalLock (hMem);
 	pEnd = pFile + l;
 	BigRead (Fid,pFile,l);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 				
     hDB = OpenGWDatabase (GMDFile,BT_WRITE);
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
@@ -2136,7 +2136,7 @@ BOOL TxtToHtm (LPSTR TxtFile,LPSTR HTMFile)
 	FidOut = GSSiOpenFile (HTMFile,0,OF_CREATE);
 	if (FidOut == HFILE_ERROR)
 	{
-		GSSiClose (FidIn);
+		GSSiClose2 (&FidIn);
 		return FALSE;
 	}
 	hStr = GSSiGlobAlloc (1563,GMEM_MOVEABLE,4096);
@@ -2168,9 +2168,9 @@ BOOL TxtToHtm (LPSTR TxtFile,LPSTR HTMFile)
 			fputstring (str,FidOut);
 		}
 	}
-	GSSiClose (FidIn);
+	GSSiClose2 (&FidIn);
 	FlushFile (FidOut);
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	GSSiGlobUlFree (&hStr);
 	return TRUE;
 }
@@ -2244,8 +2244,8 @@ BOOL CopyTextFile (LPSTR ToFile,LPSTR FromFile,LPSTR Opt,LPSTR Value)
    			fputstring (str,FidOut);
 	   	} 
 	}
-	GSSiClose (Fid); 
-	GSSiClose (FidOut);
+	GSSiClose2 (&Fid); 
+	GSSiClose2 (&FidOut);
 	GSSiGlobUlFree (&hStr);
 	return TRUE;
 }
@@ -2371,7 +2371,7 @@ BOOL ProcessBlockedRefsFile (LPSTR OutFileName)
 		st = GWDReplaceRecord (lpGWDHead,0,0,-1); 
 		StatusWindowUpdate (0,0, Tot,GSSillseek (Fid2,0,1));
 	}
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid2);
     GlobalUnlock (hDB); 
     CloseGWDatabase (hDB); 
 	DestroyStatusWindow(0);  
@@ -2460,7 +2460,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 				}
 				BigWrite (Fid,pPIAA,sizeof(PIAAStruct)+pPIAA->arraylen*2,-1);
 				GlobalUnlock (PIAStruct->hAccel);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				rtn = TRUE;
 			}
 			GlobalUnlock (hPIAStruct);
@@ -2496,7 +2496,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 			*pPIAA = PIAA;
 			BigRead (Fid,&pPIAA->barray[0],pPIAA->arraylen*2);
 			GlobalUnlock (PIAStruct->hAccel);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GlobalUnlock (hPIAStruct);
 			ltoa ((long)hPIAStruct,OutLoc,10);
 			rtn = TRUE;
@@ -2778,7 +2778,7 @@ BOOL SaveMaskAreas(LPSTR Directory)
 				{
 					BigWrite(Fid, (HPSTR)&nPnts, 4, -1);
 					BigWrite(Fid, (HPSTR)Points, nPnts*sizeof(DPOINT), -1);
-					GSSiClose(Fid);
+					GSSiClose2 (&Fid);
 				}
 				GSSiGlobUlFree(&hPnts);
 			}
@@ -3230,7 +3230,7 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 	 BTVar[0].BT_VARTYP=BT_CHAR;
 	 BTVar[0].BT_VAROFF=0;
 	 BT_CREATE (FileIn1, 4, FALSE, 1, 1,BTVar,FALSE, 0, GWDHead.TimeStamp, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 
      hDB = OpenGWDatabase (OutFile,BT_WRITE);   
      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
@@ -3246,7 +3246,7 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 			MessageBox (0,"Unable to open file",InFile,MB_ICONEXCLAMATION);     
 	     	return FALSE; 
 	    }  
-	    GSSiClose (Fid);
+	    GSSiClose2 (&Fid);
 	 }
      FidIn = GSSiOpenFile (InFile,0,OF_READ);
      if (FidIn == HFILE_ERROR)
@@ -3293,7 +3293,7 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
 		}
 		StatusWindowUpdate2 (0,TotLen,GSSillseek (FidIn,0,1));  
      }  
-     GSSiClose (FidIn); 
+     GSSiClose2 (&FidIn); 
 //     FidTxt = GSSiOpenFile (TxtFile,0,OF_CREATE);
      for (i=0;i<76;i++)
      { 
@@ -3344,11 +3344,11 @@ BOOL CreateSF3File (LPSTR InFile,LPSTR OutFile)
      		}
 			StatusWindowUpdate2 (0,TotLen,GSSillseek (Fid,0,1));  
      	}
-     	GSSiClose (Fid);
+     	GSSiClose2 (&Fid);
 		if (!ContinueProcessing)
 			break;
      } 
-//     GSSiClose (FidTxt);
+//     GSSiClose2 (&FidTxt);
      SetContinueProcessing ( TRUE); 
      BT_CLOSEANDDELETE (&lpGWDHead->BTHandle[1]);
 	 lpGWDHead->NumIndex=1;
@@ -3452,7 +3452,7 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
 	 BTVar[0].BT_VARTYP=BT_CHAR;
 	 BTVar[0].BT_VAROFF=0;
 	 BT_CREATE (FileIn1, 4, FALSE, 1, 1,BTVar,FALSE, 0, GWDHead.TimeStamp, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 
      hDB = OpenGWDatabase (OutFile,BT_WRITE);   
      lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);
@@ -3468,7 +3468,7 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
 			MessageBox (0,"Unable to open file",InFile,MB_ICONEXCLAMATION);     
 	     	return FALSE; 
 	    }  
-	    GSSiClose (Fid);
+	    GSSiClose2 (&Fid);
 	 }
      FidIn = GSSiOpenFile (InFile,0,OF_READ);
      if (FidIn == HFILE_ERROR)
@@ -3521,7 +3521,7 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
 		}
 		StatusWindowUpdate2 (0,TotLen,GSSillseek (FidIn,0,1));  
      }  
-     GSSiClose (FidIn); 
+     GSSiClose2 (&FidIn); 
 //     FidTxt = GSSiOpenFile (TxtFile,0,OF_CREATE);
      for (i=0;i<39;i++)
      { 
@@ -3573,11 +3573,11 @@ BOOL CreateSF1File (LPSTR InFile,LPSTR OutFile)
      		}
 			StatusWindowUpdate2 (0,TotLen,GSSillseek (Fid,0,1));  
      	}
-     	GSSiClose (Fid); 
+     	GSSiClose2 (&Fid); 
      	if (!ContinueProcessing)
      		break;
      } 
-//     GSSiClose (FidTxt);
+//     GSSiClose2 (&FidTxt);
      SetContinueProcessing ( TRUE); 
      BT_CLOSEANDDELETE (&lpGWDHead->BTHandle[1]);
 	 lpGWDHead->NumIndex=1;
@@ -3601,8 +3601,8 @@ BOOL TABToComma (LPSTR InFile,LPSTR OutFile)
 		fputstring (pStr,FidOut);
 	}
 	GSSiGlobUlFree (&hStr);
-	GSSiClose (FidIn);
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidIn);
+	GSSiClose2 (&FidOut);
 	return TRUE;
 }
 
@@ -3637,7 +3637,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 	fgetstring (str,1024,Fid);
 	if (!ProcessDelimTextHeader(str,0,Fid,&hDLT,0,0))
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		goto Exit;
 	}
 	while (fgetstring (str,1024,Fid))
@@ -3648,7 +3648,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 		PadString (Value,0,CompareLength);
 		BT_PUT (hBT1,Value,(LPSTR)&Dummy);
 	}
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	GSSiGlobFree (&hDLT);
 	Fid = GSSiOpenFile (File2,&OFStruct,OF_READ);
 	if (Fid == HFILE_ERROR)
@@ -3657,7 +3657,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 	fgetstring (str,1024,Fid);
 	if (!ProcessDelimTextHeader(str,0,Fid,&hDLT,0,0))
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		goto Exit;
 	}
 	while (fgetstring (str,1024,Fid))
@@ -3668,7 +3668,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
 		PadString (Value,0,CompareLength);
 		BT_PUT (hBT2,Value,(LPSTR)&Dummy);
 	}
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	GSSiGlobFree (&hDLT);
 
 	Fid = GSSiOpenFile (OutFile1,&OFStruct,OF_CREATE);
@@ -3679,7 +3679,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
     			fputstring (Value,Fid);
     	}
     	while (!BT_FIND (hBT1,Value,BT_NEXT,BT_ANY,(LPSTR)&Dummy));
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 
 	Fid = GSSiOpenFile (OutFile2,&OFStruct,OF_CREATE);
     if (!BT_FIND (hBT2,Value,BT_FIRST,BT_ANY,(LPSTR)&Dummy))
@@ -3689,7 +3689,7 @@ BOOL CrossMatch (LPSTR File1, LPSTR File2, LPSTR Cmd1, LPSTR Cmd2, LPSTR OutFile
     			fputstring (Value,Fid);
     	}
     	while (!BT_FIND (hBT2,Value,BT_NEXT,BT_ANY,(LPSTR)&Dummy));
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
     
 	rtn = TRUE;
 Exit:
@@ -3720,11 +3720,11 @@ BOOL CreateSportMapCMD (LPSTR FromPath,LPSTR CmdFile)
 	{  
 		Fid2 =	GSSiOpenFile (Name2,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 		SearchFilesInDir (str2, ".plt", Fid2,&TotFiles,"*.plt",1,TRUE,TRUE);     
-		GSSiClose (Fid2);
+		GSSiClose2 (&Fid2);
 		CreateMapIndex (str2,Name2,1,FALSE,"","",FALSE,1,0,0,0,FALSE);
 		GSSiRemove (Name2);
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	Fid =	GSSiOpenFile (Name,(LPOFSTRUCTGM)&OFStruct,OF_CREATE);
 	SearchFilesInDir (FromPath, "", Fid,&TotFiles,"index",1,TRUE,TRUE); 
 	GSSillseek (Fid,0,0);
@@ -3785,7 +3785,7 @@ BOOL CreateSportMapCMD (LPSTR FromPath,LPSTR CmdFile)
 		}
 		AppendFile (CmdFile,str);   
 	}  
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove (Name);
 	return TRUE;
 } 
@@ -3853,7 +3853,7 @@ BOOL CreateSportMapCD (LPSTR OrderFile,LPSTR OutDir,short AreaNum)
 			n++;
 		}
 	}
-	GSSiClose (FidOrder);  
+	GSSiClose2 (&FidOrder);  
 	if (!Found)  
 	{   
 		CreateSportMapCMD (OutDir,CmdFile);
@@ -4197,7 +4197,7 @@ BOOL LoadPRIMBounds (short idum)
 				GSSiMessageBox (0,"Mult Areas",AreaDumpFile,MB_ICONEXCLAMATION,0); 
 			else
 				Maxp = max (Maxp,NumPoints);
-			GSSiClose (FidAD);
+			GSSiClose2 (&FidAD);
 			if (NumPoints > 6)
 				fputstring (pNam,FidMore4);
 		}  
@@ -4208,11 +4208,11 @@ BOOL LoadPRIMBounds (short idum)
 //		metersperpix = d2/d1;
 		AddPointsToCornerList (pPoints,pPointsBMP,(short)NumPoints,nPRIMFiles); 
 		AddPolyToMap (1,&NumPoints, &hPoints,0,NewRefno++,0,2,NewAreaSymbol,0,Prefix,pNam,-1,-1,-1,0,0,0,0,TRUE,0);
-		GSSiClose (Fid);   
+		GSSiClose2 (&Fid);   
 		CloseTRANS2 (&hTran);
 		nPRIMFiles++;
 	} 
-	GSSiClose (FidMore4);
+	GSSiClose2 (&FidMore4);
 	NewAreaSymbol = GetDictSymbolNumber ("PRIMBNDSL");
 	AddToSymList (NewAreaSymbol,&NumSyms,&hSymDesc); 
 	hPRIMFiles = GSSiGlobAlloc (1130,GHND,nPRIMFiles * (long)sizeof(PRIMFILEINFO));    
@@ -4258,7 +4258,7 @@ BOOL LoadPRIMBounds (short idum)
 				}
 			}
 		}
-        GSSiClose (Fid); 
+        GSSiClose2 (&Fid); 
 /*        MidPointWorld.x = AveX / pPRIMFiles[ifile].nTranPoints;
         MidPointWorld.y = AveY / pPRIMFiles[ifile].nTranPoints;
 		hTran = STRAN2 (pPRIMFiles[ifile].WorldX,pPRIMFiles[ifile].WorldY,
@@ -4345,7 +4345,7 @@ NextCorner:;
 		AddPolyToMap (1,&NumPoints, &hPoints,0,NewRefno++,0,2,NewAreaSymbol,0,Prefix,UDI,-1,-1,-1,0,0,0,0,TRUE,0);
 		ifile++;
 	}
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid2);
     CloseMap(TRUE);  
 	AddSymToMap (NumSyms,hSymDesc,0,0); 
     DestroySymList (&NumSyms,&hSymDesc); 
@@ -4374,7 +4374,7 @@ NextCorner:;
     	BT_PUT (hBT,str,(LPSTR)&Dummy);   
     	NumFiles++;
 	} 
-	GSSiClose (FidRun);
+	GSSiClose2 (&FidRun);
 	GSSiGlobFree (&hDLT);
 	
 	{
@@ -4506,7 +4506,7 @@ NextCorner:;
 						if (!ContinueProcessing)
 							break;
 					}
-					GSSiClose (FidBM); 
+					GSSiClose2 (&FidBM); 
 					sprintf (fNameBM,"c:\\primout\\%0.3ld%0.3ld.bpw",iFileRow,iFileCol);
 					FidBPW = GSSiOpenFile (fNameBM,&OFStruct,OF_CREATE);
 					sprintf (str,"%f",Res);
@@ -4519,7 +4519,7 @@ NextCorner:;
 					fputstring (str,FidBPW);
 					sprintf (str,"%f",WorldPoint.y);
 					fputstring (str,FidBPW);
-					GSSiClose (FidBPW);
+					GSSiClose2 (&FidBPW);
 					GSSiGlobUlFree (&hScanLine);  
 					GSSiGlobUlFree (&hDibInfoOut);  
 					ifile++; 
@@ -4616,7 +4616,7 @@ BOOL BuildZoomList (LPSTR Arg1,LPSTR Heading,LPSTR Separator,LPSTR Arg4)
 	fputstring (str,FidOut);
 Exit:
     BT_CLOSEANDDELETE (&hBT);  
-    GSSiClose (FidOut);
+    GSSiClose2 (&FidOut);
     GSSiSetCursor (hcurSave); 
     return rtn;
 }
@@ -4642,7 +4642,7 @@ BOOL SplitXFERFile (LPSTR Name,LPSTR Dir,short nPieces)
 			if (loc > PieceEnd) 
 			{   
 				if (PieceEnd > 0)
-					GSSiClose (Fid2);
+					GSSiClose2 (&Fid2);
 				PieceNum++;
 				PieceEnd = PieceNum * (TotLen / nPieces); 
 				if (PieceNum == nPieces)
@@ -4656,8 +4656,8 @@ BOOL SplitXFERFile (LPSTR Name,LPSTR Dir,short nPieces)
 		StatusWindowUpdate2 ("",TotLen,loc);  
 	}
 	SetContinueProcessing ( TRUE);
-	GSSiClose (Fid);
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid);
+	GSSiClose2 (&Fid2);
 	DestroyStatusWindow(0);  
 	return TRUE;
 }  
@@ -4900,11 +4900,11 @@ BOOL PickNearestCPTFile (DPOINT Point,LPSTR Filelist,LPSTR IgnoreName,double Max
 					} 
 				Next:;
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			}
 		}
 	}
-	GSSiClose (FidFL);   
+	GSSiClose2 (&FidFL);   
 	GSSiGlobUlFree (&hStr);
 	return TRUE;
 }
@@ -5026,7 +5026,7 @@ long MaxFileRefno (LPSTR FileListFile)
 			CloseDGNFile ();
         }
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return MaxRef;
 }
 
@@ -5190,7 +5190,7 @@ NextRec:
 
 	} 
 	DestroyStatusWindow(0); 
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	BT_CLOSEANDDELETE (&hBTDups);
 	return NumDups;
 }
@@ -5273,7 +5273,7 @@ NextRec:
 		StatusWindowUpdate (0,0, nRecs, ++nLoaded);
 	} 
 	DestroyStatusWindow(0); 
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	BT_CLOSEANDDELETE (&hBTDups);
 	return NumDups;
 }
@@ -5491,7 +5491,7 @@ NextRec:
 		StatusWindowUpdate (0,0, nRecs, ++nLoaded);
 	} 
 	DestroyStatusWindow(0); 
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	BT_CLOSEANDDELETE (&hBTDups);
 	return NumDups;
 }
@@ -5539,7 +5539,7 @@ BOOL LinesToPoints (LPSTR OutFile,double SampleDist)
 			GSSiGlobUlFree (&hPoints);
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -5625,8 +5625,8 @@ BOOL FilterTextFile (LPSTR InFile,LPSTR OutFile,MNMXCORD Bounds)
 		StatusWindowUpdate (0,0, TotLen, CurLoc); 
     }  
     SetContinueProcessing ( TRUE); 
-    GSSiClose (FidIn);   
-    GSSiClose (FidOut);   
+    GSSiClose2 (&FidIn);   
+    GSSiClose2 (&FidOut);   
     GSSiGlobFree (&TxtHandle);
 	DestroyStatusWindow (0);  
 	return TRUE;
@@ -5669,7 +5669,7 @@ BOOL RecoverPltFile (LPSTR Name,LPSTR OutName)
 NextRec:;
 	}
 	GSSiGlobUlFree (&hMem);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return rtn;
 }
 
@@ -5857,7 +5857,7 @@ int GetFileChecksum (LPSTR File,int frombyte,int tobyte)
 	HFILE	Fid = GSSiOpenFile (File,0,OF_READ);
 	int		checksum = GetOpenFileChecksum (Fid,frombyte,tobyte);
 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 
 	return checksum;
 }
@@ -5935,7 +5935,7 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			GSSifstat (Fid2,&fstat);
 			lastup = fstat.st_mtime;
 			lfile = fstat.st_size;
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 		}*/
  		_splitpath (str2,drive,dir,Name,extension);  
 		strcpy (LastDir,dir);
@@ -5957,8 +5957,8 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			strlwr(str);
 		fputstring (str,OutFileFID);
 	 }  
-     GSSiClose (Fid);
-	 GSSiClose (OutFileFID);
+     GSSiClose2 (&Fid);
+	 GSSiClose2 (&OutFileFID);
      GSSiRemove (TempName);
 	 if (*GMDFile)
 	 {
@@ -6154,7 +6154,7 @@ void __cdecl BackgroundCache2 (LPSTR *Args)
 	Sleep (20000);
 	MessageBox (0,Args[0],"Starting Caching",MB_OK);
 	FidFilelist = GSSiOpenFile (Args[1],0,OF_READ);
-	GSSiClose (FidFilelist);
+	GSSiClose2 (&FidFilelist);
 	return;
 }
 
@@ -6644,7 +6644,7 @@ void RenameCachedFiles (LPSTR CacheDir)
 				LPSTR	pBS;
 
 				BigRead (Fid2,FileName,MAX_PATH);
-				GSSiClose (Fid2);
+				GSSiClose2 (&Fid2);
 				GSSiRemove (CacheRenameFile);
 				strcpy (FromName,FileName);
 				pBS = strrchr (FileName,'\\');
@@ -6665,7 +6665,7 @@ void RenameCachedFiles (LPSTR CacheDir)
 			}
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove (TempName);
 	return;
 }
@@ -6766,8 +6766,8 @@ BOOL StartBackgroundCache (void)
 				fputstring (str,Fid2);
 			}
 		}
-		GSSiClose (Fid);
-		GSSiClose (Fid2);
+		GSSiClose2 (&Fid);
+		GSSiClose2 (&Fid2);
 		BackgroundCacheStarted = TRUE;
 		RenameCachedFiles (CachePathnameTo);
 		ContinueBackgroundCache = TRUE;
@@ -7080,7 +7080,7 @@ BOOL CacheCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			GSSillseek (Fid,0,0);
 			BigWrite (Fid,&totFileLen,sizeof(long),-1);
 			BigWrite (Fid,&nFiles,sizeof(int),-1);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			strcpy (arg1,tmpFile);
 			strcpy (arg2,ipAddress);
 			itoa (port,arg3,10);
@@ -7346,7 +7346,7 @@ BOOL ProcessUpdateFile (HANDLE hMem)
 					free (pBlockData);
 					BigRead (Fid,(LPSTR)&blockLoc,sizeof(LONGLONG));
 				}
-				GSSiClose (FidUp);
+				GSSiClose2 (&FidUp);
 				BigRead (Fid,&lnf,sizeof(int));
 			}
 			st = TRUE;
@@ -7354,7 +7354,7 @@ BOOL ProcessUpdateFile (HANDLE hMem)
 				SetGlobalValue ("%LASTNETUPDATE",pLastUpdateVal);
 			free (pLastUpdateVal);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiRemove (pFile);
 	}
 	if (st)
@@ -8019,7 +8019,7 @@ BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors)
 			hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFile);
 			pFile = GlobalLock (hFile);
 			BigRead (Fid,pFile,lFile);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			strcpy (headerFile,File);
 			if ((pLoc = strrchr (headerFile,'.')))
 				strcpy (pLoc,"Data.h");
@@ -8041,7 +8041,7 @@ BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors)
 				strcpy (line,"\t");
 			}
 			fputstring ("\t};",Fid);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GSSiGlobUlFree (&hFile);
 			GSSiGlobUlFree (&hOutArray);
 			GSSiGlobUlFree (&hLastRow);

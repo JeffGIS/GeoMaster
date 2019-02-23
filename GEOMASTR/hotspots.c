@@ -646,7 +646,7 @@ GSSiExitProg (1321);
 	pGrid =  (HPLONG)GlobalLock (pHSData->hGrid); 
 	BigWrite (Fid,(HPSTR)pHSData,sizeof(HOTSPOTDATA),-1);
 	BigWrite (Fid,(HPSTR)pGrid,GridSize,-1);
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	GlobalUnlock (pHSData->hGrid); 
 {
 #if ENABLETRACE
@@ -686,7 +686,7 @@ GSSiExitProg (1322);
 	pGrid =  (HPLONG)GlobalLock (pHSData->hGrid); 
 	BigRead (Fid,(HPSTR)pGrid,GridSize);   
 	GlobalUnlock (pHSData->hGrid);
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	GlobalUnlock (handle);
 {
 #if ENABLETRACE

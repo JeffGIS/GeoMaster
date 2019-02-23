@@ -121,11 +121,11 @@ HANDLE LoadReport2 (HFILE Fid,HANDLE hBuf)
 	}
 	GSSiGlobUlFree (&hBuf);	
 	GlobalUnlock (hReport); 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return hReport;        
 ErrExit:
 	GSSiGlobUlFree (&hBuf);	  
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return 0;
 }
 HANDLE LoadReport (LPSTR Name)
@@ -155,7 +155,7 @@ HANDLE LoadReport (LPSTR Name)
 	hTempLine = GSSiGlobAlloc (1579,GMEM_MOVEABLE,2096);
 	templine = GlobalLock (hTempLine);
 	BigRead (Fid,pBuf,len); 
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	hReport = GSSiGlobAlloc (1580,GHND,sizeof(REPORT));
 	pReport = (LPREPORT)GlobalLock (hReport);  
 	pReport->Type = 1; 
@@ -995,7 +995,7 @@ BOOL ReportToFile (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref,LPSTR File)
 	if (ScrollRptCntl != HFILE_ERROR)
 	{   
 		Rtn = DisplayReport2 (0,0,Rect,1,TRUE,0);  
-		GSSiClose (ScrollRptCntl);
+		GSSiClose2 (&ScrollRptCntl);
 	}
 	UnloadReport (&SaveView2->hReport); 
 Exit:
@@ -1217,7 +1217,7 @@ BOOL GetNextPrintReport (BOOL First,LPSTR ReportName,LPLONG pRefno,LPSTR Prefix,
 		return FALSE;
 	while (ReportNum < NextReportNum && fgetstring (str,512,Fid))
 		ReportNum++;                            
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (ReportNum < NextReportNum)   
 	{
 		GSSiRemove (PrintReportListFile);
@@ -1511,7 +1511,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                PctBox (GetDlgItem(hWndDlg,IDC_STATUS), EndLoc, GSSillseek (Fid,0,1),0);
 		    	 }
 		    	 GSSiGlobUlFree (&hSTR);     
-		    	 GSSiClose (Fid);
+		    	 GSSiClose2 (&Fid);
 		    	break;   
 		    case IDM_BROWSEEND: 
 		    	BrowseLines = BrowseLinesIn;   
@@ -1584,7 +1584,7 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 			
 				 }
 				 SetContinueProcessing ( TRUE);
-				 GSSiClose (Fid); 
+				 GSSiClose2 (&Fid); 
 				 GSSiGlobUlFree (&hSTR);
 				 if (nLines) 
 				 	AveLineLength /= nLines;

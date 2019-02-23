@@ -513,7 +513,7 @@ long DumpMunicNameTable (LPSTR FileName)
 		fputstring (str,Fid);  
 		rtn++;
 	}
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	BT_CLOSE (hBTMFN);
 	return rtn;
 }
@@ -554,7 +554,7 @@ BOOL ReloadMunicNameTable (LPSTR FileName)
 	    	BT_PUT (hBT,(LPSTR)&ALTMunName,(LPSTR)&Dummy);    
 	    }
 	}
-	GSSiClose (Fid);   
+	GSSiClose2 (&Fid);   
 	BT_CLOSE (hBT);
 	return TRUE;
 }
@@ -2165,7 +2165,7 @@ BOOL DumpUserAdd (void)
         sprintf (str,"%s\t%ld\t%ld\t%f\t%f",ULAddKey.Street,ULAddKey.HouseNum,ULAddKey.Munic,Match.Point.x,Match.Point.y);
      	fputstring (str,Fid);
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CloseUserDefinedAddress (OpenedUAA);    
 	CreateUserAddressPlot ("[%DL]maplib\\useradd.plt");
 	sprintf (str,"%ld records written to %s",n,"[%DL]address\\userdump.txt");     
@@ -2331,7 +2331,7 @@ BOOL SaveStreetPolys (void)
 	} 
 	SetContinueProcessing ( TRUE); 
 	DestroyStatusWindow(0);  
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	BT_CLOSE (hBT);
 	return TRUE;
 }

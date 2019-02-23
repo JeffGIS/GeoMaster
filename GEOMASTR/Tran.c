@@ -472,7 +472,7 @@ HANDLE LoadTranFromBPW (LPSTR Name)
 		XTO[3] = wx;
 		YTO[3] = wy + 100 * yres;
 		handle = STRAN2 (1660,XFROM,YFROM,XTO,YTO,4,&RSQMIN,1,&TranBounds); 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	return handle;
 }
@@ -639,7 +639,7 @@ Next:;
 Exit:
 	GSSiGlobUlFree (&hcoord);
 	if (Fid != HFILE_ERROR)
-		GSSiClose (Fid);  
+		GSSiClose2 (&Fid);  
 	if (SetTrans)
 	{
 		SetGlobalValue("%ALT_PROJECTION",curproject);
@@ -674,7 +674,7 @@ HANDLE LoadTranFileWithDandT (LPSTR Name)
 	{
 		Fid = GSSiOpenFile (Name2,&OFStruct,OF_READ);
 		handle =  ReadTranData (Fid);
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	}
 	else
 	{               		
@@ -765,7 +765,7 @@ MNMXCORD GetTranFileBounds (LPSTR Name,LPSTR Direction)
 		if (sscanf (str,"%lf %lf %lf %lf",&Point[0].x,&Point[0].y,&Point[1].x,&Point[1].y) == 4) 
 			AddDPointToMinMax (&Point[dir],&Bounds);
 	}  
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return Bounds;
 }
                 
@@ -1956,6 +1956,6 @@ void Create256RotationHeaders (void)
 	sprintf (str,"\t%ff};",C2[255]);
 	fputstring (str,Fid); 
 
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	return;
 }

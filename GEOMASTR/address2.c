@@ -206,7 +206,7 @@ BOOL CreateINT_ACCIDTable (LPSTR File)
 	 BT_CREATE (FileIn1, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
      LocalUnlock(hVars);
      LocalFree(hVars);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 
      hDB = OpenGWDatabase (File,BT_WRITE);
      if (!hDB) return (FALSE);
@@ -444,7 +444,7 @@ BOOL UnloadStreets (HWND hWnd)
     	if (nSegs)
 			fputstring (str,Fid);
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     CloseStreetSegmentTable(Opened); 
 	CloseStreetNameTable();   
     GSSiSetCursor (hcurSave); 
@@ -495,7 +495,7 @@ BOOL ReloadStreets (HWND hWnd)
 		} 
 	}
     
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
 
 	{   
 		long	Offset, TLID; 
@@ -553,11 +553,11 @@ HANDLE CreateAddLocTable (LPSTR OutDBName,short UDIFieldLen, short AdditionalFie
     char    str[MAX_PATH], PrimeIndex[MAX_PATH]; 
     HANDLE  hDB ,  hVars,   SaveHandle,LastHandle;
     FIELDINFO   KeyFieldDef;
-    short    NumHouse,  FidData,ibeg,NumVars, ii,n=0;  
+    short    NumHouse,  ibeg,NumVars, ii,n=0;  
     static  short       NumFields, Reclen, len;
     long        StartHouse,EndHouse, Recno=0;
     GWDHEADER16 GWDHead; 
-    HFILE   OutFid;
+    HFILE   FidData, OutFid;
 	OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;
     BOOL    First;
@@ -690,7 +690,7 @@ HANDLE CreateAddLocTable (LPSTR OutDBName,short UDIFieldLen, short AdditionalFie
      *lpDot = 0;
      _fstrcat (PrimeIndex,".in1");
      BT_CREATE (PrimeIndex, 4, FALSE, 4, 1,Vars,FALSE, 0, GWDHead.TimeStamp, FALSE);
-     GSSiClose (FidData);
+     GSSiClose2 (&FidData);
      lpDot = _fstrrchr (PrimeIndex,'.');
      *lpDot = 0;
      _fstrcat (PrimeIndex,".in2");  
@@ -1368,7 +1368,7 @@ BOOL GetZIPCenter (long ZIP,LPDPOINT Point)
 		return FALSE;
 	if (!Point) 
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		return TRUE; //used to test for file existance    
 	}
 	while (fgetstring (str,64,Fid))
@@ -1376,7 +1376,7 @@ BOOL GetZIPCenter (long ZIP,LPDPOINT Point)
 		sscanf (str,"%ld %ld %ld",&zip,&lon,&lat);
 		if (zip == ZIP)
 		{         
-			GSSiClose (Fid);   
+			GSSiClose2 (&Fid);   
 			point.x = -(double)lon/1000000.0;
 			point.y = (double)lat/1000000.0;
 			ConvertCoord (&point,2,1);
@@ -1384,7 +1384,7 @@ BOOL GetZIPCenter (long ZIP,LPDPOINT Point)
 			return TRUE;
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return FALSE;
 }
 
@@ -1424,7 +1424,7 @@ BOOL ReloadSTNDTables (void)
 		StatusWindowUpdate (NULL,NULL, TotLen, --CurLoc);
 
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
 	CloseStreetNameTable();
     sprintf (Name,"%s\\strname.gmd",AddMatchDir);
     GSSiRemove (Name);
@@ -1454,7 +1454,7 @@ BOOL ReloadSTNDTables (void)
 		StatusWindowUpdate (NULL,"Reloading street names", TotLen, ++CurLoc);
 	}
 	CloseStreetNameTable();
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     GSSiRemove (TempFile);
 	DestroyStatusWindow(0);  
     GSSiSetCursor (hcurSave); 
@@ -1487,7 +1487,7 @@ BOOL FindNonNetworkedStreets (void)
     	}              
     	TotNum++;
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     GSSiSetCursor (hcurSave); 
     sprintf (str,"%ld non-networked streets of %ld total\r\nWritten to: %s",NumNotNet,TotNum,OFStruct.szPathName);
     GSSiMsgBox (GetFocus(),str,"Finished",MB_OK,0);
@@ -2340,7 +2340,7 @@ BOOL AddToUserDefinedAddressFromFile (LPSTR File)
 		BigRead (Fid,&ULAddKey,ln);
 		BigRead (Fid,&ln,4);
 		BigRead (Fid,&AM,ln);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		strupr (ULAddKey.Street);
 
 		if (BT_PUT (hBTUserDefinedAddress,(LPSTR)&ULAddKey,(LPSTR)&AM)>=0)
@@ -2387,7 +2387,7 @@ Errmes:
 		ln = sizeof (ADDMATCH);
 		BigWrite (Fid,&ln,4,-1);
 		BigWrite (Fid,pAM,ln,-1);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	CloseUserDefinedAddress (OpenedUAA);
 	return TRUE; 

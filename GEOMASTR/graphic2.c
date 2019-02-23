@@ -2866,7 +2866,7 @@ GSSiExitProg (142);
 	lFile2 = GSSiLength (File2);
 	BigWrite (Fid,(HPSTR)&lFile1,4,-1);
 	BigWrite (Fid,(HPSTR)&lFile2,4,-1);  
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	copyfile (Name,File1,TRUE,0,0,0,0,0,0);
 	copyfile (Name,File2,TRUE,0,0,0,0,0,0);
 	Fid = GSSiOpenFile (Name,&OFStruct,OF_READWRITE);
@@ -2921,7 +2921,7 @@ GSSiExitProg (143);
 		lFile1 -= lr;
 		BigWrite (FidOut,pbuf,lr,-1);
 	}
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	FidOut = GSSiOpenFile (File2,0,OF_CREATE); 
 	while (lFile2>0) 
 	{
@@ -2929,9 +2929,9 @@ GSSiExitProg (143);
 		lFile2 -= lr;
 		BigWrite (FidOut,pbuf,lr,-1);
 	}
-	GSSiClose (FidOut); 
+	GSSiClose2 (&FidOut); 
 	GSSiGlobUlFree (&hBuf);
-//	GSSiClose (*Fid);
+//	GSSiClose2 (&*Fid);
 //	copyfile (File1,Name,FALSE,pos,pos+lFile1,0,0,0,0);
 //	copyfile (File2,Name,FALSE,pos+lFile1,pos+lFile1+lFile2,0,0,0,0);  
 //	*Fid = GSSiOpenFile (Name,0,OF_READ);
@@ -3009,7 +3009,7 @@ GSSiExitProg (144);
 		GSSillseek (Fid,0,2);
 		BigWrite (Fid,(HPSTR)&lFile1,4,-1);
 		BigWrite (Fid,(HPSTR)&lFile2,4,-1);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		rtn = TRUE;
 	}
 	OpenHighlightList (File1,File2);
@@ -3046,7 +3046,7 @@ BOOL RecallHighlightList (LPSTR Name)
 		GSSillseek (Fid,-8,2);
 		BigRead (Fid,(HPSTR)&lFile1,4);
 		BigRead (Fid,(HPSTR)&lFile2,4);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		
 		copyfile (File1,Name,FALSE,0,lFile1,0,0,0,0);
 		copyfile (File2,Name,FALSE,lFile1,lFile1+lFile2,0,0,0,0);

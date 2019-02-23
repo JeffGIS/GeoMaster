@@ -284,7 +284,7 @@ static  BOOL FIRST = TRUE;
         Handle = GSSiGlobAlloc ( 401,GPTR,10000); 
         lpStuff = (char far *) GlobalLock(Handle);    
         BigRead (lpFile,(HPSTR)lpStuff,10000);
-        GSSiClose(lpFile);
+        GSSiClose2 (&lpFile);
 //S10:        READ (99,11,END=20) LINE;
        lpPtr = _fstrrchr(lpStuff,35);   //ascii 35 = # find the last comment line
        if(!lpPtr)lpPtr = lpStuff; 

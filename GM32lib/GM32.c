@@ -60,7 +60,7 @@ BOOL DisplayHelp (LPSTR HelpFileIn,LPSTR HelpTopic)
 	ExpandText (HelpFile);
 	if ((Fid = GSSiOpenFile (HelpFile,&OFStruct,OF_READ)) == HFILE_ERROR)
 		return FALSE;
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 
 	if (!First)
 	{

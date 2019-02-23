@@ -220,7 +220,7 @@ BOOL GetReplayHeader (void)
 {
 	 if (FidReplay == HFILE_ERROR || !fgetstring (ReplayHeader,127,FidReplay))
 	 {
-		 GSSiClose (FidReplay);
+		 GSSiClose2 (&FidReplay);
 		 FidReplay = HFILE_ERROR;
 		 *ReplayHeader = 'E';
 		 return FALSE;
@@ -236,7 +236,7 @@ BOOL OpenTCPReplay (LPSTR ReplayFile)
 	if (!ReplayFile)
 	{
 		if (FidReplay != HFILE_ERROR)
-			GSSiClose (FidReplay);
+			GSSiClose2 (&FidReplay);
 		FidReplay = HFILE_ERROR;
 		ReplayTCP = FALSE;
 		return TRUE;
@@ -415,7 +415,7 @@ BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
     	 PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
 	case WM_DESTROY:
-		GSSiClose (FidReplay);
+		GSSiClose2 (&FidReplay);
 		if (HaveReplayTimer)
 			KillTimer (hWndVehTimer,HaveReplayTimer);
 		HaveReplayTimer = 0;
@@ -1802,7 +1802,7 @@ BOOL ProcessUpdateServerRequest (SOCKET sock,int ln,LPSTR SocketInputBuffer)
 	lenFile = GSSillseek (FidNetTransfer,0,2);
 	GSSillseek (FidNetTransfer,0,0);
 	BigWrite (FidNetTransfer,&lenFile,sizeof(LONGLONG),-1);
-	GSSiClose (FidNetTransfer);
+	GSSiClose2 (&FidNetTransfer);
 	sprintf (msg,"OK:%s|%lli",netTransferFile,lenFile);
 	lnMsg = strlen (msg) + 1;
 	if (send (sock,(LPSTR)&lnMsg,4,0) == 4)
@@ -1812,7 +1812,7 @@ BOOL ProcessUpdateServerRequest (SOCKET sock,int ln,LPSTR SocketInputBuffer)
 	}
 	return rtn;
 Failed:
-	GSSiClose (FidNetTransfer);
+	GSSiClose2 (&FidNetTransfer);
 	GSSiRemove (netTransferFile);
 	sprintf (msg,"ERROR:%i",ierr);
 	lnMsg = strlen (msg) + 1;
@@ -2101,7 +2101,7 @@ long GetNewFileTransferRequest (LPSTR ServerFile,LPSTR LocalFile,LPSTR StatusMac
 	NextID++; 
 	GSSillseek (Fid,0,0);
 	BigWrite (Fid,(HPSTR)&NextID,4,-1);
-	GSSiClose (Fid);  
+	GSSiClose2 (&Fid);  
 	_fmemset (&FTRecord,0,sizeof(FTRecord));
 	FTRecord.ID = NextID;
 	_fstrcpy (FTRecord.ServerFile,ServerFile);
@@ -2129,7 +2129,7 @@ BOOL LoadFileTransferRecord (long ID)
 		return FALSE;
 	if (BigRead (Fid,(HPSTR)&FTRecord,sizeof(FTRecord)) == sizeof(FTRecord))
 		rtn=TRUE;
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return rtn;
 }
 
@@ -2145,7 +2145,7 @@ BOOL SaveFileTransferRecord (void)
 		return FALSE;
 	if (BigWrite (Fid,(HPSTR)&FTRecord,sizeof(FTRecord),-1) == sizeof(FTRecord))
 		rtn=TRUE;
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return rtn;
 }
 
@@ -2207,7 +2207,7 @@ BOOL ServerFile (LPSTR Option,SOCKET socket,LPSTR ServerFile,LPSTR Arg1,LPSTR Ar
 		{
 			SFileLength = GSSifilelength (Fid);
 			sprintf (CmdMess,"$SERVERFILE(HEADER,-1,%s,%s,%lu-%lu,%lu)",ServerFile,Arg1,LastWriteTimeLow,LastWriteTimeHigh,SFileLength);  
-			GSSiClose (Fid); 
+			GSSiClose2 (&Fid); 
 		}
 		GlobalUnlock (hCmdMess);
 	} 
@@ -2254,7 +2254,7 @@ BOOL ServerFile (LPSTR Option,SOCKET socket,LPSTR ServerFile,LPSTR Arg1,LPSTR Ar
 			GSSillseek (Fid,Loc,0);
 			BigRead (Fid,pRec,SegLen); 
 			GlobalUnlock (hSegRec); 
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			sprintf (CmdMess,"$SERVERFILE(SEGMENT,-1,%s,%s,%lu,%i)",ServerFile,Arg1,Loc,SegLen);  
 		}
 		GlobalUnlock (hCmdMess);
@@ -2298,7 +2298,7 @@ BOOL ProcessFTSegment (SOCKET socket,long ID,LPBYTE pSeg,short SegLen)
         	
     	GSSillseek (Fid,0,2);
     	BigWrite (Fid,pSeg,SegLen,-1);
-    	GSSiClose (Fid);
+    	GSSiClose2 (&Fid);
     	FTRecord.Loc += SegLen;
     	if (FTRecord.Loc >= FTRecord.FileLength)
     	{   

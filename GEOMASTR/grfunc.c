@@ -132,7 +132,7 @@ Top:
 		}
 		LastLoc = GSSillseek (Fid,0,1); 
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (!CurrentConfig)
 		SetConfig (1);
 	CurView = SaveVP;
@@ -776,7 +776,7 @@ GSSiExitProg (1341);
 			break;
 		First=FALSE;
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	iStack = AddToMacroStack (2,0,File,0,CurLoc);
 	sprintf (strchr (pGCmd,0),"$E(%i)",iStack);
 	lcmd = strlen(pGCmd);
@@ -1009,7 +1009,7 @@ GSSiExitProg (1345);
 		}
 	}
 Exit:
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 {
 #if ENABLETRACE
 GSSiExitProg (1345);
@@ -1151,7 +1151,7 @@ GSSiExitProg (1347);
 			{
 		     	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L); 
 		     	SetContinueProcessing ( TRUE);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				GSSiGlobUlFree (&hStr);
 {
 #if ENABLETRACE
@@ -1295,7 +1295,7 @@ NextLine:
 Exit: 
 	if (opt == 2 && CurTheme->NumDesiredClass)
 		CurTheme->NumClass = CurTheme->NumDesiredClass;	
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiGlobUlFree (&hStr);
 	if (opt == 3)
 	{

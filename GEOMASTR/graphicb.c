@@ -943,7 +943,7 @@ BOOL CopySelectedRecords (LPSTR File,BOOL ShowStatus,BOOL AssignNewRefs,HANDLE h
     } 
 	UpdateRecordCopy (2);
     hTranReorg = 0;
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	ConvertCurvesToPolylines = ConvertCurves; 
 	rtn = ContinueProcessing;
     SetContinueProcessing ( TRUE); 
@@ -1769,7 +1769,7 @@ GSSiExitProg (1158);
 	    GSSiGlobUlFree (&hPoly);
 		GSSiGlobFree (&hPolyPartLen);
 	}
-	GSSiClose(FidAO);
+	GSSiClose2 (&FidAO);
    	GlobalUnlock (hAreaOffFile);
 	ClearFullWindowBitmap (0);
 {
@@ -1868,7 +1868,7 @@ BOOL ChangeAreaOffset (double NewOffset)
 		BigWrite (FidAO,(HPSTR)&Header,sizeof(HIGHLIGHTAREAHEADER),-1);
 	}
 	GSSiGlobUlFree (&hEntries);
-	GSSiClose (FidAO);
+	GSSiClose2 (&FidAO);
 	return TRUE;
 }
 
@@ -1941,7 +1941,7 @@ BOOL AddAreaToOffsetFile (long Refno,int Type,int np, HPDPOINT lpDPoint,int nPol
 	GSSillseek (FidAO,2,0);
 	BigWrite (FidAO,&NumEntries,4,-1);
 	GSSiGlobUlFree (&hIndex);
-    GSSiClose(FidAO); 
+    GSSiClose2 (&FidAO); 
     GlobalUnlock (hAreaOffFile);
 	HaveAreaOffFile (1);
 {
@@ -2394,7 +2394,7 @@ BOOL GetFontFileName (LPSTR FontName,LPSTR FileName)
 				} 
 			}
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		if (*FileName)
 {
 #if ENABLETRACE
@@ -3145,7 +3145,7 @@ BOOL CreateBPW (LPSTR Name,	MNMXCORD MnMx, double Res)
 	fputstring (str,FidBPW);
 	sprintf (str,"%.14lg",MnMx.ymx);
 	fputstring (str,FidBPW);
-	GSSiClose (FidBPW);    
+	GSSiClose2 (&FidBPW);    
 	GSSiGlobUlFree (&hMem);
 {
 #if ENABLETRACE
@@ -3223,7 +3223,7 @@ BOOL CreateLLTranFile (LPSTR Name)
 	testPointIn.y = 44.893080;
 	testPointOut = TranPoint (&testPointIn,hTran);
 	CloseTRANS2 (&hTran);
-	GSSiClose (Fid);    
+	GSSiClose2 (&Fid);    
 	GSSiGlobUlFree (&hMem);
 {
 #if ENABLETRACE
@@ -3575,7 +3575,7 @@ GSSiExitProg (1183);
 		sprintf (str,"%12ld %12ld %ld",NextRef,NextEndRef,NextEndRef-NextRef+1);
 		fputstring (str,Fid);
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CloseUsedRefTable (Opened);
 {
 #if ENABLETRACE
@@ -3797,7 +3797,7 @@ Open:
 				goto Exit;
 			}
 			fputstring (str,NewRefFid);
-			GSSiClose (NewRefFid);  
+			GSSiClose2 (&NewRefFid);  
 			NewRefFid = HFILE_ERROR; 
 			goto Open;
 		
@@ -3818,7 +3818,7 @@ Open:
 	{   
 		ltoa(TLID,str,10);
 		fputstring(str,NewRefFid); 
-		GSSiClose(NewRefFid);
+		GSSiClose2 (&NewRefFid);
 		NewRefFid = HFILE_ERROR; 
 	}
 Exit:
@@ -3874,7 +3874,7 @@ long GetNewRefnoNoUpdate (LPSTR EditFile)
 	else
 	{
 		if (NewRefFid != HFILE_ERROR)
-			GSSiClose (NewRefFid);
+			GSSiClose2 (&NewRefFid);
 		NewRefFid = HFILE_ERROR;
 	}
 																							{
@@ -4636,7 +4636,7 @@ USHORT GroupPoints (LPSTR InFile,LPSTR SQL,LPSTR idfieldname,LPSTR xfieldname,LP
 				fputstring (str,Fid);
 			} 
 			GlobalUnlock (hBounds);
-			GSSiClose (Fid); 
+			GSSiClose2 (&Fid); 
 		}
 		if (*PointToBoundsFile)
 		{ 
@@ -4651,7 +4651,7 @@ USHORT GroupPoints (LPSTR InFile,LPSTR SQL,LPSTR idfieldname,LPSTR xfieldname,LP
 					fputstring (str,Fid);
 				} 
 				GlobalUnlock (hPointBoundAssignment);
-				GSSiClose (Fid); 
+				GSSiClose2 (&Fid); 
 			}
 		}  
 	}

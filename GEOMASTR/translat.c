@@ -108,7 +108,7 @@ BOOL GuessProjection(HWND hWndDlg, UINT ProjCntl, UINT ProjUnits, LPMNMXCORD pFi
 		}
 		CvtID++;
 	}
-	GSSiClose(Fid);
+	GSSiClose2 (&Fid);
 
 	if (UseFirst)
 		nFound = min(nFound, 1);
@@ -217,7 +217,7 @@ int GuessProjection2(LPSTR fileOfProjections,LPMNMXCORD pFileBounds, int useThis
 		}
 		CvtID++;
 	}
-	GSSiClose(Fid);
+	GSSiClose2 (&Fid);
 
 	SetGlobalValue("%ALT_PROJECTION", SaveAltProj);
 	return TRUE;
@@ -238,7 +238,7 @@ BOOL GuessShapeProjection (LPSTR Name,HWND hWnd,UINT ProjCntl,UINT ProjUnits,BOO
 			if (FidSHP == HFILE_ERROR)  
 				return FALSE;  
 			BigRead (FidSHP,(HPSTR)&SHPHeader,(UINT)sizeof(SHPHeader));
-			GSSiClose (FidSHP);      
+			GSSiClose2 (&FidSHP);      
 			SHPBounds = *(LPMNMXCORD)&SHPHeader.Xmin;
 			nvp = SHPGetNVP(Name, &factor);
 			if (nvp)
@@ -1181,7 +1181,7 @@ void CreateIntersectionFile (BOOL GeoMaster,HWND hWndStatus)
 	{
 		BT_CLOSE (hSegData); 
 		hIntersect = 0;
-		GSSiClose (Tiger1FID);
+		GSSiClose2 (&Tiger1FID);
 	}  
 	else
 		hIntersect = BT_OPEN (File,ltime, BT_READ, 0);

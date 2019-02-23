@@ -197,7 +197,7 @@ HANDLE GetNextHighlightArea (long AreaNum,LPMNMXCORD pBounds,LPINT pType,LPINT p
 	if (OpenClose == 3)
 	{
 		GSSiGlobFree (&hEntries);
-		GSSiClose(FidAO);
+		GSSiClose2 (&FidAO);
 		return 0;
 	}
 	*pType = 3;
@@ -355,7 +355,7 @@ Exit:
 	if (!OpenClose)
 	{
 		GSSiGlobFree (&hEntries);
-		GSSiClose(FidAO);
+		GSSiClose2 (&FidAO);
 	}
 {
 #if ENABLETRACE
@@ -2076,7 +2076,7 @@ BOOL DeletePickedItem (int Item,short OldType,short NewType)
 			}
 		}
 		if (Opened)
-			GSSiClose (FidDel);
+			GSSiClose2 (&FidDel);
 	}
 Exit: 
 {
@@ -3383,7 +3383,7 @@ GSSiExitProg (759);
 #endif
 		return FALSE;  
 }
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GlobalUnlock (hMenuName);
 	GMEdit (hWnd,OFStruct.szPathName);
 /*	_fstrcpy (str,"NOTEPAD.EXE ");
@@ -3477,7 +3477,7 @@ GSSiExitProg (760);
 	hNewPopups = GSSiGlobAlloc ( 361,GHND,4096); 
 	
 	hMenu = GMCreateMenu (MFid,&line,Name); 
-	GSSiClose (MFid); 
+	GSSiClose2 (&MFid); 
 	GetCmdID (0,0);
 	if (!hMenu)
 {
@@ -3640,7 +3640,7 @@ Top:
 			GSSiGlobUlFree (&hStr);
 			if (FidLast != HFILE_ERROR)
 			{   
-				GSSiClose (MFid);
+				GSSiClose2 (&MFid);
 				MFid = FidLast;
 				FidLast = HFILE_ERROR;  
 			}
@@ -3779,7 +3779,7 @@ GSSiExitProg (761);
 	}
 	if (FidLast != HFILE_ERROR)
 	{   
-		GSSiClose (MFid);
+		GSSiClose2 (&MFid);
 		MFid = FidLast;
 		FidLast = HFILE_ERROR;
 		goto Top;
@@ -3911,7 +3911,7 @@ long OutputHLTAreas (int HLTOUTFormat,LPSTR HLTOutPath)
          }
     }
     fputstring ("END",FidOut);
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 {
 #if ENABLETRACE
 GSSiExitProg (763);
@@ -4350,9 +4350,9 @@ GSSiExitProg (771);
 NextState:	istate--;
 	} 
 	if (FidOut != HFILE_ERROR)
-		GSSiClose (FidOut);
+		GSSiClose2 (&FidOut);
 	GSSiGlobUlFree (&hBuf);
-	GSSiClose (Cities4FID);  
+	GSSiClose2 (&Cities4FID);  
 DoStreets:
 	if (DisplayStreetLabels (FALSE))
 		goto Exit;
@@ -4790,7 +4790,7 @@ GSSiExitProg (773);
 Next:;
 	}
 	GlobalUnlock (hShields); 
-	GSSiClose (Fid);  
+	GSSiClose2 (&Fid);  
 	if (Error)
 	{
 		nShields = 0;
@@ -5724,7 +5724,7 @@ void ProcessZoomMacroFile(HDC hDC)
 		goto Exit;   
 	AddToMacroStack(2, 0, CurView->VisName, 0, 0);
 	ProcessZoomMacroFile2 (hDC,Fid);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 Exit: 
 	GSSiGlobUlFree (&hMem);
 {
@@ -5975,7 +5975,7 @@ int AddPuertoRicoToCities4x (int i)
 		sprintf (str,"%i\t%s\t%f\t%f",-cd.Pop,cd.Name,cd.LatLong.x,cd.LatLong.y);
 		fputstring (str,FidOut);
 	}
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	GSSillseek (Cities4FID,0,2);*/
 	fgetstring (str,250,Fid);
 	while (fgetstring (str,250,Fid))
@@ -5995,8 +5995,8 @@ int AddPuertoRicoToCities4x (int i)
 		strcpy (cd.State,"");
 		BigWrite (Cities4FID,&cd,sizeof(cd),-1);
 	}
-	GSSiClose (Fid);
-	GSSiClose (Cities4FID);
+	GSSiClose2 (&Fid);
+	GSSiClose2 (&Cities4FID);
 
 	return 0;
 }

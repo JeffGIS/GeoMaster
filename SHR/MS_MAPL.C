@@ -54,7 +54,7 @@ BOOL written;
       written = BigRead( hf , (LPSTR) Mfile[i].mem_ptr,  total);
   
      if( Ioff > 0) Mfile[i].mem_ptr = (LPSTR) Mfile[i].mem_ptr + Ioff; // user wants me to offset the pointer
-     GSSiClose(hf); 
+     GSSiClose2 (&hf); 
      if(MS_R == 2)
      {
      Mfile[i].ms_w_or_ro = TRUE;  // the file will be written upon closing
@@ -129,7 +129,7 @@ int i;
       }          //         FILE,  pointer to string, length of string
       BigWrite( hf ,  Mfile[i].mem_ptr,  Mfile[i].total,-1);  
      //  fputs (file[i].mem_ptr, fptr);
-       GSSiClose(hf);                                                           
+       GSSiClose2 (&hf);                                                           
    }
       GSSiGlobUlFree (&Mfile[i].heap_ptr);                           
       STSC2 =NULL;                                   

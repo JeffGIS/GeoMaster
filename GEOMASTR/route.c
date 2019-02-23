@@ -401,13 +401,13 @@ short LoadSoilData (short idum)
     GWDHEADER GWDHead; 
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
-    short       FidData,ibeg,NumVars;
+    short       ibeg,NumVars;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	Name[128];   
     char	PrimeIndex[128];
     LPSTR	lpDot, lpEnd;
-    HFILE	FidSP;
+    HFILE	FidData, FidSP;
     typedef	struct	{long	IntRef;
     		 		 char	SoilID[16];
     		 		}	SOILPNTS;
@@ -465,7 +465,7 @@ short LoadSoilData (short idum)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	
 	hDB = OpenGWDatabase (Name,BT_WRITE);
     lpGWDHead = (LPGWDHEADER)GlobalLock (hDB);   
@@ -478,7 +478,7 @@ short LoadSoilData (short idum)
 		_fstrncpy (pSP->SoilID,&str[11],16);
 	    GWDAddRecord (lpGWDHead,0,0);
 	}
-	GSSiClose (FidSP);    
+	GSSiClose2 (&FidSP);    
 	GlobalUnlock (hDB);
 	CloseGWDatabase (hDB); 
 	
@@ -588,7 +588,8 @@ BOOL CreatePolyIDFile (LPSTR InName)
     GWDHEADER16 GWDHead; 
     LPGWDHEADER16 lpGWDHead;
     HANDLE  hVars, hDB;
-    short       FidData,ibeg,NumVars;
+    short       ibeg,NumVars;
+	HFILE FidData;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo; 
     char	Name[MAX_PATH];   
@@ -679,7 +680,7 @@ BOOL CreatePolyIDFile (LPSTR InName)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);
+	GSSiClose2 (&FidData);
 	
 	hDB = OpenGWDatabase (Name,BT_WRITE);
 	if (!hDB) return (FALSE);
@@ -814,7 +815,7 @@ Top:
 			sprintf (str,"%f %f %f %f",XOldSP[i],YOldSP[i],XNewSP[i],YNewSP[i]);
 			fputstring (str,Fid);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		goto Top;
 	} 
     TRANS2 (pPoint->x,pPoint->y,&pPoint->x,&pPoint->y,hTran); 
@@ -860,7 +861,7 @@ short LoadTranFilePoints (LPSTR Name,LPDOUBLE XFROM, LPDOUBLE YFROM, LPDOUBLE XT
 			goto Exit;
 	}  
 Exit:
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return N;
 }
 
@@ -1707,7 +1708,7 @@ BOOL HighlightSequentialItems (HWND hWnd, int Message, WPARAM wParam, LPARAM lPa
    			BT_CLOSE (hIntRef);
    			hIntRef = 0;
    			GSSiRemove (ChainedFile);  
-   			GSSiClose (FidChain); 
+   			GSSiClose2 (&FidChain); 
 	        FidChain = HFILE_ERROR;
    		}
    		if (hBTAt)

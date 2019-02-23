@@ -2182,7 +2182,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 								ExpandText (skipfile);
 								if (!_fstricmp (skipfile,leaf))
 								{  
-						    		GSSiClose (FidSkip); 
+						    		GSSiClose2 (&FidSkip); 
 						    		GSSiGlobFree (&hDLTSkip);  
 						    		if (!CurLev)
 						    		{
@@ -2198,7 +2198,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 								}	
 							}
 				    		GSSiGlobFree (&hDLTSkip); 
-				    		GSSiClose (FidSkip);
+				    		GSSiClose2 (&FidSkip);
 				    	}
 				    }
 		    		sprintf (Mess,"File %s: Level %s",str,cOrthRes);
@@ -2230,7 +2230,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		NextFile:;
 					                    
 		        }
-		        GSSiClose (FidFileList);  
+		        GSSiClose2 (&FidFileList);  
 				GSSiGlobFree (&hDLT);
 		    }
 		    else
@@ -2284,7 +2284,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		 lpFI->EndOffset = CurOffset;
 		 GSSillseek (FidIndex,FirstHeaderOffset,0);
 		 BigWrite (FidIndex,(HPSTR)lpFI,STOREDINDEXLENGTH,-1);
-		 GSSiClose (FidIndex);  
+		 GSSiClose2 (&FidIndex);  
 		 GSSiGlobUlFree (&hlpFI);
 		 if (Compress)
 		    AVIOutClose(&hAVIFile);
@@ -2292,7 +2292,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		 setDoPaint( TRUE); 
 		 CurLev++;
 	} while (*pOrthRes); 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (itype == 1 && hWndDlg)
 	{  
 		long	lmem=sizeof(VIEWPORT)+128*MAX_VIEWPORT_FILES; 
@@ -2367,7 +2367,7 @@ BOOL CreateMapIndex (LPSTR Dir,LPSTR FileListName,short itype,BOOL UsesTimes,LPS
 		_fmemmove (CurView,pSaveVP,(size_t)lmem);
 		GlobalUnlock (hVP);
 		GSSiGlobUlFree (&hVP); 
-		GSSiClose (FidSyms);
+		GSSiClose2 (&FidSyms);
 	}
 	Processing = FALSE;
 	SetContinueProcessing ( TRUE);  
@@ -2412,7 +2412,7 @@ BOOL TransformImage (LPSTR TIFFile,LPSTR TranFile,LPSTR BMPFile,LPSTR BPWFile,LP
 			while (fgetstring (str,128,FidArea))
 				if (sscanf (str,"%lf %lf",&AreaPoints[nAreaPts].x,&AreaPoints[nAreaPts].y) == 2)
 					nAreaPts++;  
-			GSSiClose (FidArea);
+			GSSiClose2 (&FidArea);
 
 		}
 		GlobalUnlock (hAreaPts);
@@ -2432,7 +2432,7 @@ BOOL TransformImage (LPSTR TIFFile,LPSTR TranFile,LPSTR BMPFile,LPSTR BPWFile,LP
 		sprintf (str,"%f",1.0/Res);
 		fputstring (str,Fid);
 		fputstring (BMPFile,Fid);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiGlobFree (&hDibNew); 
 		rtn = TRUE;
 	}
@@ -2469,7 +2469,7 @@ BOOL CompressFrameEX (LPBITMAPINFOHEADER	lpbiIn, LPBITMAPINFOHEADER lpbiOut,long
 	len = lpbiIn->biSize + lpbiIn->biClrUsed * sizeof(RGBQUAD) + lpbiIn->biSizeImage; 
 	BigWrite (Fid,(HPSTR)&len,4,-1);
 	BigWrite (Fid,(HPSTR)lpbiIn,len,-1); 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CloseAllRequestedFiles (FALSE);
 
     sprintf (cmd,"CMPFrame %s;%s;%ld",CmpImageInFile,CmpImageOutFile,CmpImageQuality);
@@ -2514,7 +2514,7 @@ BOOL CompressFrameEX (LPBITMAPINFOHEADER	lpbiIn, LPBITMAPINFOHEADER lpbiOut,long
 		{
 			BigRead (Fid,(HPSTR)&len,4);
 			BigRead (Fid,(HPSTR)lpbiOut,len); 
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
     }
 	return rtn;
@@ -2600,7 +2600,7 @@ BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 Clip
     	FidOut = GSSiOpenFile (TempFile,&OFStruct,OF_CREATE);  
 	    if (FileErrMess (FidOut,TempFile,&OFStruct,OF_CREATE)) 
 	    {
-	    	GSSiClose (Fid);
+	    	GSSiClose2 (&Fid);
 	    	return FALSE;
 	    } 
     	if (GetGlobalCVal ("[%TFWUNITS]",str,NULL))
@@ -2618,8 +2618,8 @@ BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 Clip
 		fgetstring (str3,128,Fid);
 		fputstring (str3,FidOut);    	
 		fputstring (str2,FidOut);
-		GSSiClose (FidOut);
-		GSSiClose (Fid); 
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&Fid); 
 		_fstrcpy (ext,".tif");   	
 	    Fid = GSSiOpenFile (TempFile,&OFStruct,OF_READ);  
     }
@@ -2656,7 +2656,7 @@ BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 Clip
 		ftoa (str2,ScaleX);    	
 		fputstring (str2,FidOut);
 		_fstrcpy (ext,".tif");   	
-		GSSiClose (FidOut);
+		GSSiClose2 (&FidOut);
 	    Fid = GSSiOpenFile (TempFile,&OFStruct,OF_READ);  
     } 
     else if ((lpTXT = _fstrstr(lpFile,".bpw")))
@@ -2679,8 +2679,8 @@ BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 Clip
 		fgetstring (str3,128,Fid);
 		fputstring (str3,FidOut);    	
 		fputstring (str2,FidOut);
-		GSSiClose (FidOut);
-		GSSiClose (Fid); 
+		GSSiClose2 (&FidOut);
+		GSSiClose2 (&Fid); 
 		_fstrcpy (ext,".bmp");   	
 	    Fid = GSSiOpenFile (TempFile,&OFStruct,OF_READ);  
     } 
@@ -2727,7 +2727,7 @@ ErrOut:     MessageBox( GetFocus(),lpFile, "Invalid ortho coordinate file", MB_O
     else
     {
         MessageBox( GetFocus(), str2,"Invalid Units Parameter", MB_OK);
-	    GSSiClose (Fid);
+	    GSSiClose2 (&Fid);
         return (FALSE);
     } 
      
@@ -2804,7 +2804,7 @@ ErrOut:     MessageBox( GetFocus(),lpFile, "Invalid ortho coordinate file", MB_O
     _fstrcat(lpFile,ext);
 Exit:
     SetGlobalValue("%ALT_PROJECTION",SaveAltProj);
-    GSSiClose (Fid); 
+    GSSiClose2 (&Fid); 
     if (*TempFile)
 	    GSSiRemove (TempFile);  
     ConvertCoordClose ();
@@ -2841,7 +2841,7 @@ HRGN SetOrthoMask (LPSTR MaskAreaFileName)
 	hPnts = GSSiGlobAlloc (0,GMEM_MOVEABLE,nPnts*sizeof(DPOINT));
 	lpPoints = lpPointsIn = (HPDPOINT)GlobalLock (hPnts); 
 	BigRead (Fid,(HPSTR)lpPoints,nPnts*sizeof(DPOINT));
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (!SameDPoint (&lpPoints[0],&lpPoints[nPnts-1]))
     	AddPoint = TRUE;
 	if (nPnts > MaxDisplayPoints)   
@@ -3272,7 +3272,7 @@ BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName)
     BigRead (FidIndex,(HPSTR)&Version,2);
     if (Signature != 80251 || Version != 2)
     {    
-        GSSiClose (FidIndex); 
+        GSSiClose2 (&FidIndex); 
         return rtn;
     }
 	Version = 3;
@@ -3295,7 +3295,7 @@ BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName)
     	lpIndex->NumFiles = USHRT_MAX - 1;
     BigRead (FidIndex,&lpIndex->FirstIndex,(size_t)lpIndex->Length);
     lpIndex->NextHeaderOffset = GSSillseek (FidIndex,0,1);
-    GSSiClose (FidIndex);
+    GSSiClose2 (&FidIndex);
 Next:
 	totLen = 0;
 	curNumFiles = lpIndex->NumFiles;
@@ -3351,8 +3351,8 @@ Next:
 Exit:
     BigWrite (FidIndexOut,(HPSTR)&Signature,4,-1);
     BigWrite (FidIndexOut,(HPSTR)&Version,2,-1);
-	GSSiClose (FidIndexOut);
-	GSSiClose (FidJP2Out);
+	GSSiClose2 (&FidIndexOut);
+	GSSiClose2 (&FidJP2Out);
 	return rtn;
 }
 

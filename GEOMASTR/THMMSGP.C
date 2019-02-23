@@ -414,7 +414,7 @@ BOOL ThemeDisplayOffsetAreas (void)
 					}
 				}
 			}
-		    GSSiClose (CurTheme->FidAreas);
+		    GSSiClose2 (&CurTheme->FidAreas);
 		    CurTheme->FidAreas = HFILE_ERROR;
 		    GSSiRemoveAndClear (CurTheme->ScatterFile);
 		}
@@ -979,7 +979,7 @@ void DisplayCoordGridThemeLegend(short From)
 				}
 				if (fidGridOut != HFILE_ERROR)
 				{
-					GSSiClose (fidGridOut);
+					GSSiClose2 (&fidGridOut);
 					SetGlobalValue ("%GRIDOUTPUTFILE","");
 					MessageBox (0,"Done","",MB_OK);
 				}
@@ -1094,7 +1094,7 @@ HANDLE	CreateListFile (LPSTR File,short lenListData,BOOL SortOnData)
 	 lpDot = _fstrrchr (File,'.');
 	 _fstrcpy (lpDot,".in1");	
 	 BT_CREATE (File, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 	 _fstrcpy (lpDot,".gmd");	
 
      hDB = OpenGWDatabase (File,BT_WRITE);
@@ -2621,7 +2621,7 @@ GSSiExitProg (1294);
 				 {   
 					 Fid = GSSiOpenFile (File,(LPOFSTRUCTGM)&OFStruct,OF_READ); 
 					 ReadObject (&Fid,TRUE,&NewTheme,0); 
-					 GSSiClose (Fid);
+					 GSSiClose2 (&Fid);
 
 					if (CurView->pTheme)
 					{   
@@ -3173,7 +3173,7 @@ GSSiExitProg (1325);
 		return FALSE;
 }
 	ReadObject (&Fid,FALSE,&pTheme,0); 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (pTheme->ScatterFile)
 	{
 		pTheme->hScatterFile = BT_OPEN (pTheme->ScatterFile,0, BT_READ, 0); 
@@ -3230,7 +3230,7 @@ GSSiExitProg (1325);
 	if (ReadObject (&Fid,FALSE,&pTheme,0))
 	{
 		rtn = TRUE;
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		if (pTheme->ScatterFile)
 		{
 			pTheme->hScatterFile = BT_OPEN (pTheme->ScatterFile,0, BT_READ, 0); 
@@ -3255,7 +3255,7 @@ GSSiExitProg (1325);
 		CurTheme = SaveTheme;
 	}
 	else
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (1325);

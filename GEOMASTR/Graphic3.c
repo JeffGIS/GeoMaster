@@ -1006,7 +1006,7 @@ GSSiExitProg (657);
 	*str = 0;
 	if (!GetTextString (hWnd,str,sizeof(str),"Enter the zoom list title",0,0,0,TRUE,TRUE))  
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		Fid = GSSiRemove (Name);
 {
 #if ENABLETRACE
@@ -1016,7 +1016,7 @@ GSSiExitProg (657);
 }
 	}
 	fputstring (str,Fid);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GetCurVal (TypeFile,sizeof(TypeFile),IDS_FILEZMT); 
 	Fid = GSSiOpenFile (TypeFile,&OFStruct,OF_READWRITE);  
 	if (Fid == HFILE_ERROR)
@@ -1031,7 +1031,7 @@ GSSiExitProg (657);
 	_fstrcat (str,"|");
 	_fstrcat (str,Name);
 	fputstring (str,Fid);	
-	GSSiClose (Fid);	
+	GSSiClose2 (&Fid);	
 {
 #if ENABLETRACE
 GSSiExitProg (657);
@@ -3122,7 +3122,7 @@ GSSiExitProg (603);
 		GlobalUnlock (hFields);
 		if (GMHeader == 2)
 		{   
-			GSSiClose (OutFid);
+			GSSiClose2 (&OutFid);
 			OutFid = HFILE_ERROR;
 			if (!CreateGWDDatabase (File,1,Compress,0,nKeyFields,lpHead))
 			{
@@ -3333,11 +3333,11 @@ NextHlt:
         }
         BigWrite(OutFid,(HPSTR)&nRecs,sizeof(nRecs),-1);
         BigWrite(OutFid,(HPSTR)&maxrowlen,sizeof(maxrowlen),-1);
-        GSSiClose(IndexFid);
+        GSSiClose2 (&IndexFid);
         GSSiRemove(IndexFile);
     } 
     if (OutFid != HFILE_ERROR)     
-    	GSSiClose (OutFid);
+    	GSSiClose2 (&OutFid);
 Exit:
     GSSiGlobUlFree(&hRec);
     GSSiGlobUlFree(&hHead);
@@ -3468,7 +3468,7 @@ short OpenLegendFile (void)
    				BigRead (FidMap,(HPSTR)&LegendBounds[i],sizeof(MNMXCORD));
    				BigRead (FidMap,(HPSTR)&LegendSignature[i],sizeof(FILLSIGNATURE)); 
    			} 
-   			GSSiClose (FidMap); 
+   			GSSiClose2 (&FidMap); 
    		}
    		return nLegends;
 }
@@ -3557,7 +3557,7 @@ Start:
 	PRJ_UNITS[3] = SaveUnits;
     if (!pIndexBounds && !WantThisPass ())
     {
-        GSSiClose (FidIndex);
+        GSSiClose2 (&FidIndex);
 {
 #if ENABLETRACE
 GSSiExitProg (61);
@@ -3575,7 +3575,7 @@ GSSiExitProg (61);
 	    if (FidZM != HFILE_ERROR)
 	    {   
 	    	ProcessZoomMacroFile2(CurView->hDC,FidZM);
-	    	GSSiClose (FidZM);
+	    	GSSiClose2 (&FidZM);
 	    } 
 	}
 	//The [%ORTHORES] value may have changed
@@ -3599,7 +3599,7 @@ GSSiExitProg (61);
     BigRead (FidIndex,(HPSTR)&Version,2);
     if (Signature != 80251)
     {    
-        GSSiClose (FidIndex); 
+        GSSiClose2 (&FidIndex); 
         ContinueProcessing=FALSE;
         GSSiMessageBox (0,"This is not a valid index file",File, MB_OK,0);
 {
@@ -3612,7 +3612,7 @@ GSSiExitProg (61);
     if (Version > 3)
     {   
     BadMap: 
-        GSSiClose (FidIndex); 
+        GSSiClose2 (&FidIndex); 
         ContinueProcessing=FALSE;
         GSSiMessageBox (0,"This index file version is not recognized",OFStruct.szPathName, MB_OK,0);
 {
@@ -3625,7 +3625,7 @@ GSSiExitProg (61);
     if (Version < 1) goto BadMap; 
     if (Version == 1)
     {
-        GSSiClose(FidIndex);
+        GSSiClose2 (&FidIndex);
         ConvertIndexV1ToV2(Name); 
         goto Start;
     }
@@ -3635,7 +3635,7 @@ GSSiExitProg (61);
     BigRead (FidIndex,(HPSTR)&FileBounds,sizeof(MNMXCORD));
     if (!pIndexBounds && !AdjustFileBounds (CurView->ID,FileNum,&FileBounds,0))
     {
-        GSSiClose (FidIndex);
+        GSSiClose2 (&FidIndex);
 {
 #if ENABLETRACE
 GSSiExitProg (61);
@@ -3653,7 +3653,7 @@ GSSiExitProg (61);
 	        CurView->NewBounds = FileBounds;
 	    if (!RectInWBounds(&FileBounds,0) &&(!UpdateOrthoIndex||PltType!=5))
 	    {
-	        GSSiClose (FidIndex);
+	        GSSiClose2 (&FidIndex);
 {
 #if ENABLETRACE
 GSSiExitProg (61);
@@ -3676,7 +3676,7 @@ GSSiExitProg (61);
     	lpIndex->NumFiles = USHRT_MAX - 1;
     BigRead (FidIndex,&lpIndex->FirstIndex,(size_t)lpIndex->Length);
     lpIndex->NextHeaderOffset = GSSillseek (FidIndex,0,1);
-    GSSiClose (FidIndex);  
+    GSSiClose2 (&FidIndex);  
     TestBounds = lpIndex->Bounds;  
     if (!pIndexBounds)
     {
@@ -3740,14 +3740,14 @@ short GetMapIndexType (LPSTR Name)
     BigRead (FidIndex,(HPSTR)&Version,2);
     if (Signature != 80251 || Version != 2)
     {    
-        GSSiClose (FidIndex); 
+        GSSiClose2 (&FidIndex); 
         return(0);
     }
         
     GSSillseek(FidIndex,0,0);
     BigRead (FidIndex,(HPSTR)&FileBounds,sizeof(MNMXCORD));
     BigRead (FidIndex,(HPSTR) &FirstIndex,STOREDINDEXLENGTH);
-    GSSiClose (FidIndex);  
+    GSSiClose2 (&FidIndex);  
 	return FirstIndex.Type;
 }
 
@@ -3776,7 +3776,7 @@ NotFound:
 		LoadIndexParm (0); 
         if (FidIndex) 
         {
-            GSSiClose(FidIndex);  
+            GSSiClose2 (&FidIndex);  
             CloseRefIndex (TRUE);
 {
 #if ENABLETRACE
@@ -3820,7 +3820,7 @@ GetNextIndex:
     BigRead (FidIndex,&lpIndex->FirstIndex,(size_t)lpIndex->Length);
     lpIndex->NextHeaderOffset = GSSillseek (FidIndex,0,1);
     lpIndex->CurrentEntryOffset=-1;
-    GSSiClose (FidIndex);
+    GSSiClose2 (&FidIndex);
     
 {
 #if ENABLETRACE
@@ -3839,7 +3839,7 @@ void CloseMapIndex (LPSTR Name,HANDLE hlpFI, BOOL Write,BOOL CloseParmFiles)
 #endif
 { 
     OFSTRUCTGM    OFStruct; 
-    short FidIdx;
+    HFILE FidIdx;
     short     Version=1;
     long    Signature=80251; 
     long    ii;
@@ -3867,7 +3867,7 @@ GSSiExitProg (63);
         BigWrite (FidIdx,&lpFI->FirstIndex,lpFI->Length-sizeof(FILEINDEX),-1);
         BigWrite (FidIdx,(char *)&Signature,4,-1);
         BigWrite (FidIdx,(char *)&Version,2,-1);
-        GSSiClose (FidIdx);
+        GSSiClose2 (&FidIdx);
     }
     GSSiGlobUlFree (&hlpFI);
 {
@@ -4697,7 +4697,7 @@ BOOL AddStreetNumber (HPSTR buf,LPLONG len)
 		OFSTRUCTGM	OFStruct;
 				
 		if (hData)
-			GSSiClose (hData); 
+			GSSiClose2 (&hData); 
 		hData = 0;
 		BT_CLOSE (hBT);
 		hBT = BT_OPEN ("[STATE]\\tiger1.btr", 0, BT_READ, 0);

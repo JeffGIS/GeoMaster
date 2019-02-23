@@ -480,8 +480,8 @@ BOOL UpdatePictureID(LPSTR PathName, int oldSequence, int newSequence)
 		else
 			fputstring(line, FidNew);
 	}
-	GSSiClose(FidOld);
-	GSSiClose(FidNew);
+	GSSiClose2 (&FidOld);
+	GSSiClose2 (&FidNew);
 	GSSiRemove(PathName);
 	rtn = GSSiRename(NewFile, PathName);
 	return rtn;
@@ -527,14 +527,14 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 								Execute(line,0);
 								nTot++;
 							}
-							GSSiClose(fid);
+							GSSiClose2 (&fid);
 						}
 					}
 					first = FALSE;
 				}
 			}
 			Execute("COMMIT",0);
-			GSSiClose(FidList);
+			GSSiClose2 (&FidList);
 
 			GSSiGetTempFileName(0, "txt", 0, tempFile);
 			fidTemp = GSSiOpenFile(tempFile, 0, OF_CREATE);
@@ -550,7 +550,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 			}
 			sqlite3_finalize(statement);
 			rc = sqlite3_close(database);
-			GSSiClose(fidTemp);
+			GSSiClose2 (&fidTemp);
 			rc = sqlite3_open(DataBase, &database);
 			if (showProgress)
 			{
@@ -574,7 +574,7 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 			}
 			if (showProgress)
 				DestroyStatusWindow(0);
-			GSSiClose(fidTemp);
+			GSSiClose2 (&fidTemp);
 			GSSiRemove(tempFile);
 		}
 		if (checkPointOpt)
@@ -657,7 +657,7 @@ int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int h
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
 		rc = sqlite3_close(database);
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 	}
 	return rtn;
 }
@@ -727,10 +727,10 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 				}
 				free(line);
 				free(pmpInt);
-				GSSiClose(FidOut);
+				GSSiClose2 (&FidOut);
 				rtn = TRUE;
 			}
-			GSSiClose(FidList);
+			GSSiClose2 (&FidList);
 		}
 		rc = sqlite3_close(database);
 
@@ -781,7 +781,7 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 					free(rampText);
 				}
 			}
-			GSSiClose(FidOut);
+			GSSiClose2 (&FidOut);
 			rtn = TRUE;
 		}
 		rc = sqlite3_close(database);
@@ -814,7 +814,7 @@ int getAllRampIDs (LPSTR OutFile)
 			nRamps++;
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
-		GSSiClose(FidOut);
+		GSSiClose2 (&FidOut);
 	}
 	free(query);
 
@@ -876,9 +876,9 @@ BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, i
 						}
 					}
 				}
-				GSSiClose(FidList);
+				GSSiClose2 (&FidList);
 			}
-			GSSiClose(FidOut);
+			GSSiClose2 (&FidOut);
 			rtn = TRUE;
 		}
 		rc = sqlite3_close(database);
@@ -927,7 +927,7 @@ BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int header)
 		}
 		SQLOK(sqlite3_finalize(statement), database, "get pl", 0);
 		rc = sqlite3_close(database);
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 	}
 	return rtn;
 }
@@ -983,10 +983,10 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 				}
 				free(line);
 				free(pmpInt);
-				GSSiClose(FidOut);
+				GSSiClose2 (&FidOut);
 				rtn = TRUE;
 			}
-			GSSiClose(FidList);
+			GSSiClose2 (&FidList);
 			GSSiRemove(tempfile);
 		}
 		rc = sqlite3_close(database);
@@ -1007,7 +1007,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 		return FALSE;
 
 	fid = GSSiOpenFile(NVCRISDataBase, &OFStruct, OF_READ);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	if (fid != HFILE_ERROR)
 	{
 		rc = sqlite3_open_v2(OFStruct.szPathName, &database, SQLITE_OPEN_READONLY, NULL);
@@ -1047,7 +1047,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 					ii = 1;
 				free(line);
 				free(pmpInt);
-				GSSiClose(FidOut);
+				GSSiClose2 (&FidOut);
 				rtn = TRUE;
 			}
 			rc = sqlite3_close(database);
@@ -1067,7 +1067,7 @@ BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDat
 	*OutLoc = 0;
 	rampNum = fixRampNum(rampNum);
 	HFILE fid = GSSiOpenFile(NVCRISDataBase, &OFStruct, OF_READ);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	if (fid != HFILE_ERROR)
 	{
 
@@ -1568,7 +1568,7 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 			}
 		}
 	}
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	if (!rtn && !*errFile && !checkPointOpt) //file has to be edited on server (by GSSi) before more data can be loaded
 	{
 		err = Execute("ROLLBACK", errFile);
@@ -2007,7 +2007,7 @@ BOOL NVCreateDB(LPSTR path,BOOL Delete)
 	else
 	{
 		HFILE fid = GSSiOpenFile(path, 0, OF_CREATE);
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 		GSSiRemove(path);
 	}
 
@@ -2783,7 +2783,7 @@ BOOL loadUpdate(int databaseID, LPSTR file)
 				line++;
 			}
 		}
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 		if (!rtn) //file has to be edited on server (by GSSi) before more data can be loaded
 		{
 			SLT_AbortTrans(database);

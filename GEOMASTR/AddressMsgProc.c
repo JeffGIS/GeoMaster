@@ -92,7 +92,7 @@ BOOL    OpenAddressFilesPID (HWND hWnd)
     {                              
         sprintf(str,"Error in addloc.txt at line %i",n);
         GSSiMsgBox( GetFocus(), str,"Error", MB_OK,0);  
-ErrOut: GSSiClose(Fid);        
+ErrOut: GSSiClose2 (&Fid);        
         return (FALSE);
     } 
     str[0]='#'; while (str[0]=='#') {str[0]=' ';fgetstring (str,128,Fid);n++;}
@@ -194,7 +194,7 @@ GetPID:
     AddDisplayLine = GlobalLock (hAddDisplayLine);
     _fstrcpy (AddDisplayLine,str);      
     GlobalUnlock (hAddDisplayLine);
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     return (TRUE);
 }
 
@@ -1271,7 +1271,7 @@ BOOL FAR PASCAL ADDEDIT_HELPERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
         		}  
 				DestroyStatusWindow(0);  
 				SetContinueProcessing ( TRUE);
-        		GSSiClose (FidOut);
+        		GSSiClose2 (&FidOut);
         		sprintf (str,"%ld records (summarizing %ld unmatched records) dumped to %s",NumRecs,TotRecs,OFStruct.szPathName); 
         		SetDlgItemText (hWndDlg,IDC_MESS,str);
 				GSSiSetCursor(hcurSave);
@@ -1515,7 +1515,7 @@ BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				type++;
 		} 
 		Key.FullName[0]=0;
-		GSSiClose (Fid);  
+		GSSiClose2 (&Fid);  
 		SetFocus (GetDlgItem(hWndDlg,IDC_FULLWORD));
     }
         break; /* End of WM_INITDIALOG                                 */
@@ -1797,7 +1797,7 @@ BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				            }
 				            fputstring (OutString,Fid); 
 			             } 
-		        		 GSSiClose (Fid);             
+		        		 GSSiClose2 (&Fid);             
 		        	 }
 	            	 GSSiGlobUlFree (&hName);      
 	                 BT_CLOSEANDDELETE (&hBT); 
@@ -1951,7 +1951,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  BigWrite (FidSave,(HPSTR)&NumMatched,4,-1);
 			     MOPT=SendDlgItemMessage(hWndDlg,IDC_MOPT,CB_GETCURSEL,0,0)+1; 
                  BigWrite (FidSave,(HPSTR)&MOPT,2,-1);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
         NoUpdate:   
             	 if (LOWORD(wParam) == IDC_EXIT)
@@ -2008,7 +2008,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  BigRead (FidSave,(HPSTR)&TotAddLen,4);
                  BigRead (FidSave,(HPSTR)&NumMatched,4);
                  BigRead (FidSave,(HPSTR)&MOPT,2);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_DEST),TRUE); 
                //  EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_HELPER),TRUE); 
                  FileIsOpen = TRUE;
@@ -2402,7 +2402,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
                  BigWrite (FidSave,(HPSTR)&NumMatched,4,-1);
 			     MOPT=SendDlgItemMessage(hWndDlg,IDC_MOPT,CB_GETCURSEL,0,0)+1; 
                  BigWrite (FidSave,(HPSTR)&MOPT,2,-1);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
         NoUpdate:   
             	 if (LOWORD(wParam) == IDC_EXIT)
@@ -2461,7 +2461,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
                  BigRead (FidSave,(HPSTR)&TotAddLen,4);
                  BigRead (FidSave,(HPSTR)&NumMatched,4);
                  BigRead (FidSave,(HPSTR)&MOPT,2);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_DEST),TRUE); 
                  FileIsOpen = TRUE;
                  PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
@@ -2919,7 +2919,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
                  BigWrite (FidSave,(HPSTR)str,256,-1);
                  GetDlgItemText (hWndDlg,IDC_INTID_FIELD,str,sizeof(str));
                  BigWrite (FidSave,(HPSTR)str,256,-1);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
             	 break;
             	 
@@ -2940,7 +2940,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
                  SetDlgItemText (hWndDlg,IDC_SQL,str);                 
                  BigRead (FidSave,str,256);
                  SetDlgItemText (hWndDlg,IDC_INTID_FIELD,str);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
                  PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
             }
            		 break;
@@ -6143,7 +6143,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  BigWrite (FidSave,(HPSTR)&NumMatched,4,-1);
                  CreateNewFile = SendDlgItemMessage (hWndDlg,IDC_NEW,BM_GETCHECK,0,0L);
                  BigWrite (FidSave,(HPSTR)&CreateNewFile,4,-1);
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
             } 
         NoUpdate:   
             	 if (LOWORD(wParam) == IDC_EXIT)
@@ -6256,7 +6256,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 					 SendDlgItemMessage (hWndDlg,IDC_NEW,BM_SETCHECK,CreateNewFile,0L);
 					 break;
 				 }
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
                  PctBox (GetDlgItem(hWndDlg,IDC_STATUS1), TotAddLen, NumMatched,0);
                  FileIsOpen = TRUE;
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_DEST),TRUE); 

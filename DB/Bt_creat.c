@@ -625,7 +625,7 @@ BOOL BT_CREATE (LPSTR FNAME, int DATLEN, BOOL DATED, int NVARIn, int NVAR2,
       else
       {
 		btwrite (pBTree->BtFid,(LPSTR)&pBTree->BT_HEAD,(long)1024,0);//sizeof(BTHEAD)
-		GSSiClose (pBTree->BtFid); 
+		GSSiClose2 (&pBTree->BtFid); 
 		pBTree->BtFid = HFILE_ERROR;
 		rtn=TRUE;   
 	  }
@@ -726,7 +726,7 @@ HGLOBAL BT_OPEN (LPSTR FNAME, time_t TIME, int ACCESS, int DATE)
      Error:
      	 GSSiGlobUlFree (&hBTHEADER);
          if (Fid != HFILE_ERROR)
-         	GSSiClose(Fid);
+         	GSSiClose2 (&Fid);
          hBTree = NULL;
          goto Exit;
 	  }
@@ -1177,7 +1177,7 @@ GSSiExitProg (478);
 	      }
       }
       /*MS_$UNMAP (BT_HEAD,1024,IST)*/;
-      ST = GSSiClose (pBTree->BtFid);
+      ST = GSSiClose2 (&pBTree->BtFid);
       //GSSiGlobUlFree (&pBTree->hBT_HEAD);
       GSSiGlobUlFree (&pBTree->hBT_BLOCK);
       pBTree = 0;
@@ -1225,12 +1225,12 @@ GSSiExitProg (479);
 		  pBTree->BT_BUFF_INDEX->usedbufs = 1;
           if (!GSSiChangeLength (pBTree->BtFid, (LONGLONG)pBTree->BT_HEAD.BT_HEADLEN + pBTree->BT_HEAD.BT_LENGTH + 32))
           {
-          	GSSiClose (pBTree->BtFid);
+          	GSSiClose2 (&pBTree->BtFid);
           	CloseFidSmall ();
           	pBTree->BtFid = GSSiOpenFile (pBTree->BT_FNAME,0,OF_READWRITE);
           	if (!GSSiChangeLength (pBTree->BtFid, (LONGLONG)pBTree->BT_HEAD.BT_HEADLEN + pBTree->BT_HEAD.BT_LENGTH + 32))
           		ii=1;
-          	GSSiClose (pBTree->BtFid);
+          	GSSiClose2 (&pBTree->BtFid);
           	CreateFidSmall ();
           	pBTree->BtFid = GSSiOpenFile (pBTree->BT_FNAME,0,OF_READWRITE);
           }

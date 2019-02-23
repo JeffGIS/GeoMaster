@@ -911,14 +911,14 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    			lMacro += _fstrlen (pStr);   
 	    			if (lMacro > USHRT_MAX)
 	    			{
-	    				GSSiClose (Fid);  
+	    				GSSiClose2 (&Fid);  
 	    				GSSiMessageBox (0,Name,"Macro file exceeds maximum length",MB_ICONEXCLAMATION,0); 
 	    				rtn = FALSE;
 	    				goto Exit;
 	    			}
 	    			_fstrcat (pMacro,pStr);   
 	    		}
-	    	GSSiClose (Fid); 
+	    	GSSiClose2 (&Fid); 
 	    }
 ProcessMacro:
 		lMacro = strlen (pMacro);

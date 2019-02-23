@@ -373,7 +373,7 @@ void CreateSHPSymlistFile(LPSTR SHPFileName, int NumSHPParms, LPSTR SymName)
 					CloseDataFile(FALSE,&hDB);
 					fid = GSSiOpenFile(symlistFile, 0, OF_CREATE);
 					BigWrite(fid, pSymbols, lSymbols + 2,-1);
-					GSSiClose(fid);
+					GSSiClose2 (&fid);
 					GSSiGlobUlFree(&hSymbols);
 				}
 				GSSiGlobUlFree(&hStr);
@@ -657,7 +657,7 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 	if (fgetstring (str,256,Fid))
 		_fstrcpy (SHPEndDate,str);
 	
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 RtnTrue:
 {
 #if ENABLETRACE
@@ -1033,8 +1033,8 @@ HFILE CreateSHPFileIndex (LPSTR IndexName,LPSTR SHPFileName)
 	BigWrite (FidIdx,(HPSTR)&NumIndexSyms,2,-1);
 	GSSillseek (FidIdx,10,0);
 	BigWrite (FidIdx,(HPSTR)BlockMinMax,NumIndexBlocks*sizeof(mnmxCor),-1);
-	GSSiClose (Fid);   
-	GSSiClose (FidIdx);
+	GSSiClose2 (&Fid);   
+	GSSiClose2 (&FidIdx);
 	NVShapeIndexClose(db);
 	FidIdx = GSSiOpenFile (IndexName,0,OF_READ);  
 	SHPIndexType = SaveIndexType;
@@ -1079,7 +1079,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 	if (!SHPFileName)
 	{
 		if (SHPIDXFid != HFILE_ERROR)
-			GSSiClose(SHPIDXFid);
+			GSSiClose2 (&SHPIDXFid);
 		SHPIDXFid = HFILE_ERROR;
 		GSSiGlobFree(&hSHPIndexBlocks);
 		GetSHPRecordOffset(-1, FALSE);
@@ -1138,7 +1138,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 		    dtime = difftime (stat.st_mtime,SHPParmTime);  
 		    if (dtime < 0)
 		    {
-		    	GSSiClose (TMPFid);
+		    	GSSiClose2 (&TMPFid);
 				TMPFid = CreateSHPFileIndex (Name,SHPFileName);  
 			}
 			else
@@ -1153,15 +1153,15 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 			    ii=GSSifstat (SHPFid,&stat);
 			    dtime = difftime (stat.st_mtime,IndexTime);  
 				if (DoClose)
-					GSSiClose (SHPFid);
+					GSSiClose2 (&SHPFid);
 			    if (dtime > 0)
 			    {
-			    	GSSiClose (TMPFid);
+			    	GSSiClose2 (&TMPFid);
 					TMPFid = CreateSHPFileIndex (Name,SHPFileName); 
 				}  
 			}	
 		}
-		GSSiClose (SHPIDXFid); 
+		GSSiClose2 (&SHPIDXFid); 
 		GetSHPRecordOffset (-1,FALSE);
 		if (TMPFid == HFILE_ERROR)
 			return FALSE; 
@@ -1169,9 +1169,9 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 		BigRead (SHPIDXFid,(HPSTR)&Version,2);
 		if (Version != 2)
 		{
-			GSSiClose (SHPIDXFid); 
+			GSSiClose2 (&SHPIDXFid); 
 			TMPFid = CreateSHPFileIndex (Name,SHPFileName);
-			GSSiClose (SHPIDXFid); 
+			GSSiClose2 (&SHPIDXFid); 
 			GetSHPRecordOffset (-1,FALSE);
 			SHPIDXFid = TMPFid;
 		}
@@ -1213,7 +1213,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 			dtime = difftime(stat.st_mtime, SHPParmTime);
 			if (dtime < 0)
 			{
-				GSSiClose(TMPFid);
+				GSSiClose2 (&TMPFid);
 				GSSiRemove(Name);
 				haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
 			}
@@ -1229,10 +1229,10 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 				ii = GSSifstat(SHPFid, &stat);
 				dtime = difftime(stat.st_mtime, IndexTime);
 				if (DoClose)
-					GSSiClose(SHPFid);
+					GSSiClose2 (&SHPFid);
 				if (dtime > 0)
 				{
-					GSSiClose(TMPFid);
+					GSSiClose2 (&TMPFid);
 					GSSiRemove(Name);
 					haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
 				}
@@ -1240,7 +1240,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 					haveSLTIndex = TRUE;
 			}
 		}
-		GSSiClose(SHPIDXFid);
+		GSSiClose2 (&SHPIDXFid);
 		GetSHPRecordOffset(-1, FALSE);
 		if (TMPFid == HFILE_ERROR)
 			return FALSE;
@@ -3247,7 +3247,7 @@ GSSiExitProg (1107);
 			            fputstring (PGDBFile,FidFL);
 						StartRef += Count;
 					}
-					GSSiClose (FidFL);
+					GSSiClose2 (&FidFL);
 					_fstrcpy (PGDBFile,FileList);  
 		            SubstituteDL (PGDBFile,FALSE); 
 				}
@@ -3369,7 +3369,7 @@ GSSiExitProg (1107);
 			            fputstring (File2,FidFL);
 						StartRef += Count;
 					}
-					GSSiClose (FidFL);
+					GSSiClose2 (&FidFL);
 					_fstrcpy (FGDBFile,FileList);  
 		            SubstituteDL (FGDBFile,FALSE); 
 				}
@@ -3676,7 +3676,7 @@ GSSiExitProg (1107);
 						}
 						hItems[0] = TreeView_GetNextSibling (hTreeWnd,hItems[0]);
 					}
-					GSSiClose (FidFL);
+					GSSiClose2 (&FidFL);
 					_fstrcpy (FGDBFile,FileList);  
 		            SubstituteDL (FGDBFile,FALSE); 
 				}
@@ -3764,7 +3764,7 @@ BOOL CheckCode (int Recnum,LPSTR pElement,int BinSizeE,int code, int val)
 		{
 			HFILE FidDB=GSSiOpenFile (File,0,OF_CREATE);
 			BigWrite (FidDB,pElement,BinSizeE,-1);
-			GSSiClose (FidDB);
+			GSSiClose2 (&FidDB);
 		}
 #endif
 		return FALSE;
@@ -3831,7 +3831,7 @@ BOOL SaveContours (int NumPoints,HPDPOINT pPoints,LPSTR CurrentUDI)
 
 			sprintf (filename,"%s\\file%4.4i.bin",CurrentUDI,i+1);
 			pfid[i] = GSSiOpenFile (filename,&OFStruct,OF_CREATE);
-			//GSSiClose (pfid[i]);
+			//GSSiClose2 (&pfid[i]);
 			//pfid[i] = HFILE_ERROR;
 		}
 		GlobalUnlock (hfid);
@@ -3842,7 +3842,7 @@ BOOL SaveContours (int NumPoints,HPDPOINT pPoints,LPSTR CurrentUDI)
 		pfid = GlobalLock (hfid);
 		nrows = 0;
 		for (i=0;i<nfiles;i++)
-			GSSiClose (pfid[i]);
+			GSSiClose2 (&pfid[i]);
 		GSSiGlobUlFree (&hfid);
 		return TRUE;
 	}
@@ -4176,7 +4176,7 @@ BOOL OpenThinnedContours (LPSTR UDI)
 
 	if (!UDI)
 	{
-		GSSiClose (thinnedConFid);
+		GSSiClose2 (&thinnedConFid);
 		thinnedConFid = HFILE_ERROR;
 		return TRUE;
 	}
@@ -4310,7 +4310,7 @@ void DisplayContours (HDC hDC,LPSTR UDI)
 	DeleteObject (hRedBrush);
 	DeleteObject (hRedPen);
 	RestoreDC (hDC,-1);
-	GSSiClose (fid);
+	GSSiClose2 (&fid);
 	return;
 }
 void DisplayContours_d (HDC hDC,LPSTR UDI)
@@ -4369,7 +4369,7 @@ void DisplayContours_d (HDC hDC,LPSTR UDI)
 			GSSillseek (fid,header.npnts*sizeof(DPOINT),1);
 	}
 	RestoreDC (hDC,-1);
-	GSSiClose (fid);
+	GSSiClose2 (&fid);
 	return;
 }
 void DisplayContours_old (HDC hDC,LPSTR UDI)
@@ -4426,7 +4426,7 @@ void DisplayContours_old (HDC hDC,LPSTR UDI)
 			GSSillseek (fid,header.npnts*sizeof(DPOINT),1);
 	}
 	RestoreDC (hDC,-1);
-	GSSiClose (fid);
+	GSSiClose2 (&fid);
 	return;
 }
 int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geometryType)
@@ -4525,7 +4525,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 		{
 			HFILE FidDB=GSSiOpenFile ("c:\\temp.bin",0,OF_CREATE);
 			BigWrite (FidDB,pElement,BinSizeE,-1);
-			GSSiClose (FidDB);
+			GSSiClose2 (&FidDB);
 		}
 	}
 	ShowValue (hDC,FALSE);  
@@ -4743,7 +4743,7 @@ DoPoly:
 				sprintf (BinFileName,"c:\\curvedecode\\%i_%i-%i.bin",ExtraBytes,NumPoints,CurrentRefno);
 				Fid = GSSiOpenFile (BinFileName,0,OF_CREATE);
 				BigWrite (Fid,&pRec[recloc],ExtraBytes,-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				if (ExtraBytes != 33)
 					ii=1;
 				else
@@ -5670,7 +5670,7 @@ BOOL ProcessPGDBRecord (HDC hDC,long RecordNumber,int IsFGDB)
 		{
 			HFILE FidDB=GSSiOpenFile ("c:\\temp.bin",0,OF_CREATE);
 			BigWrite (FidDB,pElement,BinSizeE,-1);
-			GSSiClose (FidDB);
+			GSSiClose2 (&FidDB);
 		}
 	}
 	ShowValue (hDC,FALSE);  
@@ -5884,7 +5884,7 @@ DoPoly:
 				sprintf (BinFileName,"c:\\curvedecode\\%i_%i-%i.bin",ExtraBytes,NumPoints,CurrentRefno);
 				Fid = GSSiOpenFile (BinFileName,0,OF_CREATE);
 				BigWrite (Fid,&pRec[recloc],ExtraBytes,-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				if (ExtraBytes != 33)
 					ii=1;
 				else

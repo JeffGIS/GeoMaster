@@ -451,7 +451,7 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 			}
 			sqlite3_finalize(statement);
 		}
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	}
 	GSSiGlobUlFree(&hCmd);
 	GSSiGlobUlFree(&hOutstr);
@@ -523,7 +523,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 			sqlite3_finalize(statement);
 		}
 		if (Fid != NO_FILE)
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 	}
 	GSSiGlobUlFree(&hCmd);
 	GSSiGlobUlFree(&hOutstr);
@@ -725,7 +725,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			if (displayStatus)
 					DestroyStatusWindow(0);
 			GSSiGlobUlFree(&hstr);
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 		}
 	}
 	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd,OutputVarName(opt))-single command only - no ; separator
@@ -1172,7 +1172,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						if (!update)
 							fputstring(fldDefs, fid);
 					}
-					GSSiClose(fidDef);
+					GSSiClose2 (&fidDef);
 				}
 				if (!rtn)
 				{
@@ -1422,10 +1422,10 @@ NextCrimeRec:
 							cond = BT_GE;
 							goto NextCrimeRec;
 						}
-						GSSiClose(fromFileFid);
+						GSSiClose2 (&fromFileFid);
 					}
 					DestroyStatusWindow(0);
-					GSSiClose(fid);
+					GSSiClose2 (&fid);
 					//SQLOK(sqlite3_finalize(self.statement), "loadIntersectionTextToDatabase8");
 					GSSiGlobUlFree(&hVal);
 				}
@@ -1866,7 +1866,7 @@ NextCrimeRec:
 							fputstring(pCmd, fid);
 						}
 						DestroyStatusWindow(0);
-						GSSiClose(fid);
+						GSSiClose2 (&fid);
 						//SQLOK(sqlite3_finalize(self.statement), "loadIntersectionTextToDatabase8");
 						GSSiGlobUlFree(&hVal);
 					}
@@ -2165,7 +2165,7 @@ NextCrimeRec:
 				DestroyStatusWindow(0);
 				sprintf(pCmd, "/* maxLineLen=%i */", maxLineLen);
 				fputstring(pCmd, Fid);
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 				GSSiGlobUlFree(&hCmd);
 			}
 		}
@@ -2376,7 +2376,7 @@ NextCrimeRec:
 					DestroySavedPolys();
 				}
 				DestroyStatusWindow(0);
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 				GSSiGlobUlFree(&hCmd);
 			}
 		}
@@ -2444,7 +2444,7 @@ NextCrimeRec:
 					keepGoing = StatusWindowUpdate(NULL, NULL, nRecs, ++nLoaded);
 				}
 				DestroyStatusWindow(0);
-				GSSiClose(Fid);
+				GSSiClose2 (&Fid);
 				GSSiGlobUlFree(&hCmd);
 			}
 		}
@@ -2477,7 +2477,7 @@ int SQLITEOpenPrj(LPSTR SQLITEFileName, int projectionID)
 
 			BigRead(fid, pMem, len);
 			pMem[len] = 0;
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 			if (!ConvertPRJtoProj4(pMem, proj4def))
 			{
 				LoadProjection(projectionID, proj4def);
@@ -2682,7 +2682,7 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 
 void CloseSQLITEMapFile(void)
 {
-	/*GSSiClose(SHPFid);
+	/*GSSiClose2 (&SHPFid);
 	OpenSHPFileIndex(0, HFILE_ERROR);*/
 	if (SQLITEHandle)
 	{
@@ -3287,7 +3287,7 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 		if (fgetstring(str, 256, Fid))
 			_fstrcpy(SQLITEEndDate, str);
 
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	RtnTrue:
 		{
 #if ENABLETRACE
@@ -3344,7 +3344,7 @@ int TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, 
 	{
 		rtn = SQLOK(sqlite3_exec(db, str, NULL, NULL, 0), db, "", 0);
 	}
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	SQLOK(sqlite3_exec(db, "ROLLBACK", NULL, NULL, 0), db, "", 0);
 	//sqlite3_exec(db, "COMMIT", NULL, NULL, 0);
 	rtn = sqlite3_close(db);
@@ -3465,7 +3465,7 @@ BOOL LoadSQLiteCrimes(LPSTR FromPath, LPSTR ToPath)
 				}
 			}
 			GSSiGlobUlFree(&hstr);
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 		}
 	}
 	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd)
@@ -3648,7 +3648,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	{
 		OFSTRUCTGM OFStruct;
 		HFILE fid = GSSiOpenFile(Name, &OFStruct, OF_READ);
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 		if (fid != HFILE_ERROR)
 			rtn = sqlite3_open_v2(OFStruct.szPathName, &db, SQLITE_OPEN_READONLY, NULL);
 		else

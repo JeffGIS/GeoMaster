@@ -751,7 +751,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
 		fputstring (str,FidBPW);
 		sprintf (str,"%f",MnMx.ymx);
 		fputstring (str,FidBPW);
-		GSSiClose (FidBPW);
+		GSSiClose2 (&FidBPW);
 		
 		
         nBytesPerPel = pDibInfoOut->bmiHeader.biBitCount/8;
@@ -851,7 +851,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
 					    GSSiMsgBox(0,"Error writing bitmap - disk may be full",
 					               "Fatal Write Error",MB_OK|MB_ICONQUESTION|MB_TASKMODAL,0);  
 					    GSSiGlobUlFree (&hBlock);
-					    GSSiClose (FidBM);
+					    GSSiClose2 (&FidBM);
 					    return FALSE;
 					}
 					pBlock += BlockRowLen;
@@ -867,7 +867,7 @@ BOOL CreateBMPs (LPSTR Name,double Res,double BaseRes,double Offset,HWND hWndDlg
 			ClipBMP (Name); 
 Exit:
 		RemoveFromHighlightList (iref,0);
-		GSSiClose (FidBM);
+		GSSiClose2 (&FidBM);
         PctBox (GetDlgItem(hWndDlg,IDC_STATUS2),NumItems,Item++,0); 
 		CloseOrthos(TRUE);
     } 
@@ -958,7 +958,7 @@ void TIGEROut(void)
             char    str[8];
                 
            if (hData)
-                GSSiClose (hData); 
+                GSSiClose2 (&hData); 
             hData = 0;
             BT_CLOSE (hBT);
             if (!(hBT = BT_OPEN ("[STATE]\\tiger1.btr", 0, BT_READ, 0)))
@@ -1150,9 +1150,9 @@ NextTLID:
     } 
     Good = TRUE;
 Exit:
-    GSSiClose(FidTIGER1);
-    GSSiClose(FidTIGER2);
-    GSSiClose(FidTIGER4); 
+    GSSiClose2 (&FidTIGER1);
+    GSSiClose2 (&FidTIGER2);
+    GSSiClose2 (&FidTIGER4); 
     ipos = BT_FIRST; 
     Loc = 0;
     EndLoc = BT_NUM_IN_INDEX (hMultStreets);
@@ -1171,11 +1171,11 @@ Exit:
 		StatusWindowUpdate (NULL,NULL, EndLoc,++Loc);
 	}
 
-    GSSiClose(FidTIGER5);   
+    GSSiClose2 (&FidTIGER5);   
     BT_CLOSEANDDELETE (&hMultStreets);
     CloseStreetSegmentTable(OpenedSeg);                  
     if (hData)
-        GSSiClose (hData); 
+        GSSiClose2 (&hData); 
     hData = 0;
     BT_CLOSE (hBT);
     CloseGSStreetNames();

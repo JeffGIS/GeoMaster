@@ -479,7 +479,7 @@ NextIndex:
 		goto NextIndex; 
 	GSSillseek (FidIndex,0,0);
 	BigWrite (FidIndex,(HPSTR)&NewBounds,sizeof(MNMXCORD),-1);
-    GSSiClose (FidIndex);  
+    GSSiClose2 (&FidIndex);  
 
     
 {
@@ -572,7 +572,7 @@ GSSiExitProg (944);
 			BT_PUT (hConvertSym,FromName,&str[9]);
 		}
 	    BT_CLOSE (hConvertSym);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		hConvertSym = BT_OPEN (Name, 0, BT_READ, 0);
 	}               
 	if (hConvertSym)
@@ -2247,9 +2247,9 @@ GSSiExitProg (980);
 		FidMap2 = GSSiOpenFile (lpE,&OFStruct,OF_READWRITE);
 		GSSillseek (FidMap2,loc,0);
 		BigRead (FidMap2,(HPSTR)&Item,sizeof(ITEM));
-		GSSiClose (FidMap2);
+		GSSiClose2 (&FidMap2);
 	}                    
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (980);
@@ -4828,7 +4828,7 @@ Exit:
 	if (FastMapCopy)
 	{
 		FastMapCopy = FALSE;
-		GSSiClose (FastMapCopyFid);
+		GSSiClose2 (&FastMapCopyFid);
 		FastMapCopyFid=HFILE_ERROR;
 	}
     Printing = SavePrint;

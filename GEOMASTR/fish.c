@@ -682,7 +682,7 @@ BOOL FAR PASCAL GPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lPar
 			 	} 
 		 	}
 		 }
-    	 GSSiClose (Fid);   
+    	 GSSiClose2 (&Fid);   
     	 if (*WPName)
     	 {
 			index = SendDlgItemMessage (hWndDlg,IDC_GPSLIST,LB_FINDSTRING,(WPARAM)-1,(LPARAM) WPName); 
@@ -762,7 +762,7 @@ SetGPS:
 		    	if (Fid == HFILE_ERROR)
 		    		break;
             	fputstring (Title,Fid);
-            	GSSiClose (Fid);
+            	GSSiClose2 (&Fid);
 				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L); 
 				break;
             		
@@ -963,7 +963,7 @@ SetGPS:
 					fputstring (str,Fid);
 				}
 				GSSiGlobUlFree (&hItems);    
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				PrintTextFile (hWndDlg,TempFile,ntab,TabStops);
 				GSSiRemove (TempFile); 
 			}
@@ -1552,7 +1552,7 @@ BOOL AddRouteToGPSList (long RouteRef)
 	}
 	GSSiGlobUlFree (&hPoly);
 	DTMClose (&hSurf);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -1608,7 +1608,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 		sprintf (str,"%s\t\t%s\t\t%s\t%s\t%ld",WPID,Depth,Lat,Long,Refno);
 		fputstring (str,Fid); 
 		DTMClose (&hSurf);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
     else if (!_fstrcmp (WPID,"AREA"))
     {   
@@ -1636,7 +1636,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 			sprintf (str,"%s\t\t%s\t\t%s\t%s\t%ld",PointID,Depth,Lat,Long,i+1);
 			fputstring (str,Fid);
 		} 
-		GSSiClose (Fid);   
+		GSSiClose2 (&Fid);   
 		GSSiGlobUlFree (&hPoly);
 	}
     else if (Refno>0)
@@ -1665,7 +1665,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 			 GlobalUnlock (hDBWP);  
 			 CloseGWDatabase (hDBWP);
 		}   
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		UpdateGPSWPDB (File);
 	} 
 	else
@@ -1678,7 +1678,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 		PadString (WPID,' ',10);
 		sprintf (str,"%s\t%s\t%s\tC\t%s\t%s\t%ld",WPID,SymName,SymName,Lat,Long,-Refno);
 		fputstring (str,Fid); 
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		UpdateGPSWPDB (File);
 	} 
 	return TRUE;
@@ -1819,7 +1819,7 @@ HANDLE	CreateFoundWPDB (void)
 	 lpDot = _fstrrchr (File,'.');
 	 _fstrcpy (lpDot,".in1");	
 	 BT_CREATE (File, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 	 _fstrcpy (lpDot,".gmd");	
 
      hDB = OpenGWDatabase (File,BT_WRITE);
@@ -1901,7 +1901,7 @@ HANDLE	CreateGPSWPDB (void)
 	 lpDot = _fstrrchr (File,'.');
 	 _fstrcpy (lpDot,".in1");	
 	 BT_CREATE (File, 4, FALSE, 1, 1,BTVar,FALSE, 0, 0, FALSE);
- 	 GSSiClose (FidData);
+ 	 GSSiClose2 (&FidData);
 	 _fstrcpy (lpDot,".gmd");	
 
      hDB = OpenGWDatabase (File,BT_WRITE);
@@ -1945,7 +1945,7 @@ void UpdateGPSWPDB (LPSTR InFile)
 	 			GWDAddRecord (lpGWDHeadGPS,0,0); 
 	 		} 
  		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	} 
 	GlobalUnlock (hDBGPS);  
     CloseGWDatabase (hDBGPS); 
@@ -2219,7 +2219,7 @@ BOOL SaveGPSList (HWND hWndDlg)
  		{
  			fputstring (str,Fid);
  		}
-		GSSiClose (Fid);  
+		GSSiClose2 (&Fid);  
 		return TRUE;
 	}                                           
 	GSSiMessageBox (0,"Unable to create GPS file",File,MB_ICONEXCLAMATION,0);
@@ -2253,7 +2253,7 @@ BOOL RemoveWPNameFromWPFile (LPSTR WPName)
 	 	} 
 	 	loc = GSSillseek (Fid,0,1);
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -2320,7 +2320,7 @@ BOOL RunSportMapStartupCommand (void)
 		            		sprintf (str,"%c:\\",DriveID);
 		            		SetGlobalValue ("CDDRIVE",str);
 		            		fgetstring (str,256,Fid);
-		            		GSSiClose (Fid);
+		            		GSSiClose2 (&Fid);
 		            		ProcessText (str);  
 		            	} 
 		            }

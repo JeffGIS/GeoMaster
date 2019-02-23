@@ -184,7 +184,7 @@ void DestroySavedGraphicsFile (int Type)
 	SetSavedGraphicsFid (0);
 	if (Type && SavedGraphicsFids[Type-1] != HFILE_ERROR)
 	{
-		GSSiClose (SavedGraphicsFids[Type-1]);
+		GSSiClose2 (&SavedGraphicsFids[Type-1]);
 		SavedGraphicsFids[Type-1] = HFILE_ERROR;
 		GSSiRemoveAndClear (SavedGraphicsFileName[Type-1]);
 	}
@@ -196,7 +196,7 @@ void DestroySavedGraphicsFile (int Type)
 		{
 			if (SavedGraphicsFids[i] != HFILE_ERROR)
 			{
-				GSSiClose (SavedGraphicsFids[i]);
+				GSSiClose2 (&SavedGraphicsFids[i]);
 				SavedGraphicsFids[i] = HFILE_ERROR;
 				GSSiRemoveAndClear (SavedGraphicsFileName[i]);
 			}

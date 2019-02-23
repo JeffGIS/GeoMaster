@@ -473,7 +473,7 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
 				GlobalUnlock (hSavedZooms);     
 				ForceBounds = TRUE;
 	 		}
-	 		GSSiClose (Fid);
+	 		GSSiClose2 (&Fid);
 	 		GSSiRemove (TempName);
 		}
 	 }
@@ -907,12 +907,12 @@ BOOL GetNodeParms (LPSTR NodeName,LPSTR Parms)
 			*pTAB = 0;
 			if (!_fstricmp (NodeName,str))
 			{
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				return TRUE;
 			}
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 
 	return FALSE;
 }
@@ -1204,7 +1204,7 @@ void testConvertBitmapToPoly(LPSTR file);
 			nColors++;
 		}
 	}
-	GSSiClose(fidIn);
+	GSSiClose2 (&fidIn);
 	for (int i = 0; i < NUMCOLORNAMES; i++)
 	{
 		for (int j = 0; j < nColors; j++)
@@ -1262,7 +1262,7 @@ void testConvertBitmapToPoly(LPSTR file);
 	sprintf(outLine, "\t};");
 	fputstring(outLine, fidOut);
 
-	GSSiClose(fidOut);
+	GSSiClose2 (&fidOut);
 }*/
 /*void loadColorChart(void)
 {
@@ -1308,7 +1308,7 @@ void testConvertBitmapToPoly(LPSTR file);
 		}
 		pName = strstr(pEnd+1, "background-color:");
 	}
-	GSSiClose(fidIn);
+	GSSiClose2 (&fidIn);
 	sprintf(outLine, "#define NUMCOLORNAMES %i", nColors);
 	fputstring(outLine, fidOut);
 	sprintf(outLine, "\tchar colorName[NUMCOLORNAMES][21] ={\"%s\"", name[0]);
@@ -1351,7 +1351,7 @@ void testConvertBitmapToPoly(LPSTR file);
 	sprintf(outLine, "\t};");
 	fputstring(outLine, fidOut);
 
-	GSSiClose(fidOut);
+	GSSiClose2 (&fidOut);
 }
 */
 LONG FAR PASCAL WndProcTemp(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
@@ -1440,7 +1440,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	char outprj[1024];
 	HFILE fid = GSSiOpenFile("C:\\GMMobile\\MetroUTM\\MGFire\\Water System\\wMain.prj", 0, OF_READ);
 	BigRead(fid, prj, 1023);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	ConvertPRJtoProj4(prj,outprj);*/
 	_set_invalid_parameter_handler(
 		my_invalid_parameter_handler
@@ -1590,8 +1590,8 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 		 line2[nOut++] = *pLoc;
 		 fputstring (line2,Fid2);
 	 }
-	 GSSiClose (Fid);
-	 GSSiClose (Fid2);
+	 GSSiClose2 (&Fid);
+	 GSSiClose2 (&Fid2);
 }
 */
  
@@ -1676,7 +1676,7 @@ HFILE	Fid = GSSiOpenFile ("c:\\pngrid\\400\\pngrid.bin",0,OF_READWRITE);
 	Head2.GridOffset = Head1.GridOffset;
 	Head2.fac = Head1.fac;
 	BigWrite (Fid,&Head2,sizeof(Head2),-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 }*/
 
 // testMemIO("c:\\test.tif");
@@ -1769,8 +1769,8 @@ ExpandDL ();
  	 GSSiGlobUlFree (&hMemF1);
  	 GSSiGlobUlFree (&hMemF2);
 
-	 GSSiClose (Fid1);
-	 GSSiClose (Fid2);
+	 GSSiClose2 (&Fid1);
+	 GSSiClose2 (&Fid2);
 
 }*/
 
@@ -1972,7 +1972,7 @@ GSSiExitProg (437);
 	 {
 		 HFILE fid = GSSiOpenFile("c:\\temp\\targetwindow.bin", 0, OF_CREATE);
 		 BigWrite(fid, &hWndMain, sizeof(HWND), -1);
-		 GSSiClose(fid);
+		 GSSiClose2 (&fid);
 	 }
 
  }
@@ -3338,7 +3338,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	            	 	SetGlobalValue ("STATE",str);
 	            	 	CreateIntersectionFile (TRUE); 
 	            	} 
-	            	GSSiClose (FidI);
+	            	GSSiClose2 (&FidI);
 	            	SetWindowText (hWnd,"Intersection Creation Complete"); 
             	 }   
             	 
@@ -4756,7 +4756,7 @@ DisplayParcel:
 					 CopyMapFile ("-DONE-","-DONE-",-1,CurFileIndexEntry); 
 					 DoMapCopy = 2;
 		UseOldList:
-					 GSSiClose (CopyFID); 
+					 GSSiClose2 (&CopyFID); 
 					 CreateStatusWind (hWnd,1,"Copying Map Data");
 					 CopyMapFile ("","",-1,CurFileIndexEntry); 
 					 DoMapCopy = 0;

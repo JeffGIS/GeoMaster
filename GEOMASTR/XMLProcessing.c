@@ -22,7 +22,7 @@ HANDLE LoadXMLFile (LPSTR File)
 			if (!*pFile)
 				*pFile = 1;
 		GlobalUnlock (hFile);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 
 	return hFile;

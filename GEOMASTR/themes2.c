@@ -1920,7 +1920,7 @@ void ProcessDataDisplayMacro (int id,LPVIEWPORT CurView)
 
 		GSSillseek (Fid,pDataDisplayRect->Offset,0);
 		BigRead (Fid,pMacro,pDataDisplayRect->MacroLen);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		CurrentPoint = pDataDisplayRect->WPoint;
 		GlobalUnlock (CurView->hDataDisplayRect);
 		ProcessText (pMacro);
@@ -2035,7 +2035,7 @@ BOOL AddDataDisplayRect (RECT ScreenRect,DPOINT WPoint,LPSTR InMacro)
 	ExpandText (Macro);
 	pDataDisplayRect->MacroLen = strlen (Macro) + 1;
 	BigWrite (Fid,Macro,pDataDisplayRect->MacroLen,-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GlobalUnlock (CurView->hDataDisplayRect);
 	return TRUE;
 }

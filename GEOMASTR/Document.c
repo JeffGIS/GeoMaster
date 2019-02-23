@@ -32,7 +32,7 @@ BOOL CreateCompressedImage (LPSTR ToName,LPSTR FromName)
 	fputstring ("0.0",FidIndex);           
 	fputstring ("1.0",FidIndex);           
 	fputstring (FromName,FidIndex);
-	GSSiClose (FidIndex);
+	GSSiClose2 (&FidIndex);
 	FidIndex = GSSiOpenFile (Index,(LPOFSTRUCTGM) &OFStruct,OF_CREATE); 
 	
 	hlpFI = GSSiGlobAlloc ( 408,GHND,sizeof(FILEINDEX)+sizeof(FILEINDEXENTRY)); 
@@ -56,7 +56,7 @@ BOOL CreateCompressedImage (LPSTR ToName,LPSTR FromName)
 	BigWrite (FidIndex,(char *)&lpFI->NumFiles,2,-1);
 	BigWrite (FidIndex,(char *)&lpFI->Length,4,-1); 
 	BigWrite (FidIndex,(char *)&lpFI->OrthoRes,8,-1);
-	GSSiClose (FidIndex);  
+	GSSiClose2 (&FidIndex);  
 	GlobalUnlock(hlpFI);
 	GSSiGlobFree (&hlpFI);
 	AVIOutClose (&hAVIFile); 
@@ -130,7 +130,7 @@ BOOL DisplayDocumentList (HWND hWnd,LPSTR Prefix,LPSTR UDI,int Item, HMENU InMen
 				} 
 			}
 		}
-		GSSiClose(FidDoc);
+		GSSiClose2 (&FidDoc);
 	} 
 	if (InMenu) return TRUE;
 	if (Found) 
@@ -234,7 +234,7 @@ BOOL ProcessDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 				}
 			}
 		}
-		GSSiClose(FidNoteType); 
+		GSSiClose2 (&FidNoteType); 
 	}                                 
 	return TRUE;
  }   
@@ -265,11 +265,11 @@ NoMess:
 		{   
 			lpErMess = _fstrchr (str,'\t');
 			lpErMess++;
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			goto NoMess;
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	goto NoMess;
 }
 

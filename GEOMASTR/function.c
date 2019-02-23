@@ -56,7 +56,7 @@ void GetMassShapeFiles(void)
 	}
 	GSSiGlobUlFree(&hFile);
 	//GSSiGlobUlFree(&hFile2);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	return;
 }
 
@@ -609,7 +609,7 @@ GSSiExitProg (1348);
 					ltoa (Refno,cref,10);
 					fputstring (cref,Fid1);
 				}
-				GSSiClose (Fid1);
+				GSSiClose2 (&Fid1);
 				goto RtnTrue;
 			}   
 			if (!_fstrcmp(Arg[1],"VIEWPORT"))
@@ -2558,7 +2558,7 @@ SetVis:
 		case 358://$TIN(EXPORT,File)
 		{
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
-			GSSiClose(FidTINExtract);
+			GSSiClose2 (&FidTINExtract);
 			FidTINExtract = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 			if (FidTINExtract == HFILE_ERROR)
 				goto RtnFalse;
@@ -2727,14 +2727,14 @@ SetVis:
 				    Bounds.ymn = 0;
 				    Bounds.xmx = pDibInfo->bmiHeader.biWidth;
 				    Bounds.ymx = pDibInfo->bmiHeader.biHeight;
-				    GSSiClose (Fid);  
+				    GSSiClose2 (&Fid);  
 				    GSSiGlobUlFree (&hDibInfo);
 					Immediate = atob(Arg[3]); 
 				    CurView->CurZoomAreaRef = 0;
 					ZoomToRect(Bounds,Immediate);
 				 	goto RtnTrue;
 				 }  else
-				 	GSSiClose (Fid);
+				 	GSSiClose2 (&Fid);
 				 goto RtnFalse;
 			}   
 			else if (!_fstricmp(Arg[1],"ELEMENT"))
@@ -3020,7 +3020,7 @@ SetVis:
 						HFILE	Fid = GSSiOpenFile (Arg[1],0,OF_READ);
 
 						if (Fid != HFILE_ERROR)
-							GSSiClose (Fid);
+							GSSiClose2 (&Fid);
 					}
 					goto RtnTrue;
 				break;
@@ -3538,7 +3538,7 @@ SetVis:
 			LPSTR  pMem = GlobalLock(hMem);
 			HFILE  Fid = GSSiOpenFile("C:\\GEOMas\\projects\\corners\\Macros\\loadadafiles.txt", 0, OF_READ);
 			BigRead(Fid, pMem, SHRT_MAX - 2);
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 			GSSiGlobUlFree(&hMem);*/
 			//GetMassShapeFiles();
 			//isLaptop(1);
@@ -3615,7 +3615,7 @@ SetVis:
 			HFILE	Fid = GSSiOpenFile ("L:\\geomas\\DataXfer\\cachetestfile.txt",0,OF_READ);
 
 			WaitForKeystroke (TRUE);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			MessageBox (0,"Closed","",MB_OK);*/
 
 
@@ -3639,8 +3639,8 @@ SetVis:
 					if (val1 != val2)
 						ndiff1++;
 				}
-				GSSiClose (Fid1);
-				GSSiClose (Fid2);
+				GSSiClose2 (&Fid1);
+				GSSiClose2 (&Fid2);
 
 				Fid1 = GSSiOpenFile ("[%DL]attribut\\jtest\\journal\\areaway2.in1",0,OF_READ);
 			//	Fid2 = GSSiOpenFile ("[%DL]attribut\\jtest\\nojournal\\areaway2.in1",0,OF_READ);
@@ -3657,8 +3657,8 @@ SetVis:
 					if (val1 != val2)
 						ndiff2++;
 				}
-				GSSiClose (Fid1);
-				GSSiClose (Fid2);
+				GSSiClose2 (&Fid1);
+				GSSiClose2 (&Fid2);
 
 				sprintf (OutLoc,"Diff:%i - %i",ndiff1,ndiff2);*/
 				goto Rtnl;
@@ -4166,7 +4166,7 @@ SetVis:
 							ipt.y = IDNINT(pt.y * COORDINATEMULTIPLIER);
 							BigWrite(fid, &ipt, sizeof(POINT), -1);
 						}
-						GSSiClose(fid);
+						GSSiClose2 (&fid);
 						GlobalUnlock(hPoly);
 					}
 					else
@@ -4383,7 +4383,7 @@ int SearchGMC (int i)
 		    UnallocateConfig ();
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	strcpy (CfgName,SaveCFG);
 	OpenConfig(0,0);
 	return 1;

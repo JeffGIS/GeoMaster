@@ -229,7 +229,7 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			}
 			ii=strlen (str);
 			SetDlgItemText (hWndDlg,IDC_HEADINGS,str);
-			GSSiClose (fptr);
+			GSSiClose2 (&fptr);
 			GSSiGlobUlFree (&hData);
 			//SelectObject (hDC,OldFont);
 			DeleteObject (hFont);
@@ -526,7 +526,7 @@ NoSize:
 
 		case WM_DESTROY:{
 			//close the data file  
-			GSSiClose(fptr);
+			GSSiClose2 (&fptr);
 			//delete the brush
 			GSSiDeleteObject(&hbrush);  
 			if (hGridSize)

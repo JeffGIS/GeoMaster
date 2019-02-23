@@ -594,7 +594,7 @@ GotFirstLine:
             {
     S220:   ;//    MessageBox(NULL,"Invalid units in projection",
              //               NAME,MB_OK); 
-                GSSiClose(lpFile1);
+                GSSiClose2 (&lpFile1);
                 return -3;
             } 
         }
@@ -675,7 +675,7 @@ S190:
            if(PRJ_ZONE[ID] == 0) PRJ_ZONE[ID] = 61;
        else 
 		   if (PRJ_TYPE[ID] > 2 && PRJ_TYPE[ID] != 50 && PRJ_TYPE[ID] != PROJ4PROJECTION) PRJ_ZONE[ID] = 61;
-        GSSiClose(lpFile1);
+        GSSiClose2 (&lpFile1);
 	   if (ID != 1 && !IS_BASE[ID])
 	   {
 		   if (PRJ_TYPE[1] != PROJ4PROJECTION && PRJ_TYPE[ID] != PROJ4PROJECTION)

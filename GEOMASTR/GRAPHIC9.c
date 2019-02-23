@@ -1614,7 +1614,7 @@ void DisplayTransformThemeLegend(short From)
 		goto Exit;
 	if (!fgetstring (str,256,Fid))
 	{
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		goto Exit;
 	}
 	Truncate (str);  
@@ -1721,7 +1721,7 @@ void DisplayTransformThemeLegend(short From)
 		{   
 			if (N < 1)
 			{
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				goto Exit;
 			}
 			TotN=N;
@@ -1746,7 +1746,7 @@ void DisplayTransformThemeLegend(short From)
 			GetBest = -1; 
 	}
 	
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (SetTrans)
 	{
 		SetGlobalValue("%ALT_PROJECTION",curproject);
@@ -2070,7 +2070,7 @@ BOOL LoadVPToolBar (void)
 			len += 2;
 			GlobalUnlock (CurView->ToolbarHandle);   
 			CurView->ToolbarHandle = GSSiGlobalReAlloc (0,CurView->ToolbarHandle,len,GMEM_MOVEABLE);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
 	}     
 	CloseTRANS2 (&hTran);
@@ -2082,7 +2082,7 @@ GSSiExitProg (1045);
 }
 ErrOut:
 	GSSiGlobUlFree (&CurView->ToolbarHandle);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CloseTRANS2 (&hTran);
 	sprintf (str,"Error at line %ld in toolbar file %s",line,CurView->PickMacroFile);
 	GSSiMessageBox (0,str,0,MB_ICONEXCLAMATION,0);
@@ -2263,7 +2263,7 @@ GSSiExitProg (1048);
 	if (!hToolCmd)
 		hToolCmd = GSSiGlobAlloc ( 976,GHND,USHRT_MAX);
 	hMenu = GMCreateMenu (MFid,&line,Name); 
-	GSSiClose (MFid); 
+	GSSiClose2 (&MFid); 
 	*phPopups = hNewPopups;
 	hNewPopups = 0;
 	GetCmdID (0,0);
@@ -2363,12 +2363,12 @@ long FillProjectionList (HWND hWndDlg,UINT cntl,LPSHORT pCurProj,UINT unitscntl,
 				*pCurUnits = UnitsFromText (&str[1]);
 			}
 	        Item = SendDlgItemMessage (hWndDlg,cntl,CB_SETITEMDATA,(WPARAM)Item,(LPARAM)Loc);
-        	GSSiClose (Fid2);
+        	GSSiClose2 (&Fid2);
         }
         Loc = GSSillseek (Fid,0,1);
 	} while (fgetstring (Name,250,Fid));
 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GlobalUnlock (hProjectionFile);
 	if (*defaultProj)
 	{
@@ -2402,7 +2402,7 @@ BOOL GetProjectionFile (HWND hWndDlg,UINT cntl,LPSTR File)
 		fgetstring (File,250,Fid);
 		SubstituteDL (File,TRUE);
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -2604,7 +2604,7 @@ GSSiExitProg (1056);
 			NumPoints++; 
   		} 
 		GSSiGlobFree (&hDLT);
-      	GSSiClose (Fid2); 
+      	GSSiClose2 (&Fid2); 
 		switch (FitType)
 		{
 			case 0:
@@ -2686,7 +2686,7 @@ GSSiExitProg (1056);
             DestroySymList (&NumSyms,&hSymDesc);
 		}
     }
-    GSSiClose (Fid1);
+    GSSiClose2 (&Fid1);
 	GSSiGlobUlFree (&hWeights);
 	GSSiGlobUlFree (&hPoints); 
 	GSSiGlobUlFree (&hFitPoints);
@@ -3020,7 +3020,7 @@ GSSiExitProg (1067);
 	else
 		rtn=FALSE;   
 	GSSiGlobUlFree (&hStr);
-	GSSiClose (Fid);  
+	GSSiClose2 (&Fid);  
 {
 #if ENABLETRACE
 GSSiExitProg (1067);

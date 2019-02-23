@@ -478,7 +478,7 @@ BOOL CreateCPPatternInclude (void)
 	fputstring ("};",Fid);
 	strcat (numPstr,"};");
 	fputstring (numPstr,Fid);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -814,7 +814,7 @@ BOOL LoadTiltFile (LPSTR TINPath)
 		LPBYTE pTile = GlobalLock (hTr);
 
 		BigRead (FidTr,pTile,ln);
-		GSSiClose (FidTr);
+		GSSiClose2 (&FidTr);
 
 		minElev = *(int *)pTile;
 		pTile += 4;
@@ -1087,7 +1087,7 @@ FoundDepth:
 
 					BigRead (FidTr,pTr,ln);
 					BigWrite (FidSTG,pTr,ln,-1);
-					GSSiClose (FidTr);
+					GSSiClose2 (&FidTr);
 					GSSiGlobUlFree (&hTr);
 					tileGraphicsHeader.triPointsLen = ln;
 				}
@@ -1119,14 +1119,14 @@ FoundDepth:
 		BigRead (FidSTG,pMem,len);
 		lcmp = CompressBinaryRecord ((LPBYTE)pMem,pMemCmp,len);
 		GetOpenFilePathname (FidSTG,pathName);
-		GSSiClose (FidSTG);
+		GSSiClose2 (&FidSTG);
 		FidSTG = GSSiOpenFile (pathName,0,OF_CREATE);
 		BigWrite (FidSTG,(LPSTR)&lcmp,4,-1);
 		BigWrite (FidSTG,(LPSTR)&len,4,-1);
 		BigWrite (FidSTG,pMemCmp,lcmp,-1);
 		GSSiGlobUlFree (&hMem);
 		GSSiGlobUlFree (&hMemCmp);
-		GSSiClose (FidSTG);
+		GSSiClose2 (&FidSTG);
 		FidSTG = HFILE_ERROR;
 		tgNumSegs = 0;
 		rtn = TRUE;
@@ -1881,7 +1881,7 @@ char	quadKey[22];
 	hTile = GSSiGlobAlloc (1769,GMEM_MOVEABLE,len);
 	pTile = GlobalLock (hTile);
 	BigRead (Fid,pTile,len);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 
 	ShowContourLines=GetGlobalBVal2 ("[%SHOWHBIRDCONTOURLINES]",FALSE);
 	ShowDepthColors=GetGlobalBVal2 ("[%SHOWHBIRDDEPTHCOLORS]",TRUE);
@@ -2723,7 +2723,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 	BigRead (FidColors,&maxsym,2);
 	nsym = (maxsym-minsym+1);
 	BigRead (FidColors,SymDep,nsym*4);
-	GSSiClose (FidColors);
+	GSSiClose2 (&FidColors);
 	GSSiGetTempFileName (0,"gmh",0,(LPSTR)OutFile); 
 	if ((pDot = strrchr (OutFile,'.')))
 		strcpy (pDot,".tif");
@@ -2795,7 +2795,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 						BOOL	Err=FALSE;
 
 						BigWrite (FidOut,pMem,pMAPFILE->Size,-1);
-						GSSiClose (FidOut);
+						GSSiClose2 (&FidOut);
 						dibin = BMPHandleFromEXT (OutFile);
 						for (iSixteenth=0;iSixteenth < nSixteenth;iSixteenth++)
 						{
@@ -2837,7 +2837,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								pMem = GlobalLock (hMem);
 								Fid  = GSSiOpenFile (OutFile2,0,OF_READ);
 								BigRead (Fid,pMem,l);
-								GSSiClose (Fid);
+								GSSiClose2 (&Fid);
 								pbmFileHeader = (LPBITMAPFILEHEADER)pMem;
 								pbmInfoHeader = (LPBITMAPINFOHEADER)(pbmFileHeader+1);
 								pbmInfoHeader->biXPelsPerMeter = pbmInfoHeader->biYPelsPerMeter = 0;
@@ -2874,7 +2874,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 									BigWrite (FidBINOut,pMembin,lbin,-1);
 									GWDReplaceRecord (lpGWDHeadOut,0,NULL,-1); 
 								}
-								GSSiClose (FidBINOut);
+								GSSiClose2 (&FidBINOut);
 
 								GSSiGlobUlFree (&hMem);
 								GSSiGlobUlFree (&hMembin);
@@ -2893,7 +2893,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 						FreeImage_Unload (dibin);
 						rtn=TRUE;
 					}
-					GSSiClose (FidBIN);  
+					GSSiClose2 (&FidBIN);  
 					GSSiGlobUlFree (&hMem);
 				}
 			} 
@@ -2955,7 +2955,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 							BigWrite (Fid,rgbpal,1024,-1);
 							pByte = (LPBYTE)FreeImage_GetBits (dib);
 							BigWrite (Fid,pByte,pbi->biSizeImage,-1);
-							GSSiClose (Fid);
+							GSSiClose2 (&Fid);
 								sprintf (bmpname,"c:\\temp\\temp%i.bmp",Offset);
 								GMFIBMPHandleToEXT (bmpname,dibin,0);
 							/*GMFIBMPHandleToEXT ("c:\\temp\\temp3.bmp",dibt,0);
@@ -2973,7 +2973,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 											ii=1;
 								}*/
 								//BigRead (Fid,pMem,l);
-								//GSSiClose (Fid);
+								//GSSiClose2 (&Fid);
 							/*	FidBMPOut = GSSiOpenFile ("c:\\temp\\tempbmp.bmp",0,OF_CREATE);
 								FileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 256*sizeof(RGBQUAD);
 								FileHeader.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 256*sizeof(RGBQUAD) + lMemDeCmp;
@@ -2981,11 +2981,11 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								BigWrite (FidBMPOut,pbi,sizeof(BITMAPINFOHEADER),-1);
 								BigWrite (FidBMPOut,rgbpalx,256*sizeof(RGBQUAD),-1);
 								BigWrite (FidBMPOut,pMem2,lMemDeCmp,-1);
-								GSSiClose (FidBMPOut);
+								GSSiClose2 (&FidBMPOut);
 								FidBMPOut = GSSiOpenFile ("c:\\temp\\temppaint.bmp",0,OF_READ);
 								BigRead (FidBMPOut,&FileHeader,sizeof(BITMAPFILEHEADER));
 								BigRead (FidBMPOut,pbi,sizeof(BITMAPINFOHEADER));
-								GSSiClose (FidBMPOut);*/
+								GSSiClose2 (&FidBMPOut);*/
 								//TotBMPLen += (GSSiLength (bmpname)-256*sizeof(RGBQUAD)+lPalette*sizeof(RGBQUAD)-sizeof(BITMAPFILEHEADER)-sizeof(BITMAPINFOHEADER));
 
 																//sprintf (bmpname,"c:\\temp\\temp.tif",Offset);
@@ -3065,12 +3065,12 @@ BOOL ConvertHBirdColorsOld (HDIB32 hDib,int ClrUsed,RGBQUAD *pal)
 				}
 			}
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		Fid = GSSiOpenFile ("c:\\temp\\hbirdtest\\symlist.bin",0,OF_CREATE);
 		BigWrite (Fid,&minsym,2,-1);
 		BigWrite (Fid,&maxsym,2,-1);
 		BigWrite (Fid,SymDepth,(maxsym-minsym+1)*2,-1);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		Loaded = TRUE;
 	}
 
@@ -3149,8 +3149,8 @@ BOOL WriteToHBird (LPBYTE pMem,int Size)
 			First = TRUE;
 			GSSillseek (FidHBirdIndex,0,0);
 			BigWrite (FidHBirdIndex,&NumTiles,sizeof(int),-1);
-			GSSiClose (FidHBirdData);
-			GSSiClose (FidHBirdIndex);
+			GSSiClose2 (&FidHBirdData);
+			GSSiClose2 (&FidHBirdIndex);
 			FidHBirdData = HFILE_ERROR;
 			NumTiles=0;
 		}
@@ -4069,7 +4069,7 @@ BOOL CreateTileDepthPixels(LPSTR Directory, int iLevel, int tileX, int tileY)
 				BigWrite(Fid, &baseElev, sizeof(int), -1);
 				BigWrite(Fid, ptElev, sizeof(ptElev), -1);
 			}
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 			rtn = TRUE;
 		}
 	}*/

@@ -139,8 +139,8 @@ Retry:
   			_fstrcpy (lastpath,file);
   		}
 	}  
-	GSSiClose (Fid);
-	GSSiClose (OutFileFID);
+	GSSiClose2 (&Fid);
+	GSSiClose2 (&OutFileFID);
 	GSSiRemove (Name);
 	GSSiSetCursor(hcurSave); 
 	sprintf (str2,"CD %s successfully registered",VolLabel);
@@ -413,7 +413,7 @@ BOOL InstallCD (LPSTR FromPath,LPSTR ToPath,LPSTR Exclude,HWND hWndDlg,UINT MsgC
 	        PctBox (GetDlgItem(hWndDlg,StatusCntl),TotLen,CurLoc,0);
 	  	}
 	}  
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove (TempName);
 	GSSiSetCursor(hcurSave); 
 	return TRUE;
@@ -440,7 +440,7 @@ short SaveCurrentCD (HWND hWndDlg)
 			if (i != CDNum)
 				fputstring (str,FidTemp);
 		} 
-		GSSiClose (FidOrder);
+		GSSiClose2 (&FidOrder);
 	} 
 	Choice = 0;
 	while (SendDlgItemMessage(hWndDlg,IDC_CDCONTENTS,LB_GETTEXT,Choice++,(DWORD)str) != LB_ERR)
@@ -448,7 +448,7 @@ short SaveCurrentCD (HWND hWndDlg)
 		sprintf (str2,"%i\t%s",CDNum,str);
 		fputstring (str2,FidTemp);
 	}
-	GSSiClose (FidTemp);
+	GSSiClose2 (&FidTemp);
 	GSSiRemove ("[%DL]orders\\current.txt");
 	GSSiRename ("[%DL]orders\\temp","[%DL]orders\\current.txt");
 	return CDNum;
@@ -488,7 +488,7 @@ long GetCurrentCD (HWND hWndDlg,short NumCDs,LPLONG pOrderFreeSpace)
 			    CDUsed += size;
 			}
 		} 
-		GSSiClose (FidOrder);
+		GSSiClose2 (&FidOrder);
 	} 
 	*pOrderFreeSpace = max (0,NumCDs * CDSize - OrderUsed);
 	sprintf (str,"%ld megabytes free space remain on this CD",CDSize - CDUsed);

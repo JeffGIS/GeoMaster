@@ -216,7 +216,7 @@ BOOL UpdateGlobalFile (LPSTR RptFileIn,LPSTR VName,LPSTR Value)
 			{
 				sprintf (str,"%s=%s",VarName,Value);
 				fputstring (str,Fid);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				GSSiGlobUlFree (&hStr);  
 				rtn = TRUE;
 			} 
@@ -263,8 +263,8 @@ GSSiExitProg (515);
 		fputstring (str,FidOut);
 		Found = TRUE;
 	}                     
-	GSSiClose (Fid);
-	GSSiClose (FidOut);
+	GSSiClose2 (&Fid);
+	GSSiClose2 (&FidOut);
 	CloseAllRequestedFiles(FALSE);
 	if (!GSSiRemove(OldFile))
 		GSSiRename (NewFile,OldFile);  
@@ -316,7 +316,7 @@ GSSiExitProg (516);
 		}
 	}                     
 Exit:
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	
 {
 #if ENABLETRACE
@@ -465,7 +465,7 @@ Next:
 				ProcessText (str);
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (TraceOn)
 	{ 
 		sprintf (str,"Close global init file %s",File);
@@ -668,7 +668,7 @@ BOOL SetSQLDatabaseFields (LPSTR Name)
 									   pFieldInfo->scale,pFieldInfo->length,pFieldInfo->precision,pFieldInfo->name);
 			fputstring (str,Fid);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GlobalUnlock (SQLPtr->OFHandle);
 		GlobalUnlock (pSQL->DBHandle);
 	}
@@ -711,12 +711,12 @@ HANDLE	OpenSQLDatabase (LPSTR Name,LPSTR SQL)
 //    	_fstrcpy (pDB->FldInfo[pDB->NumFields].name,str);
 		if (nf != 7)
 		{
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 			return 0;
 		}
     	pDB->NumFields++;
     }
-	GSSiClose (Fid);  
+	GSSiClose2 (&Fid);  
 	hMem = GSSiGlobAlloc (1506,GMEM_MOVEABLE,USHRT_MAX);
 	pMem = GlobalLock (hMem);  
 	_fstrcpy (pMem,pDB->Select);
@@ -1213,7 +1213,7 @@ GSSiExitProg (520);
 			}
 			else
 			{   
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 		       	_splitpath (pOFStruct->szPathName,drive,dir,fname,ext); 
 	        	sprintf (driver,"TXT;DefaultDir=%s%s",drive,dir);
 		       	FileHandle = OpenExternalDatabase (driver); 
@@ -1240,7 +1240,7 @@ GMTEXT_ERROR:
 			{   
 				if (!ProcessDelimTextHeader(TxtRecord, Name, Fid, &FileHandle, 0,  IDName))
 				{
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					goto GMTEXT_ERROR; 
 				} 
 				GMTextFirstLine = GSSillseek (Fid,0,1);
@@ -1807,7 +1807,7 @@ GSSiExitProg (524);
 		break;
 
 		case GMTEXT_DATAFILE:
-			GSSiClose (FilePtr->Fid);  
+			GSSiClose2 (&FilePtr->Fid);  
 			if (SQLPtr->TextFileIndex)
 			{
 				if (SQLPtr->statement)
@@ -2029,7 +2029,7 @@ BOOL LoadTAGDef (void)
 				GlobalUnlock (hTAGDef); 
 				hTAGDef = GSSiGlobalReAlloc (0,hTAGDef,(long)NumTAGDef*sizeof(TAGDEF),GMEM_MOVEABLE);
 			}
-			GSSiClose (TDFid);
+			GSSiClose2 (&TDFid);
 		}  
 	}
 {
@@ -5633,7 +5633,7 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
 		_fstrcpy (INstr,pstr);
 		if (FidHdr != Fid)
 		{
-			GSSiClose(FidHdr);
+			GSSiClose2 (&FidHdr);
 			if (GetGlobalBVal2("[%SKIPHEADER]", FALSE))
 			{
 				LPSTR line = malloc(USHRT_MAX);
@@ -10073,7 +10073,7 @@ void dumpvars (LPSTR Name)
 		fputstring (str,Fid);
 		GlobalUnlock(pVarSpace->VarHandles[i]);
 	} 
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (586);

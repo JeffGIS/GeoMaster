@@ -44,7 +44,7 @@ LPSTR SHPGetNVP(LPSTR ShpFileName,LPDOUBLE pFactor)
 
 			BigRead(fid, pMem, len);
 			pMem[len] = 0;
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 			if (!ConvertPRJtoProj4(pMem, proj4def))
 			{
 				int ln = strlen (proj4def);
@@ -276,9 +276,9 @@ BOOL CopySHPParm(LPSTR fromfile, LPSTR tofile, int startref)
 				fputstring(line, FidTo);
 			if (fgetstring(line, 256, Fid)) //end date
 				fputstring(line, FidTo);
-			GSSiClose(FidTo);
+			GSSiClose2 (&FidTo);
 		}
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	}
 
 	return rtn;

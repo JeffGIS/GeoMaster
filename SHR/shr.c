@@ -2008,7 +2008,7 @@ GSSiExitProg (179);
 	} 
 	rtn = TRUE;
 Exit:
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 {
 #if ENABLETRACE
 GSSiExitProg (179);
@@ -2078,7 +2078,7 @@ short loadtabs (LPINT Tabs)
 		n++;
 		lpBeg = lpEnd; 
 	}   
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (181);
@@ -2352,7 +2352,7 @@ int AppendFile (LPSTR InFile,LPSTR Line)
 	{
 		rtn = GSSillseek(Fid, 0, 2) + 1;
 		fputstring(Line, Fid);
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 	}
 Exit:
 	AllowJournal = SaveAllowJournal;
@@ -3030,7 +3030,7 @@ GSSiExitProg (210);
 			
 		y += txSize.cy;
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (210);
@@ -3070,7 +3070,7 @@ GSSiExitProg (211);
         CurLine++;
     }
     fclose (Fid);
-    GSSiClose (FidOut);  
+    GSSiClose2 (&FidOut);  
     GSSiRemove ("gmtemp2.txt");
     GSSiRename (Name,"gmtemp2.txt");
     GSSiRename ("gmtemp.txt",Name);
@@ -5744,7 +5744,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
     	pRect->bottom = min (pRect->bottom,pRect->top + ch * (NumItems+1));
 		ReleaseDC (hWndDlg,hDC);
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     if (hWndDlg)
     	SendDlgItemMessage (hWndDlg,Control,LB_SETCURSEL,DefaultIndex,0);
 Exit:
@@ -5820,7 +5820,7 @@ GSSiExitProg (274);
         }
         i++;
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
 	if (hWndDlg)
 		SendDlgItemMessage (hWndDlg,Control,CB_SELECTSTRING,-1,(LPARAM)INITVAL);
 
@@ -5870,7 +5870,7 @@ GSSiExitProg (275);
         }
     } 
 Exit:
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     
 {
 #if ENABLETRACE
@@ -5918,7 +5918,7 @@ GSSiExitProg (276);
         }
     } 
 Exit:
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     
 {
 #if ENABLETRACE
@@ -5999,7 +5999,7 @@ short DeleteDirAndContents (LPSTR InName)
 			ii=1;
 	}
 			//MessageBox (0,Name,"Unable to delete file",MB_ICONEXCLAMATION);
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	
 	Fid =	GSSiOpenFile (TempName,0,OF_CREATE);
     _fstrcpy (Name,InName);
@@ -6010,7 +6010,7 @@ short DeleteDirAndContents (LPSTR InName)
 	while (fgetstring (Name,255,Fid))
 		if (GSSiRemoveDir (Name))
 			MessageBox (0,Name,"Unable to delete directory",MB_ICONEXCLAMATION);
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	GSSiRemove (TempName);
     _fstrcpy (Name,InName);
     ExpandText (Name);
@@ -6324,7 +6324,7 @@ short GetCacheInfo (LPSTR CacheDir)
         ExpandText (CacheDir);
         fgetstring (str,16,Fid);
         CacheSize = (short)atol (str);
-        GSSiClose(Fid);   
+        GSSiClose2 (&Fid);   
 {
 #if ENABLETRACE
 GSSiExitProg (283);
@@ -6470,7 +6470,7 @@ BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
             fgetstring (str,16,Fid);
             MaxCache = atol (str);
             MaxCache *= ((long)1024 * (long)1024);
-            GSSiClose(Fid); 
+            GSSiClose2 (&Fid); 
 			if (!makedirectories (CacheDir,TRUE,FALSE))
             {
                 //if (Err)
@@ -6493,7 +6493,7 @@ BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
                 BigWrite (FidIndex,(char *)&MaxCache,4,-1);
                 BigWrite (FidIndex,(char *)&FreeSpace,4,-1);
                 BigWrite (FidIndex,(char *)&MaxFileNum,4,-1);
-                GSSiClose (FidIndex);  
+                GSSiClose2 (&FidIndex);  
                 FidIndex = HFILE_ERROR;
                 _fstrcpy(CacheFile,CacheDir);
                 _fstrcat(CacheFile,"\\freespac");
@@ -6518,7 +6518,7 @@ BOOL GetCacheFile (LPSTR UseFile, LPSTR DiskFile, BOOL Add, HWND StatusWnd)
                     }
                     GSSiGlobUlFree (&h0s);
                 }
-                GSSiClose(FidFile);
+                GSSiClose2 (&FidFile);
                 ClearProcessingMessage();
             }
         }
@@ -6551,7 +6551,7 @@ NoCache:    CacheDir[0]='\0';
                 GSSillseek (FidIndex,CurrentLoc,0);
                 BigWrite (FidIndex,(char *)pCacheBuf,sizeof(CACHEBUF),-1);
                 GSSiGlobUlFree(&hBuffer);
-                GSSiClose(FidIndex);
+                GSSiClose2 (&FidIndex);
                 FidIndex = HFILE_ERROR;
                 rtn = TRUE;
                 goto Exit;
@@ -6597,7 +6597,7 @@ NoCache:    CacheDir[0]='\0';
        	CloseFidSmall ();
         FidFile = GSSiOpenFile(CacheFile,pOFStruct,OF_READWRITE);
         st = GSSiChangeLength (FidFile,FreeSpace);
-        GSSiClose(FidFile);
+        GSSiClose2 (&FidFile);
         CreateFidSmall ();
         if (st == -1)
         {    
@@ -6644,7 +6644,7 @@ NoCache:    CacheDir[0]='\0';
         BigWrite (FidIndex,(char *)&NewNumFiles,2,-1);
         
         GSSiGlobUlFree (&hBuffer);
-        GSSiClose(FidIndex);
+        GSSiClose2 (&FidIndex);
         FidIndex = HFILE_ERROR;  
         rtn = TRUE;
         goto Exit;
@@ -6655,7 +6655,7 @@ UseDiskFile:
         _fstrcpy (UseFile,DiskFile);
         GSSiGlobUlFree (&hBuffer);
         if (FidIndex != HFILE_ERROR)
-        	GSSiClose(FidIndex);
+        	GSSiClose2 (&FidIndex);
         goto Exit;
     }
 Exit:          
@@ -6723,12 +6723,12 @@ GSSiExitProg (286);
             BigWrite (FidIndex,(HPSTR)&CacheBuf,sizeof(CACHEBUF),-1); 
             GSSillseek (FidIndex,FreeSpaceLoc,0);
             BigWrite (FidIndex,(HPSTR)&FreeSpace,4,-1);
-            GSSiClose(FidIndex);
+            GSSiClose2 (&FidIndex);
             sprintf (CacheFile,"%s\\freespac",CacheDir);
           	CloseFidSmall ();
 	        FidFile = GSSiOpenFile(CacheFile,&OFStruct,OF_READWRITE);
 	        st = GSSiChangeLength (FidFile,FreeSpace);
-	        GSSiClose(FidFile);
+	        GSSiClose2 (&FidFile);
           	CreateFidSmall ();
 {
 #if ENABLETRACE
@@ -7980,7 +7980,7 @@ HFILE GSSiOpenFileMem (LPSTR InName,UINT mode,UINT maxlen)
 	{
 		if (!handle)
 		{
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			Fid = HFILE_ERROR;
 		}
 	}
@@ -7991,7 +7991,7 @@ HFILE GSSiOpenFileMem (LPSTR InName,UINT mode,UINT maxlen)
 		
 		BigRead (Fid,ptr,len);
 		GlobalUnlock (handle);
-		GSSiClose (Fid); 
+		GSSiClose2 (&Fid); 
 		Fid = SetMemFile (Fid,handle,len);
 		if (Fid == HFILE_ERROR)
 			GSSiGlobFree (&handle);
@@ -8088,7 +8088,7 @@ BOOL CloseAndDeleteFile (LPHFILE pFid)
 	}
 	else
 		*Name = 0;
-	GSSiClose (*pFid);
+	GSSiClose2 (pFid);
 	*pFid = HFILE_ERROR;
 	GSSiRemove (Name);
 	return TRUE;
@@ -8331,7 +8331,7 @@ BOOL ConvertFileNameToCacheFileName (LPSTR FileName)
 		
 		if (Fid == HFILE_ERROR)
 			return FALSE;
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		strcpy (FileName,OFStruct.szPathName);
 		return TRUE;
 	}
@@ -8434,7 +8434,7 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 			}
 			*pConvert = 0;
 			TotLen++;
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			GlobalUnlock (hConvert);
 			hConvert = GSSiGlobalReAlloc (0,hConvert,TotLen,GMEM_MOVEABLE);
 			st = SHGetFolderPath(0, CSIDL_COMMON_APPDATA, 0, SHGFP_TYPE_CURRENT, NewPath);
@@ -8989,7 +8989,7 @@ int StoreTestToProduction(LPSTR testDirIN, int option)
 	}
 Exit:
 	GSSiGlobUlFree(&hFid);
-	GSSiClose(FidTemp);
+	GSSiClose2 (&FidTemp);
 	GSSiRemove(tempName);
 
 	return rtn;
@@ -9292,12 +9292,12 @@ Open2:
 			        		goto Exit;
 						CacheAlreadyChecked (Name,_fstrlen(CachePathnameTo),DONTEXIST);
 						InOpenFile = FALSE;  
-						GSSiClose (FidTo);
+						GSSiClose2 (&FidTo);
 		    			GSSiRemove2(Name);
 						goto Exit;
 					}  
 					GSSifstat (Fid,&statfrom);
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					if (!CacheAll && statfrom.st_size > abs (MaxFileSizeToCache) && FidTo == HFILE_ERROR)
 					{
 						InOpenFile = FALSE;
@@ -9569,7 +9569,7 @@ BOOL copyfile (LPSTR ToFileIn, LPSTR FromFile,short AppendOrReplace,long BeginPo
 {GSSiEnterProg (308);
 #endif
 {   UINT nRead;
-    short FidFrom, FidTo;
+    HFILE FidFrom, FidTo;
     DWORD maxread;
     OFSTRUCTGM    fStruct;
     LPOFSTRUCTGM  pStruct = &fStruct;
@@ -9611,7 +9611,7 @@ BOOL copyfile (LPSTR ToFileIn, LPSTR FromFile,short AppendOrReplace,long BeginPo
 			DoReplace = GSSiMsgBox (GetFocus(),pBuffer,"Verify File Replace",MB_YESNO|MB_ICONQUESTION,0); 
 			if (DoReplace != IDYES)
 		    {
-		        GSSiClose(FidFrom);
+		        GSSiClose2 (&FidFrom);
 		        goto RtnFalse;
 		    } 
     	}
@@ -9621,7 +9621,7 @@ BOOL copyfile (LPSTR ToFileIn, LPSTR FromFile,short AppendOrReplace,long BeginPo
 //    FidTo   = GSSiOpenFile (ToFile,pStruct,OF_CREATE);
     if (FidTo == HFILE_ERROR)
     {
-        GSSiClose(FidFrom);
+        GSSiClose2 (&FidFrom);
         goto RtnFalse;
     } 
 Start:
@@ -9633,8 +9633,8 @@ Start:
 //   _lwrite (FidTo,zeros,256);   
 	    if (nRead == (UINT)HFILE_ERROR) 
     	{
-		    GSSiClose (FidFrom);
-		    GSSiClose (FidTo);
+		    GSSiClose2 (&FidFrom);
+		    GSSiClose2 (&FidTo);
 		    GSSiSetCursor (hcurSave); 
     		goto RtnFalse;
     	}
@@ -9643,8 +9643,8 @@ Start:
 	    	nRead -= (TotRead - TotToRead);
         if (BigWrite(FidTo,pBuffer,nRead,-1) != nRead) 
     	{
-		    GSSiClose (FidFrom);
-		    GSSiClose (FidTo);
+		    GSSiClose2 (&FidFrom);
+		    GSSiClose2 (&FidTo);
 		    GSSiSetCursor (hcurSave); 
     		goto RtnFalse;
     	}
@@ -9659,8 +9659,8 @@ Start:
 //   _lwrite (FidTo,zeros,256);
         nRead = BigRead (FidFrom,pBuffer,(UINT) maxread);
     }
-    GSSiClose (FidFrom);
-    GSSiClose (FidTo);
+    GSSiClose2 (&FidFrom);
+    GSSiClose2 (&FidTo);
     GSSiGlobUlFree (&hBuffer);
     GSSiSetCursor (hcurSave); 
 {
@@ -10698,7 +10698,7 @@ GSSiExitProg (334);
     ii=GSSillseek (Fid,0,2);
 	BigWrite (Fid,(HPSTR)&pSaveScreen->Rect,sizeof(RECT),-1);
 	BigWrite (Fid,(HPSTR)pBounds,sizeof(MNMXCORD),-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 Exit:
 	GlobalUnlock (hSavedScreen);
 {
@@ -10750,7 +10750,7 @@ GSSiExitProg (335);
 	ii=GSSillseek (Fid,ii-(sizeof(RECT)+sizeof(MNMXCORD)),0);                
 	BigRead (Fid,(HPSTR)&pSaveScreen->Rect,sizeof(RECT));
 	BigRead (Fid,(HPSTR)pBounds,sizeof(MNMXCORD));
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	hDIB = LoadDIB (File); 
 	hPal = CreateDIBPalette (hDIB);
 	pSaveScreen->hBM = DIBToBitmap (hDIB,hPal); 
@@ -11037,7 +11037,7 @@ GSSiExitProg (344);
 		return -1;
 }
 	l = GSSifilelength (Fid);
-	GSSiClose(Fid);
+	GSSiClose2 (&Fid);
 {
 #if ENABLETRACE
 GSSiExitProg (344);

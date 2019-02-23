@@ -95,7 +95,7 @@ void SaveGMEditPosition(LPSTR file, RECT rect)
 	fid = GSSiOpenFile(PositionFile, 0, OF_CREATE);
 	recttoa(cpos, rect);
 	fputstring(cpos, fid);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	return;
 }
 
@@ -144,8 +144,8 @@ void createFunIDFile (void)
 		}
 	}
 
-	GSSiClose (fidin);
-	GSSiClose (fidout);
+	GSSiClose2 (&fidin);
+	GSSiClose2 (&fidout);
 
 	sprintf (str,"$GMDIMPORT([%DL]fundefs.gmd,N,%s,1)",outfile);
 	ProcessText (str);
@@ -1404,7 +1404,7 @@ BOOL GMEditSaveUpdates (HWND hWnd)
 	pFile = GlobalLock (hFile);
 	lnFile = strlen (pFile);
 	BigWrite (fid,pFile,lnFile,-1);
-	GSSiClose (fid);
+	GSSiClose2 (&fid);
 	GlobalUnlock (hFile);
 	return TRUE;
 }
@@ -1568,7 +1568,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				ln = strlen (pFile);
 				if (ln < 2 || (pFile[ln-2] != '\r' || pFile[ln-1] != 'n'))
 					strcat (pFile,"\r\n");
-				GSSiClose (fid);
+				GSSiClose2 (&fid);
 				GlobalUnlock (hFile);
 				avCharWidth = (double)totWidth/(double)totChr;
 				verifyLineBreaks (hFile);

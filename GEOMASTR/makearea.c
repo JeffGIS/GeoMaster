@@ -203,7 +203,7 @@ void CloseRefConnectFile (void)
     	CloseGWDatabase (hDBRefConnect);  
     hDBRefConnect=0;
 	BT_CLOSEANDDELETE (&hBTDups);
-    GSSiClose (FidDupList);
+    GSSiClose2 (&FidDupList);
     FidDupList = HFILE_ERROR;   
     CloseTRANS2 (&hTranToLPoint);
     return;
@@ -494,7 +494,7 @@ BOOL CreateRefConnectionFile (LPSTR InName,LPMNMXCORD pBounds)
 	BT_CREATE (PrimeIndex, 4, FALSE, 1, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	LocalUnlock(hVars);
 	LocalFree(hVars); 
-	GSSiClose (FidData);  
+	GSSiClose2 (&FidData);  
 */	
 	{
 		HANDLE	hKeyFields;
@@ -1677,7 +1677,7 @@ Exit:
 	    DestroySymList (&NumSyms,&hSymDesc);
 	    CloseMap(TRUE);  
     }
-	GSSiClose (FidLinkFile);
+	GSSiClose2 (&FidLinkFile);
 	GSSiRemove (LinkFile);
 	DestroyStatusWindow(0); 
 	return rtn;
@@ -2337,11 +2337,11 @@ void CloseNodes (void)
 	BT_CLOSEANDDELETE (&hNodes);
 	GSSillseek (FidLoop,0,0);
 	BigRead (FidLoop,File,MAX_PATH);
-	GSSiClose (FidLoop);
+	GSSiClose2 (&FidLoop);
 	GSSiRemove (File); 
 	GSSillseek (FidLinks,0,0);
 	BigRead (FidLinks,File,MAX_PATH);
-	GSSiClose (FidLinks);
+	GSSiClose2 (&FidLinks);
 	GSSiRemove (File); 
 	BT_CLOSEANDDELETE (&hBTLinks);
 	BT_CLOSEANDDELETE (&hBTInclusion);
@@ -2442,7 +2442,7 @@ BOOL DisplayBadArea (void)
 	BigRead (FidBad,(LPSTR)pPoint,(long)np*(long)sizeof(DPOINT));
 	GWPolylineD (CurView->hDC,pPoint,np,idesc);
 	GSSiGlobUlFree (&hLoop);  
-	GSSiClose (FidBad); 
+	GSSiClose2 (&FidBad); 
 	SelectObject (CurView->hDC,hOldPen);
 	GSSiDeleteObject (&hPen); 
 	return TRUE;
@@ -2525,7 +2525,7 @@ GotSym:;
 			BigRead (FidLinks,(HPSTR)pPoint,(long)np*sizeof(DPOINT)); 
 			BigWrite (FidBad,(HPSTR)pPoint,(long)np*(long)sizeof(DPOINT),-1);   
 			GSSiGlobUlFree (&hLoop);
-			GSSiClose (FidBad);
+			GSSiClose2 (&FidBad);
 			return 0;
 		} 
 		(*pNumSides)+=(np-1); 

@@ -90,7 +90,7 @@ BOOL OpenDGNFile (LPSTR InName,LPMNMXCORD pBounds)
 	Fid = GSSiOpenFile (CurrentDGNFile,&OFStruct,OF_READ);
 	if (Fid == HFILE_ERROR)
 		return FALSE;
-	GSSiClose (Fid);	
+	GSSiClose2 (&Fid);	
 	hDGN = DGN7Open (OFStruct.szPathName,0,pBounds);  
 	if (!hDGN)
 		return FALSE;
@@ -144,7 +144,7 @@ BOOL LoadDGNColorFile (LPSTR InName)
 			DGNColorTable[index] = RGB (r,g,b);
 	}
 	
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -317,7 +317,7 @@ GetSymbols:
 			DGNSymbolLevel[NumDGNSymbol++] = atoi (pTAB); 
 		}
 	}
-	GSSiClose (Fid);    
+	GSSiClose2 (&Fid);    
 	rtn = TRUE;
 Exit:
 	if (GetGlobalCVal ("[%DefaultDGNTAG]",DefaultTAG,"REFNO") && strcmp (DefaultTAG,"REFNO"))

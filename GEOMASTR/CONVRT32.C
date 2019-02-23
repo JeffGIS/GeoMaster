@@ -2273,7 +2273,7 @@ GSSiExitProg (614);
 	len = pWhereIndex->Len;
 	GlobalUnlock (pComboHeader->hWhere);
 	pComboHeader->hWhere = GSSiGlobalReAlloc (0,pComboHeader->hWhere,sizeof(WHEREINDEX)+len,GMEM_MOVEABLE);
-	GSSiClose (FidCF);
+	GSSiClose2 (&FidCF);
 	for (i=0;i<pComboFile->NumFiles;i++)
 		pComboFile->hSQL[i]=0; 
 	for (i=0;i<pComboFile->NumFiles;i++)
@@ -2409,7 +2409,7 @@ BOOL LoadInfoBox (LPSTR File,LPTAGBOX pTagBox)
 	*pTagBox->UDI = 0;
 	if (!pTagBox->Flags.FixedSize)   
 		pTagBox->bmWidthD = pTagBox->bmHeightD = 0;
- 	GSSiClose (Fid);
+ 	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -2457,7 +2457,7 @@ GSSiExitProg (1006);
 }   
 	    if (Version < 4)
 	    {
-	    	GSSiClose (FidConfig);
+	    	GSSiClose2 (&FidConfig);
 {
 #if ENABLETRACE
 GSSiExitProg (1006);
@@ -2576,7 +2576,7 @@ GSSiExitProg (1006);
    }
 
 	if (!Offset)
-		GSSiClose (FidConfig);
+		GSSiClose2 (&FidConfig);
 
 	GSSiGlobUlFree (&hVisList);
 	GSSiGlobUlFree (&hTAG);
@@ -2626,7 +2626,7 @@ void SaveLocalConfigToNetwork (HFILE FidConfig,LPSTR ConfigPath)
 
 					while ((lr = BigRead (FidConfig,pCommonMem,lCommonMem))>0)
 						BigWrite (FidTo,pCommonMem,lr,-1);
-					GSSiClose (FidTo);
+					GSSiClose2 (&FidTo);
 				}
 			}
 			AllowCache = SaveAllowCache;
@@ -3341,7 +3341,7 @@ GSSiExitProg (100);
 	    if (!pViewportsD[0]->Type && pViewportsD[0]->ShowFullScreen)
 			UseFullScreen (hWnd,0);
 	}
-    GSSiClose (FidConfig);
+    GSSiClose2 (&FidConfig);
 	RunStartupCommand (1);  
 	DisplayAllToolbars (0);
 	LogUsageInfo (1,FullPath);
@@ -3608,7 +3608,7 @@ GSSiExitProg (101);
 			hTempMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,CfgImageLen);
 	 		pCfgImage = GlobalLock (hTempMem);
 			BigRead (FidTemp,pCfgImage,CfgImageLen);
-			GSSiClose (FidTemp);
+			GSSiClose2 (&FidTemp);
 			GSSiRemove (pTempName);
 			GlobalUnlock (hSaveCfgImagesFileName);
 	 		BigWrite (FidConfig,(HPSTR)pCfgImage,CfgImageLen,-1); 
@@ -3682,7 +3682,7 @@ GSSiExitProg (101);
     BigWrite (FidConfig,(HPSTR)&ConfigDesc,sizeof(ConfigDesc),-1);
     BigWrite (FidConfig,(HPSTR)&Signature,2,-1);
     BigWrite (FidConfig,(HPSTR)&Version,2,-1);
-    GSSiClose (FidConfig);  
+    GSSiClose2 (&FidConfig);  
     CurVis = SaveInVis;     
     CurView = SaveVP;
 	ConfigChangesMade = FALSE;
@@ -3836,7 +3836,7 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 	}
 //	ReleaseDC (hWnd,hDC);
 Exit:
-	GSSiClose (FidConfig);
+	GSSiClose2 (&FidConfig);
 	return TRUE;
 }
 
@@ -4215,7 +4215,7 @@ int	CreateTestConfig (void)
     
 	GlobalUnlock (hViewports[0]);
 	GSSiGlobFree (&hViewports[0]);	
-    GSSiClose (FidConfig);
+    GSSiClose2 (&FidConfig);
     FidConfig = 0;
 
                   
@@ -4583,7 +4583,7 @@ int	CreateTestConfig (void)
     BigWrite (FidConfig,(HPSTR)&Version,2,-1);
     
 	GSSiGlobUlFree (&hViewports[0]);
-    GSSiClose (FidConfig);  
+    GSSiClose2 (&FidConfig);  
     FidConfig = 0;
 	GSSiGlobUlFree (&hVisList);
 
@@ -4654,7 +4654,7 @@ int	CreateTestConfig (void)
     BigWrite (FidConfig,(HPSTR)&Version,2,-1);
     
 	GSSiGlobUlFree (&hViewports[0]);
-    GSSiClose (FidConfig);  
+    GSSiClose2 (&FidConfig);  
 
 
 	return (1);

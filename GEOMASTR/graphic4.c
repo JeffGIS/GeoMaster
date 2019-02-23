@@ -3494,7 +3494,7 @@ void ProcessInvalidRecord (short Pcode,LPSHORT ipnt,int from)
 			sprintf (str,"Invalid graphics record: %s  (%ld,%ld,%i,%i)",PltName,CurrentSeg,CurElement,Pcode,from);
 			ExpandText (str);
 			fputstring (str,Fid);
-			GSSiClose (Fid);	
+			GSSiClose2 (&Fid);	
 			break;
 		case 2:
 			break;
@@ -5337,7 +5337,7 @@ void SaveTINData(LPDPOINT pDPoint, HANDLE hElev)
 	}
 	else if (haveData)
 	{
-		GSSiClose(FidTINExtract);
+		GSSiClose2 (&FidTINExtract);
 		FidTINExtract = HFILE_ERROR;
 		haveData = FALSE;
 	}

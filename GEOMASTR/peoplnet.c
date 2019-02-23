@@ -451,7 +451,7 @@ BOOL MakeMap (LPSTR Args)
 				HFILE	FidBIN;
 			
 				FidBIN = GSSiOpenFile (MemMapName,NULL,OF_CREATE);
-				GSSiClose (FidBIN); 
+				GSSiClose2 (&FidBIN); 
 			}
 			_fstrcpy (pDot,".gmd");
 		}
@@ -613,7 +613,7 @@ TryMapAgain2:
 	    			InPop = 0;
 	    		BT_CLOSE (hBTCities1);  
 	    	} 
-	    	GSSiClose (FidTiger1);
+	    	GSSiClose2 (&FidTiger1);
 	    	BT_CLOSE (hBTTiger1);
 	    } 
 	    if (InPop < GetGlobalDVal("[IN_CITY_POP]"))  
@@ -692,7 +692,7 @@ TryMapAgain:
 			if (FidScale != HFILE_ERROR)
 			{
 				fputstring (str,FidScale);
-				GSSiClose (FidScale);
+				GSSiClose2 (&FidScale);
 			}
 		} 
 		if (GetGlobalBVal2 ("[%APPLYCOLORCHANGES]",TRUE)) 
@@ -774,7 +774,7 @@ BOOL GetCountyName (short State,short County,LPSTR CountyName)
 			BT_PUT (hBTCountyName,(LPSTR)&CNKEY,&str[11]);
 		}
 		BT_CLOSE (hBTCountyName);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		First = FALSE;
 	}*/
 	
@@ -1369,7 +1369,7 @@ BOOL GetCityCoord (LPSTR Name,LPDPOINT pDPoint,LPMNMXCORD pMinMax)
 					BT_PUT (hBTCities1,(LPSTR)&CitiesKey1,(LPSTR)&CitiesData1);			
 				}
 			} 
-			GSSiClose (FidTiger1);
+			GSSiClose2 (&FidTiger1);
 NextState:; 
 		}
 		BT_CLOSE (hBTCities1);
@@ -1457,11 +1457,11 @@ short GetStateNum (LPSTR ID)
 		istate = atoi (StateStr); 
 		if (!_fstricmp (ID,&StateStr[66]))
 		{
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			goto Exit;
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 Exit:
 {
 #if ENABLETRACE
@@ -1499,7 +1499,7 @@ BOOL GetStateID (short StateNum, LPSTR ID)
 			istate = atoi (StateStr); 
 			_fstrcpy (StateIDs[istate],&StateStr[66]);
 		}
-		GSSiClose (Fid); 
+		GSSiClose2 (&Fid); 
 		First = FALSE;
 	} 
 	_fstrcpy (ID,StateIDs[StateNum]);
@@ -2265,7 +2265,7 @@ BOOL LoadColorChanges (void)
      			ColorChangesTo[NumColorChanges++] = RGBQUADFromCOLORREF ((COLORREF)atol (pTab));
      		}
      	}
-     	GSSiClose (Fid);
+     	GSSiClose2 (&Fid);
      	rtn = TRUE;
      } 
 {
@@ -2300,7 +2300,7 @@ BOOL SaveColorChanges (HWND hWnd)
 				sprintf (txt,"%ld\t%ld",COLORREFFromRGBQUAD(ColorChangesFrom[i]),COLORREFFromRGBQUAD(ColorChangesTo[i]));
 			fputstring (txt,Fid);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	} 
 {
 #if ENABLETRACE
@@ -2546,11 +2546,11 @@ GSSiExitProg (1422);
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
 	BigRead (Fid,pData,ld);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	pHead->GridOffset = ld;
 	Fid = GSSiOpenFile (GridFile,0,OF_READ);
 	BigRead (Fid,&pData[ld],lg);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	rtn = GetAreaID (Pt.y,Pt.x,pData);
 	GSSiGlobUlFree (&hData);
 	return rtn;
@@ -2576,7 +2576,7 @@ int GetPNAreaID (DPOINT Pt,LPSTR DataFile)
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
 	BigRead (Fid,pData,ld);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	rtn = GetAreaID (Pt.y,Pt.x);
 	GSSiGlobUlFree (&hData);
 Exit:
@@ -2615,12 +2615,12 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
 	BigRead (Fid,&Head,sizeof(Head));
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	hGrid = GSSiGlobAlloc (0,GMEM_MOVEABLE,lg);
 	pGrid = GlobalLock (hGrid);
 	Fid = GSSiOpenFile (GridFile,0,OF_READ);
 	BigRead (Fid,pGrid,lg);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	hGridCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lg);
 	pGridCmp = GlobalLock (hGridCmp);
 	pGridRowOffsets = pGridCmp;
@@ -2655,7 +2655,7 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 	pHead = (LPSTATEGRIDHEADER)pData;
 	Fid = GSSiOpenFile (DataFile,0,OF_READ);
 	BigRead (Fid,pData,ld);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	nExtraBytes = 4 - (ld % 4);
 	pHead->GridOffset = ld+nExtraBytes;
 	Fid = GSSiOpenFile (OutFile,0,OF_CREATE); 
@@ -2663,7 +2663,7 @@ BOOL LoadPNetStateGrid (LPSTR DataFile,LPSTR GridFile,LPSTR OutFile)
 	if (nExtraBytes)
 		BigWrite (Fid,&Bytes,nExtraBytes,-1);
 	BigWrite (Fid,pGridRowOffsets,lGridCmp*sizeof(int),-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiGlobUlFree (&hData);
 	GSSiGlobUlFree (&hGrid);
 	GSSiGlobUlFree (&hGridCmp);
@@ -2707,7 +2707,7 @@ void DisplayPNStateGrid_old (LPSTR File,LPSTR FileOff)
 
 	SaveDC (CurView->hDC);
 	BigRead (Fid,&Header,sizeof(Header));
-	GSSiClose (FidOff);
+	GSSiClose2 (&FidOff);
 	ifac = Header.ifac;
 	left = ((double)Header.left) / ifac;
 	bottom = ((double)Header.bottom) / ifac;
@@ -2762,7 +2762,7 @@ void DisplayPNStateGrid (LPSTR File)
 		goto Exit;
 	SaveDC (CurView->hDC);
 	BigRead (Fid,&Header,sizeof(Header));
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	ifac = Header.ifac;
 	fac = Header.fac;
 	left = ((double)Header.left) / ifac;
@@ -3055,9 +3055,9 @@ Exit:
 	SetContinueProcessing ( TRUE);
 //	GSSiGlobUlFree (&hCellPoint);
 	GSSiGlobUlFree (&hCellPoint16);
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	BigWrite (FidOutOff,Offsets,nrow*ncol*4,-1);
-	GSSiClose (FidOutOff);
+	GSSiClose2 (&FidOutOff);
 	GSSiGlobUlFree (&hOffsets);
 	DestroyStatusWindow(0);
 	sprintf (msg,"Totcells: %i, NumWithPoints: %i, MaxLines:%i, MaxPoints:%i",TotRecs,nWithPoints,MaxLines,MaxPoints);
@@ -3330,9 +3330,9 @@ Exit:
 //	GSSiGlobUlFree (&hCellPoint);
 	GSSiGlobUlFree (&hCellPoint16);
 	GSSiGlobUlFree (&hCompressedCell);
-	GSSiClose (FidOut);
+	GSSiClose2 (&FidOut);
 	BigWrite (FidOutOff,Offsets,nrow*ncol*4,-1);
-	GSSiClose (FidOutOff);
+	GSSiClose2 (&FidOutOff);
 	GSSiGlobUlFree (&hOffsets);
 	//DestroyStatusWindow(0);
 	sprintf (msg,"Totcells: %i, NumWithPoints: %i, MaxLines:%i, MaxPoints:%i",TotRecs,nWithPoints,MaxLines,MaxPoints);

@@ -1493,7 +1493,7 @@ BOOL CreateDynamicDialog (LPSTR DBName, LPGWDHEADER lpGWDHead,
             {fputstring("RADIOBUTTON [RadioButton]  299 30 2 2 0 0",OutFid);}
             GlobalUnlock (SQLPtr->OFHandle);
             GlobalUnlock (hSQL);
-            GSSiClose (OutFid);
+            GSSiClose2 (&OutFid);
             lpF = lpItemInfo;
             OpenModelessDialog(OutName); 
             
@@ -1684,7 +1684,7 @@ HWND hwndCurrent, hwndStart;
           Rover = GetWindow(Rover,GW_HWNDNEXT); 
         }//end of the while loop   
 
-Out:    GSSiClose (Fid);   
+Out:    GSSiClose2 (&Fid);   
    		if (CenterVP)
    			cwCenterInVP (hDlg,CenterVP);
    		else
@@ -2013,7 +2013,7 @@ GLOBALHANDLE ReadDialogDef(char *filename)
     while(0);
     if (!rc)
     	MessageBox (0,filename,"Invalid dialog file",MB_ICONEXCLAMATION);
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
        lpF = lpItemInfo;
     if(hInfo)
        GlobalUnlock(hInfo);
@@ -2897,7 +2897,7 @@ void SaveChanges(HWND hDlg)
             {fputstring("RADIOBUTTON [RadioButton]  299 30 2 2 0 0",OutFid);}
 
 
-           GSSiClose (OutFid);
+           GSSiClose2 (&OutFid);
 return; 
 }
 //****************************************************************// 
@@ -2962,7 +2962,7 @@ Again:if(0==fgetstring(buffer,200,OutFid)) break;
       {
         MessageBox(0,buffer,"Unable to read this file.",
         MB_ICONSTOP);
-        GSSiClose (OutFid);
+        GSSiClose2 (&OutFid);
         return FALSE;
       }
       if(_fstrcmp(str1,"COMBOBOX") == 0 ||
@@ -3074,7 +3074,7 @@ KeepGoing: fgetstring(buffer,256,OutFid);//contents
    }
 Exit:
    GlobalUnlock(SQLPtr->OFHandle);
-   GSSiClose (OutFid);
+   GSSiClose2 (&OutFid);
    lpF = lpItemInfo; 
    if (!HaltReport)
    		OpenModelessDialog(OutName);
@@ -3504,7 +3504,7 @@ BOOL SetDynDlgData (HWND hWndDlg,LPSTR Name,LPUINT pcntls,short lncntls)
 			        	SendDlgItemMessage (hWndDlg,pControlDef[id].ControlID,CB_ADDSTRING,0,(LPARAM)str);
 				} 
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		} 
 		DDFileUpdated = FALSE;
 		GlobalUnlock (hDynControls); 
@@ -3552,7 +3552,7 @@ BOOL SetDynDlgData (HWND hWndDlg,LPSTR Name,LPUINT pcntls,short lncntls)
 						fputstring (str,Fid);
 					}
 				}
-		    	GSSiClose (Fid);
+		    	GSSiClose2 (&Fid);
 		    	GlobalUnlock (hDynStrings);
 		    	GlobalUnlock (hDynControls); 
 		    }

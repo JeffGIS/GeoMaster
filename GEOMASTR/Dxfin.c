@@ -617,9 +617,9 @@ S1:       if(IST == -1)
          lpDxf2GM->CHECK = FALSE;
          IST = 0;
          _fstrset(lpDxf2GM->CURRENT_SECTION,' ');
-         GSSiClose (DXFDXF) ;
+         GSSiClose2 (&DXFDXF) ;
        //  fputstring("Beginning actual processing...",DXFOUT);
-       //  GSSiClose (DXFOUT);
+       //  GSSiClose2 (&DXFOUT);
          DXFDXF = GSSiOpenFile (lpDxfOpts->INFILE,lpOBF,OF_READ);
 //         DXFOUT = GSSiOpenFile (lpDxfOpts->GMRFILE,lpOBF,OF_READ);
          for (I = 1;I <= 2; I++) //DO I=1,2;
@@ -632,7 +632,7 @@ S1:       if(IST == -1)
        }    
 
 //C----
-S9000:  GSSiClose (DXFDXF);
+S9000:  GSSiClose2 (&DXFDXF);
 
      if (HaveExtents)
      {
@@ -673,7 +673,7 @@ S9000:  GSSiClose (DXFDXF);
         DXFMinMax.ymx = lpDxf2GM->EXTENTS[2][2]*FTM;
 */      
         CloseRefIndex(TRUE);           
-//        GSSiClose (DXFOUT);
+//        GSSiClose2 (&DXFOUT);
         if (hDxf[0])
 			GlobalUnlock(hDxf[0]); 
 		if (hDxf[1])
@@ -3407,7 +3407,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	                 ii=BigRead (FidSave,str,254);
 			     }
 			     while (ReadObject (FidSave, FALSE,0,0));*/
-                 GSSiClose (FidSave);
+                 GSSiClose2 (&FidSave);
 				 PostMessage(hWndDlg, WM_COMMAND, IDC_SET_SOURCE, 0L);
                  FileIsOpen = TRUE;
                	 PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0L);
@@ -3628,7 +3628,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	             item=0;  
               	 while (SendDlgItemMessage(hWndDlg,IDC_LAYER_LIST,LB_GETTEXT,item++,(DWORD)string) != LB_ERR)
               	 	fputstring (string,FidDSC); 
-              	 GSSiClose (FidDSC); 
+              	 GSSiClose2 (&FidDSC); 
 				 SymConvTableChanged = FALSE;  
             }
               	 break;
@@ -3666,7 +3666,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 						SendDlgItemMessage (hWndDlg,IDC_LAYER_LIST,LB_ADDSTRING,0,(LPARAM)((LPSTR)string));  
 					i++; 
 				 }
-	             GSSiClose (FidDSC);
+	             GSSiClose2 (&FidDSC);
 				 GSSiGlobFree (&hLayerSym);
 	        }
             	 break;
@@ -3902,7 +3902,7 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				      		goto NextFile;
 				      	}
 				      	else
-				      		GSSiClose (FidFileList);
+				      		GSSiClose2 (&FidFileList);
 				     }
                   	 EnableWindow(GetDlgItem(hWndDlg, IDCANCEL),FALSE);
                     GSSiGlobFree (&LineMem);

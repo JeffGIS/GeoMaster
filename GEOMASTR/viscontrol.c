@@ -277,7 +277,7 @@ void TempLoadFloatMenuData (int ReadOrWrite) //read=0,write=1
 		txtInOut (Fid,ReadOrWrite,TI_LONG,&TypeFontSizeInc[i]);
 		txtInOut (Fid,ReadOrWrite,TI_CHAR,TypeFontName[i]);
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return;
 }
 
@@ -2718,7 +2718,7 @@ BOOL InitCatalogData (HANDLE hInitData,BOOL Pickability)
 			if (GetDictSymbolType (symnum))
 				AddSymbolToLayer (layer,symnum,1,0,&pVCHeader->nLayerSyms[layer],&pVCHeader->hLayerSyms[layer]);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiRemove (TempFile);
 		SetConfig (SaveCfg);
 		CurView = SaveVP;

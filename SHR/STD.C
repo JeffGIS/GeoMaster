@@ -114,7 +114,7 @@ BOOL LoadCustomStreenNameConversions (BOOL Reload)
 			NumCustomConversions++;
 		}
 		GlobalUnlock (hCustomConversions);
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	return TRUE;
 }
@@ -1583,7 +1583,7 @@ s13:  HASHP	(ID, &outval[13], &STNDSP);
  
 }  //end of the while (!feof(fptr))  
 
-s14:  GSSiClose(fptr);
+s14:  GSSiClose2 (&fptr);
       HASHC(ID);
       MS_UNMAP((char *)NPNT,LM,&ISTAT);
 return TRUE;

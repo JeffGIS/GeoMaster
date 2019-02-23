@@ -1377,7 +1377,7 @@ extern BOOL			AlwaysUseSymDict;
 extern HANDLE			hMemPrintCrime;
 extern LPREPORT			CurReport;
 extern HWND			ScrollRptDlg;
-extern short			ScrollRptCntl;
+extern int			ScrollRptCntl;
 extern HANDLE			hReportScroll;
 extern short			CurFont;
 extern double			DevicePixelsPerInch;  

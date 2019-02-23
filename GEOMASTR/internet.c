@@ -215,7 +215,7 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			};
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow (0);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			if (replace && FileType((LPSTR)lpszNewFile) == 1)
 				GSSiRemove((LPSTR)lpszNewFile);
 			GSSiRename(DownloadFile,(LPSTR) lpszNewFile);
@@ -286,7 +286,7 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 			};
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow(0);
-			GSSiClose(Fid);
+			GSSiClose2 (&Fid);
 			GSSiGlobUlFree(&hBuffer);
 			InternetCloseHandle(handle);
 		}

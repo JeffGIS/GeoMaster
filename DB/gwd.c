@@ -205,7 +205,7 @@ Close:
 		BigWrite (lpGWDHead->Fid,(HPSTR)lpFieldInfo,sizeof(GWFLDINFO),-1);   
 	BigWrite (lpGWDHead->Fid,(HPSTR)pNewFldInfo,sizeof(GWFLDINFO),-1);   
 	CurLoc = GSSillseek (lpGWDHead->Fid,0,1);
-    GSSiClose (lpGWDHead->Fid);
+    GSSiClose2 (&lpGWDHead->Fid);
     for (i=0;i<lpGWDHead->NumIndex;i++)
     {   
         if (lpGWDHead->BTHandle[i])
@@ -524,7 +524,7 @@ NextField:
 		FieldDefs = pEnd + 1;
 		goto NextField;
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return rtn;
 }
                                        
@@ -602,7 +602,7 @@ GSSiExitProg (616);
 			pCFieldIndex++;
 			BigRead (FidCF,(HPSTR)pCFieldIndex,len);
 			GlobalUnlock (hComputedFields);
-			GSSiClose (FidCF);
+			GSSiClose2 (&FidCF);
 			for (i=0;i<pComboFile->NumFiles;i++)
 			{ 
 				pComboFile->hSQL[i]=0; 
@@ -754,7 +754,7 @@ GSSiExitProg (616);
                   pCFieldIndex = (LPCFIELDINDEX)GlobalLock(hComputedFields);
                   BigWrite (FidCF,(HPSTR)pCFieldIndex,sizeof(CFIELDINDEX) + pCFieldIndex->Len,-1);
                   GSSiGlobUlFree (&hComputedFields);
-                  GSSiClose (FidCF);
+                  GSSiClose2 (&FidCF);
                   GSSiGlobUlFree (&hAddFile);
                   for (i=0;i<pComboFile->NumFiles;i++)
                     CloseDataFile (TRUE, &pComboFile->hSQL[i]);
@@ -2065,8 +2065,8 @@ void SetGWDCurrentOffset (LPGWDHEADER lpGWDHead,long Offset)
          BigRead (FidFrom,(HPSTR)lpFieldInfo,sizeof(GWFLDINFO));
 		 BigWrite (FidTo,(HPSTR)lpFieldInfo,sizeof(GWFLDINFO),-1);
     }
-	GSSiClose (FidFrom);
-	GSSiClose (FidTo);
+	GSSiClose2 (&FidFrom);
+	GSSiClose2 (&FidTo);
 
 	return TRUE;
 }*/
@@ -2160,12 +2160,12 @@ TryAgain:
 					if (firstTry && lpGWDHead->SplitFid != HFILE_ERROR)
 					{
 						firstTry = FALSE;
-						GSSiClose(lpGWDHead->SplitFid);
+						GSSiClose2 (&lpGWDHead->SplitFid);
 						GSSiRemove(OFStruct.szPathName);
 						goto TryAgain;
 					}
-					GSSiClose(lpGWDHead->SplitFid);
-					GSSiClose(Fid);
+					GSSiClose2 (&lpGWDHead->SplitFid);
+					GSSiClose2 (&Fid);
 					sprintf(mess, "Missing or invalid split file: %s", SplitFileName);
 					MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 					GSSiGlobUlFree(&DBHandle);
@@ -2193,7 +2193,7 @@ TryAgain:
     SetGWDCurrentOffset (lpGWDHead,-1);
 	if (lpGWDHead->NumFields <= 0)
 	{
-		GSSiClose(Fid);
+		GSSiClose2 (&Fid);
 		goto Return0;
 	}
     lpGWDHead->hFldInfo = GSSiGlobAlloc ( 265,GHND,lpGWDHead->NumFields*sizeof(FIELDINFO));
@@ -2245,7 +2245,7 @@ TryAgain:
 		    {   
 		    	long	loc = GSSillseek (Fid,0,1);
 		    	
-		    	GSSiClose (Fid);
+		    	GSSiClose2 (&Fid);
 		        Fid =  GSSiOpenFile (Name,&OFStruct,OF_READWRITE);
 		        GSSillseek (Fid,loc,0);
 		        Mode = BT_WRITE;
@@ -2341,8 +2341,8 @@ GSSiExitProg (629);
 			BigWrite (lpGWDHead->Fid,(HPSTR)&GWDHead16 ,sizeof(GWDHEADER16),-1);
 		}
     }
-    GSSiClose (lpGWDHead->Fid);
-	GSSiClose (lpGWDHead->SplitFid);
+    GSSiClose2 (&lpGWDHead->Fid);
+	GSSiClose2 (&lpGWDHead->SplitFid);
 
     for (i=0;i<lpGWDHead->NumIndex;i++)
     {   
@@ -3520,7 +3520,7 @@ SkipField:;
 Exit:
 	if (FidOffsetList != HFILE_ERROR)
 	{
-		GSSiClose (FidOffsetList);
+		GSSiClose2 (&FidOffsetList);
 		GSSiRemove (OffsetList);
 	}
 	GlobalUnlock (hDBDest);
@@ -6245,7 +6245,7 @@ GSSiExitProg (646);
             sprintf (str,"[%s]",FieldName);
         fputstring (str,Fid);
     }
-    GSSiClose (Fid);  
+    GSSiClose2 (&Fid);  
     sprintf (str,"Report %s has been created",File);
     GSSiMsgBox( GetFocus(),str,"",MB_OK,0);  
 {
@@ -6255,7 +6255,7 @@ GSSiExitProg (646);
     return TRUE;
 }
 Cancelled:       
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove (File);
 {
 #if ENABLETRACE
@@ -6744,7 +6744,7 @@ BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile)
 							{
 								int	rc;
 
-								GSSiClose (FidCache);
+								GSSiClose2 (&FidCache);
 								FidCache = HFILE_ERROR;
 								rc = UpdateGMDFromCheckPointLog2 (ToFile,FromFile,CheckPointIDCache,HFILE_ERROR);
 								if (rc == 0 || rc == 3)
@@ -6756,7 +6756,7 @@ BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile)
 			}
 		}
 	}
-	GSSiClose (FidCache);
+	GSSiClose2 (&FidCache);
 	return rtn;
 }
 
@@ -6905,7 +6905,7 @@ BOOL GMDCreateCheckPointLog (LPSTR FileName)
 			if (Fid != HFILE_ERROR)
 			{
 				BigWrite (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER),-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				rtn = TRUE;
 			}
 		}
@@ -7263,7 +7263,7 @@ BOOL GMDUpdateCheckPointLog (LPSTR FileName)
 				CheckPntLogHeader.FirstCheckPointID += IncFirstCP;
 				GSSillseek (Fid,0,0);
 				BigWrite (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER),-1);
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 				GlobalUnlock (hDB);
 				AllowJournal = TRUE;
 				CloseGWDatabase (hDB);
@@ -7463,7 +7463,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 							nRead -= didRead;
 							StatusWindowUpdate(NULL, NULL, lpGWDHead->SplitLength, nRead);
 						}
-						GSSiClose(FidOut2);
+						GSSiClose2 (&FidOut2);
 						curLoc = GSSillseek(lpGWDHead->Fid, 0, 1);
 						lastLoc = GSSillseek(lpGWDHead->Fid, 0, 2);
 						GSSillseek(lpGWDHead->Fid, curLoc, 0);
@@ -7476,7 +7476,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 							StatusWindowUpdate(NULL, NULL, totLen, nRead+=didRead);
 							didRead = BigRead(lpGWDHead->Fid, pbuf, BUFFERSIZE);
 						}
-						GSSiClose(FidOut);
+						GSSiClose2 (&FidOut);
 						for (index = 0; index < lpGWDHead->NumIndex; index++)
 						{
 							HFILE IndexFid = GetBTFid(lpGWDHead->BTHandle[index]);
@@ -7497,8 +7497,8 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 								didRead = BigRead(IndexFid, pbuf, BUFFERSIZE);
 								StatusWindowUpdate(NULL, txt, totLen, nRead += didRead);
 							}
-							GSSiClose(IndexFid);
-							GSSiClose(FidOut);
+							GSSiClose2 (&IndexFid);
+							GSSiClose2 (&FidOut);
 						}
 						*LastChr(Arg[2]) = 'p';
 						if (FileType(Arg[2]))
@@ -7651,7 +7651,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 			GlobalUnlock(hDB1);
 			GlobalUnlock(hDB2);
 			DestroyStatusWindow(0);
-			GSSiClose(fidOut);
+			GSSiClose2 (&fidOut);
 			rtn = TRUE;
 		}
 		CloseGWDatabase(hDB1);
@@ -7753,7 +7753,7 @@ BOOL GMDFunctions (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 					BigWrite (FidIndex,&ntop,sizeof(ntop),-1);
 					BigWrite (FidIndex,tiTop,sizeof(tiTop),-1);
 					GlobalUnlock (hDB);
-					GSSiClose (FidIndex);
+					GSSiClose2 (&FidIndex);
 				}
 			}
 			CloseGWDatabase (hDB); 
@@ -8702,7 +8702,7 @@ GSSiExitProg (635);
 
 		if (!hDB)
 		{
-			GSSiClose (FidData);
+			GSSiClose2 (&FidData);
 			GSSiRemove (Name);
 			
 {
@@ -8824,7 +8824,7 @@ FoundFile:
 	Exit:
 				LocalUnlock(hVars);
 				LocalFree(hVars);
-				GSSiClose (FidData);
+				GSSiClose2 (&FidData);
 				GSSiRemove (Name);
 			
 {
@@ -8855,7 +8855,7 @@ GSSiExitProg (653);
 	 BT_CREATE (Name, 4, FALSE, NumIndexFields, 1,pVars,FALSE, 0, GWDHead.TimeStamp, FALSE);
 	 LocalUnlock(hVars);
 	 LocalFree(hVars);
-	 GSSiClose (FidData);
+	 GSSiClose2 (&FidData);
 
 	 for (i=2;i<9;i++)
 	 {
@@ -9018,9 +9018,9 @@ int NumBytesDifferent (LPSTR File1,LPSTR File2)
 				}
 			}
 			DestroyStatusWindow(0);
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 		}
-		GSSiClose (Fid1);
+		GSSiClose2 (&Fid1);
 	}
 	GSSiGlobUlFree (&hMem);
 	AllowCache = SaveAllowCache;
@@ -9125,7 +9125,7 @@ BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 				BigRead(fid, bytes, 1);
 				GSSillseek(fid, 0, 0);
 				BigWrite(fid, bytes, 1, -1);
-				GSSiClose(fid);
+				GSSiClose2 (&fid);
 				CloseAllRequestedFiles(FALSE);
 				rtn = TRUE;
 			}

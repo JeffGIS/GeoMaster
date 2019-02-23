@@ -145,7 +145,7 @@ BOOL GetFenceListFromDB (LPSTR CAN)
 	{
 		ExpandText (str);
 	}
-	GSSiClose (FidTemp);
+	GSSiClose2 (&FidTemp);
 	GSSiRemove (TempName);
 	{
 		strcpy (FileList,CurDir);
@@ -161,7 +161,7 @@ BOOL GetFenceListFromDB (LPSTR CAN)
 			strcat (MapFile," ");
 			fputstring (MapFile,Fid);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		OrderFenceFilelist (FileList);
 	}
 	SetGlobalValue ("GEOFENCEDISPLAY",GFD);
@@ -198,7 +198,7 @@ BOOL RecallFencesFromFile (LPSTR Pathname,LPSTR CAN)
 	{   
 		GSSiRemove (str);
 	}
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 	GSSiRemove (TempName);
 	while (BigRead (FidIn,&NameLen,4)==4)
 	{
@@ -212,7 +212,7 @@ BOOL RecallFencesFromFile (LPSTR Pathname,LPSTR CAN)
 		ExpandText (str);
 		Fid2 = GSSiOpenFile (str,0,OF_CREATE);
 		BigWrite (Fid2,pFile,FileLen,-1);
-		GSSiClose (Fid2);
+		GSSiClose2 (&Fid2);
 		GSSiGlobUlFree (&hFile);
 		if (!stricmp (&str[max(0,strlen(str)-4)],".plt"))
 		{
@@ -220,7 +220,7 @@ BOOL RecallFencesFromFile (LPSTR Pathname,LPSTR CAN)
 				ConvertFileCoordinates (str,2,1,2);   
 		}
 	}
-	GSSiClose (FidIn);
+	GSSiClose2 (&FidIn);
 	sprintf (TempName,"%s%s",CurDir,"\\filelist.txt");
 	ExpandText (TempName);
 	Fid2 = GSSiOpenFile (TempName,0,OF_READ);
@@ -242,8 +242,8 @@ BOOL RecallFencesFromFile (LPSTR Pathname,LPSTR CAN)
 				fputstring (str2,Fid);
 			}
 		}
-		GSSiClose (Fid);
-		GSSiClose (Fid2);
+		GSSiClose2 (&Fid);
+		GSSiClose2 (&Fid2);
 		GSSiRemove (TempName);
 		GSSiRename (TempFilelistName,TempName);
 	}
@@ -310,13 +310,13 @@ BOOL SaveFencesToFile (LPSTR Pathname,LPSTR CAN)
 		hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,FileLen);
 		pFile = GlobalLock (hFile);
 		BigRead (Fid2,pFile,FileLen);
-		GSSiClose (Fid2);
+		GSSiClose2 (&Fid2);
 		if (!stricmp (&str[max(0,lstr-4)],".plt")) 
 		{
 			GSSiGetTempFileName(0,"gm",0,TempPlt);
 			Fid3 = GSSiOpenFile (TempPlt,0,OF_CREATE);
 			BigWrite (Fid3,pFile,FileLen,-1);
-			GSSiClose (Fid3);
+			GSSiClose2 (&Fid3);
 			ConvertFileCoordinates (TempPlt,1,2,2);    
 			Fid2 = GSSiOpenFile (TempPlt,0,OF_READ);
 			FileLen = GSSifilelength (Fid2);
@@ -324,7 +324,7 @@ BOOL SaveFencesToFile (LPSTR Pathname,LPSTR CAN)
 			hFile = GSSiGlobAlloc (0,GMEM_MOVEABLE,FileLen);
 			pFile = GlobalLock (hFile);
 			BigRead (Fid2,pFile,FileLen);
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 			GSSiRemove (TempPlt);
 		}
 		BigWrite (FidOut,&NameLen,4,-1);
@@ -333,8 +333,8 @@ BOOL SaveFencesToFile (LPSTR Pathname,LPSTR CAN)
 		BigWrite (FidOut,pFile,FileLen,-1);
 		GSSiGlobUlFree (&hFile);
 	}
-	GSSiClose (Fid); 
-	GSSiClose (FidOut);
+	GSSiClose2 (&Fid); 
+	GSSiClose2 (&FidOut);
 	GSSiRemove (TempName);
 	return TRUE;
 }
@@ -416,12 +416,12 @@ BOOL OrderFenceFilelist (LPSTR FenceFilelist)
 			fputstring (File,Fid2);
 	}
 	GSSillseek (Fid2,0,0);
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	Fid1 = GSSiOpenFile (FenceFilelist,0,OF_CREATE);
 	while (fgetstring (File,MAX_PATH,Fid2))
 		fputstring (File,Fid1);
-	GSSiClose (Fid1);
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid1);
+	GSSiClose2 (&Fid2);
 	GSSiRemove (TempName);
 	return TRUE;
 }
@@ -496,7 +496,7 @@ BOOL ImportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 					lFile = DecompressBinaryRecordUnsafe (pFile,pFileCmp,lFileCmp);
 					Fid = GSSiOpenFile (FenceFileBackup,0,OF_CREATE);
 					BigWrite (Fid,pFile,lFile,-1);
-					GSSiClose (Fid);
+					GSSiClose2 (&Fid);
 					HaltMapDisplay(FALSE,FALSE); 
 					CloseAllRequestedFiles (FALSE);
 					BlockSocketProcessing (5);
@@ -1111,8 +1111,8 @@ BOOL DeleteFence (LPSTR FenceName)
 		else
 			strcpy (FencePltToDelete,str);
 	}
-	GSSiClose (Fid);
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid);
+	GSSiClose2 (&Fid2);
 	if (*FencePltToDelete)
 	{
 		LPSTR	pPlt;
@@ -1172,8 +1172,8 @@ BOOL ActivateDeactivateFence (LPSTR FenceName,BOOL Active)
 			fputstring (str,Fid2);
 		}
 	}
-	GSSiClose (Fid);
-	GSSiClose (Fid2);
+	GSSiClose2 (&Fid);
+	GSSiClose2 (&Fid2);
 	GSSiRemove (FenceFilelist);
 	GSSiRename (FenceFilelist2,FenceFilelist);
 	SetGlobalValue ("%GEOFENCENAME",FenceName);
@@ -1220,7 +1220,7 @@ BOOL CreateFencesLinksFromDB (LPSTR File)
 		CloseDataFile (TRUE,&hDB);
 	}
 	fputstring (">FenceLinkEnd;",Fid);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -1254,7 +1254,7 @@ BOOL CreateRouteStopsFromDB (LPSTR File)
 		CloseDataFile (TRUE,&hDB);
 	}
 	fputstring (">RouteStopsEnd;",Fid);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -1326,7 +1326,7 @@ BOOL ExportFencesLinks (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 			send (sock,pBuffer,lBuffer,0);
 			GSSiGlobUlFree (&hBuffer);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiRemove (TempName);
 		n = 0;
 		do
@@ -1407,7 +1407,7 @@ BOOL ExportRouteStops (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 			send (sock,pBuffer,lBuffer,0);
 			GSSiGlobUlFree (&hBuffer);
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 		GSSiRemove (TempName);
 		n = 0;
 		do
@@ -1493,7 +1493,7 @@ BOOL ExportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 	pMem = GlobalLock (hMem);
 	Fid = GSSiOpenFile (TempName,0,OF_READ);
 	BigRead (Fid,pMem,lFile);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	hMemCmp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lFile+4096);
 	pMemCmp = GlobalLock (hMemCmp);
 	lFileCmp = CompressBinaryRecord (pMem,pMemCmp,lFile);
@@ -1536,7 +1536,7 @@ BOOL ExportFences (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 			if (hWndGeoFence)
 			    PctBox (GetDlgItem(hWndGeoFence,IDC_UPLOADSTATUS), Tot, Done,0); 
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}
 	ExportFencesLinks (IPAddress,CPort,Account_New);
 	ExportRouteStops (IPAddress,CPort,Account_New);
@@ -2080,7 +2080,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 				}
 			}
 			GlobalUnlock (pDummyVehicle->hMoveList);
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 		}
 		else
 		{
@@ -2092,7 +2092,7 @@ BOOL OpenDummyVehicleFile(LPSTR FileName,long InDelay)
 		nDummyVehicles++;
 	}
 	GlobalUnlock (hDummyVehicles);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	AVLTimer = 6;
 	SetTimer(hWndMain, AVLTimer, Delay, (TIMERPROC) 0); 
 	time (&AVLStartTime); 
@@ -2180,7 +2180,7 @@ BOOL ComputeDummyVehicleLocations (time_t AVLTime)
 					Point1 = Point2;
 				}
 			}
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 		}
 	} 
 	GlobalUnlock (hDummyVehicles);
@@ -3538,7 +3538,7 @@ NextPass:
 	if (!pass++)
 		goto NextPass;
 	GSSiGlobFree (&hGRText);
-	GSSiClose (FidTemp);
+	GSSiClose2 (&FidTemp);
 	AddPointToMap (DPoint,0,0,0,0,0,0,0,0,0,0,0,0,0,TRUE,TRUE,NULL,NULL);
 	CloseMap(TRUE);  
 	AddSymToMap (NumSyms,hSymDesc,0,NULL); 
@@ -3691,7 +3691,7 @@ BOOL CreateProgressMonitoringMap (LPSTR DataFile,LPSTR MapFile,LPSTR vehid,LPSTR
 		AddPointToMap (DPoint,Refno++,0,SymNum,SymSize,0,0,hGRText,0,"VEHHIST",UDI,Color,-1,-1,FALSE,TRUE,0,0);
 	}
 	GSSiGlobFree (&hGRText);
-	GSSiClose (FidTemp);
+	GSSiClose2 (&FidTemp);
 	AddPointToMap (DPoint,0,0,0,0,0,0,0,0,0,0,0,0,0,TRUE,TRUE,NULL,NULL);
 	CloseMap(TRUE);  
 	AddSymToMap (NumSyms,hSymDesc,0,NULL); 
@@ -3770,7 +3770,7 @@ BOOL CreateProgMonMap (LPSTR Vehid,LPSTR CPoint)
 			ForceRefIndex = ForceTAGIndex = FALSE;
 			FidTemp = GSSiOpenFile ("[%PROGMONDIR]\\filelist.txt",0,OF_CREATE);
 			SearchFilesInDir ("[%PROGMONDIR]", ".plt", FidTemp,&TotFiles,"*.plt",1,TRUE,TRUE);     
-			GSSiClose (FidTemp);
+			GSSiClose2 (&FidTemp);
 			rc = TRUE;
 		}
 	}
@@ -4674,7 +4674,7 @@ BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 							ForceRefIndex = ForceTAGIndex = FALSE;
 							FidTemp = GSSiOpenFile ("[%PROGMONDIR]\\filelist.txt",0,OF_CREATE);
 							SearchFilesInDir ("[%PROGMONDIR]", ".plt", FidTemp,&TotFiles,"*.plt",1,TRUE,TRUE);     
-							GSSiClose (FidTemp);
+							GSSiClose2 (&FidTemp);
 							ZoomToRect(TotBounds,FALSE);  
 						}
 					}
@@ -4854,7 +4854,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 				 SetDlgItemText (hWndDlg,IDC_VHENDMIN,str);
 				 while (fgetstring (str,250,FidTemp))
 		 			SendDlgItemMessage (hWndDlg,IDC_VEH_HISLIST,LB_ADDSTRING,0,(LPARAM)str);
-				 GSSiClose (FidTemp);
+				 GSSiClose2 (&FidTemp);
 			 }
 			 if ((pBS = strchr (pVehicleHistoryID,'_')))
 				*pBS = 0;
@@ -5121,7 +5121,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 					fputstring (str,FidTemp);
 					while (SendDlgItemMessage(hWndDlg,IDC_VEH_HISLIST,LB_GETTEXT,Choice++,(DWORD)str) != LB_ERR)
 						fputstring (str,FidTemp);
-					GSSiClose (FidTemp);
+					GSSiClose2 (&FidTemp);
 					sprintf (SymName,"VH%s",CurrentShape);
 					CreateVehHistMap (DataFile,PltName,vehid,radio,SymName,CurrentColor,
 									  (BOOL)SendDlgItemMessage (hWndDlg,IDC_VHNUMBER,BM_GETCHECK,0,0L),
@@ -5129,7 +5129,7 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 									  &Bounds);
 					FidTemp = GSSiOpenFile ("[%VEHHISTDIR]\\filelist.txt",0,OF_CREATE);
 					SearchFilesInDir ("[%VEHHISTDIR]", ".plt", FidTemp,&TotFiles,"*.plt",1,TRUE,TRUE);     
-					GSSiClose (FidTemp);
+					GSSiClose2 (&FidTemp);
 					EnableWindow (GetDlgItem(hWndDlg,IDC_REPLAYVEHHISTORY),TRUE);
 					SetDlgItemText (hWndDlg,IDC_VHTRACE,"Done");
 					ZoomToRect(Bounds,FALSE);  
@@ -5658,7 +5658,7 @@ Reload:
 							SendDlgItemMessage(hWndDlg,IDC_GF_VEHLIST,LB_GETTEXT,*pItem,(DWORD)str); 
 							fputstring (str,Fid);
 						}
-						GSSiClose (Fid);
+						GSSiClose2 (&Fid);
 					}
 					GSSiGlobUlFree (&hItems);
 				}

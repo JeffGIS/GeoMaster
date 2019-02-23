@@ -4076,7 +4076,7 @@ BOOL GPSImportUSRWP (HWND hWndDlg,UINT Control,UINT StatusControl)
  	i=BigRead (Fid,(HPSTR)&NumRoutes,sizeof(NumRoutes));
  	i=BigRead (Fid,(HPSTR)&NumIcons,sizeof(NumIcons));
  	i=BigRead (Fid,(HPSTR)&NumTrails,sizeof(NumTrails));
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
 	SetContinueProcessing ( TRUE);
 	return TRUE;
@@ -4213,7 +4213,7 @@ short GPSExportUSRWP (HWND hWndDlg,UINT Control,UINT StatusControl)
  	BigWrite (Fid,(HPSTR)&NumRoutes,sizeof(NumRoutes),-1);
  	BigWrite (Fid,(HPSTR)&NumIcons,sizeof(NumIcons),-1);
  	BigWrite (Fid,(HPSTR)&NumTrails,sizeof(NumTrails),-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");   
 Exit:
 	GSSiGlobUlFree (&hItems);
@@ -4342,7 +4342,7 @@ BOOL GPSImportGPXWP (HWND hWndDlg,UINT Control,UINT StatusControl)
  	i=BigRead (Fid,(HPSTR)&NumRoutes,sizeof(NumRoutes));
  	i=BigRead (Fid,(HPSTR)&NumIcons,sizeof(NumIcons));
  	i=BigRead (Fid,(HPSTR)&NumTrails,sizeof(NumTrails));
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	SetDlgItemText (hWndDlg,StatusControl,"Transfer complete");
 	SetContinueProcessing ( TRUE);
 	return TRUE;

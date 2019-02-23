@@ -171,7 +171,7 @@ void ThemeEndDataPass(BOOL PixelThemesOnly)
 	    }
 		CurTheme->hScatterFile=0;
 		CloseThemeDataFile(FALSE);
-		GSSiClose (CurTheme->FidAreas);
+		GSSiClose2 (&CurTheme->FidAreas);
 		CurTheme->FidAreas = HFILE_ERROR;
 		SetShowValDB (0);
 		GSSiGlobFree (&CurTheme->hVisList);
@@ -626,7 +626,7 @@ BOOL DisplayPointInAreaThemes (short CurrentVPID)
         	if (CurTheme->TargetViewport == CurrentVPID)
         	{
 	        	if (!CurTheme->Pass && CurTheme->FidAreas != HFILE_ERROR) 
-	        		GSSiClose (CurTheme->FidAreas);
+	        		GSSiClose2 (&CurTheme->FidAreas);
 	        		CurTheme->FidAreas = HFILE_ERROR;
 	        }
 	        else if (CurTheme->PointInAreaPointThemeVPID == CurrentVPID)
@@ -659,7 +659,7 @@ BOOL DisplayPointInAreaThemes (short CurrentVPID)
 				      		GlobalUnlock (pAreaHeader[iarea].hPoints);
 				      		GetPolyBoundsD (pAreaHeader[iarea].hPoints,pAreaHeader[iarea].NumPoints,&pAreaHeader[iarea].Bounds,TYPE_AREA);
 		        		}
-		        		GSSiClose (CurTheme->FidAreas);
+		        		GSSiClose2 (&CurTheme->FidAreas);
 		        		CurTheme->FidAreas = HFILE_ERROR;
 		        		GSSiRemoveAndClear (CurTheme->ScatterFile);
 		        		CurTheme = PointTheme; 

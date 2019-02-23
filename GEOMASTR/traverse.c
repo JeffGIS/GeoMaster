@@ -21,7 +21,7 @@ BOOL LoadTravTAGs (HWND hWndDlg,UINT IDCTAPREFIX)
 			*pComma = 0;
     	SendDlgItemMessage (hWndDlg,IDCTAPREFIX,CB_ADDSTRING,0,(LPARAM)str);
      }
-     GSSiClose (Fid);
+     GSSiClose2 (&Fid);
      return TRUE;
 }
 
@@ -72,7 +72,7 @@ BOOL TravGetDefaultSymbol (LPSTR CurTAG,LPSTR SymName,int Which)
 			if (!_fstricmp (CurTAG,line))
 				break;
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}  
 	return rtn;
 } 
@@ -100,7 +100,7 @@ BOOL TravAllowUpdateLayer (LPSTR CurTAG)
 					break; 
 			}
 		}
-		GSSiClose (Fid);
+		GSSiClose2 (&Fid);
 	}  
 	return rtn;
 } 
@@ -1023,7 +1023,7 @@ BOOL SaveTravTransformation (HANDLE hPoints,HANDLE hSnapStatus,long nPoints)
 	} 
 	GlobalUnlock (hPoints);
 	GlobalUnlock (hSnapStatus);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	if (!HaveAdjust)
 		GSSiRemove (File);    
 	return HaveAdjust;

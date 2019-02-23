@@ -401,7 +401,7 @@ void AVIOutClose (LPHANDLE phFile)
 			} 
 		}
 		if (pAVIFile->GCIFid >= 0)
-			GSSiClose (pAVIFile->GCIFid);           
+			GSSiClose2 (&pAVIFile->GCIFid);           
 	}    
     AVIFileExit();
     HaveInit=FALSE;               
@@ -489,7 +489,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 			hIC = ICOpen (ICTYPE_VIDEO,CompressorID,ICMODE_DECOMPRESS);
 			if (!hIC)
 			{
-				GSSiClose (GCIFid);  
+				GSSiClose2 (&GCIFid);  
 				if (FirstErr)
 				{
 					sprintf(str, "Failed to open decompressor.\r\n\r\nTo fix do the following:\r\n\topen a 'command prompt' using a rightclick\r\n\tselect, 'Run as Administrtor'\r\n\t(32bit users can skip the next step)\r\n\ttype: cd C:\\Windows\\SysWOW64\r\n - press enter\r\r\ttype : regsvr32 ir50_32.dll - press enter");
@@ -683,7 +683,7 @@ void CloseOrthoAVI (void)
 		ICDecompressEnd(hIC);
 		ICClose (hIC);
 		case TYPEGCO:
-		GSSiClose (GCIFid);
+		GSSiClose2 (&GCIFid);
 		break;
 		
 		default:

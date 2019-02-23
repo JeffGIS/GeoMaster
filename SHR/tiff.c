@@ -504,7 +504,7 @@ HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check)
 						 &SamplesPerPix,&PlanarConfig,&TIFFCompression,
 						 BitsPerSmple,&SkipBits)) 
 	{   
-		GSSiClose (FidTiff);
+		GSSiClose2 (&FidTiff);
 			return 0;
 	}  
 				
@@ -514,7 +514,7 @@ HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check)
     {   
     	HANDLE	rtn=(HANDLE)1;
     	
-		GSSiClose (FidTiff);
+		GSSiClose2 (&FidTiff);
     	if (SkipBits)
     		rtn = 0;
     	GSSiGlobUlFree (&hDibInfo);  
@@ -601,7 +601,7 @@ HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check)
 	GSSiGlobFree (&hTIFFLengths);
     GlobalUnlock (hDibInfo);     
 						
-	GSSiClose (FidTiff); 
+	GSSiClose2 (&FidTiff); 
 	return hDibInfo;
 }
 

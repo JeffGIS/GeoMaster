@@ -154,7 +154,7 @@ BOOL FileIsVisible (LPSTR FileName)
 					if ((ORAHeaderType = ReadORAHeader (Fid,0)))  
 						rtn = IsORAFileVisible ();
 				}
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
 			}
 			break;
 			
@@ -198,7 +198,7 @@ BOOL MapIndexVisible (LPSTR IndexPathName)
 		goto RtnTrue;
 	MapVersion = 8;
     rtn = ProcessPrimarySeg (0,0,0,FALSE,1,HFILE_ERROR); 
-    GSSiClose (FidMap);
+    GSSiClose2 (&FidMap);
     FidMap = HFILE_ERROR; 
 RtnTrue:
 	GSSiGlobUlFree (&hStr);
@@ -412,7 +412,7 @@ MaxScale:
 	            	GSSiGlobUlFree (&hVisList);
 	        }
 	    } 
-        GSSiClose (FidVis); 
+        GSSiClose2 (&FidVis); 
         if (LastVisList)
         	CurVis = LastVisList; 
         else 
@@ -516,7 +516,7 @@ BOOL LoadPickList (LPSTR InName)
 	            	GSSiGlobUlFree (&hVisList);
 	        }
 	    } 
-        GSSiClose (FidVis); 
+        GSSiClose2 (&FidVis); 
         if (LastVisList)
         	CurVis = LastVisList; 
         else
@@ -571,13 +571,13 @@ HANDLE ReadVisList (LPSTR InName)
     if (nread < sizeof(VISLIST))
     {
     	GSSiGlobUlFree (&hNewVisList);
-	    GSSiClose (FidVis);
+	    GSSiClose2 (&FidVis);
     	return 0;
     }
     LastVisList = 0;
     hVisList = hNewVisList;
     NewVisList->hVisList = hVisList;
-    GSSiClose (FidVis);
+    GSSiClose2 (&FidVis);
     GlobalUnlock(hNewVisList);
     
 	return hNewVisList;
@@ -586,7 +586,8 @@ HANDLE ReadVisList (LPSTR InName)
 
 BOOL LoadVisList (LPSTR InName)
 {   LPVISLIST   SaveVis, LastVisList, NewVisList;
-    short FidVis, nread;  
+    short nread; 
+	HFILE FidVis;
     HANDLE	hMem=GSSiGlobAlloc ( 713,GMEM_MOVEABLE,1024);
     LPSTR   Name=GlobalLock (hMem);
     LPOFSTRUCTGM    pOFStruct = (LPOFSTRUCTGM)(Name+256);
@@ -686,7 +687,7 @@ BOOL LoadVisList (LPSTR InName)
 		else
 			nread = BigRead (FidVis,(HPSTR)CurVis,sizeof(VISLIST));  
 	}
-    GSSiClose (FidVis);
+    GSSiClose2 (&FidVis);
     GSSiGlobUlFree(&hVisList);
     CurVis = CurView->pVisList1; 
     _splitpath (pOFStruct->szPathName,0,0,CurView->CurVisibilityID,0);
@@ -948,7 +949,7 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
     			goto FromPltFile;
 			MapVersion = 8;
             ProcessPrimarySeg (hWndDlg,DlgItemSym,DlgItemPar,FALSE,0,FidSymList); 
-            GSSiClose (FidMap);
+            GSSiClose2 (&FidMap);
             FidMap = HFILE_ERROR; 
 	        CloseMapIndex (CurView->lpFiles[CurView->CurFile],
 	                       CurView->hlpIndex[CurView->CurFile],FALSE,TRUE);
@@ -1112,7 +1113,7 @@ FromPltFile:
 			            }
 			            else
 			            	ii=1;
-		                GSSiClose (FidMap); 
+		                GSSiClose2 (&FidMap); 
 		            } 
 		        }
 		        break;
@@ -1321,7 +1322,7 @@ BOOL SetParentVisibility (int Parent, BOOL Vis, short Layer)
                 GSSiGlobUlFree (&hParList);
             }
             SetVisByPar = -1;
-            GSSiClose (FidMap);
+            GSSiClose2 (&FidMap);
             FidMap = HFILE_ERROR; 
 	        CloseMapIndex (CurView->lpFiles[CurView->CurFile],
 	                       CurView->hlpIndex[CurView->CurFile],FALSE,TRUE);
@@ -1364,7 +1365,7 @@ FromPltFile:
                 }
 	Next:
                 SetVisByPar = -1;
-                GSSiClose (FidMap); 
+                GSSiClose2 (&FidMap); 
             }
             FidMap = HFILE_ERROR;
         }
@@ -1580,7 +1581,7 @@ BOOL SaveVisFile (LPSTR SaveName,BOOL Pickability,LPSTR desc)
 	BigWrite (Fid,(HPSTR)desc,100,-1);
 	BigWrite (Fid,(HPSTR)&Signature,2,-1);   
 	BigWrite (Fid,(HPSTR)&Version,2,-1);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	CurVis = SaveVis;
 	
 	return TRUE;
@@ -1980,7 +1981,7 @@ BOOL LoadDisplayRedefFile (LPSTR Name)
 	{
 		BigRead (Fid,(HPSTR)&version,2);
 	    if (version > 2)
-	    {	GSSiClose(Fid);
+	    {	GSSiClose2 (&Fid);
 			MessageBox( GetFocus(), "This redef file version is not recognized",Name, MB_OK);
 			return(FALSE);
 	    }
@@ -2019,7 +2020,7 @@ BOOL LoadDisplayRedefFile (LPSTR Name)
 			}
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	for (i=0;i<CurView->NumNewObjects;i++)
 		CurView->NewObject[i].Handle = 0;
 	return TRUE;
@@ -2059,7 +2060,7 @@ OFSTRUCTGM	OFStruct;
     BigWrite (Fid,(HPSTR)&Signature,2,-1);
     BigWrite (Fid,(HPSTR)&Version,2,-1);
 	
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	return TRUE;
 }
 
@@ -2150,7 +2151,7 @@ BOOL SetLayerSymbolsVisibility (LPSTR Name,short setopt)
 		if (GetVisibility(idesc) != setopt)
 			ToggleVisibility (idesc);
 	}   
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove (FileName);
     Pickability = FALSE;
 	TurnOffAutoVis (TRUE);		   
@@ -2202,7 +2203,7 @@ BOOL DumpVisibilityToFile (LPSTR FileName,BOOL ShowAllLayers,BOOL Pickability)
 				CurVis->WantType[j] = SaveType[j];
 		}
 	}
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	WaitCursor (-1);
 	RestoreViewports ();
 	CurView = SavePVP;

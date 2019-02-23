@@ -50,7 +50,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 		pCorner++;
 		nCorner++; 
 	} 
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	GSSiGlobFree (&hDLT);
 	GlobalUnlock (hCorner); 
 	nEdge = LoadEdgeFromCorners (CornerFile,&hEdge);
@@ -72,7 +72,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 		sprintf (lpstr,"%f %f %f %f",Point[0].x,Point[0].y,Point[1].x,Point[1].y);  
 		fputstring (lpstr,Fid3);
 	} 
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	GSSiGlobFree (&hDLT);
 	Fid1 = GSSiOpenFile (CornerFile,0,OF_READ);
 	if (Fid1 == HFILE_ERROR)
@@ -97,7 +97,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 			fputstring (lpstr,Fid3);
 		}
 	} 
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	Fid1 = GSSiOpenFile (JoinFileList,0,OF_READ);
 	if (Fid1 == HFILE_ERROR)
 		goto RtnFalse; 
@@ -140,7 +140,7 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	      			}
       			}
 		    }
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 			GSSiGlobFree (&hDLT);
 		}
 	}
@@ -148,8 +148,8 @@ BOOL LoadEdge (LPSTR JoinLineFile,LPSTR CornerCoordFile,LPSTR OrigTranPointFile,
 	GSSiGlobFree (&hUseEdgePoint); 
 	GSSiGlobFree (&hEdge); 
 	GSSiGlobFree (&hCorner);
-	GSSiClose (Fid1);
-	GSSiClose (Fid3);
+	GSSiClose2 (&Fid1);
+	GSSiClose2 (&Fid3);
 	return TRUE; 
 RtnFalse:
 	GSSiGlobUlFree (&hMem);
@@ -206,7 +206,7 @@ short LoadEdgeFile (LPSTR File,LPHANDLE hEdge)
 		nEdge++; 
 	} 
 	GSSiGlobFree (&hDLT);
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	GlobalUnlock (*hEdge); 
 	GSSiGlobUlFree (&hStr);
 	return nEdge;
@@ -310,7 +310,7 @@ short LoadEdgeFromCorners (LPSTR File,LPHANDLE hEdge)
 	    }
 	}
 Exit: 
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	GlobalUnlock (*hEdge); 
 	GSSiGlobUlFree (&hStr);
 	return nEdge;
@@ -594,7 +594,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 				TranDataLoc = GSSillseek (Fid2,0,1);
 			}
 	    }
-	    GSSiClose (Fid2);
+	    GSSiClose2 (&Fid2);
 		FileNameLoc = GSSillseek (Fid1,0,1);
 	}
 	st = BT_FIND (hBTMatch,(LPSTR)&MatchKeyLast,BT_FIRST,BT_ANY,(LPSTR)&MatchDataLast);  
@@ -619,7 +619,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 			sprintf (str,"%lf %lf %lf %lf %s",Points[0].x,Points[0].y,NewPoint.x,NewPoint.y, id);  
 			GSSillseek (Fid2,MatchData.TranDataLoc,0);
 			BigWrite (Fid2,(HPSTR)str,(UINT)len,-1);
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 			GSSillseek (Fid1,MatchDataLast.FileNameLoc,0);
 			fgetstring (pFile,200,Fid1);
 			Fid2 = GSSiOpenFile (pFile,pOFStruct,OF_READWRITE);
@@ -631,7 +631,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 			sprintf (str,"%lf %lf %lf %lf %s",Points[0].x,Points[0].y,NewPoint.x,NewPoint.y, id);  
 			GSSillseek (Fid2,MatchDataLast.TranDataLoc,0);
 			BigWrite (Fid2,(HPSTR)str,(UINT)len,-1);
-			GSSiClose (Fid2);
+			GSSiClose2 (&Fid2);
 			MatchKeyLast.ID[0]=0;    
 			nfix++;
 		}
@@ -642,7 +642,7 @@ BOOL MatchTranFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3)
 		}
 	}
 	GSSiGlobFree (&hEdge); 
-	GSSiClose (Fid1);
+	GSSiClose2 (&Fid1);
 	BT_CLOSEANDDELETE (&hBTMatch);
 	rtn = TRUE;
 Exit: 

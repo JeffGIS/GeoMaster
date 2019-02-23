@@ -2275,7 +2275,7 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
          			{
          				SendDlgItemMessage (hDlg,IDC_VIRTUAL_PRINTER_LIST,CB_ADDSTRING,0,(LPARAM)str); 
          			}
-         			GSSiClose (Fid);
+         			GSSiClose2 (&Fid);
          		}
          		SendDlgItemMessage (hDlg,IDC_VIRTUAL_PRINTER_LIST,CB_ADDSTRING,0,(LPARAM)"Create New Virtual Printer");
  		 		SendDlgItemMessage (hDlg,IDC_VIRTUAL_PRINTER_LIST,CB_SETCURSEL,(WPARAM)0,(LPARAM)NULL); 
@@ -2340,7 +2340,7 @@ UINT CALLBACK  PrintSetupHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				         			{
 				         				SendDlgItemMessage (hDlg,IDC_VIRTUAL_PRINTER_LIST,CB_ADDSTRING,0,(LPARAM)str); 
 				         			}
-				         			GSSiClose (Fid);
+				         			GSSiClose2 (&Fid);
 				         		}
 				         		SendDlgItemMessage (hDlg,IDC_VIRTUAL_PRINTER_LIST,CB_SELECTSTRING,-1,(LPARAM)CurVirtPrinter); 
 						      }

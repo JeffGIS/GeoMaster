@@ -1253,7 +1253,7 @@ BOOL SaveCurTheme (HWND hWnd)
 	{
 		 Fid = GSSiOpenFile (SaveName,0,OF_CREATE);  
 		 WriteCurTheme (Fid);
-	 	 GSSiClose (Fid);
+	 	 GSSiClose2 (&Fid);
 	 	 rtn =TRUE;
 	}
 {
@@ -2264,7 +2264,7 @@ GSSiExitProg (1260);
 					if (!CurTheme->Pass)
 				{
 					if (CurTheme->FidAreas != HFILE_ERROR)
-						GSSiClose (CurTheme->FidAreas);
+						GSSiClose2 (&CurTheme->FidAreas);
 					if (!CurTheme->ScatterFile[0])
 						GSSiGetTempFileName (0,"gmt",0,(LPSTR)CurTheme->ScatterFile);
 					CurTheme->FidAreas = GSSiOpenFile (CurTheme->ScatterFile,0,OF_CREATE);  

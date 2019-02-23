@@ -2144,7 +2144,7 @@ BOOL CompressSymDict (void)
 	}
     CloseSymDict(); 
 	GSSiGlobUlFree (&hBuf);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
 	GSSiRemove ("[%DL]symdict.tmp");
 	DestroyStatusWindow(0);  
 	return TRUE;
@@ -2295,7 +2295,7 @@ Start:
 		if (FidNames == HFILE_ERROR)
 			GSSiRemove (AtName);
 		else
-			GSSiClose (FidNames); 
+			GSSiClose2 (&FidNames); 
 		if (GSSiLength (AtName) != NumSymbols*sizeof(SYMBOLATTRIBUTE))
 			GSSiRemove (AtName);
 		FidAt = GSSiOpenFile (AtName,0,OF_READ);
@@ -2454,8 +2454,8 @@ Start:
 			FidNames = GSSiOpenFile (NamesName,0,OF_READ); 
 			BigRead (FidNames,pSymNames,USHRT_MAX);
 		}
-		GSSiClose (FidAt);
-		GSSiClose (FidNames);
+		GSSiClose2 (&FidAt);
+		GSSiClose2 (&FidNames);
 		GlobalUnlock (hSymbolAttributes);
 		GlobalUnlock (hSymNames);  
 	    GlobalUnlock (hSymIndex);
@@ -3454,9 +3454,9 @@ SkipStdSyms:
 				}
 				DestroySymbol (hSym); 
 			} 
-			GSSiClose (FidSymUse);   
-			GSSiClose (FidSymPar);   
-			GSSiClose (FidSymDump);
+			GSSiClose2 (&FidSymUse);   
+			GSSiClose2 (&FidSymPar);   
+			GSSiClose2 (&FidSymDump);
 			DestroyStatusWindow(0);  
 		}
 	}
@@ -4204,7 +4204,7 @@ BOOL BigPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width)
 			lpPoints++;
 			fputstring (mess,Fid);
 		}   
-		GSSiClose (Fid);*/
+		GSSiClose2 (&Fid);*/
 		ii=1;     
 {
 #if ENABLETRACE
@@ -4285,7 +4285,7 @@ BOOL FlatEndPolyline (HDC hDC, HPFPOINT lpPoints, long npnts,int Width,COLORREF 
 			lpPoints++;
 			fputstring (mess,Fid);
 		}   
-		GSSiClose (Fid);*/
+		GSSiClose2 (&Fid);*/
 		ii=1;     
 {
 #if ENABLETRACE
@@ -4604,7 +4604,7 @@ void DisplayHollowLines (BOOL Clear)
 			}
 			RestoreDC (CurView->hDC,-1);
 		}
-	    GSSiClose (FidHollowLines); 
+	    GSSiClose2 (&FidHollowLines); 
 	    FidHollowLines = HFILE_ERROR;
 		pFile = GlobalLock (hHollowLinesFile);
 	    GSSiRemove (pFile);

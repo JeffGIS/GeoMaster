@@ -108,7 +108,7 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 		flenCmp += CompressBinaryRecord(pFile, pFileCmp, reclen);
 	}
 
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 	GSSiGlobUlFree(&hMem);
 	GSSiGlobUlFree(&hMemCmp);
 	rtn = (100.0 * flenCmp) / flen;
@@ -122,7 +122,7 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 	HFILE fid = GSSiOpenFile(INFile, 0, OF_READ);
 	int flenCmp;
 	BigRead(fid, pFile, flen);
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 
 	flenCmp = CompressBinaryRecord(pFile, pFileCmp, flen);
 	GSSiGlobUlFree(&hMem);
@@ -152,7 +152,7 @@ int GMMCompression(LPSTR INFile, LPSTR OUTFile)
 		nlines++;
 		lineBeg[nlines] = lfile;
 	}
-	GSSiClose(fid);
+	GSSiClose2 (&fid);
 
 	for (int il = nlines - 1; il > 0; il--)
 	{

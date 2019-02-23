@@ -318,7 +318,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 	{
 		item++;
 	}
-	GSSiClose(fidList);
+	GSSiClose2 (&fidList);
 	if (item < DocPos)
 	{
 		CloseTRANS2(&hTran);
@@ -626,7 +626,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		if (!inManualMode)
 			SetTimer(hWnd, 1, timerValue, 0);
 	}
-	GSSiClose(fidItem);
+	GSSiClose2 (&fidItem);
 	DocPos++;
 	return rtn;
 
@@ -709,7 +709,7 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				haveFile = TRUE;
 				DocPos = 1;
-				GSSiClose(fid);
+				GSSiClose2 (&fid);
 			}
 		}
 		// Free the device context. 
@@ -792,7 +792,7 @@ LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 			int n = 0;
 			while (fgetstring(txt, 1022, fid))
 				n++;
-			GSSiClose(fid);
+			GSSiClose2 (&fid);
 			DocPos = n;
 			InvalidateRect(hWnd, 0, TRUE);
 		}

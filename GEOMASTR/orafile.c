@@ -547,8 +547,8 @@ S100:
 	else if (numtypes == 1 && types[0] == 3003)
 		Type = ORAT_POLYGON; 
 	BigWrite (FidIdx,(HPSTR)&Type,1,-1); 
-	GSSiClose (FidIdx); 
-	GSSiClose (FidSortedOffsets);
+	GSSiClose2 (&FidIdx); 
+	GSSiClose2 (&FidSortedOffsets);
 	if (ContinueProcessing)
 		FidIdx = GSSiOpenFile (IndexName,0,OF_READ); 
 	else
@@ -583,7 +583,7 @@ short OpenORAFileIndex (HFILE FidORAFile,LPSTR ORAFileName)
 	if (!ORAFileName)
 	{
 		if (ORAIDXFid != HFILE_ERROR)
-			GSSiClose (ORAIDXFid); 
+			GSSiClose2 (&ORAIDXFid); 
 		ORAIDXFid = HFILE_ERROR;
 		GetORARecordOffset (-1,FALSE);
 		CloseDataFile (TRUE,&hORAGMD);
@@ -607,7 +607,7 @@ short OpenORAFileIndex (HFILE FidORAFile,LPSTR ORAFileName)
 	    double	dtime;
 		int	rc;
 		
-		GSSiClose (ORAIDXFid);
+		GSSiClose2 (&ORAIDXFid);
 		ORAIDXFid=GSSiOpenFile (Name,0,OF_READ);
 
 	    rc = GSSifstat (ORAIDXFid,&statIndex);
@@ -1639,7 +1639,7 @@ BOOL LoadORAParm (LPSTR ORAFileName,long Type)
 		ORABaseRefno = atol (str);
 	if (fgetstring (str,100,Fid))
 		_fstrcpy (ORATAG,str);
-	GSSiClose (Fid);
+	GSSiClose2 (&Fid);
   
 	return TRUE;
 } 

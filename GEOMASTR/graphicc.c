@@ -537,7 +537,7 @@ int GetStreetSegsBetweenPoints (LPSTR OutFile,LPSTR cRecordNum,LPSTR cFound,LPST
 			goto Exit;
 		if (nStartPoints > 1)
 		{
-			GSSiClose (outFid);
+			GSSiClose2 (&outFid);
 			outFid = GSSiOpenFile (OutFile,0,OF_CREATE);
 			fputstring ("SEQINSEG\tMSLINKINSEG",outFid);
 			if ((rtn = TraceStreetLink (recordNum,wantSNum,startMSLink[1],nextIntPoint[1],toIntPoint,outFid,segFile)))
@@ -545,7 +545,7 @@ int GetStreetSegsBetweenPoints (LPSTR OutFile,LPSTR cRecordNum,LPSTR cFound,LPST
 		}
 	}
 Exit:
-	GSSiClose (outFid);
+	GSSiClose2 (&outFid);
 	return rtn;
 }
 
@@ -789,7 +789,7 @@ LPJLBPDATA	pData;
 				ltoa (LinkedRefnos[i],str,10);
 				fputstring (str,FidRefs);
 			}
-			GSSiClose (FidRefs);
+			GSSiClose2 (&FidRefs);
 			SetGlobalValueLong (Arg2,LinkedRefnos[0]);
 			SetGlobalValue (Arg3,OldTAG);
 		}
@@ -848,7 +848,7 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
     	if (hWndStatus)
 			PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
 	rtn = TRUE;
 Exit:
     GSSiGlobUlFree (&hCompressedRec); 
@@ -878,7 +878,7 @@ BOOL GetFileFromTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToGet,long L
     	BigWrite (Fid,(HPSTR)pRec,lRec,-1);
     	PctBox (hWndStatus,LenToRead,LenRead,0); 
     }
-    GSSiClose (Fid);
+    GSSiClose2 (&Fid);
     GSSiGlobUlFree (&hCompressedRec); 
     GSSiGlobUlFree (&hRec);
     return TRUE; 
@@ -1251,7 +1251,7 @@ BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 						{   
 							fgetstring (str,250,Fid2);
 							SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,-1,(LPARAM)(str+1));
-							GSSiClose (Fid2);
+							GSSiClose2 (&Fid2);
 						}
 					}
    				 	if (fgetstring (str,128,Fid))
@@ -1286,7 +1286,7 @@ BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	                	SetDlgItemText (hWndDlg,IDC_BEGINDATE,str);
 					if (fgetstring (str,256,Fid))
 	                	SetDlgItemText (hWndDlg,IDC_ENDDATE,str);
-   				 	GSSiClose (Fid);
+   				 	GSSiClose2 (&Fid);
    				 }
    				 		   
                  break;
@@ -1453,7 +1453,7 @@ BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			 	fputstring (str,Fid); 
 		 		GetDlgItemText (hWndDlg,IDC_ENDDATE,str,sizeof(str)-1);  
 			 	fputstring (str,Fid); 
-				GSSiClose (Fid);
+				GSSiClose2 (&Fid);
             	if (Opened) 
             	{
 					CloseDataFile (TRUE,&hSHPDBF); 
@@ -1595,7 +1595,7 @@ BOOL LoadGMDParm (LPSTR GMDFileName,HWND hWnd)
 	if (fgetstring (str,256,Fid))
 		_fstrcpy (GMDEndDate,str);
 	
-	GSSiClose (Fid); 
+	GSSiClose2 (&Fid); 
 RtnTrue:
 {
 #if ENABLETRACE
@@ -3037,7 +3037,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 		         		{
 		         			FileListLoc = 0;
 		         			SubFile = 0; 
-		         			GSSiClose (FidFL);
+		         			GSSiClose2 (&FidFL);
 		         			goto NextFile;
 		         		} 
 		         	}     
@@ -3232,7 +3232,7 @@ NextPiece:
 	rtn = FALSE;
 Exit: 
 	if (FileListLoc)
-		GSSiClose (FidFL);                      
+		GSSiClose2 (&FidFL);                      
 	SetCurView ( SaveView);
 	CurVis = SaveVis;
 	GSSiGlobUlFree (&hVisList);	
@@ -3285,7 +3285,7 @@ int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
 			}
 			CloseTAGIndex();
 		}
-		GSSiClose(fid);
+		GSSiClose2 (&fid);
 	}
 	return rtn;
 }
@@ -3653,7 +3653,7 @@ GSSiExitProg (1074);
 		*ReopenTAGName=0;
 		if (FidMap != HFILE_ERROR) 
 		{
-			GSSiClose (FidMap); 
+			GSSiClose2 (&FidMap); 
 			ReopenFNum = FileNum;
 			ReopenLayer = LayerID;  
 			if (hRefIdx)
@@ -3751,7 +3751,7 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     		if ((Fid = GSSiOpenFile(PathName,0,OF_READ)) == HFILE_ERROR)
 				return FALSE;
 			rc = ReadBitMapHeader (Fid,&hDibInfo, &ImageOffset);
-			GSSiClose (Fid);
+			GSSiClose2 (&Fid);
 			if (!rc)
 				return FALSE;
 			pDibInfo=(LPBITMAPINFO)GlobalLock (hDibInfo);
@@ -3808,7 +3808,7 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     	WorldPoint.x = atof (str);
     	fgetstring (str,128,Fid);
     	WorldPoint.y = atof (str);
-    	GSSiClose (Fid);
+    	GSSiClose2 (&Fid);
     	pWBounds->ymx = WorldPoint.y * factor;
     	pWBounds->xmn = WorldPoint.x * factor;  
     	pWBounds->xmx = (WorldPoint.x + ScaleX * (DibInfo.biWidth-1)) * factor;
@@ -4233,18 +4233,18 @@ ProcessImageFile:
 	}
 	if (MapType == MT_DGN8)
 	{
-		GSSiClose(FidMap);
+		GSSiClose2 (&FidMap);
 		FidMap = HFILE_ERROR;
 	}
 	if (MapType == MT_DGN7)
 	{
-		GSSiClose(FidMap);
+		GSSiClose2 (&FidMap);
 		FidMap = HFILE_ERROR;
 		//    	Fid = GSSiOpenFileMem (PltName);
 	}
 	if (MapType == MT_IMAGE)
     {
-    	GSSiClose (FidMap);
+    	GSSiClose2 (&FidMap);
     	FidMap = HFILE_ERROR;
     	PltType = 3;
     	goto ProcessImageFile;
@@ -4339,7 +4339,7 @@ DoSid:
 					{
 						hTranProjectionReverse=ReadTranData(TranFid);  
 					}
-					GSSiClose (TranFid);
+					GSSiClose2 (&TranFid);
 				}
 			}
 			GSSiGlobUlFree (&hTranName);
@@ -4764,7 +4764,7 @@ DoSid:
 			CloseTRANS2 (&hTranFileToBase); 
 			CloseTRANS2 (&hTranBaseToFile); 
 			CloseTRANS2 (&hTranFileToVP); 
-	    	GSSiClose (FidMap);
+	    	GSSiClose2 (&FidMap);
 			if (!OpenGMDMapFile (PltName))
 		    	goto RtnFalse;
 			FidMap = HFILE_GMD;
@@ -4805,7 +4805,7 @@ DoSid:
 			CloseTRANS2(&hTranFileToBase);
 			CloseTRANS2(&hTranBaseToFile);
 			CloseTRANS2(&hTranFileToVP);
-			GSSiClose(FidMap);
+			GSSiClose2 (&FidMap);
 			if (!(iType = OpenSQLITEMapFile(PltName,&CurView->FileMNMX)))
 				goto RtnFalse;
 			FidMap = HFILE_SQLITE;
@@ -4942,7 +4942,7 @@ DoSid:
 		case MT_GPX: //GPX file  
 		{   
 			
-			GSSiClose (FidMap);
+			GSSiClose2 (&FidMap);
 			FidMap = HFILE_ERROR;
 			CloseTRANS2 (&hTranFileToBase); 
 			CloseTRANS2 (&hTranBaseToFile);  
@@ -4997,7 +4997,7 @@ DoSid:
 		case MT_KML: //KML file  
 		{   
 			
-			GSSiClose (FidMap);
+			GSSiClose2 (&FidMap);
 			FidMap = HFILE_ERROR;
 			CloseTRANS2 (&hTranFileToBase); 
 			CloseTRANS2 (&hTranBaseToFile);  
@@ -5352,7 +5352,7 @@ void CloseMap (BOOL Update)
     {   
     	if (PltType == 7)
     		ProcessDisplayMacro (FidMap,3); 
-        i=GSSiClose (FidMap);
+        i=GSSiClose2 (&FidMap);
         if (i == HFILE_ERROR)
         {
             char    str[256];
@@ -5937,7 +5937,7 @@ BOOL CreateNewMap (LPSTR NewName,LPMNMXCORD MinMaxCoord,short NumSyms,HANDLE hSy
     BigWrite (Fid,(char *)&Version,2,-1);
     Version = 0;
     BigWrite (Fid,(char *)&Version,2,-1);
-    GSSiClose (Fid);  
+    GSSiClose2 (&Fid);  
     
     if (ClearBounds)
     {
@@ -6498,7 +6498,7 @@ BOOL WordIndexRemoveDups(LPSTR File)
 			nLoaded = GSSillseek(fidTemp, 0, 1);
 			StatusWindowUpdate(0, 0, nRecs, nLoaded);
 		}
-		GSSiClose(fidTemp);
+		GSSiClose2 (&fidTemp);
 		GSSiRemove(TempFile);
 		GlobalUnlock(FilePtr->FileHandle);
 		GlobalUnlock(SQLPtr->OFHandle);
@@ -7659,7 +7659,7 @@ void EscapeFunction (BOOL DoHalt)
 
 	if (LogMSGFile != HFILE_ERROR)
 	{
-		GSSiClose(LogMSGFile);
+		GSSiClose2 (&LogMSGFile);
 		LogMSGFile = GSSiOpenFile("c:\\temp\\msglog.txt", 0, OF_WRITE);
 	}
 

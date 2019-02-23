@@ -441,7 +441,7 @@ BOOL FindNextSegment2 (void)
         GSSillseek (TraceFID,0,2);
         nBlocksRead=lBlocksRead=nBlocksIn=nBlocksOut=0;    
         fputstring (str,TraceFID);
-        GSSiClose (TraceFID);
+        GSSiClose2 (&TraceFID);
     }
         
     pQuadOff  = (LPLONG) (pQuadOffset + (QuadLevelAt-1)*4);

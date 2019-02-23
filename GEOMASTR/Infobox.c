@@ -1685,7 +1685,7 @@ int GetNumInfoBox (void)
 			while (BigRead (FidTag,(HPSTR)pTAGBox,sizeof(TAGBOX)) == sizeof(TAGBOX))
 				if (TAGBox.ViewportID > 0) 
 					n++;
-			GSSiClose (FidTag); 
+			GSSiClose2 (&FidTag); 
 		}
 	}
 	GSSiGlobUlFree (&hMem);
@@ -1727,7 +1727,7 @@ void AssignTAGInstance (int PickNum)
 				}
 			} 
 		}
-		GSSiClose (FidTag); 
+		GSSiClose2 (&FidTag); 
 	}
 	MaxGroup++;
 	sprintf (TAGBox.Desc,"%s:%ld",Group,MaxGroup);
@@ -1808,7 +1808,7 @@ void WriteInfoBoxes (HFILE Fid)
 			while (BigRead (FidTag,(HPSTR)pTAGBox,sizeof(TAGBOX)) == sizeof(TAGBOX)) 
 				if (TAGBox.ViewportID > 0) 
 					BigWrite (Fid,(HPSTR)pTAGBox,sizeof(TAGBOX),-1);
-			GSSiClose (FidTag);	
+			GSSiClose2 (&FidTag);	
 		}
 	}
 	GSSiGlobUlFree (&hMem);	
@@ -1837,7 +1837,7 @@ void UpdateInfoBoxVPID (LPSHORT NewIDs)
 			BigWrite (FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX),-1);
 			loc1 = loc2;
 		}
-		GSSiClose (FidTag);	
+		GSSiClose2 (&FidTag);	
 	}	
 	return;
 }
@@ -1869,7 +1869,7 @@ void SaveTAG(int PickNum)
     	(pViewports[TAGBox.ViewportID-1]->DisplayInParent && pViewports[TAGBox.ViewportID-1]->Parent == CurView->ID))) 
     	AddInfoBoxRect (&TAGBox.rect,TBNum,CurView->ID);
 	UpdateGroup (FidTag);
-	GSSiClose (FidTag);
+	GSSiClose2 (&FidTag);
 	return;
 }
 
@@ -1911,7 +1911,7 @@ int PickTextBox (LPPOINT MousePoint)
 NextTB:;
 	}
 GotOne:
-	GSSiClose (FidTag);
+	GSSiClose2 (&FidTag);
 	if (HaveBox)  
 	{
 		TAGBox = TAGBoxSave;
@@ -1934,7 +1934,7 @@ void ClearTAGs()
 		{
 			while (BigRead (FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX)) == sizeof(TAGBOX))
 				UnloadReport (&TAGBox.hReport);
-			GSSiClose (FidTag);
+			GSSiClose2 (&FidTag);
 		}
 		GSSiRemove (TagFile);
 	}
@@ -1975,7 +1975,7 @@ Restart:
 //    SetDisplayMode (hDC, GF_MAPMODE);
 	if (TAGBox.Version == 0)
 	{
-		GSSiClose (FidTag);
+		GSSiClose2 (&FidTag);
 		ConvertTAGV0ToV1(TagFile);
 		goto Restart;
 	}
@@ -2044,7 +2044,7 @@ Next:	nRead = BigRead(FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX));
 	} 
 Exit:  
 	ContinueTAGs = 1;
-	GSSiClose(FidTag);  
+	GSSiClose2 (&FidTag);  
 	DoDisplayConfigs = FALSE;
 	ScanForReports = FALSE;
 	return;
@@ -2067,7 +2067,7 @@ Restart:
 	if (!nRead) goto Exit;
 	if (TAGBox.Version == 0)
 	{
-		GSSiClose (FidTag);
+		GSSiClose2 (&FidTag);
 		ConvertTAGV0ToV1(TagFile);
 		goto Restart;
 	}
@@ -2077,7 +2077,7 @@ Restart:
 		nRead = BigRead(FidTag,(HPSTR)&TAGBox,sizeof(TAGBOX));
 	} 
 Exit:
-	GSSiClose(FidTag);
+	GSSiClose2 (&FidTag);
 	return;
 }
 
@@ -2098,7 +2098,7 @@ Restart:
 	if (!nRead) goto Exit;
 	if (TAGBox.Version == 0)
 	{
-		GSSiClose (FidTag);
+		GSSiClose2 (&FidTag);
 		ConvertTAGV0ToV1(TagFile);
 		goto Restart;
 	}
@@ -2109,7 +2109,7 @@ Restart:
 	} 
 Exit:
     TAGBox.TXheight = fabs(TAGBox.TXheight);
-	GSSiClose(FidTag);
+	GSSiClose2 (&FidTag);
 	return rtn;
 }
 
@@ -2131,7 +2131,7 @@ Restart:
 	if (!nRead) goto Exit;
 	if (TAGBox.Version == 0)
 	{
-		GSSiClose (FidTag);
+		GSSiClose2 (&FidTag);
 		ConvertTAGV0ToV1(TagFile);
 		goto Restart;
 	}
@@ -2147,7 +2147,7 @@ Restart:
 		Loc = GSSillseek (FidTag,0,1);
 	} 
 Exit:
-	GSSiClose(FidTag);
+	GSSiClose2 (&FidTag);
 	return rtn;
 }
 
@@ -2216,8 +2216,8 @@ void ConvertTAGV0ToV1(LPSTR TagFile)
 		TAGBox.Version = 1;
 		BigWrite(FidOut,(HPSTR)&TAGBox,sizeof(TAGBOX),-1);   
 	}
-	GSSiClose(FidTag); 
-	GSSiClose(FidOut); 
+	GSSiClose2 (&FidTag); 
+	GSSiClose2 (&FidOut); 
 	GSSiRename(TagFile,V0Name);
 	copyfile (TagFile,NewName,FALSE,0,0,0,0,0,0);
 	GSSiRemove (NewName);
@@ -2272,7 +2272,7 @@ void SaveInfoBoxes (HFILE Fid)
  	BigWrite (Fid,&Version,2);
 	while (BigRead(FidTag,&TAGBox,sizeof(TAGBOX)) ==  sizeof(TAGBOX))
 		BigWrite(Fid,&TAGBox,sizeof(TAGBOX));
-	GSSiClose(FidTag);
+	GSSiClose2 (&FidTag);
 	return;
 }  */
 BOOL ProcessInfoboxMacro (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
