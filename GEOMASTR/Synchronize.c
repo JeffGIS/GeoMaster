@@ -411,7 +411,7 @@ int integerValue(LPSTR str)
 	return rtn;
 }
 
-LPSTR textInsideParentheses(LPSTR string)
+LPSTRD textInsideParentheses(LPSTR string)
 {
 	LPSTR rtn = 0;
 	if (!string)
@@ -540,7 +540,9 @@ BOOL  CRAPI_sharedInstance_processPlaces (void)
 		c->controlledInterface = ControlChar(controlStr, 1);
 		c->allowSidewalk = ControlChar(controlStr, 2);
 		strcpy(c->fullDescription,str);
-		c->name = textInsideParentheses(str);
+		LPSTRD pnam = textInsideParentheses(str);
+		strcpy(c->name, pnam);
+		free(pnam);
 		c->number = integerValue(textBeforeFirstChar(str,'('));
 		LPSTRD manager = textAfterLastChar(str,')');
 		c->managerNumber = integerValue(textBeforeFirstChar(manager, '-'));

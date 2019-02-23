@@ -94,7 +94,7 @@ typedef NSARRAY *NSArray;
 
 typedef struct {
 	char	fullDescription[256];
-	LPSTR	name;
+	char	name[256];
 	int		number;
 	int		managerNumber;
 	int		withinManager;
@@ -139,7 +139,6 @@ typedef struct {
 	CRAPIDATA sharedInstance;
 }CRAPi;
 
-LPSTRD string_Copy(LPSTR str);
 
 NSArray NSArray_Init(NSArray existingArray);
 void NSArray_Destroy(NSArray *parray);
@@ -147,16 +146,9 @@ void NSArray_Destroy(NSArray *parray);
 void NSArray_addObject(NSArray array, LPVOID pItem);
 NSArray componentsSeparatedByString(LPSTR str, LPSTR sepstr);
 BOOL NSArray_removeObjectAtIndex(NSArray placearray, int index);
-LPSTRD textAfterFirstChar(LPSTR string, char c);
-LPSTRD textBeforeLastChar(LPSTR string, char c);
-LPSTRD textAfterLastChar(LPSTR string, char c);
 
 BOOL CRAPI_sharedInstance_processPlacesArray(int row);
 
-BOOL UserDefaults_defaults_saveString(LPSTR string, LPSTR key);
-LPSTRD UserDefaults_defaults_stringForKey(LPSTR key);
-int UserDefaults_defaults_integerForKey(LPSTR key);
-BOOL UserDefaults_defaults_saveInteger(int value, LPSTR key);
 void getDownloadCounts(BOOL loading);
 
 CRAPi * CRAPI_Init(void);
@@ -168,9 +160,6 @@ BOOL CRAPI_sharedInstance_haveErrorLog(void);
 LPSTRD CRAPI_sharedInstance_errorLogPath(void);
 
 BOOL appendStringToFile(LPSTR str, LPSTR filePath);
-LPSTRD stringByDeletingLastPathComponent(LPSTR path);
-LPSTRD lastPathComponent(LPSTR path);
 void NSLog(LPSTR fmt, LPSTR str);
-void GSSiFree(LPSTR *str);
 
 extern CRAPi *CRAPI;

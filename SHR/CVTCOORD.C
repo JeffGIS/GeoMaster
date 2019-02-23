@@ -279,7 +279,7 @@ long ok;
      extern HWND    hWndMain; 
      long	SaveFromUnits;
      long	SaveToUnits;
-	 int	saveto = 0;
+	 int	saveto = -1;
      
      ok = ConvertCoordInit();
 	 if (!ok && !NeedToConvertCoord (from,to))
@@ -384,7 +384,7 @@ GotNearPoint:
 Exit:      
      PRJ_UNITS[from] = SaveFromUnits;
      PRJ_UNITS[to] = SaveToUnits; 
-	 if (saveto)
+	 if (saveto >= 0)
 	 {
 		 DPoint->x *= DEG_TO_RAD;
 		 DPoint->y *= DEG_TO_RAD;

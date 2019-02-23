@@ -1476,4 +1476,19 @@ int getwh_(void);
 double MonitorWidthInInches(int monitor);
 double MonitorHeightInInches(int monitor);
 double GetScreenPixelsPerInch(void);
+
+LPSTRD textInsideParentheses(LPSTR string);
+BOOL UserDefaults_defaults_saveString(LPSTR string, LPSTR key);
+LPSTRD UserDefaults_defaults_stringForKey(LPSTR key);
+int UserDefaults_defaults_integerForKey(LPSTR key);
+BOOL UserDefaults_defaults_saveInteger(int value, LPSTR key);
+LPSTRD textAfterFirstChar(LPSTR string, char c);
+LPSTRD textBeforeLastChar(LPSTR string, char c);
+LPSTRD textAfterLastChar(LPSTR string, char c);
+LPSTRD stringByDeletingLastPathComponent(LPSTR path);
+LPSTRD lastPathComponent(LPSTR path);
+LPSTRD string_Copy(LPSTR str);
+
+void GSSiFree(LPSTR *str);
+
 #endif

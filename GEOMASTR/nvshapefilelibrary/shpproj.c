@@ -95,7 +95,9 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
 		strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,offset INT);");
 		SLT_Execute(cmd, database);
 		CreateStatusWind(0, 1, "Create Shapefile Index");
-			
+		LPSTRD fnam = lastPathComponent(shapeFileName);
+		StatusExtraInfoUpdate(fnam);
+		GSSiFree(&fnam);
 		for (int irec = 0; irec < hSHP->nRecords; irec++)
 		{
 			if (!StatusWindowUpdate(0, "", hSHP->nRecords, irec))
