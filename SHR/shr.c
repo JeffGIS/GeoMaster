@@ -8026,7 +8026,7 @@ long BigRead (HFILE Fid,LPVOID pBuf,long isize)
 	else
 	{
 		if (OpenFileFid[Fid] < 0)
-			MessageBox(0, "Attemp to read invalid file id", 0, MB_ICONEXCLAMATION);
+			MessageBox(0, "Attempt to read invalid file id", 0, MB_ICONEXCLAMATION);
 		else
 			rtn = _read(OpenFileFid[Fid], pBuf, isize);
 	}

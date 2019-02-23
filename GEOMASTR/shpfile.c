@@ -162,7 +162,7 @@ BOOL OpenSHPFile (LPSTR SHPFileName)
 		return FALSE;
 	if (!(SHPType = ReadSHPHeader (SHPFid,&SHPFileMNMX,SHPFileName)))
     {
-    	GSSiClose (SHPFid);
+    	GSSiClose2 (&SHPFid);
     	return FALSE;
     }
 	CloseTRANS2 (&hTranFileToBase); 
@@ -184,7 +184,7 @@ BOOL OpenSHPFile (LPSTR SHPFileName)
 		if (ConvertCoord(&Points[i],0,1))
 		{   
 		    MessageBox(GetFocus(),"Unable to convert coordinates as specified", 0,MB_ICONQUESTION|MB_OK);
-	    	GSSiClose (SHPFid);
+	    	GSSiClose2 (&SHPFid);
 		    return FALSE;
 		}
 		AddDPointToMinMax (&Points[i],&FileMNMX); 
@@ -212,7 +212,7 @@ BOOL OpenSHPFile (LPSTR SHPFileName)
 
 void CloseSHPFile (void)
 {   
-	GSSiClose (SHPFid);
+	GSSiClose2 (&SHPFid);
 	OpenSHPFileIndex (0,HFILE_ERROR);
 	return;
 } 

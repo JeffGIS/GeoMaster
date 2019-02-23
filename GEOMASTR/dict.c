@@ -1876,12 +1876,11 @@ void CloseSymDict (void)
 	GSSiGlobFree (&hSymIndex); 
 	GSSiGlobFree (&hChildList);    
 	if (FidSD >= 0)
-		GSSiClose (FidSD);
+		GSSiClose2 (&FidSD);
 //	if (SymDictOpenMode != OF_READ)  
    		GSSiGlobFree (&hSymbolAttributes); 
    		GSSiGlobFree (&hSymNames); 
    	SymDictOpenMode = 0;
-	FidSD = -1; 
 	*IconDict = 0;
 	return;
 } 
@@ -2248,7 +2247,7 @@ Start:
 		    BigWrite (FidSD,(HPSTR)&FirstSymbolNum,2,-1);
 		    BigWrite (FidSD,(HPSTR)&Signature,2,-1);
 		    BigWrite (FidSD,(HPSTR)&Version,2,-1);  
-		    GSSiClose (FidSD);
+		    GSSiClose2 (&FidSD);
 			goto Start;
 		} 
 		HaltMapDisplay(FALSE,TRUE);
@@ -2265,12 +2264,12 @@ Start:
     GSSilread (FidSD,&Signature,2);
     GSSilread (FidSD,&Version,2);
     if (Signature != 28051)
-    {	GSSiClose (FidSD);
+    {	GSSiClose2 (&FidSD);
 		GSSiMsgBox( GetFocus(), "This is not a valid symbol file",Name, MB_OK,0);
     	goto Exit;
     }
     if (Version > 1)
-    {	GSSiClose (FidSD);
+    {	GSSiClose2 (&FidSD);
 		GSSiMsgBox( GetFocus(), "This symbol file version is not recognized",Name, MB_OK,0);
     	goto Exit;
     }

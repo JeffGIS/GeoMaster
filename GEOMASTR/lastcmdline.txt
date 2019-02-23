@@ -1,2 +1,2 @@
-configs\large.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T; 
-h:\pcviewer
+configs\2018_07.gmc /F [%USERLEV]=2; [%WT]='Create Multiple parcel values for size test'
+i:\GMMobile\MetroUTM
