@@ -1,2 +1,2 @@
-configs\2018_01.gmc /F [%USERLEV]=2; [%WT]='Create Multiple parcel values for size test'
+configs\2018_07.gmc /F [%USERLEV]=2; [%WT]='Create Multiple parcel values for size test'
 i:\GMMobile\MetroUTM

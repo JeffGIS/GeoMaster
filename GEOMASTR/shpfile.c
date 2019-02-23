@@ -810,8 +810,12 @@ BOOL SetSHPParms (long RecordNumber)
 	pTAG = SHPTAG;
 	if (*pTAG && (pC = _fstrchr (pTAG,':')))
 	{   
-		_fstrcpy (SHPTag,pTAG); 
-		ExpandText (SHPTag);
+		HANDLE hTag = GSSiGlobAlloc(0,GMEM_MOVEABLE, 4096);
+		LPSTR ptag = GlobalLock(hTag);
+		_fstrcpy (ptag,pTAG); 
+		ExpandText (ptag);
+		strncpy0(SHPTag, ptag, sizeof(SHPTag)-1);
+		GSSiGlobUlFree(&hTag);
 		pC = _fstrchr (SHPTag,':');
 		*pC++ = 0;
 		strncpy0 (CurrentPrefix,SHPTag,MAX_PREFIX_LEN);
