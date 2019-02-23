@@ -7991,7 +7991,7 @@ HFILE GSSiOpenFileMem (LPSTR InName,UINT mode,UINT maxlen)
 		
 		BigRead (Fid,ptr,len);
 		GlobalUnlock (handle);
-		GSSiClose2 (&Fid); 
+		GSSiClose (Fid); 
 		Fid = SetMemFile (Fid,handle,len);
 		if (Fid == HFILE_ERROR)
 			GSSiGlobFree (&handle);

@@ -1194,7 +1194,6 @@ void CloseConfig ()
 #endif
 {
    	GSSiClose2 (&FidConfig);
-    FidConfig = HFILE_ERROR;
 {
 #if ENABLETRACE
 GSSiExitProg (102);

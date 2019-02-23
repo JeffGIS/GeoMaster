@@ -3341,7 +3341,7 @@ GSSiExitProg (100);
 	    if (!pViewportsD[0]->Type && pViewportsD[0]->ShowFullScreen)
 			UseFullScreen (hWnd,0);
 	}
-    GSSiClose2 (&FidConfig);
+    GSSiClose (FidConfig);
 	RunStartupCommand (1);  
 	DisplayAllToolbars (0);
 	LogUsageInfo (1,FullPath);
@@ -3682,7 +3682,7 @@ GSSiExitProg (101);
     BigWrite (FidConfig,(HPSTR)&ConfigDesc,sizeof(ConfigDesc),-1);
     BigWrite (FidConfig,(HPSTR)&Signature,2,-1);
     BigWrite (FidConfig,(HPSTR)&Version,2,-1);
-    GSSiClose2 (&FidConfig);  
+    GSSiClose (FidConfig);  
     CurVis = SaveInVis;     
     CurView = SaveVP;
 	ConfigChangesMade = FALSE;
