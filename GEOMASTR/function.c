@@ -3381,6 +3381,7 @@ SetVis:
 				}
 				if (!*Arg[3])
 				{
+					Refno = 0;
 					if (PickByRefno(Refno, Arg[2], lpColon, UsePickList))
 					{
 						SetPickGlobals(0);

@@ -5864,7 +5864,7 @@ int GetFileChecksum (LPSTR File,int frombyte,int tobyte)
 
 int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL SearchSubdir,BOOL WantDirectories,BOOL nameOnly)
 {
-     int	Num,i;
+     int	Num,i, st;
      char	str2[_MAX_PATH+80],TempName[_MAX_FNAME],Name[_MAX_FNAME], drive[_MAX_DRIVE], dir[_MAX_DIR], extension[_MAX_EXT];
 	 char	GMDFile[MAX_PATH] = { 0 };
      LPSTR	lpBrack, lpDot; 
@@ -5873,7 +5873,9 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
      HCURSOR	hcurSave; 
 	 HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
 	 LPSTR	str = GlobalLock (hStr);
-     
+	 BOOL isSLTFile = FALSE;
+	 sqlite3 *db;
+
 	 if (!OutFile || !*OutFile) //just return num hits
 		 OutFileFID = HFILE_ERROR;
 	 else
@@ -5892,6 +5894,22 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 				 goto Exit;
 
 			 fputstring(DefStr, OutFileFID);
+		 }
+		 else if (!stricmp(pDot, ".slt"))
+		 {
+			 char	DefStr[] = "CREATE TABLE FILELIST (FULLNAME CHAR(255) PRIMARY KEY,FILENAME CHAR(128),DRIVE CHAR(8),DIRECTORY CHAR(255),LASTDIR CHAR(255),DRIVEDIR CHAR(255),EXTENSION CHAR(16),CREATTIME INT,LASTACCESS INT,LASTWRITE INT,FILELENGTH INT,STATUS INT)";
+			 GSSiRemove(OutFile);
+			 isSLTFile = TRUE;
+			 nameOnly = 0;
+
+			 st = sqlite3_open(OutFile, &db);
+
+			 if (st)
+				 goto Exit;
+
+			 SLT_StartTrans(db);
+			 SLT_Execute(DefStr, db);
+
 		 }
 		 else if (New || !ExistFile(OutFile))
 		 {
@@ -5951,21 +5969,38 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			sprintf(str, "%s%s", Name, extension);
 		else if (nameOnly == 2)
 			sprintf(str, "%s", str2);
-		else
-  			sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t",str2,Name,drive,dir,pLastDir,drive,dir,extension,timesAndLength);
-		if (*GMDFile)
+		else if (isSLTFile)
+		{
+			REPLAC(timesAndLength, "\t", ",", sizeof(timesAndLength) - 1);
+			sprintf(str, "INSERT INTO FILELIST VALUES ('%s','%s','%s','%s','%s','%s%s','%s',%s,0)", str2, Name, drive, dir, pLastDir, drive, dir, extension, timesAndLength);
 			strlwr(str);
-		fputstring (str,OutFileFID);
-	 }  
-     GSSiClose2 (&Fid);
-	 GSSiClose2 (&OutFileFID);
-     GSSiRemove (TempName);
-	 if (*GMDFile)
+			SLT_Execute(str, db);
+		}
+		else
+		{
+			sprintf(str, "%s\t%s\t%s\t%s\t%s\t%s%s\t%s\t%s\t", str2, Name, drive, dir, pLastDir, drive, dir, extension, timesAndLength);
+			if (*GMDFile)
+				strlwr(str);
+			fputstring(str, OutFileFID);
+		}
+	 } 
+	 GSSiClose2(&Fid);
+	 GSSiRemove(TempName);
+	 if (isSLTFile)
 	 {
-		 char cmd[1024];
-		 sprintf(cmd, "$GMDIMPORT(%s,N,%s,,FILENAME)", GMDFile, OutFile);
-		 ExpandText(cmd);
-		 GSSiRemove(OutFile);
+		 SLT_EndTrans(db);
+		 sqlite3_close(db);
+	 }
+	 else
+	 {
+		 GSSiClose2(&OutFileFID);
+		 if (*GMDFile)
+		 {
+			 char cmd[1024];
+			 sprintf(cmd, "$GMDIMPORT(%s,N,%s,,FILENAME)", GMDFile, OutFile);
+			 ExpandText(cmd);
+			 GSSiRemove(OutFile);
+		 }
 	 }
 Exit:
 	 GSSiGlobUlFree (&hStr);

@@ -121,7 +121,7 @@ sqlite3 * NVShapeIndexCreate(LPSTR IndexNameIN)
 		if (rtn == SQLITE_OK)
 		{
 			rtn = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
-			sprintf(cmd, "CREATE TABLE SHAPEINDEX (RECNUM INT PRIMARY KEY, SymNum INT, offset INT);");
+			sprintf(cmd, "CREATE TABLE SHAPEINDEX (RECNUM INTEGER PRIMARY KEY, SymNum INT, offset INT);");
 			rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
 			sprintf(cmd, "CREATE VIRTUAL TABLE SHAPEINDEX_index USING rtree(id,minX, maxX, minY, maxY);");
 			rtn = sqlite3_exec(db, cmd, NULL, NULL, NULL);
@@ -747,6 +747,11 @@ BOOL IsSHPFileVisible (void)
 	}
 	return FALSE;
 }
+void GetSHPTag(LPSTR tag)
+{
+	strcpy(tag, SHPTag);
+	return;
+}
 
 BOOL SetSHPVis (HWND hWndDlg, int DlgItemSym, int DlgItemPar,HFILE FidSymList)
 {
@@ -1205,7 +1210,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 		_fstrcpy(pDot, ".nvi");
 		TMPFid = GSSiOpenFile(Name, &OFStruct, OF_READ);
 		if (TMPFid == HFILE_ERROR)
-			haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
+			haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName,SHPTAG);
 		else
 		{
 			struct _stati64 stat;
@@ -1219,7 +1224,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 			{
 				GSSiClose2 (&TMPFid);
 				GSSiRemove(Name);
-				haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
+				haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName,SHPTAG);
 			}
 			else
 			{
@@ -1238,7 +1243,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 				{
 					GSSiClose2 (&TMPFid);
 					GSSiRemove(Name);
-					haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName);
+					haveSLTIndex = CreateShapeFileIndexSLT(SHPFileName,SHPTAG);
 				}
 				else
 					haveSLTIndex = TRUE;
@@ -1252,7 +1257,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 	}
 	if (haveSLTIndex)
 	{
-		LONGLONG numRows=0;
+		//LONGLONG numRows=0;
 		if (sqlite3_open(Name, &SHPIndexHandle) == SQLITE_OK)
 		{
 			/*if ((numRows = GetSQLITENumRows(SHPIndexHandle, "SHP", "")))

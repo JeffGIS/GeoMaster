@@ -3648,7 +3648,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	{
 		OFSTRUCTGM OFStruct;
 		HFILE fid = GSSiOpenFile(Name, &OFStruct, OF_READ);
-		GSSiClose2 (&fid);
+		GSSiClose (fid);
 		if (fid != HFILE_ERROR)
 			rtn = sqlite3_open_v2(OFStruct.szPathName, &db, SQLITE_OPEN_READONLY, NULL);
 		else
@@ -3658,7 +3658,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 		rtn = sqlite3_open(Name, &db);
 	if (rtn != SQLITE_OK)
 	{
-		GSSiGlobUlFree(&pDB);
+		GSSiGlobUlFree(&hDB);
 		return 0;
 	}
 	pDB->DBHandle = db;

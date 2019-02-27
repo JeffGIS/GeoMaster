@@ -29691,7 +29691,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                             	i = SHPPolyHeader.NumParts; 
 	                            nareas=SHPPolyHeader.NumParts; 
 	                            nSavePoly2 = nSavePoly;
-	                            hSavePoly2 = hSavePoly;
+								hSavePoly2 = GSSiGlobalCopy(0, hSavePoly);
 	                            hSavePoly = 0;
 	                            pIndex++; 
                             	while (GetSavedPolys ())
@@ -29863,8 +29863,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                                     break;
                             } 
                             GSSiGlobFree (&hIndex);
-							GlobalUnlock(hSavePolyParts);
-							GlobalUnlock(hSavePoly);
+							if (hSavePolyParts)
+								GlobalUnlock(hSavePolyParts);
+							if (hSavePoly)
+								GlobalUnlock(hSavePoly);
 							DestroySavedPolys();
                          }
                          else

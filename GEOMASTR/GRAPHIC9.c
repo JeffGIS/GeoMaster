@@ -285,6 +285,7 @@ BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds)
 	time_t ltime;
 	char		TAGIndexFile[MAX_PATH];    
 	short	size=8;
+	BOOL indexIsSLT = FALSE;
 
 	if (hTAGIdx && !Delete)
 	{
@@ -312,15 +313,22 @@ GSSiExitProg (1076);
 }   
 	BT_CLOSE (hTAGIdx);
 	hTAGIdx = 0;
-	if (PltType < 4 || MapFileType(PltName, 0, 0) == MT_PLT)
+	int mft = MapFileType(PltName, 0, 0);
+	if (PltType < 4 || mft == MT_PLT || mft == MT_SHP)
 	{
 		_fstrcpy (TAGIndexFile,PltName);  
 		ExpandText (TAGIndexFile);
 		if (strlen (TAGIndexFile) < 5 || !strrchr (TAGIndexFile,'.'))
 			return FALSE;
 		TAGIndexFile[_fstrlen(TAGIndexFile)-3]=0;
-		_fstrcat (TAGIndexFile,"tin");                  
-    }
+		if (mft == MT_SHP)
+		{
+			_fstrcat(TAGIndexFile, "nvi");
+			indexIsSLT = TRUE;
+		}
+		else
+			_fstrcat(TAGIndexFile, "tin");
+	}
     else
     {   
     	char	Name[MAX_PATH];
@@ -351,8 +359,15 @@ GSSiExitProg (1076);
 	}
 	else
 	{
-		if (ExistFile (TAGIndexFile))
-			hTAGIdx = BT_OPEN (TAGIndexFile, ltime, BT_READ, 0);
+		if (ExistFile(TAGIndexFile))
+		{
+			if (indexIsSLT)
+			{
+				//if (sqlite3_open(TAGIndexFile, &SHPIndexHandle) == SQLITE_OK)
+			}
+			else
+				hTAGIdx = BT_OPEN(TAGIndexFile, ltime, BT_READ, 0);
+		}
 	}
 	if (!hTAGIdx && ForceTAGIndex)
 	{

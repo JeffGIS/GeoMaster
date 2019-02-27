@@ -2939,6 +2939,7 @@ BOOL ShowBufferedScreen (BOOL Display,BOOL resetDC,int VPID,LPRECT pUpdateRect)
                              Rect.bottom-Rect.top+1,
                				 CurView->hDC,
                	  			 Rect.left,Rect.top, SRCCOPY);  
+			GdiFlush();
 		}
 		SelectClipRgn (hDC,0);
 		DeleteObject (hRgnMain);

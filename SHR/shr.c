@@ -8089,7 +8089,7 @@ BOOL CloseAndDeleteFile (LPHFILE pFid)
 	else
 		*Name = 0;
 	GSSiClose2 (pFid);
-	*pFid = HFILE_ERROR;
+
 	GSSiRemove (Name);
 	return TRUE;
 }

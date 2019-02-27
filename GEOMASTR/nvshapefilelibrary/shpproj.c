@@ -76,11 +76,12 @@ LPSTR ShapeFileIndexName(LPSTR shapeFileName)
 		*indxName = 0;
 	return indxName;
 }
-BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
+BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 {
 	BOOL rtn = FALSE;
+	BOOL useTag = FALSE;
 	int ii = 0;
-	char cmd[1024];
+	char cmd[1024], TAGVar[66];
 	LPSTR indexName = ShapeFileIndexName(shapeFileName);
 	sqlite3* database;
 	SHPHandle	hSHP = SHPOpen(shapeFileName, "rb");
@@ -92,7 +93,18 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
 		FileAlreadyNotFound(indexName, 3, 0);
 		SLT_StartTrans(database);
 
-		strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,offset INT);");
+		if (*TAG)
+		{
+			LPSTR pColon;
+			strcpy(TAGVar, TAG);
+			pColon = strchr(TAGVar, ':');
+			if (pColon)
+				*pColon = 0;
+			useTag = TRUE;
+			sprintf(cmd, "CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,'%s' CHAR(100), offset INT);CREATE INDEX SHP_Tag ON SHP ('%s');",TAGVar,TAGVar);
+		}
+		else
+			strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,offset INT);");
 		SLT_Execute(cmd, database);
 		CreateStatusWind(0, 1, "Create Shapefile Index");
 		LPSTRD fnam = lastPathComponent(shapeFileName);
@@ -108,9 +120,9 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
 
 			int Offset = hSHP->panRecOffset[irec];
 			MNMXCORD Bounds;
+			char Tag[128];
 			SetSHPParms(irec);
 			int SymNum = CurrentDesc;
-
 			SHPObject *psCShape = SHPReadObject(hSHP, irec);
 			if (psCShape)
 			{
@@ -121,7 +133,16 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName)
 					SHPBounds.xmx = psCShape->dfXMax;
 					SHPBounds.ymn = psCShape->dfYMin;
 					SHPBounds.ymx = psCShape->dfYMax;
-					sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i, %i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum, Offset);
+					if (useTag)
+					{
+						GetSHPTag(Tag);
+						LPSTR UDI = strchr(Tag, ':');
+						if (UDI)
+							UDI++;
+						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i,'%s',%i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum,UDI, Offset);
+					}
+					else
+						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i, %i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum, Offset);
 					SLT_Execute(cmd, database);
 					SHPDestroyObject(psCShape);
 				}
