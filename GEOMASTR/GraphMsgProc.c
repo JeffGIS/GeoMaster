@@ -16454,7 +16454,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 	                        	hIdx = GSSiGlobAlloc ( 968,GMEM_MOVEABLE,USHRT_MAX);
 	                        	maxlast = (long)USHRT_MAX/sizeof(TAGKEY);
 	                        } 
-	                        OpenTAGIndex (FALSE,FALSE);
+	                        OpenTAGIndex (FALSE,FALSE,0);
 					    	hTIDX[ifile] = hTAGIdx;
 					    	hTAGIdx = 0;
 				    		_fstrncpy(TAGKey.PREFIX,TagLocPrefix,8);
@@ -20010,14 +20010,16 @@ NextFile:
 								{   
 									MNMXCORD	MinMaxNew,MinMaxOld={SHPPolyHeader.Xmin,SHPPolyHeader.Ymin,SHPPolyHeader.Xmax,SHPPolyHeader.Ymax};
 									short	pos=BT_FIRST,cond=BT_GE, getnext=1;  
-									
+									LPTAGINDEX pTI = GlobalLock(hTAGIdx);
+
 									ConvertRectCoord (&MinMaxNew, &MinMaxOld,3,1)									;
 									ExpandBounds (&MinMaxNew,GetGlobalDVal2 ("[%MERGETAGDIST]",1000));
 								    ForceTAGIndex = FALSE;
 						    		_fstrncpy(TAGKey.PREFIX,pPrefix,8);
 						    		_fstrncpy (TAGKey.UDI,UDI,sizeof(TAGKey.UDI));
 						    		TAGKey.Refno = LONG_MIN;
-									while (getnext && !BT_FIND (hTAGIdx,(LPSTR)&TAGKey,pos,cond,(LPSTR)&RefIdxData))
+
+									while (getnext && !BT_FIND (pTI->hBT,(LPSTR)&TAGKey,pos,cond,(LPSTR)&RefIdxData))
 									{    
 										LPTHEME pTheme;
 										MNMXCORD	MinMaxOld;
@@ -20111,6 +20113,7 @@ NextFile:
 							                }
 										}
 									}
+									GlobalUnlock(hTAGIdx);
 								} 
 	                    	}
 	                    }

@@ -7496,6 +7496,8 @@ void GetFileMinMax (LPMINMAX pMinMax,LPMNMXCORD Rect)
     POINT   Point;
     DPOINT  DPoint;
     
+	if (!Rect)
+		return;
 	MinMaxInit (pMinMax);
     DPoint.x = Rect->xmn;
     DPoint.y = Rect->ymn;

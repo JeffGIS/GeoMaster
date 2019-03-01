@@ -113,6 +113,7 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(DIST,name,pctfrom,pctto)
 //$POINTLIST(BETWEENDIST,name,fromdist,todist)
 //$POINTLIST(BOUNDS,name)
+//$POINTLIST(POINTATDIST,name,dist);
 
 	if (nArgs < 0)
 	{
@@ -184,7 +185,7 @@ DestroyAll:
 			{
 				if (iList == nPointLists)
 					nPointLists++;
-				return TRUE;
+				rtn = TRUE;
 			}
 		}
 		else if (!stricmp (Arg[4],"ITEM")) //TAG:UDI
@@ -208,7 +209,8 @@ DestroyAll:
 					}
 					if (iList == nPointLists)
 						nPointLists++;
-					return TRUE;
+					rtn = TRUE;
+					break;
 				}
 			}
 		}
@@ -231,28 +233,47 @@ DestroyAll:
 					}
 					if (iList == nPointLists)
 						nPointLists++;
-					return TRUE;
+					rtn = TRUE;
+					break;
 				}
 			}
-			return FALSE;
+
 		}
 	}
-
-	else if (!stricmp (Arg[1],"BETWEENDIST"))
+	else if (!stricmp(Arg[1], "POINTATDIST"))
 	{
-		double fromDist = atof (Arg[3]);
-		double toDist = atof (Arg[4]);
+		double Dist = atof(Arg[3]);
 
-		for (i=0;i<nPointLists;i++)
+		for (i = 0; i < nPointLists; i++)
 		{
-			if (!stricmp (PointListID[i],Arg[2]) && nPointsInList[i] > 1)
+			if (!stricmp(PointListID[i], Arg[2]) && nPointsInList[i] > 1)
 			{
-				Points1 = GlobalLock (hPointList[i]);
-	       		hNewPoints = GetPolyBetweenDist (Points1,nPointsInList[i],
-	       									     fromDist,toDist,&nNewPoints,FALSE,FALSE);
-				GSSiGlobUlFree (&hPointList[i]);
+				Points1 = GlobalLock(hPointList[i]);
+				DPOINT atPoint = PointAtDistOnPoly(Points1, nPointsInList[i], Dist, 0,0);
+				sprintf(OutLoc, "%f %f", atPoint.x, atPoint.y);
+				GlobalUnlock(hPointList[i]);
+				rtn = TRUE;
+				break;
+			}
+		}
+	}
+	else if (!stricmp(Arg[1], "BETWEENDIST"))
+	{
+		double fromDist = atof(Arg[3]);
+		double toDist = atof(Arg[4]);
+
+		for (i = 0; i < nPointLists; i++)
+		{
+			if (!stricmp(PointListID[i], Arg[2]) && nPointsInList[i] > 1)
+			{
+				Points1 = GlobalLock(hPointList[i]);
+				hNewPoints = GetPolyBetweenDist(Points1, nPointsInList[i],
+					fromDist, toDist, &nNewPoints, FALSE, FALSE);
+				GSSiGlobUlFree(&hPointList[i]);
 				hPointList[i] = hNewPoints;
 				nPointsInList[i] = nNewPoints;
+				rtn = TRUE;
+				break;
 			}
 		}
 	}
@@ -280,12 +301,13 @@ DestroyAll:
 						GlobalUnlock (hPointList[i]);
 						GlobalUnlock (hPointList[j]);
 						dpointtoa (OutLoc,&IntPoint);
-						return TRUE;
+						rtn = TRUE;
+						break;
 					}
 				}
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"DISPLAY"))
@@ -339,7 +361,7 @@ DestroyAll:
 				break;
 			}
 		}
-		return rtn;
+
 	}
 	else if (!stricmp (Arg[1],"PCT"))
 	{
@@ -373,9 +395,10 @@ DestroyAll:
 				}
 				GlobalUnlock (hPointList[i]);
 				ftoa (OutLoc,pct);
-				return rtn;
+				rtn = TRUE;
+				break;
 			}
-			return FALSE;
+
 		}
 	}
 	else if (!stricmp (Arg[1],"AZM"))
@@ -458,10 +481,11 @@ DestroyAll:
 				az = getazd (&Points[nPointsInList[i]-1],&Points[0]);
 				GlobalUnlock (hPointList[i]);
 				ftoa (OutLoc,az);
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+	
 	}
 
 	else if (!stricmp (Arg[1],"DIST"))
@@ -500,10 +524,11 @@ DestroyAll:
 
 				GlobalUnlock (hPointList[i]);
 				ftoa (OutLoc,d * len);
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"REMOVE"))
@@ -609,10 +634,11 @@ DestroyAll:
 				hPointList[i] = hList;
 				nPointsInList[i] = np;
 				strcpy (OutLoc,"1");
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"THIN"))
@@ -626,10 +652,11 @@ DestroyAll:
 				
 				ThinPoly (&nPointsInList[i],Points, max (P_TOL,thindist));
 				GlobalUnlock (hPointList[i]);
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"LENGTH"))
@@ -643,10 +670,11 @@ DestroyAll:
 
 				GlobalUnlock (hPointList[i]);
 				ftoa (OutLoc,len);
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"BOUNDS"))
@@ -663,10 +691,11 @@ DestroyAll:
 
 				GetPolyBoundsD (hPointList[i],nPointsInList[i],&bounds,type);
 				boundstoa (OutLoc,&bounds);
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"AREA"))
@@ -680,10 +709,11 @@ DestroyAll:
 
 				GlobalUnlock (hPointList[i]);
 				ftoa (OutLoc,area);
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
+
 	}
 
 	else if (!stricmp (Arg[1],"REVERSE"))
@@ -703,10 +733,10 @@ DestroyAll:
 				GlobalUnlock (hList);
 				hPointList[i] = hList;
 				strcpy (OutLoc,"1");
-				return TRUE;
+				rtn = TRUE;
+				break;
 			}
 		}
-		return FALSE;
 	}
 
 	else if (!stricmp (Arg[1],"DESTROY"))
@@ -729,8 +759,7 @@ DestroyAll:
 				nPointLists--;
 			}
 		}
-		return rtn;
 	}
-	return FALSE;
+	return rtn;
 }
 

@@ -390,7 +390,7 @@ BOOL EditTAG (short Item,LPSTR NewTAGVal)
 		if (lNewTAG <= CurlTAG)
 		{
 		    ForceRefIndex = ForceTAGIndex = TRUE;  
-			OpenedTAGList = OpenTAGIndex (FALSE,StoreTAGBounds);
+			OpenedTAGList = OpenTAGIndex (FALSE,StoreTAGBounds,0);
 			DeleteFromTAGList (PickList[Item].Prefix,PickList[Item].UDI,PickList[Item].Refno);
 			if (OpenedTAGList)
 				CloseTAGIndex ();

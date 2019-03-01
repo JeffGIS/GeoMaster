@@ -253,109 +253,98 @@ GSSiExitProg (1017);
 }
 
 void CloseTAGIndex (void)
-#if ENABLETRACE
-{GSSiEnterProg (1018);
-#endif
-{   
+{
+	LPTAGINDEX pTI;
+
 	if (!hTAGIdx)
-{
-#if ENABLETRACE
-GSSiExitProg (1018);
-#endif
 		return;
-}
-	BT_CLOSE (hTAGIdx);
-	hTAGIdx = 0; 
-{
-#if ENABLETRACE
-GSSiExitProg (1018);
-#endif
+	pTI = GlobalLock(hTAGIdx);
+	switch (pTI->type)
+	{
+	case TAGINDEX_BTREE:
+		BT_CLOSE(pTI->hBT);
+		break;
+	case TAGINDEX_SHP:
+		sqlite3_close(pTI->sltdb);
+		break;
+	}
+
+	GSSiGlobUlFree(&hTAGIdx);
 	return;
 }
-#if ENABLETRACE
-}
-#endif
-}
 
-BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds)
-#if ENABLETRACE
-{GSSiEnterProg (1019);
-#endif
-{	BTVARDESC	BTVar[3];
+BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds,LPSTR ReopenName)
+{
+	BTVARDESC	BTVar[3];
+	LPTAGINDEX pTI;
 	time_t ltime;
 	char		TAGIndexFile[MAX_PATH];    
 	short	size=8;
 	BOOL indexIsSLT = FALSE;
+	BOOL rtn = FALSE;
 
 	if (hTAGIdx && !Delete)
 	{
 		if (!ForceTAGIndex || BT_OPEN_FOR_WRITE (hTAGIdx))
-{
-#if ENABLETRACE
-GSSiExitProg (1019);
-#endif
 			return FALSE;
-}
 	}
 	if (PltType == 5)
-{
-#if ENABLETRACE
-GSSiExitProg (1019);
-#endif
 		return FALSE;
-}
+
 	if (hTAGIdx && PltType == 4 && ForceTAGIndex && InRebuildRefIndex)  
-{
-#if ENABLETRACE
-GSSiExitProg (1076);
-#endif
 		return FALSE;
-}   
-	BT_CLOSE (hTAGIdx);
-	hTAGIdx = 0;
-	int mft = MapFileType(PltName, 0, 0);
-	if (PltType < 4 || mft == MT_PLT || mft == MT_SHP)
+   
+	CloseTAGIndex();
+
+	if (ReopenName)
+		strcpy(TAGIndexFile, ReopenName);
+	else
 	{
-		_fstrcpy (TAGIndexFile,PltName);  
-		ExpandText (TAGIndexFile);
-		if (strlen (TAGIndexFile) < 5 || !strrchr (TAGIndexFile,'.'))
-			return FALSE;
-		TAGIndexFile[_fstrlen(TAGIndexFile)-3]=0;
-		if (mft == MT_SHP)
+		int mft = MapFileType(PltName, 0, 0);
+		if (PltType < 4 || mft == MT_PLT || mft == MT_SHP)
 		{
-			_fstrcat(TAGIndexFile, "nvi");
-			indexIsSLT = TRUE;
+			_fstrcpy(TAGIndexFile, PltName);
+			ExpandText(TAGIndexFile);
+			if (strlen(TAGIndexFile) < 5 || !strrchr(TAGIndexFile, '.'))
+				return FALSE;
+			TAGIndexFile[_fstrlen(TAGIndexFile) - 3] = 0;
+			if (mft == MT_SHP)
+			{
+				_fstrcat(TAGIndexFile, "nvi");
+				indexIsSLT = TRUE;
+			}
+			else
+				_fstrcat(TAGIndexFile, "tin");
 		}
 		else
-			_fstrcat(TAGIndexFile, "tin");
+		{
+			char	Name[MAX_PATH];
+
+			_fstrcpy(Name, PltName);
+			ExpandText(Name);
+			if (!*Name)
+				return FALSE;
+			if (_fullpath(TAGIndexFile, Name, sizeof(TAGIndexFile)))
+			{
+				*_fstrrchr(TAGIndexFile, '\\') = 0;
+				_fstrcat(TAGIndexFile, "\\tagindex.rin");
+			}
+			else
+				return FALSE;
+		}
 	}
-    else
-    {   
-    	char	Name[MAX_PATH];
-    	
-    	_fstrcpy (Name,PltName);
-    	ExpandText (Name);
-		if (!*Name)
-			return FALSE;
-    	if (_fullpath (TAGIndexFile,Name,sizeof(TAGIndexFile)))
-		{
-    		*_fstrrchr (TAGIndexFile,'\\') = 0;
-    		_fstrcat (TAGIndexFile,"\\tagindex.rin");
-		}
-		else
-			return FALSE;
-    }
     if (Delete && ForceTAGIndex)
     {   
-    	OFSTRUCTGM OFStruct;
-    	
-    	GSSiRemove (TAGIndexFile);
-//    	retrn TRUE;
+    	if (!indexIsSLT)
+    		GSSiRemove (TAGIndexFile);
     }
 	ltime = 0;
+	hTAGIdx = GSSiGlobAlloc(0, GHND, sizeof(TAGINDEX) + 2);
+	pTI = GlobalLock(hTAGIdx);
 	if (ForceTAGIndex)
 	{
-		hTAGIdx = BT_OPEN (TAGIndexFile, ltime, BT_WRITE, 0);
+		pTI->hBT = BT_OPEN (TAGIndexFile, ltime, BT_WRITE, 0);
+		rtn = TRUE;
 	}
 	else
 	{
@@ -363,13 +352,17 @@ GSSiExitProg (1076);
 		{
 			if (indexIsSLT)
 			{
-				//if (sqlite3_open(TAGIndexFile, &SHPIndexHandle) == SQLITE_OK)
+				if (sqlite3_open_v2(TAGIndexFile, &pTI->sltdb, SQLITE_OPEN_READONLY, NULL) == SQLITE_OK)
+					rtn = TRUE;
 			}
 			else
-				hTAGIdx = BT_OPEN(TAGIndexFile, ltime, BT_READ, 0);
+			{
+				pTI->hBT = BT_OPEN(TAGIndexFile, ltime, BT_READ, 0);
+				rtn = TRUE;
+			}
 		}
 	}
-	if (!hTAGIdx && ForceTAGIndex)
+	if (!pTI->hBT && pTI->type == TAGINDEX_BTREE && ForceTAGIndex)
 	{
 		BTVar[0].BT_VARTYP=BT_CHAR;
 		BTVar[0].BT_VARLEN=8;
@@ -385,17 +378,13 @@ GSSiExitProg (1076);
 		else
 			size = 8;
 		BT_CREATE (TAGIndexFile, size, FALSE, 3, 1,(LPBTVARDESC)BTVar,FALSE, 0, 0, FALSE);
-		hTAGIdx = BT_OPEN (TAGIndexFile, 0, BT_WRITE, 0);
+		pTI->hBT = BT_OPEN (TAGIndexFile, 0, BT_WRITE, 0);
+		rtn = TRUE;
 	}
-{
-#if ENABLETRACE
-GSSiExitProg (1019);
-#endif
-	return TRUE;
-}
-#if ENABLETRACE
-}
-#endif
+	GlobalUnlock(hTAGIdx);
+	if (!rtn)
+		GSSiGlobFree(&hTAGIdx);
+	return rtn;
 }
 
 BOOL ChangePickedItemRefno (short Item, long NewRefno)

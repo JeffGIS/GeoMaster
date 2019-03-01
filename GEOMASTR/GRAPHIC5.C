@@ -2054,7 +2054,7 @@ BOOL DeletePickedItem (int Item,short OldType,short NewType)
 						
 						_fstrcpy (PltName,PickName);
 						ForceTAGIndex = TRUE;
-						OpenedTAGList = OpenTAGIndex (FALSE,StoreTAGBounds);
+						OpenedTAGList = OpenTAGIndex (FALSE,StoreTAGBounds,0);
 						
 						DeleteFromTAGList (PickList[Item].Prefix,PickList[Item].UDI,PickList[Item].Refno);
 						if (OpenedTAGList)

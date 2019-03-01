@@ -927,6 +927,7 @@
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
     <ClInclude Include="..\INCLUDE\gssitype.h" />
     <ClInclude Include="..\INCLUDE\rotate256.h" />
+    <ClInclude Include="..\include\tagindex.h" />
     <ClInclude Include="..\INCLUDE\UMIO.H" />
     <ClInclude Include="..\LAStools\LASzip\dll\laszip_dll.h" />
     <ClInclude Include="..\MrSid\Raster_DSDK\include\BMPImageWriter.h" />

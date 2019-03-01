@@ -1,2 +1,2 @@
-configs\large.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T; 
-h:\pcviewer
+configs\photosegments.gmc 
+j:\pcviewer\pcviewer

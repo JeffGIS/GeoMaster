@@ -709,6 +709,7 @@ GSSiExitProg (1348);
 				short	UsePickList=-1;
 
 				nlong = 0;
+				Refno = 0;
 				if (atob(Arg[5]))
 					UsePickList = -101;
 				if ((lpColon = _fstrchr (Arg[2],':')))

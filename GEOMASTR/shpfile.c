@@ -1560,8 +1560,11 @@ BOOL ReadSHPRecordHeader (HFILE FidSHP,long RecordOffset,LPMNMXCORD pMinMaxCoord
 		case SHPT_MULTIPOINT:
 		break;
 	}  
-	GetFileMinMax (&CurrentItemMinMax,pMinMaxCoord); 
-	CurrentSHPRecBounds = *pMinMaxCoord;
+	if (pMinMaxCoord)
+	{
+		GetFileMinMax(&CurrentItemMinMax, pMinMaxCoord);
+		CurrentSHPRecBounds = *pMinMaxCoord;
+	}
 	return TRUE;
 } 
 
@@ -2099,7 +2102,7 @@ DoPoly:
 			{
 				if (SHPHeader.ShapeType == SHPT_ARC || SHPHeader.ShapeType == SHPT_ARCM || SHPHeader.ShapeType == SHPT_ARCZ) 
 				{
-					if (Pick)
+					if (Pick || PickingByRefno)
 					{   
 						pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
 	        			for (i=0;i<nPoly;i++)

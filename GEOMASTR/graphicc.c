@@ -2458,10 +2458,11 @@ void BuildTAGIndex (LPSTR Prefix, LPSTR UDI, int len, long Refno,BOOL Deleted)
 		goto Exit;
     if (!len)
     	len = 33;
-	if (ForceTAGIndex)
+	if (ForceTAGIndex && hTAGIdx)
 	{	
+		LPTAGINDEX pTI = GlobalLock(hTAGIdx);
 		char str[34];
-		short	keylen = GetBTKeyLen (hTAGIdx);
+		short	keylen = GetBTKeyLen (pTI->hBT);
 		  
 		len = min (len,33);
 		_fstrncpy (str,UDI,len);
@@ -2485,7 +2486,8 @@ void BuildTAGIndex (LPSTR Prefix, LPSTR UDI, int len, long Refno,BOOL Deleted)
 				break; 
 			TAGKey.Sequence++;
 		}*/ //sizeof(REFINDEXDATA)
-		BT_PUT (hTAGIdx,(LPSTR)&TAGKey,(LPSTR)&RefIdxData);
+		BT_PUT (pTI->hBT,(LPSTR)&TAGKey,(LPSTR)&RefIdxData);
+		GlobalUnlock(hTAGIdx);
 	}
 Exit:
 {
@@ -2505,20 +2507,22 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 	short	len=32;
 	long	Refno;
 	int		NumAdded=0;
+	HANDLE  hTI;
 
 	CloseTAGIndex ();
-	if ((hTAGIdx = BT_OPEN (IndexPath, 0, BT_WRITE, 0)))
+	
+	if ((hTI = BT_OPEN (IndexPath, 0, BT_WRITE, 0)))
 	{	
 		char	str[34], FetchStr[64], OldUDIstr[66],NewUDIstr[66];
-		short	rc,keylen = GetBTKeyLen (hTAGIdx);
+		short	rc,keylen = GetBTKeyLen (hTI);
 		int		tot, loc=0;
 		
 		sprintf (FetchStr,"$NUMROWS(%s)",FileID);
 		ExpandText (FetchStr);
 		tot = atol (FetchStr);
 		CreateStatusWind (hWndMain,1,"Adding additional TAGs");
-		if (!hTAGIdx)
-			hTAGIdx = BT_OPEN (IndexPath, 0, BT_WRITE, 0);
+		if (!hTI)
+			hTI = BT_OPEN (IndexPath, 0, BT_WRITE, 0);
 		sprintf (FetchStr,"$FETCH(%s)",FileID);
 		ExpandText (FetchStr);
 		rc = atoi (FetchStr);
@@ -2530,14 +2534,14 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 			strncpy(TAGKey.UDI,OldUDIstr,32); 
 			TAGKey.Refno = LONG_MIN;  
 			*NewUDIstr=0;
-			if (!BT_FIND (hTAGIdx,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)&RefIdxData))
+			if (!BT_FIND (hTI,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)&RefIdxData))
 			{
 				if (!strcmp (TAGKey.UDI,OldUDIstr))
 				{
 					sprintf (NewUDIstr,"[%s.%s]",FileID,NewUDIvar);
 					ExpandText (NewUDIstr);
 					strncpy(TAGKey.UDI,NewUDIstr,32); 
-					BT_PUT (hTAGIdx,(LPSTR)&TAGKey,(LPSTR)&RefIdxData);
+					BT_PUT (hTI,(LPSTR)&TAGKey,(LPSTR)&RefIdxData);
 					NumAdded++;
 				}
 			}
@@ -2551,63 +2555,42 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 				SetContinueProcessing ( TRUE);
 			}
 		}
-		CloseTAGIndex ();
+		BT_CLOSE(hTI);
 		DestroyStatusWindow(0);  
 	}
 	return NumAdded;
 } 
 
 BOOL DeleteFromTAGList (LPSTR Prefix,LPSTR UDI,long Refno)
-#if ENABLETRACE
-{GSSiEnterProg (1021);
-#endif
 {   
 	REFINDEXDATA	RefIdxData;
+	BOOL rtn = FALSE;
 
 	if (!Prefix)
-{
-#if ENABLETRACE
-GSSiExitProg (1021);
-#endif
 		return FALSE;
-}
+
     if (!*Prefix)
-{
-#if ENABLETRACE
-GSSiExitProg (1021);
-#endif
     	return FALSE;
-}
+
     if (hTAGIdx)
     { 
+		LPTAGINDEX pTI = GlobalLock(hTAGIdx);
 		char str[34];
-		short	keylen = GetBTKeyLen (hTAGIdx);
+		short	keylen = GetBTKeyLen (pTI->hBT);
 		  
 		_fstrncpy (str,UDI,33);
 		str[33]=0;
 		_fstrncpy(TAGKey.PREFIX,Prefix,8); 
 		_fstrncpy(TAGKey.UDI,str,32); 
 		TAGKey.Refno = Refno;  
-		if (!BT_FIND (hTAGIdx,(LPSTR)&TAGKey,BT_FIRST,BT_EQ,(LPSTR)&RefIdxData))
+		if (!BT_FIND (pTI->hBT,(LPSTR)&TAGKey,BT_FIRST,BT_EQ,(LPSTR)&RefIdxData))
 		{
-			BT_DELETE (hTAGIdx,(LPSTR)&TAGKey,(LPSTR)&RefIdxData,FALSE);
-{
-#if ENABLETRACE
-GSSiExitProg (1021);
-#endif
-			return TRUE;
-}
+			BT_DELETE (pTI->hBT,(LPSTR)&TAGKey,(LPSTR)&RefIdxData,FALSE);
+			rtn = TRUE;
 		}
+		GlobalUnlock(hTAGIdx);
 	}
-{
-#if ENABLETRACE
-GSSiExitProg (1021);
-#endif
-	return FALSE;
-}
-#if ENABLETRACE
-}
-#endif
+	return rtn;
 } 
 
 
@@ -2956,6 +2939,7 @@ long PickByRefno (long Refno,LPSTR InPrefix, LPSTR InUDI,short PickFile)
     PICKDATA	PD;
     char	SavePltName[MAX_PATH];
 	int		SavePltType = PltType;
+	BOOL isShapeFile = FALSE;
 
 	strcpy (SavePltName,PltName);
     WantDescBlock = FALSE;
@@ -3070,35 +3054,59 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 			    			_fmemcpy (pRefIdxData,InUDI,sizeof(REFINDEXDATA));
 	                    else
 	                    {
-							short	keylen = GetBTKeyLen (hTAGIdx);  
-							BOOL	CheckNextTAG=TRUE;
-			    			short	pos=BT_FIRST, cond=BT_GE;
-							
-							if (GetBTDataLen (hTAGIdx) > 8)
-								CheckForLargestPiece=TRUE;	
-				    		_fstrncpy(TAGKey.PREFIX,Prefix,8);
-				    		_fstrncpy(TAGKey.UDI,UDI,32); 
-				    		if (keylen == 42)
-				    			TAGKey.Refno = 0;
-				    		else
-				    			TAGKey.Refno = Sequence;  
-				    		while (CheckNextTAG)
-				    		{
-				    			CheckNextTAG = FALSE;
-								st = BT_FIND (hTAGIdx,(LPSTR)&TAGKey,pos,cond,(LPSTR)pRefIdxData);
-								if (!st)
+							LPTAGINDEX pTI = GlobalLock(hTAGIdx);
+							if (pTI->type == TAGINDEX_BTREE)
+							{
+								short	keylen = GetBTKeyLen(hTAGIdx);
+								BOOL	CheckNextTAG = TRUE;
+								short	pos = BT_FIRST, cond = BT_GE;
+
+								if (GetBTDataLen(hTAGIdx) > 8)
+									CheckForLargestPiece = TRUE;
+								_fstrncpy(TAGKey.PREFIX, Prefix, 8);
+								_fstrncpy(TAGKey.UDI, UDI, 32);
+								if (keylen == 42)
+									TAGKey.Refno = 0;
+								else
+									TAGKey.Refno = Sequence;
+								while (CheckNextTAG)
 								{
-						    		if (_fstrncmp(TAGKey.PREFIX,Prefix,8) || 
-						    			_fstrncmp(TAGKey.UDI,UDI,32))
-						    			st=31;
-								}
-								if (!st && pRefIdxData->Deleted) 
-								{
-									pos = BT_NEXT;
-									cond = BT_ANY; 
-									CheckNextTAG = TRUE;
+									CheckNextTAG = FALSE;
+									st = BT_FIND(hTAGIdx, (LPSTR)&TAGKey, pos, cond, (LPSTR)pRefIdxData);
+									if (!st)
+									{
+										if (_fstrncmp(TAGKey.PREFIX, Prefix, 8) ||
+											_fstrncmp(TAGKey.UDI, UDI, 32))
+											st = 31;
+									}
+									if (!st && pRefIdxData->Deleted)
+									{
+										pos = BT_NEXT;
+										cond = BT_ANY;
+										CheckNextTAG = TRUE;
+									}
 								}
 							}
+							else
+							{
+								isShapeFile = TRUE;
+								st = 31;
+								{
+									char cmd[256];
+									sqlite3_stmt *statement;
+									sprintf(cmd, "SELECT RECNUM FROM SHP WHERE [%s] = '%s'", Prefix, UDI);
+									if (sqlite3_prepare_v2(pTI->sltdb, cmd, -1, &statement, 0) == SQLITE_OK)
+									{
+											if (sqlite3_step(statement) == SQLITE_ROW)
+											{
+												CurrentSHPRec = sqlite3_column_int(statement, 0);
+												st = 0;
+											}
+									}
+									sqlite3_finalize(statement);
+								}
+							}
+							GlobalUnlock(hTAGIdx);
 						}
 					}
 					else
@@ -3140,82 +3148,93 @@ NextPiece:
 					Pick = TRUE;
 				    NumPicked = 0; 
 				    _fmemset (&PickList[0],0,sizeof(PICKDATA));
-				    PickList[0].ViewID = CurView->ID;
-					PickList[0].ConfigID = CurrentConfig;
-					PickList[0].FileNum = FileNum;  
-					PickList[0].SubFile = SubFile; 
-					PickList[0].FileInIndex = pRefIdxData->FileInIndex;
-					PickList[0].Segment = pRefIdxData->Segment;
-					PickList[0].Refno = Refno;
-					PickList[0].Desc = 0;
-					if (!FastPick)
-						CloseRefIndex (FALSE);
-					PickList[0].Offset = pRefIdxData->Offset; 
-					PickList[0].Element = 0; 
-					CurView->SubFile = SubFile; 
-					if (SubFile)
+					if (isShapeFile)
 					{
-						strcpy (CurView->OrigFile,CurView->lpFiles[FileNum]);
-						CurView->RestoreFile = FileNum;
+						OpenMap(0, 0);
+						SHPRecOffset = GetSHPRecordOffset(CurrentSHPRec, FALSE);
+						ReadSHPRecordHeader(FidMap, SHPRecOffset,0);
+						ProcessSHPRecord(0, FidMap, CurrentSHPRec);
+						CloseMap(FALSE);
 					}
-					PD=PickList[0];
-					if (!PickedItemMinMax (NumPicked,&PD.Rect))
-					{       
-						Pick = SavePick;
-						PickingByRefno=FALSE;
+					else
+					{
+						PickList[0].ViewID = CurView->ID;
+						PickList[0].ConfigID = CurrentConfig;
+						PickList[0].FileNum = FileNum;
+						PickList[0].SubFile = SubFile;
+						PickList[0].FileInIndex = pRefIdxData->FileInIndex;
+						PickList[0].Segment = pRefIdxData->Segment;
+						PickList[0].Refno = Refno;
+						PickList[0].Desc = 0;
+						if (!FastPick)
+							CloseRefIndex(FALSE);
+						PickList[0].Offset = pRefIdxData->Offset;
+						PickList[0].Element = 0;
+						CurView->SubFile = SubFile;
+						if (SubFile)
+						{
+							strcpy(CurView->OrigFile, CurView->lpFiles[FileNum]);
+							CurView->RestoreFile = FileNum;
+						}
+						PD = PickList[0];
+						if (!PickedItemMinMax(NumPicked, &PD.Rect))
+						{
+							Pick = SavePick;
+							PickingByRefno = FALSE;
+							CurView->SubFile = 0;
+							goto NextFile;
+						}
 						CurView->SubFile = 0;
-						goto NextFile;  
-					}
-					CurView->SubFile = 0;
-				    NumPicked = 1;
-				    PickList[0] = PD;
-					PickList[0].HiPrecis = PolyIsHiPrecis;
-				    PickList[0].PickedPoint = MinMaxMidPointD (&PickList[0].Rect);
-					PD=PickList[0];
-					PickList[0].FileInIndex = pRefIdxData->FileInIndex;
-					PickList[0].Segment = pRefIdxData->Segment;
-					PickList[0].Offset = pRefIdxData->Offset; 
-					PickList[0].Desc = CurrentDesc;
-					PickList[0].Refno = CurrentRefno;
-					_fstrcpy (PickList[0].Prefix,CurrentPrefix);
-					_fstrcpy (PickList[0].UDI,CurrentUDI);
-					PickList[0].Type = 2; 
-					if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE) 
-					{
-						PickList[0].Type = 2; 
-						if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))  
-						{   
-							HPDPOINT lpPoints=(HPDPOINT)GlobalLock (hPoly);
-							
-							PickList[0].NumPoints = nPnts;
-							PickList[0].BeginPoint = lpPoints[0];
-							PickList[0].EndPoint = lpPoints[nPnts-1];
-							PickList[0].Length = GetPolyLengthD (lpPoints,nPnts);
-                            GSSiGlobUlFree (&hPoly);
+						NumPicked = 1;
+						PickList[0] = PD;
+						PickList[0].HiPrecis = PolyIsHiPrecis;
+						PickList[0].PickedPoint = MinMaxMidPointD(&PickList[0].Rect);
+						PD = PickList[0];
+						PickList[0].FileInIndex = pRefIdxData->FileInIndex;
+						PickList[0].Segment = pRefIdxData->Segment;
+						PickList[0].Offset = pRefIdxData->Offset;
+						PickList[0].Desc = CurrentDesc;
+						PickList[0].Refno = CurrentRefno;
+						_fstrcpy(PickList[0].Prefix, CurrentPrefix);
+						_fstrcpy(PickList[0].UDI, CurrentUDI);
+						PickList[0].Type = 2;
+						if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
+						{
+							PickList[0].Type = 2;
+							if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+							{
+								HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
+
+								PickList[0].NumPoints = nPnts;
+								PickList[0].BeginPoint = lpPoints[0];
+								PickList[0].EndPoint = lpPoints[nPnts - 1];
+								PickList[0].Length = GetPolyLengthD(lpPoints, nPnts);
+								GSSiGlobUlFree(&hPoly);
+							}
 						}
-					}
-					else if (CurrentType == GF_AREA) 
-					{
-						PickList[0].Type = 3; 
-						if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],FALSE,&nPnts,&hPoly))  
-						{   
-							HPDPOINT lpPoints=(HPDPOINT)GlobalLock (hPoly);
-							
-							PickList[0].Area = ComputeProjectedAreaAreaD (lpPoints,nPnts,&PickList[0].Length);
-                            GSSiGlobUlFree (&hPoly);
+						else if (CurrentType == GF_AREA)
+						{
+							PickList[0].Type = 3;
+							if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &nPnts, &hPoly))
+							{
+								HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPoly);
+
+								PickList[0].Area = ComputeProjectedAreaAreaD(lpPoints, nPnts, &PickList[0].Length);
+								GSSiGlobUlFree(&hPoly);
+							}
 						}
+						else if (CurrentType == GF_POINT)
+						{
+							PickList[0].Type = 1;
+							PickList[0].BeginPoint = PickList[0].EndPoint = PickList[0].PickedPoint = CurPointLocD;
+						}
+						else if (CurrentType == GF_TEXT)
+							PickList[0].Type = 4;
+						else if (CurrentType == GF_CURVE)
+							PickList[0].Type = 5;
+						else if (CurrentType == GF_DELETE || ItemIsDeleted)
+							PickList[0].IsDeleted = TRUE;
 					}
-					else if (CurrentType == GF_POINT) 
-					{
-						PickList[0].Type = 1; 
-						PickList[0].BeginPoint = PickList[0].EndPoint = PickList[0].PickedPoint = CurPointLocD;
-					} 
-					else if (CurrentType == GF_TEXT)
-						PickList[0].Type = 4; 
-					else if (CurrentType == GF_CURVE)
-						PickList[0].Type = 5; 
-					else if (CurrentType == GF_DELETE || ItemIsDeleted)
-						PickList[0].IsDeleted = TRUE; 
 					PD=PickList[0];
 					rtn = 1; 
 					PickingByRefno=FALSE;
@@ -3266,7 +3285,7 @@ int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
 	if (fid != HFILE_ERROR)
 	{
 		_fstrcpy(PltName, PltFile);
-		if (OpenTAGIndex(FALSE, FALSE))
+		if (OpenTAGIndex(FALSE, FALSE,0))
 		{
 			_fstrncpy(TAGKey.PREFIX, TagLocPrefix, 8);
 			TAGKey.Refno = LONG_MIN;
@@ -3303,7 +3322,7 @@ GSSiExitProg (1075);
 		return; 
 }
 	OpenRefIndex2 (Delete);
-	OpenTAGIndex (Delete,StoreTAGBounds);
+	OpenTAGIndex (Delete,StoreTAGBounds,0);
 {
 #if ENABLETRACE
 GSSiExitProg (1075);
@@ -3471,8 +3490,7 @@ GSSiExitProg (1077);
 //	hDupRef = 0;
 	BT_CLOSE (hRefIdx);
 	hRefIdx = 0;
-	BT_CLOSE (hTAGIdx);
-	hTAGIdx = 0;
+	CloseTAGIndex();
 {
 #if ENABLETRACE
 GSSiExitProg (1077);
@@ -3643,7 +3661,7 @@ GSSiExitProg (1074);
 		if (*ReopenRefName)
 			hRefIdx = BT_OPEN (ReopenRefName, 0, BT_READ, 0);
 		if (*ReopenTAGName)
-			hTAGIdx = BT_OPEN (ReopenTAGName, 0, BT_READ, 0);
+			OpenTAGIndex(FALSE, FALSE, ReopenTAGName); 
 		*ReopenRefName=0;
 		*ReopenTAGName=0;
 	}
@@ -3664,9 +3682,9 @@ GSSiExitProg (1074);
 			}
 			if (hTAGIdx)
 			{
-				BT_GETPATHNAME (hTAGIdx,ReopenTAGName);
-				BT_CLOSE (hTAGIdx);
-				hTAGIdx = 0;
+				LPTAGINDEX pTI = GlobalLock(hTAGIdx);
+				strcpy (ReopenTAGName,pTI->TAGFile);
+				CloseTAGIndex();
 			}
             _fstrcpy (str,PltName);
             ExpandText (str);

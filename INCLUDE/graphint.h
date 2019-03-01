@@ -744,7 +744,6 @@ void ShowZoomBox (HDC hDC,POINT StartPoint,POINT LastPoint, BOOL *HaveBox, BOOL 
 void BuildRefIndex (BOOL DeleteExistingRef,BOOL DeletedItem);
 void OpenRefIndex (BOOL Delete); 
 void OpenRefIndex2 (BOOL Delete);
-BOOL OpenTAGIndex(BOOL Delete, BOOL StoreBounds);
 int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile);
 BOOL AddToDupRefList (long Refno);
 HANDLE CreateDupRefTable (void);
@@ -1761,7 +1760,6 @@ BOOL LoadNewData (LPSTR Dir);
 BOOL FixDupRef (void);
 void SetThemeElementCharacteristics (int iclass); 
 BOOL PtInDrawRect (POINT SegPoint);
-void CloseTAGIndex (void);
 //void LoadDTM (void);  
 void DisplayContourLabels (BOOL Clear);
 BOOL ProcessTINPoly (HPDPOINT lpDCurPoints,HANDLE hElevBuffer,long nPnts);
