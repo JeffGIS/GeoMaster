@@ -200,6 +200,12 @@ BOOL InitGraphics (HWND hWnd)
 		OffsetChoice = FillList (0,0,name,str,0); 
 		SetGlobalValue ("%OFFSETLINEDIST",str); 
 	}
+	if (GetGlobalCVal("[%IR50PATH]", str, 0))
+	{
+		HINSTANCE hlib = LoadLibrary(str);
+		ii = 1;
+	}
+
 	hStartupMenu = GSSiGlobAlloc (  40,GHND,256);
 	hStartupCommand = GSSiGlobAlloc (  41,GHND,256);
 	hCommand = GSSiGlobAlloc (  42,GHND,1024);   

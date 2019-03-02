@@ -4152,7 +4152,7 @@ void DisplayStreetText(void)
 	double Size, Radius, Width; 
 	POINT	Point;   
 	BOOL	DoCircle,UseLayerSize=TRUE, First;
-	COLORREF	OldColor; 
+	COLORREF	OldColor=-1; 
 	int		NumStates, i, istate, laststate;
 	long	StateOffsets[70], lastpop, FIPS,ii;
 	long		lbuf = 500*sizeof(CitiesData4), lenread;
@@ -4356,7 +4356,8 @@ NextState:	istate--;
 DoStreets:
 	if (DisplayStreetLabels (FALSE))
 		goto Exit;
-	SetTextColor (CurView->hDC,OldColor); 
+	if (OldColor != -1)
+		SetTextColor (CurView->hDC,OldColor); 
 	if (!CurTheme->hScatterFile)
 		goto Exit;                 
 	BTVar[0].BT_VARTYP=BT_INTEGER;

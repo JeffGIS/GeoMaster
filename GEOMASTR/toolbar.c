@@ -447,6 +447,7 @@ void ClearToolbarTrackEvents (HWND hWnd)
 				SaveToolbarImage (i);
 			case DMS_NORMAL:
 				PostMessage (ToolbarWindow[i],GSSi_DimMenu,0,0);
+				DisplayMenuStatus[i] = DMS_DIMMED;
 			}
 		}
 	}
@@ -2529,7 +2530,7 @@ HRGN	hRgn;
 		DisplayPZRotImage(3);
 		if (!waitForUpButton)
 			iColor = VHMoveColor;
-	
+		rtn = 1;
 		break;
 
 

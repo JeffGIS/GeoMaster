@@ -5812,8 +5812,8 @@ LoadGFMenu:
 						}
 					}
 					GSSiSetCursor (hCursor);
-				}
-				ClearToolbarTrackEvents (0);
+					ClearToolbarTrackEvents(0);
+			}
 {
 #if ENABLETRACE
 GSSiExitProg (438);
