@@ -1,2 +1,2 @@
-configs\photosegments.gmc 
-j:\pcviewer\pcviewer
+configs\basemap_new3.gmc 
+I:\bu_2018_02_28\geomas

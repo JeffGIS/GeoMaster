@@ -1474,7 +1474,7 @@ Next:
 			//if (WantGMDNegGrid || RectInWBounds(&GMDBounds, 1))
 				ProcessSQLITERecord(*hDC);
 			n++;
-		} while (n < maxn && FindNextSegment());
+		} while (n < maxn && ContinueProcessing && FindNextSegment());
 		if (n < maxn)
 			goto Next;
 		goto RtnTrue;

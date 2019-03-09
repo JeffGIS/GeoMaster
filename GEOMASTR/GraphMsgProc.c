@@ -1632,7 +1632,7 @@ static void AdjustIdentifyWindow (HWND hWndDlg,BOOL first)
 	MoveWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), RECTWIDTH(&mr) - (mro.right - r3.right) - RECTWIDTH(&r3), r3.top, RECTWIDTH(&r3), RECTHEIGHT(&r3), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDC_NOTES), RECTWIDTH(&mr) - (mro.right - r5.right) - RECTWIDTH(&r5), r5.top, RECTWIDTH(&r5), RECTHEIGHT(&r5), !first);
 	if (showOnlyData)
-		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr), RECTHEIGHT(&mr), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr), RECTHEIGHT(&mr)-38, !first);
 	else
 		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, r4.top, RECTWIDTH(&mr), RECTHEIGHT(&mr) - r4.top, !first);
 }

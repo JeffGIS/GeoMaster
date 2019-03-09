@@ -221,6 +221,7 @@ void RWRITE (double RVAL, int NDP, LPSTR OutLoc);
 void RWRITEZ (double RVAL, int NDP, int len,LPSTR OutLoc); 
 short Strip(LPSTR str, char chr);
 LPSTR ReplaceChar (LPSTR str, char from, char to);
+LPSTR RemoveChars(LPSTR str, LPSTR chars);
 LPSTR RemoveDoubleQuotes (LPSTR str);
 LPSTR RemoveQuotes(LPSTR str);
 LPSTR ConvertCharBtwnDoubleQuotes(LPSTR str, char from, char to);
@@ -699,6 +700,18 @@ void GMMessageBox (UINT Message, UINT Title, UINT Style);
 long LoadProjection(long nj, LPSTR NAME); 
 long TranProjection(long I, long O, double *x, double *y); 
 int ConvertPRJtoProj4(char *in, char * out);
+unsigned int MapSize(int levelOfDetail);
+double GroundResolution(double latitude, int levelOfDetail);
+void LatLongToPixelXY(double latitudein, double longitudein, int levelOfDetail, int *pixelX, int *pixelY);
+void LatLongToPixelXYd(double latitudein, double longitudein, int levelOfDetail, double *pixelX, double *pixelY);
+void PixelXYToLatLong(double pixelX, double pixelY, int levelOfDetail, double *latitude, double *longitude);
+void PixelXYToTileXY(int pixelX, int pixelY, int *tileX, int *tileY);
+void PixelXYToTileXYd(double pixelX, double pixelY, int *tileX, int *tileY);
+void TileXYToPixelXY(int tileX, int tileY, int *pixelX, int *pixelY);
+void TileXYToQuadKey(int tileX, int tileY, int levelOfDetail, char *quadKey, int maxLen);
+int QuadKeyToTileXY(char *quadKey, int *tileX, int *tileY, int *levelOfDetail);
+
+
 
 //extern long FAR PASCAL CloseLibrary(void);
 //extern BOOL FAR PASCAL OpenGCTPLibrary(void);
@@ -839,7 +852,7 @@ void ExpandBounds (LPMNMXCORD Bounds, double Adjust);
 void ExpandMinMax (LPMINMAX Bounds, int Adjust);
 void ExpandMinMaxL (LPMNMXCORL Bounds, long Adjust);
 void TranBounds(HANDLE TranID, LPMNMXCORD pBounds);
-void ConvertBounds(LPMNMXCORD pBounds, int from, int to);
+BOOL ConvertBounds(LPMNMXCORD pBounds, int from, int to);
 void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect);
 double AdjustRectToRectFactor(LPRECT pRectToAdjust, LPRECT pRect);
 void DebugShowLine (LPDPOINT p1,LPDPOINT p2);

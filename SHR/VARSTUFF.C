@@ -2272,7 +2272,7 @@ void SetGlobalValue2 (HANDLE handle, LPSTR Value, short Index)
 #endif
 {
 	VARPNT	VP;
-	BOOL	BVal; 
+	BOOL	BVal, err; 
 	short	n, type, i,ii, ib, ie;    
 	long	Color;
 	char	nullval=0; 
@@ -3607,6 +3607,9 @@ GSSiExitProg (532);
 				wantBackgroundCache = atob(Value);
 		}
 			break;
+		case 399:
+			ProjectBounds = atobounds(Value,&err);
+			break;
 		default:
  			break;
 	}
@@ -4024,8 +4027,9 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%WANTBACKGROUNDCACHE", 396, FALSE);
 	AllocateTypeVar("%USERINIFILE", 397, FALSE);
 	AllocateTypeVar("%DLSERIALNUMBER", 398, FALSE);
+	AllocateTypeVar("%PROJECTBOUNDS", 399, FALSE);
 
-
+	
 //	AllocateTypeVar("%DL",191,FALSE);
 	
 {
@@ -5237,6 +5241,9 @@ GSSiExitProg (533);
 			DWORD Serno = GetDriveSerialNumber(drive);
 			sprintf(OutStr, "%ld", Serno);
 		}
+		case 399:
+			boundstoa(OutStr, &ProjectBounds);
+			break;
 		break;
 	}
 	GlobalUnlock (hGlobal);

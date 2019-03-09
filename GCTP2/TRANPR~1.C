@@ -51,17 +51,30 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
           *X = X2;
           *Y = Y2;
         }       
-		if (PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION || PRJ_TYPE[ID_FROM] == PROJ4PROJECTION)
+		if (PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION ||
+			PRJ_TYPE[ID_FROM] == PROJ4PROJECTION ||
+			PRJ_TYPE[ID_FROM] > 1000)
         {
 			int id = PRJ_ZONE[ID_FROM];
 
 			if (PRJ_TYPE[ID_FROM] == SphericalMercatorPROJECTION)
 				id = GOOGLEMAPSPROJECTION;
-			IRC = pj_transform(PRJ_PROJ4DEF[ID_FROM], PRJ_PROJ4DEF[2], 1, 1, X, Y, NULL,NULL);
-			if (IRC)
-           		return IRC;                   
-			*X *= RAD_TO_DEG;
-			*Y *= RAD_TO_DEG;
+			if (PRJ_TYPE[ID_FROM] > 1000)
+			{
+				int ilev = PRJ_TYPE[ID_FROM] - 1000;
+				double lat, lon;
+				PixelXYToLatLongd(*X,*Y, ilev, &lat,&lon);
+				*X = lon;
+				*Y = lat;
+			}
+			else
+			{
+				IRC = pj_transform(PRJ_PROJ4DEF[ID_FROM], PRJ_PROJ4DEF[2], 1, 1, X, Y, NULL, NULL);
+				if (IRC)
+					return IRC;
+				*X *= RAD_TO_DEG;
+				*Y *= RAD_TO_DEG;
+			}
 			SAVE_PRJ_TYPE = PRJ_TYPE[ID_FROM];
 			SAVEXBIAS = PRJ_X_BIAS[ID_FROM];
 			SAVEYBIAS = PRJ_Y_BIAS[ID_FROM];
@@ -87,8 +100,10 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
 			//if (IRC)
            		return IRC;                   
 		}
-		if (PRJ_TYPE[ID_TO] == SphericalMercatorPROJECTION || PRJ_TYPE[ID_TO] == PROJ4PROJECTION)
-        {
+		if (PRJ_TYPE[ID_TO] == SphericalMercatorPROJECTION ||
+			PRJ_TYPE[ID_TO] == PROJ4PROJECTION ||
+			PRJ_TYPE[ID_TO] > 1000)
+		{
 			SAVE_PRJ_TYPE = PRJ_TYPE[ID_TO];
 			SAVEXBIAS = PRJ_X_BIAS[ID_TO];
 			SAVEYBIAS = PRJ_Y_BIAS[ID_TO];
@@ -113,11 +128,23 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
 			PRJ_UNITS[ID_TO] = SAVE_PRJ_UNITS;
 			if (IRC)
            		return IRC;                   
-			*X *= DEG_TO_RAD;
-			*Y *= DEG_TO_RAD;
-			IRC = pj_transform(PRJ_PROJ4DEF[2], PRJ_PROJ4DEF[ID_TO], 1, 1, X, Y, NULL,NULL);
-			if (IRC)
-           		return IRC;                   
+			if (PRJ_TYPE[ID_TO] > 1000)
+			{
+				int ilev = PRJ_TYPE[ID_TO] - 1000;
+				double outx, outy;
+
+				LatLongToPixelXYd(*Y,*X, ilev, &outx,&outy);
+				*X = outx;
+				*Y = outy;
+			}
+			else
+			{
+				*X *= DEG_TO_RAD;
+				*Y *= DEG_TO_RAD;
+				IRC = pj_transform(PRJ_PROJ4DEF[2], PRJ_PROJ4DEF[ID_TO], 1, 1, X, Y, NULL, NULL);
+				if (IRC)
+					return IRC;
+			}
 		}
 		else if(PRJ_TYPE[ID_FROM] == COUNTY)
         {

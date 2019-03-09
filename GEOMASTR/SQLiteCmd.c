@@ -4,6 +4,7 @@
 //#include "sqlite3ext.h"
 #define INDEX_TYPE_RTREE	1
 #define INDEX_TYPE_XY		2
+static  char    SQLITEUsedFields[4096] = "*";
 static	char	SQLITERefno[128] = "0";
 static	char	SQLITEx[128] = "[SQLITE.x]";
 static	char	SQLITEy[128] = "[SQLITE.y]";
@@ -17,7 +18,7 @@ static	char	SQLITETAG[128] = "CONTROLN:[SQLITE.Wall Id]", SQLITETag[128];//"CASE
 static	int		SQLITEXIndex = 1, SQLITEYIndex = 2;
 static	int		SQLITEXField = 7, SQLITEYField = 8;
 static	DPOINT	SQLITEPoint;
-static	double	SQLITEPointSize;
+static	double	SQLITEPointSize=5;
 static	long	SQLITEColor = -1;
 static char		SQLITEBeginDate[256];
 static char		SQLITEEndDate[256];
@@ -566,8 +567,9 @@ BOOL GetSQLITEBounds(sqlite3 *db, LPSTR tableName, LPMNMXCORD pfileMNMX)
 		switch (SQLITEIndexType)
 		{
 		case INDEX_TYPE_RTREE:
-			rtn = query_rtree_bbox(db, tableName, pfileMNMX);
-
+		{
+			rtn = query_rtree_bbox(db,tableName, pfileMNMX);
+		}
 			break;
 
 		case INDEX_TYPE_XY:
@@ -2516,8 +2518,8 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 			if (GSSiLength(fileName) > 0)
 			{
 				int st;
-				rtnType = SHPT_POINT;
-				st = LoadSQLITEParm(fileName, tableName, rtnType, CurView->hWnd);
+				
+				rtnType = LoadSQLITEParm(fileName, tableName, CurView->hWnd);
 				if (OpenDataFile(FileNameIN, "", BT_READ, &SQLITEHandle))
 				{
 					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
@@ -2528,8 +2530,17 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 					{
 						if (!SLTSpatialIndexExists(pSQLDatabase->DBHandle, tableName))
 						{
-							SLTSpatialIndexCreate(pSQLDatabase->DBHandle, tableName);
-
+							GlobalUnlock(SQLITEHandle);
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(FilePtr->FileHandle);
+							CloseDataFile(TRUE, &SQLITEHandle);
+							if (OpenDataFile(FileNameIN, "", BT_WRITE, &SQLITEHandle))
+							{
+								SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+								FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+								pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+								SLTSpatialIndexCreate(pSQLDatabase->DBHandle, tableName);
+							}
 						}
 						if (GetSQLITEBounds(pSQLDatabase->DBHandle, tableName, &SQLITEFileMNMX))
 						{
@@ -2569,29 +2580,36 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 							}
 							CreateFileTran(&MinMax, &FileMNMX);
 							Bounds = CurView->WBounds;
-							ConvertBounds(&Bounds, 1, 0);
-							if (!stricmp(tableName, "ALLEYWALLS_NEW"))
+							if (ConvertBounds(&Bounds, 1, 0))
 							{
-								sprintf(Query, "SELECT ALLEYWALLS_NEW.id, @[Wall Id@],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
-									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+								if (!stricmp(tableName, "ALLEYWALLS_NEW"))
+								{
+									sprintf(Query, "SELECT ALLEYWALLS_NEW.id, @[Wall Id@],LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW,ALLEYWALLS_NEW_index WHERE ALLEYWALLS_NEW.Current=1 AND ALLEYWALLS_NEW.id=ALLEYWALLS_NEW_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+								}
+								else if (!stricmp(tableName, "RAMPS"))
+								{
+									sprintf(Query, "SELECT %s FROM RAMPS,RAMPS_index WHERE RAMPS.rowid=RAMPS_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",SQLITEUsedFields,
+										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+								}
+								else
+								{
+									sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND maxTime >= %i AND minTime <= %i AND maxUCR >= %i AND minUCR <= %i AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", tableName, tableName, tableName, tableName, TimeRangeBeg, TimeRangeEnd, GMDMinCode, GMDMaxCode,
+										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+								}
+								GlobalUnlock(FilePtr->FileHandle);
+								GlobalUnlock(SQLPtr->OFHandle);
+								GlobalUnlock(SQLITEHandle);
+								CloseDataFile(TRUE, &SQLITEHandle);
+								OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
+								SLTPrepare(SQLITEHandle);
+								SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+								SQLPtr->lastreadtime = INT_MAX;
+								SQLPtr->NumGlobals = 0;
+								SQLPtr->st = 0;
+								FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+								pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 							}
-							else
-							{
-								sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND maxTime >= %i AND minTime <= %i AND maxUCR >= %i AND minUCR <= %i AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", tableName, tableName, tableName, tableName, TimeRangeBeg, TimeRangeEnd, GMDMinCode, GMDMaxCode,
-									Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
-							}
-							GlobalUnlock(FilePtr->FileHandle);
-							GlobalUnlock(SQLPtr->OFHandle);
-							GlobalUnlock(SQLITEHandle);
-							CloseDataFile(TRUE, &SQLITEHandle);
-							OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
-							SLTPrepare(SQLITEHandle);
-							SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
-							SQLPtr->lastreadtime = INT_MAX;
-							SQLPtr->NumGlobals = 0;
-							SQLPtr->st = 0;
-							FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
-							pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 						}
 					}
 					GlobalUnlock(FilePtr->FileHandle);
@@ -2977,7 +2995,7 @@ BOOL ProcessSQLITERecord(HDC hDC)
 						else
 						{
 							long	DisplayedWidth = 0;
-
+							
 							DisplayPointItem(CurView->hDC, CurPointLoc, size, PTRot, iDesc, &DisplayedWidth);
 							CurView->MaxSymbolWidth = max(CurView->MaxSymbolWidth, DisplayedWidth);
 							CurView->MaxFileDisplayedPointWidth[FileNum] = max(CurView->MaxFileDisplayedPointWidth[FileNum], (DisplayedWidth / FileDistToWinDist) - (((long)CurrentItemMinMax.xmx) - CurrentItemMinMax.xmn));
@@ -3097,7 +3115,7 @@ void GetSLTName(LPSTR name)
 	SubstituteDL(name, FALSE);
 	return;
 }
-int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
+int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, HWND hWnd)
 #if ENABLETRACE
 {
 	GSSiEnterProg(1374);
@@ -3112,6 +3130,7 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 		HFILE	Fid;
 		BOOL	FileIsIndex;
 		BOOL	havePrj = FALSE;
+		long    Type = SHPT_POINT;
 		struct _stati64    statParmFile;
 
 		if (!SQLITEFileName)
@@ -3121,12 +3140,130 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 		}
 		strcpy(DBName, SQLITEFileName);
 		ExpandText(DBName);
+
 		*SQLITEBeginDate = 0;
 		*SQLITEEndDate = 0;
 		SQLITEParmTime = 0;
 		NumSQLITEParms = 0;
 		SQLITEProjectionIsBase = TRUE;
 		_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
+		pDot = _fstrrchr(DBName, '.');
+		if (pDot)
+		{
+			*pDot = 0;
+			sprintf(Name, "%s_%s.slp", DBName, tableName);
+			Fid = GSSiOpenFile(Name, 0, OF_READ);
+			if (Fid == HFILE_ERROR)
+			{
+				DLGPROC lpfnSETSHAPEPARAMMsgProc;
+
+				_fstrcpy(LastSQLITEFile, Name);
+				ExpandText(LastSQLITEFile);
+				if (!Type || GetGlobalBVal2("[%AUTOSQLITEPARM]", TRUE))
+					goto UseDefaults;
+				else
+				{
+					DLGPROC	lpfnSQLITEPOINTMsgProc;
+
+					lpfnSQLITEPOINTMsgProc = MakeProcInstance((DLGPROC)SETSQLITEPOINTMsgProc, hInst);
+					int nRc = DialogBox(hInst, (LPSTR)"SETSQLITEPOINTPARAM", hWnd, lpfnSQLITEPOINTMsgProc);
+					FreeProcInstance(lpfnSQLITEPOINTMsgProc);
+					//				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
+					//				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
+					//				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
+					Fid = GSSiOpenFile(Name, 0, OF_READ);
+					if (Fid == HFILE_ERROR)
+						goto UseDefaults;
+				}
+			}
+			GSSifstat(Fid, &statParmFile);
+			SQLITEParmTime = statParmFile.st_mtime;
+			fgetstring(str, MAX_PATH, Fid);
+			Type = atoi(str);
+			fgetstring(SQLITEUsedFields,sizeof(SQLITEUsedFields)-2, Fid);
+			fgetstring(Projection, MAX_PATH, Fid);
+			if (!havePrj)
+			{
+				if (!*Projection)
+					GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
+				LoadProjection(0, Projection);
+			}
+			SQLITEProjectionIsBase = IS_BASE[0];
+			fgetstring(Units, 32, Fid);
+			if (!*Units)
+				GetGlobalCVal("[%DefaultShapeUnits]", Units, "FEET");
+			if (!havePrj)
+			{
+				if (!_fstricmp(Units, "FEET"))
+					PRJ_UNITS[0] = 1;
+				else if (!_fstricmp(Units, "METERS"))
+					PRJ_UNITS[0] = 2;
+				else
+					PRJ_UNITS[0] = 4;
+			}
+			fgetstring(SQLITEx, sizeof(SQLITEx) - 2, Fid);
+			fgetstring(SQLITEy, sizeof(SQLITEy) - 2, Fid);
+			fgetstring(SQLITERefno, 255, Fid);
+			if (IndexEntryStartRef != LONG_MAX)
+				SQLITEBaseRefno = IndexEntryStartRef;
+			else
+				SQLITEBaseRefno = atol(SQLITERefno);
+			fgetstring(SQLITETAG, 99, Fid);
+			_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
+			nSQLITESymbols = 0;
+			while (fgetstring(str, 256, Fid))
+			{
+				if (*str == '#')
+					break;
+				DecodeSHPParam(str, SymName, cIF, cColor, cWidth, cRot);
+				SQLITESymbols[nSQLITESymbols++] = GetDictSymbolNumber(SymName);
+				_fstrcpy(pParm, SymName);
+				l = _fstrlen(SymName);
+				pParm += l + 1;
+				_fstrcpy(pParm, cIF);
+				l = _fstrlen(cIF);
+				pParm += l + 1;
+				_fstrcpy(pParm, cColor);
+				l = _fstrlen(cColor);
+				pParm += l + 1;
+				_fstrcpy(pParm, cWidth);
+				l = _fstrlen(cWidth);
+				pParm += l + 1;
+				_fstrcpy(pParm, cRot);
+				l = _fstrlen(cRot);
+				pParm += l + 1;
+				NumSQLITEParms++;
+				switch (Type)
+				{
+				default:
+				case SHPT_POINT:
+				case SHPT_POINTZ:
+				case SHPT_MULTIPOINT:
+					itype = 1;
+					break;
+				case SHPT_ARC:
+					itype = 2;
+					break;
+				case SHPT_POLYGON:
+					itype = 3;
+				}
+				if (!GetOrCreateSym(hWnd, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), itype))
+				{
+					ExpandText(SymName);
+					MessageBox(0, "Symbol not found", SymName, MB_ICONEXCLAMATION);
+				}
+			}
+			//CreateSHPSymlistFile(SHPFileName, NumSHPParms, SymName); could speed up file gdb and shp processing for multiple symbol files when symbol name contained in a variable
+			if (fgetstring(str, 256, Fid))
+				_fstrcpy(SQLITEBeginDate, str);
+			if (fgetstring(str, 256, Fid))
+				_fstrcpy(SQLITEEndDate, str);
+
+			GSSiClose2(&Fid);
+		}
+		goto RtnTrue;
+	UseDefaults:
+		Type = SHPT_POINT;
 		switch (Type)
 		{
 		case SHPT_POINT:
@@ -3180,120 +3317,12 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, long Type, HWND hWnd)
 			PRJ_UNITS[0] = 4;
 		SQLITEBaseRefno = 0;
 		*SQLITERefno = 0;
-		pDot = _fstrrchr(DBName, '.');
-		if (!pDot)
-			goto RtnFalse;
-		*pDot = 0;
-		sprintf(Name, "%s_%s.slp", DBName, tableName);
-		Fid = GSSiOpenFile(Name, 0, OF_READ);
-		if (Fid == HFILE_ERROR)
-		{
-			DLGPROC lpfnSETSHAPEPARAMMsgProc;
-
-			_fstrcpy(LastSQLITEFile, Name);
-			ExpandText(LastSQLITEFile);
-			if (!Type || GetGlobalBVal2("[%AUTOSQLITEPARM]", TRUE))
-				goto RtnTrue;
-			else
-			{
-				DLGPROC	lpfnSQLITEPOINTMsgProc;
-
-				lpfnSQLITEPOINTMsgProc = MakeProcInstance((DLGPROC)SETSQLITEPOINTMsgProc, hInst);
-				int nRc = DialogBox(hInst, (LPSTR)"SETSQLITEPOINTPARAM", hWnd, lpfnSQLITEPOINTMsgProc);
-				FreeProcInstance(lpfnSQLITEPOINTMsgProc);
-//				lpfnSETSHAPEPARAMMsgProc = MakeProcInstance((DLGPROC)SETSHAPEPARAMMsgProc, hInst);
-//				DialogBox(hInst, (LPSTR)"SETSHAPEPARAM", hWnd, lpfnSETSHAPEPARAMMsgProc);
-//				FreeProcInstance(lpfnSETSHAPEPARAMMsgProc);
-				Fid = GSSiOpenFile(Name, 0, OF_READ);
-				if (Fid == HFILE_ERROR)
-					goto RtnFalse;
-			}
-		}
-		GSSifstat(Fid, &statParmFile);
-		SQLITEParmTime = statParmFile.st_mtime;
-		fgetstring(Projection, MAX_PATH, Fid);
-		if (!havePrj)
-		{
-			if (!*Projection)
-				GetGlobalCVal("[%DefaultShapeProjection]", Projection, "BASEPROJ");
-			LoadProjection(0, Projection);
-		}
-		SQLITEProjectionIsBase = IS_BASE[0];
-		fgetstring(Units, 32, Fid);
-		if (!*Units)
-			GetGlobalCVal("[%DefaultShapeUnits]", Units, "FEET");
-		if (!havePrj)
-		{
-			if (!_fstricmp(Units, "FEET"))
-				PRJ_UNITS[0] = 1;
-			else if (!_fstricmp(Units, "METERS"))
-				PRJ_UNITS[0] = 2;
-			else
-				PRJ_UNITS[0] = 4;
-		}
-		fgetstring(SQLITERefno, 255, Fid);
-		if (IndexEntryStartRef != LONG_MAX)
-			SQLITEBaseRefno = IndexEntryStartRef;
-		else
-			SQLITEBaseRefno = atol(SQLITERefno);
-		fgetstring(SQLITETAG, 99, Fid);
-		_fmemset(SQLITEParms, 0, sizeof(SQLITEParms));
-		nSQLITESymbols = 0;
-		while (fgetstring(str, 256, Fid))
-		{
-			if (*str == '#')
-				break;
-			DecodeSHPParam(str, SymName, cIF, cColor, cWidth, cRot);
-			SQLITESymbols[nSQLITESymbols++] = GetDictSymbolNumber(SymName);
-			_fstrcpy(pParm, SymName);
-			l = _fstrlen(SymName);
-			pParm += l + 1;
-			_fstrcpy(pParm, cIF);
-			l = _fstrlen(cIF);
-			pParm += l + 1;
-			_fstrcpy(pParm, cColor);
-			l = _fstrlen(cColor);
-			pParm += l + 1;
-			_fstrcpy(pParm, cWidth);
-			l = _fstrlen(cWidth);
-			pParm += l + 1;
-			_fstrcpy(pParm, cRot);
-			l = _fstrlen(cRot);
-			pParm += l + 1;
-			NumSQLITEParms++;
-			switch (Type)
-			{
-			default:
-			case SHPT_POINT:
-			case SHPT_POINTZ:
-			case SHPT_MULTIPOINT:
-				itype = 1;
-				break;
-			case SHPT_ARC:
-				itype = 2;
-				break;
-			case SHPT_POLYGON:
-				itype = 3;
-			}
-			if (!GetOrCreateSym(hWnd, SymName, 0, 0, GetGlobalLVal2("[%ALLOWSYMBOLCREATION]", 0), itype))
-			{
-				ExpandText(SymName);
-				MessageBox(0, "Symbol not found", SymName, MB_ICONEXCLAMATION);
-			}
-		}
-		//CreateSHPSymlistFile(SHPFileName, NumSHPParms, SymName); could speed up file gdb and shp processing for multiple symbol files when symbol name contained in a variable
-		if (fgetstring(str, 256, Fid))
-			_fstrcpy(SQLITEBeginDate, str);
-		if (fgetstring(str, 256, Fid))
-			_fstrcpy(SQLITEEndDate, str);
-
-		GSSiClose2 (&Fid);
 	RtnTrue:
 		{
 #if ENABLETRACE
 			GSSiExitProg(1374);
 #endif
-			return TRUE;
+			return Type;
 		}
 	RtnFalse:
 		{
@@ -3719,7 +3748,19 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 {
 	BOOL rtn = FALSE;
 	char lastName[256] = { 0 };
-
+	char xfield[128], yfield[128];
+	LPSTR pDot = strrchr(SQLITEx, '.');
+	if (pDot)
+		strcpy(xfield, ++pDot);
+	else
+		strcpy(xfield, SQLITEx);
+	pDot = strrchr(SQLITEy, '.');
+	if (pDot)
+		strcpy(yfield, ++pDot);
+	else
+		strcpy(yfield, SQLITEy);
+	RemoveChars(xfield, "[]");
+	RemoveChars(yfield, "[]");
 	pDB->NumFields = 0;
 	pDB->numRetreived = 0;
 	if (!SQLOK(sqlite3_prepare_v2(pDB->DBHandle, pDB->Query, -1, &pDB->statement, 0), pDB->DBHandle, "prepare", 0))
@@ -3733,10 +3774,10 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 			int ibytes = sqlite3_column_bytes(pDB->statement, j);
 			LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, j);
 			LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, j);
-			if (!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE"))
+			if (!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE") || !stricmp(pName, xfield))
 				pDB->xLoc = j;
 
-			if (!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE"))
+			if (!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE") || !stricmp(pName, yfield))
 				pDB->yLoc = j;
 
 			if (!decl)
@@ -4288,11 +4329,45 @@ BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 
 	if (db)
 	{
-		sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;\
-					  CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);",tableName, tableName);
-
+		MNMXCORD projbounds = ProjectBounds;
+		ConvertBounds(&projbounds,1,0);
+		SLT_StartTrans(db);
+		sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;CREATE VIRTUAL TABLE %s_index USING rtree(id, minX, maxX, minY, maxY);",tableName, tableName);
 		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+		{
+			char x[128], y[128];
+			strcpy(x, SQLITEx);
+			strcpy(y, SQLITEy);
+			strupr(x);
+			strupr(y);
+			if (!strncmp(x, "[SQLITE.", 8))
+			{
+				strcpy(x, &SQLITEx[8]);
+				*LastChr(x) = 0;
+			}
+			if (!strncmp(y, "[SQLITE.", 8))
+			{
+				strcpy(y, &SQLITEy[8]);
+				*LastChr(y) = 0;
+			}
+			sprintf(pCmd, "SELECT rowid,%s,%s FROM %s", x,y, tableName);
+			SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "SpatialIndexCreate", 0);
+
+			while (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				long long rowid = sqlite3_column_int(statement, 0);
+				MNMXCORD bounds;
+				bounds.xmn = sqlite3_column_double(statement, 1);
+				bounds.ymn = sqlite3_column_double(statement, 2);
+				bounds.xmx = bounds.xmn;
+				bounds.ymx = bounds.ymn;
+				if (BoundsInBounds(&bounds, &projbounds, 1))
+					SLTSpatialIndexAdd(db, tableName, rowid, 0, &bounds);
+			}
+			sqlite3_finalize(statement);
+			SLT_EndTrans(db);
 			rtn = TRUE;
+		}
 	}
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -4326,13 +4401,20 @@ BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, L
 	sqlite3_stmt *statement;
 	BOOL rtn = FALSE;
 
-	if (db)
-	{
-		sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
-			tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, tableName, id, Name);
-		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
-			rtn = TRUE;
-	}
+		if (db)
+		{
+			if (Name)
+				sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f);INSERT INTO %s VALUES(%lli, '%s');",
+					tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, tableName, id, Name);
+			else
+				sprintf(pCmd, "INSERT INTO %s_index VALUES(%lli,%f,%f,%f,%f);",
+					tableName, id, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, tableName);
+
+			if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
+				rtn = TRUE;
+		}
+	
+	GSSiGlobUlFree(&hCmd);
 	return rtn;
 }
 BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD3D pBounds)
@@ -4349,6 +4431,7 @@ BOOL SLTSpatialIndexAdd3D(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name,
 		if (sqlite3_exec(db, pCmd, 0, 0, 0) == SQLITE_OK)
 			rtn = TRUE;
 	}
+	GSSiGlobUlFree(&hCmd);
 	return rtn;
 }
 MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
@@ -4378,6 +4461,7 @@ MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
 		}
 		sqlite3_finalize(statement);
 	}
+	GSSiGlobUlFree(&hCmd);
 	return Bounds;
 }
 MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
@@ -4409,5 +4493,6 @@ MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
 		}
 		sqlite3_finalize(statement);
 	}
+	GSSiGlobUlFree(&hCmd);
 	return Bounds;
 }

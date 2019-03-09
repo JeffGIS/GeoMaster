@@ -7,6 +7,8 @@
 
 static	char	LastSymName[34]=""; 
 
+static BOOL		fromCloseDict = FALSE;
+static HANDLE   cachedSymbolHandle[3200] = { 0 };
 static HANDLE	hSymIndex=0;
 static short	NumElementPoints=0;
 static long	SymbolFileEnd;
@@ -745,6 +747,9 @@ HANDLE GetDictSymDesc (int idesc,short opt)
 		return 0;
 	if (idesc > NumSymbols)
 		return 0;	
+	if (cachedSymbolHandle[idesc])
+		return cachedSymbolHandle[idesc];
+	opt = 0;
 	handle = GSSiGlobAlloc ( 454,GHND,sizeof(SYMBOL));
 	pSymDesc = (LPSYMBOL)GlobalLock (handle);
 	if (*IconDict)
@@ -820,6 +825,7 @@ ErrOut:
 	}
 Exit:  
     GlobalUnlock (handle);
+	cachedSymbolHandle[idesc] = handle;
 	return handle;
 }
 
@@ -829,6 +835,8 @@ void DestroySymbol (HANDLE hSymbol)
 	LPSYMBOL pSymDesc;
 	HANDLE	*phElement, hElement;
 	
+	if (!fromCloseDict)
+		return;
 	if (!hSymbol)
 		return;
 	pSymDesc = (LPSYMBOL)GlobalLock (hSymbol);
@@ -1880,6 +1888,16 @@ void CloseSymDict (void)
 //	if (SymDictOpenMode != OF_READ)  
    		GSSiGlobFree (&hSymbolAttributes); 
    		GSSiGlobFree (&hSymNames); 
+		fromCloseDict = TRUE;
+		for (int i = 0; i < NumSymbols; i++)
+		{
+			if (cachedSymbolHandle[i])
+			{
+				DestroySymbol(cachedSymbolHandle[i]);
+				cachedSymbolHandle[i] = 0;
+			}
+		}
+		fromCloseDict = FALSE;
    	SymDictOpenMode = 0;
 	*IconDict = 0;
 	return;
@@ -2468,6 +2486,7 @@ Start:
 		GSSiRemove (AtName);	
 	rtn = TRUE;   
 Exit:
+	memset(cachedSymbolHandle, 0, sizeof(cachedSymbolHandle));
 	GSSiGlobUlFree (&hNames);
 	return rtn;
 } 

@@ -3807,7 +3807,20 @@ GSSiExitProg (230);
 }
 #endif
 }
-    
+
+LPSTR RemoveChars(LPSTR str, LPSTR chars)
+{
+	int ln = strlen(str);
+	char chr[2];
+	chr[1] = 0;
+
+	while (*chars)
+	{
+		chr[0] = *chars++;
+		REPLAC(str, chr, "", ln);
+	}
+	return str;
+}
 
 LPSTR ReplaceChar (LPSTR str, char from, char to)
 #if ENABLETRACE
@@ -5203,7 +5216,7 @@ GSSiExitProg (263);
 #endif
 }
 
-void ConvertBounds(LPMNMXCORD pBounds, int from, int to)
+BOOL ConvertBounds(LPMNMXCORD pBounds, int from, int to)
 #if ENABLETRACE
 {
 	GSSiEnterProg(263);
@@ -5211,6 +5224,7 @@ void ConvertBounds(LPMNMXCORD pBounds, int from, int to)
 	{   
 		DPOINT	P[4];
 		short	i;
+		BOOL rtn = TRUE;
 
 		P[0].x = pBounds->xmn;
 		P[0].y = pBounds->ymn;
@@ -5225,12 +5239,14 @@ void ConvertBounds(LPMNMXCORD pBounds, int from, int to)
 		{
 			if (!ConvertCoord(&P[i], from, to))
 				AddDPointToMinMax(&P[i], pBounds);
+			else
+				rtn = FALSE;
 		}
 		{
 #if ENABLETRACE
 			GSSiExitProg(263);
 #endif
-			return;
+			return rtn;
 		}
 #if ENABLETRACE
 	}

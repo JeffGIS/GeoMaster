@@ -4067,101 +4067,48 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 	{
 	case WM_INITDIALOG:
 	{
-						  char originalName[MAX_PATH];
+		char originalName[MAX_PATH];
 
-						  Opened = FALSE;
-						  SHPIndexType = SHP_INDEX_SIMPLE;
-						  GetSLTName(str);
-						  strcpy(originalName, str);
-						  SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
-						  _fstrcpy(GSPName, str);
-						  IsPGDB = FALSE;
-						  IsFGDB = FALSE;
-						  *PGDBTable = 0;
-						  if ((pDOT = _fstrrchr(GSPName, '.')))
-						  {
-							  if (!_fstrnicmp(pDOT, ".mdb", 4))
-							  {
-								  if (*(pDOT + 4) != '(')
-									  return FALSE;
-								  IsPGDB = TRUE;
-								  _fstrcpy(PGDBTable, pDOT + 5);
-								  *LastChr(PGDBTable) = 0;
-								  *pDOT = 0;
-								  sprintf(str, "%s_%s.gsp", GSPName, PGDBTable);
-								  _fstrcpy(GSPName, str);
-							  }
-							  else if (!_fstrnicmp(pDOT, ".gdb", 4))
-							  {
-								  char fgdbPath[MAX_PATH];
+		Opened = FALSE;
+		GetSLTName(str);
+		strcpy(originalName, str);
+		SetDlgItemText(hWndDlg, IDC_SHAPEFILE, str);
+		_fstrcpy(GSPName, str);
+		if ((pDOT = _fstrrchr(GSPName, '.')))
+			_fstrcpy(pDOT, ".gsp");
+		else
+			break;
+		SetCurVal(GSPName, IDS_FILEGSP);
+		LoadTAGDef();
+		if (NumTAGDef)
+		{
+			LPTAGDEF    lpTAGDef;
 
-								  if (*(pDOT + 4) != '(')
-									  return FALSE;
-								  IsFGDB = TRUE;
-								  _fstrcpy(FGDBTable, pDOT + 5);
-								  *LastChr(FGDBTable) = 0;
-								  *pDOT = 0;
-								  sprintf(fgdbPath, "%s.gdb", GSPName);
-								  sprintf(str, "%s_%s.gsp", GSPName, FGDBTable);
-								  _fstrcpy(GSPName, str);
-								  OpenFGDB(fgdbPath, FGDBTable, "");
-								  hSHPDBF = FGDBHandle;
-								  Opened = TRUE;
-							  }
-							  else
-								  _fstrcpy(pDOT, ".gsp");
-						  }
-						  else
-							  break;
-						  SetCurVal(GSPName, IDS_FILEGSP);
-						  LoadTAGDef();
-						  if (NumTAGDef)
-						  {
-							  LPTAGDEF    lpTAGDef;
-
-							  lpTAGDef = (LPTAGDEF)GlobalLock(hTAGDef);
-							  for (i = 0; i < NumTAGDef; i++, lpTAGDef++)
-							  {
-								  SendDlgItemMessage(hWndDlg, IDC_TAPREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
-								  SendDlgItemMessage(hWndDlg, IDC_REF_PREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
-							  }
-							  GlobalUnlock(hTAGDef);
-						  }
-						  EnableWindow(GetDlgItem(hWndDlg, IDC_SAADD), TRUE);
-						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Feet");
-						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Meters");
-						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees");
-						  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees * 1000000");
-						  FillProjectionList(hWndDlg, IDC_PROJECTION, &CurProj, IDC_UNITS, &CurUnits);
-						  //         _fstrcpy (str,"*.CVT");
-						  //         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
-						  if (PRJ_UNITS[1] == 1)
-							  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
-						  else if (PRJ_UNITS[1] == 2)
-							  SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
-						  SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
-						  SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
-						  SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
-						  SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
-						  GetSHPName(str);
-						  if (IsPGDB)
-							  SHPType = ReadPGDBHeader(str, &Bounds);
-						  else if (IsFGDB)
-							  SHPType = ReadFGDBHeader(str, &Bounds);
-						  else
-						  {
-							  Fid = GSSiOpenFile(str, 0, OF_READ);
-							  if (Fid == HFILE_ERROR)
-								  goto LoadGSP;
-							  SHPType = ReadSHPHeader(Fid, &Bounds, str);
-							  GSSiClose2 (&Fid);
-						  }
-						  ii = SHPType;
-						  SetDlgItemText(hWndDlg, IDC_SHPMINX, ftoa(str, Bounds.xmn));
-						  SetDlgItemText(hWndDlg, IDC_SHPMAXX, ftoa(str, Bounds.xmx));
-						  SetDlgItemText(hWndDlg, IDC_SHPMINY, ftoa(str, Bounds.ymn));
-						  SetDlgItemText(hWndDlg, IDC_SHPMAXY, ftoa(str, Bounds.ymx));
-						  goto LoadGSP;
+			lpTAGDef = (LPTAGDEF)GlobalLock(hTAGDef);
+			for (i = 0; i < NumTAGDef; i++, lpTAGDef++)
+			{
+				SendDlgItemMessage(hWndDlg, IDC_TAPREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+				SendDlgItemMessage(hWndDlg, IDC_REF_PREFIX, CB_ADDSTRING, 0, (LPARAM)lpTAGDef->Prefix);
+			}
+			GlobalUnlock(hTAGDef);
+		}
+		EnableWindow(GetDlgItem(hWndDlg, IDC_SAADD), TRUE);
+		SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Feet");
+		SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Meters");
+		SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees");
+		SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_ADDSTRING, 0, (LPARAM)"Degrees * 1000000");
+		FillProjectionList(hWndDlg, IDC_PROJECTION, &CurProj, IDC_UNITS, &CurUnits);
+		//         _fstrcpy (str,"*.CVT");
+		//         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE); 
+		if (PRJ_UNITS[1] == 1)
+			SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+		else if (PRJ_UNITS[1] == 2)
+			SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);
+		SendDlgItemMessage(hWndDlg, IDC_PROJECTION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)"baseproj");
+		SendDlgItemMessage(hWndDlg, IDC_INDEXSTANDARD, BM_SETCHECK, SHPIndexType == SHP_INDEX_STANDARD, 0L);
+		SendDlgItemMessage(hWndDlg, IDC_INDEXSIMPLE, BM_SETCHECK, SHPIndexType == SHP_INDEX_SIMPLE, 0L);
+		SendDlgItemMessage(hWndDlg, IDC_INDEXQUAD, BM_SETCHECK, SHPIndexType == SHP_INDEX_QUAD, 0L);
+		goto LoadGSP;
 	}
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -4172,29 +4119,28 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 		{
 		case IDC_SHOW_FIELDS:
 		{
+			if (!hSHPDBF)
+			{
+				char	DBName[256];
+				LPSTR	pTable;
 
-								if (!hSHPDBF)
-								{
-									char	DBName[256];
-									LPSTR	pTable;
+				GetSLTName(str);
+				pTable = strrchr(str, '_');
+				if (pTable)
+				{
+					LPSTR pDot = strrchr(str, '.');
+					if (pDot)
+					{
+						*pDot = 0;
+						*pTable++ = 0;
+						sprintf(DBName, "SLT=%s.slt(%s)", str, pTable);
+						OpenDataFile(DBName, "", BT_READ, &hSHPDBF);
+					}
+				}
+				Opened = TRUE;
+			}
 
-									GetSLTName(str);
-									pTable = strrchr(str, '_');
-									if (pTable)
-									{
-										LPSTR pDot = strrchr(str, '.');
-										if (pDot)
-										{
-											*pDot = 0;
-											*pTable++ = 0;
-											sprintf(DBName, "SLT=%s.slt(%s)", str, pTable);
-											OpenDataFile(DBName, "", BT_READ, &hSHPDBF);
-										}
-									}
-									Opened = TRUE;
-								}
-
-								DisplayFieldList(hWndDlg, hSHPDBF, 0, 0, 0);
+			DisplayFieldList(hWndDlg, hSHPDBF, 0, 0, 0);
 		}
 			break;
 
@@ -4211,7 +4157,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 
 				if (Fid == HFILE_ERROR)
 				{
-					short	type;
+					short	type = SHPT_POINT;
 
 					GetDlgItemText(hWndDlg, IDC_SHAPEFILE, str, 256);
 					if (!*projection)

@@ -67,8 +67,7 @@ BOOL FileIsVisible (LPSTR FileName)
 		case MT_SQLITE:
 			if ((SHPType = OpenSQLITEMapFile(FileName,0)))
 			{
-				if (LoadSQLITEParm(FileName, tableName,SHPType, CurView->hWnd))
-					rtn = IsSQLITEFileVisible();
+				rtn = IsSQLITEFileVisible();
 				CloseSQLITEMapFile();
 			}
 			break;

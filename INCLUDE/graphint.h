@@ -2461,7 +2461,7 @@ BOOL SetSQLITEParms(void);
 BOOL ProcessSQLITERecord(HDC hDC);
 BOOL GetNextSQLITERecord(LPMNMXCORD pBounds);
 BOOL IsSQLITEFileVisible(void);
-int LoadSQLITEParm(LPSTR SHPFileName, LPSTR tableName,long Type, HWND hWnd);
+int LoadSQLITEParm(LPSTR SHPFileName, LPSTR tableName, HWND hWnd);
 BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds);
 BOOL GetSQLITERecord(LONGLONG SQLITERec);
 char *EncodeString(LPDPOINT llpoints, int numPoints);
@@ -2509,8 +2509,6 @@ void drawTextwithinPolygon(char *text
 
  
 LPSTR appAndVersion(void);
-
-
 
 
 	
