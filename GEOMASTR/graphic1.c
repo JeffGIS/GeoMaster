@@ -1472,7 +1472,7 @@ Next:
 		{
 			//ExpandGMDPointBounds(&GMDBounds);
 			//if (WantGMDNegGrid || RectInWBounds(&GMDBounds, 1))
-				ProcessSQLITERecord(*hDC);
+				ProcessSQLITERecord(*hDC,-1);
 			n++;
 		} while (n < maxn && ContinueProcessing && FindNextSegment());
 		if (n < maxn)
@@ -4254,7 +4254,7 @@ void ShowPickedItem (HWND hWnd, int InItem)
 			if (SavePassID)
 				CurView->PassID = 4;
 			if (GetSQLITERecord(CurrentSQLITERec))
-				ProcessSQLITERecord(CurView->hDC);
+				ProcessSQLITERecord(CurView->hDC,CurrentSQLITERec);
 		}
 		else if (MapType == MT_DGN7)
 		{
@@ -6014,6 +6014,7 @@ RtnFalse:
     CurView->PassID = SavePass;
     SetCurView ( SaveView);
     PickName[0]=0;
+	MapType = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (65);

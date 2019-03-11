@@ -159,6 +159,8 @@ LPSTR CRAPI_sharedInstance_sharedOutputDirectory(LPSTR subDir);
 BOOL CRAPI_sharedInstance_haveErrorLog(void);
 LPSTRD CRAPI_sharedInstance_errorLogPath(void);
 
+int GetiPadWithinManager(void);
+
 BOOL appendStringToFile(LPSTR str, LPSTR filePath);
 void NSLog(LPSTR fmt, LPSTR str);
 

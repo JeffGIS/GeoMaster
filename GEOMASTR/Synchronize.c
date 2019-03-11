@@ -168,6 +168,13 @@ void CRAPI_Destroy(void)
 	CRAPI = 0;
 }
 
+int GetiPadWithinManager(void)
+{
+	if (CRAPI)
+		return CRAPI->sharedInstance.currentiPadWithinManager;
+	else
+		return -1;
+}
 LPSTRD string_Copy(LPSTR str)
 {
 	int l = strlen(str);

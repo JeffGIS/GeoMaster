@@ -167,6 +167,8 @@ typedef struct RampStruct {
 	char rampStatus[256];
 	int rampCode;
 	int proximityCode;
+	char rampNotes[256];
+	char lastUpdate[32];
 } RampStruct;
 
 typedef struct ToleranceValues {

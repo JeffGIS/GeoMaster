@@ -2458,7 +2458,7 @@ int OpenSQLITEMapFile(LPSTR FileName, LPMNMXCORD pBounds);
 void CloseSQLITEMapFile(void);
 BOOL SetSQLITEVis(HWND hWndDlg, int DlgItemSym, int DlgItemPar, HFILE FidSymList);
 BOOL SetSQLITEParms(void);
-BOOL ProcessSQLITERecord(HDC hDC);
+BOOL ProcessSQLITERecord(HDC hDC, long long rec);
 BOOL GetNextSQLITERecord(LPMNMXCORD pBounds);
 BOOL IsSQLITEFileVisible(void);
 int LoadSQLITEParm(LPSTR SHPFileName, LPSTR tableName, HWND hWnd);
@@ -2477,6 +2477,7 @@ BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile,BOOL AddFileID,int checkPointOpt);
 int getRampOffsetCoord(POINT ramp21, POINT int21);
 BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
+BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc); // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new
 BOOL GetFromCodeText(int from, LPSTR text);
 BOOL NVCreateDB(LPSTR path, BOOL Delete);
 BOOL NVCopyDB(LPSTR fromPath, LPSTR toPath);

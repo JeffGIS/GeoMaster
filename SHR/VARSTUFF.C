@@ -4028,6 +4028,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%USERINIFILE", 397, FALSE);
 	AllocateTypeVar("%DLSERIALNUMBER", 398, FALSE);
 	AllocateTypeVar("%PROJECTBOUNDS", 399, FALSE);
+	AllocateTypeVar("%IPADINSERVER", 400, FALSE);
 
 	
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5241,9 +5242,12 @@ GSSiExitProg (533);
 			DWORD Serno = GetDriveSerialNumber(drive);
 			sprintf(OutStr, "%ld", Serno);
 		}
+		break;
 		case 399:
 			boundstoa(OutStr, &ProjectBounds);
 			break;
+		case 400:
+			ltoa(GetiPadWithinManager(), OutStr, 10);
 		break;
 	}
 	GlobalUnlock (hGlobal);

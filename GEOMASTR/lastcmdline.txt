@@ -1,2 +1,2 @@
-configs\basemap_new3.gmc 
-I:\bu_2018_02_28\geomas
+configs\directdisplay.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T; 
+h:\pcviewer

@@ -2601,12 +2601,25 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 								GlobalUnlock(SQLPtr->OFHandle);
 								GlobalUnlock(SQLITEHandle);
 								CloseDataFile(TRUE, &SQLITEHandle);
-								OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
-								SLTPrepare(SQLITEHandle);
-								SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
-								SQLPtr->lastreadtime = INT_MAX;
-								SQLPtr->NumGlobals = 0;
-								SQLPtr->st = 0;
+								if (PickingByRefno)
+								{
+									sprintf(Query, "SELECT %s FROM %s WHERE rowid=%lli", SQLITEUsedFields,tableName,CurrentSQLITERec);
+									OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
+									SLTPrepare(SQLITEHandle);
+									SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+									SQLPtr->lastreadtime = 0;
+									SQLPtr->NumGlobals = 1;
+									SQLPtr->st = 0;
+								}
+								else
+								{
+									OpenDataFile(FileNameIN, Query, BT_READ, &SQLITEHandle);
+									SLTPrepare(SQLITEHandle);
+									SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
+									SQLPtr->lastreadtime = INT_MAX;
+									SQLPtr->NumGlobals = 0;
+									SQLPtr->st = 0;
+								}
 								FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 								pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 							}
@@ -2675,7 +2688,10 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 
-		sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%lld", SQLITERec);
+		if (!stricmp(pSQLDatabase->From,"RAMPS"))
+			sprintf(cmd, "SELECT %s FROM %s WHERE rowid=%lli", SQLITEUsedFields, pSQLDatabase->From, CurrentSQLITERec);
+		else
+			sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%lld", SQLITERec);
 
 		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) != SQLITE_OK)
 			pSQLDatabase->statement = NULL;
@@ -2828,7 +2844,7 @@ Exit:
 	return rtn;
 }
 
-BOOL ProcessSQLITERecord(HDC hDC)
+BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 {
 	LPOPENFILEDATA	FilePtr;
 	LPOPENSQLDATA	SQLPtr;

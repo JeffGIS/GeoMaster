@@ -3,7 +3,7 @@
 #include "CRAPI.h"
 #include "CurbRamps.h"
 
-#define CURRENT_INTERSECTION_VERSION "6.0"
+#define CURRENT_INTERSECTION_VERSION "7.0"
 
 static BOOL _ignoreErrorLog = FALSE;
 static sqlite3 *database = NULL;
@@ -1411,6 +1411,14 @@ int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
 		strncpy0(pRamp->rampStatus, rampStatus, sizeof(pRamp->rampStatus) - 1);
 	pRamp->rampCode = sqlite3_column_int(statement, i++);
 	pRamp->proximityCode = sqlite3_column_int(statement, i++);
+	LPSTR rampNotes = (LPSTR)sqlite3_column_text(statement, i++);
+	if (rampNotes && *rampNotes)
+		strcpy(pRamp->rampNotes, rampNotes);
+	LPSTR ccode = (LPSTR)sqlite3_column_text(statement, i++);
+	LPSTR ccodedetail = (LPSTR)sqlite3_column_text(statement, i++);
+	LPSTR lastupdate = (LPSTR)sqlite3_column_text(statement, i++);
+	if (lastupdate && *lastupdate)
+		strcpy(pRamp->lastUpdate, lastupdate);
 	if (pRamp->bumpWidth > 0 || pRamp->bumpHeight > 0)
 		ii = 1;
 	return rampNum;
@@ -1729,6 +1737,52 @@ int getDatasetVersion(void)
 
 	return rtn;
 }
+BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc) // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new
+{
+	BOOL rtn = FALSE;
+	RAMPID rampID;
+	ToleranceValues tolerances;
+
+	*OutLoc = 0;
+	if (which)
+	{
+		setStandardToleranceValues(&tolerances);
+
+		rampID.intID = intID;
+		rampID.rampNum = rampNum;
+		rampID.retired = retired;
+		RampStruct ramp = { 0 };
+		RampStruct * pRamp = &ramp;
+		if (getRampFromDB(&rampID, pRamp))
+		{
+			if (pRamp->rampExists)
+			{
+				LPSTR detailCode;
+				LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, 1);
+				sprintf(OutLoc, "%s|%s", ccode, detailCode);
+				free(ccode);
+				free(detailCode);
+				rtn = TRUE;
+			}
+		}
+	}
+	else
+	{
+		sqlite3_stmt *statement;
+		char cmd[256];
+		sprintf(cmd, "SELECT CCSUMMARY,CCDETAIL FROM RAMPS WHERE intID=%i AND rampNum=%i AND retired=%i", intID, rampNum, retired);
+		SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0), database, "getcc", 0);
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			LPSTR ccode = (LPSTR)sqlite3_column_text(statement, 0);
+			LPSTR detailCode = (LPSTR)sqlite3_column_text(statement, 1);
+			sprintf(OutLoc, "%s|%s", ccode, detailCode);
+			rtn = TRUE;
+		}
+		SQLOK(SQLiteFinalize(statement), database, "updatedb", 0);
+	}
+	return rtn;
+}
 
 BOOL adjustToLatestVersion(LPSTR fromPath)
 {
@@ -1743,32 +1797,90 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 	{
 		switch (version)
 		{
-			case 5://convert version 5 to version 6
+		case 6://convert version 6 to version 7
+		{
+			BOOL st = TRUE;
+			rtn = FALSE;
+			SLT_StartTrans(database);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampNotes CHAR(1024);");
+			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN CCSummary CHAR(32);");
+			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN CCDetail CHAR(64);");
+			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN LastUpdate CHAR(32);");
+			if (st) st = executeCmd(cmd);
+			sprintf(cmd, "UPDATE Version SET VersionID = '%0.1f' WHERE vid = 1;", (double)(version + 1));
+			if (st) st = executeCmd(cmd);
+			if (st)
 			{
-				BOOL st = TRUE;
-				rtn = FALSE;
-				SLT_StartTrans(database);
-				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampStatus CHAR(256);");
-				if (st) st = executeCmd(cmd);
-				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampScore INT;");
-				if (st) st = executeCmd(cmd);
-				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN ProximityScore INT;");
-				if (st) st = executeCmd(cmd);
-				sprintf(cmd, "UPDATE Version SET VersionID = '%0.1f' WHERE vid = 1;", (double)(version + 1));
-				if (st) st = executeCmd(cmd);
-				strcpy(cmd, "UPDATE Ramps SET RampStatus = '', RampScore = 0, ProximityScore = 0");
-				if (st) st = executeCmd(cmd);
-				if (st)
-				{
-					SLT_EndTrans(database);
-					rtn = TRUE;
-				}
-				else
-					SLT_AbortTrans(database);
-			}
-			break;
+				char cmd[256] = "SELECT intID,rampNum,retired FROM RAMPS";
+				sqlite3_stmt *statement;
+				RAMPID rampID;
+				ToleranceValues tolerances;
+				setStandardToleranceValues(&tolerances);
 
-			case 4://convert version 4 to version 5
+				SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0), database, "updatedb", 0);
+				while (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					rampID.intID = sqlite3_column_int(statement, 0);
+					rampID.rampNum = sqlite3_column_int(statement, 1);
+					rampID.retired = sqlite3_column_int(statement, 2);
+					RampStruct ramp = { 0 };
+					RampStruct * pRamp = &ramp;
+					if (getRampFromDB(&rampID, pRamp))
+					{
+						if (pRamp->rampExists)
+						{
+							LPSTR detailCode;
+							LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, 1);
+							sprintf(cmd, "UPDATE RAMPS SET CCSummary = '%s',CCDetail='%s' WHERE intID=%i AND rampNum=%i AND retired=%i", ccode, detailCode, rampID.intID, rampID.rampNum, rampID.retired);
+							free(ccode);
+							free(detailCode);
+							st = executeCmd(cmd);
+						}
+					}
+				}
+				SQLOK(SQLiteFinalize(statement), database, "updatedb", 0);
+
+			}
+
+			if (st)
+			{
+				SLT_EndTrans(database);
+				rtn = TRUE;
+			}
+			else
+				SLT_AbortTrans(database);
+		}
+		break;
+
+		case 5://convert version 5 to version 6
+		{
+			BOOL st = TRUE;
+			rtn = FALSE;
+			SLT_StartTrans(database);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampStatus CHAR(256);");
+			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN RampScore INT;");
+			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN ProximityScore INT;");
+			if (st) st = executeCmd(cmd);
+			sprintf(cmd, "UPDATE Version SET VersionID = '%0.1f' WHERE vid = 1;", (double)(version + 1));
+			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "UPDATE Ramps SET RampStatus = '', RampScore = 0, ProximityScore = 0");
+			if (st) st = executeCmd(cmd);
+			if (st)
+			{
+				SLT_EndTrans(database);
+				rtn = TRUE;
+			}
+			else
+				SLT_AbortTrans(database);
+		}
+		break;
+
+		case 4://convert version 4 to version 5
 			{
 				char toPath[MAX_PATH];
 				BOOL st = TRUE;

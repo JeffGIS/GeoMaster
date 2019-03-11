@@ -4751,6 +4751,14 @@ GotCloseFilehSQL:
 				rtn = ComplianceCodeForRamp(atoi(Arg[2]), atoi(Arg[3]), atob(Arg[4]), Arg[5], atoi(Arg[6]), OutLoc);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "CCCODES"))
+			{
+				int which = 0;
+				if (!stricmp(Arg[2], "COMPUTE"))
+					which = 1;
+				ComputeCCCodes(atol(Arg[3]), atol(Arg[4]), atol(Arg[5]), which,OutLoc); // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[1], "FROMCODE"))
 			{
 				rtn = GetFromCodeText(atoi(Arg[2]), OutLoc);

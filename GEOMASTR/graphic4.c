@@ -3922,6 +3922,18 @@ GSSiExitProg (690);
 #endif
 }     
 
+void SetMapTypeKey(int MapType,int fromItem)
+{
+	switch (MapType)
+	{
+	case MT_SQLITE:
+		CurrentSQLITERec = PickList[fromItem].Segment;
+		break;
+	case MT_SHP:
+		CurrentSHPRec = PickList[fromItem].Segment;
+		break;
+	}
+}
 BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=display with themes,2=display no themes,-1=withpick,-2=no display process themes,-3=no display-no close*/)
 #if ENABLETRACE
 {GSSiEnterProg (692);
@@ -3944,7 +3956,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	char		str[64];
 	long		SaveMinPickItemWidth = MinPickItemWidth;
 	BOOL		OpenBP=FALSE;
-	
+	int			PickMapType;
+
 	MinPickItemWidth = 0;
 	ProcessSingleItem=TRUE;
 	
@@ -3973,7 +3986,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
     	goto RtnFalse;
 
 	if (!PickName[0])
-	   	goto RtnFalse;     
+	   	goto RtnFalse;  
+	PickMapType = MapType;
     SetPickGlobals (Item);
 	LoadIndexParm (PickDirectory);
     if (PickList[Item].IsDispersed)
@@ -3982,6 +3996,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	    DispersedPointLoc = PickList[Item].BeginPoint;
     }
 	CurrentProcessedPickedItem = Item;  
+	ExpandText(PickName);
 	if (/*FidMap != HFILE_ERROR ||*/ _fstricmp (PltName,PickName))
 	{
 		CloseMap (FALSE);
@@ -3992,6 +4007,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 		BOOL	omst;
 		WantDescBlock = FALSE; 
 		SetPGDB_SQL ("ObjectID = [%OBJECTID]");
+		SetMapTypeKey(PickMapType,Item);
 		omst = OpenMap (CurView->hWnd,CurView->hDC);
 		SetPGDB_SQL ("");
 	   	WantDescBlock = SaveWDB;  
@@ -4231,7 +4247,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 			ProcessGMDRecord(hDC, (HANDLE)FidMap, CurrentGMDRec);
 			break;
 		case MT_SQLITE:
-			ProcessSQLITERecord(hDC);
+			//if (GetSQLITERecord(CurrentSQLITERec))
+				ProcessSQLITERecord(hDC,CurrentSQLITERec);
 			break;
 		case MT_DGN7:
 			ProcessDGNRecord(hDC, CurrentDGNRec);
