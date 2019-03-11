@@ -2499,7 +2499,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 	DPOINT		Points[4];
 	int rtnType = 0;
 	LPSTR pPar, pEnd;
-	char fileName[MAX_PATH], tableName[100], Query[1024];
+	char fileName[MAX_PATH], tableName[100], Query[4096];
 
 	DBoundsInit(&FileMNMX);
 	CloseTRANS2(&hTranFileToBase);
@@ -3138,7 +3138,7 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, HWND hWnd)
 #endif
 	{
 		char	DBName[MAX_PATH];
-		char	Name[MAX_PATH], str[260], Projection[MAX_PATH + 2], Units[34];
+		char	Name[MAX_PATH], str[514], Projection[MAX_PATH + 2], Units[34];
 		char	SymName[66]="", cWidth[64]="", cRot[64]="", cColor[64]="", cIF[128]="";
 		LPSTR	pDot, pTAG, pWidth, pParm = SQLITEParms;
 		short	l;

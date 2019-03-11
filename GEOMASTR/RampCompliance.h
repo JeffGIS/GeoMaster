@@ -104,6 +104,10 @@ void GetObstructionList(LPSTR OutLoc);
 void GetRampTypesList(LPSTR OutLoc);
 int NVCRampTypeToCode(LPSTR obstruction);
 BOOL GetRampCodeForValue(LPSTR VarName,LPSTR VarValue,LPSTR OutLoc,LPSTR ErrorVarName);
+void RampTypeFromCode(int code, LPSTR OutLoc);
+void ObstructionFromCode(int code, LPSTR OutLoc);
+void TextureFromCode(int code, LPSTR OutLoc);
+
 
 
 

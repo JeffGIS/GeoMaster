@@ -772,6 +772,37 @@ static char *AWITypes[] = {"None", "Tones", "SpeechMessage"};
 static char *buttonTypes[] = {"None", "SmallPush", "LargePush", "Touch", "APS"};
 static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer"};
 
+void RampTypeFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(rampTypes) / 4;
+
+	*OutLoc = 0;
+	if (code > 100)
+		code -= 100;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, rampTypes[code]);
+	return;
+}
+
+void ObstructionFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(obstructions) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, obstructions[code]);
+	return;
+}
+void TextureFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(textures) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, textures[code]);
+	return;
+}
+
 void GetTextureList(LPSTR OutLoc)
 {
 	char delim[2] = "";

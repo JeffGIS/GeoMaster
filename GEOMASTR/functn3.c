@@ -4776,10 +4776,20 @@ GotCloseFilehSQL:
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "OBSTRUCTIONFROMCODE"))
+			{
+				ObstructionFromCode(atoi(Arg[2]),OutLoc);
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[1], "TEXTURECODE"))
 			{
 				rtn = NVCTextureToCode(Arg[2]);
 				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "TEXTUREFROMCODE"))
+			{
+				TextureFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "TEXTURELIST"))
@@ -4795,6 +4805,11 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "RAMPTYPELIST"))
 			{
 				GetRampTypesList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "RAMPTYPEFROMCODE"))
+			{
+				RampTypeFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "CODEFORVALUE"))
