@@ -1823,10 +1823,10 @@ GotCloseFilehSQL:
 				goto RtnFalse;
 			goto RtnTrue;
 		
-		case 524: //$BASIC(file,sql,updatefieldlist,title,autoupdate,sqlfieldlist,displayrect)
+		case 524: //$BASIC(file,sql,updatefieldlist,title,autoupdate,sqlfieldlist,displayrect,withphotos)
 		{
 			BOOL haveRectGlobal = FALSE;
-			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,10,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			lpDB = Arg[1];
@@ -1844,18 +1844,27 @@ GotCloseFilehSQL:
 				haveRectGlobal = TRUE;
 			}
 			showOnlyData = atob(Arg[8]);
-		    {
-		 	   DLGPROC lpfnIDENTIFYMsgProc;
-		         
-		        BasicDisplayItem=-1; 
-			    lpfnIDENTIFYMsgProc = MakeProcInstance((DLGPROC)IDENTIFYMsgProc, hInst);
-			    nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, lpfnIDENTIFYMsgProc);
-			    FreeProcInstance(lpfnIDENTIFYMsgProc);
-				
+			if (!atob (Arg[8]))
+			{
+
+				BasicDisplayItem = -1;
+				nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, (DLGPROC)IDENTIFYMsgProc);
+
 				skipPaint = 1;
 				if (haveRectGlobal)
 					SetGlobalValueRect(Arg[7], displayRect);
-		    }
+			}
+			else
+			{
+
+				BasicDisplayItem = -1;
+				rampPhotoFile = Arg[9];
+				nRc = DialogBox(hInst, (LPSTR)"IDENTIFY_WITH_PHOTO", hWndMain, (DLGPROC)IDENTIFY_WITH_PHOTOMsgProc);
+
+				skipPaint = 1;
+				if (haveRectGlobal)
+					SetGlobalValueRect(Arg[7], displayRect);
+			}
 			lpUpdateFieldList = 0;
 			lpAutoUpdateFieldList = 0;
 			lpSQLFieldList = 0;
@@ -4819,10 +4828,8 @@ GotCloseFilehSQL:
 			}
 			else if (!stricmp(Arg[1], "FIXVARNAME"))
 			{
-				if (!stricmp(Arg[2], "streetlandingobstruction"))
-					strcpy(OutLoc, "lowerlandingobstruction");
-				else
-					strcpy(OutLoc, Arg[2]);
+				ConvertRampDisplayFieldToDBField(Arg[2], 128);
+				strcpy(OutLoc, Arg[2]);
 				goto Rtnl;
 			}
 			

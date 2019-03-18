@@ -1,6 +1,7 @@
 #include "graphint.h"   
 #include "extrndb.h"
 #include "shapefil.h"
+#include "RampCompliance.h"
 #include "cddemo.h"    
 #include <sqlext.h>     
 #include <commctrl.h>          
@@ -1602,7 +1603,7 @@ void SetPhotoAndNotesFiles (HWND hWndDlg,UINT dlgList,UINT ibtnPHOTO1,UINT ibtnP
 	return;
 }
 
-static void AdjustIdentifyWindow (HWND hWndDlg,BOOL first)
+static void AdjustIdentifyWindow(HWND hWndDlg, BOOL first)
 {
 	RECT mro, mr, r0, r1, r2, r3, r4, r5, wr, cr, crwr;
 
@@ -1626,13 +1627,64 @@ static void AdjustIdentifyWindow (HWND hWndDlg,BOOL first)
 	if (first)
 		MoveWindow(hWndDlg, displayRect.left, displayRect.top, RECTWIDTH(&displayRect), RECTHEIGHT(&displayRect), !first);
 	GetClientRect(hWndDlg, &mr);
-	MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), RECTWIDTH(&mr) - RECTWIDTH(&r0)-2, 0, RECTWIDTH(&r0), RECTHEIGHT(&r0), !first);
+	MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), RECTWIDTH(&mr) - RECTWIDTH(&r0) - 2, 0, RECTWIDTH(&r0), RECTHEIGHT(&r0), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), RECTWIDTH(&mr) - (mro.right - r1.right) - RECTWIDTH(&r1), r1.top, RECTWIDTH(&r1), RECTHEIGHT(&r1), !first);
-	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), RECTWIDTH(&mr) - (mro.right - r2.right) - RECTWIDTH(&r2), r2.top, RECTWIDTH(&r2), RECTHEIGHT(&r2),!first);
+	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), RECTWIDTH(&mr) - (mro.right - r2.right) - RECTWIDTH(&r2), r2.top, RECTWIDTH(&r2), RECTHEIGHT(&r2), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), RECTWIDTH(&mr) - (mro.right - r3.right) - RECTWIDTH(&r3), r3.top, RECTWIDTH(&r3), RECTHEIGHT(&r3), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDC_NOTES), RECTWIDTH(&mr) - (mro.right - r5.right) - RECTWIDTH(&r5), r5.top, RECTWIDTH(&r5), RECTHEIGHT(&r5), !first);
 	if (showOnlyData)
-		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr), RECTHEIGHT(&mr)-38, !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr), RECTHEIGHT(&mr) - 38, !first);
+	else
+		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, r4.top, RECTWIDTH(&mr), RECTHEIGHT(&mr) - r4.top, !first);
+}
+
+static void AdjustIdentifyWithPhotosWindow(HWND hWndDlg, BOOL first)
+{
+	RECT mro, mr, r0, r1, r2, r3, r4, r5, r6, r7,wr, cr, crwr;
+
+	GetWindowRect(hWndDlg, &wr);
+	GetClientRect(hWndDlg, &cr);
+	crwr = cr;
+	ClientRectToScreenRect(hWndDlg, &crwr);
+	GetClientRect(hWndDlg, &mro);
+	GetWindowRect(GetDlgItem(hWndDlg, IDCANCEL), &r0);
+	ScreenRectToClientRect(hWndDlg, &r0);
+	GetWindowRect(GetDlgItem(hWndDlg, IDENTIFY_NEXT), &r1);
+	ScreenRectToClientRect(hWndDlg, &r1);
+	GetWindowRect(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), &r2);
+	ScreenRectToClientRect(hWndDlg, &r2);
+	GetWindowRect(GetDlgItem(hWndDlg, IDC_PHOTO1), &r3);
+	ScreenRectToClientRect(hWndDlg, &r3);
+	GetWindowRect(GetDlgItem(hWndDlg, IDENTIFY_DATA), &r4);
+	ScreenRectToClientRect(hWndDlg, &r4);
+	GetWindowRect(GetDlgItem(hWndDlg, IDC_NOTES), &r5);
+	ScreenRectToClientRect(hWndDlg, &r5);
+	GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP), &r6);
+	ScreenRectToClientRect(hWndDlg, &r6);
+	if (first)
+		MoveWindow(hWndDlg, displayRect.left, displayRect.top, RECTWIDTH(&displayRect), RECTHEIGHT(&displayRect), !first);
+	GetClientRect(hWndDlg, &mr);
+	MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), RECTWIDTH(&mr) - RECTWIDTH(&r0) - 2, 0, RECTWIDTH(&r0), RECTHEIGHT(&r0), !first);
+	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), RECTWIDTH(&mr) - (mro.right - r1.right) - RECTWIDTH(&r1), r1.top, RECTWIDTH(&r1), RECTHEIGHT(&r1), !first);
+	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), RECTWIDTH(&mr) - (mro.right - r2.right) - RECTWIDTH(&r2), r2.top, RECTWIDTH(&r2), RECTHEIGHT(&r2), !first);
+	MoveWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), RECTWIDTH(&mr) - (mro.right - r3.right) - RECTWIDTH(&r3), r3.top, RECTWIDTH(&r3), RECTHEIGHT(&r3), !first);
+	MoveWindow(GetDlgItem(hWndDlg, IDC_NOTES), RECTWIDTH(&mr) - (mro.right - r5.right) - RECTWIDTH(&r5), r5.top, RECTWIDTH(&r5), RECTHEIGHT(&r5), !first);
+	if (showOnlyData)
+	{
+		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr) / 2, RECTHEIGHT(&mr) - 38, !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), RECTWIDTH(&mr) / 2 + 5, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr) / 2 - 10, (RECTHEIGHT(&mr) - 38) / 2, !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP),					   RECTWIDTH(&mr) / 2 + 5, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / 2 + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_CLOCKWISE),		   RECTWIDTH(&mr) / 2 + 5 + ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2)+2, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / 2 + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE), RECTWIDTH(&mr) / 2 + 5 + 2*((RECTWIDTH(&mr) / 2 - 10) / 3 - 2)+4, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / 2 + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
+		
+		GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP), &r7);
+		ScreenRectToClientRect(hWndDlg, &r7);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), r7.left, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
+		GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE), &r7);
+		ScreenRectToClientRect(hWndDlg, &r7);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE), r7.left, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
+
+	}
 	else
 		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, r4.top, RECTWIDTH(&mr), RECTHEIGHT(&mr) - r4.top, !first);
 }
@@ -1695,412 +1747,907 @@ static BOOL RunIdentifyUpdateMacro(HWND hWndDlg, LPSTR macro, LPSTR lpDB, LPSTR 
 
 BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
-{GSSiEnterProg (454);
+{
+	GSSiEnterProg(454);
 #endif
-{	char	str[1024], TAG[64], SymName[34], Addresses[128],str2[1024],DBName[MAX_PATH];
-	LONG	Segment, Refno=0;
+	{	char	str[1024], TAG[64], SymName[34], Addresses[128], str2[1024], DBName[MAX_PATH];
+	LONG	Segment, Refno = 0;
 	static int		item;
-	HWND	hWnd; 
-	int		TabStops[3]={120,140,2000};
-    HANDLE hDB;
+	HWND	hWnd;
+	int		TabStops[3] = { 120,140,2000 };
+	HANDLE hDB;
 	LPGWFLDINFO	lpGWFldInfo;
 	LPGWDHEADER	lpGWDHead;
 	HANDLE		hBT;
-	long		Offset; 
-	int			st, i, len;  
+	long		Offset;
+	int			st, i, len;
 	LPSTR		lpTab;
-	int			Choice;  
-	BOOL		ShowItem=FALSE;    
+	int			Choice;
+	BOOL		ShowItem = FALSE;
 	static		long		RecNo;
-	static	HANDLE	hSaveBM=0;
+	static	HANDLE	hSaveBM = 0;
 	char	SetFieldName[128];
 	char	NewValue[1024];
 	char	cmd[1024];
 	BOOL	rtn = FALSE;
 	static  firstMove = TRUE;
 
- int	BRtn;
- if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam)))
-{
+	int	BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+	{
 #if ENABLETRACE
-GSSiExitProg (454);
+		GSSiExitProg(454);
 #endif
- 	return (BRtn);
-}
- switch(Message)
-   {
- case WM_MOVE:
- case WM_SIZE:
- {
-	 RECT rect;
-	 GetWindowRect(hWndDlg, &rect);
-	 if (!EqualRect(&rect, &displayRect))
-	 {
-		 rtn = TRUE;
-		 displayRect = rect;
-		 if (!firstMove)
-			 AdjustIdentifyWindow(hWndDlg,FALSE);
-	 }
- }
-	 break;
- case WM_PAINT:
- {
-	 PAINTSTRUCT ps;
-	 RECT rc;
-	 HDC hdc = BeginPaint(hWndDlg, &ps);
-	 GetClientRect(hWndDlg, &rc);
-	 if (showOnlyData)
-		FillRect(hdc, &rc, GetStockObject(WHITE_BRUSH));
-	 EndPaint(hWndDlg, &ps);
- }
- break;
-    case WM_INITDIALOG:   
-		 firstMove = TRUE;
-    	 hSaveBM = EnterBlockingWindow (hWndDlg);
-    	 hWndBasic = hWndDlg;
-		 if (IsRectEmpty(&displayRect))
-			 cwCenter(hWndDlg, 0);
-		 else
-			 AdjustIdentifyWindow(hWndDlg,firstMove);
-		 firstMove = FALSE;
-         /* initialize working variables                                */
-		 strcpy (DBName,lpDB);
-         item = BasicDisplayItem; 
-		 if (lpBasicTitle)
-			 SetWindowText (hWndDlg,lpBasicTitle);
-		 if (showOnlyData)
-		 {
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE0), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE1), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE2), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE3), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE4), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_SQL), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), SW_HIDE);
-			 ShowWindow(GetDlgItem(hWndDlg, IDC_NOTES), SW_HIDE);
+		return (BRtn);
+	}
+	switch (Message)
+	{
+	case WM_MOVE:
+	case WM_SIZE:
+	{
+		RECT rect;
+		GetWindowRect(hWndDlg, &rect);
+		if (!EqualRect(&rect, &displayRect))
+		{
+			rtn = TRUE;
+			displayRect = rect;
+			if (!firstMove)
+				AdjustIdentifyWindow(hWndDlg, FALSE);
+		}
+	}
+	break;
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		RECT rc;
+		HDC hdc = BeginPaint(hWndDlg, &ps);
+		GetClientRect(hWndDlg, &rc);
+		if (showOnlyData)
+			FillRect(hdc, &rc, GetStockObject(WHITE_BRUSH));
+		EndPaint(hWndDlg, &ps);
+	}
+	break;
+	case WM_INITDIALOG:
+		firstMove = TRUE;
+		hSaveBM = EnterBlockingWindow(hWndDlg);
+		hWndBasic = hWndDlg;
+		if (IsRectEmpty(&displayRect))
+			cwCenter(hWndDlg, 0);
+		else
+			AdjustIdentifyWindow(hWndDlg, firstMove);
+		firstMove = FALSE;
+		/* initialize working variables                                */
+		strcpy(DBName, lpDB);
+		item = BasicDisplayItem;
+		if (lpBasicTitle)
+			SetWindowText(hWndDlg, lpBasicTitle);
+		if (showOnlyData)
+		{
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE0), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE1), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE2), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE3), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE4), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_SQL), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NOTES), SW_HIDE);
 			// ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE); 
-		 }
-         RecNo=0;
-Show:    
-		 if (item >= 0 && ShowItem)
-		 {
-		     AddToHighlightList (PickList[item].Refno,&PickList[item],TRUE);
-			 
-			 ShowPickedItem (hWndMain, item);  
-		 } 
-		 if (item >= 0)
-		 {
-	         GetItemTAG (item,(LPSTR)&TAG,(LPSTR)&SymName,(LPLONG)&Refno);
-	         SetDlgItemText (hWndDlg,IDENTIFY_LINE1,TAG);
-	/*         if (GetParcelData (Refno, str))
-	         	SetDlgItemText (hWndDlg,IDENTIFY_LINE2,str);
-	         else
-	         	SetDlgItemText (hWndDlg,IDENTIFY_LINE2,Addresses); */
-	         wsprintf (str,"Reference  : %ld",Refno);
-	         SetDlgItemText (hWndDlg,IDENTIFY_LINE2,str);
-	         _fstrcpy(str, "Description: ");
-	         _fstrcat(str,SymName); 
-	         SetDlgItemText (hWndDlg,IDENTIFY_LINE3,str);
-	         if (!lpBasicTitle)
-			 {
-				 HANDLE hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
-				 LPSTR  pMem = GlobalLock (hMem);
-				 
-				 strcpy (pMem,lpDesc);
-				 ExpandText (pMem);
-				 SetWindowText (hWndDlg,pMem); 
-				 GSSiGlobUlFree (&hMem);
-			 }
-	     }
-       	
-		 if (*DBName)
-		 {
-			 ExpandText (DBName);
-			 SetDlgItemText (hWndDlg,IDENTIFY_LINE0,DBName);
-			 strcpy (str,lpSQL);
-			 ExpandText (str);
-			 SetDlgItemText (hWndDlg,IDENTIFY_SQL,str);
-			GetPickName (item); 
-			_fstrcpy (PltName,PickName);
-            OpenMap (CurView->hWnd,CurView->hDC);
-           	ShowWindow (GetDlgItem(hWndDlg,IDENTIFY_DATA),SW_SHOW); 
-           	if (!_fstricmp (DBName,"GraphicItemInfo"))
-           	{  
-           		short	BitRes[2]={16,32};
-           		
+		}
+		RecNo = 0;
+	Show:
+		if (item >= 0 && ShowItem)
+		{
+			AddToHighlightList(PickList[item].Refno, &PickList[item], TRUE);
+
+			ShowPickedItem(hWndMain, item);
+		}
+		if (item >= 0)
+		{
+			GetItemTAG(item, (LPSTR)&TAG, (LPSTR)&SymName, (LPLONG)&Refno);
+			SetDlgItemText(hWndDlg, IDENTIFY_LINE1, TAG);
+			/*         if (GetParcelData (Refno, str))
+						SetDlgItemText (hWndDlg,IDENTIFY_LINE2,str);
+					 else
+						SetDlgItemText (hWndDlg,IDENTIFY_LINE2,Addresses); */
+			wsprintf(str, "Reference  : %ld", Refno);
+			SetDlgItemText(hWndDlg, IDENTIFY_LINE2, str);
+			_fstrcpy(str, "Description: ");
+			_fstrcat(str, SymName);
+			SetDlgItemText(hWndDlg, IDENTIFY_LINE3, str);
+			if (!lpBasicTitle)
+			{
+				HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+				LPSTR  pMem = GlobalLock(hMem);
+
+				strcpy(pMem, lpDesc);
+				ExpandText(pMem);
+				SetWindowText(hWndDlg, pMem);
+				GSSiGlobUlFree(&hMem);
+			}
+		}
+
+		if (*DBName)
+		{
+			ExpandText(DBName);
+			SetDlgItemText(hWndDlg, IDENTIFY_LINE0, DBName);
+			strcpy(str, lpSQL);
+			ExpandText(str);
+			SetDlgItemText(hWndDlg, IDENTIFY_SQL, str);
+			GetPickName(item);
+			_fstrcpy(PltName, PickName);
+			OpenMap(CurView->hWnd, CurView->hDC);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), SW_SHOW);
+			if (!_fstricmp(DBName, "GraphicItemInfo"))
+			{
+				short	BitRes[2] = { 16,32 };
+
 				TabStops[1] = 10;
 				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
-				_fstrcpy (str,"File\t");
-		 		_fstrcat(str,PickName); 
-		 		ExpandText (str);
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);
-				_fstrcpy (str,"%INT_REFNO\t");
-		 		_fstrcat(str,ltoa(PickList[item].Refno,str2,10));
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);
-				_fstrcpy (str,"TAG\t");
-		 		_fstrcat(str,PickList[item].Prefix);
-		 		_fstrcat(str,":");
-		 		_fstrcat(str,PickList[item].UDI);
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);
-				_fstrcpy (str,"Segment\t");
-		 		_fstrcat(str,ltoa(PickList[item].Segment,str2,10));
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);
-				_fstrcpy (str,"Offset\t");
-		 		_fstrcat(str,ltoa(PickList[item].Offset,str2,10));
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);
-				_fstrcpy (str,"Symbol Number\t");   
-				GetSymbolName (PickList[item].Desc,_fstrchr(str,0),0,-(PickList[item].FileNum+1),0);
-				_fstrcat(str," - ");
-		 		_fstrcat(str,itoa(PickList[item].Desc,str2,10));
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);
-				_fstrcpy (str,"Pen\t");
-		 		_fstrcat(str,itoa(PickList[item].PolyID,str2,10));
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"PCT\t%f",PickList[item].PCT); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"OffDist\t%f",PickList[item].OffDist); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"NumPoints\t%ld",(long)PickList[item].NumPoints); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"NearPoint\t%ld",(long)PickList[item].NearPoint); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"Length\t%f",PickList[item].Length); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"Area\t%f",PickList[item].Area); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				sprintf (str,"Resolution\t%f(%i bit)",FileDistToBaseDist,BitRes[PickList[item].HiPrecis]); 
-				SendDlgItemMessage (hWndDlg,IDENTIFY_DATA,LB_ADDSTRING,0,(LPARAM)str);    
-				
-           	}
-           	else
-           	{
-	           	RecNo=1;
+				_fstrcpy(str, "File\t");
+				_fstrcat(str, PickName);
+				ExpandText(str);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				_fstrcpy(str, "%INT_REFNO\t");
+				_fstrcat(str, ltoa(PickList[item].Refno, str2, 10));
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				_fstrcpy(str, "TAG\t");
+				_fstrcat(str, PickList[item].Prefix);
+				_fstrcat(str, ":");
+				_fstrcat(str, PickList[item].UDI);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				_fstrcpy(str, "Segment\t");
+				_fstrcat(str, ltoa(PickList[item].Segment, str2, 10));
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				_fstrcpy(str, "Offset\t");
+				_fstrcat(str, ltoa(PickList[item].Offset, str2, 10));
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				_fstrcpy(str, "Symbol Number\t");
+				GetSymbolName(PickList[item].Desc, _fstrchr(str, 0), 0, -(PickList[item].FileNum + 1), 0);
+				_fstrcat(str, " - ");
+				_fstrcat(str, itoa(PickList[item].Desc, str2, 10));
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				_fstrcpy(str, "Pen\t");
+				_fstrcat(str, itoa(PickList[item].PolyID, str2, 10));
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "PCT\t%f", PickList[item].PCT);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "OffDist\t%f", PickList[item].OffDist);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "NumPoints\t%ld", (long)PickList[item].NumPoints);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "NearPoint\t%ld", (long)PickList[item].NearPoint);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "Length\t%f", PickList[item].Length);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "Area\t%f", PickList[item].Area);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "Resolution\t%f(%i bit)", FileDistToBaseDist, BitRes[PickList[item].HiPrecis]);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+
+			}
+			else
+			{
+				RecNo = 1;
 				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_SETTABSTOPS, 3, (LPARAM)&TabStops);
-	       		BasicDataDisplay (DBName,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,120);
+				BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 120);
 				if (!showOnlyData)
 				{
 					BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 120);
 					SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
 				}
 				else
-					BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, 0,0, RecNo, Refno, lpSQL, 120);
+					BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, 0, 0, RecNo, Refno, lpSQL, 120);
 
-       		}
-       		CloseMap(FALSE);
-		 }
-        else
-           	ShowWindow (GetDlgItem(hWndDlg,IDENTIFY_DATA),SW_HIDE);
-		 if (item >= 0)
-		 {
-			 sprintf(str, "%d of %d Item(s) picked", item, NumPicked);
-			 SetDlgItemText(hWndDlg, IDENTIFY_LINE4, str);
-		 }
-         hWnd = GetDlgItem (hWndDlg,IDENTIFY_NEXT);
-/*         hWnd = GetDlgItem (hWndDlg,IDENTIFY_PREV);
-         if (item>0) EnableWindow (hWnd,HaveImage);*/
-		 rtn = TRUE;
-         break; /* End of WM_INITDIALOG                                 */
-
-    case WM_CLOSE:
-         /* Closing the Dialog behaves the same as Cancel               */
-         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-		 rtn = TRUE;
-         break; /* End of WM_CLOSE                                      */
-
-    case WM_COMMAND:
+			}
+			CloseMap(FALSE);
+		}
+		else
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), SW_HIDE);
+		if (item >= 0)
+		{
+			sprintf(str, "%d of %d Item(s) picked", item, NumPicked);
+			SetDlgItemText(hWndDlg, IDENTIFY_LINE4, str);
+		}
+		hWnd = GetDlgItem(hWndDlg, IDENTIFY_NEXT);
+		/*         hWnd = GetDlgItem (hWndDlg,IDENTIFY_PREV);
+				 if (item>0) EnableWindow (hWnd,HaveImage);*/
 		rtn = TRUE;
-         switch(LOWORD(wParam))
-           {
-			case IDC_PHOTO1:
-				sprintf (cmd,"$IMAGE(%s,180,%i)",photoFile1,displayRect.right);
-				ExpandText (cmd);
-				break;
-            case IDENTIFY_NEXT: /* Button text: "Next"                  */  
- 				 sprintf (cmd,"$IMAGE()");
-				 ExpandText (cmd);
-            	 RecNo++;
-       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,80);
-				 SetPhotoAndNotesFiles (hWndDlg,IDENTIFY_DATA,IDC_PHOTO1,IDC_PHOTO2,IDC_NOTES,photoFile1,photoFile2,notesFile);
-                 break;
-            case IDENTIFY_PRIOR: /* Button text: "Next"                  */  
-  				 sprintf (cmd,"$IMAGE()");
-				 ExpandText (cmd);
-            	 RecNo--;
-       			 BasicDataDisplay (lpDB,hWndDlg,IDENTIFY_DATA,IDENTIFY_NEXT,IDENTIFY_PRIOR,RecNo,Refno,lpSQL,80);
-				 SetPhotoAndNotesFiles (hWndDlg,IDENTIFY_DATA,IDC_PHOTO1,IDC_PHOTO2,IDC_NOTES,photoFile1,photoFile2,notesFile);
-                 break;
-            case IDCANCEL:
-                 /* Ignore data values entered into the controls        */
-                 /* and dismiss the dialog window returning FALSE       */   
-                 hWndBasic = 0;
- 				 sprintf (cmd,"$IMAGE()");
-				 ExpandText (cmd);
-				 GetWindowRect(hWndDlg, &displayRect);
-	             GSSiEndDialog(hWndDlg, TRUE,hSaveBM);
-                 break; 
-			case IDC_SAVEANDEXIT:
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		rtn = TRUE;
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		rtn = TRUE;
+		switch (LOWORD(wParam))
+		{
+		case IDC_PHOTO1:
+			sprintf(cmd, "$IMAGE(%s,180,%i)", photoFile1, displayRect.right);
+			ExpandText(cmd);
+			break;
+		case IDENTIFY_NEXT: /* Button text: "Next"                  */
+			sprintf(cmd, "$IMAGE()");
+			ExpandText(cmd);
+			RecNo++;
+			BasicDataDisplay(lpDB, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 80);
+			SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
+			break;
+		case IDENTIFY_PRIOR: /* Button text: "Next"                  */
+			sprintf(cmd, "$IMAGE()");
+			ExpandText(cmd);
+			RecNo--;
+			BasicDataDisplay(lpDB, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 80);
+			SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
+			break;
+		case IDCANCEL:
+			/* Ignore data values entered into the controls        */
+			/* and dismiss the dialog window returning FALSE       */
+			hWndBasic = 0;
+			sprintf(cmd, "$IMAGE()");
+			ExpandText(cmd);
+			GetWindowRect(hWndDlg, &displayRect);
+			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+			break;
+		case IDC_SAVEANDEXIT:
+		{
+
+			if (RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
 			{
-				
-				if (RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
+				hWndBasic = 0;
+				GetWindowRect(hWndDlg, &displayRect);
+				GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+			}
+		}
+		break;
+		case IDENTIFY_DATA:
+
+			switch (HIWORD(wParam))
+			{
+			case LBN_DBLCLK:
+			{
+				HANDLE	hSQL = 0;
+				int	UpdateType;
+
+				Choice = SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_GETCURSEL, 0, 0);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_GETTEXT, Choice, (DWORD)str);
+				lpTab = _fstrrchr(str, '\t');
+				if (lpTab)
 				{
-					hWndBasic = 0;
-					GetWindowRect(hWndDlg, &displayRect);
-					GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+					*lpTab++ = 0;
+					strcpy(NewValue, lpTab);
+				}
+				else
+					*NewValue = 0;
+				lpTab = _fstrrchr(str, '\t');
+				if (lpTab)
+				{
+					*lpTab++ = 0;
+				}
+				strcpy(SetFieldName, str);
+				UpdateType = GetUpdateFieldType(SetFieldName);
+				if (!UpdateType)
+				{
+					//sprintf (str,"Update of field %s not allowed",SetFieldName);
+					//MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
+					break;
+				}
+				if (UpdateType == 3)
+				{
+					sprintf(cmd, "$WEB(%s)", lpTab);
+					ProcessText(cmd);
+					break;
+				}
+				GetDlgItemText(hWndDlg, IDENTIFY_LINE0, DBName, MAX_PATH);
+
+				if (!OpenDataFile(DBName, "", BT_WRITE, &hSQL))
+					GSSiMsgBox(GetFocus(), DBName, "Write access denied", MB_OK, 0);
+				else
+				{
+					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQL);
+					LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+					int				Type = FilePtr->Type;
+
+					if (UpdateType == 1)
+						st = GetTextString(hWndDlg, NewValue, 1024, str, 0, 0, 0, TRUE, TRUE);
+					else
+						st = GetUpdateFieldValue(hWndDlg, SetFieldName, NewValue);
+					if (st)
+					{
+						sprintf(str2, "%s=%s", SetFieldName, NewValue);
+						strcpy(lpTab - 1, "\t(*)\t");
+						strcat(lpTab, NewValue);
+						ShowWindow(GetDlgItem(hWndDlg, IDC_SAVEANDEXIT), SW_SHOW);
+						SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_DELETESTRING, Choice, 0);
+						SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_INSERTSTRING, Choice, (DWORD)str);
+						if (Type == UMIFS_DATAFILE)
+						{
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(hSQL);
+							CloseDataFile(TRUE, &hSQL);
+							GetDlgItemText(hWndDlg, IDENTIFY_SQL, str, 256);
+							if (!UpdateGMDFile(DBName, str, str2, ';', FALSE, FALSE))
+								GSSiMsgBox(GetFocus(), str2, "Invalid value", MB_OK, 0);
+						}
+						else if (Type == ODBC_DATAFILE)
+						{
+							HANDLE	hUpStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+							LPSTR	pUpStr = GlobalLock(hUpStr);
+							char	DBName[MAX_PATH], sql[256];
+							LPSTR	pTable;
+
+							strcpy(DBName, FilePtr->fullpath);
+							if ((pTable = strrchr(DBName, '|')))
+							{
+								*pTable++ = 0;
+								if (lpSQLFieldList)
+									strcpy(sql, lpSQLFieldList);
+								else
+									GetDlgItemText(hWndDlg, IDENTIFY_SQL, sql, 256);
+								if (lpAutoUpdateFieldList)
+								{
+									HANDLE	hAutoFields = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+									LPSTR	pAutoFields = GlobalLock(hAutoFields);
+
+									strcpy(pAutoFields, lpAutoUpdateFieldList);
+									ExpandText(pAutoFields);
+									ReplaceChar(pAutoFields, ';', ',');
+									GetValsFromLB(hWndDlg, IDENTIFY_DATA, sql);
+									ExpandText(sql);
+									sprintf(pUpStr, "$SQL(%s,UPDATE %s SET %s = '%s',%s WHERE %s)", DBName, pTable, SetFieldName, NewValue, pAutoFields, sql);
+									GSSiGlobUlFree(&hAutoFields);
+								}
+								else
+									sprintf(pUpStr, "$SQL(%s,UPDATE %s SET %s = '%s' WHERE %s)", DBName, pTable, SetFieldName, NewValue, sql);
+							}
+							else
+								*pUpStr = 0;
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(hSQL);
+							CloseDataFile(TRUE, &hSQL);
+							ExpandText(pUpStr);
+							GSSiGlobUlFree(&hUpStr);
+							//MessageBox (0,"Unable to update ODBC database",0,MB_ICONEXCLAMATION);
+						}
+						else
+						{
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(hSQL);
+							CloseDataFile(TRUE, &hSQL);
+						}
+					}
+					else
+					{
+						GlobalUnlock(SQLPtr->OFHandle);
+						GlobalUnlock(hSQL);
+						CloseDataFile(TRUE, &hSQL);
+					}
 				}
 			}
-				break;
-            case IDENTIFY_DATA:
-            
-                switch(HIWORD(wParam))
-                    {
-                     case LBN_DBLCLK:
-						 {
-							 HANDLE	hSQL=0;
-							 int	UpdateType;
+			break;
+			default:
+				rtn = FALSE;
+			}
+			break;
+		default:
+			rtn = FALSE;
+		}
+		break;    /* End of WM_COMMAND                                 */
 
-							 Choice=SendDlgItemMessage(hWndDlg,IDENTIFY_DATA,LB_GETCURSEL,0,0); 
-		         			 SendDlgItemMessage(hWndDlg,IDENTIFY_DATA,LB_GETTEXT,Choice,(DWORD)str);
-		         			 lpTab=_fstrrchr(str,'\t');
-		         			 if (lpTab)
-							 {
-								*lpTab++=0;
-								strcpy (NewValue,lpTab);
-							 }
-							 else
-								 *NewValue = 0;
-							 lpTab = _fstrrchr(str, '\t');
-							 if (lpTab)
-							 {
-								 *lpTab++ = 0;
-							 }
-							 strcpy (SetFieldName,str);
-							 UpdateType = GetUpdateFieldType (SetFieldName);
-							 if (!UpdateType)
-							 {
-								 //sprintf (str,"Update of field %s not allowed",SetFieldName);
-								 //MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
-								 break;
-							 }
-							 if (UpdateType == 3)
-							 {
-								 sprintf(cmd, "$WEB(%s)", lpTab);
-								 ProcessText(cmd);
-								 break;
-							 }
-							 GetDlgItemText (hWndDlg,IDENTIFY_LINE0,DBName,MAX_PATH);
-
-							 if (!OpenDataFile (DBName,"",BT_WRITE,&hSQL))
-		         				GSSiMsgBox( GetFocus(), DBName,"Write access denied", MB_OK,0);
-							 else
-							 {
-								LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA) GlobalLock (hSQL);
-								LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock (SQLPtr->OFHandle);
-								int				Type = FilePtr->Type;  
-
-								if (UpdateType == 1)
-						   			st = GetTextString (hWndDlg,NewValue,1024,str,0,0,0,TRUE,TRUE);
-								else
-									st = GetUpdateFieldValue (hWndDlg,SetFieldName,NewValue);
-								if (st)
-								{
-									sprintf (str2,"%s=%s",SetFieldName,NewValue);
-									strcpy (lpTab-1,"\t(*)\t");
-									strcat (lpTab,NewValue);
-									ShowWindow(GetDlgItem(hWndDlg, IDC_SAVEANDEXIT), SW_SHOW);
-			         				SendDlgItemMessage(hWndDlg,IDENTIFY_DATA,LB_DELETESTRING,Choice,0);
-			         				SendDlgItemMessage(hWndDlg,IDENTIFY_DATA,LB_INSERTSTRING,Choice,(DWORD)str);
-									if (Type == UMIFS_DATAFILE)
-									{
-										GlobalUnlock (SQLPtr->OFHandle);
-										GlobalUnlock (hSQL);
-										CloseDataFile (TRUE, &hSQL); 
-										GetDlgItemText (hWndDlg,IDENTIFY_SQL,str,256);
-										if (!UpdateGMDFile (DBName,str,str2,';',FALSE,FALSE))
-		         							GSSiMsgBox( GetFocus(), str2,"Invalid value", MB_OK,0);
-									}
-									else if (Type == ODBC_DATAFILE)
-									{
-										HANDLE	hUpStr = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
-										LPSTR	pUpStr = GlobalLock (hUpStr);
-										char	DBName[MAX_PATH],sql[256];
-										LPSTR	pTable;
-
-										strcpy (DBName,FilePtr->fullpath);
-										if ((pTable = strrchr (DBName,'|')))
-										{
-											*pTable++ = 0;
-											if (lpSQLFieldList)
-												strcpy (sql,lpSQLFieldList);
-											else
-												GetDlgItemText (hWndDlg,IDENTIFY_SQL,sql,256);
-											if (lpAutoUpdateFieldList)
-											{
-												HANDLE	hAutoFields=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
-												LPSTR	pAutoFields=GlobalLock (hAutoFields);
-
-												strcpy (pAutoFields,lpAutoUpdateFieldList);
-												ExpandText (pAutoFields);
-												ReplaceChar (pAutoFields,';',',');
-												GetValsFromLB (hWndDlg,IDENTIFY_DATA,sql);
-												ExpandText (sql);
-												sprintf (pUpStr,"$SQL(%s,UPDATE %s SET %s = '%s',%s WHERE %s)",DBName,pTable,SetFieldName,NewValue,pAutoFields,sql);
-												GSSiGlobUlFree (&hAutoFields);
-											}
-											else
-												sprintf (pUpStr,"$SQL(%s,UPDATE %s SET %s = '%s' WHERE %s)",DBName,pTable,SetFieldName,NewValue,sql);
-										}
-										else
-											*pUpStr = 0;
-										GlobalUnlock (SQLPtr->OFHandle);
-										GlobalUnlock (hSQL);
-										CloseDataFile (TRUE, &hSQL); 
-										ExpandText (pUpStr);
-										GSSiGlobUlFree (&hUpStr);
-										//MessageBox (0,"Unable to update ODBC database",0,MB_ICONEXCLAMATION);
-									}
-									else
-									{
-										GlobalUnlock(SQLPtr->OFHandle);
-										GlobalUnlock(hSQL);
-										CloseDataFile(TRUE, &hSQL);
-									}
-								}
-								else
-								{
-									GlobalUnlock (SQLPtr->OFHandle);
-									GlobalUnlock (hSQL);
-								    CloseDataFile (TRUE, &hSQL); 
-								}
-							 }
-						 }
-		         		 break;
-						 default:
-							 rtn = FALSE;
-		         	}
-		        break;
-				default:
-					rtn = FALSE;
-           }
-         break;    /* End of WM_COMMAND                                 */
-
-    default:
+	default:
 		break;
 
-   }
+	}
+	{
+#if ENABLETRACE
+		GSSiExitProg(454);
+#endif
+
+		return rtn;
+
+	}
+#if ENABLETRACE
+	}
+#endif
+} /* End of IDENTIFYMsgProc*/
+BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+#if ENABLETRACE
 {
+	GSSiEnterProg(454);
+#endif
+	{
+	char	str[1024], TAG[64], SymName[34], Addresses[128], str2[1024];
+	LONG	Segment, Refno = 0;
+	static int		item;
+	HWND	hWnd;
+	int		TabStops[3] = { 120*2,140*2,2000 };
+	HANDLE hDB;
+	LPGWFLDINFO	lpGWFldInfo;
+	LPGWDHEADER	lpGWDHead;
+	HANDLE		hBT;
+	long		Offset;
+	int			st, i, len;
+	LPSTR		lpTab;
+	int			Choice;
+	BOOL		ShowItem = FALSE;
+	static		long		RecNo;
+	static	HANDLE	hSaveBM = 0;
+	char	SetFieldName[128];
+	char	NewValue[1024];
+	char	cmd[1024];
+	BOOL	rtn = FALSE;
+	static  firstMove = TRUE;
+	static  RECT lastRect = { -1000,-1000,-1000,-1000 };
+	static HBITMAP hBMLeft = 0;
+	static HBITMAP hBMRight = 0;
+	static int firstImage = 0;
+	static int lastImage = 0;
+	static int totImages = 0;
+	static HBITMAP hBMLarge = 0;
+	LPSTR pTab;
+	static char FileName[MAX_PATH + 2] = { 0 };;
+	static int currentImage = 0;
+	RECT buttonRect;
+	static char DBName[MAX_PATH];
+
+	int	BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+	{
 #if ENABLETRACE
-GSSiExitProg (454);
+		GSSiExitProg(454);
+#endif
+		return (BRtn);
+	}
+	switch (Message)
+	{
+	case WM_MOVE:
+	case WM_SIZE:
+	{
+		RECT rect;
+		GetWindowRect(hWndDlg, &rect);
+		if (!EqualRect(&rect, &displayRect))
+		{
+			rtn = TRUE;
+			displayRect = rect;
+			if (!firstMove)
+				AdjustIdentifyWithPhotosWindow(hWndDlg, FALSE);
+		}
+	}
+	break;
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		RECT rc;
+		HDC hdc = BeginPaint(hWndDlg, &ps);
+		GetClientRect(hWndDlg, &rc);
+		if (showOnlyData)
+			FillRect(hdc, &rc, GetStockObject(WHITE_BRUSH));
+		EndPaint(hWndDlg, &ps);
+	}
+	break;
+	case WM_DESTROY:
+
+		if (FileType(DMIFile) == 1)
+			GSSiRemove(DMIFile);
+		GSSiDeleteObject(&hBMLarge);
+
+		break;
+
+	case WM_INITDIALOG:
+		firstMove = TRUE;
+		hSaveBM = EnterBlockingWindow(hWndDlg);
+		hWndBasic = hWndDlg;
+		if (IsRectEmpty(&displayRect))
+			cwCenter(hWndDlg, 0);
+		else
+			AdjustIdentifyWithPhotosWindow(hWndDlg, firstMove);
+		firstMove = FALSE;
+		/* initialize working variables                                */
+		strcpy(DBName, lpDB);
+		item = BasicDisplayItem;
+		if (lpBasicTitle)
+			SetWindowText(hWndDlg, lpBasicTitle);
+		if (showOnlyData)
+		{
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE0), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE1), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE2), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE3), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_LINE4), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_SQL), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NOTES), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), SW_SHOW);
+			// ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE); 
+		}
+		if (*DMITitle)
+			SetWindowText(GetDlgItem(hWndDlg, IDC_TITLE), DMITitle);
+		RecNo = 0;
+		char blankLine[] = "";
+		RecNo = 1;
+		//SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_SETTABSTOPS, 3, (LPARAM)&TabStops);
+		//BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 120);
+		if (!showOnlyData)
+		{
+			BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 120);
+			SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
+		}
+		else
+			BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, 0, 0, RecNo, Refno, lpSQL, 120);
+
+		currentImage = 0;
+		totImages = 0;
+		HFILE fid = HFILE_ERROR;
+
+		if (rampPhotoFile)
+			fid = GSSiOpenFile(rampPhotoFile, 0, OF_READ);
+		int image = 0;
+		if (fid != HFILE_ERROR)
+		{
+			while (fgetstring(FileName, MAX_PATH, fid))
+				totImages++;
+			GSSiClose2(&fid);
+		}
+	showImage:
+		if (currentImage < totImages)
+		{
+			fid = GSSiOpenFile(rampPhotoFile, 0, OF_READ);
+			BOOL doFlip = FALSE;
+			int ifile = -1;
+			while (ifile++ < currentImage)
+				fgetstring(FileName, MAX_PATH, fid);
+			if ((pTab = strchr(FileName, '\t')))
+			{
+				*pTab++ = 0;
+
+				if (!strnicmp(pTab, "Ground", 6))
+					doFlip = TRUE;
+			}
+			hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			GSSiClose2(&fid);
+		}
+
+		EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), (currentImage > 0));
+		EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE), (currentImage < totImages - 1));
+
+		rtn = TRUE;
+		break; /* End of WM_INITDIALOG                                 */
+		    case WM_DRAWITEM:
+			{
+
+				LPDRAWITEMSTRUCT lpdis = (LPDRAWITEMSTRUCT)lParam;
+
+				/* If there are no list box items, skip this message. */
+
+				if (lpdis->itemID == -1) {
+					break;
+				}
+
+				/*
+				 * Draw the bitmap and text for the list box item. Draw a
+				 * rectangle around the bitmap if it is selected.
+				 */
+
+				switch (lpdis->itemAction) {
+
+				case ODA_SELECT:
+				case ODA_DRAWENTIRE:
+				{
+					int y;
+					TEXTMETRIC tm;
+					char DisplayName[256];
+					LPSTR pTab;
+
+					SendMessage(lpdis->hwndItem, LB_GETTEXT, lpdis->itemID, (LPARAM)str);
+					strcpy(DisplayName, str);
+					pTab = strchr(DisplayName, '\t');
+					if (pTab)
+						*pTab = 0;
+					GetTextMetrics(lpdis->hDC, &tm);
+
+					y = (lpdis->rcItem.bottom + lpdis->rcItem.top -
+						tm.tmHeight) / 2;
+					COLORREF color = GetRampFieldValueColor(DisplayName);
+					UINT oldColor = SetTextColor(lpdis->hDC, color);
+					TabbedTextOut(lpdis->hDC,
+						lpdis->rcItem.left + 5,
+						y,
+						str,
+						strlen(str),2, TabStops, lpdis->rcItem.left + 5);
+					SetTextColor(lpdis->hDC, oldColor);
+
+					/* Is the item selected? */
+
+					if (lpdis->itemState & ODS_SELECTED) {
+
+
+						/*
+						 * Draw a rectangle around bitmap to indicate
+						 * the selection.
+						 */
+
+						if (lastRect.top != -1000)
+							DrawFocusRect(lpdis->hDC, &lastRect);
+						DrawFocusRect(lpdis->hDC, &lpdis->rcItem);
+						lastRect = lpdis->rcItem;
+					}
+				}
+				break;
+
+				case ODA_FOCUS:
+					InvertRect(lpdis->hDC, &lpdis->rcItem);
+
+					break;
+				}
+				return TRUE;
+			}
+
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		rtn = TRUE;
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		rtn = TRUE;
+		switch (LOWORD(wParam))
+		{
+		case IDC_IMAGE_FLIP:
+		{
+			HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+			if (hDIB)
+			{
+				if (FreeImage_FlipVertical(hDIB))
+				{
+					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+				}
+				FreeImage_Unload(hDIB);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			}
+		}
+		break;
+		case IDC_IMAGE_ROTATE_CLOCKWISE:
+		{
+			HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+			if (hDIB)
+			{
+				if (FreeImage_RotateClassic(hDIB, 90))
+				{
+					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+				}
+				FreeImage_Unload(hDIB);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			}
+		}
+		break;
+		case IDC_IMAGE_ROTATE_COUNTERCLOCKWISE:
+		{
+			HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+			if (hDIB)
+			{
+				if (FreeImage_RotateClassic(hDIB, 270))
+				{
+					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+				}
+				FreeImage_Unload(hDIB);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			}
+		}
+		break;
+		case IDC_LARGEBUTTON:
+		{
+			char cmd[MAX_PATH * 2];
+			sprintf(cmd, "$WEB(%s)", FileName);
+			if (*FileName)
+				ProcessText(cmd);
+		}
+		break;
+		case IDC_PRIOR_IMAGE:
+			currentImage--;
+			goto showImage;
+			break;
+		case IDC_NEXT_IMAGE:
+			currentImage++;
+			goto showImage;
+			break;
+
+		case IDC_PHOTO1:
+			sprintf(cmd, "$IMAGE(%s,180,%i)", photoFile1, displayRect.right);
+			ExpandText(cmd);
+			break;
+		case IDENTIFY_NEXT: /* Button text: "Next"                  */
+			sprintf(cmd, "$IMAGE()");
+			ExpandText(cmd);
+			RecNo++;
+			BasicDataDisplay(lpDB, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 80);
+			SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
+			break;
+		case IDENTIFY_PRIOR: /* Button text: "Next"                  */
+			sprintf(cmd, "$IMAGE()");
+			ExpandText(cmd);
+			RecNo--;
+			BasicDataDisplay(lpDB, hWndDlg, IDENTIFY_DATA, IDENTIFY_NEXT, IDENTIFY_PRIOR, RecNo, Refno, lpSQL, 80);
+			SetPhotoAndNotesFiles(hWndDlg, IDENTIFY_DATA, IDC_PHOTO1, IDC_PHOTO2, IDC_NOTES, photoFile1, photoFile2, notesFile);
+			break;
+		case IDCANCEL:
+			/* Ignore data values entered into the controls        */
+			/* and dismiss the dialog window returning FALSE       */
+			hWndBasic = 0;
+			sprintf(cmd, "$IMAGE()");
+			ExpandText(cmd);
+			GetWindowRect(hWndDlg, &displayRect);
+			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+			break;
+		case IDC_SAVEANDEXIT:
+		{
+
+			if (RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
+			{
+				hWndBasic = 0;
+				GetWindowRect(hWndDlg, &displayRect);
+				GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+			}
+		}
+		break;
+		case IDENTIFY_DATA:
+
+			switch (HIWORD(wParam))
+			{
+			case LBN_DBLCLK:
+			{
+				HANDLE	hSQL = 0;
+				int	UpdateType;
+
+				Choice = SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_GETCURSEL, 0, 0);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_GETTEXT, Choice, (DWORD)str);
+				lpTab = _fstrrchr(str, '\t');
+				if (lpTab)
+				{
+					*lpTab++ = 0;
+					strcpy(NewValue, lpTab);
+				}
+				else
+					*NewValue = 0;
+				lpTab = _fstrrchr(str, '\t');
+				if (lpTab)
+				{
+					*lpTab++ = 0;
+				}
+				strcpy(SetFieldName, str);
+				UpdateType = GetUpdateFieldType(SetFieldName);
+				if (!UpdateType)
+				{
+					//sprintf (str,"Update of field %s not allowed",SetFieldName);
+					//MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
+					break;
+				}
+				if (UpdateType == 3)
+				{
+					sprintf(cmd, "$WEB(%s)", lpTab);
+					ProcessText(cmd);
+					break;
+				}
+
+				if (!OpenDataFile(DBName, "", BT_WRITE, &hSQL))
+					GSSiMsgBox(GetFocus(), DBName, "Write access denied", MB_OK, 0);
+				else
+				{
+					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(hSQL);
+					LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+					int				Type = FilePtr->Type;
+
+					if (UpdateType == 1)
+						st = GetTextString(hWndDlg, NewValue, 1024, str, 0, 0, 0, TRUE, TRUE);
+					else
+						st = GetUpdateFieldValue(hWndDlg, SetFieldName, NewValue);
+					if (st)
+					{
+						sprintf(str2, "%s=%s", SetFieldName, NewValue);
+						strcpy(lpTab - 1, "\t(*)\t");
+						strcat(lpTab, NewValue);
+						ShowWindow(GetDlgItem(hWndDlg, IDC_SAVEANDEXIT), SW_SHOW);
+						SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_DELETESTRING, Choice, 0);
+						SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_INSERTSTRING, Choice, (DWORD)str);
+						if (Type == UMIFS_DATAFILE)
+						{
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(hSQL);
+							CloseDataFile(TRUE, &hSQL);
+							GetDlgItemText(hWndDlg, IDENTIFY_SQL, str, 256);
+							if (!UpdateGMDFile(DBName, str, str2, ';', FALSE, FALSE))
+								GSSiMsgBox(GetFocus(), str2, "Invalid value", MB_OK, 0);
+						}
+						else if (Type == ODBC_DATAFILE)
+						{
+							HANDLE	hUpStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+							LPSTR	pUpStr = GlobalLock(hUpStr);
+							char	DBName[MAX_PATH], sql[256];
+							LPSTR	pTable;
+
+							strcpy(DBName, FilePtr->fullpath);
+							if ((pTable = strrchr(DBName, '|')))
+							{
+								*pTable++ = 0;
+								if (lpSQLFieldList)
+									strcpy(sql, lpSQLFieldList);
+								else
+									GetDlgItemText(hWndDlg, IDENTIFY_SQL, sql, 256);
+								if (lpAutoUpdateFieldList)
+								{
+									HANDLE	hAutoFields = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+									LPSTR	pAutoFields = GlobalLock(hAutoFields);
+
+									strcpy(pAutoFields, lpAutoUpdateFieldList);
+									ExpandText(pAutoFields);
+									ReplaceChar(pAutoFields, ';', ',');
+									GetValsFromLB(hWndDlg, IDENTIFY_DATA, sql);
+									ExpandText(sql);
+									sprintf(pUpStr, "$SQL(%s,UPDATE %s SET %s = '%s',%s WHERE %s)", DBName, pTable, SetFieldName, NewValue, pAutoFields, sql);
+									GSSiGlobUlFree(&hAutoFields);
+								}
+								else
+									sprintf(pUpStr, "$SQL(%s,UPDATE %s SET %s = '%s' WHERE %s)", DBName, pTable, SetFieldName, NewValue, sql);
+							}
+							else
+								*pUpStr = 0;
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(hSQL);
+							CloseDataFile(TRUE, &hSQL);
+							ExpandText(pUpStr);
+							GSSiGlobUlFree(&hUpStr);
+							//MessageBox (0,"Unable to update ODBC database",0,MB_ICONEXCLAMATION);
+						}
+						else
+						{
+							GlobalUnlock(SQLPtr->OFHandle);
+							GlobalUnlock(hSQL);
+							CloseDataFile(TRUE, &hSQL);
+						}
+					}
+					else
+					{
+						GlobalUnlock(SQLPtr->OFHandle);
+						GlobalUnlock(hSQL);
+						CloseDataFile(TRUE, &hSQL);
+					}
+				}
+			}
+			break;
+			default:
+				rtn = FALSE;
+			}
+			break;
+		default:
+			rtn = FALSE;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		break;
+
+	}
+	{
+#if ENABLETRACE
+		GSSiExitProg(454);
 #endif
 
-	return rtn;
+		return rtn;
 
-}
+	}
 #if ENABLETRACE
-}
+	}
 #endif
-} /* End of IDENTIFYMsgProc*/ 
+} /* End of IDENTIFY_WITH_PHOTOMsgProc*/
 
 BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE

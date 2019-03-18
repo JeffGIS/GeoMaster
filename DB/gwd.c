@@ -2600,7 +2600,7 @@ Display:
 	            }
 	            l-=n;   
 	            str3+=n;
-	            SendDlgItemMessage (hWndDlg,dlgitem,LB_ADDSTRING,0,(LPARAM)str); 
+	            ii=SendDlgItemMessage (hWndDlg,dlgitem,LB_ADDSTRING,0,(LPARAM)str); 
 	            _fstrcpy (str,"\t");
 	        }
         }   

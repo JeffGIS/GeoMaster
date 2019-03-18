@@ -3398,7 +3398,10 @@
 #define IDC_IMAGE_ROTATE_COUNTERCLOCKWISE 2302
 #define IDC_DATAFILESTODOWNLOAD         2302
 #define IDC_PICTURESTODOWNLOAD          2303
+#define IDC_PRIOR_IMAGE                 2303
 #define IDC_DOWNLOADPICTS               2304
+#define IDC_IMAGE_ROTATE_COUNTERCLOCKWISE2 2304
+#define IDC_NEXT_IMAGE                  2304
 #define IDC_DOWNLOADDATA                2305
 #define IDC_PROGRESS1                   2306
 #define IDC_SYNCHRONIZE                 2307
@@ -3749,7 +3752,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1259
+#define _APS_NEXT_RESOURCE_VALUE        1260
 #define _APS_NEXT_COMMAND_VALUE         1248
 #define _APS_NEXT_CONTROL_VALUE         2310
 #define _APS_NEXT_SYMED_VALUE           1036

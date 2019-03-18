@@ -2774,8 +2774,11 @@ SetVis:
 					NumPicked = 1;
 				else
 				{
-					if ((lpColon = _fstrchr (Arg[2],':')))
-						*lpColon++=0;
+					if ((lpColon = _fstrchr(Arg[2], ':')))
+					{
+						*lpColon++ = 0;
+						Refno = 0;
+					}
 					else 
 					{
 						Refno = atol (Arg[2]); 

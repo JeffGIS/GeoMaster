@@ -6,6 +6,9 @@
 
 #include "RampCompliance.h"
 
+static char majorFields[1024] = "|";
+static char minorFields[1024] = "|";
+
 int fixRampNum(int rampNum)
 {
     int rtn = rampNum;
@@ -59,6 +62,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     char *basic = (char *)calloc(16, sizeof(char));
     char *detail = (char *)calloc(64, sizeof(char));
     
+	strcpy (majorFields,"|");
+	strcpy (minorFields,"|");
     //signals
     if (ramp->PEDButtonType > 0)
     {
@@ -67,7 +72,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
         {
 			basic = strcat(basic, selectCode(Signal, codeSystem));
 			detail = strcat(detail, selectCode(Signal, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "PEDButtonHeight");
+		}
     }
     
     //detectable warnings
@@ -79,7 +85,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             {
 				basic = strcat(basic, selectCode(DetectableWarning, codeSystem));
 				detail = strcat(detail, selectCode(DetectableWarning, codeSystem));
-            }
+				sprintf(strchr(majorFields, 0), "%s|", "texture");
+			}
         }
     }
     
@@ -90,6 +97,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     {
         if (ramp->rampWidth < (CVDimensions - tolerances->dimensions))
         {
+			sprintf(strchr(majorFields, 0), "%s|", "rampWidth");
 			basic = strcat(basic, selectCode(DimensionsMajor, codeSystem));
 			detail = strcat(detail, selectCode(RampWidthMajor, codeSystem));
             flagged = 2;
@@ -97,6 +105,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
         
         else if (ramp->rampWidth < CVDimensions)
         {
+			sprintf(strchr(minorFields, 0), "%s|", "rampWidth");
 			basic = strcat(basic, selectCode(DimensionsMinor, codeSystem));
 			detail = strcat(detail, selectCode(RampWidthMinor, codeSystem));
             flagged = 1;
@@ -107,7 +116,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     {
         if (ramp->rampDepth < (CVDimensions - tolerances->dimensions))
         {
-            if (flagged < 2)
+			sprintf(strchr(majorFields, 0), "%s|", "rampDepth");
+			if (flagged < 2)
             {
                 if (flagged == 1)
                     basic[strlen(basic) - 1] = '\0';
@@ -118,9 +128,10 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 			detail = strcat(detail, selectCode(RampDepthMajor, codeSystem));
         }
         
-        else if (ramp->rampDepth < 36)
+        else if (ramp->rampDepth < CVDimensions)
         {
-            if (flagged < 1)
+			sprintf(strchr(minorFields, 0), "%s|", "rampDepth");
+			if (flagged < 1)
 				basic = strcat(basic, selectCode(DimensionsMinor, codeSystem));
             
 			detail = strcat(detail, selectCode(RampDepthMinor, codeSystem));
@@ -135,6 +146,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     if (value > (CV8 + tolerances->cv8) && value < 9990.0)
     {
+		sprintf(strchr(majorFields, 0), "%s|", "rampSlopeFront");
 		basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
 		detail = strcat(detail, selectCode(RampFrontMajor, codeSystem));
         flagged = 2;
@@ -142,6 +154,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     
     else if (value > CV8 && value < 9990.0)
     {
+		sprintf(strchr(minorFields, 0), "%s|", "rampSlopeFront");
 		basic = strcat(basic, selectCode(SlopeMinor, codeSystem));
 		detail = strcat(detail, selectCode(RampFrontMinor, codeSystem));
         flagged = 1;
@@ -162,7 +175,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
         }
         
 		detail = strcat(detail, selectCode(RampSideMajor, codeSystem));
-    }
+		sprintf(strchr(majorFields, 0), "%s|", "rampSlopeSide");
+	}
     
     else if (value > CV2 && value < 9990.0)
     {
@@ -173,7 +187,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
         }
         
 		detail = strcat(detail, selectCode(RampSideMinor, codeSystem));
-    }
+		sprintf(strchr(minorFields, 0), "%s|", "rampSlopeSide");
+	}
     
     //upper landing slopes (2,2)
     value = fabsf(ramp->upperLandingSlopeFront);
@@ -190,6 +205,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "upperLandingSlopeFront");
 		detail = strcat(detail, selectCode(UpperLandingFrontMajor, codeSystem));
     }
     
@@ -201,6 +217,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "upperLandingSlopeFront");
 		detail = strcat(detail, selectCode(UpperLandingFrontMinor, codeSystem));
     }
     
@@ -218,6 +235,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "upperLandingSlopeSide");
 		detail = strcat(detail, selectCode(UpperLandingSideMajor, codeSystem));
     }
     
@@ -229,6 +247,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "upperLandingSlopeSide");
 		detail = strcat(detail, selectCode(UpperLandingSideMinor, codeSystem));
     }
     
@@ -247,6 +266,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "streetLandingSlopeFront");
 		detail = strcat(detail, selectCode(StreetLandingFrontMajor, codeSystem));
     }
     
@@ -258,6 +278,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "streetLandingSlopeFront");
 		detail = strcat(detail, selectCode(StreetLandingFrontMinor, codeSystem));
     }
     
@@ -275,6 +296,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "streetLandingSlopeSide");
 		detail = strcat(detail, selectCode(StreetLandingSideMajor, codeSystem));
     }
     
@@ -286,6 +308,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "streetLandingSlopeSide");
 		detail = strcat(detail, selectCode(StreetLandingSideMinor, codeSystem));
     }
 
@@ -304,6 +327,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "flareLeftSlopeFront");
 		detail = strcat(detail, selectCode(FlareLeftFrontMajor, codeSystem));
     }
     
@@ -315,6 +339,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "flareLeftSlopeFront");
 		detail = strcat(detail, selectCode(FlareLeftFrontMinor, codeSystem));
     }
 
@@ -333,6 +358,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "flareRightSlopeFront");
 		detail = strcat(detail, selectCode(FlareRightFrontMajor, codeSystem));
     }
     
@@ -344,6 +370,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "flareRightSlopeFront");
 		detail = strcat(detail, selectCode(FlareRightFrontMinor, codeSystem));
     }
     
@@ -364,7 +391,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 2;
             }
             
-            detail = strcat(detail, SwkLeftFrontMajor);
+			sprintf(strchr(majorFields, 0), "%s|", "swkLeftSlopeFront");
+			detail = strcat(detail, SwkLeftFrontMajor);
         }
         
         else if (value > CV8 && value < 9990.0)
@@ -375,7 +403,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 1;
             }
             
-            detail = strcat(detail, SwkLeftFrontMinor);
+			sprintf(strchr(minorFields, 0), "%s|", "swkLeftSlopeFront");
+			detail = strcat(detail, SwkLeftFrontMinor);
         }
     }
     
@@ -392,6 +421,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 	            flagged = 2;
 	        }
         
+			sprintf(strchr(majorFields, 0), "%s|", "swkLeftSlopeFront");
 			detail = strcat(detail, selectCode(SwkLeftFrontMajor, codeSystem));
 	    }
     
@@ -403,6 +433,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 	            flagged = 1;
         	}
         
+			sprintf(strchr(minorFields, 0), "%s|", "swkLeftSlopeFront");
 			detail = strcat(detail, selectCode(SwkLeftFrontMinor, codeSystem));
 		}
     }
@@ -421,6 +452,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 2;
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "swkLeftSlopeSide");
 		detail = strcat(detail, selectCode(SwkLeftSideMajor, codeSystem));
     }
     
@@ -432,6 +464,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "swkLeftSlopeSide");
 		detail = strcat(detail, selectCode(SwkLeftSideMinor, codeSystem));
     }
     
@@ -452,7 +485,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 2;
             }
         
-		detail = strcat(detail, selectCode(SwkRightFrontMajor, codeSystem));
+			sprintf(strchr(majorFields, 0), "%s|", "swkRightSlopeFront");
+			detail = strcat(detail, selectCode(SwkRightFrontMajor, codeSystem));
     }
     
     else if (value > CV5 && value < 9990.0)
@@ -463,6 +497,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             flagged = 1;
         }
         
+		sprintf(strchr(minorFields, 0), "%s|", "swkRightSlopeFront");
 		detail = strcat(detail, selectCode(SwkRightFrontMinor, codeSystem));
         }
     }
@@ -480,7 +515,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 2;
             }
             
-            detail = strcat(detail, selectCode(SwkRightFrontMajor, codeSystem));
+			sprintf(strchr(majorFields, 0), "%s|", "swkRightSlopeFront");
+			detail = strcat(detail, selectCode(SwkRightFrontMajor, codeSystem));
         }
         
         else if (value > CV5 && value < 9990.0)
@@ -491,7 +527,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 1;
             }
             
-            detail = strcat(detail, selectCode(SwkRightFrontMinor, codeSystem));
+			sprintf(strchr(minorFields, 0), "%s|", "swkRightSlopeFront");
+			detail = strcat(detail, selectCode(SwkRightFrontMinor, codeSystem));
         }
     }    
     
@@ -508,6 +545,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 			basic = strcat(basic, selectCode(SlopeMajor, codeSystem));
         }
         
+		sprintf(strchr(majorFields, 0), "%s|", "swkRightSlopeSide");
 		detail = strcat(detail, selectCode(SwkRightSideMajor, codeSystem));
     }
     
@@ -516,6 +554,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
         if (flagged < 1)
 			basic = strcat(basic, selectCode(SlopeMinor, codeSystem));
         
+		sprintf(strchr(minorFields, 0), "%s|", "swkRightSlopeSide");
 		detail = strcat(detail, selectCode(SwkRightSideMinor, codeSystem));
     }
     
@@ -529,14 +568,16 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 			basic = strcat(basic, selectCode(CracksMajor, codeSystem));
 			detail = strcat(detail, selectCode(RampCrackMajor, codeSystem));
             flagged = 2;
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "rampCrackWidth");
+		}
         
         else
         {
 			basic = strcat(basic, selectCode(CracksMinor, codeSystem));
 			detail = strcat(detail, selectCode(RampCrackMinor, codeSystem));
             flagged = 1;
-        }
+			sprintf(strchr(minorFields, 0), "%s|", "rampCrackWidth");
+		}
     }
     
     //upper landing cracks
@@ -554,7 +595,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(UpperLandingCrackMajor, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "upperLandingCrackWidth");
+		}
         
         else
         {
@@ -565,7 +607,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(UpperLandingCrackMinor, codeSystem));
-        }
+			sprintf(strchr(minorFields, 0), "%s|", "upperLandingCrackWidth");
+		}
     }
     
     //street landing cracks
@@ -583,7 +626,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(StreetLandingCrackMajor, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "streetLandingCrackWidth");
+		}
         
         else
         {
@@ -594,7 +638,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(StreetLandingCrackMinor, codeSystem));
-        }
+			sprintf(strchr(minorFields, 0), "%s|", "streetLandingCrackWidth");
+		}
     }
     
     //left sidewalk cracks
@@ -612,7 +657,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(SwkLeftCrackMajor, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "leftSidewalkCrackWidth");
+		}
         
         else
         {
@@ -623,7 +669,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(SwkLeftCrackMinor, codeSystem));
-        }
+			sprintf(strchr(minorFields, 0), "%s|", "leftSidewalkCrackWidth");
+		}
     }
     
     //right sidewalk cracks
@@ -641,7 +688,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(SwkRightCrackMajor, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "rightSidewalkCrackWidth");
+		}
         
         else
         {
@@ -652,7 +700,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			detail = strcat(detail, selectCode(SwkRightCrackMinor, codeSystem));
-        }
+			sprintf(strchr(minorFields, 0), "%s|", "rightSidewalkCrackWidth");
+		}
     }
     
     flagged = 0;
@@ -665,14 +714,16 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 			basic = strcat(basic, selectCode(LevelChangeMajor, codeSystem));
 			detail = strcat(detail, selectCode(STOCMajor, codeSystem));
             flagged = 2;
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "SteepTopOfCurb");
+		}
         
         else
         {
 			basic = strcat(basic, selectCode(LevelChangeMinor, codeSystem));
 			detail = strcat(detail, selectCode(STOCMinor, codeSystem));
             flagged = 1;
-        }
+			sprintf(strchr(minorFields, 0), "%s|", "SteepTopOfCurb");
+		}
     }
     
     //lip
@@ -689,6 +740,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 2;
             }
             
+			sprintf(strchr(majorFields, 0), "%s|", "PedRampLip");
 			detail = strcat(detail, selectCode(LipMajor, codeSystem));
         }
         
@@ -700,6 +752,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
                 flagged = 1;
             }
             
+			sprintf(strchr(minorFields, 0), "%s|", "PedRampLip");
 			detail = strcat(detail, selectCode(LipMinor, codeSystem));
         }
     }
@@ -714,7 +767,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 			basic = strcat(basic, selectCode(Obstructions, codeSystem));
 			detail = strcat(detail, selectCode(RampObstruction, codeSystem));
             flagged = 1;
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "RampObstruction");
+		}
     }
     
     if (ramp->upperLandingObstruction > 0)
@@ -725,7 +779,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 				basic = strcat(basic, selectCode(Obstructions, codeSystem));
             
 			detail = strcat(detail, selectCode(UpperLandingObstruction, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "UpperLandingObstruction");
+		}
     }
     
     if (ramp->lowerLandingObstruction > 0)
@@ -736,7 +791,8 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
 				basic = strcat(basic, selectCode(Obstructions, codeSystem));
             
 			detail = strcat(detail, selectCode(StreetLandingObstruction, codeSystem));
-        }
+			sprintf(strchr(majorFields, 0), "%s|", "lowerLandingObstruction");
+		}
     }
     
     //mark as compliant if no flags have been added
@@ -747,10 +803,46 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
     }
     
     *detailCode = detail;
-    
+	strlwr(majorFields);
+	strlwr(minorFields);
     return basic;
 }
+void ConvertRampDBFieldToDisplayField(LPSTR FieldName, int maxl)
+{
+	REPLAC(FieldName, "rampDepth", "UpperLandingDepth", maxl);
+	REPLAC(FieldName, "PedRampLip", "LipAtFlowLine", maxl);
+	REPLAC(FieldName, "swkLeft", "SidewalkLeft", maxl);
+	REPLAC(FieldName, "swkRight", "SidewalkRight", maxl);
+	REPLAC(FieldName, "SlopeFront", "RunningSlope", maxl);
+	REPLAC(FieldName, "SlopeSide", "CrossSlope", maxl);
+	REPLAC(FieldName, "lowerLandingObstruction", "StreetLandingObstruction", maxl);	
+}
+void ConvertRampDisplayFieldToDBField(LPSTR FieldName, int maxl)
+{
+	REPLAC(FieldName, "UpperLandingDepth", "rampDepth", maxl);
+	REPLAC(FieldName, "LipAtFlowLine", "PedRampLip", maxl);
+	REPLAC(FieldName, "SidewalkLeft", "swkLeft", maxl);
+	REPLAC(FieldName, "SidewalkRight", "swkRight", maxl);
+	REPLAC(FieldName, "RunningSlope", "SlopeFront", maxl);
+	REPLAC(FieldName, "CrossSlope", "SlopeSide", maxl);
+	REPLAC(FieldName, "StreetLandingObstruction", "lowerLandingObstruction", maxl);
+}
+COLORREF GetRampFieldValueColor(LPSTR DisplayName)
+{
+	COLORREF c = 0;
+	COLORREF majorProblem = RGB(255, 0, 0);
+	COLORREF minorProblem = RGB(0, 255, 0);
+	char searchField[256];
 
+	ConvertRampDisplayFieldToDBField(DisplayName,255);
+	strlwr(DisplayName);
+	sprintf(searchField, "|%s|", DisplayName);
+	if (strstr(majorFields, searchField))
+		c = majorProblem;
+	else if(strstr(minorFields, searchField))
+		c = minorProblem;
+	return c;
+}
 void setStandardToleranceValues(ToleranceValues *tolerances)
 {
     tolerances->buttonHeight = 4.0;
@@ -1077,6 +1169,6 @@ char *rampToText(int intNum, RampStruct *ramp, int codeSystem)
 const char *rampToTextHeader(int type)
 {
 	if (!type)
-		return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tRampStatus\tRampCode\tProximityCode\tRetired\tComplianceCodeDetail\tComplianceCodeSummary\tTimeComplete\tRampNotes\tLastUpdate\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tRampDepth\tRampSlopeFront\tRampSlopeSide\tUpperLandingSlopeFront\tUpperLandingSlopeSide\tStreetLandingSlopeFront\tStreetLandingSlopeSide\tFlareLeftSlopeFront\tFlareRightSlopeFront\tSidewalkLeftSlopeFront\tSidewalkLeftSlopeSide\tSidewalkRightSlopeFront\tSidewalkRightSlopeSide\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID";
-	return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tRampStatus(C256)\tRampCode(B2)\tProximityCode(B2)\tRetired(C1)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)\tTimeComplete(C16)\tRampNotes(C255)\tLastUpdate(C64)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tRampDepth(B2)\tRampSlopeFront(R4)\tRampSlopeSide(R4)\tUpperLandingSlopeFront(R4)\tUpperLandingSlopeSide(R4)\tStreetLandingSlopeFront(R4)\tStreetLandingSlopeSide(R4)\tFlareLeftSlopeFront(R4)\tFlareRightSlopeFront(R4)\tSidewalkLeftSlopeFront(R4)\tSidewalkLeftSlopeSide(R4)\tSidewalkRightSlopeFront(R4)\tSidewalkRightSlopeSide(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID";
+		return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tRampStatus\tRampCode\tProximityCode\tRetired\tComplianceCodeDetail\tComplianceCodeSummary\tTimeComplete\tRampNotes\tLastUpdate\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tUpperLandingDepth\tRampRunningSlope\tRampCrossSlope\tUpperLandingRunningSlope\tUpperLandingCrossSlope\tStreetLandingRunningSlope\tStreetLandingCrossSlope\tFlareLeftRunningSlope\tFlareRightRunningSlope\tSidewalkLeftRunningSlope\tSidewalkLeftCrossSlope\tSidewalkRightRunningSlope\tSidewalkRightCrossSlope\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID";
+	return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tRampStatus(C256)\tRampCode(B2)\tProximityCode(B2)\tRetired(C1)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)\tTimeComplete(C16)\tRampNotes(C255)\tLastUpdate(C64)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tUpperLandingDepth(B2)\tRampRunningSlope(R4)\tRampCrossSlope(R4)\tUpperLandingRunningSlope(R4)\tUpperLandingCrossSlope(R4)\tStreetLandingRunningSlope(R4)\tStreetLandingCrossSlope(R4)\tFlareLeftRunningSlope(R4)\tFlareRightRunningSlope(R4)\tSidewalkLeftRunningSlope(R4)\tSidewalkLeftCrossSlope(R4)\tSidewalkRightRunningSlope(R4)\tSidewalkRightCrossSlope(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID";
 }

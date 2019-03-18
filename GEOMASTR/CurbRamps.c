@@ -1007,7 +1007,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 		return FALSE;
 
 	fid = GSSiOpenFile(NVCRISDataBase, &OFStruct, OF_READ);
-	GSSiClose2 (&fid);
+	GSSiClose (fid);
 	if (fid != HFILE_ERROR)
 	{
 		rc = sqlite3_open_v2(OFStruct.szPathName, &database, SQLITE_OPEN_READONLY, NULL);
@@ -1067,7 +1067,7 @@ BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDat
 	*OutLoc = 0;
 	rampNum = fixRampNum(rampNum);
 	HFILE fid = GSSiOpenFile(NVCRISDataBase, &OFStruct, OF_READ);
-	GSSiClose2 (&fid);
+	GSSiClose (fid);
 	if (fid != HFILE_ERROR)
 	{
 

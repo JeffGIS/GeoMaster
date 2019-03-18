@@ -108,6 +108,8 @@ void RampTypeFromCode(int code, LPSTR OutLoc);
 void ObstructionFromCode(int code, LPSTR OutLoc);
 void TextureFromCode(int code, LPSTR OutLoc);
 
+COLORREF GetRampFieldValueColor(LPSTR DisplayName);
+
 
 
 

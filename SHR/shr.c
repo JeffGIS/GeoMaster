@@ -155,7 +155,11 @@ HFILE OpenFileGM(
 		if (!remove(lpFileName))
 			fid = 1;
 	default:
-		MessageBox(0, "Invalid Style in OpenFileGM", 0, MB_ICONEXCLAMATION);
+	{
+		char mess[64];
+		sprintf(mess, "Invalid Style in OpenFileGM:%lu", uStyle);
+		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+	}
 		break;
 	}
 	if (fid == HFILE_ERROR)

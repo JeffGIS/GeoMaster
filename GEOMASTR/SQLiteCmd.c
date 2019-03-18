@@ -2589,7 +2589,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 								}
 								else if (!stricmp(tableName, "RAMPS"))
 								{
-									sprintf(Query, "SELECT %s FROM RAMPS,RAMPS_index WHERE RAMPS.rowid=RAMPS_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",SQLITEUsedFields,
+									sprintf(Query, "SELECT %s FROM RAMPS,RAMPS_index WHERE RAMPS.rampExists > 0 AND RAMPS.rowid=RAMPS_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",SQLITEUsedFields,
 										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 								}
 								else

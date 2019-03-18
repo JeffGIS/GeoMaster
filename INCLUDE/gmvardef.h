@@ -231,6 +231,7 @@ LPSTR	lpSQLFieldList=0;
 LPSTR	lpBasicTitle=0;
 RECT	displayRect;
 BOOL	showOnlyData;
+LPSTR	rampPhotoFile = 0;
 int		fullBMLeft=0;
 HWND	hWndFullBM=0;
 HWND	DebugInfoWnd;

@@ -92,6 +92,7 @@ BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL TEXTSTRINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SCHMOOZMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL WAITMESSAGEMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM lParam);
