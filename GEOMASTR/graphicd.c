@@ -893,6 +893,8 @@ void CreateNewObject(int i)
     short	UseHalfTone=0;
     BOOL	HiPrecis2 = HiPrecis;
 
+	if (i >= MAX_NEW_OBJECTS)
+		return;
 	if (CurView->Rotation || UseShortSymbols)
 		HiPrecis2 = TRUE;
     

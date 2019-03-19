@@ -5939,6 +5939,8 @@ GSSiExitProg (989);
 		npnts = nSplinePoints;
 		lpPoints = pSplinePoints;
     }*/ 
+	if (CurView && CurView->LineSymbolOveride)
+		idesc = CurView->LineSymbolOveride;
 	if (!idesc)
 		ItemSymbolWidth = 0;
 	if (npnts < 0)

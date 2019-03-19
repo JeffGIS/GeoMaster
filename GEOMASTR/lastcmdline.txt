@@ -1,2 +1,2 @@
-configs\directdisplay.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T; 
-h:\pcviewer
+configs\basic1.gmc
+i:\bu_2018_02_28\geomas

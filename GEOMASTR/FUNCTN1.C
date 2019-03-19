@@ -832,6 +832,21 @@ GSSiExitProg (1348);
 					CurView->DisplayRectFactor = atof (Arg[3]);
 					goto RtnTrue;
 				}
+				else if (!_fstricmp(Arg[3], "POINTSYMBOL"))
+				{
+					CurView->PointSymbolOveride = atoi(Arg[4]);
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "LINESYMBOL"))
+				{
+					CurView->LineSymbolOveride = atoi(Arg[4]);
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "AREASYMBOL"))
+				{
+					CurView->AreaSymbolOveride = atoi(Arg[4]);
+					goto RtnTrue;
+				}
 				else if (!_fstricmp (Arg[3],"HAVELAYERCOLOR"))
 				{
 					for (i=0;i<CurView->NumFiles;i++)

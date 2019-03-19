@@ -871,11 +871,20 @@ GSSiExitProg (1348);
 			goto Rtnl;
 		}
 
-		case 309: /* $RGB(r,g,b) returns color value */ 
+		case 309: // $RGB(r,g,b) returns color value
+				  // $RGB(n) returns R|G|B
 		{	
 			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
-			
-			ltoa ((long)RGB(atoi (Arg[1]),atoi (Arg[2]),atoi (Arg[3])),OutLoc,10);
+			if (nArgs == 1)
+			{
+				COLORREF cref = atol(Arg[1]);
+				int r = GetRValue (cref), g = GetGValue (cref), b= GetBValue (cref);
+				sprintf(OutLoc, "%i|%i|%i", r, g, b);
+			}
+			else
+			{
+				ltoa((long)RGB(atoi(Arg[1]), atoi(Arg[2]), atoi(Arg[3])), OutLoc, 10);
+			}
 			goto Rtnl;
 		} 
 		case 351: /* $HSL(r,g,b) returns color value */ 
