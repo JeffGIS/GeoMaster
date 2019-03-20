@@ -1192,6 +1192,16 @@ GSSiExitProg (478);
 }
 #endif
 }
+int BT_CLOSE2(LPHANDLE pIBTID)
+{
+	int rtn = 0;
+	if (*pIBTID)
+	{
+		rtn = BT_CLOSE(*pIBTID);
+		*pIBTID = 0;
+	}
+	return rtn;
+}
 
 BOOL BT_CLEAR (HGLOBAL IBTID)
 #if ENABLETRACE

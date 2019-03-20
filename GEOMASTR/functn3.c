@@ -1863,7 +1863,12 @@ GotCloseFilehSQL:
 
 				skipPaint = 1;
 				if (haveRectGlobal)
+				{
+					char txt[128];
+					recttoa(txt, displayRect);
 					SetGlobalValueRect(Arg[7], displayRect);
+					WritePrivateProfileString("User", "IDWithPhotoWindowPos", txt, GMIni);
+				}
 			}
 			lpUpdateFieldList = 0;
 			lpAutoUpdateFieldList = 0;
@@ -4726,6 +4731,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(PRINTRAMP,FromDB,intnum,rampnum)
 			//$NVCRIS(PRINTRAMPLIST,FromDB,listpath)
 			//$NVCRIS(STREETNAMES,FromDB,intnum)
+			//$NVCRIS(CCODETOFILE, [%ARG(1)], [~TEMPFILE]);
 
 		{
 			rtn = FALSE;
@@ -4746,6 +4752,10 @@ GotCloseFilehSQL:
 				else if (!stricmp(Arg[3], "PRIORITY"))
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
 			
+			}
+			else if (!stricmp(Arg[1], "CCODETOFILE"))//$NVCRIS(CCODETOFILE,ccode,file)
+			{
+				rtn = CCodeToFile(Arg[2],Arg[3]);
 			}
 			else if (!stricmp(Arg[1], "UPDATEPICTID"))//$NVCRIS(UPDATEPICTID,sqlfile,oldsequence,newsequence)
 			{

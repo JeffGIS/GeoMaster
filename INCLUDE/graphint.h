@@ -2497,6 +2497,7 @@ BOOL SetHaveOrthos(void);
 BOOL UpdatePictureID(LPSTR PathName,int oldSequence,int newSequence);
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);
+CCodeToFile(LPSTR code, LPSTR File);
 
 void drawTextwithinPolygon(char *text
 	/*inContext : */, CGContextRef context

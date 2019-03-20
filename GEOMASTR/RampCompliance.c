@@ -32,6 +32,40 @@ int fixRampNum(int rampNum)
     
     return rtn;
 }
+BOOL CCodeToFile(LPSTR code, LPSTR File)
+{
+	BOOL rtn = FALSE;
+	HFILE fid = GSSiOpenFile(File, 0, OF_CREATE);
+
+	if (fid != HFILE_ERROR)
+	{
+		rtn = TRUE;
+		fputstring("CCODE", fid);
+		while (*code)
+		{
+			if (*code == 'W')
+			{
+				fputstring("W", fid);
+				code++;
+			}
+			else if (*code == 'B')
+			{
+				fputstring("B", fid);
+				code++;
+			}
+			else
+			{
+				char savec = code[3];
+				code[3] = 0;
+				fputstring(code, fid);
+				code[3] = savec;
+				code+=3;
+			}
+		}
+		GSSiClose(fid);
+	}
+	return rtn;
+}
 
 static LPSTR selectCode(LPSTR codes, int whichCode)
 {

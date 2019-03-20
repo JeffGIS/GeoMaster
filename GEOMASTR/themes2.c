@@ -3586,6 +3586,7 @@ BOOL CloseThemeFiles(void)
 			case GF_SINGLE_VALUE_THEME: 
 			case GF_TIME_DISPLAY_THEME:
 			case GF_TWO_VALUE_THEME: 
+				BT_CLOSE2(&CurTheme->hScatterFile);
 				GSSiRemoveAndClear (CurTheme->ScatterFile);
 SkipRemove:
 				BT_CLOSEANDDELETE (&CurTheme->hHighlightFile);

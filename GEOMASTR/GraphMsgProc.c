@@ -2193,6 +2193,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 	static int currentImage = 0;
 	RECT buttonRect;
 	static char DBName[MAX_PATH];
+	BOOL err;
 
 	int	BRtn;
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
@@ -2240,6 +2241,8 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 	case WM_INITDIALOG:
 		firstMove = TRUE;
 		hSaveBM = EnterBlockingWindow(hWndDlg);
+		GetPrivateProfileString("User", "IDWithPhotoWindowPos", "0", str, sizeof(str), GMIni);
+		displayRect = atorect(str, &err);
 		hWndBasic = hWndDlg;
 		if (IsRectEmpty(&displayRect))
 			cwCenter(hWndDlg, 0);
