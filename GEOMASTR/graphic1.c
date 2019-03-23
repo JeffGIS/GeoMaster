@@ -5117,8 +5117,27 @@ GSSiExitProg (56);
      }
      if (CurView->WantPass[0])
      {
-        CurView->PassID=0; 
-        DisplayDataPassMessage ();   
+		 BOOL doOpen = FALSE;
+         CurView->PassID=0; 
+         DisplayDataPassMessage (); 
+		 //open theme db so testchar can function in data pass
+		 for (itheme = 0; itheme < CurView->NumThemes; itheme++)         //pViewports[27]
+		 {
+			CurTheme = CurView->pThemes[itheme];
+			if (CurTheme->ID == PF_COORD_DISPLAY || CurTheme->ID == PF_BOUNDS_DISPLAY ||
+				CurTheme->ID == GF_NORTH_ARROW_THEME || CurTheme->ID == GF_CITY_THEME ||
+				!CurTheme->IsActive || !CurTheme->VPDisplayed)
+			{
+				doOpen = FALSE;
+			}
+			else if (CurTheme->SkipInvalid || CurTheme->MissOpt == 1)
+				doOpen = TRUE;
+			else for (i = 0; i < CurTheme->NumClass; i++)
+				if (CurTheme->ClassStatus[i])
+					doOpen = TRUE;
+			if (doOpen)
+				OpenThemeDataFile(CurTheme->DataFile);
+		}
      }
      else
      {

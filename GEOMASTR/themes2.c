@@ -1466,11 +1466,11 @@ KeepLooking:
 			_fstrncpy (KeyVal,Value,lnKey);
 			KeyVal[lnKey]=0;
 			ClassNo = 0;
-			if (CurTheme->DisplayViewport == 19)
+			/*if (CurTheme->DisplayViewport == 19)
 			{
 				BOOL rtn = ItemProcessedByTheme ("",376);
 				ii = rtn;
-			}
+			}*/
 			if (!BT_FIND (CurTheme->hScatterFile,KeyVal,BT_FIRST,BT_EQ,(LPSTR)&ClassNo))
 			{   
 				if (!CurTheme->NumDesiredClass)

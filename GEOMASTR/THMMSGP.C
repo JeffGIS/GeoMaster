@@ -2985,11 +2985,11 @@ GSSiExitProg (1319);
 			{
 				GSSiGlobFree (&CurTheme->hVisList);
 				CurTheme->hVisList = SetThemeVisList (CurTheme->SymNum);   
-				if (CurTheme->DisplayViewport ==  19)
+				/*if (CurTheme->DisplayViewport ==  19)
 				{
 					BOOL rtn = ItemProcessedByTheme ("",376);
 					ii = rtn;
-				}
+				}*/
 			}
 			CloseThemeDataFile(FALSE);
 	    }

@@ -353,11 +353,15 @@ BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds,LPSTR ReopenName)
 			if (indexIsSLT)
 			{
 				if (sqlite3_open_v2(TAGIndexFile, &pTI->sltdb, SQLITE_OPEN_READONLY, NULL) == SQLITE_OK)
+				{
 					rtn = TRUE;
+					pTI->type = TAGINDEX_SHP;
+				}
 			}
 			else
 			{
 				pTI->hBT = BT_OPEN(TAGIndexFile, ltime, BT_READ, 0);
+				pTI->type = TAGINDEX_BTREE;
 				rtn = TRUE;
 			}
 		}

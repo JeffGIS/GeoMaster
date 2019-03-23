@@ -1,2 +1,2 @@
-configs\directdisplay.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T;  
+configs\prioritylocs.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;  
 h:\pcviewer

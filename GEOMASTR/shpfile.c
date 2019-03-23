@@ -151,11 +151,15 @@ int NVShapeIndexClose(sqlite3 * db)
 	return rtn;
 }
 
-BOOL OpenSHPFile (LPSTR SHPFileName)
+BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 {
 	int	i;
 	MNMXCORD	FileMNMX;
 	DPOINT		Points[4];
+	char		 SHPFileName[MAX_PATH];
+
+	strcpy(SHPFileName, SHPFileNameIN);
+	ExpandText(SHPFileName);
 
 	SHPFid = GSSiOpenFile (SHPFileName,0,OF_READ);
 	if (SHPFid == HFILE_ERROR)

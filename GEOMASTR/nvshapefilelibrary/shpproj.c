@@ -81,7 +81,7 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 	BOOL rtn = FALSE;
 	BOOL useTag = FALSE;
 	int ii = 0;
-	char cmd[1024], TAGVar[66];
+	char cmd[1024], TAGVar[256];
 	LPSTR indexName = ShapeFileIndexName(shapeFileName);
 	sqlite3* database;
 	SHPHandle	hSHP = SHPOpen(shapeFileName, "rb");
@@ -136,10 +136,11 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 					if (useTag)
 					{
 						GetSHPTag(Tag);
+						REPLAC(Tag, "'", "''", sizeof(Tag)-1);
 						LPSTR UDI = strchr(Tag, ':');
 						if (UDI)
 							UDI++;
-						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i,'%s',%i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum,UDI, Offset);
+						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%g,%g,%g,%g);INSERT INTO SHP VALUES(%i, %i,'%s',%i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum,UDI, Offset);
 					}
 					else
 						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i, %i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum, Offset);

@@ -13364,6 +13364,7 @@ GSSiExitProg (1247);
        	 	case SV_CB_PERCENTILES:
 			   	ShowWindow (GetDlgItem(hWndDlg,IDC_EDITRANGES),SW_HIDE);
 				CurTheme->Recompute=TRUE;
+				SendDlgItemMessage(hWndDlg, SV_CB_RECOMPUTE, BM_SETCHECK, CurTheme->Recompute, 0L);
 			   	break;
 			   	
 			case SV_CB_MANUAL:
