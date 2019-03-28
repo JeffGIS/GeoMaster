@@ -9,7 +9,7 @@ static	char	ViewportStatusMessages[MAX_VIEWPORTS][128];
 
 #include "gmextern.h"
 
-#define MAXHOTSPOTDIMENSION	500
+int MAXHOTSPOTDIMENSION = 2500;
 
 
 /*					ThemeHighlightKey.Class = WantClass;
@@ -3034,7 +3034,6 @@ GSSiExitProg (1319);
 		long	GridSize;
 	    double  BASEX[4], BASEY[4], HSX[4], HSY[4];  
 	    double	BaseDToWinD=1, d1, d2;
-	    DPOINT	dp1, dp2,HotSpotPoint[2];
 	    float	RSQMIN;
 		
 		GSSiGlobFree (&pHSData->hGrid);
@@ -3087,21 +3086,8 @@ GSSiExitProg (1319);
 		BASEY[0]=BASEY[3]=CurView->NewBounds.ymn;
 		BASEY[1]=BASEY[2]=CurView->NewBounds.ymx;
 		pHSData->hTranBaseToHotSpot = STRAN2 (1657,BASEX,BASEY,HSX,HSY,4,&RSQMIN,1,0);  
-		dp1 = dp2 = MinMaxMidPointD (&CurView->NewBounds); 
-		_fstrcpy (str,CurTheme->ClassDefValSQL);
-		ExpandText (str);
-		ExpandText (str);
-		pHSData->Radius = atof (str); 
-		if (!pHSData->Radius)
-			pHSData->Radius = 500;
-		dp2.x += pHSData->Radius; 
-		HotSpotPoint[0] = TranPoint (&dp1,pHSData->hTranBaseToHotSpot);
-		HotSpotPoint[1] = TranPoint (&dp2,pHSData->hTranBaseToHotSpot);  
-		pHSData->MaskWidth = max (1,ldistp (HotSpotPoint[0],HotSpotPoint[1]));
-		pHSData->hMask = GSSiGlobAlloc (1024,GMEM_MOVEABLE,(long)pHSData->MaskWidth * (long)pHSData->MaskWidth * 4); 
 		CurTheme->Ymin = 0;
 		CurTheme->Ymax = 0;
-		SetupHotSpotMask (pHSData->MaskWidth,pHSData->hMask,pHSData->DecayOpt);  
 		OpenThemeDataFile(CurTheme->DataFile);
 		SetCurView (SaveVP);
 	}

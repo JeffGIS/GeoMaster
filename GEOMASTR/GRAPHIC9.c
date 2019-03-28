@@ -285,8 +285,16 @@ BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds,LPSTR ReopenName)
 
 	if (hTAGIdx && !Delete)
 	{
-		if (!ForceTAGIndex || BT_OPEN_FOR_WRITE (hTAGIdx))
-			return FALSE;
+		LPTAGINDEX pTI = GlobalLock(hTAGIdx);
+		if (pTI->type == TAGINDEX_BTREE)
+		{
+			if (!ForceTAGIndex || BT_OPEN_FOR_WRITE(pTI->hBT))
+			{
+				GlobalUnlock(hTAGIdx);
+				return FALSE;
+			}
+		}
+		GlobalUnlock(hTAGIdx);
 	}
 	if (PltType == 5)
 		return FALSE;

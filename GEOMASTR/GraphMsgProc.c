@@ -16905,9 +16905,11 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 	    		_fstrncpy(TAGKey.PREFIX,TagLocPrefix,8);
 	    		_fstrncpy(TAGKey.UDI,"",sizeof(TAGKey.UDI));
 	    		TAGKey.Refno = LONG_MIN;
-				st = BT_FIND (hTAGIdx,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)space);
+				LPTAGINDEX pTI = GlobalLock(hTAGIdx);
+				st = BT_FIND (pTI->hBT,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)space);
 			    if (!st && !_fstrncmp(TAGKey.PREFIX,TagLocPrefix,8))
 			    {   
+					GlobalUnlock(hTAGIdx);
 			    	for (i=0;i<nfile;i++)
 					{
 			    		if (SavePltType[i] == PltType && !_fstricmp (SavePltName[i],PltName))
@@ -16918,6 +16920,8 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 			    	SavePltType[nfile] = PltType;
 			    	_fstrcpy (SavePltName[nfile++],PltName);
 			    }
+				else
+					GlobalUnlock(hTAGIdx);
 		NextFile:
 //		SetWindowText (hWndMain,"Step 4");
 				CloseRefIndex(TRUE);
@@ -20595,7 +20599,7 @@ NextFile:
 						                    pTheme = AddTheme (GF_SAVEPOLYPARTS_THEME);
 						                    CurView->PassID = 4; 
 						                    ProcessSelectedTheme = CurView->NumThemes;
-	   										BT_DELETE (hTAGIdx,(LPSTR)&TAGKey,(LPSTR)&RefIdxData,FALSE);
+	   										BT_DELETE (pTI->hBT,(LPSTR)&TAGKey,(LPSTR)&RefIdxData,FALSE);
 						                    ProcessPickedItem (0,-2); 
 											ProcessSelectedTheme = 0;
 						                    WantElement = LONG_MAX;               

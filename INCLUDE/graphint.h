@@ -2195,6 +2195,7 @@ BOOL EnterAccessCode (HWND hWnd,LPSTR Code);
 short GetPieSlice (POINT RadiusPoint,double Radius,int NumSlices,int iSlice,LPPOINT Points);
 void SnapPolyPoints (long nPnts,HPDPOINT pPoints, double SnapTol);
 BOOL RemoveDupPolyPoints (LPLONG pnPnts,HPDPOINT pPoints, double Tol);
+BOOL SetHotSpotMaskWidth(LPHOTSPOTDATA	pHSData);
 void SetupHotSpotMask (short MaskWidth,HANDLE hMask,short DecayOpt);
 BOOL ImportSSURGOTables (LPSTR CompFile,LPSTR CompGMD);
 short GetWBoundsInt (LPDPOINT pPoint1,LPDPOINT pPoint2,LPDPOINT pIntPoints);

@@ -227,24 +227,30 @@ void DisplayHotSpotThemeLegend(short From)
 			SetViewport (CurTheme->TargetViewport);   
 	    	if (CurView->DisplayInParent && CurView->Parent > 0) 
 	    		CurView = pViewports[CurView->Parent-1];
-	    	if (CurTheme->HotSpotBounds.xmn == CurView->WBounds.xmn && 
-	    		CurTheme->HotSpotBounds.xmx == CurView->WBounds.xmx && 
-	    		CurTheme->HotSpotBounds.ymn == CurView->WBounds.ymn && 
-	    		CurTheme->HotSpotBounds.ymx == CurView->WBounds.ymx)
-	    	{ 
-				SaveDC (CurView->hDC);
-		    	SetDisplayMode (CurView->hDC,GF_TEXTMODE);
-				GSSiDeleteObject(&CurView->hRgn);
-				CurView->hRgn = CreateVPRgn(FALSE,FALSE);
-				SelectClipRgn (CurView->hDC,CurView->hRgn);
-				SelectClipRgn (CurView->hDC,CurView->hRgn);
-				GSSiDeleteObject(&CurView->hRgn);
-		    	//SelectClipRgn (CurView->hDC,0);  
-		    	RestoreScreen (CurView->hDC,CurTheme->hHotSpotBitmap, CurView->DrawRect);
-		    	RestoreDC (CurView->hDC,-1); 
-		    }
-		    else
-			 	GSSiDeleteObject (&CurTheme->hHotSpotBitmap);  
+			if (CurView->PassID)
+			{
+				if (CurTheme->HotSpotBounds.xmn == CurView->WBounds.xmn &&
+					CurTheme->HotSpotBounds.xmx == CurView->WBounds.xmx &&
+					CurTheme->HotSpotBounds.ymn == CurView->WBounds.ymn &&
+					CurTheme->HotSpotBounds.ymx == CurView->WBounds.ymx)
+				{
+					SaveDC(CurView->hDC);
+					SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+					GSSiDeleteObject(&CurView->hRgn);
+					CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+					SelectClipRgn(CurView->hDC, CurView->hRgn);
+					SelectClipRgn(CurView->hDC, CurView->hRgn);
+					GSSiDeleteObject(&CurView->hRgn);
+					//SelectClipRgn (CurView->hDC,0);  
+					RestoreScreen(CurView->hDC, CurTheme->hHotSpotBitmap, CurView->DrawRect);
+					RestoreDC(CurView->hDC, -1);
+				}
+				else
+					GSSiDeleteObject(&CurTheme->hHotSpotBitmap);
+			}
+			else
+				GSSiDeleteObject(&CurTheme->hHotSpotBitmap);
+
 	    	CurView = SaveVP;
         }
     	return;
@@ -306,6 +312,35 @@ GSSiExitProg (1287);
 }
 #endif
 }        
+
+BOOL SetHotSpotMaskWidth(LPHOTSPOTDATA	pHSData)
+{
+	BOOL rtn = FALSE;
+	static double lastRadius = -1;
+	DPOINT	dp1, dp2, HotSpotPoint[2];
+	char str[256];
+
+	dp1 = dp2 = MinMaxMidPointD(&CurView->NewBounds);
+	_fstrcpy(str, CurTheme->ClassDefValSQL);
+	ExpandText(str);
+	ExpandText(str);
+	pHSData->Radius = atof(str);
+	if (!pHSData->Radius)
+		pHSData->Radius = 500;
+	if (pHSData->Radius == lastRadius)
+		return TRUE;
+	GSSiGlobFree(&pHSData->hMask);
+	lastRadius = pHSData->Radius;
+	dp2.x += pHSData->Radius;
+	HotSpotPoint[0] = TranPoint(&dp1, pHSData->hTranBaseToHotSpot);
+	HotSpotPoint[1] = TranPoint(&dp2, pHSData->hTranBaseToHotSpot);
+	pHSData->MaskWidth = max(1, ldistp(HotSpotPoint[0], HotSpotPoint[1]));
+	pHSData->hMask = GSSiGlobAlloc(1024, GMEM_MOVEABLE, (long)pHSData->MaskWidth * (long)pHSData->MaskWidth * 4);
+	SetupHotSpotMask(pHSData->MaskWidth, pHSData->hMask, pHSData->DecayOpt);
+
+	return rtn;
+}
+
 void SetupHotSpotMask (short MaskWidth,HANDLE hMask,short DecayOpt)
 #if ENABLETRACE
 {GSSiEnterProg (1318);
@@ -541,6 +576,8 @@ GSSiExitProg (1320);
 		Weight = atof (CWeight);
 		HaveWeight = TRUE;
 	}	
+	SetHotSpotMaskWidth(pHSData);
+
 	HotSpotPoint = TranPoint (&CurPointLocD,pHSData->hTranBaseToHotSpot);
 	x = IDNINT (HotSpotPoint.x);
 	y = IDNINT (HotSpotPoint.y);

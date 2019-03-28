@@ -3057,11 +3057,11 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							LPTAGINDEX pTI = GlobalLock(hTAGIdx);
 							if (pTI->type == TAGINDEX_BTREE)
 							{
-								short	keylen = GetBTKeyLen(hTAGIdx);
+								short	keylen = GetBTKeyLen(pTI->hBT);
 								BOOL	CheckNextTAG = TRUE;
 								short	pos = BT_FIRST, cond = BT_GE;
 
-								if (GetBTDataLen(hTAGIdx) > 8)
+								if (GetBTDataLen(pTI->hBT) > 8)
 									CheckForLargestPiece = TRUE;
 								_fstrncpy(TAGKey.PREFIX, Prefix, 8);
 								_fstrncpy(TAGKey.UDI, UDI, 32);
@@ -3072,7 +3072,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 								while (CheckNextTAG)
 								{
 									CheckNextTAG = FALSE;
-									st = BT_FIND(hTAGIdx, (LPSTR)&TAGKey, pos, cond, (LPSTR)pRefIdxData);
+									st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, pos, cond, (LPSTR)pRefIdxData);
 									if (!st)
 									{
 										if (_fstrncmp(TAGKey.PREFIX, Prefix, 8) ||
@@ -3119,29 +3119,35 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 				else
 			    {
 			    	if (CheckForLargestPiece)
-			    	{   
+			    	{
+						LPTAGINDEX pTI;
 			    		double Size = RectArea16 (&pRefIdxData->MinMax);
-NextPiece:
-	    				st = BT_FIND (hTAGIdx,(LPSTR)&TAGKey,BT_NEXT,BT_ANY,(LPSTR)pRefIdxDataTest);
-						if (!st)
+	NextPiece:
+						pTI = GlobalLock(hTAGIdx);
+						if (pTI->type == TAGINDEX_BTREE)
 						{
-				    		if (_fstrncmp(TAGKey.PREFIX,Prefix,8) || 
-				    			_fstrncmp(TAGKey.UDI,UDI,32))
-				    			st=31;
-						}
-						if (!st && pRefIdxData->Deleted) 
-							goto NextPiece; 
-						if (!st)
-						{
-							double TestSize = RectArea16 (&pRefIdxDataTest->MinMax); 
-							
-							if (TestSize > Size)
+							st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_NEXT, BT_ANY, (LPSTR)pRefIdxDataTest);
+							if (!st)
 							{
-								Size = TestSize;
-								*pRefIdxData = *pRefIdxDataTest;
+								if (_fstrncmp(TAGKey.PREFIX, Prefix, 8) ||
+									_fstrncmp(TAGKey.UDI, UDI, 32))
+									st = 31;
 							}
-							goto NextPiece;
+							if (!st && pRefIdxData->Deleted)
+								goto NextPiece;
+							if (!st)
+							{
+								double TestSize = RectArea16(&pRefIdxDataTest->MinMax);
+
+								if (TestSize > Size)
+								{
+									Size = TestSize;
+									*pRefIdxData = *pRefIdxDataTest;
+								}
+								goto NextPiece;
+							}
 						}
+						GlobalUnlock(hTAGIdx);
                     }
 					PickingByRefno=TRUE; 
 					SavePick = Pick;
@@ -3287,10 +3293,11 @@ int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
 		_fstrcpy(PltName, PltFile);
 		if (OpenTAGIndex(FALSE, FALSE,0))
 		{
+			LPTAGINDEX pTI = GlobalLock(hTAGIdx);
 			_fstrncpy(TAGKey.PREFIX, TagLocPrefix, 8);
 			TAGKey.Refno = LONG_MIN;
 			*LastUDI = 0;
-			while (!BT_FIND(hTAGIdx, (LPSTR)&TAGKey, pos, BT_ANY, (LPSTR)pRefIdxData))
+			while (!BT_FIND(pTI->hBT, (LPSTR)&TAGKey, pos, BT_ANY, (LPSTR)pRefIdxData))
 			{
 				char prfx[16];
 				pos = BT_NEXT;
@@ -3302,6 +3309,7 @@ int DumpTAGsToFile(LPSTR PltFile, LPSTR Prefix, LPSTR OutFile)
 					rtn++;
 				}
 			}
+			GlobalUnlock(hTAGIdx);
 			CloseTAGIndex();
 		}
 		GSSiClose2 (&fid);
