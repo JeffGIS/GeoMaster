@@ -405,7 +405,10 @@ HANDLE	hSTR = 0;
 	    if (*Value)
 	    	sprintf (_fstrchr(sqlstr,0)," WHERE %s",Value); 
 	}
-    ExpandText (sqlstr);
+	char saveRawInputChar = rawInputChar;
+	rawInputChar = 0;
+	ExpandText(sqlstr);
+	rawInputChar = saveRawInputChar;
 //    rc = SQLPrepare(hstmt, lpsqlstr, SQL_NTS);
 //    if(rc == SQL_SUCCESS)  
 		rc = SQLExecDirect(hstmt, lpsqlstr, SQL_NTS);
@@ -2074,6 +2077,8 @@ s43:
    SQLGetInfo (hdbc,SQL_IDENTIFIER_QUOTE_CHAR,(PTR)QuoteChar[i],2,&qclen); 
    if (!qclen)
    	*QuoteChar[i] = 0;
+   //if (*QuoteChar[i] == 96)
+	//   *QuoteChar[i] = 39;
    DBNamePtr[next_one] = i;
    DBOpenCount[i]=1;
    OpenhDBs[i]=hdbc; 
