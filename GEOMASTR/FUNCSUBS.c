@@ -5966,9 +5966,15 @@ int GetFileList (LPSTR OutFile,BOOL New,LPSTR SearchLoc,LPSTR WildCard,BOOL Sear
 			pLastDir = _fstrchr (LastDir,0);
 		//sprintf (str,"%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",str2,Name,drive,dir,pLastDir,extension,lastup,lfile);
 		if (nameOnly == 1)
+		{
 			sprintf(str, "%s%s", Name, extension);
+			fputstring(str, OutFileFID);
+		}
 		else if (nameOnly == 2)
+		{
 			sprintf(str, "%s", str2);
+			fputstring(str, OutFileFID);
+		}
 		else if (isSLTFile)
 		{
 			REPLAC(timesAndLength, "\t", ",", sizeof(timesAndLength) - 1);

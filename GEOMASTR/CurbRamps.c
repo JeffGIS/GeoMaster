@@ -1427,19 +1427,18 @@ int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
 int GetAlternateIntersectionNum(int intID)
 {
 	sqlite3_stmt *statement = NULL;
-	int altInt = -1;
+	int altInt = 0;
 	LPSTR query = malloc(4096);
 	sprintf(query, "SELECT TrafficIntID FROM IntersectionXRef WHERE NVCRISIntID=%i", intID);
-
-	SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get altint", 0);
-
-	if (sqlite3_step(statement) == SQLITE_ROW)
+	if (sqlite3_prepare_v2(database, query, -1, &statement, NULL) == SQLITE_OK)
 	{
-		altInt = sqlite3_column_int(statement, 0);
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			altInt = sqlite3_column_int(statement, 0);
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get altint", 0);
 	}
-	SQLOK(sqlite3_finalize(statement), database, "get altint", 0);
 	free(query);
-
 	return altInt;
 }
 int FormatStreets(LPSTR from, LPSTR outtext)

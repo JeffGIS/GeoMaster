@@ -1750,7 +1750,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 {
 	GSSiEnterProg(454);
 #endif
-	{	char	str[1024], TAG[64], SymName[34], Addresses[128], str2[1024], DBName[MAX_PATH];
+	{	char	str[1024], TAG[128], SymName[34], Addresses[128], str2[1024], DBName[MAX_PATH];
 	LONG	Segment, Refno = 0;
 	static int		item;
 	HWND	hWnd;
