@@ -329,6 +329,7 @@ void CloseSLTDatabaseQuery(LPHANDLE pHandle);
 HANDLE	OpenLISTVARDatabase (LPSTR Name);
 BOOL CreateTextIndexTable(sqlite3 *db, LPSTR pIndexName, LPOPENFILEDATA FilePtr);
 BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName);
+BOOL DoesSLTFieldExist(sqlite3 *db, LPSTR tableName, LPSTR fieldName);
 BOOL SLTSpatialIndexExists(sqlite3 *db, LPSTR tableName);
 BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName);
 BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds);

@@ -658,6 +658,16 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				rtn = SLTSpatialIndexAdd(db, ARG[4], id, ARG[6], &bounds);
 		}
 	}
+	else if (!stricmp(ARG[1], "DOESTABLEEXIST"))
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = DoesSLTTableExist(db, ARG[3]);
+	}
+	else if (!stricmp(ARG[1], "DOESFIELDEXIST"))
+	{
+		db = (sqlite3*)atoi(ARG[2]);
+		rtn = DoesSLTFieldExist(db, ARG[3], ARG[4]);
+	}
 	else if (!stricmp(ARG[1], "SPATIALINDEX3D"))
 	{
 		char *error = NULL;
@@ -730,14 +740,15 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			GSSiClose2 (&fid);
 		}
 	}
-	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd,OutputVarName(opt))-single command only - no ; separator
+	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd,OutputVarName(opt),skipErrorMessage)-single command only - no ; separator
 	{
 		db = (sqlite3*)atoi(ARG[2]);
 		sqlite3_stmt *statement;
 
 		if (db)
 		{
-			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
+			int st = sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0);
+			if (st == SQLITE_OK)
 			{
 				if (!*ARG[4])
 					rtn = TRUE;
@@ -751,6 +762,8 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				}
 				sqlite3_finalize(statement);
 			}
+			else if (!atob (ARG[5]))
+				SQLOK(st, db, "", 0);
 		}
 	}
 	else if (!stricmp(ARG[1], "PREPARE"))//$SQLITE(PREPARE,sqlitehandle,cmd)returns statement address or 0
@@ -3949,15 +3962,21 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	if (hDB)
 	{
 		LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(hDB);
+		int cols = sqlite3_column_count(pDB->statement);
 		*irc = 0;
 		if (SingleVal)
 		{
 			infield->hCurVal = 0;
 			WantField = 0;
 		}
+/*		else if (infield->index >= 0 && infield->index < cols && pDB->FldInfo[infield->index].hCurVal)
+		{
+			pCurVal = (LPCURVAL)GlobalLock(pDB->FldInfo[infield->index].hCurVal);
+			strncpy0(answer, &pCurVal->Value,pCurVal->length);
+			GlobalUnlock(pDB->FldInfo[infield->index].hCurVal);
+		}*/
 		else
 		{
-			int cols = sqlite3_column_count(pDB->statement);
 			char zero[2] = "";
 			field = pDB->FldInfo;
 			int jstart = 0;
@@ -3977,7 +3996,7 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 				pDB->FldInfo[i].length = l;
 				if (field->hCurVal)
 					GSSiGlobFree(&field->hCurVal);
-				field->hCurVal = GSSiGlobAlloc(153, GMEM_MOVEABLE, sizeof(int)+l + 4);
+				field->hCurVal = GSSiGlobAlloc(1812, GMEM_MOVEABLE, sizeof(int)+l + 4);
 				pCurVal = (LPCURVAL)GlobalLock(field->hCurVal);
 				pCurVal->length = l;
 				if (pCurVal->length)
@@ -4121,6 +4140,111 @@ BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName)
 		sqlite3_finalize(statement);
 	}
 	return rtn;
+}
+BOOL DoesSLTFieldExist(sqlite3 *db, LPSTR tableName,LPSTR fieldName)
+{
+	BOOL rtn = FALSE;
+	sqlite3_stmt *statement;
+
+	if (db)
+	{
+		char cmd[256];
+
+		sprintf(cmd, "PRAGMA table_info(%s)", tableName);
+
+		SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "field exists", 0);
+
+		int numcol = sqlite3_column_count(statement);
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			for (int i = 0; i < numcol; i++)
+			{
+				LPSTR pName = (LPSTR)sqlite3_column_name(statement, i);
+				LPSTR pValue = (LPSTR)sqlite3_column_text(statement, i);
+				if (!stricmp(pName, "name") && !stricmp(fieldName, pValue))
+					rtn = TRUE;
+			}
+		}
+		sqlite3_finalize(statement);
+	}
+	return rtn;
+	// ============ Fetch table info ============= 
+/*
+	ret = sqlite3_prepare_v2(dbc, "PRAGMA table_info(JI);", -1, &stmt, NULL);
+	HANDLE_ERROR(ret, "sqlite3_prepare_v2", dbc);
+
+	printf("\n====== DB Schema ====== \n");
+
+	ret = sqlite3_step(stmt);
+	while (ret == SQLITE_ROW)
+	{
+		column = sqlite3_column_text(stmt, 1);
+		if (NULL == column)
+		{
+			printf("Error!!! Malloc Failed in SQLite\n");
+			goto exit;
+		}
+		typeName = sqlite3_column_text(stmt, 2);
+		printf(" Table - JI : Column - %s : Type - %s \n", column, typeName);
+		ret = sqlite3_step(stmt);
+	}
+	HANDLE_ERROR(ret, "sqlite3_step", dbc);
+
+	ret = sqlite3_reset(stmt);
+	HANDLE_ERROR(ret, "sqlite3_reset", dbc);
+
+	printf("\n");
+
+	// ====== Fetch Data ====== 
+
+	ret = sqlite3_prepare_v2(dbc, "SELECT * FROM JI", -1, &stmt, NULL);
+	HANDLE_ERROR(ret, "sqlite3_prepare_v2", dbc);
+
+	printf("\n====== DB Data ====== ");
+
+	ret = sqlite3_step(stmt);
+	i = 1;
+	while (ret == SQLITE_ROW)
+	{
+		printf("\n");
+		id = sqlite3_column_int(stmt, 0);
+		name = sqlite3_column_text(stmt, 1);
+		if (NULL == name)
+		{
+			printf("Error!!! Malloc Failed in SQLite\n");
+			goto exit;
+		}
+		age = sqlite3_column_int(stmt, 2);
+		printf("  Row %d :  %d   %s  %d", i, id, name, age);
+		i++;
+		ret = sqlite3_step(stmt);
+	}
+	HANDLE_ERROR(ret, "sqlite3_step", dbc);
+
+	ret = sqlite3_reset(stmt);
+	HANDLE_ERROR(ret, "sqlite3_reset", dbc);
+
+	printf("\n\n");
+
+	// =========== Free handlers ============ 
+exit:
+
+	// Free statement handler 
+	if (stmt)
+	{
+		ret = sqlite3_finalize(stmt);
+		HANDLE_ERROR(ret, "sqlite3_finalize", dbc);
+	}
+
+	// Free Connection handler 
+	if (dbc)
+	{
+		ret = sqlite3_close_v2(dbc);
+		HANDLE_ERROR(ret, "sqlite3_close_v2", dbc);
+	}
+
+	return 0;
+}*/
 }
 
 static char QuoteValue(LPOPENFILEDATA FilePtr, LPSTR pName)
