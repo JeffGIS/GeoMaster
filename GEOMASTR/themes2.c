@@ -4359,6 +4359,19 @@ void SetThemeSortOrder (void)
 	return;
 }
 
+void ProcessDataPassBeginMacro(void)
+{
+	if (*CurTheme->BeginDataPassMacro)
+	{
+		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+		LPSTR pMem = GlobalLock(hMem);
+
+		strcpy(pMem, CurTheme->BeginDataPassMacro);
+		ExpandText(pMem);
+		GSSiGlobUlFree(&hMem);
+	}
+	return;
+}
 void ProcessDisplayPassBeginMacro(void)
 {
 	if (*CurTheme->BeginDisplayMacro)

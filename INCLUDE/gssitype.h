@@ -2482,7 +2482,8 @@ typedef struct
        	HFONT	hDelayedFont;
 		long	NumAreas;
 		char	GraphicsAttributesMacro[MAX_PATH];
-		char	DataDisplayMacro[512];
+		char	DataDisplayMacro[256];
+		char	BeginDataPassMacro[256];
 		float	AbsLineWidth[MAX_THEME_CLASSES];
 		COLORREF ShowValueShadowColor; 
 		char	CurValue[256];

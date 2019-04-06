@@ -1809,6 +1809,8 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 			if (st) st = executeCmd(cmd);
 			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN LastUpdate CHAR(32);");
 			if (st) st = executeCmd(cmd);
+			strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN ProximityValue INT;");
+			if (st) st = executeCmd(cmd);
 			sprintf(cmd, "UPDATE Version SET VersionID = '%0.1f' WHERE vid = 1;", (double)(version + 1));
 			if (st) st = executeCmd(cmd);
 			if (st)

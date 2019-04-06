@@ -643,6 +643,11 @@ GSSiExitProg (1348);
 							CurView->pTheme->FactorLegend = atob(Arg[4]);
 							rtn = TRUE;
 						}
+						else if (!_fstricmp(Arg[3], "BEGINDATAPASSMACRO"))
+						{
+							strncpy0(CurView->pTheme->BeginDataPassMacro, Arg[4], sizeof(CurView->pTheme->BeginDataPassMacro) - 1);
+							rtn = TRUE;
+						}
 						else if (!_fstricmp(Arg[3], "BEGINDISPLAYMACRO"))
 						{
 							strncpy0(CurView->pTheme->BeginDisplayMacro, Arg[4], sizeof(CurView->pTheme->BeginDisplayMacro) - 1);

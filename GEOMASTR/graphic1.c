@@ -5097,6 +5097,7 @@ GSSiExitProg (56);
 		 CurTheme = CurView->pThemes[itheme];
 		 if (ThemeNeedsDataPass(FALSE,forceDataPass))
 		 {
+			ProcessDataPassBeginMacro();
         	CurView->WantPass[0]=TRUE;
 			if (CurTheme->SymNum > 0)  
 			{

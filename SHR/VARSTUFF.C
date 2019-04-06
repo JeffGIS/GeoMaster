@@ -6603,7 +6603,7 @@ LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 	LPSTR pPos;
 	LPSTR pBeg = InText;
 	LPSTR pEnd = strchr(pBeg, rawInputChar);
-	if (!pEnd)
+	if (!pEnd || !rawInputChar)
 		return ExpandTextDB2(InText, pBrkPt, bpOffset, bpLen);
 
 //	int lIn = strlen(InText);
@@ -6621,7 +6621,10 @@ LPSTR ExpandTextDB(LPSTR InText, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 	inRawInput = TRUE;
 	while (*pBeg)
 	{
-		pEnd = strchr(pBeg, rawInputChar);
+		if (rawInputChar)
+			pEnd = strchr(pBeg, rawInputChar);
+		else
+			pEnd = 0;
 		if (!pEnd)
 			pEnd = strchr(pBeg, 0);
 		else

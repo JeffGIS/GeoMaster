@@ -438,7 +438,7 @@ char *rampComplianceCode(RampStruct *ramp, char **detailCode, ToleranceValues *t
             }
             
 			sprintf(strchr(minorFields, 0), "%s|", "swkLeftSlopeFront");
-			detail = strcat(detail, SwkLeftFrontMinor);
+			detail = strcat(detail, selectCode(SwkLeftFrontMinor, codeSystem));
         }
     }
     

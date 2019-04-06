@@ -575,7 +575,9 @@ GSSiExitProg (1320);
 	{  
 		Weight = atof (CWeight);
 		HaveWeight = TRUE;
-	}	
+	}
+	if (Weight <= 0)
+		return;
 	SetHotSpotMaskWidth(pHSData);
 
 	HotSpotPoint = TranPoint (&CurPointLocD,pHSData->hTranBaseToHotSpot);

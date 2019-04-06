@@ -1889,7 +1889,7 @@ void CloseSymDict (void)
    		GSSiGlobFree (&hSymbolAttributes); 
    		GSSiGlobFree (&hSymNames); 
 		fromCloseDict = TRUE;
-		for (int i = 0; i < NumSymbols; i++)
+		for (int i = 0; i <= NumSymbols; i++)
 		{
 			if (cachedSymbolHandle[i])
 			{

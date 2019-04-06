@@ -1376,6 +1376,10 @@ LoadFields:
         {
               switch(HIWORD(wParam))
               {
+			  case CBN_EDITCHANGE:
+				  GetDlgItemText(hWndDlg, cntlDATABASE_LIST, DataFile,255);
+				  goto LoadFields;
+				  break;
               case CBN_SELCHANGE:
               case CBN_DBLCLK:   
 	             Choice=(short)SendDlgItemMessage(hWndDlg,cntlDATABASE_LIST, CB_GETCURSEL,0,0); 

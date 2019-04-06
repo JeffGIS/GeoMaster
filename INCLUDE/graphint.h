@@ -1889,6 +1889,7 @@ BOOL SetGFThemeState (LPTHEME CurTheme,LPSTR Title,LPSTR CommandLine);
 BOOL GetGFFile (LPSTR File,LPSTR from,short opt);
 BOOL GetGFIndex (LPSTR IndexPath,short opt);
 void ProcessDisplayPassBeginMacro(void);
+void ProcessDataPassBeginMacro(void);
 void ProcessDisplayPassEndMacro(void);
 void ProcessGraphicsAttributeMacro(void);
 BOOL RunGFCommandFromFileAtLoc(LPSTR File, long CurLoc, BOOL SendCmd, short opt);
@@ -2498,7 +2499,7 @@ BOOL SetHaveOrthos(void);
 BOOL UpdatePictureID(LPSTR PathName,int oldSequence,int newSequence);
 int FindDupParcels(LPSTR DUPFile);
 int GMMCompression(LPSTR INFile, LPSTR OUTFile);
-CCodeToFile(LPSTR code, LPSTR File);
+BOOL CCodeToFile(LPSTR code, LPSTR File);
 
 void drawTextwithinPolygon(char *text
 	/*inContext : */, CGContextRef context
