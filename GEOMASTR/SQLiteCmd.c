@@ -2729,8 +2729,6 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 
 void CloseSQLITEMapFile(void)
 {
-	/*GSSiClose2 (&SHPFid);
-	OpenSHPFileIndex(0, HFILE_ERROR);*/
 	if (SQLITEHandle)
 	{
 		CloseDataFile(TRUE, &SQLITEHandle);
@@ -2871,13 +2869,13 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 	DPOINT BasePt;
 	MNMXCORD	RecordBounds;
 
-	//	if (CurView->DisplayInParent && CurView->Parent)            	
-	//		SetViewport(CurView->Parent);
-	if (CurView->PassID != 2 && SQLITEHandle)
+	if (SQLITEHandle)
 	{
 		LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
 		LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
+		if (CurView->DisplayInParent && CurView->Parent)
+			SetViewport(CurView->Parent);
 		InitRecord(hDC);
 		SetSQLITEParms();
 		if (!GetVisibility(CurrentDesc))
@@ -2892,33 +2890,6 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 		BasePt.x = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->xLoc);
 		BasePt.y = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->yLoc);
 		rtn = TRUE;
-		/*	SQLPtr = (LPOPENSQLDATA)GlobalLock(GMDHandle);
-		FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
-		lpGWDHead = (LPGWDHEADER)GlobalLock(FilePtr->FileHandle);
-		FillGWDData(lpGWDHead, Offset);
-		switch (lpGWDHead->SpatialIndexType)
-		{
-		case 1:
-		case 2:
-		GRStartTime = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->FromDateField);
-		GREndTime = GMDGetIntegerFieldVal(lpGWDHead, lpGWDHead->ToDateField);
-		GMDPoint.x = GMDGetRealFieldVal(lpGWDHead, lpGWDHead->XField);
-		GMDPoint.y = GMDGetRealFieldVal(lpGWDHead, lpGWDHead->YField);
-		break;
-		}
-		GlobalUnlock(FilePtr->FileHandle);
-		GlobalUnlock(SQLPtr->OFHandle);
-		GlobalUnlock(GMDHandle);
-		if (WantGMDNegGrid)
-		{
-		if (!GMDPoint.x)
-		{
-		SelectClipRgn(CurView->hDC, 0);
-		GMDPoint = SubVPMidPointWorld;
-		}
-		else
-		goto RtnFalse;
-		}*/
 		ConvertCoord(&BasePt, 0, 1);
 		InGraphicsProcessor = TRUE;
 		ShowValue(hDC, FALSE);
@@ -2937,8 +2908,6 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 			short	Dummy;
 			MNMXCORD bounds;
 
-			//strcpy(Tag, SQLITETAG);
-			//ExpandText(Tag);
 
 			//pTag = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, 1);
 			//sprintf(Tag, "ALLYWALL:%s", pTag);
@@ -3080,63 +3049,17 @@ BOOL GetNextSQLITERecord(LPMNMXCORD pBounds)
 		GlobalUnlock(SQLITEHandle);
 	}
 	return rtn;
-/*	if (!hDGN)
-		return FALSE;
-	if (pBounds)
-	{
-		MNMXCORD	Bounds = *pBounds;
-
-		if (IgnoreBounds)
-			Bounds.xmn = Bounds.ymn = Bounds.xmx = Bounds.ymx = 0;
-		pBounds = &Bounds;
-		if (_fmemcmp(pBounds, &DGNLastBounds, sizeof(MNMXCORD)))
-		{
-			MNMXCORD	DGNBounds;
-
-			if (pBounds->xmn || pBounds->xmx || pBounds->ymn || pBounds->ymx)
-			{
-				if (ConvertRectCoord(&DGNBounds, pBounds, 1, 0))
-					DGNLibSetSpatialFilter(hDGN, &DGNBounds);
-			}
-			else
-				DGNLibSetSpatialFilter(hDGN, pBounds);
-			DGNLastBounds = *pBounds;
-		}
-	}
-	pElement = (LPDGNElementCore)GlobalLock(hElement);
-	rtn = DGNLibReadElement(hDGN, pElement, MaxDGNElementSize, &BaseDistToWinDist, &FillColor, &NumAttributes, Attributes);
-	CurrentDGNRec = pElement->element_id;
-	GlobalUnlock(hElement);*/
 }
 BOOL IsSQLITEFileVisible(void)
 {
-/*	LPSTR	pDesc, pClause, pC, pColor, pWidth, pRot;
-	short	idesc, i;
-	char	str[128];
-	//	return TRUE;
-	if (NumIndexSyms)
+	BOOL rtn = FALSE;
+
+	for (int i = 0; i < nSQLITESymbols; i++)
 	{
-		for (i = 0; i<NumIndexSyms; i++)
-			if (GetVisibility(IndexSyms[i]))
-				return TRUE;
+		if (GetVisibility(SQLITESymbols[i]))
+			rtn = TRUE;
 	}
-	if (!*SHPParms)
-		return TRUE;
-	pDesc = SHPParms;
-	while (*pDesc)
-	{
-		pClause = _fstrchr(pDesc, 0) + 1;
-		pColor = _fstrchr(pClause, 0) + 1;
-		pWidth = _fstrchr(pColor, 0) + 1;
-		pRot = _fstrchr(pWidth, 0) + 1;
-		_fstrcpy(str, pDesc);
-		ExpandText(str);
-		idesc = GetDictSymbolNumber(str);
-		if (GetVisibility(idesc))
-			return TRUE;
-		pDesc = _fstrchr(pRot, 0) + 1;
-	}*/
-	return TRUE;
+	return rtn;
 }
 void GetSLTName(LPSTR name)
 {
@@ -3282,7 +3205,6 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, HWND hWnd)
 					MessageBox(0, "Symbol not found", SymName, MB_ICONEXCLAMATION);
 				}
 			}
-			//CreateSHPSymlistFile(SHPFileName, NumSHPParms, SymName); could speed up file gdb and shp processing for multiple symbol files when symbol name contained in a variable
 			if (fgetstring(str, 256, Fid))
 				_fstrcpy(SQLITEBeginDate, str);
 			if (fgetstring(str, 256, Fid))
@@ -3306,8 +3228,6 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, HWND hWnd)
 		case SHPT_ARC:
 		case SHPT_ARCZ:
 		case SHPT_ARCM:
-			//case shapePolylineM:
-			//case shapePolylineZM:
 		case shapePolylineZ:
 			GetGlobalCVal("[%DefaultSQLITELineSymbol]", SQLITEParms, "PEN1");
 			strcpy(SymName, SQLITEParms);
@@ -3319,9 +3239,6 @@ int LoadSQLITEParm(LPSTR SQLITEFileName,LPSTR tableName, HWND hWnd)
 		case SHPT_POLYGONM:
 		case SHPT_POLYGONZ:
 		case SHPT_PGDB_POLYGONZ:
-			//case shapePolygonM:
-			//case shapePolygonZM:
-			//case shapePolygonZ:
 			GetGlobalCVal("[%DefaultSQLITEAreaSymbol]", SQLITEParms, "PARCEL");
 			strcpy(SymName, SQLITEParms);
 			break;

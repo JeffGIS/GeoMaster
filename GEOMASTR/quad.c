@@ -323,8 +323,11 @@ BOOL FindNextSegment (void)
 			goto RtnTrue;
 
 		case MT_SQLITE:
-			if (GetNextSQLITERecord(&CurView->WBounds))
-				goto RtnTrue;
+			if (CurView->PassID != 2)
+			{
+				if (GetNextSQLITERecord(&CurView->WBounds))
+					goto RtnTrue;
+			}
 			goto RtnFalse;
 
 		case MT_DGN7:

@@ -1470,9 +1470,7 @@ Next:
 
 		do
 		{
-			//ExpandGMDPointBounds(&GMDBounds);
-			//if (WantGMDNegGrid || RectInWBounds(&GMDBounds, 1))
-				ProcessSQLITERecord(*hDC,-1);
+			ProcessSQLITERecord(*hDC,-1);
 			n++;
 		} while (n < maxn && ContinueProcessing && FindNextSegment());
 		if (n < maxn)
