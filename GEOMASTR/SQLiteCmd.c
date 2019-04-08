@@ -3741,7 +3741,7 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 					nc = atoi(pPar);
 				}
 				strncpy(pDB->FldInfo[pDB->NumFields].name, pName, sizeof(pDB->FldInfo[pDB->NumFields].name));
-				pDB->FldInfo[pDB->NumFields].index = pDB->NumFields;
+				pDB->FldInfo[pDB->NumFields].index = j;
 
 				//if (itype != SQLITE_NULL)
 				pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
@@ -3771,8 +3771,8 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 						pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
 						pDB->FldInfo[pDB->NumFields].length = nc;
 					}
-					//else
-					//	MessageBox(0, decl, "Invalid type", MB_OK);
+					else
+						MessageBox(0, decl, "Invalid type", MB_OK);
 				}
 				pDB->NumFields++;
 
@@ -3796,18 +3796,14 @@ BOOL SLTPrepare(HANDLE SQLITEHandle)
 
 	if (SQLITEPrepare(pDB))
 	{
-		HANDLE hFields = 0;
-		BOOL HaveNonStandardFields;
-		int NumFields = GetFieldDefs(FilePtr->FileHandle, FilePtr->Type, &hFields, &HaveNonStandardFields);
 
-		FilePtr->NumFields = NumFields;
-		LPFIELDINFO lpFieldInfoSave = (LPFIELDINFO)GlobalLock(hFields);
+		FilePtr->NumFields = pDB->NumFields;
 		LPFIELDINFO lpFieldInfo = &FilePtr->FldInfo;
-		if (NumFields)
-			for (int i = 0; i < NumFields; i++, lpFieldInfoSave++, lpFieldInfo++)
-				*lpFieldInfo = *lpFieldInfoSave;
+		LPFIELDINFO lpFieldInfoSLT = pDB->FldInfo;
 
-		GSSiGlobUlFree(&hFields);
+		for (int i = 0; i < pDB->NumFields; i++)
+			*lpFieldInfo++ = *lpFieldInfoSLT++;
+
 		rtn = TRUE;
 	}
 	GlobalUnlock(FilePtr->FileHandle);
@@ -3866,67 +3862,16 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	int WantField = infield->index;
 
 	*irc = 1;
-	if (infield->hCurVal)
-	{
-		pCurVal = (LPCURVAL)GlobalLock(infield->hCurVal);
-		int len = min(MAXVARLEN - 2, pCurVal->length);
-		_fstrncpy(answer, &pCurVal->Value, len);
-		answer[len] = 0;
-		GlobalUnlock(infield->hCurVal);
-		*irc = 0;
-		return lpvoid;
-	}
+	answer[0] = 0;
 	if (hDB)
 	{
 		LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(hDB);
-		int cols = sqlite3_column_count(pDB->statement);
+		int l = sqlite3_column_bytes(pDB->statement, WantField);
+		LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, WantField);
 		*irc = 0;
-		if (SingleVal)
-		{
-			infield->hCurVal = 0;
-			WantField = 0;
-		}
-/*		else if (infield->index >= 0 && infield->index < cols && pDB->FldInfo[infield->index].hCurVal)
-		{
-			pCurVal = (LPCURVAL)GlobalLock(pDB->FldInfo[infield->index].hCurVal);
-			strncpy0(answer, &pCurVal->Value,pCurVal->length);
-			GlobalUnlock(pDB->FldInfo[infield->index].hCurVal);
-		}*/
-		else
-		{
-			char zero[2] = "";
-			field = pDB->FldInfo;
-			int jstart = 0;
-			int i = 0;
-			if (cols > pDB->NumFields)
-			{
-				field++;
-				jstart++;
-			}
-			for (int j = jstart; j < cols;j++, i++,field++)
-			{
-				int l = sqlite3_column_bytes(pDB->statement, j);
-				LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, j);
 
-				if (!str)
-					str = zero;
-				pDB->FldInfo[i].length = l;
-				if (field->hCurVal)
-					GSSiGlobFree(&field->hCurVal);
-				field->hCurVal = GSSiGlobAlloc(1812, GMEM_MOVEABLE, sizeof(int)+l + 4);
-				pCurVal = (LPCURVAL)GlobalLock(field->hCurVal);
-				pCurVal->length = l;
-				if (pCurVal->length)
-					_fstrncpy(&pCurVal->Value, str, pCurVal->length);
-				GlobalUnlock(field->hCurVal);
-				if (i == WantField)
-				{
-					int i = min(MAXVARLEN, l);
-					_fstrncpy(answer, str, i);
-					answer[i] = 0;
-				}
-			}
-		}
+		if (str && l)
+			strncpy0(answer, str, l);
 		GlobalUnlock(hDB);
 	}
 	return lpvoid;

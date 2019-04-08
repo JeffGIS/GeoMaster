@@ -1417,6 +1417,7 @@ int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
 	LPSTR ccode = (LPSTR)sqlite3_column_text(statement, i++);
 	LPSTR ccodedetail = (LPSTR)sqlite3_column_text(statement, i++);
 	LPSTR lastupdate = (LPSTR)sqlite3_column_text(statement, i++);
+	pRamp->proximityValue = sqlite3_column_int(statement, i++);
 	if (lastupdate && *lastupdate)
 		strcpy(pRamp->lastUpdate, lastupdate);
 	if (pRamp->bumpWidth > 0 || pRamp->bumpHeight > 0)
@@ -2317,6 +2318,7 @@ Retired INT,\
 RampStatus CHAR(256),\
 RampCode INT,\
 ProximityCode INT, \
+ProximityValue INT, \
 PRIMARY KEY (intID,rampNum,Retired ASC));";
 rtn = executeCmd(createcmd2);
 

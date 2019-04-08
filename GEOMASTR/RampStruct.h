@@ -169,6 +169,7 @@ typedef struct RampStruct {
 	int proximityCode;
 	char rampNotes[256];
 	char lastUpdate[32];
+	int proximityValue;
 } RampStruct;
 
 typedef struct ToleranceValues {
