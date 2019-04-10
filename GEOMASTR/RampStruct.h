@@ -166,7 +166,7 @@ typedef struct RampStruct {
 	int retired;
 	char rampStatus[256];
 	int rampCode;
-	int proximityCode;
+	int proximityScore;
 	char rampNotes[256];
 	char lastUpdate[32];
 	int proximityValue;

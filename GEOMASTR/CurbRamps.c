@@ -1410,7 +1410,7 @@ int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement)
 	if (rampStatus)
 		strncpy0(pRamp->rampStatus, rampStatus, sizeof(pRamp->rampStatus) - 1);
 	pRamp->rampCode = sqlite3_column_int(statement, i++);
-	pRamp->proximityCode = sqlite3_column_int(statement, i++);
+ 	pRamp->proximityScore = sqlite3_column_int(statement, i++);
 	LPSTR rampNotes = (LPSTR)sqlite3_column_text(statement, i++);
 	if (rampNotes && *rampNotes)
 		strcpy(pRamp->rampNotes, rampNotes);
@@ -2317,7 +2317,7 @@ CornerID INT,\
 Retired INT,\
 RampStatus CHAR(256),\
 RampCode INT,\
-ProximityCode INT, \
+ProximityScore INT, \
 ProximityValue INT, \
 PRIMARY KEY (intID,rampNum,Retired ASC));";
 rtn = executeCmd(createcmd2);

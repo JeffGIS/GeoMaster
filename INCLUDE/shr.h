@@ -1470,6 +1470,11 @@ int ChassisType(void); // returns -1 if error, 1 for desktop, 2 for laptop, 3 fo
 int MonitorType(int which,LPSTR monName);
 int GetMouseType(void);
 int GetNumMonitors(void);
+int GetCurrentMonitor(void);
+void MoveToMonitor(int imon, int fromMon);
+int WhichMonitorIsRectMostOn(RECT rect, LPINT pPctOn);
+RECT MoveRectToAMonitor(RECT rect);
+
 HMONITOR GetOtherMonitor(POINT pt);
 BOOL IsPointOnTouchScreen(HWND hWnd,POINT pt);
 

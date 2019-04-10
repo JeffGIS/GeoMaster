@@ -2235,7 +2235,7 @@ GSSiExitProg (620);
 	            	
 	            	
 	            	KeepMemLength = TRUE;  
-	            	hText = GSSiGlobAlloc ( 261,GHND,USHRT_MAX);
+	            	hText = GSSiGlobAlloc ( 261,GHND,USHRT_MAX); 
            	        KeepMemLength = KeepMemLengthSave;
 	                nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELCOUNT,0,0);  
 	                if (!nItems)

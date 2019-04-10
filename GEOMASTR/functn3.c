@@ -65,7 +65,45 @@ BOOL CALLBACK WEEnumWndProc(HWND hCtrl, LONG lParam)
 	}
 	return TRUE;
 }
+int WhichMonitorIsRectMostOn(RECT rect, LPINT pPctOn)
+{
+	int rtn = -1;
+	int maxSizeOnMonitor = 0;
+	RECT outRect;
+	int rectSize = RECTWIDTH(&rect) * RECTHEIGHT(&rect);
 
+	*pPctOn = 0;
+	for (int i=0; i< numMonitors; i++)
+	{
+		if (IntersectRect(&outRect, &MonitorRectangle[i], &rect))
+		{
+			int size = RECTWIDTH(&outRect) * RECTHEIGHT(&outRect);
+			if (size > maxSizeOnMonitor)
+			{
+				maxSizeOnMonitor = size;
+				*pPctOn = IDNINT ((100.0 * size) / rectSize);
+				rtn = i;
+			}
+		}
+	}
+	return rtn;
+}
+RECT MoveRectToAMonitor(RECT rect)
+{
+	RECT rtn = rect;
+	int pctOn;
+	int imon = WhichMonitorIsRectMostOn(rect, &pctOn);
+
+	if (imon < 0 || pctOn < 100)
+	{ 
+		imon = max(0, imon);
+		rtn.left = max (0,MonitorRectangle[imon].left);
+		rtn.top = max (0,MonitorRectangle[imon].top);
+		rtn.right = rtn.left + RECTWIDTH(&rect);
+		rtn.bottom = rtn.top + RECTHEIGHT(&rect);
+	}
+	return rtn;
+}
 HWND WindowExists(HWND hWnd)
 {
 	wantWnd = hWnd;

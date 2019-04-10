@@ -2243,6 +2243,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 		hSaveBM = EnterBlockingWindow(hWndDlg);
 		GetPrivateProfileString("User", "IDWithPhotoWindowPos", "0", str, sizeof(str), GMIni);
 		displayRect = atorect(str, &err);
+		displayRect = MoveRectToAMonitor(displayRect);
 		hWndBasic = hWndDlg;
 		if (IsRectEmpty(&displayRect))
 			cwCenter(hWndDlg, 0);
