@@ -16903,26 +16903,29 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 		         	goto NextFile;
 
 		    	OpenRefIndex (FALSE);
-	    		_fstrncpy(TAGKey.PREFIX,TagLocPrefix,8);
-	    		_fstrncpy(TAGKey.UDI,"",sizeof(TAGKey.UDI));
-	    		TAGKey.Refno = LONG_MIN;
-				LPTAGINDEX pTI = GlobalLock(hTAGIdx);
-				st = BT_FIND (pTI->hBT,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)space);
-			    if (!st && !_fstrncmp(TAGKey.PREFIX,TagLocPrefix,8))
-			    {   
-					GlobalUnlock(hTAGIdx);
-			    	for (i=0;i<nfile;i++)
+				if (hTAGIdx)
+				{
+					_fstrncpy(TAGKey.PREFIX, TagLocPrefix, 8);
+					_fstrncpy(TAGKey.UDI, "", sizeof(TAGKey.UDI));
+					TAGKey.Refno = LONG_MIN;
+					LPTAGINDEX pTI = GlobalLock(hTAGIdx);
+					st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_FIRST, BT_GE, (LPSTR)space);
+					if (!st && !_fstrncmp(TAGKey.PREFIX, TagLocPrefix, 8))
 					{
-			    		if (SavePltType[i] == PltType && !_fstricmp (SavePltName[i],PltName))
-			    			goto NextFile;
+						GlobalUnlock(hTAGIdx);
+						for (i = 0; i < nfile; i++)
+						{
+							if (SavePltType[i] == PltType && !_fstricmp(SavePltName[i], PltName))
+								goto NextFile;
+						}
+						if (nfile >= 1024)
+							goto Exit;
+						SavePltType[nfile] = PltType;
+						_fstrcpy(SavePltName[nfile++], PltName);
 					}
-					if (nfile >= 1024)
-						goto Exit;
-			    	SavePltType[nfile] = PltType;
-			    	_fstrcpy (SavePltName[nfile++],PltName);
-			    }
-				else
-					GlobalUnlock(hTAGIdx);
+					else
+						GlobalUnlock(hTAGIdx);
+				}
 		NextFile:
 //		SetWindowText (hWndMain,"Step 4");
 				CloseRefIndex(TRUE);
@@ -16991,103 +16994,113 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
            		      	if (n<TagLocMinChar) break;
 						CloseRefIndex(TRUE); 
 						_fstrcpy (SubUDI,TAGKey.UDI);  
-						for (ifile=0;ifile<nfile;ifile++)
+						for (ifile = 0; ifile < nfile; ifile++)
 						{
 							hTIDX[ifile] = 0;
 							if (st == 32)
 								continue;
 							if (ifile == 30)
-								ii=1;
+								ii = 1;
 							if (nlast > 0)
-								ii=1;
-	                 		_fmemset (TAGKey.UDI,0,32);
-	                 		_fstrcpy (TAGKey.UDI,SubUDI);
+								ii = 1;
+							_fmemset(TAGKey.UDI, 0, 32);
+							_fstrcpy(TAGKey.UDI, SubUDI);
 							PltType = SavePltType[ifile];
-							_fstrcpy (PltName,SavePltName[ifile]);
-	                        if ((ShowOnlyDisconnected = GetGlobalBVal2 ("[%SHOWONLYDISCONNECTED]",FALSE)))
-	                        {
-	                        	hTag = GSSiGlobAlloc ( 967,GMEM_MOVEABLE,USHRT_MAX);
-	                        	hIdx = GSSiGlobAlloc ( 968,GMEM_MOVEABLE,USHRT_MAX);
-	                        	maxlast = (long)USHRT_MAX/sizeof(TAGKEY);
-	                        } 
-	                        OpenTAGIndex (FALSE,FALSE,0);
-					    	hTIDX[ifile] = hTAGIdx;
-					    	hTAGIdx = 0;
-				    		_fstrncpy(TAGKey.PREFIX,TagLocPrefix,8);
-				    		TAGKey.Refno = LONG_MIN;
-				    		*LastUDI=0;
-							st = BT_FIND (hTIDX[ifile],(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)space);
-						    while (!st
-						    		 && !_fstrncmp(TAGKey.PREFIX,TagLocPrefix,8)
-						    		 && !_fstrncmp(TAGKey.UDI,SubUDI,n))
-						    {   
-						    	if (ShowOnlyDisconnected)
-						    	{
-						    		if (nlast)
-						    		{
-						    			pTag = (LPTAGKEY)GlobalLock (hTag);
-						    			if (_fmemcmp (pTag,&TAGKey,sizeof(TAGKEY)-2))
-						    			{   
-							    			GlobalUnlock (hTag);
-						    				st = DisplayDisconnected (hWndDlg,nlast,MaxDist,hIdx,hTag,udi);
-							    			nlast = 0;
-						    			}
-						    			else 
-						    				GlobalUnlock (hTag);
-						    		}
-						    		pTag = (LPTAGKEY)GlobalLock (hTag);
-						    		pTag += nlast;
-						    		pIdx = (LPREFINDEXDATA)GlobalLock (hIdx); 
-						    		pIdx += nlast;
-						    		*pTag = TAGKey;
-						    		*pIdx = *pRefIdxData;
-						    		GlobalUnlock (hTag);
-						    		GlobalUnlock (hIdx); 
-						    		if (nlast < maxlast)
-						    			nlast++;
-						    	}
-						    	else if (!pRefIdxData->Deleted)
-						    	{   
-						    		UINT	jfile;
-						    		
-									for (jfile=0;jfile<ifile;jfile++)
-									{  
-										if (!BT_FIND (hTIDX[jfile],(LPSTR)&TAGKey,BT_FIRST,BT_EQ,(LPSTR)space))
-										{
-											if (pRefIdxData->Deleted)   
-												goto NextTAG;
-										}
-									} 
-							    	if (!_fstrcmp (LastUDI,TAGKey.UDI))
-							    		sprintf (str,"%s{%ld}",TAGKey.UDI,TAGKey.Refno);
-							    	else
-							    		_fstrcpy (str,TAGKey.UDI); 
-					 				if ((idx=SendDlgItemMessage (hWndDlg,IDC_TAG_LIST,LB_ADDSTRING,0,(LPARAM)str)) ==
-					 					LB_ERRSPACE)                                                              
-					 					st = 1;
-					 				else if (!_fstrcmp (udi,str))
-					 					SendDlgItemMessage (hWndDlg,IDC_TAG_LIST,LB_SETCURSEL,idx,0);
-
-							    }
-							    else
-							    	ii=1;
-						NextTAG: 
-							    _fstrcpy (LastUDI,TAGKey.UDI); 
-				 				if (!st)
-									st = BT_FIND (hTIDX[ifile],(LPSTR)&TAGKey,BT_NEXT,BT_ANY,(LPSTR)space);
-								if (GSSiPeekMessage(&msg, GetDlgItem(hWndDlg, IDC_TAGVALUE), WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
-									st = 32;
-								if (hWndSecondaryTAGInput)
-								{
-									if (GSSiPeekMessage(&msg, hWndSecondaryTAGInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
-										st = 32;
-								}
+							_fstrcpy(PltName, SavePltName[ifile]);
+							if ((ShowOnlyDisconnected = GetGlobalBVal2("[%SHOWONLYDISCONNECTED]", FALSE)))
+							{
+								hTag = GSSiGlobAlloc(967, GMEM_MOVEABLE, USHRT_MAX);
+								hIdx = GSSiGlobAlloc(968, GMEM_MOVEABLE, USHRT_MAX);
+								maxlast = (long)USHRT_MAX / sizeof(TAGKEY);
 							}
-							DisplayDisconnected (hWndDlg,nlast,MaxDist,hIdx,hTag,udi);
-						} 
+							OpenTAGIndex(FALSE, FALSE, 0);
+							if (hTAGIdx)
+							{
+								LPTAGINDEX pTI;
+
+								hTIDX[ifile] = hTAGIdx;
+								hTAGIdx = 0;
+								pTI = GlobalLock(hTIDX[ifile]);
+								_fstrncpy(TAGKey.PREFIX, TagLocPrefix, 8);
+								TAGKey.Refno = LONG_MIN;
+								*LastUDI = 0;
+								st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_FIRST, BT_GE, (LPSTR)space);
+								while (!st
+									&& !_fstrncmp(TAGKey.PREFIX, TagLocPrefix, 8)
+									&& !_fstrncmp(TAGKey.UDI, SubUDI, n))
+								{
+									if (ShowOnlyDisconnected)
+									{
+										if (nlast)
+										{
+											pTag = (LPTAGKEY)GlobalLock(hTag);
+											if (_fmemcmp(pTag, &TAGKey, sizeof(TAGKEY) - 2))
+											{
+												GlobalUnlock(hTag);
+												st = DisplayDisconnected(hWndDlg, nlast, MaxDist, hIdx, hTag, udi);
+												nlast = 0;
+											}
+											else
+												GlobalUnlock(hTag);
+										}
+										pTag = (LPTAGKEY)GlobalLock(hTag);
+										pTag += nlast;
+										pIdx = (LPREFINDEXDATA)GlobalLock(hIdx);
+										pIdx += nlast;
+										*pTag = TAGKey;
+										*pIdx = *pRefIdxData;
+										GlobalUnlock(hTag);
+										GlobalUnlock(hIdx);
+										if (nlast < maxlast)
+											nlast++;
+									}
+									else if (!pRefIdxData->Deleted)
+									{
+										UINT	jfile;
+
+										for (jfile = 0; jfile < ifile; jfile++)
+										{
+											if (!BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_FIRST, BT_EQ, (LPSTR)space))
+											{
+												if (pRefIdxData->Deleted)
+													goto NextTAG;
+											}
+										}
+										if (!_fstrcmp(LastUDI, TAGKey.UDI))
+											sprintf(str, "%s{%ld}", TAGKey.UDI, TAGKey.Refno);
+										else
+											_fstrcpy(str, TAGKey.UDI);
+										if ((idx = SendDlgItemMessage(hWndDlg, IDC_TAG_LIST, LB_ADDSTRING, 0, (LPARAM)str)) ==
+											LB_ERRSPACE)
+											st = 1;
+										else if (!_fstrcmp(udi, str))
+											SendDlgItemMessage(hWndDlg, IDC_TAG_LIST, LB_SETCURSEL, idx, 0);
+
+									}
+									else
+										ii = 1;
+								NextTAG:
+									_fstrcpy(LastUDI, TAGKey.UDI);
+									if (!st)
+										st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_NEXT, BT_ANY, (LPSTR)space);
+									if (GSSiPeekMessage(&msg, GetDlgItem(hWndDlg, IDC_TAGVALUE), WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+										st = 32;
+									if (hWndSecondaryTAGInput)
+									{
+										if (GSSiPeekMessage(&msg, hWndSecondaryTAGInput, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE))
+											st = 32;
+									}
+								}
+								DisplayDisconnected(hWndDlg, nlast, MaxDist, hIdx, hTag, udi);
+								GlobalUnlock(hTIDX[ifile]);
+							}
+						}
 						for (ifile=0;ifile<nfile;ifile++)
 						{ 
-							BT_CLOSE (hTIDX[ifile]);
+							LPTAGINDEX pTI;
+							pTI = GlobalLock(hTIDX[ifile]);
+							BT_CLOSE (pTI->hBT);
+							GlobalUnlock(hTIDX[ifile]);
                         }
 						GSSiGlobFree (&hTag);
 						GSSiGlobFree (&hIdx);

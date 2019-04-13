@@ -3877,7 +3877,7 @@ LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG 
 		int FontSize = 36;
 		PAINTSTRUCT ps;
 		int nc = GetWindowText(hWnd, text, 255);
-		HDC hDC = BeginPaint (hWnd,&ps);
+		HDC hDC = BeginPaint(hWnd, &ps);
 		char message[] = "Getting map from Google";
 		SetTextColor(hDC, 0);
 		HFONT hFont = CreateFont(FontSize, 0, 0, 0, FW_BOLD,
@@ -3888,10 +3888,43 @@ LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG 
 		//GetTextExtentPoint32(hDC, text, strlen(text), &size);
 		//GetWindowRect(hWnd, &rect);
 		//SetWindowPos(hWnd, NULL, rect.left, rect.top, size.cx, size.cy, 0);
-		int dt =DrawText(hDC, text, strlen(text), &ps.rcPaint, DT_SINGLELINE | DT_BOTTOM |DT_CENTER);
+		int dt = DrawText(hDC, text, strlen(text), &ps.rcPaint, DT_SINGLELINE | DT_BOTTOM | DT_CENTER);
 		SelectObject(hDC, hOldFont);
 		DeleteObject(hFont);
 		EndPaint(hWnd, &ps);
+	}
+	return DefWindowProc(hWnd, Message, wParam, lParam);
+
+}
+LONG FAR PASCAL SmallMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+{
+	switch (Message)
+	{
+	case WM_PAINT:
+	{
+		SIZE size;
+		RECT rect;
+
+		int FontSize = 24;
+		PAINTSTRUCT ps;
+		HDC hDC = BeginPaint(hWnd, &ps);
+		SetTextColor(hDC, 0);
+		HFONT hFont = CreateFont(FontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, "Sans-Serif");
+		HFONT hOldFont = SelectObject(hDC, hFont);
+		GetTextExtentPoint32(hDC, smallMessageText, strlen(smallMessageText), &size);
+		GetWindowRect(hWnd, &rect);
+		SetWindowPos(hWnd, NULL, rect.left, rect.top, size.cx*1.25, size.cy*1.25, FALSE);
+		GetClientRect(hWnd, &rect);
+		int idt = DrawText(hDC, smallMessageText, strlen(smallMessageText), &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+		SelectObject(hDC, hOldFont);
+		DeleteObject(hFont);
+		EndPaint(hWnd, &ps);
+		//return TRUE;
+	}
+	case WM_KEYDOWN:
+		SetFocus(hWndMain);
+		PostMessage(hWndMain, Message, wParam, lParam);
+		return TRUE;
 	}
 	return DefWindowProc(hWnd, Message, wParam, lParam);
 
@@ -3926,6 +3959,35 @@ BOOL RegisterPopupMessageClass(BOOL UnRegister)
 
 	return (RegisterClass(&wc));
 }
+BOOL RegisterSmallMessageClass(BOOL UnRegister)
+{
+	WNDCLASS  wc;
+	static	Called = FALSE;
+
+	if (UnRegister)
+	{
+		if (Called)
+		{
+			UnregisterClass("SmallMessageWindowClass", hInst);
+			Called = FALSE;
+		}
+		return TRUE;
+	}
+	if (Called) return TRUE;
+	Called = TRUE;
+	wc.style = CS_HREDRAW | CS_DROPSHADOW;
+	wc.lpfnWndProc = (WNDPROC)SmallMessageWndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = hInst;
+	wc.hIcon = NULL;
+	wc.hCursor = NULL;
+	wc.hbrBackground = GetStockObject(WHITE_BRUSH);
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = "SmallMessageWindowClass";
+
+	return (RegisterClass(&wc));
+}
 
 HWND CreateGoogleMessage(PTSTR pszText)
 {
@@ -3941,8 +4003,8 @@ HWND CreateGoogleMessage(PTSTR pszText)
 	x = CurView->ScreenRect.left + (RECTWIDTH(&CurView->ScreenRect) - width) / 2;
 	y = CurView->ScreenRect.top + (RECTHEIGHT(&CurView->ScreenRect) - height) / 2;
 
-	HWND hwndTip = CreateWindowEx(WS_EX_TOPMOST, "PopupMessageWindowClass", "PopupMessage",WS_BORDER|WS_VISIBLE|WS_POPUP,
-		x,y,width,height,
+	HWND hwndTip = CreateWindowEx(WS_EX_TOPMOST, "PopupMessageWindowClass", "PopupMessage", WS_BORDER | WS_VISIBLE | WS_POPUP,
+		x, y, width, height,
 		hWndMain, NULL,
 		hInst, NULL);
 
@@ -3955,6 +4017,40 @@ HWND CreateGoogleMessage(PTSTR pszText)
 		SetWindowText(hwndTip, pszText);
 	UpdateWindow(hwndTip);
 
+	return hwndTip;
+}
+void UpdateSmallMessage(HWND hwndTip, LPSTR pszText)
+{
+	strncpy0(smallMessageText, pszText, MAX_SMALL_MESSAGE);
+	InvalidateRect(hwndTip, NULL, TRUE);
+	cwCenter(hwndTip, -5);
+}
+HWND CreateSmallMessage(LPSTR pszText)
+{
+	RegisterSmallMessageClass(FALSE);
+
+	int width = 100;
+	int height = 28;
+	int x, y;
+	if (pszText && *pszText)
+	{
+		width = strlen(pszText) * 40;
+		strncpy0(smallMessageText, pszText, MAX_SMALL_MESSAGE);
+	}
+	x = CurView->ScreenRect.left + (RECTWIDTH(&CurView->ScreenRect) - width) / 2;
+	y = CurView->ScreenRect.top + (RECTHEIGHT(&CurView->ScreenRect) - height) / 2;
+
+	HWND hwndTip = CreateWindowEx(WS_EX_TOPMOST, "SmallMessageWindowClass", "SmallMessage", WS_BORDER | WS_VISIBLE | WS_POPUP,
+		x, y, width, height,
+		hWndMain, NULL,
+		hInst, NULL);
+
+	if (!hwndTip)
+	{
+		return (HWND)NULL;
+	}
+	UpdateWindow(hwndTip);
+	UpdateSmallMessage(hwndTip, pszText);
 	return hwndTip;
 }
 

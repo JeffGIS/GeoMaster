@@ -105,3 +105,4 @@
 
 #define MAX_PREFIX_LEN	8
 #define MAX_UDI_LEN	64
+#define MAX_SMALL_MESSAGE	255

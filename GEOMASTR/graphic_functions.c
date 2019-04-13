@@ -13123,83 +13123,132 @@ GSSiExitProg (935);
 #endif
 }
 
-BOOL DragDist (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL DragDist(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
-{GSSiEnterProg (936);
+{
+	GSSiEnterProg(936);
 #endif
-{  
- char key;
- static	BOOL	HaveRP=FALSE;    
- static DPOINT	RadiusPoint; 
- static	HCURSOR	InCursor; 
- long			Radius;  
- POINT	MousePoint;
- 
- switch (Message)
-   {
-   	case GF_INIT:  
-	   	InCursor = CurView->hCursor;
-		SetCurs ((HCURSOR)2,FALSE);
-   		HaveRP = FALSE; 
-   		SetPrompt (PRMT_LOCATE_RADIUSP,TRUE);
-   		break;
-   		
-    case WM_LBUTTONUP: 
-    	MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
-    	if (HaveRP)
-    	{ 
-			long	nnewpt;
+	{
+		char key;
+		static	BOOL	HaveRP = FALSE;
+		static DPOINT	RadiusPoint;
+		static	HCURSOR	InCursor;
+		long			Radius;
+		POINT	MousePoint;
 
-    		if (CurrentDistance == DBL_MAX)                      
-    		{   
-    			DPOINT	BasePoint;
-    			
-    			BasePoint=ScreenPtToBasePt(MousePoint);
-    			CurrentDistance = ldistp (RadiusPoint,BasePoint);
-    		} 
-    		hNewPolyPoints = CreateCirclePoly (RadiusPoint,CurrentDistance,&nnewpt,0);
-			NumNewPolyPoints = nnewpt;
-		    PostMessage(hWnd, GF_CLOSE,0, 0L); 
-		    break;
-    	}
-	    if (!CursorIsLocked)
-	        CurrentPoint=ScreenPtToBasePt(MousePoint);
-		RadiusPoint = CurrentPoint;
-   		SetPrompt (PRMT_LOCATE_RADIUSP,TRUE);
-   		HaveRP = TRUE;
-   		CurrentDistance = DBL_MAX;
+		switch (Message)
+		{
+		case GF_INIT:
+			InCursor = CurView->hCursor;
+			SetCurs((HCURSOR)2, FALSE);
+			HaveRP = FALSE;
+			SetPrompt(PRMT_LOCATE_RADIUSP, TRUE);
+			break;
+
+		case WM_LBUTTONUP:
+			MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
+			if (HaveRP)
+			{
+				long	nnewpt;
+
+				if (CurrentDistance == DBL_MAX)
+				{
+					DPOINT	BasePoint;
+
+					BasePoint = ScreenPtToBasePt(MousePoint);
+					CurrentDistance = ldistp(RadiusPoint, BasePoint);
+				}
+				hNewPolyPoints = CreateCirclePoly(RadiusPoint, CurrentDistance, &nnewpt, 0);
+				NumNewPolyPoints = nnewpt;
+				PostMessage(hWnd, GF_CLOSE, 0, 0L);
+				break;
+			}
+			if (!CursorIsLocked)
+				CurrentPoint = ScreenPtToBasePt(MousePoint);
+			RadiusPoint = CurrentPoint;
+			SetPrompt(PRMT_LOCATE_RADIUSP, TRUE);
+			HaveRP = TRUE;
+			CurrentDistance = DBL_MAX;
+			break;
+
+		case GF_COMPLETE:
+		case GF_DISPLAYMESS:
+			if (HaveRP)
+				SetPrompt(PRMT_LOCATE_RADIUS, TRUE);
+			else
+				SetPrompt(PRMT_LOCATE_RADIUSP, TRUE);
+			break;
+
+		case GF_CLOSE:
+			SetCurs(InCursor, FALSE);
+			return FALSE;
+
+		default:
+		{
+#if ENABLETRACE
+			GSSiExitProg(936);
+#endif
+			return (FALSE);
+		}
+		}
+		{
+#if ENABLETRACE
+			GSSiExitProg(936);
+#endif
+			return (TRUE);
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+void ExecuteGraphicsMacro(int opt, POINT MousePoint, DPOINT BasePoint)
+{
+	char cmd[1024];
+	// opt 0 = quit, 1 = init, 2 = mousemove, 3 = lbuttondown, 4 = lbuttonup, 5 = lbuttondblclk, 6 = rbuttondown, 7 = rbuttonup, 10 = displaylastprompt
+	sprintf(cmd, "$MACRO(%s,%i,%i %i,%f %f)", GraphicsMacro,opt, MousePoint.x, MousePoint.y, BasePoint.x, BasePoint.y);
+	ProcessText(cmd);
+}
+BOOL GraphicsMacroFunction(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+{
+	char key;
+	static	HCURSOR	InCursor;
+	int opt;
+	POINT	MousePoint = { 0 };
+	DPOINT	BasePoint = { 0 };
+
+	switch (Message)
+	{
+	case GF_INIT:
+		InCursor = CurView->hCursor;
+		SetCurs((HCURSOR)2, FALSE);
+		ExecuteGraphicsMacro(1, MousePoint,BasePoint);
 		break;
-		
-    case GF_COMPLETE:
-    case GF_DISPLAYMESS: 
-		if (HaveRP) 
-   			SetPrompt (PRMT_LOCATE_RADIUS,TRUE);
-	   	else
-	   		SetPrompt (PRMT_LOCATE_RADIUSP,TRUE);
-        break;
-        
-    case GF_CLOSE: 
-		SetCurs (InCursor,FALSE); 
-        return FALSE;
-        
-    default:
-{
-#if ENABLETRACE
-GSSiExitProg (936);
-#endif
-    	return (FALSE);
+	case WM_MOUSEMOVE:
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+		opt = Message - WM_MOUSEMOVE + 2;
+		MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
+		BasePoint = ScreenPtToBasePt(MousePoint);
+		ExecuteGraphicsMacro(opt, MousePoint, BasePoint);
+		break;
+
+	case GF_COMPLETE:
+	case GF_DISPLAYMESS:
+		ExecuteGraphicsMacro(10, MousePoint, BasePoint);
+		break;
+
+	case GF_CLOSE:
+		ExecuteGraphicsMacro(0, MousePoint, BasePoint);
+		SetCurs(InCursor, FALSE);
+		return FALSE;
+	default:
+		return FALSE;
+	}
+	return TRUE;
 }
-    }
-{
-#if ENABLETRACE
-GSSiExitProg (936);
-#endif
-    return (TRUE);
-}
-#if ENABLETRACE
-}
-#endif
-} 
 
 BOOL PointsFromHLT (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE

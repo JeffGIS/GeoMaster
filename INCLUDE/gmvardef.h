@@ -1677,6 +1677,8 @@ BOOL	useTextFileSQLiteIndex = FALSE;
 char	CurrentZoomList[MAX_PATH] = { 0 };
 char	CurrentZoomListEntry[256] = { 0 };
 RECT	MonitorRectangle[MAX_MONITORS];
+char	GraphicsMacro[MAX_PATH] = { 0 };
+char	smallMessageText[MAX_SMALL_MESSAGE + 1] = { 0 };
 int		ii;
 
 

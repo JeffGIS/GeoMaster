@@ -3610,6 +3610,9 @@ GSSiExitProg (532);
 		case 399:
 			ProjectBounds = atobounds(Value,&err);
 			break;
+		case 401:
+			strncpy0(GraphicsMacro, Value, sizeof(GraphicsMacro) - 1);
+			break;
 		default:
  			break;
 	}
@@ -4029,6 +4032,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%DLSERIALNUMBER", 398, FALSE);
 	AllocateTypeVar("%PROJECTBOUNDS", 399, FALSE);
 	AllocateTypeVar("%IPADINSERVER", 400, FALSE);
+	AllocateTypeVar("%GRAPHICSMACRO", 401, FALSE);
 
 	
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5248,6 +5252,9 @@ GSSiExitProg (533);
 			break;
 		case 400:
 			ltoa(GetiPadWithinManager(), OutStr, 10);
+		break;
+		case 401:
+			strcpy(OutStr, GraphicsMacro);
 		break;
 	}
 	GlobalUnlock (hGlobal);

@@ -615,33 +615,36 @@ GSSiExitProg (1320);
 	}
 	else
 		MaskEndCol = pHSData->MaskWidth-1;
-	pMaskRow = (HPSHORT)GlobalLock (pHSData->hMask);
-	pMaskRow += (MaskBegRow * pHSData->MaskWidth) + MaskBegCol;
-	pGridRow = (HPLONG)GlobalLock (pHSData->hGrid);
-	pGridRow += (long)pHSData->GridWidth * (long)GridBegRow + (long)GridBegCol; 
-	row = MaskBegRow; 
-	while (row < MaskEndRow)
+	if (pHSData->hMask)
 	{
-		col = MaskBegCol;
-		pMask = pMaskRow;
-		pGrid = pGridRow;
-		while (col < MaskEndCol)
-		{   
-			if (HaveWeight)
-				*pGrid += (*pMask*Weight); 
-			else 
-				*pGrid += (*pMask); 
-			MaxGrid = max (MaxGrid,*pGrid);
-			pGrid++;
-			pMask++;
-			col++;
-		} 
-		row++;
-		pMaskRow += pHSData->MaskWidth;    
-		pGridRow += pHSData->GridWidth;
+		pMaskRow = (HPSHORT)GlobalLock(pHSData->hMask);
+		pMaskRow += (MaskBegRow * pHSData->MaskWidth) + MaskBegCol;
+		pGridRow = (HPLONG)GlobalLock(pHSData->hGrid);
+		pGridRow += (long)pHSData->GridWidth * (long)GridBegRow + (long)GridBegCol;
+		row = MaskBegRow;
+		while (row < MaskEndRow)
+		{
+			col = MaskBegCol;
+			pMask = pMaskRow;
+			pGrid = pGridRow;
+			while (col < MaskEndCol)
+			{
+				if (HaveWeight)
+					*pGrid += (*pMask*Weight);
+				else
+					*pGrid += (*pMask);
+				MaxGrid = max(MaxGrid, *pGrid);
+				pGrid++;
+				pMask++;
+				col++;
+			}
+			row++;
+			pMaskRow += pHSData->MaskWidth;
+			pGridRow += pHSData->GridWidth;
+		}
+		GlobalUnlock(pHSData->hGrid);
+		GlobalUnlock(pHSData->hMask);
 	}
-	GlobalUnlock (pHSData->hGrid);
-	GlobalUnlock (pHSData->hMask);  
 	pHSData->TotalIncidents++;
 	pHSData->MaxGridValue = CurTheme->Ymax = max (CurTheme->Ymax,(double)MaxGrid);
 {
@@ -991,7 +994,7 @@ void DisplayHotSpots (void)
 	    	ScreenToGridFactor = (double)pHSData->GridHeight/(double)(RectHeight); 
 	    i=0;
     	Rect.top = CurView->DrawRect.bottom; 
-    	y = CurView->DrawRect.bottom;
+		y = CurView->DrawRect.bottom;
 	    while (y >= CurView->DrawRect.top)
 	    {   
 	    	pGridRow = pGridArray + (long)(i*ScreenToGridFactor)*pHSData->GridWidth;   

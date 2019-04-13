@@ -363,6 +363,7 @@ void QuitGraphics()
 
 	MergeImageIntoViewport(0, 0, 0, 0);
 	RegisterPopupMessageClass(TRUE);
+	RegisterSmallMessageClass(TRUE);
 	ProcessText ("$LINKLINES(CLEAR)");
 	PATBMPDef(TRUE);
 

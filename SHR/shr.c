@@ -13424,6 +13424,7 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 /*  top == -2		 - center on cursor in parent						*/
 /*  top == -3        - center at bottom - 16                            */
 /*  top == -4        - center at bottom - 16 of CurView                 */
+/*  top == -5        - center horz on cursor in parent, vert above curs */
 /************************************************************************/
 
 void cwCenter(HWND hWnd, int top)
@@ -13479,6 +13480,8 @@ begin:
 	GetCursorPos (&pt);
 	if (top==-1)
 		pt.x=0;
+	if (top == -5)
+		pt.y -= iheight;
 }
 else
 {

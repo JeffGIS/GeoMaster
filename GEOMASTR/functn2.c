@@ -4872,11 +4872,38 @@ GSSiExitProg (1350);
 			}
 			goto Rtnl;
 		}
+		case 1226: //$SMALLMESSAGE(CREATE,text)
+				   //$SMALLMESSAGE(UPDATE,hwnd,text)
+				   //$SMALLMESSAGE(DESTROY,hwnd)
+		{
+			int iWnd;
 
-			case 1301: //$DISPLAYCONFIG(configfile,world bounds,display rect)
-		{   BOOL SaveSaveZoom = SaveZoom, SaveSaveGlobals = SaveGlobals, rtn;
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "CREATE"))
+			{
+				iWnd = (int)CreateSmallMessage(Arg[2]);
+				itoa(iWnd, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "UPDATE"))
+			{
+				UpdateSmallMessage ((HWND)atoi(Arg[2]),Arg[3]);
+				goto RtnTrue;
+			}
+			else if (!stricmp(Arg[1], "DESTROY"))
+			{
+				DestroyWindow((HWND)atoi(Arg[2]));
+				goto RtnTrue;
+			}
+			goto RtnFalse;
+		}
+		case 1301: //$DISPLAYCONFIG(configfile,world bounds,display rect)
+		{
+			BOOL SaveSaveZoom = SaveZoom, SaveSaveGlobals = SaveGlobals, rtn;
 
-		nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 3)
 				goto RtnFalse;
 			if (!ExistFile (Arg[1]))

@@ -1264,7 +1264,7 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 		pINITVAL=str;
 	maxTEXTSTRING=lenstring;
 	EnableWindow (hWnd,FALSE); 
-	if (DropDown) 
+	if (DropDown || !ListFile) 
 	{
 		lpfnTEXTSTRINGMsgProc = MakeProcInstance((DLGPROC)TEXTSTRINGMsgProc, hInst);
 		if (Sorted)
@@ -1278,7 +1278,8 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 		Arg5 = GlobalLock (hSelectItemsArgs);   
 		*Arg5 = 'N';
 		Arg5[1] = 'N';
-		_fstrcpy (&Arg5[2],ListFile);
+		if (ListFile)
+			_fstrcpy (&Arg5[2],ListFile);
 		_fstrcpy (&Arg5[850],Title);
 		GlobalUnlock (hSelectItemsArgs);
 		lpfnTEXTSTRINGMsgProc = MakeProcInstance((DLGPROC)SELECTITEMSMsgProc, hInst);

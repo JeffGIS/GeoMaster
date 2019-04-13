@@ -546,8 +546,9 @@ int	GetFunctionID12 (LPSTR str)
 			if (!_fstrnicmp (str,"TRANSPARENCY",12)) return 1222; 
 			if (!_fstrnicmp (str,"SQLFIELDTYPE",12)) return 1223; 
 			if (!_fstrnicmp (str,"GMDFIELDTYPE",12)) return 1224; 
-			if (!_fstrnicmp (str,"INSERTFORMAT",12)) return 1225; 
-			
+			if (!_fstrnicmp(str, "INSERTFORMAT", 12)) return 1225;
+			if (!_fstrnicmp(str, "SMALLMESSAGE", 12)) return 1226;
+
 			return 0; 
 			
 }

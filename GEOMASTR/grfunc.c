@@ -1721,10 +1721,13 @@ BOOL ProcessGraphicsFunction4 (short Function,
 	    case GF_SELECT_DIST:
 	    	 return (SelectDist (hWnd,Message,wParam,lParam)); 
 	    	 break;
-	    case GF_DRAG_DIST:
-	    	 return (DragDist (hWnd,Message,wParam,lParam)); 
-	    	 break;
-	    //case GF_GOLF_SHOT:
+		case GF_DRAG_DIST:
+			return (DragDist(hWnd, Message, wParam, lParam));
+			break;
+		case GF_GRAPHICS_MACRO:
+			return (GraphicsMacroFunction(hWnd, Message, wParam, lParam));
+			break;
+			//case GF_GOLF_SHOT:
 	    	 //return (GolfShot (hWnd,Message,wParam,lParam)); 
 	    	 //break;
 	    case GF_POINTS_FROM_HLT:

@@ -5405,11 +5405,16 @@ GotCloseFilehSQL:
 				DropDown = atob (Arg[4]);
 			if (nArgs > 4)
 				Sorted = atob (Arg[5]);
-			if (FunID == 728)
+			if (FunID == 709)
 			{
-				long	AutoInc = atol (Arg[3]);
-				rtn = GetTextString (GetParentFocus(),lpstr,2048,Arg[1],0,lpstr2,AutoInc,DropDown,Sorted);
-				 
+				long	AutoInc = atol(Arg[3]);
+				rtn = GetTextString(GetParentFocus(), lpstr, 2048, Arg[1], 0, Arg[3], 0,0,0);
+			}
+			else if (FunID == 728)
+			{
+				long	AutoInc = atol(Arg[3]);
+				rtn = GetTextString(GetParentFocus(), lpstr, 2048, Arg[1], 0, lpstr2, AutoInc, DropDown, Sorted);
+
 			}
 			else if (FunID == 904)
 	   	  		rtn = GetTextStringML (GetParentFocus(),lpstr,2048,Arg[1],lpstr2);
@@ -5431,7 +5436,7 @@ GotCloseFilehSQL:
 	   	  	{
 				l = _fstrlen(lpstr);
 				_fstrncpy (OutLoc,lpstr,l+1);  
-				if (Arg[2])
+				if (nArgs > 1 && *Arg[2])
 				{
 				/*	if (lpstr2)
 						SetGlobalValue(Arg[2],lpstr2);
