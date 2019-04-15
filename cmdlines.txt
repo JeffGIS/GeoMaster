@@ -1,6 +1,6 @@
 [%DL]police\configs\STARTUP_2019_PIMS.GMC /F /WD i:\BUPolice2\Mpls
-configs\directdisplay.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T;  /WD h:\pcviewer
-configs\prioritylocs.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T;  /WD h:\pcviewer
+configs\directdisplay.gmc /F /NOCACHE /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;  /WD h:\pcviewer
+configs\prioritylocs.gmc /F /NOCACHE /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;  /WD h:\pcviewer
 configs\photosegments.gmc /WD j:\pcviewer\pcviewer
 police\configs\test.gmc /WD i:\bupolice\mpls
 configs\large.gmc /F /NOCACHE /LOGMSG [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD g:\pcviewer
@@ -164,6 +164,8 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
 
 
 
