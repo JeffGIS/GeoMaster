@@ -315,7 +315,6 @@ GSSiExitProg (1287);
 
 BOOL SetHotSpotMaskWidth(LPHOTSPOTDATA	pHSData)
 {
-	BOOL rtn = FALSE;
 	static double lastRadius = -1;
 	DPOINT	dp1, dp2, HotSpotPoint[2];
 	char str[256];
@@ -325,6 +324,12 @@ BOOL SetHotSpotMaskWidth(LPHOTSPOTDATA	pHSData)
 	ExpandText(str);
 	ExpandText(str);
 	pHSData->Radius = atof(str);
+	if (pHSData->Radius < 0)
+	{
+		lastRadius = pHSData->Radius;
+		GSSiGlobFree(&pHSData->hMask);
+		return FALSE;
+	}
 	if (!pHSData->Radius)
 		pHSData->Radius = 500;
 	if (pHSData->Radius == lastRadius)
@@ -338,7 +343,7 @@ BOOL SetHotSpotMaskWidth(LPHOTSPOTDATA	pHSData)
 	pHSData->hMask = GSSiGlobAlloc(1024, GMEM_MOVEABLE, (long)pHSData->MaskWidth * (long)pHSData->MaskWidth * 4);
 	SetupHotSpotMask(pHSData->MaskWidth, pHSData->hMask, pHSData->DecayOpt);
 
-	return rtn;
+	return TRUE;
 }
 
 void SetupHotSpotMask (short MaskWidth,HANDLE hMask,short DecayOpt)
@@ -579,7 +584,8 @@ GSSiExitProg (1320);
 	if (Weight <= 0)
 		return;
 	SetHotSpotMaskWidth(pHSData);
-
+	if (pHSData->Radius <= 0)
+		return;
 	HotSpotPoint = TranPoint (&CurPointLocD,pHSData->hTranBaseToHotSpot);
 	x = IDNINT (HotSpotPoint.x);
 	y = IDNINT (HotSpotPoint.y);

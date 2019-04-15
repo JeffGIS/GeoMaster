@@ -2590,7 +2590,7 @@ void RunStartupCommand (int opt)
 		InStartup = TRUE;
 		if (pVB)
 		{
-			if (opt == 1)
+			if (opt == 2)
 			{
 				*pVB = 0;
 				strcpy (SUC,pStr);

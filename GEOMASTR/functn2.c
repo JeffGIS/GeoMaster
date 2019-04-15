@@ -5903,7 +5903,58 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		}
                 
-	    case 1701: //$RECOVERPLTFROMRIN(pltname)
+		case 1607: //$BASETODISTFACTOR(FEETorMETERSorMILES,BasePt,ReferenceProjection)
+		{
+			double refdist = 100.0;
+			double dist;
+			double factor = 1;
+			DPOINT refPoints[2];
+
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs == 3)
+			{
+				Point = atopt(Arg[2], &Err);
+				if (!Err)
+				{
+					char saveAltProj[MAX_PATH] = "[%ALT_PROJECTION]";
+
+					ExpandText(saveAltProj);
+					FreePROJ(3);
+					SetGlobalValue("%ALT_PROJECTION", Arg[3]);
+					ConvertCoordClose();
+					ConvertCoordInit();
+
+					ConvertCoord(&Point, 1, 3);
+					if (!_fstricmp(Arg[1], "FEET"))
+					{
+						dist = ConvertAltDist(refdist, 1);
+					}
+					else if (!_fstricmp(Arg[1], "METERS"))
+					{
+						dist = ConvertAltDist(refdist, 2);
+					}
+					if (!_fstricmp(Arg[1], "MILES"))
+					{
+						dist = ConvertAltDist(refdist, 4);
+					}
+					refPoints[0] = dnewpt(Point, HALFPI / 2, dist);
+					refPoints[1] = dnewpt(Point, PY + HALFPI / 2, dist);
+					ConvertCoord(&refPoints[0], 3, 1);
+					ConvertCoord(&refPoints[1], 3, 1);
+					dist = ldistp(refPoints[0], refPoints[1]);
+					SetGlobalValue("%ALT_PROJECTION",saveAltProj);
+					FreePROJ(3);
+					ConvertCoordClose();
+					ConvertCoordInit();
+					factor = dist / 100.0;
+					ftoa(OutLoc, factor);
+				}
+			}
+			goto Rtnl;
+
+		}
+		case 1701: //$RECOVERPLTFROMRIN(pltname)
         {
               
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
@@ -5911,7 +5962,6 @@ GSSiExitProg (1350);
 				goto RtnTrue;
 			goto RtnFalse;
         }   
-        
         case 1702: //$SCREENTOCLIPBOARD(opt viewport) 
         {   
 //        	HDIB	hDIB;

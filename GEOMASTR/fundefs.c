@@ -610,8 +610,9 @@ int	GetFunctionID16 (LPSTR str)
 			if (!_fstrnicmp (str,"POINTSBETWEENMPS",16)) return 1603; 
 			if (!_fstrnicmp (str,"POINTSBETWEENPCT",16)) return 1604; 
 			if (!_fstrnicmp (str,"FILLRECTWITHGRID",16)) return 1605; 
-			if (!_fstrnicmp (str,"APPENDFILETOFILE",16)) return 1606;
-			return 0; 
+			if (!_fstrnicmp(str, "APPENDFILETOFILE", 16)) return 1606;
+			if (!_fstrnicmp(str, "BASETODISTFACTOR", 16)) return 1607;
+			return 0;
 }			
 
 int	GetFunctionID17 (LPSTR str)
