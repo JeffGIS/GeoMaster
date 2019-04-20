@@ -4870,6 +4870,26 @@ GSSiExitProg (255);
 #endif
 }
 
+double MinMaxRadius(LPMNMXCORD pBounds)
+{
+	double rtn = 0;
+	DPOINT Point1, Point2;
+	double dist1, dist2;
+
+	Point1.x = pBounds->xmn;
+	Point1.y = pBounds->ymn;
+	Point2.x = pBounds->xmx;
+	Point2.y = pBounds->ymx;
+	dist1 = ldistp(Point1, Point2);
+	Point1.x = pBounds->xmn;
+	Point1.y = pBounds->ymx;
+	Point2.x = pBounds->xmx;
+	Point2.y = pBounds->ymn;
+	dist2 = ldistp(Point1, Point2);
+	rtn = fmax(dist1, dist2) / 2;
+	return rtn;
+}
+
 DPOINT MinMaxMidPointD (LPMNMXCORD pBounds)
 #if ENABLETRACE
 {GSSiEnterProg (256);

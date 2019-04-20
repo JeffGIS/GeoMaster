@@ -331,7 +331,7 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
  _fstrcpy(CmdLine,lpszCmdLine);  
  if (First)
  {  
- //MessageBox (0,lpszCmdLine,0,MB_OK);
+//MessageBox (0,lpszCmdLine,"First",MB_OK);
 //	sprintf (str,"$TEXTTOCLIPBOARD(%s)",CmdLine);
 //	ProcessText (str);
 	InfoBoxInit(&TAGBox);
@@ -408,16 +408,21 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
 	 	}
 	 	*lpSpace = 0;
 	 }
-	 if (!ForceConfig && !App && !strstr (CmdLine,".tmp") && !strstr (CmdLine,".TMP"))
+	// MessageBox(0, lpszCmdLine, "Second", MB_OK);
+
+	// MessageBox(0, CmdLine, "CmdLine", MB_OK);
+	 if (!ForceConfig && !App && !strstr(CmdLine, ".tmp") && !strstr(CmdLine, ".TMP"))
 	 {
-		strcpy (str,"[%USERDIR]geomastr.ini");
-		ExpandText (str);
-		GetPrivateProfileString ("User","DefaultConfig",CmdLine,CfgName,255,str);
-		//if (!ExistFile (CfgName))
-		//	strcpy (CfgName,CmdLine);
+		 strcpy(str, "[%USERDIR]geomastr.ini");
+		 ExpandText(str);
+		 GetPrivateProfileString("User", "DefaultConfig", CmdLine, CfgName, 255, str);
+		 //if (!ExistFile (CfgName))
+		 //	strcpy (CfgName,CmdLine);
 	 }
-	 else if (!strstr (CmdLine,".tmp") && !strstr (CmdLine,".TMP"))
-		strcpy (CfgName,CmdLine); 
+	 else if (!strstr(CmdLine, ".tmp") && !strstr(CmdLine, ".TMP"))
+		 strcpy(CfgName, CmdLine);
+	 else if (ExistFile(CmdLine))
+		 strcpy(CfgName, CmdLine);
 	 else
 	 {
 		GetTempPath (MAX_PATH,CfgName); 
@@ -451,28 +456,37 @@ BOOL ProcessCommandLine (LPSTR lpszCmdLine)
 	 	HFILE	Fid;
 		LPSTR	pPar;
 		BOOL	SaveAllowCache = AllowCache;
+		LPSTR   pSpace = strstr(CfgName, " /");
+		//MessageBox (0,CfgName,"CfgName",MB_OK);
 
-//		MessageBox (0,CfgName,0,MB_OK);
 		AllowCache = FALSE;
+		if (pSpace)
+			*pSpace = 0;
 	 	_fstrcpy (TempName,CfgName);
+		if (pSpace)
+			*pSpace = ' ';
 	 	Fid = GSSiOpenFile (TempName,0,OF_READ);
 		AllowCache = SaveAllowCache;
 		if (Fid != HFILE_ERROR)
 		{
-	 		BigRead (Fid,CfgName,MAX_PATH);
-			if ((pPar = strrchr (CfgName,'(')))
+			if (BigRead(Fid, (HPSTR)&len, 4) == 4)
 			{
-				*pPar++ = 0;
-				hWndLinkedTo = (HWND)atol (pPar);
+				BigRead(Fid, CfgName, len);
+				CfgName[len] = 0;
+				if ((pPar = strrchr(CfgName, '(')))
+				{
+					*pPar++ = 0;
+					hWndLinkedTo = (HWND)atol(pPar);
+				}
+				if (BigRead(Fid, (HPSTR)&len, 4) == 4)
+				{
+					hSavedZooms = GSSiGlobAlloc(1527, GMEM_MOVEABLE, len);
+					pNumSavedViews = (LPSHORT)GlobalLock(hSavedZooms);
+					BigRead(Fid, (HPSTR)pNumSavedViews, len);
+					GlobalUnlock(hSavedZooms);
+					ForceBounds = TRUE;
+				}
 			}
-	 		if (BigRead (Fid,(HPSTR)&len,4) == 4)
-	 		{
-				hSavedZooms = GSSiGlobAlloc (1527,GMEM_MOVEABLE,len);
-				pNumSavedViews = (LPSHORT)GlobalLock (hSavedZooms);
-				BigRead (Fid,(HPSTR)pNumSavedViews,len);
-				GlobalUnlock (hSavedZooms);     
-				ForceBounds = TRUE;
-	 		}
 	 		GSSiClose2 (&Fid);
 	 		GSSiRemove (TempName);
 		}
@@ -1425,7 +1439,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	LPSTR keyloc;
 	BOOL haveKey = FALSE;
 	CreatePrintBitmap(0);
-//	MessageBox(0, lpszCmdLine, 0, MB_OK);
+	//MessageBox(0, lpszCmdLine, "WinMain", MB_OK);
 	//loadColors();
 	//loadColorChart();
 	//testConvertBitmapToPoly("C:\\Temp\\AreaTests\\test_100102158.bmp");
@@ -1634,7 +1648,7 @@ SetOldStructSizes ();
  time (&SystemStartTime);
 //EnableTrace=2;
  hInst = hInstance; 
-// MessageBox (0,lpszCmdLine,0,MB_OK);  
+ //MessageBox (0,lpszCmdLine,"WinMainGeoMas",MB_OK);  
 // if (OFS_MAXPATHNAME != 256)
 //	 MessageBox (0,"OFS_MAXPATHNAME is not 256",0,MB_ICONEXCLAMATION);
 ii=_WIN32_WINNT;
@@ -2382,7 +2396,9 @@ SetLastMessage(Message,wParam);
   if (Message == GSSI_GPSwnd)
   	GPSInputWnd = (HWND)lParam;
   if (Message == GF_CONNECT_PROCESS)
-	  AddConnectedProcess ((HWND)wParam,lParam);
+	  AddConnectedProcess((HWND)wParam, lParam);
+  if (Message == GF_DISCONNECT_PROCESS)
+	  RemoveConnectedProcess((HWND)wParam);
 #ifndef	NDEBUG
   
   if (Message == WM_COMMAND && LOWORD (wParam) == IDM_DISPLAY_VEHICLES)
@@ -6199,6 +6215,9 @@ Close:   HaltMapDisplay(TRUE,FALSE);
          {
 			 CloseMap (FALSE);
 			 CloseRefIndex (TRUE);
+			 if (hWndLinkedTo)
+				 PostMessage(hWndLinkedTo, GF_DISCONNECT_PROCESS, (WPARAM)hWndMain, 0);
+
 	         QuitGraphics();    
 			 hWndMain = 0;
 	         //DdeBye();

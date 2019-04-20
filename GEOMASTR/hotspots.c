@@ -388,7 +388,7 @@ void SetupHotSpotMask (short MaskWidth,HANDLE hMask,short DecayOpt)
 						d = 0;
 						break;
 				}
-				*pMask = max (0,IDNINT(((HalfMaskWidth - d) / HalfMaskWidth) * 1000)); 
+				*pMask = max (1,IDNINT(((HalfMaskWidth - d) / HalfMaskWidth) * 1000)); 
 			}
 			else
 				*pMask = 0;

@@ -1140,8 +1140,13 @@ long ConvertPoint (LPSTR CvtFile,LPDPOINT Point,int Direction)
 	 {
 		 ProjChanged = TRUE;
 		 _fstrcpy (project,CvtFile);
-		 if ((lpDot=_fstrrchr(project,'.')))
-			*lpDot = 0;
+		 ExpandText(project);
+		 lpDot = strrchr(project, '.');
+		 if (lpDot)
+		 {
+			 if (stricmp (lpDot,".cvt"))
+				*lpDot = 0;//not sure what this is for
+		 }
 		 SetGlobalValue("%ALT_PROJECTION",project);
 		 ConvertCoordClose ();
 		 if ((rtn=ConvertCoordInit()))

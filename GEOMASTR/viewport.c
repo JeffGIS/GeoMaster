@@ -2277,11 +2277,30 @@ void CloseConnectedProcesses (void)
 	return;
 }
 
-BOOL AddConnectedProcess (HWND hProcess,int opt)
+BOOL AddConnectedProcess(HWND hProcess, int opt)
 {
-	if (NumConnectedProcesses+1 >= MAX_CONNECTED_PROCESSES)
+	if (NumConnectedProcesses + 1 >= MAX_CONNECTED_PROCESSES)
 		return FALSE;
 	hWndConnected[NumConnectedProcesses++] = hProcess;
+	Sleep(2000);
+	ZoomConnectedProcesses(FALSE);
+	return TRUE;
+}
+BOOL RemoveConnectedProcess(HWND hProcess)
+{
+	HWND newCP[MAX_CONNECTED_PROCESSES];
+	int  newnCP = 0;
+
+	for (int i = 0; i < NumConnectedProcesses; i++)
+	{
+		if (hWndConnected[i] != hProcess)
+			newCP[newnCP++] = hWndConnected[i];
+	}
+	NumConnectedProcesses = newnCP;
+	for (int i = 0; i < NumConnectedProcesses; i++)
+	{
+		hWndConnected[i] = newCP[i];
+	}
 	return TRUE;
 }
 
@@ -2322,9 +2341,10 @@ void ZoomConnectedProcesses (BOOL Remove)
 	static	UINT	ID=0;
 	static	char	ConFile[MAX_PATH] = { 0 };
 	char	TempDir[MAX_PATH];
-	char	Cmd[256];
+	char	DataLoc[MAX_PATH] = "[%DL]";
+	char	Cmd[512];
 	OFSTRUCTGM	OFStruct;
-	
+
 	if (!NumConnectedProcesses)
 		return;
 	if (Remove)
@@ -2339,12 +2359,16 @@ void ZoomConnectedProcesses (BOOL Remove)
 		ID = GetTempFileName (TempDir,"gml",0,ConFile); 
 	}
 	Fid = OpenFileGM (ConFile,&OFStruct,OF_CREATE);
-	sprintf (Cmd,"$ZOOM(POINTANDSCALE,%f %f,%f,F,COMMAND)",CurView->MidPointW.x,CurView->MidPointW.y,CurView->Scale);
+	ExpandText(DataLoc);
+	sprintf(Cmd, "$ZOOM(FROMCONNECTEDPROCESS,%f %f,%f,%s)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale,DataLoc);
+	//sprintf(Cmd, "$ZOOM(POINTANDSCALE,%f %f,%f,F,COMMAND)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 	_lwrite (Fid,Cmd,strlen(Cmd)+1);
 	_lclose (Fid);
 
-	for (i=0;i<NumConnectedProcesses;i++)
-		PostMessage(hWndConnected[i], GF_PROCESS_CONNECTED_CMD, ID,0); 
+	for (i = 0; i < NumConnectedProcesses; i++)
+	{
+		PostMessage(hWndConnected[i], GF_PROCESS_CONNECTED_CMD, ID, 0);
+	}
 	return;
 }    
 

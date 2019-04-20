@@ -940,6 +940,7 @@ void SetPromptDlg (UINT PromptID);
 POINT MinMaxMidPoint (LPMINMAX pBounds);
 POINT MinMaxMidPointL (LPMNMXCORL pBounds);
 DPOINT MinMaxMidPointD (LPMNMXCORD pBounds);
+double MinMaxRadius(LPMNMXCORD pBounds);
 MNMXCORD FactorBounds (LPMNMXCORD pRect,double Factor);
 DPOINT SubtractPoint (LPDPOINT pPoint1,LPDPOINT pPoint2);
 int	SaveCurView (int opt);

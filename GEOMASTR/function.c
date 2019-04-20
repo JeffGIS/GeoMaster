@@ -2643,7 +2643,8 @@ SetVis:
 					 	   BITMAP,bitmap path name)  zooms to bitmap minmax 
 					 	   SCALE,scale or REMOVE 
 					 	   POINT,point,immediate
-					 	   CIRCLE,point,distance,immediate                                         */
+					 	   CIRCLE,point,distance,immediate
+						   FROMCONNECTEDPROCESS,point,scale,fromdir)*/
 		{	   
 			BOOL	FromLimits, Immediate; 
 			
@@ -2931,18 +2932,51 @@ SetVis:
 				SetCurView ( SetVPFromName (Arg[5],&Err)); 
 				ZoomToPointAndDist (Point,Offset,Immediate); 
 			}
-			else if (!_fstricmp(Arg[1],"POINTANDSCALE"))
-			{   
-				Point = atopt (Arg[2],&Err);
+			else if (!_fstricmp(Arg[1], "POINTANDSCALE"))
+			{
+				Point = atopt(Arg[2], &Err);
 				if (Err)
-					goto RtnFalse; 
-				Offset = atobasedist (Arg[3],&Err);
+					goto RtnFalse;
+				Offset = atobasedist(Arg[3], &Err);
 				if (!stricmp(Arg[4], "-1"))
 					Immediate = -1;
 				else
 					Immediate = atob(Arg[4]);
-				SetCurView ( SetVPFromName (Arg[5],&Err)); 
-				ZoomToPointAndScale (Point,Offset,Immediate);
+				SetCurView(SetVPFromName(Arg[5], &Err));
+				ZoomToPointAndScale(Point, Offset, Immediate);
+			}
+			else if (!_fstricmp(Arg[1], "FROMCONNECTEDPROCESS"))
+			{
+				char fromProjection[MAX_PATH];
+				double Scale;
+
+				Point = atopt(Arg[2], &Err);
+				if (Err)
+					goto RtnFalse;
+				Scale = atof(Arg[3]);
+				if (*Arg[4])
+				{
+					double factor = 1;
+					DPOINT points[2];
+					double dist[2];
+
+					sprintf(fromProjection, "%sbaseproj.cvt", Arg[4]);
+					points[0].x = Point.x - 1;
+					points[0].y = Point.y - 1;
+					points[1].x = Point.x + 1;
+					points[1].y = Point.y + 1;
+					dist[0] = ldistp(points[0], points[1]);
+					ConvertPoint(fromProjection, &Point, 1);
+					ConvertPoint(fromProjection, &points[0], 1);
+					ConvertPoint(fromProjection, &points[1], 1);
+					dist[1] = ldistp(points[0], points[1]);
+					factor = dist[0] / dist[1];
+					Scale *= factor;
+				}
+				SetCurView(SetVPFromName("COMMAND", &Err));
+				if (!Scale)
+					Scale = CurView->Scale;
+				ZoomToPointAndScale(Point, Scale, TRUE);
 			}
 			else
 			{

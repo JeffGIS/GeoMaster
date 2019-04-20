@@ -1142,6 +1142,7 @@ UINT_PTR CALLBACK OFNHookProcOldStyle(HWND hDlg, UINT message,
 		  if (SendDlgItemMessage (hDlg,IDC_LINKZOOM,BM_GETCHECK,0,0L))
 		  {
 			  SendDlgItemMessage (hDlg,IDC_RETAINZOOM,BM_SETCHECK,TRUE,0L); 
+			  SendDlgItemMessage(hDlg, IDC_STARTINNEWSESSION, BM_SETCHECK, TRUE, 0L);
 			  EnableWindow (GetDlgItem(hDlg,IDC_RETAINZOOM),FALSE);
 		  }
 		  else

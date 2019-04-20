@@ -378,7 +378,8 @@ C-------------------------------        */
        int  n=0, SETUNITS;   
 	   char INNAME[MAX_PATH * 4];
        LPSTR    lpPtr, lpCVT, pBeg, lpGoogle;
-      
+	   BOOL fromOtherDL = FALSE;
+
 	   if (!ID)
 		   ii = 1;
 
@@ -410,9 +411,17 @@ C-------------------------------        */
 		   goto Top;
 	   }
 
-       _fstrcpy(NAME,INNAME); 
+       strcpy(NAME,INNAME); 
 	   ExpandText (NAME);
-       _fstrupr (NAME);   
+       strupr (NAME);   
+	   if (ExistFile(NAME))
+	   {
+		   char DL[MAX_PATH] = "[%DL]";
+		   ExpandText(DL);
+		   strupr(DL);
+		   if (strncmp(NAME, DL, strlen(DL)))
+			   fromOtherDL = TRUE;
+	   }
        if ((lpCVT = _fstrstr (NAME,".CVT")))
        		*lpCVT = 0;
        XYUNITS[0] = '\0';
@@ -421,7 +430,7 @@ C-------------------------------        */
 		   pBeg++;
 	   else
 		   pBeg = NAME;
-       if (!_fstricmp(pBeg,"BASEPROJ") && ID != 1)
+       if (!fromOtherDL && !_fstricmp(pBeg,"BASEPROJ") && ID != 1)
        {     
        		IS_BASE[ID]=TRUE; 
        		PRJ_TYPE[ID]=PRJ_TYPE[1];

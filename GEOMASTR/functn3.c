@@ -3127,6 +3127,7 @@ GotCloseFilehSQL:
 					// $BOUNDS(TRANFILE,tranfile,direction (F(default)orR)  
 					// $BOUNDS(WIDTH,BOUNDS) returns width
 					// $BOUNDS(HEIGHT,BOUNDS) returns height  
+					// $BOUNDS(RADIUS,BOUNDS) radius of circle that encompasses bounds  
 					// $BOUNDS(MID,BOUNDS) returns midpoint 
 					// $BOUNDS(MIN,BOUNDS) returns min point  
 					// $BOUNDS(MAX,BOUNDS) returns max point 
@@ -3240,13 +3241,22 @@ GotCloseFilehSQL:
 				ftoa (OutLoc,RVal);
 				goto Rtnl;
 			}
-			else if (!_fstricmp (Arg[1],"HEIGHT"))
-			{   
-				Bounds = atobounds (Arg[2],&Err);
-				if (Err || !ValidBounds (&Bounds))
-					goto RtnFalse;  
+			else if (!_fstricmp(Arg[1], "HEIGHT"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
 				RVal = Bounds.ymx - Bounds.ymn;
-				ftoa (OutLoc,RVal);
+				ftoa(OutLoc, RVal);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "RADIUS"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				RVal = MinMaxRadius (&Bounds);
+				ftoa(OutLoc, RVal);
 				goto Rtnl;
 			}
 			else if (!_fstricmp (Arg[1],"MID"))
@@ -5152,32 +5162,40 @@ GotCloseFilehSQL:
 			BOOL 	SaveTrackingStatus = TrackingStatus, ForceOpen;
 
 			HaltMapDisplay (TRUE,TRUE);	
-			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);   
+			nArgs = GetFunArgs (Args,Arg,7,&hMem, pBrkPt, bpOffset, bpLen);   
 			ForceBounds = FALSE;
 			if (!SaveZooms (0))
 			    DestroySavedZooms ();
 			if (!*Arg[1])
 			{
-				BOOL	StartInNew, RetainZoom, LinkZoom;
+				BOOL	StartInNew, RetainZoom=TRUE, LinkZoom=TRUE;
 				LPSTR	pBS,pBS1;
 				char	modulePath[MAX_PATH];
 				
 				_fstrcpy (Arg[1],Arg[2]);
 				if ((pEnd = _fstrrchr (Arg[2],'\\')))
 					*pEnd = 0;
-				if (!GSSiGetGMCName (hWndMain,Arg[1],Arg[2],"Load GeoMaster Configuration",&StartInNew,&RetainZoom,&LinkZoom,Arg[3],Arg[4]))
-			        goto RtnFalse;
+				if (!*Arg[5])
+				{
+					if (!GSSiGetGMCName(hWndMain, Arg[1], Arg[2], "Load GeoMaster Configuration", &StartInNew, &RetainZoom, &LinkZoom, Arg[3], Arg[4]))
+						goto RtnFalse;
+				}
+				else
+					StartInNew = TRUE;
 			    ForceBounds = RetainZoom;   
 			    if (StartInNew)
-			    {   
-					GSSiGetTempFileName (0,"gmc",0,Arg[6]);  
-					Fid = GSSiOpenFile (Arg[6],0,OF_CREATE);
+				{
+					long len;
+					GSSiGetTempFileName (0,"gmc",0,Arg[7]);  
+					Fid = GSSiOpenFile (Arg[7],0,OF_CREATE);
 					if (LinkZoom)
 						sprintf (strchr(Arg[1],0),"(%ld)",(ULONG)hWndMain);
-					BigWrite (Fid,(HPSTR)Arg[1],MAX_PATH,-1); 
+					len = strlen(Arg[1]);
+					BigWrite(Fid, (HPSTR)&len, 4, -1);
+					BigWrite (Fid,(HPSTR)Arg[1],len,-1); 
 					if (RetainZoom && hSavedZooms)
 					{   
-						long	len=GlobalSize (hSavedZooms);
+						len=GlobalSize (hSavedZooms);
 					    LPSHORT pNumSavedViews = (LPSHORT)GlobalLock (hSavedZooms); 
 					    
 				    	BigWrite (Fid,(HPSTR)&len,4,-1);
@@ -5186,15 +5204,15 @@ GotCloseFilehSQL:
 					}
 					GSSiClose2 (&Fid);
 					EscapeFunction (TRUE);
-					if ((pBS1 = strrchr (Arg[6],'\\')))
+					if ((pBS1 = strrchr (Arg[7],'\\')))
 						*pBS1 = 0;
-					pBS = strrchr (Arg[6],'\\')+1;
+					pBS = strrchr (Arg[7],'\\')+1;
 					if (pBS1)
 						*pBS1 = '\\';
-					GetModuleFileName(NULL,modulePath,MAX_PATH);
-	           		sprintf (Arg[5],"$EXECUTE(%s %s)",modulePath,pBS);
-	           		//sprintf (Arg[5],"$EXECUTE([%%DL]gmloader.exe %s)",pBS);
-	           		ProcessText (Arg[5]); 
+					//GetModuleFileName(NULL,modulePath,MAX_PATH);
+	           		sprintf (Arg[6],"$SESSION(CREATE,GeoMaster %s,,,%s)",Arg[7],Arg[5]);
+	           		//sprintf (Arg[6],"$EXECUTE([%%DL]gmloader.exe %s)",pBS);
+	           		ProcessText (Arg[6]); 
 	           		goto RtnTrue;
 			    }
 		    }
@@ -7096,7 +7114,7 @@ HaveVP:;
 
 			}
 
-		case 778: //$SESSION(CREATE,commandline,newwindowrect,startupzoom)
+		case 778: //$SESSION(CREATE,commandline,newwindowrect,startupzoom,startlocation)
 				  //$SESSION(STOP,hwnd
 				  //$SESSION(COMMAND,hwnd
 			{
@@ -7134,6 +7152,10 @@ HaveVP:;
 					//ExpandText(Arg[2]);
 					if (*TestFileLocation)
 						sprintf (strchr(Arg[2],0)," [%%TESTDL]=%s;",TestFileLocation);
+					else if (*Arg[5] && FileType (Arg[5]) == 2)
+					{
+						strcpy(startIn, Arg[5]);
+					}
 					ExpandText(startIn);
 					if (!*startIn)
 						pstartIn = NULL;

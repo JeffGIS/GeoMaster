@@ -1030,6 +1030,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 	char testFile[MAX_PATH + 128];
 	int iMenuOpt = 60000;
 	LPSTR pInsertOpts;
+	BOOL isMacroFile = FALSE;
 
 	if (*phMenu)
 	    DestroyMenu (*phMenu);  
@@ -1148,6 +1149,8 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			if (!strnicmp(&pFile[loc + iend], ")", 1))
 			{
 				int i = loc + iend;
+				if (loc > 1 && !strnicmp(&pFile[loc - 3], "$M(", 3))
+					isMacroFile = TRUE;
 				while (i-- > loc)
 				{
 					if (pFile[i] == '(')
@@ -1178,11 +1181,19 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 			pBeg = testFile;
 
 		_strupr(testFile);
-		if (!strncmp(pBeg, "ODBC|", 5) || FileType(pBeg) == 1 || strstr(pBeg, ".GDB") || strstr(pBeg, ".SLT") || strstr(pBeg, ".MDB"))
+		if (isMacroFile || !strncmp(pBeg, "ODBC|", 5) || FileType(pBeg) == 1 || strstr(pBeg, ".GDB") || strstr(pBeg, ".SLT") || strstr(pBeg, ".MDB"))
 		{
 			HANDLE hDB=0;
-			int itype = OpenDataFile (testFile,"",OF_READ,&hDB);
-
+			int itype = 0;
+			
+			if (!isMacroFile)
+				itype = OpenDataFile(testFile, "", OF_READ, &hDB);
+			else
+			{
+				char file[MAX_PATH];
+				sprintf(file, "[%%DL]macros\\%s.txt", testFile);
+				strcpy(testFile, file);
+			}
 			if (itype == GMTEXT_DATAFILE ||
 				!itype && (StrStrI(testFile, ".txt") || StrStrI(testFile, ".sql")))
 			{

@@ -262,13 +262,13 @@ void CreateBigMem (void)
 	AddMatchDir = NetworkDir + MAX_PATH;
 
 //pathnames
-	memlen = MAX_PATH * 28;   
+	memlen = MAX_PATH * 29;   
 	hBigMem3 = GSSiGlobAlloc (1299,GHND,memlen);
  	PltName = GlobalLock (hBigMem3);
 	PickName = PltName + MAX_PATH;
 	PickDirectory = PickName + MAX_PATH;
 	CfgName = PickDirectory + MAX_PATH;
-	Lev0CfgName = CfgName + MAX_PATH;
+	Lev0CfgName = CfgName + MAX_PATH*2;
 	AutoExportName = Lev0CfgName + MAX_PATH;
 	AutoMapIndexName = AutoExportName + MAX_PATH;
 	PMDataFile = AutoMapIndexName + MAX_PATH;
