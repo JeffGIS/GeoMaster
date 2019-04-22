@@ -2937,7 +2937,12 @@ Exit:
 	if (Final)
 		ResetShowOnlyVis ();
 	if (CurrentConfig)
+	{
 		useGDIPlus = FALSE;
+		firstDisplayComplete = TRUE;
+		if (*delayedProcessConnectedCommand)
+			PostMessage(hWndMain, GF_PROCESS_DELAYED_CONNECTED_CMD, 0, 0);
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (440);

@@ -1679,6 +1679,11 @@ char	CurrentZoomListEntry[256] = { 0 };
 RECT	MonitorRectangle[MAX_MONITORS];
 char	GraphicsMacro[MAX_PATH] = { 0 };
 char	smallMessageText[MAX_SMALL_MESSAGE + 1] = { 0 };
+BOOL	fromConnectedProcess = FALSE;
+char	delayedProcessConnectedCommand[512] = { 0 };
+HWND	hWndLinkedTo = 0;
+BOOL	firstDisplayComplete = FALSE;
+
 int		ii;
 
 

@@ -2272,8 +2272,8 @@ BOOL AddLayerToViewport (LPVIEWPORT pVP,LPSTR LayerName,LPSTR LayerPath)
 
 void CloseConnectedProcesses (void)
 {
-	if (!NumConnectedProcesses)
-		return;
+	for (int i = 0; i < NumConnectedProcesses; i++)
+		PostMessage(hWndConnected[i],WM_DESTROY,0,0);
 	return;
 }
 
@@ -2329,7 +2329,10 @@ BOOL ProcessConnectedCommand (UINT ID)
 	pMem = GlobalLock (hMem);
 	_lread (Fid,pMem,lMem);
 	_lclose (Fid);
-	ProcessText (pMem);
+	if (firstDisplayComplete)
+		ProcessText(pMem);
+	else
+		strncpy(delayedProcessConnectedCommand, pMem,sizeof(delayedProcessConnectedCommand)-1);
 	GSSiGlobUlFree (&hMem);
 	return TRUE;
 }
@@ -2345,14 +2348,16 @@ void ZoomConnectedProcesses (BOOL Remove)
 	char	Cmd[512];
 	OFSTRUCTGM	OFStruct;
 
-	if (!NumConnectedProcesses)
-		return;
 	if (Remove)
 	{
 		if (ID)
-			GSSiRemove (ConFile);
+			GSSiRemove(ConFile);
 		return;
 	}
+	if (fromConnectedProcess)
+		return;
+	if (!NumConnectedProcesses && !hWndLinkedTo)
+		return;
 	if (!ID)
 	{
 		GetTempPath (MAX_PATH,TempDir);
@@ -2365,7 +2370,9 @@ void ZoomConnectedProcesses (BOOL Remove)
 	_lwrite (Fid,Cmd,strlen(Cmd)+1);
 	_lclose (Fid);
 
-	for (i = 0; i < NumConnectedProcesses; i++)
+	if (hWndLinkedTo)
+		PostMessage(hWndLinkedTo, GF_PROCESS_CONNECTED_CMD, ID, 0);
+	else for (i = 0; i < NumConnectedProcesses; i++)
 	{
 		PostMessage(hWndConnected[i], GF_PROCESS_CONNECTED_CMD, ID, 0);
 	}

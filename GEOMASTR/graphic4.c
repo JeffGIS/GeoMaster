@@ -1802,6 +1802,7 @@ LPDEBUGARRAY	pDB=0;   */
 		if (ipnt && StartElement > 0)
 			ipnt += StartElement;
 		StartElement = -1;
+		if (FidMap != HFILE_ERROR)
         while (ipnt && ((LPSTR)ipnt - BeginSeg) <= LenSeg && *ipnt != 0 && ContinueProcessing)
         {   
 			DWORD ptime = GetTickCount();
@@ -1842,7 +1843,8 @@ LPDEBUGARRAY	pDB=0;   */
 					nPolyPoints = SavenPolyPoints;
 				}
 
-		      switch (*Pcode)
+				if (FidMap != HFILE_ERROR)
+				switch (*Pcode)
 			  {   
 	            case 2: /* pen up */
 		 		{

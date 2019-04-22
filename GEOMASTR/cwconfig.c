@@ -41,7 +41,6 @@ static char selectedStartCmd[1024];
 static MSG	pmsg[100]={0};
 static	int	activeCount=0;
 static WINDOWPOS lastWP={0};
-static HWND		hWndLinkedTo=0;
 static HBITMAP	hBMMove=0;
 static RECT		MoveStartRect, MoveEndRect;
 static DPOINT	GPSLoc;
@@ -3030,10 +3029,13 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	     } 
          break;
    
-	case GF_PROCESS_CONNECTED_CMD:
+	case GF_PROCESS_CONNECTED_CMD:		
 		ProcessConnectedCommand(wParam);
 		break;
-
+	case GF_PROCESS_DELAYED_CONNECTED_CMD:
+		ProcessText(delayedProcessConnectedCommand);
+		*delayedProcessConnectedCommand = 0;
+		break;
 	case PROCESS_COMMAND_MACRO:
 		ProcessText(CommandMacro);
 		break;
@@ -6217,7 +6219,7 @@ Close:   HaltMapDisplay(TRUE,FALSE);
 			 CloseRefIndex (TRUE);
 			 if (hWndLinkedTo)
 				 PostMessage(hWndLinkedTo, GF_DISCONNECT_PROCESS, (WPARAM)hWndMain, 0);
-
+			 CloseConnectedProcesses();
 	         QuitGraphics();    
 			 hWndMain = 0;
 	         //DdeBye();

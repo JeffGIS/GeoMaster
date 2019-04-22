@@ -2973,10 +2973,14 @@ SetVis:
 					factor = dist[0] / dist[1];
 					Scale *= factor;
 				}
+				if (NumViewportsArray[1])
+					SetConfig(1);
 				SetCurView(SetVPFromName("COMMAND", &Err));
 				if (!Scale)
 					Scale = CurView->Scale;
+				fromConnectedProcess = TRUE;
 				ZoomToPointAndScale(Point, Scale, TRUE);
+				fromConnectedProcess = FALSE;
 			}
 			else
 			{

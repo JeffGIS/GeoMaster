@@ -7471,6 +7471,7 @@ GSSiExitProg (86);
     CurTheme = SaveTheme;
 	if (saveScreen)
 		SaveFullWindowBitmap (0); 
+	firstDisplayComplete = TRUE;
 {
 #if ENABLETRACE
 GSSiExitProg (86);
