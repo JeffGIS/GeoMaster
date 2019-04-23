@@ -5096,7 +5096,27 @@ GotCloseFilehSQL:
 			DisplayPromptText(0, Arg[1]);
 			goto RtnTrue;
 		}
-
+		case 656: // $VPNAME(FROMTHEMETITLE,title)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (!stricmp(Arg[1], "FROMTHEMETITLE"))
+			{
+				for (int iview = 0; iview < *pNumViewports; iview++)
+				{
+					if (pViewports[iview]->pTheme)
+					{
+						if (!stricmp(Arg[2], pViewports[iview]->pTheme->Title))
+						{
+							strcpy(OutLoc, pViewports[iview]->Name);
+							break;
+						}
+					}
+				}
+			}
+			goto Rtnl;
+		}
+		
 		case 701: /* $LOADVIS(visibility_file,Optional VPName) Load visibility file */
 		{
 			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
