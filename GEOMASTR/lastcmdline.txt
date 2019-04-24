@@ -1,2 +1,2 @@
-configs\basic1.gmc /F /NOCACHE /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;  
+configs\prioritylocs.gmc /F /NOCACHE /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;  
 h:\pcviewer

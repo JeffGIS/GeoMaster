@@ -273,7 +273,15 @@ BOOL glblUnlock(HANDLE h)
 	return GlobalUnlock(h);
 }
 
+void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size)
+{
+	return malloc(_Size);
+}
 
+void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDOVERFLOW size_t _Size)
+{
+	return calloc(_Count,_Size);
+}
 LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 {
 	LPVOID	pntr;

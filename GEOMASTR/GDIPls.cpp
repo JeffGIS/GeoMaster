@@ -23,7 +23,7 @@ extern "C" int CurvePointsD(LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts
 static ULONG_PTR           gdiplusToken=0;
 using namespace Gdiplus;
 
-void testit(HDC hdc)
+/*void testit(HDC hdc)
 {
 	{
 		using namespace Gdiplus;
@@ -31,7 +31,7 @@ void testit(HDC hdc)
 		Gdiplus::Graphics graphic(hdc);
 		DPOINT BP = { 150, 150 }, POC = { 550, 550 }, EP = { 150, 150 };
 		long nPnt=0;
-		LPDPOINT lpPoints=(LPDPOINT)malloc(4096*32);
+		LPDPOINT lpPoints;// = (LPDPOINT)malloc(4096 * 32);
 		LPDPOINT lpPointsInit = lpPoints;
 		double BackAZ;
 		double CurveExpansionFactor = 1;
@@ -92,7 +92,7 @@ extern "C" void testGDIP(HDC hdc)
 	GdiplusShutdown(gdiplusToken);
 
 	return;
-}
+}*/
 
 extern "C" void AAShutDown(void)
 {

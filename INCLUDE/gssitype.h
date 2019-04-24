@@ -3986,7 +3986,11 @@ UINT_PTR WINAPI GSSiSetTimer( __in_opt HWND hWnd,__in UINT_PTR nIDEvent,__in UIN
 #define KillTimer	GSSiKillTimer
 BOOL WINAPI GSSiKillTimer(__in_opt HWND hWnd,__in UINT_PTR uIDEvent);
               
-#if CHECKMEM        
+#if CHECKMEM   
+#define malloc GSSimalloc
+void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size);
+#define calloc GSSicalloc
+void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDOVERFLOW size_t _Size);
 #define PostMessageA GSSiPOSTMESSAGE 
 BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
 #define	GlobalLock	GSSiGLOBALLOCK
