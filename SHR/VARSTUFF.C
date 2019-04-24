@@ -3613,6 +3613,9 @@ GSSiExitProg (532);
 		case 401:
 			strncpy0(GraphicsMacro, Value, sizeof(GraphicsMacro) - 1);
 			break;
+		case 402:
+			MAXHOTSPOTDIMENSION = atol(Value);
+			break;
 		default:
  			break;
 	}
@@ -4033,6 +4036,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%PROJECTBOUNDS", 399, FALSE);
 	AllocateTypeVar("%IPADINSERVER", 400, FALSE);
 	AllocateTypeVar("%GRAPHICSMACRO", 401, FALSE);
+	AllocateTypeVar("%HOTSPOTGRIDSIZE", 402, FALSE);
 
 	
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5255,7 +5259,10 @@ GSSiExitProg (533);
 		break;
 		case 401:
 			strcpy(OutStr, GraphicsMacro);
-		break;
+			break;
+		case 402:
+			ltoa(MAXHOTSPOTDIMENSION, OutStr,10);
+			break;
 	}
 	GlobalUnlock (hGlobal);
 {
