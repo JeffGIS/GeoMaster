@@ -1513,7 +1513,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		ProcessCommandLine("");
 		return WinMainGMDoc(hInstance, hPrevInstance, cmdLine, SW_MAXIMIZE);
 	}
-	else
+	else 
 	{
 		//if (!haveKey)
 		//	return 0;

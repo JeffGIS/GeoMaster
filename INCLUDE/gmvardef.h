@@ -1683,6 +1683,7 @@ BOOL	fromConnectedProcess = FALSE;
 char	delayedProcessConnectedCommand[512] = { 0 };
 HWND	hWndLinkedTo = 0;
 BOOL	firstDisplayComplete = FALSE;
+int		MAXHOTSPOTDIMENSION = 2500;
 
 int		ii;
 

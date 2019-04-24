@@ -9,8 +9,6 @@ static	char	ViewportStatusMessages[MAX_VIEWPORTS][128];
 
 #include "gmextern.h"
 
-int MAXHOTSPOTDIMENSION = 2500;
-
 
 /*					ThemeHighlightKey.Class = WantClass;
 					ThemeHighlightKey.Refno = LONG_MIN;

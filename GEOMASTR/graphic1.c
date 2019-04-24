@@ -7558,7 +7558,8 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
  	 HANDLE	handle;   
  	 HCURSOR	hcurSave;
  	 BOOL	SaveURT = UseRefOrTAGIndex;
-	
+	 BOOL	saveRedisplayOnly = RedisplayOnly;
+
 	 UseRefOrTAGIndex=FALSE;		     	 
 	 TimeRangeBeg = 0;
 	 TimeRangeEnd = LONG_MAX;
@@ -7591,7 +7592,9 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 	 IgnoreSelectVP = TRUE; 
 	 CreateStatusWind (hWndMain,1,"Getting List of Files");
      hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
-	 RedisplayViewport(TRUE,TRUE); 
+	 RedisplayOnly = FALSE;
+	 RedisplayViewport(TRUE, TRUE);
+	 RedisplayOnly = saveRedisplayOnly;
 	 GSSiSetCursor(hcurSave);
 	 IgnoreSelectVP = FALSE;
 	 DestroyStatusWindow(0);  
@@ -7617,7 +7620,9 @@ BOOL BuildRefIndexes (BOOL UseCurrentViewport)
 	 hDupFiles = GSSiGlobAlloc (   2,GHND,USHRT_MAX);
 	 IgnoreSelectVP = TRUE;
 	 Display = FALSE;
-	 RedisplayViewport(TRUE,TRUE);  
+	 RedisplayOnly = FALSE;
+	 RedisplayViewport(TRUE, TRUE);
+	 RedisplayOnly = saveRedisplayOnly;
 	 Display = TRUE;
 	 IgnoreSelectVP = FALSE;
 	 if (!UseCurrentViewport)

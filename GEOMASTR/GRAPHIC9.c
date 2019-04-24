@@ -351,7 +351,13 @@ BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds,LPSTR ReopenName)
 	pTI = GlobalLock(hTAGIdx);
 	if (ForceTAGIndex)
 	{
-		pTI->hBT = BT_OPEN (TAGIndexFile, ltime, BT_WRITE, 0);
+		if (indexIsSLT)
+			pTI->type = TAGINDEX_SHP;
+		else
+		{
+			pTI->type = TAGINDEX_BTREE;
+			pTI->hBT = BT_OPEN(TAGIndexFile, ltime, BT_WRITE, 0);
+		}
 		rtn = TRUE;
 	}
 	else

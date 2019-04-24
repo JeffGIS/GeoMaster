@@ -3061,6 +3061,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 								BOOL	CheckNextTAG = TRUE;
 								short	pos = BT_FIRST, cond = BT_GE;
 
+								isShapeFile = FALSE;
 								if (GetBTDataLen(pTI->hBT) > 8)
 									CheckForLargestPiece = TRUE;
 								_fstrncpy(TAGKey.PREFIX, Prefix, 8);
