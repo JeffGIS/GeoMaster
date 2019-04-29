@@ -6152,7 +6152,7 @@ GSSiExitProg (66);
 }
     }
 Start:
-    if (CurView->CurFile >= CurView->NumFiles || (!VisScan && !Pick && CurView->Type == VPTYPE_PROFILE))
+    if (CurView && CurView->CurFile >= CurView->NumFiles || (!VisScan && !Pick && CurView->Type == VPTYPE_PROFILE))
 {
 #if ENABLETRACE
 GSSiExitProg (66);

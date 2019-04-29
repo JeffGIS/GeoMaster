@@ -2866,6 +2866,7 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 	short	Symnum;
 	int		st;
 	LPVIEWPORT	SaveVP = CurView;
+	LPVIEWPORT	DisplayVP;
 	DPOINT BasePt;
 	MNMXCORD	RecordBounds;
 
@@ -2876,6 +2877,7 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 		LPSQLDATABASE pSQLDatabase = (LPSQLDATABASE)GlobalLock(FilePtr->FileHandle);
 		if (CurView->DisplayInParent && CurView->Parent)
 			SetViewport(CurView->Parent);
+		DisplayVP = CurView;
 		InitRecord(hDC);
 		SetSQLITEParms();
 		if (!GetVisibility(CurrentDesc))
@@ -2960,6 +2962,7 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 						CurPointSize = 10 * DeviceToScreenFactor();
 						iDesc = InvisiblePointSymbol;
 					}
+					CurView = SaveVP;
 					if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
 					{
 						double	size;
@@ -2970,7 +2973,7 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 							if (ThemePointSize < 0)
 								size = -ThemePointSize *DeviceToScreenFactor();
 							else
-								size = ThemePointSize / CurView->BaseUnitsPerPixel;
+								size = ThemePointSize / DisplayVP->BaseUnitsPerPixel;
 							size *= ThemeWidthFactor;
 							size = min(max(size*GraphicsPointFactor, 1), MaxPointSize);
 						}
@@ -3767,6 +3770,11 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 						pDB->FldInfo[pDB->NumFields].length = nc;
 					}
 					else if (!stricmp(decl, "TEXT"))
+					{
+						pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
+						pDB->FldInfo[pDB->NumFields].length = nc;
+					}
+					else if (itype == SQLITE_NULL)
 					{
 						pDB->FldInfo[pDB->NumFields].type = BT_CHAR;
 						pDB->FldInfo[pDB->NumFields].length = nc;
