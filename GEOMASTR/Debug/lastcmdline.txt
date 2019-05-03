@@ -1,0 +1,2 @@
+configs\basic1.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;
+c:\geomas
