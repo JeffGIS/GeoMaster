@@ -9147,5 +9147,16 @@ BOOL FILEFunctions(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 		}
 		itoa(off, OutLoc, 10);
 	}
+	else if (!stricmp(Arg[1], "TRUENAME"))
+	{
+		OFSTRUCTGM ofs;
+		HFILE fid = GSSiOpenFile(Arg[2], &ofs, OF_READ);
+		*OutLoc = 0;
+		if (fid != HFILE_ERROR)
+		{
+			strcpy(OutLoc, ofs.szPathName);
+			GSSiClose(fid);
+		}
+	}
 	return rtn;
 }
