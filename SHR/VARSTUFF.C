@@ -1395,7 +1395,7 @@ ProcessSQL:
     GlobalUnlock (SQLPtr->myhandle);  
     GlobalUnlock (FilePtr->myhandle);  
 	if (Type  == SLT_DATAFILE)
-		SLTPrepare(handle);
+		SLTPrepareStatement (handle,SQL);
 
     *hDB = handle;
     AddToOpenFileList(handle); 

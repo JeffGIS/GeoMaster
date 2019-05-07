@@ -29548,7 +29548,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
     UINT    IDC_FieldName=IDC_FIELDS;
 	short	UnitsOpt;
     LPSTR   vbar; 
-    char    txt[128], txt2[128], project[34]; 
+    char    txt[256], txt2[128], project[34]; 
     //BTHEAD  BTHead;
     long    NumItems=0;
     static	char	Ext[6], SaveExt[8],DExt[6]; 
@@ -29873,6 +29873,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 				HANDLE		h10CharFieldNames = 0;
 				BOOL		useDataFile = FALSE;
 				int		fileType;
+				char	SaveAltProj[MAX_PATH] = { 0 };
+
 
                 CloseDataFile (FALSE,&MIFOuthDB);  
                 GetDlgItemText (hWndDlg,IDC_SHAPETYPE,str,sizeof(str));
@@ -29905,6 +29907,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                     goto Exit;
                 }
 				char file[MAX_PATH];
+
+				_fstrcpy(SaveAltProj, "[%ALT_PROJECTION]");
+				ExpandText(SaveAltProj);
+
 				sprintf(file, "[%%DL]projections\\%s", project);
                 SetGlobalValue("%ALT_PROJECTION",file);
 			    ConvertCoordClose ();
@@ -30648,7 +30654,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                      
 						if (thinnedContours)
 							ftoa (txt,contourElev);
-						else if (!Missing && GetValFromOpenFiles (Name,txt,128) < 0) 
+						else if (!Missing && GetValFromOpenFiles (Name,txt,255) < 0) 
                         {
                             Missing = TRUE;
                         	*txt = 0;
@@ -30859,6 +30865,11 @@ Exit2:
                 EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDC_SAVE),TRUE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
+				SetGlobalValue("%ALT_PROJECTION", SaveAltProj);
+				ConvertCoordClose();
+				ConvertCoordInit();
+
+
                 if (*AutoExportName)
                 {
 	                 CloseDataFile (FALSE,&MIFOuthDB);

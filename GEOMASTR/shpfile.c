@@ -832,6 +832,12 @@ BOOL SetSHPParms (long RecordNumber)
 		*pC = ':'; 
 		ExpandText (CurrentUDI);
 	}
+	else if (!*SHPTAG)
+	{
+		sprintf(SHPTag, "REFNO:%i", CurrentRefno);
+		strcpy(CurrentPrefix, "REFNO");
+		sprintf(CurrentUDI, "%i", CurrentRefno);
+	}
 	else
 	{   
 		*SHPTag = 0;
