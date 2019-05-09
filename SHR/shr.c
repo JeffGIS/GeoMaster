@@ -12108,7 +12108,28 @@ GSSiExitProg (382);
 }
 #endif
 }  
-  
+ 
+int integerValueD(LPSTRD str)
+{
+	int rtn = 0;
+	if (str)
+	{
+		rtn = atoi(str);
+		free(str);
+	}
+	return rtn;
+}
+
+int integerValue(LPSTR str)
+{
+	int rtn = 0;
+	if (str)
+	{
+		rtn = atoi(str);
+	}
+	return rtn;
+}
+
 BOOL IsReal (LPSTR str)
 {
 	LPSTR pEnd;

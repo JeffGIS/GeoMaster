@@ -165,6 +165,8 @@ int	GetFunctionID5 (LPSTR str)
 			if (!_fstrnicmp (str,"ABEND",5)) return 536; 
 			if (!_fstrnicmp (str,"UNLIT",5)) return 537; 
 			if (!_fstrnicmp(str, "PLIST", 5)) return 538;
+			if (!_fstrnicmp(str, "ISINT", 5)) return 539;
+			if (!_fstrnicmp(str, "ISFLT", 5)) return 540;
 
 			return 0;		
 }
@@ -310,6 +312,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "TAGDUMP", 7)) return 786;
 			if (!_fstrnicmp(str, "DIMLINE", 7)) return 787;
 			if (!_fstrnicmp(str, "MONITOR", 7)) return 788;
+			if (!_fstrnicmp(str, "INTCHOP", 7)) return 789;
 
 			return 0;
 }

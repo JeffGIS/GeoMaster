@@ -407,17 +407,6 @@ int ControlChar(LPSTR controlStr, int whichChar)
 	return rtn;
 }
 
-int integerValue(LPSTR str)
-{
-	int rtn = 0;
-	if (str)
-	{
-		rtn = atoi(str);
-		free(str);
-	}
-	return rtn;
-}
-
 LPSTRD textInsideParentheses(LPSTR string)
 {
 	LPSTR rtn = 0;
@@ -550,11 +539,11 @@ BOOL  CRAPI_sharedInstance_processPlaces (void)
 		LPSTRD pnam = textInsideParentheses(str);
 		strcpy(c->name, pnam);
 		free(pnam);
-		c->number = integerValue(textBeforeFirstChar(str,'('));
+		c->number = integerValueD(textBeforeFirstChar(str,'('));
 		LPSTRD manager = textAfterLastChar(str,')');
-		c->managerNumber = integerValue(textBeforeFirstChar(manager, '-'));
-		c->withinManager = integerValue(textAfterFirstChar(manager, '-'));
-		c->totWithinManager = integerValue(textAfterString(manager, "of"));
+		c->managerNumber = integerValueD(textBeforeFirstChar(manager, '-'));
+		c->withinManager = integerValueD(textAfterFirstChar(manager, '-'));
+		c->totWithinManager = integerValueD(textAfterString(manager, "of"));
 		free(manager);
 		free(str);
 		free(controlStr);

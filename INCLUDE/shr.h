@@ -547,6 +547,8 @@ BOOL WaitForKeystroke (BOOL UseGetMessage);
 BOOL PctBox(HWND hWnd, LONGLONG MaxLen, LONGLONG Done, short Freq);
 BOOL IsInteger(LPSTR str);       
 BOOL IsReal(LPSTR str);
+int integerValueD(LPSTR str);
+int integerValue(LPSTR str);
 HANDLE GetPrinterDC(void);
 long BigWrite (HFILE Fid,LPVOID pBuf,DWORD isize,long seekloc);
 long BigRead (HFILE Fid,LPVOID pBuf,long isize);

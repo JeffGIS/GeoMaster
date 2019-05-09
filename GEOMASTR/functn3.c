@@ -2459,6 +2459,25 @@ GotCloseFilehSQL:
 				goto Rtnl;
 			goto RtnFalse;
 		}
+		case 539: //$ISINT(val)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (IsInteger(Arg[1]))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
+
+		case 540: //$ISFLT(val)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (IsReal(Arg[1]))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
 
 		case 601: /* $TAGLOC(Prefix,minchar,SaveGlobalName(optional-not in brackets),Title(opt),Viewport(opt),Layer(opt),locatetagonly(opt,T locates,)) Tag locator */
 		{	 
@@ -7442,6 +7461,16 @@ HaveVP:;
 			goto Rtnl;
 		}
 		break;
+		case 789:  //$INTCHOP(returns integer value (truncates remaining junk))
+		{
+			hMem = GSSiGlobAlloc(821, GMEM_MOVEABLE, 2048);
+			Arg1 = GlobalLock(hMem);
+			_fstrcpy(Arg1, Args);
+			ExpandText(Arg1);
+			nlong = integerValue(Arg1);
+			ltoa(nlong, OutLoc, 10);
+			goto Rtnl;
+		}
 
 		default:
 			goto Rtn0;

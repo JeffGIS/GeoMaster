@@ -1887,8 +1887,8 @@ SetVis:
 		case 334:  //$INT(returns integer value (truncates))
 			hMem = GSSiGlobAlloc ( 821,GMEM_MOVEABLE,2048);
 			Arg1 = GlobalLock(hMem); 
-			_fstrcpy (Arg1,Args);
-			ExpandText (Arg1);
+			//_fstrcpy (Arg1,Args);
+			//ExpandText (Arg1);
 			RVal = FltAP (Args,&Err);   
 			if (Err)
 				goto FLTAPErr;
