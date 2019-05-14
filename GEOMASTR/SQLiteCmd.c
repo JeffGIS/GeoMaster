@@ -3850,7 +3850,7 @@ BOOL SLTPrepareStatement(HANDLE SQLITEHandle, LPSTR SQL)
 	else
 		sprintf(pDB->Query, "SELECT %s* FROM '%s'",getRowID, pDB->From);
 	free(pWhere);
-	if (SLTPrepare(SQLITEHandle))
+	if (*pDB->From && SLTPrepare(SQLITEHandle))
 	{
 		rtn = TRUE;
 	}
