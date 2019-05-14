@@ -559,7 +559,9 @@ GotFirstLine:
 		if (PRJ_TYPE[ID] == -1)
 		{
 			if (PRJ_PROJ4DEF[ID])
-				pj_free(PRJ_PROJ4DEF[ID]);
+			{
+				FreePROJ(ID);
+			}
 			PRJ_TYPE[ID] = PROJ4PROJECTION;
 			PRJ_UNITS[ID] = 2;
 			_fstrcpy(PROJECTION_UNITS[ID], "METERS");

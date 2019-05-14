@@ -1429,6 +1429,7 @@ void ProjectionFunction (LPSTR Arg1,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4,LPSTR Arg5,
 			return;
 		id -= 8;
 		pj_free(projdef[id]);
+		projdef[id] = 0;
 		*projid[id] = 0;
 		strcpy (OutLoc,"1");
 	}

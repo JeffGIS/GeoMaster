@@ -277,13 +277,13 @@ TranP TP;
 lpTranP lpTP; 
 long ok;     
      extern HWND    hWndMain; 
-     long	SaveFromUnits;
-     long	SaveToUnits;
+     long	SaveFromUnits=-1;
+     long	SaveToUnits=-1;
 	 int	saveto = -1;
      
      ok = ConvertCoordInit();
-	 if (!ok && !NeedToConvertCoord (from,to))
-		 return ok;
+	 if (!ok && !NeedToConvertCoord(from, to))
+		 goto  Exit;
 	 if (!ok && PRJ_TYPE[from] == PROJ4PROJECTION) // indicates proj4 projection
 	 {
 		 if (pj_is_latlong(PRJ_PROJ4DEF[from]))
@@ -301,10 +301,7 @@ long ok;
 					 DPoint->y *= RAD_TO_DEG;
 				 }
 
-#if ENABLETRACE
-				 GSSiExitProg(1335);
-#endif
-				 return ok;//unable to properly open the files   
+				 goto Exit;
 			 }
 		 }
 		 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL,NULL);
@@ -312,13 +309,9 @@ long ok;
 		 DPoint->y *= RAD_TO_DEG;
 		 from = 2;
 	 }
-     if (ok != 0)
-{
-#if ENABLETRACE
-GSSiExitProg (1335);
-#endif
-     	return ok;//unable to properly open the files   
-}
+	 if (ok != 0)
+		 goto Exit;
+
 	 if (PRJ_TYPE[to] == PROJ4PROJECTION)
 	 {
 		 saveto = to;
@@ -381,17 +374,24 @@ GotNearPoint:
 		ok = 0;
      }
      ConvertUnits (DPoint,PRJ_UNITS[to],SaveToUnits);
-Exit:      
-     PRJ_UNITS[from] = SaveFromUnits;
-     PRJ_UNITS[to] = SaveToUnits; 
-	 if (saveto >= 0)
+ Exit:
+	 if (SaveFromUnits > -1)
 	 {
-		 DPoint->x *= DEG_TO_RAD;
-		 DPoint->y *= DEG_TO_RAD;
-		 ok = pj_transform(PRJ_PROJ4DEF[LATLONPROJECTION], PRJ_PROJ4DEF[saveto], 1, 1, &DPoint->x, &DPoint->y, NULL, &PRJ_OUTFACTOR[saveto]);
+		 PRJ_UNITS[from] = SaveFromUnits;
+		 PRJ_UNITS[to] = SaveToUnits;
 	 }
-     *DPoint = TranPoint (DPoint,hTranRotation);
-     
+	 if (ok == 0)
+	 {
+		 if (saveto >= 0)
+		 {
+			 DPoint->x *= DEG_TO_RAD;
+			 DPoint->y *= DEG_TO_RAD;
+			 ok = pj_transform(PRJ_PROJ4DEF[LATLONPROJECTION], PRJ_PROJ4DEF[saveto], 1, 1, &DPoint->x, &DPoint->y, NULL, &PRJ_OUTFACTOR[saveto]);
+		 }
+		 *DPoint = TranPoint(DPoint, hTranRotation);
+	 }
+	 if (ok != 0)
+		 ii = 1;
 {
 #if ENABLETRACE
 GSSiExitProg (1335);
