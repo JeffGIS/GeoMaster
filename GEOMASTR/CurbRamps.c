@@ -775,6 +775,19 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 			{
 				if (pRamp->rampExists)
 				{
+					if (pRamp->rampType > 100)
+					{
+						//get bump data
+						RampStruct rampBump = { 0 };
+						RampStruct * pRampBump = &rampBump;
+						RAMPID rampIDBump = rampID;
+						rampIDBump.rampNum = getMiddleRampNumFromRampNum(rampID.rampNum);
+						if (getRampFromDB(&rampIDBump, pRampBump))
+						{
+							pRamp->bumpHeight = pRampBump->bumpHeight;
+							pRamp->bumpWidth = pRampBump->bumpWidth;
+						}
+					}
 					LPSTR rampText = rampToText(intNum, pRamp, codeSystem);
 					sprintf(line, "%s", rampText);
 					fputstring(line, FidOut);
@@ -1093,6 +1106,31 @@ BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDat
 			}
 			rc = sqlite3_close(database);
 		}
+	}
+	return rtn;
+}
+int getMiddleRampNumFromRampNum(int rampNum)
+{
+	int rtn = rampNum;
+
+	switch (rampNum)
+	{
+	case 1:
+	case 8:
+		rtn = 12;
+		break;
+	case 3:
+	case 2:
+		rtn = 9;
+		break;
+	case 5:
+	case 4:
+		rtn = 10;
+		break;
+	case 7:
+	case 6:
+		rtn = 11;
+		break;
 	}
 	return rtn;
 }

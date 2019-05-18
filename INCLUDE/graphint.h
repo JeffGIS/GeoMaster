@@ -2487,6 +2487,8 @@ BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, i
 BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int headerType);
 BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL showStatus,int dbType,BOOL convertInsert,LPSTR errFile,BOOL AddFileID,int checkPointOpt);
 int getRampOffsetCoord(POINT ramp21, POINT int21);
+int getMiddleRampNumFromRampNum(int rampNum);
+int getMiddleRampIDFromRampID(int rampID);
 BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc); // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new
 BOOL GetFromCodeText(int from, LPSTR text);
