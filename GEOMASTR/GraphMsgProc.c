@@ -29503,8 +29503,9 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;    
 }
 
-static void ConvertToShortName(LPSTR Name)
+static int ConvertToShortName(LPSTR Name)
 {
+	int rtn = -1;
 	char longNameToShortNameFile[MAX_PATH];
 	char str[1024];
 	
@@ -29525,8 +29526,12 @@ static void ConvertToShortName(LPSTR Name)
 						tab = strchr(tab, '\t');
 						if (tab)
 						{
-							*tab = 0;
+							*tab++ = 0;
 							strcpy(Name, NewName);
+							if (!strnicmp(tab, "REAL", 4))
+								rtn = SQL_REAL;
+							else if (!strnicmp(tab, "INTEGER", 4))
+								rtn = SQL_INTEGER;
 							break;
 						}
 					}
@@ -29535,6 +29540,7 @@ static void ConvertToShortName(LPSTR Name)
 			GSSiClose2 (&fid);
 		}
 	}
+	return rtn;
 }
 BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 { 
@@ -30058,7 +30064,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 	short			nWidth, nDecimals=0, DBFLen;
 					char			outName[64];
 					LPSTR			pEq;
-                	
+					int				newType = -1;
+
                     SendDlgItemMessage(hWndDlg,IDC_FIELDS,
                                                LB_GETTEXT,
                                                *lpItems,(LPARAM)Name);
@@ -30069,11 +30076,19 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 					}
 					else
 					{
-						ConvertToShortName(Name);
+						newType = ConvertToShortName(Name);
 						strncpy(outName, Name, sizeof(outName)-1);
 					}
                     lpFldInfo = &FilePtrATT->FldInfo;
                     lpFldInfo += *lpItems;
+					if (newType > 0)
+					{
+						lpFldInfo->type = newType;
+						if (newType == SQL_REAL)
+							lpFldInfo->length = 8;
+						else if (newType == SQL_INTEGER)
+							lpFldInfo->length = 4;
+					}
 				    switch (lpFldInfo->type)
 				    {   
 				        default: 
