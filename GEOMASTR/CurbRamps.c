@@ -2170,6 +2170,19 @@ BOOL NVCreateDB(LPSTR path,BOOL Delete)
 	return rtn;
 }
 
+sqlite3 * getNVDBHandle(int databaseID,BOOL *opened)
+{
+	*opened = FALSE;
+
+	if (database)
+		return database;
+	if (NVOpenDB(CRAPI->sharedInstance.currentCurbRampDB, FALSE, 0))
+	{
+		*opened = TRUE;
+		return database;
+	}
+	return NULL;
+}
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle)
 {
 	int rtn = 0;
@@ -3317,3 +3330,169 @@ BOOL CloseServerFTP (HANDLE hFTPStruct)
 	return rtn;
 }
 
+BOOL CreateSharedZoomList(LPSTR name)
+{
+	BOOL rtn = FALSE;
+	sqlite3 *db;
+	BOOL opened = FALSE;
+	if (GetGlobalBVal2("[%ALLOWSHAREDLISTS]", FALSE))
+	{
+		CRAPI_Init();
+		db = getNVDBHandle(CRAPI->sharedInstance.currentDatabaseID, &opened);
+		if (db)
+		{
+			char cmd[512];
+
+			sprintf(cmd, "CREATE TABLE ZOOMLIST_%s (Name CHAR(256) PRIMARY KEY,xmin DOUBLE,ymin DOUBLE,xmax DOUBLE,ymax DOUBLE, STATUS CHAR(256))", name);
+			if (executeAndSendCmd(CRAPI->sharedInstance.currentDatabaseID, cmd, TRUE))
+				rtn = TRUE;
+			if (opened)
+				NVCloseDB((long)db);
+		}
+	}
+	return rtn;
+}
+
+BOOL SaveZoomToCurrentSharedList(LPMNMXCORD pBounds, LPSTR Name,LPSTR Status)
+{
+	BOOL rtn = FALSE;
+	BOOL opened = FALSE;
+	if (GetGlobalBVal2("[%ALLOWSHAREDLISTS]", FALSE))
+	{
+		sqlite3 *db;
+		CRAPI_Init();
+		db = getNVDBHandle(CRAPI->sharedInstance.currentDatabaseID, &opened);
+		if (db)
+		{
+			char cmd[1024];
+
+			sprintf(cmd, "INSERT INTO ZOOMLIST_%s VALUES('%s',%f,%f,%f,%f,'%s')", CurrentZoomList,Name,pBounds->xmn,pBounds->ymn,pBounds->xmx,pBounds->ymx,Status);
+			if (executeAndSendCmd(CRAPI->sharedInstance.currentDatabaseID, cmd, TRUE))
+				rtn = TRUE;
+			if (opened)
+				NVCloseDB((long)db);
+		}
+	}
+
+	return rtn;
+}
+BOOL CreateNewZoomList(HWND hWndDlg, LPSTR Name)
+{
+	BOOL rtn = FALSE;
+	char listFile[MAX_PATH];
+	char name[256] = { 0 };
+	char str[512];
+	char mess[512];
+	HFILE Fid;
+	BOOL listIsShared = FALSE;
+
+	if (!hWndDlg)
+		hWndDlg = GetFocus();
+	if (!Name)
+	{
+		if (!GetTextString(hWndDlg, name, 250, "Enter List Name:", "", 0, 0, 1, 0))
+		{
+			return FALSE;
+		}
+		if (GetGlobalBVal2("[%ALLOWSHAREDLISTS]", FALSE))
+		{
+			short opt = MessageBox(hWndDlg, "Is this a shared list?", "", MB_YESNOCANCEL);
+			switch (opt)
+			{
+			case IDCANCEL:
+				return FALSE;
+			case IDYES:
+				listIsShared = TRUE;
+			}
+		}
+	}
+	else
+		strncpy0(name, Name, 250);
+	sprintf(mess, "%s is an existing list.\nDo you wish to delete its contents?", name);
+	sprintf(listFile, "%s\\%s.txt", ZOOMLISTDIR, name);
+	if (FileType(listFile))
+	{
+		short opt = MessageBox(hWndDlg, mess, "", MB_YESNOCANCEL);
+		switch (opt)
+		{
+		case IDCANCEL:
+		case IDNO:
+			return FALSE;
+		case IDYES:
+			GSSiRemove(listFile);
+			break;
+		}
+
+	}
+	strcpy(CurrentZoomList, name);
+	if (listIsShared)
+	{
+		CRAPI_Init();
+		sprintf(strchr(name, 0), "_%2.2i", CRAPI->sharedInstance.currentiPadWithinManager);
+		if (SharedZoomListExists(name))
+		{
+			short opt = MessageBox(hWndDlg, mess, "", MB_YESNOCANCEL);
+			switch (opt)
+			{
+			case IDCANCEL:
+			case IDNO:
+				return FALSE;
+			case IDYES:
+				break;
+			}
+
+		}
+		rtn = CreateSharedZoomList(name);
+	}
+	else
+	{
+		Fid = GSSiOpenFile(listFile, 0, OF_CREATE);
+		if (Fid != HFILE_ERROR)
+		{
+			strcpy(str, "[%DEFAULTZOOMOFFSET]=00000100.0;[%NEXTZOOMRECORD]=0000000000;");
+			fputstring(str, Fid);
+			rtn = TRUE;
+			GSSiClose2(&Fid);
+		}
+	}
+	return rtn;
+}
+
+int GetSharedZoomListEntries(HWND hWndDlg, UINT ListID)
+{
+	int nItems = 0;
+	MNMXCORD bounds;
+	LPMNMXCORD pBounds = &bounds;
+	char line[1024];
+	char blank[2] = "";
+	int fileLoc=0;
+	CRAPI_Init();
+
+	BOOL opened = openDatabaseID(CRAPI->sharedInstance.currentDatabaseID);
+	char query[256];
+	sprintf(query, "SELECT rowid, * FROM ZOOMLIST_%s", CurrentZoomList);
+	sqlite3_stmt *statement;
+
+	SQLOK(SQLitePrepare(database, query, -1, &statement, 0), database, "GetSharedZoomListEntries", 0);
+	while (sqlite3_step(statement) == SQLITE_ROW)
+	{
+		int i = 0;
+		fileLoc = sqlite3_column_int(statement, i++);
+		LPSTR pName = (LPSTR)sqlite3_column_text(statement, i++);
+		bounds.xmn = sqlite3_column_double(statement, i++);
+		bounds.ymn = sqlite3_column_double(statement, i++);
+		bounds.xmx = sqlite3_column_double(statement, i++);
+		bounds.ymx = sqlite3_column_double(statement, i++);
+		LPSTR pStatus = (LPSTR)sqlite3_column_text(statement, i++);
+		if (!pStatus)
+			pStatus = blank;
+		sprintf(line, "%s\t(%f %f %f %f)", pName, pBounds->xmn, pBounds->ymn, pBounds->xmx, pBounds->ymx);
+
+		int item = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETITEMDATA, (WPARAM)item, (LPARAM)fileLoc);
+	}
+	SQLOK(SQLiteFinalize(statement), database, "getLastPictUpdateNumber", 0);
+	closeDatabaseID(CRAPI->sharedInstance.currentDatabaseID, opened);
+
+	return nItems;
+}

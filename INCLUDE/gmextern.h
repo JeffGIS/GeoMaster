@@ -1,3 +1,5 @@
+#define ZOOMLISTDIR "[%ZOOMLISTDIR]"
+
 extern int			DepthColorIntensity;
 extern int			typeChassis;
 extern int			numMonitors;
@@ -1806,6 +1808,7 @@ extern  BOOL	AllAreasArePositive;
 extern	BOOL	useTextFileSQLiteIndex;
 extern	char	CurrentZoomList[MAX_PATH];
 extern	char	CurrentZoomListEntry[256];
+extern	BOOL	CurrentZoomListIsShared;
 extern  RECT	MonitorRectangle[MAX_MONITORS];
 extern  char	GraphicsMacro[MAX_PATH];
 extern  char	smallMessageText[MAX_SMALL_MESSAGE+1];

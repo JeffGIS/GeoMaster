@@ -108,7 +108,7 @@ typedef CITYORORGANIZATIONDATA *CityOrOrganizationData;
 typedef struct {
 	int GSSiPadNumber;
 	int currentManageriPad;
-	LPSTR currentCityNameAndState;
+	LPSTRD currentCityNameAndState;
 	int currentiPadWithinManager;
 	int totiPadWithinManager;
 	BOOL hideConnectButton;
@@ -130,6 +130,7 @@ typedef struct {
 	BOOL downloadPix;
 	BOOL uploadPix;
 	BOOL refreshMap;
+	int	 currentDatabaseID;
 	char sharedFilePath[MAX_PATH];
 	char errFile[MAX_PATH];
 	char currentCurbRampDB[MAX_PATH];
@@ -163,5 +164,6 @@ int GetiPadWithinManager(void);
 
 BOOL appendStringToFile(LPSTR str, LPSTR filePath);
 void NSLog(LPSTR fmt, LPSTR str);
+BOOL openDatabaseID(int databaseID);
 
 extern CRAPi *CRAPI;

@@ -163,6 +163,7 @@ void CRAPI_Destroy(void)
 	if (CRAPI && CRAPI->haveInit)
 	{
 		NSArray_Destroy(&CRAPI->sharedInstance.placesArray);
+		free(CRAPI->sharedInstance.currentCityNameAndState);
 	}
 	free(CRAPI);
 	CRAPI = 0;
@@ -197,7 +198,7 @@ LPSTRD textAfterFirstChar(LPSTR string, char c)
 		return string_Copy(string);
 
 	LPSTR str = strchr(string, c);
-	LPSTR rtn;
+	LPSTRD rtn;
 	if (str)
 		rtn = string_Copy(++str);
 	else
@@ -245,7 +246,7 @@ LPSTRD textBeforeLastChar(LPSTR string, char c)
 
 	return rtn;
 }
-LPSTR textBeforeFirstChar(LPSTR string, char c)
+LPSTRD textBeforeFirstChar(LPSTR string, char c)
 {
 	if (!string)
 		return 0;
@@ -254,7 +255,7 @@ LPSTR textBeforeFirstChar(LPSTR string, char c)
 		return string_Copy(string);
 
 	LPSTR str = strchr(string, c);
-	LPSTR rtn;
+	LPSTRD rtn;
 	if (str)
 	{
 		*str = 0;
@@ -267,9 +268,9 @@ LPSTR textBeforeFirstChar(LPSTR string, char c)
 	return rtn;
 }
 
-LPSTR textAfterString(LPSTR string, LPSTR str)
+LPSTRD textAfterString(LPSTR string, LPSTR str)
 {
-	LPSTR rtn;
+	LPSTRD rtn;
 	if (!string)
 		return 0;
 
@@ -286,9 +287,9 @@ LPSTR textAfterString(LPSTR string, LPSTR str)
 		rtn = string_Copy(string);
 	return rtn;
 }
-LPSTR addSpaceAfterComma(LPSTR string)
+LPSTRD addSpaceAfterCommaD(LPSTR string)
 {
-	LPSTR rtn = 0;
+	LPSTRD rtn = 0;
 	if (!string)
 		return NULL;
 
@@ -377,14 +378,16 @@ LPSTRD UserDefaults_defaults_stringForKey(LPSTR key)
 }
 int UserDefaults_defaults_integerForKey(LPSTR key)
 {
-	int rtn =0;
-
+	LPSTR str = calloc(1, 64);
+	int nchr = GetPrivateProfileString("CRAPI", key, "", str, 1024, GMIni);
+	int rtn = atoi(str);
 	return rtn;
 }
 BOOL UserDefaults_defaults_saveInteger(int value, LPSTR key)
 {
-	BOOL rtn = TRUE;
-
+	char string[32];
+	itoa(value, string, 10);
+	BOOL rtn = WritePrivateProfileString("CRAPI", key, string, GMIni);
 	return rtn;
 }
 void setGSSiPadNumber (int num)
@@ -617,7 +620,7 @@ BOOL CRAPI_sharedInstance_processPlacesArray (int row)
 
 	CityOrOrganizationData c = CRAPI->sharedInstance.placesArray->item[row];
 	CRAPI->sharedInstance.GSSiPadNumber = (int)c->GSSiPadNumber;
-	CRAPI->sharedInstance.currentCityNameAndState = addSpaceAfterComma(c->name);
+	CRAPI->sharedInstance.currentCityNameAndState = addSpaceAfterCommaD(c->name);
 	setCurrentGeoid (c->number);
 
 	UserDefaults_defaults_saveInteger(CRAPI->sharedInstance.currentGeoid,"CurrentGeoid");
@@ -1786,3 +1789,4 @@ void PopoverShow(HWND hWnd, double after, LPSTR msg, LPSTR OKButtonText)
 {
 
 }
+

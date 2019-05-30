@@ -321,6 +321,14 @@ void CloseSLTDatabase(LPHANDLE pHandle);
 void SLTCloseCursor(LPSQLDATABASE pDB);
 BOOL SQLITEPrepare(LPSQLDATABASE pDB);
 BOOL SLTPrepare(HANDLE SQLITEHandle);
+int sqlite3_prepare_v2GSSi(
+	sqlite3 *db,              /* Database handle. */
+	const char *zSql,         /* UTF-8 encoded SQL statement. */
+	int nBytes,               /* Length of zSql in bytes. */
+	sqlite3_stmt **ppStmt,    /* OUT: A pointer to the prepared statement */
+	const char **pzTail       /* OUT: End of parsed string */
+);
+int sqlite3_finalizeGSSi(sqlite3_stmt **statement);
 int GetFieldDefs(HANDLE FileHandle, int Type, LPHANDLE phFields, LPBOOL pHaveNonStandardFields);
 LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal, LPSHORT irc, LPFIELDINFO FirstField);
 int FetchSLTRec(LPSQLDATABASE pSQL);
@@ -547,7 +555,7 @@ BOOL WaitForKeystroke (BOOL UseGetMessage);
 BOOL PctBox(HWND hWnd, LONGLONG MaxLen, LONGLONG Done, short Freq);
 BOOL IsInteger(LPSTR str);       
 BOOL IsReal(LPSTR str);
-int integerValueD(LPSTR str);
+int integerValueD(LPSTRD str);
 int integerValue(LPSTR str);
 HANDLE GetPrinterDC(void);
 long BigWrite (HFILE Fid,LPVOID pBuf,DWORD isize,long seekloc);

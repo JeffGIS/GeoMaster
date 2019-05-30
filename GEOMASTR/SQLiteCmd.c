@@ -1,6 +1,8 @@
 #include "graphint.h"   
 #include "gmextern.h"
 #include "shapefil.h"
+
+static int nCalls = 0;
 //#include "sqlite3ext.h"
 #define INDEX_TYPE_RTREE	1
 #define INDEX_TYPE_XY		2
@@ -104,12 +106,12 @@ static int maxID(sqlite3 *_database)
 
 	sqlite3_stmt *statement = NULL;
 
-	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "maxID", 0);
+	SQLOK(sqlite3_prepare_v2GSSi(_database, query, -1, &statement, 0), _database, "maxID", 0);
 	if (sqlite3_step(statement) == SQLITE_ROW)
 	{
 		rtn = sqlite3_column_int(statement, 0);
 	}
-	SQLOK(sqlite3_finalize(statement), _database, "maxID", 0);
+	SQLOK(sqlite3_finalizeGSSi(&statement), _database, "maxID", 0);
 	return rtn;
 }
 static int maxIDFrom(sqlite3 *_database, LPSTR table)
@@ -121,12 +123,12 @@ static int maxIDFrom(sqlite3 *_database, LPSTR table)
 
 	sqlite3_stmt *statement = NULL;
 
-	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "maxID", 0);
+	SQLOK(sqlite3_prepare_v2GSSi(_database, query, -1, &statement, 0), _database, "maxID", 0);
 	if (sqlite3_step(statement) == SQLITE_ROW)
 	{
 		rtn = sqlite3_column_int(statement, 0);
 	}
-	SQLOK(sqlite3_finalize(statement), _database, "maxID", 0);
+	SQLOK(sqlite3_finalizeGSSi(&statement), _database, "maxID", 0);
 	return rtn;
 }
 
@@ -202,12 +204,12 @@ static int idForCnum(int cnum, int seq, sqlite3 *_database)
 	sprintf (query,"SELECT id FROM OFFENSEXY WHERE ControlNbr = %li AND OffenseOrder = %i", (long)cnum, seq);
 	sqlite3_stmt *statement = NULL;
 
-	SQLOK(sqlite3_prepare_v2(_database, query, -1, &statement, 0), _database, "id for cnum", 0);
+	SQLOK(sqlite3_prepare_v2GSSi(_database, query, -1, &statement, 0), _database, "id for cnum", 0);
 	if (sqlite3_step(statement) == SQLITE_ROW)
 	{
 		rtn = sqlite3_column_int(statement, 0);
 	}
-	SQLOK(sqlite3_finalize(statement), _database, "id for cnum", 0);
+	SQLOK(sqlite3_finalizeGSSi(&statement), _database, "id for cnum", 0);
 	if (rtn < 0)
 	{
 		rtn = maxID(_database) + 1;
@@ -337,14 +339,14 @@ double GetSQLITESumCol(sqlite3 *db, LPSTR tableName,LPSTR Column, LPSTR where)
 
 	if (db)
 	{
-		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
+		if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
 			if (sqlite3_step(statement) == SQLITE_ROW)
 			{
 				rtn = sqlite3_column_double(statement, 0);
 			}
 		}
-		sqlite3_finalize(statement);
+		sqlite3_finalizeGSSi(&statement);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -373,7 +375,7 @@ LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where, LONGLONG li
 
 	if (db)
 	{
-		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
+		if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
 			if (limit)
 			{
@@ -387,7 +389,7 @@ LONGLONG GetSQLITENumRows(sqlite3 *db, LPSTR tableName, LPSTR where, LONGLONG li
 					rtn = sqlite3_column_int(statement, 0);
 				}
 			}
-			sqlite3_finalize(statement);
+			sqlite3_finalizeGSSi(&statement);
 		}
 	}
 	GSSiGlobUlFree(&hCmd);
@@ -423,7 +425,7 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 			sprintf(pCmd, "SELECT DISTINCT %s FROM %s", outstr, tableName);
 		if (db)
 		{
-			if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
+			if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
 			{
 				int numcol = sqlite3_column_count(statement);
 				char delim[2] = { 0 };
@@ -450,7 +452,7 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 					fputstring(outstr, Fid);
 				}
 			}
-			sqlite3_finalize(statement);
+			sqlite3_finalizeGSSi(&statement);
 		}
 		GSSiClose2 (&Fid);
 	}
@@ -492,7 +494,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 			sprintf(strchr(pCmd, 0), " ORDER BY %s", orderBy);
 		if (db)
 		{
-			if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
+			if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
 			{
 				int numcol = sqlite3_column_count(statement);
 				char delim[2] = { 0 };
@@ -521,7 +523,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 						fputstring(outstr, Fid);
 				}
 			}
-			sqlite3_finalize(statement);
+			sqlite3_finalizeGSSi(&statement);
 		}
 		if (Fid != NO_FILE)
 			GSSiClose2 (&Fid);
@@ -542,14 +544,14 @@ LONGLONG GetSQLITERowID(sqlite3 *db, LPSTR tableName, LPSTR where)
 
 	if (db)
 	{
-		if (SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
+		if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get num rows", 0) == SQLITE_OK)
 		{
 			if (sqlite3_step(statement) == SQLITE_ROW)
 			{
 				rtn = sqlite3_column_int(statement, 0);
 			}
 		}
-		sqlite3_finalize(statement);
+		sqlite3_finalizeGSSi(&statement);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return rtn;
@@ -747,7 +749,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 		if (db)
 		{
-			int st = sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0);
+			int st = sqlite3_prepare_v2GSSi(db, ARG[3], -1, &statement, 0);
 			if (st == SQLITE_OK)
 			{
 				if (!*ARG[4])
@@ -760,7 +762,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 						SetGlobalValue(ARG[4], value);
 					rtn = TRUE;
 				}
-				sqlite3_finalize(statement);
+				sqlite3_finalizeGSSi(&statement);
 			}
 			else if (!atob (ARG[5]))
 				SQLOK(st, db, "", 0);
@@ -773,7 +775,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 
 		if (db)
 		{
-			if (SQLOK(sqlite3_prepare_v2(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
+			if (SQLOK(sqlite3_prepare_v2GSSi(db, ARG[3], -1, &statement, 0), db, "", 0) == SQLITE_OK)
 				rtn = (int)statement;
 		}
 	}
@@ -2664,7 +2666,7 @@ BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds)
 		if (pSQLDatabase->statement)
 			sqlite3_finalize(pSQLDatabase->statement);
 		pSQLDatabase->statement = 0;
-		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) == SQLITE_OK)
+		if (sqlite3_prepare_v2GSSi(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) == SQLITE_OK)
 		{
 			int st = sqlite3_step(pSQLDatabase->statement);
 
@@ -2681,7 +2683,7 @@ BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds)
 				pBounds->ymx = BasePt.y + 1;
 				rtn = TRUE;
 			}
-			sqlite3_finalize(pSQLDatabase->statement);
+			sqlite3_finalizeGSSi(&pSQLDatabase->statement);
 		}
 		pSQLDatabase->statement = NULL;
 		GlobalUnlock(FilePtr->FileHandle);
@@ -2706,7 +2708,7 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 		else
 			sprintf(cmd, "SELECT ALLEYWALLS_NEW.id, 'Wall Id',LONGITUDE,LATITUDE FROM ALLEYWALLS_NEW WHERE ALLEYWALLS_NEW.id=%lld", SQLITERec);
 
-		if (sqlite3_prepare_v2(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) != SQLITE_OK)
+		if (sqlite3_prepare_v2GSSi(SQLITEHandle, cmd, -1, &pSQLDatabase->statement, 0) != SQLITE_OK)
 			pSQLDatabase->statement = NULL;
 		else
 		{
@@ -2716,7 +2718,7 @@ BOOL GetSQLITERecord(LONGLONG SQLITERec)
 				rtn = TRUE;
 			else
 			{
-				sqlite3_finalize(pSQLDatabase->statement);
+				sqlite3_finalizeGSSi(&pSQLDatabase->statement);
 				pSQLDatabase->statement = 0;
 			}
 		}
@@ -3307,7 +3309,7 @@ int TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, 
 								 pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 	sprintf(cmd, "SELECT ControlNbr,OffenseOrder,Offense FROM OFFENSEXY,OFFENSEXY_index WHERE OFFENSEXY.id=OFFENSEXY_index.id AND OFFENSEXY_index.maxX>=%f AND OFFENSEXY_index.minX<=%f AND OFFENSEXY_index.maxY>=%f AND OFFENSEXY_index.minY<=%f AND OFFENSEXY_index.maxTime>=%f AND OFFENSEXY_index.minTime<=%f AND OFFENSEXY_index.maxUCR>=%f AND OFFENSEXY_index.minUCR<=%f",
 		pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx, fromDate / 1000.0 - 1, toDate / 1000.0 + 1, fromUCR*10.0 - 1, toUCR*10.0 + 1);
-	SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "get num rows", 0);
+	SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "get num rows", 0);
 
 	while (sqlite3_step(statement) == SQLITE_ROW)
 	{
@@ -3316,7 +3318,7 @@ int TestSQLiteCrimes(LPMNMXCORD pBounds, int fromDate, int toDate, int fromUCR, 
 		long controlNbr = sqlite3_column_int(statement, 0);
 		n++;
 	}
-	sqlite3_finalize(statement);
+	sqlite3_finalizeGSSi(&statement);
 	HFILE fid = GSSiOpenFile("c:\\temp\\crimeup.txt", 0, OF_READ);
 	while (fgetstring(str, 4090, fid))
 	{
@@ -3348,7 +3350,7 @@ int TestSQLiteCrimeOffenseOrder(LPMNMXCORD pBounds, int fromDate, int toDate, in
 		return FALSE;
 	sqlite3_exec(db, "BEGIN", NULL, NULL, 0);
 	sprintf(cmd, "SELECT ControlNbr,OffenseOrder,Offense FROM OFFENSEXY ORDER BY ControlNbr, OffenseOrder");
-	SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "get num rows", 0);
+	SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "get num rows", 0);
 
 	while (sqlite3_step(statement) == SQLITE_ROW)
 	{
@@ -3367,7 +3369,7 @@ int TestSQLiteCrimeOffenseOrder(LPMNMXCORD pBounds, int fromDate, int toDate, in
 		maxoffenseOrder = max(offenseOrder, maxoffenseOrder);
 	}
 
-	sqlite3_finalize(statement);
+	sqlite3_finalizeGSSi(&statement);
 	sqlite3_exec(db, "COMMIT", NULL, NULL, 0);
 	rtn = sqlite3_close(db);
 	return n;
@@ -3712,7 +3714,8 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 	RemoveChars(yfield, "[]");
 	pDB->NumFields = 0;
 	pDB->numRetreived = 0;
-	if (!SQLOK(sqlite3_prepare_v2(pDB->DBHandle, pDB->Query, -1, &pDB->statement, 0), pDB->DBHandle, "prepare", 0))
+	sqlite3_finalizeGSSi(&pDB->statement);
+	if (!SQLOK(sqlite3_prepare_v2GSSi(pDB->DBHandle, pDB->Query, -1, &pDB->statement, 0), pDB->DBHandle, "prepare", 0))
 	{
 		int ncols = sqlite3_column_count(pDB->statement);
 		rtn = TRUE;
@@ -3885,6 +3888,28 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	return lpvoid;
 }
 
+int sqlite3_prepare_v2GSSi(
+	sqlite3 *db,              /* Database handle. */
+	const char *zSql,         /* UTF-8 encoded SQL statement. */
+	int nBytes,               /* Length of zSql in bytes. */
+	sqlite3_stmt **ppStmt,    /* OUT: A pointer to the prepared statement */
+	const char **pzTail       /* OUT: End of parsed string */
+)
+{
+	nCalls++;
+	return sqlite3_prepare_v2 (db, zSql, nBytes, ppStmt, pzTail);
+}
+int sqlite3_finalizeGSSi(sqlite3_stmt **statement)
+{
+	int rtn = SQLITE_OK;
+	if (*statement)
+	{
+		nCalls--;
+		rtn = sqlite3_finalize(*statement);
+		*statement = 0;
+	}
+	return rtn;
+}
 void CloseSLTDatabase(LPHANDLE pHandle)
 {
 	int rtn;
@@ -3896,7 +3921,7 @@ void CloseSLTDatabase(LPHANDLE pHandle)
 		LPFIELDINFO field;
 		pDB = (LPSQLDATABASE)GlobalLock(*pHandle);
 		if (*pDB->Query)
-			sqlite3_finalize(pDB->statement);
+			sqlite3_finalizeGSSi(&pDB->statement);
 		rtn = sqlite3_close(pDB->DBHandle);
 		field = pDB->FldInfo;
 		for (int j = 0; j < pDB->NumFields; j++, field++)
@@ -3925,7 +3950,7 @@ HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL)
 	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock (hDB);
 
-	if (sqlite3_prepare_v2(db, SQL, -1, &statement, 0) == SQLITE_OK)
+	if (sqlite3_prepare_v2GSSi(db, SQL, -1, &statement, 0) == SQLITE_OK)
 	{
 		int cols = sqlite3_column_count(statement);
 		for (int i = 0; i < cols; i++)
@@ -3961,7 +3986,7 @@ HANDLE	OpenSLTDatabaseQuery(LPSTR Name, LPSTR SQL)
 
 		}
 	}
-	sqlite3_finalize(statement);
+	sqlite3_finalizeGSSi(&statement);
 
 /*	why not just stick "limit 0" on the end of a select statement ? int cols = sqlite3_column_count(stmt); fprintf(stdout, "%d columns\n", cols); for (int i = 0; i<cols; i++) fprintf(stdout, "%d. %s\n", i, sqlite3_column_name(stmt, i)); – Erik Aronesty May 20 '15 at 21:09  
 
@@ -4000,14 +4025,14 @@ BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName)
 		char cmd[256];
 		sprintf(cmd, "SELECT name FROM sqlite_master WHERE name = '%s'", tableName);
 
-		SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "table exists", 0);
+		SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "table exists", 0);
 
 		if (sqlite3_step(statement) == SQLITE_ROW)
 		{
 			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 0);
 			rtn = TRUE;
 		}
-		sqlite3_finalize(statement);
+		sqlite3_finalizeGSSi(&statement);
 	}
 	return rtn;
 }
@@ -4022,7 +4047,7 @@ BOOL DoesSLTFieldExist(sqlite3 *db, LPSTR tableName,LPSTR fieldName)
 
 		sprintf(cmd, "PRAGMA table_info(%s)", tableName);
 
-		SQLOK(sqlite3_prepare_v2(db, cmd, -1, &statement, 0), db, "field exists", 0);
+		SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "field exists", 0);
 
 		int numcol = sqlite3_column_count(statement);
 		while (sqlite3_step(statement) == SQLITE_ROW)
@@ -4035,7 +4060,7 @@ BOOL DoesSLTFieldExist(sqlite3 *db, LPSTR tableName,LPSTR fieldName)
 					rtn = TRUE;
 			}
 		}
-		sqlite3_finalize(statement);
+		sqlite3_finalizeGSSi(&statement);
 	}
 	return rtn;
 	// ============ Fetch table info ============= 
@@ -4297,7 +4322,7 @@ int GetTextFileStartFromIndex(LPOPENFILEDATA FilePtr, LPOPENSQLDATA SQLPtr)
 			}
 			//sprintf(pCmd, "SELECT Offset,Station FROM %s", SQLPtr->TextFileIndexName);
 			ExpandText(pCmd);
-			SQLOK(sqlite3_prepare_v2(SQLPtr->TextFileIndex, pCmd, -1, &SQLPtr->statement, 0), SQLPtr->TextFileIndex, "Text Search", 0);
+			SQLOK(sqlite3_prepare_v2GSSi(SQLPtr->TextFileIndex, pCmd, -1, &SQLPtr->statement, 0), SQLPtr->TextFileIndex, "Text Search", 0);
 			free(pCmd);
 		}
 		if (SQLPtr->statement)
@@ -4310,7 +4335,7 @@ int GetTextFileStartFromIndex(LPOPENFILEDATA FilePtr, LPOPENSQLDATA SQLPtr)
 			}
 			else
 			{
-				sqlite3_finalize(SQLPtr->statement);
+				sqlite3_finalizeGSSi(&SQLPtr->statement);
 				SQLPtr->statement = NULL;
 				rtn = 1;
 			}
@@ -4361,7 +4386,7 @@ BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 				*LastChr(y) = 0;
 			}
 			sprintf(pCmd, "SELECT rowid,%s,%s FROM %s", x,y, tableName);
-			SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "SpatialIndexCreate", 0);
+			SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "SpatialIndexCreate", 0);
 
 			while (sqlite3_step(statement) == SQLITE_ROW)
 			{
@@ -4374,7 +4399,7 @@ BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName)
 				if (BoundsInBounds(&bounds, &projbounds, 1))
 					SLTSpatialIndexAdd(db, tableName, rowid, 0, &bounds);
 			}
-			sqlite3_finalize(statement);
+			sqlite3_finalizeGSSi(&statement);
 			SLT_EndTrans(db);
 			rtn = TRUE;
 		}
@@ -4457,7 +4482,7 @@ MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
 	{
 		sprintf(pCmd, "SELECT MinX, MaxX, MinY, MaxY FROM %s_index", tableName);
 
-		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
+		SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
 
 		while (sqlite3_step(statement) == SQLITE_ROW)
 		{
@@ -4469,7 +4494,7 @@ MNMXCORD SLTSpatialIndexBounds(sqlite3 *db, LPSTR tableName)
 			n++;
 			AddMinMaxD(&Bounds, &bounds);
 		}
-		sqlite3_finalize(statement);
+		sqlite3_finalizeGSSi(&statement);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return Bounds;
@@ -4487,7 +4512,7 @@ MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
 	{
 		sprintf(pCmd, "SELECT MinX, MaxX, MinY, MaxY, MinZ, MaxZ FROM %s_index", tableName);
 
-		SQLOK(sqlite3_prepare_v2(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
+		SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get bounds", 0);
 
 		while (sqlite3_step(statement) == SQLITE_ROW)
 		{
@@ -4501,8 +4526,84 @@ MNMXCORD3D SLTSpatialIndexBounds3D(sqlite3 *db, LPSTR tableName)
 			n++;
 			AddMinMax3D(&Bounds, &bounds);
 		}
-		sqlite3_finalize(statement);
+		sqlite3_finalizeGSSi(&statement);
 	}
 	GSSiGlobUlFree(&hCmd);
 	return Bounds;
 }
+int GetSharedZoomLists(LPHANDLE phTableNames)
+{
+	LPSTR	pTables;
+	int icount = 0;
+	short	ln;
+	sqlite3 *db;
+	sqlite3_stmt *statement;
+	BOOL opened = FALSE;
+	char query[] = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name";
+
+	if (!GetGlobalBVal2("[%ALLOWSHAREDLISTS]", FALSE))
+		return 0;
+	CRAPI_Init();
+	db = getNVDBHandle(0, &opened);
+	if (!db)
+		return 0;
+	*phTableNames = GSSiGlobAlloc(165, GHND, USHRT_MAX);
+	pTables = GlobalLock(*phTableNames);
+
+	if (sqlite3_prepare_v2GSSi(db, query, -1, &statement, 0) == SQLITE_OK)
+	{
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 0);
+			if (!strncasecmp(pName, "ZOOMLIST_", 9))
+			{
+				char name[256];
+				sprintf(name, "%s\tShared", pName+9);
+				strcpy(pTables, name);
+				ln = strlen(pTables);
+				pTables += ln + 1;
+				icount++;
+			}
+		}
+		sqlite3_finalizeGSSi(&statement);
+	}
+	*pTables = 0;
+	GlobalUnlock(*phTableNames);
+	if (opened)
+		NVCloseDB((long)db);
+	return icount;
+}
+BOOL SharedZoomListExists(LPSTR name)
+{
+	LPSTR	pTables;
+	BOOL rtn = FALSE;
+	short	ln;
+	sqlite3 *db;
+	sqlite3_stmt *statement;
+	BOOL opened = FALSE;
+	char query[] = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name";
+
+	if (!GetGlobalBVal2("[%ALLOWSHAREDLISTS]", FALSE))
+		return 0;
+	CRAPI_Init();
+	db = getNVDBHandle(0, &opened);
+	if (!db)
+		return 0;
+	if (sqlite3_prepare_v2GSSi(db, query, -1, &statement, 0) == SQLITE_OK)
+	{
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			LPSTR pName = (LPSTR)sqlite3_column_text(statement, 0);
+			if (!strncasecmp(pName, "ZOOMLIST_", 9))
+			{
+				if (!stricmp(pName + 9, name))
+					rtn = TRUE;
+			}
+		}
+		sqlite3_finalizeGSSi(&statement);
+	}
+	if (opened)
+		NVCloseDB((long)db);
+	return rtn;
+}
+

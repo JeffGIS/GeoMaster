@@ -134,6 +134,7 @@ BOOL ZoomToNextItemInCurrentList(void);
 BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds,LPSTR Name);
 BOOL ProcessZoomListCommand(void);
 BOOL CreateNewZoomList(HWND hWndDlg, LPSTR Name);
+int GetSharedZoomListEntries(HWND hWndDlg, UINT ListID);
 int HighlightFromTheme(LPVIEWPORT CurView, LPTHEME CurTheme, int nItems, HANDLE hItems, HWND hWndPct, BOOL UnHighlight, BOOL ComputeAreaAndLength);
 BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
@@ -2489,6 +2490,10 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 int getRampOffsetCoord(POINT ramp21, POINT int21);
 int getMiddleRampNumFromRampNum(int rampNum);
 int getMiddleRampIDFromRampID(int rampID);
+int GetSharedZoomLists(LPHANDLE phTableNames);
+BOOL SharedZoomListExists(LPSTR name);
+BOOL CreateSharedZoomList(LPSTR name);
+BOOL SaveZoomToCurrentSharedList(LPMNMXCORD pBounds, LPSTR Name, LPSTR Status);
 BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDataBase, int codeSystem, LPSTR OutLoc);
 BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc); // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new
 BOOL GetFromCodeText(int from, LPSTR text);
@@ -2496,6 +2501,7 @@ BOOL NVCreateDB(LPSTR path, BOOL Delete);
 BOOL NVCopyDB(LPSTR fromPath, LPSTR toPath);
 int NVCloseDB(long handle);
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle);
+sqlite3 * getNVDBHandle(int databaseID, BOOL *opened);
 int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir);
 int CreateMultValueFile(LPSTR INDir);

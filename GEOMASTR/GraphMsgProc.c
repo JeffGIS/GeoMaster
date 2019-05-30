@@ -6,7 +6,6 @@
 #include <sqlext.h>     
 #include <commctrl.h>          
 
-#define ZOOMLISTDIR "[%ZOOMLISTDIR]"
 
 static BOOL	WantPalleteOrthos=FALSE;
 static BOOL LoadBMPShowMess;
@@ -11216,46 +11215,22 @@ BOOL SaveZoomToCurrentList(LPMNMXCORD pBounds, LPSTR Name)
 	}
 	else
 		strncpy0(name, Name, 250);
-	sprintf(listFile, "%s\\%s.txt", ZOOMLISTDIR, CurrentZoomList);
-	Fid = GSSiOpenFile(listFile, 0, OF_READWRITE);
-	if (Fid != HFILE_ERROR)
+	if (CurrentZoomListIsShared)
 	{
-		sprintf(str, "%s|(%f %f %f %f)", name, pBounds->xmn, pBounds->ymn, pBounds->xmx, pBounds->ymx);
-		GSSillseek(Fid, 0, 2);
-		fputstring(str, Fid);
-		rtn = TRUE;
-		GSSiClose2 (&Fid);
-	}
-	return rtn;
-}
-BOOL CreateNewZoomList(HWND hWndDlg,LPSTR Name)
-{
-	BOOL rtn = FALSE;
-	char listFile[MAX_PATH];
-	char name[256] = { 0 };
-	char str[512];
-	HFILE Fid;
-
-	if (!hWndDlg)
-		hWndDlg = GetFocus();
-	if (!Name)
-	{
-		if (!GetTextString(hWndDlg, name, 250,"Enter List Name:", "", 0, 0, 1, 0))
-		{
-			return FALSE;
-		}
+		SaveZoomToCurrentSharedList(pBounds, name,"");
 	}
 	else
-		strncpy0(name, Name, 250);
-	strcpy(CurrentZoomList, name);
-	sprintf(listFile, "%s\\%s.txt", ZOOMLISTDIR, CurrentZoomList);
-	Fid = GSSiOpenFile(listFile, 0, OF_CREATE);
-	if (Fid != HFILE_ERROR)
 	{
-		strcpy(str, "[%DEFAULTZOOMOFFSET]=00000100.0;[%NEXTZOOMRECORD]=0000000000;");
-		fputstring(str, Fid);
-		rtn = TRUE;
-		GSSiClose2 (&Fid);
+		sprintf(listFile, "%s\\%s.txt", ZOOMLISTDIR, CurrentZoomList);
+		Fid = GSSiOpenFile(listFile, 0, OF_READWRITE);
+		if (Fid != HFILE_ERROR)
+		{
+			sprintf(str, "%s|(%f %f %f %f)", name, pBounds->xmn, pBounds->ymn, pBounds->xmx, pBounds->ymx);
+			GSSillseek(Fid, 0, 2);
+			fputstring(str, Fid);
+			rtn = TRUE;
+			GSSiClose2(&Fid);
+		}
 	}
 	return rtn;
 }
@@ -11364,11 +11339,12 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 	char ZoomlistDir[MAX_PATH] = ZOOMLISTDIR;
 	char listFile[MAX_PATH];
 	int	 TabStops[2] = { 1400, 1500 };
+	int	 TabStops2[2] = { 150, 1500 };
 	int nrecs = 0;
 	int fileLoc;
 
 #ifdef CHECKMEM
-	showmessage(__LINE__, __FILE__, Message);
+	//showmessage(__LINE__, __FILE__, Message);
 #endif
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
 		return (BRtn);
@@ -11379,6 +11355,8 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		CenterWindowInVP(hWndDlg, 0);
 		currentListLoc = 0;
 		hWndZoomList = hWndDlg;
+		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_SETTABSTOPS, 2, (LPARAM)&TabStops2);
+		
 	case GSSI_REINITDIALOG:
 		SetDlgItemText(hWndDlg, IDOK, "Exit");
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
@@ -11408,7 +11386,21 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 			}
 			GSSiClose2 (&Fid);
 		}
-		else
+		HANDLE hSharedListNames = 0;
+		int nSharedLists = GetSharedZoomLists(&hSharedListNames);
+		if (hSharedListNames)
+		{
+			LPSTR pName = GlobalLock(hSharedListNames);
+			for (int i = 0; i < nSharedLists; i++)
+			{
+				SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)pName);
+				pName = strchr(pName, 0);
+				pName++;
+			}
+			GSSiGlobUlFree (&hSharedListNames);
+		}
+		nFiles += nSharedLists;
+		if (!nFiles)
 			*CurrentZoomList = 0;
 
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_RESETCONTENT, 0, 0);
@@ -11419,6 +11411,9 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 
 			while (SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, loc, (LPARAM)list) != LB_ERR)
 			{
+				LPSTR pTab = strchr(list, '\t');
+				if (pTab)
+					*pTab = 0;
 				if (!stricmp(CurrentZoomList, list))
 				{
 					currentListLoc = loc;
@@ -11429,35 +11424,49 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 		}
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_SETCURSEL, currentListLoc, 0);
 		SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTS, LB_GETTEXT, currentListLoc, (LPARAM)CurrentZoomList);
-		sprintf(listFile, "%s\\%s.txt", ZoomlistDir, CurrentZoomList);
-		Fid = GSSiOpenFile(listFile, 0, OF_READ);
-		fileLoc = 0;
-		if (Fid != HFILE_ERROR)
+		LPSTR pShared = strstr(CurrentZoomList, "\tShared");
+		if (pShared)
 		{
-			while (fgetstring(line, 1024, Fid))
-			{
-				if (*LastChr(line) == ';')
-					ProcessText(line);
-				else
-				{
-					LPSTR pBar = strrchr(line, '|');
-					if (pBar && *(pBar+1)=='(')
-					{
-						int item;
-						nrecs++;
-						*pBar = '\t';
-						item = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
-						SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETITEMDATA, (WPARAM)item, (LPARAM)fileLoc);
-					}
-				}
-				fileLoc = GSSillseek(Fid, 0, 1);
-			}
-			GSSiClose2 (&Fid);
-			currentListnRecs = nrecs;
-			currentLocInList = min(currentLocInList, nrecs - 1);
-			EnableWindow(GetDlgItem(hWndDlg, ID_DELETEITEMS),nrecs);
-
+			CurrentZoomListIsShared = TRUE;
+			*pShared = 0;
 		}
+		else
+			CurrentZoomListIsShared = FALSE;
+		if (CurrentZoomListIsShared)
+		{
+			GetSharedZoomListEntries(hWndDlg, IDC_ZOOMLISTCONTENTS);
+		}
+		else
+		{
+			sprintf(listFile, "%s\\%s.txt", ZoomlistDir, CurrentZoomList);
+			Fid = GSSiOpenFile(listFile, 0, OF_READ);
+			fileLoc = 0;
+			if (Fid != HFILE_ERROR)
+			{
+				while (fgetstring(line, 1024, Fid))
+				{
+					if (*LastChr(line) == ';')
+						ProcessText(line);
+					else
+					{
+						LPSTR pBar = strrchr(line, '|');
+						if (pBar && *(pBar + 1) == '(')
+						{
+							int item;
+							nrecs++;
+							*pBar = '\t';
+							item = SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_ADDSTRING, (WPARAM)0, (LPARAM)line);
+							SendDlgItemMessage(hWndDlg, IDC_ZOOMLISTCONTENTS, LB_SETITEMDATA, (WPARAM)item, (LPARAM)fileLoc);
+						}
+					}
+					fileLoc = GSSillseek(Fid, 0, 1);
+				}
+				GSSiClose2(&Fid);
+			}
+		}
+		currentListnRecs = nrecs;
+		currentLocInList = min(currentLocInList, nrecs - 1);
+		EnableWindow(GetDlgItem(hWndDlg, ID_DELETEITEMS),nrecs);
 		if (AutoZoomNext && AutoZoomNext > -2 && currentLocInList >= 0)
 		{
 			if (AutoZoomNext + currentLocInList < 0)
