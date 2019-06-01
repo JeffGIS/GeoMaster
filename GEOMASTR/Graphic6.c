@@ -4030,7 +4030,7 @@ GSSiExitProg (828);
     WinPT1.y = (CurView->Rect.top + CurView->Rect.bottom)/2;
     if (PickApW > 0) 
     {
-        PickAp = (short)IDNINT (PickApW); 
+        PickAp = IDNINT (PickApW); 
         WinPT2.x = WinPT1.x + PickAp;
         WinPT2.y = WinPT1.y; 
         WPoint1 = WinPtToBasePt(WinPT1);
@@ -4046,7 +4046,7 @@ GSSiExitProg (828);
         WPoint2.x = WPoint1.x + PickApW;
         WPoint2.y = WPoint1.y;
         WinPT2 = BasePtToWinPt (&WPoint2);
-        PickAp = (short)IDNINT (idist (WinPT1,WinPT2));
+        PickAp = IDNINT (idist (WinPT1,WinPT2));
         PickAp = max (PickAp,1);
     } 
 {

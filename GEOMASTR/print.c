@@ -2421,7 +2421,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 				pDot = strrchr(tempFile, '.');
 				if (pDot)
 					strcpy(pDot, ".txt");
-				if (OutputRampForIntersectionAndRampnumToFile(intersectionID, rampNum, tempFile, fromDB, 1,0))
+				if (OutputRampForIntersectionAndRampnumToFile(intersectionID, rampNum, tempFile, fromDB, 1,0,FALSE))
 				{
 					BasicDataDisplayToDC(tempFile, hPr, 0, 0, "", maxline,ifontsize, ifontsize*1.5, Rect, title);
 				};

@@ -4783,9 +4783,9 @@ GotCloseFilehSQL:
 			itoa(n, OutLoc, 10);
 			goto Rtnl;
 		}
-		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1))
-			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum,retired, OUTFile,codesystem(0,1),headertype(-1,0,1))
-			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1),completioncode(0all,1complete,2paid)
+		case 652: //$NVCRIS(EXPORT,FromDB,BYINTorBYRAMP,LISTFILE(nullforALL),OUTFile,codesystem(0,1),headertype(0,1),wantPhotos(opt))
+			//$NVCRIS(EXPORT, FromDB, BYRAMP, intID,rampNum,retired, OUTFile,codesystem(0,1),headertype(-1,0,1),wantPhotos(opt))
+			//$NVCRIS(EXPORT, FromDB, ALL,OUTFile,codesystem(0,1),headertype(-1,0,1),completioncode(0all,1complete,2paid),wantPhotos(opt)
 			//$NVCRIS(EXPORT,FromDB, INT,OUTFile,opt(0=all,1=withramps,2=paidonly),header(0=none and only intid,1=header and streetnames and coord wo type,2=same with type);
 			//$NVCRIS(EXPORT,FromDB, PRIORITY,OUTFile,header(0=none,1=standard,2=with types));
 			//$NVCRIS(LOADLIST,ListFile,ToDB)
@@ -4794,7 +4794,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(TEXTURECODE,texture)
 			//$NVCRIS(CODEFORVALUE,varname,varvalue)
 			//$NVCRIS(FORMATSTREETS,codedstreets)
-			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt))
+			//$NVCRIS(RAMPHEADER,headertype(0,1),OutFile(opt),wantPhotos(opt))
 			//$NVCRIS(CREATEDATABASE,path,deleteexisting)
 			//$NVCRIS(OPEN,path,createifnotexists,varname)
 			//$NVCRIS(CLOSE,handle)
@@ -4811,15 +4811,15 @@ GotCloseFilehSQL:
 			if (!stricmp(Arg[1], "EXPORT"))
 			{
 				if (!stricmp(Arg[3], "BYINT"))
-					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2], atoi(Arg[6]), atoi(Arg[7]));
+					rtn = OutputRampsForIntersectionsInListToFile(Arg[4], Arg[5], Arg[2], atoi(Arg[6]), atoi(Arg[7]), atob(Arg[8]));
 				else if (!stricmp(Arg[3], "BYRAMP"))
-					rtn = OutputRampToFile(atoi(Arg[4]), atoi(Arg[5]), atoi(Arg[6]), Arg[7], Arg[2], atoi(Arg[8]), atoi(Arg[9]));
+					rtn = OutputRampToFile(atoi(Arg[4]), atoi(Arg[5]), atoi(Arg[6]), Arg[7], Arg[2], atoi(Arg[8]), atoi(Arg[9]), atob(Arg[10]));
 
 					//rtn = OutputRampForIntersectionAndRampnumToFile(atoi(Arg[4]), atoi(Arg[5]), Arg[6], Arg[2], atoi(Arg[7]), atoi(Arg[8]));
 				else if (!stricmp(Arg[3], "INT"))
 					rtn = OutputIntsWithRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
 				else if (!stricmp(Arg[3], "ALL"))
-					rtn = OutputAllRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]));
+					rtn = OutputAllRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atob(Arg[7]));
 					//rtn = OutputRampsToFile(Arg[4], Arg[2], atoi(Arg[5]), atoi(Arg[6]), atoi(Arg[7]));
 				else if (!stricmp(Arg[3], "PRIORITY"))
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
@@ -4992,9 +4992,9 @@ GotCloseFilehSQL:
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}
-			else if (!stricmp(Arg[1], "RAMPHEADER"))
+			else if (!stricmp(Arg[1], "RAMPHEADER"))//
 			{
-				const char * pHeader = rampToTextHeader(atoi(Arg[2]));
+				const char * pHeader = rampToTextHeader(atoi(Arg[2]),atob(Arg[4]));
 				if (!*Arg[3])
 				{
 					strcpy(OutLoc, pHeader);

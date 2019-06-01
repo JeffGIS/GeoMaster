@@ -1082,8 +1082,9 @@ static char YorN(int i)
 	return 'N';
 }
 
-char *rampToText(int intNum, RampStruct *ramp, int codeSystem)
+char *rampToText(int intNum, RampStruct *ramp, int codeSystem,LPSTR photos)
 {
+#define MAX_PHOTOS	4
 	int minTime = 1338526800;
 	int altIntNum;
 	char intStreets[512];
@@ -1123,87 +1124,194 @@ char *rampToText(int intNum, RampStruct *ramp, int codeSystem)
 	LPSTR detailCode;
 	LPSTR ccode = rampComplianceCode(ramp, &detailCode, &tolerances, codeSystem);
 
-	sprintf(rampText,
-		"%i\t%i\t%i\t%s\t%i\t%s\t%s\t%i\t%s\t%i\t%i\t%i\t%c\t%s\t%s\t%s\t%s\t%s\t%.10f\t%.10f\t%i\t%s\t%s\t%s\t%s\t%c\t%c\t%c\t%c\t%c\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%s\t%s\t%i\t%i\t%s\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%s\t%s\t%i",
-		ramp->uniqueID,
-		intNum, altIntNum,
-		intStreets,
-		ramp->rampNum,
-		ramp->rampID,
-		rampTypes[rtype],
-		ramp->yearRebuilt,
-		ramp->rampStatus,
-		ramp->rampCode,
-		ramp->proximityValue,
-		ramp->proximityScore,
-		ramp->retired ? 'Y' : 'N',
-		detailCode,
-		ccode,
-		timeCompleteC,
-		ramp->rampNotes,
-		ramp->lastUpdate,
-		ramp->latitude,
-		ramp->longitude,
-		ramp->rampInXWalk,
-		textures[ramp->texture],
-		obstructions[ramp->upperLandingObstruction],
-		obstructions[ramp->lowerLandingObstruction],
-		obstructions[ramp->rampObstruction],
-		YorN(ramp->hasRampCracks),
-		YorN(ramp->hasUpperLandingCracks),
-		YorN(ramp->hasStreetLandingCracks),
-		YorN(ramp->hasLeftSidewalkCracks),
-		YorN(ramp->hasRightSidewalkCracks),
-		ramp->crackWidth.rampCrackWidth,
-		ramp->crackWidth.upperLandingCrackWidth,
-		ramp->crackWidth.streetLandingCrackWidth,
-		ramp->crackWidth.leftSidewalkCrackWidth,
-		ramp->crackWidth.rightSidewalkCrackWidth,
-		ramp->rampWidth,
-		ramp->rampDepth,
-		fabs (ramp->rampSlopeFront),
-		fabs(ramp->rampSlopeSide),
-		fabs(ramp->upperLandingSlopeFront),
-		fabs(ramp->upperLandingSlopeSide),
-		fabs(ramp->streetLandingSlopeFront),
-		fabs(ramp->streetLandingSlopeSide),
-		fabs(ramp->flareLeftSlopeFront),
-		fabs(ramp->flareRightSlopeFront),
-		fabs(ramp->swkLeftSlopeFront),
-		fabs(ramp->swkLeftSlopeSide),
-		fabs(ramp->swkRightSlopeFront),
-		fabs(ramp->swkRightSlopeSide),
-		ramp->SteepTopOfCurb,
-		ramp->PedRampLip,
-		ramp->curbCutDistance,
-		ramp->bumpWidth,
-		ramp->bumpHeight,
-		ramp->dwWidth,
-		ramp->dwDepth,
-		signalTypes[ramp->PEDSignalType],
-		buttonTypes[ramp->PEDButtonType],
-		ramp->PEDButtonHeight,
-		ramp->PEDButtonDist,
-		AWITypes[ramp->awi],
-		ramp->hasLocatorTone,
-		ramp->hasInfoSign,
-		ramp->hasBraille,
-		ramp->hasTactileArrow,
-		ramp->locatorToneVolume,
-		ramp->audibleWalkIndicationVolume,
-		ramp->rampComment,
-		ramp->fileID,
-		ramp->cornerID		
+	if (photos)
+	{
+		LPSTR ploc = photos;
+		char photoDir[MAX_PATH];
+		char photoFiles[MAX_PHOTOS][MAX_PATH] = { 0 };
+		int iphoto = 0;
+
+		GetGlobalCVal("[%PHOTODIR]",photoDir, "");
+		while (*ploc)
+		{
+			if (iphoto < MAX_PHOTOS)
+				sprintf(photoFiles[iphoto++], "%s%s", photoDir, ploc);
+			ploc = strchr(ploc, 0);
+			ploc++;
+		}
+		maxNumPhotos = max(iphoto, maxNumPhotos);
+		sprintf(rampText,
+			"%i\t%i\t%i\t%s\t%i\t%s\t%s\t%s\t%s\t%s\t%s\t%i\t%s\t%i\t%i\t%i\t%c\t%s\t%s\t%s\t%s\t%s\t%.10f\t%.10f\t%i\t%s\t%s\t%s\t%s\t%c\t%c\t%c\t%c\t%c\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%s\t%s\t%i\t%i\t%s\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%s\t%s\t%i",
+			ramp->uniqueID,
+			intNum, altIntNum,
+			intStreets,
+			ramp->rampNum,
+			ramp->rampID,
+			rampTypes[rtype],
+			photoFiles[0],
+			photoFiles[1],
+			photoFiles[2],
+			photoFiles[3],
+			ramp->yearRebuilt,
+			ramp->rampStatus,
+			ramp->rampCode,
+			ramp->proximityValue,
+			ramp->proximityScore,
+			ramp->retired ? 'Y' : 'N',
+			detailCode,
+			ccode,
+			timeCompleteC,
+			ramp->rampNotes,
+			ramp->lastUpdate,
+			ramp->latitude,
+			ramp->longitude,
+			ramp->rampInXWalk,
+			textures[ramp->texture],
+			obstructions[ramp->upperLandingObstruction],
+			obstructions[ramp->lowerLandingObstruction],
+			obstructions[ramp->rampObstruction],
+			YorN(ramp->hasRampCracks),
+			YorN(ramp->hasUpperLandingCracks),
+			YorN(ramp->hasStreetLandingCracks),
+			YorN(ramp->hasLeftSidewalkCracks),
+			YorN(ramp->hasRightSidewalkCracks),
+			ramp->crackWidth.rampCrackWidth,
+			ramp->crackWidth.upperLandingCrackWidth,
+			ramp->crackWidth.streetLandingCrackWidth,
+			ramp->crackWidth.leftSidewalkCrackWidth,
+			ramp->crackWidth.rightSidewalkCrackWidth,
+			ramp->rampWidth,
+			ramp->rampDepth,
+			fabs(ramp->rampSlopeFront),
+			fabs(ramp->rampSlopeSide),
+			fabs(ramp->upperLandingSlopeFront),
+			fabs(ramp->upperLandingSlopeSide),
+			fabs(ramp->streetLandingSlopeFront),
+			fabs(ramp->streetLandingSlopeSide),
+			fabs(ramp->flareLeftSlopeFront),
+			fabs(ramp->flareRightSlopeFront),
+			fabs(ramp->swkLeftSlopeFront),
+			fabs(ramp->swkLeftSlopeSide),
+			fabs(ramp->swkRightSlopeFront),
+			fabs(ramp->swkRightSlopeSide),
+			ramp->SteepTopOfCurb,
+			ramp->PedRampLip,
+			ramp->curbCutDistance,
+			ramp->bumpWidth,
+			ramp->bumpHeight,
+			ramp->dwWidth,
+			ramp->dwDepth,
+			signalTypes[ramp->PEDSignalType],
+			buttonTypes[ramp->PEDButtonType],
+			ramp->PEDButtonHeight,
+			ramp->PEDButtonDist,
+			AWITypes[ramp->awi],
+			ramp->hasLocatorTone,
+			ramp->hasInfoSign,
+			ramp->hasBraille,
+			ramp->hasTactileArrow,
+			ramp->locatorToneVolume,
+			ramp->audibleWalkIndicationVolume,
+			ramp->rampComment,
+			ramp->fileID,
+			ramp->cornerID
 		);
+	}
+	else
+	{
+		sprintf(rampText,
+			"%i\t%i\t%i\t%s\t%i\t%s\t%s\t%i\t%s\t%i\t%i\t%i\t%c\t%s\t%s\t%s\t%s\t%s\t%.10f\t%.10f\t%i\t%s\t%s\t%s\t%s\t%c\t%c\t%c\t%c\t%c\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%i\t%i\t%s\t%s\t%i\t%i\t%s\t%i\t%i\t%i\t%i\t%.2f\t%.2f\t%s\t%s\t%i",
+			ramp->uniqueID,
+			intNum, altIntNum,
+			intStreets,
+			ramp->rampNum,
+			ramp->rampID,
+			rampTypes[rtype],
+			ramp->yearRebuilt,
+			ramp->rampStatus,
+			ramp->rampCode,
+			ramp->proximityValue,
+			ramp->proximityScore,
+			ramp->retired ? 'Y' : 'N',
+			detailCode,
+			ccode,
+			timeCompleteC,
+			ramp->rampNotes,
+			ramp->lastUpdate,
+			ramp->latitude,
+			ramp->longitude,
+			ramp->rampInXWalk,
+			textures[ramp->texture],
+			obstructions[ramp->upperLandingObstruction],
+			obstructions[ramp->lowerLandingObstruction],
+			obstructions[ramp->rampObstruction],
+			YorN(ramp->hasRampCracks),
+			YorN(ramp->hasUpperLandingCracks),
+			YorN(ramp->hasStreetLandingCracks),
+			YorN(ramp->hasLeftSidewalkCracks),
+			YorN(ramp->hasRightSidewalkCracks),
+			ramp->crackWidth.rampCrackWidth,
+			ramp->crackWidth.upperLandingCrackWidth,
+			ramp->crackWidth.streetLandingCrackWidth,
+			ramp->crackWidth.leftSidewalkCrackWidth,
+			ramp->crackWidth.rightSidewalkCrackWidth,
+			ramp->rampWidth,
+			ramp->rampDepth,
+			fabs(ramp->rampSlopeFront),
+			fabs(ramp->rampSlopeSide),
+			fabs(ramp->upperLandingSlopeFront),
+			fabs(ramp->upperLandingSlopeSide),
+			fabs(ramp->streetLandingSlopeFront),
+			fabs(ramp->streetLandingSlopeSide),
+			fabs(ramp->flareLeftSlopeFront),
+			fabs(ramp->flareRightSlopeFront),
+			fabs(ramp->swkLeftSlopeFront),
+			fabs(ramp->swkLeftSlopeSide),
+			fabs(ramp->swkRightSlopeFront),
+			fabs(ramp->swkRightSlopeSide),
+			ramp->SteepTopOfCurb,
+			ramp->PedRampLip,
+			ramp->curbCutDistance,
+			ramp->bumpWidth,
+			ramp->bumpHeight,
+			ramp->dwWidth,
+			ramp->dwDepth,
+			signalTypes[ramp->PEDSignalType],
+			buttonTypes[ramp->PEDButtonType],
+			ramp->PEDButtonHeight,
+			ramp->PEDButtonDist,
+			AWITypes[ramp->awi],
+			ramp->hasLocatorTone,
+			ramp->hasInfoSign,
+			ramp->hasBraille,
+			ramp->hasTactileArrow,
+			ramp->locatorToneVolume,
+			ramp->audibleWalkIndicationVolume,
+			ramp->rampComment,
+			ramp->fileID,
+			ramp->cornerID
+		);
+	}
 	free(ccode);
 	free(detailCode);
 
     return rampText;
 }
 
-const char *rampToTextHeader(int type)
+const char *rampToTextHeader(int type, BOOL havePhotos)
 {
 	if (!type)
-		return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tRampStatus\tRampCode\tProximityValue\tProximityScore\tRetired\tComplianceCodeDetail\tComplianceCodeSummary\tTimeComplete\tRampNotes\tLastUpdate\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tUpperLandingDepth\tRampRunningSlope\tRampCrossSlope\tUpperLandingRunningSlope\tUpperLandingCrossSlope\tStreetLandingRunningSlope\tStreetLandingCrossSlope\tFlareLeftRunningSlope\tFlareRightRunningSlope\tSidewalkLeftRunningSlope\tSidewalkLeftCrossSlope\tSidewalkRightRunningSlope\tSidewalkRightCrossSlope\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID";
-	return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tRampStatus(C256)\tRampCode(B2)\tProximityValue(B4)\tProximityScore(B2)\tRetired(C1)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)\tTimeComplete(C16)\tRampNotes(C255)\tLastUpdate(C64)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tUpperLandingDepth(B2)\tRampRunningSlope(R4)\tRampCrossSlope(R4)\tUpperLandingRunningSlope(R4)\tUpperLandingCrossSlope(R4)\tStreetLandingRunningSlope(R4)\tStreetLandingCrossSlope(R4)\tFlareLeftRunningSlope(R4)\tFlareRightRunningSlope(R4)\tSidewalkLeftRunningSlope(R4)\tSidewalkLeftCrossSlope(R4)\tSidewalkRightRunningSlope(R4)\tSidewalkRightCrossSlope(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID";
+	{
+		if (havePhotos)
+			return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tPhoto1\tPhoto2\tPhoto3\tPhoto4\tRampStatus\tRampCode\tProximityValue\tProximityScore\tRetired\tComplianceCodeDetail\tComplianceCodeSummary\tTimeComplete\tRampNotes\tLastUpdate\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tUpperLandingDepth\tRampRunningSlope\tRampCrossSlope\tUpperLandingRunningSlope\tUpperLandingCrossSlope\tStreetLandingRunningSlope\tStreetLandingCrossSlope\tFlareLeftRunningSlope\tFlareRightRunningSlope\tSidewalkLeftRunningSlope\tSidewalkLeftCrossSlope\tSidewalkRightRunningSlope\tSidewalkRightCrossSlope\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID";
+		else
+			return "UniqueRampID\tIntersectionNum\tAlternateIntersectionNum\tStreet Names\tRampNum\tRampID\tRampType\tYearBuilt\tRampStatus\tRampCode\tProximityValue\tProximityScore\tRetired\tComplianceCodeDetail\tComplianceCodeSummary\tTimeComplete\tRampNotes\tLastUpdate\tLatitude\tLongitude\tRampInXWalk\tTexture\tUpperLandingObstruction\tStreetLandingObstruction\tRampObstruction\tHasRampCracks\tHasUpperLandingCracks\tHasStreetLandingCracks\tHasLeftSidewalkCracks\tHasRightSidewalkCracks\tRampCrackWidth\tUpperLandingCrackWidth\tStreetLandingCrackWidth\tLeftSidewalkCrackWidth\tRightSidewalkCrackWidth\tRampWidth\tUpperLandingDepth\tRampRunningSlope\tRampCrossSlope\tUpperLandingRunningSlope\tUpperLandingCrossSlope\tStreetLandingRunningSlope\tStreetLandingCrossSlope\tFlareLeftRunningSlope\tFlareRightRunningSlope\tSidewalkLeftRunningSlope\tSidewalkLeftCrossSlope\tSidewalkRightRunningSlope\tSidewalkRightCrossSlope\tSteepTopOfCurb\tLipAtFlowLine\tCurbCutDistance\tBumpWidth\tBumpHeight\tDetectableWarningWidth\tDetectableWarningDepth\tPEDSignalType\tPEDButtonType\tPEDButtonHeight\tPEDButtonDistance\tPEDButtonAWIType\tPEDButtonHasLocatorTone\tPEDButtonHasInfoSign\tPEDButtonHasBraille\tPEDButtonHasTactileArrow\tPEDButtonLocatorToneVolume\tPEDButtonAWIVolume\tRampComment\tSourceFile\tCornerID";
+	}
+	else
+	{
+		if (havePhotos)
+			return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tPhoto1(C32)\tPhoto2(C32)\tPhoto3(C32)\tPhoto4(C32)\tRampStatus(C256)\tRampCode(B2)\tProximityValue(B4)\tProximityScore(B2)\tRetired(C1)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)\tTimeComplete(C16)\tRampNotes(C255)\tLastUpdate(C64)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tUpperLandingDepth(B2)\tRampRunningSlope(R4)\tRampCrossSlope(R4)\tUpperLandingRunningSlope(R4)\tUpperLandingCrossSlope(R4)\tStreetLandingRunningSlope(R4)\tStreetLandingCrossSlope(R4)\tFlareLeftRunningSlope(R4)\tFlareRightRunningSlope(R4)\tSidewalkLeftRunningSlope(R4)\tSidewalkLeftCrossSlope(R4)\tSidewalkRightRunningSlope(R4)\tSidewalkRightCrossSlope(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID";
+		else
+			return "UniqueRampID(B4)\tIntersectionNum(B4)\tAlternateIntersectionNum(B4)\tStreet Names(C255)\tRampNum(B4)\tRampID(C16)\tRampType(C32)\tYearBuilt(B2)\tRampStatus(C256)\tRampCode(B2)\tProximityValue(B4)\tProximityScore(B2)\tRetired(C1)\tComplianceCodeDetail(C100)\tComplianceCodeSummary(C32)\tTimeComplete(C16)\tRampNotes(C255)\tLastUpdate(C64)\tLatitude(R8)\tLongitude(R8)\tRampInXWalk(B2)\tTexture(C40)\tUpperLandingObstruction(C40)\tStreetLandingObstruction(C40)\tRampObstruction(C40)\tHasRampCracks(B2)\tHasUpperLandingCracks(B2)\tHasStreetLandingCracks(B2)\tHasLeftSidewalkCracks(B2)\tHasRightSidewalkCracks(B2)\tRampCrackWidth(R4)\tUpperLandingCrackWidth(R4)\tStreetLandingCrackWidth(R4)\tLeftSidewalkCrackWidth(R4)\tRightSidewalkCrackWidth(R4)\tRampWidth(B2)\tUpperLandingDepth(B2)\tRampRunningSlope(R4)\tRampCrossSlope(R4)\tUpperLandingRunningSlope(R4)\tUpperLandingCrossSlope(R4)\tStreetLandingRunningSlope(R4)\tStreetLandingCrossSlope(R4)\tFlareLeftRunningSlope(R4)\tFlareRightRunningSlope(R4)\tSidewalkLeftRunningSlope(R4)\tSidewalkLeftCrossSlope(R4)\tSidewalkRightRunningSlope(R4)\tSidewalkRightCrossSlope(R4)\tSteepTopOfCurb(R4)\tLipAtFlowLine(R4)\tCurbCutDistance(R4)\tBumpWidth(R4)\tBumpHeight(R4)\tDetectableWarningWidth(B4)\tDetectableWarningDepth(B4)\tPEDSignalType(C32)\tPEDButtonType(C32)\tPEDButtonHeight(B2)\tPEDButtonDistance(B2)\tPEDButtonAWIType(C16)\tPEDButtonHasLocatorTone(B2)\tPEDButtonHasInfoSign(B2)\tPEDButtonHasBraille(B2)\tPEDButtonHasTactileArrow(B2)\tPEDButtonLocatorToneVolume(B2)\tPEDButtonAWIVolume(B2)\tRampComment(C255)\tSourceFile(C12)\tCornerID";
+	}
 }

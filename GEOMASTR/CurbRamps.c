@@ -5,6 +5,10 @@
 
 #define CURRENT_INTERSECTION_VERSION "7.0"
 
+typedef struct {
+	int intID, rampNum, retired;
+} RAMPID;
+
 static BOOL _ignoreErrorLog = FALSE;
 static sqlite3 *database = NULL;
 
@@ -15,15 +19,16 @@ void convertVersion_2_to_3(LPSTR str);
 void convertVersion_3_to_4(LPSTR str, LPSTR fileID);
 void convertVersion_4_to_5(LPSTR str, LPSTR fileID);
 void convertVersion_5_to_6(LPSTR str, LPSTR fileID);
+void convertVersion_6_to_7(LPSTR str, LPSTR fileID);
+
 BOOL createIntersectionsTable(BOOL dropExistingTables);
 int GetRampData(RampStruct * pRamp, sqlite3_stmt *statement);
+int getAllRampIDs(LPSTR OutFile);
+BOOL getRampFromDB(RAMPID * pRampID, RampStruct * pRamp, LPSTR wantPhotos);
 
 static BOOL Execute(LPSTR cmd,LPSTR errFile);
 BOOL UpdateFromFile(LPSTR file, BOOL convertInsert,BOOL insertFileID,int dbType,LPSTR errFile,LPINT ptotErrors,int checkPointOpt);
 
-typedef struct {
-	int intID, rampNum, retired;
-} RAMPID;
 
 /*int getOffsetCoord:(MPIntersection *)mpint
 x : (int)x
@@ -687,7 +692,7 @@ BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc,L
 	return rtn;
 }
 
-BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType,BOOL wantPhotos)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -701,7 +706,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
 			if (FidOut != HFILE_ERROR)
 			{
-				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType,wantPhotos);
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
 				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
@@ -715,7 +720,7 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
-								LPSTR rampText = rampToText(intID, pRamp, codeSystem);
+								LPSTR rampText = rampToText(intID, pRamp, codeSystem,0);
 								sprintf(line, "%s", rampText);
 								fputstring(line, FidOut);
 								free(rampText);
@@ -737,11 +742,12 @@ BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NV
 	}
 	return rtn;
 }
-BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType,BOOL wantPhotos)
 {
 	BOOL rtn = FALSE;
 	char line[4096 * 2];
 	int rc;
+	LPSTR photos = 0;
 	ToleranceValues tolerances;
 	setStandardToleranceValues(&tolerances);
 
@@ -762,7 +768,7 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 			char tempRampIDs[MAX_PATH];
 			if (headerType >= 0)
 			{
-				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType,wantPhotos);
 				fputstring(rampHeader, FidOut);
 			}
 			RAMPID rampID;
@@ -771,7 +777,9 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 			rampID.retired = retired;
 			RampStruct ramp = { 0 };
 			RampStruct * pRamp = &ramp;
-			if (getRampFromDB(&rampID, pRamp))
+			if (wantPhotos)
+				photos = malloc(1024);
+			if (getRampFromDB(&rampID, pRamp,photos))
 			{
 				if (pRamp->rampExists)
 				{
@@ -782,18 +790,19 @@ BOOL OutputRampToFile(int intNum, int rampNum, int retired, LPSTR OutFile, LPSTR
 						RampStruct * pRampBump = &rampBump;
 						RAMPID rampIDBump = rampID;
 						rampIDBump.rampNum = getMiddleRampNumFromRampNum(rampID.rampNum);
-						if (getRampFromDB(&rampIDBump, pRampBump))
+						if (getRampFromDB(&rampIDBump, pRampBump,0))
 						{
 							pRamp->bumpHeight = pRampBump->bumpHeight;
 							pRamp->bumpWidth = pRampBump->bumpWidth;
 						}
 					}
-					LPSTR rampText = rampToText(intNum, pRamp, codeSystem);
+					LPSTR rampText = rampToText(intNum, pRamp, codeSystem,photos);
 					sprintf(line, "%s", rampText);
 					fputstring(line, FidOut);
 					free(rampText);
 				}
 			}
+			GSSiFree(&photos);
 			GSSiClose2 (&FidOut);
 			rtn = TRUE;
 		}
@@ -833,7 +842,7 @@ int getAllRampIDs (LPSTR OutFile)
 
 	return nRamps;
 }
-BOOL getRampFromDB(RAMPID * pRampID, RampStruct * pRamp)
+BOOL getRampFromDB(RAMPID * pRampID, RampStruct * pRamp,LPSTR wantPhotos)
 {
 	BOOL rtn = FALSE;
 	char query[1024];
@@ -847,14 +856,63 @@ BOOL getRampFromDB(RAMPID * pRampID, RampStruct * pRamp)
 		rtn = TRUE;
 	}
 	SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+	if (wantPhotos)
+	{
+		int cornerID = getMiddleRampIDFromRampID(pRampID->rampNum);
+		*wantPhotos = 0;
 
+		sprintf(query, "SELECT rampNum,iPadNum, pictNum FROM CURBRAMP_PICTURES WHERE intID=%i", pRampID->intID);
+		LPSTR pPos = wantPhotos;
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			char pictName[32];
+			int i = 0;
+			int rampNum = sqlite3_column_int(statement, i++);
+			int iPadNum = sqlite3_column_int(statement, i++);
+			int pictNum = sqlite3_column_int(statement, i++);
+
+			if (rampNum == pRampID->rampNum)
+			{
+				sprintf(pictName, "%i_%i.jpg",iPadNum, pictNum);
+				strcpy(pPos, pictName);
+				pPos = strchr(pPos, 0);
+				pPos++;
+				rtn = TRUE;
+			}
+		}
+		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+		SQLOK(sqlite3_prepare_v2(database, query, -1, &statement, NULL), database, "get mpint", 0);
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			char pictName[32];
+			int i = 0;
+			int rampNum = sqlite3_column_int(statement, i++);
+			int iPadNum = sqlite3_column_int(statement, i++);
+			int pictNum = sqlite3_column_int(statement, i++);
+
+			if (rampNum != pRampID->rampNum && cornerID == getMiddleRampIDFromRampID(rampNum))
+			{
+				sprintf(pictName, "%i_%i.jpg", iPadNum, pictNum);
+				strcpy(pPos, pictName);
+				pPos = strchr(pPos, 0);
+				pPos++;
+				rtn = TRUE;
+			}
+		}
+		*pPos++ = 0;
+		*pPos = 0;
+		SQLOK(sqlite3_finalize(statement), database, "get mpint", 0);
+
+	}
 	return rtn;
 }
-BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType,BOOL wantPhotos)
 {
 	BOOL rtn = FALSE;
 	char line[4096 * 2];
 	int rc;
+	LPSTR photos = 0;
 	ToleranceValues tolerances;
 	setStandardToleranceValues(&tolerances);
 
@@ -871,23 +929,26 @@ BOOL OutputAllRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, i
 			HFILE FidList = GSSiOpenFile(tempRampIDs, 0, OF_READ);
 			if (FidList != HFILE_ERROR)
 			{
-				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType,wantPhotos);
 				fputstring(rampHeader, FidOut);
 				RAMPID rampID;
 				while (BigRead(FidList, &rampID, sizeof(RAMPID)))
 				{
 					RampStruct ramp = { 0 };
 					RampStruct * pRamp = &ramp;
-					if (getRampFromDB(&rampID,pRamp))
+					if (wantPhotos)
+						photos = malloc(1024);
+					if (getRampFromDB(&rampID,pRamp,photos))
 					{
 						if (pRamp->rampExists)
 						{
-							LPSTR rampText = rampToText(rampID.intID, pRamp, codeSystem);
+							LPSTR rampText = rampToText(rampID.intID, pRamp, codeSystem,photos);
 							sprintf(line, "%s", rampText);
 							fputstring(line, FidOut);
 							free(rampText);
 						}
 					}
+					GSSiFree(&photos);
 				}
 				GSSiClose2 (&FidList);
 			}
@@ -945,7 +1006,7 @@ BOOL OutputPriorityLocToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int header)
 	return rtn;
 }
 
-BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode)
+BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType, int completionCode,BOOL wantPhotos)
 {
 	BOOL rtn = FALSE;
 	int rc;
@@ -967,7 +1028,7 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 			HFILE FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
 			if (FidOut != HFILE_ERROR)
 			{
-				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+				LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType,wantPhotos);
 				fputstring(rampHeader, FidOut);
 				LPSTR line = malloc(4096);
 				MPINTERSECTION *pmpInt = malloc(sizeof(MPINTERSECTION)+4);
@@ -983,7 +1044,7 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 							RampStruct * pRamp = &pmpInt->ramps[i];
 							if (pRamp->rampExists)
 							{
-								LPSTR rampText = rampToText(pmpInt->intID, pRamp, codeSystem);
+								LPSTR rampText = rampToText(pmpInt->intID, pRamp, codeSystem,0);
 								sprintf(line, "%s", rampText);
 								fputstring(line, FidOut);
 								free(rampText);
@@ -1006,12 +1067,13 @@ BOOL OutputRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int 
 	}
 	return rtn;
 }
-BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType)
+BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType,BOOL wantPhotos)
 {
 	BOOL rtn = FALSE;
 	OFSTRUCTGM OFStruct;
 	HFILE fid;
 	int rc;
+	LPSTR photos = 0;
 	ToleranceValues tolerances;
 	setStandardToleranceValues(&tolerances);
 
@@ -1038,7 +1100,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 			{
 				if (headerType >= 0)
 				{
-					LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType);
+					LPSTR rampHeader = (LPSTR)rampToTextHeader(headerType,wantPhotos);
 					fputstring(rampHeader, FidOut);
 				}
 				LPSTR line = malloc(4096);
@@ -1048,7 +1110,7 @@ BOOL OutputRampForIntersectionAndRampnumToFile(int intID, int rampNum, LPSTR Out
 					RampStruct * pRamp = &pmpInt->ramps[rampNum];
 					if (pRamp->rampExists)
 					{
-						LPSTR rampText = rampToText(pmpInt->intID, pRamp, codeSystem);
+						LPSTR rampText = rampToText(pmpInt->intID, pRamp, codeSystem,photos);
 						sprintf(line, "%s", rampText);
 						fputstring(line, FidOut);
 						free(rampText);
@@ -1093,7 +1155,7 @@ BOOL ComplianceCodeForRamp(int intNum, int rampNum, int retired, LPSTR NVCRISDat
 			rampID.retired = retired;
 			RampStruct ramp = { 0 };
 			RampStruct * pRamp = &ramp;
-			if (getRampFromDB(&rampID, pRamp))
+			if (getRampFromDB(&rampID, pRamp,0))
 			{
 				if (pRamp->rampExists)
 				{
@@ -1655,6 +1717,9 @@ void convertVersion(LPSTR str, int fromVer, int toVer,LPSTR fileID)
 		case 5:
 			convertVersion_5_to_6(str, fileID);
 			break;
+		case 6:
+			convertVersion_6_to_7(str, fileID);
+			break;
 		}
 	}
 	return;
@@ -1751,6 +1816,17 @@ void convertVersion_5_to_6(LPSTR str, LPSTR fileID)
 		}
 	}
 }
+void convertVersion_6_to_7(LPSTR str, LPSTR fileID)
+{
+	{
+		LPSTR ploc = strstr(str, "INSERT OR REPLACE INTO Ramps VALUES(");
+		if (ploc)
+		{
+			LPSTR pEnd = strrchr(ploc, ')');
+			sprintf(pEnd, ",0);");
+		}
+	}
+}
 
 int getDatasetVersion(void)
 {
@@ -1791,7 +1867,7 @@ BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc
 		rampID.retired = retired;
 		RampStruct ramp = { 0 };
 		RampStruct * pRamp = &ramp;
-		if (getRampFromDB(&rampID, pRamp))
+		if (getRampFromDB(&rampID, pRamp,0))
 		{
 			if (pRamp->rampExists)
 			{
@@ -1868,7 +1944,7 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 					rampID.retired = sqlite3_column_int(statement, 2);
 					RampStruct ramp = { 0 };
 					RampStruct * pRamp = &ramp;
-					if (getRampFromDB(&rampID, pRamp))
+					if (getRampFromDB(&rampID, pRamp,0))
 					{
 						if (pRamp->rampExists)
 						{

@@ -3616,6 +3616,9 @@ GSSiExitProg (532);
 		case 402:
 			MAXHOTSPOTDIMENSION = atol(Value);
 			break;
+		case 403:
+			maxNumPhotos = atol(Value);
+			break;
 		default:
  			break;
 	}
@@ -4037,6 +4040,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%IPADINSERVER", 400, FALSE);
 	AllocateTypeVar("%GRAPHICSMACRO", 401, FALSE);
 	AllocateTypeVar("%HOTSPOTGRIDSIZE", 402, FALSE);
+	AllocateTypeVar("%MAXNUMPHOTOS", 403, FALSE);
 
 	
 //	AllocateTypeVar("%DL",191,FALSE);
@@ -5262,6 +5266,9 @@ GSSiExitProg (533);
 			break;
 		case 402:
 			ltoa(MAXHOTSPOTDIMENSION, OutStr,10);
+			break;
+		case 403:
+			ltoa(maxNumPhotos, OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);

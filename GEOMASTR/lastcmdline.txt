@@ -1,2 +1,2 @@
-configs\directdisplay.gmc /F /NOCACHE /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;  
-h:\pcviewer
+[%DL]configs\testpick.GMC /F [REQUESTID]=1559327040; 
+j:\pcviewer\pcviewer

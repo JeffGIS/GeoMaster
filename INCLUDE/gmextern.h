@@ -1818,7 +1818,7 @@ extern  char	delayedProcessConnectedCommand[512];
 extern  HWND	hWndLinkedTo;
 extern  BOOL	firstDisplayComplete;
 extern  int		MAXHOTSPOTDIMENSION;
-
+extern	int		maxNumPhotos;
 extern	int		ii;
 
 extern int nPaint;
