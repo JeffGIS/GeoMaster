@@ -1270,7 +1270,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 			GSSifstat(TMPFid, &stat);
 			IndexTime = stat.st_mtime;
 			dtime = difftime(stat.st_mtime, SHPParmTime);
-			if (dtime < 0)
+			if (dtime < 0 || IndexTime < 1559413642 /*time when index changed to int32 coord*/)
 			{
 				GSSiClose2 (&TMPFid);
 				GSSiRemove(Name);

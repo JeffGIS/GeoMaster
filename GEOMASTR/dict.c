@@ -36,8 +36,8 @@ extern	int	ShowHollowStreet;
 long    IDNINT (double X)
 {
     if (X < 0)
-        return ((long) (X - 0.5));
-    return ((long) (X + 0.5));
+        return ((long) fmax ((double)INT_MIN,(X - 0.5)));
+    return ((long) fmin ((double)INT_MAX,(X + 0.5)));
 }
 
 void GetSymDictChildren (int Parent,LPSHORT pnChildren,LPHANDLE phChildren,int SymType,BOOL SearchSubPar)
