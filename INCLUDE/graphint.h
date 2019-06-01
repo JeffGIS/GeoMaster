@@ -1,4 +1,5 @@
 #define WIN31
+#include "shapefil.h"
 #include "shr.h"
 //#include "16two32.h" 
 #include "bigmemln.h"
@@ -2290,6 +2291,8 @@ BOOL GetShapeNumRecs(LPSTR file, int * nrecs);
 BOOL CopySHPParm(LPSTR fromfile, LPSTR tofile, int startref);
 long ReadSHPHeader(HFILE FidSHP, LPMNMXCORD pMinMaxCoord, LPSTR FileName);
 BOOL OpenSHPFileIndex (LPSTR SHPFileName,HFILE SHPFid);
+SHPHandle SHPOpenGSSi(const char * pszShapeFile, const char * pszAccess);
+MNMXCORL AdjustShapeBounds(LPMNMXCORD pBounds,BOOL Insert);
 BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName,LPSTR TAG);
 long GetSHPRecordOffset (long record,BOOL UseBounds);
 BOOL ReadSHPRecordHeader (HFILE FidSHP,long RecordOffset,LPMNMXCORD pMinMaxCoord);

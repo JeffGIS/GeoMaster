@@ -180,7 +180,7 @@ BOOL GetShapeBounds(LPSTR file, LPMNMXCORD pbounds)
 	int		nShapeType, nEntities;
 	double	minBounds[4], maxBounds[4];
 
-	hSHP = SHPOpen(file, "rb");
+	hSHP = SHPOpenGSSi(file, "rb");
 	if (hSHP)
 	{
 		SHPGetInfo(hSHP, &nEntities, &nShapeType, minBounds, maxBounds);
@@ -200,7 +200,7 @@ BOOL GetShapeType(LPSTR file, int * ptype)
 	int		nShapeType, nEntities;
 	double	minBounds[4], maxBounds[4];
 
-	hSHP = SHPOpen(file, "rb");
+	hSHP = SHPOpenGSSi(file, "rb");
 	if (hSHP)
 	{
 		SHPGetInfo(hSHP, &nEntities, &nShapeType, minBounds, maxBounds);
@@ -218,7 +218,7 @@ BOOL GetShapeNumRecs(LPSTR file, int * nrecs)
 	int		nShapeType, nEntities;
 	double	minBounds[4], maxBounds[4];
 
-	hSHP = SHPOpen(file, "rb");
+	hSHP = SHPOpenGSSi(file, "rb");
 	if (hSHP)
 	{
 		SHPGetInfo(hSHP, &nEntities, &nShapeType, minBounds, maxBounds);

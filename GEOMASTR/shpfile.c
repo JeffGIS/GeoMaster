@@ -87,7 +87,8 @@ static int				NumPOC;
 static HFILE			thinnedConFid=HFILE_ERROR;
 static sqlite3			*SHPIndexHandle = 0;
 static sqlite3_stmt		*SHPstatement = 0;
-
+static double			ShapeXMin = 0, ShapeYMin = 0;
+static double			ShapeXFactor = 1, ShapeYFactor = 1;
 
 #include "gmextern.h"
 #include <sys\types.h>
@@ -157,13 +158,17 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	MNMXCORD	FileMNMX;
 	DPOINT		Points[4];
 	char		 SHPFileName[MAX_PATH];
+	OFSTRUCTGM	ofStructGM;
 
 	strcpy(SHPFileName, SHPFileNameIN);
 	ExpandText(SHPFileName);
 
-	SHPFid = GSSiOpenFile (SHPFileName,0,OF_READ);
+	SHPFid = GSSiOpenFile (SHPFileName,&ofStructGM,OF_READ);
 	if (SHPFid == HFILE_ERROR)
 		return FALSE;
+	SHPHandle	hSHP = SHPOpenGSSi(ofStructGM.szPathName, "rb");
+	if (hSHP)
+		SHPClose(hSHP);
 	if (!(SHPType = ReadSHPHeader (SHPFid,&SHPFileMNMX,SHPFileName)))
     {
     	GSSiClose2 (&SHPFid);
@@ -1085,7 +1090,42 @@ int GetSHPIndexType(LPSTR Name)
 	}
 	return type;
 }
+SHPHandle SHPOpenGSSi(const char * pszShapeFile, const char * pszAccess)
+{
+	SHPHandle hSHP = SHPOpen(pszShapeFile, pszAccess);
 
+	if (hSHP)
+	{
+		ShapeXMin = hSHP->adBoundsMin[0];
+		ShapeYMin = hSHP->adBoundsMin[1];
+		ShapeXFactor = INT_MAX / (hSHP->adBoundsMax[0] - hSHP->adBoundsMin[0]);
+		ShapeYFactor = INT_MAX / (hSHP->adBoundsMax[1] - hSHP->adBoundsMin[1]);
+	}
+	return hSHP;
+}
+MNMXCORL AdjustShapeBounds(LPMNMXCORD pBounds,BOOL Insert)
+{
+	MNMXCORL AdjustedBounds = { 0 };
+	long halflong = INT_MAX / 2;
+
+	AdjustedBounds.xmn = IDNINT((pBounds->xmn - ShapeXMin) * ShapeXFactor - halflong);
+	AdjustedBounds.ymn = IDNINT((pBounds->ymn - ShapeYMin) * ShapeYFactor - halflong);
+	AdjustedBounds.xmx = IDNINT((pBounds->xmx - ShapeXMin) * ShapeXFactor - halflong);
+	AdjustedBounds.ymx = IDNINT((pBounds->ymx - ShapeYMin) * ShapeYFactor - halflong);
+	if (!Insert)
+	{
+		double queryAdjustment = 1.00000012;
+		double xMid = ((double)AdjustedBounds.xmn + (double)AdjustedBounds.xmx) / 2.0;
+		double yMid = ((double)AdjustedBounds.ymn + (double)AdjustedBounds.ymx) / 2.0;
+		double xWidth = queryAdjustment * ((double)AdjustedBounds.xmx - (double)AdjustedBounds.xmn) / 2.0;
+		double yWidth = queryAdjustment * ((double)AdjustedBounds.ymx - (double)AdjustedBounds.ymn) / 2.0;
+		AdjustedBounds.xmn = IDNINT(xMid - xWidth);
+		AdjustedBounds.xmx = IDNINT(xMid + xWidth);
+		AdjustedBounds.ymn = IDNINT(yMid - yWidth);
+		AdjustedBounds.ymx = IDNINT(yMid + yWidth);
+	}
+	return AdjustedBounds;
+}
 BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 { 
 	char	Name[MAX_PATH];  
@@ -1457,7 +1497,9 @@ long GetSHPRecordOffset (long record,BOOL UseBounds)
 						MNMXCORD shpBounds = CurView->WBounds;
 
 						ConvertBounds(&shpBounds, 1, 0);
-						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %f AND minX <= %f AND maxY >= %f AND minY <= %f", shpBounds.xmn, shpBounds.xmx, shpBounds.ymn, shpBounds.ymx);
+						MNMXCORL shpBoundsL = AdjustShapeBounds(&shpBounds,FALSE);
+
+						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP, SHP_index WHERE SHP.RECNUM = SHP_index.id AND maxX >= %i AND minX <= %i AND maxY >= %i AND minY <= %i", shpBoundsL.xmn, shpBoundsL.xmx, shpBoundsL.ymn, shpBoundsL.ymx);
 					}
 					else
 						sprintf(cmd, "SELECT RECNUM, symnum, offset FROM SHP WHERE RECNUM = %i", record);

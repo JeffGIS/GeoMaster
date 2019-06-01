@@ -1,8 +1,5 @@
 //  RampCompliance.c
 //  CCodeLibrary
-#if WIN32
-#define strcasecmp	stricmp
-#endif
 
 #include "RampCompliance.h"
 

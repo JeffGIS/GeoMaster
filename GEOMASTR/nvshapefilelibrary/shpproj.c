@@ -60,7 +60,7 @@
 #include <stdarg.h>
 #include "shapefil.h"
 #include "shpgeo.h"
-#include "shr.h"
+#include "graphint.h"
 #include "gmextern.h"
 #include "sqlite3.h"
 
@@ -84,7 +84,7 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 	char cmd[1024], TAGVar[256];
 	LPSTR indexName = ShapeFileIndexName(shapeFileName);
 	sqlite3* database;
-	SHPHandle	hSHP = SHPOpen(shapeFileName, "rb");
+	SHPHandle	hSHP = SHPOpenGSSi(shapeFileName, "rb");
 	SHPIndexType = SHP_INDEX_SLT;
 	if (hSHP && GSSiLength(indexName) <= 0)
 	{
@@ -101,10 +101,10 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 			if (pColon)
 				*pColon = 0;
 			useTag = TRUE;
-			sprintf(cmd, "CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,'%s' CHAR(100), offset INT);CREATE INDEX SHP_Tag ON SHP ('%s');",TAGVar,TAGVar);
+			sprintf(cmd, "CREATE VIRTUAL TABLE SHP_index USING rtree_i32(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,'%s' CHAR(100), offset INT);CREATE INDEX SHP_Tag ON SHP ('%s');",TAGVar,TAGVar);
 		}
 		else
-			strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,offset INT);");
+			strcpy (cmd,"CREATE VIRTUAL TABLE SHP_index USING rtree_i32(id,minX, maxX, minY, maxY);CREATE TABLE SHP (RECNUM INTEGER PRIMARY KEY,symnum INT,offset INT);");
 		SLT_Execute(cmd, database);
 		CreateStatusWind(0, 1, "Create Shapefile Index");
 		LPSTRD fnam = lastPathComponent(shapeFileName);
@@ -133,6 +133,7 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 					SHPBounds.xmx = psCShape->dfXMax;
 					SHPBounds.ymn = psCShape->dfYMin;
 					SHPBounds.ymx = psCShape->dfYMax;
+					MNMXCORL SHPBoundsL = AdjustShapeBounds(&SHPBounds,TRUE);
 					if (useTag)
 					{
 						GetSHPTag(Tag);
@@ -140,10 +141,10 @@ BOOL CreateShapeFileIndexSLT(LPSTR shapeFileName, LPSTR TAG)
 						LPSTR UDI = strchr(Tag, ':');
 						if (UDI)
 							UDI++;
-						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%g,%g,%g,%g);INSERT INTO SHP VALUES(%i, %i,'%s',%i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum,UDI, Offset);
+						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%i,%i,%i,%i);INSERT INTO SHP VALUES(%i, %i,'%s',%i);", irec, SHPBoundsL.xmn, SHPBoundsL.xmx, SHPBoundsL.ymn, SHPBoundsL.ymx, irec, SymNum,UDI, Offset);
 					}
 					else
-						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%f,%f,%f,%f);INSERT INTO SHP VALUES(%i, %i, %i);", irec, SHPBounds.xmn, SHPBounds.xmx, SHPBounds.ymn, SHPBounds.ymx, irec, SymNum, Offset);
+						sprintf(cmd, "INSERT INTO SHP_index VALUES(%i,%i,%i,%i,%i);INSERT INTO SHP VALUES(%i, %i, %i);", irec, SHPBoundsL.xmn, SHPBoundsL.xmx, SHPBoundsL.ymn, SHPBoundsL.ymx, irec, SymNum, Offset);
 					SLT_Execute(cmd, database);
 					SHPDestroyObject(psCShape);
 				}
@@ -210,7 +211,7 @@ int TransformSHP( int argc, char ** argv ,double * pOutFactor)
         return 0;
     }
 
-    old_SHP = SHPOpen( argv[1], "rb" );
+    old_SHP = SHPOpenGSSi( argv[1], "rb" );
     if( old_SHP == NULL)
     {
         printf( "Unable to open old files:%s\n", argv[1] );
