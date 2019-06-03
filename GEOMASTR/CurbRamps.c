@@ -1823,7 +1823,7 @@ void convertVersion_6_to_7(LPSTR str, LPSTR fileID)
 		if (ploc)
 		{
 			LPSTR pEnd = strrchr(ploc, ')');
-			sprintf(pEnd, ",0);");
+			sprintf(pEnd, ",'','','','',0);");
 		}
 	}
 }
@@ -1906,9 +1906,11 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 	int currentVersion = getDatasetVersion();
 	int latestVersion = atoi (CURRENT_INTERSECTION_VERSION);
 	char cmd[1024];
+	BOOL needToReload = FALSE;
 
 	for (int version = currentVersion; version < latestVersion;version++)
 	{
+		if (rtn)
 		switch (version)
 		{
 		case 6://convert version 6 to version 7
@@ -1998,14 +2000,8 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 
 		case 4://convert version 4 to version 5
 			{
-				char toPath[MAX_PATH];
 				BOOL st = TRUE;
-				sprintf (toPath,"%s.new", fromPath);
-				st = sqlite3_close(database);
-				st = NVCreateDB(toPath, TRUE);
-				NVCopyDB(fromPath, toPath);
-				st = !sqlite3_open(toPath, &database);
-				if (st)
+				needToReload = TRUE;
 				{
 					SLT_StartTrans(database);
 					strcpy(cmd, "UPDATE Ramps SET rampNum = 9 WHERE rampNum = 23");
@@ -2044,13 +2040,6 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 						SLT_EndTrans(database);
 					else
 						SLT_AbortTrans(database);
-					sqlite3_close(database);
-					if (st)
-					{
-						GSSiRemove(fromPath);
-						GSSiRename(toPath, fromPath);
-						st = !sqlite3_open(fromPath, &database);
-					}
 				}
 				rtn = st;
 			}
@@ -2066,7 +2055,9 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 				st = executeCmd(cmd);
 				strcpy(cmd, "ALTER TABLE Ramps ADD COLUMN Retired INT;");
 				if (st) st = executeCmd(cmd);
-/*				strcpy(cmd, "UPDATE Ramps SET rampNum = 9 WHERE rampNum = 23");
+				strcpy(cmd, "UPDATE Ramps SET rampNum = 9 WHERE rampNum = 23");
+				if (st) st = executeCmd(cmd);
+				strcpy(cmd, "UPDATE Ramps SET Retired = 0");
 				if (st) st = executeCmd(cmd);
 				strcpy(cmd, "UPDATE Ramps SET rampNum = 10 WHERE rampNum = 45");
 				if (st) st = executeCmd(cmd);
@@ -2074,7 +2065,7 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 				if (st) st = executeCmd(cmd);
 				strcpy(cmd, "UPDATE Ramps SET rampNum = 12 WHERE rampNum = 81");
 				if (st) st = executeCmd(cmd);
-				*/
+				
 				strcpy(cmd, "UPDATE Ramps SET CornerID = 81 WHERE rampNum = 1");
 				if (st) st = executeCmd(cmd);
 				strcpy(cmd, "UPDATE Ramps SET CornerID = 23 WHERE rampNum = 2");
@@ -2176,6 +2167,30 @@ BOOL adjustToLatestVersion(LPSTR fromPath)
 					SLT_AbortTrans(database);
 			}
 			break;
+		}
+	}
+	if (needToReload && rtn)
+	{
+		char toPath[MAX_PATH];
+		BOOL st = TRUE;
+		
+		rtn = FALSE;
+		sprintf(toPath, "%s.new", fromPath);
+		st = sqlite3_close(database);
+		st = NVCreateDB(toPath, TRUE);
+		if (NVCopyDB(fromPath, toPath))
+		{
+			st = !sqlite3_open(toPath, &database);
+			if (st)
+				sqlite3_close(database);
+			if (st)
+			{
+				GSSiRemove(fromPath);
+				GSSiRename(toPath, fromPath);
+				st = !sqlite3_open(fromPath, &database);
+			}
+			if (st)
+				rtn = TRUE;
 		}
 	}
 	return rtn;
@@ -2445,6 +2460,10 @@ Retired INT,\
 RampStatus CHAR(256),\
 RampCode INT,\
 ProximityScore INT, \
+RampNotes CHAR(1024), \
+CCSummary CHAR(32), \
+CCDetail CHAR(64), \
+LastUpdate CHAR(32), \
 ProximityValue INT, \
 PRIMARY KEY (intID,rampNum,Retired ASC));";
 rtn = executeCmd(createcmd2);
