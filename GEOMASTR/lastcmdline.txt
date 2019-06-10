@@ -1,2 +1,2 @@
-[%DL]configs\testpick.GMC /F [REQUESTID]=1559327040; 
-j:\pcviewer\pcviewer
+configs\basemap_new4.gmc /F /NOCACHE /KFO [%USERLEV]=2;[%IGNORESYSMSG]=T;  
+d:\bu_2018_02_28\geomas
