@@ -47,7 +47,7 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
         }       
         if(PRJ_TRAN[ID_FROM][1] > 0) 
         {  
-           TRANS2 (*X,*Y,&X2,&Y2,(HANDLE) PRJ_TRAN[ID_FROM][1]);
+          TRANS2 (*X,*Y,&X2,&Y2,(HANDLE) PRJ_TRAN[ID_FROM][1]);
           *X = X2;
           *Y = Y2;
         }       

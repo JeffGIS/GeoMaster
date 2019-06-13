@@ -388,10 +388,9 @@ C-------------------------------        */
 //C   SUBROUTINE START
 //C---------------------
 	   Top:
+	   FreePROJ(ID);
 	   if (*INNAME == '+')
 	   {
-		   if (PRJ_PROJ4DEF[ID])
-			   FreePROJ(ID);
 		   if (!(PRJ_PROJ4DEF[ID] = pj_init_plus(INNAME)))
 		   {
 			   PRJ_PROJ4DEF[ID] = 0;
@@ -558,13 +557,12 @@ GotFirstLine:
         PRJ_TYPE[ID]= atol(str);
 		if (PRJ_TYPE[ID] == -1)
 		{
-			if (PRJ_PROJ4DEF[ID])
-			{
-				FreePROJ(ID);
-			}
+			FreePROJ(ID);
+
 			PRJ_TYPE[ID] = PROJ4PROJECTION;
 			PRJ_UNITS[ID] = 2;
 			_fstrcpy(PROJECTION_UNITS[ID], "METERS");
+			strcpy(projid[ID], "GoogleMaps");
 			PRJ_PROJ4DEF[ID] = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs");
 			goto S190;
 		}
@@ -687,7 +685,7 @@ S190:
        if(PRJ_TYPE[ID] == 1 )
            if(PRJ_ZONE[ID] == 0) PRJ_ZONE[ID] = 61;
        else 
-		   if (PRJ_TYPE[ID] > 2 && PRJ_TYPE[ID] != 50 && PRJ_TYPE[ID] != PROJ4PROJECTION) PRJ_ZONE[ID] = 61;
+		   if (PRJ_TYPE[ID] > 2 && PRJ_TYPE[ID] != COUNTY && PRJ_TYPE[ID] != PROJ4PROJECTION) PRJ_ZONE[ID] = 61;
         GSSiClose2 (&lpFile1);
 	   if (ID != 1 && !IS_BASE[ID])
 	   {

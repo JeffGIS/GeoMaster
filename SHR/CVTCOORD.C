@@ -74,14 +74,17 @@ BOOL InitProj4CoordConv (BOOL Delete)
 	//"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs"
 
 	char googledef[] = "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +nadgrids=@null";
+	FreePROJ(GOOGLEMAPSPROJECTION);
 	if (!(PRJ_PROJ4DEF[GOOGLEMAPSPROJECTION] = pj_init_plus(googledef)))
        return FALSE;
 	PRJ_TYPE[GOOGLEMAPSPROJECTION] = SphericalMercatorPROJECTION;
 	PRJ_UNITS[GOOGLEMAPSPROJECTION] = 2;
-	strcpy (projid[1],"GoogleMaps");
+	strcpy (projid[GOOGLEMAPSPROJECTION],"GoogleMaps");
+	FreePROJ(LATLONPROJECTION);
 	if (!(PRJ_PROJ4DEF[LATLONPROJECTION] = pj_init_plus("+proj=latlong +datum=WGS84")))
        return FALSE;
-	strcpy (projid[0],"LATLON");
+	PRJ_TYPE[LATLONPROJECTION] = PROJ4PROJECTION;
+	strcpy (projid[LATLONPROJECTION],"LATLON");
 	return TRUE;
 }
 
@@ -144,7 +147,7 @@ GSSiExitProg (1333);
      	P_TOL = 0.0000000001;
      else
      	P_TOL = 0.0001;
-     _fstrcpy(Name,"latlongs");
+/*     _fstrcpy(Name,"latlongs");
      ID = 2;
      ok = LoadProjection(ID,Name);
      if (ok != 0)
@@ -157,6 +160,7 @@ GSSiExitProg (1333);
         return ok;
 }
      } 
+	 */
      ID = 3; 
      _fstrcpy(Name,"[%ALT_PROJECTION]");
      ExpandText (Name);

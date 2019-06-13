@@ -98,7 +98,7 @@ C                                           5 =  Packed dms */
 		char  PROJECTION_UNITS[MAX_PROJ][8];  //{Unit of measure English description
 		HANDLE  PRJ_TRAN[MAX_PROJ][3]={0,0,0,0,0,0,0,0,0,0,0,0} ;
 		projPJ	PRJ_PROJ4DEF[MAX_PROJ]={0};
-		char	projid[MAX_PROJ][MAX_PROJ]={0};
+		char	projid[MAX_PROJ][64]={0};
 		double PRJ_OUTFACTOR[MAX_PROJ]={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 
 
@@ -120,12 +120,13 @@ extern      char       PROJECTION_ID[MAX_PROJ][128];    //{Coord. system English
 extern      char       PROJECTION_UNITS[MAX_PROJ][8];  //{Unit of measure English description
 extern      HANDLE     PRJ_TRAN[MAX_PROJ][3] ; 
 extern		projPJ	   PRJ_PROJ4DEF[MAX_PROJ];
-extern		char	   projid[MAX_PROJ][32];
+extern		char	   projid[MAX_PROJ][64];
 extern		double	   PRJ_OUTFACTOR[MAX_PROJ];
 
 #endif     
 
 void FreePROJ(int id);
+BOOL InitProj4CoordConv(BOOL Delete);
 LPSTR SHPGetNVP(LPSTR ShpFileName, LPDOUBLE pFactor);
 BOOL IsProjectionFile(LPSTR File);
 
