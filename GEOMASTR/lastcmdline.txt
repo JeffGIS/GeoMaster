@@ -1,2 +1,2 @@
-configs\basic1.gmc
+configs\basemap_new4.gmc
 d:\bu_2018_02_28\geomas

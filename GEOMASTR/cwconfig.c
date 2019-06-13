@@ -1431,7 +1431,8 @@ void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 }
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
-//	_CrtDumpMemoryLeaks();
+	int rtn = 0;
+	//_CrtDumpMemoryLeaks();
 	char cmdLine[1024];
 	//strcpy(cmdLine, "0123456789012");
 	//char monName[12];
@@ -1521,7 +1522,12 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		//if (!haveKey)
 		//	return 0;
 		editMacro = FALSE;
-		return WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
+		rtn =  WinMainGeoMaster(hInstance, hPrevInstance, cmdLine, nCmdShow);
+#ifndef NDEBUG
+		_CrtDumpMemoryLeaks();
+#endif
+		return rtn;
+
 	}
 }
 
@@ -2310,9 +2316,6 @@ GSSiExitProg (437);
 #endif
 //	 exit:
  CoUninitialize();
-#ifndef NDEBUG
-	_CrtDumpMemoryLeaks();
-#endif
 return msg.wParam;
 }
 #if ENABLETRACE
