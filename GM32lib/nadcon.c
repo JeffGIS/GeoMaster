@@ -5,37 +5,45 @@
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
-#define  RADDEG    1.74532925199433e-2
+#define  DEGTORAD    1.74532925199433e-2
 typedef struct {double x,y;} DPOINT;
 #define DWORD	unsigned int
 typedef DPOINT	*LPDPOINT;
-struct CTABLE	ct;
+static struct	CTABLE	*pct;
+
+void GM32NADCONFREE(void)
+{
+	if (pct)
+		nad_free(pct);
+	pct = 0;
+}
 
 DWORD	GM32NADCON (LPDPOINT In,LPDPOINT Out,DWORD dir)
 {
 	int	inverse=dir;
 	LP	in,out;
 
-	in.lam = In->x * RADDEG;
-	in.phi = In->y * RADDEG;
-	out = nad_cvt(in, inverse, &ct); 
+	in.lam = In->x * DEGTORAD;
+	in.phi = In->y * DEGTORAD;
+	out = nad_cvt(in, inverse, pct); 
 	if (out.lam == HUGE_VAL)
 	{
 		*Out = *In;
 		return 0;
 	}
-	Out->x = out.lam / RADDEG;
-	Out->y = out.phi / RADDEG;
+	Out->x = out.lam / DEGTORAD;
+	Out->y = out.phi / DEGTORAD;
 	return 1;
 }
 
 DWORD GM32NADCONINIT (char	*File)
 {
-	struct	CTABLE	*pct;
+	GM32NADCONFREE();
 
 	pct = nad_init (File);
 	if (!pct)
 		return 0;
-	ct = *pct;
 	return 1;
 }
+
+

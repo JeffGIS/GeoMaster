@@ -1169,6 +1169,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 	{
 		long SaveSHPRec = CurrentSHPRec; 
 		
+		CloseDataFile(TRUE, &hSHPDBF);
 		OpenDataFile (Name,"",BT_READ,&hSHPDBF); 
 		CurrentSHPRec = SaveSHPRec;
 	}

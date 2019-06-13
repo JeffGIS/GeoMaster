@@ -144,6 +144,11 @@ long TranProjection (long ID_FROM, long ID_TO, double *X, double *Y)
 				IRC = pj_transform(PRJ_PROJ4DEF[2], PRJ_PROJ4DEF[ID_TO], 1, 1, X, Y, NULL, NULL);
 				if (IRC)
 					return IRC;
+				else if (pj_is_latlong(PRJ_PROJ4DEF[ID_TO]))
+				{
+					*X *= RAD_TO_DEG;
+					*Y *= RAD_TO_DEG;
+				}
 			}
 		}
 		else if(PRJ_TYPE[ID_FROM] == COUNTY)

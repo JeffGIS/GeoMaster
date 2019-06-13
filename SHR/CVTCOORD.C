@@ -309,14 +309,14 @@ long ok;
 			 }
 		 }
 		 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL,NULL);
-		 DPoint->x *= RAD_TO_DEG;
-		 DPoint->y *= RAD_TO_DEG;
+		 //DPoint->x *= RAD_TO_DEG;
+		 //DPoint->y *= RAD_TO_DEG;
 		 from = 2;
 	 }
 	 if (ok != 0)
 		 goto Exit;
 
-	 if (PRJ_TYPE[to] == PROJ4PROJECTION)
+	 if (PRJ_TYPE[to] == PROJ4PROJECTION) //going to have to go to lat/lon first
 	 {
 		 saveto = to;
 		 to = 2;
@@ -391,6 +391,12 @@ GotNearPoint:
 			 DPoint->x *= DEG_TO_RAD;
 			 DPoint->y *= DEG_TO_RAD;
 			 ok = pj_transform(PRJ_PROJ4DEF[LATLONPROJECTION], PRJ_PROJ4DEF[saveto], 1, 1, &DPoint->x, &DPoint->y, NULL, &PRJ_OUTFACTOR[saveto]);
+			 if (pj_is_latlong(PRJ_PROJ4DEF[saveto]))
+			 {
+				 DPoint->x *= RAD_TO_DEG;
+				 DPoint->y *= RAD_TO_DEG;
+			 }
+
 		 }
 		 *DPoint = TranPoint(DPoint, hTranRotation);
 	 }

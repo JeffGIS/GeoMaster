@@ -355,6 +355,7 @@ void QuitGraphics()
 	short	i; 
 	
 	CRAPI_Destroy();
+	GM32NADCONFREE();
 	SaveWindowPosition();
 	if (LogMSGFile != HFILE_ERROR)
 	{

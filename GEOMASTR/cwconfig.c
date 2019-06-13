@@ -1148,6 +1148,7 @@ BOOL GetCmdFileEntry(LPSTR cmdItem)
 	BOOL rtn = FALSE;
 	rtn = DialogBox(hInst, (LPCTSTR)"SELECTGMSTARTCMD", 0, (DLGPROC)SelectGMCmdMsgProc);
 	strcpy(cmdItem, selectedStartCmd);
+
 	return rtn;
 }
 
@@ -1430,6 +1431,7 @@ void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 }
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
+//	_CrtDumpMemoryLeaks();
 	char cmdLine[1024];
 	//strcpy(cmdLine, "0123456789012");
 	//char monName[12];
@@ -1437,6 +1439,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	int  monStatus, mouseType;
 	LPSTR keyloc;
 	BOOL haveKey = FALSE;
+
 	CreatePrintBitmap(0);
 	//MessageBox(0, lpszCmdLine, "WinMain", MB_OK);
 	//loadColors();
@@ -1646,7 +1649,7 @@ SetOldStructSizes ();
  _tzset ();
  time (&SystemStartTime);
 //EnableTrace=2;
- hInst = hInstance; 
+ hInst = hInstance;
  //MessageBox (0,lpszCmdLine,"WinMainGeoMas",MB_OK);  
 // if (OFS_MAXPATHNAME != 256)
 //	 MessageBox (0,"OFS_MAXPATHNAME is not 256",0,MB_ICONEXCLAMATION);

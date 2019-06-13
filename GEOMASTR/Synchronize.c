@@ -371,7 +371,7 @@ BOOL UserDefaults_defaults_saveString(LPSTR string, LPSTR key)
 
 LPSTRD UserDefaults_defaults_stringForKey(LPSTR key)
 {
-	LPSTR str = calloc(1, 1024);
+	LPSTRD str = calloc(1, 1024);
 	int nchr = GetPrivateProfileString("CRAPI", key, "", str, 1024, GMIni);
 
 	return str;
@@ -381,6 +381,7 @@ int UserDefaults_defaults_integerForKey(LPSTR key)
 	LPSTR str = calloc(1, 64);
 	int nchr = GetPrivateProfileString("CRAPI", key, "", str, 1024, GMIni);
 	int rtn = atoi(str);
+	free(str);
 	return rtn;
 }
 BOOL UserDefaults_defaults_saveInteger(int value, LPSTR key)
@@ -556,6 +557,7 @@ BOOL  CRAPI_sharedInstance_processPlaces (void)
 
 	//[_placesArray sortUsingSelector : @selector(compareName : )];
 	NSArray_Destroy(&placearray);
+	free(message);
 	return YES;
 }
 BOOL CRAPI_sharedInstance_processPlacesArray (int row)
