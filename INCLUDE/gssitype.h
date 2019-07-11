@@ -841,7 +841,7 @@ typedef	struct
 		 		PolyID;
 		UINT	NearPoint;
 		short	NearSeg,
-		 		UDILen;
+		 		NumPoly;
 		UINT	NumPoints;
 		double	Length,
 		 		PCT,

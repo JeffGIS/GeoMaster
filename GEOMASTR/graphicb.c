@@ -2220,7 +2220,8 @@ Insert:
 	PickList[i].Area = Area;
 	PickList[i].Rect = *Rect; 
 //	FileBoundsToWBounds (&CurrentItemMinMax,&PickList[i].Rect); 
-	PickList[i].NumPoints = NumPoints;  
+	PickList[i].NumPoints = NumPoints;
+	PickList[i].NumPoly = nPolySegments;
 	PickList[i].Elev = Elev;
 	_fmemcpy (PickedStreets[i],CurStreetNumbers,sizeof(CurStreetNumbers));
 	PickedStreets[i][4] = CurState;

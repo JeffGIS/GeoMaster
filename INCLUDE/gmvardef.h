@@ -789,6 +789,7 @@ HBRUSH	hTempBrush=0;
 HPDPOINT	pCurveBP;
 short	CurItemHLTShow=-1;
 short	nCurvePoints;
+short   nPolySegments;
 HANDLE	hDynamicSeg=0;
 HANDLE	hCurvePoints=0;
 HANDLE	hUnSplinedPoly=0;

@@ -8162,7 +8162,7 @@ NextTextRec:
 		    	irc = 0;
 		    	goto Exit;
 			}				    
-		    if (NeedRead (SQLPtr))
+		    if (lpGWDHead->Version > 1000 || NeedRead (SQLPtr))
 			{
 				if (lpGWDHead->Version > 1000)
 				{   

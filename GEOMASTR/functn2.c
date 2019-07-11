@@ -5828,14 +5828,14 @@ GSSiExitProg (1350);
 			}
 			else
 			{
-				if (nlong > 75)
+				if (nlong > 500)
 				{
 					double	maxdist;
 					HPDPOINT	pPoints=GlobalLock (hPoints);
 					
 					maxdist = GetPolyLengthD (pPoints,nlong)/1000;
 					ThinPoly (&nlong, pPoints, maxdist);
-					if (nlong > 75)
+					if (nlong > 500)
 						ThinPoly (&nlong, pPoints, maxdist*10);
 					GlobalUnlock (hPoints);
 				}

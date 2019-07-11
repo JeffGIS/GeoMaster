@@ -4799,23 +4799,44 @@ double BoundsHeight (LPMNMXCORD pBounds)
 double BoundsHeight (LPMNMXCORD pBounds);
 
 
-void AddDPointToMinMax (HPDPOINT Point,LPMNMXCORD pBounds)
+void AddDPointToMinMax(HPDPOINT Point, LPMNMXCORD pBounds)
 #if ENABLETRACE
-{GSSiEnterProg (253);
-#endif
-{   
-    pBounds->xmn = min (pBounds->xmn,Point->x);
-    pBounds->ymn = min (pBounds->ymn,Point->y);
-    pBounds->xmx = max (pBounds->xmx,Point->x);
-    pBounds->ymx = max (pBounds->ymx,Point->y);
 {
-#if ENABLETRACE
-GSSiExitProg (253);
+	GSSiEnterProg(253);
 #endif
-    return;
-}
+	{
+		pBounds->xmn = min(pBounds->xmn, Point->x);
+		pBounds->ymn = min(pBounds->ymn, Point->y);
+		pBounds->xmx = max(pBounds->xmx, Point->x);
+		pBounds->ymx = max(pBounds->ymx, Point->y);
+		{
 #if ENABLETRACE
+			GSSiExitProg(253);
+#endif
+			return;
+		}
+#if ENABLETRACE
+	}
+#endif
 }
+void AddBoundsToBounds(LPMNMXCORD fromBounds, LPMNMXCORD toBounds)
+#if ENABLETRACE
+{
+	GSSiEnterProg(253);
+#endif
+	{
+		toBounds->xmn = min(toBounds->xmn, fromBounds->xmn);
+		toBounds->ymn = min(toBounds->ymn, fromBounds->ymn);
+		toBounds->xmx = max(toBounds->xmx, fromBounds->xmx);
+		toBounds->ymx = max(toBounds->ymx, fromBounds->ymx);
+		{
+#if ENABLETRACE
+			GSSiExitProg(253);
+#endif
+			return;
+		}
+#if ENABLETRACE
+	}
 #endif
 }
 

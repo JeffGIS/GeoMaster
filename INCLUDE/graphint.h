@@ -616,7 +616,7 @@ BOOL PickCurve (HPDPOINT lpPointsIn,long nPnts,LPDPOINT PC,LPDPOINT POC, LPDPOIN
 BOOL PickPolygon (HPPOINTS lpPoints2,long nPnts,double Offdist);
 BOOL PickPolygonD (HPDPOINT lpPoints2,long nPnts, int nPoly,HANDLE hPolyPartLen,double Offdist,HANDLE hElev);
 BOOL PickPolyline (HPPOINTS lpPoints2,long nPnts, int PolyID, short Type,LPFLOAT pAZ,long PinA);
-BOOL PickPolylineD (HPDPOINT lpPoints,long nPnts, int PolyID,short Type,LPDOUBLE pAZ,LPDOUBLE pSize,long PinA);
+BOOL PickPolylineD (HPDPOINT lpPoints,long nPnts, int PolyID,short Type,LPDOUBLE pAZ,LPDOUBLE pSize,long PinA,LPMNMXCORD pInRect, LPDOUBLE pInLength);
 BOOL PickPolyInArea (short Type,HPPOINTS lpPoints,long nPnts,int PolyID);
 BOOL PickPointItem (POINT Point, float size, float rot, int Symbol);
 BOOL PickPolyInAreaD(short Type, HPDPOINT lpPoints, long nPnts, int PolyID, LPDOUBLE pAZ, LPDOUBLE pSize, int nPoly, HANDLE hPolyPartLen, long nTotPnts, HPDPOINT lpFirstPt);
@@ -1512,6 +1512,7 @@ short LoadCGFViewports (LPSTR Name,long Offset,HFILE Fid,LPHANDLE hViewports,LPS
 void ClearVPFields (LPVIEWPORT CurView);
 BOOL FixGMErrors (LPSTR File);
 void AddSavedPolys (void);
+BOOL ReorderSavedPolys(void);
 short GetSavedPolys (void);
 void DestroySavedPolys (void);
 BOOL UpdateRecord (int Item,int Desc,LPSTR NewPrefix, LPSTR NewUDI,LPLINEDESCRIPTION pNewLineDesc, LPAREADESCRIPTION pNewAreaDesc,int WhichFile,int OutItem);

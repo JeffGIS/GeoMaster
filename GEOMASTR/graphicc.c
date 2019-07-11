@@ -5541,6 +5541,7 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
 		CurView->PassID = SavePass; 
 		ProcessSelectedTheme = 0;       		
 		DeleteTheme (pTheme); 
+		ReorderSavedPolys();
 		nPolys = NumSavedPolys;
 		iPoly = 0;
 		while (GetSavedPolys())

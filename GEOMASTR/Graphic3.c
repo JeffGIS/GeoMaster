@@ -832,7 +832,7 @@ BOOL PickDistanceDisplayLines (void)
 	if (*pNumDistPoints < 0)
 	{
 		SetGlobalValue ("%UDI","Line"); 
-		rtn = PickPolylineD (lpPoints,abs(*pNumDistPoints),0,2,0,0,0);
+		rtn = PickPolylineD (lpPoints,abs(*pNumDistPoints),0,2,0,0,0,0);
 	}
 	else
 	{
@@ -861,7 +861,7 @@ GSSiExitProg (699);
 	CurrentRefno = ITEMBEINGDIGITIZEDREF;
 	lpPoints = (HPDPOINT)GlobalLock (hCurPolyPoints);
 	FileNum = -1;
-	rtn = PickPolylineD (lpPoints,nCurPolyPoints,0,2,0,0,0);
+	rtn = PickPolylineD (lpPoints,nCurPolyPoints,0,2,0,0,0, 0);
 	GlobalUnlock (hCurPolyPoints);
 {
 #if ENABLETRACE

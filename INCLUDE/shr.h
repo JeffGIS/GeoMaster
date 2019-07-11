@@ -804,6 +804,7 @@ void AddDPointToRect(DPOINT Point, LPRECT pBounds);
 void AddPointToRect16 (POINT Point,LPRECT16 pBounds);
 void AddPointToMinMax (POINT pPoint,LPMINMAX pMinMax);
 void AddDPointToMinMax (HPDPOINT Point,LPMNMXCORD pBounds);
+void AddBoundsToBounds(LPMNMXCORD fromBounds, LPMNMXCORD toBounds);
 double BoundsWidth (LPMNMXCORD pBounds);
 double BoundsHeight (LPMNMXCORD pBounds);
 void MinMaxInit (LPMINMAX pMinMax);

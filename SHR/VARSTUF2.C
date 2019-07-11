@@ -154,6 +154,7 @@ GetPolylineEP:
 						Type1.AZM = getazd (lpPoints,lpDEndPoint); 
 						if (CurrentType == GF_LINE || CurrentType == GF_POLYLINE)
 						{
+							Type1.NumPoly = nPolySegments;
 							if (useOnlyOnscreenPoly)
 							{
 									DPOINT ScreenPoints[5];

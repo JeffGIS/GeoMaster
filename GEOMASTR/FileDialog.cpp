@@ -1258,9 +1258,10 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									free(pPlaces);
 									hr = SHCreateItemFromParsingName(initDir, NULL, IID_IShellItem ,(void**)&defFolder);
 									if (Suceded(hr, L"8"))
+									{
 										hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
-
-									//hr = pfd->SetFolder(defFolder);    
+										hr = pfd->SetFolder(defFolder);
+									}
 									IShellItem *psiFolder;
 									LPWSTR pszFolder = NULL;
 									hr = pfd->GetFolder(&psiFolder);

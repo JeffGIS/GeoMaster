@@ -52,7 +52,7 @@ BOOL DisplayPointerLine (HDC hDC,BOOL Pick,LPDPOINT PLPoints,short np,short plsy
 		GlobalUnlock (hExport);
 	} 
 	else if (Pick)
-		PickPolylineD (PLPoints,np,0,2,0,0,0);
+		PickPolylineD (PLPoints,np,0,2,0,0,0, 0,0);
     else if (hDC)
     {   
     	HPEN	hOldPen=0;
@@ -1457,7 +1457,7 @@ void InitRecord (HDC hDC)
 	pCurveBP = 0;
 	ItemIsBlocked=ThemePointSym=HaveVarFillColor=ItemIsHighlighted=FromStreet=ToStreet=CurStreet=HighlightThisItem=SpecialThisItem=0;
 	CurTextHeaderLoc=CurSymSizeLoc=CurSymSizeLocD=CurGCmdStringLoc=CurTextStringLoc=CurBrushLoc=CurPenColorLoc=0;
-	CurTAGLoc=CurSNamesLoc=nPoly=iPoly=HaveTXLoc=TLSet=nCurvePoints=CurMSLink=0;
+	CurTAGLoc=CurSNamesLoc=nPoly=iPoly=HaveTXLoc=TLSet=nCurvePoints=nPolySegments=CurMSLink=0;
 	PostTextPointer=PenFromUMList=Visible=HaveTextColor=StreetOneWay=*StreetBPType=*StreetEPType=0;  
 	StreetCenterline=0;
 	*CurrentPrefix = *CurrentUDI = 0; 
@@ -1780,6 +1780,8 @@ BOOL ProcessGraphicsRec (HDC hDC, LPSHORT ipnt,LPSTR BeginSeg,int LenSeg)
 	static	long	DebugElement=8700; 
 	static	long	PolyBufferLen;
 	static	COLORREF	RouteColor;
+	MNMXCORD RecordBounds;
+	double   RecordLength;
 
 
 /*typedef struct {short i2array[100];} DEBUGARRAY;
@@ -2262,7 +2264,14 @@ LPDEBUGARRAY	pDB=0;   */
 						}
 					    nPnts = nCoords;
 				    }
-ProcessPolyLine:    nCurPoints = nPnts;   
+				ProcessPolyLine:
+					nCurPoints = nPnts;
+					if (!nPolySegments)
+					{
+						DBoundsInit(&RecordBounds);
+						RecordLength = 0;
+					}
+					nPolySegments++;
 					PolyIsHiPrecis = HiPrecis;
 				    if (Visible && CurrentDesc > 0 && CurrentDesc < 3201)
 				    {
@@ -2329,9 +2338,9 @@ ProcessPolyLine:    nCurPoints = nPnts;
 							if (Pick)
 							{
 								if (HiPrecis)
-									PickPolylineD (lpDCurPoints,nPnts,0,2,0,0,0);
+									PickPolylineD (lpDCurPoints,nPnts, nPolySegments-1,2,0,0,0, &RecordBounds,&RecordLength);
 								else
-									PickPolyline (lpCurPoints,nPnts,0,2,0,0);
+									PickPolyline (lpCurPoints,nPnts, nPolySegments - 1,2,0,0);
 							}
 							else if (PolyInMaskAreaFileCoord (CurrentType,&nPnts,&hCoords,&lpCurPoints,&lpDCurPoints,HiPrecis))
 							{
@@ -4543,7 +4552,7 @@ GSSiExitProg (703);
 	}
 	else
 		symsize = 0;
-	rtn = PickPolylineD (pPoint,1,0,1,&rot,&symsize,0);
+	rtn = PickPolylineD (pPoint,1,0,1,&rot,&symsize,0, 0, 0);
 	CurView->WBounds = SaveBounds; 
 	AddToPickAp = 0;
 {
@@ -4842,7 +4851,7 @@ GSSiExitProg (706);
 #endif
 } 
 
-BOOL PickPolylineD (HPDPOINT lpPointsIn,long nPnts, int PolyID,short Type,LPDOUBLE pAZ,LPDOUBLE pSize, long PinA)
+BOOL PickPolylineD (HPDPOINT lpPointsIn,long nPnts, int PolyID,short Type,LPDOUBLE pAZ,LPDOUBLE pSize, long PinA, LPMNMXCORD pInRect,LPDOUBLE pInLength)
 #if ENABLETRACE
 {GSSiEnterProg (707);
 #endif
@@ -4882,10 +4891,16 @@ GSSiExitProg (707);
 return (PickPolyInAreaD(1, lpPoints, nPnts, 0, pAZ, pSize, 0, 0, 0, 0));
 }
 	
-	TotDistW=0;  
+	if (pInLength)
+		TotDistW = *pInLength;
+	else
+		TotDistW=0;  
 	BeginPoint = *lpPoints;
 	MinDist = DBL_MAX;
-	DBoundsInit (&Rect); 
+	if (pInRect)
+		Rect = *pInRect;
+	else
+		DBoundsInit (&Rect);
 	if (nPnts > 1)
 	{
 		AZ[0] = getazd (&lpPoints[0],&lpPoints[1]);
@@ -4915,6 +4930,19 @@ return (PickPolyInAreaD(1, lpPoints, nPnts, 0, pAZ, pSize, 0, 0, 0, 0));
 			}
 		}
 	}
+	for (i = 0; i < NumPicked; i++)
+	{
+		if (CurrentRefno == PickList[i].Refno)
+		{
+			AddBoundsToBounds(&Rect, &PickList[i].Rect);
+			AddBoundsToBounds(&Rect, &HLTBounds);
+			PickList[i].Length += TotDistW;
+		}
+	}
+	if (pInRect)
+		AddBoundsToBounds(&Rect,pInRect);
+	if (pInLength)
+		*pInLength += TotDistW;
 	EndPoint = LastWPoint;
     if (PickingByRefno)
     {
@@ -5043,6 +5071,165 @@ GSSiExitProg (708);
 #endif
 }
 
+static int NumUnconnected(int numEndPoints, LPINT ConnectedTo)
+{
+	int n = 0;
+	for (int i = 0; i < numEndPoints; i++)
+	{
+		if (!ConnectedTo[i])
+			n++;
+	}
+	return n;
+}
+static void Connect2ClosestPoints(LPDPOINT EndPoints, int numEndPoints, LPINT ConnectedTo)
+{
+	double minDist = DBL_MAX;
+	int p1=0, p2=0;
+
+	for (int i = 0; i < numEndPoints; i++)
+	{
+		if (!ConnectedTo[i])
+		{
+			for (int j = i; j < numEndPoints; j++)
+			{
+				if (!ConnectedTo[j])
+				{
+					if (abs (i-j)>1)
+					{
+						double dist = ldistpp(&EndPoints[i], &EndPoints[j]);
+
+						if (dist < minDist)
+						{
+							minDist = dist;
+							p1 = i;
+							p2 = j;
+						}
+					}
+				}
+			}
+		}
+	}
+	ConnectedTo[p1] = p2+1;
+	ConnectedTo[p2] = p1+1;
+	return;
+}
+
+static int OppositeEndPoint(int endPoint)
+{
+	if (endPoint % 2)
+		return endPoint - 1;
+	return endPoint + 1;
+}
+BOOL ReorderSavedPolys(void)
+{
+	BOOL rtn = FALSE;
+
+	if (hSavedPolys && NumSavedPolys > 1)
+	{
+		LPSAVEPOLY pSavedPolys = (LPSAVEPOLY)GlobalLock(hSavedPolys);
+		rtn = TRUE;
+		for (int i = 0; i < NumSavedPolys; i++, pSavedPolys++)
+		{
+			if (pSavedPolys->Type != 1 || pSavedPolys->hSavePolyElev || pSavedPolys->hSavePolyParts)
+				rtn = FALSE;
+		}
+		GlobalUnlock(hSavedPolys);
+		if (rtn)
+		{
+			LPSAVEPOLY pSavedPolys = (LPSAVEPOLY)GlobalLock(hSavedPolys);
+			HANDLE hSavedPolysNew = GSSiGlobAlloc(1813, GHND, NumSavedPolys * sizeof(SAVEPOLY));
+			LPSAVEPOLY pSavedPolysNew = (LPSAVEPOLY)GlobalLock(hSavedPolysNew);
+			HANDLE hOrderOrig = GSSiGlobAlloc(1814, GHND, NumSavedPolys * 2 * sizeof(int));
+			HANDLE hOrderNew = GSSiGlobAlloc(1815, GHND, NumSavedPolys * 2 * sizeof(int));
+			HANDLE hConnectedTo = GSSiGlobAlloc(1815, GHND, NumSavedPolys * 2 * sizeof(int));
+			LPINT OrderOrig = GlobalLock(hOrderOrig);
+			LPINT OrderNew = GlobalLock(hOrderNew);
+			LPINT ConnectedTo = GlobalLock(hConnectedTo);
+			HANDLE hEndPoints = GSSiGlobAlloc(1815, GMEM_MOVEABLE, NumSavedPolys * 2 * sizeof(DPOINT));
+			LPDPOINT EndPoints = GlobalLock(hEndPoints);
+
+			int numEndPoints = NumSavedPolys * 2;
+			int nextEndPoint;
+			int numNewOrder = 0;
+
+			rtn = FALSE;
+			int j = 0;
+			for (int i = 0; i < NumSavedPolys; i++, pSavedPolys++)
+			{
+				LPMNMXCORD pBounds = GlobalLock(pSavedPolys->hSavePoly);
+				pBounds++;
+				LPDPOINT pPoints = (LPDPOINT)pBounds;
+				EndPoints[j] = pPoints[0];
+				OrderOrig[j] = j++;
+				EndPoints[j] = pPoints[pSavedPolys->nSavePoly-1];
+				OrderOrig[j] = j++;
+				GlobalUnlock (pSavedPolys->hSavePoly);
+			}
+
+			//find the closest unconnected points and connect them until only 2 remain
+
+			while (NumUnconnected (numEndPoints,ConnectedTo) > 2)
+			{
+				Connect2ClosestPoints(EndPoints, numEndPoints, ConnectedTo);
+			}
+			for (int i = 0; i < numEndPoints; i++)
+			{
+				if (!ConnectedTo[i])
+				{
+					nextEndPoint = i;
+					break;
+				}
+			}
+			while (numNewOrder < numEndPoints)
+			{
+				OrderNew[numNewOrder++] = nextEndPoint;
+				nextEndPoint = OppositeEndPoint(nextEndPoint);
+				OrderNew[numNewOrder++] = nextEndPoint;
+				nextEndPoint = ConnectedTo[nextEndPoint]-1;
+			}
+			if (memcmp(OrderOrig, OrderNew,numEndPoints*sizeof(int)))
+				rtn = TRUE;
+			if (rtn)
+			{
+				int nNewPoly = 0;
+				GlobalUnlock(hSavedPolys);
+				pSavedPolys = (LPSAVEPOLY)GlobalLock(hSavedPolys);
+
+				for (int i = 0; i < numEndPoints; i+=2)
+				{
+					int iPoly = OrderNew[i] / 2;
+					pSavedPolysNew[nNewPoly].hSavePoly = pSavedPolys[iPoly].hSavePoly;
+					pSavedPolysNew[nNewPoly++].nSavePoly = pSavedPolys[iPoly].nSavePoly;
+					if (OrderNew[i] % 2)
+					{
+						LPMNMXCORD pBounds = GlobalLock(pSavedPolys[iPoly].hSavePoly);
+						pBounds++;
+						LPDPOINT pPoints = (LPDPOINT)pBounds;
+						ReversePoints2(pSavedPolys[iPoly].nSavePoly, pPoints);
+						GlobalUnlock(pSavedPolys[iPoly].hSavePoly);
+					}
+				}
+			}
+			GlobalUnlock(hSavedPolys);
+			GlobalUnlock(hSavedPolysNew);
+			if (rtn)
+			{
+				GSSiGlobFree(&hSavedPolys);
+				hSavedPolys = hSavedPolysNew;
+			}
+			else
+			{
+				GSSiGlobFree(&hSavedPolysNew);
+				hSavedPolys = hSavedPolys;
+			}
+			GSSiGlobUlFree(&hOrderOrig);
+			GSSiGlobUlFree(&hOrderNew);
+			GSSiGlobUlFree(&hConnectedTo);
+			GSSiGlobUlFree(&hEndPoints);
+		}
+	}
+	return rtn;
+}
 short GetSavedPolys (void)
 #if ENABLETRACE
 {GSSiEnterProg (709);

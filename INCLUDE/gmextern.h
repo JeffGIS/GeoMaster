@@ -1281,6 +1281,7 @@ extern BOOL			GetSegFromGlobals;
 extern BOOL			ShowMatches;
 //extern char			NetworkDir[64];
 extern short			nCurvePoints;
+extern short		nPolySegments;
 extern long			nUnSplinedPoints;
 extern long			DoNotPickThisRefno;
 extern long			QuadTreeOffset;

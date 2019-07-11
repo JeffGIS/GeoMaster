@@ -1914,6 +1914,8 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
 				sprintf(str, "OffDist\t%f", PickList[item].OffDist);
 				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
+				sprintf(str, "NumPoly\t%ld", (long)PickList[item].NumPoly);
+				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
 				sprintf(str, "NumPoints\t%ld", (long)PickList[item].NumPoints);
 				SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_ADDSTRING, 0, (LPARAM)str);
 				sprintf(str, "NearPoint\t%ld", (long)PickList[item].NearPoint);

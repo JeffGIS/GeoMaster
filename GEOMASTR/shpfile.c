@@ -2166,7 +2166,7 @@ DoPoly:
 							if (nPoly > 1)
 								PolyID++;
 							nPnts = *pNumPoints;  
-							PickPolylineD (pPoints,nPnts,PolyID,2,0,0,0);
+							PickPolylineD (pPoints,nPnts,PolyID,2,0,0,0, 0);
 							pPoints+=*pNumPoints++; 
 						}   
 						GlobalUnlock (hPolyPartLen); 
@@ -5421,7 +5421,7 @@ badcode:
 			{
 				if (Pick)
 				{   
-					PickPolylineD (pPoints,NumPoints,0,2,0,0,0);
+					PickPolylineD (pPoints,NumPoints,0,2,0,0,0, 0);
 				}
 				else if (CopyRec)  
 				{
@@ -6467,7 +6467,7 @@ badcode:
 			{
 				if (Pick)
 				{   
-					PickPolylineD (pPoints,NumPoints,0,2,0,0,0);
+					PickPolylineD (pPoints,NumPoints,0,2,0,0,0, 0);
 				}
 				else if (CopyRec)  
 				{
