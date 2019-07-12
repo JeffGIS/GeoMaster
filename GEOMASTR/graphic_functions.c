@@ -2656,7 +2656,7 @@ DoPick:
 				CurrentDesc = -1;  
 				SetGlobalValue ("%PREFIX","%HLTAREA");
 				SetGlobalValueLong ("%UDI",AreaNum);
-				PickedOffsetLine = PickPolylineD (pPoints,nHighlightAreaPoints,0,2,0,0,0, 0);
+				PickedOffsetLine = PickPolylineD (pPoints,nHighlightAreaPoints,0,2,0,0,0, 0,0);
 				CurView->WBounds = SaveBounds; 
 				CurrentDesc = SaveCD;
 			    GSSiGlobUlFree (&hHighlightArea); 

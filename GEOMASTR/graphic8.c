@@ -4209,7 +4209,7 @@ GSSiExitProg (993);
     	
     	hmemmove ((HPSTR)pNewPoints,(HPSTR)lpDpoints,np*(long)sizeof(DPOINT));
     	pNewPoints[np++] = *lpDpoints;
-    	rtn = PickPolylineD (pNewPoints,np,0,3,0,0,IDNINT(Offdist+1), 0);
+    	rtn = PickPolylineD (pNewPoints,np,0,3,0,0,IDNINT(Offdist+1), 0,0);
     	GSSiGlobUlFree (&hNew); 
     	if (rtn || PickPerim == 1)
 {
@@ -4271,7 +4271,7 @@ GSSiExitProg (993);
     	if (pina)
     		inc++; 
     	
-    	Selected = PickPolylineD (lpNewPoints,nPnts,0,-3,0,0,max(0,IDNINT(Offdist-inc)), 0);
+    	Selected = PickPolylineD (lpNewPoints,nPnts,0,-3,0,0,max(0,IDNINT(Offdist-inc)), 0,0);
     	if (Selected)
     	{
 {

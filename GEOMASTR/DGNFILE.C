@@ -1145,7 +1145,7 @@ DoPoly:
 			{
 				if (Pick)
 				{   
-					PickPolylineD (pPoints,NumPoints,0,2,0,0,0,0);
+					PickPolylineD (pPoints,NumPoints,0,2,0,0,0,0,0);
 				}
 				else
 				{   
