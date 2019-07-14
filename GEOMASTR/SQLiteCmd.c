@@ -3699,7 +3699,8 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 	}
 	else if (*pDB->Where && *pDB->From)
 	{
-		sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pDB->Where);
+		//sprintf(pDB->Query, "SELECT * FROM '%s' WHERE %s;", pDB->From, pDB->Where);
+		sprintf(pDB->Query, "SELECT * FROM '%s';", pDB->From);
 		ExpandText(pDB->Query);
 		SQLITEPrepare(pDB);
 	}

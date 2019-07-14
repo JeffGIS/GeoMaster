@@ -330,7 +330,7 @@ Exit:
     return nRc;
 }
 
-HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName)
+HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName,BOOL FlipVert)
 {
 	HDIB32 hDib32 = BMPHandleFromEXT(FileName);
 	HDIB32 hDibScaled;
@@ -339,7 +339,9 @@ HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName)
 	float imageheight = FreeImage_GetHeight(hDib32);
 	float fac1, fac2, fac;
 	RECT buttonRect;
-	//BOOL flip = FreeImage_FlipVertical(hDib32);
+	BOOL flip = FALSE;
+	if (FlipVert)
+		flip = FreeImage_FlipVertical(hDib32);
 	//flip = FreeImage_FlipHorizontal(hDib32);
 	GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
 	fac1 = RECTWIDTH(&buttonRect) / imagewidth;
@@ -490,7 +492,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName,FALSE);
 			}
 		}
 			break;
@@ -505,7 +507,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 			break;
@@ -520,7 +522,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 			break;
@@ -579,7 +581,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 						}
 						if (ifile++ == ibutton + firstImage)
 						{
-							hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+							hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 							ibutton++;
 							break;
 						}
@@ -2307,14 +2309,18 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 			int ifile = -1;
 			while (ifile++ < currentImage)
 				fgetstring(FileName, MAX_PATH, fid);
-			if ((pTab = strchr(FileName, '\t')))
+			if ((pTab = strrchr(FileName, '\t')))
 			{
 				*pTab++ = 0;
 
-				if (!strnicmp(pTab, "Ground", 6))
+				if (atob(pTab))
 					doFlip = TRUE;
 			}
-			hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+			if ((pTab = strchr(FileName, '\t')))
+			{
+				*pTab++ = 0;
+			}
+			hBMLarge = DisplaySelectedImage(hWndDlg, FileName,doFlip);
 			GSSiClose2(&fid);
 		}
 
@@ -2415,7 +2421,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 		break;
@@ -2430,7 +2436,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 		break;
@@ -2445,7 +2451,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 		break;

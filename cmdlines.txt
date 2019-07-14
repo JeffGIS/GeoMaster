@@ -1,3 +1,4 @@
+configs\STREETWIDTHDISPLAY_TEST.gmc /WD d:\bu_2018_02_28\geomas
 [%DL]configs\large.GMC /F [REQUESTID]=1559327040; /WD j:\pcviewer\pcviewer
 [%DL]requestdata.GMC /F [REQUESTID]=1559327040; /WD j:\pcviewer\pcviewer
 c:\USERS\JEFF\APPDATA\LOCAL\TEMP\GMTEMP\5CB8BC9A\GMC12.TMP /WD i:\bu_2018_02_28\geomas
@@ -167,6 +168,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 

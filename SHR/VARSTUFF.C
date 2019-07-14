@@ -1395,7 +1395,8 @@ ProcessSQL:
     GlobalUnlock (SQLPtr->myhandle);  
     GlobalUnlock (FilePtr->myhandle);  
 	if (Type  == SLT_DATAFILE)
-		SLTPrepareStatement (handle,SQL);
+		//SLTPrepareStatement(handle, SQL);
+		SLTPrepareStatement(handle, "");//remove SQL to allow @[VAR] in where
 
     *hDB = handle;
     AddToOpenFileList(handle); 

@@ -4063,7 +4063,7 @@ static int decodeGoogleLocation(LPSTR url, LPDPOINT pLocPoint,LPBOOL pHaveVPPoin
 			formattedadd = json_string_value(formatted_address);
 			locationtype = json_string_value(location_type);
 			if (stricmp(locationtype, "APPROXIMATE") &&
-				stricmp(locationtype, "GEOMETRIC_CENTER"))
+				stricmp(locationtype, "GEOMETRIC_CENTERx"))
 			{
 				strcpy(formattedAddress, formattedadd);
 				strcpy(locType, locationtype);
