@@ -1917,7 +1917,8 @@ GotCloseFilehSQL:
 			lpAutoUpdateFieldList = 0;
 			lpSQLFieldList = 0;
 			lpBasicTitle = 0;
-		    goto RtnTrue; 
+			itoa(nRc, OutLoc, 10);
+		    goto Rtnl; 
 		}
 		case 525: //$VOTER(ADD)
 		{

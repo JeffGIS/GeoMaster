@@ -3278,6 +3278,8 @@
 #define IDC_PHOTO3                      2196
 #define IDC_SAVEANDEXIT                 2196
 #define IDB_DISPLAYVALUE1               2197
+#define IDC_SAVEANDEXIT2                2197
+#define IDC_NEXTPOINT                   2197
 #define IDB_VALUETODISPLAY1             2198
 #define IDC_ALTF10                      2199
 #define IDB_BREAKCONDITION              2199

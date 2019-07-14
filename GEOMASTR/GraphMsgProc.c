@@ -2499,6 +2499,10 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 			GetWindowRect(hWndDlg, &displayRect);
 			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
 			break;
+		case IDC_NEXTPOINT:
+			GSSiEndDialog(hWndDlg, 2, hSaveBM);
+
+			break;
 		case IDC_SAVEANDEXIT:
 		{
 
