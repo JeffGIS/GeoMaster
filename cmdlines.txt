@@ -1,3 +1,6 @@
+configs\sidewalktest.gmc configs\sidewalktest.gmc [GEOID]=2743000; [NVCRISDB]=[%DL]MinneapolisMN\SidewalkTest2\curbramps.slt; /WD D:\PCViewerMPLS\PCViewer
+configs\sidewalktestEMG.gmc configs\sidewalktest.gmc [GEOID]=2459425; [NVCRISDB]=[%DL]EMG\SidewalkTest\curbramps.slt;[CROSSSLOPEOFFSET]=1.2; /WD D:\PCViewerMPLS\PCViewer
+configs\directdisplay.gmc /WD D:\PCViewerMPLS\PCViewer
 configs\STREETWIDTHDISPLAY_TEST.gmc /WD d:\bu_2018_02_28\geomas
 [%DL]configs\large.GMC /F [REQUESTID]=1559327040; /WD j:\pcviewer\pcviewer
 [%DL]requestdata.GMC /F [REQUESTID]=1559327040; /WD j:\pcviewer\pcviewer
@@ -168,6 +171,9 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
 
 
 

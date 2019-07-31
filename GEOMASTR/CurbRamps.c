@@ -1581,7 +1581,7 @@ BOOL GetFromCodeText(int from, LPSTR text)
 {
 	char *fromText[] = { "Ramp", "Ramp", "Signal", "Texture", "Obstruction", "Steep TOC", "Crack", "Curb Cut", "Bump Width", "Bump Height", "Manual Slope","","","","","","","Ground Front","Ground Back","Top Down" };
 
-	if (from > 0 && from < 20)
+	if (from > 0 && from < 21)
 	{
 		strcpy(text, fromText[from - 1]);
 		return TRUE;

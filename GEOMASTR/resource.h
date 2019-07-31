@@ -3278,9 +3278,10 @@
 #define IDC_PHOTO3                      2196
 #define IDC_SAVEANDEXIT                 2196
 #define IDB_DISPLAYVALUE1               2197
-#define IDC_SAVEANDEXIT2                2197
 #define IDC_NEXTPOINT                   2197
 #define IDB_VALUETODISPLAY1             2198
+#define IDC_NEXTPOINT2                  2198
+#define IDC_PREVIOUSPOINT               2198
 #define IDC_ALTF10                      2199
 #define IDB_BREAKCONDITION              2199
 #define IDC_ALTF1NAME10                 2200
@@ -3409,6 +3410,7 @@
 #define IDC_SYNCHRONIZE                 2307
 #define IDC_CONNECT_LABEL               2308
 #define IDC_CONNECT                     2309
+#define IDC_IMAGE_NAME                  2310
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3756,7 +3758,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1260
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2310
+#define _APS_NEXT_CONTROL_VALUE         2311
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

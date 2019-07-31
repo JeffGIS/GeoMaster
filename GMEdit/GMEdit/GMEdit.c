@@ -1146,7 +1146,7 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 	s10:
 			loc++;
 			iend = strcspn (&pFile[loc],",)};!\r\n\t");
-			if (!strnicmp(&pFile[loc + iend], ")", 1))
+			if (!strnicmp(&pFile[loc + iend], ",", 1))
 			{
 				int i = loc + iend;
 				if (loc > 1 && !strnicmp(&pFile[loc - 3], "$M(", 3))
@@ -1158,7 +1158,21 @@ void AutoInsert (HWND hWnd,HANDLE hFile,HMENU *phMenu)
 						iend++;
 						break;
 					}
-				}				
+				}
+			}
+			else if (!strnicmp(&pFile[loc + iend], ")", 1))
+			{
+				int i = loc + iend;
+				if (loc > 1 && !strnicmp(&pFile[loc - 3], "$M(", 3))
+					isMacroFile = TRUE;
+				while (i-- > loc)
+				{
+					if (pFile[i] == '(')
+					{
+						iend++;
+						break;
+					}
+				}
 			}
 			if (!strnicmp(&pFile[loc + iend], ";DBQ=", 5))
 				iend += 5 + strcspn (&pFile[loc+iend+5],",);!\r\n");

@@ -50,7 +50,10 @@ static char		zoomListCmd[1024] = { 0 };
 static int		currentListLoc = 0;
 static int		currentListnRecs = 0;
 static int		currentLocInList = 0;
-
+#define SIDEWALK 1
+#define CURBRAMP 2
+static int		DATA_TYPE = SIDEWALK;
+static char RulerPathnames[5][MAX_PATH];
 static struct {long   TLID;
      short    Type;
      long   StreetNum;
@@ -330,10 +333,16 @@ Exit:
     return nRc;
 }
 
-HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName,BOOL FlipVert)
+HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName, BOOL FlipVert, BOOL FlipHorz, int RulerNumber)
 {
 	HDIB32 hDib32 = BMPHandleFromEXT(FileName);
-	HDIB32 hDibScaled;
+	HDIB32 hDibRuler;
+	if (RulerNumber)
+	{
+
+		hDibRuler = BMPHandleFromEXT(RulerPathnames[RulerNumber - 1]);
+	}
+	HDIB32 hDibScaled, hDibComposite, hDibRulerScaled;
 	HBITMAP hBMLarge = 0;
 	float imagewidth = FreeImage_GetWidth(hDib32);
 	float imageheight = FreeImage_GetHeight(hDib32);
@@ -342,19 +351,78 @@ HBITMAP DisplaySelectedImage(HWND hWndDlg, LPSTR FileName,BOOL FlipVert)
 	BOOL flip = FALSE;
 	if (FlipVert)
 		flip = FreeImage_FlipVertical(hDib32);
+	if (FlipHorz)
+		flip = FreeImage_FlipHorizontal(hDib32);
 	//flip = FreeImage_FlipHorizontal(hDib32);
 	GetClientRect(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), &buttonRect);
 	fac1 = RECTWIDTH(&buttonRect) / imagewidth;
 	fac2 = RECTHEIGHT(&buttonRect) / imageheight;
 	fac = min(fac1, fac2);
 	hDibScaled = FreeImage_Rescale(hDib32, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
-	hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
+	if (RulerNumber)
+	{
+		hDibRulerScaled = FreeImage_Rescale(hDibRuler, imagewidth*fac, imageheight*fac, FILTER_CATMULLROM);
+		hDibComposite = FreeImage_Composite(hDibRulerScaled, FALSE, 0, hDibScaled);
+		hBMLarge = DIB32ToBitmap(hDibComposite, (HPALETTE)0);
+	}
+	else
+		hBMLarge = DIB32ToBitmap(hDibScaled, (HPALETTE)0);
 	HBITMAP hOldBM = (HBITMAP)SendDlgItemMessage(hWndDlg, IDC_LARGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMLarge);
 	GSSiDeleteObject(&hOldBM);
 	DestroyDIB32(hDib32, FALSE);
 	DestroyDIB32(hDibScaled, FALSE);
+	if (RulerNumber)
+	{
+		DestroyDIB32(hDibRuler, FALSE);
+		DestroyDIB32(hDibRulerScaled, FALSE);
+		DestroyDIB32(hDibComposite, FALSE);
+	}
 	EnableWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), TRUE);
 	return hBMLarge;
+}
+BOOL CreateCompositeImage(LPSTR FileName, BOOL FlipVert, BOOL FlipHorz, int RulerNumber,LPSTR OutFile)
+{
+	HDIB32 hDib32 = BMPHandleFromEXT(FileName);
+	HDIB32 hDibRuler;
+	BOOL rtn = FALSE;
+	if (RulerNumber)
+	{
+
+		hDibRuler = BMPHandleFromEXT(RulerPathnames[RulerNumber - 1]);
+	}
+	HDIB32 hDibScaled, hDibComposite, hDibRulerScaled;
+	HBITMAP hBMLarge = 0;
+	float imagewidth = FreeImage_GetWidth(hDib32);
+	float imageheight = FreeImage_GetHeight(hDib32);
+	float fac1, fac2, fac;
+	RECT buttonRect;
+	BOOL flip = FALSE;
+	if (FlipVert)
+		flip = FreeImage_FlipVertical(hDib32);
+	if (FlipHorz)
+		flip = FreeImage_FlipHorizontal(hDib32);
+	//flip = FreeImage_FlipHorizontal(hDib32);
+	if (RulerNumber)
+	{
+		hDibComposite = FreeImage_Composite(hDibRuler, FALSE, 0, hDib32);
+		if (hDibComposite)
+		{
+			SaveDIB32(hDibComposite, OutFile, 0, 0);
+			rtn = TRUE;
+		}
+	}
+	else
+		SaveDIB32(hDib32, OutFile, 0, 0);
+	DestroyDIB32(hDib32, FALSE);
+	if (RulerNumber)
+	{
+		DestroyDIB32(hDibRuler, FALSE);
+		if (rtn)
+		{
+			DestroyDIB32(hDibComposite, FALSE);
+		}
+	}
+	return rtn;
 }
 
 BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
@@ -366,6 +434,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 	static int firstImage = 0;
 	static int lastImage = 0;
 	static int totImages = 0;
+	static int rulernum = 0;
 	static HBITMAP hBMLarge = 0;
 	char blankLine[2] = "";
 
@@ -381,6 +450,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 	{
 	case WM_INITDIALOG:
 		firstImage = 0;
+		rulernum = 0;
 		memset(hBM, 0, sizeof(hBM));
 	case GSSI_REINITDIALOG:
 	{
@@ -492,7 +562,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName,FALSE);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName,FALSE,FALSE,rulernum);
 			}
 		}
 			break;
@@ -507,7 +577,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,rulernum);
 			}
 		}
 			break;
@@ -522,7 +592,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
 				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
+				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,rulernum);
 			}
 		}
 			break;
@@ -581,7 +651,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 						}
 						if (ifile++ == ibutton + firstImage)
 						{
-							hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
+							hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,rulernum);
 							ibutton++;
 							break;
 						}
@@ -1672,15 +1742,17 @@ static void AdjustIdentifyWithPhotosWindow(HWND hWndDlg, BOOL first)
 	MoveWindow(GetDlgItem(hWndDlg, IDC_NOTES), RECTWIDTH(&mr) - (mro.right - r5.right) - RECTWIDTH(&r5), r5.top, RECTWIDTH(&r5), RECTHEIGHT(&r5), !first);
 	if (showOnlyData)
 	{
+		double heightFac = 1.3;
 		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr) / 2, RECTHEIGHT(&mr) - 38, !first);
-		MoveWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), RECTWIDTH(&mr) / 2 + 5, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr) / 2 - 10, (RECTHEIGHT(&mr) - 38) / 2, !first);
-		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP),					   RECTWIDTH(&mr) / 2 + 5, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / 2 + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
-		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_CLOCKWISE),		   RECTWIDTH(&mr) / 2 + 5 + ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2)+2, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / 2 + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
-		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE), RECTWIDTH(&mr) / 2 + 5 + 2*((RECTWIDTH(&mr) / 2 - 10) / 3 - 2)+4, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / 2 + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_LARGEBUTTON), RECTWIDTH(&mr) / 2 + 5, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr) / 2 - 10, (RECTHEIGHT(&mr) - 38) / heightFac, !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP),					   RECTWIDTH(&mr) / 2 + 5, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / heightFac + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_CLOCKWISE),		   RECTWIDTH(&mr) / 2 + 5 + ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2)+2, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / heightFac + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE), RECTWIDTH(&mr) / 2 + 5 + 2*((RECTWIDTH(&mr) / 2 - 10) / 3 - 2)+4, RECTHEIGHT(&r0) + 4 + (RECTHEIGHT(&mr) - 38) / heightFac + 4, (RECTWIDTH(&mr) / 2 - 10) / 3 - 2, RECTHEIGHT(&r6), !first);
 		
 		GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP), &r7);
 		ScreenRectToClientRect(hWndDlg, &r7);
 		MoveWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), r7.left, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_NAME), RECTWIDTH(&mr) / 2 + 5 + ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2) + 2, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
 		GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE), &r7);
 		ScreenRectToClientRect(hWndDlg, &r7);
 		MoveWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE), r7.left, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
@@ -2190,12 +2262,15 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 	static int firstImage = 0;
 	static int lastImage = 0;
 	static int totImages = 0;
+	static int rulernum = 0;
+	static int MAX_RULERS = 0;
 	static HBITMAP hBMLarge = 0;
 	LPSTR pTab;
 	static char FileName[MAX_PATH + 2] = { 0 };;
 	static int currentImage = 0;
 	RECT buttonRect;
 	static char DBName[MAX_PATH];
+	static BOOL doHFlip, doVFlip;
 	BOOL err;
 
 	int	BRtn;
@@ -2242,6 +2317,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 		break;
 
 	case WM_INITDIALOG:
+		rulernum = 0;
 		firstMove = TRUE;
 		hSaveBM = EnterBlockingWindow(hWndDlg);
 		GetPrivateProfileString("User", "IDWithPhotoWindowPos", "0", str, sizeof(str), GMIni);
@@ -2252,6 +2328,14 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 			cwCenter(hWndDlg, 0);
 		else
 			AdjustIdentifyWithPhotosWindow(hWndDlg, firstMove);
+		if (DATA_TYPE = SIDEWALK)
+		{
+			SetDlgItemText(hWndDlg, IDC_IMAGE_FLIP, "Top Down");
+			SetDlgItemText(hWndDlg, IDC_IMAGE_ROTATE_CLOCKWISE, "Ground Front");
+			SetDlgItemText(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE, "Ground Back");
+			SetDlgItemText(hWndDlg, IDC_PRIOR_IMAGE, "Ruler");
+			SetDlgItemText(hWndDlg, IDC_NEXT_IMAGE, "Street View");
+		}
 		firstMove = FALSE;
 		/* initialize working variables                                */
 		strcpy(DBName, lpDB);
@@ -2288,7 +2372,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 		else
 			BasicDataDisplay(DBName, hWndDlg, IDENTIFY_DATA, 0, 0, RecNo, Refno, lpSQL, 120);
 
-		currentImage = 0;
+		//currentImage = 0;
 		totImages = 0;
 		HFILE fid = HFILE_ERROR;
 
@@ -2305,7 +2389,8 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 		if (currentImage < totImages)
 		{
 			fid = GSSiOpenFile(rampPhotoFile, 0, OF_READ);
-			BOOL doFlip = FALSE;
+			doVFlip = FALSE;
+			doHFlip = TRUE;
 			int ifile = -1;
 			while (ifile++ < currentImage)
 				fgetstring(FileName, MAX_PATH, fid);
@@ -2314,19 +2399,27 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 				*pTab++ = 0;
 
 				if (atob(pTab))
-					doFlip = TRUE;
+					doVFlip = TRUE;
 			}
 			if ((pTab = strchr(FileName, '\t')))
 			{
 				*pTab++ = 0;
+				SetDlgItemText(hWndDlg, IDC_IMAGE_NAME, pTab);
 			}
-			hBMLarge = DisplaySelectedImage(hWndDlg, FileName,doFlip);
+			hBMLarge = DisplaySelectedImage(hWndDlg, FileName,doVFlip,doHFlip,rulernum);
 			GSSiClose2(&fid);
 		}
 
-		EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), (currentImage > 0));
-		EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE), (currentImage < totImages - 1));
-
+		if (DATA_TYPE = SIDEWALK)
+		{
+			EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), TRUE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE),TRUE);
+		}
+		else
+		{
+			EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), (currentImage > 0));
+			EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE), (currentImage < totImages - 1));
+		}
 		rtn = TRUE;
 		break; /* End of WM_INITDIALOG                                 */
 		    case WM_DRAWITEM:
@@ -2412,63 +2505,119 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 		{
 		case IDC_IMAGE_FLIP:
 		{
-			HDIB32 hDIB = BMPHandleFromEXT(FileName);
-
-			if (hDIB)
+			if (DATA_TYPE == SIDEWALK)
 			{
-				if (FreeImage_FlipVertical(hDIB))
+				currentImage = 0;
+				MAX_RULERS = 5;
+				strcpy(RulerPathnames[0], "D:\\PCViewerMPLS\\PCViewer\\rulers\\topruler1.png");
+				strcpy(RulerPathnames[1], "D:\\PCViewerMPLS\\PCViewer\\rulers\\topruler2.png");
+				strcpy(RulerPathnames[2], "D:\\PCViewerMPLS\\PCViewer\\rulers\\topruler3.png");
+				strcpy(RulerPathnames[3], "D:\\PCViewerMPLS\\PCViewer\\rulers\\topruler4.png");
+				strcpy(RulerPathnames[4], "D:\\PCViewerMPLS\\PCViewer\\rulers\\topruler5.png");
+				goto showImage;
+			}
+			else
+			{
+				HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+				if (hDIB)
 				{
-					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+					if (FreeImage_FlipVertical(hDIB))
+					{
+						GMFIBMPHandleToEXT(FileName, hDIB, 0);
+					}
+					FreeImage_Unload(hDIB);
+					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
 				}
-				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 		break;
 		case IDC_IMAGE_ROTATE_CLOCKWISE:
 		{
-			HDIB32 hDIB = BMPHandleFromEXT(FileName);
-
-			if (hDIB)
+			if (DATA_TYPE == SIDEWALK)
 			{
-				if (FreeImage_RotateClassic(hDIB, 90))
+				currentImage = 1;
+				MAX_RULERS = 1;
+				strcpy(RulerPathnames[0], "D:\\PCViewerMPLS\\PCViewer\\rulers\\frontruler1.png");
+				goto showImage;
+			}
+			else
+			{
+				HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+				if (hDIB)
 				{
-					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+					if (FreeImage_RotateClassic(hDIB, 90))
+					{
+						GMFIBMPHandleToEXT(FileName, hDIB, 0);
+					}
+					FreeImage_Unload(hDIB);
+					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
 				}
-				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 		break;
 		case IDC_IMAGE_ROTATE_COUNTERCLOCKWISE:
 		{
-			HDIB32 hDIB = BMPHandleFromEXT(FileName);
-
-			if (hDIB)
+			if (DATA_TYPE == SIDEWALK)
 			{
-				if (FreeImage_RotateClassic(hDIB, 270))
+				currentImage = 2;
+				MAX_RULERS = 1;
+				strcpy(RulerPathnames[0], "D:\\PCViewerMPLS\\PCViewer\\rulers\\backruler1.png");
+
+				goto showImage;
+			}
+			else
+			{
+				HDIB32 hDIB = BMPHandleFromEXT(FileName);
+
+				if (hDIB)
 				{
-					GMFIBMPHandleToEXT(FileName, hDIB, 0);
+					if (FreeImage_RotateClassic(hDIB, 270))
+					{
+						GMFIBMPHandleToEXT(FileName, hDIB, 0);
+					}
+					FreeImage_Unload(hDIB);
+					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
 				}
-				FreeImage_Unload(hDIB);
-				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE);
 			}
 		}
 		break;
 		case IDC_LARGEBUTTON:
 		{
 			char cmd[MAX_PATH * 2];
-			sprintf(cmd, "$WEB(%s)", FileName);
-			if (*FileName)
+			char file[MAX_PATH] = "C:\\temp\\tempimage.png";
+
+			if (rulernum)
+			{
+				CreateCompositeImage(FileName, doVFlip, doHFlip, rulernum,file);
+				sprintf(cmd, "$WEB(%s)", file);
 				ProcessText(cmd);
+			}
+			else
+			{
+				sprintf(cmd, "$WEB(%s)", FileName);
+				if (*FileName)
+					ProcessText(cmd);
+			}
 		}
 		break;
 		case IDC_PRIOR_IMAGE:
-			currentImage--;
+			if (DATA_TYPE == SIDEWALK)
+			{
+				rulernum++;
+				if (rulernum > MAX_RULERS)
+					rulernum = 0;
+			}
+			else
+				currentImage--;
 			goto showImage;
 			break;
 		case IDC_NEXT_IMAGE:
-			currentImage++;
+			if (DATA_TYPE == SIDEWALK)
+				currentImage = 0;
+			else
+				currentImage++;
 			goto showImage;
 			break;
 
@@ -2501,6 +2650,10 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 			break;
 		case IDC_NEXTPOINT:
 			GSSiEndDialog(hWndDlg, 2, hSaveBM);
+
+			break;
+		case IDC_PREVIOUSPOINT:
+			GSSiEndDialog(hWndDlg, 3, hSaveBM);
 
 			break;
 		case IDC_SAVEANDEXIT:
