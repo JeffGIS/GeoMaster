@@ -825,7 +825,8 @@ ErrOut:
 	}
 Exit:  
     GlobalUnlock (handle);
-	cachedSymbolHandle[idesc] = handle;
+	if (SymDictOpenMode == OF_READ && allowCachedSymbols)
+		cachedSymbolHandle[idesc] = handle;
 	return handle;
 }
 
@@ -835,7 +836,7 @@ void DestroySymbol (HANDLE hSymbol)
 	LPSYMBOL pSymDesc;
 	HANDLE	*phElement, hElement;
 	
-	if (!fromCloseDict)
+	if (!fromCloseDict && allowCachedSymbols)
 		return;
 	if (!hSymbol)
 		return;
@@ -2201,7 +2202,7 @@ BOOL OpenSymDict (int Mode)
 		return FALSE;
 	}
     SetContinueProcessing ( TRUE);
-    CloseSymDict();  
+    CloseSymDict();
     *LastSymName=0;                  
     SymDictOpenMode = Mode;
     AllVarEqQuestionMark = FALSE;  

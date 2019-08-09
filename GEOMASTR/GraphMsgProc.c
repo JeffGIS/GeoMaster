@@ -8735,6 +8735,7 @@ int FAR PASCAL NEWSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				double	StartX=0, StartY=0;  
 	    		HANDLE	hTran=0; 
 				
+				allowCachedSymbols = FALSE;
 				copyPar = SendDlgItemMessage (hWndDlg,IDC_COPYPARENT,BM_GETCHECK,0,0); 
 				sameName = SendDlgItemMessage (hWndDlg,IDC_SAMENAME,BM_GETCHECK,0,0); 
 

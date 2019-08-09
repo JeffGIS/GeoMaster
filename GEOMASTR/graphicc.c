@@ -2940,6 +2940,8 @@ long PickByRefno (long Refno,LPSTR InPrefix, LPSTR InUDI,short PickFile)
     char	SavePltName[MAX_PATH];
 	int		SavePltType = PltType;
 	BOOL isShapeFile = FALSE;
+	int  SHPRec[MAXPICKITEMS];
+	int	 nSHPPicked = 0;
 
 	strcpy (SavePltName,PltName);
     WantDescBlock = FALSE;
@@ -3096,11 +3098,11 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 									char cmd[256];
 									sqlite3_stmt *statement;
 									sprintf(cmd, "SELECT RECNUM FROM SHP WHERE [%s] = '%s'", Prefix, UDI);
-									if (sqlite3_prepare_v2(pTI->sltdb, cmd, -1, &statement, 0) == SQLITE_OK)
+									if (SQLOK(sqlite3_prepare_v2(pTI->sltdb, cmd, -1, &statement, 0),pTI->sltdb,"Get SHP RECNUM",0) == SQLITE_OK)
 									{
-											if (sqlite3_step(statement) == SQLITE_ROW)
+											while (nSHPPicked < MaxPick && sqlite3_step(statement) == SQLITE_ROW)
 											{
-												CurrentSHPRec = sqlite3_column_int(statement, 0);
+												SHPRec[nSHPPicked++] = sqlite3_column_int(statement, 0);
 												st = 0;
 											}
 									}
@@ -3153,18 +3155,24 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 					PickingByRefno=TRUE; 
 					SavePick = Pick;
 					Pick = TRUE;
-				    NumPicked = 0; 
 				    _fmemset (&PickList[0],0,sizeof(PICKDATA));
 					if (isShapeFile)
 					{
 						OpenMap(0, 0);
-						SHPRecOffset = GetSHPRecordOffset(CurrentSHPRec, FALSE);
-						ReadSHPRecordHeader(FidMap, SHPRecOffset,0);
-						ProcessSHPRecord(0, FidMap, CurrentSHPRec);
+						for (int i = 0; i < nSHPPicked; i++)
+						{
+							CurrentSHPRec = SHPRec[i];
+							SHPRecOffset = GetSHPRecordOffset(CurrentSHPRec, FALSE);
+							ReadSHPRecordHeader(FidMap, SHPRecOffset, 0);
+							ProcessSHPRecord(0, FidMap, CurrentSHPRec);
+						}
 						CloseMap(FALSE);
+						rtn = nSHPPicked;
 					}
 					else
 					{
+						NumPicked = 0;
+						rtn = 1;
 						PickList[0].ViewID = CurView->ID;
 						PickList[0].ConfigID = CurrentConfig;
 						PickList[0].FileNum = FileNum;
@@ -3243,7 +3251,6 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							PickList[0].IsDeleted = TRUE;
 					}
 					PD=PickList[0];
-					rtn = 1; 
 					PickingByRefno=FALSE;
 					Pick = SavePick;
 					goto Exit;

@@ -1687,6 +1687,8 @@ HWND	hWndLinkedTo = 0;
 BOOL	firstDisplayComplete = FALSE;
 int		MAXHOTSPOTDIMENSION = 2500;
 int		maxNumPhotos = 0;
+BOOL	allowCachedSymbols = TRUE;
+
 int		ii;
 
 

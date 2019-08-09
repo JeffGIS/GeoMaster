@@ -3433,10 +3433,12 @@ SetVis:
 				if (!*Arg[3])
 				{
 					Refno = 0;
-					if (PickByRefno(Refno, Arg[2], lpColon, UsePickList))
+					int st = PickByRefno(Refno, Arg[2], lpColon, UsePickList);
+					if (st)
 					{
 						SetPickGlobals(0);
-						goto RtnTrue;
+						itoa(st,OutLoc, 10);
+						goto Rtnl;
 					}
 					goto RtnFalse;
 				}

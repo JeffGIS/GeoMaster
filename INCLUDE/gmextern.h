@@ -1820,6 +1820,7 @@ extern  HWND	hWndLinkedTo;
 extern  BOOL	firstDisplayComplete;
 extern  int		MAXHOTSPOTDIMENSION;
 extern	int		maxNumPhotos;
+extern BOOL		allowCachedSymbols;
 extern	int		ii;
 
 extern int nPaint;

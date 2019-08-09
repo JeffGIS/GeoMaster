@@ -68,7 +68,7 @@ static	long	ii, numEnter=0, numExit=0;
 static	long	nextid=1, wantid=4268, WantCallID=31,NextLockID=1, WantLockID=8648, NextFreeID=1, WantFreeID=4386;
 static	HANDLE	WantHandle=0;
 
-#define	MAXMEM	8192   
+#define	MAXMEM	16384   
 #define MAXFREE	256 
 #define PREMEM	16
 #define POSTMEM	64   
