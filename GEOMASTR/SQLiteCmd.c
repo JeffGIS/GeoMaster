@@ -2066,7 +2066,7 @@ NextCrimeRec:
 
 							if (!skipConvert)
 								ConvertBounds(pBounds, 1, 2);
-							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.8f,%.8f,%.8f,%.8f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 							if (!skipQuadIndex)
 								fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							if (nLoops > 1)

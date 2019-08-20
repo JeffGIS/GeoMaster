@@ -3098,7 +3098,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 									char cmd[256];
 									sqlite3_stmt *statement;
 									sprintf(cmd, "SELECT RECNUM FROM SHP WHERE [%s] = '%s'", Prefix, UDI);
-									if (SQLOK(sqlite3_prepare_v2(pTI->sltdb, cmd, -1, &statement, 0),pTI->sltdb,"Get SHP RECNUM",0) == SQLITE_OK)
+									if (sqlite3_prepare_v2(pTI->sltdb, cmd, -1, &statement, 0) == SQLITE_OK)
 									{
 											while (nSHPPicked < MaxPick && sqlite3_step(statement) == SQLITE_ROW)
 											{

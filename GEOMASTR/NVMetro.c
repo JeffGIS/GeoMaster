@@ -5,8 +5,8 @@
 #define COORDINATE_FACTOR 10000000.0
 
 #define FIRSTYEAR	2004
-#define LASTYEAR	2015
-#define NYEARS	12
+#define LASTYEAR	2018
+#define NYEARS	15
 #define NUMVARS 64
 #define MAXLINELEN 2048
 
@@ -16,16 +16,29 @@ static HFILE fidYear[NYEARS];
 
 static void test(LPSTR INDir);
 static void test2(LPSTR INDir);
+
+#define NUMCHANGEVALUES 8
+/*
+#pragma pack(1)
 typedef struct {
+	unsigned int	HOMESTEAD : 1,
+					TAXEXEMPT : 1,
+					ValueChanged : NUMCHANGEVALUES,
+		filler : 32 - 2 - NUMCHANGEVALUES;
+}CHANGEVALUEHEADER;
+*/
+typedef struct {
+	//CHANGEVALUEHEADER cvheader;
 	int EMV_LAND, EMV_BLDG, EMV_TOTAL, TAX_CAPACITY, TOTAL_TAX, SPEC_ASSES, SALE_DATE, SALE_VALUE;
 }YEARLYVALUES;
 typedef YEARLYVALUES *LPYEARLYVALUES;
+//#pragma pack()
 
-int LoadMultPropertyDB(LPSTR INDir)
+int LoadMultPropertyDB(LPSTR INDir,int LastYear)
 {
 	int rtn = 0;
 	HANDLE	hIndex = 0;
-	int year = 2016;
+	int year = 2002;
 	int offset;
 	short	st;
 	char inFile[MAX_PATH];
@@ -37,7 +50,7 @@ int LoadMultPropertyDB(LPSTR INDir)
 	int mxlnlen = 0;
 
 	test2(INDir);
-	while (year < 2017)
+	while (year <= LastYear)
 	{
 		BTVARDESC   BTVar[2];
 		BTVar[0].BT_VARTYP = BT_CHAR;
@@ -203,7 +216,6 @@ int CreateMultValueFile(LPSTR INDir)
 	char cvFile[MAX_PATH];
 	char indexFile[MAX_PATH];
 	char cvindexFile[MAX_PATH];
-	int year = 2016;
 	HANDLE hIndex;
 	char line[1024];
 	int maxLineLen = 1020;
@@ -249,9 +261,9 @@ int CreateMultValueFile(LPSTR INDir)
 	{
 		pValues[i] = malloc(MAXLINELEN + 4);
 	}
-	sprintf(inFile, "%s\\%i.txt", INDir, year);
+	sprintf(inFile, "%s\\%i.txt", INDir, LASTYEAR);
 	fid = GSSiOpenFile(inFile, 0, OF_READ);
-	sprintf(indexFile, "%s\\%i.index", INDir, year);
+	sprintf(indexFile, "%s\\%i.index", INDir, LASTYEAR);
 	hIndex = BT_OPEN(indexFile, 0, BT_READ, 0);
 	OpenYearFiles(INDir);
 	CreateStatusWind(hWndMain, 1, 0);
@@ -314,13 +326,14 @@ int CreateMultValueFile(LPSTR INDir)
 			lnChangeValues = NYEARS * sizeof(YEARLYVALUES);
 			offset = GSSillseek(fidChangeValues, 0, 1);
 			BT_PUT(hChangeValueIndex, pid, (LPSTR)&offset);
+		//group by value to improve compression
 			LPINT pIntValuesYearly = (LPINT)pChangeValues;
 			pIntValues = (LPINT)pChangeValues2;
-			for (int i = 0; i < 8; i++, pIntValuesYearly++)
+			for (int i = 0; i < NUMCHANGEVALUES; i++, pIntValuesYearly++)
 			{
 				for (int iyear = 0; iyear < NYEARS; iyear++)
 				{
-					*pIntValues++ = pIntValuesYearly[iyear*8];
+					*pIntValues++ = pIntValuesYearly[iyear*NUMCHANGEVALUES];
 				}
 			}
 			lnChangeValuesCompressed = CompressBinaryRecord(pChangeValues2, pChangeValuesCompressed, lnChangeValues);

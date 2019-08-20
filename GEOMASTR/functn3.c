@@ -5337,8 +5337,11 @@ GotCloseFilehSQL:
 				} 
 				else if (!_fstricmp (Arg[2],"ITEM"))
 				{
-					if ((lpColon = _fstrchr (Arg[3],':')))
-						*lpColon++=0;
+					if ((lpColon = _fstrchr(Arg[3], ':')))
+					{
+						*lpColon++ = 0;
+						Refno = 0;
+					}
 					else 
 					{
 						Refno = atol (Arg[3]); 
@@ -7354,12 +7357,12 @@ HaveVP:;
 			rtn = CopyDirectory(Arg[1], Arg[2], atob(Arg[3]), Arg[4]);
 			goto Rtnrtn;
 		}
-		case 785: //$NVMETRO(LOADMULTPROP
+		case 785: //$NVMETRO(LOADMULTPROP,LastYear)
 		{
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (!stricmp(Arg[1], "LOADMULTPROP"))
 			{
-				itoa(LoadMultPropertyDB(Arg[2]), OutLoc, 10);
+				itoa(LoadMultPropertyDB(Arg[2],atoi(Arg[3])), OutLoc, 10);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "CREATEMULTVALUES"))

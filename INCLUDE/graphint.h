@@ -2507,7 +2507,7 @@ int NVCloseDB(long handle);
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle);
 sqlite3 * getNVDBHandle(int databaseID, BOOL *opened);
 int FormatStreets (LPSTR from, LPSTR text);
-int LoadMultPropertyDB(LPSTR INDir);
+int LoadMultPropertyDB(LPSTR INDir, int LastYear);
 int CreateMultValueFile(LPSTR INDir);
 BOOL AssignMultValues(LPSTR INDir,LPSTR UpdateFile);
 int AssignLandUseCodeToParcels(LLPOINT pt, sqlite3 *_database);
