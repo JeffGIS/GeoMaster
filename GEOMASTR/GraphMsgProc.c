@@ -9137,6 +9137,8 @@ BOOL FAR PASCAL EDITSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  switch(Message)
    {
     case WM_INITDIALOG:  
+		 CloseSymDict();
+		 allowCachedSymbols = FALSE;
 		 hSaveBM = EnterBlockingWindow (hWndDlg);
          InSymLoad = FALSE;
        	 hSymbol = 0;   
