@@ -1,2 +1,2 @@
-configs\STREETWIDTHDISPLAY_TEST.gmc 
+configs\basemap_new3.gmc [%USERLEV]=2;
 d:\bu_2018_02_28\geomas
