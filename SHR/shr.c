@@ -12162,31 +12162,58 @@ BOOL IsReal (LPSTR str)
 }
 	
 BOOL IsInteger(LPSTR str)
-{   
+{
 	short	lstr;
 	LPSTR	instr;
-	
+
 	if (!*str)
 		return FALSE;
 	while (*str == ' ')
 		str++;
 	if (*str == '-')
-		str++; 
+		str++;
 	instr = str;
-	lstr = _fstrlen (str);
+	lstr = _fstrlen(str);
 	if (lstr > 10)
 		return FALSE;
-    while (*str)
-    {
-        if (!isdigit(*str++))
-            return FALSE;
-    }
-    if (lstr == 10)
-    {
-    	if (atof (instr) > LONG_MAX)
-    		return FALSE;
-    }
-    return TRUE;
+	while (*str)
+	{
+		if (!isdigit(*str++))
+			return FALSE;
+	}
+	if (lstr == 10)
+	{
+		if (atof(instr) > LONG_MAX)
+			return FALSE;
+	}
+	return TRUE;
+}
+BOOL IsLongInteger(LPSTR str)
+{
+	short	lstr;
+	LPSTR	instr;
+
+	if (!*str)
+		return FALSE;
+	while (*str == ' ')
+		str++;
+	if (*str == '-')
+		str++;
+	instr = str;
+	lstr = _fstrlen(str);
+	if (lstr > 19)
+		return FALSE;
+	while (*str)
+	{
+		if (!isdigit(*str++))
+			return FALSE;
+	}
+	if (lstr == 19)
+	{
+		if (atof(instr) > LLONG_MAX)
+			return FALSE;
+	}
+	return TRUE;
 }
 
 BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)

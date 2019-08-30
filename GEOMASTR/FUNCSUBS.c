@@ -663,19 +663,26 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 //$FORALL(TABLES,file,wildcard,initalize,return,executable statements)
 //$FORALL(FIELDS,file,type(def all),initalize,return,executable statements)
 //$FORALL(DISTINCT,file,sql,initalize,return,value,executable statements,varprefix(opt))
-  	LPSTR	pEnd, pStatusText, pLoopText=0, pLineNo, pFile, pFileName, pVarName=0;
+  	LPSTR	pEnd, pStatusText, pMaxRecs, pLoopText=0, pLineNo, pFile, pFileName, pVarName=0;
 	long	ProcessLine = -1, AtLine=0, CurLoc, nlong;
 	static	int istatus=0;
 	BOOL	rtn=FALSE;
 	HANDLE	hDB=0;
 	short	itype;
+	long	maxRecords = INT_MAX;
+	long	nRecords = 0;
 
 	
 	ExpandText (Arg[1]);
 	ExpandText (Arg[2]);
 	pFile = Arg[2];
-	if ((pLoopText = strrchr (pFile,'!')))
-		*pLoopText++ = 0;   
+	if ((pMaxRecs = strrchr(pFile, '#')))
+	{
+		*pMaxRecs++ = 0;
+		maxRecords = atol(pMaxRecs);
+	}
+	if ((pLoopText = strrchr(pFile, '!')))
+		*pLoopText++ = 0;
 	if ((pStatusText = strrchr (pFile,'!')))
 		*pStatusText++ = 0;   
 	else
@@ -691,6 +698,7 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 	if (pStatusText)
 	{   
 		nlong = NumSQLRows (hDB); 
+		nlong = min(nlong, maxRecords);
 		if (istatus < 2)
 			CreateStatusWind (hWndMain,1,pStatusText);
 		istatus++;
@@ -699,7 +707,8 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 	{
 		IgnoreSelectVP = TRUE;    
 		CurLoc = 0;
-		while (ContinueProcessing  && FetchDBRec (hDB))
+		ProcessTextDB(Arg[4], pBrkPt, bpOffset, bpLen);
+		while (ContinueProcessing  && FetchDBRec (hDB) && nRecords++ < maxRecords)
 		{   
 			if (pStatusText)
 			{
@@ -722,6 +731,7 @@ BOOL RunForAll(int nArgs, LPSTR *Arg, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpO
 				break; 
 			CurLoc++;  
 		}
+		ProcessTextDB(Arg[5], pBrkPt, bpOffset, bpLen);
 	}
 	else if (!stricmp(Arg[1], "TABLES"))//???
 	{

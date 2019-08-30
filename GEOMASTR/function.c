@@ -3538,6 +3538,14 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
+			{
+				HFILE Fid = GSSiOpenFile("[%DL]data\\parcelfiles\\textfiles\\ChangeValues.bin", 0, OF_READ);
+				int nyears, firstyear, lastyear;
+				BigRead(Fid, &nyears, 4);
+				BigRead(Fid, &firstyear, 4);
+				BigRead(Fid, &lastyear, 4);
+				GSSiClose(Fid);
+			}
 			HDC hDC = GetDC(hWndMain);
 			int iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
 			int pageWidth = GetDeviceCaps(hDC, HORZRES);

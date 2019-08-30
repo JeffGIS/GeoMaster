@@ -744,7 +744,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			GSSiClose2 (&fid);
 		}
 	}
-	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd,OutputVarName(opt),skipErrorMessage)-single command only - no ; separator
+	else if (!stricmp(ARG[1], "EXECUTE"))//$SQLITE(EXECUTE,sqlitehandle,cmd,OutputVarName(opt),skipErrorMessage,outfile(opt))-single command only - no ; separator
 	{
 		db = (sqlite3*)atoi(ARG[2]);
 		sqlite3_stmt *statement;
@@ -754,15 +754,56 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			int st = sqlite3_prepare_v2GSSi(db, ARG[3], -1, &statement, 0);
 			if (st == SQLITE_OK)
 			{
-				if (!*ARG[4])
-					rtn = TRUE;
-				if (sqlite3_step(statement) == SQLITE_ROW)
+				if (*ARG[6])
 				{
-					LPSTR pName = (LPSTR)sqlite3_column_name(statement, 0);
-					LPSTR value = (LPSTR)sqlite3_column_text(statement, 0);
-					if (*ARG[4])
-						SetGlobalValue(ARG[4], value);
-					rtn = TRUE;
+					HFILE Fid = GSSiOpenFile(ARG[6], 0, OF_CREATE);
+					if (Fid == HFILE_ERROR)
+						rtn = -1;
+					else
+					{
+						rtn = 0;
+						{
+							int numcol = sqlite3_column_count(statement);
+							char delim[2] = { 0 };
+							LPSTR outstr = malloc(4096 * 4);
+							*outstr = 0;
+							for (int i = 0; i < numcol; i++)
+							{
+								LPSTR colname = (LPSTR)sqlite3_column_name(statement, i);
+								sprintf(strchr(outstr, 0), "%s%s", delim, colname);
+								*delim = '\t';
+							}
+							fputstring(outstr, Fid);
+							rtn = 0;
+							while (sqlite3_step(statement) == SQLITE_ROW)
+							{
+								char delim[2] = { 0 };
+								*outstr = 0;
+								rtn++;
+								for (int i = 0; i < numcol; i++)
+								{
+									LPSTR txt = (LPSTR)sqlite3_column_text(statement, i);
+									sprintf(strchr(outstr, 0), "%s%s", delim, txt);
+									*delim = '\t';
+								}
+								fputstring(outstr, Fid);
+							}
+						}
+						GSSiClose(Fid);
+					}
+				}
+				else
+				{
+					if (!*ARG[4])
+						rtn = TRUE;
+					if (sqlite3_step(statement) == SQLITE_ROW)
+					{
+						LPSTR pName = (LPSTR)sqlite3_column_name(statement, 0);
+						LPSTR value = (LPSTR)sqlite3_column_text(statement, 0);
+						if (*ARG[4])
+							SetGlobalValue(ARG[4], value);
+						rtn = TRUE;
+					}
 				}
 				sqlite3_finalizeGSSi(&statement);
 			}
@@ -3903,6 +3944,7 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	LPFIELDINFO field;
 	LPCURVAL	pCurVal;
 	int WantField = infield->index;
+	double dval = 0;
 
 	*irc = 1;
 	answer[0] = 0;

@@ -511,15 +511,17 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 		if (n)
 		{
 			LPSTR pList=0;
+			LPSTR pListOrig;
 			int	i;
 
-			*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
-			pList = (LPSTR)GlobalLock (*phList);
+			//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
+			//pList = (LPSTR)GlobalLock (*phList);
+			pList = pListOrig = (LPSTR)calloc(n*MaxElementSize*2 + 32,1);
 			for (i = 0; i < n; i++, pList += MaxElementSize)
 			{
 				//char tmp[1024] = { 0 };
 				//string s = ws2s(childList[i]);
-				string s = WStringToString(childList[i]);
+				std::string s = WStringToString(childList[i]);
 
 				//strcpy(tmp, s.c_str());
 				//strncpy0(pList, tmp, MaxElementSize - 1);
@@ -527,7 +529,10 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 			}
 				//strcpy (pList,WStringToString(childList[i]).c_str());
 
-			GlobalUnlock (*phList);
+			//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
+			//pList = (LPSTR)GlobalLock (*phList);
+			//GlobalUnlock (*phList);
+			//free(pListOrig);
 		}
 	}
 

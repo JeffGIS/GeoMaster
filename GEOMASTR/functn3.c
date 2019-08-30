@@ -2460,13 +2460,21 @@ GotCloseFilehSQL:
 				goto Rtnl;
 			goto RtnFalse;
 		}
-		case 539: //$ISINT(val)
+		case 539: //$ISINT(val,testforlongint(opt))
 		{
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-			if (IsInteger(Arg[1]))
-				goto RtnTrue;
+			if (atob(Arg[2]))
+			{
+				if (IsLongInteger(Arg[1]))
+					goto RtnTrue;
+			}
+			else
+			{
+				if (IsInteger(Arg[1]))
+					goto RtnTrue;
+			}
 			goto RtnFalse;
 		}
 

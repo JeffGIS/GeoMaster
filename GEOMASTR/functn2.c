@@ -1719,6 +1719,7 @@ GSSiExitProg (1350);
 				else if (*Arg[3] == 'W')
 				{
 					fid = GSSiOpenFile(Arg[2], 0, OF_READWRITE);
+					GSSillseek(fid, 0, 2);
 				}
 				ltoa(fid, OutLoc, 10);
 				goto Rtnl;

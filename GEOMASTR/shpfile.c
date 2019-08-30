@@ -6,7 +6,7 @@
 #define MAXINDEXSYMBOLS	3200
 #define MAXPOC	4096
 #define MAXFGDBLEVS	8
-#define MAX_CHILD_LENGTH 256
+#define MAX_CHILD_LENGTH 1024
 
 static	struct {float fcontour;
 			float size;

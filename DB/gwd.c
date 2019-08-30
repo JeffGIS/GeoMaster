@@ -3985,10 +3985,10 @@ BOOL GMDGetCharFieldVal (LPGWDHEADER lpGWDHead,int Field,LPSTR str)
                                                 
         case BT_REAL:
             if (lpGWFldInfo->Len == 4)
-                sprintf(str,"%f",*(LPFLOAT)lpVal);
+                _snprintf(str,32,"%f",*(LPFLOAT)lpVal);
 			else
 			{
-				if (_snprintf(str, 32, "%G", *(LPDOUBLE)lpVal) < 0)
+				if (_snprintf(str, 32, "%lf", *(LPDOUBLE)lpVal) < 0)
 					ii = 1;
 				else
 					ii = 1;

@@ -2846,7 +2846,7 @@ GSSiExitProg (100);
 					pCfgImage = GlobalLock (hCfgImage); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,TotImageLen);  
 					GlobalUnlock (hCfgImage);
-					CfgImageFormat = 1;
+					//CfgImageFormat = 1;
 				}
 				break;
 			default:
