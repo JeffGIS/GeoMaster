@@ -81,9 +81,11 @@ BOOL InitProj4CoordConv (BOOL Delete)
 	PRJ_UNITS[GOOGLEMAPSPROJECTION] = 2;
 	strcpy (projid[GOOGLEMAPSPROJECTION],"GoogleMaps");
 	FreePROJ(LATLONPROJECTION);
-	if (!(PRJ_PROJ4DEF[LATLONPROJECTION] = pj_init_plus("+proj=latlong +datum=WGS84")))
-       return FALSE;
+	//if (!(PRJ_PROJ4DEF[LATLONPROJECTION] = pj_init_plus("+proj=latlong +datum=WGS84")))
+		if (!(PRJ_PROJ4DEF[LATLONPROJECTION] = pj_init_plus("+proj=latlong +datum=NAD83")))
+			return FALSE;
 	PRJ_TYPE[LATLONPROJECTION] = PROJ4PROJECTION;
+	PRJ_SPHEROID[LATLONPROJECTION] = 8;
 	strcpy (projid[LATLONPROJECTION],"LATLON");
 	return TRUE;
 }
@@ -309,8 +311,9 @@ long ok;
 			 }
 		 }
 		 ok = pj_transform(PRJ_PROJ4DEF[from], PRJ_PROJ4DEF[LATLONPROJECTION], 1, 1, &DPoint->x, &DPoint->y, NULL,NULL);
-		 //DPoint->x *= RAD_TO_DEG;
-		 //DPoint->y *= RAD_TO_DEG;
+		// DPOINT testpt;
+		// testpt.x = DPoint->x * RAD_TO_DEG;
+		// testpt.y = DPoint->y * RAD_TO_DEG;
 		 from = 2;
 	 }
 	 if (ok != 0)
