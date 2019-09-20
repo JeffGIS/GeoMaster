@@ -81,12 +81,12 @@ extern "C" HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UI
 extern "C" LPSTR ftoa (LPSTR Value,double DVal);
 extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSize,LPHANDLE phList);
 
-using namespace std;
 using namespace FileGDBAPI;
+using namespace std;
 
 #define esriShapeBasicTypeMask 255
 
-#define MAXOPENFGDB	32
+#define MAXOPENFGDB	1
 
 static	char		openGDBName[MAXOPENFGDB][MAX_PATH]={0};
 static	int			openGDBid[MAXOPENFGDB];
@@ -97,6 +97,7 @@ static	int			gdbInUse[MAXOPENFGDB]={0};
 static	EnumRows	attributeQueryRows[MAXOPENFGDB];
 static	Row			row[MAXOPENFGDB];
 static	int			ii=0,not=0,nod=0,noq=0;
+static	char		fullName[MAX_PATH];
 
 static	wstring fieldName LONGWSDEF;
 
@@ -292,7 +293,6 @@ HANDLE stringToMem (string str)
 int OpenGDB (LPCTSTR DBName)
 {
 	long	hr;
-	char	fullName[MAX_PATH];
 	int		openID = -1;
 
 	_fullpath (fullName,DBName,MAX_PATH-1);
@@ -309,8 +309,8 @@ int OpenGDB (LPCTSTR DBName)
 	}
 	if (openID < 0)
 		return -1;
-	string	dbname = LPCTSTR(DBName);
-	wstring wdbname (dbname.begin(),dbname.end());
+	std::string	dbname = LPCTSTR(fullName);
+	std::wstring wdbname (dbname.begin(),dbname.end());
 	if ((hr = OpenGeodatabase(wdbname, geodatabase[openID])) != S_OK)
 	{
 		char mess[128];
@@ -355,7 +355,7 @@ HaveDB:
 		return 0;
 	openGDBid[idb] = openID;
 	gdbInUse[idb] = 1;
-	if (Table)
+	if (Table && *Table)
 	{
 		string	tablename = LPCTSTR(Table);
 		wstring wtablename(tablename.begin(), tablename.end());
@@ -498,44 +498,44 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 	std::vector<wstring> childList; 
 	//wstring	under (undr.begin(),undr.end());
 	
-	
-	if (iDB < 1)
-		return 0;
+	//if (iDB < 1)
+	//	return 0;
 	if (Type < 1 || Type > 3)
 		return 0;
-	undr = utf8toUtf16(Under);
-	hr = geodatabase[openGDBid[iDB-1]].GetChildDatasets(undr, type[Type-1], childList);
-	if (!hr)
-	{
-		n = childList.size();
-		if (n)
+
+		undr = utf8toUtf16(Under);
+		hr = geodatabase[openGDBid[iDB - 1]].GetChildDatasets(undr, type[Type - 1], childList);
+		if (!hr)
 		{
-			LPSTR pList=0;
-			LPSTR pListOrig;
-			int	i;
-
-			//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
-			//pList = (LPSTR)GlobalLock (*phList);
-			pList = pListOrig = (LPSTR)calloc(n*MaxElementSize*2 + 32,1);
-			for (i = 0; i < n; i++, pList += MaxElementSize)
+			n = childList.size();
+			if (n)
 			{
-				//char tmp[1024] = { 0 };
-				//string s = ws2s(childList[i]);
-				std::string s = WStringToString(childList[i]);
+				LPSTR pList = 0;
+				LPSTR pListOrig;
+				int	i;
 
-				//strcpy(tmp, s.c_str());
-				//strncpy0(pList, tmp, MaxElementSize - 1);
-				strncpy0(pList, (LPSTR)s.c_str(), MaxElementSize - 1);
-			}
+				//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
+				//pList = (LPSTR)GlobalLock (*phList);
+				pList = pListOrig = (LPSTR)calloc(n*MaxElementSize * 2 + 32, 1);
+				for (i = 0; i < n; i++, pList += MaxElementSize)
+				{
+					//char tmp[1024] = { 0 };
+					//string s = ws2s(childList[i]);
+					//std::string s = WStringToString(childList[i]);
+
+					//strcpy(tmp, s.c_str());
+					//strncpy0(pList, tmp, MaxElementSize - 1);
+					//strncpy0(pList, (LPSTR)s.c_str(), MaxElementSize - 1);
+				}
 				//strcpy (pList,WStringToString(childList[i]).c_str());
 
 			//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
 			//pList = (LPSTR)GlobalLock (*phList);
 			//GlobalUnlock (*phList);
-			//free(pListOrig);
+				free(pListOrig);
+			
 		}
 	}
-
     return n;
 }
 extern "C" BOOL CloseFGDB (int iDB)

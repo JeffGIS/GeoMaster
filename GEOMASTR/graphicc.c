@@ -3748,7 +3748,10 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
 	double factor = 1.0;
 	char units[32];
 
-
+	if (!hdib)
+	{
+		GMFIInfoFromEXT(PathName, &DibInfo);
+	}
 	if (hdib)
 	{
 		if (!GetBitmapInfoFromHandle (&DibInfo,hdib))

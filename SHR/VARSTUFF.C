@@ -3595,7 +3595,7 @@ GSSiExitProg (532);
 			SetTimeRangeBeg(TimeRangeBeg);
 			break;
 		case 394:
-			adjustIntensity = atof(Value);
+			adjustIntensity = dclamp (atof(Value),-1.0,1.0);
 			break;
 		case 395:
 			useTextFileSQLiteIndex = atob(Value);
@@ -5658,8 +5658,15 @@ short ProcessDelimTextHeader(LPSTR INstr, LPSTR File, HFILE Fid, LPHANDLE phDLT,
 				}
 			}
 		}
+	NextLine:
 		if (!fgetstring (str,USHRT_MAX-2,FidHdr))
 			goto Exit; 
+		else if (*LastChr(str) == ';')
+		{
+			ProcessText(str);
+			goto NextLine;
+		}
+
 		pstr = str;
 		while ((int)*pstr < 0) //what is this for?
 			pstr++;

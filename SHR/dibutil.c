@@ -1585,7 +1585,7 @@ BOOL RemoveBMPFromCache32 (LPSTR Name)
     return FALSE;
 }
 
-void AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
+BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 {   
 	ULONG	MinUse=ULONG_MAX;
 	USHORT	Mini, i;
@@ -1601,22 +1601,27 @@ void AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 				*BMPNames32[i] = 0;
 			}
 		FirstBMPCache32 = TRUE; 
-		return;
+		return TRUE;
 	}
 	
 	if (!*hBMP)
-		return;  
+		return FALSE;  
 	
 	if (!AllowBMPCaching)
-		return;
-		
+		return FALSE;
+	LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)*hBMP);
+	UINT BMPSize = pDibInfo->biHeight * pDibInfo->biWidth * pDibInfo->biBitCount / 8;
+
+	if (BMPSize > MAXBMPSIZETOCACHE)
+		return FALSE;
+
 	if (FirstBMPCache32)
 	{   
 		FirstBMPCache32 = FALSE;
 		for (i=0;i<MAXBMPCACHE;i++)
 			*BMPNames32[i] = 0;  
 	}
-	if (FreeImage_GetBPP(*hBMP) != 24)
+	if (pDibInfo->biBitCount != 24)
 	{
 		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(*hBMP);
 		FreeImage_Unload(*hBMP);
@@ -1629,7 +1634,7 @@ void AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 			BMPLastUse32[i] = BMPNextUse++;
 			BMPHandles32[i] = *hBMP;
 			_fstrcpy (BMPNames32[i],Name);
-			return;
+			return TRUE;
 		}
 		if (BMPLastUse32[i] < MinUse)
 		{
@@ -1641,9 +1646,19 @@ void AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 	BMPLastUse32[Mini] = BMPNextUse32++;
 	BMPHandles32[Mini] =*hBMP;
 	_fstrcpy (BMPNames32[Mini],Name);
-	return;
+	return TRUE;
 }
+BOOL BMPInCache(HDIB32 hDib)
+{
+	BOOL rtn = FALSE;
+	for (int i = 0; i < maxBMP32Cache; i++)
+	{
+		if (BMPHandles32[i] == hDib)
+			rtn = TRUE;
+	}
 
+	return rtn;
+}
 
 LPBITMAPINFO GetDibHeader (HDIB32 hDib)
 {   

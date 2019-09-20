@@ -12151,6 +12151,18 @@ int integerValue(LPSTR str)
 	return rtn;
 }
 
+double dclamp(double val, double min, double max)
+{
+	val = max(val, min);
+	val = min(val, max);
+	return val;
+}
+int iclamp(int val, int min, int max)
+{
+	val = max(val, min);
+	val = min(val, max);
+	return val;
+}
 BOOL IsReal (LPSTR str)
 {
 	LPSTR pEnd;

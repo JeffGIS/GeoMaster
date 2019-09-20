@@ -747,6 +747,42 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName)
 	}
 	return rtn;
 }
+BOOL GMFIInfoFromEXT(LPSTR PathName, LPBITMAPINFOHEADER	pDibInfo)
+{
+	FIBITMAP *dib = NULL;
+	BOOL	rtn = FALSE;
+	int id = 1;
+	char	lpszPathName[MAX_PATH];
+
+	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+
+	strcpy(lpszPathName, PathName);
+	ExpandText(lpszPathName);
+	ConvertToNewLocation(lpszPathName, FALSE);
+	// check the file signature and deduce its format
+	// (the second argument is currently not used by FreeImage)
+	fif = FreeImage_GetFileType(lpszPathName, 0);
+	if (strstr(lpszPathName, ".sbm"))
+		fif = FIF_BMP;
+	else if (fif == FIF_UNKNOWN)
+	{
+		// no signature ?
+		// try to guess the file format from the file extension
+		fif = FreeImage_GetFIFFromFilename(lpszPathName);
+	}
+	// check that the plugin has reading capabilities ...
+	if ((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
+	{
+		dib = FreeImage_Load(fif, lpszPathName, FIF_LOAD_NOPIXELS);
+		if (dib)
+		{
+			*pDibInfo = *FreeImage_GetInfoHeader((FIBITMAP *)dib);
+			FreeImage_Unload(dib);
+			rtn = TRUE;
+		}
+	}
+	return rtn;
+}
 
 HANDLE GMFreeImageRotateClassic (HANDLE hDIBIn,LPDOUBLE pRotate)
 {

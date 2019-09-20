@@ -1052,7 +1052,8 @@ BOOL DisplayBMFileInVP32(HDC hDC, LPSTR BMFile, double RotationAZ, BOOL fitToVP,
 //	   				      ColorType,RastOpts[rop]);
     nOrthoBytes += (long) bmwidth * (long) bmheight * 3;
     nOrthoBlocks++;
-// 	GlobalUnlock (hDib);
+	if (!BMPInCache(hDib))
+		FreeImage_Unload(hDib);
 	return (TRUE);
 }
 

@@ -114,9 +114,12 @@ extern "C" void AAPolyLine(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, 
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, &gdiplusStartupOutput);
 	{
 		int intensity = GetIValue(ColorRef);
-		intensity *= adjustIntensity;
-		intensity = max(0, min(255, intensity));
-		if (!intensity)
+		if (intensity)
+		{
+			intensity = intensity + (255 - intensity) * adjustIntensity;
+			intensity = max(0, min(255, intensity));
+		}
+		else
 			intensity = defaultLineTransparency;
 
 		Gdiplus::Graphics graphic(hdc);
@@ -233,10 +236,12 @@ extern "C" void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH
 			{
 				extern BOOL maxIntensity;
 				int intensity = GetIValue(lb->lbColor);
-				intensity *= adjustIntensity;
-				intensity = max(0, min(255, intensity));
-
-				if (!intensity)
+				if (intensity)
+				{
+					intensity = intensity + (255 - intensity) * adjustIntensity;
+					intensity = max(0, min(255, intensity));
+				}
+				else
 					intensity = defaultAreaTransparency;
 				if (maxIntensity)
 					intensity = 255;

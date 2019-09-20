@@ -1,2 +1,2 @@
-configs\basic1.gmc [%USEGDIPLUS]=F;[%KFO]=T;
+configs\2019_07.gmc [%USEGDIPLUS]=F;[%KFO]=T; 
 i:\gmmobile\metroUTM
