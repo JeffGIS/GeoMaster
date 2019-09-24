@@ -4024,7 +4024,7 @@ void DisplayVirtualPrintAreas (void)
 	return;
 }
 
-BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int nrows, int ncols)
+BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int nrows, int ncols,LPSTR Format)
 {   
 	HDIB32	hFullImage, hTile; 
 	MNMXCORD BitmapBounds, WBounds;
@@ -4033,7 +4033,14 @@ BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int nrows, int ncols)
 	DPOINT	BitmapPoint, WorldPoint;
 	double	ScaleX, ScaleY, WorldWidth, WorldHeight;  
 	char	OutFile[256];
-	
+	char	format[256]="%s\\tile%2.2i%2.2i.tif";
+
+	if (Format && *Format)
+	{
+		strcpy(format, "%s\\");
+		strcat(format, Format);
+	}
+	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(InFile, 0);
 	hFullImage = BMPHandleFromEXT (InFile);
 	if (!hFullImage)
 		return FALSE;
@@ -4062,8 +4069,10 @@ BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int nrows, int ncols)
 			WorldPoint.x = WBounds.xmn + left * ScaleX;  
 			hTile = CopyBMP32 (hFullImage,left,min(FullRight,right),min(FullTop,top),bottom);
 	   		SetGeoTiffData (hTile,&ScaleX,&ScaleY,&BitmapPoint,&WorldPoint);  
-	   		sprintf (OutFile,"%s\\tile%2.2i%2.2i.tif",OutDir,irow,icol);
-	   		SaveDIB32 (hTile,OutFile,FIF_TIFF,TIFF_ADOBE_DEFLATE); 
+	   		sprintf (OutFile,format,OutDir,irow,icol);
+			if (*OutType)
+				fif = TIFF_ADOBE_DEFLATE;
+	   		SaveDIB32 (hTile,OutFile,FIF_TIFF,fif); 
 			GMDestroyDIB32 (hTile); 
 	   		left += width;
 	   		right += width;

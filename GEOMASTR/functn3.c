@@ -1401,9 +1401,10 @@ GotCloseFilehSQL:
 		 
 		case 511: // $IMAGE(image file pathname)  
 				  // $IMAGE(WINDOW,image file name)
-				  // $IMAGE(SPLIT,imagefile,outdir,outtype,width,height)
+				  // $IMAGE(SPLIT,imagefile,outdir,outtype,width,height,format(opt))
 				  // $IMAGE(WIDTH,imageFile);
 				  // $IMAGE(HEIGHT,imageFile);
+				  // $IMAGE(CONVERT,infile,outfile,flag)
 		{				
 			
 			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
@@ -1413,6 +1414,14 @@ GotCloseFilehSQL:
 					PostMessage(hWndFullBM, WM_CLOSE, 0, 0L);
 
 				goto RtnTrue;
+			}
+			if (!_fstricmp(Arg[1], "CONVERT"))
+			{
+				int flag = atoi(Arg[4]);
+				HDIB32 hDIB = LoadDIB32(Arg[2], FALSE);
+				rtn = SaveDIB32(hDIB, Arg[3], -1, flag);
+				DestroyDIB32(hDIB, FALSE);
+				goto Rtnrtn;
 			}
 			if (!_fstricmp(Arg[1], "SETICONCOLORS"))
 			{
@@ -1492,7 +1501,7 @@ GotCloseFilehSQL:
 			}
 			if (!_fstricmp (Arg[1],"SPLIT"))
 			{
-				rtn = SplitImage (Arg[2],Arg[3],Arg[4],atoi(Arg[5]),atoi(Arg[6]));
+				rtn = SplitImage (Arg[2],Arg[3],Arg[4],atoi(Arg[5]),atoi(Arg[6]),Arg[7]);
 				goto Rtnrtn;
 			}
 			if (!_fstricmp(Arg[1], "CONVERTCOLOR"))

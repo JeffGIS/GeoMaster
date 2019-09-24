@@ -824,7 +824,7 @@ LPSHORT FindNextGraphicsLink (HPSHORT ipnt);
 //						long NewGraphicsOffset );
 //int CopyQuadTree (int FidOut);
 BOOL GetBMCoord (LPSTR lpFile,MNMXCORD *Bounds, double *Resolution,LPRECT32 ClipRect,LPHANDLE phTran,BOOL UseCPT); 
-BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int width, int height);
+BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int width, int height,LPSTR format);
 BOOL SetPNParms (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
 void DisplayAddress (HDC hDC,LPDPOINT DPoint, double AZ, LPSTR txt,long Ref,int ID,short UseHalfTone);
 short ProvinceToState (short prov);
