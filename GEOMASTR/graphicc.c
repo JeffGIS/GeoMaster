@@ -3747,10 +3747,12 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
 	HANDLE	hTran;
 	double factor = 1.0;
 	char units[32];
+	BOOL deleteDib = FALSE;
 
 	if (!hdib)
 	{
-		GMFIInfoFromEXT(PathName, &DibInfo);
+		hdib = GMFIBMPHandleFromEXT(PathName,TRUE);
+		deleteDib = TRUE;
 	}
 	if (hdib)
 	{
@@ -3850,14 +3852,17 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     	pWBounds->xmn = WorldPoint.x * factor;  
     	pWBounds->xmx = (WorldPoint.x + ScaleX * (DibInfo.biWidth-1)) * factor;
     	pWBounds->ymn = (WorldPoint.y + ScaleY * (DibInfo.biHeight-1)) * factor; 
-    	
+    	if (deleteDib)
+			FreeImage_Unload(hdib);
     	return TRUE;
     }
 Exit:	
    	pWBounds->xmn = pWBounds->ymn = 0;
    	pWBounds->ymx = DibInfo.biHeight-1;
    	pWBounds->xmx = DibInfo.biWidth-1;
-    return TRUE;
+	if (deleteDib)
+		FreeImage_Unload(hdib);
+	return TRUE;
 } 
 
 void ExpandPltName (LPSTR PltName)

@@ -363,7 +363,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 		{
 			if (iDate < nDatesReturned)
 			{
-				HDIB32 hDib32 = GMFIBMPHandleFromEXT(datedOrthoFile[iDate]);
+				HDIB32 hDib32 = GMFIBMPHandleFromEXT(datedOrthoFile[iDate], FALSE);
 
 
 				if (hDib32)

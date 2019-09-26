@@ -6755,10 +6755,12 @@ BOOL StartBackgroundCache (void)
 		BY_HANDLE_FILE_INFORMATION fiList, fiLastCacheCheckFile;
 		LONG	dtime;
 		BOOL	st;
+		SYSTEMTIME systim;
 
 		FidList = OpenFileGM (BackgroundCacheFilelist,&OFStruct,OF_READ);
 		st = GetFileInformationByHandle((HANDLE)FidList,&fiList);
 		st = GetFileInformationByHandle((HANDLE)FidLastCacheCheck,&fiLastCacheCheckFile);
+		FileTimeToSystemTime(&fiLastCacheCheckFile.ftLastWriteTime, &systim);
 		dtime = CompareFileTime (&fiList.ftLastWriteTime,&fiLastCacheCheckFile.ftLastWriteTime); 
 		_lclose (FidList);
 		_lclose (FidLastCacheCheck);

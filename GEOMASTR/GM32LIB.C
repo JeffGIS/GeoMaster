@@ -801,7 +801,7 @@ HDIB32  BMPHandleFromEXT (LPSTR ImageFile)
 		 URLToFile (ImageFile,TempName);
 		 ImageFile = TempName;    
    	} 
-	st = GMFIBMPHandleFromEXT (ImageFile);
+	st = GMFIBMPHandleFromEXT (ImageFile, FALSE);
 	if (*TempName)
 		GSSiRemove32 (TempName); 
 	return (HDIB32)st;

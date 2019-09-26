@@ -566,7 +566,7 @@ NextPoly:;
 void testConvertBitmapToPoly(LPSTR file)
 {
 	char outFile[MAX_PATH];
-	HDIB32 hDib32 = GMFIBMPHandleFromEXT(file);
+	HDIB32 hDib32 = GMFIBMPHandleFromEXT(file,FALSE);
 	BITMAP bm;
 	LPRGBQUAD pbit;
 	LPCOLORREF pbits, pbits2;

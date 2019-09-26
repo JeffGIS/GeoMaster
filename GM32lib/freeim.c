@@ -323,15 +323,19 @@ int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColo
 			RGBQUAD	c;
 
 			FreeImage_GetPixelColor(hDIB24, col, row, &c);
-			if (RGBQUADDist(c, FromColorQ) <= colordist)
+			if (c.rgbBlue != ToColorQ.rgbBlue || c.rgbGreen != ToColorQ.rgbGreen || c.rgbRed != ToColorQ.rgbRed)
 			{
-				n++;
-				FreeImage_SetPixelColor(hDIB24, col, row, &ToColorQ);
+				if (RGBQUADDist(c, FromColorQ) <= colordist)
+				{
+					n++;
+					FreeImage_SetPixelColor(hDIB24, col, row, &ToColorQ);
+				}
 			}
 		}
 		//StatusWindowUpdate (0,0,nrow-begrow,row-begrow);
 	}
-	n = SaveDIB32(hDIB24, ToPath, 0, -1);
+	if (!SaveDIB32(hDIB24, ToPath, 0, -1))
+		n = -1;
 	FreeImage_Unload(hDIB24);
 	return n;
 }
@@ -703,15 +707,18 @@ DWORD GM32PasteDIB (HDIB32 ToDIB,HDIB32 FromDIB,DWORD Left,DWORD Top,DWORD Alpha
 	return rtn;
 }
 
-HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName)
+HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName, BOOL InfoOnly)
 {
 	FIBITMAP *dib = NULL;
 	HDIB32	rtn=0;
 	int id = 1;
 	char	lpszPathName[MAX_PATH];
+	UINT flag = BMP_DEFAULT;
 
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
 
+	if (InfoOnly)
+		flag = FIF_LOAD_NOPIXELS;
 	strcpy (lpszPathName,PathName);
 	ExpandText (lpszPathName);
 	ConvertToNewLocation (lpszPathName,FALSE);
@@ -730,7 +737,6 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName)
 	if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
 	{
 		// ok, let's load the file
-		UINT flag = BMP_DEFAULT;
 		FIBITMAP *dib;
 		if (fif == FIF_JPEG)
 		{

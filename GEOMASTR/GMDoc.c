@@ -58,7 +58,7 @@ INT_PTR CALLBACK AboutGMDoc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 		char	value[128];
 		char ImagePath[MAX_PATH] = "[%DL]GMDocumenter\\GMDocHelp.png";
 		ExpandText(ImagePath);
-		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath, FALSE);
 		HBITMAP hBitmap = DIB32ToBitmap(hDib32, (HPALETTE)0);
 		DestroyDIB32(hDib32, FALSE);
 
@@ -1055,7 +1055,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen, POINT tiePo
 	hDC = GetDC(hWnd);
 	if (Transparent)
 	{
-		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath, FALSE);
 		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
 		POINT tiePointVP = { rect.left , rect.top};
 		DisplayTransparentBitmap(hDC, &hDib24, tiePointVP, &tiePointBM,0, 0, 0, &TranColor);
@@ -1070,7 +1070,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen, POINT tiePo
 	}
 	else
 	{
-		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath);
+		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath, FALSE);
 
 		FadeSpeed = fade;
 		if (hDib32)

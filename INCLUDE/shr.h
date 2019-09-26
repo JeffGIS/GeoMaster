@@ -1198,7 +1198,7 @@ BOOL SaveImageToMem (FREE_IMAGE_FORMAT fif, FIBITMAP *dib,void *pMem, int *MemLe
 HANDLE WriteDIBToMem (HDIB32 hDib,int Format, int flags,LPINT pSize);
 DWORD GM32Remove (LPSTR Name);
 DWORD GM32GetNodeInfo (LPSTR NodeName,LPSTR UserName,LPSTR Winver);
-HDIB32 GMFIBMPHandleFromEXT (LPSTR lpszPathName);
+HDIB32 GMFIBMPHandleFromEXT (LPSTR lpszPathName,BOOL InfoOnly);
 BOOL GMFIBMPGetBitmapInfo (LPBITMAPINFOHEADER pDibInfoD, HANDLE hDib);
 BOOL GMFIInfoFromEXT(LPSTR PathName, LPBITMAPINFOHEADER	pDibInfo);
 DWORD GM32StretchDIBitsFromHandle (HDC hDC16,long destX,long destY,long destW,long destH,long xoff,
