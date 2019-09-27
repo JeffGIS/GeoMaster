@@ -463,11 +463,14 @@ void ClearCurVals (LPOPENFILEDATA FilePtr)
 		{   
 			if (lpField->type == SQL_LONGVARBINARY || lpField->type == SQL_MSSHAPE)
 			{ 
-				LPCURVAL pCurVal = (LPCURVAL)GlobalLock (lpField->hCurVal);   
+				LPCURVAL pCurVal = (LPCURVAL)GlobalLock (lpField->hCurVal);  
+				LPSTR sCurVal = &pCurVal->Value;
 				HANDLE	hBinVal = (HANDLE)atol (&pCurVal->Value);
-				
+				int iBinVal = (int)hBinVal;
+
 				GlobalUnlock (lpField->hCurVal);
-				GSSiGlobFree (&hBinVal);
+				if (iBinVal > 0)
+					GSSiGlobFree (&hBinVal);
 			} 
 			GSSiGlobFree (&lpField->hCurVal);
 		}
@@ -1077,6 +1080,7 @@ ErrMes:
     			//binval=GlobalLock (hBinVal);
 				pTemp = malloc (lCommonMem);
 		    	//rc = SQLGetData(*hstmt, FldNum, SQL_C_BINARY, pCommonMem, lCommonMem, &lenanswer);   
+//should make multiple calls to SQLGetData to get entire shape record
 		    	rc = SQLGetData(*hstmt, FldNum, SQL_C_BINARY, pTemp, lCommonMem, &lenanswer);   
 				pShp = (LPMSGEOGRAPHY)pTemp;
 		    	//rc = SQLGetData(*hstmt, FldNum, SQL_C_BINARY, binval, size, &lenanswer);   
@@ -1115,6 +1119,7 @@ ErrMes:
     			hBinVal=GSSiGlobAlloc (0,GMEM_MOVEABLE,BinSize);
     			binval=GlobalLock (hBinVal);
     			hmemmove (binval,pTemp,BinSize-1);
+				binval[lenanswer] = 0;
 		    	BinSize = lenanswer; 
 				free (pTemp);
 		    /*	if (BinSize > size)
@@ -1136,7 +1141,7 @@ ErrMes:
 					LPDOUBLE pZ;
 
 		    		ltoa ((long)hBinVal,str,10); 
-					lenanswer = _fstrlen (str); 
+					lenanswer = _fstrlen (str) + 1; 
 					if (isPoint)
 					{
 						pNumFigures = (LPDWORD)((LPBYTE)&pShp->numPoints + sizeof (DPOINT));
@@ -1658,7 +1663,9 @@ Next:
        		default:
        		break;
        	} 
-       GSSiGlobUlFree (&hMem);	
+       GSSiGlobUlFree (&hMem);
+	   lpmine->hCurVal = 0;
+
        return lpmine;
     
     }
