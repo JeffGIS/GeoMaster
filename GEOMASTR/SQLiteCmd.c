@@ -496,7 +496,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 			sprintf(strchr(pCmd, 0), " ORDER BY %s", orderBy);
 		if (db)
 		{
-			if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "get distinct", 0) == SQLITE_OK)
+			if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "query", 0) == SQLITE_OK)
 			{
 				int numcol = sqlite3_column_count(statement);
 				char delim[2] = { 0 };
@@ -504,7 +504,36 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 				for (int i = 0; i < numcol; i++)
 				{
 					LPSTR colname = (LPSTR)sqlite3_column_name(statement, i);
-					sprintf(strchr(outstr, 0), "%s%s", delim, colname);
+					LPSTR pcolName = malloc(strlen(colname) + 1);
+					if (!strnicmp(colname, "MIN(", 4))
+					{
+						*LastChr(colname) = 0;
+						sprintf(pcolName, "MIN_%s", &colname[4]);
+					}
+					else if (!strnicmp(colname, "MAX(", 4))
+					{
+						*LastChr(colname) = 0;
+						sprintf(pcolName, "MAX_%s", &colname[4]);
+					}
+					else if (!strnicmp(colname, "AVG(", 4))
+					{
+						*LastChr(colname) = 0;
+						sprintf(pcolName, "AVG_%s", &colname[4]);
+					}
+					else if (!strnicmp(colname, "SUM(", 4))
+					{
+						*LastChr(colname) = 0;
+						sprintf(pcolName, "SUM_%s", &colname[4]);
+					}
+					else if (!strnicmp(colname, "COUNT(", 6))
+					{
+						*LastChr(colname) = 0;
+						sprintf(pcolName, "COUNT_%s", &colname[6]);
+					}
+					else
+						strcpy(pcolName, colname);
+					sprintf(strchr(outstr, 0), "%s%s", delim, pcolName);
+					free(pcolName);
 					*delim = '\t';
 				}
 				if (Fid != NO_FILE)
