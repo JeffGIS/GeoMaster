@@ -1,2 +1,2 @@
-configs\basemap_new3.gmc
-l:\geomas
+configs\basemap3.gmc [%WANTBACKGROUNDCACHE]=T;
+i:\bu_2018_02_28\geomas
