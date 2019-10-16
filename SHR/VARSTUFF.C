@@ -3604,7 +3604,7 @@ GSSiExitProg (532);
 		{
 			char testFile[MAX_PATH] = "[%DL]global.ini";
 			ExpandText(testFile);
-			if (!IsLocalFile(testFile))
+			//if (!IsLocalFile(testFile))
 				wantBackgroundCache = atob(Value);
 		}
 			break;

@@ -6470,7 +6470,7 @@ Exit:
 	return rtn;
 }
 
-long SearchFilesInDir2 (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub)
+long SearchFilesInDirBC (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub)
 {   
 	DWORD	hDir, Type;
 	long	NumFilesIn=*TotFiles;
@@ -6523,7 +6523,7 @@ Top:
 			if (Type)
             {   
             	if (WantSub)
-                	SearchFilesInDir2 (str,Ext,OutFile,TotFiles,WildCard,Lev+1,WantSub);
+                	SearchFilesInDirBC (str,Ext,OutFile,TotFiles,WildCard,Lev+1,WantSub);
             }
             else if (SubDirOnly)
             	goto SkipFile; 
@@ -6591,49 +6591,47 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 			if (FidFilelist != NULL)
 			{
 				while (ContinueBackgroundCache && fgetss(str,MAX_PATH,FidFilelist))
-				{
+				{					
+					REPLAC (str,"[%DL]",DataLocDir,MAX_PATH);
+					if (strchr (str,'*'))
 					{
-						REPLAC (str,"[%DL]",DataLocDir,MAX_PATH);
-						if (strchr (str,'*'))
-						{
-							int		nFiles=0;
-							LPSTR	pWild = strrchr (str,'\\');
-							BOOL	wantSub=FALSE;
+						int		nFiles=0;
+						LPSTR	pWild = strrchr (str,'\\');
+						BOOL	wantSub=FALSE;
 
-							if (pWild)
-							{
-								if (*(pWild-1) == '\\')
-								{
-									wantSub = TRUE;
-									*(pWild-1) = 0;
-								}
-								*pWild++ = 0;
-								Fid2 = OpenFileGM (tempFile,&OFStruct,OF_CREATE); 
-								ii = SearchFilesInDir2 (str, 0, Fid2,&nFiles,pWild,1,wantSub);     
-								_llseek (Fid2,0,0);
-								if (pass)
-								{
-									while (ContinueBackgroundCache && fgetstring2 (str,MAX_PATH,Fid2))
-									{
-										REPLAC (str,"[%DL]",DataLocDir,MAX_PATH);
-										pctdone = (100 * ifile++)/totFiles;
-										CacheFileInBackground (str,CacheDir,DataLocDir,0,pctdone);
-									}
-								}
-								else
-									totFiles += nFiles;
-								_lclose (Fid2);
-								OpenFileGM (tempFile,&OFStruct,OF_DELETE);
-							}
-						}
-						else if (pass)
+						if (pWild)
 						{
-							pctdone = (100 * ifile++)/totFiles;
-							CacheFileInBackground (str,CacheDir,DataLocDir,0,pctdone);
+							if (*(pWild-1) == '\\')
+							{
+								wantSub = TRUE;
+								*(pWild-1) = 0;
+							}
+							*pWild++ = 0;
+							Fid2 = OpenFileGM (tempFile,&OFStruct,OF_CREATE); 
+							ii = SearchFilesInDirBC (str, 0, Fid2,&nFiles,pWild,1,wantSub);     
+							_llseek (Fid2,0,0);
+							if (pass)
+							{
+								while (ContinueBackgroundCache && fgetstring2 (str,MAX_PATH,Fid2))
+								{
+									REPLAC (str,"[%DL]",DataLocDir,MAX_PATH);
+									pctdone = (100 * ifile++)/totFiles;
+									CacheFileInBackground (str,CacheDir,DataLocDir,0,pctdone);
+								}
+							}
+							else
+								totFiles += nFiles;
+							_lclose (Fid2);
+							OpenFileGM (tempFile,&OFStruct,OF_DELETE);
 						}
-						else
-							totFiles++;
 					}
+					else if (pass)
+					{
+						pctdone = (100 * ifile++)/totFiles;
+						CacheFileInBackground (str,CacheDir,DataLocDir,0,pctdone);
+					}
+					else
+						totFiles++;	
 				}
 				if (ContinueBackgroundCache && pass)
 				{
@@ -6666,22 +6664,38 @@ void RenameCachedFiles (LPSTR CacheDir)
 	char	TempName[MAX_PATH];
 	char	FileName[MAX_PATH];
 	char	FromName[MAX_PATH];
+	char	TrustedCacheFiles[MAX_PATH];
 	char	CacheRenameFile[MAX_PATH+2];
 	char	SearchString[32]="*.crn";
 	HFILE	Fid, Fid2;
 	long	TotFiles=0;
 	LPSTR	pDot;
+	HFILE	FidCachedFiles=HFILE_ERROR;
     
 	if (!*CacheDir || !BackgroundCacheStarted)
 		return;
-	sprintf (CacheListDir,"%sCacheRenameList\\",CacheDir);
+	sprintf(CacheListDir, "%sCacheRenameList\\", CacheDir);
 	makedirectories (CacheListDir,TRUE,FALSE);
 	GSSiGetTempFileName(0,"gm",0,TempName);
 	CacheRenameListNum = time (0);
 	Fid = GSSiOpenFile (TempName,0,OF_CREATE);
-	SearchFilesInDir (CacheListDir, "", Fid,&TotFiles,SearchString,1,FALSE,FALSE); 
+	SearchFilesInDir2 (CacheListDir, "", Fid,&TotFiles,SearchString,1,FALSE,FALSE,MAX_FILES_TO_RENAME); 
 	if (TotFiles)
 	{
+		char	CacheDirectory[MAX_PATH + 2];
+		sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CacheDir);
+		FidCachedFiles = GSSiOpenFile(TrustedCacheFiles, 0, OF_WRITE);
+		if (FidCachedFiles == HFILE_ERROR)
+		{
+			FidCachedFiles = GSSiOpenFile(TrustedCacheFiles, 0, OF_CREATE);
+			fputstring("", FidCachedFiles);
+		}
+		else
+			GSSillseek(FidCachedFiles, 0, 2);
+		strcpy(CacheDirectory, CacheDir);
+		ExpandText(CacheDirectory);
+		strupr(CacheDirectory);
+		int lnCacheDirectory = strlen (CacheDirectory);
 		CloseAllRequestedFiles (FALSE);
 		GSSillseek (Fid,0,0);
 		while (fgetstring (CacheRenameFile,MAX_PATH,Fid))
@@ -6711,12 +6725,22 @@ void RenameCachedFiles (LPSTR CacheDir)
 								*pDot = '.';
 							GSSiOpenFile (FileName,0,OF_DELETE);
 							GSSiRename (FromName,FileName);
+							strupr(FileName);
+							LPSTR pName = FileName;
+							if (!strncmp(FileName, CacheDirectory, lnCacheDirectory))
+							{
+								FileName[lnCacheDirectory-1] = '*';
+								pName = &FileName[lnCacheDirectory-1];
+							}
+							fputstring(pName, FidCachedFiles);
 						}
 					}
 				}
 			}
 		}
 	}
+	if (FidCachedFiles != HFILE_ERROR)
+		GSSiClose2(&FidCachedFiles);
 	GSSiClose2 (&Fid);
 	GSSiRemove (TempName);
 	return;
@@ -6826,6 +6850,13 @@ BOOL StartBackgroundCache (void)
 		RenameCachedFiles (CachePathnameTo);
 		ContinueBackgroundCache = TRUE;
 		BackgroundUpdateMessage ("Checking for files to cache");
+		{
+			char cmd[512];
+			arg1 = GlobalLock(hArgs);
+			sprintf(cmd, "$TEXTTOCLIPBOARD(%s)", arg1);
+			GlobalUnlock(hArgs);
+			ExpandText (cmd);
+		}
 		hCacheThread = (HANDLE)_beginthread( BackgroundCache, 0, &hArgs);
 		SetThreadPriority (hCacheThread,THREAD_PRIORITY_LOWEST);
 		rtn = TRUE;

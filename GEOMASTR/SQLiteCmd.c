@@ -496,7 +496,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 			sprintf(strchr(pCmd, 0), " ORDER BY %s", orderBy);
 		if (db)
 		{
-			if (SQLOK(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "query", 0) == SQLITE_OK)
+			if (SQLOK2(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "query",pCmd, 0) == SQLITE_OK)
 			{
 				int numcol = sqlite3_column_count(statement);
 				char delim[2] = { 0 };

@@ -6146,12 +6146,18 @@ LPSTR FilePart(LPSTR File,LPSTR Part)
 	return rtn;
 }
 
-long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub,BOOL fileNameOnly)
+long SearchFilesInDir(LPSTR CurDirIN, LPSTR Ext, HFILE OutFile, LPLONG TotFiles, LPSTR WildCardIn, int Lev, BOOL WantSub, BOOL fileNameOnly)
+{
+	return SearchFilesInDir2(CurDirIN, Ext, OutFile, TotFiles, WildCardIn, Lev, WantSub, fileNameOnly,INT_MAX);
+}
+
+long SearchFilesInDir2(LPSTR CurDirIN, LPSTR Ext, HFILE OutFile, LPLONG TotFiles, LPSTR WildCardIn, int Lev, BOOL WantSub, BOOL fileNameOnly,int MaxFiles)
 #if ENABLETRACE
 {GSSiEnterProg (280);
 #endif
 {   
-	DWORD	hDir, Type;
+	DWORD	hDir = 0;
+	DWORD	Type;
 	long	NumFilesIn=*TotFiles;
     char    setstr[1024],FileName[256],FullName[256], TestExt[64], CurDir[256], str[2048], WildCard[256];
     short       i, rtn,ii;
@@ -6159,7 +6165,8 @@ long SearchFilesInDir (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,
     BOOL	FirstPass=TRUE, SubDirOnly; 
 	LPSTR	lc;
 	WIN32_FIND_DATA	FindFileData;
-	
+	int nFiles = 0;
+
 	_fstrcpy (WildCard,WildCardIn);
 	if (WildCard && !_fstricmp (WildCard,"*.*"))
 		*WildCard = 0;
@@ -6184,79 +6191,57 @@ Top:
     		sprintf (setstr,"%s\\%s.*",CurDir,WildCard);  
     	_fstrcpy (FileName,setstr);
 		hDir = SearchDirectory32 (FileName,0,&Type,&FindFileData);
-//	    st = _dos_findfirst (setstr,_A_NORMAL,&FileInfo);
     }
     else 
     {   
     	sprintf (setstr,"%s\\*.*",CurDir);
     	if (*WildCard)
 			SubDirOnly = TRUE;   
-//    	st = _dos_findfirst (setstr,_A_SUBDIR,&FileInfo);
     	_fstrcpy (FileName,setstr);
 		hDir = SearchDirectory32 (FileName,0,&Type,&FindFileData);
 	   	FirstPass=FALSE;
     }
-    while (hDir)
+    while (hDir && nFiles < MaxFiles)
     {   
         if (FileName[0] != '.')
         {
             sprintf (str,"%s\\%s",CurDir,FileName);
-//            if (FileInfo.attrib & _A_SUBDIR)  
 			if (Type)
             {   
             	if (WantSub)
-					SearchFilesInDir(str, Ext, OutFile, TotFiles, WildCard, Lev + 1, WantSub, fileNameOnly);
+					SearchFilesInDir2(str, Ext, OutFile, TotFiles, WildCard, Lev + 1, WantSub, fileNameOnly,MaxFiles - nFiles);
             }
             else if (SubDirOnly)
             	goto SkipFile; 
             else
             {   
-            	
                 _fullpath (FullName,str,sizeof(FullName));
                 _splitpath (FullName,0,0,0,TestExt);  
-/*                if (WildCard)
-                {   short	l;
-                	LPSTR	lpast;
-                	
-                	lpast = _fstrchr (WildCard,'*');
-                	if (lpast)
-                		l=lpast-WildCard;
-                	else
-                		l=_fstrlen(WildCard);
-                	if (_fstrnicmp(WildCard,FileInfo.name,l))
-                		goto SkipFile;
-                } 
-                if (!_fstricmp (Ext,TestExt))
-                {*/
-	                (*TotFiles)++;
-					//strupr (FullName);
-	                if (OutFile != HFILE_ERROR)
+	            (*TotFiles)++;
+				nFiles++;
+	            if (OutFile != HFILE_ERROR)
+				{
+					if (fileNameOnly)
+	                	fputstring (FullName,OutFile);
+					else
 					{
-						if (fileNameOnly)
-	                		fputstring (FullName,OutFile);
-						else
-						{
-							long	createTime = Time64toTime32 (FileTimeToint64(FindFileData.ftCreationTime));
-							long	accessTime = Time64toTime32 (FileTimeToint64(FindFileData.ftLastAccessTime));
-							long	writeTime = Time64toTime32 (FileTimeToint64(FindFileData.ftLastWriteTime));
-							__int64 fLen = HighLowToint64(FindFileData.nFileSizeHigh,FindFileData.nFileSizeLow);
+						long	createTime = Time64toTime32 (FileTimeToint64(FindFileData.ftCreationTime));
+						long	accessTime = Time64toTime32 (FileTimeToint64(FindFileData.ftLastAccessTime));
+						long	writeTime = Time64toTime32 (FileTimeToint64(FindFileData.ftLastWriteTime));
+						__int64 fLen = HighLowToint64(FindFileData.nFileSizeHigh,FindFileData.nFileSizeLow);
 
-							sprintf (str,"%s\t%i\t%i\t%i\t%I64i",FullName,createTime,accessTime,writeTime,fLen);
-	                		fputstring (str,OutFile);
-						}
+						sprintf (str,"%s\t%i\t%i\t%i\t%I64i",FullName,createTime,accessTime,writeTime,fLen);
+	                	fputstring (str,OutFile);
 					}
-	            //} 
+				}
 	     SkipFile:;
             }
         }
-#if WIN32
-//        st = _findnext (st,&FileInfo);
-#else
-//        st = _dos_findnext (&FileInfo);
-#endif
 		hDir = SearchDirectory32 (FileName,hDir,&Type,&FindFileData);
     }
-    if (FirstPass)
+	if (hDir)
+		FindClose((HANDLE)hDir);
+    else if (FirstPass)
     {
     	FirstPass=FALSE;
     	goto Top;
