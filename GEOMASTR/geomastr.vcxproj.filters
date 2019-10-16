@@ -2421,6 +2421,8 @@
     <None Include="..\MrSid\Raster_DSDK\lib\tbb.dll">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Debug\msvcp110d.dll" />
+    <None Include="Debug\msvcr110d.dll" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="cmdlines.txt" />
