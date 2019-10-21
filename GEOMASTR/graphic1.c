@@ -428,7 +428,7 @@ void QuitGraphics()
 	GSSiDeleteObject (&hBlackPen);
 	GSSiSetCursor(LoadCursor(0, IDC_WAIT));
 	ProcessGlobal ("[%ENDCMD]");
-	GSSiGlobFree (&hCfgImage); 
+	GSSiGlobFree (&hCfgImages); 
 	CloseDGNCellLibrary ();  
 	ClearSpecial (); 
 	ResetStreetLabels ();
@@ -4701,11 +4701,11 @@ Top:
 		    	GlobalUnlock (hCfgImage); 
 	    }*/
 
-	    if (hCfgImage)
+	    if (hCfgImage || hCfgImages)
 	    {   
 	    	RECT	Rect;
 	    	
-	    	if (hCfgImage && CurrentConfig)
+	    	if (CurrentConfig)
 	    	{
 			    short	iv;
 	    		LPVIEWPORT	pSaveVP;
@@ -4713,8 +4713,8 @@ Top:
 				SetDisplayMode (hDC, GF_SCREENMODE); 
 		        SelectClipRgn (hDC,0);
 	   			GetClientRect (hWnd,&Rect);
-				if (CfgImageFormat == 1)
-	   				DisplayBMInRect2 (hDC,hCfgImage, MainRect,-1,0,0,0);
+				if (hCfgImage)
+					DisplayBMInRect32(hDC, hCfgImage, MainRect, FALSE);
 				else if (NumSavedImages)
 				{
 					short image, nearimage=0;
@@ -4738,11 +4738,11 @@ Top:
 							}
 						}
 					}
-					pCfgImage = GlobalLock (hCfgImage); 
+					pCfgImage = GlobalLock (hCfgImages); 
 					CfgImageLen = SavedImageData[nearimage].ImageLen;
 					pCfgImage += SavedImageData[nearimage].Offset;
-					hDib = LoadDIBFromMem (pCfgImage,CfgImageLen,CfgImageFormat,0);
-					GSSiGlobUlFree (&hCfgImage);
+					hDib = LoadDIBFromMem (pCfgImage,CfgImageLen, FIF_TIFF,0);
+					GSSiGlobUlFree (&hCfgImages);
 					hCfgImage = hDib;
 					DisplayBMInRect32 (hDC,hCfgImage,MainRect,FALSE);
 					//Sleep (2000);
@@ -4757,8 +4757,8 @@ Top:
 					DisplayBMInRect32 (hDC,hCfgImage,MainRect,FALSE);
 	   			if (CurrentConfig)
 				{
-					if (CfgImageFormat == 1)
-		    			GSSiGlobFree (&hCfgImage);
+					if (NumSavedImages > 1)
+		    			GSSiGlobFree (&hCfgImages);
 					else
 					{
 						GMDestroyDIB32 (hCfgImage);

@@ -2842,27 +2842,26 @@ GSSiExitProg (100);
 					BigRead (FidConfig,(HPSTR)SavedImageData,NumSavedImages*sizeof(SAVEDIMAGEDATA)); 
 					for (i=0;i<NumSavedImages;i++)
 						TotImageLen += SavedImageData[i].ImageLen;
-					hCfgImage = GSSiGlobAlloc (1534,GMEM_MOVEABLE,TotImageLen);
-					pCfgImage = GlobalLock (hCfgImage); 
+					hCfgImages = GSSiGlobAlloc (1534,GMEM_MOVEABLE,TotImageLen);
+					pCfgImage = GlobalLock (hCfgImages); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,TotImageLen);  
-					GlobalUnlock (hCfgImage);
-					//CfgImageFormat = 1;
+					GlobalUnlock (hCfgImages);
 				}
 				break;
 			default:
 				if (CfgImageLen)
 				{ 
-					hCfgImage = GSSiGlobAlloc (1534,GMEM_MOVEABLE,CfgImageLen);
-					pCfgImage = GlobalLock (hCfgImage); 
+					hCfgImages = GSSiGlobAlloc (1534,GMEM_MOVEABLE,CfgImageLen);
+					pCfgImage = GlobalLock (hCfgImages); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,CfgImageLen);  
 					if (CfgImageFormat != 1)
 					{
-						hDib = LoadDIBFromMem (pCfgImage,CfgImageLen,CfgImageFormat,0);
-						GSSiGlobUlFree (&hCfgImage);
+						hDib = LoadDIBFromMem (pCfgImage,CfgImageLen, FIF_TIFF,0);
+						GSSiGlobUlFree (&hCfgImages);
 						hCfgImage = hDib;
 					}
 					else
-						GlobalUnlock (hCfgImage);
+						GlobalUnlock (hCfgImages);
 					//SaveBitmap (hCfgImage,"c:\\testitem.bmp",0,0);
 				}
 				break;
@@ -3247,8 +3246,8 @@ GSSiExitProg (100);
     SetCurView (pViewports[*pCommandViewport-1]);  
     if (ForceBounds)
     {
-		if (CfgImageFormat == 1)
-			GSSiGlobFree (&hCfgImage);
+		if (NumSavedImages > 1)
+			GSSiGlobFree (&hCfgImages);
 		else
 		{
 			GMDestroyDIB32 (hCfgImage);
@@ -3259,8 +3258,8 @@ GSSiExitProg (100);
 	}
 	else if (ValidBounds (&StartupZoom) && First)
     {
-		if (CfgImageFormat == 1)
-			GSSiGlobFree (&hCfgImage);
+		if (NumSavedImages > 1)
+			GSSiGlobFree (&hCfgImages);
 		else
 		{
 			GMDestroyDIB32 (hCfgImage);
@@ -3788,13 +3787,13 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 							neardiff = fabs (NearAspect - ImageAspect);
 						}
 					}
-					hCfgImage = GSSiGlobAlloc (1534,GMEM_MOVEABLE,TotImageLen);
-					pCfgImage = GlobalLock (hCfgImage); 
+					hCfgImages = GSSiGlobAlloc (1534,GMEM_MOVEABLE,TotImageLen);
+					pCfgImage = GlobalLock (hCfgImages); 
 					BigRead (FidConfig,(HPSTR)pCfgImage,TotImageLen);  
 					CfgImageLen = SavedImageData[nearimage].ImageLen;
 					pCfgImage += SavedImageData[nearimage].Offset;
-					hDib = LoadDIBFromMem (pCfgImage,CfgImageLen,CfgImageFormat,0);
-					GSSiGlobUlFree (&hCfgImage);
+					hDib = LoadDIBFromMem (pCfgImage,CfgImageLen, FIF_TIFF,0);
+					GSSiGlobUlFree (&hCfgImages);
 					DisplayBMInRect32 (hDC,hDib,  *ImageRect,TRUE);
 				}
 				break;
@@ -3807,7 +3806,7 @@ BOOL DisplayConfigPreview (HWND hWnd,HDC hDC,LPSTR Name,LPRECT ImageRect, UINT T
 					BigRead (FidConfig,(HPSTR)pCfgImage,CfgImageLen);  
 					if (CfgImageFormat != 1)
 					{
-						hDib = LoadDIBFromMem (pCfgImage,CfgImageLen,CfgImageFormat,0);
+						hDib = LoadDIBFromMem (pCfgImage,CfgImageLen, FIF_TIFF,0);
 						GSSiGlobUlFree (&hCfgImage);
 						DisplayBMInRect32 (hDC,hDib,  *ImageRect,TRUE);
 	   					//DisplayBMInRect2 (hDC,hDib,  *ImageRect,-1,0,0);
