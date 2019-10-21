@@ -976,6 +976,8 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				LastNameInc = NameInc;
 				TextSize = StartTextSize = min(MaxTextSize*txtfac, (pStreet->HollowStreetWidth * OverAllStreetWidthFactor)*txtfac - 2);
    				TextOffsetBegin = 0;
+				MinTextSize = max(MinTextSize, pStreet->HollowStreetWidth-2);
+				MaxTextSize = max(MinTextSize, MaxTextSize);
 				if (TextSize <  MinTextSize*txtfac)
 	   			{
 					TextSize = StartTextSize = MaxTextSize*txtfac;

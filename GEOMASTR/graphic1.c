@@ -4879,12 +4879,12 @@ void SetThemeOrder (LPVIEWPORT CurView)
 #endif
 {   
 	UINT	i; 
-	LPTHEME	pTheme;
 	
 	CurView->NumThemes=0;
 	for (i=0;i<*pNumViewports;i++)                  
 	{
-		if ((pTheme=pViewports[i]->pTheme))
+		LPTHEME pTheme = pViewports[i]->pTheme;
+		if (pTheme && pViewports[i]->ID != CurView->ID)
 		{
 			if (pTheme->TargetViewport == CurView->ID)
 				AddThemeToVP (CurView,pTheme);
