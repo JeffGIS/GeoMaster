@@ -4574,7 +4574,7 @@ GSSiExitProg (533);
 		break; 
 		
 		case 137:
-			GetWindowsDirectory (OutStr,144);  
+			GetWindowsDirectory (OutStr,MAX_PATH);  
 		break; 
 			
 		case 138:
@@ -4927,7 +4927,7 @@ GSSiExitProg (533);
         case 273:
 			if (NumMemRead + NumFidRead)
 			{
-				double pct=100*(((double)NumMemRead)/(NumMemRead + NumFidRead));
+				double pct=100*(((double)NumMemRead)/((double)NumMemRead + (double)NumFidRead));
         		sprintf (OutStr,"%f %ld %ld %ld",pct,NumFileOpen,NumNullOpen,NumActualOpen);
 				NumMemRead = NumFidRead = NumFileOpen = NumNullOpen = NumActualOpen = 0;
 			}
@@ -5597,7 +5597,7 @@ int SetGlobalFromTextBox (HWND hWndDlg,UINT Control,LPSTR VarName,BOOL ConvertRe
 				*pCvt++ = *pStr;
 				break;
 			}
-			*pStr++;
+			pStr++;
 		}
 		*pCvt = 0;
 		SetGlobalValue (VarName,pCvt2);
@@ -10620,7 +10620,7 @@ GSSiExitProg (596);
 	iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
 
 	iLogPixsX = GetScreenPixelsPerInch();
-	IDist = (double)(CurView->DrawRect.right - CurView->DrawRect.left) / (double)iLogPixsX;
+	IDist = ((double)CurView->DrawRect.right - (double)CurView->DrawRect.left) / (double)iLogPixsX;
 
     if (!IDist)  
 {
@@ -10790,7 +10790,7 @@ long FilePos (LPSTR Cmd,LPSTR FileID,LPSTR Pos,int index)
 	if (!stricmp (Cmd,"SET") && FilePtr->Type == UMIFS_DATAFILE)
 	{
 		LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock (FilePtr->FileHandle); 
-		int	pos;
+		int	pos = BT_FIRST;
 
 		if (!stricmp (Pos,"PRIOR"))
 			pos = BT_PRIOR;

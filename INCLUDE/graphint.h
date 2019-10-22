@@ -2259,6 +2259,7 @@ int DGridCellID (LPDPOINT pPoint);
 BOOL HaveNonBKColor (LPRECT rect,HDIB32 hDib32);
 double GetPCTColorInBitmapWithMask(HDIB32 hBitmap, HDIB32 hMask, COLORREF color, COLORREF maskColor);
 int CreateOverlapMap(LPSTR OutImage, LPSTR InImages, COLORREF color);
+BOOL CreateGMStartupFile(LPSTR OutFile, LPSTR ConfigPath, BOOL LinkZoom, BOOL RetainZoom);
 
 //BOOL AddTransCanadaDesignatonToStreetName (short State);
 void InitTileGraphics (HFILE Fid);

@@ -31,6 +31,30 @@ typedef struct {
 }WINPROCESSANDTHREAD;
 typedef WINPROCESSANDTHREAD *LPWINPROCESSANDTHREAD;
 
+BOOL CreateGMStartupFile(LPSTR OutFile, LPSTR ConfigPath, BOOL LinkZoom, BOOL RetainZoom)
+{
+	long len;
+	GSSiGetTempFileName(0, "gmc", 0, OutFile);
+	HFILE Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (Fid == HFILE_ERROR)
+		return FALSE;
+	if (LinkZoom)
+		sprintf(strchr(ConfigPath, 0), "(%ld)", (ULONG)hWndMain);
+	len = strlen(ConfigPath);
+	BigWrite(Fid, (HPSTR)&len, 4, -1);
+	BigWrite(Fid, (HPSTR)ConfigPath, len, -1);
+	if (RetainZoom && hSavedZooms)
+	{
+		len = GlobalSize(hSavedZooms);
+		LPSHORT pNumSavedViews = (LPSHORT)GlobalLock(hSavedZooms);
+
+		BigWrite(Fid, (HPSTR)&len, 4, -1);
+		BigWrite(Fid, (HPSTR)pNumSavedViews, len, -1);
+		GlobalUnlock(hSavedZooms);
+	}
+	GSSiClose2(&Fid);
+	return TRUE;
+}
 int GetCurrentMonitor(void)
 {
 	int rtn = 1;
@@ -5214,7 +5238,8 @@ GotCloseFilehSQL:
 			goto RtnTrue;
 		}
 
-		case 711: /* $LOADCFG (config file) Load config file */
+		case 711: // $LOADCFG (config file) Load config file
+				  // $LOADCFG(,pathname,networkdir,personaldir,startindir) brings up new load control
 		{	
 			BOOL 	SaveTrackingStatus = TrackingStatus, ForceOpen;
 
@@ -5225,8 +5250,7 @@ GotCloseFilehSQL:
 			    DestroySavedZooms ();
 			if (!*Arg[1])
 			{
-				BOOL	StartInNew, RetainZoom=TRUE, LinkZoom=TRUE;
-				LPSTR	pBS,pBS1;
+				BOOL	StartInNew, RetainZoom=FALSE, LinkZoom=FALSE;
 				char	modulePath[MAX_PATH];
 				
 				_fstrcpy (Arg[1],Arg[2]);
@@ -5242,6 +5266,7 @@ GotCloseFilehSQL:
 			    ForceBounds = RetainZoom;   
 			    if (StartInNew)
 				{
+					CreateGMStartupFile(Arg[7], Arg[1], LinkZoom, RetainZoom);
 					long len;
 					GSSiGetTempFileName (0,"gmc",0,Arg[7]);  
 					Fid = GSSiOpenFile (Arg[7],0,OF_CREATE);
@@ -5261,14 +5286,7 @@ GotCloseFilehSQL:
 					}
 					GSSiClose2 (&Fid);
 					EscapeFunction (TRUE);
-					if ((pBS1 = strrchr (Arg[7],'\\')))
-						*pBS1 = 0;
-					pBS = strrchr (Arg[7],'\\')+1;
-					if (pBS1)
-						*pBS1 = '\\';
-					//GetModuleFileName(NULL,modulePath,MAX_PATH);
 	           		sprintf (Arg[6],"$SESSION(CREATE,GeoMaster %s,,,%s)",Arg[7],Arg[5]);
-	           		//sprintf (Arg[6],"$EXECUTE([%%DL]gmloader.exe %s)",pBS);
 	           		ProcessText (Arg[6]); 
 	           		goto RtnTrue;
 			    }
@@ -7190,7 +7208,7 @@ HaveVP:;
 					RECT	rect;
 					char	startIn[MAX_PATH] = "[%DL]";
 					LPSTR	pstartIn = startIn;
-					//MNMXCORD zoomBounds;
+					MNMXCORD zoomBounds;
 			
 					CloseAllRequestedFiles (FALSE);
 					GetModuleFileName(NULL,modulePath,MAX_PATH);
@@ -7206,7 +7224,17 @@ HaveVP:;
 						si.dwYSize = RECTHEIGHT (&rect);
 						si.dwFlags = STARTF_USEPOSITION|STARTF_USESIZE|STARTF_USESHOWWINDOW ;
 					}
-					//zoomBounds = atobounds(Arg[4],ierr);
+					zoomBounds = atobounds(Arg[4],&Err);
+					if (!Err)
+					{
+						char OutFile[MAX_PATH];
+						LPSTR pConfigFile = Arg[2];
+						if (!strnicmp(pConfigFile, "GeoMaster ", 10))
+							pConfigFile += 10;
+						SaveZooms(&zoomBounds);
+						CreateGMStartupFile(OutFile, pConfigFile, FALSE,TRUE);
+						sprintf (Arg[2], "GeoMaster %s",OutFile);
+					}
 					CRFlags = DETACHED_PROCESS;
 					// for mapserver addd BELOW_NORMAL_PRIORITY_CLASS
 					//ExpandText(Arg[2]);

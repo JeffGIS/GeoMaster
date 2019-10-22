@@ -32,7 +32,7 @@ BOOL PickCurve (HPDPOINT lpPointsIn,long nPnts,LPDPOINT PC,LPDPOINT POC, LPDPOIN
 {
 	DPOINT	BeginPoint, EndPoint, PickedPoint,NodePoint, WPoint, LastWPoint, NearPoint; 
 	HPDPOINT lpPoints = lpPointsIn;
-	POINT	BeginPointFile, EndPointFile, PickedPointFile;
+	POINT	BeginPointFile = { 0 }, EndPointFile = { 0 }, PickedPointFile = { 0 };
 	DWORD	i, mini;
 	double	PCT, OffDist, TotDistW, AZ[3], MinDist, Dist, AZAdjust;
 	BOOL	First=TRUE, rtn=FALSE;   

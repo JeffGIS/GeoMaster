@@ -1252,6 +1252,9 @@ BOOL GM32GetGMCName(HWND hWnd,LPSTR PathName,
 	_getcwd (CurDir,MAX_PATH);  
 	strcpy (NetworkCFGDir,NetDir);
 	strcpy (PersonalCFGDir,PersonalDir);
+	LinkZoom = *pLinkZoom;
+	RetainZoom = *pRetainZoom;
+	StartInNewSession = *pStartInNew;
 //	MessageBox (0,NetworkCFGDir,PersonalCFGDir,MB_OK);
 	Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST |OFN_NOREADONLYRETURN|
 								OFN_FILEMUSTEXIST|OFN_ENABLEHOOK| OFN_ENABLETEMPLATE ;
@@ -1349,6 +1352,7 @@ BOOL GM32GetGMCName(HWND hWnd,LPSTR PathName,
 			strcpy (PathName,ShortName);
 			*pStartInNew = StartInNewSession;
 			*pRetainZoom = RetainZoom;
+			*pLinkZoom = LinkZoom;
 		}
 	}
 	_chdir (CurDir);
