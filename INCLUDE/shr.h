@@ -932,6 +932,7 @@ int	GetFunctionValue(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, i
 int	GetFunctionValue1(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 int	GetFunctionValue2(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 int	GetFunctionValue3(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
+int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 short GetFunArgs(LPSTR	Args, LPSTR *Arg, short MaxArgs, LPHANDLE phMem, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen);
 COLORREF ColorWOWidth(COLORREF InColor);
 COLORREF ColorWithWidth (COLORREF Color,int Width);

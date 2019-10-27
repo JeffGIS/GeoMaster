@@ -2061,7 +2061,8 @@ GSSiExitProg (867);
 #endif
     	return FALSE;
 }
-    hSavedZooms = GSSiGlobAlloc ( 178,GHND,*pNumViewports*sizeof(SAVEDZOOM)+sizeof(short));
+	int lMem = *pNumViewports * sizeof(SAVEDZOOM) + sizeof(short);
+    hSavedZooms = GSSiGlobAlloc ( 178,GHND,lMem);
     pNumSavedViews = (LPSHORT)GlobalLock (hSavedZooms);
     *pNumSavedViews = 1;
     pNumSavedViews++;

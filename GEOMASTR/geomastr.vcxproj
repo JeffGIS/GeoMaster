@@ -29,6 +29,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>NotSet</CharacterSet>
+    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -110,7 +111,7 @@
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <EmbedManifest>true</EmbedManifest>
-    <TargetName>GeoMaster34m</TargetName>
+    <TargetName>GeoMaster34n</TargetName>
     <LibraryPath>C:\Program Files %28x86%29\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>$(IncludePath);..\sqlite3;..\gdal\include;..\LAStools\LASzip\dll;..\gdal-2.2.3\gcore;..\gdal-2.2.3\ogr</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
@@ -207,7 +208,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\VisualStudio\include;..\FileGDBAPI\2012\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\sunang\ipw\h;..\dgnlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>S_VERSION;WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;NVSERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>S_VERSION;WIN32;NDEBUG;_WINDOWS;USEFREEIMAGE;NO_STRICT;SQLITE_ENABLE_RTREE;USEMRSID;CHECKMEMx;ENABLETRACEx;BITS_PER_COLOR=8;GEOMASTER;NVSERVER;WINDOWS_IGNORE_PACKING_MISMATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -347,9 +348,9 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\FileGDBAPI\2013\include;..\include;..\Proj-4\src;..\MrSid\Raster_DSDK\include;..\dgnlib;..\sunang\ipw\h;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS_IGNORE_PACKING_MISMATCH;_WINDOWS;USEFREEIMAGE;CHECKMEM;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACE;BITS_PER_COLOR=8;GEOMASTER;SQLITE_ENABLE_RTREE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;USEFREEIMAGE;CHECKMEM;XPORABOVEx;USEMRSID;_WIN32_WINNTx=0x0502;ENABLETRACE;BITS_PER_COLOR=8;GEOMASTER;SQLITE_ENABLE_RTREE;WINDOWS_IGNORE_PACKING_MISMATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <StructMemberAlignment>2Bytes</StructMemberAlignment>
@@ -364,6 +365,8 @@
       <BrowseInformation>true</BrowseInformation>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -520,6 +523,7 @@
     <ClCompile Include="FUNCTN1.C" />
     <ClCompile Include="functn2.c" />
     <ClCompile Include="FUNCTN3.C" />
+    <ClCompile Include="Functn7.c" />
     <ClCompile Include="FUNDEFS.C" />
     <ClCompile Include="..\gctpc\gctp.c" />
     <ClCompile Include="..\Proj-4\src\geocent.c" />

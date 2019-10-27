@@ -2554,6 +2554,7 @@ GSSiExitProg (532);
 				break;
 			}
 		break;
+
 		case 80: /*%VPBOUNDS*/ 
 			switch (Index)
 			{   
@@ -4328,22 +4329,38 @@ GSSiExitProg (533);
 			}
 		break;
 		case 80: /*%VPBOUNDS*/ 
+		{
+			LPVIEWPORT saveCurView = CurView;
+			int saveCurrentConfig = CurrentConfig;
+			SetConfig(1);
+			if (Index > 100)
+			{
+				Index -= 100;
+				if (Index <= *pNumViewports)
+				{
+					SetViewport(Index);
+				}
+				Index = 0;
+			}
 			switch (Index)
-			{   
-				default:
-				case 0:
-					sprintf (OutStr,"%.14lg %.14lg %.14lg %.14lg",CurView->WBounds.xmn, 
-												  CurView->WBounds.ymn,
-												  CurView->WBounds.xmx,
-												  CurView->WBounds.ymx);  
+			{
+			default:
+			case 0:
+				sprintf(OutStr, "%.14lg %.14lg %.14lg %.14lg", CurView->WBounds.xmn,
+					CurView->WBounds.ymn,
+					CurView->WBounds.xmx,
+					CurView->WBounds.ymx);
 				break;
-				case 1:
-					sprintf (OutStr,"%.14lg %.14lg",CurView->WBounds.xmn,CurView->WBounds.ymn);
+			case 1:
+				sprintf(OutStr, "%.14lg %.14lg", CurView->WBounds.xmn, CurView->WBounds.ymn);
 				break;
-				case 2:
-					sprintf (OutStr,"%.14lg %.14lg",CurView->WBounds.xmx,CurView->WBounds.ymx);
-				break; 
-			} 
+			case 2:
+				sprintf(OutStr, "%.14lg %.14lg", CurView->WBounds.xmx, CurView->WBounds.ymx);
+				break;
+			}
+			CurView = saveCurView;
+			SetConfig(saveCurrentConfig);
+		}
 		
 		break;
 		
@@ -7128,9 +7145,11 @@ GSSiExitProg (558);
 				{
 					if (FunID > 799 && FunID != 904)
 						l = GetFunctionValue3(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack-startLoc)+bpOffset, bpLen);
-			    	else if (FunID > 499)
+					else if (FunID > 699)
+						l = GetFunctionValue7(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);
+					else if (FunID > 499)
 						l = GetFunctionValue2(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);
-			    	else if (FunID > 299)
+					else if (FunID > 299)
 						l = GetFunctionValue1(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);
 			    	else
 						l = GetFunctionValue(FunID, OutLoc, OutLoc, pBrkPt, (int)(BegBrack - startLoc) + bpOffset, bpLen);

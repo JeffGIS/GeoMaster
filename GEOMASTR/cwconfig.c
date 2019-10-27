@@ -1441,6 +1441,17 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	LPSTR keyloc;
 	BOOL haveKey = FALSE;
 
+#ifdef CHECKMEM
+	rtn = 1;
+	int iii = 4;
+	iii -= 2;
+#endif
+
+#ifdef _DEBUG
+	rtn = 0;
+#endif
+
+	rtn = 0;
 	CreatePrintBitmap(0);
 	//MessageBox(0, lpszCmdLine, "WinMain", MB_OK);
 	//loadColors();
