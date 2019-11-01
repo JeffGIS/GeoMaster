@@ -6851,7 +6851,7 @@ BOOL ExistFile(LPSTR Name)
 	}
     else if (*Name)
     {
-		if (strnicmp (Name,"http:",5))
+		if (strnicmp(Name, "http:", 5) && strnicmp(Name, "https:", 6))
 		{
 			if (GSSiOpenFile(Name,&OFStruct,OF_EXIST)!=HFILE_ERROR)
 				rtn = TRUE;
@@ -6876,7 +6876,7 @@ int GetPathType2(LPSTR Name) //returns: 0=not found,1=file, 2=directory,3=http
 	int		rtn = 0;
 	if (*Name)
 	{
-		if (_fstrnicmp (Name,"http:",5))
+		if (strnicmp(Name, "http:", 5) && strnicmp(Name, "https:", 6))
 		{
 			if (GetFileAttributesEx(Name, GetFileExInfoStandard, &WFAD))
 			{
@@ -9180,7 +9180,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 //    SetWindowText (hWndMain,Name); 
 if (_fstrstr (Name,"offensexy.GMD"))
 	ii=1;
-    if (strnicmp (Name,"HTTP:",5) && !_fstrchr (Name,'\\'))   // change    filex.typ  to .\filex.typ (does this mess up OF_SEARCH?)
+    if (strnicmp(Name, "HTTP:", 5) && strnicmp(Name, "HTTPS:", 6) && !_fstrchr (Name,'\\'))   // change    filex.typ  to .\filex.typ (does this mess up OF_SEARCH?)
     {
         LPSTR s1, s2;
         
@@ -9225,7 +9225,7 @@ Open2:
     	LPSTR	pNoCacheEnd, pType;
 
     	_fstrcpy (SaveName,Name);
-    	if (strnicmp (Name,"HTTP:",5))
+    	if (strnicmp(Name, "HTTP:", 5) && strnicmp(Name, "HTTPS:", 6))
     		_fullpath (str,Name,256);  
     	_fstrcpy (NoCacheVal,NoCache);  
     	
@@ -9520,7 +9520,7 @@ Open:
             Sleep(2000);
             goto Open;
         }
-		else if (!strnicmp (Name,"HTTP:",5) && pOFStruct->nErrCode==22)
+		else if ((!strnicmp(Name, "HTTP:", 5) || !strnicmp(Name, "HTTPS:", 6)) && pOFStruct->nErrCode==22)
 			goto Exit;
         else if (pOFStruct->nErrCode == 5 && nAccessErrors++ < 10)
 		{
