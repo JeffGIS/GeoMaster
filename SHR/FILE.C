@@ -228,7 +228,7 @@ extern BOOL	AllowCache;
 		hDIB = BMPHandleFromEXT(lpFileName);
 	}
 
-	if (strnicmp (lpFileName,"http:",5))
+	if (strnicmp(lpFileName, "http:", 5) && strnicmp(lpFileName, "https:", 6))
 	{
 		if (AdjustColorsToVP)
 			hDIB = AdjustDIB32Colors (hDIB); 

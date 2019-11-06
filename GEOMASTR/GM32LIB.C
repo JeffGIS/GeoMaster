@@ -442,7 +442,7 @@ BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 	if (UndoEnabled)
 		return (copyfile(toPath, fromPath, AppendOrReplace, 0, 0, 0, 0, 0, 0));
 	makedirectories(toPath, FALSE, FALSE);
-	if (!strnicmp(fromPath, "ftp:", 4) || !strnicmp(fromPath, "http:", 5))
+	if (!strnicmp(fromPath, "ftp:", 4) || !strnicmp(fromPath, "http:", 5) || !strnicmp(fromPath, "https:", 6))
 		ln = URLToFile(fromPath, toPath);
 	else
 	{
@@ -795,7 +795,7 @@ HDIB32  BMPHandleFromEXT (LPSTR ImageFile)
 	HDIB32	st;
     char	TempName[MAX_PATH]="";
     
-   	if (!_fstrnicmp (ImageFile,"http:",5))
+   	if (!strnicmp(ImageFile, "http:", 5) || !strnicmp(ImageFile, "https:", 6))
    	{   
 		 GSSiGetTempFileName (0,"gmi",0,TempName);  
 		 URLToFile (ImageFile,TempName);

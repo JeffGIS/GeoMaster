@@ -1074,7 +1074,7 @@ GSSiExitProg (12);
 				CurView->HaveOrthos = TRUE; 
 				if (MapFileType(PltName, 0, 0) == MT_SID)
 					DisplaySIDInVP32 (CurView,PltName);
-        		else if (_fstrstr(PltName,".BMP") || _fstrstr(PltName,".JPG") || _fstrstr(PltName,".PNG") || _fstrstr(PltName,".GIF")|| _fstrstr(PltName,".TIF")|| _fstrstr(PltName,".PCX") || !_fstrnicmp (PltName,"http:",5))
+        		else if (_fstrstr(PltName,".BMP") || _fstrstr(PltName,".JPG") || _fstrstr(PltName,".PNG") || _fstrstr(PltName,".GIF")|| _fstrstr(PltName,".TIF")|| _fstrstr(PltName,".PCX") || !_fstrnicmp(PltName, "http:", 5) || !_fstrnicmp(PltName, "https:", 6))
 					goto DisplayImage;
 				else
 				{
@@ -1095,7 +1095,7 @@ GSSiExitProg (12);
         {
 DisplayImage:
         	ExpandText (PltName); 
-        	if (_fstrnicmp (PltName,"http:",5))
+        	if (strnicmp(PltName, "http:", 5) && strnicmp(PltName, "https:", 6))
         		_fstrupr (PltName);
         	if (_fstrstr(PltName,".TXT"))
         		DisplayTextFileInRect (*hDC,&CurView->DrawRect,PltName);
@@ -1104,8 +1104,9 @@ DisplayImage:
 					 _fstrstr(PltName, ".GIF") ||
 					 _fstrstr(PltName, ".TIF") ||
 					 _fstrstr(PltName, ".PCX") ||
-					 !_fstrnicmp(PltName, "http:", 5))
-        	{
+					!_fstrnicmp(PltName, "http:", 5) ||
+					!_fstrnicmp(PltName, "https:", 6))
+{
 		        if ((CurView->PassID != 1 && CurView->PassID != 5) && CurView->Type != 5)
 		        	goto Next; 
     			if (!CurView->HaveBounds)
