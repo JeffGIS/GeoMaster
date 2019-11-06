@@ -1,2 +1,2 @@
 configs\basemap_new3.gmc /[%USERLEV]=2;
-i:\bu_2018_02_28\geomas
+l:\geomas
