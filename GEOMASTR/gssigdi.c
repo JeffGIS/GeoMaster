@@ -224,7 +224,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 	HPEN	hPen, hPen2, hRestorePen=0;
 	HBRUSH	hBrush, hBrush2, hRestoreBrush=0;
 	COLORREF	color=0, fillColor=0;
-	int curWidth;
+	int curWidth=1;
 	int		mode;
 	int	x,y;
 	int	PrevSGid=-1;

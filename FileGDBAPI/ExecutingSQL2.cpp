@@ -86,7 +86,7 @@ using namespace std;
 
 #define esriShapeBasicTypeMask 255
 
-#define MAXOPENFGDB	1
+#define MAXOPENFGDB	16
 
 static	char		openGDBName[MAXOPENFGDB][MAX_PATH]={0};
 static	int			openGDBid[MAXOPENFGDB];
@@ -206,7 +206,7 @@ extern "C" BOOL FGDBCheck(void)
 
 extern "C" LPSTR FGDBVersion(void)
 {
-	static char version[] = { "File Geodatabase Version 1.4" };
+	static char version[] = { "File Geodatabase Version 1.5" };
 	LPSTR pVer = version;
 	return pVer;
 }
@@ -225,14 +225,33 @@ return temp;
 
 */
 
-string ws2s(const std::wstring& w)
+std::wstring s2ws(const std::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	std::wstring r(len, L'\0');
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, &r[0], len);
+	return r;
+}
+
+std::string ws2s(const std::wstring& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
+	std::string r(len, '\0');
+	WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, &r[0], len, 0, 0);
+	return r;
+}
+/*string ws2s(const std::wstring& w)
 {
 	string result;
 	for (char x : w)
 		result += x;
 	return result;
-}
-std::string WStringToString(const std::wstring& s)
+}*/
+std::string WStringToStringx(const std::wstring& s)
 {
 	wchar_t *wstr = new wchar_t [s.length()+1];
 	char * cstr = new char [s.length()+1];
@@ -254,7 +273,7 @@ delete []wstr;
 delete []cstr;
 return str; 
 }
-wstring utf8toUtf16(const string & str)
+wstring utf8toUtf16x(const string & str)
 {
 	if (str.empty())
 		return wstring();
@@ -272,14 +291,14 @@ wstring utf8toUtf16(const string & str)
 
 	return wstring(&buffer[0], charsConverted);
 }
-/*int StringToWString(std::wstring &ws, const std::string &s)
+int StringToWString(std::wstring &ws, const std::string &s)
 {
-    std::wstring; wsTmp(s.begin(), s.end());
+    std::wstring wsTmp(s.begin(), s.end());
 
     ws = wsTmp;
 
     return 0;
-}*/
+}
 HANDLE stringToMem (string str)
 {
 	HANDLE	hMem = GlobalAlloc (GMEM_MOVEABLE,str.size()+1);
@@ -493,7 +512,7 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 {   
 	long	hr;
 	int		n=0;
-	wstring undr;
+	std::wstring undr;
 	wstring	type[3]= {L"Table",L"Feature Class",L"Feature Dataset"};
 	std::vector<wstring> childList; 
 	//wstring	under (undr.begin(),undr.end());
@@ -503,7 +522,9 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 	if (Type < 1 || Type > 3)
 		return 0;
 
-		undr = utf8toUtf16(Under);
+//		undr = s2ws(Under);
+	StringToWString(undr, Under);
+		//undr = L"\\";
 		hr = geodatabase[openGDBid[iDB - 1]].GetChildDatasets(undr, type[Type - 1], childList);
 		if (!hr)
 		{
@@ -514,25 +535,25 @@ extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSi
 				LPSTR pListOrig;
 				int	i;
 
-				//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
-				//pList = (LPSTR)GlobalLock (*phList);
-				pList = pListOrig = (LPSTR)calloc(n*MaxElementSize * 2 + 32, 1);
+				*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
+				pList = (LPSTR)GlobalLock (*phList);
+				//pList = pListOrig = (LPSTR)calloc(n*MaxElementSize * 2 + 32, 1);
 				for (i = 0; i < n; i++, pList += MaxElementSize)
 				{
-					//char tmp[1024] = { 0 };
-					//string s = ws2s(childList[i]);
+					char tmp[1024] = { 0 };
+					string s = ws2s(childList[i]);
 					//std::string s = WStringToString(childList[i]);
 
-					//strcpy(tmp, s.c_str());
-					//strncpy0(pList, tmp, MaxElementSize - 1);
+					strcpy(tmp, s.c_str());
+					strncpy0(pList, tmp, MaxElementSize - 1);
 					//strncpy0(pList, (LPSTR)s.c_str(), MaxElementSize - 1);
 				}
 				//strcpy (pList,WStringToString(childList[i]).c_str());
 
 			//*phList = GSSiGlobAlloc (0,GHND,n*MaxElementSize+32);
 			//pList = (LPSTR)GlobalLock (*phList);
-			//GlobalUnlock (*phList);
-				free(pListOrig);
+			GlobalUnlock (*phList);
+				//free(pListOrig);
 			
 		}
 	}
@@ -544,7 +565,7 @@ extern "C" BOOL CloseFGDB (int iDB)
 
 	if (!iDB--)
 		return FALSE;
-	  
+
 	if (gdbInUse[iDB] == 3)
 	{
 		attributeQueryRows[iDB].Close(); 
@@ -654,7 +675,7 @@ extern "C" BOOL FGDBGetFieldInfo(int iDB,int icount, LPSTR FieldName, LPINT pFie
 		fieldInfo.GetFieldType(icount-1, fieldType);
 		fieldInfo.GetFieldName(icount-1, fieldName);
 		fieldInfo.GetFieldLength(icount-1, fieldLength);
-		strcpy (FieldName,WStringToString(fieldName).c_str());
+		strcpy (FieldName,ws2s(fieldName).c_str());
 
 		switch (fieldType)
 		{
@@ -861,7 +882,7 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 					  {
 						wstring   wstringField (L"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ");
 					row[iDB].GetString(fieldName, wstringField);
-					std::string stringField = WStringToString(wstringField);
+					std::string stringField = ws2s(wstringField);
 					iii = stringField.length();
 					strncpy0 ((LPSTR)&pCurVal->Value,(LPSTR)stringField.c_str(),stringField.length());
 					//if (!stricmp((LPSTR)&pCurVal->Value, "283401320222"))

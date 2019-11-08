@@ -24,8 +24,9 @@ BOOL CreatePrintBitmap(HWND hWnd);
 int SetLastMessage(long mes, WPARAM wParam);
 
 int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
-int PASCAL WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
-int PASCAL WinMainGMDoc(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
+int  APIENTRY  WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
+int  APIENTRY  WinMainGMDoc(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
+int  APIENTRY  WinMainGMCache(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 LONG FAR PASCAL WndProcGMEdit(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 LONG FAR PASCAL WndProcGMDoc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
 LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
@@ -1528,7 +1529,15 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		ProcessCommandLine("");
 		return WinMainGMDoc(hInstance, hPrevInstance, cmdLine, SW_MAXIMIZE);
 	}
-	else 
+	else if (strstr(cmdLine, "/GMCache"))
+	{
+		isGMEdit = TRUE;
+		CreateBigMem();
+		AllowCache = FALSE;
+		ProcessCommandLine("");
+		return WinMainGMCache(hInstance, hPrevInstance, cmdLine, SW_MAXIMIZE);
+	}
+	else
 	{
 		//if (!haveKey)
 		//	return 0;

@@ -1,2 +1,2 @@
-[%DL]configs\basic1.gmc
-i:\BUPolice2\Mpls
+configs\jeff\fgdbtest.gmc
+i:\bu_2018_02_28\geomas

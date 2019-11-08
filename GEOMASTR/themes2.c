@@ -394,6 +394,23 @@ void DisplayCityNames(void)
 	return;
 }
 
+BOOL ThemeDatafileIsGraphics(LPTHEME CurTheme)
+{
+	BOOL rtn = FALSE;
+
+	if (CurTheme)
+	{
+		LPSTR file = CurTheme->DataFile;
+		int lFile = strlen(file);
+		if (lFile > 11)
+		{
+			if (!stricmp(&file[lFile - 12], "graphic1.gmd") || !stricmp(&file[lFile - 12], "graphic2.gmd"))
+				rtn = TRUE;
+		}
+	}
+	return rtn;
+}
+
 short ThemeSetChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 #if ENABLETRACE
 {GSSiEnterProg (1262);
@@ -429,6 +446,7 @@ short ThemeSetChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 	BOOL		GetFirstClass=TRUE, AtEndOfValues;
 	static	long	SymbolNumberColor=0,SymbolNumberColorType=-1;
 	short	MinClass=MAX_THEME_CLASSES+1;
+	BOOL	datafileIsGraphics = FALSE;
 
     if (desc == 376)
 		ii = 1;
@@ -453,6 +471,7 @@ GSSiExitProg (1262);
     HaltReport = FALSE;
 	ThemeDisplayPass = 1;
 	*CurTheme->CurValue = 0;
+	datafileIsGraphics = ThemeDatafileIsGraphics(CurTheme);
 	switch (CurTheme->ID)    
 	{ 
 		case GF_CITY_THEME:
@@ -1186,6 +1205,8 @@ InvalidSV1:
 								HaveTrueValD = TrueValD;
 					    		InClass=TRUE;
 							}
+							if (datafileIsGraphics)
+								goto SetClassChar;
 							goto NextVal;
 						case 8:
 							if (!InClass || iclass > HaveClass)
@@ -1195,6 +1216,8 @@ InvalidSV1:
 								HaveTrueValD = TrueValD;
 					    		InClass=TRUE;
 							}
+							if (datafileIsGraphics)
+								goto SetClassChar;
 							goto NextVal;
 						}
 			    		InClass=TRUE;
