@@ -159,7 +159,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;filegdbapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;filegdbapid.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.11</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
