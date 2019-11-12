@@ -1531,7 +1531,6 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	}
 	else if (strstr(cmdLine, "/GMCache"))
 	{
-		isGMEdit = TRUE;
 		CreateBigMem();
 		AllowCache = FALSE;
 		ProcessCommandLine("");
@@ -1832,6 +1831,9 @@ PeopleNet = GetGlobalBVal ("[PEOPLENET]");
 
 //if (!RunFromCache)
 //	AllowCache = TRUE;
+
+NeedToStartBackgroundCache();
+
  if(!hPrevInstance)
    {
     /* register window classes if first instance of application         */   

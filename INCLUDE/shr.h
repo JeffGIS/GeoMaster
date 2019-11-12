@@ -1063,6 +1063,7 @@ BOOL hDIBInCache32 (HDIB32 hBMP);
 BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP);
 void SetMaxBMP32Cache(int n);
 BOOL RemoveBMPFromCache32 (LPSTR Name);
+void NeedToStartBackgroundCache(void);
 short CacheAlreadyChecked (LPSTR Name,int lCacheDir,UINT Mode);
 void ResetOriginalDrive (void);
 long ConvertRectToArea (LPHANDLE phPoints);

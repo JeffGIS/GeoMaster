@@ -93,3 +93,50 @@ int APIENTRY WinMainGMCache(HINSTANCE hInstance,
 	return (int)msg.wParam;
 }
 
+void NeedToStartBackgroundCache(void)
+{
+	char LastCacheStartDateFile[MAX_PATH];
+	char LastDataUpdateFile[MAX_PATH];
+	OFSTRUCTGM	OFStruct;
+	char cDate[24];
+	time_t currentTime;
+	time_t lastDataUpdateTime = 0;
+	time_t lastCacheCompleteTime = 0;
+
+	time(&currentTime);
+	sprintf(LastCacheStartDateFile,"%sLastCacheStartDate.txt", CachePathnameTo);
+	ExpandText(LastCacheStartDateFile);
+	strcpy (LastDataUpdateFile,"[%DL]lastdataupdate.txt");
+	ExpandText(LastDataUpdateFile);
+
+	HFILE	Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
+
+	if (Fid != HFILE_ERROR)
+	{
+		int ln = min(22, _lread(Fid, cDate, 22));
+		cDate[ln] = 0;
+
+		lastDataUpdateTime = atol(cDate);
+		_lclose(Fid);
+	}
+	Fid = OpenFileGM(LastCacheStartDateFile, &OFStruct, OF_READ);
+
+	if (Fid != HFILE_ERROR)
+	{
+		int ln = min(22, _lread(Fid, cDate, 22));
+		cDate[ln] = 0;
+
+		lastCacheCompleteTime = atol(cDate);
+		_lclose(Fid);
+	}
+
+	if (lastDataUpdateTime > lastCacheCompleteTime)
+	{
+		sprintf(cDate, "%lli", currentTime);
+		Fid = OpenFileGM(LastCacheStartDateFile, &OFStruct, OF_CREATE);
+		int ln = strlen(cDate);
+		_lwrite(Fid, cDate, ln + 1);
+		_lclose(Fid);
+	}
+	return;
+}

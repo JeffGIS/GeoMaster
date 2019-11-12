@@ -1,2 +1,2 @@
-[%DL]police\configs\STARTUP_2019_PIMS.GMC /F 
-l:\mpd\geomaster\mpls
+configs\basemap_new3.gmc 
+i:\bu_2018_02_28\geomas
