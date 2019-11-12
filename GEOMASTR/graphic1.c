@@ -614,7 +614,8 @@ void QuitGraphics()
 	RegisterPromptClass(TRUE);
 	RegisterBgUpdateClass(TRUE);
 	RegisterImageZoomClass(TRUE);
-	FGDBCheck ();
+	if (!FGDBCheck())
+		ii = 1;
 	if (fidLogFileUse != INVALID_HANDLE_VALUE)
 		CloseHandle(fidLogFileUse);
 

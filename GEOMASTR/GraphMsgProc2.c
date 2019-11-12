@@ -3606,7 +3606,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 
 				if (Fid == HFILE_ERROR)
 				{
-					short	type;
+					short	type=0;
 
 					GetDlgItemText(hWndDlg, IDC_SHAPEFILE, str, 256);
 					if (!*projection)
@@ -3660,6 +3660,8 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 						type = 3;
 						break;
 					}
+					if (!type)
+						break;
 					if (*PGDBTable)
 					{
 						sprintf(SymName, "%s,PAR=NEW", PGDBTable);

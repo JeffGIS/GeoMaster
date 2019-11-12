@@ -1473,6 +1473,9 @@
     <ClCompile Include="Functn7.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GMCache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -2434,5 +2437,6 @@
     <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPI.lib">
       <Filter>Source Files</Filter>
     </Library>
+    <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
   </ItemGroup>
 </Project>

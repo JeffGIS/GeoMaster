@@ -340,6 +340,8 @@ BOOL CreateTextIndexTable(sqlite3 *db, LPSTR pIndexName, LPOPENFILEDATA FilePtr)
 BOOL DoesSLTTableExist(sqlite3 *db, LPSTR tableName);
 BOOL DoesSLTFieldExist(sqlite3 *db, LPSTR tableName, LPSTR fieldName);
 BOOL SLTSpatialIndexExists(sqlite3 *db, LPSTR tableName);
+BOOL SLTSpatialIndex2Exists(sqlite3* db, LPSTR tableName);
+BOOL SLTSpatialIndex2Create(sqlite3* db, LPSTR tableName);
 BOOL SLTSpatialIndexCreate(sqlite3 *db, LPSTR tableName);
 BOOL SLTSpatialIndexAdd(sqlite3 *db, LPSTR tableName, LONGLONG id, LPSTR Name, LPMNMXCORD pBounds);
 BOOL SLTSpatialIndexCreate3D(sqlite3 *db, LPSTR tableName);

@@ -2894,7 +2894,7 @@ GSSiExitProg (633);
 ExitLoop:
 	if (!n && MultiValOption != 1)
 		*irc = 1;                 
-	else switch (MultiValOption)
+	else switch (MultiValOption)// 0=First Value,1 = Count of,2=Average of,3 = Sum of,4 = Min of,5=Max of,6 = Range of,7=Lowest Class,8=Highest Class, 9 = All Classes
 	{
 	case 1:
 		ValD = n;

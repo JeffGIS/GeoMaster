@@ -5183,7 +5183,25 @@ GSSiExitProg (1350);
 
 			goto Rtnl;
 		}
-
+		case 1314: //$POINTINBOUNDS(PT,BOUNDS)
+		{
+			BOOL err;
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs == 2)
+			{
+				DPOINT pt = atopt(Arg[1], &err);
+				if (!err)
+				{
+					MNMXCORD bounds = atobounds(Arg[2], &err);
+					if (!err)
+					{
+						if (PointInBounds(pt, &bounds))
+							goto RtnTrue;
+					}
+				}
+			}
+			goto RtnFalse;
+		}
         case 1401: //$SETTEXTGLOBALS() 
         {
 		
