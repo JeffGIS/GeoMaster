@@ -1,2 +1,2 @@
-configs\jeff\fgdbtest.gmc
-i:\bu_2018_02_28\geomas
+[%DL]police\configs\STARTUP_2019_PIMS.GMC /F 
+l:\mpd\geomaster\mpls
