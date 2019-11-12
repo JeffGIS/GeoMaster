@@ -1,2 +1,2 @@
-configs\basemap_new3.gmc /[%USERLEV]=2;
-l:\geomas
+[%DL]police\configs\STARTUP_2019_PIMS.GMC /F 
+l:\mpd\geomaster\mpls
