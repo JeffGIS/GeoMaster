@@ -6697,8 +6697,9 @@ LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 {GSSiEnterProg (558);
 #endif
 {
-	HANDLE	hMem=0, hMemTrace;
-	LPSTR	InLoc, OutLoc, NewText, BegBrack, EndBrack, loc, EqLoc, pLchr;
+	HANDLE	hMemTrace;
+	LPSTR	NewText = 0;
+	LPSTR	InLoc, OutLoc,  BegBrack, EndBrack, loc, EqLoc, pLchr;
 	LPSTR	pEnd, pStr, startLoc = InText;
 	long	l,ii;
 	BOOL	FoundLit=FALSE, SaveIE=InExpand, ExpandTrace=FALSE;
@@ -6709,11 +6710,10 @@ LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 	InExpand = TRUE;
 	if (TraceOn)
 	{   
-		hMem=GSSiGlobAlloc ( 205,GMEM_MOVEABLE,USHRT_MAX);
-		pStr = GlobalLock (hMem);
+		pStr = malloc(USHRT_MAX);
 		sprintf (pStr,"EXPIN:%s",InText);
 		GSSiTraceLev (pStr,1,1);
-		GSSiGlobUlFree (&hMem);
+		free(pStr);
 	}
 	if (*TraceString && !strnicmp (InText,TraceString,strlen(TraceString)))
 	{
@@ -6737,8 +6737,7 @@ LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 		if (pBrkPt) breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen, BA_BEGINBLOCK);
 		if (*lc != '}')
 			goto OutChar; 
-		hMem = GSSiGlobAlloc ( 206,GMEM_MOVEABLE,USHRT_MAX);
-		NewText = GlobalLock(hMem); 
+		NewText = malloc (USHRT_MAX);
 		*lc = 0;
 		_fstrcpy (NewText,(InLoc+1));
 		if (pBrkPt)
@@ -6746,7 +6745,7 @@ LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 		else
 			lc = ExpandText(NewText);
 		_fstrcpy (InText,NewText);
-		GSSiGlobUlFree (&hMem);
+		free(NewText);
 		if (ExpandTrace)
 			MessageBoxHalt (hWndMain,InText,"Expanded",MB_OK|MB_APPLMODAL);
 {
@@ -6761,10 +6760,9 @@ GSSiExitProg (558);
 		if (pBrkPt) breakAtPos(InLoc - startLoc, pBrkPt, bpOffset, bpLen, BA_NEXTPOS);
 		if (*InLoc == literalChar) /* literal */
 		{
-			if (!hMem)
+			if (!NewText)
 			{
-				hMem = GSSiGlobAlloc ( 207,GMEM_MOVEABLE,USHRT_MAX);
-				NewText = GlobalLock(hMem);
+				NewText = malloc(USHRT_MAX);
 				l = (InLoc - InText);
 				if (l>0) _fmemmove(NewText,InText,(size_t) l);
 				OutLoc = NewText + l;
@@ -6786,10 +6784,9 @@ GSSiExitProg (558);
 					MessageBox(0, InLoc, "No matching bracket", MB_ICONEXCLAMATION);
 				goto OutChar;
 			}
-			if (!hMem)
+			if (!NewText)
 			{
-				hMem = GSSiGlobAlloc ( 208,GMEM_MOVEABLE,USHRT_MAX);
-				NewText = GlobalLock(hMem);
+				NewText = malloc(USHRT_MAX);
 				l = (InLoc - InText);
 				if (l>0) _fmemmove(NewText,InText,(size_t) l);
 				OutLoc = NewText + l;
@@ -6934,10 +6931,9 @@ GSSiExitProg (558);
 			GSSiGlobFree (&hLoop);
 			GSSiGlobFree (&hWhile);
 	WhileError:
-			if (!hMem)
+			if (!NewText)
 			{
-				hMem = GSSiGlobAlloc ( 213,GMEM_MOVEABLE,USHRT_MAX);
-				NewText = GlobalLock(hMem);
+				NewText = malloc(USHRT_MAX);
 				l = (InLoc - InText);
 				if (l>0) _fmemmove(NewText,InText,(size_t) l);
 				OutLoc = NewText + l;
@@ -7003,10 +6999,9 @@ GSSiExitProg (558);
 			GSSiGlobUlFree(&hIF);
 			if (rc)
 				goto IfError; 
-			if (!hMem)
+			if (!NewText)
 			{
-				hMem = GSSiGlobAlloc ( 215,GMEM_MOVEABLE,USHRT_MAX);
-				NewText = GlobalLock(hMem);
+				NewText = malloc(USHRT_MAX);
 				l = (pStartIF - InText);
 				if (l>0) _fmemmove(NewText,InText,(size_t) l);
 				OutLoc = NewText + l;
@@ -7109,10 +7104,9 @@ GSSiExitProg (558);
 				goto OutChar;
 			if (AllVarEqQuestionMark == 2)
 				AddToODBCParms (InLoc,EndBrack);
-			if (!hMem)
+			if (!NewText)
 			{
-				hMem = GSSiGlobAlloc ( 216,GMEM_MOVEABLE,USHRT_MAX);
-				NewText = GlobalLock(hMem);
+				NewText = malloc(USHRT_MAX);
 				l = (InLoc - InText);
 				if (l>0) _fmemmove(NewText,InText,(size_t) l);
 				OutLoc = NewText + l;
@@ -7154,7 +7148,7 @@ GSSiExitProg (558);
 		}
 		else
 		{
-OutChar:	if (hMem)
+OutChar:	if (NewText)
 				*OutLoc++ = *InLoc++;
 			else
 				InLoc++;
@@ -7165,7 +7159,7 @@ OutChar:	if (hMem)
 	{
 		hMemTrace=GSSiGlobAlloc ( 217,GMEM_MOVEABLE,USHRT_MAX);
 		pStr = GlobalLock (hMemTrace); 
-		if (hMem)   
+		if (NewText)   
 		{
 			l = OutLoc - NewText;
 			NewText[l]=0;
@@ -7177,7 +7171,7 @@ OutChar:	if (hMem)
 		GSSiGlobUlFree (&hMemTrace);
 	}
 	InExpand = SaveIE;
-	if (hMem)
+	if (NewText)
 	{
 		l = OutLoc - NewText;
 		if (*NewText == '"' && l > 1)
@@ -7192,7 +7186,7 @@ OutChar:	if (hMem)
 		*OutLoc++ = '\0'; 
 		_fstrcpy(InText,NewText);
 		InText+=l;
-		GSSiGlobUlFree (&hMem);
+		free(NewText);
 		if (ExpandTrace)
 			MessageBoxHalt (hWndMain,InText,"Expanded",MB_OK|MB_APPLMODAL);
 {

@@ -492,7 +492,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 				GSSiClose2 (&GCIFid);  
 				if (FirstErr)
 				{
-					sprintf(str, "Failed to open decompressor.\r\n\r\nTo fix do the following:\r\n\topen a 'command prompt' using a rightclick\r\n\tselect, 'Run as Administrtor'\r\n\t(32bit users can skip the next step)\r\n\ttype: cd C:\\Windows\\SysWOW64\r\n - press enter\r\r\ttype : regsvr32 ir50_32.dll - press enter");
+					sprintf(str, "Failed to open decompressor.\r\n\r\n*** CONTACT YOUR ADMINISTRATOR ***\r\n\r\nTo fix do the following:\r\n\topen a 'command prompt' using a rightclick\r\n\tselect, 'Run as Administrator'\r\n\t(32bit users can skip the next step)\r\n\ttype: cd C:\\Windows\\SysWOW64\r\n - press enter\r\r\ttype : regsvr32 ir50_32.dll - press enter");
 					GSSiMessageBox (0,str,NULL,MB_ICONEXCLAMATION,0);
 				}
 				FirstErr = FALSE;

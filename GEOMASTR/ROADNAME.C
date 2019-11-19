@@ -7,7 +7,7 @@
 #define MAXSHIELDSDISPLAYED	2730*4   
 #define MAX_SHIELD_ID 24*4
 
-static	HANDLE	hSymbolLines[MAXSYMBOLLINES] = { 0 };
+static	LPSHORT	pSymbolLines[MAXSYMBOLLINES] = { 0 };
 static	COLORREF	SymbolLineColor[MAXSYMBOLLINES] = { 0 };
 static	USHORT	nSymbolLines=0;  
 static	POINT	ShieldDisplayPoint[MAXSHIELDSDISPLAYED] = { 0 };
@@ -290,7 +290,7 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 
 	for (i=0;i<nSymbolLines;i++)
 	{   
-		pNumPoints = (LPSHORT)GlobalLock (hSymbolLines[i]);  
+		pNumPoints = pSymbolLines[i];  
 		pSymNum   = (LPSHORT)(pNumPoints+1); 
 		pIsCenterline = (LPTHEME*)(pSymNum+1);  
 		pPoints = (HPFPOINT)(pIsCenterline+1);
@@ -300,7 +300,6 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 			{
 				if (ConnectedTo != -1)
 				{
-					GlobalUnlock (hSymbolLines[i]);
 					LinkSymbolLines (ConnectedTo,i,1,HowConnected);
 					goto Exit;  
 				}
@@ -309,7 +308,6 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 				for (j=0;j<np-1;j++)
 					pPoints[j] = Points[k--];       //pPoints[*pNumPoints-1]
 				(*pNumPoints)+=(np-1);  
-				GlobalUnlock (hSymbolLines[i]);
 				HowConnected = 1;
 				ConnectedTo = i;
 				continue;
@@ -318,7 +316,6 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 			{
 				if (ConnectedTo != -1)
 				{
-					GlobalUnlock (hSymbolLines[i]); 
 					LinkSymbolLines (ConnectedTo,i,1,HowConnected);
 					goto Exit;  
 				}
@@ -326,7 +323,6 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 				for (j=0;j<np-1;j++)
 					pPoints[j] = Points[j];
 				(*pNumPoints)+=(np-1);  
-				GlobalUnlock (hSymbolLines[i]); 
 				HowConnected = 1;
 				ConnectedTo = i;
 				continue;
@@ -335,14 +331,12 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 			{
 				if (ConnectedTo != -1)
 				{
-					GlobalUnlock (hSymbolLines[i]); 
 					LinkSymbolLines (ConnectedTo,i,2,HowConnected);
 					goto Exit;  
 				}
 				for (j=0;j<np-1;j++)
 					pPoints[*pNumPoints+j] = Points[j+1];   //pPoints[*pNumPoints-2]
 				(*pNumPoints)+=(np-1);  
-				GlobalUnlock (hSymbolLines[i]); 
 				HowConnected = 2;
 				ConnectedTo = i;
 				continue;
@@ -351,7 +345,6 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 			{
 				if (ConnectedTo != -1)
 				{
-					GlobalUnlock (hSymbolLines[i]); 
 					LinkSymbolLines (ConnectedTo,i,2,HowConnected);
 					goto Exit;  
 				}
@@ -359,18 +352,16 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 				for (j=0;j<np-1;j++)
 					pPoints[*pNumPoints+j] = Points[k--];
 				(*pNumPoints)+=(np-1);  
-				GlobalUnlock (hSymbolLines[i]); 
 				HowConnected = 2;
 				ConnectedTo = i;
 				continue;
 			}
 		}
-		GlobalUnlock (hSymbolLines[i]); 
 	} 
 	if (ConnectedTo == -1 && nSymbolLines < MAXSYMBOLLINES)
 	{
-		hSymbolLines[nSymbolLines] = GSSiGlobAlloc (0,GMEM_MOVEABLE,MAXPOINTSINLABEL*sizeof(FPOINT)+2*sizeof(short)+sizeof(LPTHEME*));		
-		pNumPoints = (LPSHORT)GlobalLock (hSymbolLines[nSymbolLines]);
+		pSymbolLines[nSymbolLines] = malloc (MAXPOINTSINLABEL*sizeof(FPOINT)+2*sizeof(short)+sizeof(LPTHEME*));		
+		pNumPoints = pSymbolLines[nSymbolLines];
 		*pNumPoints = np; 
 		pSymNum   = (LPSHORT)(pNumPoints+1); 
 		pIsCenterline = (LPTHEME*)(pSymNum+1);   
@@ -382,7 +373,6 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 			SymbolLineColor[nSymbolLines] = GlobalColors[0];
 		else
 			SymbolLineColor[nSymbolLines] = -1;
-		GlobalUnlock (hSymbolLines[nSymbolLines++]);
 	}
 Exit: 
 	return TRUE;
@@ -442,7 +432,7 @@ BOOL DoesSymConnectToMiddleOfAnother (HPFPOINT	pPoint,short skip,short SymNum)
 	{   
 		if (i != skip)
 		{
-			pNumPoints = (LPSHORT)GlobalLock (hSymbolLines[i]);  
+			pNumPoints = pSymbolLines[i];  
 			pSymNum   = (LPSHORT)(pNumPoints+1); 
 			pIsCenterline = (LPTHEME*)(pSymNum+1);  
 			if (*pSymNum == SymNum)
@@ -450,12 +440,10 @@ BOOL DoesSymConnectToMiddleOfAnother (HPFPOINT	pPoint,short skip,short SymNum)
 				pPoints = (HPFPOINT)(pIsCenterline+1);
 				for (j=1;j<*pNumPoints-1;j++)
 					if (pPoint->x == pPoints[j].x && pPoint->y == pPoints[j].y)
-					{
-						GlobalUnlock (hSymbolLines[i]);  
+					{ 
 						return TRUE;
 					}
-			}
-			GlobalUnlock (hSymbolLines[i]);  
+			} 
 		}
 	} 
 	return FALSE;
@@ -492,7 +480,7 @@ BOOL DisplayLayeredSymbols (HDC hDC,BOOL Clear)
 			}
 			else
 				HaveVarFillColor = FALSE;
-			pNumPoints = (LPSHORT)GlobalLock (hSymbolLines[i]);  
+			pNumPoints = pSymbolLines[i];  
 			pSymNum   = (LPSHORT)(pNumPoints+1); 
 			pIsCenterline = (LPTHEME*)(pSymNum+1);  
 			pPoints = (HPFPOINT)(pIsCenterline+1); //pPoints[2]
@@ -511,13 +499,16 @@ BOOL DisplayLayeredSymbols (HDC hDC,BOOL Clear)
 			    UseFlatEndPolyline = SaveUseFlatEndPolyline;
 				CurTheme = SaveTheme;
             }
-			GlobalUnlock (hSymbolLines[i]); 
 		} 
 	 	RestoreDC (hDC,-1); 
 		WaitCursor (-1);
 	}
-	for (i=0;i<nSymbolLines;i++) 
-		GSSiGlobFree(&hSymbolLines[i]);
+	for (i = 0; i < nSymbolLines; i++)
+	{
+		if (pSymbolLines[i])
+			free (pSymbolLines[i]);
+		pSymbolLines[i] = 0;
+	}
     nSymbolLines = 0;
 	return TRUE;
 }
@@ -1427,26 +1418,24 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 	LPLONG	pStreets1, pStreets2, pTempStreets;    
 	LPSHORT	pSymNum1, pSymNum2, pTempSymNum;
 	USHORT	i,j;  
-	HANDLE	hTemp;
+	LPSHORT pTemp;
 	
-	pNumPoints1 = (LPSHORT)GlobalLock (hSymbolLines[Line1]); 
+	pNumPoints1 = pSymbolLines[Line1]; 
 	pSymNum1   = (LPSHORT)(pNumPoints1+1);
 	pIsCenterline1 = (LPTHEME*)(pSymNum1+1);  
 	pPoints1 = (HPFPOINT)(pIsCenterline1+1);
-	pNumPoints2 = (LPSHORT)GlobalLock (hSymbolLines[Line2]); 
+	pNumPoints2 = pSymbolLines[Line2]; 
 	pSymNum2   = (LPSHORT)(pNumPoints2+1);
 	pIsCenterline2 = (LPTHEME*)(pSymNum2+1);  
 	pPoints2 = (HPFPOINT)(pIsCenterline2+1);
 	if (*pNumPoints1 + *pNumPoints2 > MAXPOINTSINLABEL)
 	{
-		GlobalUnlock (hSymbolLines[Line1]);
-		GlobalUnlock (hSymbolLines[Line2]);
 		return;
 	}
 	if (Type1 == 1 && Type2 == 1)
 	{
-		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,4096*16);	
-		pTempNumPoints = (LPSHORT)GlobalLock (hTemp);
+		pTemp = malloc (4096*16);	
+		pTempNumPoints = pTemp;
 		pTempSymNum = (LPSHORT) (pTempNumPoints+1);  
 		pTempIsCenterline = (LPTHEME*)(pTempSymNum + 1);
 		pTempPoints = (LPFPOINT)(pTempIsCenterline+1);  
@@ -1458,13 +1447,13 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 		for (i=0;i<*pNumPoints2;i++)
 			pTempPoints[*pTempNumPoints + i] = pPoints2[i];  
 		*pTempNumPoints += *pNumPoints2;
-		GlobalUnlock (hTemp); 
-		GSSiGlobUlFree (&hSymbolLines[Line1]); 
-		hSymbolLines[Line1] = hTemp;
-		GSSiGlobUlFree (&hSymbolLines[Line2]);
+		free (pSymbolLines[Line1]); 
+		pSymbolLines[Line1] = pTemp;
+		free (pSymbolLines[Line2]);
+		pSymbolLines[Line2] = 0;
 		for (i=Line2;i<nSymbolLines-1;i++)
 		{
-			hSymbolLines[i] = hSymbolLines[i+1];
+			pSymbolLines[i] = pSymbolLines[i+1];
 			SymbolLineColor[i] = SymbolLineColor[i+1];
 		}
 
@@ -1474,12 +1463,12 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 		for (i=0;i<*pNumPoints1;i++)
 			pPoints2[*pNumPoints2 + i] = pPoints1[i];   //pPoints2[21]
 		*pNumPoints2 += *pNumPoints1;
-		*pIsCenterline2 = *pIsCenterline1;
-		GlobalUnlock (hSymbolLines[Line2]); 
-		GSSiGlobUlFree (&hSymbolLines[Line1]);
+		*pIsCenterline2 = *pIsCenterline1; 
+		free (pSymbolLines[Line1]);
+		pSymbolLines[Line1] = 0;
 		for (i=Line1;i<nSymbolLines-1;i++)
 		{
-			hSymbolLines[i] = hSymbolLines[i+1];
+			pSymbolLines[i] = pSymbolLines[i+1];
 			SymbolLineColor[i] = SymbolLineColor[i+1];
 		}
 	}
@@ -1488,12 +1477,12 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 		for (i=0;i<*pNumPoints2;i++)
 			pPoints1[*pNumPoints1 + i] = pPoints2[i];  
 		*pNumPoints1 += *pNumPoints2;
-		*pIsCenterline1 = *pIsCenterline2;
-		GlobalUnlock (hSymbolLines[Line1]); 
-		GSSiGlobUlFree (&hSymbolLines[Line2]);
+		*pIsCenterline1 = *pIsCenterline2; 
+		free (pSymbolLines[Line2]);
+		pSymbolLines[Line2] = 0;
 		for (i=Line2;i<nSymbolLines-1;i++)
 		{
-			hSymbolLines[i] = hSymbolLines[i+1];
+			pSymbolLines[i] = pSymbolLines[i+1];
 			SymbolLineColor[i] = SymbolLineColor[i+1];
 		}
 	}
@@ -1506,11 +1495,11 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 		*pNumPoints1 += *pNumPoints2;
 		*pIsCenterline1 = *pIsCenterline2;
 //		Polyline (CurView->hDC,pPoints1,*pNumPoints1);
-		GlobalUnlock (hSymbolLines[Line1]); 
-		GSSiGlobUlFree (&hSymbolLines[Line2]);
+		free (pSymbolLines[Line2]);
+		pSymbolLines[Line2] = 0;
 		for (i=Line2;i<nSymbolLines-1;i++)
 		{
-			hSymbolLines[i] = hSymbolLines[i+1];
+			pSymbolLines[i] = pSymbolLines[i+1];
 			SymbolLineColor[i] = SymbolLineColor[i+1];
 		}
 	}

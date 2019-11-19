@@ -6201,15 +6201,18 @@ Top:
 		hDir = SearchDirectory32 (FileName,0,&Type,&FindFileData);
 	   	FirstPass=FALSE;
     }
-    while (hDir && nFiles < MaxFiles)
+    while (hDir && *TotFiles < MaxFiles)
     {   
         if (FileName[0] != '.')
         {
             sprintf (str,"%s\\%s",CurDir,FileName);
 			if (Type)
             {   
-            	if (WantSub)
-					SearchFilesInDir2(str, Ext, OutFile, TotFiles, WildCard, Lev + 1, WantSub, fileNameOnly,MaxFiles - nFiles);
+				if (WantSub)
+				{
+					int nSub = SearchFilesInDir2(str, Ext, OutFile, TotFiles, WildCard, Lev + 1, WantSub, fileNameOnly, MaxFiles);
+					ii = nSub;
+				}
             }
             else if (SubDirOnly)
             	goto SkipFile; 

@@ -1064,6 +1064,7 @@ BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP);
 void SetMaxBMP32Cache(int n);
 BOOL RemoveBMPFromCache32 (LPSTR Name);
 void NeedToStartBackgroundCache(void);
+BOOL StartCachingFiles(void);
 short CacheAlreadyChecked (LPSTR Name,int lCacheDir,UINT Mode);
 void ResetOriginalDrive (void);
 long ConvertRectToArea (LPHANDLE phPoints);
@@ -1224,6 +1225,7 @@ BOOL GM32GetGMCName(HWND hWnd16,LPSTR PathName,
 								 LPSTR InitialDirIn,LPSTR Title,LPBOOL pStartInNewSession,LPBOOL pRetainZoom,LPBOOL pLinkZoom,LPSTR NetDir,LPSTR PersonalDir);
 BOOL PickNearestCPTFile (DPOINT Point,LPSTR Filelist,LPSTR IgnoreName,double MaxDist,LPSTR OutLoc);
 DWORD SearchDirectory32 (LPSTR Name,DWORD UseHandle,LPDWORD pType,WIN32_FIND_DATA	*pFindFileData);
+long SearchFilesInDirBC(LPSTR CurDirIN, LPSTR Ext, HFILE OutFile, LPLONG TotFiles, LPSTR WildCardIn, int Lev, BOOL WantSub);
 DWORD GetSpecialDirectory (LPSTR Name);
 BOOL GSSiGetNodeInfo (LPSTR CDriveSerno,LPSTR NodeName,LPSTR UserName,LPSTR Winver);
 DWORD	GetDriveSerialNumber (LPSTR Drive);
@@ -1399,7 +1401,7 @@ BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 void __cdecl BackgroundCache (LPHANDLE phArgs);
 BOOL StartBackgroundCache (void);
 void StopBackgroundCache (void);
-void RenameCachedFiles (LPSTR CacheDir);
+void RenameCachedFiles (void);
 HANDLE GetNextXMLElement (HANDLE FileHandle,LPINT pFileLoc,LPSTR TagID);
 HANDLE LoadXMLFile (LPSTR File);
 BOOL GetXMLElementAttribute (HANDLE hElem,LPSTR AttrName,LPSTR AttrValue);

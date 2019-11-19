@@ -1,7 +1,6 @@
 #include "graphint.h"   
 #include "extrndb.h"   
 #include "dibapi.h"
-#include <psapi.h>
 #include <wininet.h>
 
 #define MAXCORNERS	4096 
@@ -52,8 +51,6 @@ static	char	UserTimerMacro[10][1024];
 static	int		UserTimerInterval[10];
 static	int		UserTimerID[10];
 static	time_t	LastTime[10]={0};
-static	BYTE	Cachebuf[USHRT_MAX];
-static	UINT	lCachebuf = USHRT_MAX;
 static	DWORD	CacheRenameListNum;
 static	BOOL	BackgroundCacheStarted=FALSE;
 static	char	NetTransferDir[MAX_PATH];
@@ -6195,280 +6192,6 @@ BOOL ComposeMessage (HWND hWnd,LPSTR Title,LPSTR InMessage,LPSTR ResponseAction)
 	return rtn;
 }
 
-void __cdecl BackgroundCache2 (LPSTR *Args)
-{
-    char    File[MAX_PATH];
-	char	CacheDir[MAX_PATH];
-	HFILE	FidFilelist;
-	HFILE	Fid;
-
-	strcpy (CacheDir,Args[2]);
-	Sleep (20000);
-	MessageBox (0,Args[0],"Starting Caching",MB_OK);
-	FidFilelist = GSSiOpenFile (Args[1],0,OF_READ);
-	GSSiClose2 (&FidFilelist);
-	return;
-}
-
-void CacheFileInBackground (LPSTR FromFileIN,LPSTR CacheDir,LPSTR DataLocDir,LONGLONG StartPos,int PctDone)
-{
-	int	dtime;
-	BY_HANDLE_FILE_INFORMATION fifrom, fito;
-	HFILE	FidFrom, FidTo;
-	int		lDL = 5;
-	OFSTRUCTGM	OFStruct;
-	char	FromFile[MAX_PATH];
-	char	ToFile[MAX_PATH];
-	char	ToFileIntermediate[MAX_PATH];
-	int		st;
-	LONGLONG	FromSize, ToSize, TotRead;
-	UINT	OFMode = OF_CREATE;
-	DWORD	lRead;
-	LPSTR	pDot;
-	char	CacheFromName[MAX_PATH];
-	char	altDir[MAX_PATH];
-	int		icpf,l;
-	char mess[256];
-
-	for (icpf = 0;icpf < NumCachePathnameFrom; icpf++)
-	{   
-		strcpy (CacheFromName,CachePathnameFrom[icpf]); 
-		if (!stricmp(CacheFromName,"[%DL]"))
-			strcpy (CacheFromName,DataLocDir);
-		l = _fstrlen(CacheFromName);
-		if (l)
-		{
-			if (!strnicmp(FromFileIN,CacheFromName,l))
-				goto Next;
-		}
-	}
-	return;
-
-Next:
-	if (icpf)
-	{
-		strcpy (altDir,CacheFromName);
-		REPLAC (altDir,":\\","_",MAX_PATH);
-	}
-	else
-		*altDir = 0;
-	sprintf (FromFile,"%s%s",CacheFromName,&FromFileIN[l]);
-	sprintf (ToFile,"%s%s%s",CacheDir,altDir,&FromFileIN[l]);
-	strcpy (ToFileIntermediate,ToFile);
-	if ((pDot = strrchr (ToFileIntermediate,'.')))
-		*pDot = '$';
-	strcat (ToFileIntermediate,".tbr");
-	FidFrom = OpenFileGM (FromFile,&OFStruct,OF_READ);
-	FidTo = OpenFileGM (ToFileIntermediate,&OFStruct,OF_READ);
-	if (FidTo == HFILE_ERROR)
-		FidTo = OpenFileGM (ToFile,&OFStruct,OF_READ);
-	if (FidFrom == HFILE_ERROR)
-	{
-		if (FidTo != HFILE_ERROR)
-		{
-			_lclose (FidTo);
-			OpenFileGM (ToFile,&OFStruct,OF_DELETE);
-			OpenFileGM (ToFileIntermediate,&OFStruct,OF_DELETE);
-		}
-		return;
-	}
-	strcpy (ToFile,ToFileIntermediate);
-	st = GetFileInformationByHandle((HANDLE)FidFrom,&fifrom);
-	FromSize = (LONGLONG)fifrom.nFileSizeLow + ULONG_MAX * (LONGLONG)fifrom.nFileSizeHigh;
-	if (FidTo == HFILE_ERROR)
-		dtime=1;
-	else
-	{
-		st = GetFileInformationByHandle((HANDLE)FidTo,&fito);
-		ToSize = (LONGLONG)fito.nFileSizeLow + ULONG_MAX * (LONGLONG)fito.nFileSizeHigh;
-		if (StartPos > 0)
-		{
- 			dtime = 1;
-			if (StartPos != ToSize)
-				StartPos = 0;
-			else
-				OFMode = OF_READWRITE;
-		}
-		else if (FromSize != ToSize)
-			dtime = 1;
-		else
-			dtime = CompareFileTime (&fifrom.ftLastWriteTime,&fito.ftLastWriteTime); 
-		_lclose (FidTo);
-		FidTo = HFILE_ERROR;
-	}
-	if (dtime>0)
-	{   
-		BOOL	OkToCache = makedirectories (ToFile,FALSE,FALSE);
-
-		if (OkToCache)
-		{
-			LONGLONG FreeSpace = GetDriveFreeSpace (ToFile); 
-
-			FreeSpace -= FromSize;
-			if (FreeSpace < MinCacheDriveFreeSpace)
-				OkToCache = FALSE;
-			if (OkToCache)
-			{
-				FidTo = OpenFileGM (ToFile,&OFStruct,OFMode);
-				if (FidTo != HFILE_ERROR)
-				{
-					LPSTR	pName = strrchr (FromFile,'\\');
-
-					if (pName)
-						pName++;
-					else
-						pName = FromFile;
-					
-					sprintf (mess,"Caching %s",pName);
-					BackgroundUpdateMessage (mess);
-					llFileSeek ((HANDLE)FidTo,StartPos,0);
-					llFileSeek ((HANDLE)FidFrom,StartPos,0);
-					TotRead = StartPos;
-					ReadFile((HANDLE)FidFrom,Cachebuf,lCachebuf,&lRead,0);
-					while (ContinueBackgroundCache && lRead > 0)
-					{
-						if (lRead != _lwrite (FidTo,Cachebuf,lRead))
-						{
-							_lclose (FidTo);
-							FidTo = HFILE_ERROR;
-							OpenFileGM (ToFile,&OFStruct,OF_DELETE);
-							break;
-						}
-						TotRead += lRead;
-						ReadFile((HANDLE)FidFrom,Cachebuf,lCachebuf,&lRead,0);
-					}
-					if (!ContinueBackgroundCache && TotRead != FromSize)
-					{
-						HFILE	FidRestart;
-						char	str[600];
-						char	RestartFile[MAX_PATH];
-
-						if (TotRead)
-						{
-							SubstituteDL (FromFileIN,FALSE);
-							sprintf (str,"%s\t%s\t%lld",FromFileIN,DataLocDir,TotRead);
-							sprintf (RestartFile,"%sRestartCache.txt",CacheDir);
-							FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_CREATE);
-							_lwrite (FidRestart,str,600);
-							_lclose (FidRestart);
-						}
-					}
-					else
-					{
-						char	RenameListFile[MAX_PATH];
-						char	RenameListFileTemp[MAX_PATH];
-						HFILE	FidRenameList;
-
-						sprintf (RenameListFileTemp,"%sCacheRenameList\\%ld.tmp",CacheDir,CacheRenameListNum++);
-						sprintf (RenameListFile,"%sCacheRenameList\\%ld.crn",CacheDir,CacheRenameListNum++);
-						FidRenameList = OpenFileGM (RenameListFileTemp,&OFStruct,OF_CREATE);
-						_lwrite (FidRenameList,ToFile,MAX_PATH);
-						_lclose (FidRenameList);
-						rename (RenameListFileTemp,RenameListFile);
-					}
-				}
-			}
-		} 
-	}
-	else
-	{
-		sprintf (mess,"Checking for files to cache (%i %% complete)",PctDone);
-		BackgroundUpdateMessage (mess);
-	}
-	_lclose (FidFrom);
-	if (FidTo != HFILE_ERROR)
-		_lclose (FidTo);
-
-	return;
-}
-
-void ContinueInteruptedCache (LPSTR CacheDir)
-{
-	char	str[600];
-	char	File[MAX_PATH];
-	char	RestartFile[MAX_PATH];
-	HFILE	FidRestart;
-	LONGLONG	RestartPos;
-	LPSTR	DataLocDir;
-	LPSTR	pTab;
-	OFSTRUCTGM	OFStruct;
-
-	sprintf (RestartFile,"%sRestartCache.txt",CacheDir);
-	FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_READ);
-	if (FidRestart != HFILE_ERROR)
-	{
-		_lread (FidRestart,str,600);
-		_lclose (FidRestart);
-		FidRestart = OpenFileGM (RestartFile,&OFStruct,OF_DELETE);
-		DataLocDir = strchr (str,'\t');
-		*DataLocDir++ = 0;
-		pTab = strchr (DataLocDir,'\t');
-		*pTab++ = 0;
-		RestartPos = _atoi64 (pTab);
-		strcpy (File,str);
-		REPLAC (File,"[%DL]",DataLocDir,600);
-		CacheFileInBackground (File,CacheDir,DataLocDir,RestartPos,-1);
-	}
-	return;
-}
-
-BOOL AnotherProcessIsCaching (LPSTR ProcessIDFile)
-{
-	LPDWORD pPid = malloc (4096*sizeof(DWORD));
-	DWORD	nBytes, nPid;
-	BOOL	rtn=FALSE;
-	DWORD	CachingPid;
-	OFSTRUCTGM	OFStruct;
-	HFILE	Fid = OpenFileGM (ProcessIDFile,&OFStruct,OF_READ);
-
-	if (Fid == HFILE_ERROR)
-		return FALSE;
-
-	_lread (Fid,&CachingPid,sizeof(DWORD));
-	_lclose (Fid);
-	EnumProcesses(pPid,4096*sizeof(DWORD),&nBytes);
-	nPid = nBytes / sizeof(DWORD);
-	while (nPid--)
-	{
-		if (pPid[nPid] == CachingPid)
-		{
-		    HMODULE hMods[1024];
-			HANDLE hProcess;
-			DWORD cbNeeded;
-			unsigned int i;
-
-		    hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,FALSE, CachingPid );
-			if (NULL == hProcess)
-			{
-				ii = GetLastError ();
-				goto Exit;
-			}
-			if( EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded))
-			{
-				for ( i = 0; i < (cbNeeded / sizeof(HMODULE)); i++ )
-				{
-					TCHAR szModName[MAX_PATH];
-
-					// Get the full path to the module's file.
-
-					if ( GetModuleFileNameEx(hProcess, hMods[i], szModName,
-											 sizeof(szModName)/sizeof(TCHAR)))
-					{
-						ii=1;
-					}
-				}
-			}
-
-			CloseHandle( hProcess );
-
-			rtn = TRUE;
-			break;
-		}
-	}
-Exit:
-	free (pPid);
-	return rtn;
-}
 
 long SearchFilesInDirBC (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub)
 {   
@@ -6616,7 +6339,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 								{
 									REPLAC (str,"[%DL]",DataLocDir,MAX_PATH);
 									pctdone = (100 * ifile++)/totFiles;
-									CacheFileInBackground (str,CacheDir,DataLocDir,0,pctdone);
+									CacheFileInBackground (str,CacheDir,DataLocDir,0);
 								}
 							}
 							else
@@ -6628,7 +6351,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 					else if (pass)
 					{
 						pctdone = (100 * ifile++)/totFiles;
-						CacheFileInBackground (str,CacheDir,DataLocDir,0,pctdone);
+						CacheFileInBackground (str,CacheDir,DataLocDir,0);
 					}
 					else
 						totFiles++;	
@@ -6655,94 +6378,6 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 	OpenFileGM (CachingPidFile,&OFStruct,OF_DELETE);
 	hCacheThread = 0;
 	//Wow64RevertWow64FsRedirection (oldValue);
-	return;
-}
-
-void RenameCachedFiles (LPSTR CacheDir)
-{
-	char	CacheListDir[MAX_PATH];
-	char	TempName[MAX_PATH];
-	char	FileName[MAX_PATH];
-	char	FromName[MAX_PATH];
-	char	TrustedCacheFiles[MAX_PATH];
-	char	CacheRenameFile[MAX_PATH+2];
-	char	SearchString[32]="*.crn";
-	HFILE	Fid, Fid2;
-	long	TotFiles=0;
-	LPSTR	pDot;
-	HFILE	FidCachedFiles=HFILE_ERROR;
-    
-	if (!*CacheDir || !BackgroundCacheStarted)
-		return;
-	sprintf(CacheListDir, "%sCacheRenameList\\", CacheDir);
-	makedirectories (CacheListDir,TRUE,FALSE);
-	GSSiGetTempFileName(0,"gm",0,TempName);
-	CacheRenameListNum = time (0);
-	Fid = GSSiOpenFile (TempName,0,OF_CREATE);
-	SearchFilesInDir2 (CacheListDir, "", Fid,&TotFiles,SearchString,1,FALSE,FALSE,MAX_FILES_TO_RENAME); 
-	if (TotFiles)
-	{
-		char	CacheDirectory[MAX_PATH + 2];
-		sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CacheDir);
-		FidCachedFiles = GSSiOpenFile(TrustedCacheFiles, 0, OF_WRITE);
-		if (FidCachedFiles == HFILE_ERROR)
-		{
-			FidCachedFiles = GSSiOpenFile(TrustedCacheFiles, 0, OF_CREATE);
-			fputstring("", FidCachedFiles);
-		}
-		else
-			GSSillseek(FidCachedFiles, 0, 2);
-		strcpy(CacheDirectory, CacheDir);
-		ExpandText(CacheDirectory);
-		strupr(CacheDirectory);
-		int lnCacheDirectory = strlen (CacheDirectory);
-		CloseAllRequestedFiles (FALSE);
-		GSSillseek (Fid,0,0);
-		while (fgetstring (CacheRenameFile,MAX_PATH,Fid))
-		{
-			LPSTR pTAB = strchr (CacheRenameFile,'\t');
-
-			if (pTAB)
-				*pTAB = 0;
-			Fid2 = GSSiOpenFile (CacheRenameFile,0,OF_READ);
-			if (Fid2 != HFILE_ERROR)
-			{
-				LPSTR	pBS;
-
-				BigRead (Fid2,FileName,MAX_PATH);
-				GSSiClose2 (&Fid2);
-				GSSiRemove (CacheRenameFile);
-				strcpy (FromName,FileName);
-				pBS = strrchr (FileName,'\\');
-				if (pBS)
-				{
-					if ((pDot = strrchr (FileName,'.')))
-					{
-						if (!stricmp (pDot,".tbr"))
-						{
-							*pDot = 0;
-							if ((pDot = strrchr (pBS,'$')))
-								*pDot = '.';
-							GSSiOpenFile (FileName,0,OF_DELETE);
-							GSSiRename (FromName,FileName);
-							strupr(FileName);
-							LPSTR pName = FileName;
-							if (!strncmp(FileName, CacheDirectory, lnCacheDirectory))
-							{
-								FileName[lnCacheDirectory-1] = '*';
-								pName = &FileName[lnCacheDirectory-1];
-							}
-							fputstring(pName, FidCachedFiles);
-						}
-					}
-				}
-			}
-		}
-	}
-	if (FidCachedFiles != HFILE_ERROR)
-		GSSiClose2(&FidCachedFiles);
-	GSSiClose2 (&Fid);
-	GSSiRemove (TempName);
 	return;
 }
 
@@ -6847,7 +6482,7 @@ BOOL StartBackgroundCache (void)
 		GSSiClose2 (&Fid);
 		GSSiClose2 (&Fid2);
 		BackgroundCacheStarted = TRUE;
-		RenameCachedFiles (CachePathnameTo);
+		RenameCachedFiles ();
 		ContinueBackgroundCache = TRUE;
 		BackgroundUpdateMessage ("Checking for files to cache");
 		{
@@ -6875,7 +6510,7 @@ void StopBackgroundCache (void)
 		ContinueBackgroundCache = FALSE;
 		rtn = WaitForSingleObject (hCacheThread,5000);
 	}
-	RenameCachedFiles (CachePathnameTo);
+	RenameCachedFiles ();
 	return;
 }
 
@@ -7336,7 +6971,10 @@ void BackgroundUpdateMessage (LPSTR mess)
 	static	HWND hWnd=0;
 	static	char	lastMess[1024]="";
 	RECT	rect;
-//return;
+
+	if (hWndMain)
+		SetWindowText(hWndMain, mess);
+	return;
 	if (!mess)
 	{
 		if (hWnd)

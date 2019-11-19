@@ -2690,7 +2690,6 @@ GSSiExitProg (440);
 //			st = GM32DrawDibClose (hdd);  
 		}
 		DisplayVirtualPrintAreas ();
-		RenameCachedFiles (CachePathnameTo);
 	}
 //	CloseSymDict();
 	switch (DisplayFinOpt)

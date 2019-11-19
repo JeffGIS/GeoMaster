@@ -981,7 +981,7 @@ BOOL ProcessUserParms (void)
 BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
 	LPSTR lpStart, lpTab;
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 	static char cmdFile[MAX_PATH];
 	HFILE	fid;
 	char	txt[1024], str[1024];
@@ -1532,9 +1532,11 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	else if (strstr(cmdLine, "/GMCache"))
 	{
 		CreateBigMem();
+		isGMCache = TRUE;
 		AllowCache = FALSE;
+		ProcessNodeParms();
 		ProcessCommandLine("");
-		return WinMainGMCache(hInstance, hPrevInstance, cmdLine, SW_MAXIMIZE);
+		return WinMainGMCache(hInstance, hPrevInstance, cmdLine, SW_MINIMIZE);
 	}
 	else
 	{
@@ -1832,7 +1834,6 @@ PeopleNet = GetGlobalBVal ("[PEOPLENET]");
 //if (!RunFromCache)
 //	AllowCache = TRUE;
 
-NeedToStartBackgroundCache();
 
  if(!hPrevInstance)
    {
@@ -2020,6 +2021,8 @@ GSSiExitProg (437);
 	 }
 
  }
+
+ 
    PromptFocus = hWndMain;
     {
     	static	FirstAct=TRUE;
@@ -2051,7 +2054,7 @@ GSSiExitProg (437);
    // } // end of lda addition
 if (setWindowToTopOfZ)
 	SetWindowPos (hWndMain,HWND_TOP,0,0,0,0,SWP_NOSIZE);
-if (MapServer)
+if (MapServer || isGMCache)
 	ShowWindow(hWndMain, SW_HIDE);
 else if (BackgroundTask && !UpdateServer)
 	ShowWindow(hWndMain, SW_SHOWMINIMIZED);
@@ -2087,6 +2090,10 @@ else
 	OpenConfig(hWndMain, hDC);
 	ReleaseDC(hWndMain, hDC);
 }
+
+		NeedToStartBackgroundCache();
+
+
    {
 	   RECT	rect;
 
@@ -2142,7 +2149,24 @@ nMess = -1;
 	 {
 		 char text[128];
 		 sprintf (text,"%i\t%i\t%i\t%i",(int)msg.hwnd,msg.message,msg.lParam,msg.wParam);
-		 fputstring (text,LogMSGFile);	 }
+		 fputstring (text,LogMSGFile);	
+	 }
+	 switch (msg.message)
+	 {
+	 case WM_LBUTTONDBLCLK:
+	 case WM_KEYDOWN:
+	 case WM_SYSKEYDOWN:
+	 case WM_LBUTTONDOWN:
+	 case WM_LBUTTONUP:
+	 case WM_CHAR:
+	 case WM_MOUSEMOVE:
+	 case WM_MOUSEWHEEL:
+	 case WM_COMMAND:
+		 lastActivityTime = clock();
+		 break;
+	 default:
+		 break;
+	 }
 #ifndef	NDEBUG
 	 nMess++;
 	 if (nMess > 99)
@@ -5548,6 +5572,7 @@ DisplayParcel:
 							DiffTime = EndTime - StartTime;
 							Counter-=DiffTime;
 							StartTime = EndTime; 
+							lastActivityTime = clock();
 						}
 					}
 /*					else 
@@ -5696,7 +5721,18 @@ DisplayParcel:
 								  }
 			}
 				break;
-
+			case CACHE_FILE_RENAME_TIMER:
+			{
+				clock_t cputime = clock();
+				double secs = ((double)cputime-(double)lastActivityTime) / (double)CLOCKS_PER_SEC;
+				if (secs > minInactiveTimeBetweenCacheRename)
+				{
+					lastActivityTime = cputime;
+					RenameCachedFiles();
+					lastActivityTime = clock();
+				}
+			}
+				break;
 			case GF_WHEELZOOM: //WheelZoom Timer
 				 WheelZoom (0,0,1);
 				 break;

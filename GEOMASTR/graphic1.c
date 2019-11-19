@@ -375,7 +375,7 @@ void QuitGraphics()
 	BT_CLOSEANDDELETE(&hGMDKeyList);
 
 	DestroyAllToolbars ();
-	StopBackgroundCache ();
+	//StopBackgroundCache ();
 	//ShowCounts (1);
 	
 	if (GPSInputWnd) 
