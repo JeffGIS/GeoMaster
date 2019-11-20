@@ -2114,6 +2114,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 
 			CloseAllRequestedFiles(FALSE);
 			GetModuleFileName(NULL, modulePath, MAX_PATH);
+			REPLAC(modulePath, "\\.\\", "\\",MAX_PATH);
 			ZeroMemory(&si, sizeof(si));
 			si.cb = sizeof(si);
 			ZeroMemory(&pi, sizeof(pi));

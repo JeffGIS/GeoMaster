@@ -6779,6 +6779,7 @@ BOOL CacheCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 				ln = strlen(fileName)+1;
 				BigWrite (Fid,fileName,ln,-1);
 				nFiles++;
+				strcpy(OutLoc, "1");
 			}
 			AllowCache = saveAllowCache;
 			rtn = TRUE;
