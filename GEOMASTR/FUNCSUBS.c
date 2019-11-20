@@ -6824,6 +6824,11 @@ BOOL CacheCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 		{
 		}
 	}
+	else if (!stricmp(Arg[1], "NEWFILES"))
+	{
+		UpdateLastDataUpdate();
+		rtn = TRUE;
+	}
 	return rtn;
 }
 

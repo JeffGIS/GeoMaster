@@ -223,7 +223,7 @@ BOOL GMCacheIsRunning(void)
 void NeedToStartBackgroundCache(void)
 {
 	char	BackgroundCacheFilelist[MAX_PATH];
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 
 	GetGlobalCVal("[%BackgroundCacheFilelist]", BackgroundCacheFilelist, "[%DL]BackgroundCacheFilelist.txt");
 	if (!*BackgroundCacheFilelist || !AllowCache || !ExistFile(BackgroundCacheFilelist))
@@ -313,6 +313,24 @@ void NeedToStartBackgroundCache(void)
 	if (!ExistFile(RenameCompleteFile) && !GMCacheTimer)
 		GMCacheTimer = SetTimer(hWndMain, CACHE_FILE_RENAME_TIMER, 15000, 0);
 	return;
+}
+
+void UpdateLastDataUpdate(void)
+{
+	char LastDataUpdateFile[MAX_PATH];
+	time_t currentTime;
+	OFSTRUCTGM	OFStruct = { 0 };
+	char cDate[32];
+
+	time(&currentTime);
+
+	strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
+	ExpandText(LastDataUpdateFile);
+	sprintf(cDate, "%lli", currentTime);
+	HFILE Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_CREATE);
+	int ln = strlen(cDate);
+	_lwrite(Fid, cDate, ln + 1);
+	_lclose(Fid);
 }
 
 void FreeTrustedFiles(void)
@@ -597,6 +615,7 @@ void RenameCachedFiles(void)
 				}
 			}
 		}
+		GSSiGlobFree(&hTrustedCacheFiles);
 	}
 	if (FidCachedFiles != HFILE_ERROR)
 		_lclose (FidCachedFiles);
