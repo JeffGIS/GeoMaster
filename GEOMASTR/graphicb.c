@@ -1469,7 +1469,7 @@ BOOL RestoreFullWindowBitmap (void)
 		RedisplayLastPrompt (); 
 	    NotifyFunction ((LPVIEWPORT)-1,GF_REDRAW);  
 		//DisplayAllToolbars  (1);
-		BackgroundUpdateMessage ("!REDISPLAY!");
+		//BackgroundUpdateMessage ("!REDISPLAY!");
 		RestoreDC (hDC,-1);
 		GdiFlush ();
 		rtn = TRUE;

@@ -467,7 +467,7 @@ BOOL ProcessPassiveFunctions (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam
 						    NotifyFunction (LastVP,GF_EXIT_VIEWPORT);  
 							LastVP = SetLastVP (CurView);
 							NotifyFunction (LastVP,GF_ENTER_VIEWPORT);
-							BackgroundUpdateMessage ("!REDISPLAY!");
+							//BackgroundUpdateMessage ("!REDISPLAY!");
 						}   
 						else
 						{

@@ -618,7 +618,7 @@ void QuitGraphics()
 		ii = 1;
 	if (fidLogFileUse != INVALID_HANDLE_VALUE)
 		CloseHandle(fidLogFileUse);
-
+	FreeTrustedFiles();
 
 #if CHECKMEM
 	TrackObject (0,-100); 

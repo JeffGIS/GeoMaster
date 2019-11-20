@@ -9090,7 +9090,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
 {GSSiEnterProg (307);
 #endif
 {   HFILE   Fid=HFILE_ERROR; 
- 	HANDLE	hSTR=GSSiGlobAlloc (  94,GHND,14*512);
+ 	HANDLE	hSTR=GSSiGlobAlloc (  94,GHND,15*512);
     LPSTR	str=GlobalLock (hSTR);
     LPSTR	SaveName=str+512;
     LPSTR	SaveText=SaveName+512;
@@ -9101,7 +9101,8 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
     LPSTR	SaveWT=CacheFromName+512;    
     LPSTR	LongName=SaveWT+512;
     LPSTR	NoCacheVal=LongName+512; 
-	LPOFSTRUCTGM	pOFStruct2=(LPOFSTRUCTGM)(NoCacheVal+512);
+	LPSTR	TrustedFileName = NoCacheVal + 512;
+	LPOFSTRUCTGM	pOFStruct2=(LPOFSTRUCTGM)(TrustedFileName +512);
     
     unsigned    frequency=1000, duration=100; 
     short       NumWait, NumBusyWait,l,ii; 
@@ -9255,7 +9256,8 @@ Open2:
     		pNoCache = pNoCacheEnd;
     	}
     	for (icpf = 0;icpf < NumCachePathnameFrom; icpf++)
-    	{   
+    	{ 
+			*TrustedFileName = 0;
     		_fstrcpy (CacheFromName,CachePathnameFrom[icpf]); 
     		ExpandText (CacheFromName);
 	    	l = _fstrlen(CacheFromName);
@@ -9277,7 +9279,7 @@ Open2:
 					REPLAC (altDir,":\\","_",MAX_PATH);
 				}
 				sprintf (Name,"%s%s%s",CachePathnameTo,altDir,&str[l]);
-
+				strcpy(TrustedFileName, &str[l]);
 	    		if (_fstrstr (Name,"Configs"))
 	    			ii=1;
 	    		if (Mode == OF_EXIST)
@@ -9319,20 +9321,23 @@ Open2:
 				{    		
 					double	dtime;
 					struct _stati64	statfrom, statto;  
-					HFILE	FidTo;
+					HFILE	FidTo = HFILE_ERROR;
 					
 					InOpenFile = TRUE;
-					FidTo = GSSiOpenFile (Name,pOFStruct,Mode);
-					if (FidTo != HFILE_ERROR) 
+					if (UseTrustedCacheFile(TrustedFileName))
 					{
-						GSSifstat (FidTo,&statto); 
- 						if (CacheAlreadyChecked (Name,_fstrlen(CachePathnameTo),CHECKTIMESTAMP))
-		    		    {
-			   		    	InOpenFile = FALSE;
-		    		    	Fid = FidTo;
-		    		    	goto Exit;
-		    		    } 
-						*pOFStruct2 = *pOFStruct;
+						FidTo = GSSiOpenFile(Name, pOFStruct, Mode);
+						if (FidTo != HFILE_ERROR)
+						{
+							GSSifstat(FidTo, &statto);
+							if (CacheAlreadyChecked(Name, _fstrlen(CachePathnameTo), CHECKTIMESTAMP))
+							{
+								InOpenFile = FALSE;
+								Fid = FidTo;
+								goto Exit;
+							}
+							*pOFStruct2 = *pOFStruct;
+						}
 					}
 					Fid = GSSiOpenFile (SaveName,pOFStruct,Mode);   
 					if (Fid == HFILE_ERROR) 
@@ -9368,15 +9373,15 @@ Open2:
 						
 						if (FidTo != HFILE_ERROR)
 						{
-							if (UpdateGMDFromCheckPointLog (FidTo,Name,SaveName))
+							if (UpdateGMDFromCheckPointLog(FidTo, Name, SaveName))
 							{
 								InOpenFile = FALSE;
-	   		    				break;
+								break;
 							}
 							GSSiRemove2(Name);
-						} 
+						}
 						else
-							OkToCache = makedirectories (Name,FALSE,FALSE);
+							OkToCache = FALSE;// makedirectories(Name, FALSE, FALSE);
 						if (OkToCache)
 						{
 							double FreeSpace = GetDriveFreeSpace (Name); 

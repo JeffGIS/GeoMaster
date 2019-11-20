@@ -5909,7 +5909,7 @@ GSSiExitProg (438);
 	    		if (LastVP)
 				{
 			    	NotifyFunction (LastVP,GF_EXIT_VIEWPORT);
-					BackgroundUpdateMessage ("!REDISPLAY!");
+					//BackgroundUpdateMessage ("!REDISPLAY!");
 				}
 			    LastVP = 0;  
 //	    		sprintf (str,"%ld",(long)lParam);

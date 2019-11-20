@@ -1402,6 +1402,8 @@ void __cdecl BackgroundCache (LPHANDLE phArgs);
 BOOL StartBackgroundCache (void);
 void StopBackgroundCache (void);
 void RenameCachedFiles (void);
+BOOL UseTrustedCacheFile(LPSTR FileName);
+void FreeTrustedFiles(void);
 HANDLE GetNextXMLElement (HANDLE FileHandle,LPINT pFileLoc,LPSTR TagID);
 HANDLE LoadXMLFile (LPSTR File);
 BOOL GetXMLElementAttribute (HANDLE hElem,LPSTR AttrName,LPSTR AttrValue);

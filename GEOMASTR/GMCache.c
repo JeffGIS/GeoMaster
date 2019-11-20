@@ -9,13 +9,13 @@
 
 static	BYTE	Cachebuf[USHRT_MAX];
 static	UINT	lCachebuf = USHRT_MAX;
-
+static  int		nCalls = 0;
 int CreateFilesToCacheFile(LPSTR cachFileList, HFILE fidOut);
 void CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDir, LONGLONG StartPos);
 
 static TCHAR szTitle[] = "GMCache";					// The title bar text
 static TCHAR szWindowClass[] = "GMCache";		// the main window class name
-
+static HANDLE hTrustedCacheFiles = 0;
 //
 //  FUNCTION: MyRegisterClass()
 //
@@ -50,6 +50,11 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		char	BackgroundCacheFilelist[MAX_PATH];
 
 		hWndMain = hWnd;
+		SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
+
+		sprintf(FilesToCacheFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
+		GSSiRemove(FilesToCacheFile);
+
 		GetGlobalCVal("[%BackgroundCacheFilelist]", BackgroundCacheFilelist, "[%DL]BackgroundCacheFilelist.txt");
 		sprintf(FilesToCacheFile, "%sFilesToCacheFile.txt", CachePathnameTo);
 		ExpandText(FilesToCacheFile);
@@ -60,7 +65,14 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		int nFiles = CreateFilesToCacheFile(BackgroundCacheFilelist, fidFilesToCache);
 		_lclose(fidFilesToCache);
 		if (!nFiles)
+		{
+			sprintf(FilesToCacheFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
+			HFILE fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
+			_lwrite(fid, "NoFiles", 6);
+			_lclose(fid);
+
 			DestroyWindow(hWnd);
+		}
 		else
 		{
 			DWORD	Pid = _getpid();
@@ -69,7 +81,6 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			HFILE Fid = OpenFileGM(CachingPidFile, &OFStruct, OF_CREATE);
 			_lwrite(Fid, (LPSTR)cPid, strlen(cPid));
 			_lclose(Fid);
-
 			SetTimer(hWnd, GMCACHE_TIMER, 20, 0);
 		}
 	}
@@ -223,6 +234,7 @@ void NeedToStartBackgroundCache(void)
 	char LastCacheCompleteTimeFile[MAX_PATH];
 	char LastDataUpdateFile[MAX_PATH];
 	char RenameCompleteFile[MAX_PATH];
+	char TrustedCacheFiles[MAX_PATH];
 	char cDate[24];
 	time_t currentTime;
 	time_t lastDataUpdateTime = 0;
@@ -236,6 +248,8 @@ void NeedToStartBackgroundCache(void)
 	ExpandText(LastCacheCompleteTimeFile);
 	sprintf(FilesToCacheFile, "%sFilesToCacheFile.txt", CachePathnameTo);
 	ExpandText(FilesToCacheFile);
+	sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CachePathnameTo);
+	ExpandText(TrustedCacheFiles);
 	strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
 	ExpandText(LastDataUpdateFile);
 	strcpy(RenameCompleteFile, "[%DL]renameComplete.txt");
@@ -291,14 +305,21 @@ void NeedToStartBackgroundCache(void)
 			int ln = strlen(cDate);
 			_lwrite(Fid, cDate, ln + 1);
 			_lclose(Fid);
+			GSSiRemove(TrustedCacheFiles);
+			GSSiGlobFree(&hTrustedCacheFiles);
 			StartGMCache();
 		}
 	}
 	if (!ExistFile(RenameCompleteFile) && !GMCacheTimer)
-		GMCacheTimer = SetTimer(hWndMain, CACHE_FILE_RENAME_TIMER, 30000, 0);
+		GMCacheTimer = SetTimer(hWndMain, CACHE_FILE_RENAME_TIMER, 15000, 0);
 	return;
 }
 
+void FreeTrustedFiles(void)
+{
+	GSSiGlobFree(&hTrustedCacheFiles);
+	nCalls++;
+}
 BOOL StartCachingFiles(void)
 {
 	char DataLocDir[MAX_PATH];
@@ -344,6 +365,10 @@ BOOL StartCachingFiles(void)
 		sprintf(mess, "%s (%.1f %% complete)",pName, PctDone);
 		BackgroundUpdateMessage (mess);
 	}
+	_lclose(fid);
+	sprintf(FromFile, "%sCACHE_IS_COMPLETE.tbr", CacheDir);
+	fid = OpenFileGM(FromFile, &OFStruct, OF_CREATE);
+	_lwrite(fid, "Done", 4);
 	_lclose(fid);
 	return TRUE;
 }
@@ -429,6 +454,42 @@ int CreateFilesToCacheFile(LPSTR cachFileList,HFILE fidOut)
 
 }
 
+BOOL UseTrustedCacheFile(LPSTR FileName)
+{
+	BOOL rtn = FALSE;
+	LPSTR pTrustedFiles;
+	if (!hTrustedCacheFiles)
+	{
+		char TrustedCacheFiles[MAX_PATH];
+		OFSTRUCTGM OFStruct = { 0 };
+		sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CachePathnameTo);
+		ExpandText(TrustedCacheFiles);
+		HFILE fid = OpenFileGM(TrustedCacheFiles, &OFStruct, OF_READ);
+		if (fid != HFILE_ERROR)
+		{
+			int ln = _llseek(fid, 0, 2);
+			_llseek(fid, 0, 0);
+			hTrustedCacheFiles = GSSiGlobAlloc(0,GMEM_MOVEABLE,ln+2);
+			LPSTR pTrustedFiles = GlobalLock(hTrustedCacheFiles);
+			_lread(fid, pTrustedFiles, ln);
+			pTrustedFiles[ln] = 0;
+			GlobalUnlock(hTrustedCacheFiles);
+		}
+		else
+			hTrustedCacheFiles = GSSiGlobAlloc(0, GHND, 4);
+	}
+	pTrustedFiles = GlobalLock(hTrustedCacheFiles);
+	char searchFile[MAX_PATH + 2];
+
+	sprintf(searchFile, "*%s\r\n", FileName);
+	strupr(searchFile);
+	if (strstr(pTrustedFiles, searchFile))
+		rtn = TRUE;
+	GlobalUnlock(hTrustedCacheFiles);
+	nCalls++;
+	return rtn;
+}
+
 #define MAX_FILES_TO_RENAME 4096
 void RenameCachedFiles(void)
 {
@@ -503,6 +564,7 @@ void RenameCachedFiles(void)
 							int ln = strlen(cDate);
 							_lwrite(Fid, cDate, ln + 1);
 							_lclose(Fid);
+							KillTimer(hWndMain, GMCacheTimer);
 						}
 						continue;
 					}
@@ -519,6 +581,11 @@ void RenameCachedFiles(void)
 						GSSiRemove(FromName);
 						*pIsGood = '.';
 					}
+					else
+					{
+						GSSiRemove(FileName);
+						GSSiRename(FromName, FileName);
+					}
 					strupr(FileName);
 					LPSTR pName = FileName;
 					if (!strncmp(FileName, CacheDirectory, lnCacheDirectory))
@@ -533,7 +600,7 @@ void RenameCachedFiles(void)
 	}
 	if (FidCachedFiles != HFILE_ERROR)
 		_lclose (FidCachedFiles);
-	_lclose (Fid);
+	GSSiClose (Fid);
 	GSSiRemove(TempName);
 	return;
 }
