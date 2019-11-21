@@ -6245,7 +6245,7 @@ Top:
             sprintf (str,"%s\\%s",CurDir,FileName);
 			if (Type)
             {   
-            	if (WantSub)
+            	if (WantSub && !FirstPass)
                 	SearchFilesInDirBC (str,Ext,OutFile,TotFiles,WildCard,Lev+1,WantSub);
             }
             else if (SubDirOnly)

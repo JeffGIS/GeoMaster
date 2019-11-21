@@ -401,7 +401,7 @@ int CreateFilesToCacheFile(LPSTR cachFileList,HFILE fidOut)
 	char	tempFile[MAX_PATH];
 	char	str[MAX_PATH + 2];
 	HFILE	Fid, Fid2;
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 	int totFiles = 0;
 	BOOL	skip = FALSE;
 
@@ -658,6 +658,7 @@ void CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDir, L
 	char	altDir[MAX_PATH];
 	int		icpf, l;
 	char mess[256];
+	BOOL	toIsRenameFile = FALSE;
 
 	for (icpf = 0; icpf < NumCachePathnameFrom; icpf++)
 	{
@@ -691,6 +692,11 @@ Next:
 	FidTo = OpenFileGM(ToFileIntermediate, &OFStruct, OF_READ);
 	if (FidTo == HFILE_ERROR)
 		FidTo = OpenFileGM(ToFile, &OFStruct, OF_READ);
+	else
+	{
+		toIsRenameFile = TRUE;
+		GSSiRemove(ToFile);
+	}
 	if (FidFrom == HFILE_ERROR)
 	{
 		if (FidTo != HFILE_ERROR)
@@ -756,6 +762,7 @@ Next:
 							break;
 						}
 						TotRead += lRead;
+						SleepEx(0, 0);
 						st = ReadFile((HANDLE)FidFrom, Cachebuf, lCachebuf, &lRead, 0);
 					}
 					if (!ContinueBackgroundCache && TotRead != FromSize)
@@ -778,7 +785,7 @@ Next:
 			}
 		}
 	}
-	else
+	else if (!toIsRenameFile)
 	{
 		LPSTR pDollar = strrchr(ToFileIntermediate, '$');
 		if (pDollar)
@@ -788,6 +795,15 @@ Next:
 			HFILE FidIsGood = OpenFileGM(ToFileIntermediate, &OFStruct, OF_CREATE);
 			_lwrite(FidIsGood, "IsGood", 6);
 			_lclose(FidIsGood);
+		}
+	}
+	else
+	{
+		LPSTR pDollar = strrchr(ToFileIntermediate, '$');
+		if (pDollar)
+		{
+			*pDollar = '#';
+			GSSiRemove(ToFileIntermediate);
 		}
 	}
 	_lclose(FidFrom);
