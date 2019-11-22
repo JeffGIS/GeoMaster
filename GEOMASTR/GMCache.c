@@ -96,9 +96,11 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_TIMER:
 		if (wParam == GMCACHE_TIMER)
 		{
-			KillTimer(hWnd, wParam);
-			if (StartCachingFiles ())
+			if (!StartCachingFiles())
+			{
+				KillTimer(hWnd, wParam);
 				PostQuitMessage(0);
+			}
 			return 0;
 		}
 		break;
@@ -340,30 +342,47 @@ void FreeTrustedFiles(void)
 }
 BOOL StartCachingFiles(void)
 {
-	char DataLocDir[MAX_PATH];
-	char CacheDir[MAX_PATH];
-	char FilesToCacheFile[MAX_PATH];
+	static char DataLocDir[MAX_PATH];
+	static char CacheDir[MAX_PATH];
+	static char FilesToCacheFile[MAX_PATH];
 	OFSTRUCTGM	OFStruct = { 0 };
 	double PctDone = 0;
 	LONGLONG StartPos = 0;
 	char FromFile[MAX_PATH + 2];
 	char mess[MAX_PATH*2];
-	int totLen;
+	static int totLen;
+	static int loc = 0;
+#define NEACH_LOOP	10
+	int nProcessed = NEACH_LOOP;
 
-	strcpy(DataLocDir, "[%DL]");
-	ExpandText(DataLocDir);
-	strcpy(CacheDir, CachePathnameTo);
-	ExpandText(CacheDir);
-	sprintf(FilesToCacheFile, "%sFilesToCacheFile.txt", CacheDir);
-	ExpandText(FilesToCacheFile);
+	HFILE fid = HFILE_ERROR;
+	static first = TRUE;
+	BOOL rtn = TRUE;
 
-	HFILE fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_READ);
-	totLen = _llseek(fid, 0, 2);
-	_llseek(fid, 0, 0);
-	while (fgetstring2(FromFile, MAX_PATH, fid))
+	if (first)
+	{
+		first = FALSE;
+		strcpy(DataLocDir, "[%DL]");
+		ExpandText(DataLocDir);
+		strcpy(CacheDir, CachePathnameTo);
+		ExpandText(CacheDir);
+		sprintf(FilesToCacheFile, "%sFilesToCacheFile.txt", CacheDir);
+		ExpandText(FilesToCacheFile);
+
+		fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_READ);
+		totLen = _llseek(fid, 0, 2);
+		_llseek(fid, 0, 0);
+	}
+	else
+	{
+		fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_READ);
+		_llseek(fid, loc, 0);
+	}
+	PctDone = 100.0 * (double)loc / (double)totLen;
+	while (fgetstring2(FromFile, MAX_PATH, fid) && nProcessed--)
 	{
 		int nDir = 3;
-		int loc = _llseek(fid,0,1);
+		loc = _llseek(fid,0,1);
 		LPSTR	pName = strrchr(FromFile, '\\');
 		LPSTR	pNameLast = FromFile;
 		while (pName && nDir--)
@@ -378,17 +397,23 @@ BOOL StartCachingFiles(void)
 		else
 			pName = FromFile;
 
+		sprintf(mess, "%s (%.1f %% complete)", pName, PctDone);
+		BackgroundUpdateMessage(mess);
 		CacheFileInBackground(FromFile, CacheDir, DataLocDir, StartPos);
 		PctDone = 100.0 * (double)loc / (double)totLen;
 		sprintf(mess, "%s (%.1f %% complete)",pName, PctDone);
 		BackgroundUpdateMessage (mess);
 	}
 	_lclose(fid);
-	sprintf(FromFile, "%sCACHE_IS_COMPLETE.tbr", CacheDir);
-	fid = OpenFileGM(FromFile, &OFStruct, OF_CREATE);
-	_lwrite(fid, "Done", 4);
-	_lclose(fid);
-	return TRUE;
+	if (nProcessed > 0)
+	{
+		sprintf(FromFile, "%sCACHE_IS_COMPLETE.tbr", CacheDir);
+		fid = OpenFileGM(FromFile, &OFStruct, OF_CREATE);
+		_lwrite(fid, "Done", 4);
+		_lclose(fid);
+		rtn = FALSE;
+	}
+	return rtn;
 }
 int CreateFilesToCacheFile(LPSTR cachFileList,HFILE fidOut)
 {

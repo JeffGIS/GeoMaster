@@ -1536,6 +1536,16 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 		AllowCache = FALSE;
 		ProcessNodeParms();
 		ProcessCommandLine("");
+		ProcessUserParms();
+		{
+			HANDLE	hStr = GSSiGlobAlloc(4, GMEM_MOVEABLE, 256);
+			LPSTR	str = GlobalLock(hStr);
+
+			GetGlobalCVal("[%DL]", str, 0);
+			AddVectoredHandlers(UserName, str);
+			GSSiGlobUlFree(&hStr);
+		}
+
 		return WinMainGMCache(hInstance, hPrevInstance, cmdLine, SW_MINIMIZE);
 	}
 	else
