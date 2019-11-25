@@ -517,6 +517,7 @@ BOOL UseTrustedCacheFile(LPSTR FileName)
 			_lread(fid, pTrustedFiles, ln);
 			pTrustedFiles[ln] = 0;
 			GlobalUnlock(hTrustedCacheFiles);
+			_lclose(fid);
 		}
 		else
 			hTrustedCacheFiles = GSSiGlobAlloc(0, GHND, 4);
