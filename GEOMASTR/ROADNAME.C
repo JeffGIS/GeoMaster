@@ -967,13 +967,13 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				LastNameInc = NameInc;
 				TextSize = StartTextSize = min(MaxTextSize*txtfac, (pStreet->HollowStreetWidth * OverAllStreetWidthFactor)*txtfac - 2);
    				TextOffsetBegin = 0;
-				MinTextSize = max(MinTextSize, pStreet->HollowStreetWidth-2);
+				MinTextSize = max(MinTextSize, pStreet->HollowStreetWidth/2);
 				MaxTextSize = max(MinTextSize, MaxTextSize);
 				if (TextSize <  MinTextSize*txtfac)
 	   			{
 					TextSize = StartTextSize = MaxTextSize*txtfac;
 	   				if (ShowHollowStreet)
-						TextOffsetBegin = (pStreet->HollowStreetWidth * OverAllStreetWidthFactor + TextSize + 1);
+						TextOffsetBegin = (pStreet->HollowStreetWidth * OverAllStreetWidthFactor + TextSize/2 + 1);
 	   				MaxD = MaxDeflection/2;
 	   			} 
 	   			else 
