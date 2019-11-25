@@ -7734,12 +7734,20 @@ HCURSOR GSSiSetCursor (HCURSOR hCursorIn)
 	HCURSOR	hCur=0; 
 	int	ii;
 	static	HCURSOR hCurrentCursor=0;
+	static	HCURSOR hArrowCursor = 0;
+	static  ncalls = 0;
+
+	ncalls++;
 extern	BOOL	ddbug;
 	if (ddbug)
 		ddbug=FALSE;
+	if (hCursorIn == (HCURSOR)-1)
+		ii = 1;
 	if (!hCursorIn)
 	{
-		hCursorIn = LoadCursor(0, IDC_ARROW);
+		if (!hArrowCursor)
+			hArrowCursor = LoadCursor(0, IDC_ARROW);;
+		hCursorIn = hArrowCursor;
 		hCurrentCursor = 0;
 	}
 	if (hCursorIn &&  hCursorIn != hCurrentCursor)

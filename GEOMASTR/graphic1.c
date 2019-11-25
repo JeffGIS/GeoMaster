@@ -354,6 +354,7 @@ void QuitGraphics()
 	char	str[256],ExitMessage[256];
 	short	i; 
 	
+	GSSiSetCursor((HCURSOR)-1);
 	CRAPI_Destroy();
 	GM32NADCONFREE();
 	SaveWindowPosition();

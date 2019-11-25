@@ -5343,11 +5343,6 @@ void CloseMap (BOOL Update)
 		    if (Display && !Pick)
 		    {   
 		    	idTimer=0;
-		    	if (CurrentConfig)
-		    	{
-		        	GSSiSetCursor (VPCursor (hWndMain));
-		        	PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
-		        }
 	        }
 	        else
 	        	ii=1;
