@@ -4752,7 +4752,8 @@ Top:
 					CurView->NewBounds = SavedImageData[nearimage].Bounds;
 					SetScaleAndMidpointFromBounds (CurView);
 			        SetBounds(CurView->hWnd,CurView->hDC);
-
+					GMDestroyDIB32(hCfgImage);
+					hCfgImage = 0;
 				}
 
 				else
