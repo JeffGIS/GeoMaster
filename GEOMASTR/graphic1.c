@@ -605,7 +605,6 @@ void QuitGraphics()
 	SaveDataToUndoFile (0,0,0,0,0);    
 	CheckPointEnd ();
 	AllowJournal = FALSE;
-	GetTempDir (0);
 	ConvertToNewLocation (0,0);
 	DestroyVarSpace((HANDLE)-1);
 	ScreenBufferDC((HWND)1, 0);
@@ -620,6 +619,7 @@ void QuitGraphics()
 	if (fidLogFileUse != INVALID_HANDLE_VALUE)
 		CloseHandle(fidLogFileUse);
 	FreeTrustedFiles();
+	GetTempDir(0);
 
 #if CHECKMEM
 	TrackObject (0,-100); 

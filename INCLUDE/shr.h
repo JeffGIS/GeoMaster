@@ -1074,6 +1074,7 @@ void RectToDPoints (LPRECT Rect,LPDPOINT Points);
 void RectToBounds (LPRECT Rect,LPMNMXCORD pBounds);
 MNMXCORD RotateBounds (LPMNMXCORD pBounds,double Rotation);
 int GSSiGetTempFileName (BYTE Drive,LPSTR Pre,UINT Unique,LPSTR Name);
+int GetPersistentTempFileName(LPSTR Pre, LPSTR OutName);
 BOOL GetTempDir (LPSTR Dir);
 BOOL GetCacheDir (LPSTR Dir);
 short CompressCensusString (LPSTR pStr);

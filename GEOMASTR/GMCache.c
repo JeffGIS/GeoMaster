@@ -237,6 +237,7 @@ void NeedToStartBackgroundCache(void)
 	char LastDataUpdateFile[MAX_PATH];
 	char RenameCompleteFile[MAX_PATH];
 	char TrustedCacheFiles[MAX_PATH];
+	char CacheIsCompleteFile[MAX_PATH];
 	char cDate[24];
 	time_t currentTime;
 	time_t lastDataUpdateTime = 0;
@@ -256,6 +257,8 @@ void NeedToStartBackgroundCache(void)
 	ExpandText(LastDataUpdateFile);
 	strcpy(RenameCompleteFile, "[%DL]renameComplete.txt");
 	ExpandText(LastDataUpdateFile);
+	sprintf(CacheIsCompleteFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
+	ExpandText(CacheIsCompleteFile);
 
 	HFILE	Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
 
@@ -293,23 +296,26 @@ void NeedToStartBackgroundCache(void)
 	//lastCacheCompleteTime = 0;
 	if (lastDataUpdateTime > lastCacheCompleteTime)
 	{
-		if (!GMCacheIsRunning())
+		if (!ExistFile(CacheIsCompleteFile))
 		{
-			char DataLocDir[MAX_PATH];
-			char CacheDir[MAX_PATH];
+			if (!GMCacheIsRunning())
+			{
+				char DataLocDir[MAX_PATH];
+				char CacheDir[MAX_PATH];
 
-			strcpy(DataLocDir, "[%DL]");
-			ExpandText(DataLocDir);
-			strcpy(CacheDir, CachePathnameTo);
-			ExpandText(CacheDir);
-			sprintf(cDate, "%lli", currentTime);
-			Fid = OpenFileGM(LastCacheStartTimeFile, &OFStruct, OF_CREATE);
-			int ln = strlen(cDate);
-			_lwrite(Fid, cDate, ln + 1);
-			_lclose(Fid);
-			GSSiRemove(TrustedCacheFiles);
-			GSSiGlobFree(&hTrustedCacheFiles);
-			StartGMCache();
+				strcpy(DataLocDir, "[%DL]");
+				ExpandText(DataLocDir);
+				strcpy(CacheDir, CachePathnameTo);
+				ExpandText(CacheDir);
+				sprintf(cDate, "%lli", currentTime);
+				Fid = OpenFileGM(LastCacheStartTimeFile, &OFStruct, OF_CREATE);
+				int ln = strlen(cDate);
+				_lwrite(Fid, cDate, ln + 1);
+				_lclose(Fid);
+				GSSiRemove(TrustedCacheFiles);
+				GSSiGlobFree(&hTrustedCacheFiles);
+				StartGMCache();
+			}
 		}
 	}
 	if (!ExistFile(RenameCompleteFile) && !GMCacheTimer)
@@ -405,7 +411,7 @@ BOOL StartCachingFiles(void)
 		BackgroundUpdateMessage (mess);
 	}
 	_lclose(fid);
-	if (nProcessed > 0)
+	if (nProcessed > -1)
 	{
 		sprintf(FromFile, "%sCACHE_IS_COMPLETE.tbr", CacheDir);
 		fid = OpenFileGM(FromFile, &OFStruct, OF_CREATE);

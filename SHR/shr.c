@@ -2100,9 +2100,9 @@ BOOL makedirectories2 (LPSTR Name,BOOL IsDir,BOOL Verify)
 {GSSiEnterProg (182);
 #endif
 {   
-	char	FullName[MAX_PATH], Dir[MAX_PATH], FName[MAX_PATH], Ext[64], NewName[MAX_PATH]="", drive[32]; 
+	char	FullName[MAX_PATH], Dir[MAX_PATH], FName[MAX_PATH], Ext[64],  drive[32];
+	char	NewName[MAX_PATH] = "";
 	LPSTR	StartDir, EndDir,pFull;  
-	OFSTRUCTGM	OFStruct;
 	BOOL	Replace; 
 	DWORD	Err;
 	
@@ -6422,6 +6422,17 @@ GSSiExitProg (284);
 #endif
 }    
 
+int GetPersistentTempFileName(LPSTR Pre, LPSTR OutName)
+{
+	char TempDir[MAX_PATH];
+	char	Prefix[8];
+	strncpy0(Prefix, Pre, 3);
+	strcat(Prefix, "xxx");
+	Prefix[3] = 0;
+	GetTempPath(MAX_PATH, TempDir);
+	int rtn = GetTempFileName(TempDir, Prefix, 0, OutName);
+	return rtn;
+}
 int GSSiGetTempFileName (BYTE Drive,LPSTR Pre,UINT Uniquex,LPSTR Name)
 {   
 	char	Dir[MAX_PATH];

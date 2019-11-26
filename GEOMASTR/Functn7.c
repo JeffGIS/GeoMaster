@@ -2137,6 +2137,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 				SaveZooms(&zoomBounds);
 				CreateGMStartupFile(OutFile, pConfigFile, FALSE, TRUE);
 				sprintf(Arg[2], "GeoMaster %s", OutFile);
+				CloseAllRequestedFiles(FALSE);
 			}
 			CRFlags = DETACHED_PROCESS;
 			// for mapserver addd BELOW_NORMAL_PRIORITY_CLASS
