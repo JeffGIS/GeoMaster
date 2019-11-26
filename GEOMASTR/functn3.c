@@ -32,7 +32,7 @@ typedef WINPROCESSANDTHREAD *LPWINPROCESSANDTHREAD;
 BOOL CreateGMStartupFile(LPSTR OutFile, LPSTR ConfigPath, BOOL LinkZoom, BOOL RetainZoom)
 {
 	long len;
-	GSSiGetTempFileName(0, "gmc", 0, OutFile);
+	GetPersistentTempFileName("gmlnk",OutFile);
 	HFILE Fid = GSSiOpenFile(OutFile, 0, OF_CREATE);
 	if (Fid == HFILE_ERROR)
 		return FALSE;
@@ -595,6 +595,8 @@ GSSiExitProg (1348);
 						}
 						else if (!_fstricmp(Arg[3], "CONTENTS"))
 						{
+							if (stricmp(Arg[2], "Street Names"))
+								ii = 1;
 							rtn = SetThemeContents(CurView->pTheme, Arg[4]);
 							if (CurView->pTheme->hVisList)
 							{
