@@ -4709,7 +4709,7 @@ Display2:
 				  rtn = TRUE;
                   if (Processing)
                   {
-                    ContinueProcessing=FALSE;   
+                    SetContinueProcessing(FALSE);   
                     break;
                   }
                   DestroyWindow (hWndDlg);

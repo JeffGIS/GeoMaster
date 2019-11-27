@@ -424,7 +424,7 @@ BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,H
     {    
     	 char	CheckMark, str[256];
     	 
-         ContinueProcessing=TRUE;  
+		 SetContinueProcessing(TRUE);
          
          if (!GetDlgItem(hWndDlg,IDC_ADVANCED_OPTS))
         	 break; 

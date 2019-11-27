@@ -162,8 +162,12 @@ void PATBMPDef (BOOL clear)
 BOOL SetContinueProcessing(BOOL set)
 {
 	BOOL rtn = ContinueProcessing;
-	ContinueProcessing = set;
-	if (MemMap && !set)
+	if (set == -1)
+		ContinueProcessing = FALSE;
+	else
+		ContinueProcessing = set;
+
+	if (!set)
 		ii = 1;
 	return rtn;
 }
@@ -2181,7 +2185,7 @@ GSSiExitProg (18);
     if (Imediate < 2)
 		HaltMapDisplay(FALSE,FALSE);
 	useGDIPlus = wantGDIPlus;
-    ContinueProcessing=TRUE;
+	SetContinueProcessing(TRUE);
     GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
     NumViewportsToDisplay = *pNumViewports;
     DisplayViewID=0; 

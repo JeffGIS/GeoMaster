@@ -278,7 +278,7 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)  
                  {
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
 	                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Canceled");
 				 }                    
                  else
@@ -467,7 +467,7 @@ BOOL FAR PASCAL ADDLOC_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 				 double	XVal, YVal;
                  
                  Processing = TRUE;
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  if (!GetDlgItemText (hWndDlg,IDC_ALDEST_FILE,DestName,lnDestName))
                  {
                     GSSiMsgBox(GetFocus(),"No destination file", 0,MB_ICONQUESTION|MB_OK,0);
@@ -1815,7 +1815,7 @@ GSSiExitProg (445);
             case IDCANCEL:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window retrning FALSE       */   
-                 ContinueProcessing=FALSE;  
+				 SetContinueProcessing(FALSE);
 				 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE);
                  break;
            }
@@ -3143,7 +3143,7 @@ BOOL FAR PASCAL DTMTOTEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
                 DisableHalt = TRUE;  
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
                 NumItems = BT_NUM_IN_INDEX (hHighlight);                              
@@ -3344,7 +3344,7 @@ Exit2:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
@@ -11693,7 +11693,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
            { 
             case IDCANCEL:
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  Processing = FALSE;
                  break;
                  
@@ -11764,7 +11764,7 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 Offset = ConvertInDist (atof (str),units);  
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
 				CloseTRANS2 (&hTranExport[0]);
 				CloseTRANS2 (&hTranExport[1]);
@@ -11973,7 +11973,7 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 EnableWindow (GetDlgItem(hWndDlg,IDC_SAVE),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
                 DisableHalt = TRUE;  
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
 				NumItems = BT_NUM_IN_INDEX(hHighlight); 
 				MaxHandle = 0; 
@@ -12413,7 +12413,7 @@ Exit:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),TRUE); 
@@ -12982,7 +12982,7 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 EnableWindow (GetDlgItem(hWndDlg,IDC_SAVE),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
                 DisableHalt = TRUE;  
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
 				NumItems = BT_NUM_IN_INDEX(hHighlight); 
 				MaxHandle = 0; 
@@ -13556,7 +13556,7 @@ Exit:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),TRUE); 
@@ -14589,7 +14589,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
                 EnableWindow (GetDlgItem(hWndDlg,IDC_SAVE),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
                 DisableHalt = TRUE;  
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
                 NumItems = BT_NUM_IN_INDEX (hHighlight);                              
@@ -15418,7 +15418,7 @@ Exit2:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),TRUE); 

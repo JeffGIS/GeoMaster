@@ -20,7 +20,7 @@ static	BOOL	InProcessTCPData=FALSE;
 static	BOOL	BlockSocketInput=FALSE;
 static	char	ErrMsg[128];  
 static	BOOL	FirstSocketCall=TRUE,WinsockOpened=FALSE;
-static	SOCKET	OpenSockets[MAXOPENSOCKETS]; 
+static	SOCKET	OpenSockets[MAXOPENSOCKETS] = { INVALID_SOCKET };
 static	HWND	OpenSockethWnd[MAXOPENSOCKETS];
 static	SOCKET	BlockedSocket[MAXOPENSOCKETS];  
 static	int		SocketTimerDelay[MAXOPENSOCKETS];
@@ -1102,6 +1102,20 @@ BOOL GetMyIPNetAddress (LPSTR inetAddr)
 	return TRUE;
 }
 
+void InitSockets()
+{
+	for (int i = 0; i < MAXOPENSOCKETS; i++)
+	{
+		OpenSockets[i] = INVALID_SOCKET;
+		hSocketProcessString[i] = 0;
+		hSocketCloseString[i] = 0;
+		hSocketRestartString[i] = 0;
+		hSocketTimerString[i] = 0;
+		hSocketBuffer[i] = 0;
+		BlockedSocket[i] = 0;
+	}
+
+}
 BOOL OpenWinSock (void)
 {
 	WORD	wVersionRequested = 256 + 1;
@@ -1121,16 +1135,7 @@ BOOL OpenWinSock (void)
 	{
 		FirstSocketCall = FALSE;
 		NumBlockedSockets=0;
-		for (i=0;i<MAXOPENSOCKETS;i++)
-		{
-			OpenSockets[i] = INVALID_SOCKET;
-			hSocketProcessString[i] = 0;
-			hSocketCloseString[i] = 0; 
-			hSocketRestartString[i] = 0; 
-			hSocketTimerString[i] = 0;
-			hSocketBuffer[i] = 0;
-			BlockedSocket[i]=0;
-		}  
+		InitSockets();
 	} 
 	WSASetLastError (0);
     return TRUE;

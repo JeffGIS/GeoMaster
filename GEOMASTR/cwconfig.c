@@ -1453,6 +1453,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 #endif
 
 	rtn = 0;
+	InitSockets();
 	CreatePrintBitmap(0);
 	//MessageBox(0, lpszCmdLine, "WinMain", MB_OK);
 	//loadColors();
@@ -4241,7 +4242,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
       			 if (InAccel)
        			 	ClearCurrentCD ();
 		         setDoPaint( TRUE);
-			     ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
 			     if (lParam == -99)
     		        UnallocateConfig ();
      	         if (ConfigLevel)

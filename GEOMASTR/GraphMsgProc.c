@@ -20203,7 +20203,7 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                    ContinueProcessing=FALSE;
+                    SetContinueProcessing(FALSE);
                  break;
             
             case IDOK: 
@@ -21454,7 +21454,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                    ContinueProcessing=FALSE;
+                    SetContinueProcessing(FALSE);
                  break;
             
             case IDOK: 
@@ -21944,7 +21944,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  break;
             
                  
@@ -22697,7 +22697,7 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  break;
             
                  
@@ -25006,7 +25006,7 @@ BOOL FAR PASCAL LOADBNAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  else
                     EndDialog(hWndDlg, FALSE);
                  break;
@@ -25718,7 +25718,7 @@ BOOL FAR PASCAL LOADFLOODMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
                  /* and dismiss the dialog window returning FALSE       */
                  ForceRefIndex = ForceTAGIndex = FALSE;
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  else
                     EndDialog(hWndDlg, FALSE);
                  break;
@@ -26224,7 +26224,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                  
             case IDCANCEL:
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  break;
             
             case IDC_EXIT:
@@ -27503,7 +27503,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  break;
             
             case IDC_METHOD:
@@ -27640,7 +27640,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  CloseDataFile (TRUE, &PMhDB);  
 				 DestroyAdvancedOpts ();
 	             GSSiEndDialog(hWndDlg, ContinueProcessing,hSaveBM);  
-			 	 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  break;
                  
             case IDC_UNIQUEREFNO:
@@ -27814,7 +27814,7 @@ BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
                  HANDLE hSymDesc=0;
                  BOOL	UseSingleRulesPass;
                   
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
 	             UniqueRefno=SendDlgItemMessage (hWndDlg,IDC_UNIQUEREFNO,BM_GETCHECK,0,0);
 			 	 if (GetDlgItemText (hWndDlg,IDC_STARTNO,str,128))
 			 	 {
@@ -28222,7 +28222,7 @@ SkipFirstPass:
                  }
        Exit:
 			 	 Status = ContinueProcessing;
-			 	 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
 		         {
 					 DPOINT Dpoint={0,0};
 					AddPointToMap (Dpoint,0,0,0,0,0,0,0,0,0,0,0,0,0,TRUE,FALSE,0,0);
@@ -28352,7 +28352,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
             
             case IDCANCEL:
                  if (ContinueProcessing && Processing)
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  else
                  {
                     EndDialog(hWndDlg, FALSE); 
@@ -28989,7 +28989,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */   
                  if (Processing)
-                    ContinueProcessing=FALSE;
+					SetContinueProcessing(FALSE);
                  else
                     EndDialog(hWndDlg, FALSE);
                  break;
@@ -29040,7 +29040,7 @@ BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
                  Tiger4 = (LPTIGER4)GlobalLock (hTiger4);
                  hTiger5 = GSSiGlobAlloc ( 440,GMEM_MOVEABLE,sizeof(TIGER5)+4);
                  Tiger5 = (LPTIGER5)GlobalLock (hTiger5);
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  SaveFPT = CurView->FileProjectionType; 
 				 CurView->FileProjectionType=0;
                  DisableHalt = TRUE;
@@ -30151,7 +30151,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
                 EnableWindow (GetDlgItem(hWndDlg,IDC_SAVE),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
                 DisableHalt = TRUE;  
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
 				if (fileType == GMTEXT_DATAFILE && useDataFile)
@@ -31077,7 +31077,7 @@ Exit2:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),TRUE); 
@@ -32086,7 +32086,7 @@ BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
                 DisableHalt = TRUE;  
-				ContinueProcessing=TRUE;  
+				SetContinueProcessing(TRUE);
 				Processing = TRUE;
                 //GetBTHeader (hHighlight,&BTHead); 
 				NumItems = BT_NUM_IN_INDEX (hHighlight);  
@@ -32236,7 +32236,7 @@ Exit2:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)
-                     ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),TRUE); 
@@ -32397,7 +32397,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	           { 
 	            case IDCANCEL:
 	                 if (Processing)
-	                     ContinueProcessing=FALSE;
+						 SetContinueProcessing(FALSE);
 	                 Processing = FALSE;
 	                 break;
 	                 
@@ -32606,7 +32606,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
 	                NumLines = atof (str);  
 	                EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
 	                EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 
-					ContinueProcessing=TRUE;  
+					SetContinueProcessing(TRUE);
 					Processing = TRUE;
 	                GetDlgItemText (hWndDlg,IDC_OUT_FILE,Name,sizeof(Name)); 
 	                FidDisplay = GSSiOpenFile (Name,0,OF_CREATE); 

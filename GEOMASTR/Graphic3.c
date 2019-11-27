@@ -3601,7 +3601,7 @@ GSSiExitProg (61);
     if (Signature != 80251)
     {    
         GSSiClose2 (&FidIndex); 
-        ContinueProcessing=FALSE;
+        SetContinueProcessing(FALSE);
         GSSiMessageBox (0,"This is not a valid index file",File, MB_OK,0);
 {
 #if ENABLETRACE
@@ -3614,7 +3614,7 @@ GSSiExitProg (61);
     {   
     BadMap: 
         GSSiClose2 (&FidIndex); 
-        ContinueProcessing=FALSE;
+       SetContinueProcessing(FALSE);
         GSSiMessageBox (0,"This index file version is not recognized",OFStruct.szPathName, MB_OK,0);
 {
 #if ENABLETRACE

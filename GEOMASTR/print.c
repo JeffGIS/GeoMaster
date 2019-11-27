@@ -878,7 +878,7 @@ BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPA
       {
    case WM_INITDIALOG: 
    		ProcessStatusWnd = hDlg;
-   		ContinueProcessing=TRUE; 
+		SetContinueProcessing(TRUE);
 		cwCenter(hDlg, 0);
    		break;
    case WM_DESTROY:
@@ -890,7 +890,7 @@ BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPA
       switch (LOWORD(wParam))
          {
       case IDCANCEL:
-         ContinueProcessing=FALSE;
+		  SetContinueProcessing(FALSE);
          DestroyWindow(ProcessStatusWnd); 
          HaltMapDisplay (FALSE,FALSE);
          return TRUE;
@@ -915,7 +915,7 @@ BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM l
       {
    case WM_INITDIALOG: 
    		ProcessStatusWnd = hDlg;
-   		ContinueProcessing=TRUE; 
+		SetContinueProcessing(TRUE);
 		cwCenter(hDlg, 0);
    		break;
    case WM_DESTROY:
@@ -927,7 +927,7 @@ BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM l
       switch (LOWORD(wParam))
          {
       case IDCANCEL:
-         ContinueProcessing=FALSE;
+		  SetContinueProcessing(FALSE);
          DestroyWindow(ProcessStatusWnd); 
          HaltMapDisplay (FALSE,FALSE);
          return TRUE;

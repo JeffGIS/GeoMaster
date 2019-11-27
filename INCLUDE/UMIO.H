@@ -38,6 +38,7 @@ BOOL ReadNTBlock (SOCKET sock,LPSTR pBuf,long lBuf);
 BOOL SendNTBlock (SOCKET sock,LPSTR pBuf,long lBuf);
 void ResetSocketLog(void);
 void LogServerActivity(LPSTR Mess);
+void InitSockets(void);
 
 
 

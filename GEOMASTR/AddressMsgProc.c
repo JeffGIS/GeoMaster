@@ -1899,7 +1899,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)  
                  {
-                    ContinueProcessing=FALSE;
+                    SetContinueProcessing(FALSE);
 	                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Canceled");
 				 }                    
                  else
@@ -2089,7 +2089,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 			     LPGWDHEADER	lpGWDHead;
 			     BADNAMEKEY		BadNameKey;
                  
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  if (!GetDlgItemText (hWndDlg,IDC_DEST_FILE,DestName,lnDestName))
                  {
                     GSSiMsgBox(GetFocus(),"No destination file", 0,MB_ICONQUESTION|MB_OK,0);
@@ -2149,7 +2149,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                 
                 pIMER = (LPINTMATCHEDITREC)lpGWDHead->GWDData;
                     
-				ContinueProcessing=TRUE;
+				SetContinueProcessing(TRUE);
                 Processing = TRUE;
                 NewRefno=0;
                 Done = FALSE; 
@@ -2246,7 +2246,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_DEST),TRUE); 
         Reset:
                  Processing = FALSE;
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
@@ -2348,7 +2348,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)  
                  {
-                    ContinueProcessing=FALSE;
+					 SetContinueProcessing(FALSE);
 	                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Canceled");
 				 }                    
                  else
@@ -2544,7 +2544,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
 			     LPSTR	pPar, pDot;
 			     char	DestNameSegs[128],COrigKey[128];
                  
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  if (!GetDlgItemText (hWndDlg,IDC_DEST_FILE,DestName,lnDestName))
                  {
                     GSSiMsgBox(GetFocus(),"No destination file", 0,MB_ICONQUESTION|MB_OK,0);
@@ -2620,7 +2620,7 @@ BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARA
                 
                 pIMER = (LPSTREET_SEGS_BETWEEN_INTSMATCHEDITREC)&lpGWDHead->GWDData;
                     
-				ContinueProcessing=TRUE;
+				SetContinueProcessing(TRUE);
                 Processing = TRUE;
                 NewRefno=0;
                 Done = FALSE; 
@@ -2823,7 +2823,7 @@ pIMER->NumSegsFound=0;
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EDIT_DEST),TRUE); 
         Reset:
                  Processing = FALSE;
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
@@ -2893,7 +2893,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */
                  if (Processing)  
-                    ContinueProcessing=FALSE;
+                    SetContinueProcessing(FALSE);
                  break;
             
             case IDC_EXIT: 
@@ -3119,7 +3119,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
 				 CloseNetIntersect (Opened);
 				 CloseStreetSegmentTable (OpenedSeg);
                  Processing = FALSE;
-				 ContinueProcessing=TRUE;
+				 SetContinueProcessing(TRUE);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE); 
                  EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),FALSE); 
@@ -6077,7 +6077,7 @@ BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
 
 				if (Processing)
                  {
-                    ContinueProcessing=FALSE;
+                    SetContinueProcessing(FALSE);
 	                SetDlgItemText (hWndDlg,IDC_PROCESS_MESS,"Canceled");
 				 }                    
                  else

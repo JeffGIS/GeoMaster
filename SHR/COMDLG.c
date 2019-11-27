@@ -2656,7 +2656,7 @@ UINT CALLBACK  PrintDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM
       {
    case WM_INITDIALOG: 
    		PrintMsgWnd = hDlg;
-   		ContinueProcessing=TRUE; 
+		SetContinueProcessing(TRUE);
         HaveAbortProc = FALSE;
 		if (!BackgroundTask)
 		{
