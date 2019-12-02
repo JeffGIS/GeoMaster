@@ -502,11 +502,11 @@ HANDLE LoadTranFile (LPSTR Name,int dir,int InType,LPSHORT pNumPoints,LPDOUBLE p
 	XTO = YFROM+MAXTRANPOINTS;
 	YTO = XTO+MAXTRANPOINTS;
 	
+	hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
 	Fid = GSSiOpenFile (Name,NULL,OF_READ);
 	if (Fid == HFILE_ERROR)
 		goto Exit;  
 	
-    hcurSave = GSSiSetCursor (LoadCursor (0,IDC_WAIT));
 	while (fgetstring (str,256,Fid))
 	{   
 		Truncate (str); 

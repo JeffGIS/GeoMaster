@@ -2162,6 +2162,17 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 				CopyFile(modulePath, gmdocEx, FALSE);
 				strcpy(modulePath, gmdocEx);
 			}
+			if (strstr(Arg[2], "/GMCache"))
+			{
+				char gmdocEx[MAX_PATH];
+				LPSTR pDot;
+				strcpy(gmdocEx, modulePath);
+				pDot = strrchr(gmdocEx, '.');
+				strcpy(pDot, "_gmcache.exe");
+				//if (!FileType(gmdocEx))
+				CopyFile(modulePath, gmdocEx, FALSE);
+				strcpy(modulePath, gmdocEx);
+			}
 			if (CreateProcess(modulePath, Arg[2],
 				NULL,             // Process handle not inheritable. 
 				NULL,             // Thread handle not inheritable. 

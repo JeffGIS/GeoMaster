@@ -1145,11 +1145,14 @@
     <Image Include="..\GMEdit\GMEdit\gmedit_icon2.ico" />
     <Image Include="..\Citytour\GMLOGOW.BMP" />
     <Image Include="..\Citytour\GREEN_BI.BMP" />
+    <Image Include="GMCache.ICO" />
+    <Image Include="GMDOC1.ICO" />
     <Image Include="GWIZ1.ICO" />
     <Image Include="HLP-DWN.BMP" />
     <Image Include="HLP-UP.BMP" />
     <Image Include="HOME.ICO" />
     <Image Include="ICO00001.ICO" />
+    <Image Include="ICO00002.ICO" />
     <Image Include="icon1.ico" />
     <Image Include="..\GMEdit\GMEdit\icon1.ico" />
     <Image Include="..\GMEdit\GMEdit\icon2.ico" />

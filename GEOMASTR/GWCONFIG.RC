@@ -53,6 +53,10 @@ IDI_GMEDIT_LARGE        ICON                    "..\\GEOMASTR\\ICON8.ICO"
 
 GMDOC                   ICON                    "..\\GEOMASTR\\GWIZ1.ICO"
 
+GMCache                 ICON                    "..\\GEOMASTR\\GMCache.ICO"
+
+GWIZ1                   ICON                    "..\\GEOMASTR\\ICO00002.ICO"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -163,7 +163,7 @@ static ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GMEDIT_LARGE));
+	wcex.hIcon = LoadIcon(hInstance, "GMCache");
 	wcex.hCursor = LoadCursor(NULL, IDC_IBEAM);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_GMEDIT);
@@ -235,7 +235,6 @@ void NeedToStartBackgroundCache(void)
 	char LastCacheStartTimeFile[MAX_PATH];
 	char LastCacheCompleteTimeFile[MAX_PATH];
 	char LastDataUpdateFile[MAX_PATH];
-	char RenameCompleteFile[MAX_PATH];
 	char TrustedCacheFiles[MAX_PATH];
 	char CacheIsCompleteFile[MAX_PATH];
 	char cDate[24];
@@ -254,8 +253,6 @@ void NeedToStartBackgroundCache(void)
 	sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CachePathnameTo);
 	ExpandText(TrustedCacheFiles);
 	strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
-	ExpandText(LastDataUpdateFile);
-	strcpy(RenameCompleteFile, "[%DL]renameComplete.txt");
 	ExpandText(LastDataUpdateFile);
 	sprintf(CacheIsCompleteFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
 	ExpandText(CacheIsCompleteFile);
@@ -317,9 +314,9 @@ void NeedToStartBackgroundCache(void)
 				StartGMCache();
 			}
 		}
+		if (!GMCacheTimer)
+			GMCacheTimer = SetTimer(hWndMain, CACHE_FILE_RENAME_TIMER, 15000, 0);
 	}
-	if (!ExistFile(RenameCompleteFile) && !GMCacheTimer)
-		GMCacheTimer = SetTimer(hWndMain, CACHE_FILE_RENAME_TIMER, 15000, 0);
 	return;
 }
 
