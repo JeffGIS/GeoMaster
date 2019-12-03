@@ -53,7 +53,7 @@ IDI_GMEDIT_LARGE        ICON                    "..\\GEOMASTR\\ICON8.ICO"
 
 GMDOC                   ICON                    "..\\GEOMASTR\\GWIZ1.ICO"
 
-GMCache                 ICON                    "..\\GEOMASTR\\GMCache.ICO"
+GMCACHE                 ICON                    "..\\GEOMASTR\\GMCache.ICO"
 
 GWIZ1                   ICON                    "..\\GEOMASTR\\ICO00002.ICO"
 
@@ -8524,6 +8524,16 @@ BEGIN
     PUSHBUTTON      "Previous Point",IDC_PREVIOUSPOINT,176,1,78,14
 END
 
+GMCACHE_DIALOG DIALOGEX 0, 0, 342, 176
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
+FONT 14, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Hide",IDOK,198,155,50,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Hide",IDCANCEL,285,155,50,14
+    CTEXT           "This process is caching files used by GeoMaster. It will go away when it is finished.",IDC_STATIC,7,7,328,10
+    CTEXT           "Static",IDC_CACHEMESSAGE,25,110,287,30
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -9568,6 +9578,14 @@ BEGIN
         RIGHTMARGIN, 899
         BOTTOMMARGIN, 561
     END
+
+    "GMCACHE_DIALOG", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 335
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -9578,8 +9596,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,14,104,0
- PRODUCTVERSION 34,14,104,0
+ FILEVERSION 34,14,105,0
+ PRODUCTVERSION 34,14,105,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9596,7 +9614,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34n build 104"
+            VALUE "FileVersion", "34n build 105"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"
@@ -9699,6 +9717,11 @@ BEGIN
 END
 
 POINTMAP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+GMCACHE_DIALOG AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

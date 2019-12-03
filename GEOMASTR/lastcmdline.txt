@@ -1,2 +1,2 @@
-configs\2019_10.gmc [%USEGDIPLUS]=F;[%KFO]=T; 
-i:\gmmobile\metroUTM
+/GMCache
+i:\bu_2018_02_28\geomas

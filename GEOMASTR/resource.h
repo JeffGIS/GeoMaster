@@ -3411,6 +3411,7 @@
 #define IDC_CONNECT_LABEL               2308
 #define IDC_CONNECT                     2309
 #define IDC_IMAGE_NAME                  2310
+#define IDC_CACHEMESSAGE                2311
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3756,9 +3757,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1260
+#define _APS_NEXT_RESOURCE_VALUE        1262
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2311
+#define _APS_NEXT_CONTROL_VALUE         2312
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

@@ -10,6 +10,7 @@
 static	BYTE	Cachebuf[USHRT_MAX];
 static	UINT	lCachebuf = USHRT_MAX;
 static  int		nCalls = 0;
+static  HWND	hWndGMCacheDialog = 0;
 int CreateFilesToCacheFile(LPSTR cachFileList, HFILE fidOut);
 void CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDir, LONGLONG StartPos);
 
@@ -29,6 +30,45 @@ static HANDLE hTrustedCacheFiles = 0;
 //    so that the application will get 'well formed' small icons associated
 //    with it.
 //
+
+BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+{
+
+	int	BRtn;
+	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))
+		return (BRtn);
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+		hWndGMCacheDialog = hWndDlg;
+		cwCenter(hWndDlg, 0);
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			hWndGMCacheDialog = 0;
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDOK:
+			EndDialog(hWndDlg, TRUE);
+			break;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
 LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
@@ -108,9 +148,37 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		hdc = BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);
 		break;
-
+	case WM_SHOWWINDOW:
+		if (wParam)
+		{
+			DialogBox(hInst, (LPSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
+		}
+		else
+		{
+			if (hWndGMCacheDialog)
+				PostMessage (hWndGMCacheDialog, WM_COMMAND, IDCANCEL, 0L);
+		}
+		break;
 	case WM_SIZE:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		switch (wParam)
+		{
+		case SIZE_MINIMIZED:
+			if (hWndGMCacheDialog)
+				PostMessage(hWndGMCacheDialog, WM_COMMAND, IDCANCEL, 0L);
+			break;
+		case SIZE_MAXIMIZED:
+			if (!hWndGMCacheDialog)
+			{
+				DialogBox(hInst, (LPSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
+				ShowWindow(hWnd, SW_MINIMIZE);
+			}
+			break;
+		case SIZE_RESTORED:
+			ShowWindow(hWnd, SW_MAXIMIZE);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
 	case WM_SETFOCUS:
 		break;
 	case WM_KILLFOCUS:
@@ -138,7 +206,7 @@ BOOL InitInstanceGMCache(HINSTANCE hInstance, int nCmdShow)
 
 	hInst = hInstance; // Store instance handle in our global variable
 
-	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
+	hWnd = CreateWindow(szWindowClass, szTitle, WS_DLGFRAME,
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
 	if (!hWnd)
@@ -165,8 +233,8 @@ static ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(hInstance, "GMCache");
 	wcex.hCursor = LoadCursor(NULL, IDC_IBEAM);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_GMEDIT);
+	wcex.hbrBackground = (HBRUSH)(COLOR_BTNSHADOW + 1);
+	wcex.lpszMenuName = 0;
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_GMEDIT_SMALL));
 
@@ -343,6 +411,17 @@ void FreeTrustedFiles(void)
 	GSSiGlobFree(&hTrustedCacheFiles);
 	nCalls++;
 }
+
+void UpdateCacheMessage(LPSTR mess)
+{
+	if (hWndGMCacheDialog)
+	{
+		SetDlgItemText(hWndGMCacheDialog, IDC_CACHEMESSAGE, mess);
+	}
+	else if (hWndMain)
+		SetWindowText(hWndMain, mess);
+}
+
 BOOL StartCachingFiles(void)
 {
 	static char DataLocDir[MAX_PATH];
@@ -400,12 +479,12 @@ BOOL StartCachingFiles(void)
 		else
 			pName = FromFile;
 
-		sprintf(mess, "%s (%.1f %% complete)", pName, PctDone);
-		BackgroundUpdateMessage(mess);
+		sprintf(mess, "%s\r\n(%.1f %% complete)", pName, PctDone);
+		UpdateCacheMessage(mess);
 		CacheFileInBackground(FromFile, CacheDir, DataLocDir, StartPos);
 		PctDone = 100.0 * (double)loc / (double)totLen;
-		sprintf(mess, "%s (%.1f %% complete)",pName, PctDone);
-		BackgroundUpdateMessage (mess);
+		sprintf(mess, "%s\r\n(%.1f %% complete)",pName, PctDone);
+		UpdateCacheMessage(mess);
 	}
 	_lclose(fid);
 	if (nProcessed > -1)
