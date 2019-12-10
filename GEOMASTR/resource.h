@@ -20,8 +20,11 @@
 #define IDC_DATE_TODAY                  4
 #define IDC_CLEARHLTLIST                4
 #define ID_DBNEXTBP                     4
+#define IDOK3                           4
+#define IDC_HOLD_UNTIL_5                4
 #define IDC_DATE_THISWEEK               5
 #define ID_DBSHOWFUN                    5
+#define IDC_RELEASEHOLD                 5
 #define IDC_DATE_THISMONTH              6
 #define ID_DBSHOWFUN2                   6
 #define ID_DBTORETURN                   6
@@ -3412,6 +3415,8 @@
 #define IDC_CONNECT                     2309
 #define IDC_IMAGE_NAME                  2310
 #define IDC_CACHEMESSAGE                2311
+#define IDC_CACHEHOLDMESSAGE            2312
+#define IDC_HOLD_ONE_HOUR               2313
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3759,7 +3764,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1262
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2312
+#define _APS_NEXT_CONTROL_VALUE         2314
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

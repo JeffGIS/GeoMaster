@@ -50,6 +50,14 @@ static int SLTIndexType = 1;
 int query_rtree_bbox(sqlite3 *db_handle, const char *rtree_name, LPMNMXCORD pBounds);
 MNMXCORL AdjustSLTBounds(LPMNMXCORD pBounds, BOOL Insert);
 
+BOOL fputstringWithLength(LPSTR pCmd, HFILE Fid)
+{
+	char linlen[32];
+	sprintf(linlen, "--LL%i", strlen(pCmd));
+	fputstring(linlen, Fid);
+	fputstring(pCmd, Fid);
+	return TRUE;
+}
 void SetSQLiteErrFile(LPSTR errFile)
 {
 	if (errFile)
@@ -640,7 +648,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		if (db)
 		{
-			int err = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+			int err = SQLOK(sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, 0), db, "", 0);
 			if (!err)
 			{
 				rtn = 1;
@@ -651,7 +659,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	{
 		char *error = NULL;
 		db = (sqlite3*)atoi(ARG[2]);
-		int err = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+		int err = SQLOK(sqlite3_exec(db, "END TRANSACTION", NULL, NULL, 0), db, "", 0);
 		if (!err)
 		{
 			rtn = 1;
@@ -723,7 +731,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 	}
 	else if (!stricmp(ARG[1], "CMDFROMFILE"))//$SQLITE(CMDFROMFILE,dbhandle,infile,displaystatus,convertINSERT INTO to INSERT OR REPLACE,skiperrors)
 	{
-#define MAXSTR 1024 * 1024 * 16
+		int MAXSTR = 1024 * 1024 * 2;
 		char *error = NULL;
 		HFILE fid = GSSiOpenFile(ARG[3], 0, OF_READ);
 		BOOL displayStatus = atob(ARG[4]);
@@ -748,9 +756,14 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 			rtn = 1;
 			while (keepGoing && fgetstring(cmd, -(MAXSTR - 2), fid))
 			{
-				int err;
+				int err=0;
 				char errLoc[512];
-
+				if (!strncmp(cmd, "--LL", 4))
+				{
+					MAXSTR = atol(&cmd[4]) + 2;
+					continue;
+				}
+				
 				sprintf(errLoc, "%s line %i", ARG[3], line++);
 				//REPLAC(cmd, "/", "//", MAXSTR-2)
 				//REPLAC(cmd, "'", "''", MAXSTR - 2);
@@ -759,6 +772,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				getIdForUpdate(cmd, FALSE, db);
 				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, &error);
 				sqlite3_free(error);
+				
 				if (err && !skipErrors)
 				{
 					rtn = 0;
@@ -1549,6 +1563,7 @@ NextCrimeRec:
 			int  firstField = 0;
 			char testCondition[256] = { 0 };
 			BOOL haveUniqueID = FALSE;
+			char linlen[32];
 
 			if (skipFirst) //rowid
 				firstField = 1;
@@ -1580,11 +1595,10 @@ NextCrimeRec:
 			{
 				LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hGMDB);
 				LPGWDHEADER lpGWDOffConv=0;
-
-				if (atob(ARG[3]))
-					fid = GSSiOpenFile(ARG[2], 0, OF_CREATE);
-				else
-					fid = GSSiOpenFile(ARG[2], 0, OF_READWRITE);
+				UINT openOpt = OF_CREATE;
+				if (!atob(ARG[3]))
+					openOpt = OF_READWRITE;
+				fid = GSSiOpenFile(ARG[2], 0, openOpt);
 				if (fid != HFILE_ERROR)
 				{
 					HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 8);
@@ -1596,7 +1610,21 @@ NextCrimeRec:
 					int  nextId = -1;
 					int i;
 					BOOL changeFirstFieldToID = FALSE;
+					int maxLineLength = 102;
 
+					if (openOpt == OF_CREATE)
+					{
+						sprintf(pCmd, "--LL%9i", maxLineLength);
+						fputstring(pCmd, fid);
+					}
+					else
+					{
+						fgetstring(pCmd, 512, fid);
+						if (!strncmp(pCmd, "--LL", 4))
+						{
+							maxLineLength = atol(&pCmd[4]);
+						}
+					}
 					if (*ARG[8])
 					{
 						hOffConvDB = OpenGWDatabase(ARG[8], BT_READ);
@@ -1605,16 +1633,20 @@ NextCrimeRec:
 					GSSillseek(fid, 0, 2);
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s", TableName);
 					fputstring(pCmd, fid);
+					maxLineLength = max(maxLineLength, strlen(pCmd));
 					if (includesPoint)
 					{
 						sprintf(pCmd, "DROP TABLE IF EXISTS %s_index", TableName);
-						fputstring(pCmd, fid);
+				
+						fputstringWithLength(pCmd, fid);
+						maxLineLength = max(maxLineLength, strlen(pCmd));
 						if (haveDateAndUCR)
 							//sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY, minTime, maxTime, minUCR, maxUCR);", TableName);
 							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id, minTime, maxTime, minUCR, maxUCR,minX, maxX, minY, maxY);", TableName);
 						else
 							sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", TableName);
-						fputstring(pCmd, fid);
+						fputstringWithLength(pCmd, fid);
+						maxLineLength = max(maxLineLength, strlen(pCmd));
 						if (lpGWDHead->NumIndexFields[0] == 1 && lpGWDHead->pFldInfo->Type == BT_INTEGER && lpGWDHead->pFldInfo->Len == 4)
 						{
 							strcpy(lpGWDHead->pFldInfo->Name, "id");
@@ -1692,7 +1724,8 @@ NextCrimeRec:
 							}
 							sprintf(strchr(pCmd, 0), "))");
 						}
-						fputstring(pCmd, fid);
+						fputstringWithLength(pCmd, fid);
+						maxLineLength = max(maxLineLength, strlen(pCmd));
 						for (index = firstIndex; index < lastIndex; index++)
 						{
 							if (lpGWDHead->SpatialIndex != index)
@@ -1703,7 +1736,8 @@ NextCrimeRec:
 									sprintf(strchr(pCmd, 0), ",'%s' ASC", removePCT(lpFieldInfo->Name));
 								}
 								sprintf(strchr(pCmd, 0), ");");
-								fputstring(pCmd, fid);
+								fputstringWithLength(pCmd, fid);
+								maxLineLength = max(maxLineLength, strlen(pCmd));
 							}
 						}
 					}
@@ -1891,7 +1925,9 @@ NextCrimeRec:
 								}
 								else
 									sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.6f,%.6f,%.6f,%.6f);", TableName, id, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
-								fputstring(pCmd, fid);
+								
+								fputstringWithLength(pCmd, fid);
+								maxLineLength = max(maxLineLength, strlen(pCmd));
 							}
 
 							if (nextId > 0)
@@ -1955,8 +1991,21 @@ NextCrimeRec:
 							if (haveDateAndUCR)
 								sprintf(strchr(pCmd, 0), "%s%i", delim, sunAngle);
 							sprintf(strchr(pCmd, 0), ")");
+
+							fputstringWithLength(pCmd, fid);
+							maxLineLength = max(maxLineLength, strlen(pCmd));
+
+						}
+
+						GSSillseek(fid, 0, 0);
+						fgetstring(pCmd, 512, fid);
+						if (!strncmp(pCmd, "--LL", 4))
+						{
+							GSSillseek(fid, 0, 0);
+							sprintf(pCmd, "--LL%9i", maxLineLength);
 							fputstring(pCmd, fid);
 						}
+
 						DestroyStatusWindow(0);
 						GSSiClose2 (&fid);
 						//SQLOK(sqlite3_finalize(self.statement), "loadIntersectionTextToDatabase8");
@@ -2042,6 +2091,20 @@ NextCrimeRec:
 				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*2);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
+				if (createFile)
+				{
+					sprintf(pCmd, "--LL%9i", maxLineLen);
+					fputstring(pCmd, Fid);
+				}
+				else
+				{
+					fgetstring(pCmd, 512, Fid);
+					if (!strncmp(pCmd, "--LL", 4))
+					{
+						maxLineLen = atol(&pCmd[4]);
+					}
+				}
+
 				GSSillseek(Fid, 0, 2);
 				sprintf(pCmd, "Extract Table %s", ARG[4]);
 				CreateStatusWind(hWndMain, 1,pCmd);
@@ -2058,30 +2121,30 @@ NextCrimeRec:
 						sprintf(strchr(addFields, 0), ",%s", ARG[i]);
 					}
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s;", ARG[4]);
-					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+					fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					sprintf(pCmd, "DROP TABLE IF EXISTS %s_index;", ARG[4]);
-					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+					fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 
 					if (!skipQuadIndex)
 					{
 						sprintf(pCmd, "CREATE VIRTUAL TABLE %s_index USING rtree(id,minX, maxX, minY, maxY);", ARG[4]);
-						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+						fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 					if (*ARG[6])
 						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i),Area DOUBLE,Perimeter DOUBLE);", ARG[4], ARG[5], ARG[6],addFields, BLOB_MAX, BLOB_MAX * 8);
 					else
 						sprintf(pCmd, "CREATE TABLE %s (id INTEGER PRIMARY KEY,%s%s,BasePointX REAL,BasePointY REAL,NumPoints INT,NumLoops INT,PolyPartLen BLOB(%i), Points BLOB(%i),Area DOUBLE,Perimeter DOUBLE);", ARG[4], ARG[5], addFields,BLOB_MAX, BLOB_MAX * 8);
-					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+					fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if ((pSpace = strchr(ARG[5], ' ')))
 						*pSpace = 0;
 					sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC);", ARG[4],ARG[5], ARG[4], ARG[5]);
-					fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+					fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					if (*ARG[6])
 					{
 						if ((pSpace = strchr(ARG[6], ' ')))
 							*pSpace = 0;
 						sprintf(pCmd, "CREATE INDEX %s%s_Index ON %s ('%s' ASC)", ARG[4], ARG[6], ARG[4], ARG[6]);
-						fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+						fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 					}
 				}
 
@@ -2141,7 +2204,7 @@ NextCrimeRec:
 								ConvertBounds(pBounds, 1, 2);
 							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.8f,%.8f,%.8f,%.8f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 							if (!skipQuadIndex)
-								fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+								fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							if (nLoops > 1)
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
@@ -2240,7 +2303,7 @@ NextCrimeRec:
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 							}
-							fputstring(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
+							fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							free(blobPoints);
 							GSSiGlobUlFree(&hPoints);
 							GSSiGlobUlFree(&hPointsCVT);
@@ -2255,8 +2318,14 @@ NextCrimeRec:
 					DestroySavedPolys();
 				}
 				DestroyStatusWindow(0);
-				sprintf(pCmd, "/* maxLineLen=%i */", maxLineLen);
-				fputstring(pCmd, Fid);
+				GSSillseek(Fid, 0, 0);
+				fgetstring(pCmd, 512, Fid);
+				if (!strncmp(pCmd, "--LL", 4))
+				{
+					GSSillseek(Fid, 0, 0);
+					sprintf(pCmd, "--LL%9i", maxLineLen);
+					fputstring(pCmd, Fid);
+				}
 				GSSiClose2 (&Fid);
 				GSSiGlobUlFree(&hCmd);
 			}

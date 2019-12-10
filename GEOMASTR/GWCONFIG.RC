@@ -8524,14 +8524,18 @@ BEGIN
     PUSHBUTTON      "Previous Point",IDC_PREVIOUSPOINT,176,1,78,14
 END
 
-GMCACHE_DIALOG DIALOGEX 0, 0, 342, 176
+GMCACHE_DIALOG DIALOGEX 0, 0, 294, 176
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
 FONT 14, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Hide",IDOK,198,155,50,14,NOT WS_VISIBLE
-    PUSHBUTTON      "Hide",IDCANCEL,285,155,50,14
-    CTEXT           "This process is caching files used by GeoMaster. It will go away when it is finished.",IDC_STATIC,7,7,328,10
-    CTEXT           "Static",IDC_CACHEMESSAGE,25,110,287,30
+    DEFPUSHBUTTON   "Hold for 1 hour",IDC_HOLD_ONE_HOUR,7,51,62,14
+    PUSHBUTTON      "Hide",IDCANCEL,237,155,50,14
+    CTEXT           "This process is caching files used by GeoMaster. It will go away when it is finished.",IDC_STATIC,7,7,280,10
+    CTEXT           "Static",IDC_CACHEMESSAGE,7,115,280,30
+    DEFPUSHBUTTON   "Hide",IDOK2,141,155,50,14,NOT WS_VISIBLE
+    DEFPUSHBUTTON   "Hold until 5:00",IDC_HOLD_UNTIL_5,116,51,62,14
+    DEFPUSHBUTTON   "Release Hold",IDC_RELEASEHOLD,225,51,62,14,WS_DISABLED
+    CTEXT           "Static",IDC_CACHEHOLDMESSAGE,7,77,280,30
 END
 
 
@@ -9582,7 +9586,7 @@ BEGIN
     "GMCACHE_DIALOG", DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 335
+        RIGHTMARGIN, 287
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
     END
