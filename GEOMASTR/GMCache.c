@@ -7,7 +7,7 @@
 #include "gmextern.h"
 #include <psapi.h>
 
-static	UINT	lCachebuf = 1024 * 1024;
+static	UINT	lCachebuf = 1024 * 32;
 static  int		nCalls = 0;
 static  HWND	hWndGMCacheDialog = 0;
 static  int		GMCacheOnHoldUntil = 0;
@@ -78,16 +78,18 @@ BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 			EndDialog(hWndDlg, TRUE);
 			break;
 		case IDC_HOLD_ONE_HOUR:
+			KillTimer(hWndMain, GMCACHE_TIMER);
 			sprintf(cmd, "$INT([%%SYS_CLOCK]+3600)");
 			ExpandText(cmd);
 			GMCacheOnHoldUntil = atol(cmd);
 			ContinueBackgroundCache = FALSE;
-			SetTimer(hWndMain, GMCACHE_TIMER, 3600*1, 0);
+			SetTimer(hWndMain, GMCACHE_TIMER, 60000, 0);
 			SetHoldMessage(hWndDlg);
 			break;
 		case IDC_HOLD_UNTIL_5:
 		{
 			char today[64];
+			KillTimer(hWndMain, GMCACHE_TIMER);
 			sprintf(today, "[%%SYS_CLOCK]");
 			ExpandText(today);
 			int now = atol(today);
@@ -100,10 +102,16 @@ BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 				sprintf(cmd, "$CLK(%s 17:00)", today);
 				ExpandText(cmd);
 				GMCacheOnHoldUntil = atol(cmd);
-				SetTimer(hWndMain, GMCACHE_TIMER, GMCacheOnHoldUntil-now, 0);
+				SetTimer(hWndMain, GMCACHE_TIMER, (GMCacheOnHoldUntil-now)*1000, 0);
 				SetHoldMessage(hWndDlg);
 			}
 		}
+		break;
+		case IDC_RELEASEHOLD:
+			GMCacheOnHoldUntil = 0;
+			SetTimer(hWndMain, GMCACHE_TIMER, 1000, 0);
+			SetHoldMessage(hWndDlg);
+
 			break;
 		}
 		break;    /* End of WM_COMMAND                                 */
@@ -114,6 +122,29 @@ BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	return TRUE;
 }
 
+int removeFilesBeingCached(LPSTR cachedir)
+{
+	char tempFile[MAX_PATH];
+	OFSTRUCTGM	OFStruct = { 0 };
+	int nFiles = 0;
+	char str[MAX_PATH*2];
+	int rtn = 0;
+
+	sprintf(tempFile, "%sremovbc.txt",cachedir);
+	strcpy(str, cachedir);
+	ExpandText(str);
+	ExpandText(tempFile);
+	HFILE Fid2 = OpenFileGM(tempFile, &OFStruct, OF_CREATE);
+	ii = SearchFilesInDirBC(str, 0, Fid2, &nFiles, "*.beingcached", 1, TRUE);
+	_llseek(Fid2, 0, 0);
+	while (fgetstring2(str, MAX_PATH, Fid2))
+	{
+		GSSiRemove(str);
+		rtn++;
+	}
+	_lclose(Fid2);
+	return rtn;
+}
 
 LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -141,6 +172,7 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		sprintf(FilesToCacheFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
 		GSSiRemove(FilesToCacheFile);
 
+		removeFilesBeingCached(CachePathnameTo);
 		GetGlobalCVal("[%BackgroundCacheFilelist]", BackgroundCacheFilelist, "[%DL]BackgroundCacheFilelist.txt");
 		sprintf(FilesToCacheFile, "%sFilesToCacheFile.txt", CachePathnameTo);
 		ExpandText(FilesToCacheFile);
@@ -182,6 +214,8 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_TIMER:
 		if (wParam == GMCACHE_TIMER)
 		{
+			GMCacheOnHoldUntil = 0;
+			SetHoldMessage(hWndGMCacheDialog);
 			if (!StartCachingFiles())
 			{
 				KillTimer(hWnd, wParam);
@@ -202,7 +236,7 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_SHOWWINDOW:
 		if (wParam)
 		{
-			DialogBox(hInst, (LPSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
+			DialogBox(hInst, (LPCTSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
 		}
 		else
 		{
@@ -826,6 +860,7 @@ LONGLONG CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDi
 	char mess[256];
 	BOOL	toIsRenameFile = FALSE;
 
+	GMCacheOnHoldUntil = 0;
 	for (icpf = 0; icpf < NumCachePathnameFrom; icpf++)
 	{
 		strcpy(CacheFromName, CachePathnameFrom[icpf]);
@@ -853,7 +888,7 @@ Next:
 	strcpy(ToFileIntermediate, ToFile);
 	if ((pDot = strrchr(ToFileIntermediate, '.')))
 		*pDot = '$';
-	strcat(ToFileIntermediate, ".beingcached");
+	strcat(ToFileIntermediate, ".tbr");
 	FidFrom = OpenFileGM(FromFile, &OFStruct, OF_READ);
 	FidTo = OpenFileGM(ToFileIntermediate, &OFStruct, OF_READ);
 	if (FidTo == HFILE_ERROR)
@@ -911,6 +946,9 @@ Next:
 			if (OkToCache)
 			{
 				LPSTR Cachebuf = malloc(lCachebuf + 4);
+				LPSTR pDot = strrchr(ToFile, '.');
+				if (!stricmp(pDot, ".tbr"))
+					strcpy(pDot, ".beingcached");
 				FidTo = OpenFileGM(ToFile, &OFStruct, OFMode);
 				if (FidTo != HFILE_ERROR)
 				{
@@ -984,13 +1022,13 @@ Next:
 		if (pos == -2)
 		{
 			char name[MAX_PATH + 32];
-			strcpy(name, ToFileIntermediate);
+			strcpy(name, ToFile);
 			LPSTR pDot = strrchr(name, '.');
 			if (pDot && !stricmp(pDot, ".beingcached"))
 			{
 				*pDot = 0;
 				strcat(name, ".tbr");
-				GSSiRename(ToFileIntermediate, name);
+				GSSiRename(ToFile, name);
 			}
 			pos = 0;
 		}
@@ -1035,7 +1073,7 @@ BOOL AnotherProcessIsCaching(LPSTR ProcessIDFile)
 	DWORD	nBytes, nPid;
 	BOOL	rtn = FALSE;
 	DWORD	CachingPid;
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 	char	cPid[32];
 	HFILE	Fid = OpenFileGM(ProcessIDFile, &OFStruct, OF_READ);
 
