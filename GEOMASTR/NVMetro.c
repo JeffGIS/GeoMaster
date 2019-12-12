@@ -4,9 +4,9 @@
 #include "MPIntersection.h"
 #define COORDINATE_FACTOR 10000000.0
 
-#define FIRSTYEAR	2004
+#define FIRSTYEAR	2002
 #define LASTYEAR	2018
-#define NYEARS	18
+#define NYEARS	(LASTYEAR-FIRSTYEAR+1)
 #define NUMVARS 64
 #define MAXLINELEN 2048
 
@@ -46,10 +46,10 @@ int LoadMultPropertyDB(LPSTR INDir,int LastYear)
 	int nRecs;
 	HFILE fid;
 	char line[SHRT_MAX];
-	int maxLineLen = SHRT_MAX - 2;
+	int maxLineLen = 1024;
 	int mxlnlen = 0;
 
-	test2(INDir);
+	test(INDir);
 	while (year <= LastYear)
 	{
 		BTVARDESC   BTVar[2];
@@ -72,10 +72,8 @@ int LoadMultPropertyDB(LPSTR INDir,int LastYear)
 			mxlnlen = max(mxlnlen, strlen(line));
 			if (pTab)
 			{
-				LPSTR pPid = ++pTab;
-				pTab = strchr(pPid, '\t');
+				LPSTR pPid = line;
 				*pTab++ = 0;
-				offset += (pTab - line);
 				BT_PUT(hIndex, pPid, (LPSTR)&offset);
 				offset = GSSillseek(fid, 0, 1);
 			}
@@ -92,8 +90,10 @@ int LoadMultPropertyDB(LPSTR INDir,int LastYear)
 
 static void test(LPSTR INDir)
 {
-	char pid[18] = "003-263425110003";
-	int year = 2004;
+	//char pid[18] = "037-070160050012";
+	char pid[18] = "053-1202924110057";
+	
+	int year = 2014;
 	int offset;
 	short	st;
 	char inFile[MAX_PATH];
@@ -247,7 +247,7 @@ int CreateMultValueFile(LPSTR INDir)
 	BTVar[0].BT_VAROFF = 0;
 	sprintf(cvFile, "%s\\changeValues.bin", INDir);
 	fidChangeValues = GSSiOpenFile(cvFile, 0, OF_CREATE);
-	ival = NYEARS;
+	ival = LASTYEAR - FIRSTYEAR + 1;
 	BigWrite(fidChangeValues, &ival, 4, -1);
 	ival = FIRSTYEAR;
 	BigWrite(fidChangeValues, &ival, 4, -1);
@@ -294,38 +294,45 @@ int CreateMultValueFile(LPSTR INDir)
 			}*/
 			lnChangeValues = 0;
 			pYearly = (LPYEARLYVALUES)pChangeValues;
+//			$TEXTFILE(WRITE, [FID], [PIN]$CHR(9)[ACRES_POLYX]$CHR(9)[ACRES_DEEDX]$CHR(9)[HOMESTEAD]$CHR(9)[EMV_LAND]$CHR(9)[EMV_BLDG]$CHR(9)[EMV_TOTAL]$CHR(9)[TAX_CAPAC]$CHR(9)[TOTAL_TAX]$CHR(9)[SPEC_ASSES]$CHR(9)[TAX_EXEMPT]$CHR(9)[SALE_DATE]$CHR(9)[SALE_VALUE]$CHR(9)[OWNER_NAMEX]);
 			for (int iyear = 0; iyear < NYEARS; iyear++)
 			{
-				GetVarValue(31, pValues[iyear], value);
-				homestead = atob(value);
-				GetVarValue(32, pValues[iyear], value);
-				pYearly->EMV_LAND = atoi(value);
-				GetVarValue(33, pValues[iyear], value);
-				pYearly->EMV_BLDG = atoi(value);
-				GetVarValue(34, pValues[iyear], value);
-				pYearly->EMV_TOTAL = atoi(value);
-				GetVarValue(35, pValues[iyear], value);
-				pYearly->TAX_CAPACITY = atoi(value);
-				GetVarValue(36, pValues[iyear], value);
-				pYearly->TOTAL_TAX = atoi(value);
-				GetVarValue(37, pValues[iyear], value);
-				pYearly->SPEC_ASSES = atoi(value);
-				GetVarValue(38, pValues[iyear], value);
-				taxexempt = atob(value);
-				pYearly->EMV_LAND++;
-				if (homestead) pYearly->EMV_LAND *= -1;
-				pYearly->EMV_BLDG++;
-				if (taxexempt) pYearly->EMV_BLDG *= -1;
-				GetVarValue(53, pValues[iyear], value);
-				pYearly->SALE_DATE = atoi(value);
-				GetVarValue(54, pValues[iyear], value);
-				pYearly->SALE_VALUE = atoi(value);
+				memset(pYearly, 0, sizeof(YEARLYVALUES));
+				if (pValues[iyear])
+				{
+					GetVarValue(3, pValues[iyear], value);
+					homestead = atob(value);
+					GetVarValue(4, pValues[iyear], value);
+					pYearly->EMV_LAND = atoi(value);
+					GetVarValue(5, pValues[iyear], value);
+					pYearly->EMV_BLDG = atoi(value);
+					GetVarValue(6, pValues[iyear], value);
+					pYearly->EMV_TOTAL = atoi(value);
+					GetVarValue(7, pValues[iyear], value);
+					pYearly->TAX_CAPACITY = atoi(value);
+					GetVarValue(8, pValues[iyear], value);
+					pYearly->TOTAL_TAX = atoi(value);
+					GetVarValue(9, pValues[iyear], value);
+					pYearly->SPEC_ASSES = atoi(value);
+					GetVarValue(10, pValues[iyear], value);
+					taxexempt = atob(value);
+					pYearly->EMV_LAND++;
+					if (homestead) pYearly->EMV_LAND *= -1;
+					pYearly->EMV_BLDG++;
+					if (taxexempt) pYearly->EMV_BLDG *= -1;
+					GetVarValue(11, pValues[iyear], value);
+					pYearly->SALE_DATE = atoi(value);
+					GetVarValue(12, pValues[iyear], value);
+					pYearly->SALE_VALUE = atoi(value);
+				}
 				pYearly++;
 			}
 			//lnChangeValues = strlen(pChangeValues);
 			lnChangeValues = NYEARS * sizeof(YEARLYVALUES);
 			offset = GSSillseek(fidChangeValues, 0, 1);
 			BT_PUT(hChangeValueIndex, pid, (LPSTR)&offset);
+			if (!stricmp(pid, "053-1202924110057"))
+				ii = 1;
 		//group by value to improve compression
 			LPINT pIntValuesYearly = (LPINT)pChangeValues;
 			pIntValues = (LPINT)pChangeValues2;
@@ -394,6 +401,46 @@ BOOL AssignMultValues(LPSTR indexFile, LPSTR dataFile)
 	CloseDataFile(FALSE, &hDB);
 	BT_CLOSE(hIndex);
 	DestroyStatusWindow(0);
+
+	return rtn;
+}
+BOOL TestMultValues(LPSTR indexFile, LPSTR dataFile, LPSTR pid)
+{
+	BOOL rtn = FALSE;
+	HANDLE hIndex;
+	HFILE  fidBin;
+	int nRecs;
+	int iRec = 0;
+	int pos = BT_FIRST;
+	int offset;
+	char KeyString[256], UpdateString[256];
+	char datfile[300];
+	HFILE fid = GSSiOpenFile(dataFile, 0, OF_READ);
+	int reclen;
+	int nyears, firstyear, lastyear;
+
+	BigRead(fid, &nyears, 4);
+	BigRead(fid, &firstyear, 4);
+	BigRead(fid, &lastyear, 4);
+	hIndex = BT_OPEN(indexFile, 0, BT_READ, 0);
+	if (!hIndex)
+		return FALSE;
+	if (!BT_FIND(hIndex, pid, pos, BT_EQ, (LPSTR)&offset))
+	{
+		GSSillseek(fid, offset,0);
+		BigRead(fid, &reclen, 4);
+		LPBYTE	pCompressed = malloc(reclen + 4);
+		BigRead(fid, pCompressed, reclen);
+		YEARLYVALUES yearly[NYEARS];
+		LPYEARLYVALUES pYearly = yearly;
+		int		lRec = DecompressBinaryRecordUnsafe((LPBYTE)pYearly,pCompressed, reclen);
+
+		free(pCompressed);
+		rtn = TRUE;
+	}
+
+	BT_CLOSE(hIndex);
+	GSSiClose(fid);
 
 	return rtn;
 }

@@ -2335,6 +2335,11 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			rtn = AssignMultValues(Arg[2], Arg[3]);
 			goto Rtnrtn;
 		}
+		else if (!stricmp(Arg[1], "TESTMULTVALUES"))//$NVMETRO(TESTMULTVALUES, indexfile,datafile,pid)
+		{
+			rtn = TestMultValues(Arg[2], Arg[3],Arg[4]);
+			goto Rtnrtn;
+		}
 		else if (!stricmp(Arg[1], "ASSIGNUSECODE"))//$NVMETRO(ASSIGNUSECODE,[DBHANDLE],[PT])
 		{
 			BOOL err;

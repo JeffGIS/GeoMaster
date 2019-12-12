@@ -2511,6 +2511,7 @@ int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir, int LastYear);
 int CreateMultValueFile(LPSTR INDir);
 BOOL AssignMultValues(LPSTR INDir,LPSTR UpdateFile);
+BOOL TestMultValues(LPSTR indexFile, LPSTR dataFile, LPSTR pid);
 int AssignLandUseCodeToParcels(LLPOINT pt, sqlite3 *_database);
 int fixRampNum(int rampin);
 BOOL RampIDFromRampNum(int rampNum, LPSTR rampID);
