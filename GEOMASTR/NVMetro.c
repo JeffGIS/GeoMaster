@@ -93,7 +93,7 @@ static void test(LPSTR INDir)
 	//char pid[18] = "037-070160050012";
 	char pid[18] = "053-1202924110057";
 	
-	int year = 2014;
+	int year = 2018;
 	int offset;
 	short	st;
 	char inFile[MAX_PATH];
@@ -270,6 +270,9 @@ int CreateMultValueFile(LPSTR INDir)
 	nRecs = BT_NUM_IN_INDEX(hIndex);
 	while (StatusWindowUpdate(NULL, NULL, nRecs, iRec++) && !BT_FIND(hIndex, pid, pos, BT_ANY, (LPSTR)&offset))
 	{
+		pid[17] = 0;
+		if (!stricmp(pid, "053-1202924110057"))
+			ii = 1;
 		*pChangeValues = 0;
 		pos = BT_NEXT;
 		if (*pid)
@@ -294,7 +297,7 @@ int CreateMultValueFile(LPSTR INDir)
 			}*/
 			lnChangeValues = 0;
 			pYearly = (LPYEARLYVALUES)pChangeValues;
-//			$TEXTFILE(WRITE, [FID], [PIN]$CHR(9)[ACRES_POLYX]$CHR(9)[ACRES_DEEDX]$CHR(9)[HOMESTEAD]$CHR(9)[EMV_LAND]$CHR(9)[EMV_BLDG]$CHR(9)[EMV_TOTAL]$CHR(9)[TAX_CAPAC]$CHR(9)[TOTAL_TAX]$CHR(9)[SPEC_ASSES]$CHR(9)[TAX_EXEMPT]$CHR(9)[SALE_DATE]$CHR(9)[SALE_VALUE]$CHR(9)[OWNER_NAMEX]);
+			//			$TEXTFILE(WRITE, [FID], [PIN]$CHR(9)[ACRES_POLYX]$CHR(9)[ACRES_DEEDX]$CHR(9)[HOMESTEAD]$CHR(9)[EMV_LAND]$CHR(9)[EMV_BLDG]$CHR(9)[EMV_TOTAL]$CHR(9)[TAX_CAPAC]$CHR(9)[TOTAL_TAX]$CHR(9)[SPEC_ASSES]$CHR(9)[TAX_EXEMPT]$CHR(9)[SALE_DATE]$CHR(9)[SALE_VALUE]$CHR(9)[OWNER_NAMEX]);
 			for (int iyear = 0; iyear < NYEARS; iyear++)
 			{
 				memset(pYearly, 0, sizeof(YEARLYVALUES));
@@ -333,14 +336,14 @@ int CreateMultValueFile(LPSTR INDir)
 			BT_PUT(hChangeValueIndex, pid, (LPSTR)&offset);
 			if (!stricmp(pid, "053-1202924110057"))
 				ii = 1;
-		//group by value to improve compression
+			//group by value to improve compression
 			LPINT pIntValuesYearly = (LPINT)pChangeValues;
 			pIntValues = (LPINT)pChangeValues2;
 			for (int i = 0; i < NUMCHANGEVALUES; i++, pIntValuesYearly++)
 			{
 				for (int iyear = 0; iyear < NYEARS; iyear++)
 				{
-					*pIntValues++ = pIntValuesYearly[iyear*NUMCHANGEVALUES];
+					*pIntValues++ = pIntValuesYearly[iyear * NUMCHANGEVALUES];
 				}
 			}
 			lnChangeValuesCompressed = CompressBinaryRecord(pChangeValues2, pChangeValuesCompressed, lnChangeValues);
@@ -349,6 +352,8 @@ int CreateMultValueFile(LPSTR INDir)
 			totlnChangeValues += lnChangeValues;
 			totlnChangeValuesCompressed += lnChangeValuesCompressed;
 		}
+		else
+			ii = 1;
 	}
 	BT_CLOSE(hIndex);
 	BT_CLOSE(hChangeValueIndex);
