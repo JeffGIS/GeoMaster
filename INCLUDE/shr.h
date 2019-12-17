@@ -1405,7 +1405,7 @@ void StopBackgroundCache (void);
 void RenameCachedFiles (void);
 BOOL UseTrustedCacheFile(LPSTR FileName);
 void FreeTrustedFiles(void);
-void UpdateLastDataUpdate(void);
+void UpdateLastDataUpdate(LPSTR holdUntil, int bufferSize);
 HANDLE GetNextXMLElement (HANDLE FileHandle,LPINT pFileLoc,LPSTR TagID);
 HANDLE LoadXMLFile (LPSTR File);
 BOOL GetXMLElementAttribute (HANDLE hElem,LPSTR AttrName,LPSTR AttrValue);

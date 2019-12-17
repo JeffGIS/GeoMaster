@@ -6706,129 +6706,153 @@ Exit:
 }
 
 
-BOOL CacheCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
+BOOL CacheCommands(int nArgs, LPSTR* Arg, LPSTR OutLoc)
 {
-	BOOL	rtn=FALSE;
-	static	int	port=0;
-	static  char	ipAddress[32]={0};
+	BOOL	rtn = FALSE;
+	static	int	port = 0;
+	static  char	ipAddress[32] = { 0 };
 	static	char	tmpFile[MAX_PATH];
 	int		err, ln;
-	char	fileName[MAX_PATH+12];
+	char	fileName[MAX_PATH + 12];
 	char	cachingPidFile[MAX_PATH];
-	static	HFILE	Fid=HFILE_ERROR;
+	static	HFILE	Fid = HFILE_ERROR;
 	static	int		nFiles;
 
 	*OutLoc = 0;
-	ExpandText (Arg[1]);
-	ExpandText (Arg[2]);
-	if (!stricmp (Arg[1],"SERVER"))
+	ExpandText(Arg[1]);
+	ExpandText(Arg[2]);
+	if (!stricmp(Arg[1], "SERVER"))
 	{
-		strcpy (NetTransferDir,"[%CACHEDIRACTUAL]NetTransferFiles");
-		ExpandText (NetTransferDir);
-		makedirectories (NetTransferDir,TRUE,FALSE);
-		if (!stricmp (Arg[2],"OPEN"))
+		strcpy(NetTransferDir, "[%CACHEDIRACTUAL]NetTransferFiles");
+		ExpandText(NetTransferDir);
+		makedirectories(NetTransferDir, TRUE, FALSE);
+		if (!stricmp(Arg[2], "OPEN"))
 		{
 			int lastUpdate;
-			long	totFileLen=0;
-			
-			GSSiGetTempFileName (0,"gmc",0,tmpFile); 
-			Fid = GSSiOpenFile (tmpFile,0,OF_CREATE);
-			BigWrite (Fid,&totFileLen,sizeof(long),-1);
-			ExpandText (Arg[3]);
-			strcpy (ipAddress,Arg[3]);
-			ExpandText (Arg[4]);
-			port = atoi (Arg[4]);
-			ExpandText (Arg[5]);
-			lastUpdate = atoi (Arg[5]);
+			long	totFileLen = 0;
+
+			GSSiGetTempFileName(0, "gmc", 0, tmpFile);
+			Fid = GSSiOpenFile(tmpFile, 0, OF_CREATE);
+			BigWrite(Fid, &totFileLen, sizeof(long), -1);
+			ExpandText(Arg[3]);
+			strcpy(ipAddress, Arg[3]);
+			ExpandText(Arg[4]);
+			port = atoi(Arg[4]);
+			ExpandText(Arg[5]);
+			lastUpdate = atoi(Arg[5]);
 			nFiles = 0;
-			BigWrite (Fid,&nFiles,sizeof(int),-1);
-			BigWrite (Fid,&lastUpdate,sizeof(int),-1);
+			BigWrite(Fid, &nFiles, sizeof(int), -1);
+			BigWrite(Fid, &lastUpdate, sizeof(int), -1);
 			rtn = TRUE;
 		}
-		else if (!stricmp (Arg[2],"ADD"))
+		else if (!stricmp(Arg[2], "ADD"))
 		{
 			HANDLE hDB;
 			BOOL	saveAllowCache = AllowCache;
 
 			if (AllowCache)
 				AllowCache = 2;
-			if (strstr (Arg[3],".gmd") || strstr (Arg[3],".GMD"))
+			if (strstr(Arg[3], ".gmd") || strstr(Arg[3], ".GMD"))
 			{
-				HANDLE hDB = OpenGWDatabase (Arg[3],BT_READ);
+				HANDLE hDB = OpenGWDatabase(Arg[3], BT_READ);
 				int	   iCPID;
 				if (hDB)
 				{
-					LPGWDHEADER lpGWDHead = GlobalLock (hDB);
+					LPGWDHEADER lpGWDHead = GlobalLock(hDB);
 
 					iCPID = lpGWDHead->CheckPointID;
-					GlobalUnlock (hDB);
-					CloseGWDatabase (hDB); 
+					GlobalUnlock(hDB);
+					CloseGWDatabase(hDB);
 					if (iCPID > 0)
-						sprintf (fileName,"%s(%i)",Arg[3],iCPID);
+						sprintf(fileName, "%s(%i)", Arg[3], iCPID);
 					else
-						strcpy (fileName,Arg[3]);
-					ln = strlen(fileName)+1;
-					BigWrite (Fid,&ln,sizeof(int),-1);
-					BigWrite (Fid,fileName,ln,-1);
+						strcpy(fileName, Arg[3]);
+					ln = strlen(fileName) + 1;
+					BigWrite(Fid, &ln, sizeof(int), -1);
+					BigWrite(Fid, fileName, ln, -1);
 					nFiles++;
 				}
 			}
 			else
 			{
-				strcpy (fileName,Arg[3]);
-				ln = strlen(fileName)+1;
-				BigWrite (Fid,fileName,ln,-1);
+				strcpy(fileName, Arg[3]);
+				ln = strlen(fileName) + 1;
+				BigWrite(Fid, fileName, ln, -1);
 				nFiles++;
 				strcpy(OutLoc, "1");
 			}
 			AllowCache = saveAllowCache;
 			rtn = TRUE;
 		}
-		else if (!stricmp (Arg[2],"CLOSE"))
+		else if (!stricmp(Arg[2], "CLOSE"))
 		{
 			static	HANDLE hArgs;
-			LPSTR	arg1,arg2,arg3,arg4,arg5;//filelistpath,ipaddress,port,commandtorunoncompletion,cachingpidfile
-			long	totFileLen=0;
-			
-			hArgs = GSSiGlobAlloc (9999,GMEM_MOVEABLE,4096*5);
-			arg1=GlobalLock (hArgs);
-			arg2=arg1+4096;
-			arg3=arg2+4096;
-			arg4=arg3+4096;
-			arg5=arg4+4096;
+			LPSTR	arg1, arg2, arg3, arg4, arg5;//filelistpath,ipaddress,port,commandtorunoncompletion,cachingpidfile
+			long	totFileLen = 0;
 
-			totFileLen = GSSillseek (Fid,0,2);
-			GSSillseek (Fid,0,0);
-			BigWrite (Fid,&totFileLen,sizeof(long),-1);
-			BigWrite (Fid,&nFiles,sizeof(int),-1);
-			GSSiClose2 (&Fid);
-			strcpy (arg1,tmpFile);
-			strcpy (arg2,ipAddress);
-			itoa (port,arg3,10);
-			strcpy (arg4,Arg[3]);
-			sprintf (cachingPidFile,"%sCachingPid.bin",CachePathnameTo);
-			strcpy (arg5,cachingPidFile);
-			GlobalUnlock (hArgs);
-			if (OpenWinSock () && !hCacheThread && !AnotherProcessIsCaching (cachingPidFile))
+			hArgs = GSSiGlobAlloc(9999, GMEM_MOVEABLE, 4096 * 5);
+			arg1 = GlobalLock(hArgs);
+			arg2 = arg1 + 4096;
+			arg3 = arg2 + 4096;
+			arg4 = arg3 + 4096;
+			arg5 = arg4 + 4096;
+
+			totFileLen = GSSillseek(Fid, 0, 2);
+			GSSillseek(Fid, 0, 0);
+			BigWrite(Fid, &totFileLen, sizeof(long), -1);
+			BigWrite(Fid, &nFiles, sizeof(int), -1);
+			GSSiClose2(&Fid);
+			strcpy(arg1, tmpFile);
+			strcpy(arg2, ipAddress);
+			itoa(port, arg3, 10);
+			strcpy(arg4, Arg[3]);
+			sprintf(cachingPidFile, "%sCachingPid.bin", CachePathnameTo);
+			strcpy(arg5, cachingPidFile);
+			GlobalUnlock(hArgs);
+			if (OpenWinSock() && !hCacheThread && !AnotherProcessIsCaching(cachingPidFile))
 			{
 				BackgroundCacheStarted = TRUE;
 				ContinueBackgroundCache = TRUE;
-				BackgroundUpdateMessage ("Starting background cache");
-				hCacheThread = (HANDLE)_beginthread( BackgroundCacheViaServer, 0, &hArgs);
-				SetThreadPriority (hCacheThread,THREAD_PRIORITY_LOWEST);
+				BackgroundUpdateMessage("Starting background cache");
+				hCacheThread = (HANDLE)_beginthread(BackgroundCacheViaServer, 0, &hArgs);
+				SetThreadPriority(hCacheThread, THREAD_PRIORITY_LOWEST);
 				rtn = TRUE;
 			}
 			else
-				GSSiGlobFree (&hArgs);
+				GSSiGlobFree(&hArgs);
 		}
-		else if (!stricmp (Arg[2],"RESTART"))
+		else if (!stricmp(Arg[2], "RESTART"))
 		{
 		}
 	}
 	else if (!stricmp(Arg[1], "NEWFILES"))
 	{
-		UpdateLastDataUpdate();
+		UpdateLastDataUpdate(Arg[2],atoi(Arg[3]));
 		rtn = TRUE;
+	}
+	else if (!stricmp(Arg[1], "HOLD"))
+	{
+		char today[64];
+		char cmd[64];
+		sprintf(today, "[%%SYS_CLOCK]");
+		ExpandText(today);
+		int now = atol(today);
+		sprintf(today, "$CAL([%%SYS_CLOCK],3)");
+		ExpandText(today);
+		LPSTR pSpace = strchr(today, ' ');
+		if (pSpace)
+		{
+			*pSpace = 0;
+			sprintf(cmd, "$CLK(%s %s)", today,Arg[2]);
+			ExpandText(cmd);
+			GMCacheOnHoldUntil = atol(cmd);
+			int delay = GMCacheOnHoldUntil - now;
+			if (delay < 0)
+				delay = 10;
+			if (isGMCache)
+				SetTimer(hWndMain, GMCACHE_TIMER, delay * 1000, 0);
+		}
+
 	}
 	return rtn;
 }

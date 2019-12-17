@@ -7,13 +7,12 @@
 #include "gmextern.h"
 #include <psapi.h>
 
-static	UINT	lCachebuf = 1024 * 32;
 static  int		nCalls = 0;
 static  HWND	hWndGMCacheDialog = 0;
-static  int		GMCacheOnHoldUntil = 0;
 static	int		cacheDelayBetweenReads = 100;
 int CreateFilesToCacheFile(LPSTR cachFileList, HFILE fidOut);
 LONGLONG CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDir, LONGLONG StartPos);
+void UpdateCacheMessage(LPSTR mess);
 
 static TCHAR szTitle[] = "GMCache";					// The title bar text
 static TCHAR szWindowClass[] = "GMCache";		// the main window class name
@@ -33,20 +32,30 @@ static HANDLE hTrustedCacheFiles = 0;
 //
 static void SetHoldMessage(HWND hWndDlg)
 {
-	EnableWindow(GetDlgItem(hWndDlg, IDC_RELEASEHOLD), GMCacheOnHoldUntil);
-	if (GMCacheOnHoldUntil)
+	char mess[256];
+	static char lastmess[256] = "";
+	if (hWndDlg)
 	{
-		char mess[256];
-		char onHoldUntil[128];
-		sprintf(onHoldUntil, "$CAL(%i,7)", GMCacheOnHoldUntil);
-		ExpandText(onHoldUntil);
-		sprintf(mess, "Caching is on hold until %s\r\nYou may release the hold with the above button.", onHoldUntil);
-		SetDlgItemText(hWndDlg, IDC_CACHEHOLDMESSAGE, mess);
+		EnableWindow(GetDlgItem(hWndDlg, IDC_RELEASEHOLD), GMCacheOnHoldUntil);
+		if (GMCacheOnHoldUntil)
+		{
+			char onHoldUntil[128];
+			sprintf(onHoldUntil, "$CAL(%i,7)", GMCacheOnHoldUntil);
+			ExpandText(onHoldUntil);
+			sprintf(mess, "Caching is on hold until %s\r\nYou may release the hold with the above button.", onHoldUntil);
+		}
+		else
+		{
+			strcpy(mess, "To speed up your computer you may place the caching on hold using one of the above buttons");
+		}
+		if (strcmp(mess, lastmess))
+		{
+			SetDlgItemText(hWndDlg, IDC_CACHEHOLDMESSAGE, mess);
+			strcpy(lastmess, mess);
+		}
 	}
 	else
-	{
-		SetDlgItemText(hWndDlg, IDC_CACHEHOLDMESSAGE,"To speed up your computer you may place the caching on hold using one of the above buttons");
-	}
+		*lastmess = 0;
 }
 BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
@@ -59,7 +68,9 @@ BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 	case WM_INITDIALOG:
 		hWndGMCacheDialog = hWndDlg;
 		cwCenter(hWndDlg, 0);
+		SetHoldMessage(0);
 		SetHoldMessage(hWndDlg);
+		UpdateCacheMessage("");
 		break; /* End of WM_INITDIALOG                                 */
 
 	case WM_CLOSE:
@@ -82,29 +93,15 @@ BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
 			sprintf(cmd, "$INT([%%SYS_CLOCK]+3600)");
 			ExpandText(cmd);
 			GMCacheOnHoldUntil = atol(cmd);
-			ContinueBackgroundCache = FALSE;
-			SetTimer(hWndMain, GMCACHE_TIMER, 60000, 0);
+			SetTimer(hWndMain, GMCACHE_TIMER, 60*60*1000, 0);
 			SetHoldMessage(hWndDlg);
 			break;
 		case IDC_HOLD_UNTIL_5:
 		{
-			char today[64];
+			char cmd[] = "$CACHE(HOLD,17:00)";
 			KillTimer(hWndMain, GMCACHE_TIMER);
-			sprintf(today, "[%%SYS_CLOCK]");
-			ExpandText(today);
-			int now = atol(today);
-			sprintf(today, "$CAL([%%SYS_CLOCK],3)");
-			ExpandText(today);
-			LPSTR pSpace = strchr(today, ' ');
-			if (pSpace)
-			{
-				*pSpace = 0;
-				sprintf(cmd, "$CLK(%s 17:00)", today);
-				ExpandText(cmd);
-				GMCacheOnHoldUntil = atol(cmd);
-				SetTimer(hWndMain, GMCACHE_TIMER, (GMCacheOnHoldUntil-now)*1000, 0);
-				SetHoldMessage(hWndDlg);
-			}
+			ProcessText(cmd);
+			SetHoldMessage(hWndDlg);
 		}
 		break;
 		case IDC_RELEASEHOLD:
@@ -195,11 +192,28 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 			DWORD	Pid = _getpid();
 			char cPid[32];
+			char LastDataUpdateFile[MAX_PATH];
 			sprintf(cPid,"%lli", (LONGLONG)Pid);
 			HFILE Fid = OpenFileGM(CachingPidFile, &OFStruct, OF_CREATE);
 			_lwrite(Fid, (LPSTR)cPid, strlen(cPid));
 			_lclose(Fid);
+
+			strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
+			ExpandText(LastDataUpdateFile);
+
+			Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
 			SetTimer(hWnd, GMCACHE_TIMER, 20, 0);
+
+			if (Fid != HFILE_ERROR)
+			{
+				char cmd[MAX_PATH + 2];
+				while (fgetstring2(cmd, 254, Fid))
+				{
+					ExpandText(cmd);
+				}
+				_lclose(Fid);
+			}
+
 		}
 	}
 		return 0;
@@ -224,7 +238,6 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			else
 			{
 				SetTimer(hWndMain, GMCACHE_TIMER, 20, 0);
-				ContinueBackgroundCache = TRUE;
 			}
 			return 0;
 		}
@@ -254,7 +267,7 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case SIZE_MAXIMIZED:
 			if (!hWndGMCacheDialog)
 			{
-				DialogBox(hInst, (LPSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
+				DialogBox(hInst, (LPCTSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
 				ShowWindow(hWnd, SW_MINIMIZE);
 			}
 			break;
@@ -348,8 +361,13 @@ int APIENTRY WinMainGMCache(HINSTANCE hInstance,
 	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+		if (hWndGMCacheDialog && IsDialogMessage(hWndGMCacheDialog, &msg))
+			ii = 1;
+		else
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
 	return (int)msg.wParam;
@@ -414,11 +432,13 @@ void NeedToStartBackgroundCache(void)
 
 	if (Fid != HFILE_ERROR)
 	{
-		int ln = _lread(Fid, cDate, 22);
-		ln = min(22,ln);
-		cDate[ln] = 0;
-
-		lastDataUpdateTime = atol(cDate);
+		char cmd[MAX_PATH+2];
+		fgetstring2(cmd, MAX_PATH, Fid);
+		lastDataUpdateTime = atol(cmd);
+		while (fgetstring2(cmd, 254, Fid))
+		{
+			ExpandText(cmd);
+		}
 		_lclose(Fid);
 	}
 	Fid = OpenFileGM(LastCacheStartTimeFile, &OFStruct, OF_READ);
@@ -473,12 +493,12 @@ void NeedToStartBackgroundCache(void)
 	return;
 }
 
-void UpdateLastDataUpdate(void)
+void UpdateLastDataUpdate(LPSTR holdUntil,int bufferSize)
 {
 	char LastDataUpdateFile[MAX_PATH];
 	time_t currentTime;
 	OFSTRUCTGM	OFStruct = { 0 };
-	char cDate[32];
+	char cDate[64];
 
 	time(&currentTime);
 
@@ -488,6 +508,18 @@ void UpdateLastDataUpdate(void)
 	HFILE Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_CREATE);
 	int ln = strlen(cDate);
 	_lwrite(Fid, cDate, ln + 1);
+	if (*holdUntil)
+	{
+		_lwrite(Fid, "\r\n", 2);
+		sprintf(cDate, "$CACHE(HOLD,%s)", holdUntil);
+		_lwrite(Fid, cDate, strlen(cDate));
+	}
+	if (bufferSize)
+	{
+		_lwrite(Fid, "\r\n", 2);
+		sprintf(cDate, "[%%CACHEBUFFERSIZE]=%i", bufferSize);
+		_lwrite(Fid, cDate, strlen(cDate));
+	}
 	_lclose(Fid);
 }
 
@@ -499,12 +531,18 @@ void FreeTrustedFiles(void)
 
 void UpdateCacheMessage(LPSTR mess)
 {
-	if (hWndGMCacheDialog)
+	static char lastmess[512] = "";
+
+	if (strcmp(mess, lastmess))
 	{
-		SetDlgItemText(hWndGMCacheDialog, IDC_CACHEMESSAGE, mess);
+		if (hWndGMCacheDialog)
+		{
+			SetDlgItemText(hWndGMCacheDialog, IDC_CACHEMESSAGE, mess);
+		}
+		else if (hWndMain)
+			SetWindowText(hWndMain, mess);
+		strcpy(lastmess, mess);
 	}
-	else if (hWndMain)
-		SetWindowText(hWndMain, mess);
 }
 
 BOOL StartCachingFiles(void)
@@ -564,7 +602,7 @@ BOOL StartCachingFiles(void)
 		else
 			pName = FromFile;
 
-		sprintf(mess, "%s\r\n(%.1f %% complete)", pName, PctDone);
+		sprintf(mess, "%s\r\n(%.2f %% complete)", pName, PctDone);
 		UpdateCacheMessage(mess);
 		StartPos = CacheFileInBackground(FromFile, CacheDir, DataLocDir, StartPos);
 		if (!StartPos)
@@ -572,7 +610,7 @@ BOOL StartCachingFiles(void)
 			loc = _llseek(fid, 0, 1);
 
 			PctDone = 100.0 * (double)loc / (double)totLen;
-			sprintf(mess, "%s\r\n(%.1f %% complete)", pName, PctDone);
+			sprintf(mess, "%s\r\n(%.2f %% complete)", pName, PctDone);
 			UpdateCacheMessage(mess);
 		}
 	}
@@ -850,7 +888,8 @@ LONGLONG CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDi
 	char	ToFile[MAX_PATH];
 	char	ToFileIntermediate[MAX_PATH];
 	int		st;
-	LONGLONG	FromSize, ToSize, TotRead, pos=0;
+	static  LONGLONG	FromSize = 0;
+	LONGLONG ToSize, TotRead, pos=0;
 	UINT	OFMode = OF_CREATE;
 	DWORD	lRead;
 	LPSTR	pDot;
@@ -888,110 +927,107 @@ Next:
 	strcpy(ToFileIntermediate, ToFile);
 	if ((pDot = strrchr(ToFileIntermediate, '.')))
 		*pDot = '$';
-	strcat(ToFileIntermediate, ".tbr");
 	FidFrom = OpenFileGM(FromFile, &OFStruct, OF_READ);
-	FidTo = OpenFileGM(ToFileIntermediate, &OFStruct, OF_READ);
-	if (FidTo == HFILE_ERROR)
-		FidTo = OpenFileGM(ToFile, &OFStruct, OF_READ);
-	else
+	if (StartPos > 0)
 	{
-		toIsRenameFile = TRUE;
-		GSSiRemove(ToFile);
-	}
-	if (FidFrom == HFILE_ERROR)
-	{
-		if (FidTo != HFILE_ERROR)
-		{
-			_lclose(FidTo);
-			OpenFileGM(ToFile, &OFStruct, OF_DELETE);
-			OpenFileGM(ToFileIntermediate, &OFStruct, OF_DELETE);
-		}
-		return 0;
-	}
-	strcpy(ToFile, ToFileIntermediate);
-	st = GetFileInformationByHandle((HANDLE)FidFrom, &fifrom);
-	FromSize = (LONGLONG)fifrom.nFileSizeLow + ULONG_MAX * (LONGLONG)fifrom.nFileSizeHigh;
-	if (FidTo == HFILE_ERROR)
+		strcat(ToFileIntermediate, ".beingcached");
+		strcpy(ToFile, ToFileIntermediate);
+		OFMode = OF_READWRITE;
 		dtime = 1;
+	}
 	else
 	{
-		st = GetFileInformationByHandle((HANDLE)FidTo, &fito);
-		ToSize = (LONGLONG)fito.nFileSizeLow + ULONG_MAX * (LONGLONG)fito.nFileSizeHigh;
-		if (StartPos > 0)
+		strcat(ToFileIntermediate, ".tbr");
+		FidTo = OpenFileGM(ToFileIntermediate, &OFStruct, OF_READ);
+		if (FidTo == HFILE_ERROR)
+			FidTo = OpenFileGM(ToFile, &OFStruct, OF_READ);
+		else
 		{
-			dtime = 1;
-			if (StartPos != ToSize)
-				StartPos = 0;
-			else
-				OFMode = OF_READWRITE;
+			toIsRenameFile = TRUE;
+			GSSiRemove(ToFile);
 		}
-		else if (FromSize != ToSize)
+		if (FidFrom == HFILE_ERROR)
+		{
+			if (FidTo != HFILE_ERROR)
+			{
+				_lclose(FidTo);
+				OpenFileGM(ToFile, &OFStruct, OF_DELETE);
+				OpenFileGM(ToFileIntermediate, &OFStruct, OF_DELETE);
+			}
+			return 0;
+		}
+		strcpy(ToFile, ToFileIntermediate);
+		st = GetFileInformationByHandle((HANDLE)FidFrom, &fifrom);
+		FromSize = (LONGLONG)fifrom.nFileSizeLow + ULONG_MAX * (LONGLONG)fifrom.nFileSizeHigh;
+		if (FidTo == HFILE_ERROR)
 			dtime = 1;
 		else
-			dtime = CompareFileTime(&fifrom.ftLastWriteTime, &fito.ftLastWriteTime);
-		_lclose(FidTo);
-		FidTo = HFILE_ERROR;
+		{
+			st = GetFileInformationByHandle((HANDLE)FidTo, &fito);
+			ToSize = (LONGLONG)fito.nFileSizeLow + ULONG_MAX * (LONGLONG)fito.nFileSizeHigh;
+			if (StartPos > 0)
+			{
+				dtime = 1;
+				if (StartPos != ToSize)
+					StartPos = 0;
+				else
+					OFMode = OF_READWRITE;
+			}
+			else if (FromSize != ToSize)
+				dtime = 1;
+			else
+				dtime = CompareFileTime(&fifrom.ftLastWriteTime, &fito.ftLastWriteTime);
+			_lclose(FidTo);
+			FidTo = HFILE_ERROR;
+		}
 	}
 	if (dtime > 0)
 	{
-		BOOL	OkToCache = makedirectories(ToFile, FALSE, FALSE);
-
-		if (OkToCache)
+		BOOL OkToCache = TRUE;
+		if (StartPos == 0)
 		{
-			LONGLONG FreeSpace = GetDriveFreeSpace(ToFile);
+			OkToCache = makedirectories(ToFile, FALSE, FALSE);
 
-			FreeSpace -= FromSize;
-			if (FreeSpace < MinCacheDriveFreeSpace)
-				OkToCache = FALSE;
 			if (OkToCache)
 			{
-				LPSTR Cachebuf = malloc(lCachebuf + 4);
-				LPSTR pDot = strrchr(ToFile, '.');
-				if (!stricmp(pDot, ".tbr"))
-					strcpy(pDot, ".beingcached");
-				FidTo = OpenFileGM(ToFile, &OFStruct, OFMode);
-				if (FidTo != HFILE_ERROR)
-				{
-					BOOL st;
-					llFileSeek((HANDLE)FidTo, StartPos, 0);
-					llFileSeek((HANDLE)FidFrom, StartPos, 0);
-					TotRead = StartPos;
-					st = ReadFile((HANDLE)FidFrom, Cachebuf, lCachebuf, &lRead, 0);
-					if (ContinueBackgroundCache && st && lRead > 0)
-					{
-						pos = llFileSeek((HANDLE)FidFrom, 0, 1);
-						if (lRead != _lwrite(FidTo, Cachebuf, lRead))
-						{
-							_lclose(FidTo);
-							FidTo = HFILE_ERROR;
-							OpenFileGM(ToFile, &OFStruct, OF_DELETE);
-						}
-						else
-							TotRead += lRead;
-						//SleepEx(cacheDelayBetweenReads, 0);
-						//st = ReadFile((HANDLE)FidFrom, Cachebuf, lCachebuf, &lRead, 0);
-					}
-					if (ContinueBackgroundCache && TotRead == FromSize)
-						pos = -2;
-/*					if (!ContinueBackgroundCache && TotRead != FromSize)
-					{
-						HFILE	FidRestart;
-						char	str[600];
-						char	RestartFile[MAX_PATH];
+				LONGLONG FreeSpace = GetDriveFreeSpace(ToFile);
 
-						if (TotRead)
-						{
-							SubstituteDL(FromFileIN, FALSE);
-							sprintf(str, "%s\t%s\t%lld", FromFileIN, DataLocDir, TotRead);
-							sprintf(RestartFile, "%sRestartCache.txt", CacheDir);
-							FidRestart = OpenFileGM(RestartFile, &OFStruct, OF_CREATE);
-							_lwrite(FidRestart, str, 600);
-							_lclose(FidRestart);
-						}
-					}*/
-				}
-				free(Cachebuf);
+				FreeSpace -= FromSize;
+				if (FreeSpace < MinCacheDriveFreeSpace)
+					OkToCache = FALSE;
 			}
+		}
+		if (OkToCache)
+		{
+			LPSTR Cachebuf = malloc(lCachebuf + 4);
+			LPSTR pDot = strrchr(ToFile, '.');
+			if (!stricmp(pDot, ".tbr"))
+				strcpy(pDot, ".beingcached");
+			FidTo = OpenFileGM(ToFile, &OFStruct, OFMode);
+			if (FidTo != HFILE_ERROR)
+			{
+				BOOL st;
+				llFileSeek((HANDLE)FidTo, StartPos, 0);
+				llFileSeek((HANDLE)FidFrom, StartPos, 0);
+				TotRead = StartPos;
+				st = ReadFile((HANDLE)FidFrom, Cachebuf, lCachebuf, &lRead, 0);
+				if (st && lRead > 0)
+				{
+					pos = llFileSeek((HANDLE)FidFrom, 0, 1);
+					if (lRead != _lwrite(FidTo, Cachebuf, lRead))
+					{
+						_lclose(FidTo);
+						FidTo = HFILE_ERROR;
+						OpenFileGM(ToFile, &OFStruct, OF_DELETE);
+					}
+					else
+						TotRead += lRead;
+					//SleepEx(cacheDelayBetweenReads, 0);
+				}
+				if (TotRead == FromSize)
+					pos = -2;
+			}
+			free(Cachebuf);
 		}
 	}
 	else if (!toIsRenameFile)
@@ -1072,7 +1108,7 @@ BOOL AnotherProcessIsCaching(LPSTR ProcessIDFile)
 	LPDWORD pPid = malloc(4096 * sizeof(DWORD));
 	DWORD	nBytes, nPid;
 	BOOL	rtn = FALSE;
-	DWORD	CachingPid;
+	DWORD	CachingPid=0;
 	OFSTRUCTGM	OFStruct = { 0 };
 	char	cPid[32];
 	HFILE	Fid = OpenFileGM(ProcessIDFile, &OFStruct, OF_READ);

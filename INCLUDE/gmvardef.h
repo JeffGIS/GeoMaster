@@ -63,6 +63,8 @@ long	nTempFilesCleared;
 UINT	CurrentCheckPointID=0;
 BOOL	AllowCache=TRUE;
 BOOL	AllowJournal=FALSE;
+UINT	lCachebuf = 1024 * 32;
+int		GMCacheOnHoldUntil = 0;
 BOOL	AllowBMPCaching=TRUE;
 short	OPCODE_EQ='==';  
 short	OPCODE_GE='>='; 

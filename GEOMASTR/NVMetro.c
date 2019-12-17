@@ -49,7 +49,7 @@ int LoadMultPropertyDB(LPSTR INDir,int LastYear)
 	int maxLineLen = 1024;
 	int mxlnlen = 0;
 
-	test(INDir);
+	//test2(INDir);
 	while (year <= LastYear)
 	{
 		BTVARDESC   BTVar[2];
@@ -120,7 +120,8 @@ static void test(LPSTR INDir)
 }
 static void test2(LPSTR INDir)
 {
-	char pid[18] = "037-070160050012";
+	//char pid[18] = "037-070160050012";
+	char pid[18] = "053-1302824410155";
 	int year = 2004;
 	int offset;
 	short	st;
@@ -399,6 +400,7 @@ BOOL AssignMultValues(LPSTR indexFile, LPSTR dataFile)
 	while (StatusWindowUpdate(NULL, NULL, nRecs, iRec++) && !BT_FIND(hIndex, pid, pos, BT_ANY, (LPSTR)&offset))
 	{
 		pos = BT_NEXT;
+		pid[17] = 0;
 		sprintf(KeyString, "PIN=%s", pid);
 		sprintf(UpdateString, "MULTIYEAROFFSET=%i",offset);
 		rtn = UpdateGMDFile("DF", KeyString, UpdateString, ';', 1, FALSE);
