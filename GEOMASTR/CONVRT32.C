@@ -3147,6 +3147,7 @@ GSSiExitProg (100);
         SetCurView ( pViewports[iv]);  
 //        sprintf (str,"%i %i",iv);
 //        SetWindowText (hWndMain,str);
+		CurView->hBinFileList = 0;
 		if (CurView->lpBoundsDisplay)
 		{
 			HANDLE h=CurView->lpBoundsDisplay->Handle;

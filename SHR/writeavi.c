@@ -557,18 +557,19 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 		HPBYTE	pCompressedData, pData;
 		LPBIHEADER	lpbi;
 		
-		GSSillseek (GCIFid,frame,0);
+		ii = GSSillseek (GCIFid,frame,0);
 		BigRead (GCIFid,(HPSTR)&lRec,4); 
 		if (lRec <= 0 || lRec > MAXFRAME) 
 		{   
 			HANDLE	hMess=GSSiGlobAlloc ( 377,GMEM_MOVEABLE,1024);
 			LPSTR	pMess=GlobalLock (hMess);
-			static  BOOL showMessage = TRUE;
+			static  BOOL showMessage = FALSE;
 
 			if (showMessage)
 			{
 				strcpy(pMess, "$CAL([%SYS_CLOCK]) ");
-				sprintf (strcpy(pMess,0),"%s  %s:%ld",UserName,File,frame);        
+				sprintf (strchr(pMess,0)," %s  frame %ld\n%s",UserName, frame,File);
+				LPSTR ofn = GetOpenedFileName(GCIFid);
 				AppendFile ("[%DL]abends\\ortherr.txt",pMess);
 				if (GSSiMessageBox (0,pMess, "Error in Ortho File", MB_OKCANCEL, 0) == IDCANCEL)
 					showMessage = FALSE;

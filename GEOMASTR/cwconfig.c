@@ -983,7 +983,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	LPSTR lpStart, lpTab;
 	OFSTRUCTGM	OFStruct = { 0 };
 	static char cmdFile[MAX_PATH];
-	HFILE	fid;
+	HANDLE	fid;
 	char	txt[1024], str[1024];
 	int		tabStops[2] = { 500, 2000 };
 	char	path[MAX_PATH];
@@ -2569,7 +2569,7 @@ if (Message == WM_CHAR && wParam == 26) //CNTL/Z
 
 if (Message == GF_MAPSERVER_REQUEST)
 {
-	HFILE Fid;
+	HANDLE Fid;
 	OFSTRUCTGM OFStruct;
 	 //MessageBox(hWnd, "Got request", "", MB_OK);
 

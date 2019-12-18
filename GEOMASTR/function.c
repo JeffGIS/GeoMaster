@@ -3539,6 +3539,26 @@ SetVis:
 		case 424: //$MISC()
 		{
 			{
+				OFSTRUCTGM OFStruct;
+				char netFile[MAX_PATH] = "L:\\GEOMas\\orthos\\Orth2019\\2019_1\\orthos4.gci";
+				char cacheFile[MAX_PATH] = "C:\\Users\\smithjx0\\AppData\\Local\\Temp\\gmcache2\\ORTHOS\\ORTH2019\\2019_1\\ORTHOS4$GCI.tbr";
+				HANDLE FidNet = OpenFileGM(netFile, &OFStruct, OF_READ);
+				HANDLE FidCache = OpenFileGM(cacheFile, &OFStruct, OF_READ);
+				BYTE byteNet, byteCache;
+				int n = 0;
+				DWORD nread = 0;
+				while (ReadFile(FidNet, &byteNet, 1,&nread,FALSE))
+				{
+					ReadFile(FidCache, &byteCache, 1,&nread,FALSE);
+					if (byteNet != byteCache)
+						ii = 1;
+					if (byteCache != 0)
+						ii = -1;
+					n++;
+				}
+				goto RtnTrue;
+			}
+			{
 				HFILE Fid = GSSiOpenFile("[%DL]data\\parcelfiles\\textfiles\\ChangeValues.bin", 0, OF_READ);
 				int nyears, firstyear, lastyear;
 				BigRead(Fid, &nyears, 4);

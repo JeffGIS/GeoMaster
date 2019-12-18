@@ -6359,7 +6359,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 				if (ContinueBackgroundCache && pass)
 				{
 					char	LastCacheCheckFile[MAX_PATH];
-					HFILE	FidLastCacheCheck;
+					HANDLE	FidLastCacheCheck;
 
 					sprintf (LastCacheCheckFile,"%sLastCacheCheck.txt",CacheDir);
 					FidLastCacheCheck = OpenFileGM(LastCacheCheckFile,&OFStruct,OF_CREATE);
@@ -6387,7 +6387,7 @@ BOOL StartBackgroundCache (void)
 	char	str[MAX_PATH+2];
 	static	HANDLE hArgs;
 	LPSTR	arg1,arg2,arg3,arg4;//filelistpath,cachepath,datalocpath,cachingpidfile
-	HFILE	Fid, Fid2, FidList, FidLastCacheCheck;
+	HANDLE	Fid, Fid2, FidList, FidLastCacheCheck;
 	char	CachingPidFile[MAX_PATH];
 	char	LastCacheCheckFile[MAX_PATH];
 	BOOL	rtn = FALSE;
@@ -6525,7 +6525,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 	LPSTR	localNetTransferFile;
 	char	ipAddress[32];
 	char	str[MAX_PATH+2];
-	HFILE	Fid;
+	HANDLE	Fid;
 	LPSTR	arg1=GlobalLock (*phArgs);
 	LPSTR	arg2 = arg1 + 4096, arg3 = arg2 + 4096, arg4 = arg3 + 4096, arg5 = arg4 + 4096;
 	FILE	*FidFilelist;  

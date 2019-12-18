@@ -1618,8 +1618,8 @@ LPSTR requestFromURL(LPSTR url)
 
 		if (lFile > 0)
 		{
-			OFSTRUCTGM OFStruct;
-			HFILE	Fid = OpenFileGM(tempFile, &OFStruct, OF_READ);
+			OFSTRUCTGM OFStruct = { 0 };
+			HANDLE	Fid = OpenFileGM(tempFile, &OFStruct, OF_READ);
 
 			if (Fid != HFILE_ERROR)
 			{

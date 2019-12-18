@@ -108,17 +108,18 @@ long Time64toTime32 (time_t time64)
 	return rtn;
 }
 
-HFILE OpenFileGM(
+HANDLE OpenFileGM(
 	_In_    LPCSTR lpFileName,
 	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
 	_In_    UINT uStyle
 	)
 {
-	HFILE fid = (int)INVALID_HANDLE_VALUE;
+	HANDLE fid = (int)INVALID_HANDLE_VALUE;
 	char *fullPath;
 	int ln;
 	char	Name[MAX_PATH];
 	int		rtn;
+	BOOL	allowOpenFile = FALSE;
 
 	strcpy(Name, lpFileName);
 	ExpandText(Name);
@@ -131,7 +132,7 @@ HFILE OpenFileGM(
 	if (!fullPath)
 		return HFILE_ERROR;
 	ln = strlen(fullPath);
-	if (ln < OFS_MAXPATHNAME)
+	if (ln < OFS_MAXPATHNAME && allowOpenFile)
 	{
 		fid = OpenFile(fullPath,(LPOFSTRUCT) lpReOpenBuff, uStyle);
 		return fid;
@@ -139,13 +140,13 @@ HFILE OpenFileGM(
 	else switch (uStyle)
 	{
 	case OF_READ:
-		fid = (int)CreateFile(lpFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = CreateFile(lpFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_READWRITE:
-		fid = (int)CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_CREATE:
-		fid = (int)CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_EXIST:
 		if (GetPathType2((LPSTR)lpFileName) == 1)
@@ -1145,7 +1146,11 @@ int	GetParmLoc (int MaxParm,char delim,LPSTR str,LPSTR *pLoc)
 	return nFound;
 }
 
-LPSTR GetLastAccessedFile (void)
+LPSTR GetOpenedFileName(HFILE Fid)
+{
+	return OpenFileName[Fid];
+}
+LPSTR GetLastAccessedFile(void)
 {
 	return OpenFileName[LastAccessedFid];
 }
@@ -13460,7 +13465,7 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 	LPSTR	Title=malloc (4096*2+256+512);
 	LPSTR	Mess=Title+4096;
 	LPSTR	File=Mess+4096,Line=File+256;
-	HFILE		Fid; 
+	HANDLE	Fid; 
 	int	irc;
 
 //	AppendFile2 ("c:\\messagelog.txt",MessIn);
@@ -13484,7 +13489,7 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 		*Mess = 0;
 	if (BackgroundTask)
 	{   
-		OFSTRUCTGM	OFStruct;
+		OFSTRUCTGM	OFStruct = { 0 };
 		BOOL		SaveCP = ContinueProcessing;
 
 		SetContinueProcessing ( TRUE);

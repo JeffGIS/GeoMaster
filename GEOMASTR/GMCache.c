@@ -131,7 +131,7 @@ int removeFilesBeingCached(LPSTR cachedir)
 	strcpy(str, cachedir);
 	ExpandText(str);
 	ExpandText(tempFile);
-	HFILE Fid2 = OpenFileGM(tempFile, &OFStruct, OF_CREATE);
+	HANDLE Fid2 = OpenFileGM(tempFile, &OFStruct, OF_CREATE);
 	ii = SearchFilesInDirBC(str, 0, Fid2, &nFiles, "*.beingcached", 1, TRUE);
 	_llseek(Fid2, 0, 0);
 	while (fgetstring2(str, MAX_PATH, Fid2))
@@ -176,13 +176,13 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		sprintf(CachingPidFile, "%sCachingPid.txt", CachePathnameTo);
 		ExpandText(CachingPidFile);
 
-		HFILE fidFilesToCache = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
+		HANDLE fidFilesToCache = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
 		int nFiles = CreateFilesToCacheFile(BackgroundCacheFilelist, fidFilesToCache);
 		_lclose(fidFilesToCache);
 		if (!nFiles)
 		{
 			sprintf(FilesToCacheFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
-			HFILE fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
+			HANDLE fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
 			_lwrite(fid, "NoFiles", 6);
 			_lclose(fid);
 
@@ -194,14 +194,14 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			char cPid[32];
 			char LastDataUpdateFile[MAX_PATH];
 			sprintf(cPid,"%lli", (LONGLONG)Pid);
-			HFILE Fid = OpenFileGM(CachingPidFile, &OFStruct, OF_CREATE);
+			HFILE HANDLE = OpenFileGM(CachingPidFile, &OFStruct, OF_CREATE);
 			_lwrite(Fid, (LPSTR)cPid, strlen(cPid));
 			_lclose(Fid);
 
 			strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
 			ExpandText(LastDataUpdateFile);
 
-			Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
+			HANDLE = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
 			SetTimer(hWnd, GMCACHE_TIMER, 20, 0);
 
 			if (Fid != HFILE_ERROR)
@@ -428,7 +428,7 @@ void NeedToStartBackgroundCache(void)
 	sprintf(CacheIsCompleteFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
 	ExpandText(CacheIsCompleteFile);
 
-	HFILE	Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
+	HANDLE	Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
 
 	if (Fid != HFILE_ERROR)
 	{
@@ -560,7 +560,7 @@ BOOL StartCachingFiles(void)
 #define NEACH_LOOP	10
 	int nProcessed = NEACH_LOOP;
 
-	HFILE fid = HFILE_ERROR;
+	HANDLE fid = HFILE_ERROR;
 	static first = TRUE;
 	BOOL rtn = TRUE;
 	BOOL completed = FALSE;
@@ -637,7 +637,7 @@ int CreateFilesToCacheFile(LPSTR cachFileList,HFILE fidOut)
 	//char	cachFileList[MAX_PATH];
 	char	tempFile[MAX_PATH];
 	char	str[MAX_PATH + 2];
-	HFILE	Fid, Fid2;
+	HANDLE	Fid, Fid2;
 	OFSTRUCTGM	OFStruct = { 0 };
 	int totFiles = 0;
 	BOOL	skip = FALSE;
@@ -881,7 +881,7 @@ LONGLONG CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDi
 {
 	int	dtime;
 	BY_HANDLE_FILE_INFORMATION fifrom, fito;
-	HFILE	FidFrom, FidTo;
+	HANDLE	FidFrom, FidTo;
 	int		lDL = 5;
 	OFSTRUCTGM	OFStruct = { 0 };
 	char	FromFile[MAX_PATH];
@@ -1037,7 +1037,7 @@ Next:
 		{
 			OpenFileGM(ToFileIntermediate, &OFStruct, OF_DELETE);
 			*pDollar = '#';
-			HFILE FidIsGood = OpenFileGM(ToFileIntermediate, &OFStruct, OF_CREATE);
+			HANDLE FidIsGood = OpenFileGM(ToFileIntermediate, &OFStruct, OF_CREATE);
 			_lwrite(FidIsGood, "IsGood", 6);
 			_lclose(FidIsGood);
 		}
@@ -1078,7 +1078,7 @@ void ContinueInteruptedCache(LPSTR CacheDir)
 	char	str[600];
 	char	File[MAX_PATH];
 	char	RestartFile[MAX_PATH];
-	HFILE	FidRestart;
+	HANDLE	FidRestart;
 	LONGLONG	RestartPos;
 	LPSTR	DataLocDir;
 	LPSTR	pTab;
@@ -1111,7 +1111,7 @@ BOOL AnotherProcessIsCaching(LPSTR ProcessIDFile)
 	DWORD	CachingPid=0;
 	OFSTRUCTGM	OFStruct = { 0 };
 	char	cPid[32];
-	HFILE	Fid = OpenFileGM(ProcessIDFile, &OFStruct, OF_READ);
+	HANDLE	Fid = OpenFileGM(ProcessIDFile, &OFStruct, OF_READ);
 
 	if (Fid == HFILE_ERROR)
 		return FALSE;

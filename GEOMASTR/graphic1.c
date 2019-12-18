@@ -73,8 +73,8 @@ void BlowOut (LPSTR Message, LPSTR Title)
 
 void LogCode (LPSTR str)
 {
-	OFSTRUCTGM	OFStruct;
-	HFILE Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_READWRITE);
+	OFSTRUCTGM	OFStruct = { 0 };
+	HANDLE Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_READWRITE);
 
 	if (Fid == HFILE_ERROR)
 		Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_CREATE);

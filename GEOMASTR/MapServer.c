@@ -126,7 +126,7 @@ void StopBackgroundMapServer(HWND hWndServer)
 
 BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd,LPARAM id)
 {
-	HFILE Fid;
+	HANDLE Fid;
 	OFSTRUCTGM OFStruct;
 	int	serverID = GetMapserverIDFromWnd (hBackGroundServer);
 		

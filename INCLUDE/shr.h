@@ -274,7 +274,7 @@ void TraceInWindow (LPSTR str);
 void GSSiTrace (LPSTR str,short From);
 void GSSiTraceLev (LPSTR str,short lev,short From);
 BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode);
-HFILE OpenFileGM(
+HANDLE OpenFileGM(
 	_In_    LPCSTR lpFileName,
 	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
 	_In_    UINT uStyle
@@ -1108,6 +1108,7 @@ long WriteToUndoFile (HFILE Fid,HPSTR pData,long len);
 BOOL OpenHighlightList(LPSTR Name1, LPSTR Name2);
 void CloseHighlightList(void);
 void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid);
+LPSTR GetOpenedFileName(HFILE Fid);
 void DisableUndo (BOOL Disable);
 void UndoAddWindow (HWND hWnd);
 void UndoRemoveWindow (HWND hWnd);
