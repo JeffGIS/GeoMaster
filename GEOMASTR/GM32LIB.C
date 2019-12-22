@@ -1621,12 +1621,12 @@ LPSTR requestFromURL(LPSTR url)
 			OFSTRUCTGM OFStruct = { 0 };
 			HANDLE	Fid = OpenFileGM(tempFile, &OFStruct, OF_READ);
 
-			if (Fid != HFILE_ERROR)
+			if (Fid != INVALID_HANDLE_VALUE)
 			{
 				pFile = malloc(lFile + 1);
-				_lread(Fid, pFile, lFile);
+				BigRead64(Fid, pFile, lFile);
 				pFile[lFile] = 0;
-				_lclose(Fid);
+				GSSiClose64(&Fid);
 			}
 		}
 	}

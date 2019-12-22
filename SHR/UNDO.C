@@ -135,14 +135,14 @@ void DisableUndo (BOOL Disable)
 void RemoveUndoPoint (void)
 {   
 	long	CurLoc, NextLoc; 
-	HFILE	FidUndo;
-	OFSTRUCTGM	OFStruct;
+	HANDLE	FidUndo;
+	OFSTRUCTGM	OFStruct = { 0 };
 	
 	return;
 	FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_READWRITE); 
-	BigRead (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
-	CurLoc = _llseek (FidUndo,UndoHeader.FirstSeg,0);
-	BigRead (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));
+	BigRead64 (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
+	CurLoc = llFileSeek (FidUndo,UndoHeader.FirstSeg,0);
+	BigRead64 (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));
 	do
 	{ 
 		NextLoc = UndoRecordHeader.FirstPiece; 
@@ -150,8 +150,8 @@ void RemoveUndoPoint (void)
 		AddToUndoFreeSpace (FidUndo,CurLoc,sizeof(UndoRecordHeader));
 		while (NextLoc > -1)
 		{   
-			_llseek (FidUndo,NextLoc,0);
-			BigRead (FidUndo,(HPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));
+			llFileSeek (FidUndo,NextLoc,0);
+			BigRead64 (FidUndo,(HPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));
 			AddToUndoFreeSpace (FidUndo,NextLoc,(long)sizeof(UndoPieceHeader)+UndoPieceHeader.Length); 
 			NextLoc = UndoPieceHeader.Next;
 		}
@@ -160,17 +160,17 @@ void RemoveUndoPoint (void)
 			UndoHeader.LastSeg = -1;
 			goto Exit;                  
 		}
-		CurLoc = _llseek (FidUndo,UndoHeader.FirstSeg,0);
-		BigRead (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader)); 
+		CurLoc = llFileSeek (FidUndo,UndoHeader.FirstSeg,0);
+		BigRead64 (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader)); 
 	}
 	while (UndoRecordHeader.Type != UNDO_CHECKPOINT);
-	_llseek (FidUndo,CurLoc,0);   
+	llFileSeek(FidUndo,CurLoc,0);
 	UndoRecordHeader.PrevSeg = -1;
-	_lwrite (FidUndo,(LPCSTR)&UndoRecordHeader,sizeof(UndoRecordHeader)); 
+	BigWrite64 (FidUndo,(LPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader),-1); 
 Exit:
-	_llseek (FidUndo,0,0);
-	_lwrite (FidUndo,(LPCSTR)&UndoHeader,sizeof(UndoHeader));  
-	_lclose (FidUndo); 
+	llFileSeek(FidUndo,0,0);
+	BigWrite64(FidUndo,(LPSTR)&UndoHeader,sizeof(UndoHeader),-1);
+	GSSiClose64 (&FidUndo); 
 	return;
 }
 
@@ -240,17 +240,17 @@ BOOL CreateUndoPoint (LPSTR InName)
 	return TRUE;
 }
 
-void AddToUndoFreeSpace (HFILE Fid,long loc,long len)
+void AddToUndoFreeSpace (HANDLE Fid,long loc,long len)
 {   
 	BYTE	Null=UNDO_NULL; 
 	short	ii;
 	UNDOPIECEHEADER	UndoPieceHeader,UndoPieceHeader2;
 		
-	ii=_llseek (Fid,loc,0);
+	ii=llFileSeek (Fid,loc,0);
 	if (len <= sizeof(UndoPieceHeader)) 
 	{
 		while (len--)
-			_lwrite (Fid,&Null,1);
+			BigWrite64 (Fid,&Null,1,-1);
 		return;                   
 	}
 	UndoPieceHeader.Next = UndoHeader.FreeSpaceBeg;
@@ -260,17 +260,48 @@ void AddToUndoFreeSpace (HFILE Fid,long loc,long len)
 	UndoPieceHeader.Length = len - (long)sizeof(UndoPieceHeader);  
 	if (UndoPieceHeader.Next ==  loc + len)
 	{
-		_llseek (Fid,UndoPieceHeader.Next,0);	
-		BigRead (Fid,(HPSTR)&UndoPieceHeader2,sizeof(UndoPieceHeader2));
+		llFileSeek (Fid,UndoPieceHeader.Next,0);	
+		BigRead64 (Fid,(HPSTR)&UndoPieceHeader2,sizeof(UndoPieceHeader2));
 		UndoPieceHeader.Length += (long)sizeof(UndoPieceHeader) + UndoPieceHeader2.Length;
 		UndoPieceHeader.Next = UndoPieceHeader2.Next;
-		_llseek (Fid,loc,0);  
+		llFileSeek(Fid,loc,0);
 	}
-	_lwrite (Fid,(LPCSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));  
+	BigWrite64 (Fid,(LPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader),-1);  
 //checkheader (loc,UndoPieceHeader);
 //check1721 (Fid);
 	return;
 } 
+void AddToUndoFreeSpaceHFILE(HFILE Fid, long loc, long len)
+{
+	BYTE	Null = UNDO_NULL;
+	short	ii;
+	UNDOPIECEHEADER	UndoPieceHeader, UndoPieceHeader2;
+
+	ii = GSSillseek(Fid, loc, 0);
+	if (len <= sizeof(UndoPieceHeader))
+	{
+		while (len--)
+			BigWrite(Fid, &Null, 1, -1);
+		return;
+	}
+	UndoPieceHeader.Next = UndoHeader.FreeSpaceBeg;
+	UndoHeader.FreeSpaceBeg = loc;
+	//checkfsb ();
+	UndoPieceHeader.Type = UNDO_FREESPACE;
+	UndoPieceHeader.Length = len - (long)sizeof(UndoPieceHeader);
+	if (UndoPieceHeader.Next == loc + len)
+	{
+		GSSillseek(Fid, UndoPieceHeader.Next, 0);
+		BigRead(Fid, (HPSTR)&UndoPieceHeader2, sizeof(UndoPieceHeader2));
+		UndoPieceHeader.Length += (long)sizeof(UndoPieceHeader) + UndoPieceHeader2.Length;
+		UndoPieceHeader.Next = UndoPieceHeader2.Next;
+		GSSillseek(Fid, loc, 0);
+	}
+	BigWrite(Fid, &UndoPieceHeader, sizeof(UndoPieceHeader), -1);
+	//checkheader (loc,UndoPieceHeader);
+	//check1721 (Fid);
+	return;
+}
 
 short GetUndoFileIDFromFid (HFILE Fid)
 {       
@@ -338,7 +369,7 @@ BOOL GetUndoData (HFILE Fid,HPSTR pData,long length,long NextPiece,BOOL Remove)
 	
 	while (NextPiece >= 0)
 	{
-		long	HeadLoc = _llseek (Fid,NextPiece,0);
+		long	HeadLoc = GSSillseek (Fid,NextPiece,0);
 		
 		BigRead (Fid,(HPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));
 		BigRead (Fid,pData,UndoPieceHeader.Length); 
@@ -346,7 +377,7 @@ BOOL GetUndoData (HFILE Fid,HPSTR pData,long length,long NextPiece,BOOL Remove)
 		pData += UndoPieceHeader.Length;
 		NextPiece = UndoPieceHeader.Next; 
 		if (Remove)
-			AddToUndoFreeSpace (Fid,HeadLoc,UndoPieceHeader.Length + (long)sizeof(UndoPieceHeader));
+			AddToUndoFreeSpaceHFILE (Fid,HeadLoc,UndoPieceHeader.Length + (long)sizeof(UndoPieceHeader));
 	}
 	if (Outlen != length)
 		ii=1;
@@ -358,15 +389,14 @@ HFILE GetUndoFid (short UndoFileID)
 {
 	static	HFILE	OpenUndoFid=HFILE_ERROR;
 	static	short	OpenUndoFileID = -1;  
-	char	Name[128]; 
+	char	Name[MAX_PATH]; 
 	short	ii;
 	
 	debugstep=1;
 	if (UndoFileID == -1)
 	{
 		if (OpenUndoFid != HFILE_ERROR)
-			_lclose (OpenUndoFid);
-		OpenUndoFid = HFILE_ERROR;
+			GSSiClose2 (&OpenUndoFid);
 		OpenUndoFileID = -1;
 		return HFILE_ERROR;
 	}
@@ -375,15 +405,15 @@ HFILE GetUndoFid (short UndoFileID)
 		goto Exit;
 	debugstep++;	
 	if (OpenUndoFid != HFILE_ERROR)
-		_lclose (OpenUndoFid);
+		GSSiClose2(&OpenUndoFid);
 	GetUndoFileNameFromUndoFileID (UndoFileID,Name);
 	//GetShortPathName (Name,128);
-	OpenUndoFid = OpenFileGM (Name,&OFStructUndo,OF_READWRITE); 
+	OpenUndoFid = OpenFile (Name,(LPOFSTRUCT)&OFStructUndo,OF_READWRITE); 
 	if (OpenUndoFid == HFILE_ERROR)
 	{
 		if (OFStructUndo.nErrCode == 2) 
 		{
-			OpenUndoFid = OpenFileGM (Name,&OFStructUndo,OF_CREATE); 
+			OpenUndoFid = OpenFile (Name, (LPOFSTRUCT)&OFStructUndo,OF_CREATE);
 			debugstep=100;	
 		}
 		else
@@ -438,8 +468,8 @@ BOOL UndoAction (HFILE FidUndo)
 			pMem = GlobalLock (hMem); 
 			GetUndoData (FidUndo,pMem,UndoRecordHeader.Length,UndoRecordHeader.FirstPiece,TRUE);
 			Fid = GetUndoFid (UndoRecordHeader.UndoFileID);
-			if (_llseek (Fid,UndoRecordHeader.SeekLoc,0) == UndoRecordHeader.SeekLoc)
-				_hwrite (Fid,pMem,UndoRecordHeader.Length);
+			if (GSSillseek (Fid,UndoRecordHeader.SeekLoc,0) == UndoRecordHeader.SeekLoc)
+				BigWrite (Fid,pMem,UndoRecordHeader.Length,-1);
 			else
 				UndoError ("Seek");
 			GSSiGlobUlFree (&hMem);
@@ -480,7 +510,7 @@ void RemoveLastUndoPoint ()
 BOOL UndoChanges (HWND hWnd)
 {
 	HFILE	FidUndo;
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 	long	CurLoc;  
 	long	UndoPointTime;
 	LPSTR	pTime; 
@@ -512,16 +542,16 @@ BOOL UndoChanges (HWND hWnd)
 	pTime = _fstrchr (&UndoPointList[LastUndoPoint],'|');
 	pTime++;
 	UndoPointTime = atol (pTime);
-	FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_READWRITE); 
-	BigRead (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
+	FidUndo = OpenFile (UndoFileName,(LPOFSTRUCT)&OFStruct,OF_READWRITE); 
+	BigRead (FidUndo,&UndoHeader,sizeof(UndoHeader));
 	CurLoc = _llseek (FidUndo,UndoHeader.LastSeg,0);  
 if (CurLoc == 1721)
 	ii=1;
-	BigRead (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));
+	BigRead (FidUndo,&UndoRecordHeader,sizeof(UndoRecordHeader));
 	while (UndoRecordHeader.Time >= UndoPointTime)
 	{   
 //check1721 (FidUndo);
-		AddToUndoFreeSpace (FidUndo,CurLoc,sizeof(UndoRecordHeader)); 
+		AddToUndoFreeSpaceHFILE (FidUndo,CurLoc,sizeof(UndoRecordHeader)); 
 		UndoAction (FidUndo); 
 		UndoHeader.LastSeg = UndoRecordHeader.PrevSeg;
 		if (UndoHeader.LastSeg < 0)  
@@ -530,7 +560,7 @@ if (CurLoc == 1721)
 			break;
 		}
 		CurLoc = _llseek (FidUndo,UndoRecordHeader.PrevSeg,0);
-		BigRead (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));
+		BigRead (FidUndo,&UndoRecordHeader,sizeof(UndoRecordHeader));
 	}
 	_llseek (FidUndo,0,0);
 	_lwrite (FidUndo,(LPCSTR)&UndoHeader,sizeof(UndoHeader));  
@@ -550,7 +580,7 @@ Exit:
 //			GetUndoData (FidUndo,pMem,UndoRecordHeader.Length,UndoRecordHeader.FirstPiece);
 //			Fid = GetUndoFid (UndoRecordHeader.UndoFileID);
 //			if (_llseek (Fid,UndoRecordHeader.SeekLoc,0) == UndoRecordHeader.SeekLoc)
-long WriteToUndoFile (HFILE Fid,HPSTR pData,long len)
+long WriteToUndoFile (HANDLE Fid,HPSTR pData,long len)
 {
 // len < 0 implies contiguous space and no piece header    
 	long	loc,ii;
@@ -561,17 +591,17 @@ long WriteToUndoFile (HFILE Fid,HPSTR pData,long len)
 	if (UndoHeader.FreeSpaceBeg == -1) 
 	{
 WriteAtEOF:
-		loc = _llseek (Fid,0,2);
+		loc = llFileSeek (Fid,0,2);
 		if (len < 0 )
-			_hwrite (Fid,pData,labs(len));
+			BigWrite64 (Fid,pData,labs(len),-1);
 		else
 		{
 			UndoPieceHeader.Type = UNDO_DATA;
 			UndoPieceHeader.Length = len;
 			UndoPieceHeader.Next = -1;
-			_lwrite (Fid,(LPCSTR)&UndoPieceHeader,sizeof(UndoPieceHeader)); 
+			BigWrite64(Fid,&UndoPieceHeader,sizeof(UndoPieceHeader),-1);
 //checkheader (loc,UndoPieceHeader);
-			_hwrite (Fid,pData,len);
+			BigWrite64(Fid,pData,len,-1);
 		}
 //check1721 (Fid);
 		return loc;
@@ -579,20 +609,20 @@ WriteAtEOF:
 	else  
 	{
 		loc = UndoHeader.FreeSpaceBeg;
-		ii=_llseek (Fid,loc,0);
-		BigRead (Fid,(HPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader)); 
+		ii=llFileSeek (Fid,loc,0);
+		BigRead64 (Fid,&UndoPieceHeader,sizeof(UndoPieceHeader)); 
 //CheckUndoHeader (UndoPieceHeader.Type,UNDO_FREESPACE);
 		if (len < 0)
 		{
 			if (UndoPieceHeader.Length > labs (len))
 			{   
-				_llseek (Fid,loc,0);
-				_hwrite (Fid,pData,labs(len)); 
+				llFileSeek (Fid,loc,0);
+				BigWrite64 (Fid,pData,labs(len),-1); 
 				UndoHeader.FreeSpaceBeg += labs (len);
 //	checkfsb ();
 				UndoPieceHeader.Length -= labs(len);
 //checkheader (_llseek(Fid,0,1),UndoPieceHeader);
-				_lwrite (Fid,(LPCSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));
+				BigWrite64(Fid,&UndoPieceHeader,sizeof(UndoPieceHeader),-1);
 //check1721 (Fid);
 				return loc;
 			} 
@@ -600,11 +630,11 @@ WriteAtEOF:
 			{
 				UndoHeader.FreeSpaceBeg = UndoPieceHeader.Next;	
 //checkfsb ();
-				_llseek (Fid,loc,0);
-				_hwrite (Fid,pData,labs(len)); 
+				llFileSeek (Fid,loc,0);
+				BigWrite64(Fid,pData,labs(len),-1);
 	            len = UndoPieceHeader.Length + sizeof(UndoPieceHeader) - labs(len);
 				while (len--)
-					_lwrite (Fid,&Null,1);
+					BigWrite64 (Fid,&Null,1,-1);
 //check1721 (Fid);
 				return loc;
 			}
@@ -621,15 +651,15 @@ WriteAtEOF:
 			
 			while (len)
 			{
-				_llseek (Fid,NextLoc,0);
+				llFileSeek (Fid,NextLoc,0);
 				if (UndoPieceHeader.Length >= len)
 				{   
 					UndoPieceHeader2.Type = UNDO_DATA;
 					UndoPieceHeader2.Length = len;
 					UndoPieceHeader2.Next = -1;
-					_lwrite (Fid,(LPCSTR)&UndoPieceHeader2,sizeof(UndoPieceHeader2));
+					BigWrite64 (Fid,(LPSTR)&UndoPieceHeader2,sizeof(UndoPieceHeader2),-1);
 //checkheader (NextLoc,UndoPieceHeader2);
-					_hwrite (Fid,pData,labs(len)); 
+					BigWrite64(Fid,pData,labs(len),-1);
 //check1721 (Fid);
 					UndoPieceHeader.Length -= len;  
 					if (UndoPieceHeader.Length > sizeof(UndoPieceHeader))
@@ -638,13 +668,13 @@ WriteAtEOF:
 						UndoPieceHeader.Length -= sizeof(UndoPieceHeader);
 //checkfsb ();
 //checkheader (_llseek(Fid,0,1),UndoPieceHeader);
-						_lwrite (Fid,(LPCSTR)&UndoPieceHeader,sizeof(UndoPieceHeader)); 
+						BigWrite64(Fid,(LPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader),-1);
 //check1721 (Fid);
 					}
 					else 
 					{
 						UndoHeader.FreeSpaceBeg = UndoPieceHeader.Next; 
-						AddToUndoFreeSpace (Fid,_llseek (Fid,0,1),UndoPieceHeader.Length); 
+						AddToUndoFreeSpace (Fid,llFileSeek(Fid,0,1),UndoPieceHeader.Length); 
 					}
 //checkfsb ();
 					len = 0;
@@ -656,12 +686,12 @@ WriteAtEOF:
 					UndoPieceHeader.Type = UNDO_DATA; 
 					if (UndoPieceHeader.Next == -1)
 					{
-						UndoPieceHeader.Next = _llseek (Fid,0,2);
-						_llseek (Fid,NextLoc,0);
+						UndoPieceHeader.Next = llFileSeek (Fid,0,2);
+						llFileSeek (Fid,NextLoc,0);
 					}
-					_lwrite (Fid,(LPCSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));
+					BigWrite64(Fid,&UndoPieceHeader,sizeof(UndoPieceHeader),-1);
 //checkheader (NextLoc,UndoPieceHeader);
-					_hwrite (Fid,pData,UndoPieceHeader.Length);  
+					BigWrite64(Fid,pData,UndoPieceHeader.Length,-1);
 //check1721 (Fid);
 					len -= UndoPieceHeader.Length;
 					pData += UndoPieceHeader.Length;
@@ -672,18 +702,18 @@ WriteAtEOF:
 						UndoPieceHeader.Type = UNDO_DATA;  
 						UndoPieceHeader.Length = len; 
 						UndoPieceHeader.Next = -1; 
-						EndLoc=_llseek (Fid,0,2);
-						_lwrite (Fid,(LPCSTR)&UndoPieceHeader,sizeof(UndoPieceHeader));
+						EndLoc=llFileSeek (Fid,0,2);
+						BigWrite64(Fid,(LPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader),-1);
 //checkheader (EndLoc,UndoPieceHeader);
-						_hwrite (Fid,pData,UndoPieceHeader.Length);  
+						BigWrite64(Fid,pData,UndoPieceHeader.Length,-1);
 //check1721 (Fid);
 						len = 0;
 					}
 					else 
 					{
 						NextLoc = UndoHeader.FreeSpaceBeg;
-						ii=_llseek (Fid,NextLoc,0);
-						BigRead (Fid,(HPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader)); 
+						ii=llFileSeek (Fid,NextLoc,0);
+						BigRead64 (Fid,(HPSTR)&UndoPieceHeader,sizeof(UndoPieceHeader)); 
 //CheckUndoHeader (UndoPieceHeader.Type,UNDO_FREESPACE);
 					}
 				}
@@ -701,8 +731,8 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 	long	len, LastLoc,IncLen=(long)USHRT_MAX;  
 	long	CurLoc, ResetLoc; 
 	short	UndoFileID;    
-	OFSTRUCTGM	OFStruct;
-	char	Name2[128]; 
+	OFSTRUCTGM	OFStruct = { 0 };
+	char	Name2[MAX_PATH]; 
 	
 	if (!UndoEnabled || !NumUndoPoints)
 		return;
@@ -713,7 +743,7 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 			return;   
 		_fstrcpy (Name2,Name);
 		//GetShortPathName (Name2,128);
-		Fid = OpenFileGM (Name2,&OFStruct,OF_READ); 
+		Fid = OpenFile (Name2,(LPOFSTRUCT)&OFStruct,OF_READ); 
 		BeginLoc = 0;
 	}
 	else
@@ -750,8 +780,8 @@ void AddFileToUndoFile (LPSTR Name,long BeginLoc,HFILE Fid)
 
 void SaveDataToUndoFile (short Type,short UndoFileID, long len, HPSTR pData,long SeekLoc)
 {   
-	HFILE		FidUndo;
-	OFSTRUCTGM	OFStruct;
+	HANDLE		FidUndo;
+	OFSTRUCTGM	OFStruct = { 0 };
 	long		HeaderLoc, DataLoc;   
 	short		ii;
 	
@@ -773,12 +803,12 @@ void SaveDataToUndoFile (short Type,short UndoFileID, long len, HPSTR pData,long
 		UndoHeader.FirstSeg = -1;
 		UndoHeader.LastSeg = -1;
 		UndoHeader.FreeSpaceBeg = -1;
-		_lwrite (FidUndo,(LPCSTR)&UndoHeader,sizeof(UndoHeader));
+		BigWrite64 (FidUndo,(LPSTR)&UndoHeader,sizeof(UndoHeader),-1);
 	}
 	else 
 	{
 		FidUndo = OpenFileGM (UndoFileName,&OFStruct,OF_READWRITE); 
-		BigRead (FidUndo,(HPSTR)&UndoHeader,sizeof(UndoHeader));
+		BigRead64 (FidUndo,(LPSTR)&UndoHeader,sizeof(UndoHeader));
 	}
 	DataLoc = WriteToUndoFile (FidUndo,pData,len);
 	UndoRecordHeader.Type = Type;  
@@ -796,18 +826,18 @@ void SaveDataToUndoFile (short Type,short UndoFileID, long len, HPSTR pData,long
 		UndoHeader.FirstSeg = HeaderLoc;
 	if (UndoHeader.LastSeg > -1)
 	{
-		_llseek (FidUndo,UndoHeader.LastSeg,0);
-		BigRead (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));  
+		llFileSeek (FidUndo,UndoHeader.LastSeg,0);
+		BigRead64 (FidUndo,(HPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));  
 		UndoRecordHeader.NextSeg = HeaderLoc;
-		_llseek (FidUndo,UndoHeader.LastSeg,0);
-		_lwrite (FidUndo,(LPCSTR)&UndoRecordHeader,sizeof(UndoRecordHeader));  
+		llFileSeek(FidUndo,UndoHeader.LastSeg,0);
+		BigWrite64 (FidUndo,(LPSTR)&UndoRecordHeader,sizeof(UndoRecordHeader),-1);  
 	}
 //check1721 (FidUndo);
 	UndoHeader.LastSeg = HeaderLoc;
-	_llseek (FidUndo,0,0);
-	_lwrite (FidUndo,(LPCSTR)&UndoHeader,sizeof(UndoHeader));  
+	llFileSeek (FidUndo,0,0);
+	BigWrite64(FidUndo,(LPSTR)&UndoHeader,sizeof(UndoHeader),-1);
 //check1721 (FidUndo);
-	_lclose (FidUndo);
+	GSSiClose64(&FidUndo);
 	return;
 } 
 

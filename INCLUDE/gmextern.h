@@ -1565,7 +1565,7 @@ extern HFILE			OpenFileFid[MAXFILEHANDLES];
 extern UINT			OpenFileCallID[MAXFILEHANDLES];
 extern short			OpenFileUndoFileID[MAXFILEHANDLES];
 extern HFILE			UndoFileFid[MAXUNDOFILES];
-extern HFILE			JournalFileFid[MAXFILEHANDLES];
+extern HANDLE			JournalFileFid[MAXFILEHANDLES];
 extern HANDLE			JournalFileIndex[MAXFILEHANDLES];
 extern BYTE			JournalIsCompleteFile[MAXFILEHANDLES];
 extern long			OriginalFileLength[MAXFILEHANDLES];

@@ -993,13 +993,13 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 	{
 	case WM_INITDIALOG:
 		fid = OpenFileGM("lastcmdline.txt", &OFStruct, OF_READ);
-		if (fid != HFILE_ERROR)
+		if (fid != INVALID_HANDLE_VALUE)
 		{
 			fgetstring2(txt, 1020, fid);
 			SetDlgItemText(hWndDlg, IDC_COMMAND, txt);
 			fgetstring2(txt, 1020, fid);
 			SetDlgItemText(hWndDlg, IDC_DIRECTORY, txt);
-			_lclose(fid);
+			GSSiClose64(&fid);
 		}
 
 	case GSSI_REINITDIALOG:
@@ -1009,7 +1009,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		cwCenter(hWndDlg, 0);
 		SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_RESETCONTENT, 0, 0);
 		fid = OpenFileGM("../cmdlines.txt", &OFStruct, OF_READ);
-		if (fid != HFILE_ERROR)
+		if (fid != INVALID_HANDLE_VALUE)
 		{
 			strcpy(cmdFile, OFStruct.szPathName);
 			while (fgetstring2(txt, 1020, fid))
@@ -1038,7 +1038,7 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 					SendDlgItemMessage(hWndDlg, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)str);
 				}
 			}
-			_lclose(fid);
+			GSSiClose64 (&fid);
 		}
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -1112,11 +1112,11 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			GetDlgItemText(hWndDlg, IDC_COMMAND, selectedStartCmd, 1020);
 			GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH);
 			fid = OpenFileGM("lastcmdline.txt", &OFStruct, OF_CREATE);
-			if (fid != HFILE_ERROR)
+			if (fid != INVALID_HANDLE_VALUE)
 			{
 				fputstring2(selectedStartCmd, fid);
 				fputstring2(path, fid);
-				_lclose(fid);
+				GSSiClose64 (&fid);
 			}
 			if (*path)
 			{
@@ -2577,14 +2577,14 @@ if (Message == GF_MAPSERVER_REQUEST)
 	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
 	Fid = OpenFileGM(MapserverFile, &OFStruct, OF_READ);
-	if (Fid != HFILE_ERROR)
+	if (Fid != INVALID_HANDLE_VALUE)
 	{
 		LPSTR cmd = (LPSTR)malloc(4096);
-		int ln = _llseek(Fid, 0, 2);
+		int ln = llFileSeek(Fid, 0, 2);
 
-		_llseek(Fid, 0, 0);
-		_lread(Fid, cmd,ln);
-		_lclose(Fid);
+		llFileSeek(Fid, 0, 0);
+		BigRead64(Fid, cmd,ln);
+		GSSiClose64(&Fid);
 		if (dbug)
 			MessageBox(hWnd, cmd, "", MB_OK);
 		ProcessText (cmd);

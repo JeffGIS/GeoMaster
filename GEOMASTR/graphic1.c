@@ -76,12 +76,12 @@ void LogCode (LPSTR str)
 	OFSTRUCTGM	OFStruct = { 0 };
 	HANDLE Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_READWRITE);
 
-	if (Fid == HFILE_ERROR)
+	if (Fid == INVALID_HANDLE_VALUE)
 		Fid=OpenFileGM ("c:\\temp\\codes.txt",&OFStruct,OF_CREATE);
-	_llseek (Fid,0,2);
-	_lwrite (Fid,str,strlen(str)+1);
-	_lwrite (Fid,"\r\n",2);
-	_lclose (Fid);
+	llFileSeek (Fid,0,2);
+	BigWrite64 (Fid,str,strlen(str)+1,-1);
+	BigWrite64(Fid,"\r\n",2,1);
+	GSSiClose64 (&Fid);
 	return;
 }
 

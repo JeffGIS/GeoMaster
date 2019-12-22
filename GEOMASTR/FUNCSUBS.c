@@ -6193,7 +6193,7 @@ BOOL ComposeMessage (HWND hWnd,LPSTR Title,LPSTR InMessage,LPSTR ResponseAction)
 }
 
 
-long SearchFilesInDirBC (LPSTR CurDirIN, LPSTR Ext, HFILE OutFile,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub)
+long SearchFilesInDirBC (LPSTR CurDirIN, LPSTR Ext, HANDLE OutFid,LPLONG TotFiles,LPSTR WildCardIn,int Lev,BOOL WantSub)
 {   
 	DWORD	hDir, Type;
 	long	NumFilesIn=*TotFiles;
@@ -6246,7 +6246,7 @@ Top:
 			if (Type)
             {   
             	if (WantSub && !FirstPass)
-                	SearchFilesInDirBC (str,Ext,OutFile,TotFiles,WildCard,Lev+1,WantSub);
+                	SearchFilesInDirBC (str,Ext,OutFid,TotFiles,WildCard,Lev+1,WantSub);
             }
             else if (SubDirOnly)
             	goto SkipFile; 
@@ -6257,8 +6257,8 @@ Top:
                 _splitpath (FullName,0,0,0,TestExt);  
                 (*TotFiles)++;
 				strupr (FullName);
-                if (OutFile != HFILE_ERROR)
-                	fputstring2 (FullName,OutFile);
+                if (OutFid != INVALID_HANDLE_VALUE)
+                	fputstring2 (FullName,OutFid);
 	     SkipFile:;
             }
         }
@@ -6281,7 +6281,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 	char	cachFileList[MAX_PATH];
 	char	tempFile[MAX_PATH];
 	char	str[MAX_PATH+2];
-	HFILE	Fid, Fid2;
+	HANDLE	Fid, Fid2;
 	LPSTR	arg1=GlobalLock (*phArgs);
 	LPSTR	arg2 = arg1 + 4096, arg3 = arg2 + 4096, arg4 = arg3 + 4096;
 	FILE	*FidFilelist;  
@@ -6301,8 +6301,8 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 	GlobalUnlock (*phArgs);
 	GSSiGlobFree (phArgs);
 	Fid = OpenFileGM (CachingPidFile,&OFStruct,OF_CREATE);
-	_lwrite (Fid,(LPSTR)&Pid,sizeof(DWORD));
-	_lclose (Fid);
+	BigWrite64 (Fid,(LPSTR)&Pid,sizeof(DWORD),-1);
+	GSSiClose64 (&Fid);
 	GSSiGetTempFileName(0,"gmb",0,tempFile);
 	ContinueInteruptedCache (CacheDir);
 
@@ -6332,7 +6332,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 							*pWild++ = 0;
 							Fid2 = OpenFileGM (tempFile,&OFStruct,OF_CREATE); 
 							ii = SearchFilesInDirBC (str, 0, Fid2,&nFiles,pWild,1,wantSub);     
-							_llseek (Fid2,0,0);
+							llFileSeek(Fid2,0,0);
 							if (pass)
 							{
 								while (ContinueBackgroundCache && fgetstring2 (str,MAX_PATH,Fid2))
@@ -6344,7 +6344,7 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 							}
 							else
 								totFiles += nFiles;
-							_lclose (Fid2);
+							GSSiClose64 (&Fid2);
 							OpenFileGM (tempFile,&OFStruct,OF_DELETE);
 						}
 					}
@@ -6363,10 +6363,10 @@ void __cdecl BackgroundCache (LPHANDLE phArgs)
 
 					sprintf (LastCacheCheckFile,"%sLastCacheCheck.txt",CacheDir);
 					FidLastCacheCheck = OpenFileGM(LastCacheCheckFile,&OFStruct,OF_CREATE);
-					if (FidLastCacheCheck != HFILE_ERROR)
+					if (FidLastCacheCheck != INVALID_HANDLE_VALUE)
 					{
-						_lwrite (FidLastCacheCheck,"Cache check complete",20);
-						_lclose (FidLastCacheCheck);
+						BigWrite64 (FidLastCacheCheck,"Cache check complete",20,-1);
+						GSSiClose64 (&FidLastCacheCheck);
 					}
 					BackgroundUpdateMessage ("Cache is up to date");
 				}
@@ -6409,7 +6409,7 @@ BOOL StartBackgroundCache (void)
 	ExpandText(BackgroundCacheFilelist);
 	sprintf (LastCacheCheckFile,"%sLastCacheCheck.txt",CachePathnameTo);
 	FidLastCacheCheck = OpenFileGM(LastCacheCheckFile,&OFStruct,OF_READ);
-	if (FidLastCacheCheck != HFILE_ERROR)
+	if (FidLastCacheCheck != INVALID_HANDLE_VALUE)
 	{
 		BY_HANDLE_FILE_INFORMATION fiList, fiLastCacheCheckFile;
 		LONG	dtime;
@@ -6421,8 +6421,8 @@ BOOL StartBackgroundCache (void)
 		st = GetFileInformationByHandle((HANDLE)FidLastCacheCheck,&fiLastCacheCheckFile);
 		FileTimeToSystemTime(&fiLastCacheCheckFile.ftLastWriteTime, &systim);
 		dtime = CompareFileTime (&fiList.ftLastWriteTime,&fiLastCacheCheckFile.ftLastWriteTime); 
-		_lclose (FidList);
-		_lclose (FidLastCacheCheck);
+		GSSiClose64(&FidList);
+		GSSiClose64(&FidLastCacheCheck);
 		//if (dtime < 0)
 		//	ProcessText ("[%RUNFROMCACHE]=T");
 	}
@@ -6447,11 +6447,11 @@ BOOL StartBackgroundCache (void)
 		BOOL	skip=FALSE;
 
 		arg1=GlobalLock (hArgs);
-		Fid = GSSiOpenFile (BackgroundCacheFilelist,&OFStruct,OF_READ);//caches file list so it can be updated
+		Fid = OpenFileGM (BackgroundCacheFilelist,&OFStruct,OF_READ);//caches file list so it can be updated
 		GSSiGetTempFileName (0,"txt",0,arg1); 
-		Fid2 = GSSiOpenFile (arg1,0,OF_CREATE);
+		Fid2 = OpenFileGM (arg1,0,OF_CREATE);
 		GlobalUnlock (hArgs);
-		while (fgetstring (str,MAX_PATH,Fid))
+		while (fgetstring2 (str,MAX_PATH,Fid))
 		{
 			if (!strncmp (str,"[%DL]",5))
 			{
@@ -6476,11 +6476,11 @@ BOOL StartBackgroundCache (void)
 			else if (!skip)
 			{
 				ExpandText (str);
-				fputstring (str,Fid2);
+				fputstring2 (str,Fid2);
 			}
 		}
-		GSSiClose2 (&Fid);
-		GSSiClose2 (&Fid2);
+		GSSiClose64 (&Fid);
+		GSSiClose64 (&Fid2);
 		BackgroundCacheStarted = TRUE;
 		RenameCachedFiles ();
 		ContinueBackgroundCache = TRUE;
@@ -6573,8 +6573,8 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 		str[36] = 0;
 		BackgroundUpdateMessage (str);
 		Fid = OpenFileGM (CachingPidFile,&OFStruct,OF_CREATE);
-		_lwrite (Fid,(LPSTR)&Pid,sizeof(DWORD));
-		_lclose (Fid);
+		BigWrite64 (Fid,(LPSTR)&Pid,sizeof(DWORD),-1);
+		GSSiClose64(&Fid);
 	//	ContinueInteruptedCache (CacheDir);
 		if (ContinueBackgroundCache)
 		{
@@ -6582,11 +6582,11 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 			LPSTR	pBuf;
 
 			Fid = OpenFileGM (FileListFile,&OFStruct,OF_READ);
-			ln = _llseek (Fid,0,2);
-			_llseek (Fid,0,0);
+			ln = llFileSeek(Fid,0,2);
+			llFileSeek(Fid,0,0);
 			pBuf = malloc (ln);
-			_lread (Fid,pBuf,ln);
-			_lclose (Fid);
+			BigRead64 (Fid,pBuf,ln);
+			GSSiClose64 (&Fid);
 			Fid = OpenFileGM (FileListFile,&OFStruct,OF_DELETE);
 			st = SendNTBlock (sock,pBuf,ln);
 			free (pBuf);
@@ -6610,7 +6610,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 							free (pBuf);
 							makedirectories (File,FALSE,FALSE);
 							Fid = OpenFileGM (File,&OFStruct,OF_CREATE);
-							if (Fid != HFILE_ERROR)
+							if (Fid != INVALID_HANDLE_VALUE)
 							{
 								long	lnBlock;
 
@@ -6627,7 +6627,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 
 										free (pBlock);
 											
-										if (_lwrite (Fid,pExpandedBlock,lRec) == lenExpandedBlock)
+										if (BigWrite64 (Fid,pExpandedBlock,lRec,-1) == lenExpandedBlock)
 										{
 											rtnFlush = FlushFileBuffers ((HANDLE)Fid);
 											totRead += lenExpandedBlock;
@@ -6648,7 +6648,7 @@ void __cdecl BackgroundCacheViaServer (LPHANDLE phArgs)
 										break;
 									}
 								}
-								_lclose (Fid);
+								GSSiClose64(&Fid);
 								if (totRead == lenTranFile)
 								{
 									HANDLE	hMem = GSSiGlobAlloc (1732,GHND,strlen(File)+1+lnCompCommand+1);

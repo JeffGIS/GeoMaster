@@ -2307,10 +2307,10 @@ BOOL RemoveConnectedProcess(HWND hProcess)
 BOOL ProcessConnectedCommand (UINT ID)
 {
 	UINT	rtn;
-	HFILE	Fid;
+	HANDLE	Fid;
 	char	ConFile[MAX_PATH];
 	char	TempDir[MAX_PATH];
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 	HANDLE	hMem;
 	LPSTR	pMem;
 	int		lMem;
@@ -2320,15 +2320,15 @@ BOOL ProcessConnectedCommand (UINT ID)
 	if (!rtn)
 		return FALSE;
 	Fid = OpenFileGM (ConFile,&OFStruct,OF_READ);
-	if (Fid == HFILE_ERROR)
+	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
     HaltMapDisplay(TRUE,FALSE);
-	lMem = _llseek (Fid,0,2);
-	_llseek (Fid,0,0);
+	lMem = llFileSeek(Fid,0,2);
+	llFileSeek (Fid,0,0);
 	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMem);
 	pMem = GlobalLock (hMem);
-	_lread (Fid,pMem,lMem);
-	_lclose (Fid);
+	BigRead64 (Fid,pMem,lMem);
+	GSSiClose64 (&Fid);
 	if (firstDisplayComplete)
 		ProcessText(pMem);
 	else
@@ -2340,13 +2340,13 @@ BOOL ProcessConnectedCommand (UINT ID)
 void ZoomConnectedProcesses (BOOL Remove)
 {
 	int	i;
-	HFILE	Fid;
+	HANDLE	Fid;
 	static	UINT	ID=0;
 	static	char	ConFile[MAX_PATH] = { 0 };
 	char	TempDir[MAX_PATH];
 	char	DataLoc[MAX_PATH] = "[%DL]";
 	char	Cmd[512];
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 
 	if (Remove)
 	{
@@ -2367,8 +2367,8 @@ void ZoomConnectedProcesses (BOOL Remove)
 	ExpandText(DataLoc);
 	sprintf(Cmd, "$ZOOM(FROMCONNECTEDPROCESS,%f %f,%f,%s)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale,DataLoc);
 	//sprintf(Cmd, "$ZOOM(POINTANDSCALE,%f %f,%f,F,COMMAND)", CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
-	_lwrite (Fid,Cmd,strlen(Cmd)+1);
-	_lclose (Fid);
+	BigWrite64 (Fid,Cmd,strlen(Cmd)+1,-1);
+	GSSiClose64 (&Fid);
 
 	if (hWndLinkedTo)
 		PostMessage(hWndLinkedTo, GF_PROCESS_CONNECTED_CMD, ID, 0);
@@ -2382,7 +2382,7 @@ void ZoomConnectedProcesses (BOOL Remove)
 void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd)
 {
 	int	i;
-	HFILE	Fid;
+	HANDLE	Fid;
 	static	UINT	ID=0;
 	static	char	ConFile[MAX_PATH];
 	char	TempDir[MAX_PATH];
@@ -2403,8 +2403,8 @@ void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd)
 		ID = GetTempFileName (TempDir,"gml",0,ConFile); 
 	}
 	Fid = OpenFileGM (ConFile,&OFStruct,OF_CREATE);
-	_lwrite (Fid,Cmd,strlen(cmd)+1);
-	_lclose (Fid);
+	BigWrite64 (Fid,Cmd,strlen(cmd)+1,-1);
+	GSSiClose64 (&Fid);
 
 	PostMessage(hProcessWnd, GF_PROCESS_CONNECTED_CMD, ID,0); 
 	return;

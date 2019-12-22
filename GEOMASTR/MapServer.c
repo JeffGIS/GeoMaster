@@ -133,8 +133,8 @@ BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd
 	if (serverID < 0)
 		return FALSE;
 	Fid = OpenFileGM(MapServerFile[serverID], &OFStruct, OF_CREATE);
-	_lwrite(Fid, cmd, strlen(cmd) + 1);
-	_lclose(Fid);
+	BigWrite64(Fid, cmd, strlen(cmd) + 1,-1);
+	GSSiClose64(&Fid);
 	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd, id);
 
 	return TRUE;

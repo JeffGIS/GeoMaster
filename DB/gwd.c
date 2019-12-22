@@ -6415,7 +6415,7 @@ BOOL GMDCloseJournal (LPSTR FileName)
 	return rtn;
 }
 
-BOOL TransferCacheBlocks (int BlockID,HFILE FidFrom,HFILE FidTo,HFILE FidNetTransfer,int BlockSize,HWND hWndProgress,int TotBlocksToGet,int nseqblocks,int nblocks)
+BOOL TransferCacheBlocks (int BlockID,HANDLE FidFrom,HANDLE FidTo,HFILE FidNetTransfer,int BlockSize,HWND hWndProgress,int TotBlocksToGet,int nseqblocks,int nblocks)
 {
 	HANDLE	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,BlockSize*nseqblocks);
 	LPBYTE	pBlockData = GlobalLock (hMem);
@@ -6423,14 +6423,14 @@ BOOL TransferCacheBlocks (int BlockID,HFILE FidFrom,HFILE FidTo,HFILE FidNetTran
 	long	nBytes;
 	long	BlockLoc = BlockID * BlockSize;
 
-	FromLoc = _llseek (FidFrom,BlockLoc,0);
+	FromLoc = llFileSeek (FidFrom,BlockLoc,0);
 	if (FidNetTransfer == HFILE_ERROR)
-		ToLoc = _llseek (FidTo,BlockLoc,0);
-	nBytes = _lread (FidFrom,pBlockData,BlockSize*nseqblocks);
+		ToLoc = llFileSeek (FidTo,BlockLoc,0);
+	nBytes = BigRead64 (FidFrom,pBlockData,BlockSize*nseqblocks);
 	if (nBytes > 0)
 	{
 		if (FidNetTransfer == HFILE_ERROR)
-			_lwrite (FidTo,pBlockData,nBytes);
+			BigWrite64 (FidTo,pBlockData,nBytes,-1);
 		else
 		{
 			LONGLONG	blockLoc = BlockLoc;
@@ -6446,7 +6446,7 @@ BOOL TransferCacheBlocks (int BlockID,HFILE FidFrom,HFILE FidTo,HFILE FidNetTran
 	return  TRUE;
 }
 
-BOOL GetCacheBlock (int BlockID,HFILE FidFrom,HFILE FidTo,HFILE FidNetTransfer,int BlockSize,HWND hWndProgress,int TotBlocksToGet,int opt)
+BOOL GetCacheBlock (int BlockID,HANDLE FidFrom,HANDLE FidTo,HFILE FidNetTransfer,int BlockSize,HWND hWndProgress,int TotBlocksToGet,int opt)
 {
 	static	int nblocks;
 	static	int	nseqblocks;
@@ -6488,8 +6488,8 @@ BOOL GetCacheBlock (int BlockID,HFILE FidFrom,HFILE FidTo,HFILE FidNetTransfer,i
 int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromCheckPointID,HFILE FidNetTransfer)
 {
 	int		rtn=0; //0=updated OK,1=cant find cpl file,2=file too old to update,3=no need to update
-	OFSTRUCTGM	OFStruct;
-	HFILE	Fid, FidFrom, FidTo=HFILE_ERROR;
+	OFSTRUCTGM	OFStruct = { 0 };
+	HANDLE	Fid, FidFrom, FidTo=INVALID_HANDLE_VALUE;
 	CHECKPNTLOGHEADER CheckPntLogHeader;
 	CHECKPNTLOGRECORD CheckPntLogRecord;
 	long	loc,CompressedLength,FullLength,AllLength,SaveAllLength,lFullRec,CheckPointID,nBytes;
@@ -6507,9 +6507,9 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 	strcpy (pDot,"_gmd.cpl");
 
 	Fid  = OpenFileGM (CPLFile,&OFStruct,OF_READ);
-	if (Fid != HFILE_ERROR)
+	if (Fid != INVALID_HANDLE_VALUE)
 	{
-		_lread (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER));
+		BigRead64 (Fid,&CheckPntLogHeader,sizeof(CHECKPNTLOGHEADER));
 		if (UpdateFromCheckPointID >= CheckPntLogHeader.FirstCheckPointID)
 		{
 			char	Info[1024];
@@ -6561,7 +6561,7 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 				{
 					int TotBlocksToGet = 0, nblocks=0;
 
-					AllNumBlocks = (_llseek(FidFrom,0,2)-1)/CheckPntLogHeader.BlockSize + 1;
+					AllNumBlocks = (llFileSeek(FidFrom,0,2)-1)/CheckPntLogHeader.BlockSize + 1;
 					MaxNumBlocks = 0;
 					AllLength = (AllNumBlocks - 1) / 8 + 1;
 					hAllRecs = GSSiGlobAlloc (1676,GHND,AllLength);
@@ -6569,13 +6569,13 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 					loc = CheckPntLogHeader.LastCheckPointLoc[ifile];
 					while (loc >= 0 && CheckPointID-- > UpdateFromCheckPointID)
 					{
-						_llseek (Fid,loc,0);
-						_lread (Fid,&CheckPntLogRecord,sizeof(CHECKPNTLOGRECORD));
+						llFileSeek(Fid,loc,0);
+						BigRead64 (Fid,&CheckPntLogRecord,sizeof(CHECKPNTLOGRECORD));
 						CompressedLength = CheckPntLogRecord.Reclen -sizeof(CHECKPNTLOGRECORD) + 4;
 						hCompressedRec = GSSiGlobAlloc (1671,GMEM_MOVEABLE,CompressedLength);
-						_llseek (Fid,loc+(sizeof(CHECKPNTLOGRECORD)-4),0);
+						llFileSeek(Fid,loc+(sizeof(CHECKPNTLOGRECORD)-4),0);
 						pCompressedRec = GlobalLock (hCompressedRec);
-						_lread (Fid,pCompressedRec,CompressedLength);
+						BigRead64(Fid,pCompressedRec,CompressedLength);
 						MaxNumBlocks = max (MaxNumBlocks,CheckPntLogRecord.NumBlocks);
 						FullLength = (CheckPntLogRecord.NumBlocks - 1) / 8 + 1;
 						hFullRec = GSSiGlobAlloc (1672,GMEM_MOVEABLE,FullLength+32);
@@ -6702,16 +6702,16 @@ int UpdateGMDFromCheckPointLog2 (LPSTR CacheFile, LPSTR FromFile,int UpdateFromC
 				else
 					sprintf (strchr (Info,0),":File %i length FAILS(%i %i)",ifile,chksmf,chksmt);
 				*/
-				_lclose (FidFrom);
-				if (FidTo != HFILE_ERROR)
-					_lclose (FidTo);
+				GSSiClose64 (&FidFrom);
+				if (FidTo != INVALID_HANDLE_VALUE)
+					GSSiClose64(&FidTo);
 			}
 			SetGlobalValue ("%GMDCPUPDATEINFO",Info);
 		
 		}
 		else
 			rtn = 2;
-		_lclose (Fid);
+		GSSiClose64(&Fid);
 	}
 	else
 		rtn = 1;
@@ -6722,8 +6722,8 @@ BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile)
 {
 	BOOL rtn=FALSE;
 	LPSTR	pDot = strrchr (FromFile,'.');
-	HFILE	Fid;
-	OFSTRUCTGM  OFStruct;
+	HANDLE	Fid;
+	OFSTRUCTGM  OFStruct = { 0 };
     GWDHEADER GWDHead, GWDHeadFrom;
 
 	if (pDot && !stricmp (pDot,".gmd"))
@@ -6738,10 +6738,10 @@ BOOL UpdateGMDFromCheckPointLog (HFILE FidCache,LPSTR ToFile, LPSTR FromFile)
 				if (GWDHead.CheckPointID)
 				{
 					Fid = OpenFileGM (FromFile,&OFStruct,OF_READ);
-					if (Fid != HFILE_ERROR)
+					if (Fid != INVALID_HANDLE_VALUE)
 					{
-						ii=_lread (Fid,(HPSTR)&GWDHeadFrom,sizeof(GWDHEADER));
-						_lclose (Fid);
+						ii=BigRead64 (Fid,(HPSTR)&GWDHeadFrom,sizeof(GWDHEADER));
+						GSSiClose64 (&Fid);
 						if (GWDHeadFrom.StoredAs32)
 						{
 							if (GWDHeadFrom.CheckPointID >= CheckPointIDCache)
@@ -6768,8 +6768,8 @@ int UpdateGMDFromCheckPointLog_net (int CheckPointIDCache,HFILE FidNetTransfer,L
 {
 	int rtn=10;//0=file updated,10=not checkpointed gmd file,1=cant find cpl file,2=file too old to update,3=no need to update
 	LPSTR	pDot;
-	HFILE	Fid;
-	OFSTRUCTGM  OFStruct;
+	HANDLE	Fid;
+	OFSTRUCTGM  OFStruct = { 0 };
     GWDHEADER GWDHead;
 	char	fromFile[MAX_PATH];
 	char	cacheFile[MAX_PATH];
@@ -6783,10 +6783,10 @@ int UpdateGMDFromCheckPointLog_net (int CheckPointIDCache,HFILE FidNetTransfer,L
 	if (pDot && !stricmp (pDot,".gmd"))
 	{
 		Fid = OpenFileGM (fromFile,&OFStruct,OF_READ);
-		if (Fid != HFILE_ERROR)
+		if (Fid != INVALID_HANDLE_VALUE)
 		{
-			_lread (Fid,(HPSTR)&GWDHead,sizeof(GWDHEADER));
-			_lclose (Fid);
+			BigRead64 (Fid,(HPSTR)&GWDHead,sizeof(GWDHEADER));
+			GSSiClose64 (&Fid);
 			if (GWDHead.StoredAs32)
 			{
 				if (GWDHead.CheckPointID >= CheckPointIDCache)
@@ -6797,12 +6797,12 @@ int UpdateGMDFromCheckPointLog_net (int CheckPointIDCache,HFILE FidNetTransfer,L
 	return rtn;
 }
 
-int checkcpl (int i)
+/*int checkcpl (int i)
 {
 //	char	File[]="C:\\Users\\Jeff\\Downloads\\inc_comments_gmd.cpl";
 	char	File[]="C:\\Users\\Jeff\\Downloads\\mgv2\\incident_gmd.cpl";
 	OFSTRUCTGM	OFStruct;
-	HFILE	Fid;
+	HANDLE	Fid;
 	CHECKPNTLOGHEADER CheckPntLogHeader;
 	CHECKPNTLOGRECORD CheckPntLogRecord;
 	long	loc,CompressedLength,FullLength,AllLength,lFullRec;
@@ -6868,7 +6868,7 @@ return 1;
 	_lclose (Fid);
 	return 1;
 }
-
+*/
 
 BOOL GMDCreateCheckPointLog (LPSTR FileName)
 {

@@ -1647,10 +1647,10 @@ void __cdecl BackgroundFileSend (LPHANDLE phArgs)
 {
     char    File[MAX_PATH];
 	char	str[MAX_PATH+2];
-	HFILE	Fid;
+	HANDLE	Fid;
 	LPSTR	arg1=GlobalLock (*phArgs);
 	LPSTR	arg2 = arg1 + MAX_PATH, arg3 = arg2 + MAX_PATH, arg4 = arg3 + MAX_PATH;
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 	int		iThread, ier;
 	long	startLoc, lenFile, totRead=0;
 	SOCKET	sock;
@@ -1664,9 +1664,9 @@ void __cdecl BackgroundFileSend (LPHANDLE phArgs)
 	iThread = atoi (arg4);
 	GSSiGlobUlFree (phArgs);
 	Fid = OpenFileGM (File,&OFStruct,OF_READ);
-	lenFile = _llseek (Fid,0,2);
-	_llseek (Fid,startLoc,0);
-	while (totRead < lenFile && ContinueBackgroundCache && (lenBuf = _lread (Fid,pBuf,SHRT_MAX))>0)
+	lenFile = llFileSeek (Fid,0,2);
+	llFileSeek (Fid,startLoc,0);
+	while (totRead < lenFile && ContinueBackgroundCache && (lenBuf = BigRead64 (Fid,pBuf,SHRT_MAX))>0)
 	{
 		LPBYTE pCompressedRec = malloc (lenBuf+1024);
 		int	   lCompressedRec = CompressBinaryRecord (pBuf,pCompressedRec+sizeof(int),lenBuf);
@@ -1692,7 +1692,7 @@ void __cdecl BackgroundFileSend (LPHANDLE phArgs)
 		totRead += lenBuf;
 		free (pCompressedRec);
 	}
-	_lclose (Fid);
+	GSSiClose64 (&Fid);
 	free (pBuf);
 	if (totRead == lenFile)
 		Fid = OpenFileGM (File,&OFStruct,OF_DELETE);

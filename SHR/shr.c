@@ -52,7 +52,7 @@ static HWND	FontListhWndDlg;
 static UINT	FontListCntl;
 static short	MaxWaitCycles=5;
 static short	have_crc_table=0;
-static HFILE	TraceFid=HFILE_ERROR;
+static HANDLE	TraceFid=INVALID_HANDLE_VALUE;
 static char		SaveWinText[144];
 static DLGPROC	lpfnTRACEWINDOWMsgProc;  
 static int		NumTries=0,NumSuccess=0;
@@ -114,7 +114,7 @@ HANDLE OpenFileGM(
 	_In_    UINT uStyle
 	)
 {
-	HANDLE fid = (int)INVALID_HANDLE_VALUE;
+	HANDLE fid = INVALID_HANDLE_VALUE;
 	char *fullPath;
 	int ln;
 	char	Name[MAX_PATH];
@@ -125,36 +125,36 @@ HANDLE OpenFileGM(
 	ExpandText(Name);
 
 	if (uStyle == OF_CREATE && !makedirectories(Name, FALSE, TRUE))
-		return HFILE_ERROR;
+		return  INVALID_HANDLE_VALUE;
 
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
 	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
 	if (!fullPath)
-		return HFILE_ERROR;
+		return  INVALID_HANDLE_VALUE;
 	ln = strlen(fullPath);
 	if (ln < OFS_MAXPATHNAME && allowOpenFile)
 	{
-		fid = OpenFile(fullPath,(LPOFSTRUCT) lpReOpenBuff, uStyle);
-		return fid;
+		HFILE fid = OpenFile(fullPath,(LPOFSTRUCT) lpReOpenBuff, uStyle);
+		return (HANDLE)fid;
 	}
 	else switch (uStyle)
 	{
 	case OF_READ:
-		fid = CreateFile(lpFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = CreateFile(fullPath, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_READWRITE:
-		fid = CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_CREATE:
-		fid = CreateFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_EXIST:
-		if (GetPathType2((LPSTR)lpFileName) == 1)
-			fid = 1;
+		if (GetPathType2((LPSTR)fullPath) == 1)
+			fid = (HANDLE)1;
 		break;
 	case OF_DELETE:
-		if (!remove(lpFileName))
-			fid = 1;
+		if (!remove(fullPath))
+			fid = (HANDLE)1;
 	default:
 	{
 		char mess[64];
@@ -163,7 +163,7 @@ HANDLE OpenFileGM(
 	}
 		break;
 	}
-	if (fid == HFILE_ERROR)
+	if (fid == INVALID_HANDLE_VALUE)
 		lpReOpenBuff->nErrCode = GetLastError();
 	return fid;
 }
@@ -264,8 +264,8 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 {
 	char JournalFileName[MAX_PATH];
 	LPSTR	pDot;
-	HFILE	FidJnl;
-	OFSTRUCTGM	OFStruct;
+	HANDLE	FidJnl;
+	OFSTRUCTGM	OFStruct = { 0 };
 	JOURNALHEADER	JournalHeader;
 	LPLONG	pNumIndexBlocks;
 	BOOL	st;
@@ -289,14 +289,14 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 		return 1;
 	}*/
 	FidJnl = OpenFileGM (JournalFileName,&OFStruct,Mode);
-	if (FidJnl != HFILE_ERROR)
+	if (FidJnl != INVALID_HANDLE_VALUE)
 	{
-		_lread (FidJnl,&JournalHeader,sizeof(JOURNALHEADER));
+		BigRead64 (FidJnl,&JournalHeader,sizeof(JOURNALHEADER));
 		if (JournalHeader.CheckPointID != CurrentCheckPointID)
 		{
 			int	st;
 
-			_lclose (FidJnl);
+			GSSiClose64 (&FidJnl);
 			st = remove (JournalFileName);
 			st = errno;
 		}
@@ -314,11 +314,11 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 				pNumIndexBlocks = GlobalLock (JournalFileIndex[Fid]);
 				*pNumIndexBlocks = JournalHeader.NumBlocks;
 				pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
-				_llseek (FidJnl,JournalHeader.BlockIndexLoc,0);
-				_lread (FidJnl,pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
+				llFileSeek (FidJnl,JournalHeader.BlockIndexLoc,0);
+				BigRead64 (FidJnl,pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
 				if (Mode != OF_READ)
 				{
-					_lclose (FidJnl);
+					GSSiClose64 (&FidJnl);
 					iFid = _open (JournalFileName,_O_RDWR);
 					ii=_chsize(iFid,JournalHeader.BlockIndexLoc);
 					_close (iFid);
@@ -328,7 +328,7 @@ int OpenJournal (LPSTR Name,HFILE Fid,UINT Mode)
 			}
 			else if (JournalHeader.HasBeenDeleted && Mode == OF_READ)
 			{
-				_lclose (FidJnl);
+				GSSiClose64 (&FidJnl);
 				goto Exit;
 			}
 			else
@@ -375,8 +375,8 @@ Create:
 		JournalFileIndex[Fid] = GSSiGlobAlloc (1599,GHND,sizeof(int)+1024*sizeof(JOURNALINDEXRECORD));
 		JournalIsCompleteFile[Fid] = 0;
 	}
-	_lwrite (FidJnl,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER));
-	st=FlushFileBuffers ((HANDLE)FidJnl);
+	BigWrite64 (FidJnl,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER),-1);
+	st=FlushFileBuffers (FidJnl);
 	JournalFileFid[Fid] = FidJnl;
 	rtn = 1;
 Exit:
@@ -398,14 +398,14 @@ BOOL CloseJournal (HFILE Fid)
 {
 	BOOL	rtn=FALSE;
 
-	if (JournalFileFid[Fid] != HFILE_ERROR)
+	if (JournalFileFid[Fid] != INVALID_HANDLE_VALUE)
 	{
 		LPSTR pFile, pFilesWithJournals;
 		int	len,ii;
 		JOURNALHEADER	JournalHeader;
 
-		_llseek (JournalFileFid[Fid],0,0); 
-		_lread (JournalFileFid[Fid],&JournalHeader,sizeof(JOURNALHEADER));
+		llFileSeek (JournalFileFid[Fid],0,0); 
+		BigRead64 (JournalFileFid[Fid],&JournalHeader,sizeof(JOURNALHEADER));
 		JournalHeader.FileLength = OpenFileLength[Fid];
 		if (!JournalIsCompleteFile[Fid])
 		{
@@ -413,16 +413,15 @@ BOOL CloseJournal (HFILE Fid)
 			LPJOURNALINDEXRECORD pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
 
 			JournalHeader.NumBlocks = *pNumIndexBlocks;
-			JournalHeader.BlockIndexLoc = _llseek (JournalFileFid[Fid],0,2); 
-			ii=_lwrite (JournalFileFid[Fid],(LPSTR)pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
+			JournalHeader.BlockIndexLoc = llFileSeek (JournalFileFid[Fid],0,2); 
+			ii=BigWrite64 (JournalFileFid[Fid],(LPSTR)pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD),1);
 			GSSiGlobUlFree (&JournalFileIndex[Fid]);
 		}
 		JournalFileIndex[Fid] = 0;
-		ii=_llseek (JournalFileFid[Fid],0,0); 
-		ii=_lwrite (JournalFileFid[Fid],(LPSTR)&JournalHeader,sizeof(JOURNALHEADER));
-		if (!_lclose (JournalFileFid[Fid]))
+		ii=llFileSeek (JournalFileFid[Fid],0,0); 
+		ii= BigWrite64(JournalFileFid[Fid],(LPSTR)&JournalHeader,sizeof(JOURNALHEADER),-1);
+		if (!GSSiClose64 (&JournalFileFid[Fid]))
 			rtn = TRUE;
-		JournalFileFid[Fid] = HFILE_ERROR;
 		len = strlen (OpenFileName[Fid]);
 		if (!len)
 			ii=1;
@@ -473,7 +472,7 @@ BOOL ApplyJournal (LPSTR FileName)
 	BOOL rtn=FALSE;
 	char JournalFileName[MAX_PATH];
 	LPSTR	pDot;
-	HFILE	FidJnl;
+	HANDLE	FidJnl;
 	OFSTRUCTGM	OFStruct;
 	JOURNALHEADER	JournalHeader;
 	LPLONG	pNumIndexBlocks;
@@ -485,9 +484,9 @@ BOOL ApplyJournal (LPSTR FileName)
 		*pDot = '_';
 	strcat (JournalFileName,".jnl");
 	FidJnl = OpenFileGM (JournalFileName,&OFStruct,OF_READ);
-	if (FidJnl != HFILE_ERROR)
+	if (FidJnl != INVALID_HANDLE_VALUE)
 	{
-		_lread (FidJnl,&JournalHeader,sizeof(JOURNALHEADER));
+		BigRead64 (FidJnl,&JournalHeader,sizeof(JOURNALHEADER));
 		if (JournalHeader.CheckPointID == CurrentCheckPointID)
 		{
 			if (JournalHeader.HasBeenDeleted) //file deleted
@@ -498,46 +497,46 @@ BOOL ApplyJournal (LPSTR FileName)
 			}
 			else if (JournalHeader.OrigFileLength < 0) //file created
 			{
-				HFILE	FidFile = OpenFileGM(FileName,&OFStruct,OF_CREATE);
+				HANDLE	FidFile = OpenFileGM(FileName,&OFStruct,OF_CREATE);
 				HANDLE	hJournalRecord = GSSiGlobAlloc (0,GMEM_MOVEABLE,USHRT_MAX);
 				LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 				int		nread;
 
-				ii = _llseek(FidJnl,0,2);
-				ii = _llseek(FidJnl, sizeof(JOURNALHEADER), 0);
-				while ((nread = _lread(FidJnl, pJournalRecord, USHRT_MAX)) > 0)
-					_lwrite (FidFile,pJournalRecord,nread);
+				ii = llFileSeek(FidJnl,0,2);
+				ii = llFileSeek(FidJnl, sizeof(JOURNALHEADER), 0);
+				while ((nread = BigRead64(FidJnl, pJournalRecord, USHRT_MAX)) > 0)
+					BigWrite64 (FidFile,pJournalRecord,nread,-1);
 				GSSiGlobUlFree (&hJournalRecord);
 				rtn = TRUE;
-				_lclose (FidFile);
+				GSSiClose64 (&FidFile);
 			}
 			else
 			{
 				LPJOURNALINDEXRECORD pIndexRecord;
 				HANDLE hIndex = GSSiGlobAlloc (1599,GHND,sizeof(int)+JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
 				int	i;
-				HFILE	FidFile = OpenFileGM(FileName,&OFStruct,OF_READWRITE);
+				HANDLE	FidFile = OpenFileGM(FileName,&OFStruct,OF_READWRITE);
 
 				char	JLogFile[MAX_PATH];
-				HFILE	JLog=HFILE_ERROR;
+				HANDLE	JLog=INVALID_HANDLE_VALUE;
 				short	ln;
 
 				pNumIndexBlocks = GlobalLock (hIndex);
 				pIndexRecord = (LPJOURNALINDEXRECORD)(pNumIndexBlocks+1);
-				ii=_llseek (FidJnl,JournalHeader.BlockIndexLoc,0);
-				ii=_lread (FidJnl,pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
+				ii=llFileSeek (FidJnl,JournalHeader.BlockIndexLoc,0);
+				ii=BigRead64 (FidJnl,pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
 				if (GetGlobalCVal ("[%JLOG]",JLogFile,0))
 				{
 					JLog = OpenFileGM (JLogFile,&OFStruct,OF_READWRITE);
-					if (JLog == HFILE_ERROR)
+					if (JLog == INVALID_HANDLE_VALUE)
 							JLog = OpenFileGM (JLogFile,&OFStruct,OF_CREATE);
-					_llseek (JLog,0,2);
+					llFileSeek(JLog,0,2);
 					ln = strlen (JournalFileName);
-					_lwrite (JLog,(LPSTR)&ln,2);
-					_lwrite (JLog,(LPSTR)JournalFileName,ln);
-					_lwrite (JLog,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER));
-					_lwrite (JLog,(LPSTR)pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD));
-					_lclose (JLog);
+					BigWrite64 (JLog,(LPSTR)&ln,2,-1);
+					BigWrite64(JLog,(LPSTR)JournalFileName,ln,-1);
+					BigWrite64(JLog,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER),-1);
+					BigWrite64(JLog,(LPSTR)pIndexRecord,JournalHeader.NumBlocks*sizeof(JOURNALINDEXRECORD),-1);
+					GSSiClose64 (&JLog);
 				}
 				for (i=0;i<JournalHeader.NumBlocks;i++,pIndexRecord++)
 				{
@@ -548,11 +547,11 @@ BOOL ApplyJournal (LPSTR FileName)
 						HANDLE	hJournalRecord = GSSiGlobAlloc (0,GMEM_MOVEABLE,BytesToRead);
 						LPBYTE	pJournalRecord = GlobalLock (hJournalRecord);
 
-						_llseek (FidJnl,pIndexRecord->JournalFileOffset,0);
-						_llseek (FidFile,StartLoc,0);
+						llFileSeek (FidJnl,pIndexRecord->JournalFileOffset,0);
+						llFileSeek(FidFile,StartLoc,0);
 						BytesToRead = min (BytesToRead,JournalHeader.FileLength - StartLoc);
-						_lread  (FidJnl,pJournalRecord,BytesToRead);
-						_lwrite (FidFile,pJournalRecord,BytesToRead);
+						BigRead64  (FidJnl,pJournalRecord,BytesToRead);
+						BigWrite64 (FidFile,pJournalRecord,BytesToRead,-1);
 						GSSiGlobUlFree (&hJournalRecord);
 						rtn = TRUE;
 					}
@@ -560,10 +559,10 @@ BOOL ApplyJournal (LPSTR FileName)
 						ii=1;
 				}
 				GSSiGlobUlFree (&hIndex);
-				_lclose (FidFile);
+				GSSiClose64 (&FidFile);
 			}
 		}
-		_lclose (FidJnl);
+		GSSiClose64 (&FidJnl);
 		if (!DeleteFile(JournalFileName))
 		{
 			ii = GetLastError();
@@ -589,8 +588,8 @@ BOOL DeleteFileInJournal (LPSTR FileName)
 	BOOL rtn=FALSE;
 	char JournalFileName[MAX_PATH];
 	LPSTR	pDot;
-	HFILE	FidJnl;
-	OFSTRUCTGM	OFStruct;
+	HANDLE	FidJnl;
+	OFSTRUCTGM	OFStruct = { 0 };
 	JOURNALHEADER	JournalHeader;
 	LPLONG	pNumIndexBlocks;
 	BOOL	st;
@@ -602,13 +601,13 @@ BOOL DeleteFileInJournal (LPSTR FileName)
 		*pDot = '_';
 	strcat (JournalFileName,".jnl");
 	FidJnl = OpenFileGM (JournalFileName,&OFStruct,OF_CREATE);
-	if (FidJnl != HFILE_ERROR)
+	if (FidJnl != INVALID_HANDLE_VALUE)
 	{
 		memset (&JournalHeader,0,sizeof(JOURNALHEADER));
 		JournalHeader.CheckPointID = CurrentCheckPointID;
 		JournalHeader.HasBeenDeleted = TRUE;
-		_lwrite (FidJnl,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER));
-		_lclose (FidJnl);
+		BigWrite64 (FidJnl,(LPSTR)&JournalHeader,sizeof(JOURNALHEADER),-1);
+		GSSiClose64 (&FidJnl);
 		rtn = TRUE;
 	}
 
@@ -631,7 +630,7 @@ BOOL ChangeSizeOfFileInJournal (HFILE Fid,int NewLength)
 	BOOL	rtn=FALSE;
 	int		i;
 
-	if (JournalFileFid[Fid] != HFILE_ERROR)
+	if (JournalFileFid[Fid] != INVALID_HANDLE_VALUE)
 	{
 		JOURNALHEADER	JournalHeader;
 		LPLONG	pNumIndexBlocks = GlobalLock (JournalFileIndex[Fid]);
@@ -639,8 +638,8 @@ BOOL ChangeSizeOfFileInJournal (HFILE Fid,int NewLength)
 		LPSTR pFile, pFilesWithJournals;
 		int	len,ii;
 
-		_llseek (JournalFileFid[Fid],0,0); 
-		_lread (JournalFileFid[Fid],&JournalHeader,sizeof(JOURNALHEADER));
+		llFileSeek (JournalFileFid[Fid],0,0); 
+		BigRead64 (JournalFileFid[Fid],&JournalHeader,sizeof(JOURNALHEADER));
 		for (i=0;i<*pNumIndexBlocks;i++,pIndexRecord++)
 		{
 			if (pIndexRecord->StartBlock*JournalHeader.BlockSize > NewLength)
@@ -648,8 +647,8 @@ BOOL ChangeSizeOfFileInJournal (HFILE Fid,int NewLength)
 		}
 		JournalHeader.NumBlocks = *pNumIndexBlocks = i;
 		JournalHeader.FileLength = NewLength;
-		_llseek (JournalFileFid[Fid],0,0); 
-		_lwrite (JournalFileFid[Fid],(LPSTR)&JournalHeader,sizeof(JOURNALHEADER));
+		llFileSeek (JournalFileFid[Fid],0,0); 
+		BigWrite64 (JournalFileFid[Fid],(LPSTR)&JournalHeader,sizeof(JOURNALHEADER),-1);
 		rtn = TRUE;
 		OpenFileLength[Fid] = NewLength;
 		GlobalUnlock (JournalFileIndex[Fid]);
@@ -727,7 +726,7 @@ Next:
 			else
 			{
 				*pNextPos = EndBlock + 1;
-				*pJournalBlockLoc = _llseek (JournalFileFid[Fid],0,2);
+				*pJournalBlockLoc = llFileSeek (JournalFileFid[Fid],0,2);
 			}
 			goto Exit;
 		}
@@ -836,30 +835,30 @@ long WriteWithJournal2 (HFILE Fid,LPBYTE pMF,DWORD isize)
 		{
 			BytesToEndOfBlock = JOURNAL_BLOCK_SIZE - ((StartLoc + isize -1) % JOURNAL_BLOCK_SIZE) -1;
 			BytesToWrite = isize;
-			JournalBlockLoc = _llseek (JournalFileFid[Fid],0,2);
+			JournalBlockLoc = llFileSeek(JournalFileFid[Fid],0,2);
 			if (BytesFromStartOfBlock)
 			{
-				_lseek (OpenFileFid[Fid],StartBlock * JOURNAL_BLOCK_SIZE,0);
-				_read (OpenFileFid[Fid],BlockPadding,BytesFromStartOfBlock);
-				_lwrite (JournalFileFid[Fid],BlockPadding,BytesFromStartOfBlock);
+				GSSillseek (OpenFileFid[Fid],StartBlock * JOURNAL_BLOCK_SIZE,0);
+				BigRead (OpenFileFid[Fid],BlockPadding,BytesFromStartOfBlock);
+				BigWrite64(JournalFileFid[Fid],BlockPadding,BytesFromStartOfBlock,-1);
 			}
-			written += _lwrite (JournalFileFid[Fid],pMF,BytesToWrite);
+			written += BigWrite64 (JournalFileFid[Fid],pMF,BytesToWrite,-1);
 			if (BytesToEndOfBlock)
 			{
 				if (EndLoc < OriginalFileLength[Fid])
 				{
-					_lseek (OpenFileFid[Fid],EndLoc+1,0);
-					_read (OpenFileFid[Fid],BlockPadding,BytesToEndOfBlock);
+					GSSillseek (OpenFileFid[Fid],EndLoc+1,0);
+					BigRead (OpenFileFid[Fid],BlockPadding,BytesToEndOfBlock);
 				}
-				_lwrite (JournalFileFid[Fid],BlockPadding,BytesToEndOfBlock);
+				BigWrite64 (JournalFileFid[Fid],BlockPadding,BytesToEndOfBlock,-1);
 			}
 			AddBlockToJournalIndex (Fid,StartBlock,EndBlock-StartBlock+1,JournalBlockLoc);
 		}
 		else if (StartBlock == FirstBlockInJournal)
 		{
 			BytesToWrite = min (isize,JOURNAL_BLOCK_SIZE - BytesFromStartOfBlock + (nBlocksInJournal - 1) * JOURNAL_BLOCK_SIZE);
-			_llseek (JournalFileFid[Fid],JournalBlockLoc+BytesFromStartOfBlock,0);
-			written += _lwrite (JournalFileFid[Fid],pMF,BytesToWrite);
+			llFileSeek (JournalFileFid[Fid],JournalBlockLoc+BytesFromStartOfBlock,0);
+			written += BigWrite64 (JournalFileFid[Fid],pMF,BytesToWrite,-1);
 			StartBlock += nBlocksInJournal;
 			BytesFromStartOfBlock = 0;
 		}
@@ -870,22 +869,22 @@ long WriteWithJournal2 (HFILE Fid,LPBYTE pMF,DWORD isize)
 			EndLoc2 = StartLoc2 + BytesToWrite - 1;
 			BytesToEndOfBlock = JOURNAL_BLOCK_SIZE - (EndLoc2 % JOURNAL_BLOCK_SIZE) - 1;
 			EndBlock   = (StartLoc2 + BytesToWrite -1) / JOURNAL_BLOCK_SIZE;
-			JournalBlockLoc = _llseek (JournalFileFid[Fid],0,2);
+			JournalBlockLoc = llFileSeek (JournalFileFid[Fid],0,2);
 			if (BytesFromStartOfBlock)
 			{
-				_lseek (OpenFileFid[Fid],StartBlock * JOURNAL_BLOCK_SIZE,0);
-				_read (OpenFileFid[Fid],BlockPadding,BytesFromStartOfBlock);
-				_lwrite (JournalFileFid[Fid],BlockPadding,BytesFromStartOfBlock);
+				GSSillseek(OpenFileFid[Fid],StartBlock * JOURNAL_BLOCK_SIZE,0);
+				BigRead (OpenFileFid[Fid],BlockPadding,BytesFromStartOfBlock);
+				BigWrite64 (JournalFileFid[Fid],BlockPadding,BytesFromStartOfBlock,-1);
 			}
-			written += _lwrite (JournalFileFid[Fid],pMF,BytesToWrite);
+			written += BigWrite64(JournalFileFid[Fid],pMF,BytesToWrite,-1);
 			if (BytesToEndOfBlock)
 			{
 				if (EndLoc2 < OriginalFileLength[Fid])
 				{
-					_lseek (OpenFileFid[Fid],EndLoc2+1,0);
-					_read (OpenFileFid[Fid],BlockPadding,BytesToEndOfBlock);
+					GSSillseek(OpenFileFid[Fid],EndLoc2+1,0);
+					BigRead (OpenFileFid[Fid],BlockPadding,BytesToEndOfBlock);
 				}
-				_lwrite (JournalFileFid[Fid],BlockPadding,BytesToEndOfBlock);
+				BigWrite64 (JournalFileFid[Fid],BlockPadding,BytesToEndOfBlock,-1);
 			}
 			AddBlockToJournalIndex (Fid,StartBlock,EndBlock-StartBlock+1,JournalBlockLoc);
 			StartBlock = FirstBlockInJournal;
@@ -921,8 +920,8 @@ long WriteWithJournal (HFILE Fid,LPBYTE pMF,DWORD isize)
 	{
 		int	Curpos = GSSillseek (Fid,0,1);
 		
-		_llseek (JournalFileFid[Fid],Curpos + sizeof(JOURNALHEADER),0);
-		written = _lwrite (JournalFileFid[Fid],pMF,isize);
+		llFileSeek (JournalFileFid[Fid],Curpos + sizeof(JOURNALHEADER),0);
+		written = BigWrite64 (JournalFileFid[Fid],pMF,isize,-1);
 		OpenFilePosition[Fid] = Curpos + isize;
 		OpenFileLength[Fid] = max (OpenFileLength[Fid],OpenFilePosition[Fid]);
 	}
@@ -970,8 +969,8 @@ long ReadWithJournal2 (HFILE Fid,LPBYTE pMF,DWORD isize)
 		else if (StartBlock == FirstBlockInJournal)
 		{
 			BytesToRead = min (isize,JOURNAL_BLOCK_SIZE - BytesFromStartOfBlock + (nBlocksInJournal - 1) * JOURNAL_BLOCK_SIZE);
-			ii=_llseek (JournalFileFid[Fid],JournalBlockLoc+BytesFromStartOfBlock,0);
-			nread += _lread (JournalFileFid[Fid],pMF,BytesToRead);
+			ii=llFileSeek (JournalFileFid[Fid],JournalBlockLoc+BytesFromStartOfBlock,0);
+			nread += BigRead64 (JournalFileFid[Fid],pMF,BytesToRead);
 			StartBlock += nBlocksInJournal;
 			BytesFromStartOfBlock = 0;
 		}
@@ -1013,8 +1012,8 @@ long ReadWithJournal (HFILE Fid,LPBYTE pMF,DWORD isize)
 	{
 		int	Curpos = GSSillseek (Fid,0,1);
 		
-		_llseek (JournalFileFid[Fid],Curpos + sizeof(JOURNALHEADER),0);
-		nread = _lread (JournalFileFid[Fid],pMF,isize);
+		llFileSeek (JournalFileFid[Fid],Curpos + sizeof(JOURNALHEADER),0);
+		nread = BigRead64 (JournalFileFid[Fid],pMF,isize);
 		OpenFilePosition[Fid] += nread;
 	}
 	else
@@ -1059,7 +1058,7 @@ long BigWrite (HFILE Fid,LPVOID pMF,DWORD isize,long loc)
 	if (!isize)
 		goto Exit;
 	LastAccessedFid = Fid;
-	if (JournalFileFid[Fid] != HFILE_ERROR)
+	if (JournalFileFid[Fid] != INVALID_HANDLE_VALUE)
 		written = WriteWithJournal (Fid,pMF,isize);
 	else
 	{
@@ -1649,7 +1648,7 @@ HFILE LogOpenFilesOpen (UINT Mode,HFILE Fid,LPOFSTRUCTGM pOFStruct)
 		for (i=0;i<MAXFILEHANDLES;i++)
 		{
 			OpenFileFid[i] = HFILE_ERROR; 
-			JournalFileFid[i] = HFILE_ERROR;
+			JournalFileFid[i] = INVALID_HANDLE_VALUE;
 			JournalIsCompleteFile[i] =0;
 			OpenFileHandle[i] = 0; 
 			FidIsMapped[i] = FALSE;
@@ -2380,8 +2379,8 @@ int AppendFile2 (LPSTR InFile,LPSTR Line)
 {GSSiEnterProg (188);
 #endif
 {
-	OFSTRUCTGM	OFStruct;
-	HFILE		Fid;
+	OFSTRUCTGM	OFStruct = { 0 };
+	HANDLE		Fid;
 	int			rtn=0;
 	BOOL		SaveAllowJournal = AllowJournal;
 	char		File2[MAX_PATH];
@@ -2398,17 +2397,17 @@ int AppendFile2 (LPSTR InFile,LPSTR Line)
 	if (!*File)
 		goto Exit;
 	Fid = OpenFileGM (File,&OFStruct,OF_READWRITE);
-	if (Fid == HFILE_ERROR)
+	if (Fid == INVALID_HANDLE_VALUE)
 		Fid = OpenFileGM (File,&OFStruct,OF_CREATE);
-	if (Fid == HFILE_ERROR) 
+	if (Fid == INVALID_HANDLE_VALUE)
 		goto Exit;
-	rtn = _llseek (Fid,0,2)+1;
+	rtn = llFileSeek (Fid,0,2)+1;
     len=strlen(Line);
     if (len)
-        _lwrite (Fid,(char *)Line,len); 
-    _lwrite (Fid,"\r\n",2);
+        BigWrite64 (Fid,(char *)Line,len,-1); 
+	BigWrite64(Fid,"\r\n",2,-1);
 	FlushFileBuffers ((HANDLE)Fid);
-	_lclose (Fid);
+	GSSiClose64 (&Fid);
 Exit:
 	AllowJournal = SaveAllowJournal;
 {
@@ -6981,12 +6980,12 @@ void SetTrace (BOOL On)
 {   
     if (!On || On == 3)
     {
-        if (TraceFid != HFILE_ERROR && TraceOn) 
-            _lclose (TraceFid);
+        if (TraceFid != INVALID_HANDLE_VALUE && TraceOn) 
+            GSSiClose64 (&TraceFid);
         if (TraceOn == 4)
         	TraceInWindow (0);
         TraceOn = FALSE; 
-        TraceFid = HFILE_ERROR; 
+        TraceFid = INVALID_HANDLE_VALUE; 
     }
     else
         TraceOn = On; 
@@ -7198,7 +7197,7 @@ GSSiExitProg (294);
     		goto Exit;
     }
     
-    if (TraceFid == HFILE_ERROR)                                      
+    if (TraceFid == INVALID_HANDLE_VALUE)                                      
     { 
 		int saveTraceOn = TraceOn;
 		BOOL saveContinueProcessing = ContinueProcessing;
@@ -7216,7 +7215,7 @@ GSSiExitProg (294);
             Sleep(500);
         }
     }
-    if (TraceFid == HFILE_ERROR)
+    if (TraceFid == INVALID_HANDLE_VALUE)
     {
         TraceFid = OpenFileGM (TraceFile,pOFStruct,OF_CREATE);  
         if (TraceTrace)
@@ -7225,7 +7224,7 @@ GSSiExitProg (294);
             SetWindowText (hWndMain,txt);
             Sleep(500);
         }
-        if (TraceFid == HFILE_ERROR)
+        if (TraceFid == INVALID_HANDLE_VALUE)
         {   
         
             EnableWindow (hWndMain,FALSE);
@@ -7237,7 +7236,7 @@ GSSiExitProg (294);
             goto Exit;  
         }
     }
-   	_llseek(TraceFid,0,2);
+   	llFileSeek(TraceFid,0,2);
     if (CurTraceLev > 0)
     {
     	_fmemset (Spaces,' ',CurTraceLev);  
@@ -7247,13 +7246,12 @@ GSSiExitProg (294);
     	*Spaces = 0;
     sprintf (pLine,"%s%s",Spaces,str);
 //   	fputstring (pLine,TraceFid);
-	_lwrite (TraceFid,pLine,strlen(pLine));
-	_lwrite (TraceFid,"\r\n",2);
+	BigWrite64 (TraceFid,pLine,strlen(pLine),-1);
+	BigWrite64(TraceFid,"\r\n",2,-1);
     GSSiGlobUlFree (&hMem);
     if (TraceOn == 2)
     {
-        _lclose (TraceFid);
-        TraceFid = HFILE_ERROR;
+        GSSiClose64 (&TraceFid);
     }
 Exit:
 	GSSiGlobUlFree (&hMem);  
@@ -7549,22 +7547,22 @@ void dpointtoatrunc (LPSTR Value,LPDPOINT pPoint)
 	return;
 }
 
-BOOL GSSiChangeLength (HFILE Fid,LONGLONG NewLength) 
-{        
+BOOL GSSiChangeLength(HFILE Fid, LONGLONG NewLength)
+{
 	short	st;
 	BOOL	rtn = FALSE;
 
 	if (Fid == HFILE_ERROR)
 		return FALSE;
-	if (JournalFileFid[Fid] != HFILE_ERROR)
-		ChangeSizeOfFileInJournal (Fid,NewLength);
+	if (JournalFileFid[Fid] != INVALID_HANDLE_VALUE)
+		ChangeSizeOfFileInJournal(Fid, NewLength);
 	else
 	{
 		if (NewLength > 0)
-			AddFileToUndoFile (0,NewLength+1,OpenFileFid[Fid]);
+			AddFileToUndoFile(0, NewLength + 1, OpenFileFid[Fid]);
 		else
 			NewLength = -NewLength;
-		st = _chsize_s (OpenFileFid[Fid],NewLength);
+		st = _chsize_s(OpenFileFid[Fid], NewLength);
 		if (!st)
 		{
 			OpenFileLength[Fid] = NewLength;
@@ -7574,12 +7572,18 @@ BOOL GSSiChangeLength (HFILE Fid,LONGLONG NewLength)
 	return rtn;
 }
 
-  
 HFILE GSSiClose2 (LPHFILE pFid)
 {
 	HFILE rtn = GSSiClose (*pFid);
 	
 	*pFid = HFILE_ERROR;
+	return rtn;
+}
+
+BOOL GSSiClose64(LPHANDLE pHandle)
+{
+	BOOL rtn = CloseHandle(*pHandle);
+	*pHandle = INVALID_HANDLE_VALUE;
 	return rtn;
 }
 
@@ -8071,7 +8075,24 @@ HFILE GSSiOpenFileMem (LPSTR InName,UINT mode,UINT maxlen)
 	}
 	return Fid;
 } 
+LONGLONG BigRead64(HANDLE Fid, LPVOID pBuf, LONGLONG isize)
+{
+	DWORD rtn;
+	if (!ReadFile(Fid, pBuf, isize, &rtn, NULL))
+		rtn = 0;
 
+	return rtn;
+}
+
+LONGLONG BigWrite64(HANDLE Fid, LPVOID pBuf, LONGLONG isize, LONGLONG seekloc)
+{
+	DWORD rtn;
+
+	if (!WriteFile(Fid, pBuf, isize, &rtn, NULL))
+		rtn = 0;
+
+	return rtn;
+}
 long BigRead (HFILE Fid,LPVOID pBuf,long isize)
 #if ENABLETRACE
 {GSSiEnterProg (390);
@@ -8094,7 +8115,7 @@ long BigRead (HFILE Fid,LPVOID pBuf,long isize)
 		rtn = GSSilread (Fid,pBuf,isize);
 		goto Exit;
 	}
-	if (JournalFileFid[Fid] != HFILE_ERROR)
+	if (JournalFileFid[Fid] != INVALID_HANDLE_VALUE)
 		rtn = ReadWithJournal (Fid,pBuf,isize);
 	else
 	{
@@ -11338,7 +11359,7 @@ GSSiExitProg (350);
 #endif
 } 
 
-BOOL fputstring2(LPSTR lpStr, HFILE Fid)
+BOOL fputstring2(LPSTR lpStr, HANDLE Fid)
 #if ENABLETRACE
 {GSSiEnterProg (350);
 #endif
@@ -11347,8 +11368,8 @@ BOOL fputstring2(LPSTR lpStr, HFILE Fid)
     
     len=_fstrlen(lpStr);
     if (len)
-        _lwrite (Fid,(char *)lpStr,len); 
-    _lwrite (Fid,"\r\n",2);
+        BigWrite64 (Fid,(char *)lpStr,len,-1); 
+	BigWrite64(Fid,"\r\n",2,-1);
 {
 #if ENABLETRACE
 GSSiExitProg (350);
@@ -11438,7 +11459,7 @@ GSSiExitProg (352);
 #endif
 }
 
-LPSTR fgetstring2 (LPSTR lpStr, int len, HFILE Fid)
+LPSTR fgetstring2 (LPSTR lpStr, int len, HANDLE Fid)
 #if ENABLETRACE
 {GSSiEnterProg (352);
 #endif
@@ -11447,9 +11468,9 @@ LPSTR fgetstring2 (LPSTR lpStr, int len, HFILE Fid)
     DWORD   loc; 
     
     *lpStr = 0;            
-    loc = _llseek (Fid,0,1); 
+    loc = llFileSeek (Fid,0,1); 
 	LastFGSLoc = loc;    
-    lrec = _lread (Fid,lpStr,len+2);
+    lrec = BigRead64 (Fid,lpStr,len+2);
     if (!lrec)// || lrec == (UINT)HFILE_ERROR)
 {
 #if ENABLETRACE
@@ -11469,8 +11490,8 @@ GSSiExitProg (352);
 		lpEnd++;
     lrec =  lpEnd - lpStr;
     LastFGSlRec = lrec;
-    _llseek (Fid,loc,0);
-    _llseek (Fid,lrec,1);
+	llFileSeek(Fid,loc,0);
+	llFileSeek(Fid,lrec,1);
 {
 #if ENABLETRACE
 GSSiExitProg (352);
@@ -13346,7 +13367,7 @@ LONG GSSillseek (HFILE Fid, LONG loc, int opt)
 		OpenFilePosition[Fid] = max (0,OpenFilePosition[Fid]);
 		return OpenFilePosition[Fid];
 	}
-	if (JournalFileFid[Fid] != HFILE_ERROR)
+	if (JournalFileFid[Fid] != INVALID_HANDLE_VALUE)
 	{   
 		switch (opt)
 		{
@@ -13401,7 +13422,7 @@ LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt)
 	rtnloc = _lseeki64 (OpenFileFid[Fid],loc,opt); 
 	return rtnloc;
 }
- 
+
 long  GSSilread(HFILE Fid, void _huge* ptr, long len)
 {   
 	
@@ -13497,21 +13518,21 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 		GetGlobalCVal ("[%BACKGROUNDLOGFILE]",File,"bkglog.txt");
 		//GetShortPathName2 (File,128);
 		Fid = OpenFileGM (File,&OFStruct,OF_READWRITE);
-		if (Fid == HFILE_ERROR)
+		if (Fid == INVALID_HANDLE_VALUE)
 			Fid = OpenFileGM (File,&OFStruct,OF_CREATE);
-		if (Fid != HFILE_ERROR) 
+		if (Fid != INVALID_HANDLE_VALUE) 
 		{
 			int	len;
 			char	DateTime[64]="$CAL([%SYS_CLOCK])";
 
 			ExpandText (DateTime);
-			_llseek (Fid,0,2); 
+			llFileSeek (Fid,0,2); 
 			sprintf (Line,"%s Message:%s Title:%s",DateTime,Mess,Title);
 		    len=_fstrlen(Line);
 			if (len)
-				_lwrite (Fid,(char *)Line,len); 
-			_lwrite (Fid,"\r\n",2);
-			_lclose (Fid);  
+				BigWrite64(Fid,(char *)Line,len,-1);
+			BigWrite64(Fid,"\r\n",2,-1);
+			GSSiClose64 (&Fid);  
 		}
 		free (Title);
 		SetContinueProcessing ( SaveCP);

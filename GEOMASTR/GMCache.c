@@ -10,7 +10,7 @@
 static  int		nCalls = 0;
 static  HWND	hWndGMCacheDialog = 0;
 static	int		cacheDelayBetweenReads = 100;
-int CreateFilesToCacheFile(LPSTR cachFileList, HFILE fidOut);
+int CreateFilesToCacheFile(LPSTR cachFileList, HANDLE fidOut);
 LONGLONG CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDir, LONGLONG StartPos);
 void UpdateCacheMessage(LPSTR mess);
 
@@ -133,13 +133,13 @@ int removeFilesBeingCached(LPSTR cachedir)
 	ExpandText(tempFile);
 	HANDLE Fid2 = OpenFileGM(tempFile, &OFStruct, OF_CREATE);
 	ii = SearchFilesInDirBC(str, 0, Fid2, &nFiles, "*.beingcached", 1, TRUE);
-	_llseek(Fid2, 0, 0);
+	llFileSeek(Fid2, 0, 0);
 	while (fgetstring2(str, MAX_PATH, Fid2))
 	{
 		GSSiRemove(str);
 		rtn++;
 	}
-	_lclose(Fid2);
+	GSSiClose64(&Fid2);
 	return rtn;
 }
 
@@ -178,13 +178,13 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 		HANDLE fidFilesToCache = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
 		int nFiles = CreateFilesToCacheFile(BackgroundCacheFilelist, fidFilesToCache);
-		_lclose(fidFilesToCache);
+		GSSiClose64(&fidFilesToCache);
 		if (!nFiles)
 		{
 			sprintf(FilesToCacheFile, "%sCACHE_IS_COMPLETE.tbr", CachePathnameTo);
 			HANDLE fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_CREATE);
-			_lwrite(fid, "NoFiles", 6);
-			_lclose(fid);
+			BigWrite64(fid, "NoFiles", 6,-1);
+			GSSiClose64(&fid);
 
 			DestroyWindow(hWnd);
 		}
@@ -194,24 +194,24 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			char cPid[32];
 			char LastDataUpdateFile[MAX_PATH];
 			sprintf(cPid,"%lli", (LONGLONG)Pid);
-			HFILE HANDLE = OpenFileGM(CachingPidFile, &OFStruct, OF_CREATE);
-			_lwrite(Fid, (LPSTR)cPid, strlen(cPid));
-			_lclose(Fid);
+			HANDLE Fid = OpenFileGM(CachingPidFile, &OFStruct, OF_CREATE);
+			BigWrite64(Fid, (LPSTR)cPid, strlen(cPid),-1);
+			GSSiClose64(&Fid);
 
 			strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
 			ExpandText(LastDataUpdateFile);
 
-			HANDLE = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
+			Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
 			SetTimer(hWnd, GMCACHE_TIMER, 20, 0);
 
-			if (Fid != HFILE_ERROR)
+			if (Fid != INVALID_HANDLE_VALUE)
 			{
 				char cmd[MAX_PATH + 2];
 				while (fgetstring2(cmd, 254, Fid))
 				{
 					ExpandText(cmd);
 				}
-				_lclose(Fid);
+				GSSiClose64(&Fid);
 			}
 
 		}
@@ -249,7 +249,7 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	case WM_SHOWWINDOW:
 		if (wParam)
 		{
-			DialogBox(hInst, (LPCTSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
+			DialogBox(hInst, (LPCTSTR)"GMCACHE_DIALOG", hWnd, (DLGPROC)GMCacheMsgProc);
 		}
 		else
 		{
@@ -267,7 +267,7 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case SIZE_MAXIMIZED:
 			if (!hWndGMCacheDialog)
 			{
-				DialogBox(hInst, (LPCTSTR)"GMCACHE_DIALOG", hWnd, GMCacheMsgProc);
+				DialogBox(hInst, (LPCTSTR)"GMCACHE_DIALOG", hWnd, (DLGPROC)GMCacheMsgProc);
 				ShowWindow(hWnd, SW_MINIMIZE);
 			}
 			break;
@@ -430,7 +430,7 @@ void NeedToStartBackgroundCache(void)
 
 	HANDLE	Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_READ);
 
-	if (Fid != HFILE_ERROR)
+	if (Fid != INVALID_HANDLE_VALUE)
 	{
 		char cmd[MAX_PATH+2];
 		fgetstring2(cmd, MAX_PATH, Fid);
@@ -439,29 +439,29 @@ void NeedToStartBackgroundCache(void)
 		{
 			ExpandText(cmd);
 		}
-		_lclose(Fid);
+		GSSiClose64(&Fid);
 	}
 	Fid = OpenFileGM(LastCacheStartTimeFile, &OFStruct, OF_READ);
 
-	if (Fid != HFILE_ERROR)
+	if (Fid != INVALID_HANDLE_VALUE)
 	{
-		int ln = _lread(Fid, cDate, 22);
+		int ln = BigRead64(Fid, cDate, 22);
 		ln = min(22, ln);
 		cDate[ln] = 0;
 
 		lastCacheStartTime = atol(cDate);
-		_lclose(Fid);
+		GSSiClose64(&Fid);
 	}
 	Fid = OpenFileGM(LastCacheCompleteTimeFile, &OFStruct, OF_READ);
 
-	if (Fid != HFILE_ERROR)
+	if (Fid != INVALID_HANDLE_VALUE)
 	{
-		int ln = _lread(Fid, cDate, 22);
+		int ln = BigRead64(Fid, cDate, 22);
 		ln = min(22, ln);
 		cDate[ln] = 0;
 
 		lastCacheCompleteTime = atol(cDate);
-		_lclose(Fid);
+		GSSiClose64(&Fid);
 	}
 	//lastCacheCompleteTime = 0;
 	if (lastDataUpdateTime > lastCacheCompleteTime)
@@ -480,8 +480,8 @@ void NeedToStartBackgroundCache(void)
 				sprintf(cDate, "%lli", currentTime);
 				Fid = OpenFileGM(LastCacheStartTimeFile, &OFStruct, OF_CREATE);
 				int ln = strlen(cDate);
-				_lwrite(Fid, cDate, ln + 1);
-				_lclose(Fid);
+				BigWrite64(Fid, cDate, ln + 1,-1);
+				GSSiClose64(&Fid);
 				GSSiRemove(TrustedCacheFiles);
 				GSSiGlobFree(&hTrustedCacheFiles);
 				StartGMCache();
@@ -505,22 +505,22 @@ void UpdateLastDataUpdate(LPSTR holdUntil,int bufferSize)
 	strcpy(LastDataUpdateFile, "[%DL]lastdataupdate.txt");
 	ExpandText(LastDataUpdateFile);
 	sprintf(cDate, "%lli", currentTime);
-	HFILE Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_CREATE);
+	HANDLE Fid = OpenFileGM(LastDataUpdateFile, &OFStruct, OF_CREATE);
 	int ln = strlen(cDate);
-	_lwrite(Fid, cDate, ln + 1);
+	BigWrite64(Fid, cDate, ln + 1,-1);
 	if (*holdUntil)
 	{
-		_lwrite(Fid, "\r\n", 2);
+		BigWrite64(Fid, "\r\n", 2,-1);
 		sprintf(cDate, "$CACHE(HOLD,%s)", holdUntil);
-		_lwrite(Fid, cDate, strlen(cDate));
+		BigWrite64(Fid, cDate, strlen(cDate),-1);
 	}
 	if (bufferSize)
 	{
-		_lwrite(Fid, "\r\n", 2);
+		BigWrite64(Fid, "\r\n", 2,-1);
 		sprintf(cDate, "[%%CACHEBUFFERSIZE]=%i", bufferSize);
-		_lwrite(Fid, cDate, strlen(cDate));
+		BigWrite64(Fid, cDate, strlen(cDate),-1);
 	}
-	_lclose(Fid);
+	GSSiClose64(&Fid);
 }
 
 void FreeTrustedFiles(void)
@@ -548,8 +548,8 @@ void UpdateCacheMessage(LPSTR mess)
 BOOL StartCachingFiles(void)
 {
 	static char DataLocDir[MAX_PATH];
-	static char CacheDir[MAX_PATH];
-	static char FilesToCacheFile[MAX_PATH];
+	static char CacheDir[MAX_PATH] = { 0 };
+	static char FilesToCacheFile[MAX_PATH] = { 0 };
 	OFSTRUCTGM	OFStruct = { 0 };
 	double PctDone = 0;
 	static LONGLONG StartPos = 0;
@@ -560,7 +560,7 @@ BOOL StartCachingFiles(void)
 #define NEACH_LOOP	10
 	int nProcessed = NEACH_LOOP;
 
-	HANDLE fid = HFILE_ERROR;
+	HANDLE fid = INVALID_HANDLE_VALUE;
 	static first = TRUE;
 	BOOL rtn = TRUE;
 	BOOL completed = FALSE;
@@ -576,13 +576,13 @@ BOOL StartCachingFiles(void)
 		ExpandText(FilesToCacheFile);
 
 		fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_READ);
-		totLen = _llseek(fid, 0, 2);
-		_llseek(fid, 0, 0);
+		totLen = llFileSeek(fid, 0, 2);
+		llFileSeek(fid, 0, 0);
 	}
 	else
 	{
 		fid = OpenFileGM(FilesToCacheFile, &OFStruct, OF_READ);
-		_llseek(fid, loc, 0);
+		llFileSeek(fid, loc, 0);
 	}
 	PctDone = 100.0 * (double)loc / (double)totLen;
 	if (fgetstring2(FromFile, MAX_PATH, fid))
@@ -607,7 +607,7 @@ BOOL StartCachingFiles(void)
 		StartPos = CacheFileInBackground(FromFile, CacheDir, DataLocDir, StartPos);
 		if (!StartPos)
 		{
-			loc = _llseek(fid, 0, 1);
+			loc = llFileSeek(fid, 0, 1);
 
 			PctDone = 100.0 * (double)loc / (double)totLen;
 			sprintf(mess, "%s\r\n(%.2f %% complete)", pName, PctDone);
@@ -616,18 +616,18 @@ BOOL StartCachingFiles(void)
 	}
 	else
 		completed = TRUE;
-	_lclose(fid);
+	GSSiClose64(&fid);
 	if (completed)
 	{
 		sprintf(FromFile, "%sCACHE_IS_COMPLETE.tbr", CacheDir);
 		fid = OpenFileGM(FromFile, &OFStruct, OF_CREATE);
-		_lwrite(fid, "Done", 4);
-		_lclose(fid);
+		BigWrite64(fid, "Done", 4,-1);
+		GSSiClose64(&fid);
 		rtn = FALSE;
 	}
 	return rtn;
 }
-int CreateFilesToCacheFile(LPSTR cachFileList,HFILE fidOut)
+int CreateFilesToCacheFile(LPSTR cachFileList,HANDLE fidOut)
 {
 	FILE* FidFilelist;
 	//char    File[MAX_PATH];
@@ -686,14 +686,14 @@ int CreateFilesToCacheFile(LPSTR cachFileList,HFILE fidOut)
 					*pWild++ = 0;
 					Fid2 = OpenFileGM(tempFile, &OFStruct, OF_CREATE);
 					ii = SearchFilesInDirBC(str, 0, Fid2, &nFiles, pWild, 1, wantSub);
-					_llseek(Fid2, 0, 0);
+					llFileSeek(Fid2, 0, 0);
 					while (fgetstring2(str, MAX_PATH, Fid2))
 					{
 							REPLAC(str, "[%DL]", DataLocDir, MAX_PATH);
 							fputstring2(str, fidOut);
 							totFiles++;
 					}
-					_lclose(Fid2);
+					GSSiClose64(&Fid2);
 					OpenFileGM(tempFile, &OFStruct, OF_DELETE);
 				}
 			}
@@ -719,17 +719,17 @@ BOOL UseTrustedCacheFile(LPSTR FileName)
 		OFSTRUCTGM OFStruct = { 0 };
 		sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CachePathnameTo);
 		ExpandText(TrustedCacheFiles);
-		HFILE fid = OpenFileGM(TrustedCacheFiles, &OFStruct, OF_READ);
-		if (fid != HFILE_ERROR)
+		HANDLE fid = OpenFileGM(TrustedCacheFiles, &OFStruct, OF_READ);
+		if (fid != INVALID_HANDLE_VALUE)
 		{
-			int ln = _llseek(fid, 0, 2);
-			_llseek(fid, 0, 0);
+			int ln = llFileSeek(fid, 0, 2);
+			llFileSeek(fid, 0, 0);
 			hTrustedCacheFiles = GSSiGlobAlloc(0,GMEM_MOVEABLE,ln+2);
 			LPSTR pTrustedFiles = GlobalLock(hTrustedCacheFiles);
-			_lread(fid, pTrustedFiles, ln);
+			BigRead64(fid, pTrustedFiles, ln);
 			pTrustedFiles[ln] = 0;
 			GlobalUnlock(hTrustedCacheFiles);
-			_lclose(fid);
+			GSSiClose64(&fid);
 		}
 		else
 			hTrustedCacheFiles = GSSiGlobAlloc(0, GHND, 4);
@@ -760,7 +760,7 @@ void RenameCachedFiles(void)
 	HFILE	Fid, Fid2;
 	long	TotFiles = 0;
 	LPSTR	pDot;
-	HFILE	FidCachedFiles = HFILE_ERROR;
+	HANDLE	FidCachedFiles = INVALID_HANDLE_VALUE;
 	OFSTRUCTGM	OFStruct = { 0 };
 	char dir[MAX_PATH];
 	strcpy(dir, CacheDir);
@@ -783,13 +783,13 @@ void RenameCachedFiles(void)
 		int lnCacheDirectory = strlen(CacheDirectory);
 		sprintf(TrustedCacheFiles, "%sTrustedCacheFiles.txt", CacheDirectory);
 		FidCachedFiles = OpenFileGM(TrustedCacheFiles, &OFStruct, OF_WRITE);
-		if (FidCachedFiles == HFILE_ERROR)
+		if (FidCachedFiles == INVALID_HANDLE_VALUE)
 		{
 			FidCachedFiles = OpenFileGM(TrustedCacheFiles, &OFStruct, OF_CREATE);
 			fputstring2("", FidCachedFiles);
 		}
 		else
-			_llseek(FidCachedFiles, 0, 2);
+			llFileSeek(FidCachedFiles, 0, 2);
 		CloseAllRequestedFiles(FALSE);
 		GSSillseek(Fid, 0, 0);
 		while (fgetstring(FromName, MAX_PATH, Fid))
@@ -816,10 +816,10 @@ void RenameCachedFiles(void)
 							sprintf(cDate, "%lli", currentTime);
 							sprintf(LastCacheCompleteTimeFile, "%sLastCacheCompleteTime.txt", CachePathnameTo);
 							ExpandText(LastCacheCompleteTimeFile);
-							HFILE Fid = OpenFileGM(LastCacheCompleteTimeFile, &OFStruct, OF_CREATE);
+							HANDLE Fid = OpenFileGM(LastCacheCompleteTimeFile, &OFStruct, OF_CREATE);
 							int ln = strlen(cDate);
-							_lwrite(Fid, cDate, ln + 1);
-							_lclose(Fid);
+							BigWrite64(Fid, cDate, ln + 1,-1);
+							GSSiClose64(&Fid);
 							KillTimer(hWndMain, GMCacheTimer);
 						}
 						continue;
@@ -855,8 +855,8 @@ void RenameCachedFiles(void)
 		}
 		GSSiGlobFree(&hTrustedCacheFiles);
 	}
-	if (FidCachedFiles != HFILE_ERROR)
-		_lclose (FidCachedFiles);
+	if (FidCachedFiles != INVALID_HANDLE_VALUE)
+		GSSiClose64 (&FidCachedFiles);
 	GSSiClose (Fid);
 	GSSiRemove(TempName);
 	return;
@@ -939,27 +939,27 @@ Next:
 	{
 		strcat(ToFileIntermediate, ".tbr");
 		FidTo = OpenFileGM(ToFileIntermediate, &OFStruct, OF_READ);
-		if (FidTo == HFILE_ERROR)
+		if (FidTo == INVALID_HANDLE_VALUE)
 			FidTo = OpenFileGM(ToFile, &OFStruct, OF_READ);
 		else
 		{
 			toIsRenameFile = TRUE;
 			GSSiRemove(ToFile);
 		}
-		if (FidFrom == HFILE_ERROR)
+		if (FidFrom == INVALID_HANDLE_VALUE)
 		{
-			if (FidTo != HFILE_ERROR)
+			if (FidTo != INVALID_HANDLE_VALUE)
 			{
-				_lclose(FidTo);
-				OpenFileGM(ToFile, &OFStruct, OF_DELETE);
-				OpenFileGM(ToFileIntermediate, &OFStruct, OF_DELETE);
+				GSSiClose64(&FidTo);
+				GSSiRemove(ToFile);
+				GSSiRemove(ToFileIntermediate);
 			}
 			return 0;
 		}
 		strcpy(ToFile, ToFileIntermediate);
 		st = GetFileInformationByHandle((HANDLE)FidFrom, &fifrom);
 		FromSize = (LONGLONG)fifrom.nFileSizeLow + ULONG_MAX * (LONGLONG)fifrom.nFileSizeHigh;
-		if (FidTo == HFILE_ERROR)
+		if (FidTo == INVALID_HANDLE_VALUE)
 			dtime = 1;
 		else
 		{
@@ -977,8 +977,7 @@ Next:
 				dtime = 1;
 			else
 				dtime = CompareFileTime(&fifrom.ftLastWriteTime, &fito.ftLastWriteTime);
-			_lclose(FidTo);
-			FidTo = HFILE_ERROR;
+			GSSiClose64(&FidTo);
 		}
 	}
 	if (dtime > 0)
@@ -1004,20 +1003,18 @@ Next:
 			if (!stricmp(pDot, ".tbr"))
 				strcpy(pDot, ".beingcached");
 			FidTo = OpenFileGM(ToFile, &OFStruct, OFMode);
-			if (FidTo != HFILE_ERROR)
+			if (FidTo != INVALID_HANDLE_VALUE)
 			{
-				BOOL st;
 				llFileSeek((HANDLE)FidTo, StartPos, 0);
 				llFileSeek((HANDLE)FidFrom, StartPos, 0);
 				TotRead = StartPos;
-				st = ReadFile((HANDLE)FidFrom, Cachebuf, lCachebuf, &lRead, 0);
+				lRead = BigRead64((HANDLE)FidFrom, Cachebuf, lCachebuf);
 				if (st && lRead > 0)
 				{
 					pos = llFileSeek((HANDLE)FidFrom, 0, 1);
-					if (lRead != _lwrite(FidTo, Cachebuf, lRead))
+					if (lRead != BigWrite64(FidTo, Cachebuf, lRead,-1))
 					{
-						_lclose(FidTo);
-						FidTo = HFILE_ERROR;
+						GSSiClose64(&FidTo);
 						OpenFileGM(ToFile, &OFStruct, OF_DELETE);
 					}
 					else
@@ -1038,8 +1035,8 @@ Next:
 			OpenFileGM(ToFileIntermediate, &OFStruct, OF_DELETE);
 			*pDollar = '#';
 			HANDLE FidIsGood = OpenFileGM(ToFileIntermediate, &OFStruct, OF_CREATE);
-			_lwrite(FidIsGood, "IsGood", 6);
-			_lclose(FidIsGood);
+			BigWrite64(FidIsGood, "IsGood", 6,-1);
+			GSSiClose64(&FidIsGood);
 		}
 	}
 	else
@@ -1051,10 +1048,10 @@ Next:
 			GSSiRemove(ToFileIntermediate);
 		}
 	}
-	_lclose(FidFrom);
-	if (FidTo != HFILE_ERROR)
+	GSSiClose64(&FidFrom);
+	if (FidTo != INVALID_HANDLE_VALUE)
 	{
-		_lclose(FidTo);
+		GSSiClose64(&FidTo);
 		if (pos == -2)
 		{
 			char name[MAX_PATH + 32];
@@ -1082,14 +1079,14 @@ void ContinueInteruptedCache(LPSTR CacheDir)
 	LONGLONG	RestartPos;
 	LPSTR	DataLocDir;
 	LPSTR	pTab;
-	OFSTRUCTGM	OFStruct;
+	OFSTRUCTGM	OFStruct = { 0 };
 
 	sprintf(RestartFile, "%sRestartCache.txt", CacheDir);
 	FidRestart = OpenFileGM(RestartFile, &OFStruct, OF_READ);
-	if (FidRestart != HFILE_ERROR)
+	if (FidRestart != INVALID_HANDLE_VALUE)
 	{
-		_lread(FidRestart, str, 600);
-		_lclose(FidRestart);
+		BigRead64(FidRestart, str, 600);
+		GSSiClose64(&FidRestart);
 		FidRestart = OpenFileGM(RestartFile, &OFStruct, OF_DELETE);
 		DataLocDir = strchr(str, '\t');
 		*DataLocDir++ = 0;
@@ -1113,16 +1110,16 @@ BOOL AnotherProcessIsCaching(LPSTR ProcessIDFile)
 	char	cPid[32];
 	HANDLE	Fid = OpenFileGM(ProcessIDFile, &OFStruct, OF_READ);
 
-	if (Fid == HFILE_ERROR)
+	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
 
-	int ln=_lread(Fid, cPid, sizeof(cPid));
+	int ln=BigRead64(Fid, cPid, sizeof(cPid));
 	if (ln > -1)
 	{
 		cPid[ln] = 0;
 		CachingPid = atol(cPid);
 	}
-	_lclose(Fid);
+	GSSiClose64(&Fid);
 	EnumProcesses(pPid, 4096 * sizeof(DWORD), &nBytes);
 	nPid = nBytes / sizeof(DWORD);
 	while (nPid--)
