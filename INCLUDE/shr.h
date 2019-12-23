@@ -277,8 +277,12 @@ BOOL FileErrMess (HFILE Fid,LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode);
 HANDLE OpenFileGM(
 	_In_    LPCSTR lpFileName,
 	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
-	_In_    UINT uStyle
-	);
+	_In_    UINT uStyle);
+HANDLE OpenFileEX(
+	_In_    LPCSTR lpFileName,
+	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
+	_In_    UINT uStyle,
+	_In_	UINT opt);
 BOOL FileOpenForWrite (HFILE Fid);
 HFILE OpenFileGSSi (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT opt,UINT ShareOpt);
 HFILE GSSiOpenFile (LPSTR Name,LPOFSTRUCTGM pOFStruct,UINT Mode);

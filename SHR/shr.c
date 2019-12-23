@@ -111,11 +111,10 @@ long Time64toTime32 (time_t time64)
 HANDLE OpenFileGM(
 	_In_    LPCSTR lpFileName,
 	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
-	_In_    UINT uStyle
-	)
+	_In_    UINT uStyle)
 {
 	HANDLE fid = INVALID_HANDLE_VALUE;
-	char *fullPath;
+	char* fullPath;
 	int ln;
 	char	Name[MAX_PATH];
 	int		rtn;
@@ -134,7 +133,7 @@ HANDLE OpenFileGM(
 	ln = strlen(fullPath);
 	if (ln < OFS_MAXPATHNAME && allowOpenFile)
 	{
-		HFILE fid = OpenFile(fullPath,(LPOFSTRUCT) lpReOpenBuff, uStyle);
+		HFILE fid = OpenFile(fullPath, (LPOFSTRUCT)lpReOpenBuff, uStyle);
 		return (HANDLE)fid;
 	}
 	else switch (uStyle)
@@ -144,6 +143,9 @@ HANDLE OpenFileGM(
 		break;
 	case OF_READWRITE:
 		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_WRITE:
+		fid = CreateFile(fullPath, GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
 	case OF_CREATE:
 		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
@@ -155,13 +157,73 @@ HANDLE OpenFileGM(
 	case OF_DELETE:
 		if (!remove(fullPath))
 			fid = (HANDLE)1;
+		break;
 	default:
 	{
 		char mess[64];
 		sprintf(mess, "Invalid Style in OpenFileGM:%lu", uStyle);
 		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
 	}
+	break;
+	}
+	if (fid == INVALID_HANDLE_VALUE)
+		lpReOpenBuff->nErrCode = GetLastError();
+	return fid;
+}
+HANDLE OpenFileEX(
+	_In_    LPCSTR lpFileName,
+	_Inout_ LPOFSTRUCTGM lpReOpenBuff,
+	_In_    UINT uStyle,
+	_In_	UINT opt)
+{
+	HANDLE fid = INVALID_HANDLE_VALUE;
+	char* fullPath;
+	int ln;
+	char	Name[MAX_PATH];
+	int		rtn;
+	BOOL	allowOpenFile = FALSE;
+
+	strcpy(Name, lpFileName);
+	ExpandText(Name);
+
+	if (uStyle == OF_CREATE && !makedirectories(Name, FALSE, TRUE))
+		return  INVALID_HANDLE_VALUE;
+
+	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
+	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
+	if (!fullPath)
+		return  INVALID_HANDLE_VALUE;
+	ln = strlen(fullPath);
+
+	switch (uStyle)
+	{
+	case OF_READ:
+		fid = CreateFile(fullPath, GENERIC_READ|opt, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 		break;
+	case OF_READWRITE:
+		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE | opt, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_WRITE:
+		fid = CreateFile(fullPath, GENERIC_WRITE | opt, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_CREATE:
+		fid = CreateFile(fullPath, GENERIC_READ | GENERIC_WRITE | opt, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+		break;
+	case OF_EXIST:
+		if (GetPathType2((LPSTR)fullPath) == 1)
+			fid = (HANDLE)1;
+		break;
+	case OF_DELETE:
+		if (!remove(fullPath))
+			fid = (HANDLE)1;
+		break;
+	default:
+	{
+		char mess[64];
+		sprintf(mess, "Invalid Style in OpenFileGM:%lu", uStyle);
+		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+	}
+	break;
 	}
 	if (fid == INVALID_HANDLE_VALUE)
 		lpReOpenBuff->nErrCode = GetLastError();

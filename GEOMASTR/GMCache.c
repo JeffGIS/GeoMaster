@@ -927,7 +927,7 @@ Next:
 	strcpy(ToFileIntermediate, ToFile);
 	if ((pDot = strrchr(ToFileIntermediate, '.')))
 		*pDot = '$';
-	FidFrom = OpenFileGM(FromFile, &OFStruct, OF_READ);
+	FidFrom = OpenFileEX(FromFile, &OFStruct, OF_READ, 0);
 	if (StartPos > 0)
 	{
 		strcat(ToFileIntermediate, ".beingcached");
@@ -1009,7 +1009,7 @@ Next:
 				llFileSeek((HANDLE)FidFrom, StartPos, 0);
 				TotRead = StartPos;
 				lRead = BigRead64((HANDLE)FidFrom, Cachebuf, lCachebuf);
-				if (st && lRead > 0)
+				if (lRead > 0)
 				{
 					pos = llFileSeek((HANDLE)FidFrom, 0, 1);
 					if (lRead != BigWrite64(FidTo, Cachebuf, lRead,-1))
@@ -1051,6 +1051,7 @@ Next:
 	GSSiClose64(&FidFrom);
 	if (FidTo != INVALID_HANDLE_VALUE)
 	{
+		ii=FlushFileBuffers(FidTo);
 		GSSiClose64(&FidTo);
 		if (pos == -2)
 		{

@@ -1,2 +1,2 @@
-configs\basemap_new3.gmc 
+/GMCache
 i:\bu_2018_02_28\geomas
