@@ -951,7 +951,7 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 	long	StartX, EndX;
 	short	st, i, Item; 
 	DPOINT	NearPoint; 
-	double	d, MinDist, AZ[3]={0,0,0};
+	double	d, MinDist=0, AZ[3]={0,0,0};
 	MNMXCORD Rect;
 	POINT	FilePoint, PickPoint;
 	HPDPOINT	HLTAreaPoints;	

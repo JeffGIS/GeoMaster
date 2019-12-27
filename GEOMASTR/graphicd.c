@@ -2712,7 +2712,7 @@ GSSiExitProg (440);
 				goto Exit;
 			RunStartupCommand (2);
 		    DisplayFinOpt = 0;
-			if (!FirstDisp)
+			if (App && !FirstDisp)
 				goto Exit;
 			if (App)
 			{

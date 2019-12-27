@@ -1252,7 +1252,10 @@ SetClassChar:
 					LPSTR	str=GlobalLock (hStr);
 
 					ShowVal.pTheme = CurTheme;
-					ShowVal.Point = WinPoint; 
+					if (CurTheme && CurTheme->DispersePoints)
+						ShowVal.Point = CurPointLoc;
+					else
+						ShowVal.Point = WinPoint; 
 					ShowVal.Type = CurTheme->DataType;
 					if (CurTheme->DataType == 2)	
 						ShowVal.AZ = MidPointAZ;			
@@ -2236,6 +2239,8 @@ GSSiExitProg (1275);
 				UseTestRect = 2;
 			}
 			nMoves = 0;
+			if (ShowVal.pTheme && ShowVal.pTheme->DispersePoints)
+				UseTestRect = FALSE;
 TryAgain:
 			if (DispText (hDC,FALSE,ShowVal.Point.x,ShowVal.Point.x, ShowVal.Point.y,0, HJust,VJust,
 				  		-sizex,1,1,Weight, FALSE,ShowVal.AZ,ShowVal.Text,0,UseTestRect,Shadow,ShadowColor,-1,0,0,0,0,0,ShowVal.pTheme->UseHalfTone,0,0,ShowVal.pTheme,&TextRect,0,0))
