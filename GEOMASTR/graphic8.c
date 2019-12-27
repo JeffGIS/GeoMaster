@@ -810,7 +810,7 @@ BOOL PointInMaskAreaWinCoord (POINT Point)
 #if ENABLETRACE
 GSSiExitProg (947);
 #endif
-		return TRUE;
+		return PtInDrawRect(Point);
 }
 	lpRect = (LPMNMXCORD) GlobalLock (hMaskArea);
     lpRect++;

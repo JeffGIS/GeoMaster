@@ -2851,6 +2851,8 @@ GSSiExitProg (633);
 	{
 		n++;
     	ExpandText (str);
+		//remove commas and dollar sign
+		RemoveChars(str, "$,");
 		if (MultiValOption != 1)
         {
             ValD = strtod (str,&ep);
