@@ -1,2 +1,2 @@
-/GMCache
-L:\geomas
+configs\basemap_new4.gmc 
+l:\geomas

@@ -1503,6 +1503,11 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 			SymbolLineColor[i] = SymbolLineColor[i+1];
 		}
 	}
+	if (pSymbolLines[nSymbolLines])
+	{
+		free(pSymbolLines[nSymbolLines]);
+		pSymbolLines[nSymbolLines] = 0;
+	}
 	nSymbolLines--;
 	return;
 }

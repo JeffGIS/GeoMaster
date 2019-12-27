@@ -277,7 +277,14 @@ void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size)
 {
 	if (_Size == 24)
 		ii = 1;
-	return malloc(_Size);
+	void * ptr =  malloc(_Size);
+	if (!ptr)
+	{
+		char mess[64];
+		sprintf(mess, "malloc fails on %i bytes", _Size);
+		MEMERR(mess);
+	}
+	return ptr;
 }
 
 void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDOVERFLOW size_t _Size)
