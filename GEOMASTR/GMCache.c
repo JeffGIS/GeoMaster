@@ -10,6 +10,8 @@
 static  int		nCalls = 0;
 static  HWND	hWndGMCacheDialog = 0;
 static	int		cacheDelayBetweenReads = 100;
+static	time_t lastCacheStartTime = 0;
+
 int CreateFilesToCacheFile(LPSTR cachFileList, HANDLE fidOut);
 LONGLONG CacheFileInBackground(LPSTR FromFileIN, LPSTR CacheDir, LPSTR DataLocDir, LONGLONG StartPos);
 void UpdateCacheMessage(LPSTR mess);
@@ -237,7 +239,8 @@ LRESULT CALLBACK WndProcGMCache(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			}
 			else
 			{
-				SetTimer(hWndMain, GMCACHE_TIMER, 20, 0);
+				KillTimer(hWnd, wParam);
+				SetTimer(hWndMain, GMCACHE_TIMER, cacheReadDelayInMicrosecs, 0);
 			}
 			return 0;
 		}
@@ -411,7 +414,6 @@ void NeedToStartBackgroundCache(void)
 	char cDate[24];
 	time_t currentTime;
 	time_t lastDataUpdateTime = 0;
-	time_t lastCacheStartTime = 0;
 	time_t lastCacheCompleteTime = 0;
 
 	time(&currentTime);
@@ -813,7 +815,7 @@ void RenameCachedFiles(void)
 							char LastCacheCompleteTimeFile[MAX_PATH];
 							GSSiRemove(FromName);
 							time(&currentTime);
-							sprintf(cDate, "%lli", currentTime);
+							sprintf(cDate, "%lli", lastCacheStartTime);
 							sprintf(LastCacheCompleteTimeFile, "%sLastCacheCompleteTime.txt", CachePathnameTo);
 							ExpandText(LastCacheCompleteTimeFile);
 							HANDLE Fid = OpenFileGM(LastCacheCompleteTimeFile, &OFStruct, OF_CREATE);

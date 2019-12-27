@@ -3626,7 +3626,9 @@ GSSiExitProg (532);
 		case 404:
 			lCachebuf = atol(Value);
 			break;
-			
+		case 405:
+			cacheReadDelayInMicrosecs = atol(Value);
+			break;
 		default:
  			break;
 	}
@@ -4050,7 +4052,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%HOTSPOTGRIDSIZE", 402, FALSE);
 	AllocateTypeVar("%MAXNUMPHOTOS", 403, FALSE);
 	AllocateTypeVar("%CACHEBUFFERSIZE", 404, FALSE);
-	
+	AllocateTypeVar("%CACHEREADDELAY", 405, FALSE);
+
 //	AllocateTypeVar("%DL",191,FALSE);
 	
 {
@@ -5296,6 +5299,9 @@ GSSiExitProg (533);
 			break;
 		case 404:
 			ltoa(lCachebuf, OutStr, 10);
+			break;
+		case 405:
+			ltoa(cacheReadDelayInMicrosecs, OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);

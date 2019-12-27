@@ -97,6 +97,7 @@ extern BOOL			AllowCache;
 extern int			GMCacheOnHoldUntil;
 extern BOOL			AllowJournal;
 extern UINT			lCachebuf;
+extern int			cacheReadDelayInMicrosecs;
 extern RECT			ClientRect;  
 extern short		ScreenWindowFactor;
 extern RECT			MainRect;
