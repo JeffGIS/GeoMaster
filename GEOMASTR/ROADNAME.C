@@ -373,6 +373,7 @@ BOOL AddToLayeredSymbolList (HPFPOINT Points,long np,int SymNum)
 			SymbolLineColor[nSymbolLines] = GlobalColors[0];
 		else
 			SymbolLineColor[nSymbolLines] = -1;
+		nSymbolLines++;
 	}
 Exit: 
 	return TRUE;
@@ -1502,11 +1503,6 @@ void LinkSymbolLines (short Line1,short Line2,short Type2, short Type1)
 			pSymbolLines[i] = pSymbolLines[i+1];
 			SymbolLineColor[i] = SymbolLineColor[i+1];
 		}
-	}
-	if (pSymbolLines[nSymbolLines])
-	{
-		free(pSymbolLines[nSymbolLines]);
-		pSymbolLines[nSymbolLines] = 0;
 	}
 	nSymbolLines--;
 	return;
