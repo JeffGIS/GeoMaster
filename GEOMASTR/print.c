@@ -1273,6 +1273,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
 	HDC		*pPrinterDC = &PrinterDC;
 	char	InitCmd[256];
     
+	wantGDIPlus = TRUE;
 	NumVirtualPages = 1;
 	GSSiTrace ("Begin Printmap",0);    
 	
