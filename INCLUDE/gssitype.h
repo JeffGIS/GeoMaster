@@ -3954,6 +3954,8 @@ BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in 
 int WINAPI GSSiFillRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
 #define FrameRect GSSiFrameRect
 int WINAPI GSSiFrameRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
+#define SetCursor GSSiSetCursorx
+HCURSOR WINAPI GSSiSetCursorx(_In_opt_ HCURSOR hCursor);
 
 #define SetTextColor GSSiSetTextColor
 COLORREF WINAPI GSSiSetTextColor(__in HDC hdc, __in COLORREF color);

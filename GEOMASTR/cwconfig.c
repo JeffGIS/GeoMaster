@@ -2534,7 +2534,6 @@ SetLastMessage(Message,wParam);
 	goto Return0;
 if (Message == WM_SETCURSOR)
 {
-    	extern	BOOL ddbug;
     	 if (!idTimer)
     	 {
 	    	 hCursor = VPCursor (hWnd);
@@ -2542,8 +2541,9 @@ if (Message == WM_SETCURSOR)
 				goto ReturnDefault;
 		 }
          //if (GetCursor () != hCursor)  
-         	GSSiSetCursor (hCursor);
- 		 goto Return0;
+
+		 GSSiSetCursor (hCursor);
+ 		 goto Return1;
 
 } 
 
@@ -6306,9 +6306,18 @@ GSSiEnterProg (0);
         break;
 
     default:
+		goto ReturnDefault;
          /* For any message for which you don't specifically provide a  */
          /* service routine, you should retrn the message to Windows   */
          /* for default message processing.                             */
+   }
+Return0:
+{
+#if ENABLETRACE
+GSSiExitProg(438);
+#endif
+return 0;
+}
 ReturnDefault:
 {
 #if ENABLETRACE
@@ -6316,14 +6325,13 @@ GSSiExitProg (438);
 #endif
          return DefWindowProc(hWnd, Message, wParam, lParam);
 }
-Return0:
+Return1:
 {
 #if ENABLETRACE
-GSSiExitProg (438);
+	GSSiExitProg(438);
 #endif
-         return 0;
+	return 1;
 }
-   }
 {
 #if ENABLETRACE
 GSSiExitProg (438);

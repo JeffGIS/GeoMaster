@@ -887,7 +887,13 @@ WritePoly:
 	}
 	return FALSE;
 }
-
+HCURSOR WINAPI GSSiSetCursorx(_In_opt_ HCURSOR hCursor)
+{
+//	extern BOOL ddbug;
+//	if (ddbug == 2)
+//		ii = 1;
+	return SetCursor(hCursor);
+}
 BOOL  WINAPI GSSiPolyline(__in HDC hdc, __in_ecount(cpt) CONST POINT *apt, __in int cpt)
 {
 	

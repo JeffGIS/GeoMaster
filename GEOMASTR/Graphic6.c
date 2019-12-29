@@ -4546,7 +4546,7 @@ HCURSOR VPCursor (HWND hWnd)
 	POINT	CursorPoint;
 	LPVIEWPORT	SaveView; 
 	short	iview, SaveCFG;  
-	HCURSOR	hcursor;
+	HCURSOR	hcursor=0;
 	
 	if (idTimer)
 {
@@ -4555,13 +4555,13 @@ GSSiExitProg (858);
 #endif
 		return (hDrawingCursor);
 }
-	if (hCursor == hWaitCursor || CursorIsGlobal)
+/*	if (hCursor == hWaitCursor || CursorIsGlobal)
 {
 #if ENABLETRACE
 GSSiExitProg (858);
 #endif
 		return (hCursor);  
-}
+}*/
 		
 	GetCursorPos (&CursorPoint); 
 	ScreenToClient (hWnd,&CursorPoint);

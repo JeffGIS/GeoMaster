@@ -7818,21 +7818,17 @@ HCURSOR GSSiSetCursor (HCURSOR hCursorIn)
 	static	HCURSOR hCurrentCursor=0;
 	static	HCURSOR hArrowCursor = 0;
 	static  ncalls = 0;
-
 	ncalls++;
-extern	BOOL	ddbug;
-	if (ddbug)
-		ddbug=FALSE;
 	if (hCursorIn == (HCURSOR)-1)
 		ii = 1;
 	if (!hCursorIn)
 	{
 		if (!hArrowCursor)
-			hArrowCursor = LoadCursor(0, IDC_ARROW);;
+			hArrowCursor = LoadCursor(0, IDC_ARROW);
 		hCursorIn = hArrowCursor;
 		hCurrentCursor = 0;
 	}
-	if (hCursorIn &&  hCursorIn != hCurrentCursor)
+	if (hCursorIn &&  hCursorIn != GetCursor())
 	{
 		if (!BackgroundTask)
 			hCur = SetCursor(hCursorIn);

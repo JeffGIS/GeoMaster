@@ -2781,7 +2781,6 @@ GSSiExitProg (440);
 			}
 		}
 		SetCurView(SaveVP);
-
 //		ApplyVPHalfTone (); 
 	}
     First = FALSE;
@@ -2930,11 +2929,18 @@ Exit:
 	}	
 	BlockSocketProcessing (FALSE);
 	GdiFlush ();
+	idTimer = 0;
 	GSSiSetCursor (VPCursor (hWndMain));
-	PostMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
-
+	SendMessage(hWndMain, WM_SETCURSOR, 0, 0L); 
 	if (Final)
-		ResetShowOnlyVis ();
+	{
+		ResetShowOnlyVis();
+		for (int iview = 0; iview < *pNumViewports; iview++)
+		{
+			pViewportsD[iview]->hCursor = DefaultCursor;
+		}
+		SetCursor(DefaultCursor);
+	}
 	if (CurrentConfig)
 	{
 		useGDIPlus = FALSE;
