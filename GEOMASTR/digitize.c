@@ -696,7 +696,7 @@ BOOL AddAreaToMap (LPSTR EditName,LPSTR TAG,LPSTR SymNameIn,LPSTR PointList,shor
 		if (!OpenMap (CurView->hWnd,0))
 			goto Exit;
 	    ForceRefIndex = ForceTAGIndex = FALSE; 
-		EditBounds = CurView->FileMNMX; 
+		EditBounds = CurView->FileBounds; 
 		if (Type == 3)
 		{
 			rtn = TRUE;
@@ -725,7 +725,7 @@ BOOL AddAreaToMap (LPSTR EditName,LPSTR TAG,LPSTR SymNameIn,LPSTR PointList,shor
     if (Type == 1 && nPoints > 1 ||
 		Type == 2 && nPoints == 1 ||
 		Type == 3 && (nPoints == 2 || nPoints == 3) ||
-		!Type && nPoints > 1)
+		!Type && abs (nPoints) > 1)
     {   
     	LPSTR	pColon = _fstrchr (TAG,':');
     	LPSTR	pVB	= strchr (TAG,'|');

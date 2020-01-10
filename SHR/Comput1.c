@@ -3980,11 +3980,11 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
 		AddDPointToMinMax (&pAreaPoints[i],&Bounds);
 	}  
 	if (Bounds.ymx - Bounds.ymn <= 0)
-		goto Exit;
+		goto Exit2;
 	Bounds = FactorBounds (&Bounds,1.01);
 	Factor = (Bounds.xmx - Bounds.xmn)/(Bounds.ymx - Bounds.ymn);
 	if (Factor <= 0)
-		goto Exit;
+		goto Exit2;
 	dWidth = min (10000,100 * Factor);
 	dHeight = dWidth / Factor; 
 	Factor = sqrt ((((double)USHRT_MAX*FAC)-2*sizeof(PIAAStruct)) / (dWidth * dHeight)); 
@@ -4178,7 +4178,8 @@ Exit:
     GSSiDeleteObject (&hRedPen);
     if (savebm) 
     	SaveBitmap (hBM,"c:\\test.bmp",0,0);
-    GSSiDeleteObject(&hBM);   
+    GSSiDeleteObject(&hBM); 
+Exit2:
 	useGDIPlus = saveuseGDIPlus;
 {
 #if ENABLETRACE
