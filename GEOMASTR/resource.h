@@ -46,6 +46,7 @@
 #define IDC_EDIT                        106
 #define IDS_COORD_NEG1                  107
 #define IDC_ADD                         108
+#define IDC_EDIT14                      108
 #define IDC_DELETE_INDEX                109
 #define IDC_RESET                       110
 #define IDC_REMOVE                      111

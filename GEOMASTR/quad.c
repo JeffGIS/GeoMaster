@@ -20,7 +20,7 @@ long GetFileConnectOffset(int Type, int Desc,mnmxCor MinMax,int AddLength, long 
     LPSTR       LPpltBuf;
     LPSHORT       ipnt;
     LPLONG      pOffset;
-    long    Type13Offset;
+    long    Type13Offset=0;
     long    Offset, CurOffset, EOFOffset;
     long    ii, RtnLoc,nn=0;    
     short	iblock=INT_MAX;

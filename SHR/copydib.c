@@ -42,6 +42,7 @@
 
 /* header files */
 #include "shr.h"
+#include "gmextern.h"
 #include "DIBUTIL.H"
 #include "DIBAPI.H"
 
@@ -351,7 +352,7 @@ HBITMAP FAR CopyScreenToBitmap(LPRECT lpRect)
    /*  create a DC for the screen and create
     *  a memory DC compatible to screen DC
     */
-   hScrDC = CreateDC("DISPLAY", NULL, NULL, NULL);
+   hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
    hMemDC = CreateCompatibleDC(hScrDC);
 
    /* get points of rectangle to grab */
@@ -363,7 +364,8 @@ HBITMAP FAR CopyScreenToBitmap(LPRECT lpRect)
    /* get screen resolution */
    xScrn = GetDeviceCaps(hScrDC, HORZRES);
    yScrn = GetDeviceCaps(hScrDC, VERTRES);
-
+   xScrn = RECTWIDTH(&MonitorRectangleComposite);
+   yScrn = RECTHEIGHT(&MonitorRectangleComposite);
    /* make sure bitmap rectangle is visible */
    if (nX < 0)
       nX = 0;

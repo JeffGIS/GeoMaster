@@ -1267,7 +1267,9 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 			struct _stati64 stat;
 			long	IndexTime;
 			double	dtime;
-
+#ifdef			_USE_32BIT_TIME_T
+			int iii = 1;
+#endif
 			GSSifstat(TMPFid, &stat);
 			IndexTime = stat.st_mtime;
 			dtime = difftime(stat.st_mtime, SHPParmTime);
@@ -1288,6 +1290,7 @@ BOOL OpenSHPFileIndex(LPSTR SHPFileName, HFILE SHPFid)
 
 				ii = GSSifstat(SHPFid, &stat);
 				dtime = difftime(stat.st_mtime, IndexTime);
+				dtime = 0;
 				if (DoClose)
 					GSSiClose2 (&SHPFid);
 				if (dtime > 0)

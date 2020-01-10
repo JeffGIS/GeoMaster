@@ -2583,7 +2583,7 @@ GSSiExitProg (1350);
 				  //$POINTLIST(AZM,name,pct,before;after;at(default)) at averages before and after if at node point
 				  //$POINTLIST(INTERSECT,name,name2,COUNT;id;Farthest;nearest,farornearpoint)
 		{
-			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (PointListCommands (nArgs,Arg,OutLoc))

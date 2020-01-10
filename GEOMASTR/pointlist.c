@@ -100,6 +100,7 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(CREATE,name,CLOSED(TorF),HLT,hltno(def=1))
 //$POINTLIST(CREATE,name,CLOSED(TorF),POINTLIST,plistname)
 //$POINTLIST(CREATE,name,CLOSED(TorF)) creates null list to which points can be added
+//$POINTLIST(CREATE,name,CLOSED(TorF),CIRCLE,center,radius,numpoints) 
 //$POINTLIST(DESTROY,name)
 //$POINTLIST(ADD,name,ptlist)
 //$POINTLIST(THIN,name,dist(if 0 removes dup points))
@@ -135,7 +136,7 @@ DestroyAll:
 		{
 			if (!stricmp (PointListID[i],Arg[2]))
 			{
-				if (nPointsInList[nPointLists])
+				if (nPointsInList[i])
 				{
 					GSSiGlobFree (&hPointList[i]);
 					nPointsInList[i] = 0;
@@ -188,10 +189,36 @@ DestroyAll:
 				rtn = TRUE;
 			}
 		}
-		else if (!stricmp (Arg[4],"ITEM")) //TAG:UDI
+		else if (!stricmp(Arg[4], "ITEM")) //TAG:UDI
 		{
 		}
-		else if (!stricmp (Arg[4],"POINTLIST")) 
+		else if (!stricmp(Arg[4], "CIRCLE"))
+		{
+			BOOL err;
+			DPOINT center = atopt(Arg[5],&err);
+			double radius = atof(Arg[6]);
+			int npt = atoi(Arg[7]);
+			nPointsInList[iList] = npt + 1;
+			if (nPointsInList[iList])
+			{
+				hPointList[iList] = GSSiGlobAlloc(1597, GMEM_MOVEABLE, (nPointsInList[iList]) * sizeof(DPOINT));
+				Points1 = GlobalLock(hPointList[iList]);
+				double azinc = TWOPI / npt;
+				double az = 0;
+				for (int i = 0; i < npt; i++)
+				{
+					Points1[i] = dnewpt(center, az, radius);
+					az += azinc;
+				}
+				Points1[npt] = Points1[0];
+				GlobalUnlock (hPointList[iList]);
+				if (iList == nPointLists)
+					nPointLists++;
+				rtn = TRUE;
+			}
+
+		}
+		else if (!stricmp (Arg[4],"POINTLIST"))
 		{
 			for (i=0;i<nPointLists;i++)
 			{

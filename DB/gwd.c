@@ -4351,6 +4351,7 @@ BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam
 	LPFIELDINFO	pFldInfo;
     HANDLE	hMem=0;                  
 	int   nItems;
+	UINT icmd = 0;
 	LPINT lpItems;
 	HANDLE hItems;   
 	static	HANDLE hNameLocal=0;  
@@ -4463,12 +4464,34 @@ Display:
 		rtn = FALSE;
 		break;
     case WM_COMMAND:
-#if WIN32
-        switch(LOWORD(wParam))
-#else
-        switch(wParam)
-#endif
-           {  
+		icmd = LOWORD(wParam);
+		switch (icmd)
+        { 
+		case IDC_DATA_LIST:
+		case IDC_DATA_LIST2:
+			switch (HIWORD(wParam))
+			{
+				default:
+				case LBN_SELCHANGE:
+					break;
+				case LBN_DBLCLK:
+				{
+					LPSTR pMem = malloc(4096);
+					LPSTR pTAB;
+					LPSTR pCmd = &pMem[2048];
+					int Item = SendDlgItemMessage(hWndDlg, icmd, LB_GETCURSEL, 0, 0);
+					SendDlgItemMessage(hWndDlg, icmd, LB_GETTEXT, Item, (LPARAM)((LPSTR)pMem));
+					if ((pTAB = _fstrrchr(pMem, '\t')))
+					{
+						*pTAB++ = 0;
+						sprintf(pCmd, "$TEXTTOCLIPBOARD(%s)", pTAB);
+						ExpandText(pCmd);
+						free(pMem);
+					}
+					break;
+				}
+			}
+			break;
               case IDC_SORTLIST:
 		          if (SendDlgItemMessage (hWndDlg,IDC_SORTLIST,(UINT)BM_GETCHECK,(WPARAM)0,(LPARAM)0L))
 		          {

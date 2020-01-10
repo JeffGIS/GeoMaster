@@ -1104,7 +1104,13 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 		case IDC_EDIT:
 			GMEdit(hWndDlg, cmdFile);
 			break;
-
+		case IDC_SAVE:
+			GetDlgItemText(hWndDlg, IDC_DIRECTORY, path, MAX_PATH - 1);
+			GetDlgItemText(hWndDlg, IDC_COMMAND, txt, MAX_PATH - 1);
+			sprintf(strchr(txt, 0), " /WD %s", path);
+			sprintf(str, "$TEXTTOCLIPBOARD(%s)", txt);
+			ExpandText(str);
+			break;
 		case IDOK:
 		{
 			char	drive[32];
@@ -1398,6 +1404,7 @@ ATOM RegisterTempWindowClass(LPSTR className, HINSTANCE hInst)
 void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 {
 	GetWindowRect(GetDesktopWindow(), &MonitorRectangle[0]);
+	MonitorRectangleComposite = MonitorRectangle[0];
 	if (nMon < 1)
 		return;
 	char className[] = "TempWindowClass";
@@ -1426,6 +1433,7 @@ void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 		ShowWindow(hWnd, SW_MAXIMIZE);
 		GetWindowRect(hWnd, &MonitorRectangle[iMon]);
 		DestroyWindow(hWnd);
+		UnionRect(&MonitorRectangleComposite, &MonitorRectangleComposite, &MonitorRectangle[iMon]);
 	}
 	UnregisterClass(className, hInst);
 	return;

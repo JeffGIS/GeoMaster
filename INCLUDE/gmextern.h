@@ -1819,6 +1819,7 @@ extern	char	CurrentZoomList[MAX_PATH];
 extern	char	CurrentZoomListEntry[256];
 extern	BOOL	CurrentZoomListIsShared;
 extern  RECT	MonitorRectangle[MAX_MONITORS];
+extern  RECT	MonitorRectangleComposite;
 extern  char	GraphicsMacro[MAX_PATH];
 extern  char	smallMessageText[MAX_SMALL_MESSAGE+1];
 extern HBITMAP hPatBMP[5];

@@ -3918,7 +3918,7 @@ GSSiExitProg (690);
         }
 
 Exit:  	GSSiGlobUlFree (&hpltBuf);
-    	if (SetTran)     
+    	if (SetTran)
     		ReadTranRecord();   
     	GSSiGlobUlFree (&hMem);
 {
