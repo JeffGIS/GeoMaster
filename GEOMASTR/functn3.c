@@ -1922,7 +1922,7 @@ GotCloseFilehSQL:
 			showOnlyData = atob(Arg[8]);
 			if (!atob (Arg[8]))
 			{
-
+				showOnlyData = TRUE;
 				BasicDisplayItem = -1;
 				nRc = DialogBox(hInst, (LPSTR)"IDENTIFY", hWndMain, (DLGPROC)IDENTIFYMsgProc);
 

@@ -1699,13 +1699,14 @@ static void AdjustIdentifyWindow(HWND hWndDlg, BOOL first)
 		MoveWindow(hWndDlg, displayRect.left, displayRect.top, RECTWIDTH(&displayRect), RECTHEIGHT(&displayRect), !first);
 	GetClientRect(hWndDlg, &mr);
 	MoveWindow(GetDlgItem(hWndDlg, IDCANCEL), RECTWIDTH(&mr) - RECTWIDTH(&r0) - 2, 0, RECTWIDTH(&r0), RECTHEIGHT(&r0), !first);
+	MoveWindow(GetDlgItem(hWndDlg, IDC_EXIT), RECTWIDTH(&mr) - RECTWIDTH(&r0) - 2, 0, RECTWIDTH(&r0), RECTHEIGHT(&r0), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_NEXT), RECTWIDTH(&mr) - (mro.right - r1.right) - RECTWIDTH(&r1), r1.top, RECTWIDTH(&r1), RECTHEIGHT(&r1), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_PRIOR), RECTWIDTH(&mr) - (mro.right - r2.right) - RECTWIDTH(&r2), r2.top, RECTWIDTH(&r2), RECTHEIGHT(&r2), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), RECTWIDTH(&mr) - (mro.right - r3.right) - RECTWIDTH(&r3), r3.top, RECTWIDTH(&r3), RECTHEIGHT(&r3), !first);
 	MoveWindow(GetDlgItem(hWndDlg, IDC_NOTES), RECTWIDTH(&mr) - (mro.right - r5.right) - RECTWIDTH(&r5), r5.top, RECTWIDTH(&r5), RECTHEIGHT(&r5), !first);
-	if (showOnlyData)
+	/*if (showOnlyData)
 		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, RECTHEIGHT(&r0) + 4, RECTWIDTH(&mr), RECTHEIGHT(&mr) - 38, !first);
-	else
+	else*/
 		MoveWindow(GetDlgItem(hWndDlg, IDENTIFY_DATA), 0, r4.top, RECTWIDTH(&mr), RECTHEIGHT(&mr) - r4.top, !first);
 }
 
@@ -1907,6 +1908,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PHOTO1), SW_HIDE);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_NOTES), SW_HIDE);
 			// ShowWindow(GetDlgItem(hWndDlg, IDCANCEL), SW_HIDE); 
+			ShowWindow(GetDlgItem(hWndDlg, IDC_EXIT), SW_SHOW);
 		}
 		RecNo = 0;
 	Show:
@@ -2068,6 +2070,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			GetWindowRect(hWndDlg, &displayRect);
 			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
 			break;
+		case IDC_EXIT:
 		case IDC_SAVEANDEXIT:
 		{
 
@@ -2127,6 +2130,8 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 					LPOPENFILEDATA	FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
 					int				Type = FilePtr->Type;
 
+					if (lpAutoUpdateFieldList && !strnicmp(lpAutoUpdateFieldList, "MACRO(", 6))
+						Type = 0;
 					if (UpdateType == 1)
 						st = GetTextString(hWndDlg, NewValue, 1024, str, 0, 0, 0, TRUE, TRUE);
 					else

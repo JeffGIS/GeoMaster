@@ -1839,6 +1839,7 @@ GSSiExitProg (1350);
 		{   
 			if (Printing)
 				goto RtnTrue;
+			skipPaint = 0;
 			if (*Args && CurView) 
 			{
 				 HDC hDC = 0;
@@ -2706,8 +2707,26 @@ GSSiExitProg (1350);
 			itoa(i, OutLoc, 10);
 			goto Rtnl;
 		}
+		case 951: // $ADDQUOTES(dbid,fieldname,val,errorvarname)
+		{
+			HANDLE	hDB = 0;
 
-
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 2)
+				goto RtnFalse;
+			if (!(hDB = GetOpenDatabaseFromID(Arg[1])))
+				goto RtnFalse;
+			BOOL NeedQuote = NeedSQLValueQuote(hDB, Arg[2]);
+			if (NeedQuote)
+			{
+				sprintf(OutLoc, "'%s'", Arg[3]);
+			}
+			else
+			{
+				strcpy(OutLoc, Arg[3]);
+			}
+			goto Rtnl;
+		}
 		case 1001: // $DECOMPPOLY(OutFile,InteriorLineDesc,ExteriorLineDesc,LinkBetweenNodes(Opt F)
 		{	 
             DLGPROC lpfnDECOMPPOLYMsgProc; 

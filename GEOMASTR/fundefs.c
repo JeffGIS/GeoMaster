@@ -428,6 +428,8 @@ int	GetFunctionID9 (LPSTR str)
 			if (!_fstrnicmp(str, "MAPSERVER", 9)) return 948;
 			if (!_fstrnicmp(str, "CASECOUNT", 9)) return 949;
 			if (!_fstrnicmp(str, "APPENDRAW", 9)) return 950;
+			if (!_fstrnicmp(str, "ADDQUOTES", 9)) return 951;
+			
 			return 0;
 }
 int	GetFunctionID10 (LPSTR str)
