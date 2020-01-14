@@ -1821,6 +1821,12 @@ GSSiExitProg (1350);
 			}
 			goto Rtnrtn;
 		}
+		case 857://$DBLQUOTE(text) convert single quote to double quote in text string
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			DoubleQuotes(Arg[1], OutLoc);
+			goto Rtnl;
+		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);

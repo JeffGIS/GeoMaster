@@ -3915,6 +3915,25 @@ GSSiExitProg (231);
 }
 #endif
 }  
+BOOL DoubleQuotes(LPCSTR instr, LPSTR outstr)
+{
+	BOOL rtn = FALSE;
+
+	while (*instr)
+	{
+		if (*instr == '\'')
+		{
+			*outstr++ = '\'';
+			*outstr++ = '\'';
+			rtn = TRUE;
+		}
+		else
+			*outstr++ = *instr;
+		instr++;
+	}
+	*outstr = 0;
+	return rtn;
+}
 
 LPSTR RemoveDoubleQuotes(LPSTR str)
 #if ENABLETRACE

@@ -88,7 +88,7 @@ BOOL SQLOK(int sqlReturn, sqlite3* database, char *method, char ** error)
 	return sqlReturn;
 }
 
-BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** error)
+BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char * errorFile)
 {
 	if (sqlReturn != SQLITE_OK)
 	{
@@ -102,7 +102,10 @@ BOOL SQLOK2(int sqlReturn, sqlite3* database, char *method, char*cmd, char ** er
 
 		if (cmd && *cmd)
 			sprintf(strchr(mess, 0), "\n\n%s", cmd);
-		GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
+		if (errorFile)
+			AppendFile(errorFile,mess);
+		else
+			GSSiMessageBox(3, mess, "SQLite Error", MB_OK, 0);
 		free(mess);
 	}
 
@@ -474,7 +477,7 @@ int GetSQLITEDistinct(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where,
 	return rtn;
 }
 
-int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile, LPSTR orderBy)
+int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR OutFile, LPSTR orderBy,LPSTR errorFile)
 {
 #define NO_FILE	(HFILE_ERROR - 1)
 	HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX);
@@ -507,7 +510,7 @@ int SQLITEQuery(sqlite3 *db, LPSTR tableName, LPSTR fieldsIN, LPSTR where, LPSTR
 			sprintf(strchr(pCmd, 0), " ORDER BY %s", orderBy);
 		if (db)
 		{
-			if (SQLOK2(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "query",pCmd, 0) == SQLITE_OK)
+			if (SQLOK2(sqlite3_prepare_v2GSSi(db, pCmd, -1, &statement, 0), db, "query",pCmd, errorFile) == SQLITE_OK)
 			{
 				int numcol = sqlite3_column_count(statement);
 				char delim[2] = { 0 };
@@ -770,7 +773,7 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				if (convertInsertInto)
 					REPLAC(cmd, "INSERT INTO", "INSERT OR REPLACE INTO", MAXSTR - 2);
 				getIdForUpdate(cmd, FALSE, db);
-				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, &error);
+				err = SQLOK2(sqlite3_exec(db, cmd, NULL, NULL, &error), db,errLoc,cmd, 0);
 				sqlite3_free(error);
 				
 				if (err && !skipErrors)
@@ -899,10 +902,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 		db = (sqlite3*)atoi(ARG[2]);
 		rtn = GetSQLITEDistinct(db, ARG[3], ARG[4], ARG[5], ARG[6]);
 	}
-	else if (!stricmp(ARG[1], "QUERY"))//$SQLITE(QUERY,sqlitehandle,tablename,fields,where clause,outfile(opt),orderby(opt))
+	else if (!stricmp(ARG[1], "QUERY"))//$SQLITE(QUERY,sqlitehandle,tablename,fields,where clause,outfile(opt),orderby(opt),errorFile)
 	{
 		db = (sqlite3*)atoi(ARG[2]);
-		rtn = SQLITEQuery(db, ARG[3], ARG[4], ARG[5], ARG[6], ARG[7]);
+		rtn = SQLITEQuery(db, ARG[3], ARG[4], ARG[5], ARG[6], ARG[7], ARG[8]);
 	}
 	else if (!stricmp(ARG[1], "NUMROWS"))//$SQLITE(NUMROWS,sqlitehandle,tablename,where clause)
 	{
