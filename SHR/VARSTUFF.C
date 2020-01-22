@@ -3629,6 +3629,9 @@ GSSiExitProg (532);
 		case 405:
 			cacheReadDelayInMicrosecs = atol(Value);
 			break;
+		case 406:
+			forceZoomToGoogle = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -4053,6 +4056,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%MAXNUMPHOTOS", 403, FALSE);
 	AllocateTypeVar("%CACHEBUFFERSIZE", 404, FALSE);
 	AllocateTypeVar("%CACHEREADDELAY", 405, FALSE);
+	AllocateTypeVar("%FORCEZOOMTOGOOGLE", 406, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5302,6 +5306,9 @@ GSSiExitProg (533);
 			break;
 		case 405:
 			ltoa(cacheReadDelayInMicrosecs, OutStr, 10);
+			break;
+		case 406:
+			btoa(forceZoomToGoogle, OutStr);
 			break;
 	}
 	GlobalUnlock (hGlobal);

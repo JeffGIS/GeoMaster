@@ -1680,6 +1680,7 @@ double  adjustIntensity = 0;
 int		GoogleScale = 1;
 int		GoogleZoom = 21;
 int		GoogleMapType=1;
+BOOL	forceZoomToGoogle = TRUE;
 int		GoogleMapWidth=640, GoogleMapHeight=640;
 BOOL	AllAreasArePositive = TRUE;
 BOOL	useTextFileSQLiteIndex = FALSE;

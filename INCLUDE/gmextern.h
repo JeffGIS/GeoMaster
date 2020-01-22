@@ -1811,6 +1811,7 @@ extern	int		defaultLineTransparency;
 extern  double  adjustIntensity;
 extern  int		GoogleScale;
 extern	int		GoogleZoom;
+extern  BOOL	forceZoomToGoogle;
 extern  int		GoogleMapWidth, GoogleMapHeight;
 extern  int		GoogleMapType;
 extern  BOOL	AllAreasArePositive;

@@ -3797,7 +3797,7 @@ HANDLE	OpenSLTDatabase(LPSTR NameIN, PSTR SQL, short Access)
 
 	hDB = GSSiGlobAlloc(1505, GHND, USHRT_MAX);
 	pDB = (LPSQLDATABASE)GlobalLock(hDB);
-	pDB->hasRowID = TRUE;
+	pDB->hasRowID = FALSE;
 	pDB->xLoc = -1;
 	pDB->yLoc = -1;
 	strcpy(Name, NameIN);
@@ -4074,6 +4074,7 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	{
 		LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(hDB);
 		int l = sqlite3_column_bytes(pDB->statement, WantField);
+		LPSTR nam = sqlite3_column_name(pDB->statement, WantField);
 		LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, WantField);
 		*irc = 0;
 

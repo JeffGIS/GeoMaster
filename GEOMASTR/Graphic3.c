@@ -1325,7 +1325,7 @@ static BOOL SetUseGoogleZooms(void)
 			strcpy(fileName, CurView->lpFiles[ifile]);
 			ExpandText(fileName);
 			if (!strnicmp(fileName, "GOOGLE.", 7))
-				return TRUE;
+				return forceZoomToGoogle;
 		}
 	}
 	return FALSE;
