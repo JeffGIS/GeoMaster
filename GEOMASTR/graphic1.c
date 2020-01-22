@@ -362,6 +362,8 @@ void QuitGraphics()
 	CRAPI_Destroy();
 	GM32NADCONFREE();
 	SaveWindowPosition();
+	FreehPDChunkReport();
+
 	if (LogMSGFile != HFILE_ERROR)
 	{
 		GSSiClose2 (&LogMSGFile);

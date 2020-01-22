@@ -33,6 +33,7 @@ extern BOOL PrintWasCanceled;
 extern char	CurVirtPrinter[128];
 extern char	CustomHeight[16],CustomWidth[16];  
 extern char	VirtPrinterImageFile[256];
+static HANDLE	hPDChunkReport = NULL;
 
 
 static	short	CurrentStatusWindowVP;
@@ -2071,7 +2072,6 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    HWND		ghWnd;
    static	BOOL IsVirtPrinter=FALSE;
    static	HANDLE hVirtPrinter=0;
-   static HANDLE	hPDChunk=NULL;
 	LPPRINTDLG	lpPDChunk;
 
 	HDC		mfDC=0, PrinterDC=0;
@@ -2085,14 +2085,14 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    hWnd = NULL;
    
      wSize = sizeof(PRINTDLG);
-     if (!hPDChunk)
+     if (!hPDChunkReport)
      {
-     	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
+     	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunkReport, wSize)))
         	return(MemError());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
-     	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
+     	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunkReport);
      lpPDChunk->hwndOwner = ghWnd;
      	
 //     setDoPaint( FALSE); 
@@ -2231,7 +2231,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
      {
         ProcessCDError(CommDlgExtendedError());
      }
-    GlobalUnlock(hPDChunk);
+    GlobalUnlock(hPDChunkReport);
     Printing = FALSE; 
     {
 		HaltPaint = FALSE;
@@ -2246,7 +2246,10 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
     return (rtn);
 
 }     
-
+void FreehPDChunkReport(void)
+{
+	GSSiGlobFree(&hPDChunkReport);
+}
 BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 {
 	HDC hPr;

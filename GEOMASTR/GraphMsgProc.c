@@ -2041,8 +2041,10 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 
 	case WM_COMMAND:
 		rtn = TRUE;
+
 		switch (LOWORD(wParam))
 		{
+
 		case IDC_PHOTO1:
 			sprintf(cmd, "$IMAGE(%s,180,%i)", photoFile1, displayRect.right);
 			ExpandText(cmd);
@@ -2110,8 +2112,19 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				UpdateType = GetUpdateFieldType(SetFieldName);
 				if (!UpdateType)
 				{
-					//sprintf (str,"Update of field %s not allowed",SetFieldName);
-					//MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
+					LPSTR pMem = malloc(4096);
+					LPSTR pTAB;
+					LPSTR pCmd = &pMem[2048];
+					SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_GETTEXT, Choice, (LPARAM)((LPSTR)pMem));
+					if ((pTAB = _fstrrchr(pMem, '\t')))
+					{
+						*pTAB++ = 0;
+						sprintf(pCmd, "$TEXTTOCLIPBOARD(%s)", pTAB);
+						ExpandText(pCmd);
+						free(pMem);
+					}
+					else
+						free(pMem);
 					break;
 				}
 				if (UpdateType == 3)

@@ -4488,6 +4488,8 @@ Display:
 						ExpandText(pCmd);
 						free(pMem);
 					}
+					else
+						free(pMem);
 					break;
 				}
 			}

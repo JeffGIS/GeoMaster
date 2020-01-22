@@ -2866,6 +2866,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	    	CurView->NumFiles=1;    
 	    	CurView->SubFile = 0;
 	    	CurView->NumThemes=0;
+			CurView->hBinFileList = 0;
 	    	_fstrcpy (pSaveFile1,CurView->lpFiles[0]); 
 	    	_fstrcpy (CurView->lpFiles[0],pDTMInfo->TINIndex);  
 	    	CurView->FileType[0] = 4;
