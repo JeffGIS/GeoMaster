@@ -1,3 +1,4 @@
+configs\HiPriMaps_ramps.gmc /F  /WD d:\brae\pcviewer\pcviewer
 configs\test.gmc /F /WD d:\brae\pcviewer\pcviewer
 configs\jeff\streettextsize.gmc /F /WD L:\geomas
 configs\2019_10.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD i:\gmmobile\metroUTM
@@ -174,6 +175,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 
