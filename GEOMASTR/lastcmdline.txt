@@ -1,2 +1,2 @@
-configs\HiPriMaps_ramps.gmc /F 
-d:\brae\pcviewer\pcviewer
+configs\STREETWIDTHDISPLAY_TEST.gmc 
+d:\bu_2018_02_28\geomas
