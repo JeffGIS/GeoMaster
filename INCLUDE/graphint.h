@@ -1557,7 +1557,7 @@ void CloseMap (BOOL Update);
 void ClearMap (void);   
 void ReopenMap (BOOL Open);
 short	PanWindow (HWND hWnd, int pandir);
-short	ZoomWindow (HWND hWnd, float ZoomFactor);
+short	ZoomWindow (HWND hWnd, float ZoomFactor,BOOL Imediate);
 void SetBounds (HWND hWnd,HDC hDC);
 void SetBoundsRect2 (RECT Rect,HDC hDC);
 //int	MouseInput (HWND hWnd,WORD Message,POINT MousePoint, int Opt);

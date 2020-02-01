@@ -2469,7 +2469,7 @@ GSSiExitProg (21);
 #endif
 }
 
-short ZoomWindow (HWND hWnd, float ZoomFactor)
+short ZoomWindow (HWND hWnd, float ZoomFactor,BOOL Imediate)
 #if ENABLETRACE
 {GSSiEnterProg (22);
 #endif
@@ -2479,7 +2479,7 @@ short ZoomWindow (HWND hWnd, float ZoomFactor)
      if (ZoomFactor)
 	 {
 		 CurView->Scale /= ZoomFactor;
-		 ZoomToPointAndScale (CurView->MidPointW,CurView->Scale,FALSE);
+		 ZoomToPointAndScale (CurView->MidPointW,CurView->Scale,Imediate);
 	 }
  /*    {
 	     MidX = (CurView->WBounds.xmn + CurView->WBounds.xmx) / 2;
@@ -2494,7 +2494,7 @@ short ZoomWindow (HWND hWnd, float ZoomFactor)
 	 else if (CurView->PriorBounds.xmx > CurView->PriorBounds.xmn)
 	 {
 	 	CurView->NewBounds = CurView->PriorBounds; 
-		ZoomToRect(CurView->NewBounds,FALSE);
+		ZoomToRect(CurView->NewBounds,Imediate);
 	 }
 {
 #if ENABLETRACE
