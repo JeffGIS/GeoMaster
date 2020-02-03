@@ -4096,7 +4096,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                  /* Menu Item Named "Out" here.                         */
        			 HaltMapDisplay(FALSE,FALSE);
     			 SetZoomVP (lParam);
-                 ZoomWindow (hWnd,0);
+                 ZoomWindow (hWnd,0,FALSE);
                  break;
 
             case IDM_Z_ORTHO:

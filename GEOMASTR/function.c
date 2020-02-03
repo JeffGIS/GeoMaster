@@ -619,7 +619,7 @@ GSSiExitProg (1348);
 				saveType = CurView->Type;
 				if (CurView->Type == SUBVIEWPORT)
 					CurView->Type = PLANVIEWPORT;
-				nlong = HighlightInArea (CurView->hWnd,&CurView->WBounds,TRUE,TRUE,0);
+				nlong = HighlightInArea (CurView->hWnd,&CurView->WBounds,TRUE,TRUE,CurView->hMaskArea);
 				ltoa (nlong,OutLoc,10); 
 				CurView->Type = saveType;
 				CurView = SaveVP; 
@@ -2684,7 +2684,7 @@ SetVis:
 				 RVal = atof (Arg[2]);
 				 if (*Arg[3])
 					SetCurView (SetVPFromName (Arg[3],&Err));   
-                 ZoomWindow (CurView->hWnd, RVal);
+                 ZoomWindow (CurView->hWnd, RVal,atob(Arg[4]));
 				 goto RtnTrue;
 			}   
             	

@@ -1,2 +1,2 @@
-configs\basemap_new4.gmc /F [%USERLEV]=2;
-L:\geomas
+configs\HiPriMaps_defects2.gmc /F  
+d:\brae\pcviewer\pcviewer

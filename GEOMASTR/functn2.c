@@ -1846,7 +1846,8 @@ GSSiExitProg (1350);
 			if (Printing)
 				goto RtnTrue;
 			skipPaint = 0;
-			if (*Args && CurView) 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (atob(Arg[1]) && CurView)
 			{
 				 HDC hDC = 0;
 
