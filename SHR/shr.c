@@ -5165,27 +5165,34 @@ GSSiExitProg (259);
 #endif
 }
 
-void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect)
+RECT AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect,LPDOUBLE padjustWidth,LPDOUBLE padjustHeight)
 {
 	double	wf, hf, f;
-	POINT	mp = RectMid(pRectToAdjust);
+	POINT	mp = RectMid(pRect);
+	RECT rtn;
+	double width, height;
 
-	wf = (double)RECTWIDTH(pRectToAdjust) / (double)RECTWIDTH(pRect);
-	hf = (double)RECTHEIGHT(pRectToAdjust) / (double)RECTHEIGHT(pRect);
-	f = (double)RECTWIDTH(pRect) / (double)RECTHEIGHT(pRect);
-
+	wf = (double)RECTWIDTH(pRect) / (double)RECTWIDTH(pRectToAdjust);
+	hf = (double)RECTHEIGHT(pRect) / (double)RECTHEIGHT(pRectToAdjust);
 	if (RECTWIDTH(pRectToAdjust) * hf > RECTWIDTH(pRect))
 	{
-		pRectToAdjust->top = mp.y - (f * RECTHEIGHT(pRectToAdjust)) / 2;
-		pRectToAdjust->bottom = mp.y + (f * RECTHEIGHT(pRectToAdjust)) / 2;
+		f = wf;
+		*padjustWidth = 1.0;
+		*padjustHeight = wf;
 	}
 	else
 	{
-		pRectToAdjust->left = mp.x - (RECTWIDTH(pRectToAdjust) / f) / 2;
-		pRectToAdjust->right = mp.x + (RECTWIDTH(pRectToAdjust) / f) / 2;
+		f = hf;
+		*padjustWidth = hf;
+		*padjustHeight = 1.0;
 	}
-
-	return;
+	width = RECTWIDTH(pRectToAdjust) * f;
+	height = RECTHEIGHT(pRectToAdjust) * f;
+	rtn.left = mp.x - width / 2;
+	rtn.right = mp.x + width / 2;
+	rtn.top = mp.y - height / 2;
+	rtn.bottom = mp.y + height / 2;
+	return rtn;
 }
 double AdjustRectToRectFactor(LPRECT pRectToAdjust, LPRECT pRect)
 {

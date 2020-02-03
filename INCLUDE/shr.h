@@ -880,7 +880,7 @@ void ExpandMinMax (LPMINMAX Bounds, int Adjust);
 void ExpandMinMaxL (LPMNMXCORL Bounds, long Adjust);
 void TranBounds(HANDLE TranID, LPMNMXCORD pBounds);
 BOOL ConvertBounds(LPMNMXCORD pBounds, int from, int to);
-void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect);
+RECT AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect, LPDOUBLE padjustWidth, LPDOUBLE padjustHeight);
 double AdjustRectToRectFactor(LPRECT pRectToAdjust, LPRECT pRect);
 void DebugShowLine (LPDPOINT p1,LPDPOINT p2);
 double MinAngleToTheRight (double AZ1,double AZ2);
