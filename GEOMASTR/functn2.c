@@ -6083,6 +6083,33 @@ GSSiExitProg (1350);
 			CloseClipboard ();
 			goto Rtnl;
 		}
+		case 1706://$WEIGHTEDPOLYMIDPT(PickedItem)
+		{
+			HANDLE hPoly;
+			int npnts;
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			i = atoi(Arg[1]);
+			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly))
+				goto RtnFalse;
+			LPDPOINT points = GlobalLock(hPoly);
+			DPOINT MidPt = { 0,0};
+			double totdist = 0;
+			double dist;
+
+			for (int i = 0; i < npnts-1;i++)
+			{
+				DPOINT midpt = MidPointD(points[i],points[i+1]);
+				dist = ldistpp(&points[i], &points[i + 1]);
+				totdist += dist;
+				MidPt.x += dist * midpt.x;
+				MidPt.y += dist * midpt.y;
+			}
+			GSSiGlobUlFree(&hPoly);
+			MidPt.x /= totdist;
+			MidPt.y /= totdist;
+			dpointtoa(OutLoc, &MidPt);
+			goto Rtnl;
+		}
 
         case 1801: //$LOADBLOCKINGPOINTS (file)
         {   

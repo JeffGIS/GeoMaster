@@ -5531,6 +5531,8 @@ BOOL GetPolyPoints (LPPICKDATAHEADER PickData,BOOL Reverse,LPLONG pnPnts, LPHAND
     LPVISLIST	SaveVis = CurVis;
 	HANDLE		hVisList=GSSiGlobAlloc ( 964,GHND,sizeof(VISLIST));
 	
+	if (PickData->Refno == 19047504)
+		ii = 1;
 	CurVis = (LPVISLIST)GlobalLock (hVisList);
 	CurVis->hVisList=hVisList;
 	InitVis ();

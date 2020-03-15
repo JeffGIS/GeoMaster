@@ -1,2 +1,2 @@
-configs\HiPriMaps_defects2.gmc /F  
-d:\brae\pcviewer\pcviewer
+configs\newpropdata.gmc /F
+f:\BU_2020_02_20\geomas

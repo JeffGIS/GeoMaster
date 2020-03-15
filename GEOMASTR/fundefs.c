@@ -629,7 +629,8 @@ int	GetFunctionID17 (LPSTR str)
 			if (!_fstrnicmp (str,"SCREENTOCLIPBOARD",17)) return 1702; 
 			if (!_fstrnicmp (str,"PROFILEAREAPOINTS",17)) return 1703; 
 			if (!_fstrnicmp (str,"SPLITCONTOURLINES",17)) return 1704; 
-			if (!_fstrnicmp (str,"TEXTFROMCLIPBOARD",17)) return 1705; 
+			if (!_fstrnicmp(str, "TEXTFROMCLIPBOARD", 17)) return 1705;
+			if (!_fstrnicmp(str, "WEIGHTEDPOLYMIDPT", 17)) return 1706;
 			
 			return 0; 
 }			

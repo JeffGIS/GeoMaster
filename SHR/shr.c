@@ -2192,8 +2192,12 @@ BOOL makedirectories2 (LPSTR Name,BOOL IsDir,BOOL Verify)
 		
 		EndDir = _fstrchr ((LPSTR)(StartDir+1),'\\');
 		if (!EndDir)
-			EndDir = _fstrchr (StartDir,0); 
-		*EndDir = 0;
+		{
+			EndDir = _fstrchr(StartDir, 0);
+			*(EndDir + 1) = 0;
+		}
+		else
+			*EndDir = 0;
 		if (*StartDir != '\\' && *NewName)
 			_fstrcat (NewName,"\\");
 		_fstrcat (NewName,StartDir); 

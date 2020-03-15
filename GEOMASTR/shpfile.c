@@ -166,6 +166,30 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	SHPFid = GSSiOpenFile (SHPFileName,&ofStructGM,OF_READ);
 	if (SHPFid == HFILE_ERROR)
 		return FALSE;
+	int fsize = GSSillseek(SHPFid, 0, 2);
+	LPSTR pfile = malloc(fsize + 4);
+	GSSillseek(SHPFid, 0, 0);
+	ii=BigRead(SHPFid, pfile, fsize);
+	free(pfile);
+	GSSillseek(SHPFid, 0, 0);
+	{
+		char SHPFileDBFName[MAX_PATH];
+		OFSTRUCTGM	ofStructGMDBF;
+
+		strcpy(SHPFileDBFName, SHPFileName);
+		LPSTR pDot = strrchr(SHPFileDBFName, '.');
+		strcpy(pDot, ".dbf");
+		HFILE SHPDBFFid = GSSiOpenFile(SHPFileDBFName, &ofStructGMDBF, OF_READ);
+		if (SHPDBFFid == HFILE_ERROR)
+			return FALSE;
+		int fsize = GSSillseek(SHPDBFFid, 0, 2);
+		LPSTR pfile = malloc(fsize + 4);
+		GSSillseek(SHPDBFFid, 0, 0);
+		ii=BigRead(SHPDBFFid, pfile, fsize);
+		free(pfile);
+		GSSiClose2(&SHPDBFFid);
+
+	}
 	SHPHandle	hSHP = SHPOpenGSSi(ofStructGM.szPathName, "rb");
 	if (hSHP)
 		SHPClose(hSHP);

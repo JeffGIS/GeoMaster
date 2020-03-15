@@ -2271,7 +2271,7 @@ void AddSavedPolys (void)
 	hSavePoly = 0;
 	pSavedPolys->hSavePolyParts = hSavePolyParts;
 	hSavePolyParts = 0;
-	pSavedPolys->nSavePoly = nSavePoly;
+	pSavedPolys->nPoints = nSavePoly;
 	nSavePoly = 0;
 	pSavedPolys->hSavePolyElev = hSavePolyElev;
 	hSavePolyElev = 0;
