@@ -1,3 +1,5 @@
+Configs\SpecialAssessments\CREATEMAP.GMC /F /WD F:\BU_2020_02_20\GEOMas
+configs\newpropdata.gmc /F /WD F:\BU_2020_02_20\GEOMas
 configs\HiPriMaps_ramps.gmc /F  /WD d:\brae\pcviewer\pcviewer
 configs\test.gmc /F /WD d:\brae\pcviewer\pcviewer
 configs\jeff\streettextsize.gmc /F /WD L:\geomas
@@ -175,6 +177,9 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
 
 
 

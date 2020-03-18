@@ -5097,40 +5097,66 @@ GSSiExitProg (258);
 #endif
 }
 
-BOOL BoundsInBounds (LPMNMXCORD pBounds1,LPMNMXCORD pBounds2,short Opt)
+BOOL BoundsInBounds(LPMNMXCORD pBounds1, LPMNMXCORD pBounds2, short Opt)
 #if ENABLETRACE
-{GSSiEnterProg (259);
-#endif
-{   
-	BOOL InBounds=TRUE;
-	
-	switch (Opt)
-	{
-		case 0: //bounds 1 completely in bounds2
-	    if (pBounds1->xmn < pBounds2->xmn ||   
-	        pBounds1->xmx > pBounds2->xmx ||
-	        pBounds1->ymn < pBounds2->ymn ||
-	        pBounds1->ymx > pBounds2->ymx)
-	        InBounds=FALSE; 
-	    break;
-	    
-	    case 1: //bounds 1 at least partially in bounds2   
-	    if (pBounds1->xmx < pBounds2->xmn ||   
-	        pBounds1->xmn > pBounds2->xmx ||
-	        pBounds1->ymx < pBounds2->ymn ||
-	        pBounds1->ymn > pBounds2->ymx)
-	        InBounds=FALSE; 
-	    break;
-	}
 {
-#if ENABLETRACE
-GSSiExitProg (259);
+	GSSiEnterProg(259);
 #endif
-    return InBounds;
-}
+	{
+		BOOL InBounds = TRUE;
+
+		switch (Opt)
+		{
+		case 0: //bounds 1 completely in bounds2
+			if (pBounds1->xmn < pBounds2->xmn ||
+				pBounds1->xmx > pBounds2->xmx ||
+				pBounds1->ymn < pBounds2->ymn ||
+				pBounds1->ymx > pBounds2->ymx)
+				InBounds = FALSE;
+			break;
+
+		case 1: //bounds 1 at least partially in bounds2   
+			if (pBounds1->xmx < pBounds2->xmn ||
+				pBounds1->xmn > pBounds2->xmx ||
+				pBounds1->ymx < pBounds2->ymn ||
+				pBounds1->ymn > pBounds2->ymx)
+				InBounds = FALSE;
+			break;
+		}
+		{
 #if ENABLETRACE
-}
+			GSSiExitProg(259);
 #endif
+			return InBounds;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+int BoundsInBounds2(LPMNMXCORD pBounds1, LPMNMXCORD pBounds2)
+//0=1 not in 2, 1 = 1 all in 2, -1 = 1 part in 2
+{
+	int rtn;
+
+	if (pBounds1->xmn >= pBounds2->xmn &&
+		pBounds1->xmx <= pBounds2->xmx &&
+		pBounds1->ymn >= pBounds2->ymn &&
+		pBounds1->ymx <= pBounds2->ymx)
+		rtn = 1;//1 completely in 2	 
+	else if (pBounds2->xmn >= pBounds1->xmn &&
+		pBounds2->xmx <= pBounds1->xmx &&
+		pBounds2->ymn >= pBounds1->ymn &&
+		pBounds2->ymx <= pBounds1->ymx)
+		rtn = -1;// 2 completely in 1
+	else if (pBounds1->xmx < pBounds2->xmn ||
+		pBounds1->xmn > pBounds2->xmx ||
+		pBounds1->ymx < pBounds2->ymn ||
+		pBounds1->ymn > pBounds2->ymx)
+		rtn = 0;
+	else
+		rtn = -1;
+
+	return rtn;
 }
 
 BOOL Bounds4InBounds4 (LPMNMXCORL pBounds1,LPMNMXCORL pBounds2,short Opt)

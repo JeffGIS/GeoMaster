@@ -499,7 +499,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 		setDeviceToScreenFactor(DeviceToScreenFactorMemMap);
 	else if (Printing && PrinterIsVirtual)
     	setDeviceToScreenFactor((double)VirtualPrintDPI/(double)ScreenRes);
-	else if (ScreenRes)
+	else if (DeviceRes && ScreenRes)
     	setDeviceToScreenFactor( (double)DeviceRes/(double)ScreenRes);
     else
     	setDeviceToScreenFactor(1);
@@ -644,7 +644,7 @@ void SetMainRect (HWND hWnd, HDC hDC, LPRECT RectIn,int From)
 	    	}
 	    	if (!Printing)
 	    	{
-				setDeviceToScreenFactor(1.0);
+				//setDeviceToScreenFactor(1.0);
 	    		/*RECT	WindRect;  
 				double fach, facw,sw = GetGlobalDVal2 ("[%SCREENWIDTH]",(double)GetDeviceCaps(hDC, HORZSIZE) * MFT/100);
 					    		

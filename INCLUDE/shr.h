@@ -869,6 +869,7 @@ int AppendFile (LPSTR File,LPSTR Line);
 int AppendFile2 (LPSTR InFile,LPSTR Line);
 void AddToMinMaxD (LPMNMXCORD mm1, LPDPOINT pPoint); 
 BOOL BoundsInBounds (LPMNMXCORD pBounds1,LPMNMXCORD pBounds2,short Opt);
+int BoundsInBounds2(LPMNMXCORD pBounds1, LPMNMXCORD pBounds2);
 BOOL Bounds4InBounds4 (LPMNMXCORL pBounds1,LPMNMXCORL pBounds2,short Opt);
 BOOL PointInBounds (DPOINT Point,LPMNMXCORD pBounds);
 BOOL PointInBoundsL (DPOINT Point,LPMNMXCORL pBounds);
