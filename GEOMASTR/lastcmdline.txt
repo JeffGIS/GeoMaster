@@ -1,2 +1,2 @@
-Configs\SpecialAssessments\test.GMC /F 
+configs\newpropdata.gmc /F 
 F:\BU_2020_02_20\GEOMas

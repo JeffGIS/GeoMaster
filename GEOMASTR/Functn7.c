@@ -552,16 +552,18 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			goto RtnFalse;
 	}
 
-	case 723: // $GETPATH(R W D or C (creates with no overwrite prompt),Extension,title(opt),storvar(opt),startdir) Get pathname
+	case 723: // $GETPATH(R W D or C (creates with no overwrite prompt),Extension,title(opt),storvar(opt),startdir,return status instead of path) Get pathname
 			  // $GETPATH(A,path) gets full actual path - if cached displays cache name
 	{
 		HANDLE	hTemp;
 		LPSTR	str, lpSave;
 		BOOL	rtn, ResetSubDL;
+		BOOL	returnStatus = FALSE;
 
 		nArgs = GetFunArgs(Args, Arg, 6, &hMem, pBrkPt, bpOffset, bpLen);
 		if (nArgs < 2)
 			goto RtnFalse;
+		returnStatus = atob(Arg[6]);
 		_fstrupr(Arg[1]);
 		if (*Arg[1] == 'A')
 		{
@@ -601,6 +603,8 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 				{
 					sprintf(str, "[%s]", VarName);
 					ExpandText(str);
+					if (!*str)
+						strcpy(str, Arg[5]);
 					strcpy(Arg[6], str);
 				}
 				else
@@ -615,7 +619,9 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 				if (FileType(str) == 1)
 					GSSiRemove(str);
 				else if (VarName)
+				{
 					SetGlobalValue(VarName, str);
+				}
 			}
 		}
 		break;
@@ -624,13 +630,24 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		}
 	TestGPRtn:	if (ResetSubDL)
 		SetGlobalValue("%SUBDL", "Y");
-	if (rtn)
-		_fstrcpy(OutLoc, str);
+	if (returnStatus)
+	{
+		if (rtn)
+			strcpy(OutLoc, "1");
+		else
+			strcpy(OutLoc, "0");
+		goto Rtnl;
+	}
 	else
 	{
-		SetContinueProcessing(FALSE);
-		PostMessage(hWndMain, GF_CLEAR_FUN_STACK, 0, 0L);
-		*OutLoc = 0;
+		if (rtn)
+			_fstrcpy(OutLoc, str);
+		else
+		{
+			SetContinueProcessing(FALSE);
+			PostMessage(hWndMain, GF_CLEAR_FUN_STACK, 0, 0L);
+			*OutLoc = 0;
+		}
 	}
 	GSSiGlobUlFree(&hTemp);
 	goto Rtnl;
