@@ -4425,7 +4425,7 @@ GotCloseFilehSQL:
 							GMFIBMPHandleToEXT (Arg[2],hDIB,atoi(Arg[3]));
 							goto RtnTrue;
 						}
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 					}
 					goto RtnFalse;
 				}
@@ -4436,7 +4436,7 @@ GotCloseFilehSQL:
 					if (hDIB)
 					{
 						rtn = FreeImage_HasBackgroundColor(hDIB);
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 						goto Rtnrtn;
 					}
 					goto RtnFalse;
@@ -4448,7 +4448,7 @@ GotCloseFilehSQL:
 					if (hDIB)
 					{
 						rtn = FreeImage_IsTransparent(hDIB);
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 						goto Rtnrtn;
 					}
 					goto RtnFalse;
@@ -4466,11 +4466,11 @@ GotCloseFilehSQL:
 						if (hDibOut)
 						{
 							GMFIBMPHandleToEXT(Arg[5], hDibOut, atoi(Arg[6]));
-							FreeImage_Unload(hDIB);
-							FreeImage_Unload(hDibOut);
+							GSSiFreeImage_Unload(hDIB);
+							GSSiFreeImage_Unload(hDibOut);
 							goto RtnTrue;
 						}
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 					}
 					goto RtnFalse;
 				}
@@ -4486,11 +4486,11 @@ GotCloseFilehSQL:
 						if (hDibOut)
 						{
 							GMFIBMPHandleToEXT(Arg[4], hDibOut, atoi(Arg[5]));
-							FreeImage_Unload(hDIB);
-							FreeImage_Unload(hDibOut);
+							GSSiFreeImage_Unload(hDIB);
+							GSSiFreeImage_Unload(hDibOut);
 							goto RtnTrue;
 						}
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 					}
 					goto RtnFalse;
 				}
@@ -4501,7 +4501,7 @@ GotCloseFilehSQL:
 					if (hDIB)
 					{
 						int width = FreeImage_GetWidth (hDIB);
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 						itoa (width,OutLoc,10);
 						goto Rtnl;
 					}
@@ -4513,7 +4513,7 @@ GotCloseFilehSQL:
 					if (hDIB)
 					{
 						int height = FreeImage_GetHeight(hDIB);
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 						itoa(height, OutLoc, 10);
 						goto Rtnl;
 					}
@@ -4530,10 +4530,10 @@ GotCloseFilehSQL:
 						{
 							COLORREF maskColor = atoi(Arg[5]);
 							double pct = GetPCTColorInBitmapWithMask(hDIB, hDIBMask, bmColor, maskColor);
-							FreeImage_Unload(hDIBMask);
+							GSSiFreeImage_Unload(hDIBMask);
 							ftoa(OutLoc, pct);
 						}
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 						goto Rtnl;
 					}
 
@@ -4558,11 +4558,11 @@ GotCloseFilehSQL:
 						if (hDibOut)
 						{
 							GMFIBMPHandleToEXT (Arg[4],hDibOut,atoi(Arg[5]));
-							FreeImage_Unload(hDIB);
-							FreeImage_Unload(hDibOut);
+							GSSiFreeImage_Unload(hDIB);
+							GSSiFreeImage_Unload(hDibOut);
 							goto RtnTrue;
 						}
-						FreeImage_Unload(hDIB);
+						GSSiFreeImage_Unload(hDIB);
 					}
 					goto RtnFalse;
 				}
@@ -4582,12 +4582,12 @@ GotCloseFilehSQL:
 						if (FreeImage_Paste (hDIB1,hDIB2,left,top,alpha))
 						{
 							rtn = GMFIBMPHandleToEXT (Arg[6],hDIB1,atoi(Arg[8]));
-							FreeImage_Unload(hDIB1);
-							FreeImage_Unload(hDIB2);
+							GSSiFreeImage_Unload(hDIB1);
+							GSSiFreeImage_Unload(hDIB2);
 							goto Rtnrtn;
 						}
-						FreeImage_Unload(hDIB1);
-						FreeImage_Unload(hDIB2);
+						GSSiFreeImage_Unload(hDIB1);
+						GSSiFreeImage_Unload(hDIB2);
 					}
 					goto RtnFalse;
 				}

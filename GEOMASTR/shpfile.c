@@ -62,7 +62,7 @@ static long				SHPMaxRefPerFile=0;
 static BOOL				SHPProjectionIsBase;
 static short			NumSHPParms; 
 static char				SHPParms[4096]="";  
-static char				SHPTag[100], SHPTAG[100]; 
+static char				SHPTag[202], SHPTAG[202]; 
 static char				LastSHPFile[MAX_PATH]=""; 
 static HFILE			FidSmallDBF=HFILE_ERROR;
 static char				SmallDBFName[MAX_PATH]="";
@@ -639,7 +639,7 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		SHPBaseRefno = IndexEntryStartRef;
 	else
 		SHPBaseRefno = atol (SHPRefno);
-	fgetstring (SHPTAG,99,Fid); 
+	fgetstring (SHPTAG,sizeof(SHPTAG)-2,Fid); 
 	fgetstring (str,32,Fid); 
 	//SHPIndexType = atoi (str);
 	_fmemset (SHPParms,0,sizeof(SHPParms));

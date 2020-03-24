@@ -1,2 +1,2 @@
-configs\newpropdata.gmc /F 
-F:\BU_2020_02_20\GEOMas
+configs\jeff\test.gmc /F
+G:\GEOMas

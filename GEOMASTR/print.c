@@ -352,7 +352,7 @@ int GSSiEndPage (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC)
 						ProcessText (str);
 					}
 			   		SaveDIB32 (hDib32,OutFile,0,-1);//FIF_TIFF,TIFF_ADOBE_DEFLATE); 
-					FreeImage_Unload(hDib32);
+					GSSiFreeImage_Unload(hDib32);
 					hBMOld = SelectObject(hDC,hBM);
 					}
 		
@@ -405,7 +405,7 @@ int GSSiEndPage (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC)
 				strcpy (OutFile,VirtPrinterImageFile);
 				ExpandText (OutFile);
 				rtn = GMFIBMPHandleToEXT (OutFile,hDib,Flag);
-				FreeImage_Unload(hDib);
+				GSSiFreeImage_Unload(hDib);
 				rtn = 0;
 			}
 			SelectObject (hPr,hBitMap);

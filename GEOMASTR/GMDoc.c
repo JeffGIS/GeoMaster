@@ -1056,7 +1056,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen, POINT tiePo
 	if (Transparent)
 	{
 		HDIB32 hDib32 = GMFIBMPHandleFromEXT(ImagePath, FALSE);
-		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+		HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 		POINT tiePointVP = { rect.left , rect.top};
 		DisplayTransparentBitmap(hDC, &hDib24, tiePointVP, &tiePointBM,0, 0, 0, &TranColor);
 		//DisplayTransparentBitmapInRect(hDC, hDib32, &rect, TRUE);
@@ -1076,7 +1076,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen, POINT tiePo
 		if (hDib32)
 		{
 			BITMAP bm;
-			HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 			HBITMAP hBM = DIB32ToBitmap(hDib24, (HPALETTE)0);
 			GetObject(hBM, sizeof(bm), (LPSTR)&bm);
 

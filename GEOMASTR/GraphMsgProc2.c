@@ -3446,7 +3446,7 @@ BOOL FillSymbolListFromVariable (HWND hWndDlg,UINT idc_SYMBOL_LIST,UINT idc_SQL_
 
 BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
 {
-	char	SymName[66], str[260], GSPName[256], cIF[128], UDI[66], SymStuff[256];
+	char	SymName[66], str[260], GSPName[256], cIF[128],SymStuff[256];
 	static  char cpWidth[64] = { 0 }, clWidth[64] = { 0 }, cWidth[64], cRot[64] = { 0 }, cColor[64] = { 0 };
 	static	char projection[MAX_PATH] = { 0 }, units[64] = { 0 };
 	short	i, Choice, rtn;
@@ -3731,7 +3731,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
 					SendDlgItemMessage(hWndDlg, IDC_UNITS, CB_SELECTSTRING, -1, (LPARAM)str);
 				if (fgetstring(str, 128, Fid))
 					SetDlgItemText(hWndDlg, IDC_STARTNO, str);
-				if (fgetstring(str, 128, Fid))
+				if (fgetstring(str, 200, Fid))
 				{
 					LPSTR	pSC = _fstrchr(str, ':');
 

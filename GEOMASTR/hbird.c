@@ -2880,7 +2880,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 								GSSiGlobUlFree (&hMembin);
 								GSSiGlobUlFree (&hMemCmp);
 							}
-							FreeImage_Unload (dib8);
+							GSSiFreeImage_Unload (dib8);
 						}
 						if (Err)
 						{
@@ -2890,7 +2890,7 @@ BOOL ConvertHBirdImages (LPSTR InName, LPSTR OutName,LPSTR TitleMess,LPSTR Color
 							ExpandText (ErrFile);
 							copyfile (ErrFile,OutFile,FALSE,0,0,0,0,0,0);
 						}
-						FreeImage_Unload (dibin);
+						GSSiFreeImage_Unload (dibin);
 						rtn=TRUE;
 					}
 					GSSiClose2 (&FidBIN);  

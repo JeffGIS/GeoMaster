@@ -3528,15 +3528,15 @@ GSSiExitProg (1350);
 			{
 				HDIB32 hDib24;
 				hDib32 = (HDIB32)atol(Arg[2]);
-				hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+				hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 				rtn = GM32SaveDIB(hDib24, Arg[3], -1, 0);
-				FreeImage_Unload(hDib24);
+				GSSiFreeImage_Unload(hDib24);
 				goto Rtnrtn;
 			}
 			if (!stricmp(Arg[1], "UNLOAD"))
 			{
 				hDib32 = (HDIB32)atol(Arg[2]);
-				FreeImage_Unload(hDib32);
+				GSSiFreeImage_Unload(hDib32);
 				goto RtnTrue;
 			}
 			
@@ -4655,23 +4655,23 @@ GSSiExitProg (1350);
 				case 0:
 					break;
 				case 4:
-					hDib32Out = FreeImage_ConvertTo4Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo4Bits(hDib32In);
 					break;
 				case -8:
-					hDib32Out = FreeImage_ConvertTo8Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo8Bits(hDib32In);
 					break;
 				case 8:
-					hDib32Out = FreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
+					hDib32Out = GSSiFreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
 					break;
 				case 16:
-					hDib32Out = FreeImage_ConvertTo16Bits565(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo16Bits565(hDib32In);
 					break;
 				case 24:
 				default:
-					hDib32Out = FreeImage_ConvertTo24Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo24Bits(hDib32In);
 					break;
 				case 32:
-					hDib32Out = FreeImage_ConvertTo32Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo32Bits(hDib32In);
 					if (*Arg[5])
 					{
 						COLORREF icolor = atol (Arg[5]);
@@ -6380,7 +6380,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			hDib32 = BitmapToDIB32(hBitmap);
 			DeleteObject(hBitmap);
 			ReleaseDC(hWnd, hDC);
-			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPWINDOW");
 			fputstring(line, fid);
@@ -6388,8 +6388,8 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);
-			FreeImage_Unload(hDib24);
-			FreeImage_Unload(hDib32);
+			GSSiFreeImage_Unload(hDib24);
+			GSSiFreeImage_Unload(hDib32);
 			rtn = TRUE;
 		}
 		if (!stricmp(Arg[1], "CAPSCREEN"))
@@ -6404,7 +6404,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			hDib32 = BitmapToDIB32(hBitmap);
 			DeleteObject(hBitmap);
 			ReleaseDC(hWnd, hDC);
-			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPSCREEN");
 			fputstring(line, fid);
@@ -6412,8 +6412,8 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);
-			FreeImage_Unload(hDib24);
-			FreeImage_Unload(hDib32);
+			GSSiFreeImage_Unload(hDib24);
+			GSSiFreeImage_Unload(hDib32);
 			rtn = TRUE;
 		}
 		if (!stricmp(Arg[1], "CAPCURSOR"))

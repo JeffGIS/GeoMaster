@@ -20,14 +20,104 @@
 static	LPBYTE	g_load_address;
 static	int		MemDIBSize;
 static	char	CurImageName[MAX_PATH];
+static  int		numImagesAllocated = 0;
+/*#define MAX_ALLOCATED_IMAGES	1024
+static	HDIB32	allocatedImages[MAX_ALLOCATED_IMAGES];
+static	int		allocatedImagesFrom[MAX_ALLOCATED_IMAGES];
+static	int		allocatedImagesID[MAX_ALLOCATED_IMAGES];
+static	int		numAllocatedImages = 0;*/
 
 HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal);
-
+extern int ii;
 
 #if USEFREEIMAGE
 // freeim16.cpp : Defines the entry point for the DLL application.
 //
 
+void imageAllocated(HDIB32 dib,int from)
+{
+	return;
+/*	if (from == -1)
+	{
+		numImagesAllocated--;
+		for (int i = 0; i < numAllocatedImages;i++)
+		{
+			if (dib == allocatedImages[i])
+			{
+				allocatedImages[i] = 0;
+				allocatedImagesID[i] = 0;
+				break;
+			}
+		}
+	}
+	else if (from == -2)
+	{
+		numImagesAllocated--;
+	}
+	else
+	{
+		if (numAllocatedImages == 55)
+			ii = 1;
+		allocatedImages[numAllocatedImages] = dib;
+		allocatedImagesID[numAllocatedImages++] = from;
+		numImagesAllocated++;
+	}*/
+}
+FIBITMAP* GSSiFreeImage_ConvertTo4Bits(HDIB32 hDIB)
+{
+	FIBITMAP* dib = FreeImage_ConvertTo4Bits(hDIB);
+	imageAllocated(dib, 1);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_ConvertTo8Bits(HDIB32 hDIB)
+{
+	FIBITMAP* dib = FreeImage_ConvertTo8Bits(hDIB);
+	imageAllocated(dib, 1);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_ColorQuantize(HDIB32 hDib, DWORD Flag)
+{
+	FIBITMAP* dib = FreeImage_ColorQuantize(hDib,Flag);
+	imageAllocated(dib, 1);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_ConvertTo24Bits(HDIB32 hDIB)
+{
+	FIBITMAP* dib = FreeImage_ConvertTo24Bits(hDIB);
+	imageAllocated(dib, 2);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_ConvertTo32Bits(HDIB32 hDIB)
+{
+	FIBITMAP* dib = FreeImage_ConvertTo32Bits(hDIB);
+	imageAllocated(dib, 3);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_ConvertTo16Bits565(HDIB32 hDIB)
+{
+	FIBITMAP* dib = FreeImage_ConvertTo16Bits565(hDIB);
+	imageAllocated(dib, 4);
+	return dib;
+}
+
+FIBITMAP* GSSiFreeImage_ConvertToGreyscale(HDIB32 hDib)
+{
+	FIBITMAP* dib = FreeImage_ConvertToGreyscale(hDib);
+	imageAllocated(dib, 5);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_Allocate(int width, int height, int bpp, unsigned red_mask FI_DEFAULT(0), unsigned green_mask FI_DEFAULT(0), unsigned blue_mask FI_DEFAULT(0))
+{
+	FIBITMAP* dib = FreeImage_Allocate(width, height, bpp, red_mask, green_mask, blue_mask);
+	imageAllocated(dib, 6);
+	return dib;
+}
+FIBITMAP* GSSiFreeImage_Load(FREE_IMAGE_FORMAT fif, const char* filename, int flags FI_DEFAULT(0))
+{
+	FIBITMAP* dib = FreeImage_Load(fif, filename, flags);
+	imageAllocated(dib, 7);
+	return dib;
+}
 DWORD GMFIGetVersionAndCopyright (LPSTR Version,LPSTR Copyright)
 {
 	strcpy (Version,FreeImage_GetVersion ());
@@ -61,10 +151,11 @@ BOOL GenericWriter(FIBITMAP* dib, const char* lpszPathName, int flag) {
 			WORD bpp = FreeImage_GetBPP(dib);
 			if (fif == FIF_JPEG && (bpp != 8 && bpp != 24))
 			{
-				FIBITMAP* dib2 = FreeImage_ConvertTo24Bits(dib);
+				FIBITMAP* dib2 = GSSiFreeImage_ConvertTo24Bits(dib);
+
 				bSuccess = FreeImage_Save(fif, dib2, lpszPathName, flag);
 
-				FreeImage_Unload(dib2);
+				GSSiFreeImage_Unload(dib2);
 			}
 			else if(FreeImage_FIFSupportsWriting(fif) && FreeImage_FIFSupportsExportBPP(fif, bpp)) 
 			{
@@ -168,7 +259,7 @@ WORD GM32SaveDCBitMap (HDC hDC16,LPSTR OutFile,long Format,DWORD Flag,DWORD Back
 DoSave:
 		rtn = GMFIBMPHandleToEXT (OutFile,dib,Flag);
 NoSave:
-		FreeImage_Unload(dib);
+		GSSiFreeImage_Unload(dib);
 		SelectObject (hDC,hBitmap);
 		DeleteObject (hTempBM);
 	    SelectObject(hdcMem, hbmPrev);
@@ -192,7 +283,7 @@ WORD GM32SaveBitmap (HANDLE hBitmap16,LPSTR OutFile,long Format,DWORD Flag)
 		dib = BitmapToDIB_32(hBitmap,NULL);
 		l = FreeImage_GetDIBSize (dib);
 		rtn = GMFIBMPHandleToEXT (OutFile,dib,Flag);
-		FreeImage_Unload(dib);
+		GSSiFreeImage_Unload(dib);
 	}
 	return (WORD)rtn;
 }
@@ -257,8 +348,8 @@ int ConvertBitmapColorsInRect(LPSTR BitmapPath, LPMNMXCORD pBounds, COLORREF Fro
 	if (!hDIB)
 		return -1;
 	BoundsToRect(pBounds, &Rect);
-	hDIB24 = FreeImage_ConvertTo24Bits(hDIB);
-	FreeImage_Unload(hDIB);
+	hDIB24 = GSSiFreeImage_ConvertTo24Bits(hDIB);
+	GSSiFreeImage_Unload(hDIB);
 	GetDIBDimensionsFromHandle(hDIB24, &height, &width);
 	nrow = min(height, Rect.bottom);
 	ncol = min(width, Rect.right);
@@ -282,7 +373,7 @@ int ConvertBitmapColorsInRect(LPSTR BitmapPath, LPMNMXCORD pBounds, COLORREF Fro
 	}
 	if (!CountOnly)
 		SaveDIB32(hDIB24, BitmapPath, 0, -1);
-	FreeImage_Unload(hDIB24);
+	GSSiFreeImage_Unload(hDIB24);
 	return n;
 }
 int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColor, COLORREF ToColor, double colordist, LPMNMXCORD pBounds)
@@ -297,8 +388,8 @@ int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColo
 	hDIB = BMPHandleFromEXT(BitmapPath);
 	if (!hDIB)
 		return -1;
-	hDIB24 = FreeImage_ConvertTo24Bits(hDIB);
-	FreeImage_Unload(hDIB);
+	hDIB24 = GSSiFreeImage_ConvertTo24Bits(hDIB);
+	GSSiFreeImage_Unload(hDIB);
 	GetDIBDimensionsFromHandle(hDIB24, &height, &width);
 	if (pBounds)
 	{
@@ -336,7 +427,7 @@ int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColo
 	}
 	if (!SaveDIB32(hDIB24, ToPath, 0, -1))
 		n = -1;
-	FreeImage_Unload(hDIB24);
+	GSSiFreeImage_Unload(hDIB24);
 	return n;
 }
 
@@ -443,7 +534,7 @@ HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal)
    RealizePalette(hDC);
 
 
-	dib = FreeImage_Allocate (bi.biWidth,bi.biHeight,bi.biBitCount,0,0,0);
+	dib = GSSiFreeImage_Allocate (bi.biWidth,bi.biHeight,bi.biBitCount,0,0,0);
    /* alloc memory block to store our bitmap */
    //hDIB = GlobalAlloc(GHND, dwLen);
 
@@ -480,7 +571,7 @@ HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal)
    {
       /* clean up and return NULL */
 	  
-	  FreeImage_Unload(dib);
+	  GSSiFreeImage_Unload(dib);
       SelectPalette(hDC, hPal, TRUE);
       RealizePalette(hDC);
       ReleaseDC(NULL, hDC);
@@ -592,7 +683,7 @@ BOOL GMFIBMPToEXT (LPSTR lpszPathName,LPSTR FromMem,DWORD * pSize,DWORD Flag)
 		size = min (size,*pSize);
 		memcpy(bih,FromMem,size);
 		rtn = GenericWriter(dib,lpszPathName,Flag);
-		FreeImage_Unload(dib);
+		GSSiFreeImage_Unload(dib);
 	}
 
 	return rtn;
@@ -619,7 +710,7 @@ BOOL GMFIBMPFromEXT (LPSTR lpszPathName,LPSTR ToMem,DWORD * pSize)
 	if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
 	{
 		// ok, let's load the file
-		FIBITMAP *dib = FreeImage_Load(fif, lpszPathName, BMP_DEFAULT);
+		FIBITMAP *dib = GSSiFreeImage_Load(fif, lpszPathName, BMP_DEFAULT);
 		// unless a bad file format, we are done !
 
 
@@ -634,7 +725,7 @@ BOOL GMFIBMPFromEXT (LPSTR lpszPathName,LPSTR ToMem,DWORD * pSize)
 				*pSize = size;
 //				FreeImage_SaveBMP(dib, ToFile);
 
-				FreeImage_Unload(dib);
+				GSSiFreeImage_Unload(dib);
 
 			}
 
@@ -663,7 +754,7 @@ BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile,double factor)
 	if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
 	{
 		// ok, let's load the file
-		FIBITMAP *dib = FreeImage_Load(fif, lpszPathName, BMP_DEFAULT);
+		FIBITMAP *dib = GSSiFreeImage_Load(fif, lpszPathName, BMP_DEFAULT);
 		rtn = fif;
 		// unless a bad file format, we are done !
 
@@ -675,13 +766,13 @@ BOOL GMFIBMPFileFromEXT (LPSTR lpszPathName,LPSTR ToFile,double factor)
 					int w, h;
 					LPBITMAPINFOHEADER pDibInfo = FreeImage_GetInfoHeader(dib);
 					FIBITMAP *dib2 = FreeImage_Rescale(dib,pDibInfo->biWidth*factor,pDibInfo->biHeight*factor, FILTER_CATMULLROM);
-					FreeImage_Unload(dib);
+					GSSiFreeImage_Unload(dib);
 					dib = dib2;
 				}
 				rtn = FreeImage_Save(FIF_BMP, dib,ToFile,BMP_DEFAULT);
 //				FreeImage_SaveBMP(dib, ToFile);
 
-				FreeImage_Unload(dib);
+				GSSiFreeImage_Unload(dib);
 				if (rtn)
 					rtn = 3;
 				else
@@ -745,7 +836,7 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName, BOOL InfoOnly)
 			else
 				flag = JPEG_ACCURATE;
 		}
-		dib = FreeImage_Load(fif, lpszPathName, flag);
+		dib = GSSiFreeImage_Load(fif, lpszPathName, flag);
 		rtn = (HDIB32)dib;
 		// unless a bad file format, we are done !
 		LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)dib);
@@ -779,21 +870,20 @@ BOOL GMFIInfoFromEXT(LPSTR PathName, LPBITMAPINFOHEADER	pDibInfo)
 	// check that the plugin has reading capabilities ...
 	if ((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
 	{
-		dib = FreeImage_Load(fif, lpszPathName, FIF_LOAD_NOPIXELS);
+		dib = GSSiFreeImage_Load(fif, lpszPathName, FIF_LOAD_NOPIXELS);
 		if (dib)
 		{
 			*pDibInfo = *FreeImage_GetInfoHeader((FIBITMAP *)dib);
-			FreeImage_Unload(dib);
+			GSSiFreeImage_Unload(dib);
 			rtn = TRUE;
 		}
 	}
 	return rtn;
 }
 
-HANDLE GMFreeImageRotateClassic (HANDLE hDIBIn,LPDOUBLE pRotate)
+HANDLE GMFreeImageRotateClassic (HANDLE hDIBIn,double Rotate)
 {
 	FIBITMAP *dibIn = (FIBITMAP *) hDIBIn;
-	double	Rotate = *(LPDOUBLE)pRotate;
 	HANDLE	rtn=0;
 	
 	if(hDIBIn)
@@ -819,15 +909,26 @@ DWORD GMFICopy (DWORD hDIBIn,DWORD left,DWORD right, DWORD top, DWORD bottom)
 
 }
 
+void GSSiFreeImage_Unload(HDIB32 hdib)
+{
+	if (hdib)
+	{
+		imageAllocated(hdib, -1);
 
+		FreeImage_Unload(hdib);
+	}
+	else
+		imageAllocated(hdib, -2);
+}
 //DWORD GMFIBMPUnload (DWORD dibdw)
 HDIB32 GMDestroyDIB32 (HDIB32 hDib)
 {
-
-	FIBITMAP *dib = (FIBITMAP*)hDib;
+	if (hDib)
+		GSSiFreeImage_Unload(hDib);
+/*	FIBITMAP *dib = (FIBITMAP*)hDib;
 
 	if (dib != NULL)
-		FreeImage_Unload(dib);
+		FreeImage_Unload(dib);*/
 	return NULL;
 }
 
@@ -1301,6 +1402,8 @@ HDIB32 LoadDIBFromMem (LPBYTE pMem,int MemLen,int Format,int flags)
 		Flag = TIFF_ADOBE_DEFLATE;
 	check  = FreeImage_LoadFromMemory(Format, hmem, Flag);
 	FreeImage_CloseMemory(hmem);
+	imageAllocated(check, 8);
+
 	return check;
 }
 

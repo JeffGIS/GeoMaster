@@ -561,7 +561,7 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 				{
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
-				FreeImage_Unload(hDIB);
+				GSSiFreeImage_Unload(hDIB);
 				hBMLarge = DisplaySelectedImage(hWndDlg, FileName,FALSE,FALSE,rulernum);
 			}
 		}
@@ -572,11 +572,11 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 
 			if (hDIB)
 			{
-				if (FreeImage_RotateClassic(hDIB,90))
+				if (GMFreeImageRotateClassic(hDIB,90))
 				{
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
-				FreeImage_Unload(hDIB);
+				GSSiFreeImage_Unload(hDIB);
 				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,rulernum);
 			}
 		}
@@ -587,11 +587,11 @@ BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wP
 
 			if (hDIB)
 			{
-				if (FreeImage_RotateClassic(hDIB, 270))
+				if (GMFreeImageRotateClassic(hDIB, 270))
 				{
 					GMFIBMPHandleToEXT(FileName, hDIB, 0);
 				}
-				FreeImage_Unload(hDIB);
+				GSSiFreeImage_Unload(hDIB);
 				hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,rulernum);
 			}
 		}
@@ -2544,7 +2544,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 					{
 						GMFIBMPHandleToEXT(FileName, hDIB, 0);
 					}
-					FreeImage_Unload(hDIB);
+					GSSiFreeImage_Unload(hDIB);
 					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
 				}
 			}
@@ -2565,11 +2565,11 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 
 				if (hDIB)
 				{
-					if (FreeImage_RotateClassic(hDIB, 90))
+					if (GMFreeImageRotateClassic(hDIB, 90))
 					{
 						GMFIBMPHandleToEXT(FileName, hDIB, 0);
 					}
-					FreeImage_Unload(hDIB);
+					GSSiFreeImage_Unload(hDIB);
 					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
 				}
 			}
@@ -2591,11 +2591,11 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 
 				if (hDIB)
 				{
-					if (FreeImage_RotateClassic(hDIB, 270))
+					if (GMFreeImageRotateClassic(hDIB, 270))
 					{
 						GMFIBMPHandleToEXT(FileName, hDIB, 0);
 					}
-					FreeImage_Unload(hDIB);
+					GSSiFreeImage_Unload(hDIB);
 					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
 				}
 			}

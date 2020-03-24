@@ -563,14 +563,14 @@ GSSiExitProg (1348);
 						LPSTR pDot = strrchr(Arg[3], '.');
 						strcpy(pDot, ".png");
 						rtn = GMFIBMPHandleToEXT(Arg[3], dib, 0);
-						FreeImage_Unload(dib);
+						GSSiFreeImage_Unload(dib);
 					}
 					else
 					{
-						HDIB32 dib24 = FreeImage_ConvertTo24Bits(dib);
-						FreeImage_Unload(dib);
+						HDIB32 dib24 = GSSiFreeImage_ConvertTo24Bits(dib);
+						GSSiFreeImage_Unload(dib);
 						rtn = GMFIBMPHandleToEXT(Arg[3], dib24, -imageFlag);
-						FreeImage_Unload(dib24);
+						GSSiFreeImage_Unload(dib24);
 					}
 				}
 				else

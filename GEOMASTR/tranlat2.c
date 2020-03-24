@@ -1330,9 +1330,9 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 					GetBitmapInfoFromHandle(&dibInfo, hDib);
 					if (dibInfo.biBitCount == 8)
 					{
-						HDIB32 hDib24 = FreeImage_ConvertTo24Bits(hDib);
+						HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib);
 						GetBitmapInfoFromHandle(&dibInfo, hDib24);
-						FreeImage_Unload(hDib);
+						GSSiFreeImage_Unload(hDib);
 						hDib = hDib24;
 					}
 					hDibInfo = GSSiGlobAlloc(1000,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER));
@@ -1341,7 +1341,7 @@ BOOL AddMapToDir (HWND hWnd,LPSTR File, LPSTR Dir, LPFILEINDEX lpFI, short Type,
 					GlobalUnlock(hDibInfo);
 					factor = 1.0 / iOrthoRes;
 					hDibFactored = FreeImage_Rescale(hDib, dibInfo.biWidth*factor, dibInfo.biHeight*factor, FILTER_CATMULLROM);
-					FreeImage_Unload(hDib);
+					GSSiFreeImage_Unload(hDib);
 
 				}
 			}
@@ -1953,7 +1953,7 @@ Exit:
             if (FidBMOrig != HFILE_ERROR)
             	GSSiClose2 (&FidBMOrig); 
 			if (hDibFactored)
-				FreeImage_Unload(hDibFactored);
+				GSSiFreeImage_Unload(hDibFactored);
 
             GSSiGlobFree (&hRow);
             GSSiGlobFree (&hOutRow);

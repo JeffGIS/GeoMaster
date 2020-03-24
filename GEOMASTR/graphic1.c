@@ -626,7 +626,7 @@ void QuitGraphics()
 		CloseHandle(fidLogFileUse);
 	FreeTrustedFiles();
 	GetTempDir(0);
-
+	GSSiFreeImage_Unload(0);
 #if CHECKMEM
 	TrackObject (0,-100); 
 #endif

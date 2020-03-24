@@ -785,7 +785,7 @@ BOOL SetGeoTiffData (HDIB32 hBMP,LPDOUBLE pScaleX,LPDOUBLE pScaleY,LPDPOINT pBit
 HDIB32 GMRotateImageClassic (HDIB32 hDib,double DegreesRotation)
 {
 
-   	HDIB32 st = GMFreeImageRotateClassic (hDib,&DegreesRotation);
+   	HDIB32 st = GMFreeImageRotateClassic (hDib,DegreesRotation);
 	
 	return (HDIB32)st;
 } 

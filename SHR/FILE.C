@@ -195,7 +195,7 @@ HDIB32 LoadDIB32(LPSTR lpFileNameIN,BOOL AdjustColorsToVP)
    char	lpFileName[MAX_PATH];  
    short	l;
     
-extern BOOL	AllowCache;
+//extern BOOL	AllowCache;
    /*
     * Set the cursor to a hourglass, in case the loading operation
     * takes more than a sec, the user will know what's going on.
@@ -215,7 +215,7 @@ extern BOOL	AllowCache;
 	if ((hDIB = GetBMPFromCache32(lpFileName)))
 	{
 		if (hDIB && AdjustColorsToVP == 24)
-			hDIB = FreeImage_ConvertTo24Bits(hDIB);
+			hDIB = GSSiFreeImage_ConvertTo24Bits(hDIB);
 
 		return hDIB;
 	}
@@ -237,7 +237,7 @@ extern BOOL	AllowCache;
    //SetCursor(LoadCursor(NULL, IDC_ARROW)); 
 	if (hDIB && AdjustColorsToVP==24)
 	{
-		hDIB = FreeImage_ConvertTo24Bits(hDIB);
+		hDIB = GSSiFreeImage_ConvertTo24Bits(hDIB);
 	}
 	else if (hDIB && AdjustColorsToVP)
 	{

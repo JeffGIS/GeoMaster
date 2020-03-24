@@ -3853,7 +3853,7 @@ BOOL GetImageBounds (LPSTR PathName, HDIB32 hdib,LPMNMXCORD pBitmapBounds,LPMNMX
     	pWBounds->xmx = (WorldPoint.x + ScaleX * (DibInfo.biWidth-1)) * factor;
     	pWBounds->ymn = (WorldPoint.y + ScaleY * (DibInfo.biHeight-1)) * factor; 
     	if (deleteDib)
-			FreeImage_Unload(hdib);
+			GSSiFreeImage_Unload(hdib);
     	return TRUE;
     }
 Exit:	
@@ -3861,7 +3861,7 @@ Exit:
    	pWBounds->ymx = DibInfo.biHeight-1;
    	pWBounds->xmx = DibInfo.biWidth-1;
 	if (deleteDib)
-		FreeImage_Unload(hdib);
+		GSSiFreeImage_Unload(hdib);
 	return TRUE;
 } 
 
@@ -4253,6 +4253,8 @@ ProcessImageFile:
 		}
 		if (!InLoadBinaryFileList)
 		{
+			DestroyDIB32(hCurImageMapDib, FALSE);
+			hCurImageMapDib = 0;
 			hCurImageMapDib = LoadDIB32(PltName, TRUE); 
 
     		if (!hCurImageMapDib)
