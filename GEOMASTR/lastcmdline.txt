@@ -1,2 +1,2 @@
-configs\jeff\test.gmc /F
-G:\GEOMas
+configs\basemap_new3.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=F;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;
+O:\GEOMas
