@@ -1,2 +1,2 @@
-configs\HiPriMaps_ramps.gmc /F 
-d:\brae\pcviewer\pcviewer
+configs\basemap.gmc /F 
+d:\geomas
