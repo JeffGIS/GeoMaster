@@ -1001,10 +1001,10 @@ int CreateOverlapMap(LPSTR OutImage, LPSTR InImages, COLORREF color)
 	if (!GMFIBMPHandleToEXT(OutImage, hOutBM, 0))
 		rtn = -2000;
 	if (hOutBM)
-		FreeImage_Unload(hOutBM);
+		GSSiFreeImage_Unload(hOutBM);
 Exit:	
 	for (int i = 0; i < nInBM;i++)
-		FreeImage_Unload(hInBM[i]);
+		GSSiFreeImage_Unload(hInBM[i]);
 
 	return rtn;
 }
@@ -1095,9 +1095,9 @@ RGBTRIPLE NewColorValue (RGBTRIPLE *pColor,double intensitychange)
 
 HDIB32 ChangeBitmapColor (HDIB32 hDib,RGBTRIPLE *pNewColor)
 {
-//	HDIB32	hDibGS = FreeImage_ConvertTo8Bits (hDib);
-	HDIB32	hDibGS = FreeImage_ConvertToGreyscale (hDib);
-	HDIB32	hDibNewColor = FreeImage_ConvertTo24Bits (hDib);
+//	HDIB32	hDibGS = GSSiFreeImage_ConvertTo8Bits (hDib);
+	HDIB32	hDibGS = GSSiFreeImage_ConvertToGreyscale (hDib);
+	HDIB32	hDibNewColor = GSSiFreeImage_ConvertTo24Bits (hDib);
 	UINT	nrow = FreeImage_GetHeight (hDib);
 	UINT	ncol = FreeImage_GetWidth (hDib);
 	UINT	irow,icol,ii;
@@ -1125,7 +1125,7 @@ HDIB32 ChangeBitmapColor (HDIB32 hDib,RGBTRIPLE *pNewColor)
 				}
 			}
 		}
-		FreeImage_Unload(hDibGS);
+		GSSiFreeImage_Unload(hDibGS);
 	}
 	return hDibNewColor;
 }
@@ -1170,8 +1170,8 @@ BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, LPPOINT ptiePo
 //    lpbi = (LPBITMAPINFOHEADER)GetDibHeader (hDib);
 	if (lpbi.biBitCount != 24)
 	{
-		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(*hDib);
-		FreeImage_Unload(*hDib);
+		HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(*hDib);
+		GSSiFreeImage_Unload(*hDib);
 		*hDib = hDib24;
 	}
 //    pImage = FindDIBBits ((LPSTR)lpbi);
@@ -1184,7 +1184,7 @@ BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, LPPOINT ptiePo
 
 		DeleteObject (hBMColor);
 		hBMColor = DIB32ToBitmap(hDibNewColor,(HPALETTE)0);
-		FreeImage_Unload(hDibNewColor);
+		GSSiFreeImage_Unload(hDibNewColor);
 	}
 
 	hBMMask = CreateBitmapMask(hBMColor,TranColor);
@@ -1220,10 +1220,10 @@ BOOL DisplayTransparentBitmap(HDC hDC, HDIB32 *hDib, POINT Point, LPPOINT ptiePo
 	if (Printing && ii)
 	{
 //		HDIB32	hDibMask = BitmapToDIB32 (hBMMask);
-		HDIB32	hDib24 = FreeImage_ConvertTo24Bits (*hDib);
-		HDIB32	hDib8 = FreeImage_ColorQuantize (hDib24,FIQ_NNQUANT);
+		HDIB32	hDib24 = GSSiFreeImage_ConvertTo24Bits (*hDib);
+		HDIB32	hDib8 = GSSiFreeImage_ColorQuantize (hDib24,FIQ_NNQUANT);
 //		HDIB32	hDibInvert = FreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
-		HDIB32	hDibMask = FreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
+		HDIB32	hDibMask = GSSiFreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
 		LPBYTE	pBits = FreeImage_GetBits (hDibMask);
 		RGBQUAD *pal = FreeImage_GetPalette(hDibMask);
 		BYTE	black=0,white=0xFF;
@@ -1353,10 +1353,10 @@ BOOL DisplayTransparentBitmapInRect(HDC hDC, HDIB32 hDib, LPRECT pRect, BOOL Mai
 	if (Printing && ii)
 	{
 //		HDIB32	hDibMask = BitmapToDIB32 (hBMMask);
-		HDIB32	hDib24 = FreeImage_ConvertTo24Bits (hDib);
-		HDIB32	hDib8 = FreeImage_ColorQuantize (hDib24,FIQ_NNQUANT);
+		HDIB32	hDib24 = GSSiFreeImage_ConvertTo24Bits (hDib);
+		HDIB32	hDib8 = GSSiFreeImage_ColorQuantize (hDib24,FIQ_NNQUANT);
 //		HDIB32	hDibInvert = FreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
-		HDIB32	hDibMask = FreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
+		HDIB32	hDibMask = GSSiFreeImage_Allocate (bm.bmWidth,bm.bmHeight,1,0,0,0);
 		LPBYTE	pBits = FreeImage_GetBits (hDibMask);
 		RGBQUAD *pal = FreeImage_GetPalette(hDibMask);
 		BYTE	black=0,white=0xFF;

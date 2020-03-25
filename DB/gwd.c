@@ -6212,7 +6212,7 @@ BOOL CreateReport (LPSTR DBName, LPGWDHEADER lpGWDHead, int NumSelect, LPINT Sel
     HFILE Fid; 
     LPINT   pSelected;
     OFSTRUCTGM    OFStruct;
-    char    str[256],str2[64], FieldName[300];
+	char    str[256], str2[64], FieldName[300] = { 0 };
     char    File[256], Title[128];
     
     *File = 0;

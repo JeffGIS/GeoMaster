@@ -1,2 +1,2 @@
-configs\basemap.gmc /F 
-d:\geomas
+configs\jeff\test.gmc /F
+G:\GEOMas

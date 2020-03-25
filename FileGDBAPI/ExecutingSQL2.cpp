@@ -407,6 +407,7 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 	GeometryType geometryType;
 	FieldType fieldType;
 	FieldInfo	fieldInfo;
+	int			nAnnoMarkers = 0;
 	//wstring fieldName;
 
 	*pType = 0;
@@ -439,7 +440,6 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 			{
 				int			nFields;
 				bool		isNull=FALSE;
-				int			nAnnoMarkers = 0;
 				//char		fName[256];
 
 				attributeQueryRows.GetFieldInformation(fieldInfo);
@@ -506,6 +506,8 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 		geodatabase[openGDBid[iDB-1]].CloseTable(table);
 		not--;
 	}
+	if (!*pType && nAnnoMarkers == 3)
+		*pType = 99;
     return rtn;
 }
 extern "C" int FGDBGetChildList (int iDB,LPCTSTR Under,int Type,int MaxElementSize,LPHANDLE phList)

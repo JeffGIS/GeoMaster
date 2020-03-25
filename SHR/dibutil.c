@@ -48,14 +48,18 @@
 #include "dibutil.h"
 
 #include "gmextern.h"      
-#define MAXBMPSIZETOCACHE	1024L * 256L
+#define MAXBMPSIZETOCACHE	1024L * 1024L
 static	BOOL	FirstBMPCache=TRUE; 
 static	char		BMPNames[MAXBMPCACHE][MAX_PATH];
+static	int			BMPSize[MAXBMPCACHE];
+static	int			BMPLockCount[MAXBMPCACHE];
 static	HANDLE		BMPHandles[MAXBMPCACHE];
 static	ULONG		BMPLastUse[MAXBMPCACHE], BMPNextUse=0;
 static	BOOL	FirstBMPCache32=TRUE; 
 static	char		BMPNames32[MAXBMPCACHE][MAX_PATH];
 static	HDIB32		BMPHandles32[MAXBMPCACHE];
+static	int			BMPSize32[MAXBMPCACHE];
+static	int			BMPLockCount32[MAXBMPCACHE];
 static	ULONG		BMPLastUse32[MAXBMPCACHE], BMPNextUse32=0;
 static	int			imageFileRotation=0;
 static	int			maxBMP32Cache = MAXBMPCACHE;
@@ -1419,8 +1423,12 @@ HANDLE GetBMPFromCache (LPSTR Name)
 	if (FirstBMPCache)
 	{   
 		FirstBMPCache = FALSE;
-		for (i=0;i<MAXBMPCACHE;i++)
-			*BMPNames[i] = 0;  
+		for (i = 0; i < MAXBMPCACHE; i++)
+		{
+			*BMPNames[i] = 0;
+			BMPLockCount[i] = 0;
+			BMPLastUse[i] = 0;
+		}
 		return 0;
 	}
 	
@@ -1429,6 +1437,7 @@ HANDLE GetBMPFromCache (LPSTR Name)
 		if (!_fstricmp (Name,BMPNames[i])) 
 		{   
 			BMPLastUse[i] = BMPNextUse++;
+			BMPLockCount[i]++;
 			return BMPHandles[i];
 		}
 	}
@@ -1465,6 +1474,8 @@ void AddBMPToCache (LPSTR Name,HANDLE hBMP)
 				if (*BMPNames[i]) 
 					GSSiGlobFree (&BMPHandles[i]);  
 				*BMPNames[i] = 0;
+				BMPLockCount[i] = 0;
+				BMPLastUse[i] = 0;
 			}
 		FirstBMPCache = TRUE; 
 		if (hBMP)  
@@ -1485,7 +1496,11 @@ void AddBMPToCache (LPSTR Name,HANDLE hBMP)
 	{   
 		FirstBMPCache = FALSE;
 		for (i=0;i<MAXBMPCACHE;i++)
-			*BMPNames[i] = 0;  
+		{
+			*BMPNames[i] = 0;
+			BMPLockCount[i] = 0;
+			BMPLastUse[i] = 0;
+		}
 	}
 	pDibInfo = (LPBITMAPINFOHEADER)GlobalLock (hBMP);
 	BMPSize = pDibInfo->biHeight * pDibInfo->biWidth * pDibInfo->biBitCount/8;
@@ -1498,10 +1513,11 @@ void AddBMPToCache (LPSTR Name,HANDLE hBMP)
 		{   
 			BMPLastUse[i] = BMPNextUse++;
 			BMPHandles[i] = hBMP;
+			BMPLockCount[i] = 1;
 			_fstrcpy (BMPNames[i],Name);
 			return;
 		}
-		if (BMPLastUse[i] < MinUse)
+		if (BMPLastUse[i] < MinUse && !BMPLockCount[i])
 		{
 			MinUse = BMPLastUse[i];
 			Mini = i;              
@@ -1534,6 +1550,7 @@ HDIB32 GetBMPFromCache32 (LPSTR Name)
 		if (!_fstricmp (Name,BMPNames32[i])) 
 		{   
 			BMPLastUse32[i] = BMPNextUse32++;
+			BMPLockCount32[i]++;
 			return BMPHandles32[i];
 		}
 	}
@@ -1542,28 +1559,33 @@ HDIB32 GetBMPFromCache32 (LPSTR Name)
 
 BOOL DestroyDIB32(HDIB32 hDib,BOOL Force)
 { 
+	int iloc;
 	if (!hDib)
 		return TRUE;
-   if (!Force && hDIBInCache32 (hDib))
+	iloc = hDIBInCache32(hDib);
+	if (!Force && iloc)
+	{
+		BMPLockCount32[iloc - 1]--;
 		return TRUE;//allows caching
+	}
    GMDestroyDIB32 (hDib); 
    hDib = 0;
    return TRUE;
 }
 
-BOOL hDIBInCache32 (HDIB32 hBMP)
+int hDIBInCache32 (HDIB32 hBMP)
 {   
 	USHORT	i;  
 	
 	if (FirstBMPCache32)
-		return FALSE;
+		return 0;
 	
 	for (i=0;i<MAXBMPCACHE;i++)  
 	{
 		if (*BMPNames32[i] && BMPHandles32[i] == hBMP)
-			return TRUE;
+			return i+1;
 	}
-	return FALSE;
+	return 0;
 } 
 
 BOOL RemoveBMPFromCache32 (LPSTR Name)
@@ -1579,6 +1601,7 @@ BOOL RemoveBMPFromCache32 (LPSTR Name)
 			DestroyDIB32 (BMPHandles32[i],TRUE); 
 			BMPHandles32[i] = 0; 
 			*BMPNames32[i] = 0;
+			BMPLockCount[i] = 0;
 			return TRUE;
 		}
 	}
@@ -1588,16 +1611,22 @@ BOOL RemoveBMPFromCache32 (LPSTR Name)
 BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 {   
 	ULONG	MinUse=ULONG_MAX;
-	USHORT	Mini, i;
+	USHORT	Mini=0, i;
 	
 	if (!Name)
 	{
 		if (!FirstBMPCache32)
 			for (i=0;i<MAXBMPCACHE;i++)  
 			{
-				if (*BMPNames32[i]) 
-					DestroyDIB32 (BMPHandles32[i],TRUE); 
+				if (*BMPNames32[i])
+				{
+					if (BMPLockCount32[i])
+						ii = 1;
+					else
+						DestroyDIB32(BMPHandles32[i], TRUE);
+				}					
 				BMPHandles32[i] = 0; 
+				BMPLockCount32[i] = 0;
 				*BMPNames32[i] = 0;
 			}
 		FirstBMPCache32 = TRUE; 
@@ -1611,20 +1640,44 @@ BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 		return FALSE;
 	LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)*hBMP);
 	UINT BMPSize = pDibInfo->biHeight * pDibInfo->biWidth * pDibInfo->biBitCount / 8;
-
-	if (BMPSize > MAXBMPSIZETOCACHE)
-		return FALSE;
+	BOOL haveBigOne = FALSE;
 
 	if (FirstBMPCache32)
 	{   
 		FirstBMPCache32 = FALSE;
-		for (i=0;i<MAXBMPCACHE;i++)
-			*BMPNames32[i] = 0;  
+		for (i = 0; i < MAXBMPCACHE; i++)
+		{
+			*BMPNames32[i] = 0;
+			BMPLockCount32[i] = 0;
+		}
+	}
+	if (BMPSize > MAXBMPSIZETOCACHE)
+	{
+		for (i = 0; i < maxBMP32Cache; i++)
+		{
+			if (*BMPNames32[i] && BMPHandles32[i] && BMPSize32[i] > MAXBMPSIZETOCACHE)
+			{
+				if (BMPLockCount32[i] == 0)
+				{
+					DestroyDIB32(BMPHandles32[i], TRUE);
+					BMPLastUse32[i] = BMPNextUse++;
+					BMPHandles32[i] = *hBMP;
+					BMPLockCount32[i] = 1;
+					BMPSize32[i] = BMPSize;
+					strcpy(BMPNames32[i], Name);
+					return TRUE;
+				}
+				else
+					haveBigOne = TRUE;
+			}
+		}
+		if (haveBigOne)
+			return FALSE;
 	}
 	if (pDibInfo->biBitCount != 24)
 	{
-		HDIB32 hDib24 = FreeImage_ConvertTo24Bits(*hBMP);
-		FreeImage_Unload(*hBMP);
+		HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(*hBMP);
+		GSSiFreeImage_Unload(*hBMP);
 		*hBMP = hDib24;
 	}
 	for (i=0;i<maxBMP32Cache;i++)  
@@ -1633,10 +1686,12 @@ BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 		{   
 			BMPLastUse32[i] = BMPNextUse++;
 			BMPHandles32[i] = *hBMP;
+			BMPLockCount32[i] = 1;
+			BMPSize32[i] = BMPSize;
 			_fstrcpy (BMPNames32[i],Name);
 			return TRUE;
 		}
-		if (BMPLastUse32[i] < MinUse)
+		if (BMPLastUse32[i] < MinUse && BMPLockCount32[i]==0)
 		{
 			MinUse = BMPLastUse32[i];
 			Mini = i;              
@@ -1645,6 +1700,8 @@ BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 	DestroyDIB32  (BMPHandles32[Mini],TRUE); 
 	BMPLastUse32[Mini] = BMPNextUse32++;
 	BMPHandles32[Mini] =*hBMP;
+	BMPLockCount32[i] = 1;
+	BMPSize32[i] = BMPSize;
 	_fstrcpy (BMPNames32[Mini],Name);
 	return TRUE;
 }

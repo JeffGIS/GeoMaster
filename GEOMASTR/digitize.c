@@ -207,7 +207,7 @@ BOOL OpenDigConnection( HWND hWnd )
    BOOL		rtn=FALSE;
    char       DigPort[ 32 ], szTemp[ 10 ], DigName[32], DigInitString[256],Baud[32], cmd[256] ;
    BOOL       fRetVal ;
-   char		IniName[128]="[%DL]geomastr.ini";
+   char		IniName[MAX_PATH]="[%DL]geomastr.ini";
    int		ii;
    LPSTR	lpComma, lpStart;  
    BOOL		UseExternalGPSInput=GetGlobalBVal2("[%USEGPSINPUTEXE]",TRUE);

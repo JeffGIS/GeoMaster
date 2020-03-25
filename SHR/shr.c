@@ -2192,8 +2192,12 @@ BOOL makedirectories2 (LPSTR Name,BOOL IsDir,BOOL Verify)
 		
 		EndDir = _fstrchr ((LPSTR)(StartDir+1),'\\');
 		if (!EndDir)
-			EndDir = _fstrchr (StartDir,0); 
-		*EndDir = 0;
+		{
+			EndDir = _fstrchr(StartDir, 0);
+			*(EndDir + 1) = 0;
+		}
+		else
+			*EndDir = 0;
 		if (*StartDir != '\\' && *NewName)
 			_fstrcat (NewName,"\\");
 		_fstrcat (NewName,StartDir); 
@@ -5093,40 +5097,66 @@ GSSiExitProg (258);
 #endif
 }
 
-BOOL BoundsInBounds (LPMNMXCORD pBounds1,LPMNMXCORD pBounds2,short Opt)
+BOOL BoundsInBounds(LPMNMXCORD pBounds1, LPMNMXCORD pBounds2, short Opt)
 #if ENABLETRACE
-{GSSiEnterProg (259);
-#endif
-{   
-	BOOL InBounds=TRUE;
-	
-	switch (Opt)
-	{
-		case 0: //bounds 1 completely in bounds2
-	    if (pBounds1->xmn < pBounds2->xmn ||   
-	        pBounds1->xmx > pBounds2->xmx ||
-	        pBounds1->ymn < pBounds2->ymn ||
-	        pBounds1->ymx > pBounds2->ymx)
-	        InBounds=FALSE; 
-	    break;
-	    
-	    case 1: //bounds 1 at least partially in bounds2   
-	    if (pBounds1->xmx < pBounds2->xmn ||   
-	        pBounds1->xmn > pBounds2->xmx ||
-	        pBounds1->ymx < pBounds2->ymn ||
-	        pBounds1->ymn > pBounds2->ymx)
-	        InBounds=FALSE; 
-	    break;
-	}
 {
-#if ENABLETRACE
-GSSiExitProg (259);
+	GSSiEnterProg(259);
 #endif
-    return InBounds;
-}
+	{
+		BOOL InBounds = TRUE;
+
+		switch (Opt)
+		{
+		case 0: //bounds 1 completely in bounds2
+			if (pBounds1->xmn < pBounds2->xmn ||
+				pBounds1->xmx > pBounds2->xmx ||
+				pBounds1->ymn < pBounds2->ymn ||
+				pBounds1->ymx > pBounds2->ymx)
+				InBounds = FALSE;
+			break;
+
+		case 1: //bounds 1 at least partially in bounds2   
+			if (pBounds1->xmx < pBounds2->xmn ||
+				pBounds1->xmn > pBounds2->xmx ||
+				pBounds1->ymx < pBounds2->ymn ||
+				pBounds1->ymn > pBounds2->ymx)
+				InBounds = FALSE;
+			break;
+		}
+		{
 #if ENABLETRACE
-}
+			GSSiExitProg(259);
 #endif
+			return InBounds;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
+int BoundsInBounds2(LPMNMXCORD pBounds1, LPMNMXCORD pBounds2)
+//0=1 not in 2, 1 = 1 all in 2, -1 = 1 part in 2
+{
+	int rtn;
+
+	if (pBounds1->xmn >= pBounds2->xmn &&
+		pBounds1->xmx <= pBounds2->xmx &&
+		pBounds1->ymn >= pBounds2->ymn &&
+		pBounds1->ymx <= pBounds2->ymx)
+		rtn = 1;//1 completely in 2	 
+	else if (pBounds2->xmn >= pBounds1->xmn &&
+		pBounds2->xmx <= pBounds1->xmx &&
+		pBounds2->ymn >= pBounds1->ymn &&
+		pBounds2->ymx <= pBounds1->ymx)
+		rtn = -1;// 2 completely in 1
+	else if (pBounds1->xmx < pBounds2->xmn ||
+		pBounds1->xmn > pBounds2->xmx ||
+		pBounds1->ymx < pBounds2->ymn ||
+		pBounds1->ymn > pBounds2->ymx)
+		rtn = 0;
+	else
+		rtn = -1;
+
+	return rtn;
 }
 
 BOOL Bounds4InBounds4 (LPMNMXCORL pBounds1,LPMNMXCORL pBounds2,short Opt)
@@ -5165,27 +5195,34 @@ GSSiExitProg (259);
 #endif
 }
 
-void AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect)
+RECT AdjustRectToRect(LPRECT pRectToAdjust, LPRECT pRect,LPDOUBLE padjustWidth,LPDOUBLE padjustHeight)
 {
 	double	wf, hf, f;
-	POINT	mp = RectMid(pRectToAdjust);
+	POINT	mp = RectMid(pRect);
+	RECT rtn;
+	double width, height;
 
-	wf = (double)RECTWIDTH(pRectToAdjust) / (double)RECTWIDTH(pRect);
-	hf = (double)RECTHEIGHT(pRectToAdjust) / (double)RECTHEIGHT(pRect);
-	f = (double)RECTWIDTH(pRect) / (double)RECTHEIGHT(pRect);
-
+	wf = (double)RECTWIDTH(pRect) / (double)RECTWIDTH(pRectToAdjust);
+	hf = (double)RECTHEIGHT(pRect) / (double)RECTHEIGHT(pRectToAdjust);
 	if (RECTWIDTH(pRectToAdjust) * hf > RECTWIDTH(pRect))
 	{
-		pRectToAdjust->top = mp.y - (f * RECTHEIGHT(pRectToAdjust)) / 2;
-		pRectToAdjust->bottom = mp.y + (f * RECTHEIGHT(pRectToAdjust)) / 2;
+		f = wf;
+		*padjustWidth = 1.0;
+		*padjustHeight = wf;
 	}
 	else
 	{
-		pRectToAdjust->left = mp.x - (RECTWIDTH(pRectToAdjust) / f) / 2;
-		pRectToAdjust->right = mp.x + (RECTWIDTH(pRectToAdjust) / f) / 2;
+		f = hf;
+		*padjustWidth = hf;
+		*padjustHeight = 1.0;
 	}
-
-	return;
+	width = RECTWIDTH(pRectToAdjust) * f;
+	height = RECTHEIGHT(pRectToAdjust) * f;
+	rtn.left = mp.x - width / 2;
+	rtn.right = mp.x + width / 2;
+	rtn.top = mp.y - height / 2;
+	rtn.bottom = mp.y + height / 2;
+	return rtn;
 }
 double AdjustRectToRectFactor(LPRECT pRectToAdjust, LPRECT pRect)
 {

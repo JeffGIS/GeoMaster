@@ -396,6 +396,77 @@ BOOL GMCacheIsRunning(void)
 
 	return rtn;
 }
+void CacheFilesInList(LPSTR supplementalList, LPSTR CacheDir)
+{
+	HANDLE Fid = 0;
+	OFSTRUCTGM OFStruct = { 0 };
+	char fromFile[MAX_PATH+2], toFile[MAX_PATH];
+	char dataDir[MAX_PATH] = "[%DL]";
+
+	ExpandText(dataDir);
+	int ldataDir = strlen(dataDir);
+	Fid = OpenFileGM(supplementalList, &OFStruct, OF_READ);
+	while (fgetstring2(fromFile, MAX_PATH, Fid))
+	{
+		if (!strnicmp(fromFile, dataDir, ldataDir))
+		{
+			sprintf(toFile, "%s%s", CacheDir, &fromFile[ldataDir]);
+			ExpandText(fromFile);
+			ExpandText(toFile);
+			makedirectories(toFile, FALSE, FALSE);
+			CopyFile(fromFile, toFile, FALSE);
+		}
+	}
+	GSSiClose64(&Fid);
+
+	return;
+}
+BOOL LoadSupplementalCacheFiles(LPSTR SupplementalCacheDir,LPSTR CacheDir)
+{
+	char value[128];
+	char supplementalList[MAX_PATH+2];
+	char tempFile[MAX_PATH+2];
+	HANDLE Fid = 0;
+	OFSTRUCTGM OFStruct = { 0 };
+	BOOL rtn = FALSE;
+	int nFiles = 0;
+	int lastProcessed;
+	int maxID = 0;
+
+	GSSiGetTempFileName(0, "gm", 0, tempFile);
+	GetPrivateProfileString("User", "LastSupplementalCache", "0", value, sizeof(value), GMIni);
+	lastProcessed = atoi(value);
+	maxID = lastProcessed;
+	Fid = OpenFileGM(tempFile, &OFStruct, OF_CREATE);
+	ii = SearchFilesInDirBC(SupplementalCacheDir, 0, Fid, &nFiles, "*.txt", 1, FALSE);
+	if (nFiles > 0)
+	{
+		llFileSeek(Fid, 0, 0);
+		while (fgetstring2(supplementalList, MAX_PATH, Fid))
+		{
+			LPSTR pID = strrchr(supplementalList, '\\');
+			if (pID)
+			{
+				int dirID;
+				dirID = atoi(++pID);
+				if (dirID > lastProcessed)
+				{
+					maxID = max(dirID, maxID);
+					CacheFilesInList(supplementalList,CacheDir);
+				}
+			}
+		}
+		if (maxID > lastProcessed)
+		{
+			itoa(maxID, value, 10);
+			WritePrivateProfileString("User", "LastSupplementalCache", value, GMIni);
+		}
+	}
+	GSSiClose64(&Fid);
+	OpenFileGM(tempFile, &OFStruct, OF_DELETE);
+
+	return rtn;
+}
 void NeedToStartBackgroundCache(void)
 {
 	char	BackgroundCacheFilelist[MAX_PATH];
@@ -411,11 +482,14 @@ void NeedToStartBackgroundCache(void)
 	char LastDataUpdateFile[MAX_PATH];
 	char TrustedCacheFiles[MAX_PATH];
 	char CacheIsCompleteFile[MAX_PATH];
+	char SupplementalCacheDir[MAX_PATH] = "[%DL]SupplementalCacheFiles";
 	char cDate[24];
 	time_t currentTime;
 	time_t lastDataUpdateTime = 0;
 	time_t lastCacheCompleteTime = 0;
 
+	ExpandText(SupplementalCacheDir);
+	LoadSupplementalCacheFiles(SupplementalCacheDir, CachePathnameTo);
 	time(&currentTime);
 	sprintf(LastCacheStartTimeFile, "%sLastCacheStartTime.txt", CachePathnameTo);
 	ExpandText(LastCacheStartTimeFile);

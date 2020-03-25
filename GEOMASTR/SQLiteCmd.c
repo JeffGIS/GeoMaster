@@ -4074,7 +4074,7 @@ LPSTR GetSLTFieldData(HANDLE hDB, LPSTR SQL, LPFIELDINFO infield, BOOL SingleVal
 	{
 		LPSQLDATABASE pDB = (LPSQLDATABASE)GlobalLock(hDB);
 		int l = sqlite3_column_bytes(pDB->statement, WantField);
-		LPSTR nam = sqlite3_column_name(pDB->statement, WantField);
+		LPSTR nam = (LPSTR)sqlite3_column_name(pDB->statement, WantField);
 		LPSTR	str = (LPSTR)sqlite3_column_text(pDB->statement, WantField);
 		*irc = 0;
 

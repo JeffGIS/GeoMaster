@@ -1323,7 +1323,7 @@ BOOL SaveIntersectFile (LPSTR Name)
     GWDHEADER GWDHead; 
     LPGWDHEADER lpGWDHead;
     HANDLE  hVars, hDB;
-    short       ibeg,NumVars, NumSegs;
+    short       ibeg,NumVars=0, NumSegs=0;
 	HFILE FidData;
     OFSTRUCTGM    OFStruct;
     GWFLDINFO FldInfo;    
@@ -3183,3 +3183,231 @@ Exit:
 	return TRUE;
 }
 
+static int GetNodeID(LPDPOINT point,LPPOINT pNodes, LPINT pNumNodes)
+{
+	POINT pt;
+	int i = 0;
+
+	pt.x = IDNINT(point->x);
+	pt.y = IDNINT(point->y);
+
+	for (i = 0; i < *pNumNodes; i++, pNodes++)
+	{
+		if (abs(pt.x - pNodes->x) < 2 && abs(pt.y - pNodes->y) < 2)
+			return i+1;
+	}
+	*pNodes = pt;
+	(*pNumNodes)++;
+	return i+1;
+}
+BOOL LoadNetwork(LPSTR Type, LPSTR File, LPSTR Opts)
+{
+	BOOL rtn = FALSE;
+
+	
+	typedef struct
+	{
+		int	id;
+		int length;
+		int fromNode, toNode;
+		short speed;
+		short oneway; // 0-both,1 = fromto; 2= tofrom
+	} NETSEGMENT;
+
+	typedef NETSEGMENT	FAR* LPNETSEGMENT;
+
+	if (!stricmp(Type, "HLTTOSLT"))
+	{
+		sqlite3* db = NULL;
+		char cmd[1024];
+		HIGHLIGHTDATA	HighlightData;
+		int Refno;
+		int pos = BT_FIRST;
+		int totRecs = BT_NUM_IN_INDEX(hHighlight);
+		int nLoaded = 0;
+		if (totRecs > 1)
+		{
+			LPPOINT pNodes = malloc(totRecs * 2 * sizeof(POINT));
+			LPNETSEGMENT pSegs = malloc(totRecs * sizeof(NETSEGMENT));
+			int numNodes = 0;
+			int numSegs = 0;
+			CreateStatusWind(hWndMain, 1, "Writing output file");
+			while (StatusWindowUpdate(NULL, NULL, totRecs, ++nLoaded) && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+			{
+				pos = BT_NEXT;
+				if (HighlightData.PD.Type == 2)
+				{
+					HANDLE hPnts;
+					long nPnts;
+
+					if (GetPolyPoints((LPPICKDATAHEADER)&HighlightData.PD, FALSE, &nPnts, &hPnts))
+					{
+						LPDPOINT pPoints = (HPDPOINT)GlobalLock(hPnts);
+						LPSTR pSpeed;
+						int speed = 0;
+						int oneway = 0;
+						pSegs[numSegs].fromNode = GetNodeID(pPoints,pNodes,&numNodes);
+						pSegs[numSegs].toNode = GetNodeID(&pPoints[nPnts - 1], pNodes, &numNodes);
+						pSegs[numSegs].id = Refno;
+						pSegs[numSegs].length = IDNINT(GetPolyLengthDH(hPnts, nPnts));
+						pSpeed = strrchr(HighlightData.PD.UDI, ':');
+						if (pSpeed)
+						{
+							*pSpeed++ = 0;
+							speed = atoi(pSpeed);
+						}
+						pSegs[numSegs].speed = speed;
+						if (*HighlightData.PD.UDI == 'F')
+							oneway = 1;
+						else if (*HighlightData.PD.UDI == 'T')
+							oneway = 2;
+						else if (*HighlightData.PD.UDI == 'N')
+							oneway = 3;
+						pSegs[numSegs++].oneway = oneway;
+						GSSiGlobUlFree (&hPnts);
+					}
+				}
+			}
+			int st = sqlite3_open(File, &db);
+			if (st == SQLITE_OK)
+			{
+				strcpy(cmd, "DROP TABLE IF EXISTS SEGMENTS;CREATE TABLE SEGMENTS (REFNO INTEGER PRIMARY KEY,FROMNODE INT,TONODE INT,LENGTH INT,SPEED INT,ONEWAY INT);CREATE INDEX SEGMENTS_FROMNODE_INDEX ON SEGMENTS (FROMNODE);CREATE INDEX SEGMENTS_TONODE_INDEX ON SEGMENTS (TONODE); ");
+				st = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+				st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+				for (int i = 0; i < numSegs;i++)
+				{
+					sprintf(cmd, "INSERT INTO SEGMENTS VALUES (%i,%i,%i,%i,%i,%i);", pSegs[i].id, pSegs[i].fromNode, pSegs[i].toNode, pSegs[i].length, pSegs[i].speed, pSegs[i].oneway);
+					st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+				}
+				st = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+				st = sqlite3_close(db);
+			}
+
+			free(pNodes);
+			free(pSegs);
+		}
+		DestroyStatusWindow(0);
+
+	}
+	else if (!stricmp(Type, "TEST"))
+	{
+		int startSeg = atoi(Opts);
+		WalkOutTest(File, startSeg);
+	}
+	return rtn;
+}
+
+static int AddSementToWalkout(sqlite3* db, int fromref,int atNode,int currentCost)
+{
+	int rtn = 0;
+	int st;
+	int cost;
+	int toNode;
+	sqlite3_stmt* statement;
+
+	if (db)
+	{
+		char cmd[256];
+		sprintf(cmd, "SELECT * FROM SEGMENTS WHERE REFNO = %i", fromref);
+
+		SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "table exists", 0);
+
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			int fromNode = sqlite3_column_int(statement, 1);
+			int toNode   = sqlite3_column_int(statement, 2);
+			int length   = sqlite3_column_int(statement, 3);
+			int speed    = sqlite3_column_int(statement, 4);
+			int oneway   = sqlite3_column_int(statement, 5);
+			if (atNode == fromNode && (!oneway || oneway == 1))
+			{
+				cost = length + currentCost;
+				sprintf(cmd, "INSERT INTO TEMP.NEXTMOVE VALUES(%i,%i,%i)", cost, fromref,toNode);
+				st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+
+				rtn++;
+			}
+			else if (atNode == toNode && (!oneway || oneway == 2))
+			{
+				toNode = fromNode;
+				cost = length + currentCost;
+				sprintf(cmd, "INSERT INTO TEMP.NEXTMOVE VALUES(%i,%i,%i)", cost, fromref, toNode);
+				st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+
+				rtn++;
+			}
+			else if (atNode == -1)
+			{
+				toNode = fromNode;
+				cost = length / 2;
+				if (!oneway || oneway == 2)
+				{
+					sprintf(cmd, "INSERT INTO TEMP.NEXTMOVE VALUES(%i,%i,%i)", cost+1, fromref, fromNode);
+					st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+					rtn++;
+				}
+				if (!oneway || oneway == 1)
+				{
+					sprintf(cmd, "INSERT INTO TEMP.NEXTMOVE VALUES(%i,%i,%i)", cost-1, fromref, toNode);
+					st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+					rtn++;
+				}
+
+			}
+		}
+		sqlite3_finalizeGSSi(&statement);
+	}
+	return rtn;
+}
+
+void WalkOutTest(LPSTR File, int startSeg)
+{
+	BOOL done = FALSE;
+	sqlite3* db = NULL;
+	char cmd[1024];
+	sqlite3_stmt* statement;
+	int st = sqlite3_open(File, &db);
+	if (st == SQLITE_OK)
+	{
+		st = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+		strcpy(cmd, "CREATE TEMP TABLE NEXTMOVE (TOTCOST INT,FROMREF INT,ATNODE INT,PRIMARY KEY (TOTCOST,FROMREF));");
+		st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+		AddSementToWalkout(db, startSeg, -1, 0);
+		while (!done)
+		{
+			sprintf(cmd, "SELECT * FROM TEMP.NEXTMOVE LIMIT 1;");
+			SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "walkout", 0);
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				int currentCost = sqlite3_column_int(statement, 0);
+				int refno = sqlite3_column_int(statement, 1);
+				int atNode = sqlite3_column_int(statement, 2);
+				AddSementToWalkout(db, refno, atNode, currentCost);
+				sqlite3_finalizeGSSi(&statement);
+				sprintf(cmd, "DELETE FROM NEXTMOVE WHERE TOTCOST=%i AND FROMREF=%i",currentCost,refno);
+				st = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+				sprintf(cmd, "SELECT REFNO, FROMNODE, TONODE FROM SEGMENTS WHERE FROMNODE = %i OR TONODE = %i",atNode,atNode);
+				SQLOK(sqlite3_prepare_v2GSSi(db, cmd, -1, &statement, 0), db, "walkout", 0);
+				while (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					int refno = sqlite3_column_int(statement, 0);
+					int fromNode = sqlite3_column_int(statement, 1);
+					int toNode = sqlite3_column_int(statement, 2);
+					if (fromNode == atNode)
+						AddSementToWalkout(db, refno, toNode, currentCost);
+					else
+						AddSementToWalkout(db, refno, fromNode, currentCost);
+				}
+				sqlite3_finalizeGSSi(&statement);
+			}
+			else
+			{
+				done = TRUE;
+				sqlite3_finalizeGSSi(&statement);
+			}
+		}
+		st = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+		st = sqlite3_close(db);
+	}
+	return;
+}

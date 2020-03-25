@@ -1438,6 +1438,19 @@ void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 	UnregisterClass(className, hInst);
 	return;
 }
+
+int testdib(int i)
+{
+	char file[] = "G:\\PLAT VIEWER\\NUMERIC SANITARY\\S-11A-12.JPG";
+	HDIB32 hDib;
+
+	for (int i = 0; i < 2; i++)
+	{
+		hDib = LoadDIB32(file, TRUE);
+		GMDestroyDIB32(hDib);
+	}
+	return 0;
+}
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	int rtn = 0;
@@ -1460,6 +1473,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	rtn = 0;
 #endif
 
+	//testdib(0);
 	rtn = 0;
 	InitSockets();
 	CreatePrintBitmap(0);
@@ -4096,7 +4110,7 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
                  /* Menu Item Named "Out" here.                         */
        			 HaltMapDisplay(FALSE,FALSE);
     			 SetZoomVP (lParam);
-                 ZoomWindow (hWnd,0);
+                 ZoomWindow (hWnd,0,FALSE);
                  break;
 
             case IDM_Z_ORTHO:
@@ -5585,6 +5599,11 @@ DisplayParcel:
 							EndDisplayProcessing (TRUE);
 						else if (MemMap && _fstricmp (MemMapName,"%SCREEN"))
 							HaltMapDisplay(FALSE, TRUE);
+						else if (!ContinueProcessing)
+						{
+							EndDisplayProcessing(TRUE);
+							SetContinueProcessing(TRUE);
+						}
 						else 
 						{   
 							EndTime = GetTickCount();

@@ -1271,6 +1271,8 @@ BOOL SaveRouteAtFile (HANDLE hBTAt,LPSTR Name);
 BOOL HighlightRoute (LPSTR RouteFile,long Refno,double RefLoc,BOOL Display);
 BOOL SaveIntersectFile (LPSTR Name);
 BOOL AddIntsToNet (HWND hWnd, int Message);
+BOOL LoadNetwork(LPSTR Type, LPSTR File, LPSTR Opts);
+void WalkOutTest(LPSTR File, int startSeg);
 BOOL WriteQuadFile (LPQUADDATA pQuadDataIn);
 BOOL SplitRec (HPSHORT *pBuf,LPLONG plBuf,LPSHORT *Rec,LPLONG plRec,LPHANDLE phBuf, LPHANDLE phRec, BOOL AddLink);
 BOOL CreateNewMap (LPSTR NewName,LPMNMXCORD MinMaxCoord,short NumSyms,HANDLE hSymDesc,
@@ -1557,7 +1559,7 @@ void CloseMap (BOOL Update);
 void ClearMap (void);   
 void ReopenMap (BOOL Open);
 short	PanWindow (HWND hWnd, int pandir);
-short	ZoomWindow (HWND hWnd, float ZoomFactor);
+short	ZoomWindow (HWND hWnd, float ZoomFactor,BOOL Imediate);
 void SetBounds (HWND hWnd,HDC hDC);
 void SetBoundsRect2 (RECT Rect,HDC hDC);
 //int	MouseInput (HWND hWnd,WORD Message,POINT MousePoint, int Opt);

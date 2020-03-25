@@ -626,7 +626,7 @@ void QuitGraphics()
 		CloseHandle(fidLogFileUse);
 	FreeTrustedFiles();
 	GetTempDir(0);
-
+	GSSiFreeImage_Unload(0);
 #if CHECKMEM
 	TrackObject (0,-100); 
 #endif
@@ -2469,7 +2469,7 @@ GSSiExitProg (21);
 #endif
 }
 
-short ZoomWindow (HWND hWnd, float ZoomFactor)
+short ZoomWindow (HWND hWnd, float ZoomFactor,BOOL Imediate)
 #if ENABLETRACE
 {GSSiEnterProg (22);
 #endif
@@ -2479,7 +2479,7 @@ short ZoomWindow (HWND hWnd, float ZoomFactor)
      if (ZoomFactor)
 	 {
 		 CurView->Scale /= ZoomFactor;
-		 ZoomToPointAndScale (CurView->MidPointW,CurView->Scale,FALSE);
+		 ZoomToPointAndScale (CurView->MidPointW,CurView->Scale,Imediate);
 	 }
  /*    {
 	     MidX = (CurView->WBounds.xmn + CurView->WBounds.xmx) / 2;
@@ -2494,7 +2494,7 @@ short ZoomWindow (HWND hWnd, float ZoomFactor)
 	 else if (CurView->PriorBounds.xmx > CurView->PriorBounds.xmn)
 	 {
 	 	CurView->NewBounds = CurView->PriorBounds; 
-		ZoomToRect(CurView->NewBounds,FALSE);
+		ZoomToRect(CurView->NewBounds,Imediate);
 	 }
 {
 #if ENABLETRACE
@@ -4728,23 +4728,23 @@ Top:
 				{
 					short image, nearimage=0;
 					int	  Size, SizeDiff=INT_MAX, Diff;
-					int	  SizeMain=RECTWIDTH(&ClientRect) * RECTHEIGHT(&ClientRect);
-					BOOL  shape=RECTWIDTH(&ClientRect) < RECTHEIGHT(&ClientRect);
+					int	  SizeMain=RECTWIDTH(&MainRect) * RECTHEIGHT(&MainRect);
 					LPSTR	pCfgImage;
 					HDIB32	hDib;
-
+					double adjustwidthmin = 1, adjustheightmin = 1;
 					for (image = 0;image < NumSavedImages;image++)
 					{
-						if (shape == (RECTWIDTH(&SavedImageData[image].ClientRect) < RECTHEIGHT(&SavedImageData[image].ClientRect)))
-						{
-							Size = RECTWIDTH(&SavedImageData[image].ClientRect) * RECTHEIGHT(&SavedImageData[image].ClientRect);
+						double adjustwidth, adjustheight;
+						RECT testrect = AdjustRectToRect(&SavedImageData[image].ClientRect, &MainRect, &adjustwidth, &adjustheight);
+						Size = RECTWIDTH(&testrect) * RECTHEIGHT(&testrect);
 
-							Diff = abs (Size - SizeMain);
-							if (Diff < SizeDiff)
-							{
-								SizeDiff = Diff;
-								nearimage = image;
-							}
+						Diff = abs (Size - SizeMain);
+						if (Diff < SizeDiff)
+						{
+							SizeDiff = Diff;
+							nearimage = image;
+							adjustwidthmin = adjustwidth;
+							adjustheightmin = adjustheight;
 						}
 					}
 					pCfgImage = GlobalLock (hCfgImages); 
@@ -4756,7 +4756,14 @@ Top:
 					DisplayBMInRect32 (hDC,hCfgImage,MainRect,FALSE);
 					//Sleep (2000);
 					SetViewport(*pCommandViewport);
-					CurView->NewBounds = SavedImageData[nearimage].Bounds;
+					DPOINT mp = MinMaxMidPointD(&SavedImageData[nearimage].Bounds);
+					double w = BoundsWidth(&SavedImageData[nearimage].Bounds);
+					double h = BoundsHeight(&SavedImageData[nearimage].Bounds);
+					CurView->NewBounds.xmn = mp.x - w / 2;
+					CurView->NewBounds.xmx = mp.x + w / 2;
+					CurView->NewBounds.ymn = mp.y - h / 2;
+					CurView->NewBounds.ymx = mp.y + h / 2;
+
 					SetScaleAndMidpointFromBounds (CurView);
 			        SetBounds(CurView->hWnd,CurView->hDC);
 					GMDestroyDIB32(hCfgImage);

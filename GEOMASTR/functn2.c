@@ -1846,7 +1846,8 @@ GSSiExitProg (1350);
 			if (Printing)
 				goto RtnTrue;
 			skipPaint = 0;
-			if (*Args && CurView) 
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (atob(Arg[1]) && CurView)
 			{
 				 HDC hDC = 0;
 
@@ -3527,15 +3528,15 @@ GSSiExitProg (1350);
 			{
 				HDIB32 hDib24;
 				hDib32 = (HDIB32)atol(Arg[2]);
-				hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+				hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 				rtn = GM32SaveDIB(hDib24, Arg[3], -1, 0);
-				FreeImage_Unload(hDib24);
+				GSSiFreeImage_Unload(hDib24);
 				goto Rtnrtn;
 			}
 			if (!stricmp(Arg[1], "UNLOAD"))
 			{
 				hDib32 = (HDIB32)atol(Arg[2]);
-				FreeImage_Unload(hDib32);
+				GSSiFreeImage_Unload(hDib32);
 				goto RtnTrue;
 			}
 			
@@ -4654,23 +4655,23 @@ GSSiExitProg (1350);
 				case 0:
 					break;
 				case 4:
-					hDib32Out = FreeImage_ConvertTo4Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo4Bits(hDib32In);
 					break;
 				case -8:
-					hDib32Out = FreeImage_ConvertTo8Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo8Bits(hDib32In);
 					break;
 				case 8:
-					hDib32Out = FreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
+					hDib32Out = GSSiFreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
 					break;
 				case 16:
-					hDib32Out = FreeImage_ConvertTo16Bits565(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo16Bits565(hDib32In);
 					break;
 				case 24:
 				default:
-					hDib32Out = FreeImage_ConvertTo24Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo24Bits(hDib32In);
 					break;
 				case 32:
-					hDib32Out = FreeImage_ConvertTo32Bits(hDib32In);
+					hDib32Out = GSSiFreeImage_ConvertTo32Bits(hDib32In);
 					if (*Arg[5])
 					{
 						COLORREF icolor = atol (Arg[5]);
@@ -6082,6 +6083,33 @@ GSSiExitProg (1350);
 			CloseClipboard ();
 			goto Rtnl;
 		}
+		case 1706://$WEIGHTEDPOLYMIDPT(PickedItem)
+		{
+			HANDLE hPoly;
+			int npnts;
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			i = atoi(Arg[1]);
+			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly))
+				goto RtnFalse;
+			LPDPOINT points = GlobalLock(hPoly);
+			DPOINT MidPt = { 0,0};
+			double totdist = 0;
+			double dist;
+
+			for (int i = 0; i < npnts-1;i++)
+			{
+				DPOINT midpt = MidPointD(points[i],points[i+1]);
+				dist = ldistpp(&points[i], &points[i + 1]);
+				totdist += dist;
+				MidPt.x += dist * midpt.x;
+				MidPt.y += dist * midpt.y;
+			}
+			GSSiGlobUlFree(&hPoly);
+			MidPt.x /= totdist;
+			MidPt.y /= totdist;
+			dpointtoa(OutLoc, &MidPt);
+			goto Rtnl;
+		}
 
         case 1801: //$LOADBLOCKINGPOINTS (file)
         {   
@@ -6352,7 +6380,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			hDib32 = BitmapToDIB32(hBitmap);
 			DeleteObject(hBitmap);
 			ReleaseDC(hWnd, hDC);
-			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPWINDOW");
 			fputstring(line, fid);
@@ -6360,8 +6388,8 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);
-			FreeImage_Unload(hDib24);
-			FreeImage_Unload(hDib32);
+			GSSiFreeImage_Unload(hDib24);
+			GSSiFreeImage_Unload(hDib32);
 			rtn = TRUE;
 		}
 		if (!stricmp(Arg[1], "CAPSCREEN"))
@@ -6376,7 +6404,7 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			hDib32 = BitmapToDIB32(hBitmap);
 			DeleteObject(hBitmap);
 			ReleaseDC(hWnd, hDC);
-			hDib24 = FreeImage_ConvertTo24Bits(hDib32);
+			hDib24 = GSSiFreeImage_ConvertTo24Bits(hDib32);
 			rtn = GM32SaveDIB(hDib24, capScreenFile, -1, 0);
 			sprintf(line, "CAPSCREEN");
 			fputstring(line, fid);
@@ -6384,8 +6412,8 @@ int GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc)
 			fputstring(line, fid);
 			recttoa(line, ScreenRect);
 			fputstring(line, fid);
-			FreeImage_Unload(hDib24);
-			FreeImage_Unload(hDib32);
+			GSSiFreeImage_Unload(hDib24);
+			GSSiFreeImage_Unload(hDib32);
 			rtn = TRUE;
 		}
 		if (!stricmp(Arg[1], "CAPCURSOR"))

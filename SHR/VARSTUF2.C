@@ -255,16 +255,23 @@ GetPolylineEP:
 				{   
 					HANDLE hPnts;
 					int nPnts;
-					Type1.Length = ConvertDist(PickList[CurrentProcessedPickedItem].Length,OutDistUnits); 
 					if (GetPolyPoints((LPPICKDATAHEADER)&PickList[CurrentProcessedPickedItem], FALSE, &nPnts, &hPnts))
 					{
 						HPDPOINT lpPoints = (HPDPOINT)GlobalLock(hPnts);
 						double MPAZ;
 						DPOINT	MidPoint = PointAtDistOnPoly(lpPoints, nPnts, PickList[CurrentProcessedPickedItem].Length / 2, &MPAZ, 0);
+						PickList[CurrentProcessedPickedItem].Length = GetPolyLengthD(lpPoints, nPnts);
+						Type1.BPX = BP.x = lpPoints[0].x;
+						Type1.BPY = BP.y = lpPoints[0].y;
 						Type1.MPX = MP.x = MidPoint.x;
 						Type1.MPY = MP.y = MidPoint.y;
+						Type1.EPX = EP.x = lpPoints[nPnts - 1].x;
+						Type1.EPY = EP.y = lpPoints[nPnts - 1].y;
+						PickList[CurrentProcessedPickedItem].BeginPoint = BP;
+						PickList[CurrentProcessedPickedItem].EndPoint = EP;
 						GSSiGlobUlFree(&hPnts);
 					}
+					Type1.Length = ConvertDist(PickList[CurrentProcessedPickedItem].Length, OutDistUnits);
 					CurLength = PickList[CurrentProcessedPickedItem].Length;
 
 				}

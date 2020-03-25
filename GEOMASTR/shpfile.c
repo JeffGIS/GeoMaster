@@ -62,7 +62,7 @@ static long				SHPMaxRefPerFile=0;
 static BOOL				SHPProjectionIsBase;
 static short			NumSHPParms; 
 static char				SHPParms[4096]="";  
-static char				SHPTag[100], SHPTAG[100]; 
+static char				SHPTag[202], SHPTAG[202]; 
 static char				LastSHPFile[MAX_PATH]=""; 
 static HFILE			FidSmallDBF=HFILE_ERROR;
 static char				SmallDBFName[MAX_PATH]="";
@@ -166,6 +166,30 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	SHPFid = GSSiOpenFile (SHPFileName,&ofStructGM,OF_READ);
 	if (SHPFid == HFILE_ERROR)
 		return FALSE;
+	int fsize = GSSillseek(SHPFid, 0, 2);
+	LPSTR pfile = malloc(fsize + 4);
+	GSSillseek(SHPFid, 0, 0);
+	ii=BigRead(SHPFid, pfile, fsize);
+	free(pfile);
+	GSSillseek(SHPFid, 0, 0);
+	{
+		char SHPFileDBFName[MAX_PATH];
+		OFSTRUCTGM	ofStructGMDBF;
+
+		strcpy(SHPFileDBFName, SHPFileName);
+		LPSTR pDot = strrchr(SHPFileDBFName, '.');
+		strcpy(pDot, ".dbf");
+		HFILE SHPDBFFid = GSSiOpenFile(SHPFileDBFName, &ofStructGMDBF, OF_READ);
+		if (SHPDBFFid == HFILE_ERROR)
+			return FALSE;
+		int fsize = GSSillseek(SHPDBFFid, 0, 2);
+		LPSTR pfile = malloc(fsize + 4);
+		GSSillseek(SHPDBFFid, 0, 0);
+		ii=BigRead(SHPDBFFid, pfile, fsize);
+		free(pfile);
+		GSSiClose2(&SHPDBFFid);
+
+	}
 	SHPHandle	hSHP = SHPOpenGSSi(ofStructGM.szPathName, "rb");
 	if (hSHP)
 		SHPClose(hSHP);
@@ -615,7 +639,7 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		SHPBaseRefno = IndexEntryStartRef;
 	else
 		SHPBaseRefno = atol (SHPRefno);
-	fgetstring (SHPTAG,99,Fid); 
+	fgetstring (SHPTAG,sizeof(SHPTAG)-2,Fid); 
 	fgetstring (str,32,Fid); 
 	//SHPIndexType = atoi (str);
 	_fmemset (SHPParms,0,sizeof(SHPParms));

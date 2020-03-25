@@ -1313,7 +1313,7 @@ typedef	struct	{
 
 typedef struct {
 				short	Type;
-				long	nSavePoly;
+				long	nPoints;
 				HANDLE	hSavePoly; 
 				HANDLE	hSavePolyParts; 
 				HANDLE	hSavePolyElev;
