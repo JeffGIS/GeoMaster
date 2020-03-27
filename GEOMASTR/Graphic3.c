@@ -460,7 +460,7 @@ int	PickItems (HWND hWnd,DPOINT InPickPointBase)
     
     if (Rtn)
     {
-    	if (PickList[Rtn-1].OffDist < 9999999 && PickList[Rtn-1].OffDist > PickApW)
+    	if (PickList[Rtn-1].OffDist < 9999998 && PickList[Rtn-1].OffDist > PickApW)
     		Rtn = 0;
     	else
     		SetPickGlobals (Rtn-1);

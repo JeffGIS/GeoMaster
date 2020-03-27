@@ -1958,7 +1958,7 @@ FONT 10, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDCANCEL,216,4,29,14
     CTEXT           "GeoMaster version 0.47",IDC_VERSION,8,92,236,28
-    CTEXT           "Copyright (C) 2000-2017, Geographic Software Specialists, Inc.",IDC_STATIC,0,124,244,8
+    CTEXT           "Copyright (C) 2000-2020, Geographic Software Specialists, Inc.",IDC_STATIC,0,124,244,8
     ICON            "GWIZ",IDC_STATIC,4,4,20,20,NOT WS_VISIBLE
     CTEXT           " ",IDC_SERIALNUM,4,80,240,8
     CTEXT           " ",IDC_APP,0,68,244,8
