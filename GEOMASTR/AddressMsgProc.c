@@ -30,7 +30,7 @@ static  BOOL    AddRangeAll=FALSE;
 static  short   PIDAddIndex,StreetNumIndex,PidLen=13;  
 static LPOPENFILEDATA	FilePtrADD;
 static LPOPENSQLDATA	SQLPtrADD=0;
-static  GWFLDINFO   SNField, HNField, ZIPField, SNumField; 
+static  GWFLDINFO   SNField, HNField, ZIPField, SNumField, UDIField; 
 static char		AddEditHouseNum[128];
 static char		AddEditStreet[128];
 static char		AddEditCity[128];
@@ -130,6 +130,14 @@ ErrOut: GSSiClose2 (&Fid);
             }
             else
             	ZIPField.Name[0] = 0;
+			if (abs(lpGWDHead->NumIndexFields[index]) > 3)
+			{
+				lpGWFldInfo = lpGWDHead->pFldInfo;
+				lpGWFldInfo += lpGWDHead->IndexFields[index][3];
+				UDIField = *lpGWFldInfo;
+			}
+			else
+				ZIPField.Name[0] = 0;
             goto GetStreetNumIndex;
         } 
         NextIndex:;
@@ -341,9 +349,11 @@ short DisplayStreetsPID (HWND hDlg,LONG HouseMin, LONG HouseMax, short OddEven, 
     pos = BT_FIRST; 
 FirstAdd:
     SetFieldValFromLong(lpGWDHeadPID,&HNField,HouseMin);
-    if (ZIPField.Name[0])
+	if (ZIPField.Name[0])
 		SetFieldValFromChar(lpGWDHeadPID, &ZIPField, "", FALSE, FALSE, TRUE);
-    GWDFormKey(lpGWDHeadPID,PIDAddIndex,TRUE,0,0);
+	if (UDIField.Name[0])
+		SetFieldValFromChar(lpGWDHeadPID, &UDIField, "", FALSE, FALSE, TRUE);
+	GWDFormKey(lpGWDHeadPID,PIDAddIndex,TRUE,0,0);
     _fmemmove (AddText,lpGWDHeadPID->pKeys[PIDAddIndex],32);
     stName = BT_FIND (lpGWDHeadPID->BTHandle[PIDAddIndex],lpGWDHeadPID->pKeys[PIDAddIndex],
                               pos,BT_GE,(LPSTR)&Offset);   

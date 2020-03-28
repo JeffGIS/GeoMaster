@@ -1,2 +1,2 @@
-configs\jeff\parceledit.gmc /F
+configs\basemap_new3.gmc /F
 F:\BU_2020_02_20\geomas

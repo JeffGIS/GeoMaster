@@ -273,6 +273,7 @@ BEGIN
                 MENUITEM "Dump User Defined Addresses", IDM_DUMPUSERADD
                 MENUITEM "Unload Munic Table",          IDM_UNLOADMUNICS
                 MENUITEM "Build Street Poly File",      IDM_BUILDSTREETPOLYS
+                MENUITEM "Create Address Location Table", IDM_CREATE_ADDLOC
             END
             MENUITEM "Locate Street Segments Between Intersections (On-From-To)", IDM_STREET_SEGS_BETWEEN_INTS
         END
@@ -290,7 +291,6 @@ BEGIN
                 MENUITEM "Modify Existing Combo File",  IDM_CHANGE_COMBO_FILE
             END
             MENUITEM "City Extract",                IDM_CITY_EXTRACT
-            MENUITEM "Create Address Location Table", IDM_CREATE_ADDLOC
             MENUITEM "Reorganize B-Tree",           IDM_REORG_BTREE
         END
         MENUITEM "MemList",                     IDM_MEMLIST
