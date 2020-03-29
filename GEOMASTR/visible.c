@@ -1378,7 +1378,7 @@ Done:
     if (SaveSubFile && SaveCurFile >= 0)
     {
     	CurView->SubFile = SaveSubFile;  
-        CurView->RestoreFile = SaveRestoreFile;
+        SetRestoreFile(CurView,SaveRestoreFile);
         _fstrcpy (CurView->OrigFile,SaveOrigFile);
         _fstrcpy (CurView->lpFiles[CurView->RestoreFile],SaveFile); 
     }
@@ -1390,7 +1390,16 @@ Done:
     UseRefOrTAGIndex = SaveUseRefOrTAGIndex;
     return rtn;
 }
-
+SetRestoreFile(LPVIEWPORT CurView, int file)
+{
+	if (file)
+		ii = 1;
+	if (CurView->RestoreFile)
+		ii = 1;
+	if (file && CurView->RestoreFile)
+		ii = 1;
+	CurView->RestoreFile = file;
+}
 HANDLE AddParToList(int Parent)
 {   HANDLE  hParList;
     PARLIST *pParList;

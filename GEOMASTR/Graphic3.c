@@ -715,7 +715,8 @@ NextPass:
 								        if (CurView->SubFile)
 								        {
 								            _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
-								            CurView->SubFile =CurView->RestoreFile = 0;
+											CurView->SubFile = 0;
+											SetRestoreFile(CurView, 0);
 								        } 
 										goto Exit; 
 									}

@@ -3185,11 +3185,18 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							CloseRefIndex(FALSE);
 						PickList[0].Offset = pRefIdxData->Offset;
 						PickList[0].Element = 0;
+						if (CurView->SubFile)
+						{
+							_fstrcpy(CurView->lpFiles[CurView->RestoreFile], CurView->OrigFile);
+							CurView->SubFile = 0;
+							SetRestoreFile(CurView, 0);
+						}
+
 						CurView->SubFile = SubFile;
 						if (SubFile)
 						{
 							strcpy(CurView->OrigFile, CurView->lpFiles[FileNum]);
-							CurView->RestoreFile = FileNum;
+							SetRestoreFile(CurView, FileNum);
 						}
 						PD = PickList[0];
 						if (!PickedItemMinMax(NumPicked, &PD.Rect))

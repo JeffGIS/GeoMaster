@@ -698,7 +698,8 @@ GSSiExitProg (5);
         if (CurView->SubFile)
         {
             _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
-            CurView->SubFile =CurView->RestoreFile = 0;
+			CurView->SubFile = 0;
+			SetRestoreFile(CurView, 0);
         } 
         GSSiGlobFree (&CurView->hBinFileList);
         for (ifile=0;ifile<CurView->NumFiles;ifile++)
@@ -5843,7 +5844,8 @@ GSSiExitProg (65);
     if (CurView->SubFile)
     {
         _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
-        CurView->SubFile =CurView->RestoreFile = 0;
+		CurView->SubFile = 0;
+		SetRestoreFile(CurView, 0);
     } 
     SubFile = PickList[Item].SubFile;
     PltType = CurView->FileType[CurView->CurFile]; 
@@ -6837,7 +6839,8 @@ GSSiExitProg (68);
 NextFile: 
     if (CurView->SubFile)
         _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile);
-    CurView->SubFile = CurView->RestoreFile =0;
+	CurView->SubFile = 0;
+	SetRestoreFile(CurView, 0);
     DisplayHollowLines (FALSE);  
 	DisplayLayeredSymbols (CurView->hDC,FALSE);
     DisplayHollowLines (FALSE);  
@@ -6955,7 +6958,8 @@ GSSiExitProg (68);
     	
 	if (_fstrstr(str,"FILELIST.TXT"))
     {
-        CurView->SubFile=1;CurView->RestoreFile=CurView->CurFile;
+        CurView->SubFile=1;
+		SetRestoreFile(CurView, CurView->CurFile);
         _fstrcpy (CurView->OrigFile,CurView->lpFiles[CurView->CurFile]);
         goto Start;
     } 

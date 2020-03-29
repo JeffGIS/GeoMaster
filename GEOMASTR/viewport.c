@@ -172,7 +172,8 @@ void ClearVPFields (LPVIEWPORT CurView)
     CurView->Bitmap = 0;
 	CurView->BitmapID = 0;
     CurView->hBinFileList=0;
-    CurView->SubFile=CurView->RestoreFile=0; 
+	CurView->SubFile = 0;
+	SetRestoreFile(CurView, 0);
 	*CurView->OrigFile = 0;
     CurView->hCursor=CurView->LinkedCursorHandle=0;
     CurView->LastCursor=0;  
