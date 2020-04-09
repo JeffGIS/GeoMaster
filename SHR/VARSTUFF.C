@@ -9648,7 +9648,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				if (SQLPtr->st)
 					goto NotFound;
 				{
-					HANDLE hsql = GSSiGlobAlloc(0, GMEM_MOVEABLE, maxlval);
+					HANDLE hsql = GSSiGlobAlloc(1831, GMEM_MOVEABLE, maxlval);
 					LPSTR sql = GlobalLock(hsql);
 					strcpy(sql, SQLPtr->SQL);
 					ExpandText(sql);

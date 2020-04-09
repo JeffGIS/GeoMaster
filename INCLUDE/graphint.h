@@ -313,6 +313,7 @@ BOOL SelectAreaToOffsetFile (int Item,double Offset,HANDLE hTran);
 int CurvePoints (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINT *Points,double CurveExpansionFactor,long MaxPoints);
 int CurvePointsS (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINTS *Points,double CurveExpansionFactor,long MaxPoints);
 int CurvePointsD(LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points, LPDOUBLE pBackAZ, long MaxPoints, double VectorizationFactor, short LoopFactor);
+DPOINT GetBezierPoint(DPOINT * points, int nPoints, float t);
 double AreaFromPolyWithCurves(HANDLE hUnSplinedPoly, long nUnSplinedPoints, HANDLE hCurvePoints);
 void SetCurvPltCtol (double INCTOL);
 void CreateNewObject(int i);

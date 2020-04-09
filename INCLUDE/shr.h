@@ -627,7 +627,7 @@ POINT newptscreen(POINT OldPoint, double AZM, double DIS);
 DPOINT dnewpt (DPOINT OldPoint, double AZM, double DIS);  
 DPOINT dnewptproj (DPOINT OldPoint, double AZM, double DIS);  
 void LNEWPT (double X,double Y,LPDOUBLE NewX,LPDOUBLE NewY, double AZM, double DIS);  
-BOOL MemError (void);
+BOOL MemEror (void);
 #if WIN32
     BOOL WINAPI AbortProc ( HDC hPrinterDC, short nCode );
     BOOL WINAPI OpenGCTP32( long FAR *var1);

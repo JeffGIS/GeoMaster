@@ -1300,7 +1300,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
      if (!hPDChunk)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
 	    PrintPrompt = TRUE;  
      }
@@ -2088,7 +2088,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
      if (!hPDChunkReport)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunkReport, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
@@ -2292,7 +2292,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 	if (!hPDChunk)
 	{
 		if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-			return(MemError());
+			return(MemEror());
 		InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
 	}
 	else
@@ -2573,7 +2573,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
      if (!hPDChunk)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
@@ -2769,7 +2769,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
      if (!hPDChunk)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
@@ -3050,7 +3050,7 @@ BOOL PrintMerge (HWND hWnd)
     if (!hPDChunk)
     {
     	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-       	return(MemError());
+       	return(MemEror());
 		InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
     }
     else

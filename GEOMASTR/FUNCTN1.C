@@ -325,7 +325,7 @@ GSSiExitProg (1348);
 			break;
 		case 108://$M(macrofile,args..)
 		{
-			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
+			HANDLE hMem = GSSiGlobAlloc(1826, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR pMem = GlobalLock(hMem);
 			LPSTR pComma = strchr(Args, ',');
 

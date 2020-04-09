@@ -3979,7 +3979,7 @@ GotCloseFilehSQL:
 		{
         	BOOL SaveDM = DisplayMarkers;
 
-			nArgs = GetFunArgs (Args,Arg,5,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
         	Point = atopt (Arg[1],&Err); 
@@ -3989,7 +3989,7 @@ GotCloseFilehSQL:
 			Color = atoi (Arg[3]);
         	RVal = atof (Arg[5]);
         	DisplayMarkers = TRUE;  
-			DisplayMarker (Point,n,Arg[4],RVal,0,Color,TRUE,FALSE,0,0,0,0,0);
+			DisplayMarker (Point,n,Arg[4],RVal,0,Color,atob(Arg[7]),FALSE,0,0,0,0,0);
 			DisplayMarkers = SaveDM; 
 			goto RtnTrue;
 		}

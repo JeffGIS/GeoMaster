@@ -2164,7 +2164,7 @@ BOOL GetVisBounds2 (LPMNMXCORD	pBounds,HDC hDC)
 	short	FileNum;
 	HANDLE	handle;  
 	BOOL	rtn=FALSE;   
-	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+	HANDLE	hMem=GSSiGlobAlloc (1828,GMEM_MOVEABLE,1024);
 	LPSTR	str=GlobalLock (hMem);
 	int		MapType;
 

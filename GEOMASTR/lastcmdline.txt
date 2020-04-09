@@ -1,2 +1,2 @@
-configs\basemap_new3.gmc /F
+configs\jeff\test.gmc /F [%USERLEV]=2;
 F:\BU_2020_02_20\geomas

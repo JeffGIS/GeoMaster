@@ -244,7 +244,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 				BigRead (Fid,&npt,4);
 				if (npt)
 				{
-					hpt = GSSiGlobAlloc (0,GMEM_MOVEABLE,npt*sizeof(POINT));
+					hpt = GSSiGlobAlloc (1829,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
 					if (FidSTG == HFILE_ERROR)

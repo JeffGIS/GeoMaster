@@ -283,7 +283,7 @@ C
       TranPtr->C2 =-SINANG * SCLRAT;
       TranPtr->A1 = 0;
       TranPtr->A2 = 0;
-	  hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT)*N);
+	  hPoints = GSSiGlobAlloc (1827,GMEM_MOVEABLE,sizeof(DPOINT)*N);
 	  pPoints = GlobalLock (hPoints);
 	  xmin = DBL_MAX;
 	  xmax = -DBL_MAX;

@@ -2623,21 +2623,23 @@ int CurvePointsS (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPPOINTS
 	return (nump);
 }	
 
-int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points,LPDOUBLE pBackAZ,long MaxPoints,double VectorizationFactor,short LoopFactor)
+int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT *Points,LPDOUBLE pBackAZ,long MaxPoints,double VectorizationFactor,short LoopFactorIN)
 #if ENABLETRACE
 {GSSiEnterProg (1386);
 #endif
-{    
-
+{   
+	short LoopFactor = abs(LoopFactorIN);
 	DPOINT	RP, Newpt;   
 	long	np4;
 	double	CLEN, Circum, radius, AZ, azperpt; 
-	int		nump=2, st;
+	int		st;
 	long	np;
-	
+	BOOL	addPT = TRUE;
+	int nPntsIN = *nPnts;
+	if (LoopFactorIN < 0)
+		addPT = FALSE;
 	if (MaxPoints <= 0)
 	{
-		nump = 0;
 		goto Exit;
 	}
 	st = RCURVE(&PC->x,&PC->y,&POC->x,&POC->y,&PT->x,&PT->y,&RP.x,&RP.y,&CLEN); 
@@ -2658,7 +2660,9 @@ int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT
 			*pBackAZ = LTWOPI (*pBackAZ - HALFPI);
 //		np4 = IDNINT (VectorizationFactor*fabs(CLEN/2)) - 1;  
 		np4 = IDNINT(fabs(CLEN / 2)/VectorizationFactor) - 1;
-		np = min(max (np4,0),MaxPoints);       
+		np = max(np4, 0);
+		if (np >= MaxPoints)
+			np = MaxPoints;
 		if (np)
 		{
 			radius = ldistp (*PC,RP);
@@ -2680,14 +2684,18 @@ int CurvePointsD (LPDPOINT PC, LPDPOINT POC, LPDPOINT PT, LPLONG nPnts, HPDPOINT
 			(*nPnts)++;
 		} 
 	}
-	*(*Points)++ = *PT;
-	(*nPnts)++;
-Exit:
+	if (addPT)
+	{
+		*(*Points)++ = *PT;
+		(*nPnts)++;
+	}
+Exit:;
+	int npnts = *nPnts - nPntsIN;
 {
 #if ENABLETRACE
 GSSiExitProg (1386);
 #endif
-	return (nump);
+	return (npnts);
 }
 #if ENABLETRACE
 }
@@ -4205,11 +4213,14 @@ BOOL BigPolyline (HDC hDC, HPPOINT lpPoints, long npnts,int Width)
 	LPPOINT	pPoints;  
 	HANDLE	hMem;   
 	long	mxp=MaxDisplayPoints/2;
-	int		np,ii;
-	
+	int		np,ii=npnts-1;
+	POINT	pt[100];
+
+	for (int i = 0; i < min(100, npnts); i++)
+		pt[i] = lpPoints[i];
 	if (pSymbolRect)
 		AddPointsToSymbolRect (hDC,lpPoints,npnts,Width); 
-	rtn = Polyline (hDC,lpPoints,min (npnts,mxp));
+	rtn = Polyline(hDC, lpPoints, min(npnts, mxp)); lpPoints[ii];
 	if (!rtn)
 	{
 /*		char	mess[128];
@@ -5418,7 +5429,7 @@ BOOL EliminateDupPoints (long np,HPFPOINT pPoints)
 {   
 	long	CurWidth=0, CurWidthPlus1=0;//CurWidth+1;
 	HPFPOINT	pLastPoint, lpPntNew;
-//	return FALSE;
+	return FALSE;
 	if (np<1)
 {
 #if ENABLETRACE

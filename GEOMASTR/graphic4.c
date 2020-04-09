@@ -1258,7 +1258,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	char	str[16]; 
 	BOOL	Visible=DescIsVisible;
 	HIGHLIGHTDATA	HighlightData;
-    static	long	debugrefno=81000201;    
+    static	long	debugrefno= 102215;
     short	ii;
 	static	BOOL	ShowOnlyDebugRef=FALSE;
 	static	char	debugUDI[34] = "283401320222";
@@ -1295,17 +1295,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	}
     if (CurrentRefno == debugrefno)
 	   	ii=1;
-/*	else if (dbug)
-	{
-		Visible = FALSE;
-		goto Exit;
-	}*/
-/*if (CurrentRefno != 11687)
-	{
-		Visible = FALSE;
-		goto Exit; 
-	}
-	else*/ if (ShowOnlyDebugRef)
+	else if (ShowOnlyDebugRef)
 	{
 		Visible = FALSE;
 		goto Exit; 
@@ -4028,7 +4018,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
     if (FidMap == HFILE_ERROR)
     	goto RtnFalse;   
     {   
-    	HANDLE	hFile=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+    	HANDLE	hFile=GSSiGlobAlloc (1843,GMEM_MOVEABLE,1024);
     	LPSTR	File = GlobalLock (hFile); 
     	LPSTR	drive=File+512;
     	LPSTR	dir=drive+32;

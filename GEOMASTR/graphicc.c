@@ -3125,8 +3125,8 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 			    	{
 						LPTAGINDEX pTI;
 			    		double Size = RectArea16 (&pRefIdxData->MinMax);
-	NextPiece:
 						pTI = GlobalLock(hTAGIdx);
+					NextPiece:
 						if (pTI->type == TAGINDEX_BTREE)
 						{
 							st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_NEXT, BT_ANY, (LPSTR)pRefIdxDataTest);
@@ -7855,7 +7855,7 @@ BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 	int np = 0, n;
 	DPOINT PC, POC, PT, RP;
 	double radius;
-	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(POINT)* 4096);
+	HANDLE hPoints = GSSiGlobAlloc(1839, GMEM_MOVEABLE, sizeof(POINT)* 4096);
 	LPPOINT pPoints = GlobalLock(hPoints);
 	LPPOINT pPnts = pPoints;
 	int t = top;

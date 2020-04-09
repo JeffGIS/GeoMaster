@@ -1933,7 +1933,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			SetDlgItemText(hWndDlg, IDENTIFY_LINE3, str);
 			if (!lpBasicTitle)
 			{
-				HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+				HANDLE hMem = GSSiGlobAlloc(1845, GMEM_MOVEABLE, 4096);
 				LPSTR  pMem = GlobalLock(hMem);
 
 				strcpy(pMem, lpDesc);
@@ -17261,15 +17261,18 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 													goto NextTAG;
 											}
 										}
-										if (!_fstrcmp(LastUDI, TAGKey.UDI))
-											sprintf(str, "%s{%ld}", TAGKey.UDI, TAGKey.Refno);
-										else
-											_fstrcpy(str, TAGKey.UDI);
-										if ((idx = SendDlgItemMessage(hWndDlg, IDC_TAG_LIST, LB_ADDSTRING, 0, (LPARAM)str)) ==
-											LB_ERRSPACE)
-											st = 1;
-										else if (!_fstrcmp(udi, str))
-											SendDlgItemMessage(hWndDlg, IDC_TAG_LIST, LB_SETCURSEL, idx, 0);
+										if (strlen(TAGKey.UDI) > 1 || *TAGKey.UDI != ' ')
+										{
+											if (!_fstrcmp(LastUDI, TAGKey.UDI))
+												sprintf(str, "%s{%ld}", TAGKey.UDI, TAGKey.Refno);
+											else
+												_fstrcpy(str, TAGKey.UDI);
+											if ((idx = SendDlgItemMessage(hWndDlg, IDC_TAG_LIST, LB_ADDSTRING, 0, (LPARAM)str)) ==
+												LB_ERRSPACE)
+												st = 1;
+											else if (!_fstrcmp(udi, str))
+												SendDlgItemMessage(hWndDlg, IDC_TAG_LIST, LB_SETCURSEL, idx, 0);
+										}
 
 									}
 									else
@@ -17295,7 +17298,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							LPTAGINDEX pTI;
 							pTI = GlobalLock(hTIDX[ifile]);
 							BT_CLOSE (pTI->hBT);
-							GlobalUnlock(hTIDX[ifile]);
+							GSSiGlobUlFree (&hTIDX[ifile]);
                         }
 						GSSiGlobFree (&hTag);
 						GSSiGlobFree (&hIdx);
@@ -17333,7 +17336,7 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 		 		 {
 					GSSiGlobFree (&hItems);
 		 		 	GetDlgItemText (hWndDlg,IDC_TAGVALUE,str,sizeof(str));
-				 	hItems = GSSiGlobAlloc (0,GHND,sizeof(int));
+				 	hItems = GSSiGlobAlloc (1841,GHND,sizeof(int));
 				 	pItem = (LPINT)GlobalLock (hItems);
 				 	*pItem = -2;
 				 	GlobalUnlock (hItems);

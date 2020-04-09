@@ -636,6 +636,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			strcpy(OutLoc, "1");
 		else
 			strcpy(OutLoc, "0");
+		GSSiGlobUlFree(&hTemp);
 		goto Rtnl;
 	}
 	else

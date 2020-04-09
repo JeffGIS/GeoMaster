@@ -1476,6 +1476,9 @@
     <ClCompile Include="GMCache.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BezierCurves.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">

@@ -2840,7 +2840,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 		  	LPVISLIST	SaveVis=CurVis;
 	    	short	SaveMaxPick=MaxPick, SaveNFiles, SaveMT, SaveTimer, SavePT;
 	    	HFILE	SaveFid; 
-	    	HANDLE	hSaveVP = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);  
+	    	HANDLE	hSaveVP = GSSiGlobAlloc (1835,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);
 	    	HANDLE	SavehDTM, SavehProfilePoints;
 	    	LPVIEWPORT	pSaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
 	    	LPSTR	pSaveFile1=(LPSTR)(pSaveVP+1); 
@@ -2893,7 +2893,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 			SaveCRType = CurrentType;
 		    SetPickAp(0);    
 		    SavehProfilePoints = hProfilePoints;
-			hSavePicklist = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(PickList));
+			hSavePicklist = GSSiGlobAlloc (1836,GMEM_MOVEABLE,sizeof(PickList));
 			pSavePicklist = GlobalLock (hSavePicklist);
 			NumPickedSave = NumPicked;
 			memmove (pSavePicklist,PickList,sizeof(PickList));

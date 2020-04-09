@@ -278,7 +278,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			//		 SetWindowText (hWndDlg,MBHTitle);
 			SetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition);
 			SetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue);
-			hDisplay = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+			hDisplay = GSSiGlobAlloc(1846, GMEM_MOVEABLE, 4096);
 			pDisplay = GlobalLock(hDisplay);
 			strcpy(pDisplay, DisplayValue);
 			doDebug = FALSE;

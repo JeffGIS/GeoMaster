@@ -178,7 +178,7 @@ GSSiExitProg (1377);
 
 BOOL MapIndexVisible (LPSTR IndexPathName)
 {   
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc (1830,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	LPSTR	lpBS;
 	BOOL	rtn=TRUE;
@@ -897,7 +897,7 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
     BOOL		First;  
     BOOL	SaveUseRefOrTAGIndex=UseRefOrTAGIndex;   
     BOOL	SaveIgnoreBounds = IgnoreBounds, SaveDisplay = Display;
-	HANDLE  hSaveView = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
+	HANDLE  hSaveView = GSSiGlobAlloc(1847, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
 	LPVIEWPORT pSaveCurView = CurView;
 	LPVIEWPORT pSaveView = GlobalLock(hSaveView);
 

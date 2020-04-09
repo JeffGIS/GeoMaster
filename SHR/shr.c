@@ -4217,6 +4217,8 @@ HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc)
 	char	pMess[64];
     short	ii;
 
+	if (From <= 0)
+		ii = 1;
 /*	if (fuAlloc == GMEM_MOVEABLE)
 		fuAlloc = GMEM_FIXED;
 	if (fuAlloc == GHND)
@@ -12265,7 +12267,7 @@ GSSiExitProg (381);
 #endif
 }
 
-BOOL MemError ()
+BOOL MemEror ()
 #if ENABLETRACE
 {GSSiEnterProg (382);
 #endif

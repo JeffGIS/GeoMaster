@@ -2,6 +2,8 @@
 #include "translat.h"
 #include "extrndb.h"
 #include "shapefil.h"
+//#include "FileGDBAPI.h"
+
 #include <commctrl.h>
 #define MAXINDEXSYMBOLS	3200
 #define MAXPOC	4096
@@ -848,7 +850,7 @@ BOOL SetSHPParms (long RecordNumber)
 	pTAG = SHPTAG;
 	if (*pTAG && (pC = _fstrchr (pTAG,':')))
 	{   
-		HANDLE hTag = GSSiGlobAlloc(0,GMEM_MOVEABLE, 4096);
+		HANDLE hTag = GSSiGlobAlloc(1832,GMEM_MOVEABLE, 4096);
 		LPSTR ptag = GlobalLock(hTag);
 		_fstrcpy (ptag,pTAG); 
 		ExpandText (ptag);
@@ -4537,7 +4539,7 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 		if (iPoly)
 		{
 			nTot++;
-			if (n >= nTot-1)
+			if (n >= nTot)
 				n++;
 			else
 				break;
@@ -4581,6 +4583,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 	int		IsFGDB = TRUE;
 	BOOL	doWindowCheck;
 	int		structuralPart;
+	BOOL	showmarker[3] = { FALSE,FALSE,FALSE };
     
     if (CurView->ID == dbugid)
     	ii=1; 
@@ -4795,54 +4798,42 @@ DoPoly:
 	        	NumPoints = NumPoints+nPoly-1;
 	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
 	        hPolyPartLen = GSSiGlobAlloc (1785,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-	        hPolyPartLenNew = GSSiGlobAlloc (1786,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1)); 
+			hPolyPartLenNew = GSSiGlobAlloc(1786, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+//			HANDLE hLoopBeginPoints = GSSiGlobAlloc(1848, GHND, sizeof(int) * (nPoly + 1));
+//			LPINT loopBeginPoint = GlobalLock(hLoopBeginPoints);
+//			int nLoopBeginPoints = nPoly-1;
+			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1));
 	        pPartIndex = (HPLONG)GlobalLock (hPartIndex); 
 	        hmemmove ((HPSTR)pPartIndex,&pRec[recloc],nPoly*sizeof(long));   //pPartIndex[5]
 	        recloc += nPoly*sizeof(long);
-	        pPartIndex[SHPPolyHeader.NumParts]= SHPPolyHeader.NumPoints;
+			pPartIndex[SHPPolyHeader.NumParts] = SHPPolyHeader.NumPoints;
 	                    
             pPoints = pFirstPoint = (LPDPOINT)GlobalLock (hPoints); 
             pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
             pNumPointsNew = (LPINT)GlobalLock (hPolyPartLenNew);
+			int nn = 0;
 	        for (i=0;i<nPoly;i++)
 	        {   
 	            long    numpoints, startpoint,ii; 
 	                        
 	            startpoint = *pPartIndex++;
+				/*if (i)
+				{
+					loopBeginPoint[i - 1] = startpoint + i;
+				}*/
 	            numpoints = *pPartIndex-startpoint; 
-	            //if (numpoints > (long)USHRT_MAX)
-	            //	MessageBox (0,"Shape file record contains too many points",0,MB_ICONEXCLAMATION);
+				nn += numpoints;
 	            *pNumPoints++ = numpoints; 
 				*pNumPointsNew++ = numpoints;
 	            hmemmove ((HPSTR)pPoints,&pRec[recloc],numpoints * sizeof(DPOINT));     //pPoints[1]
 	            recloc += numpoints * sizeof(DPOINT); //pPoints[2]
 	            pPoints += numpoints;   
-				//if (i && pFGDBRecHeader->shapeType != SHPT_TEXT && ((SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ)))
 				if (i && pFGDBRecHeader->shapeType != SHPT_TEXT && pFGDBRecHeader->geometryType == geometryPolygon)
+				{
 					*pPoints++ = *pFirstPoint;
+				}
 	        } 
 	        ExtraBytes = BinSizeR - recloc; 
-/*	        if (ExtraBytes>1)
-	        {
-	        	HPDPOINT pPoints = (HPDPOINT)&pRec[recloc];//pPoints[3]
-	        	HPLONG pPointsl = (HPLONG)&pRec[recloc];//pPointsl[3]
-	        	HPFLOAT pPointsf = (HPFLOAT)&pRec[recloc];//pPointsf[2]  
-	        	HPSHORT	pPointss = (HPSHORT)&pRec[recloc];//pPointss[7]
-				HFILE	Fid;
-				char	BinFileName[128];
-
-				sprintf (BinFileName,"c:\\curvedecode\\%i_%i-%i.bin",ExtraBytes,NumPoints,CurrentRefno);
-				Fid = GSSiOpenFile (BinFileName,0,OF_CREATE);
-				BigWrite (Fid,&pRec[recloc],ExtraBytes,-1);
-				GSSiClose2 (&Fid);
-				if (ExtraBytes != 33)
-					ii=1;
-				else
-					db_dopoly=TRUE;
-	        	 ii = 1;
-
-	        }*/
 			if (pFGDBRecHeader->hasZs)
 			{
 				double zMin = *(LPDOUBLE)&pRec[recloc];
@@ -4883,7 +4874,13 @@ DoPoly:
 						}
 						else if (parc->Bits &  IsLine)
 						{
-							ii = 1;
+							if (showmarker[0])
+							{
+								char cmd[256];
+								SetTextColor(CurView->hDC, RGB(0, 0, 0));
+								sprintf(cmd, "$MARKER(%f %f, 20, $RGB(255,0,0),PL %i, .35)", POCCoord[NumPOC - 1].x, POCCoord[NumPOC - 1].y, NumPOC);
+								ProcessText(cmd);
+							}
 						}
 						else if (parc->Bits & IsPoint)
 						{
@@ -4894,6 +4891,13 @@ DoPoly:
 							POCPos[NumPOC] = AdjustPointIndex(pSegmentModifier->startPointIndex, nPoly, hPolyPartLen, pFGDBRecHeader->geometryType);
 							POCCoord[NumPOC] = pSegmentModifier->segmentParams.arc.centerPoint;
 							ConvertCoord(&POCCoord[NumPOC++], 0, 1);
+							if (showmarker[1])
+							{
+								char cmd[256];
+								SetTextColor(CurView->hDC, RGB(0, 0, 0));
+								sprintf(cmd, "$MARKER(%f %f, 20, $RGB(255,0,0),POC %i, .35)", POCCoord[NumPOC - 1].x, POCCoord[NumPOC - 1].y,NumPOC);
+								ProcessText(cmd);
+							}
 						}
 						else
 						{
@@ -4901,33 +4905,21 @@ DoPoly:
 						}
 					}
 						break;
+					case esriSegmentBezierCurve:
+						ii = 1;
+						break;
+				
 					default:
+						ii = 1;
 						break;
 					}
 				}
-/*				NumPOC = *(LPLONG)&pRec[recloc];
-				recloc += 4;
-				for (i=0;i<NumPOC;i++)
-				{
-					POCPos[i] = *(LPLONG)&pRec[recloc];
-					recloc += 4;
-					POCFlag[i] = *(LPLONG)&pRec[recloc];
-					recloc += 4;
-					POCCoord[i].x = *(LPDOUBLE)&pRec[recloc];
-					recloc += 8;
-					POCCoord[i].y = *(LPDOUBLE)&pRec[recloc];
-					recloc += 8;
-					recloc += 4;
-					ConvertCoord(&POCCoord[i],0,1);
-				}*/
 				recloc = reclocSave;
 			}
 	        GlobalUnlock (hPoints); 
 	        GlobalUnlock (hPolyPartLen);
 	        GlobalUnlock (hPolyPartLenNew);
 	        GSSiGlobUlFree (&hPartIndex);  
-			//if (nPoly > 1)
-			//	NumPOC = 0;
 			pPoints = (HPDPOINT)GlobalLock (hPoints);//pPoints[9]
 			doWindowCheck =  (SHPPolyHeader.Type == SHPT_ARC);
 			for (i=0;i<NumPoints;i++)
@@ -4950,24 +4942,25 @@ DoPoly:
 				GSSiGlobFree (&hPolyPartLenNew);
 				break;
 			}
-			//if (SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVESANDZ || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES)
 			if (NumPOC)
 			{
 				DPOINT	RP, BP, EP, POC;  //pPoints[3]
 				//LPDPOINT RP = (LPDPOINT)(&pRec[recloc]+12);		//(LPDPOINT)(&pRec[recloc]+28)
 				double	Radius, AZ, BackAZ;
-				LPDPOINT	pPoints2;
+				LPDPOINT	pPoints2, pPoints2Base;
 				HANDLE		hPoints2;
-				long		NumPoints2, NumPointsOrig, NumPointsAdded;// , nAddedPoints = 0;
+				long		NumPoints2, NumPointsOrig, NumPointsAdded, nAddedPoints = 0;
 				UINT		ipoc;
 				LPINT		pNumPointsChk = (LPINT)GlobalLock (hPolyPartLen);
 				int			totpChk = 0;
-
+				BOOL		keepPT = FALSE;
+				static int			reducer = 0;
+			
 				db_dopoly=TRUE;
 //SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVES;
 	
-				hPoints2 = GSSiGlobAlloc (0,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
-				pPoints2 = (HPDPOINT)GlobalLock (hPoints2); 
+				hPoints2 = GSSiGlobAlloc (1834,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
+				pPoints2 = pPoints2Base = (HPDPOINT)GlobalLock (hPoints2);
 				NumPoints2 = 0;
 				for (i=0;i<NumPoints;i++)
 				{
@@ -4979,6 +4972,13 @@ char	str[32]="";
 	SetTextColor(CurView->hDC, RGB(255, 0, 0));
 	DisplayMarker(pPoints[i], 2, str, 0.16, 0, RGB(255, 0, 0), FALSE, FALSE, NULL, NULL, 0, 0, 0);
 }*/
+if (showmarker[2])
+{
+	char cmd[256];
+	SetTextColor(CurView->hDC, RGB(0, 0, 0));
+	sprintf(cmd, "$MARKER(%f %f, 20, $RGB(0,255,0),P   %3i, .35,,F)", pPoints[i].x, pPoints[i].y,i);
+	ProcessText(cmd);
+}
 
 				/*	if (i >= totpChk + *pNumPointsChk)
 					{
@@ -4987,31 +4987,38 @@ char	str[32]="";
 						if (nAddedPoints)
 							totpChk++;
 						nAddedPoints++;
+					}
+					for (int iloop = 0; iloop < nLoopBeginPoints; iloop++)
+					{
+						if (i == loopBeginPoint[iloop])
+							nAddedPoints++;
 					}*/
+
 					for (ipoc = 0;ipoc < NumPOC;ipoc++)
 					{
-						if (POCPos[ipoc] == i)//-nAddedPoints)
+						if (POCPos[ipoc] == i-nAddedPoints)
 						{
 							BP = pPoints[i];
-							EP = pPoints[i+1];
+							EP = pPoints[i + 1];
+//							if (i + 1 >= NumPoints - 1)
+//								keepPT = TRUE;
 							switch (POCFlag[ipoc])
 							{
 							case 0:
-							case 1:
 								POC = POCCoord[ipoc];
 								break;
 							case 5:
-								{
-									DPOINT	MidPoint = MidPointD (BP,EP);
+							{
+								DPOINT	MidPoint = MidPointD(BP, EP);
 
-									RP = POCCoord[ipoc];
-									Radius = ldistpp (&RP,&BP); 
-									AZ = getazd (&RP,&MidPoint);
-									POC = dnewpt (RP,AZ, Radius);  
-								}
-								break;
+								RP = POCCoord[ipoc];
+								Radius = ldistpp(&RP, &BP);
+								AZ = getazd(&RP, &MidPoint);
+								POC = dnewpt(RP, AZ, Radius);
+							}
+							break;
 							default:
-								ii=1;
+								ii = 1;
 							}
 							NumPointsOrig = NumPoints2;
 							/*if (dbug)
@@ -5020,40 +5027,48 @@ char	str[32]="";
 								SetTextColor(CurView->hDC, 0);
 								DisplayMarker(POC, 2, str, 0.16, 0, 0, FALSE, FALSE, NULL, NULL, 0, 0, 0);
 							}*/
+							int na;
 							if (!Display || FastMapCopy)
-								CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurveChordDist,1);
+								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurveChordDist, -1);
 							else
-                				CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurView->BaseUnitsPerPixel,1); 
-							NumPointsAdded = NumPoints2 - NumPointsOrig - 1;//sub 1 to account for PT
+								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurView->BaseUnitsPerPixel, -1);
+							NumPointsAdded = NumPoints2 - NumPointsOrig - 1;
 							if (NumPointsAdded > 0)
 							{
 								UINT	j;
-								int		totp=0;
+								int		totp = 0;
 
-								pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
-								pNumPointsNew = (LPINT)GlobalLock (hPolyPartLenNew);
-								for (j=0;j<nPoly;j++,pNumPoints++,pNumPointsNew++)
+								pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
+								pNumPointsNew = (LPINT)GlobalLock(hPolyPartLenNew);
+								for (j = 0; j < nPoly; j++, pNumPoints++, pNumPointsNew++)
 								{
-									if (i >= totp && i<totp + *pNumPoints)
+									if (i >= totp && i < totp + *pNumPoints)
 									{
-										*pNumPointsNew  += NumPointsAdded;
+										*pNumPointsNew += NumPointsAdded;
 									}
 									totp += *pNumPoints;
+									if (j)
+										totp++;
 								}
-								GlobalUnlock (hPolyPartLen);
-								GlobalUnlock (hPolyPartLenNew);
+								GlobalUnlock(hPolyPartLen);
+								GlobalUnlock(hPolyPartLenNew);
 							}
+							else
+								ii = 1;
 							goto NextPt;
- 						}
+						}
 					}
 					*pPoints2++ = pPoints[i];
 					NumPoints2++;
+					pPoints2Base[NumPoints2 - 1];
 NextPt:;
 				}
-			//	Radius = ldistpp (RP,&BP); 
+				pPoints2Base[NumPoints2 - 1];
+				//	Radius = ldistpp (RP,&BP); 
 			//	AZ = getazd (RP,&MidPoint);
 			//	POC = dnewpt (*RP,AZ, Radius);  
 			//	POC = *RP;
+				//GSSiGlobUlFree(&hLoopBeginPoints);
 				GSSiGlobUlFree (&hPoints);
                 GlobalUnlock (hPoints2);
 				GSSiGlobUlFree(&hPolyPartLen);
@@ -5061,6 +5076,13 @@ NextPt:;
 				hPolyPartLenNew = 0;
 				hPoints = hPoints2;
 				NumPoints = NumPoints2;
+				pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
+				int nn = 0;
+				for (int i = 0; i < nPoly; i++)
+				{
+					nn += *pNumPoints++;
+				}
+				GlobalUnlock(hPolyPartLen);
 				pPoints = (HPDPOINT)GlobalLock (hPoints);
 //				if (Pick)
 //					PickCurve (lpDCurPoints,nPnts,&BP,&POC,&EP);
@@ -5642,7 +5664,7 @@ badcode:
 					        }
 						}
 					}*/
-					lpDCurPoints = pPoints;
+					lpDCurPoints = pPoints; lpDCurPoints[ii];
 					nPnts = nCurPoints = NumPoints;
 					if (PolyInMaskAreaFileCoord (GF_AREA,&NumPoints,0,0,&pPoints,TRUE))
 					{

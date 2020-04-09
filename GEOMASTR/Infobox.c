@@ -94,7 +94,7 @@ int GetTextWH (HDC hDC,LPSTR str,LPSIZE pSize,float f)
 
 void BlockText (HDC hDC,LPSTR str,int maxlen,float f)
 {
-	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,maxlen+1024);
+	HANDLE	hMem=GSSiGlobAlloc (1838,GMEM_MOVEABLE,maxlen+1024);
 	LPSTR	newstr = GlobalLock (hMem);
 	SIZE	txSize;
 	int		perim, minperim=INT_MAX;
@@ -154,7 +154,7 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 	HANDLE	rtn=0;  
 	RECT	WRect; 
 	short	ii;
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc (1837,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	DoNotMove = FALSE;
 	BOOL	SaveContinueProcessing = ContinueProcessing;

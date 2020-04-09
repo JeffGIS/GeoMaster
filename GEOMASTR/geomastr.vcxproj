@@ -434,6 +434,7 @@
     <ClCompile Include="..\gctpc\aziminv.c" />
     <ClCompile Include="..\email\jwsmtp\base64.cpp" />
     <ClCompile Include="..\libbci-1.1.0\bci.c" />
+    <ClCompile Include="BezierCurves.cpp" />
     <ClCompile Include="bigmem.c" />
     <ClCompile Include="..\gctpc\br_gctp.c" />
     <ClCompile Include="..\DB\Bt_creat.c" />

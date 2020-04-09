@@ -473,7 +473,7 @@ HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc)
 			memid[i] = nextid++;
 			memidID[i] = CurrentID;
 			memidcall[i] = NumMemAlloc[CurrentID];	
-			if (memidcall[i] == 1886 && memid[i] == 7490)
+			if (memidcall[i] >= 32 && memidID[i] == 1840)
 				ii = 1;
 			if (memidID[i] == wantid)
 			{ 

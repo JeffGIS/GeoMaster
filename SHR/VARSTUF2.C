@@ -930,7 +930,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    }
 ProcessMacro:
 		lMacro = strlen (pMacro);
-		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMacro+1);
+		hTemp = GSSiGlobAlloc (1825,GMEM_MOVEABLE,lMacro+1);
 		pTemp = GlobalLock (hTemp);
 		strcpy (pTemp,pMacro);
 		pMacro = pTemp;
