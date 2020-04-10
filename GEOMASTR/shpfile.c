@@ -4528,6 +4528,7 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 	LPINT pPartLen;
 	int n = startPointIndex;
 	int nTot = 0;
+	int nadd = 0;
 	int iPoly;
 
 	if (geometryType != geometryPolygon)
@@ -4538,14 +4539,13 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 		nTot += pPartLen[iPoly];
 		if (iPoly)
 		{
-			nTot++;
 			if (n >= nTot)
-				n++;
+				nadd++;
 			else
 				break;
 		}
 	}
-	
+	n += nadd;
 	GlobalUnlock(hPolyPartLen);
 	return n;
 }
@@ -4799,9 +4799,6 @@ DoPoly:
 	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
 	        hPolyPartLen = GSSiGlobAlloc (1785,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
 			hPolyPartLenNew = GSSiGlobAlloc(1786, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
-//			HANDLE hLoopBeginPoints = GSSiGlobAlloc(1848, GHND, sizeof(int) * (nPoly + 1));
-//			LPINT loopBeginPoint = GlobalLock(hLoopBeginPoints);
-//			int nLoopBeginPoints = nPoly-1;
 			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1));
 	        pPartIndex = (HPLONG)GlobalLock (hPartIndex); 
 	        hmemmove ((HPSTR)pPartIndex,&pRec[recloc],nPoly*sizeof(long));   //pPartIndex[5]
@@ -4945,11 +4942,10 @@ DoPoly:
 			if (NumPOC)
 			{
 				DPOINT	RP, BP, EP, POC;  //pPoints[3]
-				//LPDPOINT RP = (LPDPOINT)(&pRec[recloc]+12);		//(LPDPOINT)(&pRec[recloc]+28)
 				double	Radius, AZ, BackAZ;
 				LPDPOINT	pPoints2, pPoints2Base;
 				HANDLE		hPoints2;
-				long		NumPoints2, NumPointsOrig, NumPointsAdded, nAddedPoints = 0;
+				long		NumPoints2, NumPointsOrig, NumPointsAdded;
 				UINT		ipoc;
 				LPINT		pNumPointsChk = (LPINT)GlobalLock (hPolyPartLen);
 				int			totpChk = 0;
@@ -4957,7 +4953,6 @@ DoPoly:
 				static int			reducer = 0;
 			
 				db_dopoly=TRUE;
-//SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVES;
 	
 				hPoints2 = GSSiGlobAlloc (1834,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
 				pPoints2 = pPoints2Base = (HPDPOINT)GlobalLock (hPoints2);
@@ -4965,13 +4960,6 @@ DoPoly:
 				for (i=0;i<NumPoints;i++)
 				{
 char	str[32]="";
-/*if (dbug)
-{
-	DisplayMarkers = TRUE;
-	itoa(i, str, 10);
-	SetTextColor(CurView->hDC, RGB(255, 0, 0));
-	DisplayMarker(pPoints[i], 2, str, 0.16, 0, RGB(255, 0, 0), FALSE, FALSE, NULL, NULL, 0, 0, 0);
-}*/
 if (showmarker[2])
 {
 	char cmd[256];
@@ -4980,28 +4968,12 @@ if (showmarker[2])
 	ProcessText(cmd);
 }
 
-				/*	if (i >= totpChk + *pNumPointsChk)
-					{
-						totpChk += *pNumPointsChk;
-						pNumPointsChk++;
-						if (nAddedPoints)
-							totpChk++;
-						nAddedPoints++;
-					}
-					for (int iloop = 0; iloop < nLoopBeginPoints; iloop++)
-					{
-						if (i == loopBeginPoint[iloop])
-							nAddedPoints++;
-					}*/
-
 					for (ipoc = 0;ipoc < NumPOC;ipoc++)
 					{
-						if (POCPos[ipoc] == i-nAddedPoints)
+						if (POCPos[ipoc] == i)
 						{
 							BP = pPoints[i];
 							EP = pPoints[i + 1];
-//							if (i + 1 >= NumPoints - 1)
-//								keepPT = TRUE;
 							switch (POCFlag[ipoc])
 							{
 							case 0:
@@ -5021,12 +4993,6 @@ if (showmarker[2])
 								ii = 1;
 							}
 							NumPointsOrig = NumPoints2;
-							/*if (dbug)
-							{
-								itoa(ipoc, str, 10);
-								SetTextColor(CurView->hDC, 0);
-								DisplayMarker(POC, 2, str, 0.16, 0, 0, FALSE, FALSE, NULL, NULL, 0, 0, 0);
-							}*/
 							int na;
 							if (!Display || FastMapCopy)
 								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurveChordDist, -1);
@@ -5064,11 +5030,6 @@ if (showmarker[2])
 NextPt:;
 				}
 				pPoints2Base[NumPoints2 - 1];
-				//	Radius = ldistpp (RP,&BP); 
-			//	AZ = getazd (RP,&MidPoint);
-			//	POC = dnewpt (*RP,AZ, Radius);  
-			//	POC = *RP;
-				//GSSiGlobUlFree(&hLoopBeginPoints);
 				GSSiGlobUlFree (&hPoints);
                 GlobalUnlock (hPoints2);
 				GSSiGlobUlFree(&hPolyPartLen);
@@ -5111,27 +5072,6 @@ NextPt:;
 				{
 					pRPBlock++;
 				}
-			/*	DPOINT	MidPoint = MidPointD (BP,EP);
-				double	Radius, AZ, BackAZ;
-				
-				ConvertCoord(RP,0,1);
-				Radius = ldistpp (RP,&BP); 
-				AZ = getazd (RP,&MidPoint);
-				POC = dnewpt (*RP,AZ, Radius);  
-				GSSiGlobUlFree (&hPoints);
-				hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,4090*sizeof(DPOINT));
-				pPoints = (HPDPOINT)GlobalLock (hPoints); 
-				NumPoints = 0;
-				if (!Display)   
-                    CurvePointsD(&BP,&POC,&EP, &NumPoints, &pPoints,&BackAZ,4090,CurveChordDist,1);
-                else
-                	CurvePointsD(&BP,&POC,&EP, &NumPoints, &pPoints,&BackAZ,4090,DisplayCurveFactor,1); 
-                GlobalUnlock (hPoints);
-				pPoints = (HPDPOINT)GlobalLock (hPoints);
-				pNumPoints = (LPWORD)GlobalLock (hPolyPartLen);
-				*pNumPoints = NumPoints;
-		        GlobalUnlock (hPolyPartLen);
-				nPoly = 1;*/
 				SHPPolyHeader.Type = SHPT_POLYGON;	
 			}
 			else if (SHPPolyHeader.Type == -1610612685)
