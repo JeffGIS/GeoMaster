@@ -1390,7 +1390,7 @@ Done:
     UseRefOrTAGIndex = SaveUseRefOrTAGIndex;
     return rtn;
 }
-SetRestoreFile(LPVIEWPORT CurView, int file)
+void SetRestoreFile(LPVIEWPORT CurView, int file)
 {
 	if (file)
 		ii = 1;

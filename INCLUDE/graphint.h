@@ -673,7 +673,7 @@ void ClearMeterPrompts (HDC hDC);
 BOOL HaveMeterPrompts (void);
 BOOL GetMeterRect (LPRECT pRect);
 HANDLE AddParToList(int Parent);
-SetRestoreFile(LPVIEWPORT CurView, int file);
+void SetRestoreFile(LPVIEWPORT CurView, int file);
 BOOL GetTextVisibility (float TSize,short from);
 POINT AdjustPoint (HWND hWnd,POINT StartPoint,POINT LastPoint,short Xmove,short Ymove);
 BOOL PanZoomTarget (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function);
