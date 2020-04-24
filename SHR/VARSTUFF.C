@@ -7864,7 +7864,7 @@ BOOL ResetFileChangeTime (HANDLE hDB)
 
 BOOL GetFileChangeTime (VARPNT VarPtr)
 {
-    char FileID[32];  
+    char FileID[80];  
     short	isql;  
     BOOL	rtn=FALSE; 
     LPSTR	pDot;
@@ -7874,7 +7874,7 @@ BOOL GetFileChangeTime (VARPNT VarPtr)
 	LPFILEPATH	FilePathPtr;
 
     
-    _fstrcpy (FileID,VarPtr->Name);
+    strcpy_s (FileID, sizeof(FileID) - 1,VarPtr->Name);
     if ((pDot = _fstrchr (FileID,'.')))
     {
     	*pDot = 0;

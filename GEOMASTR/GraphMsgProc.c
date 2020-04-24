@@ -13385,7 +13385,10 @@ GSSiExitProg (1247);
        	 SendDlgItemMessage (hWndDlg,SV_DELAY_VALUE,BM_SETCHECK,CurTheme->DelayTextDisplay,0L); 
 		 SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_SETCHECK,FALSE,0L);
  		 SendDlgItemMessage (hWndDlg,SV_ACCUMULATE,BM_SETCHECK,FALSE,0L);
-       	 switch (CurTheme->DispersePoints)
+		 SetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro);
+		 SetDlgItemText(hWndDlg, IDC_ENDDISPLAYMACRO, CurTheme->EndDisplayMacro);
+		 SetDlgItemText(hWndDlg, IDC_DATADISPLAYMACRO, CurTheme->DataDisplayMacro);
+		 switch (CurTheme->DispersePoints)
        	 {
        	 	case 1:
        	 		SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_SETCHECK,TRUE,0L);
@@ -13671,7 +13674,9 @@ GSSiExitProg (1247);
             	 CurTheme->ShowDirection = SendDlgItemMessage (hWndDlg,IDC_SHOW_DIRECTION,BM_GETCHECK,0,0L); 
             	 CurTheme->MarkInvalid = SendDlgItemMessage (hWndDlg,IDC_MARK_INVALID,BM_GETCHECK,0,0L); 
             	 CurTheme->SkipInvalid = SendDlgItemMessage (hWndDlg,IDC_SKIP_INVALID,BM_GETCHECK,0,0L); 
-
+				 GetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro, sizeof(CurTheme->BeginDisplayMacro));
+				 GetDlgItemText(hWndDlg, IDC_ENDDISPLAYMACRO, CurTheme->EndDisplayMacro, sizeof(CurTheme->EndDisplayMacro));
+				 GetDlgItemText(hWndDlg, IDC_DATADISPLAYMACRO, CurTheme->DataDisplayMacro, sizeof(CurTheme->DataDisplayMacro));
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_EVENRANGES,BM_GETCHECK,0,0L)) CurTheme->ClassType =1;
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_PERCENTILES,BM_GETCHECK,0,0L)) CurTheme->ClassType =2;
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_MANUAL,BM_GETCHECK,0,0L)) CurTheme->ClassType =3;
