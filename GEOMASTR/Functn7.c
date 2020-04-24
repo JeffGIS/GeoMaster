@@ -2486,8 +2486,10 @@ Exit:
 	if (SaveCfg != CurrentConfig)
 	{
 		SetConfig(SaveCfg);
-		if (*pNumViewports)
-			SetCurView(SaveVP);
+	}
+	if (*pNumViewports)
+	{
+		SetCurView(SaveVP);
 	}
 	GSSiGlobUlFree(&hMem);
 	if (TraceOn)

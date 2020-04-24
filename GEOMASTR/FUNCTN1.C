@@ -1291,9 +1291,11 @@ Rtnl:
 Exit: 
 	if (SaveCfg != CurrentConfig)
 	{
-		SetConfig (SaveCfg);
-		if (*pNumViewports)
-			SetCurView ( SaveVP);
+		SetConfig(SaveCfg);
+	}
+	if (*pNumViewports)
+	{
+		SetCurView ( SaveVP);
 	}
 	GSSiGlobUlFree (&hMem);
 	if (TraceOn)

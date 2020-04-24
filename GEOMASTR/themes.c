@@ -2438,6 +2438,7 @@ GSSiExitProg (1264);
 	return -1; 
 }
 CheckTheme:
+	CurTheme->InTestChar = TRUE;
 	*CurTheme->CurValue = 0;
 	hMEM = GSSiGlobAlloc ( 641,GMEM_MOVEABLE,2048);  
 	Value = GlobalLock(hMEM);
@@ -2683,6 +2684,7 @@ KeepLooking:
 	}
 
 RtnNotProcessed:
+	CurTheme->InTestChar = FALSE;
 	if (HaltReport)
 	{
 		CloseThemeDataFile(TRUE);
@@ -2696,6 +2698,7 @@ GSSiExitProg (1264);
 	return -1;
 }
 RtnNoDisplay:
+	CurTheme->InTestChar = FALSE;
 	if (HaltReport)
 	{
 		CloseThemeDataFile(TRUE);
@@ -2709,6 +2712,7 @@ GSSiExitProg (1264);
 	return  0;
 }
 RtnProcessed:
+	CurTheme->InTestChar = FALSE;
 	if (HaltReport)
 	{
 		CloseThemeDataFile(TRUE);

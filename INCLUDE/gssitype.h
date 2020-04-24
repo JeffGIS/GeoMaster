@@ -2509,7 +2509,8 @@ typedef struct
 		char	BeginDisplayMacro[256];
 		char	EndDisplayMacro[256];
 		int		ProfileSmoothOption;
-		char	filler[168-sizeof(int)];
+		short	InTestChar;
+		char	filler[168-sizeof(int)-sizeof(short)];
 
 	}	THEME;
 typedef THEME	FAR *LPTHEME;
