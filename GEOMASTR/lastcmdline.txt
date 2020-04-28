@@ -1,2 +1,2 @@
-Configs\jeff\SPECIALASSESSMENTS2020LevyCodes2.GMC /F [SPECASSCOUNT]=1;
+Configs\basemap_new3.gmc /F
 F:\BU_2020_02_20\GEOMas

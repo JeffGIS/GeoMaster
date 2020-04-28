@@ -3538,7 +3538,9 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			{
+			
+				TestConvertToJP2(1);
+				/*
 				OFSTRUCTGM OFStruct;
 				char netFile[MAX_PATH] = "L:\\GEOMas\\orthos\\Orth2019\\2019_1\\orthos4.gci";
 				char cacheFile[MAX_PATH] = "C:\\Users\\smithjx0\\AppData\\Local\\Temp\\gmcache2\\ORTHOS\\ORTH2019\\2019_1\\ORTHOS4$GCI.tbr";
@@ -3573,6 +3575,7 @@ SetVis:
 			double scale = (double)pageWidth / (double)pageSize;
 			ReleaseDC(hWndMain, hDC);
 			ftoa(OutLoc, scale);
+			*/
 			//SetDisplayMode(hDC, GF_TEXTMODE);
 			//testGDIP(hDC);
 /*			char SSID[40];
@@ -3586,7 +3589,7 @@ SetVis:
 			//int n = TestSQLiteCrimeOffenseOrder(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
 
 			//itoa(n, OutLoc, 10);
-			goto Rtnl;
+			//goto Rtnl;
 			/*{
 #include "colorsByName.h"
 				HDC hDC = CurView->hDC;
@@ -4420,7 +4423,7 @@ Exit:
 	{
 		SetConfig(SaveCfg);
 	}
-	if (*pNumViewports)
+	if (pNumViewports && *pNumViewports)
 	{
 			SetCurView ( SaveVP);
 	}

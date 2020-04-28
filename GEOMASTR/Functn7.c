@@ -2487,7 +2487,7 @@ Exit:
 	{
 		SetConfig(SaveCfg);
 	}
-	if (*pNumViewports)
+	if (pNumViewports  && *pNumViewports)
 	{
 		SetCurView(SaveVP);
 	}

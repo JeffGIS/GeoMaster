@@ -365,11 +365,11 @@ BOOL DisplayBMInVP (HDC hDC, HANDLE hDib, BOOL DIBColorsArePalleteEntries,LPORTH
 	   				      (LPBITMAPINFO)pDibInfo,
 	   				      ColorType,RastOpts[rop]);*/
 	    i=BitBlt(hDC, vpx,vpy,vpwidth,vpheight, hdcMem, 0, 0,SRCCOPY);
-//	    hDIB = BitmapToDIB (hNewBM,NULL);  
+//	    hDIB = BitmapToDIB (hNewBM,0,NULL);  
 		if (hbmPrev)
         	SelectObject(hdcMem, hbmPrev);
 	    DeleteDC(hdcMem);    
-//	    SaveDIB (hDIB,"c:\\test.bmp");
+//	    SaveDIB (hDIB,"c:\\temp\\test.bmp");
         DeleteObject (hNewBM);        
     }
 	else 	
@@ -3230,7 +3230,7 @@ BOOL DisplayVirtualPlot (LPSTR VPName)
 	}
 	return TRUE;
 }
-BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName)
+BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName,int fmt)
 {
 	BOOL rtn = TRUE;
 
@@ -3311,8 +3311,21 @@ Next:
 			if (AVIFrameToDIB (GCIFile,frame,&hDib,&DeleteBM,lpIndex->CurrentEntry->BMBitCount,lpIndex->CurrentEntry->BMWidth,lpIndex->CurrentEntry->BMHeight))
 			{
 		   		HDIB32 hDib32 = BMPToDIB32 (hDib);  
+				//HDIB32 hDib32 = FreeImage_ConvertTo32Bits(hDib24);
+				//DestroyDIB32(hDib24, FALSE);
+
 				int	imageLen, imageOffset = GSSillseek (FidJP2Out,0,1);
-				HANDLE hmemDIB = WriteDIBToMem (hDib32,FIF_JP2,JP2CompressionFactor,&imageLen);
+				HANDLE hmemDIB;
+				switch (fmt)
+				{
+				case 1:
+					hmemDIB = WriteDIBToMem(hDib32, FIF_JP2, JP2CompressionFactor, &imageLen);
+					break;
+				case 2:
+					hmemDIB = WriteDIBToMem(hDib32, FIF_TIFF, TIFF_ADOBE_DEFLATE, &imageLen);
+					break;
+				}
+
 				LPSTR pMem;
 				FILEINDEXENTRY indexEntryOut = *lpIndex->CurrentEntry;
 				LPSTR pAt = strchr (indexEntryOut.Name,'@');
@@ -3321,8 +3334,11 @@ Next:
 				indexEntryOut.Len = lpIndex->CurrentEntry->Len - strlen (lpIndex->CurrentEntry->Name) + strlen (indexEntryOut.Name);
 				totLen += indexEntryOut.Len;
 				GSSiGlobFree (&hDib);
-				//SaveDIB32 (hDib32,"c:\\temp\\testbitmap_32.jp2",FIF_JP2,32);
-				GMDestroyDIB32 (hDib32); 
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.tif", FIF_TIFF, TIFF_DEFAULT);
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.jp2", FIF_JP2, JP2CompressionFactor);
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.j2k", FIF_J2K, JP2CompressionFactor);
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_3232.jp2", FIF_JP2, 32);
+				GMDestroyDIB32 (hDib32);
 				pMem = GlobalLock (hmemDIB);
 				BigWrite (FidIndexOut,&indexEntryOut,indexEntryOut.Len,-1);
 				BigWrite (FidJP2Out,&imageLen,sizeof(int),-1);
@@ -3358,14 +3374,21 @@ Exit:
 
 int TestConvertToJP2 (int i)
 {
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index64","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index64");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index16","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index16");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index4","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index4");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index1","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index1");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index64","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index64");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index16","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index16");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index4","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index4");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index1","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index1");
+	char dirf[MAX_PATH] = "[%DL]orthos\\Orth2019\\2019_1\\";
+	char dirt[MAX_PATH] = "[%DL]orthos_jp2_18\\Orth2019\\2019_1\\";
+	int lev = 1;
+	char cmd[128] = "[%JP2Factor]=18";
+	ExpandText(cmd);
+	while (lev < 256)
+	{
+		char from[MAX_PATH], to[MAX_PATH];
+		sprintf(from, "%sindex%i", dirf, lev);
+		sprintf(to, "%sindex%i", dirt, lev);
+		ExpandText(from);
+		ExpandText(to);
+		ConvertOrthoToJP2(from, to,1);
+		lev *= 2;
+	}
 	return 1;
 }
 
