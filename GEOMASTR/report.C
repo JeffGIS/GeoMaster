@@ -143,6 +143,7 @@ HANDLE LoadReport (LPSTR Name)
 	reptype = 0;
 	Fid = GSSiOpenFile (Name,&OFStruct,OF_READ); 
 	if (Fid == HFILE_ERROR) return 0;
+	AddToMacroStack(4, 0, Name, 0, 0);
 	SetCurVal (Name,IDS_FILERPT);
 	len = GSSillseek (Fid,0,2); 
 	GSSillseek (Fid,0,0);

@@ -50,7 +50,7 @@ BOOL OrthoInBuffer(LPSTR Name, long frame)
 	{
 		if (CurOrtho->DeleteBM == 1)
 			hDibFree (&CurOrtho->hDib);
-		else if (CurOrtho->DeleteBM == 2) 
+		else if (CurOrtho->DeleteBM == 2 && CurOrtho->hDib)
 		{
 			if (hDibIs32Bit (CurOrtho->hDib))
 				DestroyDIB32(CurOrtho->hDib,FALSE);
@@ -95,7 +95,7 @@ void CloseOrthos (BOOL Clear)
 		{
 			if (CurOrtho->DeleteBM == 1)
 				hDibFree (&CurOrtho->hDib);
-			else if (CurOrtho->DeleteBM == 2) 
+			else if (CurOrtho->DeleteBM == 2 && CurOrtho->hDib)
 			{
 				if (hDibIs32Bit (CurOrtho->hDib))
 					DestroyDIB32(CurOrtho->hDib,FALSE);
@@ -3372,22 +3372,23 @@ Exit:
 	return rtn;
 }
 
-int TestConvertToJP2 (int i)
+int ConvertToJP2(int year,int nparts)
 {
-	char dirf[MAX_PATH] = "[%DL]orthos\\Orth2019\\2019_1\\";
-	char dirt[MAX_PATH] = "[%DL]orthos_jp2_18\\Orth2019\\2019_1\\";
-	int lev = 1;
-	char cmd[128] = "[%JP2Factor]=18";
+	char cmd[128] = "[%JP2Factor]=16";
 	ExpandText(cmd);
-	while (lev < 256)
+	for (int part = 0; part < nparts; part++)
 	{
-		char from[MAX_PATH], to[MAX_PATH];
-		sprintf(from, "%sindex%i", dirf, lev);
-		sprintf(to, "%sindex%i", dirt, lev);
-		ExpandText(from);
-		ExpandText(to);
-		ConvertOrthoToJP2(from, to,1);
-		lev *= 2;
+		int lev = 1;
+		while (lev <= 256)
+		{
+			char from[MAX_PATH], to[MAX_PATH];
+			sprintf(from, "[%%DL]orthos\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
+			sprintf(to, "[%%DL]orthos\\jp2_18\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
+			ExpandText(from);
+			ExpandText(to);
+			ConvertOrthoToJP2(from, to, 1);
+			lev *= 2;
+		}
 	}
 	return 1;
 }

@@ -1,8 +1,6 @@
 #include "shr.h"
 #include "proj.h" //{/umsc/include/projections.ftn}
 //#include "cnstnt.h" //{/umsc/include/cnstnt.ftn}
-#define MFT  3.280833333333333e0
-#define FTM 3.04800609601219e-1
 #define COUNTY 50
 #define GEO 0
 

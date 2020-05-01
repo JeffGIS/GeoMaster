@@ -114,9 +114,14 @@ BOOL hDibIs32Bit (HANDLE hDib)
 	if (pByte)
 	{
 		LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)(pByte + PREMEM);
-		rtn = !(pDibInfo->biSize == 40);
-		GlobalUnlock (hDib);
+		if (pDibInfo->biSize == 40)
+			rtn = FALSE;
+		else
+			rtn = TRUE;
+		GlobalUnlock(hDib);
 	}
+	else
+		rtn = TRUE;
 	return rtn;
 
 }

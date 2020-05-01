@@ -732,7 +732,7 @@ int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int N
 	int i, mini=0, rtn;
 	UINT minUse = UINT_MAX;
 
-	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc
+	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc, 4=LoadReport, 5=displaypickeditems
 	strcpy (currentMacro,File);
 	SubstituteDL (currentMacro,FALSE);
 	for (i=0;i<lnMacroStack;i++)

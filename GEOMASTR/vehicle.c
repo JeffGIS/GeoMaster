@@ -800,9 +800,9 @@ BOOL ImportFences_old (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 					typ = 1;
 					color = RGB (255,220,200);
 					if (FenceOffsetUnits[i] == 'M')
-						width = (-FenceOffset[i] * 5280)/3.2808333;
+						width = (-FenceOffset[i] * 5280)/MFT;
 					else
-						width = (-FenceOffset[i])/3.2808333;
+						width = (-FenceOffset[i])/MFT;
 				}
 				SymNum = GetDictSymbolNumber (AreaSymbolName);
 				ConvertPolyCoord ((HPDPOINT)pArea,np,2,1);

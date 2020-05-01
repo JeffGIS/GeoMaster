@@ -1720,15 +1720,18 @@ BOOL BMPInCache(HDIB32 hDib)
 LPBITMAPINFO GetDibHeader (HDIB32 hDib)
 {   
     static BITMAPINFOHEADER DibInfo;  
-	LPBITMAPINFO	pDibInfo;
+	LPBITMAPINFO	pDibInfo=0;
 
-	if (hDibIs32Bit (hDib))
-	{ 
-	    GetBitmapInfoFromHandle (&DibInfo,hDib);
-	    pDibInfo = (LPBITMAPINFO)&DibInfo;
+	if (hDib)
+	{
+		if (hDibIs32Bit(hDib))
+		{
+			GetBitmapInfoFromHandle(&DibInfo, hDib);
+			pDibInfo = (LPBITMAPINFO)&DibInfo;
+		}
+		else
+			pDibInfo = (LPBITMAPINFO)GlobalLock((HANDLE)hDib);
 	}
-	else
-		pDibInfo = (LPBITMAPINFO)GlobalLock ((HANDLE)hDib);
 	return pDibInfo;
 }
 
@@ -2444,7 +2447,9 @@ void AdjustDIBColors (HANDLE hDib)
 	BOOL isdib32 = TRUE;
 
 	AutoOrthoColor = (COLORREF)-1;
-     
+	if (!hDib)
+		goto Exit2;
+
 	if (!hDibIs32Bit (hDib))
 	{
 		lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib);
@@ -2545,6 +2550,7 @@ void AdjustDIBColors (HANDLE hDib)
 Exit:
 	if (!isdib32)
 		GlobalUnlock (hDib);
+Exit2:
 	AutoOrthoColor = SaveAutoOrthoColor;
 	
 {

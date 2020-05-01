@@ -3538,8 +3538,10 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			
-				TestConvertToJP2(1);
+			double v = FTM;
+			v = MFT;
+
+			int i = ConvertToJP2(2016, 10);
 				/*
 				OFSTRUCTGM OFStruct;
 				char netFile[MAX_PATH] = "L:\\GEOMas\\orthos\\Orth2019\\2019_1\\orthos4.gci";

@@ -5746,7 +5746,7 @@ GSSiExitProg (60);
         return(FALSE);
 }
     }
-    if (Version > 2)
+    if (Version > 3)
     {
     BadMap:  
         GSSiClose2 (&FidIndex);
