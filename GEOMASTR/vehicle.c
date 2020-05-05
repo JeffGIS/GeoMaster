@@ -2855,10 +2855,12 @@ BOOL SaveMapServerFile(void)
 		if (MapserverRequestID)
 		{
 			BITMAP bm;
-			HBITMAP hBM = SelectObject(CurView->hDC, hMapServerBM);
+			HBITMAP hBM = SelectObject(hDCScreenBuffer, hMapServerBM);
 			HDIB32 hDIB32;
 			int	   lbitmap;
 
+			if (!hBM)
+				return FALSE;
 			if (dbug)
 			{
 				char mess[128];
@@ -2874,7 +2876,8 @@ BOOL SaveMapServerFile(void)
 			SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
 			GMDestroyDIB32(hDIB32);
 
-			SelectObject(CurView->hDC, hBM);
+			SelectObject(hDCScreenBuffer, hBM);
+			//DeleteObject(hBM);
 			if (MapServerCalledFromWnd)
 				PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(MAPSERVER_RETURNED_IMAGE, MapserverVPID), MapserverRequestID);
 			return TRUE;

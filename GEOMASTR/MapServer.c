@@ -57,6 +57,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	serverID = GetAvailableServerID();
 	CloseAllRequestedFiles(FALSE);
 	GetModuleFileName(NULL, modulePath, MAX_PATH);
+	REPLAC(modulePath, "\\.\\", "\\", MAX_PATH);
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
@@ -120,6 +121,8 @@ void StopBackgroundMapServer(HWND hWndServer)
 		PostMessage(hWndServer,WM_CLOSE,0, 0);
 		GSSiRemove(MapServerFile[serverID]);
 		MapServerWnd[serverID] = 0;
+		if (serverID == nMapServers)
+			nMapServers--;
 	}
 	return;
 }

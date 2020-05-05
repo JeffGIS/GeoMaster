@@ -13681,7 +13681,15 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 /*  top == -4        - center at bottom - 16 of CurView                 */
 /*  top == -5        - center horz on cursor in parent, vert above curs */
 /************************************************************************/
+BOOL IsTopLevelWindow(HWND hWnd)
+{
+	BOOL rtn = FALSE;
+	HWND hWndParent = GetParent(hWnd);
 
+	if (!hWndParent)
+		rtn = TRUE;
+	return rtn;
+}
 void cwCenter(HWND hWnd, int top)
 #if ENABLETRACE
 {GSSiEnterProg (452);
@@ -13694,6 +13702,7 @@ void cwCenter(HWND hWnd, int top)
  int        iheight; 
  HWND		hPWnd;  
  BOOL		IsClient=FALSE;
+ BOOL		IsTop = IsTopLevelWindow(hWnd);
 
  /* get the rectangles for the parent and the child                     */
  if (!GetWindowRect(hWnd, &swp))
@@ -13708,7 +13717,10 @@ begin:
  	IsClient = FALSE;
  }
  else
- 	hPWnd = hWndMain;
+ {
+	 hPWnd = hWndMain;
+	 IsClient = !IsTop;
+ }
 // GetClientRect(hPWnd, &rParent);
  GetWindowRect(hPWnd, &rParent);
 
@@ -13726,8 +13738,10 @@ begin:
  }
  if (top == -4)//center at bottom of vp
  {
-	 pt.y = CurView->DrawRect.top + CurView->DrawRect.bottom - iheight - 16;
+	 pt.y = CurView->DrawRect.top + RECTHEIGHT(&CurView->DrawRect) - iheight - 16;
 	 pt.x = CurView->DrawRect.left + RECTWIDTH(&CurView->DrawRect) / 2 - iwidth / 2;
+	 if (IsClient)
+		 ClientToScreen(hPWnd, &pt);
 	 goto Exit;
  }
  else if (top<0)
@@ -13741,10 +13755,10 @@ begin:
 else
 {
 	 /* find the center point and convert to screen coordinates             */
-	 pt.x = (rParent.right + rParent.left) / 2;
-	 pt.y = (rParent.bottom + rParent.top) / 2; 
-	 if (IsClient)
-	 	ClientToScreen(hWndMain, &pt);
+	 pt.x = rParent.left + RECTWIDTH(&rParent)  / 2;
+	 pt.y = rParent.top   + RECTHEIGHT(&rParent) / 2; 
+	 if (!IsClient)
+	 	ClientToScreen (hPWnd, &pt);
 } 
 
  /* calculate the new x, y starting point                               */

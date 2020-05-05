@@ -734,7 +734,6 @@ GSSiExitProg (436);
 		 NoAccel = TRUE;
 		 NoMenu = TRUE;
 		 wantGDIPlus = FALSE;
-
 	 }
  }
  if (_fstrstr(CmdLine, " /RESET "))
@@ -2043,6 +2042,9 @@ GSSiExitProg (437);
    }
  else
  {
+	 if (MapServer)
+		SetWindowText(hWndMain, "Map Server");
+
 	 CreatePrintBitmap(hWndMain);
 
 	 OpenTCPIPServer2(hWndMain);
@@ -2594,7 +2596,7 @@ if (Message == GF_MAPSERVER_REQUEST)
 	HANDLE Fid;
 	OFSTRUCTGM OFStruct;
 	 //MessageBox(hWnd, "Got request", "", MB_OK);
-
+	SetWindowText(hWnd, "Map Server");
 	MapserverRequestID = LOWORD(lParam);
 	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
@@ -5244,9 +5246,9 @@ DisplayParcel:
 		 hWndMain = hWnd;
 		 CDInit (hWnd, hInst); /* Initialize Common Dialogs */     
 		 InitGraphics (hWnd);
-/*		 if (_fstrstr (szAppName,"Highways"))
-		 	SetWindowText (hWnd,"Visual Surveyor");
-		 else*/ if (!MapServer && GetGlobalCVal ("[%WT]",str,0))
+		 if (MapServer)
+			 SetWindowText(hWnd, "Map Server");
+		 else if (GetGlobalCVal("[%WT]", str, 0))
 		 	SetWindowText (hWnd,str);
 		 ConvertCoordClose();
 		 ConvertCoordInit();

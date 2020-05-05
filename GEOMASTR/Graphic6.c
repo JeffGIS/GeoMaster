@@ -127,8 +127,8 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 	{ 
 		if (hbmpOrig)
 		{
-			hbmpOld = SelectObject (hDCScreenBuffer,hbmpOrig);
-			GSSiDeleteObject (&hbmpOld); 
+			//hbmpOld = SelectObject (hDCScreenBuffer,hbmpOrig);
+			//GSSiDeleteObject (&hbmpOrig); 
 			DeleteDC (hDCScreenBuffer);  
 			hDCScreenBuffer = 0;
 			hbmpOrig = 0;
@@ -159,12 +159,15 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 		CurrentBufferRect.left=CurrentBufferRect.right=CurrentBufferRect.top=CurrentBufferRect.bottom=0;
 		hDCScreenBuffer = CreateCompatibleDC(hDCMain);    
 	}
-	if (MapServer || (!IsIconic (hWndMain) && !EqualRect (&Rect,&CurrentBufferRect)))
-	{
+	//if (MapServer || (!IsIconic(hWndMain) && !EqualRect(&Rect, &CurrentBufferRect)))
+	if (!IsIconic(hWndMain) && !EqualRect(&Rect, &CurrentBufferRect))
+		{
 		BITMAP bm;
 		CurrentBufferRect = Rect;
 		hBitmapScreenBuffer = CreateCompatibleBitmap (hDCMain,RECTWIDTH(&CurrentBufferRect),   
 															  RECTHEIGHT(&CurrentBufferRect)); 
+		if (!hBitmapScreenBuffer)
+			MessageBox(0, "Failed to create compat bitmap", 0, MB_ICONWARNING);
 		if (dbug)
 		{
 			char mess[128];
@@ -179,10 +182,11 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 			MessageBox(0, mess, "", MB_OK);
 		}
 		hbmpOld = SelectObject(hDCScreenBuffer, hBitmapScreenBuffer);
-		if (hbmpOrig)
-			GSSiDeleteObject (&hbmpOld);
+		if (hbmpOrig && hbmpOld != hbmpOrig)
+			GSSiDeleteObject(&hbmpOld);
 		else
-			hMapServerBM = hbmpOrig = hbmpOld;
+			hbmpOrig = hbmpOld;
+		hMapServerBM = hbmpOrig;
 	}
 	if (hDCMain == hDC)  
 	{
