@@ -529,6 +529,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
 	int	l=_fstrlen (txt); 
 	SIZE	txSize;
 
+	SetDisplayMode(CurReport->hDC, GF_SCREENMODE);
 	GetTextExtentPoint32 (CurReport->hDC,txt,l,&txSize);
 	
 	if (CurReport->WantSize)

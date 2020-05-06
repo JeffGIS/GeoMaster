@@ -2017,7 +2017,33 @@ GSSiExitProg (130);
 }
 #endif
 }
-
+BOOL PtInScreenRect(POINT SegPoint)
+#if ENABLETRACE
+{
+	GSSiEnterProg(130);
+#endif
+	{
+		if (SegPoint.x < CurView->ScreenRect.left ||
+			SegPoint.x > CurView->ScreenRect.right ||
+			SegPoint.y < CurView->ScreenRect.top ||
+			SegPoint.y > CurView->ScreenRect.bottom)
+		{
+#if ENABLETRACE
+			GSSiExitProg(130);
+#endif
+			return (FALSE);
+		}
+		else
+		{
+#if ENABLETRACE
+			GSSiExitProg(130);
+#endif
+			return (TRUE);
+		}
+#if ENABLETRACE
+	}
+#endif
+}
 RECT PctRect (RECT Rect, float Pct)
 #if ENABLETRACE
 {GSSiEnterProg (131);

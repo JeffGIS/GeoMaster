@@ -1662,13 +1662,15 @@ int abcd (int i)
 	return 1;
 }
 
-void SetDisplayMode (HDC hDC, short Mode)
+int SetDisplayMode (HDC hDC, short Mode)
 #if ENABLETRACE
 {GSSiEnterProg (13);
 #endif
 {  
 	short	ii;  
 	short	CurMode;
+	int		curMapMode = 0;
+	int		CurGraphicsMode = 0;
 	XFORM xForm; 
    	int	WindowFactor;
 
@@ -1677,9 +1679,10 @@ void SetDisplayMode (HDC hDC, short Mode)
 #if ENABLETRACE
 GSSiExitProg (13);
 #endif
-   	return; 
+   	return 0; 
 }
-   CurMode = GetMapMode (hDC);	 
+   CurMode = GetMapMode (hDC);
+   CurGraphicsMode = GetGraphicsMode(hDC);
    switch (Mode)
    {   
 		case GF_MAPMODE:
@@ -1798,7 +1801,7 @@ GSSiExitProg (13);
 #if ENABLETRACE
 GSSiExitProg (13);
 #endif
-    return;
+    return curMapMode;
 }
 #if ENABLETRACE
 }
@@ -2071,6 +2074,7 @@ GSSiExitProg (17);
 #endif
 		 return TRUE;
 }
+	
      if (Point->x > CurView->WBounds.xmx ||
          Point->y > CurView->WBounds.ymx ||
          Point->x < CurView->WBounds.xmn ||
@@ -3208,7 +3212,7 @@ DPOINT WinPtToBasePt (POINT Point)
 #if ENABLETRACE
 {GSSiEnterProg (30);
 #endif
-{    DPOINT WinPointD, WorldPoint;
+{    DPOINT WinPointD, WorldPoint, VPPoint;
      
      if(!CurView->hTranBaseToVP)
      {
@@ -3225,8 +3229,9 @@ DPOINT WinPtToBasePt (POINT Point)
 		}
 	 }
      WinPointD = EnlargedPoint (Point);
-     TRANS2 (WinPointD.x,WinPointD.y,&WorldPoint.x,&WorldPoint.y,CurView->hTranVPToBase);
-/*{	//temp code
+	 TRANS2(WinPointD.x, WinPointD.y, &VPPoint.x, &VPPoint.y, CurView->hTranScreenToVP);
+	 TRANS2(VPPoint.x, VPPoint.y, &WorldPoint.x, &WorldPoint.y, CurView->hTranVPToBase);
+	 /*{	//temp code
 POINT	TestPoint=BasePtToWinPt (&WorldPoint); 
 short	ii;
 if (TestPoint.x != Point.x || TestPoint.y != Point.y)
@@ -3426,8 +3431,9 @@ POINT BasePtToWinPt (LPDPOINT WPoint)
 		    TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP); 
 			break;
      	case 0:
-     		TRANS2 (WPoint->x,WPoint->y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP);
-     		break;
+			TRANS2(WPoint->x, WPoint->y, &WinPointDt.x, &WinPointDt.y, CurView->hTranBaseToVP);
+			TRANS2(WinPointDt.x, WinPointDt.y, &WinPointD.x, &WinPointD.y, CurView->hTranVPToScreen);
+			break;
      	case 3: //google maps projection
 			{
 			PPoint = *WPoint;

@@ -424,16 +424,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 	str = ReportName + 128;
 	
 	InInfoBox=TRUE;	
-	if (TAGBox.CoordStyle == 0 && TAGBox.PLstyle && From > 1)
-	{
-		if (!PtInWBounds (&TAGBox.TAGPoint))
-		{
-			rtn = FALSE;
-			goto Exit;
-		}
-		CurrentPoint = TAGBox.TAGPoint;
-	}
-	else if (TAGBox.CoordStyle == 1 && TAGBox.PLstyle && From > 1)
+	if ((TAGBox.CoordStyle == 1 || TAGBox.CoordStyle == 1) && TAGBox.PLstyle && From > 1)
 	{
 		TAGBox.TAGPointScr = TAGPtToWinPt (TAGBox.TAGPoint);
 		if (!PtInRect (&CurView->ScreenRect,TAGBox.TAGPointScr))
@@ -722,7 +713,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	LPRECT	pRect=0;
 	BOOL	saveuseGDIPlus = useGDIPlus;
 	BOOL	SaveContinueProcessing = ContinueProcessing;
-
+	double saveRotation;
 
 	RoundingFactor = RoundingFactors[TAGBox.Shape]/2;
 
@@ -739,7 +730,10 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		useGDIPlus = TRUE;
 	SetContinueProcessing ( TRUE);
 	SaveDC(hDC);
-	SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
+	saveRotation = CurView->Rotation;
+	if (CurView && CurView->Rotation)
+		CurView->Rotation = 0;
+	SetDisplayMode (hDC, GF_TEXTMODE); 
 	Line = GlobalLock (hMEM);
 	ExpLine = Line + 1024;
 	ExpandArea = ExpLine + 1024;
@@ -1140,7 +1134,8 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			
 			else
 			{  
-		TextOut:
+			TextOut:
+				SetDisplayMode(hDC, GF_TEXTMODE);
 				GetTextExtentPoint32 (hDC,ExpLine,_fstrlen(ExpLine),&txSize);
 				Twidth = txSize.cx;
 				Theight = txSize.cy;
@@ -1237,7 +1232,7 @@ Exit:
 		SaveFullWindowBitmap (hWnd);
 	useGDIPlus = saveuseGDIPlus;
 	SetContinueProcessing ( SaveContinueProcessing);
-
+	CurView->Rotation = saveRotation;
 	return;
 
 }

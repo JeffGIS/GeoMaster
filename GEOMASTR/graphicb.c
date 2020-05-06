@@ -70,7 +70,7 @@ GSSiExitProg (1142);
 			Point = BasePtToWinPt (lpDPoints++);   
 		else
     		Point = FileCoordToWinCoord(POINTStoPOINT(*lpPoints++));
-    	if (!Clip || PtInDrawRect (Point))
+    	if (!Clip || PtInScreenRect (Point))
     	{   
     		dist = idist (Point,LastPoint);
 	        *Length += dist;
