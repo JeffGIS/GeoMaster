@@ -770,7 +770,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	switch (TAGBox.CoordStyle)
 	{
 		case 0:
-        	hRgn = CreateVPRgn (FALSE,FALSE);
+        	hRgn = CreateVPRgn (2,FALSE);
 			pRect = 0;
         	break;
 		case 2:
@@ -811,7 +811,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		Rect.bottom += inc;
 		Rect.right += inc;
 	}
-	HavePL=FALSE; 
+	HavePL=TRUE; 
 	if (MoveMode)
 	{
 		RECT	SaveRect = Rect;
@@ -852,13 +852,52 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	Points[3]=MidPoint(Points[2],Points[4]);
 	Points[5]=MidPoint(Points[4],Points[6]);
 	Points[7]=MidPoint(Points[6],Points[8]);
-	if (MoveMode)
+	/*if (MoveMode)
 	{
 		if (!Restore)
 			Polyline (hDC,(LPPOINT)Points,9);
 	}
-	else
+	else*/
 	{	
+		Elwh = (RECTWIDTH(&TAGBox.rect) + RECTHEIGHT(&TAGBox.rect)) / RoundingFactor;
+		if (TAGBox.BorderStyle != 4)
+			width = (TAGBox.BorderStyle * 2 - 1) * DeviceToScreenFactor();
+		else
+			width = (3) * DeviceToScreenFactor() * ShrinkFactor;
+		width = max(TAGBox.PLwidth, width);
+		LineWidth = width;
+
+		MinDist = LONG_MAX;
+		for (i = 0; i < 9; i++)
+		{
+			Dist = idist(TAGBox.TAGPointScr, Points[i]);
+			if (Dist < MinDist)
+			{
+				MinDist = Dist;
+				TAGBox.ConnectPoint = Points[i];
+			}
+		}
+		if (TAGBox.TAGPointScr.x < Points[0].x && TAGBox.TAGPointScr.y > Points[2].y&& TAGBox.TAGPointScr.y < Points[0].y)
+			TAGBox.ConnectPoint = Points[1];
+		else if (TAGBox.TAGPointScr.x > Points[4].x&& TAGBox.TAGPointScr.y > Points[2].y&& TAGBox.TAGPointScr.y < Points[0].y)
+			TAGBox.ConnectPoint = Points[5];
+		else if (TAGBox.TAGPointScr.y < Points[2].y && TAGBox.TAGPointScr.x > Points[0].x&& TAGBox.TAGPointScr.x < Points[6].x)
+			TAGBox.ConnectPoint = Points[3];
+		else if (TAGBox.TAGPointScr.y > Points[0].y&& TAGBox.TAGPointScr.x > Points[0].x&& TAGBox.TAGPointScr.x < Points[6].x)
+			TAGBox.ConnectPoint = Points[7];
+		hPointer = ShowPointerLine(0, TAGBox.rect, TAGBox.TAGPointScr, TAGBox.ConnectPoint, &HavePL, MoveMode, LineWidth, Elwh, Elwh, pRect);
+		if (TAGBox.BorderStyle)
+		{
+			BorderPen = CreatePen(PS_SOLID, (int)IDNINT(width), TAGBox.BorderColor);
+			OldPen = SelectObject(hDC, BorderPen);
+			Rect = TAGBox.rect;
+			InflateRect(&Rect, (int)-IDNINT(width / 2 - 1 * DeviceToScreenFactor()), (int)-IDNINT(width / 2 - 1 * DeviceToScreenFactor()));
+			Elwh = (RECTWIDTH(&TAGBox.rect) + RECTHEIGHT(&TAGBox.rect)) / RoundingFactor;
+		}
+		else
+			OldPen = SelectObject(hDC, GetStockObject(NULL_PEN));
+
+
 		if (TAGBox.BGstyle <=1)
 		{
 			//hTBBrush = CreateSolidBrush(TAGBox.BGcolor); 
@@ -880,85 +919,32 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			
 		}
 		hOldBrush = SelectObject (hDC,hTBBrush);
-//		width = min(MainRect.right-MainRect.left,MainRect.bottom-MainRect.top) * (float)TAGBox.BorderStyle/350.0;
-		if (TAGBox.BorderStyle!=4)
-			width = (TAGBox.BorderStyle*2-1)*DeviceToScreenFactor();  
-		else
-			width = (3)*DeviceToScreenFactor()*ShrinkFactor;
-		width = max (TAGBox.PLwidth,width);
-		LineWidth = width;	
-		OldPen = SelectObject (hDC,GetStockObject(NULL_PEN));
-		Elwh  = (RECTWIDTH(&TAGBox.rect) + RECTHEIGHT(&TAGBox.rect))/RoundingFactor;
 		if (TAGBox.BGstyle)
 		{
 			switch (TAGBox.Shape)
 			{
 			case 0:
-				Polygon (hDC,(LPPOINT)Points,9);
+				DrawRectPoly(hDC, &Rect, 0);
 				break;
 			default:
-				RoundRect (hDC,TAGBox.rect.left,TAGBox.rect.top,TAGBox.rect.right,TAGBox.rect.bottom,Elwh,Elwh);
-				SetROP2(hDC,DisplayRasterOpt);
-//				SelectObject (hDC,GetStockObject (NULL_BRUSH));
-//				RoundRect (hDC,TAGBox.rect.left,TAGBox.rect.top,TAGBox.rect.right,TAGBox.rect.bottom,Elwh,Elwh);
+				if (hPointer)
+				{
+					LPPOINT	pPPoints = (LPPOINT)GlobalLock(hPointer);
+					RoundRectWithPointer(hDC, Rect.left, Rect.top, Rect.right, Rect.bottom, Elwh, Elwh, pPPoints);
+					GSSiGlobUlFree(&hPointer);
+				}
+				else
+					RoundRect(hDC, Rect.left, Rect.top, Rect.right, Rect.bottom, Elwh, Elwh);
 				break;
 			}
 		}
+		SelectClipRgn(hDC, hRgn);
+		SelectObject(hDC, OldPen);
+		GSSiDeleteObject(&BorderPen);
 		if (OldTextColor >= 0)
 			SetTextColor(hDC,OldTextColor); 
 		if (OldMode)
 			SetROP2(hDC,OldMode);
-		MinDist = LONG_MAX;
-		for (i=0;i<9;i++)
-		{
-			Dist = idist (TAGBox.TAGPointScr,Points[i]);
-			if (Dist < MinDist)
-			{	MinDist = Dist;
-				TAGBox.ConnectPoint = Points[i];
-			}
-		}
-		if (TAGBox.TAGPointScr.x < Points[0].x && TAGBox.TAGPointScr.y > Points[2].y && TAGBox.TAGPointScr.y < Points[0].y)
-			TAGBox.ConnectPoint = Points[1];
-		else if (TAGBox.TAGPointScr.x > Points[4].x && TAGBox.TAGPointScr.y > Points[2].y && TAGBox.TAGPointScr.y < Points[0].y)
-			TAGBox.ConnectPoint = Points[5];
-		else if (TAGBox.TAGPointScr.y < Points[2].y && TAGBox.TAGPointScr.x > Points[0].x && TAGBox.TAGPointScr.x < Points[6].x)
-			TAGBox.ConnectPoint = Points[3];
-		else if (TAGBox.TAGPointScr.y > Points[0].y && TAGBox.TAGPointScr.x > Points[0].x && TAGBox.TAGPointScr.x < Points[6].x)
-			TAGBox.ConnectPoint = Points[7];
-		hPointer = ShowPointerLine (hDC,TAGBox.rect,TAGBox.TAGPointScr,TAGBox.ConnectPoint,&HavePL,MoveMode,LineWidth,Elwh,Elwh,pRect);
-		if (hPointer)
-		{
-			HRGN    NewRgn; 
-			LPPOINT	pPPoints=(LPPOINT)GlobalLock (hPointer);
-			
-			NewRgn = CreatePolygonRgn (pPPoints,3,ALTERNATE);
-			GSSiGlobUlFree (&hPointer);
-			CombineRgn (NewRgn,hRgn,NewRgn,RGN_DIFF);
-			SelectClipRgn (hDC,NewRgn); 
-			GSSiDeleteObject(&NewRgn);
-		}
-        if (TAGBox.BorderStyle)
-        {
-		//FillRect (CurView->hDC,&CurView->ScreenRect,GetStockObject (GRAY_BRUSH));
-			BorderPen = CreatePen (PS_SOLID,(int)IDNINT(width),TAGBox.BorderColor);
-			SelectObject (hDC,BorderPen);
-			Rect = TAGBox.rect;
-			InflateRect (&Rect,(int)-IDNINT(width/2-1*DeviceToScreenFactor()),(int)-IDNINT(width/2-1*DeviceToScreenFactor()));
-			SelectObject(hDC,GetStockObject(NULL_BRUSH));
-			switch (TAGBox.Shape)
-			{
-			case 0:
-				DrawRectPoly (hDC,&Rect,0);
-				break;
-			default:
-				RoundRect (hDC,Rect.left,Rect.top,Rect.right,Rect.bottom,Elwh,Elwh);
-				break;
-			}
-		}
-		SelectClipRgn (hDC,hRgn); 
-		SelectObject(hDC,OldPen);
-		GSSiDeleteObject (&BorderPen);
-//        DeleteObject(BorderPen);
 		if (TAGBox.BorderStyle==4)
 		{   
 			HPEN	BorderPen2,hOldPen;
@@ -989,8 +975,6 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		}	
 		if(OldBKMode) SetBkMode(hDC,OldBKMode);
 		OldBKMode=SetBkMode(hDC,TRANSPARENT);
-/*        iLogPixsY = GetDeviceCaps(hDC, LOGPIXELSY);
-	    TAGBox.LogFont.lfHeight = -1 * (iLogPixsY * TAGBox.TXheight / 72);*/
 	    if (TAGBox.Factor) 
 	    	Factor = TAGBox.Factor;
 	    else
@@ -1233,6 +1217,8 @@ Exit:
 	useGDIPlus = saveuseGDIPlus;
 	SetContinueProcessing ( SaveContinueProcessing);
 	CurView->Rotation = saveRotation;
+	GSSiGlobFree(&hPointer);
+
 	return;
 
 }
@@ -1257,7 +1243,8 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
 	else
 	{
 //		DrawPointerLine (hDC,begpoint,endpoint,hDashPen,hSolidPen,10);
-    	SaveDC (hDC);
+    	if (hDC)
+			SaveDC (hDC);
 		{   HRGN    NewRgn, OvrLapRgn; 
 		    RECT	TBRect=rect;
 		    
@@ -1279,8 +1266,10 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
             DeleteObject (OvrLapRgn);  
             DeleteObject (NewRgn);
 	  	}
+		GSSiGlobFree(&hPointer);
 		hPointer = DrawTAGPointerLine(hDC, RectMid(&rect), endpoint, MoveMode, LineWidth, TipWidth, TAGBox.PLstyle, TAGBox.PointerColor, TAGBox.BorderStyle, TAGBox.BorderColor);
-    	RestoreDC (hDC,-1);
+    	if (hDC)
+			RestoreDC (hDC,-1);
 		*HavePL = TRUE;
 	}
 
@@ -1383,9 +1372,12 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
     switch (PLstyle)
     {
     	case 1:
-			hPen = CreatePen (PS_SOLID,(int)IDNINT(1*DeviceToScreenFactor()),PointerColor);
-			DrawPointerLine (hDC,begpoint,endpoint,hPen,hPen,(int)IDNINT(5*DeviceToScreenFactor()),0); 
-			GSSiDeleteObject (&hPen);
+			if (hDC)
+			{
+				hPen = CreatePen(PS_SOLID, (int)IDNINT(1 * DeviceToScreenFactor()), PointerColor);
+				DrawPointerLine(hDC, begpoint, endpoint, hPen, hPen, (int)IDNINT(5 * DeviceToScreenFactor()), 0);
+				GSSiDeleteObject(&hPen);
+			}
     		break;
     	case 3:
     		TipWidth *=2;
@@ -1416,40 +1408,43 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
             } 
             else
             	hBrush = CreateSolidBrush (color);*/
-			OldMode = GetROP2 (hDC);
-			hBrush = CreateGMBrush (PointerColor,-2,hDC);
-			OldBrush = SelectObject (hDC,hBrush); 
-			SelectObject (hDC,GetStockObject (NULL_PEN));
-			Polygon (hDC,(LPPOINT)Points,3);
-        	SetROP2(hDC,OldMode);
-			SelectObject (hDC,GetStockObject (NULL_BRUSH));
-			if (BorderStyle)
+			if (hDC)
 			{
-				if (BorderStyle<4)
-					color = BorderColor;
-				else
-					color = PointerColor;
-				hPen = CreatePen (PS_SOLID,LineWidth,color);
-				hOldPen=SelectObject (hDC,hPen);
-/*			if (!TransParent)
-			{
-				hPen = CreatePen (PS_SOLID,LineWidth,color);
-				hOldPen=SelectObject (hDC,hPen);
+				OldMode = GetROP2(hDC);
+				hBrush = CreateGMBrush(PointerColor, -2, hDC);
+				OldBrush = SelectObject(hDC, hBrush);
+				SelectObject(hDC, GetStockObject(NULL_PEN));
+				Polygon(hDC, (LPPOINT)Points, 3);
+				SetROP2(hDC, OldMode);
+				SelectObject(hDC, GetStockObject(NULL_BRUSH));
+				if (BorderStyle)
+				{
+					if (BorderStyle < 4)
+						color = BorderColor;
+					else
+						color = PointerColor;
+					hPen = CreatePen(PS_SOLID, LineWidth, color);
+					hOldPen = SelectObject(hDC, hPen);
+					/*			if (!TransParent)
+								{
+									hPen = CreatePen (PS_SOLID,LineWidth,color);
+									hOldPen=SelectObject (hDC,hPen);
+								}
+								else
+								{
+									hPen = CreatePen (PS_SOLID,IDNINT(DeviceToScreenFactor()),color);
+									hOldPen=SelectObject (hDC,hPen);
+								}
+								else
+									hOldPen = SelectObject (hDC,GetStockObject(NULL_PEN));*/
+					Polygon(hDC, (LPPOINT)Points, 3);
+				}
+				SelectObject(hDC, OldBrush);
+				DeleteObject(hBrush);
+				if (hOldPen)
+					SelectObject(hDC, hOldPen);
+				GSSiDeleteObject(&hPen);
 			}
-			else 
-			{
-				hPen = CreatePen (PS_SOLID,IDNINT(DeviceToScreenFactor()),color);
-				hOldPen=SelectObject (hDC,hPen);
-			}
-			else
-				hOldPen = SelectObject (hDC,GetStockObject(NULL_PEN));*/
-				Polygon (hDC,(LPPOINT)Points,3); 
-			}
-			SelectObject (hDC,OldBrush); 
-	        DeleteObject (hBrush);  
-			if (hOldPen)
-				SelectObject (hDC,hOldPen);
-			GSSiDeleteObject (&hPen);
 			GlobalUnlock (hPointer);
 		break;
 		

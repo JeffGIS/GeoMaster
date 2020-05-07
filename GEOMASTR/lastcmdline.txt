@@ -1,2 +1,2 @@
-Configs\test.gmc /F
+configs\test.gmc /F 
 F:\BU_2020_02_20\GEOMas

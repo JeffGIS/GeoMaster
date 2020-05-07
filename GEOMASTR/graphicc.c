@@ -7923,3 +7923,179 @@ BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 	GSSiGlobUlFree(&hPoints);
 	return rtn;
 }
+BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int right, _In_ int bottom, _In_ int width, _In_ int height,LPPOINT pointer)
+{
+	BOOL rtn = FALSE;
+	int np = 0, n;
+	DPOINT PC, POC, PT, RP;
+	double radius;
+	HANDLE hPoints = GSSiGlobAlloc(1839, GMEM_MOVEABLE, sizeof(POINT) * 4096);
+	HANDLE hNewPoints = 0;
+	LPPOINT pPoints = GlobalLock(hPoints);
+	LPPOINT pPnts = pPoints;
+	int t = top;
+	int flipy = 0;
+
+	if (top < bottom)
+	{
+		//flipy = bottom - top;
+		top = bottom;
+		bottom = t;
+	}
+	width = min(width, (right - left) / 2);
+	height = min(height, (top - bottom) / 2);
+	width = height = min(width, height);
+	radius = (width + height) / 2.0;
+	PC.x = right;
+	PC.y = top - height;
+	RP.x = right - width;
+	RP.y = top - height;
+	POC = dnewpt(RP, PY / 4, radius);
+	PT.x = right - width;
+	PT.y = top;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = left + width;
+	PC.y = top;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = PC.x;
+	RP.y = top - height;
+	POC = dnewpt(RP, 3 * PY / 4, radius);
+	PT.x = left;
+	PT.y = RP.y;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = left;
+	PC.y = bottom + height;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = left + width;
+	RP.y = PC.y;
+	POC = dnewpt(RP, 5 * PY / 4, radius);
+	PT.x = RP.x;
+	PT.y = bottom;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = right - width;
+	PC.y = bottom;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = PC.x;
+	RP.y = bottom + height;
+	POC = dnewpt(RP, 7 * PY / 4, radius);
+	PT.x = right;
+	PT.y = RP.y;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+	*pPoints = *pPnts;
+	np++;
+	if (flipy)
+	{
+		for (int i = 0; i < np; i++)
+			pPnts[i].y += flipy;
+	}
+
+	HANDLE hPolyDP = GSSiGlobAlloc(1849, GMEM_MOVEABLE, np * sizeof(DPOINT) + 4);
+	HANDLE hPointer = GSSiGlobAlloc(1850, GMEM_MOVEABLE, 3 * sizeof(DPOINT));
+
+	LPDPOINT pPolyDPoints=GlobalLock (hPolyDP);
+	LPDPOINT pPolyPointer=GlobalLock (hPointer);
+	double	IntDist[2], AtDist=0, fromDist, toDist;
+	DPOINT	IntPoint;
+	double	InAZ, OutAZ[4];
+	BOOL	OutReverse[4];
+	short	WhichPoly[4];
+	DPOINT   fromPoint, toPoint;
+
+	for (int i = 0; i < np; i++)
+		pPolyDPoints[i] = PointToDPoint(pPnts[i]);
+	for (int i = 0; i < 3; i++)
+		pPolyPointer[i] = PointToDPoint(pointer[i]);
+	double totDist = GetPolyLengthD(pPolyDPoints, np);
+	int nint = IntersectPolys2(3, pPolyPointer, np, pPolyDPoints,		
+		AtDist, IntDist, &IntPoint, &InAZ,
+		OutAZ, OutReverse, WhichPoly, FALSE);
+	if (nint > 0)
+	{
+		AtDist = IntDist[0];
+		fromDist = IntDist[1];
+		fromPoint = IntPoint;
+		nint = IntersectPolys2(3, pPolyPointer, np, pPolyDPoints,			
+			AtDist, IntDist, &IntPoint, &InAZ,
+			OutAZ, OutReverse, WhichPoly, FALSE);
+		if (nint > 0)
+		{
+			toPoint = IntPoint;
+			toDist = IntDist[1];
+			double dist = 0;
+			DPOINT lastPoint = pPolyDPoints[0];
+			int ipt = 0;
+			int iEnd, iRestart;
+			if (fromDist > toDist)
+			{
+				double saveDist = fromDist;
+				DPOINT savePoint = fromPoint;
+				fromDist = toDist;
+				toDist = saveDist;
+				fromPoint = toPoint;
+				toPoint = savePoint;
+			}
+
+			if (fabs(fromDist - toDist) < totDist / 2)
+			{
+				while (dist < fromDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+				}
+				iEnd = ipt;
+				while (dist < toDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+				}
+				iRestart = ipt;
+				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np+3));
+				pPnts = GlobalLock(hNewPoints);
+				int npNew = 0;
+				for (int i = 0; i < iEnd; i++)
+					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
+				pPnts[npNew++] = DPointToPoint(fromPoint);
+				pPnts[npNew++] = pointer[1];
+				pPnts[npNew++] = DPointToPoint(toPoint);
+				for (int i = iRestart; i < np; i++)
+					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
+				np = npNew;
+			}
+			else
+			{
+				int iStart = 0;
+				dist = 0;
+				while (dist < fromDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+				}
+				iStart = ipt;
+				while (dist < toDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+				}
+				iEnd = ipt;
+				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np + 3));
+				pPnts = GlobalLock(hNewPoints);
+				int npNew = 0;
+				for (int i = iStart; i < iEnd; i++)
+					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
+				pPnts[npNew++] = DPointToPoint(toPoint);
+				pPnts[npNew++] = pointer[1];
+				pPnts[npNew++] = DPointToPoint(fromPoint);
+				np = npNew;
+			}
+			
+		}
+	}
+	Polygon(hdc, pPnts, np);
+	GSSiGlobUlFree(&hPolyDP);
+	GSSiGlobUlFree(&hPointer);
+	GSSiGlobUlFree(&hPoints);
+	GSSiGlobUlFree(&hNewPoints);
+	return rtn;
+}

@@ -654,7 +654,7 @@ switch (Message)
     	
     case WM_LBUTTONDOWN:  
  	    HaveDown = TRUE;
-    	
+		Restore = FALSE;
     	break;
     	
     case WM_LBUTTONUP:
@@ -691,12 +691,13 @@ switch (Message)
     case WM_MOUSEMOVE:
     	{
     		MousePoint = POINTStoPOINT(MAKEPOINTS(lParam));
-			OldMode = SetROP2(hDC,R2_NOT);
-	    	DrawTAG (hWnd,hDC, TRUE,Restore);
-	    	Restore=FALSE;
-    		TAGBox.center = WinPtToTAGPt (MousePoint);
-	    	DrawTAG (hWnd,hDC, TRUE,FALSE);
-			SetROP2(hDC,OldMode);
+			//OldMode = SetROP2(hDC,R2_NOT);
+			TAGBox.center = WinPtToTAGPt(MousePoint);
+			DrawTAG (hWnd,hDC, TRUE,Restore);
+	    	Restore=TRUE;
+			//DrawTAG(hWnd, hDC, TRUE, FALSE);
+			//DrawTAG(hWnd, hDC, FALSE,TRUE);
+			//SetROP2(hDC,OldMode);
     	}
        	break;
 
