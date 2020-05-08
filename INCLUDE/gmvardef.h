@@ -358,6 +358,7 @@ BOOL	ShortestRoute=FALSE;
 HANDLE	hBTMFN=0;
 HANDLE	hBTNZINM=0;
 TAGBOX	TAGBox;
+BOOL	InInfoBoxMacro = FALSE;
 int		CurThemeClass=-1;
 BOOL	HaveVarFillColor=FALSE; 
 LPTHEME	StreetCenterline=NULL;

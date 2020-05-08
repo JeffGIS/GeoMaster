@@ -1588,7 +1588,7 @@ GotCloseFilehSQL:
 				AllowCache = FALSE;
 				if (InInfoBox || Printing)
 				{   
-					sprintf (OutLoc,"$BITMAP(%s)",Arg[1]); 
+					sprintf (OutLoc,"$IMAGE(%s)",Arg[1]); 
 					AllowBMPCaching = SaveBMPCache;
 					goto Rtnl;
 				}

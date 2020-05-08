@@ -117,6 +117,7 @@ extern long			PrinterFormatPixelWidth;
 extern LPTHEME			CurTheme; 
 extern BOOL			ThemeDisplayPass;
 extern TAGBOX			TAGBox;
+extern BOOL			InInfoBoxMacro;
 extern FILEINDEXENTRY			CurFileIndexEntry;
 extern LPVIEWPORT			LastVP;
 extern LPVIEWPORT			LastBoxVP;

@@ -137,7 +137,7 @@ int	GetFunctionID5 (LPSTR str)
 			if (!_fstrnicmp (str,"SLEEP",5)) return 508; 
 			if (!_fstrnicmp (str,"RESET",5)) return 509; 
 			if (!_fstrnicmp (str,"MACRO",5)) return 510; 
-			if (!_fstrnicmp (str,"IMAGE",5)) return 511; 
+			if (!_fstrnicmp (str,"IMAGE",5) && !InInfoBoxMacro) return 511; 
 			if (!_fstrnicmp (str,"AFTER",5)) return 512; 
 			if (!_fstrnicmp (str,"PRINT",5)) return 513; 
 			if (!_fstrnicmp (str,"ALERT",5)) return 514; 

@@ -4057,6 +4057,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CACHEBUFFERSIZE", 404, FALSE);
 	AllocateTypeVar("%CACHEREADDELAY", 405, FALSE);
 	AllocateTypeVar("%FORCEZOOMTOGOOGLE", 406, FALSE);
+	AllocateTypeVar("%GOOGLEAPIKEY", 407, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5309,6 +5310,9 @@ GSSiExitProg (533);
 			break;
 		case 406:
 			btoa(forceZoomToGoogle, OutStr);
+			break;
+		case 407:
+			strcpy(OutStr, GOOGLE_API_KEY);
 			break;
 	}
 	GlobalUnlock (hGlobal);

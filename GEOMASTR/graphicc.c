@@ -7923,7 +7923,7 @@ BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 	GSSiGlobUlFree(&hPoints);
 	return rtn;
 }
-BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int right, _In_ int bottom, _In_ int width, _In_ int height,LPPOINT pointer)
+BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int width, int height,LPPOINT pointer)
 {
 	BOOL rtn = FALSE;
 	int np = 0, n;
@@ -7943,7 +7943,7 @@ BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 		bottom = t;
 	}
 	width = min(width, (right - left) / 2);
-	height = min(height, (top - bottom) / 2);
+	height = min(height, abs(top - bottom) / 2);
 	width = height = min(width, height);
 	radius = (width + height) / 2.0;
 	PC.x = right;
@@ -8027,10 +8027,6 @@ BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 		{
 			toPoint = IntPoint;
 			toDist = IntDist[1];
-			double dist = 0;
-			DPOINT lastPoint = pPolyDPoints[0];
-			int ipt = 0;
-			int iEnd, iRestart;
 			if (fromDist > toDist)
 			{
 				double saveDist = fromDist;
@@ -8040,29 +8036,50 @@ BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 				fromPoint = toPoint;
 				toPoint = savePoint;
 			}
+			double dist = 0;
+			DPOINT lastPoint = pPolyDPoints[0];
+			int ipt = 0;
+			int iEnd, iRestart;
+			int npNew = 0;
+			int npOld = np;
 
 			if (fabs(fromDist - toDist) < totDist / 2)
 			{
 				while (dist < fromDist)
 				{
-					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+					dist += ldistpp(&pPolyDPoints[ipt], &pPolyDPoints[ipt+1]);
+					if (ipt >= np - 1)
+						break;
+					ipt++;
 				}
 				iEnd = ipt;
 				while (dist < toDist)
 				{
-					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+					dist += ldistpp(&pPolyDPoints[ipt], &pPolyDPoints[ipt+1]);
+					if (ipt >= np - 1)
+						break;
+					ipt++;
 				}
 				iRestart = ipt;
 				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np+3));
 				pPnts = GlobalLock(hNewPoints);
-				int npNew = 0;
 				for (int i = 0; i < iEnd; i++)
-					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
+				{
+					pPnts[npNew] = DPointToPoint(pPolyDPoints[i]);
+					if (npNew >= npOld)
+						ii = 1;
+					npNew++;
+				}
 				pPnts[npNew++] = DPointToPoint(fromPoint);
 				pPnts[npNew++] = pointer[1];
 				pPnts[npNew++] = DPointToPoint(toPoint);
 				for (int i = iRestart; i < np; i++)
-					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
+				{
+					pPnts[npNew] = DPointToPoint(pPolyDPoints[i]);
+					if (npNew >= npOld)
+						ii = 1;
+					npNew++;
+				}
 				np = npNew;
 			}
 			else
@@ -8081,7 +8098,6 @@ BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 				iEnd = ipt;
 				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np + 3));
 				pPnts = GlobalLock(hNewPoints);
-				int npNew = 0;
 				for (int i = iStart; i < iEnd; i++)
 					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
 				pPnts[npNew++] = DPointToPoint(toPoint);

@@ -2142,7 +2142,7 @@ DWORD DGNGetNumElements (HANDLE hDGN);
 void CloseAllRequestedDGNFiles (void);
 DWORD DGN7Rewind (HANDLE hDGN);
 BOOL GMDocument(int nArgs, LPSTR *Arg, LPSTR OutLoc);
-BOOL  RoundRectWithPointer(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int right, _In_ int bottom, _In_ int width, _In_ int height, LPPOINT pointer);
+BOOL  RoundRctWithPointer(HDC hdc, int left, int top, int right, int bottom, int width, int height, LPPOINT pointer);
 BOOL FindBasinsAroundPoints (LPSTR DTMName,short nPoints, LPDPOINT StartPoints);
 TRIANGLEID GetAdjoiningTriangleID (TRIANGLEID FromTriID,short iside,LPSHORT pConnectsToSide);
 BOOL GetTriCoords (TRIANGLEID TriID,LPDPOINT TriPoints);

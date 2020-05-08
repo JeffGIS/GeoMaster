@@ -538,14 +538,17 @@ BOOL ResetTAGBox (HDC hDC,short From)
 			TAGBox.bmWidth = max (TAGBox.bmWidth,ReportRect.right - ReportRect.left + 1);
 			TAGBox.bmHeight += ReportRect.bottom - ReportRect.top + 1;
 	    }
-	    else if (!_fstrnicmp(Line,"$BITMAP(",8))
+	    else if (!_fstrnicmp(Line,"$BITMAP(",8) || !_fstrnicmp(Line, "$IMAGE(", 7))
 	    {   
+			int ioffset = 8;
+			if (!_fstrnicmp(Line, "$IMAGE(", 7))
+				ioffset = 7;
 			int	height,width,nLines=0; 
 			LPSTR	lpComma;
 			double	factor;
 			LPSTR	pPar;
 	
-		 	lpReport = Line+8;
+		 	lpReport = Line+ioffset;
 			lpEndReport = MatchLev (lpReport,')');
 			if (lpEndReport)
 			{                                                    
@@ -555,7 +558,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 					*lpComma++=0;
 					nLines = atoi (lpComma);
 				}
-	    		_fstrcpy (ExpLine,(LPSTR)(Line+8));
+	    		_fstrcpy (ExpLine,(LPSTR)(Line+ioffset));
 	    		*lpEndReport = ')';
 				ExpandText (ExpLine);
 				if ((pPar=strrchr (ExpLine,'(')))
@@ -707,7 +710,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	double	Factor, IBFactor;
 	SIZE	txSize;
 	int	Elwh;
-	HANDLE	hPointer;
+	HANDLE	hPointer=0;
 	double	RoundingFactors[5]={2000,20,10,5,1};
 	double	RoundingFactor;
 	LPRECT	pRect=0;
@@ -924,13 +927,12 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			switch (TAGBox.Shape)
 			{
 			case 0:
-				DrawRectPoly(hDC, &Rect, 0);
-				break;
+				Elwh = 0;
 			default:
 				if (hPointer)
 				{
 					LPPOINT	pPPoints = (LPPOINT)GlobalLock(hPointer);
-					RoundRectWithPointer(hDC, Rect.left, Rect.top, Rect.right, Rect.bottom, Elwh, Elwh, pPPoints);
+					RoundRctWithPointer(hDC, Rect.left, Rect.top, Rect.right, Rect.bottom,Elwh, Elwh, pPPoints);
 					GSSiGlobUlFree(&hPointer);
 				}
 				else
@@ -960,9 +962,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			switch (TAGBox.Shape)
 			{
 			case 0:
-				FillRectColor (hDC,&Rect,TAGBox.InnerColor);
-				DrawRectPoly (hDC,&Rect,0);  
-				break;
+				Elwh = 0;
 			default:
 				hTBBrush = CreateGMBrush (TAGBox.InnerColor,-2,hDC);
 				hOldBrush = SelectObject (hDC,hTBBrush);
@@ -1049,8 +1049,11 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 				}
 		    }
 	
-		    else if (!_fstrnicmp(Line,"$BITMAP(",8))
-		    {   
+		    else if (!_fstrnicmp(Line,"$BITMAP(",8)|| !_fstrnicmp(Line, "$IMAGE(", 7))
+		    {  
+				int ioffset = 8;
+				if (!_fstrnicmp(Line, "$IMAGE(", 7))
+					ioffset = 7;
 				LPSTR	lpComma, pPar;
 				double	factor;
 			 	BITMAPFILEHEADER bmfHead;
@@ -1059,7 +1062,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 				RECT	BMRect;
 				int	height,width, nLines=0;
 		
-		 		lpReport = Line+8;
+		 		lpReport = Line+ioffset;
 				lpEndReport = MatchLev (lpReport,')');
 				if (lpEndReport)
 				{                                                    
@@ -2397,7 +2400,9 @@ BOOL ProcessInfoBoxPickMacroFile (short InfoBoxNum)
 	if (SelectTAG(InfoBoxNum-1))   
 	{   
 		TBNum = InfoBoxNum;
+		InInfoBoxMacro = TRUE;
 		SetGlobalValue ("%INFOBOXTEXT",TAGBox.text);
+		InInfoBoxMacro = FALSE;
 		ProcessText (TAGBox.PickMacroFile);    
 		return TRUE;
 	}  
