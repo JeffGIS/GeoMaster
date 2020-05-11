@@ -10597,8 +10597,10 @@ HBITMAP SaveScreen (HDC hDC, RECT Rect)
     SetMapMode    ( hDC, MM_TEXT );
   	SelectClipRgn ( hDC,0);
     hdcMem = CreateCompatibleDC(hDC);
-    hNewBM = CreateCompatibleBitmap(hDC,w,h);
-    if (hNewBM)
+	curProgID = 10048;
+	hNewBM = CreateCompatibleBitmap(hDC,w,h);
+	curProgID = -1;
+	if (hNewBM)
     {
 		BITMAP	bm;
 
@@ -10671,7 +10673,9 @@ GSSiExitProg (329);
 
 void dumpmemdc(HDC hdc)
 {
+	curProgID = 10049;
 	HBITMAP hbm = CreateCompatibleBitmap(hdc, 1, 1);
+	curProgID = -1;
 	HBITMAP hBM = SelectObject(hdc, hbm);
 	HDIB hDib = BitmapToDIB(hBM, 0, 0);
 	SaveDIB(hDib, "c:\\temp\\dump.bmp");

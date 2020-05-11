@@ -215,7 +215,9 @@ BOOL ThemeCreateAreaInMask(int from)
 					hDCMain = GetDC(CurView->hWnd);
 					hDC = CreateCompatibleDC(hDCMain);
 					//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
+					curProgID = 10002;
 					hBM = CreateCompatibleBitmap(hDCMain, width + margin * 2, height + margin * 2);
+					curProgID =-1;
 					rect.left = rect.bottom = 0;
 					rect.right = width + margin * 2;
 					rect.top = height + margin * 2;

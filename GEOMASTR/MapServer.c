@@ -290,8 +290,10 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFa
 			int lenBits = bm.bmWidthBytes * bm.bmHeight;
 			LPBYTE	pBits = malloc(lenBits);
 			
+			curProgID = 10018;
 			hBMSave = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
 			hBMTemp = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
+			curProgID = -1;
 			hBMTempOld = SelectObject(tempDC, hBMTemp);
 			GetBitmapBits(hNewBitmap, lenBits, pBits);
 			SetBitmapBits(hBMSave, lenBits, pBits);
@@ -476,8 +478,10 @@ HBITMAP GetHiddenWindowBitmap(HWND hwnd)
 		{
 			RECT rc;
 			GetWindowRect(hwnd, &rc);
+			curProgID = 10019;
 
 			hbitmap = CreateCompatibleBitmap(hdc, RECTWIDTH(&rc), RECTHEIGHT(&rc));
+			curProgID = -1;
 			if (hbitmap)
 			{
 				SelectObject(hdcMem, hbitmap);

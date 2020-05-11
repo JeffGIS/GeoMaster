@@ -718,7 +718,9 @@ BOOL DisplayStreetCenterlines (void)
 				hDC = CreateCompatibleDC(CurView->hDC); 
 				Height = RECTHEIGHT (&FullWindowRect);
 				Width = RECTWIDTH (&FullWindowRect);
-				hBM = CreateCompatibleBitmap(CurView->hDC,Width,Height); 
+				curProgID = 10029;
+				hBM = CreateCompatibleBitmap(CurView->hDC,Width,Height);
+				curProgID = -1;
 				hBMOld = SelectObject(hDC,hBM);
 				SetDisplayMode (hDC, GF_TEXTMODE); 
 				SelectClipRgn (hDC,0);

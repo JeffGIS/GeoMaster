@@ -2202,8 +2202,10 @@ BOOL MultiZoomBegin (int UpLevels,int DownLevels,double OverlapFactor)
 	GetClientRect (hWndMain,&Rect);
 	MemMapWidth = OverlapFactor * (Rect.right - Rect.left + 1);
 	MemMapHeight = OverlapFactor * (Rect.bottom - Rect.top + 1);  
+	curProgID = 10003;
 	hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
 	hbmpOld = SelectObject(hdcMemMap, hMemBitmap);  
+	curProgID = -1;
 	MemMap = TRUE;
 	for (i=0;i<*pNumViewports;i++) 
 	{

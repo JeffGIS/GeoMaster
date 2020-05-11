@@ -298,7 +298,9 @@ int GSSiEndPage (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC)
 			
 
 			hDC = CreateCompatibleDC(hDCMain);
-			hBM = CreateCompatibleBitmap(hDCMain,VirtualPageWidth,VirtualPageHeight); 
+			curProgID = 10026;
+			hBM = CreateCompatibleBitmap(hDCMain,VirtualPageWidth,VirtualPageHeight);
+			curProgID = -1;
 			ReleaseDC (hWndMain,hDCMain);
 			 
 			for (VirtualPageRow = 0;VirtualPageRow < NumVirtualRows; VirtualPageRow++)
@@ -2760,10 +2762,17 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
    HDIB		hDIB; 
    char		drive[6], dir[128], leaf[16], ext[6], File[128]; 
    HWND		ghWnd;
-       
+   BOOL IsVirtPrinter = FALSE;
+   HANDLE hVirtPrinter = 0;
+   BOOL		ForceOrient = DMORIENT_PORTRAIT;;
+   UINT		SaveFlags;
+   LPDEVMODE   pDevMode;
+   HDC		mfDC = 0;
+
    ghWnd = hWnd;
    hWnd = NULL;
    
+   SaveViewports(0);
      _fstrupr (Name);
      wSize = sizeof(PRINTDLG);
      if (!hPDChunk)
@@ -2774,16 +2783,48 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
      }
      else
      	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
-     lpPDChunk->hwndOwner = ghWnd;
-     	
-//     setDoPaint( FALSE); 
-	 EnableWindow (hWndMain,FALSE);
-     if (PrintDlg(lpPDChunk) != 0)
-     
-     {	DOCINFO	DI;
-     
-     	hPr = lpPDChunk->hDC;
-        gbUserAbort = FALSE;
+
+
+	 lpPDChunk->hwndOwner = ghWnd;
+	 lpPDChunk->hInstance = ghInst;
+	 if (GetGlobalLVal2("[%PRINTDIALOGOPT]", 0))
+	 {
+		 lpPDChunk->Flags = lpPDChunk->Flags | PD_RETURNDC | PD_ENABLESETUPTEMPLATE | PD_ENABLESETUPHOOK | PD_PRINTSETUP | PD_USEDEVMODECOPIESANDCOLLATE;
+	 }
+	 lpPDChunk->hDC = 0;
+	 lpPDChunk->lpfnSetupHook = (LPOFNHOOKPROC)PrintSetupHook;
+	 lpPDChunk->lpSetupTemplateName = "PRNSETUPDLGGM";
+	 SetCurView(pViewportsD[0]);
+	 if (CurView->WidthType == 2 || CurView->DesiredWidth > CurView->DesiredHeight)
+		 ForceOrient = DMORIENT_LANDSCAPE;
+	 if (ForceOrient && !ShowVirtualPrintAreas)
+	 {
+		 SaveFlags = lpPDChunk->Flags;
+
+		 lpPDChunk->Flags = PD_RETURNDEFAULT;
+		 GSSiPrintDlg(lpPDChunk, 0, &hVirtPrinter, 0);
+		 lpPDChunk->Flags = SaveFlags;
+		 if (lpPDChunk->hDevMode)
+		 {
+			 IgnoreLock = TRUE;
+			 pDevMode = (LPDEVMODE)GlobalLock(lpPDChunk->hDevMode);
+			 pDevMode->dmCopies = lpPDChunk->nCopies;
+			 pDevMode->dmOrientation = ForceOrient;
+			 pDevMode->dmFields = pDevMode->dmFields | DM_ORIENTATION;
+			 GlobalUnlock(lpPDChunk->hDevMode);
+			 IgnoreLock = FALSE;
+		 }
+		 GSSiGlobFree(&hVirtPrinter);
+	 }
+	 BOOL DoPrint;
+	 if (DoPrint = GSSiPrintDlg(lpPDChunk, &IsVirtPrinter, &hVirtPrinter, 0))
+	 {
+
+		DOCINFO	DI;
+		int iPrintJob;
+		hPr = lpPDChunk->hDC;
+		//hPr = *pPrinterDC;
+		gbUserAbort = FALSE;
         bError = FALSE;
         Printing = TRUE;
         lpfnPrintDlgProc = MakeProcInstance(PrintDlgProc, ghInst);
@@ -2796,8 +2837,10 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
         
 		lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
         SetAbortProc(hPr,lpfnAbortProc);
-	    if (StartDoc(hPr,&DI) > 0)
-	    {   
+		iPrintJob = GSSiStartDoc(hPr, 0, IsVirtPrinter, &DI, lpPDChunk);
+		if (iPrintJob > 0)
+		{
+
 	       int dpi = GetDeviceCaps(hPr, LOGPIXELSX); 
 		   int	nCopies = lpPDChunk->nCopies;
 	       
@@ -2829,8 +2872,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
 		        SetDlgItemText (ghPrintingDlg,IDC_PRINTERINFO,str);
 	       }
   		   IgnoreLock = FALSE;
-           Escape(hPr, NEXTBAND, 0, (LPSTR)0, &BandRect);
-           while (!IsRectEmpty(&BandRect))
+		   if (GSSiStartPage(hPr, 0, IsVirtPrinter) > 0)
            {    
            
 	       		switch (option)
@@ -2879,13 +2921,14 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
 					}
 				}
 		EndPrint:				   	
-			    Escape(hPr, NEXTBAND, 0, (LPSTR)0, &BandRect); 
+				GSSiEndPage(hPr, 0, IsVirtPrinter, mfDC);
 		   }
-           EndDoc (hPr);
-           DeleteDC(lpPDChunk->hDC);
+           GSSiEndDoc(hPr, 0, IsVirtPrinter);
 	    }
 	    else
 	       bError = TRUE;
+		RestoreViewports();
+
 	    EnableWindow (hWndMain,TRUE);
 	    if (!gbUserAbort)
 	    {
@@ -2922,6 +2965,11 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
     	setDoPaint( TRUE);   
     }
 	EnableWindow (hWndMain,TRUE);
+	SetFocus(hWndMain);
+	GSSiTrace("End PrintImage", 0);
+	HDC hDC = GetDC(hWndMain);
+	SetMainRect(hWndMain, hDC, 0, 3);
+
     return (rtn);
 
 } 
@@ -3608,7 +3656,9 @@ ReTry:
 		GSSiDeleteObject (&hMemBitmap);
 		MemMapWidth-=64;
 		MemMapHeight = MemMapWidth * WtoHFactor;
+		curProgID = 10027;
 		hMemBitmap = CreateCompatibleBitmap (CurView->hDC,MemMapWidth,MemMapHeight);
+		curProgID = -1;
 	}
 	while (!hMemBitmap && MemMapWidth > 0);
 	
@@ -3667,7 +3717,9 @@ temp:
 	PrinterMarginRight = SavePrinterMarginRight;
 	PrinterMarginTop = SavePrinterMarginTop;
 	PrinterMarginBottom = SavePrinterMarginBottom;
-	hTempBM = CreateCompatibleBitmap (hdcMemMap,10,10);    
+	curProgID = 10028;
+	hTempBM = CreateCompatibleBitmap (hdcMemMap,10,10);
+	curProgID = -1;
 	if (Name)
 	{
 		_fstrcpy (MapName,Name);

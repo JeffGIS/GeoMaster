@@ -1930,7 +1930,9 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 			{
 				GetWindowRect (CurView->hWnd,&WindowRect);
 				CurTheme->CompareDC = CreateCompatibleDC(CurView->hDC); 
-				CurTheme->CompareBitmap = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1); 
+				curProgID = 10030;
+				CurTheme->CompareBitmap = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1);
+				curProgID = -1;
 				CurTheme->CompareBitmapOld = SelectObject (CurTheme->CompareDC,CurTheme->CompareBitmap);
 				if (pViewports[CurTheme->TargetViewport-1]->pTheme)
 					pViewports[CurTheme->TargetViewport-1]->pTheme->CompareDC = CurTheme->CompareDC;
@@ -1991,7 +1993,9 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 					SetPixel (CurView->hDC,Rect1.left+2,Rect1.top,CurView->BackGroundColor);
 					GetWindowRect (CurView->hWnd,&WindowRect);
 					hDCMem = CreateCompatibleDC(CurView->hDC); 
-					hBitmapTemp = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1); 
+					curProgID = 10031;
+					hBitmapTemp = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1);
+					curProgID = -1;
 					GetObject(hBitmapTemp, sizeof(bm), (LPSTR)&bm);
 					hBitmap = SelectObject (hDCMem,hBitmapTemp);
 					ii=BitBlt(hDCMem, 0, 0, bm.bmWidth,bm.bmHeight,CurView->hDC, 0,0, SRCCOPY);

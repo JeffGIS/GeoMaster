@@ -381,6 +381,7 @@ void QuitGraphics()
 	InQuitGraphics = TRUE;
 	BT_CLOSEANDDELETE(&hGMDKeyList);
 
+	ClearFullWindowBitmap(0);
 	DestroyAllToolbars ();
 	//StopBackgroundCache ();
 	//ShowCounts (1);

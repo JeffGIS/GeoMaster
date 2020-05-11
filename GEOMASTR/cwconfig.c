@@ -5812,17 +5812,64 @@ DisplayParcel:
 		{
 			switch (wParam)
 			{
-				case 'D':
-						SetDebug (TRUE);
+			case 'C':
+			{
+				char cmd[256];
+				sprintf(cmd, "$SCREENTOCLIPBOARD(Format)");
+				ExpandText(cmd);
+			}
+			break;
+			case 'D':
+				SetDebug(TRUE);
 				break;
-				case 'E':
+			case 'E':
 					if (GetDebug ())
 						EditViewportAtCursor (hWnd);
 				break;
-				case 'T':
-					if (GetDebug ())
-						EditFundirAtCursor (hWnd);
+			case 'T':
+				if (GetDebug())
+					EditFundirAtCursor(hWnd);
 				break;
+				case 'P':
+				{
+					BOOL Err;
+					HDIB hDib;
+					HPALETTE hPal;
+					HBITMAP hBM;
+					char FileName[MAX_PATH];
+					GSSiGetTempFileName(0, "gmb", 0, FileName);
+					LPSTR pDot = strrchr(FileName, '.');
+					if (pDot)
+						strcpy(pDot, ".bmp");
+					SetCurView(SetVPFromName("Format", &Err));
+					Rect = CurView->Rect;
+					ClientRectToScreenRect(CurView->hWnd, &Rect);
+					hDib = CopyScreenToDIB(&Rect);
+					hPal = CreateDIBPalette(hDib);
+					hBM = DIBToBitmap(hDib, hPal);
+					SaveBitmap(hBM, FileName, 0, 0);
+					DeleteObject(hBM);
+					if (hPal)
+						DeleteObject(hPal);
+					GSSiGlobFree(&hDib);
+
+					PrintImage(hWnd, FileName, 1);
+					GSSiRemove(FileName);
+				}
+					break;
+			}
+		}
+		else if (GetKeyState(VK_CONTROL) & 0x1000)
+		{
+			switch (wParam)
+			{
+			case 'C':
+			{
+				char cmd[256];
+				sprintf(cmd, "$SCREENTOCLIPBOARD(COMMAND)");
+				ExpandText(cmd);
+			}
+			break;
 			}
 		}
 		else switch (wParam)
@@ -6137,8 +6184,10 @@ GSSiExitProg (438);
             }
             if (!hMemBitmap)
             {
-				hdcMemMap = CreateCompatibleDC(hDC);    
+				hdcMemMap = CreateCompatibleDC(hDC); 
+				curProgID = 10001;
 				hMemBitmap = CreateCompatibleBitmap (hDC,(int)MemMapWidth,(int)MemMapHeight);
+				curProgID = -1;
 				hbmpOld = SelectObject(hdcMemMap, hMemBitmap);
 			} 
 			OldDC = hDC;

@@ -588,7 +588,9 @@ HDC GetScreenWithoutWindow (HWND hWnd,LPRECT pRect,HBITMAP *phBMOld)
 	HBITMAP	hBM;
 
 	GSWWStruct.hDCMem = CreateCompatibleDC (hDCWnd);
+	curProgID = 10012;
 	hBM = CreateCompatibleBitmap (hDCWnd,RECTWIDTH(pRect),RECTHEIGHT(pRect));
+	curProgID = -1;
 	*phBMOld = SelectObject (GSWWStruct.hDCMem,hBM);
 	GSWWStruct.hWnd = hWnd;
 	GSWWStruct.InRect = *pRect;
@@ -5651,9 +5653,11 @@ BOOL SetTransparency (int tranValue)
 		if (hDC)
 		{
 			GetClientRect (CurView->hWnd,&rect);  
+			curProgID = 10013;
 			CurView->transparencyBitmapWidth = RECTWIDTH(&rect);
 			CurView->transparencyBitmapHeight = RECTHEIGHT(&rect);
 			CurView->hTransparencyBitmap = CreateCompatibleBitmap (hDC,CurView->transparencyBitmapWidth,CurView->transparencyBitmapHeight);
+			curProgID = -1;
 			if (CurView->hTransparencyBitmap)
 			{
 				CurView->transParency = tranValue;

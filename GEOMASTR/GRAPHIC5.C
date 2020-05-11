@@ -5204,7 +5204,9 @@ void RemoveColorFromRect (HDC hDC,COLORREF RemoveColor,LPRECT pRect)
 	HBITMAP	hBM, hBMTemp;
 	LPBYTE	pbits;
     HDC		hDC2 = CreateCompatibleDC(hDC); 
+	curProgID = 10010;
 	HBITMAP	hBM2 = CreateCompatibleBitmap (hDC,1,1);
+	curProgID = -1;
 	BITMAPINFO	BitmapInfo;
 	LPRGBTRIPLE	pRGBTriple;
 	LPRGBQUAD	pRGBQuad;

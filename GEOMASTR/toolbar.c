@@ -350,7 +350,9 @@ void PZStartMove (int ToolbarID)
     SetMapMode    ( hDC, MM_TEXT );
   	SelectClipRgn ( hDC,0);
     hDCPZMoveImage = CreateCompatibleDC(hDC);
-    hNewBM = CreateCompatibleBitmap(hDC,w,h);
+	curProgID = 10032;
+	hNewBM = CreateCompatibleBitmap(hDC,w,h);
+	curProgID = -1;
 	hOldPZMoveBM = SelectObject (hDCPZMoveImage,hNewBM);
 	BitBlt(hDCPZMoveImage, 0, 0, w,h,
            hDC, 0,0, SRCCOPY);
@@ -375,7 +377,9 @@ void SetPZMaskBytes (HWND hWnd,HDC hDC2)
 	{
 		int	w=RECTWIDTH(&rect),h=RECTHEIGHT(&rect);
 		HDC		hDCMem=CreateCompatibleDC (hDC);
+		curProgID = 10033;
 		HBITMAP hBMMem = CreateCompatibleBitmap (hDC,w,h);
+		curProgID = -1;
 		HBITMAP hBM = SelectObject (hDCMem,hBMMem);
 
 		BitBlt (hDCMem,0,0,w,h,hDC2,0,0,SRCCOPY);
@@ -1609,7 +1613,9 @@ BOOL AdjustToolbarPositions (void)
 		mainArea =  RectArea (&mainRect);
 		mainW = RECTWIDTH(&mainRect);
 		mainH = RECTHEIGHT(&mainRect);
+		curProgID = 10034;
 		hBMMem = CreateCompatibleBitmap (hDCMain,mainW,mainH);
+		curProgID = -1;
 		hBMOld = SelectObject (hDCMem,hBMMem);
 		BitBlt (hDCMem,0,0,mainW,mainH,hDCMain,0,0,SRCCOPY);
 		if (!NumViewportsArray[0])
@@ -2214,7 +2220,9 @@ extern	BOOL	InDebug;
 	CurView = PZR_VP;
 	hDCPZ = GetDC (hWndPZR);
 	hDC = CreateCompatibleDC (hDCPZ);
+	curProgID = 10034;
 	hBMPZ = CreateCompatibleBitmap (hDCPZ,w,h);
+	curProgID = -1;
 	hBMPZOld = SelectObject (hDC,hBMPZ);
 	if (Which == 2)
 		RestoreScreen2 (hDC, hSavePZRScreen2,0,FALSE);
@@ -2256,7 +2264,9 @@ extern	BOOL	InDebug;
 			xoff = 0;
 			yoff = 0;
 			hDCBuf = CreateCompatibleDC(hDCScreenBuffer);
+			curProgID = 10035;
 			hBMBuf = CreateCompatibleBitmap (hDC,w,h);
+			curProgID = -1;
 			hOldBMBuf = SelectObject (hDCBuf,hBMBuf);
 			ReleaseDC (hWndMain,hDCMain);
 			FillRect (hDCBuf,&PZClientRect,GetStockObject (WHITE_BRUSH));
@@ -3343,7 +3353,9 @@ HBITMAP PadBitmapToConsistentSize (HWND hWnd,HBITMAP hBM,int w, int h,BOOL Stret
 	HDC		hDCWnd = GetDC (hWnd);
 	HDC		hDCMem1 = CreateCompatibleDC (hDCWnd);
 	HDC		hDCMem2 = CreateCompatibleDC (hDCWnd);
+	curProgID = 10036;
 	HBITMAP hBMNew = CreateCompatibleBitmap (hDCWnd,w,h);
+	curProgID = -1;
 	HBITMAP	hBMOld1 = SelectObject (hDCMem1,hBMNew);
 	HBITMAP	hBMOld2 = SelectObject (hDCMem2,hBM);
 	int		ix, iy;
@@ -3438,7 +3450,9 @@ int SetBitmapHeightToButton(HWND hWndBtn, HBITMAP *hBM, int iHeight)
 		HDC	hDC3 = CreateCompatibleDC(hDC);
 		double	factor = (double)iHeight / bm.bmHeight;
 		int	Width = bm.bmWidth * factor;
+		curProgID = 10037;
 		HBITMAP	hBM2 = CreateCompatibleBitmap(hDC, Width, iHeight);
+		curProgID = -1;
 		HBITMAP	hBMOld2 = SelectObject(hDC2, hBM2);
 		HBITMAP	hBMOld3 = SelectObject(hDC3, *hBM);
 
@@ -3476,7 +3490,9 @@ int SetBitmapSizeToButton(HWND hWndBtn, HBITMAP *hBM)
 		GetClientRect(hWndBtn, &rect);
 		Width = RECTWIDTH(&rect);
 		Height = RECTHEIGHT(&rect);
+		curProgID = 10038;
 		HBITMAP	hBM2 = CreateCompatibleBitmap(hDC, Width, Height);
+		curProgID = -1;
 		HBITMAP	hBMOld2 = SelectObject(hDC2, hBM2);
 		HBITMAP	hBMOld3 = SelectObject(hDC3, *hBM);
 
@@ -3546,7 +3562,9 @@ int AddButtonToToolbar2 (int ToolbarID,HWND hWndDlg,LPSTR BMPath,LPSTR ButtonTex
 			SelectObject(hDC, hOldFont);
 			rect.right = txSize.cx + 6;
 			rect.bottom = txSize.cy + 6;
+			curProgID = 10039;
 			hBM = CreateCompatibleBitmap(hDC, rect.right, rect.bottom);
+			curProgID = -1;
 			ReleaseDC(hWndMain, hDC);
 			hBMPtemp = SelectObject(hDCtemp, hBM);
 			hOldFont = SelectObject(hDCtemp, hFont);

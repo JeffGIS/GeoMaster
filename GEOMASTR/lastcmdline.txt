@@ -1,2 +1,2 @@
-configs\test.gmc /F 
+Configs\basemap_new3.GMC /F 
 F:\BU_2020_02_20\GEOMas

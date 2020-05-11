@@ -1085,7 +1085,9 @@ BOOL CreateAllSizes (HWND hWndDlg)
 	     	ConfigDisplayRect = Rect;
 			SavedImageData[iSavedImage].ClientRect = Rect;
 			MemMap = TRUE;
-			hMemBitmap = CreateCompatibleBitmap (OldDC,(int)MemMapWidth,(int)MemMapHeight); 
+			curProgID = 10040;
+			hMemBitmap = CreateCompatibleBitmap (OldDC,(int)MemMapWidth,(int)MemMapHeight);
+			curProgID = -1;
 			hbmpOld = SelectObject(hdcMemMap, hMemBitmap);
 			if (SetConfig (0))
 			{
@@ -1110,7 +1112,9 @@ BOOL CreateAllSizes (HWND hWndDlg)
 			savewidth = RECTWIDTH(&ConfigDisplayRect);
 			saveheight = RECTHEIGHT(&ConfigDisplayRect);
 			hMemDC = CreateCompatibleDC(OldDC);   
-			hSaveBitmap = CreateCompatibleBitmap (OldDC,savewidth,saveheight); 
+			curProgID = 10041;
+			hSaveBitmap = CreateCompatibleBitmap (OldDC,savewidth,saveheight);
+			curProgID = -1;
 			hbmpOld2 = SelectObject(hMemDC, hSaveBitmap);
 			BitBlt(hMemDC, 0,0,savewidth,saveheight, hdcMemMap, ConfigDisplayRect.left, ConfigDisplayRect.top, SRCCOPY);
 			hSaveBitmap = SelectObject(hMemDC, hbmpOld2);
@@ -1741,6 +1745,17 @@ GSSiExitProg (607);
 			SetConfig (config);
 	}
 Top:
+	if (IsInteger(Arg2))
+	{
+		iview = atoi(Arg2)-1;
+		if (iview >=0 && iview < *pNumViewports)
+		{
+#if ENABLETRACE
+			GSSiExitProg(607);
+#endif
+			return pViewports[iview];
+		}
+	}
 	for (iview=0;iview<*pNumViewports;iview++)
 	{   
 		if (!_fstricmp (Arg2,pViewports[iview]->Name))

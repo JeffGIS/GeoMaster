@@ -910,10 +910,11 @@ extern char	CustomHeight[16],CustomWidth[16];
 			GlobalUnlock (p->hDevMode); 
 			IgnoreLock = FALSE;
 		}
+//		ClearFullWindowBitmap(hWndMain);
 		SaveFullWindowBitmap (hWndMain);
 		rtn = PrintDlg (p); 
 		RestoreFullWindowBitmap ();
-		if (NumPrintCopies)
+//		if (NumPrintCopies)
 			p->nCopies = NumPrintCopies;
 		if (rtn && PrinterIsVirtual)
 		{   
@@ -940,8 +941,10 @@ extern char	CustomHeight[16],CustomWidth[16];
 					NumVirtualPages = VirtualPagesPerRow * NumVirtualRows; 
 					DeleteDC (p->hDC);
 					p->hDC = CreateCompatibleDC (hDC);
+					curProgID = 10005;
 					hBitmap = CreateCompatibleBitmap (hDC,VirtualPageWidth,VirtualPageHeight);
-					hbmpVirtPrinterOld = SelectObject(p->hDC, hBitmap); 
+					curProgID = -1;
+					hbmpVirtPrinterOld = SelectObject(p->hDC, hBitmap);
 					*IsVirtualPrinter = TRUE;
 					IgnoreLock = TRUE;
 					GSSiGlobFree(&p->hDevMode);
@@ -977,7 +980,9 @@ extern char	CustomHeight[16],CustomWidth[16];
 					sprintf(mes, "%i %i", PageWidth, PageHeight);
 					MessageBox(0, mes, 0, MB_OK);
 				}*/
+				curProgID = 10006;
 				hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
+				curProgID = -1;
 				if (hBitmap)
 				{
 					*PrinterDC = p->hDC;
@@ -1065,7 +1070,9 @@ BOOL CreatePrintBitmap(HWND hWnd)
 			sprintf(mes, "%i %i %i %i", PageWidth, PageHeight, MaxMemAlloc, TotMemAlloc);
 			MessageBox(0, mes, 0, MB_OK);
 		}
+		curProgID = 10007;
 		hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
+		curProgID = -1;
 		if (hBitmap)
 		{
 			rtn = TRUE;

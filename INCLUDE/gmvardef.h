@@ -33,6 +33,7 @@ BOOL	InCloseMap=FALSE;
 WORD	wFRMsg;
 WORD	wHelpMsg;
 BOOL	gbMonochrome;
+int		curProgID = 0;
 BOOL	gbUserAbort;
 LPOFNHOOKPROC lpfnFileOpenHook, lpfnFindHook, lpfnFindReplaceHook, lpfnColorHook,lpfnPrintSetupHook;
 float	LastBaseSize;

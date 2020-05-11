@@ -103,6 +103,7 @@ static	BOOL	First=TRUE;
 static	BYTE	Marker=170; 
 
 extern HANDLE countyLinkedVar,countyVar;
+extern int curProgID;
 
 int checkvp(int i);
 
@@ -934,6 +935,7 @@ int	GSSiEnterProg (int progid)
 		if (RemStack && RemStack < 1000)
 			ii=1;
 	}*/
+	curProgID = progid;
 	numEnter++;
 	if (First)
 	{   
@@ -995,6 +997,7 @@ int	GSSiExitProg (int progid)
 	
 	if (!EnableTrace || Level <= 0)
 		return 0;  
+	curProgID = -progid;
 //	checkvp(1);
 	Level--;  
 //	LastProg[0] = Level;

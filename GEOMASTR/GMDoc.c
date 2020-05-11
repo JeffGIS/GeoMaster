@@ -1213,8 +1213,10 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 			int lenBits = bm.bmWidthBytes * bm.bmHeight;
 			LPBYTE	pBits = malloc(lenBits);
 
+			curProgID = 10008;
 			hBMSave = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
 			hBMTemp = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
+			curProgID = -1;
 			hBMTempOld = SelectObject(tempDC, hBMTemp);
 			GetBitmapBits(hNewBitmap, lenBits, pBits);
 			SetBitmapBits(hBMSave, lenBits, pBits);

@@ -4259,8 +4259,10 @@ NextTile:
 			int	OutWidth = CurView->DrawRect.right-CurView->DrawRect.left+1;  
 			int	OutHeight = CurView->DrawRect.bottom-CurView->DrawRect.top+1; 
 			HDC		hDCTemp = CreateCompatibleDC(hdcMemMap);
-		    HBITMAP	hNewBM = CreateCompatibleBitmap(hdcMemMap,OutWidth,OutHeight), hbmPrev;     
-		    HDIB	hDIB;
+			curProgID = 10009;
+			HBITMAP	hNewBM = CreateCompatibleBitmap(hdcMemMap,OutWidth,OutHeight), hbmPrev;
+			curProgID = -1;
+			HDIB	hDIB;
 //			BITMAP	bm;
 			char	directory[32];
 			

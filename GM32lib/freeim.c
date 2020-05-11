@@ -29,6 +29,7 @@ static	int		numAllocatedImages = 0;*/
 
 HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal);
 extern int ii;
+extern int curProgID;
 
 #if USEFREEIMAGE
 // freeim16.cpp : Defines the entry point for the DLL application.
@@ -181,8 +182,10 @@ WORD GM32SaveDCBitMap (HDC hDC16,LPSTR OutFile,long Format,DWORD Flag,DWORD Back
 	HDC	hdcMem;
 	HBITMAP	hbmPrev,hTempBM;
 
-    hTempBM = CreateCompatibleBitmap(hDC,10,10);
-//    SetMapMode    (hDC, MM_ANISOTROPIC );
+	curProgID = 10042;
+	hTempBM = CreateCompatibleBitmap(hDC,10,10);
+	curProgID = -1;
+	//    SetMapMode    (hDC, MM_ANISOTROPIC );
 //    SetMapMode    (hDC, MM_TEXT );
 //    SetWindowOrgEx  ( hDC, 0, 0,0 );
 //    SetViewportOrgEx( hDC, 0, 0,0 );    

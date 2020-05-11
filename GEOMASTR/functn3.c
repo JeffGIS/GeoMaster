@@ -3710,7 +3710,9 @@ GotCloseFilehSQL:
 			MemMap = TRUE;     
 			_fstrcpy (MemMapName,Arg[1]);
 			hdcMemMap = CreateCompatibleDC(CurView->hDC);    
-			hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight); 
+			curProgID = 10004;
+			hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
+			curProgID = -1;
 			OldDC = CurView->hDC;
 			CurView->hDC = hdcMemMap;
 			hbmpOld = SelectObject(hdcMemMap, hMemBitmap); 

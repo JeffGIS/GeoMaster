@@ -339,8 +339,10 @@ BOOL DisplayBMInVP (HDC hDC, HANDLE hDib, BOOL DIBColorsArePalleteEntries,LPORTH
 	    BITMAP  bmp; 
 	    HDC		hDCMain = GetDC (hWndMain);
 	    HDC		hdcMem = CreateCompatibleDC(hDC);
-	    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;     
-	    HDIB	hDIB;
+		curProgID = 10020;
+		HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;
+		curProgID = -1;
+		HDIB	hDIB;
         
         ReleaseDC (hWndMain,hDCMain);
 //    	GetObject(hNewBM, sizeof(BITMAP), &bmp);
@@ -492,7 +494,9 @@ BOOL DisplayBMInVP32 (HDC hDC, HDIB32 hDib, BOOL DIBColorsArePalleteEntries,LPOR
 //   	if (GetGlobalBVal2 ("[%PR]",FALSE) && OutWidth < InWidth)
    	if (AllowShrink && DoShrinkOrtho && Printing && OutWidth < InWidth)
    	{   
-	    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;     
+		curProgID = 10021;
+		HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;
+		curProgID = -1;
 		if (!hNewBM)
 			goto DoNotShrink;
 		{
@@ -1434,8 +1438,10 @@ BOOL DisplaySIDInVP32 (LPVIEWPORT pVP,LPSTR File)
 //			SelectClipRgn (hDC,0);
 			   	if (Printing && DoShrinkOrtho && OutWidth < InWidth)
 			   	{   
-				    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;  
-					
+					curProgID = 10022;
+					HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;
+					curProgID = -1;
+
 					if (!hNewBM)
 						goto DoNotShrink;
 					{
@@ -1878,8 +1884,9 @@ BOOL DisplaySIDInVP32new (LPVIEWPORT pVP,LPSTR File)
 //			SelectClipRgn (hDC,0);
 			   	if (Printing && DoShrinkOrtho && OutWidth < InWidth)
 			   	{   
-				    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;  
-					
+					curProgID = 10023;
+					HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;
+					curProgID = -1;
 					if (!hNewBM)
 						goto DoNotShrink;
 					{

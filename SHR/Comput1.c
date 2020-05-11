@@ -3998,8 +3998,10 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
     hDC = CreateCompatibleDC(hDCMain); 
     Height *= PIASizeFactor;
     Width *= PIASizeFactor;
-    hBM = CreateCompatibleBitmap(hDCMain,Width,Height); 
-    GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+	curProgID = 10045;
+	hBM = CreateCompatibleBitmap(hDCMain,Width,Height);
+	curProgID = -1;
+	GetObject(hBM, sizeof(bm), (LPSTR)&bm);
 	ReleaseDC (hWndMain,hDCMain);
     hBMOld = SelectObject(hDC,hBM);
 	SetMapMode    ( hDC, MM_ISOTROPIC );
@@ -4879,8 +4881,10 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
     Width *= PIASizeFactor;
 	if (Height < 5 || Width < 5)
 		goto Exit;
-    hBM = CreateCompatibleBitmap(hDCMain,Width,Height); 
-    GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+	curProgID = 10046;
+	hBM = CreateCompatibleBitmap(hDCMain,Width,Height);
+	curProgID = -1;
+	GetObject(hBM, sizeof(bm), (LPSTR)&bm);
     biBits = bm.bmPlanes * bm.bmBitsPixel;
 	hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,bm.bmWidthBytes * bm.bmHeight);
 	pBits = GlobalLock (hBits);

@@ -127,6 +127,7 @@ static	HGDIOBJ	LastObjd[MAXLAST];
 static	HGDIOBJ TrackObj[MAXTRACK]; 
 static	BYTE	TrackObjType[MAXTRACK];
 static	int		TrackObjCount[MAXTRACK];
+static	int		ProgID[MAXTRACK];
 static	int		NextObjectCount=0;
 static	BOOL	FirstTrack=TRUE;
 static	char	TrackTypeName[MAXTRACKTYPE][20] = {"Pen","Solid Brush","Hatch Brush","Pat Brush","Ind Brush","Load Bitmap",
@@ -517,36 +518,46 @@ void TrackObject (HGDIOBJ hObj,short Type)
 	}
 	if (Type == -100)
 	{   
-		char	mess[64];
+		char	mess[80];
         short	n, itype;
         
-        for (itype=0;itype < MAXTRACKTYPE;itype++)
+        for (itype=1;itype <= MAXTRACKTYPE;itype++)
         {
         	n=0;
+			int obcount = 0;
+			int pid;
+			HGDIOBJ TrackOb;
 			for (i=0;i<MAXTRACK;i++)
 			{   
-				if (TrackObj[i] && TrackObjType[i] == itype+1)
+				if (TrackObj[i] && TrackObjType[i] == itype)
 				{
 					n++;
-					ii=TrackObjCount[i];
+					TrackOb = TrackObj[i];
+					obcount=TrackObjCount[i];
+					pid = ProgID[i];
 				}
 			}
 			if (n)
 			{
-				sprintf (mess,"%i %s not deleted",n,TrackTypeName[itype]);
+				DWORD ityp = GetObjectType(TrackOb); 
+				sprintf (mess,"%i %s not deleted",n,TrackTypeName[itype-1]);
 				MessageBox (0,mess,NULL,MB_ICONEXCLAMATION);
 			}
 		} 
 		return;
 	}
+	extern int curProgID;
 	if (Type > 0)
 	{
+		if (Type == 13 && NextObjectCount >= 4735 && curProgID < 0)
+			ii = 1;
 		for (i=0;i<MAXTRACK;i++)
 		{   
 			if (!TrackObj[i])
 			{
 				TrackObj[i] = hObj;
 				TrackObjType[i] = Type; 
+				ProgID[i] = curProgID;
 				TrackObjCount[i] = NextObjectCount++; 
 				if (TrackObjCount[i] == 4021 || TrackObjCount[i] ==4037)
 					ii=1;
@@ -568,6 +579,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				TrackObj[i] = 0;
 				TrackObjType[i] = 0;
 				TrackObjCount[i] = 0;
+				ProgID[i] = 0;
 				return;
 			}
 		} 

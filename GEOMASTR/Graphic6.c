@@ -164,8 +164,8 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 		{
 		BITMAP bm;
 		CurrentBufferRect = Rect;
-		hBitmapScreenBuffer = CreateCompatibleBitmap (hDCMain,RECTWIDTH(&CurrentBufferRect),   
-															  RECTHEIGHT(&CurrentBufferRect)); 
+		curProgID = 10011;
+		hBitmapScreenBuffer = CreateCompatibleBitmap(hDCMain, RECTWIDTH(&CurrentBufferRect),RECTHEIGHT(&CurrentBufferRect));
 		if (!hBitmapScreenBuffer)
 			MessageBox(0, "Failed to create compat bitmap", 0, MB_ICONWARNING);
 		if (dbug)
@@ -181,6 +181,7 @@ HDC ScreenBufferDC (HWND hWnd,HDC hDC)
 			sprintf(mess, "SB bitmap %i %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, (int)hDCMain, (int)hDCScreenBuffer);
 			MessageBox(0, mess, "", MB_OK);
 		}
+		curProgID = -1;
 		hbmpOld = SelectObject(hDCScreenBuffer, hBitmapScreenBuffer);
 		if (hbmpOrig && hbmpOld != hbmpOrig)
 			GSSiDeleteObject(&hbmpOld);
