@@ -1498,7 +1498,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		    long	Dist1=1, Dist2=5, DistFactor=1;
 		    short	NumDec;
 		    
-		    if (!DevicePixelsPerInch || !BaseDistPerPixel)
+		    if (!DevicePixelsPerInch || !BaseDistPerPixel || !BaseDistPerUnit)
 		    	break;
  			if (!CurView->WindowZoomedToOrtho || CurView->OrthoRes >= 0)
  			{   
