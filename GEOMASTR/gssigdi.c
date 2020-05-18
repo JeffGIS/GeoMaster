@@ -507,6 +507,7 @@ void SetSavedGraphicsFid (int Type)
 
 void TrackObject (HGDIOBJ hObj,short Type)
 {   
+	static BOOL inMessage = FALSE;
 	unsigned short	i;
 	
 	if (!InDebug)
@@ -539,9 +540,14 @@ void TrackObject (HGDIOBJ hObj,short Type)
 			}
 			if (n)
 			{
-				DWORD ityp = GetObjectType(TrackOb); 
-				sprintf (mess,"%i %s not deleted",n,TrackTypeName[itype-1]);
-				MessageBox (0,mess,NULL,MB_ICONEXCLAMATION);
+				if (!inMessage)
+				{
+					inMessage = TRUE;
+					DWORD ityp = GetObjectType(TrackOb);
+					sprintf(mess, "%i %s not deleted", n, TrackTypeName[itype - 1]);
+					MessageBox(0, mess, NULL, MB_ICONEXCLAMATION);
+					inMessage = FALSE;
+				}
 			}
 		} 
 		return;

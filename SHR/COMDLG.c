@@ -338,7 +338,7 @@ BOOL CDInit (HWND hWnd, HINSTANCE Inst)
 void CDClose (void)
 {
     
-	if (ghDlgBrush) DeleteObject(ghDlgBrush);
+	if (ghDlgBrush) GSSiDeleteObject(&ghDlgBrush);
 	if (hPDChunk)
 	{   
 		lpPDChunk = (LPPRINTDLG)GlobalLock (hPDChunk);

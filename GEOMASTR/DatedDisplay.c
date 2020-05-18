@@ -347,7 +347,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 					CurrentPrompt = PRMT_PANZOOM2;
 					SetPrompt(CurrentPrompt, TRUE);
 					SetCurs(0, FALSE);
-					sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1);$REDISPLAY(T)", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+					sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1,1:1);$REDISPLAY(T)", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 					SendBackgroundMapServerCommand(hWnd, hBackGroundServer, txt, MAKELPARAM(1,CurView->ID));
 				}
 

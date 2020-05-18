@@ -153,7 +153,7 @@ void PATBMPDef (BOOL clear)
 	for (i = 0; i < 5; i++)
 	{
 		if (clear)
-			DeleteObject(hPatBMP[i]);
+			GSSiDeleteObject(&hPatBMP[i]);
 		else
 			hPatBMP[i] = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[i]));
 	}

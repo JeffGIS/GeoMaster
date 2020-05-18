@@ -1,2 +1,2 @@
-configs\basemap_new3.gmc /F
-F:\BU_2020_02_20\GEOMas
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+F:\MplsRemoteTemplate\GeoMas
