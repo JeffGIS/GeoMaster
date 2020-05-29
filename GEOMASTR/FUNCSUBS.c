@@ -6023,7 +6023,7 @@ Exit:
 	 return TotFiles;
 }
 
-BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
  int	BRtn; 
@@ -6098,7 +6098,7 @@ BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam
    return TRUE;
 }
 
-BOOL FAR PASCAL MESSAGE_OUTGOINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MESSAGE_OUTGOINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
  int	BRtn; 
@@ -6859,7 +6859,7 @@ BOOL CacheCommands(int nArgs, LPSTR* Arg, LPSTR OutLoc)
 	return rtn;
 }
 
-LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	RECT	rect,screenrect;
 
@@ -7252,7 +7252,7 @@ void SetImageZoomSize (HWND hWnd,int size)
 	return;
 }
 
-LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	RECT	rect,screenrect;
 	static	BOOL	needSaveScreen=TRUE;
@@ -7558,7 +7558,7 @@ HaveImage:
 	return (hWnd != NULL);
 }
 
-BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ImageZoom (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
  switch (Message)
@@ -7623,7 +7623,7 @@ BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 } 
 
-BOOL ScreenZoom(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ScreenZoom(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	switch (Message)

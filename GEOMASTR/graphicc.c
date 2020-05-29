@@ -1111,7 +1111,7 @@ void GetGMDName (LPSTR Name)
 	return;
 }                            
 
-BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char	SymName[66], cWidth[64],cRot[64],cColor[64],str[260], GSPName[256], cIF[128], UDI[66], SymStuff[256]; 
 	short	i, Choice, rtn; 
@@ -3889,7 +3889,7 @@ void ExpandPltName (LPSTR PltName)
 	strcat (PltName,Where);
 	return;
 }
-LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	if (Message == WM_PAINT)
 	{
@@ -3919,7 +3919,7 @@ LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG 
 	return DefWindowProc(hWnd, Message, wParam, lParam);
 
 }
-LONG FAR PASCAL SmallMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL SmallMessageWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	switch (Message)
 	{

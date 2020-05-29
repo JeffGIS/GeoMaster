@@ -13,8 +13,8 @@ static	long	NextReportNum;
 static	HANDLE	hViewScroll=0;
 
 BOOL DecodeReportFont (LPSTR pLine, short ifont, LPREPORT pReport);
-BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
-BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 
 int	CurrentReportFontHeight (void)
 {   
@@ -1244,7 +1244,7 @@ BOOL GetNextPrintReport (BOOL First,LPSTR ReportName,LPLONG pRefno,LPSTR Prefix,
 		
 }
 
-BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	UserID[64], Password[32];	
     RECT	rect; 
@@ -1310,7 +1310,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 } 
 
-BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     POINT	pt;    
     int		height,width,x,y; 
@@ -1424,7 +1424,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;
 } 
 
-BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     RECT	rect,sbrect; 
     POINT	pt;  

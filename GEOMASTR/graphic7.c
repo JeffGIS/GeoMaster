@@ -618,7 +618,7 @@ HDC GetScreenWithoutWindow (HWND hWnd,LPRECT pRect,HBITMAP *phBMOld)
 	
 }
 
-LONG FAR PASCAL PromptWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL PromptWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	RECT	rect;
 	static	int fadeout, incfade, blend;

@@ -59,7 +59,7 @@ static void SetHoldMessage(HWND hWndDlg)
 	else
 		*lastmess = 0;
 }
-BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char cmd[1024];
 	int	BRtn;

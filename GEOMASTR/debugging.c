@@ -248,7 +248,7 @@ void AdjustDBChildWindows(HWND hWndDlg)
 	return;
 }
 
-BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	HANDLE	hSaveBM=0;	
 	static	HWND	hDBWnd=0;

@@ -79,9 +79,9 @@ static	int	nrows,ncols, listwidth;
 static	int	colw[MAXCOLS], intspace;
 static	double colpct[MAXCOLS];
 
-long far pascal UGRID_HLTDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam);  
-long far pascal InformationDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam);
-long far pascal WidthDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam);
+long far pascal UGRID_HLTDlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);  
+long far pascal InformationDlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
+long far pascal WidthDlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 void SetLinPrecision (HWND hWnd,short precision);
 void SetAreaPrecision (HWND hWnd,short precision);
 LPSTR	LinOpt(double dist);

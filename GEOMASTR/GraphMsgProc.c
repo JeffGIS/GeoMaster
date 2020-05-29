@@ -425,7 +425,7 @@ BOOL CreateCompositeImage(LPSTR FileName, BOOL FlipVert, BOOL FlipHorz, int Rule
 	return rtn;
 }
 
-BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ImageDisplayMultipleMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 #define MAXIMAGES 15
 	static HBITMAP hBM[MAXIMAGES] = { 0 };
@@ -678,7 +678,7 @@ void CallImageDisplayMultipleMsgProc(LPSTR ImageList,LPSTR Title)
 	int nRc = DialogBox(hInst, (LPSTR)"IMAGE_DISPLAY_MULTIPLE", hWndMain, (DLGPROC)ImageDisplayMultipleMsgProc);
 	skipPaint = 1;
 }
-BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TemplateMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	int	BRtn;
@@ -718,7 +718,7 @@ void CallTemplateMsgProc(void)
 {
 	int nRc = DialogBox(hInst, (LPSTR)"WAITMESSAGE", hWndMain, (DLGPROC)TemplateMsgProc);
 }
-BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	int	BRtn;
@@ -758,7 +758,7 @@ BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
 	return TRUE;
 }
 
-BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1250);
 #endif
@@ -1209,7 +1209,7 @@ GSSiExitProg (1250);
 #endif
 }  
 
-BOOL FAR PASCAL CITY_THEMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CITY_THEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1250);
 #endif
@@ -1485,7 +1485,7 @@ BOOL ConvertDIBToPallete (LPHDIB32 lphDib,short BitCount)
 	return TRUE;
 }
 
-BOOL FAR PASCAL REGCONNECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL REGCONNECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[512];
 	static	BOOL	CancelledByUser = FALSE;
@@ -1819,7 +1819,7 @@ static BOOL RunIdentifyUpdateMacro(HWND hWndDlg, LPSTR macro, LPSTR lpDB, LPSTR 
 	return rtn;
 }
 
-BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {
 	GSSiEnterProg(454);
@@ -2247,7 +2247,7 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 	}
 #endif
 } /* End of IDENTIFYMsgProc*/
-BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {
 	GSSiEnterProg(454);
@@ -2835,7 +2835,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 #endif
 } /* End of IDENTIFY_WITH_PHOTOMsgProc*/
 
-BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL RBUTOPSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (449);
 #endif
@@ -3075,7 +3075,7 @@ GSSiExitProg (449);
 #endif
 }
 
-BOOL FAR PASCAL SCHMOOZMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SCHMOOZMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (829);
 #endif
@@ -3192,7 +3192,7 @@ GSSiExitProg (829);
 #endif
 }
 
-BOOL FAR PASCAL WAITMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL WAITMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (873);
 #endif
@@ -3257,7 +3257,7 @@ GSSiExitProg (873);
 #endif
 } 
 
-BOOL FAR PASCAL WAITMESSAGECDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL WAITMESSAGECDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (875);
 #endif
@@ -3342,7 +3342,7 @@ GSSiExitProg (875);
 #endif
 }
 
-BOOL FAR PASCAL ADDEDITTAGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDEDITTAGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (880);
 #endif
@@ -3451,7 +3451,7 @@ GSSiExitProg (880);
 #endif
 } 
 
-BOOL FAR PASCAL ORTHOFILTERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ORTHOFILTERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	 
 	static	LPVIEWPORT	OrthVP; 
 	short	ii;
@@ -3561,7 +3561,7 @@ GetR:
 }
  
  
-BOOL FAR PASCAL TRANTHEMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRANTHEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1238);
 #endif
@@ -3680,7 +3680,7 @@ GSSiExitProg (1238);
 #endif
 } 
 
-BOOL FAR PASCAL COORDDISPLAYMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COORDDISPLAYMsgProc(HWND hWndDlg,UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1240);
 #endif
@@ -3854,7 +3854,7 @@ GSSiExitProg (1240);
 #endif
 } 
 
-BOOL FAR PASCAL DEPTHOPTIONSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DEPTHOPTIONSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  char	str[256];	 
  int	BRtn,ii,w,h,xrange, rtn=1, ipos,npos;   
@@ -3960,7 +3960,7 @@ BOOL FAR PASCAL DEPTHOPTIONSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return rtn;
 } 
  
-BOOL FAR PASCAL DTMSETTINGSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DTMSETTINGSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  char	str[256];	 
  int	BRtn,i,w,h;   
@@ -4121,7 +4121,7 @@ BOOL FAR PASCAL DTMSETTINGSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 }  
 
-BOOL FAR PASCAL AUTOREGMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL AUTOREGMsgProc(HWND hWndDlg,UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128], cUID[32];	 
 	char	FirstName[52], LastName[52], Address[52], City[32], State[7], ZIP[12], Country[8], Phone[27], EMail[52];
@@ -4200,7 +4200,7 @@ BOOL FAR PASCAL AUTOREGMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM l
  return TRUE;
 }
 
-BOOL FAR PASCAL HOTSPOT_THEMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL HOTSPOT_THEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1239);
 #endif
@@ -4398,7 +4398,7 @@ GSSiExitProg (1239);
 }
 #endif
 } 
-BOOL FAR PASCAL DISTANDDIRMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DISTANDDIRMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1010);
 #endif
@@ -4647,7 +4647,7 @@ GSSiExitProg (1010);
 #endif
 } 
 
-BOOL FAR PASCAL TRAVDANDBMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRAVDANDBMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n;
 	char	str[256],DegC[8],MinC[8],SecC[16], PreDir[4], PostDir[4], DistUnits[16]; 
 	static	char	CurDist[256]="";
@@ -4839,7 +4839,7 @@ BOOL FAR PASCAL TRAVDANDBMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
    }
  return TRUE;
 }  
-BOOL FAR PASCAL SUBTRAVERSEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SUBTRAVERSEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  	int		st, choice, n, Legno;
 	char	str[256];       
@@ -4910,7 +4910,7 @@ BOOL FAR PASCAL SUBTRAVERSEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 } 
 
-BOOL FAR PASCAL TRAVTYPE1CRVMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRAVTYPE1CRVMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,i, Maxval;
 	char	str[256], DistUnits[16],DegC[16],MinC[16],SecC[16],RadUnits[16], BearOpt[16], DistOptC[16];
 	static	char	PreDir[4]="N", PostDir[4]="E"; 
@@ -5479,7 +5479,7 @@ BOOL FAR PASCAL TRAVTYPE1CRVMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 }  
 
-BOOL FAR PASCAL TRAVTYPE2CRVMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRAVTYPE2CRVMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n;
 	char	str[256], DistUnits[16],SecC[16],RadiusUnits[16];
 	static	char	PreDir[4]="N", PostDir[4]="E"; 
@@ -5697,7 +5697,7 @@ BOOL FAR PASCAL TRAVTYPE2CRVMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 }  
 
-BOOL FAR PASCAL TRAVTYPE3CRVMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRAVTYPE3CRVMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n;
 	char	str[256], DistUnits[16],SecC[16],RadiusUnits[16],TanLenUnits[16];
 	static	char	CurDist[256]="",CrvDir[8]="Right",CurRadius[64],CurTanLen[64];
@@ -5833,7 +5833,7 @@ BOOL FAR PASCAL TRAVTYPE3CRVMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 }  
 
-BOOL FAR PASCAL VISIBLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VISIBLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	HWND	hCheckBox;
     int      TabStopsSym[3]={113,500,5000};
     int      TabStops4[2]={68,200};
@@ -6556,7 +6556,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
    }
  return TRUE;
 } /* End of VISIBLEMsgProc                                      */     
-BOOL FAR PASCAL VISIBLE2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VISIBLE2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	HWND	hCheckBox;
     int      TabStops2[2]={20,200};
 	int   	TabStops3[2]={30,48}; 
@@ -7110,7 +7110,7 @@ SetVis2:   	SendDlgItemMessage (hWndDlg,AUTO_VIS,BM_SETCHECK,TRUE,0L);
  return TRUE;
 }
 
- BOOL FAR PASCAL PRINTMERGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+ BOOL FAR PASCAL PRINTMERGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (446);
 #endif
@@ -7342,7 +7342,7 @@ GSSiExitProg (446);
 #endif
 }  
 
-BOOL FAR PASCAL PRINTMERGETSTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL PRINTMERGETSTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (447);
 #endif
@@ -7500,7 +7500,7 @@ GSSiExitProg (447);
 #endif
 } /* End of PRINTMERGETSTMsgProc                                      */
 
-BOOL FAR PASCAL STRMPIPEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL STRMPIPEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	UINT cntls[]={IDC_STRMPIPID,
 				  IDC_STRMPIPSYMBOL,
@@ -7572,7 +7572,7 @@ BOOL FAR PASCAL STRMPIPEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
       }
    return TRUE;
 }
-BOOL FAR PASCAL STRMPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL STRMPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	UINT cntls[]={IDC_STRMPIPID,
 				  IDC_STRMPIPSYMBOL,
@@ -7647,7 +7647,7 @@ BOOL FAR PASCAL STRMPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
       }
    return TRUE;
 } 
-BOOL FAR PASCAL CREATE_MAPSETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CREATE_MAPSETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1293);
 #endif
@@ -7888,7 +7888,7 @@ GSSiExitProg (1293);
 
 
 
-BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     LPSYMBOL    pSymbol; 
 	char	str[128];
@@ -8433,7 +8433,7 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 }
 
-BOOL FAR PASCAL GET_FONTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GET_FONTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     LPSYMBOL    pSymbol; 
 	char	str[128];
@@ -8633,7 +8633,7 @@ BOOL FAR PASCAL GET_FONTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 }
 
-int FAR PASCAL NEWSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+int FAR PASCAL NEWSYMBOLMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[256], cUID[32], ParName[48];
 	static	char	CurPar[48]="ALL";
@@ -9128,7 +9128,7 @@ int CreateNewSymbol (HWND hWnd,LPSTR SymName,int Type)
 	return newSymNum;
 }
 
-BOOL FAR PASCAL EDITSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL EDITSYMBOLMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[256],ParName[66],str2[128];	
 	short	i,n, SNum, ParSym, nChildren, nElem,SymDisplayOffset=-25;  
@@ -10191,7 +10191,7 @@ BOOL FAR PASCAL EDITSYMBOLMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  return TRUE;
 } 
 
-BOOL FAR PASCAL LINETYPEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LINETYPEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (161);
 #endif
@@ -10318,7 +10318,7 @@ GSSiExitProg (161);
 #endif
 } /* End of LINETYPEMsgProc                                      */
 
-BOOL FAR PASCAL VIRTUALPRINTERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VIRTUALPRINTERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[256];
     LPPRINTDLG lpPDChunk,lpPDChunkLocal; 
@@ -10458,7 +10458,7 @@ BOOL FAR PASCAL VIRTUALPRINTERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
    }
  return TRUE;
 } 
-BOOL FAR PASCAL HIGHLIGHTCLASSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL HIGHLIGHTCLASSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1299);
 #endif
@@ -10717,7 +10717,7 @@ int HighlightFromTheme(LPVIEWPORT pVP,LPTHEME pTheme,int nItems, HANDLE hItems, 
 	return numAdded;
 }
 
-BOOL FAR PASCAL DISPLAYSELECTEDCLASSESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DISPLAYSELECTEDCLASSESMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1300);
 #endif
@@ -10879,7 +10879,7 @@ GSSiExitProg (1300);
 #endif
 } 
 
-BOOL FAR PASCAL SAVEZOOMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SAVEZOOMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (658);
 #endif
@@ -11034,7 +11034,7 @@ GSSiExitProg (658);
 }
 #endif
 } /* End of SAVEZOOMMsgProc                                      */
-BOOL FAR PASCAL ZOOMLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ZOOMLISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (656);
 #endif
@@ -11514,7 +11514,7 @@ void CenterWindowInVP(HWND hWnd, LPVIEWPORT pVP)
 	return;
 }
 
-BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	int	BRtn;
 	LPSTR pDot;
@@ -11914,7 +11914,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
 }
 
 
-BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[1026], AltFunFile[MAX_PATH];   
 	HFILE	Fid; 
@@ -12058,7 +12058,7 @@ BOOL FAR PASCAL AltAccelMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
    }
  return TRUE;
 }
-BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	short	InVP;
 	char	str[128];   
@@ -12144,7 +12144,7 @@ BOOL FAR PASCAL LEGENDEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  return TRUE;
 }
 
-BOOL FAR PASCAL VAROFFSETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VAROFFSETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1138);
 #endif
@@ -12287,7 +12287,7 @@ GSSiExitProg (1138);
 #endif
 } /* End of FULLBMMsgProc                                      */
 
-BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	static	TAGBOX	SaveTAGBox;
 	char	Cmd[128];
 	int		EditFid;
@@ -12727,7 +12727,7 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
  return TRUE;
 } /* End of TAGEDITMsgProc                                      */
 
-BOOL FAR PASCAL FULLBMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FULLBMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1069);
 #endif
@@ -13180,7 +13180,7 @@ GSSiExitProg (1069);
 #endif
 } /* End of FULLBMMsgProc                                      */
 
-BOOL FAR PASCAL SV_THEME1MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SV_THEME1MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1247);
 #endif
@@ -13740,7 +13740,7 @@ GSSiExitProg (1247);
 #endif
 }
 
-BOOL FAR PASCAL LOADTHEMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADTHEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1257);
 #endif
@@ -13995,12 +13995,12 @@ BOOL LoadTheme (HWND hWnd,LPVIEWPORT pVP)
     return rtn;
 }
 
-BOOL FAR PASCAL TIME_DISPLAYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TIME_DISPLAYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  return TRUE;
 }
 
-BOOL FAR PASCAL POINT_IN_AREAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL POINT_IN_AREAMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1247);
 #endif
@@ -14589,7 +14589,7 @@ GSSiExitProg (1247);
 #endif
 }
 
-BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char	str[256], EditText[8];   
 	COLORREF	NewColor;
@@ -15631,7 +15631,7 @@ Exit:
    }
  return TRUE;
 } 
-BOOL FAR PASCAL COPYVPFROMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COPYVPFROMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1001);
 #endif
@@ -15766,7 +15766,7 @@ GSSiExitProg (1001);
 #endif
 }
 
-BOOL FAR PASCAL ASSIGN_NONNUMERICMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ASSIGN_NONNUMERICMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1243);
 #endif
@@ -16428,7 +16428,7 @@ GSSiExitProg (1243);
 #endif
 }
 
-BOOL FAR PASCAL CLASS_RANGESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CLASS_RANGESMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1244);
 #endif
@@ -16624,7 +16624,7 @@ GSSiExitProg (1244);
 }
 #endif
 }
-BOOL FAR PASCAL SELECTVALUESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTVALUESMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1297);
 #endif
@@ -16748,7 +16748,7 @@ GSSiExitProg (1297);
 }
 #endif
 } 
-BOOL FAR PASCAL CLASSESFROMTABLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CLASSESFROMTABLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1298);
 #endif
@@ -16968,7 +16968,7 @@ void SetSecondaryTAGInput(HWND hWnd)
 	return;
 }
 
-BOOL FAR PASCAL TAGLOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TAGLOCMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1032);
 #endif
@@ -17418,7 +17418,7 @@ GSSiExitProg (1032);
 }  
 
 
-BOOL FAR PASCAL COORDLOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COORDLOCMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (914);
 #endif
@@ -17506,7 +17506,7 @@ GSSiExitProg (914);
 #endif
 }
 
-BOOL FAR PASCAL CDINSTALLERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CDINSTALLERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n;
 	char	str[256], str2[256], TestName[128]; 
 	int		TabStops[2]={75,200};
@@ -17695,7 +17695,7 @@ BOOL FAR PASCAL CDINSTALLERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 }
 
-BOOL FAR PASCAL SELECTDRIVEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTDRIVEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (877);
 #endif
@@ -17791,7 +17791,7 @@ GSSiExitProg (877);
 #endif
 }
 
-BOOL FAR PASCAL EDIT_ADDS_THEMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL EDIT_ADDS_THEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1328);
 #endif
@@ -17920,7 +17920,7 @@ GSSiExitProg (1328);
 #endif
 }
 
-BOOL FAR PASCAL DOCUMENTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DOCUMENTSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	
  	HFILE	FidNoteType; 
 	OFSTRUCTGM	OFStruct;
@@ -18038,7 +18038,7 @@ BOOL FAR PASCAL DOCUMENTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
  return TRUE;
 }
 
-BOOL FAR PASCAL STREET_TEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL STREET_TEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1276);
 #endif
@@ -18259,7 +18259,7 @@ GSSiExitProg (1276);
 #endif
 }
 
-BOOL FAR PASCAL BOUNDS_DISPLAYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL BOUNDS_DISPLAYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1277);
 #endif
@@ -18370,7 +18370,7 @@ GSSiExitProg (1277);
 #endif
 }
 
-BOOL FAR PASCAL DISTANCEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DISTANCEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1278);
 #endif
@@ -18463,7 +18463,7 @@ GSSiExitProg (1278);
 #endif
 }
 
-BOOL FAR PASCAL PROFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL PROFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1279);
 #endif
@@ -18578,7 +18578,7 @@ GSSiExitProg (1279);
 #endif
 }
 
-BOOL FAR PASCAL DISPLAY2DMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DISPLAY2DMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1293);
 #endif
@@ -18662,7 +18662,7 @@ GSSiExitProg (1293);
 #endif
 }
 
-BOOL FAR PASCAL COMPARE_VIEWPORTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COMPARE_VIEWPORTSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1293);
 #endif
@@ -18740,7 +18740,7 @@ GSSiExitProg (1293);
 #endif
 }
 
-BOOL FAR PASCAL COORDGRIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COORDGRIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1280);
 #endif
@@ -18834,7 +18834,7 @@ GSSiExitProg (1280);
 #endif
 }
 
- BOOL WINAPI LOADMIFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+ BOOL WINAPI LOADMIFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 
 { 
     char   Prefix[10], UDI[256], txt[256]; 
@@ -19788,7 +19788,7 @@ EndFiles:
  return TRUE;    
 }   
 
-BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     char		Ext[6]=".TL2";
     LPTAGDEF    lpTAGDef; 
@@ -21224,7 +21224,7 @@ NextFile:
  return TRUE;    
 }
 
-BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     char		Ext[6]=".TL3";
     LPTAGDEF    lpTAGDef; 
@@ -21855,7 +21855,7 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 }
 
-BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     char		Ext[6]=".TL5";
     LPTAGDEF    lpTAGDef; 
@@ -22570,7 +22570,7 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
  return TRUE;
 } 
 
-BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
  { 
     char		Ext[6]=".TL6";
     LPTAGDEF    lpTAGDef; 
@@ -24825,7 +24825,7 @@ DoLine:
  GSSiGlobUlFree (&hMem); 
  return TRUE;
  }
-BOOL FAR PASCAL LOADBNAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADBNAMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     short   i;
     char    Ext[8], ExtID[34], str[260];
@@ -25401,11 +25401,11 @@ NextLine:
  return TRUE;    
 } 
 
-BOOL FAR PASCAL LOADDOQSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADDOQSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  return TRUE;    
 } 
-BOOL FAR PASCAL NULLDIRMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL NULLDIRMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	char		str[256], dirname[128];
 	MNMXCORD	Bounds, FileBounds;  
@@ -25620,7 +25620,7 @@ BOOL FAR PASCAL NULLDIRMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
  return TRUE;
 } 
 
-BOOL FAR PASCAL LOADFLOODMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADFLOODMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int     TabStops[2]={65,1300}, i;
     char    Ext[8], ExtID[34], str[260];
@@ -26195,7 +26195,7 @@ NextLine:
  return TRUE;    
 }
 
-BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     static	HANDLE	hAttFile=0;
     int     TabStops[2]={65,1300}, i;
@@ -26731,7 +26731,7 @@ BOOL FAR PASCAL LOADSSURGOMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  return TRUE;    
 }
 
-BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int       TabStops[2]={50,1300}, i;
     char    Ext[8], ExtID[34], Name[128],str[260], VolLabel[16], CDDrive[6];
@@ -27018,7 +27018,7 @@ BOOL FAR PASCAL CREATE_ORTHOCDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam,
  return TRUE;    
 } 
 
-BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CREATE_ORTHOCDS2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int     TabStops[2]={50,1300}, i;
     char    Ext[8], ExtID[34], Name[128],str[260], VolLabel[16], CDDrive[6];
@@ -27403,7 +27403,7 @@ HANDLE Create10CharFieldNames(HWND hWndDlg,UINT iDC_FIELDS, int nItems, LPINT lp
 	return hNames;
 }
 
-BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL POINTMAPMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     short   i;
     LPSTR   pPrefix, lpDot;  
@@ -28306,7 +28306,7 @@ SkipFirstPass:
  return TRUE;    
 }
 
-BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     char    Ext[8], ExtID[34];
 
@@ -28973,7 +28973,7 @@ BOOL FAR PASCAL LOAD_TIGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  return TRUE;    
 } 
 
-BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOAD_TIGER_PNMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     char    File[128], Ext[8], ExtID[34], str[32];
     HANDLE	hTiger1=0, hTiger4=0, hTiger5=0;
@@ -29747,7 +29747,7 @@ static int ConvertToShortName(LPSTR Name)
 	}
 	return rtn;
 }
-BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	short	Version=1;
     int		nItems, i;  
@@ -31147,7 +31147,7 @@ BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDAT
 }
 
 
-BOOL FAR PASCAL STREETSEG_FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL STREETSEG_FIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[256];	 
 	LPSHORT	lpVersion, lpLength;
@@ -31230,7 +31230,7 @@ BOOL FAR PASCAL STREETSEG_FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam
  
 }
 
-BOOL FAR PASCAL IMPORT_ATTRIBUTESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL IMPORT_ATTRIBUTESMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[256], ctype[16];	 
 	LPSHORT	lpVersion;
@@ -31491,7 +31491,7 @@ BOOL FAR PASCAL IMPORT_ATTRIBUTESMsgProc(HWND hWndDlg, int Message, WPARAM wPara
  
 }
 
-BOOL FAR PASCAL IMPORT_LIMITSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL IMPORT_LIMITSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	char		str[128], SavePlt[128];  
 	short		ii;
@@ -31628,7 +31628,7 @@ BOOL FAR PASCAL IMPORT_LIMITSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;
 }
 
- BOOL FAR PASCAL IMPORT_FILTERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+ BOOL FAR PASCAL IMPORT_FILTERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	LPIMPORTFILTER	pFilter; 
 	
@@ -31682,7 +31682,7 @@ BOOL FAR PASCAL IMPORT_LIMITSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;
 }
 
-BOOL FAR PASCAL GRTEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GRTEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	char		str[128],txt[128];
 	LPGRTEXT	lpGRText; 
@@ -31832,7 +31832,7 @@ BOOL FAR PASCAL GRTEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
  return TRUE;
 }
 
-BOOL FAR PASCAL GRCOMMANDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GRCOMMANDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	char		str[128], SavePlt[128];
 	LPGRCOMMAND	lpGRCommand; 
@@ -31901,7 +31901,7 @@ BOOL FAR PASCAL GRCOMMANDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
  return TRUE;
 }
 
-BOOL FAR PASCAL TIMESTAMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TIMESTAMPMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	LPTIMESTAMP	lpTimeStamp; 
 	short		ls;
@@ -31955,7 +31955,7 @@ BOOL FAR PASCAL TIMESTAMPMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
    }
  return TRUE;
 }
-BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int     nItems, i;
 	short	Version=1;
@@ -32281,7 +32281,7 @@ Exit2:
  return TRUE;
 }
 
-BOOL FAR PASCAL COPYLINEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COPYLINEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128];
 	static	char	offdist[16]="";   
@@ -32343,7 +32343,7 @@ BOOL FAR PASCAL COPYLINEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
    }
  return TRUE;
 }
-BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     char	Ext[6]=".TXO";
     long NumItems, CurItem,ii; 
@@ -32749,7 +32749,7 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
    }
 }
 
-BOOL FAR PASCAL LOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOGINMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	HANDLE	hSaveBM=0;	
 
@@ -32800,7 +32800,7 @@ BOOL CaptureClipboard(LPSTR title, LPSTR menu)
 	rc = DialogBox(hInst, (LPSTR)"CAPTURE_CLIPBOARD", hWndMain, (DLGPROC)CAPTURE_CLIPBOARDMsgProc);
 	return rc;
 }
-BOOL FAR PASCAL CAPTURE_CLIPBOARDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CAPTURE_CLIPBOARDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	
 	char	str[256];
 	static	int	parcelDataStatus, otherDataStatus, mapStatus;

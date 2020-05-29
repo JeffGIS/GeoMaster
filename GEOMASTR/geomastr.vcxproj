@@ -924,14 +924,17 @@
     <ClInclude Include="..\FileGDBAPI\2013\include\Row.h" />
     <ClInclude Include="..\FileGDBAPI\2013\include\Table.h" />
     <ClInclude Include="..\FileGDBAPI\2013\include\Util.h" />
+    <ClInclude Include="..\INCLUDE\Address.h" />
     <ClInclude Include="..\INCLUDE\Bt.h" />
     <ClInclude Include="..\gctpc\cproj.h" />
     <ClInclude Include="..\INCLUDE\colorsByName.h" />
+    <ClInclude Include="..\INCLUDE\Extrndb.h" />
     <ClInclude Include="..\INCLUDE\FreeImage.h" />
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
     <ClInclude Include="..\INCLUDE\gssitype.h" />
+    <ClInclude Include="..\INCLUDE\Gwd.h" />
     <ClInclude Include="..\INCLUDE\rotate256.h" />
     <ClInclude Include="..\include\tagindex.h" />
     <ClInclude Include="..\INCLUDE\UMIO.H" />
@@ -1056,6 +1059,7 @@
     <ClInclude Include="..\INCLUDE\PROJ.H" />
     <ClInclude Include="..\gctpc\proj.h" />
     <ClInclude Include="..\GMEdit\GMEdit\resource.h" />
+    <ClInclude Include="Gw.h" />
     <ClInclude Include="MPIntersection.h" />
     <ClInclude Include="nvshapefilelibrary\ExitApp.h" />
     <ClInclude Include="nvshapefilelibrary\my_nan.h" />

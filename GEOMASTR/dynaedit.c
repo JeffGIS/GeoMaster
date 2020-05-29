@@ -148,8 +148,8 @@ BOOL FAR PASCAL ComboBoxMsgProc(HWND hWndDlg,WORD Message,WPARAM wParam,LPARAM l
 //LRESULT CALLBACK __export ToolsMsgProc(HWND hWndDlg,WORD Message,WPARAM wParam,LPARAM lParam);
 BOOL FAR PASCAL  ToolsMsgProc(HWND hWndDlg,WORD Message,WPARAM wParam,LPARAM lParam);
 BOOL AddNewDlgItem(HWND Window,HWND Dialog, WORD Type);
-BOOL FAR PASCAL EditStringMsgProc(HWND hWndDlg,int Message,WPARAM wParam, LPARAM lParam);
-BOOL FAR PASCAL DIALOGSTYLEDynDialogMsgProc(HWND hWndDlg,int Message,WPARAM wParam, LPARAM lParam); 
+BOOL FAR PASCAL EditStringMsgProc(HWND hWndDlg,UINT Message,WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL DIALOGSTYLEDynDialogMsgProc(HWND hWndDlg,UINT Message,WPARAM wParam, LPARAM lParam); 
 
 
 //***************************************************// 
@@ -1123,7 +1123,7 @@ void TinyEditor(HWND Dialog)
 }        
   
 //****************************************************************// 
-BOOL FAR PASCAL EditStringMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL EditStringMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  static TypeLen; 
  //TEditInfo * Edit;                  

@@ -21,7 +21,7 @@ BOOL GetKeyWord (LPSTR str,LPSTR Key,LPSTR Value)
 	return TRUE;
 }
 
-BOOL FAR PASCAL GET_PARENTSYMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GET_PARENTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 
 	char	str[256],SymName[66],ParName[66];

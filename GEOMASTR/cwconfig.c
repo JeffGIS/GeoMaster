@@ -27,16 +27,16 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 int  APIENTRY  WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int  APIENTRY  WinMainGMDoc(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int  APIENTRY  WinMainGMCache(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
-LONG FAR PASCAL WndProcGMEdit(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
-LONG FAR PASCAL WndProcGMDoc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
-LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGMEdit(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGMDoc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 int ConvertPRJtoProj4(char *in, char * out);
 LRESULT CALLBACK GetMsgProc(
   int code,       // hook code
   WPARAM wParam,  // removal flag
   LPARAM lParam   // address of structure with message
 );
-int FileDlgWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+int FileDlgWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
 static char selectedStartCmd[1024]; 
 static MSG	pmsg[100]={0};
@@ -977,7 +977,7 @@ BOOL ProcessUserParms (void)
 	return TRUE;
 }
 
-BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	LPSTR lpStart, lpTab;
 	OFSTRUCTGM	OFStruct = { 0 };
@@ -1374,7 +1374,7 @@ void testConvertBitmapToPoly(LPSTR file);
 	GSSiClose2 (&fidOut);
 }
 */
-LONG FAR PASCAL WndProcTemp(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL WndProcTemp(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	return DefWindowProc(hWnd, Message, wParam, lParam);
 }
@@ -2188,6 +2188,8 @@ nMess = -1;
 	 }
 	 switch (msg.message)
 	 {
+	 case WM_RBUTTONDOWN:
+		 break;
 	 case WM_LBUTTONDBLCLK:
 	 case WM_KEYDOWN:
 	 case WM_SYSKEYDOWN:
@@ -2241,9 +2243,13 @@ nMess = -1;
 			 ii = 1;
 		 break; case WM_SYSKEYDOWN:
 			 ii = 1;
-		 break; case WM_LBUTTONDOWN :
+		 break; case WM_LBUTTONDOWN:
 			 ii = 1;
-		 break; case WM_LBUTTONUP :
+		 break; case WM_LBUTTONUP:
+			 ii = 1;
+		 break; case WM_RBUTTONDOWN:
+			 ii = 1;
+		 break; case WM_RBUTTONUP:
 			 ii = 1;
 		 break; case WM_CHAR:
 			 ii = 1;
@@ -2415,7 +2421,7 @@ return msg.wParam;
 /*                                                                      */
 /************************************************************************/
 
-LONG FAR PASCAL WndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (isGMEdit)
 		return WndProcGMEdit(hWnd,Message,wParam,lParam);
@@ -2424,7 +2430,7 @@ LONG FAR PASCAL WndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (438);
 #endif

@@ -7,7 +7,7 @@
 
 #include "gmextern.h"
 
-UINT CALLBACK  FontHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+UINT CALLBACK  FontHook (HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 
 void SetIgnoreError (BOOL setting);
 
@@ -515,7 +515,7 @@ Exit:
 }
 
 
-BOOL CALLBACK COLORFROMPALETTEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK COLORFROMPALETTEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	switch(Message) 
@@ -2486,7 +2486,7 @@ SetCurColor:
    return FALSE;
 }
 
-/*BOOL FAR PASCAL _export ABORTWAITMsgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+/*BOOL FAR PASCAL _export ABORTWAITMsgProc (HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	char	str[256];
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hDlg,message, wParam, lParam)))

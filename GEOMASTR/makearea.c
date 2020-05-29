@@ -2597,7 +2597,7 @@ BOOL CalculateLoopSize (HFILE FidLoop,long Offset,int NumLinks,BOOL Reverse,
 	return TRUE;
 }  
 
-BOOL CreateRefConnectTable (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateRefConnectTable (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  switch (Message)
    {
@@ -2624,7 +2624,7 @@ BOOL CreateRefConnectTable (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam
     return (TRUE);
 } 
 
-BOOL RefConnectFix (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL RefConnectFix (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  switch (Message)
    {
@@ -2642,7 +2642,7 @@ BOOL RefConnectFix (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 } 
 
-BOOL RefConnectOutputLines (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL RefConnectOutputLines (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  int	st, BPConnect,EPConnect;
  LPGWDHEADER lpGWDHead;

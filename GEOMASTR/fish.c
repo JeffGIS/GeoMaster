@@ -32,7 +32,7 @@ static	BOOL	RefreshOnExit;
 
 
 
-BOOL FAR PASCAL LOADWAYPOINTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADWAYPOINTSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128], cUID[32];	
 	HDC		hDC; 
@@ -132,7 +132,7 @@ BOOL FAR PASCAL LOADWAYPOINTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;
 }
 
-BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	int	TabStops[6]={81, 95, 139, 184, 258, 328}, ntab=6;
     static	BOOL	First=TRUE, FishChanged;
@@ -593,7 +593,7 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 }
 
-BOOL FAR PASCAL GPSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GPSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     char    Ext[8], ExtID[32];
     static	char	WPName[32]="";
@@ -1068,7 +1068,7 @@ SetGPS:
  return TRUE;
 } 
 
-BOOL FAR PASCAL FISHMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FISHMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	short	Default;
 	char	str[512];  
@@ -1197,7 +1197,7 @@ BOOL FAR PASCAL FISHMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lPa
  return TRUE;
 }
 
-BOOL FAR PASCAL GPSCONFIGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GPSCONFIGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
     short	Choice;
 	char	str[128];   
@@ -2583,7 +2583,7 @@ BOOL CreateFishGMD (HWND hWnd)
 	return TRUE;
 } 
 
-BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	short	Default, pos, st, DisplayOpt;
 	char	str[256];  
@@ -3203,7 +3203,7 @@ BOOL FAR PASCAL FINDWAYPOINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 } 
 
-BOOL FAR PASCAL WPSELECTLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL WPSELECTLISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	short	Default;
 	char	str[256], File[128];  

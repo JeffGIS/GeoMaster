@@ -3246,7 +3246,7 @@ long ListFGDBTables (LPSTR DBNameIN,HWND hWndDlg,UINT ListCntl,int ListType)
 	return Num;
 }
 
-BOOL FAR PASCAL SELECTPGDBMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTPGDBMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1107);
 #endif
@@ -3371,7 +3371,7 @@ GSSiExitProg (1107);
 }
 #endif
 }
-BOOL FAR PASCAL SELECTFGDBMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTFGDBMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1107);
 #endif
@@ -3509,7 +3509,7 @@ void DisplayFGDBItemMenu (HWND hWnd,BOOL IsTable)
 	return;
 }
 
-BOOL FAR PASCAL SELECTFGDBMsgProc_TV(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTFGDBMsgProc_TV(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1107);
 #endif

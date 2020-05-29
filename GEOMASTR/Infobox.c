@@ -2268,7 +2268,7 @@ void SaveInfoBoxes (HFILE Fid)
 	GSSiClose2 (&FidTag);
 	return;
 }  */
-BOOL ProcessInfoboxMacro (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessInfoboxMacro (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {   
 	POINT	MousePoint;
 	short	InfoBoxID;

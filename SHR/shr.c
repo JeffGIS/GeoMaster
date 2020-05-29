@@ -7122,7 +7122,7 @@ GSSiExitProg (290);
 #endif
 }
 
-BOOL FAR PASCAL TRACEWINDOWMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+BOOL FAR PASCAL TRACEWINDOWMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (291);
 #endif
@@ -8920,7 +8920,7 @@ GSSiExitProg (387);
 #endif
 }
 
-BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  switch(Message)
    {

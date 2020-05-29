@@ -2375,7 +2375,7 @@ GSSiExitProg (1292);
 
 
 
-BOOL ThemeCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, HANDLE hSQL)
+BOOL ThemeCommonCode (HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam, HANDLE hSQL)
 #if ENABLETRACE
 {GSSiEnterProg (1294);
 #endif

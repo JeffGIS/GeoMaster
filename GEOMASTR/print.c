@@ -872,7 +872,7 @@ BOOL DestroyProcessStatusWindow (void)
 	return TRUE;
 } 
 
-BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hDlg,message, wParam, lParam)))
@@ -909,7 +909,7 @@ BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPA
    return TRUE;
 }
 
-BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hDlg,message, wParam, lParam)))
@@ -961,7 +961,7 @@ void strncpy0s (LPSTR to,LPSTR from,int l,char fill)
 	return;
 }
 
-BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, int message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 #define MAXITEM	1024
  int	i;
@@ -4140,7 +4140,7 @@ BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int nrows, int ncols,LP
 	return TRUE;
 }	
 
-BOOL FAR PASCAL VIRTUAL_PRINTER_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VIRTUAL_PRINTER_CREATEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  short  BRtn,Error,Choice;
  double	Width,Height; 

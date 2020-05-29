@@ -25,7 +25,7 @@ static BOOL			loopDates = TRUE;
 static BOOL			sequentialMethod = TRUE;
 
 
-BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO scrollInfo;
 	int	BRtn;
@@ -148,7 +148,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wPara
 	return TRUE;
 }
 
-BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	HFILE	fid;
 	char	str[1024];
@@ -287,7 +287,7 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, int Message, WPARAM wPa
 }
 
 
-BOOL DisplayDatedOrthos(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {
 	static	BOOL	Inited = FALSE;
 	static HCURSOR     OldCursor;

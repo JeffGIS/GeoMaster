@@ -3277,7 +3277,7 @@ void DXFConvertSymName (LPSTR SymName)
 		_fstrcpy (SymName,"BLANK");
 	return;
 }  
-BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {   char string[130], Name[128], LeafName[128];
     char		Ext[6]=".TL2";
    	HFILE	FidDSC, FidFileList;  

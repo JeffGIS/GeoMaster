@@ -914,7 +914,7 @@ void GMServerSendMessage (HWND hWndDlg,int messageID)
 			SendMessageToServer(hWndDlg, mes);
 }
 
-BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SynchronizeMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char mes[1024];
 	int	BRtn;

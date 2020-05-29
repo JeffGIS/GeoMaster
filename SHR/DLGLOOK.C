@@ -667,7 +667,7 @@ BOOL SizeDlgToRect (HWND hWndDlg,LPRECT pRect)
 	EnumChildWindows (hWndDlg, EnumCtrlProcSizeDlg, 0L);
     return TRUE;
 }
-BOOL FAR PASCAL DIALOGSTYLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DIALOGSTYLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	BOOL bRtn=FALSE;      
 	HANDLE	hDynDlgControls;
@@ -753,7 +753,7 @@ BOOL FAR PASCAL DIALOGSTYLEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
   return FALSE;
 } 
 
-BOOL FAR PASCAL DIALOGSTYLEDynDialogMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DIALOGSTYLEDynDialogMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	BOOL bRtn=FALSE;      
 	HANDLE	hDynDlgControls;

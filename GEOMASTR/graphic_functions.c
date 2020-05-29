@@ -23,7 +23,7 @@ int checklastbox(int i)
 		ii = 1;
 	return 1;
 }
-BOOL GFFunctionTemplate(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL GFFunctionTemplate(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {
 	static	BOOL	Inited = FALSE;
 	static HCURSOR     OldCursor;
@@ -139,7 +139,7 @@ BOOL GFFunctionTemplate(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sh
 	return (TRUE);
 }
 
-LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,LPINT pLeaveCounter)
+LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam,LPINT pLeaveCounter)
 {
 	LONG    lRtn = 0;
 
@@ -241,7 +241,7 @@ void CloseWhenCursorLeavesInit(HWND hWndDlg)
 }
 
 
-BOOL ResizePoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL ResizePoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
  	POINT	MousePoint;
  	DPOINT	BasePoint;
@@ -378,7 +378,7 @@ void ClearMeterPrompts (HDC hDC)
 	return;
 }
 
-BOOL ZoomRectangle (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL ZoomRectangle (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1161);
 #endif
@@ -610,7 +610,7 @@ GSSiExitProg (1161);
 #endif
 }
 
-BOOL MoveTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL MoveTAG (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  int Xmove, Ymove;
  int		OldMode;
@@ -740,7 +740,7 @@ switch (Message)
     }
     return (TRUE);
 }
-BOOL SizeTAG (HWND hWnd,  int Message, WPARAM wParam, LPARAM lParam)
+BOOL SizeTAG (HWND hWnd,  UINT Message, WPARAM wParam, LPARAM lParam)
 {static LONG	DownPoint;
  DPOINT	BasePoint;
  POINT	MousePoint, Point1, Point2;
@@ -845,7 +845,7 @@ BOOL SizeTAG (HWND hWnd,  int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL WindowZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL WindowZoom (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (90);
 #endif
@@ -918,7 +918,7 @@ GSSiExitProg (90);
 }
 #endif
 }
-BOOL BlowUp (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL BlowUp (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {	static int	BlowUpStep;
 	POINT	Point, ScreenPoint1, ScreenPoint2;
 	DPOINT	DPoint;
@@ -972,7 +972,7 @@ BOOL BlowUp (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL PanToPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL PanToPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (152);
 #endif
@@ -1036,7 +1036,7 @@ GSSiExitProg (152);
 #endif
 }
 
-BOOL ShowItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ShowItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (155);
 #endif
@@ -1093,7 +1093,7 @@ GSSiExitProg (155);
 #endif
 }
 
-BOOL HideItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL HideItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (156);
 #endif
@@ -1161,7 +1161,7 @@ GSSiExitProg (156);
 #endif
 } 
 
-BOOL ColorClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL ColorClass (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (158);
 #endif
@@ -1294,7 +1294,7 @@ GSSiExitProg (158);
 #endif
 }
 
-BOOL LineTypeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL LineTypeClass (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (160);
 #endif
@@ -1401,7 +1401,7 @@ GSSiExitProg (160);
 #endif
 }
 
-BOOL CreateTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateTAG (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  char key;
  int	Item, nRc;
@@ -1500,7 +1500,7 @@ BOOL CreateTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (rtn);
 }
 
-BOOL PickScatterPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL PickScatterPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (148);
 #endif
@@ -1547,7 +1547,7 @@ GSSiExitProg (148);
 #endif
 }
 
-BOOL ThemeSVChangeColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeSVChangeColor (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1231);
 #endif
@@ -1594,7 +1594,7 @@ GSSiExitProg (1231);
 #endif
 }
 
-BOOL PickImage (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL PickImage (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (712);
 #endif
@@ -1641,7 +1641,7 @@ GSSiExitProg (712);
 #endif
 }
 
-BOOL PanZoomTarget (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL PanZoomTarget (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 #if ENABLETRACE
 {GSSiEnterProg (119);
 #endif
@@ -3060,7 +3060,7 @@ GSSiExitProg (119);
 #endif
 }
 
-BOOL ThemeActivate (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeActivate (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1253);
 #endif
@@ -3156,7 +3156,7 @@ GSSiExitProg (1253);
 #endif
 }
 
-BOOL ThemeDeActivate (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL ThemeDeActivate (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1254);
 #endif
@@ -3219,7 +3219,7 @@ GSSiExitProg (1254);
 #endif
 }
 
-BOOL ThemeEdit (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeEdit (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1252);
 #endif
@@ -3312,7 +3312,7 @@ GSSiExitProg (1252);
 #endif
 }
 
-BOOL ThemeLoad (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeLoad (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1255);
 #endif
@@ -3360,7 +3360,7 @@ GSSiExitProg (1255);
 #endif
 }
 
-BOOL MoveIntersection (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL MoveIntersection (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (104);
 #endif
@@ -3557,7 +3557,7 @@ GSSiExitProg (104);
 }
 #endif
 }
-BOOL ZoomIn (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ZoomIn (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (150);
 #endif
@@ -3674,7 +3674,7 @@ BOOL DisplayMLBitmap (int ilevel)
 	return rtn;
 }			
 
-BOOL SmoothZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SmoothZoom (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (150);
 #endif
@@ -4115,7 +4115,7 @@ GSSiExitProg (150);
 }
 #endif
 }
-BOOL CreateTiles (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateTiles (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (150);
 #endif
@@ -4320,7 +4320,7 @@ GSSiExitProg (150);
 #endif
 }
 
-BOOL ZoomOut (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ZoomOut (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (149);
 #endif
@@ -4393,7 +4393,7 @@ GSSiExitProg (149);
 }
 #endif
 }
-BOOL MoveTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL MoveTextBox (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  char key;
  POINT	MousePoint;
@@ -4479,7 +4479,7 @@ BOOL MoveTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL EditTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL EditTextBox (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
  char key;
  int	nRc;
@@ -4630,7 +4630,7 @@ BOOL EditTextBox (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Fun
     return (TRUE);
 }
 
-BOOL OffsetAreaHP (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL OffsetAreaHP (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (716);
 #endif
@@ -4738,7 +4738,7 @@ GSSiExitProg (716);
 #endif
 }
 
-BOOL ChangeClassVis (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ChangeClassVis (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (162);
 #endif
@@ -4810,7 +4810,7 @@ GSSiExitProg (162);
 #endif
 } 
 
-BOOL ChangeRedefColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ChangeRedefColor (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key;
  POINT	MousePoint;
@@ -4896,7 +4896,7 @@ BOOL ChangeRedefColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL ChangePenColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ChangePenColor (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key;
  POINT	MousePoint;
@@ -4968,7 +4968,7 @@ BOOL ChangePenColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     }
     return (TRUE);
 }
-BOOL ChangePenNumber (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ChangePenNumber (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key, str[16];
  POINT	MousePoint;
@@ -5035,7 +5035,7 @@ BOOL ChangePenNumber (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL MoveSizeViewport (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL MoveSizeViewport (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (911);
 #endif
@@ -5320,7 +5320,7 @@ GSSiExitProg (911);
 #endif
 } 
 
-BOOL EditViewport (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditViewport (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (912);
 #endif
@@ -5368,7 +5368,7 @@ GSSiExitProg (912);
 }
 #endif
 }
-BOOL AdjustOrthoColors (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AdjustOrthoColors (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (722);
 #endif
@@ -5409,7 +5409,7 @@ GSSiExitProg (722);
 #endif
 }
 
-BOOL SelectOrigOrtho (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SelectOrigOrtho (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (725);
 #endif
@@ -5495,7 +5495,7 @@ GSSiExitProg (725);
 #endif
 }
 
-BOOL AdjustOrthos (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AdjustOrthos (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (726);
 #endif
@@ -5633,7 +5633,7 @@ GSSiExitProg (726);
 #endif
 }
 
-BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AddDocument (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int		irec;
  	HFILE	FidNoteType; 
@@ -5886,7 +5886,7 @@ BOOL AddDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 return TRUE;
 }
 
-BOOL DisplayDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL DisplayDocument (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key; 
  long	LastPicked=LONG_MAX;
@@ -5927,7 +5927,7 @@ BOOL DisplayDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL CreatePoly (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL CreatePoly (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {HDC hDC;
  char key;
  static	POINTS	MousePoint;
@@ -6596,7 +6596,7 @@ RtnFalse:
     return (FALSE);   
     
 }
-BOOL CreateHLTArea (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateHLTArea (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
  char key;
  static	BOOL	Inited=FALSE;
@@ -6669,7 +6669,7 @@ BOOL CreateHLTArea (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     }
     return (TRUE);
 } 
-BOOL CreateNewPolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateNewPolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
  char key;   
  short	rtn=1;
@@ -6976,7 +6976,7 @@ ExitLine: 	GSSiGlobUlFree (&hStuff);
     return rtn;
 }
 
-BOOL CreateNewPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateNewPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	BOOL HaveLocPoint, ShowDrag; 
 	DPOINT	AZPoint; 
@@ -7113,7 +7113,7 @@ BOOL CreateNewPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL DistancePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL DistancePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {  
  char key;
  static	BOOL	Inited=FALSE;   
@@ -7196,7 +7196,7 @@ BOOL DistancePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, sho
     }
     return (TRUE);
 }
-BOOL HighlightItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (742);
 #endif
@@ -7303,7 +7303,7 @@ GSSiExitProg (742);
 #endif
 } 
 
-BOOL SetStreetName (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SetStreetName (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (744);
 #endif
@@ -7350,7 +7350,7 @@ GSSiExitProg (744);
 #endif
 }
 
-BOOL CreateNetLink (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short function)
+BOOL CreateNetLink (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short function)
 {HDC hDC;
  char key;     
  int	st, DoADD,ii;
@@ -7864,7 +7864,7 @@ Exit:
     }
     return (TRUE);
 }
-BOOL DisplayNetInfo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL DisplayNetInfo (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key;     
  int	st; 
@@ -8069,7 +8069,7 @@ BOOL DisplayNetInfo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL DisplayNetMarkers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL DisplayNetMarkers (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key;     
  int	st; 
@@ -8245,7 +8245,7 @@ BOOL DisplayNetMarkers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL DeleteNetMarker (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL DeleteNetMarker (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key;     
  int	st; 
@@ -8289,7 +8289,7 @@ BOOL DeleteNetMarker (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL EditPickMacro (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditPickMacro (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (749);
 #endif
@@ -8336,7 +8336,7 @@ GSSiExitProg (749);
 #endif
 }
 
-BOOL ClearRedef(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ClearRedef(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (750);
 #endif
@@ -8383,7 +8383,7 @@ GSSiExitProg (750);
 #endif
 } 
 
-BOOL ToggleFunStack (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL ToggleFunStack (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 #if ENABLETRACE
 {GSSiEnterProg (752);
 #endif
@@ -8437,7 +8437,7 @@ GSSiExitProg (752);
 #endif
 }
 
-BOOL SetCommandViewport (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SetCommandViewport (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (751);
 #endif
@@ -8476,7 +8476,7 @@ GSSiExitProg (751);
 }
 #endif
 }
-BOOL ShowPolyPoints (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ShowPolyPoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (826);
 #endif
@@ -8542,7 +8542,7 @@ GSSiExitProg (826);
 #endif
 }
 
-BOOL SaveRedefFile (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SaveRedefFile (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (840);
 #endif
@@ -8575,7 +8575,7 @@ GSSiExitProg (840);
 #endif
 }
 
-BOOL LoadRedefFile (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL LoadRedefFile (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (841);
 #endif
@@ -8613,7 +8613,7 @@ GSSiExitProg (841);
 #endif
 }
 
-BOOL EditCmdString (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditCmdString (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (975);
 #endif
@@ -8703,7 +8703,7 @@ GSSiExitProg (975);
 #endif
 }
 
-BOOL SetTAGGF (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SetTAGGF (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (834);
 #endif
@@ -8735,7 +8735,7 @@ GSSiExitProg (834);
 #endif
 }
 
-BOOL SetSYMGF (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SetSYMGF (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (835);
 #endif
@@ -8767,7 +8767,7 @@ GSSiExitProg (835);
 #endif
 } 
 
-BOOL ChangeDesc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ChangeDesc (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (853);
 #endif
@@ -8901,7 +8901,7 @@ GSSiExitProg (853);
 #endif
 }
 
-BOOL SplitSegment (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL SplitSegment (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
 	short	st, i;
 	
@@ -9075,7 +9075,7 @@ BOOL SplitSegment (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Fu
     return (TRUE);
 }
 
-BOOL SplitPolygon (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL SplitPolygon (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
 	short	st;
 	DWORD	i,j,n; 
@@ -9354,7 +9354,7 @@ UsePicked:
     return (TRUE);
 }
 
-BOOL ReplacePolyPoints (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL ReplacePolyPoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
 	short	st;
 	DWORD	i,j,n; 
@@ -9633,7 +9633,7 @@ UsePicked:
     return (TRUE);
 }
 
-BOOL DeleteItems (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short function)
+BOOL DeleteItems (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short function)
 #if ENABLETRACE
 {GSSiEnterProg (851);
 #endif
@@ -9675,7 +9675,7 @@ GSSiExitProg (851);
 }
 #endif
 } 
-BOOL DeleteStreetNet (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short function)
+BOOL DeleteStreetNet (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short function)
 {
 	char	mess[128], TrueName[66];
     BOOL		Opened;
@@ -9781,7 +9781,7 @@ BOOL DeleteStreetNet (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short
     return (TRUE);
 }
 
-BOOL SelectStreetLink (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SelectStreetLink (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  HDC hDC;
  char key;     
@@ -9873,7 +9873,7 @@ BOOL SelectStreetLink (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL SnapTo (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL SnapTo (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {HDC hDC;
  char key, str[128];     
  BOOL	st;
@@ -10325,7 +10325,7 @@ LockPoint:
     return (TRUE);
 }
 
-BOOL EditAddress (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditAddress (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (848);
 #endif
@@ -10843,7 +10843,7 @@ GSSiExitProg (848);
 #endif
 }
 
-BOOL AddSegStreetName (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AddSegStreetName (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (847);
 #endif
@@ -10947,7 +10947,7 @@ GSSiExitProg (847);
 #endif
 }
 
-BOOL LoadMarkersFromHighlight (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL LoadMarkersFromHighlight (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {HDC hDC;
  char key;     
  int	st; 
@@ -11164,7 +11164,7 @@ NextMarker:;
     return (TRUE);
 }
 
-BOOL ProcessCmdString (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessCmdString (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (974);
 #endif
@@ -11232,7 +11232,7 @@ GSSiExitProg (974);
 #endif
 }
 
-BOOL SetPhotoTrans (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SetPhotoTrans (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1112);
 #endif
@@ -11406,7 +11406,7 @@ GSSiExitProg (1112);
 #endif
 }
 
-BOOL TrackPhotoLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL TrackPhotoLoc (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1113);
 #endif
@@ -11500,7 +11500,7 @@ GSSiExitProg (1113);
 #endif
 } 
 
-BOOL SelectStreetTemplate (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL SelectStreetTemplate (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1114);
 #endif
@@ -11622,7 +11622,7 @@ GSSiExitProg (1114);
 #endif
 }
 
-BOOL TrackLocInOtherVP (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL TrackLocInOtherVP (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1116);
 #endif
@@ -11697,7 +11697,7 @@ GSSiExitProg (1116);
 #endif
 }
 
-BOOL CreateNullMap (HWND hWnd, int Message, short Function)
+BOOL CreateNullMap (HWND hWnd, UINT Message, short Function)
 { 
 
  switch (Message)
@@ -11750,7 +11750,7 @@ BOOL CreateNullMap (HWND hWnd, int Message, short Function)
     return (TRUE);
 }
 
-BOOL IdentifyPolygons (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL IdentifyPolygons (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  switch (Message)
    {
@@ -11769,7 +11769,7 @@ BOOL IdentifyPolygons (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }
 
-BOOL EditText (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL EditText (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (879);
 #endif
@@ -11940,7 +11940,7 @@ GSSiExitProg (879);
 #endif
 }
 
-BOOL Sponge (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL Sponge (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (151);
 #endif
@@ -11975,7 +11975,7 @@ GSSiExitProg (151);
 #endif
 }
 
-BOOL EditTextMultiple (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditTextMultiple (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (881);
 #endif
@@ -12090,7 +12090,7 @@ GSSiExitProg (881);
 #endif
 } 
 
-BOOL AddEditTAG (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AddEditTAG (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (878);
 #endif
@@ -12207,7 +12207,7 @@ GSSiExitProg (878);
 #endif
 }
 
-BOOL EditTextHeader (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL EditTextHeader (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (843);
 #endif
@@ -12397,7 +12397,7 @@ GSSiExitProg (843);
 }
 #endif
 }
-BOOL AddTurnData (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL AddTurnData (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
 	TURNKEY	TurnKey;
 	double	TurnCost;
@@ -12463,7 +12463,7 @@ NextRef:;
     return (TRUE);
 } 
 
-BOOL OffsetPolylinesHLT (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL OffsetPolylinesHLT (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (717);
 #endif
@@ -12527,7 +12527,7 @@ GSSiExitProg (717);
 #endif
 } 
 
-BOOL FAR PASCAL ADJUSTBITMAPCOLORSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADJUSTBITMAPCOLORSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	 
 	static	LPVIEWPORT	OrthVP; 
 	short	ii;
@@ -12667,7 +12667,7 @@ BOOL FAR PASCAL ADJUSTBITMAPCOLORSMsgProc(HWND hWndDlg, int Message, WPARAM wPar
  return TRUE;
 }
 
-BOOL AdjustBitmapColors (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL AdjustBitmapColors (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {
 #define	NUMENTRIES	256  
 	POINT	MousePoint;   
@@ -12769,7 +12769,7 @@ BOOL AdjustBitmapColors (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, s
     return (TRUE);
 } 
 
-BOOL OrthoFilterFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL OrthoFilterFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {
 #define	NUMENTRIES	256  
 	POINT	MousePoint;   
@@ -12887,7 +12887,7 @@ BOOL OrthoFilterFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, 
     return (TRUE);
 } 
 
-BOOL HighlightByClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL HighlightByClass (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1313);
 #endif
@@ -12946,7 +12946,7 @@ GSSiExitProg (1313);
 #endif
 } 
 
-BOOL AddCirclePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AddCirclePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (931);
 #endif
@@ -13022,7 +13022,7 @@ GSSiExitProg (931);
 #endif
 }
 
-BOOL AddRectanglePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AddRectanglePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (931);
 #endif
@@ -13083,7 +13083,7 @@ GSSiExitProg (931);
 #endif
 }
 
-BOOL SelectDist (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SelectDist (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (935);
 #endif
@@ -13132,7 +13132,7 @@ GSSiExitProg (935);
 #endif
 }
 
-BOOL DragDist(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL DragDist(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {
 	GSSiEnterProg(936);
@@ -13217,7 +13217,7 @@ void ExecuteGraphicsMacro(int opt, POINT MousePoint, DPOINT BasePoint)
 	sprintf(cmd, "$MACRO(%s,%i,%i %i,%f %f)", GraphicsMacro,opt, MousePoint.x, MousePoint.y, BasePoint.x, BasePoint.y);
 	ProcessText(cmd);
 }
-BOOL GraphicsMacroFunction(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL GraphicsMacroFunction(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char key;
 	static	HCURSOR	InCursor;
@@ -13259,7 +13259,7 @@ BOOL GraphicsMacroFunction(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-BOOL PointsFromHLT (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL PointsFromHLT (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (952);
 #endif
@@ -13487,7 +13487,7 @@ BOOL MoveScreen (int xinc,int yinc,HANDLE hSavedScreen,int ScreenID)
 	return TRUE;
 }
 
-BOOL SlideScreen (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SlideScreen (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (965);
 #endif
@@ -13594,7 +13594,7 @@ GSSiExitProg (965);
 }
 #endif
 }
-BOOL TraverseEntry (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL TraverseEntry (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (157);
 #endif
@@ -13648,7 +13648,7 @@ GSSiExitProg (157);
 #endif
 }
 
-BOOL RotateSymbols (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL RotateSymbols (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 { 
 	static	BOOL HaveLocPoint; 
 	DPOINT	AZPoint; 
@@ -13841,7 +13841,7 @@ BOOL RotateSymbols (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short F
     return (TRUE);
 }
 
-BOOL EditSymbol (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL EditSymbol (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1052);
 #endif
@@ -13944,7 +13944,7 @@ GSSiExitProg (1052);
 #endif
 }
 
-BOOL PointsFromOffset (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL PointsFromOffset (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (953);
 #endif
@@ -14008,7 +14008,7 @@ GSSiExitProg (953);
 #endif
 } 
 
-BOOL PointsFromLinfit (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL PointsFromLinfit (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1080);
 #endif
@@ -14056,7 +14056,7 @@ GSSiExitProg (1080);
 #endif
 }
 
-BOOL SnapToIntersection (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL SnapToIntersection (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {HDC hDC;
  char key;     
  int	st;     
@@ -14236,7 +14236,7 @@ GetHLT:
     return (TRUE);
 }
 
-BOOL RelocatePoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL RelocatePoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1060);
 #endif
@@ -14473,7 +14473,7 @@ GSSiExitProg (1060);
 #endif
 }
 
-BOOL TraceSpill (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL TraceSpill (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1064);
 #endif
@@ -14556,7 +14556,7 @@ GSSiExitProg (1064);
 #endif
 }
 
-BOOL AdjustTravPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL AdjustTravPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
  char key;
  static	HBITMAP	hShowPoint=0;  
@@ -14674,7 +14674,7 @@ BOOL AdjustTravPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short
     return (TRUE);
 } 
 
-BOOL CreateAreaAroundPoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CreateAreaAroundPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
  char key;   
  short	rtn=1;
@@ -15016,7 +15016,7 @@ ExitLine: 	GSSiGlobUlFree (&hStuff);
     return rtn;
 } 
 
-BOOL ThemeChangeSymbol (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeChangeSymbol (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1232);
 #endif
@@ -15165,7 +15165,7 @@ GSSiExitProg (1232);
 }
 #endif
 }
-BOOL ThemeChangeFactor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeChangeFactor (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1232);
 #endif
@@ -15239,7 +15239,7 @@ GSSiExitProg (1232);
 #endif
 } 
 
-BOOL ThemeChangeWidth (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeChangeWidth (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1232);
 #endif
@@ -15315,7 +15315,7 @@ GSSiExitProg (1232);
 }
 #endif
 } 
-BOOL EdgeMatchLines (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EdgeMatchLines (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1099);
 #endif
@@ -15472,7 +15472,7 @@ GSSiExitProg (1099);
 #endif
 }
 
-BOOL MovePoint (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL MovePoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1110);
 #endif
@@ -15583,7 +15583,7 @@ GSSiExitProg (1110);
 #endif
 }
 
-BOOL MoveOffsetLine (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL MoveOffsetLine (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1110);
 #endif
@@ -15703,7 +15703,7 @@ GSSiExitProg (1110);
 #endif
 }
 
-BOOL RefConnectOutput (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL RefConnectOutput (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  
  switch (Message)
@@ -15732,7 +15732,7 @@ BOOL RefConnectOutput (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 }  
 
-BOOL SelectByClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SelectByClass (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1315);
 #endif
@@ -15772,7 +15772,7 @@ GSSiExitProg (1315);
 #endif
 } 
 
-BOOL ChangeRefno (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL ChangeRefno (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1072);
 #endif
@@ -15852,7 +15852,7 @@ GSSiExitProg (1072);
 #endif
 }  
 
-BOOL IdentifyTraverseLeg (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL IdentifyTraverseLeg (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {    
 	char	str[128];
 	
@@ -15909,7 +15909,7 @@ BOOL IdentifyTraverseLeg (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,s
     return (TRUE);
 }
 
-BOOL EditBrushColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL EditBrushColor (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1053);
 #endif
@@ -16088,7 +16088,7 @@ GSSiExitProg (1053);
 #endif
 } 
 
-BOOL SnapToPolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SnapToPolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (934);
 #endif
@@ -16237,7 +16237,7 @@ void ShowCurPoint (HWND hWnd,int CurPoint)
 	DisplayMarkers = SaveDM;
 	return;
 }
-BOOL RedefinePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,int Function)
+BOOL RedefinePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,int Function)
 {  
 	static	BOOL	Inited=FALSE;  
 	static	HIGHLIGHTDATA	HighlightData;
@@ -16394,7 +16394,7 @@ BOOL RedefinePolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,int 
     return (TRUE);
 } 
 
-BOOL EditRedefData (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditRedefData (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (839);
 #endif
@@ -16430,7 +16430,7 @@ GSSiExitProg (839);
 #endif
 }
 
-BOOL AddHltAreaPolyline (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AddHltAreaPolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1177);
 #endif
@@ -16487,7 +16487,7 @@ GSSiExitProg (1177);
 #endif
 }
 
-BOOL AutoSplinePoints (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL AutoSplinePoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	POINTS	MousePoint;
 	POINT	ScreenPoints[2];
@@ -16662,7 +16662,7 @@ EndOfTheLine:
     }
     return (TRUE);
 } 
-BOOL SetViewportParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL SetViewportParms (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (1381);
 #endif
@@ -16819,7 +16819,7 @@ GSSiExitProg (1381);
 #endif
 }
 
-BOOL TextSizeClass (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL TextSizeClass (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (158);
 #endif
@@ -16957,7 +16957,7 @@ GSSiExitProg (158);
 #endif
 }
 
-BOOL DeleteItem (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL DeleteItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (742);
 #endif
@@ -17029,7 +17029,7 @@ GSSiExitProg (742);
 #endif
 }
 
-BOOL CopyPolylineWithOffset (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam, short Function)
+BOOL CopyPolylineWithOffset (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Function)
 {  
  char key;   
  short	rtn=1;
@@ -17100,7 +17100,7 @@ BOOL CopyPolylineWithOffset (HWND hWnd, int Message, WPARAM wParam, LPARAM lPara
     return rtn;
 } 
 
-BOOL LegendSetup (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL LegendSetup (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
  POINT	MousePoint;  
  short pixdist = 4;
@@ -17135,7 +17135,7 @@ BOOL LegendSetup (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 } 
 
-BOOL LegendSelect (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL LegendSelect (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {  
 	POINT	MousePoint;  
 	FILLSIGNATURE Signature;
@@ -17158,7 +17158,7 @@ BOOL LegendSelect (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 } 
 
-BOOL EditCityLoc (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL EditCityLoc (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (152);
 #endif
@@ -17249,7 +17249,7 @@ GSSiExitProg (152);
 #endif
 }
 
-BOOL RemovePolyLoop (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL RemovePolyLoop (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {
 #define MAX_LOOPS	64
 	short	st;
@@ -17473,7 +17473,7 @@ UsePicked:
     return (TRUE);
 }
 
-BOOL SetLayerColor (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL SetLayerColor (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (742);
 #endif
@@ -17537,7 +17537,7 @@ GSSiExitProg (742);
 }
 #endif
 } 
-BOOL ThemeShowClassMembers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeShowClassMembers (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  static POINT	MousePoint;
  static	HaveDown=FALSE;
@@ -17717,7 +17717,7 @@ BOOL ThemeShowClassMembers (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam
     return (TRUE);
 } 
 
-BOOL TraceDownstream (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL TraceDownstream (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {    
 	char	str[128];  
 	static	short	np;
@@ -17768,7 +17768,7 @@ BOOL TraceDownstream (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short
     return (TRUE);
 } 
 
-BOOL ThemeToggleClassStatus (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ThemeToggleClassStatus (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1232);
 #endif
@@ -17918,7 +17918,7 @@ GSSiExitProg (1232);
 #endif
 } 
 
-BOOL SetPNParms (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL SetPNParms (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {HDC hDC;
  char key;     
  char	str[128];

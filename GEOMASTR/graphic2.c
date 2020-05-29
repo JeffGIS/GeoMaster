@@ -37,7 +37,7 @@ void PickBoxesDestroy(VPID)
 	numPickBoxes = 0;
 }
 
-BOOL ProcessPickBoxes (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessPickBoxes (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (113);
 #endif
@@ -324,7 +324,7 @@ void SetConfigFromCursor (POINT CursorPoint)
 	return;
 }
          
-BOOL ProcessPassiveFunctions (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+BOOL ProcessPassiveFunctions (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (113);
 #endif
@@ -542,7 +542,7 @@ BOOL SelectZoomMacro (HWND hWnd)
 	return rtn;
 }
          
-BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (113);
 #endif
@@ -739,7 +739,7 @@ GSSiExitProg (113);
 #endif
 }
 
-void DisplayCursorCoordinate (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+void DisplayCursorCoordinate (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (114);
 #endif
@@ -3235,7 +3235,7 @@ GSSiExitProg (153);
 #endif
 }
 
-BOOL MarginPan (HWND hWnd,int Message, WPARAM wParam, LPARAM lParam)
+BOOL MarginPan (HWND hWnd,UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (154);
 #endif

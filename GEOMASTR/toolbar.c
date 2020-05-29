@@ -161,7 +161,7 @@ BOOL CALLBACK EnumChildProcTT(HWND hwndCtrl, LPARAM lParam);
 void DisplayPanZoomRot (HWND hWnd,HDC hDC,LPRECT pRect);
 HANDLE FillTBRows (int nTBTot,LPSHORT TB,int nInIndexArray,LPSHORT IndexArray,int nRows,int iRow,int lastRow,LPHANDLE phOut);
 void DrawBtnFocusRect(HWND BtnWnd);
-LRESULT CALLBACK ButtonSubclassProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ButtonSubclassProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
 HWND CursorInVisMenuWnd (POINT pt)
 {
@@ -2364,7 +2364,7 @@ extern	BOOL	InDebug;
 	return;
 }
 
-LONG FAR PASCAL PanZoomRotWndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL PanZoomRotWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  HMENU      hMenu=0;            /* handle for the menu                 */
  HBITMAP    hBitmap=0;          /* handle for bitmaps                  */                              
@@ -3848,7 +3848,7 @@ void RemoveToolbarPointer(int toolbarID)
 	return;
 }
 
-BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	HBITMAP	hBM1,hBM2,hBM3;
 	HDIB	hDIB;
@@ -5000,7 +5000,7 @@ BOOL GetFileNameFromLink (LPSTR FileName)
 	return rtn;
 }
 
-BOOL CALLBACK PICTVIEWERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK PICTVIEWERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	HDIB	hDIB;
 	HPALETTE	hPal;

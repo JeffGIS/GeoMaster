@@ -396,7 +396,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 }  // WinMain
 
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
+LRESULT CALLBACK WndProc(HWND hWnd, UINT Message,
 	WPARAM wParam, LPARAM lParam)
 {
 	HDC          hdc;

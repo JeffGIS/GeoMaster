@@ -189,13 +189,13 @@ int   TB_BestFit(HWND tblhwnd,int extra,LPARAM count,FARPROC fp);
 int  TB_RedrawTable(HWND hWnd);
 POINT POINTStoPOINT(POINTS points);
 POINTS POINTtoPOINTS(POINT point);    
-BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, UINT cntlSQL,
+BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam, UINT cntlSQL,
                                 UINT cntlSET_FILE, UINT cntlDATABASE_LIST, UINT cntlTABLE_NAMES,UINT cntlTABLE_NAMES_TITLE,
                                 LPUINT pcntlFIELD_NAMES,int NumFieldLists,
                                 LPSTR DataFile, short *DataFileType, HANDLE *hThemeDB,
                                 LPBOOL pFieldListIsCB, BOOL WantBrackets);
-BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
-BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 void ClientRectToScreenRect (HWND hWnd,LPRECT pRect);
 void ScreenRectToClientRect (HWND hWnd,LPRECT pRect);
 BOOL SetDynDlgData (HWND hWndDlg,LPSTR Name,LPUINT pcntls,short lncntls);
@@ -1419,7 +1419,7 @@ BOOL GetSystemErrMessage (DWORD errorcode,LPSTR Mess);
 HWND CreateToolbarWnd (HWND hWnd); 
 void AbendWriter (LPSTR Message,LPSTR Title,long at,int type);
 int SysMonthFromSymTime (time_t systime);
-BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 void __cdecl BackgroundCache (LPHANDLE phArgs);
 BOOL StartBackgroundCache (void);
 void StopBackgroundCache (void);

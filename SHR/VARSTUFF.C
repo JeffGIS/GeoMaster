@@ -6574,7 +6574,7 @@ LPSTR ExpandText2 (LPSTR InText)
 	return InText;
 }
 
-BOOL FAR PASCAL MESSAGEBOXHALTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MESSAGEBOXHALTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	HANDLE	hSaveBM=0;	
 

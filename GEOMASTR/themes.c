@@ -591,7 +591,7 @@ GSSiExitProg (1230);
 
  
 
-BOOL ThemeRunMacro (HWND hWnd, int Message, WPARAM wParam,LPARAM lParam)
+BOOL ThemeRunMacro (HWND hWnd, UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1233);
 #endif

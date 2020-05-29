@@ -5848,7 +5848,7 @@ GSSiExitProg (789);
 #endif
 }
 
-BOOL FAR PASCAL COLOR_ADJUSTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COLOR_ADJUSTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (724);
 #endif

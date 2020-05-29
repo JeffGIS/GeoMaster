@@ -215,7 +215,7 @@ GSSiExitProg (455);
 }
 #endif
 }
-BOOL ProcessGraphicsFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessGraphicsFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1338);
 #endif
@@ -664,7 +664,7 @@ GSSiExitProg (1339);
 #endif
 }
 
-BOOL ProcessGraphicsFunction2 (short Function,HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessGraphicsFunction2 (short Function,HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1340);
 #endif
@@ -1316,7 +1316,7 @@ GSSiExitProg (1347);
 }
 
 BOOL ProcessGraphicsFunction4 (short Function,
-							   HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {   
 	if (Message == GF_CLOSE && wParam && Function != wParam)
 		return FALSE;
@@ -1889,7 +1889,7 @@ BOOL ProcessGraphicsFunction4 (short Function,
    return (FALSE);
 } 
 BOOL ProcessGraphicsFunction3(short Function,
-	HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+	HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	BOOL rtn;
 	LPVIEWPORT SaveVP = CurView;

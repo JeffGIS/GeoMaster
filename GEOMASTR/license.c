@@ -533,7 +533,7 @@ void AddTextToClipboard (LPSTR txt)
 	return;
 }
 
- BOOL FAR PASCAL LICENSEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+ BOOL FAR PASCAL LICENSEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	
 	UINT	PrevErrMode;

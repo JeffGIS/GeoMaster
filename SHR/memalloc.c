@@ -761,7 +761,7 @@ void GetProgName (short i, LPSTR Name)
 	return;
 }
 
-BOOL FAR PASCAL TRACELISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRACELISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	int	TabStops[2]={45,500};
 	char	str[512], ProgName[256],FindString[32];

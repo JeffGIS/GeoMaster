@@ -1392,7 +1392,7 @@ GSSiExitProg (1312);
 #endif
 } 
 
-BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg,UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (620);
 #endif
@@ -1942,7 +1942,7 @@ GSSiExitProg (619);
 #endif
 }
 
-BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (620);
 #endif

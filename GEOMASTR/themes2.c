@@ -1891,7 +1891,7 @@ GSSiExitProg (1262);
 #endif
 }
 
-BOOL ProcessDataDisplayInput (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+BOOL ProcessDataDisplayInput (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 {
 	char	str[64];
 	POINT	Point16;

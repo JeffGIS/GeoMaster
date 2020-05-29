@@ -44,7 +44,7 @@ void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs);
 
 INT_PTR CALLBACK	AboutGMDoc(HWND, UINT, WPARAM, LPARAM);
 ATOM MyRegisterClassGMDoc(HINSTANCE hInstance);
-LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen,POINT tiePoint,int Fade, BOOL Transparent, COLORREF TranColor);
 
 // Message handler for about box.

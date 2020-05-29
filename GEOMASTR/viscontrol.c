@@ -177,10 +177,10 @@ int GetOnValue (int layer,int symnum,int type,int nSyms,HANDLE hSyms);
 void SortLayerSymbols (int nSyms,HANDLE hSyms,LPHANDLE phSymOrder);
 void SetVisibilityOfParentSymbol (int symnum,int nSyms,HANDLE hSyms,int status);
 void AddVCRect (LPRECT prect,int level,int viewport,int layer,int symnum,int recttype,BOOL AllowDoubleClick);
-BOOL FAR COLORINTENSITYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
-LONG FAR PASCAL CatalogMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam);
-LONG FAR PASCAL AutoVisMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam);
-LONG FAR PASCAL CMDMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam);
+BOOL FAR COLORINTENSITYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL CatalogMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam);
+LONG FAR PASCAL AutoVisMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam);
+LONG FAR PASCAL CMDMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam);
 BOOL DrawAVButton (HDC hDC,LPSTR ID,int iAV,LPINT px,LPINT py,BOOL On);
 int DrawCMDButton (HDC hDC,LPSTR ID,HBITMAP hBM,int iCMD,LPINT px,LPINT py,int h,int w);
 HANDLE GetMenuWindowHandle (HWND hWnd);
@@ -1040,7 +1040,7 @@ void DisplayFloatMenu (BOOL CheckCursorPos)
 }
 
 
-LONG FAR PASCAL FloatMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL FloatMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	BOOL	rtn, ii;
 	UINT	ilayer;
@@ -1722,7 +1722,7 @@ if (Message == WM_LBUTTONDOWN)
 	return rtn;
 }
 
-LONG FAR PASCAL AutoVisMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL AutoVisMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	HDC	hDC;
 	long	rtn=0;
@@ -2228,7 +2228,7 @@ Exit:
 	return rtn;
 } 
                               
-LONG FAR PASCAL CMDMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL CMDMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	HDC	hDC;
 	long	rtn=0;
@@ -2739,7 +2739,7 @@ BOOL InitCatalogData (HANDLE hInitData,BOOL Pickability)
 }
 
 
-LONG FAR PASCAL CatalogMenuWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL CatalogMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	HDC	hDC;
 	long	rtn=0;
@@ -4164,7 +4164,7 @@ HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect
 	return hWndMenu;
 }
 
-BOOL FAR COLORINTENSITYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR COLORINTENSITYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
   switch(Message)
    {

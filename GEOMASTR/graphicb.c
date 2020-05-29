@@ -4071,7 +4071,7 @@ BOOL ProcessVPPixelThemes (void)
 	return TRUE;
 }
  
-void SetViewportForCommand (int Message, WPARAM wParam)
+void SetViewportForCommand (UINT Message, WPARAM wParam)
 {   
 	switch (Message)
 	{ 
@@ -4844,7 +4844,7 @@ int LevelTypeFromPickType (int PickType)
 	return 1;
 }
 
-BOOL FAR PASCAL OWNERLOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL OWNERLOCMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
 	BOOL	HaveWildcard;
 	char	str[256];
@@ -5384,7 +5384,7 @@ NextOff:
 	return nHits;
 }
 
-BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
 	int		Trigger=2;
 	BOOL	HaveWildcard;
@@ -5908,7 +5908,7 @@ FoundPart:							;
  return TRUE;
 }      
 
-BOOL FAR PASCAL OWNERLOCMsgProc3(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL OWNERLOCMsgProc3(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
 	int		Trigger=3;
 	BOOL	HaveWildcard;
@@ -6411,7 +6411,7 @@ FoundPart:							;
  return TRUE;
 }      
 
-BOOL FAR PASCAL OWNERLOCMsgProc4(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL OWNERLOCMsgProc4(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
 	int		Trigger=2;
 	BOOL	HaveWildcard;

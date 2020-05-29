@@ -4057,7 +4057,7 @@ BOOL VehicleRecentlyMoved (LPVEHLOCATION	pVehLoc,int Now)
 	return rtn;
 }
 
-BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	RECT	LastRect, ColorRect,ConnectedRect,DisplayRect;
 	int	Choice,iveh,Count;
@@ -4400,7 +4400,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
    }
  return TRUE;
 }
-BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	RECT	LastRect, ColorRect,ConnectedRect,DisplayRect;
 	int	Choice,iveh,Count;
@@ -4768,7 +4768,7 @@ BOOL SetVehicleHistorySelection (int iSel)
 	return FALSE;
 }
 
-BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	UserID[64], Password[32];
 	static	HANDLE	hSaveBM=0;	
@@ -5227,7 +5227,7 @@ LPSTR YorBlank (BOOL v)
 	return pYB;
 }
 
-BOOL FAR PASCAL GEOFENCEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GEOFENCEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	LPVEHLOCATION	pVehLoc;  
 	char	str[512], str2[256], Ext[8]=".gfb";

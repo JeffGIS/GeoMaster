@@ -3,7 +3,7 @@
 #define IDS_ERR_REGISTER_CLASS   1
 #define IDS_ERR_CREATE_WINDOW    2
 
-LONG FAR PASCAL WndProc(HWND, int, WPARAM, LPARAM);
+LONG FAR PASCAL WndProc(HWND, UINT, WPARAM, LPARAM);
 #define CBB_TYPES_LB                108
 #define CBB_DIR_CB                  113
 #define CBB_CONTENTS_LB             114
