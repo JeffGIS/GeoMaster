@@ -20,7 +20,7 @@
             char    FileName[128];
         }   CACHEBUF; 
 
-extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam);
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LPARAM lParam);
 #include "gmextern.h"
 
 static	char	LastTextFile[MAX_PATH]="";

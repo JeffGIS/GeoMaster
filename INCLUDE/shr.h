@@ -59,8 +59,6 @@
 #define BING_API_KEY "AhGA_PqXHM1e8opz8VEBHts-yzpUJVjxTIUdyA9m6x7o-TRAwYupMcn6JWEQf9V3"
 #define WALKSCORE_API_KEY "96cbffe516734da405a527bf86a83bb7"
 
-#define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
-    GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
 
 #define RECTWIDTH(lpRect)     (abs(((lpRect)->right - (lpRect)->left))+0)
 #define RECTHEIGHT(lpRect)    (abs(((lpRect)->bottom - (lpRect)->top))+0)
@@ -147,6 +145,7 @@ typedef struct _OFSTRUCTGM {
 	CHAR szPathName[OFS_MAXPATHNAMEGM];
 } OFSTRUCTGM, *LPOFSTRUCTGM, *POFSTRUCTGM;
 
+WNDPROC ORIGINALPROC(HWND hWnd);
 BOOL SetContinueProcessing(BOOL set);
 
 HWND WindowExists(HWND hWnd);
@@ -206,14 +205,14 @@ BOOL ShowDlgUpdateOptions (HWND hWndEdit,HWND hWndInput);
 BOOL ShowDynDlgUpdateOptions (HWND hWndEdit,HWND hWndInput);
 BOOL GetDynDlgHandle (HWND hWndDlg,LPHANDLE phDynDlgControls);
 BOOL WriteDynDlgData (HWND hWndDlg);
-extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
-extern	BOOL CALLBACK EnumCtrlProcDynDialog(HWND hCtrl,LONG lParam); 
-LONG FAR PASCAL Draw3DDownDynDialog(HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL Draw3DUpDynDialog (HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL Draw3DDown(HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL Draw3DUp (HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam);
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl, LPARAM lParam);
+extern	BOOL CALLBACK EnumCtrlProcDynDialog(HWND hCtrl, LPARAM lParam);
+LONG FAR PASCAL Draw3DDownDynDialog(HWND hWnd, UINT uiMsg,WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL Draw3DUpDynDialog (HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL Draw3DDown(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL Draw3DUp (HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
 USHORT	AddStringToList (LPSTR str,LPSTR pStrings,LPUSHORT plen);
 BOOL GetFieldValFromSetList (LPSTR List,LPSTR Name,LPSTR Val);
 BOOL rread (LPSTR str, LPDOUBLE lpRval, LPINT lpNdp);

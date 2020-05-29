@@ -756,8 +756,10 @@
 #define IDC_TITLE                       622
 #define IDC_FUNFILE                     623
 #define IDC_BUTTONTEXT1                 623
+#define IDC_FUNINDEX                    623
 #define IDC_NEW_THEME                   624
 #define IDC_BUTTONTEXT2                 624
+#define IDC_FUNFILE2                    624
 #define IDC_ACTFUN                      625
 #define IDC_BUTTONTEXT3                 625
 #define IDC_XMAX                        626
@@ -3763,7 +3765,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1262
+#define _APS_NEXT_RESOURCE_VALUE        1263
 #define _APS_NEXT_COMMAND_VALUE         1248
 #define _APS_NEXT_CONTROL_VALUE         2314
 #define _APS_NEXT_SYMED_VALUE           1036

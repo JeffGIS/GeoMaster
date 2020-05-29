@@ -72,8 +72,20 @@ BOOL GetFieldValFromSetList (LPSTR List,LPSTR Name,LPSTR Val)
 	return FALSE;
 }
 
-LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
-    WORD wParam, LONG lParam)
+WNDPROC ORIGINALPROC(HWND hWnd)
+{
+	WNDPROC rtn=0;
+	HANDLE h1, h2;
+	h1 = GetProp(hWnd, "PrLO");
+	h2 = GetProp(hWnd, "PrHI");
+	if (h1 && h2)
+		rtn = (WNDPROC)MAKELONG(h1, h2);
+	if (!rtn)
+		ii = 0;
+	return rtn;
+}
+
+LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     WNDPROC lpOrgProc;
     LONG    lRtn = 0;
@@ -157,7 +169,7 @@ LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,
 
     return (lRtn);
     }
-LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam)
+LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     WNDPROC lpOrgProc;
     LONG    lRtn = 0;
@@ -337,8 +349,7 @@ void Draw3DBorder(HDC hDC, LPRECT pRect,int inStyle, BOOL DoubleWidth)
     }
 
 static
-LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam, int UpOrDown)
+LONG Draw3DUpDown(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam, int UpOrDown)
     {
     WNDPROC lpOrgProc=0;
     LONG    lRtn = 0; 
@@ -412,8 +423,7 @@ LONG Draw3DUpDown(HWND hWnd, unsigned uiMsg,
 
     return (lRtn);
 }
-LONG Draw3DUpDownDynDialog (HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam, int UpOrDown)
+LONG Draw3DUpDownDynDialog (HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam, int UpOrDown)
     {
     WNDPROC lpOrgProc;
     LONG    lRtn = 0; 
@@ -488,33 +498,28 @@ LONG Draw3DUpDownDynDialog (HWND hWnd, unsigned uiMsg,
     return (lRtn);
 }
 
-LONG FAR PASCAL Draw3DDown(HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam)
+LONG FAR PASCAL Draw3DDown(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     return Draw3DUpDown(hWnd, uiMsg, wParam, lParam, DOWN_3D);
     }
 
-LONG FAR PASCAL Draw3DUp(HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam)
+LONG FAR PASCAL Draw3DUp(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     return Draw3DUpDown(hWnd, uiMsg, wParam, lParam, UP_3D);
     }
 
-LONG FAR PASCAL Draw3DDownDynDialog(HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam)
+LONG FAR PASCAL Draw3DDownDynDialog(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     return Draw3DUpDownDynDialog(hWnd, uiMsg, wParam, lParam, DOWN_3D);
     }
 
-LONG FAR PASCAL Draw3DUpDynDialog(HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam)
+LONG FAR PASCAL Draw3DUpDynDialog(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     return Draw3DUpDownDynDialog(hWnd, uiMsg, wParam, lParam, UP_3D);
     }
 
 
-LONG FAR PASCAL GMMessage (HWND hWnd, unsigned uiMsg,
-    WORD wParam, LONG lParam)
+LONG FAR PASCAL GMMessage (HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     {
     return Draw3DUpDown(hWnd, uiMsg, wParam, lParam, 0);
     }
@@ -544,33 +549,33 @@ void FAR PASCAL SubclassControl(HWND hCtrl, void FAR *Callback)
 
 
 
-BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam)
+BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LPARAM lParam)
 {
     char    str[100];
     long	lUserData;
-	return TRUE;
+	//return TRUE;
     GetClassName (hCtrl, str, sizeof (str));
     if (_fstrcmp (str, "Edit") == 0)
         SubclassControl(hCtrl, Draw3DDown);
     else if (_fstrcmp (str, "ListBox") == 0)
-        ;//SubclassControl(hCtrl, Draw3DDown);
+        SubclassControl(hCtrl, Draw3DDown);
     else if (_fstrcmp (str, "ComboBox") == 0)
-        ;//SubclassControl(hCtrl, ComboColor);
+        SubclassControl(hCtrl, ComboColor);
     else if ((_fstrcmp (str, "Static") == 0)
         && (GetWindowLong (hCtrl, GWL_STYLE) & WS_BORDER) != 0)
         {
 /* if control contains no text, recess it, else raise it */
         if (GetWindowText (hCtrl, str, sizeof (str)) == 0)
-            ;//SubclassControl (hCtrl, Draw3DDown);
+            SubclassControl (hCtrl, Draw3DDown);
         else
-            ;//SubclassControl (hCtrl, Draw3DUp);
+            SubclassControl (hCtrl, Draw3DUp);
         } 
     else
-        ;//SubclassControl(hCtrl, GMMessage);
+        SubclassControl(hCtrl, GMMessage);
     return (TRUE);
 }
 
-BOOL CALLBACK EnumCtrlProcDynDialog(HWND hCtrl,LONG lParam)
+BOOL CALLBACK EnumCtrlProcDynDialog(HWND hCtrl,LPARAM lParam)
 {
     char    str[100];
     long	lUserData;

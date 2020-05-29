@@ -14596,7 +14596,7 @@ BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
 	int		i, Choice, n,ii;
 	static	short		EditLayer, FromLayer=-1;
 	LPSTR	lpTAB,lpStartFile, pShp;
-	int		TabStops[3]={85,105,1500};
+	int		TabStops[3]={125,145,1800};
 	int		Types[10]={-1,0,1,4,2,3,5,6,7,8}; 
 	static	LPVIEWPORT	EditView=0, pSaveView;
 	LPVISLIST	FromVis, LastVisList, SaveVis; 
@@ -14735,7 +14735,8 @@ BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
 		 SetDlgItemText (hWndDlg,IDC_VPMARGIN,str);
 		 sprintf (str,"%.1f",CurView->BorderPct);   
 		 SetDlgItemText (hWndDlg,IDC_VPBORDER,str);  
-		 SetDlgItemText (hWndDlg,IDC_FUNFILE,CurView->FunctionDir);
+		 SetDlgItemText(hWndDlg, IDC_FUNFILE, CurView->FunctionDir);
+		 SetDlgItemText(hWndDlg, IDC_FUNFILE2, CurView->FunctionFile);
 		 SetDlgItemText (hWndDlg,IDC_VLFILE,CurView->VisName);
 		 SetDlgItemText (hWndDlg,IDC_PLFILE,CurView->PickName);
 		 SetDlgItemText (hWndDlg,IDC_RDFILE,CurView->DisplayRedefFile);
@@ -15547,7 +15548,8 @@ HaveEmpty:
             	 CurView->Margin = atof (str);
             	 GetDlgItemText (hWndDlg,IDC_VPBORDER,str,10);
             	 CurView->BorderPct = atof (str); 
-				 GetDlgItemText (hWndDlg,IDC_FUNFILE,CurView->FunctionDir,MAX_PATH);
+				 GetDlgItemText(hWndDlg, IDC_FUNFILE, CurView->FunctionDir, MAX_PATH);
+				 GetDlgItemText(hWndDlg, IDC_FUNFILE2, CurView->FunctionFile, MAX_PATH);
 				 GetDlgItemText (hWndDlg,IDC_VLFILE,CurView->VisName,MAX_PATH);
 				 GetDlgItemText (hWndDlg,IDC_PLFILE,CurView->PickName,MAX_PATH);
 				 GetDlgItemText (hWndDlg,IDC_RDFILE,CurView->DisplayRedefFile,MAX_PATH);

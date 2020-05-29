@@ -33,7 +33,7 @@ typedef struct {
 typedef GSWWSTRUCT	*LPGSWWSTRUCT;
 
 
-extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LPARAM lParam); 
 
 #include "gmextern.h"
 

@@ -12,6 +12,8 @@ int	GetFunctionID1 (LPSTR str)
 			if (!_fstrnicmp (str,"B",1)) return 106;
 			if (!_fstrnicmp(str, "E", 1)) return 107;
 			if (!_fstrnicmp(str, "M", 1)) return 108;
+			if (!_fstrnicmp(str, "T", 1)) return 1504;//same as $TEXTTOCLIPBOARD
+			if (!_fstrnicmp(str, "V", 1)) return 803; //for VIEW:same as $EDITFILE
 			return 0;
 }
 int	GetFunctionID2 (LPSTR str)
