@@ -133,7 +133,7 @@ static	HANDLE	hDDSQL=0;
 static	short	DynRecordExists; 
 static	USHORT	lDynStrings,lInitialStrings;
 static	HANDLE	hDynStrings=0,hDynInitialStrings=0;    
-static	char	CurrentDynWhere[256], DynAutoVals[1024], DynOpenCommand[512], DynCloseCommand[512]; 
+static	char	CurrentDynWhere[256], DynAutoVals[1024], DynOpenCommand[1024], DynCloseCommand[1024]; 
 static	BOOL	AllowCreateNewRecord=FALSE;
 static	HWND	DynWnd=0;
 static	BOOL	DDFileUpdated=FALSE;     
@@ -3578,14 +3578,14 @@ BOOL ShowDlgUpdateOptions (HWND hWndEdit,HWND hWndInput)
     HMENU hMenu=CreatePopupMenu(); 
     POINT	position; 
     char	str[1024];
-	char	FileNames[2][MAX_PATH];
+	char	FileNames[2][MAX_PATH] = { 0 };
 	LPSTR	pMacro, pEnd, pEq;
 	int	n=0;
     
     GetClassName (hWndEdit, str, sizeof (str)-1);
     if (!_fstrcmp (str, "Edit"))
     {
-		char FileName[MAX_PATH+1];
+		char FileName[1024];
 
 		GetWindowText (hWndEdit,FileName,1023);
 		if (strlen (FileName) > 4 && !stricmp (&FileName[strlen(FileName)-4],".TXT"))
@@ -3601,23 +3601,48 @@ BOOL ShowDlgUpdateOptions (HWND hWndEdit,HWND hWndInput)
 				AppendMenu (hMenu,MF_ENABLED|MF_STRING,0,str);
 			}
 		}
-		else if ((pMacro = strstr (FileName,"$MACRO(")))
+		else if ((pMacro = strstr(FileName, "$MACRO(")))
 		{
 			LPSTR	pEq;
-			
+
 			pMacro += 7;
-			pEnd = strchr (pMacro,')');
+			pEnd = strchr(pMacro, ')');
 			if (pEnd)
 			{
 				*pEnd = 0;
-				pEnd = strchr (pMacro,',');
+				pEnd = strchr(pMacro, ',');
 				if (pEnd)
 					*pEnd = 0;
-				if (ExistFile (pMacro))
+				if (ExistFile(pMacro))
 				{
-					strcpy (FileNames[1],pMacro);
-					sprintf (str,"Edit macro %s",pMacro);
-					AppendMenu (hMenu,MF_ENABLED|MF_STRING,1,str);
+					strcpy(FileNames[1], pMacro);
+					sprintf(str, "Edit macro %s", pMacro);
+					AppendMenu(hMenu, MF_ENABLED | MF_STRING, 1, str);
+				}
+			}
+		}
+		else if ((pMacro = strstr(FileName, "$M(")))
+		{
+			LPSTR	pEq;
+
+			pMacro += 3;
+			pEnd = strchr(pMacro, ')');
+			if (pEnd)
+			{
+				*pEnd = 0;
+				pEnd = strchr(pMacro, ',');
+				if (pEnd)
+					*pEnd = 0;
+				if (!strchr(pMacro, '\\'))
+					sprintf(FileNames[1], "[%%DL]macros\\%s", pMacro);
+				else
+					strcpy(FileNames[1], pMacro);
+				if (!strrchr(pMacro, '.'))
+					strcat(FileNames[1], ".txt");
+				if (ExistFile(FileNames[1]))
+				{
+					sprintf(str, "Edit macro %s", pMacro);
+					AppendMenu(hMenu, MF_ENABLED | MF_STRING, 1, str);
 				}
 			}
 		}
