@@ -8593,6 +8593,18 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 	}
 	if (Recursive)
 		return FALSE;
+	if (strstr(Path, "ORTHOS")||strstr(Path, "orthos"))
+	{
+		char orthPath[MAX_PATH];
+		strcpy(orthPath, "[%DL]ORTHOS\\[ORTHODATE]\\FILELIST.TXT");
+		ExpandText(orthPath);
+		if (!stricmp(Path,orthPath))
+		{
+			strcpy(Path, "[%DL]ORTHOS\\[%ORTHTYPE][ORTHODATE]\\FILELIST.TXT");
+			ExpandText(Path);
+			return TRUE;
+		}
+	}
 	if (*Path == '(')
 	{
 		LPSTR pEnd = strchr (Path,')');

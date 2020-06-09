@@ -720,6 +720,7 @@ DWORD SearchDirectory32 (LPSTR Name,DWORD UseHandle,LPDWORD pType,WIN32_FIND_DAT
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA	FindFileData;
+	static PVOID OldValue;
 	
 	if (!Name)
 	{
@@ -728,15 +729,20 @@ DWORD SearchDirectory32 (LPSTR Name,DWORD UseHandle,LPDWORD pType,WIN32_FIND_DAT
 	}	
 	if (!UseHandle)
 	{
+		BOOL st = Wow64DisableWow64FsRedirection(&OldValue);
 		hFind = FindFirstFile(Name, &FindFileData);
-		if (hFind == INVALID_HANDLE_VALUE) 
+		if (hFind == INVALID_HANDLE_VALUE)
+		{
+			st = Wow64RevertWow64FsRedirection(OldValue);
 			return 0;
+		}
 	}
 	else
 	{
 		if (!FindNextFile ((HANDLE)UseHandle,&FindFileData))
 		{
 			FindClose ((HANDLE)UseHandle);
+			BOOL st = Wow64RevertWow64FsRedirection(OldValue);
 			return 0;
 		}
 		hFind = (HANDLE)UseHandle;

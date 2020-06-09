@@ -1827,6 +1827,64 @@ GSSiExitProg (1350);
 			DoubleQuotes(Arg[1], OutLoc);
 			goto Rtnl;
 		}
+		case 858: // $FIRSTNUM(val,allowsign,allowdecpt) allows leading spaces
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			BOOL allowSign = atob(Arg[2]);
+			BOOL allowDecpt = atob(Arg[3]);
+			LPSTR val = Arg[1];
+			while (*val == ' ')
+				val++;
+			if (*val == '-' || *val == '+')
+			{
+				if (!allowSign)
+					val++;
+				else
+					goto Rtn858;
+			}
+			while (*val)
+			{
+				if (!isdigit(*val))
+					val++;
+				else if (*val == '.' && !allowDecpt)
+					val++;
+				else
+					break;
+			}
+			Rtn858:
+				*OutLoc = *val;
+				*(OutLoc + 1) = 0;
+			goto Rtnl;
+		}
+		case 859: // $FIRSTNON(val,allowsign,allowdecpt)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			BOOL allowSign = atob(Arg[2]);
+			BOOL allowDecpt = atob(Arg[3]);
+			LPSTR val = Arg[1];
+			while (*val == ' ')
+				val++;
+			if (*val == '-' || *val == '+')
+			{
+				if (allowSign)
+					val++;
+				else
+					goto Rtn859;
+			}
+			while (*val)
+			{
+				if (isdigit(*val))
+					val++;
+				else if (*val == '.' && allowDecpt)
+					val++;
+				else
+					break;
+			}
+		Rtn859:
+			*OutLoc = *val;
+			*(OutLoc + 1) = 0;
+			goto Rtnl;
+		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);

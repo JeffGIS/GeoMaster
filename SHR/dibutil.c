@@ -2512,11 +2512,8 @@ void AdjustDIBColors (HANDLE hDib)
     	{ 
 			if (isdib32)
 				startrow = FreeImage_GetScanLine(hDib,irow);
-			else
-			{
-				rgb24 = (RGBTRIPLE	*)startrow; 
-				rgb16 = (GSSiCOLOR16 *)startrow; 
-			}
+			rgb24 = (RGBTRIPLE	*)startrow; 
+			rgb16 = (GSSiCOLOR16 *)startrow; 			
     		icol = lpbi->biWidth;
     		while (icol--)
     		{
