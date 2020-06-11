@@ -5753,6 +5753,10 @@ DisplayParcel:
 		     	 PostMessage(hWndMain, WM_COMMAND, IDM_DISPLAY_VEHICLES, 0L);
           	 	 break;
 			
+			case EXECUTE_COMMAND_TIMER:
+				KillTimer(hWnd, EXECUTE_COMMAND_TIMER);
+				ProcessText(CommandExecutedByTimer);
+				break;
 			case SUICIDE_TIMER:
 			{
 								  static BOOL test = TRUE;

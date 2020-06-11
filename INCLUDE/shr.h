@@ -134,6 +134,7 @@ typedef TRN FAR *LPTRN;
 #define BA_NEXTBP		6
 #define BA_SHOWFUN		7
 #define BA_RETURN		8
+#define BA_START		9
 
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {

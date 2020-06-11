@@ -946,7 +946,7 @@ ProcessMacro:
     	{   
 			HANDLE SaveMacArgs;
 			
-			//if (pBreakPoints) breakAtPos(pMacro - pTemp, pBreakPoints, 0, lm);
+			if (pBreakPoints) breakAtPos(pMacro - pTemp, pBreakPoints, 0, lm,BA_START);
 			pEndCmd = MatchLev(pMacro, ';');
     		if (!pEndCmd)
     		{

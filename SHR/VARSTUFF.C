@@ -6732,7 +6732,8 @@ LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 	int		loopBPOffset=0, whileBpOffset=0;
 	int		elseBpOffset=0, thenBpOffset=0;
 
-
+	if (pBrkPt)
+		ii = 1;
 	InExpand = TRUE;
 	if (TraceOn)
 	{   

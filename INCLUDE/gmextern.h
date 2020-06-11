@@ -1768,6 +1768,7 @@ extern	char	LoginPassword[32];
 extern	char	LoginTitle[128];
 extern	SOCKET	CurrentServerSocket; 
 extern	BOOL	InServerMode;
+extern  char	CommandExecutedByTimer[256];
 extern	BOOL	UpdateServer;
 extern	BOOL	MapServer;
 extern	char	MapServerOutputBitmapFile[MAX_PATH];

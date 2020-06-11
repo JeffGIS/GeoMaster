@@ -29,6 +29,8 @@
 #define ID_DBSHOWFUN2                   6
 #define ID_DBTORETURN                   6
 #define IDC_DATE_THISYEAR               7
+#define IDOK4                           7
+#define ID_LAUNCH                       7
 #define IDC_DATE_LASTWEEK               8
 #define IDNO2                           8
 #define IDC_DATE_YESTERDAY              9
@@ -3765,7 +3767,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1263
+#define _APS_NEXT_RESOURCE_VALUE        1264
 #define _APS_NEXT_COMMAND_VALUE         1248
 #define _APS_NEXT_CONTROL_VALUE         2314
 #define _APS_NEXT_SYMED_VALUE           1036
