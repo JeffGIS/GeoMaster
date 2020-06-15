@@ -577,7 +577,7 @@ void QuitGraphics()
 		DeleteObject (hbm); 
 		DeleteDC (hdcMemMap);
 	}	
-
+	GSSiDeleteObject(&hBitmapScreenBuffer);
 //	TerminateConversations(0);
     ConvertCoordClose ();  
 //    FreeLibraries();   

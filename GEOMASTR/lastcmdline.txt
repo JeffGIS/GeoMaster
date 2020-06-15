@@ -1,2 +1,2 @@
-projects\Vacations\VACATIONS_EDIT.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
-F:\MplsRemoteTemplate\GeoMas
+configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
+G:\PCViewerBKPark\PCViewer

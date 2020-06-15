@@ -2096,7 +2096,7 @@ else if (BackgroundTask && !UpdateServer)
 else if (ShowMax == 10)
 {
 	HDC hDC;
-
+	RECT wndRect;
 	showWindowCmd = SW_SHOWMAXIMIZED;
 	ShowWindow(hWndMain, showWindowCmd);
 	ShowWindow(hWndMain, SW_HIDE);
@@ -2111,7 +2111,7 @@ else if (ShowMax == 10)
 		GetObject(hCPen, sizeof(LOGPEN), &lPen);
 		width = 1;
 	}*/
-
+	GetWindowRect(hWndMain, &wndRect);
 	OpenConfig(hWndMain, hDC);
 	ReleaseDC(hWndMain, hDC);
 }

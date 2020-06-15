@@ -5603,13 +5603,18 @@ void LoadToolbarsInConfig (HFILE Fid,RECT OriginalWindowRect)
 	char	cmd[1024];
 	POINT	pt;
 	HANDLE	hTranRect;
+	RECT	fromRect = { 0 }, toRect = { 0 };
 	SetViewport (0);
 	DisplayToolbars = FALSE;
 	GSSilread (Fid,&nToolbar,4);
 	GetWindowRect(hWndMain, &windowRect);
 	if (IsRectEmpty(&OriginalWindowRect))
 		OriginalWindowRect = windowRect;
-	hTranRect = STRANRect(&OriginalWindowRect, &windowRect);
+	fromRect.right = RECTWIDTH(&OriginalWindowRect);
+	fromRect.bottom = RECTHEIGHT(&OriginalWindowRect);
+	toRect.right = RECTWIDTH(&windowRect);
+	toRect.bottom = RECTHEIGHT(&windowRect);
+	hTranRect = STRANRect(&fromRect, &toRect);
 	GSSilread (Fid,&ToolbarWidthTop,4);
 	GSSilread (Fid,&ToolbarWidthBottom,4);
 	GSSilread (Fid,&ToolbarWidthLeft,4);
