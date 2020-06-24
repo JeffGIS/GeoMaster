@@ -4248,7 +4248,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 			ProcessGMDRecord(hDC, (HANDLE)FidMap, CurrentGMDRec);
 			break;
 		case MT_SQLITE:
-			//if (GetSQLITERecord(CurrentSQLITERec))
+			if (GetSQLITERecord(CurrentSQLITERec))
 				ProcessSQLITERecord(hDC,CurrentSQLITERec);
 			break;
 		case MT_DGN7:

@@ -52,7 +52,7 @@ static int		currentListnRecs = 0;
 static int		currentLocInList = 0;
 #define SIDEWALK 1
 #define CURBRAMP 2
-static int		DATA_TYPE = SIDEWALK;
+static int		DATA_TYPE = CURBRAMP;
 static char RulerPathnames[5][MAX_PATH];
 static struct {long   TLID;
      short    Type;
@@ -2346,13 +2346,15 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 			cwCenter(hWndDlg, 0);
 		else
 			AdjustIdentifyWithPhotosWindow(hWndDlg, firstMove);
-		if (DATA_TYPE = SIDEWALK)
+		if (DATA_TYPE == SIDEWALK)
 		{
 			SetDlgItemText(hWndDlg, IDC_IMAGE_FLIP, "Top Down");
 			SetDlgItemText(hWndDlg, IDC_IMAGE_ROTATE_CLOCKWISE, "Ground Front");
 			SetDlgItemText(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE, "Ground Back");
 			SetDlgItemText(hWndDlg, IDC_PRIOR_IMAGE, "Ruler");
 			SetDlgItemText(hWndDlg, IDC_NEXT_IMAGE, "Street View");
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NEXTPOINT), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PREVIOUSPOINT), SW_SHOW);
 		}
 		firstMove = FALSE;
 		/* initialize working variables                                */
@@ -2428,7 +2430,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 			GSSiClose2(&fid);
 		}
 
-		if (DATA_TYPE = SIDEWALK)
+		if (DATA_TYPE == SIDEWALK)
 		{
 			EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), TRUE);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT_IMAGE),TRUE);

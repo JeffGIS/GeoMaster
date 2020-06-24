@@ -1,2 +1,2 @@
-configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
+configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;
 G:\PCViewerBKPark\PCViewer

@@ -118,11 +118,14 @@ RECT MoveRectToAMonitor(RECT rect)
 
 	if (imon < 0 || pctOn < 100)
 	{ 
+		RECT mRect;
 		imon = max(0, imon);
-		rtn.left = max (0,MonitorRectangle[imon].left);
-		rtn.top = max (0,MonitorRectangle[imon].top);
-		rtn.right = rtn.left + RECTWIDTH(&rect);
-		rtn.bottom = rtn.top + RECTHEIGHT(&rect);
+		mRect = MonitorRectangle[imon];
+		mRect.left = max(0, MonitorRectangle[imon].left);
+		mRect.top = max(0, MonitorRectangle[imon].top);
+		rtn = mRect;
+		rtn.right = rtn.left + RECTWIDTH(&mRect);
+		rtn.bottom = rtn.top + RECTHEIGHT(&mRect);
 	}
 	return rtn;
 }
@@ -4853,6 +4856,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(PRINTRAMPLIST,FromDB,listpath)
 			//$NVCRIS(STREETNAMES,FromDB,intnum)
 			//$NVCRIS(CCODETOFILE, [%ARG(1)], [~TEMPFILE]);
+			//$NVCRIS(CREATERAMPINDEX,dbpath);
 
 		{
 			rtn = FALSE;
@@ -4994,6 +4998,16 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "CLOSE"))
 			{
 				rtn = NVCloseDB(atol(Arg[2]));
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CREATERAMPINDEX"))
+			{
+				rtn = NVCreateRampIndex(Arg[2]);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CREATECCODES"))
+			{
+				rtn = NVCreateCCodes(Arg[2]);
 				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "EXECUTE"))

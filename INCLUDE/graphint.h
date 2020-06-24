@@ -2515,6 +2515,8 @@ BOOL NVCreateDB(LPSTR path, BOOL Delete);
 BOOL NVCopyDB(LPSTR fromPath, LPSTR toPath);
 int NVCloseDB(long handle);
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle);
+int NVCreateRampIndex(LPSTR path);
+int NVCreateCCodes(LPSTR path);
 sqlite3 * getNVDBHandle(int databaseID, BOOL *opened);
 int FormatStreets (LPSTR from, LPSTR text);
 int LoadMultPropertyDB(LPSTR INDir, int LastYear);

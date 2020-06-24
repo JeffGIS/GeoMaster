@@ -3,6 +3,7 @@
 
 #include "gmextern.h"
 
+#define MAX_ATTEMPTS 64
 static	char	MinClassValue[512];
 
 
@@ -2407,6 +2408,7 @@ short ThemeTestChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 	BOOL	InClass; 
 	HANDLE	hMEM=0;     
 	UINT	i;
+	int  nAttempts = 0;
     
     if (!UseTestChar)
     	return -1;
@@ -2620,6 +2622,7 @@ CheckStatus:
             }
 			else
 			{
+				nAttempts = 0;
 KeepLooking:
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
@@ -2675,8 +2678,11 @@ KeepLooking:
 				}
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
-				if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
-					goto KeepLooking;
+				if (nAttempts++ < MAX_ATTEMPTS)
+				{
+					if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
+						goto KeepLooking;
+				}
 				goto ProcessMissing; 
 			}
 			goto RtnProcessed;

@@ -236,7 +236,8 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
        	TAGBox.center = WinPtToTAGPt (RectMid(&TAGBox.rect));  
        	if (pRect)
        	{
-			DrawTAG(hWnd,hDC,TRUE,TRUE); 
+			if (!DoNotMove)
+				DrawTAG(hWnd,hDC,TRUE,TRUE); 
 			*pRect = TAGBox.rect;  
 			DestroySavedScreen (&TAGBox.before,0);
 		}
