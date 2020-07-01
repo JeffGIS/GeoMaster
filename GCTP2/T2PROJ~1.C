@@ -472,6 +472,7 @@ C-------------------------------        */
 		   PRJ_TYPE[ID] = 1000 + atoi (lpGoogle+6);
 		   PRJ_UNITS[ID] = 0;
 		   PRJ_BASEUNITS[ID] = 0;
+		   PRJ_SPHEROID[ID] = 8;
 		   PRJ_TRAN[ID][2] = 0;
 		   IS_BASE[ID] = FALSE;
 

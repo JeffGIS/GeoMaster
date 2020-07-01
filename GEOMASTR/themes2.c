@@ -447,6 +447,7 @@ short ThemeSetChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 	static	long	SymbolNumberColor=0,SymbolNumberColorType=-1;
 	short	MinClass=MAX_THEME_CLASSES+1;
 	BOOL	datafileIsGraphics = FALSE;
+	int nAttempts = 0;
 
     if (desc == 376)
 		ii = 1;
@@ -1438,6 +1439,7 @@ CheckStatus:
             }
 			else
 			{	
+				nAttempts = 0;
 KeepLooking:
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
@@ -1589,8 +1591,13 @@ KeepLooking:
 					ClassNo = CurTheme->AllValueClass;
 					goto GotClass;
 				}
-				if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
-					goto KeepLooking;
+				if (nAttempts++ < MAX_THEME_SEARCH_ATTEMPTS)
+				{
+					if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
+						goto KeepLooking;
+				}
+				else
+					ii = 1;
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
 				goto ProcessMissing; 

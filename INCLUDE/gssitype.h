@@ -2515,6 +2515,7 @@ typedef struct
 
 	}	THEME;
 typedef THEME	FAR *LPTHEME;
+#define MAX_THEME_SEARCH_ATTEMPTS 32
 
 typedef struct
 	{

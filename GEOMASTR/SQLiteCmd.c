@@ -2763,6 +2763,20 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 											Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 									}
 								}
+								else if (!stricmp(tableName, "INTERSECTIONS"))
+								{
+									if (SLTSpatialIndex2Exists(pSQLDatabase->DBHandle, tableName))
+									{
+										MNMXCORL adjBoundsL = AdjustSLTBounds(&Bounds, FALSE);
+										sprintf(Query, "SELECT %s FROM INTERSECTIONS,INTERSECTIONS_index2 WHERE INTERSECTIONS.rowid=INTERSECTIONS_index2.id AND maxX>=%i AND minX<=%i AND maxY>=%i AND minY<=%i", SQLITEUsedFields,
+											adjBoundsL.xmn, adjBoundsL.xmx, adjBoundsL.ymn, adjBoundsL.ymx);
+									}
+									else
+									{
+										sprintf(Query, "SELECT %s FROM INTERSECTIONS,INTERSECTIONS_index WHERE INTERSECTIONS.rowid=INTERSECTIONS_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", SQLITEUsedFields,
+											Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+									}
+								}
 								else
 								{
 									sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND %s >= %i AND %s <= %i AND %s >= %i AND %s <= %i AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
@@ -3921,12 +3935,14 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 			int ibytes = sqlite3_column_bytes(pDB->statement, j);
 			LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, j);
 			LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, j);
-			if (!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE") || !stricmp(pName, xfield))
+			if ((!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE")) && pDB->xLoc == -1)
 				pDB->xLoc = j;
-
-			if (!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE") || !stricmp(pName, yfield))
+			if ((!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE")) && pDB->yLoc == -1)
 				pDB->yLoc = j;
-
+			if (!stricmp(pName, xfield))
+				pDB->xLoc = j;
+			if (!stricmp(pName, yfield))
+				pDB->yLoc = j;
 			if (!decl)
 				decl = nulltype;
 			if (strcmp(pName, lastName))

@@ -3,7 +3,7 @@
 
 #include "gmextern.h"
 
-#define MAX_ATTEMPTS 64
+
 static	char	MinClassValue[512];
 
 
@@ -2678,11 +2678,13 @@ KeepLooking:
 				}
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
-				if (nAttempts++ < MAX_ATTEMPTS)
+				if (nAttempts++ < MAX_THEME_SEARCH_ATTEMPTS)
 				{
 					if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
 						goto KeepLooking;
 				}
+				else
+					ii = 1;
 				goto ProcessMissing; 
 			}
 			goto RtnProcessed;
