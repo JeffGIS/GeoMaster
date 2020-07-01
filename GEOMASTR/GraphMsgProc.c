@@ -14672,8 +14672,9 @@ BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
     	 	Enable = FALSE;
     	 EnableWindow (GetDlgItem(hWndDlg,IDC_EDITTHEME),Enable);
     	 EnableWindow (GetDlgItem(hWndDlg,IDC_REMOVETHEME),Enable);
-    	 EnableWindow (GetDlgItem(hWndDlg,IDC_EDITPM),ExistFile (CurView->PickMacroFile));
-       	 SendDlgItemMessage (hWndDlg,IDC_VPFILES,LB_SETTABSTOPS,3,(LPARAM)&TabStops); 
+		 EnableWindow(GetDlgItem(hWndDlg, IDC_EDITPM), ExistFile(CurView->PickMacroFile));
+		 EnableWindow(GetDlgItem(hWndDlg, IDC_EDITZM), ExistFile(CurView->VisName));
+		 SendDlgItemMessage (hWndDlg,IDC_VPFILES,LB_SETTABSTOPS,3,(LPARAM)&TabStops);
 		 SendDlgItemMessage (hWndDlg,IDC_VPTRANSPARENT,BM_SETCHECK,CurView->Transparent,0L);  
 		 SendDlgItemMessage (hWndDlg,IDC_CONVERTTOGRAY,BM_SETCHECK,CurView->ConvertToGray,0L);  
 		 if (*pCommandViewport == CurView->ID)
@@ -14904,11 +14905,15 @@ HaveEmpty:
            	case IDC_VPTRANSPARENT:
            		goto Display;
            	
-           	case IDC_EDITPM:
+			case IDC_EDITPM:
 				GMEdit(0, EditView->PickMacroFile);
 				break;
-					
-           	case IDC_REMOVETHEME: 
+
+			case IDC_EDITZM:
+				GMEdit(0, EditView->VisName);
+				break;
+
+			case IDC_REMOVETHEME:
             	if (MessageBox(hWndDlg,"Are you sure you wish to remove this Theme?",
 								"Verify Delete",MB_YESNO) == IDYES)
            		{
@@ -15475,7 +15480,6 @@ HaveEmpty:
                   }
               }
               break;            
-            
             case IDCANCEL:
                  /* Ignore data values entered into the controls        */
                  /* and dismiss the dialog window returning FALSE       */  

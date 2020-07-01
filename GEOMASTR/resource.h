@@ -2408,7 +2408,10 @@
 #define IDC_SHOWAREAB                   1422
 #define IDC_LOADTHEME                   1422
 #define IDC_MASKAREA                    1423
+#define IDC_EDITPM2                     1423
+#define IDC_EDITZM                      1423
 #define IDC_FOCUSREFGLOBAL              1424
+#define IDC_EDITPM3                     1424
 #define IDC_TRANFILE_LOC                1425
 #define IDC_BOUNDSGLOBAL                1425
 #define IDC_DISPLAYONLY                 1426
