@@ -13723,7 +13723,7 @@ void cwCenter(HWND hWnd, int top)
  /* get the rectangles for the parent and the child                     */
  if (!GetWindowRect(hWnd, &swp))
 	 return;
-
+ swp = MoveRectToAMonitor(swp);
 begin:
 
  if (!hWndMain || top == SHRT_MAX)
@@ -13798,8 +13798,11 @@ else
  }
 
  Exit:
- /* move the window                                                     */
- MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
+ /* move the window  */
+
+ RECT displayRect = { pt.x,pt.y,pt.x + iwidth,pt.y + iheight };
+ displayRect = MoveRectToAMonitor(displayRect);
+ MoveWindow(hWnd, displayRect.left, displayRect.top, iwidth, iheight, FALSE);
  //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
 {
 #if ENABLETRACE

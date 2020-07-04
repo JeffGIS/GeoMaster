@@ -1269,6 +1269,28 @@ GSSiExitProg (1348);
 			}
 			goto RtnTrue;
 		}
+		case 205: //$YN(bool value) converts bool value to Y or N
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+
+			BOOL val = atob(Arg[1]);
+			if (val)
+				strcpy(OutLoc, "Y");
+			else
+				strcpy(OutLoc, "N");
+			goto Rtnl;
+		}
+		case 206: //$TF(bool value) converts bool value to T or F
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+
+			BOOL val = atob(Arg[1]);
+			if (val)
+				strcpy(OutLoc, "T");
+			else
+				strcpy(OutLoc, "F");
+			goto Rtnl;
+		}
 		default:
 			goto Rtn0;
 	}
