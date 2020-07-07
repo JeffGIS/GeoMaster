@@ -1,6 +1,8 @@
-configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
+configs\2020_04.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD g:\GMMobile\GMMetroGIS
+g:\configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
 configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
 configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD D:\PCViewerMpls\PCViewer
+/GMEdit [%DL]fundir\metrogis_prod.txt /WD G:\GMMobile\MetroUTM
 projects\Vacations\VACATIONS_EDIT.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
 requestdata.gmc /WD c:\gmserver\gmserver
 configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
@@ -186,6 +188,8 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
 
 
 

@@ -1,2 +1,2 @@
-configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;
-G:\PCViewerBKPark\PCViewer
+configs\2020_04.gmc [%USEGDIPLUS]=F;[%KFO]=T; 
+g:\gmmobile\metroUTM

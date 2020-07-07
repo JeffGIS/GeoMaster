@@ -13719,6 +13719,7 @@ void cwCenter(HWND hWnd, int top)
  HWND		hPWnd;  
  BOOL		IsClient=FALSE;
  BOOL		IsTop = IsTopLevelWindow(hWnd);
+ int		attempt = 0;
 
  /* get the rectangles for the parent and the child                     */
  if (!GetWindowRect(hWnd, &swp))
@@ -13790,7 +13791,7 @@ else
 		 pt.x = rParent.right - iwidth;
 	 if (pt.y < rParent.top)
 		 pt.y = rParent.top;
-	 if (pt.x < 0 || pt.y < 0)
+	 if ((pt.x < 0 || pt.y < 0) && attempt++ < 2)
 	 {
 		 top = SHRT_MAX;
 		 goto begin;
