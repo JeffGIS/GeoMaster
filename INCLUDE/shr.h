@@ -691,7 +691,7 @@ BOOL DecompressTIFF (HPSTR Data,long length,long explen,short type);
 HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check);
 short DisplayTIFFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAspect);
 BOOL Report (LPSTR Name, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref,BOOL LoadOnly, BOOL FitToVP);
-BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, LPRECT pClipRect, double Factor, long Refno,LPRECT SizeRect);
+BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, LPRECT pClipRect, double Factor, long Refno,LPRECT SizeRect,BOOL FitToWindow);
 BOOL ReportToFile (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref,LPSTR File);
 BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL CloseFiles,LPRECT SizeRect);
 //RECT SizeReport (HDC hDC,HANDLE hReport,RECT CurRect,BOOL FitToVP);
@@ -1559,7 +1559,7 @@ LPSTRD textAfterLastChar(LPSTR string, char c);
 LPSTRD stringByDeletingLastPathComponent(LPSTR path);
 LPSTRD lastPathComponent(LPSTR path);
 LPSTRD string_Copy(LPSTR str);
-
+void RemoveCharacters(LPSTR str, LPSTR charstoremove);
 void GSSiFree(LPSTR *str);
 
 #endif

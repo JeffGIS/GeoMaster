@@ -9927,6 +9927,31 @@ GSSiExitProg (309);
 }
 #endif
 }
+void RemoveCharacters(LPSTR str, LPSTR charstoremove)
+{
+	LPSTR pLoc = str;
+	if (!charstoremove || !*charstoremove)
+	{
+		char minc = ' ';
+		char maxc = '~';
+		while (*pLoc)
+		{
+			if (*pLoc < minc || *pLoc > maxc)
+			{
+				LPSTR pLoc1 = pLoc;
+				LPSTR pLoc2 = pLoc + 1;
+				while (*pLoc2)
+				{
+					*pLoc1++ = *pLoc2++;
+				}
+				*pLoc1 = 0;
+			}
+			else
+				pLoc++;
+		}
+	}
+	return;
+}
 
 LPSTR NextBlank(LPSTR Text)
 #if ENABLETRACE

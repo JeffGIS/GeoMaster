@@ -3256,7 +3256,8 @@ typedef struct
 		char	FontName[MAXREPORTFONTS][LF_FACESIZE]; 
 		BOOL	WantSize;
 		RECT	SizeRect;
-		int		curLineHeight;
+		short	curLineHeight;
+		short	maxLineHeaderWidth;
 	} REPORT;
 typedef REPORT	FAR *LPREPORT;
 

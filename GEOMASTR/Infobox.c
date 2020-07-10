@@ -534,7 +534,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 					}
 				}
 			} 
-			DisplayReport (hDC,TAGBox.hReport,Rect,&Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect);  
+			DisplayReport (hDC,TAGBox.hReport,Rect,&Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect,FALSE);  
 //			ReportRect = SizeReport (hDC,TAGBox.hReport,TAGBox.rect,TRUE);
 			TAGBox.bmWidth = max (TAGBox.bmWidth,ReportRect.right - ReportRect.left + 1);
 			TAGBox.bmHeight += ReportRect.bottom - ReportRect.top + 1;
@@ -1046,7 +1046,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 					LPRECT pClipRect = &SaveRect;
 					if (!TAGBox.CoordStyle)
 						pClipRect = 0;
-					DisplayReport(hDC, TAGBox.hReport, Rect, pClipRect, Factor*DeviceToScreenFactor(), TAGBox.Refno, 0);
+					DisplayReport(hDC, TAGBox.hReport, Rect, pClipRect, Factor*DeviceToScreenFactor(), TAGBox.Refno, 0,FALSE);
 				}
 		    }
 	

@@ -5198,6 +5198,14 @@ GotCloseFilehSQL:
 			}
 			goto Rtnl;
 		}
+		case 657: // $REMOVE(text,chartoremove) removes all special characters if 2nd arg 0
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+
+			RemoveCharacters (Arg[1],Arg[2]);
+			strcpy(OutLoc, Arg[1]);
+			goto Rtnl;
+		}
 
 		default:
 			goto Rtn0;

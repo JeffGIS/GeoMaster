@@ -555,7 +555,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
     return;
 }
 
-BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect)
+BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect, BOOL FitToWindow)
 {
 	LPREPORT	pReport=(LPREPORT)GlobalLock (hReport);
 	int			irow, itab, MaxRowLen=0, ReportHeight=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
@@ -594,6 +594,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	{
 		pReport->WantSize = TRUE;
 		RectInit (&pReport->SizeRect); 
+		pReport->maxLineHeaderWidth = 0;
 	}
 	else
 		pReport->WantSize = FALSE;
@@ -706,6 +707,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 				else
 					lt=0;
 				GetTextExtentPoint32 (hDC,str,_fstrlen(str),&txSize);
+				pReport->maxLineHeaderWidth = max(txSize.cx, pReport->maxLineHeaderWidth);
 	            RowHeight = max (RowHeight,txSize.cy); 
 				_fstrcpy (FontStr,"[%JUST]");
 				ExpandText (FontStr);
@@ -813,11 +815,19 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	{
 //		FactorRect (&pReport->SizeRect,Factor);
 		w = max (xmid - pReport->SizeRect.left,pReport->SizeRect.right - xmid);
+		if (!FitToWindow && w > RECTWIDTH(pClipRect) / 2)
+			w = RECTWIDTH(pClipRect) / 2;
 		if (*pReport->JustC == 'C')
 		{
-			pReport->SizeRect.left	= xmid - w;
+			pReport->SizeRect.left = xmid - w;
 			pReport->SizeRect.right = xmid + w;
-			pReport->Just = (pReport->SizeRect.right - pReport->SizeRect.left)/2;
+			pReport->Just = (pReport->SizeRect.right - pReport->SizeRect.left) / 2;
+		}
+		else if (*pReport->JustC == 'c')
+		{
+			pReport->SizeRect.left = xmid - w;
+			pReport->SizeRect.right = xmid + w;
+			pReport->Just = pReport->maxLineHeaderWidth;
 		}
 		else
 			pReport->Just = xmid - pReport->SizeRect.left;

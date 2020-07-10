@@ -709,10 +709,13 @@ BOOL RunGFCommandFromFileAtLoc (LPSTR File,long CurLoc,BOOL SendCmd,short opt)
 	LPSTR	lpStr = GlobalLock (hStr);  
 	BOOL	SaveIgnoreFileOpenError=IgnoreFileOpenError;
 	int		iStack, lcmd;
+	char	fullFileName[MAX_PATH];
     
    	GetGFFile (lpStr,File,opt);
 Open: 
 	IgnoreFileOpenError = TRUE;
+	strcpy(fullFileName, lpStr);
+	SubstituteDL(fullFileName, FALSE);
    	Fid  = GSSiOpenFile (lpStr,0,OF_READ); 
 	IgnoreFileOpenError = SaveIgnoreFileOpenError;
 	if (Fid==HFILE_ERROR)
@@ -777,7 +780,7 @@ GSSiExitProg (1341);
 		First=FALSE;
 	}
 	GSSiClose2 (&Fid);
-	iStack = AddToMacroStack (2,0,File,0,CurLoc);
+	iStack = AddToMacroStack (2,0,fullFileName,0,CurLoc);
 	sprintf (strchr (pGCmd,0),"$E(%i)",iStack);
 	lcmd = strlen(pGCmd);
 	GSSiGlobUlFree (&hStr);

@@ -5228,7 +5228,7 @@ GSSiExitProg (56);
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
 //        ReportRect = SizeReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->FitToWindow);
-		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect);  
+		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect,CurView->FitToWindow);  
         if (!CurView->FitToWindow)
         {
             CurView->ReportFactor = DeviceToScreenFactor();
@@ -5382,7 +5382,7 @@ NextView:
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
         DisplayReport (hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect,
-                       CurView->ReportFactor,CurView->ReportRefno,0);
+                       CurView->ReportFactor,CurView->ReportRefno,0,CurView->FitToWindow);
         DisplayViewID++; 
         goto Start;
     }

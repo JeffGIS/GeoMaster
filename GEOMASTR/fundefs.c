@@ -232,6 +232,7 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "UNIQUE", 6)) return 654;
 			if (!_fstrnicmp(str, "PROMPT", 6)) return 655;
 			if (!_fstrnicmp(str, "VPNAME", 6)) return 656;
+			if (!_fstrnicmp(str, "REMOVE", 6)) return 657;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)
