@@ -2882,7 +2882,14 @@ NextPickItem:
 	    			sprintf (pTxt,"%s\r\n%s:%ld",SymName,PickList[NumPicked-1].Prefix,PickList[NumPicked-1].Refno);
 	    		if (!*pTxt) 
 	    			sprintf (pTxt,"%s\r\n%s:%s",SymName,PickList[NumPicked-1].Prefix,PickList[NumPicked-1].UDI);  
-    			YellowTextBox (hWnd,pTxt,MovePoint,&TBRect,0,TRUE,0);  
+				hLastBox = YellowTextBox (hWnd,pTxt,MovePoint,&TBRect,0,TRUE,0);
+				if (hLastBox)
+				{
+					hDC = GetDC(hWnd);
+					RestoreScreen2(hDC, hLastBox, 0, FALSE);
+					DestroySavedScreen(&hLastBox, 0);
+					ReleaseDC(hWnd, hDC);
+				}
     			YTBSize = (long)(TBRect.right - TBRect.left) * (long)(TBRect.bottom - TBRect.top);
 	    		if (PickList[NumPicked-1].Desc > 0 && HLTRectSize < YTBSize * 3)
 	    		{
@@ -2902,10 +2909,11 @@ NextPickItem:
 		    		} 
 		    	}
 				hLastBox = YellowTextBox (hWnd,pTxt,MovePoint,0,0,TRUE,0); 
+				if (hLastBox)
 				{
 					LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (hLastBox);
 					
-					LastBoxRect = pSaveScreen->Rect;
+					//LastBoxRect = pSaveScreen->Rect;
 					GlobalUnlock (hLastBox);
 				}
 				MousePoint = MovePoint; 

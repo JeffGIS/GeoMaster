@@ -1412,7 +1412,7 @@ BOOL OpenImportAttributesFile (LPHANDLE phDB);
 void CloseImportAttributesFile (LPHANDLE phDB);  
 void TIGEROut(void); 
 BOOL GetBinFileBounds (LPSTR InFile,LPMNMXCORD lpMinMax);
-LPHANDLE YellowTextBox (HWND hWnd, LPSTR str, POINT WinPoint,LPRECT pRect,LPRECT DisplayInRect,BOOL TransParent,int Style);
+HANDLE YellowTextBox (HWND hWnd, LPSTR str, POINT WinPoint,LPRECT pRect,LPRECT DisplayInRect,BOOL TransParent,int Style);
 void SetCursorPosGM (int x,int y,BOOL DisplayLinkedOnly);
 HANDLE CreateElipse (DPOINT MidPoint,double InAz,double axis1, double axis2,LPLONG pNumPnts);
 //void ShowGolfShot (HDC hDC,DPOINT StartPoint,DPOINT TowardPoint,LPHANDLE phSavedScreen,short Club);

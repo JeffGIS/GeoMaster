@@ -146,7 +146,7 @@ void BlockText (HDC hDC,LPSTR str,int maxlen,float f)
 	return;
 }
 
-LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT DisplayInRect,BOOL Transparent,int Style)
+HANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT DisplayInRect,BOOL Transparent,int Style)
 {   
 	DPOINT	TagPoint;
 	HDC hDC=GetDC (hWnd);
@@ -239,7 +239,7 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 			if (!DoNotMove)
 				DrawTAG(hWnd,hDC,TRUE,TRUE); 
 			*pRect = TAGBox.rect;  
-			DestroySavedScreen (&TAGBox.before,0);
+			//DestroySavedScreen (&TAGBox.before,0);
 		}
 		else  
 			DrawTAG(hWnd,hDC,2,TRUE);  
@@ -1242,8 +1242,11 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
 		hPointer = DrawTAGPointerLine(hDC, LastBP, LastEP, MoveMode, LineWidth, TipWidth, TAGBox.PLstyle, TAGBox.PointerColor, TAGBox.BorderStyle, TAGBox.BorderColor);
 	LastBP = begpoint;
 	LastEP = endpoint;
-	if (PtInRect(&rect,endpoint))
+	if (PtInRect(&rect, endpoint))
+	{
 		*HavePL = FALSE;
+		GSSiGlobFree(&hPointer);
+	}
 	else
 	{
 //		DrawPointerLine (hDC,begpoint,endpoint,hDashPen,hSolidPen,10);

@@ -15,7 +15,7 @@ static	HANDLE	Fences[MAX_FENCES];
 static	MNMXCORD	PMBounds={0,0,-1,-1};
 static	WNDPROC	g_OldEdit=0;
 static	int		VehStatHeight, VehStatWidth;
-static	HANDLE	hLastBox=0;
+static	HANDLE	hLastBoxV=0;
 static	HDC		hDCLastBox;
 static	int		LastVeh=-1;	
 static	int		maxinrow=5;
@@ -387,7 +387,7 @@ void ClearVehicleInfoRect (void)
 {
 	SetVehicleInfo ("","",TRUE);
 //	RestoreScreen2 (hDCLastBox, hLastBox,0,FALSE);
-	hLastBox = 0;
+	hLastBoxV = 0;
 	LastVeh=-1;	
 	return;
 }
@@ -3055,7 +3055,7 @@ BOOL DisplayAllVehicles2 (short nVP,LPVIEWPORT *pVP)
 		BlockVehicleDisplay++;
 		return FALSE;
 	}
-	if ((BufferedScreen && HaveMeterPrompts ()) || hLastBox || InVehicleDisplay || InDisplayProcessing)
+	if ((BufferedScreen && HaveMeterPrompts ()) || hLastBoxV || InVehicleDisplay || InDisplayProcessing)
 	{
 		ReleaseDC (CurView->hWnd,hDCMain);
 		return FALSE;
