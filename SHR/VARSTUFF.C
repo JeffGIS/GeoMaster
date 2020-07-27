@@ -5543,8 +5543,11 @@ void SetVarChangeTimes (short opt)
 		for (i=0;i<nChangedGlobals;i++)
 		{   
 			VP = (VARPNT)GlobalLock (ChangedGlobals[i]);
-			VP->changetime = NextVarTime();
-			GlobalUnlock (ChangedGlobals[i]);
+			if (VP)
+			{
+				VP->changetime = NextVarTime();
+				GlobalUnlock(ChangedGlobals[i]);
+			}
 		}
 	}
 	else
