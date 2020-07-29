@@ -1032,10 +1032,10 @@ GSSiExitProg (1250);
 			break;
 			     
             case IDC_DEFINE_CLASSES:
-		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3); 
+		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,4); 
 		       	 GetDlgItemText (hWndDlg,SV_FIELD_NAME,CurTheme->Field.name,62); 
 		       	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
-		       	 CurTheme->NumDesiredClass = atoi (str);
+				 CurTheme->NumDesiredClass = max(0, min(atoi(str), MAX_THEME_CLASSES));
 				 if (CurTheme->NumDesiredClass > 0)
 					 CurTheme->numPreloadedValues = 1;
 		         {
@@ -1168,11 +1168,11 @@ GSSiExitProg (1250);
 				 CurTheme->ColorScheme = SendDlgItemMessage(hWndDlg, SV_COLOR_SCHEME, LB_GETCURSEL, 0, 0);
 				 SetThemeColorsFromScheme();
 
-		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
+		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,4);
 				 GetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro, sizeof(CurTheme->BeginDisplayMacro));
 				 GetDlgItemText(hWndDlg, IDC_ENDDISPLAYMACRO, CurTheme->EndDisplayMacro, sizeof(CurTheme->EndDisplayMacro));
 				 GetDlgItemText(hWndDlg, IDC_DATADISPLAYMACRO, CurTheme->DataDisplayMacro, sizeof(CurTheme->DataDisplayMacro));
-				 CurTheme->NumDesiredClass = atoi(str);
+				 CurTheme->NumDesiredClass = max(0, min(atoi(str), MAX_THEME_CLASSES));
 				 CurTheme->NumClass = CurTheme->NumDesiredClass;    
 		       	 if (str[0]) CurTheme->YLimit = atof (str); 
 		       	 if (wParam == IDC_SAVE_THEME)
@@ -13548,8 +13548,8 @@ GSSiExitProg (1247);
               break;
             
             case IDC_EDITRANGES:
-		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
-		       	 CurTheme->NumDesiredClass = atoi (str);
+		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,4);
+				 CurTheme->NumDesiredClass = max(0, min(atoi(str), MAX_THEME_CLASSES));
             	 GetDlgItemText (hWndDlg,IDC_ROUND_TO,str,10); 
             	 Strip (str,',');
             	 CurTheme->RoundTo = atof(str);
@@ -13683,8 +13683,8 @@ GSSiExitProg (1247);
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_PERCENTILES,BM_GETCHECK,0,0L)) CurTheme->ClassType =2;
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_MANUAL,BM_GETCHECK,0,0L)) CurTheme->ClassType =3;
 		       	 if (CurTheme->ClassType!=1) CurTheme->DisplayScatterDiagram = FALSE;
-		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
-		       	 CurTheme->NumDesiredClass = atoi (str);
+		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,4);
+				 CurTheme->NumDesiredClass = max(0, min(atoi(str), MAX_THEME_CLASSES));
 		       	 if (CurTheme->ClassType == 3) 
 		       	 	CurTheme->NumClass = CurTheme->NumDesiredClass;
 		       	 GetDlgItemText (hWndDlg,SV_MAXVAL,str,16);
@@ -14432,8 +14432,8 @@ GSSiExitProg (1247);
               break;
             
             case IDC_EDITRANGES:
-		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
-		       	 CurTheme->NumDesiredClass = atoi (str);
+		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,4);
+		       	 CurTheme->NumDesiredClass = max(0,min(atoi (str), MAX_THEME_CLASSES));
             	 GetDlgItemText (hWndDlg,IDC_ROUND_TO,str,10); 
             	 Strip (str,',');
             	 CurTheme->RoundTo = atof(str);
@@ -14532,8 +14532,8 @@ GSSiExitProg (1247);
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_PERCENTILES,BM_GETCHECK,0,0L)) CurTheme->ClassType =2;
 		       	 if (SendDlgItemMessage (hWndDlg,SV_CB_MANUAL,BM_GETCHECK,0,0L)) CurTheme->ClassType =3;
 		       	 if (CurTheme->ClassType!=1) CurTheme->DisplayScatterDiagram = FALSE;
-		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,3);
-		       	 CurTheme->NumDesiredClass = atoi (str);
+		       	 GetDlgItemText (hWndDlg,SV_NUM_CLASSES,str,4);
+				 CurTheme->NumDesiredClass = max(0, min(atoi(str), MAX_THEME_CLASSES));
 		       	 if (CurTheme->ClassType == 3) 
 		       	 	CurTheme->NumClass = CurTheme->NumDesiredClass;
 		       	 GetDlgItemText (hWndDlg,SV_MAXVAL,str,16);

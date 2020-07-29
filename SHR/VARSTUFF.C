@@ -5524,12 +5524,25 @@ GSSiExitProg (539);
 #endif
 }
 
-void AddToChangedGlobalList (HANDLE handle)
-{   
-//keeps last 32 changed globals
-	if (nChangedGlobals > 31)
+void AddToChangedGlobalList(HANDLE handle)
+{
+	//keeps last 32 changed globals
+	if (nChangedGlobals >= MAX_CHANGED_GLOBALS)
 		return;
 	ChangedGlobals[nChangedGlobals++] = handle;
+	return;
+}
+void RemoveFromChangedGlobalList(HANDLE handle)
+{
+	int nChangedGlobalsNew = 0;
+	for (int i = 0; i < nChangedGlobals; i++)
+	{
+		if (ChangedGlobals[i] != handle)
+			ChangedGlobals[nChangedGlobalsNew++] = ChangedGlobals[i];
+		else
+			ii = 1;
+	}
+	nChangedGlobals = nChangedGlobalsNew;
 	return;
 }
 
@@ -10246,6 +10259,7 @@ void CloseVars (void)
 	{   
 		if ((VarPtr = (VARPNT)GlobalLock(pVarSpace->VarHandles[i])))
 		{
+			RemoveFromChangedGlobalList(pVarSpace->VarHandles[i]);
 			if (VarPtr->ValueIsHandle)
 			{
 				HANDLE handle = (HANDLE)atol (VarPtr->Value);

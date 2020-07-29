@@ -1,8 +1,8 @@
 #include "graphint.h"
 
-void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16);
+void ConvertThemeV1toV2 (LPTHEME_V4 pTheme,LPTHEME_V1 pTheme16);
 
-BOOL ConvertThemeV0toV1 (LPTHEME pTheme32,LPTHEME_v0 pTheme_v0)
+BOOL ConvertThemeV0toV1 (LPTHEME_V1 pTheme32,LPTHEME_v0 pTheme_v0)
 {   
 	HANDLE	hSave=0;
 	THEME_V1	Theme;
@@ -73,6 +73,6 @@ BOOL ConvertThemeV0toV1 (LPTHEME pTheme32,LPTHEME_v0 pTheme_v0)
 	    break;
 	} 
 	GSSiGlobUlFree (&hSave);
-	ConvertThemeV1toV2 (pTheme32,pTheme);
+	//ConvertThemeV1toV2 (pTheme32,pTheme);
 	return TRUE;
 }

@@ -870,7 +870,8 @@ FIELDINFO Field16toField32 (LPFIELDINFO16 pField);
 FIELDINFO16 Field32toField16 (LPFIELDINFO pField);
 HOTSPOTDATA Hotspot16toHotspot32 (LPHOTSPOTDATA16 pHS16);
 NEWOBJECT NewObject16_to_NewObject (LPNEWOBJECT16 pNO16);
-void ConvertThemeV1toV2 (LPTHEME CurTheme,LPTHEME_V1 pTheme_v1);
+void ConvertThemeV1toV2(LPTHEME_V4 CurTheme, LPTHEME_V1 pTheme_v1);
+void ConvertThemeV4toV5(LPTHEME CurTheme, LPTHEME_V4 pTheme_v1);
 void ConvertCD_V103_to_V104 (LPCOORDINATEDISPLAY pCD,LPCOORDINATEDISPLAY_V103 pCD103);
 void ComboFile16ToComboFile32 (LPCOMBOFILE p32,LPCOMBOFILE16 p16);
 void ComboFile32ToComboFile16 (LPCOMBOFILE16 p32,LPCOMBOFILE p16);
@@ -1557,26 +1558,26 @@ NEWOBJECT NewObject16_to_NewObject (LPNEWOBJECT16 pNO16)
 	return NOBJ;
 }
 
-void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
+void ConvertThemeV1toV2(LPTHEME_V4 pTheme, LPTHEME_V1 pTheme16)
 {
 	int	i;
-	HANDLE	hSave=NULL;
+	HANDLE	hSave = NULL;
 
 	switch (pTheme16->ID)
 	{
-		case GF_STREET_TEXT_THEME:
-		{
-		    LPSTREETTEXTDATA16	pStreetData16=(LPSTREETTEXTDATA16)pTheme16->ClassBM;
-			LPSTREETTEXTDATA	pSDSave;   
-		    
-		    hSave = GSSiGlobAlloc (1139,GMEM_MOVEABLE,sizeof(STREETTEXTDATA));
-		    pSDSave = (LPSTREETTEXTDATA)GlobalLock(hSave);
-			STREETTEXTDATA16ToSTREETTEXTDATA32 (pSDSave,pStreetData16);
-		    GlobalUnlock (hSave);
-		    break;
-		}
-		default:
-			break;
+	case GF_STREET_TEXT_THEME:
+	{
+		LPSTREETTEXTDATA16	pStreetData16 = (LPSTREETTEXTDATA16)pTheme16->ClassBM;
+		LPSTREETTEXTDATA	pSDSave;
+
+		hSave = GSSiGlobAlloc(1139, GMEM_MOVEABLE, sizeof(STREETTEXTDATA));
+		pSDSave = (LPSTREETTEXTDATA)GlobalLock(hSave);
+		STREETTEXTDATA16ToSTREETTEXTDATA32(pSDSave, pStreetData16);
+		GlobalUnlock(hSave);
+		break;
+	}
+	default:
+		break;
 	}
 	pTheme->ID = pTheme16->ID;
 	pTheme->handle = (HANDLE)pTheme16->handle;
@@ -1591,20 +1592,20 @@ void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
 	pTheme->ReScan = pTheme16->ReScan;
 	pTheme->hThemeDB = (HANDLE)pTheme16->hThemeDB;
 	pTheme->hScatterFile = (HANDLE)pTheme16->hScatterFile;
-	strncpy (pTheme->DataFile,pTheme16->DataFile,sizeof(pTheme16->DataFile));
-	strncpy (pTheme->SQL,pTheme16->SQL,sizeof(pTheme16->SQL));
+	strncpy(pTheme->DataFile, pTheme16->DataFile, sizeof(pTheme16->DataFile));
+	strncpy(pTheme->SQL, pTheme16->SQL, sizeof(pTheme16->SQL));
 	pTheme->DataFileType = pTheme16->DataFileType;
 	pTheme->DataType = pTheme16->DataType;
-	pTheme->Field = Field16toField32 (&pTheme16->Field);
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	pTheme->Field = Field16toField32(&pTheme16->Field);
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassSymbol[i] = pTheme16->ClassSymbol[i];
 	}
-	strncpy (pTheme->SymSizeC,pTheme16->SymSizeC,sizeof(pTheme16->SymSizeC));
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	strncpy(pTheme->SymSizeC, pTheme16->SymSizeC, sizeof(pTheme16->SymSizeC));
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassIsSelected[i] = pTheme16->ClassIsSelected[i];
 	}
 	pTheme->Statement_dummy = 0;//pTheme16->Statement;
-	strncpy (pTheme->ScatterFile,pTheme16->ScatterFile,sizeof(pTheme16->ScatterFile));
+	strncpy(pTheme->ScatterFile, pTheme16->ScatterFile, sizeof(pTheme16->ScatterFile));
 	pTheme->NumClass = pTheme16->NumClass;
 	pTheme->NumDesiredClass = pTheme16->NumDesiredClass;
 	pTheme->ClassType = pTheme16->ClassType;
@@ -1619,75 +1620,75 @@ void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
 	pTheme->Ymin = pTheme16->Ymin;
 	pTheme->Xmax = pTheme16->Xmax;
 	pTheme->Ymax = pTheme16->Ymax;
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassMin[i] = pTheme16->ClassMin[i];
 	}
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassMax[i] = pTheme16->ClassMax[i];
 	}
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassColor[i] = pTheme16->ClassColor[i];
 	}
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassPen[i] = (HPEN)pTheme16->ClassPen[i];
 	}
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassBrush[i] = (HBRUSH)pTheme16->ClassBrush[i];
 	}
 	pTheme->NoDataBrush = (HBRUSH)pTheme16->NoDataBrush;
 	pTheme->InvalidDataBrush = (HBRUSH)pTheme16->InvalidDataBrush;
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassCount[i] = pTheme16->ClassCount[i];
 	}
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassPnt[i] = pTheme16->ClassPnt[i];
 	}
 	pTheme->BGColor = pTheme16->BGColor;
-	pTheme-> ScatterColor = pTheme16-> ScatterColor;
-	pTheme-> ScatterBoxBG = pTheme16-> ScatterBoxBG;
-	pTheme-> TitleBoxBG = pTheme16-> TitleBoxBG;
+	pTheme->ScatterColor = pTheme16->ScatterColor;
+	pTheme->ScatterBoxBG = pTheme16->ScatterBoxBG;
+	pTheme->TitleBoxBG = pTheme16->TitleBoxBG;
 	pTheme->Rect = Rect16ToRect32(pTheme16->Rect);
-	pTheme-> TitleBox = Rect16ToRect32(pTheme16-> TitleBox);
-	pTheme-> ScatterBox = Rect16ToRect32(pTheme16-> ScatterBox);
-	pTheme-> ColorsBox = Rect16ToRect32(pTheme16-> ColorsBox);
-	pTheme-> RangesBox = Rect16ToRect32(pTheme16-> RangesBox);
-	pTheme-> InfoBox = Rect16ToRect32(pTheme16-> InfoBox);
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	pTheme->TitleBox = Rect16ToRect32(pTheme16->TitleBox);
+	pTheme->ScatterBox = Rect16ToRect32(pTheme16->ScatterBox);
+	pTheme->ColorsBox = Rect16ToRect32(pTheme16->ColorsBox);
+	pTheme->RangesBox = Rect16ToRect32(pTheme16->RangesBox);
+	pTheme->InfoBox = Rect16ToRect32(pTheme16->InfoBox);
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassClrBox[i] = Rect16ToRect32(pTheme16->ClassClrBox[i]);
 	}
 	pTheme->Margin = pTheme16->Margin;
-	pTheme-> ScatterWidth = pTheme16-> ScatterWidth;
-	pTheme-> ColorsWidth = pTheme16-> ColorsWidth;
-	pTheme-> InnerMargin = pTheme16-> InnerMargin;
-	pTheme-> TitleHeight = pTheme16-> TitleHeight;
-	for (i=0;i<MAX_THEME_CLASSES;i++){
-		strncpy (pTheme->ClassBM[i],pTheme16->ClassBM[i],sizeof(pTheme16->ClassBM[i]));
+	pTheme->ScatterWidth = pTheme16->ScatterWidth;
+	pTheme->ColorsWidth = pTheme16->ColorsWidth;
+	pTheme->InnerMargin = pTheme16->InnerMargin;
+	pTheme->TitleHeight = pTheme16->TitleHeight;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		strncpy(pTheme->ClassBM[i], pTheme16->ClassBM[i], sizeof(pTheme16->ClassBM[i]));
 	}
-	strncpy (pTheme->Title,pTheme16->Title,sizeof(pTheme16->Title));
-	strncpy (pTheme->Contents,pTheme16->Contents,sizeof(pTheme16->Contents));
+	strncpy(pTheme->Title, pTheme16->Title, sizeof(pTheme16->Title));
+	strncpy(pTheme->Contents, pTheme16->Contents, sizeof(pTheme16->Contents));
 	pTheme->SymNum = pTheme16->SymNum;
 	pTheme->TitleFont = ConvertLF16_to_32(&pTheme16->TitleFont);
 	pTheme->ClassFont1 = ConvertLF16_to_32(&pTheme16->ClassFont1);
 	pTheme->ClassFont2 = ConvertLF16_to_32(&pTheme16->ClassFont2);
 	pTheme->Xmove = pTheme16->Xmove;
-	pTheme-> Ymove = pTheme16-> Ymove;
+	pTheme->Ymove = pTheme16->Ymove;
 	pTheme->ZeroIsMissing = pTheme16->ZeroIsMissing;
 	pTheme->AddCommas = pTheme16->AddCommas;
 	pTheme->ShowValue = pTheme16->ShowValue;
 	pTheme->VPDisplayed = pTheme16->VPDisplayed;
 	pTheme->DisplayPCT = pTheme16->DisplayPCT;
-	strncpy (pTheme->RefValChar,pTheme16->RefValChar,sizeof(pTheme16->RefValChar));
+	strncpy(pTheme->RefValChar, pTheme16->RefValChar, sizeof(pTheme16->RefValChar));
 	pTheme->RefValDbl = pTheme16->RefValDbl;
 	pTheme->FieldFun = pTheme16->FieldFun;
 	pTheme->ValueLen = pTheme16->ValueLen;
 	pTheme->FieldCorrection = pTheme16->FieldCorrection;
 	pTheme->IBBGColor = pTheme16->IBBGColor;
-	pTheme-> TitleTextColor = pTheme16-> TitleTextColor;
-	for (i=0;i<2;i++){
-		pTheme-> IBTextColor[i] = pTheme16-> IBTextColor[i];
+	pTheme->TitleTextColor = pTheme16->TitleTextColor;
+	for (i = 0; i < 2; i++) {
+		pTheme->IBTextColor[i] = pTheme16->IBTextColor[i];
 	}
 	pTheme->RefIsPCT = pTheme16->RefIsPCT;
-	strncpy (pTheme->Value,pTheme16->Value,sizeof(pTheme16->Value));
+	strncpy(pTheme->Value, pTheme16->Value, sizeof(pTheme16->Value));
 	pTheme->hVisList = (HANDLE)pTheme16->hVisList;
 	pTheme->DispersePoints = pTheme16->DispersePoints;
 	pTheme->hDisperseFileName = (HANDLE)pTheme16->hDisperseFileName;
@@ -1726,35 +1727,35 @@ void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
 	pTheme->FillRow = pTheme16->FillRow;
 	pTheme->CenterText = pTheme16->CenterText;
 	pTheme->FlatEndOffsetLine = pTheme16->Unusedbit;
-	strncpy (pTheme->ClassDefDB,pTheme16->ClassDefDB,sizeof(pTheme16->ClassDefDB));
-	strncpy (pTheme->ClassDefSQL,pTheme16->ClassDefSQL,sizeof(pTheme16->ClassDefSQL));
-	strncpy (pTheme->ClassDefKeyField,pTheme16->ClassDefKeyField,sizeof(pTheme16->ClassDefKeyField));
-	strncpy (pTheme->ClassDefSymField,pTheme16->ClassDefSymField,sizeof(pTheme16->ClassDefSymField));
-	strncpy (pTheme->ClassDefTitleField,pTheme16->ClassDefTitleField,sizeof(pTheme16->ClassDefTitleField));
-	strncpy (pTheme->ClassDefValDB,pTheme16->ClassDefValDB,sizeof(pTheme16->ClassDefValDB));
-	strncpy (pTheme->ClassDefValSQL,pTheme16->ClassDefValSQL,sizeof(pTheme16->ClassDefValSQL));
-	strncpy (pTheme->ClassDefValField,pTheme16->ClassDefValField,sizeof(pTheme16->ClassDefValField));
-	for (i=0;i<4;i++){
-		strncpy (pTheme->SymbolFont[i],pTheme16->SymbolFont[i],sizeof(pTheme16->SymbolFont[i]));
+	strncpy(pTheme->ClassDefDB, pTheme16->ClassDefDB, sizeof(pTheme16->ClassDefDB));
+	strncpy(pTheme->ClassDefSQL, pTheme16->ClassDefSQL, sizeof(pTheme16->ClassDefSQL));
+	strncpy(pTheme->ClassDefKeyField, pTheme16->ClassDefKeyField, sizeof(pTheme16->ClassDefKeyField));
+	strncpy(pTheme->ClassDefSymField, pTheme16->ClassDefSymField, sizeof(pTheme16->ClassDefSymField));
+	strncpy(pTheme->ClassDefTitleField, pTheme16->ClassDefTitleField, sizeof(pTheme16->ClassDefTitleField));
+	strncpy(pTheme->ClassDefValDB, pTheme16->ClassDefValDB, sizeof(pTheme16->ClassDefValDB));
+	strncpy(pTheme->ClassDefValSQL, pTheme16->ClassDefValSQL, sizeof(pTheme16->ClassDefValSQL));
+	strncpy(pTheme->ClassDefValField, pTheme16->ClassDefValField, sizeof(pTheme16->ClassDefValField));
+	for (i = 0; i < 4; i++) {
+		strncpy(pTheme->SymbolFont[i], pTheme16->SymbolFont[i], sizeof(pTheme16->SymbolFont[i]));
 	}
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassStatus[i] = pTheme16->ClassStatus[i];
 	}
-	pTheme->HotSpotData = Hotspot16toHotspot32 (&pTheme16->HotSpotData);
-	for (i=0;i<MAX_THEME_CLASSES;i++){
+	pTheme->HotSpotData = Hotspot16toHotspot32(&pTheme16->HotSpotData);
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
 		pTheme->ClassFactor[i] = pTheme16->ClassFactor[i];
 	}
-	strncpy (pTheme->HotSpotCompareTo,pTheme16->HotSpotCompareTo,sizeof(pTheme16->HotSpotCompareTo));
-	strncpy (pTheme->HotSpotSaveTo,pTheme16->HotSpotSaveTo,sizeof(pTheme16->HotSpotSaveTo));
+	strncpy(pTheme->HotSpotCompareTo, pTheme16->HotSpotCompareTo, sizeof(pTheme16->HotSpotCompareTo));
+	strncpy(pTheme->HotSpotSaveTo, pTheme16->HotSpotSaveTo, sizeof(pTheme16->HotSpotSaveTo));
 	pTheme->CompareHotSpotFactor = pTheme16->CompareHotSpotFactor;
-	strncpy (pTheme->IconLibrary,pTheme16->IconLibrary,sizeof(pTheme16->IconLibrary));
+	strncpy(pTheme->IconLibrary, pTheme16->IconLibrary, sizeof(pTheme16->IconLibrary));
 	pTheme->ActualXMargin = pTheme16->ActualXMargin;
 	pTheme->ActualYMargin = pTheme16->ActualYMargin;
 	pTheme->ShowValueFont = ConvertLF16_to_32(&pTheme16->ShowValueFont);
 	pTheme->ShowValueTextColor = pTheme16->ShowValueTextColor;
 	pTheme->Config = pTheme16->Config;
 	pTheme->UseHalfTone = pTheme16->UseHalfTone;
-	for (i=0;i<2;i++){
+	for (i = 0; i < 2; i++) {
 		pTheme->HaveVP[i] = pTheme16->HaveVP[i];
 	}
 	pTheme->NextValueColor = pTheme16->NextValueColor;
@@ -1772,7 +1773,7 @@ void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
 	pTheme->DelayTextDisplay = pTheme16->DelayTextDisplay;
 	pTheme->DistanceBetweenProfilePoints = pTheme16->DistanceBetweenProfilePoints;
 	pTheme->CrossSectionSpacing = pTheme16->CrossSectionSpacing;
-	for (i=0;i<2;i++){
+	for (i = 0; i < 2; i++) {
 		pTheme->CrossSectionWidth[i] = pTheme16->CrossSectionWidth[i];
 	}
 	pTheme->RadiusPoint = POINTStoPOINT(pTheme16->RadiusPoint);
@@ -1781,7 +1782,7 @@ void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
 	pTheme->DynSegFixedIncrement = pTheme16->DynSegFixedIncrement;
 	pTheme->ShowValAZ = pTheme16->ShowValAZ;
 	pTheme->ProfileUnits = pTheme16->ProfileUnits;
-	strncpy (pTheme->Contents2,pTheme16->Contents2,sizeof(pTheme16->Contents2));
+	strncpy(pTheme->Contents2, pTheme16->Contents2, sizeof(pTheme16->Contents2));
 	pTheme->SymNum2 = pTheme16->SymNum2;
 	pTheme->hVisList2 = (HANDLE)pTheme16->hVisList2;
 	pTheme->hAreas = (HANDLE)pTheme16->hAreas;
@@ -1794,23 +1795,323 @@ void ConvertThemeV1toV2 (LPTHEME pTheme,LPTHEME_V1 pTheme16)
 	pTheme->FidAreas = pTheme16->FidAreas;
 	pTheme->PointInAreaPointThemeVPID = pTheme16->PointInAreaPointThemeVPID;
 	pTheme->NumMidpoint = pTheme16->NumMidpoint;
-	strncpy (pTheme->ShowValMacro,pTheme16->ShowValMacro,sizeof(pTheme16->ShowValMacro));
+	strncpy(pTheme->ShowValMacro, pTheme16->ShowValMacro, sizeof(pTheme16->ShowValMacro));
 	pTheme->FidDelayedText = pTheme16->FidDelayedText;
 	pTheme->hDelayedFont = (HFONT)pTheme16->hDelayedFont;
-	strncpy (pTheme->filler,pTheme16->filler,sizeof(pTheme16->filler));
+	strncpy(pTheme->filler, pTheme16->filler, sizeof(pTheme16->filler));
 	switch (pTheme16->ID)
 	{
-		case GF_STREET_TEXT_THEME:
-		{
-			LPSTREETTEXTDATA	pSDSave=GlobalLock (hSave);   
-		    
-		    memmove (&pTheme->ClassBM,pSDSave,sizeof(STREETTEXTDATA));
-		    GSSiGlobUlFree (&hSave);
-		    break;
-		}
-		default:
-			break;
+	case GF_STREET_TEXT_THEME:
+	{
+		LPSTREETTEXTDATA	pSDSave = GlobalLock(hSave);
+
+		memmove(&pTheme->ClassBM, pSDSave, sizeof(STREETTEXTDATA));
+		GSSiGlobUlFree(&hSave);
+		break;
 	}
+	default:
+		break;
+	}
+	return;
+}
+void ConvertThemeV4toV5(LPTHEME pTheme, LPTHEME_V4 pTheme16)
+{
+	int	i;
+	HANDLE	hSave = NULL;
+
+	switch (pTheme16->ID)
+	{
+	case GF_STREET_TEXT_THEME:
+	{
+		LPSTREETTEXTDATA	pStreetData16 = (LPSTREETTEXTDATA)pTheme16->ClassBM;
+		LPSTREETTEXTDATA	pSDSave;
+
+		hSave = GSSiGlobAlloc(1139, GMEM_MOVEABLE, sizeof(STREETTEXTDATA));
+		pSDSave = (LPSTREETTEXTDATA)GlobalLock(hSave);
+		memcpy(pSDSave, pStreetData16,sizeof(STREETTEXTDATA));
+		GlobalUnlock(hSave);
+		break;
+	}
+	default:
+		break;
+	}
+	pTheme->ID = pTheme16->ID;
+	pTheme->handle16 = pTheme16->handle16;
+	pTheme->handle = (HANDLE)pTheme16->handle;
+	pTheme->Version = 5;
+	pTheme->TargetViewport = pTheme16->TargetViewport;
+	pTheme->DisplayViewport = pTheme16->DisplayViewport;
+	pTheme->IsActive = pTheme16->IsActive;
+	pTheme->WantDataPass = pTheme16->WantDataPass;
+	pTheme->ComputeClassBoundaries = pTheme16->ComputeClassBoundaries;
+	pTheme->DisplayScatterDiagram = pTheme16->DisplayScatterDiagram;
+	pTheme->Recompute = pTheme16->Recompute;
+	pTheme->ReScan = pTheme16->ReScan;
+	pTheme->hThemeDB = (HANDLE)pTheme16->hThemeDB;
+	pTheme->hScatterFile = (HANDLE)pTheme16->hScatterFile;
+	memcpy(pTheme->DataFile, pTheme16->DataFile, sizeof(pTheme16->DataFile));
+	memcpy(pTheme->SQL, pTheme16->SQL, sizeof(pTheme16->SQL));
+	pTheme->DataFileType = pTheme16->DataFileType;
+	pTheme->DataType = pTheme16->DataType;
+	pTheme->Field = pTheme16->Field;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassSymbol[i] = pTheme16->ClassSymbol[i];
+	}
+	memcpy(pTheme->SymSizeC, pTheme16->SymSizeC, sizeof(pTheme16->SymSizeC));
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassIsSelected[i] = pTheme16->ClassIsSelected[i];
+	}
+	pTheme->Statement_dummy = 0;//pTheme16->Statement;
+	memcpy(pTheme->ScatterFile, pTheme16->ScatterFile, sizeof(pTheme16->ScatterFile));
+	pTheme->NumClass = pTheme16->NumClass;
+	pTheme->NumDesiredClass = pTheme16->NumDesiredClass;
+	pTheme->ClassType = pTheme16->ClassType;
+	pTheme->ValConv = pTheme16->ValConv;
+	pTheme->MissOpt = pTheme16->MissOpt;
+	pTheme->MarkInvalid = pTheme16->MarkInvalid;
+	pTheme->XLimit = pTheme16->XLimit;
+	pTheme->YLimit = pTheme16->YLimit;
+	pTheme->RoundTo = pTheme16->RoundTo;
+	pTheme->NumVals = pTheme16->NumVals;
+	pTheme->Xmin = pTheme16->Xmin;
+	pTheme->Ymin = pTheme16->Ymin;
+	pTheme->Xmax = pTheme16->Xmax;
+	pTheme->Ymax = pTheme16->Ymax;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassMin[i] = pTheme16->ClassMin[i];
+	}
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassMax[i] = pTheme16->ClassMax[i];
+	}
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassColor[i] = pTheme16->ClassColor[i];
+	}
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassPen[i] = (HPEN)pTheme16->ClassPen[i];
+	}
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassBrush[i] = (HBRUSH)pTheme16->ClassBrush[i];
+	}
+	pTheme->NoDataBrush = (HBRUSH)pTheme16->NoDataBrush;
+	pTheme->InvalidDataBrush = (HBRUSH)pTheme16->InvalidDataBrush;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassCount[i] = pTheme16->ClassCount[i];
+	}
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassPnt[i] = pTheme16->ClassPnt[i];
+	}
+	pTheme->BGColor = pTheme16->BGColor;
+	pTheme->ScatterColor = pTheme16->ScatterColor;
+	pTheme->ScatterBoxBG = pTheme16->ScatterBoxBG;
+	pTheme->TitleBoxBG = pTheme16->TitleBoxBG;
+	pTheme->Rect = pTheme16->Rect;
+	pTheme->TitleBox = pTheme16->TitleBox;
+	pTheme->ScatterBox = pTheme16->ScatterBox;
+	pTheme->ColorsBox = pTheme16->ColorsBox;
+	pTheme->RangesBox = pTheme16->RangesBox;
+	pTheme->InfoBox = pTheme16->InfoBox;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassClrBox[i] = pTheme16->ClassClrBox[i];
+	}
+	pTheme->Margin = pTheme16->Margin;
+	pTheme->ScatterWidth = pTheme16->ScatterWidth;
+	pTheme->ColorsWidth = pTheme16->ColorsWidth;
+	pTheme->InnerMargin = pTheme16->InnerMargin;
+	pTheme->TitleHeight = pTheme16->TitleHeight;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		memcpy(pTheme->ClassBM[i], pTheme16->ClassBM[i], sizeof(pTheme16->ClassBM[i]));
+	}
+	memcpy(pTheme->Title, pTheme16->Title, sizeof(pTheme16->Title));
+	memcpy(pTheme->Contents, pTheme16->Contents, sizeof(pTheme16->Contents));
+	pTheme->SymNum = pTheme16->SymNum;
+	pTheme->TitleFont = pTheme16->TitleFont;
+	pTheme->ClassFont1 = pTheme16->ClassFont1;
+	pTheme->ClassFont2 = pTheme16->ClassFont2;
+	pTheme->Xmove = pTheme16->Xmove;
+	pTheme->Ymove = pTheme16->Ymove;
+	pTheme->ZeroIsMissing = pTheme16->ZeroIsMissing;
+	pTheme->AddCommas = pTheme16->AddCommas;
+	pTheme->ShowValue = pTheme16->ShowValue;
+	pTheme->VPDisplayed = pTheme16->VPDisplayed;
+	pTheme->DisplayPCT = pTheme16->DisplayPCT;
+	memcpy(pTheme->RefValChar, pTheme16->RefValChar, sizeof(pTheme16->RefValChar));
+	pTheme->RefValDbl = pTheme16->RefValDbl;
+	pTheme->FieldFun = pTheme16->FieldFun;
+	pTheme->ValueLen = pTheme16->ValueLen;
+	pTheme->FieldCorrection = pTheme16->FieldCorrection;
+	pTheme->IBBGColor = pTheme16->IBBGColor;
+	pTheme->TitleTextColor = pTheme16->TitleTextColor;
+	for (i = 0; i < 2; i++) {
+		pTheme->IBTextColor[i] = pTheme16->IBTextColor[i];
+	}
+	pTheme->RefIsPCT = pTheme16->RefIsPCT;
+	memcpy(pTheme->Value, pTheme16->Value, sizeof(pTheme16->Value));
+	pTheme->hVisList = (HANDLE)pTheme16->hVisList;
+	pTheme->DispersePoints = pTheme16->DispersePoints;
+	pTheme->hDisperseFileName = (HANDLE)pTheme16->hDisperseFileName;
+	pTheme->hDisperseFile = (HANDLE)pTheme16->hDisperseFile;
+	pTheme->MaxDispersion = pTheme16->MaxDispersion;
+	pTheme->hHighlightFileName = (HANDLE)pTheme16->hHighlightFileName;
+	pTheme->hHighlightFile = (HANDLE)pTheme16->hHighlightFile;
+	pTheme->AccumPointSymbolOpt = pTheme16->AccumPointSymbolOpt;
+	pTheme->AccumPointSizeOpt = pTheme16->AccumPointSizeOpt;
+	pTheme->AccumPointBaseSize = pTheme16->AccumPointBaseSize;
+	pTheme->AccumPointLink = pTheme16->AccumPointLink;
+	pTheme->AccumPointText = pTheme16->AccumPointText;
+	pTheme->ZeroBased = pTheme16->ZeroBased;
+	pTheme->PCTByArea = pTheme16->PCTByArea;
+	pTheme->NumNonMask = pTheme16->NumNonMask;
+	pTheme->PCTDisplayCycle = pTheme16->PCTDisplayCycle;
+	pTheme->LayerID = pTheme16->LayerID;
+	pTheme->InvertLegend = pTheme16->InvertLegend;
+	pTheme->NumCols = pTheme16->NumCols;
+	pTheme->HiPrecis = pTheme16->HiPrecis;
+	pTheme->NumMidpointnotused = pTheme16->NumMidpointnotused;
+	pTheme->AllValueClass = pTheme16->AllValueClass;
+	pTheme->ClearIfNoCount = pTheme16->ClearIfNoCount;
+	pTheme->DisplayPointsOnly = pTheme16->DisplayPointsOnly;
+	pTheme->FlipLegend = pTheme16->FlipLegend;
+	pTheme->FactorLegend = pTheme16->FactorLegend;
+	pTheme->DisplayCount = pTheme16->DisplayCount;
+	pTheme->ShowOnlySelectedClasses = pTheme16->ShowOnlySelectedClasses;
+	pTheme->HideNullClasses = pTheme16->HideNullClasses;
+	pTheme->NotSetColor = pTheme16->NotSetColor;
+	pTheme->AppendCount = pTheme16->AppendCount;
+	pTheme->CompressNullClasses = pTheme16->CompressNullClasses;
+	pTheme->DisplayDistance = pTheme16->DisplayDistance;
+	pTheme->AutoClassDef = pTheme16->AutoClassDef;
+	pTheme->UseFirstSymbol = pTheme16->UseFirstSymbol;
+	pTheme->FillRow = pTheme16->FillRow;
+	pTheme->CenterText = pTheme16->CenterText;
+	pTheme->FlatEndOffsetLine = pTheme16->FlatEndOffsetLine;
+	memcpy(pTheme->ClassDefDB, pTheme16->ClassDefDB, sizeof(pTheme16->ClassDefDB));
+	memcpy(pTheme->ClassDefSQL, pTheme16->ClassDefSQL, sizeof(pTheme16->ClassDefSQL));
+	memcpy(pTheme->ClassDefKeyField, pTheme16->ClassDefKeyField, sizeof(pTheme16->ClassDefKeyField));
+	memcpy(pTheme->ClassDefSymField, pTheme16->ClassDefSymField, sizeof(pTheme16->ClassDefSymField));
+	memcpy(pTheme->ClassDefTitleField, pTheme16->ClassDefTitleField, sizeof(pTheme16->ClassDefTitleField));
+	memcpy(pTheme->ClassDefValDB, pTheme16->ClassDefValDB, sizeof(pTheme16->ClassDefValDB));
+	memcpy(pTheme->ClassDefValSQL, pTheme16->ClassDefValSQL, sizeof(pTheme16->ClassDefValSQL));
+	memcpy(pTheme->ClassDefValField, pTheme16->ClassDefValField, sizeof(pTheme16->ClassDefValField));
+	for (i = 0; i < 4; i++) {
+		memcpy(pTheme->SymbolFont[i], pTheme16->SymbolFont[i], sizeof(pTheme16->SymbolFont[i]));
+	}
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassStatus[i] = pTheme16->ClassStatus[i];
+	}
+	pTheme->HotSpotData = pTheme16->HotSpotData;
+	for (i = 0; i < MAX_THEME_CLASSES_V4; i++) {
+		pTheme->ClassFactor[i] = pTheme16->ClassFactor[i];
+	}
+	memcpy(pTheme->HotSpotCompareTo, pTheme16->HotSpotCompareTo, sizeof(pTheme16->HotSpotCompareTo));
+	memcpy(pTheme->HotSpotSaveTo, pTheme16->HotSpotSaveTo, sizeof(pTheme16->HotSpotSaveTo));
+	pTheme->CompareHotSpotFactor = pTheme16->CompareHotSpotFactor;
+	memcpy(pTheme->IconLibrary, pTheme16->IconLibrary, sizeof(pTheme16->IconLibrary));
+	pTheme->ActualXMargin = pTheme16->ActualXMargin;
+	pTheme->ActualYMargin = pTheme16->ActualYMargin;
+	pTheme->ShowValueFont = pTheme16->ShowValueFont;
+	pTheme->ShowValueTextColor = pTheme16->ShowValueTextColor;
+	pTheme->Config = pTheme16->Config;
+	pTheme->UseHalfTone = pTheme16->UseHalfTone;
+	for (i = 0; i < 2; i++) {
+		pTheme->HaveVP[i] = pTheme16->HaveVP[i];
+	}
+	pTheme->NextValueColor = pTheme16->NextValueColor;
+	pTheme->ValueColor = pTheme16->ValueColor;
+	pTheme->NumMissing = pTheme16->NumMissing;
+	pTheme->NumInvalid = pTheme16->NumInvalid;
+	pTheme->SkipInvalid = pTheme16->SkipInvalid;
+	pTheme->MultiValOption = pTheme16->MultiValOption;
+	pTheme->ColorScheme = pTheme16->ColorScheme;
+	pTheme->hHotSpotBitmap = (HANDLE)pTheme16->hHotSpotBitmap;
+	pTheme->HotSpotBounds = pTheme16->HotSpotBounds;
+	pTheme->ComputeStoredCounts = pTheme16->ComputeStoredCounts;
+	pTheme->UseStoredCounts = pTheme16->UseStoredCounts;
+	pTheme->UseCheckmark = pTheme16->UseCheckmark;
+	pTheme->DelayTextDisplay = pTheme16->DelayTextDisplay;
+	pTheme->ShowValStyle = pTheme16->ShowValStyle;
+	pTheme->ProfileAlignmentOption = pTheme16->ProfileAlignmentOption;
+	pTheme->ComputeAreaAndLength = pTheme16->ComputeAreaAndLength;
+	pTheme->UseShadowColor = pTheme16->UseShadowColor;
+	pTheme->ShowDirection = pTheme16->ShowDirection;
+	pTheme->ExpressionConverted = pTheme16->ExpressionConverted;
+	pTheme->CompareAttributes = pTheme16->CompareAttributes;
+	pTheme->ShowCityCircle = pTheme16->ShowCityCircle;
+
+	pTheme->DistanceBetweenProfilePoints = pTheme16->DistanceBetweenProfilePoints;
+	pTheme->CrossSectionSpacing = pTheme16->CrossSectionSpacing;
+	for (i = 0; i < 2; i++) {
+		pTheme->CrossSectionWidth[i] = pTheme16->CrossSectionWidth[i];
+	}
+	pTheme->RadiusPoint = pTheme16->RadiusPoint;
+	pTheme->Radius = pTheme16->Radius;
+	pTheme->DynSegMaxFixedIncrement = pTheme16->DynSegMaxFixedIncrement;
+	pTheme->DynSegFixedIncrement = pTheme16->DynSegFixedIncrement;
+	pTheme->ShowValAZ = pTheme16->ShowValAZ;
+	pTheme->ProfileUnits = pTheme16->ProfileUnits;
+	memcpy(pTheme->Contents2, pTheme16->Contents2, sizeof(pTheme16->Contents2));
+	pTheme->SymNum2 = pTheme16->SymNum2;
+	pTheme->hVisList2 = (HANDLE)pTheme16->hVisList2;
+	pTheme->hAreas = (HANDLE)pTheme16->hAreas;
+	pTheme->SortOption = pTheme16->SortOption;
+	pTheme->ACCDisperse = pTheme16->ACCDisperse;
+	pTheme->Pass = pTheme16->Pass;
+	pTheme->PointInAreaPen = pTheme16->PointInAreaPen;
+	pTheme->PointInAreaBrush = pTheme16->PointInAreaBrush;
+	pTheme->PointInAreaColor = pTheme16->PointInAreaColor;
+	pTheme->FidAreas = pTheme16->FidAreas;
+	pTheme->PointInAreaPointThemeVPID = pTheme16->PointInAreaPointThemeVPID;
+	pTheme->NumMidpoint = pTheme16->NumMidpoint;
+	memcpy(pTheme->ShowValMacro, pTheme16->ShowValMacro, sizeof(pTheme16->ShowValMacro));
+	pTheme->FidDelayedText = pTheme16->FidDelayedText;
+	pTheme->hDelayedFont = pTheme16->hDelayedFont;
+	pTheme->NumAreas = pTheme16->NumAreas;
+
+	memcpy(pTheme->GraphicsAttributesMacro, pTheme16->GraphicsAttributesMacro, sizeof(pTheme16->GraphicsAttributesMacro));
+	memcpy(pTheme->DataDisplayMacro, pTheme16->DataDisplayMacro, sizeof(pTheme16->DataDisplayMacro));
+	memcpy(pTheme->BeginDataPassMacro, pTheme16->BeginDataPassMacro, sizeof(pTheme16->BeginDataPassMacro));
+	for (int i = 0; i < MAX_THEME_CLASSES_V4; i++)
+	{
+		pTheme->AbsLineWidth[i] = pTheme16->AbsLineWidth[i];
+		pTheme->SortOrder[i] = pTheme16->SortOrder[i];
+	}
+	pTheme->ShowValueShadowColor = pTheme16->ShowValueShadowColor;
+	memcpy(pTheme->CurValue, pTheme16->CurValue, sizeof(pTheme16->CurValue));
+	memcpy(pTheme->DataFileID, pTheme16->DataFileID, sizeof(pTheme16->DataFileID));
+	pTheme->CompareDC = pTheme16->CompareDC;
+	pTheme->CompareBitmap = pTheme16->CompareBitmap;
+	pTheme->CompareBitmapOld = pTheme16->CompareBitmapOld;
+	pTheme->ScaleBarTextFactor = pTheme16->ScaleBarTextFactor;
+	pTheme->nLabelLines = pTheme16->nLabelLines;
+	pTheme->hhLabelLines = pTheme16->hhLabelLines;
+	pTheme->MinCityPop = pTheme16->MinCityPop;
+	pTheme->CityTextRectInflateFactor = pTheme16->CityTextRectInflateFactor;
+	pTheme->CityTextMinSize = pTheme16->CityTextMinSize;
+	pTheme->CityTextMaxSize = pTheme16->CityTextMaxSize;
+	pTheme->CityTextSizeOpt = pTheme16->CityTextSizeOpt;
+	pTheme->MaxCitiesToDisplay = pTheme16->MaxCitiesToDisplay;
+	pTheme->MaxCityPopOnScreen = pTheme16->MaxCityPopOnScreen;
+	pTheme->GridID = pTheme16->GridID;//0=latlon,1=Google
+	pTheme->GridZoom = pTheme16->GridZoom;
+	pTheme->numPreloadedValues = pTheme16->numPreloadedValues;
+	pTheme->isDayFilter = pTheme16->isDayFilter;
+	memcpy(pTheme->BeginDisplayMacro, pTheme16->BeginDisplayMacro,sizeof(pTheme16->BeginDisplayMacro));
+	memcpy(pTheme->EndDisplayMacro, pTheme16->EndDisplayMacro,sizeof(pTheme16->EndDisplayMacro));
+	pTheme->ProfileSmoothOption = pTheme16->ProfileSmoothOption;
+	pTheme->InTestChar = pTheme16->InTestChar;
+	switch (pTheme16->ID)
+	{
+	case GF_STREET_TEXT_THEME:
+	{
+		LPSTREETTEXTDATA	pSDSave = GlobalLock(hSave);
+
+		memmove(&pTheme->ClassBM, pSDSave, sizeof(STREETTEXTDATA));
+		GSSiGlobUlFree(&hSave);
+		break;
+	}
+	default:
+		break;
+	}
+
 	return;
 }
 

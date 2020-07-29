@@ -1795,7 +1795,9 @@ HANDLE DisplayPointerInVP (int type,DPOINT WPoint,DPOINT WPoint2,short PixelSize
 void UpdateInfoBoxVPID (LPSHORT NewIDs);
 void ConvertSymbol (LPSHORT pSym);
 void CreateFileSymList (LPSHORT pSymNum);
-BOOL ConvertThemeV0toV1 (LPTHEME CurTheme,LPTHEME_v0 pTheme_v0);
+BOOL ConvertThemeV0toV1 (LPTHEME_V1 CurTheme,LPTHEME_v0 pTheme_v0);
+void ConvertThemeV1toV2(LPTHEME_V4 CurTheme, LPTHEME_V1 pTheme_v1);
+void ConvertThemeV4toV5(LPTHEME CurTheme, LPTHEME_V4 pTheme_v1);
 BOOL GetColorName (COLORREF Color,LPSTR Name);
 COLORREF GetColorFromName (LPSTR Name);
 BOOL DisplayCharInRect (HDC hDC,int chr,RECT Rect);

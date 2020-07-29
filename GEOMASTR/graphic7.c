@@ -1715,7 +1715,7 @@ GSSiExitProg (900);
             		HANDLE	handle_v0 = GSSiGlobAlloc ( 659,GHND,sizeof(THEME_v0));
             		LPTHEME_v0	pTheme_v0=(LPTHEME_v0)GlobalLock (handle_v0);
             		GSSilread (*Fid,pTheme_v0,sizeof(THEME_v0)); 
-            		ConvertThemeV0toV1 (CurTheme,pTheme_v0);
+            		ConvertThemeV0toV1 ((LPTHEME_V1)CurTheme,pTheme_v0);
             		GSSiGlobUlFree (&handle_v0); 
             	}
             		break;
@@ -1724,16 +1724,50 @@ GSSiExitProg (900);
             		HANDLE	handle_v1 = GSSiGlobAlloc ( 659,GHND,sizeof(THEME_V1));
             		LPTHEME_V1	pTheme_v1=(LPTHEME_V1)GlobalLock (handle_v1);
             		GSSilread (*Fid,pTheme_v1,sizeof(THEME_V1)); 
-            		ConvertThemeV1toV2 (CurTheme,pTheme_v1);
+            		ConvertThemeV1toV2 ((LPTHEME_V4)CurTheme,pTheme_v1);
             		GSSiGlobUlFree (&handle_v1); 
             	}
             		break;
+				case 4:
+				{
+					HANDLE	handle_v4 = GSSiGlobAlloc(659, GHND, sizeof(THEME_V4));
+					LPTHEME_V4	pTheme_v4 = (LPTHEME_V4)GlobalLock(handle_v4);
+					GSSilread(*Fid, pTheme_v4, sizeof(THEME_V4));
+					ConvertThemeV4toV5(CurTheme, pTheme_v4);
+					GSSiGlobUlFree(&handle_v4);
+				}
+				break;
 				case 2:
 				case 3:
             	default:
-            		GSSilread (*Fid,CurTheme,sizeof(THEME)); 
+            		GSSilread (*Fid,CurTheme,sizeof(THEME_V4)); 
             		break;
             }
+			while (CurTheme->Version != CUR_THEME_VERSION)
+			{
+				HANDLE	hThemeNew = GSSiGlobAlloc(659, GHND, sizeof(THEME));
+				LPTHEME pThemeNew = GlobalLock(hThemeNew);
+				switch (CurTheme->Version)
+				{
+				case 0:
+					ConvertThemeV0toV1((LPTHEME_V1)pThemeNew, (LPTHEME_v0)CurTheme);
+					break;
+				case 1:
+					ConvertThemeV1toV2((LPTHEME_V4)pThemeNew, (LPTHEME_V1)CurTheme);
+					break;
+				case 2:
+				case 3:
+					memcpy(pThemeNew, CurTheme, sizeof(THEME));
+					pThemeNew->Version = 4;
+					break;
+				case 4:
+					ConvertThemeV4toV5(pThemeNew, (LPTHEME_V4)CurTheme);
+					break;
+				}
+				CurTheme = pThemeNew;
+				GSSiGlobUlFree(&handle);
+				handle = hThemeNew;
+			}
             CurTheme->handle = handle; 
             CurTheme->Config = CurrentConfig;   
 			CurTheme->CompareDC = 0;

@@ -1113,7 +1113,8 @@ BOOL GetUndoData (HFILE Fid,HPSTR pData,long length,long FirstPiece,BOOL Remove)
 BOOL GetUndoFileNameFromUndoFileID (short UndoFileID,LPSTR Name);
 short GetUndoFileIDFromName (LPSTR Name,BOOL Add);
 short GetUndoFileIDFromFid (HFILE Fid);
-void AddToChangedGlobalList (HANDLE handle);
+void AddToChangedGlobalList(HANDLE handle);
+void RemoveFromChangedGlobalList(HANDLE handle);
 void AddToUndoFreeSpace (HANDLE Fid,long loc,long len);
 void AddToUndoFreeSpaceHFILE(HFILE Fid, long loc, long len);
 DWORD NextVarTime(void);   
