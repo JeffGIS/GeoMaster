@@ -5130,7 +5130,7 @@ TooSmall:	fHeight *= 0.80;
 	for (iclass = 0; iclass < CurTheme->NumClass; iclass++)  //give theme editing functions correct final location
 	{
 		CurTheme->ClassClrBox[iclass] = UsedBox[iclass];
-		if (CurTheme->ClassStatus[iclass])
+		if (CurTheme->ClassStatus[iclass] && (!CurTheme->HideNullClasses || CurTheme->ClassCount[iclass] > 0))
 		{
 			ClassColorBox = CurTheme->ClassClrBox[iclass];
 			ClassColorBox.right += MaxTextWidth;

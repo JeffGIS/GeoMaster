@@ -1739,9 +1739,11 @@ GSSiExitProg (900);
 				break;
 				case 2:
 				case 3:
-            	default:
-            		GSSilread (*Fid,CurTheme,sizeof(THEME_V4)); 
-            		break;
+					GSSilread(*Fid, CurTheme, sizeof(THEME_V4));
+					break;
+				case 5:
+					GSSilread(*Fid, CurTheme, sizeof(THEME));
+					break;
             }
 			while (CurTheme->Version != CUR_THEME_VERSION)
 			{
