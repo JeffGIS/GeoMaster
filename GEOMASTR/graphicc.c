@@ -2508,6 +2508,7 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 	long	Refno;
 	int		NumAdded=0;
 	HANDLE  hTI;
+	TAGKEY	TagKey;
 
 	CloseTAGIndex ();
 	
@@ -2528,20 +2529,20 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 		rc = atoi (FetchStr);
 		while (rc)
 		{
-			strncpy(TAGKey.PREFIX,Prefix,8); 
+			strncpy(TagKey.PREFIX,Prefix,8); 
 			sprintf (OldUDIstr,"[%s.%s]",FileID,OldUDIvar);
 			ExpandText (OldUDIstr);
-			strncpy(TAGKey.UDI,OldUDIstr,32); 
-			TAGKey.Refno = LONG_MIN;  
+			strncpy(TagKey.UDI,OldUDIstr,32); 
+			TagKey.Refno = LONG_MIN;  
 			*NewUDIstr=0;
-			if (!BT_FIND (hTI,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)&RefIdxData))
+			if (!BT_FIND (hTI,(LPSTR)&TagKey,BT_FIRST,BT_GE,(LPSTR)&RefIdxData))
 			{
-				if (!strcmp (TAGKey.UDI,OldUDIstr))
+				if (!strcmp (TagKey.UDI,OldUDIstr))
 				{
 					sprintf (NewUDIstr,"[%s.%s]",FileID,NewUDIvar);
 					ExpandText (NewUDIstr);
-					strncpy(TAGKey.UDI,NewUDIstr,32); 
-					BT_PUT (hTI,(LPSTR)&TAGKey,(LPSTR)&RefIdxData);
+					strncpy(TagKey.UDI,NewUDIstr,32); 
+					BT_PUT (hTI,(LPSTR)&TagKey,(LPSTR)&RefIdxData);
 					NumAdded++;
 				}
 			}

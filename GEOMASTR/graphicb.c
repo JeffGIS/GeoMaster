@@ -5384,6 +5384,24 @@ NextOff:
 	return nHits;
 }
 
+static int GetNumPIDS(LPSTR pPids)
+{
+	int nPids = 0;
+
+	if (pPids)
+	{
+		if (strlen(pPids) > 0)
+			nPids++;
+		pPids = strchr(pPids, ',');
+		while (pPids)
+		{
+			pPids++;
+			nPids++;
+			pPids = strchr(pPids, ',');
+		}
+	}
+	return nPids;
+}
 BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
 	int		Trigger=2;
@@ -5391,7 +5409,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 	char	str[1024], teststr[1024],lastowner[4096];
 	static	char Wildcard[128]="";
 	static	char WantStr[128]=""; 
-	char	WantStr2[128],propkeyfld[64];
+	char	propkeyfld[64];
 	LPGWDHEADER lpGWDHeadNameIndex, lpGWDHeadName, lpGWDHeadProperty;
     LPOPENFILEDATA  FilePtrNameIndex, FilePtrName, FilePtrProperty;
     LPOPENSQLDATA   SQLPtrNameIndex, SQLPtrName, SQLPtrProperty;
@@ -5454,7 +5472,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
     	//hSaveBM = EnterBlockingWindow (hWndDlg);
 		First = TRUE;
 		SendDlgItemMessage (hWndDlg,IDC_AUTOHIGHLIGHT,BM_SETCHECK,AutoHighlight,0L);
-		GetGlobalCVal ("[%OWNERTABS]",str,"250 2000");
+		GetGlobalCVal ("[%OWNERTABS]",str,"250 540 2000");
 		nTabs = GetIntsFromList (str,&hList); 
 		if (nTabs)
 		{
@@ -5462,7 +5480,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 			SendDlgItemMessage (hWndDlg,IDC_OWNERLIST,LB_SETTABSTOPS,nTabs,(LPARAM)pTabs);
 			GSSiGlobUlFree (&hList);
 		}
-		GetGlobalCVal ("[%PROPERTYTABS]",str,"80 200 250 2000");
+		GetGlobalCVal ("[%PROPERTYTABS]",str,"80 300 450 2000");
 		nTabs = GetIntsFromList (str,&hList); 
 		if (nTabs)
 		{
@@ -5527,6 +5545,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
    		      			MSG     msg; 
 						char	Name[66];
 
+						SetContinueProcessing(TRUE);
 						SetDlgItemText (hWndDlg,IDC_NUMOWNERS,"Searching..."); 
 				        GetGlobalCVal ("[%NAMEINDEXDB]",str,"[%DL]attribut\\nameindex.gmd");
 						OpenDataFile (str, "",BT_READ, &hDBNameIndex);
@@ -5635,7 +5654,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 								if (nowner == 81)
 									idx = 0;
 								GetGlobalCVal ("[%NAMEDISPLAY]",str,"[NAMETAXPAYER]$CHR(1)[NAMEADDR1] [NAMEADDR2] [NAMECITY],[NAMESTATE]$CHR(1)[NAMEACCTOWNER]");
-								ExpandText (str); 
+ 								ExpandText (str); 
 								OneSpace (str); 
 								ReplaceChar (str,0x01,0x09);
  								strcpy (teststr,str);
@@ -5658,11 +5677,45 @@ FoundPart:							;
 								}
 								if (ShowThisOwner)
 								{
+									LPSTR pPID;
+									LPSTR pPIDS = 0;
+									int nPIDS = 0;
+									char savePID[128];
 									nowner++;
 									strcpy (lastowner,str);
-						 			if ((idx=SendDlgItemMessage (hWndDlg,IDC_OWNERLIST,LB_ADDSTRING,0,(LPARAM)str)) ==
-						 				LB_ERRSPACE) 
-						 				GetNext = FALSE;
+									pPID = strrchr(str, '\t');
+									if (pPID)
+									{
+										*pPID++ = 0;
+										strcpy(savePID, pPID);
+										if ((idx = SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_FINDSTRING,(WPARAM)-1, (LPARAM)str)) !=
+											LB_ERR)
+										{
+											HANDLE hLongStr = GSSiGlobAlloc(0, GMEM_MOVEABLE,USHRT_MAX);
+											LPSTR longstr = GlobalLock(hLongStr);
+											SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_GETTEXT, idx, (LPARAM)longstr);
+											pPIDS = strrchr(longstr, '\t');
+											pPIDS++;
+											int nPids = GetNumPIDS(pPIDS)+1;
+											int lStr = strlen(longstr);
+											HANDLE hLongStr2 = GSSiGlobAlloc(0, GMEM_MOVEABLE, lStr+32);
+											LPSTR longstr2 = GlobalLock(hLongStr2);
+											sprintf(longstr2, "%s\t%5i PIDs\t%s,%s", str,nPids, pPIDS, savePID);
+											int nInList = SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_DELETESTRING, idx, 0);
+											if ((idx = SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_ADDSTRING, 0, (LPARAM)longstr2)) ==
+												LB_ERRSPACE)
+												GetNext = FALSE;
+											GSSiGlobUlFree(&hLongStr);
+											GSSiGlobUlFree(&hLongStr2);
+										}
+										else
+										{
+											sprintf(strchr(str, 0), "\t\t%s", savePID);
+											if ((idx = SendDlgItemMessage(hWndDlg, IDC_OWNERLIST, LB_ADDSTRING, 0, (LPARAM)str)) ==
+												LB_ERRSPACE)
+												GetNext = FALSE;
+										}
+									}
 								}
 							} 
 				 			if (GSSiPeekMessage(&msg,hwndCtl,WM_KEYDOWN,WM_KEYDOWN,PM_NOREMOVE))
@@ -5728,7 +5781,7 @@ FoundPart:							;
 							    if (DoZoom>0)
 							    {
 						    		EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);
-							    	PostMessage(hWndMain, WM_COMMAND, IDM_Z_HLTLIMITS, 0L);
+							    	//PostMessage(hWndMain, WM_COMMAND, IDM_Z_HLTLIMITS, 0L);
 							    } 
 							    else if (DoZoom < 0)
 							    	SetDlgItemText (hWndDlg,IDC_PROPMESSAGE,"Property is marked deleted"); 
@@ -5768,21 +5821,26 @@ FoundPart:							;
 		 			HANDLE	hItems=0; 
 					int	 n=GetLBSelectedItems (hWndDlg,IDC_OWNERLIST,&hItems);
 					LPINT	pItem;
-					
+					int nFound = 0;
+
 					SendDlgItemMessage (hWndDlg,IDC_PROPERTYLIST,LB_RESETCONTENT,0,0);
 					if (n)
 					{
-						pItem = (LPINT)GlobalLock (hItems);  
+						HANDLE hLongStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+						LPSTR  pLongStr = GlobalLock(hLongStr);
+						HANDLE hWantStr2 = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+						LPSTR  WantStr2 = GlobalLock(hWantStr2);
+						pItem = (LPINT)GlobalLock (hItems);
 						while (n--)
 						{    
 							
 							Item = *pItem++;
-							SendDlgItemMessage(hWndDlg,IDC_OWNERLIST,LB_GETTEXT,Item,(DWORD)str);
-							if ((pTAB = _fstrrchr (str,'\t')))
+							SendDlgItemMessage(hWndDlg,IDC_OWNERLIST,LB_GETTEXT,Item,(DWORD)pLongStr);
+							if ((pTAB = _fstrrchr (pLongStr,'\t')))
 							{
 								*pTAB++ = 0;   
 								_fstrcpy (WantStr2,pTAB);
-								ReplaceChar (str,'\t','-');
+								ReplaceChar (pLongStr,'\t','-');
 							   //SetDlgItemText (hWndDlg,IDC_OWNERNAME,str); 
 								{               
 	   		      					short	IDIndex=GetGlobalLVal2 ("[%PROPERTYINDEX]",0), IDLen=0; 
@@ -5797,48 +5855,68 @@ FoundPart:							;
 									//	IDLen += lpGWDHeadProperty->pFldInfo[lpGWDHeadProperty->IndexFields[IDIndex][i]].Len;
 									//_fstrncpy (lpGWDHeadProperty->pKeys[IDIndex],WantStr2,IDLen);
 					        		GetGlobalCVal ("[%PROPERTYINDEXFIELD]",propindexfld,"[PID]");
-									SetFieldValFromCharAndName(lpGWDHeadProperty, propindexfld, (LPSTR)WantStr2, FALSE, TRUE);
-									GWDFormKey(lpGWDHeadProperty,IDIndex,TRUE,0,0);
+									LPSTR pPID;
+									do
+									{
+										pPID = strrchr(WantStr2, ',');
+										if (!pPID)
+											pPID = WantStr2;
+										else
+											*pPID++ = 0;
+										GetNext = TRUE;
+										pos = BT_FIRST;
+										cond = BT_GE;
+										SetFieldValFromCharAndName(lpGWDHeadProperty, propindexfld, pPID, FALSE, TRUE);
+										GWDFormKey(lpGWDHeadProperty, IDIndex, TRUE, 0, 0);
 
-		        					while (GetNext && !BT_FIND (lpGWDHeadProperty->BTHandle[IDIndex],lpGWDHeadProperty->pKeys[IDIndex],pos,cond,(LPSTR)&Offset))
-		        					{
-										char	CharKeyVal[128];
+										while (GetNext && !BT_FIND(lpGWDHeadProperty->BTHandle[IDIndex], lpGWDHeadProperty->pKeys[IDIndex], pos, cond, (LPSTR)&Offset))
+										{
+											char	CharKeyVal[128];
 
-										pos = BT_NEXT;
-		        						cond = BT_ANY;
-						        						
-		        						//lpGWDHeadProperty->pKeys[IDIndex][IDLen]=0;   
-		        						//Truncate (lpGWDHeadProperty->pKeys[IDIndex]);
-						                GMDGetCharKeyVal (lpGWDHeadProperty,IDIndex,0,CharKeyVal); 
-		        						if (!_fstricmp (WantStr2,CharKeyVal))
-		        						{
-											FillGWDData (lpGWDHeadProperty,Offset); 
-					        				SQLPtrProperty->st = 0;  
-					        				SQLPtrProperty->Offset = Offset; 
-					        				SQLPtrProperty->lastreadtime = ULONG_MAX;
-					        				GetGlobalCVal ("[%PROPERTYDISPLAY]",str,"[GEOACCT]$CHR(1)[PROPADDR] [STREET] [DIRECTION] [SFX]$CHR(1)[DEEDVOLUME]/[DEEDPAGE]$CHR(1)[ACRES]");
-			        						ExpandText (str); 
-			        						OneSpace (str); 
-					        				//GetGlobalCVal ("[%PROPERTYKEYFIELD]",propkeyfld,"[GEOACCT]");
-			        						ReplaceChar (str,0x01,0x09); 
-			        						//sprintf (_fstrchr(str,0),"\t%s",propkeyfld);
-			        						//ExpandText (str);
-				 							if ((idx=SendDlgItemMessage (hWndDlg,IDC_PROPERTYLIST,LB_ADDSTRING,0,(LPARAM)str)) ==
-				 								LB_ERRSPACE) 
-				 								GetNext = FALSE; 
-				 						} 
-				 						else
-				 							GetNext = FALSE;
-		        					}
+											pos = BT_NEXT;
+											cond = BT_ANY;
+
+											//lpGWDHeadProperty->pKeys[IDIndex][IDLen]=0;   
+											//Truncate (lpGWDHeadProperty->pKeys[IDIndex]);
+											GMDGetCharKeyVal(lpGWDHeadProperty, IDIndex, 0, CharKeyVal);
+											if (!_fstricmp(pPID, CharKeyVal))
+											{
+												FillGWDData(lpGWDHeadProperty, Offset);
+												SQLPtrProperty->st = 0;
+												SQLPtrProperty->Offset = Offset;
+												SQLPtrProperty->lastreadtime = ULONG_MAX;
+												GetGlobalCVal("[%PROPERTYDISPLAY]", str, "[GEOACCT]$CHR(1)[PROPADDR] [STREET] [DIRECTION] [SFX]$CHR(1)[DEEDVOLUME]/[DEEDPAGE]$CHR(1)[ACRES]");
+												ExpandText(str);
+												OneSpace(str);
+												//GetGlobalCVal ("[%PROPERTYKEYFIELD]",propkeyfld,"[GEOACCT]");
+												ReplaceChar(str, 0x01, 0x09);
+												//sprintf (_fstrchr(str,0),"\t%s",propkeyfld);
+												//ExpandText (str);
+												nFound++;
+												if ((idx = SendDlgItemMessage(hWndDlg, IDC_PROPERTYLIST, LB_ADDSTRING, 0, (LPARAM)str)) ==
+													LB_ERRSPACE)
+													GetNext = FALSE;
+											}
+											else
+												GetNext = FALSE;
+										}
+									} while (pPID != WantStr2);
 		        					GlobalUnlock (FilePtrProperty->FileHandle); 
 		           					GlobalUnlock (SQLPtrProperty->OFHandle);
 		        					GlobalUnlock (hDBProperty); 
 								}
 							}
 						}
+						GSSiGlobUlFree(&hLongStr);
+						GSSiGlobUlFree(&hWantStr2);
 					}
 					CloseDataFile (TRUE,&hDBProperty); 
 					GSSiGlobUlFree (&hItems);
+					if (nFound == 1)
+					{
+						PostMessage(GetDlgItem(hWndDlg, IDC_PROPERTYLIST), LB_SETSEL, TRUE, 0);
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), TRUE);
+					}
 	     	 	}  
 	     	}
      	 	break; 
@@ -5850,16 +5928,24 @@ FoundPart:							;
 				LPINT	pItem=(LPINT)GlobalLock (hItems);  
 				LPSTR	pTAB; 
 				BOOL	Err=TRUE;
-				
+				HANDLE hLongStr = GSSiGlobAlloc(0, GMEM_MOVEABLE, USHRT_MAX);
+				LPSTR  pLongStr = GlobalLock(hLongStr);
+
 				if (n == 1)
 					SaveProperty = *pItem;
 				else
 					SaveProperty = -1;
 				iOwner = SendDlgItemMessage(hWndDlg,IDC_OWNERLIST,LB_GETCURSEL,0,0);
-		 		SendDlgItemMessage(hWndDlg,IDC_OWNERLIST,LB_GETTEXT,iOwner,(DWORD)str); 
-		 		if ((pTAB = _fstrchr (str,'\t')))
-		 			*pTAB = 0;
-				SetGlobalValue ("%SELECTEDOWNER",str);
+		 		SendDlgItemMessage(hWndDlg,IDC_OWNERLIST,LB_GETTEXT,iOwner,(DWORD)pLongStr); 
+				if ((pTAB = _fstrchr(pLongStr, '\t')))
+				{
+					*pTAB = 0;
+					if ((pTAB = _fstrchr(pLongStr, '\t')))
+						*pTAB = 0;
+				}
+				SetGlobalValue ("%SELECTEDOWNER", pLongStr);
+				GSSiGlobUlFree(&hLongStr);
+
 		 		ClearHighlightList(FALSE); 
 		    	AutoHighlight=SendDlgItemMessage(hWndDlg,IDC_AUTOHIGHLIGHT,BM_GETCHECK,0,0); 
 		 		while (n--)
