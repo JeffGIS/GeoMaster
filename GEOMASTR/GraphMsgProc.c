@@ -262,7 +262,17 @@ static	UINT	SepCntl[16]=	{IDC_SEP1,
 #include "gmextern.h"     
 
 BOOL GetNextDataRecord(BOOL useDataFile, HANDLE hDB, LPINT piref, LPHIGHLIGHTDATA pHighlightData, BOOL FirstRec);
-
+BOOL SetNVCrisDataType(LPSTR dt)
+{
+	BOOL rtn = TRUE;
+	if (*dt == 'C')
+		DATA_TYPE = CURBRAMP;
+	else if (*dt == 'S')
+		DATA_TYPE = SIDEWALK;
+	else
+		rtn = FALSE;
+	return rtn;
+}
 BOOL ExportData (HWND hWnd,short Type)
 {
     DLGPROC lpfnMIF_OUTPUTMsgProc, lpfnDXF_OUTPUTMsgProc, lpfnBMP_OUTPUTMsgProc, lpfnTXT_OUTPUTMsgProc, lpfnORACLEMsgProc;

@@ -2494,6 +2494,7 @@ BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds);
 BOOL GetSQLITERecord(LONGLONG SQLITERec);
 char *EncodeString(LPDPOINT llpoints, int numPoints);
 LPDPOINT DecodeString(char *encodedString, int *numPoints);
+BOOL SetNVCrisDataType(LPSTR dt);
 BOOL GetIntersectionStreetNames(LPSTR NVCRISDataBase, int intnum, LPSTR OutLoc, LPINT pAltIntNum);
 BOOL OutputRampsForIntersectionsInListToFile(LPSTR List, LPSTR OutFile, LPSTR NVCRISDataBase, int codeSystem, int headerType,BOOL wantPhotos);
 int OutputIntsWithRampsToFile(LPSTR OutFile, LPSTR NVCRISDataBase, int opt,int header);

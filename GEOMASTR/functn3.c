@@ -4857,6 +4857,7 @@ GotCloseFilehSQL:
 			//$NVCRIS(STREETNAMES,FromDB,intnum)
 			//$NVCRIS(CCODETOFILE, [%ARG(1)], [~TEMPFILE]);
 			//$NVCRIS(CREATERAMPINDEX,dbpath);
+			//$NVCRIS(DATATYPE,Curbramp or Sidewalk);
 
 		{
 			rtn = FALSE;
@@ -4878,9 +4879,13 @@ GotCloseFilehSQL:
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
 			
 			}
+			else if (!stricmp(Arg[1], "DATATYPE"))//$NVCRIS(DATATYPE,Curbramp or Sidewalk)
+			{
+				rtn = SetNVCrisDataType(Arg[2]);
+			}
 			else if (!stricmp(Arg[1], "CCODETOFILE"))//$NVCRIS(CCODETOFILE,ccode,file)
 			{
-				rtn = CCodeToFile(Arg[2],Arg[3]);
+				rtn = CCodeToFile(Arg[2], Arg[3]);
 			}
 			else if (!stricmp(Arg[1], "UPDATEPICTID"))//$NVCRIS(UPDATEPICTID,sqlfile,oldsequence,newsequence)
 			{

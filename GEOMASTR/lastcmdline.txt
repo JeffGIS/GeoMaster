@@ -1,2 +1,2 @@
-configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
-F:\MplsRemoteTemplate\GeoMas
+configs\sidewalktest.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
+D:\PCViewerMpls\PCViewer
