@@ -593,6 +593,24 @@ void TrackObject (HGDIOBJ hObj,short Type)
 	}
 	return;
 }
+HWND WINAPI GSSiSetFocus(_In_opt_ HWND hWnd)
+{
+	HWND rtn;
+	if (GetFocus() == hWnd)
+		rtn = (HWND)-1;
+	else
+		rtn = SetFocus(hWnd);
+#if CHECKMEM 
+	static icmd = 0;
+	char printfcmd[128];
+	sprintf(printfcmd, "setfocus = %#010x:%#010x:%#010x  %6i\n",hWnd,rtn,hWndMain, icmd++);
+	OutputDebugString(printfcmd);
+
+#endif
+	if (rtn == (HWND)-1)
+		rtn = 0;
+	return rtn;
+}
 
 COLORREF WINAPI GSSiSetTextColor(__in HDC hdc, __in COLORREF color)
 {

@@ -4171,7 +4171,8 @@ int WINAPI GSSiFillRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
 int WINAPI GSSiFrameRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
 #define SetCursor GSSiSetCursorx
 HCURSOR WINAPI GSSiSetCursorx(_In_opt_ HCURSOR hCursor);
-
+#define SetFocus GSSiSetFocus
+HWND WINAPI GSSiSetFocus(_In_opt_ HWND hWnd);
 #define SetTextColor GSSiSetTextColor
 COLORREF WINAPI GSSiSetTextColor(__in HDC hdc, __in COLORREF color);
 #define StretchBlt GSSiStretchBlt
