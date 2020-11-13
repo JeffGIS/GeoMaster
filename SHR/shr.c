@@ -119,13 +119,14 @@ HANDLE OpenFileGM(
 	char	Name[MAX_PATH];
 	int		rtn;
 	BOOL	allowOpenFile = FALSE;
-
+	OFSTRUCTGM ReopenBuff;
 	strcpy(Name, lpFileName);
 	ExpandText(Name);
 
 	if (uStyle == OF_CREATE && !makedirectories(Name, FALSE, TRUE))
 		return  INVALID_HANDLE_VALUE;
-
+	if (!lpReOpenBuff)
+		lpReOpenBuff = &ReopenBuff;
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
 	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
 	if (!fullPath)
@@ -9651,8 +9652,12 @@ Open:
 			if (DeleteFileInJournal (Name))
 				Fid = 1;
 		}
-		else if (!GSSiRemove2(Name))
-			Fid = 1;
+		else
+		{
+			pOFStruct->nErrCode = GSSiRemove2(Name);
+			if (!pOFStruct->nErrCode)
+				Fid = 1;
+		}
 	}
     else
     {
@@ -11275,14 +11280,14 @@ BYTE ComputeCheckSum (LPBYTE rec,DWORD l)
 	return csum; 
 }
 
-long GSSiLength (LPSTR File)
+LONGLONG GSSiLength (LPSTR File)
 #if ENABLETRACE
 {GSSiEnterProg (344);
 #endif
 {
 	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
-	long		l;
+	LONGLONG		l;
 	
 	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
 	if (Fid == HFILE_ERROR)
@@ -11304,21 +11309,34 @@ GSSiExitProg (344);
 }
 #endif
 }
+LONGLONG GSSifilelength64(HANDLE Fid)
+{
+	LONGLONG    CurLoc, Len;
 
-long GSSifilelength (HFILE Fid)
+	if (Fid == INVALID_HANDLE_VALUE)
+		Len = -1;
+	else
+	{
+		CurLoc = GSSillseek64(Fid, 0, 1);
+		Len = GSSillseek64(Fid, 0, 2);
+		GSSillseek64(Fid, CurLoc, 0);
+	}
+	return Len;
+}
+LONGLONG GSSifilelength (HFILE Fid)
 #if ENABLETRACE
 {GSSiEnterProg (345);
 #endif
 {                
-    long    CurLoc, Len;
+    LONGLONG    CurLoc, Len;
     
 	if (Fid < 0)
 		Len = -1;
 	else
 	{
-		CurLoc = GSSillseek (Fid,0,1);
-		Len = GSSillseek (Fid,0,2);
-		GSSillseek (Fid,CurLoc,0);
+		CurLoc = GSSillseek2 (Fid,0,1);
+		Len = GSSillseek2 (Fid,0,2);
+		GSSillseek2 (Fid,CurLoc,0);
 	}
 {
 #if ENABLETRACE
@@ -13577,6 +13595,18 @@ LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt)
 	if (OpenFileFid[Fid] == HFILE_ERROR)
 		return 0;
 	rtnloc = _lseeki64 (OpenFileFid[Fid],loc,opt); 
+	return rtnloc;
+}
+
+LONGLONG GSSillseek64(HANDLE Fid, LONGLONG loc, int opt)
+{
+	LONGLONG	rtnloc;
+	LARGE_INTEGER  liDistanceToMove;
+	liDistanceToMove.QuadPart = loc;
+	LARGE_INTEGER  liRtnLoc;
+	rtnloc = llFileSeek(Fid, loc, opt);
+	BOOL st = SetFilePointerEx(Fid, liDistanceToMove, &liRtnLoc, opt);
+	rtnloc = liRtnLoc.QuadPart;
 	return rtnloc;
 }
 

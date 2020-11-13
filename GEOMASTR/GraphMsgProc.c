@@ -1785,7 +1785,7 @@ static BOOL RunIdentifyUpdateMacro(HWND hWndDlg, LPSTR macro, LPSTR lpDB, LPSTR 
 	int st = 0;
 	GetWindowText(hWndDlg, title, 510);
 
-	if (!strncmp(macro, "MACRO(", 6))
+	if (macro && !strncmp(macro, "MACRO(", 6))
 	{
 		LPSTR pMacro = macro + 6;
 		LPSTR pEndMacro = strrchr(pMacro, ')');
@@ -2299,6 +2299,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 	RECT buttonRect;
 	static char DBName[MAX_PATH];
 	static BOOL doHFlip, doVFlip;
+	static BOOL haveUpdate;
 	BOOL err;
 
 	int	BRtn;
@@ -2345,6 +2346,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		break;
 
 	case WM_INITDIALOG:
+		haveUpdate = FALSE;
 		rulernum = 0;
 		firstMove = TRUE;
 		hSaveBM = EnterBlockingWindow(hWndDlg);
@@ -2679,6 +2681,8 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
 			break;
 		case IDC_NEXTPOINT:
+			if (haveUpdate && !RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
+				break;
 			GSSiEndDialog(hWndDlg, 2, hSaveBM);
 
 			break;
@@ -2750,6 +2754,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 						st = GetUpdateFieldValue(hWndDlg, SetFieldName, NewValue);
 					if (st)
 					{
+						haveUpdate = TRUE;
 						sprintf(str2, "%s=%s", SetFieldName, NewValue);
 						strcpy(lpTab - 1, "\t(*)\t");
 						strcat(lpTab, NewValue);

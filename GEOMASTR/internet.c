@@ -252,8 +252,8 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 		if (handle)
 		{
 			__int64 size = GSSiLength((LPSTR)lpszLocalfile);
-			DWORD Tot = (DWORD)size;
-			DWORD Done = 0;
+			LONGLONG Tot = size;
+			LONGLONG Done = 0;
 			LPSTR Title, Mess;
 			DWORD dwNumberOfBytesToRead = USHRT_MAX;
 			DWORD numBytesRead;

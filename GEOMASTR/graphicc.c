@@ -803,11 +803,12 @@ LPJLBPDATA	pData;
 	return rtn;
 }
 
-void SetTransferFileName (LPSTR Option,LPSTR Name)
+void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc)
 {  
 	*TransferFileRunCommand = 0;
 	_fstrcpy (BuildTransferFileOption,Option);
-	_fstrcpy (TransferFileName,Name);
+	_fstrcpy(TransferFileName, Name);
+	_fstrcpy(TransferFrom, fromLoc);
 	return;
 } 
 
@@ -817,7 +818,7 @@ void RunTransferFileCommand (void)
 	return;
 }
 
-BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long MaxLength,LPSTR sourceDir)
+BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long MaxLength,LPSTR sourceDir)
 {   
 	long	lRec;
     HANDLE	hRec = GSSiGlobAlloc (1550,GMEM_MOVEABLE,MaxLength);
@@ -826,7 +827,7 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
     HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
     long	CompressedLength;  
 	HFILE	Fid;
-	long	TotLen;
+	LONGLONG	TotLen=0;
 	BOOL	rtn = FALSE;
 	char	filePath[MAX_PATH];
 
@@ -839,14 +840,14 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
 		goto Exit;
 	TotLen = GSSifilelength(Fid);
    	if (hWndStatus)
-		PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
+		PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
 	while ((lRec=BigRead (Fid,pRec,MaxLength)))
 	{
 	 	lRec = CompressBinaryRecord (pRec,pCompressedRec,lRec); 	    
-    	BigWrite (FidTF,(HPSTR)&lRec,4,-1);
-    	BigWrite (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
+    	BigWrite64 (FidTF,(HPSTR)&lRec,4,-1);
+    	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
     	if (hWndStatus)
-			PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
+			PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
     }
     GSSiClose2 (&Fid);
 	rtn = TRUE;
@@ -856,29 +857,30 @@ Exit:
     return rtn; 
 }
 
-BOOL GetFileFromTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToGet,long LenToRead,long MaxLength)
+BOOL GetFileFromTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToGet,LONGLONG LenToRead,long MaxLength)
 {   
 	long	lRec;
     HANDLE	hRec = GSSiGlobAlloc (1552,GMEM_MOVEABLE,MaxLength);
     HPSTR	pRec = GlobalLock (hRec); 
     HANDLE	hCompressedRec = GSSiGlobAlloc (1553,GMEM_MOVEABLE,MaxLength*2);
     HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
-    long	CompressedLength, LenRead=0;  
-	HFILE	Fid=GSSiOpenFile (FileToGet,0,OF_CREATE);
+	long	CompressedLength;
+	LONGLONG LenRead = 0;
+	HANDLE	Fid=OpenFileGM (FileToGet,0,OF_CREATE);
 	
-	if (Fid == HFILE_ERROR)
+	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
    	PctBox (hWndStatus,LenToRead,LenRead,0); 
 	while (LenRead < LenToRead)
 	{   
-		BigRead (FidTF,(HPSTR)&CompressedLength,4);
+		BigRead64 (FidTF,(HPSTR)&CompressedLength,4);
 		LenRead += CompressedLength+4;     
-		BigRead (FidTF,pCompressedRec,CompressedLength);
+		BigRead64 (FidTF,pCompressedRec,CompressedLength);
 		lRec = DecompressBinaryRecordUnsafe (pRec,pCompressedRec,CompressedLength);
-    	BigWrite (Fid,(HPSTR)pRec,lRec,-1);
+    	BigWrite64 (Fid,(HPSTR)pRec,lRec,-1);
     	PctBox (hWndStatus,LenToRead,LenRead,0); 
     }
-    GSSiClose2 (&Fid);
+    GSSiClose64 (&Fid);
     GSSiGlobUlFree (&hCompressedRec); 
     GSSiGlobUlFree (&hRec);
     return TRUE; 

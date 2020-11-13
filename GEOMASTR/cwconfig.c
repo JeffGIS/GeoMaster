@@ -2178,8 +2178,17 @@ else if (MapServer)
 	}
 }
 nMess = -1;
- while(hWndMain && GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
-   {    
+ while(GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
+   { 
+	 /*
+	 static icmd = 0;
+	 char printfcmd[32];
+	 sprintf(printfcmd, "msg = %#06X  %6i\n", msg.message,icmd++);
+	 OutputDebugString(printfcmd);
+	 if (msg.message == WM_LBUTTONDOWN)
+		 ii = 10;
+	 if (!hWndMain)
+		 break;*/
 	 if (LogMSGFile != HFILE_ERROR)
 	 {
 		 char text[128];
@@ -2190,10 +2199,11 @@ nMess = -1;
 	 {
 	 case WM_RBUTTONDOWN:
 		 break;
+	 case WM_LBUTTONDOWN:
+		 ii = 10;
 	 case WM_LBUTTONDBLCLK:
 	 case WM_KEYDOWN:
 	 case WM_SYSKEYDOWN:
-	 case WM_LBUTTONDOWN:
 	 case WM_LBUTTONUP:
 	 case WM_CHAR:
 	 case WM_MOUSEMOVE:
@@ -2274,6 +2284,8 @@ nMess = -1;
 			}
 			ii=1; 
 		}
+		if (IsToolbarMessage(&msg))
+			continue;
 		if (hWndAddEdit)
 		{
 			if (IsDialogMessage(hWndAddEdit, &msg))

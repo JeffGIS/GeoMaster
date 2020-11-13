@@ -1083,8 +1083,8 @@ extern POINT	ToolBarStartPoint;
 			PostMessage (hWndMenu,WM_CLOSE,3,(LPARAM)hWMH);
 			break;
 		}
-//	case WM_SYSCOMMAND:
-//		return DefWindowProc(hWnd, Message, wParam, lParam);
+	case WM_SYSCOMMAND:
+		return DefWindowProc(hWnd, Message, wParam, lParam);
 
 	case WM_NOTIFY:
 		 return OnWMNotify(hWnd,lParam);
@@ -1407,6 +1407,7 @@ extern POINT	ToolBarStartPoint;
 					else
 						AdjustToolbarPositions ();
 				}
+				return TRUE;
 			}
 		hWMH = savehWMH;
 		pWMH = savepWMH;
@@ -1626,7 +1627,9 @@ extern POINT	ToolBarStartPoint;
 					 rtn = TRUE;
 				 }
 				 break;
-
+			 default:
+				 ii = 1;
+				 break;
 			 }
 
 		}
@@ -2688,11 +2691,14 @@ BOOL InitCatalogData (HANDLE hInitData,BOOL Pickability)
 	HFILE	Fid;
 	char	str[260];
 
+	if (!hInitData)
+		return FALSE;
 	symnumALL = GetDictSymbolNumber("ALL");
-	pWMH = (LPWINDOWMENUHEADER)GlobalLock (hInitData);
-	
-		pWMH->menuHandle[pWMH->currentMenu] = GSSiGlobAlloc (1684,GHND,sizeof(VISCONTROLHEADER));
-		pVCHeader = GlobalLock (pWMH->menuHandle[pWMH->currentMenu]);
+	LPWINDOWMENUHEADER pWMH = (LPWINDOWMENUHEADER)GlobalLock (hInitData);
+	if (pWMH)
+	{
+		pWMH->menuHandle[pWMH->currentMenu] = GSSiGlobAlloc(1684, GHND, sizeof(VISCONTROLHEADER));
+		pVCHeader = GlobalLock(pWMH->menuHandle[pWMH->currentMenu]);
 		pVCHeader->iCurrentRect = -1;
 		pVCHeader->Config = CurrentConfig;
 		pVCHeader->VPID = CurView->ID;
@@ -2703,38 +2709,39 @@ BOOL InitCatalogData (HANDLE hInitData,BOOL Pickability)
 		pVCHeader->nLayers = CurView->NumFiles;
 		pVCHeader->ExpandViewport = 2;
 		pVCHeader->Pickability = pWMH->menuType[pWMH->currentMenu] == MT_PICKABLE;
-		GSSiGetTempFileName (0,"gm",0,TempFile);
-		DumpVisibilityToFile (TempFile,TRUE,0);
-		Fid = GSSiOpenFile (TempFile,0,OF_READ);
-		fgetstring (str,256,Fid);
-		while (fgetstring (str,256,Fid))
+		GSSiGetTempFileName(0, "gm", 0, TempFile);
+		DumpVisibilityToFile(TempFile, TRUE, 0);
+		Fid = GSSiOpenFile(TempFile, 0, OF_READ);
+		fgetstring(str, 256, Fid);
+		while (fgetstring(str, 256, Fid))
 		{
-			LPSTR	pSpace=strrchr (str,'\t');
-			
+			LPSTR	pSpace = strrchr(str, '\t');
+
 			*pSpace++ = 0;
-			layer = atoi (pSpace);
-			pSpace=strrchr (str,'\t');
-			symnum = atoi (pSpace);
-			if (GetDictSymbolType (symnum))
-				AddSymbolToLayer (layer,symnum,1,0,&pVCHeader->nLayerSyms[layer],&pVCHeader->hLayerSyms[layer]);
+			layer = atoi(pSpace);
+			pSpace = strrchr(str, '\t');
+			symnum = atoi(pSpace);
+			if (GetDictSymbolType(symnum))
+				AddSymbolToLayer(layer, symnum, 1, 0, &pVCHeader->nLayerSyms[layer], &pVCHeader->hLayerSyms[layer]);
 		}
-		GSSiClose2 (&Fid);
-		GSSiRemove (TempFile);
-		SetConfig (SaveCfg);
+		GSSiClose2(&Fid);
+		GSSiRemove(TempFile);
+		SetConfig(SaveCfg);
 		CurView = SaveVP;
 		CurVis = SaveVis;
-		for (ilayer=0;ilayer<=pVCHeader->nLayers;ilayer++)
+		for (ilayer = 0; ilayer <= pVCHeader->nLayers; ilayer++)
 		{
 			if (pVCHeader->nLayerSyms[ilayer])
 			{
 				pVCHeader->ExpandLayer[ilayer] = 2;
-				SortLayerSymbols (pVCHeader->nLayerSyms[ilayer],pVCHeader->hLayerSyms[ilayer],&pVCHeader->hSymOrder[ilayer]);
+				SortLayerSymbols(pVCHeader->nLayerSyms[ilayer], pVCHeader->hLayerSyms[ilayer], &pVCHeader->hSymOrder[ilayer]);
 			}
 			else
 				pVCHeader->ExpandLayer[ilayer] = 0;
 		}
-	GlobalUnlock (pWMH->menuHandle[pWMH->currentMenu]);	
-	GlobalUnlock (hInitData);
+		GlobalUnlock(pWMH->menuHandle[pWMH->currentMenu]);
+		GlobalUnlock(hInitData);
+	}
 	return TRUE;
 }
 
@@ -2756,6 +2763,12 @@ LONG FAR PASCAL CatalogMenuWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG 
 	LPWINDOWMENUHEADER savepWMH;
 	LPVISCONTROLHEADER	savepVCHeader;
 
+#if CHECKMEM 
+	static icmd = 0;
+	char printfcmd[64];
+	sprintf(printfcmd, "CatalogMenuWndProc = %#06x  %6i\n", Message, icmd++);
+	OutputDebugString(printfcmd);
+#endif
 
 	if (InTrackMenu)
 		return DefWindowProc(hWnd, Message, wParam, lParam);
@@ -3422,7 +3435,7 @@ SkipUnlock:;
 				GetWindowRect (pWMH->hWndMenu,&winRect);
 				SetWindowPos(pWMH->hWndMenu, 0, winRect.left,winRect.top,RECTWIDTH(&winRect)+(maxrectright-clientrect.right),RECTHEIGHT(&winRect),
 					SWP_DRAWFRAME|SWP_NOZORDER|SWP_SHOWWINDOW);
-				PostMessage (pWMH->hWndMenu,WM_CLOSE,2,(LPARAM)hWMH);
+				SendMessage (pWMH->hWndMenu,WM_CLOSE,2,(LPARAM)hWMH);
 			}
 		/*	else if (FirstDisplay)
 			{
@@ -3530,7 +3543,7 @@ ExitDefault:
 		pWMH = savepWMH;
         return DefWindowProc(hWnd, Message, wParam, lParam);
    } 
-Exit:
+//Exit:
     GlobalUnlock (pWMH->menuHandle[pWMH->currentMenu]);
 	GlobalUnlock (hWMH);
 	pVCHeader = savepVCHeader;

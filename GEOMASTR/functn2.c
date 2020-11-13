@@ -4662,10 +4662,10 @@ GSSiExitProg (1350);
         {
             DLGPROC lpfnBUILDXFERFILEMsgProc;
 			
-			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			st = 0;  
-			SetTransferFileName (Arg[1],Arg[2]);
+			SetTransferFileName (Arg[1],Arg[2],Arg[3]);
 			if (!_fstricmp (Arg[1],"BUILD") || !_fstricmp (Arg[1],"RUN"))
 			{
 	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)BUILDXFERFILEMsgProc, hInst);

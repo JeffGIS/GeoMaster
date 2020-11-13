@@ -1917,6 +1917,8 @@ GotCloseFilehSQL:
 			lpSQL = Arg[2];
 			lpUpdateFieldList = Arg[3];
 			lpBasicTitle = Arg[4];
+			lpAutoUpdateFieldList = 0;
+			lpSQLFieldList = 0;
 			if (*Arg[5])
 				lpAutoUpdateFieldList = Arg[5];
 			if (*Arg[6])
@@ -4941,9 +4943,34 @@ GotCloseFilehSQL:
 				TextureFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "CONDITIONFROMCODE"))
+			{
+				ConditionFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "MATERIALFROMCODE"))
+			{
+				MaterialFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[1], "TEXTURELIST"))
 			{
 				GetTextureList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "MATERIALLIST"))
+			{
+				GetMaterialCodeList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CONDITIONLIST"))
+			{
+				GetConditionCodeList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "SIDEWALKPOINTTYPELIST"))
+			{
+				GetPointTypeList(OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "OBSTRUCTIONLIST"))
@@ -4959,6 +4986,11 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "RAMPTYPEFROMCODE"))
 			{
 				RampTypeFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "POINTTYPEFROMCODE"))
+			{
+				PointTypeFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "CODEFORVALUE"))

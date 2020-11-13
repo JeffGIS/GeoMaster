@@ -163,6 +163,19 @@ HANDLE FillTBRows (int nTBTot,LPSHORT TB,int nInIndexArray,LPSHORT IndexArray,in
 void DrawBtnFocusRect(HWND BtnWnd);
 LRESULT CALLBACK ButtonSubclassProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
+BOOL  IsToolbarMessage(LPMSG pMsg)
+{
+	for (int imen = 0; imen < nToolbars; imen++)
+	{
+		if (ToolbarWindow[imen] == pMsg->hwnd)
+		{
+			if (IsDialogMessage(ToolbarWindow[imen], pMsg))
+				return TRUE;
+			return FALSE;
+		}
+	}
+	return FALSE;
+}
 HWND CursorInVisMenuWnd (POINT pt)
 {
 	RECT	rect;
@@ -534,7 +547,8 @@ void DisplayAllToolbars (int Opt)
 	IgnoreActivate = FALSE;
 	IgnoreWPC = FALSE;
 	inDisplayAllToobars = FALSE;
-	SetFocus(hWndFocus);
+	if (hWndFocus)
+		SetFocus(hWndFocus);
 	return;
 }
 
@@ -3865,6 +3879,8 @@ BOOL CALLBACK TOOLBARMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM l
 	long	lRetVal;
 	int		ToolbarID=-1;
 
+	if (hWndDlg == hWndMain)
+		ii = 11;
 	if (Message == WM_NOTIFY)
 		ii = 1;
 
@@ -3922,6 +3938,7 @@ switch(Message)
 */
 	case GSSi_DimMenu:
 		DisplayDimmedMenu (ToolbarID);
+		return TRUE;
 		break;
 
 	case WM_ERASEBKGND:
@@ -3937,6 +3954,7 @@ switch(Message)
 		case DMS_NOTDISPLAYED:
 			return 1;
 		}
+		return 0;
 		break;
 
 	case WM_NCHITTEST: 
@@ -3990,7 +4008,7 @@ FromNotify:
 			DrawToolbarPointer(ToolbarID);
 //			DrawBtnFocusRect(hWndDlg);
 		} 
-
+*/
 		break;
 
 	case WM_TIMER:
@@ -4005,7 +4023,7 @@ FromNotify:
 		if (*ToolbarHoverCmd[ToolbarID])
 			ii = KillTimer(hWndDlg, 1);
 		break;
-*/
+
 	case WM_SIZE:
 		//if (!DestroyToolbar (hWndDlg))
 		nWidth = LOWORD(lParam);
@@ -4281,13 +4299,25 @@ TryAgain:
 				  case IDOK:
 					  DebugWait = FALSE;
 					  break;
+				  default:
+					  ii = 1;
+					  break;
 
 			   }
 		}
          break;    /* End of WM_COMMAND                                 */
-
+	case WM_NCACTIVATE:
+		return FALSE;
     default:
-        return FALSE;
+	{
+#if CHECKMEM 
+		static icmd = 0;
+		char printfcmd[64];
+		sprintf(printfcmd, "toolmsg = %#06x  %6i\n", Message, icmd++);
+		OutputDebugString(printfcmd);
+#endif
+		return FALSE;
+	}
    }
  return TRUE;
 }
@@ -5715,7 +5745,24 @@ LRESULT CALLBACK ButtonSubclassProc(HWND hwnd, UINT message,WPARAM wParam, LPARA
 	int		ButtonNumber = 0;
 	LPTOOBAR_CONTROL_INFO pTBInfo;
 	WNDPROC	g_OrigTabProc;
+	ii = 1;
+	switch (message)
+	{
+	case WM_MOUSEMOVE:
+		ii = 2;
+		break;
 
+	case WM_MOUSEHOVER:
+		ii = 3;
+		break;
+	case WM_MOUSELEAVE:
+		ii = 4;
+		break;
+
+	case WM_LBUTTONDOWN:
+		ii = 5;
+		break;
+	}
 	if (ToolbarID < 0)
 		return DefWindowProc(hwnd, message, wParam, lParam);
 	if (!ToolbarHandle[ToolbarID])

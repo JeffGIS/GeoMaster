@@ -1539,6 +1539,7 @@ char	FGDB_SQL[512]="";
 char	PGDBFile[256];   
 char	FGDBFile[256];   
 HANDLE	hSelectFields=0;   
+char	TransferFrom[MAX_PATH];
 char	TransferFileName[MAX_PATH]; 
 char	BuildTransferFileOption[16]; 
 char	TransferFileRunCommand[1024];   

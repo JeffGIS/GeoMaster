@@ -4778,13 +4778,46 @@ BOOL FAR PASCAL CONFIGLISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
  return TRUE;
 }
 
+int AddFileToSendList(HWND hWndDlg,UINT idc_XFERFILELISTS, LPSTR pFile)
+{
+	int n = 0;
+	char File[4096+2];
+
+	if (FileType(pFile) == 1)
+	{
+		SubstituteDL(pFile, FALSE);
+		SendDlgItemMessage(hWndDlg, idc_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)pFile);
+		n++;
+	}
+	else if (FileType(pFile) == 2)
+	{
+		char TempName[MAX_PATH];
+		HFILE Fid;
+
+		GSSiGetTempFileName(0, "gm", 0, TempName);
+		n += GetFileList(TempName, TRUE, pFile, "*.*", TRUE, FALSE, FALSE);
+		Fid = GSSiOpenFile(TempName, 0, OF_READ);
+		fgetstring(File,4096, Fid);
+		while (fgetstring(File, 4096, Fid))
+		{
+			LPSTR pTab = strchr(File, '\t');
+			if (pTab)
+				*pTab = 0;
+			SubstituteDL(File, FALSE);
+			SendDlgItemMessage(hWndDlg, idc_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)File);
+		}
+		GSSiClose(Fid);
+	}
+	return n;
+}
+
 BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char	str[256];   
 	int		ii,n=0; 
 	HANDLE	hFile;
 	LPSTR	pFile; 
-	char	File[256];    
+	char	File[MAX_PATH+2];    
 	HCURSOR	hcurSave;
 	static	HANDLE	hSaveBM=0;
 		
@@ -4845,24 +4878,26 @@ FileIsInvalid:
 			 GSSiSetCursor(hcurSave);
 	         PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 	     } 
-       	 else
+       	 else if (!*TransferFrom)
 	       	 DragAcceptFiles (hWndDlg,TRUE);   
+		 else
+		 {
+			 n += AddFileToSendList(hWndDlg, IDC_XFERFILELISTS, TransferFrom);
+			 PostMessage(hWndDlg, WM_COMMAND, IDC_LOADCOMPLETEMESSAGE, 0L);
+			 PostMessage(hWndDlg, WM_COMMAND, IDC_ADDXFERCMD, 0L);
+			 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
+		 }
          break; /* End of WM_INITDIALOG                                 */
     
+
     case WM_DROPFILES:
 		 hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
     	 hFile = (HANDLE)wParam;   
     	 pFile = File;
-    	 while (DragQueryFile (hFile,n,pFile,256)) 
-    	 {
-    	 	//GetLongPathName (pFile,256);
-    	 	if (FileType (pFile) == 1)
-    	 	{
-	    	 	SubstituteDL (pFile,FALSE);
-				SendDlgItemMessage (hWndDlg,IDC_XFERFILELISTS,LB_ADDSTRING,0,(LPARAM)pFile); 
-			}
-    	 	n++;
-    	 }
+		 while (DragQueryFile(hFile, n, pFile, MAX_PATH))
+		 {
+			 n += AddFileToSendList(hWndDlg, IDC_XFERFILELISTS, pFile);
+		 }
 		 GSSiSetCursor(hcurSave);
     	 DragFinish (hFile);
     	 break;
@@ -4897,15 +4932,16 @@ FileIsInvalid:
             		break;
             	}
             	{
-					HFILE	FidTF=GSSiOpenFile (TransferFileName,0,OF_CREATE); 
-					short	choice = 0,Version=1; 
-					long	NextFileLoc=0, loc, len; 
+					HANDLE	FidTF=OpenFileGM (TransferFileName,0,OF_CREATE); 
+					short	choice = 0,Version=2; 
+					LONGLONG	NextFileLoc = 0, loc;
+					long marker, len;
 					long	TotLen = SendDlgItemMessage(hWndDlg,IDC_XFERFILELISTS,LB_GETCOUNT,0,0); 
 					long	MaxLength=8L*(long)USHRT_MAX;
 					
-           			BigWrite (FidTF,(HPSTR)&loc,4,-1);
-           			BigWrite (FidTF,(HPSTR)&Version,2,-1);
-           			BigWrite (FidTF,(HPSTR)&MaxLength,4,-1); 
+           			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
+           			BigWrite64 (FidTF,(HPSTR)&Version,2,-1);
+           			BigWrite64 (FidTF,(HPSTR)&MaxLength,4,-1); 
            			Processing = TRUE;
            			*TransferFileRunCommand = 0;
 	            	while (ContinueProcessing && SendDlgItemMessage(hWndDlg,IDC_XFERFILELISTS,LB_GETTEXT,choice++,(DWORD)str) != LB_ERR)
@@ -4915,17 +4951,17 @@ FileIsInvalid:
 		            		SetDlgItemText (hWndDlg,IDC_MESSAGE,str);  
 		            		if (NextFileLoc)
 		            		{
-		            			loc = GSSillseek (FidTF,0,1);
-		            			GSSillseek (FidTF,NextFileLoc,0);
-		            			BigWrite (FidTF,(HPSTR)&loc,4,-1);
-		            			GSSillseek (FidTF,loc,0);  
+		            			loc = GSSillseek64 (FidTF,0,1);
+		            			GSSillseek64 (FidTF,NextFileLoc,0);
+		            			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
+		            			GSSillseek64 (FidTF,loc,0);  
 		            		}
 		        			len = _fstrlen (str) + 1;    
-		        			BigWrite (FidTF,(HPSTR)&len,4,-1);
-		        			BigWrite (FidTF,(HPSTR)str,len,-1);
-		        			NextFileLoc = GSSillseek (FidTF,0,1);  
+		        			BigWrite64 (FidTF,(HPSTR)&len,4,-1);
+		        			BigWrite64 (FidTF,(HPSTR)str,len,-1);
+		        			NextFileLoc = GSSillseek64 (FidTF,0,1);  
 		        			loc = -1;
-		        			BigWrite (FidTF,(HPSTR)&loc,4,-1);
+		        			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
 		        		}
 				    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),TotLen,choice,-1);
 				    	if (_fstrnicmp (str,"[XCMD]",6) &&
@@ -4935,12 +4971,12 @@ FileIsInvalid:
 			    			_fstrcpy (TransferFileRunCommand,&str[6]); 
 				    }
 				    Processing = FALSE;
-				    loc = 32349;
-        			BigWrite (FidTF,(HPSTR)&loc,4,-1);
-           			loc = GSSillseek (FidTF,0,1);
-           			GSSillseek (FidTF,0,0);
-           			BigWrite (FidTF,(HPSTR)&loc,4,-1);
-				    GSSiClose2 (&FidTF); 
+				    marker = 80251;
+        			BigWrite64 (FidTF,(HPSTR)&marker,4,-1);
+           			loc = GSSillseek64 (FidTF,0,1);
+           			GSSillseek64 (FidTF,0,0);
+           			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
+				    GSSiClose64 (&FidTF); 
 				    if (!ContinueProcessing)
 				    {
 				    	SetContinueProcessing ( TRUE); 
@@ -4973,7 +5009,8 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 	HANDLE	hFile;
 	LPSTR	pFile, pUI; 
 	char	File[256];
-   	HFILE	FidTF,Fid; 
+	HANDLE	FidTF;
+   	HFILE	Fid; 
    	static	HANDLE	hSaveBM=0;
 	static	int		UpdateID = 0;
 		
@@ -4983,7 +5020,9 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
    {
     case WM_INITDIALOG:
     {
-		 long	NextFileLoc=0, loc, len, FileLength, EndOfFile;
+		 LONGLONG	NextFileLoc=0, loc, FileLength, EndOfFile;
+		 int len, marker;
+		 int lenlen = 4;
 		  
 	     UpdateID = 0;
 		 HaltMapDisplay(TRUE,TRUE); 
@@ -4995,8 +5034,8 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
        	 if (!*TransferFileName)
        	 	break;
     case GSSI_REINITDIALOG:  
-		 FidTF=GSSiOpenFile (TransferFileName,0,OF_READ);
-		 if (FidTF == HFILE_ERROR)
+		 FidTF=OpenFileGM (TransferFileName,0,OF_READ);
+		 if (FidTF == INVALID_HANDLE_VALUE)
 		 {   
 		 	 sprintf (str,"Unable to open transfer file\r%s",TransferFileName);
 	         MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
@@ -5005,9 +5044,23 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 	     }
 		 if ((pUI = strrchr (TransferFileName,'_')))
 			 UpdateID = atoi (++pUI);
-		 FileLength = GSSifilelength (FidTF);
-	     BigRead (FidTF,(HPSTR)&loc,4);
-	     if (loc != FileLength)
+		 FileLength = GSSifilelength64 (FidTF);
+		 GSSillseek64(FidTF, FileLength - 4, 0);
+		 BigRead64(FidTF, (HPSTR)&marker, 4);
+		 if (marker == 80251)
+			 lenlen = 8;
+		 else if (marker != 32349)
+			 goto FileIsInvalid;
+		 NextFileLoc = 6 + lenlen;
+		 GSSillseek64(FidTF, 0, 0);
+		 if (lenlen == 4)
+		 {
+			 BigRead64(FidTF, (HPSTR)&len, 4);
+			 loc = len;
+		 }
+		 else
+			BigRead64(FidTF, (HPSTR)&loc, sizeof(LONGLONG));
+		 if (loc != FileLength)
 	     {
 FileIsInvalid:
 		 	 sprintf (str,"Invalid transfer file\r%s",TransferFileName);
@@ -5015,18 +5068,13 @@ FileIsInvalid:
 	         PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
 	         break;
 	     } 
-	     GSSillseek (FidTF,loc-4,0);
-	     BigRead (FidTF,(HPSTR)&loc,4);
-	     if (loc != 32349)
-			goto FileIsInvalid;  
-		 NextFileLoc = 10;
 		 while (NextFileLoc > 0)
 		 {
 			int iPos;
-		 	GSSillseek (FidTF,NextFileLoc,0); 
-	     	BigRead (FidTF,(HPSTR)&len,4);
-	     	BigRead (FidTF,(HPSTR)File,len);
-	     	BigRead (FidTF,(HPSTR)&NextFileLoc,4);
+		 	GSSillseek64 (FidTF,NextFileLoc,0); 
+	     	BigRead64 (FidTF,(HPSTR)&len,4);
+	     	BigRead64 (FidTF,(HPSTR)File,len);
+	     	BigRead64 (FidTF,(HPSTR)&NextFileLoc,8);
 	     	if (NextFileLoc > 0)
 	     		EndOfFile = NextFileLoc - 1;
 	     	else
@@ -5034,7 +5082,7 @@ FileIsInvalid:
 			iPos = SendDlgItemMessage (hWndDlg,IDC_XFERFILELISTS,LB_ADDSTRING,0,(LPARAM)File);
     	 	n++;
     	 }
-    	 GSSiClose2 (&FidTF);  
+    	 GSSiClose64 (&FidTF);  
     	 if (Message == WM_INITDIALOG && !_fstricmp(BuildTransferFileOption, "LOAD"))
          	PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
     	 
@@ -5056,8 +5104,10 @@ FileIsInvalid:
             	
             case IDOK: 
             {   
-				 long	NextFileLoc=0, loc, len, FileLength, EndOfFile, MaxLength,LenToRead;      
+				 LONGLONG	NextFileLoc = 0, loc, FileLength, length8, EndOfFile, LenToRead;
+				 int MaxLength;
 				 short	Version;
+				 int	len;
 				 int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
 				 char	SelectedFile[MAX_PATH];
 
@@ -5065,26 +5115,26 @@ FileIsInvalid:
 					 SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
 
 
-				 FidTF=GSSiOpenFile (TransferFileName,0,OF_READ);
-				 FileLength = GSSifilelength (FidTF);
-				 NextFileLoc = 10;
-			     BigRead (FidTF,(HPSTR)&len,4);
-			     BigRead (FidTF,(HPSTR)&Version,2);
-			     BigRead (FidTF,(HPSTR)&MaxLength,4); 
+				 FidTF=OpenFileGM (TransferFileName,0,OF_READ);
+				 FileLength = GSSifilelength64 (FidTF);
+				 NextFileLoc = 14;
+			     BigRead64 (FidTF,(HPSTR)&length8,8);
+			     BigRead64 (FidTF,(HPSTR)&Version,2);
+			     BigRead64 (FidTF,(HPSTR)&MaxLength,4); 
 			     Processing = TRUE;
 				 while (ContinueProcessing && NextFileLoc > 0)
 				 {
-				 	GSSillseek (FidTF,NextFileLoc,0); 
-			     	BigRead (FidTF,(HPSTR)&len,4);
-			     	BigRead (FidTF,(HPSTR)File,len);
-			     	BigRead (FidTF,(HPSTR)&NextFileLoc,4);
+				 	GSSillseek64 (FidTF,NextFileLoc,0); 
+			     	BigRead64 (FidTF,(HPSTR)&len,4);
+			     	BigRead64 (FidTF,(HPSTR)File,len);
+			     	BigRead64 (FidTF,(HPSTR)&NextFileLoc,8);
 					if (nSelected>= 0  && stricmp(File, SelectedFile))
 						continue;
 			     	if (NextFileLoc > 0)
 			     		EndOfFile = NextFileLoc - 1;
 			     	else
 			     		EndOfFile = FileLength - 4; 
-			     	LenToRead = EndOfFile - GSSillseek (FidTF,0,1) +1;
+			     	LenToRead = EndOfFile - GSSillseek64 (FidTF,0,1) +1;
 					SetDlgItemText (hWndDlg,IDC_MESSAGE,File);
 					if (!_fstrnicmp (File,"[XCMD]",6))
 						ExpandText (&File[6]);
@@ -5098,10 +5148,10 @@ FileIsInvalid:
 						sprintf (str,"%i\t%s",UpdateID,File);
 						AppendFile ("[%%DL]updates\\updatefiles.txt",str);
 					}
-			    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),FileLength,GSSillseek (FidTF,0,1),0); 
+			    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),FileLength,GSSillseek64 (FidTF,0,1),0); 
 		    	 }  
 		    	 Processing = FALSE;
-		    	 GSSiClose2 (&FidTF);
+		    	 GSSiClose64 (&FidTF);
 			     if (!ContinueProcessing)
 			     {
 			    	SetContinueProcessing ( TRUE); 
