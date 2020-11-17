@@ -171,6 +171,7 @@ int	GetFunctionID5 (LPSTR str)
 			if (!_fstrnicmp(str, "PLIST", 5)) return 538;
 			if (!_fstrnicmp(str, "ISINT", 5)) return 539;
 			if (!_fstrnicmp(str, "ISFLT", 5)) return 540;
+			if (!_fstrnicmp(str, "ORTHO", 5)) return 541;
 
 			return 0;		
 }

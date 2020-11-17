@@ -2530,6 +2530,17 @@ GotCloseFilehSQL:
 				goto RtnTrue;
 			goto RtnFalse;
 		}
+		case 541: //$ORTHO(CONVERT,JPEG,year,nparts)
+		{
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 4)
+				goto RtnFalse;
+			int year = atoi(Arg[3]);
+			int nparts = atoi(Arg[4]);
+			if (ConvertToJP2(year, nparts))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
 
 		case 601: /* $TAGLOC(Prefix,minchar,SaveGlobalName(optional-not in brackets),Title(opt),Viewport(opt),Layer(opt),locatetagonly(opt,T locates,)) Tag locator */
 		{	 

@@ -3237,9 +3237,23 @@ BOOL DisplayVirtualPlot (LPSTR VPName)
 	}
 	return TRUE;
 }
+FILEINDEXENTRY CopyIndexEntry(LPFILEINDEXENTRY pIndexEntry)
+{
+	FILEINDEXENTRY indexEntryOut = { 0 };
+	if (pIndexEntry)
+	{
+		indexEntryOut.BMBitCount = pIndexEntry->BMBitCount;
+		indexEntryOut.BMHeight = pIndexEntry->BMHeight;
+		indexEntryOut.BMWidth = pIndexEntry->BMWidth;
+		indexEntryOut.Bounds = pIndexEntry->Bounds;
+		indexEntryOut.Len = pIndexEntry->Len;
+		strcpy(indexEntryOut.Name, pIndexEntry->Name);
+	}
+	return indexEntryOut;
+}
 BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName,int fmt)
 {
-	BOOL rtn = TRUE;
+	BOOL rtn = FALSE;
 
     OFSTRUCTGM    OFStruct; 
     short     Version;
@@ -3334,7 +3348,7 @@ Next:
 				}
 
 				LPSTR pMem;
-				FILEINDEXENTRY indexEntryOut = *lpIndex->CurrentEntry;
+				FILEINDEXENTRY indexEntryOut = CopyIndexEntry(lpIndex->CurrentEntry);
 				LPSTR pAt = strchr (indexEntryOut.Name,'@');
 
 				itoa (imageOffset,pAt+1,10);
@@ -3363,6 +3377,7 @@ Next:
     BigWrite (FidIndexOut, (HPSTR)&FirstIndex,STOREDINDEXLENGTH,-1);
 	GSSillseek (FidIndexOut,curLoc,0);
 	indexLoc = curLoc;
+	rtn = TRUE;
 	lpIndex=GetNextIndexHeader(&Handle,FALSE);
     if (lpIndex == NULL)
 		goto Exit;
@@ -3379,24 +3394,25 @@ Exit:
 	return rtn;
 }
 
-int ConvertToJP2(int year,int nparts)
+BOOL ConvertToJP2(int year,int nparts)
 {
 	char cmd[128] = "[%JP2Factor]=16";
+	BOOL rtn = TRUE;
 	ExpandText(cmd);
 	for (int part = 0; part < nparts; part++)
 	{
 		int lev = 1;
-		while (lev <= 256)
+		while (rtn && lev <= 256)
 		{
 			char from[MAX_PATH], to[MAX_PATH];
 			sprintf(from, "[%%DL]orthos\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
-			sprintf(to, "[%%DL]orthos\\jp2_18\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
+			sprintf(to, "[%%DL]orthos\\jp2\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
 			ExpandText(from);
 			ExpandText(to);
-			ConvertOrthoToJP2(from, to, 1);
+			rtn = ConvertOrthoToJP2(from, to, 1);
 			lev *= 2;
 		}
 	}
-	return 1;
+	return rtn;
 }
 
