@@ -154,6 +154,22 @@ int NVShapeIndexClose(sqlite3 * db)
 	return rtn;
 }
 
+void ClipLatLonToBase(LPMNMXCORD pMnMx, int from)
+{
+	MNMXCORD bounds=ProjectBounds;
+	MNMXCORD intBounds;
+
+	if (PRJ_TYPE[from] != LATLONGTYPE)
+		return;
+	if (PRJ_TYPE[1] == LATLONGTYPE)
+		return;
+	if (!ValidBounds(&ProjectBounds))
+		return;
+	ConvertBounds(&bounds, 1, 2);
+	IntersectBounds(&bounds, pMnMx, &intBounds);
+	*pMnMx = intBounds;
+	return;
+}
 BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 {
 	int	i;
@@ -205,7 +221,8 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	CloseTRANS2 (&hTranFileToVP);  
 	LoadSHPParm (SHPFileName,SHPType,CurView->hWnd);
 	
-	Points[0].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);   
+	ClipLatLonToBase(&SHPFileMNMX, 0);
+	Points[0].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);
 	Points[0].y = ClipCoordToProjection (SHPFileMNMX.ymn,2,0,1);   
 	Points[1].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);   
 	Points[1].y = ClipCoordToProjection (SHPFileMNMX.ymx,2,0,1);   
@@ -2506,6 +2523,7 @@ long ReadSHPHeader (HFILE FidSHP,LPMNMXCORD pMinMaxCoord,LPSTR FileName)
 		{
 			AddDPointToMinMax (&Points[i],pMinMaxCoord); 
 		} 
+		ClipLatLonToBase(pMinMaxCoord, 0);
 	}
 	return SHPHeader.ShapeType;
 }   
