@@ -1,2 +1,2 @@
-Configs\basic1.gmc
-F:\BU_2020_02_20\GEOMas
+[%DL]configs\basic1.GMC 
+d:\spm3\spm3

@@ -846,7 +846,7 @@ BOOL SetSHPVis (HWND hWndDlg, int DlgItemSym, int DlgItemPar,HFILE FidSymList)
 
 BOOL SetSHPParms (long RecordNumber)
 {   
-	LPSTR	pDesc, pTAG, pClause, pC, pColor, pWidth, pRot; 
+	LPSTR	pDesc = 0, pTAG = 0, pClause = 0, pC = 0, pColor = 0, pWidth = 0, pRot=0;
 	BOOL	rc;
 	char	str[1024];  
 	BOOL	rtn = FALSE;
@@ -987,6 +987,8 @@ BOOL SetSHPParms (long RecordNumber)
 			}
 			if (SHPType == SHPT_POINT || SHPType == SHPT_POINTZ)
 				CurPointSize = SHPWidth;
+			else
+				SHPWidth = AdjustWidth(SHPWidth);
 		}
 		else
 			SHPWidth = 0;

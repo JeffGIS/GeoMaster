@@ -1,4 +1,5 @@
 configs\2020_04.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD g:\GMMobile\GMMetroGIS
+configs\HiPriMaps_ramps.gmc /F  /WD d:\brae\pcviewer\pcviewer
 g:\configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
 configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
 configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD D:\PCViewerMpls\PCViewer
@@ -13,7 +14,6 @@ configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD G:\PCViewerBKP
 configs\MetroGIS.gmc /F [%USERLEV]=2; /WD g:\GMMobile\GMMetroGIS
 configs\NorthCarolina.gmc /F [%USERLEV]=2;  /WD g:\GMMobile\GMMetroGIS
 configs\newpropdata.gmc /F /WD F:\BU_2020_02_20\GEOMas
-configs\HiPriMaps_ramps.gmc /F  /WD d:\brae\pcviewer\pcviewer
 configs\test.gmc /F /WD d:\brae\pcviewer\pcviewer
 configs\jeff\streettextsize.gmc /F /WD L:\geomas
 configs\2019_10.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD i:\gmmobile\metroUTM
@@ -188,6 +188,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 

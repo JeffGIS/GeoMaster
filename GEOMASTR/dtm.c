@@ -54,6 +54,8 @@ static	COLORREF LightContourColor, DarkContourColor, ContourTextColor;
 static	short	ContourTextSize;  
 static	double	LightContourWidth, DarkContourWidth;
 
+BOOL ComputeSlopeParameters(LPDOUBLE pNullElv, LPDPOINT TriPoints, LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z3, LPDOUBLE pSlopePCT, LPDOUBLE pSlopeAZ);
+
 double LTWOPImacro (double AZ1)
 #if ENABLETRACE
 {GSSiEnterProg (375);
@@ -3734,6 +3736,7 @@ BOOL DisplayDTMArea (long Refno,LPDPOINT DPoint,short Nump,double SlopePCT,doubl
 	
 	CurrentDesc = SymbolNumber; 
 	CurrentRefno = Refno;
+	CurrentType = GF_AREA;
 	if (CurView->PassID && CurView->PassID != 2)
 		return FALSE;  
 	HiPrecis = TRUE;  

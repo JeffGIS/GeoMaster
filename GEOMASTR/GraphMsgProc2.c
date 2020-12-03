@@ -3645,6 +3645,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						break;
 					case SHPT_ARC:
 					case SHPT_ARCZ:
+					case SHPT_ARCM:
 						GetGlobalCVal("[%DEFAULTLINESYMBOL]", SymName, "PEN1");
 						if (!*clWidth)
 							strcpy(clWidth, "-1");
@@ -3697,6 +3698,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 							break;
 						case SHPT_ARC:
 						case SHPT_ARCZ:
+						case SHPT_ARCM:
 							rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, TRUE);
 							break;
 						case 4:
@@ -3809,6 +3811,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 							  break;
 						  case SHPT_ARC:
 						  case SHPT_ARCZ:
+						  case SHPT_ARCM:
 							  rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, FALSE);
 							  break;
 						  case 4:
@@ -4198,6 +4201,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						break;
 					case SHPT_ARC:
 					case SHPT_ARCZ:
+					case SHPT_ARCM:
 						GetGlobalCVal("[%DEFAULTLINESYMBOL]", SymName, "PEN1");
 						if (!*clWidth)
 							strcpy(clWidth, "-1");
@@ -4248,6 +4252,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 							break;
 						case SHPT_ARC:
 						case SHPT_ARCZ:
+						case SHPT_ARCM:
 							rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, TRUE);
 							break;
 						case 4:
@@ -4360,6 +4365,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 							  break;
 						  case SHPT_ARC:
 						  case SHPT_ARCZ:
+						  case SHPT_ARCM:
 							  rtn = SelectLineSymbol(hWndDlg, 1, SymName, cWidth, cColor, FALSE);
 							  break;
 						  case 4:
