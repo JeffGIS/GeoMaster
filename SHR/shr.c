@@ -11190,32 +11190,16 @@ void ResaveSavedScreens(void)
 #endif
 } 
 
-BOOL    GetBit (int ibit, LPSTR lpBytes)
-#if ENABLETRACE
-{GSSiEnterProg (341);
-#endif
+BOOL    GetBit (int ibit, LPBYTE lpBytes)
 {   int       bit, byte;
 
     byte = ibit/8;
     bit  = ibit%8;
     lpBytes += byte;
     if (Mask[bit] & *lpBytes)
-{
-#if ENABLETRACE
-GSSiExitProg (341);
-#endif
         return 1;
-}
     else
-{
-#if ENABLETRACE
-GSSiExitProg (341);
-#endif
         return 0;
-}
-#if ENABLETRACE
-}
-#endif
 }
 
 void SetBit (int ibit, LPSTR lpBytes, BOOL setto)
@@ -12448,6 +12432,8 @@ BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 {
  MSG            msg; 
 
+ if (ghPrintingDlg)
+	 return TRUE;
  GdiFlush ();
  if (pQuitProcessing)
 	 *pQuitProcessing = FALSE;

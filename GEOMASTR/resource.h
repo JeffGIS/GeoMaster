@@ -1975,7 +1975,6 @@
 #define IDM_DUMP_INTNAME_TO_TXT         1168
 #define IDC_VALBGCOLOR                  1169
 #define IDM_HLTSORT_PDIVAREA            1169
-#define IDD_DIALOG9                     1169
 #define IDC_VALTEXTCOLOR                1170
 #define IDM_STEP                        1170
 #define IDD_DIALOG10                    1170
@@ -1985,7 +1984,6 @@
 #define IDC_RANGEAREPCT                 1172
 #define IDC_BOXSIZE                     1172
 #define IDM_DXF_OUTPUT                  1172
-#define IDD_DIALOG12                    1172
 #define IDC_SELECT_SYM                  1173
 #define PRMT_IDC_VALTEXTFONT            1173
 #define IDM_ADDFORMAT                   1173
@@ -2048,9 +2046,7 @@
 #define IDC_INVISIBLE                   1195
 #define IDC_VJBASELINE                  1195
 #define IDM_FORMATJPEG                  1195
-#define IDD_DIALOG13                    1195
 #define IDC_UNDO                        1196
-#define IDD_DIALOG14                    1196
 #define IDC_SET_SOURCE                  1197
 #define IDM_BUILDSTREETPOLYS            1197
 #define IDC_SET_SOURCE2                 1198
@@ -2071,7 +2067,6 @@
 #define IDM_MAKEINFOBOX                 1204
 #define IDC_EMBEDCMD                    1205
 #define IDM_VIEWFOLDER                  1205
-#define IDD_DIALOG15                    1206
 #define IDC_SETTEXT                     1207
 #define IDM_COPYFILE                    1207
 #define IDC_MODIFY                      1208
@@ -2202,6 +2197,7 @@
 #define IDC_LINECOLOR                   1267
 #define IDC_EDITINDEX                   1267
 #define IDC_IGNOREEXTENTS               1267
+#define BITMAPVIEWER                    1267
 #define IDC_DISTRIBUTION                1268
 #define IDC_OUT_FILE                    1269
 #define IDC_RESOLUTION                  1270
@@ -3425,6 +3421,7 @@
 #define IDC_CACHEMESSAGE                2311
 #define IDC_CACHEHOLDMESSAGE            2312
 #define IDC_HOLD_ONE_HOUR               2313
+#define IDC_IMAGEBUTTON                 2314
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3770,9 +3767,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1264
+#define _APS_NEXT_RESOURCE_VALUE        1269
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2314
+#define _APS_NEXT_CONTROL_VALUE         2315
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

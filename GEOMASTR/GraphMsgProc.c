@@ -6,7 +6,7 @@
 #include <sqlext.h>     
 #include <commctrl.h>          
 
-
+static HBITMAP hBMToDisplay = 0;
 static BOOL	WantPalleteOrthos=FALSE;
 static BOOL LoadBMPShowMess;
 static short	DTMSettingLayerNum;
@@ -766,6 +766,52 @@ BOOL FAR PASCAL NetworkAnalyzerMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam
 		return FALSE;
 	}
 	return TRUE;
+}
+BOOL FAR PASCAL BitmapViewerMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+
+	int	BRtn;
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+
+		cwCenter(hWndDlg, 0);
+		SendDlgItemMessage(hWndDlg, IDC_IMAGEBUTTON, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBMToDisplay);
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDOK:
+			EndDialog(hWndDlg, TRUE);
+			break;
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+	default:
+		return FALSE;
+	}
+	return TRUE;
+}
+
+void DisplayBitmap(HBITMAP hBMP)
+{
+	DLGPROC	lpfnBitmapViewerMsgProc;
+
+	lpfnBitmapViewerMsgProc = MakeProcInstance((DLGPROC)BitmapViewerMsgProc, hInst);
+
+	hBMToDisplay = hBMP;
+	int nRc = DialogBoxParamA (hInst,(LPCSTR) "BITMAP_VIEWER", hWndMain, (DLGPROC)lpfnBitmapViewerMsgProc,0);
+	nRc = GetLastError ();
+	FreeProcInstance(lpfnBitmapViewerMsgProc);
 }
 
 BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)

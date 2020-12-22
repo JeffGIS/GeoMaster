@@ -719,7 +719,7 @@ GSSiExitProg (1348);
 					Refno = atol (Arg[2]); 
 					Arg[2] = 0;
 				}
-				SetCurView ( SetVPFromName (Arg[4],&Err));
+				SetCurView(SetVPFromName(Arg[4], &Err));
 	            if (!PickByRefno (Refno,Arg[2],lpColon,UsePickList))
 	            {
 					CurView = SaveVP; 
@@ -787,16 +787,40 @@ GSSiExitProg (1348);
 				else
 					goto RtnTrue;
 			}
-			if (!_fstricmp(Arg[1],"ROUTE"))
+			if (!_fstricmp(Arg[1], "ROUTE"))
 			{
 				if (nArgs < 4) goto Rtn0;
-				Refno = atol (Arg[3]);
-				if (!HighlightRoute (Arg[2],Refno,0,atob(Arg[3])))
+				Refno = atol(Arg[3]);
+				if (!HighlightRoute(Arg[2], Refno, 0, atob(Arg[3])))
 					goto RtnFalse;
 				else
 					goto RtnTrue;
 			}
-				
+			if (!_fstricmp(Arg[1], "REFSTOTEXT"))
+			{
+				int nWritten = 0;
+				if (nArgs < 2) goto Rtn0;
+				HFILE Fid = GSSiOpenFile (Arg[2],0,OF_CREATE);
+				if (Fid == HFILE_ERROR)
+					goto RtnFalse;
+				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+				LPSTR pLine = GlobalLock(hLine);
+				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE");
+				fputstring(pLine, Fid);
+				int pos = BT_FIRST;
+				while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+				{
+					pos = BT_NEXT;
+					sprintf(pLine, "%i\t%s\t%s", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI);
+					fputstring(pLine, Fid);
+					nWritten++;
+				}
+				GSSiClose(Fid);
+				GSSiGlobUlFree(&hLine);
+				itoa(nWritten, OutLoc, 10);
+				goto Rtnl;
+			}
+
 			if (nArgs < 5) goto Rtn0;
 			Offset = atof(Arg[3]);
 			FromLimits = atoi(Arg[4]);

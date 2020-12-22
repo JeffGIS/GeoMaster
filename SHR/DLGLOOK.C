@@ -719,7 +719,8 @@ BOOL FAR PASCAL DIALOGSTYLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 //		break;
     case WM_COMMAND:  
     //	return ProcessDynEdit (hWndDlg,hWndEdit,wParam,lParam);
-    	
+		ii = 1;
+		break;
    	case WM_DESTROY:
 		ii=1;
    		break;

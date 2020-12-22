@@ -5,7 +5,7 @@
 #include <commctrl.h>
 
 
-static	TAGKEY TAGKey;
+//static	TAGKEY TAGKey;
 static	char	RefIndexFile[MAX_PATH];
 static	BOOL	InFixDupRef=FALSE;  
 static	short	NumPrevLayers=0;
@@ -2455,6 +2455,7 @@ void BuildTAGIndex (LPSTR Prefix, LPSTR UDI, int len, long Refno,BOOL Deleted)
 {   
 	REFINDEXDATA SaveRID;
 	REFINDEXDATA	RefIdxData;
+	TAGKEY TAGKey;
 
     if (!Prefix || !*Prefix || !_fstricmp (Prefix,"REFNO"))
 		goto Exit;
@@ -2568,6 +2569,7 @@ BOOL DeleteFromTAGList (LPSTR Prefix,LPSTR UDI,long Refno)
 {   
 	REFINDEXDATA	RefIdxData;
 	BOOL rtn = FALSE;
+	TAGKEY TAGKey;
 
 	if (!Prefix)
 		return FALSE;
@@ -2945,6 +2947,7 @@ long PickByRefno (long Refno,LPSTR InPrefix, LPSTR InUDI,short PickFile)
 	BOOL isShapeFile = FALSE;
 	int  SHPRec[MAXPICKITEMS];
 	int	 nSHPPicked = 0;
+	TAGKEY TAGKey;
 
 	strcpy (SavePltName,PltName);
     WantDescBlock = FALSE;
@@ -3069,8 +3072,8 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 								isShapeFile = FALSE;
 								if (GetBTDataLen(pTI->hBT) > 8)
 									CheckForLargestPiece = TRUE;
-								_fstrncpy(TAGKey.PREFIX, Prefix, 8);
-								_fstrncpy(TAGKey.UDI, UDI, 32);
+								strncpy(TAGKey.PREFIX, Prefix, 8);
+								strncpy(TAGKey.UDI, UDI, 32);
 								if (keylen == 42)
 									TAGKey.Refno = 0;
 								else

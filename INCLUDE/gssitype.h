@@ -542,6 +542,8 @@ typedef struct {
 				 short		Type;//0 if world 1 if window
 				 short		unused;
 				 HBITMAP	hBitMap[2];
+				 HDC		hDC;
+				 BOOL		CreateAreaPoint;
 				} PCTIAStruct;
 typedef PCTIAStruct	*LPPCTIAStruct;
 

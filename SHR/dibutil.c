@@ -420,11 +420,14 @@ DWORD FAR DIBHeight(LPSTR lpDIB)
 
 WORD FAR PaletteSize(LPSTR lpDIB)
 {
+	WORD rtn;
    /* calculate the size required by the palette */
    if (IS_WIN30_DIB (lpDIB))
-      return (DIBNumColors(lpDIB) * sizeof(RGBQUAD));
+      rtn =  (DIBNumColors(lpDIB) * sizeof(RGBQUAD));
    else
-      return (DIBNumColors(lpDIB) * sizeof(RGBTRIPLE));
+      rtn = (DIBNumColors(lpDIB) * sizeof(RGBTRIPLE));
+
+   return rtn;
 }
 
 

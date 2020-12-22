@@ -947,7 +947,7 @@ BOOL SetSHPParms (long RecordNumber)
 					CurrentDesc = GetOrCreateSym (0,str,0,0,TRUE,itype);
 			}
 		}
-		if (*pRot && (SHPType == SHPT_POINT ||
+		if (pRot && *pRot && (SHPType == SHPT_POINT ||
 					  SHPType == SHPT_POINTZ ||
 					  SHPType == SHPT_TEXT ||
 					  SHPType == SHPT_MULTIPOINTZ ||
@@ -978,11 +978,10 @@ BOOL SetSHPParms (long RecordNumber)
 			{
 				case 'P':
 				case 'p':
-					SHPWidth = -SHPWidth;
 					break;
 				case 'F':
 				case 'f':
-					SHPWidth *= FTM;
+					SHPWidth *= -FTM;
 					break;
 			}
 			if (SHPType == SHPT_POINT || SHPType == SHPT_POINTZ)

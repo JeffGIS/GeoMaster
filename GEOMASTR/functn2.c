@@ -3416,15 +3416,16 @@ GSSiExitProg (1350);
 			goto RtnTrue;
 		}
 		
-        case 1034:	//$PCTINAREAS(1,bounds); initializes function. Bounds is bounds of items to be tested. Returns handle to structure
+        case 1034:	//$PCTINAREAS(1,bounds,findareapoint(TorF); initializes function. Bounds is bounds of items to be tested. Returns handle to structure
 				    //$PCTINAREAS(2,item,handle); picked item number of item to be tested. Can be called multiple times. Returns 1 if successful, 0 if not
 					//$PCTINAREAS(3,item,handle,Offset,TreatAreasAsPolylines); picked item number of area or (polyline or point with offset). Can be called multiple times. Returns 1 if successful, 0 if not
 					//$PCTINAREAS(4,handle); returns result as num between 0 and 1
 					//$PCTINAREAS(5,handle); destroys handle
+					//$PCTINAREAS(6,handle); returns area point
         {
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 
-			PCTInAreaFunction (atoi(Arg[1]),Arg[2],Arg[3],OutLoc);
+			PCTInAreaFunction (atoi(Arg[1]),Arg[2], Arg[3], Arg[4],OutLoc);
 			goto Rtnl;
 		}
 
@@ -6150,21 +6151,8 @@ GSSiExitProg (1350);
 			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly))
 				goto RtnFalse;
 			LPDPOINT points = GlobalLock(hPoly);
-			DPOINT MidPt = { 0,0};
-			double totdist = 0;
-			double dist;
-
-			for (int i = 0; i < npnts-1;i++)
-			{
-				DPOINT midpt = MidPointD(points[i],points[i+1]);
-				dist = ldistpp(&points[i], &points[i + 1]);
-				totdist += dist;
-				MidPt.x += dist * midpt.x;
-				MidPt.y += dist * midpt.y;
-			}
+			DPOINT MidPt = WeightedPolyMidPoint(points, npnts);
 			GSSiGlobUlFree(&hPoly);
-			MidPt.x /= totdist;
-			MidPt.y /= totdist;
 			dpointtoa(OutLoc, &MidPt);
 			goto Rtnl;
 		}

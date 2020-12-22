@@ -2550,7 +2550,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 	return rtn;
 }
 
-void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
+void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3, LPSTR Arg4, LPSTR OutLoc)
 {
 	BOOL	err;
 	int		nPoly, nPnts, item;
@@ -2566,7 +2566,7 @@ void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
 
 			if (err)
 				return;
-			hPIA = PCTInAreasInit (&Bounds,atoi (Arg3));
+			hPIA = PCTInAreasInit (&Bounds,atoi (Arg3),atob(Arg4));
 			itoa ((int)hPIA,OutLoc,10);
 		}
 		break;
@@ -2604,7 +2604,7 @@ void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
 						LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock (hPoly);
 						LPDPOINT	pPoints = (LPDPOINT)(pBounds + 1);
 
-						if (PCTInAreasLoad (hPIA,iopt-2,PickList[item-1].Type,nPnts,pPoints,nPoly,hPolyPartLen,0,0))
+						if (PCTInAreasLoad (hPIA,iopt-2,PickList[item-1].Type,nPnts,pPoints,nPoly,hPolyPartLen,0, pBounds))
 							strcpy (OutLoc,"1");
 						GSSiGlobFree (&hPolyPartLen);
 						GSSiGlobUlFree (&hPoly);
@@ -2622,6 +2622,13 @@ void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
 		hPIA = (HANDLE)atoi (Arg2);
 		strcpy (OutLoc,"1");
 		PCTInAreasDestroy (hPIA);
+		break;
+	case 6:
+	{
+		hPIA = (HANDLE)atoi(Arg2);
+		DPOINT pt = PCTInAreasCreatePoint(hPIA);
+		dpointtoa(OutLoc, &pt);
+	}
 		break;
 	}
 	return;

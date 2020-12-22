@@ -1,2 +1,2 @@
-[%DL]configs\basic1.GMC 
-d:\spm3\spm3
+configs\jeff\testareapoint.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+F:\MplsRemoteTemplate\GeoMas
