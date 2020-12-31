@@ -2765,7 +2765,8 @@ typedef struct
 							AllowHollow:1,
 							RotateToScreen:1,
 							NonAntialiased:1,
-							Dummy:4;
+							NotAllowTextColorAdjustment:1,
+							Dummy:3;
        	char	VisMacro[256],
        			ColorMacro[256],
        			DisplayNameMacro[256];
@@ -4120,7 +4121,18 @@ typedef struct {
 }FTPSTRUCT;
 typedef FTPSTRUCT *LPFTPSTRUCT;
 
-
+typedef struct {
+	int	NumPoints;
+	int	startPt, endPt;
+	int	Streets[4];
+	short	HollowStreetWidth;
+	short	Order;
+	short  OneWay;
+	COLORREF	OutlineColor;
+	COLORREF	FillColor;
+	char	BPType, EPType;
+}STREETHEADER;
+typedef STREETHEADER* LPSTREETHEADER;
 
 void SetOldStructSizes (void);
 

@@ -2777,6 +2777,8 @@
 #define IDC_USESHIELDS                  1750
 #define IDC_ANTIALIASED                 1751
 #define IDC_AUTOHIGHLIGHT               1752
+#define IDC_USESHIELDS2                 1752
+#define IDC_FIXEDCOLOR                  1752
 #define IDC_USELONGNAMES                1753
 #define IDC_TCMACRO                     1754
 #define IDC_TCTABLE                     1755
@@ -3767,7 +3769,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1269
+#define _APS_NEXT_RESOURCE_VALUE        1270
 #define _APS_NEXT_COMMAND_VALUE         1248
 #define _APS_NEXT_CONTROL_VALUE         2315
 #define _APS_NEXT_SYMED_VALUE           1036

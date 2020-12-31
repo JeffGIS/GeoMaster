@@ -740,10 +740,15 @@ GSSiExitProg (1348);
 					ftoa (OutLoc,CurView->Scale);
 					goto Rtnl; 
 				}
-				else if (!_fstricmp (Arg[3],"ZMSCALE"))
-				{   
-					ftoa (OutLoc,CurView->ZMScale);
-					goto Rtnl; 
+				else if (!_fstricmp(Arg[3], "ZMSCALE"))
+				{
+					ftoa(OutLoc, CurView->ZMScale);
+					goto Rtnl;
+				}
+				else if (!_fstricmp(Arg[3], "ID"))
+				{
+					itoa(CurView->ID,OutLoc,10);
+					goto Rtnl;
 				}
 				else if (!_fstricmp (Arg[3],"TEXTOPAQUE"))
 				{

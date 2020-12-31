@@ -2114,6 +2114,7 @@ void DisplayCloseIcon (void);
 BOOL GetNextDTMSegment (BOOL Init);
 BOOL GetNextGPXSegment (BOOL Init);
 BOOL DisplayDTMSegment (void);
+int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float w, COLORREF color, LPFPOINT pRestorePoint);
 BOOL SetThemeColorsFromScheme (void);
 BOOL SetDTMRenderAs (int Layer);
 int FAR PASCAL FilterFunc(int nCode,WPARAM wParam, LPARAM lParam);

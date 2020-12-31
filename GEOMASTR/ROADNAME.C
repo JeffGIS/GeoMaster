@@ -14,18 +14,6 @@ static	POINT	ShieldDisplayPoint[MAXSHIELDSDISPLAYED] = { 0 };
 static	char	ShieldID[MAXSHIELDSDISPLAYED][MAX_SHIELD_ID] = { 0 };
 static	short	NumShieldsDisplayed=0;
 
-typedef struct	{int	NumPoints;
-				 int	startPt, endPt;
-				 int	Streets[4];
-				 short	HollowStreetWidth;
-				 short	Order;
-				 short  OneWay;
-				 COLORREF	OutlineColor;
-				 COLORREF	FillColor;
-				 char	BPType, EPType;
-				}STREETHEADER;
-typedef STREETHEADER	*LPSTREETHEADER;
-
 static	struct	{ long npnts; short width, desc, OneWay, order; COLORREF color; char BPType, EPType; } HollowLineHeader;
 
 int	ShowHollowStreet=1;
@@ -48,7 +36,7 @@ void ClearStreetLabels (void)
 		GSSiGlobUlFree(&CurTheme->hhLabelLines);
 	}
 }
-int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float w,LPFPOINT pRestorePoint)
+int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float w,COLORREF color,LPFPOINT pRestorePoint)
 {
 	int rtn = 0;
 	double d, az;
@@ -82,7 +70,7 @@ int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float 
 		hBrush = CreateSolidBrush(pStreet->FillColor);
 		hOldBrush = SelectObject(hDC, hBrush);
 		PolygonF(hDC, circlePoints, nCirclePts);
-		AAPolyLineF(CurView->hDC, circlePoints, nCirclePts, 0, w);
+		AAPolyLineF(CurView->hDC, circlePoints, nCirclePts, color, w);
 		GlobalUnlock(hCirclePt);
 		SelectObject(hDC, hOldBrush);
 		GSSiDeleteObject(&hBrush);
@@ -106,7 +94,7 @@ int DrawStreetEndPoint(HDC hDC, LPFPOINT pPoints, LPSTREETHEADER pStreet, float 
 		hBrush = CreateSolidBrush(pStreet->FillColor);
 		hOldBrush = SelectObject(hDC, hBrush);
 		PolygonF(hDC, circlePoints, nCirclePts);
-		AAPolyLineF(CurView->hDC, circlePoints, nCirclePts, 0, w);
+		AAPolyLineF(CurView->hDC, circlePoints, nCirclePts, color, w);
 		GlobalUnlock(hCirclePt);
 		SelectObject(hDC, hOldBrush);
 		GSSiDeleteObject(&hBrush);
@@ -597,8 +585,8 @@ BOOL DisplayStreetCenterlines (void)
 					EdgeWidth = (w / 8 + edgeWidthInc) * EdgeWidthFactor;
 					pStreet->endPt = pStreet->NumPoints-1;
 					wplusEdge = w + EdgeWidth * 2;
-					iend = DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth,&restorePoint);
-					AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt+1, pStreet->OutlineColor, wplusEdge);
+					iend = DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth, ConvertColor(pStreet->OutlineColor, CurrentDesc) ,&restorePoint);
+					AAPolyLineF(CurView->hDC, &pPoints[pStreet->startPt], pStreet->endPt - pStreet->startPt+1, ConvertColor(pStreet->OutlineColor, CurrentDesc), wplusEdge); 
 					if (pStreet->startPt || pStreet->endPt)
 					{
 						switch (iend)
@@ -610,7 +598,7 @@ BOOL DisplayStreetCenterlines (void)
 							pPoints[pStreet->endPt] = restorePoint;
 							break;
 						}
-						DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth,0);
+						DrawStreetEndPoint(CurView->hDC, pPoints, pStreet, EdgeWidth, ConvertColor(pStreet->OutlineColor, CurrentDesc),0);
 						/*switch (iend)
 						{
 						case 1:
@@ -1026,7 +1014,10 @@ BOOL DisplayStreetLabels (BOOL Clear)
 				LogFont.lfQuality = PROOF_QUALITY;
 			SelectObject (CurView->hDC,GetStockObject(BLACK_PEN));
 			SetBkMode(CurView->hDC, TRANSPARENT);
-     		SetTextColor(CurView->hDC,ConvertColor(HollowTextColor,CurTheme->UseHalfTone));
+			COLORREF color = HollowTextColor;
+			if (!pStreetData->NotAllowTextColorAdjustment)
+				color = ConvertColor(HollowTextColor, CurTheme->UseHalfTone);
+     		SetTextColor(CurView->hDC,color);
 			ii=CurTheme->nLabelLines;
 /*			BOOL foundSome = TRUE;
 			while (foundSome)

@@ -3576,6 +3576,7 @@ GSSiExitProg (61);
 	    FidZM = GSSiOpenFile (File,0,OF_READ);
 	    if (FidZM != HFILE_ERROR)
 	    {   
+			AddToMacroStack(2, 0, File, 0, 0);
 	    	ProcessZoomMacroFile2(CurView->hDC,FidZM);
 	    	GSSiClose2 (&FidZM);
 	    } 
