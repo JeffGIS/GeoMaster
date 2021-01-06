@@ -901,6 +901,7 @@ static char *buttonTypes[] = {"None", "SmallPush", "LargePush", "Touch", "APS"};
 static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer"};
 static char *conditionCode[] = { "Unknown","New","Good","Fair","Poor","Unacceptable" };
 static char* sidewalkMaterial[] = { "Unknown","Concrete", "Asphalt", "Brick Pavers","Interlocking Pavers","Other" };
+static char* boulevardMaterial[] = {"Unknown","Concrete", "Grass","Dirt","Other" };
 static char* sidewalkPointTypes[] = { "Sidewalk","Lower Landing","Ramp","Upper Landing","Crosswalk","Island","Driveway Crossing","Driveway Flare","Driveway Apron","Slope Change"};
 
 
