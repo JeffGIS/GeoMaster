@@ -233,6 +233,7 @@ short DrawRectPoly(HDC hDC, LPRECT Rect, HPEN hPen);
 int FillRectColor (HDC hDC,LPRECT Rect,COLORREF Color);
 BOOL LoadGlobalInit (LPSTR File,BOOL First);
 HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc);
+void SetWantHandle(HANDLE hglb);
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc);
 HGLOBAL GSSiGlobalCopy(USHORT From, HGLOBAL hGlob);
 void GSSiGlobFree (LPHANDLE pHandle); 

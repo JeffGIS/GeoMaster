@@ -559,15 +559,33 @@ HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal)
    /*  call GetDIBits with a NON-NULL lpBits param, and actualy get the
     *  bits this time
     */
-   if (bi.biBitCount <= 8)
+   if (bi.biBitCount == 1)
    {
-	   ctype = DIB_RGB_COLORS;
+	   ctype = DIB_PAL_COLORS;
 	   bi.biClrUsed = 2;
+   }
+   else if (bi.biBitCount == 8)
+   {
+	   ctype = DIB_PAL_COLORS;
+	   bi.biClrUsed = 256;
    }
    else
 	   ctype = DIB_RGB_COLORS;
    /* use our bitmap info. to fill BITMAPINFOHEADER */
    *lpbi = bi;
+   if (bi.biBitCount == 1)
+   {
+	   RGBQUAD colors[2] = { RGB(0,0,0),RGB(255,255,255) };
+	   RGBQUAD* pColors = (RGBQUAD * )(lpbi + 1);
+	   pColors[0].rgbRed = 0;
+	   pColors[0].rgbGreen = 0;
+	   pColors[0].rgbBlue = 0;
+	   pColors[0].rgbReserved = 0;
+	   pColors[1].rgbRed = 255;
+	   pColors[1].rgbGreen = 255;
+	   pColors[1].rgbBlue = 255;
+	   pColors[1].rgbReserved = 255;
+   }
    if (GetDIBits(hDC, hBitmap, 0, (WORD)bi.biHeight, (LPSTR)lpbi + (WORD)lpbi
          ->biSize + PaletteSize((LPSTR)lpbi), (LPBITMAPINFO)lpbi,
          ctype) == 0)

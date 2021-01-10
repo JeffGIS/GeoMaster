@@ -803,7 +803,8 @@ BOOL StatusWindowUpdate2(LPSTR Mess, LONGLONG Tot, LONGLONG Done)
 }
 
 BOOL DestroyStatusWindow (long Macro)
-{   
+{
+	BOOL rtn = TRUE;
 	if (Macro && Macro != StatusMacro)
 		return FALSE;
 	if (UseSecondStatus)
@@ -818,8 +819,11 @@ BOOL DestroyStatusWindow (long Macro)
        		DestroyWindow(ghPrintingDlg);
        ghPrintingDlg = NULL;
     } 
-    else
-       MessageBox(GetFocus(), "Operation cancelled", " ", MB_OK);
+	else
+	{
+		MessageBox(GetFocus(), "Operation cancelled", " ", MB_OK);
+		rtn = FALSE;
+	}
 //    FreeProcInstance(lpfnAbortProc);
     if (lpfnPrintDlgProc)
     	FreeProcInstance(lpfnPrintDlgProc);
@@ -827,7 +831,7 @@ BOOL DestroyStatusWindow (long Macro)
 	LeaveBlockingWindow(hSaveStatWindowBM);
 	hSaveStatWindowBM = 0;
 	StatusMacro = 0;
-	return TRUE;
+	return rtn;
 } 
 
 BOOL CreateProcessStatusWindow (HWND hWnd,LPSTR Title)

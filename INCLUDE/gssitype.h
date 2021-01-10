@@ -8,6 +8,8 @@
 #include "sqlite3.h"
 #include "laszip_dll.h"
 
+enum STRUCTTYPES {ST_NOTYPE,ST_FTPSTRUCT,ST_VPSTRUCT};
+
 #if WIN32
 #define HUGE 
 #define _fstrncpy strncpy
@@ -542,6 +544,7 @@ typedef struct {
 				 short		Type;//0 if world 1 if window
 				 short		unused;
 				 HBITMAP	hBitMap[2];
+				 HBITMAP	hBitMapOrig;
 				 HDC		hDC;
 				 BOOL		CreateAreaPoint;
 				} PCTIAStruct;
@@ -818,7 +821,7 @@ typedef struct
         DWORD   changetime; 
         BOOL	ContainsGorF;
         BOOL	Save;
-        char    Name[34];
+        char    Name[MAX_VARNAME_LEN + 1];
         char    Value[MAXVARLEN]; 
         HANDLE	LinkedVar[1];
     } VARINFO;
@@ -3433,7 +3436,7 @@ typedef STREETPOLYHEADER	FAR	*LPSTREETPOLYHEADER;
 
 typedef struct
 	{
-		char	Name[62];
+		char	Name[MAX_VARNAME_LEN + 1];
 		short	id;
 	}VARNAMEINDEXITEM;
 typedef	VARNAMEINDEXITEM	FAR	*LPVARNAMEINDEXITEM;
@@ -4104,6 +4107,7 @@ typedef	struct {POINT Point;
 typedef SHOWVAL *LPSHOWVAL;
 
 typedef struct {
+	enum STRUCTTYPES structType;
 	HANDLE hFTP;
 	HANDLE hFind;
 	char fileName[MAX_PATH];
@@ -4290,6 +4294,7 @@ int checkvp(int i);
 
 LPVOID glbllock(HANDLE hglb);
 BOOL glblUnlock(HANDLE hglb);
+BOOL CheckStructType(HANDLE hStruct, int type);
 
 #include "TileGraphics.h"
 

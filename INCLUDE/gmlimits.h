@@ -107,3 +107,5 @@
 #define MAX_PREFIX_LEN	8
 #define MAX_UDI_LEN	64
 #define MAX_SMALL_MESSAGE	255
+
+#define MAX_VARNAME_LEN	61

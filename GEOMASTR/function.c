@@ -24,6 +24,32 @@ LPSTR priorchr(LPSTR pstr, char c)
 
 	return pstr;
 }
+BOOL CheckStructType(HANDLE hStruct, int type)
+{
+	BOOL rtn = FALSE;
+
+	if (hStruct)
+	{
+		SIZE_T l = GlobalSize(hStruct);
+		if (l > 0)
+		{
+			LPINT pType = GlobalLock(hStruct);
+			if (pType)
+			{
+				if (*pType == type)
+					rtn = TRUE;
+				GlobalUnlock(hStruct);
+			}
+		}
+	}
+	if (!rtn)
+	{
+		char mess[256];
+		sprintf(mess,"Invalid structure %i", type);
+		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+	}
+	return rtn;
+}
 void GetMassShapeFiles(void)
 {
 	char file[] = "c:\\temp\\maparcels2.txt";
@@ -2335,7 +2361,7 @@ SetVis:
 			goto Rtnl;
 		}
 
-		case 355://$FTP(OPEN,service,username,pw,directory,errvarname,port(opt),passive(opt))
+		case 355://$FTP(OPEN,service,username,pw,directory,errvarname,port(opt),passive(opt),numreopenattempts)
 				 //$FTP(CLOSE,handle);
 				 //$FTP(LIST,handle,wildcard,errvarname)
 				 //$FTP(GETFILE,handle,remotename,localname,replace,showStatus,errvarname)
@@ -2353,13 +2379,14 @@ SetVis:
 			{
 				hFTPStruct = GSSiGlobAlloc (1781,GHND,sizeof(FTPSTRUCT));
 				pFTPStruct = GlobalLock (hFTPStruct);
+				pFTPStruct->structType = ST_FTPSTRUCT;
 				pFTPStruct->hFTP = FTPOpen(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], atoi(Arg[7]), atob(Arg[8]));
 				if (!pFTPStruct->hFTP)
 				{
 					GSSiGlobUlFree (&hFTPStruct);
 					goto RtnFalse;
 				}
-				pFTPStruct->reopenAttempts = 1;
+				pFTPStruct->reopenAttempts = atoi(Arg[9]);
 				strcpy (pFTPStruct->ServerName,Arg[2]);
 				strcpy (pFTPStruct->Username,Arg[3]);
 				strcpy (pFTPStruct->Password,Arg[4]);
@@ -2371,16 +2398,12 @@ SetVis:
 			else if (!stricmp(Arg[1],"CLOSE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
-				if (hFTPStruct)
+				if (CheckStructType (hFTPStruct,ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
-						pFTPStruct = GlobalLock (hFTPStruct);
-						rtn = FTPClose (pFTPStruct->hFTP);
-						GSSiGlobUlFree (&hFTPStruct);
-						goto Rtnrtn;
-					}
+					pFTPStruct = GlobalLock (hFTPStruct);
+					rtn = FTPClose (pFTPStruct->hFTP);
+					GSSiGlobUlFree (&hFTPStruct);
+					goto Rtnrtn;
 				}
 			}
 			else if (!stricmp(Arg[1],"SPLIT"))
@@ -2421,11 +2444,8 @@ SetVis:
 			else if (!stricmp(Arg[1],"LIST"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						if (*Arg[3])
 						{
@@ -2450,18 +2470,14 @@ SetVis:
 							goto Rtnl;
 						}
 						GlobalUnlock (hFTPStruct);
-					}
 				}
 			}
 			else if (!stricmp(Arg[1],"GETFILE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						int nAttemps = 0;
 						pFTPStruct = GlobalLock (hFTPStruct);
 						do {
@@ -2471,43 +2487,33 @@ SetVis:
 						}while (!rtn && nAttemps++ < pFTPStruct->reopenAttempts);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
-				else if (*Arg[6])
-					SetGlobalValue (Arg[6],"FTP session not open"); 
+				else if (*Arg[7])
+					SetGlobalValue (Arg[7],"FTP session not open"); 
 			}
 			else if (!stricmp(Arg[1],"PUTFILE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
-
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPPutFile(pFTPStruct->hFTP,Arg[3],Arg[4],atob(Arg[5]),atob(Arg[6]),Arg[7]);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
-				else if (*Arg[6])
-					SetGlobalValue (Arg[6],"FTP session not open"); 
+				else if (*Arg[7])
+					SetGlobalValue (Arg[7],"FTP session not open"); 
 			}
 			else if (!stricmp(Arg[1],"DELETEFILE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPDeleteFile(pFTPStruct->hFTP,Arg[3],Arg[4]);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
 				else if (*Arg[4])
 					SetGlobalValue (Arg[4],"FTP session not open"); 
@@ -2516,18 +2522,14 @@ SetVis:
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPSetDirectory(pFTPStruct->hFTP,Arg[3],Arg[4]);
 						if (rtn)
 							FTPGetDirectory(pFTPStruct->hFTP,pFTPStruct->directory,0);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
 				else if (*Arg[4])
 					SetGlobalValue (Arg[4],"FTP session not open"); 
@@ -2536,11 +2538,8 @@ SetVis:
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPGetDirectory(pFTPStruct->hFTP,Arg[4],Arg[3]);
 						GlobalUnlock (hFTPStruct);
@@ -2550,7 +2549,6 @@ SetVis:
 							goto Rtnl;
 						}
 						goto Rtnrtn;
-					}
 				}
 				else if (*Arg[3])
 					SetGlobalValue (Arg[3],"FTP session not open"); 

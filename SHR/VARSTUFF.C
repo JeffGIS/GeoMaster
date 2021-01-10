@@ -2175,7 +2175,7 @@ void SetGlobalValue3 (LPSTR Name, LPSTR Value, short Index, BOOL FoundLit)
 	HANDLE	handle; 
 	short	ii; 
 	
-	if (!*Name || _fstrlen (Name) > 61)
+	if (!*Name || _fstrlen (Name) > MAX_VARNAME_LEN)
 {
 #if ENABLETRACE
 GSSiExitProg (529);
@@ -6208,6 +6208,7 @@ HANDLE	AllocateVar (LPSTR Name)
 {   VARPNT  VarPnt;   
 	HANDLE	handle;
 	HANDLE	hVarSpace;
+	BOOL	setwh = FALSE;
 
 	if (handle = FindVar(Name))
 {
@@ -6236,9 +6237,13 @@ GSSiExitProg (550);
 	}
 	handle = GSSiGlobAlloc(197, GHND, sizeof(VARINFO));
 	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
+	if (*Name == '~')
+		ii = 1;
+	if (setwh)
+		SetWantHandle(handle);
 	VarPnt = (VARPNT)GlobalLock(handle);  
 	VarPnt->Handle = handle;
-	_fstrcpy(VarPnt->Name,Name);   
+	strncpy0(VarPnt->Name, Name, MAX_VARNAME_LEN + 1);
 	VarPnt->Save = TRUE;//(*Name != '%'); 2010 01-20 to save street name and width vars for Mpls
 	GlobalUnlock (handle);
 	GlobalUnlock(hVarSpace);
@@ -6334,7 +6339,7 @@ void AddToVarNameTable (LPSTR Name)
 	}
 	if (pVarSpace->NumVars >= pVarSpace->MaxVars)
 		BlowOut ("Maximum globals exceeded",0);
-	if (_fstrlen (Name) > 61)
+	if (_fstrlen (Name) > MAX_VARNAME_LEN)
 		GSSiMsgBox (GetFocus(),"Length of variable name exceeds 61 characters",Name,MB_ICONEXCLAMATION,0);
 	if (!pVarSpace->hVarNameTable)
 		pVarSpace->hVarNameTable = GSSiGlobAlloc(198, GMEM_MOVEABLE, (long)sizeof(VARNAMEINDEXITEM)*pVarSpace->MaxVars);
@@ -6348,7 +6353,7 @@ void AddToVarNameTable (LPSTR Name)
 		}
 	}
 Exit:
-	strncpy0 (lpVN->Name,Name,62);
+	strncpy0 (lpVN->Name,Name, MAX_VARNAME_LEN+1);
 	lpVN->id = pVarSpace->NumVars;
 	GlobalUnlock(pVarSpace->hVarNameTable);
 	GlobalUnlock (hVarSpace);
