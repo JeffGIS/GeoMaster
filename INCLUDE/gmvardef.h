@@ -387,6 +387,7 @@ int		NumNewPolyPoints=0;
 HANDLE	hNewPolyPoints=0;
 HANDLE	hCurPolyPoints=NULL; 
 char	MoveHorzVert=0;   
+BOOL	allowGlobalExpansion = TRUE;
 char	literalChar = '@';
 char    rawInputChar = '`';
 LPVIEWPORT	CurPolyVP=NULL;

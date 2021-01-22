@@ -9504,7 +9504,7 @@ Open2:
 						if (FidTo != HFILE_ERROR)
 						{
 							GSSifstat(FidTo, &statto);
-							if (CacheAlreadyChecked(Name, _fstrlen(CachePathnameTo), CHECKTIMESTAMP))
+							//if (CacheAlreadyChecked(Name, _fstrlen(CachePathnameTo), CHECKTIMESTAMP))
 							{
 								InOpenFile = FALSE;
 								Fid = FidTo;

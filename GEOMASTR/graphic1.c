@@ -406,6 +406,7 @@ void QuitGraphics()
 	for (i=0;i<MAXMULTILEVELZOOM;i++)
 		GSSiDeleteObject (&hbmpMultiLevel[i]); 
 	DestroySavedGraphicsFile (0);
+	UseTrustedCacheFile(0);
  	CloseTRANS2 (&hTranFileToBase); 
 	CloseTRANS2 (&hTranBaseToFile);  
 	CloseTRANS2 (&hTranFileToVP);  

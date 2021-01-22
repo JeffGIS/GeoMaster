@@ -6491,6 +6491,7 @@ BOOL StartBackgroundCache (void)
 		}
 		GSSiClose64 (&Fid);
 		GSSiClose64 (&Fid2);
+		GSSiRemove(arg1);
 		BackgroundCacheStarted = TRUE;
 		RenameCachedFiles ();
 		ContinueBackgroundCache = TRUE;

@@ -1108,7 +1108,9 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 			GetDlgItemText(hWndDlg, IDC_COMMAND, txt, MAX_PATH - 1);
 			sprintf(strchr(txt, 0), " /WD %s", path);
 			sprintf(str, "$TEXTTOCLIPBOARD(%s)", txt);
+			allowGlobalExpansion = FALSE;
 			ExpandText(str);
+			allowGlobalExpansion = TRUE;
 			break;
 		case IDOK:
 		{
@@ -6149,8 +6151,8 @@ GSSiExitProg (438);
     {
     	 RECT	UpdateRect;
 		 HDC	hDCScreen;
-		 if (!RunFromCache && wantBackgroundCache)
-			 StartBackgroundCache ();
+//		 if (!RunFromCache && wantBackgroundCache)
+//			 StartBackgroundCache ();
 
 //         GSSiTrace ("Enter WM_PAINT");
          if (InPaint || Printing || idTimer || InDisplayProcessing==1)

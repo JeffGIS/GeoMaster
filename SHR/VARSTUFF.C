@@ -6824,7 +6824,7 @@ GSSiExitProg (558);
 				InLoc++;
 			}
 		}
-		else if (*InLoc == '[')
+		else if (*InLoc == '[' && allowGlobalExpansion)
 		{   
 			if (!(EndBrack = MatchLev((LPSTR)(InLoc + 1), ']')))
 			{

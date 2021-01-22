@@ -799,6 +799,7 @@ extern POINT			CurStartPoint;
 extern POINT			CurEndPoint;
 extern HANDLE			hCurPolyPoints;
 extern char			MoveHorzVert;
+extern BOOL			allowGlobalExpansion;
 extern char			literalChar;
 extern char			rawInputChar;
 extern LPVIEWPORT			CurPolyVP;
