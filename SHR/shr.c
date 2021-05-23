@@ -9494,7 +9494,7 @@ Open2:
 	    		else
 				{    		
 					double	dtime;
-					struct _stati64	statfrom, statto;  
+					struct _stati64	statfrom, statto = { 0 };
 					HFILE	FidTo = HFILE_ERROR;
 					
 					InOpenFile = TRUE;
@@ -11708,7 +11708,7 @@ BOOL NextLine (LPSTR *lpText,LPSTR lpLine,short nAutoLines)
 #if ENABLETRACE
 {GSSiEnterProg (365);
 #endif
-{   LPSTR	loc; 
+{   LPSTR	loc=0; 
 	short	inc=1;
 
     if (!**lpText)
@@ -12430,7 +12430,7 @@ BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 {GSSiEnterProg (384);
 #endif
 {
- MSG            msg; 
+	MSG            msg = { 0 };
 
  if (ghPrintingDlg)
 	 return TRUE;
@@ -13416,15 +13416,15 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
 	
 	if (opt == 1)
 	{
-		OSVERSIONINFOEX verinfo;
+		//OSVERSIONINFOEX verinfo;
 		BOOL isWOW64;
 		HANDLE hProcess = GetCurrentProcess();
 
 		if (!IsWow64Process(hProcess, &isWOW64))
 			isWOW64 = FALSE;
 
-		verinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		GetVersionEx((LPOSVERSIONINFO)&verinfo);
+		//verinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+		//GetVersionEx((LPOSVERSIONINFO)&verinfo);
 	//	if (verinfo.dwMajorVersion > 5) //dont care if covered if Vista or higher
 		if (isWOW64)
 			return FALSE;
@@ -13839,13 +13839,15 @@ else
 	 }
  }
 
- Exit:
- /* move the window  */
+Exit:
+ {
+	 /* move the window  */
 
- RECT displayRect = { pt.x,pt.y,pt.x + iwidth,pt.y + iheight };
- displayRect = MoveRectToAMonitor(displayRect);
- MoveWindow(hWnd, displayRect.left, displayRect.top, iwidth, iheight, FALSE);
- //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
+	 RECT displayRect = { pt.x,pt.y,pt.x + iwidth,pt.y + iheight };
+	 displayRect = MoveRectToAMonitor(displayRect);
+	 MoveWindow(hWnd, displayRect.left, displayRect.top, iwidth, iheight, FALSE);
+	 //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
+ }
 {
 #if ENABLETRACE
 GSSiExitProg (452);
