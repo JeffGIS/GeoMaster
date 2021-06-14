@@ -319,6 +319,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "DIMLINE", 7)) return 787;
 			if (!_fstrnicmp(str, "MONITOR", 7)) return 788;
 			if (!_fstrnicmp(str, "INTCHOP", 7)) return 789;
+			if (!_fstrnicmp(str, "SYSTIME", 7)) return 790;
 
 			return 0;
 }

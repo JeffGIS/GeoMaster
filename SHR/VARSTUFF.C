@@ -56,6 +56,11 @@ void SetHighlightDepth (int In);
 
 HANDLE countyLinkedVar = 0, countyVar = 0;
 
+void SetInitialGlobalValues(void)
+{
+	ProcessText("[%MACRODIR]=[%DL]macros\\");
+	ProcessText("[%PRJDIR]=[%DL]projects\\");
+}
 HANDLE CreateVarSpace(int type)
 {
 	HANDLE hSpace;

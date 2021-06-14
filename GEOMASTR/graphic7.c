@@ -1368,7 +1368,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 		goto RtnFalse;
     if (ObjectID == OB_CONFIGDESCRIPTION || ObjectID == OB_CONFIGIMAGE)
 		goto RtnFalse;
-    if (ObjectID < 0) 
+	if (ObjectID < 0)
     	BlowOut ("Invalid object in configuration file",0);
     if (WantID && ObjectID != WantID) 
     {
@@ -4165,7 +4165,7 @@ BOOL DisplayPickedItems (HWND hWnd,int NumPickedIn,BOOL UseMenus, LPSTR Cmd,LPST
     char	SymName[64],DPIMacro[256],PMFile[MAX_PATH];
     BOOL	rtn=FALSE; 
     LPSTR	lpDesc, lpSymbol,lpAction;     
-    HMENU	Menus[MAXPICKITEMS+3], PickMenu;
+	HMENU	Menus[MAXPICKITEMS + 3] = { 0 }, PickMenu;
     long	loc;
     BOOL	TopOnlyOpt, SingleOpt, DescTAGOpt;
     UINT	CmdID; 

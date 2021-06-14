@@ -7418,6 +7418,11 @@ GSSiExitProg (295);
 }
 #endif
 }  
+void lltoa(long long l, LPSTR loc, int rad)
+{
+	sprintf(loc, "%li", l);
+	return;
+}
 
 void btoa (BOOL Val,LPSTR str)
 {
