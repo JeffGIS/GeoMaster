@@ -549,6 +549,8 @@ GSSiExitProg (436);
 	 SetGlobalValue ("%DL",str);  
 	 SetGlobalValue("%INDIR",str);
 	 HaveDL = TRUE;
+	 SetInitialGlobalValues();
+
 	 lpEnd = _fstrchr (str,0);
 	 if (lpEnd != str)
 	 {

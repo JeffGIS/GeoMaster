@@ -2461,7 +2461,31 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		ltoa(nlong, OutLoc, 10);
 		goto Rtnl;
 	}
-
+	case 790:  //$SYSTIME(PCTOAPPLE,pctime)
+			   //$SYSTIME(APPLETOPC,appletime)
+	{
+		time_t	iTime;
+		nArgs = GetFunArgs(Args, Arg,3, &hMem, pBrkPt, bpOffset, bpLen);
+		*OutLoc = 0;
+		if (nArgs == 0)
+		{
+			time(&iTime);
+		}
+		else
+		{
+			iTime = atoll(Arg[2]);
+			if (!stricmp(Arg[1], "PCTOAPPLE"))
+			{
+				iTime -= PCCLKTOAPPLECLK;
+			}
+			else if (!stricmp(Arg[1], "APPLETOPC"))
+			{
+				iTime += PCCLKTOAPPLECLK;
+			}
+		}
+		lltoa(iTime, OutLoc, 10);
+		goto Rtnl;
+	}
 
 		default:
 			goto Rtn0;

@@ -12,6 +12,29 @@ static char	DOW[7][10]={"SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRID
 static HIGHLIGHTDATA	HighlightData;  
 static char	ContourOpts[6][18]={"LightContourColor","LightContourWidth","DarkContourColor","DarkContourWidth","ContourTextColor","ContourTextSize"};  
 
+LPSTR GetMacroLocation(LPSTR MacroName)
+{
+	LPSTR rtn = malloc(4096);
+	char extension[5] = ".txt";
+	LPSTR pDot = strrchr(MacroName, '.');
+
+	if (pDot)
+	{
+		if (!stricmp(pDot, extension))
+			*extension = 0;
+	}
+	sprintf(rtn, "[%%MACRODIR]%s%s", MacroName,extension);
+	ExpandText(rtn);
+	if (!FileType(rtn))
+	{
+		sprintf(rtn, "[%%DL]macros\\%s%s", MacroName, extension);
+		ExpandText(rtn);
+	}
+	else
+		ii = 1;
+
+	return rtn;
+}
 short OptionInList (LPSTR Val,LPSTR ListVals,int NumInList,int ListItemSize)
 {   
 	UINT	i,j;
@@ -328,14 +351,21 @@ GSSiExitProg (1348);
 			HANDLE hMem = GSSiGlobAlloc(1826, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR pMem = GlobalLock(hMem);
 			LPSTR pComma = strchr(Args, ',');
+			LPSTR pMacro;
 
 			if (pComma)
 			{
 				*pComma++ = 0;
-				sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt,%s)", Args,pComma);
+				pMacro = GetMacroLocation(Args);
+				sprintf(pMem, "$MACRO(%s,%s)", pMacro,pComma);
+				free(pMacro);
 			}
 			else
-				sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt)", Args);
+			{
+				pMacro = GetMacroLocation(Args);
+				sprintf(pMem, "$MACRO(%s)", pMacro);
+				free(pMacro);
+			}
 			ExpandText(pMem);
 			strcpy(OutLoc, pMem);
 			GSSiGlobUlFree(&hMem);

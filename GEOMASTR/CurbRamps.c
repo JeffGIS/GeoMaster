@@ -574,9 +574,9 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 						sprintf(mess, "%i errors", totErrors);
 						StatusWindowUpdate(0, mess, nTot, ++nDone);
 					}
-					int vid = getDatasetVersion();
-					if (vid != 7)
-						ii = 1;
+					//int vid = getDatasetVersion();
+					//if (vid != 7)
+					//	ii = 1;
 				}
 			}
 			if (showProgress)

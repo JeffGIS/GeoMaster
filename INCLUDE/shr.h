@@ -122,7 +122,7 @@ typedef TRN FAR *LPTRN;
 #define	 NULLREF 0
 #define RADtoDEG 57.295779513082322
 #define DEGtoRAD 0.017453292519943296
-
+#define PCCLKTOAPPLECLK	978331200
 #define  GOOD_SOUND 1
 #define  BAD_SOUND  2  
 
@@ -171,6 +171,7 @@ void UnixTimeToSystemTime(time_t t, LPSYSTEMTIME pst);
 __int64 HighLowToint64(DWORD HighPart,DWORD LowPart);
 __int64 FileTimeToint64(FILETIME ft);
 long Time64toTime32 (time_t time64);
+void lltoa(long long l, LPSTR loc, int rad);
 int	GSSiEnterProg (int progid);
 int	GSSiExitProg (int progid);
 int SetLastMessage (long mes,WPARAM wparam);
@@ -1512,6 +1513,7 @@ void DebugReturn(LPSTR rtnValue);
 HANDLE CreateVarSpace(int type);
 void DestroyVarSpace(HANDLE hVarSpace);
 void SetVarSpace(int type, HANDLE hVarSpace);
+void SetInitialGlobalValues(void);
 int AddToMacroStack(int from, int iCurrentMacro, LPSTR File, LPHANDLE phArgs, int NumArgs);
 void RemoveFromMacroStack (int macroID);
 BOOL AddBreakpoint(LPSTR macroFile, int insertLoc);
