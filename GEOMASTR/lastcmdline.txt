@@ -1,2 +1,2 @@
-configs\basic1.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  
+configs\sidewalk_fixpoints2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  
 F:\MplsRemoteTemplate\GeoMas

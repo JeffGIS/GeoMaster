@@ -3415,10 +3415,14 @@
 #define IDC_IMAGE_ROTATE_COUNTERCLOCKWISE2 2304
 #define IDC_NEXT_IMAGE                  2304
 #define IDC_DOWNLOADDATA                2305
+#define IDC_ASSIST_IMAGE_2              2305
 #define IDC_PROGRESS1                   2306
 #define IDC_SYNCHRONIZE                 2307
+#define IDC_ASSIST_IMAGE_1              2307
 #define IDC_CONNECT_LABEL               2308
 #define IDC_CONNECT                     2309
+#define IDC_ASSIST_IMAGE_4              2309
+#define IDC_ASSIST_IMAGE_3              2309
 #define IDC_IMAGE_NAME                  2310
 #define IDC_CACHEMESSAGE                2311
 #define IDC_CACHEHOLDMESSAGE            2312

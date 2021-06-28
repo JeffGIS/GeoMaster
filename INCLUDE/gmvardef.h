@@ -1704,7 +1704,8 @@ BOOL	firstDisplayComplete = FALSE;
 int		MAXHOTSPOTDIMENSION = 2500;
 int		maxNumPhotos = 0;
 BOOL	allowCachedSymbols = TRUE;
-
+int		SMTP_PORT = 25;
+int		DNS_PORT = 53;
 int		ii;
 
 

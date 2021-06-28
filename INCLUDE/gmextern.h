@@ -1836,6 +1836,9 @@ extern  BOOL	firstDisplayComplete;
 extern  int		MAXHOTSPOTDIMENSION;
 extern	int		maxNumPhotos;
 extern BOOL		allowCachedSymbols;
+extern int		SMTP_PORT;
+extern int		DNS_PORT;
+
 extern	int		ii;
 
 extern int nPaint;

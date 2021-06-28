@@ -7420,7 +7420,7 @@ GSSiExitProg (295);
 }  
 void lltoa(long long l, LPSTR loc, int rad)
 {
-	sprintf(loc, "%li", l);
+	sprintf(loc, "%I64i", l);
 	return;
 }
 

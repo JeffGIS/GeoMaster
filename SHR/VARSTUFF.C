@@ -3637,6 +3637,12 @@ GSSiExitProg (532);
 		case 406:
 			forceZoomToGoogle = atob(Value);
 			break;
+		case 408:
+			SMTP_PORT = atol(Value); 
+			break;
+		case 409:
+			DNS_PORT = atol(Value);
+			break;
 		default:
  			break;
 	}
@@ -4063,6 +4069,8 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CACHEREADDELAY", 405, FALSE);
 	AllocateTypeVar("%FORCEZOOMTOGOOGLE", 406, FALSE);
 	AllocateTypeVar("%GOOGLEAPIKEY", 407, FALSE);
+	AllocateTypeVar("%SMTP_PORT", 408, FALSE);
+	AllocateTypeVar("%DNS_PORT", 409, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5318,6 +5326,12 @@ GSSiExitProg (533);
 			break;
 		case 407:
 			strcpy(OutStr, GOOGLE_API_KEY);
+			break;
+		case 408:
+			ltoa(SMTP_PORT, OutStr, 10);
+			break;
+		case 409:
+			ltoa(DNS_PORT, OutStr, 10);
 			break;
 	}
 	GlobalUnlock (hGlobal);
