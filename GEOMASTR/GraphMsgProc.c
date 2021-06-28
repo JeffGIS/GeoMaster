@@ -1809,6 +1809,9 @@ static void AdjustIdentifyWithPhotosWindow(HWND hWndDlg, BOOL first)
 		GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_FLIP), &r7);
 		ScreenRectToClientRect(hWndDlg, &r7);
 		MoveWindow(GetDlgItem(hWndDlg, IDC_PRIOR_IMAGE), r7.left, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_ASSIST_IMAGE_1), r7.left, r7.top + RECTHEIGHT(&r7) + 4 + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_ASSIST_IMAGE_2), RECTWIDTH(&mr) / 2 + 5 + ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2) + 2, r7.top + RECTHEIGHT(&r7) + 4 + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
+		MoveWindow(GetDlgItem(hWndDlg, IDC_ASSIST_IMAGE_3), RECTWIDTH(&mr) / 2 + 5 + 2 * ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2) + 4, r7.top + RECTHEIGHT(&r7) + 4 + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
 		MoveWindow(GetDlgItem(hWndDlg, IDC_IMAGE_NAME), RECTWIDTH(&mr) / 2 + 5 + ((RECTWIDTH(&mr) / 2 - 10) / 3 - 2) + 2, r7.top + RECTHEIGHT(&r7) + 4, RECTWIDTH(&r7), RECTHEIGHT(&r7), !first);
 		GetWindowRect(GetDlgItem(hWndDlg, IDC_IMAGE_ROTATE_COUNTERCLOCKWISE), &r7);
 		ScreenRectToClientRect(hWndDlg, &r7);
@@ -2457,10 +2460,32 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		if (rampPhotoFile)
 			fid = GSSiOpenFile(rampPhotoFile, 0, OF_READ);
 		int image = 0;
+		int nAssistImages = 0;
 		if (fid != HFILE_ERROR)
 		{
 			while (fgetstring(FileName, MAX_PATH, fid))
+			{
 				totImages++;
+				strlwr(FileName);
+				if (strstr(FileName, "assist"))
+				{
+					nAssistImages++;
+					switch (nAssistImages)
+					{
+					case 1:
+						ShowWindow(GetDlgItem(hWndDlg, IDC_ASSIST_IMAGE_1), SW_SHOW);
+						break;
+					case 2:
+						ShowWindow(GetDlgItem(hWndDlg, IDC_ASSIST_IMAGE_2), SW_SHOW);
+						break;
+					case 3:
+						ShowWindow(GetDlgItem(hWndDlg, IDC_ASSIST_IMAGE_3), SW_SHOW);
+						break;
+					default:
+						break;
+					}
+				}
+			}
 			GSSiClose2(&fid);
 		}
 	showImage:
@@ -2468,7 +2493,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		{
 			fid = GSSiOpenFile(rampPhotoFile, 0, OF_READ);
 			doVFlip = FALSE;
-			doHFlip = TRUE;
+			doHFlip = currentImage < 3;
 			int ifile = -1;
 			while (ifile++ < currentImage)
 				fgetstring(FileName, MAX_PATH, fid);
@@ -2656,8 +2681,41 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 						GMFIBMPHandleToEXT(FileName, hDIB, 0);
 					}
 					GSSiFreeImage_Unload(hDIB);
-					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE,0);
+					hBMLarge = DisplaySelectedImage(hWndDlg, FileName, FALSE, FALSE, 0);
 				}
+			}
+		}
+		break;
+		case IDC_ASSIST_IMAGE_1:
+		{
+			if (DATA_TYPE == SIDEWALK)
+			{
+				currentImage = 3;
+				MAX_RULERS = 0;
+
+				goto showImage;
+			}
+		}
+		break;
+		case IDC_ASSIST_IMAGE_2:
+		{
+			if (DATA_TYPE == SIDEWALK)
+			{
+				currentImage = 4;
+				MAX_RULERS = 0;
+
+				goto showImage;
+			}
+		}
+		break;
+		case IDC_ASSIST_IMAGE_3:
+		{
+			if (DATA_TYPE == SIDEWALK)
+			{
+				currentImage = 5;
+				MAX_RULERS = 0;
+
+				goto showImage;
 			}
 		}
 		break;

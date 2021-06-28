@@ -902,8 +902,8 @@ static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer
 static char *conditionCode[] = { "Unknown","New","Good","Fair","Poor","Unacceptable" };
 static char* sidewalkMaterial[] = { "Unknown","Concrete", "Asphalt", "Brick Pavers","Interlocking Pavers","Other" };
 static char* boulevardMaterial[] = {"Unknown","Concrete", "Grass","Dirt","Other" };
-static char* sidewalkPointTypes[] = { "Sidewalk","Lower Landing","Ramp","Upper Landing","Crosswalk","Island","Driveway Crossing","Driveway Flare","Driveway Apron","Slope Change"};
-
+static char* sidewalkPointTypes[] = { "Sidewalk",//"Lower Landing","Ramp","Upper Landing","Crosswalk","Island","Driveway Crossing","Driveway Flare","Driveway Apron","Slope Change"};
+"Ramp", "Upper Landing","Slope Change","Displacement","Cracks","Obstruction","Driveway Crossing","Driveway Flare","Driveway Apron","Lower Landing","Crosswalk", "Island"};
 
 void RampTypeFromCode(int code, LPSTR OutLoc)
 {
