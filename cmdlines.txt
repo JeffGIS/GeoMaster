@@ -1,3 +1,4 @@
+configs\fixpoints2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
 configs\fixpoints.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
 configs\sidewalkpilot5.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
 configs\basemap_new4.gmc /F  [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=T;[%ALLOWCACHE]=T;[%LogUncachedFiles]=T;   /WD L:\geomas
@@ -193,6 +194,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 
