@@ -1840,6 +1840,21 @@ GSSiExitProg (445);
 #endif
 }
 
+int GetCurrentUpdateNumber(void)
+{
+	int rtn = 0;
+	HFILE fid = GSSiOpenFile("[%%DL]updates\\lastupdate.txt", 0, OF_READ);
+
+	if (fid)
+	{
+		char line[1024];
+		fgetstring(line, 1020, fid);
+		fgetstring(line, 1020, fid);
+		rtn = atoi(line);
+		GSSiClose2(&fid);
+	}
+	return rtn;
+}
 BOOL FAR PASCAL ABOUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (439);
@@ -1864,6 +1879,7 @@ GSSiExitProg (439);
    {
  case WM_INITDIALOG:
  {
+	 int GMUpdate = GetCurrentUpdateNumber();
 	 LPSTR fgdbVersion = FGDBVersion();
 	 GetFreeImageVersionAndCopyright(FIVersion, FICopyright);
 	 ii = MrSidVersion(MrSidVer);
@@ -1884,7 +1900,7 @@ GSSiExitProg (439);
 #if S_VERSION
 	 sprintf(FICopyright, "%s_s\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, FIVersion, MrSidVer);
 #else
-	 sprintf(FICopyright, "%s\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, FIVersion, MrSidVer);
+	 sprintf(FICopyright, "%s - Update %i\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion,GMUpdate, FIVersion, MrSidVer);
 #endif
 	 SetDlgItemText(hWndDlg, IDC_VERSION, FICopyright);
  }
