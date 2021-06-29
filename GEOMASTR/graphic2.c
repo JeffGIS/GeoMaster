@@ -2376,6 +2376,19 @@ GSSiExitProg (134);
 #endif
 					return 0;
 }
+				case 1:
+				{
+					if (Pick && CurTheme->DispersePoints)
+					{
+						{
+#if ENABLETRACE
+							GSSiExitProg(134);
+#endif
+							return 0;
+						}
+					}
+				}
+				break;
 				default:
 					break;
 			}

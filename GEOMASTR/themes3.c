@@ -930,6 +930,7 @@ GSSiExitProg (1302);
     	CurPointLoc = AddjustPointLoc (CurPointLoc,size,DisperseKey.Sequence);
 	} 
 	PointDispersionData.DisplayPoint = CurPointLoc;
+	ShowVal.Point = CurPointLoc;
 	CurTheme->MaxDispersion = max (CurTheme->MaxDispersion,abs (CurPointLoc.x-OrigPoint.x));
 	BT_PUT (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,(LPSTR)&PointDispersionData);
 {
@@ -1036,7 +1037,7 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 				    SymRect = GetSymRect (PointDispersionData.Desc);
 					RectMax = max ((long)SymRect.right - (long)SymRect.left,(long)SymRect.bottom - (long)SymRect.top);   
 					SymbolSize = PointDispersionData.Size*(double)RectMax/200;
-	                d = max (d,SymbolSize*CurView->BaseUnitsPerPixel);
+	                d = max (d,SymbolSize*CurView->BaseUnitsPerPixel/2);
 					Rect.xmn = NearPoint.x - d;
 					Rect.xmx = NearPoint.x + d;
 					Rect.ymn = NearPoint.y - d;

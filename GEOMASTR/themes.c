@@ -2430,9 +2430,20 @@ GSSiExitProg (1264);
 }
     if (CurTheme->SkipInvalid || CurTheme->MissOpt == 1)
     	goto CheckTheme;
-	for (i=0;i<CurTheme->NumClass;i++)
+	for (i = 0; i < CurTheme->NumClass; i++)
+	{
 		if (CurTheme->ClassStatus[i])
 			goto CheckTheme;
+	}
+	if (Pick && ItemProcessedByTheme(TAG, desc) && CurTheme->DispersePoints)
+	{
+		{
+#if ENABLETRACE
+			GSSiExitProg(1264);
+#endif
+			return 0;
+		}
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (1264);
