@@ -1046,6 +1046,8 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 					MinDist = idist (PointDispersionData.DisplayPoint,PickPoint)*CurView->BaseUnitsPerPixel;
 					if (PickAp && MinDist <= max(d,PickApW))
 					{
+						SetUDIValue(PointDispersionData.Prefix, PointDispersionData.UDI);
+
 						if ((Item = PickListAdd (PointDispersionData.FileNum,PointDispersionData.SubFile,PointDispersionData.FileInIndex,
 									 PointDispersionData.Segment,PointDispersionData.Refno,
 									 PointDispersionData.Desc,0,
@@ -1057,12 +1059,10 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 							short	ii;
 							
 							PickList[Item-1].IsDispersed = TRUE;
-							strcpy (PickList[0].Prefix,PointDispersionData.Prefix);
-							strcpy (PickList[0].UDI,PointDispersionData.UDI);
-							ProcessPickedItem (Item-1,FALSE); 
+							strncpy0(PickList[Item - 1].Prefix, PointDispersionData.Prefix, MAX_PREFIX_LEN);
+							strncpy0(PickList[Item - 1].UDI, PointDispersionData.UDI, MAX_UDI_LEN);
+							ProcessPickedItem (Item-1,FALSE);
 							PickList[Item-1].Desc = CurrentDesc;
-							GetVal ("%PREFIX",PickList[Item-1].Prefix);
-							GetVal ("%UDI",PickList[Item-1].UDI); 
 							PD=PickList[Item-1]; //dbug
 							ii=1;
 						}

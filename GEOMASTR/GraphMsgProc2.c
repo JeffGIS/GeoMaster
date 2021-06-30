@@ -1898,7 +1898,7 @@ GSSiExitProg (439);
 		 SetDlgItemText(hWndDlg, IDC_SERIALNUM, str);
 	 }
 #if S_VERSION
-	 sprintf(FICopyright, "%s_s\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, FIVersion, MrSidVer);
+	 sprintf(FICopyright, "%s_s - Update %i\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion, GMUpdate, FIVersion, MrSidVer);
 #else
 	 sprintf(FICopyright, "%s - Update %i\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion,GMUpdate, FIVersion, MrSidVer);
 #endif

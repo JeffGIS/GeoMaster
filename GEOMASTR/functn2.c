@@ -1702,6 +1702,7 @@ GSSiExitProg (1350);
 			//$TEXTFILE(WRITE,fid,text)
 			//$TEXTFILE(CLOSE,fid)
 			//$TEXTFILE(REPLACE,file,fromtext,totext)
+			//$TEXTFILE(CONTENTS,file,varname) puts full contents into variable varname - returns T or F
 		{
 			HFILE fid=-1;
 			rtn = 0;
@@ -1723,6 +1724,26 @@ GSSiExitProg (1350);
 				}
 				ltoa(fid, OutLoc, 10);
 				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CONTENTS"))
+			{
+				fid = GSSiOpenFile(Arg[2], 0, OF_READ);
+				if (fid != HFILE_ERROR)
+				{
+					int l = GSSifilelength(fid);
+
+					if (l > 0)
+					{
+						HANDLE handle = GSSiGlobAlloc(1853, GHND, l + 4);
+						LPSTR pMem = GlobalLock(handle);
+
+						BigRead(fid, pMem, l);
+						SetGlobalValue(Arg[3],pMem);
+						GSSiGlobUlFree(&handle);
+					}
+					GSSiClose2(&fid);
+				}
+				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "READ"))	//if just arg4 search for next line with arg4 string
 												//if arg4,5 and 6 search for string begining with arg4 containing arg5 and ending with arg6, if arg7 it indicates which instance

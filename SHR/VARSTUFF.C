@@ -1961,6 +1961,9 @@ void SetUDIValue (LPSTR Name, LPSTR Value)
 		GlobalUnlock (hTAGDef);
 	}
 	SetGlobalValue2 (hUDI,Value,0);
+	SetGlobalValue("%PREFIX",Name);
+	SetGlobalValue("%UDI", Value);
+
 		
 {
 #if ENABLETRACE
