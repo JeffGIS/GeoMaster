@@ -3958,10 +3958,15 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	long		SaveMinPickItemWidth = MinPickItemWidth;
 	BOOL		OpenBP=FALSE;
 	int			PickMapType;
+	BOOL		CallSetPickGlobals = TRUE;
 
 	MinPickItemWidth = 0;
 	ProcessSingleItem=TRUE;
-	
+	if (DoDisplayIn == -4)
+	{
+		DoDisplayIn = -3;
+		CallSetPickGlobals = FALSE;
+	}
 	if (DoDisplayIn == -3)
 	{
 		DoDisplayIn = 0;
@@ -3989,7 +3994,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	if (!PickName[0])
 	   	goto RtnFalse;  
 	PickMapType = MapType;
-    SetPickGlobals (Item);
+	if (CallSetPickGlobals)	
+		SetPickGlobals (Item);
 	LoadIndexParm (PickDirectory);
     if (PickList[Item].IsDispersed)
     {
@@ -4285,7 +4291,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
     if (Close)
 		CloseMap(FALSE);
 	GSSiGlobUlFree (&hpltBuf);
-    SetPickGlobals (Item);
+	if (CallSetPickGlobals)
+		SetPickGlobals (Item);
 	if (Display) 
 	{   
 		ThemeEndDisplayPass(FALSE,FALSE,TRUE);

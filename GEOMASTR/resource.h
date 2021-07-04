@@ -3428,6 +3428,7 @@
 #define IDC_CACHEHOLDMESSAGE            2312
 #define IDC_HOLD_ONE_HOUR               2313
 #define IDC_IMAGEBUTTON                 2314
+#define IDC_ALLOW_DUPLICATES            2315
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3773,9 +3774,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1270
+#define _APS_NEXT_RESOURCE_VALUE        1271
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2315
+#define _APS_NEXT_CONTROL_VALUE         2316
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

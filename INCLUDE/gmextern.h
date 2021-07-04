@@ -1838,6 +1838,7 @@ extern	int		maxNumPhotos;
 extern BOOL		allowCachedSymbols;
 extern int		SMTP_PORT;
 extern int		DNS_PORT;
+extern BOOL		wantSetUDIValue;
 
 extern	int		ii;
 

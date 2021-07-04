@@ -29877,6 +29877,7 @@ static int ConvertToShortName(LPSTR Name)
 BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	short	Version=1;
+#define CURRENT_MIF_FILE_VERSION 2
     int		nItems, i;  
     char    File[MAX_PATH],  ExtID[32], Name[MAX_PATH], str[256];
     LPINT   lpItems;    
@@ -29907,7 +29908,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
             PostMessage(hWndDlg, WM_COMMAND, IDC_EXIT2, 0L);
             break;
     }
-    FileIsOpen = FALSE;            
+    FileIsOpen = FALSE;  
+	MIFOutFields = 0;
     switch (EXType)
     {
         case MIF:
@@ -29984,7 +29986,8 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
-         /* Closing the Dialog behaves the same as Cancel               */
+		 GSSiGlobFree(&MIFOutFields);
+		 wantSetUDIValue = TRUE;
          PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
          break; /* End of WM_CLOSE                                      */
 
@@ -30045,12 +30048,15 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	             	_fstrcpy (File,AutoExportName);  
                  {
                     LPSTR   lpID, lpPW, lpDot;
-                    
+					int lName = 128;
+
                     GSSiGlobFree (&MIFOutFields);
                     CloseDataFile (FALSE,&MIFOuthDB);
                     Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
-                    BigRead (Fid,(HPSTR)&Version,2); 
-                    BigRead (Fid,Name,128); 
+                    BigRead (Fid,(HPSTR)&Version,2);
+					if (Version > 1)
+						lName = MAX_PATH;
+                    BigRead (Fid,Name,lName); 
                     SetDlgItemText (hWndDlg,IDC_MIF_FILE,Name);
                     if ((lpDot=_fstrrchr (Name,'.')))
                     {
@@ -30058,7 +30064,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                         _fstrcat (Name,DExt);
                         SetDlgItemText (hWndDlg,IDC_MID_FILE,Name);
                     }
-                     BigRead (Fid,MIFOutDataFile,128);
+                     BigRead (Fid,MIFOutDataFile,lName);
                      BigRead (Fid,MIFOutSQL,lnMIFOutSQL);
                      BigRead (Fid,(HPSTR)&nItems,sizeof(int));
                      MIFOutFields = GSSiGlobAlloc ( 699,GHND,nItems*4+4);
@@ -30073,8 +30079,14 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	                 SetDlgItemText (hWndDlg,IDC_PROJECTION,project);
 	                 BigRead (Fid,(HPSTR)&UnitsOpt,2);
 				     SendDlgItemMessage(hWndDlg,IDC_UNITS,CB_SETCURSEL,UnitsOpt,0);
-				     if (BigRead (Fid,str,128) == 128)
+				     if (BigRead (Fid,str,lName) == lName)
 	                 	SetDlgItemText (hWndDlg,IDC_TRANFILE,str);
+					 if (Version > 1)
+					 {
+						 short allowDup;
+						 BigRead(Fid, (HPSTR)&allowDup, 2);
+						 SendDlgItemMessage(hWndDlg, IDC_ALLOW_DUPLICATES, BM_SETCHECK,allowDup, 0);
+					 };
                      GSSiClose2 (&Fid); 
                      lpID = _fstrstr (MIFOutDataFile,";UID="); 
                      lpPW = _fstrstr (MIFOutDataFile,";PWD="); 
@@ -30104,7 +30116,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
              case IDC_SAVE:
                  if (!GetSaveName2 (hWndDlg,File,0,SaveExt,FileVarID)) 
                     break;  
-                 GetDlgItemText (hWndDlg,SV_DATABASE_LIST ,MIFOutDataFile,128);
+                 GetDlgItemText (hWndDlg,SV_DATABASE_LIST ,MIFOutDataFile,MAX_PATH);
                  if (!_fstrncmp (MIFOutDataFile,"ODBC|",5))
                  { 
                     vbar = _fstrchr (&MIFOutDataFile[5],'|');
@@ -30142,10 +30154,11 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                  else
                  {
                      Fid = GSSiOpenFile (File,&OFStruct,OF_CREATE);
+					 Version = CURRENT_MIF_FILE_VERSION;
                      BigWrite (Fid,(char *)&Version,2,-1);
-	                 GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,sizeof(Name));
-	                 BigWrite (Fid,Name,128,-1); 
-                     BigWrite (Fid,MIFOutDataFile,128,-1);
+	                 GetDlgItemText (hWndDlg,IDC_MIF_FILE,Name,MAX_PATH);
+	                 BigWrite (Fid,Name,MAX_PATH,-1); 
+                     BigWrite (Fid,MIFOutDataFile, MAX_PATH,-1);
                      BigWrite (Fid,MIFOutSQL,lnMIFOutSQL,-1);
                      lpItems = (LPINT)GlobalLock(MIFOutFields);  
                      BigWrite (Fid,(char *)lpItems,(*lpItems+1)*sizeof(int),-1); 
@@ -30156,9 +30169,15 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	                 BigWrite (Fid,project,sizeof(project),-1);
 				     UnitsOpt=SendDlgItemMessage(hWndDlg,IDC_UNITS,CB_GETCURSEL,0,0); 
 	                 BigWrite (Fid,(HPSTR)&UnitsOpt,2,-1); 
-	                 GetDlgItemText (hWndDlg,IDC_TRANFILE,str,128);
-	                 BigWrite (Fid,str,128,-1);
-                    GSSiClose2 (&Fid);
+	                 GetDlgItemText (hWndDlg,IDC_TRANFILE,str, MAX_PATH);
+	                 BigWrite (Fid,str, MAX_PATH,-1);
+					 {
+						 short allowDup = 0;
+						 if (SendDlgItemMessage(hWndDlg, IDC_ALLOW_DUPLICATES, BM_GETCHECK, 0, 0))
+							 allowDup = 1;
+						 BigWrite(Fid, (HPSTR)&allowDup, 2, -1);
+					 }
+                     GSSiClose2 (&Fid);
                  }
                  break; 
 
@@ -30212,8 +30231,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 				BOOL		useDataFile = FALSE;
 				int		fileType;
 				char	SaveAltProj[MAX_PATH] = { 0 };
+				BOOL	duplicatePoly = FALSE;
 
-
+				if (SendDlgItemMessage(hWndDlg, IDC_ALLOW_DUPLICATES, BM_GETCHECK, 0, 0))
+					duplicatePoly = TRUE;
                 CloseDataFile (FALSE,&MIFOuthDB);  
                 GetDlgItemText (hWndDlg,IDC_SHAPETYPE,str,sizeof(str));
                 if (!_fstricmp (str,"Point"))    
@@ -30376,7 +30397,9 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                         _fstrcpy (IdxName,Name);
                         lpDot = _fstrrchr (IdxName,'.');    
                         *lpDot = 0;
-                        _fstrcat (IdxName,".shx");
+						strcpy(lpDot, ".nvi");
+						GSSiRemove(IdxName);
+						strcpy(lpDot, ".shx");
 	                    GSSiRemove (IdxName);  
 	                    //sprintf (OutRec,"create table %s (",DBName); 
 		                FidSHPIdx = GSSiOpenFile (IdxName,&OFStruct,OF_CREATE); 
@@ -30536,10 +30559,13 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                 {   
               		long	ii; 
                 	short	Subrec = 0, NumSubrecs=1;
+					int		dupRecs = 0;
 
 					FirstRec = FALSE;
         NextSubrec: 
         			Subrec++;
+		NextDupRec:
+					dupRecs++;
                 	if (iref == debugref)
                 		ii=1;
                     pos = BT_NEXT; 
@@ -30567,7 +30593,18 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                     //WantElement = PickList[0].Element;
 					ProcessSelectedTheme = CurView->NumThemes;
 					if (!thinnedContours && !useDataFile)
-						ProcessPickedItem (0,-3); 
+					{
+						if (!duplicatePoly || (duplicatePoly && dupRecs == 1))
+						{
+							wantSetUDIValue = TRUE;
+							ProcessPickedItem(0, -3);
+						}
+						else
+						{
+							wantSetUDIValue = FALSE;
+							ProcessPickedItem(0, -4);
+						}
+					}
 					ProcessSelectedTheme = 0;
                     WantElement = LONG_MAX;               
                     DeleteTheme (pTheme);
@@ -30711,6 +30748,7 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                                         break;
                                 }
                             } 
+							GlobalUnlock(hSavePoly);
                             switch (EXType)
                             {
                                 case MIF:
@@ -30788,10 +30826,10 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
                                     break;
                             } 
                             GSSiGlobFree (&hIndex);
-							if (hSavePolyParts)
-								GlobalUnlock(hSavePolyParts);
-							if (hSavePoly)
-								GlobalUnlock(hSavePoly);
+//							if (hSavePolyParts)
+//								GlobalUnlock(hSavePolyParts);
+//							if (hSavePoly)
+//								GlobalUnlock(hSavePoly);
 							DestroySavedPolys();
                          }
                          else
@@ -31141,10 +31179,13 @@ BOOL FAR PASCAL MIF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
             			DestroySavedPolys();     
 					 if (fileType == GMTEXT_DATAFILE && useDataFile)
 						 CurItem = GetDBPos(MIFOuthDB);
-					PctBox(GetDlgItem(hWndDlg, IDC_STATUS), NumItems, CurItem++, 0);
 		        	if (NumDBFRecs != RecNum)  
 		        		ii=1;
-                } 
+					if (duplicatePoly && FetchDBRec(MIFOuthDB))
+						goto  NextDupRec;
+					else
+						PctBox(GetDlgItem(hWndDlg, IDC_STATUS), NumItems, CurItem++, 0);
+				}
                 FullCurves = FALSE; 
                 CloseMap (FALSE);
 				OpenThinnedContours (0);

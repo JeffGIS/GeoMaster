@@ -1,2 +1,2 @@
-configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  
-J:\GeoMas
+configs\jeff\create_condos.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  
+F:\MplsRemoteTemplate\GeoMas

@@ -7448,13 +7448,16 @@ GSSiExitProg (86);
     	if (pViewports[iview])
     	{
 	        SetCurView ( pViewports[iview]); 
-	        //if (CurView->NumFiles)
+			if (CurView->pTheme)
 	        {
-	            if (CurView->PassID == 0)
+				LPTHEME	SaveTheme = CurTheme;
+				CurTheme = CurView->pTheme;
+				if (CurView->PassID == 0)
 	                ThemeEndDataPass(FALSE);
 	            else if (CurView->PassID <5)
 	                ThemeEndDisplayPass(TRUE,FALSE,TRUE);
-	        }
+				CurTheme = SaveTheme;
+			}
 			if (CurView->pTheme && CurView->pTheme->ID == GF_STREET_TEXT_THEME)
 			{
 				LPTHEME	SaveTheme = CurTheme;

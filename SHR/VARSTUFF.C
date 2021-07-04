@@ -1941,6 +1941,8 @@ void SetUDIValue (LPSTR Name, LPSTR Value)
 	int		i,j;
 	LPTAGDEF	pTAGDef;
 	
+	if (!wantSetUDIValue)
+		return;
 	SetGlobalValue (Name,Value); 
 	LoadTAGDef();
 	if (NumTAGDef>0)

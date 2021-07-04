@@ -1376,7 +1376,8 @@ LoadFields:
         {
               switch(HIWORD(wParam))
               {
-			  case CBN_EDITCHANGE:
+			  case CBN_KILLFOCUS:
+			 // case CBN_EDITCHANGE:
 				  GetDlgItemText(hWndDlg, cntlDATABASE_LIST, DataFile,255);
 				  goto LoadFields;
 				  break;

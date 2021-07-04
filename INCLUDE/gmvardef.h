@@ -1706,6 +1706,7 @@ int		maxNumPhotos = 0;
 BOOL	allowCachedSymbols = TRUE;
 int		SMTP_PORT = 25;
 int		DNS_PORT = 53;
+BOOL	wantSetUDIValue = TRUE;
 int		ii;
 
 
