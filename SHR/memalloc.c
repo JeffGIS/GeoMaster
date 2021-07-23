@@ -88,6 +88,7 @@ static	short	LogMemDebugID=1572;
 static	long	WantCallNo=31;
 static	char	mess[1024];  
 static	long	NumMemAlloc[MAXMEM];
+static	long	CallID[MAXMEM];
 static	HGLOBAL	hmem[MAXMEM]; 
 static	HGLOBAL	RecentlyFreed[MAXFREE]; 
 static	long	RecentlyFreedID[MAXFREE]; 
@@ -140,11 +141,18 @@ void MEMERR (LPSTR Mess)
 }  
 
 
-void LogMemAlloc (unsigned short MemID,long MemLen)
+void LogMemAlloc (int MemID,long MemLen)
 {   
 	short	ii;
-	
+	int callid = 0;
+
+	if (MemID > 100000)
+	{
+		callid = MemID / 100000;
+		MemID = MemID % 100000;
+	}
 	CurrentID = MemID;
+	CallID[MemID] = callid;
 	NumMemAlloc[MemID]++;
 	if (MemID == LogMemDebugID && NumMemAlloc[MemID] == WantCallNo)
 		ii=1;  
@@ -629,7 +637,7 @@ void GSSiGLOBALLOCCLOSE (void)
 		if (hmem[i])
 		{   
 			ii = memid[i]; 
-			sprintf (mess,"Memory not freed: %ld-%ld-%ld(%ld)",(long)memidID[i],memid[i],memidcall[i],memlength[i]);
+			sprintf (mess,"Memory not freed: %ld-%ld-%ld(%ld)-%ld",(long)memidID[i],memid[i],memidcall[i],memlength[i],CallID[i]);
 #if ENABLETRACE
 			for (iprog=0;iprog<min(5,memprog[i][0]);iprog++)
 			{

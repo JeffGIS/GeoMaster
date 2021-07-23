@@ -2134,7 +2134,7 @@ GSSiExitProg (1260);
 				pStreetData->SavePAE = ProcessAllElements;
 				ProcessAllElements = pStreetData->ShowAllElements;
 		    	GSSiGlobFree (&CurTheme->hScatterFile); 
-				CurTheme->hScatterFile = GSSiGlobAlloc ( 638,GMEM_MOVEABLE,(long)sizeof(MIDPOINT)*(long)MaxMidpoints); 
+				CurTheme->hScatterFile = GSSiGlobAlloc ( 638+ CurTheme->TargetViewport * 100000,GMEM_MOVEABLE,(long)sizeof(MIDPOINT)*(long)MaxMidpoints);
 				CurTheme->NumMidpoint=0;
 				_fmemset (HaveStates,0,74*sizeof(BYTE));
 			}                                   
@@ -2306,7 +2306,7 @@ HANDLE SetThemeVisList (short SymNum)
     HANDLE		handle;
 		    
 	SetCurView (pViewports[CurTheme->TargetViewport-1]);
-    handle=GSSiGlobAlloc ( 640,GHND,sizeof(VISLIST));
+    handle=GSSiGlobAlloc (CurTheme->TargetViewport*100000 + 640,GHND,sizeof(VISLIST));
     CurVis = (LPVISLIST)GlobalLock (handle); 
     if (SaveVis) 
     	*CurVis = *SaveVis;

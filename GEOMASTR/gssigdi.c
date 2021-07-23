@@ -62,7 +62,7 @@ void MEMERR(LPSTR Mess);
 #define PostMessageA GSSiPOSTMESSAGE 
 BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
 #define	GlobalLock	GSSiGLOBALLOCK
-void LogMemAlloc (unsigned short MemID,long MemLen);
+void LogMemAlloc (int MemID,long MemLen);
 LPVOID GSSiGLOBALLOCK (HANDLE hglb);
 #define	GlobalSize	GSSiGLOBALSIZE
 DWORD GSSiGLOBALSIZE (HANDLE hglb);

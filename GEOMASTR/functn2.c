@@ -3822,7 +3822,7 @@ GSSiExitProg (1350);
 				ProcessDelimTextHeader(Arg3, pFileName, Fid, &hDLT, 0, 0);
 		    else
 		    	hDLT = 0;
-			while (ContinueProcessing  && nLinesProcessed != maxLinesToProcess && fgetstring(Arg3, 4090, Fid))
+			while (ContinueProcessing>0  && nLinesProcessed != maxLinesToProcess && fgetstring(Arg3, 4090, Fid))
 			{ 
 				nLinesProcessed++;
 				SetGlobalValue("%TEXTFILELINE", Arg3);
@@ -3859,7 +3859,8 @@ GSSiExitProg (1350);
             }
             IgnoreSelectVP = FALSE;
             rtn = ContinueProcessing;
-            SetContinueProcessing ( TRUE);
+            if (ContinueProcessing >= 0)
+				SetContinueProcessing ( TRUE);
 			GSSiGlobFree (&hDLT);
             GSSiClose2 (&Fid);
             if (pStatusText)

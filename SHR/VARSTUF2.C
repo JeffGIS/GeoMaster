@@ -147,6 +147,7 @@ GetPolylineEP:
 						Dist = GetPolyLengthD (lpPoints,nPnts);
 						GetPolyBoundsD2 (lpPoints,nPnts,&Type1.Bounds,Type);
 						lpDEndPoint = lpPoints + (nPnts-1); 
+						Type1.Length = Dist;
 						Type1.BPX = lpPoints->x;
 						Type1.BPY = lpPoints->y;  
 						Type1.EPX = lpDEndPoint->x;

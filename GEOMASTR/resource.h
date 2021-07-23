@@ -3293,6 +3293,7 @@
 #define IDC_PREVIOUSPOINT               2198
 #define IDC_ALTF10                      2199
 #define IDB_BREAKCONDITION              2199
+#define IDC_SAVEANDEXIT2                2199
 #define IDC_ALTF1NAME10                 2200
 #define IDB_BREAKPOINTS                 2200
 #define IDB_MACROSTACK                  2201

@@ -862,6 +862,9 @@ void ConvertRampDisplayFieldToDBField(LPSTR FieldName, int maxl)
 	REPLAC(FieldName, "Point Type", "type", maxl);
 	REPLAC(FieldName, "Crack Width", "crack_width", maxl);
 	REPLAC(FieldName, "Level Change", "level_change", maxl);
+	REPLAC(FieldName, "Sidewalk Width", "width", maxl);
+	REPLAC(FieldName, "Boulevard Width", "boulevardWidth", maxl);
+	REPLAC(FieldName, "Boulevard Material", "boulevardMaterial", maxl);
 }
 COLORREF GetRampFieldValueColor(LPSTR DisplayName)
 {
@@ -951,6 +954,14 @@ void MaterialFromCode(int code, LPSTR OutLoc)
 	*OutLoc = 0;
 	if (code >= 0 && code < maxType)
 		strcpy(OutLoc, sidewalkMaterial[code]);
+	return;
+}void BoulevardMaterialFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(boulevardMaterial) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, boulevardMaterial[code]);
 	return;
 }
 void PointTypeFromCode(int code, LPSTR OutLoc)
@@ -1086,6 +1097,17 @@ void GetMaterialCodeList(LPSTR OutLoc)
 	for (int i = 0; i < sizeof(sidewalkMaterial) / 4; i++)
 	{
 		sprintf(strchr(OutLoc, 0), "%s%s", delim, sidewalkMaterial[i]);
+		*delim = ',';
+	}
+	return;
+}
+void GetBoulevardMaterialCodeList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(boulevardMaterial) / 4; i++)
+	{
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, boulevardMaterial[i]);
 		*delim = ',';
 	}
 	return;

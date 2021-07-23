@@ -1016,6 +1016,7 @@ static  LPFIELDINFO lpFieldInfo = &FIELD;
     LPSTR	AttDir=cwd+256;
     LPSTR	Ext = AttDir+256;
     LPSTR	ExtID=Ext+16;  
+	static  BOOL fileNameChanged = FALSE;
                                          
  switch(Message)
    {
@@ -1346,6 +1347,7 @@ LoadFields:
 						 OpenDataFile(DataFile, "", BT_READ, hThemeDB);
 						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES), SW_SHOW);
 						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES_TITLE), SW_SHOW);
+
 					 }
 					 else
 						SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_SETCURSEL, -1, 0);
@@ -1376,8 +1378,14 @@ LoadFields:
         {
               switch(HIWORD(wParam))
               {
+			  //case CBN_SETFOCUS:
+			  case CBN_EDITCHANGE:
+				  fileNameChanged = TRUE;
+				  break;
 			  case CBN_KILLFOCUS:
-			 // case CBN_EDITCHANGE:
+				  if (!fileNameChanged)
+					  break;
+				  fileNameChanged = FALSE;
 				  GetDlgItemText(hWndDlg, cntlDATABASE_LIST, DataFile,255);
 				  goto LoadFields;
 				  break;

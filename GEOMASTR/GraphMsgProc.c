@@ -2791,9 +2791,20 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 
 			break;
 		case IDC_PREVIOUSPOINT:
+			if (haveUpdate && !RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
+				break;
 			GSSiEndDialog(hWndDlg, 3, hSaveBM);
 
 			break;
+		case IDC_SAVE:
+		{
+			if (RunIdentifyUpdateMacro(hWndDlg, lpAutoUpdateFieldList, lpDB, lpSQL))
+			{
+				ShowWindow(GetDlgItem(hWndDlg, IDC_SAVE), SW_HIDE);
+				ShowWindow(GetDlgItem(hWndDlg, IDC_SAVEANDEXIT), SW_HIDE);
+			}
+		}
+		break;
 		case IDC_SAVEANDEXIT:
 		{
 
@@ -2863,6 +2874,7 @@ BOOL FAR PASCAL IDENTIFY_WITH_PHOTOMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 						strcpy(lpTab - 1, "\t(*)\t");
 						strcat(lpTab, NewValue);
 						ShowWindow(GetDlgItem(hWndDlg, IDC_SAVEANDEXIT), SW_SHOW);
+						ShowWindow(GetDlgItem(hWndDlg, IDC_SAVE), SW_SHOW);
 						SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_DELETESTRING, Choice, 0);
 						SendDlgItemMessage(hWndDlg, IDENTIFY_DATA, LB_INSERTSTRING, Choice, (DWORD)str);
 						if (Type == UMIFS_DATAFILE)
@@ -11935,7 +11947,7 @@ BOOL FAR PASCAL ZOOMLIST2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 				}
 				GSSiGlobUlFree(&hItems);
 				if (rtn)
-					sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
+					sprintf(zoomListCmd, "$ZOOM(BOUNDS,%f %f %f %f,F,Primary Viewport)", totBounds.xmn, totBounds.ymn, totBounds.xmx, totBounds.ymx);
 			}
 			EndDialog(hWndDlg, rtn);
 		}

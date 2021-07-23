@@ -63,7 +63,7 @@ typedef FILEGDBRECHEADER	*LPFILEGDBRECHEADER;
 #define GlobalReAlloc GSSiGLOBALREALLOC  
 #define PostMessageA GSSiPOSTMESSAGE 
 extern "C" BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
-extern "C" void LogMemAlloc (unsigned short MemID,long MemLen);
+extern "C" void LogMemAlloc (int MemID,long MemLen);
 extern "C" LPVOID GSSiGLOBALLOCK (HANDLE hglb);
 extern "C" DWORD GSSiGLOBALSIZE (HANDLE hglb);
 extern "C" BOOL GSSiGLOBALUNLOCK (HANDLE hglb);

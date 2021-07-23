@@ -1083,6 +1083,7 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 			GetGFFile (lpStr,CurTheme->SQL,opt); 
 		}
 		break;
+		case 6://just process settings at top of file
 		case 1:
 			GetGFFile (lpStr,CurView->FunctionFile,0); 
 	}
@@ -1144,28 +1145,30 @@ GSSiExitProg (1347);
 			goto NextLine;
 		lpBar = _fstrchr(lpStr,'|');
 		if (!lpBar)
-		{   
+		{
 			SaveTheme = CurTheme;
 			SaveVP = CurView;
-			ExpandText (lpStr);
+			ExpandText(lpStr);
 			CurTheme = SaveTheme;
 			CurView = SaveVP;
 			if (!ContinueProcessing)
 			{
-		     	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L); 
-		     	SetContinueProcessing ( TRUE);
-				GSSiClose2 (&Fid);
-				GSSiGlobUlFree (&hStr);
-{
+				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+				SetContinueProcessing(TRUE);
+				GSSiClose2(&Fid);
+				GSSiGlobUlFree(&hStr);
+				{
 #if ENABLETRACE
-GSSiExitProg (1347);
+					GSSiExitProg(1347);
 #endif
-				return TRUE;
-}
-		    }
+					return TRUE;
+				}
+			}
 			if (*lpStr == '[')
 				goto NextLine;
 		}
+		else if (opt == 6)
+			break;
 		SkipThisEntry=FALSE;
 		if (!_fstrncmp (lpStr,"IF(",3))
 		{

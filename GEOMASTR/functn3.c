@@ -4964,6 +4964,11 @@ GotCloseFilehSQL:
 				MaterialFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "BOULEVARDMATERIALFROMCODE"))
+			{
+				BoulevardMaterialFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[1], "TEXTURELIST"))
 			{
 				GetTextureList(OutLoc);
@@ -4972,6 +4977,11 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "MATERIALLIST"))
 			{
 				GetMaterialCodeList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "BOULEVARDMATERIALLIST"))
+			{
+				GetBoulevardMaterialCodeList(OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "CONDITIONLIST"))

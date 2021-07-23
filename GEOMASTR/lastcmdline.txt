@@ -1,2 +1,2 @@
-configs\jeff\create_condos.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  
+configs\sidewalk_fixpoints12.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  
 F:\MplsRemoteTemplate\GeoMas

@@ -3589,7 +3589,8 @@ GSSiExitProg (100);
 	//RunStartupCommand (1); moved 2010_06_10
     for (iv=0;iv<NumViews;iv++)
     {
-        SetCurView ( pViewports[iv]);  
+        SetCurView ( pViewports[iv]); 
+		LoadGFFile(hWnd, "", 6, FALSE);
         if (ValidStartupFunction(CurView->StartupFunction))
         {
            	AddLBUTTON = TRUE;
