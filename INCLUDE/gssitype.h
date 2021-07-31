@@ -2419,8 +2419,8 @@ typedef struct
 		FillRow : 1,
 		CenterText : 1,
 		FlatEndOffsetLine : 1;
-	char	ClassDefDB[MAX_PATH],
-		ClassDefSQL[256],
+	char	ClassDefDB[MAX_PATH], //also used for 2 val theme vp 1
+		ClassDefSQL[256],		  //also used for 2 val theme vp 2
 		ClassDefKeyField[34],
 		ClassDefSymField[34],
 		ClassDefTitleField[34],
@@ -2516,7 +2516,8 @@ typedef struct
 	char	EndDisplayMacro[256];
 	int		ProfileSmoothOption;
 	short	InTestChar;
-	char	filler[168 - sizeof(int) - sizeof(short)];
+	HANDLE  hPoints;
+	char	filler[168 - sizeof(int) - sizeof(short) -sizeof(HANDLE)];
 
 }	THEME;
 typedef THEME	FAR* LPTHEME;

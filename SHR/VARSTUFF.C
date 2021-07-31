@@ -4075,7 +4075,9 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%FORCEZOOMTOGOOGLE", 406, FALSE);
 	AllocateTypeVar("%GOOGLEAPIKEY", 407, FALSE);
 	AllocateTypeVar("%SMTP_PORT", 408, FALSE);
-	AllocateTypeVar("%DNS_PORT", 409, FALSE);
+	AllocateTypeVar("%DNS_PORT", 409, FALSE); 
+	AllocateTypeVar("%MILESPERMETER", 410, FALSE);
+	AllocateTypeVar("%METERSPERMILE", 411, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5338,6 +5340,13 @@ GSSiExitProg (533);
 		case 409:
 			ltoa(DNS_PORT, OutStr, 10);
 			break;
+		case 410:
+			sprintf(OutStr, "%.14lg", MILESPERMETER);
+			break;
+		case 411:
+			sprintf(OutStr, "%.14lg", METERSPERMILE);
+			break;
+
 	}
 	GlobalUnlock (hGlobal);
 {

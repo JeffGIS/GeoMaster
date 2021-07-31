@@ -3250,7 +3250,8 @@ BOOL ThemeEdit (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			switch (CurTheme->ID)
 			{   
 					 
-				case GF_SINGLE_VALUE_THEME:    
+				case GF_SINGLE_VALUE_THEME:
+				case GF_TWO_VALUE_THEME:
 				case GF_HOTSPOT_THEME:
 				case GF_STREET_ADDRESS_THEME:
 				case GF_SINGLE_NONNUM_VALUE_THEME:

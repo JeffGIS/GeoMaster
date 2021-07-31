@@ -1770,6 +1770,7 @@ GSSiExitProg (900);
 				GSSiGlobUlFree(&handle);
 				handle = hThemeNew;
 			}
+			CurTheme->hPoints = 0;
             CurTheme->handle = handle; 
             CurTheme->Config = CurrentConfig;   
 			CurTheme->CompareDC = 0;
@@ -2051,6 +2052,7 @@ GSSiExitProg (901);
 		case GF_CONNECTION_LINE_THEME:
             
 			ClearCompareDC (CurTheme,TRUE);
+			GSSiGlobFree(&CurTheme->hPoints);
 		  	if (CurTheme->FidDelayedText > 0)
 		  		CloseAndDeleteFile (&CurTheme->FidDelayedText); 
 			if (CurView)

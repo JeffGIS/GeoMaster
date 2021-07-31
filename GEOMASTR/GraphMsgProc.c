@@ -813,6 +813,74 @@ void DisplayBitmap(HBITMAP hBMP)
 	nRc = GetLastError ();
 	FreeProcInstance(lpfnBitmapViewerMsgProc);
 }
+BOOL FAR PASCAL TWOValueThemeMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	BOOL rtn = FALSE;
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+		SendDlgItemMessage(hWndDlg, IDC_SHOWREG, BM_SETCHECK, TRUE, 0L);
+
+		for (int i = 0; i < *pNumViewports; i++)
+		{
+			if (pViewports[i]->pTheme)
+			{
+				if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+				{
+					SendDlgItemMessage(hWndDlg, ID_THEMELIST_1, CB_ADDSTRING, 0, (LPARAM)pViewports[i]->Name);
+					SendDlgItemMessage(hWndDlg, ID_THEMELIST_2, CB_ADDSTRING, 0, (LPARAM)pViewports[i]->Name);
+				}
+			}
+		}
+		SetDlgItemText (hWndDlg, ID_THEMELIST_1, CurTheme->ClassDefDB);
+		SetDlgItemText (hWndDlg, ID_THEMELIST_2, CurTheme->ClassDefSQL);
+		rtn = TRUE;
+		break; /* End of WM_INITDIALOG                                 */
+
+	case WM_CLOSE:
+		/* Closing the Dialog behaves the same as Cancel               */
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		rtn = TRUE;
+		break; /* End of WM_CLOSE                                      */
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDCANCEL:
+			/* Ignore data values entered into the controls        */
+			/* and dismiss the dialog window returning FALSE       */
+			EndDialog(hWndDlg, FALSE);
+			break;
+
+		case IDOK:
+		{
+			GetDlgItemText(hWndDlg, ID_THEMELIST_1, CurTheme->ClassDefDB, 256);
+			GetDlgItemText(hWndDlg, ID_THEMELIST_2, CurTheme->ClassDefSQL, 256);
+			for (int i = 0; i < *pNumViewports; i++)
+			{
+				if (pViewports[i]->pTheme)
+				{
+					if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+					{
+						if (!stricmp(CurTheme->ClassDefDB, pViewports[i]->Name))
+							CurTheme->TargetViewport = pViewports[i]->pTheme->TargetViewport;
+					}
+				}
+			}
+			EndDialog(hWndDlg, TRUE);
+		}
+		break;
+
+		}
+		break;    /* End of WM_COMMAND                                 */
+
+		default:
+		{
+			rtn = FALSE;
+		}
+	}
+	return rtn;
+}
 
 BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
@@ -13934,7 +14002,7 @@ GSSiExitProg (1257);
  		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Coordinate Display Theme\t25"));
 		 SendDlgItemMessage(hWndDlg, IDC_NEW_THEME, LB_ADDSTRING, 0, (LPARAM)((LPSTR)"City Display Theme\t26"));
 		 SendDlgItemMessage(hWndDlg, IDC_NEW_THEME, LB_ADDSTRING, 0, (LPARAM)((LPSTR)"Create Area in Mask Theme\t27"));
-		 //		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Two Numeric Value\t2"));
+		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Two Numeric Value\t28"));
 //		 SendDlgItemMessage (hWndDlg,IDC_NEW_THEME,LB_ADDSTRING,0,(LPARAM)((LPSTR)"Compare to Reference\t3"));
     case GSSI_REINITDIALOG:
 		 SendDlgItemMessage (hWndDlg,IDC_AVAIL_THEMES,LB_RESETCONTENT,0,0);  

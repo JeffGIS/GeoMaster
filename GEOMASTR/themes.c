@@ -358,9 +358,17 @@ LPTHEME CreateNewTheme (int Choice)
 				pTheme->ID = GF_AREA_IN_MASK_THEME;
 				pTheme->Recompute = FALSE;
 				pTheme->WantDataPass = FALSE;
-				pTheme->NumDesiredClass=1; 
-				pTheme->NumClass=1;  
+				pTheme->NumDesiredClass = 1;
+				pTheme->NumClass = 1;
 				break;
+			case 28:
+				pTheme->ID = GF_TWO_VALUE_THEME;
+				pTheme->Recompute = FALSE;
+				pTheme->WantDataPass = FALSE;
+				pTheme->NumDesiredClass = 1;
+				pTheme->NumClass = 1;
+				break;
+				
 				
 		}
 	}
@@ -1077,7 +1085,7 @@ void ThemeDisplayLegend2(short BeginOrEndDisplayPass,short FromVPID)
 		case GF_AREA_IN_MASK_THEME:
 			break;
 		case GF_TWO_VALUE_THEME:
-//			DisplayTwoVThemeLegend();
+			DisplayTwoVThemeLegend(BeginOrEndDisplayPass);
 			break;
 
 		case GF_MULT_BITMAPS_THEME:
@@ -1529,19 +1537,30 @@ Top:
 		case GF_GRAPHICS_FUNCTION_THEME:			 
 		case GF_OFFSETAREA_THEME:
 		case GF_SINGLE_VALUE_THEME:
-	         {
-	          DLGPROC lpfnSV_THEME1MsgProc;
-	          setDoPaint( FALSE);
-	          lpfnSV_THEME1MsgProc = MakeProcInstance((DLGPROC)SV_THEME1MsgProc, hInst);
-	          nRc = DialogBox(hInst, (LPSTR)"SV_THEME1", hWnd, lpfnSV_THEME1MsgProc);
-	          FreeProcInstance(lpfnSV_THEME1MsgProc);
-	          setDoPaint( TRUE);
-			  if (nRc == 2)
-				  goto Top;
-	         }
+		{
+			DLGPROC lpfnSV_THEME1MsgProc;
+			setDoPaint(FALSE);
+			lpfnSV_THEME1MsgProc = MakeProcInstance((DLGPROC)SV_THEME1MsgProc, hInst);
+			nRc = DialogBox(hInst, (LPSTR)"SV_THEME1", hWnd, lpfnSV_THEME1MsgProc);
+			FreeProcInstance(lpfnSV_THEME1MsgProc);
+			setDoPaint(TRUE);
+			if (nRc == 2)
+				goto Top;
+		}
 
-		break; 
-				
+		break;
+
+		case GF_TWO_VALUE_THEME:
+		{
+			setDoPaint(FALSE);
+			nRc = DialogBox(hInst, (LPSTR)"TWOValueTheme", hWnd, TWOValueThemeMsgProc);
+			setDoPaint(TRUE);
+			if (nRc == 2)
+				goto Top;
+		}
+
+		break;
+
 		case GF_CONNECTION_LINE_THEME:
 	         {
 	          DLGPROC lpfnSV_THEME2MsgProc;
@@ -2211,14 +2230,43 @@ GSSiExitProg (1260);
 			case GF_CONNECTION_LINE_THEME:
 			case GF_SINGLE_VALUE_THEME:
 			case GF_TIME_DISPLAY_THEME:
-			case GF_TWO_VALUE_THEME: 
 				OpenThemeHighlightFile (BT_WRITE);
 				OpenPointDispersionFile (BT_WRITE);
 				OpenThemeDataFile(CurTheme->DataFile);
                 if (CurTheme->hThemeDB && GetDBType (CurTheme->hThemeDB) != GMTEXT_DATAFILE)
 	            	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
 			    break;  
-			    
+			case GF_TWO_VALUE_THEME:
+			{
+				int maxValues = 0;
+				CurTheme->NumVals = 0;
+				GSSiGlobFree (&CurTheme->hPoints);
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefDB))
+								maxValues = pViewports[i]->pTheme->NumVals;
+						}
+					}
+				}
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefSQL))
+								maxValues = max(maxValues, pViewports[i]->pTheme->NumVals);
+						}
+					}
+				}
+				CurTheme->hPoints = GSSiGlobAlloc(1854, GMEM_MOVEABLE, maxValues * sizeof(DPOINT) + 4);
+			}
+			break;
+
 	        case GF_CONTEST_THEME:
 	        {
 				int			width;

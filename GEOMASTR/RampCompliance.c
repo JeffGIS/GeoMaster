@@ -855,6 +855,8 @@ void ConvertRampDisplayFieldToDBField(LPSTR FieldName, int maxl)
 	REPLAC(FieldName, "SidewalkLeft", "swkLeft", maxl);
 	REPLAC(FieldName, "SidewalkRight", "swkRight", maxl);
 	REPLAC(FieldName, "RunningSlope", "SlopeFront", maxl);
+	REPLAC(FieldName, "Cross Slope", "slope_front", maxl);//sidewalk data
+	REPLAC(FieldName, "Running Slope", "slope_side", maxl);//sidewalk data
 	REPLAC(FieldName, "CrossSlope", "SlopeSide", maxl);
 	REPLAC(FieldName, "StreetLandingObstruction", "lowerLandingObstruction", maxl);
 	REPLAC(FieldName, "Condition Rating", "condition", maxl);

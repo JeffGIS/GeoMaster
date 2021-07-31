@@ -146,6 +146,7 @@ BOOL FAR PASCAL TAGEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
 BOOL FAR PASCAL FULLBMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SV_THEME1MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL SV_THEME2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL TWOValueThemeMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL CITY_THEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL LOADTHEMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL TIME_DISPLAYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
@@ -559,7 +560,7 @@ void DisplayTimeLegend (short From);
 void CompareViewportsThemeLegend (short From,short FromVPID);	  
 HANDLE ExpandThemeValues (HANDLE hBT,LPSTR filePathname);
 void DisplayCoordPrintText (void);
-//void DisplayTwoVThemeLegend(void);
+void DisplayTwoVThemeLegend(int From);
 void ThemeDisplayLegend(short BeginOrEndDisplayPass,short FromVPID);
 void ThemeDisplayLegend2(short BeginOrEndDisplayPass,short FromVPID);
 void ThemeBeginDisplayPass(BOOL PixelThemesOnly,short FromVPID);

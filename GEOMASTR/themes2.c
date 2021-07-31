@@ -933,6 +933,37 @@ GSSiExitProg (1262);
 			}
 		}
 			break; 
+		case GF_TWO_VALUE_THEME:
+			if (CurTheme->hPoints)
+			{
+				LPDPOINT pPoints = GlobalLock(CurTheme->hPoints);
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefDB))
+								pPoints[CurTheme->NumVals].x = atof (pViewports[i]->pTheme->CurValue);
+						}
+					}
+				}
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefSQL))
+								pPoints[CurTheme->NumVals++].y = atof (pViewports[i]->pTheme->CurValue);
+						}
+					}
+				}
+				GlobalUnlock (CurTheme->hPoints);
+			}
+			goto RtnNotProcessed;
+
+			break;
 		case GF_POINT_IN_AREA_THEME: 
 			ii=1;         
 		case GF_HOTSPOT_THEME:
@@ -1607,10 +1638,6 @@ KeepLooking:
 				goto RtnNoDisplay;
 			goto RtnProcessed;
 			break;    		
-
-		case GF_TWO_VALUE_THEME:
-			goto RtnNotProcessed;
-			break;
 
 		case GF_CRIME_THEME:
 			goto RtnNotProcessed;
@@ -3499,9 +3526,10 @@ BOOL ThemeEndDisplayPass(BOOL CloseAll,BOOL PixelThemesOnly,BOOL FromHalt)
 					BT_CLOSE (CurTheme->hScatterFile);
 				CurTheme->hScatterFile = 0;
 				goto SkipRemove;
-			case GF_SINGLE_VALUE_THEME: 
+			case GF_TWO_VALUE_THEME:
+				ii = 1;
+			case GF_SINGLE_VALUE_THEME:
 			case GF_TIME_DISPLAY_THEME:
-			case GF_TWO_VALUE_THEME: 
 				if (FromHalt && !CurTheme->DisplayScatterDiagram)
 					GSSiRemoveAndClear (CurTheme->ScatterFile);
 SkipRemove:
@@ -4447,7 +4475,40 @@ void ProcessGraphicsAttributeMacro(void)
 	}
 	return;
 }
+void DisplayTwoVThemeLegend(int From)
+{
+	RECT Rect = CurView->DrawRect;
+	int	RegionType;
+	int	pointSymbol = GetDictSymbolNumber("CIRCLE");
 
+	SaveDC(CurView->hDC);
+	SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+	GSSiDeleteObject(&CurView->hRgn);
+	CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+	RegionType = SelectClipRgn(CurView->hDC, CurView->hRgn);
+	GSSiDeleteObject(&CurView->hRgn);
+	FillRectPoly(CurView->hDC, &Rect, CurTheme->BGColor);
+	if (CurTheme->hPoints && CurTheme->NumVals)
+	{
+		LPDPOINT pPoints = GlobalLock(CurTheme->hPoints);
+		MNMXCORD bounds;
+		GetPolyBoundsD2 (pPoints, CurTheme->NumVals, &bounds, TYPE_POLYLINE);
+		RECT rect = FactorRect(&Rect, 0.95);
+		HANDLE hTran = STRANBoundsToRect(&bounds, &rect);
+
+		for (int i = 0; i < CurTheme->NumVals; i++)
+		{
+			DPOINT dpt = TranPoint(pPoints++, hTran);
+			POINT pt = DPointToPoint(dpt);
+			DisplayPointItem(CurView->hDC, pt, 5 * DeviceToScreenFactor(), 0, pointSymbol, 0);
+		}
+		CloseTRANS2(&hTran);
+		GlobalUnlock(CurTheme->hPoints);
+	}
+	RestoreDC(CurView->hDC, -1);
+
+	return;
+}
 void DisplaySVThemeLegend(short From)
 #if ENABLETRACE
 {GSSiEnterProg (169);

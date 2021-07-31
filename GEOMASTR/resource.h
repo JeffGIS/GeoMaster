@@ -286,6 +286,7 @@
 #define SV_CONTENTS                     341
 #define SV_CB_LOGSCALE                  342
 #define IDC_HSGRAN                      342
+#define SV_CONTENTS4                    342
 #define SV_CB_ZEROASMISS                343
 #define SV_TITLE                        344
 #define SV_NUM_CLASSES                  345
@@ -3293,7 +3294,6 @@
 #define IDC_PREVIOUSPOINT               2198
 #define IDC_ALTF10                      2199
 #define IDB_BREAKCONDITION              2199
-#define IDC_SAVEANDEXIT2                2199
 #define IDC_ALTF1NAME10                 2200
 #define IDB_BREAKPOINTS                 2200
 #define IDB_MACROSTACK                  2201
@@ -3430,6 +3430,9 @@
 #define IDC_HOLD_ONE_HOUR               2313
 #define IDC_IMAGEBUTTON                 2314
 #define IDC_ALLOW_DUPLICATES            2315
+#define ID_THEMELIST_1                  2316
+#define ID_THEMELIST_2                  2317
+#define IDC_SHOWREG                     2318
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3775,9 +3778,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1271
+#define _APS_NEXT_RESOURCE_VALUE        1273
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2316
+#define _APS_NEXT_CONTROL_VALUE         2319
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

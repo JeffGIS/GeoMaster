@@ -1148,7 +1148,7 @@ GSSiExitProg (1348);
 								char	err[64]="[%LASTERR]";
 
 								ExpandText (err);
-								strcpy (ExpArgs,Args);
+								sprintf (ExpArgs,"%s\r\n[%%TRACEVALUE]",Args);
 								ExpandText (ExpArgs);
 								sprintf (str,"Error in: %s\r\n%s",Args,ExpArgs);
 								strcpy (OutLoc,"0");
