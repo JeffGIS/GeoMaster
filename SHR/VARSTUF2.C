@@ -799,6 +799,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 		NumArgs = 0;
 	}
     InGRFCmd = FALSE; 
+	strcpy(currentMacroFile, Name);
     macroID = AddToMacroStack (1,++CurrentMacro,Name,phArgs,NumArgs);
 	MacroVarSpace[CurrentMacro] = CreateVarSpace(VARSPACE_LOCAL);
 	SetVarSpace(VARSPACE_LOCAL, MacroVarSpace[CurrentMacro]);

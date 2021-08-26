@@ -1,3 +1,5 @@
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
+configs\TNRISParcels.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD D:\Brae\PCViewer\PCViewer  
 configs\fixpoints2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
 configs\fixpoints.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
 configs\sidewalkpilot5.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
@@ -13,7 +15,6 @@ configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD D:\PCV
 [%DL]sportmap4.GMC /WD d:\spm3
 projects\Vacations\VACATIONS_EDIT.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
 requestdata.gmc /WD c:\gmserver\gmserver
-configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
 Configs\jeff\SPECIALASSESSMENTS2020LevyCodes2.GMC /F [SPECASSCOUNT]=1; /WD F:\BU_2020_02_20\GEOMas
 Configs\SpecialAssessments\CREATEMAP.GMC /F /WD F:\BU_2020_02_20\GEOMas
 configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD G:\PCViewerBKPark\PCViewer
@@ -194,6 +195,9 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
 
 
 

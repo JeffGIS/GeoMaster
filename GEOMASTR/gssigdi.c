@@ -1087,6 +1087,11 @@ HGDIOBJ GSSiSELECTOBJECT (HDC hdc,HGDIOBJ hobj)
 	}
 	return holdobj;
 }
+int WINAPI GSSiSETROP2(_In_ HDC hdc, _In_ int rop2)
+{
+	int rtn = SetROP2(hdc, rop2);
+	return rtn;
+}
 HPEN    WINAPI GSSiCREATEPEN (int style, int width, COLORREF color)
 {
 	HPEN	rtn;

@@ -588,7 +588,7 @@ GSSiExitProg (698);
 	SaveWBounds = CurView->WBounds; 
 	SaveNewBounds = CurView->NewBounds;
 	
-	
+	ProcessText(CurView->BeginDisplayCmd);
 	CurView->WBounds.xmn = PickPointBase.x - PickApW;
 	CurView->WBounds.xmx = PickPointBase.x + PickApW;
 	CurView->WBounds.ymn = PickPointBase.y - PickApW;

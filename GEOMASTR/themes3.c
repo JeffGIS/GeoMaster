@@ -185,7 +185,6 @@ void ThemeEndDataPass(BOOL PixelThemesOnly)
 				CurTheme->NumClass = 1;
 			else
 				CurTheme->NumClass = CurTheme->NumDesiredClass;
-			for (iclass=0;iclass<CurTheme->NumClass;iclass++)
 			if (CurTheme->ComputeClassBoundaries)
 			{   
 				switch (CurTheme->ClassType)
@@ -232,12 +231,12 @@ void ThemeEndDataPass(BOOL PixelThemesOnly)
 					    while (!st)
 					    {   
 					    	num++;
-					    	if (NumInClass > DesiredNumInClass && SVKey.Y > CurTheme->ClassMin[iclass])
+					    	if (NumInClass >= DesiredNumInClass && SVKey.Y > CurTheme->ClassMin[iclass])
 					    	{
-					    		CurTheme->ClassMax[iclass]=SVKey.Y;
-					    		CurTheme->ClassMin[iclass+1]=SVKey.Y + CurTheme->RoundTo;  
-					    		NumInClass = 0;
-					    		if (num <CurTheme->NumVals) 
+					    		CurTheme->ClassMax[iclass]=SVKey.Y - CurTheme->RoundTo;
+					    		CurTheme->ClassMin[iclass+1]=SVKey.Y;  
+					    		NumInClass = 1;
+					    		if (num <= CurTheme->NumVals) 
 					    			iclass++;
 					    	}  
 					    	else

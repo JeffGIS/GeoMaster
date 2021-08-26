@@ -13582,8 +13582,9 @@ GSSiExitProg (1247);
        	 SendDlgItemMessage (hWndDlg,IDC_SHOW_DIRECTION,BM_SETCHECK,CurTheme->ShowDirection,0L);
        	 SendDlgItemMessage (hWndDlg,IDC_MARK_INVALID,BM_SETCHECK,CurTheme->MarkInvalid,0L);
        	 SendDlgItemMessage (hWndDlg,IDC_SKIP_INVALID,BM_SETCHECK,CurTheme->SkipInvalid,0L);
-       	 SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_SETCHECK,CurTheme->ShowValue,0L); 
-       	 SendDlgItemMessage (hWndDlg,SV_DELAY_VALUE,BM_SETCHECK,CurTheme->DelayTextDisplay,0L); 
+		 SendDlgItemMessage(hWndDlg, SV_DISPLAY_VALUE, BM_SETCHECK, CurTheme->ShowValue, 0L);
+		 SendDlgItemMessage(hWndDlg, SV_DISPLAY_CLASSID, BM_SETCHECK, CurTheme->showClassID, 0L);
+		 SendDlgItemMessage (hWndDlg,SV_DELAY_VALUE,BM_SETCHECK,CurTheme->DelayTextDisplay,0L);
 		 SendDlgItemMessage (hWndDlg,SV_DISPERSE,BM_SETCHECK,FALSE,0L);
  		 SendDlgItemMessage (hWndDlg,SV_ACCUMULATE,BM_SETCHECK,FALSE,0L);
 		 SetDlgItemText(hWndDlg, IDC_BEGINDISPLAYMACRO, CurTheme->BeginDisplayMacro);
@@ -13857,7 +13858,8 @@ GSSiExitProg (1247);
             	 		CurTheme->MissOpt = i;
             	 CurTheme->AddCommas = SendDlgItemMessage (hWndDlg,SV_INSERT_COMMAS,BM_GETCHECK,0,0L); 
             	 CurTheme->ZeroBased = SendDlgItemMessage (hWndDlg,SV_CB_ZEROBASED,BM_GETCHECK,0,0L); 
-            	 CurTheme->ShowValue = SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_GETCHECK,0,0L); 
+				 CurTheme->ShowValue = SendDlgItemMessage(hWndDlg, SV_DISPLAY_VALUE, BM_GETCHECK, 0, 0L);
+				 CurTheme->showClassID = SendDlgItemMessage(hWndDlg, SV_DISPLAY_CLASSID, BM_GETCHECK, 0, 0L);
 				 CurTheme->DelayTextDisplay = SendDlgItemMessage(hWndDlg, SV_DELAY_VALUE, BM_GETCHECK, 0, 0L);
 				 CurTheme->ComputeAreaAndLength = SendDlgItemMessage(hWndDlg, SV_COMPUTEAREA, BM_GETCHECK, 0, 0L);
             	 CurTheme->DispersePoints = 0;
@@ -14942,7 +14944,9 @@ BOOL FAR PASCAL VPEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
 		 SetDlgItemText (hWndDlg,IDC_VLFILE,CurView->VisName);
 		 SetDlgItemText (hWndDlg,IDC_PLFILE,CurView->PickName);
 		 SetDlgItemText (hWndDlg,IDC_RDFILE,CurView->DisplayRedefFile);
-		 SetDlgItemText (hWndDlg,IDC_PMFILE,CurView->PickMacroFile); 
+		 SetDlgItemText(hWndDlg, IDC_PMFILE, CurView->PickMacroFile);
+		 SetDlgItemText(hWndDlg, IDC_BEGIN_DISPLAY_CMD, CurView->BeginDisplayCmd);
+		 SetDlgItemText(hWndDlg, IDC_END_DISPLAY_CMD, CurView->EndDisplayCmd);
 		 if (CurView->StartupFunction)
 		 	itoa (CurView->StartupFunction,str,10);
 		 else
@@ -15758,7 +15762,10 @@ HaveEmpty:
 				 GetDlgItemText (hWndDlg,IDC_VLFILE,CurView->VisName,MAX_PATH);
 				 GetDlgItemText (hWndDlg,IDC_PLFILE,CurView->PickName,MAX_PATH);
 				 GetDlgItemText (hWndDlg,IDC_RDFILE,CurView->DisplayRedefFile,MAX_PATH);
-				 GetDlgItemText (hWndDlg,IDC_PMFILE,CurView->PickMacroFile,MAX_PATH); 
+				 GetDlgItemText(hWndDlg, IDC_PMFILE, CurView->PickMacroFile, MAX_PATH);
+				 GetDlgItemText(hWndDlg, IDC_BEGIN_DISPLAY_CMD, CurView->BeginDisplayCmd, sizeof(CurView->BeginDisplayCmd)-1);
+				 GetDlgItemText(hWndDlg, IDC_END_DISPLAY_CMD, CurView->EndDisplayCmd, sizeof(CurView->EndDisplayCmd)-1);
+
 				 CurView->NumNewObjects = min (CurView->NumNewObjects,100);
 				 GetDlgItemText (hWndDlg,IDC_ACTFUN,str,8); 
 				 CurView->StartupFunction=atoi(str); 

@@ -1248,6 +1248,7 @@ void GetDistDecimals (double Dist,LPSTR DistC)
 		n=2;
 	pEnd -= n;
 	*pEnd = 0;
+	AddCommas(DistC);
 	return;
 }
 

@@ -1150,10 +1150,22 @@ GSSiExitProg (1348);
 								ExpandText (err);
 								sprintf (ExpArgs,"%s\r\n[%%TRACEVALUE]",Args);
 								ExpandText (ExpArgs);
-								sprintf (str,"Error in: %s\r\n%s",Args,ExpArgs);
+								sprintf (str,"Error in: %s\r\n%s\nCurrent Macro: %s",Args,ExpArgs,currentMacroFile);
 								strcpy (OutLoc,"0");
-								MessageBox (hWndMain,str,err,MB_ICONEXCLAMATION);
-								GSSiGlobUlFree (&hstr);
+								short opt = MessageBox (hWndMain,str,err,MB_ICONEXCLAMATION| MB_YESNOCANCEL);
+								GSSiGlobUlFree(&hstr);
+								switch (opt)
+								{
+									case IDCANCEL:
+										SetContinueProcessing(FALSE);
+										break;
+									case IDNO:
+										break;
+								case IDYES:
+									GMEdit(hWndMain,currentMacroFile);
+									break;
+								}
+
 							}
 							break;
 						case 2:

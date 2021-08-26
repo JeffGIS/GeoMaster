@@ -650,6 +650,7 @@ void UnallocateConfig ()
     
     if (!*pNumViewports)
 		goto Exit;
+	inUnallocateConfig = TRUE;
 	DestroyAllToolbars ();
     RemoveAllInfoBoxRect();
 	RemoveDataDisplayRect(0);
@@ -804,6 +805,7 @@ Exit:
 //	CloseGEOSPANVideo ();
 	SetGlobalValue ("%OPENVIDEOWINDOW","F");
     ConfigLoaded = FALSE;
+	inUnallocateConfig = FALSE;
 {
 #if ENABLETRACE
 GSSiExitProg (99);

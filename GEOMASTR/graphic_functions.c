@@ -5962,6 +5962,7 @@ BOOL CreatePoly (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Fun
  static	HCURSOR	InCursor;
  static	BOOL	HaveDownButton;
  char	txt[128];
+ BOOL	st;
  
  if (idTimer) return FALSE;    
  if (hTempPoints)
@@ -6185,7 +6186,7 @@ LButUp:
     	if (HaveStart && !CursorIsLocked)
     	{
 			if (DoTrack)
-				NotPolylineScreen (CurView->hDC,Points,(short)nTempPoints,0,0);
+				NotPolylineScreen (CurView->hDC,Points,(short)nTempPoints,0,0, 0);
 			if (!Spline && TempLineType != 1) 
 				TempPolyline (CurView->hDC,Points,(short)nTempPoints,0,0);
 		}
@@ -6229,7 +6230,7 @@ LButUp:
 					nTempPoints = 0;
 				else
 					nTempPoints = 2;
-        		ShowTempLineType (&BasePoint,lpDPoint,&TotDist);
+        		ShowTempLineType (CurView->hDC,&BasePoint,lpDPoint,&TotDist);
 				if (HavePOC)
 				{   
 					DPOINT	PC=*lpDPoint;
@@ -6313,7 +6314,7 @@ RButUp:
 			FirstPoint = *lpDPoint;
 			lpDPoint += nCurPolyPoints; 
         	lpDPoint--;
-       		st = ShowTempLineType (&BasePoint,lpDPoint,&TotDist);
+       		st = ShowTempLineType (CurView->hDC,&BasePoint,lpDPoint,&TotDist);
        		lpDPoint++;
 //			OldMode = SetROP2(CurView->hDC,R2_NOT); 
 //			if (!st)
@@ -6425,7 +6426,9 @@ RButUp:
     case WM_MOUSEMOVE: 
     	if (!HaveStart || HaveDownButton || !hCurPolyPoints) break;
 		if (DoTrack)
-			NotPolylineScreen (CurView->hDC,Points,(short)nTempPoints,0,0);
+		{
+			NotPolylineScreen(CurView->hDC, Points, (short)nTempPoints, 0, 0, &TotDist);
+		}
     	if (CursorIsLocked) 
     	{
     		AtPoint = CurrentPoint;
@@ -6474,8 +6477,12 @@ RButUp:
     	else
     		nTempPoints = 2; 
     	
-    	if (DoTrack)
-			NotPolylineScreen (CurView->hDC,Points,(short)nTempPoints,0,0);
+		if (DoTrack)
+		{
+			BOOL st;
+			TotDist = 0;
+			NotPolylineScreen(CurView->hDC, Points, (short)nTempPoints, 0, 0, &TotDist);
+		}
 		break;
 		
     case WM_CHAR:
@@ -11282,7 +11289,7 @@ ClearEnd:
 			SaveDC (CurView->hDC);  
        		if (LastWinPt[i][0].x > SHRT_MIN)
        		{   
-				NotPolylineScreen (CurView->hDC,LastWinPt[i],2,0,0);
+				NotPolylineScreen (CurView->hDC,LastWinPt[i],2,0,0, 0);
 				SetCurView ( SaveView);
 			}  
 			SetCurView ( SaveView);
@@ -11316,7 +11323,7 @@ ClearEnd:
 	       		{   
 					Points[1] = BasePtToScreenPt (&BasePoint);
 	       			LastWinPt[i][1]=Points[1];
-					NotPolylineScreen (CurView->hDC,Points,2,0,0);  
+					NotPolylineScreen (CurView->hDC,Points,2,0,0,0);  
 				}
 				else
 	       			LastWinPt[i][0].x=SHRT_MIN;
@@ -11352,7 +11359,7 @@ ClearEnd:
 			SetCurView (pViewports[*pCommandViewport-1]); 
 			Points[1] = BasePtToScreenPt (&BasePoint);
    			LastWinPt[nPnts][1]=Points[1];
-			NotPolylineScreen (CurView->hDC,Points,2,0,0);
+			NotPolylineScreen (CurView->hDC,Points,2,0,0, 0);
 		} 
 		SetCurView ( SaveView);
     	nPnts++;  
@@ -11460,7 +11467,7 @@ BOOL TrackPhotoLoc (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
 		SaveDC (CurView->hDC);  
 		if (HaveLastLine)
-			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0);
+			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0, 0);
 		RestoreDC (CurView->hDC,-1);
 		GSSiGlobFree (&hTran);
 		HaveLastLine = FALSE;
@@ -11481,8 +11488,8 @@ BOOL TrackPhotoLoc (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		SetCurView ( SaveView);
 		SaveDC (CurView->hDC);  
 		if (HaveLastLine)
-			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0);
-		NotPolylineScreen (CurView->hDC,Points,2,0,0);
+			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0, 0);
+		NotPolylineScreen (CurView->hDC,Points,2,0,0, 0);
 		LastPoints[0]=Points[0];
 		LastPoints[1]=Points[1];
 		HaveLastLine = TRUE;
@@ -11654,7 +11661,7 @@ BOOL TrackLocInOtherVP (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
 		SaveDC (CurView->hDC);  
 		if (HaveLastLine)
-			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0);
+			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0, 0);
 		RestoreDC (CurView->hDC,-1);
 		GSSiGlobFree (&hTran);
 		HaveLastLine = FALSE;
@@ -11674,8 +11681,8 @@ BOOL TrackLocInOtherVP (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		SetCurView ( SaveView);
 		SaveDC (CurView->hDC);  
 		if (HaveLastLine)
-			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0);
-		NotPolylineScreen (CurView->hDC,Points,2,0,0);
+			NotPolylineScreen (CurView->hDC,LastPoints,2,0,0, 0);
+		NotPolylineScreen (CurView->hDC,Points,2,0,0, 0);
 		LastPoints[0]=Points[0];
 		LastPoints[1]=Points[1];
 		HaveLastLine = TRUE;

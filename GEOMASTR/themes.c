@@ -2085,7 +2085,7 @@ GSSiExitProg (1260);
 			CurTheme->ClassCount[iclass] = 0; 
         CurTheme->NumMissing = 0;
         CurTheme->NumInvalid = 0;  
-        if (CurTheme->ShowValue)
+        if (CurTheme->ShowValue || CurTheme->showClassID)
 		{
         	BeginDelayedText (CurTheme->FidDelayedText);
 			OpenShowValInfoboxFile ();

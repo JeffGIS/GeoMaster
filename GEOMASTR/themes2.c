@@ -1268,7 +1268,7 @@ SetClassChar:
 				if (DispersePoint (iref,iclass,desc,&ValD) == 2)
 					goto RtnNoDisplay;  
 			}
-			if (CurTheme->ShowValue)
+			if (CurTheme->ShowValue || CurTheme->showClassID)
 			{   
 				float	MidPointAZ;
 				float	Length;    
@@ -1296,7 +1296,23 @@ SetClassChar:
 					else
 						ShowVal.AZ = -LTWOPI(CurView->Rotation);
 					SetShowValPoly (iref,FALSE);
-					strcpy (str,ValueConv (TrueValD,CurTheme->ValConv,min(1,CurTheme->RoundTo),CurTheme->AddCommas));
+					*str = 0;
+					if (CurTheme->ShowValue)
+						strcpy (str,ValueConv (TrueValD,CurTheme->ValConv,min(1,CurTheme->RoundTo),CurTheme->AddCommas));
+					if (CurTheme->showClassID)
+					{
+						int id = 0;
+						double val = Round(TrueValD, CurTheme->RoundTo);
+						for (int iclass = 0; iclass < CurTheme->NumClass; iclass++)
+						{
+							if (val >= CurTheme->ClassMin[iclass] && val <= CurTheme->ClassMax[iclass])
+							{
+								id = iclass + 1;
+								break;
+							}
+						}
+						sprintf(strchr(str, 0), "(%i)", id);
+					}
 					if (!*ShowVal.Text)
 						strcpy (ShowVal.Text,str);
 					else

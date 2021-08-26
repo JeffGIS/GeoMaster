@@ -7764,7 +7764,7 @@ BOOL NotifyFunction (LPVIEWPORT pVP,UINT message)
 	LPVIEWPORT	SaveVP=CurView;
 	int	ii;
 	
-	if (!pVP)
+	if (!pVP || inUnallocateConfig)
 {
 #if ENABLETRACE
 GSSiExitProg (170);

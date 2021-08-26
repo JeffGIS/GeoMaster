@@ -13136,7 +13136,7 @@ void ClearFullWindowBitmap (HWND hWnd)
 		GSSiDeleteObject (&hFullWindowBitMap);
 		GdiFlush ();
 		RedisplayLastPrompt (); 
-		NotifyFunction((LPVIEWPORT)-1, GF_REDRAW);
+		//NotifyFunction((LPVIEWPORT)-1, GF_REDRAW);
 
 	}
 {

@@ -551,6 +551,7 @@
     <ClCompile Include="graphic7.c" />
     <ClCompile Include="graphic8.c" />
     <ClCompile Include="GRAPHIC9.c" />
+    <ClCompile Include="GraphicsPathTest.cpp" />
     <ClCompile Include="graphic_functions.c" />
     <ClCompile Include="graphica.c" />
     <ClCompile Include="graphicb.c" />

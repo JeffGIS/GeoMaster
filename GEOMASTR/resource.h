@@ -336,6 +336,8 @@
 #define SV_TITLEFIELD_NAME              366
 #define SV_DELAY_VALUE                  366
 #define SV_FIELD_HEADING                367
+#define SV_DISPLAY_VALUE2               367
+#define SV_DISPLAY_CLASSID              367
 #define IDC_EDIT3                       368
 #define IDC_CLASSVALTABLE               368
 #define IDC_VHSTARTMIN                  368
@@ -749,8 +751,10 @@
 #define IDC_MINMAXICON                  614
 #define IDC_VPNAME4                     615
 #define IDC_DUMPTOGMD                   615
+#define IDC_END_DISPLAY_CMD             615
 #define IDC_RDFILE                      616
 #define IDC_CREATE_DIALOG_SCREEN        617
+#define IDC_BEGIN_DISPLAY_CMD           617
 #define IDC_AVAIL_THEMES                618
 #define IDC_CREATENEWTABLE              618
 #define IDC_VPNAME5                     619
@@ -3433,6 +3437,8 @@
 #define ID_THEMELIST_1                  2316
 #define ID_THEMELIST_2                  2317
 #define IDC_SHOWREG                     2318
+#define IDC_END_DISPLAY_COMMAND         2319
+#define IDC_END_DISPLAY_COMMAND2        2320
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3780,7 +3786,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1273
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2319
+#define _APS_NEXT_CONTROL_VALUE         2320
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

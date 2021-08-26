@@ -2517,7 +2517,8 @@ typedef struct
 	int		ProfileSmoothOption;
 	short	InTestChar;
 	HANDLE  hPoints;
-	char	filler[168 - sizeof(int) - sizeof(short) -sizeof(HANDLE)];
+	BOOL	showClassID;
+	char	filler[168 - sizeof(int) - sizeof(short) -sizeof(HANDLE)- sizeof(BOOL)];
 
 }	THEME;
 typedef THEME	FAR* LPTHEME;
@@ -4140,6 +4141,9 @@ typedef struct {
 typedef STREETHEADER* LPSTREETHEADER;
 
 void SetOldStructSizes (void);
+
+#define SetROP2	GSSiSETROP2
+int   WINAPI GSSiSETROP2(_In_ HDC hdc, _In_ int rop2);
 
 #define ExtCreatePen GSSiEXTCREATEPEN
 HPEN WINAPI GSSiEXTCREATEPEN(DWORD iPenStyle,

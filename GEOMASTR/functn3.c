@@ -591,6 +591,11 @@ GSSiExitProg (1348);
 							CurView->pTheme->ShowValue = atob(Arg[4]);
 							rtn = TRUE;
 						}
+						else if (!_fstricmp(Arg[3], "SHOWCLASSID"))
+						{
+							CurView->pTheme->showClassID= atob(Arg[4]);
+							rtn = TRUE;
+						}
 						else if (!_fstricmp(Arg[3], "DELAYTEXT"))
 						{
 							CurView->pTheme->DelayTextDisplay = atob(Arg[4]);

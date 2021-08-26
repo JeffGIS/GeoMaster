@@ -16,6 +16,7 @@
 #include <process.h>
 
 BOOL InDebug=FALSE;
+LRESULT CALLBACK WndProcTest(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);
@@ -6153,6 +6154,7 @@ GSSiExitProg (438);
     {
     	 RECT	UpdateRect;
 		 HDC	hDCScreen;
+		 //WndProcTest(hWnd, Message, wParam, lParam);
 //		 if (!RunFromCache && wantBackgroundCache)
 //			 StartBackgroundCache ();
 

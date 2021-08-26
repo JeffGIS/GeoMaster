@@ -974,7 +974,7 @@ BOOL DisplayDistanceLine (BOOL DisplayDist)
 			
 			TempLineType = 1;
 			for (i=1;i<nPoints;i++)
-		    	ShowTempLineType (&pDistPoints[i-1],&pDistPoints[i],&TotDist);  
+		    	ShowTempLineType (CurView->hDC,&pDistPoints[i-1],&pDistPoints[i],&TotDist);  
 		    TempLineType = SaveTLT;
 		}
 		if (ShowArea)
@@ -1051,28 +1051,48 @@ void NotPolyline (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR Bot
 	return;
 }
 
-void NotPolylineScreen (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText)
+void NotPolylineScreen_old (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText, LPDOUBLE pTotDist)
 {   
+	static int ncalls = 0;
 	short	OldMode;
 	BOOL saveUseGDIPlus = useGDIPlus;
-
-	useGDIPlus = FALSE;
+	pTotDist = 0;
+	useGDIPlus = FALSE;// TRUE;
 	SaveDC (hDC);
 	SetDisplayMode (hDC, GF_SCREENMODE);
   	SelectClipRgn (hDC,0);
+	if (ncalls > 100)
+		ii = 1;
+	OldMode = SetROP2(hDC, R2_NOT);
+	//BeginPath(hDC);
+	if (ncalls++ % 2)
+		TrackColor = 0;
+	else
+		TrackColor = 0;// RGB(255, 0, 0);
 	if (!FirstMoveSinceRedraw)
 	{
-		OldMode = SetROP2(hDC,R2_NOT); 
-		TempPolyline (hDC,Points,nPnts,0,0); 
-		SetROP2(hDC,OldMode); 
+		//OldMode = SetROP2(hDC,R2_NOT); 
+		if (pTotDist)
+		{
+			DPOINT pt1 = WinPtToBasePt(Points[0]);
+			DPOINT pt2 = WinPtToBasePt(Points[nPnts-1]);
+			ShowTempLineType(hDC,&pt1,&pt2, pTotDist);
+		}
+		else
+			TempPolyline (hDC,Points,nPnts,0,0);
+		//SetROP2(hDC,OldMode); 
 	}
 	FirstMoveSinceRedraw=FALSE;
+	//EndPath(hDC);
+	//StrokePath(hDC);
+	GdiFlush();
+	SetROP2(hDC, OldMode);
 	RestoreDC (hDC,-1);
 	useGDIPlus = saveUseGDIPlus;
 	return;
 }
 
-BOOL ShowTempLineType (LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
+BOOL ShowTempLineType (HDC hDC,LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
 {   
 	char	txt[128]; 
 	COLORREF	Color;
@@ -1081,7 +1101,8 @@ BOOL ShowTempLineType (LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
 	POINT	Points[3];
 	DWORD	TextExt;  
 	double	AZ;
-	    
+	char fmt[16];
+
 	if (TempLineType==1)
 	{   
 		DPOINT	MidPoint;
@@ -1090,12 +1111,13 @@ BOOL ShowTempLineType (LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
 		short	DistUnits = OutDistUnits,i;
 		double	Dist,AZ, Size=GetGlobalDVal2 ("[%DISTLINETEXTSIZE]",0.15);
 		
-		Color = ConvertColor(GetGlobalLVal2 ("[%DISTLINECOLOR]",RGB(255,0,0)),0);						
+		Color = 0;// ConvertColor(GetGlobalLVal2("[%DISTLINECOLOR]", RGB(255, 0, 0)), 0);
 		width = GetGlobalLVal2 ("[%DISTLINEWIDTH]",2);
 		if (PRJ_UNITS[1] == 4)	
 			Dist = ArcDistance(*lpDPoint,*pBasePoint);
 		else
 			Dist = ldistp (*lpDPoint,*pBasePoint);
+		Dist = 0;
 		AZ = getazd (lpDPoint,pBasePoint);
 		MidPoint = MidPointD(*lpDPoint,*pBasePoint);
 		for (i=0;i<CurView->NumThemes;i++)
@@ -1116,14 +1138,37 @@ BOOL ShowTempLineType (LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
 		}
 		if (*pTotDist > 0) 
 		{
-			*pTotDist += Dist;
-			sprintf (txt,"%.1f (%.1f)", ConvertDist(Dist,DistUnits),
-										ConvertDist(*pTotDist,DistUnits)); 
+			char txt1[32], txt2[32];
+			double val1 = ConvertDist(Dist, DistUnits);
+			double val2 = ConvertDist(*pTotDist, DistUnits);
+			int ndp = 2;
+
+			double maxval = fmax(val1, val2);
+			if (maxval > 10000)
+				ndp = 0;
+			else if (maxval > 1000)
+				ndp = 1;
+			sprintf(fmt, "%%.%if",ndp);
+			//*pTotDist += Dist;
+			sprintf(txt1, fmt,val1);
+			sprintf(txt2, fmt,val2);
+			AddCommas(txt1);
+			AddCommas(txt2);
+			sprintf(txt, "%s (%s)", txt1, txt2);
 		}
 		else
 		{
-			sprintf (txt,"%.1f",ConvertDist(Dist,DistUnits)); 
-			*pTotDist = Dist;
+			double val = ConvertDist(Dist, DistUnits);
+			int ndp = 2;
+
+			if (val > 10000)
+				ndp = 0;
+			else if (val > 1000)
+				ndp = 1;
+			sprintf(fmt, "%%.%if", ndp);
+			sprintf (txt,fmt,val);
+			AddCommas(txt);
+			//*pTotDist = Dist;
 		}
 		SaveDC (CurView->hDC);  
 		SetTextColor (CurView->hDC,Color);
@@ -1164,20 +1209,24 @@ BOOL ShowTempLineType (LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pTotDist)
 	return FALSE;
 }
 
-void TempPolyline (HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
+void TempPolyline_old (HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
 {   
 	HPEN hTrackPen, hOldPen; 
 	double	AZ, dist; 
-	char	txt[32];
+	char	txt[64];
 	POINT	Point1, Point2, point;
 	LPPOINT	pPoint1, pPoint2;
 	DPOINT	DPoint1, DPoint2;  
 	float	size;
 	
 	hTrackPen = CreatePen (PS_SOLID,TrackWidth,AutoYellow(TrackColor));
-	hOldPen = SelectObject (CurView->hDC,hTrackPen);
-	Polyline (CurView->hDC,lpPoints,nPnts);  
-	SelectObject (CurView->hDC,hOldPen);
+	hOldPen = SelectObject (hDC,hTrackPen);
+	point = lpPoints[1];
+	sprintf(txt, "\nTempPolyLine: %i %i %i %i", lpPoints->x,lpPoints->y,point.x,point.y);
+	OutputDebugString(txt);
+
+	Polyline (hDC,lpPoints,nPnts);  
+	SelectObject (hDC,hOldPen);
 	DeleteObject (hTrackPen);
 	if (TempLineType==1 && TopText)
 	{   
