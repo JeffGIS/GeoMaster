@@ -4470,10 +4470,13 @@ void ProcessDisplayPassEndMacro(void)
 	{
 		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
+		int saveVPID = CurView->ID;
 
+		SetViewport(CurTheme->TargetViewport);
 		strcpy(pMem, CurTheme->EndDisplayMacro);
 		ExpandText(pMem);
 		GSSiGlobUlFree(&hMem);
+		SetViewport (saveVPID);
 	}
 	return;
 }
