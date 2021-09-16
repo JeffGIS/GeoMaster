@@ -9642,8 +9642,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 34,14,133,0
- PRODUCTVERSION 34,14,133,0
+ FILEVERSION 34,14,134,0
+ PRODUCTVERSION 34,14,134,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -9660,7 +9660,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GSSi"
             VALUE "FileDescription", "GeoMaster"
-            VALUE "FileVersion", "34n build 133"
+            VALUE "FileVersion", "34n build 134"
             VALUE "InternalName", "geomastr"
             VALUE "LegalCopyright", "Copyright © 2000-2014, Geographic Software Specialists, inc."
             VALUE "LegalTrademarks", "GeoMaster(TM)"

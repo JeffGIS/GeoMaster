@@ -605,7 +605,7 @@ BOOL GSSiGetMessage(
 void SetFilterString (UINT Filter); 
 void PrintMessage (short    ViewID, LPSTR File, short record);
 void PrintMessage2 (LPSTR line1, LPSTR line2, LPSTR line3);
-HRESULT BasicFileOpen2(LPSTR pFile, int lfile, LPSTR initialDir, LPSTR filter, LPSTR Title,BOOL save);
+HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lfile, LPSTR initialDir, LPSTR filter, LPSTR Title,BOOL save);
 BOOL GetOpenFileCD (HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir);
 BOOL GetSaveFileCD (HWND hWnd, LPSTR Name, LPSTR lpInitDir);
 BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title);

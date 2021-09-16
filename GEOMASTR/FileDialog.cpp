@@ -1163,7 +1163,7 @@ BOOL Suceded(HRESULT hr,WCHAR *msg)
 	//MessageBox(0, msg,L"Failed", MB_ICONEXCLAMATION);
 	return FALSE;
 }
-extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save)
+extern "C" HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save)
 {
 	WCHAR origFile[MAX_PATH + 2];
 	WCHAR initDir[MAX_PATH + 2];
@@ -1286,7 +1286,7 @@ extern "C" HRESULT BasicFileOpen2(LPSTR pFile, int lFile, LPSTR InitialDirectory
 									//
 									// Show the dialog
 									SetIgnoreError(TRUE);
-									hr = pfd->Show(NULL);
+									hr = pfd->Show(hWnd);
 									SetIgnoreError(FALSE);
 									if (Suceded(hr, L"11"))
 									{

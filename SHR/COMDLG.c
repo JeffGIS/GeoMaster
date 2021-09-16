@@ -651,7 +651,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 		_chdir(InitialDirectory);
 	fsLen = FormatFilterString();  //Formats gszFilter with strings
 
-	if (BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE) != (HRESULT)0)
+	if (BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE) != (HRESULT)0)
 	{
 		strcpy(Name, InitialFile);
 		rtn = TRUE;
@@ -662,7 +662,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 
 BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 {
-	//return GetOpenFileCD_new(hWnd,  Name,  lname, lpInitDir);
+	return GetOpenFileCD_new(hWnd,  Name,  lname, lpInitDir);
    /*******************************************************************
    *                                                                  *
    *                    FILEOPEN/FILESAVE VARIABLES                   *
@@ -720,6 +720,8 @@ BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 			}
 			SetIgnoreError (TRUE);
 			inOpenFileDialog = TRUE;
+			lpFOChunk->of.lpfnHook = lpfnFileOpenHook;
+			//lpFOChunk->of.Flags = lpFOChunk->of.Flags | OFN_ENABLEHOOK;
          	st = GetOpenFileName(&(lpFOChunk->of)); 
 			inOpenFileDialog = FALSE;
  			SetIgnoreError (FALSE);
@@ -823,7 +825,7 @@ BOOL GetSaveFileCD(HWND hWnd, LPSTR Name, LPSTR lpInitDir)
 	_splitpath(InitialFile, NULL, NULL, nam, ext);
 	sprintf(FName, "%s%s", nam, ext);
 	_fstrcpy(InitialFile, FName);
-	st = BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE);
+	st = BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE);
 	if (st)
 	{
 		_fstrcpy(Name, InitialFile);
@@ -1780,7 +1782,7 @@ UINT CALLBACK  FileOpenHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	int		ii;
 	char	str[256];
 
-	//return (FALSE);
+	return (FALSE);
    switch (message)
       {
    case WM_INITDIALOG:
