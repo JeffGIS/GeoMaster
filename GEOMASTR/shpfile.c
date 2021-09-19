@@ -4602,7 +4602,8 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 	int		IsFGDB = TRUE;
 	BOOL	doWindowCheck;
 	int		structuralPart;
-	BOOL	showmarker[3] = { FALSE,FALSE,FALSE };
+	static BOOL	showmarker[3] = { FALSE,FALSE,FALSE };
+	static noPOC = FALSE;
     
     if (CurView->ID == dbugid)
     	ii=1; 
@@ -4958,6 +4959,8 @@ DoPoly:
 				GSSiGlobFree (&hPolyPartLenNew);
 				break;
 			}
+			if (noPOC)
+				NumPOC = 0;
 			if (NumPOC)
 			{
 				DPOINT	RP, BP, EP, POC;  //pPoints[3]
@@ -5017,7 +5020,7 @@ if (showmarker[2])
 								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurveChordDist, -1);
 							else
 								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurView->BaseUnitsPerPixel, -1);
-							NumPointsAdded = NumPoints2 - NumPointsOrig - 1;
+							NumPointsAdded = NumPoints2 - NumPointsOrig -1;
 							if (NumPointsAdded > 0)
 							{
 								UINT	j;
@@ -5032,7 +5035,7 @@ if (showmarker[2])
 										*pNumPointsNew += NumPointsAdded;
 									}
 									totp += *pNumPoints;
-									if (j)
+									if (j && pFGDBRecHeader->geometryType == geometryPolygon)
 										totp++;
 								}
 								GlobalUnlock(hPolyPartLen);

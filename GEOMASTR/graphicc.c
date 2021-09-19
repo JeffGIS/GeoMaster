@@ -6108,7 +6108,8 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
     LPSYMBOL    pSymbol; 
 	short	i2, n,ActualNum=0;
 	long	lMem, loc, RtnLoc;
-	
+	BOOL	clear;
+
     lMem = (1+NumSyms)*36+2+2+2+2+2;  
     BigWrite (Fid,(char *)&lMem,2,-1);
     i2 = 11; 
@@ -6122,8 +6123,13 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 	    n=NumSyms;
 	    while (n--)
 	    {   
-	    	if (!pSymDesc->Handle)
-			    pSymDesc->Handle = GetDictSymDesc (pSymDesc->Number,0); 
+			if (!pSymDesc->Handle)
+			{
+				pSymDesc->Handle = GetDictSymDesc(pSymDesc->Number, 0);
+				clear = TRUE;
+			}
+			else
+				clear = FALSE;
 	        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle);
 	        if (pSymbol->Type)
 	        {
@@ -6133,8 +6139,12 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 	            ActualNum++;
 	        } 
 			GlobalUnlock (pSymDesc->Handle);
-	    	DestroySymbol (pSymDesc->Handle); 
-	    	pSymDesc++->Handle = 0;
+			if (clear)
+			{
+				DestroySymbol(pSymDesc->Handle);
+				pSymDesc->Handle = 0;
+			}
+			pSymDesc++;
 	    }
 	    GlobalUnlock (hSymDesc); 
 	}
@@ -6151,8 +6161,13 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 	    n=NumSyms;
 	    while (n--)
 	    {   
-	    	if (!pSymDesc->Handle)
-			    pSymDesc->Handle = GetDictSymDesc (pSymDesc->Number,0); 
+			if (!pSymDesc->Handle)
+			{
+				pSymDesc->Handle = GetDictSymDesc(pSymDesc->Number, 0);
+				clear = TRUE;
+			}
+			else
+				clear = FALSE;
 			if (pSymDesc->Handle)
 			{
 		        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle);
@@ -6163,10 +6178,14 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 		            BigWrite (Fid,(char *)&pSymbol++->Name,32,-1);
 		            ActualNum++;
 		        }
-		        GlobalUnlock (pSymDesc->Handle); 
-		    	DestroySymbol (pSymDesc->Handle); 
+				GlobalUnlock(pSymDesc->Handle);
+				if (clear)
+				{
+					DestroySymbol(pSymDesc->Handle);
+					pSymDesc->Handle = 0;
+				}
 		    }
-	    	pSymDesc++->Handle = 0;
+			pSymDesc++;
 	    }
 	    GlobalUnlock (hSymDesc);
 	}
