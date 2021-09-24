@@ -1051,7 +1051,7 @@ void NotPolyline (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR Bot
 	return;
 }
 
-void NotPolylineScreen_old (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText, LPDOUBLE pTotDist)
+void NotPolylineScreen (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText, LPDOUBLE pTotDist)
 {   
 	static int ncalls = 0;
 	short	OldMode;
@@ -1071,7 +1071,7 @@ void NotPolylineScreen_old (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText,
 		TrackColor = 0;// RGB(255, 0, 0);
 	if (!FirstMoveSinceRedraw)
 	{
-		//OldMode = SetROP2(hDC,R2_NOT); 
+		OldMode = SetROP2(hDC,R2_NOT); 
 		if (pTotDist)
 		{
 			DPOINT pt1 = WinPtToBasePt(Points[0]);
@@ -1080,7 +1080,7 @@ void NotPolylineScreen_old (HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText,
 		}
 		else
 			TempPolyline (hDC,Points,nPnts,0,0);
-		//SetROP2(hDC,OldMode); 
+		SetROP2(hDC,OldMode); 
 	}
 	FirstMoveSinceRedraw=FALSE;
 	//EndPath(hDC);
@@ -1117,7 +1117,6 @@ BOOL ShowTempLineType (HDC hDC,LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pT
 			Dist = ArcDistance(*lpDPoint,*pBasePoint);
 		else
 			Dist = ldistp (*lpDPoint,*pBasePoint);
-		Dist = 0;
 		AZ = getazd (lpDPoint,pBasePoint);
 		MidPoint = MidPointD(*lpDPoint,*pBasePoint);
 		for (i=0;i<CurView->NumThemes;i++)
@@ -1149,7 +1148,7 @@ BOOL ShowTempLineType (HDC hDC,LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pT
 			else if (maxval > 1000)
 				ndp = 1;
 			sprintf(fmt, "%%.%if",ndp);
-			//*pTotDist += Dist;
+			*pTotDist += Dist;
 			sprintf(txt1, fmt,val1);
 			sprintf(txt2, fmt,val2);
 			AddCommas(txt1);
@@ -1168,7 +1167,7 @@ BOOL ShowTempLineType (HDC hDC,LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pT
 			sprintf(fmt, "%%.%if", ndp);
 			sprintf (txt,fmt,val);
 			AddCommas(txt);
-			//*pTotDist = Dist;
+			*pTotDist = Dist;
 		}
 		SaveDC (CurView->hDC);  
 		SetTextColor (CurView->hDC,Color);
@@ -1209,7 +1208,7 @@ BOOL ShowTempLineType (HDC hDC,LPDPOINT pBasePoint,LPDPOINT lpDPoint,LPDOUBLE pT
 	return FALSE;
 }
 
-void TempPolyline_old (HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
+void TempPolyline (HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
 {   
 	HPEN hTrackPen, hOldPen; 
 	double	AZ, dist; 
