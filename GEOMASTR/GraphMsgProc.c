@@ -6037,8 +6037,8 @@ BOOL FAR PASCAL TRAVTYPE3CRVMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 BOOL FAR PASCAL VISIBLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	HWND	hCheckBox;
     int      TabStopsSym[3]={113,500,5000};
-    int      TabStops4[2]={68,200};
-    int      TabStops2[2]={136,200};
+    int      TabStops4[2]={144,2000};
+    int      TabStops2[2]={174,2000};
 	int   	TabStops3[2]={30,48}; 
 	int		Choice, Choice2, Choice3, ScrollPos;
 	int		nItems,  idesc, i, ntab=2;
@@ -6068,9 +6068,9 @@ BOOL FAR PASCAL VISIBLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
 		 SendDlgItemMessage (hWndDlg,IDC_ALLVISONLY,BM_SETCHECK,TRUE,0L);
          if (VisListOpt)
          {
-         	TabStopsSym[0] = 120;
-         	TabStopsSym[1] = 335;
-         	TabStopsSym[2] = 1000;
+         	TabStopsSym[0] = 200;
+         	TabStopsSym[1] = 514;
+         	TabStopsSym[2] = 2000;
     	 	ntab = 3;  
     	 }
 //    	 else

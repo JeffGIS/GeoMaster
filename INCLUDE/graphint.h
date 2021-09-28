@@ -1673,6 +1673,8 @@ BOOL CurViewActive(void);
 BOOL GetMapName (LPSTR LayerName);
 short RefInPrevLayer (long Refno);   
 BOOL RemoveDummyDelete (int Item);
+int  GetFGDBLev(HWND hWndDlg, UINT ListCntl, int hDB, LPSTR Under, int iLev, HFILE FidOut);
+long DumpFGDBTables(LPSTR DBNameIN, LPSTR OutFile, int ListType);
 BOOL OpenPrevLayers (short CurLayer, short CurLayerID);
 BOOL ClosePrevLayers (void);
 BOOL MovePolyLineD (DPOINT SnapPoint);

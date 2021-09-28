@@ -3130,13 +3130,14 @@ LPSTR ShapeTypeName (int iType)
 	return typeName;
 }
 
-void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
+int GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev,HFILE FidOut)
 {
 	char	UnderNext[256];
 	char	tabs[MAXFGDBLEVS*6];
 	char	str[256];
 	HANDLE	hList;
 	int		Num;
+	int		NumTot = 0;
 	UINT	i;
 	int	lnLev1 = strlen (Under);
 
@@ -3152,8 +3153,12 @@ void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
 			memset (tabs,' ',sizeof(tabs));
 			tabs[iLev*6] = 0;
 			sprintf (str,"%s%s",tabs,pList+inc);
-			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
-			GetFGDBLev (hWndDlg,ListCntl,hDB,pList,iLev+1);
+			NumTot++;
+			if (FidOut != HFILE_ERROR)
+				fputstring(str, FidOut);
+			else
+				SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
+			GetFGDBLev (hWndDlg,ListCntl,hDB,pList,iLev+1,FidOut);
 		}
 		GSSiGlobUlFree (&hList);
 	}
@@ -3173,95 +3178,132 @@ void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
 			if (!nrows)
 				continue;
 			sprintf (str,"%s%s\t%s\t%i",tabs,pList+lnLev1+inc,ShapeTypeName(type),nrows);
-			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
+			NumTot++;
+			if (FidOut != HFILE_ERROR)
+				fputstring(str, FidOut);
+			else
+				SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str);
 		}
 		GSSiGlobUlFree (&hList);
 	}
-	return;
+	return NumTot;
 }
 
-long ListFGDBTables (LPSTR DBNameIN,HWND hWndDlg,UINT ListCntl,int ListType)
+long DumpFGDBTables(LPSTR DBNameIN, LPSTR OutFile, int ListType)
 {
-	UINT	i,j;  
-	char	ShpType[16]="";
-	char	DBName[512],str[256], TableName[128], TableType[64];
-	LPSTR	pPar, pTab; 
-	short	ShapeType; 
-	double	Xmin,Xmax,Ymin,Ymax;  
-	short	Num=0, Num2;        
-	long	NumRows; 
+	UINT	i, j;
+	char	ShpType[16] = "";
+	char	DBName[512], str[256], TableName[128], TableType[64];
+	LPSTR	pPar, pTab;
+	short	ShapeType;
+	double	Xmin, Xmax, Ymin, Ymax;
+	short	Num = 0, Num2;
+	long	NumRows;
 	LPSTR	pFields;
-	int		hDB=0;
-	int   	TabStops[3]={270,320,370};
- 
-   	SendDlgItemMessage (hWndDlg,ListCntl,LB_SETTABSTOPS,3,(LPARAM)&TabStops); 
-	_fstrcpy (DBName,DBNameIN); 
-	ExpandText (DBName);
-    if ((pPar = _fstrrchr (DBName,'(')))
-    	*pPar++ = 0; 
-	hDB = OpenFGDB2 (DBName,"","");
+	int		hDB = 0;
+	HFILE	FidOut;
+
+	FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (FidOut != HFILE_ERROR)
+	{
+		sprintf(str, "TABLENAME\tTYPE\tCOUNT");
+		fputstring(str, FidOut);
+		strcpy(DBName, DBNameIN);
+		ExpandText(DBName);
+		if ((pPar = strrchr(DBName, '(')))
+			*pPar++ = 0;
+		hDB = OpenFGDB2(DBName, "", "");
+		if (hDB > 0)
+		{
+			Num = GetFGDBLev(0,0, hDB, "\\", 0, FidOut);
+			CloseFGDB(hDB);
+		}
+		GSSiClose2(&FidOut);
+	}
+	return Num;
+}
+long ListFGDBTables(LPSTR DBNameIN, HWND hWndDlg, UINT ListCntl, int ListType)
+{
+	UINT	i, j;
+	char	ShpType[16] = "";
+	char	DBName[512], str[256], TableName[128], TableType[64];
+	LPSTR	pPar, pTab;
+	short	ShapeType;
+	double	Xmin, Xmax, Ymin, Ymax;
+	short	Num = 0, Num2;
+	long	NumRows;
+	LPSTR	pFields;
+	int		hDB = 0;
+	int   	TabStops[3] = { 270,320,370 };
+
+	SendDlgItemMessage(hWndDlg, ListCntl, LB_SETTABSTOPS, 3, (LPARAM)&TabStops);
+	_fstrcpy(DBName, DBNameIN);
+	ExpandText(DBName);
+	if ((pPar = _fstrrchr(DBName, '(')))
+		*pPar++ = 0;
+	hDB = OpenFGDB2(DBName, "", "");
 	if (hDB < 1)
 		return 0;
-	GetFGDBLev (hWndDlg,ListCntl,hDB,"\\",0);
-	CloseFGDB (hDB);
-/*	strcpy (TableName,"gdb_items");
-	if (!OpenFGDB (DBName,TableName,""))
-		return 0;
-	hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
-	pFields = GlobalLock (hSelectFields);
-	strcpy (pFields,"Name,DatasetSubtype1,DatasetSubtype2");
-	GlobalUnlock (hSelectFields);
-	while (FetchDBRec (FGDBHandle))
-	{
-		_fstrcpy (str,"[FGDB.DatasetSubtype2]"); 
-		ExpandText (str);
-		ShapeType = atoi (str);
-		_fstrcpy (TableName,"[FGDB.Name]"); 
-		ExpandText (TableName);    
-		*ShpType = 0;  
-		
-		switch (ShapeType)
+	Num = GetFGDBLev(hWndDlg, ListCntl, hDB, "\\", 0, HFILE_ERROR);
+	CloseFGDB(hDB);
+	/*	strcpy (TableName,"gdb_items");
+		if (!OpenFGDB (DBName,TableName,""))
+			return 0;
+		hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
+		pFields = GlobalLock (hSelectFields);
+		strcpy (pFields,"Name,DatasetSubtype1,DatasetSubtype2");
+		GlobalUnlock (hSelectFields);
+		while (FetchDBRec (FGDBHandle))
 		{
-			case 1:
-				_fstrcpy (TableType,"Point");
-				break;
-			case 3:
-				_fstrcpy (TableType,"Line");  
-				break;
-			case 4:
-				_fstrcpy (TableType,"Area");
-				break;
-			default:
-				sprintf (TableType,"Unknown(%i)",ShapeType);
-				break;
+			_fstrcpy (str,"[FGDB.DatasetSubtype2]");
+			ExpandText (str);
+			ShapeType = atoi (str);
+			_fstrcpy (TableName,"[FGDB.Name]");
+			ExpandText (TableName);
+			*ShpType = 0;
+
+			switch (ShapeType)
+			{
+				case 1:
+					_fstrcpy (TableType,"Point");
+					break;
+				case 3:
+					_fstrcpy (TableType,"Line");
+					break;
+				case 4:
+					_fstrcpy (TableType,"Area");
+					break;
+				default:
+					sprintf (TableType,"Unknown(%i)",ShapeType);
+					break;
+			}
+			Num++;
+			sprintf (str,"%s\t%s",TableName,TableType);
+			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str);
 		}
-		Num++;   
-		sprintf (str,"%s\t%s",TableName,TableType);
-		SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
-	}
-	OpenFGDB (0,0,0); 
-	for (i=0;i<Num;i++)
-	{ 
-        SendDlgItemMessage(hWndDlg,ListCntl,LB_GETTEXT,i,(LPARAM)str);   
-        pTab = strchr (str,'\t');
-        *pTab++ = 0;      
-        strcpy (TableType,pTab); 
-		if (OpenFGDB (DBName,str,""))
+		OpenFGDB (0,0,0);
+		for (i=0;i<Num;i++)
 		{
-			NumRows = NumSQLRows (FGDBHandle);  
-	        if (FGDBTableIsText (DBName,str))
-		   		strcpy (TableType,"Text"); 
-		}
-		else  
-		{
-			strcpy (TableType,"Unknown");
-			NumRows = 0;
-		}
-		OpenFGDB (0,0,0);  
-		sprintf (_fstrchr(str,0),"\t%s\t%ld",TableType,NumRows);
-		SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_DELETESTRING,i,(LPARAM)0); 
-		SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_INSERTSTRING,i,(LPARAM) str); 
-	}*/
+			SendDlgItemMessage(hWndDlg,ListCntl,LB_GETTEXT,i,(LPARAM)str);
+			pTab = strchr (str,'\t');
+			*pTab++ = 0;
+			strcpy (TableType,pTab);
+			if (OpenFGDB (DBName,str,""))
+			{
+				NumRows = NumSQLRows (FGDBHandle);
+				if (FGDBTableIsText (DBName,str))
+					strcpy (TableType,"Text");
+			}
+			else
+			{
+				strcpy (TableType,"Unknown");
+				NumRows = 0;
+			}
+			OpenFGDB (0,0,0);
+			sprintf (_fstrchr(str,0),"\t%s\t%ld",TableType,NumRows);
+			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_DELETESTRING,i,(LPARAM)0);
+			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_INSERTSTRING,i,(LPARAM) str);
+		}*/
 	return Num;
 }
 

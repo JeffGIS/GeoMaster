@@ -2668,10 +2668,12 @@ void SetBounds (HWND hWnd,HDC hDC)
 {    
     MNMXCORD    SaveBounds, TransBounds;
     LPVIEWPORT  SaveView=CurView;
-    LPVISLIST	SaveVis=CurVis;
+    LPVISLIST	SaveVis=0;
     UINT		lSaveVis = 0;
 	RECT		Rect1;
     
+	if (!IsBadWritePtr(CurVis, 4))
+		SaveVis = CurVis;
     if (CurView->Type == VPTYPE_PROFILE || 
        (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))
 {
