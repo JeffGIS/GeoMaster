@@ -976,7 +976,7 @@ HWND	hWndAbortWaitMessage=0;
 HANDLE	hPDChunk=NULL;
 BOOL	OverWritePrompt=TRUE;
 DWORD	OtherFontOpts=0;
-LPPRINTDLG	lpPDChunk;
+LPPRINTDLG	lpPDChunk=0;
 HANDLE	hODBCPW=0;
 BOOL	StanSQL=TRUE;
 HANDLE	hODBCParams=0; 
