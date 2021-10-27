@@ -1505,7 +1505,7 @@ GSSiExitProg (1350);
 			no = atoi(Arg[7]);
 			if (no != 2)
 				no = atob(Arg[7]);
-			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), no);
+			int n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), no);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}
@@ -1904,6 +1904,13 @@ GSSiExitProg (1350);
 		Rtn859:
 			*OutLoc = *val;
 			*(OutLoc + 1) = 0;
+			goto Rtnl;
+		}
+		case 860://$LASTCHAR(text) returns last char in string
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = *LastChr(Arg[1]);
+			OutLoc[1] = 0;
 			goto Rtnl;
 		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search

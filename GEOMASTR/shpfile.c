@@ -159,7 +159,12 @@ void ClipLatLonToBase(LPMNMXCORD pMnMx, int from)
 	MNMXCORD bounds=ProjectBounds;
 	MNMXCORD intBounds;
 
-	if (PRJ_TYPE[from] != LATLONGTYPE)
+	if (PRJ_TYPE[from] == PROJ4PROJECTION)
+	{
+		if (PRJ_UNITS[from] != PRJ_UNITS_LATLON)
+			return;
+	}
+	else if (PRJ_TYPE[from] != LATLONGTYPE)
 		return;
 	if (PRJ_TYPE[1] == LATLONGTYPE)
 		return;
@@ -211,6 +216,7 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	SHPHandle	hSHP = SHPOpenGSSi(ofStructGM.szPathName, "rb");
 	if (hSHP)
 		SHPClose(hSHP);
+	LoadSHPParm(SHPFileName, SHPType, CurView->hWnd);
 	if (!(SHPType = ReadSHPHeader (SHPFid,&SHPFileMNMX,SHPFileName)))
     {
     	GSSiClose2 (&SHPFid);
@@ -219,7 +225,6 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	CloseTRANS2 (&hTranFileToBase); 
 	CloseTRANS2 (&hTranBaseToFile);  
 	CloseTRANS2 (&hTranFileToVP);  
-	LoadSHPParm (SHPFileName,SHPType,CurView->hWnd);
 	
 	ClipLatLonToBase(&SHPFileMNMX, 0);
 	Points[0].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);
@@ -617,15 +622,18 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 			havePrj = TRUE;
 		GetGlobalCVal("[%DefaultShapeUnits]", Units, "FEET");
 		PGDBCnvFac = 1;
-		if (!_fstricmp(Units, "FEET"))
+		if (!havePrj)
 		{
-			PRJ_UNITS[0] = 1;
-			PGDBCnvFac = FTM;
+			if (!_fstricmp(Units, "FEET"))
+			{
+				PRJ_UNITS[0] = 1;
+				PGDBCnvFac = FTM;
+			}
+			else if (!_fstricmp(Units, "METERS"))
+				PRJ_UNITS[0] = 2;
+			else
+				PRJ_UNITS[0] = 4;
 		}
-		else if (!_fstricmp(Units, "METERS"))
-			PRJ_UNITS[0] = 2;
-		else
-			PRJ_UNITS[0] = 4;
 	}
     GSSifstat (Fid,&statParmFile);
     SHPParmTime = statParmFile.st_mtime;

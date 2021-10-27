@@ -385,6 +385,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "DBLQUOTE", 8)) return 857;
 			if (!_fstrnicmp(str, "FIRSTNUM", 8)) return 858;
 			if (!_fstrnicmp(str, "FIRSTNON", 8)) return 859;
+			if (!_fstrnicmp(str, "LASTCHAR", 8)) return 860;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

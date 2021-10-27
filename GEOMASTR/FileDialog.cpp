@@ -1251,7 +1251,8 @@ extern "C" HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lFile, LPSTR Initia
 											pNextPlace = strchr(pPlace, 0);
 										hr = MultiByteToWideChar(CP_ACP, 0, pPlace, -1, pwPlace, MAX_PATH);
 										hr = SHCreateItemFromParsingName(pwPlace, NULL, IID_IShellItem, (void**)&defFolder);
-										hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
+										if (hr == S_OK)
+											hr = pfd->AddPlace(defFolder, FDAP_BOTTOM);
 										pPlace = pNextPlace;
 										pNextPlace = strchr(pPlace, '|');
 									}

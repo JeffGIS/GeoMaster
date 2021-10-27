@@ -398,6 +398,13 @@ C-------------------------------        */
 		   PRJ_TYPE[ID] = PROJ4PROJECTION;
 		   PRJ_SPHEROID[ID] = PRJ_SPHEROID[1];
 		   PRJ_ZONE[ID] = PRJ_ZONE[1];
+		   strlwr(INNAME);
+		   if (strstr(INNAME, "units=m"))
+			   PRJ_UNITS[ID] = PRJ_UNITS_METERS;
+		   if (strstr(INNAME, "units=f"))
+			   PRJ_UNITS[ID] = PRJ_UNITS_FEET;
+		   if (strstr(INNAME, "proj=longlat"))
+			   PRJ_UNITS[ID] = PRJ_UNITS_LATLON;
 		   return 0;
 	   }
 	   else if (IsProjectionFile(INNAME))

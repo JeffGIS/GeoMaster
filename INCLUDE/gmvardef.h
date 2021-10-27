@@ -1394,7 +1394,7 @@ long	ShowValRef;
 HANDLE	hShowValMaskAccelerator=0;
 short	SetVisByPar=-1;
 BOOL	ParIsVisible;
-short	VisListOpt=0;
+short	VisListOpt=1;
 BOOL	HaveGPSPoint=FALSE;    
 short	GPSFormat; 
 HANDLE	GPSStream=(HANDLE)-1;
