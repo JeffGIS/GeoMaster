@@ -3325,8 +3325,10 @@ BOOL FAR PASCAL LOADDXFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);  
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,-1,(LPARAM)curunits);
          SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,-1,(LPARAM)curproject);
         ContentsOnly = FALSE;
