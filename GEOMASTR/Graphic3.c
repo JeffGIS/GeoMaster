@@ -3596,7 +3596,7 @@ GSSiExitProg (61);
 #endif
 		return(0);
 	}
-
+	//CurFileIndexEntry.fileInIndex = 0;
     EndOffset = GSSillseek(FidIndex,(LONG)-(6),2);
     BigRead (FidIndex,(HPSTR)&Signature,4);
     BigRead (FidIndex,(HPSTR)&Version,2);
@@ -3811,7 +3811,8 @@ GSSiExitProg (62);
 	    {
 GetNextIndex:
 	        GSSillseek(FidIndex,NextIndex.NextHeaderOffset,0); 
-	        NextIndex.FileInIndex=NextIndex.NumFiles;     
+	        NextIndex.FileInIndex= NextIndex.NumFiles;
+			//CurFileIndexEntry.fileInIndex += NextIndex.NumFiles;
 	        CurIndex = NextIndex;
 	        goto Next;
 	    } 
@@ -3929,6 +3930,7 @@ GSSiExitProg (64);
     }
     lpIndex->FileInIndex++; 
 Exit:
+	//pCurFileIndexEntry->fileInIndex++;
 	pCurFileIndexEntry->Len = lpIndex->CurrentEntry->Len;
 	pCurFileIndexEntry->BMWidth = lpIndex->CurrentEntry->BMWidth;
 	pCurFileIndexEntry->BMHeight = lpIndex->CurrentEntry->BMHeight;

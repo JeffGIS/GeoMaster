@@ -666,6 +666,8 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		SHPBaseRefno = IndexEntryStartRef;
 	else
 		SHPBaseRefno = atol (SHPRefno);
+	if (FileIsIndex)
+		SHPBaseRefno = CurFileIndexEntry.fileInIndex;
 	fgetstring (SHPTAG,sizeof(SHPTAG)-2,Fid); 
 	fgetstring (str,32,Fid); 
 	//SHPIndexType = atoi (str);

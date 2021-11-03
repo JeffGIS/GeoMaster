@@ -1163,7 +1163,7 @@ BOOL Suceded(HRESULT hr,WCHAR *msg)
 	//MessageBox(0, msg,L"Failed", MB_ICONEXCLAMATION);
 	return FALSE;
 }
-extern "C" HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save)
+extern "C" HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lFile, LPSTR InitialDirectory, LPSTR filter,LPSTR Title,BOOL save, BOOL wantFolder)
 {
 	WCHAR origFile[MAX_PATH + 2];
 	WCHAR initDir[MAX_PATH + 2];
@@ -1219,9 +1219,15 @@ extern "C" HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lFile, LPSTR Initia
 				if (Suceded(hr, L"4"))
 				{
 					// In this case, get shell items only for file system items.
-					hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
+					if (wantFolder)
+						hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM | FOS_PICKFOLDERS);
+					else
+						hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
+
 					if (Suceded(hr, L"5"))
 					{
+						if (wantFolder)
+							goto SkipTypes;
 						// Set the file types to display only. 
 						// Notice that this is a 1-based array.
 						hr = pfd->SetFileTypes(nFilters, filters);
@@ -1235,6 +1241,7 @@ extern "C" HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lFile, LPSTR Initia
 								hr = pfd->SetDefaultExtension(defaultExtension);
 								if (Suceded(hr, L"8"))
 								{
+						SkipTypes:
 									IShellItem *defFolder;
 									LPSTR pPlaces = (LPSTR)malloc(SHRT_MAX);
 									LPSTR pPlace = pPlaces;

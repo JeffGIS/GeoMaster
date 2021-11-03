@@ -764,6 +764,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				if (!strncmp(cmd, "--LL", 4))
 				{
 					MAXSTR = atol(&cmd[4]) + 2;
+					GSSiGlobUlFree(&hstr);
+					hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
+					cmd = GlobalLock(hstr);
+
 					continue;
 				}
 				
@@ -2091,7 +2095,7 @@ NextCrimeRec:
 
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*2);
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*4);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				if (createFile)
@@ -2291,10 +2295,13 @@ NextCrimeRec:
 							nLops = nLoops;
 							if (skipConvert)
 								nLops = -nLoops;
+							char a7val[1024];
 							if (nLoops > 1)
 							{
+								strcpy(a7val, ARG[7]);
+								ExpandText(a7val);
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,a7val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints, sqMeters, perimeter);
 								free(blobParts);
@@ -2302,7 +2309,11 @@ NextCrimeRec:
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, Arg7Val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
+								{
+									strcpy(a7val, ARG[7]);
+									ExpandText(a7val);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, a7val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
+								}
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 							}

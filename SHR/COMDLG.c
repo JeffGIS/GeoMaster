@@ -651,7 +651,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 		_chdir(InitialDirectory);
 	fsLen = FormatFilterString();  //Formats gszFilter with strings
 
-	if (BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE) != (HRESULT)0)
+	if (BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE,FALSE) != (HRESULT)0)
 	{
 		strcpy(Name, InitialFile);
 		rtn = TRUE;
@@ -785,9 +785,28 @@ BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
          AllowCreate = FALSE;
          return (Result);
 }
+BOOL GetFolderName_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir, LPSTR title)
+{
+	BOOL rtn = FALSE;
+	if (!*Name || (*Name && *LastChr(Name) == '\\'))
+		*InitialFile = 0;
+	else
+		_fullpath(InitialFile, Name, 256);
+	if (_fullpath(InitialDirectory, lpInitDir, 256))
+		_chdir(InitialDirectory);
+	fsLen = FormatFilterString();  //Formats gszFilter with strings
+
+	if (BasicFileOpen2(hWnd, InitialFile, MAX_PATH, InitialDirectory, gszFilter, title, FALSE, TRUE) != (HRESULT)0)
+	{
+		strcpy(Name, InitialFile);
+		rtn = TRUE;
+	}
+	return rtn;
+}
 
 BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title)
 {
+	return GetFolderName_new(hWnd, outDir, MAX_PATH, startDir, title);
 	BROWSEINFO bi={0};
 	PCIDLIST_ABSOLUTE pidList;
 
@@ -825,7 +844,7 @@ BOOL GetSaveFileCD(HWND hWnd, LPSTR Name, LPSTR lpInitDir)
 	_splitpath(InitialFile, NULL, NULL, nam, ext);
 	sprintf(FName, "%s%s", nam, ext);
 	_fstrcpy(InitialFile, FName);
-	st = BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE);
+	st = BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE,FALSE);
 	if (st)
 	{
 		_fstrcpy(Name, InitialFile);
