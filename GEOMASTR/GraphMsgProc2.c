@@ -3675,6 +3675,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 					case SHPT_TEXT:
 					case SHPT_POLYGON:
 					case SHPT_POLYGONZ:
+					case SHPT_POLYGONM:
 						GetGlobalCVal("[%DEFAULTAREASYMBOL]", SymName, "PARCEL");
 						if (!*cWidth)
 							strcpy(cWidth, "-1");
@@ -3725,6 +3726,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						case SHPT_TEXT:
 						case SHPT_POLYGON:
 						case SHPT_POLYGONZ:
+						case SHPT_POLYGONM:
 							rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, TRUE);
 							break;
 						}
@@ -3838,6 +3840,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						  case SHPT_TEXT:
 						  case SHPT_POLYGON:
 						  case SHPT_POLYGONZ:
+						  case SHPT_POLYGONM:
 							  rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 							  break;
 						  }
@@ -3905,6 +3908,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 				case SHPT_TEXT:
 				case SHPT_POLYGON:
 				case SHPT_POLYGONZ:
+				case SHPT_POLYGONM:
 					rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 					break;
 				}
@@ -4231,6 +4235,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 					case SHPT_TEXT:
 					case SHPT_POLYGON:
 					case SHPT_POLYGONZ:
+					case SHPT_POLYGONM:
 						GetGlobalCVal("[%DEFAULTAREASYMBOL]", SymName, "PARCEL");
 						if (!*cWidth)
 							strcpy(cWidth, "-1");
@@ -4279,6 +4284,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						case SHPT_TEXT:
 						case SHPT_POLYGON:
 						case SHPT_POLYGONZ:
+						case SHPT_POLYGONM:
 							rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, TRUE);
 							break;
 						}
@@ -4392,6 +4398,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						  case SHPT_TEXT:
 						  case SHPT_POLYGON:
 						  case SHPT_POLYGONZ:
+						  case SHPT_POLYGONM:
 							  rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 							  break;
 						  }
@@ -4459,6 +4466,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 				case SHPT_TEXT:
 				case SHPT_POLYGON:
 				case SHPT_POLYGONZ:
+				case SHPT_POLYGONM:
 					rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 					break;
 				}

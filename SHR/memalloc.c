@@ -289,7 +289,7 @@ BOOL glblUnlock(HANDLE h)
 
 void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size)
 {
-	if (_Size == 24)
+	if (_Size < 2048)
 		ii = 1;
 	void * ptr =  malloc(_Size);
 	if (!ptr)

@@ -2836,8 +2836,9 @@ GotCloseFilehSQL:
 				GetCursorPos (&ScreenPoint); 
 				ScreenToClient (CurView->hWnd,&ScreenPoint);   
 				sprintf (ptxt,"$REPORT(%s)",Arg[1]);
-				YellowTextBox (hWnd,ptxt,ScreenPoint,&TBRect,0,TRUE,0);
+				YellowTextBox (hWnd,ptxt,ScreenPoint,&TBRect, (LPRECT)1,TRUE,0);
 				hDC = GetDC (hWnd);
+				InflateRect(&TBRect, 1, 1);
 				if (hWnd == hWndMain)
 				{
  					if (hLastBox)

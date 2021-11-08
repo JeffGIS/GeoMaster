@@ -1458,7 +1458,7 @@ int testdib(int i)
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	int rtn = 0;
-	//_CrtDumpMemoryLeaks();
+	_CrtDumpMemoryLeaks();
 	char cmdLine[1024];
 	//strcpy(cmdLine, "0123456789012");
 	//char monName[12];
