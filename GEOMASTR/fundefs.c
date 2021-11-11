@@ -127,6 +127,7 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp(str, "FILE", 4)) return 436;
 			if (!_fstrnicmp(str, "GDAL", 4)) return 437;
 			if (!_fstrnicmp(str, "POST", 4)) return 438;
+			if (!_fstrnicmp(str, "FGDB", 4)) return 439;
 			return 0;
 }
 int	GetFunctionID5 (LPSTR str)
@@ -384,6 +385,7 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "DBLQUOTE", 8)) return 857;
 			if (!_fstrnicmp(str, "FIRSTNUM", 8)) return 858;
 			if (!_fstrnicmp(str, "FIRSTNON", 8)) return 859;
+			if (!_fstrnicmp(str, "LASTCHAR", 8)) return 860;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

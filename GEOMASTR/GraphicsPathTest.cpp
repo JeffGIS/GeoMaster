@@ -24,6 +24,7 @@
 
 #define MAX_LOADSTRING 100
 typedef struct { double x, y; } DPOINT;
+typedef DPOINT* LPDPOINT;
 typedef double* LPDOUBLE;
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -43,6 +44,16 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 extern "C" int SetDisplayMode(HDC hDC, short Mode);
+extern "C" DPOINT WinPtToBasePtD(LPDPOINT WinPointD);
+extern "C" DPOINT WinPtToBasePt(POINT Point);
+extern "C" double getazd(LPDPOINT Point1, LPDPOINT Point2);
+extern "C" DWORD DispText(HDC hDC, BOOL GetExtents, int left, int right, int y, int symsize, int hJust, int vJust, double Size, double SymSizeFactor, double SymbolTextFactor,
+	int Weight, BOOL Italic, double AZ, LPSTR Text, int Symbol, BOOL TestRect,
+	BOOL Shadow, COLORREF ShadowColor, long RemoveColor,
+	long nPnts, HANDLE hAreaPoints, HANDLE hAreaAccelerator, int nPoly, HANDLE hPolyPartLen,
+	short UseHalfTone, LPSTR ActualText, short MinSize, LPVOID CurTheme, LPRECT pTextRect, LPRECT pFullRect, LPRECT pFlagRect);
+extern "C" BOOL ShowTempLineType(HDC hDC, LPDPOINT pBasePoint, LPDPOINT lpDPoint, LPDOUBLE pTotDist);
+extern "C" void TempPolyline(HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText);
 void TestPath(HDC hdc);
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -173,7 +184,7 @@ void DisplayPath(HDC hdc,POINT *points, BYTE *types, int npts)
 //  WM_DESTROY  - post a quit message and return
 //
 //
-extern "C" void TempPolyline(HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
+extern "C" void TempPolyline_new(HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText)
 {
 	HPEN hTrackPen, hOldPen;
 	double	AZ, dist;
@@ -192,7 +203,7 @@ extern "C" void TempPolyline(HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopTe
 	Polyline(hDC, lpPoints, nPnts);
 	SelectObject(hDC, hOldPen);
 	DeleteObject(hTrackPen);
-/*	if (TempLineType == 1 && TopText)
+	if (TempLineType == 1 && TopText)
 	{
 		size = -0.2;
 		AZ = 0;
@@ -210,11 +221,11 @@ extern "C" void TempPolyline(HDC hDC, LPPOINT lpPoints, short nPnts, LPSTR TopTe
 		AZ = getazd(&DPoint1, &DPoint2);
 		DispText(hDC, FALSE, point.x, point.x, point.y, 0, 4, 2, size, 1, 1, 100, FALSE, AZ, TopText, 0, FALSE, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
-	*/
+	
 	return;
 }
 
-extern "C" void NotPolylineScreen(HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText, LPDOUBLE pTotDist)
+extern "C" void NotPolylineScreen_new(HDC hDC, LPPOINT Points, short nPnts, LPSTR TopText, LPSTR BottomText, LPDOUBLE pTotDist)
 {
 	static int ncalls = 0;
 	short	OldMode;
@@ -224,8 +235,7 @@ extern "C" void NotPolylineScreen(HDC hDC, LPPOINT Points, short nPnts, LPSTR To
 
 	int ii;
 	//BOOL saveUseGDIPlus = useGDIPlus;
-	TestPath(hDC);
-	pTotDist = 0;
+	//TestPath(hDC);
 	useGDIPlus =  TRUE;
 	//SaveDC(hDC);
 	SetDisplayMode(hDC, GF_SCREENMODE);
@@ -235,7 +245,7 @@ extern "C" void NotPolylineScreen(HDC hDC, LPPOINT Points, short nPnts, LPSTR To
 	if (ncalls > 100)
 		ii = 1;
 	OldMode = SetROP2(hDC, R2_NOT);
-	BeginPath(hDC);
+//	BeginPath(hDC);
 	if (ncalls++ % 2)
 		TrackColor = 0;
 	else
@@ -245,16 +255,16 @@ extern "C" void NotPolylineScreen(HDC hDC, LPPOINT Points, short nPnts, LPSTR To
 		//OldMode = SetROP2(hDC,R2_NOT); 
 		if (pTotDist)
 		{
-//			DPOINT pt1 = WinPtToBasePt(Points[0]);
-//			DPOINT pt2 = WinPtToBasePt(Points[nPnts - 1]);
-//			ShowTempLineType(hDC, &pt1, &pt2, pTotDist);
+			DPOINT pt1 = WinPtToBasePt(Points[0]);
+			DPOINT pt2 = WinPtToBasePt(Points[nPnts - 1]);
+			ShowTempLineType(hDC, &pt1, &pt2, pTotDist);
 		}
 		else
 			TempPolyline(hDC, Points, nPnts, 0, 0);
 		//SetROP2(hDC,OldMode); 
 	}
 	FirstMoveSinceRedraw = FALSE;
-	EndPath(hDC);
+//	EndPath(hDC);
 	int npts = GetPath(hDC, points, types, 1024);
 	st = StrokePath(hDC);
 	GdiFlush();

@@ -4338,6 +4338,7 @@ SetVis:
 			FILEFunctions(nArgs, Arg, OutLoc);
 			goto Rtnl;
 		}
+		
 		case 437: //$GDAL(OPEN,file)
 		{
 #define CPL_RESTRICT
@@ -4433,6 +4434,20 @@ SetVis:
 			strcpy(CommandMacro, Arg[1]);
 			PostMessage(hWndMain, PROCESS_COMMAND_MACRO,0, 0L);
 			goto RtnTrue;
+		}
+
+		case 439: //$FGDB(DUMP,FGDBPath,OutFilePath,ListType)
+		{
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "DUMP"))
+			{
+				int n = DumpFGDBTables(Arg[2], Arg[3], atoi(Arg[4]));
+				itoa(n,OutLoc,10);
+			}
+			goto Rtnl;
 		}
 
 		default:

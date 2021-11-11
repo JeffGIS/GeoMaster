@@ -6480,7 +6480,7 @@ RButUp:
 		if (DoTrack)
 		{
 			BOOL st;
-			TotDist = 0;
+			//TotDist = 0;
 			NotPolylineScreen(CurView->hDC, Points, (short)nTempPoints, 0, 0, &TotDist);
 		}
 		break;

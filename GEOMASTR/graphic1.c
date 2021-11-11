@@ -951,7 +951,8 @@ BOOL DisplaySeg (HDC *hDC,BOOL Immediate)
 //    MNMXCORL	SaveBounds = CurView->Bounds;
     clock_t     starttime;    
     HDIB32		hDib32;
-    static		long	DebugSeg=522510;
+    static		long	DebugSeg= 4488536;
+	static		long	originalOffset = -1;
     
     if (!InDisplayProcessing && !Pick)
     	ii=1;
@@ -1558,7 +1559,11 @@ Next:
 			BOOL quitProcessing;
 		    GSSiGlobUlFree (&hpltBuf);
             
+			if (nContinues == 1)
+				originalOffset = CurrentSeg;
 			CurrentSeg = ContinuationOffset;
+			if (CurrentSeg == DebugSeg)
+				ii = 1;
 		    GSSillseek (FidMap,ContinuationOffset,0);
 		    nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
 		    hpltBuf = GSSiGlobAlloc (  48,GMEM_MOVEABLE,(DWORD)nBytes+2);
@@ -2663,10 +2668,12 @@ void SetBounds (HWND hWnd,HDC hDC)
 {    
     MNMXCORD    SaveBounds, TransBounds;
     LPVIEWPORT  SaveView=CurView;
-    LPVISLIST	SaveVis=CurVis;
+    LPVISLIST	SaveVis=0;
     UINT		lSaveVis = 0;
 	RECT		Rect1;
     
+	if (!IsBadWritePtr(CurVis, 4))
+		SaveVis = CurVis;
     if (CurView->Type == VPTYPE_PROFILE || 
        (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))
 {

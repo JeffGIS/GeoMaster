@@ -4220,6 +4220,8 @@ HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc)
 
 	if (From <= 0)
 		ii = 1;
+	if (From == 1115)
+		ii = 1;
 /*	if (fuAlloc == GMEM_MOVEABLE)
 		fuAlloc = GMEM_FIXED;
 	if (fuAlloc == GHND)

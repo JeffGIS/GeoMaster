@@ -2056,6 +2056,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 {	HDC hPr;
     RECT	Rect;
    short xPage, yPage;
+   double xPageInches, yPageInches;
    WORD wSize;
    BOOL bError;
 //   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
@@ -2078,8 +2079,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    HWND		ghWnd;
    static	BOOL IsVirtPrinter=FALSE;
    static	HANDLE hVirtPrinter=0;
-	LPPRINTDLG	lpPDChunk;
-
+#define INCHESPERMM 0.0393701
 	HDC		mfDC=0, PrinterDC=0;
 	HDC		*pPrinterDC = &PrinterDC;
 	static BOOL havePrintSetup = FALSE;
@@ -2161,6 +2161,8 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 		   {
 			   xPage = GetDeviceCaps(hPr, HORZRES);
 			   yPage = GetDeviceCaps(hPr, VERTRES);
+			   yPageInches = GetDeviceCaps(hPr, VERTSIZE) * INCHESPERMM;
+			   xPageInches = GetDeviceCaps(hPr, HORZSIZE) * INCHESPERMM;
 		   }
 	       Rect.left = 0;
 	       Rect.top = 0;

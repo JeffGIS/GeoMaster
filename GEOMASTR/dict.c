@@ -281,7 +281,7 @@ int CopySymbolParents (LPSTR SymName,LPSTR FromDict)
 	BOOL	rtn = 0;
 	int		n=0, ipar;
 	char	parNames[MAX_PARNAMES][34];
-	HANDLE	hSym[MAX_PARNAMES];
+	HANDLE	hSym[MAX_PARNAMES] = { 0 };
 	int		nParNames=1;
 
     CloseSymDict(); 
@@ -336,9 +336,11 @@ int CopySymbolFromDict (LPSTR FromDict,LPSTR SymName,LPSTR NewParent,LPSTR NewNa
 	BOOL	rtn = 0;
 	int		n=0;
 	HANDLE	hSym=0; 
+	BOOL	saveAllowCachedSymbols = allowCachedSymbols;
 
 
     CloseSymDict(); 
+	allowCachedSymbols = FALSE;
     GetGlobalCVal ("[%SYM_DICT]",SaveDict,0); 
     SetGlobalValue ("%SYM_DICT",FromDict);
 	if (OpenSymDict (OF_READ))
@@ -377,6 +379,7 @@ Exit:
 		DestroySymbol (hSym);
 	    CloseSymDict(); 
 	}
+	allowCachedSymbols = saveAllowCachedSymbols;
 	return rtn;
 }
 

@@ -5421,7 +5421,7 @@ BOOL FAR PASCAL OWNERLOCMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 	static	BOOL	First;  
 	static	short	iOwner=-1, SaveProperty=-1; 
 	short	Item;
-	char	propprefix[32];
+	char	propprefix[256];
 	TAGKEY TAGKey;  
 	LPSTR	pTAB; 
 	HWND	hwndCtl;
@@ -5762,20 +5762,29 @@ FoundPart:							;
 								
 						 		ClearHighlightList(FALSE); 
 						 		while (n--)
-						 		{   
+								{
+									LPSTR prefix = propprefix;
+									LPSTR nextPrefix;
 						 			SendDlgItemMessage(hWndDlg,IDC_PROPERTYLIST,LB_GETTEXT,*pItem++,(DWORD)str);
 						 			pTAB = _fstrrchr (str,'\t');
 						 			pTAB++; 
 						 			Strip (pTAB,' ');
-									if (PickByRefno (0,propprefix,pTAB,-1))
-									{   
-										if (PickList[0].IsDeleted) 
-											DoZoom = -1;
-										else
+									while (prefix && *prefix && !DoZoom)
+									{
+										nextPrefix = strchr(prefix, ';');
+										if (nextPrefix)
+											*nextPrefix++ = 0;
+										if (PickByRefno(0, prefix, pTAB, -1))
 										{
-											AddToHighlightList (PickList[0].Refno,&PickList[0],TRUE); 
-											DoZoom=1;
+											if (PickList[0].IsDeleted)
+												DoZoom = -1;
+											else
+											{
+												AddToHighlightList(PickList[0].Refno, &PickList[0], TRUE);
+												DoZoom = 1;
+											}
 										}
+										prefix = nextPrefix;
 									}
 								} 
 							    if (DoZoom>0)
@@ -5950,18 +5959,28 @@ FoundPart:							;
 		    	AutoHighlight=SendDlgItemMessage(hWndDlg,IDC_AUTOHIGHLIGHT,BM_GETCHECK,0,0); 
 		 		while (n--)
 		 		{   
-		 			SendDlgItemMessage(hWndDlg,IDC_PROPERTYLIST,LB_GETTEXT,*pItem++,(DWORD)str);
+					LPSTR prefix = propprefix;
+					LPSTR nextPrefix;
+
+					SendDlgItemMessage(hWndDlg,IDC_PROPERTYLIST,LB_GETTEXT,*pItem++,(DWORD)str);
 		 			pTAB = _fstrrchr (str,'\t');
 		 			pTAB++; 
 		 			Strip (pTAB,' ');
 					GetGlobalCVal ("[%PROPERTYPREFIX]",propprefix,"PINA");
-					if (PickByRefno (0,propprefix,pTAB,-1))
+					while (prefix && *prefix && Err)
 					{
-						if (PickList[0].Type != 6 && AutoHighlight) 
-							AddToHighlightList (PickList[0].Refno,&PickList[0],TRUE); 
-						Err=FALSE;
+						nextPrefix = strchr(prefix, ';');
+						if (nextPrefix)
+							*nextPrefix++ = 0;
+						if (PickByRefno(0, prefix, pTAB, -1))
+						{
+							if (PickList[0].Type != 6 && AutoHighlight)
+								AddToHighlightList(PickList[0].Refno, &PickList[0], TRUE);
+							Err = FALSE;
+						}
+						prefix = nextPrefix;
 					}
-					else 
+					if (Err)
 					{
 				    	SetDlgItemText (hWndDlg,IDC_PROPMESSAGE,"Property not found"); 
 				    }

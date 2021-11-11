@@ -1,3 +1,6 @@
+configs\hunting.gmc [%USEGDIPLUS]=F;[%KFO]=T;  /WD g:\gmmobile\metroUTM
+configs\2019_10.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD g:\gmmobile\metroUTM
+lkmaster.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;   /WD D:\MNPROMAP_2009
 configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
 configs\TNRISParcels.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD D:\Brae\PCViewer\PCViewer  
 configs\fixpoints2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
@@ -195,6 +198,9 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
 
 
 

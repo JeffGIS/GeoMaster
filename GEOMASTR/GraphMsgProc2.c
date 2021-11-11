@@ -5964,8 +5964,9 @@ SelectFiles:
 	             	FidSyms = GSSiOpenFile (VisName,&OFStruct,OF_CREATE);
 				 	hSymDesc = GSSiGlobAlloc (1114,GMEM_MOVEABLE,USHRT_MAX);
 				    pSymDesc = (LPSYMDESC)GlobalLock (hSymDesc);
-				 	while (SendDlgItemMessage (hWndDlg,SYM_VIS_LB,LB_GETTEXT,NumSyms++,(LPARAM)str)!=LB_ERR) 
+				 	while (SendDlgItemMessage (hWndDlg,SYM_VIS_LB,LB_GETTEXT,NumSyms,(LPARAM)str)!=LB_ERR) 
 				 	{   
+						NumSyms++;
 				 		pSymDesc->Handle = GSSiGlobAlloc (1115,GHND,sizeof(SYMBOL));
 				        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle); 
 				        lpTAB = _fstrrchr (str,'\t');
@@ -5978,12 +5979,14 @@ SelectFiles:
 				        lpTAB = _fstrchr (str,'\t');
 				        *lpTAB = 0;
 			            _fstrcpy (pSymbol->Name,str);
-				        GlobalUnlock (pSymDesc++->Handle); 
+				        GlobalUnlock (pSymDesc->Handle); 
+						pSymDesc++;
 				    } 
-				    NumSyms--;
-				 	while (SendDlgItemMessage (hWndDlg,PAR_VIS_LB,LB_GETTEXT,NumParent++,(LPARAM)str)!=LB_ERR) 
+
+				 	while (SendDlgItemMessage (hWndDlg,PAR_VIS_LB,LB_GETTEXT,NumParent,(LPARAM)str)!=LB_ERR) 
 				 	{   
 				 		NumSyms++;
+						NumParent++;
 				 		pSymDesc->Handle = GSSiGlobAlloc (1116,GHND,sizeof(SYMBOL));
 				        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle); 
 				        lpTAB = _fstrrchr (str,'\t');
@@ -5996,12 +5999,16 @@ SelectFiles:
 				        lpTAB = _fstrchr (str,'\t');
 				        *lpTAB = 0;
 			            _fstrcpy (pSymbol->Name,str);
-				        GlobalUnlock (pSymDesc++->Handle); 
+				        GlobalUnlock (pSymDesc->Handle); 
+						pSymDesc++;
 				    }  
-				    NumParent--;
+				    
 					GlobalUnlock (hSymDesc); 
 					WriteSymList (FidSyms, NumParent, NumSyms,hSymDesc);
+					BOOL saveAllowCachedSymbols = allowCachedSymbols;
+					allowCachedSymbols = FALSE;
 	                DestroySymList (&NumSyms,&hSymDesc);
+					allowCachedSymbols = saveAllowCachedSymbols;
 	             	_fmemmove (CurView,pSaveVP,(size_t)lmem);
 				    GSSiGlobUlFree (&hVP); 
 				    GSSiClose2 (&FidSyms);
