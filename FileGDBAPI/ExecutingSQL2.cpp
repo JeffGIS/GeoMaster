@@ -729,7 +729,10 @@ extern "C" BOOL FGDBGetFieldInfo(int iDB,int icount, LPSTR FieldName, LPINT pFie
 		  break;
           
 		  case fieldTypeBlob:
-			  *pFieldWidth = fieldLength;
+			  if (fieldLength == 0)
+				  *pFieldWidth = 255;
+			  else
+				  *pFieldWidth = fieldLength;
 			  *pFieldType = BT_CHAR;
 		  break;
           

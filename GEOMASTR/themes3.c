@@ -1348,6 +1348,18 @@ GSSiExitProg (1311);
 }
 		CreatePointDispersionFile ();
 	}
+	else
+	{
+		pName = GlobalLock(CurTheme->hDisperseFileName);
+		CurTheme->hDisperseFile = BT_OPEN(pName, 0, mode, 0);
+		GlobalUnlock(CurTheme->hDisperseFileName);
+		if (!CurTheme->hDisperseFile)
+		{
+			CreatePointDispersionFile();
+		}
+		else
+			BT_CLOSE2(&CurTheme->hDisperseFile);
+	}
 	pName = GlobalLock (CurTheme->hDisperseFileName);
 	CurTheme->hDisperseFile = BT_OPEN (pName, 0, mode, 0); 
 	if (mode == BT_WRITE)

@@ -700,36 +700,47 @@ NextPass:
 					CurTheme = SaveTheme;
 			        if (iType == 6)
 						ProcessPickedItem (MAXPICKITEMS-1,FALSE);
-			        else
-						while (DisplaySeg (&NULLHDC,FALSE))
-						{   
-							if (StopAtFirstInPickMacro && NumPicked)  
-							{   
-								int i=NumPicked;
-								
+					else
+					{
+						while (DisplaySeg(&NULLHDC, FALSE))
+						{
+							if (StopAtFirstInPickMacro && NumPicked)
+							{
+								int i = NumPicked;
+
 								while (i--)
 								{
-									if (ItemInPickMacro (i))  
+									if (ItemInPickMacro(i))
 									{
-									    CloseMap (FALSE); 
-								        if (CurView->SubFile)
-								        {
-								            _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
+										CloseMap(FALSE);
+										if (CurView->SubFile)
+										{
+											_fstrcpy(CurView->lpFiles[CurView->RestoreFile], CurView->OrigFile);
 											CurView->SubFile = 0;
 											SetRestoreFile(CurView, 0);
-								        } 
-										goto Exit; 
+										}
+										goto Exit;
 									}
 									else
 										NumPicked = i;
 								}
 							}
-							if (!ContinuePicking (QuitOnMouseMove))  
+							if (!ContinuePicking(QuitOnMouseMove))
 							{
-							    CloseMap (FALSE); 
-								goto Exit; 
+								CloseMap(FALSE);
+								goto Exit;
 							}
 						}
+					}
+					for (itheme = 0; itheme < CurView->NumThemes; itheme++) 
+					{
+						CurTheme = CurView->pThemes[itheme];
+						if (CurTheme->IsActive && CurTheme->VPDisplayed)
+						{
+								GSSiGlobFree(&CurTheme->hVisList);
+						}
+					}
+					CurTheme = SaveTheme;
 				} 
 				else
 				    CloseMap (FALSE); 
