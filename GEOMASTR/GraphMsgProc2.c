@@ -1507,8 +1507,10 @@ GSSiExitProg (445);
 		 SendDlgItemMessage (hWndDlg,IDC_FIXEDTRAN,BM_SETCHECK,TRUE,0L);
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
 		 if (PRJ_UNITS[1] == 1)
  		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)0,(LPARAM)0); 
 		 else if (PRJ_UNITS[1] == 2)
@@ -2924,8 +2926,10 @@ BOOL FAR PASCAL DTMTOTEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
 	    SendDlgItemMessage (hWndDlg,IDC_DTMOUTFORMAT,CB_ADDSTRING,0,(LPARAM)"Comma delimited X,Y,Elevation");  
 	    SendDlgItemMessage (hWndDlg,IDC_DTMOUTFORMAT,CB_ADDSTRING,0,(LPARAM)"Elevation Grid");  
 	    
-	    _fstrcpy (str,"*.CVT");
-	    DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		_fstrcpy(str, "[%DL]projections\\*.*");
+		ExpandText(str);
+		DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          if (!hHighlight)
          { 
     NoItems:
@@ -3671,6 +3675,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 					case SHPT_TEXT:
 					case SHPT_POLYGON:
 					case SHPT_POLYGONZ:
+					case SHPT_POLYGONM:
 						GetGlobalCVal("[%DEFAULTAREASYMBOL]", SymName, "PARCEL");
 						if (!*cWidth)
 							strcpy(cWidth, "-1");
@@ -3721,6 +3726,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						case SHPT_TEXT:
 						case SHPT_POLYGON:
 						case SHPT_POLYGONZ:
+						case SHPT_POLYGONM:
 							rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, TRUE);
 							break;
 						}
@@ -3834,6 +3840,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 						  case SHPT_TEXT:
 						  case SHPT_POLYGON:
 						  case SHPT_POLYGONZ:
+						  case SHPT_POLYGONM:
 							  rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 							  break;
 						  }
@@ -3901,6 +3908,7 @@ BOOL FAR PASCAL SETSHAPEPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 				case SHPT_TEXT:
 				case SHPT_POLYGON:
 				case SHPT_POLYGONZ:
+				case SHPT_POLYGONM:
 					rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 					break;
 				}
@@ -4227,6 +4235,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 					case SHPT_TEXT:
 					case SHPT_POLYGON:
 					case SHPT_POLYGONZ:
+					case SHPT_POLYGONM:
 						GetGlobalCVal("[%DEFAULTAREASYMBOL]", SymName, "PARCEL");
 						if (!*cWidth)
 							strcpy(cWidth, "-1");
@@ -4275,6 +4284,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						case SHPT_TEXT:
 						case SHPT_POLYGON:
 						case SHPT_POLYGONZ:
+						case SHPT_POLYGONM:
 							rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, TRUE);
 							break;
 						}
@@ -4388,6 +4398,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 						  case SHPT_TEXT:
 						  case SHPT_POLYGON:
 						  case SHPT_POLYGONZ:
+						  case SHPT_POLYGONM:
 							  rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 							  break;
 						  }
@@ -4455,6 +4466,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 				case SHPT_TEXT:
 				case SHPT_POLYGON:
 				case SHPT_POLYGONZ:
+				case SHPT_POLYGONM:
 					rtn = SelectAreaSymbol(hWndDlg, 1, SymName, cColor, FALSE);
 					break;
 				}
@@ -11747,8 +11759,10 @@ BOOL FAR PASCAL DECOMPPOLYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
          SetDlgItemText(hWndDlg,IDC_TOT_ITEMS,str);  
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
 		 CloseOrthos(TRUE);
          SaveMaxOrtho = GetGlobalLVal ("[%ORTHO_BUFFERS]");
          nbufs = GetGlobalLVal ("[%CVTBUFFERS]");
@@ -11909,8 +11923,10 @@ BOOL FAR PASCAL DXF_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
-		_fstrcpy (str,"*.CVT");
-		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		_fstrcpy(str, "[%DL]projections\\*.*");
+		ExpandText(str);
+		DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
  		SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj"); 
  		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"Feet"); 
 		SendDlgItemMessage (hWndDlg,IDC_INCLUDETABLES,BM_SETCHECK,TRUE,0L);
@@ -12689,8 +12705,10 @@ BOOL FAR PASCAL DGN_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 			itoa (i,str,10);
 			SendDlgItemMessage (hWndDlg,IDC_DGNPARMFONT,CB_ADDSTRING,0,(LPARAM)str);
 		}
-		_fstrcpy (str,"*.CVT");
-		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		_fstrcpy(str, "[%DL]projections\\*.*");
+		ExpandText(str);
+		DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
  		SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj"); 
  		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"Feet"); 
 		SendDlgItemMessage (hWndDlg,IDC_INCLUDETABLES,BM_SETCHECK,TRUE,0L);
@@ -14297,8 +14315,10 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
 	    SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
-	    _fstrcpy (str,"*.CVT");
-	    DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		_fstrcpy(str, "[%DL]projections\\*.*");
+		ExpandText(str);
+		DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          if (!hHighlight)
          { 
     NoItems:

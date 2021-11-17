@@ -20085,8 +20085,10 @@ BOOL FAR PASCAL LOADSHPMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)curunits);
 		 if (PRJ_UNITS[1] == 1)
  		 	SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,(WPARAM)0,(LPARAM)0); 
@@ -21510,8 +21512,10 @@ BOOL FAR PASCAL LOADUMAREASMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,-1,(LPARAM)curunits);
          SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,-1,(LPARAM)curproject);
          if (*AutoExportName)
@@ -22131,8 +22135,10 @@ BOOL FAR PASCAL LOADXFERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,-1,(LPARAM)"Meters");
  		 SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj"); 
          break; /* End of WM_INITDIALOG                                 */
@@ -22877,8 +22883,10 @@ BOOL FAR PASCAL LOADDGNDUMPMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees * 1000000");
-         _fstrcpy (str,"*.CVT");
-         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		 _fstrcpy(str, "[%DL]projections\\*.*");
+		 ExpandText(str);
+		 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SELECTSTRING,-1,(LPARAM)"Feet");
  		 SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SELECTSTRING,(WPARAM)-1,(LPARAM)"baseproj");    
          if (*AutoExportName)
@@ -32240,8 +32248,10 @@ BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Feet");
 		SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Meters");
 	    SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Degrees");
-	    _fstrcpy (str,"*.CVT");
-	    DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);   
+		_fstrcpy(str, "[%DL]projections\\*.*");
+		ExpandText(str);
+		DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+		DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
          if (!hHighlight)
          { 
     NoItems:
@@ -32658,8 +32668,10 @@ BOOL FAR PASCAL TXT_OUTPUTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 	         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_ADDSTRING,0,(LPARAM)"Decimal Degrees");  
 	         SendDlgItemMessage (hWndDlg,IDC_UNITS,CB_SETCURSEL,0,0);  
 	         
-	         _fstrcpy (str,"*.CVT");
-	         DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
+			 _fstrcpy(str, "[%DL]projections\\*.*");
+			 ExpandText(str);
+			 DlgDirListComboBox(hWndDlg, str, IDC_PROJECTION, 0, DDL_READWRITE);
+			 DlgDirListComboBox (hWndDlg,str,IDC_PROJECTION,0,DDL_READWRITE);
 	         SendDlgItemMessage (hWndDlg,IDC_PROJECTION,CB_SETCURSEL,0,0);  
 	         if (*AutoExportName)
 			 	PostMessage(hWndDlg, WM_COMMAND, IDC_RECALL, 0L);

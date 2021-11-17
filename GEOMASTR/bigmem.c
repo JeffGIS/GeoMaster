@@ -120,7 +120,7 @@ char	szAppName[20];
 char    AddPrefix[4][10] = { 0 };
 char	AddUDI[34];
 char	AddUDIVar[32];  
-char	CurrentOrthoOrigName[128];
+char	CurrentOrthoOrigName[MAX_PATH];
 char	TagLocPrefix[10];   
 char	TagLocViewport[32]="";
 char	TagLocLayer[32]="";

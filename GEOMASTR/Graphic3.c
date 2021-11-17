@@ -700,36 +700,47 @@ NextPass:
 					CurTheme = SaveTheme;
 			        if (iType == 6)
 						ProcessPickedItem (MAXPICKITEMS-1,FALSE);
-			        else
-						while (DisplaySeg (&NULLHDC,FALSE))
-						{   
-							if (StopAtFirstInPickMacro && NumPicked)  
-							{   
-								int i=NumPicked;
-								
+					else
+					{
+						while (DisplaySeg(&NULLHDC, FALSE))
+						{
+							if (StopAtFirstInPickMacro && NumPicked)
+							{
+								int i = NumPicked;
+
 								while (i--)
 								{
-									if (ItemInPickMacro (i))  
+									if (ItemInPickMacro(i))
 									{
-									    CloseMap (FALSE); 
-								        if (CurView->SubFile)
-								        {
-								            _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
+										CloseMap(FALSE);
+										if (CurView->SubFile)
+										{
+											_fstrcpy(CurView->lpFiles[CurView->RestoreFile], CurView->OrigFile);
 											CurView->SubFile = 0;
 											SetRestoreFile(CurView, 0);
-								        } 
-										goto Exit; 
+										}
+										goto Exit;
 									}
 									else
 										NumPicked = i;
 								}
 							}
-							if (!ContinuePicking (QuitOnMouseMove))  
+							if (!ContinuePicking(QuitOnMouseMove))
 							{
-							    CloseMap (FALSE); 
-								goto Exit; 
+								CloseMap(FALSE);
+								goto Exit;
 							}
 						}
+					}
+					for (itheme = 0; itheme < CurView->NumThemes; itheme++) 
+					{
+						CurTheme = CurView->pThemes[itheme];
+						if (CurTheme->IsActive && CurTheme->VPDisplayed)
+						{
+								GSSiGlobFree(&CurTheme->hVisList);
+						}
+					}
+					CurTheme = SaveTheme;
 				} 
 				else
 				    CloseMap (FALSE); 
@@ -3596,7 +3607,7 @@ GSSiExitProg (61);
 #endif
 		return(0);
 	}
-
+	//CurFileIndexEntry.fileInIndex = 0;
     EndOffset = GSSillseek(FidIndex,(LONG)-(6),2);
     BigRead (FidIndex,(HPSTR)&Signature,4);
     BigRead (FidIndex,(HPSTR)&Version,2);
@@ -3811,7 +3822,8 @@ GSSiExitProg (62);
 	    {
 GetNextIndex:
 	        GSSillseek(FidIndex,NextIndex.NextHeaderOffset,0); 
-	        NextIndex.FileInIndex=NextIndex.NumFiles;     
+	        NextIndex.FileInIndex= NextIndex.NumFiles;
+			//CurFileIndexEntry.fileInIndex += NextIndex.NumFiles;
 	        CurIndex = NextIndex;
 	        goto Next;
 	    } 
@@ -3929,6 +3941,7 @@ GSSiExitProg (64);
     }
     lpIndex->FileInIndex++; 
 Exit:
+	//pCurFileIndexEntry->fileInIndex++;
 	pCurFileIndexEntry->Len = lpIndex->CurrentEntry->Len;
 	pCurFileIndexEntry->BMWidth = lpIndex->CurrentEntry->BMWidth;
 	pCurFileIndexEntry->BMHeight = lpIndex->CurrentEntry->BMHeight;

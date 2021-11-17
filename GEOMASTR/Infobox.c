@@ -663,9 +663,9 @@ BOOL ResetTAGBox (HDC hDC,short From)
     }  
 	else
 	{
-		TAGBox.rect.left = ScreenPoint.x - TAGBox.bmWidth/2;
+		TAGBox.rect.left = max (0,ScreenPoint.x - TAGBox.bmWidth/2);
 		TAGBox.rect.right = TAGBox.rect.left + TAGBox.bmWidth;
-		TAGBox.rect.top = ScreenPoint.y - TAGBox.bmHeight/2;
+		TAGBox.rect.top = max (0,ScreenPoint.y - TAGBox.bmHeight/2);
 		TAGBox.rect.bottom = TAGBox.rect.top + TAGBox.bmHeight; 
 	}
 	if (TAGBox.hTAGDB)

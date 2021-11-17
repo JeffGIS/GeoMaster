@@ -54,7 +54,7 @@ extern BOOL			Allow32bitFileNames;
 extern long			NumOffsetFailed; 
 extern long			lCommonMem;
 extern HPSTR			pCommonMem;
-extern char			CurrentOrthoOrigName[128];
+extern char			CurrentOrthoOrigName[MAX_PATH];
 extern short			OPCODE_EQ;
 extern short			OPCODE_GE;
 extern short			OPCODE_LE;

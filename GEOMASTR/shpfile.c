@@ -666,6 +666,8 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		SHPBaseRefno = IndexEntryStartRef;
 	else
 		SHPBaseRefno = atol (SHPRefno);
+	//if (FileIsIndex)
+	//	SHPBaseRefno = CurFileIndexEntry.fileInIndex;
 	fgetstring (SHPTAG,sizeof(SHPTAG)-2,Fid); 
 	fgetstring (str,32,Fid); 
 	//SHPIndexType = atoi (str);
@@ -1633,7 +1635,8 @@ BOOL ReadSHPRecordHeader (HFILE FidSHP,long RecordOffset,LPMNMXCORD pMinMaxCoord
 		case 4:
 		case SHPT_POLYGON:
 		case SHPT_POLYGONZ:
-//			if (RecLen < sizeof(SHPPolyHeader))
+		case SHPT_POLYGONM:
+			//			if (RecLen < sizeof(SHPPolyHeader))
 //				return FALSE;
             if (BigRead (FidSHP,(HPSTR)&SHPPolyHeader,sizeof(SHPPolyHeader)) != sizeof(SHPPolyHeader))
             	return FALSE; 

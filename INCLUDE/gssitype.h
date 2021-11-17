@@ -2784,6 +2784,7 @@ typedef struct
 		short	BMWidth, BMHeight,BMBitCount;
 		MNMXCORD	Bounds;
 		char	Name[128];
+		//int fileInIndex;
 	}	FILEINDEXENTRY;
 typedef FILEINDEXENTRY	FAR		*LPFILEINDEXENTRY;
 

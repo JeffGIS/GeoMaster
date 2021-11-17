@@ -4080,7 +4080,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	}
 	else if (MapType == MT_FILE_GEO_DB)
 	{
-		SetFGDB_SQL ("ObjectID = [%OBJECTID]");
+		SetFGDB_SQL ("OBJECTID = [%OBJECTID]");
 		if (!OpenFGDBFileIndex (PltName,0))
 			goto RtnFalse;
 	    CurView->PassID=4;  

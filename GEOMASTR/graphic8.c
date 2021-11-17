@@ -449,7 +449,7 @@ NextIndex:
 
 
     {    
-    	char	TestName[128];
+    	char	TestName[MAX_PATH];
     	LPSTR	pAT;
     	
         if (*lpIndex->CurrentEntry->Name == '.')
