@@ -1227,6 +1227,8 @@ int		nHighlightAreaPoints=0;
 int		nHighlightAreaPoly=0;
 HANDLE	hHighlightAreaPolyPartLen=0;
 BOOL	UnHighlightInArea=FALSE;
+BOOL	haveExclusionBounds = FALSE;
+MNMXCORD		ExclusionBounds = { 0 };;
 BOOL	AlwaysUseZoomMacro=FALSE;
 short	ZOOMLevelUsed;
 short	ZOOMLevelWanted=-1;

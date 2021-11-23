@@ -638,17 +638,25 @@ GSSiExitProg (1348);
 				GSSiClose2 (&Fid1);
 				goto RtnTrue;
 			}   
-			if (!_fstrcmp(Arg[1],"VIEWPORT"))
+			if (!_fstrcmp(Arg[1],"VIEWPORT"))//$HLT(VIEWPORT,vpname(opt),exclusionrect(opt))
 			{
 				int saveType;
 				SetCurView ( SetVPFromName (Arg[2],&Err));
 				saveType = CurView->Type;
 				if (CurView->Type == SUBVIEWPORT)
 					CurView->Type = PLANVIEWPORT;
+				if (strlen(Arg[3]))
+				{
+					BOOL err;
+					ExclusionBounds = atobounds(Arg[3], &err);
+					if (!err)
+						haveExclusionBounds = TRUE;		 
+				}
 				nlong = HighlightInArea (CurView->hWnd,&CurView->WBounds,TRUE,TRUE,CurView->hMaskArea);
 				ltoa (nlong,OutLoc,10); 
 				CurView->Type = saveType;
 				CurView = SaveVP; 
+				haveExclusionBounds = FALSE;
 				goto Rtnl;
 			} 
 			if (!_fstrcmp(Arg[1],"AREA"))
