@@ -5236,7 +5236,10 @@ GSSiExitProg (56);
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
 //        ReportRect = SizeReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->FitToWindow);
-		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect,CurView->FitToWindow);  
+		if (!DisplayReport(CurView->hDC, CurView->hReport, CurView->DrawRect, &CurView->DrawRect, 1.0, CurView->ReportRefno, &ReportRect, CurView->FitToWindow))
+		{
+			UnloadReport(&CurView->hReport);
+		}
         if (!CurView->FitToWindow)
         {
             CurView->ReportFactor = DeviceToScreenFactor();

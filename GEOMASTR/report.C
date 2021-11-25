@@ -265,6 +265,10 @@ HANDLE LoadReport (LPSTR Name)
 	GSSiGlobUlFree (&hBuf);
 	GSSiGlobUlFree (&hTempLine);
 	GlobalUnlock (hReport); 
+	if (!OpenReportFiles(hReport))
+		UnloadReport(&hReport);
+	else
+		CloseReportFiles(hReport);
 	return hReport;
 	
 ErrOut:
@@ -1032,17 +1036,18 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 	HANDLE		hTemp;
 	LPSTR		pRow2;
 	
-	if (hDC)
-	{
-		SetDisplayMode (hDC, GF_TEXTMODE);    
-		SelectClipRgn (hDC,0);
-	}  
-	else
+	if (!hDC)
 		hReport = hReportScroll;  
 	if (!hReport)
 		return FALSE;
 	if (!OpenReportFiles (hReport))
 		return FALSE;
+	if (hDC)
+	{
+		SetDisplayMode(hDC, GF_TEXTMODE);
+		SelectClipRgn(hDC, 0);
+	}
+
 	pReport = (LPREPORT)GlobalLock (hReport);   
 	pReport->hDC = hDC;
 	pReport->Rect = Rect;  
