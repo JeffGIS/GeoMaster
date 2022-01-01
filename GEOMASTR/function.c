@@ -4444,7 +4444,8 @@ SetVis:
 			goto RtnTrue;
 		}
 
-		case 439: //$FGDB(DUMP,FGDBPath,OutFilePath,ListType)
+		case 439: //$FGDB(DUMP,FGDBPath,OutFilePath,ListType) dumps table names,types and counts to outfile
+			      //$FGDB(CONVERT,FGDBPath,OutFilePath,Version,OutTableName,KeyField,IncludedFields) converts to SQLITE based file
 		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
@@ -4453,9 +4454,35 @@ SetVis:
 			if (!stricmp(Arg[1], "DUMP"))
 			{
 				int n = DumpFGDBTables(Arg[2], Arg[3], atoi(Arg[4]));
-				itoa(n,OutLoc,10);
+				itoa(n, OutLoc, 10);
+			}
+			else if (!stricmp(Arg[1], "CONVERT"))
+			{
+				int n = ConvertFGDBTable(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7]);
+				itoa(n, OutLoc, 10);
 			}
 			goto Rtnl;
+		}
+		case 440: //$CHAR(COUNT,string,char)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "COUNT"))
+			{
+				int n = 0;
+				LPSTR loc = Arg[2];
+				loc = strchr(loc, *Arg[3]);
+				while (loc)
+				{
+					n++;
+					loc++;
+					loc = strchr(loc, *Arg[3]);
+				}
+				itoa(n, OutLoc, 10);
+				goto Rtnl;
+			}
+			goto RtnFalse;
 		}
 
 		default:

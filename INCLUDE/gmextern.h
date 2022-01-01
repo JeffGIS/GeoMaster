@@ -1,6 +1,7 @@
 #define ZOOMLISTDIR "[%ZOOMLISTDIR]"
 
 extern int			DepthColorIntensity;
+extern HANDLE		hNulls;
 extern int			typeChassis;
 extern int			numMonitors;
 extern BOOL			isTouchScreen;

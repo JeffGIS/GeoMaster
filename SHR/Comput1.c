@@ -774,7 +774,7 @@ int ShowCounts (int i)
 	return i;
 }
 
-float MULREG (double Y[], double X1[], double X2[], int N,LPDOUBLE A,LPDOUBLE B, LPDOUBLE C)
+float MULREG (LPDOUBLE Y, LPDOUBLE X1, LPDOUBLE  X2, int N,LPDOUBLE A,LPDOUBLE B, LPDOUBLE C)
 
 /******* SPECIFICATIONS ***********************************************
 C*                                                                    *

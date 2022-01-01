@@ -4171,6 +4171,9 @@ GSSiExitProg (28);
 		 CurView->HaveBounds = TRUE; 
 		 CurView->NewBounds=CurView->WBounds;
 	 }
+	 LPINT pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
+
      CreateBaseToVPTran (Rect);
      {
      	POINT	WinPoint[2];
@@ -4182,6 +4185,9 @@ GSSiExitProg (28);
    		WinPoint[1].x = CurView->Rect.right;
    		WinPoint[1].y = CurView->Rect.bottom;
 		WinPoint[0].x = WinPoint[1].x = (CurView->Rect.left+CurView->Rect.right)/2;
+		LPINT pInt = GlobalLock(hNulls);
+		GlobalUnlock(hNulls);
+
    		BasePoint[0] = WinPtToBasePt (WinPoint[0]);
    		BasePoint[1] = WinPtToBasePt (WinPoint[1]);  
    		d1 = ldistp (BasePoint[0],BasePoint[1]);

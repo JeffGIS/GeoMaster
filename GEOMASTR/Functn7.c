@@ -1285,7 +1285,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	{
 		nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 		_fstrcpy(OutLoc, Arg[1]);
-		REPLAC(OutLoc, Arg[2], Arg[3], 4096);
+		REPLAC(OutLoc, Arg[2], Arg[3], MAXVARLEN-2);
 		goto Rtnl;
 	}
 

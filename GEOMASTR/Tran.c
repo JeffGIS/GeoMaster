@@ -12,7 +12,7 @@ void SetCurrentParcelTran(LPPARCELTRAN pParTran)
 	return;
 }
 
-HANDLE STRAN2 (int ID,double X1[], double Y1[],double X2[],double Y2[],int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds)
+HANDLE STRAN2 (int ID,LPDOUBLE X1, LPDOUBLE Y1, LPDOUBLE X2, LPDOUBLE Y2,int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds)
 /*    ENTRY      TRNPRO (XIN,YIN,XOUT,YOUT,TRNNUM)
 C     ENTRY      TRANS2 (XIN,YIN,XOUT,YOUT,TRNNUM)
 C     ENTRY      RESIDS (XRESID,YRESID,MAXXRN,MAXYRN,X1,Y1,X2,Y2,N,
@@ -239,8 +239,8 @@ C
 	    TranPtr->ONE_SCALE = TRUE;
     	goto S10;
       }
-      GlobalUnlock (hTran);  
-      GSSiGlobUlFree (&hTemp);
+	  GSSiGlobUlFree(&hTemp);
+	  GlobalUnlock (hTran);
       goto Exit;
 
 /******* SET-UP WITH N EQ 2.*/
@@ -340,7 +340,10 @@ Exit:
 #if ENABLETRACE
 GSSiExitProg (1436);
 #endif
-     return (hTran);
+	TranPtr = GlobalLock(hTran);
+	GlobalUnlock(hTran);
+
+	return (hTran);
 }
 #if ENABLETRACE
 }

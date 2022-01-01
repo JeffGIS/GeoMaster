@@ -480,12 +480,12 @@ BOOL fputstring(LPSTR lpStr, HFILE Fid);
 BOOL fputstring2(LPSTR lpStr, HANDLE Fid);
 LPSTR fgetstring (LPSTR lpStr, int len, HFILE Fid);
 LPSTR fgetstring2 (LPSTR lpStr, int len, HANDLE Fid);
-float MULREG (double Y[], double X1[], double X2[], int N,
+float MULREG (LPDOUBLE Y, LPDOUBLE X1, LPDOUBLE  X2, int N,
               LPDOUBLE A,LPDOUBLE B, LPDOUBLE C);
 double AMEAN (double X[],int N);
 long IDNINT (double X);       
 short IDNSHRT (double X);
-HANDLE STRAN2 (int ID,double X1[], double Y1[],double X2[],double Y2[],int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds);
+HANDLE STRAN2 (int ID, LPDOUBLE X1, LPDOUBLE Y1, LPDOUBLE X2, LPDOUBLE Y2,int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds);
 void TRANS2 (double XIN,double YIN, LPDOUBLE XOUT,LPDOUBLE YOUT, HANDLE hlpTran);
 void TRNPRO (double XIN,double YIN, LPDOUBLE XOUT,LPDOUBLE YOUT, HANDLE hlpTran);   
 void CloseTRANS2 (LPHANDLE phlpTran); 

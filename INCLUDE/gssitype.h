@@ -343,13 +343,18 @@ typedef struct
     BYTE      lfPitchAndFamily;
     CHAR      lfFaceName[LF_FACESIZE];
 } LOGFONT16,  FAR *LPLOGFONT16;
-#pragma pack()
+typedef struct { unsigned char x, y; }	BPOINT;
+typedef struct { char x : 4, y : 4; }CPOINT;
+typedef BPOINT* LPBPOINT;
+typedef CPOINT* LPCPOINT;
 typedef struct
 {
 	short x;
 	short y;
 }  SPOINT;
-typedef SPOINT *LPSPOINT;
+typedef SPOINT* LPSPOINT;
+
+#pragma pack()
 typedef struct
 {
 	short x;
@@ -4237,13 +4242,15 @@ void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size);
 void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDOVERFLOW size_t _Size);
 #define PostMessageA GSSiPOSTMESSAGE 
 BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
+void LogMemAlloc(int MemID, long MemLen);
 #define	GlobalLock	GSSiGLOBALLOCK
-void LogMemAlloc (int MemID,long MemLen);
 LPVOID GSSiGLOBALLOCK (HANDLE hglb);
-#define	GlobalSize	GSSiGLOBALSIZE
-DWORD GSSiGLOBALSIZE (HANDLE hglb);
 #define	GlobalUnlock	GSSiGLOBALUNLOCK
 BOOL GSSiGLOBALUNLOCK (HANDLE hglb);
+LPVOID GlobalLk(HANDLE hglb);
+BOOL GlobalULk(HANDLE hglb);
+#define	GlobalSize	GSSiGLOBALSIZE
+DWORD GSSiGLOBALSIZE(HANDLE hglb);
 #define	GlobalAlloc	GSSiGLOBALALLOC
 HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc);
 #define	GlobalFree	GSSiGLOBALFREE

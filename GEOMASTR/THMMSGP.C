@@ -1290,13 +1290,16 @@ void DisplayNorthArrowLegend (int From)
 					double	SaveRot = CurView->Rotation;
 					XFORM	SavexForm; 
 					long	SaveCycle = DisplayCycle;
-
+					LPINT pInt = GlobalLock(hNulls);
+					GlobalUnlock(hNulls);
 			    	GetImageBounds (File,hDib,&BitmapBounds,&CurView->NewBounds);
 					DestroyDIB32 (hDib,FALSE);
 					SaveBounds = CurView->NewBounds;
 				    CurView->HaveBounds = FALSE;
 					SetScaleAndMidpointFromBounds (CurView);
 					DisplayCycle++;
+					pInt = GlobalLock(hNulls);
+					GlobalUnlock(hNulls);
 					SetBounds (CurView->hWnd,CurView->hDC);
 					SavexForm = CurView->xForm;
 					CurView->Rotation = 0;

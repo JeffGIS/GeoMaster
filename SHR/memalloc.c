@@ -307,10 +307,21 @@ void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDO
 		ii = 1;
 	return calloc(_Count,_Size);
 }
+
 void SetWantHandle(HANDLE hglb)
 {
 	WantHandle = hglb;
 	return;
+}
+LPVOID GlobalLk(HANDLE hglb)
+{
+	HPBYTE p =  GlobalLock(hglb);
+	p = p + 16;
+	return (LPVOID)p;
+}
+BOOL GlobalULk(HANDLE hglb)
+{
+	return GlobalUnlock(hglb);
 }
 LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 {
@@ -318,7 +329,7 @@ LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 	UINT	i; 
 	HPBYTE	pstr;
 extern LPVOID debugaddress;
-//checkvp(1);	
+checkvp(1);	
 /*	if (debugaddress && *(LPBYTE)debugaddress)
 		ii=1;
 	if (debugaddress && !*(LPBYTE)debugaddress)
@@ -375,7 +386,7 @@ BOOL GSSiGLOBALUNLOCK(HANDLE hglb)
 	UINT	i;
 	HPBYTE	pstr; 
 	long	j;
- //checkvp(1);	
+ checkvp(1);	
    
     if (hglb)
     {

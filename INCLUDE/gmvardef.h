@@ -3,6 +3,7 @@
 //char	GMVersion[36]="GeoMaster version 34f (build 6)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
+HANDLE hNulls = 0;
 int		typeChassis = 0;
 int		numMonitors = 1;
 BOOL	isTouchScreen = FALSE;

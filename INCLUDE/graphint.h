@@ -1675,6 +1675,8 @@ short RefInPrevLayer (long Refno);
 BOOL RemoveDummyDelete (int Item);
 int  GetFGDBLev(HWND hWndDlg, UINT ListCntl, int hDB, LPSTR Under, int iLev, HFILE FidOut);
 long DumpFGDBTables(LPSTR DBNameIN, LPSTR OutFile, int ListType);
+long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile,LPSTR Version, LPSTR TableName, LPSTR KeyField, LPSTR IncludeFields);
+void AddFieldType(LPSTR pCmd, LPSTR pName, LPOPENFILEDATA FilePtr, LPINT pNameIndex, LPSTR quote);
 BOOL OpenPrevLayers (short CurLayer, short CurLayerID);
 BOOL ClosePrevLayers (void);
 BOOL MovePolyLineD (DPOINT SnapPoint);
