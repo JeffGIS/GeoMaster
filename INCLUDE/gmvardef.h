@@ -3,6 +3,7 @@
 //char	GMVersion[36]="GeoMaster version 34f (build 6)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
+HANDLE hNulls = 0;
 int		typeChassis = 0;
 int		numMonitors = 1;
 BOOL	isTouchScreen = FALSE;
@@ -1227,6 +1228,8 @@ int		nHighlightAreaPoints=0;
 int		nHighlightAreaPoly=0;
 HANDLE	hHighlightAreaPolyPartLen=0;
 BOOL	UnHighlightInArea=FALSE;
+BOOL	haveExclusionBounds = FALSE;
+MNMXCORD		ExclusionBounds = { 0 };;
 BOOL	AlwaysUseZoomMacro=FALSE;
 short	ZOOMLevelUsed;
 short	ZOOMLevelWanted=-1;

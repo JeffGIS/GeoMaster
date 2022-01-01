@@ -2233,8 +2233,8 @@ NextCrimeRec:
 								ConvertCoord(&pPointsCVT[i], 1, 3);
 								if (!skipConvert)
 									ConvertCoord(&pDPoints[i], 1, 2);
-								pPoints[i].x = coordFactor * (pDPoints[i].x - midPt.x);
-								pPoints[i].y = coordFactor * (pDPoints[i].y - midPt.y);
+								pPoints[i].x = IDNINT(coordFactor * (pDPoints[i].x - midPt.x));
+								pPoints[i].y = IDNINT(coordFactor * (pDPoints[i].y - midPt.y));
 								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
 									canCompress = FALSE;
 							}
@@ -4381,7 +4381,7 @@ static char QuoteValue(LPOPENFILEDATA FilePtr, LPSTR pName)
 	}
 	return q;
 }
-static void AddFieldType(LPSTR pCmd, LPSTR pName, LPOPENFILEDATA FilePtr,LPINT pNameIndex,LPSTR quote)
+void AddFieldType(LPSTR pCmd, LPSTR pName, LPOPENFILEDATA FilePtr,LPINT pNameIndex,LPSTR quote)
 {
 	LPFIELDINFO	pFieldInfo = &FilePtr->FldInfo;
 

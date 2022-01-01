@@ -2672,7 +2672,7 @@ void SetBounds (HWND hWnd,HDC hDC)
     UINT		lSaveVis = 0;
 	RECT		Rect1;
     
-	if (!IsBadWritePtr(CurVis, 4))
+//	if (!IsBadWritePtr(CurVis, 4))
 		SaveVis = CurVis;
     if (CurView->Type == VPTYPE_PROFILE || 
        (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))
@@ -2708,6 +2708,9 @@ GSSiExitProg (25);
 		InLinkedList(-1);
     InLinkedList(CurView->ID);
     Rect1 = CurView->ScreenRect;
+
+	LPINT pInt = GlobalLock(hNulls);
+	GlobalUnlock(hNulls);
 
     SetBounds2 (hWnd,hDC); //pViewports[7]
     SaveBounds = CurView->NewBounds;
@@ -3072,6 +3075,9 @@ void SetBounds2 (HWND hWnd,HDC hDC)
  //checkvp(1);	
 	AdjustBoundsAndDrawRectToRotation ();
      //ClipRect = CurView->DrawRect;
+	LPINT pInt = GlobalLock(hNulls);
+	GlobalUnlock(hNulls);
+
      SetBoundsRect2 (CurView->DrawRect,hDC);  
      if (Display)
      {
@@ -3149,8 +3155,15 @@ void CreateBaseToVPTran (RECT Rectx)
 	 }*/
      CloseTRANS2 (&CurView->hTranVPToBase);
      CloseTRANS2 (&CurView->hTranBaseToVP);
+	 LPINT pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
+
      CurView->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
+	 pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
      CurView->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
+	 pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
 {
 #if ENABLETRACE
 GSSiExitProg (29);
@@ -5236,7 +5249,10 @@ GSSiExitProg (56);
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
 //        ReportRect = SizeReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->FitToWindow);
-		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect,CurView->FitToWindow);  
+		if (!DisplayReport(CurView->hDC, CurView->hReport, CurView->DrawRect, &CurView->DrawRect, 1.0, CurView->ReportRefno, &ReportRect, CurView->FitToWindow))
+		{
+			UnloadReport(&CurView->hReport);
+		}
         if (!CurView->FitToWindow)
         {
             CurView->ReportFactor = DeviceToScreenFactor();

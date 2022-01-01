@@ -1214,82 +1214,111 @@ GSSiExitProg (102);
 
 int checkvp(int i)
 {
-	extern	short idTimer; 
+	extern	short idTimer;
 	extern	BOOL	InProfile;
-	static	LPVIEWPORT pCheckVP=0; 
-	static	LPSTR OrigTagFile=0;
-	static	int	SaveX=0,SaveWidth;
-	static	docheck=FALSE;
+	static	LPVIEWPORT pCheckVP = 0;
+	static	LPSTR OrigTagFile = 0;
+	static	int	SaveX = 0, SaveWidth;
+	static	docheck = FALSE;
 	static	double	SaveScale;
-	static	int	ii=0;
+	static	int	ii = 0;
 	HPEN	hOldPen;
-	RECT	LastRect={0,0,0,0};
-	return 0;
+	RECT	LastRect = { 0,0,0,0 };
 
+	//return 0;
+	if (pNumViewports)
+		for (int iview = 0; iview < *pNumViewports; iview++)
+		{
+			LPVIEWPORT  CurView = pViewportsD[iview];
+			if (CurView->ID > 0)
+			{
+				ii = 0;
+			
+				if (CurView->hTranBaseToVP)
+				{
+					LPTRANDATA  TranPtr;
 
-/*	if (!pViewports)
+					if (CurView->hTranBaseToVP > (HANDLE)1)
+					{
+						TranPtr = (LPTRANDATA)GlobalLk(CurView->hTranBaseToVP);
+						if (!TranPtr)
+						{
+							ii = 1;
+							break;
+						}
+						else if (TranPtr->TriHandle)
+						{
+							ii = 2;
+						}
+						GlobalULk(CurView->hTranBaseToVP);
+					}
+				}
+			}
+		}
+
+	/*	if (!pViewports)
+			return 0;
+		if (!CurrentConfig)
+			return 0;
+		if (!pViewports[0])
+			return 0;
+		if (!pViewports[19])
+			return 0;
+		if (pViewports[19]->pTheme)
+		{
+			if (pViewports[19]->pTheme->hHighlightFile)
+				CheckBTFID (pViewports[19]->pTheme->hHighlightFile);
+		}
 		return 0;
-	if (!CurrentConfig)
-		return 0;
-	if (!pViewports[0])
-		return 0;
-	if (!pViewports[19])
-		return 0;
-	if (pViewports[19]->pTheme)
-	{
-		if (pViewports[19]->pTheme->hHighlightFile)
-			CheckBTFID (pViewports[19]->pTheme->hHighlightFile);
-	}
-	return 0;
-	if (ii==2)
-	{
-		docheck = TRUE;
-	//	SaveX = pViewports[0]->DrawRect.right;
-		SaveScale = pViewports[0]->Scale;
-		SaveWidth = pViewports[0]->LastWidth;
-	}
-	if (docheck && CurrentConfig && (SaveWidth != pViewports[0]->LastWidth || SaveScale != pViewports[0]->Scale))
-	{
-		ii=1;
-		SaveScale = pViewports[0]->Scale;
-	}
-	if (InProfile)
-	{
-		if (CurView->ID == 1)
+		if (ii==2)
+		{
+			docheck = TRUE;
+		//	SaveX = pViewports[0]->DrawRect.right;
+			SaveScale = pViewports[0]->Scale;
+			SaveWidth = pViewports[0]->LastWidth;
+		}
+		if (docheck && CurrentConfig && (SaveWidth != pViewports[0]->LastWidth || SaveScale != pViewports[0]->Scale))
+		{
 			ii=1;
-	}
-	return 1;
-	if (hWndMain)
-	{
-	    HDC	hDC = GetDC (hWndMain);
-		hOldPen = SelectObject (hDC,GetStockObject(BLACK_PEN)); 
-		SelectObject (hDC,hOldPen);
-		ReleaseDC (hWndMain,hDC);
-	}
-	return 0;
-	if (OrigTagFile && OrigTagFile != TagFile)
-		return 0; 
-	if (TagFile)
-		OrigTagFile = TagFile;  
-//	if (pCheckVP && !pCheckVP->Active)
-//		return 0;
-	if (*FontNames[1] && _fstrnicmp (FontNames[1],"Cou",3))
+			SaveScale = pViewports[0]->Scale;
+		}
+		if (InProfile)
+		{
+			if (CurView->ID == 1)
+				ii=1;
+		}
+		return 1;
+		if (hWndMain)
+		{
+			HDC	hDC = GetDC (hWndMain);
+			hOldPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
+			SelectObject (hDC,hOldPen);
+			ReleaseDC (hWndMain,hDC);
+		}
 		return 0;
-	if (testvalue (1))
-		return 0;
-	if (!pNumViewports)
-		return 0;
-	if (!*pNumViewports && idTimer)
-		return 0; 
-//return 0;
-	if (!*pNumViewports)
-		return 0; 
-	if (!pViewports[0])
-		return 0;
-	if (!CurrentConfig && pViewports[2]->Active)
-		pCheckVP = pViewports[2];
-	return 0;
-	*/
+		if (OrigTagFile && OrigTagFile != TagFile)
+			return 0;
+		if (TagFile)
+			OrigTagFile = TagFile;
+	//	if (pCheckVP && !pCheckVP->Active)
+	//		return 0;
+		if (*FontNames[1] && _fstrnicmp (FontNames[1],"Cou",3))
+			return 0;
+		if (testvalue (1))
+			return 0;
+		if (!pNumViewports)
+			return 0;
+		if (!*pNumViewports && idTimer)
+			return 0;
+	//return 0;
+		if (!*pNumViewports)
+			return 0;
+		if (!pViewports[0])
+			return 0;
+		if (!CurrentConfig && pViewports[2]->Active)
+			pCheckVP = pViewports[2];
+*/		return 0;
+
 }
 
 short SetupViewport (RECT rect,BOOL ShrinkToFit,int Band)

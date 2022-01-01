@@ -1,6 +1,7 @@
 #define ZOOMLISTDIR "[%ZOOMLISTDIR]"
 
 extern int			DepthColorIntensity;
+extern HANDLE		hNulls;
 extern int			typeChassis;
 extern int			numMonitors;
 extern BOOL			isTouchScreen;
@@ -512,6 +513,8 @@ extern int			nHighlightAreaPoints;
 extern int			nHighlightAreaPoly;
 extern HANDLE			hHighlightAreaPolyPartLen;
 extern BOOL			UnHighlightInArea;
+extern BOOL			haveExclusionBounds;
+extern MNMXCORD		ExclusionBounds;
 extern long			NumRecordsProcessed;
 extern BOOL			TraceRef;
 extern BOOL			ProcessAllElements;

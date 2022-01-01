@@ -202,7 +202,8 @@ void CreateBigMem (void)
 				//	+ MAXFONTS * sizeof(double);  
 
 //common memory
-	hBigMem7 = GSSiGlobAlloc (1302,GMEM_MOVEABLE,lCommonMem+32); 
+	hNulls = GSSiGlobAlloc(0, GHND, 128);
+	hBigMem7 = GSSiGlobAlloc (1302, GHND,lCommonMem+32);
 	pCommonMem = GlobalLock (hBigMem7);
 
 	hBigMem1 = GSSiGlobAlloc (1297,GHND,memlen);
@@ -331,7 +332,8 @@ void FreeBigMem (void)
 	GSSiGlobUlFree (&hBigMem4); 
 	GSSiGlobUlFree (&hBigMem5); 
 	GSSiGlobUlFree (&hBigMem6); 
-	GSSiGlobUlFree (&hBigMem7); 
+	GSSiGlobUlFree(&hBigMem7);
+	GSSiGlobUlFree(&hNulls);
 	return;
 }
 

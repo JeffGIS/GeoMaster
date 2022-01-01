@@ -3200,6 +3200,394 @@ int GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev,HFILE Fi
 	return NumTot;
 }
 
+long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableName,LPSTR KeyField,LPSTR IncludeFields)
+{
+	UINT	i, j;
+	char	ShpType[16] = "";
+	char	DBName[512], str[256], TableType[64];
+	LPSTR	pPar, pTab;
+	short	ShapeType;
+	double	Xmin, Xmax, Ymin, Ymax;
+	int	Num = 0;
+	int rtn;
+	long	NumRows;
+	LPSTR	pFields;
+	HANDLE	hDB = 0;
+	HANDLE		FidOut;
+	MNMXCORD minmaxCoord;
+	MNMXCORL minmaxCoorl;
+	LPFILEGDBRECHEADER pfgdbHeader;
+	LPFILEGDBRECHEADER pFGDBRecHeader;
+	char cmd[4096];
+	char SLTPath[MAX_PATH];
+	char BINPath[MAX_PATH];
+
+	long lRec;
+	LONGLONG totLen = 0;
+	LONGLONG totPoints = 0;
+	LONGLONG numSamePoint = 0;
+	LONGLONG totUCLen = 0;
+	LONGLONG nDiffPoly = 0;
+	LONGLONG numWithCurves = 0;
+	LONGLONG offset;
+	LONGLONG keyval = 1;
+	int reclen;
+	int hasCurves;
+	int numCompress1=0, numCompress2 = 0, numCompress3 = 0;
+	double coordFactor = 1000000.0;// about 5 inches
+
+	sqlite3* db = NULL;
+
+	sprintf(SLTPath, "%s.slt", OutFile);
+	sprintf(BINPath, "%s.bin", OutFile);
+	sprintf(DBName, "FGDB=%s", DBNameIN);
+	ExpandText(DBName);
+	int ftype=ReadFGDBHeader(DBNameIN, &minmaxCoord);
+	SHPType = ftype;
+	LoadSHPParm(DBNameIN, SHPType, 0);
+
+	if (OpenDataFile(DBName, "", BT_READ, &hDB))
+	{
+		int numRows = NumSQLRows(hDB);
+		LPOPENSQLDATA SQLPtr = (LPOPENSQLDATA)GlobalLock(hDB);
+		LPOPENFILEDATA FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		char	Quotes[64] = { 0 };
+		char	includeFields[1024]; 
+		LPSTR pQuote = Quotes;
+
+		CreateStatusWind(CurView->hWnd, 1, "Converting File Geodatabase");
+		GSSiRemove(SLTPath);
+		rtn = sqlite3_open(SLTPath, &db);
+		if (rtn == SQLITE_OK)
+		{
+			sprintf(cmd, "CREATE TABLE %s_VERSION(VersionNum CHAR(4), COORDFactor DOUBLE);INSERT INTO %s_VERSION VALUES('%s', %f)",TableName,TableName,Version,coordFactor);
+			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+
+			rtn = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+			sprintf(cmd, "CREATE TABLE %s (RECNUM INTEGER PRIMARY KEY,  recType INT, offset INT, recordLen INT, numPoly INT, numPoints INT, compressionType INT, hasCurves INT, FIRSTX INT, FIRSTY INT",TableName);
+			strcpy(includeFields, IncludeFields);
+			LPSTR pName = includeFields;
+			LPSTR pNextName = strchr(pName, ';');
+			while (pName && *pName)
+			{
+				int nameIndex;
+				if (pNextName)
+					*pNextName++ = 0;
+				sprintf(strchr(cmd,0), ",%s ",pName);
+				AddFieldType(cmd, pName, FilePtr, &nameIndex, pQuote);
+				pName = pNextName;
+				if (pName)
+					pNextName = strchr(pName, ';');
+				pQuote++;
+			}
+			strcat(cmd, ");");
+			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+			sprintf(cmd, "CREATE VIRTUAL TABLE %s_index USING rtree_i32(id,minX, maxX, minY, maxY);",TableName);
+			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+		}
+
+		FidOut = OpenFileGM(BINPath, 0, OF_CREATE);
+		if (FidOut != INVALID_HANDLE_VALUE)
+		{
+			while (StatusWindowUpdate(0, 0, numRows, Num) && FetchDBRec(hDB))
+			{
+				LPSTR pCompressedRec;
+				ReadFGDBRecordHeader(&minmaxCoord);
+				ConvertBounds(&minmaxCoord, 1, 2);
+				sprintf(str, "[FGDB.Shape]");
+				ExpandText(str);
+				HANDLE hRec = (HANDLE)atol(str);
+				LPBYTE		pRec = GlobalLock(hRec);
+				long BinSizeR = GlobalSize(hRec);
+				totUCLen += BinSizeR;
+				LPCURVAL pCurVal = (LPCURVAL)pRec;
+				int compType = 0;
+				POINT firstPoint = { 0 };
+
+				SetSHPParms(Num + 1);
+
+				pRec = (LPBYTE)&pCurVal->Value;
+				pFGDBRecHeader = (LPFILEGDBRECHEADER)pRec;
+				pRec += sizeof(FILEGDBRECHEADER);
+				BinSizeR -= (sizeof(FILEGDBRECHEADER) + sizeof(int));
+				//pfgdbHeader = (LPFILEGDBRECHEADER)&pCurVal->Value;
+				sprintf(str, "[FGDB.ELEMENT]");
+				ExpandText(str);
+				HANDLE hElement = (HANDLE)atol(str);
+				if (hElement)
+				{
+					ii = 1;
+				}
+			DoPoly:
+				if (SHPPolyHeader.NumPoints > USHRT_MAX)
+					ii = 1;
+				int type = pFGDBRecHeader->shapeType;
+				if (type == SHPT_POLYGON_WITHCURVES || type == SHPT_POLYGONZ || type == SHPT_POLYGONM || type == SHPT_PGDB_POLYGONZ)
+					nDiffPoly++;
+				int nPoly = SHPPolyHeader.NumParts;
+				int NumPoints = SHPPolyHeader.NumPoints;
+				int structuralPart = SHPPolyHeader.Type & esriShapeBasicTypeMask;
+				if (structuralPart == 50)
+					SHPPolyHeader.Type = SHPT_ARC;
+				if (structuralPart == 51)
+					SHPPolyHeader.Type = SHPT_POLYGON;
+				if (pFGDBRecHeader->shapeType != SHPT_TEXT && (SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ))
+					NumPoints = NumPoints + nPoly - 1;
+				HANDLE hPartIndex = GSSiGlobAlloc(1418, GMEM_MOVEABLE, sizeof(long) * (nPoly + 1));
+				HANDLE hPolyPartLen = GSSiGlobAlloc(1787, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+				HANDLE hPolyPartLenNew = GSSiGlobAlloc(1788, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+				HANDLE hPoints = GSSiGlobAlloc(1420, GMEM_MOVEABLE, sizeof(DPOINT) * NumPoints);
+				HPLONG pPartIndex = (HPLONG)GlobalLock(hPartIndex);
+				long		recloc = sizeof(SHPPOLYHEADER);
+				totPoints += NumPoints;
+				hmemmove((HPSTR)pPartIndex, &pRec[recloc], nPoly * sizeof(long));   //pPartIndex[5]
+				recloc += nPoly * sizeof(long);
+				pPartIndex[SHPPolyHeader.NumParts] = SHPPolyHeader.NumPoints;
+				LPDPOINT pPoints, pFirstPoint;
+				pPoints = pFirstPoint = (LPDPOINT)GlobalLock(hPoints);
+				LPINT pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
+				LPINT pNumPointsNew = (LPINT)GlobalLock(hPolyPartLenNew);
+				for (int i = 0; i < nPoly; i++)
+				{
+					long    numpoints, startpoint, ii;
+
+					startpoint = *pPartIndex++;
+					numpoints = *pPartIndex - startpoint;
+					*pNumPoints++ = numpoints;
+					*pNumPointsNew++ = numpoints;
+					hmemmove((HPSTR)pPoints, &pRec[recloc], numpoints * sizeof(DPOINT));     //pPoints[1]
+					recloc += numpoints * sizeof(DPOINT);
+					pPoints += numpoints;
+					if (i && type != SHPT_TEXT && ((type == SHPT_POLYGON || type == SHPT_POLYGON_WITHCURVES || type == SHPT_POLYGONZ || type == SHPT_POLYGONM || type == SHPT_PGDB_POLYGONZ)))
+						*pPoints++ = *pFirstPoint;
+				}
+				if (pFGDBRecHeader->hasZs)
+				{
+					double zMin = *(LPDOUBLE)&pRec[recloc];
+					double zMax = *(LPDOUBLE)&pRec[recloc + sizeof(double)];
+					SetGlobalValueReal("%FGDBZMin", zMin);
+					SetGlobalValueReal("%FGDBZMax", zMax);
+					recloc += (2 + SHPPolyHeader.NumPoints) * sizeof(double);
+				}
+				if (pFGDBRecHeader->hasMs)
+				{
+					double mMin = *(LPDOUBLE)&pRec[recloc];
+					double mMax = *(LPDOUBLE)&pRec[recloc + sizeof(double)];
+					recloc += (2 + SHPPolyHeader.NumPoints) * sizeof(double);
+				}
+				NumPOC = 0;
+				hasCurves = 0;
+				if (pFGDBRecHeader->hasCurves)
+				{
+					hasCurves = 1;
+					numWithCurves++;
+				}
+				GlobalUnlock(hPoints);
+				GlobalUnlock(hPolyPartLen);
+				GlobalUnlock(hPolyPartLenNew);
+				GSSiGlobUlFree(&hPartIndex);
+				pPoints = (HPDPOINT)GlobalLock(hPoints);//pPoints[9]
+				for (i = 0; i < NumPoints; i++)
+				{
+					ConvertCoord(&pPoints[i], 0, 1);
+					ConvertCoord(&pPoints[i], 1, 2);
+				}
+				HANDLE hIPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, NumPoints * sizeof(POINT));
+				LPPOINT pIPoints = (LPPOINT)GlobalLock(hIPoints);
+				BOOL canCompressI1 = TRUE;
+				BOOL canCompressI2 = TRUE;
+				for (int i = 0; i < NumPoints; i++)
+				{
+					pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+					pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+					if (i)
+					{
+						int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+						int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+						if (xdiff > CHAR_MAX || xdiff < CHAR_MIN || ydiff > CHAR_MAX || ydiff < CHAR_MIN)
+							canCompressI1 = FALSE;
+						if (xdiff > SHRT_MAX || xdiff < SHRT_MIN || ydiff > SHRT_MAX || ydiff < SHRT_MIN)
+							canCompressI2 = FALSE;
+					}
+				}
+				ii = sizeof(BPOINT);
+				ii = sizeof(SPOINT);
+				if (canCompressI1)
+				{
+					int lmem = NumPoints * sizeof(BPOINT);
+					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					LPBPOINT pCMPPoints = GlobalLock(hCMPPoints);
+					numCompress1++;
+					compType = 1;
+					for (int i = 0; i < NumPoints; i++)
+					{
+						pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+						pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+						if (i)
+						{
+							int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+							int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+							pCMPPoints[i].x = xdiff;
+							pCMPPoints[i].y = ydiff;
+							if (!xdiff && !ydiff)
+								numSamePoint++;
+						}
+						else
+							firstPoint = pIPoints[0];
+					}
+					offset = GSSillseek64(FidOut, 0, 1);
+					pCompressedRec = malloc(lmem * 2);
+					lRec = CompressBinaryRecord((LPBYTE)pCMPPoints, pCompressedRec, lmem);
+					if (lRec >= lmem)
+					{
+						lRec = lmem;
+						BigWrite64(FidOut, (HPSTR)pCMPPoints, lRec, -1);
+					}
+					else
+					{
+						BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+						compType += 10;
+					}
+					totLen += lRec;
+					free(pCompressedRec);
+					GSSiGlobUlFree(&hCMPPoints);
+				}
+				else if (canCompressI2)
+				{
+					int lmem = NumPoints * sizeof(SPOINT);
+					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					LPSPOINT pCMPPoints = GlobalLock(hCMPPoints);
+					numCompress2++;
+					compType = 2;
+					for (int i = 0; i < NumPoints; i++)
+					{
+						pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+						pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+						if (i)
+						{
+							int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+							int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+							pCMPPoints[i].x = xdiff;
+							pCMPPoints[i].y = ydiff;
+							if (!xdiff && !ydiff)
+								numSamePoint++;
+						}
+						else
+							firstPoint = pIPoints[0];
+					}
+					offset = GSSillseek64(FidOut, 0, 1);
+					pCompressedRec = malloc(lmem * 2);
+					lRec = CompressBinaryRecord((LPBYTE)pCMPPoints, pCompressedRec, lmem);
+					if (lRec >= lmem)
+					{
+						lRec = lmem;
+						BigWrite64(FidOut, (HPSTR)pCMPPoints, lRec, -1);
+					}
+					else
+					{
+						BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+						compType += 10;
+					}
+					totLen += lRec;
+					free(pCompressedRec);
+					GSSiGlobUlFree(&hCMPPoints);
+				}
+				else
+				{
+					int lmem = NumPoints * sizeof(POINT);
+					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					LPPOINT pCMPPoints = GlobalLock(hCMPPoints);
+					numCompress3++;
+					for (int i = 0; i < NumPoints; i++)
+					{
+						pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+						pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+						if (i)
+						{
+							int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+							int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+							pCMPPoints[i].x = xdiff;
+							pCMPPoints[i].y = ydiff;
+							if (!xdiff && !ydiff)
+								numSamePoint++;
+						}
+						else
+							firstPoint = pIPoints[0];
+
+					}
+					offset = GSSillseek64(FidOut, 0, 1);
+					pCompressedRec = malloc(lmem * 2);
+					lRec = CompressBinaryRecord((LPBYTE)pCMPPoints, pCompressedRec, lmem);
+					if (lRec >= lmem)
+					{
+						lRec = lmem;
+						BigWrite64(FidOut, (HPSTR)pCMPPoints, lRec, -1);
+					}
+					else
+					{
+						BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+						compType += 10;
+					}
+					totLen += lRec;
+					free(pCompressedRec);
+					GSSiGlobUlFree(&hCMPPoints);
+				}
+				GSSiGlobUlFree(&hPoints);
+				GSSiGlobUlFree(&hIPoints);
+				GSSiGlobFree(&hPolyPartLen);
+				GSSiGlobFree(&hPolyPartLenNew);
+				sprintf(cmd, "INSERT INTO %s VALUES(%lli,%i,%lli,%i,%i,%i,%i,%i,%i,%i", TableName,keyval,type,offset,lRec,nPoly,NumPoints,compType,hasCurves,firstPoint.x,firstPoint.y);
+				strcpy(includeFields, IncludeFields);
+				LPSTR pName = includeFields;
+				LPSTR pNextName = strchr(pName, ';');
+				LPSTR pQuote = Quotes;
+				while (pName && *pName)
+				{
+					char value[4096];
+					if (pNextName)
+						*pNextName++ = 0;
+					sprintf(value, "[FGDB.%s]", pName);
+					ExpandText(value);
+					if (*pQuote)
+						sprintf(strchr(cmd, 0), ",'%s'", value);
+					else
+						sprintf(strchr(cmd, 0), ",%s", value);
+					pQuote++;
+					pName = pNextName;
+					if (pName)
+						pNextName = strchr(pName, ';');
+				}
+
+				strcat(cmd, ");");
+				minmaxCoorl.xmn = IDNINT(coordFactor * minmaxCoord.xmn);
+				minmaxCoorl.xmx = IDNINT(coordFactor * minmaxCoord.xmx);
+				minmaxCoorl.ymn = IDNINT(coordFactor * minmaxCoord.ymn);
+				minmaxCoorl.ymx = IDNINT(coordFactor * minmaxCoord.ymx);
+
+				sprintf(strchr(cmd, 0), "INSERT INTO %s_index VALUES(%lli,%i,%i,%i,%i)", TableName,keyval++, minmaxCoorl.xmn, minmaxCoorl.xmx, minmaxCoorl.ymn, minmaxCoorl.ymx);
+				rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+/*				pCompressedRec = malloc(BinSizeR * 2);
+				lRec = CompressBinaryRecord((LPBYTE)pCurVal, pCompressedRec, BinSizeR);
+				totLen += lRec;
+				totPoints += SHPPolyHeader.NumPoints;
+				BigWrite64(FidOut, (HPSTR)&lRec, 4, -1);
+				BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+				free(pCompressedRec);*/
+				GlobalUnlock(hRec);
+				Num++;
+			
+			}
+			GSSiClose64(&FidOut);
+			rtn = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+			rtn = sqlite3_close(db);
+		}
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hDB);
+		CloseDataFile(TRUE, &hDB);
+		DestroyStatusWindow(0);
+	}
+	return Num;
+}
 long DumpFGDBTables(LPSTR DBNameIN, LPSTR OutFile, int ListType)
 {
 	UINT	i, j;
@@ -3226,7 +3614,7 @@ long DumpFGDBTables(LPSTR DBNameIN, LPSTR OutFile, int ListType)
 		hDB = OpenFGDB2(DBName, "", "");
 		if (hDB > 0)
 		{
-			Num = GetFGDBLev(0,0, hDB, "\\", 0, FidOut);
+			Num = GetFGDBLev(0, 0, hDB, "\\", 0, FidOut);
 			CloseFGDB(hDB);
 		}
 		GSSiClose2(&FidOut);

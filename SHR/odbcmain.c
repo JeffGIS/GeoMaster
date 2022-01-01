@@ -2052,8 +2052,19 @@ TryAgain:
      }
 	 if (GetGlobalBVal ("[%BLOCKODBCERROR]"))
 		 HaltReport=TRUE;  
-	 else if (GSSiMessageBox (0,errmess,lpcstring,MB_OKCANCEL|MB_ICONQUESTION|MB_TASKMODAL,0) == IDCANCEL)
-	     	 HaltReport=TRUE;  
+	 else
+	 {
+		 char teststr[128] = "[SITE]";
+		 UINT opt = MB_OKCANCEL;
+		 ExpandText(teststr);
+		 if (!stricmp(teststr, "MPLS_REMOTE"))
+		 {
+			 opt = 0;
+			 strcpy(errmess, "You need an active VPN connection to the network to access this database");
+		 }
+		 if (GSSiMessageBox(0, errmess, lpcstring, opt | MB_ICONQUESTION | MB_TASKMODAL, 0) == IDCANCEL || !opt)
+			 HaltReport = TRUE;
+	 }
    }  
 
    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)  goto s44;

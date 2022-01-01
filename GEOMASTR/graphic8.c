@@ -4585,10 +4585,13 @@ Exit:
 //		PickList[0].Rect = *Rect; 
 		_fstrcpy (PickList[0].Prefix,CurrentPrefix);
 		_fstrcpy (PickList[0].UDI,CurrentUDI);
-		if (UnHighlightInArea) 
-			RemoveFromHighlightList (PickList[0].Refno,0);
-		else
-			AddToHighlightList (CurrentRefno,&PickList[0],TRUE);
+		if (!haveExclusionBounds || !IntersectBounds(&PickList[0].Rect, &ExclusionBounds,0))
+		{
+			if (UnHighlightInArea)
+				RemoveFromHighlightList(PickList[0].Refno, 0);
+			else
+				AddToHighlightList(CurrentRefno, &PickList[0], TRUE);
+		}
 	}
 {
 #if ENABLETRACE

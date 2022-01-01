@@ -1907,8 +1907,19 @@ GSSiExitProg (1350);
 			goto Rtnl;
 		}
 		case 860://$LASTCHAR(text) returns last char in string
+				 //$LASTCHAR(text,SET,C) sets last char in string and returns result
 		{
-			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[2], "SET"))
+			{
+				int ln = strlen(Arg[1]);
+				strcpy(OutLoc, Arg[1]);
+				if (ln)
+				{
+					OutLoc[ln-1] = *Arg[3];
+				}
+				goto Rtnl;
+			}
 			*OutLoc = *LastChr(Arg[1]);
 			OutLoc[1] = 0;
 			goto Rtnl;
