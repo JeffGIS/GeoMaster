@@ -462,7 +462,7 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile);
 BOOL DisplayBMInVP (HDC hDC, HANDLE hDib, BOOL Stretch,LPORTHO CurOrtho,BOOL Fast);
 BOOL DisplayBMInVP32 (HDC hDC, HDIB32 hDib, BOOL Stretch,LPORTHO CurOrtho);
 BOOL DisplayBMInVP32Ext (HDC hDC,LPSTR BMFile,short vpxin,short vpyin,short vpwin,short vphin);
-BOOL ConvertToJP2(int year, int nparts);
+BOOL ConvertToJP2(LPSTR fromDir, int nparts);
 BOOL DisplayVirtualPlot (LPSTR Name);  
 BOOL VirtualPlotToImage (LPSTR ImageFile,LPSTR VirtualPlotIndex,DWORD Flag);
 BOOL CreateVirtualPlotIndex (LPSTR VirtPlotDir,LPSTR ImageFile);
