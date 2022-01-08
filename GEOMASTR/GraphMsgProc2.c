@@ -2399,6 +2399,11 @@ GSSiExitProg (1107);
         
 		hSaveBM = EnterBlockingWindow (hWndDlg);
         Args = GlobalLock (hSelectItemsArgs);
+		LPSTR pInitVal = strrchr(Args, ';');
+		if (pInitVal)
+		{
+			*pInitVal++ = 0;
+		}
         if (*Args == 'N') 
         {
         	UseFile = FALSE;
@@ -2408,7 +2413,9 @@ GSSiExitProg (1107);
         	UseFile = TRUE;
         	  
         SetWindowText (hWndDlg,&Args[850]);
-    	n = FillList (hWndDlg,IDC_LIST,&Args[2],0,&Rect);
+    	n = FillList (hWndDlg,IDC_LIST,&Args[2], pInitVal,&Rect);
+		if (pInitVal && n >= 0)
+			ii = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_SETSEL,1,n);
 		GlobalUnlock (hSelectItemsArgs);
 		if (n == -2) 
     	{ 

@@ -2540,9 +2540,8 @@ GotCloseFilehSQL:
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 4)
 				goto RtnFalse;
-			int year = atoi(Arg[3]);
 			int nparts = atoi(Arg[4]);
-			if (ConvertToJP2(year, nparts))
+			if (ConvertToJP2(Arg[3], nparts))
 				goto RtnTrue;
 			goto RtnFalse;
 		}
