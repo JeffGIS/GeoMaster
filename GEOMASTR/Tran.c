@@ -974,28 +974,32 @@ void CloseTRANS2 (LPHANDLE phlpTran)
 {    
 	LPTRANDATA  TranPtr;
 
+	if (*phlpTran == 0)
+		return;
 	if (*phlpTran > (HANDLE)1)
-	{   
+	{
 		TranPtr = (LPTRANDATA)GlobalLock(*phlpTran);
 		if (!TranPtr)
 		{
-			*phlpTran = 0;	
+			*phlpTran = 0;
 			return;
 		}
 		if (TranPtr->TriHandle)
 		{
-		    HPTRANTRI	Tri=(HPTRANTRI)GlobalLock (TranPtr->TriHandle);
-		    short		NumTri = Tri->NumTri;
+			HPTRANTRI	Tri = (HPTRANTRI)GlobalLock(TranPtr->TriHandle);
+			short		NumTri = Tri->NumTri;
 
-		    while (NumTri--)
-		    {
-		    	CloseTRANS2 (&Tri->hFromTran);
-		    	CloseTRANS2 (&Tri++->hToTran);
-		    } 
-		    GSSiGlobUlFree (&TranPtr->TriHandle);
+			while (NumTri--)
+			{
+				CloseTRANS2(&Tri->hFromTran);
+				CloseTRANS2(&Tri++->hToTran);
+			}
+			GSSiGlobUlFree(&TranPtr->TriHandle);
 		}
-		GSSiGlobUlFree (phlpTran);
+		GSSiGlobUlFree(phlpTran);
 	}
+	else
+		ii = 1;
 	*phlpTran = 0;
 	return;
 

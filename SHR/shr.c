@@ -11130,7 +11130,18 @@ GSSiExitProg (338);
 }
 #endif
 }
-   
+
+RECT RectFromPointAndWidth(POINT pt, int w)
+{
+	RECT r;
+	w /= 2;
+	r.left = pt.x - w;
+	r.right = pt.x + w;
+	r.top = pt.y - w;
+	r.bottom = pt.y + w;
+	return r;
+
+}
 void ClearSavedScreens(HWND hWnd,LPVOID pVP, LPRECT pRect)
 #if ENABLETRACE
 {GSSiEnterProg (339);

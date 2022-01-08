@@ -5223,7 +5223,7 @@ GSSiExitProg (919);
 	SetGlobalValue ("%SHOWSELECTED","");
 	hSaveVP = GSSiGlobAlloc ( 677,GMEM_MOVEABLE,sizeof(VIEWPORT));
 	SaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
-	GSSiDeleteObject (&CurView->hRgn);
+	ClearVPHandles(CurView);
 	*SaveVP = *CurView;	
 	AP = SetAutoPan (FALSE);
 	hVisList=GSSiGlobAlloc ( 678,GHND,sizeof(VISLIST));
@@ -5267,6 +5267,7 @@ NextRef:
 	IgnorePrevLayers = SaveIgnorePrevLayers;
 	GSSiGlobUlFree (&hVisList);
 	CurVis = SaveVis;
+	ClearVPHandles(CurView);
 	*CurView = *SaveVP;
 	SetAutoPan (AP);
 	GSSiGlobUlFree (&hSaveVP);

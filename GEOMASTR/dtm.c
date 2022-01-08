@@ -2862,7 +2862,8 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 			SetConfig (1);
 		  	SetViewport (*pCommandViewport);
   		  	GSSiDeleteObject(&CurView->hRgn);
-	    	*pSaveVP = *CurView; 
+			ClearVPHandles(CurView);
+			*pSaveVP = *CurView;
 			SaveDC (CurView->hDC); 
 			CurView->NumNewObjects = 0;
 	    	CurView->NumFiles=1;    
@@ -2916,7 +2917,8 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	    	hDTM = SavehDTM;
 	    	CurVis = SaveVis;   
 	    	RestoreDC (CurView->hDC,-1);
-		  	SetViewport (*pCommandViewport);  
+		  	SetViewport (*pCommandViewport); 
+			ClearVPHandles(CurView);
 	    	*CurView = *pSaveVP;  
 	    	_fstrcpy (CurView->lpFiles[0],pSaveFile1);
 	    	GSSiGlobUlFree (&hSaveVP);

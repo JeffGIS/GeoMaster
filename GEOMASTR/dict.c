@@ -1752,6 +1752,13 @@ Next:
 							}
 							else
 							{
+								if (ItemIsHighlighted)
+								{
+									COLORREF hColor = ConvertColor(HighlightColor, lpSym->Number);
+									RECT rect = RectFromPointAndWidth (*pTiePoint, max(1, IDNINT(Hsize * lpSym->HSize)));
+									InflateRect(&rect, 1, 1);
+									FillRectColor(hDC, &rect, hColor);
+								}
 								if (pElement->FillColorType == SVVARCOLOR && HaveVarFillColor)
 									DisplayTransparentBitmap (hDC,&hDib,*pTiePoint,0,max(1,IDNINT(Hsize*lpSym->HSize)),pBounds,&GlobalColors[0],0);
 								else

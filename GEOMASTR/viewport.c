@@ -1212,6 +1212,18 @@ GSSiExitProg (102);
 #endif
 }
 
+void ClearVPHandles(LPVIEWPORT pCurView)
+{
+	//return;
+	GSSiDeleteObject(&pCurView->hRgn);
+	DestroySavedScreen(&pCurView->LinkedCursorHandle, 0);
+	CloseTRANS2(&pCurView->hTranVPToBase);
+	CloseTRANS2(&pCurView->hTranBaseToVP);
+	CloseTRANS2(&pCurView->hTranVPToScreen);
+	CloseTRANS2(&pCurView->hTranScreenToVP);
+	CloseTRANS2(&pCurView->hFileTransIn);
+	CloseTRANS2(&pCurView->hFileTransOut);
+}
 int checkvp(int i)
 {
 	extern	short idTimer;
@@ -1224,8 +1236,9 @@ int checkvp(int i)
 	static	int	ii = 0;
 	HPEN	hOldPen;
 	RECT	LastRect = { 0,0,0,0 };
-
-	//return 0;
+	return 0;
+	if (inUnallocateConfig)
+		return 0;
 	if (pNumViewports)
 		for (int iview = 0; iview < *pNumViewports; iview++)
 		{

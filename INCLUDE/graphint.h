@@ -1800,6 +1800,7 @@ BOOL DisplayDTMArea (long Refno,LPDPOINT DPoint,short Nump,double SlopePCT,doubl
 long GetDTMHoles (LPSTR DTMName, LPSTR OutFile);
 BOOL DTMCopy (LPSTR ToSurf,LPSTR FromSurf,LPSTR AreaRefOrTAG);
 BOOL EditDTMSettings (HWND hWnd,short LayerNum);
+void ClearVPHandles(LPVIEWPORT pVP);
 HANDLE DisplayPointerInVP (int type,DPOINT WPoint,DPOINT WPoint2,short PixelSize,COLORREF Color);
 void UpdateInfoBoxVPID (LPSHORT NewIDs);
 void ConvertSymbol (LPSHORT pSym);
