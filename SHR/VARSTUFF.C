@@ -10765,8 +10765,9 @@ GetScale:
 	}
 
 	ires = min(numOrthoLevs-1, max(ires + GetGlobalLVal2("[%INCORTHORES]", 0), GetGlobalLVal2("[%MINORTHORES]", 0)));
-	SetGlobalValueLong ("%ORTHORES",OrthRes[ires]);
-	
+	SetGlobalValueLong("%ORTHORES", OrthRes[ires]);
+	//SetGlobalValueLong("%ORTHORES", 64);
+
 {
 #if ENABLETRACE
 GSSiExitProg (596);

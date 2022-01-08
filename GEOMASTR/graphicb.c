@@ -1281,8 +1281,15 @@ BOOL GetTextString (HWND hWnd,LPSTR String,int lenstring, LPSTR Title,LPSTR List
 		*Arg5 = 'N';
 		Arg5[1] = 'N';
 		if (ListFile)
-			_fstrcpy (&Arg5[2],ListFile);
-		_fstrcpy (&Arg5[850],Title);
+		{
+			_fstrcpy(&Arg5[2], ListFile);
+			if (InitVal)
+			{
+				strcat(&Arg5[2], ";");
+				strcat(&Arg5[2], InitVal);
+			}
+		}
+		_fstrcpy(&Arg5[850], Title);
 		GlobalUnlock (hSelectItemsArgs);
 		lpfnTEXTSTRINGMsgProc = MakeProcInstance((DLGPROC)SELECTITEMSMsgProc, hInst);
 		if (Sorted)

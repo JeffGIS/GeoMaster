@@ -1225,7 +1225,8 @@ int checkvp(int i)
 	HPEN	hOldPen;
 	RECT	LastRect = { 0,0,0,0 };
 
-	//return 0;
+	if (inUnallocateConfig)
+		return 0;
 	if (pNumViewports)
 		for (int iview = 0; iview < *pNumViewports; iview++)
 		{

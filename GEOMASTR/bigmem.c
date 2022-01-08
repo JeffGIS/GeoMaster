@@ -333,7 +333,7 @@ void FreeBigMem (void)
 	GSSiGlobUlFree (&hBigMem5); 
 	GSSiGlobUlFree (&hBigMem6); 
 	GSSiGlobUlFree(&hBigMem7);
-	GSSiGlobUlFree(&hNulls);
+	GSSiGlobFree(&hNulls);
 	return;
 }
 

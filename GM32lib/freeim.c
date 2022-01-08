@@ -1337,6 +1337,8 @@ DWORD GM32StretchDIBitsFromHandle (HDC hDC16,long destX,long destY,long destW,lo
 	else
 		OldMode = SetStretchBltMode(hDC,COLORONCOLOR);*/ //01/05/2013 for waypoint basemap
 	SetStretchBltMode(hDC,StretchMode);
+	if (StretchMode == HALFTONE)
+		SetBrushOrgEx(hDC, 0, 0, &pt);
 	if (RasterOpt >= (DWORD)0x01000000)
 		RasterOpt -= (DWORD)0x01000000;
 /*	sprintf (str,"%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld",

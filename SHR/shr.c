@@ -5871,7 +5871,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	        {   
 	        	if (pRect)
 	        		MaxLen = max (MaxLen,lpBar-str-1);
-	            *lpBar = '\t';
+	            *lpBar++ = '\t';
 	            if (hWndDlg) 
 	            {
 	                Index = SendDlgItemMessage (hWndDlg,Control,LB_ADDSTRING,0,(LPARAM)str);  
@@ -5881,7 +5881,9 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	                	MaxHeight = max (MaxHeight,Rect.bottom - Rect.top);   
 	                	NumItems++;
 	                }
-	                if (i == Default)
+					if (DefaultVal && !stricmp(lpBar, DefaultVal))
+						Default = Index;
+					if (i == Default)
 	                	DefaultIndex = Index;
 	            }
 	            else if (i == Default)

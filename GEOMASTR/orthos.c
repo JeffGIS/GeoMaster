@@ -3394,23 +3394,53 @@ Exit:
 	return rtn;
 }
 
-BOOL ConvertToJP2(int year,int nparts)
+BOOL ConvertToJP2(LPSTR fromDir,int nparts)
 {
 	char cmd[128] = "[%JP2Factor]=16";
+	char levels[256];
+	char from[MAX_PATH], to[MAX_PATH];
 	BOOL rtn = TRUE;
+	int year;
+	int maxLevels = 256;
+	char saveC = fromDir[4];
 	ExpandText(cmd);
+	fromDir[4] = 0;
+	year = atoi(fromDir);
+	fromDir[4] = saveC;
+	LPSTR pNextLev=0;
+	LPSTR pLevel = 0;
+
 	for (int part = 0; part < nparts; part++)
 	{
 		int lev = 1;
-		while (rtn && lev <= 256)
+		sprintf(from, "[%%DL]orthos\\%s\\%i_%i\\global.ini", fromDir, year, part + 1);
+		if (ExistFile(from))
 		{
-			char from[MAX_PATH], to[MAX_PATH];
-			sprintf(from, "[%%DL]orthos\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
-			sprintf(to, "[%%DL]orthos\\jp2\\Orth%i\\%i_%i\\index%i", year,year, part+1, lev);
+			LoadGlobalInit(from, FALSE);
+			strcpy(levels, "[%ORTHOLEVS]");
+			ExpandText(levels);
+			pLevel = levels;
+			pNextLev = strchr(levels, ',');
+			lev = atoi(pLevel);
+			sprintf(to, "[%%DL]orthos\\jp2\\Orth%s\\%i_%i\\global.ini", fromDir, year, part + 1);
+			GSSiCopyFile(from, to, TRUE);
+		}
+		while (rtn && lev > 0)
+		{
+			sprintf(from, "[%%DL]orthos\\%s\\%i_%i\\index%i", fromDir,year, part+1, lev);
+			sprintf(to, "[%%DL]orthos\\jp2\\%s\\%i_%i\\index%i",fromDir,year, part+1, lev);
 			ExpandText(from);
 			ExpandText(to);
 			rtn = ConvertOrthoToJP2(from, to, 1);
-			lev *= 2;
+			if (pNextLev)
+			{
+				pNextLev++;
+				pLevel = pNextLev;
+				pNextLev = strchr(pLevel, ',');
+				lev = atoi(pLevel);
+			}
+			else
+				lev = 0;
 		}
 	}
 	return rtn;

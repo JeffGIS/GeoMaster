@@ -2051,6 +2051,7 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
     BITMAPINFOHEADER DibInfo;  
     double	Factor=1; 
     short	ii;
+	POINT pt;
 	BOOL deleteImage = FALSE;
     
 	destH = 0;
@@ -2089,6 +2090,8 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
         destH = (int)(Rect.bottom - Rect.top);
     }
     SetStretchBltMode(hDC, StretchMode); 
+	if (StretchMode == HALFTONE)
+		SetBrushOrgEx(hDC, 0, 0, &pt);
 /*    if (pDibInfo->biClrUsed)
     	ColorOpt = DIB_PAL_COLORS;
     else*/
