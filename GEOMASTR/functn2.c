@@ -4742,65 +4742,73 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
+			BOOL SaveBMPCache = AllowBMPCaching;
+			BOOL SaveAllowCache = AllowCache;
+			AllowBMPCaching = FALSE;
+			AllowCache = FALSE;
+
 			hDib32In = BMPHandleFromEXT (Arg[1]);
-			if (!hDib32In)
-				goto RtnFalse;
-			if (!stricmp(Arg[3],"FENCE"))
-				rtn = CreateCompressedFenceFromBitmap (Arg[2],hDib32In,Arg[4]);
-			else
+			if (hDib32In)
 			{
-				switch (atoi (Arg[4]))
+				if (!stricmp(Arg[3], "FENCE"))
+					rtn = CreateCompressedFenceFromBitmap(Arg[2], hDib32In, Arg[4]);
+				else
 				{
-				case 0:
-					break;
-				case 4:
-					hDib32Out = GSSiFreeImage_ConvertTo4Bits(hDib32In);
-					break;
-				case -8:
-					hDib32Out = GSSiFreeImage_ConvertTo8Bits(hDib32In);
-					break;
-				case 8:
-					hDib32Out = GSSiFreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
-					break;
-				case 16:
-					hDib32Out = GSSiFreeImage_ConvertTo16Bits565(hDib32In);
-					break;
-				case 24:
-				default:
-					hDib32Out = GSSiFreeImage_ConvertTo24Bits(hDib32In);
-					break;
-				case 32:
-					hDib32Out = GSSiFreeImage_ConvertTo32Bits(hDib32In);
-					if (*Arg[5])
+					switch (atoi(Arg[4]))
 					{
-						COLORREF icolor = atol (Arg[5]);
-						BYTE r=GetRValue (icolor), g=GetGValue (icolor), b=GetBValue (icolor);
-						DWORD	w = FreeImage_GetWidth(hDib32Out);
-						DWORD	h = FreeImage_GetHeight(hDib32Out);
-						DWORD	irow, icol;
-
-						for (irow = 0;irow < h;irow++)
+					case 0:
+						break;
+					case 4:
+						hDib32Out = GSSiFreeImage_ConvertTo4Bits(hDib32In);
+						break;
+					case -8:
+						hDib32Out = GSSiFreeImage_ConvertTo8Bits(hDib32In);
+						break;
+					case 8:
+						hDib32Out = GSSiFreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
+						break;
+					case 16:
+						hDib32Out = GSSiFreeImage_ConvertTo16Bits565(hDib32In);
+						break;
+					case 24:
+					default:
+						hDib32Out = GSSiFreeImage_ConvertTo24Bits(hDib32In);
+						break;
+					case 32:
+						hDib32Out = GSSiFreeImage_ConvertTo32Bits(hDib32In);
+						if (*Arg[5])
 						{
-							LPRGBQUAD	pC32 = (LPRGBQUAD)FreeImage_GetScanLine (hDib32Out,irow);
+							COLORREF icolor = atol(Arg[5]);
+							BYTE r = GetRValue(icolor), g = GetGValue(icolor), b = GetBValue(icolor);
+							DWORD	w = FreeImage_GetWidth(hDib32Out);
+							DWORD	h = FreeImage_GetHeight(hDib32Out);
+							DWORD	irow, icol;
 
-							for(icol = 0;icol < w;icol++,pC32++)
+							for (irow = 0; irow < h; irow++)
 							{
-								if (pC32->rgbBlue == b && pC32->rgbGreen == g && pC32->rgbRed == r)
-									pC32->rgbReserved = 0;
-								else
-									pC32->rgbReserved = 255;
+								LPRGBQUAD	pC32 = (LPRGBQUAD)FreeImage_GetScanLine(hDib32Out, irow);
+
+								for (icol = 0; icol < w; icol++, pC32++)
+								{
+									if (pC32->rgbBlue == b && pC32->rgbGreen == g && pC32->rgbRed == r)
+										pC32->rgbReserved = 0;
+									else
+										pC32->rgbReserved = 255;
+								}
 							}
 						}
+						break;
 					}
-					break;
+					makedirectories(Arg[2], FALSE, FALSE);
+					if (hDib32Out)
+						rtn = GMFIBMPHandleToEXT(Arg[2], hDib32Out, atoi(Arg[3]));
 				}
-				makedirectories (Arg[2],FALSE,FALSE);
-				if (hDib32Out)
-					rtn = GMFIBMPHandleToEXT (Arg[2],hDib32Out,atoi(Arg[3]));
+				GMDestroyDIB32(hDib32In);
+				GMDestroyDIB32(hDib32Out);
 			}
-			GMDestroyDIB32 (hDib32In);
-			GMDestroyDIB32 (hDib32Out);
-           	goto Rtnrtn;
+			AllowBMPCaching = SaveBMPCache;
+			AllowCache = SaveAllowCache;
+			goto Rtnrtn;
 		}
 
 		case 1215: //$POLYPROBLEMS(Which Prob to check for (1-n) default=0or all),Symbol to display,size

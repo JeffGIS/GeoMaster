@@ -158,6 +158,20 @@ BOOL GenericWriter(FIBITMAP* dib, const char* lpszPathName, int flag) {
 
 				GSSiFreeImage_Unload(dib2);
 			}
+			else if (fif == FIF_JPEG)
+			{
+				if (flag == 1000)
+					flag = JPEG_QUALITYBAD;
+				else if (flag == 1001)
+					flag = JPEG_QUALITYAVERAGE;
+				else if (flag == 1002)
+					flag = JPEG_QUALITYNORMAL;
+				else if (flag == 1003)
+					flag = JPEG_QUALITYGOOD;
+				else if (flag == 1004)
+					flag = JPEG_QUALITYSUPERB;
+				bSuccess = FreeImage_Save(fif, dib, lpszPathName, flag);
+			}
 			else if(FreeImage_FIFSupportsWriting(fif) && FreeImage_FIFSupportsExportBPP(fif, bpp)) 
 			{
 				bSuccess = FreeImage_Save(fif, dib, lpszPathName, flag);
@@ -468,7 +482,7 @@ WORD GM32SaveDIB (HDIB32 hDIB,LPSTR OutFileIN,long Format,DWORD Flag)
 	{
 		strcpy(OutFile, OutFileIN);
 		ExpandText(OutFile);
-		rtn = GMFIBMPHandleToEXT(OutFile, (HANDLE)hDIB, Flag);
+		rtn = GMFIBMPHandleToEXT(OutFile, (HANDLE)hDIB, Flag); 
 //		rtn = GenericWriter(dib,OutFile,Flag);
 
 	}

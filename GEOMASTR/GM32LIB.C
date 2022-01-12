@@ -443,7 +443,11 @@ BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 		return (copyfile(toPath, fromPath, AppendOrReplace, 0, 0, 0, 0, 0, 0));
 	makedirectories(toPath, FALSE, FALSE);
 	if (!strnicmp(fromPath, "ftp:", 4) || !strnicmp(fromPath, "http:", 5) || !strnicmp(fromPath, "https:", 6))
+	{
+		if (Replace && ExistFile(toPath))
+			GSSiRemove(toPath);
 		ln = URLToFile(fromPath, toPath);
+	}
 	else
 	{
 		char mess[256];

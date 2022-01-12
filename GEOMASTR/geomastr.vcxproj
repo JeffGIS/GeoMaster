@@ -1253,6 +1253,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
     </Library>
     <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
+    <Library Include="..\LIB\FreeImage.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

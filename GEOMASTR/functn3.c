@@ -1454,10 +1454,16 @@ GotCloseFilehSQL:
 			}
 			if (!_fstricmp(Arg[1], "CONVERT"))
 			{
+				BOOL SaveBMPCache = AllowBMPCaching;
+				BOOL SaveAllowCache = AllowCache;
 				int flag = atoi(Arg[4]);
+				AllowBMPCaching = FALSE;
+				AllowCache = FALSE;
 				HDIB32 hDIB = LoadDIB32(Arg[2], FALSE);
 				rtn = SaveDIB32(hDIB, Arg[3], -1, flag);
 				DestroyDIB32(hDIB, FALSE);
+				AllowBMPCaching = SaveBMPCache;
+				AllowCache = SaveAllowCache;
 				goto Rtnrtn;
 			}
 			if (!_fstricmp(Arg[1], "SETICONCOLORS"))

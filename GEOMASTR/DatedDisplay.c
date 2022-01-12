@@ -73,14 +73,13 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		hBM[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_PLAY_PAUSE));
 		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PAUSE), (HBITMAP*)&hBM[3]);
 		hBM[4] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CANCEL));
-		SetWindowSizeToBitmap(GetDlgItem(hWndDlg, IDCANCEL), (HBITMAP)hBM[4]);
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDCANCEL), (HBITMAP*)&hBM[4]);
 		SendDlgItemMessage(hWndDlg, IDC_PRIOR, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[0]);
 		SendDlgItemMessage(hWndDlg, IDC_NEXT, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[1]);
 		SendDlgItemMessage(hWndDlg, IDC_PLAY, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[2]);
 		SendDlgItemMessage(hWndDlg, IDC_PAUSE, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[3]);
 		SendDlgItemMessage(hWndDlg, IDCANCEL, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[4]);
 		SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_SETPOS, TRUE, 50);
-
 	}
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -106,7 +105,8 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		switch (LOWORD(wParam))
 		{
 		case IDCANCEL:
-			//DestroyWindow(hWndDlg);
+		case IDC_BUTTON1:
+			DestroyWindow(hWndDlg);
 			SetViewport(vpid);
 			PostMessage(hWndMain, GF_CLOSE, 0, 0L);
 
@@ -148,6 +148,36 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 	return TRUE;
 }
 
+static void SetSequential(HWND hWndDlg, BOOL sequential)
+{
+	if (sequential)
+	{
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_GROUP), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_GROUP), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_LOOP), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_0), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_1), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_2), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_3), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_FULL), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_PARTIAL), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_NONE), SW_SHOW);
+	}
+	else
+	{
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_GROUP), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_GROUP), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_LOOP), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_0), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_1), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_2), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_3), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_FULL), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_PARTIAL), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_NONE), SW_HIDE);
+	}
+	return;
+}
 BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	HFILE	fid;
@@ -163,6 +193,7 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 
 		cwCenter(hWndDlg, 0);
 		SendDlgItemMessage(hWndDlg, IDC_SEQUENTIAL, BM_SETCHECK, sequentialMethod, 0L);
+		SetSequential(hWndDlg,sequentialMethod);
 		switch (timeBetweenDates)
 		{
 		case TIME_MANUAL:
@@ -230,12 +261,26 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		switch (LOWORD(wParam))
 		{
 		case IDC_LIST:
+		{
+			int nsel = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0);
 			EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_TILED), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) < 5);
+		}
 			break;
 
 		case IDC_SELECT_ALL:
 			SendDlgItemMessage(hWndDlg, IDC_LIST, LB_SETSEL, SendDlgItemMessage(hWndDlg, IDC_SELECT_ALL, BM_GETCHECK, 0, 0L), (LPARAM)-1);
 			EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
+			break;
+
+		case IDC_SEQUENTIAL:
+			sequentialMethod = SendDlgItemMessage(hWndDlg, IDC_SEQUENTIAL, BM_GETCHECK, 0, 0L);
+			SetSequential(hWndDlg, sequentialMethod);
+			break;
+
+		case IDC_TILED:
+			sequentialMethod = !SendDlgItemMessage(hWndDlg, IDC_TILED, BM_GETCHECK, 0, 0L);
+			SetSequential(hWndDlg, sequentialMethod);
 			break;
 
 		case IDCANCEL:
@@ -304,6 +349,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	switch (Message)
 	{
 	case GF_INIT:
+		//CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
 		hWndDatedOrthos = hWnd;
 		//GetClientRect(hWnd, &rect);
 		haveScreenBuf = (BOOL)HaveScreenBuffer(0);
