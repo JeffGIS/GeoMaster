@@ -1781,6 +1781,8 @@ Gotid:
 	}
 #endif
 	OpenFileMode[i] = Mode;
+	if (CallID == 62)
+		ii = 1;
 	OpenFileCallID[i] = CallID++;
 	OpenFileCloseRequested[i] = FALSE; 
 	OpenFileUndoFileID[i] = GetUndoFileIDFromName (pOFStruct->szPathName,FALSE);

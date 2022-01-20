@@ -225,7 +225,10 @@ BOOL LoadUserLib (BOOL Close)
 	ConvertFileNameToCacheFileName (UserLib);
 	if (!(ghUserLib = LoadLibrary( UserLib)))  
 	{
-		MessageBox (0,"Unable to load UserLib",UserLib,MB_ICONEXCLAMATION);
+		DWORD err = GetLastError();
+		char mess[256];
+		sprintf(mess, "Unable to load UserLib: %i", err);
+		MessageBox (0,mess,UserLib,MB_ICONEXCLAMATION);
 		return FALSE;
 	}
 	return TRUE;

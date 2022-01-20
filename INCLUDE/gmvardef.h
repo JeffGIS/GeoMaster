@@ -1312,6 +1312,7 @@ HFILE	NewQuadFID=0;
 HANDLE	hNewQuadFile=0;
 long	ReorgStartQuad;
 BOOL	DoDescScan=FALSE;
+BOOL	DoNotClear = FALSE;
 BOOL	UseUserPickAp=TRUE;
 long	DescBlockLen;
 POINT	RLButLoc;

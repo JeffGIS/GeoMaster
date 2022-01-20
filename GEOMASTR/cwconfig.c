@@ -705,7 +705,8 @@ GSSiExitProg (436);
  if (_fstrstr(CmdLine," /DB ")) UMIODebug=TRUE;
  if (_fstrstr(CmdLine," /LOG ")) LogOn=TRUE;
  if (_fstrstr(CmdLine," /DBE ")) DebugExistFile=TRUE;
- if (_fstrstr(CmdLine," /NPF ")) PatternBrush=FALSE; 
+ if (_fstrstr(CmdLine, " /NPF ")) PatternBrush = FALSE;
+ if (_fstrstr(CmdLine, " /DNC ")) DoNotClear = TRUE;
  if (_fstrstr(CmdLine, " /UPDATESERVER ")) UpdateServer = TRUE; //MGV police new update server
  if ((lpStart = _fstrstr(CmdLine, " /MAPSERVER ")))//background map server
  {
@@ -1684,7 +1685,7 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
  //RecoverBadFile ();
  //int	t=IDNINT(atof("1E+08"));
 
-  //MessageBox (0,lpszCmdLine,"In GeoMaster",MB_OK);
+ //MessageBox (0,lpszCmdLine,"In GeoMaster",MB_OK);
 
 #if CHECKMEM
 	InDebug=TRUE;
@@ -1854,7 +1855,7 @@ ExpandDL ();
 
 }*/
 
-if (!MapServer)
+if (!MapServer && !DoNotClear)
 	nTempFilesCleared = ClearGMTempFiles ();
 //MessageBox (0,"Past ClearGMTempFiles","",MB_OK);
 ProcessUserParms ();

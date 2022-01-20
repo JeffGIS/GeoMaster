@@ -203,6 +203,7 @@ extern HMENU			hUserMenu;
 extern HANDLE			hCurPopups;
 extern HANDLE			hCFName;
 extern BOOL			DoDescScan;
+extern BOOL			DoNotClear;
 extern short			DoMapCopy;
 extern short			VehSizeOpt;
 extern short			idTimer;

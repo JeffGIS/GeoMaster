@@ -11,9 +11,9 @@ static	char		orthoTitles[MAX_DATED_ORTHOS][32];
 static  int			nDatesSelected = 0;
 static  int			nDatesReturned, iDate;
 #define TIME_MANUAL	USER_TIMER_MAXIMUM
-#define TIME_FAST	5000
+#define TIME_FAST	2500
 #define TIME_MEDIUM 7500
-#define TIME_SLOW	10000
+#define TIME_SLOW	12500
 static  int			timeBetweenDates = TIME_MEDIUM;
 #define FADE_FULL	0
 #define FADE_PARTIAL 35
@@ -65,7 +65,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), TRUE);
 		}
 		hBM[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_LEFT_ARROW));
-		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR),(HBITMAP*) &hBM[0]);
+		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR), (HBITMAP*)&hBM[0]);
 		hBM[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_RIGHT_ARROW));
 		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_NEXT), (HBITMAP*)&hBM[1]);
 		hBM[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_PLAY_START));
@@ -79,7 +79,25 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		SendDlgItemMessage(hWndDlg, IDC_PLAY, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[2]);
 		SendDlgItemMessage(hWndDlg, IDC_PAUSE, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[3]);
 		SendDlgItemMessage(hWndDlg, IDCANCEL, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[4]);
-		SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_SETPOS, TRUE, 50);
+		EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1),TRUE);
+		switch (timeBetweenDates)
+		{
+		case TIME_SLOW:
+			SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_SETPOS, TRUE, 0);
+			break;
+		case TIME_FAST:
+			SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_SETPOS, TRUE, 100);
+			break;
+		case TIME_MANUAL:
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_HIDE);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), FALSE);
+			SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_SETPOS, TRUE, 50);
+			break;
+		default:
+			SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_SETPOS, TRUE, 50);
+			break;
+		}
 	}
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -95,7 +113,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		case  WM_HSCROLL:
 			if (LOWORD(wParam) == SB_ENDSCROLL)
 			{
-				timeBetweenDates = 2000 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
+				timeBetweenDates = 2500 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
 				timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 1, 0);
 			}
 		break;
@@ -131,10 +149,11 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_HIDE);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_SHOW);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), TRUE);
-			timeBetweenDates = 2000 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
+			timeBetweenDates = 2500 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
 			break;
 		case IDC_PAUSE:
 			KillTimer(hWndDatedOrthos, timerID);
+			timeBetweenDates = TIME_MANUAL;
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_SHOW);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_HIDE);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), FALSE);
@@ -162,6 +181,7 @@ static void SetSequential(HWND hWndDlg, BOOL sequential)
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_FULL), SW_SHOW);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_PARTIAL), SW_SHOW);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_NONE), SW_SHOW);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_ZOOM_TO_SCALE), SW_HIDE);
 	}
 	else
 	{
@@ -175,12 +195,14 @@ static void SetSequential(HWND hWndDlg, BOOL sequential)
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_FULL), SW_HIDE);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_PARTIAL), SW_HIDE);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_NONE), SW_HIDE);
+		ShowWindow(GetDlgItem(hWndDlg, IDC_ZOOM_TO_SCALE), SW_SHOW);
 	}
 	return;
 }
 BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	HFILE	fid;
+	static BOOL	zoomToScale = FALSE;
 	char	str[1024];
 	int		BRtn, i;
 	int		TabStops[2] = { 2000, 2100 };
@@ -193,6 +215,8 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 
 		cwCenter(hWndDlg, 0);
 		SendDlgItemMessage(hWndDlg, IDC_SEQUENTIAL, BM_SETCHECK, sequentialMethod, 0L);
+		SendDlgItemMessage(hWndDlg, IDC_TILED, BM_SETCHECK, !sequentialMethod, 0L);
+		SendDlgItemMessage(hWndDlg, IDC_ZOOM_TO_SCALE, BM_SETCHECK, zoomToScale, 0L);
 		SetSequential(hWndDlg,sequentialMethod);
 		switch (timeBetweenDates)
 		{
@@ -264,7 +288,7 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		{
 			int nsel = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0);
 			EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_TILED), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) < 5);
+			EnableWindow(GetDlgItem(hWndDlg, IDC_TILED), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) < 6);
 		}
 			break;
 
@@ -291,7 +315,7 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 			HANDLE	hItems;
 			LPINT	pItems;
 			LPSTR	pTab;
-
+			int rtn = 0;
 			nDatesSelected = GetLBSelectedItems(hWndDlg, IDC_LIST, &hItems);
 			if (!nDatesSelected)
 				break;
@@ -305,21 +329,35 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 				strcpy(orthoTitles[i], str);
 			}
 			GSSiGlobUlFree(&hItems);
-			if (SendDlgItemMessage(hWndDlg, IDC_SPEED_1, BM_GETCHECK, 0, 0L))
-				timeBetweenDates = TIME_SLOW;
-			if (SendDlgItemMessage(hWndDlg, IDC_SPEED_2, BM_GETCHECK, 0, 0L))
-				timeBetweenDates = TIME_MEDIUM;
-			if (SendDlgItemMessage(hWndDlg, IDC_SPEED_3, BM_GETCHECK, 0, 0L))
-				timeBetweenDates = TIME_FAST;
-			if (SendDlgItemMessage(hWndDlg, IDC_FADE_FULL, BM_GETCHECK, 0, 0L))
-				textFade = FADE_FULL;
-			if (SendDlgItemMessage(hWndDlg, IDC_FADE_PARTIAL, BM_GETCHECK, 0, 0L))
-				textFade = FADE_PARTIAL;
-			if (SendDlgItemMessage(hWndDlg, IDC_FADE_NONE, BM_GETCHECK, 0, 0L))
-				textFade = FADE_NONE;
-			loopDates = SendDlgItemMessage(hWndDlg, IDC_LOOP, BM_GETCHECK, 0, 0L);
-			sequentialMethod = SendDlgItemMessage(hWndDlg, IDC_SEQUENTIAL, BM_GETCHECK, 0, 0L);
-			EndDialog(hWndDlg, TRUE);
+			if (SendDlgItemMessage(hWndDlg, IDC_TILED, BM_GETCHECK, 0, 0L))
+			{
+				rtn = 2;
+				if (zoomToScale = SendDlgItemMessage(hWndDlg, IDC_ZOOM_TO_SCALE, BM_GETCHECK, 0, 0L))
+				{
+					rtn = 3;
+				}
+			}
+			else
+			{
+				rtn = 1;
+				if (SendDlgItemMessage(hWndDlg, IDC_SPEED_1, BM_GETCHECK, 0, 0L))
+					timeBetweenDates = TIME_SLOW;
+				if (SendDlgItemMessage(hWndDlg, IDC_SPEED_2, BM_GETCHECK, 0, 0L))
+					timeBetweenDates = TIME_MEDIUM;
+				if (SendDlgItemMessage(hWndDlg, IDC_SPEED_3, BM_GETCHECK, 0, 0L))
+					timeBetweenDates = TIME_FAST;
+				if (SendDlgItemMessage(hWndDlg, IDC_SPEED_0, BM_GETCHECK, 0, 0L))
+					timeBetweenDates = TIME_MANUAL;
+				if (SendDlgItemMessage(hWndDlg, IDC_FADE_FULL, BM_GETCHECK, 0, 0L))
+					textFade = FADE_FULL;
+				if (SendDlgItemMessage(hWndDlg, IDC_FADE_PARTIAL, BM_GETCHECK, 0, 0L))
+					textFade = FADE_PARTIAL;
+				if (SendDlgItemMessage(hWndDlg, IDC_FADE_NONE, BM_GETCHECK, 0, 0L))
+					textFade = FADE_NONE;
+				loopDates = SendDlgItemMessage(hWndDlg, IDC_LOOP, BM_GETCHECK, 0, 0L);
+				sequentialMethod = SendDlgItemMessage(hWndDlg, IDC_SEQUENTIAL, BM_GETCHECK, 0, 0L);
+			}
+			EndDialog(hWndDlg, rtn);
 		}
 			break;
 		}
@@ -338,7 +376,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	static HCURSOR     OldCursor;
 	static	UINT	CurrentPrompt;
 	static HWND		hBackGroundServer = 0;
-	static BOOL		ignoreHalt, serverIsReady;
+	static BOOL		ignoreHalt, serverIsReady=FALSE;
 	static HWND		hWndPlayer = 0;
 	static HBITMAP	saveFWBM = 0;
 	static BOOL		haveScreenBuf;
@@ -349,54 +387,104 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	switch (Message)
 	{
 	case GF_INIT:
+	case GF_REINIT:
+	{
 		//CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
 		hWndDatedOrthos = hWnd;
 		//GetClientRect(hWnd, &rect);
-		haveScreenBuf = (BOOL)HaveScreenBuffer(0);
-		if (haveScreenBuf)
-			ProcessText("[%BUFFERSCREEN]=0");
-		rect.left = rect.top = 0;
-		rect.right = RECTWIDTH (&CurView->DrawRect);
-		rect.bottom = RECTHEIGHT(&CurView->DrawRect);
-		serverIsReady = FALSE;
-		hBackGroundServer = StartBackgroundMapServer(hWnd, "[%DL]configs\\orthoserver.gmc", "", &rect);
-		if (!hBackGroundServer)
-		{
-			MessageBox(hWnd, "Failed to start background map server", 0, MB_ICONEXCLAMATION);
-			PostMessage(hWnd, GF_CLOSE, 0, 0L);
-			break;
-		}
-	case GF_REINIT:
-	{
 		memset(datedOrthoFile, 0, sizeof(datedOrthoFile));
 		ignoreHalt = TRUE;
 		MergeImageIntoViewport(0, 0, 0, 0);
 		KillTimer(hWnd, timerID);
-		if (!hBackGroundServer || !GetGlobalCVal("[%ORTHODATEFILE]", OrthoDateFile, 0))
+		if (!GetGlobalCVal("[%ORTHODATEFILE]", OrthoDateFile, 0))
 			PostMessage(hWnd, GF_CLOSE, 0, 0L);
 		else
 		{
-			{
 				int nRc = DialogBox(hInst, (LPSTR)"SELECTORTHOS", hWnd, (DLGPROC)SelectOrthosMESSAGEMsgProc);
 
-				if (!nRc)
-					PostMessage(hWnd, GF_CLOSE, 0, 0L);
-				else
+				switch (nRc)
 				{
-					iDate = 0;
-					Inited = TRUE;
-					saveFWBM = hFullWindowBitMap;
-					hFullWindowBitMap = (HBITMAP)-1;
-					//ClearFullWindowBitmap(0);
-
-					//SaveFullWindowBitmap(hWnd);
-					CurrentPrompt = PRMT_PANZOOM2;
-					SetPrompt(CurrentPrompt, TRUE);
-					SetCurs(0, FALSE);
-					sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1,1:1);$REDISPLAY(T)", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
-					SendBackgroundMapServerCommand(hWnd, hBackGroundServer, txt, MAKELPARAM(1,CurView->ID));
+				case 0:
+					PostMessage(hWnd, GF_CLOSE, 0, 0L);
+					break;
+				case 1:
+				{
+					if (serverIsReady)
+					{
+						iDate = 0;
+						Inited = TRUE;
+						saveFWBM = hFullWindowBitMap;
+						hFullWindowBitMap = (HBITMAP)-1;
+						CurrentPrompt = PRMT_PANZOOM2;
+						SetPrompt(CurrentPrompt, TRUE);
+						SetCurs(0, FALSE);
+						sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1,1:1);$REDISPLAY(T)", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+						SendBackgroundMapServerCommand(hWndDatedOrthos, hBackGroundServer, txt, MAKELPARAM(1, CurView->ID));
+					}
+					else
+					{
+						haveScreenBuf = (BOOL)HaveScreenBuffer(0);
+						if (haveScreenBuf)
+							ProcessText("[%BUFFERSCREEN]=0");
+						rect.left = rect.top = 0;
+						rect.right = RECTWIDTH(&CurView->DrawRect);
+						rect.bottom = RECTHEIGHT(&CurView->DrawRect);
+						hBackGroundServer = StartBackgroundMapServer(hWndDatedOrthos, "[%DL]configs\\orthoserver.gmc", "", &rect);
+						if (!hBackGroundServer)
+						{
+							MessageBox(hWnd, "Failed to start background map server", 0, MB_ICONEXCLAMATION);
+							PostMessage(hWnd, GF_CLOSE, 0, 0L);
+							break;
+						}
+					}
 				}
-
+				break;
+				case 2:
+				case 3:
+				{
+					char parmFile[MAX_PATH];
+					char str[512];
+					GSSiGetTempFileName(0, "gmc", 0, parmFile);
+					HFILE Fid = GSSiOpenFile(parmFile, 0, OF_CREATE);
+					strcpy(str, "[PROPDATE]");
+					ExpandText(str);
+					fputstring(str, Fid);
+					strcpy(str, "[PROPATTRDATE]");
+					ExpandText(str);
+					fputstring(str, Fid);
+					SetConfig(1);
+					SetViewport(*pCommandViewport);
+					DPOINT point = CurView->MidPointW;
+					dpointtoa(str, &point);
+					fputstring(str, Fid);
+					if (nRc == 2)
+					{
+						double radius = MinMaxRadius(&CurView->WBounds);
+						fputstring("2", Fid);
+						ftoa(str, radius);
+						fputstring(str, Fid);
+					}
+					else
+					{
+						fputstring("1", Fid);
+						ftoa(str, CurView->Scale);
+						fputstring(str, Fid);
+					}
+					for (int i = 0; i < nDatesSelected; i++)
+					{
+						fputstring(orthoDates[i], Fid);
+					}
+					GSSiClose(Fid);
+					CloseAllRequestedFiles(FALSE);
+					sprintf(str, "$TEXTTOCLIPBOARD(%s)", parmFile);
+					//ProcessText(str);
+					if (nDatesSelected < 4)
+						sprintf(str, "$SESSION(CREATE,GeoMaster [%%DL]orthos\\threeorthos.gmc /F /DNC @[PARMFILE]=%s)", parmFile);
+					else
+						sprintf(str, "$SESSION(CREATE,GeoMaster [%%DL]orthos\\fiveorthos.gmc /F /DNC @[PARMFILE]=%s)", parmFile);
+					ExpandText(str);
+				}
+				break;
 			}
 		}
 	}
@@ -436,6 +524,17 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	case  GF_MAPSERVER_READY:
 		serverIsReady = TRUE;
 		hBackGroundServer = (HWND)wParam;
+		{
+			iDate = 0;
+			Inited = TRUE;
+			saveFWBM = hFullWindowBitMap;
+			hFullWindowBitMap = (HBITMAP)-1;
+			CurrentPrompt = PRMT_PANZOOM2;
+			SetPrompt(CurrentPrompt, TRUE);
+			SetCurs(0, FALSE);
+			sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1,1:1);$REDISPLAY(T)", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+			SendBackgroundMapServerCommand(hWndDatedOrthos, hBackGroundServer, txt, MAKELPARAM(1, CurView->ID));
+		}
 		break;
 
 	case GF_MAPSERVER_FAILED:
@@ -583,6 +682,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 		RestoreFullWindowBitmap();
 		Inited = FALSE;
 		MergeImageIntoViewport(0, 0, 0, 0);
+		serverIsReady = FALSE;
 		StopBackgroundMapServer(hBackGroundServer);
 		for (i = 0; i < nDatesReturned; i++)
 			GSSiRemove(datedOrthoFile[i]);

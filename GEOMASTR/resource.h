@@ -3354,6 +3354,8 @@
 #define IDC_SPEED_0                     2246
 #define IDC_DBNAME                      2246
 #define IDC_DATETIMEPICKER1             2247
+#define IDC_LOOP2                       2247
+#define IDC_ZOOM_TO_SCALE               2247
 #define IDC_DATETIMEPICKER2             2248
 #define IDC_UPDATEFREQ                  2249
 #define IDC_PACKETSIZE                  2250

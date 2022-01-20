@@ -673,6 +673,7 @@ GSSiExitProg (1348);
 				}
 				else if (!_fstricmp(Arg[3], "HAVEORTHOS"))
 				{
+					CurView->HaveOrthos = SetHaveOrthos();
 					btoa(CurView->HaveOrthos, OutLoc);
 					goto Rtnl;
 				}
