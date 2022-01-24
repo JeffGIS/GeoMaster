@@ -2486,6 +2486,7 @@ int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker);
 
 HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect);
 void StopBackgroundMapServer(HWND hWnd);
+BOOL CheckMapServer(HWND hWndServer);
 BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR txt,LPARAM id);
 BOOL GetMapserverFileName(HWND hBackGroundServer, LPSTR name);
 HWND FindWindowByProcessID(DWORD ProcessID, LPSTR Text);

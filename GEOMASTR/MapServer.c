@@ -6,6 +6,7 @@
 #define MAX_MAPSERVERS	8
 static char MapServerFile[MAX_MAPSERVERS][MAX_PATH];
 static HWND MapServerWnd[MAX_MAPSERVERS] = { 0 };
+static DWORD MapServerProcessID[MAX_MAPSERVERS] = { 0 };
 static int	nMapServers = 0;
 static HANDLE hThread = 0;
 
@@ -107,18 +108,33 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 		if (!WaitForInputIdle(pi.hProcess, 18000))
 		{
 			hWndServer = MapServerWnd[serverID] = FindWindowByProcessID(ProcessID, "");
+			MapServerProcessID[serverID] = ProcessID;
 		}
 	}
 	return hWndServer;
 }
 
+BOOL CheckMapServer(HWND hWndServer)
+{
+	int	serverID = GetMapserverIDFromWnd(hWndServer);
+	if (serverID < 0)
+		return FALSE;
+	HWND hWnd = FindWindowByProcessID(MapServerProcessID[serverID], "");
+	if (hWnd == hWndServer)
+		return TRUE;
+	else
+		return FALSE;
+}
 void StopBackgroundMapServer(HWND hWndServer)
 {
 	int	serverID = GetMapserverIDFromWnd(hWndServer);
+	DWORD err = 0;
 
 	if (serverID >= 0)
 	{
-		PostMessage(hWndServer,WM_CLOSE,0, 0);
+		BOOL rtn = PostMessage(hWndServer,WM_CLOSE,0, 0);
+		if (!rtn)
+			err = GetLastError();
 		GSSiRemove(MapServerFile[serverID]);
 		MapServerWnd[serverID] = 0;
 		if (serverID == nMapServers)

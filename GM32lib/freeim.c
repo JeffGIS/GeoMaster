@@ -842,40 +842,44 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName, BOOL InfoOnly)
 	UINT flag = BMP_DEFAULT;
 
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
-
+	if (!*PathName)
+		return 0;
 	if (InfoOnly)
 		flag = FIF_LOAD_NOPIXELS;
 	strcpy (lpszPathName,PathName);
 	ExpandText (lpszPathName);
 	ConvertToNewLocation (lpszPathName,FALSE);
-	// check the file signature and deduce its format
-	// (the second argument is currently not used by FreeImage)
-	fif = FreeImage_GetFileType(lpszPathName, 0);
-	if (strstr (lpszPathName,".sbm"))
-		fif = FIF_BMP;
-	else if(fif == FIF_UNKNOWN)
+	if (ExistFile (lpszPathName))
 	{
-		// no signature ?
-		// try to guess the file format from the file extension
-		fif = FreeImage_GetFIFFromFilename(lpszPathName);
-	}
-	// check that the plugin has reading capabilities ...
-	if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
-	{
-		// ok, let's load the file
-		FIBITMAP *dib;
-		if (fif == FIF_JPEG)
+		// check the file signature and deduce its format
+		// (the second argument is currently not used by FreeImage)
+		fif = FreeImage_GetFileType(lpszPathName, 0);
+		if (strstr (lpszPathName,".sbm"))
+			fif = FIF_BMP;
+		else if(fif == FIF_UNKNOWN)
 		{
-			if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
-				flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
-			else
-				flag = JPEG_ACCURATE;
+			// no signature ?
+			// try to guess the file format from the file extension
+			fif = FreeImage_GetFIFFromFilename(lpszPathName);
 		}
-		dib = GSSiFreeImage_Load(fif, lpszPathName, flag);
-		rtn = (HDIB32)dib;
-		// unless a bad file format, we are done !
-		LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)dib);
-		id = 1;
+		// check that the plugin has reading capabilities ...
+		if ((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
+		{
+			// ok, let's load the file
+			FIBITMAP* dib;
+			if (fif == FIF_JPEG)
+			{
+				if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
+					flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
+				else
+					flag = JPEG_ACCURATE;
+			}
+			dib = GSSiFreeImage_Load(fif, lpszPathName, flag);
+			rtn = (HDIB32)dib;
+			// unless a bad file format, we are done !
+			LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP*)dib);
+			id = 1;
+		}
 	}
 	return rtn;
 }

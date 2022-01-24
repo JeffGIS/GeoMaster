@@ -114,7 +114,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 			if (LOWORD(wParam) == SB_ENDSCROLL)
 			{
 				timeBetweenDates = 2500 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
-				timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 1, 0);
+				timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
 			}
 		break;
 
@@ -137,15 +137,15 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 				iDate = nDatesSelected - 1;
 			else
 				iDate = nDatesSelected - 2;
-			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 1, 0);
+			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
 			break;
 		case IDC_NEXT:
 			if (iDate >= nDatesSelected)
 				iDate = 0;
-			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 1, 0);
+			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
 			break;
 		case IDC_PLAY:
-			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 1, 0);
+			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_HIDE);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_SHOW);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), TRUE);
@@ -389,6 +389,16 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	case GF_INIT:
 	case GF_REINIT:
 	{
+	/*	DestroySavedScreen(&CurView->Bitmap, CurView->BitmapID);
+		if (!Printing)
+		{
+			CurView->Bitmap = SaveScreen2(CurView->hDC, CurView->Rect, CurView, &CurView->BitmapID);
+			CurView->BitmapRect = CurView->Rect;
+		}
+		else if (CurView->Bitmap && EqualRect(&CurView->Rect, &CurView->BitmapRect))
+		{
+			RestoreScreen2(CurView->hDC, CurView->Bitmap, CurView->BitmapID, FALSE);
+*/
 		//CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
 		hWndDatedOrthos = hWnd;
 		//GetClientRect(hWnd, &rect);
@@ -409,6 +419,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 					break;
 				case 1:
 				{
+					nDatesReturned = 0;
 					if (serverIsReady)
 					{
 						iDate = 0;
@@ -506,15 +517,30 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 					DestroyDIB32(hDib32, FALSE);
 					timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), timeBetweenDates, 0);
 					MergeImageIntoViewport(hBM,&CurView->DrawRect, orthoTitles[iDate], textFade);
+					iDate++;
 				}
 				ignoreHalt = FALSE;
-				iDate++;
+			}
+			else if (!CheckMapServer(hBackGroundServer))
+			{
+				serverIsReady = FALSE;
+				rect.left = rect.top = 0;
+				rect.right = RECTWIDTH(&CurView->DrawRect);
+				rect.bottom = RECTHEIGHT(&CurView->DrawRect);
+				hBackGroundServer = StartBackgroundMapServer(hWndDatedOrthos, "[%DL]configs\\orthoserver.gmc", "", &rect);
+				if (!hBackGroundServer)
+				{
+					MessageBox(hWnd, "Failed to start background map server", 0, MB_ICONEXCLAMATION);
+					PostMessage(hWnd, GF_CLOSE, 0, 0L);
+					break;
+				}
+
 			}
 		}
 		else if (loopDates)
 		{
 			iDate = 0;
-			timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 1, 0);
+			timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 100, 0);
 		}
 		else
 			PostMessage(hWnd, GF_CLOSE, 0, 0L);
@@ -524,6 +550,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	case  GF_MAPSERVER_READY:
 		serverIsReady = TRUE;
 		hBackGroundServer = (HWND)wParam;
+		if (nDatesReturned < nDatesSelected)
 		{
 			iDate = 0;
 			Inited = TRUE;
@@ -532,9 +559,11 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			CurrentPrompt = PRMT_PANZOOM2;
 			SetPrompt(CurrentPrompt, TRUE);
 			SetCurs(0, FALSE);
-			sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1,1:1);$REDISPLAY(T)", orthoDates[0], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+			sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1,1:1);$REDISPLAY(T)", orthoDates[nDatesReturned], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 			SendBackgroundMapServerCommand(hWndDatedOrthos, hBackGroundServer, txt, MAKELPARAM(1, CurView->ID));
 		}
+		else
+			ii = 1;
 		break;
 
 	case GF_MAPSERVER_FAILED:
@@ -549,17 +578,17 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			GSSiGetTempFileName(0, "gmo", 0, datedOrthoFile[id - 1]);
 			CopyMapserverFileToFile(hBackGroundServer, datedOrthoFile[id - 1]);
 			nDatesReturned = id;
-			if (id < nDatesSelected)
+			if (nDatesReturned < nDatesSelected)
 			{
 				//sprintf(txt, "[ORTHODATE]=%s;$REDISPLAY(T)", orthoDates[id-1]);
-				sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1);$REDISPLAY(T)", orthoDates[id], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
+				sprintf(txt, "[ORTHODATE]=%s;$ZOOM(POINTANDSCALE,%f %f,%f,-1);$REDISPLAY(T)", orthoDates[nDatesReturned], CurView->MidPointW.x, CurView->MidPointW.y, CurView->Scale);
 				SendBackgroundMapServerCommand(hWnd, hBackGroundServer, txt, MAKELPARAM(id+1, CurView->ID));
 			}
 			if (id == 1)
 			{
 				hWndPlayer = CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
 				AnimateWindow(hWndPlayer, 500, AW_BLEND | AW_ACTIVATE);
-				timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 1, 0);
+				timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 100, 0);
 			}
 
 		}
@@ -612,7 +641,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 		}
 		else
 		{
-			timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 1, 0);
+			timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 100, 0);
 		}
 		break;
 	case WM_LBUTTONUP:
@@ -688,7 +717,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			GSSiRemove(datedOrthoFile[i]);
 		if (haveScreenBuf)
 			ProcessText("[%BUFFERSCREEN]=1");
-
+		PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
 		return FALSE;
 		break;
 
