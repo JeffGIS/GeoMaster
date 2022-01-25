@@ -69,7 +69,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	GSSiGetTempFileName(0, "gms", 0, (LPSTR)MapServerFile[serverID]);
 	pDot = strchr(MapServerFile[serverID], '.');
 	if (pDot)
-		strcpy(pDot, ".bmp");
+		strcpy(pDot, ".txt");
 	sprintf(strchr(cmd, 0), " /MAPSERVER %i '%s'", (int)hWnd,MapServerFile[serverID]);
 
 	if (pRect)
@@ -88,6 +88,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	if (*LastChr(startDir) == '\\')
 		*LastChr(startDir) = 0;
 	ExpandText(cmd);
+	sprintf(strchr(cmd, 0), " [%%TRACEMAPSERVER]=%i;", allowMapServerTrace);
 	if (CreateProcess(modulePath, cmd,
 		NULL,             // Process handle not inheritable. 
 		NULL,             // Thread handle not inheritable. 
@@ -110,6 +111,8 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 			hWndServer = MapServerWnd[serverID] = FindWindowByProcessID(ProcessID, "");
 			MapServerProcessID[serverID] = ProcessID;
 		}
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 	}
 	return hWndServer;
 }
@@ -146,15 +149,19 @@ void StopBackgroundMapServer(HWND hWndServer)
 BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd,LPARAM id)
 {
 	HANDLE Fid;
-	OFSTRUCTGM OFStruct;
+	OFSTRUCTGM OFStruct = { 0 };
+	char commandFile[MAX_PATH];
 	int	serverID = GetMapserverIDFromWnd (hBackGroundServer);
-		
+	int MapserverRequestID = LOWORD(id);
 	if (serverID < 0)
 		return FALSE;
-	Fid = OpenFileGM(MapServerFile[serverID], &OFStruct, OF_CREATE);
-	BigWrite64(Fid, cmd, strlen(cmd) + 1,-1);
+	strcpy (commandFile,MapServerFile[serverID]);
+	LPSTR pDot = strrchr(commandFile, '.');
+	sprintf(pDot, "-%i.txt", MapserverRequestID);
+	Fid = OpenFileGM(commandFile, &OFStruct, OF_CREATE);
+	BigWrite64(Fid, cmd, (LONGLONG)strlen(cmd) + 1,-1);
 	GSSiClose64(&Fid);
-	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd, id);
+	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd, MapserverRequestID);
 
 	return TRUE;
 }
@@ -170,14 +177,21 @@ BOOL GetMapserverFileName(HWND hBackGroundServer, LPSTR name)
 	return TRUE;
 }
 
-BOOL CopyMapserverFileToFile(HWND hBackGroundServer, LPSTR File)
+BOOL CopyMapserverFileToFile(HWND hBackGroundServer, LPSTR File, int requestID)
 {
 	int	serverID = GetMapserverIDFromWnd(hBackGroundServer);
-
+	char msFile[MAX_PATH];
 	if (serverID < 0)
 		return FALSE;
-	if (CopyFile(MapServerFile[serverID], File, FALSE))
+	strcpy(msFile, MapServerFile[serverID]);
+	LPSTR pDot = strrchr(msFile, '.');
+	if (pDot)
+		sprintf(pDot, "-%i.bmp", requestID);
+	if (CopyFile(msFile, File, FALSE))
+	{
+		GSSiRemove(msFile);
 		return TRUE;
+	}
 	return FALSE;
 }
 
@@ -511,4 +525,25 @@ HBITMAP GetHiddenWindowBitmap(HWND hwnd)
 		ReleaseDC(hwnd, hdc);
 	}
 	return hbitmap;
+}
+
+void SaveMapServerTrace(LPSTR ID,int requestID, LPSTR txt)
+{
+	if (!allowMapServerTrace)
+		return;
+	char traceFile[MAX_PATH];
+	static int n = 1;
+	HFILE fid;
+	char mess[1024];
+	DWORD processID = 0;
+	
+	GetWindowThreadProcessId(hWndMain, &processID);
+
+	sprintf(traceFile, "c:\\temp\\mapserver\\trace_%ld_%i.txt", processID,n++);
+	fid = GSSiOpenFile(traceFile, 0, OF_CREATE);
+	sprintf(mess, "%s:%i:%s", ID,requestID, txt);
+	fputstring(mess, fid);
+
+	GSSiClose(fid);
+	return;
 }

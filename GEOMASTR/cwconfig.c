@@ -15,6 +15,7 @@
 
 #include <process.h>
 
+static BOOL HaveMapServerReceive = FALSE;
 BOOL InDebug=FALSE;
 LRESULT CALLBACK WndProcTest(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -896,15 +897,23 @@ BOOL GetNodeParms (LPSTR NodeName,LPSTR Parms)
 	HFILE	Fid;
 	BOOL	AllowCacheSave = AllowCache;
 	
-	strcpy (str,"$BATTERY(EXISTS)");
-	ExpandText (str);
-	if (*str == '1')
+	if (MapServer)
 	{
-		strcpy (File,"[%DL]nodeparm_laptop.txt");
-		if (!ExistFile (File))
-			strcpy (File,"[%DL]nodeparm.txt");
+		strcpy(File, "[%DL]nodeparm_mapserver.txt");
+		if (!ExistFile(File))
+			strcpy(File, "[%DL]nodeparm.txt");
 	}
-		
+	else
+	{
+		strcpy(str, "$BATTERY(EXISTS)");
+		ExpandText(str);
+		if (*str == '1')
+		{
+			strcpy(File, "[%DL]nodeparm_laptop.txt");
+			if (!ExistFile(File))
+				strcpy(File, "[%DL]nodeparm.txt");
+		}
+	}
 	*Parms = 0;
 	ExpandText (File);
 	//GetShortPathName (File,128);
@@ -1767,6 +1776,8 @@ HFILE	Fid = GSSiOpenFile ("c:\\pngrid\\400\\pngrid.bin",0,OF_READWRITE);
  GoogleTilesInit ();		
  _getcwd (StartupDir,64);   
  _fstrcpy (AppName,ApName);
+ if (strstr(lpszCmdLine, "/MAPSERVER"))
+	 MapServer = TRUE;
  //MessageBox (0,lpszCmdLine,"Command Line",MB_OK);
  ProcessNodeParms ();
 if (!ProcessCommandLine (lpszCmdLine))  
@@ -2203,6 +2214,10 @@ nMess = -1;
 	 }
 	 switch (msg.message)
 	 {
+	 case GF_MAPSERVER_REQUEST:
+		 SaveMapServerTrace("RCV",LOWORD(msg.lParam), "");
+		 HaveMapServerReceive = TRUE;
+		 break;
 	 case WM_RBUTTONDOWN:
 		 break;
 	 case WM_LBUTTONDOWN:
@@ -2615,16 +2630,22 @@ if (Message == WM_CHAR && wParam == '\b' && !(lParam & KF_UP) && CursorIsLocked)
 if (Message == WM_CHAR && wParam == 26) //CNTL/Z
 	goto Return0;
 
-if (Message == GF_MAPSERVER_REQUEST)
+if (Message == GF_MAPSERVER_REQUEST && HaveMapServerReceive)
 {
 	HANDLE Fid;
 	OFSTRUCTGM OFStruct;
+	char commandFile[MAX_PATH];
 	 //MessageBox(hWnd, "Got request", "", MB_OK);
-	SetWindowText(hWnd, "Map Server");
+	//SetWindowText(hWnd, "Map Server");
+	HaveMapServerReceive = FALSE;
 	MapserverRequestID = LOWORD(lParam);
 	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
-	Fid = OpenFileGM(MapserverFile, &OFStruct, OF_READ);
+	strcpy(commandFile, MapserverFile);
+	LPSTR pDot = strrchr(commandFile, '.');
+	if (*pDot)
+		sprintf(pDot, "-%i.txt",MapserverRequestID);
+	Fid = OpenFileGM(commandFile, &OFStruct, OF_READ);
 	if (Fid != INVALID_HANDLE_VALUE)
 	{
 		LPSTR cmd = (LPSTR)malloc(4096);
@@ -2632,9 +2653,11 @@ if (Message == GF_MAPSERVER_REQUEST)
 
 		llFileSeek(Fid, 0, 0);
 		BigRead64(Fid, cmd,ln);
+		cmd[ln] = 0;
 		GSSiClose64(&Fid);
 		if (dbug)
 			MessageBox(hWnd, cmd, "", MB_OK);
+		SaveMapServerTrace("CMD", MapserverRequestID, cmd);
 		ProcessText (cmd);
 		free(cmd);
 	}
@@ -3107,6 +3130,14 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
     	 break;
     	 
     case GSSI_ADDGF:
+		if (hWndDatedOrthos)
+		{
+			EscapeFunction(TRUE);
+			//RedisplayWindow();
+			DisplayDatedOrthos(hWndDatedOrthos, GF_CLOSE,0,0,0);
+			break;
+		}
+
 		 SetViewport((short)lParam);
 		 if (CurView->DisplayInParent && CurView->Parent)            	
 			 SetViewport(CurView->Parent);
@@ -5902,7 +5933,7 @@ DisplayParcel:
 		}
 		else switch (wParam)
 		{
-			case 27:  //ESC   
+			case VK_ESCAPE:  //ESC   
 				EscapeFunction (TRUE);
 	    	break;
 			case VK_F9:

@@ -165,12 +165,12 @@ LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, UINT Message, WPARAM 
 			break;
 
 		GetCursorPos(&pt);
-		{
+/*		{
 			char msg[256];
 			GetWindowRect(hWndDlg, &rect);
 			sprintf(msg, "%i %i rect %i %i %i %i", pt.x, pt.y, rect.left, rect.right, rect.top, rect.bottom);
 			SetWindowText(hWndMain, msg);
-		}
+		}*/
 		if (!IsWindowVisible(hWndDlg))
 		{
 			GetWindowRect(hWndDlg, &rect);

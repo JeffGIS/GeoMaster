@@ -2487,10 +2487,11 @@ int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker);
 HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect);
 void StopBackgroundMapServer(HWND hWnd);
 BOOL CheckMapServer(HWND hWndServer);
+void SaveMapServerTrace(LPSTR ID,int requestID, LPSTR txt);
 BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR txt,LPARAM id);
 BOOL GetMapserverFileName(HWND hBackGroundServer, LPSTR name);
 HWND FindWindowByProcessID(DWORD ProcessID, LPSTR Text);
-BOOL CopyMapserverFileToFile(HWND hBackGroundServer,LPSTR File);
+BOOL CopyMapserverFileToFile(HWND hBackGroundServer,LPSTR File,int requestID);
 BOOL SaveMapServerFile(void);
 
 void GMFileManager(LPSTR ManagerFile);

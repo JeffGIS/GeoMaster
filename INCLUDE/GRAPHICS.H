@@ -1,5 +1,5 @@
 /*	Graphics Functions */   
-#define GF_MESSAGE_RANGE	10000 
+#define GF_MESSAGE_RANGE	WM_APP
 //should change to 50000 but all rtn values from gf functions must be converted to UINT
 #define GF_INIT			(GF_MESSAGE_RANGE+0) 
 #define GF_COMPLETE		(GF_MESSAGE_RANGE+1)

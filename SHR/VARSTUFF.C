@@ -3648,6 +3648,9 @@ GSSiExitProg (532);
 		case 409:
 			DNS_PORT = atol(Value);
 			break;
+		case 412:
+			allowMapServerTrace = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -4078,6 +4081,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%DNS_PORT", 409, FALSE); 
 	AllocateTypeVar("%MILESPERMETER", 410, FALSE);
 	AllocateTypeVar("%METERSPERMILE", 411, FALSE);
+	AllocateTypeVar("%TRACEMAPSERVER", 412, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5345,6 +5349,9 @@ GSSiExitProg (533);
 			break;
 		case 411:
 			sprintf(OutStr, "%.14lg", METERSPERMILE);
+			break;
+		case 412:
+			btoa(allowMapServerTrace, OutStr);
 			break;
 
 	}

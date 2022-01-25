@@ -2847,40 +2847,49 @@ BOOL SaveMapServerFile(void)
 	short	i, ii, iview;
 	HRGN	hRgnMain;
 	POINT	Point;
+	static  int lastID = -1;
 
 	if (MapServer)
 	{
-		SetViewport(*pCommandViewport);
-
-		if (MapserverRequestID)
+		if (MapserverRequestID > lastID)
 		{
-			BITMAP bm;
-			HBITMAP hBM = SelectObject(hDCScreenBuffer, hMapServerBM);
-			HDIB32 hDIB32;
-			int	   lbitmap;
+			lastID = MapserverRequestID;
+			SetViewport(*pCommandViewport);
 
-			if (!hBM)
-				return FALSE;
-			if (dbug)
+			if (MapserverRequestID)
 			{
-				char mess[128];
-				GetObject(hBM, sizeof(BITMAP), &bm);
-				sprintf(mess, "bitmap %i %i %i %i %i %i",CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel,(int)CurView->hDC, (int)hDCScreenBuffer);
-				MessageBox(0, mess, "", MB_OK);
+				BITMAP bm;
+				HBITMAP hBM = SelectObject(hDCScreenBuffer, hMapServerBM);
+				HDIB32 hDIB32;
+				int	   lbitmap;
+
+				if (!hBM)
+					return FALSE;
+				if (dbug)
+				{
+					char mess[128];
+					GetObject(hBM, sizeof(BITMAP), &bm);
+					sprintf(mess, "bitmap %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, (int)hDCScreenBuffer);
+					MessageBox(0, mess, "", MB_OK);
+				}
+				hDIB32 = BitmapToDIB32(hBM);
+				strcpy(MapServerOutputBitmapFile, MapserverFile);
+				LPSTR pDot = strrchr(MapServerOutputBitmapFile, '.');
+				if (pDot)
+					sprintf(pDot, "-%i.bmp", MapserverRequestID);
+				if (dbug)
+					SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
+
+				SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
+				GMDestroyDIB32(hDIB32);
+
+				SelectObject(hDCScreenBuffer, hBM);
+				//DeleteObject(hBM);
+				if (MapServerCalledFromWnd)
+					PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(MAPSERVER_RETURNED_IMAGE, MapserverVPID), MapserverRequestID);
+				SaveMapServerTrace("FIN", MapserverRequestID, "");
+				return TRUE;
 			}
-			hDIB32 = BitmapToDIB32(hBM);
-			strcpy(MapServerOutputBitmapFile, MapserverFile);
-			if (dbug)
-				SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
-
-			SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
-			GMDestroyDIB32(hDIB32);
-
-			SelectObject(hDCScreenBuffer, hBM);
-			//DeleteObject(hBM);
-			if (MapServerCalledFromWnd)
-				PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(MAPSERVER_RETURNED_IMAGE, MapserverVPID), MapserverRequestID);
-			return TRUE;
 		}
 	}
 	return FALSE;
