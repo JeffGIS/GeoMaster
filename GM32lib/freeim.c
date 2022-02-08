@@ -16,11 +16,15 @@
 #include <dibutil.h>
 #include "dibapi.h"
 #include "gm32lib.h"
+#include "gmextern.h"
 
 static	LPBYTE	g_load_address;
 static	int		MemDIBSize;
 static	char	CurImageName[MAX_PATH];
 static  int		numImagesAllocated = 0;
+static  char	curOutImagePath[MAX_PATH];
+static  DWORD	curFlag;
+
 /*#define MAX_ALLOCATED_IMAGES	1024
 static	HDIB32	allocatedImages[MAX_ALLOCATED_IMAGES];
 static	int		allocatedImagesFrom[MAX_ALLOCATED_IMAGES];
@@ -132,8 +136,18 @@ BOOL GMFIBMPHandleToEXT (LPSTR lpszPathName,HANDLE hBMP,DWORD Flag);
  Plugin responsible for the error @param message Error message */
  void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message)
  {
-	 MessageBox (0,message,"FreeImage Error",MB_ICONEXCLAMATION);
-	 sprintf("%s Format\n Message:%s", FreeImage_GetFormatFromFIF(fif),message);
+	 char mes[1024];
+	 if (InDisplayOrthos)
+	 {
+		 sprintf (mes,"File:%s Frame:%ld Error:%s",CurrentOrthoFile,CurrentOrthoFrame,message);
+		 AppendFile("[%DL]abends\\FreeImageErrors.txt", mes);
+	 }
+	 else
+	 {
+		 //	 MessageBox (0,message,"FreeImage Error",MB_ICONEXCLAMATION);
+		 sprintf(mes, "%s Format\n Message:%s\n%s\n%ld", FreeImage_GetFormatFromFIF(fif), message, curOutImagePath, curFlag);
+		 MessageBox(0, mes, "FreeImage Error", MB_ICONEXCLAMATION);
+	 }
  }
 // In your main program …
 
@@ -143,7 +157,9 @@ BOOL GenericWriter(FIBITMAP* dib, const char* lpszPathName, int flag) {
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
 	BOOL bSuccess = FALSE;
 
-	FreeImage_SetOutputMessage(FreeImageErrorHandler);
+	strcpy(curOutImagePath, lpszPathName);
+	curFlag = flag;
+//	FreeImage_SetOutputMessage(FreeImageErrorHandler);
 	if(dib) {
 		// try to guess the file format from the file extension
 		fif = FreeImage_GetFIFFromFilename(lpszPathName);
@@ -867,7 +883,7 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName, BOOL InfoOnly)
 		{
 			// ok, let's load the file
 			FIBITMAP* dib;
-			if (fif == FIF_JPEG)
+			if (fif == FIF_JPEG && !InfoOnly)
 			{
 				if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
 					flag = JPEG_EXIFROTATE | JPEG_ACCURATE;

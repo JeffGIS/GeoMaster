@@ -2484,7 +2484,7 @@ BOOL MergeImageIntoViewport(HBITMAP hNewBitmap,LPRECT pRect,LPSTR title,int text
 LONG FAR PASCAL CloseWhenCursorLeavesMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam, LPINT pLeaveCounter);
 int FixMapCmd(LPSTR inGMDFile, LPSTR outPltFile,double fixTo,int marker);
 
-HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect);
+HWND StartBackgroundMapServer(HWND hWnd, LPSTR config, LPSTR command, LPRECT pRect,int startID);
 void StopBackgroundMapServer(HWND hWnd);
 BOOL CheckMapServer(HWND hWndServer);
 void SaveMapServerTrace(LPSTR ID,int requestID, LPSTR txt);

@@ -5493,6 +5493,9 @@ GSSiExitProg (923);
 				goto NextVP;
 		}
 		ShowCurs = DisplayProfileLink (&WinBasePoint);
+		RestoreScreen2(CurView->hDC, CurView->LinkedCursorHandle, 0, FALSE);
+		DestroySavedScreen(&CurView->LinkedCursorHandle, 0);
+
 		WinPoint = BasePtToScreenPt (&WinBasePoint); 
 		Rect.left = max (0,WinPoint.x-LinkedCursorWidth-3);
 		Rect.right = WinPoint.x+LinkedCursorWidth+3;

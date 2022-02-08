@@ -1510,6 +1510,17 @@ GotCloseFilehSQL:
 				DestroyDIB32(hDib32, FALSE);
 				goto Rtnl;
 			}
+			if (!_fstricmp(Arg[1], "BOUNDS"))
+			{
+				MNMXCORD BitmapBounds = { 0 };
+				MNMXCORD WBounds = { 0 };
+				*OutLoc = 0;
+				if (GetImageBounds(Arg[2], 0, &BitmapBounds, &WBounds))
+				{
+					boundstoa(OutLoc, &BitmapBounds);
+				}
+				goto Rtnl;
+			}
 			if (!_fstricmp(Arg[1], "WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))
 			{
 			    HDIB32	hDib32 = LoadDIB32(Arg[2],FALSE);

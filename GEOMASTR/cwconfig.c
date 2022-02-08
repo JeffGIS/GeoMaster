@@ -89,6 +89,7 @@ static char title4[]="Find GeoMaster Graphics Data";
 static RECT customRect;
 static BOOL setWindowToTopOfZ = FALSE;
 static int  mapServerWidth, mapServerHeight;
+static int NextMSRequest = 0;
 
 BOOL	DoReset=FALSE;
 static		char		CfgNameIn[MAX_PATH]=""; 
@@ -739,6 +740,12 @@ GSSiExitProg (436);
 		 NoAccel = TRUE;
 		 NoMenu = TRUE;
 		 wantGDIPlus = FALSE;
+		 HFILE fidMSF = GSSiOpenFile(MapserverFile, 0, OF_READ);
+		 char line[128];
+		 fgetstring(line, 120, fidMSF);
+		 GSSiClose(fidMSF);
+		 SaveMapServerTrace("START",0, line);
+		 NextMSRequest = atoi(line);
 	 }
  }
  if (_fstrstr(CmdLine, " /RESET "))
@@ -1488,6 +1495,8 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 #endif
 
 	//testdib(0);
+	FreeImage_SetOutputMessage(FreeImageErrorHandler);
+
 	rtn = 0;
 	InitSockets();
 	CreatePrintBitmap(0);
@@ -2639,6 +2648,14 @@ if (Message == GF_MAPSERVER_REQUEST && HaveMapServerReceive)
 	//SetWindowText(hWnd, "Map Server");
 	HaveMapServerReceive = FALSE;
 	MapserverRequestID = LOWORD(lParam);
+	if (MapserverRequestID != NextMSRequest)
+	{
+		char errtxt[64];
+		sprintf(errtxt, "%i-%i", MapserverRequestID, NextMSRequest);
+		MapserverRequestID = NextMSRequest;
+		SaveMapServerTrace("ERR", MapserverRequestID, errtxt);
+	}
+	NextMSRequest++;
 	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
 	strcpy(commandFile, MapserverFile);
@@ -2661,13 +2678,9 @@ if (Message == GF_MAPSERVER_REQUEST && HaveMapServerReceive)
 		ProcessText (cmd);
 		free(cmd);
 	}
-
-	{
-#if ENABLETRACE
-		GSSiExitProg(438);
-#endif
-		return TRUE;
-	}
+	else
+		SaveMapServerTrace("NOOPEN", MapserverRequestID, commandFile);
+	goto Return0;
 }
 if (Message == GF_PROCESSTCPCMD)
 {

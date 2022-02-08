@@ -9933,6 +9933,7 @@ BOOL SnapTo (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Functi
 		    	break;
 		    case GF_SET_POC:
 		    case GF_SET_COORD:
+			case GF_SET_VPCOORD:
 		    	Prompt = GetFunStackPrompt(0);
 		    	break;
 		    default:
@@ -10066,7 +10067,7 @@ BOOL SnapTo (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Functi
 	        }
 		}
        	AddLBUTTON = TRUE;
-		if (Function == GF_SET_COORD) 
+		if (Function == GF_SET_COORD || Function == GF_SET_VPCOORD) 
 		{   
 			if (!CursorIsLocked)
 				AddLBUTTON = FALSE; 
@@ -10108,19 +10109,30 @@ BOOL SnapTo (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, short Functi
 HaveMousePoint:
 	    BasePoint=WinPtSToBasePt(MousePoint);
 HavePoint:
-		if (Function == GF_SET_COORD) 
-		{   
-			if (CursorIsLocked) 
-				UnlockCursor ();
+		if (Function == GF_SET_COORD)
+		{
+			if (CursorIsLocked)
+				UnlockCursor();
 			else
 				CurrentPoint = BasePoint;
-			SetDigWorldControlPoint (CurrentPoint);
-			SetPickCursor (FALSE);
-		    EnlargeScreen (0,0);
-			PostMessage(hWnd, GF_CLOSE,0, 0L); 
-           	return (TRUE);
+			SetDigWorldControlPoint(CurrentPoint);
+			SetPickCursor(FALSE);
+			EnlargeScreen(0, 0);
+			PostMessage(hWnd, GF_CLOSE, 0, 0L);
+			return (TRUE);
 		}
-		if (Function == GF_SNAP_CURSOR) 
+		if (Function == GF_SET_VPCOORD)
+		{
+			if (CursorIsLocked)
+				UnlockCursor();
+			sprintf(str, "[%%SCREENPT]=%i %i", MousePoint.x, MousePoint.y);
+			ExpandText(str);
+			SetPickCursor(FALSE);
+			EnlargeScreen(0, 0);
+			PostMessage(hWnd, GF_CLOSE, 0, 0L);
+			return (TRUE);
+		}
+		if (Function == GF_SNAP_CURSOR)
 		{   
 			LockCursor (&BasePoint);
 			goto LockPoint; 

@@ -462,6 +462,8 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
 	*NewDIB = 0;
 	_fstrcpy (Name,File);
 	ExpandText (Name);   
+	strcpy(CurrentOrthoFile, Name);
+	CurrentOrthoFrame = frame;
     if (DisplayFiles==1)
     {   
     	sprintf (str,"%s: %ld",Name,frame);

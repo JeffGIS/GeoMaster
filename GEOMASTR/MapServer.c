@@ -39,7 +39,7 @@ int GetMapserverIDFromWnd(HWND hWnd)
 	return -1;
 }
 
-HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
+HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect, int startID)
 {
 	char modulePath[MAX_PATH];
 
@@ -47,7 +47,9 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	PROCESS_INFORMATION pi;
 	DWORD	CRFlags = 0;
 	char	cmd[1024];
+	char	str[32];
 	char	startDir[MAX_PATH]="[%DL]";
+	char	title[] = "Map Server";
 	HWND	hWndServer = 0;
 	int		serverID;
 	LPSTR	pDot;
@@ -64,12 +66,17 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	ZeroMemory(&pi, sizeof(pi));
 	si.dwFlags =  STARTF_FORCEONFEEDBACK | STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_SHOWNORMAL;
+	si.lpTitle = title;
 	CRFlags = DETACHED_PROCESS;// | STARTF_USESIZE | STARTF_USEPOSITION;
 	sprintf(cmd, "MapServer %s",config);
 	GSSiGetTempFileName(0, "gms", 0, (LPSTR)MapServerFile[serverID]);
 	pDot = strchr(MapServerFile[serverID], '.');
 	if (pDot)
 		strcpy(pDot, ".txt");
+	HFILE fid = GSSiOpenFile(MapServerFile[serverID], 0, OF_CREATE);
+	itoa(startID, str, 10);
+	fputstring(str, fid);
+	GSSiClose(fid);
 	sprintf(strchr(cmd, 0), " /MAPSERVER %i '%s'", (int)hWnd,MapServerFile[serverID]);
 
 	if (pRect)
@@ -104,13 +111,15 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 		//int	 MaxWait = atol(Arg[5]);
 		DWORD	ProcessID = GetProcessId(pi.hProcess);
 
-		Wait (1000);
-
-		if (!WaitForInputIdle(pi.hProcess, 18000))
+		DWORD st = WaitForInputIdle(pi.hProcess, 20000);
+		if (!st)
 		{
+			Wait (1000);
 			hWndServer = MapServerWnd[serverID] = FindWindowByProcessID(ProcessID, "");
 			MapServerProcessID[serverID] = ProcessID;
 		}
+		else
+			ii = 1;
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 	}
@@ -160,8 +169,10 @@ BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd
 	sprintf(pDot, "-%i.txt", MapserverRequestID);
 	Fid = OpenFileGM(commandFile, &OFStruct, OF_CREATE);
 	BigWrite64(Fid, cmd, (LONGLONG)strlen(cmd) + 1,-1);
+	FlushFileBuffers(Fid);
 	GSSiClose64(&Fid);
-	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd, MapserverRequestID);
+	SaveMapServerTrace("SAME", MapserverRequestID, cmd);
+	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd,(LPARAM) MapserverRequestID);
 
 	return TRUE;
 }

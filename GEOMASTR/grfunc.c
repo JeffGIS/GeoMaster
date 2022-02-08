@@ -1625,6 +1625,7 @@ BOOL ProcessGraphicsFunction4 (short Function,
 	    case GF_SNAP_AVE_POINT:  
 	    case GF_SNAP_AVE_HLTPOINT:  
 	    case GF_SET_COORD:
+		case GF_SET_VPCOORD:
 		case GF_SNAP_DIST_AND_DIR:
 		case GF_SNAP_COORD: 
 		case GF_SNAP_LATLONG:
