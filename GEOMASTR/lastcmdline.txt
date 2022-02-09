@@ -1,2 +1,2 @@
-F:\MplsRemoteTemplate\GeoMas\orthos\CREATENEWTRNFILES.gmc /F /DNC
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
 F:\MplsRemoteTemplate\GeoMas

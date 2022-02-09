@@ -2193,7 +2193,7 @@ else if (MapServer)
 			MoveWindow(hWndMain, 0, 0, mapServerWidth, mapServerHeight, TRUE);
 			//PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 99L);
 			  //MessageBox(0, "Mapserver Open", "", MB_OK);
-			SetTimer(hWndMain, SUICIDE_TIMER, 2000, 0);
+			SetTimer(hWndMain, SUICIDE_TIMER, 200000, 0);
 		}
 		else
 		{
@@ -5825,7 +5825,7 @@ DisplayParcel:
 								  if (test)
 								  {
 									  test = FALSE;
-									  ProcessText("$MAPSERVER(TEST)");
+									  //ProcessText("$MAPSERVER(TEST)");
 								  }
 								  if (MapServerCalledFromWnd && !WindowExists(MapServerCalledFromWnd))
 								  {
