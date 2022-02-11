@@ -1,5 +1,6 @@
 #define ZOOMLISTDIR "[%ZOOMLISTDIR]"
 
+extern HWND			windowToNotifyOnRedisplay;
 extern int			DepthColorIntensity;
 extern HANDLE		hNulls;
 extern int			typeChassis;

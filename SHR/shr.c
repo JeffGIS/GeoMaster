@@ -5883,6 +5883,9 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	                	MaxHeight = max (MaxHeight,Rect.bottom - Rect.top);   
 	                	NumItems++;
 	                }
+					LPSTR pTab = strchr(lpBar, '\t');
+					if (pTab)
+						*pTab = 0;
 					if (DefaultVal && !stricmp(lpBar, DefaultVal))
 						Default = Index;
 					if (i == Default)

@@ -34,6 +34,7 @@ typedef char _huge *    HPSTR;          /* a huge version of LPSTR */
 extern	BOOL	EnableTrace;
 extern	HWND	TraceWnd,TraceWnd2;
 void GetProgName (short i, LPSTR Name);
+extern	BOOL	MapServer;
 
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {
@@ -131,11 +132,14 @@ BOOL hDibIs32Bit (HANDLE hDib)
 void MEMERR (LPSTR Mess) 
 {   
 	static	BOOL	ShowMess=TRUE;
+	char from[32] = { 0 };
 	int findMEMERR = 0;
+	if (MapServer)
+		strcpy(from, "Map Server");
 //	DebugBreak ();
 	HaveBlockingWindow = TRUE;
 	if (ShowMess)
-		MessageBox (NULL,Mess,NULL,MB_ICONEXCLAMATION|MB_TASKMODAL);
+		MessageBox (NULL,Mess,from,MB_ICONEXCLAMATION|MB_TASKMODAL);
 	HaveBlockingWindow = FALSE; 
 	return;
 }  

@@ -8,7 +8,7 @@ static  char		OrthoDateFile[MAX_PATH];
 static  char		OldPhotosDateFile[MAX_PATH];
 static	char		datedOrthoFile[MAX_DATED_ORTHOS][MAX_PATH];
 static	char		orthoDates[MAX_DATED_ORTHOS][32];
-static	char		orthoTitles[MAX_DATED_ORTHOS][32];
+static	char		orthoTitles[MAX_DATED_ORTHOS][32] = { 0 };
 static  int			nDatesSelected = 0;
 static  int			nDatesReturned, iDate;
 #define TIME_MANUAL	USER_TIMER_MAXIMUM
@@ -20,10 +20,43 @@ static  int			timeBetweenDates = TIME_MEDIUM;
 #define FADE_PARTIAL 35
 #define FADE_NONE	100
 static	int			textFade = FADE_FULL;
-static UINT			timerID = 0;
+static UINT			timerID = DATED_ORTHO_TIMER;
 static BOOL			loopDates = TRUE;
 static BOOL			sequentialMethod = TRUE;
+static HWND			hWndPlayDialog = 0;
+static char			lastDateTitle[32] = { 0 };
+static char			currentDateTitle[32] = { 0 };
+static char			nextDateTitle[32] = { 0 };
+static double		maxResolution = 0;
+static double		currentScale = 0;
 
+void DisplayLastCurrentAndNextDates(int iDate)
+{
+	if (!hWndPlayDialog || !nDatesSelected)
+	{
+		lastDateTitle[0] = 0;
+		currentDateTitle[0] = 0;
+		nextDateTitle[0] = 0;
+	}
+	else if (nDatesSelected)
+	{
+		strcpy(currentDateTitle, orthoTitles[iDate]);
+		if (!iDate)
+			strcpy(lastDateTitle, orthoTitles[nDatesSelected-1]);
+		else
+			strcpy(lastDateTitle, orthoTitles[iDate - 1]);
+		if (iDate < nDatesSelected - 1)
+			strcpy(nextDateTitle, orthoTitles[iDate+1]);
+		else
+			strcpy(nextDateTitle, orthoTitles[0]);
+	}
+	if (hWndPlayDialog)
+	{
+		SetDlgItemText(hWndPlayDialog, IDC_LAST_DATE, lastDateTitle);
+		SetDlgItemText(hWndPlayDialog, IDC_CURRENT_DATE, currentDateTitle);
+		SetDlgItemText(hWndPlayDialog, IDC_NEXT_DATE, nextDateTitle);
+	}
+}
 
 BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -45,6 +78,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		POINT pt;
 		RECT  rect;
 
+		hWndPlayDialog = hWndDlg;
 		vpid = CurView->ID;
 		cwCenter(hWndDlg, -4);
 		GetWindowRect(hWndDlg, &rect);
@@ -54,7 +88,9 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		{
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_SHOW);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_HIDE);
-			ShowWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PRIOR), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NEXT), SW_SHOW);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), FALSE);
 		}
 		else
@@ -63,6 +99,8 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_SHOW);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), SW_SHOW);
 			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), TRUE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PRIOR), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NEXT), SW_HIDE);
 		}
 		hBM[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_LEFT_ARROW));
 		SetBitmapSizeToButton(GetDlgItem(hWndDlg, IDC_PRIOR), (HBITMAP*)&hBM[0]);
@@ -79,9 +117,6 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 		SendDlgItemMessage(hWndDlg, IDC_PLAY, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[2]);
 		SendDlgItemMessage(hWndDlg, IDC_PAUSE, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[3]);
 		SendDlgItemMessage(hWndDlg, IDCANCEL, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBM[4]);
-		EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1),TRUE);
-		EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR), FALSE);
-		EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT), FALSE);
 		switch (timeBetweenDates)
 		{
 		case TIME_SLOW:
@@ -108,6 +143,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 	case WM_DESTROY:
 		for (i = 0; i < NBITMAPS; i++)
 			GSSiDeleteObject(&hBM[i]);
+		hWndPlayDialog = 0;
 		break;
 	case WM_CLOSE:
 		/* Closing the Dialog behaves the same as Cancel               */
@@ -118,7 +154,7 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 			if (LOWORD(wParam) == SB_ENDSCROLL)
 			{
 				timeBetweenDates = 2500 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
-				timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
+				timerID = SetTimer(hWndDatedOrthos, DATED_ORTHO_TIMER, 100, 0);
 			}
 		break;
 
@@ -141,20 +177,20 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 				iDate = nDatesSelected - 1;
 			else
 				iDate = nDatesSelected - 2;
-			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
+			timerID = SetTimer(hWndDatedOrthos, DATED_ORTHO_TIMER, 100, 0);
 			break;
 		case IDC_NEXT:
 			if (iDate >= nDatesSelected)
 				iDate = 0;
-			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
+			timerID = SetTimer(hWndDatedOrthos, DATED_ORTHO_TIMER, 100, 0);
 			break;
 		case IDC_PLAY:
-			timerID = SetTimer(hWndDatedOrthos, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, vpid), 100, 0);
+			timerID = SetTimer(hWndDatedOrthos, DATED_ORTHO_TIMER, 100, 0);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_HIDE);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_SHOW);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), TRUE);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR), FALSE);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT), FALSE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PRIOR), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NEXT), SW_HIDE);
 			timeBetweenDates = 2500 + 100 * (100 - SendDlgItemMessage(hWndDlg, IDC_SLIDER1, TBM_GETPOS, 0, 0));
 			break;
 		case IDC_PAUSE:
@@ -162,9 +198,9 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 			timeBetweenDates = TIME_MANUAL;
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PLAY), SW_SHOW);
 			ShowWindow(GetDlgItem(hWndDlg, IDC_PAUSE), SW_HIDE);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), FALSE);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_PRIOR), TRUE);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_NEXT), TRUE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_SLIDER1), SW_HIDE);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_PRIOR), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_NEXT), SW_SHOW);
 			break;
 		}
 		break;    /* End of WM_COMMAND                                 */
@@ -177,6 +213,9 @@ BOOL FAR PASCAL PlayOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wPar
 
 static void SetSequential(HWND hWndDlg, BOOL sequential)
 {
+	HFILE fid;
+	char str[1024];
+	SendDlgItemMessage(hWndDlg, IDC_LIST, LB_RESETCONTENT, 0, 0);
 	if (sequential)
 	{
 		ShowWindow(GetDlgItem(hWndDlg, IDC_SPEED_GROUP), SW_SHOW);
@@ -204,7 +243,53 @@ static void SetSequential(HWND hWndDlg, BOOL sequential)
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_PARTIAL), SW_HIDE);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_FADE_NONE), SW_HIDE);
 		ShowWindow(GetDlgItem(hWndDlg, IDC_ZOOM_TO_SCALE), SW_SHOW);
+		fid = GSSiOpenFile(OldPhotosDateFile, 0, OF_READ);
+		if (fid != HFILE_ERROR)
+		{
+			fgetstring(str, 255, fid);
+			while (fgetstring(str, 255, fid))
+			{
+				char newstr[64];
+				sprintf(newstr, "** %s **", str);
+				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_ADDSTRING, 0, (LPARAM)newstr);
+			}
+			GSSiClose2(&fid);
+		}
 	}
+	fid = GSSiOpenFile(OrthoDateFile, 0, OF_READ);
+	if (fid == HFILE_ERROR)
+	{
+		sprintf(str, "Unable to open aerial photo date file:\r%s", OrthoDateFile);
+		MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
+		PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+		return;
+	}
+	maxResolution = 0;
+	while (fgetstring(str, 255, fid))
+	{
+		LPSTR pEnd = strchr(str, '|');
+		if (pEnd)
+		{
+			LPSTR pTab = strchr(pEnd, '\t');
+			if (pTab)
+			{
+				pTab++;
+				maxResolution = fmax(maxResolution, atof(pTab));
+			}
+			*pEnd = '\t';
+			SendDlgItemMessage(hWndDlg, IDC_LIST, LB_ADDSTRING, 0, (LPARAM)str);
+		}
+	}
+	GSSiClose2(&fid);
+
+	for (int i = 0; i < nDatesSelected; i++)
+	{
+		int item = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_FINDSTRING, -1, (LPARAM)orthoTitles[i]);
+		if (item >= 0)
+			SendDlgItemMessage(hWndDlg, IDC_LIST, LB_SETSEL, TRUE, (LPARAM)item);
+	}
+	EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
+
 	return;
 }
 BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -257,43 +342,6 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		SendDlgItemMessage(hWndDlg, IDC_LOOP, BM_SETCHECK, loopDates, 0L);
 
 		SendDlgItemMessage(hWndDlg, IDC_LIST, LB_SETTABSTOPS, 2, (LPARAM)&TabStops);
-		fid = GSSiOpenFile(OldPhotosDateFile, 0, OF_READ);
-		if (fid != HFILE_ERROR)
-		{
-			fgetstring(str, 255, fid);
-			while (fgetstring(str, 255, fid))
-			{
-				char newstr[64];
-				sprintf(newstr, "** %s **", str);
-				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_ADDSTRING, 0, (LPARAM)newstr);
-			}
-			GSSiClose2(&fid);
-		}
-		fid = GSSiOpenFile(OrthoDateFile, 0, OF_READ);
-		if (fid == HFILE_ERROR)
-		{
-			sprintf(str, "Unable to open aerial photo date file:\r%s", OrthoDateFile);
-			MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
-			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-		}
-		while (fgetstring(str, 255, fid))
-		{
-			LPSTR pEnd = strchr(str, '|');
-			if (pEnd)
-			{
-				*pEnd = '\t';
-				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_ADDSTRING, 0, (LPARAM)str);
-			}
-		}
-		GSSiClose2 (&fid);
-		
-		for (i = 0; i < nDatesSelected; i++)
-		{
-			int item = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_FINDSTRING, -1, (LPARAM)orthoTitles[i]);
-			if (item >= 0)
-				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_SETSEL, TRUE, (LPARAM)item);
-		}
-		EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
 
 		break; /* End of WM_INITDIALOG                                 */
 
@@ -308,9 +356,20 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 		{
 		case IDC_LIST:
 		{
-			int nsel = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0);
-			EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
-			EnableWindow(GetDlgItem(hWndDlg, IDC_TILED), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) < 6);
+			if (HIWORD(wParam) == LBN_SELCHANGE)
+			{
+				int nsel = SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0);
+				if (!sequentialMethod && nsel > 5)
+				{
+					MessageBox(hWndDlg, "Too many dates selected for tiled mode\n(maximum of 5 allowed)", 0, MB_ICONEXCLAMATION);
+					EnableWindow(GetDlgItem(hWndDlg, IDOK), FALSE);
+				}
+				else
+				{
+					EnableWindow(GetDlgItem(hWndDlg, IDOK), nsel > 0);
+					EnableWindow(GetDlgItem(hWndDlg, IDC_TILED), nsel < 6);
+				}
+			}
 		}
 			break;
 
@@ -342,6 +401,7 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 			if (!nDatesSelected)
 				break;
 			pItems = (LPINT)GlobalLock(hItems);
+			maxResolution = 0;
 			for (i = 0; i < nDatesSelected; i++)
 			{
 				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETTEXT, pItems[i], (LPARAM)str);
@@ -349,6 +409,12 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 				if (pTab)
 				{
 					*pTab++ = 0;
+					LPSTR pTab2 = strchr(pTab, '\t');
+					if (pTab2)
+					{
+						*pTab2++ = 0;
+						maxResolution = fmax(maxResolution, atof(pTab2));
+					}
 					strcpy(orthoDates[i], pTab);
 					strcpy(orthoTitles[i], str);
 				}
@@ -390,6 +456,8 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 					textFade = FADE_NONE;
 				loopDates = SendDlgItemMessage(hWndDlg, IDC_LOOP, BM_GETCHECK, 0, 0L);
 				sequentialMethod = SendDlgItemMessage(hWndDlg, IDC_SEQUENTIAL, BM_GETCHECK, 0, 0L);
+				if (currentScale < maxResolution)
+					rtn = 4;
 			}
 			EndDialog(hWndDlg, rtn);
 		}
@@ -418,6 +486,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 	char	txt[260];
 	int		i;
 	RECT	rect;
+	int		nRc = 0;
 
 	switch (Message)
 	{
@@ -440,6 +509,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			RestoreScreen2(CurView->hDC, CurView->Bitmap, CurView->BitmapID, FALSE);
 */
 		//CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
+		currentScale = CurView->Scale;
 		strcpy(txt, "[%KFO]");
 		ExpandText(txt);
 		saveKFO = atob(txt);
@@ -462,12 +532,20 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			PostMessage(hWnd, GF_CLOSE, 0, 0L);
 		else
 		{
-				int nRc = DialogBox(hInst, (LPSTR)"SELECTORTHOS", hWnd, (DLGPROC)SelectOrthosMESSAGEMsgProc);
+			hWndPlayDialog = 0;
+			nRc = DialogBox(hInst, (LPSTR)"SELECTORTHOS", hWnd, (DLGPROC)SelectOrthosMESSAGEMsgProc);
 
-				switch (nRc)
-				{
+	Top:
+			switch (nRc)
+			{
 				case 0:
 					PostMessage(hWnd, GF_CLOSE, 0, 0L);
+					break;
+				case 4: //wait for redisplay to complete
+					KillTimer(hWnd, timerID);
+					windowToNotifyOnRedisplay = hWnd;
+					sprintf(txt, "$ZOOM(POINTANDSCALE,%f %f,%f,F,1:1);$REDISPLAY(T);", CurView->MidPointW.x, CurView->MidPointW.y, maxResolution);
+					ProcessText(txt);
 					break;
 				case 1:
 				{
@@ -504,8 +582,8 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 					}
 				}
 				break;
-				case 2:
-				case 3:
+				case 2: //tiled display - zoom to bounds
+				case 3: //tiled display - zoom to scale
 				{
 					char parmFile[MAX_PATH];
 					char str[512];
@@ -554,9 +632,11 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 		}
 	}
 		break;
-
+	case  GF_NOTIFY_REDISPLAY_COMPLETE:
+		nRc = 1;
+		goto Top;
 	case WM_TIMER:
-		if (wParam != GF_DISPLAY_DATED_ORTHOS)
+		if (wParam != DATED_ORTHO_TIMER)
 			return FALSE;
 		else if (iDate < nDatesSelected)
 		{
@@ -567,9 +647,10 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 
 				if (hDib32)
 				{
+					DisplayLastCurrentAndNextDates(iDate);
 					HBITMAP hBM = DIB32ToBitmap(hDib32, (HPALETTE)0);
 					DestroyDIB32(hDib32, FALSE);
-					timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), timeBetweenDates, 0);
+					timerID = SetTimer(hWnd, DATED_ORTHO_TIMER, timeBetweenDates, 0);
 					MergeImageIntoViewport(hBM,&CurView->DrawRect, orthoTitles[iDate], textFade);
 					iDate++;
 				}
@@ -596,7 +677,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 		else if (loopDates)
 		{
 			iDate = 0;
-			timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 100, 0);
+			timerID = SetTimer(hWnd, DATED_ORTHO_TIMER, 100, 0);
 		}
 		else
 			PostMessage(hWnd, GF_CLOSE, 0, 0L);
@@ -647,7 +728,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 			{
 				hWndPlayer = CreateDialog(hInst, (LPSTR)"PLAYER_DATED", hWnd, (DLGPROC)PlayOrthosMESSAGEMsgProc);
 				AnimateWindow(hWndPlayer, 500, AW_BLEND | AW_ACTIVATE);
-				timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 100, 0);
+				timerID = SetTimer(hWnd, DATED_ORTHO_TIMER, 100, 0);
 			}
 
 		}
@@ -705,7 +786,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 		}
 		else
 		{
-			timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), 100, 0);
+			timerID = SetTimer(hWnd, DATED_ORTHO_TIMER, 100, 0);
 		}
 		break;
 	case WM_LBUTTONUP:
