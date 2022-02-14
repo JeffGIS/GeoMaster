@@ -957,10 +957,12 @@ GSSiExitProg (520);
     	Type = THEME_HLTFILE;
 	else if (_fstrstr(Name, ".SQLITE"))
 		Type = SLT_DATAFILE;
-	else if (_fstrstr(Name, ".SQL"))
-		Type = SQL_DATAFILE;
 	else if (_fstrstr(Name, ".SLT"))
 		Type = SLT_DATAFILE;
+	else if (_fstrstr(Name, ".NVI"))
+		Type = SLT_DATAFILE;
+	else if (_fstrstr(Name, ".SQL"))
+		Type = SQL_DATAFILE;
 	else if (_fstrstr(Name, ".SHP"))
     	Type = SHAPE_DATAFILE;
     else if (_fstrstr(Name,".PND"))
