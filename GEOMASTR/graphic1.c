@@ -2678,7 +2678,7 @@ void SetBounds (HWND hWnd,HDC hDC)
     UINT		lSaveVis = 0;
 	RECT		Rect1;
     
-//	if (!IsBadWritePtr(CurVis, 4))
+	if (!IsBadWritePtr(CurVis, 4))
 		SaveVis = CurVis;
     if (CurView->Type == VPTYPE_PROFILE || 
        (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))

@@ -30,6 +30,48 @@ static char			nextDateTitle[32] = { 0 };
 static double		maxResolution = 0;
 static double		currentScale = 0;
 
+void SetDatesAndTitles(HWND hWndDlg)
+{
+	HANDLE	hItems=0;
+	LPINT	pItems;
+	LPSTR	pTab;
+	char	str[256];
+
+	nDatesSelected = GetLBSelectedItems(hWndDlg, IDC_LIST, &hItems);
+	if (nDatesSelected)
+	{
+		pItems = (LPINT)GlobalLock(hItems);
+		maxResolution = 0;
+		for (int i = 0; i < nDatesSelected; i++)
+		{
+			SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETTEXT, pItems[i], (LPARAM)str);
+			pTab = strchr(str, '\t');
+			if (pTab)
+			{
+				*pTab++ = 0;
+				LPSTR pTab2 = strchr(pTab, '\t');
+				if (pTab2)
+				{
+					*pTab2++ = 0;
+					maxResolution = fmax(maxResolution, atof(pTab2));
+				}
+				strcpy(orthoDates[i], pTab);
+				strcpy(orthoTitles[i], str);
+			}
+			else
+			{
+				strcpy(orthoTitles[i], str);
+				pTab = strchr(str, ' ');
+				LPSTR pEnd = strrchr(str, ' ');
+				pTab++;
+				*pEnd = 0;
+				strcpy(orthoDates[i], pTab);
+			}
+		}
+	}
+	GSSiGlobUlFree(&hItems);
+	return;
+}
 void DisplayLastCurrentAndNextDates(int iDate)
 {
 	if (!hWndPlayDialog || !nDatesSelected)
@@ -215,6 +257,8 @@ static void SetSequential(HWND hWndDlg, BOOL sequential)
 {
 	HFILE fid;
 	char str[1024];
+
+	SetDatesAndTitles(hWndDlg);
 	SendDlgItemMessage(hWndDlg, IDC_LIST, LB_RESETCONTENT, 0, 0);
 	if (sequential)
 	{
@@ -289,7 +333,7 @@ static void SetSequential(HWND hWndDlg, BOOL sequential)
 			SendDlgItemMessage(hWndDlg, IDC_LIST, LB_SETSEL, TRUE, (LPARAM)item);
 	}
 	EnableWindow(GetDlgItem(hWndDlg, IDOK), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) > 0);
-
+	EnableWindow(GetDlgItem(hWndDlg, IDC_TILED), SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETSELCOUNT, 0, 0) < 6);
 	return;
 }
 BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -393,42 +437,9 @@ BOOL FAR PASCAL SelectOrthosMESSAGEMsgProc(HWND hWndDlg, UINT Message, WPARAM wP
 			break;
 		case IDOK:
 		{
-			HANDLE	hItems;
-			LPINT	pItems;
-			LPSTR	pTab;
 			int rtn = 0;
-			nDatesSelected = GetLBSelectedItems(hWndDlg, IDC_LIST, &hItems);
-			if (!nDatesSelected)
-				break;
-			pItems = (LPINT)GlobalLock(hItems);
-			maxResolution = 0;
-			for (i = 0; i < nDatesSelected; i++)
-			{
-				SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETTEXT, pItems[i], (LPARAM)str);
-				pTab = strchr(str, '\t');
-				if (pTab)
-				{
-					*pTab++ = 0;
-					LPSTR pTab2 = strchr(pTab, '\t');
-					if (pTab2)
-					{
-						*pTab2++ = 0;
-						maxResolution = fmax(maxResolution, atof(pTab2));
-					}
-					strcpy(orthoDates[i], pTab);
-					strcpy(orthoTitles[i], str);
-				}
-				else
-				{
-					strcpy(orthoTitles[i], str);
-					pTab = strchr(str, ' ');
-					LPSTR pEnd = strrchr(str, ' ');
-					pTab++;
-					*pEnd = 0;
-					strcpy(orthoDates[i], pTab);
-				}
-			}
-			GSSiGlobUlFree(&hItems);
+
+			SetDatesAndTitles(hWndDlg);
 			if (SendDlgItemMessage(hWndDlg, IDC_TILED, BM_GETCHECK, 0, 0L))
 			{
 				rtn = 2;
