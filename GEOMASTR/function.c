@@ -839,13 +839,13 @@ GSSiExitProg (1348);
 					goto RtnFalse;
 				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
 				LPSTR pLine = GlobalLock(hLine);
-				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE");
+				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS");
 				fputstring(pLine, Fid);
 				int pos = BT_FIRST;
 				while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					pos = BT_NEXT;
-					sprintf(pLine, "%i\t%s\t%s", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI);
+					sprintf(pLine, "%i\t%s\t%s\t%i\t%i\t%lf %lf %lf %lf", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI, HighlightData.PD.Type, HighlightData.PD.Desc, HighlightData.PD.Rect.xmn, HighlightData.PD.Rect.ymn, HighlightData.PD.Rect.xmx, HighlightData.PD.Rect.ymx);
 					fputstring(pLine, Fid);
 					nWritten++;
 				}
@@ -1123,8 +1123,13 @@ GSSiExitProg (1348);
 		case 316: //$FLT(str)
 		{
 			
-			RVal = FltAP (Args,&Err);
-		    if (Err)
+//			hMem = GSSiGlobAlloc(807, GMEM_MOVEABLE, 4096);
+//			Arg1 = GlobalLock(hMem);
+//			strcpy(Arg1, Args);
+//			ExpandText(Arg1);
+//			RVal = FltAP(Arg1, &Err);
+			RVal = FltAP(Args, &Err);
+			if (Err)
 		    {
 	FLTAPErr:
 				if (ExpandTextDataNotFound)

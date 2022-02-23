@@ -1082,7 +1082,7 @@ GSSiExitProg (12);
 			{
 				if (CurView->PassID != 1)
 	        		goto Next;
-				GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
+				//GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 				CurView->HaveOrthos = TRUE; 
 				if (MapFileType(PltName, 0, 0) == MT_SID)
 					DisplaySIDInVP32 (CurView,PltName);
@@ -1156,7 +1156,7 @@ DisplayImage:
         	{
 		        if (CurView->PassID != 1 && CurView->Type != 5)
 		        	goto Next; 
-				GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
+				//GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 				CurView->HaveOrthos = TRUE; 
     			if (!CurView->HaveBounds)
 			    {   
@@ -1252,7 +1252,7 @@ Next:
     {
 		if (!Pick && CurView->PassID == 1)
 		{
-			GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
+			//GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 			CurView->HaveOrthos = TRUE; 
  	        SetDisplayMode (*hDC,GF_TEXTMODE);
 			DisplaySIDInVP32 (CurView,0);
@@ -2200,7 +2200,7 @@ GSSiExitProg (18);
 		HaltMapDisplay(FALSE,FALSE);
 	useGDIPlus = wantGDIPlus;
 	SetContinueProcessing(TRUE);
-    GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
+    //GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
     NumViewportsToDisplay = *pNumViewports;
     DisplayViewID=0; 
    // FormatViewport = 0;  
@@ -2527,9 +2527,15 @@ void ZoomToBM ()
     LPVISLIST   SavelpVis;
     VISLIST SaveVis; 
     short     i, SaveMaxOrthoRes=MaxOrthoRes;
+	double dval;
     
-    SavelpVis = CurVis;
-    SaveVis = *CurVis;
+	SavelpVis = CurVis;
+	SaveVis = *CurVis;
+	if (dval = GetGlobalDVal2("[%CURORTHORES]", 0))
+	{
+		CurView->OrthoRes = dval;
+		goto GotFile;
+	}
     MaxOrthoRes=0;
     CurView->WindowZoomedToOrtho = TRUE;
     for (i=0;i<CurView->NumFiles;i++)
@@ -2672,7 +2678,7 @@ void SetBounds (HWND hWnd,HDC hDC)
     UINT		lSaveVis = 0;
 	RECT		Rect1;
     
-//	if (!IsBadWritePtr(CurVis, 4))
+	if (!IsBadWritePtr(CurVis, 4))
 		SaveVis = CurVis;
     if (CurView->Type == VPTYPE_PROFILE || 
        (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))

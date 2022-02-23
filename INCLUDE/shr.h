@@ -1240,6 +1240,7 @@ HDIB32 LoadDIBFromMem (LPBYTE pMem,int MemLen,int Format,int flags);
 HDIB32  BMPHandleFromEXT (LPSTR ImageFile); 
 BOOL GMFISetGeoTiffData (DWORD hBMP,DWORD pScaleX, DWORD pScaleY, DWORD pBitmapPoint, DWORD pWorldPoint);
 HDIB32 GMRotateImageClassic (HDIB32 hDib,double DegreesRotation);
+void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char* message);
 FIBITMAP* GSSiFreeImage_ConvertToGreyscale(HDIB32 hDib);
 FIBITMAP* GSSiFreeImage_ColorQuantize(HDIB32 hDib, DWORD Flag);
 FIBITMAP* GSSiFreeImage_ConvertTo4Bits(HDIB32 hDIB);

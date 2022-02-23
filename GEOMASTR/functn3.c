@@ -1454,10 +1454,16 @@ GotCloseFilehSQL:
 			}
 			if (!_fstricmp(Arg[1], "CONVERT"))
 			{
+				BOOL SaveBMPCache = AllowBMPCaching;
+				BOOL SaveAllowCache = AllowCache;
 				int flag = atoi(Arg[4]);
+				AllowBMPCaching = FALSE;
+				AllowCache = FALSE;
 				HDIB32 hDIB = LoadDIB32(Arg[2], FALSE);
 				rtn = SaveDIB32(hDIB, Arg[3], -1, flag);
 				DestroyDIB32(hDIB, FALSE);
+				AllowBMPCaching = SaveBMPCache;
+				AllowCache = SaveAllowCache;
 				goto Rtnrtn;
 			}
 			if (!_fstricmp(Arg[1], "SETICONCOLORS"))
@@ -1502,6 +1508,17 @@ GotCloseFilehSQL:
 					height = FreeImage_GetHeight(hDib32);
 				ltoa(height, OutLoc, 10);
 				DestroyDIB32(hDib32, FALSE);
+				goto Rtnl;
+			}
+			if (!_fstricmp(Arg[1], "BOUNDS"))
+			{
+				MNMXCORD BitmapBounds = { 0 };
+				MNMXCORD WBounds = { 0 };
+				*OutLoc = 0;
+				if (GetImageBounds(Arg[2], 0, &BitmapBounds, &WBounds))
+				{
+					boundstoa(OutLoc, &BitmapBounds);
+				}
 				goto Rtnl;
 			}
 			if (!_fstricmp(Arg[1], "WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))

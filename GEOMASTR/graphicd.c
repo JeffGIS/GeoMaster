@@ -2696,6 +2696,9 @@ GSSiExitProg (440);
 //			st = GM32DrawDibClose (hdd);  
 		}
 		DisplayVirtualPrintAreas ();
+		if (windowToNotifyOnRedisplay)
+			PostMessage(windowToNotifyOnRedisplay, GF_NOTIFY_REDISPLAY_COMPLETE, 0, 0L);
+		windowToNotifyOnRedisplay = 0;
 	}
 //	CloseSymDict();
 	switch (DisplayFinOpt)

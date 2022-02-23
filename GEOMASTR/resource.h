@@ -3354,6 +3354,8 @@
 #define IDC_SPEED_0                     2246
 #define IDC_DBNAME                      2246
 #define IDC_DATETIMEPICKER1             2247
+#define IDC_LOOP2                       2247
+#define IDC_ZOOM_TO_SCALE               2247
 #define IDC_DATETIMEPICKER2             2248
 #define IDC_UPDATEFREQ                  2249
 #define IDC_PACKETSIZE                  2250
@@ -3439,6 +3441,11 @@
 #define IDC_SHOWREG                     2318
 #define IDC_END_DISPLAY_COMMAND         2319
 #define IDC_END_DISPLAY_COMMAND2        2320
+#define IDC_SPEED_GROUP                 2320
+#define IDC_FADE_GROUP                  2321
+#define IDC_LAST_DATE                   2322
+#define IDC_CURRENT_DATE                2323
+#define IDC_NEXT_DATE                   2324
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3784,9 +3791,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1273
+#define _APS_NEXT_RESOURCE_VALUE        1274
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2320
+#define _APS_NEXT_CONTROL_VALUE         2325
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

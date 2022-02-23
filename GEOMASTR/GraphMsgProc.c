@@ -8412,7 +8412,7 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
          		
 				GetDlgItemText (hWndDlg,IDC_SYMCOLOR,CurSymColor,64);  
 				ExpandText (CurSymColor);
-           		if (!*CurSymColor || *CurSymColor == 'U')
+           		if (*CurSymColor == 'U' && lParam == 1)
 					break;
 				Color = atol (CurSymColor);
             	if (lParam == 1 || GetColor(hWndDlg,&Color))
@@ -8514,7 +8514,8 @@ BOOL FAR PASCAL GET_POINTSYMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		    
 		    case IDC_SYMNAME:
                  switch (HIWORD(wParam))
-                 {  case EN_CHANGE:
+                 {
+					case EN_CHANGE:
                         if (GetDlgItemText (hWndDlg,IDC_SYMNAME,str,66))
                         {
 				 			i = SendDlgItemMessage (hWndDlg,IDC_PSYMLIST,LB_FINDSTRING,(WPARAM)-1,(LPARAM) str); 

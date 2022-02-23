@@ -1255,7 +1255,7 @@ void GetDistDecimals (double Dist,LPSTR DistC)
 void DisplayNorthArrowLegend (int From)
 {
 	static	BOOL	InDNA=FALSE;
-	if (InDNA || !CurTheme || !CurView)
+	if (InDNA || !CurTheme || !CurView ||!ContinueProcessing)
 		return;
 	{
 		LPVIEWPORT	SaveVP=CurView;

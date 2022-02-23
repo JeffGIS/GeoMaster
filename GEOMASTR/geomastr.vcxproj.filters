@@ -2465,5 +2465,6 @@
       <Filter>Source Files</Filter>
     </Library>
     <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
+    <Library Include="..\LIB\FreeImage.lib" />
   </ItemGroup>
 </Project>

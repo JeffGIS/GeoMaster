@@ -225,7 +225,10 @@ BOOL LoadUserLib (BOOL Close)
 	ConvertFileNameToCacheFileName (UserLib);
 	if (!(ghUserLib = LoadLibrary( UserLib)))  
 	{
-		MessageBox (0,"Unable to load UserLib",UserLib,MB_ICONEXCLAMATION);
+		DWORD err = GetLastError();
+		char mess[256];
+		sprintf(mess, "Unable to load UserLib: %i", err);
+		MessageBox (0,mess,UserLib,MB_ICONEXCLAMATION);
 		return FALSE;
 	}
 	return TRUE;
@@ -443,7 +446,11 @@ BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 		return (copyfile(toPath, fromPath, AppendOrReplace, 0, 0, 0, 0, 0, 0));
 	makedirectories(toPath, FALSE, FALSE);
 	if (!strnicmp(fromPath, "ftp:", 4) || !strnicmp(fromPath, "http:", 5) || !strnicmp(fromPath, "https:", 6))
+	{
+		if (Replace && ExistFile(toPath))
+			GSSiRemove(toPath);
 		ln = URLToFile(fromPath, toPath);
+	}
 	else
 	{
 		char mess[256];

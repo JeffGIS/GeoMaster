@@ -48,7 +48,7 @@
 #include "dibutil.h"
 
 #include "gmextern.h"      
-#define MAXBMPSIZETOCACHE	1024L * 1024L
+#define MAXBMPSIZETOCACHE	1024L * 1024L * 512L
 static	BOOL	FirstBMPCache=TRUE; 
 static	char		BMPNames[MAXBMPCACHE][MAX_PATH];
 static	int			BMPSize[MAXBMPCACHE];

@@ -1215,6 +1215,9 @@ GSSiExitProg (102);
 void ClearVPHandles(LPVIEWPORT pCurView)
 {
 	//return;
+	RestoreScreen2(CurView->hDC, CurView->LinkedCursorHandle, 0, FALSE);
+	DestroySavedScreen(&CurView->LinkedCursorHandle, 0);
+
 	GSSiDeleteObject(&pCurView->hRgn);
 	DestroySavedScreen(&pCurView->LinkedCursorHandle, 0);
 	CloseTRANS2(&pCurView->hTranVPToBase);

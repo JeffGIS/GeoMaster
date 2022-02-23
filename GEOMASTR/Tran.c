@@ -340,9 +340,11 @@ Exit:
 #if ENABLETRACE
 GSSiExitProg (1436);
 #endif
-	TranPtr = GlobalLock(hTran);
-	GlobalUnlock(hTran);
-
+	if (hTran)
+	{
+		TranPtr = GlobalLock(hTran);
+		GlobalUnlock(hTran);
+	}
 	return (hTran);
 }
 #if ENABLETRACE

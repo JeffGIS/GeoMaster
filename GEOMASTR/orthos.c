@@ -123,6 +123,7 @@ void DisplayOrthoPhoto ()
 
     if (!hOrthos)
     	return;
+	InDisplayOrthos = TRUE;
     CurOrtho = (LPORTHO)GlobalLock (hOrthos) + OrthoID;
 	WPoint.x = CurOrtho->Bounds.xmn;
 	WPoint.y = CurOrtho->Bounds.ymn;
@@ -179,6 +180,7 @@ void DisplayOrthoPhoto ()
 			break;
 		}
 	}
+	InDisplayOrthos = FALSE;
 	return;
 } 
 
@@ -647,8 +649,8 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
 	BMHeight = IDNINT(BitmapBounds.ymx+1);
     CloseTRANS2 (&hTranBMToBase);
     CloseTRANS2 (&hTranBaseToBM); 
-	hTranBMToBase = LoadTranFile (TranFile,1,2,0,0);;
-	hTranBaseToBM = LoadTranFile (TranFile,2,2,0,0);;
+	hTranBMToBase = LoadTranFile (TranFile,1,2,0,0);
+	hTranBaseToBM = LoadTranFile (TranFile,2,2,0,0);
 /*	{       
 		double BMX[4],BMY[4],BASEX[4],BASEY[4]; 
 		float	RSQMIN;
@@ -774,6 +776,18 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
         DeleteObject (hNewBM);        
     }
 	else */	
+	char LastImageTrnFile[MAX_PATH];
+	if (GetGlobalCVal("[%LASTIMAGETRNFILE]", LastImageTrnFile, 0))
+	{
+		char txt[256];
+		GSSiRemove(LastImageTrnFile);
+		sprintf(txt, "%ld %d %ld %ld\r\n%ld %ld %ld %ld\r\n%ld %ld %ld %ld\r\n%ld %ld %ld %ld",
+			bmx, bmy, vpx, vpy,
+			bmx, bmy - bmheight + 1 , vpx, vpy + vpheight,
+			bmx + bmwidth, bmy, vpx + vpwidth, vpy,
+			bmx + bmwidth, bmy - bmheight + 1, vpx + vpwidth, vpy + vpheight);
+		AppendFile(LastImageTrnFile, txt);
+	}
 	   	i=StretchDIBitsFromHandle (hDC,vpx,vpy,
 						   vpwidth,vpheight,
 	    				   bmx,bmy-bmheight+1,

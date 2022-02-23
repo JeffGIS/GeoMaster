@@ -1977,6 +1977,7 @@ void ThemeBeginDisplayPass(BOOL PixelThemesOnly,short FromVPID)
 	LPPROFILETHEMEDATA	lpProfileData;
 	static	long	LastDisplayCycle = -1;
 
+	ThemeEndDisplayPass(FALSE, FALSE, FALSE);
 	if (GetGlobalBVal2 ("[%ONEPASS]",FALSE))
 		CurView->PassID = 5;
 	CurView->HaveOrthos = SetHaveOrthos();
