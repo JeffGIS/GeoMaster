@@ -118,6 +118,7 @@ typedef TRN FAR *LPTRN;
 #define  TWOPI     6.283185307179586e0
 #define  ACRSM     4046.872609874253e0  
 #define  INCHES_PER_CM  0.3937e0
+#define  INCHESPERMM 0.0393701
 #define  MAX_GAP_BTWN_LINKS    0.1e0 
 #define  ZERO$  -2146450000 
 #define  TMPRF$ -2146483000   

@@ -1881,6 +1881,12 @@ GSSiExitProg (439);
    {
  case WM_INITDIALOG:
  {
+	 HDC hdc = GetDC(hWndDlg);
+	 HFONT oldFont = SelectObject(hdc, GetStockObject(SYSTEM_FONT));
+	 SIZE txSize;
+	 int rtn = GetTextExtentPoint32(hdc,"TESTTEXT", 8, &txSize);
+
+	 ReleaseDC(hWndDlg, hdc);
 	 int GMUpdate = GetCurrentUpdateNumber();
 	 LPSTR fgdbVersion = FGDBVersion();
 	 GetFreeImageVersionAndCopyright(FIVersion, FICopyright);

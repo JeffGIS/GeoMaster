@@ -3484,6 +3484,9 @@ typedef struct
 		RECT	SizeRect;
 		short	curLineHeight;
 		short	maxLineHeaderWidth;
+		HWND	hWnd;
+		HDC		hdc;
+		HFONT   currentFont;
 	} REPORT;
 typedef REPORT	FAR *LPREPORT;
 

@@ -4490,6 +4490,45 @@ SetVis:
 			goto RtnFalse;
 		}
 
+		case 441: //$JUST(LRorC,string,width)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs > 1)
+			{
+				if (CurReport && (CurReport->hWnd || CurReport->hDC) && CurReport->currentFont)
+				{
+					int width = atoi(Arg[3]);
+					width *= DeviceToScreenFactor();
+					HDC hDC = CurReport->hDC;
+					BOOL doRelease = FALSE;
+					if (!hDC)
+					{
+						hDC = GetDC(CurReport->hWnd);
+						doRelease = TRUE;
+					}
+					HFONT oldFont = SelectObject(hDC, CurReport->currentFont);
+					SIZE txSize, txSizeSpace;
+					char	tenSpace[11] = "          ";
+					int rtn = GetTextExtentPoint32(hDC, Arg[2], strlen(Arg[2]), &txSize);
+					rtn = GetTextExtentPoint32(hDC, tenSpace, 10, &txSizeSpace);
+					int pixelsPerSpace =  txSizeSpace.cx / 10;
+					SelectObject(hDC, oldFont);
+					if (doRelease)
+						ReleaseDC(CurReport->hWnd, hDC);
+					int numSpaceNeeded = ((width - txSize.cx) / pixelsPerSpace) / 2;
+					for (int i = 0; i < numSpaceNeeded; i++)
+					{
+						strcat(OutLoc, " ");
+					}
+					strcat(OutLoc, Arg[2]);
+				}
+				else
+					strcpy(OutLoc, Arg[2]);
+			}
+			goto Rtnl;
+		}
+
 		default:
 			goto Rtn0;
 	}

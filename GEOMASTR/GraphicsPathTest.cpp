@@ -27,7 +27,7 @@ typedef struct { double x, y; } DPOINT;
 typedef DPOINT* LPDPOINT;
 typedef double* LPDOUBLE;
 // Global Variables:
-HINSTANCE hInst;                                // current instance
+static HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 static ULONG_PTR           gdiplusToken = 0;
