@@ -3230,7 +3230,9 @@ typedef struct
 		RECT	CurrentIconRect; 
 		char	RButFunction[MAX_RBUTFUN];
 		short	OnPrintAddSpaceToVP; 
-		char	unusedspace[16];
+		char	unusedspace[8];
+		HANDLE  hTranScreenToBase;
+		HANDLE  hTranBaseToScreen;
 		double	LLNormFactor; 
 		short	DisplayInParent; 
 		long	CurZoomAreaRef;

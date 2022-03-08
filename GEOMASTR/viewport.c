@@ -166,7 +166,9 @@ void ClearVPFields (LPVIEWPORT CurView)
     CurView->hTranScreenToVP=0;
 	CurView->hTranProjectionToScreen = 0;
 	CurView->hTranScreenToProjection = 0;
-    CurView->hTAGList=0;  
+	CurView->hTranBaseToScreen = 0;
+	CurView->hTranScreenToBase = 0;
+	CurView->hTAGList=0;
     CurView->hPenRedef=0; 
     CurView->hReport=0;  
     CurView->Bitmap = 0;
