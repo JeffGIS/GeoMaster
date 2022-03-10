@@ -813,6 +813,18 @@ GSSiExitProg (114);
 								goto Exit;
 						}
 					}
+					else if (CurView->hTranScreenToBase)
+					{
+						BasePoint = ScreenPtToBasePt(CursorPoint);
+						DisplayCoordinate(&BasePoint, CursorPoint);
+						if (CurView->Type)
+						{
+							HaveVP = 1;
+							break;
+						}
+						else
+							HaveVP = -1;
+					}
 					else if (CurView->hTranVPToBase)
 					{
 						DPOINT	Point = PointToDPoint(CursorPoint);

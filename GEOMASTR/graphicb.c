@@ -4152,8 +4152,13 @@ BOOL ReadTranRecord (void)
 	} 
      if(!CurView->hTranBaseToVP) 
 		CreateBaseToVPTran (CurView->DrawRect);  
-	 for (i=0;i<4;i++)
-	 	TRANS2 (XBASE[i],YBASE[i],&XWIN[i],&YWIN[i],CurView->hTranBaseToVP); 
+	 for (i = 0; i < 4; i++)
+	 {
+		 if (CurView->hTranBaseToScreen)
+			TRANS2(XBASE[i], YBASE[i], &XWIN[i], &YWIN[i], CurView->hTranBaseToScreen);
+		 else
+			TRANS2(XBASE[i], YBASE[i], &XWIN[i], &YWIN[i], CurView->hTranBaseToVP);
+	 }
     hTranFileToBase = STRAN2 (1628,XINCH,YINCH,XBASE,YBASE,4,(LPFLOAT)&RSQMIN,1,0);
     hTranBaseToFile = STRAN2 (1629,XBASE,YBASE,XINCH,YINCH,4,(LPFLOAT)&RSQMIN,1,0);    
     hTranFileToVP  = STRAN2 (1630,XINCH,YINCH,XWIN,YWIN,4,(LPFLOAT)&RSQMIN,1,0);

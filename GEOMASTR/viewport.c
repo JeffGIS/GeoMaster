@@ -312,7 +312,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 	CurView->BoundsDisplayID = 0;
 	CurView->lpBoundsDisplay = 0;     
 	_fmemset (CurView->hMaskAccelerator,0,sizeof(CurView->hMaskAccelerator));
-	CurView->hMaskArea = CurView->hTranVPToBase = CurView->hTranBaseToVP = CurView->hTranVPToScreen = CurView->hTranScreenToVP =CurView->hReport =
+	CurView->hMaskArea = CurView->hTranVPToBase = CurView->hTranBaseToVP = CurView->hTranScreenToBase = CurView->hTranBaseToScreen = CurView->hTranVPToScreen = CurView->hTranScreenToVP =CurView->hReport =
 	CurView->LinkedCursorHandle = CurView->hFileTransIn = CurView->hFileTransOut = 0;
 	(*pNumViewports)++; 
 	SelectVisList (FALSE);
@@ -776,9 +776,11 @@ void UnallocateConfig ()
             
         DestroySavedScreen (&CurView->LinkedCursorHandle,0);
 //	    CloseTRANS2 (&CurView->hTranFormat);
-        CloseTRANS2 (&CurView->hTranVPToBase);
-        CloseTRANS2 (&CurView->hTranBaseToVP);
-        CloseTRANS2 (&CurView->hTranVPToScreen);
+		CloseTRANS2(&CurView->hTranVPToBase);
+		CloseTRANS2(&CurView->hTranBaseToVP);
+		CloseTRANS2(&CurView->hTranScreenToBase);
+		CloseTRANS2(&CurView->hTranBaseToScreen);
+		CloseTRANS2 (&CurView->hTranVPToScreen);
         CloseTRANS2 (&CurView->hTranScreenToVP);
        	CloseTRANS2 (&CurView->hFileTransIn); 
        	CloseTRANS2 (&CurView->hFileTransOut);
@@ -1224,6 +1226,8 @@ void ClearVPHandles(LPVIEWPORT pCurView)
 	DestroySavedScreen(&pCurView->LinkedCursorHandle, 0);
 	CloseTRANS2(&pCurView->hTranVPToBase);
 	CloseTRANS2(&pCurView->hTranBaseToVP);
+	CloseTRANS2(&pCurView->hTranScreenToBase);
+	CloseTRANS2(&pCurView->hTranBaseToScreen);
 	CloseTRANS2(&pCurView->hTranVPToScreen);
 	CloseTRANS2(&pCurView->hTranScreenToVP);
 	CloseTRANS2(&pCurView->hFileTransIn);
@@ -2292,9 +2296,11 @@ void DestroyViewport (LPHANDLE phVP)
         UnloadReport (&pCurView->hReport);  
             
         DestroySavedScreen (&pCurView->LinkedCursorHandle,0);
-        CloseTRANS2 (&pCurView->hTranVPToBase);
-        CloseTRANS2 (&pCurView->hTranBaseToVP);
-        CloseTRANS2 (&pCurView->hTranVPToScreen);
+		CloseTRANS2(&pCurView->hTranVPToBase);
+		CloseTRANS2(&pCurView->hTranBaseToVP);
+		CloseTRANS2(&pCurView->hTranScreenToBase);
+		CloseTRANS2(&pCurView->hTranBaseToScreen);
+		CloseTRANS2 (&pCurView->hTranVPToScreen);
         CloseTRANS2 (&pCurView->hTranScreenToVP);
        	CloseTRANS2 (&pCurView->hFileTransIn); 
        	CloseTRANS2 (&pCurView->hFileTransOut);

@@ -3121,17 +3121,46 @@ void CreateBaseToVPTran (RECT Rectx)
      	BoundsVP = pViewports[CurView->Parent-1];
      while (BoundsVP->DisplayInParent && BoundsVP->Parent && BoundsVP->ID != BoundsVP->Parent)
      	BoundsVP = pViewports[BoundsVP->Parent-1];
-     XWIN[0]=BoundsVP->DrawRect.left;
-     XWIN[1]=BoundsVP->DrawRect.left;
-     XWIN[2]=BoundsVP->DrawRect.right;
-     XWIN[3]=BoundsVP->DrawRect.right;
-     YWIN[0]=BoundsVP->DrawRect.bottom;
-     YWIN[1]=BoundsVP->DrawRect.top;
-     YWIN[2]=BoundsVP->DrawRect.top;
-     YWIN[3]=BoundsVP->DrawRect.bottom;
+	 CloseTRANS2(&BoundsVP->hTranVPToBase);
+	 CloseTRANS2(&BoundsVP->hTranBaseToVP);
+	 CloseTRANS2(&BoundsVP->hTranScreenToBase);
+	 CloseTRANS2(&BoundsVP->hTranBaseToScreen);
      if (BoundsVP->HaveBounds)
      {
-	     XBASE[0]=BoundsVP->WBounds.xmn;
+		 if (BoundsVP->Rotation != 0)
+		 {
+			 DPOINT CenterPointVP = RectMidD(&BoundsVP->ScreenRect), CenterPointW = BoundsVP->MidPointW;
+			 DPOINT pt;
+			 double az;
+			 DPOINT ScreenPoints[4];
+			 DPOINT WPoints[4];
+			 int flip[4] = { 1,0,3,2 };
+
+			 RectToDPoints(&BoundsVP->ScreenRect, ScreenPoints);
+			 for (int i = 0; i < 4; i++)
+			 {
+				 double dist = ldistp(CenterPointVP, ScreenPoints[i]);
+				 dist *= BoundsVP->Scale;
+				 az = getazd(&CenterPointVP, &ScreenPoints[flip[i]]);
+				 az = LTWOPI(az - BoundsVP->Rotation);
+				 WPoints[i] = dnewpt(CenterPointW, az, dist);
+				 XWIN[i] = ScreenPoints[i].x;
+				 YWIN[i] = ScreenPoints[i].y;
+				 XBASE[i] = WPoints[i].x;
+				 YBASE[i] = WPoints[i].y;
+			 }
+			 BoundsVP->hTranScreenToBase = STRAN2(1855, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+			 BoundsVP->hTranBaseToScreen = STRAN2(1856, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+		 }
+		 XWIN[0] = BoundsVP->DrawRect.left;
+		 XWIN[1] = BoundsVP->DrawRect.left;
+		 XWIN[2] = BoundsVP->DrawRect.right;
+		 XWIN[3] = BoundsVP->DrawRect.right;
+		 YWIN[0] = BoundsVP->DrawRect.bottom;
+		 YWIN[1] = BoundsVP->DrawRect.top;
+		 YWIN[2] = BoundsVP->DrawRect.top;
+		 YWIN[3] = BoundsVP->DrawRect.bottom;
+		 XBASE[0]=BoundsVP->WBounds.xmn;
 	     XBASE[1]=BoundsVP->WBounds.xmn;
 	     XBASE[2]=BoundsVP->WBounds.xmx;
 	     XBASE[3]=BoundsVP->WBounds.xmx;
@@ -3142,7 +3171,15 @@ void CreateBaseToVPTran (RECT Rectx)
 	 }
 	 else
      {
-	     XBASE[0]=XWIN[0];
+		 XWIN[0] = BoundsVP->DrawRect.left;
+		 XWIN[1] = BoundsVP->DrawRect.left;
+		 XWIN[2] = BoundsVP->DrawRect.right;
+		 XWIN[3] = BoundsVP->DrawRect.right;
+		 YWIN[0] = BoundsVP->DrawRect.bottom;
+		 YWIN[1] = BoundsVP->DrawRect.top;
+		 YWIN[2] = BoundsVP->DrawRect.top;
+		 YWIN[3] = BoundsVP->DrawRect.bottom;
+		 XBASE[0]=XWIN[0];
 	     XBASE[1]=XWIN[1];
 	     XBASE[2]=XWIN[2];
 	     XBASE[3]=XWIN[3];
@@ -3159,17 +3196,20 @@ void CreateBaseToVPTran (RECT Rectx)
 		    TRANS2 (XWIN[i],YWIN[i],&XWIN[i],&YWIN[i],CurView->hTranBaseToWin); 
 	 		
 	 }*/
-     CloseTRANS2 (&CurView->hTranVPToBase);
-     CloseTRANS2 (&CurView->hTranBaseToVP);
 	 LPINT pInt = GlobalLock(hNulls);
 	 GlobalUnlock(hNulls);
 
-     CurView->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
+	 BoundsVP->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
 	 pInt = GlobalLock(hNulls);
 	 GlobalUnlock(hNulls);
-     CurView->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
+	 BoundsVP->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
 	 pInt = GlobalLock(hNulls);
 	 GlobalUnlock(hNulls);
+	 if (!BoundsVP->hTranScreenToBase)
+	 {
+		 BoundsVP->hTranScreenToBase = STRAN2(1612, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+		 BoundsVP->hTranBaseToScreen = STRAN2(1613, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+	 }
 {
 #if ENABLETRACE
 GSSiExitProg (29);
@@ -3198,22 +3238,9 @@ DPOINT WinPtSToBasePt (POINTS Point)
 DPOINT ScreenPtToBasePt (POINT Point)
 {
     DPOINT WinPointD, WorldPoint;
-     
-	if (!CurView->pTheme)
-		CreateBaseToVPTran(CurView->DrawRect);
-	else if (CurView->pTheme->ID != GF_PROFILE_THEME)
-		CreateBaseToVPTran(CurView->DrawRect);
-	else
-	{
-		CloseTRANS2(&CurView->hTranVPToBase);
-		CloseTRANS2(&CurView->hTranBaseToVP);
-		CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
-		CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
-	}
+
 	WinPointD = EnlargedPoint(Point);
-	WinPointD = TranPoint (&WinPointD,CurView->hTranScreenToVP);
-	WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
-	return WorldPoint;
+	return ScreenPtDToBasePt(WinPointD);
 }
 
 DPOINT ScreenPtDToBasePt (DPOINT WinPointD)
@@ -3231,8 +3258,15 @@ DPOINT ScreenPtDToBasePt (DPOINT WinPointD)
 		CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
 		CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
 	}
-	WinPointD = TranPoint(&WinPointD, CurView->hTranScreenToVP);
-	WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
+	if (CurView->hTranScreenToBase)
+	{
+		WorldPoint = TranPoint(&WinPointD, CurView->hTranScreenToBase);
+	}
+	else
+	{
+		WinPointD = TranPoint(&WinPointD, CurView->hTranScreenToVP);
+		WorldPoint = TranPoint(&WinPointD, CurView->hTranVPToBase);
+	}
 	return WorldPoint;
 }
 
@@ -3402,30 +3436,44 @@ GSSiExitProg (785);
 #endif
 }
 
-POINT BasePtFLTToScreenPt (LPFLTPOINT WPointF)
+POINT BasePtFLTToScreenPt (LPFLTPOINT pWPointF)
 {
-	DPOINT	VPPoint, ScreenPointD, WPoint={WPointF->x,WPointF->y};
+	DPOINT	VPPoint, ScreenPointD, WPoint={pWPointF->x,pWPointF->y};
 
 	VPPoint = BasePtToWinPtD (&WPoint);
 	ScreenPointD = TranPoint (&VPPoint,CurView->hTranVPToScreen);
 	return DPointToPoint (ScreenPointD);
 }
 
-POINT BasePtToScreenPt (LPDPOINT WPoint)
+POINT BasePtToScreenPt (LPDPOINT pWPoint)
 {
 	DPOINT	VPPoint, ScreenPointD;
 
-	VPPoint = BasePtToWinPtD (WPoint);
-	ScreenPointD = TranPoint (&VPPoint,CurView->hTranVPToScreen);
+	if (CurView->hTranBaseToScreen)
+	{
+		ScreenPointD = TranPoint(pWPoint, CurView->hTranBaseToScreen);
+	}
+	else
+	{
+		VPPoint = BasePtToWinPtD(pWPoint);
+		ScreenPointD = TranPoint(&VPPoint, CurView->hTranVPToScreen);
+	}
 	return DPointToPoint (ScreenPointD);
 }
 
-DPOINT BasePtToScreenPtD (LPDPOINT WPoint)
+DPOINT BasePtToScreenPtD (LPDPOINT pWPoint)
 {
 	DPOINT	VPPoint, ScreenPointD;
 
-	VPPoint = BasePtToWinPtD (WPoint);
-	ScreenPointD = TranPoint (&VPPoint,CurView->hTranVPToScreen);
+	if (CurView->hTranBaseToScreen)
+	{
+		ScreenPointD = TranPoint(pWPoint, CurView->hTranBaseToScreen);
+	}
+	else
+	{
+		VPPoint = BasePtToWinPtD(pWPoint);
+		ScreenPointD = TranPoint(&VPPoint, CurView->hTranVPToScreen);
+	}
 	return ScreenPointD;
 }
 
@@ -3459,8 +3507,7 @@ POINT BasePtToWinPt (LPDPOINT WPoint)
 		    TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP); 
 			break;
      	case 0:
-			TRANS2(WPoint->x, WPoint->y, &WinPointDt.x, &WinPointDt.y, CurView->hTranBaseToVP);
-			TRANS2(WinPointDt.x, WinPointDt.y, &WinPointD.x, &WinPointD.y, CurView->hTranVPToScreen);
+			TRANS2(WPoint->x, WPoint->y, &WinPointD.x, &WinPointD.y, CurView->hTranBaseToVP);
 			break;
      	case 3: //google maps projection
 			{
