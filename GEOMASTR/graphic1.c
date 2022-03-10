@@ -6265,12 +6265,12 @@ GSSiExitProg (66);
 }
     if (ForceInc ||
     	CurView->CurFile == -1 ||
-    	CurView->FileType[CurView->CurFile] < 4 || 
-    	CurView->FileType[CurView->CurFile] ==6 ||
-    	CurView->FileType[CurView->CurFile] ==8 ||
+    	CurView->FileType[CurView->CurFile] < VPFILETYPE_PLOTDIR ||
+    	CurView->FileType[CurView->CurFile] == VPFILETYPE_HLTLIST ||
+    	CurView->FileType[CurView->CurFile] == VPFILETYPE_SUBVP ||
     	(CurView->SubFile && !CurView->hlpIndex[CurView->CurFile]) ||  
-    	((CurView->FileType[CurView->CurFile] == 4 || CurView->FileType[CurView->CurFile] ==9) && !CurView->hlpIndex[CurView->CurFile]) ||  
-    	(CurView->FileType[CurView->CurFile] == 5 && !CurView->hlpIndex[CurView->CurFile]))  
+    	((CurView->FileType[CurView->CurFile] == VPFILETYPE_PLOTDIR || CurView->FileType[CurView->CurFile] == VPFILETYPE_DTM) && !CurView->hlpIndex[CurView->CurFile]) ||
+    	(CurView->FileType[CurView->CurFile] == VPFILETYPE_ORTHODIR && !CurView->hlpIndex[CurView->CurFile]))
     {   
     	ForceInc = FALSE;
     	GetPCTPLOTType ();
@@ -6317,10 +6317,10 @@ GSSiExitProg (66);
          else
          	ii=1; 
 	}         
-    if (PltType==9)
+    if (PltType== VPFILETYPE_DTM)
     	if (!Pick)
     		SetDTMRenderAs (CurView->CurFile);
-    if (PltType==6)
+    if (PltType== VPFILETYPE_HLTLIST)
     {
 //        IncrementFile (); 
 {
@@ -6330,12 +6330,12 @@ GSSiExitProg (66);
 	   	return (TRUE);
 }
     } 
-    if (PltType == 7)
+    if (PltType == VPFILETYPE_MACRO)
 	{
 		if (ExistFile (PltName))
     		goto DisplayFile;  
 	}
-    else if (PltType<4 || (PltType == 9 && CurView->DTMRenderAs[CurView->CurFile] != DTM_RENDER_CONTOURS))
+    else if (PltType< VPFILETYPE_PLOTDIR || (PltType == VPFILETYPE_DTM && CurView->DTMRenderAs[CurView->CurFile] != DTM_RENDER_CONTOURS))
     {   
     	 ConvertLayer = -1;
 //    	 if (!VisScan && !PeopleNet) removed 5/7/01 - ConvertCoordClose now called whenever [%ALT_PROJECTION] is set
@@ -6956,15 +6956,15 @@ GSSiExitProg (68);
     	goto NextFile;
     if (CurVis->FileIsVisible[CurView->CurFile]==2 && CurView->PassID == 2)
     	goto NextFile;
-	if ((CurView->FileType[CurView->CurFile] != 3 && CurView->FileType[CurView->CurFile] != 5 && MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0) != MT_SID) && CurView->PassID == 1)
+	if ((CurView->FileType[CurView->CurFile] != VPFILETYPE_IMAGE && CurView->FileType[CurView->CurFile] != VPFILETYPE_ORTHODIR && MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0) != MT_SID) && CurView->PassID == 1)
         goto NextFile;
-    if (CurView->FileType[CurView->CurFile]==5 && (!CurVis->WantType[5] || ForceTAGIndex || ForceRefIndex || ReorgFile))
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR && (!CurVis->WantType[5] || ForceTAGIndex || ForceRefIndex || ReorgFile))
         goto NextFile;
-    if (CurView->FileType[CurView->CurFile]==5 && CurView->PassID >1 && CurView->PassID != 5)// && !PickOrtho)
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR && CurView->PassID >1 && CurView->PassID != 5)// && !PickOrtho)
         goto NextFile;
-    if (CurView->FileType[CurView->CurFile]==6 && Pick)
-        goto NextFile; 
-    if (CurView->FileType[CurView->CurFile]==8) 
+	if (CurView->FileType[CurView->CurFile] == VPFILETYPE_HLTLIST && Pick)
+		ii = 1;
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_SUBVP)
     {   
     	LPVIEWPORT	SaveVP=CurView;
     	BOOL	Err;
