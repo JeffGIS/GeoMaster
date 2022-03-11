@@ -3321,13 +3321,14 @@ typedef struct
 		short  PointSymbolOveride;
 		short  LineSymbolOveride;
 		short  AreaSymbolOveride;
+		char	VPCloseCmd[256];
 		char	GrowSpace[2898-16*MAXPROFILEROUTES-2*sizeof(short)-2*sizeof(HANDLE)
 						  -sizeof(HANDLE)-sizeof(int)-sizeof(COLORREF)
 						  -sizeof(int)-2*sizeof(HBITMAP)-2*sizeof(HDC)
 						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)
 						  -MAX_PATH-sizeof(BOOL)-sizeof(short)
 						  -MAX_PATH - 4*sizeof(short)-sizeof(POINT)
-						  - MAX_VIEWPORT_FILES-3*sizeof(short)];
+						  - MAX_VIEWPORT_FILES-3*sizeof(short)-256];
         char		EndOfViewport;     
         
 	}	VIEWPORT;

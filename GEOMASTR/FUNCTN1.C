@@ -1056,9 +1056,14 @@ GSSiExitProg (1348);
 						}
 					} 
 				}
-				else if (!_fstricmp (Arg[3],"PICKMACRO"))
+				else if (!_fstricmp(Arg[3], "PICKMACRO"))
 				{
-					_fstrcpy (CurView->PickMacroFile,Arg[4]);
+					_fstrcpy(CurView->PickMacroFile, Arg[4]);
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "CLOSECMD"))
+				{
+					strcpy(CurView->VPCloseCmd, Arg[4]);
 					goto RtnTrue;
 				}
 				else if (!_fstricmp (Arg[3],"SVMACRO"))

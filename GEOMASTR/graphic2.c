@@ -618,9 +618,10 @@ BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 		        		{
 			        		CurView->Active = FALSE;
 							PickBoxesDestroy(CurView->ID);
+							ProcessText(CurView->VPCloseCmd);
 							if (CurView->DisplayedFullScreen)
 								MakeVPFullScreen (CurView->ID,0);
-						    CurView = SaveView;
+							CurView = SaveView;
 							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
 							setDoPaint(TRUE);

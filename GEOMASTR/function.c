@@ -1865,7 +1865,10 @@ SetVis:
 					*Endloc++ = 0;
 				else
 					Endloc = strchr (Arg1,0);
-				OutLoc[n++] = atoi (Arg1);
+				OutLoc[n] = atoi (Arg1);
+				if (!OutLoc[n])
+					OutLoc[n] = *Arg1;
+				n++;
 				Arg1 = Endloc;
 			}
 			OutLoc[n] = 0;
