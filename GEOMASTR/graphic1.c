@@ -3108,6 +3108,7 @@ GSSiExitProg (27);
 }
 #endif
 }
+
 void CreateBaseToVPTran (RECT Rectx)
 #if ENABLETRACE
 {GSSiEnterProg (29);
@@ -3121,10 +3122,10 @@ void CreateBaseToVPTran (RECT Rectx)
      	BoundsVP = pViewports[CurView->Parent-1];
      while (BoundsVP->DisplayInParent && BoundsVP->Parent && BoundsVP->ID != BoundsVP->Parent)
      	BoundsVP = pViewports[BoundsVP->Parent-1];
-	 CloseTRANS2(&BoundsVP->hTranVPToBase);
-	 CloseTRANS2(&BoundsVP->hTranBaseToVP);
-	 CloseTRANS2(&BoundsVP->hTranScreenToBase);
-	 CloseTRANS2(&BoundsVP->hTranBaseToScreen);
+	 CloseTRANS2(&CurView->hTranVPToBase);
+	 CloseTRANS2(&CurView->hTranBaseToVP);
+	 CloseTRANS2(&CurView->hTranScreenToBase);
+	 CloseTRANS2(&CurView->hTranBaseToScreen);
      if (BoundsVP->HaveBounds)
      {
 		 if (BoundsVP->Rotation != 0)
@@ -3149,8 +3150,8 @@ void CreateBaseToVPTran (RECT Rectx)
 				 XBASE[i] = WPoints[i].x;
 				 YBASE[i] = WPoints[i].y;
 			 }
-			 BoundsVP->hTranScreenToBase = STRAN2(1855, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
-			 BoundsVP->hTranBaseToScreen = STRAN2(1856, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+			 CurView->hTranScreenToBase = STRAN2(1855, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+			 CurView->hTranBaseToScreen = STRAN2(1856, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
 		 }
 		 XWIN[0] = BoundsVP->DrawRect.left;
 		 XWIN[1] = BoundsVP->DrawRect.left;
@@ -3199,16 +3200,16 @@ void CreateBaseToVPTran (RECT Rectx)
 	 LPINT pInt = GlobalLock(hNulls);
 	 GlobalUnlock(hNulls);
 
-	 BoundsVP->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
+	 CurView->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
 	 pInt = GlobalLock(hNulls);
 	 GlobalUnlock(hNulls);
-	 BoundsVP->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
+	 CurView->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
 	 pInt = GlobalLock(hNulls);
 	 GlobalUnlock(hNulls);
-	 if (!BoundsVP->hTranScreenToBase)
+	 if (!CurView->hTranScreenToBase)
 	 {
-		 BoundsVP->hTranScreenToBase = STRAN2(1612, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
-		 BoundsVP->hTranBaseToScreen = STRAN2(1613, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+		 CurView->hTranScreenToBase = STRAN2(1612, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+		 CurView->hTranBaseToScreen = STRAN2(1613, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
 	 }
 {
 #if ENABLETRACE
@@ -6369,7 +6370,7 @@ GSSiExitProg (66);
             OpenRefIndex(TRUE);
          goto DisplayFile;
     } 
-    if (VisScan && CurView->FileType[CurView->CurFile]==5)
+    if (VisScan && CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR)
     {
 //        IncrementFile ();  
 		ForceInc = TRUE;
@@ -6434,7 +6435,7 @@ GSSiExitProg (66);
 		ExpandText (PltName);
         UseAVI=FALSE;
         PltType = CurView->FileType[CurView->CurFile];
-        if (PltType == 5)
+        if (PltType == VPFILETYPE_ORTHODIR)
         {
 	        lpSlash = _fstrrchr(PltName,'\\');
 	        if (lpSlash)
@@ -6473,7 +6474,7 @@ GSSiExitProg (66);
 S10:    if (CurView->hlpIndex[CurView->CurFile])
 		{
 			lpIndex = (LPFILEINDEX)GlobalLock(CurView->hlpIndex[CurView->CurFile]);
-        	if (PltType != 5 && (ForceRefIndex || ForceTAGIndex || UseRefOrTAGIndex))
+        	if (PltType != VPFILETYPE_ORTHODIR && (ForceRefIndex || ForceTAGIndex || UseRefOrTAGIndex))
             	OpenRefIndex(TRUE);
         }
         else
@@ -6574,7 +6575,7 @@ NotIn:
         if (CurView->FileType[CurView->CurFile]!=5) goto Next; 
         if (!UpdateOrthoIndex) goto Next; 
     }
-    if (CurView->OrthoDisplayName[0]&&CurView->FileType[CurView->CurFile]==5)
+    if (CurView->OrthoDisplayName[0]&&CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR)
     {   
         char    TestName[MAX_PATH];
         
@@ -6599,7 +6600,7 @@ NotIn:
         if (_fstricmp(CurView->OrthoDisplayName,TestName))
             goto Next;
     }
-    if (CurView->FileType[CurView->CurFile]==5)
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR)
     {
         lpIndex->CurrentEntry->Bounds=TestBounds;
         ComputeIndexOrthoRes (lpIndex);
@@ -6643,7 +6644,7 @@ NotIn:
     }
 
     PltType = CurView->FileType[CurView->CurFile];
-	if (PltType == 4 || PltType == 9 || (PltType == 5 && MapFileType(PltName, 0, 0) == MT_SID))
+	if (PltType == VPFILETYPE_PLOTDIR || PltType == VPFILETYPE_DTM || (PltType == VPFILETYPE_ORTHODIR && MapFileType(PltName, 0, 0) == MT_SID))
     	goto Exit;  
     if (UseAVI) 
     {   
