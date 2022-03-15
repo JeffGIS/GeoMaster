@@ -1114,6 +1114,7 @@ GSSiExitProg (1347);
 		return (FALSE);
 }
 	}
+	AddToMacroStack(6, 0, lpStr, 0, 0);
 	if (opt == 3)
 	{
 		_splitpath (lpStr,0,0,Title,0);

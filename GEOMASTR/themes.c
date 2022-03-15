@@ -2468,6 +2468,15 @@ GSSiExitProg (1264);
 #endif
     	return (-1);
 }
+/*	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1264);
+#endif
+		return (-1);
+	}
+*/
+
 	if (CurTheme->ID == PF_COORD_DISPLAY || CurTheme->ID == PF_BOUNDS_DISPLAY ||
 		CurTheme->ID == GF_NORTH_ARROW_THEME || CurTheme->ID == GF_CITY_THEME ||
 		!CurTheme->IsActive|| !CurTheme->VPDisplayed)

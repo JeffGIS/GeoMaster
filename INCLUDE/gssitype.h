@@ -2524,7 +2524,8 @@ typedef struct
 	short	InTestChar;
 	HANDLE  hPoints;
 	BOOL	showClassID;
-	char	filler[168 - sizeof(int) - sizeof(short) -sizeof(HANDLE)- sizeof(BOOL)];
+	int		MinSize;
+	char	filler[168 - sizeof(int) - sizeof(short) -sizeof(HANDLE)- sizeof(BOOL)-sizeof(int)];
 
 }	THEME;
 typedef THEME	FAR* LPTHEME;

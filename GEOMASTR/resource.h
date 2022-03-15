@@ -268,6 +268,7 @@
 #define SV_NUM_CLASS_TITLE              329
 #define IDC_COORD_XTITLE                330
 #define IDC_XFIELD_TITLE                330
+#define MIN_SIZE_TITLE                  330
 #define SV_CB_PERCENTILES               331
 #define IDC_COORD_YTITLE                332
 #define IDC_YFIELD_TITLE                332
@@ -293,6 +294,8 @@
 #define SV_TITLE_TITLE                  346
 #define SV_ROUND_TITLE                  347
 #define IDC_MINPOP                      347
+#define MIN_SIZE                        347
+#define IDC_MIN_SIZE                    347
 #define SV_ROUND_TO                     348
 #define IDC_HSDECAY                     348
 #define IDC_MAXPOP                      348

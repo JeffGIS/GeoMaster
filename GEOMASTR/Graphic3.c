@@ -2295,7 +2295,7 @@ BOOL GetVisBounds (LPMNMXCORD	pBounds,HDC hDC)
 	{
 		if (pViewportsD[iview]->DisplayInParent &&  pViewportsD[iview]->Parent == ParVP)
 		{
-			CurView = pViewportsD[iview];
+			SetCurView(pViewportsD[iview]);
 			if (GetVisBounds2 (pBounds,hDC))
 				rtn=TRUE;
 		}
@@ -3532,7 +3532,7 @@ BOOL SelectLegend (LPFILLSIGNATURE pSignature)
 	{
 		if (pViewportsD[iview]->Type == LEGENDIMAGEVIEWPORT)
 		{
-			CurView = pViewportsD[iview];
+			SetCurView(pViewportsD[iview]);
 			goto Open;
 		}
 	}

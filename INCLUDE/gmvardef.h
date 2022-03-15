@@ -949,6 +949,8 @@ long	JumpBackElement=-1;
 LPSHORT	pnPnts;
 long	nPnts; 
 HFILE	FidTINExtract = HFILE_ERROR;
+double  curItemSQMeters = 0;
+double  curItemPerim = 0;
 long	CurTextStringLoc=0;
 BOOL	ItemIsDeleted=FALSE;      
 BOOL	ItemIsRemoved=FALSE;  

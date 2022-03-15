@@ -473,6 +473,16 @@ GSSiExitProg (1262);
 	ThemeDisplayPass = 1;
 	*CurTheme->CurValue = 0;
 	datafileIsGraphics = ThemeDatafileIsGraphics(CurTheme);
+
+/*	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1264);
+#endif
+		return (-1);
+	}
+*/
+
 	switch (CurTheme->ID)    
 	{ 
 		case GF_CITY_THEME:

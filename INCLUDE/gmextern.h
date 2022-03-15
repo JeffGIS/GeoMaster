@@ -1204,6 +1204,8 @@ extern double			LLNormFactor;
 extern long			JumpBackSeg;
 extern long			JumpBackElement;
 extern HFILE			FidTINExtract;
+extern double		curItemSQMeters;
+extern double		curItemPerim;
 extern long			ReorgBadRecs;
 extern double			UserPickAP;
 extern DPOINT			CurBP;

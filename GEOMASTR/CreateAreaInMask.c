@@ -314,6 +314,7 @@ BOOL ThemeCreateAreaInMask(int from)
 							GlobalUnlock(hNewPoints[i]);
 						}
 						nPnts = np;
+						rtn = TRUE;
 					}
 					else
 						nPnts = 0;
@@ -325,7 +326,6 @@ BOOL ThemeCreateAreaInMask(int from)
 					CloseTRANS2(&hTranBMtoW);
 
 					//nPnts /= 2;
-					rtn = TRUE;
 				}
 			}
 		}

@@ -666,6 +666,50 @@ void SetCurView (LPVIEWPORT pVP)
 		ii=1;
 	if (CurView && CurView->ID == 4)
 		ii=1;*/
+	if (CurView && !inUnallocateConfig)
+	{
+		LPVIEWPORT BoundsVP = CurView;
+		if (CurView->Type == SUBVIEWPORT && CurView->Parent)
+			BoundsVP = pViewports[CurView->Parent - 1];
+		while (BoundsVP->DisplayInParent && BoundsVP->Parent && BoundsVP->ID != BoundsVP->Parent)
+			BoundsVP = pViewports[BoundsVP->Parent - 1];
+
+		if (CurView->ID != BoundsVP->ID)
+		{
+			CurView->HaveBounds = BoundsVP->HaveBounds;
+			CurView->Rotation = BoundsVP->Rotation;
+			CurView->MidPointW = BoundsVP->MidPointW;
+			CurView->ScreenRect = BoundsVP->ScreenRect;
+			CurView->DrawRect = BoundsVP->DrawRect;
+			CurView->WBounds = BoundsVP->WBounds;
+			CurView->Scale = BoundsVP->Scale;
+			CurView->Scale = BoundsVP->Scale;
+			CurView->CurrentGoogleZoom = BoundsVP->CurrentGoogleZoom;
+			CurView->CurrentGoogleType = BoundsVP->CurrentGoogleType;
+			CurView->CurrentGoogleScale = BoundsVP->CurrentGoogleScale;
+			CurView->BorderPct = BoundsVP->BorderPct;
+			CurView->BorderPct = BoundsVP->BorderPct;
+			CurView->DesiredHeight = BoundsVP->DesiredHeight;
+			CurView->TagPointID = BoundsVP->TagPointID;
+			CurView->TagPointType = BoundsVP->TagPointType;
+			CurView->TagPoint = BoundsVP->TagPoint;
+			CurView->TagPointActual = BoundsVP->TagPointActual;
+			CurView->WidthType = BoundsVP->WidthType;
+			CurView->DisplayInInches = BoundsVP->DisplayInInches;
+			CurView->DisplayedFullScreen = BoundsVP->DisplayedFullScreen;
+			CurView->AutoSize = BoundsVP->AutoSize;
+			CurView->DisplayRect = BoundsVP->DisplayRect;
+			CurView->ProfileRect = BoundsVP->ProfileRect;
+			CurView->DisplayRect = BoundsVP->DisplayRect;
+			CurView->Width = BoundsVP->Width;
+			CurView->Height = BoundsVP->Height;
+			CurView->Margin = BoundsVP->Margin;
+			CurView->Rect = BoundsVP->Rect;
+			CurView->xForm = BoundsVP->xForm;
+			CurView->ZMScale = BoundsVP->ZMScale;
+		}
+	}
+
 {
 #if ENABLETRACE
 GSSiExitProg (4);
@@ -3116,34 +3160,29 @@ void CreateBaseToVPTran (RECT Rectx)
 {
      float  RSQMIN;
      double XWIN[4], YWIN[4], XBASE[4], YBASE[4]; 
-     LPVIEWPORT	BoundsVP = CurView;
-     
-     if (CurView->Type == SUBVIEWPORT && CurView->Parent)
-     	BoundsVP = pViewports[CurView->Parent-1];
-     while (BoundsVP->DisplayInParent && BoundsVP->Parent && BoundsVP->ID != BoundsVP->Parent)
-     	BoundsVP = pViewports[BoundsVP->Parent-1];
+
 	 CloseTRANS2(&CurView->hTranVPToBase);
 	 CloseTRANS2(&CurView->hTranBaseToVP);
 	 CloseTRANS2(&CurView->hTranScreenToBase);
 	 CloseTRANS2(&CurView->hTranBaseToScreen);
-     if (BoundsVP->HaveBounds)
+     if (CurView->HaveBounds)
      {
-		 if (BoundsVP->Rotation != 0)
+		 if (CurView->Rotation != 0)
 		 {
-			 DPOINT CenterPointVP = RectMidD(&BoundsVP->ScreenRect), CenterPointW = BoundsVP->MidPointW;
+			 DPOINT CenterPointVP = RectMidD(&CurView->ScreenRect), CenterPointW = CurView->MidPointW;
 			 DPOINT pt;
 			 double az;
 			 DPOINT ScreenPoints[4];
 			 DPOINT WPoints[4];
 			 int flip[4] = { 1,0,3,2 };
 
-			 RectToDPoints(&BoundsVP->ScreenRect, ScreenPoints);
+			 RectToDPoints(&CurView->ScreenRect, ScreenPoints);
 			 for (int i = 0; i < 4; i++)
 			 {
 				 double dist = ldistp(CenterPointVP, ScreenPoints[i]);
-				 dist *= BoundsVP->Scale;
+				 dist *= CurView->Scale;
 				 az = getazd(&CenterPointVP, &ScreenPoints[flip[i]]);
-				 az = LTWOPI(az - BoundsVP->Rotation);
+				 az = LTWOPI(az - CurView->Rotation);
 				 WPoints[i] = dnewpt(CenterPointW, az, dist);
 				 XWIN[i] = ScreenPoints[i].x;
 				 YWIN[i] = ScreenPoints[i].y;
@@ -3153,33 +3192,33 @@ void CreateBaseToVPTran (RECT Rectx)
 			 CurView->hTranScreenToBase = STRAN2(1855, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
 			 CurView->hTranBaseToScreen = STRAN2(1856, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
 		 }
-		 XWIN[0] = BoundsVP->DrawRect.left;
-		 XWIN[1] = BoundsVP->DrawRect.left;
-		 XWIN[2] = BoundsVP->DrawRect.right;
-		 XWIN[3] = BoundsVP->DrawRect.right;
-		 YWIN[0] = BoundsVP->DrawRect.bottom;
-		 YWIN[1] = BoundsVP->DrawRect.top;
-		 YWIN[2] = BoundsVP->DrawRect.top;
-		 YWIN[3] = BoundsVP->DrawRect.bottom;
-		 XBASE[0]=BoundsVP->WBounds.xmn;
-	     XBASE[1]=BoundsVP->WBounds.xmn;
-	     XBASE[2]=BoundsVP->WBounds.xmx;
-	     XBASE[3]=BoundsVP->WBounds.xmx;
-	     YBASE[0]=BoundsVP->WBounds.ymn;
-	     YBASE[1]=BoundsVP->WBounds.ymx;
-	     YBASE[2]=BoundsVP->WBounds.ymx;
-	     YBASE[3]=BoundsVP->WBounds.ymn;
+		 XWIN[0] = CurView->DrawRect.left;
+		 XWIN[1] = CurView->DrawRect.left;
+		 XWIN[2] = CurView->DrawRect.right;
+		 XWIN[3] = CurView->DrawRect.right;
+		 YWIN[0] = CurView->DrawRect.bottom;
+		 YWIN[1] = CurView->DrawRect.top;
+		 YWIN[2] = CurView->DrawRect.top;
+		 YWIN[3] = CurView->DrawRect.bottom;
+		 XBASE[0]=CurView->WBounds.xmn;
+	     XBASE[1]=CurView->WBounds.xmn;
+	     XBASE[2]=CurView->WBounds.xmx;
+	     XBASE[3]=CurView->WBounds.xmx;
+	     YBASE[0]=CurView->WBounds.ymn;
+	     YBASE[1]=CurView->WBounds.ymx;
+	     YBASE[2]=CurView->WBounds.ymx;
+	     YBASE[3]=CurView->WBounds.ymn;
 	 }
 	 else
      {
-		 XWIN[0] = BoundsVP->DrawRect.left;
-		 XWIN[1] = BoundsVP->DrawRect.left;
-		 XWIN[2] = BoundsVP->DrawRect.right;
-		 XWIN[3] = BoundsVP->DrawRect.right;
-		 YWIN[0] = BoundsVP->DrawRect.bottom;
-		 YWIN[1] = BoundsVP->DrawRect.top;
-		 YWIN[2] = BoundsVP->DrawRect.top;
-		 YWIN[3] = BoundsVP->DrawRect.bottom;
+		 XWIN[0] = CurView->DrawRect.left;
+		 XWIN[1] = CurView->DrawRect.left;
+		 XWIN[2] = CurView->DrawRect.right;
+		 XWIN[3] = CurView->DrawRect.right;
+		 YWIN[0] = CurView->DrawRect.bottom;
+		 YWIN[1] = CurView->DrawRect.top;
+		 YWIN[2] = CurView->DrawRect.top;
+		 YWIN[3] = CurView->DrawRect.bottom;
 		 XBASE[0]=XWIN[0];
 	     XBASE[1]=XWIN[1];
 	     XBASE[2]=XWIN[2];
@@ -4155,8 +4194,6 @@ void ShowPickedItem (HWND hWnd, int InItem)
 		goto Exit;
     _fstrcpy (PltName,PickName);
 	ClearFullWindowBitmap (0);
-	if (CurView->DisplayInParent && CurView->Parent)
-		SetViewport (CurView->Parent);
     CloseMap (FALSE);
 	if (InItem >= 0)
 		SelectVisList (FALSE);
@@ -4868,7 +4905,8 @@ Top:
 		    	pSaveVP =CurView;  
 		    	for (iv = 0;iv<*pNumViewports;iv++)
 		    	{   
-		    		CurView = pViewports[iv];
+		    		//CurView = pViewports[iv];
+					SetViewport(pViewports[iv]->ID);
 					if (ConfigVersion > 7)
 						SetBounds (hWnd,0);
 					else
@@ -7813,7 +7851,7 @@ BOOL DisplayVPDialogs (BOOL Reposition)
 	 	SetConfig(0);
 		for (iview=0;iview<*pNumViewports;iview++) 
 		{
-			CurView = pViewports[iview];
+			SetCurView(pViewports[iview]);
 			if (pViewports[iview]->hWndDlg)
 			{
 				if (Reposition)
@@ -7824,7 +7862,7 @@ BOOL DisplayVPDialogs (BOOL Reposition)
 	 	SetConfig(1);
 		for (iview=0;iview<*pNumViewports;iview++) 
 		{
-			CurView = pViewports[iview];
+			SetCurView(pViewports[iview]);
 			if (pViewports[iview]->hWndDlg)
 			{
 				if (Reposition)

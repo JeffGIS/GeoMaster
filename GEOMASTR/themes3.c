@@ -405,6 +405,15 @@ GSSiExitProg (1265);
 #endif
 		return (FALSE);  
 }
+/*	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1265);
+#endif
+		return (FALSE);
+	}
+*/
+
 	HaltReport = FALSE;  
 	ThemeDisplayPass = 0;
 	switch (CurTheme->ID)

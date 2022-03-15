@@ -1035,8 +1035,9 @@ GSSiExitProg (1250);
          SetDlgItemInt (hWndDlg,IDC_TITSIZE,CurTheme->TitleHeight,TRUE);
          SetDlgItemInt (hWndDlg,IDC_INMARGIN,CurTheme->InnerMargin,TRUE);
          SetDlgItemInt (hWndDlg,IDC_MARGIN,CurTheme->Margin,TRUE);
-         SetDlgItemInt (hWndDlg,IDC_BOXSIZE,CurTheme->ColorsWidth,TRUE);
-		 EnableWindow (GetDlgItem(hWndDlg,IDC_CLASSES_FROM_TABLE),!CurTheme->AutoClassDef); 
+		 SetDlgItemInt(hWndDlg, IDC_BOXSIZE, CurTheme->ColorsWidth, TRUE);
+		 SetDlgItemInt(hWndDlg, IDC_MIN_SIZE, CurTheme->MinSize, TRUE);
+		 EnableWindow (GetDlgItem(hWndDlg,IDC_CLASSES_FROM_TABLE),!CurTheme->AutoClassDef);
 		 EnableWindow (GetDlgItem(hWndDlg,IDC_DEFINE_CLASSES),!CurTheme->AutoClassDef);  
          SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_RESETCONTENT,0,0);
 		 SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_ADDSTRING,0,(LPARAM)((LPSTR)"First Value")); 
@@ -1258,7 +1259,7 @@ GSSiExitProg (1250);
 									       CB_GETCURSEL,0,0);
 		         SendDlgItemMessage(hWndDlg,SV_FIELD_NAME,CB_GETLBTEXT,
 		         		  		    Choice,(DWORD)&CurTheme->Field.name);
-
+				 CurTheme->MinSize = GetDlgItemInt(hWndDlg, IDC_MIN_SIZE, &Error, TRUE);
          		 CurTheme->TitleHeight=GetDlgItemInt (hWndDlg,IDC_TITSIZE,&Error,TRUE);
          		 CurTheme->Margin=GetDlgItemInt (hWndDlg,IDC_MARGIN,&Error,TRUE);
          		 CurTheme->InnerMargin=GetDlgItemInt (hWndDlg,IDC_INMARGIN,&Error,TRUE);

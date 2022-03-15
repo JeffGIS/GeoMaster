@@ -742,7 +742,7 @@ int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int N
 	int i, mini=0, rtn;
 	UINT minUse = UINT_MAX;
 
-	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc, 3=zoommacro, 4=LoadReport, 5=displaypickeditems
+	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc, 3=zoommacro, 4=LoadReport, 5=displaypickeditems, 6=fundir file
 	if (from == 3)
 		ii = 0;
 	strcpy (currentMacro,File);

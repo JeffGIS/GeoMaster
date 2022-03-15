@@ -1806,6 +1806,7 @@ Top:
 #if ENABLETRACE
 			GSSiExitProg(607);
 #endif
+			SetViewport(pViewports[iview]->ID);
 			return pViewports[iview];
 		}
 	}
@@ -1816,7 +1817,8 @@ Top:
 #if ENABLETRACE
 GSSiExitProg (607);
 #endif
-    		return pViewports[iview];
+	SetViewport(pViewports[iview]->ID);
+	return pViewports[iview];
 }
 	}
 	if (!CurrentConfig)
