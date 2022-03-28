@@ -2082,8 +2082,12 @@ GSSiExitProg (1260);
 			CurTheme->NoDataBrush= (HBRUSH)CreatePen(PS_DOT,1,RGB(255,0,0));
 		}
 		if (!CurTheme->PCTByArea && !CurTheme->UseStoredCounts)
-		for (iclass=0;iclass<MAX_THEME_CLASSES;iclass++)
-			CurTheme->ClassCount[iclass] = 0; 
+			for (iclass = 0; iclass < MAX_THEME_CLASSES; iclass++)
+			{
+				CurTheme->ClassCount[iclass] = 0;
+				CurTheme->totClassArea[iclass] = 0;
+				CurTheme->totClassLength[iclass] = 0;
+			}
         CurTheme->NumMissing = 0;
         CurTheme->NumInvalid = 0;  
         if (CurTheme->ShowValue || CurTheme->showClassID)
@@ -2468,14 +2472,14 @@ GSSiExitProg (1264);
 #endif
     	return (-1);
 }
-/*	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
+	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
 	{
 #if ENABLETRACE
 		GSSiExitProg(1264);
 #endif
 		return (-1);
 	}
-*/
+
 
 	if (CurTheme->ID == PF_COORD_DISPLAY || CurTheme->ID == PF_BOUNDS_DISPLAY ||
 		CurTheme->ID == GF_NORTH_ARROW_THEME || CurTheme->ID == GF_CITY_THEME ||

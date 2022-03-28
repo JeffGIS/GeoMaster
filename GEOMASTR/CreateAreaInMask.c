@@ -319,6 +319,7 @@ BOOL ThemeCreateAreaInMask(int from)
 					else
 						nPnts = 0;
 					nPolyPoints = nPnts;
+					curItemSQMeters = fabs(ComputeAreaAreaD(lpDCurPoints, nPnts, &curItemPerim));
 
 					for (i = 0; i < nNewPoly; i++)
 						GSSiGlobFree(&hNewPoints[i]);

@@ -1473,6 +1473,8 @@ void InitRecord (HDC hDC)
 		GlobalColors[0]=CurView->LayerColor[FileNum];  
 		HaveVarFillColor = TRUE;
 	}
+	curItemSQMeters = -1;
+	curItemPerim = -1;
 	return;
 }
 

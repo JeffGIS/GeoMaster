@@ -341,6 +341,7 @@
 #define SV_FIELD_HEADING                367
 #define SV_DISPLAY_VALUE2               367
 #define SV_DISPLAY_CLASSID              367
+#define SV_APPEND_TOTAREA               367
 #define IDC_EDIT3                       368
 #define IDC_CLASSVALTABLE               368
 #define IDC_VHSTARTMIN                  368
@@ -2797,6 +2798,8 @@
 #define IDC_CFGDESC                     1760
 #define IDC_MULTIVALUEOPT               1761
 #define IDC_AUTOSELECT                  1762
+#define IDC_MULTIVALUEOPT2              1762
+#define IDC_AREA_UNITS                  1762
 #define IDC_ONSTREET                    1763
 #define IDC_FROMSTREET                  1764
 #define IDC_TOSTREET                    1765
@@ -3449,6 +3452,7 @@
 #define IDC_LAST_DATE                   2322
 #define IDC_CURRENT_DATE                2323
 #define IDC_NEXT_DATE                   2324
+#define IDC_AREA_UNITS_TITLE            2325
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3796,7 +3800,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1274
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2325
+#define _APS_NEXT_CONTROL_VALUE         2326
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

@@ -2108,17 +2108,12 @@ GSSiExitProg (132);
 			}
 		}
 	}
-	/*if (Type == GF_AREA && HiPrecis && nPnts > 0)
+	if (CurTheme && (CurTheme->MinSize || CurTheme->AppendTotArea) && Type == GF_AREA && HiPrecis && nPnts > 0)
 		curItemSQMeters = fabs(ComputeAreaAreaD(lpDCurPoints, nPnts, &curItemPerim));
-	else
-	{
-		curItemSQMeters = -1;
-		curItemPerim = -1;
-	}
 	SetGlobalValueReal("%CURITEMSQMETERS", curItemSQMeters);
 	if (curItemSQMeters > 0 && curItemSQMeters < 1)
 		ii = 1;
-	*/
+	
 	NumDynSegPointsRemaining = 0;
 	NumDynSegPoints = nPnts;
 

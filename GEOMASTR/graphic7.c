@@ -1742,9 +1742,12 @@ GSSiExitProg (900);
 					GSSilread(*Fid, CurTheme, sizeof(THEME_V4));
 					break;
 				case 5:
+					GSSilread(*Fid, CurTheme, sizeof(THEME_V5));
+					break;
+				case 6:
 					GSSilread(*Fid, CurTheme, sizeof(THEME));
 					break;
-            }
+			}
 			while (CurTheme->Version != CUR_THEME_VERSION)
 			{
 				HANDLE	hThemeNew = GSSiGlobAlloc(659, GHND, sizeof(THEME));
@@ -1764,6 +1767,10 @@ GSSiExitProg (900);
 					break;
 				case 4:
 					ConvertThemeV4toV5(pThemeNew, (LPTHEME_V4)CurTheme);
+					break;
+				case 5:
+					memcpy(pThemeNew, CurTheme, sizeof(THEME_V5));
+					pThemeNew->Version = 6;
 					break;
 				}
 				CurTheme = pThemeNew;
