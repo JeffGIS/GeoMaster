@@ -4419,9 +4419,9 @@ HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision)
     pPIA->Bounds = *pBounds;
 	pPIA->Offset = 4;
  	pPIA->Width  = BoundsWidth (pBounds) * Factor;
-	pPIA->Width += 8 - (pPIA->Width % 8);
+    pPIA->Width += 2 * pPIA->Offset;
+    pPIA->Width += 32 - (pPIA->Width % 32);
     pPIA->Factor = (double)pPIA->Width / BoundsWidth (pBounds);
-	pPIA->Width += 2 * pPIA->Offset;
 	pPIA->Height = BoundsHeight(pBounds) * pPIA->Factor  + 2*pPIA->Offset;
  	pPIA->hBitMap[0] = CreateBitmap (pPIA->Width,pPIA->Height,1,1,0);
  	pPIA->hBitMap[1] = CreateBitmap (pPIA->Width,pPIA->Height,1,1,0);
@@ -4530,7 +4530,8 @@ double PCTInAreas (HANDLE hPIA)
 	LPBYTE	pBits1, pBits2;
 	BYTE	MaskedByte;
 	int		TotBits=0, TotMaskedBits=0;
-	static	BOOL	First=TRUE;
+    static	BOOL	First = TRUE;
+    static	BOOL	savebm = FALSE;
 
 	if (!hPIA)
 		return -1;
@@ -4556,6 +4557,13 @@ double PCTInAreas (HANDLE hPIA)
 	pBits2 = GlobalLock (hMem2);
 	GetBitmapBits (pPIA->hBitMap[0],lMem,pBits1);
 	GetBitmapBits (pPIA->hBitMap[1],lMem,pBits2);
+    if (savebm)
+    {
+        //SaveBitmap(pPIA->hBitMap[opt], "c:\\temp\\test.png", 0, 0);
+        SaveBitmap(pPIA->hBitMap[0], "c:\\temp\\test1.png", 0, 0);
+        SaveBitmap(pPIA->hBitMap[1], "c:\\temp\\test2.png", 0, 0);
+    }
+
 
 	for (irow = 0;irow<bm.bmHeight;irow++) 
 	{
