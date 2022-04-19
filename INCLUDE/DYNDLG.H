@@ -109,7 +109,7 @@ long FieldStyles[]=
             BS_AUTORADIOBUTTON};
 
 BOOL	PopDynDlg;
-RECT	MainRect;
+RECT	MainRectDynDlg;
 
 HINSTANCE hInstanceGlobal;
 HWND hDlgBox[DLG_COUNT];

@@ -48,7 +48,7 @@
 #include "dibutil.h"
 
 #include "gmextern.h"      
-#define MAXBMPSIZETOCACHE	1024L * 1024L
+#define MAXBMPSIZETOCACHE	1024L * 1024L * 512L
 static	BOOL	FirstBMPCache=TRUE; 
 static	char		BMPNames[MAXBMPCACHE][MAX_PATH];
 static	int			BMPSize[MAXBMPCACHE];
@@ -420,11 +420,14 @@ DWORD FAR DIBHeight(LPSTR lpDIB)
 
 WORD FAR PaletteSize(LPSTR lpDIB)
 {
+	WORD rtn;
    /* calculate the size required by the palette */
    if (IS_WIN30_DIB (lpDIB))
-      return (DIBNumColors(lpDIB) * sizeof(RGBQUAD));
+      rtn =  (DIBNumColors(lpDIB) * sizeof(RGBQUAD));
    else
-      return (DIBNumColors(lpDIB) * sizeof(RGBTRIPLE));
+      rtn = (DIBNumColors(lpDIB) * sizeof(RGBTRIPLE));
+
+   return rtn;
 }
 
 
@@ -705,9 +708,10 @@ HBITMAP FAR DIBToBitmap(HDIB hDIB, HPALETTE hPal)
    RealizePalette(hDC);
 
    /* create bitmap from DIB info. and bits */
+   curProgID = 10061;
    hBitmap = CreateDIBitmap(hDC, (LPBITMAPINFOHEADER)lpDIBHdr, CBM_INIT,
                 lpDIBBits, (LPBITMAPINFO)lpDIBHdr, DIB_RGB_COLORS);
-
+   curProgID = -1;
    /* restore previous palette */
    if (hOldPal)
       SelectPalette(hDC, hOldPal, FALSE);
@@ -756,8 +760,10 @@ HBITMAP FAR DIB32ToBitmap(HDIB32 hDIB32, HPALETTE hPal)
    if (lpDIBHdr->biBitCount == 8)
 	   colorType = DIB_PAL_COLORS;
    /* create bitmap from DIB info. and bits */
+   curProgID = 10061;
    hBitmap = CreateDIBitmap(hDC, lpDIBHdr, CBM_INIT,
                 lpDIBBits, (LPBITMAPINFO)lpDIBHdr, colorType);
+   curProgID = -1;
 
    /* restore previous palette */
    if (hOldPal)
@@ -1720,15 +1726,18 @@ BOOL BMPInCache(HDIB32 hDib)
 LPBITMAPINFO GetDibHeader (HDIB32 hDib)
 {   
     static BITMAPINFOHEADER DibInfo;  
-	LPBITMAPINFO	pDibInfo;
+	LPBITMAPINFO	pDibInfo=0;
 
-	if (hDibIs32Bit (hDib))
-	{ 
-	    GetBitmapInfoFromHandle (&DibInfo,hDib);
-	    pDibInfo = (LPBITMAPINFO)&DibInfo;
+	if (hDib)
+	{
+		if (hDibIs32Bit(hDib))
+		{
+			GetBitmapInfoFromHandle(&DibInfo, hDib);
+			pDibInfo = (LPBITMAPINFO)&DibInfo;
+		}
+		else
+			pDibInfo = (LPBITMAPINFO)GlobalLock((HANDLE)hDib);
 	}
-	else
-		pDibInfo = (LPBITMAPINFO)GlobalLock ((HANDLE)hDib);
 	return pDibInfo;
 }
 
@@ -2042,6 +2051,7 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
     BITMAPINFOHEADER DibInfo;  
     double	Factor=1; 
     short	ii;
+	POINT pt;
 	BOOL deleteImage = FALSE;
     
 	destH = 0;
@@ -2080,6 +2090,8 @@ int  DisplayBMInRect32 (HDC hDC,HDIB32 hDib, RECT Rect, short MaintainAspect)
         destH = (int)(Rect.bottom - Rect.top);
     }
     SetStretchBltMode(hDC, StretchMode); 
+	if (StretchMode == HALFTONE)
+		SetBrushOrgEx(hDC, 0, 0, &pt);
 /*    if (pDibInfo->biClrUsed)
     	ColorOpt = DIB_PAL_COLORS;
     else*/
@@ -2444,7 +2456,9 @@ void AdjustDIBColors (HANDLE hDib)
 	BOOL isdib32 = TRUE;
 
 	AutoOrthoColor = (COLORREF)-1;
-     
+	if (!hDib)
+		goto Exit2;
+
 	if (!hDibIs32Bit (hDib))
 	{
 		lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib);
@@ -2504,11 +2518,8 @@ void AdjustDIBColors (HANDLE hDib)
     	{ 
 			if (isdib32)
 				startrow = FreeImage_GetScanLine(hDib,irow);
-			else
-			{
-				rgb24 = (RGBTRIPLE	*)startrow; 
-				rgb16 = (GSSiCOLOR16 *)startrow; 
-			}
+			rgb24 = (RGBTRIPLE	*)startrow; 
+			rgb16 = (GSSiCOLOR16 *)startrow; 			
     		icol = lpbi->biWidth;
     		while (icol--)
     		{
@@ -2545,6 +2556,7 @@ void AdjustDIBColors (HANDLE hDib)
 Exit:
 	if (!isdib32)
 		GlobalUnlock (hDib);
+Exit2:
 	AutoOrthoColor = SaveAutoOrthoColor;
 	
 {

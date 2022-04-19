@@ -94,7 +94,7 @@ int GetTextWH (HDC hDC,LPSTR str,LPSIZE pSize,float f)
 
 void BlockText (HDC hDC,LPSTR str,int maxlen,float f)
 {
-	HANDLE	hMem=GSSiGlobAlloc (0,GMEM_MOVEABLE,maxlen+1024);
+	HANDLE	hMem=GSSiGlobAlloc (1838,GMEM_MOVEABLE,maxlen+1024);
 	LPSTR	newstr = GlobalLock (hMem);
 	SIZE	txSize;
 	int		perim, minperim=INT_MAX;
@@ -146,7 +146,7 @@ void BlockText (HDC hDC,LPSTR str,int maxlen,float f)
 	return;
 }
 
-LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT DisplayInRect,BOOL Transparent,int Style)
+HANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT DisplayInRect,BOOL Transparent,int Style)
 {   
 	DPOINT	TagPoint;
 	HDC hDC=GetDC (hWnd);
@@ -154,7 +154,7 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
 	HANDLE	rtn=0;  
 	RECT	WRect; 
 	short	ii;
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,4096);
+	HANDLE	hStr=GSSiGlobAlloc (1837,GMEM_MOVEABLE,4096);
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	DoNotMove = FALSE;
 	BOOL	SaveContinueProcessing = ContinueProcessing;
@@ -236,9 +236,10 @@ LPHANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRE
        	TAGBox.center = WinPtToTAGPt (RectMid(&TAGBox.rect));  
        	if (pRect)
        	{
-			DrawTAG(hWnd,hDC,TRUE,TRUE); 
+			if (!DoNotMove)
+				DrawTAG(hWnd,hDC,TRUE,TRUE); 
 			*pRect = TAGBox.rect;  
-			DestroySavedScreen (&TAGBox.before,0);
+			//DestroySavedScreen (&TAGBox.before,0);
 		}
 		else  
 			DrawTAG(hWnd,hDC,2,TRUE);  
@@ -424,16 +425,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 	str = ReportName + 128;
 	
 	InInfoBox=TRUE;	
-	if (TAGBox.CoordStyle == 0 && TAGBox.PLstyle && From > 1)
-	{
-		if (!PtInWBounds (&TAGBox.TAGPoint))
-		{
-			rtn = FALSE;
-			goto Exit;
-		}
-		CurrentPoint = TAGBox.TAGPoint;
-	}
-	else if (TAGBox.CoordStyle == 1 && TAGBox.PLstyle && From > 1)
+	if ((TAGBox.CoordStyle == 1 || TAGBox.CoordStyle == 1) && TAGBox.PLstyle && From > 1)
 	{
 		TAGBox.TAGPointScr = TAGPtToWinPt (TAGBox.TAGPoint);
 		if (!PtInRect (&CurView->ScreenRect,TAGBox.TAGPointScr))
@@ -542,19 +534,22 @@ BOOL ResetTAGBox (HDC hDC,short From)
 					}
 				}
 			} 
-			DisplayReport (hDC,TAGBox.hReport,Rect,&Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect);  
+			DisplayReport (hDC,TAGBox.hReport,Rect,&Rect, Factor*DeviceToScreenFactor(), TAGBox.Refno,&ReportRect,FALSE);  
 //			ReportRect = SizeReport (hDC,TAGBox.hReport,TAGBox.rect,TRUE);
 			TAGBox.bmWidth = max (TAGBox.bmWidth,ReportRect.right - ReportRect.left + 1);
 			TAGBox.bmHeight += ReportRect.bottom - ReportRect.top + 1;
 	    }
-	    else if (!_fstrnicmp(Line,"$BITMAP(",8))
+	    else if (!_fstrnicmp(Line,"$BITMAP(",8) || !_fstrnicmp(Line, "$IMAGE(", 7))
 	    {   
+			int ioffset = 8;
+			if (!_fstrnicmp(Line, "$IMAGE(", 7))
+				ioffset = 7;
 			int	height,width,nLines=0; 
 			LPSTR	lpComma;
 			double	factor;
 			LPSTR	pPar;
 	
-		 	lpReport = Line+8;
+		 	lpReport = Line+ioffset;
 			lpEndReport = MatchLev (lpReport,')');
 			if (lpEndReport)
 			{                                                    
@@ -564,7 +559,7 @@ BOOL ResetTAGBox (HDC hDC,short From)
 					*lpComma++=0;
 					nLines = atoi (lpComma);
 				}
-	    		_fstrcpy (ExpLine,(LPSTR)(Line+8));
+	    		_fstrcpy (ExpLine,(LPSTR)(Line+ioffset));
 	    		*lpEndReport = ')';
 				ExpandText (ExpLine);
 				if ((pPar=strrchr (ExpLine,'(')))
@@ -668,9 +663,9 @@ BOOL ResetTAGBox (HDC hDC,short From)
     }  
 	else
 	{
-		TAGBox.rect.left = ScreenPoint.x - TAGBox.bmWidth/2;
+		TAGBox.rect.left = max (0,ScreenPoint.x - TAGBox.bmWidth/2);
 		TAGBox.rect.right = TAGBox.rect.left + TAGBox.bmWidth;
-		TAGBox.rect.top = ScreenPoint.y - TAGBox.bmHeight/2;
+		TAGBox.rect.top = max (0,ScreenPoint.y - TAGBox.bmHeight/2);
 		TAGBox.rect.bottom = TAGBox.rect.top + TAGBox.bmHeight; 
 	}
 	if (TAGBox.hTAGDB)
@@ -716,13 +711,13 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	double	Factor, IBFactor;
 	SIZE	txSize;
 	int	Elwh;
-	HANDLE	hPointer;
+	HANDLE	hPointer=0;
 	double	RoundingFactors[5]={2000,20,10,5,1};
 	double	RoundingFactor;
 	LPRECT	pRect=0;
 	BOOL	saveuseGDIPlus = useGDIPlus;
 	BOOL	SaveContinueProcessing = ContinueProcessing;
-
+	double saveRotation;
 
 	RoundingFactor = RoundingFactors[TAGBox.Shape]/2;
 
@@ -739,7 +734,10 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		useGDIPlus = TRUE;
 	SetContinueProcessing ( TRUE);
 	SaveDC(hDC);
-	SetDisplayMode (CurView->hDC, GF_SCREENMODE); 
+	saveRotation = CurView->Rotation;
+	if (CurView && CurView->Rotation)
+		CurView->Rotation = 0;
+	SetDisplayMode (hDC, GF_TEXTMODE); 
 	Line = GlobalLock (hMEM);
 	ExpLine = Line + 1024;
 	ExpandArea = ExpLine + 1024;
@@ -776,7 +774,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	switch (TAGBox.CoordStyle)
 	{
 		case 0:
-        	hRgn = CreateVPRgn (FALSE,FALSE);
+        	hRgn = CreateVPRgn (2,FALSE);
 			pRect = 0;
         	break;
 		case 2:
@@ -817,7 +815,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		Rect.bottom += inc;
 		Rect.right += inc;
 	}
-	HavePL=FALSE; 
+	HavePL=TRUE; 
 	if (MoveMode)
 	{
 		RECT	SaveRect = Rect;
@@ -858,13 +856,52 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 	Points[3]=MidPoint(Points[2],Points[4]);
 	Points[5]=MidPoint(Points[4],Points[6]);
 	Points[7]=MidPoint(Points[6],Points[8]);
-	if (MoveMode)
+	/*if (MoveMode)
 	{
 		if (!Restore)
 			Polyline (hDC,(LPPOINT)Points,9);
 	}
-	else
+	else*/
 	{	
+		Elwh = (RECTWIDTH(&TAGBox.rect) + RECTHEIGHT(&TAGBox.rect)) / RoundingFactor;
+		if (TAGBox.BorderStyle != 4)
+			width = (TAGBox.BorderStyle * 2 - 1) * DeviceToScreenFactor();
+		else
+			width = (3) * DeviceToScreenFactor() * ShrinkFactor;
+		width = max(TAGBox.PLwidth, width);
+		LineWidth = width;
+
+		MinDist = LONG_MAX;
+		for (i = 0; i < 9; i++)
+		{
+			Dist = idist(TAGBox.TAGPointScr, Points[i]);
+			if (Dist < MinDist)
+			{
+				MinDist = Dist;
+				TAGBox.ConnectPoint = Points[i];
+			}
+		}
+		if (TAGBox.TAGPointScr.x < Points[0].x && TAGBox.TAGPointScr.y > Points[2].y&& TAGBox.TAGPointScr.y < Points[0].y)
+			TAGBox.ConnectPoint = Points[1];
+		else if (TAGBox.TAGPointScr.x > Points[4].x&& TAGBox.TAGPointScr.y > Points[2].y&& TAGBox.TAGPointScr.y < Points[0].y)
+			TAGBox.ConnectPoint = Points[5];
+		else if (TAGBox.TAGPointScr.y < Points[2].y && TAGBox.TAGPointScr.x > Points[0].x&& TAGBox.TAGPointScr.x < Points[6].x)
+			TAGBox.ConnectPoint = Points[3];
+		else if (TAGBox.TAGPointScr.y > Points[0].y&& TAGBox.TAGPointScr.x > Points[0].x&& TAGBox.TAGPointScr.x < Points[6].x)
+			TAGBox.ConnectPoint = Points[7];
+		hPointer = ShowPointerLine(0, TAGBox.rect, TAGBox.TAGPointScr, TAGBox.ConnectPoint, &HavePL, MoveMode, LineWidth, Elwh, Elwh, pRect);
+		if (TAGBox.BorderStyle)
+		{
+			BorderPen = CreatePen(PS_SOLID, (int)IDNINT(width), TAGBox.BorderColor);
+			OldPen = SelectObject(hDC, BorderPen);
+			Rect = TAGBox.rect;
+			InflateRect(&Rect, (int)-IDNINT(width / 2 - 1 * DeviceToScreenFactor()), (int)-IDNINT(width / 2 - 1 * DeviceToScreenFactor()));
+			Elwh = (RECTWIDTH(&TAGBox.rect) + RECTHEIGHT(&TAGBox.rect)) / RoundingFactor;
+		}
+		else
+			OldPen = SelectObject(hDC, GetStockObject(NULL_PEN));
+
+
 		if (TAGBox.BGstyle <=1)
 		{
 			//hTBBrush = CreateSolidBrush(TAGBox.BGcolor); 
@@ -886,85 +923,31 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			
 		}
 		hOldBrush = SelectObject (hDC,hTBBrush);
-//		width = min(MainRect.right-MainRect.left,MainRect.bottom-MainRect.top) * (float)TAGBox.BorderStyle/350.0;
-		if (TAGBox.BorderStyle!=4)
-			width = (TAGBox.BorderStyle*2-1)*DeviceToScreenFactor();  
-		else
-			width = (3)*DeviceToScreenFactor()*ShrinkFactor;
-		width = max (TAGBox.PLwidth,width);
-		LineWidth = width;	
-		OldPen = SelectObject (hDC,GetStockObject(NULL_PEN));
-		Elwh  = (RECTWIDTH(&TAGBox.rect) + RECTHEIGHT(&TAGBox.rect))/RoundingFactor;
 		if (TAGBox.BGstyle)
 		{
 			switch (TAGBox.Shape)
 			{
 			case 0:
-				Polygon (hDC,(LPPOINT)Points,9);
-				break;
+				Elwh = 0;
 			default:
-				RoundRect (hDC,TAGBox.rect.left,TAGBox.rect.top,TAGBox.rect.right,TAGBox.rect.bottom,Elwh,Elwh);
-				SetROP2(hDC,DisplayRasterOpt);
-//				SelectObject (hDC,GetStockObject (NULL_BRUSH));
-//				RoundRect (hDC,TAGBox.rect.left,TAGBox.rect.top,TAGBox.rect.right,TAGBox.rect.bottom,Elwh,Elwh);
+				if (hPointer)
+				{
+					LPPOINT	pPPoints = (LPPOINT)GlobalLock(hPointer);
+					RoundRctWithPointer(hDC, Rect.left, Rect.top, Rect.right, Rect.bottom,Elwh, Elwh, pPPoints);
+					GSSiGlobUlFree(&hPointer);
+				}
+				else
+					RoundRect(hDC, Rect.left, Rect.top, Rect.right, Rect.bottom, Elwh, Elwh);
 				break;
 			}
 		}
+		SelectClipRgn(hDC, hRgn);
+		SelectObject(hDC, OldPen);
+		GSSiDeleteObject(&BorderPen);
 		if (OldTextColor >= 0)
 			SetTextColor(hDC,OldTextColor); 
 		if (OldMode)
 			SetROP2(hDC,OldMode);
-		MinDist = LONG_MAX;
-		for (i=0;i<9;i++)
-		{
-			Dist = idist (TAGBox.TAGPointScr,Points[i]);
-			if (Dist < MinDist)
-			{	MinDist = Dist;
-				TAGBox.ConnectPoint = Points[i];
-			}
-		}
-		if (TAGBox.TAGPointScr.x < Points[0].x && TAGBox.TAGPointScr.y > Points[2].y && TAGBox.TAGPointScr.y < Points[0].y)
-			TAGBox.ConnectPoint = Points[1];
-		else if (TAGBox.TAGPointScr.x > Points[4].x && TAGBox.TAGPointScr.y > Points[2].y && TAGBox.TAGPointScr.y < Points[0].y)
-			TAGBox.ConnectPoint = Points[5];
-		else if (TAGBox.TAGPointScr.y < Points[2].y && TAGBox.TAGPointScr.x > Points[0].x && TAGBox.TAGPointScr.x < Points[6].x)
-			TAGBox.ConnectPoint = Points[3];
-		else if (TAGBox.TAGPointScr.y > Points[0].y && TAGBox.TAGPointScr.x > Points[0].x && TAGBox.TAGPointScr.x < Points[6].x)
-			TAGBox.ConnectPoint = Points[7];
-		hPointer = ShowPointerLine (hDC,TAGBox.rect,TAGBox.TAGPointScr,TAGBox.ConnectPoint,&HavePL,MoveMode,LineWidth,Elwh,Elwh,pRect);
-		if (hPointer)
-		{
-			HRGN    NewRgn; 
-			LPPOINT	pPPoints=(LPPOINT)GlobalLock (hPointer);
-			
-			NewRgn = CreatePolygonRgn (pPPoints,3,ALTERNATE);
-			GSSiGlobUlFree (&hPointer);
-			CombineRgn (NewRgn,hRgn,NewRgn,RGN_DIFF);
-			SelectClipRgn (hDC,NewRgn); 
-			GSSiDeleteObject(&NewRgn);
-		}
-        if (TAGBox.BorderStyle)
-        {
-		//FillRect (CurView->hDC,&CurView->ScreenRect,GetStockObject (GRAY_BRUSH));
-			BorderPen = CreatePen (PS_SOLID,(int)IDNINT(width),TAGBox.BorderColor);
-			SelectObject (hDC,BorderPen);
-			Rect = TAGBox.rect;
-			InflateRect (&Rect,(int)-IDNINT(width/2-1*DeviceToScreenFactor()),(int)-IDNINT(width/2-1*DeviceToScreenFactor()));
-			SelectObject(hDC,GetStockObject(NULL_BRUSH));
-			switch (TAGBox.Shape)
-			{
-			case 0:
-				DrawRectPoly (hDC,&Rect,0);
-				break;
-			default:
-				RoundRect (hDC,Rect.left,Rect.top,Rect.right,Rect.bottom,Elwh,Elwh);
-				break;
-			}
-		}
-		SelectClipRgn (hDC,hRgn); 
-		SelectObject(hDC,OldPen);
-		GSSiDeleteObject (&BorderPen);
-//        DeleteObject(BorderPen);
 		if (TAGBox.BorderStyle==4)
 		{   
 			HPEN	BorderPen2,hOldPen;
@@ -980,9 +963,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			switch (TAGBox.Shape)
 			{
 			case 0:
-				FillRectColor (hDC,&Rect,TAGBox.InnerColor);
-				DrawRectPoly (hDC,&Rect,0);  
-				break;
+				Elwh = 0;
 			default:
 				hTBBrush = CreateGMBrush (TAGBox.InnerColor,-2,hDC);
 				hOldBrush = SelectObject (hDC,hTBBrush);
@@ -995,8 +976,6 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 		}	
 		if(OldBKMode) SetBkMode(hDC,OldBKMode);
 		OldBKMode=SetBkMode(hDC,TRANSPARENT);
-/*        iLogPixsY = GetDeviceCaps(hDC, LOGPIXELSY);
-	    TAGBox.LogFont.lfHeight = -1 * (iLogPixsY * TAGBox.TXheight / 72);*/
 	    if (TAGBox.Factor) 
 	    	Factor = TAGBox.Factor;
 	    else
@@ -1067,12 +1046,15 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 					LPRECT pClipRect = &SaveRect;
 					if (!TAGBox.CoordStyle)
 						pClipRect = 0;
-					DisplayReport(hDC, TAGBox.hReport, Rect, pClipRect, Factor*DeviceToScreenFactor(), TAGBox.Refno, 0);
+					DisplayReport(hDC, TAGBox.hReport, Rect, pClipRect, Factor*DeviceToScreenFactor(), TAGBox.Refno, 0,FALSE);
 				}
 		    }
 	
-		    else if (!_fstrnicmp(Line,"$BITMAP(",8))
-		    {   
+		    else if (!_fstrnicmp(Line,"$BITMAP(",8)|| !_fstrnicmp(Line, "$IMAGE(", 7))
+		    {  
+				int ioffset = 8;
+				if (!_fstrnicmp(Line, "$IMAGE(", 7))
+					ioffset = 7;
 				LPSTR	lpComma, pPar;
 				double	factor;
 			 	BITMAPFILEHEADER bmfHead;
@@ -1081,7 +1063,7 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 				RECT	BMRect;
 				int	height,width, nLines=0;
 		
-		 		lpReport = Line+8;
+		 		lpReport = Line+ioffset;
 				lpEndReport = MatchLev (lpReport,')');
 				if (lpEndReport)
 				{                                                    
@@ -1140,7 +1122,8 @@ void DrawTAG (HWND hWnd, HDC hDC, BOOL MoveMode, BOOL Restore)
 			
 			else
 			{  
-		TextOut:
+			TextOut:
+				SetDisplayMode(hDC, GF_TEXTMODE);
 				GetTextExtentPoint32 (hDC,ExpLine,_fstrlen(ExpLine),&txSize);
 				Twidth = txSize.cx;
 				Theight = txSize.cy;
@@ -1237,6 +1220,8 @@ Exit:
 		SaveFullWindowBitmap (hWnd);
 	useGDIPlus = saveuseGDIPlus;
 	SetContinueProcessing ( SaveContinueProcessing);
+	CurView->Rotation = saveRotation;
+	GSSiGlobFree(&hPointer);
 
 	return;
 
@@ -1257,12 +1242,16 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
 		hPointer = DrawTAGPointerLine(hDC, LastBP, LastEP, MoveMode, LineWidth, TipWidth, TAGBox.PLstyle, TAGBox.PointerColor, TAGBox.BorderStyle, TAGBox.BorderColor);
 	LastBP = begpoint;
 	LastEP = endpoint;
-	if (PtInRect(&rect,endpoint))
+	if (PtInRect(&rect, endpoint))
+	{
 		*HavePL = FALSE;
+		GSSiGlobFree(&hPointer);
+	}
 	else
 	{
 //		DrawPointerLine (hDC,begpoint,endpoint,hDashPen,hSolidPen,10);
-    	SaveDC (hDC);
+    	if (hDC)
+			SaveDC (hDC);
 		{   HRGN    NewRgn, OvrLapRgn; 
 		    RECT	TBRect=rect;
 		    
@@ -1284,8 +1273,10 @@ HANDLE ShowPointerLine (HDC hDC,RECT rect,POINT endpoint, POINT begpoint, BOOL *
             DeleteObject (OvrLapRgn);  
             DeleteObject (NewRgn);
 	  	}
+		GSSiGlobFree(&hPointer);
 		hPointer = DrawTAGPointerLine(hDC, RectMid(&rect), endpoint, MoveMode, LineWidth, TipWidth, TAGBox.PLstyle, TAGBox.PointerColor, TAGBox.BorderStyle, TAGBox.BorderColor);
-    	RestoreDC (hDC,-1);
+    	if (hDC)
+			RestoreDC (hDC,-1);
 		*HavePL = TRUE;
 	}
 
@@ -1388,9 +1379,12 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
     switch (PLstyle)
     {
     	case 1:
-			hPen = CreatePen (PS_SOLID,(int)IDNINT(1*DeviceToScreenFactor()),PointerColor);
-			DrawPointerLine (hDC,begpoint,endpoint,hPen,hPen,(int)IDNINT(5*DeviceToScreenFactor()),0); 
-			GSSiDeleteObject (&hPen);
+			if (hDC)
+			{
+				hPen = CreatePen(PS_SOLID, (int)IDNINT(1 * DeviceToScreenFactor()), PointerColor);
+				DrawPointerLine(hDC, begpoint, endpoint, hPen, hPen, (int)IDNINT(5 * DeviceToScreenFactor()), 0);
+				GSSiDeleteObject(&hPen);
+			}
     		break;
     	case 3:
     		TipWidth *=2;
@@ -1421,40 +1415,43 @@ HANDLE DrawTAGPointerLine (HDC hDC,POINT begpoint,POINT endpoint,BOOL MoveMode,i
             } 
             else
             	hBrush = CreateSolidBrush (color);*/
-			OldMode = GetROP2 (hDC);
-			hBrush = CreateGMBrush (PointerColor,-2,hDC);
-			OldBrush = SelectObject (hDC,hBrush); 
-			SelectObject (hDC,GetStockObject (NULL_PEN));
-			Polygon (hDC,(LPPOINT)Points,3);
-        	SetROP2(hDC,OldMode);
-			SelectObject (hDC,GetStockObject (NULL_BRUSH));
-			if (BorderStyle)
+			if (hDC)
 			{
-				if (BorderStyle<4)
-					color = BorderColor;
-				else
-					color = PointerColor;
-				hPen = CreatePen (PS_SOLID,LineWidth,color);
-				hOldPen=SelectObject (hDC,hPen);
-/*			if (!TransParent)
-			{
-				hPen = CreatePen (PS_SOLID,LineWidth,color);
-				hOldPen=SelectObject (hDC,hPen);
+				OldMode = GetROP2(hDC);
+				hBrush = CreateGMBrush(PointerColor, -2, hDC);
+				OldBrush = SelectObject(hDC, hBrush);
+				SelectObject(hDC, GetStockObject(NULL_PEN));
+				Polygon(hDC, (LPPOINT)Points, 3);
+				SetROP2(hDC, OldMode);
+				SelectObject(hDC, GetStockObject(NULL_BRUSH));
+				if (BorderStyle)
+				{
+					if (BorderStyle < 4)
+						color = BorderColor;
+					else
+						color = PointerColor;
+					hPen = CreatePen(PS_SOLID, LineWidth, color);
+					hOldPen = SelectObject(hDC, hPen);
+					/*			if (!TransParent)
+								{
+									hPen = CreatePen (PS_SOLID,LineWidth,color);
+									hOldPen=SelectObject (hDC,hPen);
+								}
+								else
+								{
+									hPen = CreatePen (PS_SOLID,IDNINT(DeviceToScreenFactor()),color);
+									hOldPen=SelectObject (hDC,hPen);
+								}
+								else
+									hOldPen = SelectObject (hDC,GetStockObject(NULL_PEN));*/
+					Polygon(hDC, (LPPOINT)Points, 3);
+				}
+				SelectObject(hDC, OldBrush);
+				DeleteObject(hBrush);
+				if (hOldPen)
+					SelectObject(hDC, hOldPen);
+				GSSiDeleteObject(&hPen);
 			}
-			else 
-			{
-				hPen = CreatePen (PS_SOLID,IDNINT(DeviceToScreenFactor()),color);
-				hOldPen=SelectObject (hDC,hPen);
-			}
-			else
-				hOldPen = SelectObject (hDC,GetStockObject(NULL_PEN));*/
-				Polygon (hDC,(LPPOINT)Points,3); 
-			}
-			SelectObject (hDC,OldBrush); 
-	        DeleteObject (hBrush);  
-			if (hOldPen)
-				SelectObject (hDC,hOldPen);
-			GSSiDeleteObject (&hPen);
 			GlobalUnlock (hPointer);
 		break;
 		
@@ -2275,7 +2272,7 @@ void SaveInfoBoxes (HFILE Fid)
 	GSSiClose2 (&FidTag);
 	return;
 }  */
-BOOL ProcessInfoboxMacro (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessInfoboxMacro (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {   
 	POINT	MousePoint;
 	short	InfoBoxID;
@@ -2407,7 +2404,9 @@ BOOL ProcessInfoBoxPickMacroFile (short InfoBoxNum)
 	if (SelectTAG(InfoBoxNum-1))   
 	{   
 		TBNum = InfoBoxNum;
+		InInfoBoxMacro = TRUE;
 		SetGlobalValue ("%INFOBOXTEXT",TAGBox.text);
+		InInfoBoxMacro = FALSE;
 		ProcessText (TAGBox.PickMacroFile);    
 		return TRUE;
 	}  

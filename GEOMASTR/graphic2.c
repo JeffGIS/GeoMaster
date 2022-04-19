@@ -37,7 +37,7 @@ void PickBoxesDestroy(VPID)
 	numPickBoxes = 0;
 }
 
-BOOL ProcessPickBoxes (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessPickBoxes (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (113);
 #endif
@@ -83,7 +83,7 @@ BOOL ContinuePicking (BOOL QuitOnMMove)
 {GSSiEnterProg (697);
 #endif
 {
-	MSG     msg;   
+	MSG     msg = { 0 };
 	BOOL	IsAccel;  
 	short	ii;
 	
@@ -324,7 +324,7 @@ void SetConfigFromCursor (POINT CursorPoint)
 	return;
 }
          
-BOOL ProcessPassiveFunctions (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+BOOL ProcessPassiveFunctions (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (113);
 #endif
@@ -542,7 +542,7 @@ BOOL SelectZoomMacro (HWND hWnd)
 	return rtn;
 }
          
-BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (113);
 #endif
@@ -618,9 +618,10 @@ BOOL ProcessCloseIcon (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
 		        		{
 			        		CurView->Active = FALSE;
 							PickBoxesDestroy(CurView->ID);
+							ProcessText(CurView->VPCloseCmd);
 							if (CurView->DisplayedFullScreen)
 								MakeVPFullScreen (CurView->ID,0);
-						    CurView = SaveView;
+							CurView = SaveView;
 							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
 							setDoPaint(TRUE);
@@ -739,7 +740,7 @@ GSSiExitProg (113);
 #endif
 }
 
-void DisplayCursorCoordinate (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+void DisplayCursorCoordinate (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (114);
 #endif
@@ -812,6 +813,18 @@ GSSiExitProg (114);
 							if (DisplayProfileInfo(&BasePoint, CursorPoint))
 								goto Exit;
 						}
+					}
+					else if (CurView->hTranScreenToBase)
+					{
+						BasePoint = ScreenPtToBasePt(CursorPoint);
+						DisplayCoordinate(&BasePoint, CursorPoint);
+						if (CurView->Type)
+						{
+							HaveVP = 1;
+							break;
+						}
+						else
+							HaveVP = -1;
 					}
 					else if (CurView->hTranVPToBase)
 					{
@@ -2017,7 +2030,33 @@ GSSiExitProg (130);
 }
 #endif
 }
-
+BOOL PtInScreenRect(POINT SegPoint)
+#if ENABLETRACE
+{
+	GSSiEnterProg(130);
+#endif
+	{
+		if (SegPoint.x < CurView->ScreenRect.left ||
+			SegPoint.x > CurView->ScreenRect.right ||
+			SegPoint.y < CurView->ScreenRect.top ||
+			SegPoint.y > CurView->ScreenRect.bottom)
+		{
+#if ENABLETRACE
+			GSSiExitProg(130);
+#endif
+			return (FALSE);
+		}
+		else
+		{
+#if ENABLETRACE
+			GSSiExitProg(130);
+#endif
+			return (TRUE);
+		}
+#if ENABLETRACE
+	}
+#endif
+}
 RECT PctRect (RECT Rect, float Pct)
 #if ENABLETRACE
 {GSSiEnterProg (131);
@@ -2069,6 +2108,12 @@ GSSiExitProg (132);
 			}
 		}
 	}
+	if (CurTheme && (CurTheme->MinSize || CurTheme->AppendTotArea) && Type == GF_AREA && HiPrecis && nPnts > 0)
+		curItemSQMeters = fabs(ComputeAreaAreaD(lpDCurPoints, nPnts, &curItemPerim));
+	SetGlobalValueReal("%CURITEMSQMETERS", curItemSQMeters);
+	if (curItemSQMeters > 0 && curItemSQMeters < 1)
+		ii = 1;
+	
 	NumDynSegPointsRemaining = 0;
 	NumDynSegPoints = nPnts;
 
@@ -2350,6 +2395,19 @@ GSSiExitProg (134);
 #endif
 					return 0;
 }
+				case 1:
+				{
+					if (Pick && CurTheme->DispersePoints)
+					{
+						{
+#if ENABLETRACE
+							GSSiExitProg(134);
+#endif
+							return 0;
+						}
+					}
+				}
+				break;
 				default:
 					break;
 			}
@@ -3209,7 +3267,7 @@ GSSiExitProg (153);
 #endif
 }
 
-BOOL MarginPan (HWND hWnd,int Message, WPARAM wParam, LPARAM lParam)
+BOOL MarginPan (HWND hWnd,UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (154);
 #endif

@@ -30,7 +30,7 @@ static  BOOL    AddRangeAll=FALSE;
 static  short   PIDAddIndex,StreetNumIndex,PidLen=13;  
 static LPOPENFILEDATA	FilePtrADD;
 static LPOPENSQLDATA	SQLPtrADD=0;
-static  GWFLDINFO   SNField, HNField, ZIPField, SNumField; 
+static  GWFLDINFO   SNField, HNField, ZIPField, SNumField, UDIField; 
 static char		AddEditHouseNum[128];
 static char		AddEditStreet[128];
 static char		AddEditCity[128];
@@ -130,6 +130,14 @@ ErrOut: GSSiClose2 (&Fid);
             }
             else
             	ZIPField.Name[0] = 0;
+			if (abs(lpGWDHead->NumIndexFields[index]) > 3)
+			{
+				lpGWFldInfo = lpGWDHead->pFldInfo;
+				lpGWFldInfo += lpGWDHead->IndexFields[index][3];
+				UDIField = *lpGWFldInfo;
+			}
+			else
+				ZIPField.Name[0] = 0;
             goto GetStreetNumIndex;
         } 
         NextIndex:;
@@ -341,9 +349,11 @@ short DisplayStreetsPID (HWND hDlg,LONG HouseMin, LONG HouseMax, short OddEven, 
     pos = BT_FIRST; 
 FirstAdd:
     SetFieldValFromLong(lpGWDHeadPID,&HNField,HouseMin);
-    if (ZIPField.Name[0])
+	if (ZIPField.Name[0])
 		SetFieldValFromChar(lpGWDHeadPID, &ZIPField, "", FALSE, FALSE, TRUE);
-    GWDFormKey(lpGWDHeadPID,PIDAddIndex,TRUE,0,0);
+	if (UDIField.Name[0])
+		SetFieldValFromChar(lpGWDHeadPID, &UDIField, "", FALSE, FALSE, TRUE);
+	GWDFormKey(lpGWDHeadPID,PIDAddIndex,TRUE,0,0);
     _fmemmove (AddText,lpGWDHeadPID->pKeys[PIDAddIndex],32);
     stName = BT_FIND (lpGWDHeadPID->BTHandle[PIDAddIndex],lpGWDHeadPID->pKeys[PIDAddIndex],
                               pos,BT_GE,(LPSTR)&Offset);   
@@ -443,7 +453,7 @@ FirstAdd:
 }
 
 
-BOOL FAR PASCAL LOCATION_OFFSETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOCATION_OFFSETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {   
  static short   InLocChoice;
  short	OffsetChoice, OLDefault; 
@@ -712,7 +722,7 @@ void AddIntMatch(HWND hWndDlg,LPSTR str)
 	return;
 }
 
-BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	char	Street1[36]="", Street2[36]="";   
 	char	str[256];
@@ -992,7 +1002,7 @@ BOOL FAR PASCAL LOC_INTERSECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;
 }
 
-BOOL FAR PASCAL ADDEDIT_HELPERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDEDIT_HELPERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	short	i;
     static	BOOL	First=TRUE;
@@ -1435,7 +1445,7 @@ ShowList1:
  return TRUE;
 }
 
-BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 
 	OFSTRUCTGM	OFStruct;
@@ -1819,7 +1829,7 @@ BOOL FAR PASCAL ABVEDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM 
  return TRUE;    
 }
 
-BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int       TabStops[2]={100,1300}, i;
     LPSTR   pPrefix, lpDot, lpMIDstr;  
@@ -2267,7 +2277,7 @@ BOOL FAR PASCAL ADDLOC_FROMINTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  return TRUE;    
 }
 
-BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL STREET_SEGS_BETWEEN_INTSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int		TabStops[2]={100,1300}, i;
     LPSTR   pPrefix, lpDot, lpMIDstr;  
@@ -2846,7 +2856,7 @@ pIMER->NumSegsFound=0;
 
 
 
-BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     HCURSOR OldCursor=0;    
     static   HANDLE hSQL=0;
@@ -3136,7 +3146,7 @@ BOOL FAR PASCAL INTACCIDPROFMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;    
 }
 
-BOOL FAR PASCAL TEST_STREETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TEST_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     
  short    BRtn; 
@@ -3199,7 +3209,7 @@ BOOL FAR PASCAL TEST_STREETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;    
 }
 
-BOOL FAR PASCAL ADDRESS_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDRESS_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (849);
 #endif
@@ -3274,7 +3284,7 @@ GSSiExitProg (849);
 #endif
 }
 
-BOOL FAR PASCAL STREET_NAME_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL STREET_NAME_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (850);
 #endif
@@ -3385,7 +3395,7 @@ void AddAddMatch(HWND hWndDlg, LPSTR str)
 	return;
 }
 
-BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDRESSPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  short i,nchar,ikey;
  static LONG House;
@@ -3696,7 +3706,7 @@ Close:
  return TRUE;
 } 
 
-BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {   static  char    PID[34]="";
     char    str[34];
     short       nchar;
@@ -3764,7 +3774,7 @@ BOOL FAR PASCAL LOCATEPIDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
  return TRUE;
 }
 
-BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL INTERSECT_MATCH_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     
 	static	BOOL	Opened; 
@@ -4388,7 +4398,7 @@ BOOL SetModeless(BOOL set)
 	return rtn;
 }
 
-BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADD_MATCH_EDITMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     
 	static	BOOL	Opened, OpenedZB, OpenedSP; 
@@ -5793,7 +5803,7 @@ GetNext:
  GSSiGlobUlFree (&hMem);
  return TRUE;    
 } 
-BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	char	Street[66]="";   
 	short	i;
@@ -5950,7 +5960,7 @@ BOOL FAR PASCAL LOC_STREETMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPAR
  return TRUE;
 }
 
-BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDLOC_FROMADDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1382);
 #endif
@@ -6741,7 +6751,7 @@ GSSiExitProg (1382);
 #endif
 }
 
-BOOL FAR PASCAL ADDRESS1MsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDRESS1MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  short i, nchar,ikey, st;
  static LONG House;

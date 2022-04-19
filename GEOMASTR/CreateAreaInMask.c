@@ -215,7 +215,9 @@ BOOL ThemeCreateAreaInMask(int from)
 					hDCMain = GetDC(CurView->hWnd);
 					hDC = CreateCompatibleDC(hDCMain);
 					//hBM = CreateBitmap(width+4, height+4, 1, 1, 0);
+					curProgID = 10002;
 					hBM = CreateCompatibleBitmap(hDCMain, width + margin * 2, height + margin * 2);
+					curProgID =-1;
 					rect.left = rect.bottom = 0;
 					rect.right = width + margin * 2;
 					rect.top = height + margin * 2;
@@ -312,10 +314,12 @@ BOOL ThemeCreateAreaInMask(int from)
 							GlobalUnlock(hNewPoints[i]);
 						}
 						nPnts = np;
+						rtn = TRUE;
 					}
 					else
 						nPnts = 0;
 					nPolyPoints = nPnts;
+					curItemSQMeters = fabs(ComputeAreaAreaD(lpDCurPoints, nPnts, &curItemPerim));
 
 					for (i = 0; i < nNewPoly; i++)
 						GSSiGlobFree(&hNewPoints[i]);
@@ -323,7 +327,6 @@ BOOL ThemeCreateAreaInMask(int from)
 					CloseTRANS2(&hTranBMtoW);
 
 					//nPnts /= 2;
-					rtn = TRUE;
 				}
 			}
 		}
@@ -635,7 +638,7 @@ void testConvertBitmapToPoly(LPSTR file)
 	}
 }
 
-BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL AreaInMaskThemeMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	int	BRtn;
 	if ((BRtn = DIALOGSTYLEMsgProc(hWndDlg, Message, wParam, lParam)))

@@ -3,6 +3,7 @@
 
 #include "gmextern.h"
 
+
 static	char	MinClassValue[512];
 
 
@@ -357,9 +358,17 @@ LPTHEME CreateNewTheme (int Choice)
 				pTheme->ID = GF_AREA_IN_MASK_THEME;
 				pTheme->Recompute = FALSE;
 				pTheme->WantDataPass = FALSE;
-				pTheme->NumDesiredClass=1; 
-				pTheme->NumClass=1;  
+				pTheme->NumDesiredClass = 1;
+				pTheme->NumClass = 1;
 				break;
+			case 28:
+				pTheme->ID = GF_TWO_VALUE_THEME;
+				pTheme->Recompute = FALSE;
+				pTheme->WantDataPass = FALSE;
+				pTheme->NumDesiredClass = 1;
+				pTheme->NumClass = 1;
+				break;
+				
 				
 		}
 	}
@@ -591,7 +600,7 @@ GSSiExitProg (1230);
 
  
 
-BOOL ThemeRunMacro (HWND hWnd, int Message, WPARAM wParam,LPARAM lParam)
+BOOL ThemeRunMacro (HWND hWnd, UINT Message, WPARAM wParam,LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1233);
 #endif
@@ -1076,7 +1085,7 @@ void ThemeDisplayLegend2(short BeginOrEndDisplayPass,short FromVPID)
 		case GF_AREA_IN_MASK_THEME:
 			break;
 		case GF_TWO_VALUE_THEME:
-//			DisplayTwoVThemeLegend();
+			DisplayTwoVThemeLegend(BeginOrEndDisplayPass);
 			break;
 
 		case GF_MULT_BITMAPS_THEME:
@@ -1528,19 +1537,30 @@ Top:
 		case GF_GRAPHICS_FUNCTION_THEME:			 
 		case GF_OFFSETAREA_THEME:
 		case GF_SINGLE_VALUE_THEME:
-	         {
-	          DLGPROC lpfnSV_THEME1MsgProc;
-	          setDoPaint( FALSE);
-	          lpfnSV_THEME1MsgProc = MakeProcInstance((DLGPROC)SV_THEME1MsgProc, hInst);
-	          nRc = DialogBox(hInst, (LPSTR)"SV_THEME1", hWnd, lpfnSV_THEME1MsgProc);
-	          FreeProcInstance(lpfnSV_THEME1MsgProc);
-	          setDoPaint( TRUE);
-			  if (nRc == 2)
-				  goto Top;
-	         }
+		{
+			DLGPROC lpfnSV_THEME1MsgProc;
+			setDoPaint(FALSE);
+			lpfnSV_THEME1MsgProc = MakeProcInstance((DLGPROC)SV_THEME1MsgProc, hInst);
+			nRc = DialogBox(hInst, (LPSTR)"SV_THEME1", hWnd, lpfnSV_THEME1MsgProc);
+			FreeProcInstance(lpfnSV_THEME1MsgProc);
+			setDoPaint(TRUE);
+			if (nRc == 2)
+				goto Top;
+		}
 
-		break; 
-				
+		break;
+
+		case GF_TWO_VALUE_THEME:
+		{
+			setDoPaint(FALSE);
+			nRc = DialogBox(hInst, (LPSTR)"TWOValueTheme", hWnd, TWOValueThemeMsgProc);
+			setDoPaint(TRUE);
+			if (nRc == 2)
+				goto Top;
+		}
+
+		break;
+
 		case GF_CONNECTION_LINE_THEME:
 	         {
 	          DLGPROC lpfnSV_THEME2MsgProc;
@@ -1957,6 +1977,7 @@ void ThemeBeginDisplayPass(BOOL PixelThemesOnly,short FromVPID)
 	LPPROFILETHEMEDATA	lpProfileData;
 	static	long	LastDisplayCycle = -1;
 
+	ThemeEndDisplayPass(FALSE, FALSE, FALSE);
 	if (GetGlobalBVal2 ("[%ONEPASS]",FALSE))
 		CurView->PassID = 5;
 	CurView->HaveOrthos = SetHaveOrthos();
@@ -2061,11 +2082,15 @@ GSSiExitProg (1260);
 			CurTheme->NoDataBrush= (HBRUSH)CreatePen(PS_DOT,1,RGB(255,0,0));
 		}
 		if (!CurTheme->PCTByArea && !CurTheme->UseStoredCounts)
-		for (iclass=0;iclass<MAX_THEME_CLASSES;iclass++)
-			CurTheme->ClassCount[iclass] = 0; 
+			for (iclass = 0; iclass < MAX_THEME_CLASSES; iclass++)
+			{
+				CurTheme->ClassCount[iclass] = 0;
+				CurTheme->totClassArea[iclass] = 0;
+				CurTheme->totClassLength[iclass] = 0;
+			}
         CurTheme->NumMissing = 0;
         CurTheme->NumInvalid = 0;  
-        if (CurTheme->ShowValue)
+        if (CurTheme->ShowValue || CurTheme->showClassID)
 		{
         	BeginDelayedText (CurTheme->FidDelayedText);
 			OpenShowValInfoboxFile ();
@@ -2133,7 +2158,7 @@ GSSiExitProg (1260);
 				pStreetData->SavePAE = ProcessAllElements;
 				ProcessAllElements = pStreetData->ShowAllElements;
 		    	GSSiGlobFree (&CurTheme->hScatterFile); 
-				CurTheme->hScatterFile = GSSiGlobAlloc ( 638,GMEM_MOVEABLE,(long)sizeof(MIDPOINT)*(long)MaxMidpoints); 
+				CurTheme->hScatterFile = GSSiGlobAlloc ( 638+ CurTheme->TargetViewport * 100000,GMEM_MOVEABLE,(long)sizeof(MIDPOINT)*(long)MaxMidpoints);
 				CurTheme->NumMidpoint=0;
 				_fmemset (HaveStates,0,74*sizeof(BYTE));
 			}                                   
@@ -2210,14 +2235,43 @@ GSSiExitProg (1260);
 			case GF_CONNECTION_LINE_THEME:
 			case GF_SINGLE_VALUE_THEME:
 			case GF_TIME_DISPLAY_THEME:
-			case GF_TWO_VALUE_THEME: 
 				OpenThemeHighlightFile (BT_WRITE);
 				OpenPointDispersionFile (BT_WRITE);
 				OpenThemeDataFile(CurTheme->DataFile);
                 if (CurTheme->hThemeDB && GetDBType (CurTheme->hThemeDB) != GMTEXT_DATAFILE)
 	            	 GetDBFieldInfo (&CurTheme->Field,CurTheme->hThemeDB);
 			    break;  
-			    
+			case GF_TWO_VALUE_THEME:
+			{
+				int maxValues = 0;
+				CurTheme->NumVals = 0;
+				GSSiGlobFree (&CurTheme->hPoints);
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefDB))
+								maxValues = pViewports[i]->pTheme->NumVals;
+						}
+					}
+				}
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefSQL))
+								maxValues = max(maxValues, pViewports[i]->pTheme->NumVals);
+						}
+					}
+				}
+				CurTheme->hPoints = GSSiGlobAlloc(1854, GMEM_MOVEABLE, maxValues * sizeof(DPOINT) + 4);
+			}
+			break;
+
 	        case GF_CONTEST_THEME:
 	        {
 				int			width;
@@ -2305,7 +2359,7 @@ HANDLE SetThemeVisList (short SymNum)
     HANDLE		handle;
 		    
 	SetCurView (pViewports[CurTheme->TargetViewport-1]);
-    handle=GSSiGlobAlloc ( 640,GHND,sizeof(VISLIST));
+    handle=GSSiGlobAlloc (CurTheme->TargetViewport*100000 + 640,GHND,sizeof(VISLIST));
     CurVis = (LPVISLIST)GlobalLock (handle); 
     if (SaveVis) 
     	*CurVis = *SaveVis;
@@ -2407,6 +2461,7 @@ short ThemeTestChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 	BOOL	InClass; 
 	HANDLE	hMEM=0;     
 	UINT	i;
+	int  nAttempts = 0;
     
     if (!UseTestChar)
     	return -1;
@@ -2417,6 +2472,15 @@ GSSiExitProg (1264);
 #endif
     	return (-1);
 }
+	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1264);
+#endif
+		return (-1);
+	}
+
+
 	if (CurTheme->ID == PF_COORD_DISPLAY || CurTheme->ID == PF_BOUNDS_DISPLAY ||
 		CurTheme->ID == GF_NORTH_ARROW_THEME || CurTheme->ID == GF_CITY_THEME ||
 		!CurTheme->IsActive|| !CurTheme->VPDisplayed)
@@ -2428,9 +2492,20 @@ GSSiExitProg (1264);
 }
     if (CurTheme->SkipInvalid || CurTheme->MissOpt == 1)
     	goto CheckTheme;
-	for (i=0;i<CurTheme->NumClass;i++)
+	for (i = 0; i < CurTheme->NumClass; i++)
+	{
 		if (CurTheme->ClassStatus[i])
 			goto CheckTheme;
+	}
+	if (Pick && ItemProcessedByTheme(TAG, desc) && CurTheme->DispersePoints)
+	{
+		{
+#if ENABLETRACE
+			GSSiExitProg(1264);
+#endif
+			return 0;
+		}
+	}
 {
 #if ENABLETRACE
 GSSiExitProg (1264);
@@ -2438,6 +2513,7 @@ GSSiExitProg (1264);
 	return -1; 
 }
 CheckTheme:
+	CurTheme->InTestChar = TRUE;
 	*CurTheme->CurValue = 0;
 	hMEM = GSSiGlobAlloc ( 641,GMEM_MOVEABLE,2048);  
 	Value = GlobalLock(hMEM);
@@ -2619,6 +2695,7 @@ CheckStatus:
             }
 			else
 			{
+				nAttempts = 0;
 KeepLooking:
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
@@ -2674,8 +2751,13 @@ KeepLooking:
 				}
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
-				if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
-					goto KeepLooking;
+				if (nAttempts++ < MAX_THEME_SEARCH_ATTEMPTS)
+				{
+					if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
+						goto KeepLooking;
+				}
+				else
+					ii = 1;
 				goto ProcessMissing; 
 			}
 			goto RtnProcessed;
@@ -2683,6 +2765,7 @@ KeepLooking:
 	}
 
 RtnNotProcessed:
+	CurTheme->InTestChar = FALSE;
 	if (HaltReport)
 	{
 		CloseThemeDataFile(TRUE);
@@ -2696,6 +2779,7 @@ GSSiExitProg (1264);
 	return -1;
 }
 RtnNoDisplay:
+	CurTheme->InTestChar = FALSE;
 	if (HaltReport)
 	{
 		CloseThemeDataFile(TRUE);
@@ -2709,6 +2793,7 @@ GSSiExitProg (1264);
 	return  0;
 }
 RtnProcessed:
+	CurTheme->InTestChar = FALSE;
 	if (HaltReport)
 	{
 		CloseThemeDataFile(TRUE);

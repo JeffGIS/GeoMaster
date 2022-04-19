@@ -118,11 +118,14 @@ RECT MoveRectToAMonitor(RECT rect)
 
 	if (imon < 0 || pctOn < 100)
 	{ 
+		RECT mRect;
 		imon = max(0, imon);
-		rtn.left = max (0,MonitorRectangle[imon].left);
-		rtn.top = max (0,MonitorRectangle[imon].top);
-		rtn.right = rtn.left + RECTWIDTH(&rect);
-		rtn.bottom = rtn.top + RECTHEIGHT(&rect);
+		mRect = MonitorRectangle[imon];
+		mRect.left = max(0, MonitorRectangle[imon].left);
+		mRect.top = max(0, MonitorRectangle[imon].top);
+		rtn = mRect;
+		rtn.right = rtn.left + RECTWIDTH(&mRect);
+		rtn.bottom = rtn.top + RECTHEIGHT(&mRect);
 	}
 	return rtn;
 }
@@ -588,6 +591,11 @@ GSSiExitProg (1348);
 							CurView->pTheme->ShowValue = atob(Arg[4]);
 							rtn = TRUE;
 						}
+						else if (!_fstricmp(Arg[3], "SHOWCLASSID"))
+						{
+							CurView->pTheme->showClassID= atob(Arg[4]);
+							rtn = TRUE;
+						}
 						else if (!_fstricmp(Arg[3], "DELAYTEXT"))
 						{
 							CurView->pTheme->DelayTextDisplay = atob(Arg[4]);
@@ -753,6 +761,11 @@ GSSiExitProg (1348);
 						else if (!_fstricmp(Arg[3], "SYMBOLPCT"))
 						{
 							itoa(CurView->pTheme->ColorsWidth, OutLoc, 10);
+							goto Rtnl;
+						}
+						else if (!_fstricmp(Arg[3], "INTEST"))
+						{
+							itoa(CurView->pTheme->InTestChar, OutLoc, 10);
 							goto Rtnl;
 						}
 						else if (!_fstricmp(Arg[3], "TITLE"))
@@ -1441,10 +1454,16 @@ GotCloseFilehSQL:
 			}
 			if (!_fstricmp(Arg[1], "CONVERT"))
 			{
+				BOOL SaveBMPCache = AllowBMPCaching;
+				BOOL SaveAllowCache = AllowCache;
 				int flag = atoi(Arg[4]);
+				AllowBMPCaching = FALSE;
+				AllowCache = FALSE;
 				HDIB32 hDIB = LoadDIB32(Arg[2], FALSE);
 				rtn = SaveDIB32(hDIB, Arg[3], -1, flag);
 				DestroyDIB32(hDIB, FALSE);
+				AllowBMPCaching = SaveBMPCache;
+				AllowCache = SaveAllowCache;
 				goto Rtnrtn;
 			}
 			if (!_fstricmp(Arg[1], "SETICONCOLORS"))
@@ -1489,6 +1508,17 @@ GotCloseFilehSQL:
 					height = FreeImage_GetHeight(hDib32);
 				ltoa(height, OutLoc, 10);
 				DestroyDIB32(hDib32, FALSE);
+				goto Rtnl;
+			}
+			if (!_fstricmp(Arg[1], "BOUNDS"))
+			{
+				MNMXCORD BitmapBounds = { 0 };
+				MNMXCORD WBounds = { 0 };
+				*OutLoc = 0;
+				if (GetImageBounds(Arg[2], 0, &BitmapBounds, &WBounds))
+				{
+					boundstoa(OutLoc, &BitmapBounds);
+				}
 				goto Rtnl;
 			}
 			if (!_fstricmp(Arg[1], "WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))
@@ -1583,7 +1613,7 @@ GotCloseFilehSQL:
 				AllowCache = FALSE;
 				if (InInfoBox || Printing)
 				{   
-					sprintf (OutLoc,"$BITMAP(%s)",Arg[1]); 
+					sprintf (OutLoc,"$IMAGE(%s)",Arg[1]); 
 					AllowBMPCaching = SaveBMPCache;
 					goto Rtnl;
 				}
@@ -1909,6 +1939,8 @@ GotCloseFilehSQL:
 			lpSQL = Arg[2];
 			lpUpdateFieldList = Arg[3];
 			lpBasicTitle = Arg[4];
+			lpAutoUpdateFieldList = 0;
+			lpSQLFieldList = 0;
 			if (*Arg[5])
 				lpAutoUpdateFieldList = Arg[5];
 			if (*Arg[6])
@@ -2520,6 +2552,16 @@ GotCloseFilehSQL:
 				goto RtnTrue;
 			goto RtnFalse;
 		}
+		case 541: //$ORTHO(CONVERT,JPEG,year,nparts)
+		{
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 4)
+				goto RtnFalse;
+			int nparts = atoi(Arg[4]);
+			if (ConvertToJP2(Arg[3], nparts))
+				goto RtnTrue;
+			goto RtnFalse;
+		}
 
 		case 601: /* $TAGLOC(Prefix,minchar,SaveGlobalName(optional-not in brackets),Title(opt),Viewport(opt),Layer(opt),locatetagonly(opt,T locates,)) Tag locator */
 		{	 
@@ -2810,8 +2852,9 @@ GotCloseFilehSQL:
 				GetCursorPos (&ScreenPoint); 
 				ScreenToClient (CurView->hWnd,&ScreenPoint);   
 				sprintf (ptxt,"$REPORT(%s)",Arg[1]);
-				YellowTextBox (hWnd,ptxt,ScreenPoint,&TBRect,0,TRUE,0);
+				YellowTextBox (hWnd,ptxt,ScreenPoint,&TBRect, (LPRECT)1,TRUE,0);
 				hDC = GetDC (hWnd);
+				InflateRect(&TBRect, 1, 1);
 				if (hWnd == hWndMain)
 				{
  					if (hLastBox)
@@ -3705,7 +3748,9 @@ GotCloseFilehSQL:
 			MemMap = TRUE;     
 			_fstrcpy (MemMapName,Arg[1]);
 			hdcMemMap = CreateCompatibleDC(CurView->hDC);    
-			hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight); 
+			curProgID = 10004;
+			hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
+			curProgID = -1;
 			OldDC = CurView->hDC;
 			CurView->hDC = hdcMemMap;
 			hbmpOld = SelectObject(hdcMemMap, hMemBitmap); 
@@ -3979,7 +4024,7 @@ GotCloseFilehSQL:
 		{
         	BOOL SaveDM = DisplayMarkers;
 
-			nArgs = GetFunArgs (Args,Arg,5,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 2)
 				goto RtnFalse;
         	Point = atopt (Arg[1],&Err); 
@@ -3989,7 +4034,7 @@ GotCloseFilehSQL:
 			Color = atoi (Arg[3]);
         	RVal = atof (Arg[5]);
         	DisplayMarkers = TRUE;  
-			DisplayMarker (Point,n,Arg[4],RVal,0,Color,TRUE,FALSE,0,0,0,0,0);
+			DisplayMarker (Point,n,Arg[4],RVal,0,Color,atob(Arg[7]),FALSE,0,0,0,0,0);
 			DisplayMarkers = SaveDM; 
 			goto RtnTrue;
 		}
@@ -4846,6 +4891,8 @@ GotCloseFilehSQL:
 			//$NVCRIS(PRINTRAMPLIST,FromDB,listpath)
 			//$NVCRIS(STREETNAMES,FromDB,intnum)
 			//$NVCRIS(CCODETOFILE, [%ARG(1)], [~TEMPFILE]);
+			//$NVCRIS(CREATERAMPINDEX,dbpath);
+			//$NVCRIS(DATATYPE,Curbramp or Sidewalk);
 
 		{
 			rtn = FALSE;
@@ -4867,9 +4914,13 @@ GotCloseFilehSQL:
 					rtn = OutputPriorityLocToFile(Arg[4], Arg[2], atoi(Arg[5]));
 			
 			}
+			else if (!stricmp(Arg[1], "DATATYPE"))//$NVCRIS(DATATYPE,Curbramp or Sidewalk)
+			{
+				rtn = SetNVCrisDataType(Arg[2]);
+			}
 			else if (!stricmp(Arg[1], "CCODETOFILE"))//$NVCRIS(CCODETOFILE,ccode,file)
 			{
-				rtn = CCodeToFile(Arg[2],Arg[3]);
+				rtn = CCodeToFile(Arg[2], Arg[3]);
 			}
 			else if (!stricmp(Arg[1], "UPDATEPICTID"))//$NVCRIS(UPDATEPICTID,sqlfile,oldsequence,newsequence)
 			{
@@ -4925,9 +4976,44 @@ GotCloseFilehSQL:
 				TextureFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
+			else if (!stricmp(Arg[1], "CONDITIONFROMCODE"))
+			{
+				ConditionFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "MATERIALFROMCODE"))
+			{
+				MaterialFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "BOULEVARDMATERIALFROMCODE"))
+			{
+				BoulevardMaterialFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
 			else if (!stricmp(Arg[1], "TEXTURELIST"))
 			{
 				GetTextureList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "MATERIALLIST"))
+			{
+				GetMaterialCodeList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "BOULEVARDMATERIALLIST"))
+			{
+				GetBoulevardMaterialCodeList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CONDITIONLIST"))
+			{
+				GetConditionCodeList(OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "SIDEWALKPOINTTYPELIST"))
+			{
+				GetPointTypeList(OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "OBSTRUCTIONLIST"))
@@ -4943,6 +5029,11 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "RAMPTYPEFROMCODE"))
 			{
 				RampTypeFromCode(atoi(Arg[2]), OutLoc);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "POINTTYPEFROMCODE"))
+			{
+				PointTypeFromCode(atoi(Arg[2]), OutLoc);
 				goto Rtnl;
 			}
 			else if (!stricmp(Arg[1], "CODEFORVALUE"))
@@ -4987,6 +5078,16 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "CLOSE"))
 			{
 				rtn = NVCloseDB(atol(Arg[2]));
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CREATERAMPINDEX"))
+			{
+				rtn = NVCreateRampIndex(Arg[2]);
+				goto Rtnrtn;
+			}
+			else if (!stricmp(Arg[1], "CREATECCODES"))
+			{
+				rtn = NVCreateCCodes(Arg[2]);
 				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "EXECUTE"))
@@ -5177,6 +5278,14 @@ GotCloseFilehSQL:
 			}
 			goto Rtnl;
 		}
+		case 657: // $REMOVE(text,chartoremove) removes all special characters if 2nd arg 0
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+
+			RemoveCharacters (Arg[1],Arg[2]);
+			strcpy(OutLoc, Arg[1]);
+			goto Rtnl;
+		}
 
 		default:
 			goto Rtn0;
@@ -5200,9 +5309,11 @@ Rtnl:
 Exit: 
 	if (SaveCfg != CurrentConfig)
 	{
-		SetConfig (SaveCfg);
-		if (*pNumViewports)
-			SetCurView ( SaveVP);
+		SetConfig(SaveCfg);
+	}
+	if (pNumViewports  && *pNumViewports)
+	{
+		SetCurView(SaveVP);
 	}
 	GSSiGlobUlFree (&hMem);
 	if (TraceOn)

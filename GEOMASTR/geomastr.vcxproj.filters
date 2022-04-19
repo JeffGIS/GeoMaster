@@ -1476,6 +1476,12 @@
     <ClCompile Include="GMCache.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BezierCurves.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsPathTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\prog16\GM32lib\Demo.Rc">
@@ -1943,6 +1949,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\tagindex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\INCLUDE\Address.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\INCLUDE\Extrndb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\INCLUDE\Gwd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2447,5 +2465,6 @@
       <Filter>Source Files</Filter>
     </Library>
     <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
+    <Library Include="..\LIB\FreeImage.lib" />
   </ItemGroup>
 </Project>

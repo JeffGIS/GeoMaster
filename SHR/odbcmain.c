@@ -2052,8 +2052,19 @@ TryAgain:
      }
 	 if (GetGlobalBVal ("[%BLOCKODBCERROR]"))
 		 HaltReport=TRUE;  
-	 else if (GSSiMessageBox (0,errmess,lpcstring,MB_OKCANCEL|MB_ICONQUESTION|MB_TASKMODAL,0) == IDCANCEL)
-	     	 HaltReport=TRUE;  
+	 else
+	 {
+		 char teststr[128] = "[SITE]";
+		 UINT opt = MB_OKCANCEL;
+		 ExpandText(teststr);
+		 if (!stricmp(teststr, "MPLS_REMOTE"))
+		 {
+			 opt = 0;
+			 strcpy(errmess, "You need an active VPN connection to the network to access this database");
+		 }
+		 if (GSSiMessageBox(0, errmess, lpcstring, opt | MB_ICONQUESTION | MB_TASKMODAL, 0) == IDCANCEL || !opt)
+			 HaltReport = TRUE;
+	 }
    }  
 
    if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)  goto s44;
@@ -2553,7 +2564,7 @@ BOOL GetSQLWhereClause (HWND hWnd, HANDLE hDB,  LPSTR Where)
 	return nRc;
 }
                              
-BOOL FAR PASCAL SQLWHEREMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SQLWHEREMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128], cUID[32];	
 	int		Choice, ibeg,ii; 
@@ -2716,7 +2727,7 @@ BOOL FAR PASCAL SQLWHEREMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
  return TRUE;
 } /* End of SQLWHEREMsgProc                                      */
 
-BOOL FAR PASCAL SQL_LIKEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SQL_LIKEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128];	
 
@@ -2779,7 +2790,7 @@ BOOL FAR PASCAL SQL_LIKEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
  return TRUE;
 }
 
-BOOL FAR PASCAL SQL_INMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SQL_INMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128];	
 
@@ -2871,7 +2882,7 @@ BOOL FAR PASCAL SQL_INMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM l
 }
 
 
-BOOL FAR PASCAL SQL_BETWEENMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SQL_BETWEENMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128];	
 
@@ -2954,7 +2965,7 @@ BOOL FAR PASCAL SQL_BETWEENMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
  return TRUE;
 }
 
-BOOL FAR PASCAL SQL_VALUEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SQL_VALUEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	str[128];	
 
@@ -3017,7 +3028,7 @@ BOOL FAR PASCAL SQL_VALUEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
  return TRUE;
 }
 
-BOOL FAR PASCAL DBLOGINMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DBLOGINMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	UserID[64], Password[32];
 	static	HANDLE	hSaveBM=0;	

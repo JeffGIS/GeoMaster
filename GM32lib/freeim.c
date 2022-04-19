@@ -16,11 +16,15 @@
 #include <dibutil.h>
 #include "dibapi.h"
 #include "gm32lib.h"
+#include "gmextern.h"
 
 static	LPBYTE	g_load_address;
 static	int		MemDIBSize;
 static	char	CurImageName[MAX_PATH];
 static  int		numImagesAllocated = 0;
+static  char	curOutImagePath[MAX_PATH];
+static  DWORD	curFlag;
+
 /*#define MAX_ALLOCATED_IMAGES	1024
 static	HDIB32	allocatedImages[MAX_ALLOCATED_IMAGES];
 static	int		allocatedImagesFrom[MAX_ALLOCATED_IMAGES];
@@ -29,6 +33,7 @@ static	int		numAllocatedImages = 0;*/
 
 HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal);
 extern int ii;
+extern int curProgID;
 
 #if USEFREEIMAGE
 // freeim16.cpp : Defines the entry point for the DLL application.
@@ -131,8 +136,18 @@ BOOL GMFIBMPHandleToEXT (LPSTR lpszPathName,HANDLE hBMP,DWORD Flag);
  Plugin responsible for the error @param message Error message */
  void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message)
  {
-	 MessageBox (0,message,"FreeImage Error",MB_ICONEXCLAMATION);
-	 sprintf("%s Format\n Message:%s", FreeImage_GetFormatFromFIF(fif),message);
+	 char mes[1024];
+	 if (InDisplayOrthos)
+	 {
+		 sprintf (mes,"File:%s Frame:%ld Error:%s",CurrentOrthoFile,CurrentOrthoFrame,message);
+		 AppendFile("[%DL]abends\\FreeImageErrors.txt", mes);
+	 }
+	 else
+	 {
+		 //	 MessageBox (0,message,"FreeImage Error",MB_ICONEXCLAMATION);
+		 sprintf(mes, "%s Format\n Message:%s\n%s\n%ld", FreeImage_GetFormatFromFIF(fif), message, curOutImagePath, curFlag);
+		 MessageBox(0, mes, "FreeImage Error", MB_ICONEXCLAMATION);
+	 }
  }
 // In your main program …
 
@@ -142,7 +157,9 @@ BOOL GenericWriter(FIBITMAP* dib, const char* lpszPathName, int flag) {
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
 	BOOL bSuccess = FALSE;
 
-	FreeImage_SetOutputMessage(FreeImageErrorHandler);
+	strcpy(curOutImagePath, lpszPathName);
+	curFlag = flag;
+//	FreeImage_SetOutputMessage(FreeImageErrorHandler);
 	if(dib) {
 		// try to guess the file format from the file extension
 		fif = FreeImage_GetFIFFromFilename(lpszPathName);
@@ -156,6 +173,20 @@ BOOL GenericWriter(FIBITMAP* dib, const char* lpszPathName, int flag) {
 				bSuccess = FreeImage_Save(fif, dib2, lpszPathName, flag);
 
 				GSSiFreeImage_Unload(dib2);
+			}
+			else if (fif == FIF_JPEG)
+			{
+				if (flag == 1000)
+					flag = JPEG_QUALITYBAD;
+				else if (flag == 1001)
+					flag = JPEG_QUALITYAVERAGE;
+				else if (flag == 1002)
+					flag = JPEG_QUALITYNORMAL;
+				else if (flag == 1003)
+					flag = JPEG_QUALITYGOOD;
+				else if (flag == 1004)
+					flag = JPEG_QUALITYSUPERB;
+				bSuccess = FreeImage_Save(fif, dib, lpszPathName, flag);
 			}
 			else if(FreeImage_FIFSupportsWriting(fif) && FreeImage_FIFSupportsExportBPP(fif, bpp)) 
 			{
@@ -181,8 +212,10 @@ WORD GM32SaveDCBitMap (HDC hDC16,LPSTR OutFile,long Format,DWORD Flag,DWORD Back
 	HDC	hdcMem;
 	HBITMAP	hbmPrev,hTempBM;
 
-    hTempBM = CreateCompatibleBitmap(hDC,10,10);
-//    SetMapMode    (hDC, MM_ANISOTROPIC );
+	curProgID = 10042;
+	hTempBM = CreateCompatibleBitmap(hDC,10,10);
+	curProgID = -1;
+	//    SetMapMode    (hDC, MM_ANISOTROPIC );
 //    SetMapMode    (hDC, MM_TEXT );
 //    SetWindowOrgEx  ( hDC, 0, 0,0 );
 //    SetViewportOrgEx( hDC, 0, 0,0 );    
@@ -465,7 +498,7 @@ WORD GM32SaveDIB (HDIB32 hDIB,LPSTR OutFileIN,long Format,DWORD Flag)
 	{
 		strcpy(OutFile, OutFileIN);
 		ExpandText(OutFile);
-		rtn = GMFIBMPHandleToEXT(OutFile, (HANDLE)hDIB, Flag);
+		rtn = GMFIBMPHandleToEXT(OutFile, (HANDLE)hDIB, Flag); 
 //		rtn = GenericWriter(dib,OutFile,Flag);
 
 	}
@@ -556,15 +589,33 @@ HDIB32 BitmapToDIB_32(HBITMAP hBitmap, HPALETTE hPal)
    /*  call GetDIBits with a NON-NULL lpBits param, and actualy get the
     *  bits this time
     */
-   if (bi.biBitCount <= 8)
+   if (bi.biBitCount == 1)
    {
-	   ctype = DIB_RGB_COLORS;
+	   ctype = DIB_PAL_COLORS;
 	   bi.biClrUsed = 2;
+   }
+   else if (bi.biBitCount == 8)
+   {
+	   ctype = DIB_PAL_COLORS;
+	   bi.biClrUsed = 256;
    }
    else
 	   ctype = DIB_RGB_COLORS;
    /* use our bitmap info. to fill BITMAPINFOHEADER */
    *lpbi = bi;
+   if (bi.biBitCount == 1)
+   {
+	   RGBQUAD colors[2] = { RGB(0,0,0),RGB(255,255,255) };
+	   RGBQUAD* pColors = (RGBQUAD * )(lpbi + 1);
+	   pColors[0].rgbRed = 0;
+	   pColors[0].rgbGreen = 0;
+	   pColors[0].rgbBlue = 0;
+	   pColors[0].rgbReserved = 0;
+	   pColors[1].rgbRed = 255;
+	   pColors[1].rgbGreen = 255;
+	   pColors[1].rgbBlue = 255;
+	   pColors[1].rgbReserved = 255;
+   }
    if (GetDIBits(hDC, hBitmap, 0, (WORD)bi.biHeight, (LPSTR)lpbi + (WORD)lpbi
          ->biSize + PaletteSize((LPSTR)lpbi), (LPBITMAPINFO)lpbi,
          ctype) == 0)
@@ -807,40 +858,44 @@ HDIB32 GMFIBMPHandleFromEXT (LPSTR PathName, BOOL InfoOnly)
 	UINT flag = BMP_DEFAULT;
 
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
-
+	if (!*PathName)
+		return 0;
 	if (InfoOnly)
 		flag = FIF_LOAD_NOPIXELS;
 	strcpy (lpszPathName,PathName);
 	ExpandText (lpszPathName);
 	ConvertToNewLocation (lpszPathName,FALSE);
-	// check the file signature and deduce its format
-	// (the second argument is currently not used by FreeImage)
-	fif = FreeImage_GetFileType(lpszPathName, 0);
-	if (strstr (lpszPathName,".sbm"))
-		fif = FIF_BMP;
-	else if(fif == FIF_UNKNOWN)
+	if (ExistFile (lpszPathName))
 	{
-		// no signature ?
-		// try to guess the file format from the file extension
-		fif = FreeImage_GetFIFFromFilename(lpszPathName);
-	}
-	// check that the plugin has reading capabilities ...
-	if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
-	{
-		// ok, let's load the file
-		FIBITMAP *dib;
-		if (fif == FIF_JPEG)
+		// check the file signature and deduce its format
+		// (the second argument is currently not used by FreeImage)
+		fif = FreeImage_GetFileType(lpszPathName, 0);
+		if (strstr (lpszPathName,".sbm"))
+			fif = FIF_BMP;
+		else if(fif == FIF_UNKNOWN)
 		{
-			if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
-				flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
-			else
-				flag = JPEG_ACCURATE;
+			// no signature ?
+			// try to guess the file format from the file extension
+			fif = FreeImage_GetFIFFromFilename(lpszPathName);
 		}
-		dib = GSSiFreeImage_Load(fif, lpszPathName, flag);
-		rtn = (HDIB32)dib;
-		// unless a bad file format, we are done !
-		LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP *)dib);
-		id = 1;
+		// check that the plugin has reading capabilities ...
+		if ((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
+		{
+			// ok, let's load the file
+			FIBITMAP* dib;
+			if (fif == FIF_JPEG && !InfoOnly)
+			{
+				if (GetGlobalBVal2("[%USEJPEGROTATION]", TRUE))
+					flag = JPEG_EXIFROTATE | JPEG_ACCURATE;
+				else
+					flag = JPEG_ACCURATE;
+			}
+			dib = GSSiFreeImage_Load(fif, lpszPathName, flag);
+			rtn = (HDIB32)dib;
+			// unless a bad file format, we are done !
+			LPBITMAPINFOHEADER	pDibInfo = FreeImage_GetInfoHeader((FIBITMAP*)dib);
+			id = 1;
+		}
 	}
 	return rtn;
 }
@@ -1316,6 +1371,8 @@ DWORD GM32StretchDIBitsFromHandle (HDC hDC16,long destX,long destY,long destW,lo
 	else
 		OldMode = SetStretchBltMode(hDC,COLORONCOLOR);*/ //01/05/2013 for waypoint basemap
 	SetStretchBltMode(hDC,StretchMode);
+	if (StretchMode == HALFTONE)
+		SetBrushOrgEx(hDC, 0, 0, &pt);
 	if (RasterOpt >= (DWORD)0x01000000)
 		RasterOpt -= (DWORD)0x01000000;
 /*	sprintf (str,"%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld",

@@ -23,7 +23,7 @@ BOOL RestartSocket (SOCKET sock);
 BOOL OpenTCPIPServer (LPSTR IPAddress,USHORT Port); 
 BOOL OpenTCPIPServer2 (HWND hWnd);
 short CheckForRegistrationServer (HWND hWnd,LPSTR SerialNum);
-BOOL FAR PASCAL REGCONNECTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL REGCONNECTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL BlockSocketProcessing (BOOL Block);
 void SetLogSocketIO (BOOL set);
 BOOL OpenTCPReplay (LPSTR ReplayFile);

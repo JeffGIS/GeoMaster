@@ -63,7 +63,7 @@ typedef FILEGDBRECHEADER	*LPFILEGDBRECHEADER;
 #define GlobalReAlloc GSSiGLOBALREALLOC  
 #define PostMessageA GSSiPOSTMESSAGE 
 extern "C" BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
-extern "C" void LogMemAlloc (unsigned short MemID,long MemLen);
+extern "C" void LogMemAlloc (int MemID,long MemLen);
 extern "C" LPVOID GSSiGLOBALLOCK (HANDLE hglb);
 extern "C" DWORD GSSiGLOBALSIZE (HANDLE hglb);
 extern "C" BOOL GSSiGLOBALUNLOCK (HANDLE hglb);
@@ -98,8 +98,6 @@ static	EnumRows	attributeQueryRows[MAXOPENFGDB];
 static	Row			row[MAXOPENFGDB];
 static	int			ii=0,not=0,nod=0,noq=0;
 static	char		fullName[MAX_PATH];
-
-static	wstring fieldName LONGWSDEF;
 
 #include "gmlimits.h"
 #pragma pack(2)
@@ -235,7 +233,12 @@ std::wstring s2ws(const std::string& s)
 	return r;
 }
 
-std::string ws2s(const std::wstring& s)
+std::string ws2s(const std::wstring& ws)
+{
+	std::string s(ws.begin(), ws.end());
+	return s;
+}
+std::string ws2sx(const std::wstring& s)
 {
 	int len;
 	int slength = (int)s.length() + 1;
@@ -348,7 +351,7 @@ void CloseGDBid (int id)
 	numOpens[id]--;
 	if (!numOpens[id])
 	{
-		CloseGeodatabase(geodatabase[id]);
+		fgdbError st = CloseGeodatabase(geodatabase[id]);
 		*openGDBName[id] = 0;
 		nod--;
 	}
@@ -402,11 +405,7 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 	Table	table;
 	EnumRows	attributeQueryRows;
 	Envelope	extent;
-	ShapeBuffer shapebuf;
-	ShapeType	shapeType;
-	GeometryType geometryType;
-	FieldType fieldType;
-	FieldInfo	fieldInfo;
+	
 	int			nAnnoMarkers = 0;
 	//wstring fieldName;
 
@@ -416,7 +415,6 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 	hr = geodatabase[openGDBid[iDB-1]].OpenTable(under, table);
 	if (!hr)
 	{
-		Row row;
 		EnumRows	attributeQueryRows;
 
 		not++;
@@ -435,17 +433,21 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 		}
 		if ((hr = table.Search(L"*", L"", true, attributeQueryRows)) == S_OK)
 		{
+			Row row;
 			noq++;
 			if ((rc = attributeQueryRows.Next(row)) == S_OK)
 			{
 				int			nFields;
 				bool		isNull=FALSE;
 				//char		fName[256];
+				FieldInfo	fieldInfo;
+				
 
 				attributeQueryRows.GetFieldInformation(fieldInfo);
 				fieldInfo.GetFieldCount(nFields);
 				for (long fieldNumber = 0; fieldNumber < nFields; fieldNumber++)
 				{
+					std::wstring fieldName;
 				  fieldInfo.GetFieldName(fieldNumber, fieldName);
 				 // strcpy (fName,WStringToString(fieldName).c_str());
 				  if (!wcsicmp (fieldName.c_str(),L"TextString") ||
@@ -455,6 +457,8 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 				}
 				for (long fieldNumber = 0; fieldNumber < nFields; fieldNumber++)
 				{
+					FieldType fieldType;
+					std::wstring fieldName;
 				  fieldInfo.GetFieldType(fieldNumber, fieldType);
 				  fieldInfo.GetFieldName(fieldNumber, fieldName);
 				  row.IsNull(fieldName, isNull);
@@ -465,6 +469,9 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 						{
 						  case fieldTypeGeometry:
 							  {
+							    ShapeBuffer shapebuf;
+							    ShapeType	shapeType;
+							    GeometryType geometryType;
 
 								row.GetGeometry(shapebuf);
 								shapebuf.GetShapeType(shapeType);
@@ -503,7 +510,7 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 			attributeQueryRows.Close();
 			noq--;
 		}
-		geodatabase[openGDBid[iDB-1]].CloseTable(table);
+		fgdbError dbst = geodatabase[openGDBid[iDB-1]].CloseTable(table);
 		not--;
 	}
 	if (!*pType && nAnnoMarkers == 3)
@@ -663,7 +670,7 @@ extern "C" BOOL FGDBGetFieldInfo(int iDB,int icount, LPSTR FieldName, LPINT pFie
 	if (iDB-- > 0 && gdbInUse[iDB])
 	{
 
-	   //wstring fieldName;
+		std::wstring  fieldName;
 		if (icount == 1)
 		{
 			if ((hr = table[iDB].Search(L"*", L"", true, attrQueryRows)) != S_OK)
@@ -722,7 +729,10 @@ extern "C" BOOL FGDBGetFieldInfo(int iDB,int icount, LPSTR FieldName, LPINT pFie
 		  break;
           
 		  case fieldTypeBlob:
-			  *pFieldWidth = fieldLength;
+			  if (fieldLength == 0)
+				  *pFieldWidth = 255;
+			  else
+				  *pFieldWidth = fieldLength;
 			  *pFieldType = BT_CHAR;
 		  break;
           
@@ -838,7 +848,7 @@ extern "C" int FetchFGDBRecord (LPOPENFILEDATA	FilePtr,int singleValID)
 			LPCURVAL  pCurVal;
 			int		  ii,iii;
 			LONGLONG  sysTime;
-			//wstring fieldName;
+			std::wstring fieldName;
 
 			attributeQueryRows[iDB].GetFieldInformation(fieldInfo);
 			fieldInfo.GetFieldCount(nFields);

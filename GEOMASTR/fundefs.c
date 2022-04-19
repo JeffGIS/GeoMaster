@@ -12,6 +12,8 @@ int	GetFunctionID1 (LPSTR str)
 			if (!_fstrnicmp (str,"B",1)) return 106;
 			if (!_fstrnicmp(str, "E", 1)) return 107;
 			if (!_fstrnicmp(str, "M", 1)) return 108;
+			if (!_fstrnicmp(str, "T", 1)) return 1504;//same as $TEXTTOCLIPBOARD
+			if (!_fstrnicmp(str, "V", 1)) return 803; //for VIEW:same as $EDITFILE
 			return 0;
 }
 int	GetFunctionID2 (LPSTR str)
@@ -19,7 +21,9 @@ int	GetFunctionID2 (LPSTR str)
 			if (!_fstrnicmp (str,"OS",2)) return 201;
 			if (!_fstrnicmp (str,"LV",2)) return 202;
 			if (!_fstrnicmp (str,"RV",2)) return 203;
-			if (!_fstrnicmp (str,"VP",2)) return 204;
+			if (!_fstrnicmp(str, "VP", 2)) return 204;
+			if (!_fstrnicmp(str, "YN", 2)) return 205;
+			if (!_fstrnicmp(str, "TF", 2)) return 206;
 			return 0;
 }
 int	GetFunctionID3 (LPSTR str)
@@ -123,6 +127,9 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp(str, "FILE", 4)) return 436;
 			if (!_fstrnicmp(str, "GDAL", 4)) return 437;
 			if (!_fstrnicmp(str, "POST", 4)) return 438;
+			if (!_fstrnicmp(str, "FGDB", 4)) return 439;
+			if (!_fstrnicmp(str, "CHAR", 4)) return 440;
+			if (!_fstrnicmp(str, "JUST", 4)) return 441;
 			return 0;
 }
 int	GetFunctionID5 (LPSTR str)
@@ -137,7 +144,7 @@ int	GetFunctionID5 (LPSTR str)
 			if (!_fstrnicmp (str,"SLEEP",5)) return 508; 
 			if (!_fstrnicmp (str,"RESET",5)) return 509; 
 			if (!_fstrnicmp (str,"MACRO",5)) return 510; 
-			if (!_fstrnicmp (str,"IMAGE",5)) return 511; 
+			if (!_fstrnicmp (str,"IMAGE",5) && !InInfoBoxMacro) return 511; 
 			if (!_fstrnicmp (str,"AFTER",5)) return 512; 
 			if (!_fstrnicmp (str,"PRINT",5)) return 513; 
 			if (!_fstrnicmp (str,"ALERT",5)) return 514; 
@@ -167,6 +174,7 @@ int	GetFunctionID5 (LPSTR str)
 			if (!_fstrnicmp(str, "PLIST", 5)) return 538;
 			if (!_fstrnicmp(str, "ISINT", 5)) return 539;
 			if (!_fstrnicmp(str, "ISFLT", 5)) return 540;
+			if (!_fstrnicmp(str, "ORTHO", 5)) return 541;
 
 			return 0;		
 }
@@ -228,6 +236,7 @@ int	GetFunctionID6 (LPSTR str)
 			if (!_fstrnicmp(str, "UNIQUE", 6)) return 654;
 			if (!_fstrnicmp(str, "PROMPT", 6)) return 655;
 			if (!_fstrnicmp(str, "VPNAME", 6)) return 656;
+			if (!_fstrnicmp(str, "REMOVE", 6)) return 657;
 			return 0;
 }
 int	GetFunctionID7 (LPSTR str)
@@ -313,6 +322,7 @@ int	GetFunctionID7 (LPSTR str)
 			if (!_fstrnicmp(str, "DIMLINE", 7)) return 787;
 			if (!_fstrnicmp(str, "MONITOR", 7)) return 788;
 			if (!_fstrnicmp(str, "INTCHOP", 7)) return 789;
+			if (!_fstrnicmp(str, "SYSTIME", 7)) return 790;
 
 			return 0;
 }
@@ -375,6 +385,9 @@ int	GetFunctionID8 (LPSTR str)
 			if (!_fstrnicmp(str, "MAKELONG", 8)) return 855;
 			if (!_fstrnicmp(str, "TEXTFILE", 8)) return 856;
 			if (!_fstrnicmp(str, "DBLQUOTE", 8)) return 857;
+			if (!_fstrnicmp(str, "FIRSTNUM", 8)) return 858;
+			if (!_fstrnicmp(str, "FIRSTNON", 8)) return 859;
+			if (!_fstrnicmp(str, "LASTCHAR", 8)) return 860;
 			return 0;
 }
 int	GetFunctionID9 (LPSTR str)

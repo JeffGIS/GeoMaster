@@ -107,6 +107,17 @@ BOOL GetRampCodeForValue(LPSTR VarName,LPSTR VarValue,LPSTR OutLoc,LPSTR ErrorVa
 void RampTypeFromCode(int code, LPSTR OutLoc);
 void ObstructionFromCode(int code, LPSTR OutLoc);
 void TextureFromCode(int code, LPSTR OutLoc);
+void ConditionFromCode(int code, LPSTR OutLoc);
+void MaterialFromCode(int code, LPSTR OutLoc);
+void BoulevardMaterialFromCode(int code, LPSTR OutLoc);
+int NVCMaterialToCode(LPSTR texture);
+void PointTypeFromCode(int code, LPSTR OutLoc);
+int NVCPointTypeToCode(LPSTR texture);
+int NVCConditionToCode(LPSTR texture);
+void GetBoulevardMaterialCodeList(LPSTR OutLoc);
+void GetConditionCodeList(LPSTR OutLoc);
+void GetPointTypeList(LPSTR OutLoc);
+void ConvertRampDisplayFieldToDBField(LPSTR FieldName, int maxl);
 
 COLORREF GetRampFieldValueColor(LPSTR DisplayName);
 

@@ -59,8 +59,6 @@
 #define BING_API_KEY "AhGA_PqXHM1e8opz8VEBHts-yzpUJVjxTIUdyA9m6x7o-TRAwYupMcn6JWEQf9V3"
 #define WALKSCORE_API_KEY "96cbffe516734da405a527bf86a83bb7"
 
-#define ORIGINALPROC(hWnd) (WNDPROC) MAKELONG( \
-    GetProp(hWnd, "PrLO"), GetProp(hWnd, "PrHI") )
 
 #define RECTWIDTH(lpRect)     (abs(((lpRect)->right - (lpRect)->left))+0)
 #define RECTHEIGHT(lpRect)    (abs(((lpRect)->bottom - (lpRect)->top))+0)
@@ -103,10 +101,14 @@ typedef TRN FAR *LPTRN;
 #define  CMCFT   3.5314454833912e1
 #define  CMCYD   1.3079427716264e0
 #define  CYDCM   7.645594553315e-1
-#define  FTM     3.04800609601219e-1
+#define  FTM     0.304800609600914e0
+#define	 METERSPERMILE 1609.34
+#define  MILESPERMETER 0.000621371
+#define  FTMINTERNATIONAL     3.04800000000e-1
 #define  HAFSEC    1.388888888888889e-5
 #define  HALFPI    1.570796326794896e0
-#define  MFT       3.280833333333333e0
+#define  MFT       3.28083333333333333e0
+#define  MFTINTERNATIONAL       3.280839895013124e0
 #define  PIHALF    4.712388980384689e0
 #define  PY        3.141592653589793e0
 #define  RADDEG    1.74532925199433e-2
@@ -116,13 +118,14 @@ typedef TRN FAR *LPTRN;
 #define  TWOPI     6.283185307179586e0
 #define  ACRSM     4046.872609874253e0  
 #define  INCHES_PER_CM  0.3937e0
+#define  INCHESPERMM 0.0393701
 #define  MAX_GAP_BTWN_LINKS    0.1e0 
 #define  ZERO$  -2146450000 
 #define  TMPRF$ -2146483000   
 #define	 NULLREF 0
 #define RADtoDEG 57.295779513082322
 #define DEGtoRAD 0.017453292519943296
-
+#define PCCLKTOAPPLECLK	978331200
 #define  GOOD_SOUND 1
 #define  BAD_SOUND  2  
 
@@ -134,6 +137,7 @@ typedef TRN FAR *LPTRN;
 #define BA_NEXTBP		6
 #define BA_SHOWFUN		7
 #define BA_RETURN		8
+#define BA_START		9
 
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {
@@ -145,6 +149,7 @@ typedef struct _OFSTRUCTGM {
 	CHAR szPathName[OFS_MAXPATHNAMEGM];
 } OFSTRUCTGM, *LPOFSTRUCTGM, *POFSTRUCTGM;
 
+WNDPROC ORIGINALPROC(HWND hWnd);
 BOOL SetContinueProcessing(BOOL set);
 
 HWND WindowExists(HWND hWnd);
@@ -169,6 +174,7 @@ void UnixTimeToSystemTime(time_t t, LPSYSTEMTIME pst);
 __int64 HighLowToint64(DWORD HighPart,DWORD LowPart);
 __int64 FileTimeToint64(FILETIME ft);
 long Time64toTime32 (time_t time64);
+void lltoa(long long l, LPSTR loc, int rad);
 int	GSSiEnterProg (int progid);
 int	GSSiExitProg (int progid);
 int SetLastMessage (long mes,WPARAM wparam);
@@ -188,13 +194,13 @@ int   TB_BestFit(HWND tblhwnd,int extra,LPARAM count,FARPROC fp);
 int  TB_RedrawTable(HWND hWnd);
 POINT POINTStoPOINT(POINTS points);
 POINTS POINTtoPOINTS(POINT point);    
-BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, UINT cntlSQL,
+BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam, UINT cntlSQL,
                                 UINT cntlSET_FILE, UINT cntlDATABASE_LIST, UINT cntlTABLE_NAMES,UINT cntlTABLE_NAMES_TITLE,
                                 LPUINT pcntlFIELD_NAMES,int NumFieldLists,
                                 LPSTR DataFile, short *DataFileType, HANDLE *hThemeDB,
                                 LPBOOL pFieldListIsCB, BOOL WantBrackets);
-BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
-BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 void ClientRectToScreenRect (HWND hWnd,LPRECT pRect);
 void ScreenRectToClientRect (HWND hWnd,LPRECT pRect);
 BOOL SetDynDlgData (HWND hWndDlg,LPSTR Name,LPUINT pcntls,short lncntls);
@@ -204,14 +210,14 @@ BOOL ShowDlgUpdateOptions (HWND hWndEdit,HWND hWndInput);
 BOOL ShowDynDlgUpdateOptions (HWND hWndEdit,HWND hWndInput);
 BOOL GetDynDlgHandle (HWND hWndDlg,LPHANDLE phDynDlgControls);
 BOOL WriteDynDlgData (HWND hWndDlg);
-extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
-extern	BOOL CALLBACK EnumCtrlProcDynDialog(HWND hCtrl,LONG lParam); 
-LONG FAR PASCAL Draw3DDownDynDialog(HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL Draw3DUpDynDialog (HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL Draw3DDown(HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL Draw3DUp (HWND hWnd, unsigned uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam);
-LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg,WORD wParam, LONG lParam);
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl, LPARAM lParam);
+extern	BOOL CALLBACK EnumCtrlProcDynDialog(HWND hCtrl, LPARAM lParam);
+LONG FAR PASCAL Draw3DDownDynDialog(HWND hWnd, UINT uiMsg,WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL Draw3DUpDynDialog (HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL Draw3DDown(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL Draw3DUp (HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL ComboColor(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL ComboColorDynDialog(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
 USHORT	AddStringToList (LPSTR str,LPSTR pStrings,LPUSHORT plen);
 BOOL GetFieldValFromSetList (LPSTR List,LPSTR Name,LPSTR Val);
 BOOL rread (LPSTR str, LPDOUBLE lpRval, LPINT lpNdp);
@@ -231,6 +237,7 @@ short DrawRectPoly(HDC hDC, LPRECT Rect, HPEN hPen);
 int FillRectColor (HDC hDC,LPRECT Rect,COLORREF Color);
 BOOL LoadGlobalInit (LPSTR File,BOOL First);
 HGLOBAL GSSiGlobAlloc(int From,UINT fuAlloc, long cbAlloc);
+void SetWantHandle(HANDLE hglb);
 HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc);
 HGLOBAL GSSiGlobalCopy(USHORT From, HGLOBAL hGlob);
 void GSSiGlobFree (LPHANDLE pHandle); 
@@ -454,12 +461,13 @@ void dumpmemdc(HDC hdc);
 void wantnextblt(void);
 void SetBit (int ibit, LPSTR lpBytes, BOOL setto);
 void SetBit2 (int ibit, LPSTR lpBytes, BOOL setto);
-BOOL GetBit (int ibit, LPSTR lpBytes);
+BOOL GetBit (int ibit, LPBYTE lpBytes);
 BOOL GetBitH (long ibit, HPSTR lpBytes);
 void SetBitH (long ibit, HPSTR lpBytes, BOOL setto);
 void GetRunDate (LPSTR RunID, LPSTR Date);
 COLORREF SetColor (LPSTR pColor);
-long GSSifilelength (HFILE Fid);
+LONGLONG GSSifilelength(HFILE Fid);
+LONGLONG GSSifilelength64(HANDLE Fid);
 void BlockText (HDC hDC,LPSTR str,int maxlen,float f);
 void ConvertSpanishText (LPBYTE pTxt);
 int WaitCursor (int iWait);
@@ -473,12 +481,12 @@ BOOL fputstring(LPSTR lpStr, HFILE Fid);
 BOOL fputstring2(LPSTR lpStr, HANDLE Fid);
 LPSTR fgetstring (LPSTR lpStr, int len, HFILE Fid);
 LPSTR fgetstring2 (LPSTR lpStr, int len, HANDLE Fid);
-float MULREG (double Y[], double X1[], double X2[], int N,
+float MULREG (LPDOUBLE Y, LPDOUBLE X1, LPDOUBLE  X2, int N,
               LPDOUBLE A,LPDOUBLE B, LPDOUBLE C);
 double AMEAN (double X[],int N);
 long IDNINT (double X);       
 short IDNSHRT (double X);
-HANDLE STRAN2 (int ID,double X1[], double Y1[],double X2[],double Y2[],int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds);
+HANDLE STRAN2 (int ID, LPDOUBLE X1, LPDOUBLE Y1, LPDOUBLE X2, LPDOUBLE Y2,int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds);
 void TRANS2 (double XIN,double YIN, LPDOUBLE XOUT,LPDOUBLE YOUT, HANDLE hlpTran);
 void TRNPRO (double XIN,double YIN, LPDOUBLE XOUT,LPDOUBLE YOUT, HANDLE hlpTran);   
 void CloseTRANS2 (LPHANDLE phlpTran); 
@@ -534,10 +542,11 @@ BOOL  POINT_IN_AREA (POINT PickPoint, DWORD nPoints, HPPOINT lpAreaPoints);
 HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPoly,HANDLE hPolyPartLen,HANDLE hMaskAccelerator); 
 HANDLE  PointInAreaAcceleratorSetupMono (DWORD nPoints, HPDPOINT pAreaPoints, int nPoly,HANDLE hPolyPartLen,double Offset,LPMNMXCORD pBounds);
 HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints,HANDLE hMaskAccelerator); 
-HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision);
+HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision,BOOL CreateAreaPoint);
 void PCTInAreasDestroy (HANDLE hPIA);
 double  PCTInAreasLoad (HANDLE hPIA,int opt,int type,DWORD nPoints, HPDPOINT pAreaPoints, int nPoly,HANDLE hPolyPartLen,double Offset,LPMNMXCORD pBounds);
 double PCTInAreas (HANDLE hPIA);
+DPOINT PCTInAreasCreatePoint(HANDLE hPIA);
 int	PointInAreaAccelerator (LPDPOINT Point,HANDLE hAccelerator);    
 POINT PIAACenter (LPPIAAStruct pPIAA,LPLONG piCPDist,LPLONG pMaxn,BOOL UsePCTBox,LPBOOL pHaveCP);
 POINT	DPointToPIAAPoint (HPDPOINT pDPoint,LPMNMXCORD pBounds,LPDOUBLE pFactor,short Offset,short Type);
@@ -597,7 +606,7 @@ BOOL GSSiGetMessage(
 void SetFilterString (UINT Filter); 
 void PrintMessage (short    ViewID, LPSTR File, short record);
 void PrintMessage2 (LPSTR line1, LPSTR line2, LPSTR line3);
-HRESULT BasicFileOpen2(LPSTR pFile, int lfile, LPSTR initialDir, LPSTR filter, LPSTR Title,BOOL save);
+HRESULT BasicFileOpen2(HWND hWnd,LPSTR pFile, int lfile, LPSTR initialDir, LPSTR filter, LPSTR Title,BOOL save, BOOL wantFolder);
 BOOL GetOpenFileCD (HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir);
 BOOL GetSaveFileCD (HWND hWnd, LPSTR Name, LPSTR lpInitDir);
 BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title);
@@ -627,7 +636,7 @@ POINT newptscreen(POINT OldPoint, double AZM, double DIS);
 DPOINT dnewpt (DPOINT OldPoint, double AZM, double DIS);  
 DPOINT dnewptproj (DPOINT OldPoint, double AZM, double DIS);  
 void LNEWPT (double X,double Y,LPDOUBLE NewX,LPDOUBLE NewY, double AZM, double DIS);  
-BOOL MemError (void);
+BOOL MemEror (void);
 #if WIN32
     BOOL WINAPI AbortProc ( HDC hPrinterDC, short nCode );
     BOOL WINAPI OpenGCTP32( long FAR *var1);
@@ -689,7 +698,7 @@ BOOL DecompressTIFF (HPSTR Data,long length,long explen,short type);
 HANDLE  BMPFromTIF (LPSTR TiffFile,BOOL Check);
 short DisplayTIFFileInRect (HDC hDC,LPSTR ImageFile, RECT Rect, BOOL MaintainAspect);
 BOOL Report (LPSTR Name, LPSTR ViewportName, LPSTR Prefix, LPSTR UDI, long ref,BOOL LoadOnly, BOOL FitToVP);
-BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, LPRECT pClipRect, double Factor, long Refno,LPRECT SizeRect);
+BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect, LPRECT pClipRect, double Factor, long Refno,LPRECT SizeRect,BOOL FitToWindow);
 BOOL ReportToFile (LPSTR Name, LPSTR Prefix, LPSTR UDI, long ref,LPSTR File);
 BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL CloseFiles,LPRECT SizeRect);
 //RECT SizeReport (HDC hDC,HANDLE hReport,RECT CurRect,BOOL FitToVP);
@@ -772,7 +781,7 @@ HWND GetParentFocus(void);
 int	GSSiRemove (LPSTR Name);
 int GSSiRemoveAndClear (LPSTR Name);
 int GSSiRemove2 (LPSTR Name);
-long GSSiLength (LPSTR Name);
+LONGLONG GSSiLength (LPSTR Name);
 BOOL GSSiRename (LPSTR NameFrom, LPSTR NameTo);
 HCURSOR GSSiSetCursor (HCURSOR hCursor);
 POINT TAGPtToWinPt (DPOINT TagPoint);
@@ -850,6 +859,7 @@ void RoundToPTOL (LPDPOINT Point);
 void InflateBounds (LPMNMXCORD pBounds, double Value);
 void InflateMinMax (LPMINMAX pBounds, int Value);
 void InflateMinMaxL (LPMNMXCORL pBounds, int Value);
+RECT RectFromPointAndWidth(POINT pt, int w);
 BOOL DPointInRect(LPDPOINT pt, LPRECT rect);
 BOOL FPointInRect(LPFPOINT pt, LPRECT rect);
 BOOL RectInRect(LPRECT pRectIn,LPRECT pRectTest);
@@ -917,6 +927,7 @@ double ComputeAreaAreaD (HPDPOINT lpDPoints,long nPnts,LPDOUBLE pPerim);
 double ComputeAreaAreaDH (HANDLE hPoints,long nPnts,LPDOUBLE pPerim);
 DPOINT ComputeAreaMidpoint2 (HPDPOINT pPoints,long nPnts);
 DPOINT ComputeAreaMidpoint (HANDLE hPoints,long nPnts);
+DPOINT WeightedPolyMidPoint(LPDPOINT points, int npnts);
 BOOL GetItemMidpoint (LPSTR TagOrRef,LPDPOINT pMidPoint);
 DPOINT ComputePolylineMidpoint2 (HPDPOINT pPoints,long nPnts);
 DPOINT ComputePolylineMidpoint (HANDLE hPoints,long nPnts);
@@ -1057,6 +1068,7 @@ BOOL TABToComma (LPSTR InFile,LPSTR OutFile);
 __int64 llFileSeek (HANDLE hf, __int64 distance, DWORD MoveMethod);
 LONG GSSillseek (HFILE Fid, LONG loc, int opt); 
 LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt);
+LONGLONG GSSillseek64(HANDLE Fid, LONGLONG loc, int opt);
 long  GSSilread(HFILE Fid, void _huge* ptr, long len);
 UINT  WINAPI GSSilwrite(HFILE Fid, const void _huge* ptr, UINT len);
 BOOL ConvertToMemFile (HFILE Fid,int MaxMem);
@@ -1111,7 +1123,8 @@ BOOL GetUndoData (HFILE Fid,HPSTR pData,long length,long FirstPiece,BOOL Remove)
 BOOL GetUndoFileNameFromUndoFileID (short UndoFileID,LPSTR Name);
 short GetUndoFileIDFromName (LPSTR Name,BOOL Add);
 short GetUndoFileIDFromFid (HFILE Fid);
-void AddToChangedGlobalList (HANDLE handle);
+void AddToChangedGlobalList(HANDLE handle);
+void RemoveFromChangedGlobalList(HANDLE handle);
 void AddToUndoFreeSpace (HANDLE Fid,long loc,long len);
 void AddToUndoFreeSpaceHFILE(HFILE Fid, long loc, long len);
 DWORD NextVarTime(void);   
@@ -1228,6 +1241,7 @@ HDIB32 LoadDIBFromMem (LPBYTE pMem,int MemLen,int Format,int flags);
 HDIB32  BMPHandleFromEXT (LPSTR ImageFile); 
 BOOL GMFISetGeoTiffData (DWORD hBMP,DWORD pScaleX, DWORD pScaleY, DWORD pBitmapPoint, DWORD pWorldPoint);
 HDIB32 GMRotateImageClassic (HDIB32 hDib,double DegreesRotation);
+void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char* message);
 FIBITMAP* GSSiFreeImage_ConvertToGreyscale(HDIB32 hDib);
 FIBITMAP* GSSiFreeImage_ColorQuantize(HDIB32 hDib, DWORD Flag);
 FIBITMAP* GSSiFreeImage_ConvertTo4Bits(HDIB32 hDIB);
@@ -1418,7 +1432,7 @@ BOOL GetSystemErrMessage (DWORD errorcode,LPSTR Mess);
 HWND CreateToolbarWnd (HWND hWnd); 
 void AbendWriter (LPSTR Message,LPSTR Title,long at,int type);
 int SysMonthFromSymTime (time_t systime);
-BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 void __cdecl BackgroundCache (LPHANDLE phArgs);
 BOOL StartBackgroundCache (void);
 void StopBackgroundCache (void);
@@ -1504,6 +1518,7 @@ void DebugReturn(LPSTR rtnValue);
 HANDLE CreateVarSpace(int type);
 void DestroyVarSpace(HANDLE hVarSpace);
 void SetVarSpace(int type, HANDLE hVarSpace);
+void SetInitialGlobalValues(void);
 int AddToMacroStack(int from, int iCurrentMacro, LPSTR File, LPHANDLE phArgs, int NumArgs);
 void RemoveFromMacroStack (int macroID);
 BOOL AddBreakpoint(LPSTR macroFile, int insertLoc);
@@ -1557,7 +1572,7 @@ LPSTRD textAfterLastChar(LPSTR string, char c);
 LPSTRD stringByDeletingLastPathComponent(LPSTR path);
 LPSTRD lastPathComponent(LPSTR path);
 LPSTRD string_Copy(LPSTR str);
-
+void RemoveCharacters(LPSTR str, LPSTR charstoremove);
 void GSSiFree(LPSTR *str);
 
 #endif

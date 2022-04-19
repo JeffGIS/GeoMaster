@@ -6,7 +6,15 @@
 typedef USHORT	COLORREF16;
 typedef COLORREF16	*LPCOLORREF16;
 
-static	BYTE	nBitsInByte[256];
+typedef struct {
+	LPBYTE pBytes;
+	int width, height, widthBytes;
+}MTPIA;
+typedef MTPIA *LPMTPIA;
+
+static	DWORD	nBitsInByte[256];
+static int xinc[] = { 0, 1,  1,  0, -1, -1, -1, 0, 1, 2, 2,  2,  2,  1,  0, -1, -2, -2, -2, -2, -2, -1, 0, 1, 2 ,3, 3, 3, 3, 3, 2, 1, 0,-1,-2,-3,-3,-3,-3,-3,-2,-1, 0, 1 ,2};
+static int yinc[] = { 0, 0, -1, -1, -1,  0,  1, 1, 1, 1, 0, -1, -2, -2, -2, -2, -2, -1,  0,  1,  2,  2, 2, 2, 2 ,2, 1, 0,-1,-2,-3,-3,-3,-3,-3,-2,-1, 0, 1, 2, 3, 3, 3, 3, 3};
 
 #include "gmextern.h"   
 
@@ -766,7 +774,7 @@ int ShowCounts (int i)
 	return i;
 }
 
-float MULREG (double Y[], double X1[], double X2[], int N,LPDOUBLE A,LPDOUBLE B, LPDOUBLE C)
+float MULREG (LPDOUBLE Y, LPDOUBLE X1, LPDOUBLE  X2, int N,LPDOUBLE A,LPDOUBLE B, LPDOUBLE C)
 
 /******* SPECIFICATIONS ***********************************************
 C*                                                                    *
@@ -3604,6 +3612,24 @@ BOOL GetItemMidpoint (LPSTR TagOrRef,LPDPOINT pMidPoint)
 	return rtn;
 }
 
+DPOINT WeightedPolyMidPoint(LPDPOINT points,int npnts)
+{
+	DPOINT MidPt = { 0,0 };
+	double totdist = 0;
+	double dist;
+
+	for (int i = 0; i < npnts - 1; i++)
+	{
+		DPOINT midpt = MidPointD(points[i], points[i + 1]);
+		dist = ldistpp(&points[i], &points[i + 1]);
+		totdist += dist;
+		MidPt.x += dist * midpt.x;
+		MidPt.y += dist * midpt.y;
+	}
+	MidPt.x /= totdist;
+	MidPt.y /= totdist;
+	return MidPt;
+}
 DPOINT ComputePolylineMidpoint2 (HPDPOINT pPoints,long nPnts)
 {
 	DPOINT		MidP;
@@ -3998,8 +4024,10 @@ HANDLE  PointInAreaAcceleratorSetup (DWORD nPoints, HPDPOINT pAreaPoints,int nPo
     hDC = CreateCompatibleDC(hDCMain); 
     Height *= PIASizeFactor;
     Width *= PIASizeFactor;
-    hBM = CreateCompatibleBitmap(hDCMain,Width,Height); 
-    GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+	curProgID = 10045;
+	hBM = CreateCompatibleBitmap(hDCMain,Width,Height);
+	curProgID = -1;
+	GetObject(hBM, sizeof(bm), (LPSTR)&bm);
 	ReleaseDC (hWndMain,hDCMain);
     hBMOld = SelectObject(hDC,hBM);
 	SetMapMode    ( hDC, MM_ISOTROPIC );
@@ -4377,12 +4405,42 @@ void PCTInAreasDestroy (HANDLE hPIA)
 
 		GSSiDeleteObject (&pPIA->hBitMap[0]);
 		GSSiDeleteObject (&pPIA->hBitMap[1]);
+		GSSiDeleteDC(pPIA->hDC,FALSE);
 		GSSiGlobUlFree (&hPIA);
 	}
     return;
 }
 
-HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision)
+void SetDCBitmapToBlack (HDC hDC,HBITMAP hBitmap)
+{
+	HPEN OldPen = SelectObject(hDC, GetStockObject(BLACK_PEN));
+	HBRUSH OldBrush = SelectObject(hDC, GetStockObject(BLACK_BRUSH));
+	POINT points[4];
+	RECT  rect;
+	BITMAP bm; 
+
+	if (!hBitmap)
+		return;
+
+	if (!GetObject(hBitmap, sizeof(bm), (LPSTR)&bm))
+		return;
+
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = bm.bmWidth;
+	rect.bottom = bm.bmHeight;
+
+	HBITMAP hBMOld = SelectObject(hDC, hBitmap);
+
+	RectToPoints(&rect, points);
+	Polygon(hDC, points, 4);
+	SelectObject(hDC, hBMOld);
+	SelectObject(hDC, OldBrush);
+	SelectObject(hDC, OldPen);
+	return;
+}
+
+HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision, BOOL CreateAreaPoint)
 #if ENABLETRACE
 {GSSiEnterProg (1437);
 #endif
@@ -4405,7 +4463,7 @@ HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision)
 	short	Offsetx=3;
     BITMAP	bm;   
 	DPOINT	Point[5];
-	int		MaxDim[3]={4000,8000,16000};
+	int		MaxDim[3]={500,8000,16000};
 	
 //	if (FAC > 5)
 //		ii=1;
@@ -4417,14 +4475,22 @@ HANDLE  PCTInAreasInit (LPMNMXCORD pBounds,int Precision)
     pPIA = (LPPCTIAStruct)GlobalLock (hPIA); 
     pPIA->Type = 0;
     pPIA->Bounds = *pBounds;
-	pPIA->Offset = 4;
+	if (!CreateAreaPoint)
+		pPIA->Offset = 4;
  	pPIA->Width  = BoundsWidth (pBounds) * Factor;
-    pPIA->Width += 2 * pPIA->Offset;
-    pPIA->Width += 32 - (pPIA->Width % 32);
+	pPIA->Width += 2 * pPIA->Offset;
+	pPIA->Width += 32 - (pPIA->Width % 32);
     pPIA->Factor = (double)pPIA->Width / BoundsWidth (pBounds);
 	pPIA->Height = BoundsHeight(pBounds) * pPIA->Factor  + 2*pPIA->Offset;
- 	pPIA->hBitMap[0] = CreateBitmap (pPIA->Width,pPIA->Height,1,1,0);
- 	pPIA->hBitMap[1] = CreateBitmap (pPIA->Width,pPIA->Height,1,1,0);
+	pPIA->hDC = CreateCompatibleDC(0);
+	pPIA->hBitMap[0] = CreateCompatibleBitmap(pPIA->hDC, pPIA->Width, pPIA->Height);
+	SetDCBitmapToBlack(pPIA->hDC, pPIA->hBitMap[0]);
+	if (!CreateAreaPoint)
+	{
+		pPIA->hBitMap[1] = CreateCompatibleBitmap(pPIA->hDC, pPIA->Width, pPIA->Height);
+		SetDCBitmapToBlack(pPIA->hDC, pPIA->hBitMap[1]);
+	}
+	pPIA->hBitMapOrig = SelectObject(pPIA->hDC, pPIA->hBitMap[0]);
 	GlobalUnlock (hPIA);
 Exit:
 {
@@ -4445,7 +4511,7 @@ double  PCTInAreasLoad (HANDLE hPIA,int opt,int Type,DWORD nPoints, HPDPOINT pAr
 {
 	double	rtn=0;
     DWORD   i; 
-    HDC		hDC,hDCMain;
+	HDC		hDC;
     HBITMAP	hBM=0, hBMOld=0; 
     double	Factor; 
     UINT	Height,Width,irow,icol;
@@ -4453,7 +4519,7 @@ double  PCTInAreasLoad (HANDLE hPIA,int opt,int Type,DWORD nPoints, HPDPOINT pAr
     HANDLE	hPoint = GSSiGlobAlloc ( 294,GMEM_MOVEABLE,max(5,(long)nPoints+1) * sizeof(POINT));
     HPPOINT	pPoint = (HPPOINT)GlobalLock(hPoint);
 	HBRUSH	OldBrush; 
-	HPEN	OldPen, hPen;
+	HPEN	OldPen, hPen=0;
     long	memsize,ii;
 	LPPCTIAStruct pPIA;
 	HPUSHORT	array;   
@@ -4468,18 +4534,21 @@ double  PCTInAreasLoad (HANDLE hPIA,int opt,int Type,DWORD nPoints, HPDPOINT pAr
 	double	PenWidth;
 	
     pPIA = (LPPCTIAStruct)GlobalLock (hPIA); 
-	hDCMain = GetDC (hWndMain);
-    hDC = CreateCompatibleDC(hDCMain); 
-	ReleaseDC (hWndMain,hDCMain);
+	hDC = pPIA->hDC;
     hBMOld = SelectObject(hDC,pPIA->hBitMap[opt]);
 	SetMapMode    ( hDC, MM_ISOTROPIC );
     SetWindowOrgEx  ( hDC, 0, 0,0 );
     SetViewportOrgEx( hDC, 0, 0,0 );    
-  	SetWindowExtEx  ( hDC, 1024, 1024,0 ); 
-	SetViewportExtEx( hDC, 1024, 1024,0 );         
+  	SetWindowExtEx  ( hDC, pPIA->Width,pPIA->Height,0 );
+	SetViewportExtEx( hDC, pPIA->Width, pPIA->Height,0 );
 	OldBrush = SelectObject (hDC,GetStockObject(BLACK_BRUSH));  
     OldPen = SelectObject (hDC,GetStockObject(BLACK_PEN)); 
 	PenWidth = 1;
+
+	DPOINT MidPtW = WeightedPolyMidPoint(pAreaPoints, nPoints);
+	DPOINT MidPt = ComputeAreaMidpoint2(pAreaPoints, nPoints);
+	//DPOINT MidPtB = MinMaxMidPointD(pBounds);
+
     for (i=0;i<nPoints;i++)
     	pPoint[i] = DPointToPIAAPoint (&pAreaPoints[i],&pPIA->Bounds,&pPIA->Factor,pPIA->Offset,0); 
 	switch (Type)
@@ -4492,9 +4561,16 @@ double  PCTInAreasLoad (HANDLE hPIA,int opt,int Type,DWORD nPoints, HPDPOINT pAr
 		GSSiDeleteObject (&hPen);
 		break;
 	case 3:
-	    pPoint[nPoints] = pPoint[0];  
-		hPen = CreatePen (PS_SOLID,(int)IDNINT(PenWidth),RGB(255,255,255));
-		OldPen = SelectObject (hDC,hPen);
+	    pPoint[nPoints] = pPoint[0]; 
+		if (pPIA->CreateAreaPoint)
+		{
+			OldPen = SelectObject(hDC, GetStockObject(NULL_PEN));
+		}
+		else
+		{
+			hPen = CreatePen (PS_SOLID,(int)IDNINT(PenWidth),RGB(255,255,255));
+			OldPen = SelectObject(hDC, hPen);
+		}
 		OldBrush = SelectObject (hDC,GetStockObject(WHITE_BRUSH));
 		Polygon (hDC,pPoint,(int)nPoints+1);
 		SelectObject (hDC,OldBrush);
@@ -4503,11 +4579,15 @@ double  PCTInAreasLoad (HANDLE hPIA,int opt,int Type,DWORD nPoints, HPDPOINT pAr
 		break;
 	}
     GSSiGlobUlFree (&hPoint);  
-	SelectObject(hDC,hBMOld);
-    DeleteDC(hDC);
-    if (savebm) 
-    	SaveBitmap (pPIA->hBitMap[opt],"c:\\test.bmp",0,0);
-    GlobalUnlock (hPIA);  
+	hBM = SelectObject(hDC, pPIA->hBitMapOrig);
+	savebm = 0;
+	if (savebm)
+	{
+		//SaveBitmap(pPIA->hBitMap[opt], "c:\\temp\\test.png", 0, 0);
+		SaveBitmap(hBM, "c:\\temp\\test.png", 0, 0);
+		DisplayBitmap(hBM);
+	}
+	GlobalUnlock (hPIA);
 {
 #if ENABLETRACE
 GSSiExitProg (1437);
@@ -4518,6 +4598,220 @@ GSSiExitProg (1437);
 }
 #endif
 }  
+
+static int medianValue(HANDLE hBits, int n, long long totBits)
+{
+	int rtn=0;
+	long long* pBits = GlobalLock(hBits);
+	long long tot = *pBits;
+	totBits /= 2;
+	while (tot < totBits && rtn < n-1)
+	{
+		tot += *(pBits++);
+		rtn++;
+	}
+	GlobalUnlock(hBits);
+	return rtn;
+}
+RECT makerect(POINT centerpt, int offset)
+{
+	RECT rect;
+
+	rect.left = centerpt.x - offset;
+	rect.right = centerpt.x + offset;
+	rect.top = centerpt.y + offset;
+	rect.bottom = centerpt.y - offset;
+
+	return rect;
+}
+int NumIncPointsInArea(POINT startpt, LPMTPIA pMTPia)
+{
+	int np = 0;
+	static int nIncPoints = sizeof(xinc) / sizeof(int);
+
+	for (int inc = 0; inc < nIncPoints; inc++)
+	{
+		POINT pt = startpt;
+		pt.x += xinc[inc];
+		pt.y += yinc[inc];
+		if (pt.x >= 0 && pt.x < pMTPia->width && pt.y >= 0 && pt.y < pMTPia->height)
+		{
+			LPBYTE pBytes = pMTPia->pBytes + pt.y * pMTPia->widthBytes;
+			if (GetBit(pt.x, pBytes))
+				np++;
+			else
+				ii = 1;
+		}
+		else
+			ii = 1;
+	}
+	
+	return np;
+}
+POINT MoveToPointInArea(POINT startpt,LPMTPIA pMTPia)
+{
+	POINT rtn = startpt;
+	POINT ptMostIn = startpt;
+	int nMoves = 0;
+	int maxMoves = pMTPia->width * pMTPia->height;
+	int maxLoops = max(max(max(startpt.x, pMTPia->height - startpt.x), pMTPia->width), pMTPia->width - startpt.y);
+	int nInArea = NumIncPointsInArea(startpt, pMTPia);
+	static int nIncPoints = sizeof(xinc) / sizeof(int);
+	int maxInArea = 0;
+
+	if (nInArea == nIncPoints)
+		return rtn;
+	maxInArea = nInArea;
+	for (int iLoop = 1; iLoop < maxLoops; iLoop++)
+	{
+		POINT testpt;
+		RECT rect = makerect(startpt, iLoop);
+		if (rect.top < pMTPia->height)
+		{
+			//run along top of rect
+			testpt.y = rect.top;
+			testpt.x = rect.left;
+			while (testpt.x < rect.right)
+			{
+				testpt.x++;
+				nInArea = NumIncPointsInArea(testpt, pMTPia);
+				if (nInArea == nIncPoints)
+					return testpt;
+				if (nInArea > maxInArea)
+				{
+					maxInArea = nInArea;
+					ptMostIn = testpt;
+				}
+			}
+			//run along left of rect
+			testpt.y = rect.bottom;
+			testpt.x = rect.left;
+			while (testpt.y < rect.top)
+			{
+				testpt.y++;
+				nInArea = NumIncPointsInArea(testpt, pMTPia);
+				if (nInArea == nIncPoints)
+					return testpt;
+				if (nInArea > maxInArea)
+				{
+					maxInArea = nInArea;
+					ptMostIn = testpt;
+				}
+			}
+			//run along bottom of rect
+			testpt.y = rect.bottom;
+			testpt.x = rect.left;
+			while (testpt.x < rect.right)
+			{
+				testpt.x++;
+				nInArea = NumIncPointsInArea(testpt, pMTPia);
+				if (nInArea == nIncPoints)
+					return testpt;
+				if (nInArea > maxInArea)
+				{
+					maxInArea = nInArea;
+					ptMostIn = testpt;
+				}
+			}
+
+			//run along right of rect
+			testpt.y = rect.bottom;
+			testpt.x = rect.right;
+			while (testpt.y < rect.top)
+			{
+				testpt.y++;
+				nInArea = NumIncPointsInArea(testpt, pMTPia);
+				if (nInArea == nIncPoints)
+					return testpt;
+				if (nInArea > maxInArea)
+				{
+					maxInArea = nInArea;
+					ptMostIn = testpt;
+				}
+			}
+		}
+		testpt.x = startpt.x;
+	}
+	return ptMostIn;
+}
+DPOINT PCTInAreasCreatePoint(HANDLE hPIA)
+{
+	DPOINT rtn = { 0 };
+	POINT startpt = { 0 };
+	POINT areapt;
+	LPPCTIAStruct pPIA;
+	BITMAP	bm;
+	int	lMem;
+	HANDLE	hMem1, hMem2;
+	DWORD	irow, icol;
+	LPBYTE	pBits1;
+	BYTE	MaskedByte;
+	int		TotBits = 0, TotMaskedBits = 0;
+	static	BOOL	First = TRUE;
+
+	if (!hPIA)
+		return rtn;
+	if (First)
+	{
+		BYTE	b = 0;
+		int		i, j;
+
+		for (i = 0; i < 256; i++, b++)
+		{
+			nBitsInByte[i] = 0;
+			for (j = 0; j < 8; j++)
+				nBitsInByte[i] += GetBit(j, &b);
+		}
+		First = FALSE;
+	}
+	pPIA = (LPPCTIAStruct)GlobalLock(hPIA);
+	GetObject(pPIA->hBitMap[0], sizeof(bm), (LPSTR)&bm);
+	lMem = bm.bmWidthBytes * bm.bmHeight;
+	hMem1 = GSSiGlobAlloc(1724, GMEM_MOVEABLE, lMem);
+	pBits1 = GlobalLock(hMem1);
+	GetBitmapBits(pPIA->hBitMap[0], lMem, pBits1);
+	HANDLE hRowBits = GSSiGlobAlloc(1851, GHND, bm.bmHeight * sizeof(long long));
+	long long *pRowBits = GlobalLock(hRowBits);
+	long long* pColBits = 0;
+	HANDLE hColBits = GSSiGlobAlloc(1852, GHND, bm.bmWidthBytes * sizeof(long long));
+	long long totRowBits = 0, totColBits = 0;
+	LPBYTE pBits = pBits1;
+	for (irow = 0; irow < bm.bmHeight; irow++,pRowBits++)
+	{
+		pColBits = GlobalLock(hColBits);
+		for (icol = 0; icol < bm.bmWidthBytes; icol++, pBits++,pColBits++)
+		{
+			if (!*pBits)
+				;
+			else
+			{
+				(*pRowBits) += nBitsInByte[*pBits];
+				(*pColBits) += nBitsInByte[*pBits];
+				totRowBits += nBitsInByte[*pBits];
+				totColBits += nBitsInByte[*pBits];
+			}
+		}
+		GlobalUnlock(hColBits);
+	}
+	GlobalUnlock(hRowBits);
+
+	startpt.x = medianValue(hColBits, bm.bmWidthBytes, totColBits);
+	startpt.x *= 8;
+	startpt.y = medianValue(hRowBits, bm.bmHeight, totRowBits);
+	MTPIA mtpia;
+	mtpia.pBytes = pBits1;
+	mtpia.width = bm.bmWidth;
+	mtpia.height = bm.bmHeight;
+	mtpia.widthBytes = bm.bmWidthBytes;
+
+	areapt = MoveToPointInArea(startpt,&mtpia);
+	rtn = PIAAPointToDPoint(areapt, &pPIA->Bounds, &pPIA->Factor, pPIA->Offset, pPIA->Type);
+	GSSiGlobUlFree(&hMem1);
+	GlobalUnlock(hPIA);
+	GSSiGlobFree(&hRowBits);
+	GSSiGlobFree(&hColBits);
+	return rtn;
+}
 
 double PCTInAreas (HANDLE hPIA)
 {
@@ -4530,8 +4824,8 @@ double PCTInAreas (HANDLE hPIA)
 	LPBYTE	pBits1, pBits2;
 	BYTE	MaskedByte;
 	int		TotBits=0, TotMaskedBits=0;
-    static	BOOL	First = TRUE;
-    static	BOOL	savebm = FALSE;
+	static	BOOL	First=TRUE;
+	static  BOOL	savebm = FALSE;
 
 	if (!hPIA)
 		return -1;
@@ -4548,7 +4842,7 @@ double PCTInAreas (HANDLE hPIA)
 		}
 		First = FALSE;
 	}
-	pPIA = GlobalLock (hPIA);
+	pPIA = (LPPCTIAStruct)GlobalLock (hPIA);
     GetObject(pPIA->hBitMap[0], sizeof(bm), (LPSTR)&bm);
 	lMem = bm.bmWidthBytes * bm.bmHeight;
 	hMem1 = GSSiGlobAlloc (1724,GMEM_MOVEABLE,lMem);
@@ -4557,14 +4851,14 @@ double PCTInAreas (HANDLE hPIA)
 	pBits2 = GlobalLock (hMem2);
 	GetBitmapBits (pPIA->hBitMap[0],lMem,pBits1);
 	GetBitmapBits (pPIA->hBitMap[1],lMem,pBits2);
-    if (savebm)
-    {
-        //SaveBitmap(pPIA->hBitMap[opt], "c:\\temp\\test.png", 0, 0);
-        SaveBitmap(pPIA->hBitMap[0], "c:\\temp\\test1.png", 0, 0);
-        SaveBitmap(pPIA->hBitMap[1], "c:\\temp\\test2.png", 0, 0);
-    }
-
-
+	if (savebm)
+	{
+		//SaveBitmap(pPIA->hBitMap[opt], "c:\\temp\\test.png", 0, 0);
+		SaveBitmap(pPIA->hBitMap[0], "c:\\temp\\test1.png", 0, 0);
+		SaveBitmap(pPIA->hBitMap[1], "c:\\temp\\test2.png", 0, 0);
+		DisplayBitmap(pPIA->hBitMap[0]);
+		DisplayBitmap(pPIA->hBitMap[1]);
+	}
 	for (irow = 0;irow<bm.bmHeight;irow++) 
 	{
 		for (icol=0;icol<bm.bmWidthBytes;icol++,pBits1++,pBits2++)
@@ -4887,8 +5181,10 @@ HANDLE  PointInAreaAcceleratorSetupWindow (DWORD nPoints, HPDPOINT pAreaPoints, 
     Width *= PIASizeFactor;
 	if (Height < 5 || Width < 5)
 		goto Exit;
-    hBM = CreateCompatibleBitmap(hDCMain,Width,Height); 
-    GetObject(hBM, sizeof(bm), (LPSTR)&bm);
+	curProgID = 10046;
+	hBM = CreateCompatibleBitmap(hDCMain,Width,Height);
+	curProgID = -1;
+	GetObject(hBM, sizeof(bm), (LPSTR)&bm);
     biBits = bm.bmPlanes * bm.bmBitsPixel;
 	hBits = GSSiGlobAlloc (0,GMEM_MOVEABLE,bm.bmWidthBytes * bm.bmHeight);
 	pBits = GlobalLock (hBits);

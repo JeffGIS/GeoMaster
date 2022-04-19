@@ -528,7 +528,7 @@ NextField:
 	return rtn;
 }
                                        
-BOOL FAR PASCAL COMBO_FILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COMBO_FILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (616);
 #endif
@@ -985,7 +985,7 @@ GSSiExitProg (616);
 #endif
 }   
 
-BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, UINT cntlSQL,
+BOOL FAR PASCAL DATAFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam, UINT cntlSQL,
                                 UINT cntlSET_FILE, UINT cntlDATABASE_LIST, UINT cntlTABLE_NAMES,UINT cntlTABLE_NAMES_TITLE,
                                 LPUINT pcntlFIELD_NAMESIn,int NumFieldLists,
                                 LPSTR DataFile, short *DataFileType, HANDLE *hThemeDB,
@@ -1016,6 +1016,7 @@ static  LPFIELDINFO lpFieldInfo = &FIELD;
     LPSTR	AttDir=cwd+256;
     LPSTR	Ext = AttDir+256;
     LPSTR	ExtID=Ext+16;  
+	static  BOOL fileNameChanged = FALSE;
                                          
  switch(Message)
    {
@@ -1346,6 +1347,7 @@ LoadFields:
 						 OpenDataFile(DataFile, "", BT_READ, hThemeDB);
 						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES), SW_SHOW);
 						 ShowWindow(GetDlgItem(hWndDlg, cntlTABLE_NAMES_TITLE), SW_SHOW);
+
 					 }
 					 else
 						SendDlgItemMessage(hWndDlg, cntlDATABASE_LIST, CB_SETCURSEL, -1, 0);
@@ -1376,7 +1378,14 @@ LoadFields:
         {
               switch(HIWORD(wParam))
               {
+			  //case CBN_SETFOCUS:
 			  case CBN_EDITCHANGE:
+				  fileNameChanged = TRUE;
+				  break;
+			  case CBN_KILLFOCUS:
+				  if (!fileNameChanged)
+					  break;
+				  fileNameChanged = FALSE;
 				  GetDlgItemText(hWndDlg, cntlDATABASE_LIST, DataFile,255);
 				  goto LoadFields;
 				  break;
@@ -4323,7 +4332,7 @@ GSSiExitProg (641);
 #endif
 }
                                        
-BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DISPLAY_GWD_DATAMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (642);
 #endif
@@ -5070,7 +5079,7 @@ return  rtn;
 } 
 
     
-BOOL FAR PASCAL GWD_INDEXESMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GWD_INDEXESMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (643);
 #endif

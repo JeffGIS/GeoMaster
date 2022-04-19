@@ -8,6 +8,8 @@
 #include "sqlite3.h"
 #include "laszip_dll.h"
 
+enum STRUCTTYPES {ST_NOTYPE,ST_FTPSTRUCT,ST_VPSTRUCT};
+
 #if WIN32
 #define HUGE 
 #define _fstrncpy strncpy
@@ -186,6 +188,8 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define SUICIDE_TIMER 11
 #define GMCACHE_TIMER 12
 #define CACHE_FILE_RENAME_TIMER 13
+#define EXECUTE_COMMAND_TIMER 14
+#define DATED_ORTHO_TIMER 15
 #define TCPTIMER	21 
 #define LEAVE_WINDOW_TIMER 22
 #define TCPREPLAYTIMER	99
@@ -340,13 +344,18 @@ typedef struct
     BYTE      lfPitchAndFamily;
     CHAR      lfFaceName[LF_FACESIZE];
 } LOGFONT16,  FAR *LPLOGFONT16;
-#pragma pack()
+typedef struct { unsigned char x, y; }	BPOINT;
+typedef struct { char x : 4, y : 4; }CPOINT;
+typedef BPOINT* LPBPOINT;
+typedef CPOINT* LPCPOINT;
 typedef struct
 {
 	short x;
 	short y;
 }  SPOINT;
-typedef SPOINT *LPSPOINT;
+typedef SPOINT* LPSPOINT;
+
+#pragma pack()
 typedef struct
 {
 	short x;
@@ -541,6 +550,9 @@ typedef struct {
 				 short		Type;//0 if world 1 if window
 				 short		unused;
 				 HBITMAP	hBitMap[2];
+				 HBITMAP	hBitMapOrig;
+				 HDC		hDC;
+				 BOOL		CreateAreaPoint;
 				} PCTIAStruct;
 typedef PCTIAStruct	*LPPCTIAStruct;
 
@@ -815,7 +827,7 @@ typedef struct
         DWORD   changetime; 
         BOOL	ContainsGorF;
         BOOL	Save;
-        char    Name[34];
+        char    Name[MAX_VARNAME_LEN + 1];
         char    Value[MAXVARLEN]; 
         HANDLE	LinkedVar[1];
     } VARINFO;
@@ -2051,9 +2063,9 @@ typedef struct
 		short	DataFileType,
 				DataType;
 		FIELDINFO16	Field; 
-		short	ClassSymbol[MAX_THEME_CLASSES];      
+		short	ClassSymbol[MAX_THEME_CLASSES_V4];
 		char	SymSizeC[32];
-		BYTE	ClassIsSelected[MAX_THEME_CLASSES];
+		BYTE	ClassIsSelected[MAX_THEME_CLASSES_V4];
 		LPVOID	Statement;
 		char	ScatterFile[128];
 		short		NumClass;
@@ -2067,20 +2079,20 @@ typedef struct
         		RoundTo;
         long	NumVals;
         double	Xmin,Ymin,Xmax,Ymax;
-        double	ClassMin[MAX_THEME_CLASSES],
-        		ClassMax[MAX_THEME_CLASSES];
-        COLORREF	ClassColor[MAX_THEME_CLASSES]; 
-        HPEN16		ClassPen[MAX_THEME_CLASSES];
-        HBRUSH16		ClassBrush[MAX_THEME_CLASSES],
+        double	ClassMin[MAX_THEME_CLASSES_V4],
+        		ClassMax[MAX_THEME_CLASSES_V4];
+        COLORREF	ClassColor[MAX_THEME_CLASSES_V4];
+        HPEN16		ClassPen[MAX_THEME_CLASSES_V4];
+        HBRUSH16		ClassBrush[MAX_THEME_CLASSES_V4],
         		NoDataBrush,
         		InvalidDataBrush;
-        long	ClassCount[MAX_THEME_CLASSES];
-        DPOINT	ClassPnt[MAX_THEME_CLASSES];
+        long	ClassCount[MAX_THEME_CLASSES_V4];
+        DPOINT	ClassPnt[MAX_THEME_CLASSES_V4];
         COLORREF	BGColor, ScatterColor, ScatterBoxBG, TitleBoxBG;
         RECT16	Rect, TitleBox, ScatterBox, ColorsBox, RangesBox, InfoBox;
-        RECT16	ClassClrBox[MAX_THEME_CLASSES];
+        RECT16	ClassClrBox[MAX_THEME_CLASSES_V4];
         short	Margin, ScatterWidth, ColorsWidth, InnerMargin, TitleHeight;
-        char	ClassBM[MAX_THEME_CLASSES][128];
+        char	ClassBM[MAX_THEME_CLASSES_V4][128];
         char	Title[256]; 
         char	Contents[34];
         short	SymNum;
@@ -2149,9 +2161,9 @@ typedef struct
 				ClassDefValSQL[256],   //also used for hotspot radius
 				ClassDefValField[34];
 		char	SymbolFont[4][32];  
-		BYTE	ClassStatus[MAX_THEME_CLASSES];
+		BYTE	ClassStatus[MAX_THEME_CLASSES_V4];
 		HOTSPOTDATA16 HotSpotData; 
-		float	ClassFactor[MAX_THEME_CLASSES]; 
+		float	ClassFactor[MAX_THEME_CLASSES_V4];
 		char	HotSpotCompareTo[128];
 		char	HotSpotSaveTo[128];  
 		double	CompareHotSpotFactor;
@@ -2303,216 +2315,660 @@ typedef struct
     }	COORDINATEDISPLAY;
 typedef	COORDINATEDISPLAY	FAR	*LPCOORDINATEDISPLAY; 
 
-typedef struct    		
-	{
-		short	ID;
-		HANDLE16	handle16; 
-		short	Version;
-		HANDLE	handle;
-		short	TargetViewport,
-				DisplayViewport;
-		BOOL	IsActive,
-				WantDataPass,
-				ComputeClassBoundaries,
-				DisplayScatterDiagram,
-				Recompute,
-				ReScan;  		// also holds network opened flag, TargetViewport2
-		HANDLE	hThemeDB,
-				hScatterFile;
-		char	DataFile[MAX_PATH];
-		char	SQL[256];
-		short	DataFileType,
-				DataType;
-		FIELDINFO	Field; 
-		short	ClassSymbol[MAX_THEME_CLASSES];      
-		char	SymSizeC[32];
-		BYTE	ClassIsSelected[MAX_THEME_CLASSES];
-		LPVOID	Statement_dummy;
-		char	ScatterFile[MAX_PATH];
-		short		NumClass;
-		short		NumDesiredClass;
-        short		ClassType;
-        short		ValConv;  
-        short		MissOpt;
-        short	MarkInvalid;
-        double	XLimit,
-        		YLimit,
-        		RoundTo;
-        long	NumVals;
-        double	Xmin,Ymin,Xmax,Ymax;
-        double	ClassMin[MAX_THEME_CLASSES],
-        		ClassMax[MAX_THEME_CLASSES];
-        COLORREF	ClassColor[MAX_THEME_CLASSES]; 
-        HPEN		ClassPen[MAX_THEME_CLASSES];
-        HBRUSH		ClassBrush[MAX_THEME_CLASSES],
-        		NoDataBrush,
-        		InvalidDataBrush;
-        long	ClassCount[MAX_THEME_CLASSES];
-        DPOINT	ClassPnt[MAX_THEME_CLASSES];
-        COLORREF	BGColor, ScatterColor, ScatterBoxBG, TitleBoxBG;
-        RECT	Rect, TitleBox, ScatterBox, ColorsBox, RangesBox, InfoBox;
-        RECT	ClassClrBox[MAX_THEME_CLASSES];
-        short	Margin, ScatterWidth, ColorsWidth, InnerMargin, TitleHeight;
-        char	ClassBM[MAX_THEME_CLASSES][256];
-        char	Title[256]; 
-        char	Contents[34];
-        short	SymNum;
-       	LOGFONT	TitleFont,
-       			ClassFont1,
-       			ClassFont2;
-       	short	Xmove, Ymove;  	// Xmove also used to hold NetworkID, DisplayOpt
-       	BOOL	ZeroIsMissing,
-       			AddCommas,
-       			ShowValue,
-       			VPDisplayed,
-       			DisplayPCT; 
-       	char	RefValChar[36]; 
-       	double	RefValDbl;  
-       	short	FieldFun, 
-       			ValueLen;
-       	short	FieldCorrection,
-       			CityUniqueInc;   
-       	COLORREF	IBBGColor, TitleTextColor, IBTextColor[2]; 
-       	short	RefIsPCT; 
-       	char	Value[256]; 
-       	HANDLE	hVisList;
-       	short	DispersePoints;
-       	HANDLE	hDisperseFileName,
-       			hDisperseFile;
-       	short	MaxDispersion;
-       	HANDLE	hHighlightFileName,
-       			hHighlightFile;
-       	BYTE	AccumPointSymbolOpt;
-       	BYTE	AccumPointSizeOpt; 
-       	float	AccumPointBaseSize;  
-       	BYTE	AccumPointLink; 
-       	BYTE	AccumPointText;
-       	BOOL	ZeroBased;
-       	BOOL	PCTByArea;
-       	long	NumNonMask;
-       	long	PCTDisplayCycle; 
-       	short	LayerID;
-       	BOOL	InvertLegend;
-       	short	NumCols;
-       	BOOL	HiPrecis;
-       	short	NumMidpointnotused;  
-       	short	AllValueClass; 
-		unsigned	short	ClearIfNoCount:1,
-						DisplayPointsOnly:1,
-						FlipLegend:1,
-						FactorLegend:1,
-						DisplayCount:1,
-						ShowOnlySelectedClasses:1,
-						HideNullClasses:1,
-						NotSetColor:1,
-						AppendCount:1,
-						CompressNullClasses:1,
-						DisplayDistance:1,
-						AutoClassDef:1,
-						UseFirstSymbol:1,
-						FillRow:1,
-						CenterText:1,
-						FlatEndOffsetLine:1; 
-		char	ClassDefDB[MAX_PATH], 
-				ClassDefSQL[256],
-				ClassDefKeyField[34],
-				ClassDefSymField[34],
-				ClassDefTitleField[34],
-				ClassDefValDB[MAX_PATH],    
-				ClassDefValSQL[256],   //also used for hotspot radius
-				ClassDefValField[34];
-		char	SymbolFont[4][64];  
-		BYTE	ClassStatus[MAX_THEME_CLASSES];
-		HOTSPOTDATA HotSpotData; 
-		float	ClassFactor[MAX_THEME_CLASSES]; 
-		char	HotSpotCompareTo[MAX_PATH];
-		char	HotSpotSaveTo[MAX_PATH];  
-		double	CompareHotSpotFactor;
-		char	IconLibrary[MAX_PATH];//also used for hotspot weight 
-		short	ActualXMargin;
-		short	ActualYMargin; 
-		LOGFONT	ShowValueFont;
-		COLORREF ShowValueTextColor; 
-		short	Config;  
-		short	UseHalfTone; 
-		short	HaveVP[2];  
-		long	NextValueColor; 
-		long	ValueColor; 
-		long	NumMissing;
-		long	NumInvalid; 
-		short	SkipInvalid;
-		short	MultiValOption;// 0=First Value,1 = Count of,2=Average of,3 = Sum of,4 = Min of,5=Max of,6 = Range of,7=Lowest Class,8=Highest Class, 9 = All Classes
-		short	ColorScheme; 
-		HANDLE	hHotSpotBitmap; 
-		MNMXCORD	HotSpotBounds;  
-		unsigned	short	ComputeStoredCounts:1,
-						UseStoredCounts:1,
-						UseCheckmark:1, 
-						DelayTextDisplay:1,
-						ShowValStyle:3,//0=original,1=yellowtb
-						ProfileAlignmentOption:2,
-						ComputeAreaAndLength:1,
-						UseShadowColor:1,
-						ShowDirection:2,
-						ExpressionConverted:1,
-						CompareAttributes:1,// also used for auto city max pop option
-						ShowCityCircle:1;  
-		double	DistanceBetweenProfilePoints; 
-		double	CrossSectionSpacing;
-		double	CrossSectionWidth[2]; 
-		POINT	RadiusPoint;
-		double	Radius; 
-		double	DynSegMaxFixedIncrement;
-		double	DynSegFixedIncrement; 
-		double	ShowValAZ;  
-		short	ProfileUnits;
-        char	Contents2[64];
-        short	SymNum2;
-       	HANDLE	hVisList2;
-       	HANDLE	hAreas;
-       	USHORT	SortOption;
-       	short	ACCDisperse; 
-       	short	Pass;
-       	HPEN	PointInAreaPen;
-       	HBRUSH	PointInAreaBrush; 
-       	COLORREF	PointInAreaColor;
-       	HFILE	FidAreas; 
-       	short	PointInAreaPointThemeVPID;  
-       	long	NumMidpoint; 
-       	char	ShowValMacro[256]; 
-       	HFILE	FidDelayedText; 
-       	HFONT	hDelayedFont;
-		long	NumAreas;
-		char	GraphicsAttributesMacro[MAX_PATH];
-		char	DataDisplayMacro[256];
-		char	BeginDataPassMacro[256];
-		float	AbsLineWidth[MAX_THEME_CLASSES];
-		COLORREF ShowValueShadowColor; 
-		char	CurValue[256];
-		char	DataFileID[34];
-		HDC		CompareDC;
-		HBITMAP	CompareBitmap,CompareBitmapOld;
-		BYTE	SortOrder[MAX_THEME_CLASSES];
-		float	ScaleBarTextFactor;
-		int		nLabelLines;
-		HANDLE	hhLabelLines;
-		long	MinCityPop;
-		int		CityTextRectInflateFactor;
-		int		CityTextMinSize, CityTextMaxSize;
-		short	CityTextSizeOpt;
-		USHORT	MaxCitiesToDisplay;
-		int		MaxCityPopOnScreen;
-		short	GridID;//0=latlon,1=Google
-		short	GridZoom;
-		int		numPreloadedValues;
-		short	isDayFilter;
-		char	BeginDisplayMacro[256];
-		char	EndDisplayMacro[256];
-		int		ProfileSmoothOption;
-		char	filler[168-sizeof(int)];
+typedef struct
+{
+	short	ID;
+	HANDLE16	handle16;
+	short	Version;
+	HANDLE	handle;
+	short	TargetViewport,
+		DisplayViewport;
+	BOOL	IsActive,
+		WantDataPass,
+		ComputeClassBoundaries,
+		DisplayScatterDiagram,
+		Recompute,
+		ReScan;  		// also holds network opened flag, TargetViewport2
+	HANDLE	hThemeDB,
+		hScatterFile;
+	char	DataFile[MAX_PATH];
+	char	SQL[256];
+	short	DataFileType,
+		DataType;
+	FIELDINFO	Field;
+	short	ClassSymbol[MAX_THEME_CLASSES];
+	char	SymSizeC[32];
+	BYTE	ClassIsSelected[MAX_THEME_CLASSES];
+	LPVOID	Statement_dummy;
+	char	ScatterFile[MAX_PATH];
+	short		NumClass;
+	short		NumDesiredClass;
+	short		ClassType;
+	short		ValConv;
+	short		MissOpt;
+	short	MarkInvalid;
+	double	XLimit,
+		YLimit,
+		RoundTo;
+	long	NumVals;
+	double	Xmin, Ymin, Xmax, Ymax;
+	double	ClassMin[MAX_THEME_CLASSES],
+		ClassMax[MAX_THEME_CLASSES];
+	COLORREF	ClassColor[MAX_THEME_CLASSES];
+	HPEN		ClassPen[MAX_THEME_CLASSES];
+	HBRUSH		ClassBrush[MAX_THEME_CLASSES],
+		NoDataBrush,
+		InvalidDataBrush;
+	long	ClassCount[MAX_THEME_CLASSES];
+	DPOINT	ClassPnt[MAX_THEME_CLASSES];
+	COLORREF	BGColor, ScatterColor, ScatterBoxBG, TitleBoxBG;
+	RECT	Rect, TitleBox, ScatterBox, ColorsBox, RangesBox, InfoBox;
+	RECT	ClassClrBox[MAX_THEME_CLASSES];
+	short	Margin, ScatterWidth, ColorsWidth, InnerMargin, TitleHeight;
+	char	ClassBM[MAX_THEME_CLASSES][256];
+	char	Title[256];
+	char	Contents[34];
+	short	SymNum;
+	LOGFONT	TitleFont,
+		ClassFont1,
+		ClassFont2;
+	short	Xmove, Ymove;  	// Xmove also used to hold NetworkID, DisplayOpt
+	BOOL	ZeroIsMissing,
+		AddCommas,
+		ShowValue,
+		VPDisplayed,
+		DisplayPCT;
+	char	RefValChar[36];
+	double	RefValDbl;
+	short	FieldFun,
+		ValueLen;
+	short	FieldCorrection,
+		CityUniqueInc;
+	COLORREF	IBBGColor, TitleTextColor, IBTextColor[2];
+	short	RefIsPCT;
+	char	Value[256];
+	HANDLE	hVisList;
+	short	DispersePoints;
+	HANDLE	hDisperseFileName,
+		hDisperseFile;
+	short	MaxDispersion;
+	HANDLE	hHighlightFileName,
+		hHighlightFile;
+	BYTE	AccumPointSymbolOpt;
+	BYTE	AccumPointSizeOpt;
+	float	AccumPointBaseSize;
+	BYTE	AccumPointLink;
+	BYTE	AccumPointText;
+	BOOL	ZeroBased;
+	BOOL	PCTByArea;
+	long	NumNonMask;
+	long	PCTDisplayCycle;
+	short	LayerID;
+	BOOL	InvertLegend;
+	short	NumCols;
+	BOOL	HiPrecis;
+	short	NumMidpointnotused;
+	short	AllValueClass;
+	unsigned	short	ClearIfNoCount : 1,
+		DisplayPointsOnly : 1,
+		FlipLegend : 1,
+		FactorLegend : 1,
+		DisplayCount : 1,
+		ShowOnlySelectedClasses : 1,
+		HideNullClasses : 1,
+		NotSetColor : 1,
+		AppendCount : 1,
+		CompressNullClasses : 1,
+		DisplayDistance : 1,
+		AutoClassDef : 1,
+		UseFirstSymbol : 1,
+		FillRow : 1,
+		CenterText : 1,
+		FlatEndOffsetLine : 1;
+	char	ClassDefDB[MAX_PATH], //also used for 2 val theme vp 1
+		ClassDefSQL[256],		  //also used for 2 val theme vp 2
+		ClassDefKeyField[34],
+		ClassDefSymField[34],
+		ClassDefTitleField[34],
+		ClassDefValDB[MAX_PATH],
+		ClassDefValSQL[256],   //also used for hotspot radius
+		ClassDefValField[34];
+	char	SymbolFont[4][64];
+	BYTE	ClassStatus[MAX_THEME_CLASSES];
+	HOTSPOTDATA HotSpotData;
+	float	ClassFactor[MAX_THEME_CLASSES];
+	char	HotSpotCompareTo[MAX_PATH];
+	char	HotSpotSaveTo[MAX_PATH];
+	double	CompareHotSpotFactor;
+	char	IconLibrary[MAX_PATH];//also used for hotspot weight 
+	short	ActualXMargin;
+	short	ActualYMargin;
+	LOGFONT	ShowValueFont;
+	COLORREF ShowValueTextColor;
+	short	Config;
+	short	UseHalfTone;
+	short	HaveVP[2];
+	long	NextValueColor;
+	long	ValueColor;
+	long	NumMissing;
+	long	NumInvalid;
+	short	SkipInvalid;
+	short	MultiValOption;// 0=First Value,1 = Count of,2=Average of,3 = Sum of,4 = Min of,5=Max of,6 = Range of,7=Lowest Class,8=Highest Class, 9 = All Classes
+	short	ColorScheme;
+	HANDLE	hHotSpotBitmap;
+	MNMXCORD	HotSpotBounds;
+	unsigned	short	ComputeStoredCounts : 1,
+		UseStoredCounts : 1,
+		UseCheckmark : 1,
+		DelayTextDisplay : 1,
+		ShowValStyle : 3,//0=original,1=yellowtb
+		ProfileAlignmentOption : 2,
+		ComputeAreaAndLength : 1,
+		UseShadowColor : 1,
+		ShowDirection : 2,
+		ExpressionConverted : 1,
+		CompareAttributes : 1,// also used for auto city max pop option
+		ShowCityCircle : 1;
+	double	DistanceBetweenProfilePoints;
+	double	CrossSectionSpacing;
+	double	CrossSectionWidth[2];
+	POINT	RadiusPoint;
+	double	Radius;
+	double	DynSegMaxFixedIncrement;
+	double	DynSegFixedIncrement;
+	double	ShowValAZ;
+	short	ProfileUnits;
+	char	Contents2[64];
+	short	SymNum2;
+	HANDLE	hVisList2;
+	HANDLE	hAreas;
+	USHORT	SortOption;
+	short	ACCDisperse;
+	short	Pass;
+	HPEN	PointInAreaPen;
+	HBRUSH	PointInAreaBrush;
+	COLORREF	PointInAreaColor;
+	HFILE	FidAreas;
+	short	PointInAreaPointThemeVPID;
+	long	NumMidpoint;
+	char	ShowValMacro[256];
+	HFILE	FidDelayedText;
+	HFONT	hDelayedFont;
+	long	NumAreas;
+	char	GraphicsAttributesMacro[MAX_PATH];
+	char	DataDisplayMacro[256];
+	char	BeginDataPassMacro[256];
+	float	AbsLineWidth[MAX_THEME_CLASSES];
+	COLORREF ShowValueShadowColor;
+	char	CurValue[256];
+	char	DataFileID[34];
+	HDC		CompareDC;
+	HBITMAP	CompareBitmap, CompareBitmapOld;
+	BYTE	SortOrder[MAX_THEME_CLASSES];
+	float	ScaleBarTextFactor;
+	int		nLabelLines;
+	HANDLE	hhLabelLines;
+	long	MinCityPop;
+	int		CityTextRectInflateFactor;
+	int		CityTextMinSize, CityTextMaxSize;
+	short	CityTextSizeOpt;
+	USHORT	MaxCitiesToDisplay;
+	int		MaxCityPopOnScreen;
+	short	GridID;//0=latlon,1=Google
+	short	GridZoom;
+	int		numPreloadedValues;
+	short	isDayFilter;
+	char	BeginDisplayMacro[256];
+	char	EndDisplayMacro[256];
+	int		ProfileSmoothOption;
+	short	InTestChar;
+	HANDLE  hPoints;
+	BOOL	showClassID;
+	int		MinSize;
+	char	filler[168 - sizeof(int) - sizeof(short) -sizeof(HANDLE)- sizeof(BOOL)-sizeof(int)];
 
-	}	THEME;
-typedef THEME	FAR *LPTHEME;
+}	THEME_V5;
+typedef THEME_V5	FAR* LPTHEME_V5;
+
+typedef struct
+{
+	short	ID;
+	HANDLE16	handle16;
+	short	Version;
+	HANDLE	handle;
+	short	TargetViewport,
+		DisplayViewport;
+	BOOL	IsActive,
+		WantDataPass,
+		ComputeClassBoundaries,
+		DisplayScatterDiagram,
+		Recompute,
+		ReScan;  		// also holds network opened flag, TargetViewport2
+	HANDLE	hThemeDB,
+		hScatterFile;
+	char	DataFile[MAX_PATH];
+	char	SQL[256];
+	short	DataFileType,
+		DataType;
+	FIELDINFO	Field;
+	short	ClassSymbol[MAX_THEME_CLASSES];
+	char	SymSizeC[32];
+	BYTE	ClassIsSelected[MAX_THEME_CLASSES];
+	LPVOID	Statement_dummy;
+	char	ScatterFile[MAX_PATH];
+	short		NumClass;
+	short		NumDesiredClass;
+	short		ClassType;
+	short		ValConv;
+	short		MissOpt;
+	short	MarkInvalid;
+	double	XLimit,
+		YLimit,
+		RoundTo;
+	long	NumVals;
+	double	Xmin, Ymin, Xmax, Ymax;
+	double	ClassMin[MAX_THEME_CLASSES],
+		ClassMax[MAX_THEME_CLASSES];
+	COLORREF	ClassColor[MAX_THEME_CLASSES];
+	HPEN		ClassPen[MAX_THEME_CLASSES];
+	HBRUSH		ClassBrush[MAX_THEME_CLASSES],
+		NoDataBrush,
+		InvalidDataBrush;
+	long	ClassCount[MAX_THEME_CLASSES];
+	DPOINT	ClassPnt[MAX_THEME_CLASSES];
+	COLORREF	BGColor, ScatterColor, ScatterBoxBG, TitleBoxBG;
+	RECT	Rect, TitleBox, ScatterBox, ColorsBox, RangesBox, InfoBox;
+	RECT	ClassClrBox[MAX_THEME_CLASSES];
+	short	Margin, ScatterWidth, ColorsWidth, InnerMargin, TitleHeight;
+	char	ClassBM[MAX_THEME_CLASSES][256];
+	char	Title[256];
+	char	Contents[34];
+	short	SymNum;
+	LOGFONT	TitleFont,
+		ClassFont1,
+		ClassFont2;
+	short	Xmove, Ymove;  	// Xmove also used to hold NetworkID, DisplayOpt
+	BOOL	ZeroIsMissing,
+		AddCommas,
+		ShowValue,
+		VPDisplayed,
+		DisplayPCT;
+	char	RefValChar[36];
+	double	RefValDbl;
+	short	FieldFun,
+		ValueLen;
+	short	FieldCorrection,
+		CityUniqueInc;
+	COLORREF	IBBGColor, TitleTextColor, IBTextColor[2];
+	short	RefIsPCT;
+	char	Value[256];
+	HANDLE	hVisList;
+	short	DispersePoints;
+	HANDLE	hDisperseFileName,
+		hDisperseFile;
+	short	MaxDispersion;
+	HANDLE	hHighlightFileName,
+		hHighlightFile;
+	BYTE	AccumPointSymbolOpt;
+	BYTE	AccumPointSizeOpt;
+	float	AccumPointBaseSize;
+	BYTE	AccumPointLink;
+	BYTE	AccumPointText;
+	BOOL	ZeroBased;
+	BOOL	PCTByArea;
+	long	NumNonMask;
+	long	PCTDisplayCycle;
+	short	LayerID;
+	BOOL	InvertLegend;
+	short	NumCols;
+	BOOL	HiPrecis;
+	short	NumMidpointnotused;
+	short	AllValueClass;
+	unsigned	short	ClearIfNoCount : 1,
+		DisplayPointsOnly : 1,
+		FlipLegend : 1,
+		FactorLegend : 1,
+		DisplayCount : 1,
+		ShowOnlySelectedClasses : 1,
+		HideNullClasses : 1,
+		NotSetColor : 1,
+		AppendCount : 1,
+		CompressNullClasses : 1,
+		DisplayDistance : 1,
+		AutoClassDef : 1,
+		UseFirstSymbol : 1,
+		FillRow : 1,
+		CenterText : 1,
+		FlatEndOffsetLine : 1;
+	char	ClassDefDB[MAX_PATH], //also used for 2 val theme vp 1
+		ClassDefSQL[256],		  //also used for 2 val theme vp 2
+		ClassDefKeyField[34],
+		ClassDefSymField[34],
+		ClassDefTitleField[34],
+		ClassDefValDB[MAX_PATH],
+		ClassDefValSQL[256],   //also used for hotspot radius
+		ClassDefValField[34];
+	char	SymbolFont[4][64];
+	BYTE	ClassStatus[MAX_THEME_CLASSES];
+	HOTSPOTDATA HotSpotData;
+	float	ClassFactor[MAX_THEME_CLASSES];
+	char	HotSpotCompareTo[MAX_PATH];
+	char	HotSpotSaveTo[MAX_PATH];
+	double	CompareHotSpotFactor;
+	char	IconLibrary[MAX_PATH];//also used for hotspot weight 
+	short	ActualXMargin;
+	short	ActualYMargin;
+	LOGFONT	ShowValueFont;
+	COLORREF ShowValueTextColor;
+	short	Config;
+	short	UseHalfTone;
+	short	HaveVP[2];
+	long	NextValueColor;
+	long	ValueColor;
+	long	NumMissing;
+	long	NumInvalid;
+	short	SkipInvalid;
+	short	MultiValOption;// 0=First Value,1 = Count of,2=Average of,3 = Sum of,4 = Min of,5=Max of,6 = Range of,7=Lowest Class,8=Highest Class, 9 = All Classes
+	short	ColorScheme;
+	HANDLE	hHotSpotBitmap;
+	MNMXCORD	HotSpotBounds;
+	unsigned	short	ComputeStoredCounts : 1,
+		UseStoredCounts : 1,
+		UseCheckmark : 1,
+		DelayTextDisplay : 1,
+		ShowValStyle : 3,//0=original,1=yellowtb
+		ProfileAlignmentOption : 2,
+		ComputeAreaAndLength : 1,
+		UseShadowColor : 1,
+		ShowDirection : 2,
+		ExpressionConverted : 1,
+		CompareAttributes : 1,// also used for auto city max pop option
+		ShowCityCircle : 1;
+	double	DistanceBetweenProfilePoints;
+	double	CrossSectionSpacing;
+	double	CrossSectionWidth[2];
+	POINT	RadiusPoint;
+	double	Radius;
+	double	DynSegMaxFixedIncrement;
+	double	DynSegFixedIncrement;
+	double	ShowValAZ;
+	short	ProfileUnits;
+	char	Contents2[64];
+	short	SymNum2;
+	HANDLE	hVisList2;
+	HANDLE	hAreas;
+	USHORT	SortOption;
+	short	ACCDisperse;
+	short	Pass;
+	HPEN	PointInAreaPen;
+	HBRUSH	PointInAreaBrush;
+	COLORREF	PointInAreaColor;
+	HFILE	FidAreas;
+	short	PointInAreaPointThemeVPID;
+	long	NumMidpoint;
+	char	ShowValMacro[256];
+	HFILE	FidDelayedText;
+	HFONT	hDelayedFont;
+	long	NumAreas;
+	char	GraphicsAttributesMacro[MAX_PATH];
+	char	DataDisplayMacro[256];
+	char	BeginDataPassMacro[256];
+	float	AbsLineWidth[MAX_THEME_CLASSES];
+	COLORREF ShowValueShadowColor;
+	char	CurValue[256];
+	char	DataFileID[34];
+	HDC		CompareDC;
+	HBITMAP	CompareBitmap, CompareBitmapOld;
+	BYTE	SortOrder[MAX_THEME_CLASSES];
+	float	ScaleBarTextFactor;
+	int		nLabelLines;
+	HANDLE	hhLabelLines;
+	long	MinCityPop;
+	int		CityTextRectInflateFactor;
+	int		CityTextMinSize, CityTextMaxSize;
+	short	CityTextSizeOpt;
+	USHORT	MaxCitiesToDisplay;
+	int		MaxCityPopOnScreen;
+	short	GridID;//0=latlon,1=Google
+	short	GridZoom;
+	int		numPreloadedValues;
+	short	isDayFilter;
+	char	BeginDisplayMacro[256];
+	char	EndDisplayMacro[256];
+	int		ProfileSmoothOption;
+	short	InTestChar;
+	HANDLE  hPoints;
+	BOOL	showClassID;
+	int		MinSize;
+	unsigned	short
+		DisplayTotArea : 1,
+		AppendTotArea : 1,
+		UnusedTotArea : 14;
+	short unusedShort;
+	int		totClassAreaUnits; //0-sqmeters,1-sq feet,2-sqkm,3-sqmiles,4-acres
+	unsigned	short
+		DisplayTotLength : 1,
+		AppendTotLength : 1,
+		UnusedTotLendth : 14;
+	short unusedShort2;
+	int		totClassLengthUnits; //0-meters,1-feet,2-km,3-miles
+	double  totClassArea[MAX_THEME_CLASSES];
+	double  totClassLength[MAX_THEME_CLASSES];
+	char	filler[4096];
+}	THEME;
+typedef THEME	FAR* LPTHEME;
+typedef struct
+{
+	short	ID;
+	HANDLE16	handle16;
+	short	Version;
+	HANDLE	handle;
+	short	TargetViewport,
+		DisplayViewport;
+	BOOL	IsActive,
+		WantDataPass,
+		ComputeClassBoundaries,
+		DisplayScatterDiagram,
+		Recompute,
+		ReScan;  		// also holds network opened flag, TargetViewport2
+	HANDLE	hThemeDB,
+		hScatterFile;
+	char	DataFile[MAX_PATH];
+	char	SQL[256];
+	short	DataFileType,
+		DataType;
+	FIELDINFO	Field;
+	short	ClassSymbol[MAX_THEME_CLASSES_V4];
+	char	SymSizeC[32];
+	BYTE	ClassIsSelected[MAX_THEME_CLASSES_V4];
+	LPVOID	Statement_dummy;
+	char	ScatterFile[MAX_PATH];
+	short		NumClass;
+	short		NumDesiredClass;
+	short		ClassType;
+	short		ValConv;
+	short		MissOpt;
+	short	MarkInvalid;
+	double	XLimit,
+		YLimit,
+		RoundTo;
+	long	NumVals;
+	double	Xmin, Ymin, Xmax, Ymax;
+	double	ClassMin[MAX_THEME_CLASSES_V4],
+		ClassMax[MAX_THEME_CLASSES_V4];
+	COLORREF	ClassColor[MAX_THEME_CLASSES_V4];
+	HPEN		ClassPen[MAX_THEME_CLASSES_V4];
+	HBRUSH		ClassBrush[MAX_THEME_CLASSES_V4],
+		NoDataBrush,
+		InvalidDataBrush;
+	long	ClassCount[MAX_THEME_CLASSES_V4];
+	DPOINT	ClassPnt[MAX_THEME_CLASSES_V4];
+	COLORREF	BGColor, ScatterColor, ScatterBoxBG, TitleBoxBG;
+	RECT	Rect, TitleBox, ScatterBox, ColorsBox, RangesBox, InfoBox;
+	RECT	ClassClrBox[MAX_THEME_CLASSES_V4];
+	short	Margin, ScatterWidth, ColorsWidth, InnerMargin, TitleHeight;
+	char	ClassBM[MAX_THEME_CLASSES_V4][256];
+	char	Title[256];
+	char	Contents[34];
+	short	SymNum;
+	LOGFONT	TitleFont,
+		ClassFont1,
+		ClassFont2;
+	short	Xmove, Ymove;  	// Xmove also used to hold NetworkID, DisplayOpt
+	BOOL	ZeroIsMissing,
+		AddCommas,
+		ShowValue,
+		VPDisplayed,
+		DisplayPCT;
+	char	RefValChar[36];
+	double	RefValDbl;
+	short	FieldFun,
+		ValueLen;
+	short	FieldCorrection,
+		CityUniqueInc;
+	COLORREF	IBBGColor, TitleTextColor, IBTextColor[2];
+	short	RefIsPCT;
+	char	Value[256];
+	HANDLE	hVisList;
+	short	DispersePoints;
+	HANDLE	hDisperseFileName,
+		hDisperseFile;
+	short	MaxDispersion;
+	HANDLE	hHighlightFileName,
+		hHighlightFile;
+	BYTE	AccumPointSymbolOpt;
+	BYTE	AccumPointSizeOpt;
+	float	AccumPointBaseSize;
+	BYTE	AccumPointLink;
+	BYTE	AccumPointText;
+	BOOL	ZeroBased;
+	BOOL	PCTByArea;
+	long	NumNonMask;
+	long	PCTDisplayCycle;
+	short	LayerID;
+	BOOL	InvertLegend;
+	short	NumCols;
+	BOOL	HiPrecis;
+	short	NumMidpointnotused;
+	short	AllValueClass;
+	unsigned	short	ClearIfNoCount : 1,
+		DisplayPointsOnly : 1,
+		FlipLegend : 1,
+		FactorLegend : 1,
+		DisplayCount : 1,
+		ShowOnlySelectedClasses : 1,
+		HideNullClasses : 1,
+		NotSetColor : 1,
+		AppendCount : 1,
+		CompressNullClasses : 1,
+		DisplayDistance : 1,
+		AutoClassDef : 1,
+		UseFirstSymbol : 1,
+		FillRow : 1,
+		CenterText : 1,
+		FlatEndOffsetLine : 1;
+	char	ClassDefDB[MAX_PATH],
+		ClassDefSQL[256],
+		ClassDefKeyField[34],
+		ClassDefSymField[34],
+		ClassDefTitleField[34],
+		ClassDefValDB[MAX_PATH],
+		ClassDefValSQL[256],   //also used for hotspot radius
+		ClassDefValField[34];
+	char	SymbolFont[4][64];
+	BYTE	ClassStatus[MAX_THEME_CLASSES_V4];
+	HOTSPOTDATA HotSpotData;
+	float	ClassFactor[MAX_THEME_CLASSES_V4];
+	char	HotSpotCompareTo[MAX_PATH];
+	char	HotSpotSaveTo[MAX_PATH];
+	double	CompareHotSpotFactor;
+	char	IconLibrary[MAX_PATH];//also used for hotspot weight 
+	short	ActualXMargin;
+	short	ActualYMargin;
+	LOGFONT	ShowValueFont;
+	COLORREF ShowValueTextColor;
+	short	Config;
+	short	UseHalfTone;
+	short	HaveVP[2];
+	long	NextValueColor;
+	long	ValueColor;
+	long	NumMissing;
+	long	NumInvalid;
+	short	SkipInvalid;
+	short	MultiValOption;// 0=First Value,1 = Count of,2=Average of,3 = Sum of,4 = Min of,5=Max of,6 = Range of,7=Lowest Class,8=Highest Class, 9 = All Classes
+	short	ColorScheme;
+	HANDLE	hHotSpotBitmap;
+	MNMXCORD	HotSpotBounds;
+	unsigned	short	ComputeStoredCounts : 1,
+		UseStoredCounts : 1,
+		UseCheckmark : 1,
+		DelayTextDisplay : 1,
+		ShowValStyle : 3,//0=original,1=yellowtb
+		ProfileAlignmentOption : 2,
+		ComputeAreaAndLength : 1,
+		UseShadowColor : 1,
+		ShowDirection : 2,
+		ExpressionConverted : 1,
+		CompareAttributes : 1,// also used for auto city max pop option
+		ShowCityCircle : 1;
+	double	DistanceBetweenProfilePoints;
+	double	CrossSectionSpacing;
+	double	CrossSectionWidth[2];
+	POINT	RadiusPoint;
+	double	Radius;
+	double	DynSegMaxFixedIncrement;
+	double	DynSegFixedIncrement;
+	double	ShowValAZ;
+	short	ProfileUnits;
+	char	Contents2[64];
+	short	SymNum2;
+	HANDLE	hVisList2;
+	HANDLE	hAreas;
+	USHORT	SortOption;
+	short	ACCDisperse;
+	short	Pass;
+	HPEN	PointInAreaPen;
+	HBRUSH	PointInAreaBrush;
+	COLORREF	PointInAreaColor;
+	HFILE	FidAreas;
+	short	PointInAreaPointThemeVPID;
+	long	NumMidpoint;
+	char	ShowValMacro[256];
+	HFILE	FidDelayedText;
+	HFONT	hDelayedFont;
+	long	NumAreas;
+	char	GraphicsAttributesMacro[MAX_PATH];
+	char	DataDisplayMacro[256];
+	char	BeginDataPassMacro[256];
+	float	AbsLineWidth[MAX_THEME_CLASSES_V4];
+	COLORREF ShowValueShadowColor;
+	char	CurValue[256];
+	char	DataFileID[34];
+	HDC		CompareDC;
+	HBITMAP	CompareBitmap, CompareBitmapOld;
+	BYTE	SortOrder[MAX_THEME_CLASSES_V4];
+	float	ScaleBarTextFactor;
+	int		nLabelLines;
+	HANDLE	hhLabelLines;
+	long	MinCityPop;
+	int		CityTextRectInflateFactor;
+	int		CityTextMinSize, CityTextMaxSize;
+	short	CityTextSizeOpt;
+	USHORT	MaxCitiesToDisplay;
+	int		MaxCityPopOnScreen;
+	short	GridID;//0=latlon,1=Google
+	short	GridZoom;
+	int		numPreloadedValues;
+	short	isDayFilter;
+	char	BeginDisplayMacro[256];
+	char	EndDisplayMacro[256];
+	int		ProfileSmoothOption;
+	short	InTestChar;
+	char	filler[168 - sizeof(int) - sizeof(short)];
+
+}	THEME_V4;
+typedef THEME_V4	FAR* LPTHEME_V4;
+#define MAX_THEME_SEARCH_ATTEMPTS 32
 
 typedef struct
 	{
@@ -2549,7 +3005,8 @@ typedef struct
 							AllowHollow:1,
 							RotateToScreen:1,
 							NonAntialiased:1,
-							Dummy:4;
+							NotAllowTextColorAdjustment:1,
+							Dummy:3;
        	char	VisMacro[256],
        			ColorMacro[256],
        			DisplayNameMacro[256];
@@ -2562,6 +3019,7 @@ typedef struct
 		short	BMWidth, BMHeight,BMBitCount;
 		MNMXCORD	Bounds;
 		char	Name[128];
+		//int fileInIndex;
 	}	FILEINDEXENTRY;
 typedef FILEINDEXENTRY	FAR		*LPFILEINDEXENTRY;
 
@@ -3001,7 +3459,9 @@ typedef struct
 		RECT	CurrentIconRect; 
 		char	RButFunction[MAX_RBUTFUN];
 		short	OnPrintAddSpaceToVP; 
-		char	unusedspace[16];
+		char	unusedspace[8];
+		HANDLE  hTranScreenToBase;
+		HANDLE  hTranBaseToScreen;
 		double	LLNormFactor; 
 		short	DisplayInParent; 
 		long	CurZoomAreaRef;
@@ -3090,13 +3550,14 @@ typedef struct
 		short  PointSymbolOveride;
 		short  LineSymbolOveride;
 		short  AreaSymbolOveride;
+		char	VPCloseCmd[256];
 		char	GrowSpace[2898-16*MAXPROFILEROUTES-2*sizeof(short)-2*sizeof(HANDLE)
 						  -sizeof(HANDLE)-sizeof(int)-sizeof(COLORREF)
 						  -sizeof(int)-2*sizeof(HBITMAP)-2*sizeof(HDC)
 						  -sizeof(HRGN)-2*sizeof(int)-sizeof(short)
 						  -MAX_PATH-sizeof(BOOL)-sizeof(short)
 						  -MAX_PATH - 4*sizeof(short)-sizeof(POINT)
-						  - MAX_VIEWPORT_FILES-3*sizeof(short)];
+						  - MAX_VIEWPORT_FILES-3*sizeof(short)-256];
         char		EndOfViewport;     
         
 	}	VIEWPORT;
@@ -3216,7 +3677,7 @@ typedef STREETPOLYHEADER	FAR	*LPSTREETPOLYHEADER;
 
 typedef struct
 	{
-		char	Name[62];
+		char	Name[MAX_VARNAME_LEN + 1];
 		short	id;
 	}VARNAMEINDEXITEM;
 typedef	VARNAMEINDEXITEM	FAR	*LPVARNAMEINDEXITEM;
@@ -3253,7 +3714,11 @@ typedef struct
 		char	FontName[MAXREPORTFONTS][LF_FACESIZE]; 
 		BOOL	WantSize;
 		RECT	SizeRect;
-		int		curLineHeight;
+		short	curLineHeight;
+		short	maxLineHeaderWidth;
+		HWND	hWnd;
+		HDC		hdc;
+		HFONT   currentFont;
 	} REPORT;
 typedef REPORT	FAR *LPREPORT;
 
@@ -3886,6 +4351,7 @@ typedef	struct {POINT Point;
 typedef SHOWVAL *LPSHOWVAL;
 
 typedef struct {
+	enum STRUCTTYPES structType;
 	HANDLE hFTP;
 	HANDLE hFind;
 	char fileName[MAX_PATH];
@@ -3903,9 +4369,23 @@ typedef struct {
 }FTPSTRUCT;
 typedef FTPSTRUCT *LPFTPSTRUCT;
 
-
+typedef struct {
+	int	NumPoints;
+	int	startPt, endPt;
+	int	Streets[4];
+	short	HollowStreetWidth;
+	short	Order;
+	short  OneWay;
+	COLORREF	OutlineColor;
+	COLORREF	FillColor;
+	char	BPType, EPType;
+}STREETHEADER;
+typedef STREETHEADER* LPSTREETHEADER;
 
 void SetOldStructSizes (void);
+
+#define SetROP2	GSSiSETROP2
+int   WINAPI GSSiSETROP2(_In_ HDC hdc, _In_ int rop2);
 
 #define ExtCreatePen GSSiEXTCREATEPEN
 HPEN WINAPI GSSiEXTCREATEPEN(DWORD iPenStyle,
@@ -3956,7 +4436,8 @@ int WINAPI GSSiFillRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
 int WINAPI GSSiFrameRect(_In_ HDC hDC,_In_ CONST RECT *lprc,_In_ HBRUSH hbr);
 #define SetCursor GSSiSetCursorx
 HCURSOR WINAPI GSSiSetCursorx(_In_opt_ HCURSOR hCursor);
-
+#define SetFocus GSSiSetFocus
+HWND WINAPI GSSiSetFocus(_In_opt_ HWND hWnd);
 #define SetTextColor GSSiSetTextColor
 COLORREF WINAPI GSSiSetTextColor(__in HDC hdc, __in COLORREF color);
 #define StretchBlt GSSiStretchBlt
@@ -3997,13 +4478,15 @@ void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size);
 void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDOVERFLOW size_t _Size);
 #define PostMessageA GSSiPOSTMESSAGE 
 BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
+void LogMemAlloc(int MemID, long MemLen);
 #define	GlobalLock	GSSiGLOBALLOCK
-void LogMemAlloc (unsigned short MemID,long MemLen);
 LPVOID GSSiGLOBALLOCK (HANDLE hglb);
-#define	GlobalSize	GSSiGLOBALSIZE
-DWORD GSSiGLOBALSIZE (HANDLE hglb);
 #define	GlobalUnlock	GSSiGLOBALUNLOCK
 BOOL GSSiGLOBALUNLOCK (HANDLE hglb);
+LPVOID GlobalLk(HANDLE hglb);
+BOOL GlobalULk(HANDLE hglb);
+#define	GlobalSize	GSSiGLOBALSIZE
+DWORD GSSiGLOBALSIZE(HANDLE hglb);
 #define	GlobalAlloc	GSSiGLOBALALLOC
 HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc);
 #define	GlobalFree	GSSiGLOBALFREE
@@ -4060,6 +4543,7 @@ int checkvp(int i);
 
 LPVOID glbllock(HANDLE hglb);
 BOOL glblUnlock(HANDLE hglb);
+BOOL CheckStructType(HANDLE hStruct, int type);
 
 #include "TileGraphics.h"
 

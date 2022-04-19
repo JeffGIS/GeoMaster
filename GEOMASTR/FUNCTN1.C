@@ -12,6 +12,29 @@ static char	DOW[7][10]={"SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRID
 static HIGHLIGHTDATA	HighlightData;  
 static char	ContourOpts[6][18]={"LightContourColor","LightContourWidth","DarkContourColor","DarkContourWidth","ContourTextColor","ContourTextSize"};  
 
+LPSTR GetMacroLocation(LPSTR MacroName)
+{
+	LPSTR rtn = malloc(4096);
+	char extension[5] = ".txt";
+	LPSTR pDot = strrchr(MacroName, '.');
+
+	if (pDot)
+	{
+		if (!stricmp(pDot, extension))
+			*extension = 0;
+	}
+	sprintf(rtn, "[%%MACRODIR]%s%s", MacroName,extension);
+	ExpandText(rtn);
+	if (!FileType(rtn))
+	{
+		sprintf(rtn, "[%%DL]macros\\%s%s", MacroName, extension);
+		ExpandText(rtn);
+	}
+	else
+		ii = 1;
+
+	return rtn;
+}
 short OptionInList (LPSTR Val,LPSTR ListVals,int NumInList,int ListItemSize)
 {   
 	UINT	i,j;
@@ -325,17 +348,24 @@ GSSiExitProg (1348);
 			break;
 		case 108://$M(macrofile,args..)
 		{
-			HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, SHRT_MAX);
+			HANDLE hMem = GSSiGlobAlloc(1826, GMEM_MOVEABLE, SHRT_MAX);
 			LPSTR pMem = GlobalLock(hMem);
 			LPSTR pComma = strchr(Args, ',');
+			LPSTR pMacro;
 
 			if (pComma)
 			{
 				*pComma++ = 0;
-				sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt,%s)", Args,pComma);
+				pMacro = GetMacroLocation(Args);
+				sprintf(pMem, "$MACRO(%s,%s)", pMacro,pComma);
+				free(pMacro);
 			}
 			else
-				sprintf(pMem, "$MACRO([%%DL]macros\\%s.txt)", Args);
+			{
+				pMacro = GetMacroLocation(Args);
+				sprintf(pMem, "$MACRO(%s)", pMacro);
+				free(pMacro);
+			}
 			ExpandText(pMem);
 			strcpy(OutLoc, pMem);
 			GSSiGlobUlFree(&hMem);
@@ -643,6 +673,7 @@ GSSiExitProg (1348);
 				}
 				else if (!_fstricmp(Arg[3], "HAVEORTHOS"))
 				{
+					CurView->HaveOrthos = SetHaveOrthos();
 					btoa(CurView->HaveOrthos, OutLoc);
 					goto Rtnl;
 				}
@@ -740,10 +771,15 @@ GSSiExitProg (1348);
 					ftoa (OutLoc,CurView->Scale);
 					goto Rtnl; 
 				}
-				else if (!_fstricmp (Arg[3],"ZMSCALE"))
-				{   
-					ftoa (OutLoc,CurView->ZMScale);
-					goto Rtnl; 
+				else if (!_fstricmp(Arg[3], "ZMSCALE"))
+				{
+					ftoa(OutLoc, CurView->ZMScale);
+					goto Rtnl;
+				}
+				else if (!_fstricmp(Arg[3], "ID"))
+				{
+					itoa(CurView->ID,OutLoc,10);
+					goto Rtnl;
 				}
 				else if (!_fstricmp (Arg[3],"TEXTOPAQUE"))
 				{
@@ -1020,9 +1056,14 @@ GSSiExitProg (1348);
 						}
 					} 
 				}
-				else if (!_fstricmp (Arg[3],"PICKMACRO"))
+				else if (!_fstricmp(Arg[3], "PICKMACRO"))
 				{
-					_fstrcpy (CurView->PickMacroFile,Arg[4]);
+					_fstrcpy(CurView->PickMacroFile, Arg[4]);
+					goto RtnTrue;
+				}
+				else if (!_fstricmp(Arg[3], "CLOSECMD"))
+				{
+					strcpy(CurView->VPCloseCmd, Arg[4]);
 					goto RtnTrue;
 				}
 				else if (!_fstricmp (Arg[3],"SVMACRO"))
@@ -1269,6 +1310,28 @@ GSSiExitProg (1348);
 			}
 			goto RtnTrue;
 		}
+		case 205: //$YN(bool value) converts bool value to Y or N
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+
+			BOOL val = atob(Arg[1]);
+			if (val)
+				strcpy(OutLoc, "Y");
+			else
+				strcpy(OutLoc, "N");
+			goto Rtnl;
+		}
+		case 206: //$TF(bool value) converts bool value to T or F
+		{
+			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
+
+			BOOL val = atob(Arg[1]);
+			if (val)
+				strcpy(OutLoc, "T");
+			else
+				strcpy(OutLoc, "F");
+			goto Rtnl;
+		}
 		default:
 			goto Rtn0;
 	}
@@ -1291,9 +1354,11 @@ Rtnl:
 Exit: 
 	if (SaveCfg != CurrentConfig)
 	{
-		SetConfig (SaveCfg);
-		if (*pNumViewports)
-			SetCurView ( SaveVP);
+		SetConfig(SaveCfg);
+	}
+	if (pNumViewports  && *pNumViewports)
+	{
+		SetCurView ( SaveVP);
 	}
 	GSSiGlobUlFree (&hMem);
 	if (TraceOn)

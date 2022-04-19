@@ -574,7 +574,9 @@ BOOL LoadFilesInListInChronologicalSequence(LPSTR List, LPSTR DataBase, BOOL sho
 						sprintf(mess, "%i errors", totErrors);
 						StatusWindowUpdate(0, mess, nTot, ++nDone);
 					}
-
+					//int vid = getDatasetVersion();
+					//if (vid != 7)
+					//	ii = 1;
 				}
 			}
 			if (showProgress)
@@ -1607,9 +1609,11 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 	char searchFor[] = "CREATE TABLE";
 	char searchFor1[] = "DROP TABLE";
 	char searchFor2[] = "INSERT OR REPLACE INTO Ramps VALUES(";
+	char searchFor3[] = "INSERT OR REPLACE INTO VERSION VALUES(";
 	int lenSearch = strlen(searchFor);
 	int lenSearch1 = strlen(searchFor1);
 	int lenSearch2 = strlen(searchFor2);
+	int lenSearch3 = strlen(searchFor3);
 	LPSTR pBS = strrchr(file, '\\');
 	if (pBS)
 	{
@@ -1654,13 +1658,15 @@ BOOL UpdateFromFile(LPSTR file,BOOL convertInsert,BOOL insertFileID,int dbType,L
 				}
 				else if (!strnicmp(str, searchFor2, lenSearch2))
 				{
-					LPSTR pLoc = strchr(str,0);
+					LPSTR pLoc = strchr(str, 0);
 
 					pLoc -= 2;
 					if (*pLoc == ')')
 						sprintf(pLoc, ",'%s');", fileID);
 				}
 			}
+			if (strstr(str, searchFor3))
+				*str = 0;
 			if (convertInsert)
 				REPLAC(str, "INSERT INTO", "INSERT OR REPLACE INTO", maxLineLen + 4090);
 			rtn = Execute(str, errFile);
@@ -1851,14 +1857,14 @@ int getDatasetVersion(void)
 
 	return rtn;
 }
-BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc) // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new
+BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc) // retrieves both summary and detail sep by |, if which 0 retrieves current , 1 computes new, 2 recomputes all
 {
 	BOOL rtn = FALSE;
 	RAMPID rampID;
 	ToleranceValues tolerances;
 
 	*OutLoc = 0;
-	if (which)
+	if (which == 1)
 	{
 		setStandardToleranceValues(&tolerances);
 
@@ -1880,7 +1886,7 @@ BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc
 			}
 		}
 	}
-	else
+	else if (which == 0)
 	{
 		sqlite3_stmt *statement;
 		char cmd[256];
@@ -1895,6 +1901,7 @@ BOOL ComputeCCCodes(int intID, int rampNum, int retired, int which, LPSTR OutLoc
 		}
 		SQLOK(SQLiteFinalize(statement), database, "updatedb", 0);
 	}
+
 	return rtn;
 }
 
@@ -2273,6 +2280,95 @@ sqlite3 * getNVDBHandle(int databaseID,BOOL *opened)
 		return database;
 	}
 	return NULL;
+}
+int NVCreateRampIndex(LPSTR path)
+{
+	int rtn = 0;
+	if (NVOpenDB(path, FALSE, 0))
+	{
+		char cmd[1024];
+		SLT_StartTrans(database);
+		strcpy(cmd, "DROP TABLE IF EXISTS Ramps_index;CREATE VIRTUAL TABLE IF NOT EXISTS Ramps_index USING rtree(id, minX, maxX, minY, maxY);");
+		rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+		if (rtn)
+		{
+			int nramps = GetSQLITENumRows(database, "RAMPS", "", 0);
+			if (nramps)
+			{
+				LoadProjection(0, "GOOGLE21");
+				sprintf(cmd, "SELECT rowid, lev21x , lev21y FROM RAMPS");
+				sqlite3_stmt* statement;
+
+				SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0), database, "NVCreateRampIndex", 0);
+				while (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					DPOINT pt, pt2;
+					int i = 0;
+					int id = sqlite3_column_int(statement, i++);
+					pt.x = sqlite3_column_int(statement, i++);
+					pt.y = sqlite3_column_int(statement, i++);
+					pt2 = pt;
+					ConvertCoord(&pt2, 0, 1);
+					if (PointInBounds(pt2, &ProjectBounds))
+					{
+						sprintf(cmd, "INSERT INTO Ramps_index VALUES(%i, %f, %f, %f, %f);", id, pt.x, pt.x, pt.y, pt.y);
+						Execute(cmd, 0);
+					}
+				}
+				SQLOK(SQLiteFinalize(statement), database, "getLastPictUpdateNumber", 0);
+
+			}
+		}
+		SLT_EndTrans(database);
+		NVCloseDB(0);
+	}
+	return rtn;
+}
+int NVCreateCCodes(LPSTR path)
+{	
+	int rtn = 0;
+	if (NVOpenDB(path, FALSE, 0))
+	{
+		char cmd[1024] = "SELECT intID,rampNum,retired FROM RAMPS";;
+		sqlite3_stmt* statement;
+		RAMPID rampID;
+		ToleranceValues tolerances;
+		setStandardToleranceValues(&tolerances);
+		int st = 1;
+		SLT_StartTrans(database);
+		SQLOK(SQLitePrepare(database, cmd, -1, &statement, 0), database, "recompute all ccodes", 0);
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			rampID.intID = sqlite3_column_int(statement, 0);
+			rampID.rampNum = sqlite3_column_int(statement, 1);
+			rampID.retired = sqlite3_column_int(statement, 2);
+			RampStruct ramp = { 0 };
+			RampStruct* pRamp = &ramp;
+			if (getRampFromDB(&rampID, pRamp, 0))
+			{
+				if (pRamp->rampExists)
+				{
+					LPSTR detailCode;
+					LPSTR ccode = rampComplianceCode(pRamp, &detailCode, &tolerances, 1);
+					sprintf(cmd, "UPDATE RAMPS SET CCSummary = '%s',CCDetail='%s' WHERE intID=%i AND rampNum=%i AND retired=%i", ccode, detailCode, rampID.intID, rampID.rampNum, rampID.retired);
+					free(ccode);
+					free(detailCode);
+					st = executeCmd(cmd);
+				}
+			}
+		}
+		SQLOK(SQLiteFinalize(statement), database, "updatedb", 0);
+		if (st)
+		{
+			SLT_EndTrans(database);
+			rtn = TRUE;
+		}
+		else
+			SLT_AbortTrans(database);
+
+		NVCloseDB(0);
+	}
+	return rtn;
 }
 int NVOpenDB(LPSTR path, BOOL CreateIfNotExists, LPSTR varnameforhandle)
 {

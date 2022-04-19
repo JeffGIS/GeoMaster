@@ -298,7 +298,9 @@ int GSSiEndPage (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC)
 			
 
 			hDC = CreateCompatibleDC(hDCMain);
-			hBM = CreateCompatibleBitmap(hDCMain,VirtualPageWidth,VirtualPageHeight); 
+			curProgID = 10026;
+			hBM = CreateCompatibleBitmap(hDCMain,VirtualPageWidth,VirtualPageHeight);
+			curProgID = -1;
 			ReleaseDC (hWndMain,hDCMain);
 			 
 			for (VirtualPageRow = 0;VirtualPageRow < NumVirtualRows; VirtualPageRow++)
@@ -691,8 +693,14 @@ BOOL PrintReport2 (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC,LPSTR Repor
 			Factor = (double)VirtualPrintDPI / 72;
 		else
 			Factor = Pixelsperinch/72;
-		//Factor = 1;
+		Factor = 1;
+		double xPage = GetDeviceCaps(hPr, HORZRES);
+		double xPageInches = GetDeviceCaps(hPr, HORZSIZE) * INCHESPERMM;
+		//Factor = (xPage / xPageInches)/96;
+		Factor = Pixelsperinch / 96.0;
+		float saveFactor = setDeviceToScreenFactor(Factor);
 		DisplayReport2 (hPr, CurView->hReport,MainRect,Factor,FALSE,FALSE);
+		setDeviceToScreenFactor(saveFactor);
 	}
 	UnloadReport (&CurView->hReport); 
 	GSSiGlobUlFree (&hView);
@@ -801,7 +809,8 @@ BOOL StatusWindowUpdate2(LPSTR Mess, LONGLONG Tot, LONGLONG Done)
 }
 
 BOOL DestroyStatusWindow (long Macro)
-{   
+{
+	BOOL rtn = TRUE;
 	if (Macro && Macro != StatusMacro)
 		return FALSE;
 	if (UseSecondStatus)
@@ -816,8 +825,11 @@ BOOL DestroyStatusWindow (long Macro)
        		DestroyWindow(ghPrintingDlg);
        ghPrintingDlg = NULL;
     } 
-    else
-       MessageBox(GetFocus(), "Operation cancelled", " ", MB_OK);
+	else
+	{
+		MessageBox(GetFocus(), "Operation cancelled", " ", MB_OK);
+		rtn = FALSE;
+	}
 //    FreeProcInstance(lpfnAbortProc);
     if (lpfnPrintDlgProc)
     	FreeProcInstance(lpfnPrintDlgProc);
@@ -825,7 +837,7 @@ BOOL DestroyStatusWindow (long Macro)
 	LeaveBlockingWindow(hSaveStatWindowBM);
 	hSaveStatWindowBM = 0;
 	StatusMacro = 0;
-	return TRUE;
+	return rtn;
 } 
 
 BOOL CreateProcessStatusWindow (HWND hWnd,LPSTR Title)
@@ -870,7 +882,7 @@ BOOL DestroyProcessStatusWindow (void)
 	return TRUE;
 } 
 
-BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hDlg,message, wParam, lParam)))
@@ -907,7 +919,7 @@ BOOL FAR PASCAL ProcessStatusDlgProc (HWND hDlg, int message, WPARAM wParam, LPA
    return TRUE;
 }
 
-BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, int message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TemplateDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hDlg,message, wParam, lParam)))
@@ -959,7 +971,7 @@ void strncpy0s (LPSTR to,LPSTR from,int l,char fill)
 	return;
 }
 
-BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, int message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DeconstructMsgProc (HWND hWndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 #define MAXITEM	1024
  int	i;
@@ -1300,7 +1312,7 @@ BOOL PrintMap (HWND hWnd, long Page, long TotPage)
      if (!hPDChunk)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
 	    PrintPrompt = TRUE;  
      }
@@ -2050,6 +2062,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 {	HDC hPr;
     RECT	Rect;
    short xPage, yPage;
+   double xPageInches, yPageInches;
    WORD wSize;
    BOOL bError;
 //   DLGPROC lpfnAbortProc, lpfnPrintDlgProc;
@@ -2072,13 +2085,16 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    HWND		ghWnd;
    static	BOOL IsVirtPrinter=FALSE;
    static	HANDLE hVirtPrinter=0;
-	LPPRINTDLG	lpPDChunk;
-
 	HDC		mfDC=0, PrinterDC=0;
 	HDC		*pPrinterDC = &PrinterDC;
 	static BOOL havePrintSetup = FALSE;
+	HDC fromDC = GetDC(hWnd);
+	int fromPixelsPerInch = GetDeviceCaps(fromDC, LOGPIXELSX);
+	BOOL saveUseGDIPlus = useGDIPlus;
+	BOOL saveWantGDIPlus = wantGDIPlus;
 
-
+	useGDIPlus = wantGDIPlus = TRUE;
+	ReleaseDC(hWnd, fromDC);
    GetGlobalCVal ("[%PRINTNAME]",SavePrintName,0); 
     
    ghWnd = hWnd;
@@ -2088,7 +2104,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
      if (!hPDChunkReport)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunkReport, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
@@ -2155,6 +2171,9 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 		   {
 			   xPage = GetDeviceCaps(hPr, HORZRES);
 			   yPage = GetDeviceCaps(hPr, VERTRES);
+			   yPageInches = GetDeviceCaps(hPr, VERTSIZE) * INCHESPERMM;
+			   xPageInches = GetDeviceCaps(hPr, HORZSIZE) * INCHESPERMM;
+			   dpi = xPage / xPageInches;
 		   }
 	       Rect.left = 0;
 	       Rect.top = 0;
@@ -2242,6 +2261,8 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    	MainRect = SaveMainRect;
 	ShadowInc = SaveShadow;
    	SetGlobalValue ("%PRINTNAME",SavePrintName); 
+	useGDIPlus = saveUseGDIPlus;
+	wantGDIPlus = saveWantGDIPlus;
 
     return (rtn);
 
@@ -2292,7 +2313,7 @@ BOOL PrintCurbRamp(LPSTR fromDB, int intersectionID, int rampNum)
 	if (!hPDChunk)
 	{
 		if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-			return(MemError());
+			return(MemEror());
 		InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
 	}
 	else
@@ -2573,7 +2594,7 @@ BOOL PrintTextFile (HWND hWnd,LPSTR File,int nTabs,LPINT TabsIn)
      if (!hPDChunk)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
@@ -2760,30 +2781,69 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
    HDIB		hDIB; 
    char		drive[6], dir[128], leaf[16], ext[6], File[128]; 
    HWND		ghWnd;
-       
+   BOOL IsVirtPrinter = FALSE;
+   HANDLE hVirtPrinter = 0;
+   BOOL		ForceOrient = DMORIENT_PORTRAIT;;
+   UINT		SaveFlags;
+   LPDEVMODE   pDevMode;
+   HDC		mfDC = 0;
+
    ghWnd = hWnd;
    hWnd = NULL;
    
+   SaveViewports(0);
      _fstrupr (Name);
      wSize = sizeof(PRINTDLG);
      if (!hPDChunk)
      {
      	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-        	return(MemError());
+        	return(MemEror());
 	    InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
      }
      else
      	lpPDChunk = (LPPRINTDLG) GlobalLock (hPDChunk);
-     lpPDChunk->hwndOwner = ghWnd;
-     	
-//     setDoPaint( FALSE); 
-	 EnableWindow (hWndMain,FALSE);
-     if (PrintDlg(lpPDChunk) != 0)
-     
-     {	DOCINFO	DI;
-     
-     	hPr = lpPDChunk->hDC;
-        gbUserAbort = FALSE;
+
+
+	 lpPDChunk->hwndOwner = ghWnd;
+	 lpPDChunk->hInstance = ghInst;
+	 if (GetGlobalLVal2("[%PRINTDIALOGOPT]", 0))
+	 {
+		 lpPDChunk->Flags = lpPDChunk->Flags | PD_RETURNDC | PD_ENABLESETUPTEMPLATE | PD_ENABLESETUPHOOK | PD_PRINTSETUP | PD_USEDEVMODECOPIESANDCOLLATE;
+	 }
+	 lpPDChunk->hDC = 0;
+	 lpPDChunk->lpfnSetupHook = (LPOFNHOOKPROC)PrintSetupHook;
+	 lpPDChunk->lpSetupTemplateName = "PRNSETUPDLGGM";
+	 SetCurView(pViewportsD[0]);
+	 if (CurView->WidthType == 2 || CurView->DesiredWidth > CurView->DesiredHeight)
+		 ForceOrient = DMORIENT_LANDSCAPE;
+	 if (ForceOrient && !ShowVirtualPrintAreas)
+	 {
+		 SaveFlags = lpPDChunk->Flags;
+
+		 lpPDChunk->Flags = PD_RETURNDEFAULT;
+		 GSSiPrintDlg(lpPDChunk, 0, &hVirtPrinter, 0);
+		 lpPDChunk->Flags = SaveFlags;
+		 if (lpPDChunk->hDevMode)
+		 {
+			 IgnoreLock = TRUE;
+			 pDevMode = (LPDEVMODE)GlobalLock(lpPDChunk->hDevMode);
+			 pDevMode->dmCopies = lpPDChunk->nCopies;
+			 pDevMode->dmOrientation = ForceOrient;
+			 pDevMode->dmFields = pDevMode->dmFields | DM_ORIENTATION;
+			 GlobalUnlock(lpPDChunk->hDevMode);
+			 IgnoreLock = FALSE;
+		 }
+		 GSSiGlobFree(&hVirtPrinter);
+	 }
+	 BOOL DoPrint;
+	 if (DoPrint = GSSiPrintDlg(lpPDChunk, &IsVirtPrinter, &hVirtPrinter, 0))
+	 {
+
+		DOCINFO	DI;
+		int iPrintJob;
+		hPr = lpPDChunk->hDC;
+		//hPr = *pPrinterDC;
+		gbUserAbort = FALSE;
         bError = FALSE;
         Printing = TRUE;
         lpfnPrintDlgProc = MakeProcInstance(PrintDlgProc, ghInst);
@@ -2796,8 +2856,10 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
         
 		lpfnAbortProc = MakeProcInstance((ABORTPROC)AbortProc, ghInst);
         SetAbortProc(hPr,lpfnAbortProc);
-	    if (StartDoc(hPr,&DI) > 0)
-	    {   
+		iPrintJob = GSSiStartDoc(hPr, 0, IsVirtPrinter, &DI, lpPDChunk);
+		if (iPrintJob > 0)
+		{
+
 	       int dpi = GetDeviceCaps(hPr, LOGPIXELSX); 
 		   int	nCopies = lpPDChunk->nCopies;
 	       
@@ -2829,8 +2891,7 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
 		        SetDlgItemText (ghPrintingDlg,IDC_PRINTERINFO,str);
 	       }
   		   IgnoreLock = FALSE;
-           Escape(hPr, NEXTBAND, 0, (LPSTR)0, &BandRect);
-           while (!IsRectEmpty(&BandRect))
+		   if (GSSiStartPage(hPr, 0, IsVirtPrinter) > 0)
            {    
            
 	       		switch (option)
@@ -2879,13 +2940,14 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
 					}
 				}
 		EndPrint:				   	
-			    Escape(hPr, NEXTBAND, 0, (LPSTR)0, &BandRect); 
+				GSSiEndPage(hPr, 0, IsVirtPrinter, mfDC);
 		   }
-           EndDoc (hPr);
-           DeleteDC(lpPDChunk->hDC);
+           GSSiEndDoc(hPr, 0, IsVirtPrinter);
 	    }
 	    else
 	       bError = TRUE;
+		RestoreViewports();
+
 	    EnableWindow (hWndMain,TRUE);
 	    if (!gbUserAbort)
 	    {
@@ -2922,6 +2984,11 @@ BOOL PrintImage (HWND hWnd, LPSTR Name,int option)
     	setDoPaint( TRUE);   
     }
 	EnableWindow (hWndMain,TRUE);
+	SetFocus(hWndMain);
+	GSSiTrace("End PrintImage", 0);
+	HDC hDC = GetDC(hWndMain);
+	SetMainRect(hWndMain, hDC, 0, 3);
+
     return (rtn);
 
 } 
@@ -3050,7 +3117,7 @@ BOOL PrintMerge (HWND hWnd)
     if (!hPDChunk)
     {
     	if (!(lpPDChunk = (LPPRINTDLG)AllocAndLockMem(&hPDChunk, wSize)))
-       	return(MemError());
+       	return(MemEror());
 		InitializeStruct(IDC_PRINTDLG, (LPSTR)lpPDChunk);
     }
     else
@@ -3608,7 +3675,9 @@ ReTry:
 		GSSiDeleteObject (&hMemBitmap);
 		MemMapWidth-=64;
 		MemMapHeight = MemMapWidth * WtoHFactor;
+		curProgID = 10027;
 		hMemBitmap = CreateCompatibleBitmap (CurView->hDC,MemMapWidth,MemMapHeight);
+		curProgID = -1;
 	}
 	while (!hMemBitmap && MemMapWidth > 0);
 	
@@ -3667,7 +3736,9 @@ temp:
 	PrinterMarginRight = SavePrinterMarginRight;
 	PrinterMarginTop = SavePrinterMarginTop;
 	PrinterMarginBottom = SavePrinterMarginBottom;
-	hTempBM = CreateCompatibleBitmap (hdcMemMap,10,10);    
+	curProgID = 10028;
+	hTempBM = CreateCompatibleBitmap (hdcMemMap,10,10);
+	curProgID = -1;
 	if (Name)
 	{
 		_fstrcpy (MapName,Name);
@@ -4088,7 +4159,7 @@ BOOL SplitImage (LPSTR InFile,LPSTR OutDir,LPSTR OutType,int nrows, int ncols,LP
 	return TRUE;
 }	
 
-BOOL FAR PASCAL VIRTUAL_PRINTER_CREATEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VIRTUAL_PRINTER_CREATEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  short  BRtn,Error,Choice;
  double	Width,Height; 

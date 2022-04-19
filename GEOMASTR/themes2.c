@@ -41,6 +41,17 @@ void SetShowValDB (LPSTR DBName)
 	return;
 }
 
+static LPSTR ConvertTotArea(double* totArea)
+{
+	static char UNITS[6][12] = { "SqFt","SqMeter","SqYards","SqMile","SqKm","Acres" };
+	LPSTR punits = UNITS[CurTheme->totClassAreaUnits];
+	double area = ConvertArea(*totArea, CurTheme->totClassAreaUnits+1);
+		//char	AreaUnitOpts[6][10]={"SQRFEET","SQRMETERS","SQRYARDS","SQRMILES","SQRKILOS","ACRES"};
+
+	*totArea = area;
+	return punits;
+}
+
 void SetShowValPoly (long Refno,BOOL Close)
 #if ENABLETRACE
 {GSSiEnterProg (1225);
@@ -447,6 +458,7 @@ short ThemeSetChar (int Type, long iref, int desc, LPSTR TAG, LPSTR UDI)
 	static	long	SymbolNumberColor=0,SymbolNumberColorType=-1;
 	short	MinClass=MAX_THEME_CLASSES+1;
 	BOOL	datafileIsGraphics = FALSE;
+	int nAttempts = 0;
 
     if (desc == 376)
 		ii = 1;
@@ -472,6 +484,16 @@ GSSiExitProg (1262);
 	ThemeDisplayPass = 1;
 	*CurTheme->CurValue = 0;
 	datafileIsGraphics = ThemeDatafileIsGraphics(CurTheme);
+
+	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters >= 0 && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1264);
+#endif
+		return (-1);
+	}
+
+
 	switch (CurTheme->ID)    
 	{ 
 		case GF_CITY_THEME:
@@ -932,6 +954,37 @@ GSSiExitProg (1262);
 			}
 		}
 			break; 
+		case GF_TWO_VALUE_THEME:
+			if (CurTheme->hPoints)
+			{
+				LPDPOINT pPoints = GlobalLock(CurTheme->hPoints);
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefDB))
+								pPoints[CurTheme->NumVals].x = atof (pViewports[i]->pTheme->CurValue);
+						}
+					}
+				}
+				for (int i = 0; i < *pNumViewports; i++)
+				{
+					if (pViewports[i]->pTheme)
+					{
+						if (pViewports[i]->pTheme->ID == GF_SINGLE_VALUE_THEME)
+						{
+							if (!stricmp(pViewports[i]->Name, CurTheme->ClassDefSQL))
+								pPoints[CurTheme->NumVals++].y = atof (pViewports[i]->pTheme->CurValue);
+						}
+					}
+				}
+				GlobalUnlock (CurTheme->hPoints);
+			}
+			goto RtnNotProcessed;
+
+			break;
 		case GF_POINT_IN_AREA_THEME: 
 			ii=1;         
 		case GF_HOTSPOT_THEME:
@@ -1236,7 +1289,7 @@ SetClassChar:
 				if (DispersePoint (iref,iclass,desc,&ValD) == 2)
 					goto RtnNoDisplay;  
 			}
-			if (CurTheme->ShowValue)
+			if (CurTheme->ShowValue || CurTheme->showClassID)
 			{   
 				float	MidPointAZ;
 				float	Length;    
@@ -1264,7 +1317,23 @@ SetClassChar:
 					else
 						ShowVal.AZ = -LTWOPI(CurView->Rotation);
 					SetShowValPoly (iref,FALSE);
-					strcpy (str,ValueConv (TrueValD,CurTheme->ValConv,min(1,CurTheme->RoundTo),CurTheme->AddCommas));
+					*str = 0;
+					if (CurTheme->ShowValue)
+						strcpy (str,ValueConv (TrueValD,CurTheme->ValConv,min(1,CurTheme->RoundTo),CurTheme->AddCommas));
+					if (CurTheme->showClassID)
+					{
+						int id = 0;
+						double val = Round(TrueValD, CurTheme->RoundTo);
+						for (int iclass = 0; iclass < CurTheme->NumClass; iclass++)
+						{
+							if (val >= CurTheme->ClassMin[iclass] && val <= CurTheme->ClassMax[iclass])
+							{
+								id = iclass + 1;
+								break;
+							}
+						}
+						sprintf(strchr(str, 0), "(%i)", id);
+					}
 					if (!*ShowVal.Text)
 						strcpy (ShowVal.Text,str);
 					else
@@ -1438,6 +1507,7 @@ CheckStatus:
             }
 			else
 			{	
+				nAttempts = 0;
 KeepLooking:
 				SwitchThemeSHPFile ();		
 				status = GetCharFieldData (CurTheme->hThemeDB,
@@ -1517,7 +1587,11 @@ KeepLooking:
 					goto NextValue;  
 				if (!CurTheme->PCTByArea && !CurTheme->UseStoredCounts)
 		    		CurTheme->ClassCount[ClassNo-1]++;
-		    	if (CurTheme->UseFirstSymbol && !CurTheme->ClassSymbol[ClassNo-1])
+				if (curItemSQMeters > 0)
+					CurTheme->totClassArea[ClassNo - 1] += curItemSQMeters;
+				if (curItemPerim > 0)
+					CurTheme->totClassLength[ClassNo - 1] += curItemPerim;
+				if (CurTheme->UseFirstSymbol && !CurTheme->ClassSymbol[ClassNo-1])
 		    		CurTheme->ClassSymbol[ClassNo-1] = desc;
 				SetThemeElementCharacteristics (ClassNo-1);
 				if (DispersePoint (iref,ClassNo-1,desc,Value) == 2)
@@ -1589,8 +1663,13 @@ KeepLooking:
 					ClassNo = CurTheme->AllValueClass;
 					goto GotClass;
 				}
-				if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
-					goto KeepLooking;
+				if (nAttempts++ < MAX_THEME_SEARCH_ATTEMPTS)
+				{
+					if (!CurTheme->MultiValOption && CurTheme->DataFileType != SHAPE_DATAFILE)
+						goto KeepLooking;
+				}
+				else
+					ii = 1;
 				if (CurTheme->SkipInvalid)
 					goto RtnNoDisplay;
 				goto ProcessMissing; 
@@ -1600,10 +1679,6 @@ KeepLooking:
 				goto RtnNoDisplay;
 			goto RtnProcessed;
 			break;    		
-
-		case GF_TWO_VALUE_THEME:
-			goto RtnNotProcessed;
-			break;
 
 		case GF_CRIME_THEME:
 			goto RtnNotProcessed;
@@ -1891,7 +1966,7 @@ GSSiExitProg (1262);
 #endif
 }
 
-BOOL ProcessDataDisplayInput (HWND hWnd,int Message, WPARAM wParam,LPARAM lParam)
+BOOL ProcessDataDisplayInput (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 {
 	char	str[64];
 	POINT	Point16;
@@ -3492,9 +3567,10 @@ BOOL ThemeEndDisplayPass(BOOL CloseAll,BOOL PixelThemesOnly,BOOL FromHalt)
 					BT_CLOSE (CurTheme->hScatterFile);
 				CurTheme->hScatterFile = 0;
 				goto SkipRemove;
-			case GF_SINGLE_VALUE_THEME: 
+			case GF_TWO_VALUE_THEME:
+				ii = 1;
+			case GF_SINGLE_VALUE_THEME:
 			case GF_TIME_DISPLAY_THEME:
-			case GF_TWO_VALUE_THEME: 
 				if (FromHalt && !CurTheme->DisplayScatterDiagram)
 					GSSiRemoveAndClear (CurTheme->ScatterFile);
 SkipRemove:
@@ -4419,10 +4495,13 @@ void ProcessDisplayPassEndMacro(void)
 	{
 		HANDLE hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
 		LPSTR pMem = GlobalLock(hMem);
+		int saveVPID = CurView->ID;
 
+		SetViewport(CurTheme->TargetViewport);
 		strcpy(pMem, CurTheme->EndDisplayMacro);
 		ExpandText(pMem);
 		GSSiGlobUlFree(&hMem);
+		SetViewport (saveVPID);
 	}
 	return;
 }
@@ -4440,7 +4519,40 @@ void ProcessGraphicsAttributeMacro(void)
 	}
 	return;
 }
+void DisplayTwoVThemeLegend(int From)
+{
+	RECT Rect = CurView->DrawRect;
+	int	RegionType;
+	int	pointSymbol = GetDictSymbolNumber("CIRCLE");
 
+	SaveDC(CurView->hDC);
+	SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+	GSSiDeleteObject(&CurView->hRgn);
+	CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+	RegionType = SelectClipRgn(CurView->hDC, CurView->hRgn);
+	GSSiDeleteObject(&CurView->hRgn);
+	FillRectPoly(CurView->hDC, &Rect, CurTheme->BGColor);
+	if (CurTheme->hPoints && CurTheme->NumVals)
+	{
+		LPDPOINT pPoints = GlobalLock(CurTheme->hPoints);
+		MNMXCORD bounds;
+		GetPolyBoundsD2 (pPoints, CurTheme->NumVals, &bounds, TYPE_POLYLINE);
+		RECT rect = FactorRect(&Rect, 0.95);
+		HANDLE hTran = STRANBoundsToRect(&bounds, &rect);
+
+		for (int i = 0; i < CurTheme->NumVals; i++)
+		{
+			DPOINT dpt = TranPoint(pPoints++, hTran);
+			POINT pt = DPointToPoint(dpt);
+			DisplayPointItem(CurView->hDC, pt, 5 * DeviceToScreenFactor(), 0, pointSymbol, 0);
+		}
+		CloseTRANS2(&hTran);
+		GlobalUnlock(CurTheme->hPoints);
+	}
+	RestoreDC(CurView->hDC, -1);
+
+	return;
+}
 void DisplaySVThemeLegend(short From)
 #if ENABLETRACE
 {GSSiEnterProg (169);
@@ -4482,6 +4594,7 @@ void DisplaySVThemeLegend(short From)
 	RECT	BMRect;
 	char	IconFile[MAX_PATH];
 	char	CheckMarkSymbol[32]="check1.bmp";
+	double  maxClassArea = 0;
     
 	if (From == 1)
 	{
@@ -4539,6 +4652,7 @@ void DisplaySVThemeLegend(short From)
     	fontfactor = (double)CurTheme->ClassFont2.lfHeight/(double)CurTheme->ClassFont1.lfHeight;
     TotCount = 0;
 	SetThemeColorsFromScheme();
+	maxClassArea = 0;
 	for (iclass=0;iclass<CurTheme->NumClass;iclass++) 
 	{
 		MaxCount = max (MaxCount,CurTheme->ClassCount[iclass]);
@@ -4547,6 +4661,10 @@ void DisplaySVThemeLegend(short From)
 		{ 
 			MaxCountD = max (MaxCountD,GetThemeClassDistance(iclass));
 			TotCountD += GetThemeClassDistance(iclass);
+		}
+		if (CurTheme->AppendTotArea)
+		{
+			maxClassArea = max(maxClassArea, CurTheme->totClassArea[iclass]);
 		}
 	}
 	if (!TotCount && CurTheme->ClearIfNoCount)
@@ -4873,6 +4991,7 @@ GetTitleSize:
 			GetClassMinMax (iclass,&ClassMin,&ClassMax);
 			SetGlobalValueReal ("%CLASSMIN",ClassMin);
 			SetGlobalValueReal ("%CLASSMAX",ClassMax);
+			*Text = 0;
 			if (CurTheme->ClassType ==3)
 			{ 
 				_fstrcpy(Text,CurTheme->ClassBM[iclass]); 
@@ -4903,11 +5022,17 @@ GetTitleSize:
 			if (CurTheme->AppendCount && !CurTheme->ClassStatus[iclass])
 			{
 				if (CurTheme->DisplayDistance)
-					sprintf (_fstrchr(Text,0),"%.2f",MaxCountD);
-			    else
-					sprintf (_fstrchr(Text,0)," (%ld)",MaxCount);
+					sprintf(_fstrchr(Text, 0), "%.2f", MaxCountD);
+				else
+					sprintf(_fstrchr(Text, 0), " (%ld)", MaxCount);
 			}
-           	GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
+			if (CurTheme->AppendTotArea && !CurTheme->ClassStatus[iclass])
+			{
+				double area = maxClassArea;
+				LPSTR pUnits = ConvertTotArea(&area);
+				sprintf(_fstrchr(Text, 0), "  %s %s ", ValueConv(area, 1,1,TRUE),pUnits);
+			}
+			GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
            	MaxTextWidth = max (MaxTextWidth,txSize.cx);
            	theight = txSize.cy;  
        		if (CurTheme->PCTByArea)
@@ -4944,12 +5069,23 @@ GetTitleSize:
     }
 
 TooSmall:	fHeight *= 0.80;
-	if (CurTheme->AppendCount)
+	if (CurTheme->AppendCount || CurTheme->AppendTotArea)
 	{ 
-		if (CurTheme->DisplayDistance)
-			sprintf (Text," (%.2f)",MaxCountD);  
-		else
-			sprintf (Text," (%ld)",MaxCount);
+		*Text = 0;
+		if (CurTheme->AppendCount)
+		{
+			if (CurTheme->DisplayDistance)
+				sprintf(Text, " (%.2f)", MaxCountD);
+			else
+				sprintf(Text, " (%ld)", MaxCount);
+		}
+		if (CurTheme->AppendTotArea && maxClassArea)
+		{
+			double totArea = maxClassArea;
+			LPSTR pUnits = ConvertTotArea(&maxClassArea);
+			sprintf(_fstrchr(Text, 0), "  %s %s ", ValueConv(totArea, 1, 1, TRUE), pUnits);
+		}
+
        	GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
        	CountTextWidth = txSize.cx; 
        	BeginCount = MaxTextWidth - CountTextWidth;
@@ -5066,17 +5202,25 @@ TooSmall:	fHeight *= 0.80;
 			else if (CurTheme->AppendCount && !CurTheme->ClassStatus[iclass])
 			{   
 				short	BeginCount2;
-				char	CountText[32];
+				char	CountText[128];
 				
+				*CountText = 0;
 				TextOut(CurView->hDC, x+BeginCount, y, " (", 2); 
 				if (CurTheme->DisplayDistance)
 					sprintf (CountText,"%.2f)",GetThemeClassDistance(iclass)); 
 				else
 			    	sprintf (CountText,"%ld)",CurTheme->ClassCount[iclass]);
+				if (CurTheme->AppendTotArea)
+				{
+					double totArea = CurTheme->totClassArea[iclass];
+					LPSTR pUnits = ConvertTotArea(&totArea);
+					sprintf(_fstrchr(CountText, 0), "  %s %s ", ValueConv(totArea, 1, 1, TRUE), pUnits);
+				}
+
 		       	GetTextExtentPoint32 (CurView->hDC,CountText,_fstrlen(CountText),&txSize);
 		       	CountTextWidth = txSize.cx; 
 		       	CountTextHeight = txSize.cy; 
-		       	BeginCount2 = MaxTextWidth - CountTextWidth;
+		       	BeginCount2 = MaxTextWidth - CountTextWidth + 12;
 				TextOut(CurView->hDC, x+BeginCount2, y,CountText, _fstrlen(CountText)); 
 			} 
 		} 
@@ -5123,7 +5267,7 @@ TooSmall:	fHeight *= 0.80;
 	for (iclass = 0; iclass < CurTheme->NumClass; iclass++)  //give theme editing functions correct final location
 	{
 		CurTheme->ClassClrBox[iclass] = UsedBox[iclass];
-		if (CurTheme->ClassStatus[iclass])
+		if (CurTheme->ClassStatus[iclass] && (!CurTheme->HideNullClasses || CurTheme->ClassCount[iclass] > 0))
 		{
 			ClassColorBox = CurTheme->ClassClrBox[iclass];
 			ClassColorBox.right += MaxTextWidth;

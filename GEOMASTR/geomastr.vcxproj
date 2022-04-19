@@ -234,7 +234,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FreeImage.lib;shlwapi.lib;jansson.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>NVServer\$(TargetName)$(TargetExtension).exe</OutputFile>
       <Version>34.14</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -373,7 +373,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;vfw32.lib;winmm.lib;urlmon.lib;setupapi.lib;mpr.lib;comctl32.lib;lti_dsdk_cdll.lib;psapi.lib;Msimg32.lib;FileGDBAPID.lib;FreeImage.lib;shlwapi.lib;wininet.lib;jansson.lib;libcurl.lib;proj.lib;gdal_i.lib;delayimp.lib;gdiplus.lib;propsys.lib;regex.lib;Dxva2.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug/$(TargetName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\lib;..\FileGDBAPI\2015\lib;..\gdal\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -434,6 +434,7 @@
     <ClCompile Include="..\gctpc\aziminv.c" />
     <ClCompile Include="..\email\jwsmtp\base64.cpp" />
     <ClCompile Include="..\libbci-1.1.0\bci.c" />
+    <ClCompile Include="BezierCurves.cpp" />
     <ClCompile Include="bigmem.c" />
     <ClCompile Include="..\gctpc\br_gctp.c" />
     <ClCompile Include="..\DB\Bt_creat.c" />
@@ -550,6 +551,7 @@
     <ClCompile Include="graphic7.c" />
     <ClCompile Include="graphic8.c" />
     <ClCompile Include="GRAPHIC9.c" />
+    <ClCompile Include="GraphicsPathTest.cpp" />
     <ClCompile Include="graphic_functions.c" />
     <ClCompile Include="graphica.c" />
     <ClCompile Include="graphicb.c" />
@@ -923,14 +925,17 @@
     <ClInclude Include="..\FileGDBAPI\2013\include\Row.h" />
     <ClInclude Include="..\FileGDBAPI\2013\include\Table.h" />
     <ClInclude Include="..\FileGDBAPI\2013\include\Util.h" />
+    <ClInclude Include="..\INCLUDE\Address.h" />
     <ClInclude Include="..\INCLUDE\Bt.h" />
     <ClInclude Include="..\gctpc\cproj.h" />
     <ClInclude Include="..\INCLUDE\colorsByName.h" />
+    <ClInclude Include="..\INCLUDE\Extrndb.h" />
     <ClInclude Include="..\INCLUDE\FreeImage.h" />
     <ClInclude Include="..\INCLUDE\gmextern.h" />
     <ClInclude Include="..\INCLUDE\gmlimits.h" />
     <ClInclude Include="..\INCLUDE\gmvardef.h" />
     <ClInclude Include="..\INCLUDE\gssitype.h" />
+    <ClInclude Include="..\INCLUDE\Gwd.h" />
     <ClInclude Include="..\INCLUDE\rotate256.h" />
     <ClInclude Include="..\include\tagindex.h" />
     <ClInclude Include="..\INCLUDE\UMIO.H" />
@@ -1055,6 +1060,7 @@
     <ClInclude Include="..\INCLUDE\PROJ.H" />
     <ClInclude Include="..\gctpc\proj.h" />
     <ClInclude Include="..\GMEdit\GMEdit\resource.h" />
+    <ClInclude Include="Gw.h" />
     <ClInclude Include="MPIntersection.h" />
     <ClInclude Include="nvshapefilelibrary\ExitApp.h" />
     <ClInclude Include="nvshapefilelibrary\my_nan.h" />
@@ -1247,6 +1253,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
     </Library>
     <Library Include="..\FileGDBAPI\2013\lib\FileGDBAPID.lib" />
+    <Library Include="..\LIB\FreeImage.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

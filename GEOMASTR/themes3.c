@@ -185,7 +185,6 @@ void ThemeEndDataPass(BOOL PixelThemesOnly)
 				CurTheme->NumClass = 1;
 			else
 				CurTheme->NumClass = CurTheme->NumDesiredClass;
-			for (iclass=0;iclass<CurTheme->NumClass;iclass++)
 			if (CurTheme->ComputeClassBoundaries)
 			{   
 				switch (CurTheme->ClassType)
@@ -232,12 +231,12 @@ void ThemeEndDataPass(BOOL PixelThemesOnly)
 					    while (!st)
 					    {   
 					    	num++;
-					    	if (NumInClass > DesiredNumInClass && SVKey.Y > CurTheme->ClassMin[iclass])
+					    	if (NumInClass >= DesiredNumInClass && SVKey.Y > CurTheme->ClassMin[iclass])
 					    	{
-					    		CurTheme->ClassMax[iclass]=SVKey.Y;
-					    		CurTheme->ClassMin[iclass+1]=SVKey.Y + CurTheme->RoundTo;  
-					    		NumInClass = 0;
-					    		if (num <CurTheme->NumVals) 
+					    		CurTheme->ClassMax[iclass]=SVKey.Y - CurTheme->RoundTo;
+					    		CurTheme->ClassMin[iclass+1]=SVKey.Y;  
+					    		NumInClass = 1;
+					    		if (num <= CurTheme->NumVals) 
 					    			iclass++;
 					    	}  
 					    	else
@@ -406,6 +405,15 @@ GSSiExitProg (1265);
 #endif
 		return (FALSE);  
 }
+	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1265);
+#endif
+		return (FALSE);
+	}
+
+
 	HaltReport = FALSE;  
 	ThemeDisplayPass = 0;
 	switch (CurTheme->ID)
@@ -930,6 +938,7 @@ GSSiExitProg (1302);
     	CurPointLoc = AddjustPointLoc (CurPointLoc,size,DisperseKey.Sequence);
 	} 
 	PointDispersionData.DisplayPoint = CurPointLoc;
+	ShowVal.Point = CurPointLoc;
 	CurTheme->MaxDispersion = max (CurTheme->MaxDispersion,abs (CurPointLoc.x-OrigPoint.x));
 	BT_PUT (CurTheme->hDisperseFile,(LPSTR)&DisperseKey,(LPSTR)&PointDispersionData);
 {
@@ -1036,7 +1045,7 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 				    SymRect = GetSymRect (PointDispersionData.Desc);
 					RectMax = max ((long)SymRect.right - (long)SymRect.left,(long)SymRect.bottom - (long)SymRect.top);   
 					SymbolSize = PointDispersionData.Size*(double)RectMax/200;
-	                d = max (d,SymbolSize*CurView->BaseUnitsPerPixel);
+	                d = max (d,SymbolSize*CurView->BaseUnitsPerPixel/2);
 					Rect.xmn = NearPoint.x - d;
 					Rect.xmx = NearPoint.x + d;
 					Rect.ymn = NearPoint.y - d;
@@ -1045,6 +1054,8 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 					MinDist = idist (PointDispersionData.DisplayPoint,PickPoint)*CurView->BaseUnitsPerPixel;
 					if (PickAp && MinDist <= max(d,PickApW))
 					{
+						SetUDIValue(PointDispersionData.Prefix, PointDispersionData.UDI);
+
 						if ((Item = PickListAdd (PointDispersionData.FileNum,PointDispersionData.SubFile,PointDispersionData.FileInIndex,
 									 PointDispersionData.Segment,PointDispersionData.Refno,
 									 PointDispersionData.Desc,0,
@@ -1056,12 +1067,10 @@ BOOL PickDispersedPoints (DPOINT PickPointBase,int PickAp,LPDOUBLE pNearDist)
 							short	ii;
 							
 							PickList[Item-1].IsDispersed = TRUE;
-							strcpy (PickList[0].Prefix,PointDispersionData.Prefix);
-							strcpy (PickList[0].UDI,PointDispersionData.UDI);
-							ProcessPickedItem (Item-1,FALSE); 
+							strncpy0(PickList[Item - 1].Prefix, PointDispersionData.Prefix, MAX_PREFIX_LEN);
+							strncpy0(PickList[Item - 1].UDI, PointDispersionData.UDI, MAX_UDI_LEN);
+							ProcessPickedItem (Item-1,FALSE);
 							PickList[Item-1].Desc = CurrentDesc;
-							GetVal ("%PREFIX",PickList[Item-1].Prefix);
-							GetVal ("%UDI",PickList[Item-1].UDI); 
 							PD=PickList[Item-1]; //dbug
 							ii=1;
 						}
@@ -1348,6 +1357,18 @@ GSSiExitProg (1311);
 }
 		CreatePointDispersionFile ();
 	}
+	else
+	{
+		pName = GlobalLock(CurTheme->hDisperseFileName);
+		CurTheme->hDisperseFile = BT_OPEN(pName, 0, mode, 0);
+		GlobalUnlock(CurTheme->hDisperseFileName);
+		if (!CurTheme->hDisperseFile)
+		{
+			CreatePointDispersionFile();
+		}
+		else
+			BT_CLOSE2(&CurTheme->hDisperseFile);
+	}
 	pName = GlobalLock (CurTheme->hDisperseFileName);
 	CurTheme->hDisperseFile = BT_OPEN (pName, 0, mode, 0); 
 	if (mode == BT_WRITE)
@@ -1392,7 +1413,7 @@ GSSiExitProg (1312);
 #endif
 } 
 
-BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg,int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL CENFIELDSMsgProc(HWND hWndDlg,UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (620);
 #endif
@@ -1942,7 +1963,7 @@ GSSiExitProg (619);
 #endif
 }
 
-BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FIELDSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (620);
 #endif

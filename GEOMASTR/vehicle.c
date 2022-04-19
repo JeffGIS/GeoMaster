@@ -15,7 +15,7 @@ static	HANDLE	Fences[MAX_FENCES];
 static	MNMXCORD	PMBounds={0,0,-1,-1};
 static	WNDPROC	g_OldEdit=0;
 static	int		VehStatHeight, VehStatWidth;
-static	HANDLE	hLastBox=0;
+static	HANDLE	hLastBoxV=0;
 static	HDC		hDCLastBox;
 static	int		LastVeh=-1;	
 static	int		maxinrow=5;
@@ -387,7 +387,7 @@ void ClearVehicleInfoRect (void)
 {
 	SetVehicleInfo ("","",TRUE);
 //	RestoreScreen2 (hDCLastBox, hLastBox,0,FALSE);
-	hLastBox = 0;
+	hLastBoxV = 0;
 	LastVeh=-1;	
 	return;
 }
@@ -800,9 +800,9 @@ BOOL ImportFences_old (LPSTR IPAddress,LPSTR CPort,LPSTR Account)
 					typ = 1;
 					color = RGB (255,220,200);
 					if (FenceOffsetUnits[i] == 'M')
-						width = (-FenceOffset[i] * 5280)/3.2808333;
+						width = (-FenceOffset[i] * 5280)/MFT;
 					else
-						width = (-FenceOffset[i])/3.2808333;
+						width = (-FenceOffset[i])/MFT;
 				}
 				SymNum = GetDictSymbolNumber (AreaSymbolName);
 				ConvertPolyCoord ((HPDPOINT)pArea,np,2,1);
@@ -2847,37 +2847,49 @@ BOOL SaveMapServerFile(void)
 	short	i, ii, iview;
 	HRGN	hRgnMain;
 	POINT	Point;
+	static  int lastID = -1;
 
 	if (MapServer)
 	{
-		SetViewport(*pCommandViewport);
-
-		if (MapserverRequestID)
+		if (MapserverRequestID > lastID)
 		{
-			BITMAP bm;
-			HBITMAP hBM = SelectObject(CurView->hDC, hMapServerBM);
-			HDIB32 hDIB32;
-			int	   lbitmap;
+			lastID = MapserverRequestID;
+			SetViewport(*pCommandViewport);
 
-			if (dbug)
+			if (MapserverRequestID)
 			{
-				char mess[128];
-				GetObject(hBM, sizeof(BITMAP), &bm);
-				sprintf(mess, "bitmap %i %i %i %i %i %i",CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel,(int)CurView->hDC, (int)hDCScreenBuffer);
-				MessageBox(0, mess, "", MB_OK);
+				BITMAP bm;
+				HBITMAP hBM = SelectObject(hDCScreenBuffer, hMapServerBM);
+				HDIB32 hDIB32;
+				int	   lbitmap;
+
+				if (!hBM)
+					return FALSE;
+				if (dbug)
+				{
+					char mess[128];
+					GetObject(hBM, sizeof(BITMAP), &bm);
+					sprintf(mess, "bitmap %i %i %i %i %i %i", CurView->ID, bm.bmHeight, bm.bmWidth, bm.bmBitsPixel, (int)CurView->hDC, (int)hDCScreenBuffer);
+					MessageBox(0, mess, "", MB_OK);
+				}
+				hDIB32 = BitmapToDIB32(hBM);
+				strcpy(MapServerOutputBitmapFile, MapserverFile);
+				LPSTR pDot = strrchr(MapServerOutputBitmapFile, '.');
+				if (pDot)
+					sprintf(pDot, "-%i.bmp", MapserverRequestID);
+				if (dbug)
+					SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
+
+				SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
+				GMDestroyDIB32(hDIB32);
+
+				SelectObject(hDCScreenBuffer, hBM);
+				//DeleteObject(hBM);
+				if (MapServerCalledFromWnd)
+					PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(MAPSERVER_RETURNED_IMAGE, MapserverVPID), MapserverRequestID);
+				SaveMapServerTrace("FIN", MapserverRequestID, "");
+				return TRUE;
 			}
-			hDIB32 = BitmapToDIB32(hBM);
-			strcpy(MapServerOutputBitmapFile, MapserverFile);
-			if (dbug)
-				SaveDIB32(hDIB32, "c:\\temp\\testmapserveroutput.bmp", -1, 0);
-
-			SaveDIB32(hDIB32, MapServerOutputBitmapFile, -1, 0);
-			GMDestroyDIB32(hDIB32);
-
-			SelectObject(CurView->hDC, hBM);
-			if (MapServerCalledFromWnd)
-				PostMessage(MapServerCalledFromWnd, GF_MAPSERVER_RESPONSE, MAKEWPARAM(MAPSERVER_RETURNED_IMAGE, MapserverVPID), MapserverRequestID);
-			return TRUE;
 		}
 	}
 	return FALSE;
@@ -3052,7 +3064,7 @@ BOOL DisplayAllVehicles2 (short nVP,LPVIEWPORT *pVP)
 		BlockVehicleDisplay++;
 		return FALSE;
 	}
-	if ((BufferedScreen && HaveMeterPrompts ()) || hLastBox || InVehicleDisplay || InDisplayProcessing)
+	if ((BufferedScreen && HaveMeterPrompts ()) || hLastBoxV || InVehicleDisplay || InDisplayProcessing)
 	{
 		ReleaseDC (CurView->hWnd,hDCMain);
 		return FALSE;
@@ -4054,7 +4066,7 @@ BOOL VehicleRecentlyMoved (LPVEHLOCATION	pVehLoc,int Now)
 	return rtn;
 }
 
-BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	RECT	LastRect, ColorRect,ConnectedRect,DisplayRect;
 	int	Choice,iveh,Count;
@@ -4397,7 +4409,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
    }
  return TRUE;
 }
-BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL PROGRESS_MONITORINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static	RECT	LastRect, ColorRect,ConnectedRect,DisplayRect;
 	int	Choice,iveh,Count;
@@ -4765,7 +4777,7 @@ BOOL SetVehicleHistorySelection (int iSel)
 	return FALSE;
 }
 
-BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	UserID[64], Password[32];
 	static	HANDLE	hSaveBM=0;	
@@ -5224,7 +5236,7 @@ LPSTR YorBlank (BOOL v)
 	return pYB;
 }
 
-BOOL FAR PASCAL GEOFENCEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GEOFENCEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	LPVEHLOCATION	pVehLoc;  
 	char	str[512], str2[256], Ext[8]=".gfb";

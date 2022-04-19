@@ -13,9 +13,10 @@
 #define		MAX_VIEWPORTS		64 
 #define		MAX_CITYNAME_LENGTH	80
 #define		MAX_THEME_CLASSES_v0 16
-#define		MAX_THEME_CLASSES	48  
+#define		MAX_THEME_CLASSES_V4	48  
+#define		MAX_THEME_CLASSES	256  
 #define		MAX_THEME_VALUE_LEN	128
-#define		CUR_THEME_VERSION	4	//3 adds len to nonnum theme value list, 4 stores classno as long
+#define		CUR_THEME_VERSION	6	//3 adds len to nonnum theme value list, 4 stores classno as long, 5 increases max class to 256
 #define		MAX_NEW_OBJECTS		100  
 #define		MAX_DIGPOINTS		64000
 #define		MAXPENS				266       
@@ -106,3 +107,5 @@
 #define MAX_PREFIX_LEN	8
 #define MAX_UDI_LEN	64
 #define MAX_SMALL_MESSAGE	255
+
+#define MAX_VARNAME_LEN	61

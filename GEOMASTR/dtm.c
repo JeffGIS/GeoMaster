@@ -54,6 +54,8 @@ static	COLORREF LightContourColor, DarkContourColor, ContourTextColor;
 static	short	ContourTextSize;  
 static	double	LightContourWidth, DarkContourWidth;
 
+BOOL ComputeSlopeParameters(LPDOUBLE pNullElv, LPDPOINT TriPoints, LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z3, LPDOUBLE pSlopePCT, LPDOUBLE pSlopeAZ);
+
 double LTWOPImacro (double AZ1)
 #if ENABLETRACE
 {GSSiEnterProg (375);
@@ -2840,7 +2842,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 		  	LPVISLIST	SaveVis=CurVis;
 	    	short	SaveMaxPick=MaxPick, SaveNFiles, SaveMT, SaveTimer, SavePT;
 	    	HFILE	SaveFid; 
-	    	HANDLE	hSaveVP = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);  
+	    	HANDLE	hSaveVP = GSSiGlobAlloc (1835,GMEM_MOVEABLE,sizeof(VIEWPORT)+256);
 	    	HANDLE	SavehDTM, SavehProfilePoints;
 	    	LPVIEWPORT	pSaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
 	    	LPSTR	pSaveFile1=(LPSTR)(pSaveVP+1); 
@@ -2860,7 +2862,8 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 			SetConfig (1);
 		  	SetViewport (*pCommandViewport);
   		  	GSSiDeleteObject(&CurView->hRgn);
-	    	*pSaveVP = *CurView; 
+			ClearVPHandles(CurView);
+			*pSaveVP = *CurView;
 			SaveDC (CurView->hDC); 
 			CurView->NumNewObjects = 0;
 	    	CurView->NumFiles=1;    
@@ -2893,7 +2896,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 			SaveCRType = CurrentType;
 		    SetPickAp(0);    
 		    SavehProfilePoints = hProfilePoints;
-			hSavePicklist = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(PickList));
+			hSavePicklist = GSSiGlobAlloc (1836,GMEM_MOVEABLE,sizeof(PickList));
 			pSavePicklist = GlobalLock (hSavePicklist);
 			NumPickedSave = NumPicked;
 			memmove (pSavePicklist,PickList,sizeof(PickList));
@@ -2914,7 +2917,8 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	    	hDTM = SavehDTM;
 	    	CurVis = SaveVis;   
 	    	RestoreDC (CurView->hDC,-1);
-		  	SetViewport (*pCommandViewport);  
+		  	SetViewport (*pCommandViewport); 
+			ClearVPHandles(CurView);
 	    	*CurView = *pSaveVP;  
 	    	_fstrcpy (CurView->lpFiles[0],pSaveFile1);
 	    	GSSiGlobUlFree (&hSaveVP);
@@ -3734,6 +3738,7 @@ BOOL DisplayDTMArea (long Refno,LPDPOINT DPoint,short Nump,double SlopePCT,doubl
 	
 	CurrentDesc = SymbolNumber; 
 	CurrentRefno = Refno;
+	CurrentType = GF_AREA;
 	if (CurView->PassID && CurView->PassID != 2)
 		return FALSE;  
 	HiPrecis = TRUE;  

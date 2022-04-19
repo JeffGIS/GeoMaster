@@ -15,7 +15,9 @@
 
 #include <process.h>
 
+static BOOL HaveMapServerReceive = FALSE;
 BOOL InDebug=FALSE;
+LRESULT CALLBACK WndProcTest(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void _testMemIO(const char *lpszPathName);
 BOOL RecoverBadFile (void);
@@ -27,16 +29,16 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
 int  APIENTRY  WinMainGMEdit(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int  APIENTRY  WinMainGMDoc(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
 int  APIENTRY  WinMainGMCache(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow);
-LONG FAR PASCAL WndProcGMEdit(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
-LONG FAR PASCAL WndProcGMDoc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
-LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGMEdit(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGMDoc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 int ConvertPRJtoProj4(char *in, char * out);
 LRESULT CALLBACK GetMsgProc(
   int code,       // hook code
   WPARAM wParam,  // removal flag
   LPARAM lParam   // address of structure with message
 );
-int FileDlgWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+int FileDlgWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
 static char selectedStartCmd[1024]; 
 static MSG	pmsg[100]={0};
@@ -87,6 +89,7 @@ static char title4[]="Find GeoMaster Graphics Data";
 static RECT customRect;
 static BOOL setWindowToTopOfZ = FALSE;
 static int  mapServerWidth, mapServerHeight;
+static int NextMSRequest = 0;
 
 BOOL	DoReset=FALSE;
 static		char		CfgNameIn[MAX_PATH]=""; 
@@ -549,6 +552,8 @@ GSSiExitProg (436);
 	 SetGlobalValue ("%DL",str);  
 	 SetGlobalValue("%INDIR",str);
 	 HaveDL = TRUE;
+	 SetInitialGlobalValues();
+
 	 lpEnd = _fstrchr (str,0);
 	 if (lpEnd != str)
 	 {
@@ -702,7 +707,8 @@ GSSiExitProg (436);
  if (_fstrstr(CmdLine," /DB ")) UMIODebug=TRUE;
  if (_fstrstr(CmdLine," /LOG ")) LogOn=TRUE;
  if (_fstrstr(CmdLine," /DBE ")) DebugExistFile=TRUE;
- if (_fstrstr(CmdLine," /NPF ")) PatternBrush=FALSE; 
+ if (_fstrstr(CmdLine, " /NPF ")) PatternBrush = FALSE;
+ if (_fstrstr(CmdLine, " /DNC ")) DoNotClear = TRUE;
  if (_fstrstr(CmdLine, " /UPDATESERVER ")) UpdateServer = TRUE; //MGV police new update server
  if ((lpStart = _fstrstr(CmdLine, " /MAPSERVER ")))//background map server
  {
@@ -734,7 +740,12 @@ GSSiExitProg (436);
 		 NoAccel = TRUE;
 		 NoMenu = TRUE;
 		 wantGDIPlus = FALSE;
-
+		 HFILE fidMSF = GSSiOpenFile(MapserverFile, 0, OF_READ);
+		 char line[128];
+		 fgetstring(line, 120, fidMSF);
+		 GSSiClose(fidMSF);
+		 SaveMapServerTrace("START",0, line);
+		 NextMSRequest = atoi(line);
 	 }
  }
  if (_fstrstr(CmdLine, " /RESET "))
@@ -893,15 +904,23 @@ BOOL GetNodeParms (LPSTR NodeName,LPSTR Parms)
 	HFILE	Fid;
 	BOOL	AllowCacheSave = AllowCache;
 	
-	strcpy (str,"$BATTERY(EXISTS)");
-	ExpandText (str);
-	if (*str == '1')
+	if (MapServer)
 	{
-		strcpy (File,"[%DL]nodeparm_laptop.txt");
-		if (!ExistFile (File))
-			strcpy (File,"[%DL]nodeparm.txt");
+		strcpy(File, "[%DL]nodeparm_mapserver.txt");
+		if (!ExistFile(File))
+			strcpy(File, "[%DL]nodeparm.txt");
 	}
-		
+	else
+	{
+		strcpy(str, "$BATTERY(EXISTS)");
+		ExpandText(str);
+		if (*str == '1')
+		{
+			strcpy(File, "[%DL]nodeparm_laptop.txt");
+			if (!ExistFile(File))
+				strcpy(File, "[%DL]nodeparm.txt");
+		}
+	}
 	*Parms = 0;
 	ExpandText (File);
 	//GetShortPathName (File,128);
@@ -978,7 +997,7 @@ BOOL ProcessUserParms (void)
 	return TRUE;
 }
 
-BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	LPSTR lpStart, lpTab;
 	OFSTRUCTGM	OFStruct = { 0 };
@@ -1109,7 +1128,9 @@ BOOL FAR PASCAL SelectGMCmdMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPA
 			GetDlgItemText(hWndDlg, IDC_COMMAND, txt, MAX_PATH - 1);
 			sprintf(strchr(txt, 0), " /WD %s", path);
 			sprintf(str, "$TEXTTOCLIPBOARD(%s)", txt);
+			allowGlobalExpansion = FALSE;
 			ExpandText(str);
+			allowGlobalExpansion = TRUE;
 			break;
 		case IDOK:
 		{
@@ -1375,7 +1396,7 @@ void testConvertBitmapToPoly(LPSTR file);
 	GSSiClose2 (&fidOut);
 }
 */
-LONG FAR PASCAL WndProcTemp(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL WndProcTemp(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	return DefWindowProc(hWnd, Message, wParam, lParam);
 }
@@ -1454,7 +1475,7 @@ int testdib(int i)
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
 {
 	int rtn = 0;
-	//_CrtDumpMemoryLeaks();
+//	_CrtDumpMemoryLeaks();
 	char cmdLine[1024];
 	//strcpy(cmdLine, "0123456789012");
 	//char monName[12];
@@ -1474,6 +1495,8 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 #endif
 
 	//testdib(0);
+	FreeImage_SetOutputMessage(FreeImageErrorHandler);
+
 	rtn = 0;
 	InitSockets();
 	CreatePrintBitmap(0);
@@ -1680,7 +1703,7 @@ int PASCAL WinMainGeoMaster(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR 
  //RecoverBadFile ();
  //int	t=IDNINT(atof("1E+08"));
 
-  //MessageBox (0,lpszCmdLine,"In GeoMaster",MB_OK);
+ //MessageBox (0,lpszCmdLine,"In GeoMaster",MB_OK);
 
 #if CHECKMEM
 	InDebug=TRUE;
@@ -1762,6 +1785,8 @@ HFILE	Fid = GSSiOpenFile ("c:\\pngrid\\400\\pngrid.bin",0,OF_READWRITE);
  GoogleTilesInit ();		
  _getcwd (StartupDir,64);   
  _fstrcpy (AppName,ApName);
+ if (strstr(lpszCmdLine, "/MAPSERVER"))
+	 MapServer = TRUE;
  //MessageBox (0,lpszCmdLine,"Command Line",MB_OK);
  ProcessNodeParms ();
 if (!ProcessCommandLine (lpszCmdLine))  
@@ -1850,7 +1875,7 @@ ExpandDL ();
 
 }*/
 
-if (!MapServer)
+if (!MapServer && !DoNotClear)
 	nTempFilesCleared = ClearGMTempFiles ();
 //MessageBox (0,"Past ClearGMTempFiles","",MB_OK);
 ProcessUserParms ();
@@ -2043,6 +2068,9 @@ GSSiExitProg (437);
    }
  else
  {
+	 if (MapServer)
+		SetWindowText(hWndMain, "Map Server");
+
 	 CreatePrintBitmap(hWndMain);
 
 	 OpenTCPIPServer2(hWndMain);
@@ -2094,7 +2122,7 @@ else if (BackgroundTask && !UpdateServer)
 else if (ShowMax == 10)
 {
 	HDC hDC;
-
+	RECT wndRect;
 	showWindowCmd = SW_SHOWMAXIMIZED;
 	ShowWindow(hWndMain, showWindowCmd);
 	ShowWindow(hWndMain, SW_HIDE);
@@ -2109,7 +2137,7 @@ else if (ShowMax == 10)
 		GetObject(hCPen, sizeof(LOGPEN), &lPen);
 		width = 1;
 	}*/
-
+	GetWindowRect(hWndMain, &wndRect);
 	OpenConfig(hWndMain, hDC);
 	ReleaseDC(hWndMain, hDC);
 }
@@ -2165,7 +2193,7 @@ else if (MapServer)
 			MoveWindow(hWndMain, 0, 0, mapServerWidth, mapServerHeight, TRUE);
 			//PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 99L);
 			  //MessageBox(0, "Mapserver Open", "", MB_OK);
-			SetTimer(hWndMain, SUICIDE_TIMER, 2000, 0);
+			SetTimer(hWndMain, SUICIDE_TIMER, 200000, 0);
 		}
 		else
 		{
@@ -2176,8 +2204,17 @@ else if (MapServer)
 	}
 }
 nMess = -1;
- while(hWndMain && GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
-   {    
+ while(GetMessage(&msg, 0, 0, 0))        /* Until WM_QUIT message    */
+   { 
+	 /*
+	 static icmd = 0;
+	 char printfcmd[32];
+	 sprintf(printfcmd, "msg = %#06X  %6i\n", msg.message,icmd++);
+	 OutputDebugString(printfcmd);
+	 if (msg.message == WM_LBUTTONDOWN)
+		 ii = 10;
+	 if (!hWndMain)
+		 break;*/
 	 if (LogMSGFile != HFILE_ERROR)
 	 {
 		 char text[128];
@@ -2186,10 +2223,17 @@ nMess = -1;
 	 }
 	 switch (msg.message)
 	 {
+	 case GF_MAPSERVER_REQUEST:
+		 SaveMapServerTrace("RCV",LOWORD(msg.lParam), "");
+		 HaveMapServerReceive = TRUE;
+		 break;
+	 case WM_RBUTTONDOWN:
+		 break;
+	 case WM_LBUTTONDOWN:
+		 ii = 10;
 	 case WM_LBUTTONDBLCLK:
 	 case WM_KEYDOWN:
 	 case WM_SYSKEYDOWN:
-	 case WM_LBUTTONDOWN:
 	 case WM_LBUTTONUP:
 	 case WM_CHAR:
 	 case WM_MOUSEMOVE:
@@ -2239,9 +2283,13 @@ nMess = -1;
 			 ii = 1;
 		 break; case WM_SYSKEYDOWN:
 			 ii = 1;
-		 break; case WM_LBUTTONDOWN :
+		 break; case WM_LBUTTONDOWN:
 			 ii = 1;
-		 break; case WM_LBUTTONUP :
+		 break; case WM_LBUTTONUP:
+			 ii = 1;
+		 break; case WM_RBUTTONDOWN:
+			 ii = 1;
+		 break; case WM_RBUTTONUP:
 			 ii = 1;
 		 break; case WM_CHAR:
 			 ii = 1;
@@ -2266,6 +2314,8 @@ nMess = -1;
 			}
 			ii=1; 
 		}
+		if (IsToolbarMessage(&msg))
+			continue;
 		if (hWndAddEdit)
 		{
 			if (IsDialogMessage(hWndAddEdit, &msg))
@@ -2413,7 +2463,7 @@ return msg.wParam;
 /*                                                                      */
 /************************************************************************/
 
-LONG FAR PASCAL WndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (isGMEdit)
 		return WndProcGMEdit(hWnd,Message,wParam,lParam);
@@ -2422,7 +2472,7 @@ LONG FAR PASCAL WndProc(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+LONG FAR PASCAL WndProcGeoMaster(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (438);
 #endif
@@ -2589,16 +2639,30 @@ if (Message == WM_CHAR && wParam == '\b' && !(lParam & KF_UP) && CursorIsLocked)
 if (Message == WM_CHAR && wParam == 26) //CNTL/Z
 	goto Return0;
 
-if (Message == GF_MAPSERVER_REQUEST)
+if (Message == GF_MAPSERVER_REQUEST && HaveMapServerReceive)
 {
 	HANDLE Fid;
 	OFSTRUCTGM OFStruct;
+	char commandFile[MAX_PATH];
 	 //MessageBox(hWnd, "Got request", "", MB_OK);
-
+	//SetWindowText(hWnd, "Map Server");
+	HaveMapServerReceive = FALSE;
 	MapserverRequestID = LOWORD(lParam);
+	if (MapserverRequestID != NextMSRequest)
+	{
+		char errtxt[64];
+		sprintf(errtxt, "%i-%i", MapserverRequestID, NextMSRequest);
+		MapserverRequestID = NextMSRequest;
+		SaveMapServerTrace("ERR", MapserverRequestID, errtxt);
+	}
+	NextMSRequest++;
 	MapserverVPID = HIWORD(lParam);
 	MapServerCalledFromWnd = (HWND)wParam;
-	Fid = OpenFileGM(MapserverFile, &OFStruct, OF_READ);
+	strcpy(commandFile, MapserverFile);
+	LPSTR pDot = strrchr(commandFile, '.');
+	if (*pDot)
+		sprintf(pDot, "-%i.txt",MapserverRequestID);
+	Fid = OpenFileGM(commandFile, &OFStruct, OF_READ);
 	if (Fid != INVALID_HANDLE_VALUE)
 	{
 		LPSTR cmd = (LPSTR)malloc(4096);
@@ -2606,19 +2670,17 @@ if (Message == GF_MAPSERVER_REQUEST)
 
 		llFileSeek(Fid, 0, 0);
 		BigRead64(Fid, cmd,ln);
+		cmd[ln] = 0;
 		GSSiClose64(&Fid);
 		if (dbug)
 			MessageBox(hWnd, cmd, "", MB_OK);
+		SaveMapServerTrace("CMD", MapserverRequestID, cmd);
 		ProcessText (cmd);
 		free(cmd);
 	}
-
-	{
-#if ENABLETRACE
-		GSSiExitProg(438);
-#endif
-		return TRUE;
-	}
+	else
+		SaveMapServerTrace("NOOPEN", MapserverRequestID, commandFile);
+	goto Return0;
 }
 if (Message == GF_PROCESSTCPCMD)
 {
@@ -2867,7 +2929,7 @@ if (!DisableMarginPan &&
 			{
 				LPVIEWPORT	SaveVP=CurView;
 				
-				CurView = pViewports[vpid-1];
+				SetCurView(pViewports[vpid - 1]);
 				if (ProfileAndCrossSectionSettings (FALSE))
 					DisplayProfileThemeLegend(4); 
 				CurView = SaveVP;
@@ -2882,7 +2944,7 @@ if (!DisableMarginPan &&
 			{
 				LPVIEWPORT	SaveVP = CurView;
 
-				CurView = pViewports[vpid - 1];
+				SetCurView(pViewports[vpid - 1]);
 				ZoomToProfile(CurView);
 				CurView = SaveVP;
 			}
@@ -2893,7 +2955,7 @@ if (!DisableMarginPan &&
 			{
 				LPVIEWPORT	SaveVP = CurView;
 
-				CurView = pViewports[vpid - 1];
+				SetCurView(pViewports[vpid - 1]);
 				if (CurTheme->ProfileAlignmentOption)
 					CurTheme->ProfileAlignmentOption = 0;
 				else
@@ -3081,6 +3143,14 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
     	 break;
     	 
     case GSSI_ADDGF:
+		if (hWndDatedOrthos)
+		{
+			EscapeFunction(TRUE);
+			//RedisplayWindow();
+			DisplayDatedOrthos(hWndDatedOrthos, GF_CLOSE,0,0,0);
+			break;
+		}
+
 		 SetViewport((short)lParam);
 		 if (CurView->DisplayInParent && CurView->Parent)            	
 			 SetViewport(CurView->Parent);
@@ -5244,9 +5314,9 @@ DisplayParcel:
 		 hWndMain = hWnd;
 		 CDInit (hWnd, hInst); /* Initialize Common Dialogs */     
 		 InitGraphics (hWnd);
-/*		 if (_fstrstr (szAppName,"Highways"))
-		 	SetWindowText (hWnd,"Visual Surveyor");
-		 else*/ if (!MapServer && GetGlobalCVal ("[%WT]",str,0))
+		 if (MapServer)
+			 SetWindowText(hWnd, "Map Server");
+		 else if (GetGlobalCVal("[%WT]", str, 0))
 		 	SetWindowText (hWnd,str);
 		 ConvertCoordClose();
 		 ConvertCoordInit();
@@ -5745,13 +5815,17 @@ DisplayParcel:
 		     	 PostMessage(hWndMain, WM_COMMAND, IDM_DISPLAY_VEHICLES, 0L);
           	 	 break;
 			
+			case EXECUTE_COMMAND_TIMER:
+				KillTimer(hWnd, EXECUTE_COMMAND_TIMER);
+				ProcessText(CommandExecutedByTimer);
+				break;
 			case SUICIDE_TIMER:
 			{
 								  static BOOL test = TRUE;
 								  if (test)
 								  {
 									  test = FALSE;
-									  ProcessText("$MAPSERVER(TEST)");
+									  //ProcessText("$MAPSERVER(TEST)");
 								  }
 								  if (MapServerCalledFromWnd && !WindowExists(MapServerCalledFromWnd))
 								  {
@@ -5810,22 +5884,69 @@ DisplayParcel:
 		{
 			switch (wParam)
 			{
-				case 'D':
-						SetDebug (TRUE);
+			case 'C':
+			{
+				char cmd[256];
+				sprintf(cmd, "$SCREENTOCLIPBOARD(Format)");
+				ExpandText(cmd);
+			}
+			break;
+			case 'D':
+				SetDebug(TRUE);
 				break;
-				case 'E':
+			case 'E':
 					if (GetDebug ())
 						EditViewportAtCursor (hWnd);
 				break;
-				case 'T':
-					if (GetDebug ())
-						EditFundirAtCursor (hWnd);
+			case 'T':
+				if (GetDebug())
+					EditFundirAtCursor(hWnd);
 				break;
+				case 'P':
+				{
+					BOOL Err;
+					HDIB hDib;
+					HPALETTE hPal;
+					HBITMAP hBM;
+					char FileName[MAX_PATH];
+					GSSiGetTempFileName(0, "gmb", 0, FileName);
+					LPSTR pDot = strrchr(FileName, '.');
+					if (pDot)
+						strcpy(pDot, ".bmp");
+					SetCurView(SetVPFromName("Format", &Err));
+					Rect = CurView->Rect;
+					ClientRectToScreenRect(CurView->hWnd, &Rect);
+					hDib = CopyScreenToDIB(&Rect);
+					hPal = CreateDIBPalette(hDib);
+					hBM = DIBToBitmap(hDib, hPal);
+					SaveBitmap(hBM, FileName, 0, 0);
+					DeleteObject(hBM);
+					if (hPal)
+						DeleteObject(hPal);
+					GSSiGlobFree(&hDib);
+
+					PrintImage(hWnd, FileName, 1);
+					GSSiRemove(FileName);
+				}
+					break;
+			}
+		}
+		else if (GetKeyState(VK_CONTROL) & 0x1000)
+		{
+			switch (wParam)
+			{
+			case 'C':
+			{
+				char cmd[256];
+				sprintf(cmd, "$SCREENTOCLIPBOARD(COMMAND)");
+				ExpandText(cmd);
+			}
+			break;
 			}
 		}
 		else switch (wParam)
 		{
-			case 27:  //ESC   
+			case VK_ESCAPE:  //ESC   
 				EscapeFunction (TRUE);
 	    	break;
 			case VK_F9:
@@ -6078,8 +6199,9 @@ GSSiExitProg (438);
     {
     	 RECT	UpdateRect;
 		 HDC	hDCScreen;
-		 if (!RunFromCache && wantBackgroundCache)
-			 StartBackgroundCache ();
+		 //WndProcTest(hWnd, Message, wParam, lParam);
+//		 if (!RunFromCache && wantBackgroundCache)
+//			 StartBackgroundCache ();
 
 //         GSSiTrace ("Enter WM_PAINT");
          if (InPaint || Printing || idTimer || InDisplayProcessing==1)
@@ -6135,8 +6257,10 @@ GSSiExitProg (438);
             }
             if (!hMemBitmap)
             {
-				hdcMemMap = CreateCompatibleDC(hDC);    
+				hdcMemMap = CreateCompatibleDC(hDC); 
+				curProgID = 10001;
 				hMemBitmap = CreateCompatibleBitmap (hDC,(int)MemMapWidth,(int)MemMapHeight);
+				curProgID = -1;
 				hbmpOld = SelectObject(hdcMemMap, hMemBitmap);
 			} 
 			OldDC = hDC;

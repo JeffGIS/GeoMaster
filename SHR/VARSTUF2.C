@@ -147,6 +147,7 @@ GetPolylineEP:
 						Dist = GetPolyLengthD (lpPoints,nPnts);
 						GetPolyBoundsD2 (lpPoints,nPnts,&Type1.Bounds,Type);
 						lpDEndPoint = lpPoints + (nPnts-1); 
+						Type1.Length = Dist;
 						Type1.BPX = lpPoints->x;
 						Type1.BPY = lpPoints->y;  
 						Type1.EPX = lpDEndPoint->x;
@@ -798,6 +799,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 		NumArgs = 0;
 	}
     InGRFCmd = FALSE; 
+	strcpy(currentMacroFile, Name);
     macroID = AddToMacroStack (1,++CurrentMacro,Name,phArgs,NumArgs);
 	MacroVarSpace[CurrentMacro] = CreateVarSpace(VARSPACE_LOCAL);
 	SetVarSpace(VARSPACE_LOCAL, MacroVarSpace[CurrentMacro]);
@@ -930,7 +932,7 @@ BOOL ProcessMacroFile (LPSTR Name,LPSTR RtnVal,LPHANDLE phArgs,short NumArgs)
 	    }
 ProcessMacro:
 		lMacro = strlen (pMacro);
-		hTemp = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMacro+1);
+		hTemp = GSSiGlobAlloc (1825,GMEM_MOVEABLE,lMacro+1);
 		pTemp = GlobalLock (hTemp);
 		strcpy (pTemp,pMacro);
 		pMacro = pTemp;
@@ -946,7 +948,7 @@ ProcessMacro:
     	{   
 			HANDLE SaveMacArgs;
 			
-			//if (pBreakPoints) breakAtPos(pMacro - pTemp, pBreakPoints, 0, lm);
+			if (pBreakPoints) breakAtPos(pMacro - pTemp, pBreakPoints, 0, lm,BA_START);
 			pEndCmd = MatchLev(pMacro, ';');
     		if (!pEndCmd)
     		{

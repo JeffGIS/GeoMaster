@@ -29,6 +29,8 @@
 #define ID_DBSHOWFUN2                   6
 #define ID_DBTORETURN                   6
 #define IDC_DATE_THISYEAR               7
+#define IDOK4                           7
+#define ID_LAUNCH                       7
 #define IDC_DATE_LASTWEEK               8
 #define IDNO2                           8
 #define IDC_DATE_YESTERDAY              9
@@ -266,6 +268,7 @@
 #define SV_NUM_CLASS_TITLE              329
 #define IDC_COORD_XTITLE                330
 #define IDC_XFIELD_TITLE                330
+#define MIN_SIZE_TITLE                  330
 #define SV_CB_PERCENTILES               331
 #define IDC_COORD_YTITLE                332
 #define IDC_YFIELD_TITLE                332
@@ -284,12 +287,15 @@
 #define SV_CONTENTS                     341
 #define SV_CB_LOGSCALE                  342
 #define IDC_HSGRAN                      342
+#define SV_CONTENTS4                    342
 #define SV_CB_ZEROASMISS                343
 #define SV_TITLE                        344
 #define SV_NUM_CLASSES                  345
 #define SV_TITLE_TITLE                  346
 #define SV_ROUND_TITLE                  347
 #define IDC_MINPOP                      347
+#define MIN_SIZE                        347
+#define IDC_MIN_SIZE                    347
 #define SV_ROUND_TO                     348
 #define IDC_HSDECAY                     348
 #define IDC_MAXPOP                      348
@@ -333,6 +339,9 @@
 #define SV_TITLEFIELD_NAME              366
 #define SV_DELAY_VALUE                  366
 #define SV_FIELD_HEADING                367
+#define SV_DISPLAY_VALUE2               367
+#define SV_DISPLAY_CLASSID              367
+#define SV_APPEND_TOTAREA               367
 #define IDC_EDIT3                       368
 #define IDC_CLASSVALTABLE               368
 #define IDC_VHSTARTMIN                  368
@@ -746,8 +755,10 @@
 #define IDC_MINMAXICON                  614
 #define IDC_VPNAME4                     615
 #define IDC_DUMPTOGMD                   615
+#define IDC_END_DISPLAY_CMD             615
 #define IDC_RDFILE                      616
 #define IDC_CREATE_DIALOG_SCREEN        617
+#define IDC_BEGIN_DISPLAY_CMD           617
 #define IDC_AVAIL_THEMES                618
 #define IDC_CREATENEWTABLE              618
 #define IDC_VPNAME5                     619
@@ -756,8 +767,10 @@
 #define IDC_TITLE                       622
 #define IDC_FUNFILE                     623
 #define IDC_BUTTONTEXT1                 623
+#define IDC_FUNINDEX                    623
 #define IDC_NEW_THEME                   624
 #define IDC_BUTTONTEXT2                 624
+#define IDC_FUNFILE2                    624
 #define IDC_ACTFUN                      625
 #define IDC_BUTTONTEXT3                 625
 #define IDC_XMAX                        626
@@ -1971,7 +1984,6 @@
 #define IDM_DUMP_INTNAME_TO_TXT         1168
 #define IDC_VALBGCOLOR                  1169
 #define IDM_HLTSORT_PDIVAREA            1169
-#define IDD_DIALOG9                     1169
 #define IDC_VALTEXTCOLOR                1170
 #define IDM_STEP                        1170
 #define IDD_DIALOG10                    1170
@@ -1981,7 +1993,6 @@
 #define IDC_RANGEAREPCT                 1172
 #define IDC_BOXSIZE                     1172
 #define IDM_DXF_OUTPUT                  1172
-#define IDD_DIALOG12                    1172
 #define IDC_SELECT_SYM                  1173
 #define PRMT_IDC_VALTEXTFONT            1173
 #define IDM_ADDFORMAT                   1173
@@ -2044,9 +2055,7 @@
 #define IDC_INVISIBLE                   1195
 #define IDC_VJBASELINE                  1195
 #define IDM_FORMATJPEG                  1195
-#define IDD_DIALOG13                    1195
 #define IDC_UNDO                        1196
-#define IDD_DIALOG14                    1196
 #define IDC_SET_SOURCE                  1197
 #define IDM_BUILDSTREETPOLYS            1197
 #define IDC_SET_SOURCE2                 1198
@@ -2067,7 +2076,6 @@
 #define IDM_MAKEINFOBOX                 1204
 #define IDC_EMBEDCMD                    1205
 #define IDM_VIEWFOLDER                  1205
-#define IDD_DIALOG15                    1206
 #define IDC_SETTEXT                     1207
 #define IDM_COPYFILE                    1207
 #define IDC_MODIFY                      1208
@@ -2198,6 +2206,7 @@
 #define IDC_LINECOLOR                   1267
 #define IDC_EDITINDEX                   1267
 #define IDC_IGNOREEXTENTS               1267
+#define BITMAPVIEWER                    1267
 #define IDC_DISTRIBUTION                1268
 #define IDC_OUT_FILE                    1269
 #define IDC_RESOLUTION                  1270
@@ -2404,7 +2413,10 @@
 #define IDC_SHOWAREAB                   1422
 #define IDC_LOADTHEME                   1422
 #define IDC_MASKAREA                    1423
+#define IDC_EDITPM2                     1423
+#define IDC_EDITZM                      1423
 #define IDC_FOCUSREFGLOBAL              1424
+#define IDC_EDITPM3                     1424
 #define IDC_TRANFILE_LOC                1425
 #define IDC_BOUNDSGLOBAL                1425
 #define IDC_DISPLAYONLY                 1426
@@ -2774,6 +2786,8 @@
 #define IDC_USESHIELDS                  1750
 #define IDC_ANTIALIASED                 1751
 #define IDC_AUTOHIGHLIGHT               1752
+#define IDC_USESHIELDS2                 1752
+#define IDC_FIXEDCOLOR                  1752
 #define IDC_USELONGNAMES                1753
 #define IDC_TCMACRO                     1754
 #define IDC_TCTABLE                     1755
@@ -2784,6 +2798,8 @@
 #define IDC_CFGDESC                     1760
 #define IDC_MULTIVALUEOPT               1761
 #define IDC_AUTOSELECT                  1762
+#define IDC_MULTIVALUEOPT2              1762
+#define IDC_AREA_UNITS                  1762
 #define IDC_ONSTREET                    1763
 #define IDC_FROMSTREET                  1764
 #define IDC_TOSTREET                    1765
@@ -3344,6 +3360,8 @@
 #define IDC_SPEED_0                     2246
 #define IDC_DBNAME                      2246
 #define IDC_DATETIMEPICKER1             2247
+#define IDC_LOOP2                       2247
+#define IDC_ZOOM_TO_SCALE               2247
 #define IDC_DATETIMEPICKER2             2248
 #define IDC_UPDATEFREQ                  2249
 #define IDC_PACKETSIZE                  2250
@@ -3410,14 +3428,31 @@
 #define IDC_IMAGE_ROTATE_COUNTERCLOCKWISE2 2304
 #define IDC_NEXT_IMAGE                  2304
 #define IDC_DOWNLOADDATA                2305
+#define IDC_ASSIST_IMAGE_2              2305
 #define IDC_PROGRESS1                   2306
 #define IDC_SYNCHRONIZE                 2307
+#define IDC_ASSIST_IMAGE_1              2307
 #define IDC_CONNECT_LABEL               2308
 #define IDC_CONNECT                     2309
+#define IDC_ASSIST_IMAGE_4              2309
+#define IDC_ASSIST_IMAGE_3              2309
 #define IDC_IMAGE_NAME                  2310
 #define IDC_CACHEMESSAGE                2311
 #define IDC_CACHEHOLDMESSAGE            2312
 #define IDC_HOLD_ONE_HOUR               2313
+#define IDC_IMAGEBUTTON                 2314
+#define IDC_ALLOW_DUPLICATES            2315
+#define ID_THEMELIST_1                  2316
+#define ID_THEMELIST_2                  2317
+#define IDC_SHOWREG                     2318
+#define IDC_END_DISPLAY_COMMAND         2319
+#define IDC_END_DISPLAY_COMMAND2        2320
+#define IDC_SPEED_GROUP                 2320
+#define IDC_FADE_GROUP                  2321
+#define IDC_LAST_DATE                   2322
+#define IDC_CURRENT_DATE                2323
+#define IDC_NEXT_DATE                   2324
+#define IDC_AREA_UNITS_TITLE            2325
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3763,9 +3798,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1262
+#define _APS_NEXT_RESOURCE_VALUE        1274
 #define _APS_NEXT_COMMAND_VALUE         1248
-#define _APS_NEXT_CONTROL_VALUE         2314
+#define _APS_NEXT_CONTROL_VALUE         2326
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

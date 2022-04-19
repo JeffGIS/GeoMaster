@@ -27,9 +27,9 @@ static VARPNT	Varptr;
 static LPSTR	pFile;
 static RECT		UGridRect, GMGridRect;
 
-long far pascal WidthDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam);
-long far pascal InformationDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam);
-long far pascal UGRID1DlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam);
+long far pascal WidthDlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
+long far pascal InformationDlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
+long far pascal UGRID1DlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam);
 
 int PixelsToDialogBoxTemplateUnits (HWND hWndDlg,int pixels)
 {
@@ -99,7 +99,7 @@ BOOL WantGridVar (LPSTR Name,LPSTR ID)
 }
 
 
-BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	int		Choice, CurLoc, Offset,ii, windoff=8; 
 	HANDLE	hData;
@@ -374,7 +374,7 @@ HWND ShowGrid(HWND hWnd,LPSTR SavePosVName,LPSTR VPName){
 
 /*******************************************
 ********************************************/
-/*long far pascal UGRID1DlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam){
+/*long far pascal UGRID1DlgProc(HWND hwnd,UINT Message,WPARAM wParam,LPARAM lParam){
 
 	//general purpose variables
 	int  		t,x;

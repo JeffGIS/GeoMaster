@@ -62,7 +62,7 @@ void MEMERR(LPSTR Mess);
 #define PostMessageA GSSiPOSTMESSAGE 
 BOOL    WINAPI GSSiPOSTMESSAGE(HWND, UINT, WPARAM, LPARAM);
 #define	GlobalLock	GSSiGLOBALLOCK
-void LogMemAlloc (unsigned short MemID,long MemLen);
+void LogMemAlloc (int MemID,long MemLen);
 LPVOID GSSiGLOBALLOCK (HANDLE hglb);
 #define	GlobalSize	GSSiGLOBALSIZE
 DWORD GSSiGLOBALSIZE (HANDLE hglb);
@@ -127,6 +127,7 @@ static	HGDIOBJ	LastObjd[MAXLAST];
 static	HGDIOBJ TrackObj[MAXTRACK]; 
 static	BYTE	TrackObjType[MAXTRACK];
 static	int		TrackObjCount[MAXTRACK];
+static	int		ProgID[MAXTRACK];
 static	int		NextObjectCount=0;
 static	BOOL	FirstTrack=TRUE;
 static	char	TrackTypeName[MAXTRACKTYPE][20] = {"Pen","Solid Brush","Hatch Brush","Pat Brush","Ind Brush","Load Bitmap",
@@ -244,7 +245,7 @@ void DisplaySavedGraphicsFile (HDC hDC,int Type)
 				BigRead (Fid,&npt,4);
 				if (npt)
 				{
-					hpt = GSSiGlobAlloc (0,GMEM_MOVEABLE,npt*sizeof(POINT));
+					hpt = GSSiGlobAlloc (1829,GMEM_MOVEABLE,npt*sizeof(POINT));
 					ppt = (LPPOINT)GlobalLock (hpt);
 					BigRead (Fid,ppt,npt*sizeof(POINT));
 					if (FidSTG == HFILE_ERROR)
@@ -506,6 +507,7 @@ void SetSavedGraphicsFid (int Type)
 
 void TrackObject (HGDIOBJ hObj,short Type)
 {   
+	static BOOL inMessage = FALSE;
 	unsigned short	i;
 	
 	if (!InDebug)
@@ -517,36 +519,51 @@ void TrackObject (HGDIOBJ hObj,short Type)
 	}
 	if (Type == -100)
 	{   
-		char	mess[64];
+		char	mess[80];
         short	n, itype;
         
-        for (itype=0;itype < MAXTRACKTYPE;itype++)
+        for (itype=1;itype <= MAXTRACKTYPE;itype++)
         {
         	n=0;
+			int obcount = 0;
+			int pid;
+			HGDIOBJ TrackOb;
 			for (i=0;i<MAXTRACK;i++)
 			{   
-				if (TrackObj[i] && TrackObjType[i] == itype+1)
+				if (TrackObj[i] && TrackObjType[i] == itype)
 				{
 					n++;
-					ii=TrackObjCount[i];
+					TrackOb = TrackObj[i];
+					obcount=TrackObjCount[i];
+					pid = ProgID[i];
 				}
 			}
 			if (n)
 			{
-				sprintf (mess,"%i %s not deleted",n,TrackTypeName[itype]);
-				MessageBox (0,mess,NULL,MB_ICONEXCLAMATION);
+				if (!inMessage)
+				{
+					inMessage = TRUE;
+					DWORD ityp = GetObjectType(TrackOb);
+					sprintf(mess, "%i %s not deleted", n, TrackTypeName[itype - 1]);
+					MessageBox(0, mess, NULL, MB_ICONEXCLAMATION);
+					inMessage = FALSE;
+				}
 			}
 		} 
 		return;
 	}
+	extern int curProgID;
 	if (Type > 0)
 	{
+		if (Type == 13 && NextObjectCount >= 4735 && curProgID < 0)
+			ii = 1;
 		for (i=0;i<MAXTRACK;i++)
 		{   
 			if (!TrackObj[i])
 			{
 				TrackObj[i] = hObj;
 				TrackObjType[i] = Type; 
+				ProgID[i] = curProgID;
 				TrackObjCount[i] = NextObjectCount++; 
 				if (TrackObjCount[i] == 4021 || TrackObjCount[i] ==4037)
 					ii=1;
@@ -568,12 +585,31 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				TrackObj[i] = 0;
 				TrackObjType[i] = 0;
 				TrackObjCount[i] = 0;
+				ProgID[i] = 0;
 				return;
 			}
 		} 
 		MEMERR ("Deleting Invalid Object");
 	}
 	return;
+}
+HWND WINAPI GSSiSetFocus(_In_opt_ HWND hWnd)
+{
+	HWND rtn;
+	if (GetFocus() == hWnd)
+		rtn = (HWND)-1;
+	else
+		rtn = SetFocus(hWnd);
+#if CHECKMEM 
+	static icmd = 0;
+	char printfcmd[128];
+	sprintf(printfcmd, "setfocus = %#010x:%#010x:%#010x  %6i\n",hWnd,rtn,hWndMain, icmd++);
+	OutputDebugString(printfcmd);
+
+#endif
+	if (rtn == (HWND)-1)
+		rtn = 0;
+	return rtn;
 }
 
 COLORREF WINAPI GSSiSetTextColor(__in HDC hdc, __in COLORREF color)
@@ -1050,6 +1086,11 @@ HGDIOBJ GSSiSELECTOBJECT (HDC hdc,HGDIOBJ hobj)
 			LastObj[nLast++] = hobj;
 	}
 	return holdobj;
+}
+int WINAPI GSSiSETROP2(_In_ HDC hdc, _In_ int rop2)
+{
+	int rtn = SetROP2(hdc, rop2);
+	return rtn;
 }
 HPEN    WINAPI GSSiCREATEPEN (int style, int width, COLORREF color)
 {

@@ -20,7 +20,7 @@
             char    FileName[128];
         }   CACHEBUF; 
 
-extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam);
+extern BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LPARAM lParam);
 #include "gmextern.h"
 
 static	char	LastTextFile[MAX_PATH]="";
@@ -119,13 +119,14 @@ HANDLE OpenFileGM(
 	char	Name[MAX_PATH];
 	int		rtn;
 	BOOL	allowOpenFile = FALSE;
-
+	OFSTRUCTGM ReopenBuff;
 	strcpy(Name, lpFileName);
 	ExpandText(Name);
 
 	if (uStyle == OF_CREATE && !makedirectories(Name, FALSE, TRUE))
 		return  INVALID_HANDLE_VALUE;
-
+	if (!lpReOpenBuff)
+		lpReOpenBuff = &ReopenBuff;
 	memset(lpReOpenBuff, 0, sizeof(OFSTRUCTGM));
 	fullPath = _fullpath(lpReOpenBuff->szPathName, Name, OFS_MAXPATHNAMEGM);
 	if (!fullPath)
@@ -1780,6 +1781,8 @@ Gotid:
 	}
 #endif
 	OpenFileMode[i] = Mode;
+	if (CallID == 62)
+		ii = 1;
 	OpenFileCallID[i] = CallID++;
 	OpenFileCloseRequested[i] = FALSE; 
 	OpenFileUndoFileID[i] = GetUndoFileIDFromName (pOFStruct->szPathName,FALSE);
@@ -4217,6 +4220,10 @@ HGLOBAL GSSiGlobAlloc (int From,UINT fuAlloc, long cbAlloc)
 	char	pMess[64];
     short	ii;
 
+	if (From <= 0)
+		ii = 1;
+	if (From == 1115)
+		ii = 1;
 /*	if (fuAlloc == GMEM_MOVEABLE)
 		fuAlloc = GMEM_FIXED;
 	if (fuAlloc == GHND)
@@ -5866,7 +5873,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	        {   
 	        	if (pRect)
 	        		MaxLen = max (MaxLen,lpBar-str-1);
-	            *lpBar = '\t';
+	            *lpBar++ = '\t';
 	            if (hWndDlg) 
 	            {
 	                Index = SendDlgItemMessage (hWndDlg,Control,LB_ADDSTRING,0,(LPARAM)str);  
@@ -5876,7 +5883,12 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	                	MaxHeight = max (MaxHeight,Rect.bottom - Rect.top);   
 	                	NumItems++;
 	                }
-	                if (i == Default)
+					LPSTR pTab = strchr(lpBar, '\t');
+					if (pTab)
+						*pTab = 0;
+					if (DefaultVal && !stricmp(lpBar, DefaultVal))
+						Default = Index;
+					if (i == Default)
 	                	DefaultIndex = Index;
 	            }
 	            else if (i == Default)
@@ -7120,7 +7132,7 @@ GSSiExitProg (290);
 #endif
 }
 
-BOOL FAR PASCAL TRACEWINDOWMsgProc(HWND hWndDlg, WORD Message, WORD wParam, LONG lParam)
+BOOL FAR PASCAL TRACEWINDOWMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (291);
 #endif
@@ -7415,6 +7427,11 @@ GSSiExitProg (295);
 }
 #endif
 }  
+void lltoa(long long l, LPSTR loc, int rad)
+{
+	sprintf(loc, "%I64i", l);
+	return;
+}
 
 void btoa (BOOL Val,LPSTR str)
 {
@@ -8591,6 +8608,18 @@ int ConvertToNewLocation (LPSTR Path,BOOL DoCopy)
 	}
 	if (Recursive)
 		return FALSE;
+	if (strstr(Path, "ORTHOS")||strstr(Path, "orthos"))
+	{
+		char orthPath[MAX_PATH];
+		strcpy(orthPath, "[%DL]ORTHOS\\[ORTHODATE]\\FILELIST.TXT");
+		ExpandText(orthPath);
+		if (!stricmp(Path,orthPath))
+		{
+			strcpy(Path, "[%DL]ORTHOS\\[%ORTHTYPE][ORTHODATE]\\FILELIST.TXT");
+			ExpandText(Path);
+			return TRUE;
+		}
+	}
 	if (*Path == '(')
 	{
 		LPSTR pEnd = strchr (Path,')');
@@ -8918,7 +8947,7 @@ GSSiExitProg (387);
 #endif
 }
 
-BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK CACHEFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
  switch(Message)
    {
@@ -9341,7 +9370,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
     		goto Exit; 
     }
 //    SetWindowText (hWndMain,Name); 
-if (_fstrstr (Name,"offensexy.GMD"))
+if (strstr (Name,"fundir"))
 	ii=1;
     if (strnicmp(Name, "HTTP:", 5) && strnicmp(Name, "HTTPS:", 6) && !_fstrchr (Name,'\\'))   // change    filex.typ  to .\filex.typ (does this mess up OF_SEARCH?)
     {
@@ -9479,7 +9508,7 @@ Open2:
 	    		else
 				{    		
 					double	dtime;
-					struct _stati64	statfrom, statto;  
+					struct _stati64	statfrom, statto = { 0 };
 					HFILE	FidTo = HFILE_ERROR;
 					
 					InOpenFile = TRUE;
@@ -9489,7 +9518,7 @@ Open2:
 						if (FidTo != HFILE_ERROR)
 						{
 							GSSifstat(FidTo, &statto);
-							if (CacheAlreadyChecked(Name, _fstrlen(CachePathnameTo), CHECKTIMESTAMP))
+							//if (CacheAlreadyChecked(Name, _fstrlen(CachePathnameTo), CHECKTIMESTAMP))
 							{
 								InOpenFile = FALSE;
 								Fid = FidTo;
@@ -9637,8 +9666,12 @@ Open:
 			if (DeleteFileInJournal (Name))
 				Fid = 1;
 		}
-		else if (!GSSiRemove2(Name))
-			Fid = 1;
+		else
+		{
+			pOFStruct->nErrCode = GSSiRemove2(Name);
+			if (!pOFStruct->nErrCode)
+				Fid = 1;
+		}
 	}
     else
     {
@@ -9912,6 +9945,31 @@ GSSiExitProg (309);
 #if ENABLETRACE
 }
 #endif
+}
+void RemoveCharacters(LPSTR str, LPSTR charstoremove)
+{
+	LPSTR pLoc = str;
+	if (!charstoremove || !*charstoremove)
+	{
+		char minc = ' ';
+		char maxc = '~';
+		while (*pLoc)
+		{
+			if (*pLoc < minc || *pLoc > maxc)
+			{
+				LPSTR pLoc1 = pLoc;
+				LPSTR pLoc2 = pLoc + 1;
+				while (*pLoc2)
+				{
+					*pLoc1++ = *pLoc2++;
+				}
+				*pLoc1 = 0;
+			}
+			else
+				pLoc++;
+		}
+	}
+	return;
 }
 
 LPSTR NextBlank(LPSTR Text)
@@ -10595,8 +10653,10 @@ HBITMAP SaveScreen (HDC hDC, RECT Rect)
     SetMapMode    ( hDC, MM_TEXT );
   	SelectClipRgn ( hDC,0);
     hdcMem = CreateCompatibleDC(hDC);
-    hNewBM = CreateCompatibleBitmap(hDC,w,h);
-    if (hNewBM)
+	curProgID = 10048;
+	hNewBM = CreateCompatibleBitmap(hDC,w,h);
+	curProgID = -1;
+	if (hNewBM)
     {
 		BITMAP	bm;
 
@@ -10669,7 +10729,9 @@ GSSiExitProg (329);
 
 void dumpmemdc(HDC hdc)
 {
+	curProgID = 10049;
 	HBITMAP hbm = CreateCompatibleBitmap(hdc, 1, 1);
+	curProgID = -1;
 	HBITMAP hBM = SelectObject(hdc, hbm);
 	HDIB hDib = BitmapToDIB(hBM, 0, 0);
 	SaveDIB(hDib, "c:\\temp\\dump.bmp");
@@ -10702,11 +10764,11 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	}
 	pSaveScreen->Rect = Rect;
 	pSaveScreen->hBM = SaveScreen (hDC,Rect);
-	/*if (dbug)
+	if (dbug)
 	{
 		HDIB hDib=BitmapToDIB (pSaveScreen->hBM, 0,0);
 		SaveDIB (hDib,"c:\\temp\\temp.bmp");
-	}*/
+	}
 	if (!pSaveScreen->hBM)
 		GSSiGlobUlFree (&handle);
 	else
@@ -11075,7 +11137,18 @@ GSSiExitProg (338);
 }
 #endif
 }
-   
+
+RECT RectFromPointAndWidth(POINT pt, int w)
+{
+	RECT r;
+	w /= 2;
+	r.left = pt.x - w;
+	r.right = pt.x + w;
+	r.top = pt.y - w;
+	r.bottom = pt.y + w;
+	return r;
+
+}
 void ClearSavedScreens(HWND hWnd,LPVOID pVP, LPRECT pRect)
 #if ENABLETRACE
 {GSSiEnterProg (339);
@@ -11142,32 +11215,16 @@ void ResaveSavedScreens(void)
 #endif
 } 
 
-BOOL    GetBit (int ibit, LPSTR lpBytes)
-#if ENABLETRACE
-{GSSiEnterProg (341);
-#endif
+BOOL    GetBit (int ibit, LPBYTE lpBytes)
 {   int       bit, byte;
 
     byte = ibit/8;
     bit  = ibit%8;
     lpBytes += byte;
     if (Mask[bit] & *lpBytes)
-{
-#if ENABLETRACE
-GSSiExitProg (341);
-#endif
         return 1;
-}
     else
-{
-#if ENABLETRACE
-GSSiExitProg (341);
-#endif
         return 0;
-}
-#if ENABLETRACE
-}
-#endif
 }
 
 void SetBit (int ibit, LPSTR lpBytes, BOOL setto)
@@ -11232,14 +11289,14 @@ BYTE ComputeCheckSum (LPBYTE rec,DWORD l)
 	return csum; 
 }
 
-long GSSiLength (LPSTR File)
+LONGLONG GSSiLength (LPSTR File)
 #if ENABLETRACE
 {GSSiEnterProg (344);
 #endif
 {
 	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
-	long		l;
+	LONGLONG		l;
 	
 	Fid = GSSiOpenFile (File,&OFStruct,OF_READ);
 	if (Fid == HFILE_ERROR)
@@ -11261,21 +11318,34 @@ GSSiExitProg (344);
 }
 #endif
 }
+LONGLONG GSSifilelength64(HANDLE Fid)
+{
+	LONGLONG    CurLoc, Len;
 
-long GSSifilelength (HFILE Fid)
+	if (Fid == INVALID_HANDLE_VALUE)
+		Len = -1;
+	else
+	{
+		CurLoc = GSSillseek64(Fid, 0, 1);
+		Len = GSSillseek64(Fid, 0, 2);
+		GSSillseek64(Fid, CurLoc, 0);
+	}
+	return Len;
+}
+LONGLONG GSSifilelength (HFILE Fid)
 #if ENABLETRACE
 {GSSiEnterProg (345);
 #endif
 {                
-    long    CurLoc, Len;
+    LONGLONG    CurLoc, Len;
     
 	if (Fid < 0)
 		Len = -1;
 	else
 	{
-		CurLoc = GSSillseek (Fid,0,1);
-		Len = GSSillseek (Fid,0,2);
-		GSSillseek (Fid,CurLoc,0);
+		CurLoc = GSSillseek2 (Fid,0,1);
+		Len = GSSillseek2 (Fid,0,2);
+		GSSillseek2 (Fid,CurLoc,0);
 	}
 {
 #if ENABLETRACE
@@ -11663,7 +11733,7 @@ BOOL NextLine (LPSTR *lpText,LPSTR lpLine,short nAutoLines)
 #if ENABLETRACE
 {GSSiEnterProg (365);
 #endif
-{   LPSTR	loc; 
+{   LPSTR	loc=0; 
 	short	inc=1;
 
     if (!**lpText)
@@ -12265,7 +12335,7 @@ GSSiExitProg (381);
 #endif
 }
 
-BOOL MemError ()
+BOOL MemEror ()
 #if ENABLETRACE
 {GSSiEnterProg (382);
 #endif
@@ -12385,8 +12455,10 @@ BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 {GSSiEnterProg (384);
 #endif
 {
- MSG            msg; 
+	MSG            msg = { 0 };
 
+ if (ghPrintingDlg)
+	 return TRUE;
  GdiFlush ();
  if (pQuitProcessing)
 	 *pQuitProcessing = FALSE;
@@ -13084,7 +13156,7 @@ void ClearFullWindowBitmap (HWND hWnd)
 		GSSiDeleteObject (&hFullWindowBitMap);
 		GdiFlush ();
 		RedisplayLastPrompt (); 
-		NotifyFunction((LPVIEWPORT)-1, GF_REDRAW);
+		//NotifyFunction((LPVIEWPORT)-1, GF_REDRAW);
 
 	}
 {
@@ -13369,15 +13441,15 @@ BOOL WindowIsCovered (HWND hWnd,short opt)
 	
 	if (opt == 1)
 	{
-		OSVERSIONINFOEX verinfo;
+		//OSVERSIONINFOEX verinfo;
 		BOOL isWOW64;
 		HANDLE hProcess = GetCurrentProcess();
 
 		if (!IsWow64Process(hProcess, &isWOW64))
 			isWOW64 = FALSE;
 
-		verinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		GetVersionEx((LPOSVERSIONINFO)&verinfo);
+		//verinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+		//GetVersionEx((LPOSVERSIONINFO)&verinfo);
 	//	if (verinfo.dwMajorVersion > 5) //dont care if covered if Vista or higher
 		if (isWOW64)
 			return FALSE;
@@ -13537,6 +13609,18 @@ LONGLONG GSSillseek2 (HFILE Fid, LONGLONG loc, int opt)
 	return rtnloc;
 }
 
+LONGLONG GSSillseek64(HANDLE Fid, LONGLONG loc, int opt)
+{
+	LONGLONG	rtnloc;
+	LARGE_INTEGER  liDistanceToMove;
+	liDistanceToMove.QuadPart = loc;
+	LARGE_INTEGER  liRtnLoc;
+	rtnloc = llFileSeek(Fid, loc, opt);
+	BOOL st = SetFilePointerEx(Fid, liDistanceToMove, &liRtnLoc, opt);
+	rtnloc = liRtnLoc.QuadPart;
+	return rtnloc;
+}
+
 long  GSSilread(HFILE Fid, void _huge* ptr, long len)
 {   
 	
@@ -13679,7 +13763,15 @@ int GSSiMsgBox (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPSTR Position
 /*  top == -4        - center at bottom - 16 of CurView                 */
 /*  top == -5        - center horz on cursor in parent, vert above curs */
 /************************************************************************/
+BOOL IsTopLevelWindow(HWND hWnd)
+{
+	BOOL rtn = FALSE;
+	HWND hWndParent = GetParent(hWnd);
 
+	if (!hWndParent)
+		rtn = TRUE;
+	return rtn;
+}
 void cwCenter(HWND hWnd, int top)
 #if ENABLETRACE
 {GSSiEnterProg (452);
@@ -13692,11 +13784,13 @@ void cwCenter(HWND hWnd, int top)
  int        iheight; 
  HWND		hPWnd;  
  BOOL		IsClient=FALSE;
+ BOOL		IsTop = IsTopLevelWindow(hWnd);
+ int		attempt = 0;
 
  /* get the rectangles for the parent and the child                     */
  if (!GetWindowRect(hWnd, &swp))
 	 return;
-
+ swp = MoveRectToAMonitor(swp);
 begin:
 
  if (!hWndMain || top == SHRT_MAX)
@@ -13706,7 +13800,10 @@ begin:
  	IsClient = FALSE;
  }
  else
- 	hPWnd = hWndMain;
+ {
+	 hPWnd = hWndMain;
+	 IsClient = !IsTop;
+ }
 // GetClientRect(hPWnd, &rParent);
  GetWindowRect(hPWnd, &rParent);
 
@@ -13724,8 +13821,10 @@ begin:
  }
  if (top == -4)//center at bottom of vp
  {
-	 pt.y = CurView->DrawRect.top + CurView->DrawRect.bottom - iheight - 16;
+	 pt.y = CurView->DrawRect.top + RECTHEIGHT(&CurView->DrawRect) - iheight - 16;
 	 pt.x = CurView->DrawRect.left + RECTWIDTH(&CurView->DrawRect) / 2 - iwidth / 2;
+	 if (IsClient)
+		 ClientToScreen(hPWnd, &pt);
 	 goto Exit;
  }
  else if (top<0)
@@ -13739,10 +13838,10 @@ begin:
 else
 {
 	 /* find the center point and convert to screen coordinates             */
-	 pt.x = (rParent.right + rParent.left) / 2;
-	 pt.y = (rParent.bottom + rParent.top) / 2; 
-	 if (IsClient)
-	 	ClientToScreen(hWndMain, &pt);
+	 pt.x = rParent.left + RECTWIDTH(&rParent)  / 2;
+	 pt.y = rParent.top   + RECTHEIGHT(&rParent) / 2; 
+	 if (!IsClient)
+	 	ClientToScreen (hPWnd, &pt);
 } 
 
  /* calculate the new x, y starting point                               */
@@ -13758,17 +13857,22 @@ else
 		 pt.x = rParent.right - iwidth;
 	 if (pt.y < rParent.top)
 		 pt.y = rParent.top;
-	 if (pt.x < 0 || pt.y < 0)
+	 if ((pt.x < 0 || pt.y < 0) && attempt++ < 2)
 	 {
 		 top = SHRT_MAX;
 		 goto begin;
 	 }
  }
 
- Exit:
- /* move the window                                                     */
- MoveWindow(hWnd, pt.x, pt.y, iwidth, iheight, FALSE);
- //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
+Exit:
+ {
+	 /* move the window  */
+
+	 RECT displayRect = { pt.x,pt.y,pt.x + iwidth,pt.y + iheight };
+	 displayRect = MoveRectToAMonitor(displayRect);
+	 MoveWindow(hWnd, displayRect.left, displayRect.top, iwidth, iheight, FALSE);
+	 //SetWindowPos (hWnd,0,pt.x, pt.y, iwidth, iheight,SWP_NOZORDER|SWP_NOOWNERZORDER);
+ }
 {
 #if ENABLETRACE
 GSSiExitProg (452);

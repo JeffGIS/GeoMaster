@@ -764,6 +764,10 @@ int SQLiteCmd(int nArgs, LPSTR *ARG)
 				if (!strncmp(cmd, "--LL", 4))
 				{
 					MAXSTR = atol(&cmd[4]) + 2;
+					GSSiGlobUlFree(&hstr);
+					hstr = GSSiGlobAlloc(0, GMEM_MOVEABLE, MAXSTR);
+					cmd = GlobalLock(hstr);
+
 					continue;
 				}
 				
@@ -2091,7 +2095,7 @@ NextCrimeRec:
 
 			if (Fid != HFILE_ERROR)
 			{
-				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*2);
+				HANDLE hCmd = GSSiGlobAlloc(1796, GMEM_MOVEABLE, USHRT_MAX * 64*4);
 				LPSTR  pCmd = GlobalLock(hCmd);
 
 				if (createFile)
@@ -2229,8 +2233,8 @@ NextCrimeRec:
 								ConvertCoord(&pPointsCVT[i], 1, 3);
 								if (!skipConvert)
 									ConvertCoord(&pDPoints[i], 1, 2);
-								pPoints[i].x = coordFactor * (pDPoints[i].x - midPt.x);
-								pPoints[i].y = coordFactor * (pDPoints[i].y - midPt.y);
+								pPoints[i].x = IDNINT(coordFactor * (pDPoints[i].x - midPt.x));
+								pPoints[i].y = IDNINT(coordFactor * (pDPoints[i].y - midPt.y));
 								if (pPoints[i].x > SHRT_MAX || pPoints[i].x < SHRT_MIN || pPoints[i].y > SHRT_MAX || pPoints[i].y < SHRT_MIN)
 									canCompress = FALSE;
 							}
@@ -2291,10 +2295,13 @@ NextCrimeRec:
 							nLops = nLoops;
 							if (skipConvert)
 								nLops = -nLoops;
+							char a7val[1024];
 							if (nLoops > 1)
 							{
+								strcpy(a7val, ARG[7]);
+								ExpandText(a7val);
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,Arg7Val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,a7val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints, sqMeters, perimeter);
 								free(blobParts);
@@ -2302,7 +2309,11 @@ NextCrimeRec:
 							else
 							{
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, Arg7Val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
+								{
+									strcpy(a7val, ARG[7]);
+									ExpandText(a7val);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, a7val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
+								}
 								else
 									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 							}
@@ -2760,6 +2771,20 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 									else
 									{
 										sprintf(Query, "SELECT %s FROM RAMPS,RAMPS_index WHERE RAMPS.rampExists > 0 AND RAMPS.rowid=RAMPS_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", SQLITEUsedFields,
+											Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+									}
+								}
+								else if (!stricmp(tableName, "INTERSECTIONS"))
+								{
+									if (SLTSpatialIndex2Exists(pSQLDatabase->DBHandle, tableName))
+									{
+										MNMXCORL adjBoundsL = AdjustSLTBounds(&Bounds, FALSE);
+										sprintf(Query, "SELECT %s FROM INTERSECTIONS,INTERSECTIONS_index2 WHERE INTERSECTIONS.rowid=INTERSECTIONS_index2.id AND maxX>=%i AND minX<=%i AND maxY>=%i AND minY<=%i", SQLITEUsedFields,
+											adjBoundsL.xmn, adjBoundsL.xmx, adjBoundsL.ymn, adjBoundsL.ymx);
+									}
+									else
+									{
+										sprintf(Query, "SELECT %s FROM INTERSECTIONS,INTERSECTIONS_index WHERE INTERSECTIONS.rowid=INTERSECTIONS_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", SQLITEUsedFields,
 											Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 									}
 								}
@@ -3921,12 +3946,14 @@ BOOL SQLITEPrepare(LPSQLDATABASE pDB)
 			int ibytes = sqlite3_column_bytes(pDB->statement, j);
 			LPSTR decl = (LPSTR)sqlite3_column_decltype(pDB->statement, j);
 			LPSTR pName = (LPSTR)sqlite3_column_name(pDB->statement, j);
-			if (!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE") || !stricmp(pName, xfield))
+			if ((!stricmp(pName, "X") || !stricmp(pName, "LONGITUDE")) && pDB->xLoc == -1)
 				pDB->xLoc = j;
-
-			if (!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE") || !stricmp(pName, yfield))
+			if ((!stricmp(pName, "Y") || !stricmp(pName, "LATITUDE")) && pDB->yLoc == -1)
 				pDB->yLoc = j;
-
+			if (!stricmp(pName, xfield))
+				pDB->xLoc = j;
+			if (!stricmp(pName, yfield))
+				pDB->yLoc = j;
 			if (!decl)
 				decl = nulltype;
 			if (strcmp(pName, lastName))
@@ -4354,7 +4381,7 @@ static char QuoteValue(LPOPENFILEDATA FilePtr, LPSTR pName)
 	}
 	return q;
 }
-static void AddFieldType(LPSTR pCmd, LPSTR pName, LPOPENFILEDATA FilePtr,LPINT pNameIndex,LPSTR quote)
+void AddFieldType(LPSTR pCmd, LPSTR pName, LPOPENFILEDATA FilePtr,LPINT pNameIndex,LPSTR quote)
 {
 	LPFIELDINFO	pFieldInfo = &FilePtr->FldInfo;
 

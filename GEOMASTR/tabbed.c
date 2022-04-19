@@ -14,7 +14,7 @@ static WNDPROC g_OldProc;
 WNDPROC	g_OrigTabProc;
 
 void DisplayTabbedMenu (HWND hWnd);
-LRESULT CALLBACK TabSubclassProc (HWND hwnd, UINT message, 
+LRESULT CALLBACK TabSubclassProc (HWND hwnd, UINT Message, 
                              WPARAM wParam, LPARAM lParam);
 
 int SwitchTabbedMenu (HWND hWnd,int ipage);

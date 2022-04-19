@@ -564,7 +564,7 @@ static void setSelectedSize(HWND hWndDlg)
 	SetDlgItemText(hWndDlg, IDC_FMTOTALS, txt);
 }
 
-BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FileManagerMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char txt[1024];
 	char filePath[MAX_PATH];

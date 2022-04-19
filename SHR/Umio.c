@@ -315,7 +315,7 @@ int SetReplayPosition (int pos,HFILE FidReplay2)
 	return 0;
 }
 
-BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VEHICLE_TIMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	BOOL	Err,ii;
 	RECT	Rect;

@@ -56,6 +56,11 @@ void SetHighlightDepth (int In);
 
 HANDLE countyLinkedVar = 0, countyVar = 0;
 
+void SetInitialGlobalValues(void)
+{
+	ProcessText("[%MACRODIR]=[%DL]macros\\");
+	ProcessText("[%PRJDIR]=[%DL]projects\\");
+}
 HANDLE CreateVarSpace(int type)
 {
 	HANDLE hSpace;
@@ -952,10 +957,12 @@ GSSiExitProg (520);
     	Type = THEME_HLTFILE;
 	else if (_fstrstr(Name, ".SQLITE"))
 		Type = SLT_DATAFILE;
-	else if (_fstrstr(Name, ".SQL"))
-		Type = SQL_DATAFILE;
 	else if (_fstrstr(Name, ".SLT"))
 		Type = SLT_DATAFILE;
+	else if (_fstrstr(Name, ".NVI"))
+		Type = SLT_DATAFILE;
+	else if (_fstrstr(Name, ".SQL"))
+		Type = SQL_DATAFILE;
 	else if (_fstrstr(Name, ".SHP"))
     	Type = SHAPE_DATAFILE;
     else if (_fstrstr(Name,".PND"))
@@ -1936,6 +1943,8 @@ void SetUDIValue (LPSTR Name, LPSTR Value)
 	int		i,j;
 	LPTAGDEF	pTAGDef;
 	
+	if (!wantSetUDIValue)
+		return;
 	SetGlobalValue (Name,Value); 
 	LoadTAGDef();
 	if (NumTAGDef>0)
@@ -1956,6 +1965,9 @@ void SetUDIValue (LPSTR Name, LPSTR Value)
 		GlobalUnlock (hTAGDef);
 	}
 	SetGlobalValue2 (hUDI,Value,0);
+	SetGlobalValue("%PREFIX",Name);
+	SetGlobalValue("%UDI", Value);
+
 		
 {
 #if ENABLETRACE
@@ -2175,7 +2187,7 @@ void SetGlobalValue3 (LPSTR Name, LPSTR Value, short Index, BOOL FoundLit)
 	HANDLE	handle; 
 	short	ii; 
 	
-	if (!*Name || _fstrlen (Name) > 61)
+	if (!*Name || _fstrlen (Name) > MAX_VARNAME_LEN)
 {
 #if ENABLETRACE
 GSSiExitProg (529);
@@ -3632,6 +3644,15 @@ GSSiExitProg (532);
 		case 406:
 			forceZoomToGoogle = atob(Value);
 			break;
+		case 408:
+			SMTP_PORT = atol(Value); 
+			break;
+		case 409:
+			DNS_PORT = atol(Value);
+			break;
+		case 412:
+			allowMapServerTrace = atob(Value);
+			break;
 		default:
  			break;
 	}
@@ -4057,6 +4078,12 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%CACHEBUFFERSIZE", 404, FALSE);
 	AllocateTypeVar("%CACHEREADDELAY", 405, FALSE);
 	AllocateTypeVar("%FORCEZOOMTOGOOGLE", 406, FALSE);
+	AllocateTypeVar("%GOOGLEAPIKEY", 407, FALSE);
+	AllocateTypeVar("%SMTP_PORT", 408, FALSE);
+	AllocateTypeVar("%DNS_PORT", 409, FALSE); 
+	AllocateTypeVar("%MILESPERMETER", 410, FALSE);
+	AllocateTypeVar("%METERSPERMILE", 411, FALSE);
+	AllocateTypeVar("%TRACEMAPSERVER", 412, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5310,6 +5337,25 @@ GSSiExitProg (533);
 		case 406:
 			btoa(forceZoomToGoogle, OutStr);
 			break;
+		case 407:
+			strcpy(OutStr, GOOGLE_API_KEY);
+			break;
+		case 408:
+			ltoa(SMTP_PORT, OutStr, 10);
+			break;
+		case 409:
+			ltoa(DNS_PORT, OutStr, 10);
+			break;
+		case 410:
+			sprintf(OutStr, "%.14lg", MILESPERMETER);
+			break;
+		case 411:
+			sprintf(OutStr, "%.14lg", METERSPERMILE);
+			break;
+		case 412:
+			btoa(allowMapServerTrace, OutStr);
+			break;
+
 	}
 	GlobalUnlock (hGlobal);
 {
@@ -5520,12 +5566,25 @@ GSSiExitProg (539);
 #endif
 }
 
-void AddToChangedGlobalList (HANDLE handle)
-{   
-//keeps last 32 changed globals
-	if (nChangedGlobals > 31)
+void AddToChangedGlobalList(HANDLE handle)
+{
+	//keeps last 32 changed globals
+	if (nChangedGlobals >= MAX_CHANGED_GLOBALS)
 		return;
 	ChangedGlobals[nChangedGlobals++] = handle;
+	return;
+}
+void RemoveFromChangedGlobalList(HANDLE handle)
+{
+	int nChangedGlobalsNew = 0;
+	for (int i = 0; i < nChangedGlobals; i++)
+	{
+		if (ChangedGlobals[i] != handle)
+			ChangedGlobals[nChangedGlobalsNew++] = ChangedGlobals[i];
+		else
+			ii = 1;
+	}
+	nChangedGlobals = nChangedGlobalsNew;
 	return;
 }
 
@@ -5539,8 +5598,11 @@ void SetVarChangeTimes (short opt)
 		for (i=0;i<nChangedGlobals;i++)
 		{   
 			VP = (VARPNT)GlobalLock (ChangedGlobals[i]);
-			VP->changetime = NextVarTime();
-			GlobalUnlock (ChangedGlobals[i]);
+			if (VP)
+			{
+				VP->changetime = NextVarTime();
+				GlobalUnlock(ChangedGlobals[i]);
+			}
 		}
 	}
 	else
@@ -6188,6 +6250,7 @@ HANDLE	AllocateVar (LPSTR Name)
 {   VARPNT  VarPnt;   
 	HANDLE	handle;
 	HANDLE	hVarSpace;
+	BOOL	setwh = FALSE;
 
 	if (handle = FindVar(Name))
 {
@@ -6216,9 +6279,13 @@ GSSiExitProg (550);
 	}
 	handle = GSSiGlobAlloc(197, GHND, sizeof(VARINFO));
 	pVarSpace->VarHandles[pVarSpace->NumVars++] = handle;
+	if (*Name == '~')
+		ii = 1;
+	if (setwh)
+		SetWantHandle(handle);
 	VarPnt = (VARPNT)GlobalLock(handle);  
 	VarPnt->Handle = handle;
-	_fstrcpy(VarPnt->Name,Name);   
+	strncpy0(VarPnt->Name, Name, MAX_VARNAME_LEN + 1);
 	VarPnt->Save = TRUE;//(*Name != '%'); 2010 01-20 to save street name and width vars for Mpls
 	GlobalUnlock (handle);
 	GlobalUnlock(hVarSpace);
@@ -6314,7 +6381,7 @@ void AddToVarNameTable (LPSTR Name)
 	}
 	if (pVarSpace->NumVars >= pVarSpace->MaxVars)
 		BlowOut ("Maximum globals exceeded",0);
-	if (_fstrlen (Name) > 61)
+	if (_fstrlen (Name) > MAX_VARNAME_LEN)
 		GSSiMsgBox (GetFocus(),"Length of variable name exceeds 61 characters",Name,MB_ICONEXCLAMATION,0);
 	if (!pVarSpace->hVarNameTable)
 		pVarSpace->hVarNameTable = GSSiGlobAlloc(198, GMEM_MOVEABLE, (long)sizeof(VARNAMEINDEXITEM)*pVarSpace->MaxVars);
@@ -6328,7 +6395,7 @@ void AddToVarNameTable (LPSTR Name)
 		}
 	}
 Exit:
-	strncpy0 (lpVN->Name,Name,62);
+	strncpy0 (lpVN->Name,Name, MAX_VARNAME_LEN+1);
 	lpVN->id = pVarSpace->NumVars;
 	GlobalUnlock(pVarSpace->hVarNameTable);
 	GlobalUnlock (hVarSpace);
@@ -6570,7 +6637,7 @@ LPSTR ExpandText2 (LPSTR InText)
 	return InText;
 }
 
-BOOL FAR PASCAL MESSAGEBOXHALTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MESSAGEBOXHALTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	HANDLE	hSaveBM=0;	
 
@@ -6728,7 +6795,8 @@ LPSTR ExpandTextDB2 (LPSTR InText,LPBREAKPOINT pBrkPt,int bpOffset,int bpLen)
 	int		loopBPOffset=0, whileBpOffset=0;
 	int		elseBpOffset=0, thenBpOffset=0;
 
-
+	if (pBrkPt)
+		ii = 1;
 	InExpand = TRUE;
 	if (TraceOn)
 	{   
@@ -6798,7 +6866,7 @@ GSSiExitProg (558);
 				InLoc++;
 			}
 		}
-		else if (*InLoc == '[')
+		else if (*InLoc == '[' && allowGlobalExpansion)
 		{   
 			if (!(EndBrack = MatchLev((LPSTR)(InLoc + 1), ']')))
 			{
@@ -7864,7 +7932,7 @@ BOOL ResetFileChangeTime (HANDLE hDB)
 
 BOOL GetFileChangeTime (VARPNT VarPtr)
 {
-    char FileID[32];  
+    char FileID[80];  
     short	isql;  
     BOOL	rtn=FALSE; 
     LPSTR	pDot;
@@ -7874,7 +7942,7 @@ BOOL GetFileChangeTime (VARPNT VarPtr)
 	LPFILEPATH	FilePathPtr;
 
     
-    _fstrcpy (FileID,VarPtr->Name);
+    strcpy_s (FileID, sizeof(FileID) - 1,VarPtr->Name);
     if ((pDot = _fstrchr (FileID,'.')))
     {
     	*pDot = 0;
@@ -9648,7 +9716,7 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 				if (SQLPtr->st)
 					goto NotFound;
 				{
-					HANDLE hsql = GSSiGlobAlloc(0, GMEM_MOVEABLE, maxlval);
+					HANDLE hsql = GSSiGlobAlloc(1831, GMEM_MOVEABLE, maxlval);
 					LPSTR sql = GlobalLock(hsql);
 					strcpy(sql, SQLPtr->SQL);
 					ExpandText(sql);
@@ -10238,6 +10306,7 @@ void CloseVars (void)
 	{   
 		if ((VarPtr = (VARPNT)GlobalLock(pVarSpace->VarHandles[i])))
 		{
+			RemoveFromChangedGlobalList(pVarSpace->VarHandles[i]);
 			if (VarPtr->ValueIsHandle)
 			{
 				HANDLE handle = (HANDLE)atol (VarPtr->Value);
@@ -10705,8 +10774,9 @@ GetScale:
 	}
 
 	ires = min(numOrthoLevs-1, max(ires + GetGlobalLVal2("[%INCORTHORES]", 0), GetGlobalLVal2("[%MINORTHORES]", 0)));
-	SetGlobalValueLong ("%ORTHORES",OrthRes[ires]);
-	
+	SetGlobalValueLong("%ORTHORES", OrthRes[ires]);
+	//SetGlobalValueLong("%ORTHORES", 64);
+
 {
 #if ENABLETRACE
 GSSiExitProg (596);

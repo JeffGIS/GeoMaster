@@ -314,7 +314,7 @@ long ok;
 		// DPOINT testpt;
 		// testpt.x = DPoint->x * RAD_TO_DEG;
 		// testpt.y = DPoint->y * RAD_TO_DEG;
-		 from = 2;
+		 from = LATLONPROJECTION;
 	 }
 	 if (ok != 0)
 		 goto Exit;
@@ -322,7 +322,7 @@ long ok;
 	 if (PRJ_TYPE[to] == PROJ4PROJECTION) //going to have to go to lat/lon first
 	 {
 		 saveto = to;
-		 to = 2;
+		 to = LATLONPROJECTION;
 	 }
      SaveFromUnits=PRJ_UNITS[from];
      SaveToUnits=PRJ_UNITS[to];

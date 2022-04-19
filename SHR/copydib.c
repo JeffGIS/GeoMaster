@@ -379,7 +379,9 @@ HBITMAP FAR CopyScreenToBitmap(LPRECT lpRect)
    nHeight = nY2 - nY;
 
    /* create a bitmap compatible with the screen DC */
+   curProgID = 10047;
    hBitmap = CreateCompatibleBitmap(hScrDC, nWidth, nHeight);
+   curProgID = -1;
 
    /* select new bitmap into memory DC */
    hOldBitmap = SelectObject(hMemDC, hBitmap);

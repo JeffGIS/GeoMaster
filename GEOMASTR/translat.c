@@ -407,7 +407,7 @@ void DestroyAdvancedOpts (void)
 	 return;
 } 
 
-BOOL ImportCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam,HANDLE hDB) 
+BOOL ImportCommonCode (HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam,HANDLE hDB) 
 {
   HANDLE	hStr=GSSiGlobAlloc ( 427,GMEM_MOVEABLE,256);
   LPSTR	str=GlobalLock (hStr);

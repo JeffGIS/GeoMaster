@@ -178,7 +178,7 @@ GSSiExitProg (1377);
 
 BOOL MapIndexVisible (LPSTR IndexPathName)
 {   
-	HANDLE	hStr=GSSiGlobAlloc (0,GMEM_MOVEABLE,256);
+	HANDLE	hStr=GSSiGlobAlloc (1830,GMEM_MOVEABLE,256);
 	LPSTR	str=GlobalLock (hStr);
 	LPSTR	lpBS;
 	BOOL	rtn=TRUE;
@@ -897,7 +897,7 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
     BOOL		First;  
     BOOL	SaveUseRefOrTAGIndex=UseRefOrTAGIndex;   
     BOOL	SaveIgnoreBounds = IgnoreBounds, SaveDisplay = Display;
-	HANDLE  hSaveView = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
+	HANDLE  hSaveView = GSSiGlobAlloc(1847, GMEM_MOVEABLE, sizeof(VIEWPORT)+4);
 	LPVIEWPORT pSaveCurView = CurView;
 	LPVIEWPORT pSaveView = GlobalLock(hSaveView);
 
@@ -1378,7 +1378,7 @@ Done:
     if (SaveSubFile && SaveCurFile >= 0)
     {
     	CurView->SubFile = SaveSubFile;  
-        CurView->RestoreFile = SaveRestoreFile;
+        SetRestoreFile(CurView,SaveRestoreFile);
         _fstrcpy (CurView->OrigFile,SaveOrigFile);
         _fstrcpy (CurView->lpFiles[CurView->RestoreFile],SaveFile); 
     }
@@ -1390,7 +1390,16 @@ Done:
     UseRefOrTAGIndex = SaveUseRefOrTAGIndex;
     return rtn;
 }
-
+void SetRestoreFile(LPVIEWPORT CurView, int file)
+{
+	if (file)
+		ii = 1;
+	if (CurView->RestoreFile)
+		ii = 1;
+	if (file && CurView->RestoreFile)
+		ii = 1;
+	CurView->RestoreFile = file;
+}
 HANDLE AddParToList(int Parent)
 {   HANDLE  hParList;
     PARLIST *pParList;

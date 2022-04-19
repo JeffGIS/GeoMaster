@@ -7,7 +7,7 @@
 
 #include "gmextern.h"
 
-UINT CALLBACK  FontHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+UINT CALLBACK  FontHook (HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 
 void SetIgnoreError (BOOL setting);
 
@@ -338,7 +338,7 @@ BOOL CDInit (HWND hWnd, HINSTANCE Inst)
 void CDClose (void)
 {
     
-	if (ghDlgBrush) DeleteObject(ghDlgBrush);
+	if (ghDlgBrush) GSSiDeleteObject(&ghDlgBrush);
 	if (hPDChunk)
 	{   
 		lpPDChunk = (LPPRINTDLG)GlobalLock (hPDChunk);
@@ -515,7 +515,7 @@ Exit:
 }
 
 
-BOOL CALLBACK COLORFROMPALETTEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK COLORFROMPALETTEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	switch(Message) 
@@ -651,7 +651,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 		_chdir(InitialDirectory);
 	fsLen = FormatFilterString();  //Formats gszFilter with strings
 
-	if (BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE) != (HRESULT)0)
+	if (BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter,OFTitle,FALSE,FALSE) != (HRESULT)0)
 	{
 		strcpy(Name, InitialFile);
 		rtn = TRUE;
@@ -662,7 +662,7 @@ BOOL GetOpenFileCD_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir)
 
 BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 {
-	//return GetOpenFileCD_new(hWnd,  Name,  lname, lpInitDir);
+	return GetOpenFileCD_new(hWnd,  Name,  lname, lpInitDir);
    /*******************************************************************
    *                                                                  *
    *                    FILEOPEN/FILESAVE VARIABLES                   *
@@ -720,6 +720,8 @@ BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
 			}
 			SetIgnoreError (TRUE);
 			inOpenFileDialog = TRUE;
+			lpFOChunk->of.lpfnHook = lpfnFileOpenHook;
+			//lpFOChunk->of.Flags = lpFOChunk->of.Flags | OFN_ENABLEHOOK;
          	st = GetOpenFileName(&(lpFOChunk->of)); 
 			inOpenFileDialog = FALSE;
  			SetIgnoreError (FALSE);
@@ -783,9 +785,28 @@ BOOL GetOpenFileCD (HWND hWnd,LPSTR Name,int lname, LPSTR lpInitDir)
          AllowCreate = FALSE;
          return (Result);
 }
+BOOL GetFolderName_new(HWND hWnd, LPSTR Name, int lname, LPSTR lpInitDir, LPSTR title)
+{
+	BOOL rtn = FALSE;
+	if (!*Name || (*Name && *LastChr(Name) == '\\'))
+		*InitialFile = 0;
+	else
+		_fullpath(InitialFile, Name, 256);
+	if (_fullpath(InitialDirectory, lpInitDir, 256))
+		_chdir(InitialDirectory);
+	fsLen = FormatFilterString();  //Formats gszFilter with strings
+
+	if (BasicFileOpen2(hWnd, InitialFile, MAX_PATH, InitialDirectory, gszFilter, title, FALSE, TRUE) != (HRESULT)0)
+	{
+		strcpy(Name, InitialFile);
+		rtn = TRUE;
+	}
+	return rtn;
+}
 
 BOOL GetFolderName (HWND hWnd,LPSTR startDir,LPSTR outDir,LPSTR title)
 {
+	return GetFolderName_new(hWnd, outDir, MAX_PATH, startDir, title);
 	BROWSEINFO bi={0};
 	PCIDLIST_ABSOLUTE pidList;
 
@@ -823,7 +844,7 @@ BOOL GetSaveFileCD(HWND hWnd, LPSTR Name, LPSTR lpInitDir)
 	_splitpath(InitialFile, NULL, NULL, nam, ext);
 	sprintf(FName, "%s%s", nam, ext);
 	_fstrcpy(InitialFile, FName);
-	st = BasicFileOpen2(InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE);
+	st = BasicFileOpen2(hWnd,InitialFile, MAX_PATH, InitialDirectory, gszFilter, OFTitle,TRUE,FALSE);
 	if (st)
 	{
 		_fstrcpy(Name, InitialFile);
@@ -1780,7 +1801,7 @@ UINT CALLBACK  FileOpenHook (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	int		ii;
 	char	str[256];
 
-	//return (FALSE);
+	return (FALSE);
    switch (message)
       {
    case WM_INITDIALOG:
@@ -2486,7 +2507,7 @@ SetCurColor:
    return FALSE;
 }
 
-/*BOOL FAR PASCAL _export ABORTWAITMsgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+/*BOOL FAR PASCAL _export ABORTWAITMsgProc (HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {	char	str[256];
  int	BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hDlg,message, wParam, lParam)))

@@ -12,7 +12,7 @@ void SetCurrentParcelTran(LPPARCELTRAN pParTran)
 	return;
 }
 
-HANDLE STRAN2 (int ID,double X1[], double Y1[],double X2[],double Y2[],int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds)
+HANDLE STRAN2 (int ID,LPDOUBLE X1, LPDOUBLE Y1, LPDOUBLE X2, LPDOUBLE Y2,int N, LPFLOAT RSQMIN, int Type,LPMNMXCORD pBounds)
 /*    ENTRY      TRNPRO (XIN,YIN,XOUT,YOUT,TRNNUM)
 C     ENTRY      TRANS2 (XIN,YIN,XOUT,YOUT,TRNNUM)
 C     ENTRY      RESIDS (XRESID,YRESID,MAXXRN,MAXYRN,X1,Y1,X2,Y2,N,
@@ -239,8 +239,8 @@ C
 	    TranPtr->ONE_SCALE = TRUE;
     	goto S10;
       }
-      GlobalUnlock (hTran);  
-      GSSiGlobUlFree (&hTemp);
+	  GSSiGlobUlFree(&hTemp);
+	  GlobalUnlock (hTran);
       goto Exit;
 
 /******* SET-UP WITH N EQ 2.*/
@@ -283,7 +283,7 @@ C
       TranPtr->C2 =-SINANG * SCLRAT;
       TranPtr->A1 = 0;
       TranPtr->A2 = 0;
-	  hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,sizeof(DPOINT)*N);
+	  hPoints = GSSiGlobAlloc (1827,GMEM_MOVEABLE,sizeof(DPOINT)*N);
 	  pPoints = GlobalLock (hPoints);
 	  xmin = DBL_MAX;
 	  xmax = -DBL_MAX;
@@ -340,7 +340,12 @@ Exit:
 #if ENABLETRACE
 GSSiExitProg (1436);
 #endif
-     return (hTran);
+	if (hTran)
+	{
+		TranPtr = GlobalLock(hTran);
+		GlobalUnlock(hTran);
+	}
+	return (hTran);
 }
 #if ENABLETRACE
 }
@@ -971,28 +976,32 @@ void CloseTRANS2 (LPHANDLE phlpTran)
 {    
 	LPTRANDATA  TranPtr;
 
+	if (*phlpTran == 0)
+		return;
 	if (*phlpTran > (HANDLE)1)
-	{   
+	{
 		TranPtr = (LPTRANDATA)GlobalLock(*phlpTran);
 		if (!TranPtr)
 		{
-			*phlpTran = 0;	
+			*phlpTran = 0;
 			return;
 		}
 		if (TranPtr->TriHandle)
 		{
-		    HPTRANTRI	Tri=(HPTRANTRI)GlobalLock (TranPtr->TriHandle);
-		    short		NumTri = Tri->NumTri;
+			HPTRANTRI	Tri = (HPTRANTRI)GlobalLock(TranPtr->TriHandle);
+			short		NumTri = Tri->NumTri;
 
-		    while (NumTri--)
-		    {
-		    	CloseTRANS2 (&Tri->hFromTran);
-		    	CloseTRANS2 (&Tri++->hToTran);
-		    } 
-		    GSSiGlobUlFree (&TranPtr->TriHandle);
+			while (NumTri--)
+			{
+				CloseTRANS2(&Tri->hFromTran);
+				CloseTRANS2(&Tri++->hToTran);
+			}
+			GSSiGlobUlFree(&TranPtr->TriHandle);
 		}
-		GSSiGlobUlFree (phlpTran);
+		GSSiGlobUlFree(phlpTran);
 	}
+	else
+		ii = 1;
 	*phlpTran = 0;
 	return;
 

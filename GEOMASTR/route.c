@@ -1530,7 +1530,7 @@ Exit:
 	return rtn;
 }  
 
-BOOL HighlightSequentialItems (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam,short Function)
+BOOL HighlightSequentialItems (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 {HDC hDC;
  char key;     
  int	st;

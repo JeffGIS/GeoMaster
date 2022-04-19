@@ -1,6 +1,31 @@
-Configs\SpecialAssessments\CREATEMAP.GMC /F /WD F:\BU_2020_02_20\GEOMas
-configs\newpropdata.gmc /F /WD F:\BU_2020_02_20\GEOMas
+F:\MplsRemoteTemplate\GeoMas\orthos\threeorthos.gmc /F /DNC [PARMFILE]=c:\temp\parmfile.txt /WD F:\MplsRemoteTemplate\GeoMas
+orthos\fiveorthost.gmc /F /DNC [%USERLEV]=2;[PARMFILE]=c:\temp\parms.txt; /WD F:\MplsRemoteTemplate\GeoMas
+configs\hunting.gmc [%USEGDIPLUS]=F;[%KFO]=T;  /WD g:\gmmobile\metroUTM
+configs\2019_10.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD g:\gmmobile\metroUTM
+lkmaster.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;   /WD D:\MNPROMAP_2009
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
+configs\TNRISParcels.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD D:\Brae\PCViewer\PCViewer  
+configs\fixpoints2.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
+configs\fixpoints.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
+configs\sidewalkpilot5.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;  /WD F:\MplsRemoteTemplate\GeoMas
+configs\basemap_new4.gmc /F  [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=T;[%ALLOWCACHE]=T;[%LogUncachedFiles]=T;   /WD L:\geomas
+GeoMaster /GMCache /WD L:\geomas
+configs\basemap_new4.gmc /F  [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=T;[%ALLOWCACHE]=T;[%LogUncachedFiles]=T;  /WD L:\geomas
+configs\2020_04.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD g:\GMMobile\GMMetroGIS
 configs\HiPriMaps_ramps.gmc /F  /WD d:\brae\pcviewer\pcviewer
+g:\configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
+configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T;/WD G:\PCViewerBKPark\PCViewer
+configs\DirectDisplay.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD D:\PCViewerMpls\PCViewer
+/GMEdit [%DL]fundir\metrogis_prod.txt /WD G:\GMMobile\MetroUTM
+[%DL]sportmap4.GMC /WD d:\spm3\spm3
+projects\Vacations\VACATIONS_EDIT.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; /WD F:\MplsRemoteTemplate\GeoMas
+requestdata.gmc /WD c:\gmserver\gmserver
+Configs\jeff\SPECIALASSESSMENTS2020LevyCodes2.GMC /F [SPECASSCOUNT]=1; /WD F:\BU_2020_02_20\GEOMas
+Configs\SpecialAssessments\CREATEMAP.GMC /F /WD F:\BU_2020_02_20\GEOMas
+configs\large.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD G:\PCViewerBKPark\PCViewer
+configs\MetroGIS.gmc /F [%USERLEV]=2; /WD g:\GMMobile\GMMetroGIS
+configs\NorthCarolina.gmc /F [%USERLEV]=2;  /WD g:\GMMobile\GMMetroGIS
+configs\newpropdata.gmc /F /WD F:\BU_2020_02_20\GEOMas
 configs\test.gmc /F /WD d:\brae\pcviewer\pcviewer
 configs\jeff\streettextsize.gmc /F /WD L:\geomas
 configs\2019_10.gmc [%USEGDIPLUS]=F;[%KFO]=T; /WD i:\gmmobile\metroUTM
@@ -35,7 +60,6 @@ data\gamedata\minnesota.gmc /F /WD K:\gmmobile\metroUTM
 configs\basemap.gmc /F /WD o:\bu_2018_02_28\geomas [%USERLEV]=2;[%IGNORESYSMSG]=T;
 configs\basic1.gmc /F /WD o:\bu_2018_02_28\geomas [%USERLEV]=2;[%IGNORESYSMSG]=T;
 [%DL]basic1.GMC /WD c:\gmserver
-[%DL]sportmap4.GMC /WD d:\spm3
 [%DL]RequestData.GMC /F [REQUESTID]=1515163911; /WD c:\gmserver\gmserver
 configs\SpecialAssessments\CreateMap.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD L:\GEOMas
 configs\basic1.gmc /F /WD j:\bu_2017_06_20\geomas [%USERLEV]=2;[%IGNORESYSMSG]=T;
@@ -64,7 +88,6 @@ basic1.gmc /WD K:\BUPolice\Mpls\
 projects\AlleyWalls\WallPoints.GMC /WD j:\BU_2015_01_16\GEOMas
 configs\exportsewer.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD j:\BU_2015_01_16\GEOMas
 police\configs\startup_2015.gmc /F [%USERLEV]=2; /WD L:\MPD\GeoMaster\Mpls
-configs\MetroGIS.gmc /F [%USERLEV]=2; /WD k:\GMMobile\GMMetroGIS
 configs\places.gmc /F [%USERLEV]=2; /SERVER 22335 /WD d:\ADAPedRamps\PreSurvey
 configs\SpecialAssessments\CreateMap.GMC /F [%USERLEV]=2;[%IGNORESYSMSG]=T; /WD G:\BU_2015_01_16\GEOMas
 configs\places.gmc /F [%USERLEV]=2; /WD J:\ADAPedRamps\PreSurvey
@@ -177,6 +200,36 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

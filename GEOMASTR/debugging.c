@@ -24,16 +24,17 @@ static HANDLE hShowFunIn = 0;
 static int	funInLev = 0;
 static int  returnLevel = -1;
 
-#define NUM_DB_CHILDWND	17
+#define NUM_DB_CHILDWND	18
 #define SNAP_LEFT	-1
 #define SNAP_TOP	-1
 #define SNAP_BOTTOM	-2
 #define SNAP_RIGHT	-2
-static UINT childWndID[NUM_DB_CHILDWND] = { IDB_MACROSTACK, IDC_FILEVIEW, IDB_MOVETOMON2, IDCANCEL, IDOK, ID_DBNEXTFUN, ID_DBNEXTBP, ID_DBSHOWFUN, ID_DBTORETURN,IDC_STATIC_BP, IDC_STATIC_BC, IDC_STATIC_DV, IDB_BREAKPOINTS, IDB_BREAKCONDITION, IDB_VALUETODISPLAY1, IDB_DISPLAYVALUE1 };
+static UINT childWndID[NUM_DB_CHILDWND] = { IDB_MACROSTACK, IDC_FILEVIEW, IDB_MOVETOMON2, IDCANCEL, IDOK, ID_LAUNCH, ID_DBNEXTFUN, ID_DBNEXTBP, ID_DBSHOWFUN, ID_DBTORETURN,IDC_STATIC_BP, IDC_STATIC_BC, IDC_STATIC_DV, IDB_BREAKPOINTS, IDB_BREAKCONDITION, IDB_VALUETODISPLAY1, IDB_DISPLAYVALUE1 };
 static RECT childWndPCT[NUM_DB_CHILDWND] = {SNAP_LEFT,SNAP_TOP,0,0,
 											SNAP_LEFT,0,SNAP_RIGHT,0,
 											0,SNAP_TOP,0,0,
 											0,0,SNAP_RIGHT,0,
+											0, 0, 0, 0,
 											0, 0, 0, 0,
 											0, 0, 0, 0,
 											0, 0, 0, 0,
@@ -248,7 +249,7 @@ void AdjustDBChildWindows(HWND hWndDlg)
 	return;
 }
 
-BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	static	HANDLE	hSaveBM=0;	
 	static	HWND	hDBWnd=0;
@@ -278,7 +279,7 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 			//		 SetWindowText (hWndDlg,MBHTitle);
 			SetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition);
 			SetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue);
-			hDisplay = GSSiGlobAlloc(0, GMEM_MOVEABLE, 4096);
+			hDisplay = GSSiGlobAlloc(1846, GMEM_MOVEABLE, 4096);
 			pDisplay = GlobalLock(hDisplay);
 			strcpy(pDisplay, DisplayValue);
 			doDebug = FALSE;
@@ -387,7 +388,16 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM
 				breakAt = BA_NEXTLINE;
 				EndDialog(hWndDlg, TRUE);
 				break;
-
+			case ID_LAUNCH:
+			{
+				char curMacro[MAX_PATH];
+				GMEditGetFile(curMacro);
+				breakAt = BA_NEXTLINE;
+				sprintf(CommandExecutedByTimer, "$MACRO(%s)", curMacro);
+				SetTimer(hWndMain, EXECUTE_COMMAND_TIMER, 100, 0);
+				EndDialog(hWndDlg, TRUE);
+			}
+				break;
 			case ID_DBNEXTFUN:
 				GetDlgItemText(hWndDlg, IDB_BREAKCONDITION, BreakCondition, sizeof(BreakCondition)-1);
 				GetDlgItemText(hWndDlg, IDB_VALUETODISPLAY1, DisplayValue, sizeof(DisplayValue)-1);
@@ -732,7 +742,9 @@ int AddToMacroStack (int from,int iCurrentMacro,LPSTR File,LPHANDLE phArgs,int N
 	int i, mini=0, rtn;
 	UINT minUse = UINT_MAX;
 
-	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc
+	//from: 1=RunMacro, 2=RunGFCommandFromFileAtLoc, 3=zoommacro, 4=LoadReport, 5=displaypickeditems, 6=fundir file
+	if (from == 3)
+		ii = 0;
 	strcpy (currentMacro,File);
 	SubstituteDL (currentMacro,FALSE);
 	for (i=0;i<lnMacroStack;i++)

@@ -347,7 +347,7 @@ BOOL OpenTAGIndex (BOOL Delete,BOOL StoreBounds,LPSTR ReopenName)
     		GSSiRemove (TAGIndexFile);
     }
 	ltime = 0;
-	hTAGIdx = GSSiGlobAlloc(0, GHND, sizeof(TAGINDEX) + 2);
+	hTAGIdx = GSSiGlobAlloc(1840, GHND, sizeof(TAGINDEX) + 2);
 	pTI = GlobalLock(hTAGIdx);
 	if (ForceTAGIndex)
 	{
@@ -2280,6 +2280,7 @@ GSSiExitProg (1048);
 }
 	}
 	strcpy (LastMenuFile,Name);
+	AddToMacroStack(2, 0, Name, 0, 0);
 	hNewPopups = GSSiGlobAlloc ( 975,GHND,4096);
 	phWhichCmdList = &hToolCmd; 
 	if (!hToolCmd)

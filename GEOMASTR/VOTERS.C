@@ -461,7 +461,7 @@ void SetPrecinctNameListFromZIP (HWND hWndDlg,UINT icntl,long ZIP)
 	return;
 }
 
-BOOL FAR PASCAL VOTER_NAME_LOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VOTER_NAME_LOCMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 	int		st, choice, n,idx,ifile,i; 
 	BOOL	HaveFirstName,HaveMiddleName,HaveLastName;
 	char	str[256];
@@ -869,7 +869,7 @@ BOOL FAR PASCAL VOTER_NAME_LOCMsgProc(HWND hWndDlg, int Message, WPARAM wParam, 
  return TRUE;
 } 
 
-BOOL FAR PASCAL DISPLAYRECORDMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL DISPLAYRECORDMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1055);
 #endif
@@ -926,7 +926,7 @@ GSSiExitProg (1055);
 }
 #endif
 }
-BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  int	BRtn;  
  char	str[256];
@@ -1287,7 +1287,7 @@ BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARA
  return TRUE;
 } 
 
-BOOL FAR PASCAL VOTER_DEFINE_USER_DATAMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL VOTER_DEFINE_USER_DATAMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  int	BRtn;  
  char	str[256];
@@ -1427,7 +1427,7 @@ BOOL FAR PASCAL VOTER_DEFINE_USER_DATAMsgProc(HWND hWndDlg, int Message, WPARAM 
  return TRUE;
 } 
 
-BOOL FAR PASCAL FIELD_TITLE_AND_NAMEMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL FIELD_TITLE_AND_NAMEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  int	BRtn;  
  char	str[256];
@@ -1575,7 +1575,7 @@ BOOL FAR PASCAL FIELD_TITLE_AND_NAMEMsgProc(HWND hWndDlg, int Message, WPARAM wP
  return TRUE;
 }
 
-BOOL FAR PASCAL ADDCBFIELDTOPOINTLISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL ADDCBFIELDTOPOINTLISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
  int	BRtn;  
  char	str[256], LayerText[130];

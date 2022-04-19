@@ -18,8 +18,6 @@ extern long FAR PASCAL  GCTPZ0 (lpGctpArgs lpGctp, double *PRJ_IN_COR, double *F
                       
 extern long FAR PASCAL NADCON (long *KEY, double *TMP_CORDS);
                      
-#define MFT  3.280833333333333e0
-#define FTM 3.04800609601219e-1
 #define COUNTY 50
 //{Geographic Coordinate System
 #define GEOx 0
@@ -400,6 +398,13 @@ C-------------------------------        */
 		   PRJ_TYPE[ID] = PROJ4PROJECTION;
 		   PRJ_SPHEROID[ID] = PRJ_SPHEROID[1];
 		   PRJ_ZONE[ID] = PRJ_ZONE[1];
+		   strlwr(INNAME);
+		   if (strstr(INNAME, "units=m"))
+			   PRJ_UNITS[ID] = PRJ_UNITS_METERS;
+		   if (strstr(INNAME, "units=f"))
+			   PRJ_UNITS[ID] = PRJ_UNITS_FEET;
+		   if (strstr(INNAME, "proj=longlat"))
+			   PRJ_UNITS[ID] = PRJ_UNITS_LATLON;
 		   return 0;
 	   }
 	   else if (IsProjectionFile(INNAME))
@@ -474,6 +479,7 @@ C-------------------------------        */
 		   PRJ_TYPE[ID] = 1000 + atoi (lpGoogle+6);
 		   PRJ_UNITS[ID] = 0;
 		   PRJ_BASEUNITS[ID] = 0;
+		   PRJ_SPHEROID[ID] = 8;
 		   PRJ_TRAN[ID][2] = 0;
 		   IS_BASE[ID] = FALSE;
 

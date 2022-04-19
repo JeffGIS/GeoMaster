@@ -2,6 +2,8 @@
 #include "translat.h"
 #include "extrndb.h"
 #include "shapefil.h"
+//#include "FileGDBAPI.h"
+
 #include <commctrl.h>
 #define MAXINDEXSYMBOLS	3200
 #define MAXPOC	4096
@@ -152,6 +154,27 @@ int NVShapeIndexClose(sqlite3 * db)
 	return rtn;
 }
 
+void ClipLatLonToBase(LPMNMXCORD pMnMx, int from)
+{
+	MNMXCORD bounds=ProjectBounds;
+	MNMXCORD intBounds;
+
+	if (PRJ_TYPE[from] == PROJ4PROJECTION)
+	{
+		if (PRJ_UNITS[from] != PRJ_UNITS_LATLON)
+			return;
+	}
+	else if (PRJ_TYPE[from] != LATLONGTYPE)
+		return;
+	if (PRJ_TYPE[1] == LATLONGTYPE)
+		return;
+	if (!ValidBounds(&ProjectBounds))
+		return;
+	ConvertBounds(&bounds, 1, 2);
+	IntersectBounds(&bounds, pMnMx, &intBounds);
+	*pMnMx = intBounds;
+	return;
+}
 BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 {
 	int	i;
@@ -193,6 +216,7 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	SHPHandle	hSHP = SHPOpenGSSi(ofStructGM.szPathName, "rb");
 	if (hSHP)
 		SHPClose(hSHP);
+	LoadSHPParm(SHPFileName, SHPType, CurView->hWnd);
 	if (!(SHPType = ReadSHPHeader (SHPFid,&SHPFileMNMX,SHPFileName)))
     {
     	GSSiClose2 (&SHPFid);
@@ -201,9 +225,9 @@ BOOL OpenSHPFile (LPSTR SHPFileNameIN)
 	CloseTRANS2 (&hTranFileToBase); 
 	CloseTRANS2 (&hTranBaseToFile);  
 	CloseTRANS2 (&hTranFileToVP);  
-	LoadSHPParm (SHPFileName,SHPType,CurView->hWnd);
 	
-	Points[0].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);   
+	ClipLatLonToBase(&SHPFileMNMX, 0);
+	Points[0].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);
 	Points[0].y = ClipCoordToProjection (SHPFileMNMX.ymn,2,0,1);   
 	Points[1].x = ClipCoordToProjection (SHPFileMNMX.xmn,1,0,1);   
 	Points[1].y = ClipCoordToProjection (SHPFileMNMX.ymx,2,0,1);   
@@ -598,15 +622,18 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 			havePrj = TRUE;
 		GetGlobalCVal("[%DefaultShapeUnits]", Units, "FEET");
 		PGDBCnvFac = 1;
-		if (!_fstricmp(Units, "FEET"))
+		if (!havePrj)
 		{
-			PRJ_UNITS[0] = 1;
-			PGDBCnvFac = FTM;
+			if (!_fstricmp(Units, "FEET"))
+			{
+				PRJ_UNITS[0] = 1;
+				PGDBCnvFac = FTM;
+			}
+			else if (!_fstricmp(Units, "METERS"))
+				PRJ_UNITS[0] = 2;
+			else
+				PRJ_UNITS[0] = 4;
 		}
-		else if (!_fstricmp(Units, "METERS"))
-			PRJ_UNITS[0] = 2;
-		else
-			PRJ_UNITS[0] = 4;
 	}
     GSSifstat (Fid,&statParmFile);
     SHPParmTime = statParmFile.st_mtime;
@@ -639,6 +666,8 @@ BOOL LoadSHPParm (LPSTR SHPFileName,long Type,HWND hWnd)
 		SHPBaseRefno = IndexEntryStartRef;
 	else
 		SHPBaseRefno = atol (SHPRefno);
+	//if (FileIsIndex)
+	//	SHPBaseRefno = CurFileIndexEntry.fileInIndex;
 	fgetstring (SHPTAG,sizeof(SHPTAG)-2,Fid); 
 	fgetstring (str,32,Fid); 
 	//SHPIndexType = atoi (str);
@@ -827,7 +856,7 @@ BOOL SetSHPVis (HWND hWndDlg, int DlgItemSym, int DlgItemPar,HFILE FidSymList)
 
 BOOL SetSHPParms (long RecordNumber)
 {   
-	LPSTR	pDesc, pTAG, pClause, pC, pColor, pWidth, pRot; 
+	LPSTR	pDesc = 0, pTAG = 0, pClause = 0, pC = 0, pColor = 0, pWidth = 0, pRot=0;
 	BOOL	rc;
 	char	str[1024];  
 	BOOL	rtn = FALSE;
@@ -848,7 +877,7 @@ BOOL SetSHPParms (long RecordNumber)
 	pTAG = SHPTAG;
 	if (*pTAG && (pC = _fstrchr (pTAG,':')))
 	{   
-		HANDLE hTag = GSSiGlobAlloc(0,GMEM_MOVEABLE, 4096);
+		HANDLE hTag = GSSiGlobAlloc(1832,GMEM_MOVEABLE, 4096);
 		LPSTR ptag = GlobalLock(hTag);
 		_fstrcpy (ptag,pTAG); 
 		ExpandText (ptag);
@@ -928,7 +957,7 @@ BOOL SetSHPParms (long RecordNumber)
 					CurrentDesc = GetOrCreateSym (0,str,0,0,TRUE,itype);
 			}
 		}
-		if (*pRot && (SHPType == SHPT_POINT ||
+		if (pRot && *pRot && (SHPType == SHPT_POINT ||
 					  SHPType == SHPT_POINTZ ||
 					  SHPType == SHPT_TEXT ||
 					  SHPType == SHPT_MULTIPOINTZ ||
@@ -959,15 +988,16 @@ BOOL SetSHPParms (long RecordNumber)
 			{
 				case 'P':
 				case 'p':
-					SHPWidth = -SHPWidth;
 					break;
 				case 'F':
 				case 'f':
-					SHPWidth *= FTM;
+					SHPWidth *= -FTM;
 					break;
 			}
 			if (SHPType == SHPT_POINT || SHPType == SHPT_POINTZ)
 				CurPointSize = SHPWidth;
+			else
+				SHPWidth = AdjustWidth(SHPWidth);
 		}
 		else
 			SHPWidth = 0;
@@ -1605,7 +1635,8 @@ BOOL ReadSHPRecordHeader (HFILE FidSHP,long RecordOffset,LPMNMXCORD pMinMaxCoord
 		case 4:
 		case SHPT_POLYGON:
 		case SHPT_POLYGONZ:
-//			if (RecLen < sizeof(SHPPolyHeader))
+		case SHPT_POLYGONM:
+			//			if (RecLen < sizeof(SHPPolyHeader))
 //				return FALSE;
             if (BigRead (FidSHP,(HPSTR)&SHPPolyHeader,sizeof(SHPPolyHeader)) != sizeof(SHPPolyHeader))
             	return FALSE; 
@@ -2504,6 +2535,7 @@ long ReadSHPHeader (HFILE FidSHP,LPMNMXCORD pMinMaxCoord,LPSTR FileName)
 		{
 			AddDPointToMinMax (&Points[i],pMinMaxCoord); 
 		} 
+		ClipLatLonToBase(pMinMaxCoord, 0);
 	}
 	return SHPHeader.ShapeType;
 }   
@@ -3109,13 +3141,14 @@ LPSTR ShapeTypeName (int iType)
 	return typeName;
 }
 
-void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
+int GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev,HFILE FidOut)
 {
 	char	UnderNext[256];
 	char	tabs[MAXFGDBLEVS*6];
 	char	str[256];
 	HANDLE	hList;
 	int		Num;
+	int		NumTot = 0;
 	UINT	i;
 	int	lnLev1 = strlen (Under);
 
@@ -3131,8 +3164,12 @@ void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
 			memset (tabs,' ',sizeof(tabs));
 			tabs[iLev*6] = 0;
 			sprintf (str,"%s%s",tabs,pList+inc);
-			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
-			GetFGDBLev (hWndDlg,ListCntl,hDB,pList,iLev+1);
+			NumTot++;
+			if (FidOut != HFILE_ERROR)
+				fputstring(str, FidOut);
+			else
+				SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
+			GetFGDBLev (hWndDlg,ListCntl,hDB,pList,iLev+1,FidOut);
 		}
 		GSSiGlobUlFree (&hList);
 	}
@@ -3152,99 +3189,524 @@ void GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev)
 			if (!nrows)
 				continue;
 			sprintf (str,"%s%s\t%s\t%i",tabs,pList+lnLev1+inc,ShapeTypeName(type),nrows);
-			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
+			NumTot++;
+			if (FidOut != HFILE_ERROR)
+				fputstring(str, FidOut);
+			else
+				SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str);
 		}
 		GSSiGlobUlFree (&hList);
 	}
-	return;
+	return NumTot;
 }
 
-long ListFGDBTables (LPSTR DBNameIN,HWND hWndDlg,UINT ListCntl,int ListType)
+long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableName,LPSTR KeyField,LPSTR IncludeFields)
 {
-	UINT	i,j;  
-	char	ShpType[16]="";
-	char	DBName[512],str[256], TableName[128], TableType[64];
-	LPSTR	pPar, pTab; 
-	short	ShapeType; 
-	double	Xmin,Xmax,Ymin,Ymax;  
-	short	Num=0, Num2;        
-	long	NumRows; 
+	UINT	i, j;
+	char	ShpType[16] = "";
+	char	DBName[512], str[256], TableType[64];
+	LPSTR	pPar, pTab;
+	short	ShapeType;
+	double	Xmin, Xmax, Ymin, Ymax;
+	int	Num = 0;
+	int rtn;
+	long	NumRows;
 	LPSTR	pFields;
-	int		hDB=0;
-	int   	TabStops[3]={270,320,370};
- 
-   	SendDlgItemMessage (hWndDlg,ListCntl,LB_SETTABSTOPS,3,(LPARAM)&TabStops); 
-	_fstrcpy (DBName,DBNameIN); 
-	ExpandText (DBName);
-    if ((pPar = _fstrrchr (DBName,'(')))
-    	*pPar++ = 0; 
-	hDB = OpenFGDB2 (DBName,"","");
+	HANDLE	hDB = 0;
+	HANDLE		FidOut;
+	MNMXCORD minmaxCoord;
+	MNMXCORL minmaxCoorl;
+	LPFILEGDBRECHEADER pfgdbHeader;
+	LPFILEGDBRECHEADER pFGDBRecHeader;
+	char cmd[4096];
+	char SLTPath[MAX_PATH];
+	char BINPath[MAX_PATH];
+
+	long lRec;
+	LONGLONG totLen = 0;
+	LONGLONG totPoints = 0;
+	LONGLONG numSamePoint = 0;
+	LONGLONG totUCLen = 0;
+	LONGLONG nDiffPoly = 0;
+	LONGLONG numWithCurves = 0;
+	LONGLONG offset;
+	LONGLONG keyval = 1;
+	int reclen;
+	int hasCurves;
+	int numCompress1=0, numCompress2 = 0, numCompress3 = 0;
+	double coordFactor = 1000000.0;// about 5 inches
+
+	sqlite3* db = NULL;
+
+	sprintf(SLTPath, "%s.slt", OutFile);
+	sprintf(BINPath, "%s.bin", OutFile);
+	sprintf(DBName, "FGDB=%s", DBNameIN);
+	ExpandText(DBName);
+	int ftype=ReadFGDBHeader(DBNameIN, &minmaxCoord);
+	SHPType = ftype;
+	LoadSHPParm(DBNameIN, SHPType, 0);
+
+	if (OpenDataFile(DBName, "", BT_READ, &hDB))
+	{
+		int numRows = NumSQLRows(hDB);
+		LPOPENSQLDATA SQLPtr = (LPOPENSQLDATA)GlobalLock(hDB);
+		LPOPENFILEDATA FilePtr = (LPOPENFILEDATA)GlobalLock(SQLPtr->OFHandle);
+		char	Quotes[64] = { 0 };
+		char	includeFields[1024]; 
+		LPSTR pQuote = Quotes;
+
+		CreateStatusWind(CurView->hWnd, 1, "Converting File Geodatabase");
+		GSSiRemove(SLTPath);
+		rtn = sqlite3_open(SLTPath, &db);
+		if (rtn == SQLITE_OK)
+		{
+			sprintf(cmd, "CREATE TABLE %s_VERSION(VersionNum CHAR(4), COORDFactor DOUBLE);INSERT INTO %s_VERSION VALUES('%s', %f)",TableName,TableName,Version,coordFactor);
+			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+
+			rtn = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
+			sprintf(cmd, "CREATE TABLE %s (RECNUM INTEGER PRIMARY KEY,  recType INT, offset INT, recordLen INT, numPoly INT, numPoints INT, compressionType INT, hasCurves INT, FIRSTX INT, FIRSTY INT",TableName);
+			strcpy(includeFields, IncludeFields);
+			LPSTR pName = includeFields;
+			LPSTR pNextName = strchr(pName, ';');
+			while (pName && *pName)
+			{
+				int nameIndex;
+				if (pNextName)
+					*pNextName++ = 0;
+				sprintf(strchr(cmd,0), ",%s ",pName);
+				AddFieldType(cmd, pName, FilePtr, &nameIndex, pQuote);
+				pName = pNextName;
+				if (pName)
+					pNextName = strchr(pName, ';');
+				pQuote++;
+			}
+			strcat(cmd, ");");
+			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+			sprintf(cmd, "CREATE VIRTUAL TABLE %s_index USING rtree_i32(id,minX, maxX, minY, maxY);",TableName);
+			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+		}
+
+		FidOut = OpenFileGM(BINPath, 0, OF_CREATE);
+		if (FidOut != INVALID_HANDLE_VALUE)
+		{
+			while (StatusWindowUpdate(0, 0, numRows, Num) && FetchDBRec(hDB))
+			{
+				LPSTR pCompressedRec;
+				ReadFGDBRecordHeader(&minmaxCoord);
+				ConvertBounds(&minmaxCoord, 1, 2);
+				sprintf(str, "[FGDB.Shape]");
+				ExpandText(str);
+				HANDLE hRec = (HANDLE)atol(str);
+				LPBYTE		pRec = GlobalLock(hRec);
+				long BinSizeR = GlobalSize(hRec);
+				totUCLen += BinSizeR;
+				LPCURVAL pCurVal = (LPCURVAL)pRec;
+				int compType = 0;
+				POINT firstPoint = { 0 };
+
+				SetSHPParms(Num + 1);
+
+				pRec = (LPBYTE)&pCurVal->Value;
+				pFGDBRecHeader = (LPFILEGDBRECHEADER)pRec;
+				pRec += sizeof(FILEGDBRECHEADER);
+				BinSizeR -= (sizeof(FILEGDBRECHEADER) + sizeof(int));
+				//pfgdbHeader = (LPFILEGDBRECHEADER)&pCurVal->Value;
+				sprintf(str, "[FGDB.ELEMENT]");
+				ExpandText(str);
+				HANDLE hElement = (HANDLE)atol(str);
+				if (hElement)
+				{
+					ii = 1;
+				}
+			DoPoly:
+				if (SHPPolyHeader.NumPoints > USHRT_MAX)
+					ii = 1;
+				int type = pFGDBRecHeader->shapeType;
+				if (type == SHPT_POLYGON_WITHCURVES || type == SHPT_POLYGONZ || type == SHPT_POLYGONM || type == SHPT_PGDB_POLYGONZ)
+					nDiffPoly++;
+				int nPoly = SHPPolyHeader.NumParts;
+				int NumPoints = SHPPolyHeader.NumPoints;
+				int structuralPart = SHPPolyHeader.Type & esriShapeBasicTypeMask;
+				if (structuralPart == 50)
+					SHPPolyHeader.Type = SHPT_ARC;
+				if (structuralPart == 51)
+					SHPPolyHeader.Type = SHPT_POLYGON;
+				if (pFGDBRecHeader->shapeType != SHPT_TEXT && (SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ))
+					NumPoints = NumPoints + nPoly - 1;
+				HANDLE hPartIndex = GSSiGlobAlloc(1418, GMEM_MOVEABLE, sizeof(long) * (nPoly + 1));
+				HANDLE hPolyPartLen = GSSiGlobAlloc(1787, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+				HANDLE hPolyPartLenNew = GSSiGlobAlloc(1788, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+				HANDLE hPoints = GSSiGlobAlloc(1420, GMEM_MOVEABLE, sizeof(DPOINT) * NumPoints);
+				HPLONG pPartIndex = (HPLONG)GlobalLock(hPartIndex);
+				long		recloc = sizeof(SHPPOLYHEADER);
+				totPoints += NumPoints;
+				hmemmove((HPSTR)pPartIndex, &pRec[recloc], nPoly * sizeof(long));   //pPartIndex[5]
+				recloc += nPoly * sizeof(long);
+				pPartIndex[SHPPolyHeader.NumParts] = SHPPolyHeader.NumPoints;
+				LPDPOINT pPoints, pFirstPoint;
+				pPoints = pFirstPoint = (LPDPOINT)GlobalLock(hPoints);
+				LPINT pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
+				LPINT pNumPointsNew = (LPINT)GlobalLock(hPolyPartLenNew);
+				for (int i = 0; i < nPoly; i++)
+				{
+					long    numpoints, startpoint, ii;
+
+					startpoint = *pPartIndex++;
+					numpoints = *pPartIndex - startpoint;
+					*pNumPoints++ = numpoints;
+					*pNumPointsNew++ = numpoints;
+					hmemmove((HPSTR)pPoints, &pRec[recloc], numpoints * sizeof(DPOINT));     //pPoints[1]
+					recloc += numpoints * sizeof(DPOINT);
+					pPoints += numpoints;
+					if (i && type != SHPT_TEXT && ((type == SHPT_POLYGON || type == SHPT_POLYGON_WITHCURVES || type == SHPT_POLYGONZ || type == SHPT_POLYGONM || type == SHPT_PGDB_POLYGONZ)))
+						*pPoints++ = *pFirstPoint;
+				}
+				if (pFGDBRecHeader->hasZs)
+				{
+					double zMin = *(LPDOUBLE)&pRec[recloc];
+					double zMax = *(LPDOUBLE)&pRec[recloc + sizeof(double)];
+					SetGlobalValueReal("%FGDBZMin", zMin);
+					SetGlobalValueReal("%FGDBZMax", zMax);
+					recloc += (2 + SHPPolyHeader.NumPoints) * sizeof(double);
+				}
+				if (pFGDBRecHeader->hasMs)
+				{
+					double mMin = *(LPDOUBLE)&pRec[recloc];
+					double mMax = *(LPDOUBLE)&pRec[recloc + sizeof(double)];
+					recloc += (2 + SHPPolyHeader.NumPoints) * sizeof(double);
+				}
+				NumPOC = 0;
+				hasCurves = 0;
+				if (pFGDBRecHeader->hasCurves)
+				{
+					hasCurves = 1;
+					numWithCurves++;
+				}
+				GlobalUnlock(hPoints);
+				GlobalUnlock(hPolyPartLen);
+				GlobalUnlock(hPolyPartLenNew);
+				GSSiGlobUlFree(&hPartIndex);
+				pPoints = (HPDPOINT)GlobalLock(hPoints);//pPoints[9]
+				for (i = 0; i < NumPoints; i++)
+				{
+					ConvertCoord(&pPoints[i], 0, 1);
+					ConvertCoord(&pPoints[i], 1, 2);
+				}
+				HANDLE hIPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, NumPoints * sizeof(POINT));
+				LPPOINT pIPoints = (LPPOINT)GlobalLock(hIPoints);
+				BOOL canCompressI1 = TRUE;
+				BOOL canCompressI2 = TRUE;
+				for (int i = 0; i < NumPoints; i++)
+				{
+					pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+					pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+					if (i)
+					{
+						int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+						int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+						if (xdiff > CHAR_MAX || xdiff < CHAR_MIN || ydiff > CHAR_MAX || ydiff < CHAR_MIN)
+							canCompressI1 = FALSE;
+						if (xdiff > SHRT_MAX || xdiff < SHRT_MIN || ydiff > SHRT_MAX || ydiff < SHRT_MIN)
+							canCompressI2 = FALSE;
+					}
+				}
+				ii = sizeof(BPOINT);
+				ii = sizeof(SPOINT);
+				if (canCompressI1)
+				{
+					int lmem = NumPoints * sizeof(BPOINT);
+					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					LPBPOINT pCMPPoints = GlobalLock(hCMPPoints);
+					numCompress1++;
+					compType = 1;
+					for (int i = 0; i < NumPoints; i++)
+					{
+						pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+						pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+						if (i)
+						{
+							int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+							int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+							pCMPPoints[i].x = xdiff;
+							pCMPPoints[i].y = ydiff;
+							if (!xdiff && !ydiff)
+								numSamePoint++;
+						}
+						else
+							firstPoint = pIPoints[0];
+					}
+					offset = GSSillseek64(FidOut, 0, 1);
+					pCompressedRec = malloc(lmem * 2);
+					lRec = CompressBinaryRecord((LPBYTE)pCMPPoints, pCompressedRec, lmem);
+					if (lRec >= lmem)
+					{
+						lRec = lmem;
+						BigWrite64(FidOut, (HPSTR)pCMPPoints, lRec, -1);
+					}
+					else
+					{
+						BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+						compType += 10;
+					}
+					totLen += lRec;
+					free(pCompressedRec);
+					GSSiGlobUlFree(&hCMPPoints);
+				}
+				else if (canCompressI2)
+				{
+					int lmem = NumPoints * sizeof(SPOINT);
+					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					LPSPOINT pCMPPoints = GlobalLock(hCMPPoints);
+					numCompress2++;
+					compType = 2;
+					for (int i = 0; i < NumPoints; i++)
+					{
+						pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+						pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+						if (i)
+						{
+							int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+							int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+							pCMPPoints[i].x = xdiff;
+							pCMPPoints[i].y = ydiff;
+							if (!xdiff && !ydiff)
+								numSamePoint++;
+						}
+						else
+							firstPoint = pIPoints[0];
+					}
+					offset = GSSillseek64(FidOut, 0, 1);
+					pCompressedRec = malloc(lmem * 2);
+					lRec = CompressBinaryRecord((LPBYTE)pCMPPoints, pCompressedRec, lmem);
+					if (lRec >= lmem)
+					{
+						lRec = lmem;
+						BigWrite64(FidOut, (HPSTR)pCMPPoints, lRec, -1);
+					}
+					else
+					{
+						BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+						compType += 10;
+					}
+					totLen += lRec;
+					free(pCompressedRec);
+					GSSiGlobUlFree(&hCMPPoints);
+				}
+				else
+				{
+					int lmem = NumPoints * sizeof(POINT);
+					HANDLE hCMPPoints = GSSiGlobAlloc(0, GHND, lmem);
+					LPPOINT pCMPPoints = GlobalLock(hCMPPoints);
+					numCompress3++;
+					for (int i = 0; i < NumPoints; i++)
+					{
+						pIPoints[i].x = IDNINT(coordFactor * pPoints[i].x);
+						pIPoints[i].y = IDNINT(coordFactor * pPoints[i].y);
+						if (i)
+						{
+							int xdiff = pIPoints[i].x - pIPoints[i - 1].x;
+							int ydiff = pIPoints[i].y - pIPoints[i - 1].y;
+							pCMPPoints[i].x = xdiff;
+							pCMPPoints[i].y = ydiff;
+							if (!xdiff && !ydiff)
+								numSamePoint++;
+						}
+						else
+							firstPoint = pIPoints[0];
+
+					}
+					offset = GSSillseek64(FidOut, 0, 1);
+					pCompressedRec = malloc(lmem * 2);
+					lRec = CompressBinaryRecord((LPBYTE)pCMPPoints, pCompressedRec, lmem);
+					if (lRec >= lmem)
+					{
+						lRec = lmem;
+						BigWrite64(FidOut, (HPSTR)pCMPPoints, lRec, -1);
+					}
+					else
+					{
+						BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+						compType += 10;
+					}
+					totLen += lRec;
+					free(pCompressedRec);
+					GSSiGlobUlFree(&hCMPPoints);
+				}
+				GSSiGlobUlFree(&hPoints);
+				GSSiGlobUlFree(&hIPoints);
+				GSSiGlobFree(&hPolyPartLen);
+				GSSiGlobFree(&hPolyPartLenNew);
+				sprintf(cmd, "INSERT INTO %s VALUES(%lli,%i,%lli,%i,%i,%i,%i,%i,%i,%i", TableName,keyval,type,offset,lRec,nPoly,NumPoints,compType,hasCurves,firstPoint.x,firstPoint.y);
+				strcpy(includeFields, IncludeFields);
+				LPSTR pName = includeFields;
+				LPSTR pNextName = strchr(pName, ';');
+				LPSTR pQuote = Quotes;
+				while (pName && *pName)
+				{
+					char value[4096];
+					if (pNextName)
+						*pNextName++ = 0;
+					sprintf(value, "[FGDB.%s]", pName);
+					ExpandText(value);
+					if (*pQuote)
+						sprintf(strchr(cmd, 0), ",'%s'", value);
+					else
+						sprintf(strchr(cmd, 0), ",%s", value);
+					pQuote++;
+					pName = pNextName;
+					if (pName)
+						pNextName = strchr(pName, ';');
+				}
+
+				strcat(cmd, ");");
+				minmaxCoorl.xmn = IDNINT(coordFactor * minmaxCoord.xmn);
+				minmaxCoorl.xmx = IDNINT(coordFactor * minmaxCoord.xmx);
+				minmaxCoorl.ymn = IDNINT(coordFactor * minmaxCoord.ymn);
+				minmaxCoorl.ymx = IDNINT(coordFactor * minmaxCoord.ymx);
+
+				sprintf(strchr(cmd, 0), "INSERT INTO %s_index VALUES(%lli,%i,%i,%i,%i)", TableName,keyval++, minmaxCoorl.xmn, minmaxCoorl.xmx, minmaxCoorl.ymn, minmaxCoorl.ymx);
+				rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
+/*				pCompressedRec = malloc(BinSizeR * 2);
+				lRec = CompressBinaryRecord((LPBYTE)pCurVal, pCompressedRec, BinSizeR);
+				totLen += lRec;
+				totPoints += SHPPolyHeader.NumPoints;
+				BigWrite64(FidOut, (HPSTR)&lRec, 4, -1);
+				BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+				free(pCompressedRec);*/
+				GlobalUnlock(hRec);
+				Num++;
+			
+			}
+			GSSiClose64(&FidOut);
+			rtn = SQLOK(sqlite3_exec(db, "COMMIT", NULL, NULL, 0), db, "", 0);
+			rtn = sqlite3_close(db);
+		}
+		GlobalUnlock(SQLPtr->OFHandle);
+		GlobalUnlock(hDB);
+		CloseDataFile(TRUE, &hDB);
+		DestroyStatusWindow(0);
+	}
+	return Num;
+}
+long DumpFGDBTables(LPSTR DBNameIN, LPSTR OutFile, int ListType)
+{
+	UINT	i, j;
+	char	ShpType[16] = "";
+	char	DBName[512], str[256], TableName[128], TableType[64];
+	LPSTR	pPar, pTab;
+	short	ShapeType;
+	double	Xmin, Xmax, Ymin, Ymax;
+	short	Num = 0, Num2;
+	long	NumRows;
+	LPSTR	pFields;
+	int		hDB = 0;
+	HFILE	FidOut;
+
+	FidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+	if (FidOut != HFILE_ERROR)
+	{
+		sprintf(str, "TABLENAME\tTYPE\tCOUNT");
+		fputstring(str, FidOut);
+		strcpy(DBName, DBNameIN);
+		ExpandText(DBName);
+		if ((pPar = strrchr(DBName, '(')))
+			*pPar++ = 0;
+		hDB = OpenFGDB2(DBName, "", "");
+		if (hDB > 0)
+		{
+			Num = GetFGDBLev(0, 0, hDB, "\\", 0, FidOut);
+			CloseFGDB(hDB);
+		}
+		GSSiClose2(&FidOut);
+	}
+	return Num;
+}
+long ListFGDBTables(LPSTR DBNameIN, HWND hWndDlg, UINT ListCntl, int ListType)
+{
+	UINT	i, j;
+	char	ShpType[16] = "";
+	char	DBName[512], str[256], TableName[128], TableType[64];
+	LPSTR	pPar, pTab;
+	short	ShapeType;
+	double	Xmin, Xmax, Ymin, Ymax;
+	short	Num = 0, Num2;
+	long	NumRows;
+	LPSTR	pFields;
+	int		hDB = 0;
+	int   	TabStops[3] = { 270,320,370 };
+
+	SendDlgItemMessage(hWndDlg, ListCntl, LB_SETTABSTOPS, 3, (LPARAM)&TabStops);
+	_fstrcpy(DBName, DBNameIN);
+	ExpandText(DBName);
+	if ((pPar = _fstrrchr(DBName, '(')))
+		*pPar++ = 0;
+	hDB = OpenFGDB2(DBName, "", "");
 	if (hDB < 1)
 		return 0;
-	GetFGDBLev (hWndDlg,ListCntl,hDB,"\\",0);
-	CloseFGDB (hDB);
-/*	strcpy (TableName,"gdb_items");
-	if (!OpenFGDB (DBName,TableName,""))
-		return 0;
-	hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
-	pFields = GlobalLock (hSelectFields);
-	strcpy (pFields,"Name,DatasetSubtype1,DatasetSubtype2");
-	GlobalUnlock (hSelectFields);
-	while (FetchDBRec (FGDBHandle))
-	{
-		_fstrcpy (str,"[FGDB.DatasetSubtype2]"); 
-		ExpandText (str);
-		ShapeType = atoi (str);
-		_fstrcpy (TableName,"[FGDB.Name]"); 
-		ExpandText (TableName);    
-		*ShpType = 0;  
-		
-		switch (ShapeType)
+	Num = GetFGDBLev(hWndDlg, ListCntl, hDB, "\\", 0, HFILE_ERROR);
+	CloseFGDB(hDB);
+	/*	strcpy (TableName,"gdb_items");
+		if (!OpenFGDB (DBName,TableName,""))
+			return 0;
+		hSelectFields = GSSiGlobAlloc (GMEM_MOVEABLE,0,1024);
+		pFields = GlobalLock (hSelectFields);
+		strcpy (pFields,"Name,DatasetSubtype1,DatasetSubtype2");
+		GlobalUnlock (hSelectFields);
+		while (FetchDBRec (FGDBHandle))
 		{
-			case 1:
-				_fstrcpy (TableType,"Point");
-				break;
-			case 3:
-				_fstrcpy (TableType,"Line");  
-				break;
-			case 4:
-				_fstrcpy (TableType,"Area");
-				break;
-			default:
-				sprintf (TableType,"Unknown(%i)",ShapeType);
-				break;
+			_fstrcpy (str,"[FGDB.DatasetSubtype2]");
+			ExpandText (str);
+			ShapeType = atoi (str);
+			_fstrcpy (TableName,"[FGDB.Name]");
+			ExpandText (TableName);
+			*ShpType = 0;
+
+			switch (ShapeType)
+			{
+				case 1:
+					_fstrcpy (TableType,"Point");
+					break;
+				case 3:
+					_fstrcpy (TableType,"Line");
+					break;
+				case 4:
+					_fstrcpy (TableType,"Area");
+					break;
+				default:
+					sprintf (TableType,"Unknown(%i)",ShapeType);
+					break;
+			}
+			Num++;
+			sprintf (str,"%s\t%s",TableName,TableType);
+			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str);
 		}
-		Num++;   
-		sprintf (str,"%s\t%s",TableName,TableType);
-		SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_ADDSTRING,0,(LPARAM) str); 
-	}
-	OpenFGDB (0,0,0); 
-	for (i=0;i<Num;i++)
-	{ 
-        SendDlgItemMessage(hWndDlg,ListCntl,LB_GETTEXT,i,(LPARAM)str);   
-        pTab = strchr (str,'\t');
-        *pTab++ = 0;      
-        strcpy (TableType,pTab); 
-		if (OpenFGDB (DBName,str,""))
+		OpenFGDB (0,0,0);
+		for (i=0;i<Num;i++)
 		{
-			NumRows = NumSQLRows (FGDBHandle);  
-	        if (FGDBTableIsText (DBName,str))
-		   		strcpy (TableType,"Text"); 
-		}
-		else  
-		{
-			strcpy (TableType,"Unknown");
-			NumRows = 0;
-		}
-		OpenFGDB (0,0,0);  
-		sprintf (_fstrchr(str,0),"\t%s\t%ld",TableType,NumRows);
-		SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_DELETESTRING,i,(LPARAM)0); 
-		SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_INSERTSTRING,i,(LPARAM) str); 
-	}*/
+			SendDlgItemMessage(hWndDlg,ListCntl,LB_GETTEXT,i,(LPARAM)str);
+			pTab = strchr (str,'\t');
+			*pTab++ = 0;
+			strcpy (TableType,pTab);
+			if (OpenFGDB (DBName,str,""))
+			{
+				NumRows = NumSQLRows (FGDBHandle);
+				if (FGDBTableIsText (DBName,str))
+					strcpy (TableType,"Text");
+			}
+			else
+			{
+				strcpy (TableType,"Unknown");
+				NumRows = 0;
+			}
+			OpenFGDB (0,0,0);
+			sprintf (_fstrchr(str,0),"\t%s\t%ld",TableType,NumRows);
+			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_DELETESTRING,i,(LPARAM)0);
+			SendDlgItemMessage ((HWND)hWndDlg,ListCntl,LB_INSERTSTRING,i,(LPARAM) str);
+		}*/
 	return Num;
 }
 
-BOOL FAR PASCAL SELECTPGDBMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTPGDBMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1107);
 #endif
@@ -3369,7 +3831,7 @@ GSSiExitProg (1107);
 }
 #endif
 }
-BOOL FAR PASCAL SELECTFGDBMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTFGDBMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1107);
 #endif
@@ -3507,7 +3969,7 @@ void DisplayFGDBItemMenu (HWND hWnd,BOOL IsTable)
 	return;
 }
 
-BOOL FAR PASCAL SELECTFGDBMsgProc_TV(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SELECTFGDBMsgProc_TV(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1107);
 #endif
@@ -4526,6 +4988,7 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 	LPINT pPartLen;
 	int n = startPointIndex;
 	int nTot = 0;
+	int nadd = 0;
 	int iPoly;
 
 	if (geometryType != geometryPolygon)
@@ -4536,14 +4999,13 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 		nTot += pPartLen[iPoly];
 		if (iPoly)
 		{
-			nTot++;
-			if (n >= nTot-1)
-				n++;
+			if (n >= nTot)
+				nadd++;
 			else
 				break;
 		}
 	}
-	
+	n += nadd;
 	GlobalUnlock(hPolyPartLen);
 	return n;
 }
@@ -4581,6 +5043,8 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 	int		IsFGDB = TRUE;
 	BOOL	doWindowCheck;
 	int		structuralPart;
+	static BOOL	showmarker[3] = { FALSE,FALSE,FALSE };
+	static noPOC = FALSE;
     
     if (CurView->ID == dbugid)
     	ii=1; 
@@ -4795,54 +5259,39 @@ DoPoly:
 	        	NumPoints = NumPoints+nPoly-1;
 	        hPartIndex = GSSiGlobAlloc (1418,GMEM_MOVEABLE,sizeof(long)*(nPoly+1));
 	        hPolyPartLen = GSSiGlobAlloc (1785,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-	        hPolyPartLenNew = GSSiGlobAlloc (1786,GMEM_MOVEABLE,sizeof(int)*(nPoly+1));
-			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1)); 
+			hPolyPartLenNew = GSSiGlobAlloc(1786, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+			hPoints = GSSiGlobAlloc (1420,GMEM_MOVEABLE,sizeof(DPOINT)*(NumPoints+1));
 	        pPartIndex = (HPLONG)GlobalLock (hPartIndex); 
 	        hmemmove ((HPSTR)pPartIndex,&pRec[recloc],nPoly*sizeof(long));   //pPartIndex[5]
 	        recloc += nPoly*sizeof(long);
-	        pPartIndex[SHPPolyHeader.NumParts]= SHPPolyHeader.NumPoints;
+			pPartIndex[SHPPolyHeader.NumParts] = SHPPolyHeader.NumPoints;
 	                    
             pPoints = pFirstPoint = (LPDPOINT)GlobalLock (hPoints); 
             pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
             pNumPointsNew = (LPINT)GlobalLock (hPolyPartLenNew);
+			int nn = 0;
 	        for (i=0;i<nPoly;i++)
 	        {   
 	            long    numpoints, startpoint,ii; 
 	                        
 	            startpoint = *pPartIndex++;
+				/*if (i)
+				{
+					loopBeginPoint[i - 1] = startpoint + i;
+				}*/
 	            numpoints = *pPartIndex-startpoint; 
-	            //if (numpoints > (long)USHRT_MAX)
-	            //	MessageBox (0,"Shape file record contains too many points",0,MB_ICONEXCLAMATION);
+				nn += numpoints;
 	            *pNumPoints++ = numpoints; 
 				*pNumPointsNew++ = numpoints;
 	            hmemmove ((HPSTR)pPoints,&pRec[recloc],numpoints * sizeof(DPOINT));     //pPoints[1]
 	            recloc += numpoints * sizeof(DPOINT); //pPoints[2]
 	            pPoints += numpoints;   
-				//if (i && pFGDBRecHeader->shapeType != SHPT_TEXT && ((SHPPolyHeader.Type == SHPT_POLYGON || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYGONZ || SHPPolyHeader.Type == SHPT_POLYGONM || SHPPolyHeader.Type == SHPT_PGDB_POLYGONZ)))
 				if (i && pFGDBRecHeader->shapeType != SHPT_TEXT && pFGDBRecHeader->geometryType == geometryPolygon)
+				{
 					*pPoints++ = *pFirstPoint;
+				}
 	        } 
 	        ExtraBytes = BinSizeR - recloc; 
-/*	        if (ExtraBytes>1)
-	        {
-	        	HPDPOINT pPoints = (HPDPOINT)&pRec[recloc];//pPoints[3]
-	        	HPLONG pPointsl = (HPLONG)&pRec[recloc];//pPointsl[3]
-	        	HPFLOAT pPointsf = (HPFLOAT)&pRec[recloc];//pPointsf[2]  
-	        	HPSHORT	pPointss = (HPSHORT)&pRec[recloc];//pPointss[7]
-				HFILE	Fid;
-				char	BinFileName[128];
-
-				sprintf (BinFileName,"c:\\curvedecode\\%i_%i-%i.bin",ExtraBytes,NumPoints,CurrentRefno);
-				Fid = GSSiOpenFile (BinFileName,0,OF_CREATE);
-				BigWrite (Fid,&pRec[recloc],ExtraBytes,-1);
-				GSSiClose2 (&Fid);
-				if (ExtraBytes != 33)
-					ii=1;
-				else
-					db_dopoly=TRUE;
-	        	 ii = 1;
-
-	        }*/
 			if (pFGDBRecHeader->hasZs)
 			{
 				double zMin = *(LPDOUBLE)&pRec[recloc];
@@ -4883,7 +5332,13 @@ DoPoly:
 						}
 						else if (parc->Bits &  IsLine)
 						{
-							ii = 1;
+							if (showmarker[0])
+							{
+								char cmd[256];
+								SetTextColor(CurView->hDC, RGB(0, 0, 0));
+								sprintf(cmd, "$MARKER(%f %f, 20, $RGB(255,0,0),PL %i, .35)", POCCoord[NumPOC - 1].x, POCCoord[NumPOC - 1].y, NumPOC);
+								ProcessText(cmd);
+							}
 						}
 						else if (parc->Bits & IsPoint)
 						{
@@ -4894,6 +5349,13 @@ DoPoly:
 							POCPos[NumPOC] = AdjustPointIndex(pSegmentModifier->startPointIndex, nPoly, hPolyPartLen, pFGDBRecHeader->geometryType);
 							POCCoord[NumPOC] = pSegmentModifier->segmentParams.arc.centerPoint;
 							ConvertCoord(&POCCoord[NumPOC++], 0, 1);
+							if (showmarker[1])
+							{
+								char cmd[256];
+								SetTextColor(CurView->hDC, RGB(0, 0, 0));
+								sprintf(cmd, "$MARKER(%f %f, 20, $RGB(255,0,0),POC %i, .35)", POCCoord[NumPOC - 1].x, POCCoord[NumPOC - 1].y,NumPOC);
+								ProcessText(cmd);
+							}
 						}
 						else
 						{
@@ -4901,33 +5363,21 @@ DoPoly:
 						}
 					}
 						break;
+					case esriSegmentBezierCurve:
+						ii = 1;
+						break;
+				
 					default:
+						ii = 1;
 						break;
 					}
 				}
-/*				NumPOC = *(LPLONG)&pRec[recloc];
-				recloc += 4;
-				for (i=0;i<NumPOC;i++)
-				{
-					POCPos[i] = *(LPLONG)&pRec[recloc];
-					recloc += 4;
-					POCFlag[i] = *(LPLONG)&pRec[recloc];
-					recloc += 4;
-					POCCoord[i].x = *(LPDOUBLE)&pRec[recloc];
-					recloc += 8;
-					POCCoord[i].y = *(LPDOUBLE)&pRec[recloc];
-					recloc += 8;
-					recloc += 4;
-					ConvertCoord(&POCCoord[i],0,1);
-				}*/
 				recloc = reclocSave;
 			}
 	        GlobalUnlock (hPoints); 
 	        GlobalUnlock (hPolyPartLen);
 	        GlobalUnlock (hPolyPartLenNew);
 	        GSSiGlobUlFree (&hPartIndex);  
-			//if (nPoly > 1)
-			//	NumPOC = 0;
 			pPoints = (HPDPOINT)GlobalLock (hPoints);//pPoints[9]
 			doWindowCheck =  (SHPPolyHeader.Type == SHPT_ARC);
 			for (i=0;i<NumPoints;i++)
@@ -4950,110 +5400,99 @@ DoPoly:
 				GSSiGlobFree (&hPolyPartLenNew);
 				break;
 			}
-			//if (SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVES || SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVESANDZ || SHPPolyHeader.Type == SHPT_POLYGON_WITHCURVES)
+			if (noPOC)
+				NumPOC = 0;
 			if (NumPOC)
 			{
 				DPOINT	RP, BP, EP, POC;  //pPoints[3]
-				//LPDPOINT RP = (LPDPOINT)(&pRec[recloc]+12);		//(LPDPOINT)(&pRec[recloc]+28)
 				double	Radius, AZ, BackAZ;
-				LPDPOINT	pPoints2;
+				LPDPOINT	pPoints2, pPoints2Base;
 				HANDLE		hPoints2;
-				long		NumPoints2, NumPointsOrig, NumPointsAdded;// , nAddedPoints = 0;
+				long		NumPoints2, NumPointsOrig, NumPointsAdded;
 				UINT		ipoc;
 				LPINT		pNumPointsChk = (LPINT)GlobalLock (hPolyPartLen);
 				int			totpChk = 0;
-
+				BOOL		keepPT = FALSE;
+				static int			reducer = 0;
+			
 				db_dopoly=TRUE;
-//SHPPolyHeader.Type == SHPT_POLYLINE_WITHCURVES;
 	
-				hPoints2 = GSSiGlobAlloc (0,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
-				pPoints2 = (HPDPOINT)GlobalLock (hPoints2); 
+				hPoints2 = GSSiGlobAlloc (1834,GMEM_MOVEABLE,(1024*NumPOC+NumPoints*2)*sizeof(DPOINT));
+				pPoints2 = pPoints2Base = (HPDPOINT)GlobalLock (hPoints2);
 				NumPoints2 = 0;
 				for (i=0;i<NumPoints;i++)
 				{
 char	str[32]="";
-/*if (dbug)
+if (showmarker[2])
 {
-	DisplayMarkers = TRUE;
-	itoa(i, str, 10);
-	SetTextColor(CurView->hDC, RGB(255, 0, 0));
-	DisplayMarker(pPoints[i], 2, str, 0.16, 0, RGB(255, 0, 0), FALSE, FALSE, NULL, NULL, 0, 0, 0);
-}*/
+	char cmd[256];
+	SetTextColor(CurView->hDC, RGB(0, 0, 0));
+	sprintf(cmd, "$MARKER(%f %f, 20, $RGB(0,255,0),P   %3i, .35,,F)", pPoints[i].x, pPoints[i].y,i);
+	ProcessText(cmd);
+}
 
-				/*	if (i >= totpChk + *pNumPointsChk)
-					{
-						totpChk += *pNumPointsChk;
-						pNumPointsChk++;
-						if (nAddedPoints)
-							totpChk++;
-						nAddedPoints++;
-					}*/
 					for (ipoc = 0;ipoc < NumPOC;ipoc++)
 					{
-						if (POCPos[ipoc] == i)//-nAddedPoints)
+						if (POCPos[ipoc] == i)
 						{
 							BP = pPoints[i];
-							EP = pPoints[i+1];
+							EP = pPoints[i + 1];
 							switch (POCFlag[ipoc])
 							{
 							case 0:
-							case 1:
 								POC = POCCoord[ipoc];
 								break;
 							case 5:
-								{
-									DPOINT	MidPoint = MidPointD (BP,EP);
+							{
+								DPOINT	MidPoint = MidPointD(BP, EP);
 
-									RP = POCCoord[ipoc];
-									Radius = ldistpp (&RP,&BP); 
-									AZ = getazd (&RP,&MidPoint);
-									POC = dnewpt (RP,AZ, Radius);  
-								}
-								break;
+								RP = POCCoord[ipoc];
+								Radius = ldistpp(&RP, &BP);
+								AZ = getazd(&RP, &MidPoint);
+								POC = dnewpt(RP, AZ, Radius);
+							}
+							break;
 							default:
-								ii=1;
+								ii = 1;
 							}
 							NumPointsOrig = NumPoints2;
-							/*if (dbug)
-							{
-								itoa(ipoc, str, 10);
-								SetTextColor(CurView->hDC, 0);
-								DisplayMarker(POC, 2, str, 0.16, 0, 0, FALSE, FALSE, NULL, NULL, 0, 0, 0);
-							}*/
+							int na;
 							if (!Display || FastMapCopy)
-								CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurveChordDist,1);
+								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurveChordDist, -1);
 							else
-                				CurvePointsD(&BP,&POC,&EP, &NumPoints2, &pPoints2,&BackAZ,1020,CurView->BaseUnitsPerPixel,1); 
-							NumPointsAdded = NumPoints2 - NumPointsOrig - 1;//sub 1 to account for PT
+								na = CurvePointsD(&BP, &POC, &EP, &NumPoints2, &pPoints2, &BackAZ, 1020, CurView->BaseUnitsPerPixel, -1);
+							NumPointsAdded = NumPoints2 - NumPointsOrig -1;
 							if (NumPointsAdded > 0)
 							{
 								UINT	j;
-								int		totp=0;
+								int		totp = 0;
 
-								pNumPoints = (LPINT)GlobalLock (hPolyPartLen);
-								pNumPointsNew = (LPINT)GlobalLock (hPolyPartLenNew);
-								for (j=0;j<nPoly;j++,pNumPoints++,pNumPointsNew++)
+								pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
+								pNumPointsNew = (LPINT)GlobalLock(hPolyPartLenNew);
+								for (j = 0; j < nPoly; j++, pNumPoints++, pNumPointsNew++)
 								{
-									if (i >= totp && i<totp + *pNumPoints)
+									if (i >= totp && i < totp + *pNumPoints)
 									{
-										*pNumPointsNew  += NumPointsAdded;
+										*pNumPointsNew += NumPointsAdded;
 									}
 									totp += *pNumPoints;
+									if (j && pFGDBRecHeader->geometryType == geometryPolygon)
+										totp++;
 								}
-								GlobalUnlock (hPolyPartLen);
-								GlobalUnlock (hPolyPartLenNew);
+								GlobalUnlock(hPolyPartLen);
+								GlobalUnlock(hPolyPartLenNew);
 							}
+							else
+								ii = 1;
 							goto NextPt;
- 						}
+						}
 					}
 					*pPoints2++ = pPoints[i];
 					NumPoints2++;
+					pPoints2Base[NumPoints2 - 1];
 NextPt:;
 				}
-			//	Radius = ldistpp (RP,&BP); 
-			//	AZ = getazd (RP,&MidPoint);
-			//	POC = dnewpt (*RP,AZ, Radius);  
-			//	POC = *RP;
+				pPoints2Base[NumPoints2 - 1];
 				GSSiGlobUlFree (&hPoints);
                 GlobalUnlock (hPoints2);
 				GSSiGlobUlFree(&hPolyPartLen);
@@ -5061,6 +5500,13 @@ NextPt:;
 				hPolyPartLenNew = 0;
 				hPoints = hPoints2;
 				NumPoints = NumPoints2;
+				pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
+				int nn = 0;
+				for (int i = 0; i < nPoly; i++)
+				{
+					nn += *pNumPoints++;
+				}
+				GlobalUnlock(hPolyPartLen);
 				pPoints = (HPDPOINT)GlobalLock (hPoints);
 //				if (Pick)
 //					PickCurve (lpDCurPoints,nPnts,&BP,&POC,&EP);
@@ -5089,27 +5535,6 @@ NextPt:;
 				{
 					pRPBlock++;
 				}
-			/*	DPOINT	MidPoint = MidPointD (BP,EP);
-				double	Radius, AZ, BackAZ;
-				
-				ConvertCoord(RP,0,1);
-				Radius = ldistpp (RP,&BP); 
-				AZ = getazd (RP,&MidPoint);
-				POC = dnewpt (*RP,AZ, Radius);  
-				GSSiGlobUlFree (&hPoints);
-				hPoints = GSSiGlobAlloc (0,GMEM_MOVEABLE,4090*sizeof(DPOINT));
-				pPoints = (HPDPOINT)GlobalLock (hPoints); 
-				NumPoints = 0;
-				if (!Display)   
-                    CurvePointsD(&BP,&POC,&EP, &NumPoints, &pPoints,&BackAZ,4090,CurveChordDist,1);
-                else
-                	CurvePointsD(&BP,&POC,&EP, &NumPoints, &pPoints,&BackAZ,4090,DisplayCurveFactor,1); 
-                GlobalUnlock (hPoints);
-				pPoints = (HPDPOINT)GlobalLock (hPoints);
-				pNumPoints = (LPWORD)GlobalLock (hPolyPartLen);
-				*pNumPoints = NumPoints;
-		        GlobalUnlock (hPolyPartLen);
-				nPoly = 1;*/
 				SHPPolyHeader.Type = SHPT_POLYGON;	
 			}
 			else if (SHPPolyHeader.Type == -1610612685)
@@ -5642,7 +6067,7 @@ badcode:
 					        }
 						}
 					}*/
-					lpDCurPoints = pPoints;
+					lpDCurPoints = pPoints; lpDCurPoints[ii];
 					nPnts = nCurPoints = NumPoints;
 					if (PolyInMaskAreaFileCoord (GF_AREA,&NumPoints,0,0,&pPoints,TRUE))
 					{

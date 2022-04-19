@@ -855,8 +855,18 @@ void ConvertRampDisplayFieldToDBField(LPSTR FieldName, int maxl)
 	REPLAC(FieldName, "SidewalkLeft", "swkLeft", maxl);
 	REPLAC(FieldName, "SidewalkRight", "swkRight", maxl);
 	REPLAC(FieldName, "RunningSlope", "SlopeFront", maxl);
+	REPLAC(FieldName, "Cross Slope", "slope_front", maxl);//sidewalk data
+	REPLAC(FieldName, "Running Slope", "slope_side", maxl);//sidewalk data
 	REPLAC(FieldName, "CrossSlope", "SlopeSide", maxl);
 	REPLAC(FieldName, "StreetLandingObstruction", "lowerLandingObstruction", maxl);
+	REPLAC(FieldName, "Condition Rating", "condition", maxl);
+	REPLAC(FieldName, "Surface Material", "material", maxl);
+	REPLAC(FieldName, "Point Type", "type", maxl);
+	REPLAC(FieldName, "Crack Width", "crack_width", maxl);
+	REPLAC(FieldName, "Level Change", "level_change", maxl);
+	REPLAC(FieldName, "Sidewalk Width", "width", maxl);
+	REPLAC(FieldName, "Boulevard Width", "boulevardWidth", maxl);
+	REPLAC(FieldName, "Boulevard Material", "boulevardMaterial", maxl);
 }
 COLORREF GetRampFieldValueColor(LPSTR DisplayName)
 {
@@ -894,6 +904,11 @@ static char *rampTypes[] = {"Perp", "PerpNonWalk", "CombPerpWalk", "CombPerpNonW
 static char *AWITypes[] = {"None", "Tones", "SpeechMessage"};
 static char *buttonTypes[] = {"None", "SmallPush", "LargePush", "Touch", "APS"};
 static char *signalTypes[] = {"None", "Text", "Symbol", "SideTimer", "BelowTimer"};
+static char *conditionCode[] = { "Unknown","New","Good","Fair","Poor","Unacceptable" };
+static char* sidewalkMaterial[] = { "Unknown","Concrete", "Asphalt", "Brick Pavers","Interlocking Pavers","Other" };
+static char* boulevardMaterial[] = {"Unknown","Concrete", "Grass","Dirt","Other" };
+static char* sidewalkPointTypes[] = { "Sidewalk",//"Lower Landing","Ramp","Upper Landing","Crosswalk","Island","Driveway Crossing","Driveway Flare","Driveway Apron","Slope Change"};
+"Ramp", "Upper Landing","Slope Change","Displacement","Cracks","Obstruction","Driveway Crossing","Driveway Flare","Driveway Apron","Lower Landing","Crosswalk", "Island"};
 
 void RampTypeFromCode(int code, LPSTR OutLoc)
 {
@@ -923,6 +938,41 @@ void TextureFromCode(int code, LPSTR OutLoc)
 	*OutLoc = 0;
 	if (code >= 0 && code < maxType)
 		strcpy(OutLoc, textures[code]);
+	return;
+}
+void ConditionFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(conditionCode) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, conditionCode[code]);
+	return;
+}
+void MaterialFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(sidewalkMaterial) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, sidewalkMaterial[code]);
+	return;
+}void BoulevardMaterialFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(boulevardMaterial) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, boulevardMaterial[code]);
+	return;
+}
+void PointTypeFromCode(int code, LPSTR OutLoc)
+{
+	int maxType = sizeof(sidewalkPointTypes) / 4;
+
+	*OutLoc = 0;
+	if (code >= 0 && code < maxType)
+		strcpy(OutLoc, sidewalkPointTypes[code]);
 	return;
 }
 
@@ -969,9 +1019,42 @@ int NVCObstructionToCode(LPSTR obstruction)
 {
 	if (!strlen(obstruction))
 		return 0;
-	for (int i = 0; i < sizeof (obstructions)/4; i++)
+	for (int i = 0; i < sizeof(obstructions) / 4; i++)
 	{
 		if (!strcasecmp(obstruction, obstructions[i]))
+			return i;
+	}
+	return 0;
+}
+int NVCMaterialToCode(LPSTR material)
+{
+	if (!strlen(material))
+		return 0;
+	for (int i = 0; i < sizeof(sidewalkMaterial) / 4; i++)
+	{
+		if (!strcasecmp(material, sidewalkMaterial[i]))
+			return i;
+	}
+	return 0;
+}
+int NVCPointTypeToCode(LPSTR material)
+{
+	if (!strlen(material))
+		return 0;
+	for (int i = 0; i < sizeof(sidewalkPointTypes) / 4; i++)
+	{
+		if (!strcasecmp(material, sidewalkPointTypes[i]))
+			return i;
+	}
+	return 0;
+}
+int NVCConditionToCode(LPSTR condition)
+{
+	if (!strlen(condition))
+		return 0;
+	for (int i = 0; i < sizeof(conditionCode) / 4; i++)
+	{
+		if (!strcasecmp(condition, conditionCode[i]))
 			return i;
 	}
 	return 0;
@@ -983,6 +1066,50 @@ void GetRampTypesList(LPSTR OutLoc)
 	for (int i = 0; i < sizeof(rampTypes) / 4; i++)
 	{
 		sprintf(strchr(OutLoc, 0), "%s%s", delim, rampTypes[i]);
+		*delim = ',';
+	}
+	return;
+}
+void GetPointTypeList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(sidewalkPointTypes) / 4; i++)
+	{
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, sidewalkPointTypes[i]);
+		*delim = ',';
+	}
+	return;
+}
+void GetConditionCodeList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(conditionCode) / 4; i++)
+	{
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, conditionCode[i]);
+		*delim = ',';
+	}
+	return;
+}
+void GetMaterialCodeList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(sidewalkMaterial) / 4; i++)
+	{
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, sidewalkMaterial[i]);
+		*delim = ',';
+	}
+	return;
+}
+void GetBoulevardMaterialCodeList(LPSTR OutLoc)
+{
+	char delim[2] = "";
+	*OutLoc = 0;
+	for (int i = 0; i < sizeof(boulevardMaterial) / 4; i++)
+	{
+		sprintf(strchr(OutLoc, 0), "%s%s", delim, boulevardMaterial[i]);
 		*delim = ',';
 	}
 	return;
@@ -1022,7 +1149,22 @@ BOOL GetRampCodeForValue(LPSTR VarName, LPSTR VarValue, LPSTR ErrorVarName, LPST
 	int iCode;
 	char mess[256];
 
-	if (!stricmp(VarName, "RampType"))
+	if (!stricmp(VarName, "Condition"))
+	{
+		iCode = NVCConditionToCode(VarValue);
+		itoa(iCode, OutLoc, 10);
+	}
+	else if (!stricmp(VarName, "Material"))
+	{
+		iCode = NVCMaterialToCode(VarValue);
+		itoa(iCode, OutLoc, 10);
+	}
+	else if (!stricmp(VarName, "type"))
+	{
+		iCode = NVCPointTypeToCode(VarValue);
+		itoa(iCode, OutLoc, 10);
+	}
+	else if (!stricmp(VarName, "RampType"))
 	{
 		iCode = NVCRampTypeToCode(VarValue);
 		itoa(iCode, OutLoc, 10);

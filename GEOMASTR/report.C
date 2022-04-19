@@ -13,8 +13,8 @@ static	long	NextReportNum;
 static	HANDLE	hViewScroll=0;
 
 BOOL DecodeReportFont (LPSTR pLine, short ifont, LPREPORT pReport);
-BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
-BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 
 int	CurrentReportFontHeight (void)
 {   
@@ -143,6 +143,7 @@ HANDLE LoadReport (LPSTR Name)
 	reptype = 0;
 	Fid = GSSiOpenFile (Name,&OFStruct,OF_READ); 
 	if (Fid == HFILE_ERROR) return 0;
+	AddToMacroStack(4, 0, Name, 0, 0);
 	SetCurVal (Name,IDS_FILERPT);
 	len = GSSillseek (Fid,0,2); 
 	GSSillseek (Fid,0,0);
@@ -264,6 +265,10 @@ HANDLE LoadReport (LPSTR Name)
 	GSSiGlobUlFree (&hBuf);
 	GSSiGlobUlFree (&hTempLine);
 	GlobalUnlock (hReport); 
+	if (!OpenReportFiles(hReport))
+		UnloadReport(&hReport);
+	else
+		CloseReportFiles(hReport);
 	return hReport;
 	
 ErrOut:
@@ -528,6 +533,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
 	int	l=_fstrlen (txt); 
 	SIZE	txSize;
 
+	SetDisplayMode(CurReport->hDC, GF_SCREENMODE);
 	GetTextExtentPoint32 (CurReport->hDC,txt,l,&txSize);
 	
 	if (CurReport->WantSize)
@@ -553,7 +559,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
     return;
 }
 
-BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect)
+BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect, BOOL FitToWindow)
 {
 	LPREPORT	pReport=(LPREPORT)GlobalLock (hReport);
 	int			irow, itab, MaxRowLen=0, ReportHeight=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
@@ -592,6 +598,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	{
 		pReport->WantSize = TRUE;
 		RectInit (&pReport->SizeRect); 
+		pReport->maxLineHeaderWidth = 0;
 	}
 	else
 		pReport->WantSize = FALSE;
@@ -704,6 +711,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 				else
 					lt=0;
 				GetTextExtentPoint32 (hDC,str,_fstrlen(str),&txSize);
+				pReport->maxLineHeaderWidth = max(txSize.cx, pReport->maxLineHeaderWidth);
 	            RowHeight = max (RowHeight,txSize.cy); 
 				_fstrcpy (FontStr,"[%JUST]");
 				ExpandText (FontStr);
@@ -811,11 +819,19 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	{
 //		FactorRect (&pReport->SizeRect,Factor);
 		w = max (xmid - pReport->SizeRect.left,pReport->SizeRect.right - xmid);
+		if (!FitToWindow && w > RECTWIDTH(pClipRect) / 2)
+			w = RECTWIDTH(pClipRect) / 2;
 		if (*pReport->JustC == 'C')
 		{
-			pReport->SizeRect.left	= xmid - w;
+			pReport->SizeRect.left = xmid - w;
 			pReport->SizeRect.right = xmid + w;
-			pReport->Just = (pReport->SizeRect.right - pReport->SizeRect.left)/2;
+			pReport->Just = (pReport->SizeRect.right - pReport->SizeRect.left) / 2;
+		}
+		else if (*pReport->JustC == 'c')
+		{
+			pReport->SizeRect.left = xmid - w;
+			pReport->SizeRect.right = xmid + w;
+			pReport->Just = pReport->maxLineHeaderWidth;
 		}
 		else
 			pReport->Just = xmid - pReport->SizeRect.left;
@@ -888,6 +904,19 @@ BOOL DisplayReportScroll (HWND hWndDlg, int ScrollCntl)
 	
 	ScrollRptDlg = hWndDlg;
 	ScrollRptCntl = ScrollCntl;	
+	if (hReportScroll)
+	{
+		LPREPORT pReport = GlobalLock(hReportScroll);
+		HDC hDC = GetDC(hWndDlg);
+		pReport->hWnd = hWndDlg;
+		pReport->hdc = hDC;
+		HFONT hFont = SelectObject(hDC, GetStockObject(SYSTEM_FONT));
+		pReport->currentFont = hFont;
+		SelectObject(hDC, hFont);
+		ReleaseDC(hWndDlg, hDC);
+		GlobalUnlock(hReportScroll);
+
+	}
 	return (DisplayReport2 (0,0,Rect,1,TRUE,0));
 }  
 
@@ -1020,19 +1049,27 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 	HANDLE		hTemp;
 	LPSTR		pRow2;
 	
-	if (hDC)
-	{
-		SetDisplayMode (hDC, GF_TEXTMODE);    
-		SelectClipRgn (hDC,0);
-	}  
-	else
+	if (!hDC)
 		hReport = hReportScroll;  
 	if (!hReport)
 		return FALSE;
 	if (!OpenReportFiles (hReport))
 		return FALSE;
-	pReport = (LPREPORT)GlobalLock (hReport);   
-	pReport->hDC = hDC;
+	if (hDC)
+	{
+		SetDisplayMode(hDC, GF_TEXTMODE);
+		SelectClipRgn(hDC, 0);
+	}
+
+	pReport = (LPREPORT)GlobalLock(hReport);
+	if (!pReport->currentFont)
+	{
+		pReport->hDC = hDC;
+		HFONT hFont = SelectObject(hDC, GetStockObject(SYSTEM_FONT));
+		pReport->currentFont = hFont;
+		SelectObject(hDC, hFont);
+	}
+
 	pReport->Rect = Rect;  
 	pReport->curLineHeight = 0;
 	if (pSizeRect)
@@ -1072,6 +1109,8 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 			AddPointToRect (p,&pReport->SizeRect);
 		}
 		PixPerInch = GetDeviceCaps(hDC, LOGPIXELSY);      
+		//SetWindowExtEx(hDC, pReport->Rect.right, pReport->Rect.bottom, 0);
+		//SetViewportExtEx(hDC, pReport->Rect.right, pReport->Rect.bottom, 0);
 
 /*    	if (pReport->First)
     		LastFactor = 1;
@@ -1242,7 +1281,7 @@ BOOL GetNextPrintReport (BOOL First,LPSTR ReportName,LPLONG pRefno,LPSTR Prefix,
 		
 }
 
-BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	char	UserID[64], Password[32];	
     RECT	rect; 
@@ -1251,35 +1290,44 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
     int		height,width,x,y;
  switch(Message)
    {
-    case WM_INITDIALOG:  
-        hSaveBM = EnterBlockingWindow (hWndDlg);
-		{ 
+    case WM_INITDIALOG: 
+	{
+		HDC hdc = GetDC(hWndDlg);
+		HFONT oldFont = SelectObject(hdc, GetStockObject(SYSTEM_FONT));
+		SIZE txSize;
+		int rtn = GetTextExtentPoint32(hdc, "TESTTEXT", 8, &txSize);
+
+		ReleaseDC(hWndDlg, hdc);
+
+		hSaveBM = EnterBlockingWindow(hWndDlg);
+		{
 			DWORD dwStringExt;
 			TEXTMETRIC tm;
-			HDC hdcLB=GetDC (hWndDlg);
-			
-			GetTextMetrics (hdcLB,&tm);
-			dwStringExt = tm.tmAveCharWidth*255;
-		
-		    SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_SETHORIZONTALEXTENT,
-		        			   LOWORD(dwStringExt), 0L);
-		    ReleaseDC (hWndDlg,hdcLB);
-		}
+			HDC hdcLB = GetDC(hWndDlg);
 
-         CurView->hWnd = hWndDlg;
-		 GetWindowRect(hWndMain, &rect);    
-		 rect.left = max(0,rect.left);
-		 rect.top = max(0,rect.top); 
-		 x = rect.left;
-		 y = rect.top;
-		 height = rect.bottom-rect.top-6;    
-		 width = rect.right - rect.left-6;
-	 	 SetWindowPos(hWndDlg, (HWND) 0, x+1, y+1,width, height,0); 
-	 	 GetClientRect(hWndDlg,&rect);
-	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, 0, 0,rect.right, rect.bottom,0);
-		 if ( !DisplayReportScroll (hWndDlg,IDC_SCROLLBOX))
-    	 	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-			
+			GetTextMetrics(hdcLB, &tm);
+			dwStringExt = tm.tmAveCharWidth * 255;
+
+			SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_SETHORIZONTALEXTENT,
+				LOWORD(dwStringExt), 0L);
+			ReleaseDC(hWndDlg, hdcLB);
+		}
+		hdc = GetDC(hWndDlg);
+		CurView->hWnd = hWndDlg;
+		GetWindowRect(hWndMain, &rect);
+		rect.left = max(0, rect.left);
+		rect.top = max(0, rect.top);
+		x = rect.left;
+		y = rect.top;
+		height = rect.bottom - rect.top - 6;
+		width = rect.right - rect.left - 6;
+		SetWindowPos(hWndDlg, (HWND)0, x + 1, y + 1, width, height, 0);
+		GetClientRect(hWndDlg, &rect);
+		SetWindowPos(GetDlgItem(hWndDlg, IDC_SCROLLBOX), (HWND)0, 0, 0, rect.right, rect.bottom, 0);
+		if (!DisplayReportScroll(hWndDlg, IDC_SCROLLBOX))
+			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+
+	}
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
@@ -1308,7 +1356,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LP
  return TRUE;
 } 
 
-BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     POINT	pt;    
     int		height,width,x,y; 
@@ -1422,7 +1470,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, int Message, WPARAM wParam, L
  return TRUE;
 } 
 
-BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     RECT	rect,sbrect; 
     POINT	pt;  

@@ -50,7 +50,7 @@ BOOL OrthoInBuffer(LPSTR Name, long frame)
 	{
 		if (CurOrtho->DeleteBM == 1)
 			hDibFree (&CurOrtho->hDib);
-		else if (CurOrtho->DeleteBM == 2) 
+		else if (CurOrtho->DeleteBM == 2 && CurOrtho->hDib)
 		{
 			if (hDibIs32Bit (CurOrtho->hDib))
 				DestroyDIB32(CurOrtho->hDib,FALSE);
@@ -95,7 +95,7 @@ void CloseOrthos (BOOL Clear)
 		{
 			if (CurOrtho->DeleteBM == 1)
 				hDibFree (&CurOrtho->hDib);
-			else if (CurOrtho->DeleteBM == 2) 
+			else if (CurOrtho->DeleteBM == 2 && CurOrtho->hDib)
 			{
 				if (hDibIs32Bit (CurOrtho->hDib))
 					DestroyDIB32(CurOrtho->hDib,FALSE);
@@ -123,6 +123,7 @@ void DisplayOrthoPhoto ()
 
     if (!hOrthos)
     	return;
+	InDisplayOrthos = TRUE;
     CurOrtho = (LPORTHO)GlobalLock (hOrthos) + OrthoID;
 	WPoint.x = CurOrtho->Bounds.xmn;
 	WPoint.y = CurOrtho->Bounds.ymn;
@@ -179,6 +180,7 @@ void DisplayOrthoPhoto ()
 			break;
 		}
 	}
+	InDisplayOrthos = FALSE;
 	return;
 } 
 
@@ -339,8 +341,10 @@ BOOL DisplayBMInVP (HDC hDC, HANDLE hDib, BOOL DIBColorsArePalleteEntries,LPORTH
 	    BITMAP  bmp; 
 	    HDC		hDCMain = GetDC (hWndMain);
 	    HDC		hdcMem = CreateCompatibleDC(hDC);
-	    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;     
-	    HDIB	hDIB;
+		curProgID = 10020;
+		HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;
+		curProgID = -1;
+		HDIB	hDIB;
         
         ReleaseDC (hWndMain,hDCMain);
 //    	GetObject(hNewBM, sizeof(BITMAP), &bmp);
@@ -365,11 +369,11 @@ BOOL DisplayBMInVP (HDC hDC, HANDLE hDib, BOOL DIBColorsArePalleteEntries,LPORTH
 	   				      (LPBITMAPINFO)pDibInfo,
 	   				      ColorType,RastOpts[rop]);*/
 	    i=BitBlt(hDC, vpx,vpy,vpwidth,vpheight, hdcMem, 0, 0,SRCCOPY);
-//	    hDIB = BitmapToDIB (hNewBM,NULL);  
+//	    hDIB = BitmapToDIB (hNewBM,0,NULL);  
 		if (hbmPrev)
         	SelectObject(hdcMem, hbmPrev);
 	    DeleteDC(hdcMem);    
-//	    SaveDIB (hDIB,"c:\\test.bmp");
+//	    SaveDIB (hDIB,"c:\\temp\\test.bmp");
         DeleteObject (hNewBM);        
     }
 	else 	
@@ -492,7 +496,9 @@ BOOL DisplayBMInVP32 (HDC hDC, HDIB32 hDib, BOOL DIBColorsArePalleteEntries,LPOR
 //   	if (GetGlobalBVal2 ("[%PR]",FALSE) && OutWidth < InWidth)
    	if (AllowShrink && DoShrinkOrtho && Printing && OutWidth < InWidth)
    	{   
-	    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;     
+		curProgID = 10021;
+		HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,(int)OutWidth,(int)OutHeight), hbmPrev;
+		curProgID = -1;
 		if (!hNewBM)
 			goto DoNotShrink;
 		{
@@ -643,8 +649,8 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
 	BMHeight = IDNINT(BitmapBounds.ymx+1);
     CloseTRANS2 (&hTranBMToBase);
     CloseTRANS2 (&hTranBaseToBM); 
-	hTranBMToBase = LoadTranFile (TranFile,1,2,0,0);;
-	hTranBaseToBM = LoadTranFile (TranFile,2,2,0,0);;
+	hTranBMToBase = LoadTranFile (TranFile,1,2,0,0);
+	hTranBaseToBM = LoadTranFile (TranFile,2,2,0,0);
 /*	{       
 		double BMX[4],BMY[4],BASEX[4],BASEY[4]; 
 		float	RSQMIN;
@@ -770,6 +776,18 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
         DeleteObject (hNewBM);        
     }
 	else */	
+	char LastImageTrnFile[MAX_PATH];
+	if (GetGlobalCVal("[%LASTIMAGETRNFILE]", LastImageTrnFile, 0))
+	{
+		char txt[256];
+		GSSiRemove(LastImageTrnFile);
+		sprintf(txt, "%ld %d %ld %ld\r\n%ld %ld %ld %ld\r\n%ld %ld %ld %ld\r\n%ld %ld %ld %ld",
+			bmx, bmy, vpx, vpy,
+			bmx, bmy - bmheight + 1 , vpx, vpy + vpheight,
+			bmx + bmwidth, bmy, vpx + vpwidth, vpy,
+			bmx + bmwidth, bmy - bmheight + 1, vpx + vpwidth, vpy + vpheight);
+		AppendFile(LastImageTrnFile, txt);
+	}
 	   	i=StretchDIBitsFromHandle (hDC,vpx,vpy,
 						   vpwidth,vpheight,
 	    				   bmx,bmy-bmheight+1,
@@ -1434,8 +1452,10 @@ BOOL DisplaySIDInVP32 (LPVIEWPORT pVP,LPSTR File)
 //			SelectClipRgn (hDC,0);
 			   	if (Printing && DoShrinkOrtho && OutWidth < InWidth)
 			   	{   
-				    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;  
-					
+					curProgID = 10022;
+					HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;
+					curProgID = -1;
+
 					if (!hNewBM)
 						goto DoNotShrink;
 					{
@@ -1878,8 +1898,9 @@ BOOL DisplaySIDInVP32new (LPVIEWPORT pVP,LPSTR File)
 //			SelectClipRgn (hDC,0);
 			   	if (Printing && DoShrinkOrtho && OutWidth < InWidth)
 			   	{   
-				    HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;  
-					
+					curProgID = 10023;
+					HBITMAP	hNewBM = CreateCompatibleBitmap(hDC,OutWidth,OutHeight), hbmPrev;
+					curProgID = -1;
 					if (!hNewBM)
 						goto DoNotShrink;
 					{
@@ -3230,9 +3251,23 @@ BOOL DisplayVirtualPlot (LPSTR VPName)
 	}
 	return TRUE;
 }
-BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName)
+FILEINDEXENTRY CopyIndexEntry(LPFILEINDEXENTRY pIndexEntry)
 {
-	BOOL rtn = TRUE;
+	FILEINDEXENTRY indexEntryOut = { 0 };
+	if (pIndexEntry)
+	{
+		indexEntryOut.BMBitCount = pIndexEntry->BMBitCount;
+		indexEntryOut.BMHeight = pIndexEntry->BMHeight;
+		indexEntryOut.BMWidth = pIndexEntry->BMWidth;
+		indexEntryOut.Bounds = pIndexEntry->Bounds;
+		indexEntryOut.Len = pIndexEntry->Len;
+		strcpy(indexEntryOut.Name, pIndexEntry->Name);
+	}
+	return indexEntryOut;
+}
+BOOL ConvertOrthoToJP2 (LPSTR Name,LPSTR NewName,int fmt)
+{
+	BOOL rtn = FALSE;
 
     OFSTRUCTGM    OFStruct; 
     short     Version;
@@ -3311,18 +3346,34 @@ Next:
 			if (AVIFrameToDIB (GCIFile,frame,&hDib,&DeleteBM,lpIndex->CurrentEntry->BMBitCount,lpIndex->CurrentEntry->BMWidth,lpIndex->CurrentEntry->BMHeight))
 			{
 		   		HDIB32 hDib32 = BMPToDIB32 (hDib);  
+				//HDIB32 hDib32 = FreeImage_ConvertTo32Bits(hDib24);
+				//DestroyDIB32(hDib24, FALSE);
+
 				int	imageLen, imageOffset = GSSillseek (FidJP2Out,0,1);
-				HANDLE hmemDIB = WriteDIBToMem (hDib32,FIF_JP2,JP2CompressionFactor,&imageLen);
+				HANDLE hmemDIB;
+				switch (fmt)
+				{
+				case 1:
+					hmemDIB = WriteDIBToMem(hDib32, FIF_JP2, JP2CompressionFactor, &imageLen);
+					break;
+				case 2:
+					hmemDIB = WriteDIBToMem(hDib32, FIF_TIFF, TIFF_ADOBE_DEFLATE, &imageLen);
+					break;
+				}
+
 				LPSTR pMem;
-				FILEINDEXENTRY indexEntryOut = *lpIndex->CurrentEntry;
+				FILEINDEXENTRY indexEntryOut = CopyIndexEntry(lpIndex->CurrentEntry);
 				LPSTR pAt = strchr (indexEntryOut.Name,'@');
 
 				itoa (imageOffset,pAt+1,10);
 				indexEntryOut.Len = lpIndex->CurrentEntry->Len - strlen (lpIndex->CurrentEntry->Name) + strlen (indexEntryOut.Name);
 				totLen += indexEntryOut.Len;
 				GSSiGlobFree (&hDib);
-				//SaveDIB32 (hDib32,"c:\\temp\\testbitmap_32.jp2",FIF_JP2,32);
-				GMDestroyDIB32 (hDib32); 
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.tif", FIF_TIFF, TIFF_DEFAULT);
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.jp2", FIF_JP2, JP2CompressionFactor);
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.j2k", FIF_J2K, JP2CompressionFactor);
+				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_3232.jp2", FIF_JP2, 32);
+				GMDestroyDIB32 (hDib32);
 				pMem = GlobalLock (hmemDIB);
 				BigWrite (FidIndexOut,&indexEntryOut,indexEntryOut.Len,-1);
 				BigWrite (FidJP2Out,&imageLen,sizeof(int),-1);
@@ -3340,6 +3391,7 @@ Next:
     BigWrite (FidIndexOut, (HPSTR)&FirstIndex,STOREDINDEXLENGTH,-1);
 	GSSillseek (FidIndexOut,curLoc,0);
 	indexLoc = curLoc;
+	rtn = TRUE;
 	lpIndex=GetNextIndexHeader(&Handle,FALSE);
     if (lpIndex == NULL)
 		goto Exit;
@@ -3356,16 +3408,55 @@ Exit:
 	return rtn;
 }
 
-int TestConvertToJP2 (int i)
+BOOL ConvertToJP2(LPSTR fromDir,int nparts)
 {
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index64","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index64");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index16","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index16");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index4","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index4");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_1\\index1","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_1\\index1");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index64","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index64");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index16","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index16");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index4","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index4");
-	ConvertOrthoToJP2 ("G:\\GEOMas\\orthos\\Orth2010\\2010_2\\index1","G:\\GEOMas\\orthos_jp2\\Orth2010\\2010_2\\index1");
-	return 1;
+	char cmd[128] = "[%JP2Factor]=16";
+	char levels[256];
+	char from[MAX_PATH], to[MAX_PATH];
+	BOOL rtn = TRUE;
+	int year;
+	int maxLevels = 256;
+	char saveC = fromDir[4];
+	ExpandText(cmd);
+	fromDir[4] = 0;
+	year = atoi(fromDir);
+	fromDir[4] = saveC;
+	LPSTR pNextLev=0;
+	LPSTR pLevel = 0;
+
+	for (int part = 0; part < nparts; part++)
+	{
+		int lev = 1;
+		sprintf(from, "[%%DL]orthos\\%s\\%i_%i\\global.ini", fromDir, year, part + 1);
+		if (ExistFile(from))
+		{
+			LoadGlobalInit(from, FALSE);
+			strcpy(levels, "[%ORTHOLEVS]");
+			ExpandText(levels);
+			pLevel = levels;
+			pNextLev = strchr(levels, ',');
+			lev = atoi(pLevel);
+			sprintf(to, "[%%DL]orthos\\jp2\\Orth%s\\%i_%i\\global.ini", fromDir, year, part + 1);
+			GSSiCopyFile(from, to, TRUE);
+		}
+		while (rtn && lev > 0)
+		{
+			sprintf(from, "[%%DL]orthos\\%s\\%i_%i\\index%i", fromDir,year, part+1, lev);
+			sprintf(to, "[%%DL]orthos\\jp2\\%s\\%i_%i\\index%i",fromDir,year, part+1, lev);
+			ExpandText(from);
+			ExpandText(to);
+			rtn = ConvertOrthoToJP2(from, to, 1);
+			if (pNextLev)
+			{
+				pNextLev++;
+				pLevel = pNextLev;
+				pNextLev = strchr(pLevel, ',');
+				lev = atoi(pLevel);
+			}
+			else
+				lev = 0;
+		}
+	}
+	return rtn;
 }
 

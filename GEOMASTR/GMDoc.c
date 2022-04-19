@@ -44,7 +44,7 @@ void __cdecl BackgroundMergeDocImageIntoViewport(LPHANDLE phArgs);
 
 INT_PTR CALLBACK	AboutGMDoc(HWND, UINT, WPARAM, LPARAM);
 ATOM MyRegisterClassGMDoc(HINSTANCE hInstance);
-LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProcGMDoc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen,POINT tiePoint,int Fade, BOOL Transparent, COLORREF TranColor);
 
 // Message handler for about box.
@@ -1213,8 +1213,10 @@ BOOL MergeDocImageIntoViewport2(HBITMAP hNewBitmap, RECT rect, LPSTR title, int 
 			int lenBits = bm.bmWidthBytes * bm.bmHeight;
 			LPBYTE	pBits = malloc(lenBits);
 
+			curProgID = 10008;
 			hBMSave = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
 			hBMTemp = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
+			curProgID = -1;
 			hBMTempOld = SelectObject(tempDC, hBMTemp);
 			GetBitmapBits(hNewBitmap, lenBits, pBits);
 			SetBitmapBits(hBMSave, lenBits, pBits);

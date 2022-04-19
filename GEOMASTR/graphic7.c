@@ -33,7 +33,7 @@ typedef struct {
 typedef GSWWSTRUCT	*LPGSWWSTRUCT;
 
 
-extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LONG lParam); 
+extern	BOOL CALLBACK EnumCtrlProc(HWND hCtrl,LPARAM lParam); 
 
 #include "gmextern.h"
 
@@ -588,7 +588,9 @@ HDC GetScreenWithoutWindow (HWND hWnd,LPRECT pRect,HBITMAP *phBMOld)
 	HBITMAP	hBM;
 
 	GSWWStruct.hDCMem = CreateCompatibleDC (hDCWnd);
+	curProgID = 10012;
 	hBM = CreateCompatibleBitmap (hDCWnd,RECTWIDTH(pRect),RECTHEIGHT(pRect));
+	curProgID = -1;
 	*phBMOld = SelectObject (GSWWStruct.hDCMem,hBM);
 	GSWWStruct.hWnd = hWnd;
 	GSWWStruct.InRect = *pRect;
@@ -616,7 +618,7 @@ HDC GetScreenWithoutWindow (HWND hWnd,LPRECT pRect,HBITMAP *phBMOld)
 	
 }
 
-LONG FAR PASCAL PromptWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL PromptWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	RECT	rect;
 	static	int fadeout, incfade, blend;
@@ -1366,7 +1368,7 @@ BOOL ReadObject (HFILE *Fid, BOOL UpdateTarget,LPVOID *RtnAdd,short WantID)
 		goto RtnFalse;
     if (ObjectID == OB_CONFIGDESCRIPTION || ObjectID == OB_CONFIGIMAGE)
 		goto RtnFalse;
-    if (ObjectID < 0) 
+	if (ObjectID < 0)
     	BlowOut ("Invalid object in configuration file",0);
     if (WantID && ObjectID != WantID) 
     {
@@ -1713,7 +1715,7 @@ GSSiExitProg (900);
             		HANDLE	handle_v0 = GSSiGlobAlloc ( 659,GHND,sizeof(THEME_v0));
             		LPTHEME_v0	pTheme_v0=(LPTHEME_v0)GlobalLock (handle_v0);
             		GSSilread (*Fid,pTheme_v0,sizeof(THEME_v0)); 
-            		ConvertThemeV0toV1 (CurTheme,pTheme_v0);
+            		ConvertThemeV0toV1 ((LPTHEME_V1)CurTheme,pTheme_v0);
             		GSSiGlobUlFree (&handle_v0); 
             	}
             		break;
@@ -1722,16 +1724,60 @@ GSSiExitProg (900);
             		HANDLE	handle_v1 = GSSiGlobAlloc ( 659,GHND,sizeof(THEME_V1));
             		LPTHEME_V1	pTheme_v1=(LPTHEME_V1)GlobalLock (handle_v1);
             		GSSilread (*Fid,pTheme_v1,sizeof(THEME_V1)); 
-            		ConvertThemeV1toV2 (CurTheme,pTheme_v1);
+            		ConvertThemeV1toV2 ((LPTHEME_V4)CurTheme,pTheme_v1);
             		GSSiGlobUlFree (&handle_v1); 
             	}
             		break;
+				case 4:
+				{
+					HANDLE	handle_v4 = GSSiGlobAlloc(659, GHND, sizeof(THEME_V4));
+					LPTHEME_V4	pTheme_v4 = (LPTHEME_V4)GlobalLock(handle_v4);
+					GSSilread(*Fid, pTheme_v4, sizeof(THEME_V4));
+					ConvertThemeV4toV5(CurTheme, pTheme_v4);
+					GSSiGlobUlFree(&handle_v4);
+				}
+				break;
 				case 2:
 				case 3:
-            	default:
-            		GSSilread (*Fid,CurTheme,sizeof(THEME)); 
-            		break;
-            }
+					GSSilread(*Fid, CurTheme, sizeof(THEME_V4));
+					break;
+				case 5:
+					GSSilread(*Fid, CurTheme, sizeof(THEME_V5));
+					break;
+				case 6:
+					GSSilread(*Fid, CurTheme, sizeof(THEME));
+					break;
+			}
+			while (CurTheme->Version != CUR_THEME_VERSION)
+			{
+				HANDLE	hThemeNew = GSSiGlobAlloc(659, GHND, sizeof(THEME));
+				LPTHEME pThemeNew = GlobalLock(hThemeNew);
+				switch (CurTheme->Version)
+				{
+				case 0:
+					ConvertThemeV0toV1((LPTHEME_V1)pThemeNew, (LPTHEME_v0)CurTheme);
+					break;
+				case 1:
+					ConvertThemeV1toV2((LPTHEME_V4)pThemeNew, (LPTHEME_V1)CurTheme);
+					break;
+				case 2:
+				case 3:
+					memcpy(pThemeNew, CurTheme, sizeof(THEME));
+					pThemeNew->Version = 4;
+					break;
+				case 4:
+					ConvertThemeV4toV5(pThemeNew, (LPTHEME_V4)CurTheme);
+					break;
+				case 5:
+					memcpy(pThemeNew, CurTheme, sizeof(THEME_V5));
+					pThemeNew->Version = 6;
+					break;
+				}
+				CurTheme = pThemeNew;
+				GSSiGlobUlFree(&handle);
+				handle = hThemeNew;
+			}
+			CurTheme->hPoints = 0;
             CurTheme->handle = handle; 
             CurTheme->Config = CurrentConfig;   
 			CurTheme->CompareDC = 0;
@@ -2013,6 +2059,7 @@ GSSiExitProg (901);
 		case GF_CONNECTION_LINE_THEME:
             
 			ClearCompareDC (CurTheme,TRUE);
+			GSSiGlobFree(&CurTheme->hPoints);
 		  	if (CurTheme->FidDelayedText > 0)
 		  		CloseAndDeleteFile (&CurTheme->FidDelayedText); 
 			if (CurView)
@@ -4127,7 +4174,7 @@ BOOL DisplayPickedItems (HWND hWnd,int NumPickedIn,BOOL UseMenus, LPSTR Cmd,LPST
     char	SymName[64],DPIMacro[256],PMFile[MAX_PATH];
     BOOL	rtn=FALSE; 
     LPSTR	lpDesc, lpSymbol,lpAction;     
-    HMENU	Menus[MAXPICKITEMS+3], PickMenu;
+	HMENU	Menus[MAXPICKITEMS + 3] = { 0 }, PickMenu;
     long	loc;
     BOOL	TopOnlyOpt, SingleOpt, DescTAGOpt;
     UINT	CmdID; 
@@ -5183,7 +5230,7 @@ GSSiExitProg (919);
 	SetGlobalValue ("%SHOWSELECTED","");
 	hSaveVP = GSSiGlobAlloc ( 677,GMEM_MOVEABLE,sizeof(VIEWPORT));
 	SaveVP = (LPVIEWPORT)GlobalLock (hSaveVP); 
-	GSSiDeleteObject (&CurView->hRgn);
+	ClearVPHandles(CurView);
 	*SaveVP = *CurView;	
 	AP = SetAutoPan (FALSE);
 	hVisList=GSSiGlobAlloc ( 678,GHND,sizeof(VISLIST));
@@ -5227,6 +5274,7 @@ NextRef:
 	IgnorePrevLayers = SaveIgnorePrevLayers;
 	GSSiGlobUlFree (&hVisList);
 	CurVis = SaveVis;
+	ClearVPHandles(CurView);
 	*CurView = *SaveVP;
 	SetAutoPan (AP);
 	GSSiGlobUlFree (&hSaveVP);
@@ -5452,6 +5500,9 @@ GSSiExitProg (923);
 				goto NextVP;
 		}
 		ShowCurs = DisplayProfileLink (&WinBasePoint);
+		RestoreScreen2(CurView->hDC, CurView->LinkedCursorHandle, 0, FALSE);
+		DestroySavedScreen(&CurView->LinkedCursorHandle, 0);
+
 		WinPoint = BasePtToScreenPt (&WinBasePoint); 
 		Rect.left = max (0,WinPoint.x-LinkedCursorWidth-3);
 		Rect.right = WinPoint.x+LinkedCursorWidth+3;
@@ -5651,9 +5702,11 @@ BOOL SetTransparency (int tranValue)
 		if (hDC)
 		{
 			GetClientRect (CurView->hWnd,&rect);  
+			curProgID = 10013;
 			CurView->transparencyBitmapWidth = RECTWIDTH(&rect);
 			CurView->transparencyBitmapHeight = RECTHEIGHT(&rect);
 			CurView->hTransparencyBitmap = CreateCompatibleBitmap (hDC,CurView->transparencyBitmapWidth,CurView->transparencyBitmapHeight);
+			curProgID = -1;
 			if (CurView->hTransparencyBitmap)
 			{
 				CurView->transParency = tranValue;

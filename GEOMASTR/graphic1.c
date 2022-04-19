@@ -153,7 +153,7 @@ void PATBMPDef (BOOL clear)
 	for (i = 0; i < 5; i++)
 	{
 		if (clear)
-			DeleteObject(hPatBMP[i]);
+			GSSiDeleteObject(&hPatBMP[i]);
 		else
 			hPatBMP[i] = LoadBitmap(ghInst, MAKEINTRESOURCE(PatBMP[i]));
 	}
@@ -381,6 +381,7 @@ void QuitGraphics()
 	InQuitGraphics = TRUE;
 	BT_CLOSEANDDELETE(&hGMDKeyList);
 
+	ClearFullWindowBitmap(0);
 	DestroyAllToolbars ();
 	//StopBackgroundCache ();
 	//ShowCounts (1);
@@ -405,6 +406,7 @@ void QuitGraphics()
 	for (i=0;i<MAXMULTILEVELZOOM;i++)
 		GSSiDeleteObject (&hbmpMultiLevel[i]); 
 	DestroySavedGraphicsFile (0);
+	UseTrustedCacheFile(0);
  	CloseTRANS2 (&hTranFileToBase); 
 	CloseTRANS2 (&hTranBaseToFile);  
 	CloseTRANS2 (&hTranFileToVP);  
@@ -576,7 +578,7 @@ void QuitGraphics()
 		DeleteObject (hbm); 
 		DeleteDC (hdcMemMap);
 	}	
-
+	GSSiDeleteObject(&hBitmapScreenBuffer);
 //	TerminateConversations(0);
     ConvertCoordClose ();  
 //    FreeLibraries();   
@@ -664,6 +666,50 @@ void SetCurView (LPVIEWPORT pVP)
 		ii=1;
 	if (CurView && CurView->ID == 4)
 		ii=1;*/
+	if (CurView && !inUnallocateConfig)
+	{
+		LPVIEWPORT BoundsVP = CurView;
+		if (CurView->Type == SUBVIEWPORT && CurView->Parent)
+			BoundsVP = pViewports[CurView->Parent - 1];
+		while (BoundsVP->DisplayInParent && BoundsVP->Parent && BoundsVP->ID != BoundsVP->Parent)
+			BoundsVP = pViewports[BoundsVP->Parent - 1];
+
+		if (CurView->ID != BoundsVP->ID)
+		{
+			CurView->HaveBounds = BoundsVP->HaveBounds;
+			CurView->Rotation = BoundsVP->Rotation;
+			CurView->MidPointW = BoundsVP->MidPointW;
+			CurView->ScreenRect = BoundsVP->ScreenRect;
+			CurView->DrawRect = BoundsVP->DrawRect;
+			CurView->WBounds = BoundsVP->WBounds;
+			CurView->Scale = BoundsVP->Scale;
+			CurView->Scale = BoundsVP->Scale;
+			CurView->CurrentGoogleZoom = BoundsVP->CurrentGoogleZoom;
+			CurView->CurrentGoogleType = BoundsVP->CurrentGoogleType;
+			CurView->CurrentGoogleScale = BoundsVP->CurrentGoogleScale;
+			CurView->BorderPct = BoundsVP->BorderPct;
+			CurView->BorderPct = BoundsVP->BorderPct;
+			CurView->DesiredHeight = BoundsVP->DesiredHeight;
+			CurView->TagPointID = BoundsVP->TagPointID;
+			CurView->TagPointType = BoundsVP->TagPointType;
+			CurView->TagPoint = BoundsVP->TagPoint;
+			CurView->TagPointActual = BoundsVP->TagPointActual;
+			CurView->WidthType = BoundsVP->WidthType;
+			CurView->DisplayInInches = BoundsVP->DisplayInInches;
+			CurView->DisplayedFullScreen = BoundsVP->DisplayedFullScreen;
+			CurView->AutoSize = BoundsVP->AutoSize;
+			CurView->DisplayRect = BoundsVP->DisplayRect;
+			CurView->ProfileRect = BoundsVP->ProfileRect;
+			CurView->DisplayRect = BoundsVP->DisplayRect;
+			CurView->Width = BoundsVP->Width;
+			CurView->Height = BoundsVP->Height;
+			CurView->Margin = BoundsVP->Margin;
+			CurView->Rect = BoundsVP->Rect;
+			CurView->xForm = BoundsVP->xForm;
+			CurView->ZMScale = BoundsVP->ZMScale;
+		}
+	}
+
 {
 #if ENABLETRACE
 GSSiExitProg (4);
@@ -698,7 +744,8 @@ GSSiExitProg (5);
         if (CurView->SubFile)
         {
             _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
-            CurView->SubFile =CurView->RestoreFile = 0;
+			CurView->SubFile = 0;
+			SetRestoreFile(CurView, 0);
         } 
         GSSiGlobFree (&CurView->hBinFileList);
         for (ifile=0;ifile<CurView->NumFiles;ifile++)
@@ -948,7 +995,8 @@ BOOL DisplaySeg (HDC *hDC,BOOL Immediate)
 //    MNMXCORL	SaveBounds = CurView->Bounds;
     clock_t     starttime;    
     HDIB32		hDib32;
-    static		long	DebugSeg=522510;
+    static		long	DebugSeg= 4488536;
+	static		long	originalOffset = -1;
     
     if (!InDisplayProcessing && !Pick)
     	ii=1;
@@ -1078,7 +1126,7 @@ GSSiExitProg (12);
 			{
 				if (CurView->PassID != 1)
 	        		goto Next;
-				GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
+				//GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 				CurView->HaveOrthos = TRUE; 
 				if (MapFileType(PltName, 0, 0) == MT_SID)
 					DisplaySIDInVP32 (CurView,PltName);
@@ -1152,7 +1200,7 @@ DisplayImage:
         	{
 		        if (CurView->PassID != 1 && CurView->Type != 5)
 		        	goto Next; 
-				GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
+				//GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 				CurView->HaveOrthos = TRUE; 
     			if (!CurView->HaveBounds)
 			    {   
@@ -1248,7 +1296,7 @@ Next:
     {
 		if (!Pick && CurView->PassID == 1)
 		{
-			GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
+			//GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 			CurView->HaveOrthos = TRUE; 
  	        SetDisplayMode (*hDC,GF_TEXTMODE);
 			DisplaySIDInVP32 (CurView,0);
@@ -1555,7 +1603,11 @@ Next:
 			BOOL quitProcessing;
 		    GSSiGlobUlFree (&hpltBuf);
             
+			if (nContinues == 1)
+				originalOffset = CurrentSeg;
 			CurrentSeg = ContinuationOffset;
+			if (CurrentSeg == DebugSeg)
+				ii = 1;
 		    GSSillseek (FidMap,ContinuationOffset,0);
 		    nRead = BigRead (FidMap,(HPSTR)&nBytes,2);
 		    hpltBuf = GSSiGlobAlloc (  48,GMEM_MOVEABLE,(DWORD)nBytes+2);
@@ -1661,13 +1713,15 @@ int abcd (int i)
 	return 1;
 }
 
-void SetDisplayMode (HDC hDC, short Mode)
+int SetDisplayMode (HDC hDC, short Mode)
 #if ENABLETRACE
 {GSSiEnterProg (13);
 #endif
 {  
 	short	ii;  
 	short	CurMode;
+	int		curMapMode = 0;
+	int		CurGraphicsMode = 0;
 	XFORM xForm; 
    	int	WindowFactor;
 
@@ -1676,9 +1730,10 @@ void SetDisplayMode (HDC hDC, short Mode)
 #if ENABLETRACE
 GSSiExitProg (13);
 #endif
-   	return; 
+   	return 0; 
 }
-   CurMode = GetMapMode (hDC);	 
+   CurMode = GetMapMode (hDC);
+   CurGraphicsMode = GetGraphicsMode(hDC);
    switch (Mode)
    {   
 		case GF_MAPMODE:
@@ -1797,7 +1852,7 @@ GSSiExitProg (13);
 #if ENABLETRACE
 GSSiExitProg (13);
 #endif
-    return;
+    return curMapMode;
 }
 #if ENABLETRACE
 }
@@ -2070,6 +2125,7 @@ GSSiExitProg (17);
 #endif
 		 return TRUE;
 }
+	
      if (Point->x > CurView->WBounds.xmx ||
          Point->y > CurView->WBounds.ymx ||
          Point->x < CurView->WBounds.xmn ||
@@ -2188,7 +2244,7 @@ GSSiExitProg (18);
 		HaltMapDisplay(FALSE,FALSE);
 	useGDIPlus = wantGDIPlus;
 	SetContinueProcessing(TRUE);
-    GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
+    //GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_DISABLED| MF_GRAYED);
     NumViewportsToDisplay = *pNumViewports;
     DisplayViewID=0; 
    // FormatViewport = 0;  
@@ -2515,9 +2571,15 @@ void ZoomToBM ()
     LPVISLIST   SavelpVis;
     VISLIST SaveVis; 
     short     i, SaveMaxOrthoRes=MaxOrthoRes;
+	double dval;
     
-    SavelpVis = CurVis;
-    SaveVis = *CurVis;
+	SavelpVis = CurVis;
+	SaveVis = *CurVis;
+	if (dval = GetGlobalDVal2("[%CURORTHORES]", 0))
+	{
+		CurView->OrthoRes = dval;
+		goto GotFile;
+	}
     MaxOrthoRes=0;
     CurView->WindowZoomedToOrtho = TRUE;
     for (i=0;i<CurView->NumFiles;i++)
@@ -2656,10 +2718,12 @@ void SetBounds (HWND hWnd,HDC hDC)
 {    
     MNMXCORD    SaveBounds, TransBounds;
     LPVIEWPORT  SaveView=CurView;
-    LPVISLIST	SaveVis=CurVis;
+    LPVISLIST	SaveVis=0;
     UINT		lSaveVis = 0;
 	RECT		Rect1;
     
+	if (!IsBadWritePtr(CurVis, 4))
+		SaveVis = CurVis;
     if (CurView->Type == VPTYPE_PROFILE || 
        (!CurView->NumFiles && !(CurView->pTheme && CurView->pTheme->ID == GF_COMPARE_VIEWPORTS_THEME)))
 {
@@ -2694,6 +2758,9 @@ GSSiExitProg (25);
 		InLinkedList(-1);
     InLinkedList(CurView->ID);
     Rect1 = CurView->ScreenRect;
+
+	LPINT pInt = GlobalLock(hNulls);
+	GlobalUnlock(hNulls);
 
     SetBounds2 (hWnd,hDC); //pViewports[7]
     SaveBounds = CurView->NewBounds;
@@ -3058,6 +3125,9 @@ void SetBounds2 (HWND hWnd,HDC hDC)
  //checkvp(1);	
 	AdjustBoundsAndDrawRectToRotation ();
      //ClipRect = CurView->DrawRect;
+	LPINT pInt = GlobalLock(hNulls);
+	GlobalUnlock(hNulls);
+
      SetBoundsRect2 (CurView->DrawRect,hDC);  
      if (Display)
      {
@@ -3082,6 +3152,7 @@ GSSiExitProg (27);
 }
 #endif
 }
+
 void CreateBaseToVPTran (RECT Rectx)
 #if ENABLETRACE
 {GSSiEnterProg (29);
@@ -3089,34 +3160,66 @@ void CreateBaseToVPTran (RECT Rectx)
 {
      float  RSQMIN;
      double XWIN[4], YWIN[4], XBASE[4], YBASE[4]; 
-     LPVIEWPORT	BoundsVP = CurView;
-     
-     if (CurView->Type == SUBVIEWPORT && CurView->Parent)
-     	BoundsVP = pViewports[CurView->Parent-1];
-     while (BoundsVP->DisplayInParent && BoundsVP->Parent && BoundsVP->ID != BoundsVP->Parent)
-     	BoundsVP = pViewports[BoundsVP->Parent-1];
-     XWIN[0]=BoundsVP->DrawRect.left;
-     XWIN[1]=BoundsVP->DrawRect.left;
-     XWIN[2]=BoundsVP->DrawRect.right;
-     XWIN[3]=BoundsVP->DrawRect.right;
-     YWIN[0]=BoundsVP->DrawRect.bottom;
-     YWIN[1]=BoundsVP->DrawRect.top;
-     YWIN[2]=BoundsVP->DrawRect.top;
-     YWIN[3]=BoundsVP->DrawRect.bottom;
-     if (BoundsVP->HaveBounds)
+
+	 CloseTRANS2(&CurView->hTranVPToBase);
+	 CloseTRANS2(&CurView->hTranBaseToVP);
+	 CloseTRANS2(&CurView->hTranScreenToBase);
+	 CloseTRANS2(&CurView->hTranBaseToScreen);
+     if (CurView->HaveBounds)
      {
-	     XBASE[0]=BoundsVP->WBounds.xmn;
-	     XBASE[1]=BoundsVP->WBounds.xmn;
-	     XBASE[2]=BoundsVP->WBounds.xmx;
-	     XBASE[3]=BoundsVP->WBounds.xmx;
-	     YBASE[0]=BoundsVP->WBounds.ymn;
-	     YBASE[1]=BoundsVP->WBounds.ymx;
-	     YBASE[2]=BoundsVP->WBounds.ymx;
-	     YBASE[3]=BoundsVP->WBounds.ymn;
+		 if (CurView->Rotation != 0)
+		 {
+			 DPOINT CenterPointVP = RectMidD(&CurView->ScreenRect), CenterPointW = CurView->MidPointW;
+			 DPOINT pt;
+			 double az;
+			 DPOINT ScreenPoints[4];
+			 DPOINT WPoints[4];
+			 int flip[4] = { 1,0,3,2 };
+
+			 RectToDPoints(&CurView->ScreenRect, ScreenPoints);
+			 for (int i = 0; i < 4; i++)
+			 {
+				 double dist = ldistp(CenterPointVP, ScreenPoints[i]);
+				 dist *= CurView->Scale;
+				 az = getazd(&CenterPointVP, &ScreenPoints[flip[i]]);
+				 az = LTWOPI(az - CurView->Rotation);
+				 WPoints[i] = dnewpt(CenterPointW, az, dist);
+				 XWIN[i] = ScreenPoints[i].x;
+				 YWIN[i] = ScreenPoints[i].y;
+				 XBASE[i] = WPoints[i].x;
+				 YBASE[i] = WPoints[i].y;
+			 }
+			 CurView->hTranScreenToBase = STRAN2(1855, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+			 CurView->hTranBaseToScreen = STRAN2(1856, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+		 }
+		 XWIN[0] = CurView->DrawRect.left;
+		 XWIN[1] = CurView->DrawRect.left;
+		 XWIN[2] = CurView->DrawRect.right;
+		 XWIN[3] = CurView->DrawRect.right;
+		 YWIN[0] = CurView->DrawRect.bottom;
+		 YWIN[1] = CurView->DrawRect.top;
+		 YWIN[2] = CurView->DrawRect.top;
+		 YWIN[3] = CurView->DrawRect.bottom;
+		 XBASE[0]=CurView->WBounds.xmn;
+	     XBASE[1]=CurView->WBounds.xmn;
+	     XBASE[2]=CurView->WBounds.xmx;
+	     XBASE[3]=CurView->WBounds.xmx;
+	     YBASE[0]=CurView->WBounds.ymn;
+	     YBASE[1]=CurView->WBounds.ymx;
+	     YBASE[2]=CurView->WBounds.ymx;
+	     YBASE[3]=CurView->WBounds.ymn;
 	 }
 	 else
      {
-	     XBASE[0]=XWIN[0];
+		 XWIN[0] = CurView->DrawRect.left;
+		 XWIN[1] = CurView->DrawRect.left;
+		 XWIN[2] = CurView->DrawRect.right;
+		 XWIN[3] = CurView->DrawRect.right;
+		 YWIN[0] = CurView->DrawRect.bottom;
+		 YWIN[1] = CurView->DrawRect.top;
+		 YWIN[2] = CurView->DrawRect.top;
+		 YWIN[3] = CurView->DrawRect.bottom;
+		 XBASE[0]=XWIN[0];
 	     XBASE[1]=XWIN[1];
 	     XBASE[2]=XWIN[2];
 	     XBASE[3]=XWIN[3];
@@ -3133,10 +3236,20 @@ void CreateBaseToVPTran (RECT Rectx)
 		    TRANS2 (XWIN[i],YWIN[i],&XWIN[i],&YWIN[i],CurView->hTranBaseToWin); 
 	 		
 	 }*/
-     CloseTRANS2 (&CurView->hTranVPToBase);
-     CloseTRANS2 (&CurView->hTranBaseToVP);
-     CurView->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
-     CurView->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
+	 LPINT pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
+
+	 CurView->hTranVPToBase = STRAN2 (1612,XWIN,YWIN,XBASE,YBASE,4,&RSQMIN,1,0);
+	 pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
+	 CurView->hTranBaseToVP = STRAN2 (1613,XBASE,YBASE,XWIN,YWIN,4,&RSQMIN,1,0);
+	 pInt = GlobalLock(hNulls);
+	 GlobalUnlock(hNulls);
+	 if (!CurView->hTranScreenToBase)
+	 {
+		 CurView->hTranScreenToBase = STRAN2(1612, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+		 CurView->hTranBaseToScreen = STRAN2(1613, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+	 }
 {
 #if ENABLETRACE
 GSSiExitProg (29);
@@ -3165,22 +3278,9 @@ DPOINT WinPtSToBasePt (POINTS Point)
 DPOINT ScreenPtToBasePt (POINT Point)
 {
     DPOINT WinPointD, WorldPoint;
-     
-	if (!CurView->pTheme)
-		CreateBaseToVPTran(CurView->DrawRect);
-	else if (CurView->pTheme->ID != GF_PROFILE_THEME)
-		CreateBaseToVPTran(CurView->DrawRect);
-	else
-	{
-		CloseTRANS2(&CurView->hTranVPToBase);
-		CloseTRANS2(&CurView->hTranBaseToVP);
-		CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
-		CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
-	}
+
 	WinPointD = EnlargedPoint(Point);
-	WinPointD = TranPoint (&WinPointD,CurView->hTranScreenToVP);
-	WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
-	return WorldPoint;
+	return ScreenPtDToBasePt(WinPointD);
 }
 
 DPOINT ScreenPtDToBasePt (DPOINT WinPointD)
@@ -3198,8 +3298,15 @@ DPOINT ScreenPtDToBasePt (DPOINT WinPointD)
 		CurView->hTranVPToBase = STRANRectToBounds(&CurView->ProfileRect, &CurView->ProfileBounds);
 		CurView->hTranBaseToVP = STRANBoundsToRect(&CurView->ProfileBounds, &CurView->ProfileRect);
 	}
-	WinPointD = TranPoint(&WinPointD, CurView->hTranScreenToVP);
-	WorldPoint = TranPoint (&WinPointD,CurView->hTranVPToBase);
+	if (CurView->hTranScreenToBase)
+	{
+		WorldPoint = TranPoint(&WinPointD, CurView->hTranScreenToBase);
+	}
+	else
+	{
+		WinPointD = TranPoint(&WinPointD, CurView->hTranScreenToVP);
+		WorldPoint = TranPoint(&WinPointD, CurView->hTranVPToBase);
+	}
 	return WorldPoint;
 }
 
@@ -3207,7 +3314,7 @@ DPOINT WinPtToBasePt (POINT Point)
 #if ENABLETRACE
 {GSSiEnterProg (30);
 #endif
-{    DPOINT WinPointD, WorldPoint;
+{    DPOINT WinPointD, WorldPoint, VPPoint;
      
      if(!CurView->hTranBaseToVP)
      {
@@ -3224,8 +3331,9 @@ DPOINT WinPtToBasePt (POINT Point)
 		}
 	 }
      WinPointD = EnlargedPoint (Point);
-     TRANS2 (WinPointD.x,WinPointD.y,&WorldPoint.x,&WorldPoint.y,CurView->hTranVPToBase);
-/*{	//temp code
+	 TRANS2(WinPointD.x, WinPointD.y, &VPPoint.x, &VPPoint.y, CurView->hTranScreenToVP);
+	 TRANS2(VPPoint.x, VPPoint.y, &WorldPoint.x, &WorldPoint.y, CurView->hTranVPToBase);
+	 /*{	//temp code
 POINT	TestPoint=BasePtToWinPt (&WorldPoint); 
 short	ii;
 if (TestPoint.x != Point.x || TestPoint.y != Point.y)
@@ -3368,30 +3476,44 @@ GSSiExitProg (785);
 #endif
 }
 
-POINT BasePtFLTToScreenPt (LPFLTPOINT WPointF)
+POINT BasePtFLTToScreenPt (LPFLTPOINT pWPointF)
 {
-	DPOINT	VPPoint, ScreenPointD, WPoint={WPointF->x,WPointF->y};
+	DPOINT	VPPoint, ScreenPointD, WPoint={pWPointF->x,pWPointF->y};
 
 	VPPoint = BasePtToWinPtD (&WPoint);
 	ScreenPointD = TranPoint (&VPPoint,CurView->hTranVPToScreen);
 	return DPointToPoint (ScreenPointD);
 }
 
-POINT BasePtToScreenPt (LPDPOINT WPoint)
+POINT BasePtToScreenPt (LPDPOINT pWPoint)
 {
 	DPOINT	VPPoint, ScreenPointD;
 
-	VPPoint = BasePtToWinPtD (WPoint);
-	ScreenPointD = TranPoint (&VPPoint,CurView->hTranVPToScreen);
+	if (CurView->hTranBaseToScreen)
+	{
+		ScreenPointD = TranPoint(pWPoint, CurView->hTranBaseToScreen);
+	}
+	else
+	{
+		VPPoint = BasePtToWinPtD(pWPoint);
+		ScreenPointD = TranPoint(&VPPoint, CurView->hTranVPToScreen);
+	}
 	return DPointToPoint (ScreenPointD);
 }
 
-DPOINT BasePtToScreenPtD (LPDPOINT WPoint)
+DPOINT BasePtToScreenPtD (LPDPOINT pWPoint)
 {
 	DPOINT	VPPoint, ScreenPointD;
 
-	VPPoint = BasePtToWinPtD (WPoint);
-	ScreenPointD = TranPoint (&VPPoint,CurView->hTranVPToScreen);
+	if (CurView->hTranBaseToScreen)
+	{
+		ScreenPointD = TranPoint(pWPoint, CurView->hTranBaseToScreen);
+	}
+	else
+	{
+		VPPoint = BasePtToWinPtD(pWPoint);
+		ScreenPointD = TranPoint(&VPPoint, CurView->hTranVPToScreen);
+	}
 	return ScreenPointD;
 }
 
@@ -3425,8 +3547,8 @@ POINT BasePtToWinPt (LPDPOINT WPoint)
 		    TRANS2 (PPoint.x,PPoint.y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP); 
 			break;
      	case 0:
-     		TRANS2 (WPoint->x,WPoint->y,&WinPointD.x,&WinPointD.y,CurView->hTranBaseToVP);
-     		break;
+			TRANS2(WPoint->x, WPoint->y, &WinPointD.x, &WinPointD.y, CurView->hTranBaseToVP);
+			break;
      	case 3: //google maps projection
 			{
 			PPoint = *WPoint;
@@ -4072,8 +4194,6 @@ void ShowPickedItem (HWND hWnd, int InItem)
 		goto Exit;
     _fstrcpy (PltName,PickName);
 	ClearFullWindowBitmap (0);
-	if (CurView->DisplayInParent && CurView->Parent)
-		SetViewport (CurView->Parent);
     CloseMap (FALSE);
 	if (InItem >= 0)
 		SelectVisList (FALSE);
@@ -4785,7 +4905,8 @@ Top:
 		    	pSaveVP =CurView;  
 		    	for (iv = 0;iv<*pNumViewports;iv++)
 		    	{   
-		    		CurView = pViewports[iv];
+		    		//CurView = pViewports[iv];
+					SetViewport(pViewports[iv]->ID);
 					if (ConfigVersion > 7)
 						SetBounds (hWnd,0);
 					else
@@ -5220,7 +5341,10 @@ GSSiExitProg (56);
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
 //        ReportRect = SizeReport (CurView->hDC,CurView->hReport,CurView->DrawRect,CurView->FitToWindow);
-		DisplayReport (CurView->hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect, 1.0, CurView->ReportRefno,&ReportRect);  
+		if (!DisplayReport(CurView->hDC, CurView->hReport, CurView->DrawRect, &CurView->DrawRect, 1.0, CurView->ReportRefno, &ReportRect, CurView->FitToWindow))
+		{
+			UnloadReport(&CurView->hReport);
+		}
         if (!CurView->FitToWindow)
         {
             CurView->ReportFactor = DeviceToScreenFactor();
@@ -5374,7 +5498,7 @@ NextView:
         SetUDIValue (CurView->Prefix,CurView->UDI); 
         CurrentUDILen = _fstrlen(CurView->UDI);
         DisplayReport (hDC,CurView->hReport,CurView->DrawRect,&CurView->DrawRect,
-                       CurView->ReportFactor,CurView->ReportRefno,0);
+                       CurView->ReportFactor,CurView->ReportRefno,0,CurView->FitToWindow);
         DisplayViewID++; 
         goto Start;
     }
@@ -5745,7 +5869,7 @@ GSSiExitProg (60);
         return(FALSE);
 }
     }
-    if (Version > 2)
+    if (Version > 3)
     {
     BadMap:  
         GSSiClose2 (&FidIndex);
@@ -5843,7 +5967,8 @@ GSSiExitProg (65);
     if (CurView->SubFile)
     {
         _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile); 
-        CurView->SubFile =CurView->RestoreFile = 0;
+		CurView->SubFile = 0;
+		SetRestoreFile(CurView, 0);
     } 
     SubFile = PickList[Item].SubFile;
     PltType = CurView->FileType[CurView->CurFile]; 
@@ -6179,12 +6304,12 @@ GSSiExitProg (66);
 }
     if (ForceInc ||
     	CurView->CurFile == -1 ||
-    	CurView->FileType[CurView->CurFile] < 4 || 
-    	CurView->FileType[CurView->CurFile] ==6 ||
-    	CurView->FileType[CurView->CurFile] ==8 ||
+    	CurView->FileType[CurView->CurFile] < VPFILETYPE_PLOTDIR ||
+    	CurView->FileType[CurView->CurFile] == VPFILETYPE_HLTLIST ||
+    	CurView->FileType[CurView->CurFile] == VPFILETYPE_SUBVP ||
     	(CurView->SubFile && !CurView->hlpIndex[CurView->CurFile]) ||  
-    	((CurView->FileType[CurView->CurFile] == 4 || CurView->FileType[CurView->CurFile] ==9) && !CurView->hlpIndex[CurView->CurFile]) ||  
-    	(CurView->FileType[CurView->CurFile] == 5 && !CurView->hlpIndex[CurView->CurFile]))  
+    	((CurView->FileType[CurView->CurFile] == VPFILETYPE_PLOTDIR || CurView->FileType[CurView->CurFile] == VPFILETYPE_DTM) && !CurView->hlpIndex[CurView->CurFile]) ||
+    	(CurView->FileType[CurView->CurFile] == VPFILETYPE_ORTHODIR && !CurView->hlpIndex[CurView->CurFile]))
     {   
     	ForceInc = FALSE;
     	GetPCTPLOTType ();
@@ -6231,10 +6356,10 @@ GSSiExitProg (66);
          else
          	ii=1; 
 	}         
-    if (PltType==9)
+    if (PltType== VPFILETYPE_DTM)
     	if (!Pick)
     		SetDTMRenderAs (CurView->CurFile);
-    if (PltType==6)
+    if (PltType== VPFILETYPE_HLTLIST)
     {
 //        IncrementFile (); 
 {
@@ -6244,12 +6369,12 @@ GSSiExitProg (66);
 	   	return (TRUE);
 }
     } 
-    if (PltType == 7)
+    if (PltType == VPFILETYPE_MACRO)
 	{
 		if (ExistFile (PltName))
     		goto DisplayFile;  
 	}
-    else if (PltType<4 || (PltType == 9 && CurView->DTMRenderAs[CurView->CurFile] != DTM_RENDER_CONTOURS))
+    else if (PltType< VPFILETYPE_PLOTDIR || (PltType == VPFILETYPE_DTM && CurView->DTMRenderAs[CurView->CurFile] != DTM_RENDER_CONTOURS))
     {   
     	 ConvertLayer = -1;
 //    	 if (!VisScan && !PeopleNet) removed 5/7/01 - ConvertCoordClose now called whenever [%ALT_PROJECTION] is set
@@ -6283,7 +6408,7 @@ GSSiExitProg (66);
             OpenRefIndex(TRUE);
          goto DisplayFile;
     } 
-    if (VisScan && CurView->FileType[CurView->CurFile]==5)
+    if (VisScan && CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR)
     {
 //        IncrementFile ();  
 		ForceInc = TRUE;
@@ -6348,7 +6473,7 @@ GSSiExitProg (66);
 		ExpandText (PltName);
         UseAVI=FALSE;
         PltType = CurView->FileType[CurView->CurFile];
-        if (PltType == 5)
+        if (PltType == VPFILETYPE_ORTHODIR)
         {
 	        lpSlash = _fstrrchr(PltName,'\\');
 	        if (lpSlash)
@@ -6387,7 +6512,7 @@ GSSiExitProg (66);
 S10:    if (CurView->hlpIndex[CurView->CurFile])
 		{
 			lpIndex = (LPFILEINDEX)GlobalLock(CurView->hlpIndex[CurView->CurFile]);
-        	if (PltType != 5 && (ForceRefIndex || ForceTAGIndex || UseRefOrTAGIndex))
+        	if (PltType != VPFILETYPE_ORTHODIR && (ForceRefIndex || ForceTAGIndex || UseRefOrTAGIndex))
             	OpenRefIndex(TRUE);
         }
         else
@@ -6488,7 +6613,7 @@ NotIn:
         if (CurView->FileType[CurView->CurFile]!=5) goto Next; 
         if (!UpdateOrthoIndex) goto Next; 
     }
-    if (CurView->OrthoDisplayName[0]&&CurView->FileType[CurView->CurFile]==5)
+    if (CurView->OrthoDisplayName[0]&&CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR)
     {   
         char    TestName[MAX_PATH];
         
@@ -6513,7 +6638,7 @@ NotIn:
         if (_fstricmp(CurView->OrthoDisplayName,TestName))
             goto Next;
     }
-    if (CurView->FileType[CurView->CurFile]==5)
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR)
     {
         lpIndex->CurrentEntry->Bounds=TestBounds;
         ComputeIndexOrthoRes (lpIndex);
@@ -6557,7 +6682,7 @@ NotIn:
     }
 
     PltType = CurView->FileType[CurView->CurFile];
-	if (PltType == 4 || PltType == 9 || (PltType == 5 && MapFileType(PltName, 0, 0) == MT_SID))
+	if (PltType == VPFILETYPE_PLOTDIR || PltType == VPFILETYPE_DTM || (PltType == VPFILETYPE_ORTHODIR && MapFileType(PltName, 0, 0) == MT_SID))
     	goto Exit;  
     if (UseAVI) 
     {   
@@ -6837,7 +6962,8 @@ GSSiExitProg (68);
 NextFile: 
     if (CurView->SubFile)
         _fstrcpy (CurView->lpFiles[CurView->RestoreFile],CurView->OrigFile);
-    CurView->SubFile = CurView->RestoreFile =0;
+	CurView->SubFile = 0;
+	SetRestoreFile(CurView, 0);
     DisplayHollowLines (FALSE);  
 	DisplayLayeredSymbols (CurView->hDC,FALSE);
     DisplayHollowLines (FALSE);  
@@ -6869,15 +6995,15 @@ GSSiExitProg (68);
     	goto NextFile;
     if (CurVis->FileIsVisible[CurView->CurFile]==2 && CurView->PassID == 2)
     	goto NextFile;
-	if ((CurView->FileType[CurView->CurFile] != 3 && CurView->FileType[CurView->CurFile] != 5 && MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0) != MT_SID) && CurView->PassID == 1)
+	if ((CurView->FileType[CurView->CurFile] != VPFILETYPE_IMAGE && CurView->FileType[CurView->CurFile] != VPFILETYPE_ORTHODIR && MapFileType(CurView->lpFiles[CurView->CurFile], 0, 0) != MT_SID) && CurView->PassID == 1)
         goto NextFile;
-    if (CurView->FileType[CurView->CurFile]==5 && (!CurVis->WantType[5] || ForceTAGIndex || ForceRefIndex || ReorgFile))
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR && (!CurVis->WantType[5] || ForceTAGIndex || ForceRefIndex || ReorgFile))
         goto NextFile;
-    if (CurView->FileType[CurView->CurFile]==5 && CurView->PassID >1 && CurView->PassID != 5)// && !PickOrtho)
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_ORTHODIR && CurView->PassID >1 && CurView->PassID != 5)// && !PickOrtho)
         goto NextFile;
-    if (CurView->FileType[CurView->CurFile]==6 && Pick)
-        goto NextFile; 
-    if (CurView->FileType[CurView->CurFile]==8) 
+	if (CurView->FileType[CurView->CurFile] == VPFILETYPE_HLTLIST && Pick)
+		ii = 1;
+    if (CurView->FileType[CurView->CurFile]== VPFILETYPE_SUBVP)
     {   
     	LPVIEWPORT	SaveVP=CurView;
     	BOOL	Err;
@@ -6955,7 +7081,8 @@ GSSiExitProg (68);
     	
 	if (_fstrstr(str,"FILELIST.TXT"))
     {
-        CurView->SubFile=1;CurView->RestoreFile=CurView->CurFile;
+        CurView->SubFile=1;
+		SetRestoreFile(CurView, CurView->CurFile);
         _fstrcpy (CurView->OrigFile,CurView->lpFiles[CurView->CurFile]);
         goto Start;
     } 
@@ -7436,13 +7563,16 @@ GSSiExitProg (86);
     	if (pViewports[iview])
     	{
 	        SetCurView ( pViewports[iview]); 
-	        //if (CurView->NumFiles)
+			if (CurView->pTheme)
 	        {
-	            if (CurView->PassID == 0)
+				LPTHEME	SaveTheme = CurTheme;
+				CurTheme = CurView->pTheme;
+				if (CurView->PassID == 0)
 	                ThemeEndDataPass(FALSE);
 	            else if (CurView->PassID <5)
 	                ThemeEndDisplayPass(TRUE,FALSE,TRUE);
-	        }
+				CurTheme = SaveTheme;
+			}
 			if (CurView->pTheme && CurView->pTheme->ID == GF_STREET_TEXT_THEME)
 			{
 				LPTHEME	SaveTheme = CurTheme;
@@ -7721,7 +7851,7 @@ BOOL DisplayVPDialogs (BOOL Reposition)
 	 	SetConfig(0);
 		for (iview=0;iview<*pNumViewports;iview++) 
 		{
-			CurView = pViewports[iview];
+			SetCurView(pViewports[iview]);
 			if (pViewports[iview]->hWndDlg)
 			{
 				if (Reposition)
@@ -7732,7 +7862,7 @@ BOOL DisplayVPDialogs (BOOL Reposition)
 	 	SetConfig(1);
 		for (iview=0;iview<*pNumViewports;iview++) 
 		{
-			CurView = pViewports[iview];
+			SetCurView(pViewports[iview]);
 			if (pViewports[iview]->hWndDlg)
 			{
 				if (Reposition)

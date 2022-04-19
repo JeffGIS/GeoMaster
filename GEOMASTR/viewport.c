@@ -166,13 +166,16 @@ void ClearVPFields (LPVIEWPORT CurView)
     CurView->hTranScreenToVP=0;
 	CurView->hTranProjectionToScreen = 0;
 	CurView->hTranScreenToProjection = 0;
-    CurView->hTAGList=0;  
+	CurView->hTranBaseToScreen = 0;
+	CurView->hTranScreenToBase = 0;
+	CurView->hTAGList=0;
     CurView->hPenRedef=0; 
     CurView->hReport=0;  
     CurView->Bitmap = 0;
 	CurView->BitmapID = 0;
     CurView->hBinFileList=0;
-    CurView->SubFile=CurView->RestoreFile=0; 
+	CurView->SubFile = 0;
+	SetRestoreFile(CurView, 0);
 	*CurView->OrigFile = 0;
     CurView->hCursor=CurView->LinkedCursorHandle=0;
     CurView->LastCursor=0;  
@@ -309,7 +312,7 @@ BOOL CopyCurViewToNew (LPSTR NewName)
 	CurView->BoundsDisplayID = 0;
 	CurView->lpBoundsDisplay = 0;     
 	_fmemset (CurView->hMaskAccelerator,0,sizeof(CurView->hMaskAccelerator));
-	CurView->hMaskArea = CurView->hTranVPToBase = CurView->hTranBaseToVP = CurView->hTranVPToScreen = CurView->hTranScreenToVP =CurView->hReport =
+	CurView->hMaskArea = CurView->hTranVPToBase = CurView->hTranBaseToVP = CurView->hTranScreenToBase = CurView->hTranBaseToScreen = CurView->hTranVPToScreen = CurView->hTranScreenToVP =CurView->hReport =
 	CurView->LinkedCursorHandle = CurView->hFileTransIn = CurView->hFileTransOut = 0;
 	(*pNumViewports)++; 
 	SelectVisList (FALSE);
@@ -649,6 +652,7 @@ void UnallocateConfig ()
     
     if (!*pNumViewports)
 		goto Exit;
+	inUnallocateConfig = TRUE;
 	DestroyAllToolbars ();
     RemoveAllInfoBoxRect();
 	RemoveDataDisplayRect(0);
@@ -772,9 +776,11 @@ void UnallocateConfig ()
             
         DestroySavedScreen (&CurView->LinkedCursorHandle,0);
 //	    CloseTRANS2 (&CurView->hTranFormat);
-        CloseTRANS2 (&CurView->hTranVPToBase);
-        CloseTRANS2 (&CurView->hTranBaseToVP);
-        CloseTRANS2 (&CurView->hTranVPToScreen);
+		CloseTRANS2(&CurView->hTranVPToBase);
+		CloseTRANS2(&CurView->hTranBaseToVP);
+		CloseTRANS2(&CurView->hTranScreenToBase);
+		CloseTRANS2(&CurView->hTranBaseToScreen);
+		CloseTRANS2 (&CurView->hTranVPToScreen);
         CloseTRANS2 (&CurView->hTranScreenToVP);
        	CloseTRANS2 (&CurView->hFileTransIn); 
        	CloseTRANS2 (&CurView->hFileTransOut);
@@ -803,6 +809,7 @@ Exit:
 //	CloseGEOSPANVideo ();
 	SetGlobalValue ("%OPENVIDEOWINDOW","F");
     ConfigLoaded = FALSE;
+	inUnallocateConfig = FALSE;
 {
 #if ENABLETRACE
 GSSiExitProg (99);
@@ -1084,7 +1091,9 @@ BOOL CreateAllSizes (HWND hWndDlg)
 	     	ConfigDisplayRect = Rect;
 			SavedImageData[iSavedImage].ClientRect = Rect;
 			MemMap = TRUE;
-			hMemBitmap = CreateCompatibleBitmap (OldDC,(int)MemMapWidth,(int)MemMapHeight); 
+			curProgID = 10040;
+			hMemBitmap = CreateCompatibleBitmap (OldDC,(int)MemMapWidth,(int)MemMapHeight);
+			curProgID = -1;
 			hbmpOld = SelectObject(hdcMemMap, hMemBitmap);
 			if (SetConfig (0))
 			{
@@ -1109,7 +1118,9 @@ BOOL CreateAllSizes (HWND hWndDlg)
 			savewidth = RECTWIDTH(&ConfigDisplayRect);
 			saveheight = RECTHEIGHT(&ConfigDisplayRect);
 			hMemDC = CreateCompatibleDC(OldDC);   
-			hSaveBitmap = CreateCompatibleBitmap (OldDC,savewidth,saveheight); 
+			curProgID = 10041;
+			hSaveBitmap = CreateCompatibleBitmap (OldDC,savewidth,saveheight);
+			curProgID = -1;
 			hbmpOld2 = SelectObject(hMemDC, hSaveBitmap);
 			BitBlt(hMemDC, 0,0,savewidth,saveheight, hdcMemMap, ConfigDisplayRect.left, ConfigDisplayRect.top, SRCCOPY);
 			hSaveBitmap = SelectObject(hMemDC, hbmpOld2);
@@ -1205,84 +1216,131 @@ GSSiExitProg (102);
 #endif
 }
 
+void ClearVPHandles(LPVIEWPORT pCurView)
+{
+	//return;
+	RestoreScreen2(CurView->hDC, CurView->LinkedCursorHandle, 0, FALSE);
+	DestroySavedScreen(&CurView->LinkedCursorHandle, 0);
+
+	GSSiDeleteObject(&pCurView->hRgn);
+	DestroySavedScreen(&pCurView->LinkedCursorHandle, 0);
+	CloseTRANS2(&pCurView->hTranVPToBase);
+	CloseTRANS2(&pCurView->hTranBaseToVP);
+	CloseTRANS2(&pCurView->hTranScreenToBase);
+	CloseTRANS2(&pCurView->hTranBaseToScreen);
+	CloseTRANS2(&pCurView->hTranVPToScreen);
+	CloseTRANS2(&pCurView->hTranScreenToVP);
+	CloseTRANS2(&pCurView->hFileTransIn);
+	CloseTRANS2(&pCurView->hFileTransOut);
+}
 int checkvp(int i)
 {
-	extern	short idTimer; 
+	extern	short idTimer;
 	extern	BOOL	InProfile;
-	static	LPVIEWPORT pCheckVP=0; 
-	static	LPSTR OrigTagFile=0;
-	static	int	SaveX=0,SaveWidth;
-	static	docheck=FALSE;
+	static	LPVIEWPORT pCheckVP = 0;
+	static	LPSTR OrigTagFile = 0;
+	static	int	SaveX = 0, SaveWidth;
+	static	docheck = FALSE;
 	static	double	SaveScale;
-	static	int	ii=0;
+	static	int	ii = 0;
 	HPEN	hOldPen;
-	RECT	LastRect={0,0,0,0};
+	RECT	LastRect = { 0,0,0,0 };
 	return 0;
+	if (inUnallocateConfig)
+		return 0;
+	if (pNumViewports)
+		for (int iview = 0; iview < *pNumViewports; iview++)
+		{
+			LPVIEWPORT  CurView = pViewportsD[iview];
+			if (CurView->ID > 0)
+			{
+				ii = 0;
+			
+				if (CurView->hTranBaseToVP)
+				{
+					LPTRANDATA  TranPtr;
 
+					if (CurView->hTranBaseToVP > (HANDLE)1)
+					{
+						TranPtr = (LPTRANDATA)GlobalLk(CurView->hTranBaseToVP);
+						if (!TranPtr)
+						{
+							ii = 1;
+							break;
+						}
+						else if (TranPtr->TriHandle)
+						{
+							ii = 2;
+						}
+						GlobalULk(CurView->hTranBaseToVP);
+					}
+				}
+			}
+		}
 
-/*	if (!pViewports)
+	/*	if (!pViewports)
+			return 0;
+		if (!CurrentConfig)
+			return 0;
+		if (!pViewports[0])
+			return 0;
+		if (!pViewports[19])
+			return 0;
+		if (pViewports[19]->pTheme)
+		{
+			if (pViewports[19]->pTheme->hHighlightFile)
+				CheckBTFID (pViewports[19]->pTheme->hHighlightFile);
+		}
 		return 0;
-	if (!CurrentConfig)
-		return 0;
-	if (!pViewports[0])
-		return 0;
-	if (!pViewports[19])
-		return 0;
-	if (pViewports[19]->pTheme)
-	{
-		if (pViewports[19]->pTheme->hHighlightFile)
-			CheckBTFID (pViewports[19]->pTheme->hHighlightFile);
-	}
-	return 0;
-	if (ii==2)
-	{
-		docheck = TRUE;
-	//	SaveX = pViewports[0]->DrawRect.right;
-		SaveScale = pViewports[0]->Scale;
-		SaveWidth = pViewports[0]->LastWidth;
-	}
-	if (docheck && CurrentConfig && (SaveWidth != pViewports[0]->LastWidth || SaveScale != pViewports[0]->Scale))
-	{
-		ii=1;
-		SaveScale = pViewports[0]->Scale;
-	}
-	if (InProfile)
-	{
-		if (CurView->ID == 1)
+		if (ii==2)
+		{
+			docheck = TRUE;
+		//	SaveX = pViewports[0]->DrawRect.right;
+			SaveScale = pViewports[0]->Scale;
+			SaveWidth = pViewports[0]->LastWidth;
+		}
+		if (docheck && CurrentConfig && (SaveWidth != pViewports[0]->LastWidth || SaveScale != pViewports[0]->Scale))
+		{
 			ii=1;
-	}
-	return 1;
-	if (hWndMain)
-	{
-	    HDC	hDC = GetDC (hWndMain);
-		hOldPen = SelectObject (hDC,GetStockObject(BLACK_PEN)); 
-		SelectObject (hDC,hOldPen);
-		ReleaseDC (hWndMain,hDC);
-	}
-	return 0;
-	if (OrigTagFile && OrigTagFile != TagFile)
-		return 0; 
-	if (TagFile)
-		OrigTagFile = TagFile;  
-//	if (pCheckVP && !pCheckVP->Active)
-//		return 0;
-	if (*FontNames[1] && _fstrnicmp (FontNames[1],"Cou",3))
+			SaveScale = pViewports[0]->Scale;
+		}
+		if (InProfile)
+		{
+			if (CurView->ID == 1)
+				ii=1;
+		}
+		return 1;
+		if (hWndMain)
+		{
+			HDC	hDC = GetDC (hWndMain);
+			hOldPen = SelectObject (hDC,GetStockObject(BLACK_PEN));
+			SelectObject (hDC,hOldPen);
+			ReleaseDC (hWndMain,hDC);
+		}
 		return 0;
-	if (testvalue (1))
-		return 0;
-	if (!pNumViewports)
-		return 0;
-	if (!*pNumViewports && idTimer)
-		return 0; 
-//return 0;
-	if (!*pNumViewports)
-		return 0; 
-	if (!pViewports[0])
-		return 0;
-	if (!CurrentConfig && pViewports[2]->Active)
-		pCheckVP = pViewports[2];
-	return 0;
-	*/
+		if (OrigTagFile && OrigTagFile != TagFile)
+			return 0;
+		if (TagFile)
+			OrigTagFile = TagFile;
+	//	if (pCheckVP && !pCheckVP->Active)
+	//		return 0;
+		if (*FontNames[1] && _fstrnicmp (FontNames[1],"Cou",3))
+			return 0;
+		if (testvalue (1))
+			return 0;
+		if (!pNumViewports)
+			return 0;
+		if (!*pNumViewports && idTimer)
+			return 0;
+	//return 0;
+		if (!*pNumViewports)
+			return 0;
+		if (!pViewports[0])
+			return 0;
+		if (!CurrentConfig && pViewports[2]->Active)
+			pCheckVP = pViewports[2];
+*/		return 0;
+
 }
 
 short SetupViewport (RECT rect,BOOL ShrinkToFit,int Band)
@@ -1740,6 +1798,18 @@ GSSiExitProg (607);
 			SetConfig (config);
 	}
 Top:
+	if (IsInteger(Arg2))
+	{
+		iview = atoi(Arg2)-1;
+		if (iview >=0 && iview < *pNumViewports)
+		{
+#if ENABLETRACE
+			GSSiExitProg(607);
+#endif
+			SetViewport(pViewports[iview]->ID);
+			return pViewports[iview];
+		}
+	}
 	for (iview=0;iview<*pNumViewports;iview++)
 	{   
 		if (!_fstricmp (Arg2,pViewports[iview]->Name))
@@ -1747,7 +1817,8 @@ Top:
 #if ENABLETRACE
 GSSiExitProg (607);
 #endif
-    		return pViewports[iview];
+	SetViewport(pViewports[iview]->ID);
+	return pViewports[iview];
 }
 	}
 	if (!CurrentConfig)
@@ -2227,9 +2298,11 @@ void DestroyViewport (LPHANDLE phVP)
         UnloadReport (&pCurView->hReport);  
             
         DestroySavedScreen (&pCurView->LinkedCursorHandle,0);
-        CloseTRANS2 (&pCurView->hTranVPToBase);
-        CloseTRANS2 (&pCurView->hTranBaseToVP);
-        CloseTRANS2 (&pCurView->hTranVPToScreen);
+		CloseTRANS2(&pCurView->hTranVPToBase);
+		CloseTRANS2(&pCurView->hTranBaseToVP);
+		CloseTRANS2(&pCurView->hTranScreenToBase);
+		CloseTRANS2(&pCurView->hTranBaseToScreen);
+		CloseTRANS2 (&pCurView->hTranVPToScreen);
         CloseTRANS2 (&pCurView->hTranScreenToVP);
        	CloseTRANS2 (&pCurView->hFileTransIn); 
        	CloseTRANS2 (&pCurView->hFileTransOut);

@@ -1505,7 +1505,7 @@ GSSiExitProg (1350);
 			no = atoi(Arg[7]);
 			if (no != 2)
 				no = atob(Arg[7]);
-			n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), no);
+			int n = GetFileList(Arg[1], atob(Arg[2]), Arg[3], Arg[4], atob(Arg[5]), atob(Arg[6]), no);
 			itoa (n,OutLoc,10);
 			goto Rtnl;
 		}
@@ -1702,6 +1702,7 @@ GSSiExitProg (1350);
 			//$TEXTFILE(WRITE,fid,text)
 			//$TEXTFILE(CLOSE,fid)
 			//$TEXTFILE(REPLACE,file,fromtext,totext)
+			//$TEXTFILE(CONTENTS,file,varname) puts full contents into variable varname - returns T or F
 		{
 			HFILE fid=-1;
 			rtn = 0;
@@ -1723,6 +1724,26 @@ GSSiExitProg (1350);
 				}
 				ltoa(fid, OutLoc, 10);
 				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "CONTENTS"))
+			{
+				fid = GSSiOpenFile(Arg[2], 0, OF_READ);
+				if (fid != HFILE_ERROR)
+				{
+					int l = GSSifilelength(fid);
+
+					if (l > 0)
+					{
+						HANDLE handle = GSSiGlobAlloc(1853, GHND, l + 4);
+						LPSTR pMem = GlobalLock(handle);
+
+						BigRead(fid, pMem, l);
+						SetGlobalValue(Arg[3],pMem);
+						GSSiGlobUlFree(&handle);
+					}
+					GSSiClose2(&fid);
+				}
+				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "READ"))	//if just arg4 search for next line with arg4 string
 												//if arg4,5 and 6 search for string begining with arg4 containing arg5 and ending with arg6, if arg7 it indicates which instance
@@ -1825,6 +1846,82 @@ GSSiExitProg (1350);
 		{
 			nArgs = GetFunArgs(Args, Arg, 1, &hMem, pBrkPt, bpOffset, bpLen);
 			DoubleQuotes(Arg[1], OutLoc);
+			goto Rtnl;
+		}
+		case 858: // $FIRSTNUM(val,allowsign,allowdecpt) allows leading spaces
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			BOOL allowSign = atob(Arg[2]);
+			BOOL allowDecpt = atob(Arg[3]);
+			LPSTR val = Arg[1];
+			while (*val == ' ')
+				val++;
+			if (*val == '-' || *val == '+')
+			{
+				if (!allowSign)
+					val++;
+				else
+					goto Rtn858;
+			}
+			while (*val)
+			{
+				if (!isdigit(*val))
+					val++;
+				else if (*val == '.' && !allowDecpt)
+					val++;
+				else
+					break;
+			}
+			Rtn858:
+				*OutLoc = *val;
+				*(OutLoc + 1) = 0;
+			goto Rtnl;
+		}
+		case 859: // $FIRSTNON(val,allowsign,allowdecpt)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			BOOL allowSign = atob(Arg[2]);
+			BOOL allowDecpt = atob(Arg[3]);
+			LPSTR val = Arg[1];
+			while (*val == ' ')
+				val++;
+			if (*val == '-' || *val == '+')
+			{
+				if (allowSign)
+					val++;
+				else
+					goto Rtn859;
+			}
+			while (*val)
+			{
+				if (isdigit(*val))
+					val++;
+				else if (*val == '.' && allowDecpt)
+					val++;
+				else
+					break;
+			}
+		Rtn859:
+			*OutLoc = *val;
+			*(OutLoc + 1) = 0;
+			goto Rtnl;
+		}
+		case 860://$LASTCHAR(text) returns last char in string
+				 //$LASTCHAR(text,SET,C) sets last char in string and returns result
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (!stricmp(Arg[2], "SET"))
+			{
+				int ln = strlen(Arg[1]);
+				strcpy(OutLoc, Arg[1]);
+				if (ln)
+				{
+					OutLoc[ln-1] = *Arg[3];
+				}
+				goto Rtnl;
+			}
+			*OutLoc = *LastChr(Arg[1]);
+			OutLoc[1] = 0;
 			goto Rtnl;
 		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
@@ -3358,15 +3455,16 @@ GSSiExitProg (1350);
 			goto RtnTrue;
 		}
 		
-        case 1034:	//$PCTINAREAS(1,bounds); initializes function. Bounds is bounds of items to be tested. Returns handle to structure
+        case 1034:	//$PCTINAREAS(1,bounds,findareapoint(TorF); initializes function. Bounds is bounds of items to be tested. Returns handle to structure
 				    //$PCTINAREAS(2,item,handle); picked item number of item to be tested. Can be called multiple times. Returns 1 if successful, 0 if not
 					//$PCTINAREAS(3,item,handle,Offset,TreatAreasAsPolylines); picked item number of area or (polyline or point with offset). Can be called multiple times. Returns 1 if successful, 0 if not
 					//$PCTINAREAS(4,handle); returns result as num between 0 and 1
 					//$PCTINAREAS(5,handle); destroys handle
+					//$PCTINAREAS(6,handle); returns area point
         {
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 
-			PCTInAreaFunction (atoi(Arg[1]),Arg[2],Arg[3],OutLoc);
+			PCTInAreaFunction (atoi(Arg[1]),Arg[2], Arg[3], Arg[4],OutLoc);
 			goto Rtnl;
 		}
 
@@ -3742,7 +3840,7 @@ GSSiExitProg (1350);
 				ProcessDelimTextHeader(Arg3, pFileName, Fid, &hDLT, 0, 0);
 		    else
 		    	hDLT = 0;
-			while (ContinueProcessing  && nLinesProcessed != maxLinesToProcess && fgetstring(Arg3, 4090, Fid))
+			while (ContinueProcessing>0  && nLinesProcessed != maxLinesToProcess && fgetstring(Arg3, 4090, Fid))
 			{ 
 				nLinesProcessed++;
 				SetGlobalValue("%TEXTFILELINE", Arg3);
@@ -3779,7 +3877,8 @@ GSSiExitProg (1350);
             }
             IgnoreSelectVP = FALSE;
             rtn = ContinueProcessing;
-            SetContinueProcessing ( TRUE);
+            if (ContinueProcessing >= 0)
+				SetContinueProcessing ( TRUE);
 			GSSiGlobFree (&hDLT);
             GSSiClose2 (&Fid);
             if (pStatusText)
@@ -4604,10 +4703,10 @@ GSSiExitProg (1350);
         {
             DLGPROC lpfnBUILDXFERFILEMsgProc;
 			
-			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			st = 0;  
-			SetTransferFileName (Arg[1],Arg[2]);
+			SetTransferFileName (Arg[1],Arg[2],Arg[3]);
 			if (!_fstricmp (Arg[1],"BUILD") || !_fstricmp (Arg[1],"RUN"))
 			{
 	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)BUILDXFERFILEMsgProc, hInst);
@@ -4643,65 +4742,73 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 2)
 				goto RtnFalse;  
+			BOOL SaveBMPCache = AllowBMPCaching;
+			BOOL SaveAllowCache = AllowCache;
+			AllowBMPCaching = FALSE;
+			AllowCache = FALSE;
+
 			hDib32In = BMPHandleFromEXT (Arg[1]);
-			if (!hDib32In)
-				goto RtnFalse;
-			if (!stricmp(Arg[3],"FENCE"))
-				rtn = CreateCompressedFenceFromBitmap (Arg[2],hDib32In,Arg[4]);
-			else
+			if (hDib32In)
 			{
-				switch (atoi (Arg[4]))
+				if (!stricmp(Arg[3], "FENCE"))
+					rtn = CreateCompressedFenceFromBitmap(Arg[2], hDib32In, Arg[4]);
+				else
 				{
-				case 0:
-					break;
-				case 4:
-					hDib32Out = GSSiFreeImage_ConvertTo4Bits(hDib32In);
-					break;
-				case -8:
-					hDib32Out = GSSiFreeImage_ConvertTo8Bits(hDib32In);
-					break;
-				case 8:
-					hDib32Out = GSSiFreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
-					break;
-				case 16:
-					hDib32Out = GSSiFreeImage_ConvertTo16Bits565(hDib32In);
-					break;
-				case 24:
-				default:
-					hDib32Out = GSSiFreeImage_ConvertTo24Bits(hDib32In);
-					break;
-				case 32:
-					hDib32Out = GSSiFreeImage_ConvertTo32Bits(hDib32In);
-					if (*Arg[5])
+					switch (atoi(Arg[4]))
 					{
-						COLORREF icolor = atol (Arg[5]);
-						BYTE r=GetRValue (icolor), g=GetGValue (icolor), b=GetBValue (icolor);
-						DWORD	w = FreeImage_GetWidth(hDib32Out);
-						DWORD	h = FreeImage_GetHeight(hDib32Out);
-						DWORD	irow, icol;
-
-						for (irow = 0;irow < h;irow++)
+					case 0:
+						break;
+					case 4:
+						hDib32Out = GSSiFreeImage_ConvertTo4Bits(hDib32In);
+						break;
+					case -8:
+						hDib32Out = GSSiFreeImage_ConvertTo8Bits(hDib32In);
+						break;
+					case 8:
+						hDib32Out = GSSiFreeImage_ColorQuantize(hDib32In, FIQ_NNQUANT);
+						break;
+					case 16:
+						hDib32Out = GSSiFreeImage_ConvertTo16Bits565(hDib32In);
+						break;
+					case 24:
+					default:
+						hDib32Out = GSSiFreeImage_ConvertTo24Bits(hDib32In);
+						break;
+					case 32:
+						hDib32Out = GSSiFreeImage_ConvertTo32Bits(hDib32In);
+						if (*Arg[5])
 						{
-							LPRGBQUAD	pC32 = (LPRGBQUAD)FreeImage_GetScanLine (hDib32Out,irow);
+							COLORREF icolor = atol(Arg[5]);
+							BYTE r = GetRValue(icolor), g = GetGValue(icolor), b = GetBValue(icolor);
+							DWORD	w = FreeImage_GetWidth(hDib32Out);
+							DWORD	h = FreeImage_GetHeight(hDib32Out);
+							DWORD	irow, icol;
 
-							for(icol = 0;icol < w;icol++,pC32++)
+							for (irow = 0; irow < h; irow++)
 							{
-								if (pC32->rgbBlue == b && pC32->rgbGreen == g && pC32->rgbRed == r)
-									pC32->rgbReserved = 0;
-								else
-									pC32->rgbReserved = 255;
+								LPRGBQUAD	pC32 = (LPRGBQUAD)FreeImage_GetScanLine(hDib32Out, irow);
+
+								for (icol = 0; icol < w; icol++, pC32++)
+								{
+									if (pC32->rgbBlue == b && pC32->rgbGreen == g && pC32->rgbRed == r)
+										pC32->rgbReserved = 0;
+									else
+										pC32->rgbReserved = 255;
+								}
 							}
 						}
+						break;
 					}
-					break;
+					makedirectories(Arg[2], FALSE, FALSE);
+					if (hDib32Out)
+						rtn = GMFIBMPHandleToEXT(Arg[2], hDib32Out, atoi(Arg[3]));
 				}
-				makedirectories (Arg[2],FALSE,FALSE);
-				if (hDib32Out)
-					rtn = GMFIBMPHandleToEXT (Arg[2],hDib32Out,atoi(Arg[3]));
+				GMDestroyDIB32(hDib32In);
+				GMDestroyDIB32(hDib32Out);
 			}
-			GMDestroyDIB32 (hDib32In);
-			GMDestroyDIB32 (hDib32Out);
-           	goto Rtnrtn;
+			AllowBMPCaching = SaveBMPCache;
+			AllowCache = SaveAllowCache;
+			goto Rtnrtn;
 		}
 
 		case 1215: //$POLYPROBLEMS(Which Prob to check for (1-n) default=0or all),Symbol to display,size
@@ -6092,21 +6199,8 @@ GSSiExitProg (1350);
 			if (!GetPolyPoints((LPPICKDATAHEADER)&PickList[0], FALSE, &npnts, &hPoly))
 				goto RtnFalse;
 			LPDPOINT points = GlobalLock(hPoly);
-			DPOINT MidPt = { 0,0};
-			double totdist = 0;
-			double dist;
-
-			for (int i = 0; i < npnts-1;i++)
-			{
-				DPOINT midpt = MidPointD(points[i],points[i+1]);
-				dist = ldistpp(&points[i], &points[i + 1]);
-				totdist += dist;
-				MidPt.x += dist * midpt.x;
-				MidPt.y += dist * midpt.y;
-			}
+			DPOINT MidPt = WeightedPolyMidPoint(points, npnts);
 			GSSiGlobUlFree(&hPoly);
-			MidPt.x /= totdist;
-			MidPt.y /= totdist;
 			dpointtoa(OutLoc, &MidPt);
 			goto Rtnl;
 		}

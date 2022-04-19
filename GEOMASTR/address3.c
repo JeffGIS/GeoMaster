@@ -54,7 +54,7 @@ int GetGeocodeType(LPSTR Input) //returns 1 if intersection,2 if house-street,3 
 	return 0;
 }
 
-BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GeocodeAlltypesMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	RECT	rect, crect, rect2;

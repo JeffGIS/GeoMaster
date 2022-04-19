@@ -225,7 +225,10 @@ BOOL LoadUserLib (BOOL Close)
 	ConvertFileNameToCacheFileName (UserLib);
 	if (!(ghUserLib = LoadLibrary( UserLib)))  
 	{
-		MessageBox (0,"Unable to load UserLib",UserLib,MB_ICONEXCLAMATION);
+		DWORD err = GetLastError();
+		char mess[256];
+		sprintf(mess, "Unable to load UserLib: %i", err);
+		MessageBox (0,mess,UserLib,MB_ICONEXCLAMATION);
 		return FALSE;
 	}
 	return TRUE;
@@ -443,7 +446,11 @@ BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 		return (copyfile(toPath, fromPath, AppendOrReplace, 0, 0, 0, 0, 0, 0));
 	makedirectories(toPath, FALSE, FALSE);
 	if (!strnicmp(fromPath, "ftp:", 4) || !strnicmp(fromPath, "http:", 5) || !strnicmp(fromPath, "https:", 6))
+	{
+		if (Replace && ExistFile(toPath))
+			GSSiRemove(toPath);
 		ln = URLToFile(fromPath, toPath);
+	}
 	else
 	{
 		char mess[256];
@@ -910,10 +917,11 @@ extern char	CustomHeight[16],CustomWidth[16];
 			GlobalUnlock (p->hDevMode); 
 			IgnoreLock = FALSE;
 		}
+//		ClearFullWindowBitmap(hWndMain);
 		SaveFullWindowBitmap (hWndMain);
 		rtn = PrintDlg (p); 
 		RestoreFullWindowBitmap ();
-		if (NumPrintCopies)
+//		if (NumPrintCopies)
 			p->nCopies = NumPrintCopies;
 		if (rtn && PrinterIsVirtual)
 		{   
@@ -940,8 +948,10 @@ extern char	CustomHeight[16],CustomWidth[16];
 					NumVirtualPages = VirtualPagesPerRow * NumVirtualRows; 
 					DeleteDC (p->hDC);
 					p->hDC = CreateCompatibleDC (hDC);
+					curProgID = 10005;
 					hBitmap = CreateCompatibleBitmap (hDC,VirtualPageWidth,VirtualPageHeight);
-					hbmpVirtPrinterOld = SelectObject(p->hDC, hBitmap); 
+					curProgID = -1;
+					hbmpVirtPrinterOld = SelectObject(p->hDC, hBitmap);
 					*IsVirtualPrinter = TRUE;
 					IgnoreLock = TRUE;
 					GSSiGlobFree(&p->hDevMode);
@@ -977,7 +987,9 @@ extern char	CustomHeight[16],CustomWidth[16];
 					sprintf(mes, "%i %i", PageWidth, PageHeight);
 					MessageBox(0, mes, 0, MB_OK);
 				}*/
+				curProgID = 10006;
 				hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
+				curProgID = -1;
 				if (hBitmap)
 				{
 					*PrinterDC = p->hDC;
@@ -1065,7 +1077,9 @@ BOOL CreatePrintBitmap(HWND hWnd)
 			sprintf(mes, "%i %i %i %i", PageWidth, PageHeight, MaxMemAlloc, TotMemAlloc);
 			MessageBox(0, mes, 0, MB_OK);
 		}
+		curProgID = 10007;
 		hBitmap = CreateCompatibleBitmap(hDCMain, PageWidth, PageHeight);
+		curProgID = -1;
 		if (hBitmap)
 		{
 			rtn = TRUE;

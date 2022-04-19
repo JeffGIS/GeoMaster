@@ -503,7 +503,10 @@ HANDLE GetBMPBlock (short nRows, short nCols,short nBytesPerPel,double Res,doubl
 	MemMapWidth = ((CurView->NewBounds.xmx - CurView->NewBounds.xmn)/OrthoRes) * 1.05;
 	MemMapHeight = ((CurView->NewBounds.ymx - CurView->NewBounds.ymn)/OrthoRes) * 1.05; 
 	hdcMemMap = CreateCompatibleDC(CurView->hDC); 
+	curProgID = 10002;
+
 	hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);    
+	curProgID = -1;
 
 	hbmpOld = SelectObject(hdcMemMap, hMemBitmap);   
 	CurView->WindowZoomedToOrtho = TRUE;  

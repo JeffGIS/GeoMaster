@@ -24,6 +24,32 @@ LPSTR priorchr(LPSTR pstr, char c)
 
 	return pstr;
 }
+BOOL CheckStructType(HANDLE hStruct, int type)
+{
+	BOOL rtn = FALSE;
+
+	if (hStruct)
+	{
+		SIZE_T l = GlobalSize(hStruct);
+		if (l > 0)
+		{
+			LPINT pType = GlobalLock(hStruct);
+			if (pType)
+			{
+				if (*pType == type)
+					rtn = TRUE;
+				GlobalUnlock(hStruct);
+			}
+		}
+	}
+	if (!rtn)
+	{
+		char mess[256];
+		sprintf(mess,"Invalid structure %i", type);
+		MessageBox(0, mess, 0, MB_ICONEXCLAMATION);
+	}
+	return rtn;
+}
 void GetMassShapeFiles(void)
 {
 	char file[] = "c:\\temp\\maparcels2.txt";
@@ -612,17 +638,25 @@ GSSiExitProg (1348);
 				GSSiClose2 (&Fid1);
 				goto RtnTrue;
 			}   
-			if (!_fstrcmp(Arg[1],"VIEWPORT"))
+			if (!_fstrcmp(Arg[1],"VIEWPORT"))//$HLT(VIEWPORT,vpname(opt),exclusionrect(opt))
 			{
 				int saveType;
 				SetCurView ( SetVPFromName (Arg[2],&Err));
 				saveType = CurView->Type;
 				if (CurView->Type == SUBVIEWPORT)
 					CurView->Type = PLANVIEWPORT;
+				if (strlen(Arg[3]))
+				{
+					BOOL err;
+					ExclusionBounds = atobounds(Arg[3], &err);
+					if (!err)
+						haveExclusionBounds = TRUE;		 
+				}
 				nlong = HighlightInArea (CurView->hWnd,&CurView->WBounds,TRUE,TRUE,CurView->hMaskArea);
 				ltoa (nlong,OutLoc,10); 
 				CurView->Type = saveType;
 				CurView = SaveVP; 
+				haveExclusionBounds = FALSE;
 				goto Rtnl;
 			} 
 			if (!_fstrcmp(Arg[1],"AREA"))
@@ -719,7 +753,7 @@ GSSiExitProg (1348);
 					Refno = atol (Arg[2]); 
 					Arg[2] = 0;
 				}
-				SetCurView ( SetVPFromName (Arg[4],&Err));
+				SetCurView(SetVPFromName(Arg[4], &Err));
 	            if (!PickByRefno (Refno,Arg[2],lpColon,UsePickList))
 	            {
 					CurView = SaveVP; 
@@ -787,16 +821,40 @@ GSSiExitProg (1348);
 				else
 					goto RtnTrue;
 			}
-			if (!_fstricmp(Arg[1],"ROUTE"))
+			if (!_fstricmp(Arg[1], "ROUTE"))
 			{
 				if (nArgs < 4) goto Rtn0;
-				Refno = atol (Arg[3]);
-				if (!HighlightRoute (Arg[2],Refno,0,atob(Arg[3])))
+				Refno = atol(Arg[3]);
+				if (!HighlightRoute(Arg[2], Refno, 0, atob(Arg[3])))
 					goto RtnFalse;
 				else
 					goto RtnTrue;
 			}
-				
+			if (!_fstricmp(Arg[1], "REFSTOTEXT"))
+			{
+				int nWritten = 0;
+				if (nArgs < 2) goto Rtn0;
+				HFILE Fid = GSSiOpenFile (Arg[2],0,OF_CREATE);
+				if (Fid == HFILE_ERROR)
+					goto RtnFalse;
+				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
+				LPSTR pLine = GlobalLock(hLine);
+				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS");
+				fputstring(pLine, Fid);
+				int pos = BT_FIRST;
+				while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+				{
+					pos = BT_NEXT;
+					sprintf(pLine, "%i\t%s\t%s\t%i\t%i\t%lf %lf %lf %lf", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI, HighlightData.PD.Type, HighlightData.PD.Desc, HighlightData.PD.Rect.xmn, HighlightData.PD.Rect.ymn, HighlightData.PD.Rect.xmx, HighlightData.PD.Rect.ymx);
+					fputstring(pLine, Fid);
+					nWritten++;
+				}
+				GSSiClose(Fid);
+				GSSiGlobUlFree(&hLine);
+				itoa(nWritten, OutLoc, 10);
+				goto Rtnl;
+			}
+
 			if (nArgs < 5) goto Rtn0;
 			Offset = atof(Arg[3]);
 			FromLimits = atoi(Arg[4]);
@@ -1065,8 +1123,13 @@ GSSiExitProg (1348);
 		case 316: //$FLT(str)
 		{
 			
-			RVal = FltAP (Args,&Err);
-		    if (Err)
+//			hMem = GSSiGlobAlloc(807, GMEM_MOVEABLE, 4096);
+//			Arg1 = GlobalLock(hMem);
+//			strcpy(Arg1, Args);
+//			ExpandText(Arg1);
+//			RVal = FltAP(Arg1, &Err);
+			RVal = FltAP(Args, &Err);
+			if (Err)
 		    {
 	FLTAPErr:
 				if (ExpandTextDataNotFound)
@@ -1098,12 +1161,24 @@ GSSiExitProg (1348);
 								char	err[64]="[%LASTERR]";
 
 								ExpandText (err);
-								strcpy (ExpArgs,Args);
+								sprintf (ExpArgs,"%s\r\n[%%TRACEVALUE]",Args);
 								ExpandText (ExpArgs);
-								sprintf (str,"Error in: %s\r\n%s",Args,ExpArgs);
+								sprintf (str,"Error in: %s\r\n%s\nCurrent Macro: %s",Args,ExpArgs,currentMacroFile);
 								strcpy (OutLoc,"0");
-								MessageBox (hWndMain,str,err,MB_ICONEXCLAMATION);
-								GSSiGlobUlFree (&hstr);
+								short opt = MessageBox (hWndMain,str,err,MB_ICONEXCLAMATION| MB_YESNOCANCEL);
+								GSSiGlobUlFree(&hstr);
+								switch (opt)
+								{
+									case IDCANCEL:
+										SetContinueProcessing(FALSE);
+										break;
+									case IDNO:
+										break;
+								case IDYES:
+									GMEdit(hWndMain,currentMacroFile);
+									break;
+								}
+
 							}
 							break;
 						case 2:
@@ -1790,7 +1865,10 @@ SetVis:
 					*Endloc++ = 0;
 				else
 					Endloc = strchr (Arg1,0);
-				OutLoc[n++] = atoi (Arg1);
+				OutLoc[n] = atoi (Arg1);
+				if (!OutLoc[n])
+					OutLoc[n] = *Arg1;
+				n++;
 				Arg1 = Endloc;
 			}
 			OutLoc[n] = 0;
@@ -2311,7 +2389,7 @@ SetVis:
 			goto Rtnl;
 		}
 
-		case 355://$FTP(OPEN,service,username,pw,directory,errvarname,port(opt),passive(opt))
+		case 355://$FTP(OPEN,service,username,pw,directory,errvarname,port(opt),passive(opt),numreopenattempts)
 				 //$FTP(CLOSE,handle);
 				 //$FTP(LIST,handle,wildcard,errvarname)
 				 //$FTP(GETFILE,handle,remotename,localname,replace,showStatus,errvarname)
@@ -2329,13 +2407,14 @@ SetVis:
 			{
 				hFTPStruct = GSSiGlobAlloc (1781,GHND,sizeof(FTPSTRUCT));
 				pFTPStruct = GlobalLock (hFTPStruct);
+				pFTPStruct->structType = ST_FTPSTRUCT;
 				pFTPStruct->hFTP = FTPOpen(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], atoi(Arg[7]), atob(Arg[8]));
 				if (!pFTPStruct->hFTP)
 				{
 					GSSiGlobUlFree (&hFTPStruct);
 					goto RtnFalse;
 				}
-				pFTPStruct->reopenAttempts = 1;
+				pFTPStruct->reopenAttempts = atoi(Arg[9]);
 				strcpy (pFTPStruct->ServerName,Arg[2]);
 				strcpy (pFTPStruct->Username,Arg[3]);
 				strcpy (pFTPStruct->Password,Arg[4]);
@@ -2347,16 +2426,12 @@ SetVis:
 			else if (!stricmp(Arg[1],"CLOSE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
-				if (hFTPStruct)
+				if (CheckStructType (hFTPStruct,ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
-						pFTPStruct = GlobalLock (hFTPStruct);
-						rtn = FTPClose (pFTPStruct->hFTP);
-						GSSiGlobUlFree (&hFTPStruct);
-						goto Rtnrtn;
-					}
+					pFTPStruct = GlobalLock (hFTPStruct);
+					rtn = FTPClose (pFTPStruct->hFTP);
+					GSSiGlobUlFree (&hFTPStruct);
+					goto Rtnrtn;
 				}
 			}
 			else if (!stricmp(Arg[1],"SPLIT"))
@@ -2397,11 +2472,8 @@ SetVis:
 			else if (!stricmp(Arg[1],"LIST"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						if (*Arg[3])
 						{
@@ -2426,18 +2498,14 @@ SetVis:
 							goto Rtnl;
 						}
 						GlobalUnlock (hFTPStruct);
-					}
 				}
 			}
 			else if (!stricmp(Arg[1],"GETFILE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						int nAttemps = 0;
 						pFTPStruct = GlobalLock (hFTPStruct);
 						do {
@@ -2447,43 +2515,33 @@ SetVis:
 						}while (!rtn && nAttemps++ < pFTPStruct->reopenAttempts);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
-				else if (*Arg[6])
-					SetGlobalValue (Arg[6],"FTP session not open"); 
+				else if (*Arg[7])
+					SetGlobalValue (Arg[7],"FTP session not open"); 
 			}
 			else if (!stricmp(Arg[1],"PUTFILE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
-
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPPutFile(pFTPStruct->hFTP,Arg[3],Arg[4],atob(Arg[5]),atob(Arg[6]),Arg[7]);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
-				else if (*Arg[6])
-					SetGlobalValue (Arg[6],"FTP session not open"); 
+				else if (*Arg[7])
+					SetGlobalValue (Arg[7],"FTP session not open"); 
 			}
 			else if (!stricmp(Arg[1],"DELETEFILE"))
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPDeleteFile(pFTPStruct->hFTP,Arg[3],Arg[4]);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
 				else if (*Arg[4])
 					SetGlobalValue (Arg[4],"FTP session not open"); 
@@ -2492,18 +2550,14 @@ SetVis:
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPSetDirectory(pFTPStruct->hFTP,Arg[3],Arg[4]);
 						if (rtn)
 							FTPGetDirectory(pFTPStruct->hFTP,pFTPStruct->directory,0);
 						GlobalUnlock (hFTPStruct);
 						goto Rtnrtn;
-					}
 				}
 				else if (*Arg[4])
 					SetGlobalValue (Arg[4],"FTP session not open"); 
@@ -2512,11 +2566,8 @@ SetVis:
 			{
 				hFTPStruct = (HANDLE)atoi (Arg[2]);
 
-				if (hFTPStruct)
+				if (CheckStructType(hFTPStruct, ST_FTPSTRUCT))
 				{
-					SIZE_T l=GlobalSize (hFTPStruct);
-					if (l > 0)
-					{
 						pFTPStruct = GlobalLock (hFTPStruct);
 						rtn = FTPGetDirectory(pFTPStruct->hFTP,Arg[4],Arg[3]);
 						GlobalUnlock (hFTPStruct);
@@ -2526,7 +2577,6 @@ SetVis:
 							goto Rtnl;
 						}
 						goto Rtnrtn;
-					}
 				}
 				else if (*Arg[3])
 					SetGlobalValue (Arg[3],"FTP session not open"); 
@@ -3538,7 +3588,11 @@ SetVis:
 		
 		case 424: //$MISC()
 		{
-			{
+			double v = FTM;
+			v = MFT;
+
+			//int i = ConvertToJP2(2020, 7);
+				/*
 				OFSTRUCTGM OFStruct;
 				char netFile[MAX_PATH] = "L:\\GEOMas\\orthos\\Orth2019\\2019_1\\orthos4.gci";
 				char cacheFile[MAX_PATH] = "C:\\Users\\smithjx0\\AppData\\Local\\Temp\\gmcache2\\ORTHOS\\ORTH2019\\2019_1\\ORTHOS4$GCI.tbr";
@@ -3573,6 +3627,7 @@ SetVis:
 			double scale = (double)pageWidth / (double)pageSize;
 			ReleaseDC(hWndMain, hDC);
 			ftoa(OutLoc, scale);
+			*/
 			//SetDisplayMode(hDC, GF_TEXTMODE);
 			//testGDIP(hDC);
 /*			char SSID[40];
@@ -3586,7 +3641,7 @@ SetVis:
 			//int n = TestSQLiteCrimeOffenseOrder(&CurView->WBounds, TimeRangeBeg, TimeRangeEnd, 1, 10);
 
 			//itoa(n, OutLoc, 10);
-			goto Rtnl;
+			//goto Rtnl;
 			/*{
 #include "colorsByName.h"
 				HDC hDC = CurView->hDC;
@@ -4299,6 +4354,7 @@ SetVis:
 			FILEFunctions(nArgs, Arg, OutLoc);
 			goto Rtnl;
 		}
+		
 		case 437: //$GDAL(OPEN,file)
 		{
 #define CPL_RESTRICT
@@ -4396,6 +4452,86 @@ SetVis:
 			goto RtnTrue;
 		}
 
+		case 439: //$FGDB(DUMP,FGDBPath,OutFilePath,ListType) dumps table names,types and counts to outfile
+			      //$FGDB(CONVERT,FGDBPath,OutFilePath,Version,OutTableName,KeyField,IncludedFields) converts to SQLITE based file
+		{
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "DUMP"))
+			{
+				int n = DumpFGDBTables(Arg[2], Arg[3], atoi(Arg[4]));
+				itoa(n, OutLoc, 10);
+			}
+			else if (!stricmp(Arg[1], "CONVERT"))
+			{
+				int n = ConvertFGDBTable(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7]);
+				itoa(n, OutLoc, 10);
+			}
+			goto Rtnl;
+		}
+		case 440: //$CHAR(COUNT,string,char)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			if (nArgs < 1)
+				goto RtnFalse;
+			if (!stricmp(Arg[1], "COUNT"))
+			{
+				int n = 0;
+				LPSTR loc = Arg[2];
+				loc = strchr(loc, *Arg[3]);
+				while (loc)
+				{
+					n++;
+					loc++;
+					loc = strchr(loc, *Arg[3]);
+				}
+				itoa(n, OutLoc, 10);
+				goto Rtnl;
+			}
+			goto RtnFalse;
+		}
+
+		case 441: //$JUST(LRorC,string,width)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs > 1)
+			{
+				if (CurReport && (CurReport->hWnd || CurReport->hDC) && CurReport->currentFont)
+				{
+					int width = atoi(Arg[3]);
+					width *= DeviceToScreenFactor();
+					HDC hDC = CurReport->hDC;
+					BOOL doRelease = FALSE;
+					if (!hDC)
+					{
+						hDC = GetDC(CurReport->hWnd);
+						doRelease = TRUE;
+					}
+					HFONT oldFont = SelectObject(hDC, CurReport->currentFont);
+					SIZE txSize, txSizeSpace;
+					char	tenSpace[11] = "          ";
+					int rtn = GetTextExtentPoint32(hDC, Arg[2], strlen(Arg[2]), &txSize);
+					rtn = GetTextExtentPoint32(hDC, tenSpace, 10, &txSizeSpace);
+					int pixelsPerSpace =  txSizeSpace.cx / 10;
+					SelectObject(hDC, oldFont);
+					if (doRelease)
+						ReleaseDC(CurReport->hWnd, hDC);
+					int numSpaceNeeded = ((width - txSize.cx) / pixelsPerSpace) / 2;
+					for (int i = 0; i < numSpaceNeeded; i++)
+					{
+						strcat(OutLoc, " ");
+					}
+					strcat(OutLoc, Arg[2]);
+				}
+				else
+					strcpy(OutLoc, Arg[2]);
+			}
+			goto Rtnl;
+		}
+
 		default:
 			goto Rtn0;
 	}
@@ -4418,8 +4554,10 @@ Rtnl:
 Exit: 
 	if (SaveCfg != CurrentConfig)
 	{
-		SetConfig (SaveCfg);
-		if (*pNumViewports)
+		SetConfig(SaveCfg);
+	}
+	if (pNumViewports && *pNumViewports)
+	{
 			SetCurView ( SaveVP);
 	}
 	GSSiGlobUlFree (&hMem);

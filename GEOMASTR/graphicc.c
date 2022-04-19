@@ -5,7 +5,7 @@
 #include <commctrl.h>
 
 
-static	TAGKEY TAGKey;
+//static	TAGKEY TAGKey;
 static	char	RefIndexFile[MAX_PATH];
 static	BOOL	InFixDupRef=FALSE;  
 static	short	NumPrevLayers=0;
@@ -803,11 +803,12 @@ LPJLBPDATA	pData;
 	return rtn;
 }
 
-void SetTransferFileName (LPSTR Option,LPSTR Name)
+void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc)
 {  
 	*TransferFileRunCommand = 0;
 	_fstrcpy (BuildTransferFileOption,Option);
-	_fstrcpy (TransferFileName,Name);
+	_fstrcpy(TransferFileName, Name);
+	_fstrcpy(TransferFrom, fromLoc);
 	return;
 } 
 
@@ -817,7 +818,7 @@ void RunTransferFileCommand (void)
 	return;
 }
 
-BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long MaxLength,LPSTR sourceDir)
+BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long MaxLength,LPSTR sourceDir)
 {   
 	long	lRec;
     HANDLE	hRec = GSSiGlobAlloc (1550,GMEM_MOVEABLE,MaxLength);
@@ -826,7 +827,7 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
     HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
     long	CompressedLength;  
 	HFILE	Fid;
-	long	TotLen;
+	LONGLONG	TotLen=0;
 	BOOL	rtn = FALSE;
 	char	filePath[MAX_PATH];
 
@@ -839,14 +840,14 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToAdd,long Max
 		goto Exit;
 	TotLen = GSSifilelength(Fid);
    	if (hWndStatus)
-		PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
+		PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
 	while ((lRec=BigRead (Fid,pRec,MaxLength)))
 	{
 	 	lRec = CompressBinaryRecord (pRec,pCompressedRec,lRec); 	    
-    	BigWrite (FidTF,(HPSTR)&lRec,4,-1);
-    	BigWrite (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
+    	BigWrite64 (FidTF,(HPSTR)&lRec,4,-1);
+    	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
     	if (hWndStatus)
-			PctBox (hWndStatus,TotLen,GSSillseek (Fid,0,1),0); 
+			PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
     }
     GSSiClose2 (&Fid);
 	rtn = TRUE;
@@ -856,29 +857,30 @@ Exit:
     return rtn; 
 }
 
-BOOL GetFileFromTransferFile (HWND hWndStatus,HFILE FidTF,LPSTR FileToGet,long LenToRead,long MaxLength)
+BOOL GetFileFromTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToGet,LONGLONG LenToRead,long MaxLength)
 {   
 	long	lRec;
     HANDLE	hRec = GSSiGlobAlloc (1552,GMEM_MOVEABLE,MaxLength);
     HPSTR	pRec = GlobalLock (hRec); 
     HANDLE	hCompressedRec = GSSiGlobAlloc (1553,GMEM_MOVEABLE,MaxLength*2);
     HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
-    long	CompressedLength, LenRead=0;  
-	HFILE	Fid=GSSiOpenFile (FileToGet,0,OF_CREATE);
+	long	CompressedLength;
+	LONGLONG LenRead = 0;
+	HANDLE	Fid=OpenFileGM (FileToGet,0,OF_CREATE);
 	
-	if (Fid == HFILE_ERROR)
+	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
    	PctBox (hWndStatus,LenToRead,LenRead,0); 
 	while (LenRead < LenToRead)
 	{   
-		BigRead (FidTF,(HPSTR)&CompressedLength,4);
+		BigRead64 (FidTF,(HPSTR)&CompressedLength,4);
 		LenRead += CompressedLength+4;     
-		BigRead (FidTF,pCompressedRec,CompressedLength);
+		BigRead64 (FidTF,pCompressedRec,CompressedLength);
 		lRec = DecompressBinaryRecordUnsafe (pRec,pCompressedRec,CompressedLength);
-    	BigWrite (Fid,(HPSTR)pRec,lRec,-1);
+    	BigWrite64 (Fid,(HPSTR)pRec,lRec,-1);
     	PctBox (hWndStatus,LenToRead,LenRead,0); 
     }
-    GSSiClose2 (&Fid);
+    GSSiClose64 (&Fid);
     GSSiGlobUlFree (&hCompressedRec); 
     GSSiGlobUlFree (&hRec);
     return TRUE; 
@@ -1111,7 +1113,7 @@ void GetGMDName (LPSTR Name)
 	return;
 }                            
 
-BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char	SymName[66], cWidth[64],cRot[64],cColor[64],str[260], GSPName[256], cIF[128], UDI[66], SymStuff[256]; 
 	short	i, Choice, rtn; 
@@ -2453,6 +2455,7 @@ void BuildTAGIndex (LPSTR Prefix, LPSTR UDI, int len, long Refno,BOOL Deleted)
 {   
 	REFINDEXDATA SaveRID;
 	REFINDEXDATA	RefIdxData;
+	TAGKEY TAGKey;
 
     if (!Prefix || !*Prefix || !_fstricmp (Prefix,"REFNO"))
 		goto Exit;
@@ -2508,6 +2511,7 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 	long	Refno;
 	int		NumAdded=0;
 	HANDLE  hTI;
+	TAGKEY	TagKey;
 
 	CloseTAGIndex ();
 	
@@ -2528,20 +2532,20 @@ int AddAdditionalUDI (LPSTR IndexPath,LPSTR FileID,LPSTR Prefix, LPSTR OldUDIvar
 		rc = atoi (FetchStr);
 		while (rc)
 		{
-			strncpy(TAGKey.PREFIX,Prefix,8); 
+			strncpy(TagKey.PREFIX,Prefix,8); 
 			sprintf (OldUDIstr,"[%s.%s]",FileID,OldUDIvar);
 			ExpandText (OldUDIstr);
-			strncpy(TAGKey.UDI,OldUDIstr,32); 
-			TAGKey.Refno = LONG_MIN;  
+			strncpy(TagKey.UDI,OldUDIstr,32); 
+			TagKey.Refno = LONG_MIN;  
 			*NewUDIstr=0;
-			if (!BT_FIND (hTI,(LPSTR)&TAGKey,BT_FIRST,BT_GE,(LPSTR)&RefIdxData))
+			if (!BT_FIND (hTI,(LPSTR)&TagKey,BT_FIRST,BT_GE,(LPSTR)&RefIdxData))
 			{
-				if (!strcmp (TAGKey.UDI,OldUDIstr))
+				if (!strcmp (TagKey.UDI,OldUDIstr))
 				{
 					sprintf (NewUDIstr,"[%s.%s]",FileID,NewUDIvar);
 					ExpandText (NewUDIstr);
-					strncpy(TAGKey.UDI,NewUDIstr,32); 
-					BT_PUT (hTI,(LPSTR)&TAGKey,(LPSTR)&RefIdxData);
+					strncpy(TagKey.UDI,NewUDIstr,32); 
+					BT_PUT (hTI,(LPSTR)&TagKey,(LPSTR)&RefIdxData);
 					NumAdded++;
 				}
 			}
@@ -2565,6 +2569,7 @@ BOOL DeleteFromTAGList (LPSTR Prefix,LPSTR UDI,long Refno)
 {   
 	REFINDEXDATA	RefIdxData;
 	BOOL rtn = FALSE;
+	TAGKEY TAGKey;
 
 	if (!Prefix)
 		return FALSE;
@@ -2942,6 +2947,7 @@ long PickByRefno (long Refno,LPSTR InPrefix, LPSTR InUDI,short PickFile)
 	BOOL isShapeFile = FALSE;
 	int  SHPRec[MAXPICKITEMS];
 	int	 nSHPPicked = 0;
+	TAGKEY TAGKey;
 
 	strcpy (SavePltName,PltName);
     WantDescBlock = FALSE;
@@ -3066,8 +3072,8 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 								isShapeFile = FALSE;
 								if (GetBTDataLen(pTI->hBT) > 8)
 									CheckForLargestPiece = TRUE;
-								_fstrncpy(TAGKey.PREFIX, Prefix, 8);
-								_fstrncpy(TAGKey.UDI, UDI, 32);
+								strncpy(TAGKey.PREFIX, Prefix, 8);
+								strncpy(TAGKey.UDI, UDI, 32);
 								if (keylen == 42)
 									TAGKey.Refno = 0;
 								else
@@ -3125,8 +3131,8 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 			    	{
 						LPTAGINDEX pTI;
 			    		double Size = RectArea16 (&pRefIdxData->MinMax);
-	NextPiece:
 						pTI = GlobalLock(hTAGIdx);
+					NextPiece:
 						if (pTI->type == TAGINDEX_BTREE)
 						{
 							st = BT_FIND(pTI->hBT, (LPSTR)&TAGKey, BT_NEXT, BT_ANY, (LPSTR)pRefIdxDataTest);
@@ -3185,11 +3191,18 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 							CloseRefIndex(FALSE);
 						PickList[0].Offset = pRefIdxData->Offset;
 						PickList[0].Element = 0;
+						if (CurView->SubFile)
+						{
+							_fstrcpy(CurView->lpFiles[CurView->RestoreFile], CurView->OrigFile);
+							CurView->SubFile = 0;
+							SetRestoreFile(CurView, 0);
+						}
+
 						CurView->SubFile = SubFile;
 						if (SubFile)
 						{
 							strcpy(CurView->OrigFile, CurView->lpFiles[FileNum]);
-							CurView->RestoreFile = FileNum;
+							SetRestoreFile(CurView, FileNum);
 						}
 						PD = PickList[0];
 						if (!PickedItemMinMax(NumPicked, &PD.Rect))
@@ -3882,7 +3895,7 @@ void ExpandPltName (LPSTR PltName)
 	strcat (PltName,Where);
 	return;
 }
-LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	if (Message == WM_PAINT)
 	{
@@ -3912,7 +3925,7 @@ LONG FAR PASCAL PopupMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG 
 	return DefWindowProc(hWnd, Message, wParam, lParam);
 
 }
-LONG FAR PASCAL SmallMessageWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL SmallMessageWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	switch (Message)
 	{
@@ -6095,7 +6108,8 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
     LPSYMBOL    pSymbol; 
 	short	i2, n,ActualNum=0;
 	long	lMem, loc, RtnLoc;
-	
+	BOOL	clear;
+
     lMem = (1+NumSyms)*36+2+2+2+2+2;  
     BigWrite (Fid,(char *)&lMem,2,-1);
     i2 = 11; 
@@ -6109,8 +6123,13 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 	    n=NumSyms;
 	    while (n--)
 	    {   
-	    	if (!pSymDesc->Handle)
-			    pSymDesc->Handle = GetDictSymDesc (pSymDesc->Number,0); 
+			if (!pSymDesc->Handle)
+			{
+				pSymDesc->Handle = GetDictSymDesc(pSymDesc->Number, 0);
+				clear = TRUE;
+			}
+			else
+				clear = FALSE;
 	        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle);
 	        if (pSymbol->Type)
 	        {
@@ -6120,8 +6139,12 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 	            ActualNum++;
 	        } 
 			GlobalUnlock (pSymDesc->Handle);
-	    	DestroySymbol (pSymDesc->Handle); 
-	    	pSymDesc++->Handle = 0;
+			if (clear)
+			{
+				DestroySymbol(pSymDesc->Handle);
+				pSymDesc->Handle = 0;
+			}
+			pSymDesc++;
 	    }
 	    GlobalUnlock (hSymDesc); 
 	}
@@ -6138,8 +6161,13 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 	    n=NumSyms;
 	    while (n--)
 	    {   
-	    	if (!pSymDesc->Handle)
-			    pSymDesc->Handle = GetDictSymDesc (pSymDesc->Number,0); 
+			if (!pSymDesc->Handle)
+			{
+				pSymDesc->Handle = GetDictSymDesc(pSymDesc->Number, 0);
+				clear = TRUE;
+			}
+			else
+				clear = FALSE;
 			if (pSymDesc->Handle)
 			{
 		        pSymbol = (LPSYMBOL)GlobalLock (pSymDesc->Handle);
@@ -6150,10 +6178,14 @@ BOOL WriteSymList (HFILE Fid, short NumParent, short NumSyms, HANDLE hSymDesc)
 		            BigWrite (Fid,(char *)&pSymbol++->Name,32,-1);
 		            ActualNum++;
 		        }
-		        GlobalUnlock (pSymDesc->Handle); 
-		    	DestroySymbol (pSymDesc->Handle); 
+				GlobalUnlock(pSymDesc->Handle);
+				if (clear)
+				{
+					DestroySymbol(pSymDesc->Handle);
+					pSymDesc->Handle = 0;
+				}
 		    }
-	    	pSymDesc++->Handle = 0;
+			pSymDesc++;
 	    }
 	    GlobalUnlock (hSymDesc);
 	}
@@ -7751,7 +7783,7 @@ BOOL NotifyFunction (LPVIEWPORT pVP,UINT message)
 	LPVIEWPORT	SaveVP=CurView;
 	int	ii;
 	
-	if (!pVP)
+	if (!pVP || inUnallocateConfig)
 {
 #if ENABLETRACE
 GSSiExitProg (170);
@@ -7848,7 +7880,7 @@ BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 	int np = 0, n;
 	DPOINT PC, POC, PT, RP;
 	double radius;
-	HANDLE hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, sizeof(POINT)* 4096);
+	HANDLE hPoints = GSSiGlobAlloc(1839, GMEM_MOVEABLE, sizeof(POINT)* 4096);
 	LPPOINT pPoints = GlobalLock(hPoints);
 	LPPOINT pPnts = pPoints;
 	int t = top;
@@ -7914,5 +7946,197 @@ BOOL  WINAPI GSSiRoundRect(_In_ HDC hdc, _In_ int left, _In_ int top, _In_ int r
 	}
 	Polygon(hdc, pPnts, np);
 	GSSiGlobUlFree(&hPoints);
+	return rtn;
+}
+BOOL  RoundRctWithPointer(HDC hdc, int left, int top,int right,int bottom, int width, int height,LPPOINT pointer)
+{
+	BOOL rtn = FALSE;
+	int np = 0, n;
+	DPOINT PC, POC, PT, RP;
+	double radius;
+	HANDLE hPoints = GSSiGlobAlloc(1839, GMEM_MOVEABLE, sizeof(POINT) * 4096);
+	HANDLE hNewPoints = 0;
+	LPPOINT pPoints = GlobalLock(hPoints);
+	LPPOINT pPnts = pPoints;
+	int t = top;
+	int flipy = 0;
+
+	if (top < bottom)
+	{
+		//flipy = bottom - top;
+		top = bottom;
+		bottom = t;
+	}
+	width = min(width, (right - left) / 2);
+	height = min(height, abs(top - bottom) / 2);
+	width = height = min(width, height);
+	radius = (width + height) / 2.0;
+	PC.x = right;
+	PC.y = top - height;
+	RP.x = right - width;
+	RP.y = top - height;
+	POC = dnewpt(RP, PY / 4, radius);
+	PT.x = right - width;
+	PT.y = top;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = left + width;
+	PC.y = top;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = PC.x;
+	RP.y = top - height;
+	POC = dnewpt(RP, 3 * PY / 4, radius);
+	PT.x = left;
+	PT.y = RP.y;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = left;
+	PC.y = bottom + height;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = left + width;
+	RP.y = PC.y;
+	POC = dnewpt(RP, 5 * PY / 4, radius);
+	PT.x = RP.x;
+	PT.y = bottom;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+
+	PC.x = right - width;
+	PC.y = bottom;
+	*pPoints++ = DPointToPoint(PC);
+	np++;
+	RP.x = PC.x;
+	RP.y = bottom + height;
+	POC = dnewpt(RP, 7 * PY / 4, radius);
+	PT.x = right;
+	PT.y = RP.y;
+	n = CurvePoints(&PC, &POC, &PT, &np, &pPoints, 1, 4096);
+	*pPoints = *pPnts;
+	np++;
+	if (flipy)
+	{
+		for (int i = 0; i < np; i++)
+			pPnts[i].y += flipy;
+	}
+
+	HANDLE hPolyDP = GSSiGlobAlloc(1849, GMEM_MOVEABLE, np * sizeof(DPOINT) + 4);
+	HANDLE hPointer = GSSiGlobAlloc(1850, GMEM_MOVEABLE, 3 * sizeof(DPOINT));
+
+	LPDPOINT pPolyDPoints=GlobalLock (hPolyDP);
+	LPDPOINT pPolyPointer=GlobalLock (hPointer);
+	double	IntDist[2], AtDist=0, fromDist, toDist;
+	DPOINT	IntPoint;
+	double	InAZ, OutAZ[4];
+	BOOL	OutReverse[4];
+	short	WhichPoly[4];
+	DPOINT   fromPoint, toPoint;
+
+	for (int i = 0; i < np; i++)
+		pPolyDPoints[i] = PointToDPoint(pPnts[i]);
+	for (int i = 0; i < 3; i++)
+		pPolyPointer[i] = PointToDPoint(pointer[i]);
+	double totDist = GetPolyLengthD(pPolyDPoints, np);
+	int nint = IntersectPolys2(3, pPolyPointer, np, pPolyDPoints,		
+		AtDist, IntDist, &IntPoint, &InAZ,
+		OutAZ, OutReverse, WhichPoly, FALSE);
+	if (nint > 0)
+	{
+		AtDist = IntDist[0];
+		fromDist = IntDist[1];
+		fromPoint = IntPoint;
+		nint = IntersectPolys2(3, pPolyPointer, np, pPolyDPoints,			
+			AtDist, IntDist, &IntPoint, &InAZ,
+			OutAZ, OutReverse, WhichPoly, FALSE);
+		if (nint > 0)
+		{
+			toPoint = IntPoint;
+			toDist = IntDist[1];
+			if (fromDist > toDist)
+			{
+				double saveDist = fromDist;
+				DPOINT savePoint = fromPoint;
+				fromDist = toDist;
+				toDist = saveDist;
+				fromPoint = toPoint;
+				toPoint = savePoint;
+			}
+			double dist = 0;
+			DPOINT lastPoint = pPolyDPoints[0];
+			int ipt = 0;
+			int iEnd, iRestart;
+			int npNew = 0;
+			int npOld = np;
+
+			if (fabs(fromDist - toDist) < totDist / 2)
+			{
+				while (dist < fromDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt], &pPolyDPoints[ipt+1]);
+					if (ipt >= np - 1)
+						break;
+					ipt++;
+				}
+				iEnd = ipt;
+				while (dist < toDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt], &pPolyDPoints[ipt+1]);
+					if (ipt >= np - 1)
+						break;
+					ipt++;
+				}
+				iRestart = ipt;
+				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np+3));
+				pPnts = GlobalLock(hNewPoints);
+				for (int i = 0; i < iEnd; i++)
+				{
+					pPnts[npNew] = DPointToPoint(pPolyDPoints[i]);
+					if (npNew >= npOld)
+						ii = 1;
+					npNew++;
+				}
+				pPnts[npNew++] = DPointToPoint(fromPoint);
+				pPnts[npNew++] = pointer[1];
+				pPnts[npNew++] = DPointToPoint(toPoint);
+				for (int i = iRestart; i < np; i++)
+				{
+					pPnts[npNew] = DPointToPoint(pPolyDPoints[i]);
+					if (npNew >= npOld)
+						ii = 1;
+					npNew++;
+				}
+				np = npNew;
+			}
+			else
+			{
+				int iStart = 0;
+				dist = 0;
+				while (dist < fromDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+				}
+				iStart = ipt;
+				while (dist < toDist)
+				{
+					dist += ldistpp(&pPolyDPoints[ipt++], &pPolyDPoints[ipt]);
+				}
+				iEnd = ipt;
+				hNewPoints = GSSiGlobAlloc(1851, GMEM_MOVEABLE, sizeof(POINT) * (np + 3));
+				pPnts = GlobalLock(hNewPoints);
+				for (int i = iStart; i < iEnd; i++)
+					pPnts[npNew++] = DPointToPoint(pPolyDPoints[i]);
+				pPnts[npNew++] = DPointToPoint(toPoint);
+				pPnts[npNew++] = pointer[1];
+				pPnts[npNew++] = DPointToPoint(fromPoint);
+				np = npNew;
+			}
+			
+		}
+	}
+	Polygon(hdc, pPnts, np);
+	GSSiGlobUlFree(&hPolyDP);
+	GSSiGlobUlFree(&hPointer);
+	GSSiGlobUlFree(&hPoints);
+	GSSiGlobUlFree(&hNewPoints);
 	return rtn;
 }

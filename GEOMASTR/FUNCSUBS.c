@@ -428,7 +428,8 @@ Exit:
 BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 {
 	BOOL rtn = FALSE;
-	HFILE FidTF, fidFiles, fidIndex = HFILE_ERROR;
+	HANDLE FidTF;
+	HFILE fidFiles, fidIndex = HFILE_ERROR;
 	char filePath[MAX_PATH + 2];
 	char indexRec[MAX_PATH + 32];
 
@@ -455,36 +456,36 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 			sprintf(indexRec, "FILE\tFILELOC");
 			fputstring(indexRec, fidIndex);
 		}
-		FidTF = GSSiOpenFile(Arg[2], 0, OF_CREATE);
-		if (FidTF == HFILE_ERROR)
+		FidTF = OpenFileGM(Arg[2], 0, OF_CREATE);
+		if (FidTF == INVALID_HANDLE_VALUE)
 		{
 			GSSiClose2 (&fidFiles);
 			goto Exit;
 		}
 
-		BigWrite(FidTF, (HPSTR)&Version, 2, -1);
-		BigWrite(FidTF, (HPSTR)&MaxLength, 4, -1);
+		BigWrite64(FidTF, (HPSTR)&Version, 2, -1);
+		BigWrite64(FidTF, (HPSTR)&MaxLength, 4, -1);
 		while (fgetstring(filePath, MAX_PATH, fidFiles))
 		{
 			len = _fstrlen(filePath) + 1;
 			if (fidIndex != HFILE_ERROR)
 			{
-				long loc = GSSillseek(FidTF, 0, 1);
-				sprintf(indexRec, "%s\t%i", filePath, loc);
+				LONGLONG loc = GSSillseek64(FidTF, 0, 1);
+				sprintf(indexRec, "%s\t%lli", filePath, loc);
 				fputstring(indexRec, fidIndex);
 			}
-			BigWrite(FidTF, (HPSTR)&len, 4, -1);
-			BigWrite(FidTF, (HPSTR)filePath, len, -1);
+			BigWrite64(FidTF, (HPSTR)&len, 4, -1);
+			BigWrite64(FidTF, (HPSTR)filePath, len, -1);
 			AddFileToTransferFile(0, FidTF, filePath, MaxLength, Arg[4]);
 			loc = -1;
-			BigWrite(FidTF, (HPSTR)&loc, 4, -1);
+			BigWrite64(FidTF, (HPSTR)&loc, 4, -1);
 		}
 		loc = -1;
-		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
+		BigWrite64(FidTF, (HPSTR)&loc, 4, -1);
 		loc = 32349;
-		BigWrite(FidTF, (HPSTR)&loc, 4, -1);
+		BigWrite64(FidTF, (HPSTR)&loc, 4, -1);
 		GSSiClose2 (&fidFiles);
-		GSSiClose2 (&FidTF);
+		GSSiClose64 (&FidTF);
 		GSSiClose2 (&fidIndex);
 		rtn = TRUE;
 	}
@@ -495,7 +496,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 	Exit:
 	return rtn;
 }
-static int GetFileFromTransferFile(HFILE FidTF,LPSTR FileToGet,long MaxLength,_int64 totlen)
+static int GetFileFromTransferFile_del(HFILE FidTF,LPSTR FileToGet,long MaxLength,_int64 totlen)
 {
 			int lRec, rtn = FALSE;
 			int	CompressedLength, LenRead = 0;
@@ -543,18 +544,18 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 			int	len, MaxLength;
 			char File[PATH_MAX], OutFile[PATH_MAX];
 			short Version, endMarker;
-			HFILE FidTF;
+			HANDLE FidTF;
 			BOOL rtn = TRUE;
 			LPSTR pBS;
-			FidTF = GSSiOpenFile(TransferFileName, 0,OF_READ);
-			long fileLen;
+			FidTF = OpenFileGM(TransferFileName, 0,OF_READ);
+			LONGLONG fileLen;
 			long nFilesRead = 0;
-			_int64 totLen = 0;
+			LONGLONG totLen = 0;
 
-			if (FidTF == HFILE_ERROR)
+			if (FidTF == INVALID_HANDLE_VALUE)
 				return FALSE;
 
-			fileLen = GSSifilelength(FidTF);
+			fileLen = GSSifilelength64(FidTF);
 			if (fileLen < 14)
 			{
 				rtn = FALSE;
@@ -562,8 +563,8 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 			}
 			totLen = fileLen;
 
-			GSSillseek(FidTF, -4, SEEK_END);
-			BigRead(FidTF,&endMarker, sizeof(short));
+			GSSillseek64(FidTF, -4, SEEK_END);
+			BigRead64(FidTF,&endMarker, sizeof(short));
 
 			if (endMarker != 32349)
 			{
@@ -571,14 +572,14 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 				goto Exit;
 			}
 
-			GSSillseek(FidTF, 0, SEEK_SET);
-			BigRead(FidTF, &Version, sizeof(short));
-			BigRead(FidTF, &MaxLength, sizeof(int));
-			BigRead(FidTF, &len, 4);
+			GSSillseek64(FidTF, 0, SEEK_SET);
+			BigRead64(FidTF, &Version, sizeof(short));
+			BigRead64(FidTF, &MaxLength, sizeof(int));
+			BigRead64(FidTF, &len, 4);
 
 			while (rtn && len > 0)
 			{
-				BigRead(FidTF, File, len);
+				BigRead64(FidTF, File, len);
 
 				if (!(pBS = strrchr(File, '\\')))
 				{
@@ -589,15 +590,15 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 					pBS++;
 				}
 				sprintf(OutFile, "%s\\%s", toDirectory, pBS);
-				rtn = GetFileFromTransferFile(FidTF,OutFile,MaxLength,totLen);
+				rtn = GetFileFromTransferFile(0,FidTF,OutFile,MaxLength,totLen);
 				nFilesRead++;
 				if (!rtn)
 					goto Exit;
-				BigRead(FidTF, &len, 4);
+				BigRead64(FidTF, &len, 4);
 			}
 
 		Exit:
-			GSSiClose2 (&FidTF);
+			GSSiClose64 (&FidTF);
 			return rtn;
 }
 
@@ -2202,8 +2203,10 @@ BOOL MultiZoomBegin (int UpLevels,int DownLevels,double OverlapFactor)
 	GetClientRect (hWndMain,&Rect);
 	MemMapWidth = OverlapFactor * (Rect.right - Rect.left + 1);
 	MemMapHeight = OverlapFactor * (Rect.bottom - Rect.top + 1);  
+	curProgID = 10003;
 	hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
 	hbmpOld = SelectObject(hdcMemMap, hMemBitmap);  
+	curProgID = -1;
 	MemMap = TRUE;
 	for (i=0;i<*pNumViewports;i++) 
 	{
@@ -2547,7 +2550,7 @@ BOOL PointInAreaFunctions (int nArgs,LPSTR *Args,LPSTR OutLoc)
 	return rtn;
 }
 
-void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
+void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3, LPSTR Arg4, LPSTR OutLoc)
 {
 	BOOL	err;
 	int		nPoly, nPnts, item;
@@ -2563,7 +2566,7 @@ void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
 
 			if (err)
 				return;
-			hPIA = PCTInAreasInit (&Bounds,atoi (Arg3));
+			hPIA = PCTInAreasInit (&Bounds,atoi (Arg3),atob(Arg4));
 			itoa ((int)hPIA,OutLoc,10);
 		}
 		break;
@@ -2601,7 +2604,7 @@ void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
 						LPMNMXCORD	pBounds = (LPMNMXCORD)GlobalLock (hPoly);
 						LPDPOINT	pPoints = (LPDPOINT)(pBounds + 1);
 
-						if (PCTInAreasLoad (hPIA,iopt-2,PickList[item-1].Type,nPnts,pPoints,nPoly,hPolyPartLen,0,0))
+						if (PCTInAreasLoad (hPIA,iopt-2,PickList[item-1].Type,nPnts,pPoints,nPoly,hPolyPartLen,0, pBounds))
 							strcpy (OutLoc,"1");
 						GSSiGlobFree (&hPolyPartLen);
 						GSSiGlobUlFree (&hPoly);
@@ -2619,6 +2622,13 @@ void PCTInAreaFunction (int iopt,LPSTR Arg2,LPSTR Arg3,LPSTR OutLoc)
 		hPIA = (HANDLE)atoi (Arg2);
 		strcpy (OutLoc,"1");
 		PCTInAreasDestroy (hPIA);
+		break;
+	case 6:
+	{
+		hPIA = (HANDLE)atoi(Arg2);
+		DPOINT pt = PCTInAreasCreatePoint(hPIA);
+		dpointtoa(OutLoc, &pt);
+	}
 		break;
 	}
 	return;
@@ -6021,7 +6031,7 @@ Exit:
 	 return TotFiles;
 }
 
-BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
  int	BRtn; 
@@ -6096,7 +6106,7 @@ BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam
    return TRUE;
 }
 
-BOOL FAR PASCAL MESSAGE_OUTGOINGMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL MESSAGE_OUTGOINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
  int	BRtn; 
@@ -6481,6 +6491,7 @@ BOOL StartBackgroundCache (void)
 		}
 		GSSiClose64 (&Fid);
 		GSSiClose64 (&Fid2);
+		GSSiRemove(arg1);
 		BackgroundCacheStarted = TRUE;
 		RenameCachedFiles ();
 		ContinueBackgroundCache = TRUE;
@@ -6857,7 +6868,7 @@ BOOL CacheCommands(int nArgs, LPSTR* Arg, LPSTR OutLoc)
 	return rtn;
 }
 
-LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL BGUpdateWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	RECT	rect,screenrect;
 
@@ -7250,7 +7261,7 @@ void SetImageZoomSize (HWND hWnd,int size)
 	return;
 }
 
-LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, int Message, WPARAM wParam, LONG lParam)
+LONG FAR PASCAL ImageZoomWndProc(HWND hWnd, UINT Message, WPARAM wParam, LONG lParam)
 {
 	RECT	rect,screenrect;
 	static	BOOL	needSaveScreen=TRUE;
@@ -7556,7 +7567,7 @@ HaveImage:
 	return (hWnd != NULL);
 }
 
-BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ImageZoom (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
  switch (Message)
@@ -7621,7 +7632,7 @@ BOOL ImageZoom (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
     return (TRUE);
 } 
 
-BOOL ScreenZoom(HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ScreenZoom(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
 	switch (Message)

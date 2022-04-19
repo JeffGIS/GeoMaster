@@ -174,6 +174,10 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 		LPSTR leafName;
 		if (!(leafName = strrchr(lpszRemoteFile, '/')))
 			leafName = (LPSTR)lpszRemoteFile;
+
+		if (errorVarName && *errorVarName)
+			SetGlobalValue(errorVarName, "");
+
 		CreateStatusWind(0, 1, leafName);
 
 		HANDLE handle = FtpOpenFile (hConnect,lpszRemoteFile,GENERIC_READ,FTP_TRANSFER_TYPE_BINARY,0);
@@ -214,7 +218,12 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 				}
 			};
 			StatusWindowUpdate(leafName, 0,Tot, Tot);
-			DestroyStatusWindow (0);
+			if (!DestroyStatusWindow (0))
+			{
+				if (errorVarName && *errorVarName)
+					SetGlobalValue(errorVarName, "Cancelled by user");
+				rtn = FALSE;
+			}
 			GSSiClose2 (&Fid);
 			if (replace && FileType((LPSTR)lpszNewFile) == 1)
 				GSSiRemove((LPSTR)lpszNewFile);
@@ -230,7 +239,19 @@ BOOL FTPGetFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszNewFile,BOOL 
 			FILE_ATTRIBUTE_NORMAL, FTP_TRANSFER_TYPE_BINARY, 0);
 	}
 	if (!rtn)
-		SetInternetErrorVar (errorVarName);
+	{
+		if (errorVarName && *errorVarName)
+		{
+			char val[256];
+			GetGlobalCVal(errorVarName, val, 0);
+			if (!*val)
+				SetInternetErrorVar(errorVarName);
+			else
+				SetInternetErrorVar(0);
+		}
+		else
+			SetInternetErrorVar(errorVarName);
+	}
 	return rtn;
 }
 
@@ -252,8 +273,8 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 		if (handle)
 		{
 			__int64 size = GSSiLength((LPSTR)lpszLocalfile);
-			DWORD Tot = (DWORD)size;
-			DWORD Done = 0;
+			LONGLONG Tot = size;
+			LONGLONG Done = 0;
 			LPSTR Title, Mess;
 			DWORD dwNumberOfBytesToRead = USHRT_MAX;
 			DWORD numBytesRead;

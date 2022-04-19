@@ -59,7 +59,7 @@ static void SetHoldMessage(HWND hWndDlg)
 	else
 		*lastmess = 0;
 }
-BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL GMCacheMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char cmd[1024];
 	int	BRtn;
@@ -539,7 +539,7 @@ void NeedToStartBackgroundCache(void)
 		lastCacheCompleteTime = atol(cDate);
 		GSSiClose64(&Fid);
 	}
-	//lastCacheCompleteTime = 0;
+//	lastCacheCompleteTime = 0;
 	if (lastDataUpdateTime > lastCacheCompleteTime)
 	{
 		if (!ExistFile(CacheIsCompleteFile))
@@ -785,10 +785,96 @@ int CreateFilesToCacheFile(LPSTR cachFileList,HANDLE fidOut)
 
 }
 
+static BOOL Execute(LPSTR cmd, sqlite3* database)
+{
+	BOOL rtn = !SQLOK(sqlite3_exec(database, cmd, 0, 0, 0), database, "", 0);
+
+	return rtn;
+}
+
+BOOL SortAndReduceCachedFiles (LPSTR List)
+{
+#define LINELEN	USHRT_MAX
+	sqlite3* database = NULL;
+	BOOL rtn = FALSE;
+	int rc, iseq=0;
+	int nTot = 0, nDone = 0, totErrors = 0;
+	LPSTR line = malloc(LINELEN);
+	char tempFile[MAX_PATH];
+	HFILE fidOut;
+
+	GSSiGetTempFileName(0, "slt", 0, tempFile);
+
+	LPSTR file = malloc(1024);
+	rc = sqlite3_open(tempFile, &database);
+	if (rc == SQLITE_OK)
+	{
+		HFILE FidList = GSSiOpenFile(List, 0, OF_READ);
+		if (FidList != HFILE_ERROR)
+		{
+			BOOL first = TRUE;
+			Execute("BEGIN", database);
+
+			sprintf(line, "CREATE TABLE SORTEDFILES (FILEPATH CHAR(256) PRIMARY KEY,OrigSequence INT);");
+			if (Execute(line, database))
+			{
+				while (fgetstring(file, 258, FidList))
+				{
+					sprintf(line, "INSERT OR REPLACE INTO SORTEDFILES VALUES('%s',%i);", file, iseq++);
+					Execute(line, database);
+				}
+			}
+			Execute("COMMIT", database);
+			GSSiClose2(&FidList);
+
+			fidOut = GSSiOpenFile("c:\\temp\\sortedfiles.txt", 0, OF_CREATE);
+			sprintf(line, "SELECT FILEPATH FROM SORTEDFILES ORDER BY OrigSequence;");
+			sqlite3_stmt* statement = NULL;
+			if (sqlite3_prepare_v2(database, line, -1, &statement, 0) == SQLITE_OK)
+			{
+				while (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					LPSTR filePath = (LPSTR)sqlite3_column_text(statement, 0);
+					fputstring(filePath, fidOut);
+				}
+			}
+			sqlite3_finalize(statement);
+			GSSiClose2(&fidOut);
+		}
+		rc = sqlite3_close(database);
+	}
+	GSSiRemove(tempFile);
+	free(line);
+	free(file);
+	return rtn;
+}
+
 BOOL UseTrustedCacheFile(LPSTR FileName)
 {
+	static int logUncachedFiles = 0;
+	static FILE* uncachedFileFile = 0;
 	BOOL rtn = FALSE;
 	LPSTR pTrustedFiles;
+
+	if (!FileName)
+	{
+		if (logUncachedFiles == 1)
+		{
+			fclose(uncachedFileFile);
+			SortAndReduceCachedFiles("c:\\temp\\uncachedfiles.txt");
+		}
+		return TRUE;
+	}
+	if (!logUncachedFiles)
+	{
+		if (GetGlobalBVal2("[%LogUncachedFiles]", FALSE))
+		{
+			logUncachedFiles = 1;
+			uncachedFileFile = fopen("c:\\temp\\uncachedfiles.txt", "w");
+		}
+		else
+			logUncachedFiles = 2;
+	}
 	if (!hTrustedCacheFiles)
 	{
 		char TrustedCacheFiles[MAX_PATH];
@@ -817,6 +903,23 @@ BOOL UseTrustedCacheFile(LPSTR FileName)
 	strupr(searchFile);
 	if (strstr(pTrustedFiles, searchFile))
 		rtn = TRUE;
+	else if (logUncachedFiles == 1)
+	{
+		char str[MAX_PATH + 2];
+		LPSTR pFile = searchFile;
+		if (*pFile == '*')
+		{
+			pFile++;
+			sprintf(str, "[%%DL]%s", pFile);
+		}
+		else
+			strcpy(str, pFile);
+		LPSTR pEnd = strrchr(str, '\n');
+		if (pEnd)
+			*pEnd = 0;
+		//ExpandText(str);
+		fwrite(str, strlen(str),1, uncachedFileFile);
+	}
 	GlobalUnlock(hTrustedCacheFiles);
 	nCalls++;
 	return rtn;
@@ -832,7 +935,7 @@ void RenameCachedFiles(void)
 	char	FromName[MAX_PATH+2];
 	char	TrustedCacheFiles[MAX_PATH];
 	char	CacheRenameFile[MAX_PATH + 2];
-	char	SearchString[32] = "*.tbr";
+	char	SearchString[32] = "*.tb*";
 	HFILE	Fid, Fid2;
 	long	TotFiles = 0;
 	LPSTR	pDot;
@@ -919,6 +1022,20 @@ void RenameCachedFiles(void)
 						GSSiRename(FromName, FileName);
 					}
 					strupr(FileName);
+					LPSTR pName = FileName;
+					if (!strncmp(FileName, CacheDirectory, lnCacheDirectory))
+					{
+						FileName[lnCacheDirectory - 1] = '*';
+						pName = &FileName[lnCacheDirectory - 1];
+					}
+					fputstring2(pName, FidCachedFiles);
+				}
+				else if (!stricmp(pDot, ".tbd"))
+				{
+					GSSiRemove(FileName);
+					strupr(FileName);
+					REPLAC(FileName, ".TBD", "", MAX_PATH);
+					REPLAC(FileName, "$", ".", MAX_PATH);
 					LPSTR pName = FileName;
 					if (!strncmp(FileName, CacheDirectory, lnCacheDirectory))
 					{
@@ -1030,6 +1147,10 @@ Next:
 				GSSiRemove(ToFile);
 				GSSiRemove(ToFileIntermediate);
 			}
+			REPLAC(ToFileIntermediate, ".tbr", ".tbd", MAX_PATH);
+			FidTo = OpenFileGM(ToFileIntermediate, &OFStruct, OF_CREATE);
+			BigWrite64(FidTo, "Does not exist", 6, -1);
+			GSSiClose64(&FidTo);
 			return 0;
 		}
 		strcpy(ToFile, ToFileIntermediate);

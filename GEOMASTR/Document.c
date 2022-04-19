@@ -171,7 +171,7 @@ BOOL HaveDesiredDocType (LPSTR Prefix, LPSTR UDI)
 
 
 
-BOOL ProcessDocument (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessDocument (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
     int		rec, irec;
  	HFILE	FidNoteType; 

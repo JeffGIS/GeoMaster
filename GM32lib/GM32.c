@@ -23,6 +23,7 @@
 #include <dlgs.h>
 //#include <projects.h>
 #include "gm32lib.h"
+extern int 	curProgID;
 
 
 LPSTR	GetPacket (void);
@@ -373,7 +374,9 @@ HDC GM32LargeMemDC (HDC hDC16,LPDWORD pMemMapWidth,LPDWORD pMemMapHeight,LPDWORD
 	DWORD MemMapHeight=*pMemMapHeight;
 	HDC	hDC= hDC16;//WOWHandle32((WORD) hDC16, WOW_TYPE_HDC );
 	HDC	hdcMemMap = CreateCompatibleDC(hDC);    
-	HBITMAP	hMemBitmap = CreateCompatibleBitmap (hDC,MemMapWidth,MemMapHeight); 
+	curProgID = 10043;
+	HBITMAP	hMemBitmap = CreateCompatibleBitmap (hDC,MemMapWidth,MemMapHeight);
+	curProgID = -1;
 	HBITMAP hbmpOld;
 	BITMAP	bm;
 	double	whfactor=(double)MemMapWidth/(double)MemMapHeight;
@@ -391,7 +394,9 @@ HDC GM32LargeMemDC (HDC hDC16,LPDWORD pMemMapWidth,LPDWORD pMemMapHeight,LPDWORD
 	{
 		MemMapWidth -= 32;
 		MemMapHeight = MemMapWidth / whfactor;
+		curProgID = 10044;
 		hMemBitmap = CreateCompatibleBitmap (hDC,MemMapWidth,MemMapHeight);
+		curProgID = -1;
 	}
 	if (!hMemBitmap)
 		return 0;
@@ -715,6 +720,7 @@ DWORD SearchDirectory32 (LPSTR Name,DWORD UseHandle,LPDWORD pType,WIN32_FIND_DAT
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA	FindFileData;
+	static PVOID OldValue;
 	
 	if (!Name)
 	{
@@ -723,15 +729,20 @@ DWORD SearchDirectory32 (LPSTR Name,DWORD UseHandle,LPDWORD pType,WIN32_FIND_DAT
 	}	
 	if (!UseHandle)
 	{
+		BOOL st = Wow64DisableWow64FsRedirection(&OldValue);
 		hFind = FindFirstFile(Name, &FindFileData);
-		if (hFind == INVALID_HANDLE_VALUE) 
+		if (hFind == INVALID_HANDLE_VALUE)
+		{
+			st = Wow64RevertWow64FsRedirection(OldValue);
 			return 0;
+		}
 	}
 	else
 	{
 		if (!FindNextFile ((HANDLE)UseHandle,&FindFileData))
 		{
 			FindClose ((HANDLE)UseHandle);
+			BOOL st = Wow64RevertWow64FsRedirection(OldValue);
 			return 0;
 		}
 		hFind = (HANDLE)UseHandle;

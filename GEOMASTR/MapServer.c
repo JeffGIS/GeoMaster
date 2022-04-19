@@ -6,6 +6,7 @@
 #define MAX_MAPSERVERS	8
 static char MapServerFile[MAX_MAPSERVERS][MAX_PATH];
 static HWND MapServerWnd[MAX_MAPSERVERS] = { 0 };
+static DWORD MapServerProcessID[MAX_MAPSERVERS] = { 0 };
 static int	nMapServers = 0;
 static HANDLE hThread = 0;
 
@@ -38,7 +39,7 @@ int GetMapserverIDFromWnd(HWND hWnd)
 	return -1;
 }
 
-HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
+HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect, int startID)
 {
 	char modulePath[MAX_PATH];
 
@@ -46,7 +47,9 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	PROCESS_INFORMATION pi;
 	DWORD	CRFlags = 0;
 	char	cmd[1024];
+	char	str[32];
 	char	startDir[MAX_PATH]="[%DL]";
+	char	title[] = "Map Server";
 	HWND	hWndServer = 0;
 	int		serverID;
 	LPSTR	pDot;
@@ -57,17 +60,23 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	serverID = GetAvailableServerID();
 	CloseAllRequestedFiles(FALSE);
 	GetModuleFileName(NULL, modulePath, MAX_PATH);
+	REPLAC(modulePath, "\\.\\", "\\", MAX_PATH);
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
 	si.dwFlags =  STARTF_FORCEONFEEDBACK | STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_SHOWNORMAL;
+	si.lpTitle = title;
 	CRFlags = DETACHED_PROCESS;// | STARTF_USESIZE | STARTF_USEPOSITION;
 	sprintf(cmd, "MapServer %s",config);
 	GSSiGetTempFileName(0, "gms", 0, (LPSTR)MapServerFile[serverID]);
 	pDot = strchr(MapServerFile[serverID], '.');
 	if (pDot)
-		strcpy(pDot, ".bmp");
+		strcpy(pDot, ".txt");
+	HFILE fid = GSSiOpenFile(MapServerFile[serverID], 0, OF_CREATE);
+	itoa(startID, str, 10);
+	fputstring(str, fid);
+	GSSiClose(fid);
 	sprintf(strchr(cmd, 0), " /MAPSERVER %i '%s'", (int)hWnd,MapServerFile[serverID]);
 
 	if (pRect)
@@ -86,6 +95,7 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 	if (*LastChr(startDir) == '\\')
 		*LastChr(startDir) = 0;
 	ExpandText(cmd);
+	sprintf(strchr(cmd, 0), " [%%TRACEMAPSERVER]=%i;", allowMapServerTrace);
 	if (CreateProcess(modulePath, cmd,
 		NULL,             // Process handle not inheritable. 
 		NULL,             // Thread handle not inheritable. 
@@ -101,25 +111,46 @@ HWND StartBackgroundMapServer(HWND hWnd,LPSTR config,LPSTR command,LPRECT pRect)
 		//int	 MaxWait = atol(Arg[5]);
 		DWORD	ProcessID = GetProcessId(pi.hProcess);
 
-		Wait (1000);
-
-		if (!WaitForInputIdle(pi.hProcess, 18000))
+		DWORD st = WaitForInputIdle(pi.hProcess, 20000);
+		if (!st)
 		{
+			Wait (1000);
 			hWndServer = MapServerWnd[serverID] = FindWindowByProcessID(ProcessID, "");
+			MapServerProcessID[serverID] = ProcessID;
 		}
+		else
+			ii = 1;
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 	}
 	return hWndServer;
 }
 
+BOOL CheckMapServer(HWND hWndServer)
+{
+	int	serverID = GetMapserverIDFromWnd(hWndServer);
+	if (serverID < 0)
+		return FALSE;
+	HWND hWnd = FindWindowByProcessID(MapServerProcessID[serverID], "");
+	if (hWnd == hWndServer)
+		return TRUE;
+	else
+		return FALSE;
+}
 void StopBackgroundMapServer(HWND hWndServer)
 {
 	int	serverID = GetMapserverIDFromWnd(hWndServer);
+	DWORD err = 0;
 
 	if (serverID >= 0)
 	{
-		PostMessage(hWndServer,WM_CLOSE,0, 0);
+		BOOL rtn = PostMessage(hWndServer,WM_CLOSE,0, 0);
+		if (!rtn)
+			err = GetLastError();
 		GSSiRemove(MapServerFile[serverID]);
 		MapServerWnd[serverID] = 0;
+		if (serverID == nMapServers)
+			nMapServers--;
 	}
 	return;
 }
@@ -127,15 +158,21 @@ void StopBackgroundMapServer(HWND hWndServer)
 BOOL SendBackgroundMapServerCommand(HWND hWnd, HWND hBackGroundServer, LPSTR cmd,LPARAM id)
 {
 	HANDLE Fid;
-	OFSTRUCTGM OFStruct;
+	OFSTRUCTGM OFStruct = { 0 };
+	char commandFile[MAX_PATH];
 	int	serverID = GetMapserverIDFromWnd (hBackGroundServer);
-		
+	int MapserverRequestID = LOWORD(id);
 	if (serverID < 0)
 		return FALSE;
-	Fid = OpenFileGM(MapServerFile[serverID], &OFStruct, OF_CREATE);
-	BigWrite64(Fid, cmd, strlen(cmd) + 1,-1);
+	strcpy (commandFile,MapServerFile[serverID]);
+	LPSTR pDot = strrchr(commandFile, '.');
+	sprintf(pDot, "-%i.txt", MapserverRequestID);
+	Fid = OpenFileGM(commandFile, &OFStruct, OF_CREATE);
+	BigWrite64(Fid, cmd, (LONGLONG)strlen(cmd) + 1,-1);
+	FlushFileBuffers(Fid);
 	GSSiClose64(&Fid);
-	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd, id);
+	SaveMapServerTrace("SAME", MapserverRequestID, cmd);
+	PostMessage(hBackGroundServer, GF_MAPSERVER_REQUEST,(WPARAM) hWnd,(LPARAM) MapserverRequestID);
 
 	return TRUE;
 }
@@ -151,14 +188,21 @@ BOOL GetMapserverFileName(HWND hBackGroundServer, LPSTR name)
 	return TRUE;
 }
 
-BOOL CopyMapserverFileToFile(HWND hBackGroundServer, LPSTR File)
+BOOL CopyMapserverFileToFile(HWND hBackGroundServer, LPSTR File, int requestID)
 {
 	int	serverID = GetMapserverIDFromWnd(hBackGroundServer);
-
+	char msFile[MAX_PATH];
 	if (serverID < 0)
 		return FALSE;
-	if (CopyFile(MapServerFile[serverID], File, FALSE))
+	strcpy(msFile, MapServerFile[serverID]);
+	LPSTR pDot = strrchr(msFile, '.');
+	if (pDot)
+		sprintf(pDot, "-%i.bmp", requestID);
+	if (CopyFile(msFile, File, FALSE))
+	{
+		GSSiRemove(msFile);
 		return TRUE;
+	}
 	return FALSE;
 }
 
@@ -287,8 +331,10 @@ BOOL MergeImageIntoViewport2(HBITMAP hNewBitmap,RECT rect,LPSTR title,int textFa
 			int lenBits = bm.bmWidthBytes * bm.bmHeight;
 			LPBYTE	pBits = malloc(lenBits);
 			
+			curProgID = 10018;
 			hBMSave = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
 			hBMTemp = CreateCompatibleBitmap(hDC, bm.bmWidth, bm.bmHeight);
+			curProgID = -1;
 			hBMTempOld = SelectObject(tempDC, hBMTemp);
 			GetBitmapBits(hNewBitmap, lenBits, pBits);
 			SetBitmapBits(hBMSave, lenBits, pBits);
@@ -473,8 +519,10 @@ HBITMAP GetHiddenWindowBitmap(HWND hwnd)
 		{
 			RECT rc;
 			GetWindowRect(hwnd, &rc);
+			curProgID = 10019;
 
 			hbitmap = CreateCompatibleBitmap(hdc, RECTWIDTH(&rc), RECTHEIGHT(&rc));
+			curProgID = -1;
 			if (hbitmap)
 			{
 				SelectObject(hdcMem, hbitmap);
@@ -488,4 +536,25 @@ HBITMAP GetHiddenWindowBitmap(HWND hwnd)
 		ReleaseDC(hwnd, hdc);
 	}
 	return hbitmap;
+}
+
+void SaveMapServerTrace(LPSTR ID,int requestID, LPSTR txt)
+{
+	if (!allowMapServerTrace)
+		return;
+	char traceFile[MAX_PATH];
+	static int n = 1;
+	HFILE fid;
+	char mess[1024];
+	DWORD processID = 0;
+	
+	GetWindowThreadProcessId(hWndMain, &processID);
+
+	sprintf(traceFile, "c:\\temp\\mapserver\\trace_%ld_%i.txt", processID,n++);
+	fid = GSSiOpenFile(traceFile, 0, OF_CREATE);
+	sprintf(mess, "%s:%i:%s", ID,requestID, txt);
+	fputstring(mess, fid);
+
+	GSSiClose(fid);
+	return;
 }

@@ -1258,7 +1258,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	char	str[16]; 
 	BOOL	Visible=DescIsVisible;
 	HIGHLIGHTDATA	HighlightData;
-    static	long	debugrefno=81000201;    
+    static	long	debugrefno= 100357885;
     short	ii;
 	static	BOOL	ShowOnlyDebugRef=FALSE;
 	static	char	debugUDI[34] = "283401320222";
@@ -1295,17 +1295,7 @@ BOOL ProcessRefAndTAG (BOOL DescIsVisible,LPSTR lpTAG,int ltag)
 	}
     if (CurrentRefno == debugrefno)
 	   	ii=1;
-/*	else if (dbug)
-	{
-		Visible = FALSE;
-		goto Exit;
-	}*/
-/*if (CurrentRefno != 11687)
-	{
-		Visible = FALSE;
-		goto Exit; 
-	}
-	else*/ if (ShowOnlyDebugRef)
+	else if (ShowOnlyDebugRef)
 	{
 		Visible = FALSE;
 		goto Exit; 
@@ -1483,6 +1473,8 @@ void InitRecord (HDC hDC)
 		GlobalColors[0]=CurView->LayerColor[FileNum];  
 		HaveVarFillColor = TRUE;
 	}
+	curItemSQMeters = -1;
+	curItemPerim = -1;
 	return;
 }
 
@@ -3968,10 +3960,15 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	long		SaveMinPickItemWidth = MinPickItemWidth;
 	BOOL		OpenBP=FALSE;
 	int			PickMapType;
+	BOOL		CallSetPickGlobals = TRUE;
 
 	MinPickItemWidth = 0;
 	ProcessSingleItem=TRUE;
-	
+	if (DoDisplayIn == -4)
+	{
+		DoDisplayIn = -3;
+		CallSetPickGlobals = FALSE;
+	}
 	if (DoDisplayIn == -3)
 	{
 		DoDisplayIn = 0;
@@ -3999,7 +3996,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	if (!PickName[0])
 	   	goto RtnFalse;  
 	PickMapType = MapType;
-    SetPickGlobals (Item);
+	if (CallSetPickGlobals)	
+		SetPickGlobals (Item);
 	LoadIndexParm (PickDirectory);
     if (PickList[Item].IsDispersed)
     {
@@ -4028,7 +4026,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
     if (FidMap == HFILE_ERROR)
     	goto RtnFalse;   
     {   
-    	HANDLE	hFile=GSSiGlobAlloc (0,GMEM_MOVEABLE,1024);
+    	HANDLE	hFile=GSSiGlobAlloc (1843,GMEM_MOVEABLE,1024);
     	LPSTR	File = GlobalLock (hFile); 
     	LPSTR	drive=File+512;
     	LPSTR	dir=drive+32;
@@ -4084,7 +4082,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 	}
 	else if (MapType == MT_FILE_GEO_DB)
 	{
-		SetFGDB_SQL ("ObjectID = [%OBJECTID]");
+		SetFGDB_SQL ("OBJECTID = [%OBJECTID]");
 		if (!OpenFGDBFileIndex (PltName,0))
 			goto RtnFalse;
 	    CurView->PassID=4;  
@@ -4258,7 +4256,7 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
 			ProcessGMDRecord(hDC, (HANDLE)FidMap, CurrentGMDRec);
 			break;
 		case MT_SQLITE:
-			//if (GetSQLITERecord(CurrentSQLITERec))
+			if (GetSQLITERecord(CurrentSQLITERec))
 				ProcessSQLITERecord(hDC,CurrentSQLITERec);
 			break;
 		case MT_DGN7:
@@ -4295,7 +4293,8 @@ BOOL ProcessPickedItem (int Item,short DoDisplayIn /*0=nodisplay-no themes,1=dis
     if (Close)
 		CloseMap(FALSE);
 	GSSiGlobUlFree (&hpltBuf);
-    SetPickGlobals (Item);
+	if (CallSetPickGlobals)
+		SetPickGlobals (Item);
 	if (Display) 
 	{   
 		ThemeEndDisplayPass(FALSE,FALSE,TRUE);

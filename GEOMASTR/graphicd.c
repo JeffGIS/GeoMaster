@@ -1067,7 +1067,9 @@ BOOL SaveMemMap (void)
 /*		hDIB = BitmapToDIB (hMemBitmap, 0);
 	SaveDIB (hDIB,MemMapName);
 	DestroyDIB (hDIB); */
-	hTempBM = CreateCompatibleBitmap (hdcMemMap,10,10);    
+	curProgID = 10015;
+	hTempBM = CreateCompatibleBitmap (hdcMemMap,10,10);
+	curProgID = -1;
 	hMemBitmap = SelectObject (hdcMemMap,hTempBM);
 	hDib32 = BitmapToDIB32 (hMemBitmap);  
 	hOldBM = SelectObject (hdcMemMap,hMemBitmap);
@@ -2669,7 +2671,9 @@ void EndDisplayProcessing (BOOL Final)
 			MultiLevelBounds[MultiZoomLevel] = CurView->WBounds;
 			if (MultiZoomLevel)
 			{
+				curProgID = 10016;
 				hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
+				curProgID = -1;
 				hbmpMultiLevel[MultiZoomLevel] = SelectObject(hdcMemMap, hMemBitmap);
 				CurView->Scale *= 0.5;
 				ZoomToPointAndScale (CurView->MidPointW,CurView->Scale,FALSE);
@@ -2683,13 +2687,18 @@ GSSiExitProg (440);
 				return;								
 }
 			} 
+			curProgID = 10017;
 			hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
-			hbmpMultiLevel[MultiZoomLevel] = SelectObject(hdcMemMap,hbmpOld); 
+			curProgID = -1;
+			hbmpMultiLevel[MultiZoomLevel] = SelectObject(hdcMemMap,hbmpOld);
 			PostMessage(hWndMain, GF_MULTIZOOM_END, 0, 0L);    
 //			hdd = GM32DrawDibOpen ();
 //			st = GM32DrawDibClose (hdd);  
 		}
 		DisplayVirtualPrintAreas ();
+		if (windowToNotifyOnRedisplay)
+			PostMessage(windowToNotifyOnRedisplay, GF_NOTIFY_REDISPLAY_COMPLETE, 0, 0L);
+		windowToNotifyOnRedisplay = 0;
 	}
 //	CloseSymDict();
 	switch (DisplayFinOpt)

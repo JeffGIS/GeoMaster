@@ -5204,7 +5204,9 @@ void RemoveColorFromRect (HDC hDC,COLORREF RemoveColor,LPRECT pRect)
 	HBITMAP	hBM, hBMTemp;
 	LPBYTE	pbits;
     HDC		hDC2 = CreateCompatibleDC(hDC); 
+	curProgID = 10010;
 	HBITMAP	hBM2 = CreateCompatibleBitmap (hDC,1,1);
+	curProgID = -1;
 	BITMAPINFO	BitmapInfo;
 	LPRGBTRIPLE	pRGBTriple;
 	LPRGBQUAD	pRGBQuad;
@@ -5723,7 +5725,7 @@ void ProcessZoomMacroFile(HDC hDC)
 	Fid=GSSiOpenFile(CurView->VisName,0,OF_READ);
 	if (Fid==HFILE_ERROR)
 		goto Exit;   
-	AddToMacroStack(2, 0, CurView->VisName, 0, 0);
+	AddToMacroStack(3, 0, CurView->VisName, 0, 0);
 	ProcessZoomMacroFile2 (hDC,Fid);
 	GSSiClose2 (&Fid);
 Exit: 
@@ -5846,7 +5848,7 @@ GSSiExitProg (789);
 #endif
 }
 
-BOOL FAR PASCAL COLOR_ADJUSTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL COLOR_ADJUSTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (724);
 #endif

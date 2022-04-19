@@ -1248,13 +1248,14 @@ void GetDistDecimals (double Dist,LPSTR DistC)
 		n=2;
 	pEnd -= n;
 	*pEnd = 0;
+	AddCommas(DistC);
 	return;
 }
 
 void DisplayNorthArrowLegend (int From)
 {
 	static	BOOL	InDNA=FALSE;
-	if (InDNA || !CurTheme || !CurView)
+	if (InDNA || !CurTheme || !CurView ||!ContinueProcessing)
 		return;
 	{
 		LPVIEWPORT	SaveVP=CurView;
@@ -1289,13 +1290,16 @@ void DisplayNorthArrowLegend (int From)
 					double	SaveRot = CurView->Rotation;
 					XFORM	SavexForm; 
 					long	SaveCycle = DisplayCycle;
-
+					LPINT pInt = GlobalLock(hNulls);
+					GlobalUnlock(hNulls);
 			    	GetImageBounds (File,hDib,&BitmapBounds,&CurView->NewBounds);
 					DestroyDIB32 (hDib,FALSE);
 					SaveBounds = CurView->NewBounds;
 				    CurView->HaveBounds = FALSE;
 					SetScaleAndMidpointFromBounds (CurView);
 					DisplayCycle++;
+					pInt = GlobalLock(hNulls);
+					GlobalUnlock(hNulls);
 					SetBounds (CurView->hWnd,CurView->hDC);
 					SavexForm = CurView->xForm;
 					CurView->Rotation = 0;
@@ -1498,7 +1502,7 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		    long	Dist1=1, Dist2=5, DistFactor=1;
 		    short	NumDec;
 		    
-		    if (!DevicePixelsPerInch || !BaseDistPerPixel)
+		    if (!DevicePixelsPerInch || !BaseDistPerPixel || !BaseDistPerUnit)
 		    	break;
  			if (!CurView->WindowZoomedToOrtho || CurView->OrthoRes >= 0)
  			{   
@@ -1930,7 +1934,9 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 			{
 				GetWindowRect (CurView->hWnd,&WindowRect);
 				CurTheme->CompareDC = CreateCompatibleDC(CurView->hDC); 
-				CurTheme->CompareBitmap = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1); 
+				curProgID = 10030;
+				CurTheme->CompareBitmap = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1);
+				curProgID = -1;
 				CurTheme->CompareBitmapOld = SelectObject (CurTheme->CompareDC,CurTheme->CompareBitmap);
 				if (pViewports[CurTheme->TargetViewport-1]->pTheme)
 					pViewports[CurTheme->TargetViewport-1]->pTheme->CompareDC = CurTheme->CompareDC;
@@ -1991,7 +1997,9 @@ void CompareViewportsThemeLegend (short From,short FromVPID)
 					SetPixel (CurView->hDC,Rect1.left+2,Rect1.top,CurView->BackGroundColor);
 					GetWindowRect (CurView->hWnd,&WindowRect);
 					hDCMem = CreateCompatibleDC(CurView->hDC); 
-					hBitmapTemp = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1); 
+					curProgID = 10031;
+					hBitmapTemp = CreateCompatibleBitmap (CurView->hDC,WindowRect.right-WindowRect.left+1,WindowRect.bottom-WindowRect.top-1);
+					curProgID = -1;
 					GetObject(hBitmapTemp, sizeof(bm), (LPSTR)&bm);
 					hBitmap = SelectObject (hDCMem,hBitmapTemp);
 					ii=BitBlt(hDCMem, 0, 0, bm.bmWidth,bm.bmHeight,CurView->hDC, 0,0, SRCCOPY);
@@ -2371,7 +2379,7 @@ GSSiExitProg (1292);
 
 
 
-BOOL ThemeCommonCode (HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam, HANDLE hSQL)
+BOOL ThemeCommonCode (HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam, HANDLE hSQL)
 #if ENABLETRACE
 {GSSiEnterProg (1294);
 #endif
@@ -2419,7 +2427,8 @@ case GSSI_REINITDIALOG:
 		SendDlgItemMessage(hWndDlg, SV_DISPLAY_COUNT, BM_SETCHECK, CurTheme->DisplayCount, 0L);
 		SendDlgItemMessage(hWndDlg, SV_DAY_FILTER, BM_SETCHECK, CurTheme->isDayFilter, 0L);
 		SendDlgItemMessage(hWndDlg, SV_APPEND_COUNT, BM_SETCHECK, CurTheme->AppendCount, 0L);
-       	SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_SETCHECK,CurTheme->PCTByArea,0L);
+		SendDlgItemMessage(hWndDlg, SV_APPEND_TOTAREA, BM_SETCHECK, CurTheme->AppendTotArea, 0L);
+		SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_SETCHECK,CurTheme->PCTByArea,0L);
        	SendDlgItemMessage (hWndDlg,SV_INVERT,BM_SETCHECK,CurTheme->InvertLegend,0L);
        	SendDlgItemMessage (hWndDlg,IDC_FILLROW,BM_SETCHECK,CurTheme->FillRow,0L);
        	SendDlgItemMessage (hWndDlg,SV_FLIP,BM_SETCHECK,CurTheme->FlipLegend,0L);
@@ -2655,7 +2664,9 @@ GSSiExitProg (1294);
 				 CurTheme->DisplayCount = SendDlgItemMessage(hWndDlg, SV_DISPLAY_COUNT, BM_GETCHECK, 0, 0L);
 				 CurTheme->isDayFilter = SendDlgItemMessage(hWndDlg, SV_DAY_FILTER, BM_GETCHECK, 0, 0L);
 				 CurTheme->AppendCount = SendDlgItemMessage(hWndDlg, SV_APPEND_COUNT, BM_GETCHECK, 0, 0L);
-            	 CurTheme->DisplayPCT = SendDlgItemMessage (hWndDlg,SV_DISPLAY_PCT,BM_GETCHECK,0,0L);  
+				 CurTheme->AppendTotArea = SendDlgItemMessage(hWndDlg, SV_APPEND_TOTAREA, BM_GETCHECK, 0, 0L);
+				 CurTheme->totClassAreaUnits = SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_GETCURSEL, 0, 0L);
+				 CurTheme->DisplayPCT = SendDlgItemMessage (hWndDlg,SV_DISPLAY_PCT,BM_GETCHECK,0,0L);
             	 CurTheme->PCTByArea = SendDlgItemMessage (hWndDlg,SV_PCTBYAREA,BM_GETCHECK,0,0L);  
             	 CurTheme->InvertLegend = SendDlgItemMessage (hWndDlg,SV_INVERT,BM_GETCHECK,0,0L);  
             	 CurTheme->FillRow = SendDlgItemMessage (hWndDlg,IDC_FILLROW,BM_GETCHECK,0,0L);  

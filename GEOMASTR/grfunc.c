@@ -215,7 +215,7 @@ GSSiExitProg (455);
 }
 #endif
 }
-BOOL ProcessGraphicsFunction (HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessGraphicsFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1338);
 #endif
@@ -664,7 +664,7 @@ GSSiExitProg (1339);
 #endif
 }
 
-BOOL ProcessGraphicsFunction2 (short Function,HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+BOOL ProcessGraphicsFunction2 (short Function,HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1340);
 #endif
@@ -709,10 +709,13 @@ BOOL RunGFCommandFromFileAtLoc (LPSTR File,long CurLoc,BOOL SendCmd,short opt)
 	LPSTR	lpStr = GlobalLock (hStr);  
 	BOOL	SaveIgnoreFileOpenError=IgnoreFileOpenError;
 	int		iStack, lcmd;
+	char	fullFileName[MAX_PATH];
     
    	GetGFFile (lpStr,File,opt);
 Open: 
 	IgnoreFileOpenError = TRUE;
+	strcpy(fullFileName, lpStr);
+	SubstituteDL(fullFileName, FALSE);
    	Fid  = GSSiOpenFile (lpStr,0,OF_READ); 
 	IgnoreFileOpenError = SaveIgnoreFileOpenError;
 	if (Fid==HFILE_ERROR)
@@ -777,7 +780,7 @@ GSSiExitProg (1341);
 		First=FALSE;
 	}
 	GSSiClose2 (&Fid);
-	iStack = AddToMacroStack (2,0,File,0,CurLoc);
+	iStack = AddToMacroStack (2,0,fullFileName,0,CurLoc);
 	sprintf (strchr (pGCmd,0),"$E(%i)",iStack);
 	lcmd = strlen(pGCmd);
 	GSSiGlobUlFree (&hStr);
@@ -1080,6 +1083,7 @@ BOOL LoadGFFile (HWND hWndDlg,LPSTR InFile,short opt,BOOL FloatingTB)
 			GetGFFile (lpStr,CurTheme->SQL,opt); 
 		}
 		break;
+		case 6://just process settings at top of file
 		case 1:
 			GetGFFile (lpStr,CurView->FunctionFile,0); 
 	}
@@ -1110,6 +1114,7 @@ GSSiExitProg (1347);
 		return (FALSE);
 }
 	}
+	AddToMacroStack(6, 0, lpStr, 0, 0);
 	if (opt == 3)
 	{
 		_splitpath (lpStr,0,0,Title,0);
@@ -1141,28 +1146,30 @@ GSSiExitProg (1347);
 			goto NextLine;
 		lpBar = _fstrchr(lpStr,'|');
 		if (!lpBar)
-		{   
+		{
 			SaveTheme = CurTheme;
 			SaveVP = CurView;
-			ExpandText (lpStr);
+			ExpandText(lpStr);
 			CurTheme = SaveTheme;
 			CurView = SaveVP;
 			if (!ContinueProcessing)
 			{
-		     	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L); 
-		     	SetContinueProcessing ( TRUE);
-				GSSiClose2 (&Fid);
-				GSSiGlobUlFree (&hStr);
-{
+				PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+				SetContinueProcessing(TRUE);
+				GSSiClose2(&Fid);
+				GSSiGlobUlFree(&hStr);
+				{
 #if ENABLETRACE
-GSSiExitProg (1347);
+					GSSiExitProg(1347);
 #endif
-				return TRUE;
-}
-		    }
+					return TRUE;
+				}
+			}
 			if (*lpStr == '[')
 				goto NextLine;
 		}
+		else if (opt == 6)
+			break;
 		SkipThisEntry=FALSE;
 		if (!_fstrncmp (lpStr,"IF(",3))
 		{
@@ -1316,7 +1323,7 @@ GSSiExitProg (1347);
 }
 
 BOOL ProcessGraphicsFunction4 (short Function,
-							   HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {   
 	if (Message == GF_CLOSE && wParam && Function != wParam)
 		return FALSE;
@@ -1619,6 +1626,7 @@ BOOL ProcessGraphicsFunction4 (short Function,
 	    case GF_SNAP_AVE_POINT:  
 	    case GF_SNAP_AVE_HLTPOINT:  
 	    case GF_SET_COORD:
+		case GF_SET_VPCOORD:
 		case GF_SNAP_DIST_AND_DIR:
 		case GF_SNAP_COORD: 
 		case GF_SNAP_LATLONG:
@@ -1889,7 +1897,7 @@ BOOL ProcessGraphicsFunction4 (short Function,
    return (FALSE);
 } 
 BOOL ProcessGraphicsFunction3(short Function,
-	HWND hWnd, int Message, WPARAM wParam, LPARAM lParam)
+	HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	BOOL rtn;
 	LPVIEWPORT SaveVP = CurView;

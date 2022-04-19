@@ -547,6 +547,7 @@ BOOL AddressLocationPID (HWND hWnd, HINSTANCE hInst)
 	      DLGPROC lpfnADDRESSPIDMsgProc;
 		  short	nRc;
 		  int	n = 0;
+		  char testTAG[128] = "Graphic record not found for this address";
 	
 	      lpfnADDRESSPIDMsgProc = MakeProcInstance((DLGPROC)ADDRESSPIDMsgProc, hInst);
 	      nRc = DialogBox(hInst, (LPSTR)"ADDRESS1", hWnd, lpfnADDRESSPIDMsgProc);
@@ -555,12 +556,13 @@ BOOL AddressLocationPID (HWND hWnd, HINSTANCE hInst)
 		  {
 			  while (n < 4 && *AddPrefix[n])
 			  {
+				  sprintf(testTAG,"Graphic record not found for this address\n%s:%s", AddPrefix[n], AddUDI);
 				  if (!PickByRefno(AddRefno, AddPrefix[n++], AddUDI, -1) || PickList[0].Type == 6)
 					  continue;
 				  AddRefno = PickList[0].Refno;
 				  return nRc;
 			  }
-			  GSSiMsgBox(hWndMain, "Graphic record not found for this address",
+			  GSSiMsgBox(hWndMain, testTAG,
 				  "Unable to Locate", MB_OK | MB_APPLMODAL, 0);
 			  nRc = 0;
 		  }

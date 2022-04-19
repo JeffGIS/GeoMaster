@@ -34,6 +34,7 @@ typedef char _huge *    HPSTR;          /* a huge version of LPSTR */
 extern	BOOL	EnableTrace;
 extern	HWND	TraceWnd,TraceWnd2;
 void GetProgName (short i, LPSTR Name);
+extern	BOOL	MapServer;
 
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {
@@ -88,6 +89,7 @@ static	short	LogMemDebugID=1572;
 static	long	WantCallNo=31;
 static	char	mess[1024];  
 static	long	NumMemAlloc[MAXMEM];
+static	long	CallID[MAXMEM];
 static	HGLOBAL	hmem[MAXMEM]; 
 static	HGLOBAL	RecentlyFreed[MAXFREE]; 
 static	long	RecentlyFreedID[MAXFREE]; 
@@ -103,6 +105,7 @@ static	BOOL	First=TRUE;
 static	BYTE	Marker=170; 
 
 extern HANDLE countyLinkedVar,countyVar;
+extern int curProgID;
 
 int checkvp(int i);
 
@@ -114,9 +117,14 @@ BOOL hDibIs32Bit (HANDLE hDib)
 	if (pByte)
 	{
 		LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)(pByte + PREMEM);
-		rtn = !(pDibInfo->biSize == 40);
-		GlobalUnlock (hDib);
+		if (pDibInfo->biSize == 40)
+			rtn = FALSE;
+		else
+			rtn = TRUE;
+		GlobalUnlock(hDib);
 	}
+	else
+		rtn = TRUE;
 	return rtn;
 
 }
@@ -124,21 +132,31 @@ BOOL hDibIs32Bit (HANDLE hDib)
 void MEMERR (LPSTR Mess) 
 {   
 	static	BOOL	ShowMess=TRUE;
+	char from[32] = { 0 };
 	int findMEMERR = 0;
+	if (MapServer)
+		strcpy(from, "Map Server");
 //	DebugBreak ();
 	HaveBlockingWindow = TRUE;
 	if (ShowMess)
-		MessageBox (NULL,Mess,NULL,MB_ICONEXCLAMATION|MB_TASKMODAL);
+		MessageBox (NULL,Mess,from,MB_ICONEXCLAMATION|MB_TASKMODAL);
 	HaveBlockingWindow = FALSE; 
 	return;
 }  
 
 
-void LogMemAlloc (unsigned short MemID,long MemLen)
+void LogMemAlloc (int MemID,long MemLen)
 {   
 	short	ii;
-	
+	int callid = 0;
+
+	if (MemID > 100000)
+	{
+		callid = MemID / 100000;
+		MemID = MemID % 100000;
+	}
 	CurrentID = MemID;
+	CallID[MemID] = callid;
 	NumMemAlloc[MemID]++;
 	if (MemID == LogMemDebugID && NumMemAlloc[MemID] == WantCallNo)
 		ii=1;  
@@ -275,7 +293,7 @@ BOOL glblUnlock(HANDLE h)
 
 void* __cdecl GSSimalloc(_In_ _CRT_GUARDOVERFLOW size_t _Size)
 {
-	if (_Size == 24)
+	if (_Size < 2048)
 		ii = 1;
 	void * ptr =  malloc(_Size);
 	if (!ptr)
@@ -293,13 +311,29 @@ void* __cdecl GSSicalloc(_In_ _CRT_GUARDOVERFLOW size_t _Count, _In_ _CRT_GUARDO
 		ii = 1;
 	return calloc(_Count,_Size);
 }
+
+void SetWantHandle(HANDLE hglb)
+{
+	WantHandle = hglb;
+	return;
+}
+LPVOID GlobalLk(HANDLE hglb)
+{
+	HPBYTE p =  GlobalLock(hglb);
+	p = p + 16;
+	return (LPVOID)p;
+}
+BOOL GlobalULk(HANDLE hglb)
+{
+	return GlobalUnlock(hglb);
+}
 LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 {
 	LPVOID	pntr;
 	UINT	i; 
 	HPBYTE	pstr;
 extern LPVOID debugaddress;
-//checkvp(1);	
+checkvp(1);	
 /*	if (debugaddress && *(LPBYTE)debugaddress)
 		ii=1;
 	if (debugaddress && !*(LPBYTE)debugaddress)
@@ -356,7 +390,7 @@ BOOL GSSiGLOBALUNLOCK(HANDLE hglb)
 	UINT	i;
 	HPBYTE	pstr; 
 	long	j;
- //checkvp(1);	
+ checkvp(1);	
    
     if (hglb)
     {
@@ -473,7 +507,7 @@ HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc)
 			memid[i] = nextid++;
 			memidID[i] = CurrentID;
 			memidcall[i] = NumMemAlloc[CurrentID];	
-			if (memidcall[i] == 1886 && memid[i] == 7490)
+			if (memidcall[i] >= 29 && memidID[i] == 1613)
 				ii = 1;
 			if (memidID[i] == wantid)
 			{ 
@@ -618,7 +652,7 @@ void GSSiGLOBALLOCCLOSE (void)
 		if (hmem[i])
 		{   
 			ii = memid[i]; 
-			sprintf (mess,"Memory not freed: %ld-%ld-%ld(%ld)",(long)memidID[i],memid[i],memidcall[i],memlength[i]);
+			sprintf (mess,"Memory not freed: %ld-%ld-%ld(%ld)-%ld",(long)memidID[i],memid[i],memidcall[i],memlength[i],CallID[i]);
 #if ENABLETRACE
 			for (iprog=0;iprog<min(5,memprog[i][0]);iprog++)
 			{
@@ -755,7 +789,7 @@ void GetProgName (short i, LPSTR Name)
 	return;
 }
 
-BOOL FAR PASCAL TRACELISTMsgProc(HWND hWndDlg, int Message, WPARAM wParam, LPARAM lParam)
+BOOL FAR PASCAL TRACELISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 { 
 	int	TabStops[2]={45,500};
 	char	str[512], ProgName[256],FindString[32];
@@ -929,6 +963,7 @@ int	GSSiEnterProg (int progid)
 		if (RemStack && RemStack < 1000)
 			ii=1;
 	}*/
+	curProgID = progid;
 	numEnter++;
 	if (First)
 	{   
@@ -990,6 +1025,7 @@ int	GSSiExitProg (int progid)
 	
 	if (!EnableTrace || Level <= 0)
 		return 0;  
+	curProgID = -progid;
 //	checkvp(1);
 	Level--;  
 //	LastProg[0] = Level;

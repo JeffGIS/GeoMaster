@@ -320,7 +320,9 @@ BOOL MakeMap (LPSTR Args)
 			CurView->hDC = OldDC;
     	}	
 		hdcMemMap = CreateCompatibleDC(CurView->hDC);    
-		hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight); 
+		curProgID = 10024;
+		hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight);
+		curProgID = -1;
 		OldDC = CurView->hDC;
 		CurView->hDC = hdcMemMap;
 		hbmpOld = SelectObject(hdcMemMap, hMemBitmap); 
@@ -525,6 +527,7 @@ TryMapAgain2:
 				CurView->hDC = OldDC;
 	    	}	
 			hdcMemMap = CreateCompatibleDC(CurView->hDC);    
+			curProgID = 10025;
 			if ((hMemBitmap = CreateCompatibleBitmap (CurView->hDC,(int)MemMapWidth,(int)MemMapHeight)))
 			{
 				OldDC = CurView->hDC;
@@ -536,6 +539,7 @@ TryMapAgain2:
 			else
 				rtn = FALSE;
 		}
+		curProgID = -1;
 		_fstrcpy (MemMapName,Arg3);
 		ExpandText (MemMapName);
 		CurView->NewBounds = MinMax;
