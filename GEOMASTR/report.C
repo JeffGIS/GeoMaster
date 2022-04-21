@@ -1425,52 +1425,8 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
             break;
 
 		    case IDM_PRINT:
-				inPrintScrollReport = TRUE;
 				PrintScrollReport (hWndDlg,FALSE);
-				inPrintScrollReport = FALSE;
-				break;
-
-			case ID_SAVE:
-			{
-				char    File[256];
-
-				*File = 0;
-				if (GetSaveName2(hWndDlg, File, IDS_FILTERTEXT, ".TXT", IDS_FILERPT))
-				{
-					HFILE Fid = GSSiOpenFile(File, 0, OF_CREATE);
-					int indx = 1;//skip title line
-					if (Fid != HFILE_ERROR)
-					{
-						while (SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_GETTEXT, indx++, (DWORD)pCommonMem) != LB_ERR)
-						{
-							int l = strlen(pCommonMem);
-							if (l)
-							{
-								PUCHAR pNewLine = malloc(l + 4);
-								BOOL inTab = FALSE;
-								int nNewLine = 0;
-								for (int i = 0; i < l; i++)
-								{
-									if (pCommonMem[i] == 32 + 128)
-									{
-										inTab = !inTab;
-										if (!inTab)
-											pNewLine[nNewLine++] = 9;
-									}
-									else if (!inTab)
-										pNewLine[nNewLine++] = pCommonMem[i];
-								}
-								pNewLine[nNewLine++] = 0;
-								fputstring(pNewLine, Fid);
-								free(pNewLine);
-							}
-						}
-						GSSiClose(Fid);
-					}
-				}
-			}
-
-				break;
+		    	break;
 		    case IDC_SCROLLBOX: 
 		    {
                 SetContinueProcessing ( TRUE);

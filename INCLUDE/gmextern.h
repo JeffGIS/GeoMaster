@@ -1,7 +1,6 @@
 #define ZOOMLISTDIR "[%ZOOMLISTDIR]"
 
 extern HWND			windowToNotifyOnRedisplay;
-extern BOOL			inPrintScrollReport;
 extern int			DepthColorIntensity;
 extern HANDLE		hNulls;
 extern int			typeChassis;
@@ -56,7 +55,7 @@ extern BOOL			BackgroundTask;
 extern BOOL			Allow32bitFileNames;
 extern long			NumOffsetFailed; 
 extern long			lCommonMem;
-extern PUCHAR		pCommonMem;
+extern HPSTR			pCommonMem;
 extern char			CurrentOrthoOrigName[MAX_PATH];
 extern char			CurrentOrthoFile[MAX_PATH];
 extern long			CurrentOrthoFrame;
