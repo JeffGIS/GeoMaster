@@ -2032,25 +2032,37 @@ SetVis:
 		}
 			
 			
-		case 337: /* $PAD(val,len,fillchar) right fills val with fillchar to length len */ 
-		{	double	rval;
-			int		l, len; 
-			LPSTR	lpOut; 
-			char	fillchar='0';
-			
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
-			
+		case 337: /* $PAD(val,len,fillchar,inReport) right fills val with fillchar to length len */
+		{
+			double	rval;
+			int		l, len;
+			UCHAR* lpOut;
+			char	fillchar = '0';
+			UCHAR	startStopChar;
+
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+
 			l = _fstrlen(Arg[1]);
-			len = IDNINT(atof (Arg[2])); 
+			len = IDNINT(atof(Arg[2]));
 			if (*Arg[3])
-				fillchar = *Arg[3]; 
-			_fstrcpy (OutLoc,Arg[1]);
-			lpOut = OutLoc+l;
-			while (l++ < len)
-				*lpOut++ = fillchar; 
+				fillchar = *Arg[3];
+			if (atob(Arg[4]))
+			{
+				startStopChar = 32 + 128;
+				if (inPrintScrollReport)
+					startStopChar = 32;
+			}
+			else
+				startStopChar = fillchar;
+			_fstrcpy(OutLoc, Arg[1]);
+			lpOut = OutLoc + l;
+			*lpOut++ = 32 + 128;
+			while (l++ < len - 2)
+				*lpOut++ = fillchar;
+			*lpOut++ = 32 + 128;
 			*lpOut = 0;
 			goto Rtnl;
-		} 
+		}
 
 		case 339:  //$MIN(arg1,arg2....argn)  
 		case 340:  //$MAX(arg1,arg2....argn)  

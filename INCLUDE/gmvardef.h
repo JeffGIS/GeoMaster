@@ -905,6 +905,7 @@ long	CurSymSizeLocD=0;
 long	CurBrushLoc=0;
 long	CurPenColorLoc=0;  
 HWND	hWndScroll2=0;  
+BOOL	inPrintScrollReport=FALSE;
 RECT	ScrollRect={1,0,-1,0};
 short	CurlTAG=0;  
 HDC		CompareDC=0; 
