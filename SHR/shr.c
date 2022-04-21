@@ -5609,6 +5609,8 @@ int GSSiRemove (LPSTR Name)
 	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	
+	if (!*Name)
+		return 0;
 //	return GSSiRemove2 (Name);
 	Fid = GSSiOpenFile (Name,&OFStruct,OF_DELETE);
 

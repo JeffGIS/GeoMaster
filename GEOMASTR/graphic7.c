@@ -2109,8 +2109,11 @@ GSSiExitProg (901);
 			}
 			CurTheme->ScatterFile[0] = 0;
 			DeleteThemeHighlightFile ();
+			BT_CLOSE2(&CurTheme->hDisperseFile);
 			DeletePointDispersionFile ();
 	FreeTheme: 
+			if (CurTheme->hVisList)
+				GSSiGlobFree(&CurTheme->hVisList);
 			DestroyThemePens (CurTheme);
 			handle = CurTheme->handle;
 			GSSiGlobUlFree (&handle); 
@@ -2127,13 +2130,18 @@ GSSiExitProg (901);
 			}
 			break;
 		case GF_STREET_TEXT_THEME:
-	    	GSSiGlobFree (&CurTheme->hScatterFile);
             {
 			    LPSTREETTEXTDATA	pStreetData=(LPSTREETTEXTDATA)CurTheme->ClassBM;
-				GSSiRemoveAndClear (pStreetData->NameFile2);
-            }
-			DeleteThemeHighlightFile ();
-            
+				BT_CLOSE(pStreetData->hNameFile1);
+				BT_CLOSE(pStreetData->hNameFile2);
+				GSSiRemoveAndClear(pStreetData->NameFile1);
+				GSSiRemoveAndClear(pStreetData->NameFile2);
+				CloseThemeDataFile(TRUE);
+				GSSiGlobFree(&CurTheme->hScatterFile);
+				DeleteThemeHighlightFile ();
+			}
+			goto FreeTheme;
+
         case GF_STREET_ADDRESS_THEME: 
 	    	GSSiGlobFree (&CurTheme->hScatterFile);
 			
