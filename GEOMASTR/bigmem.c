@@ -102,7 +102,7 @@ LPHBRUSH	brushes;
  
 
 
-HPSTR	pCommonMem; 
+PUCHAR	pCommonMem;
 long	lCommonMem=((long)USHRT_MAX)*8L;
 LPTHEME	CurTheme=0;  
 LPVIEWPORT  CurView=0;
