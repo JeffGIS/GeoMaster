@@ -555,6 +555,8 @@ void SaveViewports (int from)
 	    CloseTRANS2 (&CurView->hTranVPToScreen);
 	    CloseTRANS2 (&CurView->hTranScreenToVP); 
 	    CloseTRANS2 (&CurView->hFileTransIn);
+		CloseTRANS2(&CurView->hTranBaseToScreen);
+		CloseTRANS2(&CurView->hTranScreenToBase);
 		GSSiGlobFree (&CurView->ToolbarHandle);
 	    GSSiGlobFree (&CurView->hTAGList);  
 //	    GSSiGlobFree (&CurView->hProfileElev);
@@ -614,6 +616,8 @@ void RestoreViewports (void)
 	    CloseTRANS2 (&CurView->hTranVPToScreen);
 	    CloseTRANS2 (&CurView->hTranScreenToVP); 
 	    CloseTRANS2 (&CurView->hFileTransIn);
+		CloseTRANS2(&CurView->hTranBaseToScreen);
+		CloseTRANS2(&CurView->hTranScreenToBase);
 		GSSiGlobFree (&CurView->ToolbarHandle);
 	    GSSiGlobFree (&CurView->hTAGList);
 	   // GSSiGlobFree (&CurView->hProfileElev);

@@ -682,6 +682,7 @@ void SetCurView (LPVIEWPORT pVP)
 			CurView->ScreenRect = BoundsVP->ScreenRect;
 			CurView->DrawRect = BoundsVP->DrawRect;
 			CurView->WBounds = BoundsVP->WBounds;
+			CurView->NewBounds = BoundsVP->NewBounds;
 			CurView->Scale = BoundsVP->Scale;
 			CurView->Scale = BoundsVP->Scale;
 			CurView->CurrentGoogleZoom = BoundsVP->CurrentGoogleZoom;
