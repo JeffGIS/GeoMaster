@@ -343,7 +343,6 @@ BOOL OpenBasePens(void)
         		hProPen[FALSE][i]= CreatePen(PS_SOLID,(int) IDNINT(PenWIDTH[i]*WidthFactor*fac * PenWidthFactor), ConvertColor(PenCOLOR[i],-1));
         	}
 		CreateClassPens (); 
-		//DestroyRandomBrushes ();                                      
 		CreateRandomBrushes (CurView,0);
 	    HaveBasePens = TRUE;
 		rtn = TRUE;
@@ -396,6 +395,7 @@ void CloseBasePens(BOOL DoClose)
        		}
 		} 
 		DestroyClassPens();  
+		DestroyRandomBrushes ();   
 		CurrentPen = 0;
 		HaveBasePens = FALSE;
 	}

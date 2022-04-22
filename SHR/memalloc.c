@@ -928,6 +928,8 @@ int	GSSiEnterProg (int progid)
 	long	RemStack; 
 	char	str[256];
 	
+	if (progid == 4)
+		ii = 1;
 //	checkvp(1);
 //	if (_fstrncmp (FName,"..\\GEOMASTR\\funids.txt",36))
 //		ii=1;
