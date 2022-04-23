@@ -2111,7 +2111,10 @@ GSSiExitProg (901);
 			DeleteThemeHighlightFile ();
 			BT_CLOSE2(&CurTheme->hDisperseFile);
 			DeletePointDispersionFile ();
-	FreeTheme: 
+		FreeTheme: 
+			GSSiDeleteObject(&CurTheme->NoDataBrush);
+			GSSiDeleteObject(&CurTheme->InvalidDataBrush);
+
 			if (CurTheme->hVisList)
 				GSSiGlobFree(&CurTheme->hVisList);
 			DestroyThemePens (CurTheme);

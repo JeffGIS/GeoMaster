@@ -566,7 +566,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				TrackObjType[i] = Type; 
 				ProgID[i] = curProgID;
 				TrackObjCount[i] = NextObjectCount++; 
-				if (TrackObjCount[i] == 7914 || TrackObjCount[i] ==4037)
+				if (TrackObjCount[i] == 7855 || TrackObjCount[i] ==7855)
 					ii=1;
 				if (i==10)// && Type == 8)
 					ii=1;

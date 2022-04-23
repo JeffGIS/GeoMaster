@@ -3901,6 +3901,8 @@ void DestroyThemePens (LPTHEME CurTheme)
 	HPEN	OldPen=0;
 	HBRUSH	OldBrush=0;
 	
+	if (!CurTheme)
+		return;
     if (CurView)
     {
 		OldPen = SelectObject (CurView->hDC,GetStockObject(NULL_PEN));
@@ -3918,6 +3920,9 @@ void DestroyThemePens (LPTHEME CurTheme)
 			GSSiDeleteObject(&CurTheme->ClassBrush[iclass]);
 		GSSiDeleteObject(&CurTheme->ClassPen[iclass]);
 	}
+	GSSiDeleteObject(&CurTheme->NoDataBrush);
+	GSSiDeleteObject(&CurTheme->InvalidDataBrush);
+
 	CurTheme->HiPrecis = 2; 
 	if (OldPen && !PenInUse)
 		SelectObject (CurView->hDC,OldPen);
