@@ -1684,7 +1684,7 @@ extern	char	FGDB_SQL[512];
 extern	char	PGDBFile[256]; 
 extern	char	FGDBFile[256]; 
 extern	HANDLE	hSelectFields;   
-extern  char	TransferFrom[MAX_PATH];
+extern  char	TransferFrom[MAX_PATH*4];
 extern	char	TransferFileName[MAX_PATH]; 
 extern	char	BuildTransferFileOption[16]; 
 extern	char	TransferFileRunCommand[1024];   

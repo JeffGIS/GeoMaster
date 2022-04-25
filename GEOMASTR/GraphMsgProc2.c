@@ -9,7 +9,7 @@
 #include "gmextern.h"  
 
 static	char	MsgAtPos[1024];  
-static	int		MsgAtPosLoc; 
+static	int		MsgAtPosLoc=0; 
 static	UINT	MsgAtPosOpt;
 static	char	TypeName[5][8]={"Point","Line","Area","Text","Line"};
 
@@ -27,6 +27,7 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam
 		int	iwidth, iheight, border, framewidth, move, i, nbuttons=3;
 		RECT	rect, crect;
 		HWND buttons[3];
+		char msg[1024];
 
 		buttons[0] = GetDlgItem(hWndDlg, IDYES);
 		buttons[1] = GetDlgItem(hWndDlg, IDNO);
@@ -46,6 +47,9 @@ BOOL FAR PASCAL MESSAGEBOXATPOSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam
 		iheight = RECTHEIGHT(&rect);
 		iwidth = max(RECTWIDTH(&rect), txSize.cx + 6+border*2);
 		move = (iwidth - RECTWIDTH(&rect))/2;
+		sprintf(msg, "%i %i %i %i %i", rect.left, rect.top, iwidth, iheight, framewidth);
+		//MessageBox(0, msg, 0, MB_OK);
+		rect.left = rect.top = 0;
 		SetWindowPos(hWndDlg, 0, rect.left, rect.top, iwidth+framewidth, iheight, SWP_NOZORDER | SWP_NOOWNERZORDER);
 
 		for (i = 0; i < nbuttons; i++)
@@ -160,7 +164,7 @@ int MessageBoxAtPosition (HWND hWnd, LPSTR MessIn, LPSTR TitleIn, UINT Flag,LPST
 	strcpy (MsgAtPos,MessIn);
 	MsgAtPosLoc = -2;
 	if (*Position == 'W')
-		MsgAtPosLoc = 0;
+		MsgAtPosLoc = 1;
 	MsgAtPosOpt = Flag;
 	irc = DialogBox(hInst, (LPSTR)"MESSAGEBOXATPOS", hWnd, (DLGPROC)MESSAGEBOXATPOSMsgProc);
 	return irc;
@@ -4829,32 +4833,42 @@ int AddFileToSendList(HWND hWndDlg,UINT idc_XFERFILELISTS, LPSTR pFile)
 {
 	int n = 0;
 	char File[4096+2];
+	LPSTR pEndFile = 0;
 
-	if (FileType(pFile) == 1)
+	do
 	{
-		SubstituteDL(pFile, FALSE);
-		SendDlgItemMessage(hWndDlg, idc_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)pFile);
-		n++;
-	}
-	else if (FileType(pFile) == 2)
-	{
-		char TempName[MAX_PATH];
-		HFILE Fid;
+		pEndFile = strchr(pFile, '|');
 
-		GSSiGetTempFileName(0, "gm", 0, TempName);
-		n += GetFileList(TempName, TRUE, pFile, "*.*", TRUE, FALSE, FALSE);
-		Fid = GSSiOpenFile(TempName, 0, OF_READ);
-		fgetstring(File,4096, Fid);
-		while (fgetstring(File, 4096, Fid))
+		if (pEndFile)
+			*pEndFile++ = 0;
+		if (FileType(pFile) == 1)
 		{
-			LPSTR pTab = strchr(File, '\t');
-			if (pTab)
-				*pTab = 0;
-			SubstituteDL(File, FALSE);
-			SendDlgItemMessage(hWndDlg, idc_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)File);
+			SubstituteDL(pFile, FALSE);
+			SendDlgItemMessage(hWndDlg, idc_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)pFile);
+			n++;
 		}
-		GSSiClose(Fid);
+		else if (FileType(pFile) == 2)
+		{
+			char TempName[MAX_PATH];
+			HFILE Fid;
+
+			GSSiGetTempFileName(0, "gm", 0, TempName);
+			n += GetFileList(TempName, TRUE, pFile, "*.*", TRUE, FALSE, FALSE);
+			Fid = GSSiOpenFile(TempName, 0, OF_READ);
+			fgetstring(File, 4096, Fid);
+			while (fgetstring(File, 4096, Fid))
+			{
+				LPSTR pTab = strchr(File, '\t');
+				if (pTab)
+					*pTab = 0;
+				SubstituteDL(File, FALSE);
+				SendDlgItemMessage(hWndDlg, idc_XFERFILELISTS, LB_ADDSTRING, 0, (LPARAM)File);
+			}
+			GSSiClose(Fid);
+		}
+		pFile = pEndFile;
 	}
+	while (pEndFile);
 	return n;
 }
 
