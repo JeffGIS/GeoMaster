@@ -2310,6 +2310,7 @@ NextLink:
 		if (Imediate < 2)
 			EndDisplayProcessing (TRUE);
 		BlockSocketProcessing (FALSE);
+		ResetToViewport = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (18);
@@ -2329,6 +2330,7 @@ GSSiExitProg (18);
 	    InDisplayProcessing = TRUE;   
     if (SaveInVP)
     	SetCurView (SaveInVP); 
+	ResetToViewport = 0;
 {
 #if ENABLETRACE
 GSSiExitProg (18);
