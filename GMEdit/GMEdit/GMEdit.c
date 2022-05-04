@@ -1624,7 +1624,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			int st;
 
 			sprintf(str, "Do you want to save changes to: %s?", fileToEdit);
-			st = MessageBoxAtPosition(hWnd, str, "GMEdit", MB_YESNOCANCEL, "W");
+			st = MessageBoxAtPosition(0, str, "GMEdit", MB_YESNOCANCEL, "W");
 
 			if (st == IDYES)
 			{
@@ -1650,7 +1650,7 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			int st;
 
 			sprintf(str, "Do you want to save changes to: %s?", fileToEdit);
-			st = MessageBoxAtPosition(hWnd, str, "GMEdit", MB_YESNOCANCEL, "C");
+			st = MessageBoxAtPosition(0, str, "GMEdit", MB_YESNOCANCEL, "W");
 
 			if (st == IDCANCEL)
 				return 0;

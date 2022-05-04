@@ -555,6 +555,8 @@ void SaveViewports (int from)
 	    CloseTRANS2 (&CurView->hTranVPToScreen);
 	    CloseTRANS2 (&CurView->hTranScreenToVP); 
 	    CloseTRANS2 (&CurView->hFileTransIn);
+		CloseTRANS2(&CurView->hTranBaseToScreen);
+		CloseTRANS2(&CurView->hTranScreenToBase);
 		GSSiGlobFree (&CurView->ToolbarHandle);
 	    GSSiGlobFree (&CurView->hTAGList);  
 //	    GSSiGlobFree (&CurView->hProfileElev);
@@ -614,6 +616,8 @@ void RestoreViewports (void)
 	    CloseTRANS2 (&CurView->hTranVPToScreen);
 	    CloseTRANS2 (&CurView->hTranScreenToVP); 
 	    CloseTRANS2 (&CurView->hFileTransIn);
+		CloseTRANS2(&CurView->hTranBaseToScreen);
+		CloseTRANS2(&CurView->hTranScreenToBase);
 		GSSiGlobFree (&CurView->ToolbarHandle);
 	    GSSiGlobFree (&CurView->hTAGList);
 	   // GSSiGlobFree (&CurView->hProfileElev);
@@ -693,8 +697,14 @@ BOOL PrintReport2 (HDC hPr,HDC PrinterDC,BOOL IsVirtPrinter,HDC mfDC,LPSTR Repor
 			Factor = (double)VirtualPrintDPI / 72;
 		else
 			Factor = Pixelsperinch/72;
-		//Factor = 1;
+		Factor = 1;
+		double xPage = GetDeviceCaps(hPr, HORZRES);
+		double xPageInches = GetDeviceCaps(hPr, HORZSIZE) * INCHESPERMM;
+		//Factor = (xPage / xPageInches)/96;
+		Factor = Pixelsperinch / 96.0;
+		float saveFactor = setDeviceToScreenFactor(Factor);
 		DisplayReport2 (hPr, CurView->hReport,MainRect,Factor,FALSE,FALSE);
+		setDeviceToScreenFactor(saveFactor);
 	}
 	UnloadReport (&CurView->hReport); 
 	GSSiGlobUlFree (&hView);
@@ -2079,12 +2089,16 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    HWND		ghWnd;
    static	BOOL IsVirtPrinter=FALSE;
    static	HANDLE hVirtPrinter=0;
-#define INCHESPERMM 0.0393701
 	HDC		mfDC=0, PrinterDC=0;
 	HDC		*pPrinterDC = &PrinterDC;
 	static BOOL havePrintSetup = FALSE;
+	HDC fromDC = GetDC(hWnd);
+	int fromPixelsPerInch = GetDeviceCaps(fromDC, LOGPIXELSX);
+	BOOL saveUseGDIPlus = useGDIPlus;
+	BOOL saveWantGDIPlus = wantGDIPlus;
 
-
+	useGDIPlus = wantGDIPlus = TRUE;
+	ReleaseDC(hWnd, fromDC);
    GetGlobalCVal ("[%PRINTNAME]",SavePrintName,0); 
     
    ghWnd = hWnd;
@@ -2163,6 +2177,7 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
 			   yPage = GetDeviceCaps(hPr, VERTRES);
 			   yPageInches = GetDeviceCaps(hPr, VERTSIZE) * INCHESPERMM;
 			   xPageInches = GetDeviceCaps(hPr, HORZSIZE) * INCHESPERMM;
+			   dpi = xPage / xPageInches;
 		   }
 	       Rect.left = 0;
 	       Rect.top = 0;
@@ -2250,6 +2265,8 @@ BOOL PrintScrollReport (HWND hWnd,BOOL useCurrentPrintSetup)
    	MainRect = SaveMainRect;
 	ShadowInc = SaveShadow;
    	SetGlobalValue ("%PRINTNAME",SavePrintName); 
+	useGDIPlus = saveUseGDIPlus;
+	wantGDIPlus = saveWantGDIPlus;
 
     return (rtn);
 

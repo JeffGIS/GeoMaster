@@ -129,6 +129,7 @@ int	GetFunctionID4 (LPSTR str)
 			if (!_fstrnicmp(str, "POST", 4)) return 438;
 			if (!_fstrnicmp(str, "FGDB", 4)) return 439;
 			if (!_fstrnicmp(str, "CHAR", 4)) return 440;
+			if (!_fstrnicmp(str, "JUST", 4)) return 441;
 			return 0;
 }
 int	GetFunctionID5 (LPSTR str)

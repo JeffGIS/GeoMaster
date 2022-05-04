@@ -41,6 +41,17 @@ void SetShowValDB (LPSTR DBName)
 	return;
 }
 
+static LPSTR ConvertTotArea(double* totArea)
+{
+	static char UNITS[6][12] = { "SqFt","SqMeter","SqYards","SqMile","SqKm","Acres" };
+	LPSTR punits = UNITS[CurTheme->totClassAreaUnits];
+	double area = ConvertArea(*totArea, CurTheme->totClassAreaUnits+1);
+		//char	AreaUnitOpts[6][10]={"SQRFEET","SQRMETERS","SQRYARDS","SQRMILES","SQRKILOS","ACRES"};
+
+	*totArea = area;
+	return punits;
+}
+
 void SetShowValPoly (long Refno,BOOL Close)
 #if ENABLETRACE
 {GSSiEnterProg (1225);
@@ -473,6 +484,16 @@ GSSiExitProg (1262);
 	ThemeDisplayPass = 1;
 	*CurTheme->CurValue = 0;
 	datafileIsGraphics = ThemeDatafileIsGraphics(CurTheme);
+
+	if (CurTheme->MinSize && Type == GF_AREA && curItemSQMeters >= 0 && curItemSQMeters < CurTheme->MinSize)
+	{
+#if ENABLETRACE
+		GSSiExitProg(1264);
+#endif
+		return (-1);
+	}
+
+
 	switch (CurTheme->ID)    
 	{ 
 		case GF_CITY_THEME:
@@ -1566,7 +1587,11 @@ KeepLooking:
 					goto NextValue;  
 				if (!CurTheme->PCTByArea && !CurTheme->UseStoredCounts)
 		    		CurTheme->ClassCount[ClassNo-1]++;
-		    	if (CurTheme->UseFirstSymbol && !CurTheme->ClassSymbol[ClassNo-1])
+				if (curItemSQMeters > 0)
+					CurTheme->totClassArea[ClassNo - 1] += curItemSQMeters;
+				if (curItemPerim > 0)
+					CurTheme->totClassLength[ClassNo - 1] += curItemPerim;
+				if (CurTheme->UseFirstSymbol && !CurTheme->ClassSymbol[ClassNo-1])
 		    		CurTheme->ClassSymbol[ClassNo-1] = desc;
 				SetThemeElementCharacteristics (ClassNo-1);
 				if (DispersePoint (iref,ClassNo-1,desc,Value) == 2)
@@ -3876,6 +3901,8 @@ void DestroyThemePens (LPTHEME CurTheme)
 	HPEN	OldPen=0;
 	HBRUSH	OldBrush=0;
 	
+	if (!CurTheme)
+		return;
     if (CurView)
     {
 		OldPen = SelectObject (CurView->hDC,GetStockObject(NULL_PEN));
@@ -3893,6 +3920,9 @@ void DestroyThemePens (LPTHEME CurTheme)
 			GSSiDeleteObject(&CurTheme->ClassBrush[iclass]);
 		GSSiDeleteObject(&CurTheme->ClassPen[iclass]);
 	}
+	GSSiDeleteObject(&CurTheme->NoDataBrush);
+	GSSiDeleteObject(&CurTheme->InvalidDataBrush);
+
 	CurTheme->HiPrecis = 2; 
 	if (OldPen && !PenInUse)
 		SelectObject (CurView->hDC,OldPen);
@@ -4569,6 +4599,7 @@ void DisplaySVThemeLegend(short From)
 	RECT	BMRect;
 	char	IconFile[MAX_PATH];
 	char	CheckMarkSymbol[32]="check1.bmp";
+	double  maxClassArea = 0;
     
 	if (From == 1)
 	{
@@ -4626,6 +4657,7 @@ void DisplaySVThemeLegend(short From)
     	fontfactor = (double)CurTheme->ClassFont2.lfHeight/(double)CurTheme->ClassFont1.lfHeight;
     TotCount = 0;
 	SetThemeColorsFromScheme();
+	maxClassArea = 0;
 	for (iclass=0;iclass<CurTheme->NumClass;iclass++) 
 	{
 		MaxCount = max (MaxCount,CurTheme->ClassCount[iclass]);
@@ -4634,6 +4666,10 @@ void DisplaySVThemeLegend(short From)
 		{ 
 			MaxCountD = max (MaxCountD,GetThemeClassDistance(iclass));
 			TotCountD += GetThemeClassDistance(iclass);
+		}
+		if (CurTheme->AppendTotArea)
+		{
+			maxClassArea = max(maxClassArea, CurTheme->totClassArea[iclass]);
 		}
 	}
 	if (!TotCount && CurTheme->ClearIfNoCount)
@@ -4960,6 +4996,7 @@ GetTitleSize:
 			GetClassMinMax (iclass,&ClassMin,&ClassMax);
 			SetGlobalValueReal ("%CLASSMIN",ClassMin);
 			SetGlobalValueReal ("%CLASSMAX",ClassMax);
+			*Text = 0;
 			if (CurTheme->ClassType ==3)
 			{ 
 				_fstrcpy(Text,CurTheme->ClassBM[iclass]); 
@@ -4990,11 +5027,17 @@ GetTitleSize:
 			if (CurTheme->AppendCount && !CurTheme->ClassStatus[iclass])
 			{
 				if (CurTheme->DisplayDistance)
-					sprintf (_fstrchr(Text,0),"%.2f",MaxCountD);
-			    else
-					sprintf (_fstrchr(Text,0)," (%ld)",MaxCount);
+					sprintf(_fstrchr(Text, 0), "%.2f", MaxCountD);
+				else
+					sprintf(_fstrchr(Text, 0), " (%ld)", MaxCount);
 			}
-           	GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
+			if (CurTheme->AppendTotArea && !CurTheme->ClassStatus[iclass])
+			{
+				double area = maxClassArea;
+				LPSTR pUnits = ConvertTotArea(&area);
+				sprintf(_fstrchr(Text, 0), "  %s %s ", ValueConv(area, 1,1,TRUE),pUnits);
+			}
+			GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
            	MaxTextWidth = max (MaxTextWidth,txSize.cx);
            	theight = txSize.cy;  
        		if (CurTheme->PCTByArea)
@@ -5031,12 +5074,23 @@ GetTitleSize:
     }
 
 TooSmall:	fHeight *= 0.80;
-	if (CurTheme->AppendCount)
+	if (CurTheme->AppendCount || CurTheme->AppendTotArea)
 	{ 
-		if (CurTheme->DisplayDistance)
-			sprintf (Text," (%.2f)",MaxCountD);  
-		else
-			sprintf (Text," (%ld)",MaxCount);
+		*Text = 0;
+		if (CurTheme->AppendCount)
+		{
+			if (CurTheme->DisplayDistance)
+				sprintf(Text, " (%.2f)", MaxCountD);
+			else
+				sprintf(Text, " (%ld)", MaxCount);
+		}
+		if (CurTheme->AppendTotArea && maxClassArea)
+		{
+			double totArea = maxClassArea;
+			LPSTR pUnits = ConvertTotArea(&maxClassArea);
+			sprintf(_fstrchr(Text, 0), "  %s %s ", ValueConv(totArea, 1, 1, TRUE), pUnits);
+		}
+
        	GetTextExtentPoint32 (CurView->hDC,Text,_fstrlen(Text),&txSize);
        	CountTextWidth = txSize.cx; 
        	BeginCount = MaxTextWidth - CountTextWidth;
@@ -5153,17 +5207,25 @@ TooSmall:	fHeight *= 0.80;
 			else if (CurTheme->AppendCount && !CurTheme->ClassStatus[iclass])
 			{   
 				short	BeginCount2;
-				char	CountText[32];
+				char	CountText[128];
 				
+				*CountText = 0;
 				TextOut(CurView->hDC, x+BeginCount, y, " (", 2); 
 				if (CurTheme->DisplayDistance)
 					sprintf (CountText,"%.2f)",GetThemeClassDistance(iclass)); 
 				else
 			    	sprintf (CountText,"%ld)",CurTheme->ClassCount[iclass]);
+				if (CurTheme->AppendTotArea)
+				{
+					double totArea = CurTheme->totClassArea[iclass];
+					LPSTR pUnits = ConvertTotArea(&totArea);
+					sprintf(_fstrchr(CountText, 0), "  %s %s ", ValueConv(totArea, 1, 1, TRUE), pUnits);
+				}
+
 		       	GetTextExtentPoint32 (CurView->hDC,CountText,_fstrlen(CountText),&txSize);
 		       	CountTextWidth = txSize.cx; 
 		       	CountTextHeight = txSize.cy; 
-		       	BeginCount2 = MaxTextWidth - CountTextWidth;
+		       	BeginCount2 = MaxTextWidth - CountTextWidth + 12;
 				TextOut(CurView->hDC, x+BeginCount2, y,CountText, _fstrlen(CountText)); 
 			} 
 		} 

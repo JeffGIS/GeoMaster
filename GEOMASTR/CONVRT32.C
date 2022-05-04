@@ -3291,8 +3291,10 @@ GSSiExitProg (100);
         }        	
         if (!_fstricmp (CurView->FunctionDir,"fundir"))
             _fstrcpy (CurView->FunctionDir,"index.txt");
-        if (CurView->Type != 7)
+		if (CurView->Type != 7)
 			CurView->ZoomTarget = 0;
+		else
+			ii = 1;
 
         for (i=0;i<CurView->NumFiles;i++)
         {

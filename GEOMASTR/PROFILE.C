@@ -130,7 +130,7 @@ BOOL ZoomToProfile(LPVIEWPORT pVP)
 		GlobalUnlock(hPnts);
 		sprintf(cmd, "$VP(SETVAL,Primary Viewport,ROTATION,$MACRO([%%DL]macros\\rotatetohorv.txt,$AZM(%f %f,%f %f),H))", BP.x, BP.y, EP.x, EP.y);
 		ProcessText(cmd);
-		CurView = pViewports[0];		
+		SetCurView(pViewports[0]);
 		ZoomToPolyPoints(hPnts, 2,  0.02, TRUE);
 		GSSiGlobFree(&hPnts);
 		CurView = pVP;
@@ -146,7 +146,7 @@ BOOL ZoomToProfile(LPVIEWPORT pVP)
 		GlobalUnlock(pVP->hProfileRoute[0]);
 		sprintf(cmd, "$VP(SETVAL,Primary Viewport,ROTATION,$MACRO([%%DL]macros\\rotatetohorv.txt,$AZM(%f %f,%f %f),H))", BP.x, BP.y, EP.x, EP.y);
 		ProcessText(cmd);
-		CurView = pViewports[0];
+		SetCurView(pViewports[0]);
 		ZoomToPolyPoints(pVP->hProfileRoute[0], pVP->nProfileRoute[0], 0.02, TRUE);
 		CurView = pVP;
 		rtn = TRUE;

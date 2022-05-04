@@ -2929,7 +2929,7 @@ if (!DisableMarginPan &&
 			{
 				LPVIEWPORT	SaveVP=CurView;
 				
-				CurView = pViewports[vpid-1];
+				SetCurView(pViewports[vpid - 1]);
 				if (ProfileAndCrossSectionSettings (FALSE))
 					DisplayProfileThemeLegend(4); 
 				CurView = SaveVP;
@@ -2944,7 +2944,7 @@ if (!DisableMarginPan &&
 			{
 				LPVIEWPORT	SaveVP = CurView;
 
-				CurView = pViewports[vpid - 1];
+				SetCurView(pViewports[vpid - 1]);
 				ZoomToProfile(CurView);
 				CurView = SaveVP;
 			}
@@ -2955,7 +2955,7 @@ if (!DisableMarginPan &&
 			{
 				LPVIEWPORT	SaveVP = CurView;
 
-				CurView = pViewports[vpid - 1];
+				SetCurView(pViewports[vpid - 1]);
 				if (CurTheme->ProfileAlignmentOption)
 					CurTheme->ProfileAlignmentOption = 0;
 				else

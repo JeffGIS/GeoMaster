@@ -514,7 +514,7 @@ short GetNextPickFile (LPLONG pStartRef)
 				GetPickName (MAXPICKITEMS-1);  
 				_fstrcpy (PltName,PickName);
 				PltType = 2;
-				rtn = 6;
+				rtn = VPFILETYPE_HLTLIST;
 				(*pStartRef)++;	 
 			}
 			*CurView = *SaveVP;
@@ -651,9 +651,42 @@ NextPass:
 	while ((iType = GetNextPickFile (&NextRef)))
 	{   
 		CurView->WBounds = SavePBounds;	
-		if (PltType == 3)
-			idum=0;
-		else if (PltType < 5 || (PltType == 5 && !PickOrtho))
+		if (PltType == VPFILETYPE_IMAGE)
+			idum = 0;
+		else if (PltType == VPFILETYPE_HLTLIST)
+		{
+			HIGHLIGHTDATA	HighlightData;
+			LPVIEWPORT		SaveVP;
+			HANDLE			hSaveVP;
+			short			pos = BT_FIRST, cond = BT_GE;
+
+			if (hHighlight)
+			{
+				hSaveVP = GSSiGlobAlloc(171, GMEM_MOVEABLE, sizeof(VIEWPORT));
+				SaveVP = (LPVIEWPORT)GlobalLock(hSaveVP);
+				*SaveVP = *CurView;
+			Next:
+				if (!BT_FIND(hHighlight, (LPSTR)&NextRef, pos, cond, (LPSTR)&HighlightData))
+				{
+					pos = BT_NEXT;
+					cond = BT_ANY;
+					if (!RectInWBounds(&HighlightData.PD.Rect, 1))
+						goto Next;
+					for (int i = 0; i < NumPicked; i++)
+					{
+						if (PickList[i].Refno == NextRef)
+							goto Next;
+					}
+					PickList[NumPicked++] = HighlightData.PD;
+					PltType = 2;
+					NextRef++;
+					goto Next;
+				}
+				*CurView = *SaveVP;
+				GSSiGlobUlFree(&hSaveVP);
+			}
+		}
+		else if (PltType < VPFILETYPE_ORTHODIR || (PltType == VPFILETYPE_ORTHODIR && !PickOrtho))
 		{
 			DisplayPlotInit(hWnd,TRUE);
 			if (OpenMap (hWnd, (HDC)1))
@@ -698,7 +731,7 @@ NextPass:
 						}
 					}
 					CurTheme = SaveTheme;
-			        if (iType == 6)
+			        if (iType == VPFILETYPE_HLTLIST)
 						ProcessPickedItem (MAXPICKITEMS-1,FALSE);
 					else
 					{
@@ -2262,7 +2295,7 @@ BOOL GetVisBounds (LPMNMXCORD	pBounds,HDC hDC)
 	{
 		if (pViewportsD[iview]->DisplayInParent &&  pViewportsD[iview]->Parent == ParVP)
 		{
-			CurView = pViewportsD[iview];
+			SetCurView(pViewportsD[iview]);
 			if (GetVisBounds2 (pBounds,hDC))
 				rtn=TRUE;
 		}
@@ -3499,7 +3532,7 @@ BOOL SelectLegend (LPFILLSIGNATURE pSignature)
 	{
 		if (pViewportsD[iview]->Type == LEGENDIMAGEVIEWPORT)
 		{
-			CurView = pViewportsD[iview];
+			SetCurView(pViewportsD[iview]);
 			goto Open;
 		}
 	}

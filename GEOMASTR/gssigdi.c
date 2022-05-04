@@ -526,7 +526,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
         {
         	n=0;
 			int obcount = 0;
-			int pid;
+			int pid,icount;
 			HGDIOBJ TrackOb;
 			for (i=0;i<MAXTRACK;i++)
 			{   
@@ -536,6 +536,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
 					TrackOb = TrackObj[i];
 					obcount=TrackObjCount[i];
 					pid = ProgID[i];
+					icount = TrackObjCount[i];
 				}
 			}
 			if (n)
@@ -544,7 +545,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				{
 					inMessage = TRUE;
 					DWORD ityp = GetObjectType(TrackOb);
-					sprintf(mess, "%i %s not deleted", n, TrackTypeName[itype - 1]);
+					sprintf(mess, "%i %i,%s not deleted from %i", n, icount,TrackTypeName[itype - 1],pid);
 					MessageBox(0, mess, NULL, MB_ICONEXCLAMATION);
 					inMessage = FALSE;
 				}
@@ -565,7 +566,7 @@ void TrackObject (HGDIOBJ hObj,short Type)
 				TrackObjType[i] = Type; 
 				ProgID[i] = curProgID;
 				TrackObjCount[i] = NextObjectCount++; 
-				if (TrackObjCount[i] == 4021 || TrackObjCount[i] ==4037)
+				if (TrackObjCount[i] == 7855 || TrackObjCount[i] ==7855)
 					ii=1;
 				if (i==10)// && Type == 8)
 					ii=1;

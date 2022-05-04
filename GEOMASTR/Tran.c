@@ -989,14 +989,17 @@ void CloseTRANS2 (LPHANDLE phlpTran)
 		if (TranPtr->TriHandle)
 		{
 			HPTRANTRI	Tri = (HPTRANTRI)GlobalLock(TranPtr->TriHandle);
-			short		NumTri = Tri->NumTri;
-
-			while (NumTri--)
+			if (Tri)
 			{
-				CloseTRANS2(&Tri->hFromTran);
-				CloseTRANS2(&Tri++->hToTran);
+				short		NumTri = Tri->NumTri;
+
+				while (NumTri--)
+				{
+					CloseTRANS2(&Tri->hFromTran);
+					CloseTRANS2(&Tri++->hToTran);
+				}
+				GSSiGlobUlFree(&TranPtr->TriHandle);
 			}
-			GSSiGlobUlFree(&TranPtr->TriHandle);
 		}
 		GSSiGlobUlFree(phlpTran);
 	}

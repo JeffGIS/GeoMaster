@@ -16,7 +16,7 @@
 #define		MAX_THEME_CLASSES_V4	48  
 #define		MAX_THEME_CLASSES	256  
 #define		MAX_THEME_VALUE_LEN	128
-#define		CUR_THEME_VERSION	5	//3 adds len to nonnum theme value list, 4 stores classno as long, 5 increases max class to 256
+#define		CUR_THEME_VERSION	6	//3 adds len to nonnum theme value list, 4 stores classno as long, 5 increases max class to 256
 #define		MAX_NEW_OBJECTS		100  
 #define		MAX_DIGPOINTS		64000
 #define		MAXPENS				266       

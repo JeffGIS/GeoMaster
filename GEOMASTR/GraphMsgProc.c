@@ -952,7 +952,20 @@ GSSiExitProg (1250);
  switch(Message)
    {
     case WM_INITDIALOG:  
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_RESETCONTENT, 0, 0);
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_ADDSTRING, 0, (LPARAM)((LPSTR)"Square Feet"));
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_ADDSTRING, 0, (LPARAM)((LPSTR)"Square Meters"));
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_ADDSTRING, 0, (LPARAM)((LPSTR)"Square Yards"));
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_ADDSTRING, 0, (LPARAM)((LPSTR)"Square Miles"));
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_ADDSTRING, 0, (LPARAM)((LPSTR)"Square Killometers"));
+		SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_ADDSTRING, 0, (LPARAM)((LPSTR)"Acres"));
     case GSSI_REINITDIALOG:
+		if (CurTheme->AppendTotArea)
+		{
+			ShowWindow(GetDlgItem(hWndDlg, IDC_AREA_UNITS_TITLE), SW_SHOW);
+			ShowWindow(GetDlgItem(hWndDlg, IDC_AREA_UNITS), SW_SHOW);
+			SendDlgItemMessage(hWndDlg, IDC_AREA_UNITS, CB_SETCURSEL, CurTheme->totClassAreaUnits,0);
+		}
         SendDlgItemMessage (hWndDlg,SV_FIELDFUNCTION,CB_RESETCONTENT,0,0);
 		SendDlgItemMessage (hWndDlg,SV_FIELDFUNCTION,CB_ADDSTRING,0,(LPARAM)((LPSTR)"Field"));
 		SendDlgItemMessage (hWndDlg,SV_FIELDFUNCTION,CB_ADDSTRING,0,(LPARAM)((LPSTR)"Expression")); 
@@ -1035,8 +1048,9 @@ GSSiExitProg (1250);
          SetDlgItemInt (hWndDlg,IDC_TITSIZE,CurTheme->TitleHeight,TRUE);
          SetDlgItemInt (hWndDlg,IDC_INMARGIN,CurTheme->InnerMargin,TRUE);
          SetDlgItemInt (hWndDlg,IDC_MARGIN,CurTheme->Margin,TRUE);
-         SetDlgItemInt (hWndDlg,IDC_BOXSIZE,CurTheme->ColorsWidth,TRUE);
-		 EnableWindow (GetDlgItem(hWndDlg,IDC_CLASSES_FROM_TABLE),!CurTheme->AutoClassDef); 
+		 SetDlgItemInt(hWndDlg, IDC_BOXSIZE, CurTheme->ColorsWidth, TRUE);
+		 SetDlgItemInt(hWndDlg, IDC_MIN_SIZE, CurTheme->MinSize, TRUE);
+		 EnableWindow (GetDlgItem(hWndDlg,IDC_CLASSES_FROM_TABLE),!CurTheme->AutoClassDef);
 		 EnableWindow (GetDlgItem(hWndDlg,IDC_DEFINE_CLASSES),!CurTheme->AutoClassDef);  
          SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_RESETCONTENT,0,0);
 		 SendDlgItemMessage (hWndDlg,IDC_MULTIVALUEOPT,CB_ADDSTRING,0,(LPARAM)((LPSTR)"First Value")); 
@@ -1080,9 +1094,24 @@ GSSiExitProg (1250);
 				break;
             
 			case SV_DISPLAY_VALUE:
-                 EnableWindow (GetDlgItem(hWndDlg,IDC_DATADISPLAYMACRO),SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_GETCHECK,0,0L));
-                 EnableWindow (GetDlgItem(hWndDlg,IDC_DDMACRO_HEADER),SendDlgItemMessage (hWndDlg,SV_DISPLAY_VALUE,BM_GETCHECK,0,0L));
-				 break;
+				EnableWindow(GetDlgItem(hWndDlg, IDC_DATADISPLAYMACRO), SendDlgItemMessage(hWndDlg, SV_DISPLAY_VALUE, BM_GETCHECK, 0, 0L));
+				EnableWindow(GetDlgItem(hWndDlg, IDC_DDMACRO_HEADER), SendDlgItemMessage(hWndDlg, SV_DISPLAY_VALUE, BM_GETCHECK, 0, 0L));
+				break;
+
+			case SV_APPEND_TOTAREA:
+				if (SendDlgItemMessage(hWndDlg, SV_APPEND_TOTAREA, BM_GETCHECK, 0, 0L))
+				{
+					ShowWindow(GetDlgItem(hWndDlg, IDC_AREA_UNITS_TITLE), SW_SHOW);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_AREA_UNITS), SW_SHOW);
+				}
+				else
+				{
+					ShowWindow(GetDlgItem(hWndDlg, IDC_AREA_UNITS_TITLE), SW_HIDE);
+					ShowWindow(GetDlgItem(hWndDlg, IDC_AREA_UNITS), SW_HIDE);
+				}
+				break;
+
+
             case IDC_SHOW_FIELDS:
             	 DisplayFieldList (hWndDlg,CurTheme->hThemeDB,0,0,0);
                  break;
@@ -1092,7 +1121,6 @@ GSSiExitProg (1250);
                  EnableWindow (GetDlgItem(hWndDlg,IDC_SHOW_FIELDS),TRUE);
                  break;  
             
-            	break;   
             case SV_FIELDFUNCTION:
               switch(HIWORD(wParam))
               {
@@ -1258,7 +1286,7 @@ GSSiExitProg (1250);
 									       CB_GETCURSEL,0,0);
 		         SendDlgItemMessage(hWndDlg,SV_FIELD_NAME,CB_GETLBTEXT,
 		         		  		    Choice,(DWORD)&CurTheme->Field.name);
-
+				 CurTheme->MinSize = GetDlgItemInt(hWndDlg, IDC_MIN_SIZE, &Error, TRUE);
          		 CurTheme->TitleHeight=GetDlgItemInt (hWndDlg,IDC_TITSIZE,&Error,TRUE);
          		 CurTheme->Margin=GetDlgItemInt (hWndDlg,IDC_MARGIN,&Error,TRUE);
          		 CurTheme->InnerMargin=GetDlgItemInt (hWndDlg,IDC_INMARGIN,&Error,TRUE);
@@ -1297,7 +1325,7 @@ GSSiExitProg (1250);
 				 GetDlgItemText(hWndDlg, IDC_ENDDISPLAYMACRO, CurTheme->EndDisplayMacro, sizeof(CurTheme->EndDisplayMacro));
 				 GetDlgItemText(hWndDlg, IDC_DATADISPLAYMACRO, CurTheme->DataDisplayMacro, sizeof(CurTheme->DataDisplayMacro));
 				 CurTheme->NumDesiredClass = max(0, min(atoi(str), MAX_THEME_CLASSES));
-				 CurTheme->NumClass = CurTheme->NumDesiredClass;    
+				 CurTheme->NumClass = CurTheme->NumDesiredClass;  
 		       	 if (str[0]) CurTheme->YLimit = atof (str); 
 		       	 if (wParam == IDC_SAVE_THEME)
 		       	   	SaveCurTheme(hWndDlg);

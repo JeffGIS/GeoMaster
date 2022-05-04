@@ -5609,6 +5609,8 @@ int GSSiRemove (LPSTR Name)
 	OFSTRUCTGM	OFStruct;
 	HFILE		Fid;
 	
+	if (!*Name)
+		return 0;
 //	return GSSiRemove2 (Name);
 	Fid = GSSiOpenFile (Name,&OFStruct,OF_DELETE);
 
@@ -9370,7 +9372,7 @@ HFILE GSSiOpenFile (LPSTR InName,LPOFSTRUCTGM pOFStruct,UINT Mode)
     		goto Exit; 
     }
 //    SetWindowText (hWndMain,Name); 
-if (_fstrstr (Name,"offensexy.GMD"))
+if (strstr (Name,"fundir"))
 	ii=1;
     if (strnicmp(Name, "HTTP:", 5) && strnicmp(Name, "HTTPS:", 6) && !_fstrchr (Name,'\\'))   // change    filex.typ  to .\filex.typ (does this mess up OF_SEARCH?)
     {

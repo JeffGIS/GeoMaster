@@ -1742,9 +1742,12 @@ GSSiExitProg (900);
 					GSSilread(*Fid, CurTheme, sizeof(THEME_V4));
 					break;
 				case 5:
+					GSSilread(*Fid, CurTheme, sizeof(THEME_V5));
+					break;
+				case 6:
 					GSSilread(*Fid, CurTheme, sizeof(THEME));
 					break;
-            }
+			}
 			while (CurTheme->Version != CUR_THEME_VERSION)
 			{
 				HANDLE	hThemeNew = GSSiGlobAlloc(659, GHND, sizeof(THEME));
@@ -1764,6 +1767,10 @@ GSSiExitProg (900);
 					break;
 				case 4:
 					ConvertThemeV4toV5(pThemeNew, (LPTHEME_V4)CurTheme);
+					break;
+				case 5:
+					memcpy(pThemeNew, CurTheme, sizeof(THEME_V5));
+					pThemeNew->Version = 6;
 					break;
 				}
 				CurTheme = pThemeNew;
@@ -2102,8 +2109,14 @@ GSSiExitProg (901);
 			}
 			CurTheme->ScatterFile[0] = 0;
 			DeleteThemeHighlightFile ();
+			BT_CLOSE2(&CurTheme->hDisperseFile);
 			DeletePointDispersionFile ();
-	FreeTheme: 
+		FreeTheme: 
+			GSSiDeleteObject(&CurTheme->NoDataBrush);
+			GSSiDeleteObject(&CurTheme->InvalidDataBrush);
+
+			if (CurTheme->hVisList)
+				GSSiGlobFree(&CurTheme->hVisList);
 			DestroyThemePens (CurTheme);
 			handle = CurTheme->handle;
 			GSSiGlobUlFree (&handle); 
@@ -2120,13 +2133,18 @@ GSSiExitProg (901);
 			}
 			break;
 		case GF_STREET_TEXT_THEME:
-	    	GSSiGlobFree (&CurTheme->hScatterFile);
             {
 			    LPSTREETTEXTDATA	pStreetData=(LPSTREETTEXTDATA)CurTheme->ClassBM;
-				GSSiRemoveAndClear (pStreetData->NameFile2);
-            }
-			DeleteThemeHighlightFile ();
-            
+				BT_CLOSE(pStreetData->hNameFile1);
+				BT_CLOSE(pStreetData->hNameFile2);
+				GSSiRemoveAndClear(pStreetData->NameFile1);
+				GSSiRemoveAndClear(pStreetData->NameFile2);
+				CloseThemeDataFile(TRUE);
+				GSSiGlobFree(&CurTheme->hScatterFile);
+				DeleteThemeHighlightFile ();
+			}
+			goto FreeTheme;
+
         case GF_STREET_ADDRESS_THEME: 
 	    	GSSiGlobFree (&CurTheme->hScatterFile);
 			

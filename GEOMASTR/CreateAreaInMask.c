@@ -314,10 +314,12 @@ BOOL ThemeCreateAreaInMask(int from)
 							GlobalUnlock(hNewPoints[i]);
 						}
 						nPnts = np;
+						rtn = TRUE;
 					}
 					else
 						nPnts = 0;
 					nPolyPoints = nPnts;
+					curItemSQMeters = fabs(ComputeAreaAreaD(lpDCurPoints, nPnts, &curItemPerim));
 
 					for (i = 0; i < nNewPoly; i++)
 						GSSiGlobFree(&hNewPoints[i]);
@@ -325,7 +327,6 @@ BOOL ThemeCreateAreaInMask(int from)
 					CloseTRANS2(&hTranBMtoW);
 
 					//nPnts /= 2;
-					rtn = TRUE;
 				}
 			}
 		}

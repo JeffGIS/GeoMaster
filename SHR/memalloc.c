@@ -507,7 +507,7 @@ HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc)
 			memid[i] = nextid++;
 			memidID[i] = CurrentID;
 			memidcall[i] = NumMemAlloc[CurrentID];	
-			if (memidcall[i] >= 29 && memidID[i] == 1613)
+			if (memidcall[i] == 53 && memidID[i] == 104)
 				ii = 1;
 			if (memidID[i] == wantid)
 			{ 
@@ -928,6 +928,8 @@ int	GSSiEnterProg (int progid)
 	long	RemStack; 
 	char	str[256];
 	
+	if (progid == 4)
+		ii = 1;
 //	checkvp(1);
 //	if (_fstrncmp (FName,"..\\GEOMASTR\\funids.txt",36))
 //		ii=1;

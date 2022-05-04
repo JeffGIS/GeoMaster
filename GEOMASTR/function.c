@@ -1865,7 +1865,10 @@ SetVis:
 					*Endloc++ = 0;
 				else
 					Endloc = strchr (Arg1,0);
-				OutLoc[n++] = atoi (Arg1);
+				OutLoc[n] = atoi (Arg1);
+				if (!OutLoc[n])
+					OutLoc[n] = *Arg1;
+				n++;
 				Arg1 = Endloc;
 			}
 			OutLoc[n] = 0;
@@ -2029,25 +2032,37 @@ SetVis:
 		}
 			
 			
-		case 337: /* $PAD(val,len,fillchar) right fills val with fillchar to length len */ 
-		{	double	rval;
-			int		l, len; 
-			LPSTR	lpOut; 
-			char	fillchar='0';
-			
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
-			
+		case 337: /* $PAD(val,len,fillchar,inReport) right fills val with fillchar to length len */
+		{
+			double	rval;
+			int		l, len;
+			UCHAR* lpOut;
+			char	fillchar = '0';
+			UCHAR	startStopChar;
+
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
+
 			l = _fstrlen(Arg[1]);
-			len = IDNINT(atof (Arg[2])); 
+			len = IDNINT(atof(Arg[2]));
 			if (*Arg[3])
-				fillchar = *Arg[3]; 
-			_fstrcpy (OutLoc,Arg[1]);
-			lpOut = OutLoc+l;
-			while (l++ < len)
-				*lpOut++ = fillchar; 
+				fillchar = *Arg[3];
+			if (atob(Arg[4]))
+			{
+				startStopChar = 32 + 128;
+				if (inPrintScrollReport)
+					startStopChar = 32;
+			}
+			else
+				startStopChar = fillchar;
+			_fstrcpy(OutLoc, Arg[1]);
+			lpOut = OutLoc + l;
+			*lpOut++ = 32 + 128;
+			while (l++ < len - 2)
+				*lpOut++ = fillchar;
+			*lpOut++ = 32 + 128;
 			*lpOut = 0;
 			goto Rtnl;
-		} 
+		}
 
 		case 339:  //$MIN(arg1,arg2....argn)  
 		case 340:  //$MAX(arg1,arg2....argn)  
@@ -4488,6 +4503,45 @@ SetVis:
 				goto Rtnl;
 			}
 			goto RtnFalse;
+		}
+
+		case 441: //$JUST(LRorC,string,width)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			if (nArgs > 1)
+			{
+				if (CurReport && (CurReport->hWnd || CurReport->hDC) && CurReport->currentFont)
+				{
+					int width = atoi(Arg[3]);
+					width *= DeviceToScreenFactor();
+					HDC hDC = CurReport->hDC;
+					BOOL doRelease = FALSE;
+					if (!hDC)
+					{
+						hDC = GetDC(CurReport->hWnd);
+						doRelease = TRUE;
+					}
+					HFONT oldFont = SelectObject(hDC, CurReport->currentFont);
+					SIZE txSize, txSizeSpace;
+					char	tenSpace[11] = "          ";
+					int rtn = GetTextExtentPoint32(hDC, Arg[2], strlen(Arg[2]), &txSize);
+					rtn = GetTextExtentPoint32(hDC, tenSpace, 10, &txSizeSpace);
+					int pixelsPerSpace =  txSizeSpace.cx / 10;
+					SelectObject(hDC, oldFont);
+					if (doRelease)
+						ReleaseDC(CurReport->hWnd, hDC);
+					int numSpaceNeeded = ((width - txSize.cx) / pixelsPerSpace) / 2;
+					for (int i = 0; i < numSpaceNeeded; i++)
+					{
+						strcat(OutLoc, " ");
+					}
+					strcat(OutLoc, Arg[2]);
+				}
+				else
+					strcpy(OutLoc, Arg[2]);
+			}
+			goto Rtnl;
 		}
 
 		default:

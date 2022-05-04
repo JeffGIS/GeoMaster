@@ -904,6 +904,19 @@ BOOL DisplayReportScroll (HWND hWndDlg, int ScrollCntl)
 	
 	ScrollRptDlg = hWndDlg;
 	ScrollRptCntl = ScrollCntl;	
+	if (hReportScroll)
+	{
+		LPREPORT pReport = GlobalLock(hReportScroll);
+		HDC hDC = GetDC(hWndDlg);
+		pReport->hWnd = hWndDlg;
+		pReport->hdc = hDC;
+		HFONT hFont = SelectObject(hDC, GetStockObject(SYSTEM_FONT));
+		pReport->currentFont = hFont;
+		SelectObject(hDC, hFont);
+		ReleaseDC(hWndDlg, hDC);
+		GlobalUnlock(hReportScroll);
+
+	}
 	return (DisplayReport2 (0,0,Rect,1,TRUE,0));
 }  
 
@@ -1048,8 +1061,15 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 		SelectClipRgn(hDC, 0);
 	}
 
-	pReport = (LPREPORT)GlobalLock (hReport);   
-	pReport->hDC = hDC;
+	pReport = (LPREPORT)GlobalLock(hReport);
+	if (!pReport->currentFont)
+	{
+		pReport->hDC = hDC;
+		HFONT hFont = SelectObject(hDC, GetStockObject(SYSTEM_FONT));
+		pReport->currentFont = hFont;
+		SelectObject(hDC, hFont);
+	}
+
 	pReport->Rect = Rect;  
 	pReport->curLineHeight = 0;
 	if (pSizeRect)
@@ -1089,6 +1109,8 @@ BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL Clos
 			AddPointToRect (p,&pReport->SizeRect);
 		}
 		PixPerInch = GetDeviceCaps(hDC, LOGPIXELSY);      
+		//SetWindowExtEx(hDC, pReport->Rect.right, pReport->Rect.bottom, 0);
+		//SetViewportExtEx(hDC, pReport->Rect.right, pReport->Rect.bottom, 0);
 
 /*    	if (pReport->First)
     		LastFactor = 1;
@@ -1268,35 +1290,44 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
     int		height,width,x,y;
  switch(Message)
    {
-    case WM_INITDIALOG:  
-        hSaveBM = EnterBlockingWindow (hWndDlg);
-		{ 
+    case WM_INITDIALOG: 
+	{
+		HDC hdc = GetDC(hWndDlg);
+		HFONT oldFont = SelectObject(hdc, GetStockObject(SYSTEM_FONT));
+		SIZE txSize;
+		int rtn = GetTextExtentPoint32(hdc, "TESTTEXT", 8, &txSize);
+
+		ReleaseDC(hWndDlg, hdc);
+
+		hSaveBM = EnterBlockingWindow(hWndDlg);
+		{
 			DWORD dwStringExt;
 			TEXTMETRIC tm;
-			HDC hdcLB=GetDC (hWndDlg);
-			
-			GetTextMetrics (hdcLB,&tm);
-			dwStringExt = tm.tmAveCharWidth*255;
-		
-		    SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_SETHORIZONTALEXTENT,
-		        			   LOWORD(dwStringExt), 0L);
-		    ReleaseDC (hWndDlg,hdcLB);
-		}
+			HDC hdcLB = GetDC(hWndDlg);
 
-         CurView->hWnd = hWndDlg;
-		 GetWindowRect(hWndMain, &rect);    
-		 rect.left = max(0,rect.left);
-		 rect.top = max(0,rect.top); 
-		 x = rect.left;
-		 y = rect.top;
-		 height = rect.bottom-rect.top-6;    
-		 width = rect.right - rect.left-6;
-	 	 SetWindowPos(hWndDlg, (HWND) 0, x+1, y+1,width, height,0); 
-	 	 GetClientRect(hWndDlg,&rect);
-	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, 0, 0,rect.right, rect.bottom,0);
-		 if ( !DisplayReportScroll (hWndDlg,IDC_SCROLLBOX))
-    	 	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-			
+			GetTextMetrics(hdcLB, &tm);
+			dwStringExt = tm.tmAveCharWidth * 255;
+
+			SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_SETHORIZONTALEXTENT,
+				LOWORD(dwStringExt), 0L);
+			ReleaseDC(hWndDlg, hdcLB);
+		}
+		hdc = GetDC(hWndDlg);
+		CurView->hWnd = hWndDlg;
+		GetWindowRect(hWndMain, &rect);
+		rect.left = max(0, rect.left);
+		rect.top = max(0, rect.top);
+		x = rect.left;
+		y = rect.top;
+		height = rect.bottom - rect.top - 6;
+		width = rect.right - rect.left - 6;
+		SetWindowPos(hWndDlg, (HWND)0, x + 1, y + 1, width, height, 0);
+		GetClientRect(hWndDlg, &rect);
+		SetWindowPos(GetDlgItem(hWndDlg, IDC_SCROLLBOX), (HWND)0, 0, 0, rect.right, rect.bottom, 0);
+		if (!DisplayReportScroll(hWndDlg, IDC_SCROLLBOX))
+			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+
+	}
          break; /* End of WM_INITDIALOG                                 */
 
     case WM_CLOSE:
@@ -1394,8 +1425,53 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
             break;
 
 		    case IDM_PRINT:
-				PrintScrollReport (hWndDlg,FALSE);
-		    	break;
+				inPrintScrollReport = TRUE;
+				PrintScrollReport(hWndDlg, FALSE);
+				inPrintScrollReport = FALSE;
+				break;
+				
+			case ID_SAVE:
+				{
+					char    File[256];
+					
+					*File = 0;
+					if (GetSaveName2(hWndDlg, File, IDS_FILTERTEXT, ".TXT", IDS_FILERPT))
+					{
+						HFILE Fid = GSSiOpenFile(File, 0, OF_CREATE);
+						int indx = 1;//skip title line
+						if (Fid != HFILE_ERROR)
+						{
+							while (SendDlgItemMessage(hWndDlg, IDC_SCROLLBOX, LB_GETTEXT, indx++, (DWORD)pCommonMem) != LB_ERR)
+							{
+								int l = strlen(pCommonMem);
+								if (l)
+								{
+									PUCHAR pNewLine = malloc(l + 4);
+									BOOL inTab = FALSE;
+									int nNewLine = 0;
+									for (int i = 0; i < l; i++)
+									{
+										if (pCommonMem[i] == 32 + 128)
+										{
+											inTab = !inTab;
+											if (!inTab)
+												pNewLine[nNewLine++] = 9;
+										}
+										else if (!inTab)
+											pNewLine[nNewLine++] = pCommonMem[i];
+									}
+									 pNewLine[nNewLine++] = 0;
+									fputstring(pNewLine, Fid);
+									free(pNewLine);
+								}
+							}
+							GSSiClose(Fid);
+						}
+					}			
+				}
+				
+				break;
+
 		    case IDC_SCROLLBOX: 
 		    {
                 SetContinueProcessing ( TRUE);

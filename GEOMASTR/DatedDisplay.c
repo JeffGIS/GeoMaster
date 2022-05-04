@@ -35,7 +35,7 @@ void SetDatesAndTitles(HWND hWndDlg)
 	HANDLE	hItems=0;
 	LPINT	pItems;
 	LPSTR	pTab;
-	char	str[256];
+	char	str[256] = { 0 };
 
 	nDatesSelected = GetLBSelectedItems(hWndDlg, IDC_LIST, &hItems);
 	if (nDatesSelected)

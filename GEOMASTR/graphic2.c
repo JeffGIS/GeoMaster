@@ -83,7 +83,7 @@ BOOL ContinuePicking (BOOL QuitOnMMove)
 {GSSiEnterProg (697);
 #endif
 {
-	MSG     msg;   
+	MSG     msg = { 0 };
 	BOOL	IsAccel;  
 	short	ii;
 	
@@ -618,9 +618,10 @@ BOOL ProcessCloseIcon (HWND hWnd,UINT Message, WPARAM wParam,LPARAM lParam)
 		        		{
 			        		CurView->Active = FALSE;
 							PickBoxesDestroy(CurView->ID);
+							ProcessText(CurView->VPCloseCmd);
 							if (CurView->DisplayedFullScreen)
 								MakeVPFullScreen (CurView->ID,0);
-						    CurView = SaveView;
+							CurView = SaveView;
 							HaltMapDisplay(FALSE,FALSE); 
 							IgnoreLbutton = TRUE;
 							setDoPaint(TRUE);
@@ -812,6 +813,18 @@ GSSiExitProg (114);
 							if (DisplayProfileInfo(&BasePoint, CursorPoint))
 								goto Exit;
 						}
+					}
+					else if (CurView->hTranScreenToBase)
+					{
+						BasePoint = ScreenPtToBasePt(CursorPoint);
+						DisplayCoordinate(&BasePoint, CursorPoint);
+						if (CurView->Type)
+						{
+							HaveVP = 1;
+							break;
+						}
+						else
+							HaveVP = -1;
 					}
 					else if (CurView->hTranVPToBase)
 					{
@@ -2095,6 +2108,12 @@ GSSiExitProg (132);
 			}
 		}
 	}
+	if (CurTheme && (CurTheme->MinSize || CurTheme->AppendTotArea) && Type == GF_AREA && HiPrecis && nPnts > 0)
+		curItemSQMeters = fabs(ComputeAreaAreaD(lpDCurPoints, nPnts, &curItemPerim));
+	SetGlobalValueReal("%CURITEMSQMETERS", curItemSQMeters);
+	if (curItemSQMeters > 0 && curItemSQMeters < 1)
+		ii = 1;
+	
 	NumDynSegPointsRemaining = 0;
 	NumDynSegPoints = nPnts;
 
