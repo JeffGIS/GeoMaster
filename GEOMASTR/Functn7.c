@@ -2325,15 +2325,19 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	{
 		nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 		*OutLoc = 0;
-		if (!FileType(Arg[2]) == 2)
+		if (FileType(Arg[2]) != 2)
 		{
-			sprintf(OutLoc, "%s is not a directory", Arg[2]);
-			goto Rtnl;
+			sprintf(OutLoc, "[%%ERRMESS]=%s is not a directory", Arg[2]);
+			ProcessText(OutLoc);
+			rtn = FALSE;
+			goto Rtnrtn;
 		}
 		if (FileType(Arg[1]) && !atob(Arg[3]))
 		{
-			sprintf(OutLoc, "%s already exists", Arg[1]);
-			goto Rtnl;
+			sprintf(OutLoc, "[%%ERRMESS]=%s already exists", Arg[1]);
+			ProcessText(OutLoc);
+			rtn = FALSE;
+			goto Rtnrtn;
 		}
 		rtn = CopyDirectory(Arg[1], Arg[2], atob(Arg[3]), Arg[4]);
 		goto Rtnrtn;

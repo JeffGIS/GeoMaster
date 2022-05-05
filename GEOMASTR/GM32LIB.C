@@ -414,7 +414,7 @@ BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle)
 	ldir = strlen(fromDir);
 	GSSiGetTempFileName(0, "gmc", 0, TempName);
 	Fid = GSSiOpenFile(TempName, 0, OF_CREATE);
-	SearchFilesInDir(fromDir, "*", Fid, &TotFiles, "*", 1, TRUE,TRUE);
+	SearchFilesInDir(fromDir, "*", Fid, &TotFiles, "", 1, TRUE,TRUE);
 	GSSillseek(Fid, 0, 0);
 	if (*statusTitle)
 		CreateStatusWind(hWndMain, 1, statusTitle);
