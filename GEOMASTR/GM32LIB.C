@@ -384,12 +384,16 @@ BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle)
 {
 	BOOL rtn = FALSE;
 	int exists = FileType(toDir);
-	char	TempName[MAX_PATH], fromPath[MAX_PATH], toPath[MAX_PATH];
+	char	TempName[MAX_PATH], fromPath[MAX_PATH+2], toPath[MAX_PATH+2];
 	char	fileName[MAX_PATH];
+	char	errmess[MAX_PATH * 2];
 	HFILE	Fid;
 	long	TotFiles = 0;
 	int		ldir, lfile;
 	int		numDone = 0;
+
+	sprintf(errmess, "[%%ERRMESS]=;", fromPath);
+	ProcessText(errmess);
 
 	if (exists && !replace)
 		return rtn;
@@ -399,7 +403,11 @@ BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle)
 	{
 		rtn = DeleteDirAndContents(toDir);
 		if (!rtn)
+		{
+			sprintf(errmess, "[%%ERRMESS]=Failed to delete %s;", toDir);
+			ProcessText(errmess);
 			return rtn;
+		}
 	}
 
 	ExpandText(fromDir);
@@ -410,23 +418,27 @@ BOOL CopyDirectory(LPSTR toDir, LPSTR fromDir, BOOL replace, LPSTR statusTitle)
 	GSSillseek(Fid, 0, 0);
 	if (*statusTitle)
 		CreateStatusWind(hWndMain, 1, statusTitle);
-
-	while (StatusWindowUpdate(0, "", TotFiles,numDone++) && fgetstring(fromPath, 255, Fid))
+	rtn = TRUE;
+	while (rtn && StatusWindowUpdate(0, "", TotFiles,numDone++) && fgetstring(fromPath, MAX_PATH, Fid))
 	{
 		sprintf(toPath, "%s%s", toDir, &fromPath[ldir]);
-		GSSiCopyFile(fromPath, toPath, FALSE);
+		rtn = GSSiCopyFile(fromPath, toPath, FALSE);
 	}
 	GSSiClose2 (&Fid);
 	GSSiRemove(TempName);
 	if (*statusTitle)
 		DestroyStatusWindow(0);
-
+	if (!rtn)
+	{
+		sprintf(errmess, "[%%ERRMESS]=Failed to copy %s;", fromPath);
+		ProcessText(errmess);
+	}
 	return rtn;
 }
 
 BOOL GSSiCopyFile (LPSTR OldName,LPSTR NewName,BOOL Replace)
 {
-	short	ln; 
+	short	ln=0; 
 	DWORD	FailIfExists=TRUE;
 	short	AppendOrReplace=0;
 	char	fromPath[MAX_PATH], toPath[MAX_PATH];
