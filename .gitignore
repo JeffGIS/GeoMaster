@@ -68,6 +68,8 @@ ipch/
 *.psess
 *.vsp
 *.vspx
+*.db-shm
+Browse.VC.*
 
 # TFS 2012 Local Workspace
 $tf/
@@ -196,7 +198,3 @@ $RECYCLE.BIN/
 /GEOMASTR/.vs/geomastr/v16/Solution.VC.db-wal
 /GEOMASTR/.vs/geomastr/v16/Solution.VC.db-shm
 /GEOMASTR/.vs/geomastr/v16/Solution.VC.db
-/GEOMASTR/.vs/geomastr/v16/Browse.VC.opendb
-/GEOMASTR/.vs/geomastr/v16/Browse.VC.db
-/GEOMASTR/.vs/geomastr/v16/Browse.VC.db-shm
-/GEOMASTR/.vs/geomastr/v16/Browse.VC.db-wal
