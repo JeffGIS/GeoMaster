@@ -3166,8 +3166,11 @@ void CreateBaseToVPTran (RECT Rectx)
 
 	 CloseTRANS2(&CurView->hTranVPToBase);
 	 CloseTRANS2(&CurView->hTranBaseToVP);
+	 CloseTRANS2(&CurView->hTranVPToScreen);
+	 CloseTRANS2(&CurView->hTranScreenToVP);
 	 CloseTRANS2(&CurView->hTranScreenToBase);
 	 CloseTRANS2(&CurView->hTranBaseToScreen);
+
      if (CurView->HaveBounds)
      {
 		 if (CurView->Rotation != 0)

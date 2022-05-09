@@ -56,6 +56,7 @@ BOOL	IgnoreLock=FALSE, ReportMemErrors=TRUE,KeepMemLength=FALSE;
 static	char	FName[]="..\\GEOMASTR\\funids.txt";
 static	short	LastProg[6]={0,0,0,0,0,0};
 static	UINT	icount=1;
+static  HANDLE	debugHandle = 0;
 
 #if ENABLETRACE
 //#include <toolhelp.h>
@@ -66,7 +67,7 @@ static	__int64 	TotTime[MAXPROG], StartTime[MAXLEVEL];
 #endif
 
 static	long	ii, numEnter=0, numExit=0;
-static	long	nextid=1, wantid=4268, WantCallID=31,NextLockID=1, WantLockID=8648, NextFreeID=1, WantFreeID=4386;
+static	long	nextid=1, wantid=2486, WantCallID=31,NextLockID=1, WantLockID=8648, NextFreeID=1, WantFreeID=2578;
 static	HANDLE	WantHandle=0;
 
 #define	MAXMEM	16384   
@@ -332,6 +333,7 @@ LPVOID GSSiGLOBALLOCK (HANDLE hglb)
 	LPVOID	pntr;
 	UINT	i; 
 	HPBYTE	pstr;
+	int totAlloc = 0;
 extern LPVOID debugaddress;
 checkvp(1);	
 /*	if (debugaddress && *(LPBYTE)debugaddress)
@@ -350,35 +352,46 @@ checkvp(1);
 			ii = 1;
 		if (hglb == WantHandle)
 		ii=1;
-	for (i=0;i<MAXMEM;i++)
-		if (hmem[i] == hglb)
-		{   
-			if (NextLockID == WantLockID)
-				ii=1;
-			pstr = (HPBYTE)pntr;
-			memset (pstr,Marker,premem[i]);
-			memset (&pstr[memlength[i]-postmem[i]],Marker,postmem[i]); 
-			pntr = (LPVOID) ((LPSTR)pntr + premem[i]);
-			if (!IgnoreLock && lockcount[i])// && memid[i] == wantid)
-				ii=1;
-			lockcount[i]++;
-			if (lockcount[i] > 1)
-				ii = 1;
-			if (hglb == WantHandle && lockcount[i]>1)
-				ii = 1;
-			lockid[i] = NextLockID++;
-			if (memid[i] == wantid)
-			{ 
-				ii=1; 
+		for (i = 0; i < MAXMEM; i++)
+		{
+			if (hmem[i])
+			{
+				totAlloc++;
+				if (hmem[i] == hglb)
+				{
+					if (NextLockID == WantLockID)
+						ii = 1;
+					pstr = (HPBYTE)pntr;
+					memset(pstr, Marker, premem[i]);
+					memset(&pstr[memlength[i] - postmem[i]], Marker, postmem[i]);
+					pntr = (LPVOID)((LPSTR)pntr + premem[i]);
+					if (!IgnoreLock && lockcount[i])// && memid[i] == wantid)
+						ii = 1;
+					lockcount[i]++;
+					if (lockcount[i] > 1)
+						ii = 1;
+					if (hglb == WantHandle && lockcount[i] > 1)
+						ii = 1;
+					lockid[i] = NextLockID++;
+					if (memid[i] == wantid)
+					{
+						ii = 1;
+					}
+					return pntr;
+				}
 			}
+		}
+		if (IgnoreLock)
 			return pntr;
-		} 
-	if (IgnoreLock)
-		return pntr;
-	ii=-1;
-	for (i=0;i<MAXFREE;i++)
-		if (hglb == RecentlyFreed[i])
-			ii=RecentlyFreedID[i]; 
+		ii=-1;
+		for (i = 0; i < MAXFREE; i++)
+		{
+			if (hglb == RecentlyFreed[i])
+			{
+				ii = RecentlyFreedID[i];
+				break;
+			}
+		}
 	}
 	MEMERR ("Locking invalid handle");
 	return 0;
@@ -388,7 +401,8 @@ BOOL GSSiGLOBALUNLOCK(HANDLE hglb)
 {
 	BOOL	rtn=GlobalUnlock (hglb);
 	UINT	i;
-	HPBYTE	pstr; 
+	HPBYTE	pstr;
+	BYTE b;
 	long	j;
  checkvp(1);	
    
@@ -468,6 +482,8 @@ HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc)
 	memset (pstr,Marker,prmem);
 	memset (&pstr[memlen-pstmem],Marker,pstmem); 
 	GlobalUnlock (rtn);
+	if (rtn == debugHandle)
+		ii = 1;
 	if (First)
 	{
 		First = FALSE;
@@ -553,7 +569,10 @@ HGLOBAL GSSiGLOBALFREE (HANDLE hglb)
 		RecentlyFreedID[i]=RecentlyFreedID[i-1]; 
 	}
 	if (WantFreeID == NextFreeID)
-		ii=1;
+	{
+		ii = 1;
+		debugHandle = hglb;
+	}
 	RecentlyFreed[0] = hglb;
 	RecentlyFreedID[0] = NextFreeID++;
 	if (hglb)

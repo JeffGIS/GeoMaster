@@ -2604,7 +2604,7 @@ void BuildRefIndex (BOOL DeleteExistingRef,BOOL DeletedItem)
 {GSSiEnterProg (1022);
 #endif
 {   int ii;
-	REFINDEXDATA	RefIdxData, RefIdxDataCur; 
+REFINDEXDATA	RefIdxData = { 0 };
 	PICKDATA		SavePick0=PickList[0];
     
     if (CurrentRefno > LONG_MAX-1000) //fixes problem in Kaufman where single maxrefno value causes fix dup ref to start at LONG_MIN

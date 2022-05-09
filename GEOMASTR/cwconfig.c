@@ -746,6 +746,7 @@ GSSiExitProg (436);
 		 GSSiClose(fidMSF);
 		 SaveMapServerTrace("START",0, line);
 		 NextMSRequest = atoi(line);
+		 SetGlobalValueBool("%IGNORESYSMSG", TRUE);
 	 }
  }
  if (_fstrstr(CmdLine, " /RESET "))

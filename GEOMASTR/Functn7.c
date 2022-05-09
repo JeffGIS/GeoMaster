@@ -2118,6 +2118,8 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	case 778: //$SESSION(CREATE,commandline,newwindowrect,startupzoom,startlocation)
 			  //$SESSION(STOP,hwnd
 			  //$SESSION(COMMAND,hwnd
+			  //$SESSION(MINIMIZE)
+			  //$SESSION(MAXIMIZE)
 	{
 		char modulePath[MAX_PATH];
 
@@ -2247,6 +2249,17 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		{
 			GetModuleFileName(NULL, OutLoc, MAX_PATH);
 		}
+		else if (!stricmp(Arg[1], "MINIMIZE"))
+		{
+			ShowWindow(hWndMain, SW_SHOWMINIMIZED);
+			goto RtnTrue;
+		}
+		else if (!stricmp(Arg[1], "MAXIMIZE"))
+		{
+			ShowWindow(hWndMain, SW_SHOWMAXIMIZED);
+			goto RtnTrue;
+		}
+
 		goto Rtnl;
 
 	}

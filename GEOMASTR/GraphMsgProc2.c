@@ -1594,10 +1594,13 @@ GSSiExitProg (445);
 					 TimeRangeBeg=0;
 					 TimeRangeEnd=LONG_MAX;
 					 SetViewport(*pCommandViewport);
-			         CloseTRANS2 (&CurView->hTranVPToBase);
-			         CloseTRANS2 (&CurView->hTranBaseToVP);
-			         CloseTRANS2 (&CurView->hTranVPToScreen);
-			         CloseTRANS2 (&CurView->hTranScreenToVP);
+					 CloseTRANS2(&CurView->hTranVPToBase);
+					 CloseTRANS2(&CurView->hTranBaseToVP);
+					 CloseTRANS2(&CurView->hTranVPToScreen);
+					 CloseTRANS2(&CurView->hTranScreenToVP);
+					 CloseTRANS2(&CurView->hTranScreenToBase);
+					 CloseTRANS2(&CurView->hTranBaseToScreen);
+
 			         CloseTRANS2 (&hTranReorg);
 				     GSSiGlobFree (&CurView->hTAGList);
    				     GSSiDeleteObject(&CurView->hRgn);
@@ -1773,8 +1776,10 @@ GSSiExitProg (445);
 			         CloseTRANS2 (&CurView->hTranVPToBase);
 			         CloseTRANS2 (&CurView->hTranBaseToVP); 
 			         CloseTRANS2 (&CurView->hTranVPToScreen);
-			         CloseTRANS2 (&CurView->hTranScreenToVP); 
-			         if (hTranReorg == (HANDLE)1)
+					 CloseTRANS2(&CurView->hTranScreenToVP);
+					 CloseTRANS2(&CurView->hTranScreenToBase);
+					 CloseTRANS2(&CurView->hTranBaseToScreen);
+					 if (hTranReorg == (HANDLE)1)
 			         	hTranReorg = 0;
 				     GSSiGlobFree (&CurView->hTAGList);
 			         CloseTRANS2 (&hTranReorg);
