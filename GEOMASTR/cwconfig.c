@@ -5477,11 +5477,11 @@ DisplayParcel:
 			if (hFullWindowBitMap && !IgnoreActivate) 
 			{
 				RestoreFullWindowBitmap ();		
-				UpdateVehicleStatusDlg ();
-				DisplayAllToolbars (4);
 			}
 			else
 				RepaintServerInfo();
+			UpdateVehicleStatusDlg();
+			DisplayAllToolbars(4);
 
 			break;
 		}

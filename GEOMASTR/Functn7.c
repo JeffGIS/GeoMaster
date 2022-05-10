@@ -1971,7 +1971,13 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		}
 		if (!stricmp(Arg[1], "REDISPLAY"))
 		{
-			rtn = RedisplayToolbar(Arg[2]);//not working yet
+			if (nArgs < 2 || !stricmp(Arg[2], "ALL"))
+			{
+				DisplayAllToolbars(1);
+				rtn = TRUE;
+			}
+			else
+				rtn = RedisplayToolbar(Arg[2]);//not working yet
 		}
 		goto Rtnrtn;
 	case 774: //$NETWORK(FALSEINT,STREETLIST
