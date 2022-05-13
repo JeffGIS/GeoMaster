@@ -2692,9 +2692,19 @@ BOOL OpenFGDBFileIndex (LPSTR DBNameIN,LPMNMXCORD WBounds)
     _fstrcpy (LastSHPFile,DBNameIN);
     if (WBounds)
     { 
-		MNMXCORD	bounds;
+		MNMXCORD	bounds, fgdbbounds;
 
 		ConvertRectCoord (&bounds, &CurView->WBounds, 1,0);
+		fgdbbounds = GetGlobalBoundsVal("[%FGDBBOUNDS]", 0);
+		if (ValidBounds(&fgdbbounds))
+		{
+			MNMXCORD intBounds;
+			if (IntersectBounds(&bounds, &fgdbbounds, &intBounds))
+				bounds = intBounds;
+			else
+				return FALSE;
+		}
+
 		strcpy (str,"BOUNDS=(");
 		boundstoa (strchr(str,0),&bounds);
 		strcat (str,")");
@@ -2894,6 +2904,7 @@ long ReadFGDBHeader (LPSTR DBNameIN,LPMNMXCORD pMinMaxCoord)
 	LPSTR	pFields;
 	int		iDB;
 	BOOL	rc;
+	MNMXCORD bounds;
 
 	_fstrcpy (DBName,DBNameIN); 
 	ExpandText (DBName);
@@ -2911,7 +2922,11 @@ long ReadFGDBHeader (LPSTR DBNameIN,LPMNMXCORD pMinMaxCoord)
 	iDB = OpenFGDB2 (DBName,"","");
 	if (iDB < 1)
 		goto RtnFalse;
-	rc = FGDBGetTableInfo (iDB,FGDBTable,&ShapeType,0,pMinMaxCoord);
+	bounds = GetGlobalBoundsVal("[%FGDBBOUNDS]", 0);
+	if (ValidBounds (&bounds))
+		rc = FGDBGetTableInfo(iDB, FGDBTable, &ShapeType, 0, pMinMaxCoord, &bounds);
+	else
+		rc = FGDBGetTableInfo(iDB, FGDBTable, &ShapeType, 0, pMinMaxCoord, 0);
 	CloseFGDB (iDB);
 	if (!rc)
 		goto RtnFalse;
@@ -3185,7 +3200,7 @@ int GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev,HFILE Fi
 			int		type=0, nrows=0;
 			int inc = *(pList+lnLev1) == '\\';
 
-			FGDBGetTableInfo (hDB,pList,&type,&nrows,0);
+			FGDBGetTableInfo (hDB,pList,&type,&nrows,0,0);
 			if (!nrows)
 				continue;
 			sprintf (str,"%s%s\t%s\t%i",tabs,pList+lnLev1+inc,ShapeTypeName(type),nrows);

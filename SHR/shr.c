@@ -13350,20 +13350,31 @@ GSSiExitProg (422);
 }   
 
 
-MNMXCORD FactorBounds (LPMNMXCORD pRect,double Factor)
+MNMXCORD FactorBounds(LPMNMXCORD pRect, double Factor)
 {
-	MNMXCORD OutRect;  
-	DPOINT	MidPoint=MinMaxMidPointD(pRect);
-	double	w = (pRect->xmx - pRect->xmn) * Factor/2;
-	double	h = (pRect->ymx - pRect->ymn) * Factor/2;        
-	
+	MNMXCORD OutRect;
+	DPOINT	MidPoint = MinMaxMidPointD(pRect);
+	double	w = (pRect->xmx - pRect->xmn) * Factor / 2;
+	double	h = (pRect->ymx - pRect->ymn) * Factor / 2;
+
 	OutRect.xmn = MidPoint.x - w;
 	OutRect.xmx = MidPoint.x + w;
 	OutRect.ymn = MidPoint.y - h;
 	OutRect.ymx = MidPoint.y + h;
 	return OutRect;
-} 
-   
+}
+
+MNMXCORD MultiplyBounds(LPMNMXCORD pRect, double Factor)
+{
+	MNMXCORD OutRect;
+
+	OutRect.xmn = pRect->xmn * Factor;
+	OutRect.xmx = pRect->xmx * Factor;
+	OutRect.ymn = pRect->ymn * Factor;
+	OutRect.ymx = pRect->ymx * Factor;
+	return OutRect;
+}
+
 RECT FactorRect (LPRECT pRect,double Factor)
 {
 	RECT OutRect;  

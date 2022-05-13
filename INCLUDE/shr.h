@@ -981,6 +981,7 @@ POINT MinMaxMidPointL (LPMNMXCORL pBounds);
 DPOINT MinMaxMidPointD (LPMNMXCORD pBounds);
 double MinMaxRadius(LPMNMXCORD pBounds);
 MNMXCORD FactorBounds (LPMNMXCORD pRect,double Factor);
+MNMXCORD MultiplyBounds(LPMNMXCORD pRect, double Factor);
 DPOINT SubtractPoint (LPDPOINT pPoint1,LPDPOINT pPoint2);
 int	SaveCurView (int opt);
 short GSSiMessageBox (int from,LPSTR Mess,LPSTR Title,UINT icon,LPSTR Position);

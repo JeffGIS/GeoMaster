@@ -395,7 +395,7 @@ HaveDB:
 	}
     return idb + 1;
 }
-extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pnRows,LPMNMXCORD pBounds)
+extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pnRows, LPMNMXCORD pBounds, LPMNMXCORD pSetBounds)
 {   
 	long	hr, rc;
 	int		n;
@@ -405,7 +405,8 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 	Table	table;
 	EnumRows	attributeQueryRows;
 	Envelope	extent;
-	
+	Envelope	envelope;
+
 	int			nAnnoMarkers = 0;
 	//wstring fieldName;
 
@@ -420,6 +421,13 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 		not++;
 		if (pnRows)
 			hr = table.GetRowCount(*pnRows);
+		if (pSetBounds)
+		{
+			envelope.xMin = pSetBounds->xmn;
+			envelope.yMin = pSetBounds->ymn;
+			envelope.xMax = pSetBounds->xmx;
+			envelope.yMax = pSetBounds->ymx;
+		}
 		if (pBounds)
 		{
 			hr = table.GetExtent(extent);
@@ -431,7 +439,12 @@ extern "C" BOOL FGDBGetTableInfo (int iDB,LPCTSTR TablePath,LPINT pType,LPINT pn
 				pBounds->ymx = extent.yMax;
 			}
 		}
-		if ((hr = table.Search(L"*", L"", true, attributeQueryRows)) == S_OK)
+
+		if (pSetBounds)
+			hr = table.Search(L"*", L"", envelope, true, attributeQueryRows);
+		else
+			hr = table.Search(L"*", L"", true, attributeQueryRows);
+		if (hr == S_OK)
 		{
 			Row row;
 			noq++;

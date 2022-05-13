@@ -3222,6 +3222,7 @@ GotCloseFilehSQL:
 					// $BOUNDS(INIT) returns init bounds
 					// $BOUNDS(ADD,B1,B2) add bounds if both valid (xmn >= xmx) 
 					// $BOUNDS(FACTOR,bounds,factor)
+					// $BOUNDS(MULTIPLY,bounds,factor)
 					// $BOUNDS(INC,B1,D) add D to bounds 
 					// $BOUNDS(VISLIM) returns bounds of visible limits
 					// $BOUNDS(VALID,BOUNDS) return 0 if not valid 1 if valid  
@@ -3441,16 +3442,28 @@ GotCloseFilehSQL:
 				boundstoa (OutLoc,&Bounds); 
 				goto Rtnl;
 			}
-			else if (!_fstricmp (Arg[1],"FACTOR"))
-			{   
-				 
+			else if (!_fstricmp(Arg[1], "FACTOR"))
+			{
+
 				*OutLoc = 0;
-				Bounds = atobounds (Arg[2],&Err);
+				Bounds = atobounds(Arg[2], &Err);
 				if (Err)
 					goto Rtnl;
-				RVal = atof (Arg[3]);
-				Bounds = FactorBounds (&Bounds,RVal);
-				boundstoa (OutLoc,&Bounds); 
+				RVal = atof(Arg[3]);
+				Bounds = FactorBounds(&Bounds, RVal);
+				boundstoa(OutLoc, &Bounds);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "MULTIPLY"))
+			{
+
+				*OutLoc = 0;
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err)
+					goto Rtnl;
+				RVal = atof(Arg[3]);
+				Bounds = MultiplyBounds(&Bounds, RVal);
+				boundstoa(OutLoc, &Bounds);
 				goto Rtnl;
 			}
 			else if (!_fstricmp (Arg[1],"UL"))
