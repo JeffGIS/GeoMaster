@@ -5612,6 +5612,7 @@ DisplayParcel:
 				//RestoreScreenRect (hDC,hBMMove,MoveStartRect,WindowRect);
 				RestoreFullWindowBitmap();
 				ReleaseDC (hWnd,hDC);
+				DisplayAllToolbars(3);
 				AdjustToolbarPositions ();
 				if (EqualRect (&FullWindowBitMapRect,&WindowRect))
             		break;
