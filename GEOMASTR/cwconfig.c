@@ -1425,7 +1425,7 @@ ATOM RegisterTempWindowClass(LPSTR className, HINSTANCE hInst)
 }
 void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 {
-	GetWindowRect(GetDesktopWindow(), &MonitorRectangle[0]);
+//	GetWindowRect(GetDesktopWindow(), &MonitorRectangle[0]);
 	MonitorRectangleComposite = MonitorRectangle[0];
 	if (nMon < 1)
 		return;
@@ -1440,21 +1440,21 @@ void GetMonitorRectangles(int nMon,HINSTANCE hInst)
 	int inc = -32;
 	for (int iMon = 0; iMon < nMon; iMon++)
 	{
-		int winx = MonitorRectangle[max(0,iMon-1)].right + inc, winy = MonitorRectangle[max(0,iMon - 1)].top + abs(inc), winw=16, winh=16;
+/*		int winx = MonitorRectangle[max(0, iMon - 1)].right + inc, winy = MonitorRectangle[max(0, iMon - 1)].top + abs(inc), winw = 16, winh = 16;
 		inc = 32;
 		HWND hWnd = CreateWindowEx(WS_EX_APPWINDOW,
-			className,               /* Window class name           */
-			className,             /* Window's title              */
+			className,             
+			className,             
 			style,
 			winx, winy, winw, winh,
-			0,                    /* Parent window's handle      */
-			0,                    /* Default to Class Menu       */
-			hInst,                   /* Instance of window          */
-			0);                   /* Create struct for WM_CREATE */
+			0,                    
+			0,                   
+			hInst,                  
+			0);                   
 		GetWindowRect(hWnd, &MonitorRectangle[iMon]);
 		ShowWindow(hWnd, SW_MAXIMIZE);
 		GetWindowRect(hWnd, &MonitorRectangle[iMon]);
-		DestroyWindow(hWnd);
+		DestroyWindow(hWnd);*/
 		UnionRect(&MonitorRectangleComposite, &MonitorRectangleComposite, &MonitorRectangle[iMon]);
 	}
 	UnregisterClass(className, hInst);
@@ -5653,7 +5653,7 @@ DisplayParcel:
 	        	 ReopenMap (TRUE);
 	        	 TrapKillTimer=FALSE; 
 
-				 while (HaveMapTimer()&&Counter>0)
+				 while (CurView && HaveMapTimer()&&Counter>0)
 				 {	
 					HaveSeg = TRUE;
 //					if (OpenMap (hWnd, hDC))

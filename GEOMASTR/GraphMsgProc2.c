@@ -1920,6 +1920,7 @@ GSSiExitProg (439);
 	 sprintf(FICopyright, "%s - Update %i\r\nFreeImage Version %s\r\nMrSID Version %s", GMVersion,GMUpdate, FIVersion, MrSidVer);
 #endif
 	 SetDlgItemText(hWndDlg, IDC_VERSION, FICopyright);
+	 cwCenter(hWndDlg, 0);
  }
          break; /* End of WM_INITDIALOG                                 */
 
@@ -2438,7 +2439,7 @@ GSSiExitProg (1107);
     		break;
     	}
  		w = max (MinWidth,Rect.right - Rect.left);
-		h = min (MaxHeight,Rect.bottom -Rect.top); 
+		h = min (MaxHeight,abs(Rect.bottom -Rect.top)); 
         GetWindowRect (GetDlgItem (hWndDlg,IDOK),&OKRect);
  		ScreenRectToClientRect (hWndDlg,&OKRect);
         GetWindowRect (GetDlgItem (hWndDlg,IDCANCEL),&Rect);

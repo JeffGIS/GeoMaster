@@ -5803,6 +5803,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
     BOOL		UseBAR=FALSE, UseFile=FALSE;  
     short		ii, MaxHeight=0;
 	int			MaxLen=16, NumItems=0;
+	int			totHeight = 0;
 	RECT		Rect = { 0 };
     
     if (!hWndDlg)
@@ -5882,6 +5883,7 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
 	                if (pRect)
 	                {
 	                	SendDlgItemMessage (hWndDlg,Control,LB_GETITEMRECT,Index,(LPARAM)&Rect);
+						totHeight += (Rect.bottom - Rect.top);
 	                	MaxHeight = max (MaxHeight,Rect.bottom - Rect.top);   
 	                	NumItems++;
 	                }
@@ -5923,23 +5925,25 @@ short FillList (HWND hWndDlg,UINT Control,LPSTR file, LPSTR DefaultVal,LPRECT pR
     MaxLen += 2;//allow for scroll bar 
     if (pRect)
     {   
-    	POINT	p;
 	   	TEXTMETRIC	TextMet;
 		HDC		hDC = GetDC (GetDlgItem (hWndDlg,Control));
 		int		cw, ch;
+		RECT	mainRect;
 
+		if (hWndMain)
+			GetWindowRect(hWndMain,&mainRect);
+		else
+			GetWindowRect(GetDesktopWindow(), &mainRect);
+		totHeight = min(totHeight, RECTHEIGHT(&mainRect)*0.75);
     	GetWindowRect (GetDlgItem (hWndDlg,Control),pRect);
-    	p.x = pRect->left;
-    	p.y = pRect->top;
-    	ScreenToClient (hWndDlg,&p);
-    	pRect->left = p.x;
-    	pRect->top = p.y;
+    	ScreenRectToClientRect (hWndDlg,pRect);
 		GetTextMetrics (hDC,&TextMet);
 		cw = LOWORD(GetDialogBaseUnits());
 		ch = HIWORD(GetDialogBaseUnits());
     	pRect->right = pRect->left + cw * MaxLen;    
-    	pRect->bottom = min (pRect->bottom,pRect->top + ch * (NumItems+1));
+    	pRect->bottom = pRect->top + totHeight + ch;
 		ReleaseDC (hWndDlg,hDC);
+		ClientRectToScreenRect(hWndDlg, pRect);
     }
     GSSiClose2 (&Fid);
     if (hWndDlg)
@@ -13785,7 +13789,7 @@ BOOL IsTopLevelWindow(HWND hWnd)
 		rtn = TRUE;
 	return rtn;
 }
-void cwCenter(HWND hWnd, int top)
+void cwCenter(HWND hWnd, int opt)
 #if ENABLETRACE
 {GSSiEnterProg (452);
 #endif
@@ -13793,6 +13797,7 @@ void cwCenter(HWND hWnd, int top)
  POINT      pt;
  RECT       swp;
  RECT       rParent;
+ RECT		mainRect;
  int        iwidth;
  int        iheight; 
  HWND		hPWnd;  
@@ -13800,15 +13805,21 @@ void cwCenter(HWND hWnd, int top)
  BOOL		IsTop = IsTopLevelWindow(hWnd);
  int		attempt = 0;
 
- /* get the rectangles for the parent and the child                     */
+ //opt =  0 Center in hWndMain or desktop if no hWndMain
+ //	   = -1 Center in hWndMain or desktop if no hWndMain
+ // // = SHRT_MAX Center in hWndMain or desktop if no hWndMain
+ //    = -2 Center on cursor
+ //    = -3 Center at bottom of hWndMain or desktop if no hWndMain
+ //    = -4 Center at bottom of VP
+
  if (!GetWindowRect(hWnd, &swp))
 	 return;
- swp = MoveRectToAMonitor(swp);
+ 
 begin:
 
- if (!hWndMain || top == SHRT_MAX)
+ if (!hWndMain || opt == SHRT_MAX)
  {
- 	top = 0;
+ 	opt = 0;
  	hPWnd = GetDesktopWindow();  
  	IsClient = FALSE;
  }
@@ -13819,12 +13830,13 @@ begin:
  }
 // GetClientRect(hPWnd, &rParent);
  GetWindowRect(hPWnd, &rParent);
+ GetWindowRect(hPWnd, &mainRect);
 
  /* calculate the height and width for MoveWindow                       */
  iwidth = swp.right - swp.left;
  iheight = swp.bottom - swp.top;
 
- if (top == -3)//center at bottom
+ if (opt == -3)//center at bottom
  {
 	 pt.y = rParent.bottom - iheight - 16;
 	 if (!IsRectEmpty(&PromptRect))
@@ -13832,7 +13844,7 @@ begin:
 	 pt.x = RECTWIDTH(&rParent) / 2 - iwidth / 2;
 	 goto Exit;
  }
- if (top == -4)//center at bottom of vp
+ if (opt == -4)//center at bottom of vp
  {
 	 pt.y = CurView->DrawRect.top + RECTHEIGHT(&CurView->DrawRect) - iheight - 16;
 	 pt.x = CurView->DrawRect.left + RECTWIDTH(&CurView->DrawRect) / 2 - iwidth / 2;
@@ -13840,12 +13852,12 @@ begin:
 		 ClientToScreen(hPWnd, &pt);
 	 goto Exit;
  }
- else if (top<0)
+ else if (opt<0)
 {
 	GetCursorPos (&pt);
-	if (top==-1)
-		pt.x=0;
-	if (top == -5)
+	if (opt==-1)
+		pt.x=rParent.left;
+	if (opt == -5)
 		pt.y -= iheight;
 }
 else
@@ -13858,23 +13870,23 @@ else
 } 
 
  /* calculate the new x, y starting point                               */
- pt.x = max (0,pt.x - (iwidth / 2));
- pt.y = max (0,pt.y - (iheight / 2));
+ pt.x = pt.x - (iwidth / 2);
+ pt.y = pt.y - (iheight / 2);
 
- /* top will adjust the window position, up or down                     */
- if(top>0)
-   pt.y = pt.y + top;
+ /* positive opt will adjust the window position, up or down                     */
+ if(opt>0)
+   pt.y = pt.y + opt;
  else
  {
 	 if (pt.x + iwidth > rParent.right)
 		 pt.x = rParent.right - iwidth;
 	 if (pt.y < rParent.top)
 		 pt.y = rParent.top;
-	 if ((pt.x < 0 || pt.y < 0) && attempt++ < 2)
+/*	 if ((pt.x < mainRect.left || pt.y < mainRect.top) && attempt++ < 2)
 	 {
 		 top = SHRT_MAX;
 		 goto begin;
-	 }
+	 }*/
  }
 
 Exit:

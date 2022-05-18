@@ -830,13 +830,12 @@ long far pascal UGRID_HLTDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPa
            	lastrow = -1;
 			isMinMax = 0;
 
-            //if (!First)
-            {  
 				SetWindowPos(hwnd,HWND_TOP,WindRect.left,WindRect.top,
 										   WindRect.right-WindRect.left,
 										   WindRect.bottom-WindRect.top,SWP_NOZORDER);
-            }
-           	First = FALSE;   
+			if (First)
+				cwCenter(hwnd, 0);
+			First = FALSE;
            	OutAreaUnits = GetGlobalLVal2 ("[%AREAUNITS]",1);
            	OutDistUnits = GetGlobalLVal2 ("[%DISTANCEUNITS]",1);
 			//create a gray brush (to be used for the dialog background)

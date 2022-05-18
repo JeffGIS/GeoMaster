@@ -12,6 +12,7 @@ using namespace std;
 static int numMon;
 static HMONITOR hMonIn = 0, hOtherMon;
 
+extern "C" RECT MonitorRectangle[4];
 
 class WMIQuery 
 { 
@@ -642,7 +643,8 @@ extern "C" int isLaptop(int ii)
 		MONITORINFOEX mi;
 		mi.cbSize = sizeof(mi);
 		GetMonitorInfo(hMonitor, &mi);
-		numMon++;
+		MonitorRectangle[numMon++] = *lprcMonitor;
+
 		if (hMonIn && hMonIn != hMonitor)
 		{
 			hOtherMon = hMonitor;
