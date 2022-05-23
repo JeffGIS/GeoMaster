@@ -23,7 +23,7 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	char	LastF[MAX_PATH*2];
 	LPSTR	LastAF = &LastF[MAX_PATH];
 	BOOL	SaveSE=ShareEnabled;
-	long	Minutes; 
+	long	seconds; 
 	time_t	systime; 
 	RECT	WindRect,ClientRect; 
 	char	DateTime[64];
@@ -55,11 +55,11 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	
 	strcpy (DateTime,ctime(&systime));
 	*strchr(DateTime,'\n') = 0;   
-	Minutes = (GetTickCount()-SysStartTime)/1000;
+	seconds = (GetTickCount64()-SysStartTime)/1000;
 	GetWindowRect (hWndMain,&WindRect);
 	GetClientRect (hWndMain,&ClientRect);
 	ShareEnabled = TRUE;
-	sprintf (msg,"\r\n\r\n%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",DateTime,UserName,NodeName,Minutes,NumScreensDisplayed,GMVersion,nTempFilesCleared,
+	sprintf (msg,"\r\n\r\n%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",DateTime,UserName,NodeName,seconds,NumScreensDisplayed,GMVersion,nTempFilesCleared,
 																			  		 WindRect.left,WindRect.top,WindRect.right,WindRect.bottom,ClientRect.left,ClientRect.top,ClientRect.right,ClientRect.bottom);
 	AppendFile2 (AbendFile,msg);
 	GetWindowsVersion (Winver);

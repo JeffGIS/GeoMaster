@@ -12,7 +12,7 @@ int		DepthColorIntensity=4;
 int		ShallowWaterHighlight=0;
 int		WaterLevelOffset=0;
 HFILE	SavedGraphicsFid=HFILE_ERROR;
-DWORD	SysStartTime;
+LONGLONG	SysStartTime;
 double	P_TOL = 1e-4;
 HINSTANCE	ghInst;
 HWND	ghWnd;  

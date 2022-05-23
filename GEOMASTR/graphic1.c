@@ -186,7 +186,7 @@ BOOL InitGraphics (HWND hWnd)
     	hbmpMultiLevel[i] = 0;   
     _fstrcpy (CurHelpTopic,"topic5");
 	DragAcceptFiles (hWnd,TRUE);   
-	SysStartTime = GetTickCount();  
+	SysStartTime = GetTickCount64();  
 	CreateFidSmall (); 
 //	CreateFidDBF ();
 	InitProj4CoordConv (FALSE);
@@ -290,12 +290,13 @@ void FreeSavedConfigs (void)
 
 void LogUsageInfo (int From,LPSTR mess)
 {
-	char str[512],DateTime[64];
+	char str[1024],DateTime[64];
+	static char usageFile[MAX_PATH] = { 0 };
 
 	if (LogUsage && !MapServer)
 	{  
 		BOOL	SaveSE=ShareEnabled;
-		long	Minutes; 
+		long	seconds; 
 		time_t	systime; 
 		RECT	WindRect,ClientRect;  
 		BOOL	SaveAllowCache = AllowCache;
@@ -310,30 +311,35 @@ void LogUsageInfo (int From,LPSTR mess)
 
 		AllowCache = FALSE;
 		systime=time(&systime);
-		
+		if (!*usageFile)
+		{
+			sprintf(usageFile, "[%%DL]abends\\usage_%s_%lli.txt", UserName, systime);
+		}
+
 		_fstrcpy (DateTime,ctime(&systime));
 		*_fstrchr(DateTime,'\n') = 0;   
 		switch (From)
 		{
 		case 0:
-		Minutes = (GetTickCount()-SysStartTime)/1000;
-		GetWindowRect (hWndMain,&WindRect);
-		GetClientRect (hWndMain,&ClientRect);
-		ShareEnabled = TRUE;
-		if (!ExistFile ("[%%DL]usage.txt"))
-			AppendFile ("[%%DL]usage.txt","DATE\tUSER\tNODE\tWINDOWSVER\tMINUTES\tSCREENS\tVERSION\tNTEMP\tWL\tWT\tWR\tWB\tCL\tCT\tCR\tCB\tCLB\tCTB\tCRB\tCBB");
+		case 2:
+			seconds = (GetTickCount64()-SysStartTime)/1000;
+			GetWindowRect (hWndMain,&WindRect);
+			GetClientRect (hWndMain,&ClientRect);
+		//ShareEnabled = TRUE;
+			if (!ExistFile (usageFile))
+				AppendFile (usageFile,"FROM\tDATE\tUSER\tNODE\tWINDOWSVER\tNUMMONITORS\tSECONDS\tSCREENS\tVERSION\tNTEMP\tWL\tWT\tWR\tWB\tCL\tCT\tCR\tCB\tCLB\tCTB\tCRB\tCBB");
 
-		sprintf (str,"%s\t%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",DateTime,UserName,NodeName,winVersion,Minutes,NumScreensDisplayed,GMVersion,nTempFilesCleared,nCheckPointUpdateBlocks,
+			sprintf (str,"%i\t%s\t%s\t%s\t%s\t%i\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",From,DateTime,UserName,NodeName,winVersion,numMonitors,seconds,NumScreensDisplayed,GMVersion,nTempFilesCleared,nCheckPointUpdateBlocks,
 																			  		 WindRect.left,WindRect.top,WindRect.right,WindRect.bottom,
 																					 ClientRect.left,ClientRect.top,ClientRect.right,ClientRect.bottom,
 																					 ClientRectStart.left,ClientRectStart.top,ClientRectStart.right,ClientRectStart.bottom);
 		break;
 		case 1:
-			sprintf (str,"%s\t%s\t%s\tLoad config:%s",DateTime,UserName,NodeName,mess);
+			sprintf (str,"%i\t%s\t%s\t%s\tLoad config:%s",From,DateTime,UserName,NodeName,mess);
 			break;
 		}
-		AppendFile ("[%%DL]usage.txt",str);
-		ShareEnabled = SaveSE;
+		AppendFile (usageFile,str);
+		//ShareEnabled = SaveSE;
 		AllowCache = SaveAllowCache;
 	} 
 	return;
@@ -400,7 +406,7 @@ void QuitGraphics()
 	}
 	else
 		*ExitMessage = 0;
-	LogUsageInfo (0,"");
+	LogUsageInfo (2,"");
 	AAShutDown();
 	InitProj4CoordConv (TRUE);
 	for (i=0;i<MAXMULTILEVELZOOM;i++)

@@ -3649,8 +3649,9 @@ GSSiExitProg (100);
     GSSiClose (FidConfig);
 	RunStartupCommand (1);  
 	DisplayAllToolbars (0);
-	LogUsageInfo (1,FullPath);
-/*    for (iv=0;iv<NumViews;iv++)
+	LogUsageInfo(0, "");
+	LogUsageInfo(1, FullPath);
+	/*    for (iv=0;iv<NumViews;iv++)
     {
         SetCurView ( pViewports[iv]);
 		if (CurView->UsePanZoomControl)

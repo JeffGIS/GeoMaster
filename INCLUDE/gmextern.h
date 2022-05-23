@@ -9,7 +9,7 @@ extern BOOL			isTouchScreen;
 extern int			ShallowWaterHighlight;
 extern int			WaterLevelOffset;
 extern HFILE			SavedGraphicsFid;
-extern DWORD			SysStartTime;
+extern LONGLONG			SysStartTime;
 extern double			P_TOL;    
 extern double			CompressAccuracy;
 extern HANDLE			hBTDups;
