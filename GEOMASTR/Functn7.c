@@ -2441,9 +2441,13 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 	case 788: //$MONITOR(COUNT)
 			  //$MONITOR(CURRENT)
 			  //$MONITOR(MOVE,id)
+			  //$MONITOR(SWITCH)
 	{
 		nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 		*OutLoc = 0;
+		numMonitors = GetNumMonitors();
+		GetMonitorRectangles(numMonitors, hInst);
+
 		if (!stricmp(Arg[1], "COUNT"))
 		{
 			itoa(numMonitors, OutLoc, 10);
@@ -2455,12 +2459,11 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		else if (!stricmp(Arg[1], "SWITCH"))
 		{
 			int fromMon = GetCurrentMonitor();
-			int iMon = fromMon;
-			if (iMon == 1)
-				iMon = 2;
-			else
-				iMon = 1;
-			MoveToMonitor(iMon - 1, fromMon - 1);
+			int iMon = fromMon + 1;
+
+			if (iMon == numMonitors)
+				iMon = 0;
+			MoveToMonitor(iMon, fromMon);
 			strcpy(OutLoc, "1");
 		}
 		else if (!stricmp(Arg[1], "MOVETO"))

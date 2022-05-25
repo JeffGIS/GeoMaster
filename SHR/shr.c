@@ -13833,8 +13833,8 @@ begin:
  GetWindowRect(hPWnd, &mainRect);
 
  /* calculate the height and width for MoveWindow                       */
- iwidth = swp.right - swp.left;
- iheight = swp.bottom - swp.top;
+ iwidth = RECTWIDTH(&swp);
+ iheight = RECTHEIGHT(&swp);
 
  if (opt == -3)//center at bottom
  {
@@ -13863,8 +13863,8 @@ begin:
 else
 {
 	 /* find the center point and convert to screen coordinates             */
-	 pt.x = rParent.left + RECTWIDTH(&rParent)  / 2;
-	 pt.y = rParent.top   + RECTHEIGHT(&rParent) / 2; 
+	 pt.x = (rParent.left + rParent.right)  / 2;
+	 pt.y = (rParent.top  + rParent.bottom) / 2; 
 	 if (!IsClient)
 	 	ClientToScreen (hPWnd, &pt);
 } 

@@ -25,7 +25,7 @@ int	CurrentReportFontHeight (void)
 	if (CurFont && CurFont <= CurReport->NumFonts)
 			SelectObject (CurReport->hDC,CurReport->hFonts[CurFont-1]);
 	GetTextExtentPoint32 (CurReport->hDC,str,_fstrlen(str),&txSize);
-    return (txSize.cy);
+    return abs(txSize.cy);
 }
 
 HANDLE LoadReport2 (HFILE Fid,HANDLE hBuf)
@@ -562,7 +562,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
 BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect, BOOL FitToWindow)
 {
 	LPREPORT	pReport=(LPREPORT)GlobalLock (hReport);
-	int			irow, itab, MaxRowLen=0, ReportHeight=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
+	int			irow, itab, MaxRowLen=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
 	LPSTR		pRow, Tabloc, StartTab, EndTab, pFirstRow, Tabstr;
 	LPLONG		startrow, pRows;
 	char		tabstr[16], FontStr[32];  
@@ -583,7 +583,7 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 		return FALSE;
 	if (!pSizeRect)
 		f = (double)pReport->Just / 1000;
-	xmid  = Rect.left + (Rect.right - Rect.left) * f;
+	xmid  = Rect.left + abs(Rect.right - Rect.left) * f;
 	pReport->hDC = hDC;
 	pReport->Rect = Rect;
 	if (pReport->Type == 2)
@@ -612,8 +612,8 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	pReport = (LPREPORT)GlobalLock (hReport);
 	if (pSizeRect)
 	{
-		hinc = ((Rect.bottom-Rect.top)*pReport->Height*Factor)/2;
-		winc = ((Rect.right-Rect.left)*pReport->Width*Factor)/2;
+		hinc = (abs(Rect.bottom-Rect.top)*pReport->Height*Factor)/2;
+		winc = (abs(Rect.right-Rect.left)*pReport->Width*Factor)/2;
 		Rect.top += hinc;
 		Rect.left += winc;
 		Rect.bottom -= hinc;
@@ -621,8 +621,8 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 		pReport->Rect = Rect; 
 	}
 	if (!pSizeRect)
-		Margin = min (IDNINT(pReport->Margin * (Rect.bottom-Rect.top)), 
-					  IDNINT(pReport->Margin * (Rect.right-Rect.left))); 
+		Margin = min (IDNINT(pReport->Margin * abs(Rect.bottom-Rect.top)), 
+					  IDNINT(pReport->Margin * abs(Rect.right-Rect.left))); 
 	for (i=0;i< pReport->NumTabs;i++)
 		if (pSizeRect)
 			pReport->TabLen[i] = 0;
@@ -1036,7 +1036,7 @@ Exit:
 BOOL DisplayReport2 (HDC hDC, HANDLE hReport, RECT Rect, double Factor,BOOL CloseFiles,LPRECT pSizeRect)
 {
 	LPREPORT	pReport, SaveCurReport;
-	int			irow, itab, MaxRowLen=0, ReportHeight=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin,ifont;  
+	int			irow, itab, MaxRowLen=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin,ifont;  
 	LPSTR		pRow, Tabloc, StartTab, EndTab, pFirstRow, Tabstr;
 	char		tabstr[16], FontStr[32];  
 	int			PixPerInch; 
@@ -1383,16 +1383,17 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
 	 	 	rect = ScrollRect;
 	 	 else
 		 	GetWindowRect(hWndMain, &rect);    
-		 rect.left = max(0,rect.left);
-		 rect.top = max(0,rect.top); 
+		// rect.left = max(0,rect.left);
+		// rect.top = max(0,rect.top); 
 		 x = rect.left;
 		 y = rect.top;
-		 height = rect.bottom-rect.top;    
-		 width = rect.right - rect.left;
+		 height = RECTHEIGHT(&rect);
+		 width = RECTWIDTH(&rect);
 	 	 SetWindowPos(hWndDlg, (HWND) 0, x, y,width, height,0); 
 	 	 GetClientRect(hWndDlg,&rect);
-	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, 0, 0,rect.right, rect.bottom,0);  
+	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, 0, 0, RECTWIDTH(&rect), RECTHEIGHT(&rect),0);
 	 	 hWndScroll2 = hWndDlg;
+		 cwCenter(hWndDlg, 0);
 		 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 			
          break; /* End of WM_INITDIALOG                                 */
@@ -1418,7 +1419,8 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
 		 		SendDlgItemMessage (hWndDlg,IDC_SCROLLBOX,LB_RESETCONTENT,0,0);
 				if ( !DisplayReportScroll (hWndDlg,IDC_SCROLLBOX))
 		    	 	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-         		break;
+				cwCenter(hWndDlg, 0);
+				break;
 		    case IDM_EXIT:	 
             case IDCANCEL: 
     	 		PostMessage(hWndDlg, WM_CLOSE, 0, 0L);

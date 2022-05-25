@@ -55,15 +55,24 @@ BOOL CreateGMStartupFile(LPSTR OutFile, LPSTR ConfigPath, BOOL LinkZoom, BOOL Re
 }
 int GetCurrentMonitor(void)
 {
-	int rtn = 1;
+	int rtn = 0;
 	RECT rect, outRect;
-
+	double area, maxarea = 0;
+	
 	if (numMonitors > 1)
+	for (int i = 0;i<numMonitors;i++)
 	{
 		GetWindowRect(hWndMain, &rect);
 		InflateRect(&rect, -32, -32);
-		if (!IntersectRect(&outRect, &MonitorRectangle[0], &rect))
-			rtn = 2;
+		if (IntersectRect(&outRect, &MonitorRectangle[i], &rect))
+		{
+			area = RECTWIDTH(&rect) * RECTHEIGHT(&rect);
+			if (area > maxarea)
+			{
+				area = maxarea;
+				rtn = i;
+			}
+		}
 	}
 	return rtn;
 }
