@@ -127,14 +127,8 @@ RECT MoveRectToAMonitor(RECT rect)
 
 	if (imon < 0 || pctOn < 100)
 	{ 
-		RECT mRect;
 		imon = max(0, imon);
-		mRect = MonitorRectangle[imon];
-		mRect.left = max(0, MonitorRectangle[imon].left);
-		mRect.top = max(0, MonitorRectangle[imon].top);
-		rtn = mRect;
-		rtn.right = rtn.left + RECTWIDTH(&mRect);
-		rtn.bottom = rtn.top + RECTHEIGHT(&mRect);
+		IntersectRect(&rtn, &MonitorRectangle[imon], &rect);
 	}
 	return rtn;
 }
