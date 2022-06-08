@@ -4112,7 +4112,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 		if (Message != GSSI_REPOSITION || wParam == 1)
 			lastw = lasth = -1;
 //		ClientRectToScreenRect (CurView->hWnd,&Rect);
-		SetWindowPos(hWndDlg,HWND_TOP,Rect.left,Rect.top+1,Rect.right-Rect.left,Rect.bottom-Rect.top-2,SWP_SHOWWINDOW|SWP_NOZORDER);
+		SetWindowPos(hWndDlg,HWND_TOP,Rect.left,Rect.top+1, abs(Rect.right-Rect.left), abs(Rect.bottom-Rect.top-2),SWP_SHOWWINDOW|SWP_NOZORDER);
 		w = Rect.right-Rect.left;
 		maxinrow = 6;
 		if (w < 300)
@@ -4132,7 +4132,7 @@ BOOL FAR PASCAL VEHICLE_STATUSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 		ScreenRectToClientRect (hWndDlg,&rect);
 		SetWindowPos(GetDlgItem(hWndDlg,IDC_VEHICLE_STAT_LIST),HWND_TOP,0,rect.bottom+2,w-6,h,SWP_SHOWWINDOW|SWP_NOZORDER);
 		SendDlgItemMessage (hWndDlg,IDC_VEHICLE_STAT_LIST,LB_SETITEMHEIGHT,-1,MAKELPARAM(w/maxinrow,0));
-		SetWindowPos(GetDlgItem(hWndDlg,IDC_VEHICLEINFO),HWND_TOP,3,rect.bottom+2+h+4,w-3,Rect.bottom-(rect.bottom+2+h+4)-4,SWP_SHOWWINDOW|SWP_NOZORDER);
+		SetWindowPos(GetDlgItem(hWndDlg,IDC_VEHICLEINFO),HWND_TOP,3,rect.bottom+2+h+4,w-3, abs(Rect.bottom-(rect.bottom+2+h+4)-4),SWP_SHOWWINDOW|SWP_NOZORDER);
 		if (w != lastw || h != lasth)
 		{
 			int	ninrow=0;
@@ -4876,8 +4876,8 @@ BOOL FAR PASCAL VEHICLE_HISTORYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam
 			
 		 //GetClientRect(hWndDlg,&ClientRect);
 		 GetWindowRect(hWndDlg,&ClientRect);
-		 w = ClientRect.right - ClientRect.left;
-		 h = ClientRect.bottom - ClientRect.top;
+		 w = abs(ClientRect.right - ClientRect.left);
+		 h = abs(ClientRect.bottom - ClientRect.top);
 		 SetViewport(*pCommandViewport);
 		 //ClientRect = ConfigDisplayRect;
 		 //GetClientRect(CurView->hWnd,&ClientRect);

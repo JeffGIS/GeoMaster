@@ -2438,7 +2438,7 @@ GSSiExitProg (1107);
             GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
     		break;
     	}
- 		w = max (MinWidth,Rect.right - Rect.left);
+ 		w = max (MinWidth,abs(Rect.right - Rect.left));
 		h = min (MaxHeight,abs(Rect.bottom -Rect.top)); 
         GetWindowRect (GetDlgItem (hWndDlg,IDOK),&OKRect);
  		ScreenRectToClientRect (hWndDlg,&OKRect);

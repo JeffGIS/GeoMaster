@@ -2735,7 +2735,7 @@ HRGN	hRgn;
 //			MoveWindow(hWnd,pt.x,pt.y,
 //							rect.right-rect.left,rect.bottom-rect.top,TRUE);
 			SetWindowPos (hWnd,0,pt.x,pt.y,
-							rect.right-rect.left,rect.bottom-rect.top,SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_SHOWWINDOW);
+							abs(rect.right-rect.left),abs(rect.bottom-rect.top),SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_SHOWWINDOW);
 			GetWindowRect (hWnd,&ToolbarRect[ToolbarID]);
 			CurView->PanZoomControlPoint = RectMid (&rect);
 			break;
@@ -5105,8 +5105,8 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 		GetClientRect (hWndPict,&rect);
 		FillRect (hDC,&rect,GetStockObject(DC_BRUSH));
 		SetWindowPos(GetDlgItem (hWndDlg,IDC_IMAGE),HWND_TOP,imagelft,imagetop,
-									   WindRect.right-WindRect.left-imagergt,
-									   WindRect.bottom-WindRect.top-imagebot,SWP_NOZORDER|SWP_SHOWWINDOW);
+			abs(WindRect.right-WindRect.left-imagergt),
+			abs(WindRect.bottom-WindRect.top-imagebot),SWP_NOZORDER|SWP_SHOWWINDOW);
 		SetWindowPos(GetDlgItem (hWndDlg,IDC_NEXTPICT),HWND_TOP,WindRect.right-nxlft,WindRect.bottom-nxbot,
 									   nxw,nxh,SWP_NOZORDER|SWP_SHOWWINDOW);
 		SetWindowPos(GetDlgItem (hWndDlg,IDC_PREVPICT),HWND_TOP,WindRect.left+prvlft,WindRect.bottom-prvbot,
@@ -5193,8 +5193,8 @@ static	int	nxw, nxh, nxlft, nxbot, prvlft, prvbot,DisplayHeight,ImageWidth,Image
 		imagergt = (WindRect.right - WindRect.left) - (rect.right - rect.left);
 		imagelft = rect.left - WindRect.left;
 		GetWindowRect (GetDlgItem (hWndDlg,IDC_NEXTPICT),&rect);
-		nxw = rect.right - rect.left;
-		nxh = rect.bottom - rect.top;
+		nxw = abs(rect.right - rect.left);
+		nxh = abs(rect.bottom - rect.top);
 		nxlft = WindRect.right - rect.left;
 		nxbot = WindRect.bottom - rect.top;
 		GetWindowRect (GetDlgItem (hWndDlg,IDC_PREVPICT),&rect);

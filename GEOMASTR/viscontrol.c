@@ -1575,7 +1575,7 @@ extern POINT	ToolBarStartPoint;
 						 SendMessage (pWMH->hWndTab,WM_SETFONT,(WPARAM)pWMH->hFontTab,MAKELPARAM(TRUE, 0));    
 						 TabCtrl_AdjustRect(pWMH->hWndTab, FALSE, &rect); 
 					     SetWindowPos(pWMH->hWndDisplay, HWND_TOP, rect.left, rect.top, 
-				                                               rect.right - rect.left, rect.bottom - rect.top, 0); 
+							 abs(rect.right - rect.left), abs(rect.bottom - rect.top), 0);
 						 rtn = TRUE;
 					 }
 				 }
@@ -4153,7 +4153,7 @@ HWND VisibilityControl (HWND hWnd,HINSTANCE hInst,LPSTR ConnectToVP,LPRECT pRect
 			SetWindowLong (hWndVisMenu,GWL_WNDPROC,g_OldProc2);
 	}*/
     SetWindowPos(g_hwndDisplay, HWND_TOP, rect.left, rect.top, 
-				rect.right - rect.left, rect.bottom - rect.top, 0); 
+		abs(rect.right - rect.left), abs(rect.bottom - rect.top), 0);
 	ToolbarWindow[ToolbarID] = hWndTab;//g_hwndDisplay;
 	hwndTT = DoCreateDialogTooltip(ToolbarID); 
 	ToolbarWindow[ToolbarID] = hWndMenu;

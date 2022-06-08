@@ -184,8 +184,8 @@ BOOL FAR PASCAL ADDWAYPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 		 if (!First)
 		 {  
 			SetWindowPos(hWndDlg,HWND_TOP,WindRect.left,WindRect.top,
-									   WindRect.right-WindRect.left,
-									   WindRect.bottom-WindRect.top,SWP_NOZORDER);
+									   RECTWIDTH(&WindRect),
+									   RECTHEIGHT(&WindRect),SWP_NOZORDER);
 		 } 
 		 First = FALSE; 
 		 hWndAddWaypoint=hWndDlg;

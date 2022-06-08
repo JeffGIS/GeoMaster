@@ -1319,11 +1319,11 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		rect.top = max(0, rect.top);
 		x = rect.left;
 		y = rect.top;
-		height = rect.bottom - rect.top - 6;
-		width = rect.right - rect.left - 6;
+		height = abs(rect.bottom - rect.top) - 6;
+		width = abs(rect.right - rect.left) - 6;
 		SetWindowPos(hWndDlg, (HWND)0, x + 1, y + 1, width, height, 0);
 		GetClientRect(hWndDlg, &rect);
-		SetWindowPos(GetDlgItem(hWndDlg, IDC_SCROLLBOX), (HWND)0, 0, 0, rect.right, rect.bottom, 0);
+		SetWindowPos(GetDlgItem(hWndDlg, IDC_SCROLLBOX), (HWND)0, 0, 0, rect.right, abs(rect.bottom), 0);
 		if (!DisplayReportScroll(hWndDlg, IDC_SCROLLBOX))
 			PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
 
@@ -1554,12 +1554,12 @@ BOOL FAR PASCAL BROWSETEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPA
 		 rect.top = max(0,rect.top); 
 		 x = rect.left;
 		 y = rect.top;
-		 height = rect.bottom-rect.top-6;    
-		 width = rect.right - rect.left-6;
+		 height = abs(rect.bottom-rect.top)-6;    
+		 width = abs(rect.right - rect.left)-6;
 	 	 SetWindowPos(hWndDlg, (HWND) 0, x+1, y+1,width, height,0); 
 	 	 GetClientRect(hWndDlg,&rect);  
 	 	 GetWindowRect (GetDlgItem(hWndDlg,IDC_SCROLLBOX),&sbrect);
-	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, sbrect.left, sbrect.top,rect.right, rect.bottom,0);
+	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, sbrect.left, sbrect.top,abs(rect.right), abs(rect.bottom),0);
 		 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 		}
          break; /* End of WM_INITDIALOG                                 */

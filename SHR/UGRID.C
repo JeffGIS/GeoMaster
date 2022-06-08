@@ -242,26 +242,26 @@ BOOL FAR PASCAL GMNGRID1DlgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 			{
 				GetWindowRect (hWndDlg,&ParentRect);
 				SetWindowPos(hWndDlg,HWND_TOP,Rect.left,Rect.top,
-									 (tot-nCol*8)*2+4+windoff,
-									 ParentRect.bottom-ParentRect.top,0);
+					abs((tot-nCol*8)*2+4+windoff),
+					abs(ParentRect.bottom-ParentRect.top),0);
 			}
 			else
 			{
 				ParentRect = GMGridRect;
 				SetWindowPos(hWndDlg,HWND_TOP,ParentRect.left,ParentRect.top,
-											  ParentRect.right-ParentRect.left,
-											  ParentRect.bottom-ParentRect.top,0);
+					abs(ParentRect.right-ParentRect.left),
+						abs(ParentRect.bottom-ParentRect.top),0);
 			}
 			GetWindowRect (GetDlgItem (hWndDlg,IDC_HEADINGS),&Rect);
 			ScreenRectToClientRect (hWndDlg,&Rect);
 			SetWindowPos(GetDlgItem (hWndDlg,IDC_HEADINGS),HWND_TOP,Rect.left,Rect.top,
-															 ParentRect.right-ParentRect.left-windoff*2,
-															 Rect.bottom-Rect.top,0);
+				abs(ParentRect.right-ParentRect.left-windoff*2),
+				abs(Rect.bottom-Rect.top),0);
 			GetWindowRect (GetDlgItem (hWndDlg,IDC_RECORDLIST),&Rect);
 			ScreenRectToClientRect (hWndDlg,&Rect);
 			SetWindowPos(GetDlgItem (hWndDlg,IDC_RECORDLIST),HWND_TOP,Rect.left,Rect.top,
-															 ParentRect.right - ParentRect.left - windoff*2,
-															 ParentRect.bottom-ParentRect.top - windoff - Rect.top,0);
+				abs(ParentRect.right - ParentRect.left - windoff*2),
+					abs(ParentRect.bottom-ParentRect.top - windoff - Rect.top),0);
 			ii=SendDlgItemMessage(hWndDlg,IDC_RECORDLIST,LB_GETHORIZONTALEXTENT,0,0);
 			ii=SendDlgItemMessage(hWndDlg,IDC_RECORDLIST,LB_SETHORIZONTALEXTENT,3500,0);
 	}	

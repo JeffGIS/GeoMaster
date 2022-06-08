@@ -3601,7 +3601,6 @@ GSSiExitProg (1350);
 			HBITMAP	hBitmap;
 			HDIB32 hDib32;
 			RECT	ScreenRect;
-			HWND	hWnd = GetDesktopWindow();
 			HDC		hDC;
 
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
@@ -3609,6 +3608,7 @@ GSSiExitProg (1350);
 				goto RtnFalse;
 			if (!stricmp(Arg[1], "TOHANDLE"))
 			{
+				HWND	hWnd = GetDesktopWindow();
 				hDC = GetWindowDC(hWnd);
 				//SaveDC(hDC);
 				//SetDisplayMode(hDC, GF_TEXTMODE);

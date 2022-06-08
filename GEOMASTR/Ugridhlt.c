@@ -336,7 +336,7 @@ int TB_Subclass (HWND hWndDlg,UINT message,WPARAM wParam,LPARAM lParam)
 					//get the size of the client window
 					//adjust the table child window to fit in the parent window
 					SetWindowPos(GetDlgItem(hWndDlg,IDC_UGTABLE),HWND_TOP,5,(int)(32*shrink),rect.right-10,
-						(int)(rect.bottom-40*shrink-InitialFTRHeight*shrink),SWP_NOZORDER);
+						abs((int)(rect.bottom-40*shrink-InitialFTRHeight*shrink)),SWP_NOZORDER);
 					//adjust the heading child window to fit
 	            	break;
 	            	
@@ -831,8 +831,8 @@ long far pascal UGRID_HLTDlgProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lPa
 			isMinMax = 0;
 
 				SetWindowPos(hwnd,HWND_TOP,WindRect.left,WindRect.top,
-										   WindRect.right-WindRect.left,
-										   WindRect.bottom-WindRect.top,SWP_NOZORDER);
+					abs(WindRect.right-WindRect.left),
+						abs(WindRect.bottom-WindRect.top),SWP_NOZORDER);
 			if (First)
 				cwCenter(hwnd, 0);
 			First = FALSE;

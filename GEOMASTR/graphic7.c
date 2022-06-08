@@ -4147,8 +4147,8 @@ void cwCenterInVP (HWND hWnd, short VPID)
  rParent = pViewports[VPID-1]->DrawRect;
 
  /* calculate the height and width for MoveWindow                       */
- iwidth = swp.right - swp.left;
- iheight = swp.bottom - swp.top;
+ iwidth = abs(swp.right - swp.left);
+ iheight = abs(swp.bottom - swp.top);
 
 	 /* find the center point and convert to screen coordinates             */
 	 pt.x = (rParent.right + rParent.left) / 2;

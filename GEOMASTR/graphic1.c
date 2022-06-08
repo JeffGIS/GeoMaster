@@ -299,9 +299,22 @@ void LogUsageInfo (int From,LPSTR mess)
 		long	seconds; 
 		time_t	systime; 
 		RECT	WindRect,ClientRect;  
-		BOOL	SaveAllowCache = AllowCache;
 		BOOL	is64Bit = Is64BitMachine();
 		char	winVersion[256];
+		char	txt[128];
+		BOOL	saveKFO;
+		BOOL	saveAllowCache;
+
+		strcpy(txt, "[%KFO]");
+		ExpandText(txt);
+		saveKFO = atob(txt);
+		strcpy(txt, "[%KFO]=F");
+		ExpandText(txt);
+		strcpy(txt, "[%ALLOWCACHE]");
+		ExpandText(txt);
+		saveAllowCache = atob(txt);
+		strcpy(txt, "[%ALLOWCACHE]=F");
+		ExpandText(txt);
 
 		GetWindowsVersion(winVersion);
 		if (is64Bit)
@@ -339,8 +352,17 @@ void LogUsageInfo (int From,LPSTR mess)
 			break;
 		}
 		AppendFile (usageFile,str);
-		//ShareEnabled = SaveSE;
-		AllowCache = SaveAllowCache;
+		if (saveKFO)
+			strcpy(txt, "[%KFO]=T");
+		else
+			strcpy(txt, "[%KFO]=F");
+		ExpandText(txt);
+		if (saveAllowCache)
+			strcpy(txt, "[%ALLOWCACHE]=T");
+		else
+			strcpy(txt, "[%ALLOWCACHE]=F");
+		ExpandText(txt);
+
 	} 
 	return;
 }

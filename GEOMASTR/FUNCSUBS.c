@@ -6051,7 +6051,7 @@ BOOL FAR PASCAL MESSAGE_INCOMINGMsgProc(HWND hWndDlg, UINT Message, WPARAM wPara
 		pt.x = rect2.left;
 		pt.y = rect2.top;
 		ScreenToClient (hWndDlg,&pt);  
-		SetWindowPos(hWndDlg, HWND_TOP,0, 0, RECTWIDTH(&rect1),rect2.top-rect1.top, SWP_NOMOVE);
+		SetWindowPos(hWndDlg, HWND_TOP,0, 0, RECTWIDTH(&rect1),abs(rect2.top-rect1.top), SWP_NOMOVE);
         cwCenter(hWndDlg,0);
 	    GetWindowRect (GetDlgItem (hWndDlg,IDC_REPLY),&rect2);
      	SetCursorPos (rect2.left,rect2.top);

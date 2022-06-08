@@ -644,8 +644,8 @@ BOOL CALLBACK EnumCtrlProcSizeDlg (HWND hWnd,LONG lParam)
 	long	w,h;
 	
 	GetWindowRect(hWnd, &rect2);  
-	w = rect2.right - rect2.left;
-	h = rect2.bottom - rect2.top;  
+	w = abs(rect2.right - rect2.left);
+	h = abs(rect2.bottom - rect2.top);
 //	rect2 = rect;
 	SetWindowPos(hWnd, (HWND) 0,(int)(OldRect.left + (rect2.left-OldRect.left)*wfactor),
 								   (int)(OldRect.top  + (rect2.top-OldRect.top)  *hfactor),
