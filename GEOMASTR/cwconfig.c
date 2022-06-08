@@ -5582,6 +5582,9 @@ DisplayParcel:
 				SaveFullWindowBitmap(hWndMain);
 		}
 		goto ReturnDefault;
+	case WM_DISPLAYCHANGE:
+		ReloadMainMenu();
+		goto ReturnDefault;
 	case WM_SIZE:     /*  code for sizing client area                   */
     	 ConfigDisplayRect.left = ConfigDisplayRect.right = 0;
          switch (wParam)

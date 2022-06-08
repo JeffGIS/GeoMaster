@@ -76,6 +76,19 @@ int GetCurrentMonitor(void)
 	}
 	return rtn;
 }
+void MoveCursorToMonitor(int imon)
+{
+	POINT pt;
+	
+	GetCursorPos(&pt);
+	if (!PtInRect(&MonitorRectangle[imon], pt))
+	{
+		int x = (MonitorRectangle[imon].left + MonitorRectangle[imon].right) / 2;
+		int y = (MonitorRectangle[imon].top + MonitorRectangle[imon].bottom) / 2;
+		SetCursorPos(x, y);
+	}
+	return;
+}
 void MoveToMonitor(int imon,int fromMon)
 {
 	if (fromMon != imon)
@@ -84,6 +97,7 @@ void MoveToMonitor(int imon,int fromMon)
 		{
 			MoveWindow(hWndMain, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
 			MoveToolbarsToMonitor(fromMon, imon);
+			MoveCursorToMonitor(imon);
 		}
 	}
 }
