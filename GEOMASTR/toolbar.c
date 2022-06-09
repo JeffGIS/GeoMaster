@@ -482,20 +482,23 @@ void ClearToolbarTrackEvents (HWND hWnd)
 }
 void MoveToolbarsToMonitor(int fromMon, int toMon)
 {
-	RECT tbRect;
-	HANDLE hTran = STRANRect(&MonitorRectangle[fromMon], &MonitorRectangle[toMon]);
-	for (int i = 0; i < nToolbars; i++)
+	if (fromMon >= 0 && fromMon < numMonitors)
 	{
-		GetWindowRect(ToolbarWindow[i], &tbRect);
-		if (RectInRect(&MonitorRectangle[fromMon], &tbRect))
+		RECT tbRect;
+		HANDLE hTran = STRANRect(&MonitorRectangle[fromMon], &MonitorRectangle[toMon]);
+		for (int i = 0; i < nToolbars; i++)
 		{
-			RECT origRect = tbRect;
-			TRANRect(&tbRect, hTran);
-			MoveWindow(ToolbarWindow[i], tbRect.left, tbRect.top, RECTWIDTH(&origRect), RECTHEIGHT(&origRect), TRUE);
-			GetWindowRect(ToolbarWindow[i], &ToolbarRect[i]);
+			GetWindowRect(ToolbarWindow[i], &tbRect);
+			if (RectInRect(&MonitorRectangle[fromMon], &tbRect))
+			{
+				RECT origRect = tbRect;
+				TRANRect(&tbRect, hTran);
+				MoveWindow(ToolbarWindow[i], tbRect.left, tbRect.top, RECTWIDTH(&origRect), RECTHEIGHT(&origRect), TRUE);
+				GetWindowRect(ToolbarWindow[i], &ToolbarRect[i]);
+			}
 		}
+		CloseTRANS2(&hTran);
 	}
-	CloseTRANS2(&hTran);
 }
 void DisplayAllToolbars (int Opt)
 {

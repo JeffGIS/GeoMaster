@@ -1536,7 +1536,7 @@ int MonitorType(int which,LPSTR monName);
 int GetMouseType(void);
 int GetNumMonitors(void);
 int GetCurrentMonitor(void);
-void MoveToMonitor(int imon, int fromMon);
+void MoveToMonitor(int imon, int fromMon,HWND hWnd);
 int WhichMonitorIsRectMostOn(RECT rect, LPINT pPctOn);
 RECT MoveRectToAMonitor(RECT rect);
 

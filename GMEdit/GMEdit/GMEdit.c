@@ -73,8 +73,8 @@ static	char	currentBreakpoint[32]={0};
 static  HWND	hWndGMEditReturn = 0;
 static	int		breakAtLoc = -1;
 static	BOOL	SavePosition = FALSE;
-
-
+static	int		xtop = CW_USEDEFAULT, ytop = 0, winwidth = CW_USEDEFAULT, winheight = 0;
+static	int		iMonitor = 0;
 static HANDLE hFunDefDB=0;
 
 // Forward declarations of functions included in this code module:
@@ -165,6 +165,7 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 	LPSTR pFile = strstr(lpCmdLine, "/GMEdit ");
 	LPSTR pEndFile = strchr(pFile, 0);
 	LPSTR pWnd = strstr(lpCmdLine, "/W ");
+	LPSTR pMon = strstr(lpCmdLine, "/M ");
 	//createFunIDFile ();
 
 	//MessageBox(0, lpCmdLine, 0, MB_OK);
@@ -172,6 +173,17 @@ int APIENTRY WinMainGMEdit(HINSTANCE hInstance,
 		HANDLE FileHandle = OpenExternalDatabase("ODBC|MS Access Database;DBQ=C:\\geomas\\projects\\corners\\tables\\Update_ADA_Curb_Ramp_Inventory.mdb|JEFF");
 		//CloseDataFile(FALSE,&FileHandle);
 	}*/
+
+	numMonitors = GetNumMonitors();
+	GetMonitorRectangles(numMonitors, hInstance);
+
+	int imon = GetCurrentMonitor();
+	if (pMon)
+	{
+		*pMon = 0;
+		pMon += 3;
+		iMonitor = atoi(pMon);
+	}
 	if (pWnd)
 	{
 		*pWnd = 0;
@@ -297,7 +309,7 @@ BOOL InitInstanceGM(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW|WS_VSCROLL|WS_HSCROLL,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+      xtop,ytop,winwidth,winheight, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
@@ -1606,6 +1618,8 @@ LRESULT CALLBACK WndProcGMEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
  		SelectObject (hdc,hOldFont);
         ReleaseDC (hWnd, hdc); 
 		AutoInsertOpen ();
+		if (!SavePosition)
+			MoveToMonitor(iMonitor,-1,hWnd);
 		GetWindowRect (hWnd,&rect);
 		if (FindBreakpoint (currentBreakpoint,&loc))
 		{

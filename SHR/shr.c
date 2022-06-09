@@ -13086,11 +13086,12 @@ BOOL GMEdit (HWND hWnd, LPSTR File)
 	BOOL rtn=TRUE;
 	char str[MAX_PATH+32];
 	char nonCachedFile[MAX_PATH];
+	int  iMon = GetCurrentMonitor();
 
 	strcpy(nonCachedFile, File);
 	GetNonCachedFile(nonCachedFile);
 	CloseAllRequestedFiles(FALSE);
-	sprintf(str, "$SESSION(CREATE,GMEdit /GMEdit %s /W %ld)", nonCachedFile, (DWORD)hWnd);
+	sprintf(str, "$SESSION(CREATE,GMEdit /GMEdit %s /W %ld /M %i)", nonCachedFile, (DWORD)hWnd,iMon);
 	ProcessText (str);
 	return rtn;
 }

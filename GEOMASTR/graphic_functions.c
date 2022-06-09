@@ -8330,6 +8330,7 @@ BOOL EditPickMacro (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
        	break;
 
 	case GSSI_GMEDITCOMPLETE:
+		GMEditReturn();
 		PostMessage(hWnd, GF_CLOSE, 0, 0L);
 		break;
 

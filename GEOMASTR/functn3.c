@@ -89,13 +89,15 @@ void MoveCursorToMonitor(int imon)
 	}
 	return;
 }
-void MoveToMonitor(int imon,int fromMon)
+void MoveToMonitor(int imon,int fromMon,HWND hWnd)
 {
+	if (!hWnd)
+		hWnd = hWndMain;
 	if (fromMon != imon)
 	{
 		if (imon < numMonitors)
 		{
-			MoveWindow(hWndMain, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
+			MoveWindow(hWnd, MonitorRectangle[imon].left, MonitorRectangle[imon].top, RECTWIDTH(&MonitorRectangle[imon]), RECTHEIGHT(&MonitorRectangle[imon]), TRUE);
 			MoveToolbarsToMonitor(fromMon, imon);
 			MoveCursorToMonitor(imon);
 		}

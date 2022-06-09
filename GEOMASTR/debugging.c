@@ -306,6 +306,8 @@ BOOL FAR PASCAL DEBUGGERMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 			{
 				MoveWindow(hWndDlg, currentRect.left, currentRect.top, RECTWIDTH(&currentRect), RECTHEIGHT(&currentRect), TRUE);
 			}
+			int iMonitor = GetCurrentMonitor();
+			MoveToMonitor(iMonitor, -1,hWndDlg);
 		 case GSSI_REINITDIALOG:
 			 SendDlgItemMessage(hWndDlg, IDB_MACROSTACK, LB_RESETCONTENT, 0,0);
 			 for (i = 0; i < lnMacroStack; i++)

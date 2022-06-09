@@ -2463,7 +2463,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 
 			if (iMon == numMonitors)
 				iMon = 0;
-			MoveToMonitor(iMon, fromMon);
+			MoveToMonitor(iMon, fromMon,0);
 			strcpy(OutLoc, "1");
 		}
 		else if (!stricmp(Arg[1], "MOVETO"))
@@ -2471,7 +2471,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			int iMon = atoi(Arg[2]);
 			int fromMon = GetCurrentMonitor();
 			iMon = max(0, iMon - 1);
-			MoveToMonitor(iMon, fromMon);
+			MoveToMonitor(iMon, fromMon,0);
 			strcpy(OutLoc, "1");
 		}
 		goto Rtnl;
