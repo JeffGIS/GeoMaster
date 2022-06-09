@@ -5075,7 +5075,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 	int		ii,n=0; 
 	HANDLE	hFile;
 	LPSTR	pFile, pUI; 
-	char	File[256];
+	char	File[MAX_PATH];
 	HANDLE	FidTF;
    	HFILE	Fid; 
    	static	HANDLE	hSaveBM=0;
@@ -5162,82 +5162,89 @@ FileIsInvalid:
          break; /* End of WM_CLOSE                                      */
 
     case WM_COMMAND:
-         switch(LOWORD(wParam))
-           {
-            case IDC_SETXFERFILE:
-				if (GetFileName2 (hWndDlg,TransferFileName,Ext,0))
-					PostMessage (hWndDlg,GSSI_REINITDIALOG,0,0);
-            	break;
-            	
-            case IDOK: 
-            {   
-				 LONGLONG	NextFileLoc = 0, loc, FileLength, length8, EndOfFile, LenToRead;
-				 int MaxLength;
-				 short	Version;
-				 int	len;
-				 int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
-				 char	SelectedFile[MAX_PATH];
+	{
+		BOOL altLoad = FALSE;
+		switch (LOWORD(wParam))
+		{
+		case IDC_SETXFERFILE:
+			if (GetFileName2(hWndDlg, TransferFileName, Ext, 0))
+				PostMessage(hWndDlg, GSSI_REINITDIALOG, 0, 0);
+			break;
 
-				 if (nSelected >= 0)
-					 SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
+		case ID_ALTLOAD:
+			altLoad = TRUE;
+		case IDOK:
+		{
+			LONGLONG	NextFileLoc = 0, loc, FileLength, length8, EndOfFile, LenToRead;
+			int MaxLength;
+			short	Version;
+			int	len;
+			int    nSelected = SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETCURSEL, 0, 0);
+			char	SelectedFile[MAX_PATH];
+
+			if (nSelected >= 0)
+				SendDlgItemMessage(hWndDlg, IDC_XFERFILELISTS, LB_GETTEXT, nSelected, (DWORD)SelectedFile);
 
 
-				 FidTF=OpenFileGM (TransferFileName,0,OF_READ);
-				 FileLength = GSSifilelength64 (FidTF);
-				 NextFileLoc = 14;
-			     BigRead64 (FidTF,(HPSTR)&length8,8);
-			     BigRead64 (FidTF,(HPSTR)&Version,2);
-			     BigRead64 (FidTF,(HPSTR)&MaxLength,4); 
-			     Processing = TRUE;
-				 while (ContinueProcessing && NextFileLoc > 0)
-				 {
-				 	GSSillseek64 (FidTF,NextFileLoc,0); 
-			     	BigRead64 (FidTF,(HPSTR)&len,4);
-			     	BigRead64 (FidTF,(HPSTR)File,len);
-			     	BigRead64 (FidTF,(HPSTR)&NextFileLoc,8);
-					if (nSelected>= 0  && stricmp(File, SelectedFile))
-						continue;
-			     	if (NextFileLoc > 0)
-			     		EndOfFile = NextFileLoc - 1;
-			     	else
-			     		EndOfFile = FileLength - 4; 
-			     	LenToRead = EndOfFile - GSSillseek64 (FidTF,0,1) +1;
-					SetDlgItemText (hWndDlg,IDC_MESSAGE,File);
-					if (!_fstrnicmp (File,"[XCMD]",6))
-						ExpandText (&File[6]);
-					else if (!GetFileFromTransferFile (GetDlgItem (hWndDlg,IDC_STATUS2),FidTF,File,LenToRead,MaxLength))
-					{   
-						sprintf (str,"Unable to open file\r\n%s",File);
-						MessageBox (hWndDlg,str,0,MB_ICONEXCLAMATION);
-					}
-					else if (UpdateID)
-					{
-						sprintf (str,"%i\t%s",UpdateID,File);
-						AppendFile ("[%%DL]updates\\updatefiles.txt",str);
-					}
-			    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),FileLength,GSSillseek64 (FidTF,0,1),0); 
-		    	 }  
-		    	 Processing = FALSE;
-		    	 GSSiClose64 (&FidTF);
-			     if (!ContinueProcessing)
-			     {
-			    	SetContinueProcessing ( TRUE); 
-			    	SetDlgItemText (hWndDlg,IDC_MESSAGE,"Load cancelled by user");
-			    	break;
-			     }
-		    	 
-                 GSSiEndDialog(hWndDlg, TRUE,hSaveBM); 
-            }
-            	break;
-            	 
-            case IDCANCEL:  
-            	if (Processing)
-            		SetContinueProcessing (FALSE);
-            	else
-	                GSSiEndDialog(hWndDlg, FALSE,hSaveBM);
-                break; 
-                 
-           }
+			FidTF = OpenFileGM(TransferFileName, 0, OF_READ);
+			FileLength = GSSifilelength64(FidTF);
+			NextFileLoc = 14;
+			BigRead64(FidTF, (HPSTR)&length8, 8);
+			BigRead64(FidTF, (HPSTR)&Version, 2);
+			BigRead64(FidTF, (HPSTR)&MaxLength, 4);
+			Processing = TRUE;
+			while (ContinueProcessing && NextFileLoc > 0)
+			{
+				GSSillseek64(FidTF, NextFileLoc, 0);
+				BigRead64(FidTF, (HPSTR)&len, 4);
+				BigRead64(FidTF, (HPSTR)File, len);
+				BigRead64(FidTF, (HPSTR)&NextFileLoc, 8);
+				if (nSelected >= 0 && stricmp(File, SelectedFile))
+					continue;
+				if (altLoad)
+					REPLAC(File, "[%DL]","[%DL]\\altloc\\",MAX_PATH);
+				if (NextFileLoc > 0)
+					EndOfFile = NextFileLoc - 1;
+				else
+					EndOfFile = FileLength - 4;
+				LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1) + 1;
+				SetDlgItemText(hWndDlg, IDC_MESSAGE, File);
+				if (!_fstrnicmp(File, "[XCMD]", 6))
+					ExpandText(&File[6]);
+				else if (!GetFileFromTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, File, LenToRead, MaxLength))
+				{
+					sprintf(str, "Unable to open file\r\n%s", File);
+					MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
+				}
+				else if (UpdateID)
+				{
+					sprintf(str, "%i\t%s", UpdateID, File);
+					AppendFile("[%%DL]updates\\updatefiles.txt", str);
+				}
+				PctBox(GetDlgItem(hWndDlg, IDC_STATUS), FileLength, GSSillseek64(FidTF, 0, 1), 0);
+			}
+			Processing = FALSE;
+			GSSiClose64(&FidTF);
+			if (!ContinueProcessing)
+			{
+				SetContinueProcessing(TRUE);
+				SetDlgItemText(hWndDlg, IDC_MESSAGE, "Load cancelled by user");
+				break;
+			}
+
+			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+		}
+		break;
+
+		case IDCANCEL:
+			if (Processing)
+				SetContinueProcessing(FALSE);
+			else
+				GSSiEndDialog(hWndDlg, FALSE, hSaveBM);
+			break;
+
+		}
+	}
     default:
         return FALSE;
    }
