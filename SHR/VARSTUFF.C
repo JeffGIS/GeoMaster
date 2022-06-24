@@ -4084,6 +4084,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%MILESPERMETER", 410, FALSE);
 	AllocateTypeVar("%METERSPERMILE", 411, FALSE);
 	AllocateTypeVar("%TRACEMAPSERVER", 412, FALSE);
+	AllocateTypeVar("%ENDPADCHAR", 413, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5354,6 +5355,13 @@ GSSiExitProg (533);
 			break;
 		case 412:
 			btoa(allowMapServerTrace, OutStr);
+			break;
+		case 413:
+		{
+			char endpadchar = 32 + 128;
+			OutStr[0] = endpadchar;
+			OutStr[1] = 0;
+		}
 			break;
 
 	}

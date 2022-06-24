@@ -3171,25 +3171,26 @@ GotCloseFilehSQL:
 			if (!l)
 				goto RtnFalse;
 			if (*Arg[3] == 'l')
-			{   
+			{
 				lpChr = Arg[1];
 				LastLoc = 0;
 				do
 				{
 					if (*lpChr)
 					{
-						lpChr = _fstrstr (lpChr+1,Arg[2]); 
+						lpChr = _fstrstr(lpChr + 1, Arg[2]);
 						if (lpChr)
 							LastLoc = lpChr;
 					}
 					else
 						lpChr = 0;
-				}
-				while (lpChr); 
+				} while (lpChr);
 				lpChr = LastLoc;
 			}
+			else if (l == 1)
+				lpChr = strchr(Arg[1], *Arg[2]);
 			else
-				lpChr = _fstrstr (Arg[1],Arg[2]);
+				lpChr = strstr ((const char* )Arg[1],(const char* )Arg[2]);
 			if (lpChr)
 				*lpChr = 0;
 			_fstrcpy (OutLoc,Arg[1]);

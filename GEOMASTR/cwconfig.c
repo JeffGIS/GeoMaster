@@ -1482,8 +1482,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	//char monName[12];
 	//sscanf(cmdLine, "%11s",monName );
 	int  monStatus, mouseType;
-	LPSTR keyloc;
-	BOOL haveKey = FALSE;
+	LPSTR keyloc,lFrom;
 
 #ifdef CHECKMEM
 	rtn = 1;
@@ -1546,11 +1545,17 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	else
 		strncpy (cmdLine,lpszCmdLine,1024);
 	cmdLine[1023] = 0;
+	if ((lFrom = strstr(cmdLine, "LAUNCHFROM=")))
+	{
+		*lFrom = 0;
+		lFrom += 11;
+		strcpy(launchFrom, lFrom);
+	}
 	if ((keyloc = strstr(cmdLine, "KEYLOC=")))
 	{
 		*keyloc = 0;
 		keyloc += 7;
-		if (stricmp(keyloc, "03231949"))
+		if (stricmp(keyloc, "032319491"))
 			return 0;
 		haveKey = TRUE;
 	}

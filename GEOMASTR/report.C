@@ -1387,13 +1387,13 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
 		// rect.top = max(0,rect.top); 
 		 x = rect.left;
 		 y = rect.top;
-		 height = RECTHEIGHT(&rect);
-		 width = RECTWIDTH(&rect);
+		 height = RECTHEIGHT(&rect)*0.99;
+		 width = RECTWIDTH(&rect)*0.99;
 	 	 SetWindowPos(hWndDlg, (HWND) 0, x, y,width, height,0); 
 	 	 GetClientRect(hWndDlg,&rect);
-	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, 0, 0, RECTWIDTH(&rect), RECTHEIGHT(&rect),0);
+	 	 SetWindowPos(GetDlgItem(hWndDlg,IDC_SCROLLBOX),(HWND)0, 0, 0, RECTWIDTH(&rect)*0.99, RECTHEIGHT(&rect)*0.99,0);
 	 	 hWndScroll2 = hWndDlg;
-		 cwCenter(hWndDlg, 0);
+		 cwCenter(hWndDlg, 99);
 		 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 			
          break; /* End of WM_INITDIALOG                                 */
@@ -1419,7 +1419,7 @@ BOOL FAR PASCAL SCROLLREPORTMsgProc2(HWND hWndDlg, UINT Message, WPARAM wParam, 
 		 		SendDlgItemMessage (hWndDlg,IDC_SCROLLBOX,LB_RESETCONTENT,0,0);
 				if ( !DisplayReportScroll (hWndDlg,IDC_SCROLLBOX))
 		    	 	PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
-				cwCenter(hWndDlg, 0);
+				//cwCenter(hWndDlg, 99);
 				break;
 		    case IDM_EXIT:	 
             case IDCANCEL: 

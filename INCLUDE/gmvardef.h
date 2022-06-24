@@ -21,6 +21,8 @@ UINT	ThemeEditStartCmd=0;
 //HBRUSH	ghBkgndBrush=0, ghDlgBrush=0;
 //HFONT	ghSelectedFont=0;   
 UINT	HelpID=0;
+BOOL haveKey = FALSE;
+char	launchFrom[MAX_PATH] = { 0 };
 double	PIASizeFactor=2; 
 short	PIAWidthFactor=3;  
 HANDLE	hBTDups=0;

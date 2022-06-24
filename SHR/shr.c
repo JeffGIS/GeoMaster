@@ -13805,6 +13805,7 @@ void cwCenter(HWND hWnd, int opt)
  BOOL		IsClient=FALSE;
  BOOL		IsTop = IsTopLevelWindow(hWnd);
  int		attempt = 0;
+ double		factor = 1;
 
  //opt =  0 Center in hWndMain or desktop if no hWndMain
  //	   = -1 Center in hWndMain or desktop if no hWndMain
@@ -13815,7 +13816,11 @@ void cwCenter(HWND hWnd, int opt)
 
  if (!GetWindowRect(hWnd, &swp))
 	 return;
- 
+ if (opt > 90)
+ {
+	 factor = (double)opt / 100;
+	 opt = 0;
+}
 begin:
 
  if (!hWndMain || opt == SHRT_MAX)
@@ -13834,8 +13839,8 @@ begin:
  GetWindowRect(hPWnd, &mainRect);
 
  /* calculate the height and width for MoveWindow                       */
- iwidth = RECTWIDTH(&swp);
- iheight = RECTHEIGHT(&swp);
+ iwidth = RECTWIDTH(&swp) * factor;
+ iheight = RECTHEIGHT(&swp) * factor;
 
  if (opt == -3)//center at bottom
  {
