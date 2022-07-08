@@ -335,17 +335,24 @@ void LogUsageInfo (int From,LPSTR mess)
 		{
 		case 0:
 		case 2:
-			seconds = (GetTickCount64()-SysStartTime)/1000;
-			GetWindowRect (hWndMain,&WindRect);
-			GetClientRect (hWndMain,&ClientRect);
-		//ShareEnabled = TRUE;
-			if (!ExistFile (usageFile))
-				AppendFile (usageFile,"FROM\tDATE\tUSER\tNODE\tWINDOWSVER\tHAVEKEY\tNUMMONITORS\tSECONDS\tSCREENS\tVERSION\tNTEMP\tWL\tWT\tWR\tWB\tCL\tCT\tCR\tCB\tCLB\tCTB\tCRB\tCBB\tLAUNCHFROM");
+		{
+			char SymDictName[256];
+			_fstrcpy(SymDictName, "[%SYM_DICT]");
+			ExpandText(SymDictName);
 
-			sprintf (str,"%i\t%s\t%s\t%s\t%s\t%i\t%i\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%s",From,DateTime,UserName,NodeName,winVersion,haveKey,numMonitors,seconds,NumScreensDisplayed,GMVersion,nTempFilesCleared,nCheckPointUpdateBlocks,
-																			  		 WindRect.left,WindRect.top,WindRect.right,WindRect.bottom,
-																					 ClientRect.left,ClientRect.top,ClientRect.right,ClientRect.bottom,
-																					 ClientRectStart.left,ClientRectStart.top,ClientRectStart.right,ClientRectStart.bottom,launchFrom);
+			seconds = (GetTickCount64() - SysStartTime) / 1000;
+			GetWindowRect(hWndMain, &WindRect);
+			GetClientRect(hWndMain, &ClientRect);
+			//ShareEnabled = TRUE;
+			if (!ExistFile(usageFile))
+				AppendFile(usageFile, "FROM\tDATE\tUSER\tNODE\tWINDOWSVER\tHAVEKEY\tNUMMONITORS\tSECONDS\tSCREENS\tVERSION\tNTEMP\tWL\tWT\tWR\tWB\tCL\tCT\tCR\tCB\tCLB\tCTB\tCRB\tCBB\tLAUNCHFROM\tSYMDICT");
+
+			sprintf(str, "%i\t%s\t%s\t%s\t%s\t%i\t%i\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%s\t%s", From, DateTime, UserName, NodeName, winVersion, haveKey, numMonitors, seconds, NumScreensDisplayed, GMVersion, nTempFilesCleared, nCheckPointUpdateBlocks,
+				WindRect.left, WindRect.top, WindRect.right, WindRect.bottom,
+				ClientRect.left, ClientRect.top, ClientRect.right, ClientRect.bottom,
+				ClientRectStart.left, ClientRectStart.top, ClientRectStart.right, ClientRectStart.bottom,
+				launchFrom, SymDictName);
+		}
 		break;
 		case 1:
 			sprintf (str,"%i\t%s\t%s\t%s\tLoad config:%s",From,DateTime,UserName,NodeName,mess);
