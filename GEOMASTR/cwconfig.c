@@ -1477,7 +1477,8 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 {
 	int rtn = 0;
 //	_CrtDumpMemoryLeaks();
-	char cmdLine[1024];
+	char cmdLine[2048];
+	int maxCmdline = 2048;
 	//strcpy(cmdLine, "0123456789012");
 	//char monName[12];
 	//sscanf(cmdLine, "%11s",monName );
@@ -1543,8 +1544,8 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 			return 0;
 	}
 	else
-		strncpy (cmdLine,lpszCmdLine,1024);
-	cmdLine[1023] = 0;
+		strcpy_s (cmdLine, maxCmdline,lpszCmdLine);
+	cmdLine[maxCmdline-1] = 0;
 	if ((lFrom = strstr(cmdLine, "LAUNCHFROM=")))
 	{
 		*lFrom = 0;
@@ -1553,11 +1554,14 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, 
 	}
 	if ((keyloc = strstr(cmdLine, "KEYLOC=")))
 	{
+		LPSTR pEnd = strchr(keyloc, ';');
+		if (pEnd)
+			*pEnd = 0;
 		*keyloc = 0;
 		keyloc += 7;
-		if (stricmp(keyloc, "032319491"))
-			return 0;
-		haveKey = TRUE;
+		//MessageBox(0, keyloc, 0, MB_OK);
+		if (!stricmp(keyloc, "03231949_1"))
+			haveKey = TRUE;
 	}
 	if (*LastChr (cmdLine) != ';')
 		strcat (cmdLine," ");
