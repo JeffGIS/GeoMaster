@@ -1,2 +1,2 @@
-[%DL]sportmap6.GMC 
-d:\spm3\spm3
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+e:\MplsRemoteTemplate\GeoMas
