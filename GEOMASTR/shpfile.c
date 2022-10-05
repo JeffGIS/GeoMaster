@@ -3215,7 +3215,7 @@ int GetFGDBLev (HWND hWndDlg,UINT ListCntl,int hDB,LPSTR Under,int iLev,HFILE Fi
 	return NumTot;
 }
 
-long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableName,LPSTR KeyField,LPSTR IncludeFields)
+long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableName,LPSTR sqlString,LPSTR KeyField,LPSTR IncludeFields)
 {
 	UINT	i, j;
 	char	ShpType[16] = "";
@@ -3261,7 +3261,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 	SHPType = ftype;
 	LoadSHPParm(DBNameIN, SHPType, 0);
 
-	if (OpenDataFile(DBName, "", BT_READ, &hDB))
+	if (OpenDataFile(DBName, sqlString, BT_READ, &hDB))
 	{
 		int numRows = NumSQLRows(hDB);
 		LPOPENSQLDATA SQLPtr = (LPOPENSQLDATA)GlobalLock(hDB);
@@ -3559,10 +3559,12 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				while (pName && *pName)
 				{
 					char value[4096];
+					char value2[4096];
 					if (pNextName)
 						*pNextName++ = 0;
-					sprintf(value, "[FGDB.%s]", pName);
-					ExpandText(value);
+					sprintf(value2, "[FGDB.%s]", pName);
+					ExpandText(value2);
+					DoubleQuotes(value2, value);
 					if (*pQuote)
 						sprintf(strchr(cmd, 0), ",'%s'", value);
 					else
@@ -3581,13 +3583,13 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 
 				sprintf(strchr(cmd, 0), "INSERT INTO %s_index VALUES(%lli,%i,%i,%i,%i)", TableName,keyval++, minmaxCoorl.xmn, minmaxCoorl.xmx, minmaxCoorl.ymn, minmaxCoorl.ymx);
 				rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
-/*				pCompressedRec = malloc(BinSizeR * 2);
-				lRec = CompressBinaryRecord((LPBYTE)pCurVal, pCompressedRec, BinSizeR);
-				totLen += lRec;
-				totPoints += SHPPolyHeader.NumPoints;
-				BigWrite64(FidOut, (HPSTR)&lRec, 4, -1);
-				BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
-				free(pCompressedRec);*/
+//				pCompressedRec = malloc(BinSizeR * 2);
+//				lRec = CompressBinaryRecord((LPBYTE)pCurVal, pCompressedRec, BinSizeR);
+//				totLen += lRec;
+//				totPoints += SHPPolyHeader.NumPoints;
+//				BigWrite64(FidOut, (HPSTR)&lRec, 4, -1);
+//				BigWrite64(FidOut, (HPSTR)pCompressedRec, lRec, -1);
+//				free(pCompressedRec);
 				GlobalUnlock(hRec);
 				Num++;
 			

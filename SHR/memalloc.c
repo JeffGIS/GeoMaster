@@ -161,7 +161,7 @@ void LogMemAlloc (int MemID,long MemLen)
 	NumMemAlloc[MemID]++;
 	if (MemID == LogMemDebugID && NumMemAlloc[MemID] == WantCallNo)
 		ii=1;  
-	if (MemID == 321)
+	if (MemID == 638)
 		ii=1;
 	return;
 }

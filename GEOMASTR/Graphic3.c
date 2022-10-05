@@ -2950,7 +2950,8 @@ long OutputToFile(LPSTR File, BOOL Create, LPSTR DBName, LPSTR pSQL, HANDLE hFie
     LPINT       lpField, StartField, pNumFields, pNumKeyFields, pFieldID, pKeyFieldID,pFieldIDIN;
 	int			NumFieldsIN;
     short       NumFields=0,n, FieldID, NumKeyFields;
-    long        rtn=0, TotRecs=0, AtRec=0;
+	long        rtn = 0;
+	LONGLONG	TotRecs = 0, AtRec = 0;
     LPSTR		str;
     HANDLE		hStr;
     short       st,ifield,j,nKeyFields=1; 
@@ -3225,7 +3226,7 @@ GSSiExitProg (603);
 	    }
 		else if (!useFileLength)
 	    {
-	    	sprintf (str,"%ld records written",AtRec);
+	    	sprintf (str,"%lld records written",AtRec);
 	    	SetWindowText (hWndDlg,str);
 	    }
 		if (Create)

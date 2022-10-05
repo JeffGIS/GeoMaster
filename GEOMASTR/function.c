@@ -4478,7 +4478,7 @@ SetVis:
 			}
 			else if (!stricmp(Arg[1], "CONVERT"))
 			{
-				int n = ConvertFGDBTable(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7]);
+				int n = ConvertFGDBTable(Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7],Arg[8]);
 				itoa(n, OutLoc, 10);
 			}
 			goto Rtnl;

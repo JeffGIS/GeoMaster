@@ -8783,8 +8783,8 @@ BOOL PctBox(HWND hWnd, LONGLONG MaxLen, LONGLONG Done, short InFreq)
  double         PCTDone,PercentDone; 
  static			double	debugpct=32.55;  
  static			short	LastIPCT=-1;
- char           Text[32];
- static	char	LastText[32]="";
+ char           Text[128];
+ static	char	LastText[128]="";
  static	HWND	LasthWnd=0;
  MSG            msg; 
  HDC            hDC; 
