@@ -5683,7 +5683,7 @@ void LoadToolbarsInConfig (HFILE Fid,RECT OriginalWindowRect)
 			}
 			break;
 		case TBT_VISMENU:
-			break;
+			//break;
 			sprintf (cmd,"$VIS(CONTROL,,%i %i %i %i,0.80)",rect.left,rect.top,rect.right,rect.bottom);
 			ProcessText (cmd);
 			break;

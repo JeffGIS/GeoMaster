@@ -6814,7 +6814,7 @@ BOOL FAR PASCAL VISIBLE2MsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
          SendDlgItemMessage (hWndDlg,FILE_VIS_LB,LB_SETTABSTOPS,2,(LPARAM)&TabStops2);
        	 SendDlgItemMessage (hWndDlg,VIS_ZOOM_LEV,LB_SETTABSTOPS,2,(LPARAM)&TabStops3); 
  
-         cwCenter(hWndDlg, 0);
+         //cwCenter(hWndDlg, 0);
          /* initialize working variables                                */ 
          ResetVis = CurVis; 
 SetVis:  if (SelectVisList(Pickability))

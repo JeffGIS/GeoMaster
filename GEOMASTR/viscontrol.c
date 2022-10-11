@@ -3544,7 +3544,8 @@ ExitDefault:
         return DefWindowProc(hWnd, Message, wParam, lParam);
    } 
 //Exit:
-    GlobalUnlock (pWMH->menuHandle[pWMH->currentMenu]);
+    if (pWMH)
+		GlobalUnlock (pWMH->menuHandle[pWMH->currentMenu]);
 	GlobalUnlock (hWMH);
 	pVCHeader = savepVCHeader;
 	hWMH = savehWMH;

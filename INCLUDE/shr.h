@@ -767,7 +767,7 @@ BOOL AVIFrameToDIB (LPSTR File, long frame,LPHANDLE NewDIB,LPSHORT ShouldDeleteB
                     short Bitcount, short width, short height);
 long NumDIBColors (HANDLE hDib);
 void CloseOrthoAVI (void);
-short AVIOut (LPSTR Name,LPBITMAPINFOHEADER alpbi,LPHANDLE hFile,LPLONG pFrame,BOOL UseExCmp);
+short AVIOut (LPSTR Name,LPBITMAPINFOHEADER alpbi,LPHANDLE hFile,LPLONG pFrame,BOOL UseExCmp, int fmt);
 void AVIOutClose (LPHANDLE phFile);
 HANDLE ConvertBitmap16To24 (LPBITMAPINFOHEADER  lpbi);
 HANDLE ConvertBitmap8To24 (LPBITMAPINFOHEADER  lpbi);

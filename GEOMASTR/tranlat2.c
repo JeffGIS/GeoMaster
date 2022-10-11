@@ -1833,7 +1833,7 @@ ProcessBitmap:
                      char AVIFile[MAX_PATH];
                      BOOL   st;  
                      long	nc;
-                     char	OrthoImageExtension[6]=".gci";
+                     char	OrthoImageExtension[6]=".gco";
                      
                      _fstrcpy (AVIFile,Dir);
                      sprintf (AVIFile,"%s\\orthos%s%s",Dir,cOrthoRes,OrthoImageExtension);
@@ -1849,7 +1849,7 @@ ProcessBitmap:
 					 	pDIB = (LPBITMAPINFOHEADER)GlobalLock (hNewDIB);
 					 	hDIB = hNewDIB;
 					 }                       
-                     st = AVIOut (AVIFile,pDIB,&hAVIFile,&Frame,UseExCmp);
+                     st = AVIOut (AVIFile,pDIB,&hAVIFile,&Frame,UseExCmp,1);
 				 	 GlobalUnlock (hDIB);
                      DestroyDIB (hDIB);
                      GSSiRemove (fNameBM);

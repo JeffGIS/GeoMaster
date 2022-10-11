@@ -3369,10 +3369,6 @@ Next:
 				indexEntryOut.Len = lpIndex->CurrentEntry->Len - strlen (lpIndex->CurrentEntry->Name) + strlen (indexEntryOut.Name);
 				totLen += indexEntryOut.Len;
 				GSSiGlobFree (&hDib);
-				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.tif", FIF_TIFF, TIFF_DEFAULT);
-				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.jp2", FIF_JP2, JP2CompressionFactor);
-				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_32.j2k", FIF_J2K, JP2CompressionFactor);
-				//SaveDIB32(hDib32, "c:\\temp\\testbitmap_3232.jp2", FIF_JP2, 32);
 				GMDestroyDIB32 (hDib32);
 				pMem = GlobalLock (hmemDIB);
 				BigWrite (FidIndexOut,&indexEntryOut,indexEntryOut.Len,-1);

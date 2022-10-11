@@ -57,7 +57,7 @@ static PGETFRAME	pget=0;
 static BOOL	UseExternalCompression=FALSE;
 
 
-BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile);
+BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile,int fmt);
 
 #define	MAXFRAME 640L * 480L * 3L + 1024L
 
@@ -75,46 +75,61 @@ short DIBHeadSize (LPBITMAPINFOHEADER lpbi)
 }
 
 
-BOOL CreateGCIFile (LPSTR Name,LPBITMAPINFOHEADER lpbi, HANDLE hFile)
+BOOL CreateGCIFile (LPSTR Name,LPBITMAPINFOHEADER lpbi, HANDLE hFile,int fmt)
 {         
 	HANDLE 	hIC;
-	LONG	ICRtn;
 	short	lhead;
     LPAVIFILE	pAVIFile;  
 	OFSTRUCTGM	OFStruct;
     LPBITMAPINFOHEADER	lpbiHead;  
     HANDLE	hHeader; 
-    DWORD	CompressorID; 
+    DWORD	CompressorID=0; 
     BOOL	rtn=FALSE; 
     char	str[32],DefaultCompressor[8];
 	
-	if (lpbi->biBitCount > 8)
-		_fstrcpy (DefaultCompressor,"IV50");
-	else 
+	pAVIFile = (LPAVIFILE)GlobalLock(hFile);
+	pAVIFile->GCIFid = -1;
+	if (!fmt)
+	{
+		pAVIFile->Type = TYPEGCI;
+		if (lpbi->biBitCount > 8)
+			_fstrcpy(DefaultCompressor, "IV50");
+		else
+		{
+			UseExternalCompression = FALSE;
+			_fstrcpy(DefaultCompressor, "IV32");
+		}
+		GetGlobalCVal("[%GCICOMPRESSOR]", str, DefaultCompressor);
+		CompressorID = mmioFOURCC(str[0], str[1], str[2], str[3]);
+		//   	AVIFileInit();
+		pAVIFile->hIC = ICOpen(ICTYPE_VIDEO, CompressorID, ICMODE_COMPRESS);
+		if (!pAVIFile->hIC)
+		{
+			GSSiMessageBox(0, "Failed to open compressor", str, MB_ICONEXCLAMATION, 0);
+			goto Exit;
+		}
+	}
+	else
 	{
 		UseExternalCompression = FALSE;
-		_fstrcpy (DefaultCompressor,"IV32"); 
-	}
-	GetGlobalCVal ("[%GCICOMPRESSOR]",str,DefaultCompressor);
-	CompressorID = mmioFOURCC(str[0],str[1],str[2],str[3]);
-//   	AVIFileInit();
-	pAVIFile = (LPAVIFILE)GlobalLock (hFile);
-	pAVIFile->GCIFid = -1;
-	pAVIFile->hIC = ICOpen (ICTYPE_VIDEO,CompressorID,ICMODE_COMPRESS);
-	if (!pAVIFile->hIC)
-	{
-		GSSiMessageBox (0,"Failed to open compressor",str,MB_ICONEXCLAMATION,0);
-		goto Exit;
+		pAVIFile->Type = TYPEGCO;
 	}
 	hHeader = GSSiGlobAlloc ( 372,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD));
 	lpbiHead = (LPBITMAPINFOHEADER)GlobalLock (hHeader);
-	ICRtn = ICCompressGetFormat(pAVIFile->hIC,lpbi, lpbiHead); 
-	ICRtn = ICCompressBegin(pAVIFile->hIC, lpbi,lpbiHead);  
-	if (ICRtn != ICERR_OK)
-	{   
-		GSSiGlobUlFree (&hHeader);
-		GSSiMessageBox (0,"Bad compressor format",str,MB_ICONEXCLAMATION,0);
-		goto Exit;            
+	if (!fmt)
+	{
+		LONG ICRtn = ICCompressGetFormat(pAVIFile->hIC, lpbi, lpbiHead);
+		ICRtn = ICCompressBegin(pAVIFile->hIC, lpbi, lpbiHead);
+		if (ICRtn != ICERR_OK)
+		{
+			GSSiGlobUlFree(&hHeader);
+			GSSiMessageBox(0, "Bad compressor format", str, MB_ICONEXCLAMATION, 0);
+			goto Exit;
+		}
+	}
+	else
+	{
+		*lpbiHead = *lpbi;
 	}
 	pAVIFile->GCIFid = GSSiOpenFile (Name,&OFStruct,OF_CREATE);
 	lhead = DIBHeadSize (lpbiHead);
@@ -142,7 +157,7 @@ Exit:
 	return rtn;
 }
 
-BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile)
+BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile,int fmt)
 {
     int			i;
     char		ach[50];
@@ -154,21 +169,23 @@ BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile)
     CLSID 	ClsID;
     LPAVIFILE	pAVIFile;
 
-    /* first let's make sure we are running on 1.1 */
-    wVer = HIWORD(VideoForWindowsVersion());
-    if (wVer < 0x010a){
-	    /* oops, we are too old, blow out of here */
-	    MessageBeep(MB_ICONHAND);
-	    MessageBox(NULL, "Video for Windows version is too old",
-		       "WriteAVI Error", MB_OK|MB_ICONSTOP);
-	    return FALSE;
-    }
-    
-    
-    if (!HaveInit)
-    	AVIFileInit();
-    HaveInit = TRUE;
-    
+	if (!fmt)
+	{
+		/* first let's make sure we are running on 1.1 */
+		wVer = HIWORD(VideoForWindowsVersion());
+		if (wVer < 0x010a) {
+			/* oops, we are too old, blow out of here */
+			MessageBeep(MB_ICONHAND);
+			MessageBox(NULL, "Video for Windows version is too old",
+				"WriteAVI Error", MB_OK | MB_ICONSTOP);
+			return FALSE;
+		}
+
+
+		if (!HaveInit)
+			AVIFileInit();
+		HaveInit = TRUE;
+	}
 	*phFile = GSSiGlobAlloc ( 373,GHND,sizeof(AVIFILE));
 	pAVIFile = (LPAVIFILE)GlobalLock (*phFile); 
     if (!UserDefinedImageQuality)
@@ -176,10 +193,10 @@ BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile)
 	else
 	    pAVIFile->CompressionFactor = UserDefinedImageQuality;
 	
-    if (_fstrstr (Name,".gci")) 
+    if (_fstrstr (Name,".gco")) 
     {
     	GlobalUnlock (*phFile);
-    	return (CreateGCIFile (Name,alpbi, *phFile));
+    	return (CreateGCIFile (Name,alpbi, *phFile,fmt));
     }
    	pAVIFile->Type = TYPEAVI;
     hr = AVIFileOpen(&pAVIFile->pfile,			    // returned file pointer
@@ -239,7 +256,7 @@ BOOL InitAVIOut (LPSTR Name, LPBITMAPINFOHEADER alpbi,LPHANDLE phFile)
 	return TRUE;
 }
 
-short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BOOL UseExCmp)
+short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BOOL UseExCmp, int fmt)
 {   
     HRESULT		hr;
     HDIB		hDIB;
@@ -253,11 +270,6 @@ short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BO
     HANDLE		hHeader=0;   
     short		rtn=1;
     
-/*	HeadLen = sizeof(BITMAPINFOHEADER)+alpbi->biClrUsed*sizeof(RGBQUAD);
-	image = (LPSTR)alpbi + HeadLen; 
-	OutSize = 0.25 * alpbi->biSizeImage;
-    hDIB = ICImageCompress (NULL,0,alpbi,image,alpbi,7000,&OutSize);
-    alpbi = GlobalLock(hDIB); */
     if (!lpbi->biSizeImage)
     {
     	long	rowlen = (long)lpbi->biWidth * (long)lpbi->biBitCount/8;
@@ -269,9 +281,9 @@ short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BO
     if (!*hFile)
 	{   
 		UseExternalCompression = UseExCmp;
-		if (!InitAVIOut (Name, lpbi,hFile)) 
+		if (!InitAVIOut (Name, lpbi,hFile,fmt)) 
 		{
-			GSSiGlobFree (hFile);
+			GSSiGlobFree (*hFile);
 			return FALSE;       
 		}
 	}
@@ -297,66 +309,68 @@ short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BO
 	else
 	{   
 		HANDLE	hCompData=0;
+		HANDLE	hmemDIB = 0;
 		DWORD	Flags;
 		long	lRec; 
 		ULONG	NextLen; 
 		short	ii;
 		
-//		hHeader = GSSiGlobAlloc ( 375,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD));
 		hHeader = GSSiGlobAlloc ( 374,GMEM_MOVEABLE,sizeof(BITMAPINFOHEADER)+256*sizeof(RGBQUAD)+lpbi->biSizeImage);
 		lpbiHeadOut = (LPBITMAPINFOHEADER)GlobalLock (hHeader);  
-/*		{   
-			long	lInRec = lpbi->biSize + lpbi->biClrUsed * sizeof(RGBQUAD) +lpbi->biSizeImage;
-
-			lRec = CompressBinaryRecord ((HPSTR)lpbi,(HPSTR)lpbiHeadOut,lInRec);
-			pAVIFile->iframe = GSSillseek (pAVIFile->GCIFid,0,2);  
-			*pFrame = pAVIFile->iframe;
-			NextLen = (ULONG)*pFrame + (ULONG)lRec;
-			if (NextLen < (ULONG)LONG_MAX) 
-			{
-				BigWrite (pAVIFile->GCIFid,(HPSTR)&lRec,4,-1);
-				BigWrite (pAVIFile->GCIFid,(HPSTR)lpbiHeadOut,lRec,-1);
-			}
-			else
-				rtn = -1; 
-			goto Exit;
-		}*/ 
-		if (UseExternalCompression)
+		if (pAVIFile->Type == TYPEGCO)
 		{
-			if ((rtn = CompressFrameEX (lpbi,lpbiHeadOut,pAVIFile->CompressionFactor)))
-			{
-			 	pCompressedData = (LPBYTE) lpbiHeadOut +  
-						  lpbiHeadOut->biSize +
-						  lpbiHeadOut->biClrUsed * sizeof(RGBQUAD); 
-			} 
-			else
-				goto Exit; 
+			HDIB32 hDib32 = pBMPToDIB32(lpbi);
+			int	JP2CompressionFactor = GetGlobalLVal2("[%JP2Factor]", 16);
+			int imageLen;
+			hmemDIB = WriteDIBToMem(hDib32, FIF_JP2, JP2CompressionFactor, &imageLen);
+			GMDestroyDIB32(hDib32);
+			*lpbiHeadOut = *lpbi;
+			lpbiHeadOut->biSizeImage = imageLen;
+			hCompData = hmemDIB;
+			hmemDIB = 0;
+			pCompressedData = GlobalLock(hCompData);
 		}
 		else
 		{
-			hCompData = GSSiGlobAlloc ( 374,GMEM_MOVEABLE,lpbi->biSizeImage);
-			pCompressedData = GlobalLock (hCompData);
-	 		ICRtn = ICCompressGetFormat(pAVIFile->hIC,lpbi,lpbiHeadOut);
-			if (ICRtn != ICERR_OK)
-				ii=1;
-			ICRtn = ICCompress (pAVIFile->hIC,ICCOMPRESS_KEYFRAME,
-											lpbiHeadOut,pCompressedData,
-											lpbi,pInData,
-											NULL,&Flags,0,0,
-											pAVIFile->CompressionFactor,NULL,NULL);  
-			if (ICRtn != ICERR_OK)
-				rtn = -2; 
-		} 
+
+			if (UseExternalCompression)
+			{
+				if ((rtn = CompressFrameEX(lpbi, lpbiHeadOut, pAVIFile->CompressionFactor)))
+				{
+					pCompressedData = (LPBYTE)lpbiHeadOut +
+						lpbiHeadOut->biSize +
+						lpbiHeadOut->biClrUsed * sizeof(RGBQUAD);
+				}
+				else
+					goto Exit;
+			}
+			else
+			{
+				hCompData = GSSiGlobAlloc(374, GMEM_MOVEABLE, lpbi->biSizeImage);
+				pCompressedData = GlobalLock(hCompData);
+				ICRtn = ICCompressGetFormat(pAVIFile->hIC, lpbi, lpbiHeadOut);
+				if (ICRtn != ICERR_OK)
+					ii = 1;
+				ICRtn = ICCompress(pAVIFile->hIC, ICCOMPRESS_KEYFRAME,
+					lpbiHeadOut, pCompressedData,
+					lpbi, pInData,
+					NULL, &Flags, 0, 0,
+					pAVIFile->CompressionFactor, NULL, NULL);
+				if (ICRtn != ICERR_OK)
+					rtn = -2;
+			}
+		}
 		if (rtn == 1)
 		{
 			pAVIFile->iframe = GSSillseek (pAVIFile->GCIFid,0,2);  
 			*pFrame = pAVIFile->iframe;
 			lRec = lpbiHeadOut->biSize + lpbiHeadOut->biSizeImage;
+			lRec = lpbiHeadOut->biSizeImage;
 			NextLen = (ULONG)*pFrame + (ULONG)lRec;
 			if (NextLen < (ULONG)LONG_MAX) 
 			{
 				BigWrite (pAVIFile->GCIFid,(HPSTR)&lRec,4,-1);
-				BigWrite (pAVIFile->GCIFid,(HPSTR)lpbiHeadOut,(size_t)lpbiHeadOut->biSize,-1);
+				//BigWrite (pAVIFile->GCIFid,(HPSTR)lpbiHeadOut,(size_t)lpbiHeadOut->biSize,-1);
 				if (BigWrite (pAVIFile->GCIFid,(HPSTR)pCompressedData,lpbiHeadOut->biSizeImage,-1) != lpbiHeadOut->biSizeImage)
 					rtn = 0;
 			}
@@ -365,7 +379,8 @@ short AVIOut (LPSTR Name,LPBITMAPINFOHEADER lpbi,LPHANDLE hFile,LPLONG pFrame,BO
 		}
 Exit:
 		GSSiGlobUlFree (&hCompData);   
-		GSSiGlobUlFree (&hHeader);   
+		GSSiGlobUlFree (&hHeader);  
+		GSSiGlobUlFree (&hmemDIB);
 	} 
 	GlobalUnlock (*hFile);
     return rtn;
@@ -392,7 +407,7 @@ void AVIOutClose (LPHANDLE phFile)
     }
     else
     {   
-    	if (!UseExternalCompression)
+    	if (pAVIFile->Type != TYPEGCO && !UseExternalCompression)
     	{
 	    	if (pAVIFile->hIC)
 	    	{
@@ -402,8 +417,9 @@ void AVIOutClose (LPHANDLE phFile)
 		}
 		if (pAVIFile->GCIFid >= 0)
 			GSSiClose2 (&pAVIFile->GCIFid);           
-	}    
-    AVIFileExit();
+	}
+	if (pAVIFile->Type != TYPEGCO)
+		AVIFileExit();
     HaveInit=FALSE;               
     GSSiGlobUlFree (phFile);
 

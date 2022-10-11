@@ -3005,24 +3005,19 @@ Exit:
 	return rtn;
 }
 
-HDIB32 BMPToDIB32(HANDLE hBMP)
+HDIB32 pBMPToDIB32(LPBITMAPINFOHEADER lpbi)
 {
 	HDIB32	dib = NULL;
-	BITMAPINFOHEADER FAR *lpbi;  // pointer to BITMAPINFOHEADER
 	DWORD rowLen;                // size of scanline
 	WORD biBits;                 // bits per pixel
 	int	ctype,i;
 	LPSTR	fromLine, toLine;
 
-	if (!hBMP)
-	  return NULL;
-	lpbi = GlobalLock (hBMP);
 
 	dib = FreeImage_Allocate (lpbi->biWidth,lpbi->biHeight,lpbi->biBitCount,0,0,0);
 
 	if (!dib)
 	{
-		GlobalUnlock (hBMP);
 	    return NULL;
 	}
 
@@ -3034,9 +3029,17 @@ HDIB32 BMPToDIB32(HANDLE hBMP)
 		LPSTR toLine = (LPSTR)FreeImage_GetScanLine(dib,i);
 		memcpy (toLine,fromLine,rowLen);
 	}
-	GlobalUnlock (hBMP);
 
 	return dib;
 }
 
-
+HDIB32 BMPToDIB32(HANDLE hBMP)
+{
+	LPBITMAPINFOHEADER lpbi;  // pointer to BITMAPINFOHEADER
+	if (!hBMP)
+		return NULL;
+	lpbi = GlobalLock(hBMP);
+	HDIB32 hBMP32 = pBMPToDIB32(lpbi);
+	GlobalUnlock(hBMP);
+	return hBMP32;
+}
