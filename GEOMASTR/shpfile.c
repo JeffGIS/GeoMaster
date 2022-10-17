@@ -3567,8 +3567,10 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 					DoubleQuotes(value2, value);
 					if (*pQuote)
 						sprintf(strchr(cmd, 0), ",'%s'", value);
-					else
+					else if (*value)
 						sprintf(strchr(cmd, 0), ",%s", value);
+					else
+						sprintf(strchr(cmd, 0), ",0");
 					pQuote++;
 					pName = pNextName;
 					if (pName)

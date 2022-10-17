@@ -716,6 +716,7 @@ BOOL	EnableTrace=TRUE;
 BOOL	UseShortSymbols=FALSE;
 short	maxbrush=0;  
 short	PreBuiltMapDesc=0;
+LONGLONG totAllocatedMem = 0;
 HDIB32	MrSIDImageHandle=0; 
 double	MrSidConversion;
 char	MrSidProjection[MAX_PATH];

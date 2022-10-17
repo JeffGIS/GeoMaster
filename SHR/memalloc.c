@@ -35,7 +35,7 @@ extern	BOOL	EnableTrace;
 extern	HWND	TraceWnd,TraceWnd2;
 void GetProgName (short i, LPSTR Name);
 extern	BOOL	MapServer;
-
+extern  LONGLONG totAllocatedMem;
 #define OFS_MAXPATHNAMEGM 256
 typedef struct _OFSTRUCTGM {
 	BYTE cBytes;
@@ -450,93 +450,96 @@ BOOL GSSiGLOBALUNLOCK(HANDLE hglb)
 HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc)
 {
 	HANDLE	rtn;
-	UINT	i; 
+	UINT	i;
 	long	memlen;
-	long	prmem,pstmem=POSTMEM; 
+	long	prmem, pstmem = POSTMEM;
 	HPBYTE	pstr;
-	
+
 	if (KeepMemLength)
 	{
 		prmem = pstmem = 0;
 		memlen = cbAlloc;
 	}
-	else if (PREMEM)   
-	{   
+	else if (PREMEM)
+	{
 		prmem = PREMEM;
-		memlen = cbAlloc + PREMEM + POSTMEM;   
+		memlen = cbAlloc + PREMEM + POSTMEM;
 	}
-	else 
-	{   
+	else
+	{
 		prmem = 0;
 		memlen = cbAlloc + POSTMEM;
 	}
-	rtn = GlobalAlloc (fuAlloc,memlen); 
+	rtn = GlobalAlloc(fuAlloc, memlen);
 	if (!rtn)
 	{
-		MEMERR ("Memory allocation failed"); 
-		exit (1);
-	} 
+		MEMERR("Memory allocation failed");
+		exit(1);
+	}
 	if (rtn == WantHandle)
-		ii=1;
-	pstr = (HPBYTE)GlobalLock (rtn);
-	memset (pstr,Marker,prmem);
-	memset (&pstr[memlen-pstmem],Marker,pstmem); 
-	GlobalUnlock (rtn);
+		ii = 1;
+	pstr = (HPBYTE)GlobalLock(rtn);
+	memset(pstr, Marker, prmem);
+	memset(&pstr[memlen - pstmem], Marker, pstmem);
+	GlobalUnlock(rtn);
 	if (rtn == debugHandle)
 		ii = 1;
 	if (First)
 	{
 		First = FALSE;
-		memset (hmem,0,sizeof(hmem)); 
-		memset (RecentlyFreed,0,sizeof(RecentlyFreed)); 
-		memset (lockcount,0,sizeof(lockcount));
-		memset (NumMemAlloc,0,sizeof(NumMemAlloc));
+		memset(hmem, 0, sizeof(hmem));
+		memset(RecentlyFreed, 0, sizeof(RecentlyFreed));
+		memset(lockcount, 0, sizeof(lockcount));
+		memset(NumMemAlloc, 0, sizeof(NumMemAlloc));
 	}
-	for (i=0;i<MAXMEM;i++)
-		if (!hmem[i])     
+	for (i = 0; i < MAXMEM; i++)
+	{
+		if (!hmem[i])
 		{
 			hmem[i] = rtn;
-			lockcount[i] = 0; 
+			lockcount[i] = 0;
 			memlength[i] = memlen;
-			memmove (memprog[i],LastProg,sizeof(LastProg));  
+			totAllocatedMem += memlength[i];
+			memmove(memprog[i], LastProg, sizeof(LastProg));
 			if (/*i==606 && */memlen == 644)
-				ii=1; 
+				ii = 1;
 			/*{
-				HTASK	hTask; 
+				HTASK	hTask;
 				TASKENTRY	TE;
-				static	WORD	MaxStack=0, UsedStack=0;  
+				static	WORD	MaxStack=0, UsedStack=0;
 				long	RemStack;
-				 
-				hTask = GetCurrentTask ();   
+
+				hTask = GetCurrentTask ();
 				TE.dwSize = sizeof (TE);
 				if (TaskFindHandle (&TE,hTask))
 				{
-					MaxStack = max (MaxStack,TE.wStackBottom-TE.wStackTop); 
-					UsedStack = max (UsedStack,TE.wStackBottom-TE.wStackMinimum); 
+					MaxStack = max (MaxStack,TE.wStackBottom-TE.wStackTop);
+					UsedStack = max (UsedStack,TE.wStackBottom-TE.wStackMinimum);
 					RemStack = ((long)MaxStack - (long)UsedStack);
 		//			memstack[i]=RemStack;
 		//			memstack[i]=TE.wSS;
-				} 
+				}
 			} */
 			premem[i] = prmem;
 			postmem[i] = pstmem;
 			memid[i] = nextid++;
 			memidID[i] = CurrentID;
-			memidcall[i] = NumMemAlloc[CurrentID];	
+			memidcall[i] = NumMemAlloc[CurrentID];
 			if (memidcall[i] == 53 && memidID[i] == 104)
 				ii = 1;
 			if (memidID[i] == wantid)
-			{ 
+			{
 				if (memidcall[i] = WantCallID)
-//if (memid[i]>11335&&memid[i]<11380&&memlength[i]==8)
-				ii=1;
+					//if (memid[i]>11335&&memid[i]<11380&&memlength[i]==8)
+					ii = 1;
 			}
-			if (i > MAXMEM-1000 && memidID[i] == wantidid)
-				ii=1;
-			if (i > MAXMEM-100)
-				ii=1;	
+			if (i > MAXMEM - 1000 && memidID[i] == wantidid)
+				ii = 1;
+			if (i > MAXMEM - 100)
+				ii = 1;
 			return rtn;
 		}
+	}
 	MEMERR ("Mem Alloc Limit Reached");
 	exit (1);
 } 
@@ -577,17 +580,20 @@ HGLOBAL GSSiGLOBALFREE (HANDLE hglb)
 	RecentlyFreedID[0] = NextFreeID++;
 	if (hglb)
 	{
-	for (i=0;i<MAXMEM;i++)
-		if (hmem[i] == hglb)     
+		for (i = 0; i < MAXMEM; i++)
 		{
-			hmem[i] = 0;
-			if (memid[i] == wantid)
-				ii=lockid[i];	
-			if (lockcount[i])
-				MEMERR ("Free locked handle");
-			rtn = GlobalFree(hglb);
-			return rtn;
-		} 
+			if (hmem[i] == hglb)
+			{
+				hmem[i] = 0;
+				if (memid[i] == wantid)
+					ii = lockid[i];
+				if (lockcount[i])
+					MEMERR("Free locked handle");
+				rtn = GlobalFree(hglb);
+				totAllocatedMem -= memlength[i];
+				return rtn;
+			}
+		}
 		rtn = GlobalFree(hglb);
 		if (IgnoreLock)
 			return rtn; 
@@ -635,6 +641,7 @@ HGLOBAL WINAPI GSSiGLOBALREALLOC (HGLOBAL hglb, DWORD cbAlloc, UINT fuAlloc)
 	for (i=0;i<MAXMEM;i++)
 		if (hmem[i] == hglb)     
 		{
+			totAllocatedMem -= memlength[i];
 			if (premem[i] && !prmem)
 			{   
 				long	j;
@@ -648,6 +655,7 @@ HGLOBAL WINAPI GSSiGLOBALREALLOC (HGLOBAL hglb, DWORD cbAlloc, UINT fuAlloc)
 			}
 			hmem[i] = hnew; 
 			memlength[i] = memlen;   
+			totAllocatedMem += memlength[i];
 			premem[i] = prmem; 
 			postmem[i] = pstmem;
 			if (memid[i] == wantid)
@@ -667,6 +675,7 @@ void GSSiGLOBALLOCCLOSE (void)
 {   
 	UINT	i, iprog;
 	
+	totAllocatedMem += 1;
 	for (i=0;i<MAXMEM;i++)
 		if (hmem[i])
 		{   

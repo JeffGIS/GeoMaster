@@ -666,6 +666,7 @@ void QuitGraphics()
 	GSSiFreeImage_Unload(0);
 #if CHECKMEM
 	TrackObject (0,-100); 
+	totAllocatedMem += 1;
 #endif
 	if (*ExitMessage)
 		GSSiMsgBox (0,ExitMessage,"",MB_OK,0); 

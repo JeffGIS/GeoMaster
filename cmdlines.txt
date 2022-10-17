@@ -1,3 +1,4 @@
+configs\hunting2.gmc [%USEGDIPLUS]=F;[%KFO]=T;   /WD f:\gmmobile\metroUTM
 F:\MplsRemoteTemplate\GeoMas\orthos\threeorthos.gmc /F /DNC [PARMFILE]=c:\temp\parmfile.txt /WD F:\MplsRemoteTemplate\GeoMas
 orthos\fiveorthost.gmc /F /DNC [%USERLEV]=2;[PARMFILE]=c:\temp\parms.txt; /WD F:\MplsRemoteTemplate\GeoMas
 configs\hunting.gmc [%USEGDIPLUS]=F;[%KFO]=T;  /WD g:\gmmobile\metroUTM
@@ -200,6 +201,7 @@ platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=smithjx0;[%NODENAME]=TRAFFIC
 platcntl.gmc /WD c:\mpls83 [%USERLEV]=2;[%USERNAME]=J_SMITH;[%NODENAME]=TRAFFIC1;
 parctag.gmc /WD c:\vanzan [%NODENAME]=gssi52
 granth.gmc /WD c:\granth
+
 
 
 

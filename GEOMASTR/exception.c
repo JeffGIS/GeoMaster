@@ -59,7 +59,8 @@ void AbendWriter (LPSTR Message,LPSTR Title,long at,int type)
 	GetWindowRect (hWndMain,&WindRect);
 	GetClientRect (hWndMain,&ClientRect);
 	ShareEnabled = TRUE;
-	sprintf (msg,"\r\n\r\n%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",DateTime,UserName,NodeName,seconds,NumScreensDisplayed,GMVersion,nTempFilesCleared,
+	sprintf (msg,"\r\n\r\n%s\t%s\t%s\t%ld\t%ld\t%s\t%ld\t%li\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",
+        DateTime,UserName,NodeName,seconds,NumScreensDisplayed,GMVersion,nTempFilesCleared,totAllocatedMem,
 																			  		 WindRect.left,WindRect.top,WindRect.right,WindRect.bottom,ClientRect.left,ClientRect.top,ClientRect.right,ClientRect.bottom);
 	AppendFile2 (AbendFile,msg);
 	GetWindowsVersion (Winver);

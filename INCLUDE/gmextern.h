@@ -648,6 +648,7 @@ extern HANDLE			hPNGrid;
 extern HANDLE			hHollowLinesFile; 
 extern BOOL			UseHollowStreets;  
 extern BOOL			UseShortSymbols;
+extern LONGLONG		totAllocatedMem;
 extern LPORTHO			CurOrtho;
 extern LPORTHO			OrthoBuffers[8];
 extern long				nPnts;
