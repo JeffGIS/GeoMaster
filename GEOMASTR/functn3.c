@@ -2572,13 +2572,41 @@ GotCloseFilehSQL:
 			goto RtnFalse;
 		}
 		case 541: //$ORTHO(CONVERT,JPEG,year,nparts)
+			      //$ORTHO(SETVERSION,indexfile,versionnum)
 		{
 			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
-			if (nArgs < 4)
-				goto RtnFalse;
-			int nparts = atoi(Arg[4]);
-			if (ConvertToJP2(Arg[3], nparts))
-				goto RtnTrue;
+			if (!stricmp(Arg[1], "CONVERT"))
+			{
+				if (nArgs < 4)
+					goto RtnFalse;
+				int nparts = atoi(Arg[4]);
+				if (ConvertToJP2(Arg[3], nparts))
+					goto RtnTrue;
+			}
+			else if (!stricmp(Arg[1], "SETVERSION"))
+			{
+				HFILE FidIndex = GSSiOpenFile(Arg[2], 0, OF_READWRITE);
+				if (FidIndex != HFILE_ERROR)
+				{
+					long EndOffset = GSSillseek(FidIndex, (LONG)-(6), 2);
+					int Signature;
+					short Version;
+					BOOL rtn = FALSE;
+					BigRead(FidIndex, (HPSTR)&Signature, 4);
+					BigRead(FidIndex, (HPSTR)&Version, 2);
+					if (Signature == 80251)
+					{
+						int off = GSSillseek(FidIndex, EndOffset, 0);
+						BigWrite(FidIndex, &Signature, 4,-1);
+						Version = atoi(Arg[3]);
+						BigWrite(FidIndex, &Version, 2,-1);
+						rtn = TRUE;
+					}
+					GSSiClose (FidIndex);
+					if (rtn)
+						goto RtnTrue;
+				}
+			}
 			goto RtnFalse;
 		}
 

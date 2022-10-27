@@ -1,2 +1,2 @@
-configs\hunting2.gmc [%USEGDIPLUS]=F;[%KFO]=T;  
-f:\gmmobile\metroUTM
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+f:\geomas
