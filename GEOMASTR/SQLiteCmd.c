@@ -2216,6 +2216,12 @@ NextCrimeRec:
 							{
 								pPartLen = GlobalLock(hPolyPartLen);
 								pPartLen++;//first is npoly
+								int totPntInParts = 0;
+								for (int i = 0; i < nLoops;i++)
+								{
+									int j = pPartLen[i];
+									totPntInParts += j;
+								}
 								blobParts = (LPSTR)BytesToBlob((LPBYTE)pPartLen, nLoops*sizeof(int));
 								GlobalUnlock(hPolyPartLen);
 							}

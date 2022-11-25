@@ -2544,7 +2544,9 @@ BOOL OpenFGDB (LPSTR DBName,LPSTR Table,LPSTR SQL)
 {   
 	BOOL	rtn=TRUE;
 	char	dbName[MAX_PATH+8];
-	
+	//char	SQL2[256];
+
+	//sprintf(SQL2, "OBJECTID = 2372183");
     CloseDataFile (TRUE, &FGDBHandle); 
     hSHPDBF = 0; 
 	if (DBName)
@@ -3246,6 +3248,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 	LONGLONG numWithCurves = 0;
 	LONGLONG offset;
 	LONGLONG keyval = 1;
+	LONGLONG objectid;
 	int reclen;
 	int hasCurves;
 	int numCompress1=0, numCompress2 = 0, numCompress3 = 0;
@@ -3255,6 +3258,8 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 
 	sprintf(SLTPath, "%s.slt", OutFile);
 	sprintf(BINPath, "%s.bin", OutFile);
+	GSSiRemove(SLTPath);
+	GSSiRemove(BINPath);
 	sprintf(DBName, "FGDB=%s", DBNameIN);
 	ExpandText(DBName);
 	int ftype=ReadFGDBHeader(DBNameIN, &minmaxCoord);
@@ -3279,7 +3284,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 			rtn = SQLOK(sqlite3_exec(db, cmd, NULL, NULL, 0), db, "", 0);
 
 			rtn = SQLOK(sqlite3_exec(db, "BEGIN", NULL, NULL, 0), db, "", 0);
-			sprintf(cmd, "CREATE TABLE %s (RECNUM INTEGER PRIMARY KEY,  recType INT, offset INT, recordLen INT, numPoly INT, numPoints INT, compressionType INT, hasCurves INT, FIRSTX INT, FIRSTY INT",TableName);
+			sprintf(cmd, "CREATE TABLE %s (RECNUM INTEGER PRIMARY KEY,  objectid INT, recType INT, offset INT, recordLen INT, numPoly INT, numPoints INT, compressionType INT, hasCurves INT, FIRSTX INT, FIRSTY INT",TableName);
 			strcpy(includeFields, IncludeFields);
 			LPSTR pName = includeFields;
 			LPSTR pNextName = strchr(pName, ';');
@@ -3309,6 +3314,11 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				LPSTR pCompressedRec;
 				ReadFGDBRecordHeader(&minmaxCoord);
 				ConvertBounds(&minmaxCoord, 1, 2);
+				sprintf(str, "[FGDB.OBJECTID]");
+				ExpandText(str);
+				objectid = _atoi64(str);
+				if (objectid == 709141)
+					ii = 1;
 				sprintf(str, "[FGDB.Shape]");
 				ExpandText(str);
 				HANDLE hRec = (HANDLE)atol(str);
@@ -3350,7 +3360,7 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 					NumPoints = NumPoints + nPoly - 1;
 				HANDLE hPartIndex = GSSiGlobAlloc(1418, GMEM_MOVEABLE, sizeof(long) * (nPoly + 1));
 				HANDLE hPolyPartLen = GSSiGlobAlloc(1787, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
-				HANDLE hPolyPartLenNew = GSSiGlobAlloc(1788, GMEM_MOVEABLE, sizeof(int) * (nPoly + 1));
+				HANDLE hPolyBounds = GSSiGlobAlloc(1855, GMEM_MOVEABLE, sizeof(MNMXCORD) * (nPoly + 1));
 				HANDLE hPoints = GSSiGlobAlloc(1420, GMEM_MOVEABLE, sizeof(DPOINT) * NumPoints);
 				HPLONG pPartIndex = (HPLONG)GlobalLock(hPartIndex);
 				long		recloc = sizeof(SHPPOLYHEADER);
@@ -3359,9 +3369,9 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				recloc += nPoly * sizeof(long);
 				pPartIndex[SHPPolyHeader.NumParts] = SHPPolyHeader.NumPoints;
 				LPDPOINT pPoints, pFirstPoint;
+				LPMNMXCORD pPolyBounds;
 				pPoints = pFirstPoint = (LPDPOINT)GlobalLock(hPoints);
 				LPINT pNumPoints = (LPINT)GlobalLock(hPolyPartLen);
-				LPINT pNumPointsNew = (LPINT)GlobalLock(hPolyPartLenNew);
 				for (int i = 0; i < nPoly; i++)
 				{
 					long    numpoints, startpoint, ii;
@@ -3369,7 +3379,6 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 					startpoint = *pPartIndex++;
 					numpoints = *pPartIndex - startpoint;
 					*pNumPoints++ = numpoints;
-					*pNumPointsNew++ = numpoints;
 					hmemmove((HPSTR)pPoints, &pRec[recloc], numpoints * sizeof(DPOINT));     //pPoints[1]
 					recloc += numpoints * sizeof(DPOINT);
 					pPoints += numpoints;
@@ -3399,14 +3408,29 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				}
 				GlobalUnlock(hPoints);
 				GlobalUnlock(hPolyPartLen);
-				GlobalUnlock(hPolyPartLenNew);
 				GSSiGlobUlFree(&hPartIndex);
 				pPoints = (HPDPOINT)GlobalLock(hPoints);//pPoints[9]
+				pPolyBounds = GlobalLock(hPolyBounds);
+				LPINT polyPartLen = (LPINT)GlobalLock(hPolyPartLen);
+				int iPoly = 0;
+				int iPointInPoly = 0;
+				DBoundsInit(&pPolyBounds[iPoly]);
 				for (i = 0; i < NumPoints; i++)
 				{
 					ConvertCoord(&pPoints[i], 0, 1);
 					ConvertCoord(&pPoints[i], 1, 2);
+					iPointInPoly++;
+					if (iPointInPoly > 0)
+						AddDPointToMinMax(&pPoints[i], &pPolyBounds[iPoly]);
+					if (iPointInPoly == polyPartLen[iPoly])
+					{
+						iPoly++;
+						DBoundsInit(&pPolyBounds[iPoly]);
+						iPointInPoly = -1;
+					}
 				}
+				GlobalUnlock(hPolyBounds);
+				GlobalUnlock(hPolyPartLen);
 				HANDLE hIPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, NumPoints * sizeof(POINT));
 				LPPOINT pIPoints = (LPPOINT)GlobalLock(hIPoints);
 				BOOL canCompressI1 = TRUE;
@@ -3547,11 +3571,23 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 					free(pCompressedRec);
 					GSSiGlobUlFree(&hCMPPoints);
 				}
+				if (nPoly > 1)
+				{
+					LPINT polyPartLen = GlobalLock(hPolyPartLen);
+					LPMNMXCORD polyBounds = GlobalLock(hPolyBounds);
+					int totPnt = 0;
+					for (int i = 0; i < nPoly; i++)
+						totPnt += polyPartLen[i];
+					BigWrite64(FidOut, (HPSTR)polyPartLen, nPoly * sizeof(int), -1);
+					GlobalUnlock(hPolyPartLen);
+					BigWrite64(FidOut, (HPSTR)polyBounds, nPoly * sizeof(MNMXCORD), -1);
+					GlobalUnlock(hPolyBounds);
+				}
 				GSSiGlobUlFree(&hPoints);
 				GSSiGlobUlFree(&hIPoints);
 				GSSiGlobFree(&hPolyPartLen);
-				GSSiGlobFree(&hPolyPartLenNew);
-				sprintf(cmd, "INSERT INTO %s VALUES(%lli,%i,%lli,%i,%i,%i,%i,%i,%i,%i", TableName,keyval,type,offset,lRec,nPoly,NumPoints,compType,hasCurves,firstPoint.x,firstPoint.y);
+				GSSiGlobFree(&hPolyBounds);
+				sprintf(cmd, "INSERT INTO %s VALUES(%lli,%lli,%i,%lli,%i,%i,%i,%i,%i,%i,%i", TableName,keyval,objectid,type,offset,lRec,nPoly,NumPoints,compType,hasCurves,firstPoint.x,firstPoint.y);
 				strcpy(includeFields, IncludeFields);
 				LPSTR pName = includeFields;
 				LPSTR pNextName = strchr(pName, ';');

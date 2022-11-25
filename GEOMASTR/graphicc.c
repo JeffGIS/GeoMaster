@@ -5834,7 +5834,7 @@ int GetPolyPointsWithParts (LPPICKDATAHEADER PickData,LPLONG pnPnts,LPHANDLE phP
 						{
 							*phPolyPartLen = GSSiGlobalReAlloc(1802, *phPolyPartLen, (nLoops + 2)*sizeof(int), GMEM_MOVEABLE);
 							pPolyParts = GlobalLock(*phPolyPartLen);
-							pPolyParts[nLoops] = nSavePoly;
+							pPolyParts[nLoops+1] = nSavePoly;
 							pPolyParts[0]++;
 							GlobalUnlock(*phPolyPartLen);
 						}
