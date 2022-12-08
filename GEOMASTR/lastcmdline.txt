@@ -1,2 +1,2 @@
-configs\hunting2.gmc [%USEGDIPLUS]=F;[%KFO]=T;   
-f:\gmmobile\metroUTM
+configs\basemap_new4.gmc /F  [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;[%LogUncachedFiles]=F;   
+D:\MplsRemoteTemplate\GEOMas

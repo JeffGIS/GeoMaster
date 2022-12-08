@@ -4699,14 +4699,14 @@ GSSiExitProg (1350);
            	goto Rtnl;
 		}
 				
-	    case 1212: //$TRANSFERFILE(BUILDorLOAD,name(opt))
+	    case 1212: //$TRANSFERFILE(BUILDorLOAD,name(opt),transferfrom,splitcount(opt))
         {
             DLGPROC lpfnBUILDXFERFILEMsgProc;
 			
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 4, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			st = 0;  
-			SetTransferFileName (Arg[1],Arg[2],Arg[3]);
+			SetTransferFileName (Arg[1],Arg[2],Arg[3],Arg[4]);
 			if (!_fstricmp (Arg[1],"BUILD") || !_fstricmp (Arg[1],"RUN"))
 			{
 	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)BUILDXFERFILEMsgProc, hInst);
@@ -4720,6 +4720,11 @@ GSSiExitProg (1350);
 	            st = DialogBox(hInst, (LPSTR)"XFERFILELOAD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);
 	            FreeProcInstance(lpfnBUILDXFERFILEMsgProc); 
 	        }
+			if (st > 1)
+			{
+				ltoa(st, OutLoc, 10);
+				goto Rtnl;
+			}
 			if (st)
 				goto RtnTrue;
 			goto RtnFalse;

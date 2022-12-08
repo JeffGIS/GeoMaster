@@ -803,12 +803,14 @@ LPJLBPDATA	pData;
 	return rtn;
 }
 
-void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc)
+void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc,LPSTR splitOption)
 {  
 	*TransferFileRunCommand = 0;
 	_fstrcpy (BuildTransferFileOption,Option);
 	_fstrcpy(TransferFileName, Name);
 	_fstrcpy(TransferFrom, fromLoc);
+	TransferFileSplitOpt = atoi(splitOption);
+	TransferFileSegmentLen = 1024 * 1024 * 100;
 	return;
 } 
 

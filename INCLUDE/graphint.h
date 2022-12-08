@@ -2187,7 +2187,7 @@ BOOL XMLToGMD2 (LPSTR XMLFile,LPSTR GMDFile);
 BOOL MultiZoomBegin (int UpLevels,int DownLevels,double OverlapFactor); 
 BOOL TxtToHtm (LPSTR TxtFile,LPSTR HTMFile);
 DPOINT ScreenPointToVPPoint (POINT Point);
-void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc);
+void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc, LPSTR splitOption);
 BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, LONGLONG LenToRead, long MaxLength);
 void RunTransferFileCommand (void);
 long JoinLinesBetweenPoints (LPSTR Option,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4);

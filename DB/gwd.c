@@ -8648,6 +8648,7 @@ BOOL CreateGWDDatabase (LPSTR InName,int Version,BOOL Compress,int NumFields,int
 	HANDLE	hDB;
 
 	memset (&GWDHead,0,sizeof(GWDHEADER));
+
 	DBoundsInit (&GWDHead.FileBounds);
     _fstrcpy (Name,InName);
     _fstrlwr (Name);

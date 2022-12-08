@@ -4881,7 +4881,7 @@ int AddFileToSendList(HWND hWndDlg,UINT idc_XFERFILELISTS, LPSTR pFile)
 BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char	str[256];   
-	int		ii,n=0; 
+	int		ii,nFilesAdded=0; 
 	HANDLE	hFile;
 	LPSTR	pFile; 
 	char	File[MAX_PATH+2];    
@@ -4939,7 +4939,7 @@ FileIsInvalid:
 		     	else
 		     		EndOfFile = FileLength - 4;
 				SendDlgItemMessage (hWndDlg,IDC_XFERFILELISTS,LB_ADDSTRING,0,(LPARAM)File);
-	    	 	n++;
+	    	 	nFilesAdded++;
 	    	 }
 	    	 GSSiClose2 (&FidTF); 
 			 GSSiSetCursor(hcurSave);
@@ -4949,7 +4949,7 @@ FileIsInvalid:
 	       	 DragAcceptFiles (hWndDlg,TRUE);   
 		 else
 		 {
-			 n += AddFileToSendList(hWndDlg, IDC_XFERFILELISTS, TransferFrom);
+			 nFilesAdded += AddFileToSendList(hWndDlg, IDC_XFERFILELISTS, TransferFrom);
 			 PostMessage(hWndDlg, WM_COMMAND, IDC_LOADCOMPLETEMESSAGE, 0L);
 			 PostMessage(hWndDlg, WM_COMMAND, IDC_ADDXFERCMD, 0L);
 			 PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
@@ -4958,15 +4958,19 @@ FileIsInvalid:
     
 
     case WM_DROPFILES:
-		 hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT)); 
-    	 hFile = (HANDLE)wParam;   
-    	 pFile = File;
-		 while (DragQueryFile(hFile, n, pFile, MAX_PATH))
-		 {
-			 n += AddFileToSendList(hWndDlg, IDC_XFERFILELISTS, pFile);
-		 }
-		 GSSiSetCursor(hcurSave);
-    	 DragFinish (hFile);
+	{
+		int n = 0;
+		hcurSave = GSSiSetCursor(LoadCursor(0, IDC_WAIT));
+		hFile = (HANDLE)wParam;
+		pFile = File;
+
+		while (DragQueryFile(hFile, n++, pFile, MAX_PATH))
+		{
+			nFilesAdded += AddFileToSendList(hWndDlg, IDC_XFERFILELISTS, pFile);
+		}
+		GSSiSetCursor(hcurSave);
+		DragFinish(hFile);
+	}
     	 break;
     	 
     case WM_CLOSE:
@@ -4992,7 +4996,7 @@ FileIsInvalid:
 				break;
             case IDOK: 
             {   
-            	
+				int numSegments = 1;
             	if (!*TransferFileName)
             	{
             		MessageBox (hWndDlg,"Transfer file name not set",0,MB_ICONEXCLAMATION);
@@ -5043,7 +5047,37 @@ FileIsInvalid:
            			loc = GSSillseek64 (FidTF,0,1);
            			GSSillseek64 (FidTF,0,0);
            			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
-				    GSSiClose64 (&FidTF); 
+					if (TransferFileSplitOpt > 0)
+					{
+						char SegmentFileDir[MAX_PATH];
+						char SegmentFileName[MAX_PATH];
+						LONGLONG splitSegmentSize = TransferFileSegmentLen;
+						numSegments = loc / splitSegmentSize;
+						int remSize = loc % splitSegmentSize;
+						if (remSize > 0)
+							numSegments++;
+						if (numSegments > 1)
+						{
+							LPSTR pBuf = malloc(splitSegmentSize + 4);
+							GSSillseek64(FidTF, 0, 0);
+							strcpy(SegmentFileDir, TransferFileName);
+							LPSTR pDot = strrchr(SegmentFileDir, '.');
+							if (pDot)
+								*pDot = 0;
+							makedirectories(SegmentFileDir, TRUE, FALSE);
+							for (int iSeg = 0; iSeg < numSegments; iSeg++)
+							{
+								sprintf(SegmentFileName, "%s\\Segment_%i.seg", SegmentFileDir, iSeg + 1);
+								HANDLE	FidSegment = OpenFileGM(SegmentFileName, 0, OF_CREATE);
+								LONGLONG lenRead = BigRead64(FidTF, pBuf, splitSegmentSize);
+								BigWrite64(FidSegment, pBuf, lenRead, -1);
+								GSSiClose64(&FidSegment);
+							}
+							free(pBuf);
+						}
+					}
+					GSSiClose64(&FidTF);
+
 				    if (!ContinueProcessing)
 				    {
 				    	SetContinueProcessing ( TRUE); 
@@ -5051,7 +5085,7 @@ FileIsInvalid:
 				    	break;
 				    }
 				}
-                GSSiEndDialog(hWndDlg, TRUE,hSaveBM);
+                GSSiEndDialog(hWndDlg, numSegments,hSaveBM);
             }
             	break;
             	 
@@ -5069,6 +5103,35 @@ FileIsInvalid:
  return TRUE;
 } 
 
+BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL DeleteDirectory)
+{
+	BOOL rtn = TRUE;
+	if (FileType(fileName) == 2)
+	{
+		char dirName[MAX_PATH];
+		strcpy(dirName, fileName);
+		strcat(fileName, ".gcf");
+		HANDLE hOutFile = OpenFileGM(fileName, 0, OF_CREATE);
+		LPSTR pBuf = malloc(TransferFileSegmentLen + 4);
+		for (int iSeg = 1; iSeg <= numSegmentsRequired; iSeg++)
+		{
+			char segmentFile[MAX_PATH];
+			sprintf(segmentFile, "%s\\Segment_%i.seg", dirName, iSeg);
+			HANDLE hSegFile = OpenFileGM(segmentFile, 0, OF_READ);
+			if (hSegFile == INVALID_HANDLE_VALUE)
+			{
+				rtn = FALSE;
+				break;
+			}
+			int lenRead = BigRead64(hSegFile, pBuf, TransferFileSegmentLen);
+			BigWrite64(hOutFile, pBuf, lenRead,-1);
+			GSSiClose64(&hSegFile);
+		}
+		free(pBuf);
+		GSSiClose64(&hOutFile);
+	}
+	return rtn;
+}
 BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	char	str[512],Ext[6]=".bin";   
@@ -5100,6 +5163,13 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
        	 cwCenter(hWndDlg, 0);  
        	 if (!*TransferFileName)
        	 	break;
+		 if (!BuildTransferFileFromSegments(TransferFileName, TransferFileSplitOpt,TRUE))
+		 {
+			 sprintf(str, "Unable to rebuild transfer file\r%s", TransferFileName);
+			 MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);
+			 PostMessage(hWndDlg, WM_COMMAND, IDCANCEL, 0L);
+			 break;
+		 }
     case GSSI_REINITDIALOG:  
 		 FidTF=OpenFileGM (TransferFileName,0,OF_READ);
 		 if (FidTF == INVALID_HANDLE_VALUE)

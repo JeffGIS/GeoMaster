@@ -1691,6 +1691,8 @@ extern  char	TransferFrom[MAX_PATH*4];
 extern	char	TransferFileName[MAX_PATH]; 
 extern	char	BuildTransferFileOption[16]; 
 extern	char	TransferFileRunCommand[1024];   
+extern  int		TransferFileSplitOpt;
+extern  int		TransferFileSegmentLen;
 extern	RGBQUAD	ColorChangesFrom[MAXCHANGES];
 extern	RGBQUAD	ColorChangesTo[MAXCHANGES]; 
 extern	RGBQUAD	SavePalette[256];
