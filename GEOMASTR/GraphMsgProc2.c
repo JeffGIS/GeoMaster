@@ -5064,14 +5064,21 @@ FileIsInvalid:
 							LPSTR pDot = strrchr(SegmentFileDir, '.');
 							if (pDot)
 								*pDot = 0;
-							makedirectories(SegmentFileDir, TRUE, FALSE);
-							for (int iSeg = 0; iSeg < numSegments; iSeg++)
+							LPSTR pBS = strrchr(SegmentFileDir, '\\');
+							if (pBS)
 							{
-								sprintf(SegmentFileName, "%s\\Segment_%i.seg", SegmentFileDir, iSeg + 1);
-								HANDLE	FidSegment = OpenFileGM(SegmentFileName, 0, OF_CREATE);
-								LONGLONG lenRead = BigRead64(FidTF, pBuf, splitSegmentSize);
-								BigWrite64(FidSegment, pBuf, lenRead, -1);
-								GSSiClose64(&FidSegment);
+								char SegmentFile[MAX_PATH];
+								pBS++;
+								strcpy(SegmentFile, pBS);
+								makedirectories(SegmentFileDir, TRUE, FALSE);
+								for (int iSeg = 0; iSeg < numSegments; iSeg++)
+								{
+									sprintf(SegmentFileName, "%s\\%s_seg%i.bin", SegmentFileDir, SegmentFile, iSeg + 1);
+									HANDLE	FidSegment = OpenFileGM(SegmentFileName, 0, OF_CREATE);
+									LONGLONG lenRead = BigRead64(FidTF, pBuf, splitSegmentSize);
+									BigWrite64(FidSegment, pBuf, lenRead, -1);
+									GSSiClose64(&FidSegment);
+								}
 							}
 							free(pBuf);
 						}
@@ -5109,6 +5116,15 @@ BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL D
 	if (FileType(fileName) == 2)
 	{
 		char dirName[MAX_PATH];
+		char fName[MAX_PATH];
+		LPSTR pBS = strrchr (fileName,'\\');
+		if (pBS)
+		{
+			pBS++;
+			strcpy(fName, pBS);
+		}
+		else
+			return FALSE;
 		strcpy(dirName, fileName);
 		strcat(fileName, ".gcf");
 		HANDLE hOutFile = OpenFileGM(fileName, 0, OF_CREATE);
@@ -5116,7 +5132,7 @@ BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL D
 		for (int iSeg = 1; iSeg <= numSegmentsRequired; iSeg++)
 		{
 			char segmentFile[MAX_PATH];
-			sprintf(segmentFile, "%s\\Segment_%i.seg", dirName, iSeg);
+			sprintf(segmentFile, "%s\\%s_seg%i.bin", dirName,fName, iSeg);
 			HANDLE hSegFile = OpenFileGM(segmentFile, 0, OF_READ);
 			if (hSegFile == INVALID_HANDLE_VALUE)
 			{

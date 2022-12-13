@@ -603,6 +603,9 @@ void QuitGraphics()
 	GSSiGlobFree (&hPolyPartLen);
 	GSSiGlobFree (&hAreaOffFile);  
 	GSSiGlobFree (&hScreenFile);
+	CloseTRANS2(&hTranBMToBase);
+	CloseTRANS2(&hTranBaseToBM);
+
 //	CloseAddressFiles (TRUE); 
 	if (hWndDigControl)
 		DestroyWindow (hWndDigControl);
