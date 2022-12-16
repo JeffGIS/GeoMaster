@@ -5117,6 +5117,7 @@ BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL D
 	{
 		char dirName[MAX_PATH];
 		char fName[MAX_PATH];
+		char msg[256];
 		LPSTR pBS = strrchr (fileName,'\\');
 		if (pBS)
 		{
@@ -5126,12 +5127,15 @@ BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL D
 		else
 			return FALSE;
 		strcpy(dirName, fileName);
-		strcat(fileName, ".gcf");
+		strcat(fileName, ".bin");
 		HANDLE hOutFile = OpenFileGM(fileName, 0, OF_CREATE);
 		LPSTR pBuf = malloc(TransferFileSegmentLen + 4);
+		sprintf(msg, "Rebuild %s", fName);
+		CreateStatusWind(0, 1, msg);
 		for (int iSeg = 1; iSeg <= numSegmentsRequired; iSeg++)
 		{
 			char segmentFile[MAX_PATH];
+			StatusWindowUpdate(0, 0, numSegmentsRequired, iSeg);
 			sprintf(segmentFile, "%s\\%s_seg%i.bin", dirName,fName, iSeg);
 			HANDLE hSegFile = OpenFileGM(segmentFile, 0, OF_READ);
 			if (hSegFile == INVALID_HANDLE_VALUE)
@@ -5145,6 +5149,7 @@ BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL D
 		}
 		free(pBuf);
 		GSSiClose64(&hOutFile);
+		DestroyStatusWindow(0);
 	}
 	return rtn;
 }

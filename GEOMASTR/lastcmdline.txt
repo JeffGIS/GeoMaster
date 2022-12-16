@@ -1,2 +1,2 @@
-configs\basemap_new4.gmc /F  [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F;[%LogUncachedFiles]=F;   
-D:\MplsRemoteTemplate\GEOMas
+configs\basemap_remote.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+d:\MplsRemoteTemplate\GeoMas

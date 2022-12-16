@@ -5476,6 +5476,8 @@ DisplayParcel:
 		{
 		case SC_MINIMIZE:
 	    	HaltMapDisplay(FALSE,TRUE); 
+			if (PrintMsgWnd)
+				ShowWindow(PrintMsgWnd, SW_HIDE);
 			//SaveFullWindowBitmap (hWndMain);
 				// if (hCacheThread)
 				//	 ii = SuspendThread(hCacheThread);
@@ -5491,6 +5493,8 @@ DisplayParcel:
 				RepaintServerInfo();
 			UpdateVehicleStatusDlg();
 			DisplayAllToolbars(4);
+			if (PrintMsgWnd)
+				ShowWindow(PrintMsgWnd, SW_SHOW);
 
 			break;
 		}

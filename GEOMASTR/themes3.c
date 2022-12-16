@@ -2259,8 +2259,11 @@ GSSiExitProg (620);
 	            	hText = GSSiGlobAlloc ( 261,GHND,USHRT_MAX); 
            	        KeepMemLength = KeepMemLengthSave;
 	                nItems=SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELCOUNT,0,0);  
-	                if (!nItems)
-	                	break;
+					if (!nItems)
+					{
+						GSSiGlobUlFree(&hText);
+						break;
+					}
 	                hFields = GSSiGlobAlloc ( 262,GHND,nItems*4);
 	                lpItems = (LPINT)GlobalLock(hFields);
 	                SendDlgItemMessage(hWndDlg,IDC_FIELDS,LB_GETSELITEMS,nItems,(LPARAM)lpItems); 

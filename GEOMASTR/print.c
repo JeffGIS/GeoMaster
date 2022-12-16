@@ -772,6 +772,10 @@ BOOL StatusWindowUpdate(LPSTR Title, LPSTR Mess, LONGLONG Tot, LONGLONG Done)
 	
 	if (!PrintMsgWnd)
 		return FALSE;  
+	if (IsIconic(hWndMain))
+		ShowWindow(PrintMsgWnd, SW_HIDE);
+	else
+		ShowWindow(PrintMsgWnd, SW_SHOW);
 	if (UseSecondStatus)
 	{ 
 		StatusWindowUpdate2 (Mess,Tot,Done);
