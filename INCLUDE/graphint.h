@@ -229,6 +229,7 @@ BOOL FAR PASCAL SETSQLITEPOINTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam,
 BOOL FAR PASCAL SETGMDPARAMMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL CONFIGLISTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
+INT64 TransferFileSize(LPSTR fileName);
 BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL VOTER_NEWMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL FAR PASCAL VOTER_DEFINE_USER_DATAMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM lParam);
@@ -2189,6 +2190,7 @@ BOOL TxtToHtm (LPSTR TxtFile,LPSTR HTMFile);
 DPOINT ScreenPointToVPPoint (POINT Point);
 void SetTransferFileName (LPSTR Option,LPSTR Name,LPSTR fromLoc, LPSTR splitOption);
 BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, LONGLONG LenToRead, long MaxLength);
+INT64 GetFileLenFromTransferFile(HANDLE FidTF, LONGLONG LenToRead, long MaxLength);
 void RunTransferFileCommand (void);
 long JoinLinesBetweenPoints (LPSTR Option,LPSTR Arg2,LPSTR Arg3,LPSTR Arg4);
 BOOL CreateInterleavedCoord (double x,double y,int nchar,LPSTR OutLoc);

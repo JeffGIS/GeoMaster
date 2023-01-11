@@ -4716,10 +4716,21 @@ GSSiExitProg (1350);
 	        }
 			else if (!_fstricmp(Arg[1], "LOAD") || !_fstricmp(Arg[1], "VIEW"))
 			{
-	            lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)LOADXFERFILEMsgProc, hInst);
-	            st = DialogBox(hInst, (LPSTR)"XFERFILELOAD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);
-	            FreeProcInstance(lpfnBUILDXFERFILEMsgProc); 
-	        }
+				lpfnBUILDXFERFILEMsgProc = MakeProcInstance((DLGPROC)LOADXFERFILEMsgProc, hInst);
+				st = DialogBox(hInst, (LPSTR)"XFERFILELOAD", CurView->hWnd, lpfnBUILDXFERFILEMsgProc);
+				FreeProcInstance(lpfnBUILDXFERFILEMsgProc);
+			}
+			else if (!_fstricmp(Arg[1], "SIZE"))
+			{
+				INT64 size = TransferFileSize(Arg[2]);
+				if (!stricmp (Arg[3],"M"))
+					sprintf(OutLoc, "%.1f", (double)size / (1024.0 * 1024.0));
+				else if (!stricmp (Arg[3],"G"))
+					sprintf(OutLoc, "%.3f", (double)size / (1024.0 * 1024.0 * 1024));
+				else
+					sprintf(OutLoc, "%.lld", size);
+				goto Rtnl;
+			}
 			if (st > 1)
 			{
 				ltoa(st, OutLoc, 10);
@@ -5585,7 +5596,18 @@ GSSiExitProg (1350);
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			rtn = CompressedFileCmd (nArgs, Arg);
 			goto Rtnrtn;
-			
+		case 1413: //$DRIVEFREESPACE(dir)
+		{
+			nArgs = GetFunArgs(Args, Arg, 2, &hMem, pBrkPt, bpOffset, bpLen);
+			INT64 freeSpace = GetDriveFreeSpace(Arg[1]);
+			if (!stricmp(Arg[2], "M"))
+				sprintf(OutLoc, "%.1f", (double)freeSpace / (1024.0 * 1024.0));
+			else if (!stricmp(Arg[2], "G"))
+				sprintf(OutLoc, "%.2f", (double)freeSpace / (1024.0 * 1024.0 * 1024.0));
+			else
+				sprintf(OutLoc, "%lld", freeSpace);
+			goto Rtnl;
+		}
         case 1501: //$OPENVEHICLEFILE(filename,Delay) 
         {
 			hMem = GSSiGlobAlloc (1226,GMEM_MOVEABLE,3*2048);

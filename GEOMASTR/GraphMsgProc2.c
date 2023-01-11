@@ -5009,7 +5009,8 @@ FileIsInvalid:
 					long marker, len;
 					long	TotLen = SendDlgItemMessage(hWndDlg,IDC_XFERFILELISTS,LB_GETCOUNT,0,0); 
 					long	MaxLength=8L*(long)USHRT_MAX;
-					
+					INT64 totFileLen = 0;
+
            			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
            			BigWrite64 (FidTF,(HPSTR)&Version,2,-1);
            			BigWrite64 (FidTF,(HPSTR)&MaxLength,4,-1); 
@@ -5035,12 +5036,16 @@ FileIsInvalid:
 		        			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
 		        		}
 				    	PctBox (GetDlgItem(hWndDlg,IDC_STATUS),TotLen,choice,-1);
-				    	if (_fstrnicmp (str,"[XCMD]",6) &&
-				    	    !SendDlgItemMessage(hWndDlg,IDC_BUILDNAMESONLY,BM_GETCHECK,0,0)) 
-			    			AddFileToTransferFile(GetDlgItem(hWndDlg,IDC_STATUS2),FidTF,str,MaxLength,0);
+						if (_fstrnicmp(str, "[XCMD]", 6) &&
+							!SendDlgItemMessage(hWndDlg, IDC_BUILDNAMESONLY, BM_GETCHECK, 0, 0))
+						{
+							totFileLen += GSSiLength(str);
+							AddFileToTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, str, MaxLength, 0);
+						}
 			    		else if (!_fstricmp (BuildTransferFileOption,"RUN"))
 			    			_fstrcpy (TransferFileRunCommand,&str[6]); 
 				    }
+					SetGlobalValueINT64("%TRANFILESTOTSIZE", totFileLen);
 				    Processing = FALSE;
 				    marker = 80251;
         			BigWrite64 (FidTF,(HPSTR)&marker,4,-1);
@@ -5109,6 +5114,71 @@ FileIsInvalid:
    }
  return TRUE;
 } 
+INT64 TransferFileSize(LPSTR fileName)
+{
+	INT64 rtn = 0;
+	char File[MAX_PATH];
+
+	HANDLE FidTF = OpenFileGM(fileName, 0, OF_READ);
+	if (FidTF == INVALID_HANDLE_VALUE)
+	{
+		return -1;
+	}
+	INT64 FileLength = GSSifilelength64(FidTF);
+	INT64 NextFileLoc = 0, loc, EndOfFile, length8;
+	int len, marker;
+	int lenlen = 4;
+	int MaxLength;
+	int n = 0;
+	short	Version;
+
+	BigRead64(FidTF, (HPSTR)&length8, 8);
+	BigRead64(FidTF, (HPSTR)&Version, 2);
+	BigRead64(FidTF, (HPSTR)&MaxLength, 4);
+
+	GSSillseek64(FidTF, FileLength - 4, 0);
+	BigRead64(FidTF, (HPSTR)&marker, 4);
+	if (marker == 80251)
+		lenlen = 8;
+	else if (marker != 32349)
+		goto FileIsInvalid;
+	NextFileLoc = 6 + lenlen;
+	GSSillseek64(FidTF, 0, 0);
+	if (lenlen == 4)
+	{
+		BigRead64(FidTF, (HPSTR)&len, 4);
+		loc = len;
+	}
+	else
+		BigRead64(FidTF, (HPSTR)&loc, sizeof(LONGLONG));
+	if (loc != FileLength)
+	{
+	FileIsInvalid:
+		return -1;
+	}
+	while (NextFileLoc > 0)
+	{
+		int iPos;
+		GSSillseek64(FidTF, NextFileLoc, 0);
+		BigRead64(FidTF, (HPSTR)&len, 4);
+		BigRead64(FidTF, (HPSTR)File, len);
+		BigRead64(FidTF, (HPSTR)&NextFileLoc, 8);
+		if (NextFileLoc > 0)
+			EndOfFile = NextFileLoc - 1;
+		else
+			EndOfFile = FileLength - 4;
+		if (NextFileLoc > 0)
+			EndOfFile = NextFileLoc - 1;
+		else
+			EndOfFile = FileLength - 4;
+		INT64 LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1) + 1;
+		if (strnicmp(File, "[XCMD]", 6))
+			rtn += GetFileLenFromTransferFile(FidTF, LenToRead, MaxLength);
+		n++;
+	}
+	GSSiClose64(&FidTF);
+	return rtn;
+}
 
 BOOL BuildTransferFileFromSegments(LPSTR fileName,int numSegmentsRequired,BOOL DeleteDirectory)
 {

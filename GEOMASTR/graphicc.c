@@ -859,33 +859,57 @@ Exit:
     return rtn; 
 }
 
-BOOL GetFileFromTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToGet,LONGLONG LenToRead,long MaxLength)
-{   
+BOOL GetFileFromTransferFile(HWND hWndStatus, HANDLE FidTF, LPSTR FileToGet, LONGLONG LenToRead, long MaxLength)
+{
 	long	lRec;
-    HANDLE	hRec = GSSiGlobAlloc (1552,GMEM_MOVEABLE,MaxLength);
-    HPSTR	pRec = GlobalLock (hRec); 
-    HANDLE	hCompressedRec = GSSiGlobAlloc (1553,GMEM_MOVEABLE,MaxLength*2);
-    HPSTR	pCompressedRec = GlobalLock (hCompressedRec); 
+	HANDLE	hRec = GSSiGlobAlloc(1552, GMEM_MOVEABLE, MaxLength);
+	HPSTR	pRec = GlobalLock(hRec);
+	HANDLE	hCompressedRec = GSSiGlobAlloc(1553, GMEM_MOVEABLE, MaxLength * 2);
+	HPSTR	pCompressedRec = GlobalLock(hCompressedRec);
 	long	CompressedLength;
 	LONGLONG LenRead = 0;
-	HANDLE	Fid=OpenFileGM (FileToGet,0,OF_CREATE);
-	
+	HANDLE	Fid = OpenFileGM(FileToGet, 0, OF_CREATE);
+
 	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
-   	PctBox (hWndStatus,LenToRead,LenRead,0); 
+	PctBox(hWndStatus, LenToRead, LenRead, 0);
 	while (LenRead < LenToRead)
-	{   
-		BigRead64 (FidTF,(HPSTR)&CompressedLength,4);
-		LenRead += CompressedLength+4;     
-		BigRead64 (FidTF,pCompressedRec,CompressedLength);
-		lRec = DecompressBinaryRecordUnsafe (pRec,pCompressedRec,CompressedLength);
-    	BigWrite64 (Fid,(HPSTR)pRec,lRec,-1);
-    	PctBox (hWndStatus,LenToRead,LenRead,0); 
-    }
-    GSSiClose64 (&Fid);
-    GSSiGlobUlFree (&hCompressedRec); 
-    GSSiGlobUlFree (&hRec);
-    return TRUE; 
+	{
+		BigRead64(FidTF, (HPSTR)&CompressedLength, 4);
+		LenRead += CompressedLength + 4;
+		BigRead64(FidTF, pCompressedRec, CompressedLength);
+		lRec = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, CompressedLength);
+		BigWrite64(Fid, (HPSTR)pRec, lRec, -1);
+		PctBox(hWndStatus, LenToRead, LenRead, 0);
+	}
+	GSSiClose64(&Fid);
+	GSSiGlobUlFree(&hCompressedRec);
+	GSSiGlobUlFree(&hRec);
+	return TRUE;
+}
+
+INT64 GetFileLenFromTransferFile(HANDLE FidTF,LONGLONG LenToRead, long MaxLength)
+{
+	long	lRec;
+	HANDLE	hRec = GSSiGlobAlloc(1552, GMEM_MOVEABLE, MaxLength);
+	HPSTR	pRec = GlobalLock(hRec);
+	HANDLE	hCompressedRec = GSSiGlobAlloc(1553, GMEM_MOVEABLE, MaxLength * 2);
+	HPSTR	pCompressedRec = GlobalLock(hCompressedRec);
+	long	CompressedLength;
+	LONGLONG LenRead = 0;
+	INT64 rtn = 0;
+
+	while (LenRead < LenToRead)
+	{
+		BigRead64(FidTF, (HPSTR)&CompressedLength, 4);
+		LenRead += CompressedLength + 4;
+		BigRead64(FidTF, pCompressedRec, CompressedLength);
+		lRec = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, CompressedLength);
+		rtn += lRec;
+	}
+	GSSiGlobUlFree(&hCompressedRec);
+	GSSiGlobUlFree(&hRec);
+	return rtn;
 }
 
 

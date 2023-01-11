@@ -2278,12 +2278,13 @@ BOOL makedirectories (LPSTR InName,BOOL IsDir,BOOL Verify)
 	return makedirectories2 (InName,IsDir,Verify);
 }
 
-double	GetDriveFreeSpace (LPSTR Dir)
+INT64	GetDriveFreeSpace (LPSTR Dir)
 #if ENABLETRACE
 {GSSiEnterProg (183);
 #endif
 {   
 	BOOL	st;
+	INT64 rtn;
 	ULARGE_INTEGER MySpace,TotSpace,FreeSpace;
 	char	Drive[MAX_PATH];
 	LPSTR	pBS;
@@ -2307,12 +2308,16 @@ GSSiExitProg (183);
 }
     else
 	{
-		FrSpace = (double)FreeSpace.LowPart + (double)FreeSpace.HighPart * (double)ULONG_MAX;
+		INT64 FrSpace = (INT64)FreeSpace.LowPart + (INT64)FreeSpace.HighPart * (INT64)ULONG_MAX;
+		INT64 MSpace = (INT64)MySpace.LowPart + (INT64)MySpace.HighPart * (INT64)ULONG_MAX;
+		INT64 TSpace = (INT64)TotSpace.LowPart + (INT64)TotSpace.HighPart * (INT64)ULONG_MAX;
+		rtn = FrSpace;
+
 {
 #if ENABLETRACE
 GSSiExitProg (183);
 #endif
-    	return FrSpace;
+    	return rtn;
 }
 	}
 #if ENABLETRACE
@@ -2320,7 +2325,7 @@ GSSiExitProg (183);
 #endif
 }
 
-double	GetDriveSize (char Drive)
+INT64	GetDriveSize (char Drive)
 {   
 	char	DriveC[2]={Drive,0};
 	
@@ -9578,7 +9583,7 @@ Open2:
 							OkToCache = FALSE;// makedirectories(Name, FALSE, FALSE);
 						if (OkToCache)
 						{
-							double FreeSpace = GetDriveFreeSpace (Name); 
+							INT64 FreeSpace = GetDriveFreeSpace (Name); 
 
 							FreeSpace -= statfrom.st_size;
 							if (FreeSpace < MinCacheDriveFreeSpace)

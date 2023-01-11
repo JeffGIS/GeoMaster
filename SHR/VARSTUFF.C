@@ -5510,6 +5510,14 @@ GSSiExitProg (537);
 }
 #endif
 }
+void SetGlobalValueINT64(LPSTR Name, INT64 val)
+{
+   char	txt[64];
+
+	lltoa(val, txt, 10);
+	SetGlobalValue(Name, txt);
+	return;
+}
 
 void SetGlobalValueLong (LPSTR Name, long val)
 #if ENABLETRACE
