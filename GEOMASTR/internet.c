@@ -305,7 +305,10 @@ BOOL FTPPutFile(HANDLE hConnect,LPCTSTR lpszRemoteFile,LPCTSTR lpszLocalfile,BOO
 					rtn = 0;
 				Done += numBytesRead;
 			};
-			StatusWindowUpdate(leafName, 0,Tot, Tot);
+			if (Done < Tot)
+				rtn = 0;
+			else if (rtn)
+				StatusWindowUpdate(leafName, 0,Tot, Tot);
 			DestroyStatusWindow(0);
 			GSSiClose2 (&Fid);
 			GSSiGlobUlFree(&hBuffer);
