@@ -4186,6 +4186,8 @@ HGLOBAL GSSiGlobalReAlloc (USHORT From,HGLOBAL hGlob, long cbAlloc,UINT fuAlloc)
 	long	PrevLen;
 	char	pMess[64];
 
+	if (From != 0)
+		ii = 1;
     if (cbAlloc <= 0)
     {    
 		sprintf(pMess, "%i %i", (long)cbAlloc,From);

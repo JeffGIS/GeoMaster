@@ -123,6 +123,7 @@ typedef RECT16	FAR *LPRECT16;
 #define DTMTYPE_TIN_GM		2
 #define DTMTYPE_LIDAR_GM	3
 #define DTMTYPE_LIDAR_LAZ	4
+#define DTMTYPE_SLT	5
 #ifdef	_WIN32_WCE
 typedef long clock_t;
 /* OpenFile() Structure */

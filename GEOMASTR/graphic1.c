@@ -3292,8 +3292,8 @@ void CreateBaseToVPTran (RECT Rectx)
 	 GlobalUnlock(hNulls);
 	 if (!CurView->hTranScreenToBase)
 	 {
-		 CurView->hTranScreenToBase = STRAN2(1612, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
-		 CurView->hTranBaseToScreen = STRAN2(1613, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
+		 CurView->hTranScreenToBase = STRAN2(1856, XWIN, YWIN, XBASE, YBASE, 4, &RSQMIN, 1, 0);
+		 CurView->hTranBaseToScreen = STRAN2(1857, XBASE, YBASE, XWIN, YWIN, 4, &RSQMIN, 1, 0);
 	 }
 {
 #if ENABLETRACE

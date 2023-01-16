@@ -67,7 +67,7 @@ static	__int64 	TotTime[MAXPROG], StartTime[MAXLEVEL];
 #endif
 
 static	long	ii, numEnter=0, numExit=0;
-static	long	nextid=1, wantid=2486, WantCallID=31,NextLockID=1, WantLockID=8648, NextFreeID=1, WantFreeID=2578;
+static	long	nextid=1, wantid=2264, wantidID= 51, WantCallID=2264,NextLockID=1, WantLockID=2042, NextFreeID=1, WantFreeID=2578;
 static	HANDLE	WantHandle=0;
 
 #define	MAXMEM	16384   
@@ -86,8 +86,8 @@ typedef char				HUGE *HPSTR;
 typedef unsigned char		HUGE *HPBYTE; 
 
 
-static	short	LogMemDebugID=1572;
-static	long	WantCallNo=31;
+static	short	LogMemDebugID=1612;
+static	long	WantCallNo=2042;
 static	char	mess[1024];  
 static	long	NumMemAlloc[MAXMEM];
 static	long	CallID[MAXMEM];
@@ -525,10 +525,12 @@ HGLOBAL GSSiGLOBALALLOC(UINT fuAlloc, DWORD cbAlloc)
 			memid[i] = nextid++;
 			memidID[i] = CurrentID;
 			memidcall[i] = NumMemAlloc[CurrentID];
-			if (memidcall[i] == 53 && memidID[i] == 104)
+			if (memidcall[i] == 53 && memidID[i] == 1612)
 				ii = 1;
-			if (memidID[i] == wantid)
+			if (memid[i] == wantid)
 			{
+				if (memidID[i] == wantidID)
+					ii = 1;
 				if (memidcall[i] = WantCallID)
 					//if (memid[i]>11335&&memid[i]<11380&&memlength[i]==8)
 					ii = 1;

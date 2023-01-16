@@ -136,7 +136,19 @@ GSSiExitProg (1005);
 }
 #endif
 }	
-
+void ClearVPTran(LPVIEWPORT CurView)
+{
+	GSSiDeleteObject(&CurView->hRgn);
+	CloseTRANS2(&CurView->hTranVPToBase);
+	CloseTRANS2(&CurView->hTranBaseToVP);
+	CloseTRANS2(&CurView->hTranVPToScreen);
+	CloseTRANS2(&CurView->hTranScreenToVP);
+	CloseTRANS2(&CurView->hFileTransIn);
+	CloseTRANS2(&CurView->hTranBaseToScreen);
+	CloseTRANS2(&CurView->hTranScreenToBase);
+	for (int iFile = 0;iFile<CurView->NumFiles;iFile++)
+		GSSiGlobFree(&CurView->hlpIndex[iFile]);
+}
 void ClearVPFields (LPVIEWPORT CurView)
 #if ENABLETRACE
 {GSSiEnterProg (1007);

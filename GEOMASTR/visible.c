@@ -901,6 +901,7 @@ void GetVisList (HWND hWndDlg,int DlgItemSym, int DlgItemPar, int DlgItemFile,in
 	LPVIEWPORT pSaveCurView = CurView;
 	LPVIEWPORT pSaveView = GlobalLock(hSaveView);
 
+	ClearVPTran(CurView);
 	memcpy(pSaveView, CurView, sizeof(VIEWPORT));
 
     Display = FALSE;
@@ -1140,6 +1141,7 @@ Done:
     UseRefOrTAGIndex = SaveUseRefOrTAGIndex;
     IgnoreBounds = SaveIgnoreBounds;  
     Display = SaveDisplay;
+	ClearVPTran(CurView);
 	CurView = pSaveCurView;
 	memcpy(CurView, pSaveView, sizeof(VIEWPORT));
 	GSSiGlobUlFree(&hSaveView);

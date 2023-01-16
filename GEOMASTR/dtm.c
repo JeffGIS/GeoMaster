@@ -2057,8 +2057,10 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 	_fstrcpy (FileName,FileNameIN);  
 	ExpandText (FileName);
 	_fstrupr (FileName);
-	if (StringEndsWith(FileName,".DTM"))
+	if (StringEndsWith(FileName, ".DTM"))
 		Type = DTMTYPE_NGI;
+	if (StringEndsWith(FileName, ".DTS"))
+		Type = DTMTYPE_SLT;
 	else if (StringEndsWith(FileName,".TIN"))
 		Type = DTMTYPE_TIN_GM; 
 	else if (StringEndsWith(FileName, ".LDR"))
@@ -2193,6 +2195,57 @@ ReOpen:
 			GlobalUnlock(hSurf);
 		}
 			break;
+		case DTMTYPE_SLT:
+		{
+			sqlite3* db;
+			LPSTR pDot;
+			char FileNameBin[MAX_PATH];
+
+			if (sqlite3_open(FileName, &db) != SQLITE_OK)
+				return FALSE;
+			strcpy(FileNameBin, FileName);
+			pDot = strrchr(FileNameBin, '.');
+			strcpy(pDot, ".bin");
+			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+
+			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			pDTMInfo->Type = Type;
+			pDTMInfo->db = db;
+			pDTMInfo->Fid = GSSiOpenFile(FileNameBin, 0, OF_READ);
+			char query[64];
+			sqlite3_stmt* statement;
+			int offset = -1;
+			sprintf(query, "SELECT * FROM DTMINFO");
+			if (sqlite3_prepare_v2GSSi(pDTMInfo->db, query, -1, &statement, 0) == SQLITE_OK)
+			{
+				if (sqlite3_step(statement) == SQLITE_ROW)
+				{
+					int i = 0;
+					pDTMInfo->Version = sqlite3_column_int(statement, i++);
+					pDTMInfo->NULLElv = sqlite3_column_double(statement, i++);
+					pDTMInfo->GridSpace = sqlite3_column_double(statement, i++);
+					pDTMInfo->ElevUnits = sqlite3_column_int(statement, i++);
+					pDTMInfo->CoordUnits = sqlite3_column_int(statement, i++);
+					pDTMInfo->SouthWestNode.x = sqlite3_column_double(statement, i++);
+					pDTMInfo->SouthWestNode.y = sqlite3_column_double(statement, i++);
+					pDTMInfo->Bounds.xmn = sqlite3_column_double(statement, i++);
+					pDTMInfo->Bounds.ymn = sqlite3_column_double(statement, i++);
+					pDTMInfo->Bounds.xmx = sqlite3_column_double(statement, i++);
+					pDTMInfo->Bounds.ymx = sqlite3_column_double(statement, i++);
+				}
+			}
+			sqlite3_finalizeGSSi(&statement);
+
+
+			for (i = 0; i < MAXDTMCELLBUFFERS; i++)
+			{
+				pDTMInfo->CellUse[i] = LONG_MIN;
+				pDTMInfo->CellID[i] = LONG_MIN;
+			}
+			GlobalUnlock(hSurf);
+
+		}
+		break;
 		case DTMTYPE_LIDAR_LAZ:
 		{
 			sqlite3 *db;
@@ -2269,12 +2322,20 @@ void DTMClose (LPHANDLE pHandle)
 			if (hOpenSurf[i])
 			{
 				pDTMInfo = (LPDTMINFO)GlobalLock (hOpenSurf[i]); 
-				if (pDTMInfo->Type == DTMTYPE_LIDAR_GM)
-					GSSiClose2 (&pDTMInfo->Fid);
-				else if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+				switch (pDTMInfo->Type)
+				{
+				case DTMTYPE_LIDAR_GM:
+					GSSiClose2(&pDTMInfo->Fid);
+					break;
+				case DTMTYPE_SLT:
+					GSSiClose2(&pDTMInfo->Fid);
+				case DTMTYPE_LIDAR_LAZ:
 					sqlite3_close(pDTMInfo->db);
-				else
-					CloseGWDatabase (pDTMInfo->hDB); 
+					break;
+				case DTMTYPE_NGI:
+					CloseGWDatabase(pDTMInfo->hDB);
+					break;
+				}
 				for (j=0;j<MAXDTMCELLBUFFERS;j++)
 					if (pDTMInfo->hCell[j] > (HANDLE)1)
 						GSSiGlobFree (&pDTMInfo->hCell[j]);
@@ -2289,15 +2350,25 @@ void DTMClose (LPHANDLE pHandle)
 			if (hOpenSurf[i] == *pHandle) 
 			{
 				pDTMInfo = (LPDTMINFO)GlobalLock (hOpenSurf[i]);
-				if (pDTMInfo->Type == 3)
-				{   
+				switch (pDTMInfo->Type)
+				{
+				case  DTMTYPE_LIDAR_GM:
+				{
 					short	ii;
-					GSSiClose2 (&pDTMInfo->Fid); 
+					GSSiClose2(&pDTMInfo->Fid);
 					if (pDTMInfo->Fid == 35)
-						ii=1;
+						ii = 1;
 				}
-				else
-					CloseGWDatabase (pDTMInfo->hDB); 
+				break;
+				case DTMTYPE_NGI:
+					CloseGWDatabase(pDTMInfo->hDB);
+					break;
+				case DTMTYPE_SLT:
+					GSSiClose2(&pDTMInfo->Fid);
+				case DTMTYPE_LIDAR_LAZ:
+					sqlite3_close(pDTMInfo->db);
+					break;
+				}
 				for (j=0;j<MAXDTMCELLBUFFERS;j++)
 					if (pDTMInfo->hCell[j] > (HANDLE)1)
 						GSSiGlobFree (&pDTMInfo->hCell[j]); 
@@ -2319,8 +2390,82 @@ void DTMClose (LPHANDLE pHandle)
 																							}
 																							#endif
 }
+BOOL ConvertDTMToSQLITE(HANDLE hSurf,LPSTR SQLiteFileName)
+{
+	int version = 1;
+	BOOL rtn = FALSE;
+	sqlite3* db;
+#define BLOB_MAX 1024*1024*8
+	char	DefStr[512];
+	int totCompressed = 0;
+	char BinFileName[MAX_PATH];
+	strcpy(BinFileName, SQLiteFileName);
+	LPSTR pDot = strrchr(BinFileName, '.');
+	if (!pDot)
+		return rtn;
+	strcpy(pDot, ".bin");
+	sprintf (DefStr,"CREATE TABLE DTM (CellID INTEGER PRIMARY KEY,OFFSET INT);CREATE TABLE DTMINFO(Version INT,NULLElv DOUBLE,GridSpace DOUBLE,ElevUnits INT,CoordUnits INT,SouthWestNodeX DOUBLE, SouthWestNodeY DOUBLE,BoundsXMN DOUBLE,BoundsYMN DOUBLE,BoundsXMX DOUBLE,BoundsYMX DOUBLE)");
+	double	NULLElv;
+	double	GridSpace;
+	short	ElevUnits; 						//0=feet,1=feet*100,2=decimeters
+	short	CoordUnits;						//0=meters,1=feet
+	DPOINT	SouthWestNode;
+	MNMXCORD	Bounds;
 
-HANDLE GetDTMSubCell (HANDLE hSurf,long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
+	GSSiRemove(SQLiteFileName);
+	HFILE FidBin = GSSiOpenFile(BinFileName, 0, OF_CREATE);
+	rtn = !sqlite3_open(SQLiteFileName, &db);
+	if (rtn)
+	{
+		LPSTR cmd = malloc(BLOB_MAX);
+		LPSTR pCompressedRec = malloc(BLOB_MAX);
+		SLT_StartTrans(db);
+		if (SLT_Execute(DefStr, db))
+		{
+			int pos = BT_FIRST;
+			LPGWDHEADER	lpGWDHead;
+			long		CellID, Offset;
+			LPDTMINFO	pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			lpGWDHead = (LPGWDHEADER)GlobalLock(pDTMInfo->hDB);
+			sprintf(cmd, "INSERT INTO DTMINFO VALUES (%i,%f,%f,%i,%i,%f,%f,%f,%f,%f,%f)",version,pDTMInfo->NULLElv,
+				pDTMInfo->GridSpace,pDTMInfo->ElevUnits,pDTMInfo->CoordUnits, pDTMInfo->SouthWestNode.x, pDTMInfo->SouthWestNode.y,
+				pDTMInfo->Bounds.xmn, pDTMInfo->Bounds.ymn, pDTMInfo->Bounds.xmx, pDTMInfo->Bounds.ymx);
+			SLT_Execute(cmd, db);
+			while (!BT_FIND(lpGWDHead->BTHandle[0], (LPSTR)&CellID, pos, BT_ANY, (LPSTR)&Offset))
+			{
+				unsigned short	len;
+				LPLONG	pCell;
+
+				if (pos == BT_FIRST)
+					pos = BT_NEXT;
+				else
+				{
+					GSSillseek(lpGWDHead->Fid, Offset, 0);
+					BigRead(lpGWDHead->Fid, (HPSTR)&len, 2);
+					BigRead(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, len);
+					int lenDecompressed = len;
+					int lenCompressed = CompressBinaryRecord((LPBYTE)&lpGWDHead->GWDData, pCompressedRec, lenDecompressed);
+					totCompressed += lenCompressed;
+					Offset = GSSillseek(FidBin, 0, 1);
+					BigWrite(FidBin, &lenCompressed, sizeof(int), -1);
+					BigWrite(FidBin, &lenDecompressed, sizeof(int), -1);
+					BigWrite(FidBin, pCompressedRec, lenCompressed, -1);
+					sprintf(cmd, "INSERT INTO DTM VALUES(%i,%i)", CellID, Offset);
+					SLT_Execute(cmd, db);
+				}
+			}
+			GlobalUnlock(pDTMInfo->hDB);
+			GlobalUnlock(hSurf);
+		}
+		SLT_EndTrans(db);
+		SLT_Close(db);
+		GSSiClose2(&FidBin);
+		free(cmd);
+		free(pCompressedRec);
+	}
+	return rtn;
+}
+HANDLE GetDTMSubCell (long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
 																							#if ENABLETRACE
 																							{GSSiEnterProg (1364);
 																							#endif
@@ -2364,35 +2509,81 @@ HANDLE GetDTMSubCell (HANDLE hSurf,long GeoSeg, short SubCell,LPDTMINFO pDTMInfo
 			MinUse = pDTMInfo->CellUse[i];
 			MinUseID = i;
 		}
-	lpGWDHead = (LPGWDHEADER)GlobalLock (pDTMInfo->hDB); 
-	pSUBCELLInfo = (LPSUBCELLINFO)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY)));
-	pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
-	CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4); 
 	if (pDTMInfo->hCell[MinUseID] > (HANDLE)1) 
     	GSSiGlobFree (&pDTMInfo->hCell[MinUseID]);
     else
     	pDTMInfo->hCell[MinUseID] = 0;
-   	if (!BT_FIND (lpGWDHead->BTHandle[0],(LPSTR)&CellID,BT_FIRST,BT_EQ,(LPSTR)&Offset)) 
-   	{
-		unsigned short	len;    
+	switch (pDTMInfo->Type)
+	{
+	case DTMTYPE_NGI:
+	{
+		lpGWDHead = (LPGWDHEADER)GlobalLock(pDTMInfo->hDB);
+		pSUBCELLInfo = (LPSUBCELLINFO)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY)));
+		pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
+		CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
+		if (!BT_FIND(lpGWDHead->BTHandle[0], (LPSTR)&CellID, BT_FIRST, BT_EQ, (LPSTR)&Offset))
+		{
+			unsigned short	len;
+			LPLONG	pCell;
+
+			GSSillseek(lpGWDHead->Fid, Offset, 0);
+			BigRead(lpGWDHead->Fid, (HPSTR)&len, 2);
+			BigRead(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, len);
+			SetGWDCurrentOffset(lpGWDHead, Offset);
+			pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(1099, GMEM_MOVEABLE, 4096);
+			pCell = (LPLONG)GlobalLock(pDTMInfo->hCell[MinUseID]);
+			ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
+			GlobalUnlock(pDTMInfo->hCell[MinUseID]);
+			handle = pDTMInfo->hCell[MinUseID];
+			GlobalUnlock(pDTMInfo->hDB);
+			nio++;
+		}
+		else
+			pDTMInfo->hCell[MinUseID] = (HANDLE)1;
+	}
+		break;
+	case DTMTYPE_SLT:
+	{
+		char query[64];
+		sqlite3_stmt* statement;
+		int offset = -1;
+		int	len;
+		int  lenDecompressed;
 		LPLONG	pCell;
 
-	    GSSillseek (lpGWDHead->Fid,Offset,0);
-	    BigRead (lpGWDHead->Fid,(HPSTR)&len,2);
-	    BigRead (lpGWDHead->Fid,(HPSTR)&lpGWDHead->GWDData,len); 
-	    SetGWDCurrentOffset (lpGWDHead,Offset);
-	    pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc (1099,GMEM_MOVEABLE,4096);
-	    pCell = (LPLONG)GlobalLock (pDTMInfo->hCell[MinUseID]);
-		ExpandSubcell (pCell,*pSUBCELLInfo,CompressedDTMData,pBias);
-		GlobalUnlock (pDTMInfo->hCell[MinUseID]);
-		handle = pDTMInfo->hCell[MinUseID]; 
-		nio++;
-	} 
-	else
-	    pDTMInfo->hCell[MinUseID] = (HANDLE)1;
+		sprintf(query, "SELECT OFFSET FROM DTM WHERE CELLID = %i", CellID);
+		if (sqlite3_prepare_v2GSSi(pDTMInfo->db, query, -1, &statement, 0) == SQLITE_OK)
+		{
+			if (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				offset = sqlite3_column_int(statement, 0);
+				GSSillseek(pDTMInfo->Fid, offset, 0);
+				BigRead(pDTMInfo->Fid, (HPSTR)&len,sizeof(int));
+				BigRead(pDTMInfo->Fid, (HPSTR)&lenDecompressed, sizeof(int));
+				LPSTR pCompressedRec = malloc(len + 4);
+				LPSTR pDeCompressedRec = malloc(lenDecompressed + 4);
+				BigRead(pDTMInfo->Fid,pCompressedRec, len);
+				int lDecompRec = DecompressBinaryRecordUnsafe(pDeCompressedRec, pCompressedRec, len);
+				pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(1099, GMEM_MOVEABLE, 4096);
+				pCell = (LPLONG)GlobalLock(pDTMInfo->hCell[MinUseID]);
+				pSUBCELLInfo = (LPSUBCELLINFO)(pDeCompressedRec + (sizeof(DTMKEY)));
+				pBias = (LPLONG)(pDeCompressedRec + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
+				CompressedDTMData = pDeCompressedRec + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
+
+				ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
+				free(pCompressedRec);
+				free(pDeCompressedRec);
+				GlobalUnlock(pDTMInfo->hCell[MinUseID]);
+				handle = pDTMInfo->hCell[MinUseID];
+			}
+		}
+		sqlite3_finalizeGSSi(&statement);
+
+	}
+		break;
+	}
 	pDTMInfo->CellID[MinUseID] = CellID;
 	pDTMInfo->CellUse[MinUseID] = ++NextDTMUse;    
-	GlobalUnlock (pDTMInfo->hDB);
 {
 																							#if ENABLETRACE
 																							GSSiExitProg (1364);
@@ -2715,7 +2906,7 @@ HANDLE GetDTMSubCellFromPoint (DPOINT Point,HANDLE hSurf)
       INTX   = TSPX;
       INTY   = TSPY;
       NGSANE (INTX,INTY,&SNGNUM[1],&SNSCNM[1],&SNELNM[1]);
-      hCell = GetDTMSubCell (hSurf,SNGNUM[1],SNSCNM[1],pDTMInfo);
+      hCell = GetDTMSubCell (SNGNUM[1],SNSCNM[1],pDTMInfo);
   	  GlobalUnlock (hSurf);
   	  return hCell;
 }  
@@ -3062,7 +3253,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 //C******* PLACE THE SUBCELL INTO THE SUBCELL BUFFER. IF IT DOES NOT
 //C        EXIST SET NGIELV TO INTMAX AND RETRN.
       NODE = 1;
-      if (!(hCell = GetDTMSubCell (hSurf,SNGNUM[NODE],SNSCNM[NODE],pDTMInfo)))
+      if (!(hCell = GetDTMSubCell (SNGNUM[NODE],SNSCNM[NODE],pDTMInfo)))
       	goto S500;
 //C******* DETERMINE THE ELEMENT NUMBERS OF THE REMAINING THREE
 //C        SURROUNDING NODES, THEN DETERMINE HOW MANY OF THE SURROUNDING
@@ -3175,7 +3366,7 @@ S15:
 S130: NOFINN = 0;
       for (NODE = 1; NODE <= 4; NODE++) 
       {
-      	  if ((hCell = GetDTMSubCell (hSurf,SNGNUM[NODE],SNSCNM[NODE],pDTMInfo))) 
+      	  if ((hCell = GetDTMSubCell (SNGNUM[NODE],SNSCNM[NODE],pDTMInfo))) 
       	  {
       		pCell = (LPLONG)GlobalLock (hCell);
       	  	if (pCell[SNELNM[NODE]-1] != LONG_MAX)

@@ -1931,12 +1931,21 @@ SetVis:
 				rtn = EditDTMSettings (CurView->hWnd,n);
 				goto Rtnrtn;
 			}
-			else if (!_fstricmp (Arg[1],"COPY"))
+			else if (!_fstricmp(Arg[1], "COPY"))
 			{
 				if (nArgs < 4)
 					goto RtnFalse;
-				if (DTMCopy (Arg[2],Arg[3],Arg[4]))
+				if (DTMCopy(Arg[2], Arg[3], Arg[4]))
 					goto RtnTrue;
+			}
+			else if (!_fstricmp(Arg[1], "CONVERT"))
+			{
+				HANDLE hDTM = DTMOpen(Arg[2], DBL_MAX, BT_READ, 0);
+				if (nArgs < 3)
+					goto RtnFalse;
+				rtn = ConvertDTMToSQLITE(hDTM, Arg[3]);
+				DTMClose(&hDTM);
+				goto Rtnrtn;
 			}
 			else if (!_fstricmp (Arg[1],"DUMP"))
 			{

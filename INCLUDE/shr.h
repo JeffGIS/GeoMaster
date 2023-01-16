@@ -166,6 +166,8 @@ BOOL SLT_EndTrans(sqlite3* db);
 BOOL SLT_AbortTrans(sqlite3* db);
 BOOL SLT_Vacuum(sqlite3* db);
 BOOL SLT_Execute(LPSTR cmd, sqlite3* db);
+LPSTR  BytesToBlob(LPBYTE pBytes, int nBytes);
+BOOL SLT_Close(sqlite3* db);
 
 HBITMAP GetToolBitmap (LPSTR BMPath);
 BOOL WaitForProcessToEnd (DWORD pID,LPINT pMaxWait);

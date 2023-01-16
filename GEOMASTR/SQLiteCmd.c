@@ -213,6 +213,11 @@ BOOL SLT_Vacuum(sqlite3* db)
 	}
 	return rtn;
 }
+BOOL SLT_Close(sqlite3* db)
+{
+	BOOL rtn = !sqlite3_close(db);
+	return rtn;
+}
 static int idForCnum(int cnum, int seq, sqlite3 *_database)
 {
 	int rtn = -1;
@@ -297,7 +302,7 @@ static LPSTR  PointsToBlob(HPPOINT pPoints, int nPnts)
 	pBlob[lBlob] = 0;
 	return pBlob;
 }
-static LPSTR  BytesToBlob(LPBYTE pBytes, int nBytes)
+LPSTR  BytesToBlob(LPBYTE pBytes, int nBytes)
 {
 	LPSTR pBlob = malloc(nBytes * 2 +4);
 	int i, lBlob = 0;
