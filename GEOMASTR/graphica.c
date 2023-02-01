@@ -2190,7 +2190,7 @@ short MapFileType (LPSTR InName,LPSTR fileName, LPSTR tableName)
 		return MT_GOOGLE_TERRAIN;
 	if (!_fstricmp(&Name[l - 4], ".GG4"))
 		return MT_GOOGLE_HYBRID;
-	if (!_fstricmp(&Name[l - 4], ".DTM") || !_fstricmp(&Name[l - 4], ".DTS") || !_fstricmp(&Name[l - 4], ".LDR") || !_fstricmp(&Name[l - 4], ".TIN") || !_fstricmp(&Name[l - 3], ".LA"))
+	if (!_fstricmp(&Name[l - 4], ".DTM") || !_fstricmp(&Name[l - 4], ".DTS") || !_fstricmp(&Name[l - 4], ".LDR") || !_fstricmp(&Name[l - 4], ".TIN") || !_fstricmp(&Name[l - 4], ".LAZ"))
 		return MT_DTM; 
 	if (!_fstrnicmp (pBS,"INDEX",5))
 		return MT_INDEX;

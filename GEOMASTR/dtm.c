@@ -6,6 +6,12 @@ static	short	NumRawPointsToUse=4;
 #include "gmextern.h"
 #include "laszip_dll.h"
 
+typedef struct {
+	unsigned	int	count : 8,
+		value : 24;
+} LIDARGRIDCELL;
+typedef LIDARGRIDCELL	* LPLIDARGRIDCELL;
+
 static	HANDLE	hOpenSurf[MAXOPENSURF]; 
 static	long	NextDTMUse=LONG_MIN;
 static	POINT	LidarCellOffsets[9]={0,0,-1,0,-1,1,0,1,1,1,1,0,1,-1,0,-1,-1,-1};    
@@ -2065,7 +2071,7 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 		Type = DTMTYPE_TIN_GM; 
 	else if (StringEndsWith(FileName, ".LDR"))
 		Type = DTMTYPE_LIDAR_GM;
-	else if (StringEndsWith(FileName, ".LA"))
+	else if (StringEndsWith(FileName, ".LAZ"))
 		Type = DTMTYPE_LIDAR_LAZ;
 	if (!Type)
 {
@@ -2961,7 +2967,9 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 																							#endif
 {     
 	//DesiredUnits (0=feet, 1=meters)
-      double    SPX=Point.x, SPY=Point.y, TSPX, TSPY, ELV, X, Y; 
+//	Point.x = 573180.1;
+//	Point.y = 5278670.7;
+	  double    SPX=Point.x, SPY=Point.y, TSPX, TSPY, ELV, X, Y;
       long		INTX, INTY, LSPXDM, LSPYDM;
       long      SURNOD[5], SNGNUM[5];
       short		SNSCNM[5], SNELNM[5], NODE, NOFINN, MISING, I, SurfUnits,ii;  
@@ -4475,13 +4483,13 @@ BOOL FindContourVectors (LPDPOINT TriPoints,LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z
 		}
 	for (iside=0;iside<2;iside++)
 	{   
-		if (Z[iside] < Z[iside+1])
+		if (Z[iside] < Z[iside+1] && CheckForContinue(TRUE, 0))
 		{   
 			ElevDiff = Z[iside+1]-Z[iside];
 			Dist = ldistppmacro (&TriPoints[iside],&TriPoints[iside+1]);  
 			AZ = getazdmacro (&TriPoints[iside],&TriPoints[iside+1]);
 			ZC = Z[iside] - fmod (Z[iside],DTMContourInterval) + DTMContourInterval;
-			while (ZC < Z[iside+1])
+			while (ZC < Z[iside+1] && CheckForContinue(TRUE, 0))
 			{ 
 				pct = (ZC - Z[iside])/ElevDiff;
 				d = pct * Dist;
@@ -4491,13 +4499,13 @@ BOOL FindContourVectors (LPDPOINT TriPoints,LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z
 				ZC += DTMContourInterval; 
 			}
 		}
-		else if (Z[iside] > Z[iside+1])
+		else if (Z[iside] > Z[iside+1] && CheckForContinue(TRUE, 0))
 		{
 			ElevDiff = Z[iside+1]-Z[iside];
 			Dist = ldistppmacro (&TriPoints[iside],&TriPoints[iside+1]);  
 			AZ = getazdmacro (&TriPoints[iside],&TriPoints[iside+1]);
 			ZC = Z[iside] - fmod (Z[iside],DTMContourInterval);
-			while (ZC > Z[iside+1])
+			while (ZC > Z[iside+1] && CheckForContinue(TRUE, 0))
 			{ 
 				pct = (ZC - Z[iside])/ElevDiff;
 				d = pct * Dist;
@@ -5385,16 +5393,16 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 	}
 	return rtn;
 }
-int classifyLAZFile(char * file, char * outFile)
+int classifyLAZFile(char* file, char* outFile)
 {
 	int rtn = 0;
 	int totals[19] = { 0 };
 	HFILE fid;
 	char txt[256];
 	char description[19][40] = { "Never classified", "Unassigned", "Ground", "Low Vegetation", "Medium Vegetation", "High Vegetation", "Building", "Low Point", "Reserved", "Water", "Rail", "Road Surface", "Reserved","Wire - Guard(Shield)","Wire - Conductor(Phase)","Transmission Tower","Wire - Structure Connector(Insulator)","Bridge Deck","High Noise" };
-		
 
-			
+
+
 	laszip_point_struct* point;
 	static __int64 use = 1;
 
@@ -5422,7 +5430,155 @@ int classifyLAZFile(char * file, char * outFile)
 					sprintf(txt, "%i\t%i\t%s", i, totals[i], description[i]);
 					fputstring(txt, fid);
 				}
-				GSSiClose2 (&fid);
+				GSSiClose2(&fid);
+			}
+			laszip_destroy(laszip_reader);
+		}
+	}
+	return rtn;
+}
+int DTMFromLAZFile(char* file, char* outFile)
+{
+	int rtn = 0;
+	int totals[19] = { 0 };
+	HFILE fid;
+	char txt[256];
+	int ground = 2;
+	int water = 9;
+	int roads = 11;
+	int bridgeDeck = 17;
+	char description[19][40] = { "Never classified", "Unassigned", "Ground", "Low Vegetation", "Medium Vegetation", "High Vegetation", "Building", "Low Point", "Reserved", "Water", "Rail", "Road Surface", "Reserved","Wire - Guard(Shield)","Wire - Conductor(Phase)","Transmission Tower","Wire - Structure Connector(Insulator)","Bridge Deck","High Noise" };
+
+
+
+	laszip_point_struct* point;
+	static __int64 use = 1;
+
+	if (laszip_load_dll() != 1)
+	{
+		laszip_POINTER laszip_reader;
+		if (!laszip_create(&laszip_reader))
+		{
+			int cellSize = 2;
+			laszip_BOOL is_compressed = 0;
+			if (!laszip_open_reader(laszip_reader, file, &is_compressed))
+			{
+				laszip_header_struct* header;
+				laszip_get_header_pointer(laszip_reader, &header);
+				laszip_get_point_pointer(laszip_reader, &point);
+				MNMXCORD bounds;
+				bounds.xmn = header->min_x;
+				bounds.xmx = header->max_x;
+				bounds.ymn = header->min_y;
+				bounds.ymx = header->max_y;
+				int gridXWidth = (bounds.xmx - bounds.xmn) / cellSize + 1;
+				int gridYWidth = (bounds.ymx - bounds.ymn) / cellSize + 1;
+				int gridZRange = header->max_z - header->min_z;
+				int gridSize = gridXWidth * gridYWidth;
+				LPLIDARGRIDCELL pGround = calloc(gridSize, sizeof(LIDARGRIDCELL));
+				LPLIDARGRIDCELL pRoads = calloc(gridSize, sizeof(LIDARGRIDCELL));
+				LPLIDARGRIDCELL pWater = calloc(gridSize, sizeof(LIDARGRIDCELL));
+				LPINT pAll = calloc(gridSize, sizeof(int));
+				int found = 0;
+				while (!laszip_read_point(laszip_reader) && rtn < header->number_of_point_records)
+				{
+					rtn++;
+					if (point->classification >= 0 && point->classification <= 18)
+						totals[point->classification]++;
+					int index = (int)((point->Y * header->y_scale_factor + header->y_offset) - bounds.ymn)/cellSize * gridXWidth + (int)((point->X * header->x_scale_factor + header->x_offset) - bounds.xmn)/cellSize;
+					if (index < 0 || index > gridSize)
+						continue;
+					found++;
+					int newval = (point->Z * header->z_scale_factor) - header->min_z;
+					if (point->classification == ground)
+					{
+						if (pGround[index].count < 255)
+							pGround[index].count++;
+						else
+							ii = 1;
+						if (pGround[index].value < 16777216 - newval)
+							pGround[index].value += newval;
+						else
+							ii = 1;
+					}
+					if (point->classification == water)
+					{
+						if (pWater[index].count < 255)
+							pWater[index].count++;
+						else
+							ii = 1;
+						if (pWater[index].value < 16777216 - newval)
+							pWater[index].value += newval;
+						else
+							ii = 1;
+					}
+					if (point->classification == roads)
+					{
+						if (pRoads[index].count < 255)
+							pRoads[index].count++;
+						else
+							ii = 1;
+						if (pRoads[index].value < 16777216 - newval)
+							pRoads[index].value += newval;
+						else
+							ii = 1;
+					}
+					if (point->classification)
+						pAll[index]++;
+				}
+				
+				// Allocate a 32-bit dib
+				HDIB32 dib = FreeImage_Allocate(gridXWidth, gridYWidth, 24, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK);
+				// Calculate the number of bytes per pixel (3 for 24-bit or 4 for 32-bit)
+				int bytespp = FreeImage_GetLine(dib) / FreeImage_GetWidth(dib);
+				for (unsigned y = 0; y < FreeImage_GetHeight(dib); y++)
+				{
+					BYTE* bits = FreeImage_GetScanLine(dib, y);
+					for (unsigned x = 0; x < FreeImage_GetWidth(dib); x++)
+					{
+						int index = y * gridXWidth + x;
+						// Set pixel color to green with a transparency of 128
+						bits[FI_RGBA_RED] = 0;
+						bits[FI_RGBA_GREEN] = 0;
+						bits[FI_RGBA_BLUE] = 0;
+						
+						if (pGround[index].count > 0)
+							bits[FI_RGBA_RED] = 255;
+						else if (pWater[index].count > 0)
+							bits[FI_RGBA_BLUE] = 255;
+						else if (pAll[index] > 0)
+							bits[FI_RGBA_GREEN] = 255;
+						
+						//bits[FI_RGBA_ALPHA] = 128;
+						bits += bytespp;
+					}
+				}
+				int haveValue = 0;
+				int noValue = 0;
+				for (int i = 0; i < gridSize; i++)
+				{
+					if (pGround[i].count > 0 || pWater[i].count > 0 || pRoads[i].count > 0)
+						haveValue++;
+					else
+						noValue++;
+				}
+				double pctNoValue = (noValue * 100.0) /(noValue + haveValue);
+				laszip_close_reader(laszip_reader);
+				fid = GSSiOpenFile(outFile, 0, OF_CREATE);
+				for (int i = 0; i < 19; i++)
+				{
+					sprintf(txt, "%i\t%i\t%s", i, totals[i], description[i]);
+					fputstring(txt, fid);
+				}
+				GSSiClose2(&fid);
+				free(pGround);
+				free(pRoads);
+				free(pWater);
+				free(pAll);
+				int w = FreeImage_GetWidth(dib);
+				int h = FreeImage_GetHeight(dib);
+				char outFile[MAX_PATH] = "c:\\temp\\LAZBitmap.bmp";
+				SaveDIB32(dib, outFile, 0, -1);
 			}
 			laszip_destroy(laszip_reader);
 		}
@@ -5430,3 +5586,87 @@ int classifyLAZFile(char * file, char * outFile)
 	return rtn;
 }
 
+BOOL LoadXYZDem(LPSTR InFile, LPSTR OutFile, LPSTR Result)
+{
+	BOOL rtn = FALSE;
+	MNMXCORD bounds;
+	MNMXCORD3D bounds3D;
+	double minz = DBL_MAX;
+	double maxz = DBL_MIN;
+	OFSTRUCTGM OFStruct = { 0 };
+	BOOL getBounds = FALSE;
+	double x, y, z;
+	HANDLE FidIn = OpenFileGM(InFile, &OFStruct, OF_READ);
+	HANDLE FidOut = INVALID_HANDLE_VALUE;
+
+	DBoundsInit(&bounds);
+	DPOINT pt;
+	if (!stricmp(OutFile, "BOUNDS"))
+		getBounds = TRUE;
+	else
+		FidOut = OpenFileGM(OutFile, &OFStruct, OF_CREATE);
+	if (FidIn != INVALID_HANDLE_VALUE)
+	{
+		LONGLONG nPoints = 0;
+		int bufferLen = 1024 * 1024 * 1024;
+		int nRows = 0;
+		int nCols = 0;
+		int nCurCols = 0;
+		int lineNo = 0;
+		LPSTR pBuf = malloc(bufferLen + 128);
+		LPSTR pBufStartRead = pBuf;
+		int lRead = BigRead64(FidIn, pBuf, bufferLen);
+		while (lRead > 0)
+		{
+			pBuf[lRead] = 0;
+			LPSTR pLoc = pBuf;
+			LPSTR pEndLine = strchr(pLoc, '\n');
+			int lineLen;
+			while (pEndLine)
+			{
+				*pEndLine++ = 0;
+				lineLen = strlen(pLoc);
+				int nvals = sscanf(pLoc, "%lf %lf %lf", &x,&y,&z);
+				lineNo++;
+				pt.x = x;
+				pt.y = y;
+				AddDPointToMinMax(&pt, &bounds);
+				if (z > 0)
+				{
+					minz = min(minz, z);
+					maxz = max(maxz, z);
+				}
+				if (minz < 1)
+					ii = 1;
+				if (x < 10)
+					ii = 1;
+				nPoints++;
+				pLoc = pEndLine;
+				pEndLine = strchr(pLoc, '\n');
+			}
+			lineLen = strlen(pLoc);
+			if (lineLen > 0)
+			{
+				memmove(pBuf, pLoc, lineLen);
+				pBufStartRead = &pBuf[lineLen];
+			}
+			else
+				pBufStartRead = pBuf;
+			lRead = BigRead64(FidIn, pBufStartRead, bufferLen) + lineLen;
+		}
+		bounds3D.xmn = bounds.xmn;
+		bounds3D.xmx = bounds.xmx;
+		bounds3D.ymn = bounds.ymn;
+		bounds3D.ymx = bounds.ymx;
+		bounds3D.zmn = minz;
+		bounds3D.zmx = maxz;
+
+		bounds3Dtoa(Result, &bounds3D);
+		rtn = TRUE;
+		//BigWrite64(FidOut, pBufStartRead, len, -1);
+		free(pBuf);
+	}
+	GSSiClose64(&FidIn);
+	GSSiClose64(&FidOut);
+	return rtn;
+}

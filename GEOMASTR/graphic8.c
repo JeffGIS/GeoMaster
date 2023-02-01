@@ -2356,64 +2356,128 @@ int FillRectColor (HDC hDC,LPRECT Rect,COLORREF Color)
 
 short FillRectPoly(HDC hDC, LPRECT Rect, COLORREF Color)
 #if ENABLETRACE
-{GSSiEnterProg (982);
+{
+	GSSiEnterProg(982);
 #endif
-{
-    POINT   Points[5];
-    HBRUSH  CurBrush=0, brush;
-    HPEN    CurPen, pen=0;
-    short       i;
-	int		iw = RECTWIDTH(Rect);
-	int		ih = RECTHEIGHT(Rect);
-    
-    {
-    	HDC hdcmain=GetDC (hWndMain);  
-    	short	ii;
-    	
-    	if (hDC == hdcmain)
-    		ii=1;
-    	ReleaseDC (hWndMain,hdcmain);
-    }
-    SaveDC (hDC);
-    brush = CreateGMBrush (Color,0,hDC);
-    if (brush)
-    	CurBrush = SelectObject (hDC,brush); 
-    pen = CreatePen (PS_SOLID,0,ColorWOWidth(Color));  
-    if (GetROP2 (hDC) != R2_MASKPEN)
-    	CurPen = SelectObject (hDC,pen);
-    else
-    	CurPen = SelectObject (hDC,GetStockObject(NULL_PEN));
-    Points[0].x = Rect->left;
-    Points[0].y = Rect->bottom;
-    Points[1].x = Rect->left;
-    Points[1].y = Rect->top;    
-    Points[2].x = Rect->right;
-    Points[2].y = Rect->top;
-    Points[3].x = Rect->right;
-	Points[3].y = Rect->bottom;
-	Points[4] = Points[0];
-	if (brush)
-    	i = Polygon (hDC,Points,5);  
-    else
-    	i = Polyline (hDC,Points,5);  
-    if (CurBrush)
-	    SelectObject (hDC,CurBrush);
-	if (CurPen)                         
-    	SelectObject (hDC,CurPen);  
-    GSSiDeleteObject (&pen); 
-    GSSiDeleteObject (&brush);
-    RestoreDC (hDC,-1);
-{
+	{
+		POINT   Points[5];
+		HBRUSH  CurBrush = 0, brush;
+		HPEN    CurPen, pen = 0;
+		short       i;
+		int		iw = RECTWIDTH(Rect);
+		int		ih = RECTHEIGHT(Rect);
+
+		{
+			HDC hdcmain = GetDC(hWndMain);
+			short	ii;
+
+			if (hDC == hdcmain)
+				ii = 1;
+			ReleaseDC(hWndMain, hdcmain);
+		}
+		SaveDC(hDC);
+		brush = CreateGMBrush(Color, 0, hDC);
+		if (brush)
+			CurBrush = SelectObject(hDC, brush);
+		pen = CreatePen(PS_SOLID, 0, ColorWOWidth(Color));
+		if (GetROP2(hDC) != R2_MASKPEN)
+			CurPen = SelectObject(hDC, pen);
+		else
+			CurPen = SelectObject(hDC, GetStockObject(NULL_PEN));
+		Points[0].x = Rect->left;
+		Points[0].y = Rect->bottom;
+		Points[1].x = Rect->left;
+		Points[1].y = Rect->top;
+		Points[2].x = Rect->right;
+		Points[2].y = Rect->top;
+		Points[3].x = Rect->right;
+		Points[3].y = Rect->bottom;
+		Points[4] = Points[0];
+		if (brush)
+			i = Polygon(hDC, Points, 5);
+		else
+			i = Polyline(hDC, Points, 5);
+		if (CurBrush)
+			SelectObject(hDC, CurBrush);
+		if (CurPen)
+			SelectObject(hDC, CurPen);
+		GSSiDeleteObject(&pen);
+		GSSiDeleteObject(&brush);
+		RestoreDC(hDC, -1);
+		{
 #if ENABLETRACE
-GSSiExitProg (982);
+			GSSiExitProg(982);
 #endif
-    return (i);
-}
+			return (i);
+		}
 
 #if ENABLETRACE
-}
+	}
 #endif
-}      
+}
+short FillRectPoly2(HDC hDC, LPRECT Rect, BOOL fill,BOOL border,COLORREF fillColor,COLORREF borderColor)
+#if ENABLETRACE
+{
+	GSSiEnterProg(982);
+#endif
+	{
+		POINT   Points[5];
+		HBRUSH  CurBrush = 0, brush;
+		HPEN    CurPen, pen = 0;
+		short       i;
+		int		iw = RECTWIDTH(Rect);
+		int		ih = RECTHEIGHT(Rect);
+
+		{
+			HDC hdcmain = GetDC(hWndMain);
+			short	ii;
+
+			if (hDC == hdcmain)
+				ii = 1;
+			ReleaseDC(hWndMain, hdcmain);
+		}
+		SaveDC(hDC);
+		brush = CreateGMBrush(fillColor, 0, hDC);
+		if (fill)
+			CurBrush = SelectObject(hDC, brush);
+		else
+			CurBrush = SelectObject(hDC, GetStockObject(NULL_BRUSH));
+		pen = CreatePen(PS_SOLID, 0, ColorWOWidth(borderColor));
+		if (border && GetROP2(hDC) != R2_MASKPEN)
+			CurPen = SelectObject(hDC, pen);
+		else
+			CurPen = SelectObject(hDC, GetStockObject(NULL_PEN));
+		Points[0].x = Rect->left;
+		Points[0].y = Rect->bottom;
+		Points[1].x = Rect->left;
+		Points[1].y = Rect->top;
+		Points[2].x = Rect->right;
+		Points[2].y = Rect->top;
+		Points[3].x = Rect->right;
+		Points[3].y = Rect->bottom;
+		Points[4] = Points[0];
+		if (brush)
+			i = Polygon(hDC, Points, 5);
+		else
+			i = Polyline(hDC, Points, 5);
+		if (CurBrush)
+			SelectObject(hDC, CurBrush);
+		if (CurPen)
+			SelectObject(hDC, CurPen);
+		GSSiDeleteObject(&pen);
+		GSSiDeleteObject(&brush);
+		RestoreDC(hDC, -1);
+		{
+#if ENABLETRACE
+			GSSiExitProg(982);
+#endif
+			return (i);
+		}
+
+#if ENABLETRACE
+	}
+#endif
+}
 
 BOOL SetCVTFromVis (void)
 #if ENABLETRACE

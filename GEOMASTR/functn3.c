@@ -3286,7 +3286,7 @@ GotCloseFilehSQL:
 					// $BOUNDS(MAX,BOUNDS) returns max point 
 				    // $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
 					// $BOUNDS(LAYER,layer name,vpname)
-					// $BOUNDS(DISPLAY,BOUNDS,COLOR);
+					// $BOUNDS(DISPLAY,BOUNDS,BORDERCOLOR,FILLCOLOR);
 		{				
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
@@ -3311,7 +3311,13 @@ GotCloseFilehSQL:
 				HANDLE hPoints = GSSiGlobAlloc(1225, GMEM_MOVEABLE, 4 * sizeof(DPOINT));
 				LPDPOINT pPoint = (HPDPOINT)GlobalLock(hPoints);
 				Bounds = atobounds(Arg[2], &Err);
-				DisplayFileBounds(Bounds);
+				COLORREF borderColor = atoi(Arg[3]);
+				COLORREF fillColor = atoi(Arg[4]);
+				BOOL doFill = TRUE;
+				BOOL doBorder = TRUE;
+				if (fillColor == -1)
+					doFill = FALSE;
+				DisplayBounds(Bounds,doFill,doBorder,fillColor,borderColor);
 				/*BoundsToPoints(&Bounds, pPoint, 0);
 				SelectObject(CurView->hDC, GetStockObject(GRAY_BRUSH));
 				GMPolygon(CurView->hDC, pPoint, 4);
@@ -3616,6 +3622,12 @@ GotCloseFilehSQL:
 				boundstoa (OutLoc,&Bounds);
 				goto Rtnl;  
 			} 
+			else if (!_fstricmp(Arg[1], "TOPOINTS"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				sprintf(OutLoc, "%f %f %f %f %f %f %f %f", Bounds.xmn, Bounds.ymn, Bounds.xmn, Bounds.ymx, Bounds.xmx, Bounds.ymx, Bounds.xmx, Bounds.ymn);
+				goto Rtnl;
+			}
 			else if (!_fstricmp(Arg[1], "CONTAINS"))
 			{
 				Bounds = atobounds(Arg[2], &Err);
@@ -5229,6 +5241,7 @@ GotCloseFilehSQL:
 				rtn = getLAZMinMax(Arg[2], &Bounds.xmn, &Bounds.xmx, &Bounds.ymn, &Bounds.ymx, &zmn, &zmx);
 				if (*Arg[3])
 					SetGlobalValueBounds(Arg[3], &Bounds);
+				goto Rtnrtn;
 			}
 			if (!stricmp(Arg[1], "GETBOUNDS3D"))
 			{
@@ -5236,6 +5249,7 @@ GotCloseFilehSQL:
 				rtn = getLAZMinMax(Arg[2], &Bounds3D.xmn, &Bounds3D.xmx, &Bounds3D.ymn, &Bounds3D.ymx, &Bounds3D.zmn, &Bounds3D.zmx);
 				if (*Arg[3])
 					SetGlobalValueBounds3D(Arg[3], &Bounds3D);
+				goto Rtnrtn;
 			}
 			else if (!stricmp(Arg[1], "LAZTOTEXT"))//$LAZTOTEXT(infile,outfile,pointtype)
 			{
@@ -5246,6 +5260,12 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[1], "CLASSIFY"))//$LAZTOTEXT(CLASSIFY,infile,outfile)
 			{
 				rtn = classifyLAZFile(Arg[2], Arg[3]);
+				itoa(rtn, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!stricmp(Arg[1], "DTMFROMLAZ"))//$LAZTOTEXT(CLASSIFY,infile,outfile)
+			{
+				rtn = DTMFromLAZFile(Arg[2], Arg[3]);
 				itoa(rtn, OutLoc, 10);
 				goto Rtnl;
 			}

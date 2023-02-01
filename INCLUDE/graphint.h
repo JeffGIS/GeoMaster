@@ -400,6 +400,8 @@ BOOL EliminateDupPoints (long np,HPFPOINT pPoints);
 int PlotLinearItem (HDC hDC,HPFPOINT lpPoints,long nPnts,int idesc,HANDLE hSymbol,short nElementsToDisplay, HANDLE hElementToDisplay,BOOL WantPreSym,BOOL WantPostSym,double Factor);
 //int DescScan(int desc,WORD SegSize);
 void DisplayFileBounds (MNMXCORD Bounds);
+void DisplayBounds(MNMXCORD Bounds, BOOL fill, BOOL showBorder, COLORREF fillColor, COLORREF borderColor);
+short FillRectPoly2(HDC hDC, LPRECT Rect, BOOL fill, BOOL border, COLORREF fillColor, COLORREF borderColor);
 BOOL SetRezoomBounds (MNMXCORD Bounds);
 HANDLE OpenMapIndex (LPSTR Name,LPMNMXCORD pIndexBounds);
 short GetMapIndexType (LPSTR Name);

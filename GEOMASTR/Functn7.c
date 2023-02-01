@@ -1327,6 +1327,11 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			if (LoadERDASDem())
 				goto RtnTrue;
 		}
+		else if (!_fstricmp(Arg[1], "XYZ"))
+		{
+			if (LoadXYZDem(Arg[2], Arg[3],OutLoc))
+				goto Rtnl;
+		}
 		goto RtnFalse;
 	}
 	case 755: // $SYMDICT(COMPRESS) 

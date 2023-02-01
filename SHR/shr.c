@@ -7676,6 +7676,12 @@ void boundstoa (LPSTR Value,LPMNMXCORD Bounds)
 	sprintf (Value,"%.14lg %.14lg %.14lg %.14lg",Bounds->xmn,Bounds->ymn,Bounds->xmx,Bounds->ymx); 
 	return;
 }
+void bounds3Dtoa(LPSTR Value, LPMNMXCORD3D Bounds)
+{
+	sprintf(Value, "%.14lg %.14lg %.14lg %.14lg %.14lg %.14lg", Bounds->xmn, Bounds->ymn, Bounds->zmn, Bounds->xmx, Bounds->ymx, Bounds->zmx);
+	return;
+
+}
 
 LPSTR ftoa (LPSTR Value,double DVal)
 {

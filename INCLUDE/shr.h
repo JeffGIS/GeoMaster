@@ -1000,7 +1000,8 @@ MNMXCORD3D atobounds3D(LPSTR Value, LPBOOL pErr);
 MNMXCORD lboundstobounds(LPMNMXCORL plbounds);
 RECT atorect (LPSTR Value,LPBOOL pErr); 
 void boundstoa (LPSTR Value,LPMNMXCORD Bounds);
-void lboundstoa (LPSTR Value,LPMNMXCORL Bounds);
+void lboundstoa(LPSTR Value, LPMNMXCORL Bounds);
+void bounds3Dtoa(LPSTR Value, LPMNMXCORD3D Bounds);
 void recttoa (LPSTR Value,RECT Rect);
 void pttoa (LPSTR Value,POINT Point);
 void dpointtoa (LPSTR Value,LPDPOINT pPoint);
@@ -1558,6 +1559,9 @@ BOOL getLAZMinMax(char * file, double * xmin, double * xmax, double * ymin, doub
 int getLAZPointsInBounds(LPLAZFILESTRUCT pFiles, int fileNum, char * file, int wantType, LPMNMXCORD pBounds, int maxPoints, LPDPOINT3D points);
 int writeLAZFileToText(char * file, int wantType, char * outFile);
 int classifyLAZFile(char * file, char * outFile);
+int DTMFromLAZFile(char* file, char* outFile);
+BOOL LoadXYZDem(LPSTR InFile, LPSTR OutFile, LPSTR Result);
+
 
 int getww_(void);
 int getwh_(void);

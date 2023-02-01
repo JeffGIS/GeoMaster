@@ -458,7 +458,7 @@ int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColo
 		}
 		//StatusWindowUpdate (0,0,nrow-begrow,row-begrow);
 	}
-	if (!SaveDIB32(hDIB24, ToPath, 0, -1))
+	if (!SaveDIB32(hDIB24, ToPath,-1, 0))
 		n = -1;
 	GSSiFreeImage_Unload(hDIB24);
 	return n;

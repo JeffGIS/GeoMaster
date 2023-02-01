@@ -3321,42 +3321,77 @@ GSSiExitProg (862);
 #endif
 }
 
-void DisplayFileBounds (MNMXCORD Bounds)
+void DisplayFileBounds(MNMXCORD Bounds)
 #if ENABLETRACE
-{GSSiEnterProg (863);
+{
+	GSSiEnterProg(863);
 #endif
-{	MNMXCORD	FileBounds, BoundSP;
-	RECT		Rect;     
+	{	MNMXCORD	FileBounds, BoundSP;
+	RECT		Rect;
 	DPOINT		BasePt;
 	POINT		WinPt;
-	
-	SetDisplayMode (CurView->hDC,GF_TEXTMODE);
-    
-    BasePt.x = Bounds.xmn;
-    BasePt.y = Bounds.ymn;
+
+	SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+
+	BasePt.x = Bounds.xmn;
+	BasePt.y = Bounds.ymn;
 	WinPt = BasePtToWinPt(&BasePt);
 	Rect.left = WinPt.x;
 	Rect.bottom = WinPt.y;
-    BasePt.x = Bounds.xmx;
-    BasePt.y = Bounds.ymx;
+	BasePt.x = Bounds.xmx;
+	BasePt.y = Bounds.ymx;
 	WinPt = BasePtToWinPt(&BasePt);
 	Rect.right = WinPt.x;
 	Rect.top = WinPt.y;
-	FillRectPoly (CurView->hDC,&Rect,
-                  RGB(127+32+IDNINT(((double)rand()/RAND_MAX)*32),
-                      127+32+IDNINT(((double)rand()/RAND_MAX)*32),
-                      127+32+IDNINT(((double)rand()/RAND_MAX)*32)));
+	FillRectPoly(CurView->hDC, &Rect,
+		RGB(127 + 32 + IDNINT(((double)rand() / RAND_MAX) * 32),
+			127 + 32 + IDNINT(((double)rand() / RAND_MAX) * 32),
+			127 + 32 + IDNINT(((double)rand() / RAND_MAX) * 32)));
+	{
+#if ENABLETRACE
+		GSSiExitProg(863);
+#endif
+		return;
+	}
+#if ENABLETRACE
+	}
+#endif
+}
+
+void DisplayBounds(MNMXCORD Bounds,BOOL fill,BOOL showBorder,COLORREF fillColor,COLORREF borderColor)
+#if ENABLETRACE
 {
-#if ENABLETRACE
-GSSiExitProg (863);
+	GSSiEnterProg(863);
 #endif
-	return;
-}
+	{	MNMXCORD	FileBounds, BoundSP;
+	RECT		Rect;
+	DPOINT		BasePt;
+	POINT		WinPt;
+
+	SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+
+	BasePt.x = Bounds.xmn;
+	BasePt.y = Bounds.ymn;
+	WinPt = BasePtToWinPt(&BasePt);
+	Rect.left = WinPt.x;
+	Rect.bottom = WinPt.y;
+	BasePt.x = Bounds.xmx;
+	BasePt.y = Bounds.ymx;
+	WinPt = BasePtToWinPt(&BasePt);
+	Rect.right = WinPt.x;
+	Rect.top = WinPt.y;
+	FillRectPoly2(CurView->hDC, &Rect, fill, showBorder, fillColor, borderColor);
+	{
 #if ENABLETRACE
-}
+		GSSiExitProg(863);
+#endif
+		return;
+	}
+#if ENABLETRACE
+	}
 #endif
 }
-	
+
 
 void CreateDigCursor (HDC hDC)
 #if ENABLETRACE

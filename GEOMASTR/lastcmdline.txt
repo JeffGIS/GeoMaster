@@ -1,2 +1,2 @@
-[%DL]sportmap4.GMC 
-d:\spm3\spm3
+configs\dtmtest.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
+D:\PCViewerMpls\PCViewer

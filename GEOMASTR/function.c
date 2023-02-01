@@ -3613,9 +3613,23 @@ SetVis:
 			v = MFT;
 
 			//int i = ConvertToJP2(2020, 7);
-				/*
+				
 				OFSTRUCTGM OFStruct;
-				char netFile[MAX_PATH] = "L:\\GEOMas\\orthos\\Orth2019\\2019_1\\orthos4.gci";
+				char netFile[MAX_PATH] = "C:\\temp\\fromimg.txt";
+				char outFile[MAX_PATH] = "C:\\temp\\toimg.txt";
+				HANDLE FidIn = OpenFileGM(netFile, &OFStruct, OF_READ);
+				HANDLE FidOut = OpenFileGM(outFile, &OFStruct, OF_CREATE);
+				int len = 1024 * 1024 * 1024;
+				//len = 64;
+				LPSTR pBuf = malloc(len + 4);
+				BigRead64(FidIn, pBuf, len);
+				double x, y, z;
+
+				BigWrite64(FidOut, pBuf, len,-1);
+				GSSiClose64(&FidIn);
+				GSSiClose64(&FidOut);
+				goto RtnTrue;
+				/*
 				char cacheFile[MAX_PATH] = "C:\\Users\\smithjx0\\AppData\\Local\\Temp\\gmcache2\\ORTHOS\\ORTH2019\\2019_1\\ORTHOS4$GCI.tbr";
 				HANDLE FidNet = OpenFileGM(netFile, &OFStruct, OF_READ);
 				HANDLE FidCache = OpenFileGM(cacheFile, &OFStruct, OF_READ);
