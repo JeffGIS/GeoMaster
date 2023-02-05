@@ -12,6 +12,7 @@ typedef struct {
 } LIDARGRIDCELL;
 typedef LIDARGRIDCELL	* LPLIDARGRIDCELL;
 
+static  int		nOpenDTM = 0;
 static	HANDLE	hOpenSurf[MAXOPENSURF]; 
 static	long	NextDTMUse=LONG_MIN;
 static	POINT	LidarCellOffsets[9]={0,0,-1,0,-1,1,0,1,1,1,1,0,1,-1,0,-1,-1,-1};    
@@ -279,7 +280,7 @@ void DTMOutputType2Run (short nRun,long CURDIF,LPSHORT CompressedDTMData,LPSHORT
 																							#endif
 }  
 
-void ExpandSubcell (LPLONG DTMData,SUBCELLINFO SUBCELLInfo,LPSTR CompressedData,LPLONG pBias)
+int ExpandSubcell (LPLONG DTMData,SUBCELLINFO SUBCELLInfo,LPSTR CompressedData,LPLONG pBias)
 																							#if ENABLETRACE
 																							{GSSiEnterProg (1354);
 																							#endif
@@ -391,7 +392,7 @@ void ExpandSubcell (LPLONG DTMData,SUBCELLINFO SUBCELLInfo,LPSTR CompressedData,
 																							#if ENABLETRACE
 																							GSSiExitProg (1354);
 																							#endif
-	return;
+	return ExpLoc * sizeof(LONG);
 }
 																							#if ENABLETRACE
 																							}
@@ -668,7 +669,7 @@ BOOL LoadERDASDem (void)
 	pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
 	CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
 	
-	Fid = GSSiOpenFile ("g:\\usdata\\dem\\demerd\\statedem.gis",&OFStruct,OF_READ); 
+	Fid = GSSiOpenFile ("g:\\statedem.gis",&OFStruct,OF_READ); 
 	TotLen = GSSillseek (Fid,0,2);
 	GSSillseek (Fid,0,0);
 	CreateStatusWind (hWndMain,1,0);
@@ -736,7 +737,7 @@ BOOL LoadERDASDem (void)
 				MaxElv = SHRT_MIN;   
 				SUBCELLInfo = CompressSubcell (DTMElev,CompressedDTMData,pBias);  
 				_fmemset (DTMData2,0,4096); 
-				ExpandSubcell (DTMData2,SUBCELLInfo,CompressedDTMData,pBias);
+				int expLen = ExpandSubcell (DTMData2,SUBCELLInfo,CompressedDTMData,pBias);
 				for (i=0;i<1024;i++)
 					if (DTMElev[i] != DTMData2[i]) 
 					{
@@ -1516,7 +1517,7 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 				MaxElv = SHRT_MIN;   
 				SUBCELLInfo = CompressSubcell (DTMElev,CompressedDTMData,pBias);  
 				_fmemset (DTMData2,0,4096); 
-				ExpandSubcell (DTMData2,SUBCELLInfo,CompressedDTMData,pBias);
+				int expLen = ExpandSubcell (DTMData2,SUBCELLInfo,CompressedDTMData,pBias);
 				for (i=0;i<1024;i++)
 					if (DTMElev[i] != DTMData2[i]) 
 					{   
@@ -1786,7 +1787,7 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 				MaxElv = SHRT_MIN;   
 				SUBCELLInfo = CompressSubcell (DTMElev,CompressedDTMData,pBias);  
 				_fmemset (DTMData2,0,4096); 
-				ExpandSubcell (DTMData2,SUBCELLInfo,CompressedDTMData,pBias);
+				int expLen = ExpandSubcell (DTMData2,SUBCELLInfo,CompressedDTMData,pBias);
 				for (i=0;i<1024;i++)
 					if (DTMElev[i] != DTMData2[i]) 
 					{   
@@ -2301,6 +2302,7 @@ ReOpen:
 																							#if ENABLETRACE
 																							GSSiExitProg (1362);
 																							#endif
+	nOpenDTM++;
 	return hSurf;
 }
 																							#if ENABLETRACE
@@ -2315,7 +2317,7 @@ void DTMClose (LPHANDLE pHandle)
 {   
 	UINT	i,j;
 	LPDTMINFO	pDTMInfo;
-	          
+	nOpenDTM--;
 	GSSiGlobFree (&DTMCellHandle); 
 	GSSiGlobFree (&hDTMRenderGridRow[0]);
 	GSSiGlobFree (&hDTMRenderGridRow[1]);
@@ -2449,6 +2451,13 @@ BOOL ConvertDTMToSQLITE(HANDLE hSurf,LPSTR SQLiteFileName)
 					GSSillseek(lpGWDHead->Fid, Offset, 0);
 					BigRead(lpGWDHead->Fid, (HPSTR)&len, 2);
 					BigRead(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, len);
+					LPSUBCELLINFO pSUBCELLInfo = (LPSUBCELLINFO)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY)));
+					LPLONG pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
+					LPSTR CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
+
+					pCell = (LPLONG)malloc(4096 + 4);
+					int expLen = ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
+
 					int lenDecompressed = len;
 					int lenCompressed = CompressBinaryRecord((LPBYTE)&lpGWDHead->GWDData, pCompressedRec, lenDecompressed);
 					totCompressed += lenCompressed;
@@ -2538,7 +2547,7 @@ HANDLE GetDTMSubCell (long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
 			SetGWDCurrentOffset(lpGWDHead, Offset);
 			pDTMInfo->hCell[MinUseID] = GSSiGlobAlloc(1099, GMEM_MOVEABLE, 4096);
 			pCell = (LPLONG)GlobalLock(pDTMInfo->hCell[MinUseID]);
-			ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
+			int expLen = ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
 			GlobalUnlock(pDTMInfo->hCell[MinUseID]);
 			handle = pDTMInfo->hCell[MinUseID];
 			GlobalUnlock(pDTMInfo->hDB);
@@ -2575,8 +2584,7 @@ HANDLE GetDTMSubCell (long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
 				pSUBCELLInfo = (LPSUBCELLINFO)(pDeCompressedRec + (sizeof(DTMKEY)));
 				pBias = (LPLONG)(pDeCompressedRec + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
 				CompressedDTMData = pDeCompressedRec + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
-
-				ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
+				int expLen = ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
 				free(pCompressedRec);
 				free(pDeCompressedRec);
 				GlobalUnlock(pDTMInfo->hCell[MinUseID]);
@@ -2670,7 +2678,7 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 	    BigRead (lpGWDHead->Fid,(HPSTR)&lpGWDHead->GWDData,len); 
 	    hCell = GSSiGlobAlloc (1100,GMEM_MOVEABLE,4096);
 	    pCell = (LPLONG)GlobalLock (hCell);
-		ExpandSubcell (pCell,*pSUBCELLInfo,CompressedDTMData,pBias);
+		int expLen = ExpandSubcell (pCell,*pSUBCELLInfo,CompressedDTMData,pBias);
 		pCell[node] = IElev;
 		*pSUBCELLInfo = CompressSubcell (pCell,CompressedDTMData,pBias); 
 		length = sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4 + pSUBCELLInfo->LENGTH;
@@ -3593,7 +3601,7 @@ long GetDTMHoles (LPSTR DTMName, LPSTR OutFile)
 	    {   
 	    	XLL = pDTMInfo->SouthWestNode.x + ((long)DTMKey.GEOSEG_COL * 16 * 32 + (long)DTMKey.SUBCEL_COL * 32) * pDTMInfo->GridSpace;
 	    	YLL = pDTMInfo->SouthWestNode.y + ((long)DTMKey.GEOSEG_ROW * 16 * 32 + (long)DTMKey.SUBCEL_ROW * 32) * pDTMInfo->GridSpace;
-			ExpandSubcell ((LPLONG)Cell,*pSUBCELLInfo,CompressedDTMData,pBias);
+			int expLen = ExpandSubcell ((LPLONG)Cell,*pSUBCELLInfo,CompressedDTMData,pBias);
 			for (i=0;i<32;i++)
 				for (j=0;j<32;j++)
 					if (Cell[i][j] == LONG_MAX)
@@ -5437,6 +5445,10 @@ int classifyLAZFile(char* file, char* outFile)
 	}
 	return rtn;
 }
+void dbBreak(int i)
+{
+	ii = 1;
+}
 int DTMFromLAZFile(char* file, char* outFile)
 {
 	int rtn = 0;
@@ -5444,7 +5456,11 @@ int DTMFromLAZFile(char* file, char* outFile)
 	HFILE fid;
 	char txt[256];
 	int ground = 2;
+	int lowVeg = 3;
+	int medVeg = 4;
+	int highVeg = 5;
 	int water = 9;
+	int buildings = 6;
 	int roads = 11;
 	int bridgeDeck = 17;
 	char description[19][40] = { "Never classified", "Unassigned", "Ground", "Low Vegetation", "Medium Vegetation", "High Vegetation", "Building", "Low Point", "Reserved", "Water", "Rail", "Road Surface", "Reserved","Wire - Guard(Shield)","Wire - Conductor(Phase)","Transmission Tower","Wire - Structure Connector(Insulator)","Bridge Deck","High Noise" };
@@ -5459,7 +5475,7 @@ int DTMFromLAZFile(char* file, char* outFile)
 		laszip_POINTER laszip_reader;
 		if (!laszip_create(&laszip_reader))
 		{
-			int cellSize = 2;
+			int cellSize = 1;
 			laszip_BOOL is_compressed = 0;
 			if (!laszip_open_reader(laszip_reader, file, &is_compressed))
 			{
@@ -5478,6 +5494,8 @@ int DTMFromLAZFile(char* file, char* outFile)
 				LPLIDARGRIDCELL pGround = calloc(gridSize, sizeof(LIDARGRIDCELL));
 				LPLIDARGRIDCELL pRoads = calloc(gridSize, sizeof(LIDARGRIDCELL));
 				LPLIDARGRIDCELL pWater = calloc(gridSize, sizeof(LIDARGRIDCELL));
+				LPLIDARGRIDCELL pBuilding = calloc(gridSize, sizeof(LIDARGRIDCELL));
+				LPLIDARGRIDCELL pVegetation = calloc(gridSize, sizeof(LIDARGRIDCELL));
 				LPINT pAll = calloc(gridSize, sizeof(int));
 				int found = 0;
 				while (!laszip_read_point(laszip_reader) && rtn < header->number_of_point_records)
@@ -5487,7 +5505,7 @@ int DTMFromLAZFile(char* file, char* outFile)
 						totals[point->classification]++;
 					int index = (int)((point->Y * header->y_scale_factor + header->y_offset) - bounds.ymn)/cellSize * gridXWidth + (int)((point->X * header->x_scale_factor + header->x_offset) - bounds.xmn)/cellSize;
 					if (index < 0 || index > gridSize)
-						continue;
+						dbBreak (0);
 					found++;
 					int newval = (point->Z * header->z_scale_factor) - header->min_z;
 					if (point->classification == ground)
@@ -5495,33 +5513,55 @@ int DTMFromLAZFile(char* file, char* outFile)
 						if (pGround[index].count < 255)
 							pGround[index].count++;
 						else
-							ii = 1;
+							dbBreak(1);
 						if (pGround[index].value < 16777216 - newval)
 							pGround[index].value += newval;
 						else
-							ii = 1;
+							dbBreak(2);
 					}
-					if (point->classification == water)
+					else if (point->classification == water)
 					{
 						if (pWater[index].count < 255)
 							pWater[index].count++;
 						else
-							ii = 1;
+							dbBreak(3);
 						if (pWater[index].value < 16777216 - newval)
 							pWater[index].value += newval;
 						else
-							ii = 1;
+							dbBreak(4);
 					}
-					if (point->classification == roads)
+					else if (point->classification == buildings)
+					{
+						if (pBuilding[index].count < 255)
+							pBuilding[index].count++;
+						else
+							dbBreak(5);
+						if (pBuilding[index].value < 16777216 - newval)
+							pBuilding[index].value += newval;
+						else
+							dbBreak(6);
+					}
+					else if (point->classification >= highVeg && point->classification <= highVeg)
+					{
+						if (pVegetation[index].count < 255)
+							pVegetation[index].count++;
+						else
+							dbBreak(7);
+						if (pVegetation[index].value < 16777216 - newval)
+							pVegetation[index].value += newval;
+						else
+							dbBreak(8);
+					}
+					else if (point->classification == roads)
 					{
 						if (pRoads[index].count < 255)
 							pRoads[index].count++;
 						else
-							ii = 1;
+							dbBreak(9);
 						if (pRoads[index].value < 16777216 - newval)
 							pRoads[index].value += newval;
 						else
-							ii = 1;
+							dbBreak(10);
 					}
 					if (point->classification)
 						pAll[index]++;
@@ -5544,10 +5584,12 @@ int DTMFromLAZFile(char* file, char* outFile)
 						
 						if (pGround[index].count > 0)
 							bits[FI_RGBA_RED] = 255;
-						else if (pWater[index].count > 0)
-							bits[FI_RGBA_BLUE] = 255;
-						else if (pAll[index] > 0)
+						if (pVegetation[index].count < 0)
 							bits[FI_RGBA_GREEN] = 255;
+						if (pBuilding[index].count < 0)
+							bits[FI_RGBA_BLUE] = 255;
+						//else if (pAll[index] > 0)
+						//	bits[FI_RGBA_GREEN] = 255;
 						
 						//bits[FI_RGBA_ALPHA] = 128;
 						bits += bytespp;
@@ -5574,6 +5616,8 @@ int DTMFromLAZFile(char* file, char* outFile)
 				free(pGround);
 				free(pRoads);
 				free(pWater);
+				free(pBuilding);
+				free(pVegetation);
 				free(pAll);
 				int w = FreeImage_GetWidth(dib);
 				int h = FreeImage_GetHeight(dib);

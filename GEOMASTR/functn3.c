@@ -3287,6 +3287,8 @@ GotCloseFilehSQL:
 				    // $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
 					// $BOUNDS(LAYER,layer name,vpname)
 					// $BOUNDS(DISPLAY,BOUNDS,BORDERCOLOR,FILLCOLOR);
+					// $BOUNDS(3DTO2D,BOUNDS3D);
+					// $BOUNDS(2DTO3D,BOUNDS,YMN,YMX);
 		{				
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
@@ -3297,6 +3299,32 @@ GotCloseFilehSQL:
 				boundstoa (OutLoc,&Bounds); 
 				goto Rtnl;
 			} 
+			else if (!_fstricmp(Arg[1], "3DTO2D"))
+			{
+				MNMXCORD3D	Bounds3D;
+
+				Bounds3D = atobounds3D(Arg[2], &Err);
+				Bounds.xmn = Bounds3D.xmn;
+				Bounds.xmx = Bounds3D.xmx;
+				Bounds.ymn = Bounds3D.ymn;
+				Bounds.ymx = Bounds3D.ymx;
+
+				boundstoa(OutLoc, &Bounds);
+				goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "2DTO3D"))
+			{
+				MNMXCORD3D	Bounds3D;
+				Bounds = atobounds(Arg[2], &Err);
+				Bounds3D.xmn = Bounds.xmn;
+				Bounds3D.xmx = Bounds.xmx;
+				Bounds3D.ymn = Bounds.ymn;
+				Bounds3D.ymx = Bounds.ymx;
+				Bounds3D.zmn = atof(Arg[3]);
+				Bounds3D.zmx = atof(Arg[4]);
+				bounds3Dtoa(OutLoc, &Bounds3D);
+				goto Rtnl;
+			}
 			else if (!_fstricmp(Arg[1], "INBOUNDS"))
 			{
 				MNMXCORD	Bounds2;

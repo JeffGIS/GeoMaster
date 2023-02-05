@@ -149,6 +149,7 @@ typedef struct _OFSTRUCTGM {
 	CHAR szPathName[OFS_MAXPATHNAMEGM];
 } OFSTRUCTGM, *LPOFSTRUCTGM, *POFSTRUCTGM;
 
+void dbBreak(int i);
 WNDPROC ORIGINALPROC(HWND hWnd);
 BOOL SetContinueProcessing(BOOL set);
 
