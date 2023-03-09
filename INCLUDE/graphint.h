@@ -1822,6 +1822,8 @@ BOOL FontDisplay (LPSTR FontName);
 BOOL WriteMaskArea (HFILE Fid);
 BOOL WriteBackgroundArea (HFILE Fid);
 BOOL LoadERDASDem (void);
+BOOL LoadASCDTM(LPSTR InFile, LPSTR OutFile);
+BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile);
 BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile);
 BOOL LoadLIDARDTM (LPSTR Infiles,LPSTR OutFile,LPSTR CBounds);
 BOOL LoadLIDARDTMfromLAZ(LPSTR InDir, LPSTR OutFile, int wantType);

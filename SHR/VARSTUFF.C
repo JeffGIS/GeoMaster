@@ -10712,7 +10712,7 @@ double GetViewportScale (HDC hDC)
 #endif
 {                
 	double scale, WDist, IDist, BaseScale;
-	double	iLogPixsX;   
+	double	iLogPixsX = 0;   
 	DPOINT	p1,p2; 
 	long	OrthRes[10]={1,4,16,16,16,16,16,16,16,16}; 
 	int		numOrthoLevs=3;
@@ -10728,7 +10728,7 @@ GSSiExitProg (596);
 #endif
 		return 0;
 }
-	iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
+	//iLogPixsX = GetDeviceCaps(hDC, LOGPIXELSX);
 
 	iLogPixsX = GetScreenPixelsPerInch();
 	IDist = ((double)CurView->DrawRect.right - (double)CurView->DrawRect.left) / (double)iLogPixsX;

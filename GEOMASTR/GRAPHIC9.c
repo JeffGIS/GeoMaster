@@ -1912,7 +1912,9 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
     	HANDLE		hSurf = DTMOpen (File,DBL_MAX,BT_READ,0);
 		LPDTMINFO	pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);  
 		
-		CurView->FileMNMX = pDTMInfo->Bounds;  
+		CurView->FileMNMX = pDTMInfo->Bounds;
+		if (pDTMInfo->useProjection)
+			ConvertBounds(&CurView->FileMNMX, 0, 1);
 		GlobalUnlock (hSurf);
 		DTMClose (&hSurf);
     }

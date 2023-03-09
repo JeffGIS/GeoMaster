@@ -4266,6 +4266,7 @@ typedef struct {
 				char	LAZDir[256];
 				LAZFILESTRUCT lazFiles;
 				VISLIST	VisList; //location of data for TIN surface
+				BOOL	useProjection;
 				} DTMINFO;
 typedef DTMINFO	FAR	*LPDTMINFO;
 

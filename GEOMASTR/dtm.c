@@ -789,6 +789,682 @@ Exit:
 																							}
 																							#endif
 } 
+BOOL LoadASCDTM(LPSTR InFile, LPSTR OutFile)
+#if ENABLETRACE
+{
+	GSSiEnterProg(1357);
+#endif
+	{
+		typedef struct erdhead {
+			char hdword[6];
+			short pack, bands;
+			char res1[6];
+			long cols, rows, col1, row1;
+			char res2[56];
+			short maptyp, nclass;
+			char res3[14];
+			short utyp;
+			float area, xl, yt, xcell, ycell;
+		} erdhead;
+		erdhead eh;
+		HFILE	Fid;
+		OFSTRUCTGM	OFStruct;
+		//	static	short	row[19580]; 
+		UINT	irow, icol;
+		DPOINT	Point;
+		HFILE		Fid1, Fid2;
+		short		ii, length;
+		UINT		i, n, pos;
+		long		GeoSeg, Bias, nFiles = 0, MaxFiles = 50, nOutOfRange = 0, nSubCells = 0, nLess12 = 0;
+		short		NumElv, SubCell, Indeterminate, MinElv, MaxElv, ERDASRow[32], SubcellRow;
+		BOOL		OutOfRange;
+		short		nSubcells, icell;
+		long		LastLen;
+		BTVARDESC BTVar[2], * pVars;
+		short		NumFields, Reclen, len;
+		long	Offset;
+		long	TotFileLen;
+		GWDHEADER16 GWDHead;
+		LPGWDHEADER	lpGWDHead;
+		GWDHEADER	GWDHead32;
+		GWFLDINFO GWFldInfo;
+		LPGWFLDINFO	lpGWFldInfo;
+		HANDLE hBT, hDB = 0;
+		HFILE	FidData;
+		int		ibeg;
+		GWFLDINFO FldInfo;
+		char	File[MAX_PATH] = "C:\\temp\\OneMeter.asc";
+		LPSTR	lpDot;
+		HANDLE	hCell;
+		LPSHORT	SubcellDat;
+		LPLONG	pBias;
+		static	long	debugsubcell = 845;
+		long	TotLen, CurLoc, SubCellID;
+		DTMKEY		DTMKey;
+		DTMDATA	DTMData;
+		SUBCELLINFO	SUBCELLInfo;
+		LPSUBCELLINFO	pSUBCELLInfo;
+		LPSTR		CompressedDTMData;
+		HANDLE	hSubcellHandles;
+		LPHANDLE	SubcellHandles;
+		LPLONG	DTMRow;
+		long	INTX, INTY, DTMKeyl;
+		short	IELV;
+		double	SPX, SPY, ymod;
+		HANDLE	hData = GSSiGlobAlloc(1090, GMEM_MOVEABLE, 4096 + 2048);
+		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
+		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
+
+		strcpy(File, OutFile);
+		lpGWDHead = &GWDHead32;
+		_fmemset(&GWDHead, 0, sizeof(GWDHEADER16));
+
+		FidData = GSSiOpenFile(File, &OFStruct, OF_CREATE);
+		GWDHead.NumFields = 0;
+		GWDHead.NumIndex = 1;
+		GWDHead.Version = 2;
+		GWDHead.NumIndexFields[0] = 1;
+		GWDHead.IndexFields[0][0] = 0;
+		BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
+		ibeg = 0;
+
+		FldInfo.Len = sizeof(DTMKEY);
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_INTEGER;
+		_fstrcpy(FldInfo.Name, "DTMKEY");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+		FldInfo.Len = 4;
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_INTEGER;
+		_fstrcpy(FldInfo.Name, "BIAS");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+		FldInfo.Len = sizeof(SUBCELLINFO);
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_INTEGER;
+		_fstrcpy(FldInfo.Name, "SUBCELLINFO");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+
+		FldInfo.Len = 4096;
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_CHAR;
+		_fstrcpy(FldInfo.Name, "COMPRESSEDNODES");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+		GWDHead.Reclen = ibeg;
+		GWDHead.TimeStamp = 0;
+		GSSillseek(FidData, 0, 0);
+		BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
+		GSSillseek(FidData, 0, 2);
+
+		BTVar[0].BT_VARLEN = 4;
+		BTVar[0].BT_VARTYP = BT_INTEGER;
+		BTVar[0].BT_VAROFF = 0;
+		lpDot = _fstrrchr(File, '.');
+		_fstrcpy(lpDot, ".in1");
+		BT_CREATE(File, 4, FALSE, 1, 1, BTVar, FALSE, 0, 0, FALSE);
+		GSSiClose2(&FidData);
+		_fstrcpy(lpDot, ".dtm");
+
+		hDB = OpenGWDatabase(File, BT_WRITE);
+		lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+		pSUBCELLInfo = (LPSUBCELLINFO)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY)));
+		pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
+		CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
+
+		Fid = GSSiOpenFile(InFile, &OFStruct, OF_READ);
+		TotLen = GSSillseek(Fid, 0, 2);
+		GSSillseek(Fid, 0, 0);
+		CreateStatusWind(hWndMain, 1, 0);
+#define MAX_LINE 1024*1024
+		HANDLE hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
+		LPSTR pLine = GlobalLock(hLine);
+		/*			ncols 2450
+					nrows 3489
+					xllcorner 456327.000000
+					yllcorner 5080292.000000
+					cellsize 1.000000
+					NODATA_value - 9999.0
+		*/
+		fgetstring(pLine, MAX_LINE, Fid);
+		if (strnicmp(pLine, "ncols", 5))
+			goto ErrOut;
+		int ncols = atoi(&pLine[5]);
+		fgetstring(pLine, MAX_LINE, Fid);
+		if (strnicmp(pLine, "nrows", 5))
+			goto ErrOut;
+		int nrows = atoi(&pLine[5]);
+		fgetstring(pLine, MAX_LINE, Fid);
+		if (strnicmp(pLine, "xllcorner", 9))
+			goto ErrOut;
+		double xllcorner = atof(&pLine[9]);
+		fgetstring(pLine, MAX_LINE, Fid);
+		if (strnicmp(pLine, "yllcorner", 9))
+			goto ErrOut;
+		double yllcorner = atof(&pLine[9]);
+		fgetstring(pLine, MAX_LINE, Fid);
+		if (strnicmp(pLine, "cellsize", 8))
+			goto ErrOut;
+		double cellsize = atof(&pLine[8]);
+		fgetstring(pLine, MAX_LINE, Fid);
+		if (strnicmp(pLine, "NODATA_value", 12))
+			goto ErrOut;
+		double NODATA_value = atof(&pLine[12]);
+
+		BigRead(Fid, (HPSTR)&eh, sizeof(erdhead));
+		_fmemset(&DTMData, 0, sizeof(DTMData));
+		DTMData.GridSpace = cellsize;
+		DTMData.SouthWestNode.x = xllcorner;
+		DTMData.SouthWestNode.y = yllcorner;
+		DTMData.Bounds.ymn = DTMData.SouthWestNode.y;
+		ymod = fmod((double)eh.yt, DTMData.GridSpace * 32);
+		DTMData.SouthWestNode.y -= (DTMData.GridSpace * 32 - ymod);
+		DTMData.Bounds.xmn = eh.xl;
+		DTMData.Bounds.xmx = eh.xl + DTMData.GridSpace * (eh.cols - 1);
+		DTMData.Bounds.ymx = eh.yt;
+
+		irow = eh.rows;
+		nSubcells = (eh.cols - 1) / 32 + 1;
+		LastLen = eh.cols % 32;
+		if (!LastLen)
+			LastLen = 32;
+		hSubcellHandles = GSSiGlobAlloc(1091, GHND, nSubcells * sizeof(HANDLE));
+		SubcellHandles = (LPHANDLE)GlobalLock(hSubcellHandles);
+		for (i = 0; i < nSubcells; i++)
+			SubcellHandles[i] = GSSiGlobAlloc(1092, GMEM_MOVEABLE, 1024 * 4);
+		SubcellRow = 31;
+		SPY = eh.yt - 16 * eh.ycell;
+		while (ContinueProcessing && irow--)
+		{
+			for (icell = 0; icell < nSubcells; icell++)
+			{
+				DTMRow = (LPLONG)GlobalLock(SubcellHandles[icell]);
+				DTMRow += 32 * SubcellRow;
+				if (icell < nSubcells - 1)
+					BigRead(Fid, (HPSTR)ERDASRow, 32 * 2);
+				else
+				{
+					BigRead(Fid, (HPSTR)ERDASRow, (size_t)(LastLen * 2));
+					for (icol = LastLen; icol < 32; icol++)
+						ERDASRow[icol] = -1;
+				}
+				for (icol = 0; icol < 32; icol++)
+					if (ERDASRow[icol] > -1)
+						DTMRow[icol] = ERDASRow[icol];
+					else
+						DTMRow[icol] = LONG_MAX;
+				GlobalUnlock(SubcellHandles[icell]);
+			}
+			if (!SubcellRow || !irow)
+			{
+				SPX = eh.xl + 16 * eh.xcell;
+				for (icell = 0; icell < nSubcells; icell++)
+				{
+					DTMElev = (LPLONG)GlobalLock(SubcellHandles[icell]);
+					INTX = (SPX - DTMData.SouthWestNode.x) / DTMData.GridSpace;
+					INTY = (SPY - DTMData.SouthWestNode.y) / DTMData.GridSpace;
+					NGSANE(INTX, INTY, &GeoSeg, &SubCell, &IELV);
+					GeoSeg--;
+					SubCell--;
+					DTMKey.GEOSEG_ROW = GeoSeg / 4096;
+					DTMKey.GEOSEG_COL = GeoSeg % 4096;
+					DTMKey.SUBCEL_ROW = SubCell / 16;
+					DTMKey.SUBCEL_COL = SubCell % 16;
+					n = 1024;
+					MinElv = SHRT_MAX;
+					MaxElv = SHRT_MIN;
+					SUBCELLInfo = CompressSubcell(DTMElev, CompressedDTMData, pBias);
+					_fmemset(DTMData2, 0, 4096);
+					int expLen = ExpandSubcell(DTMData2, SUBCELLInfo, CompressedDTMData, pBias);
+					for (i = 0; i < 1024; i++)
+						if (DTMElev[i] != DTMData2[i])
+						{
+							GSSiMessageBox(0, "decompress error", 0, MB_ICONEXCLAMATION, 0);
+							goto Exit;
+						}
+					if (*pBias < LONG_MAX)
+					{
+						*pSUBCELLInfo = SUBCELLInfo;
+						Offset = GSSillseek(lpGWDHead->Fid, 0, 1);
+						length = sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4 + SUBCELLInfo.LENGTH;
+						BigWrite(lpGWDHead->Fid, (HPSTR)&length, 2, -1);
+						BigWrite(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, length, -1);
+						BT_PUT(lpGWDHead->BTHandle[0], (LPSTR)&DTMKey, (LPSTR)&Offset);
+					}
+					SPX += 32 * eh.xcell;
+					GlobalUnlock(SubcellHandles[icell]);
+				}
+				SPY -= 32 * eh.ycell;
+				SubcellRow = 32;
+			}
+			SubcellRow--;
+		Exit:
+			CurLoc = GSSillseek(Fid, 0, 1);
+			StatusWindowUpdate("", "", TotLen, CurLoc);
+		}
+		Offset = GSSillseek(lpGWDHead->Fid, 0, 1);
+		length = sizeof(DTMDATA);
+		BigWrite(lpGWDHead->Fid, (HPSTR)&length, 2, -1);
+		BigWrite(lpGWDHead->Fid, (HPSTR)&DTMData, length, -1);
+		DTMKeyl = LONG_MAX;
+		BT_PUT(lpGWDHead->BTHandle[0], (LPSTR)&DTMKeyl, (LPSTR)&Offset);
+		SetContinueProcessing(TRUE);
+		GSSiClose2(&Fid);
+		DestroyStatusWindow(0);
+		GlobalUnlock(hDB);
+		CloseGWDatabase(hDB);
+		for (i = 0; i < nSubcells; i++)
+			GSSiGlobFree(&SubcellHandles[i]);
+		GSSiGlobUlFree(&hSubcellHandles);
+		GSSiGlobUlFree(&hData);
+		GSSiGlobUlFree(&hLine);
+		{
+#if ENABLETRACE
+			GSSiExitProg(1357);
+#endif
+			return TRUE;
+		}
+	ErrOut:
+		GSSiGlobUlFree(&hLine);
+		GSSiClose2(&Fid);
+		return FALSE;
+
+#if ENABLETRACE
+	}
+#endif
+}
+BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile)
+#if ENABLETRACE
+{
+	GSSiEnterProg(1357);
+#endif
+	{
+		HFILE	Fid;
+		OFSTRUCTGM	OFStruct;
+		//	static	short	row[19580]; 
+		UINT	irow, icol;
+		DPOINT	Point;
+		HFILE		Fid1, Fid2;
+		short		ii, length;
+		UINT		i, n, pos;
+		long		GeoSeg, Bias, nFiles = 0, MaxFiles = 50, nOutOfRange = 0, nSubCells = 0, nLess12 = 0;
+		short		NumElv, SubCell, Indeterminate, MinElv, MaxElv, SubcellRow;
+		float		BINRow[32];
+		BOOL		OutOfRange;
+		short		nSubcells, icell;
+		long		LastLen;
+		BTVARDESC BTVar[2], * pVars;
+		short		NumFields, Reclen, len;
+		long	Offset;
+		long	TotFileLen;
+		GWDHEADER16 GWDHead;
+		LPGWDHEADER	lpGWDHead;
+		GWDHEADER	GWDHead32;
+		GWFLDINFO GWFldInfo;
+		LPGWFLDINFO	lpGWFldInfo;
+		HANDLE hBT, hDB = 0;
+		HFILE	FidData;
+		int		ibeg;
+		GWFLDINFO FldInfo;
+		char	File[MAX_PATH] = "C:\\temp\\OneMeter.asc";
+		LPSTR	lpDot;
+		HANDLE	hCell;
+		LPSHORT	SubcellDat;
+		LPLONG	pBias;
+		static	long	debugsubcell = 845;
+		long	TotLen, CurLoc, SubCellID;
+		DTMKEY		DTMKey;
+		DTMDATA	DTMData;
+		SUBCELLINFO	SUBCELLInfo;
+		LPSUBCELLINFO	pSUBCELLInfo;
+		LPSTR		CompressedDTMData;
+		HANDLE	hSubcellHandles;
+		LPHANDLE	SubcellHandles;
+		LPLONG	DTMRow;
+		long	INTX, INTY, DTMKeyl;
+		short	IELV;
+		double	SPX, SPY, ymod;
+		HANDLE	hData = GSSiGlobAlloc(1090, GMEM_MOVEABLE, 4096 + 2048);
+		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
+		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
+
+		strcpy(File, OutFile);
+		lpGWDHead = &GWDHead32;
+		_fmemset(&GWDHead, 0, sizeof(GWDHEADER16));
+
+		FidData = GSSiOpenFile(File, &OFStruct, OF_CREATE);
+		GWDHead.NumFields = 0;
+		GWDHead.NumIndex = 1;
+		GWDHead.Version = 2;
+		GWDHead.NumIndexFields[0] = 1;
+		GWDHead.IndexFields[0][0] = 0;
+		BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
+		ibeg = 0;
+
+		FldInfo.Len = sizeof(DTMKEY);
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_INTEGER;
+		_fstrcpy(FldInfo.Name, "DTMKEY");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+		FldInfo.Len = 4;
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_INTEGER;
+		_fstrcpy(FldInfo.Name, "BIAS");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+		FldInfo.Len = sizeof(SUBCELLINFO);
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_INTEGER;
+		_fstrcpy(FldInfo.Name, "SUBCELLINFO");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+
+		FldInfo.Len = 4096;
+		FldInfo.Beg = ibeg;
+		ibeg += FldInfo.Len;
+		FldInfo.Type = BT_CHAR;
+		_fstrcpy(FldInfo.Name, "COMPRESSEDNODES");
+		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+		GWDHead.NumFields++;
+
+		GWDHead.Reclen = ibeg;
+		GWDHead.TimeStamp = 0;
+		GSSillseek(FidData, 0, 0);
+		BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
+		GSSillseek(FidData, 0, 2);
+
+		BTVar[0].BT_VARLEN = 4;
+		BTVar[0].BT_VARTYP = BT_INTEGER;
+		BTVar[0].BT_VAROFF = 0;
+		lpDot = _fstrrchr(File, '.');
+		_fstrcpy(lpDot, ".in1");
+		BT_CREATE(File, 4, FALSE, 1, 1, BTVar, FALSE, 0, 0, FALSE);
+		GSSiClose2(&FidData);
+		_fstrcpy(lpDot, ".dtm");
+
+		hDB = OpenGWDatabase(File, BT_WRITE);
+		lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
+		pSUBCELLInfo = (LPSUBCELLINFO)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY)));
+		pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
+		CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
+		double coordFactor = 0;
+		LPSTR proj4def = SHPGetNVP(InFile, &coordFactor);
+
+		char hdrFile[MAX_PATH];
+		strcpy(hdrFile, InFile);
+		LPSTR pDot = strrchr(hdrFile, '.');
+		if (!pDot)
+			goto ErrOut;
+		strcpy(pDot, ".hdr");
+		Fid = GSSiOpenFile(hdrFile, &OFStruct, OF_READ);
+		if (Fid == HFILE_ERROR)
+			goto ErrOut;
+		TotLen = GSSillseek(Fid, 0, 2);
+		GSSillseek(Fid, 0, 0);
+#define MAX_LINE 1024*1024
+		HANDLE hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
+		LPSTR pLine = GlobalLock(hLine);
+		/*BYTEORDER      I
+		LAYOUT         BIL
+		NROWS          7067
+		NCOLS          7523
+		NBANDS         1
+		NBITS          32
+		BANDROWBYTES   30092
+		TOTALROWBYTES  30092
+		PIXELTYPE      FLOAT
+		ULXMAP         477716.5
+		ULYMAP         4976092.5
+		XDIM           1
+		YDIM           1
+		NODATA         -3.4028231e+038
+		*/
+		int ncols = 0;
+		int nrows = 0;
+		int nbands = 0;
+		int nbits = 0;
+		int bandRowBytes = 0;
+		int totalRowBytes = 0;
+		char pixelType[32];
+		double ulXMap = 0;
+		double ulYMap = 0;
+		int xDim = 0;
+		int yDim = 0;
+		float noData = 0;
+
+		while (fgetstring(pLine, MAX_LINE, Fid))
+		{
+			LPSTR pVal = pLine;
+			if (!strnicmp(pLine, "ncols", 5))
+			{
+				pVal += 5;
+				pVal = FirstNonBlank(pVal);
+				ncols = atoi(pVal);
+			}
+			else if (!strnicmp(pLine, "nrows", 5))
+			{
+				pVal += 5;
+				pVal = FirstNonBlank(pVal);
+				nrows = atoi(pVal);
+			}
+			else if (!strnicmp(pLine, "XDIM", 4))
+			{
+				pVal += 4;
+				pVal = FirstNonBlank(pVal);
+				xDim = atoi(pVal);
+			}
+			else if (!strnicmp(pLine, "YDIM", 4))
+			{
+				pVal += 4;
+				pVal = FirstNonBlank(pVal);
+				yDim = atoi(pVal);
+			}
+			else if (!strnicmp(pLine, "TOTALROWBYTES", 13))
+			{
+				pVal += 13;
+				pVal = FirstNonBlank(pVal);
+				totalRowBytes = atoi(pVal);
+			}
+			else if (!strnicmp(pLine, "ULXMAP", 6))
+			{
+				pVal += 6;
+				pVal = FirstNonBlank(pVal);
+				ulXMap = atof(pVal);
+			}
+			else if (!strnicmp(pLine, "ULYMAP", 6))
+			{
+				pVal += 6;
+				pVal = FirstNonBlank(pVal);
+				ulYMap = atof(pVal);
+			}
+			else if (!strnicmp(pLine, "NODATA", 6))
+			{
+				pVal += 6;
+				pVal = FirstNonBlank(pVal);
+				noData = atof(pVal);
+			}
+			else if (!strnicmp(pLine, "PIXELTYPE", 9))
+			{
+				pVal += 9;
+				pVal = FirstNonBlank(pVal);
+				strncpy0(pixelType, pVal,31);
+			}
+
+		}
+		GSSiClose2(&Fid);
+		Fid = GSSiOpenFile(InFile, &OFStruct, OF_READ);
+		TotLen = GSSillseek(Fid, 0, 2);
+		GSSillseek(Fid, 0, 0);
+		CreateStatusWind(hWndMain, 1, 0);
+
+		_fmemset(&DTMData, 0, sizeof(DTMData));
+		DTMData.GridSpace = xDim;
+		DTMData.SouthWestNode.x = ulXMap;
+		DTMData.SouthWestNode.y = ulYMap - yDim * (nrows - 1);
+		DTMData.Bounds.ymn = DTMData.SouthWestNode.y;
+		ymod = fmod((double)ulYMap, DTMData.GridSpace * 32);
+		DTMData.SouthWestNode.y -= (DTMData.GridSpace * 32 - ymod);
+		DTMData.Bounds.xmn = ulXMap;
+		DTMData.Bounds.xmx = ulXMap + DTMData.GridSpace * (ncols - 1);
+		DTMData.Bounds.ymx = ulYMap;
+		DTMData.NULLElv = noData;
+		DTMData.ElevUnits = 1;
+		DTMData.CoordUnits = 1;
+		if (proj4def)
+		{
+			if (strstr(proj4def, "units=us-ft "))
+			{
+				DTMData.ElevUnits = 1;
+				DTMData.CoordUnits = 1;
+			}
+			else if (strstr(proj4def, "units=m "))
+			{
+				DTMData.ElevUnits = 0;
+				DTMData.CoordUnits = 0;
+			}
+		}
+
+		irow = nrows;
+		nSubcells = (ncols - 1) / 32 + 1;
+		LastLen = ncols % 32;
+		if (!LastLen)
+			LastLen = 32;
+		hSubcellHandles = GSSiGlobAlloc(1091, GHND, nSubcells * sizeof(HANDLE));
+		SubcellHandles = (LPHANDLE)GlobalLock(hSubcellHandles);
+		for (i = 0; i < nSubcells; i++)
+			SubcellHandles[i] = GSSiGlobAlloc(1092, GMEM_MOVEABLE, 1024 * 4);
+		SubcellRow = 31;
+		SPY = ulYMap - 16 * DTMData.GridSpace;
+		while (ContinueProcessing && irow--)
+		{
+			for (icell = 0; icell < nSubcells; icell++)
+			{
+				DTMRow = (LPLONG)GlobalLock(SubcellHandles[icell]);
+				DTMRow += 32 * SubcellRow;
+				if (icell < nSubcells - 1)
+					BigRead(Fid, (HPSTR)BINRow, 32 * sizeof(float));
+				else
+				{
+					BigRead(Fid, (HPSTR)BINRow, (size_t)(LastLen * sizeof(float)));
+					for (icol = LastLen; icol < 32; icol++)
+						BINRow[icol] = DTMData.NULLElv;
+				}
+				for (icol = 0; icol < 32; icol++)
+				{
+					if (BINRow[icol] != DTMData.NULLElv)
+						DTMRow[icol] = IDNINT(BINRow[icol]*100);
+					else
+						DTMRow[icol] = LONG_MAX;
+				}
+				GlobalUnlock(SubcellHandles[icell]);
+			}
+			if (!SubcellRow || !irow)
+			{
+				SPX = DTMData.Bounds.xmn + 16 * DTMData.GridSpace;
+				for (icell = 0; icell < nSubcells; icell++)
+				{
+					DTMElev = (LPLONG)GlobalLock(SubcellHandles[icell]);
+					INTX = (SPX - DTMData.SouthWestNode.x) / DTMData.GridSpace;
+					INTY = (SPY - DTMData.SouthWestNode.y) / DTMData.GridSpace;
+					NGSANE(INTX, INTY, &GeoSeg, &SubCell, &IELV);
+					GeoSeg--;
+					SubCell--;
+					DTMKey.GEOSEG_ROW = GeoSeg / 4096;
+					DTMKey.GEOSEG_COL = GeoSeg % 4096;
+					DTMKey.SUBCEL_ROW = SubCell / 16;
+					DTMKey.SUBCEL_COL = SubCell % 16;
+					n = 1024;
+					MinElv = SHRT_MAX;
+					MaxElv = SHRT_MIN;
+					SUBCELLInfo = CompressSubcell(DTMElev, CompressedDTMData, pBias);
+					_fmemset(DTMData2, 0, 4096);
+					int expLen = ExpandSubcell(DTMData2, SUBCELLInfo, CompressedDTMData, pBias);
+					for (i = 0; i < 1024; i++)
+						if (DTMElev[i] != DTMData2[i])
+						{
+							GSSiMessageBox(0, "decompress error", 0, MB_ICONEXCLAMATION, 0);
+							goto Exit;
+						}
+					if (*pBias < LONG_MAX)
+					{
+						*pSUBCELLInfo = SUBCELLInfo;
+						Offset = GSSillseek(lpGWDHead->Fid, 0, 1);
+						length = sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4 + SUBCELLInfo.LENGTH;
+						BigWrite(lpGWDHead->Fid, (HPSTR)&length, 2, -1);
+						BigWrite(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, length, -1);
+						BT_PUT(lpGWDHead->BTHandle[0], (LPSTR)&DTMKey, (LPSTR)&Offset);
+					}
+					SPX += 32 * DTMData.GridSpace;
+					GlobalUnlock(SubcellHandles[icell]);
+				}
+				SPY -= 32 * DTMData.GridSpace;
+				SubcellRow = 32;
+			}
+			SubcellRow--;
+		Exit:
+			CurLoc = GSSillseek(Fid, 0, 1);
+			StatusWindowUpdate("", "", TotLen, CurLoc);
+		}
+		Offset = GSSillseek(lpGWDHead->Fid, 0, 1);
+		length = sizeof(DTMDATA);
+		int lp4 = 0;
+		if (proj4def)
+		{
+			lp4 = strlen(proj4def);
+			length += lp4;
+		}
+		BigWrite(lpGWDHead->Fid, (HPSTR)&length, 2, -1);
+		BigWrite(lpGWDHead->Fid, (HPSTR)&DTMData, length-lp4, -1);
+		if (lp4)
+		{
+			BigWrite(lpGWDHead->Fid, (HPSTR)proj4def, lp4, -1);
+			free(proj4def);
+		}
+		DTMKeyl = LONG_MAX;
+		BT_PUT(lpGWDHead->BTHandle[0], (LPSTR)&DTMKeyl, (LPSTR)&Offset);
+		SetContinueProcessing(TRUE);
+		GSSiClose2(&Fid);
+		DestroyStatusWindow(0);
+		GlobalUnlock(hDB);
+		CloseGWDatabase(hDB);
+		for (i = 0; i < nSubcells; i++)
+			GSSiGlobFree(&SubcellHandles[i]);
+		GSSiGlobUlFree(&hSubcellHandles);
+		GSSiGlobUlFree(&hData);
+		GSSiGlobUlFree(&hLine);
+		{
+#if ENABLETRACE
+			GSSiExitProg(1357);
+#endif
+			return TRUE;
+		}
+	ErrOut:
+		GSSiGlobUlFree(&hLine);
+		GSSiClose2(&Fid);
+		return FALSE;
+
+#if ENABLETRACE
+	}
+#endif
+}
+
 BOOL LoadLIDARDTM(LPSTR Infiles, LPSTR OutFile, LPSTR CBounds)
 {   
 	LPSTR InFile = Infiles;
@@ -2114,6 +2790,12 @@ ReOpen:
 		    BigRead (lpGWDHead->Fid,(HPSTR)&len,2);
 		    BigRead (lpGWDHead->Fid,(HPSTR)&lpGWDHead->GWDData,len); 
 		    _fmemcpy (&pDTMInfo->NULLElv,pDTMData,sizeof(DTMDATA));
+			if (len > sizeof(DTMDATA))
+			{
+				LPSTR proj4def = &lpGWDHead->GWDData[sizeof(DTMDATA)];
+				LoadProjection(0, proj4def);
+				pDTMInfo->useProjection = TRUE;
+			}
 		} 
 		else 
 		{
@@ -3024,8 +3706,12 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	  }
 	  DTMPoint.x = SPX;
 	  DTMPoint.y = SPY; 
-	  if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+	  if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ || pDTMInfo->useProjection)
+	  {
 		  ConvertCoord(&DTMPoint, 1, 0);
+		  SPX = DTMPoint.x;
+		  SPY = DTMPoint.y;
+	  }
 	  /*	  if (DTMPoint.x == 158715.0 &&  DTMPoint.y == 55275.0)
 	  	  ii=1;
 	  if (DTMPoint.x == 158754.0 &&  DTMPoint.y == 55296.0)
@@ -3664,7 +4350,7 @@ BOOL GetNextDTMSegment (BOOL Init)
    	if (Init)
    	{
 		MNMXCORD bounds = pDTMInfo->Bounds;
-		if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ)
+		if (pDTMInfo->Type == DTMTYPE_LIDAR_LAZ || pDTMInfo->useProjection)
 			ConvertBounds(&bounds, 0, 1);
 		if (pDTMInfo->Type < 1 && !bounds.xmx)
 		{

@@ -1,2 +1,2 @@
-configs\dtmtest.gmc /F /NOCACHE [%USERLEV]=2;[%IGNORESYSMSG]=T; 
-D:\PCViewerMpls\PCViewer
+configs\jeff\dtmtest.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+g:\MplsRemoteTemplate\GeoMas
