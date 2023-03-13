@@ -4299,18 +4299,20 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
             	 	RedisplayMenu = FALSE; 
             	 	goto DoRedisplay;    
             	 }
-       			 HaltMapDisplay(FALSE,FALSE);
-				 ClearFullWindowBitmap(0);
-				 setDoPaint( TRUE);
-                 IgnoreBounds=FALSE;  
-                 if (lParam)
-                 {
-                 	if (!SetViewport((short)lParam))
-                 		break;
-                 	if (CurView->Type == INDEXVIEWPORT)
-                 		Imed = TRUE;
-                 }
-	   			 RedisplayViewport(Imed,FALSE);
+				 if (HaltMapDisplay(FALSE, FALSE))
+				 {
+					 ClearFullWindowBitmap(0);
+					 setDoPaint(TRUE);
+					 IgnoreBounds = FALSE;
+					 if (lParam)
+					 {
+						 if (!SetViewport((short)lParam))
+							 break;
+						 if (CurView->Type == INDEXVIEWPORT)
+							 Imed = TRUE;
+					 }
+					 RedisplayViewport(Imed, FALSE);
+				 }
 	   		}
                  break;
             
@@ -6416,7 +6418,11 @@ GSSiExitProg (438);
         // end of lda addition  
 		 PostMessage(hWndMain, WM_COMMAND, IDM_EXIT, 0L);//allows imediate processing to terminate 
 		 break;
-Close:   HaltMapDisplay(TRUE,FALSE);
+	 Close:   HaltMapDisplay(TRUE,FALSE);
+		 if (DoNotContinue)
+		 {
+			 break;
+		 }
 		 if (hWndVehTime)
 			 DestroyWindow (hWndVehTime);
 		 DisplayToolbars = FALSE;

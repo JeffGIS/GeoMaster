@@ -1493,8 +1493,10 @@ Next:
     }
     else if (MapType == MT_DTM)
     {   
-    	DisplayDTMSegment ();
-		goto RtnTrue;
+		if (DisplayDTMSegment())
+			goto RtnTrue;
+		else
+			goto RtnFalse;
     }
     else if (MapType == MT_ORA)
     {
@@ -7554,7 +7556,7 @@ GSSiExitProg (85);
 #endif
 }
 
-void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
+BOOL HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
 #if ENABLETRACE
 {GSSiEnterProg (86);
 #endif
@@ -7562,6 +7564,18 @@ void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
     LPVIEWPORT	SaveView=CurView;
     LPTHEME		SaveTheme=CurTheme; 
     short	ii;  
+	BOOL	rtn = TRUE;
+	if (InCheckForContinue)
+	{
+		DoNotContinue = TRUE;
+		{
+#if ENABLETRACE
+			GSSiExitProg(86);
+#endif
+			return FALSE;
+		}
+
+	}
                         
 //    DisplayFinOpt = 0;  
 	if (MemMap)
@@ -7573,7 +7587,7 @@ void HaltMapDisplay(BOOL ClearCFGStack,BOOL saveScreen)
 #if ENABLETRACE
 GSSiExitProg (86);
 #endif
-    	return; 
+    	return rtn; 
 }
 /*    {//tempdebu
     	char str[128];
@@ -7669,7 +7683,7 @@ GSSiExitProg (86);
 #if ENABLETRACE
 GSSiExitProg (86);
 #endif
-    return;
+    return rtn;
 }
 #if ENABLETRACE
 }

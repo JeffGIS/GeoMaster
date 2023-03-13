@@ -1083,7 +1083,7 @@ BOOL LoadASCDTM(LPSTR InFile, LPSTR OutFile)
 	}
 #endif
 }
-BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile)
+BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 #if ENABLETRACE
 {
 	GSSiEnterProg(1357);
@@ -1107,9 +1107,6 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile)
 		short		NumFields, Reclen, len;
 		long	Offset;
 		long	TotFileLen;
-		GWDHEADER16 GWDHead;
-		LPGWDHEADER	lpGWDHead;
-		GWDHEADER	GWDHead32;
 		GWFLDINFO GWFldInfo;
 		LPGWFLDINFO	lpGWFldInfo;
 		HANDLE hBT, hDB = 0;
@@ -1137,67 +1134,74 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile)
 		HANDLE	hData = GSSiGlobAlloc(1090, GMEM_MOVEABLE, 4096 + 2048);
 		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
 		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
+		LPGWDHEADER	lpGWDHead;
 
 		strcpy(File, OutFile);
-		lpGWDHead = &GWDHead32;
-		_fmemset(&GWDHead, 0, sizeof(GWDHEADER16));
+		if (new)
+		{
+			GWDHEADER16 GWDHead;
+			GWDHEADER	GWDHead32;
 
-		FidData = GSSiOpenFile(File, &OFStruct, OF_CREATE);
-		GWDHead.NumFields = 0;
-		GWDHead.NumIndex = 1;
-		GWDHead.Version = 2;
-		GWDHead.NumIndexFields[0] = 1;
-		GWDHead.IndexFields[0][0] = 0;
-		BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
-		ibeg = 0;
+			lpGWDHead = &GWDHead32;
+			_fmemset(&GWDHead, 0, sizeof(GWDHEADER16));
 
-		FldInfo.Len = sizeof(DTMKEY);
-		FldInfo.Beg = ibeg;
-		ibeg += FldInfo.Len;
-		FldInfo.Type = BT_INTEGER;
-		_fstrcpy(FldInfo.Name, "DTMKEY");
-		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
-		GWDHead.NumFields++;
+			FidData = GSSiOpenFile(File, &OFStruct, OF_CREATE);
+			GWDHead.NumFields = 0;
+			GWDHead.NumIndex = 1;
+			GWDHead.Version = 2;
+			GWDHead.NumIndexFields[0] = 1;
+			GWDHead.IndexFields[0][0] = 0;
+			BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
+			ibeg = 0;
 
-		FldInfo.Len = 4;
-		FldInfo.Beg = ibeg;
-		ibeg += FldInfo.Len;
-		FldInfo.Type = BT_INTEGER;
-		_fstrcpy(FldInfo.Name, "BIAS");
-		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
-		GWDHead.NumFields++;
+			FldInfo.Len = sizeof(DTMKEY);
+			FldInfo.Beg = ibeg;
+			ibeg += FldInfo.Len;
+			FldInfo.Type = BT_INTEGER;
+			_fstrcpy(FldInfo.Name, "DTMKEY");
+			BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+			GWDHead.NumFields++;
 
-		FldInfo.Len = sizeof(SUBCELLINFO);
-		FldInfo.Beg = ibeg;
-		ibeg += FldInfo.Len;
-		FldInfo.Type = BT_INTEGER;
-		_fstrcpy(FldInfo.Name, "SUBCELLINFO");
-		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
-		GWDHead.NumFields++;
+			FldInfo.Len = 4;
+			FldInfo.Beg = ibeg;
+			ibeg += FldInfo.Len;
+			FldInfo.Type = BT_INTEGER;
+			_fstrcpy(FldInfo.Name, "BIAS");
+			BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+			GWDHead.NumFields++;
+
+			FldInfo.Len = sizeof(SUBCELLINFO);
+			FldInfo.Beg = ibeg;
+			ibeg += FldInfo.Len;
+			FldInfo.Type = BT_INTEGER;
+			_fstrcpy(FldInfo.Name, "SUBCELLINFO");
+			BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+			GWDHead.NumFields++;
 
 
-		FldInfo.Len = 4096;
-		FldInfo.Beg = ibeg;
-		ibeg += FldInfo.Len;
-		FldInfo.Type = BT_CHAR;
-		_fstrcpy(FldInfo.Name, "COMPRESSEDNODES");
-		BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
-		GWDHead.NumFields++;
+			FldInfo.Len = 4096;
+			FldInfo.Beg = ibeg;
+			ibeg += FldInfo.Len;
+			FldInfo.Type = BT_CHAR;
+			_fstrcpy(FldInfo.Name, "COMPRESSEDNODES");
+			BigWrite(FidData, (HPSTR)&FldInfo, sizeof(FldInfo), -1);
+			GWDHead.NumFields++;
 
-		GWDHead.Reclen = ibeg;
-		GWDHead.TimeStamp = 0;
-		GSSillseek(FidData, 0, 0);
-		BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
-		GSSillseek(FidData, 0, 2);
+			GWDHead.Reclen = ibeg;
+			GWDHead.TimeStamp = 0;
+			GSSillseek(FidData, 0, 0);
+			BigWrite(FidData, (HPSTR)&GWDHead, sizeof(GWDHEADER16), -1);
+			GSSillseek(FidData, 0, 2);
 
-		BTVar[0].BT_VARLEN = 4;
-		BTVar[0].BT_VARTYP = BT_INTEGER;
-		BTVar[0].BT_VAROFF = 0;
-		lpDot = _fstrrchr(File, '.');
-		_fstrcpy(lpDot, ".in1");
-		BT_CREATE(File, 4, FALSE, 1, 1, BTVar, FALSE, 0, 0, FALSE);
-		GSSiClose2(&FidData);
-		_fstrcpy(lpDot, ".dtm");
+			BTVar[0].BT_VARLEN = 4;
+			BTVar[0].BT_VARTYP = BT_INTEGER;
+			BTVar[0].BT_VAROFF = 0;
+			lpDot = _fstrrchr(File, '.');
+			_fstrcpy(lpDot, ".in1");
+			BT_CREATE(File, 4, FALSE, 1, 1, BTVar, FALSE, 0, 0, FALSE);
+			GSSiClose2(&FidData);
+			_fstrcpy(lpDot, ".dtm");
+		}
 
 		hDB = OpenGWDatabase(File, BT_WRITE);
 		lpGWDHead = (LPGWDHEADER)GlobalLock(hDB);
@@ -1313,8 +1317,26 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile)
 		TotLen = GSSillseek(Fid, 0, 2);
 		GSSillseek(Fid, 0, 0);
 		CreateStatusWind(hWndMain, 1, 0);
+		DTMDATA DTMDataExisting;
 
-		_fmemset(&DTMData, 0, sizeof(DTMData));
+		if (new)
+			_fmemset(&DTMData, 0, sizeof(DTMData));
+		else
+		{
+			LPDTMDATA pDTMData = (LPDTMDATA)((LPSTR)&lpGWDHead->GWDData);
+			long DTMDataKey = LONG_MAX;
+			if (!BT_FIND(lpGWDHead->BTHandle[0], (LPSTR)&DTMDataKey, BT_FIRST, BT_EQ, (LPSTR)&Offset))
+			{
+				unsigned short	len;
+				LPLONG	pCell;
+
+				GSSillseek(lpGWDHead->Fid, Offset, 0);
+				BigRead(lpGWDHead->Fid, (HPSTR)&len, 2);
+				BigRead(lpGWDHead->Fid, (HPSTR)&lpGWDHead->GWDData, len);
+				_fmemcpy(&DTMDataExisting, pDTMData, sizeof(DTMDATA));
+			}
+
+		}
 		DTMData.GridSpace = xDim;
 		DTMData.SouthWestNode.x = ulXMap;
 		DTMData.SouthWestNode.y = ulYMap - yDim * (nrows - 1);
@@ -1325,19 +1347,19 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile)
 		DTMData.Bounds.xmx = ulXMap + DTMData.GridSpace * (ncols - 1);
 		DTMData.Bounds.ymx = ulYMap;
 		DTMData.NULLElv = noData;
-		DTMData.ElevUnits = 1;
-		DTMData.CoordUnits = 1;
+		DTMData.ElevUnits = DTM_ELEV_FEETX100;
+		DTMData.CoordUnits = DTM_COORD_FEET;
 		if (proj4def)
 		{
 			if (strstr(proj4def, "units=us-ft "))
 			{
-				DTMData.ElevUnits = 1;
-				DTMData.CoordUnits = 1;
+				DTMData.ElevUnits = DTM_ELEV_FEETX100;
+				DTMData.CoordUnits = DTM_COORD_FEET;
 			}
 			else if (strstr(proj4def, "units=m "))
 			{
-				DTMData.ElevUnits = 0;
-				DTMData.CoordUnits = 0;
+				DTMData.ElevUnits = DTM_ELEV_DECIMETERS;
+				DTMData.CoordUnits = DTM_COORD_METERS;
 			}
 		}
 
@@ -2121,8 +2143,8 @@ BOOL LoadGRIDDTM (LPSTR InFile, LPSTR OutFile)
 	DTMData.Bounds.xmn = DTMData.SouthWestNode.x;
 	DTMData.Bounds.xmx = DTMData.SouthWestNode.x + DTMData.GridSpace * (nCols-1);
 	DTMData.Bounds.ymx = Maxy;
-	DTMData.ElevUnits = 1; 
-	DTMData.CoordUnits = 1; 
+	DTMData.ElevUnits = DTM_ELEV_FEETX100; 
+	DTMData.CoordUnits = DTM_COORD_FEET; 
 
 	
 	irow = nRows; 
@@ -2391,8 +2413,8 @@ BOOL LoadAREADTM (LPSTR InFile, LPSTR OutFile)
 	DTMData.Bounds.xmn = DTMData.SouthWestNode.x;
 	DTMData.Bounds.xmx = DTMData.SouthWestNode.x + DTMData.GridSpace * (nCols-1);
 	DTMData.Bounds.ymx = Maxy;
-	DTMData.ElevUnits = 1; 
-	DTMData.CoordUnits = 1; 
+	DTMData.ElevUnits = DTM_ELEV_FEETX100;
+	DTMData.CoordUnits = DTM_COORD_FEET;
 
 	
 	irow = nRows; 
@@ -2799,7 +2821,7 @@ ReOpen:
 		} 
 		else 
 		{
-			pDTMInfo->ElevUnits = 2;  
+			pDTMInfo->ElevUnits = DTM_ELEV_DECIMETERS;  
 			pDTMInfo->SouthWestNode.x = 0;
 			pDTMInfo->SouthWestNode.y = 0;
 			pDTMInfo->GridSpace = 0.5;
@@ -2824,7 +2846,7 @@ ReOpen:
 			pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
 			pDTMInfo->Type = Type; 
 			if (PRJ_BASEUNITS[1] == 1)
-				pDTMInfo->ElevUnits = 0;
+				pDTMInfo->ElevUnits = DTM_ELEV_FEET;
 			else
 				pDTMInfo->ElevUnits = 3;   
 			_fstrcpy (pDTMInfo->TINIndex,FileName);
@@ -3232,11 +3254,11 @@ HANDLE GetDTMSubCell (long GeoSeg, short SubCell,LPDTMINFO pDTMInfo)
 			int expLen = ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
 			GlobalUnlock(pDTMInfo->hCell[MinUseID]);
 			handle = pDTMInfo->hCell[MinUseID];
-			GlobalUnlock(pDTMInfo->hDB);
 			nio++;
 		}
 		else
 			pDTMInfo->hCell[MinUseID] = (HANDLE)1;
+		GlobalUnlock(pDTMInfo->hDB);
 	}
 		break;
 	case DTMTYPE_SLT:
@@ -3312,13 +3334,13 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 		case 0: //have feet
 			switch (pDTMInfo->ElevUnits)
 			{   
-				case 0: //want feet  
+				case DTM_ELEV_FEET: //want feet  
 				IElev = IDNINT(Elev);
 				break;
-				case 1: //want feet*100
+				case DTM_ELEV_FEETX100: //want feet*100
 				IElev = IDNINT (Elev * 100);
 				break;
-				case 2://want decimeters
+				case DTM_ELEV_DECIMETERS://want decimeters
 				IElev = IDNINT(Elev * FTM * 100);
 				break;
 			}
@@ -3327,13 +3349,13 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 		case 1: //have meters
 			switch (pDTMInfo->ElevUnits)
 			{   
-				case 0: //want feet
+				case DTM_ELEV_FEET: //want feet
 				IElev = IDNINT (Elev * MFT);
 				break; 
-				case 1: //want feet*100 
+				case DTM_ELEV_FEETX100: //want feet*100 
 				IElev = IDNINT (Elev * MFT * 100);
 				break;
-				case 2: //want decimeters
+				case DTM_ELEV_DECIMETERS: //want decimeters
 				IElev = IDNINT (Elev * 100);
 				break;
 			}
@@ -3657,6 +3679,8 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 																							#endif
 {     
 	//DesiredUnits (0=feet, 1=meters)
+#define FEET	0
+#define METERS  1
 //	Point.x = 573180.1;
 //	Point.y = 5278670.7;
 	  double    SPX=Point.x, SPY=Point.y, TSPX, TSPY, ELV, X, Y;
@@ -3693,16 +3717,16 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	  	return PlaneElev;
 }
 	  pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
-	  SurfUnits = pDTMInfo->ElevUnits; 
-	  if (pDTMInfo->CoordUnits == 1)
+	  SurfUnits = pDTMInfo->ElevUnits;
+	  if (pDTMInfo->CoordUnits == DTM_COORD_METERS)
 	  {
-	  	SPX = ConvertDist (SPX,1);
-	  	SPY = ConvertDist (SPY,1);
+	  	SPX = ConvertDist (SPX,IU_METERS);
+	  	SPY = ConvertDist (SPY,IU_METERS);
 	  }
 	  else
 	  {
-	  	SPX = ConvertDist (SPX,2);
-	  	SPY = ConvertDist (SPY,2);
+	  	SPX = ConvertDist (SPX,IU_FEET);
+	  	SPY = ConvertDist (SPY,IU_FEET);
 	  }
 	  DTMPoint.x = SPX;
 	  DTMPoint.y = SPY; 
@@ -4098,35 +4122,35 @@ S1000:
 	GlobalUnlock (hSurf);
 	switch (DesiredUnits)
 	{
-		case 0: //want feet
+		case FEET: //want feet
 			switch (SurfUnits)
 			{   
-				case 0: //have feet 
+				case DTM_ELEV_FEET: //have feet 
 				break;
-				case 1: //have feet*100
+				case DTM_ELEV_FEETX100: //have feet*100
 				ELV /= 100.0;
 				break;
-				case 2://have decimeters
+				case DTM_ELEV_DECIMETERS://have decimeters
 				ELV /= 100.0; 
-				case 3: //have meters
+				case DTM_ELEV_METERS: //have meters
 				ELV *= MFT;
 				break;
 			}
 		break;
 		
-		case 1: //want meters
+		case METERS: //want meters
 			switch (SurfUnits)
 			{   
-				case 0: //have feet
+				case DTM_ELEV_FEET: //have feet
 				ELV *= FTM;
 				break; 
-				case 1: //have feet*100 
+				case DTM_ELEV_FEETX100: //have feet*100 
 				ELV /= 100.0;
 				ELV *= FTM;
 				break;
-				case 2: //have decimeters
+				case DTM_ELEV_DECIMETERS: //have decimeters
 				ELV /= 100.0; 
-				case 3: //have meters
+				case DTM_ELEV_METERS: //have meters
 				break;
 			}
 		break;
@@ -4184,7 +4208,7 @@ static	ii=0,debugii=171;
 }
 	  pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
 	  SurfUnits = pDTMInfo->ElevUnits; 
-	  if (pDTMInfo->CoordUnits == 1)
+	  if (pDTMInfo->CoordUnits == DTM_COORD_FEET)
 	  {
 	  	SPX = ConvertDist (SPX,1);
 	  	SPY = ConvertDist (SPY,1);
@@ -5154,7 +5178,7 @@ BOOL FindContourVectors (LPDPOINT TriPoints,LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z
 	double	Z[4], ZC, Dist, d, AZ, ElevDiff, pct;
 	USHORT	i, iside, ii; 
 	DPOINT	Point1, Point2;
-	BOOL	rtn=FALSE;
+	BOOL	rtn=TRUE;
 	
 	if (*Z1 == CurNullElv || *Z2 == CurNullElv || *Z3 == CurNullElv)
 		goto Exit;
@@ -5176,8 +5200,13 @@ BOOL FindContourVectors (LPDPOINT TriPoints,LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z
 	  				  20,1,1,2, FALSE,0,str,0,FALSE,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0); 
 		}
 	for (iside=0;iside<2;iside++)
-	{   
-		if (Z[iside] < Z[iside+1] && CheckForContinue(TRUE, 0))
+	{  
+		if (!CheckForContinue(TRUE, 0))
+		{
+			rtn = FALSE;
+			break;
+		}
+		if (Z[iside] < Z[iside+1])
 		{   
 			ElevDiff = Z[iside+1]-Z[iside];
 			Dist = ldistppmacro (&TriPoints[iside],&TriPoints[iside+1]);  
@@ -5193,7 +5222,7 @@ BOOL FindContourVectors (LPDPOINT TriPoints,LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z
 				ZC += DTMContourInterval; 
 			}
 		}
-		else if (Z[iside] > Z[iside+1] && CheckForContinue(TRUE, 0))
+		else if (Z[iside] > Z[iside+1])
 		{
 			ElevDiff = Z[iside+1]-Z[iside];
 			Dist = ldistppmacro (&TriPoints[iside],&TriPoints[iside+1]);  
@@ -5210,7 +5239,6 @@ BOOL FindContourVectors (LPDPOINT TriPoints,LPDOUBLE Z1, LPDOUBLE Z2, LPDOUBLE Z
 			}
 		}
 	}
-	rtn = TRUE;  
 Exit:
 {
 																							#if ENABLETRACE
@@ -5326,6 +5354,7 @@ BOOL DisplayDTMSegment (void)
    	double	TriMidYInc[4]={0.5*DTMRenderGridSpacing,0.75*DTMRenderGridSpacing,0.5*DTMRenderGridSpacing,0.25*DTMRenderGridSpacing};
 	DPOINT	TriPoints[4]; 
 	HPLONG	pSubCell;
+	BOOL rtn = TRUE;
 	
    	if (!hDTM)
    		return FALSE; 
@@ -5518,10 +5547,14 @@ BOOL DisplayDTMSegment (void)
 							TriPoints[iTriPnt].x += DTMTriPointCol[iTri][iTriPnt] * DTMRenderGridSpacing;
 							TriPoints[iTriPnt].y += DTMTriPointRow[iTri][iTriPnt] * DTMRenderGridSpacing/2;
 						}
-						FindContourVectors (TriPoints,
-											&pRenderNode[DTMTriPointRow[iTri][0]][DTMTriPointCol[iTri][0]+ip],
-					                        &pRenderNode[DTMTriPointRow[iTri][1]][DTMTriPointCol[iTri][1]+ip],
-					                        &pRenderNode[1][ip]);
+						if (!FindContourVectors(TriPoints,
+							&pRenderNode[DTMTriPointRow[iTri][0]][DTMTriPointCol[iTri][0] + ip],
+							&pRenderNode[DTMTriPointRow[iTri][1]][DTMTriPointCol[iTri][1] + ip],
+							&pRenderNode[1][ip]))
+						{
+							rtn = FALSE;
+							goto getOut;
+						}
 				    	if (ShowGridLines)
 				    	{   
 				    		GWPolylineD (CurView->hDC, TriPoints, 3,GridLineDesc);
@@ -5530,6 +5563,7 @@ BOOL DisplayDTMSegment (void)
 				}
 				Point.x += DTMRenderGridSpacing;
 			}
+	getOut:
 			GlobalUnlock (hDTMRenderGridRow[0]);
 			GlobalUnlock (hDTMRenderGridRow[1]);
 			GlobalUnlock (hDTMRenderGridRow[2]);
@@ -5539,7 +5573,7 @@ BOOL DisplayDTMSegment (void)
 	ShowValue (CurView->hDC,FALSE); 
 	InGraphicsProcessor = FALSE;
    	GlobalUnlock (hDTM); 
-	return TRUE;
+	return rtn;
 }
 
 BOOL SetDTMRenderAs (int Layer)

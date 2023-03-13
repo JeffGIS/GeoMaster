@@ -60,7 +60,7 @@ static char		NotFoundList[MAXNOTFOUND][MAX_PATH];
 static int		NotFoundCode[MAXNOTFOUND];
 static BYTE		BlockPadding[JOURNAL_BLOCK_SIZE];
 
-void HaltMapDisplay(BOOL ClearCFGStack, BOOL saveScreen);
+BOOL HaltMapDisplay(BOOL ClearCFGStack, BOOL saveScreen);
 void DebugShowLine (LPDPOINT p1,LPDPOINT p2);
 int ActuallyCloseFile (HFILE Fid);
 
@@ -12469,16 +12469,59 @@ BOOL IsLongInteger(LPSTR str)
 	return TRUE;
 }
 
+BOOL ExitOnMessage(UINT message)
+{
+	BOOL rtn = FALSE;
+	switch (message)
+	{
+	case  WM_NCMOUSEMOVE:
+	case  WM_NCLBUTTONDOWN:
+	case  WM_NCLBUTTONUP:
+	case  WM_NCLBUTTONDBLCLK:
+	case  WM_NCRBUTTONDOWN:
+	case  WM_NCRBUTTONUP:
+	case  WM_NCRBUTTONDBLCLK:
+	case  WM_NCMBUTTONDOWN:
+	case  WM_NCMBUTTONUP:
+	case WM_NCMBUTTONDBLCLK:
+	case WM_CLOSE:
+	case WM_COMMAND:
+	case WM_KEYDOWN:
+	case  WM_LBUTTONDOWN:
+	case  WM_LBUTTONUP:                     
+	case  WM_LBUTTONDBLCLK:                
+	case  WM_RBUTTONDOWN:                  
+	case  WM_RBUTTONUP:                    
+	case  WM_RBUTTONDBLCLK:                
+	case  WM_MBUTTONDOWN:                   
+	case  WM_MBUTTONUP:                    
+	case  WM_MBUTTONDBLCLK:                
+	case  WM_XBUTTONDOWN:                  
+	case  WM_XBUTTONUP:                    
+	case  WM_XBUTTONDBLCLK:               
+	case WM_MOUSEHWHEEL: 
+	case VK_F2:
+	case VK_F3:
+		rtn = TRUE;
+		break;
+	default:
+		ii = 1;
+		break;
+	}
+	return rtn;
+}
+
 BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 #if ENABLETRACE
 {GSSiEnterProg (384);
 #endif
 {
+	BOOL rtn = TRUE;
 	MSG            msg = { 0 };
 
- if (ghPrintingDlg)
-	 return TRUE;
- GdiFlush ();
+	if (ghPrintingDlg)
+		goto Exit;
+ //GdiFlush ();
  if (pQuitProcessing)
 	 *pQuitProcessing = FALSE;
  while (GSSiPeekMessage(&msg,0,0,0,PM_NOREMOVE))
@@ -12487,55 +12530,56 @@ BOOL CheckForContinue(BOOL QuitOnEscapeOnly, LPBOOL pQuitProcessing)
 	 SetLastMessage(-1 * (long)msg.message, msg.wParam);
 																							#endif
 	if (msg.message == WM_QUIT)
-{
-																							#if ENABLETRACE
-																							GSSiExitProg (384);
-																							#endif
-	if (pQuitProcessing)
-		*pQuitProcessing = TRUE;
-	return FALSE;
-}
-//	if (msg.message == WM_PAINT)
-//    	rturn TRUE;
-	if (msg.message == WM_COMMAND && msg.wParam == IDCANCEL)
-{
-																							#if ENABLETRACE
-																							GSSiExitProg (384);
-																							#endif
-	if (pQuitProcessing)
-		*pQuitProcessing = TRUE;
-	return FALSE;
-}
-	if (msg.message == WM_KEYDOWN && (!QuitOnEscapeOnly || (msg.wParam == 27)))
-{
-																							#if ENABLETRACE
-																							GSSiExitProg (384);
-																							#endif
-		if (msg.wParam == 27 && pQuitProcessing)
+	{
+		if (pQuitProcessing)
 			*pQuitProcessing = TRUE;
-																							
-		return FALSE;  
-}
-	if (msg.message == WM_LBUTTONDOWN ||
-		msg.message == WM_RBUTTONDOWN)
-   {
-#if ENABLETRACE
-		GSSiExitProg(384);
-#endif
-
-		return FALSE;
+		rtn = FALSE;
+		goto Exit;
 	}
-	GSSiPeekMessage(&msg, 0, 0, 0, PM_REMOVE);
+	if (msg.message == WM_COMMAND && msg.wParam == IDCANCEL)
+	{
+		if (pQuitProcessing)
+			*pQuitProcessing = TRUE;
+		rtn = FALSE;
+		goto Exit;
+	}
+	if (msg.message == WM_KEYDOWN && (!QuitOnEscapeOnly || (msg.wParam == VK_ESCAPE)))
+	{
+		if (msg.wParam == VK_ESCAPE && pQuitProcessing)
+			*pQuitProcessing = TRUE;																						
+		rtn = FALSE;
+		goto Exit;
+	}
+	if (GSSiPeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+	{
+		if (ExitOnMessage(msg.message))
+		{
+			PostMessage(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+			rtn = FALSE;
+			goto Exit;
+		}
+	}
+	InCheckForContinue = TRUE;
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
-   
+	InCheckForContinue = FALSE;
+	if (DoNotContinue)
+	{
+		DoNotContinue = FALSE;
+		{
+			rtn = FALSE;
+			goto Exit;
+		}
+	}
+
 
  }
+ Exit:
 {
 																							#if ENABLETRACE
 																							GSSiExitProg (384);
 																							#endif
- return TRUE;
+ return rtn;
 }
 																							#if ENABLETRACE
 																							}

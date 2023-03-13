@@ -2285,6 +2285,8 @@ BOOL GetVisBounds (LPMNMXCORD	pBounds,HDC hDC)
 	BOOL	rtn=FALSE, SaveDisplay=Display;
 	LPVIEWPORT	SaveVP=CurView;
 	
+	if (!HaltMapDisplay(FALSE, FALSE))
+		return FALSE;
 	CloseMap (FALSE);
 	DBoundsInit (pBounds); 
 	

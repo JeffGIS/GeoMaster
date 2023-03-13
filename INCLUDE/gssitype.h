@@ -4279,6 +4279,12 @@ typedef struct {
 				MNMXCORD	Bounds; 
 				} DTMDATA;
 typedef DTMDATA	FAR	*LPDTMDATA;
+#define DTM_COORD_METERS	IU_METERS
+#define DTM_COORD_FEET	IU_FEET
+#define DTM_ELEV_FEET	0
+#define DTM_ELEV_FEETX100	1
+#define DTM_ELEV_DECIMETERS	2
+#define DTM_ELEV_METERS	3
 
 typedef struct {
 	    short	VPID;

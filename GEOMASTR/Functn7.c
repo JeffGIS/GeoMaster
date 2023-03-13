@@ -1314,7 +1314,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		}
 		if (!_fstricmp(Arg[1], "BIL"))
 		{
-			if (LoadBILDTM(Arg[2], Arg[3]))
+			if (LoadBILDTM(Arg[2], Arg[3], atob(Arg[4])))
 				goto RtnTrue;
 		}
 		else if (!_fstricmp(Arg[1], "AREA"))
