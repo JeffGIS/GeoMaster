@@ -404,6 +404,7 @@ short GetFileTypeFromName(LPSTR InName,BOOL OpenFilelist)
 		return 4;
 	if (_fstrstr (Name,".DTM") || 
 		_fstrstr(Name, ".TIN") ||
+		_fstrstr(Name, ".DTI") ||
 		_fstrstr(Name, ".LA") ||
 		_fstrstr(Name, ".LDR"))
 		return 8;

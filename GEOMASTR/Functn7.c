@@ -1307,6 +1307,16 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			if (LoadGRIDDTM(Arg[2], Arg[3]))
 				goto RtnTrue;
 		}
+		if (!_fstricmp(Arg[1], "INDEX"))
+		{
+			if (CreateDTMIndex(Arg[2]))
+				goto RtnTrue;
+		}
+		if (!_fstricmp(Arg[1], "ADDTOINDEX"))
+		{
+			if (AddDTMToDTMIndex(Arg[2], Arg[3]))
+				goto RtnTrue;
+		}
 		if (!_fstricmp(Arg[1], "ASC"))
 		{
 			if (LoadASCDTM(Arg[2], Arg[3]))

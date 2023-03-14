@@ -10459,7 +10459,7 @@ BEGIN
     PRMT_ROTATE_SYMBOLS     "Hit 'S' to set rotation, 'R' to reverse current rotation, 'F' or 'L' to use the rotation of the first or last highlighted items or draw a new rotation vector with the mouse."
     IDS_GRAPHIC2DEF2        "NODEPOINT_X(R8),NODEPOINT_Y(R8),PCT(R8),LENGTH(R8),AREA(R8),OFFDIST(R8),NUMPOINTS(B4),BPAZ(R8),PPAZ(R8),EPAZ(R8),SLOPEPCT(R8),SLOPEANGLE(R8)"
     IDS_FILESURFACE         "%FILESURFACE"
-    IDS_FILTERSURFACE       "Digital Terrain Models(*.DTM)|*.dtm|LIDAR Surfaces(*.LDR)|*.ldr|TIN Surface Index(INDEX.TIN)|index.tin|"
+    IDS_FILTERSURFACE       "Digital Terrain Models(*.DTM)|*.dtm|LIDAR Surfaces(*.LDR)|*.ldr|TIN Surface Index(*.DTI)|*.dti|"
     IDS_FILESQL             "%FILESQL"
     IDS_WAYPOINTDEF         "WAYPID(B4),LAKEID(B4),WPX(R8),WPY(R8),TYPE(B2),YEAR(B2),MONTH(B2),DAY(B2),FROMTIME(B2),TOTIME(B2),DEPTH(B2),WTEMP(B2),ATEMP(B2),WEATHER(B2),WINDSPEED(B2),WINDDIR(B2),BARSTATE(B2),BARVALUE(B2),COMMENT(C82),WPNAME(C16)"
     PRMT_PROFILE1           "Hit 'C' to display a cross-section at this location, 'S' to modify profile and cross-section settings or 'V' to change visibility"

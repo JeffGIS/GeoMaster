@@ -986,7 +986,7 @@ GSSiExitProg (520);
     	Type =GMTEXT_DATAFILE;
     else if (_fstrstr(Name,".HLT"))
     	Type =HLTLIST_DATAFILE;
-	else if (_fstrstr(Name, ".DTM") || _fstrstr(Name, ".DTS") || _fstrstr(Name, ".LDR") || _fstrstr(Name, "INDEX.TIN") || _fstrstr(Name, "INDEX.LA"))
+	else if (_fstrstr(Name, ".DTM") || _fstrstr(Name, ".DTS") || _fstrstr(Name, ".LDR") || _fstrstr(Name, ".DTI") || _fstrstr(Name, "INDEX.TIN") || _fstrstr(Name, "INDEX.LA"))
     	Type =DTM_DATAFILE;
     else if (_fstrstr(Name,".BMP") || _fstrstr(Name,".JPG") || _fstrstr(Name,".TIF"))
     	Type =IMAGE_DATAFILE;

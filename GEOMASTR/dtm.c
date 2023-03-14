@@ -2772,6 +2772,8 @@ HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
 		Type = DTMTYPE_LIDAR_GM;
 	else if (StringEndsWith(FileName, ".LAZ"))
 		Type = DTMTYPE_LIDAR_LAZ;
+	else if (StringEndsWith(FileName, ".DTI"))
+		Type = DTMTYPE_INDEX;
 	if (!Type)
 {
 																							#if ENABLETRACE
@@ -2959,7 +2961,7 @@ ReOpen:
 		break;
 		case DTMTYPE_LIDAR_LAZ:
 		{
-			sqlite3 *db;
+			sqlite3* db;
 			LPSTR pDot;
 
 			if (sqlite3_open(FileName, &db) != SQLITE_OK)
@@ -2986,7 +2988,27 @@ ReOpen:
 
 			GlobalUnlock(hSurf);
 		}
-			break;
+		break;
+		case DTMTYPE_INDEX:
+		{
+			sqlite3* db;
+			LPSTR pDot;
+
+			if (sqlite3_open(FileName, &db) != SQLITE_OK)
+				return FALSE;
+
+			hSurf = GSSiGlobAlloc(1097, GHND, sizeof(DTMINFO));
+
+			pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+			pDTMInfo->Type = Type;
+			pDTMInfo->db = db;
+			pDTMInfo->Fid = HFILE_ERROR;
+			pDTMInfo->Bounds = SLTSpatialIndexBounds(db, "DTMINDEX");
+
+			pDTMInfo->NULLElv = NULLElv;
+			GlobalUnlock(hSurf);
+		}
+		break;
 	}
 	if (hSurf) 
 	{   
@@ -3044,6 +3066,9 @@ void DTMClose (LPHANDLE pHandle)
 				case DTMTYPE_LIDAR_LAZ:
 					sqlite3_close(pDTMInfo->db);
 					break;
+				case DTMTYPE_INDEX:
+					sqlite3_close(pDTMInfo->db);
+					break;
 				case DTMTYPE_NGI:
 					CloseGWDatabase(pDTMInfo->hDB);
 					break;
@@ -3077,6 +3102,7 @@ void DTMClose (LPHANDLE pHandle)
 					break;
 				case DTMTYPE_SLT:
 					GSSiClose2(&pDTMInfo->Fid);
+				case DTMTYPE_INDEX:
 				case DTMTYPE_LIDAR_LAZ:
 					sqlite3_close(pDTMInfo->db);
 					break;
@@ -3102,6 +3128,77 @@ void DTMClose (LPHANDLE pHandle)
 																							}
 																							#endif
 }
+
+BOOL CreateDTMIndex(LPSTR IndexPath)
+{
+	int version = 1;
+	BOOL rtn = FALSE;
+	sqlite3* db;
+	char	DefStr[512];
+	sprintf(DefStr, "CREATE TABLE DTMINDEX (DTM_FILE_NUM INTEGER PRIMARY KEY,DTMPATH CHAR(256),BOUNDS_XMN DOUBLE,BOUNDS_YMN DOUBLE,BOUNDS_XMX DOUBLE,BOUNDS_YMX DOUBLE);CREATE VIRTUAL TABLE DTMINDEX_INDEX USING rtree(id,minX, maxX, minY, maxY)");
+
+	GSSiRemove(IndexPath);
+	rtn = !sqlite3_open(IndexPath, &db);
+	if (rtn)
+	{
+		SLT_StartTrans(db);
+		if (SLT_Execute(DefStr, db))
+		{
+			SLT_EndTrans(db);
+		}
+		SLT_Close(db);
+	}
+	return rtn;
+}
+
+BOOL AddDTMToDTMIndex(LPSTR IndexPath, LPSTR DTMPath)
+{
+	BOOL rtn = FALSE;
+	sqlite3* db;
+	sqlite3_stmt* statement;
+
+	char query[1024];
+	rtn = !sqlite3_open(IndexPath, &db);
+	if (rtn)
+	{
+		int numDTMInIndex = 0;
+		SLT_StartTrans(db);
+		sprintf(query, "SELECT * FROM DTMINDEX");
+		if (sqlite3_prepare_v2GSSi(db, query, -1, &statement, 0) == SQLITE_OK)
+		{
+			while (sqlite3_step(statement) == SQLITE_ROW)
+			{
+				numDTMInIndex++;
+			}
+		}
+		sqlite3_finalizeGSSi(&statement);
+
+		numDTMInIndex++;
+		HANDLE hDTM = DTMOpen(DTMPath, DBL_MAX, BT_READ, 0);
+		if (hDTM)
+		{
+			LPDTMINFO pDTMInfo = (LPDTMINFO)GlobalLock(hDTM);
+			MNMXCORD bounds = pDTMInfo->Bounds;
+			char DTMPath2[MAX_PATH];
+			strcpy(DTMPath2, DTMPath);
+			SubstituteDL(DTMPath2,FALSE);
+			if (pDTMInfo->useProjection)
+				ConvertBounds(&bounds, 0, 1);
+			sprintf(query, "INSERT INTO DTMINDEX VALUES (%i,'%s',%f,%f,%f,%f);INSERT INTO DTMINDEX_INDEX VALUES (%i,%f,%f,%f,%f);",
+				numDTMInIndex,DTMPath2, bounds.xmn, bounds.ymn, bounds.xmx, bounds.ymx,
+				numDTMInIndex, bounds.xmn, bounds.xmx, bounds.ymn, bounds.ymx);
+			if (SLT_Execute(query, db))
+			{
+				SLT_EndTrans(db);
+			}
+			GlobalUnlock(hDTM);
+			DTMClose(hDTM);
+		}
+		SLT_Close(db);
+	}
+	return rtn;
+}
+
 BOOL ConvertDTMToSQLITE(HANDLE hSurf,LPSTR SQLiteFileName)
 {
 	int version = 1;
@@ -3673,7 +3770,8 @@ double NGIELV_bci (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 	return xyzpoint[27].z;
 }
 
-double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits)
+
+double NGIELV2 (DPOINT Point,HANDLE hSurf,short DesiredUnits)
 																							#if ENABLETRACE
 																							{GSSiEnterProg (1366);
 																							#endif
@@ -4165,6 +4263,38 @@ S1000:
 																							}
 																							#endif
 } 
+
+double NGIELV(DPOINT Point, HANDLE hSurf, short DesiredUnits)
+{
+	double rtn = PlaneElev;
+	if (!hSurf)
+	{
+		return PlaneElev;
+	}
+	LPDTMINFO pDTMInfo = (LPDTMINFO)GlobalLock(hSurf);
+	if (pDTMInfo->Type != DTMTYPE_INDEX)
+	{
+		GlobalUnlock(hSurf);
+		return NGIELV(Point, hSurf, DesiredUnits);
+	}
+	else
+	{
+		sqlite3_stmt* statement;
+		char Cmd[256];
+		sprintf(Cmd, "SELECT * FROM DTMINDEX, DTMINDEX_index WHERE	DTM_FILE_NUM =DTMINDEX_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",Point.x,Point.x,Point.y,Point.y);
+		SQLOK(sqlite3_prepare_v2(pDTMInfo->db, Cmd, -1, &statement, 0), pDTMInfo->db, "get dtm", 0);
+		while (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			int i = 0;
+			int id = sqlite3_column_int(statement, i++);
+			LPSTR DTMPath = (LPSTR)sqlite3_column_text(statement, i++);
+		}
+		sqlite3_finalize(statement);
+	}
+
+	GlobalUnlock(hSurf);
+	return rtn;
+}
 
 BOOL SetNGIELV (DPOINT Point,double Elev,HANDLE hSurf,short Units)
 																							#if ENABLETRACE

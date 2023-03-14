@@ -1800,6 +1800,8 @@ BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,
 HANDLE DTMOpen (LPSTR FileName, double NULLElv,short Mode,LPSHORT SurfaceType);
 void DTMClose (LPHANDLE pHandle);
 BOOL ConvertDTMToSQLITE(HANDLE hSurf, LPSTR SQLiteFileName);
+BOOL CreateDTMIndex(LPSTR IndexPath);
+BOOL AddDTMToDTMIndex(LPSTR IndexPath, LPSTR DTMPath);
 BOOL DisplayDTMPoint (long Refno,DPOINT DPoint,double Elevation,double AZ,short SymbolNumber,double Size,LPDTMINFO	pDTMInfo);
 BOOL DisplayDTMArea (long Refno,LPDPOINT DPoint,short Nump,double SlopePCT,double AZ,short SymbolNumber,LPDTMINFO pDTMInfo);
 long GetDTMHoles (LPSTR DTMName, LPSTR OutFile);
