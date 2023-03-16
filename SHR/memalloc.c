@@ -362,6 +362,8 @@ checkvp(1);
 					if (NextLockID == WantLockID)
 						ii = 1;
 					pstr = (HPBYTE)pntr;
+					if (!pstr)
+						ii = 1;
 					memset(pstr, Marker, premem[i]);
 					memset(&pstr[memlength[i] - postmem[i]], Marker, postmem[i]);
 					pntr = (LPVOID)((LPSTR)pntr + premem[i]);

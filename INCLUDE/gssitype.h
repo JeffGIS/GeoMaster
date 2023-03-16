@@ -4268,6 +4268,11 @@ typedef struct {
 				LAZFILESTRUCT lazFiles;
 				VISLIST	VisList; //location of data for TIN surface
 				BOOL	useProjection;
+				int numOpenDTMs;
+				HANDLE DTMHandles[MAXOPENSURF];
+				MNMXCORD DTMBounds[MAXOPENSURF];
+				BOOL triedDTM[MAXOPENSURF];
+				int	currentHandleID;
 				} DTMINFO;
 typedef DTMINFO	FAR	*LPDTMINFO;
 

@@ -1003,7 +1003,7 @@ GSSiExitProg (116);
 		LastVPType = SaveView->Type;
 		OutPoint = CurWorldPoint; 
 		if (*CD->ElevSurface && !CD->hSurf)
-			CD->hSurf = DTMOpen (CD->ElevSurface,DBL_MAX,BT_READ,0);
+			CD->hSurf = DTMOpen (CD->ElevSurface,DBL_MAX,BT_READ,0,0);
        	pElevation = 0;
         if (CD->DisplayElevation && CD->hSurf)
         {   

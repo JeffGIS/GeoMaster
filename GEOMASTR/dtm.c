@@ -2725,8 +2725,32 @@ BOOL ConvertDTMv1Tov2 (LPSTR FileName)
 	return TRUE;
 }
 	
+int OpenIndexedDTMs(LPDTMINFO pDTMInfo, LPMNMXCORD pBounds)
+{
+	sqlite3_stmt* statement;
+	int id = -1;
+	char Cmd[256];
+	int numDTM = 0;
+	pDTMInfo->currentHandleID = 0;
+	sprintf(Cmd, "SELECT * FROM DTMINDEX, DTMINDEX_index WHERE	DTM_FILE_NUM =DTMINDEX_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+	SQLOK(sqlite3_prepare_v2(pDTMInfo->db, Cmd, -1, &statement, 0), pDTMInfo->db, "get dtm", 0);
+	while (numDTM < MAXOPENSURF && sqlite3_step(statement) == SQLITE_ROW)
+	{
+		int i = 0;
+		id = sqlite3_column_int(statement, i++);
+		LPSTR DTMPath = (LPSTR)sqlite3_column_text(statement, i++);
+		pDTMInfo->DTMBounds[numDTM].xmn = sqlite3_column_double(statement, i++);
+		pDTMInfo->DTMBounds[numDTM].ymn = sqlite3_column_double(statement, i++);
+		pDTMInfo->DTMBounds[numDTM].xmx = sqlite3_column_double(statement, i++);
+		pDTMInfo->DTMBounds[numDTM].ymx = sqlite3_column_double(statement, i++);
+		pDTMInfo->DTMHandles[numDTM++] = DTMOpen(DTMPath, pDTMInfo->NULLElv, BT_READ, 0, 0);
+	}
+	sqlite3_finalize(statement);
+	pDTMInfo->numOpenDTMs = numDTM;
+	return numDTM;
+}
 	
-HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType)
+HANDLE DTMOpen (LPSTR FileNameIN, double NULLElv,short Mode,LPSHORT pSurfType,LPMNMXCORD pWindowBounds)
 																							#if ENABLETRACE
 																							{GSSiEnterProg (1362);
 																							#endif
@@ -2834,6 +2858,8 @@ ReOpen:
 			pDTMInfo->CellUse[i]=LONG_MIN;
 			pDTMInfo->CellID[i]=LONG_MIN;
 	    }
+		PlaneElev = pDTMInfo->NULLElv;
+
 	    GlobalUnlock (pDTMInfo->hDB);
 		GlobalUnlock (hSurf);
 		break;
@@ -2871,6 +2897,8 @@ ReOpen:
 			i=0;	
 			//StartFastPick (-(i+CurView->ID*256));
 			CurVis = SaveVis;
+			PlaneElev = pDTMInfo->NULLElv;
+
 			GlobalUnlock (hSurf);
 		}
 		break;
@@ -2905,6 +2933,8 @@ ReOpen:
 				pDTMInfo->CellUse[i] = LONG_MIN;
 				pDTMInfo->CellID[i] = LONG_MIN;
 			}
+			PlaneElev = pDTMInfo->NULLElv;
+
 			GlobalUnlock(hSurf);
 		}
 			break;
@@ -2955,6 +2985,7 @@ ReOpen:
 				pDTMInfo->CellUse[i] = LONG_MIN;
 				pDTMInfo->CellID[i] = LONG_MIN;
 			}
+			PlaneElev = pDTMInfo->NULLElv;
 			GlobalUnlock(hSurf);
 
 		}
@@ -2985,6 +3016,7 @@ ReOpen:
 			pDTMInfo->NULLElv = NULLElv;
 			sprintf(Projection, "%s\\projection.cvt", pDTMInfo->LAZDir);
 			LoadProjection(0, Projection);
+			PlaneElev = pDTMInfo->NULLElv;
 
 			GlobalUnlock(hSurf);
 		}
@@ -3006,6 +3038,8 @@ ReOpen:
 			pDTMInfo->Bounds = SLTSpatialIndexBounds(db, "DTMINDEX");
 
 			pDTMInfo->NULLElv = NULLElv;
+			PlaneElev = pDTMInfo->NULLElv;
+			OpenIndexedDTMs(pDTMInfo, pWindowBounds);
 			GlobalUnlock(hSurf);
 		}
 		break;
@@ -3014,6 +3048,8 @@ ReOpen:
 	{   
 		pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);
 		CurNullElv = pDTMInfo->NULLElv;
+		PlaneElev = pDTMInfo->NULLElv;
+
 		GlobalUnlock (hSurf);
 		for (i=0;i<MAXOPENSURF;i++)
 		{ 
@@ -3050,6 +3086,7 @@ void DTMClose (LPHANDLE pHandle)
 	GSSiGlobFree (&hDTMRenderGridRow[2]);
 	if (!pHandle)
 	{
+		/*
 		for (i=0;i<MAXOPENSURF;i++)
 		{
 		
@@ -3078,7 +3115,8 @@ void DTMClose (LPHANDLE pHandle)
 						GSSiGlobFree (&pDTMInfo->hCell[j]);
 			} 
 			GSSiGlobUlFree (&hOpenSurf[i]);
-		}	
+		}
+		*/
 	}
 	else if (*pHandle)
 	{ 
@@ -3102,9 +3140,13 @@ void DTMClose (LPHANDLE pHandle)
 					break;
 				case DTMTYPE_SLT:
 					GSSiClose2(&pDTMInfo->Fid);
-				case DTMTYPE_INDEX:
 				case DTMTYPE_LIDAR_LAZ:
 					sqlite3_close(pDTMInfo->db);
+					break;
+				case DTMTYPE_INDEX:
+					sqlite3_close(pDTMInfo->db);
+					for (int i = 0; i < pDTMInfo->numOpenDTMs; i++)
+						DTMClose(&pDTMInfo->DTMHandles[i]);
 					break;
 				}
 				for (j=0;j<MAXDTMCELLBUFFERS;j++)
@@ -3174,7 +3216,7 @@ BOOL AddDTMToDTMIndex(LPSTR IndexPath, LPSTR DTMPath)
 		sqlite3_finalizeGSSi(&statement);
 
 		numDTMInIndex++;
-		HANDLE hDTM = DTMOpen(DTMPath, DBL_MAX, BT_READ, 0);
+		HANDLE hDTM = DTMOpen(DTMPath, DBL_MAX, BT_READ, 0,0);
 		if (hDTM)
 		{
 			LPDTMINFO pDTMInfo = (LPDTMINFO)GlobalLock(hDTM);
@@ -3191,6 +3233,8 @@ BOOL AddDTMToDTMIndex(LPSTR IndexPath, LPSTR DTMPath)
 			{
 				SLT_EndTrans(db);
 			}
+			PlaneElev = pDTMInfo->NULLElv;
+
 			GlobalUnlock(hDTM);
 			DTMClose(hDTM);
 		}
@@ -4267,6 +4311,7 @@ S1000:
 double NGIELV(DPOINT Point, HANDLE hSurf, short DesiredUnits)
 {
 	double rtn = PlaneElev;
+	HANDLE hDTM = 0;
 	if (!hSurf)
 	{
 		return PlaneElev;
@@ -4275,24 +4320,56 @@ double NGIELV(DPOINT Point, HANDLE hSurf, short DesiredUnits)
 	if (pDTMInfo->Type != DTMTYPE_INDEX)
 	{
 		GlobalUnlock(hSurf);
-		return NGIELV(Point, hSurf, DesiredUnits);
+		return NGIELV2(Point, hSurf, DesiredUnits);
 	}
 	else
 	{
-		sqlite3_stmt* statement;
-		char Cmd[256];
-		sprintf(Cmd, "SELECT * FROM DTMINDEX, DTMINDEX_index WHERE	DTM_FILE_NUM =DTMINDEX_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",Point.x,Point.x,Point.y,Point.y);
-		SQLOK(sqlite3_prepare_v2(pDTMInfo->db, Cmd, -1, &statement, 0), pDTMInfo->db, "get dtm", 0);
-		while (sqlite3_step(statement) == SQLITE_ROW)
+		memset(pDTMInfo->triedDTM, 0, sizeof(BOOL) * MAXOPENSURF);
+		if (DPointInBounds(&Point, &pDTMInfo->DTMBounds[pDTMInfo->currentHandleID]))
 		{
-			int i = 0;
-			int id = sqlite3_column_int(statement, i++);
-			LPSTR DTMPath = (LPSTR)sqlite3_column_text(statement, i++);
+			pDTMInfo->triedDTM[pDTMInfo->currentHandleID] = TRUE;
+			hDTM = pDTMInfo->DTMHandles[pDTMInfo->currentHandleID];
 		}
-		sqlite3_finalize(statement);
+		else
+		{
+			pDTMInfo->triedDTM[pDTMInfo->currentHandleID] = TRUE;
+			pDTMInfo->currentHandleID = 0;
+			while (!hDTM && pDTMInfo->currentHandleID < pDTMInfo->numOpenDTMs)
+			{
+				if (!pDTMInfo->triedDTM[pDTMInfo->currentHandleID] && DPointInBounds(&Point, &pDTMInfo->DTMBounds[pDTMInfo->currentHandleID]))
+				{
+					pDTMInfo->triedDTM[pDTMInfo->currentHandleID] = TRUE;
+					hDTM = pDTMInfo->DTMHandles[pDTMInfo->currentHandleID];
+				}
+				else
+					pDTMInfo->currentHandleID++;
+			}
+		}
+		
+		while (hDTM && rtn == PlaneElev)
+		{
+			rtn = NGIELV2(Point, hDTM, DesiredUnits);
+			if (rtn == PlaneElev)
+			{
+				hDTM = 0;
+				pDTMInfo->currentHandleID = 0;
+				while (!hDTM && pDTMInfo->currentHandleID < pDTMInfo->numOpenDTMs)
+				{
+					if (!pDTMInfo->triedDTM[pDTMInfo->currentHandleID] && DPointInBounds(&Point, &pDTMInfo->DTMBounds[pDTMInfo->currentHandleID]))
+					{
+						pDTMInfo->triedDTM[pDTMInfo->currentHandleID] = TRUE;
+						hDTM = pDTMInfo->DTMHandles[pDTMInfo->currentHandleID];
+					}
+					else
+						pDTMInfo->currentHandleID++;
+				}
+			}
+		}
 	}
 
 	GlobalUnlock(hSurf);
+	if (rtn == PlaneElev)
+		ii = 1;
 	return rtn;
 }
 
@@ -4409,7 +4486,7 @@ long GetDTMHoles (LPSTR DTMName, LPSTR OutFile)
 	OFSTRUCTGM	OFStruct;
 	long	nRecs, nLoaded=0;
 	
-	hSurf = DTMOpen (DTMName, LONG_MAX,BT_READ,0);
+	hSurf = DTMOpen (DTMName, LONG_MAX,BT_READ,0,0);
 	if (!hSurf)
 {
 																							#if ENABLETRACE
@@ -5920,7 +5997,7 @@ typedef NEXTTRIANGLEHEADER    FAR *LPNEXTTRIANGLEHEADER;
 	double	AZToCorner;
 	
 	FlatSlope = GetGlobalDVal2("[%DTMFlatSlope]",0.02); 
-	hDTMBasins = DTMOpen (DTMName, BasinsNullElv,BT_READ,0);
+	hDTMBasins = DTMOpen (DTMName, BasinsNullElv,BT_READ,0,0);
 	if (!hDTMBasins)
 		return FALSE; 
 //StartPoints[0].x = 158520.7;
@@ -6142,7 +6219,7 @@ BOOL SurfToFile (LPSTR DTMFile,LPMNMXCORD pBounds,double GridSpace,LPSTR OutFile
 {
 	BOOL	rtn=FALSE;
 	double	minElev = DBL_MAX, maxElev = -DBL_MAX;
-	HANDLE hSurf = DTMOpen (DTMFile,NULL_ELV,BT_READ,0);
+	HANDLE hSurf = DTMOpen (DTMFile,NULL_ELV,BT_READ,0,0);
 	int		i;
 
 	if (hSurf)

@@ -1797,7 +1797,7 @@ double NGIELV (DPOINT Point,HANDLE hSurf,short DesiredUnits);
 double NGIELV_bci (DPOINT Point,HANDLE hSurf,short DesiredUnits);
 BOOL SetNGIELV (DPOINT Point,double Elev,HANDLE hSurf,short Units);
 BOOL SetDTMSubCell (long GeoSeg, short SubCell,int node,double Elev,short Units,LPDTMINFO pDTMInfo);
-HANDLE DTMOpen (LPSTR FileName, double NULLElv,short Mode,LPSHORT SurfaceType);
+HANDLE DTMOpen (LPSTR FileName, double NULLElv,short Mode,LPSHORT SurfaceType, LPMNMXCORD pWindowBounds);
 void DTMClose (LPHANDLE pHandle);
 BOOL ConvertDTMToSQLITE(HANDLE hSurf, LPSTR SQLiteFileName);
 BOOL CreateDTMIndex(LPSTR IndexPath);

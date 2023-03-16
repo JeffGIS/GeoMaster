@@ -1078,7 +1078,7 @@ GSSiExitProg (520);
  	    	break;
 
 	    case DTM_DATAFILE:
-	       	FileHandle = DTMOpen (Name,DBL_MAX,BT_READ,0);
+	       	FileHandle = DTMOpen (Name,DBL_MAX,BT_READ,0,0);
  	    	break; 
 
         case ODBC_DATAFILE:

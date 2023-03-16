@@ -422,14 +422,14 @@ void DisplayProfileThemeLegend(short From)
 	GSSiDeleteObject(&CurView->hRgn);
 	if (CurView->HaveFixedProfileRoute || (hHighlight && lpProfileData->MinSeq <= lpProfileData->MaxSeq))
 	{
-        hSurf[0] = DTMOpen (SurfName,DBL_MAX,BT_READ,&SurfType[0]);
+        hSurf[0] = DTMOpen (SurfName,DBL_MAX,BT_READ,&SurfType[0],0);
         if (!hSurf[0])
         {
         	goto Exit;
         } 
         if (*CurTheme->SQL)
         {
-	        hSurf[1] = DTMOpen (CurTheme->SQL,DBL_MAX,BT_READ,&SurfType[1]); 
+	        hSurf[1] = DTMOpen (CurTheme->SQL,DBL_MAX,BT_READ,&SurfType[1],0); 
 	        if (hSurf[1])
 	        	nSurf = 2;
         }

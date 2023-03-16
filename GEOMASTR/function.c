@@ -1912,7 +1912,7 @@ SetVis:
 					Mode = BT_WRITE;
 				else
 					Mode = BT_READ;
-				hSurf = DTMOpen (Arg[2],Elevation,Mode,0); 
+				hSurf = DTMOpen (Arg[2],Elevation,Mode,0,0); 
 				SetGlobalValueLong (Arg[4],(long)hSurf);
 				if (hSurf)
 					goto RtnTrue;
@@ -1940,7 +1940,7 @@ SetVis:
 			}
 			else if (!_fstricmp(Arg[1], "CONVERT"))
 			{
-				HANDLE hDTM = DTMOpen(Arg[2], DBL_MAX, BT_READ, 0);
+				HANDLE hDTM = DTMOpen(Arg[2], DBL_MAX, BT_READ, 0,0);
 				if (nArgs < 3)
 					goto RtnFalse;
 				rtn = ConvertDTMToSQLITE(hDTM, Arg[3]);

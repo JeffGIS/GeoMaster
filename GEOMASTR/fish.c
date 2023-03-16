@@ -1597,7 +1597,7 @@ BOOL AddWPToGPSList (LPSTR WPID,long Refno,LPSTR SymName,LPDPOINT pPoint)
 		GetLatText (Lat,LatLong.y);
 		GetLonText (Long,LatLong.x);
 		GetGlobalCVal ("[%DTMNAME]",str,"");
-        hSurf = DTMOpen (str,DBL_MAX,BT_READ,0);
+        hSurf = DTMOpen (str,DBL_MAX,BT_READ,0,0);
 	    Elev = NGIELV (DPoint,hSurf,0);
 	    if (Elev < DBL_MAX)
 	    	sprintf (Depth,"%.0f",Elev);	

@@ -32403,7 +32403,7 @@ BOOL FAR PASCAL DTMTOORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LP
 				CloseTRANS2 (&hTranExport[1]);
                 GetDlgItemText (hWndDlg,IDC_GRIDSPACE,str,34);
                 GridSpace = atof (str);
-               	hSurf = DTMOpen (DTMFile,NULL_ELV,BT_READ,0);
+               	hSurf = DTMOpen (DTMFile,NULL_ELV,BT_READ,0,0);
                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDCANCEL),TRUE); 

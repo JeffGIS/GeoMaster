@@ -1909,7 +1909,7 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
 
 	case MT_DTM:
     {   
-    	HANDLE		hSurf = DTMOpen (File,DBL_MAX,BT_READ,0);
+    	HANDLE		hSurf = DTMOpen (File,DBL_MAX,BT_READ,0,0);
 		LPDTMINFO	pDTMInfo = (LPDTMINFO)GlobalLock (hSurf);  
 		
 		CurView->FileMNMX = pDTMInfo->Bounds;

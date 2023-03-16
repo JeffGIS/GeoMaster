@@ -5237,7 +5237,7 @@ DoSid:
         	if (CurView->DTMRenderAs[CurView->CurFile] == DTM_RENDER_SLOPE_POLYGONS &&
         		(CurView->PassID && CurView->PassID != 2))
         		goto RtnFalse;
-	       	hDTM = DTMOpen (PltName,DBL_MAX,BT_READ,0);  
+	       	hDTM = DTMOpen (PltName,DBL_MAX,BT_READ,0,&CurView->WBounds);  
 	       	if (!GetNextDTMSegment (TRUE))
 	       		goto RtnFalse;
         }

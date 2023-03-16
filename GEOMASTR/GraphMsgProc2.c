@@ -3160,7 +3160,7 @@ BOOL FAR PASCAL DTMTOTEXTMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPAR
                 }
                 sprintf (fmt,"%%.%if,%%.%if,%%.2f",ndp,ndp);  
                 GetDlgItemText (hWndDlg,IDC_SOURCEDTM,DTMFile,sizeof(DTMFile)-1);
-               	if (!(hSurf = DTMOpen (DTMFile,NULL_ELV,BT_READ,0)))
+               	if (!(hSurf = DTMOpen (DTMFile,NULL_ELV,BT_READ,0,0)))
                 {
                     MessageBox(GetFocus(),"Unable to open surface", 0,MB_ICONQUESTION|MB_OK);
                     goto Exit;
@@ -14882,7 +14882,7 @@ BOOL FAR PASCAL ORACLEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM 
                 GetDlgItemText (hWndDlg,IDC_VOID_ELEV,str,34);
                 VoidElev = PlaneElev = atof (str);
                 if (ComputeElev)
-                	hSurf = DTMOpen (DTMFile,VoidElev,BT_READ,0);
+                	hSurf = DTMOpen (DTMFile,VoidElev,BT_READ,0,0);
                 EnableWindow (GetDlgItem(hWndDlg,IDC_EXIT2),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDOK),FALSE); 
                 EnableWindow (GetDlgItem(hWndDlg,IDC_LOAD),FALSE); 
