@@ -2732,7 +2732,10 @@ int OpenIndexedDTMs(LPDTMINFO pDTMInfo, LPMNMXCORD pBounds)
 	char Cmd[256];
 	int numDTM = 0;
 	pDTMInfo->currentHandleID = 0;
-	sprintf(Cmd, "SELECT * FROM DTMINDEX, DTMINDEX_index WHERE	DTM_FILE_NUM =DTMINDEX_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+	if (pBounds)
+		sprintf(Cmd, "SELECT * FROM DTMINDEX, DTMINDEX_index WHERE	DTM_FILE_NUM =DTMINDEX_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f", pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+	else
+		sprintf(Cmd, "SELECT * FROM DTMINDEX");
 	SQLOK(sqlite3_prepare_v2(pDTMInfo->db, Cmd, -1, &statement, 0), pDTMInfo->db, "get dtm", 0);
 	while (numDTM < MAXOPENSURF && sqlite3_step(statement) == SQLITE_ROW)
 	{
@@ -2877,6 +2880,7 @@ ReOpen:
 				pDTMInfo->ElevUnits = DTM_ELEV_FEET;
 			else
 				pDTMInfo->ElevUnits = 3;   
+			pDTMInfo->CoordUnits = PRJ_BASEUNITS[1];
 			_fstrcpy (pDTMInfo->TINIndex,FileName);
 			if ((pDot=_fstrrchr (pDTMInfo->TINIndex,'.'))) 
 			{

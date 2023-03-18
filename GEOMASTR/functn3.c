@@ -3284,7 +3284,9 @@ GotCloseFilehSQL:
 					// $BOUNDS(MID,BOUNDS) returns midpoint 
 					// $BOUNDS(MIN,BOUNDS) returns min point  
 					// $BOUNDS(MAX,BOUNDS) returns max point 
-				    // $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
+					// $BOUNDS(LEFTorRIGHTorTOPorBOTTOM,BOUNDS) 
+					// $BOUNDS(ULorLLorURorLR) 
+					// $BOUNDS(CONTAINS,BOUNDS,POINTorBOUNDS)
 					// $BOUNDS(LAYER,layer name,vpname)
 					// $BOUNDS(DISPLAY,BOUNDS,BORDERCOLOR,FILLCOLOR);
 					// $BOUNDS(3DTO2D,BOUNDS3D);

@@ -714,8 +714,8 @@ EndRoute:
 					{
 						pProfileD->x = Dist;
 			   			pProfileD->y = NGIELV_bci (Point,hSurf[isurf],1);
-if (isurf)
-	pProfileD->y -= (42/12.0) / MFT;
+//if (isurf)
+//	pProfileD->y -= (42/12.0) / MFT;
 						if (pProfileD->y < DBL_MAX && (!AlignWithRoute || haveInPoint))
 			   			{  
 							if (!AlignWithRoute || pointIsIn)

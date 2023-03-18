@@ -1481,6 +1481,7 @@ ByeBye:
 #if ENABLETRACE
 GSSiExitProg (781);
 #endif
+	GdiFlush();
     return (TextExt);
 }
 #if ENABLETRACE
