@@ -10766,7 +10766,8 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	HANDLE	handle=GSSiGlobAlloc (  96,GHND,sizeof(SAVESCREEN));
 	LPSAVESCREEN	pSaveScreen=(LPSAVESCREEN)GlobalLock (handle);
 	RECT winRect;
-	BOOL	dbug=FALSE;
+	static saveIndex = 1;
+	//static BOOL	dbug=FALSE;
 
 	if (pID)
 	{
@@ -10785,8 +10786,14 @@ HANDLE SaveScreen2 (HWND hWnd,HDC hDC, RECT Rect, LPVOID pVP,LPLONG pID)
 	pSaveScreen->hBM = SaveScreen (hDC,Rect);
 	if (dbug)
 	{
+		char dibName[128];
+		char txt[128];
+		sprintf(dibName, "c:\\temp\\temp_%i.bmp", saveIndex);
 		HDIB hDib=BitmapToDIB (pSaveScreen->hBM, 0,0);
-		SaveDIB (hDib,"c:\\temp\\temp.bmp");
+		SaveDIB (hDib,dibName);
+		sprintf(dibName, "c:\\temp\\temp_%i.txt", saveIndex++);
+		sprintf(txt, "%i %ld:%i %i %i %i", pSaveScreen->ID, (UINT)hWnd,pSaveScreen->Rect.left, pSaveScreen->Rect.right, pSaveScreen->Rect.top, pSaveScreen->Rect.bottom);
+		AppendFile(dibName, txt);
 	}
 	if (!pSaveScreen->hBM)
 		GSSiGlobUlFree (&handle);
@@ -10880,14 +10887,18 @@ GSSiExitProg (332);
 		goto Exit;
 	if (ID && pSaveScreen->ID != ID)
 		goto Exit;
+	if (pSaveScreen->hWnd)
+		hDC = GetDC(pSaveScreen->hWnd);
     SaveDC (hDC);
 	SetDisplayMode (hDC, GF_SCREENMODE); 
 // 	SetGraphicsMode(hDC, GM_COMPATIBLE);
     SetMapMode    ( hDC, MM_TEXT );
     SetWindowOrgEx  ( hDC, 0, 0,0 );
     SetViewportOrgEx( hDC, 0, 0,0 );
-  	if (!Clip)
-  		SelectClipRgn ( hDC,0);
+	if (!Clip)
+		SelectClipRgn(hDC, 0);
+	else
+		ii = 1;
     hdcMem = CreateCompatibleDC(hDC); 
     if (hdcMem)
     {
@@ -10903,6 +10914,8 @@ GSSiExitProg (332);
 	    DeleteDC(hdcMem); 
 	}
     RestoreDC (hDC,-1);
+	if (pSaveScreen->hWnd)
+		ReleaseDC(pSaveScreen->hWnd, hDC);
 Exit: 
     GlobalUnlock (hSavedScreen);
 {

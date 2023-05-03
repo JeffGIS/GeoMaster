@@ -1783,11 +1783,11 @@ HANDLE TransformBitmap (HANDLE hBMP,HANDLE hTran,HANDLE hTranBack,LPMNMXCORD pBo
 	if (RowLenNew%4)
 		RowLenNew += 4-RowLenNew%4;
 	SizeImageNew = NewHeight * RowLenNew;
-/*	Dwords = pDib->biWidth / 32;
+	int Dwords = pDib->biWidth / 32;
 	if (pDib->biWidth % 32)
 		Dwords++;
 	RowLenOld = Dwords * 4;
-	Dwords = NewWidth / 32;
+/*	Dwords = NewWidth / 32;
 	if (NewWidth % 32)
 		Dwords++; 
 	RowLenNew = Dwords * 4; */  

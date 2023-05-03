@@ -1509,6 +1509,45 @@ GotCloseFilehSQL:
 				goto Rtnrtn;
 			}
 
+			if (!_fstricmp(Arg[1], "DUMP"))
+			{
+				int width = 0;
+				int height = 0;
+				HDIB32	hDib32 = BMPHandleFromEXT(Arg[2]);
+				if (hDib32)
+				{
+					HFILE fidOut = GSSiOpenFile(Arg[3], 0, OF_CREATE);
+					if (fidOut != HFILE_ERROR)
+					{
+						BITMAPINFOHEADER DibInfo;
+
+						GetBitmapInfoFromHandle(&DibInfo, hDib32);
+
+						width = FreeImage_GetWidth(hDib32);
+						height = FreeImage_GetHeight(hDib32);
+						LPSTR outLine = malloc(width * 14);
+						float fval;
+						int	  ival;
+						for (int row = 0; row < height; row++)
+						{
+							RGBQUAD* p32Bit = (RGBQUAD*)FreeImage_GetScanLine(hDib32, row);
+							*outLine = 0;
+							for (int col = 0; col < width; col++)
+							{
+								fval = *(float*)p32Bit;
+								ival = *(int*)p32Bit;
+								RGBQUAD quad = *p32Bit++;
+								sprintf(strchr(outLine,0), "%.2f ", fval);
+							}
+							fputstring(outLine, fidOut);
+						}
+						GSSiClose(fidOut);
+						free(outLine);
+					}
+					DestroyDIB32(hDib32, FALSE);
+				}
+				goto RtnTrue;
+			}
 			if (!_fstricmp(Arg[1], "WIDTH"))
 			{
 				int width = 0;
@@ -2897,9 +2936,9 @@ GotCloseFilehSQL:
 				if (hWndScroll2)
 					hWnd = hWndScroll2;
 				GetCursorPos (&ScreenPoint); 
-				ScreenToClient (CurView->hWnd,&ScreenPoint);   
+				ScreenToClient (hWnd,&ScreenPoint);   
 				sprintf (ptxt,"$REPORT(%s)",Arg[1]);
-				YellowTextBox (hWnd,ptxt,ScreenPoint,&TBRect, (LPRECT)1,TRUE,0);
+				YellowTextBox (hWnd,ptxt,ScreenPoint,&TBRect, (LPRECT)2,TRUE,0);
 				hDC = GetDC (hWnd);
 				InflateRect(&TBRect, 1, 1);
 				if (hWnd == hWndMain)

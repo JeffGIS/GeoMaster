@@ -17428,8 +17428,10 @@ NextFileInList:    		GSSillseek (FidFL,FileListLoc,0);
 						
                  		_fmemset (TAGKey.UDI,0,32);
            		      	GetDlgItemText (hWndDlg,IDC_TAGVALUE,udi,40);
-           		      	if ((lpBrace=_fstrrchr (udi,'{'))) 
-           		      		*lpBrace = 0;
+						if ((lpBrace = _fstrrchr(udi, '{')))
+							*lpBrace = 0;
+						else
+							udi[32] = 0;
            		      	n = _fstrlen (udi);
            		      	_fstrcpy (TAGKey.UDI,udi);
            		      	GetDlgItemText (hWndDlg,IDC_TAGVALUE,udi,40);
