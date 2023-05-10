@@ -1471,6 +1471,25 @@ GotCloseFilehSQL:
 
 				goto RtnTrue;
 			}
+
+
+			if (!_fstricmp(Arg[1], "LISTTIFFTAGS"))
+			{
+				HDIB32	hDib32;
+				BOOL	st;
+				BITMAPINFOHEADER DibInfo = { 0 };
+				double	ScaleX, ScaleY;
+				DPOINT	BitmapPoint, WorldPoint;
+
+				hDib32 = BMPHandleFromEXT(Arg[2]);
+				if (!hDib32)
+					goto RtnFalse;
+
+				GetBitmapInfoFromHandle(&DibInfo, hDib32);
+				st = GetGeoTiffData(hDib32, &ScaleX, &ScaleY, &BitmapPoint, &WorldPoint);
+				GMDestroyDIB32(hDib32);
+				goto RtnTrue;
+			}
 			if (!_fstricmp(Arg[1], "CONVERT"))
 			{
 				BOOL SaveBMPCache = AllowBMPCaching;
