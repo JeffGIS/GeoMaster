@@ -415,6 +415,8 @@ void QuitGraphics()
 	HaltMapDisplay (FALSE,FALSE);
 	InQuitGraphics = TRUE;
 	BT_CLOSEANDDELETE(&hGMDKeyList);
+	ClosePassiveFunctions();
+	DTMClose(0);
 
 	ClearFullWindowBitmap(0);
 	DestroyAllToolbars ();
