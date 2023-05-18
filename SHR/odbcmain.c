@@ -1897,7 +1897,32 @@ HWND InitEXTDBInstance(HWND hWndPar, LPRECT pRect)
 	return hWnd;
 }
 
+int strnicmpGSSi(LPSTR str1, LPSTR str2)
+{
+	int l = strlen(str2);
+	int rtn = strnicmp(str1, str2, l);
+	return rtn;
+}
+void FixChannelInMSAccessDB(LPSTR str)
+{
+	int inLen = strlen(str);
 
+	if (!strnicmpGSSi(str, "DSN=MS ACCESS DATABASE;"))
+	{
+		LPSTR chanPos = strstr(str, "(CHAN");
+		if (chanPos)
+		{
+			*chanPos++ = 0;
+			LPSTR tempStr = malloc(inLen + 4);
+			LPSTR pSC = strchr(str, ';');
+			*pSC++ = 0;
+			sprintf(tempStr, "%s(%s;%s", str, chanPos, pSC);
+			strcpy(str, tempStr);
+			free(tempStr);
+		}
+	}
+	return;
+}
 /******************************************************************/
 HANDLE OpenExternalDatabase( LPSTR Inname)
 {
@@ -1975,7 +2000,8 @@ FoundOne:
    }
    _fstrcpy (DBAndTable,tnames);  
    cptr = _fstrstr (tnames,"(CHAN");
-   if(cptr) *cptr = 0;
+   if(cptr)
+	   *cptr = 0;
    _fstrcpy (CurODBCFile,tnames);   
    sprintf (DriverName,"[%%STANDARDSQL_%s",tnames);   
    cptr = _fstrchr (DriverName,';');
@@ -2020,6 +2046,7 @@ TryAgain:
 		//EXTDBRegisterClass(hInst);
 		//hWnd = InitEXTDBInstance(0, &rect);
 //calling this with MS Access Database driver messes up font in main window
+		FixChannelInMSAccessDB(lpcstring);
 		rc = SQLDriverConnect(hdbc, 0, lpcstring, strlen(lpcstring), lptnames, maxoutlen, &Moutlen, SQL_DRIVER_COMPLETE_REQUIRED);
 //testvalue(1); 
 	   SaveCurView (1);
