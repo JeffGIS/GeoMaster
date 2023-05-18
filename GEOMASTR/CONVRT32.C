@@ -2975,6 +2975,7 @@ GSSiExitProg (100);
 #endif
     	return (FALSE);    
 }  
+
 	ClearPolyOff(FALSE);
 	CloseAllRequestedFiles (FALSE);
 	memset (&InitWindowRect,0,sizeof(RECT));

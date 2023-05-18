@@ -666,6 +666,10 @@ void UnallocateConfig ()
     if (!*pNumViewports)
 		goto Exit;
 	inUnallocateConfig = TRUE;
+
+	ClosePassiveFunctions();
+	DTMClose(0);
+
 	DestroyAllToolbars ();
     RemoveAllInfoBoxRect();
 	RemoveDataDisplayRect(0);
