@@ -3687,7 +3687,7 @@ typedef	VARNAMEINDEXITEM	FAR	*LPVARNAMEINDEXITEM;
 typedef struct
 	{   short	Type,
 				NumFiles,
-				NumRows, 
+				NumRows,
 				NumTabs, 
 				NumFonts, 
 				Height,
@@ -3721,6 +3721,8 @@ typedef struct
 		HWND	hWnd;
 		HDC		hdc;
 		HFONT   currentFont;
+		short   NumCols;
+		char	Title[256];
 	} REPORT;
 typedef REPORT	FAR *LPREPORT;
 

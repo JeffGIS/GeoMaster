@@ -160,9 +160,12 @@ HANDLE LoadReport (LPSTR Name)
 	hReport = GSSiGlobAlloc (1580,GHND,sizeof(REPORT));
 	pReport = (LPREPORT)GlobalLock (hReport);  
 	pReport->Type = 1; 
+	if (!strnicmp (HeadLine,"GMREPORT ",9))
+		strcpy (pReport->Title, & HeadLine[9]);
 	pReport->Just = 300;
 	pReport->First = TRUE;
 	pReport->Margin = 0.01;
+	pReport->NumCols = 1;
 	pNextLine = pBuf;
 	LineNum = 0;
 	while ((pLine = NextRepLine (&pNextLine,&LineNum)))
@@ -182,21 +185,41 @@ HANDLE LoadReport (LPSTR Name)
 					goto ErrOut;
 			}
 		}
-		else if (!_fstrnicmp (pLine,"[%NUM_FILES]=",13))
-		{   
+		else if (!_fstrnicmp(pLine, "[%NUM_FILES]=", 13))
+		{
 			int		ifile;
 			LPSTR	FirstFile;
-			long	TotLen=0;
-			
-			pLine += 13;                    
-			pReport->NumFiles = atoi (pLine);
-			for (ifile=0;ifile<pReport->NumFiles;ifile++)
-				pReport->FileTypes[ifile]=0;
+			long	TotLen = 0;
+
+			pLine += 13;
+			pReport->NumFiles = atoi(pLine);
+			for (ifile = 0; ifile < pReport->NumFiles; ifile++)
+				pReport->FileTypes[ifile] = 0;
 			if (pReport->NumFiles)
 			{
-				if (!LoadStrings(pReport->NumFiles,&pReport->hFiles,&pNextLine,&LineNum))
-					goto ErrOut; 
+				if (!LoadStrings(pReport->NumFiles, &pReport->hFiles, &pNextLine, &LineNum))
+					goto ErrOut;
 			}
+		}
+		else if (!_fstrnicmp(pLine, "[%NUM_COLS]=", 12))
+		{
+			int		ifile;
+			LPSTR	FirstFile;
+			long	TotLen = 0;
+
+			pLine += 12;
+			ExpandText(pLine);
+			pReport->NumCols = max(1, atoi(pLine));
+		}
+		else if (!_fstrnicmp(pLine, "[%TITLE]=", 9))
+		{
+			int		ifile;
+			LPSTR	FirstFile;
+			long	TotLen = 0;
+
+			pLine += 9;
+			ExpandText(pLine);
+			strcpy (pReport->Title,pLine);
 		}
 		else if (!_fstrnicmp (pLine,"[%NUM_ROWS]=",12))
 		{   
@@ -559,7 +582,7 @@ void ReportTextOut (LPREPORT CurReport,LPSTR txt,long ShadowColor)
     return;
 }
 
-BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect, BOOL FitToWindow)
+BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT InRect,LPRECT pClipRect,double Factor, long Refno,LPRECT pSizeRect, BOOL FitToWindow)
 {
 	LPREPORT	pReport=(LPREPORT)GlobalLock (hReport);
 	int			irow, itab, MaxRowLen=0, RowHeight, ReportWidth, x, y,xj,yj=0,w,lt, Margin=0,ifont;  
@@ -577,13 +600,18 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	double		f=0;
 	int			xmid;
 	long		ShadowColor;
+	RECT		Rect = InRect;
 
+	if (!pSizeRect)
+	{
+		Rect.right /= pReport->NumCols;
+	}
 	HaltReport = FALSE;                   
 	if (!pReport)
 		return FALSE;
 	if (!pSizeRect)
 		f = (double)pReport->Just / 1000;
-	xmid  = Rect.left + abs(Rect.right - Rect.left) * f;
+	xmid  = Rect.left + abs(Rect.right - Rect.left)/pReport->NumCols * f;
 	pReport->hDC = hDC;
 	pReport->Rect = Rect;
 	if (pReport->Type == 2)
@@ -652,9 +680,48 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 		}
 	//SelectClipRgn (hDC,0);//tempdebug
 		y = Rect.top + Margin;	
+		int colLen = Rect.right - Rect.left - Margin * 2;
+		int icol = 0;
+		int splitRow = -2;
+		int topY = y;
+		if (pReport->NumCols > 1)
+		{
+			splitRow = pReport->NumRows / pReport->NumCols;
+		}
+		if (*pReport->Title && !pSizeRect)
+		{
+			char title[256];
+			LPSTR pTitle = title;
+			strcpy(title, pReport->Title);
+			ifont = 1;
+			ShadowColor = -1;
+			SetTextColor(CurView->hDC, pReport->FontColor[ifont - 1]);
+			if (pReport->FontShadow[ifont - 1])
+				ShadowColor = pReport->FontShadowColor[ifont - 1];
+			SelectObject(hDC, pReport->hFonts[ifont - 1]);
+			do
+			{
+				LPSTR pNewLine = strchr(pTitle,'\r');
+				if (pNewLine)
+					*pNewLine++ = 0;
+				GetTextExtentPoint32(hDC, pTitle, _fstrlen(pTitle), &txSize);
+				pReport->x = InRect.left + (InRect.right - InRect.left) / 2 - txSize.cx / 2;
+				pReport->y = y;
+				ReportTextOut(pReport, pTitle, ShadowColor);
+				y += txSize.cy;
+				pTitle = pNewLine;
+			} while (pTitle);
+			topY = y;
+		}
 		for (irow = 0;irow<pReport->NumRows;irow++)
-		{   
-			x = Rect.left + Margin;
+		{ 
+			if (irow == splitRow)
+			{
+				splitRow += pReport->NumRows / pReport->NumCols;
+				icol++;
+				y = topY;
+			}
+			x = Rect.left + Margin + icol * colLen;
 			startrow = pRows;
 			startrow += irow;  
 			RowHeight = 0;
@@ -818,14 +885,18 @@ BOOL DisplayReport (HDC hDC, HANDLE hReport, RECT Rect,LPRECT pClipRect,double F
 	if (pSizeRect)
 	{
 //		FactorRect (&pReport->SizeRect,Factor);
-		w = max (xmid - pReport->SizeRect.left,pReport->SizeRect.right - xmid);
+		if (pReport->NumCols > 1)
+		{
+
+		}
+		w = max (xmid - pReport->SizeRect.left,pReport->SizeRect.right - xmid) / pReport->NumCols;
 		if (!FitToWindow && w > RECTWIDTH(pClipRect) / 2)
 			w = RECTWIDTH(pClipRect) / 2;
 		if (*pReport->JustC == 'C')
 		{
 			pReport->SizeRect.left = xmid - w;
 			pReport->SizeRect.right = xmid + w;
-			pReport->Just = (pReport->SizeRect.right - pReport->SizeRect.left) / 2;
+			pReport->Just = ((pReport->SizeRect.right - pReport->SizeRect.left)/pReport->NumCols) / 2;
 		}
 		else if (*pReport->JustC == 'c')
 		{

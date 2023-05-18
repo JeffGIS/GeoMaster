@@ -1090,6 +1090,9 @@ GSSiExitProg (520);
 					strcpy (str,pDBQ+5);
 					if ((pEnd = strpbrk (str,";|")))
 						*pEnd = 0;
+					LPSTR cptr = strstr(str, "(CHAN");
+					if (cptr)
+						*cptr = 0;
 					if (!ExistFile (str))
 					{
 						FileHandle = NULL;

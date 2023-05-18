@@ -158,11 +158,17 @@ HANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT
 	LPSTR	str=GlobalLock (hStr);
 	BOOL	DoNotMove = FALSE;
 	BOOL	SaveContinueProcessing = ContinueProcessing;
+	BOOL	displayTAG = TRUE;
 
 	SetContinueProcessing ( TRUE);
 	if (DisplayInRect == (LPRECT)1)
 	{
 		DoNotMove = TRUE;
+		DisplayInRect = 0;
+	}
+	if (DisplayInRect == (LPRECT)2)
+	{
+		displayTAG = FALSE;
 		DisplayInRect = 0;
 	}
 	strcpy (str,instr);
@@ -236,7 +242,7 @@ HANDLE YellowTextBox (HWND hWnd, LPSTR instr, POINT WinPoint,LPRECT pRect,LPRECT
        	TAGBox.center = WinPtToTAGPt (RectMid(&TAGBox.rect));  
        	if (pRect)
        	{
-			if (!DoNotMove)
+			if (displayTAG)
 				DrawTAG(hWnd,hDC,TRUE,TRUE); 
 			*pRect = TAGBox.rect;  
 			//DestroySavedScreen (&TAGBox.before,0);

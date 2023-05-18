@@ -5994,8 +5994,10 @@ FoundPart:							;
 					}
 					if (Err)
 					{
-				    	SetDlgItemText (hWndDlg,IDC_PROPMESSAGE,"Property not found"); 
-				    }
+						SetDlgItemText(hWndDlg, IDC_PROPMESSAGE, "Property not found");
+					}
+					else if (n)
+						Err = TRUE;
 				} 
 				GSSiGlobUlFree (&hItems);
 				if (Err)
