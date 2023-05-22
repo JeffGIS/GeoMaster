@@ -28,33 +28,33 @@ long PointsBetweenPCT (long Refno,double FromPCT, double ToPCT,BOOL ShapePointsO
 	*phPoints = *phCurvePoints = 0;
 	if (hNewBPEP)
 		ShapePointsOnly = FALSE;
-	if (PickByRefno(Refno,NULL,NULL,-101))
-	{	
-		BOOL	Reverse=FALSE;
+	if (PickByRefno(Refno, NULL, NULL, -101))
+	{
+		BOOL	Reverse = FALSE;
 
-		PolyID = FromPCT/1000;
+		PolyID = FromPCT / 1000;
 		PickList[0].PolyID = PolyID;
 		FromPCT -= PolyID * 1000;
-		ToPCT   -= PolyID * 1000;
+		ToPCT -= PolyID * 1000;
 		if (FromPCT > ToPCT)
 		{
 			Reverse = TRUE;
 			FromPCT = 1.0 - FromPCT;
 			ToPCT = 1.0 - ToPCT;
 		}
-		if (GetPolyPoints ((LPPICKDATAHEADER)&PickList[0],Reverse,&npnts,&hPoly)) 
-	   	{ 
-	   		LPDPOINT pPoly = (LPDPOINT)GlobalLock (hPoly);  
-	   		double	PolyLength = GetPolyLengthD (pPoly,npnts);
-	   		double	StartDist = FromPCT * PolyLength;
-	   		double	EndDist = ToPCT * PolyLength;
+		if (GetPolyPoints((LPPICKDATAHEADER)&PickList[0], Reverse, &npnts, &hPoly))
+		{
+			LPDPOINT pPoly = (LPDPOINT)GlobalLock(hPoly);
+			double	PolyLength = GetPolyLengthD(pPoly, npnts);
+			double	StartDist = FromPCT * PolyLength;
+			double	EndDist = ToPCT * PolyLength;
 			float	RSQ;
-	   			
-			*phPoints =  GetPolyBetweenDist (pPoly,npnts,StartDist,EndDist,&NumOutPoints,ShapePointsOnly,FALSE);
+
+			*phPoints = GetPolyBetweenDist(pPoly, npnts, StartDist, EndDist, &NumOutPoints, ShapePointsOnly, FALSE);
 			if (hNewBPEP && *phPoints)
 			{
-				HPDPOINT	Point   = GlobalLock (*phPoints);
-				HPDPOINT	NewBPEP = GlobalLock (hNewBPEP);
+				HPDPOINT	Point = GlobalLock(*phPoints);
+				HPDPOINT	NewBPEP = GlobalLock(hNewBPEP);
 				UINT		i;
 				HANDLE		hTran;
 				double		FromX[2], FromY[2], ToX[2], ToY[2];
@@ -65,18 +65,20 @@ long PointsBetweenPCT (long Refno,double FromPCT, double ToPCT,BOOL ShapePointsO
 				ToY[1] = NewBPEP[1].y;
 				FromX[0] = Point[0].x;
 				FromY[0] = Point[0].y;
-				FromX[1] = Point[NumOutPoints-1].x;
-				FromY[1] = Point[NumOutPoints-1].y;
-				hTran = STRAN2 (1639,FromX,FromY,ToX,ToY,2,&RSQ,2,0);
-				for (i=0;i<NumOutPoints;i++)
-					Point[i] = TranPoint (&Point[i],hTran);
-				GlobalUnlock (*phPoints);
-				GlobalUnlock (hNewBPEP);
-				CloseTRANS2 (&hTran);
+				FromX[1] = Point[NumOutPoints - 1].x;
+				FromY[1] = Point[NumOutPoints - 1].y;
+				hTran = STRAN2(1639, FromX, FromY, ToX, ToY, 2, &RSQ, 2, 0);
+				for (i = 0; i < NumOutPoints; i++)
+					Point[i] = TranPoint(&Point[i], hTran);
+				GlobalUnlock(*phPoints);
+				GlobalUnlock(hNewBPEP);
+				CloseTRANS2(&hTran);
 			}
-   			GSSiGlobUlFree (&hPoly);
+			GSSiGlobUlFree(&hPoly);
 		}
 	}
+	else
+		ii = 1;
 	return NumOutPoints;
 }
 

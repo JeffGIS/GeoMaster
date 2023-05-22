@@ -479,40 +479,41 @@ GSSiExitProg (1348);
 			    
 			    if (CurView == SaveVP)
     				goto RtnTrue;
-    			if (InGRFCmd)
-    			{
-				    if (SaveVP->FunStackHandle)
-				    {
-				    	LPCMDSTRING	pCmdStr = (LPCMDSTRING)GlobalLock (SaveVP->FunStackHandle); 
-						LPSTR		pLoc = pCmdStr->Cmd; 
-						
-						pLoc += pCmdStr->CurLoc; 
+				if (InGRFCmd)
+				{
+					if (SaveVP->FunStackHandle)
+					{
+						LPCMDSTRING	pCmdStr = (LPCMDSTRING)GlobalLock(SaveVP->FunStackHandle);
+						LPSTR		pLoc = pCmdStr->Cmd;
+
+						pLoc += pCmdStr->CurLoc;
 						if (*pLoc == ';')
 							pLoc++;
 						if (*pLoc)
-						{   
-							LPSTR	pGCmd; 
-							long	lcmd = _fstrlen (pLoc);
+						{
+							LPSTR	pGCmd;
+							long	lcmd = _fstrlen(pLoc);
 							short	Inc = 0;
-							
-						   	GSSiGlobFree (&hAddGraphicsFun2);
-					   		AddGraphicsFunVP = CurView->ID;
-							hAddGraphicsFun2 = GSSiGlobAlloc ( 793,GHND,lcmd+1);
-							pGCmd = GlobalLock (hAddGraphicsFun2); 
-							_fstrcpy (pGCmd,pLoc);
-							GlobalUnlock (hAddGraphicsFun2);  
+
+							GSSiGlobFree(&hAddGraphicsFun2);
+							AddGraphicsFunVP = CurView->ID;
+							hAddGraphicsFun2 = GSSiGlobAlloc(793, GHND, lcmd + 1);
+							pGCmd = GlobalLock(hAddGraphicsFun2);
+							_fstrcpy(pGCmd, pLoc);
+							GlobalUnlock(hAddGraphicsFun2);
 							pCmdStr->CurLoc = pCmdStr->EndLoc;
-							GlobalUnlock (SaveVP->FunStackHandle);
+							GlobalUnlock(SaveVP->FunStackHandle);
 							if (CurrentConfig)
 								Inc = 1000;
-							PostMessage(hWndMain, GSSI_ADDGF, 0, CurView->ID+Inc); 
+							PostMessage(hWndMain, GSSI_ADDGF, 0, CurView->ID + Inc);
 						}
 						else
-							GlobalUnlock (SaveVP->FunStackHandle);
+							GlobalUnlock(SaveVP->FunStackHandle);
 					}
-					SetCurView ( SaveVP);
+					SetCurView(SaveVP);
 				}
-			
+				else
+					SaveVP = CurView;
 //				if (InGRCmd) goto Rtn0;    
 //				IgnoreSelectVP = TRUE;
 			}

@@ -2584,21 +2584,21 @@ GotCloseFilehSQL:
 			goto Rtnl;
 		}
 
-		case 538: //$POINTLIST(CREATE,name,pointlist)
-				  //$POINTLIST(DESTROY,name)
-				  //$POINTLIST(ADD,name,pointlist)
-				  //$POINTLIST(THIN,name,dist(if 0 removes dup points))
-				  //$POINTLIST(DISPLAY,name,FILL,color)
-				  //$POINTLIST(DISPLAY,name,DRAW,color,width)
-				  //$POINTLIST(LENGTH,name)
-				  //$POINTLIST(AREA,name)
-				  //$POINTLIST(AZM,name,pct,before;after;at(default)) at averages before and after if at node point
-				  //$POINTLIST(INTERSECT,name,name2,COUNT;id;Farthest;nearest,farornearpoint)
+		case 538: //$PLIST(CREATE,name,pointlist)
+				  //$PLIST(DESTROY,name)
+				  //$PLIST(ADD,name,pointlist)
+				  //$PLIST(THIN,name,dist(if 0 removes dup points))
+				  //$PLIST(DISPLAY,name,FILL,color)
+				  //$PLIST(DISPLAY,name,DRAW,color,width)
+				  //$PLIST(LENGTH,name)
+				  //$PLIST(AREA,name)
+				  //$PLIST(AZM,name,pct,before;after;at(default)) at averages before and after if at node point
+				  //$PLIST(INTERSECT,name,name2,COUNT;id;Farthest;nearest,farornearpoint)
 		{
-			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
 			if (nArgs < 1)
 				goto RtnFalse;
-			if (PListCommands (nArgs,Arg,OutLoc))
+			if (PointListCommands(nArgs, Arg, OutLoc))
 				goto Rtnl;
 			goto RtnFalse;
 		}
@@ -4272,13 +4272,20 @@ GotCloseFilehSQL:
 		case 632:	//$ZOOMVP(vpname,immediate(TorF),type,...
 		{   
 			short	VPID;
-			
+			BOOL	noDisplay = FALSE;
+
 			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 3)
 				goto RtnFalse;
 			if ((VPID = GetVPIDFromName (Arg[1])))
 			{
-				Immediate = atob(Arg[2]); 
+				if (!stricmp(Arg[2], "-1"))
+				{
+					noDisplay = TRUE;
+					Immediate = TRUE;
+				}
+				else
+					Immediate = atob(Arg[2]); 
 				if (!_fstricmp(Arg[3],"BOUNDS"))
 				{
 					Bounds = atobounds (Arg[4],&Err);
@@ -4287,8 +4294,13 @@ GotCloseFilehSQL:
 						SetViewport (VPID); 
 						if (CurViewActive())
 						{
+							int saveNumFiles = CurView->NumFiles;
+
 						    CurView->CurZoomAreaRef = 0;
+							if (noDisplay)
+								CurView->NumFiles = 0;
 							ZoomToRect(Bounds,Immediate);
+							CurView->NumFiles = saveNumFiles;
 							SetCurView ( SaveVP);
 							goto RtnTrue;
 						} 
