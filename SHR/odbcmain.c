@@ -1906,19 +1906,24 @@ int strnicmpGSSi(LPSTR str1, LPSTR str2)
 void FixChannelInMSAccessDB(LPSTR str)
 {
 	int inLen = strlen(str);
-
-	if (!strnicmpGSSi(str, "DSN=MS ACCESS DATABASE;"))
+	
+	if (!strnicmpGSSi(str, "ODBC|MS ACCESS DATABASE;"))
 	{
 		LPSTR chanPos = strstr(str, "(CHAN");
 		if (chanPos)
 		{
-			*chanPos++ = 0;
-			LPSTR tempStr = malloc(inLen + 4);
-			LPSTR pSC = strchr(str, ';');
-			*pSC++ = 0;
-			sprintf(tempStr, "%s(%s;%s", str, chanPos, pSC);
-			strcpy(str, tempStr);
-			free(tempStr);
+			LPSTR afterChan = strchr(chanPos, ')');
+			if (afterChan)
+			{
+				*afterChan++ = 0;
+				*chanPos++ = 0;
+				LPSTR tempStr = malloc(inLen + 4);
+				LPSTR pSC = strchr(str, ';');
+				*pSC++ = 0;
+				sprintf(tempStr, "%s(%s);%s%s", str, chanPos, pSC,afterChan);
+				strcpy(str, tempStr);
+				free(tempStr);
+			}
 		}
 	}
 	return;
@@ -1953,6 +1958,8 @@ char	additional[256]={0};
 
 	strcpy (name,Inname);
 	ExpandText (name);
+	FixChannelInMSAccessDB(name);
+
 //	MessageBox (0,name,"Open",MB_OK);
 	SaveDrive = _getdrive();
 	_getcwd (cwd,256); 
@@ -1998,7 +2005,7 @@ FoundOne:
 	   strcpy (additional,pSC);
  	   *pSC = 0;
    }
-   _fstrcpy (DBAndTable,tnames);  
+	_fstrcpy (DBAndTable,tnames);
    cptr = _fstrstr (tnames,"(CHAN");
    if(cptr)
 	   *cptr = 0;
@@ -2046,7 +2053,6 @@ TryAgain:
 		//EXTDBRegisterClass(hInst);
 		//hWnd = InitEXTDBInstance(0, &rect);
 //calling this with MS Access Database driver messes up font in main window
-		FixChannelInMSAccessDB(lpcstring);
 		rc = SQLDriverConnect(hdbc, 0, lpcstring, strlen(lpcstring), lptnames, maxoutlen, &Moutlen, SQL_DRIVER_COMPLETE_REQUIRED);
 //testvalue(1); 
 	   SaveCurView (1);
