@@ -1630,9 +1630,15 @@ GotCloseFilehSQL:
 				}
 				goto Rtnrtn;
 			}
-			if (!_fstricmp (Arg[1],"SPLIT"))
+			if (!_fstricmp(Arg[1], "SPLIT"))
 			{
-				rtn = SplitImage (Arg[2],Arg[3],Arg[4],atoi(Arg[5]),atoi(Arg[6]),Arg[7]);
+				rtn = SplitImage(Arg[2], Arg[3], Arg[4], atoi(Arg[5]), atoi(Arg[6]), Arg[7]);
+				goto Rtnrtn;
+			}
+			if (!_fstricmp(Arg[1], "SETTRANS"))
+			{
+				COLORREF fromColor = atol(Arg[3]);
+				rtn = ConvertBitmapColorToTransparent(Arg[2], fromColor);
 				goto Rtnrtn;
 			}
 			if (!_fstricmp(Arg[1], "CONVERTCOLOR"))
@@ -2016,6 +2022,7 @@ GotCloseFilehSQL:
 			lpSQL = Arg[2];
 			lpUpdateFieldList = Arg[3];
 			lpBasicTitle = Arg[4];
+			lpBasicPrompt = Arg[9];
 			lpAutoUpdateFieldList = 0;
 			lpSQLFieldList = 0;
 			if (*Arg[5])

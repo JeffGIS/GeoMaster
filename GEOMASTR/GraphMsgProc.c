@@ -2185,6 +2185,13 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 		hWnd = GetDlgItem(hWndDlg, IDENTIFY_NEXT);
 		/*         hWnd = GetDlgItem (hWndDlg,IDENTIFY_PREV);
 				 if (item>0) EnableWindow (hWnd,HaveImage);*/
+		if (*lpBasicPrompt)
+		{
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PROMPT), SW_SHOW);
+			SetDlgItemText(hWndDlg, IDENTIFY_PROMPT, lpBasicPrompt);
+		}
+		else
+			ShowWindow(GetDlgItem(hWndDlg, IDENTIFY_PROMPT), SW_HIDE);
 		rtn = TRUE;
 		break; /* End of WM_INITDIALOG                                 */
 

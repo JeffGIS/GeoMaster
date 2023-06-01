@@ -367,6 +367,43 @@ DWORD GM32SetDIBPalette(HDIB32 hDIB,DWORD PalletSize,LPRGBQUAD pPalletIn)
 	return rtn;
 }
 
+int ConvertBitmapColorToTransparent(LPSTR BitmapPath,COLORREF FromColor)
+{
+	HDIB32	hDIB, hDIB32;
+	DWORD	nrow, ncol, row, col, begrow, begcol;
+	int		height, width, n = 0;
+	RGBQUAD	FromColorQ = RGBQUADFromCOLORREF(FromColor);
+	RGBQUAD	ToColorQ = { 0 };
+
+
+	hDIB = BMPHandleFromEXT(BitmapPath);
+	if (!hDIB)
+		return -1;
+	hDIB32 = GSSiFreeImage_ConvertTo32Bits(hDIB);
+	GSSiFreeImage_Unload(hDIB);
+	GetDIBDimensionsFromHandle(hDIB32, &height, &width);
+	nrow = height;
+	ncol = width;
+	begrow = 0;
+	begcol = 0;
+	for (row = begrow; row < nrow; row++)
+	{
+		for (col = begcol; col < ncol; col++)
+		{
+			RGBQUAD	c;
+
+			FreeImage_GetPixelColor(hDIB32, col, row, &c);
+			if (COLORREFFromRGBQUAD(c) == FromColor)
+			{
+				n++;
+				FreeImage_SetPixelColor(hDIB32, col, row, &ToColorQ);
+			}
+		}
+	}
+	SaveDIB32(hDIB32, BitmapPath, 0, -1);
+	GSSiFreeImage_Unload(hDIB32);
+	return n;
+}
 int ConvertBitmapColorsInRect(LPSTR BitmapPath, LPMNMXCORD pBounds, COLORREF FromColor, COLORREF ToColor, BOOL CountOnly)
 {
 	HDIB32	hDIB, hDIB24;
@@ -389,9 +426,9 @@ int ConvertBitmapColorsInRect(LPSTR BitmapPath, LPMNMXCORD pBounds, COLORREF Fro
 	begrow = Rect.top;
 	begcol = Rect.left;
 	//CreateStatusWindow(hWndMain,1,0);
-	for (row = begrow; row<nrow; row++)
+	for (row = begrow; row < nrow; row++)
 	{
-		for (col = begcol; col<ncol; col++)
+		for (col = begcol; col < ncol; col++)
 		{
 			RGBQUAD	c;
 

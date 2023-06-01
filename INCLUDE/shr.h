@@ -1180,6 +1180,7 @@ WORD GM32SaveBitmap(HANDLE hBitmap16, LPSTR OutFile, long Format, DWORD Flag);
 WORD GM32SaveDIB (HDIB32 hDIB,LPSTR OutFile,long Format,DWORD Flag);
 HDIB32 GM32AllocateDIB (DWORD Width,DWORD Height,DWORD BitsPerPixel);
 DWORD GM32PasteDIB (HDIB32 ToDIB,HDIB32 FromDIB,DWORD Left,DWORD Top,DWORD Alpha);
+int ConvertBitmapColorToTransparent(LPSTR BitmapPath, COLORREF FromColor);
 int ConvertBitmapColorsInRect (LPSTR BitmapPath,LPMNMXCORD pBounds,COLORREF FromColor,COLORREF ToColor,BOOL CountOnly);
 int ConvertBitmapColorsInRange(LPSTR BitmapPath, LPSTR ToPath, COLORREF FromColor, COLORREF ToColor, double colordist, LPMNMXCORD pBounds);
 DWORD GM32CompressFrame (LPBITMAPINFOHEADER	lpbiIn, LPBITMAPINFOHEADER lpbiOut);

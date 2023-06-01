@@ -1362,6 +1362,7 @@ extern LPSTR			lpInsert;
 extern LPSTR			lpUpdateFieldList;
 extern LPSTR			lpAutoUpdateFieldList;
 extern LPSTR			lpBasicTitle;
+extern LPSTR		lpBasicPrompt;
 extern RECT			displayRect;
 extern BOOL			showOnlyData;
 extern LPSTR		rampPhotoFile;

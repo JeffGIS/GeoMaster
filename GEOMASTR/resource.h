@@ -118,6 +118,8 @@
 #define IDENTIFY_SQL                    170
 #define IDB_HSPACE                      171
 #define IDM_PICKABILITY                 172
+#define IDENTIFY_LINE5                  172
+#define IDENTIFY_PROMPT                 172
 #define ID_TEXT_CENTER                  173
 #define IDB_GROUP                       174
 #define IDM_CONFIGURE                   175
