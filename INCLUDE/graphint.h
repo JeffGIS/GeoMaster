@@ -939,10 +939,13 @@ BOOL FillRectWithGrid (LPSTR EditName,LPSTR SymName,LPMNMXCORD pRect,double Grid
 BOOL CreateNewPolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL CreateNewPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL CreateAreaAroundPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
-BOOL ProcessGraphicsFunction2 (short FunStackID,
+int ProcessGraphicsFunction2 (short FunStackID,
 							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
-BOOL ProcessGraphicsFunction3 (short FunStackID,
+int ProcessGraphicsFunction3 (short FunStackID,
 							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+int ProcessGraphicsFunction4(short Function,
+	HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+
 BOOL ChangeAreaOffset (double NewOffset);
 BOOL AddAreaToOffsetFile (long Refno,int Type,int np, HPDPOINT lpDPoint,int nPoly,LPINT pPolyPartLen,double Offset);
 BOOL AddAreaToMap (LPSTR File,LPSTR TAG,LPSTR SymbolName,LPSTR PointList,short Type,double size,double rot,LPSTR Text,double TextSize,long TextColor,BOOL OpaqueText,BOOL Shadow,LPSHORT Stuff,HANDLE hTime);
