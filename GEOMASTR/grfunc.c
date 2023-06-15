@@ -922,15 +922,17 @@ BOOL SetGFThemeState (LPTHEME pTheme,LPSTR Title,LPSTR CommandLine)
 	return TRUE;
 }
 
-BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt) 
+BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt,BOOL sort) 
 #if ENABLETRACE
 {GSSiEnterProg (1345);
 #endif
 {
 	char	str[512],path[MAX_PATH],curpath[MAX_PATH], str2[MAX_PATH+32], delim='\t';
+	char	fileToDelete[MAX_PATH + 2];
 	HFILE	Fid=HFILE_ERROR;
 	LPSTR	lpBar;
 	short	i,LineNo=0;
+	BOOL	deleteFile = FALSE;
 	
 	if (opt == 3) 
 	{
@@ -951,6 +953,15 @@ BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt)
 		else if (WantLine > 0)
 			WantLine--;
 	}
+	if (sort)
+	{
+		char sortFile[MAX_PATH + 2];
+		GSSiGetTempFileName(0, "gm", 0, sortFile);
+		SortTextFile(str, sortFile, 512, TRUE);
+		strcpy(str, sortFile);
+		strcpy(fileToDelete, str);
+		deleteFile = TRUE;
+	}
 	Fid = GSSiOpenFile (str,0,OF_READ);
 	if (Fid == HFILE_ERROR)
 	{  
@@ -968,9 +979,16 @@ GSSiExitProg (1345);
 	GetGFFile (str2,CurView->FunctionFile,opt); 
 	_fullpath (curpath,str2,sizeof(curpath));
 	while (fgetstring (str,254,Fid))
-	{   
+	{
+		LPSTR beginLine = str;
+		if (sort)
+		{
+			LineNo = atoi(str);
+			beginLine = strchr(str, '|');
+			beginLine++;
+		}
 		LineNo++;
-		lpBar = _fstrchr(str,'|');
+		lpBar = _fstrchr(beginLine,'|');
 		if (lpBar)
 		{
 			*lpBar++ = delim; 
@@ -979,33 +997,33 @@ GSSiExitProg (1345);
 		} 
 		else
 			*path = 0; 
-		ExpandText (str);
-		Truncate (str); 
-		if (*str)
+		ExpandText (beginLine);
+		Truncate (beginLine);
+		if (*beginLine)
 		switch (opt)
 		{
 			case 1:
-				i=SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_ADDSTRING,0,(LPARAM)str);  
+				i=SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_ADDSTRING,0,(LPARAM)beginLine);
 				if (!_fstricmp (path,curpath))
 					SendDlgItemMessage (hWndDlg,FUNCTION_LIST_LB,LB_SETCURSEL,i,0); 
 				break;
 			case 2:
 				if (!_fstricmp (path,curpath))
 				{
-					_fstrcpy (CurTheme->Title,str);
+					_fstrcpy (CurTheme->Title, beginLine);
 					_fstrcpy (CurTheme->SQL,lpBar);
 				}
 				break;
 			case 3:
 			{
 				UINT	CmdID=63800+LineNo+1;  
-				AppendMenu (hMenu,MF_ENABLED|MF_STRING,CmdID,str); 
+				AppendMenu (hMenu,MF_ENABLED|MF_STRING,CmdID, beginLine);
 				break;
 			} 
 			case 4:
 				if (LineNo == WantLine && lpBar)
 				{   
-					SetGFThemeState (CurTheme,str,lpBar);
+					SetGFThemeState (CurTheme, beginLine,lpBar);
 					goto Exit;
 				}
 				break;
@@ -1013,6 +1031,8 @@ GSSiExitProg (1345);
 	}
 Exit:
 	GSSiClose2 (&Fid); 
+	if (deleteFile)
+		GSSiRemove(fileToDelete);
 {
 #if ENABLETRACE
 GSSiExitProg (1345);
@@ -1034,7 +1054,7 @@ BOOL LoadGFFunctionList (short WantLine)
 	CurTheme = LastGFTheme; 
 	if (CurrentConfig != LastGFConfig)
 		SetConfig (LastGFConfig);
-	LoadFunctionLists (0,0,WantLine,4);
+	LoadFunctionLists (0,0,WantLine,4,FALSE);
 	CurTheme = SaveTheme;
 {
 #if ENABLETRACE
@@ -1955,7 +1975,7 @@ void DisplayGFList (void)
 		UINT	CmdID=63801;  
 		AppendMenu (ApMenu,MF_ENABLED|MF_STRING,CmdID,"Edit Menu"); 
 	}
-    LoadFunctionLists (0,ApMenu,-1,3);
+    LoadFunctionLists (0,ApMenu,-1,3,TRUE);
    	GetCursorPos (&position);  
    	if (CurView && GetMenuItemCount(ApMenu))
   		TrackPopupMenu (ApMenu,TPM_CENTERALIGN|TPM_LEFTBUTTON,position.x,position.y,0,CurView->hWnd,0);

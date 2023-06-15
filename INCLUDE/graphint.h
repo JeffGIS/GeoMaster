@@ -1921,7 +1921,7 @@ BOOL RemoveLinkLines (void);
 //BOOL AdjustPolygons (short Opt);
 BOOL CreatePanZoomRotTool (HWND hWnd,POINT Center,BOOL adjustToWindow);
 BOOL LoadGFFile (HWND hWndDlg,LPSTR Infile,short opt,BOOL Float);
-BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt);
+BOOL LoadFunctionLists (HWND hWndDlg,HMENU hMenu,short WantLine,short opt,BOOL sort);
 BOOL SetGFThemeState (LPTHEME CurTheme,LPSTR Title,LPSTR CommandLine);
 BOOL GetGFFile (LPSTR File,LPSTR from,short opt);
 BOOL GetGFIndex (LPSTR IndexPath,short opt);

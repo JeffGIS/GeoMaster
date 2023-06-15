@@ -1585,4 +1585,7 @@ LPSTRD string_Copy(LPSTR str);
 void RemoveCharacters(LPSTR str, LPSTR charstoremove);
 void GSSiFree(LPSTR *str);
 
+BOOL SortTextFile(LPSTR InFile, LPSTR OutFile, int maxLineLen, BOOL ascending);
+
+
 #endif

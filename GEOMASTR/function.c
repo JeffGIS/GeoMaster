@@ -4644,3 +4644,63 @@ int SearchGMC (int i)
 	return 1;
 }
 			
+BOOL SortTextFile(LPSTR InFile, LPSTR OutFile, int maxLineLen,BOOL ascending)
+{
+	BOOL rtn = FALSE;
+	sqlite3* db;
+	char tempFile[MAX_PATH + 2];
+	HFILE fidIn = GSSiOpenFile(InFile, 0, OF_READ);
+	if (fidIn != HFILE_ERROR)
+	{
+		HFILE fidOut = GSSiOpenFile(OutFile, 0, OF_CREATE);
+		if (fidOut != HFILE_ERROR)
+		{
+			LPSTR line = malloc(maxLineLen + 4);
+			LPSTR outline = malloc(maxLineLen + 14);
+			LPSTR cmd = malloc(maxLineLen + 64);
+			GSSiGetTempFileName(0, "gm", 0, tempFile);
+
+			sprintf(cmd, "CREATE TABLE TEXTTABLE (LINE CHAR(256), LINENO INT);");
+
+			rtn = !sqlite3_open(tempFile, &db);
+			if (rtn)
+			{
+				SLT_StartTrans(db);
+				if (SLT_Execute(cmd, db))
+				{
+					int lineno = 0;
+					while (fgetstring(line, maxLineLen, fidIn))
+					{
+						sprintf(cmd, "INSERT INTO TEXTTABLE VALUES ('%s',%i);", line,lineno++);
+						SLT_Execute(cmd, db);
+					}
+					sprintf(cmd, "SELECT * FROM TEXTTABLE ORDER BY LINE ASC;");
+					sqlite3_stmt* statement = NULL;
+					if (sqlite3_prepare_v2(db, cmd, -1, &statement, 0) == SQLITE_OK)
+					{
+						while (sqlite3_step(statement) == SQLITE_ROW)
+						{
+							LPSTR line = (LPSTR)sqlite3_column_text(statement, 0);
+							int lineno = sqlite3_column_int(statement, 1);
+							if (strlen(line) > 0)
+							{
+								sprintf(outline, "%i|%s", lineno, line);
+								fputstring(outline, fidOut);
+							}
+						}	
+					}
+					sqlite3_finalize(statement);
+				}
+				SLT_EndTrans(db);
+				SLT_Close(db);
+			}
+			free(cmd);
+			free(line);
+			free(outline);
+			GSSiClose(fidOut);
+		}
+		GSSiRemove(tempFile);
+		GSSiClose(fidIn);
+	}
+	return rtn;
+}

@@ -3159,7 +3159,7 @@ GSSiExitProg (449);
 		 x = rect.left + (rect.right - rect.left)/2;
 		 y = rect.bottom - (rect.bottom - rect.top) / 2;
 		 SetCursorPos (x,y);   
-         LoadFunctionLists (hWndDlg,0,0,1);
+         LoadFunctionLists (hWndDlg,0,0,1,FALSE);
  LoadFile:
 		 _splitpath(CurView->FunctionFile, 0, 0, curName, 0);
 		 Choice = 0;
