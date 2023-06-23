@@ -3656,6 +3656,10 @@ GSSiExitProg (532);
 		case 412:
 			allowMapServerTrace = atob(Value);
 			break;
+		case 414:
+			ignorePatternAndTransparency = atob(Value);
+			break;
+
 		default:
  			break;
 	}
@@ -4088,6 +4092,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%METERSPERMILE", 411, FALSE);
 	AllocateTypeVar("%TRACEMAPSERVER", 412, FALSE);
 	AllocateTypeVar("%ENDPADCHAR", 413, FALSE);
+	AllocateTypeVar("%IGNORE_PATANDTRANS", 414, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5365,6 +5370,9 @@ GSSiExitProg (533);
 			OutStr[0] = endpadchar;
 			OutStr[1] = 0;
 		}
+			break;
+		case 414:
+			btoa(ignorePatternAndTransparency, OutStr);
 			break;
 
 	}

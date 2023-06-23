@@ -1799,6 +1799,7 @@ extern	HWND	MapServerCalledFromWnd;
 extern  int		MapserverRequestID;
 extern	int		MapserverVPID;
 extern  BOOL	allowMapServerTrace;
+extern  BOOL	ignorePatternAndTransparency;
 extern	UINT	showWindowCmd;
 extern	BOOL	PickSubVP;
 extern	int		SizeSYMBOL_V1;

@@ -834,7 +834,7 @@ GSSiExitProg (1348);
 			{
 				int nWritten = 0;
 				if (nArgs < 2) goto Rtn0;
-				HFILE Fid = GSSiOpenFile (Arg[2],0,OF_CREATE);
+				HFILE Fid = GSSiOpenFile(Arg[2], 0, OF_CREATE);
 				if (Fid == HFILE_ERROR)
 					goto RtnFalse;
 				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
@@ -851,6 +851,56 @@ GSSiExitProg (1348);
 				}
 				GSSiClose(Fid);
 				GSSiGlobUlFree(&hLine);
+				itoa(nWritten, OutLoc, 10);
+				goto Rtnl;
+			}
+
+			if (!_fstricmp(Arg[1], "REFSTOGMD"))//$HLT(REFSTOGMD,outfile)
+			{
+				char	DefStr[] = "REFNO(B4),PREFIX(C8),UDI(C64),TAG(C72),TYPE(B4),SYMNUM(B4),SYMNAME(C66),MNX(R8),MNY(R8),MXX(R8),MXY(R8)";
+
+				int nWritten = 0;
+				typedef struct {
+					long	Refno;
+					char	Prefix[8];
+					char	UDI[64];
+					char	TAG[72];
+					int		TYPE;
+					int		DESC;
+					char	SymName[66];
+					double	MNX,MNY,MXX,MXY;
+				}HLTREFSDATA;
+				typedef HLTREFSDATA	FAR* LPHLTREFSDATA;
+				LPHLTREFSDATA	pData;
+
+				if (nArgs < 2) goto Rtn0;
+				if (CreateGWDDatabase(Arg[2], 1, FALSE, 0, 2, DefStr))
+				{
+					HANDLE hOutFile = OpenGWDatabase(Arg[2], BT_WRITE);
+					LPGWDHEADER lpGWDHead = (LPGWDHEADER)GlobalLock(hOutFile);
+					pData = (LPHLTREFSDATA)&lpGWDHead->GWDData;
+					int pos = BT_FIRST;
+					while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+					{
+						pos = BT_NEXT;
+						pData->Refno = Refno;
+						strncpy(pData->Prefix, HighlightData.PD.Prefix, 8);
+						strncpy(pData->UDI, HighlightData.PD.UDI, 64);
+						sprintf(pData->TAG, "%s:%s", HighlightData.PD.Prefix, HighlightData.PD.UDI);
+						pData->TYPE = HighlightData.PD.Type;
+						pData->DESC = HighlightData.PD.Desc;
+						GetDictSymName(HighlightData.PD.Desc, pData->SymName);
+						pData->MNX = HighlightData.PD.Rect.xmn;
+						pData->MNY = HighlightData.PD.Rect.ymn;
+						pData->MXX = HighlightData.PD.Rect.xmx;
+						pData->MXY = HighlightData.PD.Rect.ymx;
+						GWDAddRecord(lpGWDHead, 0, 0);
+
+						nWritten++;
+					}
+					GlobalUnlock(hOutFile);
+					CloseGWDatabase(hOutFile);
+				}
 				itoa(nWritten, OutLoc, 10);
 				goto Rtnl;
 			}

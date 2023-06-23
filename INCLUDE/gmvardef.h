@@ -1668,6 +1668,7 @@ HWND	MapServerCalledFromWnd=0;
 int		MapserverRequestID=0;
 int		MapserverVPID;
 BOOL	allowMapServerTrace = FALSE;
+BOOL	ignorePatternAndTransparency = FALSE;
 UINT	showWindowCmd;
 BOOL	PickSubVP = TRUE;
 int		SizeSYMBOL_V1;

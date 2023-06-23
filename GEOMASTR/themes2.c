@@ -4932,7 +4932,7 @@ GetTitleSize:
 		    		}
 					else
 					{
-						if (Printing)
+						if (Printing || ignorePatternAndTransparency)
 							maxIntensity = TRUE; //PDF plots dont handle transparency well
 						FillRect(CurView->hDC, &FactoredRect, CurTheme->ClassBrush[iclass]);
 						FrameRect(CurView->hDC, &FactoredRect, GetStockObject(BLACK_BRUSH));

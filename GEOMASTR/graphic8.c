@@ -1770,11 +1770,18 @@ HBRUSH CreateGMBrush (COLORREF GMColor,int UseHalfTone,HDC hDC)
 	COLORREF	color;
 	PATBYTE		PatByte;      
 	HBRUSH		brush=0;
-				
+
 	PatByt = GetWValue (GMColor);
 	_fmemmove (&PatByte,&PatByt,1); 
 Top:
-	color = ConvertColor(ColorWOWidth (GMColor),UseHalfTone);  
+	color = ConvertColor(ColorWOWidth (GMColor),UseHalfTone);
+	if (ignorePatternAndTransparency)
+	{
+#if ENABLETRACE
+		GSSiExitProg(971);
+#endif
+		return CreateSolidBrush(color);
+	}
 	if (!PatByte.Pattern || PatByte.notUsingPattern)
 	{
 		if (hDC)

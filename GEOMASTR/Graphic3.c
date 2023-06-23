@@ -4914,10 +4914,10 @@ BOOL ConvertTAG (HPSTR buf,LPLONG len)
 	        	{   
 	TAGIsRefno:		_fstrcpy(CurrentPrefix,"REFNO");
 					SetGlobalValue2 (hPrefix,"REFNO",0);
-					if (SetRefno)  
-						sprintf (str,"%.2f",(((double)CurrentRefno) - (-2146450000))/100); 
+					if (SetRefno)
+						sprintf(str, "%.2f", (((double)CurrentRefno) - (-2146450000)) / 100);
 					else
-						*str = 0;
+						ltoa(CurrentRefno, str, 10);
 					SetGlobalValue2 (hUDI,str,0);
 					CurrentUDILen = _fstrlen(str);
 					strncpy0 (CurrentUDI,str,MAX_UDI_LEN); 
