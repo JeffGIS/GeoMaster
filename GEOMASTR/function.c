@@ -4616,6 +4616,66 @@ SetVis:
 			}
 			goto Rtnl;
 		}
+		case 442: //$RECT(WIDTH,rect)
+				  //$RECT(HEIGHT,rect)
+				  //$RECT(UL,rect)
+				  //$RECT(UR,rect)
+				  //$RECT(LL,rect)
+				  //$RECT(LR,rect)
+				  //$RECT(SPLIT,rect,UL)
+				  //$RECT(SPLIT,rect,LL)
+				  //$RECT(SPLIT,rect,UR)
+				  //$RECT(SPLIT,rect,LR)
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+
+			if (nArgs > 1)
+			{
+				int ival;
+				BOOL err;
+				RECT inRect = atorect(Arg[2], &err);
+				RECT outRect = inRect;
+				if (!err)
+				{
+					if (!stricmp(Arg[1], "WIDTH"))
+					{
+						ival = RECTWIDTH(&inRect);
+						itoa(ival, OutLoc, 10);
+					}
+					else if (!stricmp(Arg[1], "HEIGHT"))
+					{
+						ival = RECTHEIGHT(&inRect);
+						itoa(ival, OutLoc, 10);
+					}
+					else if (!stricmp(Arg[1], "SPLIT"))
+					{
+						if (!stricmp(Arg[3], "UL"))
+						{
+							outRect.right = RECTWIDTH(&inRect) / 2;
+							outRect.bottom = RECTHEIGHT(&inRect) / 2;
+						}
+						else if (!stricmp(Arg[3], "LL"))
+						{
+							outRect.right = RECTWIDTH(&inRect) / 2;
+							outRect.top = RECTHEIGHT(&inRect) / 2;
+						}
+						if (!stricmp(Arg[3], "UR"))
+						{
+							outRect.left = RECTWIDTH(&inRect) / 2;
+							outRect.bottom = RECTHEIGHT(&inRect) / 2;
+						}
+						if (!stricmp(Arg[3], "LR"))
+						{
+							outRect.left = RECTWIDTH(&inRect) / 2;
+							outRect.top = RECTHEIGHT(&inRect) / 2;
+						}
+						recttoa(OutLoc, outRect);
+					}
+				}
+				goto Rtnl;
+			}
+		}
 
 		default:
 			goto Rtn0;

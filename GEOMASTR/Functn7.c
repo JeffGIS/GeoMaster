@@ -2499,6 +2499,11 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			MoveToMonitor(iMon, fromMon,0);
 			strcpy(OutLoc, "1");
 		}
+		else if (!stricmp(Arg[1], "RECT"))
+		{
+			int iMon = atoi(Arg[2]);
+			recttoa(OutLoc, MonitorRectangle[iMon]);		
+		}
 		goto Rtnl;
 	}
 	break;
