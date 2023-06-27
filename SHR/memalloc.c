@@ -698,7 +698,9 @@ void GSSiGLOBALLOCCLOSE (void)
 } 
 
 DWORD GSSiGLOBALSIZE (HANDLE hglb)
-{   
+{
+	if (!hglb)
+		return 0;
 	DWORD	rtn=GlobalSize (hglb);
 	UINT	i;
 	

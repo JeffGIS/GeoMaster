@@ -243,7 +243,7 @@ BOOL CALLBACK FWBPEnumWndProc(HWND hCtrl, LONG lParam)
 	char    txt[256];
 	long	lUserData; 
 	HWND	hPar;
-	DWORD	ProcessID;
+	DWORD	ProcessID=1;
 	    
 	GetWindowThreadProcessId (hCtrl,&ProcessID);
 	if (ProcessID == (DWORD)lParam)

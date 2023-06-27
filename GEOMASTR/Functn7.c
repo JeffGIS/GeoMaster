@@ -2146,7 +2146,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 
 	}
 
-	case 778: //$SESSION(CREATE,commandline,newwindowrect,startupzoom,startlocation)
+	case 778: //$SESSION(CREATE,commandline,newwindowrect,startupzoom,startlocation,waitmilliseconds)
 			  //$SESSION(STOP,hwnd
 			  //$SESSION(COMMAND,hwnd
 			  //$SESSION(MINIMIZE)
@@ -2239,10 +2239,12 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 				)
 			{
 				BOOL TimedOut;
-				int	 MaxWait = atol(Arg[5]);
+				int	 MaxWait = atol(Arg[7]);
 				DWORD	ProcessID = GetProcessId(pi.hProcess);
-
-				//Wait (1000);
+				int milSecs = atoi(Arg[6]);
+				
+				if (milSecs)
+					Wait (milSecs);
 
 				WaitForInputIdle(pi.hProcess, INFINITE);
 				hWnd = FindWindowByProcessID(ProcessID, "");

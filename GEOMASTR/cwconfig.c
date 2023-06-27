@@ -1898,7 +1898,7 @@ ProcessUserParms ();
 	GSSiGlobUlFree (&hStr);
 }
 PeopleNet = GetGlobalBVal ("[PEOPLENET]");
-
+//MessageBox(0, "HOLD", "HOLD", MB_OK);
 //if (!RunFromCache)
 //	AllowCache = TRUE;
 
@@ -2118,6 +2118,8 @@ GSSiExitProg (437);
  // added by LDA 
  GotItUp = FALSE;
  Ready = FALSE; 
+ RECT	rect;
+
   //  aFormats[0].atom = CF_TEXT; // exception - predefined.
   //  for (i = 1; i < CFORMATS; i++) 
   // {
@@ -2155,6 +2157,8 @@ else
 {
 	HDC hDC;
 
+	GetWindowRect(hWndMain, &rect);
+
 	showWindowCmd = SW_SHOW;
 	ShowWindow(hWndMain, SW_HIDE);
 	hDC = GetDC(hWndMain);
@@ -2166,7 +2170,6 @@ else
 
 
    {
-	   RECT	rect;
 
 	   GetWindowRect (hWndMain,&rect);
 	   rect.left = 0;
