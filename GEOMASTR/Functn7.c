@@ -2123,6 +2123,11 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			//CloseHandle( pi.hProcess );
 			//CloseHandle( pi.hThread );
 		}
+		else if (!stricmp(Arg[1], "STOPALL"))
+		{
+			SendMessageToAllProcesses(Arg[2], GF_END_PROCESS);
+			goto RtnTrue;
+		}
 		else if (!stricmp(Arg[1], "GETWINDOW"))
 		{
 			HANDLE	hProcess = (HANDLE)atol(Arg[2]);
@@ -2185,12 +2190,25 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			if (!Err)
 			{
 				char OutFile[MAX_PATH];
+				char configFile[MAX_PATH+2];
+				char args[1024];
 				LPSTR pConfigFile = Arg[2];
 				if (!strnicmp(pConfigFile, "GeoMaster ", 10))
+				{
 					pConfigFile += 10;
+					strncpy(configFile, pConfigFile, MAX_PATH);
+					LPSTR pEnd = strchr(configFile, ' ');
+					if (pEnd)
+					{
+						strcpy(args, pEnd);
+						*pEnd = 0;
+					}
+					else
+						*args = 0;
+				}
 				SaveZooms(&zoomBounds);
-				CreateGMStartupFile(OutFile, pConfigFile, FALSE, TRUE);
-				sprintf(Arg[2], "GeoMaster %s", OutFile);
+				CreateGMStartupFile(OutFile, configFile, FALSE, TRUE);
+				sprintf(Arg[2], "GeoMaster %s%s", OutFile,args);
 				CloseAllRequestedFiles(FALSE);
 			}
 			CRFlags = DETACHED_PROCESS;
@@ -2247,7 +2265,14 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 					Wait (milSecs);
 
 				WaitForInputIdle(pi.hProcess, INFINITE);
-				hWnd = FindWindowByProcessID(ProcessID, "");
+				int nAttempts = 0;
+				hWnd = 0;
+				while (!hWnd && nAttempts++ < 10)
+				{
+					hWnd = FindWindowByProcessID(ProcessID, "");
+					if (!hWnd)
+						Wait(200);
+				}
 				ltoa((long)hWnd, OutLoc, 10);
 				if (atob(Arg[5]))
 				{

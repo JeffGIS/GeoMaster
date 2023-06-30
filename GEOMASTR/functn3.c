@@ -240,7 +240,7 @@ void ShowHideChildren(HWND hWndPar, UINT fun)
 
 BOOL CALLBACK FWBPEnumWndProc(HWND hCtrl, LONG lParam)
 {
-	char    txt[256];
+	char    txt[1024];
 	long	lUserData; 
 	HWND	hPar;
 	DWORD	ProcessID=1;
@@ -274,7 +274,28 @@ HWND FindWindowByProcessID (DWORD ProcessID,LPSTR Text)
 	EnumWindows (FWBPEnumWndProc,ProcessID);   
 	return hWndFound;
 } 
+BOOL CALLBACK TOALLEnumWndProc(HWND hCtrl, LONG lParam)
+{
+	char    txt[1024];
 
+	if (pFindWindowText && *pFindWindowText)
+	{
+		LPSTR wc = strchr (pFindWindowText,'*');
+		if (wc)
+			*wc = 0;
+		int	n = strlen(pFindWindowText);
+		GetWindowText(hCtrl, txt, 1022);
+		if (n && !strnicmp(txt, pFindWindowText,n))
+			SendConnectedProcessMessage(hCtrl,lParam, 0, 0);
+	}
+	return TRUE;
+}
+
+void SendMessageToAllProcesses(LPSTR Text,UINT msg)
+{
+	pFindWindowText = Text;
+	EnumWindows(TOALLEnumWndProc, msg);
+}
 int	GetFunctionValue2(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, int bpOffset, int bpLen)
 #if ENABLETRACE
 {GSSiEnterProg (1348);
@@ -3532,14 +3553,33 @@ GotCloseFilehSQL:
 				dpointtoa (OutLoc,&Point); 
 				goto Rtnl;
 			}
-			else if (!_fstricmp (Arg[1],"MAX"))
-			{   
-				Bounds = atobounds (Arg[2],&Err);
-				if (Err || !ValidBounds (&Bounds))
-					goto RtnFalse;  
-				Point.x = Bounds.xmx;
-				Point.y = Bounds.ymx;
-				dpointtoa (OutLoc,&Point); 
+			else if (!_fstricmp(Arg[1], "MAX"))
+			{
+			Bounds = atobounds(Arg[2], &Err);
+			if (Err || !ValidBounds(&Bounds))
+				goto RtnFalse;
+			Point.x = Bounds.xmx;
+			Point.y = Bounds.ymx;
+			dpointtoa(OutLoc, &Point);
+			goto Rtnl;
+			}
+			else if (!_fstricmp(Arg[1], "MINWH"))
+			{
+				Bounds = atobounds(Arg[2], &Err);
+				if (Err || !ValidBounds(&Bounds))
+					goto RtnFalse;
+				Point = MinMaxMidPointD(&Bounds);
+				double w = Bounds.xmx - Bounds.xmn;
+				double h = Bounds.ymx - Bounds.ymn;
+				double minw = atof(Arg[3]);
+				double minh = atof(Arg[4]);
+				w = max(minw, w)/2;
+				h = max(minh, h)/2;
+				Bounds.xmn = Point.x - w;
+				Bounds.xmx = Point.x + w;
+				Bounds.ymn = Point.y - h;
+				Bounds.ymx = Point.y + h;
+				boundstoa(OutLoc, &Bounds);
 				goto Rtnl;
 			}
 			else if (!_fstricmp (Arg[1],"HLTLIM"))

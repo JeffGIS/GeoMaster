@@ -2021,6 +2021,7 @@ BOOL RemoveConnectedProcess(HWND hProcess);
 BOOL ProcessConnectedCommand (UINT ID);
 void ZoomConnectedProcesses (BOOL Remove);
 void SendConnectedProcessMessage (HWND hProcessWnd,UINT Msg,WPARAM wParam,LPARAM lParam);
+void SendMessageToAllProcesses(LPSTR Text, UINT msg);
 void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd);
 double GetTriangleElev (DPOINT PickPointW,HPDPOINT lpNewPoints,LPFLOAT pElev);
 BOOL UseFullScreen (HWND hWnd,LPRECT pRect);
