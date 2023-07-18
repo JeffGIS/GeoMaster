@@ -1106,6 +1106,7 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 		BTVARDESC BTVar[2], * pVars;
 		short		NumFields, Reclen, len;
 		long	Offset;
+		LONGLONG Offset64;
 		long	TotFileLen;
 		GWFLDINFO GWFldInfo;
 		LPGWFLDINFO	lpGWFldInfo;
@@ -1119,7 +1120,8 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 		LPSHORT	SubcellDat;
 		LPLONG	pBias;
 		static	long	debugsubcell = 845;
-		long	TotLen, CurLoc, SubCellID;
+		LONGLONG	TotLen, CurLoc;
+		long SubCellID;
 		DTMKEY		DTMKey;
 		DTMDATA	DTMData;
 		SUBCELLINFO	SUBCELLInfo;
@@ -1135,6 +1137,7 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 		LPLONG		DTMElev, DTMData2 = (LPLONG)GlobalLock(hData);
 		LPSHORT		SubcellData = (LPSHORT)(DTMData2 + 1024);
 		LPGWDHEADER	lpGWDHead;
+		HANDLE hLine = 0;
 
 		strcpy(File, OutFile);
 		if (new)
@@ -1220,10 +1223,10 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 		Fid = GSSiOpenFile(hdrFile, &OFStruct, OF_READ);
 		if (Fid == HFILE_ERROR)
 			goto ErrOut;
-		TotLen = GSSillseek(Fid, 0, 2);
+		TotLen = GSSillseek2(Fid, 0, 2);
 		GSSillseek(Fid, 0, 0);
 #define MAX_LINE 1024*1024
-		HANDLE hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
+		hLine = GSSiGlobAlloc(1858, GMEM_MOVEABLE, MAX_LINE);
 		LPSTR pLine = GlobalLock(hLine);
 		/*BYTEORDER      I
 		LAYOUT         BIL
@@ -1314,7 +1317,7 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 		}
 		GSSiClose2(&Fid);
 		Fid = GSSiOpenFile(InFile, &OFStruct, OF_READ);
-		TotLen = GSSillseek(Fid, 0, 2);
+		TotLen = GSSillseek2(Fid, 0, 2);
 		GSSillseek(Fid, 0, 0);
 		CreateStatusWind(hWndMain, 1, 0);
 		DTMDATA DTMDataExisting;
@@ -1441,10 +1444,13 @@ BOOL LoadBILDTM(LPSTR InFile, LPSTR OutFile,BOOL new)
 			}
 			SubcellRow--;
 		Exit:
-			CurLoc = GSSillseek(Fid, 0, 1);
+			CurLoc = GSSillseek2(Fid, 0, 1);
 			StatusWindowUpdate("", "", TotLen, CurLoc);
 		}
-		Offset = GSSillseek(lpGWDHead->Fid, 0, 1);
+		Offset64 = GSSillseek2(lpGWDHead->Fid, 0, 1);
+		if (Offset64 > INT_MAX)
+			MessageBox(0,"Size limit reached", "", MB_ICONERROR);
+		Offset = Offset64;
 		length = sizeof(DTMDATA);
 		int lp4 = 0;
 		if (proj4def)
@@ -3083,14 +3089,13 @@ void DTMClose (LPHANDLE pHandle)
 {   
 	UINT	i,j;
 	LPDTMINFO	pDTMInfo;
-	nOpenDTM--;
 	GSSiGlobFree (&DTMCellHandle); 
 	GSSiGlobFree (&hDTMRenderGridRow[0]);
 	GSSiGlobFree (&hDTMRenderGridRow[1]);
 	GSSiGlobFree (&hDTMRenderGridRow[2]);
 	if (!pHandle)
 	{
-		/*
+		
 		for (i=0;i<MAXOPENSURF;i++)
 		{
 		
@@ -3120,7 +3125,7 @@ void DTMClose (LPHANDLE pHandle)
 			} 
 			GSSiGlobUlFree (&hOpenSurf[i]);
 		}
-		*/
+		
 	}
 	else if (*pHandle)
 	{ 
@@ -3162,6 +3167,7 @@ void DTMClose (LPHANDLE pHandle)
 				break;
 			}
 		}
+		nOpenDTM--;
 		*pHandle = 0;
 	}
 {
@@ -3240,7 +3246,7 @@ BOOL AddDTMToDTMIndex(LPSTR IndexPath, LPSTR DTMPath)
 			PlaneElev = pDTMInfo->NULLElv;
 
 			GlobalUnlock(hDTM);
-			DTMClose(hDTM);
+			DTMClose(&hDTM);
 		}
 		SLT_Close(db);
 	}
@@ -4135,6 +4141,7 @@ double NGIELV2 (DPOINT Point,HANDLE hSurf,short DesiredUnits)
       SNELNM[4] = SNELNM[1] + 1;
       NOFINN = 0;
       pCell = (LPLONG)GlobalLock (hCell);
+	  MISING = 0;
       for (I=1; I<=4; I++)
       {   
       	  if (pCell[SNELNM[I]-1] == LONG_MAX)
