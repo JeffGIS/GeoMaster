@@ -3563,9 +3563,9 @@ void SubstituteDL (LPSTR Name,BOOL WantAt)
 		if (!_fstrnicmp (DL,Name,l))
 		{
 			if (WantAt)
-				sprintf (Name,"@[%cDL]%s",'%',&TempName[l]); 
+				sprintf (Name,"@[%cDL]%s",'%',&Name[l]); 
 			else
-				sprintf (Name,"[%cDL]%s",'%',&TempName[l]); 
+				sprintf (Name,"[%cDL]%s",'%',&Name[l]); 
 		}
 		GSSiGlobUlFree (&hMEM);
 	}

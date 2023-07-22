@@ -1309,7 +1309,8 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		}
 		if (!_fstricmp(Arg[1], "INDEX"))
 		{
-			if (CreateDTMIndex(Arg[2]))
+			int version = atoi(Arg[3]);
+			if (CreateDTMIndex(Arg[2],version))
 				goto RtnTrue;
 		}
 		if (!_fstricmp(Arg[1], "ADDTOINDEX"))

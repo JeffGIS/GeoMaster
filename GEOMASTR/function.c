@@ -1990,8 +1990,10 @@ SetVis:
 			}
 			else if (!_fstricmp(Arg[1], "CONVERT"))
 			{
-				HANDLE hDTM = DTMOpen(Arg[2], DBL_MAX, BT_READ, 0,0);
 				if (nArgs < 3)
+					goto RtnFalse;
+				HANDLE hDTM = DTMOpen(Arg[2], DBL_MAX, BT_READ, 0, 0);
+				if (!hDTM)
 					goto RtnFalse;
 				rtn = ConvertDTMToSQLITE(hDTM, Arg[3]);
 				DTMClose(&hDTM);

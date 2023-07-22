@@ -1809,6 +1809,7 @@ BOOL LoadLIDARDTMfromLAZ (LPSTR InDir,LPSTR OutFile,int wantType)
 		NumRows = 1 + (MaxY - FileMinY) / LIDARCELLSIZE;
 		if ((double)NumRows * (double)NumCols * (double)sizeof(LIDARREC) > (double)LONG_MAX*64)
 		{
+			free(zeros);
 			MessageBox(0, "Lidar file size exceeds maximum", 0, MB_ICONEXCLAMATION);
 			return FALSE;
 		}
@@ -3181,13 +3182,12 @@ void DTMClose (LPHANDLE pHandle)
 																							#endif
 }
 
-BOOL CreateDTMIndex(LPSTR IndexPath)
+BOOL CreateDTMIndex(LPSTR IndexPath,int version)
 {
-	int version = 1;
 	BOOL rtn = FALSE;
 	sqlite3* db;
 	char	DefStr[512];
-	sprintf(DefStr, "CREATE TABLE DTMINDEX (DTM_FILE_NUM INTEGER PRIMARY KEY,DTMPATH CHAR(256),BOUNDS_XMN DOUBLE,BOUNDS_YMN DOUBLE,BOUNDS_XMX DOUBLE,BOUNDS_YMX DOUBLE);CREATE VIRTUAL TABLE DTMINDEX_INDEX USING rtree(id,minX, maxX, minY, maxY)");
+	sprintf(DefStr, "CREATE TABLE VERSION (VersionNum INTEGER);INSERT INTO VERSION VALUES(%i);CREATE TABLE DTMINDEX (DTM_FILE_NUM INTEGER PRIMARY KEY,DTMPATH CHAR(256),BOUNDS_XMN DOUBLE,BOUNDS_YMN DOUBLE,BOUNDS_XMX DOUBLE,BOUNDS_YMX DOUBLE);CREATE VIRTUAL TABLE DTMINDEX_INDEX USING rtree(id,minX, maxX, minY, maxY)",version);
 
 	GSSiRemove(IndexPath);
 	rtn = !sqlite3_open(IndexPath, &db);
@@ -3297,7 +3297,6 @@ BOOL ConvertDTMToSQLITE(HANDLE hSurf,LPSTR SQLiteFileName)
 			while (!BT_FIND(lpGWDHead->BTHandle[0], (LPSTR)&CellID, pos, BT_ANY, (LPSTR)&Offset))
 			{
 				unsigned short	len;
-				LPLONG	pCell;
 
 				if (pos == BT_FIRST)
 					pos = BT_NEXT;
@@ -3309,10 +3308,6 @@ BOOL ConvertDTMToSQLITE(HANDLE hSurf,LPSTR SQLiteFileName)
 					LPSUBCELLINFO pSUBCELLInfo = (LPSUBCELLINFO)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY)));
 					LPLONG pBias = (LPLONG)((LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO)));
 					LPSTR CompressedDTMData = (LPSTR)&lpGWDHead->GWDData + (sizeof(DTMKEY) + sizeof(SUBCELLINFO) + 4);
-
-					pCell = (LPLONG)malloc(4096 + 4);
-					int expLen = ExpandSubcell(pCell, *pSUBCELLInfo, CompressedDTMData, pBias);
-
 					int lenDecompressed = len;
 					int lenCompressed = CompressBinaryRecord((LPBYTE)&lpGWDHead->GWDData, pCompressedRec, lenDecompressed);
 					totCompressed += lenCompressed;
