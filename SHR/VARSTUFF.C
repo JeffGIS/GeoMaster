@@ -933,6 +933,8 @@ GSSiExitProg (520);
 	{
 		*lpEq = 0;
 		_fstrcpy (IDName,Name);
+		if (!stricmp(IDName, "GRID"))
+			ii = 1;
 		*lpEq = '=';
 		Name = ++lpEq;
 	}
@@ -9104,7 +9106,9 @@ int GetValFromOpenFiles (LPSTR VarName,LPSTR Value,int maxlval)
 			goto GetOut;
         }
 		if (!stricmp(IDName, "GRID"))
+		{
 			ii = 1;
+		}
 		if (!stricmp (IDName,"BDDLIST"))
 		{
 			rtn = GetDlgListVal (VarName,Value);

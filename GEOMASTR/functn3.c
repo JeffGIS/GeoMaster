@@ -2033,7 +2033,7 @@ GotCloseFilehSQL:
 				goto RtnFalse;
 			goto RtnTrue;
 		
-		case 524: //$BASIC(file,sql,updatefieldlist,title,autoupdate,sqlfieldlist,displayrect,withphotos)
+		case 524: //$BASIC(file,sql,updatefieldlist,title,autoupdate,sqlfieldlist,displayrect,withphotos,prompt)
 		{
 			BOOL haveRectGlobal = FALSE;
 			nArgs = GetFunArgs (Args,Arg,10,&hMem, pBrkPt, bpOffset, bpLen); 

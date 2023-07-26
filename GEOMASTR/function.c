@@ -3556,13 +3556,18 @@ SetVis:
 				if (!*Arg[3])
 				{
 					Refno = 0;
+					SetCurView(SetVPFromName(Arg[4], &Err));
 					int st = PickByRefno(Refno, Arg[2], lpColon, UsePickList);
 					if (st)
 					{
+						SetCurView(SaveVP);
+
 						SetPickGlobals(0);
 						itoa(st,OutLoc, 10);
 						goto Rtnl;
 					}
+					SetCurView(SaveVP);
+
 					goto RtnFalse;
 				}
 				Point = atopt (Arg[3],&Err);
