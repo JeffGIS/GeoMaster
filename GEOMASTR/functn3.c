@@ -4460,6 +4460,11 @@ GotCloseFilehSQL:
 				if (!hWnd)
 					goto RtnFalse;
 			}
+			if (nArgs == 1)
+			{
+				ltoa(hWnd, OutLoc, 10);
+				goto Rtnl;
+			}
 			if (!stricmp (Arg[2],"SETTEXT"))
 			{
 				if (hWnd)
@@ -4494,6 +4499,8 @@ GotCloseFilehSQL:
 				ShowWindow(hWnd, SW_HIDE);
 			else if (!stricmp(Arg[2], "SHOW"))
 				ShowWindow(hWnd, SW_SHOW);
+			else if (!stricmp(Arg[2], "SHOWTOP"))
+				SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 			else if (!stricmp(Arg[2], "HIDEALL"))
 				ShowHideWindows(Arg[1], SW_HIDE);
 			else if (!stricmp(Arg[2], "SHOWALL"))
@@ -4510,6 +4517,8 @@ GotCloseFilehSQL:
 				//ShowWindow(GetTopParent(hWnd), SW_SHOW);
 			else if (!stricmp(Arg[2], "MINIMIZE"))
 				ShowWindow(hWnd, SW_FORCEMINIMIZE);
+			else if (!stricmp(Arg[2], "MAXIMIZE"))
+				ShowWindow(hWnd, SW_SHOWMAXIMIZED);
 			else if (!stricmp(Arg[2], "RESTORE"))
 				ShowWindow(hWnd, SW_RESTORE);
 

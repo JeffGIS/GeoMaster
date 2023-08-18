@@ -47,22 +47,44 @@ BOOL PointCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 	BOOL	err;
 	double	width;
 
-	if (!stricmp (Arg[1],"DISPLAY"))
+	if (!stricmp(Arg[1], "DISPLAY"))
 	{
-		DPoint = atopt (Arg[2],&err);
+		DPoint = atopt(Arg[2], &err);
 		if (!err)
 		{
-			Point = BasePtToWinPt (&DPoint);
-			symnum = GetDictSymbolNumber (Arg[3]);
-			width = atof (Arg[4]);
+			Point = BasePtToWinPt(&DPoint);
+			symnum = GetDictSymbolNumber(Arg[3]);
+			width = atof(Arg[4]);
 			if (symnum)
 			{
-				HANDLE hSymbol = GetDictSymDesc (symnum,0);
+				HANDLE hSymbol = GetDictSymDesc(symnum, 0);
 
-				DisplayPointSymbol (hSymbol,CurView->hDC, width, width,0, &Point,0,FALSE,0,0,FALSE,FALSE,Arg[6],0);  
-				DestroySymbol (hSymbol);
+				DisplayPointSymbol(hSymbol, CurView->hDC, width, width, 0, &Point, 0, FALSE, 0, 0, FALSE, FALSE, Arg[6], 0);
+				DestroySymbol(hSymbol);
 				return TRUE;
 			}
+		}
+	}
+	else if (!stricmp(Arg[1], "BP"))
+	{
+		DPoint = atopt(Arg[2], &err);
+		if (!err)
+		{
+			dpointtoa(OutLoc, &DPoint);
+			return TRUE;
+		}
+	}
+	else if (!stricmp(Arg[1], "EP"))
+	{
+		HANDLE hList = 0;
+		int np = GetPointsFromList(Arg[2], &hList);
+		if (np)
+		{
+			LPDPOINT pPoints = GlobalLock(hList);
+			DPoint = pPoints[np - 1];
+			GSSiGlobUlFree(&hList);
+			dpointtoa(OutLoc, &DPoint);
+			return TRUE;
 		}
 	}
 	return FALSE;

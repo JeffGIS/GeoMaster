@@ -456,6 +456,25 @@ void DisplayProfileThemeLegend(short From)
 	   	}
 	   	else 
 	   	{
+			double begPCT = 0;
+			double endPCT = 0;
+			char cpct[128];
+			int nhlt = BT_NUM_IN_INDEX(hHighlight);
+			if (nhlt == 1)
+			{
+				if (*CurTheme->profilePCTFrom)
+				{
+					strcpy(cpct, CurTheme->profilePCTFrom);
+					ExpandText(cpct);
+					begPCT = atof(cpct);
+				}
+				if (*CurTheme->profilePCTTo)
+				{
+					strcpy(cpct, CurTheme->profilePCTTo);
+					ExpandText(cpct);
+					endPCT = atof(cpct);
+				}
+			}
 			nRoutes = 1;
 			hRoute = GSSiGlobAlloc (1012,GMEM_MOVEABLE,(long)4096*sizeof(DPOINT));
 		   	pRoute = (HPDPOINT)GlobalLock (hRoute);
@@ -485,7 +504,18 @@ void DisplayProfileThemeLegend(short From)
 							OpenEnd = HighlightData1.PD.EndPoint;
 				   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData1.PD,Reverse,&nPolyPoints,&hPolyPoints))
 				   		{
-					   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
+							pPoly = (HPDPOINT)GlobalLock(hPolyPoints);
+							if (endPCT > 0)
+							{
+								double	PolyLength = GetPolyLengthD(pPoly, nPolyPoints);
+								double	StartDist = begPCT * PolyLength;
+								double	EndDist = endPCT * PolyLength;
+								int NumOutPoints = 0;
+								HANDLE hPoints = GetPolyBetweenDist(pPoly, nPolyPoints, StartDist, EndDist, &NumOutPoints,FALSE, FALSE);
+								pPoly = (HPDPOINT)GlobalLock(hPoints);
+								GSSiGlobUlFree(&hPolyPoints);
+								hPolyPoints = hPoints;
+							}
 					   		while (nPolyPoints--)
 					   			pRoute[nRoutePoints++] = *pPoly++;
 				   			GSSiGlobUlFree (&hPolyPoints);
@@ -508,7 +538,18 @@ void DisplayProfileThemeLegend(short From)
 			   		if (GetPolyPoints ((LPPICKDATAHEADER)&HighlightData.PD,Reverse,&nPolyPoints,&hPolyPoints))
 			   		{
 				   		pPoly = (HPDPOINT)GlobalLock (hPolyPoints);
-				   		while (nPolyPoints--)
+						if (endPCT > 0)
+						{
+							double	PolyLength = GetPolyLengthD(pPoly, nPolyPoints);
+							double	StartDist = begPCT * PolyLength;
+							double	EndDist = endPCT * PolyLength;
+							int NumOutPoints = 0;
+							HANDLE hPoints = GetPolyBetweenDist(pPoly, nPolyPoints, StartDist, EndDist, &NumOutPoints, FALSE, FALSE);
+							pPoly = (HPDPOINT)GlobalLock(hPoints);
+							GSSiGlobUlFree(&hPolyPoints);
+							hPolyPoints = hPoints;
+						}
+						while (nPolyPoints--)
 				   			pRoute[nRoutePoints++] = *pPoly++;
 			   			GSSiGlobUlFree (&hPolyPoints); 
 			   		}

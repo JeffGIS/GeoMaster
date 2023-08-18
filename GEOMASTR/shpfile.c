@@ -3920,17 +3920,43 @@ GSSiExitProg (1107);
             break; 
             
             case IDC_LIST:
-				switch(HIWORD(wParam))
+				switch (HIWORD(wParam))
 				{
 					case LBN_SELCHANGE:
-						EnableWindow (GetDlgItem(hWndDlg,IDOK),TRUE);  
-						break;
+					{
+						HANDLE	hItems=0;
+						short	nItems = GetLBSelectedItems(hWndDlg, IDC_LIST, &hItems);
+
+						EnableWindow(GetDlgItem(hWndDlg, IDOK), nItems > 0);
+						EnableWindow(GetDlgItem(hWndDlg, ID_VIEW), nItems == 1);
+						GSSiGlobFree(&hItems);
+					}
+					break;
 				 	case LBN_DBLCLK:
 				     	PostMessage(hWndDlg, WM_COMMAND, IDOK, 0L);
 				 	break;
 				}
 			break;
-			 
+			
+			case ID_VIEW:
+			{
+				HANDLE	hItems;
+				LPINT	lpItems;
+				short	nItems = GetLBSelectedItems(hWndDlg, IDC_LIST, &hItems);
+				lpItems = (LPINT)GlobalLock(hItems);
+				if (nItems == 1)
+				{
+					char cmd[512];
+					SendDlgItemMessage(hWndDlg, IDC_LIST, LB_GETTEXT, *lpItems, (LPARAM)str);
+					LPSTR pBS = strchr(str, '\t');
+					if (pBS)
+						*pBS = 0;
+					sprintf(cmd, "$FIELDS(%s(%s))", FGDBFile,str);
+					ProcessText(cmd);
+				}
+				GSSiGlobUlFree(&hItems);
+			}
+				break;
             case IDOK: 
             {
                 HANDLE	hItems;

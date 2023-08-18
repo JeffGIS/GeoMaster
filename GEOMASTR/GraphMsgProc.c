@@ -2228,11 +2228,16 @@ BOOL FAR PASCAL IDENTIFYMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARA
 		case IDCANCEL:
 			/* Ignore data values entered into the controls        */
 			/* and dismiss the dialog window returning FALSE       */
+			if (IsWindowVisible(GetDlgItem(hWndDlg, IDC_SAVEANDEXIT)))
+			{
+				if (MessageBox(hWndDlg,"Do you wish to exit without saving your changes", "Verify Exit", MB_YESNO) == IDNO)
+					break;
+			}
 			hWndBasic = 0;
 			sprintf(cmd, "$IMAGE()");
 			ExpandText(cmd);
 			GetWindowRect(hWndDlg, &displayRect);
-			GSSiEndDialog(hWndDlg, TRUE, hSaveBM);
+			GSSiEndDialog(hWndDlg, FALSE, hSaveBM);
 			break;
 		case IDC_EXIT:
 		case IDC_SAVEANDEXIT:
@@ -18756,6 +18761,9 @@ GSSiExitProg (1279);
          ftoa (str,CurTheme->CrossSectionWidth[1]*MFT);
     	 SetDlgItemText (hWndDlg,IDC_XSECTWRIGHT,str); 
     	 SetDlgItemText (hWndDlg,IDC_PROFILE_UNITS,"Feet");
+		 SetDlgItemText(hWndDlg, IDC_FROMPCT, CurTheme->profilePCTFrom);
+		 SetDlgItemText(hWndDlg, IDC_TOPCT, CurTheme->profilePCTTo);
+
 		 SetDlgItemInt(hWndDlg, IDC_PROFILESMOOTH, CurTheme->ProfileSmoothOption,FALSE);
        	 SendDlgItemMessage (hWndDlg,IDC_ALIGNPROFILE,BM_SETCHECK,CurTheme->ProfileAlignmentOption,0L);
 		 break; /* End of WM_INITDIALOG                                 */
@@ -18766,49 +18774,56 @@ GSSiExitProg (1279);
          break; /* End of WM_CLOSE                                      */
 
     case WM_COMMAND:
-         switch(LOWORD(wParam))
-           {
-            case IDC_SELECT_SURFACE1: 
-            	 _fstrcpy (str,CurTheme->DataFile);
-   		         if (GetFileName3 (hWndDlg,str,IDS_FILTERSURFACE,IDS_FILESURFACE))   
-                 {
-           	        SetDlgItemText (hWndDlg,IDC_SURFACE1,str);
-                 }
-            	 break;
-            case IDC_SELECT_SURFACE2: 
-            	 _fstrcpy (str,CurTheme->SQL);
-   		         if (GetFileName3 (hWndDlg,str,IDS_FILTERSURFACE,IDS_FILESURFACE))   
-                 {
-           	        SetDlgItemText (hWndDlg,IDC_SURFACE2,str);
-                 }
-            	 break;
-            case IDCANCEL:
-                 /* Ignore data values entered into the controls        */
-                 /* and dismiss the dialog window returning FALSE       */
-                 EndDialog(hWndDlg, FALSE);
-                 break;
-            case IDC_SAVE_THEME:  
-            	 SaveCurTheme(hWndDlg);
-            	 break;  
-            case IDOK:
-            {
-            	GetDlgItemText (hWndDlg,IDC_SURFACE1,CurTheme->DataFile,128);
-            	GetDlgItemText (hWndDlg,IDC_SURFACE2,CurTheme->SQL,128);
-				GetDlgItemText (hWndDlg,IDC_DISTBTWNPROFILEPOINtS,str,32); 
-				CurTheme->DistanceBetweenProfilePoints = atof (str) * FTM;
-				GetDlgItemText (hWndDlg,IDC_XSECTSPACING,str,32);
-				CurTheme->CrossSectionSpacing = atof (str) * FTM;
-				GetDlgItemText (hWndDlg,IDC_XSECTWLEFT,str,32); 
-				CurTheme->CrossSectionWidth[0] = atof (str) * FTM;
-				GetDlgItemText (hWndDlg,IDC_XSECTWRIGHT,str,32);
-				CurTheme->CrossSectionWidth[1] = atof (str) * FTM;
-				CurTheme->ProfileAlignmentOption = SendDlgItemMessage(hWndDlg, IDC_ALIGNPROFILE, BM_GETCHECK, 0, 0L);
-				CurTheme->ProfileSmoothOption = GetDlgItemInt(hWndDlg, IDC_PROFILESMOOTH,0,FALSE);
+	{
+		WORD cmd = LOWORD(wParam);
+		switch (cmd)
+		{
+		case IDC_SELECT_SURFACE1:
+			_fstrcpy(str, CurTheme->DataFile);
+			if (GetFileName3(hWndDlg, str, IDS_FILTERSURFACE, IDS_FILESURFACE))
+			{
+				SetDlgItemText(hWndDlg, IDC_SURFACE1, str);
+			}
+			break;
+		case IDC_SELECT_SURFACE2:
+			_fstrcpy(str, CurTheme->SQL);
+			if (GetFileName3(hWndDlg, str, IDS_FILTERSURFACE, IDS_FILESURFACE))
+			{
+				SetDlgItemText(hWndDlg, IDC_SURFACE2, str);
+			}
+			break;
+		case IDCANCEL:
+			/* Ignore data values entered into the controls        */
+			/* and dismiss the dialog window returning FALSE       */
+			EndDialog(hWndDlg, FALSE);
+			break;
+		case IDC_SAVE_THEME:
+		case IDOK:
+		{
+			GetDlgItemText(hWndDlg, IDC_SURFACE1, CurTheme->DataFile, 128);
+			GetDlgItemText(hWndDlg, IDC_SURFACE2, CurTheme->SQL, 128);
+			GetDlgItemText(hWndDlg, IDC_DISTBTWNPROFILEPOINtS, str, 32);
+			CurTheme->DistanceBetweenProfilePoints = atof(str) * FTM;
+			GetDlgItemText(hWndDlg, IDC_XSECTSPACING, str, 32);
+			CurTheme->CrossSectionSpacing = atof(str) * FTM;
+			GetDlgItemText(hWndDlg, IDC_XSECTWLEFT, str, 32);
+			CurTheme->CrossSectionWidth[0] = atof(str) * FTM;
+			GetDlgItemText(hWndDlg, IDC_XSECTWRIGHT, str, 32);
+			CurTheme->CrossSectionWidth[1] = atof(str) * FTM;
+			CurTheme->ProfileAlignmentOption = SendDlgItemMessage(hWndDlg, IDC_ALIGNPROFILE, BM_GETCHECK, 0, 0L);
+			CurTheme->ProfileSmoothOption = GetDlgItemInt(hWndDlg, IDC_PROFILESMOOTH, 0, FALSE);
+			GetDlgItemText(hWndDlg, IDC_FROMPCT, CurTheme->profilePCTFrom, 64);
+			GetDlgItemText(hWndDlg, IDC_TOPCT, CurTheme->profilePCTTo, 64);
+			if (cmd == IDC_SAVE_THEME)
+				SaveCurTheme(hWndDlg);
+			else
 				EndDialog(hWndDlg, TRUE);
-            }
-                break; 
+			break;
+		}
+		break;
 
-           }
+		}
+	}
          break;    /* End of WM_COMMAND                                 */
 
     default:

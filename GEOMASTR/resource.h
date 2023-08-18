@@ -555,10 +555,13 @@
 #define IDC_SECLONG                     515
 #define IDC_VOTER_WORK_PHONE            515
 #define IDC_EXTERNALSITE                515
+#define IDC_FROMPCT                     515
 #define IDC_CFNAME                      516
 #define IDC_SECLAT                      516
 #define IDC_VOTER_EMAIL                 516
 #define IDC_MAPSITE                     516
+#define IDC_XSECTWRIGHT2                516
+#define IDC_TOPCT                       516
 #define IDC_MILEPOINT                   517
 #define IDC_VOTER_STREET_NAME           517
 #define IDC_WEBSITE                     517
@@ -3458,6 +3461,7 @@
 #define IDC_NEXT_DATE                   2324
 #define IDC_AREA_UNITS_TITLE            2325
 #define ID_ALTLOAD                      2326
+#define ID_VIEW                         2327
 #define PRMT_HIGHLIGHT                  5035
 #define PRMT_PANZOOM1                   5036
 #define PRMT_PANZOOM2                   5037
@@ -3803,9 +3807,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1275
+#define _APS_NEXT_RESOURCE_VALUE        1277
 #define _APS_NEXT_COMMAND_VALUE         1250
-#define _APS_NEXT_CONTROL_VALUE         2327
+#define _APS_NEXT_CONTROL_VALUE         2328
 #define _APS_NEXT_SYMED_VALUE           1036
 #endif
 #endif

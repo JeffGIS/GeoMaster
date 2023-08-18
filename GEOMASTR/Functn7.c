@@ -2301,7 +2301,7 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 		else if (!stricmp(Arg[1], "COMMAND"))
 		{
 			HWND hProcessWnd = (HWND)atol(Arg[2]);
-			SendConnectedProcessCommand(hProcessWnd, Arg[2]);
+			SendConnectedProcessCommand(hProcessWnd, Arg[3]);
 			goto RtnTrue;
 		}
 		else if (!stricmp(Arg[1], "PATH"))

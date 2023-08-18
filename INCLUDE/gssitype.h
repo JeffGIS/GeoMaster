@@ -192,6 +192,7 @@ typedef OFSTRUCT *LPOFSTRUCT;
 #define CACHE_FILE_RENAME_TIMER 13
 #define EXECUTE_COMMAND_TIMER 14
 #define DATED_ORTHO_TIMER 15
+#define REDISPLAYTIMER 16
 #define TCPTIMER	21 
 #define LEAVE_WINDOW_TIMER 22
 #define TCPREPLAYTIMER	99
@@ -2756,7 +2757,9 @@ typedef struct
 	int		totClassLengthUnits; //0-meters,1-feet,2-km,3-miles
 	double  totClassArea[MAX_THEME_CLASSES];
 	double  totClassLength[MAX_THEME_CLASSES];
-	char	filler[4096];
+	char	profilePCTFrom[65];
+	char	profilePCTTo[65];
+	char	filler[4096-2*65];
 }	THEME;
 typedef THEME	FAR* LPTHEME;
 typedef struct

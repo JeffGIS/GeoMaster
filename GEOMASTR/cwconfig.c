@@ -3197,7 +3197,8 @@ if (ProcessDocument (hWnd,Message, wParam,lParam))
 	     } 
          break;
    
-	case GF_PROCESS_CONNECTED_CMD:		
+	case GF_PROCESS_CONNECTED_CMD:	
+		SetConfig(1);
 		ProcessConnectedCommand(wParam);
 		break;
 	case GF_PROCESS_DELAYED_CONNECTED_CMD:
@@ -5832,12 +5833,17 @@ DisplayParcel:
 		 	}
 				 break;
 
-            case 10: //GPS Timer
+			case GPSTIMER:
  				 CloseDigConnection ();
    				 OpenDigConnection(hWndMain);
 		     	 PostMessage(hWndMain, WM_COMMAND, IDM_DISPLAY_VEHICLES, 0L);
           	 	 break;
 			
+			case REDISPLAYTIMER:
+				KillTimer(hWnd, REDISPLAYTIMER);
+				PostMessage(hWndMain, WM_COMMAND, IDM_REDISPLAY, 0L);
+				break;
+
 			case EXECUTE_COMMAND_TIMER:
 				KillTimer(hWnd, EXECUTE_COMMAND_TIMER);
 				ProcessText(CommandExecutedByTimer);

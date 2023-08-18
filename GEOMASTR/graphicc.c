@@ -845,8 +845,11 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long Ma
 		PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
 	while ((lRec=BigRead (Fid,pRec,MaxLength)))
 	{
-	 	lRec = CompressBinaryRecord (pRec,pCompressedRec,lRec); 	    
-    	BigWrite64 (FidTF,(HPSTR)&lRec,4,-1);
+	    lRec = FreeImage_ZLibCompress(pCompressedRec, MaxLength * 2, pRec,lRec);
+//		lRec = CompressBinaryRecord(pRec, pCompressedRec, lRec);
+//		int diff = IDNINT((100.0 * lRecFI) / lRec);
+//		int dclen = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, lRec);
+		BigWrite64 (FidTF,(HPSTR)&lRec,4,-1);
     	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
     	if (hWndStatus)
 			PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 

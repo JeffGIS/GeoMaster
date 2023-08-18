@@ -1944,7 +1944,18 @@ GSSiExitProg (1350);
 				goto RtnTrue;
 			skipPaint = 0;
 			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
-			if (atob(Arg[1]) && CurView)
+			if (*Arg[1] == 'D')
+			{
+				int delay = 1500;
+				LPSTR pColon = strrchr(Arg[1], ':');
+				if (pColon)
+				{
+					pColon++;
+					delay = atoi(pColon);
+				}
+				SetTimer(hWndMain, REDISPLAYTIMER, delay, 0);
+			}
+			else if (atob(Arg[1]) && CurView)
 			{
 				 HDC hDC = 0;
 
@@ -1967,7 +1978,7 @@ GSSiExitProg (1350);
 	           	 RedisplayViewports(TRUE);
 				 if (hDC)
 					 ReleaseDC(hWndMain, hDC);
-			}			
+			}
 			else
 			{
 				HaltMapDisplay(FALSE,FALSE);

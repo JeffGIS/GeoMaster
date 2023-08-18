@@ -2394,7 +2394,7 @@ BOOL RemoveConnectedProcess(HWND hProcess)
 	return TRUE;
 }
 
-BOOL ProcessConnectedCommand (UINT ID)
+BOOL ProcessConnectedCommand(UINT ID)
 {
 	UINT	rtn;
 	HANDLE	Fid;
@@ -2405,22 +2405,26 @@ BOOL ProcessConnectedCommand (UINT ID)
 	LPSTR	pMem;
 	int		lMem;
 
-	GetTempPath (MAX_PATH,TempDir);
-	rtn = GetTempFileName (TempDir,"gml",ID,ConFile); 
+	GetTempPath(MAX_PATH, TempDir);
+	rtn = GetTempFileName(TempDir, "gml", ID, ConFile);
+	//MessageBox(hWndMain, ConFile, "ProcessConnectedCommand", MB_OK);
 	if (!rtn)
 		return FALSE;
-	Fid = OpenFileGM (ConFile,&OFStruct,OF_READ);
+	Fid = OpenFileGM(ConFile, &OFStruct, OF_READ);
 	if (Fid == INVALID_HANDLE_VALUE)
 		return FALSE;
-    HaltMapDisplay(TRUE,FALSE);
-	lMem = llFileSeek(Fid,0,2);
-	llFileSeek (Fid,0,0);
-	hMem = GSSiGlobAlloc (0,GMEM_MOVEABLE,lMem);
-	pMem = GlobalLock (hMem);
-	BigRead64 (Fid,pMem,lMem);
-	GSSiClose64 (&Fid);
+	HaltMapDisplay(TRUE, FALSE);
+	lMem = llFileSeek(Fid, 0, 2);
+	llFileSeek(Fid, 0, 0);
+	hMem = GSSiGlobAlloc(0, GMEM_MOVEABLE, lMem);
+	pMem = GlobalLock(hMem);
+	BigRead64(Fid, pMem, lMem);
+	GSSiClose64(&Fid);
 	if (firstDisplayComplete)
+	{
+		//MessageBox(hWndMain, pMem, "ProcessConnectedCommand", MB_OK);
 		ProcessText(pMem);
+	}
 	else
 		strncpy(delayedProcessConnectedCommand, pMem,sizeof(delayedProcessConnectedCommand)-1);
 	GSSiGlobUlFree (&hMem);
@@ -2474,13 +2478,12 @@ void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd)
 	int	i;
 	HANDLE	Fid;
 	static	UINT	ID=0;
-	static	char	ConFile[MAX_PATH];
+	static	char	ConFile[MAX_PATH] = { 0 };
 	char	TempDir[MAX_PATH];
-	char	Cmd[256];
 	OFSTRUCTGM	OFStruct;
 	
-	if (!NumConnectedProcesses)
-		return;
+//	if (!NumConnectedProcesses)
+//		return;
 	if (!hProcessWnd)
 	{
 		if (ID)
@@ -2493,7 +2496,7 @@ void SendConnectedProcessCommand (HWND hProcessWnd,LPSTR cmd)
 		ID = GetTempFileName (TempDir,"gml",0,ConFile); 
 	}
 	Fid = OpenFileGM (ConFile,&OFStruct,OF_CREATE);
-	BigWrite64 (Fid,Cmd,strlen(cmd)+1,-1);
+	BigWrite64 (Fid,cmd,strlen(cmd)+1,-1);
 	GSSiClose64 (&Fid);
 
 	PostMessage(hProcessWnd, GF_PROCESS_CONNECTED_CMD, ID,0); 
