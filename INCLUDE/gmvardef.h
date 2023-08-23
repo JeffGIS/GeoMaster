@@ -241,7 +241,7 @@ LPSTR	lpAutoUpdateFieldList=0;
 LPSTR	lpSQLFieldList=0;
 LPSTR	lpBasicTitle = 0;
 LPSTR	lpBasicPrompt = 0;
-RECT	displayRect;
+RECT	displayRect = { 0 };
 BOOL	showOnlyData;
 LPSTR	rampPhotoFile = 0;
 int		fullBMLeft=0;

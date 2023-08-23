@@ -4462,7 +4462,7 @@ GotCloseFilehSQL:
 			}
 			if (nArgs == 1)
 			{
-				ltoa(hWnd, OutLoc, 10);
+				ltoa((int)hWnd, OutLoc, 10);
 				goto Rtnl;
 			}
 			if (!stricmp (Arg[2],"SETTEXT"))
