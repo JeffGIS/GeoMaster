@@ -5040,7 +5040,7 @@ FileIsInvalid:
 							!SendDlgItemMessage(hWndDlg, IDC_BUILDNAMESONLY, BM_GETCHECK, 0, 0))
 						{
 							totFileLen += GSSiLength(str);
-							AddFileToTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, str, MaxLength, 0);
+							AddFileToTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, str, MaxLength, 0,FALSE);
 						}
 			    		else if (!_fstricmp (BuildTransferFileOption,"RUN"))
 			    			_fstrcpy (TransferFileRunCommand,&str[6]); 
@@ -5048,6 +5048,7 @@ FileIsInvalid:
 					SetGlobalValueINT64("%TRANFILESTOTSIZE", totFileLen);
 				    Processing = FALSE;
 				    marker = 80251;
+					//marker = 80351; //zlib compressed
         			BigWrite64 (FidTF,(HPSTR)&marker,4,-1);
            			loc = GSSillseek64 (FidTF,0,1);
            			GSSillseek64 (FidTF,0,0);
@@ -5131,6 +5132,7 @@ INT64 TransferFileSize(LPSTR fileName)
 	int MaxLength;
 	int n = 0;
 	short	Version;
+	BOOL	zlibCompressed = FALSE;
 
 	BigRead64(FidTF, (HPSTR)&length8, 8);
 	BigRead64(FidTF, (HPSTR)&Version, 2);
@@ -5140,6 +5142,11 @@ INT64 TransferFileSize(LPSTR fileName)
 	BigRead64(FidTF, (HPSTR)&marker, 4);
 	if (marker == 80251)
 		lenlen = 8;
+	else if (marker == 80351)
+	{
+		lenlen = 8;
+		zlibCompressed = TRUE;
+	}
 	else if (marker != 32349)
 		goto FileIsInvalid;
 	NextFileLoc = 6 + lenlen;
@@ -5173,7 +5180,7 @@ INT64 TransferFileSize(LPSTR fileName)
 			EndOfFile = FileLength - 4;
 		INT64 LenToRead = EndOfFile - GSSillseek64(FidTF, 0, 1) + 1;
 		if (strnicmp(File, "[XCMD]", 6))
-			rtn += GetFileLenFromTransferFile(FidTF, LenToRead, MaxLength);
+			rtn += GetFileLenFromTransferFile(FidTF, LenToRead, MaxLength, zlibCompressed);
 		n++;
 	}
 	GSSiClose64(&FidTF);
@@ -5234,6 +5241,7 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
    	HFILE	Fid; 
    	static	HANDLE	hSaveBM=0;
 	static	int		UpdateID = 0;
+	static  BOOL    zlibCompressed = FALSE;
 		
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
@@ -5277,6 +5285,11 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		 BigRead64(FidTF, (HPSTR)&marker, 4);
 		 if (marker == 80251)
 			 lenlen = 8;
+		 else if (marker == 80351)
+		 {
+			 lenlen = 8;
+			 zlibCompressed = TRUE;
+		 }
 		 else if (marker != 32349)
 			 goto FileIsInvalid;
 		 NextFileLoc = 6 + lenlen;
@@ -5372,7 +5385,7 @@ FileIsInvalid:
 				SetDlgItemText(hWndDlg, IDC_MESSAGE, File);
 				if (!_fstrnicmp(File, "[XCMD]", 6))
 					ExpandText(&File[6]);
-				else if (!GetFileFromTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, File, LenToRead, MaxLength))
+				else if (!GetFileFromTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, File, LenToRead, MaxLength, zlibCompressed))
 				{
 					sprintf(str, "Unable to open file\r\n%s", File);
 					MessageBox(hWndDlg, str, 0, MB_ICONEXCLAMATION);

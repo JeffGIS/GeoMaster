@@ -1586,6 +1586,8 @@ void RemoveCharacters(LPSTR str, LPSTR charstoremove);
 void GSSiFree(LPSTR *str);
 
 BOOL SortTextFile(LPSTR InFile, LPSTR OutFile, int maxLineLen, BOOL ascending);
+int ZLibCompress(BYTE* target, DWORD target_size, BYTE* source, DWORD source_size);
+int ZLibUncompress(BYTE* target, DWORD target_size, BYTE* source, DWORD source_size);
 
 
 #endif

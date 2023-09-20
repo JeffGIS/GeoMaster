@@ -476,7 +476,7 @@ BOOL CompressedFileCmd(int nArgs, LPSTR *Arg)
 			}
 			BigWrite64(FidTF, (HPSTR)&len, 4, -1);
 			BigWrite64(FidTF, (HPSTR)filePath, len, -1);
-			AddFileToTransferFile(0, FidTF, filePath, MaxLength, Arg[4]);
+			AddFileToTransferFile(0, FidTF, filePath, MaxLength, Arg[4],FALSE);
 			loc = -1;
 			BigWrite64(FidTF, (HPSTR)&loc, 4, -1);
 		}
@@ -590,7 +590,7 @@ BOOL DecompressGMZipFile(LPSTR TransferFileName, LPSTR toDirectory, LPSTR whichF
 					pBS++;
 				}
 				sprintf(OutFile, "%s\\%s", toDirectory, pBS);
-				rtn = GetFileFromTransferFile(0,FidTF,OutFile,MaxLength,totLen);
+				rtn = GetFileFromTransferFile(0,FidTF,OutFile,MaxLength,totLen,FALSE);
 				nFilesRead++;
 				if (!rtn)
 					goto Exit;
