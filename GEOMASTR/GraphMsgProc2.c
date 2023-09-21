@@ -4887,6 +4887,7 @@ BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 	char	File[MAX_PATH+2];    
 	HCURSOR	hcurSave;
 	static	HANDLE	hSaveBM=0;
+	static	BOOL useZLIB = TRUE;
 		
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
@@ -4899,6 +4900,8 @@ BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 		 CloseAllRequestedFiles(FALSE);
     	 hSaveBM = EnterBlockingWindow (hWndDlg);
        	 cwCenter(hWndDlg, 0); 
+		 SendDlgItemMessage(hWndDlg, IDC_USEZLIB, BM_SETCHECK, useZLIB, 0L);
+
        	 SetDlgItemText (hWndDlg,IDC_XFERFILENAME,TransferFileName);
        	 if (!_fstricmp (BuildTransferFileOption,"RUN"))
        	 {
@@ -4997,6 +5000,7 @@ FileIsInvalid:
             case IDOK: 
             {   
 				int numSegments = 1;
+				useZLIB = SendDlgItemMessage(hWndDlg, IDC_USEZLIB, BM_GETCHECK, 0, 0);
             	if (!*TransferFileName)
             	{
             		MessageBox (hWndDlg,"Transfer file name not set",0,MB_ICONEXCLAMATION);
@@ -5040,16 +5044,18 @@ FileIsInvalid:
 							!SendDlgItemMessage(hWndDlg, IDC_BUILDNAMESONLY, BM_GETCHECK, 0, 0))
 						{
 							totFileLen += GSSiLength(str);
-							AddFileToTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, str, MaxLength, 0,FALSE);
+							AddFileToTransferFile(GetDlgItem(hWndDlg, IDC_STATUS2), FidTF, str, MaxLength, 0,useZLIB);
 						}
 			    		else if (!_fstricmp (BuildTransferFileOption,"RUN"))
 			    			_fstrcpy (TransferFileRunCommand,&str[6]); 
 				    }
 					SetGlobalValueINT64("%TRANFILESTOTSIZE", totFileLen);
 				    Processing = FALSE;
-				    marker = 80251;
-					//marker = 80351; //zlib compressed
-        			BigWrite64 (FidTF,(HPSTR)&marker,4,-1);
+					if (useZLIB)
+						marker = 80351; //zlib compressed
+					else
+						marker = 80251;
+					BigWrite64 (FidTF,(HPSTR)&marker,4,-1);
            			loc = GSSillseek64 (FidTF,0,1);
            			GSSillseek64 (FidTF,0,0);
            			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
@@ -5283,8 +5289,11 @@ BOOL FAR PASCAL LOADXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, L
 		 FileLength = GSSifilelength64 (FidTF);
 		 GSSillseek64(FidTF, FileLength - 4, 0);
 		 BigRead64(FidTF, (HPSTR)&marker, 4);
+		 zlibCompressed = FALSE;
 		 if (marker == 80251)
+		 {
 			 lenlen = 8;
+		 }
 		 else if (marker == 80351)
 		 {
 			 lenlen = 8;

@@ -845,14 +845,17 @@ BOOL AddFileToTransferFile (HWND hWndStatus,HANDLE FidTF,LPSTR FileToAdd,long Ma
 		PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
 	while ((lRec=BigRead (Fid,pRec,MaxLength)))
 	{
-		int lRec2 = FreeImage_ZLibCompress(pCompressedRec, MaxLength * 2, pRec,lRec);
-	    int lRec3 = ZLibCompress(pCompressedRec, MaxLength * 2, pRec,lRec);
-		int lUCRec3 = ZLibUncompress(pRec, MaxLength * 2, pCompressedRec,lRec3);
-		int lRec4 = CompressBinaryRecord(pRec, pCompressedRec, lRec);
+		int lRecCMP;
+//		int lRec2 = FreeImage_ZLibCompress(pCompressedRec, MaxLength * 2, pRec,lRec);
+		if (useGZip)
+			lRecCMP = ZLibCompress(pCompressedRec, MaxLength * 2, pRec, lRec);
+		else
+			lRecCMP = CompressBinaryRecord(pRec, pCompressedRec, lRec);
+//		int lUCRec3 = ZLibUncompress(pRec, MaxLength * 2, pCompressedRec,lRec3);
 //		int diff = IDNINT((100.0 * lRecFI) / lRec);
 //		int dclen = DecompressBinaryRecordUnsafe(pRec, pCompressedRec, lRec);
-		BigWrite64 (FidTF,(HPSTR)&lRec,4,-1);
-    	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRec,-1);       
+		BigWrite64 (FidTF,(HPSTR)&lRecCMP,4,-1);
+    	BigWrite64 (FidTF,(HPSTR)pCompressedRec,lRecCMP,-1);       
     	if (hWndStatus)
 			PctBox (hWndStatus,TotLen,GSSillseek2 (Fid,0,1),0); 
     }

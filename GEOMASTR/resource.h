@@ -2833,6 +2833,8 @@
 #define IDC_XFERFILENAME                1787
 #define IDC_BUILDNAMESONLY              1788
 #define IDC_SNAPDISTTITLE               1789
+#define IDC_BUILDNAMESONLY2             1789
+#define IDC_USEZLIB                     1789
 #define IDC_SNAPDISTTITLE2              1790
 #define POINT_VIS                       1791
 #define LINECURVE_VIS                   1792
