@@ -3409,6 +3409,36 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 				GlobalUnlock(hPoints);
 				GlobalUnlock(hPolyPartLen);
 				GSSiGlobUlFree(&hPartIndex);
+//create loop bounds (polybounds)
+/*				if (nLoops > 1)
+				{
+					int ip = 0;
+					int ii;
+
+					for (int loop = 0; loop < nLoops; loop++)
+					{
+						CGContextMoveToPoint(context, pPoints[ip].x, pPoints[ip].y);
+						ip++;
+						ii = pPartLen[loop];
+						int iEndLoop = pPartLen[loop];
+						for (int i = 1; i < iEndLoop; i++)
+						{
+							CGContextAddLineToPoint(context, pPoints[ip].x, pPoints[ip].y);
+							ip++;
+						}
+
+						if (loop)
+							ip++;
+
+						if (!CGContextIsPathEmpty(context))
+						{
+							CGContextSetStrokeColorWithColor(context, color);
+							//color = UIColor.greenColor.CGColor;
+							CGContextDrawPath(context, kCGPathStroke);
+						}
+					}
+*/
+
 				pPoints = (HPDPOINT)GlobalLock(hPoints);//pPoints[9]
 				pPolyBounds = GlobalLock(hPolyBounds);
 				LPINT polyPartLen = (LPINT)GlobalLock(hPolyPartLen);
@@ -3420,14 +3450,14 @@ long ConvertFGDBTable(LPSTR DBNameIN, LPSTR OutFile, LPSTR Version,LPSTR TableNa
 					ConvertCoord(&pPoints[i], 0, 1);
 					ConvertCoord(&pPoints[i], 1, 2);
 					iPointInPoly++;
-					if (iPointInPoly > 0)
-						AddDPointToMinMax(&pPoints[i], &pPolyBounds[iPoly]);
 					if (iPointInPoly == polyPartLen[iPoly])
 					{
 						iPoly++;
 						DBoundsInit(&pPolyBounds[iPoly]);
 						iPointInPoly = -1;
 					}
+					else
+						AddDPointToMinMax(&pPoints[i], &pPolyBounds[iPoly]);
 				}
 				GlobalUnlock(hPolyBounds);
 				GlobalUnlock(hPolyPartLen);
