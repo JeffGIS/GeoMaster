@@ -3,6 +3,7 @@
 //char	GMVersion[36]="GeoMaster version 34f (build 6)";
 //char	GMVersion[36]="GeoMaster version 32z (build 25)";
 
+BOOL useZLIB = FALSE;
 HANDLE hNulls = 0;
 HWND	windowToNotifyOnRedisplay = 0;
 int		typeChassis = 0;

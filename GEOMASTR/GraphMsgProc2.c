@@ -4887,7 +4887,6 @@ BOOL FAR PASCAL BUILDXFERFILEMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, 
 	char	File[MAX_PATH+2];    
 	HCURSOR	hcurSave;
 	static	HANDLE	hSaveBM=0;
-	static	BOOL useZLIB = TRUE;
 		
  short  BRtn;
  if ((BRtn = DIALOGSTYLEMsgProc (hWndDlg,Message, wParam, lParam))) return (BRtn);
