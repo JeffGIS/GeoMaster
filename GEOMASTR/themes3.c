@@ -1114,6 +1114,8 @@ BOOL CreatePointDispersionFile (void)
 	LPSTR pName;
 	BTVARDESC	BTVar[3];	
 	
+	if (CurTheme->hDisperseFileName)
+		ii = 1;
 	CurTheme->hDisperseFileName = GSSiGlobAlloc (1022,GMEM_MOVEABLE,256);
 	pName = GlobalLock (CurTheme->hDisperseFileName);
 	GSSiGetTempFileName (0,"gmp",0,pName);

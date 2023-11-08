@@ -1924,6 +1924,13 @@ GSSiExitProg (1350);
 			OutLoc[1] = 0;
 			goto Rtnl;
 		}
+		case 861://$PERSONAL(
+		{
+			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			*OutLoc = 0;
+			st = PersonalStuff(Arg[1],Arg[2],Arg[3], OutLoc);
+			goto Rtnl;
+		}
 		case 901: // $ADDSEARCH(address,city,zip,outaddressvar,outcoordvar,matchOpt(1,2 or 3)) address search
 		{
 			nArgs = GetFunArgs(Args, Arg, 7, &hMem, pBrkPt, bpOffset, bpLen);

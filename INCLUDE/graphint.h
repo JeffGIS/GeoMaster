@@ -1234,6 +1234,7 @@ BOOL ProcessCmdString(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL ImageZoom (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL ScreenZoom(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL CreateCompressedFenceFromBitmap(LPSTR File, HDIB32 hDib, LPSTR cColors);
+int  PersonalStuff(LPSTR Arg1, LPSTR Arg2, LPSTR Arg3, LPSTR OutLoc);
 void TempPolyline (HDC hDC, LPPOINT pPoints, short nPnts, LPSTR TopText, LPSTR BottomText);
 void TempPolylineD (HDC hDC, HPDPOINT lpPoints, short nPnts, LPSTR TopText, LPSTR BottomText);
 void NotPolyline (HDC hDC, LPPOINT Points, short nPnt, LPSTR TopText, LPSTR BottomText);

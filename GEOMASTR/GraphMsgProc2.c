@@ -5083,6 +5083,7 @@ FileIsInvalid:
 								pBS++;
 								strcpy(SegmentFile, pBS);
 								makedirectories(SegmentFileDir, TRUE, FALSE);
+								SetWindowText(hWndDlg, "Creating Segments");
 								for (int iSeg = 0; iSeg < numSegments; iSeg++)
 								{
 									sprintf(SegmentFileName, "%s\\%s_seg%i.bin", SegmentFileDir, SegmentFile, iSeg + 1);
@@ -5090,6 +5091,7 @@ FileIsInvalid:
 									LONGLONG lenRead = BigRead64(FidTF, pBuf, splitSegmentSize);
 									BigWrite64(FidSegment, pBuf, lenRead, -1);
 									GSSiClose64(&FidSegment);
+									PctBox(GetDlgItem(hWndDlg, IDC_STATUS), numSegments, iSeg+1, -1);
 								}
 							}
 							free(pBuf);

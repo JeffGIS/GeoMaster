@@ -7820,3 +7820,40 @@ BOOL CreateCompressedFenceFromBitmap (LPSTR File,HDIB32 hDib,LPSTR cColors)
 	return rtn;
 }
 
+int PersonalStuff(LPSTR Arg1, LPSTR Arg2, LPSTR Arg3, LPSTR OutLoc)
+{
+	int st = 0;
+	double total = 0;
+	double video = 0;
+	double amt;
+	int num = 0;
+	if (!stricmp(Arg1, "AMAZONBILL"))
+	{
+		HFILE fid = GSSiOpenFile(Arg2, 0, OF_READ);
+		if (fid != HFILE_ERROR)
+		{
+			char line[256];
+			while (fgetstring(line, 250, fid))
+			{
+				LPSTR ploc = strstr(line, "-$");
+				if (ploc)
+				{
+					ploc += 2;
+					amt = atof(ploc);
+					total += amt;
+					num++;
+					continue;
+				}
+				ploc = strstr(line, "+$");
+				if (ploc)
+				{
+					continue;
+				}
+				if (strstr(line, "Video"))
+					video += amt;
+			}
+			GSSiClose(fid);
+		}
+	}
+	return st;
+}
