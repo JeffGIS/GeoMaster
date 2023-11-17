@@ -69,7 +69,7 @@ static struct  from_ihrans
         short NADDS;                     
         long MAX;
         BOOL16 HALF;
-      } IPOINT, IPNTRS[51] ;
+      } iPOINT, IPNTRS[51] ;
       
     
       
@@ -600,17 +600,17 @@ long   IHRANS (int ID,long  ILEN,long  IMAX)
    long  IHRAN (int ID,char ITEM[])
 {       
 long   INTTOT = 0, I;
-        IPOINT = IPNTRS [ID];
-      for (I=1; I < IPOINT.NADDS; I++)
+        iPOINT = IPNTRS [ID];
+      for (I=1; I < iPOINT.NADDS; I++)
        {// DO I = 1, NADDS;
           INTTOT += ITEM[I] * I;
        }// ENDDO;                  >>
-      if (IPOINT.HALF) INTTOT += (IPOINT.NADDS+1) *  ( ITEM[IPOINT.NADDS+1] >> 8 );  // destroys ITEM!!!!
+      if (iPOINT.HALF) INTTOT += (iPOINT.NADDS+1) *  ( ITEM[iPOINT.NADDS+1] >> 8 );  // destroys ITEM!!!!
       LDA3.RVAL = 1907719e0 * INTTOT + 907633963e0;
 /*C      CI(1) = CRI(1) // CRI(7)*/
 /*C      CI(2) = CRI(5) // CRI(3)*/
 /*C      IVAL = (long)(IEQ2(1)) * (long)(IEQ2(2))*/
 /*C      IHRAN = MOD(IABS(IVAL),MAX) + 1*/
  //     IHRAN = MOD (IABS((long)(IEQ[1])*(long)(IEQ[2])*(long)(IEQ[3])),MAX) + 1;
-      return (labs((long)LDA3.IEQ[1]*(long)LDA3.IEQ[2]*(long)LDA3.IEQ[3])  % IPOINT.MAX) + 1;
+      return (labs((long)LDA3.IEQ[1]*(long)LDA3.IEQ[2]*(long)LDA3.IEQ[3])  % iPOINT.MAX) + 1;
 } 

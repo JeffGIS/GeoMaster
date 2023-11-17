@@ -117,7 +117,6 @@ HANDLE OpenFileGM(
 	char* fullPath;
 	int ln;
 	char	Name[MAX_PATH];
-	int		rtn;
 	BOOL	allowOpenFile = FALSE;
 	OFSTRUCTGM ReopenBuff;
 	strcpy(Name, lpFileName);
@@ -181,7 +180,6 @@ HANDLE OpenFileEX(
 	char* fullPath;
 	int ln;
 	char	Name[MAX_PATH];
-	int		rtn;
 	BOOL	allowOpenFile = FALSE;
 
 	strcpy(Name, lpFileName);

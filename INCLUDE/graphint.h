@@ -2517,7 +2517,7 @@ BOOL SetSQLITEVis(HWND hWndDlg, int DlgItemSym, int DlgItemPar, HFILE FidSymList
 BOOL SetSQLITEParms(void);
 BOOL ProcessSQLITERecord(HDC hDC, long long rec);
 BOOL GetNextSQLITERecord(LPMNMXCORD pBounds);
-BOOL IsSQLITEFileVisible(void);
+BOOL IsSQLITEFileVisible(int type);
 int LoadSQLITEParm(LPSTR SHPFileName, LPSTR tableName, HWND hWnd);
 BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds);
 BOOL GetSQLITERecord(LONGLONG SQLITERec);

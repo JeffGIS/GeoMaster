@@ -44,7 +44,7 @@ static MNMXCORD SLTBounds;
 static double SLTXMin=0, SLTXFactor=1, SLTYMin=0, SLTYFactor=1;
 static int SLTIndexType = 1;
 #define BLOB_MAX	USHRT_MAX
-#define COORDINATE_FACTOR	10000000
+#define COORDINATE_FACTOR	10000000.0
 #define INPUTBUFSIZE USHRT_MAX * 32
 
 int query_rtree_bbox(sqlite3 *db_handle, const char *rtree_name, LPMNMXCORD pBounds);
@@ -2036,7 +2036,8 @@ NextCrimeRec:
 				CloseGWDatabase(hGMDB);
 			}
 		}
-		else if (!stricmp(ARG[1], "TEXTFROMPOLY"))//$SQLITE(TEXTFROMPOLY,outfilename,new,tablename,
+		else if (!stricmp(ARG[1], "TEXTFROMPOLY") ||
+				 !stricmp(ARG[1], "TEXTFROMPOLYSPLIT"))//$SQLITE(TEXTFROMPOLY,outfilename,new,tablename,
 												  //UDIFieldNameAndType(i.e PID  CHAR(13)-no spaces in name),
 												  //UDIFieldNameAndType2(i.e PID  CHAR(13)-no spaces in name),value,
 												  //skipquad(TF),skipconvert(TF),add LastUpdate Field
@@ -2044,7 +2045,11 @@ NextCrimeRec:
 												  //...
 		{
 			short	pos = BT_FIRST;
+			short   cond = BT_ANY;
+			int		wantLoop = 1;
+			BOOL	splitPoly = FALSE;
 			long	Refno;
+			long	outRefno = 0;
 			HIGHLIGHTDATA	HighlightData;
 			long	nPnts;
 			HANDLE	hPoly;
@@ -2069,6 +2074,8 @@ NextCrimeRec:
 			double perimeterCVT;
 			int maxLineLen = 0;
 
+			if (!stricmp(ARG[1], "TEXTFROMPOLYSPLIT"))
+				splitPoly = TRUE;
 			if (skipConvert)
 				coordFactor /= 1000;
 			if (pUS)
@@ -2160,12 +2167,18 @@ NextCrimeRec:
 					}
 				}
 
-				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
+				while (keepGoing && !BT_FIND(hHighlight, (LPSTR)&Refno, pos, cond, (LPSTR)&HighlightData))
 				{
 					char UDI[80];
 					char Arg7Val[256];
 					char addFieldVals[1024] = { 0 };
 
+					if (!splitPoly)
+						outRefno = Refno;
+					else
+						outRefno++;
+					pos = BT_NEXT;
+					cond = BT_ANY;
 					if (Refno == 80002608)
 						ii = 1;
 					if (atob(ARG[10]))
@@ -2195,7 +2208,6 @@ NextCrimeRec:
 						strcpy(UDI, HighlightData.PD.UDI);
 						REPLAC(UDI, "'", "''", 80);
 					}
-					pos = BT_NEXT;
 					if (HighlightData.PD.Type == wantType && strlen(UDI)>0)
 					{
 						if ((nLoops = GetPolyPointsWithParts((LPPICKDATAHEADER)&HighlightData.PD, &nPnts, &hPoly, &hPolyPartLen)))
@@ -2204,17 +2216,18 @@ NextCrimeRec:
 							DPOINT midPt;
 							HPDPOINT pDPoints, pPointsCVT;
 							HPPOINT  pPoints;
-							LPSTR blobPoints,blobParts;
+							LPSTR blobPoints=0,blobParts=0;
 							HANDLE hPoints, hPointsCVT;
 							BOOL canCompress=TRUE;
 							int  np = nPnts;
 							int  nLops;
 							double maxd = 0;
 							double diffArea, diffPerim;
+							int offsetPoints = 0;
 
 							if (!skipConvert)
 								ConvertBounds(pBounds, 1, 2);
-							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.8f,%.8f,%.8f,%.8f);", ARG[4], Refno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
+							sprintf(pCmd, "INSERT INTO %s_index VALUES(%i,%.8f,%.8f,%.8f,%.8f);", ARG[4], outRefno, pBounds->xmn, pBounds->xmx, pBounds->ymn, pBounds->ymx);
 							if (!skipQuadIndex)
 								fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							if (nLoops > 1)
@@ -2229,8 +2242,26 @@ NextCrimeRec:
 								}
 								blobParts = (LPSTR)BytesToBlob((LPBYTE)pPartLen, nLoops*sizeof(int));
 								GlobalUnlock(hPolyPartLen);
+								if (splitPoly)
+								{
+									nPnts = pPartLen[wantLoop - 1];
+									offsetPoints = 0;
+									for (int i = 0; i < wantLoop-1; i++)
+									{
+										offsetPoints += pPartLen[i];
+									}
+									if (wantLoop < nLoops)
+									{
+										wantLoop++;
+										pos = BT_FIRST;
+										cond = BT_EQ;
+									}
+									else
+										wantLoop = 1;
+								}
 							}
 							pDPoints = (HPDPOINT)(pBounds + 1);
+							pDPoints += offsetPoints;
 							sqMeters = ComputeAreaAreaD(pDPoints, nPnts, &perimeter);
 							hPoints = GSSiGlobAlloc(0, GMEM_MOVEABLE, nPnts * sizeof(POINT));
 							pPoints = GlobalLock(hPoints);
@@ -2256,6 +2287,7 @@ NextCrimeRec:
 								ii = 1;
 							sqMeters = sqMetersCVT;
 							perimeter = perimeterCVT;
+							np = nPnts;
 							if (canCompress)
 							{
 								LPPOINTS pShortPoints = malloc(nPnts*sizeof(POINTS)+4);
@@ -2303,6 +2335,10 @@ NextCrimeRec:
 								free(googlestr);
 								free(pNewPt);
 							}
+							if (splitPoly)
+							{
+								nLoops = 1;
+							}
 							nLops = nLoops;
 							if (skipConvert)
 								nLops = -nLoops;
@@ -2312,21 +2348,24 @@ NextCrimeRec:
 								strcpy(a7val, ARG[7]);
 								ExpandText(a7val);
 								if (*ARG[7])
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno,UDI,a7val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], outRefno,UDI,a7val, midPt.x, midPt.y, np, nLops, blobParts, blobPoints,sqMeters,perimeter);
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], Refno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints, sqMeters, perimeter);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s',%.8f,%.8f,%i,%i,X'%s',X'%s',%f,%f);", ARG[4], outRefno, UDI, midPt.x, midPt.y, np, nLops, blobParts, blobPoints, sqMeters, perimeter);
 								free(blobParts);
 							}
 							else
 							{
+								char addfvals[1024];
+								strcpy(addfvals,addFieldVals);
+								ExpandText(addfvals);
 								if (*ARG[7])
 								{
 									strcpy(a7val, ARG[7]);
 									ExpandText(a7val);
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, a7val, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s','%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], outRefno, UDI, a7val, addfvals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 								}
 								else
-									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], Refno, UDI, addFieldVals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
+									sprintf(pCmd, "INSERT INTO %s VALUES(%i,'%s'%s,%.8f,%.8f,%i,%i,X'',X'%s',%f,%f);", ARG[4], outRefno, UDI, addfvals, midPt.x, midPt.y, np, nLops, blobPoints, sqMeters, perimeter);
 							}
 							fputstringWithLength(pCmd, Fid);maxLineLen = max(maxLineLen,strlen(pCmd));
 							free(blobPoints);
@@ -2681,8 +2720,9 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 	int	i;
 	MNMXCORD	FileMNMX, Bounds;
 	DPOINT		Points[4];
-	int rtnType = 0;
 	LPSTR pPar, pEnd;
+	char symname[66];
+
 	char fileName[MAX_PATH], tableName[100], Query[4096];
 
 	DBoundsInit(&FileMNMX);
@@ -2703,7 +2743,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 			{
 				int st;
 				
-				rtnType = LoadSQLITEParm(fileName, tableName, CurView->hWnd);
+				SLTType = LoadSQLITEParm(fileName, tableName, CurView->hWnd);
 				if (OpenDataFile(FileNameIN, "", BT_READ, &SQLITEHandle))
 				{
 					LPOPENSQLDATA	SQLPtr = (LPOPENSQLDATA)GlobalLock(SQLITEHandle);
@@ -2799,13 +2839,42 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 											Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
 									}
 								}
-								else
+								else if (!stricmp(tableName, "POLICE"))
 								{
 									sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND %s >= %i AND %s <= %i AND %s >= %i AND %s <= %i AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
 										tableName, tableName, tableName, tableName,
-										SQLITEEndDate,TimeRangeBeg, SQLITEBeginDate,TimeRangeEnd,
-										SQLITEMaxUCR,GMDMinCode, SQLITEMinUCR, GMDMaxCode,
+										SQLITEEndDate, TimeRangeBeg, SQLITEBeginDate, TimeRangeEnd,
+										SQLITEMaxUCR, GMDMinCode, SQLITEMinUCR, GMDMaxCode,
 										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+								}
+								else if (SLTType == 2)
+								{
+									sprintf(Query, "SELECT %s.ID,BasePointX,BasePointY,NumPoints,NumLoops,PolyPartLen,Points, %s.NAME FROM %s,%s_index WHERE %s.id=%s_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+										tableName, tableName, tableName, tableName, tableName, tableName,
+										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+
+									strcpy(symname, tableName);
+									int isym = GetDictSymbolNumber(symname);
+									if (isym)
+										HaveSQLITESym = isym;
+									else if (!stricmp(tableName, "HUNTER_WALKING_TRAILS_LINE"))
+									{
+										isym = GetDictSymbolNumber("HUNTER_WALKING_TRAIL");
+										if (isym)
+											HaveSQLITESym = isym;
+										SLTType = 2;
+										SQLITESymbols[0] = isym;
+									}
+								}
+								else
+								{
+									sprintf(Query, "SELECT * FROM %s,%s_index WHERE %s.id=%s_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+										tableName, tableName, tableName, tableName,
+										Bounds.xmn, Bounds.xmx, Bounds.ymn, Bounds.ymx);
+									strcpy(symname, tableName);
+									int isym = GetDictSymbolNumber(symname);
+									if (isym)
+										HaveSQLITESym = isym;
 								}
 								GlobalUnlock(FilePtr->FileHandle);
 								GlobalUnlock(SQLPtr->OFHandle);
@@ -2849,7 +2918,7 @@ int OpenSQLITEMapFile(LPSTR FileNameIN, LPMNMXCORD pFileMNMX)
 	}
 	if (pFileMNMX)
 		*pFileMNMX = FileMNMX;
-	return rtnType;
+	return SLTType;
 }
 
 BOOL GetSQLITERecordBounds(LONGLONG Recno, LPMNMXCORD pBounds)
@@ -3091,129 +3160,241 @@ BOOL ProcessSQLITERecord(HDC hDC,long long rec)
 			if (!LogicP(SQLITEWhere, &irc))
 				goto RtnFalse;
 		}
-		BasePt.x = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->xLoc);
-		BasePt.y = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->yLoc);
-		rtn = TRUE;
-		ConvertCoord(&BasePt, 0, 1);
-		InGraphicsProcessor = TRUE;
-		ShowValue(hDC, FALSE);
-		CurrentRefno = sqlite3_column_int(pSQLDatabase->statement, 0);
-		ItemSeg = CurrentSQLITERec = CurrentRefno;
-		strcpy(str, SQLITERefno);
-		ExpandText(str);
-		SQLITEBaseRefno = atol(str);
-		CurrentRefno += SQLITEBaseRefno;
-		PTRot = 0;
-		if (PointInWBounds(&BasePt))// && GRStartTime >= TimeRangeBeg && SQLITEStartTime < TimeRangeEnd)
+		switch (SLTType)
 		{
-			LPSTR	pTag;
-			char	Tag[80];
-			short	ltag;
-			short	Dummy;
-			MNMXCORD bounds;
+		case 1://points
+		{
 
-
-			//pTag = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, 1);
-			//sprintf(Tag, "ALLYWALL:%s", pTag);
-			strcpy(Tag, SQLITETAG);
-			ExpandText(Tag);
-			SetSymNum(CurrentDesc);
-			ltag = _fstrlen(Tag);
-			if (ProcessRefAndTAG(TRUE, Tag, ltag))
+			BasePt.x = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->xLoc);
+			BasePt.y = sqlite3_column_double(pSQLDatabase->statement, pSQLDatabase->yLoc);
+			rtn = TRUE;
+			ConvertCoord(&BasePt, 0, 1);
+			InGraphicsProcessor = TRUE;
+			ShowValue(hDC, FALSE);
+			CurrentRefno = sqlite3_column_int(pSQLDatabase->statement, 0);
+			ItemSeg = CurrentSQLITERec = CurrentRefno;
+			strcpy(str, SQLITERefno);
+			ExpandText(str);
+			SQLITEBaseRefno = atol(str);
+			CurrentRefno += SQLITEBaseRefno;
+			PTRot = 0;
+			if (PointInWBounds(&BasePt))// && GRStartTime >= TimeRangeBeg && SQLITEStartTime < TimeRangeEnd)
 			{
-				HiPrecis = TRUE;
-				lpDCurPoints = &BasePt;
-				CurrentPoint = CurPointLocD = BasePt;
-				ItemSeg = CurrentSQLITERec;
-				LastElementBeginPoint = LastElementEndPoint = BasePt;
-				nPnts = nCurPoints = 1;
-				CurPointLoc = BasePtToWinPt(lpDCurPoints);
-				if (PointIsBlocked(&CurPointLocD, CurrentDesc) ||!PointInMaskAreaWinCoordD(&CurPointLocD))
-					goto RtnFalse;
-				InGraphicsProcessor = TRUE;
-				HaveTXLoc = TRUE;
-				CurrentType = GF_POINT;
-				CurPointSize = SQLITEPointSize;
-				if (CurPointSize < 0)
-					CurPointSize = -CurPointSize * DeviceToScreenFactor();
-				else
-					CurPointSize /= CurView->BaseUnitsPerPixel;
-				CurPointSize *= GraphicsPointFactor;
-				DBoundsInit(&bounds);
-				AddDPointToMinMax(lpDCurPoints, &bounds);
-				CurrentItemMinMax = WBoundsToFileBounds(&bounds);
-				if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
-				{
-					CurrentSeg = CurrentRefno;
-					PickPointItemD(lpDCurPoints, (CurPointSize*ThemeWidthFactor*GraphicsPointFactor)*CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
-				}
-				else if (GetTypeVisibility(TYPE_POINT))
-				{
-					short	iDesc = CurrentDesc;
+				LPSTR	pTag;
+				char	Tag[80];
+				short	ltag;
+				short	Dummy;
+				MNMXCORD bounds;
 
-					if (CurrentDesc > 0 && CurrentDesc < 3201)
-					{
-						if (TSize)
-							CurView->CurVisType[CurrentDesc] = 5;
-						else
-							CurView->CurVisType[CurrentDesc] = 4;
-					}
-					HighlightPointSym = FALSE;
-					if (!GetTypeVisibility(6) && SymbolIsVisible(iDesc))
-					{
-						CurPointSize = 10 * DeviceToScreenFactor();
-						iDesc = InvisiblePointSymbol;
-					}
-					CurView = SaveVP;
-					if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
-					{
-						double	size;
 
-						if (ThemePointSym)
+				//pTag = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, 1);
+				//sprintf(Tag, "ALLYWALL:%s", pTag);
+				strcpy(Tag, SQLITETAG);
+				ExpandText(Tag);
+				SetSymNum(CurrentDesc);
+				ltag = _fstrlen(Tag);
+				if (ProcessRefAndTAG(TRUE, Tag, ltag))
+				{
+					HiPrecis = TRUE;
+					lpDCurPoints = &BasePt;
+					CurrentPoint = CurPointLocD = BasePt;
+					ItemSeg = CurrentSQLITERec;
+					LastElementBeginPoint = LastElementEndPoint = BasePt;
+					nPnts = nCurPoints = 1;
+					CurPointLoc = BasePtToWinPt(lpDCurPoints);
+					if (PointIsBlocked(&CurPointLocD, CurrentDesc) || !PointInMaskAreaWinCoordD(&CurPointLocD))
+						goto RtnFalse;
+					InGraphicsProcessor = TRUE;
+					HaveTXLoc = TRUE;
+					CurrentType = GF_POINT;
+					CurPointSize = SQLITEPointSize;
+					if (CurPointSize < 0)
+						CurPointSize = -CurPointSize * DeviceToScreenFactor();
+					else
+						CurPointSize /= CurView->BaseUnitsPerPixel;
+					CurPointSize *= GraphicsPointFactor;
+					DBoundsInit(&bounds);
+					AddDPointToMinMax(lpDCurPoints, &bounds);
+					CurrentItemMinMax = WBoundsToFileBounds(&bounds);
+					if ((Pick || PickingByRefno) && GetTypeVisibility(TYPE_POINT))
+					{
+						CurrentSeg = CurrentRefno;
+						PickPointItemD(lpDCurPoints, (CurPointSize * ThemeWidthFactor * GraphicsPointFactor) * CurView->BaseUnitsPerPixel, PTRot, CurrentDesc);
+					}
+					else if (GetTypeVisibility(TYPE_POINT))
+					{
+						short	iDesc = CurrentDesc;
+
+						if (CurrentDesc > 0 && CurrentDesc < 3201)
 						{
-							iDesc = ThemePointSym;
-							if (ThemePointSize < 0)
-								size = -ThemePointSize *DeviceToScreenFactor();
+							if (TSize)
+								CurView->CurVisType[CurrentDesc] = 5;
 							else
-								size = ThemePointSize / DisplayVP->BaseUnitsPerPixel;
-							size *= ThemeWidthFactor;
-							size = min(max(size*GraphicsPointFactor, 1), MaxPointSize);
+								CurView->CurVisType[CurrentDesc] = 4;
 						}
-						else if (ItemSymbolWidth > 0)
-							size = ItemSymbolWidth * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
-						else if (ItemSymbolWidth < 0)
-							size = -ItemSymbolWidth * BaseDistToWinDist * CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
-						else
-							size = CurPointSize*ThemeWidthFactor*GraphicsPointFactor;
-						if (iDesc < 0)
+						HighlightPointSym = FALSE;
+						if (!GetTypeVisibility(6) && SymbolIsVisible(iDesc))
 						{
-							COLORREF	OldColor;
+							CurPointSize = 10 * DeviceToScreenFactor();
+							iDesc = InvisiblePointSymbol;
+						}
+						CurView = SaveVP;
+						if (SetDisplayChar(CurView->hDC, GF_POINT, CurrentRefno, CurrentDesc, CurrentPrefix, CurrentUDI) > 0)
+						{
+							double	size;
 
-							if (ThemePointColor > -1)
-								OldColor = SetTextColor(CurView->hDC, ConvertColor(ThemePointColor, ThemePointUseHalfTone));
-							DisplayCharAtLoc(CurView->hDC, CurPointLoc, (short)IDNINT(size), -iDesc);
-							if (ThemePointColor > -1)
-								SetTextColor(CurView->hDC, OldColor);
+							if (ThemePointSym)
+							{
+								iDesc = ThemePointSym;
+								if (ThemePointSize < 0)
+									size = -ThemePointSize * DeviceToScreenFactor();
+								else
+									size = ThemePointSize / DisplayVP->BaseUnitsPerPixel;
+								size *= ThemeWidthFactor;
+								size = min(max(size * GraphicsPointFactor, 1), MaxPointSize);
+							}
+							else if (ItemSymbolWidth > 0)
+								size = ItemSymbolWidth * CurPointSize * ThemeWidthFactor * GraphicsPointFactor;
+							else if (ItemSymbolWidth < 0)
+								size = -ItemSymbolWidth * BaseDistToWinDist * CurPointSize * ThemeWidthFactor * GraphicsPointFactor;
+							else
+								size = CurPointSize * ThemeWidthFactor * GraphicsPointFactor;
+							if (iDesc < 0)
+							{
+								COLORREF	OldColor;
+
+								if (ThemePointColor > -1)
+									OldColor = SetTextColor(CurView->hDC, ConvertColor(ThemePointColor, ThemePointUseHalfTone));
+								DisplayCharAtLoc(CurView->hDC, CurPointLoc, (short)IDNINT(size), -iDesc);
+								if (ThemePointColor > -1)
+									SetTextColor(CurView->hDC, OldColor);
+							}
+							else
+							{
+								long	DisplayedWidth = 0;
+
+								DisplayPointItem(CurView->hDC, CurPointLoc, size, PTRot, iDesc, &DisplayedWidth);
+								CurView->MaxSymbolWidth = max(CurView->MaxSymbolWidth, DisplayedWidth);
+								CurView->MaxFileDisplayedPointWidth[FileNum] = max(CurView->MaxFileDisplayedPointWidth[FileNum], (DisplayedWidth / FileDistToWinDist) - (((long)CurrentItemMinMax.xmx) - CurrentItemMinMax.xmn));
+							}
+							DBoundsInit(&RecordBounds);
+							AddDPointToMinMax(lpDCurPoints, &RecordBounds);
+							InflateBounds(&RecordBounds, size);
+							GetFileMinMax(&CurrentItemMinMax, &RecordBounds);
 						}
-						else
-						{
-							long	DisplayedWidth = 0;
-							
-							DisplayPointItem(CurView->hDC, CurPointLoc, size, PTRot, iDesc, &DisplayedWidth);
-							CurView->MaxSymbolWidth = max(CurView->MaxSymbolWidth, DisplayedWidth);
-							CurView->MaxFileDisplayedPointWidth[FileNum] = max(CurView->MaxFileDisplayedPointWidth[FileNum], (DisplayedWidth / FileDistToWinDist) - (((long)CurrentItemMinMax.xmx) - CurrentItemMinMax.xmn));
-						}
-						DBoundsInit(&RecordBounds);
-						AddDPointToMinMax(lpDCurPoints, &RecordBounds);
-						InflateBounds(&RecordBounds, size);
-						GetFileMinMax(&CurrentItemMinMax, &RecordBounds);
 					}
+					InGraphicsProcessor = FALSE;
+					TXLoc = CurPointLocD;
+					HaveTXLoc = 1;
 				}
-				InGraphicsProcessor = FALSE;
-				TXLoc = CurPointLocD;
-				HaveTXLoc = 1;
 			}
 		}
+		break;
+		case 2: //lines
+		{
+/*
+query = [NSString stringWithFormat : @"SELECT BasePointX,BasePointY,NumPoints,NumLoops,PolyPartLen,Points, HUNTER_WALKING_TRAILS_LINE.NAME FROM HUNTER_WALKING_TRAILS_LINE,HUNTER_WALKING_TRAILS_LINE_index WHERE HUNTER_WALKING_TRAILS_LINE.id=HUNTER_WALKING_TRAILS_LINE_index.id AND maxX>=%f AND minX<=%f AND maxY>=%f AND minY<=%f",
+				platlonBounds->xmn, platlonBounds->xmx, platlonBounds->ymn, platlonBounds->ymx];
+			_totRecords = [self getQueryCount : query];
+			[CRAPI.sharedInstance updateProgress : -1
+				current : 0
+				range : 1
+				numRanges : 1] ;
+
+			SQLOK(__FILE__, __LINE__, SQLitePrepare(self.database, query.UTF8String, -1, &statement, 0), hd.database);
+			_currentRec = 0;
+			while ([self continueProcessing] && sqlite3_step(statement) == SQLITE_ROW)
+			{*/
+				int i = 0;
+				int refno = sqlite3_column_int(pSQLDatabase->statement, i++);
+				BasePt.x = sqlite3_column_double(pSQLDatabase->statement, i++);
+				BasePt.y = sqlite3_column_double(pSQLDatabase->statement, i++);
+				int numPoints = sqlite3_column_int(pSQLDatabase->statement, i++);
+				int numLoops = sqlite3_column_int(pSQLDatabase->statement, i++);
+				int nBlobBytes = sqlite3_column_bytes(pSQLDatabase->statement, i);
+				int* polyPartLen = (int*)sqlite3_column_blob(pSQLDatabase->statement, i++);
+				int nBlobBytes2 = sqlite3_column_bytes(pSQLDatabase->statement, i);
+				
+				LPIPOINT offsetPoints = (LPIPOINT)sqlite3_column_blob(pSQLDatabase->statement, i++);
+				LPDPOINT llpoints = malloc(abs(numPoints) * sizeof(DPOINT) + 4);
+				LPSTR routeid = (LPSTR)sqlite3_column_text(pSQLDatabase->statement, i++);
+				int np = 0;
+				//if (abs(numPoints)<108000)
+				{
+					if (numPoints < 0)
+					{
+						numPoints = -numPoints;
+						LPSPOINT offsetPoints16 = (LPSPOINT)offsetPoints;
+
+						for (int i = 0; i < numPoints; i++)
+						{
+							llpoints[np].x = (BasePt.x + offsetPoints16[i].x / COORDINATE_FACTOR);
+							llpoints[np].y = (BasePt.y + offsetPoints16[i].y / COORDINATE_FACTOR);
+							//POINT pt = BasePtToWinPt(&llpoints[np]);
+							ConvertCoord(&llpoints[np], 2, 1);
+
+							np++;
+						}
+					}
+
+					else for (int i = 0; i < numPoints; i++)
+					{
+						llpoints[np].x = (BasePt.x + offsetPoints[i].x / COORDINATE_FACTOR);
+						llpoints[np].y = (BasePt.y + offsetPoints[i].y / COORDINATE_FACTOR);
+						//llpoints[np] = TranDPOINTP(&llpoints[np], _pTranLLtoView);
+						//POINT pt = BasePtToWinPt(&llpoints[np]);
+						ConvertCoord(&llpoints[np], 2, 1);
+						np++;
+					}
+
+					int nLoopTot = 0;
+					if (numLoops > 1)
+					{
+						numLoops--;
+						for (int i = 0; i < numLoops; i++)
+						{
+							nLoopTot += polyPartLen[i];
+						}
+					}
+					{
+						char linewidthC[128];
+						char wantIDC[128];
+						strcpy(wantIDC,"[WANTID]");
+						ExpandText(wantIDC);
+						int wantRef = atol(wantIDC);
+						strcpy(linewidthC, "[LINEWIDTH]");
+						ExpandText(linewidthC);
+						int lWidth = IDNINT(atof(linewidthC));
+						COLORREF clr=RGB(255,0,0);
+						HPEN	hPen = CreatePen(PS_SOLID, lWidth,clr);
+						HPEN	OldPen = SelectObject(CurView->hDC, hPen);
+						CurrentType = GF_LINE;
+						if (!wantRef || wantRef == refno)
+							GWPolylineD(CurView->hDC, llpoints, numPoints, HaveSQLITESym);
+						SelectObject(CurView->hDC, OldPen);
+						GSSiDeleteObject(&hPen);
+					}
+					/*
+					if ([themes setDisplayCharacteristics : dc
+						displayID : _processingID
+						compareClass : nil] != DO_NOT_DISPLAY_ITEM)
+					{
+
+						[self drawRoad : context
+							nPoints : np
+							nLoops : numLoops
+							partLen : polyPartLen
+							points : llpoints
+							withColor : dc.penColor.CGColor
+							andWidth : dc.width] ;
+						nDisplayed++;
+					}
+					*/
+				}
+				free(llpoints);
+
+		}
+	}
 		ShowValue(hDC, FALSE);
 	RtnFalse:
 		GlobalUnlock(FilePtr->FileHandle);
@@ -3255,10 +3436,14 @@ BOOL GetNextSQLITERecord(LPMNMXCORD pBounds)
 	}
 	return rtn;
 }
-BOOL IsSQLITEFileVisible(void)
+BOOL IsSQLITEFileVisible(int type)
 {
 	BOOL rtn = FALSE;
 
+	if (type == 1 && !GetTypeVisibility(TYPE_POINT))
+		return FALSE;
+	if (type == 2 && !GetTypeVisibility(TYPE_LINECURVE))
+		return FALSE;
 	for (int i = 0; i < nSQLITESymbols; i++)
 	{
 		if (GetVisibility(SQLITESymbols[i]))

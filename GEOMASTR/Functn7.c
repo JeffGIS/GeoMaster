@@ -1283,7 +1283,10 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 
 	case 752: // $REPLACE(str,oldstr,newstr) 
 	{
-		nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+		nArgs = GetFunArgs(Args, Arg, -3, &hMem, pBrkPt, bpOffset, bpLen);
+		ExpandText(Arg[1]);
+		ExpandText(Arg[2]);
+		ExpandText(Arg[3]);
 		_fstrcpy(OutLoc, Arg[1]);
 		REPLAC(OutLoc, Arg[2], Arg[3], MAXVARLEN-2);
 		goto Rtnl;

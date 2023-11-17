@@ -5058,6 +5058,8 @@ FileIsInvalid:
            			loc = GSSillseek64 (FidTF,0,1);
            			GSSillseek64 (FidTF,0,0);
            			BigWrite64 (FidTF,(HPSTR)&loc,8,-1);
+					GSSiClose64(&FidTF);
+					FidTF = OpenFileGM(TransferFileName, 0, OF_READ);
 					if (TransferFileSplitOpt > 0)
 					{
 						char SegmentFileDir[MAX_PATH];
