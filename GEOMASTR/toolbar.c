@@ -1922,7 +1922,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 	int		w=22;
 
 	strcpy (FileName,"[%DL]icons\\zoomwin_tp.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,24)))
+	if ((hDib32 = LoadDIB32 (FileName,24, 0)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.right--;
@@ -1937,7 +1937,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		strcpy (FileName,"[%DL]icons\\find_tp.bmp");
 	else
 		strcpy (FileName,"[%DL]icons\\pan.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,24)))
+	if ((hDib32 = LoadDIB32 (FileName,24, 0)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.left++;
@@ -1949,7 +1949,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		DestroyDIB32(hDib32,FALSE);
 	}
 	strcpy (FileName,"[%DL]icons\\cancelnew_tp.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,24)))
+	if ((hDib32 = LoadDIB32 (FileName,24, 0)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.right--;
@@ -1961,7 +1961,7 @@ void DisplayPZIcons (HWND hWnd,HDC hDC)
 		DestroyDIB32(hDib32,FALSE);
 	}
 	strcpy (FileName,"[%DL]icons\\list_tp.bmp");
-	if ((hDib32 = LoadDIB32 (FileName,24)))
+	if ((hDib32 = LoadDIB32 (FileName,24,0)))
 	{
 		GetClientRect (hWnd,&rect);
 		//rect.left++;
@@ -3343,7 +3343,7 @@ HBITMAP GetToolBitmap (LPSTR BMPath)
 			hBM = LoadBitmap (hInst,MAKEINTRESOURCE(idBmp));
 		}
 		else
-			hDib32 = LoadDIB32 (BMPath,FALSE);
+			hDib32 = LoadDIB32 (BMPath,FALSE, 0);
 		if (hDib32)    
 		{
 			int	nBits = FreeImage_GetBPP (hDib32);

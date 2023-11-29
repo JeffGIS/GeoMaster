@@ -2192,7 +2192,7 @@ BOOL ChangeImageColors (LPSTR ImageFile,BOOL UseSavedPalette)
 	long	NumColors; 
 
 	
-	AddBMPToCache32 (NULL,0);
+	AddBMPToCache32 (NULL,0, 0);
 	hDib = BMPHandleFromEXT (ImageFile); 
 	if (!hDib)
 		goto Exit;

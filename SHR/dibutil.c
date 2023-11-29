@@ -1401,7 +1401,7 @@ BOOL GetDIBDimensions(LPSTR File,LPINT height,LPINT width)
     BITMAPINFOHEADER    DibInfo; 
 	BOOL	rtn=FALSE;
     
-	if ((hDib32 = LoadDIB32(File,FALSE)))
+	if ((hDib32 = LoadDIB32(File,FALSE, 0)))
 	{
 		rtn = TRUE;
 	    GetBitmapInfoFromHandle (&DibInfo,hDib32);
@@ -1614,7 +1614,7 @@ BOOL RemoveBMPFromCache32 (LPSTR Name)
     return FALSE;
 }
 
-BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
+BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP, int displayPlaneInRed)
 {   
 	ULONG	MinUse=ULONG_MAX;
 	USHORT	Mini=0, i;
@@ -1680,13 +1680,23 @@ BOOL AddBMPToCache32 (LPSTR Name,HDIB32 *hBMP)
 		if (haveBigOne)
 			return FALSE;
 	}
-	if (pDibInfo->biBitCount != 24)
+	if (pDibInfo->biBitCount == 32)
+	{
+		if (displayPlaneInRed)
+		{
+			ConvertPlaneToRed(*hBMP, displayPlaneInRed);
+		}
+		HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(*hBMP);
+		GSSiFreeImage_Unload(*hBMP);
+		*hBMP = hDib24;
+	}
+	else if (pDibInfo->biBitCount != 24)
 	{
 		HDIB32 hDib24 = GSSiFreeImage_ConvertTo24Bits(*hBMP);
 		GSSiFreeImage_Unload(*hBMP);
 		*hBMP = hDib24;
 	}
-	for (i=0;i<maxBMP32Cache;i++)  
+	for (i=0;i<maxBMP32Cache;i++)
 	{
 		if (!*BMPNames32[i]) 
 		{   
@@ -1792,7 +1802,7 @@ GSSiExitProg (399);
     }
     else// if (_fstrstr (NewName,".pcx") || _fstrstr (NewName,".tif") || _fstrstr (NewName,".bmp") || _fstrstr (NewName,".jpg"))
     {
-    	if (!(*phDib = LoadDIB32 (NewName,TRUE))) 
+    	if (!(*phDib = LoadDIB32 (NewName,TRUE, 0)))
 			return FALSE;
     	*pDeleteBM = 2;  
     	if (!*width)
@@ -1961,7 +1971,7 @@ GSSiExitProg (392);
 }
     _fstrlwr (Name);
 	SetCurImage (Name);
-    hDibInfo=LoadDIB32(Name,FALSE);
+    hDibInfo=LoadDIB32(Name,FALSE, 0);
 	if (imageFileRotation)
 		hDibInfo = GMRotateImageClassic (hDibInfo,imageFileRotation);
 
@@ -2687,6 +2697,84 @@ GSSiExitProg (1431);
 }
 #endif
 }  
+HDIB32 ConvertPlaneToRed (HDIB32 hDib,int plane)
+#if ENABLETRACE
+{
+	GSSiEnterProg(1431);
+#endif
+{
+
+		BYTE HUGE* startrow;
+		BYTE* startimage;
+		HANDLE h;
+		DWORD cnt;
+		WORD	irow, icol, BytesPerPel, MaxVal;
+		long	rowlen;
+		RGBQUAD* rgb32;
+		LPBITMAPINFOHEADER	lpbi;
+
+		if (!hDib)
+			goto Exit;
+		lpbi = FreeImage_GetInfoHeader(hDib);
+
+		if (lpbi->biBitCount != 32)
+			goto Exit;
+
+			startimage = (LPSTR)FreeImage_GetBits(hDib);
+			startrow = startimage;
+			irow = lpbi->biHeight;
+			rowlen = lpbi->biWidth * sizeof(RGBQUAD);
+			if (rowlen % 4)
+				rowlen += (4 - rowlen % 4);
+			while (irow--)
+			{
+				rgb32 = (RGBQUAD*)startrow;
+				icol = lpbi->biWidth;
+				while (icol--)
+				{
+					switch (plane)
+					{
+					case 1:
+						rgb32->rgbGreen = 0;
+						rgb32->rgbBlue = 0;
+						rgb32->rgbReserved = 0;
+						break;
+					case 2:
+						rgb32->rgbRed = rgb32->rgbGreen;
+						rgb32->rgbGreen = 0;
+						rgb32->rgbBlue = 0;
+						rgb32->rgbReserved = 0;
+						break;
+					case 3:
+						rgb32->rgbRed = rgb32->rgbBlue;
+						rgb32->rgbGreen = 0;
+						rgb32->rgbBlue = 0;
+						rgb32->rgbReserved = 0;
+						break;
+					case 4:
+						rgb32->rgbRed = rgb32->rgbReserved;
+						rgb32->rgbGreen = 0;
+						rgb32->rgbBlue = 0;
+						rgb32->rgbReserved = 0;
+						break;
+					}
+					rgb32++;
+				}
+				startrow += rowlen;
+			}
+		
+	Exit:
+
+		{
+#if ENABLETRACE
+			GSSiExitProg(1431);
+#endif
+			return hDib;
+		}
+#if ENABLETRACE
+	}
+#endif
+}
 
 HANDLE ConvertBitmap16To24 (LPBITMAPINFOHEADER  lpbi)
 #if ENABLETRACE

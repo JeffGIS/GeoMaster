@@ -1076,7 +1076,7 @@ GSSiExitProg (520);
  	    	break;
 
  	    case IMAGE_DATAFILE:
- 	    	FileHandle = LoadDIB32(Name,FALSE);
+ 	    	FileHandle = LoadDIB32(Name,FALSE, 0);
  	    	break;
 
 	    case DTM_DATAFILE:
@@ -3139,7 +3139,7 @@ GSSiExitProg (532);
 				AllowCache = atob(Value);
 				if (!AllowCache)
 				{
-					AddBMPToCache32(0, 0);
+					AddBMPToCache32(0, 0, 0);
 					CacheAlreadyChecked(0, 0, 0);
 				}
 				if (AllowJournal)

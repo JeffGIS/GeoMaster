@@ -513,7 +513,7 @@ void QuitGraphics()
 
     CloseSymDict();  
 	AddBMPToCache (0,0);
-	AddBMPToCache32 (0,0);
+	AddBMPToCache32 (0,0, 0);
 	CloseFidSmall (); 
 //	CloseFidDBF (TRUE);
 	if (WSAIsBlocking())

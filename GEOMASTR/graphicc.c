@@ -4308,7 +4308,7 @@ ProcessImageFile:
 		{
 			DestroyDIB32(hCurImageMapDib, FALSE);
 			hCurImageMapDib = 0;
-			hCurImageMapDib = LoadDIB32(PltName, TRUE); 
+			hCurImageMapDib = LoadDIB32(PltName, TRUE, CurView->displayImagePlaneInRed);
 
     		if (!hCurImageMapDib)
     			goto RtnFalse;
@@ -7897,7 +7897,7 @@ void EscapeFunction (BOOL DoHalt)
 	CloseOrthos(TRUE);
 	GetSymAttrFile (0,0,0,0,0,0);
 	AddBMPToCache (0,0);
-	AddBMPToCache32 (0,0);
+	AddBMPToCache32 (0,0, 0);
 	LoadCustomStreenNameConversions (TRUE);
 	ClosePassiveFunctions ();
 	DTMClose (0);

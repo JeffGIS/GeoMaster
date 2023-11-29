@@ -872,12 +872,12 @@ HDIB32 GetSymbolImage (LPSTR SymName)
 	{   
 		pBS++;
 		sprintf (pBS,"%s.bmp",SymName);
-		hDib = LoadDIB32(BMPName,TRUE);
+		hDib = LoadDIB32(BMPName,TRUE, 0);
 		if (!hDib)
 		{
 			strcpy (BMPName,SymbolImage);
 			ExpandText (BMPName);
-			hDib = LoadDIB32(BMPName,TRUE);
+			hDib = LoadDIB32(BMPName,TRUE, 0);
 		}
 	}
 	GSSiGlobUlFree (&hMem);

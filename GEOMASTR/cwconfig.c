@@ -1468,7 +1468,7 @@ int testdib(int i)
 
 	for (int i = 0; i < 2; i++)
 	{
-		hDib = LoadDIB32(file, TRUE);
+		hDib = LoadDIB32(file, TRUE,0);
 		GMDestroyDIB32(hDib);
 	}
 	return 0;
@@ -5369,7 +5369,7 @@ DisplayParcel:
 				if (MapFileType (pFile,0,0) == MT_IMAGE)
 				{
 					DPOINT Point;
-					HDIB32 hDib = LoadDIB32 (pFile,FALSE); 
+					HDIB32 hDib = LoadDIB32 (pFile,FALSE,0); 
 
 					if (hDib)
 					{

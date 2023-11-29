@@ -4415,7 +4415,7 @@ GSSiExitProg (1350);
 			if (GMFIBMPHandleToEXT (Arg[1],hDib32Out,0))
 			{
 				AddBMPToCache (0,0);
-				AddBMPToCache32 (0,0);
+				AddBMPToCache32 (0,0,0);
 				CloseAllRequestedFiles(FALSE); 
 				goto RtnTrue;
 			}

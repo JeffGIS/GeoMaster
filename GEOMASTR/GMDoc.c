@@ -355,7 +355,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		{
 			int width = 0;
 			int height = 0;
-			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE, 0);
 			if (hDib32)
 			{
 				width = FreeImage_GetWidth(hDib32);
@@ -429,7 +429,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		{
 			int width = 0;
 			int height = 0;
-			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE, 0);
 			if (hDib32)
 			{
 				width = FreeImage_GetWidth(hDib32);
@@ -512,7 +512,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		{
 			int width = 0;
 			int height = 0;
-			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE, 0);
 			if (hDib32)
 			{
 				width = FreeImage_GetWidth(hDib32);
@@ -590,7 +590,7 @@ BOOL ProcessGMDocItem(HWND hWnd)
 		{
 			int width = 0;
 			int height = 0;
-			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE);
+			HDIB32	hDib32 = LoadDIB32(imagePath, FALSE,0);
 			if (hDib32)
 			{
 				width = FreeImage_GetWidth(hDib32);

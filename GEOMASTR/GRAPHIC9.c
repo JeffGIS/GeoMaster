@@ -1922,7 +1922,7 @@ BOOL GetMapBounds (LPSTR File,LPMNMXCORD pBounds)
 
 	case MT_IMAGE:
 	{
-		HDIB32 hDib = LoadDIB32 (File,FALSE);
+		HDIB32 hDib = LoadDIB32 (File,FALSE, 0);
 		MNMXCORD BitmapBounds;
 
     	GetImageBounds (File,hDib,&BitmapBounds,&CurView->FileMNMX);

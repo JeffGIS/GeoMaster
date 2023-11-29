@@ -3466,7 +3466,8 @@ typedef struct
 		RECT	CurrentIconRect; 
 		char	RButFunction[MAX_RBUTFUN];
 		short	OnPrintAddSpaceToVP; 
-		char	unusedspace[8];
+		short	displayImagePlaneInRed;
+		char	unusedspace[6];
 		HANDLE  hTranScreenToBase;
 		HANDLE  hTranBaseToScreen;
 		double	LLNormFactor; 

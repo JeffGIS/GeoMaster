@@ -3267,7 +3267,7 @@ BOOL CreateBPWFromCPT (LPSTR ImageFile)
 	strcpy (BPWFile,CPTFile);
 	strcat (CPTFile,".cpt");
 	strcat (BPWFile,".bpw");
-	if (!(hDib = LoadDIB32 (ImageFile,TRUE)))
+	if (!(hDib = LoadDIB32 (ImageFile,TRUE, 0)))
 		return rtn;
 	pDibInfo = (LPBITMAPINFOHEADER) GetDibHeader (hDib);
 	DestroyDIB32(hDib,FALSE);

@@ -1518,7 +1518,7 @@ GotCloseFilehSQL:
 				int flag = atoi(Arg[4]);
 				AllowBMPCaching = FALSE;
 				AllowCache = FALSE;
-				HDIB32 hDIB = LoadDIB32(Arg[2], FALSE);
+				HDIB32 hDIB = LoadDIB32(Arg[2], FALSE, 0);
 				rtn = SaveDIB32(hDIB, Arg[3], -1, flag);
 				DestroyDIB32(hDIB, FALSE);
 				AllowBMPCaching = SaveBMPCache;
@@ -1591,7 +1591,7 @@ GotCloseFilehSQL:
 			if (!_fstricmp(Arg[1], "WIDTH"))
 			{
 				int width = 0;
-				HDIB32	hDib32 = LoadDIB32(Arg[2], FALSE);
+				HDIB32	hDib32 = LoadDIB32(Arg[2], FALSE, 0);
 				if (hDib32)
 					width = FreeImage_GetWidth(hDib32);
 				ltoa(width, OutLoc, 10);
@@ -1601,7 +1601,7 @@ GotCloseFilehSQL:
 			if (!_fstricmp(Arg[1], "HEIGHT"))
 			{
 				int height = 0;
-				HDIB32	hDib32 = LoadDIB32(Arg[2], FALSE);
+				HDIB32	hDib32 = LoadDIB32(Arg[2], FALSE, 0);
 				if (hDib32)
 					height = FreeImage_GetHeight(hDib32);
 				ltoa(height, OutLoc, 10);
@@ -1621,7 +1621,7 @@ GotCloseFilehSQL:
 			}
 			if (!_fstricmp(Arg[1], "WINDOW"))//$IMAGE(WINDOW,file,waitforkey,rect(opt))
 			{
-			    HDIB32	hDib32 = LoadDIB32(Arg[2],FALSE);
+			    HDIB32	hDib32 = LoadDIB32(Arg[2],FALSE, 0);
 				RECT	WindowRect;
 
  				rtn = FALSE;
@@ -2431,7 +2431,7 @@ GotCloseFilehSQL:
 		case 530: //$CLEAR(IMAGEBUFFER)
 		{
 			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
-			AddBMPToCache32 (0,0);
+			AddBMPToCache32 (0,0, 0);
 			goto RtnTrue;
 		}
 
@@ -4875,7 +4875,7 @@ GotCloseFilehSQL:
 				width = atof (Arg[3]);
 				height = atof (Arg[4]);
 				wantPickBox = atob(Arg[5]);
-				hDIB32 = LoadDIB32(Arg[2],FALSE);
+				hDIB32 = LoadDIB32(Arg[2],FALSE, 0);
 				if (hDIB32)
 				{
 				    BITMAPINFOHEADER DibInfo;  

@@ -874,6 +874,11 @@ GSSiExitProg (1348);
 					CurView->PointSymbolOveride = atoi(Arg[4]);
 					goto RtnTrue;
 				}
+				else if (!_fstricmp(Arg[3], "SHOWPLANEASRED"))
+				{
+					CurView->displayImagePlaneInRed = atoi(Arg[4]);
+					goto RtnTrue;
+				}
 				else if (!_fstricmp(Arg[3], "LINESYMBOL"))
 				{
 					CurView->LineSymbolOveride = atoi(Arg[4]);

@@ -1944,7 +1944,7 @@ GSSiExitProg (439);
 			 ExpandText(BMPath);
 			 if (ExistFile(BMPath))
 			 {
-				 hDIB = LoadDIB32(BMPath,FALSE);
+				 hDIB = LoadDIB32(BMPath,FALSE, 0);
 			 }
 			 else if ((hBmp = LoadBitmap(hInst, UCAPPNAME)))
 			 {
@@ -8151,7 +8151,7 @@ BOOL FAR PASCAL PNPARMSMsgProc(HWND hWndDlg, UINT Message, WPARAM wParam, LPARAM
 				else
 				{
 					SetViewport(*pCommandViewport);
-					AddBMPToCache32 (0,0);
+					AddBMPToCache32 (0,0, 0);
 					_fstrcpy (ImageFile,CurView->lpFiles[0]);  
 					ExpandText (ImageFile);
 					hDib = BMPHandleFromEXT (ImageFile);

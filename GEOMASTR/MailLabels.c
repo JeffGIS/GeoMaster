@@ -86,7 +86,7 @@ BOOL PrintMailLabels(int nArgs, LPSTR *Arg, LPSTR OutLoc)//print to 5160 labels
 		int PointSize = 8;
 		int FontSize = -MulDiv(PointSize, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 		int nLabels = NumSQLRows(hDB);
-		HDIB32 hDIB32 = LoadDIB32(ImagePath, FALSE);
+		HDIB32 hDIB32 = LoadDIB32(ImagePath, FALSE, 0);
 		char lines[4][256];
 
 		// You always have to use an AbortProc().

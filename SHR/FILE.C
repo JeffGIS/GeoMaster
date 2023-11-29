@@ -187,7 +187,7 @@ Exit:
 }
 
 
-HDIB32 LoadDIB32(LPSTR lpFileNameIN,BOOL AdjustColorsToVP)
+HDIB32 LoadDIB32(LPSTR lpFileNameIN,BOOL AdjustColorsToVP,int displayImagePlaneInRed)
 {
    HDIB32 hDIB=0;
    LPBITMAPINFOHEADER  pDibInfo;
@@ -224,7 +224,7 @@ HDIB32 LoadDIB32(LPSTR lpFileNameIN,BOOL AdjustColorsToVP)
 	hDIB = BMPHandleFromEXT(lpFileName);
 	if (!hDIB && ExistFile(lpFileName))
 	{
-		AddBMPToCache32(0, 0);
+		AddBMPToCache32(0, 0, 0);
 		hDIB = BMPHandleFromEXT(lpFileName);
 	}
 
@@ -232,7 +232,7 @@ HDIB32 LoadDIB32(LPSTR lpFileNameIN,BOOL AdjustColorsToVP)
 	{
 		if (AdjustColorsToVP)
 			hDIB = AdjustDIB32Colors (hDIB); 
-		AddBMPToCache32 (lpFileName,&hDIB);
+		AddBMPToCache32 (lpFileName,&hDIB, displayImagePlaneInRed);
 	}
    //SetCursor(LoadCursor(NULL, IDC_ARROW)); 
 	if (hDIB && AdjustColorsToVP==24)

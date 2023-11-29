@@ -2315,7 +2315,7 @@ BOOL ProcessFTSegment (SOCKET socket,long ID,LPBYTE pSeg,short SegLen)
 		    CloseSymDict();  
 			CloseOrthos(TRUE);
 			AddBMPToCache (NULL,0);
-			AddBMPToCache32 (NULL,0);
+			AddBMPToCache32 (NULL,0, 0);
     		CloseAllRequestedFiles(FALSE); 
     		GSSiRemove (FTRecord.LocalFile);
     		GSSiRename (FTRecord.TempFile,FTRecord.LocalFile);  

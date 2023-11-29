@@ -1213,7 +1213,7 @@ int MapImageToFile (LPSTR MapImageFile,long MapID,LPSTR OutFile,LPMNMXCORD pBoun
 						{
 							BigWrite (FidOut,pMem,pMAPFILE->Size,-1);
 							GSSiClose2 (&FidOut);  
-							AddBMPToCache32 (0,0);
+							AddBMPToCache32 (0,0, 0);
 							rtn=TRUE;
 	//            			GMEnableMenuItem(hWndMain, IDM_Z_ORTHO, MF_BYCOMMAND | MF_ENABLED);
 						}

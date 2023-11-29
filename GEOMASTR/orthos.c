@@ -628,7 +628,7 @@ BOOL DisplayTranBMFileInVP (HDC hDC,LPSTR BMFile,LPSTR TranFile)
 	RECT	bm, vp;   
 	short	rop=0;   
 	double	Res=1;
-	HDIB32 hDib=LoadDIB32 (BMFile,TRUE); 
+	HDIB32 hDib=LoadDIB32 (BMFile,TRUE, 0);
 	MNMXCORD	BitmapBounds,WBounds;
 	LPSTR	pDot;
 	HANDLE	hTran;
@@ -820,7 +820,7 @@ BOOL DisplayBMFileInVP32(HDC hDC, LPSTR BMFile, double RotationAZ, BOOL fitToVP,
 	RECT	bm, vp;   
 	short	rop=0;   
 	double	Res=1;
-	HDIB32 hDib=LoadDIB32 (BMFile,TRUE); 
+	HDIB32 hDib=LoadDIB32 (BMFile,TRUE, 0);
 	HDIB32 hDib32bit;
 	MNMXCORD	BitmapBounds,WBounds;
 	char	TranFile[MAX_PATH];
@@ -3055,7 +3055,7 @@ BOOL DisplayBMInVP32Ext (HDC hDC,LPSTR BMFile,short vpxin,short vpyin,short vpwi
 	RECT	bm, vp;   
 	short	rop=0;   
 	double	Res=1;
-	HDIB32 hDib=LoadDIB32 (BMFile,TRUE);
+	HDIB32 hDib=LoadDIB32 (BMFile,TRUE, 0);
     
     if (!hDib)
     	return FALSE;

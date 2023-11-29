@@ -7537,7 +7537,7 @@ BOOL CreateImageZoomWindow (int VPID)
 	{
 		if (CurView->FileType[i] == 3)
 		{
-			if (!(hDibImageZoom = LoadDIB32 (CurView->lpFiles[i],TRUE)))
+			if (!(hDibImageZoom = LoadDIB32 (CurView->lpFiles[i],TRUE, 0)))
 				return FALSE;
 
 			if (!GetImageBounds (CurView->lpFiles[i],hDibImageZoom,&BitmapBounds,&WBounds))

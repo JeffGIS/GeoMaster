@@ -313,7 +313,7 @@ HPEN CreateTexturePen (int iWidth,LPSTR TextureFile)
 	int	ln;
 	HPEN	hPen;
 
-	hDIB = LoadDIB32 (TextureFile,FALSE);
+	hDIB = LoadDIB32 (TextureFile,FALSE, 0);
 	if (!hDIB)
 		hPen = CreatePen (PS_SOLID,iWidth,0);
 	else

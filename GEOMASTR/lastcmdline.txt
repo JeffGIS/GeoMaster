@@ -1,2 +1,2 @@
-configs\trailrank3.gmc  [%USEGDIPLUS]=F;[%KFO]=T;  
-f:\gmmobile\metroUTM
+configs\jeff\imagelayers.gmc /F /DNC [%USERLEV]=2;[PARMFILE]=c:\temp\parms.txt; 
+h:\MplsRemoteTemplate\GeoMas
