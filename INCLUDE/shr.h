@@ -623,6 +623,7 @@ double ldistpp(LPDPOINT Point1, LPDPOINT Point2);
 FPOINT MidPointF(FPOINT Point1, FPOINT Point2);
 POINT MidPoint(POINT Point1, POINT Point2);
 DPOINT MidPointD(DPOINT Point1, DPOINT Point2);
+DPOINT MidPointDp(LPDPOINT Point1, LPDPOINT Point2);
 DPOINT3D MidPoint3D (DPOINT3D Point1, DPOINT3D Point2);
 double getaz(POINT Point1, POINT Point2);
 double getazF(FPOINT Point1, FPOINT Point2);

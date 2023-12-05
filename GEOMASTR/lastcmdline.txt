@@ -1,2 +1,2 @@
-configs\jeff\imagelayers.gmc /F /DNC [%USERLEV]=2;[PARMFILE]=c:\temp\parms.txt; 
+configs\jeff\textproblem.gmc /F /DNC [%USERLEV]=2;[PARMFILE]=c:\temp\parms.txt; 
 h:\MplsRemoteTemplate\GeoMas

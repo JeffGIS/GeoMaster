@@ -12206,20 +12206,40 @@ point.y = (Point1.y + Point2.y) / 2;
 
 DPOINT MidPointD(DPOINT Point1, DPOINT Point2)
 #if ENABLETRACE
-{GSSiEnterProg (377);
-#endif
-{   DPOINT point;
-
-    point.x = (Point1.x + Point2.x)/2;
-    point.y = (Point1.y + Point2.y)/2;
 {
-#if ENABLETRACE
-GSSiExitProg (377);
+	GSSiEnterProg(377);
 #endif
-    return (point);
-}
+	{   DPOINT point;
+
+	point.x = (Point1.x + Point2.x) / 2;
+	point.y = (Point1.y + Point2.y) / 2;
+	{
 #if ENABLETRACE
+		GSSiExitProg(377);
+#endif
+		return (point);
+	}
+#if ENABLETRACE
+	}
+#endif
 }
+DPOINT MidPointDp(LPDPOINT Point1,LPDPOINT Point2)
+#if ENABLETRACE
+{
+	GSSiEnterProg(377);
+#endif
+	{   DPOINT point;
+
+	point.x = (Point1->x + Point2->x) / 2;
+	point.y = (Point1->y + Point2->y) / 2;
+	{
+#if ENABLETRACE
+		GSSiExitProg(377);
+#endif
+		return (point);
+	}
+#if ENABLETRACE
+	}
 #endif
 }
 

@@ -4270,8 +4270,12 @@ GSSiExitProg (993);
 	PickPointW = CurPickPoint;
     if (!PickingByRefno)
 		pina = POINT_IN_AREAD (PickPointW, nPnts, lpDpoints,1,0,0,GetPolygonPickAccelerator(-nPnts));
-	
-    if (PickPerim == 1) 
+	DPOINT pt[4];
+	pt[0] = lpDpoints[0];
+	pt[1] = lpDpoints[1];
+	pt[2] = lpDpoints[2];
+	pt[3] = lpDpoints[3];
+	if (PickPerim == 1)
     {
     	HANDLE hNew = GSSiGlobAlloc ( 773,GMEM_MOVEABLE,(nPnts+1)*(long)sizeof(DPOINT));
     	HPDPOINT	pNewPoints=(HPDPOINT)GlobalLock (hNew);

@@ -5120,6 +5120,204 @@ int AdjustPointIndex(int startPointIndex,int nPoly, HANDLE hPolyPartLen, int geo
 	GlobalUnlock(hPolyPartLen);
 	return n;
 }
+
+DPOINT PolyAverage(LPDPOINT points, int np)
+{
+	DPOINT rtn = { 0,0 };
+	for (int i = 0; i < np; i++)
+	{
+		rtn.x += points[i].x;
+		rtn.y += points[i].y;
+	}
+	rtn.x /= np;
+	rtn.y /= np;
+	return rtn;
+}
+
+double fixZeroDeg(double deg, LPDPOINT Points)
+{
+	double rtn = deg;
+
+	if (deg == 0.0)
+	{
+		DPOINT midp[4];
+		midp[0] = MidPointDp(&Points[0], &Points[1]);
+		midp[1] = MidPointDp(&Points[1], &Points[2]);
+		midp[2] = MidPointDp(&Points[2], &Points[3]);
+		midp[3] = MidPointDp(&Points[3], &Points[0]);
+		double d1 = ldistpp(&midp[0],&midp[2]);
+		double d2 = ldistpp(&midp[1],&midp[3]);
+		if (d1 > d2)
+		{
+			rtn = getazd(&midp[0], &midp[2]);
+			rtn /= DEGtoRAD;
+		}
+		else
+		{
+			rtn = getazd(&midp[1], &midp[3]);
+			rtn /= DEGtoRAD;
+		}
+		if (rtn > 90 && rtn < 270)
+		{
+			rtn += 180;
+			rtn *= DEGtoRAD;
+			rtn = LTWOPI(rtn);
+			rtn /= DEGtoRAD;
+		}
+	}
+	return rtn;
+}
+static DPOINT GetTextBeginPoint(LPDPOINT Points, double* deg, int np)
+{
+	DPOINT rtn = Points[0];
+	*deg = fixZeroDeg(*deg, Points);
+	if (*deg != 0.0 && (np > 3 && np < 6))
+	{
+		DPOINT midPt = PolyAverage(Points, 4);
+		double az = *deg * DEGtoRAD;
+		//az = avAzm;
+		DPOINT NewPoints[4];
+		DPOINT zeroPt = { 0,0 };
+		int swPt = 0;
+		double minDtoZero = DBL_MAX;
+
+		double rot = LTWOPI(-az);
+		for (int i = 0; i < 4; i++)
+		{
+			double d = ldistpp(&midPt, &Points[i]);
+			double azm = getazd(&midPt, &Points[i]);
+			azm = LTWOPI(azm + rot);
+			NewPoints[i] = dnewpt(midPt, azm, d);
+			double dtoZero = ldistpp(&zeroPt, &NewPoints[i]);
+			if (dtoZero < minDtoZero)
+			{
+				minDtoZero = dtoZero;
+				swPt = i;
+			}
+		}
+		rtn = Points[swPt];
+	}
+	return rtn;
+}
+static DPOINT GetTextBeginPoint1(LPDPOINT Points, double* az, int np)
+{
+	DPOINT pt = Points[0];
+	int lowpt = 0;
+	int highpt = 0;
+	double adjustaz = 0;
+	DPOINT pts[4];
+	memcpy(pts, Points, 4 * sizeof(DPOINT));
+	if (*az < 0.0)
+		*az += 360.0;
+	else if (*az >= 360.0)
+		*az -= 360.0;
+	if (*az == 0.0)
+		adjustaz = 0.000001;
+	else if (*az == 90.0)
+		adjustaz = -0.000001;
+	else if (*az == 180.0)
+		adjustaz = -0.000001;
+	else if (*az == 270.0)
+		adjustaz = 0.000001;
+	if (*az > 90 && *az < 180)
+		*az += 180;
+
+	//rotate to 0 and pick the most southwest point
+	switch (np)
+	{
+	case 4:
+	case 5:
+	{
+		if (adjustaz != 0.0)
+		{
+			DPOINT OldPoints[2];
+			DPOINT NewPoints[2];
+			DPOINT fromPoints[4], toPoints[4];
+			float RSQMIN;
+			double oldAz = *az;
+			*az += adjustaz;
+			OldPoints[0] = Points[0];
+			OldPoints[1] = Points[2];
+			double dist = ldistpp(&OldPoints[0], &OldPoints[1]);
+			double azm = getazd (&OldPoints[0], &OldPoints[1]);
+			azm += adjustaz;
+			NewPoints[0] = Points[0];
+			NewPoints[1] = dnewpt(NewPoints[0], azm, dist);
+			HANDLE hTran = STRANPoints(1859, OldPoints,NewPoints, 2, &RSQMIN, 1, 0);
+			for (int i = 0; i < 4; i++)
+			{
+				fromPoints[i] = Points[i];
+				Points[i] = TranPoint(&Points[i], hTran);
+				toPoints[i] = Points[i];
+
+			}
+			CloseTRANS2(&hTran);
+		}
+		double miny = DBL_MAX;
+		double maxy = -DBL_MAX;
+		for (int i = 0; i < 4; i++)
+		{
+			if (Points[i].y < miny)
+			{
+				lowpt = i;
+				miny = Points[i].y;
+			}
+			if (Points[i].y > maxy)
+			{
+				highpt = i;
+				maxy = Points[i].y;
+			}
+		}
+		if (*az >= 0 && *az <= 90)
+		{
+			pt = Points[lowpt];
+		}
+		else if (*az > 90 && *az < 180)
+		{
+			int nearPt = lowpt;
+			double nearDist = DBL_MAX;
+			pt = Points[lowpt];
+			for (int i = 0; i < 4; i++)
+			{
+				if (i != lowpt)
+				{
+					double d = ldistpp(&pt, &Points[i]);
+					if (d < nearDist)
+					{
+						nearDist = d;
+						nearPt = i;
+					}
+				}
+			}
+			pt = Points[nearPt];
+		}
+		else if (*az > 270)
+		{
+			int nearPt = highpt;
+			double nearDist = DBL_MAX;
+			pt = Points[highpt];
+			for (int i = 0; i < 4; i++)
+			{
+				if (i != highpt)
+				{
+					double d = ldistpp(&pt, &Points[i]);
+					if (d < nearDist)
+					{
+						nearDist = d;
+						nearPt = i;
+					}
+				}
+			}
+			pt = Points[nearPt];
+		}
+	}
+		break;
+	default:
+		break;
+	}
+	return pt;
+}
+
 BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
 #if ENABLETRACE
 {GSSiEnterProg (1375);
@@ -5717,11 +5915,18 @@ NextPt:;
 					debugvalue++;
 				else if (type == 2 && *pNumPoints != 5)
 					ii = 1;
+				displayTextPoly = TRUE;
 				if (displayTextPoly)
         		for (i=0;i<nPoly;i++)
         		{   
         			int	np=*pNumPoints;
-					GWPolylineD (hDC,lpDCurPoints,np,0); 
+					DPOINT pt[5];
+					pt[0] = lpDCurPoints[0];
+					pt[1] = lpDCurPoints[1];
+					pt[2] = lpDCurPoints[2];
+					pt[3] = lpDCurPoints[3];
+					pt[4] = lpDCurPoints[4];
+					GWPolylineD (hDC,lpDCurPoints,np,0);
 					lpDCurPoints+=*pNumPoints++;
 				}
 				GlobalUnlock (hPolyPartLen);
@@ -5882,11 +6087,12 @@ NextPt:;
 					//	goto RtnFalse;
 					CurPointLocD.x = MidPoint.x; 
 					CurPointLocD.y = MidPoint.y;
-					TXLoc = CurPointLocD; 
-		    		LastElementBeginPoint = CurPointLocD;     
+					double azc = atof(AZC);
+					TXLoc = CurPointLocD = GetTextBeginPoint(lpDCurPoints,&azc, np);// CurPointLocD;
+					LastElementBeginPoint = TXLoc;// CurPointLocD;
 		    		//MidPointAZ = RADDEG * atof (AZC);
 		    		MidPointAZ = AZ; 
-		    		PTRot = MidPointAZ; 
+					PTRot = azc * DEG_TO_RAD;// MidPointAZ;
 
 ExitText:
 					HaveTXLoc = TRUE;
