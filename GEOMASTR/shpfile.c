@@ -5915,7 +5915,7 @@ NextPt:;
 					debugvalue++;
 				else if (type == 2 && *pNumPoints != 5)
 					ii = 1;
-				displayTextPoly = TRUE;
+				displayTextPoly = FALSE;
 				if (displayTextPoly)
         		for (i=0;i<nPoly;i++)
         		{   
