@@ -137,6 +137,8 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(BETWEENDIST,name,fromdist,todist)
 //$POINTLIST(BOUNDS,name)
 //$POINTLIST(POINTATDIST,name,dist);
+	if (OutLoc)
+		strcpy(OutLoc, "0");
 
 	if (nArgs < 0)
 	{
@@ -183,6 +185,7 @@ DestroyAll:
 			hPointList[iList] = 0;
 			if (iList == nPointLists)
 				nPointLists++;
+			strcpy(OutLoc, "1");
 			return TRUE;
 		}
 		else if (strchr (Arg[4],' '))
@@ -199,6 +202,7 @@ DestroyAll:
 			}
 			if (iList == nPointLists)
 				nPointLists++;
+			strcpy(OutLoc, "1");
 			return TRUE;
 		}
 		else if (!stricmp (Arg[4],"HLT")) //item in highlight list
@@ -208,6 +212,7 @@ DestroyAll:
 			{
 				if (iList == nPointLists)
 					nPointLists++;
+				strcpy(OutLoc, "1");
 				rtn = TRUE;
 			}
 		}
@@ -236,6 +241,7 @@ DestroyAll:
 				GlobalUnlock (hPointList[iList]);
 				if (iList == nPointLists)
 					nPointLists++;
+				strcpy(OutLoc, "1");
 				rtn = TRUE;
 			}
 
@@ -258,6 +264,7 @@ DestroyAll:
 					}
 					if (iList == nPointLists)
 						nPointLists++;
+					strcpy(OutLoc, "1");
 					rtn = TRUE;
 					break;
 				}
@@ -282,6 +289,7 @@ DestroyAll:
 					}
 					if (iList == nPointLists)
 						nPointLists++;
+					strcpy(OutLoc, "1");
 					rtn = TRUE;
 					break;
 				}
@@ -797,6 +805,7 @@ DestroyAll:
 			if (!stricmp (PointListID[i],Arg[2]))
 			{
 				rtn = TRUE;
+				strcpy(OutLoc, "1");
 				GSSiGlobFree (&hPointList[i]);
 				nPointsInList[i] = 0;
 				if (i != nPointLists-1)

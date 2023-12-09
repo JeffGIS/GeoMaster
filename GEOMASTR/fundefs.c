@@ -673,11 +673,16 @@ int	GetFunctionID20 (LPSTR str)
 			if (!_fstrnicmp (str,"ADDCONTOURSPLITLINES",20)) return 2002;
 			return 0; 
 }
-int	GetFunctionID22 (LPSTR str)
+int	GetFunctionID22(LPSTR str)
 {
-			if (!_fstrnicmp (str,"JOINLINESBETWEENPOINTS",22)) return 2201;          
-			return 0; 
-}			
+	if (!_fstrnicmp(str, "JOINLINESBETWEENPOINTS", 22)) return 2201;
+	return 0;
+}
+int	GetFunctionID24(LPSTR str)
+{
+	if (!_fstrnicmp(str, "GETPERPPOLYATPOINTONPOLY", 24)) return 2401;
+	return 0;
+}
 int	GetFunctionID26 (LPSTR str)
 {
 			if (!_fstrnicmp (str,"GETSTREETSEGSBETWEENPOINTS",26)) return 2601;          
@@ -860,13 +865,20 @@ GSSiExitProg (609);
 #endif
 			return GetFunctionID20 (str);
 }
-		case 22: 
-{
+		case 22:
+		{
 #if ENABLETRACE
-GSSiExitProg (609);
+			GSSiExitProg(609);
 #endif
-			return GetFunctionID22 (str);
-}
+			return GetFunctionID22(str);
+		}
+		case 24:
+		{
+#if ENABLETRACE
+			GSSiExitProg(609);
+#endif
+			return GetFunctionID24(str);
+		}
 		case 26:
 {
 #if ENABLETRACE

@@ -3228,10 +3228,21 @@ BOOL CreateThemeHighlightFile (void)
 	BTVARDESC	BTVar[2];	
 	short	len =  MAX_THEME_VALUE_LEN;
 	
+	if (CurTheme->hHighlightFile)
+	{
+		BT_CLOSEANDDELETE(&CurTheme->hHighlightFile);
+	}
+	else if (CurTheme->hHighlightFileName)
+	{
+		pName = GlobalLock(CurTheme->hHighlightFileName);
+		if (FileType(pName))
+			GSSiRemove(pName);
+		GSSiGlobUlFree(&CurTheme->hHighlightFileName);
+	}
 	if (CurTheme->ID == GF_SINGLE_VALUE_THEME)
 		len = 8;
 	CurTheme->ValueLen = len;
-	CurTheme->hHighlightFileName = GSSiGlobAlloc (1021,GMEM_MOVEABLE,256);
+	CurTheme->hHighlightFileName = GSSiGlobAlloc (1021,GMEM_MOVEABLE,MAX_PATH+2);
 	pName = GlobalLock (CurTheme->hHighlightFileName);
 	GSSiGetTempFileName (0,"gml",0,pName);
 	BTVar[0].BT_VARTYP=BT_INTEGER;
@@ -3694,7 +3705,13 @@ BOOL CloseThemeFiles(void)
 				GSSiRemoveAndClear (CurTheme->ScatterFile);
 SkipRemove:
 				BT_CLOSEANDDELETE (&CurTheme->hHighlightFile);
-				GSSiGlobFree (&CurTheme->hHighlightFileName);
+				if (CurTheme->hHighlightFileName)
+				{
+					LPSTR pName = GlobalLock(CurTheme->hHighlightFileName);
+					if (FileType(pName))
+						GSSiRemove(pName);
+					GSSiGlobUlFree(&CurTheme->hHighlightFileName);
+				}
 				BT_CLOSEANDDELETE (&CurTheme->hDisperseFile);
 				CloseThemeDataFile(FALSE); 
 	  			CloseAndDeleteFile ((LPHFILE)&CurTheme->FidDelayedText); 

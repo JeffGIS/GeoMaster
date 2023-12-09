@@ -839,13 +839,13 @@ GSSiExitProg (1348);
 					goto RtnFalse;
 				HANDLE hLine = GSSiGlobAlloc(0, GMEM_MOVEABLE, 1024);
 				LPSTR pLine = GlobalLock(hLine);
-				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS");
+				sprintf(pLine, "REFNO\tPREFIX\tUDI\tTYPE\tDESC\tBOUNDS\tLENGTH");
 				fputstring(pLine, Fid);
 				int pos = BT_FIRST;
 				while (!BT_FIND(hHighlight, (LPSTR)&Refno, pos, BT_ANY, (LPSTR)&HighlightData))
 				{
 					pos = BT_NEXT;
-					sprintf(pLine, "%i\t%s\t%s\t%i\t%i\t%lf %lf %lf %lf", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI, HighlightData.PD.Type, HighlightData.PD.Desc, HighlightData.PD.Rect.xmn, HighlightData.PD.Rect.ymn, HighlightData.PD.Rect.xmx, HighlightData.PD.Rect.ymx);
+					sprintf(pLine, "%i\t%s\t%s\t%i\t%i\t%lf %lf %lf %lf	%lf", HighlightData.PD.Refno, HighlightData.PD.Prefix, HighlightData.PD.UDI, HighlightData.PD.Type, HighlightData.PD.Desc, HighlightData.PD.Rect.xmn, HighlightData.PD.Rect.ymn, HighlightData.PD.Rect.xmx, HighlightData.PD.Rect.ymx, HighlightData.PD.Length);
 					fputstring(pLine, Fid);
 					nWritten++;
 				}
@@ -3525,7 +3525,8 @@ SetVis:
 			{
 				short	pickfile = atoi (Arg[3]);
 				SetCurView(SetVPFromName(Arg[4], &Err));
-				pickfile += CurView->ID * 256;
+				if (pickfile > -1)
+					pickfile += CurView->ID * 256;
 				if ((lpColon = _fstrchr(Arg[2], ':')))
 					*lpColon++ = 0;
 				else
@@ -3931,7 +3932,7 @@ SetVis:
 		case 426: //$POLY(Ref or TAG or PICKED or POINTS|pointlist,LENGTH)
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,POINT,dist)
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,AZ,dist)
-				//		 (Ref or TAG or PICKED or POINTS|pointlist,OFFSET,dist)
+				//		 (Ref or TAG or PICKED or POINTS|pointlist,OFFSET,dist,offsetdist)
 		{
 			int			nPoints;
 			HANDLE		hPoints=0;
@@ -3939,7 +3940,7 @@ SetVis:
 			LPSTR		Prefix,lpColon;
 			BOOL		UnSplined=TRUE;
 
-			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp(Arg[1], "SAVE"))
@@ -4055,13 +4056,19 @@ SetVis:
 				GSSiGlobUlFree (&hPoints);
 				goto Rtnl;
 			}
-			Dist = atof (Arg[3]);
+			Dist = atof(Arg[3]);
+			double OffsetDist = atof(Arg[4]);
 			Point = PointAtDistOnPoly (pPoints,nPoints,Dist,&RVal,0);
 			if (!stricmp (Arg[2],"AZ"))
 			{
 				ftoa (OutLoc,RVal);
 				GSSiGlobUlFree (&hPoints);
 				goto Rtnl;
+			}
+			if (OffsetDist != 0)
+			{
+				double az = LTWOPI(RVal - HALFPI);
+				Point = dnewpt(Point, az, OffsetDist);
 			}
 			dpointtoa (OutLoc,&Point);
 			GSSiGlobUlFree (&hPoints);

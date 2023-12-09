@@ -6401,13 +6401,20 @@ GSSiExitProg (1350);
 			goto Rtnl;
         }
 
-		case 2601: //$GETSTREETSEGSBETWEENPOINTS(
-        {   
+		case 2401: //$GETPERPPOLYATPOINTONPOLY(
+		{
 			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
-			nlong = GetStreetSegsBetweenPoints (Arg[1],Arg[2],Arg[3],Arg[4],Arg[5],Arg[6],Arg[7],Arg[8]);
-			ltoa (nlong,OutLoc,10);
+			nlong = GetStreetSegsBetweenPoints(Arg[1], Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7], Arg[8]);
+			ltoa(nlong, OutLoc, 10);
 			goto Rtnl;
-        }
+		}
+		case 2601: //$GETSTREETSEGSBETWEENPOINTS(
+		{
+			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nlong = GetStreetSegsBetweenPoints(Arg[1], Arg[2], Arg[3], Arg[4], Arg[5], Arg[6], Arg[7], Arg[8]);
+			ltoa(nlong, OutLoc, 10);
+			goto Rtnl;
+		}
 
 		default:
 			goto Rtn0;
