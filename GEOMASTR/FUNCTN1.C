@@ -746,6 +746,16 @@ GSSiExitProg (1348);
 					ftoa (OutLoc,CurView->Height);
 					goto Rtnl; 
 				}
+				else if (!_fstricmp(Arg[3], "PWIDTH"))
+				{
+					ftoa(OutLoc, RECTWIDTH(&CurView->Rect));
+					goto Rtnl;
+				}
+				else if (!_fstricmp(Arg[3], "PHEIGHT"))
+				{
+					ftoa(OutLoc, RECTHEIGHT(&CurView->Rect));
+					goto Rtnl;
+				}
 				else if (!_fstricmp (Arg[3],"TAGPOINTX"))
 				{
 					ftoa (OutLoc,CurView->TagPoint.x);

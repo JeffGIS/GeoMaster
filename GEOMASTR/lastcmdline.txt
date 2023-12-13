@@ -1,2 +1,2 @@
-configs\jeff\alleywidth.gmc /F /DNC [%USERLEV]=2;[PARMFILE]=c:\temp\parms.txt; 
+[%DL]configs\AlleyWidthReview.GMC /F [LEFTMENU]=idxalleywidth;[%GFTHEMEFUNFILE]=AlleyWidthReview;
 h:\MplsRemoteTemplate\GeoMas

@@ -1377,12 +1377,23 @@ void DisplayDistanceThemeLegend(short From,double ThisDist,double AZ,double TotD
 		{
 			GetDistDecimals (ConvertDist(ThisDist,DistUnits),DistC);
 			GetDistDecimals (ConvertDist(TotDist+ThisDist,DistUnits),TotDistC);
+			if (DistUnits == IU_MILES && *DistC == '0')
+			{
+				DistUnits = IU_FEET;
+				GetDistDecimals(ConvertDist(ThisDist, DistUnits), DistC);
+				GetDistDecimals(ConvertDist(TotDist + ThisDist, IU_FEET), TotDistC);
+			}
 			sprintf (txt,"%s (%s total) %s", DistC,TotDistC,DistUnitOpts[DistUnits-1]); 
 		} 
 		else if (TotDist < 0)
 		{
 			GetDistDecimals (ConvertDist(ThisDist,DistUnits),DistC);
-			AZToBear (AZ,PreDir,DegC,MinC,SecC,PostDir); 
+			if (DistUnits == IU_MILES && *DistC == '0')
+			{
+				DistUnits = IU_FEET;
+				GetDistDecimals(ConvertDist(ThisDist, DistUnits), DistC);
+			}
+			AZToBear (AZ,PreDir,DegC,MinC,SecC,PostDir);
 			sprintf (BearingC,"%s %s %s %s %s",PreDir,DegC,MinC,SecC,PostDir);
 			sprintf (txt,"%s %s    %s", DistC,DistUnitOpts[DistUnits-1],BearingC); 
 		}

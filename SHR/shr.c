@@ -13467,6 +13467,26 @@ MNMXCORD MultiplyBounds(LPMNMXCORD pRect, double Factor)
 	OutRect.ymx = pRect->ymx * Factor;
 	return OutRect;
 }
+RECT AdjustRect(LPRECT Rect, int xinc, int yinc)
+{
+	RECT OutRect = *Rect;
+
+	OutRect.left -= xinc;
+	OutRect.right += xinc;
+	OutRect.top -= yinc;
+	OutRect.bottom += yinc;
+	return OutRect;
+}
+RECT MoveRect(LPRECT Rect, int xinc, int yinc)
+{
+	RECT OutRect = *Rect;
+
+	OutRect.left += xinc;
+	OutRect.right += xinc;
+	OutRect.top += yinc;
+	OutRect.bottom += yinc;
+	return OutRect;
+}
 
 RECT FactorRect (LPRECT pRect,double Factor)
 {

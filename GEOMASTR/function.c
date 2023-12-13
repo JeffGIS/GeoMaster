@@ -4640,8 +4640,10 @@ SetVis:
 				  //$RECT(SPLIT,rect,LL)
 				  //$RECT(SPLIT,rect,UR)
 				  //$RECT(SPLIT,rect,LR)
+				  //$RECT(ADJUST,rect,xinc,yinc)
+				  //$RECT(DISPLAY,rect,color,text,vpname)
 		{
-			nArgs = GetFunArgs(Args, Arg, 3, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 5, &hMem, pBrkPt, bpOffset, bpLen);
 			*OutLoc = 0;
 
 			if (nArgs > 1)
@@ -4661,6 +4663,31 @@ SetVis:
 					{
 						ival = RECTHEIGHT(&inRect);
 						itoa(ival, OutLoc, 10);
+					}
+					else if (!stricmp(Arg[1], "ADJUST"))
+					{
+						int xinc = atoi(Arg[3]);
+						int yinc = atoi(Arg[4]);
+
+						outRect = AdjustRect(&inRect, xinc, yinc);
+						recttoa(OutLoc, outRect);
+					}
+					else if (!stricmp(Arg[1], "MOVE"))
+					{
+						int xinc = atoi(Arg[3]);
+						int yinc = atoi(Arg[4]);
+
+						outRect = MoveRect(&inRect, xinc, yinc);
+						recttoa(OutLoc, outRect);
+					}
+					else if (!stricmp(Arg[1], "DISPLAY"))
+					{
+						COLORREF color = atoi(Arg[3]);
+						LPSTR text = Arg[4];
+						SetCurView(SetVPFromName(Arg[5], &Err));
+						outRect = MoveRect(&inRect, CurView->Rect.left, CurView->Rect.top);
+						FillRectColor(CurView->hDC, &outRect, color);
+						strcpy(OutLoc, "1");
 					}
 					else if (!stricmp(Arg[1], "SPLIT"))
 					{
@@ -4690,7 +4717,19 @@ SetVis:
 				goto Rtnl;
 			}
 		}
-
+		case 443: //$TEXT(DISPLAY,text,point,size,color,font,vp(opt))
+		{
+			nArgs = GetFunArgs(Args, Arg,7, &hMem, pBrkPt, bpOffset, bpLen);
+			SetCurView(SetVPFromName(Arg[7], &Err));
+			HFONT font = GetStockObject(DEVICE_DEFAULT_FONT);
+			DPOINT pt = atopt(Arg[3], &Err);
+			pt.x += CurView->Rect.left;
+			pt.y += CurView->Rect.top;
+			HFONT oldFont = SelectObject(CurView->hDC, font);
+			TextOut(CurView->hDC, IDNINT(pt.x),IDNINT(pt.y), Arg[2], strlen(Arg[2]));
+			SelectObject(CurView->hDC, oldFont);
+			goto RtnTrue;
+		}
 		default:
 			goto Rtn0;
 	}

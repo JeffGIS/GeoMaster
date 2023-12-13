@@ -5225,9 +5225,9 @@ BOOL ReorderSavedPolys(void)
 				if (!haveGap)
 				{
 					int nJoinedPolys = 1;
-					hSavedPolysJoined = GSSiGlobAlloc(1813, GHND, nJoinedPolys * sizeof(SAVEPOLY));
+					hSavedPolysJoined = GSSiGlobAlloc(1860, GHND, nJoinedPolys * sizeof(SAVEPOLY));
 					LPSAVEPOLY pSavedPolysJoined = (LPSAVEPOLY)GlobalLock(hSavedPolysJoined);
-					pSavedPolysJoined->hSavePoly = GSSiGlobAlloc(1813, GHND, sizeof(MNMXCORD) * nTotPoints * sizeof(DPOINT));
+					pSavedPolysJoined->hSavePoly = GSSiGlobAlloc(1861, GHND, sizeof(MNMXCORD) * nTotPoints * sizeof(DPOINT));
 					LPMNMXCORD pBoundsJoined = GlobalLock(pSavedPolysJoined->hSavePoly);
 					LPDPOINT pPointsJoined = (LPDPOINT)&pBoundsJoined[1];
 					DBoundsInit(pBoundsJoined);
@@ -5263,6 +5263,7 @@ BOOL ReorderSavedPolys(void)
 				DestroySavedPolys();
 				hSavedPolys = hSavedPolysJoined;
 				NumSavedPolys = 1;
+				GSSiGlobFree(&hSavedPolysNew);
 			}
 			else
 			{
