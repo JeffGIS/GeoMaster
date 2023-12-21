@@ -5167,10 +5167,11 @@ double fixZeroDeg(double deg, LPDPOINT Points)
 	}
 	return rtn;
 }
-static DPOINT GetTextBeginPoint(LPDPOINT Points, double* deg, int np)
+static DPOINT GetTextBeginPoint(LPDPOINT Points, double* deg, int np, int nchar)
 {
 	DPOINT rtn = Points[0];
-	*deg = fixZeroDeg(*deg, Points);
+	if (nchar > 2)
+		*deg = fixZeroDeg(*deg, Points);
 	if (*deg != 0.0 && (np > 3 && np < 6))
 	{
 		DPOINT midPt = PolyAverage(Points, 4);
@@ -5915,7 +5916,7 @@ NextPt:;
 					debugvalue++;
 				else if (type == 2 && *pNumPoints != 5)
 					ii = 1;
-				displayTextPoly = FALSE;
+
 				if (displayTextPoly)
         		for (i=0;i<nPoly;i++)
         		{   
@@ -6088,7 +6089,8 @@ NextPt:;
 					CurPointLocD.x = MidPoint.x; 
 					CurPointLocD.y = MidPoint.y;
 					double azc = atof(AZC);
-					TXLoc = CurPointLocD = GetTextBeginPoint(lpDCurPoints,&azc, np);// CurPointLocD;
+					nchar = _fstrlen(word);
+					TXLoc = CurPointLocD = GetTextBeginPoint(lpDCurPoints,&azc, np,nchar);// CurPointLocD;
 					LastElementBeginPoint = TXLoc;// CurPointLocD;
 		    		//MidPointAZ = RADDEG * atof (AZC);
 		    		MidPointAZ = AZ; 

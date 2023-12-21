@@ -1,2 +1,2 @@
-[%DL]configs\AlleyWidthReview.GMC /F [LEFTMENU]=idxalleywidth;[%GFTHEMEFUNFILE]=AlleyWidthReview;
-h:\MplsRemoteTemplate\GeoMas
+Configs\jeff\FGDBTextRotation.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
+g:\geomas
