@@ -218,6 +218,32 @@ DestroyAll:
 		}
 		else if (!stricmp(Arg[4], "ITEM")) //TAG:UDI
 		{
+			LPSTR lpColon;
+			LPSTR Prefix;
+			int Refno = 0;
+			if ((lpColon = _fstrchr(Arg[5], ':')))
+			{
+				Prefix = Arg[5];
+				*lpColon++ = 0;
+			}
+			else
+			{
+				Prefix = 0;
+				Refno = atol(Arg[5]);
+			}
+
+			if (PickByRefno(Refno, Prefix, lpColon, -1))
+			{
+				if (GetPolyPnts((LPPICKDATAHEADER)&PickList[0], FALSE, &nPointsInList[iList],
+					&hPointList[iList], TRUE))
+				{
+					if (iList == nPointLists)
+						nPointLists++;
+					strcpy(OutLoc, "1");
+					rtn = TRUE;
+				}
+			}
+
 		}
 		else if (!stricmp(Arg[4], "CIRCLE"))
 		{

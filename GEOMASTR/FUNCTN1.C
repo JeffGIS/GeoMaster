@@ -665,7 +665,20 @@ GSSiExitProg (1348);
 				{
 					POINT WindowPoint = BasePtToWinPt(&Point);
 					COLORREF c = GetPixel(CurView->hDC, WindowPoint.x, WindowPoint.y);
-					sprintf (OutLoc, "%i", c);
+					sprintf(OutLoc, "%i", c);
+				}
+				goto Rtnl;
+			}
+			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2,opt,color)
+			{
+				DPOINT Point = atopt(Arg[3], &Err);
+				if (Err)
+					*OutLoc = 0;
+				else
+				{
+					POINT WindowPoint = BasePtToWinPt(&Point);
+					COLORREF c = GetPixel(CurView->hDC, WindowPoint.x, WindowPoint.y);
+					sprintf(OutLoc, "%i", c);
 				}
 				goto Rtnl;
 			}

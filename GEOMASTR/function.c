@@ -3933,6 +3933,7 @@ SetVis:
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,POINT,dist)
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,AZ,dist)
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,OFFSET,dist,offsetdist)
+				//		 (Ref or TAG or PICKED or POINTS|pointlist,DISPLAY,width,color,vp)
 		{
 			int			nPoints;
 			HANDLE		hPoints=0;
@@ -4028,6 +4029,41 @@ SetVis:
 					GSSiGlobUlFree (&hOffPoints);
 				}
 				GSSiGlobUlFree (&hPoints);
+				goto Rtnl;
+			}
+			if (!stricmp(Arg[2], "DISPLAY"))
+			{
+				double		baseWidth = atobasedist(Arg[3], &Err);
+				COLORREF	iColor = atoll(Arg[4]);
+				SetCurView(SetVPFromName(Arg[5], &Err));
+				if (!baseWidth)
+					baseWidth = 1;
+				int screenWidth = IDNINT(baseWidth/CurView->BaseUnitsPerPixel);
+				SaveDC(CurView->hDC);
+				SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+				if (!CurView->hRgn)
+				{
+					CurView->hRgn = CreateVPRgn(FALSE, FALSE);
+				}
+				SelectVPClipRgn(CurView->hRgn);
+
+				*OutLoc = 0;
+				HPEN hPen = CreatePen(PS_SOLID, screenWidth, iColor);
+				HPEN hOldPen = SelectObject(CurView->hDC, hPen);
+
+				HANDLE hPoints2 = GSSiGlobAlloc(1323, GMEM_MOVEABLE, (long)sizeof(POINT) * (long)nPoints+4);
+				LPPOINT pPoint = (HPPOINT)GlobalLock(hPoints2);
+				for (int i = 0; i < nPoints; i++)
+				{
+					pPoint[i] = BasePtToScreenPt(&pPoints[i]);
+				}
+				Polyline(CurView->hDC, pPoint, nPoints);
+				GSSiGlobUlFree(&hPoints);
+				GSSiGlobUlFree(&hPoints2);
+				SelectObject(CurView->hDC, hOldPen);
+				GSSiDeleteObject(&hPen);
+				GSSiDeleteObject(&CurView->hRgn);
+				RestoreDC(CurView->hDC, -1);
 				goto Rtnl;
 			}
 			if (!stricmp (Arg[2],"BOUNDS"))
@@ -4721,13 +4757,17 @@ SetVis:
 		{
 			nArgs = GetFunArgs(Args, Arg,7, &hMem, pBrkPt, bpOffset, bpLen);
 			SetCurView(SetVPFromName(Arg[7], &Err));
+			SaveDC(CurView->hDC);
 			HFONT font = GetStockObject(DEVICE_DEFAULT_FONT);
+			COLORREF	iColor = atoll(Arg[5]);
 			DPOINT pt = atopt(Arg[3], &Err);
 			pt.x += CurView->Rect.left;
 			pt.y += CurView->Rect.top;
 			HFONT oldFont = SelectObject(CurView->hDC, font);
+			SetTextColor(CurView->hDC, iColor);
 			TextOut(CurView->hDC, IDNINT(pt.x),IDNINT(pt.y), Arg[2], strlen(Arg[2]));
 			SelectObject(CurView->hDC, oldFont);
+			RestoreDC(CurView->hDC, -1);
 			goto RtnTrue;
 		}
 		default:

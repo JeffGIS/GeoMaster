@@ -1396,6 +1396,7 @@ extern BOOL			HaveTextColor;
 extern BOOL			SetDimensions;
 extern BOOL			FullCurves;
 extern BOOL			HaveTextPointers;
+extern BOOL			displayTextPoly;
 extern BOOL			WantUnsplinedPoints;
 extern RECT			SetDimRect;
 extern short			UsedOrthoBufs;

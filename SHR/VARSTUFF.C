@@ -3664,7 +3664,10 @@ GSSiExitProg (532);
 		case 415:
 			useZLIB = atob(Value);
 			break;
-
+		case 416:
+			displayTextPoly = atob(Value);
+			break;
+			
 		default:
  			break;
 	}
@@ -4099,6 +4102,7 @@ void CreateInternalGlobals (void)
 	AllocateTypeVar("%ENDPADCHAR", 413, FALSE);
 	AllocateTypeVar("%IGNORE_PATANDTRANS", 414, FALSE);
 	AllocateTypeVar("%USEZLIB", 415, FALSE);
+	AllocateTypeVar("%DISPLAYTEXTPOLY", 416, FALSE);
 
 //	AllocateTypeVar("%DL",191,FALSE);
 	
@@ -5382,6 +5386,9 @@ GSSiExitProg (533);
 			break;
 		case 415:
 			btoa(useZLIB, OutStr);
+			break;
+		case 416:
+			btoa(displayTextPoly, OutStr);
 			break;
 
 	}

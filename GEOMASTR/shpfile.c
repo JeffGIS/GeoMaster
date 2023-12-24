@@ -5345,7 +5345,7 @@ BOOL ProcessFGDBRecord (HDC hDC,long RecordNumber)
     static	long	DebugRecNum=21291;
 	static	int	nCurveText=0;
 	BOOL	save=FALSE;
-	static	BOOL	db_dopoly=TRUE,displayTextPoly=FALSE;
+	static	BOOL	db_dopoly = TRUE;
 	int		opt;
 	HANDLE	hPolyPartLenNew=0;
 	char	FileID[2][6]={"PGDB","FGDB"};

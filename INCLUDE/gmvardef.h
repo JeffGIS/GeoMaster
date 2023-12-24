@@ -828,6 +828,7 @@ BOOL	HaveTextColor=FALSE;
 long	NumRecordsProcessed=0;
 BOOL	TraceRef=FALSE;
 BOOL	HaveTextPointers;
+BOOL	displayTextPoly = FALSE;
 COLORREF	AutoOrthoColor=RGB(255,255,0);
 BOOL	AutoOpaque=FALSE;
 BOOL	AutoOpaqueSetting=FALSE;
