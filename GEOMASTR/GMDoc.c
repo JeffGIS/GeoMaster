@@ -1084,6 +1084,7 @@ void DisplayDocImage(LPSTR ImagePath, RECT rect, int windowOrScreen, POINT tiePo
 			DestroyDIB32(hDib24, FALSE);
 			//timerID = SetTimer(hWnd, MAKELPARAM(GF_DISPLAY_DATED_ORTHOS, CurView->ID), timeBetweenDates, 0);
 			MergeDocImageIntoViewport(hBM, &rect, "", 0);
+			DeleteObject(hBM);
 		}
 	}
 	ReleaseDC(hWndMain, hDC);

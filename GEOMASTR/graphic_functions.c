@@ -7287,6 +7287,8 @@ BOOL HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short 
 			    RemoveFromHighlightList (PickList[NumPicked].Refno,0);
 			    rtn = GF_INCREASE_SUCCESS_COUNT;
 			}
+			DWORD i = GF_INCREASE_SUCCESS_COUNT;
+			i = GF_DECREASE_SUCCESS_COUNT;
 			SaveNP = NumPicked;
 			Display = TRUE;
 	    	ShowPickedItem (hWndMain,NumPicked); 

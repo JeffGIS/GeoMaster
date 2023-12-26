@@ -663,6 +663,7 @@ BOOL DisplayDatedOrthos(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, s
 					DestroyDIB32(hDib32, FALSE);
 					timerID = SetTimer(hWnd, DATED_ORTHO_TIMER, timeBetweenDates, 0);
 					MergeImageIntoViewport(hBM,&CurView->DrawRect, orthoTitles[iDate], textFade);
+					DeleteObject(hBM);
 					iDate++;
 				}
 				ignoreHalt = FALSE;

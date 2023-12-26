@@ -2212,7 +2212,8 @@ int GetStreetSegsBetweenPoints (LPSTR OutFile,LPSTR cRecordNum,LPSTR cFound,LPST
 int GetNearestIntPoint(LPSTR cX,LPSTR cY,LPSTR cStreetNum,LPSTR cnChar,LPSTR segFile,LPSTR OutLoc);
 void InvertRotatedRect (HDC hDC,LPEDITRECTINFO pEditRect);
 BOOL CheckIfPolyIsAlsoExclusion (long Ref,LOOPKEY OrigLoopKey,LOOPDATA OrigLoopData); 
-RGBTRIPLE COLORREFtoRGBTRIPLE (COLORREF cr);
+RGBTRIPLE COLORREFtoRGBTRIPLE(COLORREF cr);
+RGBQUAD COLORREFtoRGBQUAD(COLORREF cr);
 double CompareFillPatternSignatures (LPFILLSIGNATURE pSign1,LPFILLSIGNATURE pSign2);
 void GetFillPatternSignature (HDC hDC,POINT pt,short pixdist,double colordist,LPFILLSIGNATURE pSign);
 BOOL CompareHotSpotData (LPHOTSPOTDATA pHSData);

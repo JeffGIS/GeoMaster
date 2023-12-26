@@ -293,9 +293,9 @@ GSSiExitProg (1338);
 			TotLen = BT_NUM_IN_INDEX (hHighlight2);
 		else
 			TotLen = 0;
-	    if (st == GF_READY_TO_PROCESS && !TotLen)
+	    if (st == (int)GF_READY_TO_PROCESS && !TotLen)
 	    	st = 1;
-		if (st == GF_READY_TO_PROCESS && CmdLim == USHRT_MAX)
+		if (st == (int)GF_READY_TO_PROCESS && CmdLim == USHRT_MAX)
 		{   
 			AddLBUTTON = FALSE;
 			if (TotLen)
@@ -345,7 +345,7 @@ GSSiExitProg (1338);
 		    GlobalUnlock (CurView->FunStackHandle);  
 			PostMessage(hWnd, GF_CLOSE,0, 0L);	
 		}
-		else if (st == GF_INCREASE_SUCCESS_COUNT)
+		else if (st == (int)GF_INCREASE_SUCCESS_COUNT)
 		{
 		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
 			if (pCmdStr->CommandLimit)
@@ -358,7 +358,7 @@ GSSiExitProg (1338);
 			} 
 		    GlobalUnlock (CurView->FunStackHandle);  
 		}
-		else if (st == GF_DECREASE_SUCCESS_COUNT)
+		else if (st == (int)GF_DECREASE_SUCCESS_COUNT)
 		{
 		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
 			if (pCmdStr->CommandLimit && pCmdStr->CommandSuccessCount)

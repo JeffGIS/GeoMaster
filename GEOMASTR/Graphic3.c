@@ -3424,6 +3424,16 @@ RGBTRIPLE COLORREFtoRGBTRIPLE (COLORREF cr)
 	rgb.rgbtBlue = GetBValue (cr);
 	return rgb;
 }
+RGBQUAD COLORREFtoRGBQUAD(COLORREF cr)
+{
+	RGBQUAD	rgb;
+
+	rgb.rgbRed = GetRValue(cr);
+	rgb.rgbGreen = GetGValue(cr);
+	rgb.rgbBlue = GetBValue(cr);
+	return rgb;
+}
+
 void GetFillPatternSignature (HDC hDC,POINT pt,short pixdist,double colordist,LPFILLSIGNATURE pSign)
 { 
 	short xoffsets[]={ 0, 0, 1, 1, 1, 0,-1,-1,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0,-1,-2,-2,-2,-2,-2,-1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0,-1,-2,-3,-3,-3,-3,-3,-3,-3,-2,-1,
