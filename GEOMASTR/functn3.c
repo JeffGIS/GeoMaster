@@ -4465,10 +4465,10 @@ GotCloseFilehSQL:
 				ltoa((int)hWnd, OutLoc, 10);
 				goto Rtnl;
 			}
-			if (!stricmp (Arg[2],"SETTEXT"))
+			if (!stricmp(Arg[2], "SETTEXT"))
 			{
 				if (hWnd)
-					SetWindowText (hWnd,Arg[3]);
+					SetWindowText(hWnd, Arg[3]);
 			}
 			else if (!stricmp(Arg[2], "COMMAND"))
 				SendMessage(hWnd, WM_COMMAND, atol(Arg[3]), 0L);
@@ -4514,14 +4514,19 @@ GotCloseFilehSQL:
 			else if (!stricmp(Arg[2], "SHOWPAR"))
 				SetWindowPos(GetTopParent(hWnd), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 
-				//ShowWindow(GetTopParent(hWnd), SW_SHOW);
+			//ShowWindow(GetTopParent(hWnd), SW_SHOW);
 			else if (!stricmp(Arg[2], "MINIMIZE"))
 				ShowWindow(hWnd, SW_FORCEMINIMIZE);
 			else if (!stricmp(Arg[2], "MAXIMIZE"))
 				ShowWindow(hWnd, SW_SHOWMAXIMIZED);
 			else if (!stricmp(Arg[2], "RESTORE"))
 				ShowWindow(hWnd, SW_RESTORE);
-
+			else if (!stricmp(Arg[2], "ACTIVE"))
+				SetActiveWindow(hWnd);
+			else if (!stricmp(Arg[2], "FOCUS"))
+				SetFocus(hWnd);
+			else if (!stricmp(Arg[2], "CLEAR"))
+				ClearFullWindowBitmap(hWnd);
 			goto RtnTrue;
 		} 
 

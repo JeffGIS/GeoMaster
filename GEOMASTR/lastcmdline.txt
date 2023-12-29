@@ -1,2 +1,2 @@
-Configs\jeff\FGDBTextRotation.gmc /F [%USERLEV]=2;[%IGNORESYSMSG]=T;[%WantBackgroundCache]=F;[%ALLOWCACHE]=F; 
-g:\geomas
+h:\MplsRemoteTemplate\GeoMas\configs\jeff\SpecAssParcelComp.gmc /F /DNC [PARMFILE]=c:\temp\parmfile.txt 
+h:\MplsRemoteTemplate\GeoMas

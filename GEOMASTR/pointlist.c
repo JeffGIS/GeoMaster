@@ -13,6 +13,103 @@ static	int			nPointsInList[MAXPOINTLIST];
 static	char		PointListID[MAXPOINTLIST][32];
 static	BOOL		Closed[MAXPOINTLIST];
 
+HANDLE GetParcelFront2(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStreetPoints, int numPointsInParcel, HANDLE hParcelPoints,LPINT pstartPointIndex)
+{
+	HANDLE hOutPoints = GSSiGlobAlloc (1862,GMEM_MOVEABLE,numPointsInParcel*sizeof(DPOINT)+4);
+	int numOutPoints = 0;
+	int endPointIndex = -1;
+	int startPointIndex = *pstartPointIndex;
+	LPDPOINT pParcelPoints = GlobalLock(hParcelPoints);
+	LPDPOINT pStreetPoints = GlobalLock(hStreetPoints);
+	LPDPOINT pOutPoints = GlobalLock(hOutPoints);
+	DPOINT IntPoint;
+	BOOL err;
+	double OffDist, PolyDist;
+	double MAXAZDIFF = 10 * DEGtoRAD;
+
+	for (int i = startPointIndex; i < numPointsInParcel - 1; i++)
+	{
+		DPOINT midPt;
+		double AZ = getazd(&pParcelPoints[i], &pParcelPoints[i + 1]);
+		midPt.x = (pParcelPoints[i].x + pParcelPoints[i + 1].x) / 2;
+		midPt.y = (pParcelPoints[i].y + pParcelPoints[i + 1].y) / 2;
+		if (GetPerpendicularOffsetToPoly(&midPt, numPointsInStreet, pStreetPoints, &IntPoint, &OffDist, &PolyDist, 0))
+		{
+			double polyAZatInt = getazd(&midPt, &IntPoint);
+			double AZDiff = fabs (DeltaAZ(AZ, polyAZatInt));
+			double az1 = HALFPI - MAXAZDIFF;
+			double az2 = HALFPI + MAXAZDIFF;
+			if (AZDiff >= az1 && AZDiff <= az2)
+			{
+				if (!numOutPoints)
+					pOutPoints[numOutPoints++] = pParcelPoints[i];
+				pOutPoints[numOutPoints++] = pParcelPoints[i + 1];
+				endPointIndex = i + 1;
+			}
+			else if (numOutPoints)
+				break;
+		}
+		else if (numOutPoints)
+			break;
+	}
+	GlobalUnlock(hOutPoints);
+	GlobalUnlock(hParcelPoints);
+	GlobalUnlock(hStreetPoints);
+	*pstartPointIndex = endPointIndex;
+	*pnumOutPoints = numOutPoints;
+	if (!numOutPoints)
+		GSSiGlobFree(&hOutPoints);
+	return hOutPoints;
+}
+HANDLE GetParcelFront(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStreetPoints, int numPointsInParcel, HANDLE hParcelPoints)
+{
+#define MAXLINES 16
+	int numOutPoints[MAXLINES] = { 0 };
+	int startPointIndex = 0;
+	HANDLE hOutPoints[MAXLINES];
+	HANDLE rtn = 0;
+	int numLines = 0;
+	
+	for (numLines = 0; numLines < MAXLINES; numLines++)
+	{
+		hOutPoints[numLines] = GetParcelFront2(&numOutPoints[numLines], numPointsInStreet, hStreetPoints, numPointsInParcel, hParcelPoints, &startPointIndex);
+		if (!numOutPoints[numLines])
+			break;
+	}
+	if (numLines)
+	{
+		int nearLine = 0;
+		if (numLines > 1)
+		{
+			double nearDist = DBL_MAX;
+			for (int i = 0; i < numLines; i++)
+			{
+				DPOINT midp = ComputePolylineMidpoint(hOutPoints[i], numOutPoints[i]);
+				LPDPOINT pPoints = GlobalLock(hStreetPoints);
+				DPOINT IntPoint;
+				double OffDist, PolyDist;
+				if (GetPerpendicularOffsetToPoly(&midp, numPointsInStreet, pPoints, &IntPoint, &OffDist, &PolyDist, 0))
+				{
+					if (OffDist < nearDist)
+					{
+						nearDist = OffDist;
+						nearLine = i;
+					}
+				}
+				GlobalUnlock(hStreetPoints);
+			}
+			for (int i = 0; i < numLines; i++)
+			{
+				if (i != nearLine)
+					GSSiGlobFree(&hOutPoints[i]);
+			}
+		}
+		rtn = hOutPoints[nearLine];
+		*pnumOutPoints = numOutPoints[nearLine];
+	}
+	return rtn;
+}
+
 HANDLE GetPointListPoints (LPSTR ID,LPINT pnPoints)
 {
 	LPDPOINT Points1, Points2;
@@ -137,6 +234,7 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(BETWEENDIST,name,fromdist,todist)
 //$POINTLIST(BOUNDS,name)
 //$POINTLIST(POINTATDIST,name,dist);
+//$POINTLIST(PARFRONT,outname,streetplname,parcelplname)
 	if (OutLoc)
 		strcpy(OutLoc, "0");
 
@@ -293,6 +391,33 @@ DestroyAll:
 					strcpy(OutLoc, "1");
 					rtn = TRUE;
 					break;
+				}
+			}
+		}
+		else if (!stricmp(Arg[4], "PARFRONT")) //$POINTLIST(CREATE,name,closed,PARFRONT,streetplname,parcelplname)
+		{
+			int PLStreet = -1, PLParcel = -1;
+			rtn = FALSE;
+			for (i = 0; i < nPointLists; i++)
+			{
+				if (!stricmp(PointListID[i], Arg[5]) && nPointsInList[i] > 1)
+					PLStreet = i;
+				else if (!stricmp(PointListID[i], Arg[6]) && nPointsInList[i] > 1)
+					PLParcel = i;
+			}
+			if (PLStreet > -1 && PLParcel > -1)
+			{
+				rtn = TRUE;
+				int numOutPoints;
+				HANDLE hPoints = GetParcelFront(&numOutPoints, nPointsInList[PLStreet], hPointList[PLStreet], nPointsInList[PLParcel], hPointList[PLParcel]);
+				if (hPoints)
+				{
+					nPointsInList[iList] = numOutPoints;
+					hPointList[iList] = hPoints;
+					if (iList == nPointLists)
+						nPointLists++;
+					strcpy(OutLoc, "1");
+					rtn = TRUE;
 				}
 			}
 		}

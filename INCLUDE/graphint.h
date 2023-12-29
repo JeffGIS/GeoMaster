@@ -939,11 +939,11 @@ BOOL FillRectWithGrid (LPSTR EditName,LPSTR SymName,LPMNMXCORD pRect,double Grid
 BOOL CreateNewPolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL CreateNewPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL CreateAreaAroundPoint (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
-int ProcessGraphicsFunction2 (short FunStackID,
+UINT ProcessGraphicsFunction2 (short FunStackID,
 							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
-int ProcessGraphicsFunction3 (short FunStackID,
+UINT ProcessGraphicsFunction3 (short FunStackID,
 							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
-int ProcessGraphicsFunction4(short Function,
+UINT ProcessGraphicsFunction4(short Function,
 	HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
 BOOL ChangeAreaOffset (double NewOffset);
@@ -951,7 +951,7 @@ BOOL AddAreaToOffsetFile (long Refno,int Type,int np, HPDPOINT lpDPoint,int nPol
 BOOL AddAreaToMap (LPSTR File,LPSTR TAG,LPSTR SymbolName,LPSTR PointList,short Type,double size,double rot,LPSTR Text,double TextSize,long TextColor,BOOL OpaqueText,BOOL Shadow,LPSHORT Stuff,HANDLE hTime);
 long GetPointsFromList (LPSTR PointList,LPHANDLE phList);
 long GetIntsFromList (LPSTR PointList,LPHANDLE phList);
-BOOL HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function);
+UINT HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function);
 BOOL ShowPolyPoints (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 BOOL HighlightSequentialItems (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function);
 int ShowHLTList(HWND hWnd,int DockingStatus);

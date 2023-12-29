@@ -5108,8 +5108,8 @@ static double Connect2ClosestPoints(LPDPOINT EndPoints, int numEndPoints, LPINT 
 			}
 		}
 	}
-	ConnectedTo[p1] = p2+1;
-	ConnectedTo[p2] = p1+1;
+	ConnectedTo[p1] = p2 +1;
+	ConnectedTo[p2] = p1 +1;
 	return minDist;
 }
 
@@ -5234,17 +5234,17 @@ BOOL ReorderSavedPolys(void)
 					nTotPoints = 0;
 					for (int i = 0; i < nNewPoly;i++)
 					{
-						LPMNMXCORD pBounds = GlobalLock(pSavedPolys[i].hSavePoly);
+						LPMNMXCORD pBounds = GlobalLock(pSavedPolysNew[i].hSavePoly);
 						AddMinMaxD(pBoundsJoined, pBounds);
 						pBounds++;
 						LPDPOINT pPoints = (LPDPOINT)pBounds;
-						for (j = 0; j < pSavedPolys[i].nPoints; j++)
+						for (j = 0; j < pSavedPolysNew[i].nPoints; j++)
 						{
 							pPointsJoined[nTotPoints++] = pPoints[j];
 						}
 						if (i < nNewPoly - 1)
 							nTotPoints--;
-						GlobalUnlock(pSavedPolys[i].hSavePoly);
+						GlobalUnlock(pSavedPolysNew[i].hSavePoly);
 					}
 					pSavedPolysJoined->nPoints = nTotPoints;
 					GlobalUnlock(pSavedPolysJoined->hSavePoly);

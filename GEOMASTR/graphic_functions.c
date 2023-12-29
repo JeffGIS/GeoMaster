@@ -7212,7 +7212,7 @@ BOOL DistancePolyline (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, sh
     }
     return (TRUE);
 }
-BOOL HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
+UINT HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short Function)
 #if ENABLETRACE
 {GSSiEnterProg (742);
 #endif
@@ -7220,7 +7220,8 @@ BOOL HighlightItem (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam,short 
  char key;     
  int	st,np, SaveNP;
  long	TLID;
- short	rtn=TRUE, SavePOH;
+ UINT	rtn = TRUE;
+ short SavePOH;
  HIGHLIGHTDATA	HighlightData;
  POINT	MousePoint;
  DPOINT	BasePoint;

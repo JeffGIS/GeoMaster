@@ -220,7 +220,7 @@ BOOL ProcessGraphicsFunction (HWND hWnd, UINT Message, WPARAM wParam, LPARAM lPa
 {GSSiEnterProg (1338);
 #endif
 {   
-	int	st,ii;
+	UINT st;
 	int		CmdLim;
 	LPCMDSTRING    pCmdStr;
    	HCURSOR	hcurSave=0; 
@@ -293,9 +293,9 @@ GSSiExitProg (1338);
 			TotLen = BT_NUM_IN_INDEX (hHighlight2);
 		else
 			TotLen = 0;
-	    if (st == (int)GF_READY_TO_PROCESS && !TotLen)
+	    if (st == GF_READY_TO_PROCESS && !TotLen)
 	    	st = 1;
-		if (st == (int)GF_READY_TO_PROCESS && CmdLim == USHRT_MAX)
+		if (st == GF_READY_TO_PROCESS && CmdLim == USHRT_MAX)
 		{   
 			AddLBUTTON = FALSE;
 			if (TotLen)
@@ -345,7 +345,7 @@ GSSiExitProg (1338);
 		    GlobalUnlock (CurView->FunStackHandle);  
 			PostMessage(hWnd, GF_CLOSE,0, 0L);	
 		}
-		else if (st == (int)GF_INCREASE_SUCCESS_COUNT)
+		else if (st == GF_INCREASE_SUCCESS_COUNT)
 		{
 		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
 			if (pCmdStr->CommandLimit)
@@ -358,7 +358,7 @@ GSSiExitProg (1338);
 			} 
 		    GlobalUnlock (CurView->FunStackHandle);  
 		}
-		else if (st == (int)GF_DECREASE_SUCCESS_COUNT)
+		else if (st == GF_DECREASE_SUCCESS_COUNT)
 		{
 		    pCmdStr = (LPCMDSTRING)GlobalLock (CurView->FunStackHandle);  
 			if (pCmdStr->CommandLimit && pCmdStr->CommandSuccessCount)
@@ -664,13 +664,13 @@ GSSiExitProg (1339);
 #endif
 }
 
-int ProcessGraphicsFunction2 (short Function,HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+UINT ProcessGraphicsFunction2 (short Function,HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 #if ENABLETRACE
 {GSSiEnterProg (1340);
 #endif
 {
 	LPVIEWPORT	SaveVP=CurView;  
-	int			st;  
+	UINT			st;
 	HCURSOR		hCursor=0;
     
     st = ProcessGraphicsFunction3 (Function,hWnd,Message,wParam,lParam);  
@@ -1342,7 +1342,7 @@ GSSiExitProg (1347);
 #endif
 }
 
-int ProcessGraphicsFunction4 (short Function,
+UINT ProcessGraphicsFunction4 (short Function,
 							   HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {   
 	if (Message == GF_CLOSE && wParam && Function != wParam)
@@ -1916,10 +1916,10 @@ int ProcessGraphicsFunction4 (short Function,
   }
    return (FALSE);
 } 
-int ProcessGraphicsFunction3(short Function,
+UINT ProcessGraphicsFunction3(short Function,
 	HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-	int rtn;
+	UINT rtn;
 	LPVIEWPORT SaveVP = CurView;
 
 	if (Message == WM_TIMER)

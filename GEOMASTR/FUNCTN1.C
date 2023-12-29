@@ -736,9 +736,10 @@ GSSiExitProg (1348);
 								}
 							}
 						}
-						SaveDIB32(hDIB32, "c:\\temp\\screen2.bmp", 0, -1);
+						//SaveDIB32(hDIB32, "c:\\temp\\screen2.bmp", 0, -1);
 
 						HBITMAP hBMout = DIB32ToBitmap(hDIB32, 0);
+						SelectClipRgn(hDC, 0);
 						RestoreScreen(hDC, hBMout, screenRect);
 						ReleaseDC(hWndMain, hDC);
 						DeleteObject(hBMout);
