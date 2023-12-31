@@ -732,6 +732,13 @@ int	GetFunctionValue7(int FunID, LPSTR Args, LPSTR OutLoc, LPBREAKPOINT pBrkPt, 
 			if (LoadInfoBox(Arg[2], &TAGBox))
 				goto RtnTrue;
 		}
+		if (!_fstricmp(Arg[1], "DISPLAY"))
+		{
+			HDC hDC = GetWindowDC(hWndMain);
+			DisplayTAGs(hDC);
+			ReleaseDC(hWndMain,hDC);
+			goto RtnTrue;
+		}
 		if (!_fstricmp(Arg[1], "DELETE"))
 		{
 			if (DeleteTAGByName(Arg[2]))

@@ -4057,7 +4057,13 @@ SetVis:
 				{
 					pPoint[i] = BasePtToScreenPt(&pPoints[i]);
 				}
-				Polyline(CurView->hDC, pPoint, nPoints);
+				if (!wantGDIPlus)
+					Polyline(CurView->hDC, pPoint, nPoints);
+				else
+				{
+					AAPolyLineWithCap(CurView->hDC, pPoint, nPoints, iColor, screenWidth,0);
+				}
+
 				GSSiGlobUlFree(&hPoints);
 				GSSiGlobUlFree(&hPoints2);
 				SelectObject(CurView->hDC, hOldPen);

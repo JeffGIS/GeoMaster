@@ -455,7 +455,7 @@ GSSiExitProg (1348);
 		{	
 			short	SaveCurrentConfig=CurrentConfig;
 			
-			nArgs = GetFunArgs(Args, Arg, 8, &hMem, pBrkPt, bpOffset, bpLen);
+			nArgs = GetFunArgs(Args, Arg, 9, &hMem, pBrkPt, bpOffset, bpLen);
 			
 			SaveVP = CurView; 
 			Err = 0;
@@ -669,12 +669,49 @@ GSSiExitProg (1348);
 				}
 				goto Rtnl;
 			}
-			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2,opt,color1,color2)
+			else if (!strcmp(Arg[1], "PIXELSOFCOLOR"))//$VP(PIXELSOFCOLOR,vpname,color)
 			{
-				COLORREF outColorc = atoll(Arg[6]);
-				RGBQUAD outColor1 = COLORREFtoRGBQUAD(outColorc);
-				outColorc = atoll(Arg[7]);
-				RGBQUAD outColor2 = COLORREFtoRGBQUAD(outColorc);
+				COLORREF wantColor = atoll(Arg[3]);
+				HDC hDC = GetDC(hWndMain);
+				RECT screenRect;
+				RECT clientRect;
+				GetClientRect(hWndMain, &clientRect);
+				screenRect = clientRect;
+				ClientRectToScreenRect(hWndMain, &screenRect);
+				HBITMAP hScreen = SaveScreen(hDC, screenRect);
+				HDIB32 hDIB32 = BitmapToDIB32(hScreen);
+				DeleteObject(hScreen);
+				LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GetDibHeader(hDIB32);
+				int numFound = 0;
+				//SaveDIB32(hDIB32, "c:\\temp\\screen.bmp", 0, -1);
+				for (int irow = CurView->Rect.top; irow < CurView->Rect.bottom; irow++)
+				{
+					for (int icol = CurView->Rect.left; icol < CurView->Rect.right; icol++)
+					{
+						POINT pt = { icol,irow };
+						DPOINT wpt = WinPtToBasePt(pt);
+						COLORREF c1;
+						RGBQUAD c14;
+						FreeImage_GetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &c14);
+						RGBTRIPLE c13 = RGBQuadToRGBTriple(c14);
+						c1 = RGBTRIPLEToCOLORREF(c13);
+						if (c1 == wantColor)
+							numFound++;
+					}
+				}
+				ReleaseDC(hWndMain, hDC);
+				GMDestroyDIB32(hDIB32);
+				itoa(numFound, OutLoc, 10);
+				goto Rtnl;
+			}
+			else if (!strcmp(Arg[1], "COMBINE"))//$VP(COMBINE,outvpname,vpname1,vpname2,opt,color1,color2,color3)
+			{
+				COLORREF color1 = atoll(Arg[6]);
+				RGBQUAD outColor1 = COLORREFtoRGBQUAD(color1);
+				COLORREF color2 = atoll(Arg[7]);
+				RGBQUAD outColor2 = COLORREFtoRGBQUAD(color2);
+				COLORREF color3 = atoll(Arg[8]);
+				RGBQUAD outColor3 = COLORREFtoRGBQUAD(color3);
 				int opt = atoi(Arg[5]);
 				LPVIEWPORT outVP, inVP1, inVP2;
 				strcpy (OutLoc, "1");
@@ -704,7 +741,7 @@ GSSiExitProg (1348);
 						DeleteObject(hScreen);
 						LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GetDibHeader(hDIB32);
 
-						SaveDIB32(hDIB32, "c:\\temp\\screen.bmp", 0, -1);
+						//SaveDIB32(hDIB32, "c:\\temp\\screen.bmp", 0, -1);
 						for (int irow = CurView->Rect.top; irow < CurView->Rect.bottom; irow++)
 						{
 							for (int icol = CurView->Rect.left; icol < CurView->Rect.right; icol++)
@@ -726,13 +763,24 @@ GSSiExitProg (1348);
 								c1 = RGBTRIPLEToCOLORREF(c13);
 								c2 = RGBTRIPLEToCOLORREF(c23);
 
-								if (c1 > c2)
+								switch (opt)
 								{
-									FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
-								}
-								if (c1 < c2)
-								{
-									FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
+								case 1:
+									if (c1 > c2)
+									{
+										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
+									}
+									if (c1 < c2)
+									{
+										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
+									}
+									break;
+								case 2:
+									if (c1 == color2 && c2 == color3)
+									{
+										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
+									}
+									break;
 								}
 							}
 						}
@@ -741,6 +789,8 @@ GSSiExitProg (1348);
 						HBITMAP hBMout = DIB32ToBitmap(hDIB32, 0);
 						SelectClipRgn(hDC, 0);
 						RestoreScreen(hDC, hBMout, screenRect);
+						GMDestroyDIB32(hDIB32);
+
 						ReleaseDC(hWndMain, hDC);
 						DeleteObject(hBMout);
 						

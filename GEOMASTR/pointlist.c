@@ -25,7 +25,7 @@ HANDLE GetParcelFront2(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStree
 	DPOINT IntPoint;
 	BOOL err;
 	double OffDist, PolyDist;
-	double MAXAZDIFF = 10 * DEGtoRAD;
+	double MAXAZDIFF = 15 * DEGtoRAD;
 
 	for (int i = startPointIndex; i < numPointsInParcel - 1; i++)
 	{
@@ -61,6 +61,43 @@ HANDLE GetParcelFront2(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStree
 		GSSiGlobFree(&hOutPoints);
 	return hOutPoints;
 }
+static 	void JointFirstToLast(LPINT pnumLines, LPINT pnumOutPoints, LPHANDLE phOutPoints)
+{
+	if (*pnumLines < 2)
+		return;
+	DPOINT firstPt, lastPt;
+	LPDPOINT pPt = GlobalLock(phOutPoints[0]);
+	firstPt = *pPt;
+	GlobalUnlock (phOutPoints[0]);
+	pPt = GlobalLock(phOutPoints[*pnumLines-1]);
+	pPt += (pnumOutPoints[*pnumLines-1] - 1);
+	lastPt = *pPt;
+	GlobalUnlock(phOutPoints[*pnumLines - 1]);
+	double d = ldistpp(&firstPt, &lastPt);
+	if (d <= P_TOL)
+	{
+		HANDLE hNewPoints = GSSiGlobAlloc(1863, GMEM_MOVEABLE, sizeof(DPOINT) * (pnumOutPoints[0] + pnumOutPoints[*pnumLines - 1] - 1) + 4);
+		LPDPOINT pPtNew = GlobalLock(hNewPoints);
+		LPDPOINT pPt1 = GlobalLock(phOutPoints[0]);
+		LPDPOINT pPt2 = GlobalLock(phOutPoints[*pnumLines - 1]);
+		for (int i = 0; i < pnumOutPoints[*pnumLines - 1]-1; i++)
+		{
+			*pPtNew++ = *pPt2++;
+		}
+		for (int i = 0; i < pnumOutPoints[0]; i++)
+		{
+			*pPtNew++ = *pPt1++;
+		}
+		pnumOutPoints[0] += (pnumOutPoints[*pnumLines - 1] - 1);
+		GSSiGlobUlFree (&phOutPoints[0]);
+		GlobalUnlock(hNewPoints);
+		phOutPoints[0] = hNewPoints;
+		GSSiGlobUlFree (&phOutPoints[*pnumLines - 1]);
+		*pnumLines -= 1;
+	}
+	return;
+}
+
 HANDLE GetParcelFront(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStreetPoints, int numPointsInParcel, HANDLE hParcelPoints)
 {
 #define MAXLINES 16
@@ -76,6 +113,8 @@ HANDLE GetParcelFront(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStreet
 		if (!numOutPoints[numLines])
 			break;
 	}
+	//joint first and last lines if possible
+	JointFirstToLast(&numLines, numOutPoints, hOutPoints);
 	if (numLines)
 	{
 		int nearLine = 0;
@@ -223,8 +262,8 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(DESTROY,name)
 //$POINTLIST(ADD,name,ptlist)
 //$POINTLIST(THIN,name,dist(if 0 removes dup points))
-//$POINTLIST(DISPLAY,name,FILL,color)
-//$POINTLIST(DISPLAY,name,DRAW,color,width)
+//$POINTLIST(DISPLAY,name,vp,FILL,color)
+//$POINTLIST(DISPLAY,name,vp,DRAW,color,width)
 //$POINTLIST(LENGTH,name)
 //$POINTLIST(AREA,name)
 //$POINTLIST(PCT,name,point)
@@ -530,41 +569,73 @@ DestroyAll:
 			{
 				if (nPointsInList[i])
 				{
-					Points1 = GlobalLock (hPointList[i]);
-					if (!stricmp (Arg[3],"FILL"))
+					LPVIEWPORT saveVP = CurView;
+					BOOL Err = FALSE;
+					if (*Arg[3])
+						SetCurView(SetVPFromName(Arg[3], &Err));
+					if (!Err)
 					{
-						Color = atoi (Arg[4]);
-						hBrush = CreateSolidBrush(Color);
-						hOldBrush = SelectObject (CurView->hDC,hBrush); 
-						GWPolygonD (CurView->hDC,Points1,nPointsInList[i],0,0,0,TRUE,TRUE,0);  
-						SelectObject (CurView->hDC,hOldBrush);
-						DeleteObject (hBrush);
-						rtn = TRUE;
-					}
-					else if (!stricmp (Arg[3],"DRAW"))
-					{
-						Color = atoi (Arg[4]);
-						hPen = CreatePen (PS_SOLID,atoi (Arg[5]),Color);
-						hOldPen = SelectObject (CurView->hDC,hPen); 
-						GWPolylineD (CurView->hDC,Points1,nPointsInList[i],0);  
-						SelectObject (CurView->hDC,hOldPen);
-						DeleteObject (hPen);
-						rtn = TRUE;
-					}
-					else if (!stricmp (Arg[3],"NUMBER"))
-					{
-						BOOL	SaveDM=DisplayMarkers;
-
-						DisplayMarkers = TRUE; 
-						for (j=0;j<nPointsInList[i];j++)
+						SaveDC(CurView->hDC);
+						SetDisplayMode(CurView->hDC, GF_TEXTMODE);
+						if (!CurView->hRgn)
 						{
-							itoa (j,txt,10);
-							DisplayMarker (*Points1++,2,txt,0.16,0,0,FALSE,FALSE,0,0,0,0,0);
+							CurView->hRgn = CreateVPRgn(FALSE, FALSE);
 						}
-						DisplayMarkers = SaveDM; 
-						rtn = TRUE;
+						SelectVPClipRgn(CurView->hRgn);
+
+						Points1 = GlobalLock(hPointList[i]);
+						if (!stricmp(Arg[4], "FILL"))
+						{
+							Color = atoi(Arg[5]);
+							hBrush = CreateSolidBrush(Color);
+							hOldBrush = SelectObject(CurView->hDC, hBrush);
+							GWPolygonD(CurView->hDC, Points1, nPointsInList[i], 0, 0, 0, TRUE, TRUE, 0);
+							SelectObject(CurView->hDC, hOldBrush);
+							DeleteObject(hBrush);
+							rtn = TRUE;
+						}
+						else if (!stricmp(Arg[4], "DRAW"))
+						{
+							int iWidth = atoi(Arg[6]);
+							Color = atoi(Arg[5]);
+							hPen = CreatePen(PS_SOLID, iWidth, Color);
+							hOldPen = SelectObject(CurView->hDC, hPen);
+							if (!useGDIPlus)
+								GWPolylineD(CurView->hDC, Points1, nPointsInList[i], 0);
+							else
+							{
+								HANDLE hPoints = GSSiGlobAlloc(1864, GMEM_MOVEABLE, nPointsInList[i] * sizeof(POINT) + 4);
+								LPPOINT pPoints = GlobalLock(hPoints);
+								for (int i = 0; i < nPointsInList[i]; i++)
+								{
+									pPoints[i] = BasePtToWinPt(&Points1[i]);
+								}
+								AAPolyLine(CurView->hDC, pPoints, nPointsInList[i], Color, iWidth);
+								GSSiGlobUlFree(hPoints);
+							}
+							SelectObject(CurView->hDC, hOldPen);
+							DeleteObject(hPen);
+							rtn = TRUE;
+						}
+						else if (!stricmp(Arg[3], "NUMBER"))
+						{
+							BOOL	SaveDM = DisplayMarkers;
+
+							DisplayMarkers = TRUE;
+							for (j = 0; j < nPointsInList[i]; j++)
+							{
+								itoa(j, txt, 10);
+								DisplayMarker(*Points1++, 2, txt, 0.16, 0, 0, FALSE, FALSE, 0, 0, 0, 0, 0);
+							}
+							DisplayMarkers = SaveDM;
+							rtn = TRUE;
+						}
+						GlobalUnlock(hPointList[i]);
+						GSSiDeleteObject(&CurView->hRgn);
+						RestoreDC(CurView->hDC, -1);
+
 					}
-					GlobalUnlock (hPointList[i]);
+					CurView = saveVP;
 				}
 				break;
 			}

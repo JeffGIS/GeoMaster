@@ -376,6 +376,7 @@ int GWPolyline (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
 int GWPolyline2 (HDC hDC, HPPOINT Points, long npnts,int idesc);
 int GWPolylineD (HDC hDC, HPDPOINT lpPoints, long npnts,int idesc);
 int GWPolylineShort (HDC hDC, HPPOINTS lpPoints, long npnts,int idesc);
+void AAPolyLineWithCap(HDC hdc, LPPOINT pPoints, int np, COLORREF ColorRef, float w, int cap);
 void AAPolyLine(HDC hDC, LPPOINT pPoints, int np, COLORREF Color, float w);
 void AAPolyLineF(HDC hDC, LPFPOINT pPoints, int np, COLORREF Color, float w);
 void AAPolygon(HDC hdc, LPPOINT pPoints, int np, LOGPEN *lp, LOGBRUSH *lb);
