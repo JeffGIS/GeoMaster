@@ -983,7 +983,30 @@ GSSiExitProg (1348);
 				  // $RGB(n) returns R|G|B
 		{	
 			nArgs = GetFunArgs (Args,Arg,3,&hMem, pBrkPt, bpOffset, bpLen); 
-			if (nArgs == 1)
+			if (!nArgs)
+			{
+				HDC hDC = GetDC(hWndMain);
+				COLORREF testrefs[16];
+				POINT pt;
+				RECT windRect;
+				int numDiff = 0;
+				GetWindowRect(hWndMain, &windRect);
+				pt.x = (windRect.left + windRect.right) / 2;
+				pt.y = (windRect.top + windRect.bottom) / 2;
+				for (i = 1000; i < 1016; i++)
+				{
+					testrefs[i] = i;
+					SetPixel(hDC, pt.x, pt.y,testrefs[i]);
+					COLORREF ref = GetPixel(hDC, pt.x, pt.y);
+					if (testrefs[i] != ref)
+						numDiff++;
+					pt.x++;
+					pt.y++;
+				}
+				ReleaseDC(hWndMain, hDC);
+				itoa(numDiff, OutLoc, 10);
+			}
+			else if (nArgs == 1)
 			{
 				COLORREF cref = atol(Arg[1]);
 				int r = GetRValue (cref), g = GetGValue (cref), b= GetBValue (cref);
@@ -3933,7 +3956,7 @@ SetVis:
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,POINT,dist)
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,AZ,dist)
 				//		 (Ref or TAG or PICKED or POINTS|pointlist,OFFSET,dist,offsetdist)
-				//		 (Ref or TAG or PICKED or POINTS|pointlist,DISPLAY,width,color,vp)
+				//		 (Ref or TAG or PICKED or POINTS|pointlist,DISPLAY,width,color,vp,cap)
 		{
 			int			nPoints;
 			HANDLE		hPoints=0;
@@ -3941,7 +3964,7 @@ SetVis:
 			LPSTR		Prefix,lpColon;
 			BOOL		UnSplined=TRUE;
 
-			nArgs = GetFunArgs (Args,Arg,6,&hMem, pBrkPt, bpOffset, bpLen); 
+			nArgs = GetFunArgs (Args,Arg,8,&hMem, pBrkPt, bpOffset, bpLen); 
 			if (nArgs < 1)
 				goto RtnFalse;
 			if (!stricmp(Arg[1], "SAVE"))
@@ -4036,6 +4059,7 @@ SetVis:
 				double		baseWidth = atobasedist(Arg[3], &Err);
 				COLORREF	iColor = atoll(Arg[4]);
 				SetCurView(SetVPFromName(Arg[5], &Err));
+				int cap = atoi(Arg[6]);
 				if (!baseWidth)
 					baseWidth = 1;
 				int screenWidth = IDNINT(baseWidth/CurView->BaseUnitsPerPixel);
@@ -4061,7 +4085,7 @@ SetVis:
 					Polyline(CurView->hDC, pPoint, nPoints);
 				else
 				{
-					AAPolyLineWithCap(CurView->hDC, pPoint, nPoints, iColor, screenWidth,0);
+					AAPolyLineWithCap(CurView->hDC, pPoint, nPoints, iColor, screenWidth,cap);
 				}
 
 				GSSiGlobUlFree(&hPoints);

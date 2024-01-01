@@ -735,8 +735,8 @@ GSSiExitProg (1348);
 						RECT clientRect;
 						GetClientRect(hWndMain, &clientRect);
 						screenRect = clientRect;
-						ClientRectToScreenRect(hWndMain, &screenRect);
-						HBITMAP hScreen = SaveScreen(hDC, screenRect);
+						//ClientRectToScreenRect(hWndMain, &screenRect);
+						HBITMAP hScreen = SaveScreen(hDC, clientRect);
 						HDIB32 hDIB32 = BitmapToDIB32(hScreen);
 						DeleteObject(hScreen);
 						LPBITMAPINFOHEADER pDibInfo = (LPBITMAPINFOHEADER)GetDibHeader(hDIB32);
@@ -751,6 +751,7 @@ GSSiExitProg (1348);
 								CurView = inVP1;
 								POINT pt1 = BasePtToWinPt(&wpt);
 								COLORREF c1, c2;
+								COLORREF white = RGB(255, 255, 255);
 								RGBQUAD c14;
 								FreeImage_GetPixelColor(hDIB32, pt1.x,pDibInfo->biHeight - pt1.y, &c14);
 								CurView = inVP2;
@@ -766,11 +767,20 @@ GSSiExitProg (1348);
 								switch (opt)
 								{
 								case 1:
-									if (c1 > c2)
+									if (c1 == white && c2 == white)
+										break;
+									else if (abs (c1 - c2) < 2)
+									{
+										if (pt.x % 2)
+											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
+										else
+											FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
+									}
+									else if (c1 > c2)
 									{
 										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor1);
 									}
-									if (c1 < c2)
+									else if (c1 < c2)
 									{
 										FreeImage_SetPixelColor(hDIB32, pt.x, pDibInfo->biHeight - pt.y, &outColor2);
 									}

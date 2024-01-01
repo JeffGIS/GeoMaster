@@ -126,7 +126,7 @@ extern "C" void AAPolyLineWithCap(HDC hdc, LPPOINT pPoints, int np, COLORREF Col
 		graphic.SetCompositingQuality(CompositingQualityHighQuality);
 		int r = GetRValue(ColorRef), g = GetGValue(ColorRef), b = GetBValue(ColorRef);
 		Pen pn(Color(intensity, r,g,b), w);
-		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+		graphic.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighSpeed);// SmoothingModeHighQuality);
 		//graphic.DrawLine(&blue, 0, 0, 1024, 1024);
 		PointF pt1;
 		PointF pt2;
