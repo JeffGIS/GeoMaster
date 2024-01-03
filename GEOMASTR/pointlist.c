@@ -25,7 +25,8 @@ HANDLE GetParcelFront2(LPINT pnumOutPoints, int numPointsInStreet, HANDLE hStree
 	DPOINT IntPoint;
 	BOOL err;
 	double OffDist, PolyDist;
-	double MAXAZDIFF = 15 * DEGtoRAD;
+	double maxFrontDeg = GetGlobalDVal2("[%FRONTDEG]", 15);
+	double MAXAZDIFF = maxFrontDeg * DEGtoRAD;
 
 	for (int i = startPointIndex; i < numPointsInParcel - 1; i++)
 	{
@@ -259,6 +260,8 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(CREATE,name,CLOSED(TorF),POINTLIST,plistname)
 //$POINTLIST(CREATE,name,CLOSED(TorF)) creates null list to which points can be added
 //$POINTLIST(CREATE,name,CLOSED(TorF),CIRCLE,center,radius,numpoints) 
+//$POINTLIST(CREATE,name,CLOSED(TorF),LINK,inname1, inname2)
+//$POINTLIST(CREATE,name,CLOSED(TorF),COPY,inname1)
 //$POINTLIST(DESTROY,name)
 //$POINTLIST(ADD,name,ptlist)
 //$POINTLIST(THIN,name,dist(if 0 removes dup points))
@@ -274,6 +277,8 @@ BOOL PointListCommands (int nArgs,LPSTR *Arg,LPSTR OutLoc)
 //$POINTLIST(BOUNDS,name)
 //$POINTLIST(POINTATDIST,name,dist);
 //$POINTLIST(PARFRONT,outname,streetplname,parcelplname)
+//$POINTLIST(BP,name)
+//$POINTLIST(EP,name)
 	if (OutLoc)
 		strcpy(OutLoc, "0");
 
@@ -381,6 +386,110 @@ DestroyAll:
 				}
 			}
 
+		}
+		else if (!stricmp(Arg[4], "LINK"))
+		{
+			int list1 = -1, list2 = -1;
+			for (i = 0; i < nPointLists; i++)
+			{
+				if (!stricmp(PointListID[i], Arg[5]))
+					list1 = i;
+				if (!stricmp(PointListID[i], Arg[6]))
+					list2 = i;
+			}
+			if (list1 > -1 && list2 > -1)
+			{
+				LPDPOINT pPoints1 = GlobalLock(hPointList[list1]);
+				LPDPOINT pPoints2 = GlobalLock(hPointList[list2]);
+
+				hPointList[iList] = GSSiGlobAlloc(1597, GMEM_MOVEABLE, ((nPointsInList[list1] + nPointsInList[list2])) * sizeof(DPOINT) + 4);
+				LPDPOINT outPoints = GlobalLock(hPointList[iList]);
+				double d, minDist = DBL_MAX;
+				int opt;
+#define linkEP1toBP2 1
+#define linkEP1toEP2 2
+#define linkBP1toBP2 3
+#define linkBP1toEP2 4
+				minDist = ldistpp(&pPoints1[nPointsInList[list1] - 1], pPoints2);
+				opt = linkEP1toBP2;
+				d = ldistpp(&pPoints1[nPointsInList[list1] - 1], &pPoints2[nPointsInList[list2] - 1]);
+				if (d < minDist)
+				{
+					minDist = d;
+					opt = linkEP1toEP2;
+				}
+				d = ldistpp(pPoints1, pPoints2);
+				if (d < minDist)
+				{
+					minDist = d;
+					opt = linkBP1toBP2;
+				}
+				d = ldistpp(pPoints1, &pPoints2[nPointsInList[list2] - 1]);
+				if (d < minDist)
+				{
+					minDist = d;
+					opt = linkBP1toEP2;
+				}
+				switch (opt)
+				{
+				case linkEP1toBP2:
+					for (int i = 0; i < nPointsInList[list1]; i++)
+						*outPoints++ = *pPoints1++;
+					for (int i = 0; i < nPointsInList[list2]; i++)
+						*outPoints++ = *pPoints2++;
+					break;
+				case linkEP1toEP2:
+					for (int i = 0; i < nPointsInList[list1]; i++)
+						*outPoints++ = *pPoints1++;
+					for (int i = nPointsInList[list2] - 1; i >= 0; i--)
+						*outPoints++ = pPoints2[i];
+					break;
+				case linkBP1toBP2:
+					for (int i = nPointsInList[list1] - 1; i >= 0; i--)
+						*outPoints++ = pPoints1[i];
+					for (int i = 0; i < nPointsInList[list2]; i++)
+						*outPoints++ = *pPoints2++;
+					break;
+				case linkBP1toEP2:
+					for (int i = nPointsInList[list1] - 1; i >= 0; i--)
+						*outPoints++ = pPoints1[i];
+					for (int i = nPointsInList[list2] - 1; i >= 0; i--)
+						*outPoints++ = pPoints2[i];
+					break;
+				}
+				nPointsInList[iList] = nPointsInList[list1] + nPointsInList[list2];
+				GlobalUnlock(hPointList[list1]);
+				GlobalUnlock(hPointList[list2]);
+				GlobalUnlock(hPointList[iList]);
+				if (iList == nPointLists)
+					nPointLists++;
+				strcpy(OutLoc, "1");
+				rtn = TRUE;
+			}
+		}
+		else if (!stricmp(Arg[4], "COPY"))
+		{
+			int list1 = -1;
+			for (i = 0; i < nPointLists; i++)
+			{
+				if (!stricmp(PointListID[i], Arg[5]))
+					list1 = i;
+			}
+			if (list1 > -1)
+			{
+				LPDPOINT pPoints1 = GlobalLock(hPointList[list1]);
+				hPointList[iList] = GSSiGlobAlloc(1597, GMEM_MOVEABLE, nPointsInList[list1] * sizeof(DPOINT) + 4);
+				LPDPOINT outPoints = GlobalLock(hPointList[iList]);
+				for (int i = 0; i < nPointsInList[list1]; i++)
+					*outPoints++ = *pPoints1++;
+				nPointsInList[iList] = nPointsInList[list1];
+				GlobalUnlock(hPointList[list1]);
+				GlobalUnlock(hPointList[iList]);
+				if (iList == nPointLists)
+					nPointLists++;
+				strcpy(OutLoc, "1");
+				rtn = TRUE;
+			}
 		}
 		else if (!stricmp(Arg[4], "CIRCLE"))
 		{
@@ -977,7 +1086,39 @@ DestroyAll:
 
 	}
 
-	else if (!stricmp (Arg[1],"AREA"))
+	else if (!stricmp(Arg[1], "BP"))
+	{
+		for (i = 0; i < nPointLists; i++)
+		{
+			if (!stricmp(PointListID[i], Arg[2]))
+			{
+				HPDPOINT	Points = GlobalLock(hPointList[i]);
+				DPOINT pt = *Points;
+
+				GlobalUnlock(hPointList[i]);
+				dpointtoa(OutLoc, &pt);
+				rtn = TRUE;
+				break;
+			}
+		}
+	}
+	else if (!stricmp(Arg[1], "EP"))
+	{
+		for (i = 0; i < nPointLists; i++)
+		{
+			if (!stricmp(PointListID[i], Arg[2]))
+			{
+				HPDPOINT	Points = GlobalLock(hPointList[i]);
+				DPOINT pt = Points[nPointsInList[i]-1];
+
+				GlobalUnlock(hPointList[i]);
+				dpointtoa(OutLoc, &pt);
+				rtn = TRUE;
+				break;
+			}
+		}
+	}
+	else if (!stricmp(Arg[1], "AREA"))
 	{
 		for (i=0;i<nPointLists;i++)
 		{
